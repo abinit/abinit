@@ -1,5 +1,5 @@
 
-.Version 10.3.4.2 of ABINIT, released May 2025.
+.Version 9.11.6.5 of ABINIT, released Jul 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 26 Jun 2025.
-- ( at 10h57 )
+.Starting date : Wed  9 Jul 2025.
+- ( at 11h58 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/leshu_invaraxial/tests/TestBot_MPI1/v10_t30/t30.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v10_t30/t30.abi
 - output file    -> t30.abo
 - root for input  files -> t30i
 - root for output files -> t30o
@@ -174,14 +174,14 @@ _ WF disk file :      0.967 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
            diemac      1.20000000E+01
              ecut      8.00000000E+00 Hartree
 -          fftalg         512
-      hspinfield11    0.00000000E+00  0.00000000E+00  0.00000000E+00
-      hspinfield12    0.00000000E+00  0.00000000E+00  0.00000000E+00
-      hspinfield21    1.00000000E+00  0.00000000E+00  0.00000000E+00
-      hspinfield22    1.00000000E+00  0.00000000E+00  0.00000000E+00
-      hspinfield31    0.00000000E+00  1.00000000E+00  0.00000000E+00
-      hspinfield32    0.00000000E+00  1.00000000E+00  0.00000000E+00
-      hspinfield41    0.00000000E+00  0.00000000E+00  1.00000000E+00
-      hspinfield42    0.00000000E+00  0.00000000E+00  1.00000000E+00
+       hspinfield11    0.00000000E+00  0.00000000E+00  0.00000000E+00
+       hspinfield12    0.00000000E+00  0.00000000E+00  0.00000000E+00
+       hspinfield21    1.00000000E+00  0.00000000E+00  0.00000000E+00
+       hspinfield22    1.00000000E+00  0.00000000E+00  0.00000000E+00
+       hspinfield31    0.00000000E+00  1.00000000E+00  0.00000000E+00
+       hspinfield32    0.00000000E+00  1.00000000E+00  0.00000000E+00
+       hspinfield41    0.00000000E+00  0.00000000E+00  1.00000000E+00
+       hspinfield42    0.00000000E+00  0.00000000E+00  1.00000000E+00
            istwfk        1
               ixc       -1012
            jdtset       11   12   21   22   31   32   41   42
@@ -576,8 +576,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.02738
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/leshu_invaraxial/tests/Pspdir/Cr_r_LDA_1012_dojov0.4.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/leshu_invaraxial/tests/Pspdir/Cr_r_LDA_1012_dojov0.4.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Cr_r_LDA_1012_dojov0.4.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Cr_r_LDA_1012_dojov0.4.psp8
 - Cr    ONCVPSP-3.3.0  r_core=   1.30591   1.30591   1.71817
 - 24.00000  14.00000    170825                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -594,8 +594,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   spin-orbit 2    0.006706    0.003344   -0.000025
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/leshu_invaraxial/tests/Pspdir/O_r_LDA.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/leshu_invaraxial/tests/Pspdir/O_r_LDA.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/O_r_LDA.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/O_r_LDA.psp8
 - O     ONCVPSP-4.0.1  r_core=   1.35491   1.45575   1.35491
 -  8.00000   6.00000    211008                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -625,11 +625,11 @@ solver: {iscf: 7, nstep: 4, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-06, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -422.18031047664    -4.222E+02 2.835E-02 8.752E+03
- ETOT  2  -425.96045540581    -3.780E+00 1.041E-02 1.683E+03
- ETOT  3  -427.05714711705    -1.097E+00 8.531E-03 3.248E+02
- ETOT  4  -427.19592800424    -1.388E-01 9.684E-04 2.283E+02
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -422.18031047664    -4.222E+02 2.835E-02 8.752E+03 2.868E-01 2.868E-01
+ ETOT  2  -425.96045540581    -3.780E+00 1.041E-02 1.683E+03 1.780E-01 4.648E-01
+ ETOT  3  -427.05714711705    -1.097E+00 8.531E-03 3.248E+02 6.506E-02 5.296E-01
+ ETOT  4  -427.19592800424    -1.388E-01 9.684E-04 2.283E+02 5.108E-03 5.245E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  4.87419188E-02  sigma(3 2)=  0.00000000E+00
@@ -847,11 +847,11 @@ solver: {iscf: 7, nstep: 4, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-06, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -422.18247593926    -4.222E+02 2.835E-02 8.758E+03
- ETOT  2  -425.95803941811    -3.776E+00 1.060E-02 1.717E+03
- ETOT  3  -426.98799060616    -1.030E+00 8.686E-03 4.620E+02
- ETOT  4  -427.04469066408    -5.670E-02 2.594E-03 4.825E+02
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -422.18247593926    -4.222E+02 2.835E-02 8.758E+03 3.249E-01 3.249E-01
+ ETOT  2  -425.95803941811    -3.776E+00 1.060E-02 1.717E+03 3.303E-01 6.552E-01
+ ETOT  3  -426.98799060616    -1.030E+00 8.686E-03 4.620E+02 1.917E-01 5.087E-01
+ ETOT  4  -427.04469066408    -5.670E-02 2.594E-03 4.825E+02 1.433E-01 4.925E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  4.86118209E-02  sigma(3 2)=  3.09693751E-06
@@ -1069,11 +1069,11 @@ solver: {iscf: 7, nstep: 4, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-06, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -411.62920130942    -4.116E+02 4.569E-02 6.865E+03
- ETOT  2  -414.40590506919    -2.777E+00 1.942E-02 8.508E+02
- ETOT  3  -414.77772859019    -3.718E-01 5.493E-03 8.207E+00
- ETOT  4  -414.77653863710     1.190E-03 2.368E-03 4.175E-01
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -411.62920130942    -4.116E+02 4.569E-02 6.865E+03 1.661E-01 1.661E-01
+ ETOT  2  -414.40590506919    -2.777E+00 1.942E-02 8.508E+02 4.050E-02 1.361E-01
+ ETOT  3  -414.77772859019    -3.718E-01 5.493E-03 8.207E+00 5.495E-02 8.144E-02
+ ETOT  4  -414.77653863710     1.190E-03 2.368E-03 4.175E-01 4.027E-02 4.148E-02
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.36381417E-02  sigma(3 2)=  1.12792121E-05
@@ -1293,11 +1293,11 @@ solver: {iscf: 7, nstep: 4, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-06, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -413.45737808103    -4.135E+02 4.569E-02 7.107E+03
- ETOT  2  -416.68393652550    -3.227E+00 2.554E-02 8.500E+02
- ETOT  3  -417.01156290270    -3.276E-01 2.621E-02 1.321E+01
- ETOT  4  -417.01560467626    -4.042E-03 1.180E-03 4.157E-01
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -413.45737808103    -4.135E+02 4.569E-02 7.107E+03 3.286E+00 3.286E+00
+ ETOT  2  -416.68393652550    -3.227E+00 2.554E-02 8.500E+02 1.841E+00 4.540E+00
+ ETOT  3  -417.01156290270    -3.276E-01 2.621E-02 1.321E+01 3.786E-01 4.165E+00
+ ETOT  4  -417.01560467626    -4.042E-03 1.180E-03 4.157E-01 4.692E-02 4.122E+00
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.46178486E-02  sigma(3 2)=  5.03790071E-06
@@ -1517,11 +1517,11 @@ solver: {iscf: 7, nstep: 4, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-06, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -411.67421247873    -4.117E+02 4.774E-02 6.683E+03
- ETOT  2  -414.43596186445    -2.762E+00 1.530E-02 7.547E+02
- ETOT  3  -414.77534368735    -3.394E-01 5.088E-03 6.267E+00
- ETOT  4  -414.77625308565    -9.094E-04 1.831E-03 3.696E-01
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -411.67421247873    -4.117E+02 4.774E-02 6.683E+03 1.671E-01 1.671E-01
+ ETOT  2  -414.43596186445    -2.762E+00 1.530E-02 7.547E+02 3.550E-02 1.316E-01
+ ETOT  3  -414.77534368735    -3.394E-01 5.088E-03 6.267E+00 5.396E-02 7.766E-02
+ ETOT  4  -414.77625308565    -9.094E-04 1.831E-03 3.696E-01 3.692E-02 4.074E-02
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.36328655E-02  sigma(3 2)=  0.00000000E+00
@@ -1741,11 +1741,11 @@ solver: {iscf: 7, nstep: 4, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-06, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -413.52307778894    -4.135E+02 4.774E-02 6.919E+03
- ETOT  2  -416.72179674716    -3.199E+00 2.911E-02 7.504E+02
- ETOT  3  -417.01120361637    -2.894E-01 6.784E-03 1.149E+01
- ETOT  4  -417.01558946221    -4.386E-03 8.426E-03 4.040E-01
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -413.52307778894    -4.135E+02 4.774E-02 6.919E+03 3.317E+00 3.317E+00
+ ETOT  2  -416.72179674716    -3.199E+00 2.911E-02 7.504E+02 1.772E+00 4.537E+00
+ ETOT  3  -417.01120361637    -2.894E-01 6.784E-03 1.149E+01 3.887E-01 4.154E+00
+ ETOT  4  -417.01558946221    -4.386E-03 8.426E-03 4.040E-01 3.449E-02 4.121E+00
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.46104704E-02  sigma(3 2)= -1.81994631E-06
@@ -1965,11 +1965,11 @@ solver: {iscf: 7, nstep: 4, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-06, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -411.75125221175    -4.118E+02 4.031E-02 6.791E+03
- ETOT  2  -414.41371502129    -2.662E+00 2.251E-02 8.027E+02
- ETOT  3  -414.77308566760    -3.594E-01 4.392E-03 7.756E+00
- ETOT  4  -414.77527858589    -2.193E-03 2.238E-03 3.174E-01
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -411.75125221175    -4.118E+02 4.031E-02 6.791E+03 2.039E-01 2.039E-01
+ ETOT  2  -414.41371502129    -2.662E+00 2.251E-02 8.027E+02 1.508E-01 5.315E-02
+ ETOT  3  -414.77308566760    -3.594E-01 4.392E-03 7.756E+00 1.050E-02 4.265E-02
+ ETOT  4  -414.77527858589    -2.193E-03 2.238E-03 3.174E-01 2.411E-02 1.854E-02
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.36383067E-02  sigma(3 2)=  0.00000000E+00
@@ -2189,11 +2189,11 @@ solver: {iscf: 7, nstep: 4, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-06, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -413.54560802801    -4.135E+02 4.031E-02 7.060E+03
- ETOT  2  -416.68906513469    -3.143E+00 2.604E-02 8.339E+02
- ETOT  3  -417.01084487939    -3.218E-01 3.759E-02 1.387E+01
- ETOT  4  -417.01549666211    -4.652E-03 1.329E-03 3.865E-01
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -413.54560802801    -4.135E+02 4.031E-02 7.060E+03 3.268E+00 3.268E+00
+ ETOT  2  -416.68906513469    -3.143E+00 2.604E-02 8.339E+02 1.966E+00 4.545E+00
+ ETOT  3  -417.01084487939    -3.218E-01 3.759E-02 1.387E+01 3.874E-01 4.160E+00
+ ETOT  4  -417.01549666211    -4.652E-03 1.329E-03 3.865E-01 4.920E-02 4.122E+00
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.46193856E-02  sigma(3 2)= -2.33386952E-06
@@ -2476,14 +2476,14 @@ band_energy         : -6.51126648413906E+01
                        1.2215472302E-01 -7.1547404712E-02  5.5902895943E-03
                       -7.9486085384E-04  1.4048416545E-01  5.5257691133E-03
 -          fftalg         512
-      hspinfield11    0.00000000E+00  0.00000000E+00  0.00000000E+00
-      hspinfield12    0.00000000E+00  0.00000000E+00  0.00000000E+00
-      hspinfield21    1.00000000E+00  0.00000000E+00  0.00000000E+00
-      hspinfield22    1.00000000E+00  0.00000000E+00  0.00000000E+00
-      hspinfield31    0.00000000E+00  1.00000000E+00  0.00000000E+00
-      hspinfield32    0.00000000E+00  1.00000000E+00  0.00000000E+00
-      hspinfield41    0.00000000E+00  0.00000000E+00  1.00000000E+00
-      hspinfield42    0.00000000E+00  0.00000000E+00  1.00000000E+00
+       hspinfield11    0.00000000E+00  0.00000000E+00  0.00000000E+00
+       hspinfield12    0.00000000E+00  0.00000000E+00  0.00000000E+00
+       hspinfield21    1.00000000E+00  0.00000000E+00  0.00000000E+00
+       hspinfield22    1.00000000E+00  0.00000000E+00  0.00000000E+00
+       hspinfield31    0.00000000E+00  1.00000000E+00  0.00000000E+00
+       hspinfield32    0.00000000E+00  1.00000000E+00  0.00000000E+00
+       hspinfield41    0.00000000E+00  0.00000000E+00  1.00000000E+00
+       hspinfield42    0.00000000E+00  0.00000000E+00  1.00000000E+00
            istwfk        1
               ixc       -1012
            jdtset       11   12   21   22   31   32   41   42
@@ -2942,10 +2942,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         60.0  wall=         60.2
+- Proc.   0 individual time (sec): cpu=         60.7  wall=         61.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  16 WARNINGs and  27 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         60.0  wall=         60.2
++Overall time at end (sec) : cpu=         60.7  wall=         61.3
