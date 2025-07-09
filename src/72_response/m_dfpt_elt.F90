@@ -2419,7 +2419,7 @@ subroutine dfpt_ewald(dyew,gmet,gsqcut,icutcoul,my_natom,natom,ngfft,nkpt,qphon,
        computeit= .true.
 !      Skip q=0:
        if (gsq<1.0d-20) then
-         if (icutcoul==55) computeit= .false.
+         computeit= .false.
          if (sumg0==1) then
            write(message,'(5a)')&
 &           'The phonon wavelength should not be zero : ',ch10,&

@@ -627,18 +627,20 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
                    if(choice==5 .and. ilang>=2) then
                      jjk=1+((ilang-2)*(ilang-1)*ilang)/6
                      compact=-1
-                     temp(:,1:(rank*(rank+1))/2)= &
-&                     dgxdt(:,2,jjk:jjk-1+(rank*(rank+1))/2,ia,iproj,ispin)
+!                     temp(:,1:(rank*(rank+1))/2)= &
+!&                     dgxdt(:,2,jjk:jjk-1+(rank*(rank+1))/2,ia,iproj,ispin)
+                     temp(:,1:(rank*(rank+1))/2)=0.d0
                      call ddkten(compact,idir,rank,temp,tmpfac)
-                     dgxdt(:,1,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj,ispin)= &
-&                     dgxdt(:,1,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj,ispin)&
-&                     +tmpfac(:,1:((rank+1)*(rank+2))/2)
+!                     dgxdt(:,1,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj,ispin)= &
+!&                     dgxdt(:,1,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj,ispin)&
+!&                     +tmpfac(:,1:((rank+1)*(rank+2))/2)
                      compact=1
                      tmpfac(:,1:((rank+1)*(rank+2))/2)= &
 &                     gxafac(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj)
                      call ddkten(compact,idir,rank,temp,tmpfac)
-                     dgxdtfac(:,2,jjk:jjk-1+(rank*(rank+1))/2,ia,iproj)= &
-&                     temp(:,1:(rank*(rank+1))/2)
+!                     dgxdtfac(:,2,jjk:jjk-1+(rank*(rank+1))/2,ia,iproj)= &
+!&                     temp(:,1:(rank*(rank+1))/2)
+                     dgxdtfac(:,2,jjk:jjk-1+(rank*(rank+1))/2,ia,iproj)=0.d0
                    end if
 
 !                  Section for strain perturbation
