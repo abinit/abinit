@@ -768,7 +768,7 @@ subroutine opernl3(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 !arrays
  integer,allocatable :: parity(:)
 ! real(dp) :: tsec(2)
- real(dp),allocatable :: ffkg(:,:),kpgx(:,:),scalars(:,:),teffv(:,:)
+ real(dp),allocatable :: ffkg(:,:),kpgx(:,:),scalars(:,:),teffv(:,:), dkpg(:,:)
 
 ! *************************************************************************
 
@@ -852,6 +852,7 @@ subroutine opernl3(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
  ABI_MALLOC(ffkg,(nffkg,mblkpw))
  ABI_MALLOC(parity,(nffkg))
  ABI_MALLOC(kpgx,(mblkpw,ntens))
+ ABI_MALLOC(dkpg,(mblkpw,ntens))
  ABI_MALLOC(scalars,(2,nffkg))
  ABI_MALLOC(teffv,(2,mblkpw))
 !!$OMP DO
@@ -863,7 +864,7 @@ subroutine opernl3(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 !  Initialize kpgx array related to tensors defined below
    call dfpt_mkffkg(choice,ffkg,ffnl,gmet,idir,indlmn,ipw1,ispinor,itypat,&
 &   kg_k,kpg_k,kpgx,kpt,lmnmax,mblkpw,ndgxdt,nffkg,nffnl,nincpw,nkpg,nlang,&
-&   npw,ntens,ntypat,parity)
+&   npw,ntens,ntypat,parity,dkpg)
 
 !  call timab(74+choice,2,tsec)
 
@@ -1208,6 +1209,7 @@ subroutine opernl3(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 !!$OMP END DO
  ABI_FREE(ffkg)
  ABI_FREE(kpgx)
+ ABI_FREE(dkpg)
  ABI_FREE(parity)
  ABI_FREE(scalars)
  ABI_FREE(teffv)
@@ -1354,7 +1356,7 @@ subroutine opernl4a(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
  real(dp),parameter :: two_pi2=two_pi*two_pi
 !arrays
  integer,allocatable :: parity(:)
- real(dp),allocatable :: ffkg(:,:),kpgx(:,:),scalars(:,:),teffv(:,:)
+ real(dp),allocatable :: ffkg(:,:),kpgx(:,:),scalars(:,:),teffv(:,:), dkpg(:,:)
 
 ! *************************************************************************
 
@@ -1450,6 +1452,7 @@ subroutine opernl4a(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
  ABI_MALLOC(ffkg,(nffkg,mblkpw))
  ABI_MALLOC(parity,(nffkg))
  ABI_MALLOC(kpgx,(mblkpw,ntens))
+ ABI_MALLOC(dkpg,(mblkpw,ntens))
  ABI_MALLOC(scalars,(2,nffkg))
  ABI_MALLOC(teffv,(2,mblkpw))
 
@@ -1462,7 +1465,7 @@ subroutine opernl4a(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 !  Initialize kpgx array related to tensors defined below
    call dfpt_mkffkg(choice,ffkg,ffnl,gmet,idir,indlmn,ipw1,ispinor,itypat,&
 &   kg_k,kpg_k,kpgx,kpt,lmnmax,mblkpw,ndgxdt,nffkg,nffnl,nincpw,nkpg,nlang,&
-&   npw,ntens,ntypat,parity)
+&   npw,ntens,ntypat,parity,dkpg)
 
    do ia=1,nincat
 
@@ -2240,6 +2243,7 @@ subroutine opernl4a(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 
  ABI_FREE(ffkg)
  ABI_FREE(kpgx)
+ ABI_FREE(dkpg)
  ABI_FREE(parity)
  ABI_FREE(scalars)
  ABI_FREE(teffv)
@@ -2353,7 +2357,7 @@ subroutine opernl4b(choice,dgxds,dgxdt,ffnl,gmet,gxa,&
  character(len=500) :: message
 !arrays
  integer,allocatable :: parity(:)
- real(dp),allocatable :: ffkg(:,:),kpgx(:,:),scalars(:,:),teffv(:,:)
+ real(dp),allocatable :: ffkg(:,:),kpgx(:,:),scalars(:,:),teffv(:,:), dkpg(:,:)
 
 ! *************************************************************************
 
@@ -2406,6 +2410,7 @@ subroutine opernl4b(choice,dgxds,dgxdt,ffnl,gmet,gxa,&
  ABI_MALLOC(ffkg,(nffkg,mblkpw))
  ABI_MALLOC(parity,(nffkg))
  ABI_MALLOC(kpgx,(mblkpw,ntens))
+ ABI_MALLOC(dkpg,(mblkpw,ntens))
  ABI_MALLOC(scalars,(2,nffkg))
  ABI_MALLOC(teffv,(2,mblkpw))
 
@@ -2419,7 +2424,7 @@ subroutine opernl4b(choice,dgxds,dgxdt,ffnl,gmet,gxa,&
 !  Initialize kpgx array related to tensors defined below
    call dfpt_mkffkg(choice,ffkg,ffnl,gmet,idir,indlmn,ipw1,ispinor,itypat,&
 &   kg_k,kpg_k,kpgx,kpt,lmnmax,mblkpw,ndgxdt,nffkg,nffnl,nincpw,nkpg,nlang,&
-&   npw,ntens,ntypat,parity)
+&   npw,ntens,ntypat,parity,dkpg)
 
    if (choice==1 .or. choice==2 .or. choice==3 .or. choice==5) then
 !    Application of non-local part from projected scalars
@@ -2981,6 +2986,7 @@ subroutine opernl4b(choice,dgxds,dgxdt,ffnl,gmet,gxa,&
 
  ABI_FREE(ffkg)
  ABI_FREE(kpgx)
+ ABI_FREE(dkpg)
  ABI_FREE(parity)
  ABI_FREE(scalars)
  ABI_FREE(teffv)
