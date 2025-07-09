@@ -2471,6 +2471,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%fockoptmix=0
    dtsets(idtset)%fockdownsampling(:)=1
    dtsets(idtset)%fock_icutcoul=0  ! Spherical-cutoff for legacy reasons
+   dtsets(idtset)%fock_rcut=zero   ! Spencer-Alavi by default
    dtsets(idtset)%freqim_alpha=five
    dtsets(idtset)%friction=0.001_dp
    dtsets(idtset)%frictionbar=0.001_dp

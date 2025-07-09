@@ -644,7 +644,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
    call fockbz_create(fockbz,mgfft,dtset%mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_ACE)
 
    fockcommon%fock_icutcoul = dtset%fock_icutcoul
-   fockcommon%rcut = dtset%rcut
+   fockcommon%rcut = dtset%fock_rcut
 
 !* Initialize %mband, %mkpt, %mkptband = size of arrays
    fockcommon%mband=mband
