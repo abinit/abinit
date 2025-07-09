@@ -498,14 +498,13 @@ end subroutine epsm1_print
 !!  the same symmetry as the crystal.
 !!
 !! INPUTS
+!!  iq_bz=Index of the q-point in the BZ where epsilon^-1 is required.
 !!  nomega=Number of frequencies required. All frequencies from 1 up to nomega are symmetrized.
 !!  npwc=Number of G vectors in symmetrized matrix, has to be smaller than epsm1%npwe.
-!!  remove_exchange=If .TRUE., return e^{-1}-1 namely remove the exchange part.
-!!  epsm1<epsm1_t>=Data structure containing the inverse dielectric matrix.
 !!  Gsph<gsphere_t>=data related to the G-sphere
 !!  Qmesh<kmesh_t>=Structure defining the q-mesh used for epsm1.
-!!  iq_bz=Index of the q-point in the BZ where epsilon^-1 is required.
-!!
+!!  remove_exchange=If .TRUE., return e^{-1}-1 namely remove the exchange part.
+
 !! OUTPUT
 !!  epsm1_qbz(npwc,npwc,nomega)=The inverse dielectric matrix at the q-point defined by iq_bz.
 !!   Exchange part can be subtracted out.
@@ -531,7 +530,7 @@ end subroutine epsm1_print
 !!
 !! SOURCE
 
-subroutine Epsm1_rotate_iqbz(epsm1, iq_bz, nomega, npwc, Gsph, Qmesh, remove_exchange) !, epsm1_qbz)
+subroutine Epsm1_rotate_iqbz(epsm1, iq_bz, nomega, npwc, Gsph, Qmesh, remove_exchange)
 
 !Arguments ------------------------------------
 !scalars
@@ -540,8 +539,6 @@ subroutine Epsm1_rotate_iqbz(epsm1, iq_bz, nomega, npwc, Gsph, Qmesh, remove_exc
  logical,intent(in) :: remove_exchange
  type(gsphere_t),target,intent(in) :: Gsph
  type(kmesh_t),intent(in) :: Qmesh
-!arrays
- !complex(gwpc),intent(out) :: epsm1_qbz(npwc,npwc,nomega)
 
 !Local variables-------------------------------
 !scalars
@@ -576,7 +573,7 @@ subroutine Epsm1_rotate_iqbz(epsm1, iq_bz, nomega, npwc, Gsph, Qmesh, remove_exc
      end do
    end do
  end do
- !
+
  ! Account for time-reversal
  if (itim_q==2) then
 !!$OMP PARALLEL DO IF (nomega > 1)
@@ -614,14 +611,12 @@ end subroutine Epsm1_rotate_iqbz
 !!  via an auxiliary work array of shape (npwc,npwc)
 !!
 !! INPUTS
+!!  iq_bz=Index of the q-point in the BZ where epsilon^-1 is required.
 !!  nomega=Number of frequencies required. All frequencies from 1 up to nomega are symmetrized.
 !!  npwc=Number of G vectors in symmetrized matrix, has to be smaller than epsm1%npwe.
-!!  remove_exchange=If .TRUE., return e^{-1}-1 namely remove the exchange part.
-!!  epsm1<epsm1_t>=Data structure containing the inverse dielectric matrix.
-!!  Gsph<gsphere_t>=data related to the G-sphere
 !!  Gsph<gsphere_t>=data related to the G-sphere
 !!  Qmesh<kmesh_t>=Structure defining the q-mesh used for epsm1.
-!!  iq_bz=Index of the q-point in the BZ where epsilon^-1 is required.
+!!  remove_exchange=If .TRUE., return e^{-1}-1 namely remove the exchange part.
 !!
 !! OUTPUT
 !!  epsm1%epsm1(npwc,npwc,nomega,iq_loc) symmetrised
@@ -650,10 +645,10 @@ subroutine Epsm1_rotate_iqbz_inplace(epsm1, iq_bz, nomega, npwc, Gsph, Qmesh, re
 !Arguments ------------------------------------
 !scalars
  class(epsm1_t),intent(inout) :: epsm1
- integer,intent(in) :: iq_bz,nomega,npwc
- logical,intent(in) :: remove_exchange
+ integer,intent(in) :: iq_bz, nomega, npwc
  type(gsphere_t),target,intent(in) :: Gsph
  type(kmesh_t),intent(in) :: Qmesh
+ logical,intent(in) :: remove_exchange
 
 !Local variables-------------------------------
 !scalars
@@ -737,8 +732,8 @@ subroutine epsm1_from_file(epsm1, fname, mqmem, npwe_asked, comm)
 
 !Arguments ------------------------------------
  class(epsm1_t),intent(inout) :: epsm1
- integer,intent(in) :: mqmem,npwe_asked,comm
  character(len=*),intent(in) :: fname
+ integer,intent(in) :: mqmem,npwe_asked,comm
 
 !Local variables-------------------------------
 !scalars
@@ -1187,6 +1182,14 @@ subroutine epsm1_malloc_epsm1_qbz(epsm1, npwc, nomega)
 end subroutine epsm1_malloc_epsm1_qbz
 !!***
 
+!----------------------------------------------------------------------
+
+!!****f* m_screening/epsm1_free_epsm1_qbz
+!! NAME
+!!  epsm1_free_epsm1_qbz
+!!
+!! FUNCTION
+!!  Free the internal buffer %epsm1_qbz
 
 subroutine epsm1_free_epsm1_qbz(epsm1)
 
@@ -1573,9 +1576,9 @@ subroutine make_epsm1_driver(iq_ibz, dim_wing, npwe, nI, nJ, nomega, omega,&
 
  if (use_mpi_shared_win) call xmpi_win_fence(XMPI_MODE_NOPRECEDE, epsm1_win, ierr) ! Start the RMA epoch.
 
- SELECT CASE (approx_type)
+ select case (approx_type)
 
- CASE (0)
+ case (0)
    ! RPA: \tepsilon = 1 - Vc^{1/2} chi0 Vc^{1/2}
    ! vc_sqrt contains vc^{1/2}(q,G), complex-valued to allow for a possible cutoff.
    do io=1,nomega
@@ -1592,7 +1595,7 @@ subroutine make_epsm1_driver(iq_ibz, dim_wing, npwe, nI, nJ, nomega, omega,&
      end if
    end do ! nomega
 
- CASE (1)
+ case (1)
    ! Vertex correction from Adiabatic TDDFT. chi_{G1,G2} = [\delta -\chi0 (vc+kxc)]^{-1}_{G1,G3} \chi0_{G3,G2}
    ABI_CHECK(Vcp%nqlwl==1,"nqlwl/=1 not coded")
    ABI_CHECK(nkxc==1,"nkxc/=1 not coded")
@@ -1641,7 +1644,7 @@ subroutine make_epsm1_driver(iq_ibz, dim_wing, npwe, nI, nJ, nomega, omega,&
      call print_arr([std_out], chi0(:,:,io))
    end do
 
- CASE (2)
+ case (2)
    ! ADA nonlocal vertex correction contained in fxc_ADA
    ABI_WARNING('Entered fxc_ADA branch: EXPERIMENTAL!')
    ! Test that argument was passed
@@ -1668,7 +1671,7 @@ subroutine make_epsm1_driver(iq_ibz, dim_wing, npwe, nI, nJ, nomega, omega,&
      call print_arr([std_out], chi0(:,:,io))
    end do
 
- CASE (4)
+ case (4)
    ! Bootstrap vertex kernel by Sharma [[cite:Sharma2011]]
    ABI_MALLOC_OR_DIE(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
    ABI_MALLOC_OR_DIE(vfxc_boot0,(npwe*nI,npwe*nJ), ierr)
@@ -1752,7 +1755,7 @@ subroutine make_epsm1_driver(iq_ibz, dim_wing, npwe, nI, nJ, nomega, omega,&
      call print_arr([std_out], chi0(:,:,io))
    end do
 
- CASE (5)
+ case (5)
    ! One-shot scalar bootstrap approximation
    ABI_MALLOC_OR_DIE(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
    ABI_MALLOC_OR_DIE(chi0_save,(npwe*nI,npwe*nJ,nomega), ierr)
@@ -1798,7 +1801,7 @@ subroutine make_epsm1_driver(iq_ibz, dim_wing, npwe, nI, nJ, nomega, omega,&
      call print_arr([std_out], chi0(:,:,io))
    end do
 
- CASE (6)
+ case (6)
    ! RPA bootstrap by Rigamonti [[cite:Rigamonti2015]] and Berger [[cite:Berger2015]]
    ABI_MALLOC_OR_DIE(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
    ABI_MALLOC_OR_DIE(chi0_save,(npwe*nI,npwe*nJ,nomega), ierr)
@@ -1876,7 +1879,7 @@ subroutine make_epsm1_driver(iq_ibz, dim_wing, npwe, nI, nJ, nomega, omega,&
      call print_arr([std_out], chi0(:,:,io))
    end do
 
- CASE (7)
+ case (7)
    ! LR+ALDA hybrid vertex kernel by Tal
    ! First ALDA
    ABI_CHECK(Vcp%nqlwl==1,"nqlwl/=1 not coded")
@@ -1963,9 +1966,9 @@ subroutine make_epsm1_driver(iq_ibz, dim_wing, npwe, nI, nJ, nomega, omega,&
      call print_arr([std_out], chi0(:,:,io))
    end do
 
- CASE DEFAULT
+ case default
    ABI_BUG(sjoin('Wrong approx_type:',itoa(approx_type)))
- END SELECT
+ end select
 
  if (use_mpi_shared_win) call xmpi_win_fence(XMPI_MODE_NOSUCCEED, epsm1_win, ierr) ! Close the RMA epoch.
 
