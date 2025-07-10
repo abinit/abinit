@@ -20031,9 +20031,9 @@ Variable(
     mnemonics="TOLerance on the DiFference of MAGnetizations",
     commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[toldff]], [[tolrff]], [[toldfe]], [[toldmag]] or [[tolvrs]] can differ from zero.",
     excludes="[[toldfe]] or [[tolrff]] or [[tolvrs]]",
-    added_in_version="before_v...",
+    added_in_version="v10.5",
     text=r"""
-Sets a tolerance for differences of magnetization (in ???? ) that, reached
+Sets a tolerance for differences of magnetization (in atomic unit ) that, reached
 TWICE successively, will cause one SCF cycle to stop (and ions to be moved).
 If set to zero, this stopping condition is ignored.
 Effective only when SCF cycles are done ([[iscf]]>0). This tolerance applies
@@ -20051,6 +20051,9 @@ will have precedence on the non-zero value for another input variable defined ge
 To do so one has to specify both criteria for the same dataset.
 Note that a tolerance defined generically does not couple with a criterion defined for one particular dataset.
 See [[tolwfr]] for more details about coupling two criteria.
+
+When the maximum magnetization among all atoms and directions is smaller than 10e^-8, both the maximum of magnetization 
+and its difference are reset to zero. In this case, the toldmag convergence criterion cannot be used.
 """,
 ),
 Variable(

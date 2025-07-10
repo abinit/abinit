@@ -657,8 +657,8 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
          toldmag_ok=toldmag_ok+1
          ! add warning for magnetizations which are 0 . Check below that the wave
          ! functions are relatively converged as well
-         if (difmagsph < tol12) then
-           write (message,'(3a)') ' toldmag criterion is satisfied.', ch10,&
+         if (maxmagsph < tol8) then
+           write (message,'(3a)') ' toldmag criterion is satisfied, but your magnetizations are suspiciously low.', ch10,&
             ' Check if the magnetizations are 0 : in that case you can not use the toldmag convergence criterion!'
            ABI_WARNING(message)
      ! HEREE  ??
