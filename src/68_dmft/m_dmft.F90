@@ -106,10 +106,10 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  type(pawtab_type), intent(inout) :: pawtab(paw_dmft%ntypat)
  type(oper_type), intent(in) :: dft_occup
 !Local variables ------------------------------
- integer :: check,dmft_iter,dmft_optim,idmftloop,istep_iter,itypat,myproc,natom
+ integer :: check,dmft_iter,idmftloop,istep_iter,itypat,myproc,natom
  integer :: ntypat,opt_diff,opt_maxent,opt_moments,opt_renorm,prtopt
  !logical :: etot_var
- logical :: t2g,x2my2d
+ logical :: dmft_optim,t2g,x2my2d
  real(dp) :: tsec(2)
  character(len=200) :: char_enddmft
  type(green_type) :: green,greendft,weiss
@@ -133,7 +133,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  ntypat = paw_dmft%ntypat
  dmft_iter  = paw_dmft%dmft_iter
  opt_maxent = paw_dmft%dmft_prt_maxent
- dmft_optim  = paw_dmft%dmft_optim ! skip some unneeded calls to compute_green with TRIQS
+ dmft_optim  = (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) ! skip some unneeded calls to compute_green with TRIQS
  !paw_dmft%dmft_fermi_prec=tol5
  !paw_dmft%dmft_fermi_prec = paw_dmft%dmft_charge_prec * ten
 !paw_dmft%dmft_charge_prec=20_dp ! total number of electron.
@@ -151,8 +151,8 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  !end if
 
  opt_moments = merge(1,0,paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7)
- prtopt = merge(2,0,dmft_optim==1)
- opt_diff = merge(1,0,dmft_optim==1)
+ prtopt = merge(2,0,dmft_optim)
+ opt_diff = merge(1,0,dmft_optim)
 
  if (check == 1) then
    write(message,'(2a)') ch10,' DMFT Checks are enabled '
@@ -319,7 +319,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
    & ch10," =====  Green's Function Calculation with input self-energy ========", &
    & ch10," ==================================================================="
  call wrtout(std_out,message,'COLL')
- if (dmft_optim == 1) then
+ if (dmft_optim) then
    call init_green(green,paw_dmft,opt_moments=opt_moments)
  else
    call icip_green("DFT+DMFT",green,paw_dmft,pawprtvol,self,opt_self=1,opt_moments=opt_moments)
@@ -335,7 +335,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  call compute_green(green,paw_dmft,0,self,opt_self=1,opt_nonxsum=1,opt_restart_moments=1)
  call integrate_green(green,paw_dmft,prtopt)
 
- if (dmft_optim == 1) then
+ if (dmft_optim) then
    call printocc_green(green,5,paw_dmft,3,chtype="DFT+DMFT")
  end if
 
@@ -465,7 +465,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 
 !  ==  Compute green function self -> G(k)
 !  ---------------------------------------------------------------------
-   if (dmft_optim == 0) then
+   if (.not. dmft_optim) then
      call compute_green(green,paw_dmft,1,self,opt_self=1,opt_nonxsum=1)
      call integrate_green(green,paw_dmft,3,opt_diff=1) !,opt_nonxsum=1)
 
@@ -482,7 +482,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
    call compute_green(green,paw_dmft,0,self,opt_self=1,opt_nonxsum=1,opt_log=paw_dmft%dmft_triqs_entropy,opt_restart_moments=1)
    call integrate_green(green,paw_dmft,prtopt,opt_diff=opt_diff,opt_ksloc=3,opt_fill_occnd=1)
 
-   if (dmft_optim == 1) then
+   if (dmft_optim) then
      call printocc_green(green,5,paw_dmft,3,chtype="DFT+DMFT")
    end if
 
@@ -518,7 +518,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 
 !== Save self on disk
 !-------------------------------------------------------------------------
- if (dmft_optim == 0) then
+ if (.not. dmft_optim) then
    call timab(627,1,tsec(:))
    call rw_self(self,paw_dmft,prtopt=2,opt_rw=2)
    call timab(627,2,tsec(:))
@@ -542,7 +542,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 !--------------------------------------------------------------------------------
 !Do not compute here, because, one want a energy computed after the
 !solver (for Hubbard I and DFT+U).
- if (dmft_optim == 0) then
+ if (.not. dmft_optim) then
    call compute_green(green,paw_dmft,1,self,opt_self=1,opt_nonxsum=1)
    call integrate_green(green,paw_dmft,2,opt_fill_occnd=1) !,opt_nonxsum=1)
  end if

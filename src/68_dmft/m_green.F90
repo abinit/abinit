@@ -2248,7 +2248,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
                 & ikpt,isppol) = fac * aimag(green%occup%ks(ib,ib1,ikpt,isppol))
            end do  ! ib
          end do ! ib1
-         if (paw_dmft%dmft_use_all_bands) then
+         if (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) then
            nband_k = paw_dmft%nband(ikpt+(isppol-1)*nkpt)
            do ib=1,nband_k
              if (paw_dmft%band_in(ib)) cycle
@@ -2295,7 +2295,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
 
 !  - Compute trace over ks density matrix
    call trace_oper(green%occup,green%charge_ks,green%charge_matlu(:,:),1)
-   if (paw_dmft%dmft_use_all_bands) then
+   if (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) then
 
      band_index = 0
      correction = zero
@@ -3761,8 +3761,8 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
  real(dp), intent(inout) :: x_input,x_precision
  integer, optional, intent(in) :: opt_algo
 !Local variables-------------------------------
- integer :: dmft_optim,iter,option
- logical :: l_minus,l_plus
+ integer :: iter,option
+ logical :: dmft_optim,l_minus,l_plus
  real(dp) :: Fx,Fxdouble,Fxoptimum,Fxprime,nb_elec_x,step
  real(dp) :: x_minus,x_optimum,x_plus,xold
  character(len=500) :: message
@@ -3795,9 +3795,9 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
  Fxoptimum = one
  x_optimum = zero
 
- dmft_optim = paw_dmft%dmft_optim
+ dmft_optim = (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7)
 
- if (dmft_optim == 1) xold = x_input
+ if (dmft_optim) xold = x_input
 
 !========================================
 ! Start iteration to find fermi level
@@ -3807,7 +3807,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 !  ========================================
 !  If zero is located between two values: apply newton method or dichotomy
 !  ========================================
-   if ((l_minus .and. l_plus) .or. dmft_optim == 1) then
+   if ((l_minus .and. l_plus) .or. dmft_optim) then
 
 !    ==============================================
 !    Compute the function and derivatives for newton
@@ -3845,7 +3845,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 !    ==============================================
      xold = x_input
      if (option == 1) then
-       if (dmft_optim == 1) then
+       if (dmft_optim) then
          x_input = x_input - sign(one,Fx)*merge(step,min(step,abs(Fx/Fxprime)),Fxprime<0)
        else
          x_input = x_input - Fx/Fxprime
@@ -3857,7 +3857,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 !    If newton does not work well, use dichotomy.
 !    ==============================================
 
-     if (dmft_optim == 1) then
+     if (dmft_optim) then
        if (Fx < 0) then
          l_minus = .true.
          x_minus = xold
@@ -3870,13 +3870,13 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 
      if ((x_input < x_minus .or. x_input > x_plus) .and. (l_minus .and. l_plus)) then
 
-       if (dmft_optim == 0) then
+       if (.not. dmft_optim) then
          call compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,xold)
        end if
 
        write(message,'(a,3f12.6)') " ---",x_input,Fx+paw_dmft%nelectval,Fx
        call wrtout(std_out,message,'COLL')
-       if (dmft_optim == 0) then
+       if (.not. dmft_optim) then
          if (Fx > 0) then
            x_plus = xold
          else if (Fx < 0) then
@@ -3914,9 +3914,9 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 
    end if ! l_minus and l_plus
 
-   if (abs(Fx) < abs(Fxoptimum) .or. (iter == 1 .and. dmft_optim == 1)) then
+   if (abs(Fx) < abs(Fxoptimum) .or. (iter == 1 .and. dmft_optim)) then
      Fxoptimum = Fx
-     x_optimum = merge(xold,x_input,dmft_optim==1)
+     x_optimum = merge(xold,x_input,dmft_optim)
    end if ! abs(Fx)<abs(Fxoptimum)
 
 
@@ -3979,14 +3979,14 @@ subroutine function_and_deriv(green,self,paw_dmft,x_input,x_precision, &
  real(dp), intent(in) :: f_precision,x_input,x_precision
  real(dp), intent(out) :: Fx,Fxprime,Fxdouble
 !Local variables-------------------------------
- integer :: dmft_optim
+ logical :: dmft_optim
  real(dp) :: deltax,Fxminus,Fxplus,nb_elec_x,xminus,x0,xplus
  character(len=500) :: message
 ! *********************************************************************
 
-   dmft_optim = paw_dmft%dmft_optim
+   dmft_optim = (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7)
 
-   if (dmft_optim == 0) then
+   if (.not. dmft_optim) then
 
 !  Choose deltax: for numeric evaluation of derivative
    !if(iter==1) then
@@ -4074,8 +4074,9 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
  real(dp), intent(out) :: Fx,nb_elec_x
  real(dp), optional, intent(out) :: Fxprime
 !Local variables-------------------------------
- integer :: band_index,dmft_optim,i,ib,ierr,ifreq,ikpt,isppol,mbandc
+ integer :: band_index,i,ib,ierr,ifreq,ikpt,isppol,mbandc
  integer :: mkmem,nband_k,nkpt,nmoments,nspinor,nsppol,shift
+ logical :: dmft_optim
  real(dp) :: correction,correction_prime,eig
  real(dp) :: fac,occ_prime,temp,wtk
  complex(dpc) :: omega
@@ -4084,9 +4085,9 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
 ! *********************************************************************
 
    ABI_NVTX_START_RANGE(NVTX_DMFT_COMPUTE_NB_ELEC)
-   dmft_optim = paw_dmft%dmft_optim
+   dmft_optim = (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7)
 
-   if (dmft_optim == 0) then
+   if (.not. dmft_optim) then
 
      paw_dmft%fermie = fermie
      call compute_green(green,paw_dmft,0,self,opt_self=1,opt_nonxsum=1,opt_nonxsum2=1)
@@ -4173,7 +4174,7 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
      ABI_FREE(trace_moments_prime)
      ABI_FREE(omega_fac)
 
-     if (paw_dmft%dmft_use_all_bands) then
+     if (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) then
        band_index = 0
        correction = zero
        correction_prime = zero

@@ -652,8 +652,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    if (dt%usedmft>0.and.dt%usedmft/=10) then
      cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftcheck',dt%dmftcheck,4,(/-1,0,1,2/),iout)
-     cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_optim',dt%dmft_optim,2,(/0,1/),iout)
      if(dt%dmftcheck/=-1) then
 
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
@@ -707,10 +705,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_prtwan',dt%dmft_prtwan,2,(/0,1/),iout)
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_rslf',dt%dmft_rslf,3,(/-1,0,1/),iout)
-       cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
-       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_use_all_bands',dt%dmft_use_all_bands,2,(/0,1/),iout)
-       cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
-       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_use_full_chipsi',dt%dmft_use_full_chipsi,2,(/0,1/),iout)
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
        call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_fermi_step',dt%dmft_fermi_step,1,zero,iout)
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
@@ -791,7 +785,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
        if (dt%dmft_prtwan==1) then
          cond_string(1)='dmft_prtwan' ; cond_values(1)=dt%dmft_prtwan
-         call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_use_full_chipsi',dt%dmft_use_full_chipsi,1,(/1/),iout)
+         call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_solv',dt%dmft_solv,2,(/6,7/),iout)
        end if
 
        if (dt%dmft_solv>=5) then
@@ -979,10 +973,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        cond_string(1)='dmft_triqs_compute_integral' ; cond_values(1)=dt%dmft_triqs_compute_integral
        cond_string(2)='dmft_triqs_entropy' ; cond_values(2)=dt%dmft_triqs_entropy
        call chkint_ge(0,2,cond_string,cond_values,ierr,'dmft_triqs_gaussorder',dt%dmft_triqs_gaussorder,2,iout)
-     end if
-     if (dt%dmft_triqs_entropy == 1) then
-       cond_string(1)='dmft_triqs_entropy' ; cond_values(1)=dt%dmft_triqs_entropy
-       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_use_all_bands',dt%dmft_use_all_bands,1,(/1/),iout)
      end if
      if (dt%dmft_t2g == 1) then
        cond_string(1)='dmft_t2g' ; cond_values(1)=dt%dmft_t2g
@@ -2006,12 +1996,12 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
 !  kptopt
    call chkint_le(0,0,cond_string,cond_values,ierr,'kptopt',dt%kptopt,4,iout)
-  ! If kptopt < 0, it is only valid when iscf = -2 
+  ! If kptopt < 0, it is only valid when iscf = -2
    if (dt%iscf/=-2) then
-      cond_string(1)='iscf' ; cond_values(1)=dt%iscf 
+      cond_string(1)='iscf' ; cond_values(1)=dt%iscf
       call chkint_ge(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,0,iout)
-   end if   
-  ! If hspinfield is applied, only kptopt = 0, 3, 4 are allowed 
+   end if
+  ! If hspinfield is applied, only kptopt = 0, 3, 4 are allowed
    if (any(abs(dt%hspinfield)>tol8)) then
       cond_string(1) = 'hspinfield(x)' ; cond_values(1) = dt%hspinfield(1)
       cond_string(2) = 'hspinfield(y)' ; cond_values(2) = dt%hspinfield(2)

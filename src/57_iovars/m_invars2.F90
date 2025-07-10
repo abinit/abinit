@@ -2489,9 +2489,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread==1) dtset%dmft_solv=intarr(1)
    if (dtset%dmft_solv==6.or.dtset%dmft_solv==7) then ! change some default values for TRIQS
      dtset%dmftctqmc_meas=0
-     dtset%dmft_optim=1
-     dtset%dmft_use_all_bands=1
-     dtset%dmft_use_full_chipsi=1
      dtset%dmftctqmc_basis=-1
      dtset%dmft_dc=0
      dtset%dmft_iter=-1
@@ -2533,8 +2530,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread==1) dtset%dmft_nwlo=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_occnd_imag',tread,'INT')
    if(tread==1) dtset%dmft_occnd_imag=intarr(1)
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_optim',tread,'INT')
-   if(tread==1) dtset%dmft_optim=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'dmft_orbital',tread,'INT')
    if(tread==1) dtset%dmft_orbital(:)=intarr(1:ntypat)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),"dmft_orbital_filepath",tread,'KEY',key_value=key_value)
@@ -2553,10 +2548,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread==1) dtset%dmft_shiftself(:)=dprarr(1:natom)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_t2g',tread,'INT')
    if(tread==1) dtset%dmft_t2g=intarr(1)
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_use_all_bands',tread,'INT')
-   if(tread==1) dtset%dmft_use_all_bands=intarr(1)
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_use_full_chipsi',tread,'INT')
-   if(tread==1) dtset%dmft_use_full_chipsi=intarr(1)
 
    natomcor=0
    do iatom=1,dtset%natom

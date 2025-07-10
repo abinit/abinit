@@ -1517,7 +1517,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
     if (tread == 1) then
        write(msg, '(3a)')&
        'Input variable "zeemanfield" is deprecated.', ch10, &
-       'Its value has been assigned to "hspinfield", please update your input.'   
+       'Its value has been assigned to "hspinfield", please update your input.'
        ABI_COMMENT(msg)
   end if
 end if
@@ -2364,7 +2364,6 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_nwli=0
    dtsets(idtset)%dmft_nwlo=0
    dtsets(idtset)%dmft_occnd_imag=1
-   dtsets(idtset)%dmft_optim=0
    dtsets(idtset)%dmft_orbital(:)=1
    dtsets(idtset)%dmft_prt_maxent=1
    dtsets(idtset)%dmft_prtself=1
@@ -2405,8 +2404,6 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_triqs_tol_block=tol12
    dtsets(idtset)%dmft_triqs_use_norm_as_weight=1
    dtsets(idtset)%dmft_triqs_wmax=-1.0_dp
-   dtsets(idtset)%dmft_use_all_bands=0
-   dtsets(idtset)%dmft_use_full_chipsi=0
    dtsets(idtset)%dmft_wanorthnorm=3
    dtsets(idtset)%dmft_wanrad=-1.0_dp
    dtsets(idtset)%dmft_x2my2d=0
