@@ -1,5 +1,5 @@
 
-.Version 9.11.6.5 of ABINIT, released May 2025.
+.Version 10.4.5.4 of ABINIT, released Jul 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 Jun 2025.
-- ( at 13h12 )
+.Starting date : Thu 10 Jul 2025.
+- ( at 15h51 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI4/paral_t22_MPI4/t22.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI4/mpiio_t22_MPI4/t22.abi
 - output file    -> t22_MPI4.abo
 - root for input  files -> t22_MPI4i
 - root for output files -> t22_MPI4o
@@ -204,6 +204,7 @@ _ WF disk file :      0.049 Mbytes ; DEN or POT disk file :      0.358 Mbytes.
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
+-          iomode           1
             acell      7.0000000000E+00  7.0000000000E+00  7.0000000000E+00 Bohr
               amu      1.20110000E+01
         bs_loband1          0
@@ -350,7 +351,6 @@ P           mkmem9          1
     nblock_lobpcg           6
 -          npband           2
 -           npfft           2
--          np_slk          10
            nspden1          1
            nspden2          1
            nspden3          1
@@ -4161,11 +4161,16 @@ tolerances: {toldfe: 1.00E-10, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
+ CHANGE REFFFFFFFFF
  ETOT  1  -10.528884660120    -1.053E+01 4.398E-04 9.502E+01 0.000E+00 0.000E+00
- ETOT  2  -10.429302253439     9.958E-02 2.339E-06 9.384E+00 2.794E-13 2.794E-13
- ETOT  3  -10.417980425761     1.132E-02 2.756E-07 1.479E-01 7.127E-13 9.903E-13
- ETOT  4  -10.417942351463     3.807E-05 2.187E-08 2.182E-03 4.609E-12 3.619E-12
- ETOT  5  -10.417943506030    -1.155E-06 9.328E-10 2.221E-05 1.254E-12 2.368E-12
+ CHANGE REFFFFFFFFF
+ ETOT  2  -10.429302253439     9.958E-02 2.339E-06 9.384E+00 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT  3  -10.417980425761     1.132E-02 2.756E-07 1.479E-01 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT  4  -10.417942351463     3.807E-05 2.187E-08 2.182E-03 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT  5  -10.417943506030    -1.155E-06 9.328E-10 2.221E-05 0.000E+00 0.000E+00
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -8.18104940E-03  sigma(3 2)= -1.74503349E-03
@@ -4430,6 +4435,7 @@ total_energy_dc_eV  : -2.83486659774388E+02
 ================================================================================
   
  -outvars: echo values of variables after computation  --------
+-          iomode           1
             acell1     7.0000000000E+00  7.0000000000E+00  7.0000000000E+00 Bohr
             acell2     7.0000000000E+00  7.0000000000E+00  7.0000000000E+00 Bohr
             acell3     7.0000000000E+00  7.0000000000E+00  7.0000000000E+00 Bohr
@@ -4611,7 +4617,6 @@ P           mkmem9          1
     nblock_lobpcg           6
 -          npband           2
 -           npfft           2
--          np_slk          10
            nspden1          1
            nspden2          1
            nspden3          1
@@ -4942,10 +4947,10 @@ P           mkmem9          1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          4.7  wall=          4.7
+- Proc.   0 individual time (sec): cpu=          5.2  wall=          5.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered  21 WARNINGs and  24 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         18.2  wall=         18.2
++Overall time at end (sec) : cpu=         20.3  wall=         20.3
