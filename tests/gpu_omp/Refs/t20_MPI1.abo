@@ -1,5 +1,5 @@
 
-.Version 9.11.6.5 of ABINIT, released May 2025.
+.Version 10.4.5.4 of ABINIT, released Jul 2025.
 .(MPI version, prepared for a x86_64_linux_nvhpc23.9-0 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  7 Jul 2025.
-- ( at 15h04 )
+.Starting date : Thu 10 Jul 2025.
+- ( at 17h06 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/srostami_test/tests/TestBot_MPI1/gpu_omp_t20_MPI1/t20.abi
 - output file    -> t20_MPI1.abo
@@ -201,21 +201,21 @@ tolerances: {tolvrs: 1.00E-28, }
  
      iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
  ETOT  1  -10.529010105630    -1.053E+01 1.127E-05 9.508E+01 0.000E+00 0.000E+00
- ETOT  2  -10.429281838308     9.973E-02 2.712E-09 9.390E+00 1.019E-13 1.019E-13
- ETOT  3  -10.417982518815     1.130E-02 1.460E-08 1.492E-01 2.629E-13 3.528E-13
- ETOT  4  -10.417942114811     4.040E-05 8.345E-11 2.429E-03 5.672E-12 6.019E-12
- ETOT  5  -10.417943508762    -1.394E-06 1.801E-12 2.582E-05 3.624E-12 2.395E-12
- ETOT  6  -10.417943516286    -7.524E-09 2.158E-14 4.979E-07 9.421E-12 7.026E-12
- ETOT  7  -10.417943516433    -1.465E-10 5.683E-16 1.370E-09 5.542E-12 1.484E-12
- ETOT  8  -10.417943516433    -7.105E-13 4.258E-18 5.234E-11 2.404E-12 9.288E-13
- ETOT  9  -10.417943516433    -2.665E-14 1.260E-19 2.395E-12 4.669E-12 3.757E-12
- ETOT 10  -10.417943516434    -4.263E-14 3.802E-21 8.905E-14 5.562E-12 1.822E-12
- ETOT 11  -10.417943516434    -3.730E-14 1.030E-21 7.399E-15 5.902E-12 7.707E-12
- ETOT 12  -10.417943516434    -6.040E-14 4.465E-21 6.644E-16 8.645E-12 9.381E-13
- ETOT 13  -10.417943516434     4.796E-14 1.729E-21 5.989E-17 1.286E-12 2.224E-12
- ETOT 14  -10.417943516433     1.297E-13 5.400E-22 6.069E-18 1.700E-12 5.240E-13
- ETOT 15  -10.417943516434    -9.415E-14 2.163E-22 5.546E-19 7.085E-13 1.912E-13
- ETOT 16  -10.417943516434     1.776E-14 3.204E-22 2.876E-19 1.361E-13 6.373E-14
+ ETOT  2  -10.429281838308     9.973E-02 2.712E-09 9.390E+00 0.000E+00 0.000E+00
+ ETOT  3  -10.417982518815     1.130E-02 1.460E-08 1.492E-01 0.000E+00 0.000E+00
+ ETOT  4  -10.417942114811     4.040E-05 8.345E-11 2.429E-03 0.000E+00 0.000E+00
+ ETOT  5  -10.417943508762    -1.394E-06 1.801E-12 2.582E-05 0.000E+00 0.000E+00
+ ETOT  6  -10.417943516286    -7.524E-09 2.158E-14 4.979E-07 0.000E+00 0.000E+00
+ ETOT  7  -10.417943516433    -1.465E-10 5.683E-16 1.370E-09 0.000E+00 0.000E+00
+ ETOT  8  -10.417943516433    -7.105E-13 4.258E-18 5.234E-11 0.000E+00 0.000E+00
+ ETOT  9  -10.417943516433    -2.665E-14 1.260E-19 2.395E-12 0.000E+00 0.000E+00
+ ETOT 10  -10.417943516434    -4.263E-14 3.802E-21 8.905E-14 0.000E+00 0.000E+00
+ ETOT 11  -10.417943516434    -3.730E-14 1.030E-21 7.399E-15 0.000E+00 0.000E+00
+ ETOT 12  -10.417943516434    -6.040E-14 4.465E-21 6.644E-16 0.000E+00 0.000E+00
+ ETOT 13  -10.417943516434     4.796E-14 1.729E-21 5.989E-17 0.000E+00 0.000E+00
+ ETOT 14  -10.417943516433     1.297E-13 5.400E-22 6.069E-18 0.000E+00 0.000E+00
+ ETOT 15  -10.417943516434    -9.415E-14 2.163E-22 5.546E-19 0.000E+00 0.000E+00
+ ETOT 16  -10.417943516434     1.776E-14 3.204E-22 2.876E-19 0.000E+00 0.000E+00
  
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -8.17911254E-03  sigma(3 2)= -1.74491794E-03
@@ -640,10 +640,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          4.9  wall=          4.9
+- Proc.   0 individual time (sec): cpu=          2.8  wall=          2.8
  
 ================================================================================
  
  Calculation completed.
 .Delivered   2 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.9  wall=          4.9
++Overall time at end (sec) : cpu=          2.8  wall=          2.8

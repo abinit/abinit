@@ -1,5 +1,5 @@
 
-.Version 9.11.6.5 of ABINIT, released May 2025.
+.Version 10.4.5.4 of ABINIT, released Jul 2025.
 .(MPI version, prepared for a x86_64_linux_nvhpc23.9-0 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  7 Jul 2025.
-- ( at 15h04 )
+.Starting date : Thu 10 Jul 2025.
+- ( at 17h06 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/srostami_test/tests/TestBot_MPI1/gpu_omp_t13_MPI1/t13.abi
 - output file    -> t13_MPI1.abo
@@ -200,22 +200,22 @@ tolerances: {tolvrs: 1.00E-28, }
 ...
  
      iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
- ETOT  1  -10.529010105677    -1.053E+01 4.688E-04 9.508E+01 4.441E-16 4.441E-16
- ETOT  2  -10.429281816027     9.973E-02 8.874E-07 9.390E+00 1.264E-12 1.264E-12
- ETOT  3  -10.417982529577     1.130E-02 2.839E-07 1.491E-01 6.708E-13 5.931E-13
- ETOT  4  -10.417942115283     4.041E-05 1.184E-08 2.434E-03 2.494E-13 8.424E-13
- ETOT  5  -10.417943509208    -1.394E-06 1.650E-10 2.587E-05 1.284E-12 2.123E-12
- ETOT  6  -10.417943516249    -7.041E-09 3.041E-13 4.939E-07 3.741E-12 1.630E-12
- ETOT  7  -10.417943516433    -1.839E-10 3.760E-14 1.447E-09 5.138E-12 3.508E-12
- ETOT  8  -10.417943516434    -7.478E-13 3.654E-16 5.586E-11 6.748E-12 1.025E-11
- ETOT  9  -10.417943516433     2.665E-14 1.000E-18 3.414E-12 1.323E-11 2.979E-12
- ETOT 10  -10.417943516434    -7.816E-14 1.499E-19 8.766E-14 3.452E-12 4.738E-13
- ETOT 11  -10.417943516434    -3.908E-14 2.504E-21 7.385E-15 1.018E-12 5.491E-13
- ETOT 12  -10.417943516434     8.882E-14 1.740E-21 6.623E-16 5.349E-12 4.807E-12
- ETOT 13  -10.417943516434    -4.086E-14 4.021E-21 5.953E-17 1.862E-12 6.663E-12
- ETOT 14  -10.417943516433     1.084E-13 4.086E-21 5.354E-18 5.204E-12 1.467E-12
- ETOT 15  -10.417943516434    -1.155E-13 4.957E-21 7.002E-19 1.725E-11 1.579E-11
- ETOT 16  -10.417943516434     4.796E-14 2.091E-21 1.850E-19 1.668E-12 1.412E-11
+ ETOT  1  -10.529010105677    -1.053E+01 4.688E-04 9.508E+01 0.000E+00 0.000E+00
+ ETOT  2  -10.429281816027     9.973E-02 8.874E-07 9.390E+00 0.000E+00 0.000E+00
+ ETOT  3  -10.417982529577     1.130E-02 2.839E-07 1.491E-01 0.000E+00 0.000E+00
+ ETOT  4  -10.417942115283     4.041E-05 1.184E-08 2.434E-03 0.000E+00 0.000E+00
+ ETOT  5  -10.417943509208    -1.394E-06 1.650E-10 2.587E-05 0.000E+00 0.000E+00
+ ETOT  6  -10.417943516249    -7.041E-09 3.041E-13 4.939E-07 0.000E+00 0.000E+00
+ ETOT  7  -10.417943516433    -1.839E-10 3.760E-14 1.447E-09 0.000E+00 0.000E+00
+ ETOT  8  -10.417943516434    -7.478E-13 3.654E-16 5.586E-11 0.000E+00 0.000E+00
+ ETOT  9  -10.417943516433     2.665E-14 1.000E-18 3.414E-12 0.000E+00 0.000E+00
+ ETOT 10  -10.417943516434    -7.816E-14 1.499E-19 8.766E-14 0.000E+00 0.000E+00
+ ETOT 11  -10.417943516434    -3.908E-14 2.504E-21 7.385E-15 0.000E+00 0.000E+00
+ ETOT 12  -10.417943516434     8.882E-14 1.740E-21 6.623E-16 0.000E+00 0.000E+00
+ ETOT 13  -10.417943516434    -4.086E-14 4.021E-21 5.953E-17 0.000E+00 0.000E+00
+ ETOT 14  -10.417943516433     1.084E-13 4.086E-21 5.354E-18 0.000E+00 0.000E+00
+ ETOT 15  -10.417943516434    -1.155E-13 4.957E-21 7.002E-19 0.000E+00 0.000E+00
+ ETOT 16  -10.417943516434     4.796E-14 2.091E-21 1.850E-19 0.000E+00 0.000E+00
  
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -8.17911254E-03  sigma(3 2)= -1.74491794E-03
@@ -640,10 +640,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          5.2  wall=          5.2
+- Proc.   0 individual time (sec): cpu=          5.9  wall=          5.9
  
 ================================================================================
  
  Calculation completed.
 .Delivered   2 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.2  wall=          5.2
++Overall time at end (sec) : cpu=          5.9  wall=          5.9

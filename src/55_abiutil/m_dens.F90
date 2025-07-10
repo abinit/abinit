@@ -2776,7 +2776,7 @@ subroutine calmaxdifmag(cplex,intgden,intgden0,natom,nspden,maxmag,difmag)
    if (maxmag < tol8) then
      maxmag=0
      if (difmag < tol8) difmag=0
-     write(ab_out,*) "CHANGE REFFFFFFFFF"
+     !write(ab_out,*) "CHANGE REFFFFFFFFF"
    endif
 end subroutine calmaxdifmag
 !!***

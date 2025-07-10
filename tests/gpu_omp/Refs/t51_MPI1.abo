@@ -1,5 +1,5 @@
 
-.Version 9.11.6.5 of ABINIT, released May 2025.
+.Version 10.4.5.4 of ABINIT, released Jul 2025.
 .(MPI version, prepared for a x86_64_linux_nvhpc23.9-0 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  7 Jul 2025.
-- ( at 15h14 )
+.Starting date : Thu 10 Jul 2025.
+- ( at 17h15 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/srostami_test/tests/TestBot_MPI1/gpu_omp_t51_MPI1/t51.abi
 - output file    -> t51_MPI1.abo
@@ -203,22 +203,22 @@ tolerances: {tolvrs: 1.00E-28, }
 ...
  
      iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
- ETOT  1  -10.527502560051    -1.053E+01 1.993E-02 9.468E+01 4.441E-16 4.441E-16
- ETOT  2  -10.429378852501     9.812E-02 4.942E-03 9.467E+00 1.804E-12 1.804E-12
- ETOT  3  -10.417973437554     1.141E-02 3.587E-03 1.481E-01 2.855E-12 4.652E-12
- ETOT  4  -10.417942900826     3.054E-05 2.840E-03 2.378E-03 1.794E-11 1.329E-11
- ETOT  5  -10.417943523311    -6.225E-07 2.285E-03 8.490E-05 7.240E-12 6.086E-12
- ETOT  6  -10.417943515271     8.039E-09 2.041E-03 7.760E-07 2.539E-12 3.550E-12
- ETOT  7  -10.417943516446    -1.175E-09 1.784E-03 2.169E-08 3.102E-13 3.260E-12
- ETOT  8  -10.417943516433     1.277E-11 1.667E-03 4.441E-10 1.190E-13 3.379E-12
- ETOT  9  -10.417943516434    -1.261E-13 1.515E-03 3.880E-12 2.872E-12 5.067E-13
- ETOT 10  -10.417943516434     4.619E-14 1.437E-03 4.356E-13 1.313E-12 1.820E-12
- ETOT 11  -10.417943516434     1.066E-14 1.331E-03 1.117E-14 5.351E-13 2.346E-12
- ETOT 12  -10.417943516433     4.796E-14 1.271E-03 9.382E-16 7.172E-13 1.650E-12
- ETOT 13  -10.417943516434    -7.283E-14 1.190E-03 6.446E-17 5.350E-12 6.978E-12
- ETOT 14  -10.417943516434    -4.619E-14 1.138E-03 5.704E-18 1.564E-11 8.659E-12
- ETOT 15  -10.417943516433     9.948E-14 1.072E-03 5.648E-19 4.264E-12 4.395E-12
- ETOT 16  -10.417943516434    -6.928E-14 1.026E-03 7.406E-19 1.132E-11 6.926E-12
+ ETOT  1  -10.527502560051    -1.053E+01 1.993E-02 9.468E+01 0.000E+00 0.000E+00
+ ETOT  2  -10.429378852502     9.812E-02 4.942E-03 9.467E+00 0.000E+00 0.000E+00
+ ETOT  3  -10.417973437557     1.141E-02 3.587E-03 1.481E-01 0.000E+00 0.000E+00
+ ETOT  4  -10.417942900826     3.054E-05 2.840E-03 2.378E-03 0.000E+00 0.000E+00
+ ETOT  5  -10.417943523311    -6.225E-07 2.285E-03 8.490E-05 0.000E+00 0.000E+00
+ ETOT  6  -10.417943515271     8.040E-09 2.041E-03 7.760E-07 0.000E+00 0.000E+00
+ ETOT  7  -10.417943516446    -1.175E-09 1.784E-03 2.169E-08 0.000E+00 0.000E+00
+ ETOT  8  -10.417943516434     1.269E-11 1.667E-03 4.441E-10 0.000E+00 0.000E+00
+ ETOT  9  -10.417943516434    -4.086E-14 1.515E-03 3.878E-12 0.000E+00 0.000E+00
+ ETOT 10  -10.417943516434     3.375E-14 1.437E-03 4.360E-13 0.000E+00 0.000E+00
+ ETOT 11  -10.417943516434    -3.730E-14 1.331E-03 1.115E-14 0.000E+00 0.000E+00
+ ETOT 12  -10.417943516434     6.928E-14 1.271E-03 9.362E-16 0.000E+00 0.000E+00
+ ETOT 13  -10.417943516434     5.329E-15 1.190E-03 6.616E-17 0.000E+00 0.000E+00
+ ETOT 14  -10.417943516434    -2.842E-14 1.138E-03 5.841E-18 0.000E+00 0.000E+00
+ ETOT 15  -10.417943516434     1.599E-14 1.072E-03 5.939E-19 0.000E+00 0.000E+00
+ ETOT 16  -10.417943516433     3.020E-14 1.026E-03 5.772E-19 0.000E+00 0.000E+00
  
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -8.17911254E-03  sigma(3 2)= -1.74491794E-03
@@ -228,7 +228,7 @@ tolerances: {tolvrs: 1.00E-28, }
  
  scprqt:  WARNING -
   nstep=   16 was not enough SCF cycles to converge;
-  density residual=  7.406E-19 exceeds tolvrs=  1.000E-28
+  density residual=  5.772E-19 exceeds tolvrs=  1.000E-28
  
 
 --- !ResultsGS
@@ -241,7 +241,7 @@ lattice_vectors:
 lattice_lengths: [   4.94975,    4.94975,    4.94975, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.5750000E+01
-convergence: {deltae: -6.928E-14, res2:  7.406E-19, residm:  1.026E-03, diffor: null, }
+convergence: {deltae:  3.020E-14, res2:  5.772E-19, residm:  1.026E-03, diffor: null, }
 etotal    :  -1.04179435E+01
 entropy   :   0.00000000E+00
 fermie    :   4.73464154E-01
@@ -263,19 +263,19 @@ force_length_stats: {min:   4.07882017E-01, max:   4.07882017E-01, mean:   4.078
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.11202     0.715320     0.715320      1.430641     0.000000
-    2   1.11202     0.720655     0.720655      1.441311     0.000000
+    1   1.11202     0.715320     0.715320      1.430641    -0.000000
+    2   1.11202     0.720655     0.720655      1.441311    -0.000000
  ---------------------------------------------------------------------
-  Sum:              1.435976     1.435976      2.871952     0.000000
- Total magnetization (from the atomic spheres):             0.000000
+  Sum:              1.435976     1.435976      2.871952    -0.000000
+ Total magnetization (from the atomic spheres):            -0.000000
  Total magnetization (exact up - dn):                      -0.000000
  
  
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      0.475538079734224
- Compensation charge over fine fft grid    =      0.475544024225765
+ Compensation charge over spherical meshes =      0.475538079741098
+ Compensation charge over fine fft grid    =      0.475544024235572
  
  ==== Results concerning PAW augmentation regions ====
  
@@ -403,21 +403,21 @@ force_length_stats: {min:   4.07882017E-01, max:   4.07882017E-01, mean:   4.078
        0.000000000000      0.000000000000      0.000000000000
        0.220000000000      0.220000000000      0.220000000000
  rms dE/dt=  1.6484E+00; max dE/dt=  1.6484E+00; dE/dt below (all hartree)
-    1       1.648435545933      1.648435545933      1.648435545933
-    2      -1.648435545933     -1.648435545933     -1.648435545933
+    1       1.648435545881      1.648435545881      1.648435545881
+    2      -1.648435545881     -1.648435545881     -1.648435545881
  
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      0.81493290122860     0.81493290122860     0.81493290122860
  
  cartesian forces (hartree/bohr) at end:
-    1     -0.23549079227618    -0.23549079227618    -0.23549079227618
-    2      0.23549079227618     0.23549079227618     0.23549079227618
+    1     -0.23549079226871    -0.23549079226871    -0.23549079226871
+    2      0.23549079226871     0.23549079226871     0.23549079226871
  frms,max,avg= 2.3549079E-01 2.3549079E-01   0.000E+00  0.000E+00  0.000E+00 h/b
  
  cartesian forces (eV/Angstrom) at end:
-    1    -12.10942240161285   -12.10942240161285   -12.10942240161286
-    2     12.10942240161285    12.10942240161285    12.10942240161286
+    1    -12.10942240122842   -12.10942240122842   -12.10942240122842
+    2     12.10942240122842    12.10942240122842    12.10942240122842
  frms,max,avg= 1.2109422E+01 1.2109422E+01   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.000000000000  7.000000000000  7.000000000000 bohr
               =  3.704240460130  3.704240460130  3.704240460130 angstroms
@@ -444,28 +444,28 @@ force_length_stats: {min:   4.07882017E-01, max:   4.07882017E-01, mean:   4.078
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.71250470417468E+00
-hartree             :  1.52253104806105E+00
-xc                  : -3.90577896093413E+00
+kinetic             :  8.71250470424699E+00
+hartree             :  1.52253104809775E+00
+xc                  : -3.90577896094561E+00
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  5.49532697036700E-01
-local_psp           : -6.85227632119124E+00
-spherical_terms     :  1.79642897677936E+00
-total_energy        : -1.04179435165365E+01
-total_energy_eV     : -2.83486660060274E+02
+local_psp           : -6.85227632122484E+00
+spherical_terms     :  1.79642897669919E+00
+total_energy        : -1.04179435165528E+01
+total_energy_eV     : -2.83486660060716E+02
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  1.77707714501863E+00
+band_energy         :  1.77707714483318E+00
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  5.49532697036700E-01
-xc_dc               : -6.31916859976245E-01
-spherical_terms     :  1.28249161950338E-01
-total_energy_dc     : -1.04179435164336E+01
-total_energy_dc_eV  : -2.83486660057472E+02
+xc_dc               : -6.31916860007921E-01
+spherical_terms     :  1.28249162167532E-01
+total_energy_dc     : -1.04179435164335E+01
+total_energy_dc_eV  : -2.83486660057470E+02
 ...
 
  
@@ -493,8 +493,8 @@ total_energy_dc_eV  : -2.83486660057472E+02
              ecut      1.50000000E+01 Hartree
            enunit           2
            etotal1    -1.0417943516E+01
-            fcart1    -2.3549079228E-01 -2.3549079228E-01 -2.3549079228E-01
-                       2.3549079228E-01  2.3549079228E-01  2.3549079228E-01
+            fcart1    -2.3549079227E-01 -2.3549079227E-01 -2.3549079227E-01
+                       2.3549079227E-01  2.3549079227E-01  2.3549079227E-01
 -          fftalg         402
 -      gpu_option           2
 -gpu_thread_limit          64
@@ -526,8 +526,8 @@ P           mkmem           1
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
           spgroup         166
    spinmagntarget      0.00000000E+00
-           strten1    -8.1791125428E-03 -8.1791125428E-03 -8.1791125428E-03
-                      -1.7449179386E-03 -1.7449179386E-03 -1.7449179386E-03
+           strten1    -8.1791125418E-03 -8.1791125418E-03 -8.1791125418E-03
+                      -1.7449179385E-03 -1.7449179385E-03 -1.7449179385E-03
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0
                        0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0
@@ -637,10 +637,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          3.1  wall=          3.1
+- Proc.   0 individual time (sec): cpu=          3.2  wall=          3.2
  
 ================================================================================
  
  Calculation completed.
 .Delivered   4 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.1  wall=          3.1
++Overall time at end (sec) : cpu=          3.2  wall=          3.2

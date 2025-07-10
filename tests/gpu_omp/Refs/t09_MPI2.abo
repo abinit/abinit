@@ -1,6 +1,6 @@
 
-.Version 9.11.6.5 of ABINIT, released May 2025.
-.(MPI version, prepared for a x86_64_linux_nvhpc24.9-0 computer) 
+.Version 10.4.5.4 of ABINIT, released Jul 2025.
+.(MPI version, prepared for a x86_64_linux_nvhpc23.9-0 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  7 Jul 2025.
-- ( at 13h49 )
+.Starting date : Thu 10 Jul 2025.
+- ( at 17h34 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/srostami_test/tests/TestBot_MPI2/gpu_omp_t09_MPI2/t09.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/srostami_test/tests/TestBot_MPI2/gpu_omp_t09_MPI2/t09.abi
 - output file    -> t09_MPI2.abo
 - root for input  files -> t09_MPI2i
 - root for output files -> t09_MPI2o
@@ -168,8 +168,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 1, }
  
  
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/srostami_test/tests/Pspdir/6c_lda.paw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/srostami_test/tests/Pspdir/6c_lda.paw
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/srostami_test/tests/Pspdir/6c_lda.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/srostami_test/tests/Pspdir/6c_lda.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): carbon
 -  6.00000   4.00000  20041014                znucl, zion, pspdat
     7    2    1    0       467   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -204,22 +204,22 @@ tolerances: {tolvrs: 1.00E-28, }
 ...
  
      iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
- ETOT  1  -10.529010105653    -1.053E+01 2.287E-04 9.508E+01 6.661E-16 6.661E-16
- ETOT  2  -10.429281813925     9.973E-02 3.433E-07 9.390E+00 2.839E-12 2.838E-12
- ETOT  3  -10.417982529649     1.130E-02 3.171E-08 1.491E-01 3.571E-12 7.412E-13
- ETOT  4  -10.417942115272     4.041E-05 7.058E-09 2.434E-03 1.802E-12 1.069E-12
- ETOT  5  -10.417943509205    -1.394E-06 1.309E-10 2.587E-05 1.594E-13 1.218E-12
- ETOT  6  -10.417943516249    -7.044E-09 4.107E-13 4.938E-07 8.764E-12 7.546E-12
- ETOT  7  -10.417943516433    -1.840E-10 4.386E-14 1.446E-09 5.728E-12 1.818E-12
- ETOT  8  -10.417943516434    -7.354E-13 3.049E-16 5.594E-11 4.938E-12 3.120E-12
- ETOT  9  -10.417943516434     1.599E-14 1.998E-19 3.427E-12 8.001E-12 4.881E-12
- ETOT 10  -10.417943516434     1.776E-14 1.238E-19 8.776E-14 3.898E-12 9.943E-13
- ETOT 11  -10.417943516433     6.395E-14 2.369E-21 7.400E-15 6.894E-13 1.673E-12
- ETOT 12  -10.417943516434    -1.190E-13 9.189E-21 6.631E-16 2.653E-13 1.413E-12
- ETOT 13  -10.417943516434     6.040E-14 1.601E-21 6.111E-17 4.009E-12 5.421E-12
- ETOT 14  -10.417943516434    -8.882E-15 1.763E-21 6.075E-18 9.828E-13 4.440E-12
- ETOT 15  -10.417943516434    -1.030E-13 3.121E-21 5.313E-19 7.887E-13 3.653E-12
- ETOT 16  -10.417943516434     1.101E-13 5.600E-21 5.625E-20 3.881E-13 3.270E-12
+ ETOT  1  -10.529010105653    -1.053E+01 2.287E-04 9.508E+01 0.000E+00 0.000E+00
+ ETOT  2  -10.429281813925     9.973E-02 3.433E-07 9.390E+00 0.000E+00 0.000E+00
+ ETOT  3  -10.417982529649     1.130E-02 3.171E-08 1.491E-01 0.000E+00 0.000E+00
+ ETOT  4  -10.417942115272     4.041E-05 7.058E-09 2.434E-03 0.000E+00 0.000E+00
+ ETOT  5  -10.417943509205    -1.394E-06 1.309E-10 2.587E-05 0.000E+00 0.000E+00
+ ETOT  6  -10.417943516249    -7.044E-09 4.107E-13 4.938E-07 0.000E+00 0.000E+00
+ ETOT  7  -10.417943516433    -1.840E-10 4.386E-14 1.446E-09 0.000E+00 0.000E+00
+ ETOT  8  -10.417943516434    -7.354E-13 3.049E-16 5.594E-11 0.000E+00 0.000E+00
+ ETOT  9  -10.417943516434     1.599E-14 1.998E-19 3.427E-12 0.000E+00 0.000E+00
+ ETOT 10  -10.417943516434     1.776E-14 1.238E-19 8.776E-14 0.000E+00 0.000E+00
+ ETOT 11  -10.417943516433     6.395E-14 2.369E-21 7.400E-15 0.000E+00 0.000E+00
+ ETOT 12  -10.417943516434    -1.190E-13 9.189E-21 6.631E-16 0.000E+00 0.000E+00
+ ETOT 13  -10.417943516434     6.040E-14 1.601E-21 6.111E-17 0.000E+00 0.000E+00
+ ETOT 14  -10.417943516434    -8.882E-15 1.763E-21 6.075E-18 0.000E+00 0.000E+00
+ ETOT 15  -10.417943516434    -1.030E-13 3.121E-21 5.313E-19 0.000E+00 0.000E+00
+ ETOT 16  -10.417943516434     1.101E-13 5.600E-21 5.625E-20 0.000E+00 0.000E+00
  
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -8.17911254E-03  sigma(3 2)= -1.74491794E-03
@@ -639,10 +639,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          6.7  wall=          6.7
+- Proc.   0 individual time (sec): cpu=          4.7  wall=          4.7
  
 ================================================================================
  
  Calculation completed.
 .Delivered   1 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         13.3  wall=         13.3
++Overall time at end (sec) : cpu=          9.3  wall=          9.3
