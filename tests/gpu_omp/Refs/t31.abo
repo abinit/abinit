@@ -154,6 +154,8 @@ P          mk1mem          32
             prtwf2          0
             rfddk1          0
             rfddk2          1
+            rfdir1          1       1       1
+            rfdir2          1       0       0
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -782,9 +784,7 @@ meta: {optdriver: 1, rfddk: 1, }
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   3
-    2)    idir= 2    ipert=   3
-    3)    idir= 3    ipert=   3
-
+ 
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -846,285 +846,6 @@ tolerances: {tolwfr: 1.00E-20, }
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
  2DEtotal=   -0.9717650826E+01 Ha. Also 2DEtotal=   -0.264430726839E+03 eV
     (  non-var. 2DEtotal :   -9.7176508223E+00 Ha)
-
---------------------------------------------------------------------------------
- Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
- Perturbation : derivative vs k along direction   2
- The set of symmetries contains only one element for this perturbation.
- symkpt : not enough symmetry to change the number of k points.
-
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-
- Initialisation of the first-order wave-functions :
-  ireadwf=   0
-
---- !BeginCycle
-iteration_state: {dtset: 2, }
-solver: {iscf: -3, nstep: 10, nline: 4, wfoptalg: 10, }
-tolerances: {tolwfr: 1.00E-20, }
-...
-
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -9.7150032064657     -9.715E+00 1.147E-02 0.000E+00
- ETOT  2  -9.7176489654467     -2.646E-03 6.953E-06 0.000E+00
- ETOT  3  -9.7176507500006     -1.785E-06 6.343E-09 0.000E+00
- ETOT  4  -9.7176507522479     -2.247E-09 5.572E-12 0.000E+00
- ETOT  5  -9.7176507522510     -3.096E-12 1.051E-14 0.000E+00
- ETOT  6  -9.7176507522509      1.421E-14 1.073E-17 0.000E+00
- ETOT  7  -9.7176507522510     -2.665E-14 2.125E-20 0.000E+00
- ETOT  8  -9.7176507522510      7.105E-15 9.842E-21 0.000E+00
-
- At SCF step    8   max residual=  9.84E-21 < tolwfr=  1.00E-20 =>converged.
-================================================================================
-
- ----iterations are completed or convergence reached----
-
- Mean square residual over all n,k,spin=   34.673E-22; max=  98.421E-22
- dfpt_looppert : ek2=    1.7858742990E+01
-          f-sum rule ratio=    1.2091346861E+00
- Expectation of eigenvalue derivatives (hartree) for nkpt=  32  k points:
-  (in case of degenerate eigenvalues, averaged derivative)
- kpt#   1, nband=  8, wtk=  0.03125, kpt= -0.2500  0.5000  0.0000 (reduced coord)
-  -0.11846   -0.11803    0.18180    0.18147    0.19440    0.19369   -0.04245   -0.04243
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-
- Nine components of 2nd-order total energy (hartree) are
- 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   2.81487112E+01 eigvalue=  -7.23875929E+00  local=  -3.07856543E+01  nclr dpl0=  -8.18218564E-08
- 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-     kin1=  -2.15936256E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00  nclr dpl1=   6.06416366E-09
- 7,8,9: eventually, occupation + non-local contributions
-    edocc=   0.00000000E+00     enl0=   1.94843504E+01   enl1=   2.26732691E+00
- 10: eventually, PAW "on-site" Hxc contribution: epaw1=   0.00000000E+00
- 1-10 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=  -9.71765075E+00
- 11 Contribution from 1st-order change of wavefunctions overlap
- eovl1 =  -5.45014035E-02
-  No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.9717650752E+01 Ha. Also 2DEtotal=   -0.264430724837E+03 eV
-    (  non-var. 2DEtotal :   -9.7176507475E+00 Ha)
-
---------------------------------------------------------------------------------
- Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
- Perturbation : derivative vs k along direction   3
- The set of symmetries contains only one element for this perturbation.
- symkpt : not enough symmetry to change the number of k points.
-
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-
- Initialisation of the first-order wave-functions :
-  ireadwf=   0
-
---- !BeginCycle
-iteration_state: {dtset: 2, }
-solver: {iscf: -3, nstep: 10, nline: 4, wfoptalg: 10, }
-tolerances: {tolwfr: 1.00E-20, }
-...
-
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -9.7150031887020     -9.715E+00 1.147E-02 0.000E+00
- ETOT  2  -9.7176489476481     -2.646E-03 6.953E-06 0.000E+00
- ETOT  3  -9.7176507322020     -1.785E-06 6.343E-09 0.000E+00
- ETOT  4  -9.7176507344493     -2.247E-09 5.572E-12 0.000E+00
- ETOT  5  -9.7176507344523     -3.014E-12 1.051E-14 0.000E+00
- ETOT  6  -9.7176507344524     -3.197E-14 1.073E-17 0.000E+00
- ETOT  7  -9.7176507344523      8.882E-15 2.125E-20 0.000E+00
- ETOT  8  -9.7176507344523     -3.553E-15 9.842E-21 0.000E+00
-
- At SCF step    8   max residual=  9.84E-21 < tolwfr=  1.00E-20 =>converged.
-================================================================================
-
- ----iterations are completed or convergence reached----
-
- Mean square residual over all n,k,spin=   34.673E-22; max=  98.421E-22
- dfpt_looppert : ek2=    1.7858742990E+01
-          f-sum rule ratio=    1.2091346839E+00
- Expectation of eigenvalue derivatives (hartree) for nkpt=  32  k points:
-  (in case of degenerate eigenvalues, averaged derivative)
- kpt#   1, nband=  8, wtk=  0.03125, kpt= -0.2500  0.5000  0.0000 (reduced coord)
-   0.09597    0.09546   -0.05006   -0.04851   -0.19582   -0.19575   -0.05403   -0.05368
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-
- Nine components of 2nd-order total energy (hartree) are
- 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   2.81487111E+01 eigvalue=  -7.23875924E+00  local=  -3.07856541E+01  nclr dpl0=  -8.18218616E-08
- 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-     kin1=  -2.15936256E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00  nclr dpl1=   6.06416216E-09
- 7,8,9: eventually, occupation + non-local contributions
-    edocc=   0.00000000E+00     enl0=   1.94843502E+01   enl1=   2.26732690E+00
- 10: eventually, PAW "on-site" Hxc contribution: epaw1=   0.00000000E+00
- 1-10 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=  -9.71765073E+00
- 11 Contribution from 1st-order change of wavefunctions overlap
- eovl1 =  -5.45014036E-02
-  No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.9717650734E+01 Ha. Also 2DEtotal=   -0.264430724353E+03 eV
-    (  non-var. 2DEtotal :   -9.7176507298E+00 Ha)
-
-====================================================
-
- Orbital magnetic moment computed with DFPT derivative wavefunctions
-
- Orbital magnetic moment, Cartesian directions :
- -3.49249106E-04  2.25276958E-09  2.71347845E-09
-
-
- Chern vector, Cartesian directions :
-  3.23839641E-06  6.81539081E-12 -7.82909772E-11
-
-
- Orbital magnetic moment, term-by-term breakdown :
-     rho(1) CC :   2.52870235E-04  1.87773828E-09  2.14811325E-09
-    rho(1) VV1 :  -6.84149279E-06 -5.05338418E-12  3.84913240E-12
-    rho(1) VV2 :  -1.50043295E-09  1.06741533E-13 -7.66532009E-14
-     rho(0) NL :   1.77595472E-04  3.42264989E-10  5.68112511E-10
-   <L_R> terms :  -3.67987250E-06  3.77597594E-11 -6.47031831E-12
- <A0.An> terms :  -2.43194717E-06 -4.68026767E-14 -4.94721812E-14
-    Lamb terms :  -7.66760000E-04  0.00000000E+00  0.00000000E+00
- Chern vector, term-by-term breakdown :
-  Ch CC :   3.06736912E-06  6.14920747E-12 -7.88309565E-11
- Ch vv1 :   1.71027291E-07  6.66183344E-13  5.39979306E-13
- Ch vv2 :  -5.29395592E-23  1.11259589E-22 -9.31595362E-23
-
-
- Term-by-term breakdowns for each band :
-
-
- band   1 of   8
- Orbital magnetic moment :  -5.21021302E-04  3.39602456E-10  2.94294803E-10
-     rho(1) CC :  -1.54565886E-04  5.52951806E-12  1.10178814E-12
-    rho(1) VV1 :   4.52231060E-05 -2.33831527E-12  2.11012454E-12
-    rho(1) VV2 :  -1.10638940E-06  1.60547788E-13  8.54460603E-14
-     rho(0) NL :  -4.11012469E-04  3.36063686E-10  2.91890322E-10
-   <L_R> terms :   5.92687049E-07  1.99847221E-13 -8.79427697E-13
- <A0.An> terms :  -1.52351022E-07 -1.28281109E-14 -1.34493686E-14
-
-
- Chern vector :  -2.62711147E-07  1.30894158E-13  1.45744767E-13
-  Ch CC :   2.00017173E-07  1.07805418E-13  1.69867791E-13
- Ch VV1 :  -4.74247556E-07  2.51604218E-14 -2.29239396E-14
- Ch VV2 :   1.15192361E-08 -2.07168130E-15 -1.19908435E-15
-
-
- band   2 of   8
- Orbital magnetic moment :   5.52973344E-04  4.16080604E-10  4.51528596E-11
-     rho(1) CC :   1.60823161E-04 -2.78196889E-11 -6.31451173E-12
-    rho(1) VV1 :  -4.71863677E-05 -1.17507341E-12  6.34424566E-13
-    rho(1) VV2 :   1.08928695E-06 -1.90609058E-13  1.08277339E-13
-     rho(0) NL :   4.39103650E-04  4.45700114E-10  5.08910501E-11
-   <L_R> terms :  -7.04264881E-07 -4.21325448E-13 -1.52905140E-13
- <A0.An> terms :  -1.52122294E-07 -1.28132349E-14 -1.34754521E-14
-
-
- Chern vector :   2.84426680E-07  3.63181940E-13 -1.84535684E-14
-  Ch CC :  -1.99040460E-07  3.48436895E-13 -9.40021386E-15
- Ch VV1 :   4.94832248E-07  1.23006507E-14 -7.82768698E-15
- Ch VV2 :  -1.13651083E-08  2.44439422E-15 -1.22566753E-15
-
-
- band   3 of   8
- Orbital magnetic moment :  -5.29573990E-04 -1.60313611E-10  3.75609708E-11
-     rho(1) CC :  -2.05340956E-04 -1.37031452E-10 -2.90209875E-13
-    rho(1) VV1 :   7.34662081E-06  6.89063701E-13 -2.49921214E-13
-    rho(1) VV2 :   3.17267046E-07 -1.89026138E-13 -2.24901699E-13
-     rho(0) NL :  -3.88826279E-04 -6.00060522E-11  4.47291308E-11
-   <L_R> terms :   5.72668431E-05  3.62273923E-11 -6.39950503E-12
- <A0.An> terms :  -3.37485991E-07 -3.53584420E-15 -3.62215347E-15
-
-
- Chern vector :  -1.90644532E-05  1.94214154E-12 -2.67744552E-12
-  Ch CC :  -1.88650262E-05  1.95440564E-12 -2.69747676E-12
- Ch VV1 :  -1.91570890E-07 -1.65726807E-14  1.44759789E-14
- Ch VV2 :  -7.85604457E-09  4.30857895E-15  5.55525867E-15
-
-
- band   4 of   8
- Orbital magnetic moment :   6.88777304E-04  8.58884926E-12  1.10645274E-10
-     rho(1) CC :   2.82877990E-04  8.75980240E-12  1.33385902E-10
-    rho(1) VV1 :  -9.68830117E-06 -1.27855888E-12  1.20636841E-12
-    rho(1) VV2 :  -2.95227790E-07  3.57214312E-13 -5.12757933E-14
-     rho(0) NL :   4.72129104E-04 -3.01143577E-13 -2.26855684E-11
-   <L_R> terms :  -5.59086843E-05  1.05506611E-12 -1.20670695E-12
- <A0.An> terms :  -3.37577466E-07 -3.53110278E-15 -3.44578170E-15
-
-
- Chern vector :   1.81732963E-05 -8.48626314E-13  1.69088036E-12
-  Ch CC :   1.79181550E-05 -8.65238966E-13  1.71118824E-12
- Ch VV1 :   2.47798113E-07  2.53700917E-14 -2.08971281E-14
- Ch VV2 :   7.34318304E-09 -8.75743938E-15  5.89253235E-16
-
-
- band   5 of   8
- Orbital magnetic moment :  -1.98562813E-02  8.44157192E-09  9.17896374E-09
-     rho(1) CC :  -2.88420030E-02  1.16505084E-08  1.23833250E-08
-    rho(1) VV1 :  -1.39804769E-05 -2.10895258E-11 -2.37885398E-11
-    rho(1) VV2 :   6.11773340E-08 -8.20526762E-14 -1.26813536E-13
-     rho(0) NL :   1.09329192E-02 -3.80372929E-09 -3.86824280E-09
-   <L_R> terms :  -1.93293209E-03  6.16088408E-10  6.87930915E-10
- <A0.An> terms :  -3.46021665E-07 -1.24013080E-13 -1.34035768E-13
-
-
- Chern vector :  -3.30805475E-03  1.18041003E-09  1.24742494E-09
-  Ch CC :  -3.35940946E-03  1.19754214E-09  1.26567433E-09
- Ch VV1 :   5.11066139E-05 -1.70494006E-11 -1.81634482E-11
- Ch VV2 :   2.48098706E-07 -8.27112150E-14 -8.59414932E-14
-
-
- band   6 of   8
- Orbital magnetic moment :   2.06191271E-02 -7.82186426E-09 -1.03030351E-08
-     rho(1) CC :   2.95636279E-02 -1.09835905E-08 -1.36491265E-08
-    rho(1) VV1 :   1.23943908E-05  2.03703421E-11  2.41048426E-11
-    rho(1) VV2 :  -6.13467205E-08  5.61845233E-14  1.09460224E-13
-     rho(0) NL :  -1.08890061E-02  3.76999861E-09  3.99819561E-09
-   <L_R> terms :   1.93251961E-03 -6.28570258E-10 -6.76179044E-10
- <A0.An> terms :  -3.47234016E-07 -1.28626691E-13 -1.39483452E-13
-
-
- Chern vector :   3.37279410E-03 -1.20623517E-09 -1.28086021E-09
-  Ch CC :   3.42434017E-03 -1.22404445E-09 -1.29861771E-09
- Ch VV1 :  -5.12980164E-05  1.77257966E-11  1.76676481E-11
- Ch VV2 :  -2.48052774E-07  8.34801937E-14  8.98451513E-14
-
-
- band   7 of   8
- Orbital magnetic moment :  -2.77985553E-02  3.57028055E-09  3.89481664E-09
-     rho(1) CC :  -3.90431633E-02  3.96065059E-09  4.03365286E-09
-    rho(1) VV1 :   2.49791810E-07 -3.44672442E-11 -3.80049304E-11
-    rho(1) VV2 :   5.06627954E-08 -2.07041824E-13 -2.05227159E-13
-     rho(0) NL :   1.36557359E-02 -3.25960769E-10 -9.60980583E-11
-   <L_R> terms :  -2.41104861E-03 -2.98546117E-11 -4.65783771E-12
- <A0.An> terms :  -3.79767634E-07  1.19620289E-13  1.29840330E-13
-
-
- Chern vector :  -4.28398172E-03  2.47977395E-10  2.45866244E-10
-  Ch CC :  -4.34860086E-03  2.48853344E-10  2.46191931E-10
- Ch VV1 :   6.43088694E-05 -8.81732991E-13 -3.25967252E-13
- Ch VV2 :   3.10269603E-07  5.78399397E-15  2.80525161E-16
-
-
- band   8 of   8
- Orbital magnetic moment :   2.72620650E-02 -2.54117692E-09 -5.44920748E-10
-     rho(1) CC :   3.84906144E-02 -2.59926838E-09 -7.47621112E-10
-    rho(1) VV1 :  -1.20025646E-06  3.42359275E-11  3.78367638E-11
-    rho(1) VV2 :  -5.69306443E-08  2.01524605E-13  2.28381362E-13
-     rho(0) NL :  -1.36334474E-02 -1.95001619E-11  1.69432826E-10
-   <L_R> terms :   2.40653464E-03  4.30352415E-11 -4.92580675E-12
- <A0.An> terms :  -3.79387081E-07  1.18925098E-13  1.28199464E-13
-
-
- Chern vector :   4.22335021E-03 -2.16924450E-10 -2.89862671E-10
-  Ch CC :   4.28768342E-03 -2.17747235E-10 -2.91253687E-10
- Ch VV1 :  -6.40232516E-05  8.25261841E-13  1.39891943E-12
- Ch VV2 :  -3.09956802E-07 -2.47682500E-15 -7.90394329E-15
-
-====================================================
-
 ================================================================================
 
  ---- first-order wavefunction calculations are completed ----
@@ -1140,7 +861,7 @@ tolerances: {tolwfr: 1.00E-20, }
               amu      3.09737620E+01  2.69815390E+01
              ecut      5.00000000E+00 Hartree
            etotal1    -8.7988622112E+00
-           etotal2    -9.7176507345E+00
+           etotal2    -9.7176508258E+00
             fcart1     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
                        9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
 -          fftalg         312
@@ -1222,6 +943,8 @@ P          mk1mem          32
             prtwf2          0
             rfddk1          0
             rfddk2          1
+            rfdir1          1       1       1
+            rfdir2          1       0       0
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
