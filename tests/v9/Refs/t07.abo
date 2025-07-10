@@ -1,5 +1,5 @@
 
-.Version 9.11.6.5 of ABINIT, released May 2025.
+.Version 10.4.5.4 of ABINIT, released Jul 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 Jun 2025.
-- ( at 13h05 )
+.Starting date : Thu 10 Jul 2025.
+- ( at 15h45 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v9_t07-t08/t07.abi
 - output file    -> t07.abo
@@ -533,12 +533,19 @@ tolerances: {tolwfr: 1.00E-12, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ CHANGE REFFFFFFFFF
  ETOT  1  -11.247173154483    -1.125E+01 9.545E-04 4.051E+00 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
  ETOT  2  -11.250405530405    -3.232E-03 3.906E-08 2.711E-01 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
  ETOT  3  -11.250577848936    -1.723E-04 1.938E-06 6.223E-03 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
  ETOT  4  -11.250579211526    -1.363E-06 6.892E-09 5.749E-04 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
  ETOT  5  -11.250579342469    -1.309E-07 5.498E-10 3.115E-06 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
  ETOT  6  -11.250579343470    -1.001E-09 1.675E-12 3.491E-08 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
  ETOT  7  -11.250579343476    -6.208E-12 9.109E-13 1.485E-09 0.000E+00 0.000E+00
 
  At SCF step    7   max residual=  9.11E-13 < tolwfr=  1.00E-12 =>converged.

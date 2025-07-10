@@ -1,5 +1,5 @@
 
-.Version 9.11.6.5 of ABINIT, released May 2025.
+.Version 10.4.5.4 of ABINIT, released Jul 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 Jun 2025.
-- ( at 12h52 )
+.Starting date : Thu 10 Jul 2025.
+- ( at 15h33 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/paral_t05_MPI1/t05.abi
 - output file    -> t05_MPI1.abo
@@ -201,18 +201,30 @@ tolerances: {tolwfr: 1.00E-15, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
- ETOT  1  -19.233171862056    -1.923E+01 1.578E-01 1.483E+02 4.796E-14 4.796E-14
- ETOT  2  -19.561552725181    -3.284E-01 7.126E-05 1.893E+02 4.707E-14 8.882E-16
- ETOT  3  -19.574361893893    -1.281E-02 9.800E-05 7.424E+01 1.776E-15 2.665E-15
- ETOT  4  -19.581598718674    -7.237E-03 1.862E-04 2.544E+00 2.665E-15 8.882E-16
- ETOT  5  -19.581596263122     2.456E-06 7.209E-08 2.417E-01 8.882E-16 8.882E-16
- ETOT  6  -19.581624199989    -2.794E-05 5.875E-07 2.165E-03 1.776E-15 8.882E-16
- ETOT  7  -19.581624347447    -1.475E-07 2.899E-09 4.876E-05 2.665E-15 2.665E-15
- ETOT  8  -19.581624343863     3.584E-09 4.339E-11 4.649E-05 2.665E-15 8.882E-16
- ETOT  9  -19.581624348876    -5.013E-09 1.223E-10 7.445E-08 8.882E-16 8.882E-16
- ETOT 10  -19.581624348886    -1.043E-11 4.257E-13 1.337E-08 1.776E-15 1.776E-15
- ETOT 11  -19.581624348889    -2.164E-12 2.149E-14 1.596E-09 4.441E-15 4.441E-15
- ETOT 12  -19.581624348886     2.622E-12 8.611E-16 3.701E-11 1.776E-15 3.553E-15
+ CHANGE REFFFFFFFFF
+ ETOT  1  -19.233171862056    -1.923E+01 1.578E-01 1.483E+02 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT  2  -19.561552725181    -3.284E-01 7.126E-05 1.893E+02 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT  3  -19.574361893893    -1.281E-02 9.800E-05 7.424E+01 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT  4  -19.581598718674    -7.237E-03 1.862E-04 2.544E+00 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT  5  -19.581596263122     2.456E-06 7.209E-08 2.417E-01 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT  6  -19.581624199989    -2.794E-05 5.875E-07 2.165E-03 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT  7  -19.581624347447    -1.475E-07 2.899E-09 4.876E-05 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT  8  -19.581624343863     3.584E-09 4.339E-11 4.649E-05 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT  9  -19.581624348876    -5.013E-09 1.223E-10 7.445E-08 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT 10  -19.581624348886    -1.043E-11 4.257E-13 1.337E-08 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT 11  -19.581624348889    -2.164E-12 2.149E-14 1.596E-09 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT 12  -19.581624348886     2.622E-12 8.611E-16 3.701E-11 0.000E+00 0.000E+00
 
  At SCF step   12   max residual=  8.61E-16 < tolwfr=  1.00E-15 =>converged.
 
@@ -793,10 +805,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          4.7  wall=          4.8
+- Proc.   0 individual time (sec): cpu=          4.8  wall=          4.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  19 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.7  wall=          4.8
++Overall time at end (sec) : cpu=          4.8  wall=          4.8

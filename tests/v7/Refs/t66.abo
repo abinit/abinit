@@ -1,5 +1,5 @@
 
-.Version 9.11.6.5 of ABINIT, released May 2025.
+.Version 10.4.5.4 of ABINIT, released Jul 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 Jun 2025.
-- ( at 13h03 )
+.Starting date : Thu 10 Jul 2025.
+- ( at 15h44 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v7_t66/t66.abi
 - output file    -> t66.abo
@@ -277,14 +277,23 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ CHANGE REFFFFFFFFF
  ETOT  1  -7.8618190211833    -7.862E+00 1.677E-03 7.452E+00 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
  ETOT  2  -7.8672083247803    -5.389E-03 2.858E-06 2.569E-01 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
  ETOT  3  -7.8673316881059    -1.234E-04 2.751E-06 3.256E-03 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
  ETOT  4  -7.8673326446059    -9.565E-07 2.388E-08 3.211E-06 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
  ETOT  5  -7.8673326453024    -6.965E-10 1.741E-10 1.316E-08 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
  ETOT  6  -7.8673326453076    -5.272E-12 9.381E-12 6.586E-11 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
  ETOT  7  -7.8673326453077    -3.197E-14 1.997E-13 4.372E-13 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
  ETOT  8  -7.8673326453076     2.576E-14 1.025E-14 2.106E-14 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
  ETOT  9  -7.8673326453076     2.309E-14 7.299E-15 1.532E-16 0.000E+00 0.000E+00
 
  At SCF step    9   max residual=  7.30E-15 < tolwfr=  1.00E-14 =>converged.
@@ -465,11 +474,17 @@ tolerances: {toldfe: 1.00E-07, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ CHANGE REFFFFFFFFF
  ETOT  1  -7.8903009585120    -7.890E+00 3.430E-11 2.594E-02 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
  ETOT  2  -7.8905539429103    -2.530E-04 1.146E-12 4.047E-03 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
  ETOT  3  -7.8905634386633    -9.496E-06 6.460E-08 2.678E-04 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
  ETOT  4  -7.8905640398121    -6.011E-07 9.072E-10 1.135E-05 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
  ETOT  5  -7.8905640791535    -3.934E-08 6.941E-11 3.378E-07 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
  ETOT  6  -7.8905640802802    -1.127E-09 2.659E-12 7.417E-08 0.000E+00 0.000E+00
 
  At SCF step    6, etot is converged : 

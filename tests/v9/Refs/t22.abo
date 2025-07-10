@@ -1,5 +1,5 @@
 
-.Version 9.11.6.5 of ABINIT, released May 2025.
+.Version 10.4.5.4 of ABINIT, released Jul 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 Jun 2025.
-- ( at 13h05 )
+.Starting date : Thu 10 Jul 2025.
+- ( at 15h45 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v9_t22/t22.abi
 - output file    -> t22.abo
@@ -280,10 +280,14 @@ tolerances: {toldff: 1.00E-06, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
- ETOT  1  -213.96262611385    -2.140E+02 4.409E-01 7.441E+02 4.369E-02 4.369E-02 8.882E-16 8.882E-16
- ETOT  2  -190.50127389921     2.346E+01 6.810E-03 5.022E+01 6.810E-02 5.082E-02 4.841E-13 4.841E-13
- ETOT  3  -189.77671644674     7.246E-01 3.493E-03 2.360E+00 1.026E-01 5.181E-02 4.041E-13 3.126E-13
- ETOT  4  -189.66592519232     1.108E-01 8.347E-04 8.628E-02 4.282E-02 4.866E-02 2.709E-13 7.283E-14
+ CHANGE REFFFFFFFFF
+ ETOT  1  -213.96262611385    -2.140E+02 4.409E-01 7.441E+02 4.369E-02 4.369E-02 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT  2  -190.50127389921     2.346E+01 6.810E-03 5.022E+01 6.810E-02 5.082E-02 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT  3  -189.77671644674     7.246E-01 3.493E-03 2.360E+00 1.026E-01 5.181E-02 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT  4  -189.66592519232     1.108E-01 8.347E-04 8.628E-02 4.282E-02 4.866E-02 0.000E+00 0.000E+00
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.84410115E-02  sigma(3 2)=  0.00000000E+00
@@ -1267,10 +1271,14 @@ tolerances: {toldff: 1.00E-06, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
- ETOT  1  -187.97626723665    -1.880E+02 2.303E+00 7.988E-01 3.355E-02 3.355E-02 4.219E-14 4.219E-14
- ETOT  2  -189.71698815447    -1.741E+00 3.243E-05 6.088E-01 5.989E-02 3.077E-02 2.358E-13 2.638E-13
- ETOT  3  -189.68052644610     3.646E-02 1.184E-04 1.492E-01 1.369E-02 3.238E-02 2.900E-13 5.014E-13
- ETOT  4  -189.67463153170     5.895E-03 6.581E-05 6.581E-02 3.708E-03 2.867E-02 3.877E-13 1.323E-13
+ CHANGE REFFFFFFFFF
+ ETOT  1  -187.97626723665    -1.880E+02 2.303E+00 7.988E-01 3.355E-02 3.355E-02 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT  2  -189.71698815447    -1.741E+00 3.243E-05 6.088E-01 5.989E-02 3.077E-02 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT  3  -189.68052644610     3.646E-02 1.184E-04 1.492E-01 1.369E-02 3.238E-02 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT  4  -189.67463153170     5.895E-03 6.581E-05 6.581E-02 3.708E-03 2.867E-02 0.000E+00 0.000E+00
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.84681192E-02  sigma(3 2)=  0.00000000E+00
@@ -2255,10 +2263,14 @@ tolerances: {toldff: 1.00E-06, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
- ETOT  1  -187.82175809570    -1.878E+02 2.686E+00 1.391E+00 6.410E-02 6.410E-02 2.975E-13 2.975E-13
- ETOT  2  -189.74884365764    -1.927E+00 4.702E-05 1.066E+00 7.998E-02 4.297E-02 2.826E-12 2.706E-12
- ETOT  3  -189.68255681148     6.629E-02 1.746E-04 2.293E-01 2.157E-02 3.260E-02 3.746E-12 1.043E-12
- ETOT  4  -189.67657551996     5.981E-03 7.769E-06 1.016E-01 6.402E-03 2.676E-02 2.247E-12 1.206E-12
+ CHANGE REFFFFFFFFF
+ ETOT  1  -187.82175809570    -1.878E+02 2.686E+00 1.391E+00 6.410E-02 6.410E-02 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT  2  -189.74884365764    -1.927E+00 4.702E-05 1.066E+00 7.998E-02 4.297E-02 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT  3  -189.68255681148     6.629E-02 1.746E-04 2.293E-01 2.157E-02 3.260E-02 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT  4  -189.67657551996     5.981E-03 7.769E-06 1.016E-01 6.402E-03 2.676E-02 0.000E+00 0.000E+00
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.84848173E-02  sigma(3 2)=  0.00000000E+00
@@ -3430,10 +3442,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         14.9  wall=         15.0
+- Proc.   0 individual time (sec): cpu=         14.8  wall=         14.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  54 WARNINGs and  17 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         14.9  wall=         15.0
++Overall time at end (sec) : cpu=         14.8  wall=         14.8
