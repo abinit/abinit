@@ -2662,11 +2662,11 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,pawang,pawrad,pawtab,&
    case(3)
      use_soc=.TRUE.; use_sd=.TRUE.; use_fc=.TRUE.
    ! the default case is a bit strange because of the legacy
-   ! feature that SOC in just one of several ZORA terms but
-   ! historically was treated as "stand alone" by abinit.
+   ! feature that, although SOC in just one of several ZORA terms,
+   ! historically it was treated as "stand alone" by abinit.
    ! so, this routine can be triggered in abinit by "pawspnorb 1"
    ! without the use of the zora variable, so if we get to this point
-   ! in the code without a zora value, we still have the legacy
+   ! in the code with zora=0, we still have the legacy
    ! pawspnorb case to deal with
    case default
      use_soc=.TRUE.; use_sd=.FALSE.; use_fc=.FALSE.
@@ -2752,16 +2752,18 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,pawang,pawrad,pawtab,&
 
  LIBPAW_ALLOCATE(z_kernel,(mesh_size))
  LIBPAW_ALLOCATE(z_intgd,(mesh_size))
- LIBPAW_ALLOCATE(dijso_rad,(ij_size))
-
+ 
  ! spin-orbit kernel
- z_kernel(2:mesh_size) = dkdr(2:mesh_size)/pawrad%rad(2:mesh_size)
- call pawrad_deducer0(z_kernel,mesh_size,pawrad)
- do kln=1,ij_size
-   z_intgd = z_kernel*pawtab%phiphj(1:mesh_size,kln)
-   call simp_gen(dijso_rad(kln),z_intgd,pawrad)
- end do
- dijso_rad(:)=spnorbscl*dijso_rad(:)
+ if (use_soc) then
+   LIBPAW_ALLOCATE(dijso_rad,(ij_size))
+   z_kernel(2:mesh_size) = dkdr(2:mesh_size)/pawrad%rad(2:mesh_size)
+   call pawrad_deducer0(z_kernel,mesh_size,pawrad)
+   do kln=1,ij_size
+     z_intgd = z_kernel*pawtab%phiphj(1:mesh_size,kln)
+     call simp_gen(dijso_rad(kln),z_intgd,pawrad)
+   end do
+   dijso_rad(:)=spnorbscl*dijso_rad(:)
+ end if
 
  ! nuclear dipole kernels
  if (has_nucdipmom) then
@@ -2781,7 +2783,6 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,pawang,pawrad,pawtab,&
      z_intgd = z_kernel*pawtab%phiphj(1:mesh_size,kln)
      call simp_gen(dijnd_rad(2,kln),z_intgd,pawrad)
    end do
- 
  end if ! nuclear dipole radial integrals
 
  LIBPAW_DEALLOCATE(z_kernel)
@@ -2809,44 +2810,45 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,pawang,pawrad,pawtab,&
 !----- Loop over density components
 !------------------------------------------------------------------------
  dijso=zero
- do idij=1,ndij
+ if (use_soc) then
+   do idij=1,ndij
 
-!  ------------------------------------------------------------------------
-!  ----- Computation of Dij_so
-!  ------------------------------------------------------------------------
-   klmn1=1
-   if (mod(idij,2)==1) then
-     ispden=(1+idij)/2
-     do klmn=1,lmn2_size
-       if (indklmn(3,klmn)==0) then   ! il==jl
-         klm=indklmn(1,klmn);kln=indklmn(2,klmn)
-         ilm=indklmn(5,klmn);jlm=indklmn(6,klmn)
-         fact=dijso_rad(kln);if (ilm>jlm) fact=-fact
-         dijso(klmn1  ,idij)=fact*pawang%ls_ylm(1,klm,ispden)
-         dijso(klmn1+1,idij)=fact*pawang%ls_ylm(2,klm,ispden)
-       end if
-       klmn1=klmn1+cplex_dij
-     end do
-   else if (idij==2) then
-     do klmn=1,lmn2_size
-       if (indklmn(3,klmn)==0) then   ! il==jl
-         dijso(klmn1  ,2)=-dijso(klmn1  ,1)
-         dijso(klmn1+1,2)=-dijso(klmn1+1,1)
-       end if
-       klmn1=klmn1+cplex_dij
-     end do
-   else if (idij==4) then
-     do klmn=1,lmn2_size
-       if (indklmn(3,klmn)==0) then   ! il==jl
-         dijso(klmn1  ,4)=-dijso(klmn1  ,3)
-         dijso(klmn1+1,4)= dijso(klmn1+1,3)
-       end if
-       klmn1=klmn1+cplex_dij
-     end do
-   end if
- end do !  ----- End loop over idij
- if(.NOT. use_soc) dijso=zero
- LIBPAW_DEALLOCATE(dijso_rad)
+!    ------------------------------------------------------------------------
+!    ----- Computation of Dij_so
+!    ------------------------------------------------------------------------
+     klmn1=1
+     if (mod(idij,2)==1) then
+       ispden=(1+idij)/2
+       do klmn=1,lmn2_size
+         if (indklmn(3,klmn)==0) then   ! il==jl
+           klm=indklmn(1,klmn);kln=indklmn(2,klmn)
+           ilm=indklmn(5,klmn);jlm=indklmn(6,klmn)
+           fact=dijso_rad(kln);if (ilm>jlm) fact=-fact
+           dijso(klmn1  ,idij)=fact*pawang%ls_ylm(1,klm,ispden)
+           dijso(klmn1+1,idij)=fact*pawang%ls_ylm(2,klm,ispden)
+         end if
+         klmn1=klmn1+cplex_dij
+       end do
+     else if (idij==2) then
+       do klmn=1,lmn2_size
+         if (indklmn(3,klmn)==0) then   ! il==jl
+           dijso(klmn1  ,2)=-dijso(klmn1  ,1)
+           dijso(klmn1+1,2)=-dijso(klmn1+1,1)
+         end if
+         klmn1=klmn1+cplex_dij
+       end do
+     else if (idij==4) then
+       do klmn=1,lmn2_size
+         if (indklmn(3,klmn)==0) then   ! il==jl
+           dijso(klmn1  ,4)=-dijso(klmn1  ,3)
+           dijso(klmn1+1,4)= dijso(klmn1+1,3)
+         end if
+         klmn1=klmn1+cplex_dij
+       end do
+     end if
+   end do !  ----- End loop over idij
+   LIBPAW_DEALLOCATE(dijso_rad)
+ end if ! end use_soc condition
 
  ! add nucdipmom terms if present
  if(has_nucdipmom) then
