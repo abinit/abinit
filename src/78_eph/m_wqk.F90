@@ -42,16 +42,17 @@ module m_wqk
 
  use defs_abitypes,    only : mpi_type
  use defs_datatypes,   only : pseudopotential_type
- use m_gwdefs,         only : GW_Q0_DEFAULT
+ use m_gwdefs,         only : GW_Q0_DEFAULT, cone_gw, czero_gw
  use m_hide_blas,      only : xgemm, xdotc
+ use m_special_funcs,  only : gaussian
  use m_time,           only : cwtime, cwtime_report, timab, sec2str
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
- use m_numeric_tools,  only : arth, c2r, get_diag, linfit, iseven, print_arr
- use m_io_tools,       only : iomode_from_fname, file_exists, is_open, open_file, flush_unit
- use m_fftcore,        only : ngfft_seq, sphereboundary, get_kg, kgindex, print_ngfft
+ use m_numeric_tools,  only : arth, linspace !, get_diag, print_arr
+ use m_io_tools,       only : iomode_from_fname
+ use m_fftcore,        only : ngfft_seq, sphereboundary, get_kg, print_ngfft
  !use m_krank,          only : krank_t, krank_from_kptrlatt
- use m_cgtk,           only : cgtk_rotate
- use m_cgtools,        only : cg_zdotc, cg_real_zdotc, cg_zgemm
+ !use m_cgtk,           only : cgtk_rotate
+ !use m_cgtools,        only : cg_zdotc, cg_real_zdotc, cg_zgemm
  use m_crystal,        only : crystal_t
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map
  use m_bz_mesh,        only : isamek, kmesh_t
@@ -68,6 +69,7 @@ module m_wqk
  use m_pstat,          only : pstat_proc
  use m_sigtk,          only : sigtk_multiply_by_vc_sqrt
  use m_screening,      only : epsm1_t
+ use m_ddk,            only : ddkop_t, ddkop_new
 
  implicit none
 
@@ -100,9 +102,6 @@ contains  !=====================================================
 !! dtset<dataset_type>=All input variables for this dataset.
 !! ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
 !! wfk_hdr=Header of the WFK file.
-!! pawfgr <type(pawfgr_type)>=fine grid parameters and related data
-!! pawang<pawang_type)>=PAW angular mesh and related data.
-!! pawrad(ntypat*usepaw)<pawrad_type>=Paw radial mesh and related data.
 !! pawtab(ntypat*usepaw)<pawtab_type>=Paw tabulated starting data.
 !! psps<pseudopotential_type>=Variables related to pseudopotentials.
 !! comm=MPI communicator.
@@ -112,43 +111,38 @@ contains  !=====================================================
 !! SOURCE
 
 subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hdr, &
-                   pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+                   pawtab, psps, mpi_enreg, comm)
 
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: wfk0_path
- integer,intent(in) :: comm
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(inout) :: dtset
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),target,intent(in) :: ebands
  type(hdr_type),intent(in) :: wfk_hdr
- type(pawang_type),intent(in) :: pawang
  type(pseudopotential_type),intent(in) :: psps
- type(pawfgr_type),intent(in) :: pawfgr
  type(mpi_type),intent(inout) :: mpi_enreg
+ integer,intent(in) :: comm
 !arrays
  integer,intent(in) :: ngfft(18), ngfftf(18)
- type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
 
 !Local variables ------------------------------
 !scalars
  integer,parameter :: LOG_MODQ = 1, LOG_MODK = 4, istwfk1 = 1, master = 0, ndat1 = 1
  integer :: id_required, approx_type, ikxc, option_test, nkxc, ig
- integer :: band, nkibz, my_rank, nsppol, iq_ibz, iq_bz
+ integer :: nkibz, my_rank, nsppol, iq_ibz, iq_bz, isym_qq, itim_qq
  integer :: cplex,nspinor,nprocs, ii, ib, my_is, spin, max_npw_xc, min_npw_xc,  npw_x, npw_c, bstart_k, bstop_k, nband_k, ik_bz
  integer :: isym_q, trev_q, bstart_kq, bstop_kq, nband_kq, ncols, mpw, ierr, ncerr !,spad
  integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_k_ibz, istwf_k_ibz
  integer :: ikq_ibz, isym_kq, trev_kq, npw_kq, istwf_kq,  npw_kq_ibz, istwf_kq_ibz
- integer :: n1,n2,n3,n4,n5,n6, m_kq, n_k, restart, root_ncid, ib_k, ib_kq
- integer :: nfft,nfftf,mgfft,mgfftf,nkpg_k,nkpg_kq,cnt, edos_intmeth ! ndone, nmiss, spin_ncid,
- integer :: nqlwl, scr_iomode
- integer :: ikfs_bz, ikq_fs, my_ik, qbuf_size, iqbuf_cnt !, my_iq,
- real(dp) :: cpu_all, wall_all, gflops_all, cpu_qq, wall_qq, gflops_qq, cpu_kk, wall_kk, gflops_kk
- real(dp) :: edos_step, edos_broad, ecut, e_nk, e_mkq
- logical :: isirr_k, isirr_kq, qq_is_gamma, isirr_q, remove_exchange
- logical :: print_time_qq, print_time_kk
+ integer :: m_kq, n_k, root_ncid, ib_k, ib_kq, prtwqk, ne ! n1,n2,n3,n4,n5,n6,
+ integer :: nfft,nfftf,mgfft,mgfftf,nkpg_k,nkpg_kq,cnt, edos_intmeth, nqlwl, scr_iomode
+ integer :: ikfs_bz, ikq_fs, my_ik, my_nk, qbuf_size, iqbuf_cnt !, my_iq,
+ real(dp) :: cpu_all, wall_all, gflops_all, cpu, wall, gflops, cpu_qq, wall_qq, gflops_qq, cpu_kk, wall_kk, gflops_kk
+ real(dp) :: edos_step, edos_broad, ecut, e_nk, e_mkq, e_min, e_max, de
+ logical :: isirr_k, isirr_kq, qq_is_gamma, isirr_q, remove_exchange, print_time_qq, print_time_kk
  type(wfd_t) :: wfd
  type(kmesh_t) :: qmesh, kmesh
  type(gsphere_t),target :: gsph_x, gsph_c
@@ -156,32 +150,31 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  type(vcoul_t) :: vcp
  type(edos_t) :: edos
  type(epsm1_t) :: epsm1
+ type(ddkop_t) :: ddkop
  !type(krank_t) :: krank_ibz
  character(len=fnlen) :: screen_filepath
  character(len=5000) :: msg, qkp_string
 !arrays
- integer :: g0_k(3), g0_kq(3), units(2), work_ngfft(18), gmax(3), prtwqk
- integer :: mapl_k(6), mapl_kq(6) !, mapc_qq(6)
- integer,allocatable :: kg_k(:,:), kg_kq(:,:)
- integer,allocatable :: gbound_k(:,:), gbound_kq(:,:), gbound_c(:,:), gbound_x(:,:), nband(:,:), wfd_istwfk(:)
- integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:), kbz2ibz(:,:)
+ integer :: g0_k(3), g0_kq(3), units(2), work_ngfft(18), gmax(3), mapl_k(6), mapl_kq(6)
+ integer,allocatable :: kg_k(:,:), kg_kq(:,:), gbound_k(:,:), gbound_kq(:,:), gbound_c(:,:), gbound_x(:,:)
+ integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:), kbz2ibz(:,:), nband(:,:), wfd_istwfk(:)
  !integer(i1b),allocatable :: itreat_qibz(:)
  integer, ABI_CONTIGUOUS pointer :: kg_c(:,:), kg_x(:,:)
- real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3), kqmp(3), kmp(3), pp(3), kmp_ibz(3), kqmp_ibz(3), qq_ibz(3), qq_bz(3)
- complex(gwpc) :: ctmp_gwpc
+ real(dp) :: kk(3), kq(3), kk_ibz(3), kq_ibz(3), qq_bz(3) ! qq_ibz(3),
+ complex(gwpc) :: ctmp_gwpc, mu
 !arrays
  real(dp) :: n0(ebands%nsppol)
- real(dp),allocatable :: qlwl(:,:), kpg_k(:,:), kpg_kq(:,:), ug_k(:,:,:), ug_kq(:,:) ! cg_work(:,:),
- real(dp),allocatable :: work(:,:,:,:) !, my_gbuf(:,:,:,:,:,:)
- complex(gwpc),allocatable :: cwork_ur(:), rhotwg_x(:,:,:), w_rhotwg_c(:,:,:),vc_sqrt_gx(:), ur_nk(:,:), ur_mkq(:,:)
+ real(dp),allocatable :: qlwl(:,:), kpg_k(:,:), kpg_kq(:,:), ug_k(:,:,:), ug_kq(:,:), cg_work(:,:)
+ real(dp),allocatable :: work(:,:,:,:), e_mesh(:), vcart_ibz(:,:,:,:) !, my_gbuf(:,:,:,:,:,:)
+ complex(gwpc),allocatable :: cwork_ur(:), rhotwg_x(:,:,:),rhotwg_c(:,:,:), w_rhotwg_c(:,:,:),vc_sqrt_gx(:), ur_nk(:,:), ur_mkq(:,:)
  complex(gwpc),allocatable :: kxcg(:,:)
+ complex(dp),allocatable :: w_ee(:,:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
  type(fstab_t),target,allocatable :: fstab(:)
 !************************************************************************
 
  if (psps%usepaw == 1) then
    ABI_ERROR("PAW not implemented")
-   ABI_UNUSED((/pawang%nsym, pawrad(1)%mesh_size/))
  end if
  if (dtset%nsppol == 2) then
    ABI_ERROR("nsppol implemented")
@@ -217,6 +210,18 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
    call fstab_print(fstab, unit=ab_out)
  end if
 
+ spin = 1
+ associate (fs => fstab(spin))
+ ! Build linear mesh for W(e,e').
+ e_min = minval(ebands%eig(fs%bmin,:,spin)) - 0.1_dp * eV_Ha
+ e_max = maxval(ebands%eig(fs%bmax,:,spin)) + 0.1_dp * eV_Ha
+ de = 0.002 * eV_Ha
+ ne = 1 + (e_max - e_min) / de
+ ABI_CALLOC(w_ee, (ne, ne))
+ ABI_MALLOC(e_mesh, (ne))
+ e_mesh = linspace(e_min, e_max, ne)
+ end associate
+
  ! ================
  ! HANDLE SCREENING
  ! ================
@@ -247,8 +252,10 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ! reduce the number of wavevectors in the IBZ that must be stored in memory.
  !call qmesh%pack_by_stars()
 
- ! Initialize Coulomb term on the IBZ of the pp_mesh. Use largest G-sphere.
- !call kmesh%init(cryst, wfk_hdr%nkpt, wfk_hdr%kptns, dtset%kptopt)
+ !ABI_ICALLOC(itreat_qibz, (gstore%nqibz))
+ !itreat_qibz = 1
+ !call wrtout(std_out, sjoin("P Number of q-points in the IBZ treated by this proc: " ,itoa(count(itreat_qibz == 1))))
+ !ABI_FREE(itreat_qibz)
 
  ! Initialize Coulomb term on the IBZ of the qmesh. Use largest G-sphere.
  call kmesh%init(cryst, wfk_hdr%nkpt, wfk_hdr%kptns, dtset%kptopt)
@@ -277,14 +284,9 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ABI_CHECK_IGE(npw_x, 1, "npw_x <= 1")
  ABI_CHECK_IGE(npw_c, 1, "npw_c <= 1")
 
- ! Note that in this case, the sphere is always Gamma-centered i.e. it does not depend on the pp wavevector
+ ! Note that in this case, the sphere is always Gamma-centered i.e. it does not depend on the qq wavevector
  kg_c => gsph_c%gvec(:, 1:npw_c)
  kg_x => gsph_x%gvec(:, 1:npw_x)
-
- !ABI_ICALLOC(itreat_qibz, (gstore%nqibz))
- !itreat_qibz = 1
- !call wrtout(std_out, sjoin("P Number of q-points in the IBZ treated by this proc: " ,itoa(count(itreat_qibz == 1))))
- !ABI_FREE(itreat_qibz)
 
  ! Initialize the wave function descriptor.
  ! Only wavefunctions on the FS are stored in wfd.
@@ -334,6 +336,64 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
 
  call ephtk_get_mpw_gmax(nkibz, wfk_hdr%kptns, ecut, cryst%gmet, mpw, gmax, comm)
 
+ ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
+#if 0
+ call cwtime(cpu, wall, gflops, "start", msg=" Computing v_nk matrix elements for all states on the FS...")
+ ii = huge(1); jj = -1
+ do spin=1,nsppol
+   ii = min(ii, fstab(spin)%bmin)
+   jj = max(jj, fstab(spin)%bmax)
+ end do
+ ABI_CALLOC(vcart_ibz, (3, ii:jj, nkibz, nsppol))
+ ABI_MALLOC(cg_work, (2, mpw * nspinor))
+
+ cnt = 0
+ do spin=1,nsppol
+   associate (fs => fstab(spin))
+   do ik_ibz=1,ebands%nkpt
+     kk = ebands%kptns(:, ik_ibz)
+     npw_k = wfd%npwarr(ik_ibz); istwf_k = wfd%istwfk(ik_ibz)
+     ! NB: The two checks below are global --> all procs will cycle.
+     if (all(bks_mask(:, ik_ibz, spin) .eqv. .False.)) cycle
+     if (npw_k == 1) cycle
+     cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism.
+
+     call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kk, istwf_k, npw_k, wfd%kdata(ik_ibz)%kg_k)
+
+     do band_k=fs%bmin,fs%bmax
+       if (.not. bks_mask(band_k, ik_ibz, spin)) cycle
+       call wfd%copy_cg(band_k, ik_ibz, spin, cg_work)
+       eig0nk = ebands%eig(band_k, ik_ibz, spin)
+       vk = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, wfd%nspinor, cg_work, cwaveprj0)
+       vcart_ibz(:, band_k, ik_ibz, spin) = vk
+
+       ! TODO: Use ebands_get_edos_matrix_elements
+       ! reald(dp) :: vv_fs(3,3,nsppol)
+       !vv_fs = zero
+       !sigma = fs%eph_fsmear
+       !if (fs%eph_fsmear < zero) then
+       !  sigma = max(maxval([(abs(dot_product(fs%vk(:, ib2), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
+       !end if
+       !fs_wtk = gaussian(emesh - ebands%eig(band_k, ik_ibz, spin), sigma) / (one * fs%nktot)
+       !do ii=1,3
+       !  do jj=1,3
+       !    vv_fs(ii,jj,spin) = vv_fs(ii,jj,spin) + vk(ii) * vk(jj) * fs_wtk
+       !  end do
+       !end do
+       !call xmpi_sum(vv_fs, comm, ierr)
+
+     end do
+   end do
+   end associate
+ end do ! spin
+
+ call xmpi_sum(vcart_ibz, comm, ierr)
+ ABI_FREE(cg_work)
+ ABI_FREE(vcart_ibz)
+ call cwtime_report(" Velocities", cpu, wall, gflops)
+#endif
+ call ddkop%free()
+
  call ngfft_seq(work_ngfft, gmax)
  !write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
  ABI_MALLOC(work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
@@ -342,7 +402,7 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ! NB: ur arrays are always allocated with nfft and not with product(ngfft(4:6)).
  nfftf = product(ngfftf(1:3)); mgfftf = maxval(ngfftf(1:3))
  nfft = product(ngfft(1:3)) ; mgfft = maxval(ngfft(1:3))
- n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3); n4 = ngfft(4); n5 = ngfft(5); n6 = ngfft(6)
+ !n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3); n4 = ngfft(4); n5 = ngfft(5); n6 = ngfft(6)
 
  call print_ngfft([std_out], ngfft, header="FFT mesh")
 
@@ -354,7 +414,6 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ABI_MALLOC(gbound_kq, (2*mgfft+8, 2))
  ABI_MALLOC(gbound_c, (2*mgfft+8, 2))
  ABI_MALLOC(gbound_x, (2*mgfft+8, 2))
- !ABI_MALLOC(cg_work, (2, mpw*nspinor))
 
  ! ====================================
  ! This is the g-sphere for W_{gg'}(pp)
@@ -369,7 +428,25 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ABI_MALLOC(kg_k, (3, mpw))
  ABI_MALLOC(kg_kq, (3, mpw))
 
- call pstat_proc%print(_PSTAT_ARGS_)
+ spin = 1
+ associate (fs => fstab(spin))
+ ABI_MALLOC_OR_DIE(ur_nk,  (nfft*nspinor, fs%bmax-fs%bmin+1), ierr)
+ ABI_MALLOC_OR_DIE(ur_mkq, (nfft*nspinor, fs%bmax-fs%bmin+1), ierr)
+ !ABI_MALLOC_OR_DIE(my_gbuf, (gqk%cplex, nb, nb, natom3, gqk%my_nk, qbuf_size), ierr)
+ ABI_MALLOC(cwork_ur, (nfft*nspinor))
+
+ ! Read symmetrized em1 from file and build ppmodel parameters.
+ ! TODO: MPI-shared memory + compute my set of pp-vectors on ppm%new_setup
+ id_required = 4; ikxc = 0; approx_type = 0; option_test = 0; nkxc = 0
+ ABI_MALLOC(kxcg, (nfftf, nkxc))
+ scr_iomode = iomode_from_fname(screen_filepath)
+
+ call epsm1%from_file(screen_filepath, qmesh%nibz, npw_c, comm)
+ call epsm1%mkdump(vcp, npw_c, kg_c, nkxc, kxcg, id_required, approx_type, &
+                   ikxc, option_test, dtfil%fnameabo_scr, scr_iomode, nfftf, ngfft, comm)
+
+ call epsm1%malloc_epsm1_qbz(npw_c, epsm1%nomega)
+ ABI_FREE(kxcg)
 
  ! This parameter defines the size of the q-buffer used to store the g(k, q) e-ph matrix elements
  ! for all the k-point treated by this MPI rank.
@@ -379,6 +456,7 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  qbuf_size = 1
  !qbuf_size = 16
  call wrtout(std_out, sjoin(" Begin computation of Wqk matrix elements with qbuf_size:", itoa(qbuf_size)), pre_newlines=1)
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  ! Open WQK.nc file and go to data mode.
  prtwqk = 1
@@ -389,38 +467,13 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
 
  !ABI_MALLOC(iq_buf, (2, qbuf_size))
 
- spin = 1
- associate (fs => fstab(spin))
-
- ABI_MALLOC_OR_DIE(ur_nk,  (nfft*nspinor, fs%bmax-fs%bmin+1), ierr)
- ABI_MALLOC_OR_DIE(ur_mkq, (nfft*nspinor, fs%bmax-fs%bmin+1), ierr)
- !ABI_MALLOC_OR_DIE(my_gbuf, (gqk%cplex, nb, nb, natom3, gqk%my_nk, qbuf_size), ierr)
- ABI_MALLOC(cwork_ur, (nfft*nspinor))
-
- !ABI_MALLOC(kbz2ibz, (6, gstore%nkbz))
- !krank_ibz = krank_from_kptrlatt(gstore%nkibz, gstore%kibz, ebands%kptrlatt, compute_invrank=.False.)
- !if (kpts_map("symrel", ebands%kptopt, cryst, krank_ibz, gstore%nkbz, kbz, kbz2ibz) /= 0) then
- !  ABI_ERROR("Cannot map kBZ to IBZ!")
- !end if
- !ABI_FREE(kbz2ibz)
- !call krank_ibz%free()
-
- ! Read symmetrized em1 from file and build ppmodel parameters.
- ! TODO: MPI-shared memory + compute my set of pp-vectors on ppm%new_setup
- call epsm1%from_file(screen_filepath, qmesh%nibz, npw_c, comm)
- id_required = 4; ikxc = 0; approx_type = 0; option_test = 0; nkxc = 0
- ABI_MALLOC(kxcg, (nfftf, nkxc))
- scr_iomode = iomode_from_fname(screen_filepath)
- call epsm1%mkdump(vcp, npw_c, kg_c, nkxc, kxcg, id_required, approx_type, &
-                   ikxc, option_test, dtfil%fnameabo_scr, scr_iomode, nfftf, ngfft, comm)
-
- call epsm1%malloc_epsm1_qbz(npw_c, epsm1%nomega)
- ABI_FREE(kxcg)
-
  ! ==================
  ! Loop over k-points
  ! ==================
+ mu = zero
  do ikfs_bz=1,fs%nkfs
+   my_ik = ikfs_bz
+   my_nk = fs%nkfs
    ! NB: All procs in gqk%pert_comm and gqk%bsum_com and gqk%pp_sum_comm enter this section.
    !iqbuf_cnt = 1 + mod(my_iq - 1, qbuf_size)
    !iq_buf(:, iqbuf_cnt) = [my_iq, iq_bz]
@@ -428,6 +481,8 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
    ! Set entry to zero. Important as there are cycle instructions inside these loops
    ! and we don't want random numbers written to disk.
    !my_gbuf(:,:,:,:, ikfs_bz, iqbuf_cnt) = zero
+   print_time_kk = my_rank == 0 .and. (ikfs_bz <= LOG_MODK .or. mod(ikfs_bz, LOG_MODK) == 0)
+   if (print_time_kk) call cwtime(cpu_kk, wall_kk, gflops_kk, "start")
 
    ! Symmetry indices for kk.
    kk = fs%kpts(:, ikfs_bz)
@@ -441,9 +496,6 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
    kk_ibz = ebands%kptns(:,ik_ibz)
    istwf_k_ibz = wfd%istwfk(ik_ibz); npw_k_ibz = wfd%npwarr(ik_ibz)
    !print *, "ik_ibz:", ik_ibz, "kk:", kk, "kk_ibz:", kk_ibz
-
-   print_time_kk = my_rank == 0 .and. (ikfs_bz <= LOG_MODK .or. mod(ikfs_bz, LOG_MODK) == 0)
-   if (print_time_kk) call cwtime(cpu_kk, wall_kk, gflops_kk, "start")
 
    ! Get npw_k, kg_k for kk
    call wfd%get_gvec_gbound(cryst%gmet, ecut, kk, ik_ibz, isirr_k, dtset%nloalg, & ! in
@@ -470,10 +522,6 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
      kq = kk + qq_bz
      ikq_fs = fs%findkg0(kq, g0_kq)
      if (ikq_fs == -1) cycle
-     !if (kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, 1, kq, mapl_kq) /= 0) then
-     !  write(msg, '(4a)' )"k-mesh is not closed!",ch10, "k+q could not be generated from a symmetrical one.",trim(ltoa(kq))
-     !  ABI_ERROR(msg)
-     !end if
 
      mapl_kq = fs%indkk_fs(:, ikq_fs)
      ikq_ibz = mapl_kq(1); isym_kq = mapl_kq(2); trev_kq = mapl_kq(6); g0_kq = mapl_kq(3:5)
@@ -503,55 +551,70 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
          call sigtk_multiply_by_vc_sqrt("N", npw_x, nspinor, 1, vc_sqrt_gx, rhotwg_x(:, ib_k, ib_kq))
        end do
      end do
+
      ABI_FREE(ug_kq)
+
+     ! Find the corresponding irred pp-point in the pp_mesh.
+     call qmesh%get_bz_item(iq_bz, qq_bz, iq_ibz, isym_qq, itim_qq)
+
+     ! Get Fourier components of the Coulomb interaction in the BZ
+     ! In 3D systems, neglecting umklapp: vc(Sq,sG) = vc(q,G) = 4pi/|q+G|**2
+     ! The same relation holds for 0-D systems, but not in 1-D or 2D systems. It depends on S.
+
+     ! NOTE: vc_sqrt_gx is dimensioned with npw_x --> use rottb table from gsph_x.
+     do ig=1,npw_x
+       vc_sqrt_gx(gsph_x%rottb(ig, itim_qq, isym_qq)) = vcp%vc_sqrt(ig, iq_ibz)
+     end do
 
      remove_exchange = .True.
      call epsm1%rotate_iqbz(iq_bz, hscr%nomega, npw_c, gsph_c, qmesh, remove_exchange)
 
+     ! Compute \sum_{gg'} (M_g^{kn,k'm})^* W_{gg'}(q) M_g'^{kn,k'm} with k' = k + q.
+
      ! TODO: nspinor
+     ABI_MALLOC(rhotwg_c, (npw_c*nspinor, nband_k, nband_kq))
+     rhotwg_c(:,:,:) = rhotwg_x(1:npw_c,:,:)
+
      ABI_MALLOC(w_rhotwg_c, (npw_c*nspinor, nband_k, nband_kq))
      ncols = nband_k * nband_kq
-     !matmul(epsm1%epsm1_qbz(:,:,1), rhotwg_x(1:npw_c,:,:))
-     !call xgemm("N", "N', npw_c, ncols, npw_c, cone_gw, epsm%epsm1_qbz(:,:,1), npw_c, b, ldb,
-     !          czero_gw, w_rhotwg_c, npw_c)
+
+     !call xgemm("N", "N", npw_c, ncols, npw_c, cone_gw, epsm1%epsm1_qbz(:,:,1), npw_c, rhotwg_c(:,:,1), npw_c*nspinor, &
+     !           czero_gw, w_rhotwg_c(:,:,1), npw_c)
+
+     do ib_k=1, nband_k
+       do ib_kq=1, nband_kq
+         w_rhotwg_c(:,ib_k,ib_kq) = matmul(epsm1%epsm1_qbz(:,:,1), rhotwg_c(:,ib_k,ib_kq))
+       end do
+     end do
+     !print *, "epsm1_qibz:", maxval(abs(epsm1%epsm1_qbz(:,:,1)))
+     !if (.not. qq_is_gamma) then
+     !if (qq_is_gamma) then
+     !print *,  " rhotwg_c",  maxval(abs(rhotwg_c)), maxloc(abs(rhotwg_c))
+     !end if
+     !print *, "w_rhotwg_c:", maxval(abs(w_rhotwg_c))
 
      do n_k=bstart_k, bstop_k
        ib_k = n_k - bstart_k + 1
        e_nk = ebands%eig(n_k, ik_ibz, spin)
+       !gaussian(e_nk - ef, smear)
        do m_kq=bstart_kq, bstop_kq
          ib_kq = m_kq - bstart_kq + 1
          e_mkq = ebands%eig(m_kq, ikq_ibz, spin)
-         !rhotwg_x(npw_x*nspinor, ib_k, ib_kq))
-         !w_rhotwg_c(npw_c*nspinor, ib_k, ib_kq)
-         !ctmp_gwpc = xdotc(npw_c*nspinor, rhotwg_x(:,ib_k, ib_kq), 1, w_rhotwg_c(:,ib_k, ib_kq), 1)
-         !ctmp_gwpc = ctmp_gwpc + xdotc(npw_x*nspinor, rhotwg_x(:,ib_k, ib_kq), 1, rhotwg_x(:,ib_k, ib_kq), 1)
+         !gaussian(e_mkq - ef, smear)
+         !rhotwg_x(npw_x*nspinor, ib_k, ib_kq)); w_rhotwg_c(npw_c*nspinor, ib_k, ib_kq)
+         ctmp_gwpc = xdotc(npw_c*nspinor, rhotwg_c(:,ib_k, ib_kq), 1, w_rhotwg_c(:,ib_k, ib_kq), 1)
+         if (remove_exchange) then
+           ctmp_gwpc = ctmp_gwpc + xdotc(npw_x*nspinor, rhotwg_x(:,ib_k, ib_kq), 1, rhotwg_x(:,ib_k, ib_kq), 1)
+         end if
+         !print *, "ctmp_gwpc:", ctmp_gwpc
+         !mu = mu + ctmp_gwpc *
+         !w_ee =
        end do
      end do
 
      ABI_FREE(rhotwg_x)
+     ABI_FREE(rhotwg_c)
      ABI_FREE(w_rhotwg_c)
-
-#if 0
-     ! Be careful here because pp should run over the list of wavevectors in the screening matrix!
-     ! as qmesh%bz is not necessarily equivalent to the k-mesh for the wavefunctions,
-     ! and we have to use the ipp_bz index to symmetrize W(pp_bz) from W(pp_ibz).
-     !
-     ! TODO: Should order nbz in shells so that one can reduce the memory required
-     ! to store W(pp) if pp_parallelism is activated.
-
-     ! Handle possible restart.
-     !if (done_qbz_spin(iq_bz, spin) == 1) then
-     !  call wrtout(std_out, sjoin(" iq_bz:", itoa(iq_bz), ", spin: ", itoa(spin), " already computed --> skipping iteration"))
-     !  cycle
-     !end if
-
-     ! Note symrec conventions here as needed to symmetrize DFPT potentials.
-     iq_ibz = gqk%my_q2ibz(1, iq_bz) ; isym_q = gqk%my_q2ibz(2, iq_bz)
-     trev_q = gqk%my_q2ibz(6, iq_bz) !; g0_q = gqk%my_q2ibz(3:5, iq_bz)
-     isirr_q = (isym_q == 1 .and. trev_q == 0)
-     !isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
-     !tsign_q = 1; if (trev_q == 1) tsign_q = -1
-     !mapc_qq = gqk%my_q2ibz(:, iq_bz)
 
      !print_time_qq = my_rank == 0 .and. (iq_bz <= LOG_MODQ .or. mod(iq_bz, LOG_MODQ) == 0)
      !if (print_time_qq) then
@@ -567,13 +630,12 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
      !  call inds2str(2, "My q-point", my_iq, my_nq, qmesh%nbz, msg)
      !  call cwtime_report(msg, cpu_qq, wall_qq, gflops_qq); if (iq_bz == LOG_MODQ) call wrtout(std_out, "...", do_flush=.True.)
      !end if
-#endif
    end do ! iq_ibz
 
-    !if (print_time_kk) then
-    !  call inds2str(3, "My k-point", my_ik, my_nk, fs%nkfs, msg)
-    !  call cwtime_report(msg, cpu_kk, wall_kk, gflops_kk); if (ikfs_bz == LOG_MODK) call wrtout(std_out, "...", do_flush=.True.)
-    !end if
+    if (print_time_kk) then
+      call inds2str(1, "My k-point", my_ik, my_nk, fs%nkfs, msg)
+      call cwtime_report(msg, cpu_kk, wall_kk, gflops_kk); if (ikfs_bz == LOG_MODK) call wrtout(std_out, "...", do_flush=.True.)
+    end if
 
     ABI_FREE(ug_k)
     ABI_FREE(kpg_k)
@@ -588,6 +650,8 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  !ABI_FREE(iq_buf)
  !ABI_FREE(my_gbuf)
  !end do ! my_is
+
+ !call xmpi_sum_master(w_ee, master, comm, ierr)
 
  call cwtime_report(" wqk calculation", cpu_all, wall_all, gflops_all, end_str=ch10)
 
@@ -606,7 +670,6 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ! Free memory
  ABI_FREE(kg_k)
  ABI_FREE(kg_kq)
- !ABI_FREE(cg_work)
  ABI_FREE(cwork_ur)
  ABI_FREE(work)
  ABI_FREE(gbound_k)
@@ -615,6 +678,8 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ABI_FREE(gbound_x)
  !ABI_FREE(done_qbz_spin)
  ABI_FREE(vc_sqrt_gx)
+ ABI_FREE(w_ee)
+ ABI_FREE(e_mesh)
 
  call wfd%free(); call vcp%free(); call qmesh%free(); call gsph_x%free(); call gsph_c%free(); call hscr%free(); call edos%free()
  call epsm1%free()
@@ -629,13 +694,13 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
 
 contains
 
-subroutine inds2str(level, prefix, my_ik, my_nk, nk_tot, out_str)
+subroutine inds2str(ilevel, prefix, my_ik, my_nk, nk_tot, out_str)
  character(len=*),intent(in) :: prefix
- integer,intent(in) :: level, my_ik, my_nk, nk_tot
+ integer,intent(in) :: ilevel, my_ik, my_nk, nk_tot
  character(len=*),intent(out) :: out_str
 
  out_str = sjoin(prefix, itoa(my_ik), "/", itoa(my_nk), "[", itoa(nk_tot), "]")
- out_str = repeat(' ', 4 * level) // trim(out_str)
+ out_str = repeat(' ', 4 * ilevel) // trim(out_str)
 end subroutine  inds2str
 
 subroutine dump_my_gbuf()
