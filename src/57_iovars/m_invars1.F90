@@ -1487,7 +1487,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
      end if
    end if
  end if
- if (dtset%zora .GT. 1) then
+ if ( (dtset%zora .GT. 1) .OR. (dtset%zora < 0) ) then
    dtset%nspinor=2
    dtset%pawspnorb=1
  end if
