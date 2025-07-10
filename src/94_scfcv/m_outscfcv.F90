@@ -950,7 +950,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !!!!!!!!!!!!!!!!!!!!!!!!if prt_lorbmag value is equal 1 and the calculations are noncollinear then the local orbital magnetic moments are calculated
 if (dtset%prt_lorbmag==1) then
 
-    if ((dtset%nspinor .ne. 2) .and. (dtset%nsppol .ne.4)) then
+    if ((dtset%nspinor .ne. 2) .and. (dtset%nspden .ne.4)) then
         write (msg,'(a)')" "
         call wrtout(units, msg)
         write (msg,'(a)')"WARNING*"
