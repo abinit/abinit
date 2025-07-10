@@ -314,6 +314,10 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
    return
  end if
 
+ ! at line 1142 below, spaw may be used before it is set,
+ ! which breaks some compilers. Set it here to zero,
+ ! it will be recomputed if needed below
+ spaw=zero
 !Init energies
  if (option/=1) then
    e1xc=zero     ; e1xcdc=zero
