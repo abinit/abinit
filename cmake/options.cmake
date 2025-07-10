@@ -170,8 +170,23 @@ if(ABINIT_ENABLE_NVTX OR (ABINIT_ENABLE_GPU_MARKERS AND ABINIT_ENABLE_GPU_CUDA))
     set(HAVE_GPU_MARKERS 1)
     set(HAVE_GPU_MARKERS_NVTX 1)
     add_library(abinit::gpu_markers ALIAS CUDA::nvToolsExt)
+  # Else check manually for nvtx3interop (new name from CUDA 12.9)
   else()
-    message(SEND_ERROR "NVTX (GPU markers for NVIDIA tools) required but not found")
+    find_library(NVTX_LIBRARY
+      NAMES libnvtx3interop.so
+      PATHS ${CUDAToolkit_ROOT}/lib ${CUDAToolkit_ROOT}/lib64
+      DOC "Location of the NVTX library"
+    )
+    if (NVTX_LIBRARY)
+      set(HAVE_GPU_CUDA10 1)
+      set(HAVE_GPU_MARKERS 1)
+      set(HAVE_GPU_MARKERS_NVTX 1)
+      add_library(nvtx3interop UNKNOWN IMPORTED ${NVTX_LIBRARY})
+      set_target_properties(nvtx3interop PROPERTIES IMPORTED_LOCATION ${NVTX_LIBRARY})
+      add_library(abinit::gpu_markers ALIAS nvtx3interop)
+    else()
+      message(SEND_ERROR "NVTX (GPU markers for NVIDIA tools) required but not found")
+    endif()
   endif()
 
 elseif(ABINIT_ENABLE_ROCTX OR (ABINIT_ENABLE_GPU_MARKERS AND ABINIT_ENABLE_GPU_HIP))
