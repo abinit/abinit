@@ -2112,13 +2112,14 @@ subroutine strfock(fockcommon,gprimd,fockstr,mpi_enreg,nfft,ngfft,&
  !else(gpu_option==ABI_GPU_OPENMP) then
  !  gpu_set_to_zero(fockstr, 6*ndat)
  !end if
- rcut= (three*nkpt_bz*ucvol/four_pi)**(one/three)
+ if(fockcommon%rcut<tol8) then
+   rcut = (three*nkpt_bz*ucvol/four_pi)**(one/three)
+ else
+   rcut = fockcommon%rcut
+ endif
  irho2=0;if (present(rhog2)) irho2=1
 
 !Conduct looping over all fft grid points to find G vecs inside fockcommon%gsqcut
-!Include G**2 on surface of cutoff sphere as well as inside:
- !FBruneval: cutoff is never used.
- !cutoff=fockcommon%gsqcut*tolfix
 
  n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
  me_fft=ngfft(11)
@@ -2165,9 +2166,10 @@ subroutine strfock(fockcommon,gprimd,fockstr,mpi_enreg,nfft,ngfft,&
          if(gsquar<tol10) then
            if (abs(fockcommon%hyb_mixing_sr)>tol8) cycle
            if (abs(fockcommon%hyb_mixing)>tol8) then
-             fockstr(1,idat)=fockstr(1,idat)+fockcommon%hyb_mixing*vqg(1)/3.0_dp*rhogsq
-             fockstr(2,idat)=fockstr(2,idat)+fockcommon%hyb_mixing*vqg(1)/3.0_dp*rhogsq
-             fockstr(3,idat)=fockstr(3,idat)+fockcommon%hyb_mixing*vqg(1)/3.0_dp*rhogsq
+             ! vqg(1) already contains the factor fockcommon%hyb_mixing
+             fockstr(1,idat)=fockstr(1,idat)+vqg(1)/3.0_dp*rhogsq
+             fockstr(2,idat)=fockstr(2,idat)+vqg(1)/3.0_dp*rhogsq
+             fockstr(3,idat)=fockstr(3,idat)+vqg(1)/3.0_dp*rhogsq
              cycle
            end if
          end if
@@ -2243,9 +2245,10 @@ subroutine strfock(fockcommon,gprimd,fockstr,mpi_enreg,nfft,ngfft,&
   !        Case G=0:
            if(gsquar<tol10) then
              if (abs(fockcommon%hyb_mixing)>tol8 .and. abs(fockcommon%hyb_mixing_sr)<tol8) then
-               fockstr1=fockstr1+fockcommon%hyb_mixing*vqg(1)/3.0_dp*rhogsq
-               fockstr2=fockstr2+fockcommon%hyb_mixing*vqg(1)/3.0_dp*rhogsq
-               fockstr3=fockstr3+fockcommon%hyb_mixing*vqg(1)/3.0_dp*rhogsq
+               ! vqg(1) already contains the factor fockcommon%hyb_mixing
+               fockstr1=fockstr1+vqg(1)/3.0_dp*rhogsq
+               fockstr2=fockstr2+vqg(1)/3.0_dp*rhogsq
+               fockstr3=fockstr3+vqg(1)/3.0_dp*rhogsq
              end if
 
            else
