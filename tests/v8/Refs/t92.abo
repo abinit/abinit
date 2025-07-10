@@ -1,5 +1,5 @@
 
-.Version 9.11.6.5 of ABINIT, released May 2025.
+.Version 10.4.5.4 of ABINIT, released Jul 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 Jun 2025.
-- ( at 13h04 )
+.Starting date : Thu 10 Jul 2025.
+- ( at 15h45 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v8_t92/t92.abi
 - output file    -> t92.abo
@@ -573,7 +573,8 @@ tolerances: {tolwfr: 1.00E-15, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
- ETOT  1  -8.3628058223925    -8.363E+00 9.875E-16 2.993E-26 1.916E-33 1.916E-33
+ CHANGE REFFFFFFFFF
+ ETOT  1  -8.3628058223925    -8.363E+00 9.875E-16 2.993E-26 0.000E+00 0.000E+00
 
  At SCF step    1   max residual=  9.87E-16 < tolwfr=  1.00E-15 =>converged.
 
@@ -1605,10 +1606,10 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          4.2  wall=          4.2
+- Proc.   0 individual time (sec): cpu=          4.1  wall=          4.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  19 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.2  wall=          4.2
++Overall time at end (sec) : cpu=          4.1  wall=          4.1

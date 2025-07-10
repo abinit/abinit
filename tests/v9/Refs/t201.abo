@@ -1,5 +1,5 @@
 
-.Version 9.11.6.5 of ABINIT, released May 2025.
+.Version 10.4.5.4 of ABINIT, released Jul 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 Jun 2025.
-- ( at 13h07 )
+.Starting date : Thu 10 Jul 2025.
+- ( at 15h47 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v9_t201/t201.abi
 - output file    -> t201.abo
@@ -366,8 +366,10 @@ tolerances: {tolwfr: 1.00E-20, tolvrs: 1.00E-15, }
  ETOT 25  -352.97892022142    -5.116E-13 2.327E-17 1.101E-13 5.099E-08 4.197E-08
  ETOT 26  -352.97892022142     3.979E-13 1.249E-17 1.845E-14 2.062E-08 5.051E-08
  ETOT 27  -352.97892022142     2.274E-13 1.827E-19 6.321E-14 8.692E-08 1.374E-07
- ETOT 28  -352.97892022142    -1.137E-13 5.913E-19 3.338E-15 1.350E-07 2.869E-09
- ETOT 29  -352.97892022142    -5.684E-14 3.430E-19 6.472E-16 2.284E-09 8.507E-10
+ CHANGE REFFFFFFFFF
+ ETOT 28  -352.97892022142    -1.137E-13 5.913E-19 3.338E-15 1.350E-07 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT 29  -352.97892022142    -5.684E-14 3.430E-19 6.472E-16 0.000E+00 0.000E+00
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.26668743E-01  sigma(3 2)=  3.73112599E-03
@@ -787,8 +789,10 @@ tolerances: {tolwfr: 1.00E-20, tolvrs: 1.00E-15, }
  ETOT 25  -352.97892022142    -5.116E-13 2.327E-17 1.101E-13 5.099E-08 4.197E-08
  ETOT 26  -352.97892022142     3.979E-13 1.249E-17 1.845E-14 2.062E-08 5.051E-08
  ETOT 27  -352.97892022142     0.000E+00 1.827E-19 6.321E-14 8.692E-08 1.374E-07
- ETOT 28  -352.97892022142     3.411E-13 5.914E-19 3.338E-15 1.349E-07 2.901E-09
- ETOT 29  -352.97892022142    -1.137E-13 3.484E-19 6.440E-16 2.394E-09 6.697E-10
+ CHANGE REFFFFFFFFF
+ ETOT 28  -352.97892022142     3.411E-13 5.914E-19 3.338E-15 1.349E-07 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT 29  -352.97892022142    -1.137E-13 3.484E-19 6.440E-16 0.000E+00 0.000E+00
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.26668743E-01  sigma(3 2)=  3.73112599E-03
@@ -1208,8 +1212,10 @@ tolerances: {tolwfr: 1.00E-20, tolvrs: 1.00E-15, }
  ETOT 25  -352.97892022142    -5.116E-13 2.327E-17 1.101E-13 5.099E-08 4.197E-08
  ETOT 26  -352.97892022142     3.979E-13 1.249E-17 1.845E-14 2.062E-08 5.051E-08
  ETOT 27  -352.97892022142     0.000E+00 1.827E-19 6.321E-14 8.692E-08 1.374E-07
- ETOT 28  -352.97892022142     3.411E-13 5.914E-19 3.338E-15 1.349E-07 2.901E-09
- ETOT 29  -352.97892022142    -1.137E-13 3.484E-19 6.440E-16 2.394E-09 6.697E-10
+ CHANGE REFFFFFFFFF
+ ETOT 28  -352.97892022142     3.411E-13 5.914E-19 3.338E-15 1.349E-07 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT 29  -352.97892022142    -1.137E-13 3.484E-19 6.440E-16 0.000E+00 0.000E+00
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.26668743E-01  sigma(3 2)=  3.73112599E-03
@@ -2222,10 +2228,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          8.0  wall=          8.1
+- Proc.   0 individual time (sec): cpu=          7.9  wall=          7.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and  17 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.0  wall=          8.1
++Overall time at end (sec) : cpu=          7.9  wall=          7.9

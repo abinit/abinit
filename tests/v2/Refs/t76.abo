@@ -1,5 +1,5 @@
 
-.Version 9.11.6.5 of ABINIT, released May 2025.
+.Version 10.4.5.4 of ABINIT, released Jul 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 Jun 2025.
-- ( at 12h59 )
+.Starting date : Thu 10 Jul 2025.
+- ( at 15h40 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v2_t76-t77/t76.abi
 - output file    -> t76.abo
@@ -814,6 +814,7 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ CHANGE REFFFFFFFFF
  ETOT  1  -8.8582479417765    -8.858E+00 2.752E-15 1.519E-28 0.000E+00 0.000E+00
 
  At SCF step    1   max residual=  2.75E-15 < tolwfr=  1.00E-14 =>converged.
