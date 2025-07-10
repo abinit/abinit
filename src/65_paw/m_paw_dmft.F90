@@ -168,9 +168,6 @@ MODULE m_paw_dmft
   integer :: dmft_nwr
   ! Number of real frequencies
 
-  integer :: dmft_optim
-  ! Corrects some bugs and optimizes the code
-
   integer :: dmft_prgn
   ! Specify the way of printing the green function.
   !  =1   print green
@@ -250,10 +247,6 @@ MODULE m_paw_dmft
 
   integer :: dmft_triqs_therm_restart
   ! TRIQS CTQMC: Number of thermalization steps when we restart from a previous configuration.
-
-  integer :: dmft_use_full_chipsi
-  ! =0 Only use the PAW contribution sum_i <pi|Psi_tilde> |Phi> to compute <Chi|Psi>
-  ! =1 Use the full formula |Psi_tilde> + sum_i <pi|Psi_tilde> (|Phi> - |Phi_tilde>) to compute <Chi|Psi>
 
   integer :: dmft_wanorthnorm
   ! =2 orthonormalization of Wannier functions for each k-point
@@ -442,10 +435,6 @@ MODULE m_paw_dmft
   logical :: dmft_triqs_use_norm_as_weight
   ! TRIQS CTQMC: Flag to activate the use of the norm of the matrix as weight
   ! instead of the trace
-
-  logical :: dmft_use_all_bands
-  ! =0 Only consider the DMFT contribution on the correlated bands
-  ! =1 Considers the DMFT contribution on every band
 
   real(dp) :: dmft_charge_prec
   ! Precision on charge required for determination of fermi level (fermi_green)
@@ -1041,10 +1030,9 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
 !==  Define integers and reals
 !=============================
 
- paw_dmft%dmft_use_all_bands = (dtset%dmft_use_all_bands == 1)
  paw_dmft%nelectval = dble(dtset%nelect)
 
- if (.not. paw_dmft%dmft_use_all_bands) then
+ if (dmft_solv /= 6 .and. dmft_solv /= 7) then
    fac = merge(2,1,nsppol==1.and.nspinor==1)
    paw_dmft%nelectval = dble(dtset%nelect-(dmftbandi-1)*nsppol*fac)
  end if ! not use_all_bands
@@ -1071,9 +1059,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_prtwan          = dtset%dmft_prtwan
  paw_dmft%dmft_wanrad          = dtset%dmft_wanrad
  paw_dmft%dmft_t2g             = dtset%dmft_t2g
- paw_dmft%dmft_optim           = dtset%dmft_optim
  paw_dmft%dmft_x2my2d          = dtset%dmft_x2my2d
- paw_dmft%dmft_use_full_chipsi = dtset%dmft_use_full_chipsi
 
  ! for entropy (alternate external calculation)
  paw_dmft%ientropy = 0
@@ -1353,7 +1339,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
 
  ! Now build radial grid by extending the PAW mesh up to max(rmax,size(proj))
  ! The mesh inside the PAW sphere is still exactly the same.
- use_full_chipsi = (paw_dmft%dmft_use_full_chipsi == 1)
+ use_full_chipsi = (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7)
  paw_dmft%int_meshsz => pawrad(:)%int_meshsz
 
  if (use_full_chipsi) then
@@ -2398,7 +2384,7 @@ subroutine print_sc_dmft(paw_dmft,pawprtvol)
      write(message,'(5x,i5,10x,i5)') iband,paw_dmft%include_bands(iband)
      call wrtout(std_out,message,'COLL')
    end do ! iband
-   if (.not. paw_dmft%dmft_use_all_bands) then
+   if (paw_dmft%dmft_solv /= 6 .and. paw_dmft%dmft_solv /= 7) then
      write(message,'(2a,i4,a)') ch10,&
         & 'The',paw_dmft%mband-paw_dmft%dmftbandf+paw_dmft%dmftbandi-1,&
         & '  Following bands are excluded from the DMFT calculation'
@@ -2454,9 +2440,9 @@ subroutine saveocc_dmft(paw_dmft)
    do ikpt=1,nkpt
      nband_k = paw_dmft%nband(ikpt+(is-1)*nkpt)
      do ib=1,nband_k
-       if ((.not. paw_dmft%band_in(ib)) .and. (.not. paw_dmft%dmft_use_all_bands)) cycle
+       if ((.not. paw_dmft%band_in(ib)) .and. (paw_dmft%dmft_solv /= 6 .and. paw_dmft%dmft_solv /= 7)) cycle
        do ib1=1,nband_k
-         if ((.not. paw_dmft%band_in(ib1)) .and. (.not. paw_dmft%dmft_use_all_bands)) cycle
+         if ((.not. paw_dmft%band_in(ib1)) .and. (paw_dmft%dmft_solv /= 6 .and. paw_dmft%dmft_solv /= 7)) cycle
          write(unitsaveocc,*) is,ikpt,ib,ib1,paw_dmft%occnd(1,ib,ib1,ikpt,is),&
                                            & paw_dmft%occnd(2,ib,ib1,ikpt,is)
        end do ! ib1
@@ -2522,9 +2508,9 @@ subroutine readocc_dmft(paw_dmft,filnam_ds3,filnam_ds4)
      do ikpt=1,nkpt
        nband_k = paw_dmft%nband(ikpt+(is-1)*nkpt)
        do ib=1,nband_k
-         if ((.not. paw_dmft%band_in(ib)) .and. (.not. paw_dmft%dmft_use_all_bands)) cycle
+         if ((.not. paw_dmft%band_in(ib)) .and. (paw_dmft%dmft_solv /= 6 .and. paw_dmft%dmft_solv /= 7)) cycle
          do ib1=1,nband_k
-           if ((.not. paw_dmft%band_in(ib1)) .and. (.not. paw_dmft%dmft_use_all_bands)) cycle
+           if ((.not. paw_dmft%band_in(ib1)) .and. (paw_dmft%dmft_solv /= 6 .and. paw_dmft%dmft_solv /= 7)) cycle
            read(unitsaveocc,*) dum1,dum2,dum3,dum4,&
                & paw_dmft%occnd(1,ib,ib1,ikpt,is),paw_dmft%occnd(2,ib,ib1,ikpt,is)
          end do ! ib1

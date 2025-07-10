@@ -535,7 +535,7 @@ subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_dft,f
      wtk = paw_dmft%wtk(ikpt)
      ibc = 0
      do ib=1,nband_k
-       if ((.not. paw_dmft%band_in(ib)) .and. (.not. paw_dmft%dmft_use_all_bands)) cycle
+       if ((.not. paw_dmft%band_in(ib)) .and. (paw_dmft%dmft_solv /= 6 .and. paw_dmft%dmft_solv /= 7)) cycle
        if (paw_dmft%band_in(ib)) ibc = ibc + 1
        eig = paw_dmft%eigen(ib+band_index)
        if (present(fcalc_dft)) then
@@ -895,11 +895,11 @@ subroutine compute_dftu_energy(energies_dmft,green,paw_dmft,pawtab,renorm)
  real(dp), optional, intent(in) :: renorm(:)
 ! integer :: prtopt
 !Local variables-------------------------------
- integer :: dmft_optim,iatom,idijeff,im,im1,ims,ims1,ispinor,ispinor1,isppol,itypat
+ integer :: iatom,idijeff,im,im1,ims,ims1,ispinor,ispinor1,isppol,itypat
  integer :: lpawu,lpawu1,ndim,ndim1,nocc,nsploop,prt_pawuenergy
  real(dp) :: e_dc,e_dc_for_s,e_dcdc,e_dcdc_for_s,e_ee,edftumdc,edftumdc_for_s
  real(dp) :: edftumdcdc,edftumdcdc_for_s,e_ee_for_s,jpawu,upawu,xe1,xe2
- logical :: t2g,x2my2d
+ logical :: dmft_optim,t2g,x2my2d
  character(len=500) :: message
  integer, parameter :: spinor_idxs(2,4) = RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))
  integer, parameter :: mt2g(3) = (/1,2,4/)
@@ -920,7 +920,7 @@ subroutine compute_dftu_energy(energies_dmft,green,paw_dmft,pawtab,renorm)
  t2g        = (paw_dmft%dmft_t2g == 1)
  x2my2d     = (paw_dmft%dmft_x2my2d == 1)
 
- dmft_optim = paw_dmft%dmft_optim
+ dmft_optim = (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7)
 
  isppol   = 1
  ispinor  = 1
@@ -961,12 +961,12 @@ subroutine compute_dftu_energy(energies_dmft,green,paw_dmft,pawtab,renorm)
      do im1=1,ndim
        ims1 = im1
        ! Correct bug in computation of DFT+U energy in the t2g/x2my2d case with TRIQS
-       if (x2my2d .and. dmft_optim == 1) ims1 = 5
-       if (t2g .and. dmft_optim == 1) ims1 = mt2g(im1)
+       if (x2my2d .and. dmft_optim) ims1 = 5
+       if (t2g .and. dmft_optim) ims1 = mt2g(im1)
        do im=1,ndim
          ims = im
-         if (x2my2d .and. dmft_optim == 1) ims = 5
-         if (t2g .and. dmft_optim == 1) ims = mt2g(im)
+         if (x2my2d .and. dmft_optim) ims = 5
+         if (t2g .and. dmft_optim) ims = mt2g(im)
          ! Here, we take the transpose in order to match pawuenergy's conventions
          noccmmp(1,ims,ims1,idijeff) = &
            & dble(green%occup%matlu(iatom)%mat(im1+(ispinor-1)*ndim,im+(ispinor1-1)*ndim,isppol))

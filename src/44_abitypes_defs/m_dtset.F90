@@ -140,7 +140,6 @@ type, public :: dataset_type
  integer :: dmft_nwli
  integer :: dmft_nwlo
  integer :: dmft_occnd_imag
- integer :: dmft_optim
  integer :: dmft_prt_maxent
  integer :: dmft_prtself
  integer :: dmft_prtwan
@@ -168,8 +167,6 @@ type, public :: dataset_type
  integer :: dmft_triqs_therm_restart
  integer :: dmft_triqs_time_invariance
  integer :: dmft_triqs_use_norm_as_weight
- integer :: dmft_use_all_bands
- integer :: dmft_use_full_chipsi
  integer :: dmft_wanorthnorm
  integer :: dmft_x2my2d
  integer :: dmft_yukawa_param
@@ -1561,7 +1558,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmft_nwlo          = dtin%dmft_nwlo
  dtout%dmft_nwli          = dtin%dmft_nwli
  dtout%dmft_occnd_imag    = dtin%dmft_occnd_imag
- dtout%dmft_optim         = dtin%dmft_optim
  dtout%dmft_orbital_filepath = dtin%dmft_orbital_filepath
  dtout%dmft_prt_maxent    = dtin%dmft_prt_maxent
  dtout%dmft_prtself       = dtin%dmft_prtself
@@ -1570,8 +1566,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmft_rslf          = dtin%dmft_rslf
  dtout%dmft_solv          = dtin%dmft_solv
  dtout%dmft_t2g           = dtin%dmft_t2g
- dtout%dmft_use_all_bands = dtin%dmft_use_all_bands
- dtout%dmft_use_full_chipsi = dtin%dmft_use_full_chipsi
  dtout%dmft_wanrad        = dtin%dmft_wanrad
  dtout%dmft_x2my2d        = dtin%dmft_x2my2d
  dtout%dmft_yukawa_param  = dtin%dmft_yukawa_param
@@ -3579,9 +3573,9 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmft_entropy dmft_epsilon_yukawa dmft_fermi_step'
  list_vars=trim(list_vars)//' dmft_iter dmft_kspectralfunc dmft_lambda_yukawa dmft_magnfield dmft_magnfield_b dmft_mxsf '
  list_vars=trim(list_vars)//' dmft_nlambda dmft_nominal dmft_nwli dmft_nwlo'
- list_vars=trim(list_vars)//' dmft_occnd_imag dmft_optim dmft_orbital dmft_orbital_filepath dmft_prt_maxent dmft_prtself dmft_prtwan dmft_read_occnd'
+ list_vars=trim(list_vars)//' dmft_occnd_imag dmft_orbital dmft_orbital_filepath dmft_prt_maxent dmft_prtself dmft_prtwan dmft_read_occnd'
  list_vars=trim(list_vars)//' dmft_rslf dmft_shiftself dmft_solv dmft_tolfreq dmft_tollc'
- list_vars=trim(list_vars)//' dmft_t2g dmft_test dmft_use_all_bands dmft_use_full_chipsi dmft_wanorthnorm'
+ list_vars=trim(list_vars)//' dmft_t2g dmft_wanorthnorm'
  list_vars=trim(list_vars)//' dmft_wanrad dmft_x2my2d dmft_yukawa_param dosdeltae dtion dtele dynamics dynimage' !FB: dynamics?
  list_vars=trim(list_vars)//' dvdb_add_lr dvdb_ngqpt dvdb_qdamp dvdb_rspace_cell'
  list_vars=trim(list_vars)//' dyn_chksym dyn_tolsym'
