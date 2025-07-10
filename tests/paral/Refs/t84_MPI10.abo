@@ -1,5 +1,5 @@
 
-.Version 9.11.6.5 of ABINIT, released May 2025.
+.Version 10.4.5.4 of ABINIT, released Jul 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 Jun 2025.
-- ( at 13h19 )
+.Starting date : Thu 10 Jul 2025.
+- ( at 15h59 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI10/paral_t84_MPI10/t84.abi
 - output file    -> t84_MPI10.abo
@@ -301,17 +301,28 @@ tolerances: {tolvrs: 1.00E-12, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
- ETOT  1  -72.260822198766    -7.226E+01 1.269E-06 7.447E+01 7.878E-21 7.878E-21
- ETOT  2  -72.210285950032     5.054E-02 1.478E-09 9.907E+00 8.047E-21 1.952E-22
- ETOT  3  -72.167680429996     4.261E-02 7.219E-07 2.965E+00 3.710E-22 3.748E-22
- ETOT  4  -72.162090182211     5.590E-03 7.128E-08 2.843E-02 3.611E-22 3.272E-23
- ETOT  5  -72.162015556761     7.463E-05 3.317E-10 1.074E-03 3.502E-23 3.278E-24
- ETOT  6  -72.162012656661     2.900E-06 1.345E-10 5.027E-05 2.978E-24 3.009E-25
- ETOT  7  -72.162012569246     8.742E-08 1.909E-12 8.268E-07 2.852E-25 1.207E-25
- ETOT  8  -72.162012568902     3.436E-10 4.245E-14 5.080E-09 1.317E-25 3.463E-26
- ETOT  9  -72.162012568981    -7.924E-11 3.073E-15 1.386E-09 3.244E-26 2.674E-27
- ETOT 10  -72.162012568976     5.230E-12 1.215E-16 1.332E-12 2.181E-27 2.160E-27
- ETOT 11  -72.162012568974     1.862E-12 8.785E-20 5.350E-14 2.155E-27 7.830E-30
+ CHANGE REFFFFFFFFF
+ ETOT  1  -72.260822198766    -7.226E+01 1.269E-06 7.447E+01 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT  2  -72.210285950032     5.054E-02 1.478E-09 9.907E+00 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT  3  -72.167680429996     4.261E-02 7.219E-07 2.965E+00 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT  4  -72.162090182211     5.590E-03 7.128E-08 2.843E-02 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT  5  -72.162015556761     7.463E-05 3.317E-10 1.074E-03 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT  6  -72.162012656661     2.900E-06 1.345E-10 5.027E-05 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT  7  -72.162012569246     8.742E-08 1.909E-12 8.268E-07 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT  8  -72.162012568902     3.436E-10 4.245E-14 5.080E-09 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT  9  -72.162012568981    -7.924E-11 3.073E-15 1.386E-09 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT 10  -72.162012568976     5.230E-12 1.215E-16 1.332E-12 0.000E+00 0.000E+00
+ CHANGE REFFFFFFFFF
+ ETOT 11  -72.162012568974     1.862E-12 8.785E-20 5.350E-14 0.000E+00 0.000E+00
 
  At SCF step   11       nres2   =  5.35E-14 < tolvrs=  1.00E-12 =>converged.
 
@@ -1082,7 +1093,8 @@ tolerances: {tolvrs: 1.00E-12, }
       -0.00000 -0.00000    0.00000 -0.00505   -0.00000 -0.00000    0.44162 -0.00000    0.00000  0.00000
        0.00000 -0.00578   -0.00000 -0.00000   -0.00000 -0.00000    0.00000 -0.00000    0.30091  0.00000
 
- ETOT  1  -72.073577977559    -7.207E+01 9.450E-21 4.562E-02 1.057E-22 1.057E-22
+ CHANGE REFFFFFFFFF
+ ETOT  1  -72.073577977559    -7.207E+01 9.450E-21 4.562E-02 0.000E+00 0.000E+00
  (Edmft  2   0.05607601133)
 
   == The DFT+DMFT occupation matrix for correlated electrons is ==
@@ -1117,7 +1129,8 @@ tolerances: {tolvrs: 1.00E-12, }
       -0.00000 -0.00000    0.00000 -0.00548   -0.00000 -0.00000    0.44082  0.00000    0.00000  0.00000
        0.00009 -0.00564    0.00000 -0.00000   -0.00000 -0.00000    0.00000 -0.00000    0.29821 -0.00000
 
- ETOT  2  -72.073228845841     3.491E-04 8.121E-21 1.221E-02 1.061E-21 1.166E-21
+ CHANGE REFFFFFFFFF
+ ETOT  2  -72.073228845841     3.491E-04 8.121E-21 1.221E-02 0.000E+00 0.000E+00
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -8.33141291E-04  sigma(3 2)=  0.00000000E+00
@@ -2062,10 +2075,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         95.1  wall=         95.8
+- Proc.   0 individual time (sec): cpu=         94.0  wall=         94.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        956.3  wall=        957.9
++Overall time at end (sec) : cpu=        944.1  wall=        944.8
