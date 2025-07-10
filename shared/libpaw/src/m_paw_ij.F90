@@ -1231,7 +1231,7 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
        call get_dij_parts(cplex_dij,qphase,Paw_ij(iatom)%dij,dij2p,dij2p_,always_img=.true.)
        call pawio_print_ij(my_unt,dij2p,lmn2_size,tmp_cplex_dij,lmn_size,-1,idum,0,&
 &           my_prtvol,idum,50.d0*dble(3-2*idij),1,opt_sym=2,asym_ij=dij2p_,mode_paral=my_mode,&
-            title=msg)
+&           title=msg)
      end if
 
    end if
