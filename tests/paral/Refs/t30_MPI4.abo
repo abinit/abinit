@@ -236,13 +236,9 @@ tolerances: {toldfe: 1.00E-10, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
- CHANGE REFFFFFFFFF
  ETOT  1  -10.528832089054    -1.053E+01 3.362E-02 9.521E+01 0.000E+00 0.000E+00
- CHANGE REFFFFFFFFF
  ETOT  2  -10.429248475348     9.958E-02 2.312E-03 9.378E+00 0.000E+00 0.000E+00
- CHANGE REFFFFFFFFF
  ETOT  3  -10.417978453882     1.127E-02 2.137E-03 1.510E-01 0.000E+00 0.000E+00
- CHANGE REFFFFFFFFF
  ETOT  4  -10.417942550517     3.590E-05 6.726E-04 2.440E-03 0.000E+00 0.000E+00
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -558,13 +554,9 @@ tolerances: {toldfe: 1.00E-10, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
- CHANGE REFFFFFFFFF
  ETOT  1  -10.528832089054    -1.053E+01 1.600E-01 9.521E+01 0.000E+00 0.000E+00
- CHANGE REFFFFFFFFF
  ETOT  2  -10.429248476066     9.958E-02 7.345E-03 9.378E+00 0.000E+00 0.000E+00
- CHANGE REFFFFFFFFF
  ETOT  3  -10.417978451732     1.127E-02 7.408E-03 1.510E-01 0.000E+00 0.000E+00
- CHANGE REFFFFFFFFF
  ETOT  4  -10.417942550302     3.590E-05 2.524E-03 2.440E-03 0.000E+00 0.000E+00
 
  Cartesian components of stress tensor (hartree/bohr^3)

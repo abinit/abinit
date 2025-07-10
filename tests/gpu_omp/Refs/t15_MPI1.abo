@@ -1,5 +1,5 @@
 
-.Version 9.11.6.5 of ABINIT, released May 2025.
+.Version 10.4.5.4 of ABINIT, released Jul 2025.
 .(MPI version, prepared for a x86_64_linux_nvhpc23.9-0 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  7 Jul 2025.
-- ( at 15h04 )
+.Starting date : Thu 10 Jul 2025.
+- ( at 17h05 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/srostami_test/tests/TestBot_MPI1/gpu_omp_t15_MPI1/t15.abi
 - output file    -> t15_MPI1.abo
@@ -187,15 +187,15 @@ tolerances: {tolvrs: 1.00E-28, }
  ETOT  5  -10.934532360047    -1.684E-08 2.253E-03 2.501E-07 0.000E+00 0.000E+00
  ETOT  6  -10.934532360245    -1.980E-10 1.998E-03 4.662E-09 0.000E+00 0.000E+00
  ETOT  7  -10.934532360248    -3.034E-12 1.823E-03 2.229E-11 0.000E+00 0.000E+00
- ETOT  8  -10.934532360248    -3.908E-14 1.692E-03 1.696E-12 0.000E+00 0.000E+00
- ETOT  9  -10.934532360248    -2.309E-14 1.588E-03 4.512E-16 1.776E-15 1.776E-15
- ETOT 10  -10.934532360248     3.908E-14 1.501E-03 6.297E-16 3.553E-15 3.553E-15
- ETOT 11  -10.934532360248    -6.217E-14 1.427E-03 1.278E-20 2.665E-15 1.776E-15
- ETOT 12  -10.934532360248     6.928E-14 1.361E-03 7.567E-20 3.553E-15 5.329E-15
- ETOT 13  -10.934532360248    -3.020E-14 1.301E-03 1.255E-21 5.329E-15 0.000E+00
- ETOT 14  -10.934532360248     3.197E-14 1.247E-03 2.403E-23 8.882E-16 8.882E-16
- ETOT 15  -10.934532360248    -2.487E-14 1.197E-03 7.575E-26 1.776E-15 1.776E-15
- ETOT 16  -10.934532360248     5.329E-15 1.150E-03 1.600E-26 2.665E-15 8.882E-16
+ ETOT  8  -10.934532360248    -3.553E-14 1.692E-03 1.696E-12 0.000E+00 0.000E+00
+ ETOT  9  -10.934532360248    -2.487E-14 1.588E-03 4.512E-16 0.000E+00 0.000E+00
+ ETOT 10  -10.934532360248     3.730E-14 1.501E-03 6.297E-16 0.000E+00 0.000E+00
+ ETOT 11  -10.934532360248    -5.507E-14 1.427E-03 1.278E-20 0.000E+00 0.000E+00
+ ETOT 12  -10.934532360248     6.217E-14 1.361E-03 7.564E-20 0.000E+00 0.000E+00
+ ETOT 13  -10.934532360248    -2.487E-14 1.301E-03 1.250E-21 0.000E+00 0.000E+00
+ ETOT 14  -10.934532360248     2.665E-14 1.247E-03 2.367E-23 0.000E+00 0.000E+00
+ ETOT 15  -10.934532360248    -2.487E-14 1.197E-03 4.449E-26 0.000E+00 0.000E+00
+ ETOT 16  -10.934532360248     5.329E-15 1.150E-03 1.372E-27 0.000E+00 0.000E+00
  
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -5.77543783E-03  sigma(3 2)= -1.59085611E-03
@@ -205,7 +205,7 @@ tolerances: {tolvrs: 1.00E-28, }
  
  scprqt:  WARNING -
   nstep=   16 was not enough SCF cycles to converge;
-  potential residual=  1.600E-26 exceeds tolvrs=  1.000E-28
+  potential residual=  1.372E-27 exceeds tolvrs=  1.000E-28
  
 
 --- !ResultsGS
@@ -218,7 +218,7 @@ lattice_vectors:
 lattice_lengths: [   4.94975,    4.94975,    4.94975, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.5750000E+01
-convergence: {deltae:  5.329E-15, res2:  1.600E-26, residm:  1.150E-03, diffor: null, }
+convergence: {deltae:  5.329E-15, res2:  1.372E-27, residm:  1.150E-03, diffor: null, }
 etotal    :  -1.09345324E+01
 entropy   :   0.00000000E+00
 fermie    :   5.23389539E-01
@@ -269,8 +269,8 @@ force_length_stats: {min:   4.05939413E-01, max:   4.05939413E-01, mean:   4.059
  frms,max,avg= 2.3436923E-01 2.3436923E-01   0.000E+00  0.000E+00  0.000E+00 h/b
  
  cartesian forces (eV/Angstrom) at end:
-    1    -12.05174931699352   -12.05174931699352   -12.05174931699352
-    2     12.05174931699352    12.05174931699352    12.05174931699352
+    1    -12.05174931699353   -12.05174931699353   -12.05174931699353
+    2     12.05174931699353    12.05174931699353    12.05174931699353
  frms,max,avg= 1.2051749E+01 1.2051749E+01   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.000000000000  7.000000000000  7.000000000000 bohr
               =  3.704240460130  3.704240460130  3.704240460130 angstroms
@@ -299,11 +299,11 @@ iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.06815546419849E+01
 hartree             :  1.49476741154060E+00
-xc                  : -4.42100460426033E+00
+xc                  : -4.42100460426034E+00
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  1.72763340806685E-01
-local_psp           : -7.30529939675594E+00
-non_local_psp       :  6.83571906899518E-01
+local_psp           : -7.30529939675595E+00
+non_local_psp       :  6.83571906899521E-01
 total_energy        : -1.09345323602476E+01
 total_energy_eV     : -2.97543757384289E+02
 band_energy         :  2.17409356020644E+00
@@ -488,10 +488,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.2  wall=          3.2
+- Proc.   0 individual time (sec): cpu=          2.5  wall=          2.5
  
 ================================================================================
  
  Calculation completed.
 .Delivered   3 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.2  wall=          3.2
++Overall time at end (sec) : cpu=          2.5  wall=          2.5

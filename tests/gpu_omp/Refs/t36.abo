@@ -1,5 +1,5 @@
 
-.Version 9.11.6.5 of ABINIT, released May 2025.
+.Version 10.4.5.4 of ABINIT, released Jul 2025.
 .(MPI version, prepared for a x86_64_linux_nvhpc23.9-0 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  7 Jul 2025.
-- ( at 15h13 )
+.Starting date : Thu 10 Jul 2025.
+- ( at 17h12 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/srostami_test/tests/TestBot_MPI1/gpu_omp_t36/t36.abi
 - output file    -> t36.abo
@@ -1305,10 +1305,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         11.5  wall=         11.5
+- Proc.   0 individual time (sec): cpu=         13.4  wall=         13.4
  
 ================================================================================
  
  Calculation completed.
 .Delivered  68 WARNINGs and  14 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.5  wall=         11.5
++Overall time at end (sec) : cpu=         13.4  wall=         13.4

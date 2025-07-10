@@ -558,7 +558,6 @@ tolerances: {tolwfr: 1.00E-16, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
- CHANGE REFFFFFFFFF
  ETOT  1  -8.3628058223925    -8.363E+00 9.352E-17 3.321E-17 0.000E+00 0.000E+00
 
  At SCF step    1   max residual=  9.35E-17 < tolwfr=  1.00E-16 =>converged.
