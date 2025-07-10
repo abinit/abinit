@@ -249,7 +249,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  real(dp) :: dummy_in(0)
  real(dp) :: dummy_out1(0),dummy_out2(0),dummy_out3(0),dummy_out4(0),dummy_out5(0),dummy_out6(0)
  real(dp) :: strn_dummy6(6), strv_dummy6(6)
- real(dp) :: vzeeman(4)
+ real(dp) :: vhspinfield(4)
  real(dp),allocatable :: grtn(:,:),dyfr_dum(:,:,:),gr_dum(:,:)
  real(dp),allocatable :: rhojellg(:,:),rhojellr(:),rhowk(:,:),vjell(:)
  real(dp),allocatable :: v_constr_dft_r(:,:),rhog_dum(:,:)
@@ -706,25 +706,25 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 
  end if
 
-!Add the zeeman field to vtrial
+!Add the hspinfield to vtrial
  if (any(abs(dtset%hspinfield(:))>tol8)) then
-   vzeeman(:) = zero                            ! vzeeman_ij = -1/2*sigma_ij^alpha*B_alpha
+   vhspinfield(:) = zero                            ! vhspinfield_ij = -1/2*sigma_ij^alpha*B_alpha
    if(dtset%nspden==2)then
-     vzeeman(1) = -half*dtset%hspinfield(3)   ! v_dwndwn = -1/2*B_z
-     vzeeman(2) =  half*dtset%hspinfield(3)   ! v_upup   =  1/2*B_z
+     vhspinfield(1) = -half*dtset%hspinfield(3)   ! v_dwndwn = -1/2*B_z
+     vhspinfield(2) =  half*dtset%hspinfield(3)   ! v_upup   =  1/2*B_z
      do ifft=1,nfft
-       vtrial(ifft,1) = vtrial(ifft,1) + vzeeman(1) !SPr: added 1st component
-       vtrial(ifft,2) = vtrial(ifft,2) + vzeeman(2)
+       vtrial(ifft,1) = vtrial(ifft,1) + vhspinfield(1) !SPr: added 1st component
+       vtrial(ifft,2) = vtrial(ifft,2) + vhspinfield(2)
      end do !ifft
    end if
    if(dtset%nspden==4)then
-     vzeeman(1)=-half*dtset%hspinfield(3)     ! v_dwndwn                  => v_11
-     vzeeman(2)= half*dtset%hspinfield(3)     ! v_upup                    => v_22
-     vzeeman(3)=-half*dtset%hspinfield(1)     ! Re(v_dwnup) = Re(v_updwn) => Re(v_12)
-     vzeeman(4)= half*dtset%hspinfield(2)     ! Im(v_dwnup) =-Im(v_dwnup) => Im(v_12)
+     vhspinfield(1)=-half*dtset%hspinfield(3)     ! v_dwndwn                  => v_11
+     vhspinfield(2)= half*dtset%hspinfield(3)     ! v_upup                    => v_22
+     vhspinfield(3)=-half*dtset%hspinfield(1)     ! Re(v_dwnup) = Re(v_updwn) => Re(v_12)
+     vhspinfield(4)= half*dtset%hspinfield(2)     ! Im(v_dwnup) =-Im(v_dwnup) => Im(v_12)
      do ispden=1,dtset%nspden
        do ifft=1,nfft
-         vtrial(ifft,ispden) = vtrial(ifft,ispden) + vzeeman(ispden)
+         vtrial(ifft,ispden) = vtrial(ifft,ispden) + vhspinfield(ispden)
        end do
      end do
    end if
@@ -749,7 +749,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
      do ifft=1,nfft
 !      TODO : MJV: check that magnetic constraint works also for nspden 2 or add input variable condition
 !              EB: ispden=2 is rho_up only: to be tested
-!             SPr: for ispden=2, both components should be used (e.g. see definition for vzeeman)?
+!             SPr: for ispden=2, both components should be used (e.g. see definition for vhspinfield)?
        vtrial(ifft,1) = vtrial(ifft,1) + v_constr_dft_r(ifft,1) !SPr: added the first component here
        vtrial(ifft,2) = vtrial(ifft,2) + v_constr_dft_r(ifft,2)
      end do !ifft
