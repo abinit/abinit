@@ -2085,6 +2085,7 @@ subroutine strfock(fockcommon,gprimd,fockstr,mpi_enreg,nfft,ngfft,&
  integer,parameter :: im=2,re=1
  integer :: i1,i2,i3,id1,id2,id3,ierr,ig1,ig2,ig3,ii,irho2,idat,me_fft,n1,n2,n3,nproc_fft
  real(dp) :: arg,cutoff,gsquar,rcut,rhogsq,tolfix=1.000000001_dp,tot,tot1
+ logical :: rcut_spencer_alavi
 #ifdef HAVE_OPENMP_OFFLOAD
  ! Cray has trouble with reduction on array, so we use 6 scalars instead
  real(dp) :: fockstr1,fockstr2,fockstr3,fockstr4,fockstr5,fockstr6
@@ -2112,7 +2113,11 @@ subroutine strfock(fockcommon,gprimd,fockstr,mpi_enreg,nfft,ngfft,&
  !else(gpu_option==ABI_GPU_OPENMP) then
  !  gpu_set_to_zero(fockstr, 6*ndat)
  !end if
- if(fockcommon%rcut<tol8) then
+
+ ! fockcommon%rcut is zero, rcut is a function of the cell volume (Spencer-Alavi scheme)
+ ! Therefore gives a contribution to the stress 
+ rcut_spencer_alavi = fockcommon%rcut<tol8
+ if(rcut_spencer_alavi) then
    rcut = (three*nkpt_bz*ucvol/four_pi)**(one/three)
  else
    rcut = fockcommon%rcut
@@ -2174,11 +2179,13 @@ subroutine strfock(fockcommon,gprimd,fockstr,mpi_enreg,nfft,ngfft,&
            end if
          end if
 
-!        Spencer-Alavi screening
+!        Spherical cutoff screening
          if (abs(fockcommon%hyb_mixing)>tol8) then
            arg=two_pi*rcut*sqrt(gsquar)
            tot=fockcommon%hyb_mixing*rhogsq*piinv/(gsquar**2)*(1-cos(arg)-arg*sin(arg)/two)
-           tot1=fockcommon%hyb_mixing*rhogsq/three*rcut*sin(arg)/sqrt(gsquar)
+           if (rcut_spencer_alavi) then
+             tot1=fockcommon%hyb_mixing*rhogsq/three*rcut*sin(arg)/sqrt(gsquar)
+           end if
          end if
 
 !        Erfc screening
@@ -2253,11 +2260,13 @@ subroutine strfock(fockcommon,gprimd,fockstr,mpi_enreg,nfft,ngfft,&
 
            else
 
-    !        Spencer-Alavi screening
+    !        Spherical cutoff screening
              if (abs(fockcommon%hyb_mixing)>tol8) then
                arg=two_pi*rcut*sqrt(gsquar)
                tot=fockcommon%hyb_mixing*rhogsq*piinv/(gsquar**2)*(1-cos(arg)-arg*sin(arg)/two)
-               tot1=fockcommon%hyb_mixing*rhogsq/three*rcut*sin(arg)/sqrt(gsquar)
+               if (rcut_spencer_alavi) then
+                 tot1=fockcommon%hyb_mixing*rhogsq/three*rcut*sin(arg)/sqrt(gsquar)
+               endif
              end if
 
     !        Erfc screening
