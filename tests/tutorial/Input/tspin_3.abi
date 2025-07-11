@@ -12,7 +12,7 @@ tmpdata_prefix = "tspin_3t"
    ecut  25.0
 
 # SCF:
-  nstep   70
+  nstep   30
  tolwfr   1.0d-7
 
 # Multidataset:
