@@ -2169,6 +2169,18 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  else if (xc_is_pot_only) then
    dtset%optstress=0
  end if
+ ! ABINIT cannot calculate stress when fock_icutcoul is not zero (not implemented)
+ if (dtset%optstress==1.and.dtset%fock_icutcoul/=0) then
+   write(msg, '(3a)' ) &
+        'Stress can only be calculated (as of today) when fock_icutcoul=0',ch10,&
+        'If you really want the stress, change fock_icutcoul.'
+   if(tread==1) then
+     ABI_ERROR(msg)
+   else
+     ABI_COMMENT(msg)
+     dtset%optstress=0
+   endif
+ end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optnlxccc',tread,'INT')
  if(tread==1) dtset%optnlxccc=intarr(1)

@@ -341,7 +341,7 @@ subroutine barevcoul(rcut,icutcoul,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,i
    end do
    
 
- case('SPHERE') ! Spencer-Alavi method
+ case('SPHERE') ! Spherical cutoff
 
    !
    ! Treatment of the divergence at q+g=zero
