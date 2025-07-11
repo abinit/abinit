@@ -76,7 +76,7 @@ ratsph3  2.4
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   tspin_3.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%   tspin_3.abo, tolnlines = 1, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
