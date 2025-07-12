@@ -542,7 +542,7 @@ subroutine Epsm1_rotate_iqbz(epsm1, iq_bz, nomega, npwc, Gsph, Qmesh, remove_exc
 
 !Local variables-------------------------------
 !scalars
- integer :: iw,ii,jj,iq_ibz,itim_q,isym_q,iq_loc,sg1,sg2, ierr
+ integer :: iw,ii,jj,iq_ibz,itim_q,isym_q,iq_loc,sg1,sg2, ierr, g0(3)
  complex(gwpc) :: phmsg1t,phmsg2t_star
 !arrays
  real(dp) :: qbz(3)
@@ -552,7 +552,8 @@ subroutine Epsm1_rotate_iqbz(epsm1, iq_bz, nomega, npwc, Gsph, Qmesh, remove_exc
  ABI_CHECK(epsm1%npwe >= npwc, 'Too many G-vectors required')
 
  ! Get iq_ibz, and symmetries from iq_ibz.
- call Qmesh%get_BZ_item(iq_bz, qbz, iq_ibz, isym_q, itim_q)
+ call Qmesh%get_BZ_item(iq_bz, qbz, iq_ibz, isym_q, itim_q, umklp=g0)
+ ABI_CHECK(all(g0 == 0), "non-zero g0 is not coded")
 
  ! If out-of-memory, only epsm1%espm1(:,:,:,1) has been allocated and filled.
  iq_loc = iq_ibz; if (epsm1%mqmem == 0) iq_loc=1
@@ -652,7 +653,7 @@ subroutine Epsm1_rotate_iqbz_inplace(epsm1, iq_bz, nomega, npwc, Gsph, Qmesh, re
 
 !Local variables-------------------------------
 !scalars
- integer :: iw,ii,jj,iq_ibz,itim_q,isym_q,iq_loc,sg1,sg2
+ integer :: iw,ii,jj,iq_ibz,itim_q,isym_q,iq_loc,sg1,sg2, g0(3)
 !arrays
  real(dp) :: qbz(3)
  complex(gwpc) :: phmsg1t,phmsg2t_star
@@ -665,7 +666,8 @@ subroutine Epsm1_rotate_iqbz_inplace(epsm1, iq_bz, nomega, npwc, Gsph, Qmesh, re
  ABI_MALLOC(work, (npwc, npwc))
 
  ! Get iq_ibz, and symmetries from iq_ibz.
- call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q)
+ call qmesh%get_BZ_item(iq_bz,qbz, iq_ibz, isym_q, itim_q, umklp=g0)
+ ABI_CHECK(all(g0 == 0), "non-zero g0 is not coded")
 
  ! If out-of-memory, only epsm1%espm1(:,:,:,1) has been allocated and filled.
  iq_loc=iq_ibz; if (epsm1%mqmem==0) iq_loc=1

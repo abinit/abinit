@@ -115,8 +115,7 @@ program mrgscr
  complex(dpc),allocatable :: omega(:),em1_ppm(:),epsm1_eigen(:,:),ppm_eigen(:,:),rhoggp(:,:)
  character(len=fnlen),allocatable :: filenames(:)
  type(pawrhoij_type),allocatable :: pawrhoij(:)
- type(hscr_t),target,allocatable :: Hscr_file(:) ! Cannot use allocatable as pathscale5 miscompiles the code
-
+ type(hscr_t),target,allocatable :: Hscr_file(:)
 ! *************************************************************************
 
  ! Change communicator for I/O (mandatory!)
@@ -735,6 +734,7 @@ program mrgscr
              else
                call PPm%init(epsm1%mqmem,epsm1%nqibz,epsm1%npwe,ppmodel,drude_plsmf,Dtset%gw_invalid_freq)
              end if
+
              call PPm%setup(Cryst,Qmesh,epsm1%npwe,epsm1%nomega,epsm1%omega,epsm1%epsm1,nfft,Gsphere%gvec,ngfft,rhor(:,1),iqibz)
 
              call PPm%get_eigenvalues(iqibz,epsm1%Hscr%zcut,epsm1%nomega,epsm1%omega,Vcp,ppm_eigen)
@@ -774,6 +774,7 @@ program mrgscr
          write(std_out,'(a)') ' Enter the number of frequency points in the'
          write(std_out,'(a)') '  interval 0 - freqremax (0 means same as input file ): '
          read(std_in,*) nfreqre
+
          if (nfreqre==0) then
            nfreqre   = epsm1%nomega_r
            nfreqim   = epsm1%nomega_i
