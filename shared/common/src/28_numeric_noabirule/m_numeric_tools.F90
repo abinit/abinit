@@ -1406,7 +1406,6 @@ pure function is_integer_0d(rr,tol) result(ans)
  logical :: ans
 !arrays
  real(dp),intent(in) :: rr
-
 ! *************************************************************************
 
  ans=(ABS(rr-NINT(rr))<tol)
@@ -1436,7 +1435,6 @@ pure function is_integer_1d(rr,tol) result(ans)
  logical :: ans
 !arrays
  real(dp),intent(in) :: rr(:)
-
 ! *************************************************************************
 
  ans=ALL((ABS(rr-NINT(rr))<tol))
@@ -2601,8 +2599,7 @@ recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,np
  real(dp) :: TOL
  character(len=500) :: msg
 !arrays
- real(dp),allocatable :: h(:),s(:)
- real(dp),allocatable :: wx(:),xx(:)
+ real(dp),allocatable :: h(:),s(:), wx(:),xx(:)
 ! *************************************************************************
 
  ierr = 0
@@ -2784,7 +2781,6 @@ subroutine ctrap(imax,ff,hh,ans)
 !scalars
  integer :: ir,ir2
  real(dp) :: endpt,sum
-
 ! *************************************************************************
 
  if (imax>=10)then
@@ -3447,7 +3443,6 @@ subroutine hermit(chmin, chmout, ierr, ndim)
  real(dp),parameter :: eps=epsilon(0.0d0)
  real(dp) :: ch_im,ch_re,modules,tol
  character(len=500) :: msg
-
 ! *************************************************************************
 
  tol=4096.0d0*eps
@@ -3685,7 +3680,6 @@ subroutine pack_matrix(mat_in, mat_out, N, cplx)
 
 !Local variables-------------------------------
  integer :: isubh, i, j
-
 ! *************************************************************************
 
  isubh = 1
@@ -3726,7 +3720,6 @@ integer function check_vec_conjg(nn, vec1, vec2, abs_diff, abs_tol) result(ierr)
 !Local variables-------------------------------
  integer :: ii
  real(dp) :: my_abs_tol
-
  ! *************************************************************************
 
  my_abs_tol = tol6; if (present(abs_tol)) my_abs_tol = abs_tol
@@ -4251,7 +4244,6 @@ subroutine remove_copies(n_in, set_in, n_out, is_equal)
   real(dp),pointer :: rpt(:)
  end type rdp1d_pt
  type(rdp1d_pt),allocatable :: Ap(:)
-
 ! *************************************************************************
 
  ABI_MALLOC(Ap,(n_in))
@@ -4448,7 +4440,7 @@ subroutine continued_fract(nlev,term_type,aa,bb,nz,zpts,spectrum)
    ABI_ERROR("To be tested")
    div = zero
    if (nlev>4) then
-     bg=zero; bup_=zero
+     bg=zero; bup=zero
      do it=1,nlev,2
        if (it+2<nlev) bg = bg + bb(it+2)
        bup = bup + bb(it)
@@ -4524,7 +4516,6 @@ subroutine cmplx_sphcart(carr, from, units)
  integer :: jj,ii
  real(dp) :: rho,theta,fact
  character(len=500) :: msg
-
 ! *************************************************************************
 
  select case (from(1:1))
@@ -4603,7 +4594,6 @@ subroutine pfactorize(nn,nfactors,pfactors,powers)
 !Local variables ------------------------------
 !scalars
  integer :: tnn,ifc,fact,ipow,maxpwr
-
 ! *************************************************************************
 
  powers=0; tnn=nn
@@ -4663,7 +4653,6 @@ function isordered_rdp(nn,arr,direction,tol) result(isord)
  integer :: ii
  real(dp) :: prev
  character(len=500) :: msg
-
 ! *************************************************************************
 
  prev = arr(1); isord =.TRUE.
@@ -4722,7 +4711,6 @@ pure function stats_eval(arr) result(stats)
 !scalars
  integer :: ii,nn
  real(dp) :: xx,x2_sum
-
 ! *************************************************************************
 
  stats%min   = +HUGE(one)
@@ -4782,7 +4770,6 @@ elemental subroutine wrap2_zero_one(num, red, shift)
 !scalars
  real(dp),intent(in) :: num
  real(dp),intent(out) :: red,shift
-
 ! *************************************************************************
 
  if (num>zero) then
@@ -4870,6 +4857,7 @@ pure function interpol1d(npts_o,npts_i,pts_o,pts_i,val_o) result(res)
   integer :: ii, jj
   real(dp) :: x1, x2, y1, y2, slope
 ! *************************************************************************
+
   res = zero
 
   do ii = 1, npts_i
@@ -4907,7 +4895,6 @@ pure function interpol1d_c(npts_o,npts_i,pts_o,pts_i,val_o) result(res)
  complex(dpc) :: res(npts_i)
 !Local variables-------------------------------
  real(dp) :: val_o_r(npts_o), val_o_i(npts_o), res_r(npts_i), res_i(npts_i)
-
 ! *************************************************************************
 
   ! Split the complex values into real and imaginary parts.
@@ -6044,7 +6031,6 @@ subroutine findmin(dedv_1,dedv_2,dedv_predict,&
  real(dp) :: discr,ee,eep,lambda_shift,sum1,sum2,sum3,uu
  real(dp) :: uu3,vv,vv3
  character(len=500) :: msg
-
 ! *************************************************************************
 
 !DEBUG
@@ -6221,7 +6207,6 @@ subroutine kramerskronig(nomega,omega,eps,method,only_check)
  character(len=500) :: msg
 !arrays
  real(dp) :: e1kk(nomega),intkk(nomega),kk(nomega)
-
 ! *************************************************************************
 
 !Check whether the frequency grid is linear or not
@@ -6365,8 +6350,8 @@ function dotproduct(nv1,nv2,v1,v2)
 !Local variables-------------------------------
 !scalars
  integer :: i,j
-
 ! *************************************************************************
+
  dotproduct=zero
  do j=1,nv2
   do i=1,nv1
@@ -6411,7 +6396,6 @@ subroutine invcb(rhoarr,rspts,npts)
  real(dp) :: del,prod,rho,rhom1,rhomtrd
  logical :: test
 !character(len=500) :: message
-
 ! *************************************************************************
 
 !Loop over points : here, brute force algorithm

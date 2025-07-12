@@ -21,17 +21,14 @@
 
 module m_wqk
 
- use, intrinsic :: iso_c_binding
+ !use, intrinsic :: iso_c_binding
  use defs_basis
  use m_abicore
- USE_MPI
  use m_xmpi
  use m_mpinfo
  use m_errors
- use m_wfk
  use m_fft
  use m_wfd
- use m_sort
  use m_hdr
  use netcdf
  use m_nctk
@@ -134,6 +131,7 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  integer :: id_required, approx_type, ikxc, option_test, nkxc, ig
  integer :: nkibz, my_rank, nsppol, iq_ibz, iq_bz, isym_qq, itim_qq
  integer :: cplex,nspinor,nprocs, ii, ib, my_is, spin, max_npw_xc, min_npw_xc,  npw_x, npw_c, bstart_k, bstop_k, nband_k, ik_bz
+ integer :: bmin, bmax, max_nb
  integer :: isym_q, trev_q, bstart_kq, bstop_kq, nband_kq, ncols, mpw, ierr, ncerr !,spad
  integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_k_ibz, istwf_k_ibz
  integer :: ikq_ibz, isym_kq, trev_kq, npw_kq, istwf_kq,  npw_kq_ibz, istwf_kq_ibz
@@ -141,7 +139,7 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg_k,nkpg_kq,cnt, edos_intmeth, nqlwl, scr_iomode
  integer :: ikfs_bz, ikq_fs, my_ik, my_nk, qbuf_size, iqbuf_cnt !, my_iq,
  real(dp) :: cpu_all, wall_all, gflops_all, cpu, wall, gflops, cpu_qq, wall_qq, gflops_qq, cpu_kk, wall_kk, gflops_kk
- real(dp) :: edos_step, edos_broad, ecut, e_nk, e_mkq, e_min, e_max, de
+ real(dp) :: edos_step, edos_broad, ecut, e_nk, e_mkq, e_min, e_max, e_step, smear_nk, smear_mkq
  logical :: isirr_k, isirr_kq, qq_is_gamma, isirr_q, remove_exchange, print_time_qq, print_time_kk
  type(wfd_t) :: wfd
  type(kmesh_t) :: qmesh, kmesh
@@ -165,7 +163,7 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
 !arrays
  real(dp) :: n0(ebands%nsppol)
  real(dp),allocatable :: qlwl(:,:), kpg_k(:,:), kpg_kq(:,:), ug_k(:,:,:), ug_kq(:,:), cg_work(:,:)
- real(dp),allocatable :: work(:,:,:,:), e_mesh(:), vcart_ibz(:,:,:,:) !, my_gbuf(:,:,:,:,:,:)
+ real(dp),allocatable :: work(:,:,:,:), e_mesh(:), e_args(:), vcart_ibz(:,:,:,:), delta_nk(:), delta_mkq(:,:) !, my_gbuf(:,:,:,:,:,:)
  complex(gwpc),allocatable :: cwork_ur(:), rhotwg_x(:,:,:),rhotwg_c(:,:,:), w_rhotwg_c(:,:,:),vc_sqrt_gx(:), ur_nk(:,:), ur_mkq(:,:)
  complex(gwpc),allocatable :: kxcg(:,:)
  complex(dp),allocatable :: w_ee(:,:)
@@ -210,15 +208,25 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
    call fstab_print(fstab, unit=ab_out)
  end if
 
+ bmin = huge(1); bmax = -1
+ do spin=1,nsppol
+   bmin = min(bmin, fstab(spin)%bmin)
+   bmax = max(bmax, fstab(spin)%bmax)
+ end do
+ max_nb = bmax - bmin + 1
+
  spin = 1
  associate (fs => fstab(spin))
  ! Build linear mesh for W(e,e').
  e_min = minval(ebands%eig(fs%bmin,:,spin)) - 0.1_dp * eV_Ha
  e_max = maxval(ebands%eig(fs%bmax,:,spin)) + 0.1_dp * eV_Ha
- de = 0.002 * eV_Ha
- ne = 1 + (e_max - e_min) / de
+ e_step = 0.002 * eV_Ha
+ ne = 1 + (e_max - e_min) / e_step
  ABI_CALLOC(w_ee, (ne, ne))
  ABI_MALLOC(e_mesh, (ne))
+ ABI_MALLOC(e_args, (ne))
+ ABI_MALLOC(delta_nk, (ne))
+ ABI_MALLOC(delta_mkq, (ne, max_nb))
  e_mesh = linspace(e_min, e_max, ne)
  end associate
 
@@ -339,12 +347,8 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
 #if 0
  call cwtime(cpu, wall, gflops, "start", msg=" Computing v_nk matrix elements for all states on the FS...")
- ii = huge(1); jj = -1
- do spin=1,nsppol
-   ii = min(ii, fstab(spin)%bmin)
-   jj = max(jj, fstab(spin)%bmax)
- end do
- ABI_CALLOC(vcart_ibz, (3, ii:jj, nkibz, nsppol))
+
+ ABI_CALLOC(vcart_ibz, (3, bmin:bmax, nkibz, nsppol))
  ABI_MALLOC(cg_work, (2, mpw * nspinor))
 
  cnt = 0
@@ -366,22 +370,6 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
        eig0nk = ebands%eig(band_k, ik_ibz, spin)
        vk = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, wfd%nspinor, cg_work, cwaveprj0)
        vcart_ibz(:, band_k, ik_ibz, spin) = vk
-
-       ! TODO: Use ebands_get_edos_matrix_elements
-       ! reald(dp) :: vv_fs(3,3,nsppol)
-       !vv_fs = zero
-       !sigma = fs%eph_fsmear
-       !if (fs%eph_fsmear < zero) then
-       !  sigma = max(maxval([(abs(dot_product(fs%vk(:, ib2), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
-       !end if
-       !fs_wtk = gaussian(emesh - ebands%eig(band_k, ik_ibz, spin), sigma) / (one * fs%nktot)
-       !do ii=1,3
-       !  do jj=1,3
-       !    vv_fs(ii,jj,spin) = vv_fs(ii,jj,spin) + vk(ii) * vk(jj) * fs_wtk
-       !  end do
-       !end do
-       !call xmpi_sum(vv_fs, comm, ierr)
-
      end do
    end do
    end associate
@@ -578,30 +566,35 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
      ABI_MALLOC(w_rhotwg_c, (npw_c*nspinor, nband_k, nband_kq))
      ncols = nband_k * nband_kq
 
-     !call xgemm("N", "N", npw_c, ncols, npw_c, cone_gw, epsm1%epsm1_qbz(:,:,1), npw_c, rhotwg_c(:,:,1), npw_c*nspinor, &
-     !           czero_gw, w_rhotwg_c(:,:,1), npw_c)
+     call xgemm("N", "N", npw_c, ncols, npw_c, cone_gw, epsm1%epsm1_qbz(:,:,1), npw_c, rhotwg_c(:,:,1), npw_c*nspinor, &
+                czero_gw, w_rhotwg_c(:,:,1), npw_c)
 
-     do ib_k=1, nband_k
-       do ib_kq=1, nband_kq
-         w_rhotwg_c(:,ib_k,ib_kq) = matmul(epsm1%epsm1_qbz(:,:,1), rhotwg_c(:,ib_k,ib_kq))
-       end do
-     end do
-     !print *, "epsm1_qibz:", maxval(abs(epsm1%epsm1_qbz(:,:,1)))
-     !if (.not. qq_is_gamma) then
-     !if (qq_is_gamma) then
+     !do ib_k=1, nband_k
+     !  do ib_kq=1, nband_kq
+     !    w_rhotwg_c(:,ib_k,ib_kq) = matmul(epsm1%epsm1_qbz(:,:,1), rhotwg_c(:,ib_k,ib_kq))
+     !  end do
+     !end do
      !print *,  " rhotwg_c",  maxval(abs(rhotwg_c)), maxloc(abs(rhotwg_c))
-     !end if
      !print *, "w_rhotwg_c:", maxval(abs(w_rhotwg_c))
+
+     ! Precompute delta(e - e_mkq - ef).
+     do m_kq=bstart_kq, bstop_kq
+       ib_kq = m_kq - bstart_kq + 1
+       e_mkq = ebands%eig(m_kq, ikq_ibz, spin)
+       e_args = e_mesh - e_mkq - ebands%fermie
+       smear_mkq = 0.1_dp * eV_Ha
+       delta_mkq(:, ib_kq) = gaussian(e_args, smear_mkq)
+     end do
 
      do n_k=bstart_k, bstop_k
        ib_k = n_k - bstart_k + 1
        e_nk = ebands%eig(n_k, ik_ibz, spin)
-       !gaussian(e_nk - ef, smear)
+       e_args = e_mesh - e_nk - ebands%fermie
+       smear_nk = 0.1_dp * eV_Ha
+       delta_nk = gaussian(e_args, smear_nk)
        do m_kq=bstart_kq, bstop_kq
          ib_kq = m_kq - bstart_kq + 1
-         e_mkq = ebands%eig(m_kq, ikq_ibz, spin)
-         !gaussian(e_mkq - ef, smear)
-         !rhotwg_x(npw_x*nspinor, ib_k, ib_kq)); w_rhotwg_c(npw_c*nspinor, ib_k, ib_kq)
+         !delta_mkq(:, ib_kq)
          ctmp_gwpc = xdotc(npw_c*nspinor, rhotwg_c(:,ib_k, ib_kq), 1, w_rhotwg_c(:,ib_k, ib_kq), 1)
          if (remove_exchange) then
            ctmp_gwpc = ctmp_gwpc + xdotc(npw_x*nspinor, rhotwg_x(:,ib_k, ib_kq), 1, rhotwg_x(:,ib_k, ib_kq), 1)
@@ -680,6 +673,9 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ABI_FREE(vc_sqrt_gx)
  ABI_FREE(w_ee)
  ABI_FREE(e_mesh)
+ ABI_FREE(e_args)
+ ABI_FREE(delta_nk)
+ ABI_FREE(delta_mkq)
 
  call wfd%free(); call vcp%free(); call qmesh%free(); call gsph_x%free(); call gsph_c%free(); call hscr%free(); call edos%free()
  call epsm1%free()

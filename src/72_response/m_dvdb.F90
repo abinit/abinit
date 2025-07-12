@@ -3219,13 +3219,12 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
  integer :: iqst,nqst,itimrev,tsign,isym,ix,iy,iz,nq1,nq2,nq3,r1,r2,r3
  integer :: nproc,my_rank,ifft,cnt,ierr
  character(len=500) :: msg
- real(dp) :: dksqmax
+ real(dp) :: dksqmax, cpu, wall, gflops
  logical :: isirr_q, found
 !arrays
  integer :: qptrlatt(3,3),g0q(3)
  integer,allocatable :: indqq(:,:),iperm(:),bz2ibz_sort(:),nqsts(:),iqs_dvdb(:)
  real(dp) :: qpt_bz(3),shift(3)
- real(dp) :: cpu, wall, gflops
  real(dp),allocatable :: qibz(:,:),qbz(:,:),wtq(:),emiqr(:,:)
  real(dp),allocatable :: v1r_qibz(:,:,:,:),v1r_qbz(:,:,:,:), v1r_lr(:,:)
 ! *************************************************************************
