@@ -157,9 +157,10 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), gbound_k(:,:), gbound_kq(:,:), gbound_c(:,:), gbound_x(:,:)
  integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:), kbz2ibz(:,:), nband(:,:), wfd_istwfk(:)
  !integer(i1b),allocatable :: itreat_qibz(:)
- integer, ABI_CONTIGUOUS pointer :: kg_c(:,:), kg_x(:,:)
+ integer, contiguous, pointer :: kg_c(:,:), kg_x(:,:)
  real(dp) :: kk(3), kq(3), kk_ibz(3), kq_ibz(3), qq_bz(3) ! qq_ibz(3),
  complex(gwpc) :: ctmp_gwpc, mu
+ character(len=fnlen) :: path
 !arrays
  real(dp) :: n0(ebands%nsppol)
  real(dp),allocatable :: qlwl(:,:), kpg_k(:,:), kpg_kq(:,:), ug_k(:,:,:), ug_kq(:,:), cg_work(:,:)
@@ -192,21 +193,16 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ! Get DOS per spin channel
  n0(:) = edos%gef(1:edos%nsppol)
  if (my_rank == master) then
-   call edos%print(unit=ab_out)
-   call edos%print(unit=std_out)
-   !path = strcat(dtfil%filnam_ds(4), "_EDOS")
-   !call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path, ch10))
-   !call edos%write(path)
+   call edos%print(units)
+   path = strcat(dtfil%filnam_ds(4), "_EDOS")
+   call edos%write(path)
  end if
 
  ! Find Fermi surface k-points
  ! TODO: support kptopt, change setup of k-points if tetra: fist tetra weights then k-points on the Fermi surface!
  ABI_MALLOC(fstab, (nsppol))
  call fstab_init(fstab, ebands, cryst, dtset, comm)
- if (my_rank == master) then
-   call fstab_print(fstab, unit=std_out)
-   call fstab_print(fstab, unit=ab_out)
- end if
+ if (my_rank == master) call fstab_print(fstab, units)
 
  bmin = huge(1); bmax = -1
  do spin=1,nsppol
@@ -383,7 +379,6 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  call ddkop%free()
 
  call ngfft_seq(work_ngfft, gmax)
- !write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
  ABI_MALLOC(work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
 
  ! FFT meshes from input file, not necessarily equal to the ones found in the external files.
@@ -449,7 +444,19 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ! Open WQK.nc file and go to data mode.
  prtwqk = 1
  if (prtwqk /= 0) then
-   NCF_CHECK(nctk_open_create(root_ncid, strcat(dtfil%filnam_ds(4), "_WQK.nc") , comm))
+
+   ! Master creates the netcdf file used to store the results of the calculation.
+   if (my_rank == master) then
+       NCF_CHECK(nctk_open_create(root_ncid, strcat(dtfil%filnam_ds(4), "_WQK.nc") , xmpi_comm_self))
+       NCF_CHECK(nctk_open_create(root_ncid, path, xmpi_comm_self))
+       NCF_CHECK(cryst%ncwrite(root_ncid))
+       NCF_CHECK(ebands%ncwrite(root_ncid))
+       NCF_CHECK(edos%ncwrite(root_ncid))
+       NCF_CHECK(nf90_close(root_ncid))
+   end if
+   call xmpi_barrier(comm)
+
+   NCF_CHECK(nctk_open_modify(root_ncid, strcat(dtfil%filnam_ds(4), "_WQK.nc") , comm))
    NCF_CHECK(nctk_set_datamode(root_ncid))
  end if
 
@@ -581,7 +588,7 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
      do m_kq=bstart_kq, bstop_kq
        ib_kq = m_kq - bstart_kq + 1
        e_mkq = ebands%eig(m_kq, ikq_ibz, spin)
-       e_args = e_mesh - e_mkq - ebands%fermie
+       e_args = e_mesh - e_mkq + ebands%fermie
        smear_mkq = 0.1_dp * eV_Ha
        delta_mkq(:, ib_kq) = gaussian(e_args, smear_mkq)
      end do
@@ -589,7 +596,7 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
      do n_k=bstart_k, bstop_k
        ib_k = n_k - bstart_k + 1
        e_nk = ebands%eig(n_k, ik_ibz, spin)
-       e_args = e_mesh - e_nk - ebands%fermie
+       e_args = e_mesh - e_nk + ebands%fermie
        smear_nk = 0.1_dp * eV_Ha
        delta_nk = gaussian(e_args, smear_nk)
        do m_kq=bstart_kq, bstop_kq
@@ -600,8 +607,10 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
            ctmp_gwpc = ctmp_gwpc + xdotc(npw_x*nspinor, rhotwg_x(:,ib_k, ib_kq), 1, rhotwg_x(:,ib_k, ib_kq), 1)
          end if
          !print *, "ctmp_gwpc:", ctmp_gwpc
-         !mu = mu + ctmp_gwpc *
+         !mu = mu + ctmp_gwpc * delta_nk(edos%ief) * delta_mkq(edos%ief, ib_kq)
          !w_ee =
+         ! Computes: A := A + alpha * x * y^T
+         !call dger(ne, ne, alpha, x, incx, y, incy, w_ee, lda)
        end do
      end do
 

@@ -3073,7 +3073,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  character(len=500) :: msg
  character(len=fnlen) :: path
 !arrays
- integer :: g0_k(3),g0bz_kq(3),g0_kq(3),symq(4,2,cryst%nsym)
+ integer :: g0_k(3),g0bz_kq(3),g0_kq(3),symq(4,2,cryst%nsym), units(2)
  integer :: indkk_kq(6,1), work_ngfft(18),gmax(3),my_gmax(3),gamma_ngqpt(3) !g0ibz_kq(3),
  integer,allocatable :: kg_k(:,:),kg_kq(:,:),gtmp(:,:),nband(:,:),wfd_istwfk(:), my_pinfo(:,:), pert_table(:,:) !, qibz_done(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3), lf(2),rg(2),res(2), vk(3), vkq(3), wminmax(2), n0(ebands%nsppol)
@@ -3107,6 +3107,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
+ units = [std_out, ab_out]
 
  ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor; nspden = dtset%nspden
@@ -3127,9 +3128,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ! Store DOS per spin channel
  n0(:) = edos%gef(1:edos%nsppol)
  if (my_rank == master) then
-   call edos%print(unit=ab_out)
+   call edos%print(units)
    path = strcat(dtfil%filnam_ds(4), "_EDOS")
-   call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path, ch10))
    call edos%write(path)
  end if
 
@@ -3137,10 +3137,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ! TODO: support kptopt, change setup of k-points if tetra: fist tetra weights then k-points on the Fermi surface!
  ABI_MALLOC(fstab, (nsppol))
  call fstab_init(fstab, ebands, cryst, dtset, comm)
- if (my_rank == master) then
-   call fstab_print(fstab, unit=std_out)
-   call fstab_print(fstab, unit=ab_out)
- end if
+ if (my_rank == master) call fstab_print(fstab, units)
 
  ! Define q-mesh. eph_ngqpt_fine activates the Fourier interpolation of the DFPT potentials.
  gamma_ngqpt = ifc%ngqpt; if (all(dtset%eph_ngqpt_fine /= 0)) gamma_ngqpt = dtset%eph_ngqpt_fine
@@ -3298,8 +3295,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
  path = strcat(dtfil%filnam_ds(4), "_A2F.nc")
  ncid = nctk_noid
- if (my_rank == master) then
 
+ if (my_rank == master) then
    write(std_out, "(/,a)")" === MPI parallelism ==="
    !write(std_out, "(2(a,i0))")"P Allocating and summing bands from my_bsum_start: ", self%my_bsum_start, &
    !    " up to my_bsum_stop: ", self%my_bsum_stop
