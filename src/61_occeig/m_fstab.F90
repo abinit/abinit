@@ -661,59 +661,69 @@ end subroutine fstab_get_dbldelta_weights
 !!  Print info on the object.
 !!
 !! INPUTS
-!! [unit]=the unit number for output
+!! units=unit numbers for output
 !! [prtvol]=verbosity level
 !!
 !! SOURCE
 
-subroutine fstab_print(fstab, header, unit, prtvol)
+subroutine fstab_print(fstab, units, header, prtvol)
 
 !Arguments ------------------------------------
 !scalars
- integer,optional,intent(in) :: prtvol,unit
- character(len=*),optional,intent(in) :: header
  class(fstab_t),target,intent(in) :: fstab(:)
+ integer,intent(in) :: units(:)
+ character(len=*),optional,intent(in) :: header
+ integer,optional,intent(in) :: prtvol
 
 !Local variables-------------------------------
 !scalars
- integer :: my_unt,my_prtvol,spin
+ integer :: my_prtvol,spin
  character(len=5000) :: msg
 ! *************************************************************************
 
- my_unt = std_out; if (present(unit)) my_unt = unit
  my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
 
  msg = ' ==== Fermi surface info ==== '
  if (PRESENT(header)) msg=' ==== '//TRIM(ADJUSTL(header))//' ==== '
- write(my_unt, "(a)")trim(msg)
+ call wrtout(units, msg)
 
- if (fstab(1)%eph_intmeth == 1) then
+ select case (fstab(1)%eph_intmeth)
+ case (1)
    if (fstab(1)%eph_fsmear > zero) then
-     write(my_unt,"(a,f5.1,a)")" FS integration done with gaussian method and broadening:", &
+     write(msg,"(a,f5.1,a)")" FS integration done with gaussian method and broadening:", &
        fstab(1)%eph_fsmear * Ha_eV, " (meV)"
    else
-     write(my_unt,"(a)")" FS integration done with adaptive gaussian method"
+     write(msg,"(a)")" FS integration done with adaptive gaussian method"
    end if
- else if (fstab(1)%eph_intmeth == 2) then
-   write(my_unt,"(a)")" FS integration done with tetrahedron method"
- else if (fstab(1)%eph_intmeth == -2) then
-   write(my_unt,"(a)")" FS integration done with optimized tetrahedron method"
- else
+ case (2)
+   write(msg,"(a)")" FS integration done with tetrahedron method"
+ case (-2)
+   write(msg,"(a)")" FS integration done with optimized tetrahedron method"
+ case default
    ABI_ERROR(sjoin("Invalid value for eph_intmeth:", itoa(fstab(1)%eph_intmeth)))
- end if
+ end select
 
- write(my_unt,"(a,i0)")" Total number of k-points in the full mesh: ",fstab(1)%nktot
- !write(my_unt,"(a,f5.1)")" Energy window: ",fstab(1)%eph_fsewin * Ha_eV, " (eV)
+ call wrtout(units, msg)
+
+ write(msg,"(a,i0)")" Total number of k-points in the full mesh: ",fstab(1)%nktot
+ call wrtout(units, msg)
+ !write(msg,"(a,f5.1)")" Energy window: ",fstab(1)%eph_fsewin * Ha_eV, " (eV)
+ !call wrtout(units, msg)
 
  do spin=1,size(fstab)
    associate (fs => fstab(spin))
-   write(my_unt,"(a,i0)")" For spin: ",spin
-   write(my_unt,"(a,i0,a,f5.1,a)") &
+   write(msg,"(a,i0)")" For spin: ",spin
+   call wrtout(units, msg)
+   write(msg,"(a,i0,a,f5.1,a)") &
      "    Number of BZ k-points close to the Fermi surface: ",fs%nkfs," [", (100.0_dp * fs%nkfs) / fs%nktot, " %]"
-   write(my_unt,"(a,i0)")"    Maximum number of bands crossing the Fermi level: ",fs%maxnb
-   write(my_unt,"(2(a,i0))")"    min band: ", minval(fs%bstart_cnt_ibz(1,:), mask=fs%bstart_cnt_ibz(1,:) /= -1)
-   write(my_unt,"(2(a,i0))")"    Max band: ", maxval(fs%bstart_cnt_ibz(1,:) + fs%bstart_cnt_ibz(2,:) - 1, &
+   call wrtout(units, msg)
+   write(msg,"(a,i0)")"    Maximum number of bands crossing the Fermi level: ",fs%maxnb
+   call wrtout(units, msg)
+   write(msg,"(2(a,i0))")"    min band: ", minval(fs%bstart_cnt_ibz(1,:), mask=fs%bstart_cnt_ibz(1,:) /= -1)
+   call wrtout(units, msg)
+   write(msg,"(2(a,i0))")"    Max band: ", maxval(fs%bstart_cnt_ibz(1,:) + fs%bstart_cnt_ibz(2,:) - 1, &
                                                      mask=fs%bstart_cnt_ibz(1,:) /= -1)
+   call wrtout(units, msg)
    end associate
  end do
 

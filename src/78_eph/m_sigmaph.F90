@@ -3413,8 +3413,7 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
      path = strcat(dtfil%filnam_ds(4), "_EDOS")
      call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path))
      call edos%write(path)
-     call edos%print(unit=std_out)
-     !call edos%print(unit=ab_out)
+     call edos%print([std_out])
    end if
    call cwtime_report(" sigmaph_new: ebands", cpu, wall, gflops)
  end if
