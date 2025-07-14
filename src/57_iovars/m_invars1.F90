@@ -243,7 +243,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  dtsets(:)%ntypat=1 ; dtsets(0)%ntypat=0    ! Will always echo ntypat
  dtsets(:)%macro_uj=0
  dtsets(:)%maxnsym=384
- dtsets(:)%usegbt=0
+ dtsets(:)%use_gbt=0
  dtsets(:)%useria=0
  dtsets(:)%userib=0
  dtsets(:)%useric=0
@@ -385,9 +385,9 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useextfpmd',tread,'INT')
    if(tread==1) dtsets(idtset)%useextfpmd=intarr(1)
 
-   ! Read usegbt
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usegbt',tread,'INT')
-   if (tread==1) dtsets(idtset)%usegbt=intarr(1)
+   ! Read use_gbt
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gbt',tread,'INT')
+   if (tread==1) dtsets(idtset)%use_gbt=intarr(1)
 
    ! Read user* variables
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useria',tread,'INT')
