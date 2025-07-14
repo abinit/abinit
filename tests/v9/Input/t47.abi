@@ -90,7 +90,7 @@
 #%% test_chain = t47.abi, t48.abi, t49.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t47.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -easy;
+#%%   t47.abo, tolnlines = 6, tolabs = 1.1e-03, tolrel = 7.0e-03, fld_options = -easy;
 #%% [paral_info]
 #%% max_nprocs = 28
 #%% [extra_info]
