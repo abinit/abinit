@@ -209,6 +209,10 @@ module m_hamiltonian
    ! governs the way the nonlocal operator is to be applied:
    !   1=using Ylm, 0=using Legendre polynomials
 
+  integer :: use_gbt
+   ! if use_gbt=0, use normal non-collinear calculation
+   ! if use_gbt=1, use spin spiral calculation
+
 ! ===== Integer arrays
 
 #if defined HAVE_GPU && defined HAVE_YAKL
@@ -651,6 +655,7 @@ subroutine gsham_free(Ham)
  if (associated(Ham%ffnl_kp)) nullify(Ham%ffnl_kp)
  if (associated(Ham%ph3d_k)) nullify(Ham%ph3d_k)
  if (associated(Ham%ph3d_kp)) nullify(Ham%ph3d_kp)
+ 
 
 ! Real arrays
  ABI_SFREE(Ham%ekb_spin)
@@ -729,13 +734,14 @@ end subroutine gsham_free
 subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 &                     xred,nfft,mgfft,ngfft,rprimd,nloalg,&
 &                     ph1d,usecprj,comm_atom,mpi_atmtab,mpi_spintab,paw_ij,&  ! optional
-&                     electronpositron,fock,nucdipmom,gpu_option)         ! optional
+&                     electronpositron,fock,nucdipmom,gpu_option,use_gbt)         ! optional
 
 !Arguments ------------------------------------
 !scalars
  class(gs_hamiltonian_type),intent(inout),target :: ham
  integer,intent(in) :: nfft,natom,nspinor,nsppol,nspden,mgfft
  integer,optional,intent(in) :: comm_atom,usecprj,gpu_option
+ integer,optional,intent(in) :: use_gbt
  type(electronpositron_type),optional,pointer :: electronpositron
  type(fock_type),optional,pointer :: fock
  type(pseudopotential_type),intent(in) :: psps

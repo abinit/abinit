@@ -4349,7 +4349,7 @@ if (dtset%usekden==1) then
     ABI_ERROR(sjoin("A valid wfk_task must be specified when optdriver= ", itoa(dtset%optdriver), ", Received:", key_value))
  end if
 
- if (dtset%usegbt /= 0) then
+ if (dtset%use_gbt /= 0) then
   call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'qgbt', tread, 'DPR')
   dtset%qgbt(1:3) = dprarr(1:3)
   

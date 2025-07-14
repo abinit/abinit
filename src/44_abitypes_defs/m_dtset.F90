@@ -695,11 +695,11 @@ type, public :: dataset_type
  integer :: useric = 0
  integer :: userid = 0
  integer :: userie = 0
- integer :: usegbt
  integer :: usewvl
  integer :: usexcnhat_orig
  integer :: useylm
  integer :: useextfpmd = 0
+ integer :: use_gbt
  integer :: use_yaml = 0
  integer :: use_slk
  integer :: use_oldchi = 1
@@ -2173,6 +2173,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%timopt             = dtin%timopt
  dtout%use_gemm_nonlop    = dtin%use_gemm_nonlop
  dtout%useextfpmd         = dtin%useextfpmd
+ dtout%use_gbt            = dtin%use_gbt
  dtout%use_yaml           = dtin%use_yaml   ! This variable activates the Yaml output for testing purposes
                                             ! It will be removed when Yaml output enters production.
  dtout%use_slk            = dtin%use_slk
@@ -2181,7 +2182,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%usedmft            = dtin%usedmft
  dtout%useexexch          = dtin%useexexch
  dtout%usefock            = dtin%usefock
- dtout%usegbt             = dtin%usegbt
  dtout%usekden            = dtin%usekden
  dtout%use_nonscf_gkk     = dtin%use_nonscf_gkk
  dtout%usepaw             = dtin%usepaw
@@ -3799,7 +3799,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' tolvrs tolwfr tolwfr_diago tphysel ts_option tsmear typat'
 !U
  list_vars=trim(list_vars)//' ucrpa ucrpa_bands ucrpa_window udtset upawu usepead usedmatpu '
- list_vars=trim(list_vars)//' usedmft useexexch usegbt usekden use_nonscf_gkk usepawu usepotzero'
+ list_vars=trim(list_vars)//' usedmft useexexch usekden use_gbt use_nonscf_gkk usepawu usepotzero'
  list_vars=trim(list_vars)//' useria userib useric userid userie'
  list_vars=trim(list_vars)//' userra userrb userrc userrd userre'
  list_vars=trim(list_vars)//' usewvl usexcnhat useylm use_gemm_nonlop'
