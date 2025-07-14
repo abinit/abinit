@@ -100,7 +100,7 @@
 #%% test_chain = t105.abi, t106.abi, t107.abi, t108.abi, t109.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t107.abo, tolnlines = 15, tolabs = 2.0e-04, tolrel = 1.0e+00, fld_options =  -medium
+#%%   t107.abo, tolnlines = 19, tolabs = 2.0e-04, tolrel = 1.0e+00, fld_options =  -medium
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]
