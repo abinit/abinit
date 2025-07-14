@@ -3,11 +3,11 @@
 !!  m_paw_exactDC
 !!
 !! FUNCTION
-!!  This module contains several routines related to the "exact" double counting.
+!!  This module contains several routines related to the exact formula for the double counting.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2020 Kristjan Haule
-!! These routines were translated from embedded DMFT.
+!! Copyright (C) 2025-2025 ABINIT group
+!! These routines were inspired by K. Haule routines in embedded DMFT.
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,7 +31,6 @@ MODULE m_paw_exactDC
  private
 
  public :: compute_exactDC
- public :: grule
 
 CONTAINS  !========================================================================================
 !!***
@@ -44,8 +43,8 @@ CONTAINS  !=====================================================================
 !!
 !! FUNCTION
 !!
-!! Compute the "exact" double counting.
-!! See Physical review letters, Haule, K. (2015), 115(19), 196403  for formula.
+!! Compute the exact formula for the double counting.
+!! See Physical review letters, Haule, K. (2015), 115(19), 196403 for formula.
 !!
 !! INPUTS
 !!  lpawu = angular momentum for correlated species
@@ -54,6 +53,7 @@ CONTAINS  !=====================================================================
 !!  occ(2*lpawu+1,2*lpawu+1) = occupation matrix (summed over spins) in
 !!    the real spherical harmonics basis, with the convention
 !!    occ(i,j) = <c_j^dagger c_i>
+!!  ixc = index of the XC functional
 !!
 !! OUTPUT
 !!  vdc(2*lpawu+1,2*lpawu+1) = double counting potential
@@ -62,26 +62,33 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
- subroutine compute_exactDC(lpawu,pawtab,pawrad,occ,vdc,edc,edcdc)
+ subroutine compute_exactDC(lpawu,pawtab,pawrad,occ,vdc,edc,edcdc,ixc)
 
  use m_pawtab, only : pawtab_type
  use m_pawrad, only : pawrad_type,simp_gen
- use m_paw_sphharm, only : ylmc
+ use m_paw_sphharm, only : ylmc,ylmcd
+ use m_splines, only : spline2
 
 !Arguments ------------------------------------
- integer, intent(in) :: lpawu
+ integer, intent(in) :: ixc,lpawu
  type(pawtab_type), intent(in) :: pawtab
  type(pawrad_type), intent(in) :: pawrad
  complex(dpc), intent(in) :: occ(2*lpawu+1,2*lpawu+1)
  complex(dpc), intent(inout) :: vdc(2*lpawu+1,2*lpawu+1)
  real(dp), intent(out) :: edc,edcdc
 !Local variables ------------------------------
- integer :: i,ir,j,k,l,ln,m,m1,mm,minusm,meshsz,ndim
- real(dp) :: excint,phi,rho,rs1,sexc,svxc,theta,vxcf
- real(dp) :: ecc(1),exx(1),kcart(3),rs1s(1),vcc(1),vxx(1)
- complex(dpc) :: ylm_c
- real(dp), allocatable :: exc(:,:,:),exci(:),phis(:),rho_angle(:,:)
- real(dp), allocatable :: thetas(:),tweights(:),vxc(:,:,:),vxci(:,:,:),ylm(:,:,:)
+ integer :: i,ir,j,k,l,m,m1,mm,minusm,meshsz,ndim
+ logical :: need_gradient
+ real(dp) :: cphi,ctheta,ecc,excint,exx,grad,gradphi,gradr,gradth
+ real(dp) :: onemsqrt2,phi,rad,rho,rhor,rs1,sexc,sphi,stheta,svxc
+ real(dp) :: theta,vcc,vxcf,vxx
+ real(dp) :: kcart(3)
+ complex(dpc) :: dphi,dth,ylm_c
+ integer, parameter :: ln = 13
+ real(dp), allocatable :: exc(:,:,:),exci(:),phis(:),proj_dr(:),rho_angle(:,:)
+ real(dp), allocatable :: rho_angle_dphi(:,:),rho_angle_dtheta(:,:)
+ real(dp), allocatable :: slm_dphi(:,:,:),slm_dtheta(:,:,:),thetas(:),tweights(:)
+ real(dp), allocatable :: vxc(:,:,:),vxci(:,:,:),ylm(:,:,:)
  !************************************************************************
 
  ! VERY IMPORTANT: This routine assumes that we work in the real spherical harmonic basis.
@@ -89,7 +96,11 @@ CONTAINS  !=====================================================================
  ! below are not valid, so you would need to add some complex conjugates.
  ! Also, we work with the convention occ(i,j) = <c_j^dagger c_i>.
 
- ln = 13  ! Size of angular mesh, same as eDMFT
+ if (ixc /= 7 .and. ixc /= 11 .and. ixc /= -1012 .and. ixc /= -101130) &
+    & ABI_ERROR("Only PW92 and PBE are handled!")
+
+ need_gradient = (ixc == 11 .or. ixc == -101130)
+
  meshsz = size(pawtab%proj2(:)) ! Size of radial mesh
  ndim = 2*lpawu + 1
 
@@ -102,6 +113,18 @@ CONTAINS  !=====================================================================
  ABI_MALLOC(vxc,(ln+1,2*ln+1,meshsz))
  ABI_MALLOC(vxci,(meshsz,ndim,ndim))
  ABI_MALLOC(ylm,(ln+1,2*ln+1,ndim))
+
+ if (need_gradient) then
+   ABI_MALLOC(proj_dr,(meshsz))
+   ABI_MALLOC(rho_angle_dphi,(ln+1,2*ln+1))
+   ABI_MALLOC(rho_angle_dtheta,(ln+1,2*ln+1))
+   ABI_MALLOC(slm_dphi,(ln+1,2*ln+1,ndim))
+   ABI_MALLOC(slm_dtheta,(ln+1,2*ln+1,ndim))
+   call spline2(pawrad%rad(1:meshsz),pawtab%proj2(:)/max(epsilon(one),pawrad%rad(1:meshsz)**2), &
+              & meshsz,proj_dr(:),zero,zero,3,3)
+   rho_angle_dphi(:,:)   = zero
+   rho_angle_dtheta(:,:) = zero
+ end if ! gradient
 
  vdc(:,:) = czero
  edc = zero
@@ -125,28 +148,37 @@ CONTAINS  !=====================================================================
  ! XC contribution
 
  ! Prepare angular mesh
- call tfpoint(thetas(:),phis(:),tweights(:),ln)
+ call angular_mesh(thetas(:),phis(:),tweights(:),ln)
 
  ! Compute the real spherical harmonics on the angular mesh
  do m=0,lpawu
-   mm = m + lpawu + 1
-   minusm = - m + lpawu + 1
+   mm = m + lpawu + 1 ; minusm = - m + lpawu + 1
+   onemsqrt2 = (-one)**m * sqrt2
    do j=1,2*ln+1
-     phi = phis(j)
+     phi = phis(j) ; cphi = cos(phi) ; sphi = sin(phi)
      do i=1,ln+1
-       theta = thetas(i)
-       ! The definition of theta and phi is swapped in ylmc
-       kcart(1) = cos(phi) * sin(theta)
-       kcart(2) = sin(phi) * sin(theta)
-       kcart(3) = cos(theta)
+       theta = thetas(i) ; ctheta = cos(theta) ; stheta = sin(theta)
+       kcart(1) = cphi * stheta ; kcart(2) = sphi * stheta ; kcart(3) = ctheta
        ylm_c = ylmc(lpawu,m,kcart(:))
        ! Convert complex harmonics to real harmonics
        if (m == 0) then
          ylm(i,j,mm) = dble(ylm_c)
        else
-         ylm(i,j,mm) = (-one)**m * sqrt2 * dble(ylm_c)
-         ylm(i,j,minusm) = (-one)**m * sqrt2 * aimag(ylm_c)
+         ylm(i,j,mm)     = onemsqrt2 * dble(ylm_c)
+         ylm(i,j,minusm) = onemsqrt2 * aimag(ylm_c)
        end if ! m=0
+       if (need_gradient) then
+         call ylmcd(lpawu,m,kcart(:),dth,dphi)
+         if (m == 0) then
+             slm_dphi(i,j,mm)   = dble(dphi)
+             slm_dtheta(i,j,mm) = dble(dth)
+         else
+             slm_dphi(i,j,mm)       = onemsqrt2 * dble(dphi)
+             slm_dtheta(i,j,mm)     = onemsqrt2 * dble(dth)
+             slm_dphi(i,j,minusm)   = onemsqrt2 * aimag(dphi)
+             slm_dtheta(i,j,minusm) = onemsqrt2 * aimag(dth)
+         end if ! m=0
+       end if ! gradient
      end do ! i
    end do ! j
  end do ! m
@@ -157,6 +189,11 @@ CONTAINS  !=====================================================================
    do m=1,ndim
      ! In the complex case, you should use ylm(:,:,m)*conjg(ylm(:,:,m1))
      rho_angle(:,:) = rho_angle(:,:) + dble(occ(m,m1))*ylm(:,:,m)*ylm(:,:,m1)
+     if (need_gradient) then
+       ! In the complex case, there should be a conjg each time there is a m1
+       rho_angle_dphi(:,:)   = rho_angle_dphi(:,:) + dble(occ(m,m1))*(slm_dphi(:,:,m)*ylm(:,:,m1)+ylm(:,:,m)*slm_dphi(:,:,m1))
+       rho_angle_dtheta(:,:) = rho_angle_dtheta(:,:) + dble(occ(m,m1))*(slm_dtheta(:,:,m)*ylm(:,:,m1)+ylm(:,:,m)*slm_dtheta(:,:,m1))
+     end if ! gradient
    end do ! m
  end do ! m1
 
@@ -164,28 +201,28 @@ CONTAINS  !=====================================================================
  rho_angle(:,:) = abs(rho_angle(:,:))
 
  do ir=1,meshsz
+   rad  = pawrad%rad(ir)
+   rhor = pawtab%proj2(ir) / max(rad**2,epsilon(one))
    do j=1,2*ln+1
      do i=1,ln+1
-       rho = rho_angle(i,j) * pawtab%proj2(ir) / max(pawrad%rad(ir)**2,epsilon(one))
-       rs1 = (four_pi * rho / three)**(third)
-       rs1s(1) = rs1
-       call ExchangeLDA(exx(:),vxx(:),rs1s(:),pawtab%lambda,1)
-       exc(i,j,ir) = exx(1) * half / pawtab%eps ! convert from Rydberg to Hartree
-       vxc(i,j,ir) = vxx(1) * half / pawtab%eps
-       rs1s(1) = one / max(rs1,epsilon(one))
-       ! In his code, K. Haule has two fits for the correlation energy: an old
-       ! one with only lambda, and a more recent one with lambda and epsilon.
-       ! The more recent one seems much less reliable, is not guaranteed to have
-       ! the correct asymptotic behavior for high values of lambda, and overall
-       ! seems to be stable only on a very small window of [rs,lambda,epsilon].
-       ! So I prefer to use the old fit when possible.
-       if (pawtab%eps == one) then
-         call CorrLDA(ecc(:),vcc(:),rs1s(:),pawtab%lambda,1)
-       else
-         call CorrLDA_2(ecc(:),vcc(:),rs1s(:),pawtab%lambda,pawtab%eps,1)
-       end if ! eps
-       exc(i,j,ir) = exc(i,j,ir) + ecc(1)*half
-       vxc(i,j,ir) = vxc(i,j,ir) + vcc(1)*half
+
+       rho  = rho_angle(i,j) * rhor
+       grad = zero
+
+       if (need_gradient) then
+         stheta  = sin(thetas(i))
+         gradr   = rho_angle(i,j) * proj_dr(ir)
+         gradth  = (rho_angle_dtheta(i,j)*rhor) / rad
+         gradphi = (rho_angle_dphi(i,j)*rhor) / (rad*stheta)
+         grad = gradr*gradr + gradth*gradth + gradphi*gradphi
+       end if ! gradient
+
+       call exchange_yukawa(exx,vxx,rho,pawtab%lambda,grad,ixc)
+       exc(i,j,ir) = exx ; vxc(i,j,ir) = vxx
+
+       call correlation_yukawa(ecc,vcc,rho,pawtab%lambda,grad,ixc)
+       exc(i,j,ir) = exc(i,j,ir) + ecc ; vxc(i,j,ir) = vxc(i,j,ir) + vcc
+
      end do ! i
    end do ! j
  end do ! ir
@@ -201,13 +238,11 @@ CONTAINS  !=====================================================================
        sexc = zero
        do j=1,2*ln+1
          ! In the complex case, you should use ylm(:,j,m)*conjg(ylm(:,j,m1))
-         svxc = svxc + two_pi*sum(ylm(:,j,m)*ylm(:,j,m1)*tweights(:)* &
-              & vxc(:,j,ir))/dble(2*ln+1)
-         sexc = sexc + two_pi*sum(ylm(:,j,m)*ylm(:,j,m1)*tweights(:)* &
-              & exc(:,j,ir))*dble(occ(m,m1))/dble(2*ln+1)
+         svxc = svxc + sum(ylm(:,j,m)*ylm(:,j,m1)*tweights(:)*vxc(:,j,ir))
+         sexc = sexc + sum(ylm(:,j,m)*ylm(:,j,m1)*tweights(:)*exc(:,j,ir))
        end do ! j
-       vxci(ir,m,m1) = svxc
-       exci(ir) = exci(ir) + sexc
+       vxci(ir,m,m1) = two_pi * svxc / dble(2*ln+1)
+       exci(ir) = exci(ir) + two_pi * sexc * dble(occ(m,m1)) / dble(2*ln+1)
      end do ! ir
    end do ! m
  end do ! m1
@@ -235,374 +270,291 @@ CONTAINS  !=====================================================================
  ABI_FREE(vxc)
  ABI_FREE(vxci)
  ABI_FREE(ylm)
+ ABI_SFREE(proj_dr)
+ ABI_SFREE(rho_angle_dphi)
+ ABI_SFREE(rho_angle_dtheta)
+ ABI_SFREE(slm_dphi)
+ ABI_SFREE(slm_dtheta)
 
  end subroutine compute_exactDC
 !!***
 
-SUBROUTINE tfpoint(thetas,phis,tweights,ln)
-  !************************************************!
-  !     GENERATES POINTS ON A UNIT SPHERE          !
-  !************************************************!
-  !
-  INTEGER, intent(in)  :: ln
-  REAL*8, intent(out)  :: thetas(ln+1), phis(2*ln+1), tweights(ln+1)! spt(2,(ln+1)*(2*ln+1)),weight((ln+1)*(2*ln+1))
-  !
-  REAL*8 :: dsum
-  REAL*8 :: fake_shift, phi, pi
-  INTEGER :: i, j, lg
-  !
-  PI=4.D0*ATAN(1.D0)
-  lg = ln+1
-  !
-  CALL GRULE(lg,thetas,tweights) ! Gauss points in the interval [1...0]
-  !
-  do i=1,(lg+1)/2                ! adding symmetrical points to [0,...-1]
-     j = lg+1-i
-     thetas(j)=-thetas(i)
-     tweights(j)=tweights(i)
-  enddo
-  do i=1,lg
-     thetas(i) = dacos(thetas(i))
-  enddo
-  !
-  fake_shift=EXP(-4.D0)  ! small shift such that we do not start at phi=0
-  DO i=0,2*lg-2       ! 2*l-1 points in phi direction
-     PHI=PI*(2*dble(i)/dble(2*lg-1) + fake_shift)
-     phis(i+1)=PHI
-  ENDDO
-  !
-  dsum = sum(tweights)
-  tweights(:) = tweights(:)*2./dsum
-  !write(6,*)'Gauss-Legendre grid of ',lg,'x',2*lg-1
-  return
-end SUBROUTINE tfpoint
+!----------------------------------------------------------------------
 
-SUBROUTINE GRULE(N,X,W)
-  !
-  !     DETERMINES THE (N+1)/2 NONNEGATIVE POINTS X(I) AND
-  !     THE CORRESPONDING WEIGHTS W(I) OF THE N-POINT
-  !     GAUSS-LEGENDRE INTEGRATION RULE, NORMALIZED TO THE
-  !     INTERVAL \-1,1\. THE X(I) APPEAR IN DESCENDING ORDER.
-  !
-  !     THIS ROUTINE IS FROM 'METHODS OF NUMERICAL INTEGRATION',
-  !     P.J. DAVIS AND P. RABINOWITZ, PAGE 369.
-  !
-  INTEGER, intent(in) :: N
-  REAL*8, intent(out) :: X(*), W(*)
-  !
-  REAL*8  :: D1, d2pn, d3pn, d4pn, den, dp, dpn, e1, fx, h, p, pi, pk, pkm1, pkp1, t, t1, u, v, x0
-  INTEGER :: i, it, k, m
-  !
-  PI=4.D0*ATAN(1.D0)
-  M=(N+1)/2
-  E1=N*(N+1)
-  DO I=1,M         ! 1
-     T=(4*I-1)*PI/(4*N+2)
-     X0=(1.D0-(1.D0-1.D0/N)/(8.D0*N*N))*COS(T)
-     !--->    ITERATE ON THE VALUE  (M.W. JAN. 1982)
-     DO IT=1,3     ! 2
-        PKM1=1.D0
-        PK=X0
-        DO K=2,N   ! 3
-           T1=X0*PK
-           PKP1=T1-PKM1-(T1-PKM1)/K+T1
-           PKM1=PK
-           PK=PKP1
-        ENDDO      ! 3
-        DEN=1.D0-X0*X0
-        D1=N*(PKM1-X0*PK)
-        DPN=D1/DEN
-        D2PN=(2.D0*X0*DPN-E1*PK)/DEN
-        D3PN=(4.D0*X0*D2PN+(2.D0-E1)*DPN)/DEN
-        D4PN=(6.D0*X0*D3PN+(6.D0-E1)*D2PN)/DEN
-        U=PK/DPN
-        V=D2PN/DPN
-        H=-U*(1.D0+.5D0*U*(V+U*(V*V-U*D3PN/(3.D0*DPN))))
-        P=PK+H*(DPN+.5D0*H*(D2PN+H/3.D0*(D3PN+.25D0*H*D4PN)))
-        DP=DPN+H*(D2PN+.5D0*H*(D3PN+H*D4PN/3.D0))
-        H=H-P/DP
-        X0=X0+H
-     ENDDO
-     X(I)=X0
-     FX=D1-H*E1*(PK+.5D0*H*(DPN+H/3.D0*(D2PN+.25D0*H*(D3PN+.2D0*H*D4PN))))
-     W(I)=2.D0*(1.D0-X(I)*X(I))/(FX*FX)
-  ENDDO
-  IF(M+M.GT.N) X(M)=0.D0
-  RETURN
-END SUBROUTINE GRULE
+!!****f* m_paw_exactDC/angular_mesh
+!! NAME
+!! angular_mesh
+!!
+!! FUNCTION
+!!
+!! Prepare the angular mesh for the integration over thetas and phis.
+!!
+!! INPUTS
+!!  ln = controls the number of integration points
+!!
+!! OUTPUT
+!!  thetas(ln+1) = Gauss-Legendre integration points for theta grid
+!!  phis(2*ln+1) = uniform points for phi grid
+!!  tweights(ln+1) = Gauss-Legendre weights for theta grid
+!!
+!! SOURCE
 
-subroutine ExchangeLDA(Ex, Vx, rs_1, lambda, N)
-  REAL*8, intent(in) :: lambda
-  INTEGER, intent(in):: N
-  REAL*8, intent(in) :: rs_1(N)
-  REAL*8, intent(out):: Ex(N), Vx(N)
-  ! locals
-  REAL*8 :: kf_rs, c0, pi
-  REAL*8 :: xs(N), dEx(N)
-  !
-  pi = 4.*atan(1.)
-  !
-  kf_rs = (9*pi/4.)**(1./3.)
-  c0 = (3./(2.*pi))*(9.*pi/4.)**(1./3.)
-  if (abs(lambda).gt.1e-10) then
-     !print *, 'lambda too small'
-     xs(:) = rs_1(:)*(kf_rs/lambda)       ! kf/(rs*lambda)
-     CALL fexchange(xs,Ex,dEx,N)
-  else
-     !print *, 'lambda zero', lambda, abs(lambda).gt.1e-10
-     xs(:) = rs_1(:)*kf_rs                ! kf/(rs*lambda)
-     Ex(:)=1.0
-     dEx(:)=0.0
-  endif
-  Ex(:) = -(c0*rs_1)*Ex(:)
-  Vx(:) = 4./3.*Ex(:) - (c0/3.)*rs_1(:)*xs(:)*dEx(:)
-end subroutine ExchangeLDA
+subroutine angular_mesh(thetas,phis,tweights,ln)
 
-SUBROUTINE fexchange(xs,ex,dex,N)
-  !* Evaluating a function (and its derivative) for exchange energy, which has a formula
-  !*  f(x) = 1-1/(6*x^2)-4/(3*x)*atan(2*x)+(1+1/(12*x^2))/(2*x^2)*log(1+4*x^2)
-  !* df/dx = 2/(3*x^3) + 4/(3*x^2)*atan(2*x) - (1+6*x^2)/(6*x^5)*log(1+4*x^2)
-  INTEGER, intent(in):: N
-  REAL*8, intent(in) :: xs(N)
-  REAL*8, intent(out):: ex(N), dex(N)
-  ! locals
-  INTEGER :: i
-  integer, volatile :: iCopy
-  REAL*8 :: x, x2, x3, at2, lg2
-  do i=1,N
-     x = xs(i)
-     x2 = x*x
-     x3 = x2*x
-     iCopy = i  ! A fix for intel compiler bug, so that it does not optimize out the loop
-     if (x<0.01) then
-        ex(i) = 4.*x2/9.*(1-6*x2/5.)
-        dex(i) = 8.*x/9.*(1-12*x2/5.)
-     else
-        at2 = atan(2*x)*4./(3.*x)
-        lg2 = log(1+4.*x2)/(2.*x2)
-        ex(i) = 1-1/(6.*x2) - at2+ (1.+1/(12.*x2))*lg2
-        dex(i) = 2./(3.*x3) + at2/x - (1.+6*x2)/(3.*x3)*lg2
-     end if
-  end do
-END SUBROUTINE fexchange
+use m_numeric_tools, only : coeffs_gausslegint
 
-subroutine CorrLDA_2(Ec, Vc, rs, lambda, eps, N)
-  INTEGER, intent(in):: N
-  REAL*8, intent(in) :: rs(N)
-  REAL*8, intent(in) :: lambda, eps
-  REAL*8, intent(out):: Ec(N), Vc(N)
-  !locals
-  INTEGER :: i
-  REAL*8 :: fn_l(N), qn_l(N), fn_e(N), qn_e(N), fn(N), qn(N)
+!Arguments ------------------------------------
+ integer, intent(in) :: ln
+ real(dp), intent(inout) :: phis(2*ln+1),thetas(ln+1),tweights(ln+1)
+!Local variables ------------------------------
+ integer :: i,j,lg
+ real(dp) :: dsum,phi
+ real(dp), parameter :: fake_shift = exp(-4.0_dp) ! small shift such that we do not start at phi=0
+!************************************************************************
 
-  do i=1,N
-     CALL CorLDA(Ec(i),Vc(i),rs(i))
-  enddo
-  CALL EcVc_reduce_yw_2(rs,lambda,fn_l,qn_l,N)
-  !print *, 'l=', lambda, 'fn_l=', fn_l
-  !print *, 'rs=', rs, 'qn_l=', qn_l
-  CALL EcVc_reduce_di_2(rs,eps,fn_e,qn_e,N)
-  !print *, 'e=', eps, 'fn_e=', fn_e
-  !print *, 'rs=', rs, 'qn_e=', qn_e
+ lg = ln + 1
+ call coeffs_gausslegint(-1.0_dp,1.0_dp,thetas(:),tweights(:),lg)
+ do i=1,lg
+   thetas(i) = acos(thetas(i))
+ end do
 
-  fn(:) = fn_l(:)*fn_e(:)
-  qn(:) = qn_l(:)*fn_e(:)+fn_l(:)*qn_e(:)
+ do i=0,2*lg-2       ! 2*lg-1 points in phi direction
+   phi = pi * (two*dble(i)/dble(2*lg-1)+fake_shift)
+   phis(i+1) = phi
+ end do ! i
 
-  Vc(:) = Vc(:)*fn(:) + Ec(:)*qn(:)
-  Ec(:) = Ec(:)*fn(:)
-end subroutine CorrLDA_2
+ dsum = sum(tweights(:))
+ tweights(:) = tweights(:) * 2.0_dp / dsum
 
-subroutine CorLDA(Ec,Vc,rs)
-  !  UNITS OF Rydberg
-  !  UNIFORM-GAS CORRELATION OF PERDEW AND WANG 1991
-  !  INPUT: SEITZ RADIUS (rs)
-  !  OUTPUT: CORRELATION ENERGY PER ELECTRON (Ec) and POTENTIALS (Vc)
-  !
-  REAL*8, intent(out):: Ec, Vc
-  REAL*8, intent(in) :: rs
-  ! locals
-  REAL*8 :: H2Ry, Ecrs
-  H2Ry = 2.0    ! Conversion from Hartree to Rydberg
-  CALL Gcor(Ec, Ecrs,    rs, 0.0310907D0,  0.21370D0,  7.5957D0, 3.5876D0, 1.6382D0, 0.49294D0, 1)
-  Vc = Ec - rs*Ecrs/3.
-  Vc = Vc*H2Ry  ! From Hartree to Rydbergs
-  Ec = Ec*H2Ry  ! From Hartree to Rydbergs
-  !if (ISNAN(GG)) then
-  !print *, 'rs=', rs, 'RS12=', RS12, 'RS32=', RS32, 'RSP=', RSP, 'Q1=', Q1, 'Q2=', Q2, 'GG=', GG, 'GGRS=', GGRS
-  !endif
-  !print *, 'rs=', rs, Ec, Vc
-end subroutine CorLDA
+end subroutine angular_mesh
+!!***
 
-SUBROUTINE  Gcor(GG,GGrs,rs, A,A1,B1,B2,B3,B4,P)
-  REAL*8, intent(in)  :: rs, A, A1, B1, B2, B3, B4
-  INTEGER, intent(in) :: P
-  REAL*8, intent(out) :: GG, GGrs
-  ! locals
-  REAL*8 :: P1, Q0, RS12, RS32, RSP, Q1, Q2, Q3
-  P1 = P + 1.
-  Q0 = -2.*A*(1.+A1*rs)
-  RS12 = sqrt(rs)
-  RS32 = RS12**3
-  RSP = rs**P
-  Q1 = 2.*A*(B1*RS12+B2*rs+B3*RS32+B4*rs*RSP)
-  Q2 = log(1.+1./Q1)
-  GG = Q0*Q2
-  Q3 = A*(B1/RS12+2.*B2+3.*B3*RS12+2.*B4*P1*RSP)
-  GGRS = -2.*A*A1*Q2-Q0*Q3/(Q1**2+Q1)
-END SUBROUTINE Gcor
+!----------------------------------------------------------------------
 
-subroutine EcVc_reduce_yw_2(rs,lambda,fn,qn,N)
-  INTEGER, intent(in):: N
-  REAL*8, intent(in) :: rs(N)
-  REAL*8, intent(in) :: lambda
-  REAL*8, intent(out):: fn(N), qn(N)
-  ! locals
-  INTEGER:: i, m
-  REAL*8 :: lmrs, dlms, te, das
-  REAL*8 :: C(7,6)
-  REAL*8 :: an(6)
-  C = Reshape((/0.15805009, -0.77391602, 1.23971169, -1.04865383, 0.47809619, -0.11057964, 0.01016968,&
-               -0.306851, -0.77296572, 0.8791705, -0.69185034, 0.33779654, -0.08858483, 0.00935635,&
-               0.13215843, -0.2776552, 0.45727548, -0.31469164, 0.10787374, -0.01661214, 0.0007591,&
-               -0.03086548, 0.0549528, -0.07252823, 0.04177618, -0.01084882, 0.00062192, 0.0001177,&
-               0.00273230889, -0.00357007233, 0.00425309814, -0.00198811211, 0.000233761378, 0.000106803015, -2.50612307e-05,&
-               -9.28530649e-05, 8.09009085e-05, -9.43747991e-05, 3.89520548e-05, -3.10149723e-07, &
-               -4.23041605e-06, 8.02291467e-07/),(/7,6/))
-  do m=1,6
-     an(m) = lambda * (c(1,m) + lambda * (c(2,m) + lambda * (c(3,m) + lambda * (c(4,m) + lambda * (c(5,m) + lambda * (c(6,m) &
-             + lambda*c(7,m)))))))
-  enddo
-  !print *, an
+!!****f* m_paw_exactDC/exchange_yukawa
+!! NAME
+!! exchange_yukawa
+!!
+!! FUNCTION
+!!
+!! Compute the exchange contribution with a Yukawa potential
+!!
+!! INPUTS
+!!  rho = density at current point
+!!  lambda = parameter for Yukawa potential
+!!  grad = square of the gradient of the density
+!!  ixc = index of the XC functional
+!!
+!! OUTPUT
+!!  ex = exchange energy per particle
+!!  vx = exchange potential
+!!
+!! SOURCE
 
-  do i=1,N
-     te = exp(an(1)+rs(i)*(an(2)+rs(i)*(an(3)+rs(i)*(an(4)+rs(i)*(an(5)+rs(i)*an(6))))))
-     lmrs = 0.008 - 0.00112 * rs(i)**2
-     dlms = -2*0.00112*rs(i)
-     fn(i) = te*(1-lmrs) + lmrs
-     das = rs(i)*(an(2) + rs(i)*(2*an(3) + rs(i)*(3*an(4) + rs(i)*(4*an(5) + rs(i)*5*an(6)))))
-     qn(i) = -1./3.*te*(1-lmrs)*das - 1./3.*rs(i)*(1-te)*dlms
-  enddo
-  ! Ec = Ev * fn
-  ! Vc = Vc * fn + Ec * qn
-end subroutine EcVc_reduce_yw_2
+subroutine exchange_yukawa(ex,vx,rho,lambda,grad,ixc)
 
-subroutine EcVc_reduce_di_2(rs,eps,fn,qn,N)
-  INTEGER, intent(in):: N
-  REAL*8, intent(in) :: rs(N)
-  REAL*8, intent(in) :: eps
-  REAL*8, intent(out):: fn(N), qn(N)
-  ! locals
-  INTEGER:: i
-  REAL*8 :: a, b, d, eps_a, eps_d, eps_abd, b2r_9, r_da_dr, r_db_dr, r_dd_dr
-  REAL*8 :: ca(3), cb(3), cd(4)
-  ! The coefficients a, b, d depend on rs, and here is their more precise fit:
-  ca = (/1.74596971, -0.0892907,   0.00658866/)
-  cb = (/ 1.63289109,  1.15291480, 0.149402/)
-  cd = (/3.64370598, 0.03636027, -0.03886317, 0.00693599/)
+!Arguments ------------------------------------
+ integer, intent(in) :: ixc
+ real(dp), intent(in) :: grad,lambda,rho
+ real(dp), intent(out) :: ex,vx
+!Local variables ------------------------------
+ logical :: islambda
+ real(dp) :: dfdkappa,dfdrho,dfdss,dfx,div,dkappadx,dssdrho
+ real(dp) :: dxdrho,fx,fx_pbe,kappa,rhothird,rhotwothird,rsinv,ss,x
+ real(dp), parameter :: c0 = (9.0_dp/(4.0_dp*pi*pi))**third * three_quarters
+ real(dp), parameter :: c1 = 1.804_dp
+ real(dp), parameter :: kffac = (3.0_dp*pi*pi)**third
+ real(dp), parameter :: mu = 0.2195149727645171_dp
+ real(dp), parameter :: rsfac = (4.0_dp*pi/3.0_dp)**third
+ real(dp), parameter :: twotothird = 2.0_dp**third
+ real(dp), parameter :: xfac = (9.0_dp*pi/4.0_dp)**third
+!************************************************************************
 
-  do i=1,N
-     if (rs(i) .gt. 40) then
-        qn(i)=0.0
-        CYCLE
-     endif
-     a = ca(1) + rs(i) * ca(2) + rs(i)**2 * ca(3)
-     b = 0.001*(cb(1)*sqrt(rs(i))+cb(2)*rs(i))/(1+ (cb(3)*rs(i))**9)
-     d = cd(1) + rs(i) * cd(2) + rs(i)**2 * cd(3) + rs(i)**3 * cd(4)
-     eps_a = eps**a
-     eps_d = eps**d
-     eps_abd = eps_a+b*eps_d
-     b2r_9 = (cb(3)*rs(i))**9
-     fn(i) = (1.+b)/eps_abd
-     r_da_dr = rs(i) * ca(2) + 2*rs(i)**2 * ca(3)
-     r_dd_dr = rs(i) * cd(2) + 2*rs(i)**2 * cd(3) + 3*rs(i)**3 * cd(4)
-     r_db_dr = 0.001*(cb(1)*sqrt(rs(i))*(0.5 - 17./2.*b2r_9)+cb(2)*rs(i)*(1-b2r_9*8))/(1+ b2r_9)**2
-     qn(i) = -1./3.*(r_db_dr*(eps_a-eps_d)-(eps_a*r_da_dr + b*eps_d*r_dd_dr)*(1+b)*log(eps))/eps_abd**2
-  enddo
-  ! Ec = Ev * fn
-  ! Vc = Vc * fn + Ec * qn
-end subroutine EcVc_reduce_di_2
+ ! Careful, K. Haule formula is in Ry, and misses a minus sign for Vx
+ rhothird = rho**third ; rsinv = rsfac * rhothird
+ islambda = (abs(lambda) > tol10)
 
-subroutine CorrLDA(Ec, Vc, rsi, lambda, N)
-  IMPLICIT NONE
-  INTEGER, intent(in):: N
-  REAL*8, intent(in) :: rsi(N)
-  REAL*8, intent(in) :: lambda
-  REAL*8, intent(out):: Ec(N), Vc(N)
-  !locals
-  INTEGER :: i
-  REAL*8 :: A(N), C(N)
+ ! LDA exchange
+ if (islambda) then
+   x = xfac * rsinv / lambda
+   call fexchange(x,fx,dfx)
+   ex = - c0 * fx * rsinv
+   vx = 4.0_dp*ex/3.0_dp - c0*x*dfx*rsinv/3.0_dp
+ else
+   ex = - c0 * rsinv
+   vx = 4.0_dp * ex / 3.0_dp
+ end if
 
-  do i=1,N
-     CALL CorLDA(Ec(i),Vc(i),rsi(i))
-  enddo
+ if (ixc == 7 .or. ixc == -1012) return
 
-  CALL EcVc_reduce(rsi,lambda,A,C,N)
-  Vc(:) = Vc(:)/A(:)+Ec(:)/C(:)
-  Ec(:) = Ec(:)/A(:)
-end subroutine CorrLDA
+ ! PBE exchange
+ if (abs(rho) < tol30) then
+   ex = zero ; vx = zero
+   return
+ end if
 
-REAL*8 Function f1(coef,x,x2,x4,x6)
-  IMPLICIT NONE
-  REAL*8, intent(in) :: x, x2, x4, x6, coef(5)
-  f1 = (x*coef(1)+x2*coef(2))/(1+x2*coef(3)+x4*coef(4)+x6*coef(5))
-  return
-END Function f1
-REAL*8 Function f2(coef,x2,x3,x4)
-  IMPLICIT NONE
-  REAL*8, intent(in) :: x2, x3, x4, coef(4)
-  ! locals
-  f2 = (x2*coef(1)+x3*coef(2))/(1+x2*coef(3)+x4*coef(4))
-  return
-END Function f2
-REAL*8 Function f3(coef,x2,x3,x4)
-  IMPLICIT NONE
-  REAL*8, intent(in) :: x2, x3, x4, coef(3)
-  f3 = (x3*coef(1)+x4*coef(2))/(1+coef(3)*x2)
-  return
-END Function f3
-REAL*8 Function f4(coef,x2,x4)
-  IMPLICIT NONE
-  REAL*8, intent(in) :: x2, x4, coef(2)
-  f4 = x4*(coef(1)+coef(2)*x2)
-  return
-END Function f4
+ if (islambda) then
+   x = twotothird * x
+   call fexchange(x,fx,dfx)
+ else
+   fx  = 1.0_dp
+   dfx = 0.0_dp
+ end if
+ kappa = c1/fx - 1.0_dp
+ rhotwothird = rhothird * rhothird
+ ss = grad / (4.0_dp*rho*rho*rhotwothird*kffac*kffac)
+ div = 1.0_dp+mu*ss/kappa
+ fx_pbe = 1.0_dp + kappa*(1.0_dp-1.0_dp/div)
+ dssdrho = -8.0_dp*third*ss/rho
+ dfdss = mu / (div*div)
+ if (islambda) then
+   dxdrho = third*kffac/(lambda*rhotwothird)
+ else
+   dxdrho = zero
+ end if
+ dkappadx = -c1 * twotothird * dfx / (fx*fx)
+ dfdkappa = 1.0_dp - (1.0_dp+2.0_dp*mu*ss/kappa)/(div*div)
+ dfdrho = dfdss*dssdrho + dfdkappa*dkappadx*dxdrho
+ vx = vx*fx_pbe + rho*ex*dfdrho
+ ex = ex * fx_pbe
 
-subroutine EcVc_reduce(rsi,lambda,A,C,N)
-  IMPLICIT NONE
-  INTEGER, intent(in):: N
-  REAL*8, intent(in) :: rsi(N)
-  REAL*8, intent(in) :: lambda
-  REAL*8, intent(out):: A(N), C(N)
-  !
-  ! locals
-  INTEGER:: i
-  REAL*8 :: coef1(5), coef2(4), coef3(3), coef4(2)
-  REAL*8 :: cfs(4)
-  REAL*8 :: x, x2, x3, x4, x6, rs, Br
-  coef1 = (/0.12238912,  0.73648662,  0.96044695, -0.07501634,  0.00207808/)
-  coef2 = (/0.05839362,  0.11969474,  0.10156124,  0.01594125/)
-  coef3 = (/0.00827519,  0.00557133,  0.01725079/)
-  coef4 = (/5.29134419e-04, 4.49628225e-06/)
+end subroutine exchange_yukawa
+!!***
 
-  x=lambda
-  x2=x*x
-  x3=x*x2
-  x4=x2*x2
-  x6=x4*x2
+!----------------------------------------------------------------------
 
-  cfs(1)=exp(f1(coef1,x,x2,x4,x6))-1.
-  cfs(2)=exp(f2(coef2,x2,x3,x4))-1.
-  cfs(3)=exp(f3(coef3,x2,x3,x4))-1.
-  cfs(4)=exp(f4(coef4,x2,x4))-1.
+!!****f* m_paw_exactDC/fexchange
+!! NAME
+!! fexchange
+!!
+!! FUNCTION
+!!
+!! Compute the function in the HEG exchange energy with Yukawa potential
+!!
+!! INPUTS
+!!  x = input of the function (=(9*pi/4)**(1/3) / (lambda*rs)
+!!      with lambda the Yukawa parameter and rs the Wigner-Seitz radius)
+!!
+!! OUTPUT
+!!  fx  = value of the function at x
+!!  dfx = derivative of the function at x
+!!
+!! SOURCE
 
-  !print *, 'cfs=', cfs
-  do i=1,N
-     rs=rsi(i)
-     A(i)  = 1.0+rs*(cfs(1)+rs*(cfs(2)+rs*(cfs(3)+rs*cfs(4))))
-     Br = rs*(cfs(1)+rs*(2*cfs(2)+rs*(3*cfs(3)+rs*4*cfs(4))))
-     C(i) = 3*A(i)**2/Br
-  enddo
-end subroutine EcVc_reduce
+subroutine fexchange(x,fx,dfx)
+
+!Arguments ------------------------------------
+ real(dp), intent(in) :: x
+ real(dp), intent(out) :: fx,dfx
+!Local variables ------------------------------
+ real(dp) :: at2,lg2,x2,x3,x4,x5
+!************************************************************************
+
+ x2 =  x * x ; x3 = x2 * x ; x4 = x3 * x ; x5 = x4 * x
+ if (x < tol2) then ! Taylor expansion
+   fx  = 4.0_dp * x2 * (1.0_dp/9.0_dp-2.0_dp*x2/15.0_dp+8.0_dp*x4/35.0_dp)
+   dfx = 8.0_dp * x * (1.0_dp/9.0_dp-4.0_dp*x2/15.0_dp+24.0_dp*x4/35.0_dp)
+ else
+   at2 = atan(2.0_dp*x) ; lg2 = log(1.0_dp+4.0_dp*x2)
+   fx  = 1.0_dp - 1.0_dp/(6.0_dp*x2) - 4.0_dp*at2/(3.0_dp*x) + &
+      & (1.0_dp+12.0_dp*x2)*lg2/(24.0_dp*x4)
+   dfx = (8.0_dp*x3*at2+4.0_dp*x2-(1.0_dp+6.0_dp*x2)*lg2)/(6.0_dp*x5)
+ end if
+
+end subroutine fexchange
+!!***
+
+!!****f* m_paw_exactDC/correlation_yukawa
+!! NAME
+!! correlation_yukawa
+!!
+!! FUNCTION
+!!
+!! Compute the correlation contribution with a Yukawa potential
+!!
+!! INPUTS
+!!  rho = density at current point
+!!  lambda = parameter for Yukawa potential
+!!  grad = square of the gradient of the density
+!!  ixc = index of the XC functional
+!!
+!! OUTPUT
+!!  ec = correlation energy per particle
+!!  vc = correlation potential
+!!
+!! SOURCE
+
+subroutine correlation_yukawa(ec,vc,rho,lambda,grad,ixc)
+
+!Arguments ------------------------------------
+ integer, intent(in) :: ixc
+ real(dp), intent(in) :: grad,lambda,rho
+ real(dp), intent(out) :: ec,vc
+!Local variables ------------------------------
+ real(dp) :: aa_pbe,alb,alb_pow,arg_log,daadec,decdrho,den,df,dhdaa
+ real(dp) :: dhdrho,dhdtt,div,dttdrho,exp_pbe,fx,h_pbe,lg,pade,pow,q0
+ real(dp) :: q1,q1p,rhothird,rs,sqr_rs,tt
+ real(dp), parameter :: aa = 0.031091_dp,a1 = 0.21370_dp
+ real(dp), parameter :: b1 = 7.5957_dp,b2 = 3.5876_dp
+ real(dp), parameter :: b3 = 1.6382_dp,b4 = 0.49294_dp
+ real(dp), parameter :: a = 0.47808102_dp,b = 0.84449703_dp
+ real(dp), parameter :: c = 1.30089155_dp,d = 0.02949437_dp,beta = 1.34835105_dp
+ real(dp), parameter :: kffac = (3.0_dp*pi*pi)**third
+ real(dp), parameter :: rsfac = (3.0_dp/(4.0_dp*pi))**third
+ real(dp), parameter :: beta_pbe = 0.066725_dp,gamma_pbe = (1.0_dp-log(2.0_dp))/(pi*pi)
+!************************************************************************
+
+ if (abs(rho) < tol30) then
+   ec = 0.0_dp
+   vc = 0.0_dp
+   return
+ end if
+
+ rhothird = rho**third
+ rs = rsfac / rhothird
+ sqr_rs = sqrt(rs)
+
+ ! LDA correlation for Coulomb potential (PW91 parametrization)
+ q0  = -2.0_dp * aa * (1.0_dp+a1*rs)
+ q1  = 2.0_dp * aa * (b1*sqr_rs+b2*rs+b3*rs*sqr_rs+b4*rs*rs)
+ q1p = aa * (b1/sqr_rs+2._dp*b2+3._dp*b3*sqr_rs+4._dp*b4*rs)
+ den = 1.0_dp / (q1*q1+q1)
+ lg  = -log(q1*q1*den)
+ ec  = q0 * lg
+ vc  = -2.0_dp*aa*a1*lg - q0*q1p*den
+ vc  = ec - rs*vc/3.0_dp
+
+ ! Correction factor for Yukawa potential
+ ! Parametrization based on data from Savin, "Beyond the Kohn-Sham Determinant"
+ pow = c + d*log(1.0_dp+rs)
+ alb = a*lambda*(rs**b) ; alb_pow = alb**pow
+ fx  = (1.0_dp+alb_pow)**(beta-1.0_dp)
+ df  = beta * fx * alb_pow * (pow*b/rs+d*log(alb)/(1.0_dp+rs))
+ fx  = fx * (1.0_dp+alb_pow)
+
+ vc = vc/fx + ec*rs*df/(3.0_dp*fx*fx)
+ ec = ec/fx
+
+ if (ixc == 7 .or. ixc == -1012) return
+
+ tt = grad * pi / (rho*rho*16.0_dp*kffac*rhothird)
+ exp_pbe = exp(-ec/gamma_pbe)
+ aa_pbe = beta_pbe / (gamma_pbe*(exp_pbe-1.0_dp))
+ daadec = beta_pbe * exp_pbe / (gamma_pbe*gamma_pbe*(exp_pbe-1.0_dp)*(exp_pbe-1.0_dp))
+ decdrho = (vc-ec) / rho
+ div = 1.0_dp + aa_pbe*tt + aa_pbe*aa_pbe*tt*tt
+ pade = (1.0_dp+aa_pbe*tt) / div
+ arg_log = 1.0_dp + beta_pbe*tt*pade/gamma_pbe
+ h_pbe = gamma_pbe * log(arg_log)
+ dhdaa = -beta_pbe * tt * (2.0_dp*aa_pbe*tt*tt+aa_pbe*aa_pbe*tt*tt*tt) / (div*div*arg_log)
+ dttdrho = -7.0_dp * tt / (3.0_dp*rho)
+ dhdtt = beta_pbe * (pade-tt*(2.0_dp*aa_pbe*aa_pbe*tt+aa_pbe*aa_pbe*aa_pbe*tt*tt)/(div*div)) / arg_log
+ dhdrho = dhdtt*dttdrho + dhdaa*daadec*decdrho
+ vc = vc + h_pbe + rho*dhdrho
+ ec = ec + h_pbe
+
+end subroutine correlation_yukawa
+!!***
 
 END MODULE m_paw_exactDC
 !!***

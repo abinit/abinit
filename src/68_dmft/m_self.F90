@@ -438,7 +438,7 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
      end do ! isppol
      if (nsppol == 1 .and. nspinor == 1) occ(:,:) = occ(:,:) * two
      call compute_exactDC(lpawu,pawtab(itypat),paw_dmft%radgrid(itypat),occ(:,:), &
-                        & vdc(:,:),paw_dmft%edc(iatom),paw_dmft%edcdc(iatom))
+                        & vdc(:,:),paw_dmft%edc(iatom),paw_dmft%edcdc(iatom),paw_dmft%ixc)
      do isppol=1,nsppol
        do ispinor=1,nspinor
          hdc(iatom)%mat(1+(ispinor-1)*ndim:ispinor*ndim,1+(ispinor-1)*ndim:ispinor*ndim,isppol) = vdc(:,:)

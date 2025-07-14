@@ -49,10 +49,10 @@ MODULE m_forctqmc
      & diag_matlu,diff_matlu,fac_matlu,gather_matlu,init_matlu,magmomforb_matlu,magmomfspin_matlu, &
      & magmomfzeeman_matlu,matlu_type,print_matlu,printplot_matlu,prod_matlu,rotate_matlu,shift_matlu, &
      & slm2ylm_matlu,sym_matlu,symmetrize_matlu,xmpi_matlu,ylm2jmj_matlu,zero_matlu,magnfield_matlu
+ use m_numeric_tools, only : coeffs_gausslegint
  use m_oper, only : destroy_oper,gather_oper,identity_oper,init_oper,inverse_oper,oper_type
  use m_paw_correlations, only : calc_vee
  use m_paw_dmft, only : paw_dmft_type
- use m_paw_exactDC, only : grule
  use m_paw_numeric, only : jbessel => paw_jbessel
  use m_pawang, only : pawang_type
  use m_self, only : destroy_self,initialize_self,self_type
@@ -3543,16 +3543,8 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    ABI_MALLOC(tweights,(ngauss))
    ABI_MALLOC(tpoints,(ngauss))
 
-   ! Calculation of Gauss-Legendre grid (on [-1,1]) of size ngauss, only the zeros of [1...0] are returned, so the symmetric points
-   ! on [0...-1] are added afterwards
-   call grule(ngauss,tpoints(:),tweights(:))
-
-   ! Fill the symmetric t-points on [-1,0], and put array in ascending order
-   do i=1,ngauss/2  ! valid in both cases ngauss odd and ngauss even
-     tpoints(ngauss-i+1)  =   tpoints(i)
-     tpoints(i)           = - tpoints(i)
-     tweights(ngauss-i+1) =   tweights(i)
-   end do ! i
+   ! Calculation of Gauss-Legendre grid (on [-1,1]) of size ngauss
+   call coeffs_gausslegint(-one,one,tpoints(:),tweights(:),ngauss)
 
    dx = one / dble(nsub)
 
