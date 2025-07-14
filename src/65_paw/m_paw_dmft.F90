@@ -335,6 +335,9 @@ MODULE m_paw_dmft
   integer :: ireadself
   ! Internal flag to indicate if an input self file must be read
 
+  integer :: ixc
+  ! Index of the XC functional
+
   integer :: kptopt
   ! Option to generate kpts
 
@@ -1060,6 +1063,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_wanrad          = dtset%dmft_wanrad
  paw_dmft%dmft_t2g             = dtset%dmft_t2g
  paw_dmft%dmft_x2my2d          = dtset%dmft_x2my2d
+ paw_dmft%ixc                  = dtset%ixc
 
  ! for entropy (alternate external calculation)
  paw_dmft%ientropy = 0
@@ -1567,13 +1571,14 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,filctqmcdatain,filsel
  real(dp), target, intent(in) :: dmatpawu(:,:,:,:)
  type(pawtab_type), intent(in) :: pawtab(dtset%ntypat)
 !Local variables ------------------------------------
- integer :: grid_unt,iatom,ierr,ifreq,ioerr,ir,irot,isym
+ integer :: iatom,ierr,ifreq,ioerr,ir,irot,isym
  integer :: itypat,lpawu,meshsz,nflavor,ngrid,nsym,unt
  real(dp) :: int1,step
  logical :: lexist
  character(len=4) :: tag_at
  character(len=500) :: message
  character(len=fnlen) :: tmpfil
+ integer, parameter :: grid_unt = 2000
 ! *********************************************************************
 
  if (dtset%ucrpa == 0) then
@@ -1659,7 +1664,6 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,filctqmcdatain,filsel
  if (dtset%iscf < 0 .and. paw_dmft%dmft_solv >= 5 .and. paw_dmft%dmft_solv <= 8) then
    tmpfil = trim(paw_dmft%filapp)//'_spectralfunction_realgrid'
    inquire(file=trim(tmpfil),exist=lexist)!,recl=nrecl)
-   grid_unt = 2000
    if (.not. lexist) then
      write(message,'(4x,a,i5,3a)') "File number",grid_unt," called ",trim(tmpfil)," does not exist"
      call wrtout(std_out,message,'COLL')

@@ -7,8 +7,8 @@
 !!  of Coulomb interactions in the PAW approach.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2024 K. Haule
-!! These routines were translated from embedded DMFT.
+!! Copyright (C) 2025-2025 ABINIT group
+!! These routines are inspired by K. Haule routines in embedded DMFT.
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -223,9 +223,9 @@ CONTAINS  !=====================================================================
 
  end do ! i
 
- write(message,'(4a)') "An error occurred when trying to find suitable lambda and ", &
-                     & "epsilon for your input values of upawu and jpawu.", ch10, &
-                     & "Either try different values or use dmft_lambda_yukawa and dmft_epsilon_yukawa."
+ write(message,'(4a)') "An error occurred when trying to find a suitable lambda ", &
+                     & "for your input values of upawu.", ch10, &
+                     & "Either try a different value of upawu or use dmft_lambda_yukawa."
 
  if (fkk(1) > upawu) ABI_ERROR(message)
 
@@ -241,8 +241,9 @@ CONTAINS  !=====================================================================
  lambda = lmb_temp
  eps    = one
 
- if (yukawa_param == 2) return
+ if (yukawa_param == 1) return
 
+ ! This part finds epsilon (not used anymore)
  if (lpawu > 0) then
 
    ! Default values from scipy

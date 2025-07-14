@@ -69,8 +69,7 @@ dmft_mxsf 0.1
 dmft_dc  7
 dmft_nominal 1
 dmft_dc2 8
-dmft_yukawa_param 4
-dmft_epsilon_yukawa 1.0
+dmft_yukawa_param 2
 dmft_lambda_yukawa 1.62
 
 dmft_triqs_off_diag 1
