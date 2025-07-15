@@ -376,7 +376,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    ABI_MALLOC(amass,(dtset%natom,nimage))
    do iimage=1,nimage
      if (any(amu_img(:,iimage)/=amu_img(:,1))) then
-       ABI_ERROR('HIST file is not compatible with variable masses!')
+       ABI_ERROR('Problem with variable masses!')
      end if
      amass(:,iimage)=amu_emass*amu_img(dtset%typat(:),iimage)
    end do
@@ -583,7 +583,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
        end if
 
 !    check change of rprim and rewriting in hist
-!    check change of xred and rewriting in hist
+ !    check change of xred and rewriting in hist
 
 !      Close output units ; restore defaults
        call localredirect(mpi_enreg%comm_cell,mpi_enreg%comm_world,dtset%nimage,mpi_enreg%paral_img,dtset%prtvolimg)
@@ -687,7 +687,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    end if
 
 !Temporary statement
-   110 continue
+!  110 continue
 
 !  Dont call the predictor at last time step (except for PIMD)
    if (itimimage>=ntimimage_max) call_predictor=(call_predictor.and.is_pimd)
@@ -717,6 +717,9 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      end if
    end if
 #endif
+
+!Temporary statement
+   110 continue
 
 !  Increment indexes
    if (itimimage>=ntimimage_max) exit
