@@ -3669,7 +3669,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  type(paw_ij_type),allocatable :: paw_ij1fr(:)
  type(pawrhoij_type),pointer :: pawrhoijfermi_unsym(:)
 ! real(dp),allocatable :: vlocal1(:,:,:,:),vlocal_tmp(:,:,:,:)
-! real(dp),allocatable :: v1zeeman(:,:),vtrial_tmp(:,:)
+! real(dp),allocatable :: v1hspinfield(:,:),vtrial_tmp(:,:)
 
 ! *********************************************************************
 

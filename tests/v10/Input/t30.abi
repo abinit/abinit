@@ -1,4 +1,4 @@
-# Crystalline Cr2O3 : computation of the total energy under zeeman field (axial symmetry)
+# Crystalline Cr2O3 : computation of the total energy under hspinfield (axial symmetry)
 # Test axial vector symmetry for the hspinfield
 # 8 datasets = 4 field directions \times 2 symmetry settings (full/nsym=1)
 
@@ -40,7 +40,7 @@
 # symmetry setting 
 nsym?2 1
 
-# Zeeman field definition
+# hspinfield field definition
 hspinfield2?   1   0   0
 hspinfield3?   0   1   0
 hspinfield4?   0   0   1
@@ -76,9 +76,9 @@ pseudos "Cr_r_LDA_1012_dojov0.4.psp8, O_r_LDA.psp8"
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords = 
-#%% description =  Cr2O3 total energy under Zeeman field in x/y/z direction,
+#%% description =  Cr2O3 total energy under hspinfield in x/y/z direction,
 #%%   with and without enforcing nsym=1 (identity symmetry only).
 #%%   Used to verify correct axial vector symmetry handling.
 #%% WARNING: In non-collinear calculations, the total energy differs between nsym=1
-#%%         and default symmetry settings for the Zeeman field response.  
+#%%         and default symmetry settings for the hspinfield response.  
 #%%<END TEST_INFO>
