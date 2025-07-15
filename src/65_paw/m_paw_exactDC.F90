@@ -80,7 +80,7 @@ CONTAINS  !=====================================================================
  integer :: i,ir,j,k,l,m,m1,mm,minusm,meshsz,ndim
  logical :: need_gradient
  real(dp) :: cphi,ctheta,ecc,excint,exx,grad,gradphi,gradr,gradth
- real(dp) :: onemsqrt2,phi,rad,rho,rhor,rs1,sexc,sphi,stheta,svxc
+ real(dp) :: onemsqrt2,phi,rad,rho,rhor,sexc,sphi,stheta,svxc
  real(dp) :: theta,vcc,vxcf,vxx
  real(dp) :: kcart(3)
  complex(dpc) :: dphi,dth,ylm_c
@@ -212,8 +212,8 @@ CONTAINS  !=====================================================================
        if (need_gradient) then
          stheta  = sin(thetas(i))
          gradr   = rho_angle(i,j) * proj_dr(ir)
-         gradth  = (rho_angle_dtheta(i,j)*rhor) / rad
-         gradphi = (rho_angle_dphi(i,j)*rhor) / (rad*stheta)
+         gradth  = (rho_angle_dtheta(i,j)*rhor) / max(rad,epsilon(one))
+         gradphi = (rho_angle_dphi(i,j)*rhor) / (max(rad,epsilon(one))*stheta)
          grad = gradr*gradr + gradth*gradth + gradphi*gradphi
        end if ! gradient
 
@@ -307,7 +307,7 @@ use m_numeric_tools, only : coeffs_gausslegint
  integer, intent(in) :: ln
  real(dp), intent(inout) :: phis(2*ln+1),thetas(ln+1),tweights(ln+1)
 !Local variables ------------------------------
- integer :: i,j,lg
+ integer :: i,lg
  real(dp) :: dsum,phi
  real(dp), parameter :: fake_shift = exp(-4.0_dp) ! small shift such that we do not start at phi=0
 !************************************************************************
@@ -491,6 +491,7 @@ subroutine correlation_yukawa(ec,vc,rho,lambda,grad,ixc)
  real(dp), intent(in) :: grad,lambda,rho
  real(dp), intent(out) :: ec,vc
 !Local variables ------------------------------
+ logical :: islambda
  real(dp) :: aa_pbe,alb,alb_pow,arg_log,daadec,decdrho,den,df,dhdaa
  real(dp) :: dhdrho,dhdtt,div,dttdrho,exp_pbe,fx,h_pbe,lg,pade,pow,q0
  real(dp) :: q1,q1p,rhothird,rs,sqr_rs,tt
@@ -524,13 +525,19 @@ subroutine correlation_yukawa(ec,vc,rho,lambda,grad,ixc)
  vc  = -2.0_dp*aa*a1*lg - q0*q1p*den
  vc  = ec - rs*vc/3.0_dp
 
+ islambda = (abs(lambda) > tol10)
+
  ! Correction factor for Yukawa potential
  ! Parametrization based on data from Savin, "Beyond the Kohn-Sham Determinant"
  pow = c + d*log(1.0_dp+rs)
  alb = a*lambda*(rs**b) ; alb_pow = alb**pow
  fx  = (1.0_dp+alb_pow)**(beta-1.0_dp)
- df  = beta * fx * alb_pow * (pow*b/rs+d*log(alb)/(1.0_dp+rs))
- fx  = fx * (1.0_dp+alb_pow)
+ if (islambda) then
+   df = beta * fx * alb_pow * (pow*b/rs+d*log(alb)/(1.0_dp+rs))
+ else
+   df = zero
+ end if
+ fx = fx * (1.0_dp+alb_pow)
 
  vc = vc/fx + ec*rs*df/(3.0_dp*fx*fx)
  ec = ec/fx
@@ -539,6 +546,8 @@ subroutine correlation_yukawa(ec,vc,rho,lambda,grad,ixc)
 
  tt = grad * pi / (rho*rho*16.0_dp*kffac*rhothird)
  exp_pbe = exp(-ec/gamma_pbe)
+ if (abs(exp_pbe-1.0_dp) < tol30) return
+
  aa_pbe = beta_pbe / (gamma_pbe*(exp_pbe-1.0_dp))
  daadec = beta_pbe * exp_pbe / (gamma_pbe*gamma_pbe*(exp_pbe-1.0_dp)*(exp_pbe-1.0_dp))
  decdrho = (vc-ec) / rho
