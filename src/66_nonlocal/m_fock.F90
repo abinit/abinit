@@ -636,7 +636,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
      ABI_MALLOC(fockcommon%forces_ikpt,(3,dtset%natom,nband))
      ABI_MALLOC(fockcommon%forces,(3,dtset%natom))
      fockcommon%forces=zero
-   endif
+   end if
    use_ACE=1 ! Default. Normal users do not have access to this variable, although the next line allows experts to make tests.
    if(dtset%userie==1729)use_ACE=0 ! Hidden possibility to disable ACE
 
@@ -1146,7 +1146,7 @@ subroutine fock_updateikpt(fock,ikpt,isppol)
 !* Set all the Fock contributions to the forces to 0.d0.
    if ((fock%optfor).and.(fock%use_ACE==0)) then
      fock%forces_ikpt=zero
-   endif
+   end if
 
 end subroutine fock_updateikpt
 !!***
@@ -1238,7 +1238,7 @@ subroutine fock_common_destroy(fock)
  if (allocated(fock%pawfgrtab)) then
     call pawfgrtab_free(fock%pawfgrtab)
     ABI_FREE(fock%pawfgrtab)
- endif
+ end if
 
  ! Put the integer to 0
  fock%ieigen=0
@@ -1247,7 +1247,7 @@ subroutine fock_common_destroy(fock)
 
  if (allocated(fock%symrec)) then
     ABI_FREE(fock%symrec)
- endif
+ end if
 
 !* [description of divergence in |q+G|=0]
 !* Put the real (dp) to 0
@@ -1277,7 +1277,7 @@ subroutine fock_BZ_destroy(fock)
  if (allocated(fock%cwaveocc_prj)) then
    call pawcprj_free(fock%cwaveocc_prj)
    ABI_FREE(fock%cwaveocc_prj)
- endif
+ end if
  ! Deallocate integer arrays
 
  ABI_SFREE(fock%kg_bz)
@@ -1403,7 +1403,7 @@ subroutine fock_calc_ene(dtset,fock,fock_energy,ikpt,nband,occ)
 !* accumulate Fock contributions to the forces.
 !     if (fock%optfor) then
        fock%forces(:,:)=fock%forces(:,:)+occ(iband)*dtset%wtk(ikpt)*fock%forces_ikpt(:,:,iband)
-!     endif
+!     end if
    end if
  end do
 
@@ -2171,10 +2171,12 @@ subroutine strfock(fockcommon,gprimd,fockstr,mpi_enreg,nfft,ngfft,&
          if(gsquar<tol10) then
            if (abs(fockcommon%hyb_mixing_sr)>tol8) cycle
            if (abs(fockcommon%hyb_mixing)>tol8) then
-             ! vqg(1) already contains the factor fockcommon%hyb_mixing
-             fockstr(1,idat)=fockstr(1,idat)+vqg(1)/3.0_dp*rhogsq
-             fockstr(2,idat)=fockstr(2,idat)+vqg(1)/3.0_dp*rhogsq
-             fockstr(3,idat)=fockstr(3,idat)+vqg(1)/3.0_dp*rhogsq
+             if (rcut_spencer_alavi) then
+               ! vqg(1) already contains the factor fockcommon%hyb_mixing
+               fockstr(1,idat)=fockstr(1,idat)+vqg(1)/3.0_dp*rhogsq
+               fockstr(2,idat)=fockstr(2,idat)+vqg(1)/3.0_dp*rhogsq
+               fockstr(3,idat)=fockstr(3,idat)+vqg(1)/3.0_dp*rhogsq
+             endif
              cycle
            end if
          end if
@@ -2253,9 +2255,11 @@ subroutine strfock(fockcommon,gprimd,fockstr,mpi_enreg,nfft,ngfft,&
            if(gsquar<tol10) then
              if (abs(fockcommon%hyb_mixing)>tol8 .and. abs(fockcommon%hyb_mixing_sr)<tol8) then
                ! vqg(1) already contains the factor fockcommon%hyb_mixing
-               fockstr1=fockstr1+vqg(1)/3.0_dp*rhogsq
-               fockstr2=fockstr2+vqg(1)/3.0_dp*rhogsq
-               fockstr3=fockstr3+vqg(1)/3.0_dp*rhogsq
+               if (rcut_spencer_alavi) then
+                 fockstr1=fockstr1+vqg(1)/3.0_dp*rhogsq
+                 fockstr2=fockstr2+vqg(1)/3.0_dp*rhogsq
+                 fockstr3=fockstr3+vqg(1)/3.0_dp*rhogsq
+               end if
              end if
 
            else
@@ -2266,7 +2270,7 @@ subroutine strfock(fockcommon,gprimd,fockstr,mpi_enreg,nfft,ngfft,&
                tot=fockcommon%hyb_mixing*rhogsq*piinv/(gsquar**2)*(1-cos(arg)-arg*sin(arg)/two)
                if (rcut_spencer_alavi) then
                  tot1=fockcommon%hyb_mixing*rhogsq/three*rcut*sin(arg)/sqrt(gsquar)
-               endif
+               end if
              end if
 
     !        Erfc screening
