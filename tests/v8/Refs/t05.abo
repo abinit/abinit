@@ -1,8 +1,8 @@
 
-.Version 10.2.2.4 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.3.6.1 of ABINIT, released May 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 17 Oct 2024.
-- ( at 15h26 )
-
-- input  file    -> /home/blancheta/git/abinit/build/tests/Test_suite/v8_t05/t05.abi
+.Starting date : Wed 25 Jun 2025.
+- ( at 16h46 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_hist-fix/tests/TestBot_MPI1/v8_t05/t05.abi
 - output file    -> t05.abo
 - root for input  files -> t05i
 - root for output files -> t05o
@@ -46,17 +46,17 @@ _ WF disk file :      0.026 Mbytes ; DEN or POT disk file :      0.477 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file
--  max_nthreads =    1
+-  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
             acell      8.0000000000E+00  8.0000000000E+00  1.1000000000E+01 Bohr
               amu      1.00000000E+00
             dtion      1.00000000E+01
              ecut      1.00000000E+01 Hartree
--          fftalg         312
+-          fftalg         512
          friction      2.00000000E-04
            imgmov           9
           irandom           1
@@ -126,7 +126,7 @@ P           mkmem           1
 
 ================================================================================
 == DATASET  1 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -147,9 +147,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Moving images of the cell...
 
  This is a PIMD calculation from scratch
- In the initial configuration, the temperature is    600.00000 K
 
- At PIMD time step     1, the temperature is   601.92833 K
+ At PIMD time step     1, the temperature is   600.00000 K
 
  Energy:
    Internal energy (PRIMITIVE estimator) =      -3.327992245 Ha
@@ -200,40 +199,40 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
  Velocities:
  vel
-     -0.0000036373      0.0000111262     -0.0000223722
-      0.0011585254     -0.0000836288      0.0012615548
-      0.0019469438      0.0002748851      0.0003656762
-      0.0000010548      0.0000146120      0.0000020768
-      0.0009240214     -0.0031452218      0.0002087699
-      0.0000731431     -0.0029595508     -0.0008790004
+      0.0000000000      0.0000000000      0.0000000000
+      0.0011606697     -0.0000796922      0.0012155049
+      0.0019697060      0.0002743360      0.0003735486
+      0.0000000000      0.0000000000      0.0000000000
+      0.0009351985     -0.0031200066      0.0001989870
+      0.0000987496     -0.0029252156     -0.0008529976
  vel_2img
-      0.0000049645      0.0000322655     -0.0000285280
-      0.0004190068     -0.0003237257      0.0011794826
-     -0.0004137420      0.0010143093      0.0009361439
-      0.0000105251     -0.0000004635     -0.0000598266
-     -0.0005061025     -0.0006140018     -0.0000722611
-      0.0017361958     -0.0027629120     -0.0017172987
+      0.0000000000      0.0000000000      0.0000000000
+      0.0003880263     -0.0002915555      0.0011978979
+     -0.0003678744      0.0010107577      0.0009181701
+      0.0000000000      0.0000000000      0.0000000000
+     -0.0004847450     -0.0005830368     -0.0001195256
+      0.0017147684     -0.0027934982     -0.0017401111
  vel_3img
-     -0.0000222939      0.0000140142     -0.0000467008
-      0.0007166176      0.0007731428      0.0008635638
-     -0.0001651546      0.0027734236      0.0001096735
-      0.0000148514      0.0000034652      0.0000116843
-     -0.0004880456      0.0017891505      0.0014926865
-     -0.0004852502     -0.0002275274      0.0000785900
+      0.0000000000      0.0000000000      0.0000000000
+      0.0007138573      0.0007793799      0.0008774207
+     -0.0001511648      0.0028124160      0.0001130101
+      0.0000000000      0.0000000000      0.0000000000
+     -0.0004733857      0.0018248114      0.0015125513
+     -0.0005032215     -0.0002604180      0.0001149816
  vel_4img
-      0.0000074528      0.0000260817      0.0000618244
-     -0.0007047121     -0.0000599044      0.0004500001
-     -0.0014222163      0.0012524251     -0.0020809342
-      0.0000348731     -0.0000104050     -0.0000022622
-     -0.0020450975      0.0003896013     -0.0015572611
-     -0.0001879993      0.0017247877      0.0016641158
+      0.0000000000      0.0000000000      0.0000000000
+     -0.0007180902     -0.0001097952      0.0004287737
+     -0.0014609167      0.0012550179     -0.0021166998
+      0.0000000000      0.0000000000      0.0000000000
+     -0.0020291775      0.0003904782     -0.0015549412
+     -0.0001884671      0.0016816135      0.0016330775
  vel_5img
-      0.0000048723     -0.0000544170      0.0000257772
-     -0.0015588800     -0.0004187255      0.0007559853
-     -0.0002961622     -0.0002277103     -0.0001203741
-      0.0000315011     -0.0000110604     -0.0000075398
-     -0.0001319034     -0.0007070399     -0.0012766888
-      0.0013466478      0.0015130039     -0.0015965571
+      0.0000000000      0.0000000000      0.0000000000
+     -0.0015420280     -0.0004355167      0.0007763668
+     -0.0002600668     -0.0002118794     -0.0001298431
+      0.0000000000      0.0000000000      0.0000000000
+     -0.0001150844     -0.0006935529     -0.0012851121
+      0.0013132463      0.0014753566     -0.0015610600
 
 ------------------------------------------------------------
  Moving images of the cell...
@@ -596,10 +595,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
  Cell   Total_energy[Ha]     deltae       diffor       residm         res2
     1   -3.36903529E+00  -3.68638E-09   2.21391E-06   4.14447E-11   2.81677E-09
-    2   -3.37032648E+00  -6.90697E-09   2.83300E-06   1.02393E-10   4.66236E-08
+    2   -3.37032648E+00  -6.90698E-09   2.83300E-06   1.02393E-10   4.66236E-08
     3   -3.37039789E+00  -7.44437E-09   3.72782E-06   7.25000E-11   1.60599E-08
     4   -3.36910266E+00  -1.47199E-09   2.51540E-06   1.97858E-11   7.99732E-09
-    5   -3.37003952E+00  -1.53650E-09   1.72778E-06   1.08393E-11   6.63157E-09
+    5   -3.37003952E+00  -1.53651E-09   1.72778E-06   1.08393E-11   6.63157E-09
 
 ------------------------------------------------------------
  Moving images of the cell...
@@ -696,9 +695,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Cell   Total_energy[Ha]     deltae       diffor       residm         res2
     1   -3.36836466E+00  -2.31498E-10   1.43730E-06   1.61938E-11   7.06856E-10
     2   -3.36985664E+00  -1.47132E-09   3.78077E-06   8.36460E-12   7.22829E-09
-    3   -3.37028257E+00  -5.13189E-11   1.80268E-06   7.48587E-12   5.33399E-10
+    3   -3.37028257E+00  -5.13229E-11   1.80268E-06   7.48587E-12   5.33399E-10
     4   -3.36821804E+00  -7.45619E-09   1.11034E-06   2.18655E-11   6.37212E-09
-    5   -3.36943062E+00  -3.80186E-10   2.71125E-06   2.48805E-12   8.70262E-09
+    5   -3.36943062E+00  -3.80187E-10   2.71125E-06   2.48805E-12   8.70262E-09
 
 ------------------------------------------------------------
  Moving images of the cell...
@@ -794,10 +793,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
  Cell   Total_energy[Ha]     deltae       diffor       residm         res2
     1   -3.36762573E+00  -2.30173E-10   1.48604E-06   1.54471E-11   6.50414E-10
-    2   -3.36931825E+00  -1.70633E-09   4.46177E-06   2.42712E-11   1.00069E-08
-    3   -3.37014103E+00  -4.11466E-11   1.62339E-06   7.93807E-12   3.69911E-10
+    2   -3.36931825E+00  -1.70632E-09   4.46177E-06   2.42712E-11   1.00069E-08
+    3   -3.37014103E+00  -4.11511E-11   1.62339E-06   7.93807E-12   3.69911E-10
     4   -3.36718071E+00  -7.30973E-09   9.91421E-07   1.87234E-11   6.20251E-09
-    5   -3.36874226E+00  -3.64433E-10   7.69989E-07   2.49603E-12   4.54159E-09
+    5   -3.36874226E+00  -3.64428E-10   7.69989E-07   2.49603E-12   4.54159E-09
 
 ------------------------------------------------------------
  Moving images of the cell...
@@ -892,11 +891,11 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  PATH-INTEGRAL MOLECULAR DYNAMICS (LANGEVIN) - TIME STEP     9
 
  Cell   Total_energy[Ha]     deltae       diffor       residm         res2
-    1   -3.36685599E+00  -2.13687E-10   1.40117E-06   1.81392E-11   7.04400E-10
+    1   -3.36685599E+00  -2.13685E-10   1.40117E-06   1.81392E-11   7.04400E-10
     2   -3.36872669E+00  -1.68673E-09   4.36918E-06   2.32581E-11   1.02508E-08
-    3   -3.36998188E+00  -3.85549E-11   1.60611E-06   9.31728E-12   3.55943E-10
+    3   -3.36998188E+00  -3.85518E-11   1.60611E-06   9.31728E-12   3.55943E-10
     4   -3.36603162E+00  -7.83031E-09   9.31660E-07   1.41315E-11   4.72847E-09
-    5   -3.36795810E+00  -9.21330E-10   3.76313E-06   3.40049E-11   1.51599E-08
+    5   -3.36795810E+00  -9.21327E-10   3.76313E-06   3.40049E-11   1.51599E-08
 
 ------------------------------------------------------------
  Moving images of the cell...
@@ -991,11 +990,11 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  PATH-INTEGRAL MOLECULAR DYNAMICS (LANGEVIN) - TIME STEP    10
 
  Cell   Total_energy[Ha]     deltae       diffor       residm         res2
-    1   -3.36603584E+00  -1.96149E-10   1.34857E-06   2.29466E-11   9.16166E-10
-    2   -3.36807290E+00  -1.27661E-09   3.54784E-06   8.02111E-12   7.19267E-09
+    1   -3.36603584E+00  -1.96147E-10   1.34857E-06   2.29466E-11   9.16166E-10
+    2   -3.36807290E+00  -1.27662E-09   3.54784E-06   8.02111E-12   7.19267E-09
     3   -3.36981729E+00  -6.29528E-10   4.82819E-06   1.33027E-13   1.88075E-08
     4   -3.36478677E+00  -8.19514E-09   1.00738E-06   9.45657E-12   3.16500E-09
-    5   -3.36708404E+00  -5.58119E-10   4.55015E-06   6.87187E-12   1.52404E-08
+    5   -3.36708404E+00  -5.58121E-10   4.55015E-06   6.87187E-12   1.52404E-08
 
 ------------------------------------------------------------
  Moving images of the cell...
@@ -1088,7 +1087,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      8.0000000000E+00  8.0000000000E+00  1.1000000000E+01 Bohr
               amu      1.00000000E+00
@@ -1129,7 +1128,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
                       -1.7186572168E-03 -4.0726397874E-04 -2.0222089052E-03
                        2.9713404555E-02  3.7045676607E-03 -7.3113845825E-04
                       -2.9179173763E-02 -3.3727318013E-03 -1.2287196539E-04
--          fftalg         312
+-          fftalg         512
          friction      2.00000000E-04
            imgmov           9
           irandom           1
@@ -1169,7 +1168,7 @@ P           mkmem           1
       strten_2img      4.0866520708E-04  2.1139265878E-04 -1.7021322109E-04
                        2.8109394701E-07 -4.9629911149E-06 -1.2226622102E-05
       strten_3img      3.1904224159E-04  2.0862296210E-04 -1.6858291699E-04
-                       3.5821395091E-07  7.3532514640E-07  8.4539113406E-09
+                       3.5821395091E-07  7.3532514640E-07  8.4539113415E-09
       strten_4img      3.7670322235E-04  2.1167404445E-04 -1.6808974104E-04
                        1.6613767378E-06  1.1855180441E-05  1.3955764626E-06
       strten_5img      2.4981615392E-04  2.1004193327E-04 -1.5356003049E-04
@@ -1177,36 +1176,36 @@ P           mkmem           1
            toldff      5.00000000E-06
             typat      1  1  1  1  1  1
            useylm           1
-              vel      1.4098644351E-04  1.0402808148E-04  1.6764534578E-05
-                       1.1290921838E-03  7.5718374219E-05  1.3350721725E-03
-                       1.3484981183E-03  1.5176248557E-04  4.3480633885E-04
-                       1.9146903482E-04 -1.6948991546E-05  2.8451790514E-04
-                       7.7693921888E-04 -3.1035453459E-03  6.4578360792E-05
-                       3.1091165740E-04 -2.9023133069E-03 -8.8086876436E-04
-         vel_2img      3.3075400597E-05  6.7888912041E-05  1.2949659712E-04
-                       2.7030720251E-04 -3.1709647688E-04  1.1301696665E-03
-                      -2.9980682851E-04  1.1406952214E-03  1.0266585053E-03
-                      -1.5128146266E-04 -1.2526064701E-05 -2.5873612033E-04
-                      -2.5860809637E-04 -5.3388093355E-04 -9.8878501741E-05
-                       1.3860612468E-03 -2.6846728975E-03 -1.5784666795E-03
-         vel_3img     -1.9627254920E-05 -1.3028809236E-05 -2.1712528382E-04
-                       6.2757616184E-04  6.9860346073E-04  7.6534995104E-04
-                       1.2675626051E-04  2.6457822514E-03  1.2183600837E-05
-                       1.1193536236E-05  2.2539061172E-04  1.1465514580E-04
-                      -6.2752877959E-04  1.4894703281E-03  1.3537608168E-03
-                      -5.9742901133E-04 -1.3131882054E-04 -1.1203294912E-04
-         vel_4img      3.9906039635E-05 -6.8863208237E-05  5.6243045569E-05
-                      -6.1322732163E-04  5.2793337365E-05  4.1370689546E-04
-                      -1.2963961558E-03  1.3677876144E-03 -1.9922125576E-03
-                      -6.4978298135E-05 -2.7591085469E-04 -1.7294484479E-04
-                      -1.8077606265E-03  3.3444846995E-04 -1.3486850950E-03
-                      -3.3981534284E-04  1.7968648619E-03  1.5788108654E-03
-         vel_5img     -2.1492842352E-05 -3.7137332355E-05  1.8121220888E-04
-                      -1.0749492320E-03 -4.3803541611E-04  7.0711463015E-04
-                      -3.4680620098E-04 -2.9103159795E-04 -1.4646866949E-04
-                       6.4566329848E-05  8.6075769009E-05 -1.0204689971E-04
-                      -1.2417388930E-04 -8.3860463894E-04 -1.1741047526E-03
-                       1.1865425083E-03  1.4276049158E-03 -1.5225301226E-03
+              vel      1.4859158702E-04  9.4079545260E-05 -2.3503057957E-05
+                       1.0957886086E-03  6.2572858705E-05  1.3475777870E-03
+                       1.3192605520E-03  1.8400998475E-04  4.6744607164E-04
+                       1.7976826369E-04 -5.3614857264E-05  2.8226097942E-04
+                       7.5901167327E-04 -3.0758692521E-03  4.9101278208E-05
+                       2.7844308517E-04 -2.9192976951E-03 -8.9727187489E-04
+         vel_2img     -2.1987024547E-05  1.1339994141E-04  1.2845652165E-04
+                       2.8101179538E-04 -2.3551262263E-04  1.1410052369E-03
+                      -2.7994407339E-04  1.1654372705E-03  9.9041551581E-04
+                      -1.2171562137E-04  2.1450711302E-05 -2.5394042623E-04
+                      -2.2103837604E-04 -5.3354313994E-04 -1.0819370332E-04
+                       1.3658908675E-03 -2.6775723784E-03 -1.5626148126E-03
+         vel_3img     -7.2380523964E-05 -6.4278288616E-05 -1.9431295596E-04
+                       6.3624125524E-04  6.8726026685E-04  7.3962683655E-04
+                       1.2747584376E-04  2.6501664423E-03  2.9844756647E-05
+                       4.2522878525E-05  2.0487568041E-04  1.3652498960E-04
+                      -6.2525285032E-04  1.4824605926E-03  1.3581456084E-03
+                      -5.8154962383E-04 -1.2004652013E-04 -8.2078284767E-05
+         vel_4img      3.4116108502E-06 -2.3489225156E-05  7.3189494342E-05
+                      -6.2626557930E-04  6.1077233256E-05  3.9200799647E-04
+                      -1.2833904295E-03  1.2889748626E-03 -1.9879939564E-03
+                      -4.4075519298E-05 -2.9007806795E-04 -1.8261467623E-04
+                      -1.8244847512E-03  3.2258264845E-04 -1.3523837616E-03
+                      -3.3969738565E-04  1.7549930987E-03  1.5369436932E-03
+         vel_5img     -4.8309293597E-06 -4.0349708684E-05  1.9160375469E-04
+                      -1.0727766311E-03 -4.2405486425E-04  7.3288323267E-04
+                      -3.3067676603E-04 -2.8028018861E-04 -1.0080946263E-04
+                       6.4028988336E-05  3.8422710747E-05 -1.0112376952E-04
+                      -6.5214523522E-05 -7.9675260769E-04 -1.1951310226E-03
+                       1.2138335992E-03  1.4029755687E-03 -1.5550619886E-03
           wtatcon      1.00000000E-01 -3.00000000E+00  5.50000000E-01
                        0.00000000E+00  0.00000000E+00  0.00000000E+00
                        0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1344,7 +1343,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1356,12 +1355,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1379,7 +1378,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1394,15 +1393,15 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          4.8  wall=          4.8
+- Proc.   0 individual time (sec): cpu=         10.0  wall=         10.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered 297 WARNINGs and  22 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.8  wall=          4.8
++Overall time at end (sec) : cpu=         10.0  wall=         10.0
