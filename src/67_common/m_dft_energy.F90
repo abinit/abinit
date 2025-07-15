@@ -606,7 +606,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
        my_bandfft_kpt => bandfft_kpt(my_ikpt)
      else
        my_ikpt=ikpt
-       nblockbd=nband_k/mpi_enreg%bandpp
+       nblockbd=nband_k
        !if (nband_k/=nblockbd*mpi_enreg%nproc_fft) nblockbd=nblockbd+1
      end if
      blocksize=nband_k/nblockbd
