@@ -44,22 +44,16 @@ module m_wqk
  use m_special_funcs,  only : gaussian
  use m_time,           only : cwtime, cwtime_report, timab, sec2str
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
- use m_numeric_tools,  only : arth, linspace !, get_diag, print_arr
+ use m_numeric_tools,  only : arth, linspace ! print_arr
  use m_io_tools,       only : iomode_from_fname
  use m_fftcore,        only : ngfft_seq, sphereboundary, get_kg, print_ngfft
  !use m_krank,          only : krank_t, krank_from_kptrlatt
- !use m_cgtk,           only : cgtk_rotate
- !use m_cgtools,        only : cg_zdotc, cg_real_zdotc, cg_zgemm
  use m_crystal,        only : crystal_t
- use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map
- use m_bz_mesh,        only : isamek, kmesh_t, findqg0
+ !use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map
+ use m_bz_mesh,        only : kmesh_t, findqg0
  use m_gsphere,        only : gsphere_t
- use m_pawang,         only : pawang_type
- use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type
- use m_pawrhoij,       only : pawrhoij_type
- use m_pawfgr,         only : pawfgr_type
- use m_io_screening,   only : hscr_t, get_hscr_qmesh_gsph !, read_screening
+ use m_io_screening,   only : hscr_t, get_hscr_qmesh_gsph
  use m_vcoul,          only : vcoul_t
  !use m_occ,            only : get_fact_spin_tol_empty
  use m_ebands,         only : ebands_t, edos_t
@@ -72,10 +66,6 @@ module m_wqk
 
  private
 !!***
-
-#ifdef HAVE_MPI1
- include 'mpif.h'
-#endif
 
  public :: wqk_run  ! Main entry point to compute wqk matrix elements.
 
@@ -130,17 +120,17 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  integer,parameter :: LOG_MODQ = 1, LOG_MODK = 4, istwfk1 = 1, master = 0, ndat1 = 1
  integer :: id_required, approx_type, ikxc, option_test, nkxc, ig
  integer :: nkibz, my_rank, nsppol, iq_ibz, iq_bz, isym_qq, itim_qq
- integer :: cplex,nspinor,nprocs, ii, ib, my_is, spin, max_npw_xc, min_npw_xc, npw_x, npw_c
+ integer :: cplex,nspinor,nprocs, ii, ib, my_is, spin, npw_x, npw_c ! max_npw_xc, min_npw_xc,
  integer :: bstart_k, bstop_k, nband_k, ncols, mpw, ierr, ncerr
  integer :: bstart_kp, bstop_kp, nband_kp, ik_bz, bmin, bmax, max_nb
  integer :: ikp_ibz, isym_kp, trev_kp, npw_kp, istwf_kp, npw_kp_ibz, istwf_kp_ibz
  integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_k_ibz, istwf_k_ibz
  integer :: m_k, im_k, n_kp, in_kp, root_ncid, prtwqk, ne
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg_kp,nkpg_k,cnt, edos_intmeth, nqlwl, scr_iomode
- integer :: ikp_bz, my_ikp, my_nkp !, qbuf_size, iqbuf_cnt !, my_iq,
+ integer :: ikp_bz, my_ikp, my_nkp !, my_iq,
  real(dp) :: cpu_all, wall_all, gflops_all, cpu, wall, gflops, cpu_kp, wall_kp, gflops_kp ! cpu_qq, wall_qq, gflops_qq,
- real(dp) :: edos_step, edos_broad, ecut, e_mk, e_nkp, e_min, e_max, e_step, smear_mk, smear_mkq
- logical :: isirr_k, isirr_kp, qq_is_gamma, remove_exchange, print_time_kp ! print_time_kk,
+ real(dp) :: edos_step, edos_broad, ecut, e_mk, e_nkp, e_min, e_max, e_step, smear_mk, smear_nkp
+ logical :: isirr_k, isirr_kp, qq_is_gamma, remove_exchange, print_time_kp ! print_time_kk
  type(wfd_t) :: wfd
  type(kmesh_t) :: qmesh, kmesh
  type(gsphere_t),target :: gsph_x, gsph_c
@@ -149,23 +139,21 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  type(edos_t) :: edos
  type(epsm1_t) :: epsm1
  type(ddkop_t) :: ddkop
- !type(krank_t) :: krank_ibz
  character(len=fnlen) :: screen_filepath
  character(len=5000) :: msg, qkp_string
 !arrays
  integer :: g0_k(3), g0_kp(3), g0_qq(3), units(2), work_ngfft(18), gmax(3), mapl_k(6), mapl_kp(6), mg0(3)
  integer,allocatable :: kg_kp(:,:), kg_k(:,:), gbound_kp(:,:), gbound_k(:,:), gbound_c(:,:), gbound_x(:,:)
  integer,allocatable :: nband(:,:), wfd_istwfk(:) ! iq_buf(:,:), done_qbz_spin(:,:),
- !integer(i1b),allocatable :: itreat_qibz(:)
  integer, contiguous, pointer :: kg_c(:,:), kg_x(:,:)
- real(dp) :: kk_ibz(3), kk_bz(3), kp_ibz(3), kp_bz(3), qq_bz(3), kk_diff(3) ! qq_ibz(3),
+ real(dp) :: kk_ibz(3), kk_bz(3), kp_ibz(3), kp_bz(3), qq_bz(3), kk_diff(3) ! qq_ibz(3)
  complex(gwpc) :: ctmp_gwpc, mu
  character(len=fnlen) :: path
 !arrays
  real(dp) :: n0(ebands%nsppol)
  real(dp),allocatable :: qlwl(:,:), kpg_kp(:,:), kpg_k(:,:), ug_kp(:,:,:), ug_k(:,:), cg_work(:,:)
  real(dp),allocatable :: work(:,:,:,:), e_mesh(:), e_args(:), vcart_ibz(:,:,:,:), delta_mk(:), delta_nkp(:,:) !, my_gbuf(:,:,:,:,:,:)
- complex(gwpc),allocatable :: cwork_ur(:), rhotwg_mn_x(:,:,:), rhotwg_mn_c(:,:,:), w_rhotwg_c(:,:,:), vc_sqrt_gx(:), ur_nkp(:,:), ur_mk(:,:)
+ complex(gwpc),allocatable :: cwork_ur(:), rhotwg_mn_x(:,:,:), rhotwg_mn_c(:,:,:), w_rhotwg_mn_c(:,:,:), vc_sqrt_gx(:), ur_nkp(:,:), ur_mk(:,:)
  complex(gwpc),allocatable :: kxcg(:,:)
  complex(dp),allocatable :: w_ee(:,:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
@@ -202,7 +190,6 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ! TODO: support kptopt, change setup of k-points if tetra: fist tetra weights then k-points on the Fermi surface!
  ABI_MALLOC(fstab, (nsppol))
  call fstab_init(fstab, ebands, cryst, dtset, comm)
- if (my_rank == master) call fstab_print(fstab, units)
 
  bmin = huge(1); bmax = -1
  do spin=1,nsppol
@@ -256,17 +243,10 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ! reduce the number of wavevectors in the IBZ that must be stored in memory.
  !call qmesh%pack_by_stars()
 
- !ABI_ICALLOC(itreat_qibz, (gstore%nqibz))
- !itreat_qibz = 1
- !call wrtout(std_out, sjoin("P Number of q-points in the IBZ treated by this proc: " ,itoa(count(itreat_qibz == 1))))
- !ABI_FREE(itreat_qibz)
-
  ! Initialize Coulomb term on the IBZ of the qmesh. Use largest G-sphere.
  call kmesh%init(cryst, wfk_hdr%nkpt, wfk_hdr%kptns, dtset%kptopt)
 
- npw_x = gsph_x%ng; npw_c = gsph_c%ng
- min_npw_xc = min(npw_x, npw_c)
- max_npw_xc = max(npw_x, npw_c)
+ npw_x = gsph_x%ng; npw_c = gsph_c%ng !; min_npw_xc = min(npw_x, npw_c); max_npw_xc = max(npw_x, npw_c)
  if (gsph_x%ng >= gsph_c%ng) then
    call vcp%init(gsph_x, cryst, qmesh, kmesh, dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, gsph_x%ng, &
                  nqlwl, qlwl, comm)
@@ -399,7 +379,7 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ABI_MALLOC(gbound_x, (2*mgfft+8, 2))
 
  ! ====================================
- ! This is the g-sphere for W_{gg'}(pp)
+ ! This is the g-sphere for W_{gg'}(qq)
  ! ====================================
  ! Init g-sphere for the exchange part from ecutsigx.
  call sphereboundary(gbound_c, istwfk1, kg_c, mgfft, npw_c)
@@ -407,7 +387,7 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
 
  ABI_MALLOC(vc_sqrt_gx, (npw_x))
 
- ! Allocate g-vectors centered on k, k+q, k-p, and k+q-p.
+ ! Allocate g-vectors centered on k, k'
  ABI_MALLOC(kg_kp, (3, mpw))
  ABI_MALLOC(kg_k, (3, mpw))
 
@@ -418,8 +398,7 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  !ABI_MALLOC_OR_DIE(my_gbuf, (gqk%cplex, nb, nb, natom3, gqk%my_nk, qbuf_size), ierr)
  ABI_MALLOC(cwork_ur, (nfft*nspinor))
 
- ! Read symmetrized em1 from file and build ppmodel parameters.
- ! TODO: MPI-shared memory + compute my set of pp-vectors on ppm%new_setup
+ ! Read symmetrized em1 from file
  id_required = 4; ikxc = 0; approx_type = 0; option_test = 0; nkxc = 0
  ABI_MALLOC(kxcg, (nfftf, nkxc))
  scr_iomode = iomode_from_fname(screen_filepath)
@@ -431,14 +410,6 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  call epsm1%malloc_epsm1_qbz(npw_c, epsm1%nomega)
  ABI_FREE(kxcg)
 
- ! This parameter defines the size of the q-buffer used to store the g(k, q) e-ph matrix elements
- ! for all the k-point treated by this MPI rank.
- ! Increasing the buffer size increases the memory requirements
- ! but it leads to better performance as the number of IO operations is decreased.
- ! TODO: Should compute it on the basis of my_nkpt and my_nqpt
- !qbuf_size = 1
- !qbuf_size = 16
- !call wrtout(std_out, sjoin(" Begin computation of Wqk matrix elements with qbuf_size:", itoa(qbuf_size)), pre_newlines=1)
  call pstat_proc%print(_PSTAT_ARGS_)
 
  ! Open WQK.nc file and go to data mode.
@@ -459,8 +430,6 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
    NCF_CHECK(nctk_open_modify(root_ncid, strcat(dtfil%filnam_ds(4), "_WQK.nc") , comm))
    NCF_CHECK(nctk_set_datamode(root_ncid))
  end if
-
- !ABI_MALLOC(iq_buf, (2, qbuf_size))
 
  ! ===================
  ! Loop over k'-points
@@ -488,17 +457,17 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
    !print *, "ikp_ibz:", ikp_ibz, "kk:", kk, "kp_ibz:", kp_ibz
 
    ! Get npw_kp, kg_kp for kp_bz
-   call wfd%get_gvec_gbound(cryst%gmet, ecut, kp_bz, ikp_ibz, isirr_kp, dtset%nloalg, &  ! in
+   call wfd%get_gvec_gbound(cryst%gmet, ecut, kp_bz, ikp_ibz, isirr_kp, dtset%nloalg, & ! in
                             istwf_kp, npw_kp, kg_kp, nkpg_kp, kpg_kp, gbound_kp)        ! out
 
-   ! Precompute ur_nkp and for all n_kp bands.
+   ! Rotate from IBZ to BZ and compute ur_nkp for all n_kp bands.
    bstart_kp = fs%bstart_cnt_ibz(1, ikp_ibz); nband_kp = fs%bstart_cnt_ibz(2, ikp_ibz); bstop_kp = bstart_kp + nband_kp - 1
    ABI_MALLOC(ug_kp, (2, npw_kp*nspinor, nband_kp))
    call wfd%rotate_cg(bstart_kp, nband_kp, spin, kp_ibz, npw_kp, kg_kp, istwf_kp, &
                       cryst, mapl_kp, gbound_kp, work_ngfft, work, ug_kp, urs_kbz=ur_nkp)
 
    ! ==================
-   ! Loop over q-points
+   ! Loop over k-points
    ! ==================
    do ik_bz=1,fs%nkfs
 
@@ -513,15 +482,15 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
 
      ! Get npw_k, kg_k for k
      call wfd%get_gvec_gbound(cryst%gmet, ecut, kk_bz, ik_ibz, isirr_k, dtset%nloalg, &  ! in
-                              istwf_k, npw_k, kg_k, nkpg_k, kpg_k, gbound_k)      ! out
+                              istwf_k, npw_k, kg_k, nkpg_k, kpg_k, gbound_k)             ! out
      ABI_FREE(kpg_k)
 
-     ! Precompute ur_mk for all m_k bands.
      bstart_k = fs%bstart_cnt_ibz(1, ik_ibz); nband_k = fs%bstart_cnt_ibz(2, ik_ibz); bstop_k = bstart_k + nband_k - 1
      ABI_MALLOC(ug_k, (2, npw_k*nspinor))
      ABI_MALLOC(rhotwg_mn_x, (npw_x*nspinor, nband_k, nband_kp))
 
      do m_k=bstart_k, bstop_k
+       ! Rotate from IBZ to BZ and compute ur_mk
        im_k = m_k - bstart_k + 1
        call wfd%rotate_cg(m_k, ndat1, spin, kk_ibz, npw_k, kg_k, istwf_k, &
                           cryst, mapl_k, gbound_k, work_ngfft, work, ug_k, urs_kbz=ur_mk(:,im_k))
@@ -541,10 +510,8 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
      mg0 = [1, 1, 1]
      call findqg0(iq_bz, g0_qq, kk_diff, qmesh%nbz, qmesh%bz, mG0)
 
-     ! Find the corresponding irred pp-point in the pp_mesh.
+     ! Find the corresponding irred qq-point in qmesh.
      call qmesh%get_bz_item(iq_bz, qq_bz, iq_ibz, isym_qq, itim_qq)
-
-     !qq_bz = qmesh%bz(:, iq_bz)
      qq_is_gamma = sum(qq_bz**2) < tol14
 
      ! Find k + q in the extended zone and extract symmetry info.
@@ -552,17 +519,10 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
      !
      !   k + q = k_bz + g0_bz = IS(k_ibz) + g0_ibz + g0_bz
      !
-     !kq = kk + qq_bz
-     ! TODO
-     !kk = ??
-     !kb_bz
-     !ikq_fs = fs%findkg0(kq, g0_kq)
-     !if (ikq_fs == -1) cycle
 
      ! Get Fourier components of the Coulomb interaction in the BZ
      ! In 3D systems, neglecting umklapp: vc(Sq,sG) = vc(q,G) = 4pi/|q+G|**2
      ! The same relation holds for 0-D systems, but not in 1-D or 2D systems. It depends on S.
-
      ! NOTE: vc_sqrt_gx is dimensioned with npw_x --> use rottb table from gsph_x.
      do ig=1,npw_x
        vc_sqrt_gx(gsph_x%rottb(ig, itim_qq, isym_qq)) = vcp%vc_sqrt(ig, iq_ibz)
@@ -572,51 +532,46 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
      call epsm1%rotate_iqbz(iq_bz, hscr%nomega, npw_c, gsph_c, qmesh, remove_exchange)
 
      ! Compute \sum_{gg'} (M_g^{kn,k'm})^* W_{gg'}(q) M_g'^{kn,k'm} with k' = k + q.
-
      ! TODO: nspinor
      ABI_MALLOC(rhotwg_mn_c, (npw_c*nspinor, nband_k, nband_kp))
      rhotwg_mn_c(:,:,:) = rhotwg_mn_x(1:npw_c,:,:)
 
-     ABI_MALLOC(w_rhotwg_c, (npw_c*nspinor, nband_k, nband_kp))
      ncols = nband_k * nband_kp
+     ABI_MALLOC(w_rhotwg_mn_c, (npw_c*nspinor, nband_k, nband_kp))
 
      call xgemm("N", "N", npw_c, ncols, npw_c, cone_gw, epsm1%epsm1_qbz(:,:,1), npw_c, rhotwg_mn_c(:,:,1), npw_c*nspinor, &
-                czero_gw, w_rhotwg_c(:,:,1), npw_c)
+                czero_gw, w_rhotwg_mn_c(:,:,1), npw_c)
 
      !do in_kp=1, nband_k
      !  do im_k=1, nband_kq
-     !    w_rhotwg_c(:,in_kp,im_k) = matmul(epsm1%epsm1_qbz(:,:,1), rhotwg_mn_c(:,im_k,in_kp))
+     !    w_rhotwg_mn_c(:,in_kp,im_k) = matmul(epsm1%epsm1_qbz(:,:,1), rhotwg_mn_c(:,im_k,in_kp))
      !  end do
      !end do
      !print *,  " rhotwg_mn_c",  maxval(abs(rhotwg_mn_c)), maxloc(abs(rhotwg_mn_c))
-     !print *, "w_rhotwg_c:", maxval(abs(w_rhotwg_c))
+     !print *, "w_rhotwg_mn_c:", maxval(abs(w_rhotwg_mn_c))
 
      ! Precompute delta(e - e_nkp - ef).
-     do m_k=bstart_k, bstop_k
-       im_k = m_k - bstart_k + 1
-       e_nkp = ebands%eig(m_k, ik_ibz, spin)
-       e_args = e_mesh - e_nkp !+ ebands%fermie
-       smear_mkq = 0.1_dp * eV_Ha
-       delta_nkp(:, im_k) = gaussian(e_args, smear_mkq)
+     do n_kp=bstart_kp, bstop_kp
+       in_kp = n_kp - bstart_kp + 1
+       e_nkp = ebands%eig(n_kp, ik_ibz, spin)
+       e_args = e_mesh - e_nkp
+       smear_nkp = 0.1_dp * eV_Ha
+       delta_nkp(:, im_k) = gaussian(e_args, smear_nkp)
      end do
 
      do n_kp=bstart_kp, bstop_kp
        in_kp = n_kp - bstart_kp + 1
-       e_mk = ebands%eig(n_kp, ikp_ibz, spin)
-       e_args = e_mesh - e_mk ! + ebands%fermie
-       smear_mk = 0.1_dp * eV_Ha
-       delta_mk = gaussian(e_args, smear_mk)
+       e_nkp = ebands%eig(n_kp, ikp_ibz, spin)
        do m_k=bstart_k, bstop_k
          im_k = m_k - bstart_k + 1
-         e_nkp = ebands%eig(m_k, ik_ibz, spin)
-         smear_mkq = 0.1_dp * eV_Ha
-         !delta_nkp(:, im_k)
-         ctmp_gwpc = xdotc(npw_c*nspinor, rhotwg_mn_c(:,im_k,in_kp), 1, w_rhotwg_c(:,im_k, in_kp), 1)
+         e_mk = ebands%eig(m_k, ik_ibz, spin)
+         smear_mk = 0.1_dp * eV_Ha
+         ctmp_gwpc = xdotc(npw_c*nspinor, rhotwg_mn_c(:,im_k,in_kp), 1, w_rhotwg_mn_c(:,im_k,in_kp), 1)
          if (remove_exchange) then
            ctmp_gwpc = ctmp_gwpc + xdotc(npw_x*nspinor, rhotwg_mn_x(:,im_k,in_kp), 1, rhotwg_mn_x(:,im_k,in_kp), 1)
          end if
          !print *, "ctmp_gwpc:", ctmp_gwpc
-         !mu = mu + ctmp_gwpc * gaussian(e_mk - ebands%fermie, smear_mk) * gaussian(e_nkp - ebands%fermie, smear_mkq)
+         !mu = mu + ctmp_gwpc * gaussian(e_mk - ebands%fermie, smear_mk) * gaussian(e_mp, smear_mk)
          ! Computes: A := A + alpha * x * y^T
          !w_ee =
          !call dger(ne, ne, alpha, x, incx, y, incy, w_ee, lda)
@@ -625,7 +580,7 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
 
      ABI_FREE(rhotwg_mn_x)
      ABI_FREE(rhotwg_mn_c)
-     ABI_FREE(w_rhotwg_c)
+     ABI_FREE(w_rhotwg_mn_c)
 
      !print_time_kk = my_rank == 0 .and. (iq_bz <= LOG_MODQ .or. mod(iq_bz, LOG_MODQ) == 0)
      !if (print_time_kk) then
@@ -634,14 +589,11 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
      !  call wrtout(std_out, sjoin(msg, ", for spin:", itoa(spin)), pre_newlines=1)
      !end if
 
-     ! Dump buffer
-     !if (iqbuf_cnt == qbuf_size) call dump_my_gbuf()
-
      !if (print_time_kk) then
      !  call inds2str(2, "My q-point", my_iq, my_nq, qmesh%nbz, msg)
      !  call cwtime_report(msg, cpu_qq, wall_qq, gflops_qq); if (iq_bz == LOG_MODQ) call wrtout(std_out, "...", do_flush=.True.)
      !end if
-   end do ! iq_ibz
+   end do ! ik_bz
 
     if (print_time_kp) then
       call inds2str(1, "My kp-point", my_ikp, my_nkp, fs%nkfs, msg)
@@ -653,13 +605,8 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  end do ! ikp_bz
  end associate
 
- ! Dump the remainder.
- !if (iqbuf_cnt /= 0) call dump_my_gbuf()
-
  ABI_FREE(ur_nkp)
  ABI_FREE(ur_mk)
- !ABI_FREE(iq_buf)
- !ABI_FREE(my_gbuf)
  !end do ! my_is
 
  !call xmpi_sum_master(w_ee, master, comm, ierr)
@@ -715,63 +662,6 @@ subroutine inds2str(ilevel, prefix, my_ik, my_nk, nk_tot, out_str)
  out_str = sjoin(prefix, itoa(my_ik), "/", itoa(my_nk), "[", itoa(nk_tot), "]")
  out_str = repeat(' ', 4 * ilevel) // trim(out_str)
 end subroutine  inds2str
-
-subroutine dump_my_gbuf()
-
- ! This function is called inside the double loop over (my_is, my_iq) or when we exit
- ! from the my_iq loop to dump the remainder that is still in the q-buffer,
- ! All the MPI procs in the (kpt_comm x pert_comm) grid shall call this contained routine
- ! as we have side-effects i.e. iqbuf_cnt set to 0.
-
- ! On disk we have the global arrays:
- !
- !      nctkarr_t("gvals", "dp", "gstore_cplex, nb, nb, natom3, glob_nk, glob_nq")
- !
- ! while the local MPI buffers are dimensioned as follows:
- !
- !      my_gbuf(2, nb, nb, natom3, gqk%my_nk, qbuf_size)
-
- ! If parallelism over perturbation is activated, only the procs treating the first perturbation
- ! i.e. the procs treating different k-points for this q are involved in IO
- ! as all the local buffers store results for all natom3 perturbations.
-
- !integer :: ii, iq_bz, iq_glob, my_iq
-
- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- ! FIXME: Recheck this part as we have way more levels of parallelism in GWPT
- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- !if (gqk%coords_qkpb_sumbp(3) /= 0) goto 10 ! Yes, I'm very proud of this GOTO.
- !if (gqk%pert_ppsum_bsum_comm%me /= 0) goto 10 ! Yes, I'm very proud of this GOTO.
-
- !iq_buf(:, iqbuf_cnt) = [my_iq, iq_bz]
- !my_iq = iq_buf(1, 1)
- !iq_glob = my_iq + gqk%my_qstart - 1
-
- !print *, "in dump_my_gbuf with start: ", [1, 1, 1, 1, gqk%my_kstart, iq_glob]
- !print *, "                  count; ", [gqk%cplex, gqk%nb, gqk%nb, gqk%natom3, gqk%my_nk, iqbuf_cnt]
- !print *, "my_gbuf", my_gbuf(:,:,:,natom3,1,1)
-
- ! NB: this is an individual IO operation
- !ncerr = nf90_put_var(spin_ncid, spin_vid("gvals"), my_gbuf, &
- !                     start=[1, 1, 1, 1, gqk%my_kstart, iq_glob], &
- !                     count=[gqk%cplex, gqk%nb, gqk%nb, gqk%natom3, gqk%my_nk, iqbuf_cnt])
- !NCF_CHECK(ncerr)
-
- ! Only one proc sets the entry in done_qbz_spin to 1 for all the q-points in the buffer.
- !if (all(gqk%coords_qkpb_sumbp(2:3) == [0, 0]))  then
- !  do ii=1,iqbuf_cnt
- !    iq_bz = iq_buf(2, ii)
- !    NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_done_qbz_spin"), 1, start=[iq_bz, spin]))
- !  end do
- !end if
-
- ! Zero the counter before returning
-!10 iqbuf_cnt = 0
-
- !NCF_CHECK(nf90_sync(spin_ncid))
- !NCF_CHECK(nf90_sync(root_ncid))
-
-end subroutine dump_my_gbuf
 
 integer function root_vid(var_name)
   character(len=*),intent(in) :: var_name
