@@ -217,7 +217,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
  logical :: is_hybrid_ncpp,wvlbigdft=.false.
  type(xcdata_type) :: xcdata
 !arrays
- real(dp) :: evxc,tsec(2),vmean(dtset%nspden),vzeeman(dtset%nspden)
+ real(dp) :: evxc,tsec(2),vmean(dtset%nspden),vhspinfield(dtset%nspden)
  real(dp),target :: vxctau_dum(0,0,0)
  real(dp),allocatable :: rhowk(:,:),v_constr_dft_r(:,:),vnew(:,:),xcart(:,:)
  real(dp),pointer :: vxctau_(:,:,:)
@@ -400,18 +400,18 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
 !------Produce residual vector and square norm of it-------------
 !(only if requested ; if optres==0)
 
-!Set up array for Zeeman field
-!EB vzeeman(:) = factor*( Hz, Hx+iHy; Hx-iHy, -Hz)
+!Set up array for hspinfield
+!EB vhspinfield(:) = factor*( Hz, Hx+iHy; Hx-iHy, -Hz)
 !EB factor = -g/2 * mu_B * mu_0 = -1/2*B in a.u.
-!EB <-- vzeeman might have to be allocated correctly --> to be checked
-! vzeeman = 1/2 ( -B_z, -B_x + iB_y ; -B_x - iB_y , B_z)
- vzeeman(:) = zero
+!EB <-- vhspinfield might have to be allocated correctly --> to be checked
+! vhspinfield = 1/2 ( -B_z, -B_x + iB_y ; -B_x - iB_y , B_z)
+ vhspinfield(:) = zero
 ! ABI_MALLOC(vzeemanHarm,(nfft,dtset%nspden))  ! SPr: debug stuff
 ! vzeemanHarm(:,:) = zero                        !
  if (any(abs(dtset%hspinfield(:))>tol8)) then
    if(dtset%nspden==2)then
 !    EB The collinear case has to be checked :
-!    EB Is it vzeeman(1) or (2) that has to be added here? to be checked in setvtr and energy as well
+!    EB Is it vhspinfield(1) or (2) that has to be added here? to be checked in setvtr and energy as well
 !    SPr: the density components are: rhor(1) => n_upup + n_dwndwn
 !                                     rhor(2) => n_upup
 !         the convention for the potential components is different:
@@ -419,11 +419,11 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
 !                                     v(2)    => v_dndn
 !         verified by comparing collinear and non-collinear calculations
 
-     vzeeman(1) =-half*dtset%hspinfield(3)  ! v_upup
-     vzeeman(2) = half*dtset%hspinfield(3)  ! v_dndn
+     vhspinfield(1) =-half*dtset%hspinfield(3)  ! v_upup
+     vhspinfield(2) = half*dtset%hspinfield(3)  ! v_dndn
 
-     !vzeeman(1) = zero  ! v_upup
-     !vzeeman(2) = zero  ! v_dndn
+     !vhspinfield(1) = zero  ! v_upup
+     !vhspinfield(2) = zero  ! v_dndn
 
      !nx=ngfft(1); ny=ngfft(2); nz=ngfft(3)
      !do kk=0,nz-1
@@ -441,15 +441,15 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
 
    else if(dtset%nspden==4)then
 
-     vzeeman(1)=-half*dtset%hspinfield(3)    ! v_upup
-     vzeeman(2)= half*dtset%hspinfield(3)    ! v_dndn
-     vzeeman(3)=-half*dtset%hspinfield(1)    ! Re(v_updn)
-     vzeeman(4)= half*dtset%hspinfield(2)    ! Im(v_updn)
+     vhspinfield(1)=-half*dtset%hspinfield(3)    ! v_upup
+     vhspinfield(2)= half*dtset%hspinfield(3)    ! v_dndn
+     vhspinfield(3)=-half*dtset%hspinfield(1)    ! Re(v_updn)
+     vhspinfield(4)= half*dtset%hspinfield(2)    ! Im(v_updn)
 
-     !vzeeman(1)=0.0
-     !vzeeman(2)=0.0
-     !vzeeman(3)=0.0
-     !vzeeman(4)=0.0
+     !vhspinfield(1)=0.0
+     !vhspinfield(2)=0.0
+     !vhspinfield(3)=0.0
+     !vhspinfield(4)=0.0
 
      !nx=ngfft(1); ny=ngfft(2); nz=ngfft(3)
      !do kk=0,nz-1
@@ -486,7 +486,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
 !$OMP PARALLEL DO COLLAPSE(2)
      do ispden=1,min(dtset%nspden,2)
        do ifft=1,nfft
-         vnew(ifft,ispden)=vhartr(ifft)+vpsp(ifft)+vxc(ifft,ispden)+vzeeman(ispden)+v_constr_dft_r(ifft,ispden)
+         vnew(ifft,ispden)=vhartr(ifft)+vpsp(ifft)+vxc(ifft,ispden)+vhspinfield(ispden)+v_constr_dft_r(ifft,ispden)
          !vnew(ifft,ispden)=vnew(ifft,ispden)+vzeemanHarm(ifft,ispden)
          if(mod(dtset%fockoptmix,100)==11)vnew(ifft,ispden)=vnew(ifft,ispden)+vxc_hybcomp(ifft,ispden)
          vresidnew(ifft,ispden)=vnew(ifft,ispden)-vtrial(ifft,ispden)
@@ -496,7 +496,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
 !$OMP PARALLEL DO COLLAPSE(2)
        do ispden=3,4
          do ifft=1,nfft
-           vnew(ifft,ispden)=vxc(ifft,ispden)+vzeeman(ispden)+v_constr_dft_r(ifft,ispden)
+           vnew(ifft,ispden)=vxc(ifft,ispden)+vhspinfield(ispden)+v_constr_dft_r(ifft,ispden)
            !vnew(ifft,ispden)=vnew(ifft,ispden)+vzeemanHarm(ifft,ispden)
            if(mod(dtset%fockoptmix,100)==11)vnew(ifft,ispden)=vnew(ifft,ispden)+vxc_hybcomp(ifft,ispden)
            vresidnew(ifft,ispden)=vnew(ifft,ispden)-vtrial(ifft,ispden)
@@ -585,7 +585,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
 !$OMP PARALLEL DO COLLAPSE(2)
      do ispden=1,min(dtset%nspden,2)
        do ifft=1,nfft
-         vtrial(ifft,ispden)=vhartr(ifft)+vpsp(ifft)+vxc(ifft,ispden)+vzeeman(ispden)+v_constr_dft_r(ifft,ispden)
+         vtrial(ifft,ispden)=vhartr(ifft)+vpsp(ifft)+vxc(ifft,ispden)+vhspinfield(ispden)+v_constr_dft_r(ifft,ispden)
          !vtrial(ifft,ispden)=vtrial(ifft,ispden)+vzeemanHarm(ifft,ispden)
          if(mod(dtset%fockoptmix,100)==11)vtrial(ifft,ispden)=vtrial(ifft,ispden)+vxc_hybcomp(ifft,ispden)
        end do
@@ -593,7 +593,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
      if(dtset%nspden==4) then
 !$OMP PARALLEL DO
        do ifft=1,nfft
-         vtrial(ifft,3:4)=vxc(ifft,3:4)+vzeeman(3:4)+v_constr_dft_r(ifft,3:4)
+         vtrial(ifft,3:4)=vxc(ifft,3:4)+vhspinfield(3:4)+v_constr_dft_r(ifft,3:4)
          !vtrial(ifft,3:4)=vtrial(ifft,3:4)+vzeemanHarm(ifft,3:4)
          if(mod(dtset%fockoptmix,100)==11)vtrial(ifft,3:4)=vtrial(ifft,3:4)+vxc_hybcomp(ifft,3:4)
        end do
