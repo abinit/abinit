@@ -126,6 +126,7 @@ module m_scfcv_core
  use m_pspini,           only : pspcor
  use m_ewald,            only : ewald
  use m_atm2fft,          only : atm2fft
+ use m_paw_correlations, only : loc_orbmom_cal
 
 #if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
@@ -391,6 +392,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  real(dp) :: red_efield2(3),red_efield2_old(3)
  real(dp) :: vpotzero(2)
  real(dp) :: maxmag , difmag  
+ real(dp) :: dmatdum(0,0,0,0)
+ real(dp) :: orb_mom_atom(10,3,dtset%natom)
 ! red_efield1(3),red_efield2(3) is reduced electric field, defined by Eq.(25) of Nat. Phys. suppl. (2009) [[cite:Stengel2009]]
 ! red_efield1(3) for fixed ebar calculation, red_efield2(3) for fixed reduced d calculation, in mixed BC
 ! red_efieldbar_lc(3) is local reduced electric field, defined by Eq.(28) of Nat. Phys. suppl. (2009) [[cite:Stengel2009]]
@@ -626,6 +629,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  gred(:,:)=zero
  fcart(:,:)=results_gs%fcart(:,:) ! This is a side effect ...
  intgden(:,:)=zero
+ orb_mom_atom=zero
 !results_gs should not be used as input of scfcv_core
 !HERE IS PRINTED THE FIRST LINE OF SCFCV
 
@@ -1769,8 +1773,14 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
        intgden0=intgden
        call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nspden,&
                             dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,intgden=intgden)
-      !Compute maximal magnet and maximal difference of magnet
+       !Compute maximal magnet and maximal difference of magnet
        call calmaxdifmag(cplex1,intgden,intgden0,dtset%natom,dtset%nspden,maxmag,difmag)
+       if (dtset%prt_lorbmag==1 .and. (dtset%nspinor==2) .and. (dtset%nspden==4 ) .and. (dtset%usepawu .ne. 0)) then
+         call loc_orbmom_cal(1,0,dmatdum,0,0,indsym,my_natom,dtset%natom,dtset%natpawu,&
+         &   dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,paw_ij,pawang,pawrad,dtset%pawprtvol,&
+         &   pawrhoij,pawtab,dtset%spinat,dtset%symafm,dtset%typat,0,dtset%usepawu,&
+         &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,orb_mom_atom=orb_mom_atom,maxmag=maxmag,difmag=difmag)
+       endif
      endif
      call scprqt(choice,cpus,deltae,diffor,maxmag,difmag,dtset,&
 &     eigen,etotal,favg,fcart,energies%e_fermie,energies%e_fermih,dtfil%fnameabo_app_eig,&
@@ -2037,7 +2047,14 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
        intgden0=intgden
        call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nspden,&
                             dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,intgden=intgden)
+       !Compute maximal magnet and maximal difference of magnet
        call calmaxdifmag(cplex1,intgden,intgden0,dtset%natom,dtset%nspden,maxmag,difmag)
+       if (dtset%prt_lorbmag==1 .and. (dtset%nspinor==2) .and. (dtset%nspden==4 ) .and. (dtset%usepawu .ne. 0)) then
+         call loc_orbmom_cal(1,0,dmatdum,0,0,indsym,my_natom,dtset%natom,dtset%natpawu,&
+         &   dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,paw_ij,pawang,pawrad,dtset%pawprtvol,&
+         &   pawrhoij,pawtab,dtset%spinat,dtset%symafm,dtset%typat,0,dtset%usepawu,&
+         &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,orb_mom_atom=orb_mom_atom,maxmag=maxmag,difmag=difmag)
+       endif
      endif
 
      call scprqt(choice,cpus,deltae,diffor,maxmag,difmag,dtset,&

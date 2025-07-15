@@ -3126,7 +3126,7 @@ end subroutine setrhoijpbe0
 subroutine loc_orbmom_cal(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym,my_natom,natom,&
 &                     natpawu,nspinor,nsppol,nsym,ntypat,paw_ij,pawang,pawrad,pawprtvol,pawrhoij,pawtab,&
 &                     spinat,symafm,typat,useexexch,usepawu, &
-&                     mpi_atmtab,comm_atom) ! optional arguments (parallelism)
+&                     mpi_atmtab,comm_atom,orb_mom_atom,maxmag,difmag) ! optional arguments (parallelism)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -3144,12 +3144,14 @@ subroutine loc_orbmom_cal(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,in
  type(pawrhoij_type),intent(in) :: pawrhoij(my_natom)
  type(pawtab_type),intent(in) :: pawtab(ntypat)
  integer,pointer :: my_atmtab(:)
+ real(dp),intent(inout), optional :: orb_mom_atom(10,3,natom),maxmag,difmag
+ real(dp):: orb_mom_atom0(10,3,natom)
 !Local variables ---------------------------------------
 !scalars
 logical :: paral_atom,my_atmtab_allocated
 character(len=5) :: orb_char
  integer :: cplex_dij,im1,im2,ndij,itypat,my_comm_atom
- integer :: my_lcur,my_iatom,coor,isp,lmin,lmax,me_atom
+ integer :: my_lcur,my_iatom,coor,isp,lmin,lmax,me_atom,mu
  real(dp),allocatable :: my_l_occmat(:,:,:,:)
  complex(dpc),allocatable :: op_l(:,:,:),cmfoccmat(:,:,:)
  real(dp) :: orb_mom(3)
@@ -3165,6 +3167,7 @@ character(len=5) :: orb_char
     integer :: llexexch(ntypat),llpawu(ntypat),nn,ii
 !*********************************************************************
 orb_char='pdfgh'
+if (.not. present(orb_mom_atom)) then
    write(message,*) '  '
     call wrtout([std_out, ab_out], message)
        write(message,*) '  '
@@ -3177,6 +3180,9 @@ orb_char='pdfgh'
     call wrtout([std_out, ab_out], message)
     write(message,*) '--------------------------------------------------'
     call wrtout([std_out, ab_out], message)
+else
+    orb_mom_atom0=orb_mom_atom
+endif
 
 
 !Set up parallelism over atoms
@@ -3387,6 +3393,7 @@ call  setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym,nato
              end if
 
   sum_orb_mom=sum_orb_mom+orb_mom
+if (.not. present(orb_mom_atom)) then
   if (my_lcur==1) then
       write(message,'(i5,a8,3f12.6)') my_iatom, orb_char(my_lcur:my_lcur), orb_mom(1),orb_mom(2),orb_mom(3)
   else
@@ -3394,20 +3401,31 @@ call  setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym,nato
   end if
 
   call wrtout([std_out, ab_out], message)
+else
+  orb_mom_atom(my_lcur,:,my_iatom)=orb_mom
+  do mu=1,3
+    maxmag=max(maxmag,abs(orb_mom_atom(my_lcur,mu,my_iatom)))
+    difmag=max(difmag,abs(orb_mom_atom(my_lcur,mu,my_iatom)-orb_mom_atom0(my_lcur,mu,my_iatom)))
+  enddo
+endif
 
 
 end do    !!!!!!!!! END DO lcur
+if (.not. present(orb_mom_atom)) then
     write(message,*) '--------------------------------------------------'
     call wrtout([std_out, ab_out], message)
+endif
 end do   !!!!!!!!! END DO natoms
 
 
+if (.not. present(orb_mom_atom)) then
     write(message,'(a,3f12.6)') ' Total (sum) ', sum_orb_mom(1),sum_orb_mom(2),sum_orb_mom(3)
     call wrtout([std_out, ab_out], message)
     write(message,*) '--------------------------------------------------'
     call wrtout([std_out, ab_out], message)
     write(message,*) ' '
     call wrtout([std_out, ab_out], message)
+endif
 
 end if  !!!!!!!!!!
 
