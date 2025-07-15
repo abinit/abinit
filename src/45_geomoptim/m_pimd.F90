@@ -560,6 +560,7 @@ end function pimd_temperature
 !!  vel_cell(3,3)= velocities of cell parameters (time derivative of rprimd)
 !!  xcart(3,natom,trotter)=cartesian coordinates of atoms in in each cell
 !!  xred(3,natom,trotter)=reduced coordinates of atoms in in each cell
+!!  [print_forces]= optional argument; if TRUE print all forces on atoms (default=FALSE)
 !!
 !! OUTPUT
 !!  -- only printing --
@@ -571,12 +572,14 @@ end function pimd_temperature
 subroutine pimd_print(constraint,constraint_output,eharm,eharm_virial,epot,&
 &          forces,inertmass,irestart,itimimage,kt,natom,optcell,prtstress,&
 &          prtvolimg,rprimd,stress,temperature,traj_unit,&
-&          trotter,vel,vel_cell,xcart,xred)
+&          trotter,vel,vel_cell,xcart,xred, &
+&          print_forces) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: constraint,irestart,itimimage,natom,optcell
  integer,intent(in) :: prtstress,prtvolimg,traj_unit,trotter
+ logical,optional,intent(in) :: print_forces
  real(dp),intent(in) :: eharm,eharm_virial,epot,kt,temperature
 !arrays
  real(dp),intent(in) :: constraint_output(2)
@@ -597,7 +600,7 @@ subroutine pimd_print(constraint,constraint_output,eharm,eharm_virial,epot,&
 !Temperature
 if(itimimage==1)then
    msg=ch10
-   if(mod(irestart,10)==0) then
+   if(mod(irestart,10)==0.and.trotter>1) then
      write(msg,'(2a)') ch10,' This is a PIMD calculation from scratch'
    else if (mod(irestart,10)==1) then
      write(msg,'(2a)') ch10,' This is a RESTART calculation'
@@ -609,18 +612,56 @@ if(itimimage==1)then
 !   call wrtout(ab_out,msg,'COLL')
 !   call wrtout(std_out,msg,'COLL')
  end if
- write(msg,'(2a,i5,a,f12.5,a)') ch10,&
-&  ' At PIMD time step ',itimimage,', the temperature is',temperature,' K'
+ if (trotter>1) then
+   write(msg,'(2a,i5,a,f12.5,a)') ch10,&
+&    ' At PIMD time step ',itimimage,', the temperature is',temperature,' K'
+ else
+   write(msg,'(2a,i5,a,f12.5,a)') ch10,&
+&    ' At time step ',itimimage,', the temperature is',temperature,' K'
+ end if
  call wrtout(ab_out,msg,'COLL')
  call wrtout(std_out,msg,'COLL')
 
 !Energies
- write(msg,'(4a,f18.9,a,a,a,f18.9,a,a)') ch10,&
-&  ' Energy:',ch10, &
-&  '   Internal energy (PRIMITIVE estimator) =',onehalf*dble(natom*trotter)*kt-eharm+epot ,' Ha',ch10, &
-&  '   Internal energy (VIRIAL    estimator) =',onehalf*dble(natom)*kt+eharm_virial+epot,' Ha',ch10
+ if (trotter>1) then
+   write(msg,'(4a,f18.9,a,a,a,f18.9,a,a)') ch10,&
+&    ' Energy:',ch10, &
+&    '   Internal energy (PRIMITIVE estimator) =',onehalf*dble(natom*trotter)*kt-eharm+epot ,' Ha',ch10, &
+&    '   Internal energy (VIRIAL    estimator) =',onehalf*dble(natom)*kt+eharm_virial+epot,' Ha',ch10
+ else
+   write(msg,'(2a,f18.9,a)') ch10,&
+&    ' Internal energy =',onehalf*dble(natom)*temperature*kb_HaK+epot ,' Ha'
+ end if
  call wrtout(ab_out,msg,'COLL')
  call wrtout(std_out,msg,'COLL')
+
+!Forces
+ if (present(print_forces)) then
+   if (print_forces) then
+     write(msg,'(2a)') ch10,' Forces on atoms:'
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     do iimage=1,trotter
+       select case(iimage)
+       case(1)
+         write(msg,'(a)') ' fcart'
+       case(2,3,4,5,6,7,8,9)
+         write(msg,'(a,i1,a)') ' fcart_',iimage,'img'
+       case(10:99)
+         write(msg,'(a,i2,a)') ' fcart_',iimage,'img'
+       case default
+         write(msg,'(a,i3,a)') ' fcart_',iimage,'img'
+       end select
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       do iatom=1,natom
+         write(msg,'(3f18.10)') forces(1:3,iatom,iimage)
+         call wrtout(std_out,msg,'COLL')
+         call wrtout(ab_out,msg,'COLL')
+       end do
+     end do
+   end if
+ end if
 
 !Stress tensor and pressure
  write(msg,'(2a,3(2a,3f18.9))') ch10,&
