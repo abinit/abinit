@@ -94,8 +94,8 @@ pseudos "28ni.paw, 8o.2.paw"
 #%% files_to_test = t106_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
 #%%                 t106_MPI8o_DS2_UnitaryMatrix_iatom0001, tolnlines = 14, tolabs = 1.e-4, tolrel = 1.e-3, fld_options=-medium;
 #%%                 t106_MPI8o_DS2_UnitaryMatrix_iatom0002, tolnlines = 14, tolabs = 1.e-4, tolrel = 1.e-3, fld_options=-medium;
-#%%                 t106_MPI8o_DS2_Selfmxent0001_isppol1_iflavor0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
-#%%                 t106_MPI8o_DS2_Selfmxent0002_isppol1_iflavor0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
+#%%                 t106_MPI8o_DS2_Selfmxent0001_is1_iflav0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
+#%%                 t106_MPI8o_DS2_Selfmxent0002_is1_iflav0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
 #%%                 t106_MPI8o_DS2_Gtau_diag_Leg_iatom0001.dat, tolnlines = 12, tolabs = 5.e-8, tolrel = 5.e-8, fld_options=-medium;
 #%%                 t106_MPI8o_DS2_Gtau_diag_Leg_iatom0002.dat, tolnlines = 4, tolabs = 5.e-8, tolrel = 5.e-8, fld_options=-medium;
 #%%                 t106_MPI8o_DS2_Gtau_offdiag_Leg_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
