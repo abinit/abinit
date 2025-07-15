@@ -514,6 +514,8 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
 
  call cwtime_report(" fstab_init%fs_weights:", cpu, wall, gflops)
 
+ if (xmpi_comm_rank(comm) == 0) call fstab_print(fstab, [std_out, ab_out])
+
 end subroutine fstab_init
 !!***
 
