@@ -407,7 +407,7 @@ real(dp) :: k0(3)
  else
    if(need_verbose)then
      write(msg,'(a,a,i2,a,a,a,80a)')&
-&     ch10,'=== [ionmov=',ab_mover%ionmov,'] ',specs%method,&
+&     ch10,'=== [ionmov=',ab_mover%ionmov,'] ',trim(specs%method),&
 &     ch10,('=',kk=1,80)
      call wrtout([std_out, ab_out], msg)
    end if
@@ -809,7 +809,7 @@ real(dp) :: k0(3)
        write(msg,'(a,3a,a,72a)')ch10,('-',kk=1,3),'OUTPUT',('-',kk=1,71)
        call wrtout([std_out, ab_out], msg)
      end if
-     if (useprtxfase) then
+     if (useprtxfase.and..not.ab_mover%use_pimd_routine) then
        call prtxfase(ab_mover,hist,itime_hist,ab_out,mover_AFTER)
        call prtxfase(ab_mover,hist,itime_hist,std_out,mover_AFTER)
      end if
@@ -852,7 +852,7 @@ real(dp) :: k0(3)
 !    ### 16. => Precondition forces, stress and energy
 !    ### 17. => Call to each predictor
 !    Some MOLDYN algorithms require pimd_param to be initialized
-     if(scfcv_args%dtset%ionmov==16) then
+     if(ab_mover%use_pimd_routine) then
        call pimd_init(scfcv_args%dtset,pimd_param,me==master,force_imgmov=9)
      end if
 
