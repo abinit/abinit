@@ -314,6 +314,10 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
    return
  end if
 
+ ! at line 1142 below, spaw may be used before it is set,
+ ! which breaks some compilers. Set it here to zero,
+ ! it will be recomputed if needed below
+ spaw=zero
 !Init energies
  if (option/=1) then
    e1xc=zero     ; e1xcdc=zero
@@ -926,7 +930,8 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
 
 !    Compute nuclear dipole contribution to energy
      if (option/=1) then
-       call pawaccenergy_nospin(enucdip,pawrhoij(iatom),paw_ij(iatom)%dijnd,cplex_dij,1,pawtab(itypat))
+       call pawaccenergy_nospin(enucdip,pawrhoij(iatom),paw_ij(iatom)%dijnd,&
+         & cplex_dij,1,pawtab(itypat))
      end if
 
    end if
@@ -938,15 +943,17 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
 
 !    Compute spin-orbit contribution to Dij
      if (option/=2.or.cplex_rhoij==2) then
-       call pawdijso(paw_ij(iatom)%dijso,cplex_dij,cplex,ndij,nspden,pawang,pawrad(itypat),pawtab(itypat), &
-&                    pawxcdev,spnorbscl,paw_an(iatom)%vh1,paw_an(iatom)%vxc1,znucl(itypat),&
-&                    nucdipmom=nucdipmom(1:3,iatom))
+       call pawdijso(paw_ij(iatom)%dijso,cplex_dij,cplex,ndij,nspden,pawang,&
+         & pawrad(itypat),pawtab(itypat),pawxcdev,spnorbscl,paw_an(iatom)%vh1,&
+         & paw_an(iatom)%vxc1,znucl(itypat),paw_ij(iatom)%zora,&
+         & nucdipmom=nucdipmom(1:3,iatom))
        paw_ij(iatom)%has_dijso=2
      end if
 
 !    Compute spin-orbit contribution to on-site energy
      if (option/=1.and.cplex_rhoij==2) then
-       call pawaccenergy(espnorb,pawrhoij(iatom),paw_ij(iatom)%dijso,cplex_dij,qphase,ndij,pawtab(itypat))
+       call pawaccenergy(espnorb,pawrhoij(iatom),paw_ij(iatom)%dijso,&
+         & cplex_dij,qphase,ndij,pawtab(itypat))
      end if
 
    end if

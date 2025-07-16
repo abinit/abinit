@@ -157,7 +157,8 @@ subroutine ingeo (acell,amu,atndlist,bravais,chrgat,dtset,field_red,field_red_ax
  real(dp),intent(inout) :: atndlist(3,natnd),chrgat(natom)
  real(dp),intent(inout) :: nucdipmom(3,natom),ratsph(ntypat)
  real(dp),intent(inout) :: spinat(3,natom)
- real(dp),intent(out) :: acell(3),amu(ntypat),field_red(3),field_red_axial(3),genafm(3),mixalch(npspalch,ntypalch)
+ real(dp),intent(out) :: acell(3),amu(ntypat),field_red(3),field_red_axial(3)
+ real(dp),intent(out) :: genafm(3),mixalch(npspalch,ntypalch)
  real(dp),intent(inout) :: rprim(3,3),tnons(3,msym) !vz_i
  real(dp),intent(out) :: vel(3,natom),vel_cell(3,3),xred(3,natom)
  real(dp),intent(in) :: znucl(npsp)

@@ -284,7 +284,7 @@ Variable(
     requires="[[natnd]] > 0 and [[iatnd]]",
     added_in_version="v10.5",
     text=r"""
-Provides an alternative input to [[nucdipmom]] for the atoms carrying explicit 
+Provides a simplified, alternative input to [[nucdipmom]] for the atoms carrying explicit 
 nuclear dipole moments. The number of atoms in the cell with explicit
 nuclear dipoles is [[natnd]]; the list of the atoms is [[iatnd]]; and the components
 of the dipole moment vector on each atom is given in [[atndlist]]. There are 3*[[natnd]]
@@ -7779,7 +7779,7 @@ Variable(
     requires="[[natnd]] > 0",
     added_in_version="v10.5",
     text=r"""
-Together with [[natnd]], provides an alternative input to [[nucdipmom]] for 
+Together with [[natnd]], provides a simplified, alternative input to [[nucdipmom]] for 
 the atoms carrying explicit nuclear dipole moments. The number of atoms in the cell with 
 explicit nuclear dipoles is [[natnd]]; the list of the atoms is [[iatnd]]; and the components
 of the dipole moment vector on each atom is given in [[atndlist]]. This simplified
@@ -11237,7 +11237,7 @@ Variable(
     mnemonics="Number of AToms with Nuclear Dipole moment",
     added_in_version="v10.5",
     text=r"""
-Provides an alternative input to [[nucdipmom]] for the atoms carrying explicit 
+Provides a simplified, alternative input to [[nucdipmom]] for the atoms carrying explicit 
 nuclear dipole moments. The number of atoms in the cell with explicit
 nuclear dipoles is [[natnd]]; the list of the atoms is [[iatnd]]; and the components
 of the dipole moment vector on each atom is given in [[atndlist]]. This simplified
@@ -13660,6 +13660,8 @@ moment values are entered in atomic units, as vectors in the Cartesian (not crys
 coordinate frame. For reference, note that
 one Bohr magneton has value $1/2$ in atomic units, while one nuclear
 Bohr magneton has value $2.7321\times 10^{-4}$ in atomic units.
+
+A simplified input to these values is provided by the variables [[natnd]], [[iatnd]], and [[atndlist]].
 """,
 ),
 
@@ -22728,13 +22730,18 @@ ZORA is an effective approximation to the full Dirac equation, which
 delivers reasonable values for relativistic effects at modest 
 cost [[cite:Autschbach2013]].
 The ZORA Hamiltonian includes kinetic energy couplings that are
-independent of electron spin, and additional terms depending explcitly
+independent of electron spin, and additional terms depending explicitly
 on electron spin. The default, [[zora]] 0, provides the usual nonrelativistic calculation.
 [[zora]] 1 activates kinetic energy terms, which currently include only those
 due to nuclear magnetic dipoles (see [[nucdipmom]]).
 [[zora]] 2 activates the spin-dependent terms, which include both spin-orbit couplings
-(so identical to [[pawspnorb]] 1) and terms arising from nuclear magnetic dipoles.
+(so identical to [[pawspnorb]] 1) and terms arising from nuclear magnetic dipoles if present.
 [[zora]] 3 activates both kinetic energy and electron spin terms.
+
+Negative values of [[zora]] are present only for debugging purposes. [[zora]] -1 permits only
+spin-orbit coupling, regardless of the presence of nuclear dipoles. [[zora]] -2 permits only 
+the electon spin-nuclear dipole through space interaciton, and [[zora]] -3 permits only the
+electron spin-nuclear dipole Fermi-contact-like interaction.
 """,
 ),
 
