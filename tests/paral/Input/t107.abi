@@ -94,7 +94,7 @@ pseudos "58ce.paw"
 #%% [NCPU_8]
 #%% files_to_test = t107_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
 #%% [extra_info]
-#%% authors = J. Bieder, B. Amadon, E. Castiel
+#%% authors = E. Castiel, J. Bieder, B. Amadon
 #%% keywords = DMFT, TRIQS
 #%% description = DFT+DMFT for Ce : test parallelism of TRIQS interface with self-consistency and off-diagonal elements in the cubic basis
 #%%<END TEST_INFO>

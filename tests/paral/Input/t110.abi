@@ -19,7 +19,7 @@ occopt 3 tsmear 700 K
 diemix 0.1
 nline    5
 nnsclo1  0
-nnsclo   10
+nnsclo   15
 fftalg   112
 
 nspinor 2
@@ -84,8 +84,8 @@ usepawu     14
 dmatpuopt  1   # choose expression of the density matrix
 lpawu   3   # U on d-orbitals of Ni, no U on oxygen
 upawu1  0.00     # values in Hartree
-upawu  6 eV     # values in Hartree
-jpawu  0.0000  # values in Hartree
+upawu  6 eV      # values in Hartree
+jpawu  0.1000  # values in Hartree
 
 pp_dirpath "$ABI_PSPDIR"
 pseudos "58ce.paw"
@@ -103,7 +103,7 @@ pseudos "58ce.paw"
 #%%                 t110_MPI8o_DS5_Gtau_offdiag_DLR_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
 #%%                 t110_MPI8o_DS5_Gtau_offdiag_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
 #%% [extra_info]
-#%% authors = J. Bieder, B. Amadon, E. Castiel
+#%% authors = E. Castiel, J. Bieder, B. Amadon
 #%% keywords = DMFT, TRIQS
 #%% description = DFT+DMFT for Ce : test TRIQS interface with different basis and spinors
 #%%<END TEST_INFO>

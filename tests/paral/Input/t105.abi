@@ -105,7 +105,7 @@ pseudos "23v.paw"
 #%%                 t105_MPI8o_DS2_Wannier_functions_iatom0001_001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
 #%%                 t105_MPI8o_DS2_DMFTOCCND, tolnlines = 688, tolabs = 0.1, tolrel = 1.1, fld_options=-easy;
 #%% [extra_info]
-#%% authors = B. Amadon, T. Cavignac, E. Castiel
+#%% authors = E. Castiel, B. Amadon, T. Cavignac
 #%% keywords = DMFT, TRIQS
 #%% description = DFT+DMFT for V : test TRIQS interface with KGB parallelization, spinors and off-diagonal elements in the JmJ basis
 #%% topics = DMFT

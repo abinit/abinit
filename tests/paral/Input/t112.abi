@@ -145,7 +145,7 @@ kptbounds3               # The four segments of the band structure are
 #%% nprocs_to_test = 8
 #%% max_nprocs = 8
 #%% [extra_info]
-#%% authors = F. Gendron, E. Castiel
+#%% authors = E. Castiel, F. Gendron
 #%% keywords = dmft_kspectralfunc, DMFT, TRIQS
 #%% description = Test for the spectral function with TRIQS
 #%%<END TEST_INFO>
