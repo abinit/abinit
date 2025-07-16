@@ -165,14 +165,14 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 &          pawxcdev,qphon,spnorbscl,ucvol,charge,vtrial,vxc,xred,znuc,&
 &          electronpositron_calctype,electronpositron_pawrhoij,electronpositron_lmselect,&
 &          atvshift,fatvshift,natvshift,nucdipmom,eijkl_is_sym,&
-&          mpi_atmtab,comm_atom,mpi_comm_grid,hyb_mixing,hyb_mixing_sr,zora)
+&          mpi_atmtab,comm_atom,mpi_comm_grid,hyb_mixing,hyb_mixing_sr)
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: cplex,enunit,ipert,my_natom,natom,nfft,nfftot
  integer,intent(in) :: nspden,ntypat,pawprtvol,pawspnorb,pawxcdev
  integer,optional,intent(in) :: electronpositron_calctype
- integer,optional,intent(in) :: comm_atom,mpi_comm_grid,natvshift,zora
+ integer,optional,intent(in) :: comm_atom,mpi_comm_grid,natvshift
  real(dp),intent(in) :: spnorbscl,ucvol,charge
  real(dp),intent(in),optional ::fatvshift,hyb_mixing,hyb_mixing_sr
  type(pawang_type),intent(in) :: pawang
@@ -200,7 +200,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
  integer, parameter :: PAWU_FLL=1,PAWU_AMF=2
  integer :: cplex_dij,iatom,iatom_tot,idij,ipositron,itypat,klmn,klmn1,lm_size,lmn2_size
  integer :: lpawu,my_comm_atom,my_comm_grid,natvshift_,ndij,nsploop,nsppol
- integer :: pawu_algo,pawu_dblec,qphase,usekden,usepawu,usexcnhat,zora_
+ integer :: pawu_algo,pawu_dblec,qphase,usekden,usepawu,usexcnhat
  logical :: dij_available,dij_need,dij_prereq
  logical :: dij0_available,dij0_need,dij0_prereq
  logical :: dijexxc_available,dijexxc_need,dijexxc_prereq
@@ -215,7 +215,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
  logical :: dijxcval_available,dijxcval_need,dijxcval_prereq
  logical :: dijU_available,dijU_need,dijU_prereq
  logical :: has_nucdipmom,my_atmtab_allocated,is_sym
- logical :: need_to_print,paral_atom,v_dijhat_allocated,usezora
+ logical :: need_to_print,paral_atom,v_dijhat_allocated
  real(dp) :: hyb_mixing_,hyb_mixing_sr_
  character(len=500) :: msg
 !arrays
@@ -237,9 +237,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 
  hyb_mixing_   =zero ; if(present(hyb_mixing))    hyb_mixing_   =hyb_mixing
  hyb_mixing_sr_=zero ; if(present(hyb_mixing_sr)) hyb_mixing_sr_=hyb_mixing_sr
-
- zora_ = 0; if(present(zora)) zora_ = zora
- usezora=(zora_.GT.0)
 
  natvshift_=0;if (present(natvshift)) natvshift_=natvshift
  if (natvshift_>0) then
@@ -837,7 +834,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        LIBPAW_ALLOCATE(dijso,(cplex_dij*qphase*lmn2_size,ndij))
        call pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
 &                    pawang,pawrad(itypat),pawtab(itypat),pawxcdev,spnorbscl,&
-&                    paw_an(iatom)%vh1,paw_an(iatom)%vxc1,znuc(itypat),&
+&                    paw_an(iatom)%vh1,paw_an(iatom)%vxc1,znuc(itypat),paw_ij(iatom)%zora,&
 &                    nucdipmom=nucdipmom(1:3,iatom))
        if (dijso_need) paw_ij(iatom)%dijso(:,:)=dijso(:,:)
        if (dij_need) paw_ij(iatom)%dij(:,:)=paw_ij(iatom)%dij(:,:)+dijso(:,:)
@@ -2463,8 +2460,8 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
    LIBPAW_BUG(msg)
  end if
 
- LIBPAW_ALLOCATE(zk1,(mesh_size))
  if(usezora) then
+   LIBPAW_ALLOCATE(zk1,(mesh_size))
    if (size(vh1,1)/=qphase*mesh_size.or.size(vh1,2)<1.or.size(vh1,3)<1) then
      msg='invalid sizes for vh1!'
      LIBPAW_BUG(msg)
@@ -2517,7 +2514,9 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
    call simp_gen(intgr3(kln),ff,pawrad)
  end do
  LIBPAW_DEALLOCATE(ff)
- LIBPAW_DEALLOCATE(zk1)
+ if(allocated(zk1)) then
+   LIBPAW_DEALLOCATE(zk1)
+ end if
 
  !---------------------------
  ! accumulate matrix elements
@@ -2571,7 +2570,8 @@ end subroutine pawdijnd
 !!
 !! FUNCTION
 !! Compute the spin-orbit contribution to the PAW
-!! pseudopotential strength Dij
+!! pseudopotential strength Dij and also the nuclear dipole 
+!! spin interactions.
 !! (for one atom only)
 !!
 !! INPUTS
@@ -2591,6 +2591,7 @@ end subroutine pawdijnd
 !!                                given on a (r,theta,phi) grid (v_size=angl_size)
 !!                                or on (l,m) spherical moments (v_size=lm_size)
 !!  znuc=nuclear charge
+!!  zora=use of zora terms
 !!
 !! OUTPUT
 !!  dijso(cplex_dij*qphase*lmn2_size,ndij)= spin-orbit Dij terms
@@ -2610,13 +2611,13 @@ end subroutine pawdijnd
 !!
 !! SOURCE
 
-subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
-&                   pawang,pawrad,pawtab,pawxcdev,spnorbscl,vh1,vxc1,znuc,&
-&                   nucdipmom)
+subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,pawang,pawrad,pawtab,&
+    & pawxcdev,spnorbscl,vh1,vxc1,znuc,zora,&
+    & nucdipmom)
 
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: cplex_dij,ndij,nspden,pawxcdev,qphase
+ integer,intent(in) :: cplex_dij,ndij,nspden,pawxcdev,qphase,zora
  real(dp), intent(in) :: spnorbscl,znuc
  type(pawang_type),intent(in) :: pawang
  type(pawrad_type),intent(in) :: pawrad
@@ -2632,7 +2633,7 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  integer :: lm_size,lmn2_size,mdir,mesh_size,ngnt,sdir
  real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
  real(dp) :: fact,me1,me2,rc,rr,rt,sme
- logical :: has_nucdipmom
+ logical :: has_nucdipmom,use_soc,use_sd,use_fc
  character(len=500) :: msg
 !arrays
  integer,pointer :: indklmn(:,:)
@@ -2648,6 +2649,32 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  angl_size=pawang%angl_size
  mesh_size=pawtab%mesh_size
  indklmn => pawtab%indklmn
+
+ select case(zora)
+   case(-3)
+     use_soc=.FALSE.; use_sd=.FALSE.; use_fc=.TRUE.
+   case(-2)
+     use_soc=.FALSE.; use_sd=.TRUE.; use_fc=.FALSE.
+   case(-1)
+     use_soc=.TRUE.; use_sd=.FALSE.; use_fc=.FALSE.
+   case(1)
+     ! this case really shouldn't appear as zora 1 means kinetic only and
+     ! no spin terms
+     use_soc=.FALSE.; use_sd=.FALSE.; use_fc=.FALSE.
+   case(2)
+     use_soc=.TRUE.; use_sd=.TRUE.; use_fc=.TRUE.
+   case(3)
+     use_soc=.TRUE.; use_sd=.TRUE.; use_fc=.TRUE.
+   ! the default case is a bit strange because of the legacy
+   ! feature that, although SOC in just one of several ZORA terms,
+   ! historically it was treated as "stand alone" by abinit.
+   ! so, this routine can be triggered in abinit by "pawspnorb 1"
+   ! without the use of the zora variable, so if we get to this point
+   ! in the code with zora=0, we still have the legacy
+   ! pawspnorb case to deal with
+   case default
+     use_soc=.TRUE.; use_sd=.FALSE.; use_fc=.FALSE.
+ end select
 
 !Check data consistency
  if (qphase/=1) then
@@ -2729,16 +2756,18 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
 
  LIBPAW_ALLOCATE(z_kernel,(mesh_size))
  LIBPAW_ALLOCATE(z_intgd,(mesh_size))
- LIBPAW_ALLOCATE(dijso_rad,(ij_size))
-
+ 
  ! spin-orbit kernel
- z_kernel(2:mesh_size) = dkdr(2:mesh_size)/pawrad%rad(2:mesh_size)
- call pawrad_deducer0(z_kernel,mesh_size,pawrad)
- do kln=1,ij_size
-   z_intgd = z_kernel*pawtab%phiphj(1:mesh_size,kln)
-   call simp_gen(dijso_rad(kln),z_intgd,pawrad)
- end do
- dijso_rad(:)=spnorbscl*dijso_rad(:)
+ if (use_soc) then
+   LIBPAW_ALLOCATE(dijso_rad,(ij_size))
+   z_kernel(2:mesh_size) = dkdr(2:mesh_size)/pawrad%rad(2:mesh_size)
+   call pawrad_deducer0(z_kernel,mesh_size,pawrad)
+   do kln=1,ij_size
+     z_intgd = z_kernel*pawtab%phiphj(1:mesh_size,kln)
+     call simp_gen(dijso_rad(kln),z_intgd,pawrad)
+   end do
+   dijso_rad(:)=spnorbscl*dijso_rad(:)
+ end if
 
  ! nuclear dipole kernels
  if (has_nucdipmom) then
@@ -2758,7 +2787,6 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
      z_intgd = z_kernel*pawtab%phiphj(1:mesh_size,kln)
      call simp_gen(dijnd_rad(2,kln),z_intgd,pawrad)
    end do
- 
  end if ! nuclear dipole radial integrals
 
  LIBPAW_DEALLOCATE(z_kernel)
@@ -2786,43 +2814,45 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
 !----- Loop over density components
 !------------------------------------------------------------------------
  dijso=zero
- do idij=1,ndij
+ if (use_soc) then
+   do idij=1,ndij
 
-!  ------------------------------------------------------------------------
-!  ----- Computation of Dij_so
-!  ------------------------------------------------------------------------
-   klmn1=1
-   if (mod(idij,2)==1) then
-     ispden=(1+idij)/2
-     do klmn=1,lmn2_size
-       if (indklmn(3,klmn)==0) then   ! il==jl
-         klm=indklmn(1,klmn);kln=indklmn(2,klmn)
-         ilm=indklmn(5,klmn);jlm=indklmn(6,klmn)
-         fact=dijso_rad(kln);if (ilm>jlm) fact=-fact
-         dijso(klmn1  ,idij)=fact*pawang%ls_ylm(1,klm,ispden)
-         dijso(klmn1+1,idij)=fact*pawang%ls_ylm(2,klm,ispden)
-       end if
-       klmn1=klmn1+cplex_dij
-     end do
-   else if (idij==2) then
-     do klmn=1,lmn2_size
-       if (indklmn(3,klmn)==0) then   ! il==jl
-         dijso(klmn1  ,2)=-dijso(klmn1  ,1)
-         dijso(klmn1+1,2)=-dijso(klmn1+1,1)
-       end if
-       klmn1=klmn1+cplex_dij
-     end do
-   else if (idij==4) then
-     do klmn=1,lmn2_size
-       if (indklmn(3,klmn)==0) then   ! il==jl
-         dijso(klmn1  ,4)=-dijso(klmn1  ,3)
-         dijso(klmn1+1,4)= dijso(klmn1+1,3)
-       end if
-       klmn1=klmn1+cplex_dij
-     end do
-   end if
- end do !  ----- End loop over idij
- LIBPAW_DEALLOCATE(dijso_rad)
+!    ------------------------------------------------------------------------
+!    ----- Computation of Dij_so
+!    ------------------------------------------------------------------------
+     klmn1=1
+     if (mod(idij,2)==1) then
+       ispden=(1+idij)/2
+       do klmn=1,lmn2_size
+         if (indklmn(3,klmn)==0) then   ! il==jl
+           klm=indklmn(1,klmn);kln=indklmn(2,klmn)
+           ilm=indklmn(5,klmn);jlm=indklmn(6,klmn)
+           fact=dijso_rad(kln);if (ilm>jlm) fact=-fact
+           dijso(klmn1  ,idij)=fact*pawang%ls_ylm(1,klm,ispden)
+           dijso(klmn1+1,idij)=fact*pawang%ls_ylm(2,klm,ispden)
+         end if
+         klmn1=klmn1+cplex_dij
+       end do
+     else if (idij==2) then
+       do klmn=1,lmn2_size
+         if (indklmn(3,klmn)==0) then   ! il==jl
+           dijso(klmn1  ,2)=-dijso(klmn1  ,1)
+           dijso(klmn1+1,2)=-dijso(klmn1+1,1)
+         end if
+         klmn1=klmn1+cplex_dij
+       end do
+     else if (idij==4) then
+       do klmn=1,lmn2_size
+         if (indklmn(3,klmn)==0) then   ! il==jl
+           dijso(klmn1  ,4)=-dijso(klmn1  ,3)
+           dijso(klmn1+1,4)= dijso(klmn1+1,3)
+         end if
+         klmn1=klmn1+cplex_dij
+       end do
+     end if
+   end do !  ----- End loop over idij
+   LIBPAW_DEALLOCATE(dijso_rad)
+ end if ! end use_soc condition
 
  ! add nucdipmom terms if present
  if(has_nucdipmom) then
@@ -2832,8 +2862,9 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
      do mdir=1,3
        if (abs(nucdipmom(mdir))<tol8) cycle
        do sdir=1,3
-         me1=nucdipmom(mdir)*dijnd_rad(1,kln)*dyadic(mdir,sdir,klm,1)
-         me2=nucdipmom(mdir)*dijnd_rad(2,kln)*dyadic(mdir,sdir,klm,2)
+         me1=zero;me2=zero
+         if(use_sd) me1=nucdipmom(mdir)*dijnd_rad(1,kln)*dyadic(mdir,sdir,klm,1)
+         if(use_fc) me2=nucdipmom(mdir)*dijnd_rad(2,kln)*dyadic(mdir,sdir,klm,2)
          sme = half*(me1+me2)
          select case(sdir)
          case(1) !Sx operator
