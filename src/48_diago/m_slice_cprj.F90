@@ -236,13 +236,14 @@ subroutine slice_init(slice,neigenpairs,spacedim,cprjdim,tolerance,ecut,bandpp, 
  slice%spectral_cut  = spectral_cut
 
  !!!!! HARDCODED !!!!!
- slice%slicedim = 10 ! hard-coded
+ slice%slicedim = 20 ! hard-coded
  !!!!!!!!!!!!!!!!!!!!!
  
  ABI_CHECK(slice%slicedim == neigenpairs/2, "must change hard-coded quantity to continue")
 
  ! cprj depending on number of bands specific
- slice%blockdim_cprj = slice%slicedim*xg_nonlop%nspinor
+ !slice%blockdim_cprj = slice%slicedim*xg_nonlop%nspinor
+ slice%blockdim_cprj = slice%neigenpairs*xg_nonlop%nspinor
  slice%all_blockdim_cprj = neigenpairs*xg_nonlop%nspinor
 
  call slice_allocateAll(slice)
@@ -289,7 +290,8 @@ subroutine slice_allocateAll(slice)
  space       = slice%space
  space_cprj  = slice%space_cprj
  spacedim    = slice%spacedim
- slicedim    = slice%slicedim
+ !slicedim    = slice%slicedim
+ slicedim    = slice%neigenpairs
  neigenpairs = slice%neigenpairs
  nspinor     = slice%xg_nonlop%nspinor
 
@@ -530,14 +532,15 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  type(xgBlock_t) :: cprjX_prev
  type(xgBlock_t) :: cprj_work_prev
  type(xgBlock_t) :: eig_part
- type(xgBlock_t) :: X_part
- type(xgBlock_t) :: AX_part
- type(xgBlock_t) :: cprjX_part
+ type(xg_t) :: X_part
+ type(xg_t) :: AX_part
+ type(xg_t) :: cprjX_part
  integer,parameter :: gpu_option=ABI_GPU_DISABLED
 !arrays
  real(dp) :: tsec(2)
  integer, allocatable :: permute_cols(:)
  real(dp), allocatable :: rayleigh_quotients(:)
+ real(dp), pointer :: dist2_array(:) => null()
  real(dp), pointer :: theta_(:,:) => null()
  !Pointers similar to old Chebfi
  integer,allocatable :: ndeg_filter_slice(:) !Slice variable
@@ -618,8 +621,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  ! ITEST
 
  ! B-orthonormalize X and AX for all bands(assuming linalg)
- call xg_Borthonormalize_cprj(xg_nonlop,slice%all_blockdim_cprj,slice%AllX,slice%AllcprjX,ierr,tim_ortho,&
-    gpu_option,AX=slice%AllAX%self)
+ !call xg_Borthonormalize_cprj(xg_nonlop,slice%all_blockdim_cprj,slice%AllX,slice%AllcprjX,ierr,tim_ortho,&
+ !   gpu_option,AX=slice%AllAX%self)
 
  ! ITEST
  write(901,*) 'slice%AllX after Bortho no1=', xgBlock_getid(slice%AllX) 
@@ -628,8 +631,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  ! ITEST
 
  ! B-orthonormalize X and AX for all bands(assuming linalg)
- call xg_Borthonormalize_cprj(xg_nonlop,slice%all_blockdim_cprj,slice%AllX,slice%AllcprjX,ierr,tim_ortho,&
-     gpu_option,AX=slice%AllAX%self)
+ !call xg_Borthonormalize_cprj(xg_nonlop,slice%all_blockdim_cprj,slice%AllX,slice%AllcprjX,ierr,tim_ortho,&
+ !    gpu_option,AX=slice%AllAX%self)
 
  ! ITEST
  write(901,*) 'slice%AllX after Bortho no2=', xgBlock_getid(slice%AllX) 
@@ -659,7 +662,6 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  ! Permute columns 1,..,neigenpairs according to order
  call xgBlock_permuteCols(slice%AllX, slice%spacedim, neigenpairs, permute_cols)
  call xgBlock_permuteCols(slice%AllAX%self, slice%spacedim, neigenpairs, permute_cols)
-
  ! ITEST
  write(901,*) 'slice%AllX after perm=', xgBlock_getid(slice%AllX) 
  write(901,*) 'slice%AllAX after perm=', xgBlock_getid(slice%AllAX%self) 
@@ -674,67 +676,90 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  !!!!!!!!!!!!!!!!!!!!!
 
  ! Sequential loop on slices
- do islice=1, nslice
+ do islice=2, nslice
 
     ! ITEST
     write(901,*)
     write(901,*) '====================Slice=================', islice
-    write(901,*) 'Apply slicing for slicedim=', slicedim 
+    write(901,*) 'Apply slicing for slicedim(fixed)=', slicedim 
+    write(901,*) 'computing slicedim from probe...'
     flush(901)
-    ! ITEST 
+    ! ITEST
 
-    ! Create pointers (spacedim, slicedim) to part of current slice
-    shift_x = (islice-1)*slicedim
-    call xgBlock_setBlock(slice%AllX      , X_part , spacedim, slicedim, fcol=shift_x+1)
-    call xgBlock_setBlock(slice%AllAX%self, AX_part, spacedim, slicedim, fcol=shift_x+1)
-    slice%X = X_part
-    slice%AX = AX_part
+    ! Init: at first all bands are into slice
+    slicedim = neigenpairs
 
-    shift_cprj = (islice-1)*slicedim*xg_nonlop%nspinor
-    call xgBlock_setBlock(slice%AllcprjX         , cprjX_part     , slice%cprjdim, slice%blockdim_cprj, fcol=shift_cprj+1)
-    call xgBlock_setBlock(slice%Allcprj_work%self, slice%cprj_work, slice%cprjdim, slice%blockdim_cprj)
-    slice%cprjX = cprjX_part
+    ! In latest version, *_part is a separate object that does not impact AllX
+    call xg_init(X_part, slice%space, spacedim, slicedim, slice%spacecom, me_g0=slice%me_g0_fft)
+    call xg_init(AX_part, slice%space, spacedim, slicedim, slice%spacecom, me_g0=slice%me_g0_fft)
+    call xg_init(cprjX_part, slice%space_cprj, slice%cprjdim, slicedim*nspinor, comm=slice%spacecom)
+
+    ! old shifts assuming all slices have the same slicedim kept for reference
+    shift_x = (islice-1)*slice%slicedim
+    !shift_cprj = (islice-1)*slicedim*xg_nonlop%nspinor
+
+    ! All bands are copied to current slice workspace
+    call xgBlock_copy(slice%AllX, X_part%self)
+    call xgBlock_copy(slice%AllAX%self, AX_part%self)
+    call xgBlock_copy(slice%AllcprjX, cprjX_part%self)
+    
+    ! Working pointers to slice workspace
+    slice%X = X_part%self
+    slice%AX = AX_part%self
+    slice%cprjX = cprjX_part%self
+    call xgBlock_setBlock(slice%Allcprj_work%self, slice%cprj_work, slice%cprjdim, slice%blockdim_cprj) 
+    call xgBlock_setBlock(DivResults%self, DivResults_part, slicedim, 1)
+    call xgBlock_reshape(DivResults_part, 1, neigenpairs)
+
+    ! Old version where AllX was modified
+    ! Pointers to global objects common to all slices
+    !call xgBlock_setBlock(slice%AllX, X_part%self, spacedim, slicedim, fcol=shift_x+1)
+    !call xgBlock_setBlock(slice%AllAX%self, AX_part%self, spacedim, slicedim, fcol=shift_x+1)
+    !call xgBlock_setBlock(slice%AllcprjX, cprjX_part%self, slice%cprjdim, slice%blockdim_cprj, fcol=shift_cprj+1)
 
     ! Get part of eigenvalues
-    call xgBlock_reshape(DivResults%self, 1, neigenpairs)
-    call xgBlock_setBlock(DivResults%self, DivResults_part, 1, slicedim, fcol=shift_x+1)
-    call xgBlock_reshape(DivResults%self, neigenpairs, 1)
+    !call xgBlock_reshape(DivResults%self, 1, neigenpairs)
+    !call xgBlock_setBlock(DivResults%self, DivResults_part, 1, slicedim, fcol=shift_x+1)
+    !call xgBlock_reshape(DivResults%self, neigenpairs, 1)
 
-    ! Orthogonalize current X_part With Respect To previous blocks in B-basis
-    if ( islice > 1 ) then
-        call xgBlock_setBlock(slice%AllX             , X_prev         , spacedim     , shift_x   , fcol=1)
-        call xgBlock_setBlock(slice%AllcprjX         , cprjX_prev     , slice%cprjdim, shift_cprj, fcol=1)
-        call xgBlock_setBlock(slice%Allcprj_work%self, cprj_work_prev , slice%cprjdim, shift_cprj, fcol=1)
+    !! ######### Deactivate orthogonalization wrt Blocks
+    !! Orthogonalize current X_part With Respect To previous blocks in B-basis
+    !if ( islice > 1 ) then
+    !    call xgBlock_setBlock(slice%AllX             , X_prev         , spacedim     , shift_x   , fcol=1)
+    !    call xgBlock_setBlock(slice%AllcprjX         , cprjX_prev     , slice%cprjdim, shift_cprj, fcol=1)
+    !    call xgBlock_setBlock(slice%Allcprj_work%self, cprj_work_prev , slice%cprjdim, shift_cprj, fcol=1)
 
-        ! ITEST
-        write(901,*) 'X prev=', xgBlock_getid(X_prev) 
-        write(901,*) 'cprjX prev=', xgBlock_getid(cprjX_prev) 
-        write(901,*) 'slice%X before orthoXwrt prev=', xgBlock_getid(slice%X) 
-        write(901,*) 'slice%AX before orthoXwrt prev=', xgBlock_getid(slice%AX) 
-        flush(901)
-        ! ITEST
+    !    ! ITEST
+    !    write(901,*) 'X prev=', xgBlock_getid(X_prev) 
+    !    write(901,*) 'cprjX prev=', xgBlock_getid(cprjX_prev) 
+    !    write(901,*) 'slice%X before orthoXwrt prev=', xgBlock_getid(slice%X) 
+    !    write(901,*) 'slice%AX before orthoXwrt prev=', xgBlock_getid(slice%AX) 
+    !    flush(901)
+    !    ! ITEST
 
-        call slice_orthoXwrtBlocks(slice, X_prev, cprjX_prev, slice%X, slice%cprjX, islice, cprj_work_prev)
+    !    call slice_orthoXwrtBlocks(slice, X_prev, cprjX_prev, slice%X, slice%cprjX, islice, cprj_work_prev)
 
-        ! ITEST
-        write(901,*) 'slice%X after orthoXwrt prev no1=', xgBlock_getid(slice%X) 
-        write(901,*) 'slice%AX after orthoXwrt prev no1=', xgBlock_getid(slice%AX) 
-        flush(901)
-        ! ITEST
+    !    ! ITEST
+    !    write(901,*) 'slice%X after orthoXwrt prev no1=', xgBlock_getid(slice%X) 
+    !    write(901,*) 'slice%AX after orthoXwrt prev no1=', xgBlock_getid(slice%AX) 
+    !    flush(901)
+    !    ! ITEST
         
-        !call slice_orthoXwrtBlocks(slice, X_prev, cprjX_prev, slice%X, slice%cprjX, islice, cprj_work_prev)
+    !    !call slice_orthoXwrtBlocks(slice, X_prev, cprjX_prev, slice%X, slice%cprjX, islice, cprj_work_prev)
 
-        ! ITEST
-        !write(901,*) 'slice%X after orthoXwrt prev no2=', xgBlock_getid(slice%X) 
-        !write(901,*) 'slice%AX after orthoXwrt prev no2=', xgBlock_getid(slice%AX) 
-        !flush(901)
-        ! ITEST
+    !    ! ITEST
+    !    !write(901,*) 'slice%X after orthoXwrt prev no2=', xgBlock_getid(slice%X) 
+    !    !write(901,*) 'slice%AX after orthoXwrt prev no2=', xgBlock_getid(slice%AX) 
+    !    !flush(901)
+    !    ! ITEST
 
-    end if
+    !end if
 
     if (islice==1) then
+        !*** hardcoded
+        lambda_minus = 0.81501785305036
         ! unwanted spectrum
-        lambda_minus = rayleigh_quotients(slicedim) ! largest eigenvalue from current slice
+        !lambda_minus = rayleigh_quotients(slicedim) ! largest eigenvalue from current slice
         lambda_plus = slice%ecut
         center = (lambda_plus + lambda_minus)*0.5
         radius = (lambda_plus - lambda_minus)*0.5
@@ -746,42 +771,48 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
     else if (islice>1) then
  
-        write(901,*) 'rayleigh_quotients=', rayleigh_quotients
-        flush(901)
+        !write(901,*) 'rayleigh_quotients=', rayleigh_quotients
+        !flush(901)
 
-        call timab(tim_RR_q, 1, tsec)
-        call slice_rayleighRitzQuotientsOnSlice(slice, maxeig, mineig, DivResults%self)
-        call timab(tim_RR_q, 2, tsec)
+        !call timab(tim_RR_q, 1, tsec)
+        !call slice_rayleighRitzQuotientsOnSlice(slice, maxeig, mineig, DivResults%self)
+        !call timab(tim_RR_q, 2, tsec)
         
-        call xgBlock_reverseMap(DivResults%self, theta_, rows=1, cols=slicedim)
-        rayleigh_quotients(shift_x+1:shift_x+slicedim) = theta_(1,1:slicedim)
+        !call xgBlock_reverseMap(DivResults%self, theta_, rows=1, cols=slicedim)
+        !rayleigh_quotients(shift_x+1:shift_x+slicedim) = theta_(1,1:slicedim)
         
-        write(901,*) 'rayleigh_quotients=', rayleigh_quotients
-        flush(901)
+        !write(901,*) 'rayleigh_quotients=', rayleigh_quotients
+        !flush(901)
 
+        !*** hardcoded
+        lambda_minus = 0.50
+        lambda_plus = 0.9
         ! wanted second slice
-        lambda_minus = rayleigh_quotients(slicedim) ! largest eigenvalue from previous slice
-        lambda_plus = maxeig-0.3
-        center = (slice%ecut + rayleigh_quotients(1))*0.5
-        radius = (slice%ecut - rayleigh_quotients(1))*0.5
+        !lambda_minus = rayleigh_quotients(slicedim) ! largest eigenvalue from previous slice
+        !lambda_plus = maxeig-0.3
+        !center = (slice%ecut + rayleigh_quotients(1))*0.5
+        !radius = (slice%ecut - rayleigh_quotients(1))*0.5
+        center = (slice%ecut - 0.15)*0.5 !** hard-coded
+        radius = (slice%ecut + 0.15)*0.5 !** hard-coded
         ls = (lambda_minus - center) / radius
         us = (lambda_plus - center) / radius
 
         ! ITEST
         write(901,*) 'wanted part of the spectrum [a,b)=', lambda_minus, lambda_plus
+        write(901,*) 'scaled in [-1,1)=', ls, us
         flush(901)
         ! ITEST
     end if
 
-    one_over_r = 1/radius
-    two_over_r = 2/radius
+    one_over_r = 1.0/radius
+    two_over_r = 2.0/radius
     ndeg_filter = ndeg_filter_slice(islice)
  
     !!!!! HARDCODED !!!!!
     if (islice==1) then
-        max_niter_restart=2
+        max_niter_restart=1
     else
-        max_niter_restart = 2! number of inner iterations
+        max_niter_restart = 1! number of inner iterations
     end if
     !!!!!!!!!!!!!!!!!!!!!
 
@@ -793,24 +824,19 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         ! Initialize Chebyshev expansion
         if (islice>1) then
    
-            if (niter>1) then
-                ! adapt limits of wanted interval
-                ! TODO lambda_plus should take into account occupancies. Put to last occupied state
-                lambda_minus = rayleigh_quotients(shift_x+1) ! smalles eigenvalue in slice
-                lambda_plus = rayleigh_quotients(shift_x+slicedim) ! largest eigenvalue in slice
-                ls = (lambda_minus - center) / radius
-                us = (lambda_plus - center) / radius
-            end if
+            ! # deactivate update for this version
+            !if (niter>1) then
+            !    ! adapt limits of wanted interval
+            !    ! TODO lambda_plus should take into account occupancies. Put to last occupied state
+            !    lambda_minus = rayleigh_quotients(shift_x+1) ! smalles eigenvalue in slice
+            !    lambda_plus = rayleigh_quotients(shift_x+slicedim) ! largest eigenvalue in slice
+            !    ls = (lambda_minus - center) / radius
+            !    us = (lambda_plus - center) / radius
+            !end if
 
             if (niter==1) then
-                call xg_init(Xsum,slice%space,slice%total_spacedim,slice%slicedim,slice%spacecom,&
+                call xg_init(Xsum,slice%space,slice%total_spacedim,slicedim,slice%spacecom,&
                     gpu_option=gpu_option)
-                ! dist1 = |slice%X|^2 colwise L2-norm
-                call xg_init(dist1,SPACE_R,slice%slicedim,1)
-                call xgBlock_colwiseNorm2(slice%X,dist1%self,comm_loc=xmpi_comm_null)
-                ! preallocate
-                call xg_init(dist2,SPACE_R,slice%slicedim,1)
-                call xg_init(dist12,SPACE_R,slice%slicedim,1)
             else
                 call xgBlock_zero(Xsum%self)
             end if
@@ -820,12 +846,26 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
             call xgBlock_saxpy(Xsum%self, mu*damp, slice%X)
         end if
 
+        if (niter==1) then
+            ! dist1 = |slice%X|^2 colwise L2-norm
+            call xg_init(dist1,SPACE_R,slicedim,1)
+            call xgBlock_colwiseNorm2(slice%X,dist1%self,comm_loc=xmpi_comm_null)
+            ! preallocate
+            call xg_init(dist2,SPACE_R,slicedim,1)
+            call xg_init(dist12,SPACE_R,slicedim,1)
+        end if
+
         ! ITEST
         write(901,*) 'restarted interval=', lambda_minus, lambda_plus
         flush(901)
         ! ITEST
 
         do ideg = 0, ndeg_filter - 1
+
+            ! ITEST
+            write(901,*) 'inner polynomial degree=', ideg
+            flush(901)
+            ! ITEST
 
             call timab(tim_cprj,1,tsec)
             call xg_nonlop_getcprj(xg_nonlop,slice%AX,slice%cprjX,slice%proj_work%self)
@@ -834,27 +874,36 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
             call slice_computeNextOrderChebfiPolynom(slice, ideg, center, one_over_r, two_over_r)
 
             call timab(tim_swap,1,tsec)
-            call slice_swapInnerBuffers(slice, slice%total_spacedim, slice%slicedim)
+            call slice_swapInnerBuffers(slice, slice%total_spacedim, slicedim)
             call timab(tim_swap,2,tsec)
 
-            ! Accumulate X with weight for bandpass filters
+            ! Accumulate X with weight in Xsum for bandpass filters
             if (islice==2) then
-
                 mu = 2/Pi * (SIN((ideg+1)*ACOS(ls)) - SIN((ideg+1)*ACOS(us)))/(ideg+1)
                 damp = ((1 - (ideg+1)/(ndeg_filter+2))*SIN(cdeg)*COS((ideg+1)*cdeg) + &
                     1/(ndeg_filter+2)*COS(cdeg)*SIN((ideg+1)*cdeg))/SIN(cdeg)
                 call xgBlock_saxpy(Xsum%self, mu*damp, slice%X)
+            end if
 
-                ! dist2 = |Xsum%self|^2 colwise L2-norm
+            ! ######### Compute probe
+            ! dist2 = |Xsum%self|^2 colwise L2-norm
+            if (islice==1) then
+                call xgBlock_colwiseNorm2(slice%X, dist2%self, comm_loc=xmpi_comm_null)
+            else
                 call xgBlock_colwiseNorm2(Xsum%self,dist2%self,comm_loc=xmpi_comm_null)
-                call xgBlock_colwiseDivision(dist1%self,dist2%self,dist12%self) ! dist1/dist2
-
-                ! ITEST
-                write(901,*) 'probe='
-                call xgBlock_print(dist12%self,901)
-                flush(901)
-                ! ITEST
-
+            end if
+            !call xgBlock_reverseMap_1d(dist2%self, dist2_array)
+            !call xgBlock_colwiseMul(dist2%self, dist2_array) ! dist2 = dist2^2
+            !call xgBlock_colwiseDivision(dist2%self,dist1%self,dist12%self) ! dist2/dist
+            ! ITEST
+            write(901,*) 'probe dist1='
+            call xgBlock_print(dist1%self,901)
+            write(901,*) 'probe dist2='
+            call xgBlock_print(dist2%self,901)
+            flush(901)
+            ! ITEST
+            
+            if (islice==2) then
                 ! store final expansion Xsum to X
                 if (ideg==ndeg_filter - 1) then 
                     call xgBlock_copy(Xsum%self, slice%X)
@@ -885,7 +934,6 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
             call slice_ampfactor(slice, DivResults_part, lambda_minus, lambda_plus, ndeg_filter_bands)
             ABI_FREE(ndeg_filter_bands)
             call timab(tim_amp_f,2,tsec)
-
 
             call timab(tim_cprj,1,tsec)
             call xg_nonlop_getcprj(xg_nonlop,slice%X,slice%cprjX,slice%proj_work%self)
@@ -924,55 +972,57 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         flush(901)
         ! ITEST
 
-        ! Orthogonalize current X_part With Respect To previous blocks in B-basis
-        if ( islice > 1 ) then
-            call xgBlock_setBlock(slice%AllX             , X_prev         , spacedim     , shift_x   , fcol=1)
-            call xgBlock_setBlock(slice%AllcprjX         , cprjX_prev     , slice%cprjdim, shift_cprj, fcol=1)
-            call xgBlock_setBlock(slice%Allcprj_work%self, cprj_work_prev , slice%cprjdim, shift_cprj, fcol=1)
+        !! ######### Deactivate orthogonalization wrt Blocks
+        !! Orthogonalize current X_part With Respect To previous blocks in B-basis
+        !if ( islice > 1 ) then
+        !    call xgBlock_setBlock(slice%AllX             , X_prev         , spacedim     , shift_x   , fcol=1)
+        !    call xgBlock_setBlock(slice%AllcprjX         , cprjX_prev     , slice%cprjdim, shift_cprj, fcol=1)
+        !    call xgBlock_setBlock(slice%Allcprj_work%self, cprj_work_prev , slice%cprjdim, shift_cprj, fcol=1)
 
-            ! ITEST
-            write(901,*) 'X prev=', xgBlock_getid(X_prev) 
-            write(901,*) 'cprjX prev=', xgBlock_getid(cprjX_prev) 
-            write(901,*) 'slice%X before orthoXwrt prev=', xgBlock_getid(slice%X) 
-            write(901,*) 'slice%AX before orthoXwrt prev=', xgBlock_getid(slice%AX) 
-            flush(901)
-            ! ITEST
+        !    ! ITEST
+        !    write(901,*) 'X prev=', xgBlock_getid(X_prev) 
+        !    write(901,*) 'cprjX prev=', xgBlock_getid(cprjX_prev) 
+        !    write(901,*) 'slice%X before orthoXwrt prev=', xgBlock_getid(slice%X) 
+        !    write(901,*) 'slice%AX before orthoXwrt prev=', xgBlock_getid(slice%AX) 
+        !    flush(901)
+        !    ! ITEST
 
-            call slice_orthoXwrtBlocks(slice, X_prev, cprjX_prev, slice%X, slice%cprjX, islice, cprj_work_prev)
+        !    call slice_orthoXwrtBlocks(slice, X_prev, cprjX_prev, slice%X, slice%cprjX, islice, cprj_work_prev)
 
-            ! ITEST
-            write(901,*) 'slice%X after orthoXwrt prev no1=', xgBlock_getid(slice%X) 
-            write(901,*) 'slice%AX after orthoXwrt prev no1=', xgBlock_getid(slice%AX) 
-            flush(901)
-            ! ITEST
+        !    ! ITEST
+        !    write(901,*) 'slice%X after orthoXwrt prev no1=', xgBlock_getid(slice%X) 
+        !    write(901,*) 'slice%AX after orthoXwrt prev no1=', xgBlock_getid(slice%AX) 
+        !    flush(901)
+        !    ! ITEST
         
-            !call slice_orthoXwrtBlocks(slice, X_prev, cprjX_prev, slice%X, slice%cprjX, islice, cprj_work_prev)
+        !    !call slice_orthoXwrtBlocks(slice, X_prev, cprjX_prev, slice%X, slice%cprjX, islice, cprj_work_prev)
 
-            ! ITEST
-            !write(901,*) 'slice%X after orthoXwrt prev no2=', xgBlock_getid(slice%X) 
-            !write(901,*) 'slice%AX after orthoXwrt prev no2=', xgBlock_getid(slice%AX) 
-            !flush(901)
-            ! ITEST
+        !    ! ITEST
+        !    !write(901,*) 'slice%X after orthoXwrt prev no2=', xgBlock_getid(slice%X) 
+        !    !write(901,*) 'slice%AX after orthoXwrt prev no2=', xgBlock_getid(slice%AX) 
+        !    !flush(901)
+        !    ! ITEST
 
-        end if
+        !end if
     
         ! Get part of eigenvalues
-        call xgBlock_reshape(slice%eigenvalues, 1, neigenpairs)
-        call xgBlock_setBlock(slice%eigenvalues, eig_part, 1, slicedim, fcol=shift_x+1)
-        call xgBlock_reshape(slice%eigenvalues, neigenpairs, 1)
-        call xgBlock_reshape(eig_part, slicedim, 1)
+        !call xgBlock_reshape(slice%eigenvalues, 1, neigenpairs)
+        !call xgBlock_setBlock(slice%eigenvalues, eig_part, 1, slicedim, fcol=shift_x+1)
+        !call xgBlock_reshape(slice%eigenvalues, neigenpairs, 1)
+        !call xgBlock_reshape(eig_part, slicedim, 1)
 
         ! Apply Rayleigh Ritz on slice (refinement)
-        call xg_RayleighRitz_cprj(xg_nonlop,slice%X,slice%cprjX,slice%AX,eig_part,&
+        call xg_RayleighRitz_cprj(xg_nonlop,slice%X,slice%cprjX,slice%AX,slice%eigenvalues,&
             slice%blockdim_cprj,ierr,0,tim_RR,ABI_GPU_DISABLED,solve_ax_bx=.true.)
 
+        ! ### current version does no update
         ! Extract eigenvalues to array
-        call xgBlock_reverseMap(eig_part, theta_, rows=1, cols=slicedim)
-        rayleigh_quotients(shift_x+1:shift_x+slicedim) = theta_(1,1:slicedim)
+        !call xgBlock_reverseMap(eig_part, theta_, rows=1, cols=slicedim)
+        !rayleigh_quotients(shift_x+1:shift_x+slicedim) = theta_(1,1:slicedim)
 
-        write(901,*) 'converged slice eigenvalues='
-        call xgBlock_print(eig_part, 901)
-        flush(901)
+        !write(901,*) 'converged slice eigenvalues='
+        !call xgBlock_print(eig_part, 901)
+        !flush(901)
 
         if ( ierr /= 0 ) then
             ABI_BUG("RayleighRitz did not work")
@@ -985,17 +1035,19 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
     if (islice>1) then
         call xg_free(Xsum)
-        if (niter == max_niter_restart) then
-            call xg_free(dist1)
-            call xg_free(dist2)
-            call xg_free(dist12)
-        end if
+    end if
+    
+    if (niter == max_niter_restart) then
+        call xg_free(dist1)
+        call xg_free(dist2)
+        call xg_free(dist12)
     end if
 
+    ! ** do not update collective space
     ! Store to all-workspace
-    call xgBlock_copy(slice%X, X_part)
-    call xgBlock_copy(slice%AX, AX_part)
-    call xgBlock_copy(slice%cprjX, cprjX_part)
+    !call xgBlock_copy(slice%X, X_part%self)
+    !call xgBlock_copy(slice%AX, AX_part%self)
+    !call xgBlock_copy(slice%cprjX, cprjX_part%self)
 
     ! ITEST
     write(901,*) 'On partial output - slice: Bortho test'
@@ -1011,12 +1063,13 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     flush(901)
     ! ITEST
 
+    ! ### current version does no update
     ! Update eigenvalues
-    call xgBlock_reverseMap(eig_part, theta_, rows=1, cols=slicedim)
-    rayleigh_quotients(shift_x+1:shift_x+slicedim) = theta_(1,1:slicedim)
+    !call xgBlock_reverseMap(eig_part, theta_, rows=1, cols=slicedim)
+    !rayleigh_quotients(shift_x+1:shift_x+slicedim) = theta_(1,1:slicedim)
 
     ! ITEST
-    write(901,*) 'eigenvalues after diago on slice=', rayleigh_quotients(:)
+    !write(901,*) 'eigenvalues after diago on slice=', rayleigh_quotients(:)
     write(901,*) 'slice%X after diago=', xgBlock_getid(slice%X) 
     write(901,*) 'slice%AllX after diago=', xgBlock_getid(slice%AllX) 
     write(901,*) 'slice%cprjX after diago=', xgBlock_getid(slice%cprjX)
@@ -1024,6 +1077,11 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     call xgBlock_print(slice%eigenvalues,901)
     flush(901)
     ! ITEST
+
+    ! free xg on slice
+    call xg_free(X_part)
+    call xg_free(AX_part)
+    call xg_free(cprjX_part)
 
  end do
 
@@ -1289,14 +1347,14 @@ subroutine slice_rayleighRitzQuotientsOnSlice(slice,maxeig,mineig,DivResults)
  else
    ABI_ERROR('space(X) should be SPACE_C or SPACE_CR')
  end if
- call xg_init(Results1, space_res, slice%slicedim, 1)
- call xg_init(Results2, space_res, slice%slicedim, 1)
+ call xg_init(Results1, space_res, slice%neigenpairs, 1)
+ call xg_init(Results2, space_res, slice%neigenpairs, 1)
 
  call xgBlock_colwiseDotProduct(slice%X,slice%AX,Results1%self,comm_loc=xmpi_comm_null)
 
  call xgBlock_colwiseDotProduct(slice%X,slice%X,Results2%self,comm_loc=xmpi_comm_null)
  if (slice%xg_nonlop%paw) then
-   call xg_init(Results_work, space_res, slice%slicedim, 1)
+   call xg_init(Results_work, space_res, slice%neigenpairs, 1)
    call xg_nonlop_colwiseXAX(slice%xg_nonlop,slice%xg_nonlop%Sij%self,slice%cprjX,&
        slice%cprj_work,Results_work%self)
    call xgBlock_add(Results2%self,Results_work%self)
@@ -1467,7 +1525,7 @@ subroutine slice_ampfactor(slice,DivResults,lambda_minus,lambda_plus,ndeg_filter
 
   call xgBlock_reverseMap(DivResults,eig,rows=1,cols=cols(DivResults))
 
-  do iband = 1, slice%slicedim
+  do iband = 1, cols(DivResults)
 
     eig_per_band = eig(1,iband)
 
