@@ -120,7 +120,7 @@ jpawu2      0.84 eV  # Values of J
 #%% files_to_test = t108_MPI8.abo, tolnlines = 1, tolabs = 1.e-5, tolrel = 1.e-5, fld_options=-medium;
 #%%                 t108_MPI8o_DS2_CTQMC_HISTOGRAM_iatom0001.dat, tolnlines = 6, tolabs = 0.0, tolrel = 0.0;
 #%% [extra_info]
-#%% authors = F. Gendron, E. Castiel
+#%% authors = E. Castiel, F. Gendron
 #%% keywords = DMFT, TRIQS
 #%% description = DFT+DMFT for Fe : test TRIQS interface with computation of entropy and orbital given from file.
 #%% topics = DMFT

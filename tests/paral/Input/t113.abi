@@ -110,7 +110,7 @@ jpawu       0.84 eV  # Values of J
 #%% [NCPU_8]
 #%% files_to_test = t113_MPI8.abo;
 #%% [extra_info]
-#%% authors = F. Gendron, E. Castiel
+#%% authors = E. Castiel, F. Gendron
 #%% keywords = DMFT, TRIQS
 #%% description = DFT+DMFT for Fe : test exact formula for double counting in GGA
 #%% topics = DMFT

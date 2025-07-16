@@ -116,7 +116,7 @@ jpawu       0.84 eV  # Values of J
 #%% [NCPU_8]
 #%% files_to_test = t111_MPI8.abo, tolnlines = 3, tolabs = 1.e-4, tolrel = 1.e-4, fld_options=-easy;
 #%% [extra_info]
-#%% authors = F. Gendron, E. Castiel
+#%% authors = E. Castiel, F. Gendron
 #%% keywords = DMFT, TRIQS
 #%% description = DFT+DMFT for Fe : test TRIQS interface for different basis with magnetic DFT
 #%% topics = DMFT

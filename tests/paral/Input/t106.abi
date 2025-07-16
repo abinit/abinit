@@ -102,6 +102,6 @@ pseudos "28ni.paw, 8o.2.paw"
 #%%                 t106_MPI8o_DS2_Gtau_offdiag_Leg_iatom0002.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
 #%% [extra_info]
 #%% keywords = PAW, DMFT, TRIQS
-#%% authors = B. Amadon, E. Castiel
+#%% authors = E. Castiel, B. Amadon
 #%% description = DFT+DMFT for NiO : test TRIQS interface with several correlated atoms, Legendre measurement and off-diagonal elements
 #%%<END TEST_INFO>
