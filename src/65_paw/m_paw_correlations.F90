@@ -865,7 +865,7 @@ CONTAINS  !=====================================================================
        rstep = pawrad(itypat)%rstep
 
        call pawrad_init(pawrad_tmp,meshsz,mesh_type,rstep,lstep)
-       call simp_gen(int1,pawtab(itypat)%proj(1:meshsz)**2,pawrad_tmp)
+       call simp_gen(int1,pawtab(itypat)%proj(1:meshsz)*pawtab(itypat)%proj(1:meshsz),pawrad_tmp)
 
        write(message,'(a,f6.4)') " Squared norm of the DMFT orbital: ",int1
        call wrtout(std_out,message,"COLL")
@@ -886,7 +886,7 @@ CONTAINS  !=====================================================================
          end if
 
          ABI_MALLOC(pawtab(itypat)%proj2,(meshsz))
-         pawtab(itypat)%proj2(:) = (pawtab(itypat)%proj(:)/int1)**2
+         pawtab(itypat)%proj2(:) = (pawtab(itypat)%proj(:)/int1)*(pawtab(itypat)%proj(:)/int1)
 
          ABI_MALLOC(fk,(lcur+1))
 

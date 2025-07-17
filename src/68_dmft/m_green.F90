@@ -1350,7 +1350,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  integer :: me_kpt,mkmem,myproc,natom,nband_k,nkpt,nmoments,nspinor,nsppol
  integer :: opt_quick_restart,option,optlog,optnonxsum,optnonxsum2,optself
  integer :: shift,shift_green,spacecomm,gpu_option
- real(dp) :: beta,correction,eigen,fac,fermilevel,temp,wtk
+ real(dp) :: beta,correction,eigen,fac,fermilevel,freq2,temp,wtk
  complex(dpc) :: green_tmp,omega_current,trace_tmp
  character(len=500) :: message
  real(dp) :: tsec(2)
@@ -1607,6 +1607,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
     !  write(std_out,*) "1199",green_temp%ks(1,1,9,9)
     !endif
    if (optlog == 1) then
+     freq2 = paw_dmft%omega_lo(ifreq) * paw_dmft%omega_lo(ifreq)
      trace_tmp = czero
      do isppol=1,nsppol
        do ikpt=1,mkmem
@@ -1622,7 +1623,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
                         & mbandc,green%oper(ifreq)%ks(:,:,ikpt+shift_green,isppol),mbandc,czero,mat_tmp(:,:),mbandc)
            call zheev("n","u",mbandc,mat_tmp(:,:),mbandc,eig(:),work(:),lwork,rwork(:),info)
            ! Do not use DOT_PRODUCT
-           trace_tmp = trace_tmp + sum(log(eig(:)*(paw_dmft%omega_lo(ifreq)**2)))*wtk*temp
+           trace_tmp = trace_tmp + sum(log(eig(:)*freq2))*wtk*temp
          end if ! optself
        end do ! ikpt
      end do ! isppol
@@ -4217,28 +4218,34 @@ subroutine compute_trace_moments(fermie,trace_fermie,trace_moments,trace_moments
  real(dp), intent(in) :: fermie
  complex(dpc), intent(in) :: trace_fermie(:)
  complex(dpc), intent(inout) :: trace_moments(:),trace_moments_prime(:)
+!Local variables-------------------------------
+ real(dp) :: fermie2,fermie3,fermie4
 ! *********************************************
+
+  fermie2 = fermie * fermie
+  fermie3 = fermie2 * fermie
+  fermie4 = fermie3 * fermie
 
   trace_moments(2) = trace_fermie(2) - fermie*trace_fermie(1)
   trace_moments(3) = trace_fermie(3) + trace_fermie(4) - two*fermie*trace_fermie(2) + &
-         & (fermie**2)*trace_fermie(1)
+         & fermie2*trace_fermie(1)
   trace_moments(4) = trace_fermie(5) + two*(trace_fermie(6)-fermie*trace_fermie(3)) + &
          & trace_fermie(7) - three*fermie*trace_fermie(4) + &
-         & three*(fermie**2)*trace_fermie(2) - (fermie**3)*trace_fermie(1)
+         & three*fermie2*trace_fermie(2) - fermie3*trace_fermie(1)
   trace_moments(5) = trace_fermie(8) + two*(trace_fermie(9)-fermie*trace_fermie(5)) + &
          & trace_fermie(10) + three*(trace_fermie(11)-two*fermie*trace_fermie(6)+ &
-         & (fermie**2)*trace_fermie(3)) + trace_fermie(12) - four*fermie*trace_fermie(7) + &
-         & six*(fermie**2)*trace_fermie(4) - four*(fermie**3)*trace_fermie(2) + &
-         & (fermie**4)*trace_fermie(1)
+         & fermie2*trace_fermie(3)) + trace_fermie(12) - four*fermie*trace_fermie(7) + &
+         & six*fermie2*trace_fermie(4) - four*fermie3*trace_fermie(2) + &
+         & fermie4*trace_fermie(1)
 
   trace_moments_prime(2) = - trace_fermie(1)
   trace_moments_prime(3) = two * (fermie*trace_fermie(1)-trace_fermie(2))
   trace_moments_prime(4) = - two*trace_fermie(3) - three*trace_fermie(4) + &
-         & six*fermie*trace_fermie(2) - three*(fermie**2)*trace_fermie(1)
+         & six*fermie*trace_fermie(2) - three*fermie2*trace_fermie(1)
   trace_moments_prime(5) = - two*trace_fermie(5) + three*(-two*trace_fermie(6)+ &
          & two*fermie*trace_fermie(3)) - four*trace_fermie(7) + &
-         & dble(12)*fermie*trace_fermie(4) - dble(12)*(fermie**2)*trace_fermie(2) + &
-         & four*(fermie**3)*trace_fermie(1)
+         & dble(12)*fermie*trace_fermie(4) - dble(12)*fermie2*trace_fermie(2) + &
+         & four*fermie3*trace_fermie(1)
 
  end subroutine compute_trace_moments
 !!***
@@ -4453,7 +4460,7 @@ subroutine compute_moments_ks(green,self,paw_dmft,opt_self,opt_log,opt_quick_res
 !Local variables ------------------------------
  integer :: diag,i,ib,ierr,mkmem,natom,nsppol
  integer :: optlog,optquickrestart,optself,shift
- real(dp) :: dum,mu
+ real(dp) :: dum,mu,mu2,mu3,mu4
  complex(dpc) :: trace_tmp
  type(oper_type) :: oper(2)
  real(dp), allocatable :: trace_loc(:,:)
@@ -4477,6 +4484,9 @@ subroutine compute_moments_ks(green,self,paw_dmft,opt_self,opt_log,opt_quick_res
  diag   = 1 - optself
  mkmem  = green%moments(1)%nkpt
  mu     = paw_dmft%fermie
+ mu2    = mu * mu
+ mu3    = mu2 * mu
+ mu4    = mu3 * mu
  natom  = paw_dmft%natom
  nsppol = paw_dmft%nsppol
  shift  = green%moments(1)%shiftk
@@ -4501,7 +4511,7 @@ subroutine compute_moments_ks(green,self,paw_dmft,opt_self,opt_log,opt_quick_res
      green%moments(2)%ks(ib,ib,:,:) = paw_dmft%eigen_dft(ib,1+shift:mkmem+shift,:) - mu
    end if
    ! Careful, we need to substract mu**2 below, not add it (think about it)
-   if (optquickrestart == 1) green%moments(3)%ks(ib,ib,:,:) = green%moments(3)%ks(ib,ib,:,:) - mu**2
+   if (optquickrestart == 1) green%moments(3)%ks(ib,ib,:,:) = green%moments(3)%ks(ib,ib,:,:) - mu2
  end do ! ib
 
  if (optquickrestart == 1) then
@@ -4529,17 +4539,17 @@ subroutine compute_moments_ks(green,self,paw_dmft,opt_self,opt_log,opt_quick_res
  if (optlog == 1 .and. optquickrestart == 1) then
    green%trace_moments_log_ks(1) = green%trace_fermie(2) - mu*green%trace_fermie(1)
    green%trace_moments_log_ks(2) = green%trace_fermie(3) + &
-       & half*(green%trace_fermie(4)-two*mu*green%trace_fermie(2)+(mu**2)*green%trace_fermie(1))
+       & half*(green%trace_fermie(4)-two*mu*green%trace_fermie(2)+mu2*green%trace_fermie(1))
    green%trace_moments_log_ks(3) = green%trace_fermie(5) + green%trace_fermie(6) - &
       & mu*green%trace_fermie(3) + third*(green%trace_fermie(7)+ &
-      & three*(mu**2)*green%trace_fermie(2)-three*mu*green%trace_fermie(4)- &
-      & (mu**3)*green%trace_fermie(1))
+      & three*mu2*green%trace_fermie(2)-three*mu*green%trace_fermie(4)- &
+      & mu3*green%trace_fermie(1))
    green%trace_moments_log_ks(4) = green%trace_fermie(8) + green%trace_fermie(9) - &
       & mu*green%trace_fermie(5) + half*green%trace_fermie(10) + &
-      & green%trace_fermie(11) - two*mu*green%trace_fermie(6) + (mu**2)*green%trace_fermie(3) + &
-      & quarter*(green%trace_fermie(12)-four*(mu**3)*green%trace_fermie(2)+ &
-      & six*(mu**2)*green%trace_fermie(4)-four*mu*green%trace_fermie(7)+ &
-      & (mu**4)*green%trace_fermie(1))
+      & green%trace_fermie(11) - two*mu*green%trace_fermie(6) + mu2*green%trace_fermie(3) + &
+      & quarter*(green%trace_fermie(12)-four*mu3*green%trace_fermie(2)+ &
+      & six*mu2*green%trace_fermie(4)-four*mu*green%trace_fermie(7)+ &
+      & mu4*green%trace_fermie(1))
  end if ! optlog=1 and optquickrestart=1
 
  if (optself == 1) then

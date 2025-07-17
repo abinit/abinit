@@ -75,11 +75,12 @@ CONTAINS  !=====================================================================
 !Local variables ------------------------------
  integer :: ir,k,mesh_type
  real(dp) :: dum,r_for_intg,y0
- real(dp), allocatable :: u_inside(:),u_outside(:),y1(:),y2(:)
+ real(dp), allocatable :: r_k(:),u_inside(:),u_outside(:),y1(:),y2(:)
  !************************************************************************
 
  mesh_type  = pawrad%mesh_type
  r_for_intg = pawrad%rad(meshsz)
+ ABI_MALLOC(r_k,(meshsz))
  ABI_MALLOC(u_inside,(meshsz))
  ABI_MALLOC(u_outside,(meshsz))
 
@@ -87,22 +88,23 @@ CONTAINS  !=====================================================================
 
    do k=0,2*lpawu+1,2
      u_inside(1) = zero
+     r_k(:) = pawrad%rad(1:meshsz)**k
      do ir=2,meshsz
        if (ir == 2) then
          ! Use a trapezoidal rule
-         u_inside(ir) = half * (proj2(1)*(pawrad%rad(1)**k)+proj2(2)*(pawrad%rad(2)**k)) * &
+         u_inside(ir) = half * (proj2(1)*r_k(1)+proj2(2)*r_k(2)) * &
                  & (pawrad%rad(2)-pawrad%rad(1))
        else if (ir == 3 .and. mesh_type == 3) then
          ! simp_gen doesn't handle this case, so we use a trapezoidal rule instead
-         u_inside(ir) = u_inside(2) + half*(proj2(2)*(pawrad%rad(2)**k)+proj2(3)*(pawrad%rad(3)**k))* &
+         u_inside(ir) = u_inside(2) + half*(proj2(2)*r_k(2)+proj2(3)*r_k(3))* &
                  & (pawrad%rad(3)-pawrad%rad(2))
        else
          ! Use Simpson rule when enough points are available
-         call simp_gen(u_inside(ir),proj2(1:ir)*(pawrad%rad(1:ir)**k),pawrad,r_for_intg=pawrad%rad(ir))
+         call simp_gen(u_inside(ir),proj2(1:ir)*r_k(1:ir),pawrad,r_for_intg=pawrad%rad(ir))
        end if ! ir=2
      end do ! ir
      u_outside(1) = zero
-     u_outside(2:meshsz) = two * u_inside(2:meshsz) * proj2(2:meshsz) / (pawrad%rad(2:meshsz)**(k+1))
+     u_outside(2:meshsz) = two * u_inside(2:meshsz) * proj2(2:meshsz) / (pawrad%rad(2:meshsz)*r_k(2:meshsz))
      call simp_gen(fk(k/2+1),u_outside(:),pawrad,r_for_intg=r_for_intg)
    end do ! k
 
@@ -110,6 +112,8 @@ CONTAINS  !=====================================================================
 
    ABI_MALLOC(y1,(meshsz))
    ABI_MALLOC(y2,(meshsz))
+
+   r_k(:) = sqrt(pawrad%rad(1:meshsz))
 
    do k=0,2*lpawu+1,2
 
@@ -121,7 +125,7 @@ CONTAINS  !=====================================================================
      do ir=2,meshsz
 
        call bessel_iv(half+dble(k),lambda*pawrad%rad(ir),zero,y1(ir),dum)
-       y1(ir) = y1(ir) / sqrt(pawrad%rad(ir))
+       y1(ir) = y1(ir) / r_k(ir)
 
        if (ir == 2) then
          ! Use a trapezoidal rule
@@ -137,7 +141,7 @@ CONTAINS  !=====================================================================
        end if ! ir
 
        call bessel_kv(half+dble(k),lambda*pawrad%rad(ir),zero,y2(ir),dum)
-       y2(ir) = y2(ir) / sqrt(pawrad%rad(ir))
+       y2(ir) = y2(ir) / r_k(ir)
      end do ! ir
 
      u_outside(1) = zero
@@ -153,6 +157,7 @@ CONTAINS  !=====================================================================
 
  fk(1:lpawu+1) = fk(1:lpawu+1) / eps
 
+ ABI_FREE(r_k)
  ABI_FREE(u_inside)
  ABI_FREE(u_outside)
 

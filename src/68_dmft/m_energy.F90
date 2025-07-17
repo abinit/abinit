@@ -1280,7 +1280,7 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
 !Local variables-------------------------------
  integer :: i,iatom,ierr,ifreq,info,isppol,lpawu,lwork,natom,ndim
  integer :: nmoments,nspinor,nsppol,nwlo,optinv
- real(dp) :: correction,fac,temp
+ real(dp) :: correction,fac,freq2,temp
  complex(dpc) :: trace_tmp
  real(dp), allocatable :: eig(:),rwork(:)
  complex(dpc), allocatable :: mat_temp(:,:),omega_fac(:),work(:)
@@ -1312,6 +1312,7 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
    if (green%distrib%procf(ifreq) /= paw_dmft%myproc) cycle
    fac = merge(temp*two,temp,nsppol==1.and.nspinor==1)
    trace_tmp = czero
+   freq2 = paw_dmft%omega_lo(ifreq) * paw_dmft%omega_lo(ifreq)
    do iatom=1,natom
      lpawu = paw_dmft%lpawu(iatom)
      if (lpawu == -1) cycle
@@ -1323,9 +1324,9 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
        call zheev('n','u',ndim,mat_temp(:,:),ndim,eig(:),work(:),lwork,rwork(1:3*ndim-2),info)
 
        if (optinv == 1) then
-         trace_tmp = trace_tmp - sum(log(eig(1:ndim)/(paw_dmft%omega_lo(ifreq)**2)))
+         trace_tmp = trace_tmp - sum(log(eig(1:ndim)/freq2))
        else
-         trace_tmp = trace_tmp + sum(log(eig(1:ndim)*(paw_dmft%omega_lo(ifreq)**2)))
+         trace_tmp = trace_tmp + sum(log(eig(1:ndim)*freq2))
        end if
 
      end do ! isppol

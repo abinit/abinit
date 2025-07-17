@@ -1,7 +1,8 @@
 # Multi_dataset parameters
-ndtset 2
-jdtset 1 2
-getden  -1
+ndtset 3
+jdtset 1 2 3
+getden1 0
+getden  1
 
 pawprtvol 3  # Printing additional information
 prtvol 4     #
@@ -66,8 +67,10 @@ spinat 0.0 0.0 0.0
 ############################
 usedmft   1       # DMFT calculation
 nstep     2       # Number of iterations for the DFT+DMFT convergence
-nline2   10
-nnsclo2   7
+nline1    4
+nnsclo1   0
+nline    10
+nnsclo    7
 
 # Definition for DMFT loop
 dmftbandi 5             # First KS band included in the projection for Wannier orbitals
@@ -99,6 +102,9 @@ upawu1      0.00 eV
 upawu       5.5  eV  # Values of U for each angular momentum
 jpawu1      0.00 eV
 jpawu       0.84 eV  # Values of J
+
+dmft_yukawa_param3 2
+dmft_lambda_yukawa 0.0
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
