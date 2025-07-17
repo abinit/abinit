@@ -147,7 +147,7 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  integer,allocatable :: nband(:,:), wfd_istwfk(:) ! iq_buf(:,:), done_qbz_spin(:,:),
  integer, contiguous, pointer :: kg_c(:,:), kg_x(:,:)
  real(dp) :: kk_ibz(3), kk_bz(3), kp_ibz(3), kp_bz(3), qq_bz(3), kk_diff(3) ! qq_ibz(3)
- complex(gwpc) :: ctmp_gwpc, mu
+ complex(gwpc) :: ctmp_gwpc, mu_c
  character(len=fnlen) :: path
 !arrays
  real(dp) :: n0(ebands%nsppol)
@@ -216,7 +216,6 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ! ================
  ! HANDLE SCREENING
  ! ================
- ! Init gsph_c for the correlated part.
  screen_filepath = dtfil%fnameabi_scr
  ABI_CHECK(dtfil%fnameabi_scr /= ABI_NOFILE, "SCR file must be specified")
 
@@ -276,7 +275,6 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ! Only wavefunctions on the FS are stored in wfd.
  ! Need all k-points on the FS because of k+q, spin is not distributed for the time being.
  ! It would be possible to reduce the memory allocated per MPI-rank via OpenMP.
-
  nkibz = wfk_hdr%nkpt
  ABI_MALLOC(nband, (nkibz, nsppol))
  ABI_MALLOC(bks_mask, (dtset%mband, nkibz, nsppol))
@@ -388,14 +386,13 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ABI_MALLOC(vc_sqrt_gx, (npw_x))
 
  ! Allocate g-vectors centered on k, k'
- ABI_MALLOC(kg_kp, (3, mpw))
  ABI_MALLOC(kg_k, (3, mpw))
+ ABI_MALLOC(kg_kp, (3, mpw))
 
  spin = 1
  associate (fs => fstab(spin))
  ABI_MALLOC_OR_DIE(ur_nkp,  (nfft*nspinor, fs%bmax-fs%bmin+1), ierr)
  ABI_MALLOC_OR_DIE(ur_mk, (nfft*nspinor, fs%bmax-fs%bmin+1), ierr)
- !ABI_MALLOC_OR_DIE(my_gbuf, (gqk%cplex, nb, nb, natom3, gqk%my_nk, qbuf_size), ierr)
  ABI_MALLOC(cwork_ur, (nfft*nspinor))
 
  ! Read symmetrized em1 from file
@@ -412,29 +409,26 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
 
  call pstat_proc%print(_PSTAT_ARGS_)
 
- ! Open WQK.nc file and go to data mode.
  prtwqk = 1
- if (prtwqk /= 0) then
-
-   ! Master creates the netcdf file used to store the results of the calculation.
-   if (my_rank == master) then
-     NCF_CHECK(nctk_open_create(root_ncid, strcat(dtfil%filnam_ds(4), "_WQK.nc") , xmpi_comm_self))
-     NCF_CHECK(nctk_open_create(root_ncid, path, xmpi_comm_self))
-     NCF_CHECK(cryst%ncwrite(root_ncid))
-     NCF_CHECK(ebands%ncwrite(root_ncid))
-     NCF_CHECK(edos%ncwrite(root_ncid))
-     NCF_CHECK(nf90_close(root_ncid))
-   end if
-   call xmpi_barrier(comm)
-
-   NCF_CHECK(nctk_open_modify(root_ncid, strcat(dtfil%filnam_ds(4), "_WQK.nc") , comm))
-   NCF_CHECK(nctk_set_datamode(root_ncid))
+ ! Master creates the netcdf file used to store the results of the calculation.
+ if (my_rank == master) then
+   NCF_CHECK(nctk_open_create(root_ncid, strcat(dtfil%filnam_ds(4), "_WQK.nc") , xmpi_comm_self))
+   NCF_CHECK(cryst%ncwrite(root_ncid))
+   NCF_CHECK(ebands%ncwrite(root_ncid))
+   NCF_CHECK(edos%ncwrite(root_ncid))
+   NCF_CHECK(nf90_close(root_ncid))
  end if
+ call xmpi_barrier(comm)
 
- ! ===================
- ! Loop over k'-points
- ! ===================
- mu = zero
+ ! Open WQK.nc file and go to data mode.
+ NCF_CHECK(nctk_open_modify(root_ncid, strcat(dtfil%filnam_ds(4), "_WQK.nc") , comm))
+ NCF_CHECK(nctk_set_datamode(root_ncid))
+
+ mg0 = [1, 1, 1]
+ remove_exchange = .True.
+ mu_c = zero
+
+ ! Loop over k'-points in the energy window.
  do ikp_bz=1,fs%nkfs
    my_ikp = ikp_bz; my_nkp = fs%nkfs
 
@@ -456,7 +450,7 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
    istwf_kp_ibz = wfd%istwfk(ikp_ibz); npw_kp_ibz = wfd%npwarr(ikp_ibz)
    !print *, "ikp_ibz:", ikp_ibz, "kk:", kk, "kp_ibz:", kp_ibz
 
-   ! Get npw_kp, kg_kp for kp_bz
+   ! Get npw_kp, kg_kp for this kp_bz.
    call wfd%get_gvec_gbound(cryst%gmet, ecut, kp_bz, ikp_ibz, isirr_kp, dtset%nloalg, & ! in
                             istwf_kp, npw_kp, kg_kp, nkpg_kp, kpg_kp, gbound_kp)        ! out
 
@@ -466,9 +460,7 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
    call wfd%rotate_cg(bstart_kp, nband_kp, spin, kp_ibz, npw_kp, kg_kp, istwf_kp, &
                       cryst, mapl_kp, gbound_kp, work_ngfft, work, ug_kp, urs_kbz=ur_nkp)
 
-   ! ==================
-   ! Loop over k-points
-   ! ==================
+   ! Loop over k-points in the energy window.
    do ik_bz=1,fs%nkfs
 
      mapl_k = fs%indkk_fs(:, ik_bz)
@@ -480,7 +472,7 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
      kk_bz = fs%kpts(:, ik_bz)
      kk_ibz = ebands%kptns(:,ik_ibz)
 
-     ! Get npw_k, kg_k for k
+     ! Get npw_k, kg_k for this k.
      call wfd%get_gvec_gbound(cryst%gmet, ecut, kk_bz, ik_ibz, isirr_k, dtset%nloalg, &  ! in
                               istwf_k, npw_k, kg_k, nkpg_k, kpg_k, gbound_k)             ! out
      ABI_FREE(kpg_k)
@@ -507,7 +499,7 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
 
      ! Identify q and G0 where q + G0 = k_GW - k_i
      kk_diff = kk_bz - kp_bz
-     mg0 = [1, 1, 1]
+
      call findqg0(iq_bz, g0_qq, kk_diff, qmesh%nbz, qmesh%bz, mG0)
 
      ! Find the corresponding irred qq-point in qmesh.
@@ -528,7 +520,6 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
        vc_sqrt_gx(gsph_x%rottb(ig, itim_qq, isym_qq)) = vcp%vc_sqrt(ig, iq_ibz)
      end do
 
-     remove_exchange = .True.
      call epsm1%rotate_iqbz(iq_bz, hscr%nomega, npw_c, gsph_c, qmesh, remove_exchange)
 
      ! Compute \sum_{gg'} (M_g^{kn,k'm})^* W_{gg'}(q) M_g'^{kn,k'm} with k' = k + q.
@@ -562,16 +553,18 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
      do n_kp=bstart_kp, bstop_kp
        in_kp = n_kp - bstart_kp + 1
        e_nkp = ebands%eig(n_kp, ikp_ibz, spin)
+       !fs%tetra_wtk(n_kp - fs%bmin + 1, ikp_ibz)
        do m_k=bstart_k, bstop_k
          im_k = m_k - bstart_k + 1
          e_mk = ebands%eig(m_k, ik_ibz, spin)
+         !fs%tetra_wtk(m_k - fs%bmin + 1, ik_ibz)
          smear_mk = 0.1_dp * eV_Ha
          ctmp_gwpc = xdotc(npw_c*nspinor, rhotwg_mn_c(:,im_k,in_kp), 1, w_rhotwg_mn_c(:,im_k,in_kp), 1)
          if (remove_exchange) then
            ctmp_gwpc = ctmp_gwpc + xdotc(npw_x*nspinor, rhotwg_mn_x(:,im_k,in_kp), 1, rhotwg_mn_x(:,im_k,in_kp), 1)
          end if
          !print *, "ctmp_gwpc:", ctmp_gwpc
-         !mu = mu + ctmp_gwpc * gaussian(e_mk - ebands%fermie, smear_mk) * gaussian(e_mp, smear_mk)
+         !mu_c = mu_c + ctmp_gwpc * gaussian(e_mk - ebands%fermie, smear_mk) * gaussian(e_mp, smear_mk)
          ! Computes: A := A + alpha * x * y^T
          !w_ee =
          !call dger(ne, ne, alpha, x, incx, y, incy, w_ee, lda)
@@ -614,13 +607,13 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  call cwtime_report(" wqk calculation", cpu_all, wall_all, gflops_all, end_str=ch10)
 
  ! Set vqk_completed to 1 so that we can easily check if restarted is needed.
- if (prtwqk /= 0) then
-   !if (my_rank == master) then
-   !  NCF_CHECK(nf90_put_var(root_ncid, root_vid("vqk_completed"), 1))
-   !end if
-   NCF_CHECK(nf90_close(root_ncid))
-   call xmpi_barrier(comm)
- end if
+ !if (prtwqk /= 0) then
+ !if (my_rank == master) then
+ !  NCF_CHECK(nf90_put_var(root_ncid, root_vid("vqk_completed"), 1))
+ !end if
+ NCF_CHECK(nf90_close(root_ncid))
+ call xmpi_barrier(comm)
+ !end if
 
  ! Output some of the results to ab_out for testing purposes
  !call gstore%print_for_abitests(dtset)
