@@ -904,7 +904,7 @@ subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
  natom    = paw_dmft%natom
  nsppol   = paw_dmft%nsppol
  nspinor  = paw_dmft%nspinor
- triqs    = (paw_dmft%dmft_solv == 6) .or. (paw_dmft%dmft_solv == 7)
+ triqs    = (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7)
  weissinv = merge(0,1,paw_dmft%dmft_solv==2.or.triqs)
 
  if (opt_weissself == 1) then

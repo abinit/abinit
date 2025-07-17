@@ -741,7 +741,8 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  integer :: mkmem,ml1,mm,mpw,ms1,myproc,natom,nband_k,ndim,nkpt,nproc,nproju,npw
  integer :: nspinor,nsppol,nsym,ntypat,off_diag,siz_paw,siz_proj,siz_wan,use_dmft
  logical :: t2g,use_full_chipsi,verif,x2my2d
- real(dp) :: bes,besp,invsqrt2lp1,lstep,norm,onem,rad,rint,rstep,sumwtk,xj,xmj
+ real(dp) :: bes,besp,fac_bessel,invsqrt2lp1,lstep,norm,onem,rad,rint,rstep,sumwtk,xj,xmj
+ complex(dpc) :: j_l
  integer, parameter :: mt2g(3) = (/1,2,4/)
  integer, allocatable :: ind_msml(:,:)
  logical, allocatable :: lcycle(:),typcycle(:)
@@ -1430,6 +1431,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
 
    ik  = 0 ! kpt index on current CPU
    ikg = 0
+   fac_bessel = four_pi / sqrt(ucvol)
 
    do ikpt=1,nkpt
 
@@ -1481,6 +1483,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
        if (.not. typcycle(itypat)) then   ! if this type has not been visited
          lpawu1 = lpawu ! physical l
          if (t2g .or. x2my2d) lpawu1 = 2
+         j_l = j_dpc**lpawu1
          siz_proj = paw_dmft%siz_proj(itypat)
          rint = paw_dmft%radgrid(itypat)%rad(siz_proj)
          siz_wan = paw_dmft%radgrid(itypat)%mesh_size
@@ -1489,15 +1492,15 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
            do ig=1,npw
              call paw_jbessel_4spline(bes,besp,lpawu1,0,two_pi*kpg_norm(ig)*rad,tol3)
              ! Multiply by r since we want to compute Psi(r) * r, for radial integration
-             paw_dmft%bessel(ig,ir,itypat,ik) = four_pi * bes * rad / sqrt(ucvol)
+             paw_dmft%bessel(ig,ir,itypat,ik) = fac_bessel * bes * rad
            end do ! ig
          end do ! ir
          do ig=1,npw
            call simp_gen(bes,pawtab(itypat)%proj(1:siz_proj)*dble(paw_dmft%bessel(ig,1:siz_proj,itypat,ik)), &
                        & paw_dmft%radgrid(itypat),r_for_intg=rint)
-           paw_dmft%bessel_int(ig,itypat,ik) = bes * (j_dpc**lpawu1) ! CAREFUL: we multiply by j^l AFTER simp_gen since simp_gen doesn_t handle complex
+           paw_dmft%bessel_int(ig,itypat,ik) = bes * j_l ! CAREFUL: we multiply by j^l AFTER simp_gen since simp_gen doesn_t handle complex
          end do ! ig
-         paw_dmft%bessel(1:npw,1:siz_wan,itypat,ik) = paw_dmft%bessel(1:npw,1:siz_wan,itypat,ik) * (j_dpc**lpawu1)
+         paw_dmft%bessel(1:npw,1:siz_wan,itypat,ik) = paw_dmft%bessel(1:npw,1:siz_wan,itypat,ik) * j_l
          typcycle(itypat) = .true.
        end if ! not typcycle
 
@@ -1637,7 +1640,7 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,filctqmcdatain,filsel
      if (lpawu == -1) cycle
      meshsz = paw_dmft%siz_proj(itypat)
 
-     call simp_gen(int1,pawtab(itypat)%proj(1:meshsz)**2,paw_dmft%radgrid(itypat), &
+     call simp_gen(int1,pawtab(itypat)%proj(1:meshsz)*pawtab(itypat)%proj(1:meshsz),paw_dmft%radgrid(itypat), &
                  & r_for_intg=paw_dmft%radgrid(itypat)%rad(meshsz))
      int1 = sqrt(int1)
 
