@@ -59,6 +59,7 @@ module m_prcref
  use m_rhotoxc,    only : rhotoxc
  use m_mklocl,     only : mklocl
  use m_mkcore,     only : mkcore
+ !use m_iterative_solvers, only : linsolve
 
  implicit none
 
@@ -456,7 +457,7 @@ subroutine prcref(atindx,dielar,dielinv,&
 
    else if (dtset%iprcel>=200 .and. dtset%iprcel<300) then
       cplex=optreal
-      call chi0diel(precon, dtset, cplex, mgfft, mpi_enreg, nfftprc, ngfftprc, dtset%nspden, optreal, optres, 20, tol4, vresid, vrespc)
+      call chi0diel(precon, dtset, cplex, mpi_enreg, optreal, optres, 20, tol4, vresid, vrespc)
 !    Other choice ?
  
    else
@@ -1109,7 +1110,7 @@ end subroutine prcref
 
    else if (dtset%iprcel>=200 .and. dtset%iprcel<300) then
      cplex=optreal
-     call chi0diel(precon, dtset, cplex, mgfft, mpi_enreg, nfftprc, ngfftprc, dtset%nspden, optreal, optres, 20, tol4, vresid, vrespc)
+     call chi0diel(precon, dtset, cplex, mpi_enreg, optreal, optres, 20, tol4, vresid, vrespc)
  
 !    Other choice ?
    else
@@ -2398,11 +2399,6 @@ end subroutine dieltcel
 !!  dtset         =
 !!  cplex         = If 1, vresid is REAL, if 2, vresid is COMPLEX.
 !!  mpi_enreg     = Information about MPI parallelization.
-!!  nfft          = Number of FFT grid points (for this processor).
-!!                      *To use this preconditioner, there must be no fft-grid parallelization.  
-!!  ngfft         = Contains all needed information about 3D FFT, see ~abinit/doc/variables/gstate/#ngfft.
-!!  gprimd        = Reciprocal space metric tensor in bohr**-2.
-!!  nspden        = Number of spin-density components.
 !!  optreal       = 1: vresid is given in the REAL space.
 !!                  2: vresid is given in the RECIPROCAL space.
 !!  optres        = 0: the array vresid contains a potential residual.
@@ -2420,20 +2416,18 @@ end subroutine dieltcel
 !!
 !! SOURCE
 
-subroutine chi0diel(precon, dtset, cplex, mgfft, mpi_enreg, nfft, ngfft, nspden, optreal, &
-&   optres, gmres_maxiter, gmres_rtol, vresid, vrespc)
+subroutine chi0diel(precon, dtset, cplex, mpi_enreg, optreal, optres, gmres_maxiter, gmres_rtol, vresid, vrespc)
 
 !Arguments ------------------------------------
  type(precon_object) :: precon
 !scalars
- integer,intent(in) :: cplex, mgfft, nfft, nspden, optreal, optres, gmres_maxiter
+ integer,intent(in) :: cplex, optreal, optres, gmres_maxiter
  real(dp), intent(in) :: gmres_rtol
  type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
 !arrays
- integer,intent(in) :: ngfft(:)
- real(dp),intent(in) :: vresid(:,:)
- real(dp),intent(out) :: vrespc(:,:)
+ real(dp),intent(in) :: vresid(optreal*precon%nfftprc, dtset%nspden)
+ real(dp),intent(out) :: vrespc(optreal*precon%nfftprc, dtset%nspden)
 
 !Local variables-------------------------------
 !scalars
@@ -2446,13 +2440,9 @@ subroutine chi0diel(precon, dtset, cplex, mgfft, mpi_enreg, nfft, ngfft, nspden,
 
 ! *************************************************************************
  write(6,*)'chi0diel start'; flush(6) !DEBUG
- ! TODO : remove some of the arguments (mgfft, nfft, nspden) and just check that the size of vresid and vrespc are coherent with precon%nfftprc, ngfftprc, dtset%nspden
 
- if (ngfft(10)>1) then
+ if (precon%ngfftprc(10)>1) then
    ABI_BUG("chi0-based preconditioning (chi0diel) used with fft-grid parallelization")
- end if
- if (nfft /= precon%nfftprc) then
-   ABI_BUG("Mismatched nfft in chi0-based preconditioning")
  end if
 
 !The preconditioner P^-1 is defined by : 
@@ -2465,18 +2455,18 @@ subroutine chi0diel(precon, dtset, cplex, mgfft, mpi_enreg, nfft, ngfft, nspden,
 !by soling the linear equation P * vrespc = vresid approximately with GMRES.
 
 !Right-hand side : rhs is vresid (flattened) in the Fourier space.
- ABI_MALLOC(rhs, (nspden*2*nfft))
+ ABI_MALLOC(rhs, (dtset%nspden*2*precon%nfftprc))
 
- do ispden = 1, nspden
-   !Indices of the ispden component in the flattened (nspden, 2, nfft)-array 'rhs'.
-   start_ispden = 1+(ispden-1)*2*nfft
-   end_ispden = ispden*2*nfft
+ do ispden = 1, dtset%nspden
+   !Indices of the ispden component in the flattened (dtset%nspden, 2, precon%nfftprc)-array 'rhs'.
+   start_ispden = 1+(ispden-1)*2*precon%nfftprc
+   end_ispden = ispden*2*precon%nfftprc
   
    if (optreal==1) then
      !vresid is given in the real space : We need to do a fft.
-     ABI_MALLOC(workr, (cplex*nfft))   !We need workr here because fourdp needs an 
-     workr(:) = vresid(:, ispden)      !intent(inout) argument while vresid is intent(in).
-     call fourdp(cplex, rhs(start_ispden:end_ispden), workr, -1, mpi_enreg, nfft, 1, ngfft, 0)
+     ABI_MALLOC(workr, (cplex*precon%nfftprc))    !We need workr here because fourdp needs an 
+     workr(:) = vresid(:, ispden)                 !intent(inout) argument while vresid is intent(in).
+     call fourdp(cplex, rhs(start_ispden:end_ispden), workr, -1, mpi_enreg, precon%nfftprc, 1, precon%ngfftprc, 0)
      ABI_FREE(workr)
 
     else
@@ -2487,11 +2477,13 @@ subroutine chi0diel(precon, dtset, cplex, mgfft, mpi_enreg, nfft, ngfft, nspden,
  end do
 
 !Initial guess :
- ABI_MALLOC(est, (nspden*2*nfft))
+ ABI_MALLOC(est, (dtset%nspden*2*precon%nfftprc))
  est = 0
 
 !Resolution with GMRES :
- call linsolve(nspden*2*nfft, matvec, rhs, est, gmres_maxiter, gmres_rtol)
+ write(6,*)'chi0diel : dtset%nspden*2*precon%nfftprc ', dtset%nspden*2*precon%nfftprc; flush(6) !DEBUG
+ write(6,*)'chi0diel : gmres_maxiter ', gmres_maxiter; flush(6) !DEBUG
+ call linsolve(2*precon%nfftprc*dtset%nspden, matvec, rhs, est, gmres_maxiter, gmres_rtol)
  write(6,*)'chi0diel : est(10:20) ', est(10:20); flush(6) !DEBUG
 
  ! Pseudo-inversion for non positive definite preconditioners
@@ -2501,14 +2493,14 @@ subroutine chi0diel(precon, dtset, cplex, mgfft, mpi_enreg, nfft, ngfft, nspden,
  !end if
 
 !Reshaping the final result :
- do ispden = 1, nspden
-   !Indices of the ispden component in the flattened (2, nfft, nspden)-array 'est'.
-   start_ispden = 1+(ispden-1)*2*nfft
-   end_ispden = ispden*2*nfft
+ do ispden = 1, dtset%nspden
+   !Indices of the ispden component in the flattened (2, precon%nfftprc, dtset%nspden)-array 'est'.
+   start_ispden = 1+(ispden-1)*2*precon%nfftprc
+   end_ispden = ispden*2*precon%nfftprc
 
    if (optreal==1) then
      !vrespc must be returned in the real space : We need to do a ifft. 
-     call fourdp(cplex, est(start_ispden:end_ispden), vrespc(:, ispden), 1, mpi_enreg, nfft, 1, ngfft, 0)
+     call fourdp(cplex, est(start_ispden:end_ispden), vrespc(:, ispden), 1, mpi_enreg, precon%nfftprc, 1, precon%ngfftprc, 0)
    else
      !vrespc must be returned in the fourier space.
      vrespc(:, ispden) = est(start_ispden:end_ispden)
@@ -2537,9 +2529,9 @@ subroutine chi0diel(precon, dtset, cplex, mgfft, mpi_enreg, nfft, ngfft, nspden,
    !C pointers to match the flattened arrays x and y to their 3D versions needed by
    !precon%apply_adjdielmat and precon%apply_dielmat
    x_c = c_loc(x)
-   call c_f_pointer(x_c, x_3d, shape=[2, nfft, nspden])
+   call c_f_pointer(x_c, x_3d, shape=[2, precon%nfftprc, dtset%nspden])
    y_c = c_loc(y)
-   call c_f_pointer(y_c, y_3d, shape=[2, nfft, nspden])
+   call c_f_pointer(y_c, y_3d, shape=[2, precon%nfftprc, dtset%nspden])
 
    if (optres==1) then
    ! We are preconditioning density residual so P = (I-chi0*vc) = adjoint dielectric matrix.
