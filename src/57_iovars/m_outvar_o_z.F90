@@ -135,7 +135,6 @@ contains
  real(dp),allocatable :: dprarr(:,:),dprarr_images(:,:,:)
  real(dp),allocatable :: xangst(:,:),xcart(:,:),xred(:,:)
  real(dp),allocatable :: xangst_(:,:,:,:),xcart_(:,:,:,:)
-
 ! *************************************************************************
 
 !###########################################################
@@ -503,7 +502,7 @@ contains
    intarr(1:mxvals%natom,0)=(/ (ii,ii=1,mxvals%natom) /)
    call prttagm(dprarr,intarr,iout,jdtset_,4,marr,natom,narrm,ncid,ndtset_alloc,'prtatlist','INT',0)
  else
-!  This thing will disapear with new generalized prttagm
+!  This thing will disappear with new generalized prttagm
  end if
 
  intarr(1,:)=dtsets(:)%prtbbb
@@ -1650,6 +1649,9 @@ contains
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,4,marr,npsp,narrm,ncid,ndtset_alloc,'znucl','DPR',0,forceprint=2)
 
+ intarr(1,:)=dtsets(:)%zora
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'zora','INT',0)
+
 !###########################################################
 !## Deallocation for generic arrays, and for n-z variables
 
@@ -1715,10 +1717,9 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
  integer :: multi_tsmear
  integer :: print,tnkpt
  logical, allocatable :: test_multiimages(:)
- character(len=4) :: appen
+ character(len=4) :: append
  character(len=16) :: keywd
  character(len=500) :: message
-
 ! *************************************************************************
 
  if(ndtset_alloc<1)then
@@ -1917,7 +1918,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
      end if
      if(dtsets(idtset)%iscf/=-2)then
        jdtset=jdtset_(idtset)
-       call appdig(jdtset,'',appen)
+       call appdig(jdtset,'',append)
        do iimage=1,nimagem(idtset)
          if(iimage==1 .or. test_multiimages(idtset) )then
            keywd=trim(token)//trim(strimg(iimage))
@@ -1930,7 +1931,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
                  nban=dtsets(idtset)%nband(ikpsp)
                  if(ikpsp==1)then
                    write(iout, '(1x,a16,a,1x,(t22,6f10.6))' )&
-&                   trim(keywd),appen,results_out(idtset)%occ(iban:iban+nban-1,iimage)
+&                   trim(keywd),append,results_out(idtset)%occ(iban:iban+nban-1,iimage)
                  else
                    write(iout, '((t22,6f10.6))' )results_out(idtset)%occ(iban:iban+nban-1,iimage)
                  end if
@@ -1942,7 +1943,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
 !            The number of bands is identical for all k points and spin
              nban=dtsets(idtset)%nband(1)
              write(iout, '(1x,a16,a,1x,(t22,6f10.6))' )&
-&             trim(keywd),appen,results_out(idtset)%occ(1:nban,iimage)
+&             trim(keywd),append,results_out(idtset)%occ(1:nban,iimage)
 !            if occopt==1, the occ might differ with the spin
              if(dtsets(idtset)%nsppol/=1)then
                write(iout, '((t22,6f10.6))' ) &

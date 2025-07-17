@@ -18,7 +18,7 @@ repos:
       - id: trailing-whitespace
       - id: check-executables-have-shebangs
       - id: check-added-large-files
-        args: ['--maxkb=100']  # 1000 KB = 1 MB
+        args: ['--maxkb=250']  # 1000 KB = 1 MB
 
   #- repo: https://github.com/astral-sh/ruff-pre-commit
   #  rev: v0.11.12
@@ -39,7 +39,7 @@ repos:
       - id: codespell
         stages: [pre-commit, commit-msg]
         exclude_types: [html]
-        args: [--ignore-words=.codespell.ignore]
+        args: [--ignore-words=.codespell.ignore, --skip=doc/abiref.bib]
 
   #- repo: https://github.com/adamchainz/blacken-docs
   #  rev: 1.19.1
