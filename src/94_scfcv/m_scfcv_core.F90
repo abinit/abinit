@@ -766,7 +766,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
    dielar(5)=dtset%diegap;dielar(6)=dtset%dielam
    dielar(7)=dtset%diemix;if (dtset%iscf>=10) dielar(7)=dtset%diemixmag
    ABI_MALLOC(nvresid,(nfftf,dtset%nspden))
-   ABI_MALLOC(nvtauresid,(nfftf,dtset%nspden*usevxctau))
+   ABI_MALLOC(nvtauresid,(nfftf,dtset%nspden*dtset%usekden))
    if (nstep==0) then
     nvresid=zero
     nvtauresid=zero
