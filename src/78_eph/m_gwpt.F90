@@ -1739,8 +1739,17 @@ subroutine dump_my_gbuf()
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  ! FIXME: Recheck this part as we have way more levels of parallelism in GWPT
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- if (gqk%coords_qkpb_sumbp(3) /= 0) goto 10 ! Yes, I'm very proud of this GOTO.
- if (gqk%pert_ppsum_bsum_comm%me /= 0) goto 10 ! Yes, I'm very proud of this GOTO.
+ !if (gqk%coords_qkpb_sumbp(3) /= 0) goto 10 ! Yes, I'm very proud of this GOTO.
+ !if (gqk%pert_ppsum_bsum_comm%me /= 0) goto 10 ! Yes, I'm very proud of this GOTO.
+ ! SC: I think the above GOTOs can cause nf90_put_var to deadlock --- Some MPI ranks 
+ !     call nf90_put_var while others skip it via goto. As the result, the ranks that 
+ !     call it get stuck as they will wait for the others to enter nf90_put_var.
+ !     I think we can simply replace the GOTOs by set iqbuf_cnt = 0, such that all 
+ !     MPI ranks call nf90_put_var, while for those with count=[..., 0], they have 
+ !     nothing (zero-length) to write and NetCDF can handles this safely.
+
+ if (gqk%coords_qkpb_sumbp(3) /= 0) iqbuf_cnt = 0
+ if (gqk%pert_ppsum_bsum_comm%me /= 0) iqbuf_cnt = 0
 
  !iq_buf(:, iqbuf_cnt) = [my_iq, iq_bz]
  my_iq = iq_buf(1, 1)
@@ -1765,7 +1774,8 @@ subroutine dump_my_gbuf()
  !end if
 
  ! Zero the counter before returning
-10 iqbuf_cnt = 0
+ !10 iqbuf_cnt = 0
+ iqbuf_cnt = 0
 
  !NCF_CHECK(nf90_sync(spin_ncid))
  !NCF_CHECK(nf90_sync(root_ncid))
