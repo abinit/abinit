@@ -457,7 +457,7 @@ subroutine prcref(atindx,dielar,dielinv,&
 
    else if (dtset%iprcel>=200 .and. dtset%iprcel<300) then
       cplex=optreal
-      call chi0diel(precon, dtset, cplex, mpi_enreg, optreal, optres, 20, tol4, vresid, vrespc)
+      call chi0diel(precon, dtset, cplex, mpi_enreg, optreal, optres, vresid, vrespc)
 !    Other choice ?
  
    else
@@ -1110,7 +1110,7 @@ end subroutine prcref
 
    else if (dtset%iprcel>=200 .and. dtset%iprcel<300) then
      cplex=optreal
-     call chi0diel(precon, dtset, cplex, mpi_enreg, optreal, optres, 20, tol4, vresid, vrespc)
+     call chi0diel(precon, dtset, cplex, mpi_enreg, optreal, optres, vresid, vrespc)
  
 !    Other choice ?
    else
@@ -2416,13 +2416,12 @@ end subroutine dieltcel
 !!
 !! SOURCE
 
-subroutine chi0diel(precon, dtset, cplex, mpi_enreg, optreal, optres, gmres_maxiter, gmres_rtol, vresid, vrespc)
+subroutine chi0diel(precon, dtset, cplex, mpi_enreg, optreal, optres, vresid, vrespc)
 
 !Arguments ------------------------------------
  type(precon_object) :: precon
 !scalars
- integer,intent(in) :: cplex, optreal, optres, gmres_maxiter
- real(dp), intent(in) :: gmres_rtol
+ integer,intent(in) :: cplex, optreal, optres
  type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
 !arrays
@@ -2482,15 +2481,8 @@ subroutine chi0diel(precon, dtset, cplex, mpi_enreg, optreal, optres, gmres_maxi
 
 !Resolution with GMRES :
  write(6,*)'chi0diel : dtset%nspden*2*precon%nfftprc ', dtset%nspden*2*precon%nfftprc; flush(6) !DEBUG
- write(6,*)'chi0diel : gmres_maxiter ', gmres_maxiter; flush(6) !DEBUG
- call linsolve(2*precon%nfftprc*dtset%nspden, matvec, rhs, est, gmres_maxiter, gmres_rtol)
+ call precon%linsolve(2*precon%nfftprc*dtset%nspden, matvec, rhs, est)
  write(6,*)'chi0diel : est(10:20) ', est(10:20); flush(6) !DEBUG
-
- ! Pseudo-inversion for non positive definite preconditioners
- !if (dtset%iprcel==203) then
- !  call treshold_schur_decomposition(matvec, treshold, eigensolver_maxiter, eigensolver_rtol, D, Y, Q)  !TODO
- !  call linsolve()
- !end if
 
 !Reshaping the final result :
  do ispden = 1, dtset%nspden

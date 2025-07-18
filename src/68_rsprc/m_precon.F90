@@ -11,43 +11,39 @@
 
 module m_precon
 
-    use defs_abitypes,      only : MPI_type
+    use defs_abitypes,          only : MPI_type
     use defs_basis
     use m_dtset
     use m_dtfil
     use m_xmpi
 
-    use defs_datatypes,     only : pseudopotential_type
+    use defs_datatypes,         only : pseudopotential_type
     use defs_wvltypes
-    use m_atomdata,         only : atom_length
-    use m_cgprj,            only : ctocprj
-    use m_dfpt_mkvxc,       only : dfpt_mkvxc, dfpt_mkvxc_noncoll
-    use m_fft,              only : fourdp, fourwf, fftpac
-    use m_fftcore,          only : sphereboundary
-    use m_fourier_interpol, only : transgrid
-    use m_kg,               only : ph1d3d
+    use m_atomdata,             only : atom_length
+    use m_cgprj,                only : ctocprj
+    use m_dfpt_mkvxc,           only : dfpt_mkvxc, dfpt_mkvxc_noncoll
+    use m_fft,                  only : fourdp, fourwf, fftpac
+    use m_fftcore,              only : sphereboundary
+    use m_fourier_interpol,     only : transgrid
+    use m_iterative_solvers,    only : gmres_linear_solver, cg_eigen_solver_treshold
+    use m_kg,                   only : ph1d3d
     use m_mkrho
-    use m_mpinfo,           only : proc_distrb_cycle
+    use m_mpinfo,               only : proc_distrb_cycle
     use m_paw_dmft
-    use m_pawrhoij,         only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free
-    use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_mpi_allgather, pawcprj_free
-    use m_pawang,           only : pawang_type
-    use m_pawfgr,           only : pawfgr_type
-    use m_pawtab,           only : pawtab_type
-    use m_pawfgrtab,        only : pawfgrtab_type
-    use m_paw_finegrid,     only : pawgylmg
-    use m_paw_occupancies,  only : pawmkrhoij
-    use m_paw_mkrho,        only : pawmkrho
-    use m_paw_nhat,         only : pawsushat
-    use m_spacepar,         only : symrhg
+    use m_pawrhoij,             only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free
+    use m_pawcprj,              only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_mpi_allgather, pawcprj_free
+    use m_pawang,               only : pawang_type
+    use m_pawfgr,               only : pawfgr_type
+    use m_pawtab,               only : pawtab_type
+    use m_pawfgrtab,            only : pawfgrtab_type
+    use m_paw_finegrid,         only : pawgylmg
+    use m_paw_occupancies,      only : pawmkrhoij
+    use m_paw_mkrho,            only : pawmkrho
+    use m_paw_nhat,             only : pawsushat
+    use m_spacepar,             only : symrhg
 
-!#if defined HAVE_LINALG_MKL_OMATCOPY
-!    use mkl_rci, only : dfgmres, dfgmres_check, dfgmres_get, dfgmres_init
-!#endif
-    
     implicit none
     private
-    public :: linsolve
 
     type, public :: precon_object
         integer  :: iprcel
@@ -78,14 +74,22 @@ module m_precon
         integer :: ngfftprc(18) ! All needed information about the 3D FFT for preconditioned quantities.
         !For Kxc :
         integer :: nkxc
-        logical :: need_kxc
         real(dp), pointer :: kxc(:, :)
         real(dp), pointer :: rhor(:, :)
         real(dp), pointer :: vxc(:, :)
 
+        !Logical variables :
+        logical :: use_ldos
+        logical :: use_kxc
+        logical :: is_posdef
+
         !For LDOS preconditioner :
         real(dp) :: tdos
         real(dp), allocatable :: ldos(:, :)
+
+        !Linear solver parameters
+        integer :: gmres_maxiter, eigensolver_maxiter, max_neig
+        real(dp) :: gmres_rtol, eigensolver_rtol, treshold
 
     contains
         procedure :: init => precon_init                    ! Initialize the precon_object.
@@ -102,6 +106,8 @@ module m_precon
         procedure :: apply_chi0 => apply_chi0               ! Apply the model chi0 operator to an input vector.
         procedure :: apply_dielmat => apply_dielmat         ! Apply the dielectric matrix to an input vector.
         procedure :: apply_adjdielmat => apply_adjdielmat   ! Apply the adjoint dielectric matrix to an input vector.
+
+        procedure :: linsolve => precon_linsolve            ! Solve a linear system with the preconditioner.
         
         ! For code validation :
         procedure :: save_applied_op_g => save_applied_op_g ! Save the application of an operator in reciprocal space (for code validation).
@@ -195,7 +201,7 @@ contains
             this%gmet   = gmet
             this%rmet  = rmet
             this%ucvol  = ucvol
-            this%need_kxc = .false.
+            this%use_kxc = .false.
             !Pointers
             this%atindx => atindx 
             this%atindx1 => atindx1 
@@ -215,11 +221,21 @@ contains
             this%symrec => symrec
             this%vxc    => vxc
             this%xred   => xred
+
+            !Logical variables that describe the preconditioner :
+            this%use_ldos = .false.                     ! this%use_ldos = .true. activates the computation of the ldos.
+            if (this%iprcel == 202 .or. this%iprcel == 203) this%use_ldos = .true.
+            this%use_kxc = .false.                      ! this%use_kxc = .true. activates the use of the exchange and correlation kernel.
+                                                        ! If this%use_kxc = .false. the RPA will be used.
+            if (this%iprcel == 203) this%use_kxc = .true.
+            this%is_posdef = .true.                     ! this%is_posdef = .false. activates the use of an adapted linear solver.
+            if (this%iprcel == 203) this%use_kxc = .false.
+            ! Other than here, iprcel is only used in apply_chi0, apply_dielmat and apply_adjdielmat.
             
             !PAW :
             if (psps%usepaw==1) then
                 this%unpaw      = dtfil%unpaw
-                this%cprj       => cprj     ! TODO : when cprj_in_memory = 0 the cprj array is computed on the fly and not allocated (or allocated with 0 size maybe)...
+                this%cprj       => cprj
                 this%usecprj    => usecprj
                 this%dimcprj    => dimcprj
                 this%mcprj      => mcprj
@@ -231,15 +247,14 @@ contains
             end if
             
             !Initializing LDOS specific variables
-            if (this%iprcel == 202) then
+            if (this%use_ldos) then
                 !Allocating the array containing ldos
-                ABI_MALLOC(this%ldos, (this%nfftprc, dtset%nspden)) ! TODO
+                ABI_MALLOC(this%ldos, (this%nfftprc, dtset%nspden))
             end if
             
-            !Initializing chi0_diag specific variables
-            if (this%iprcel == 203) then
+            !Initializing variables needed for Kxc
+            if (this%use_kxc) then
                 !Preparing the allocation of Kxc
-                this%need_kxc = .true.
                 if (dtset%xclevel==1) then  !LDA
                     this%nkxc = 2*min(dtset%nspden,2)-1
                 else if (dtset%xclevel==2)then  !GGA
@@ -250,6 +265,16 @@ contains
                     end if
                 end if
             end if
+
+            !Linear solver parameters
+            this%gmres_maxiter = 20
+            this%gmres_rtol = tol6
+                ! For inversion of non positive definite (adjointe) dielectric matrix
+            this%eigensolver_maxiter = 20
+            this%eigensolver_rtol = tol6
+            this%max_neig = 10
+            this%treshold = 0.1
+            ! TODO : Make these parameters user-defined.
 
         end if
         
@@ -276,7 +301,7 @@ contains
         ! *************************************************************************
         write(6,*)'chi0diel precon%init_kxc'; flush(6) !DEBUG
 
-        if (this%need_kxc) then
+        if (this%use_kxc) then
             this%kxc => kxc
         end if
 
@@ -288,7 +313,7 @@ contains
     !!
     !! FUNCTION
     !!  Update the precon_object :
-    !!      For LDOS preconditioning (iprcel=202) : 
+    !!      For preconditioners using the LDOS (iprcel = 202 or 203) : 
     !!          Compute the new ldos (local density of state) with current wavefunctions 
     !!          and the new tdos (total density of state = integral of ldos).
     !!
@@ -313,7 +338,7 @@ contains
         write(6,*)'chi0diel precon%update'; flush(6) !DEBUG
 
         !LDOS
-        if (this%iprcel == 202) then 
+        if (this%use_ldos) then 
             !update ldos
             call compute_ldos(this, dtset, mpi_enreg, this%ldos)
             !update tdos
@@ -339,7 +364,7 @@ contains
         ! *************************************************************************
         write(6,*)'chi0diel precon%free'; flush(6) !DEBUG
        
-        if (this%iprcel == 202) then
+        if (this%use_ldos) then
             !Deallocating the array containing ldos and tdos
             ABI_FREE(this%ldos)
         end if
@@ -886,15 +911,14 @@ contains
         write(6,*)'chi0diel apply_kernel'; flush(6) !DEBUG
         
         ! RPA : LDOS/Kerker model - only vc
-        if (this%iprcel == 201 .or. this%iprcel == 202) then
+        if (.not. this%use_kxc) then
             call to_pauli(this, 1, vec_g)       ! Convert vec_g to the Pauli basis
             call apply_vc(this, dtset, vec_g)   ! Apply vc in place
             call from_pauli(this, 0, vec_g)     ! Convert vec_g back to the default Abinit spin-basis
             ! TODO : make apply_vc work in the default Abinit spin-basis
-        end if
 
         ! No RPA : vc and Kxc
-        if (this%iprcel == 200) then    ! No use case yet
+        else
             ! IFFT to get vec in real space
             ABI_MALLOC(vec_r, (this%nfftprc, dtset%nspden))
             call fourdp(1, vec_g, vec_r, -1, mpi_enreg, this%nfftprc, dtset%nspden, this%ngfftprc, 0)
@@ -977,10 +1001,10 @@ contains
             delta = exp(-x**2)/sqrt(pi)
         else if (occopt==8) then
         !Uniform smearing
-            ABI_BUG("iprcel=201 : LDOS preconditioning needs a smooth smearing function")
+            ABI_BUG("iprcel=2** : LDOS preconditioning needs a smooth smearing function")
         else if (occopt==9) then
         !Fermi-Dirac occupation is enforced with two distinct quasi-Fermi levels
-            ABI_BUG("iprcel=201 : LDOS preconditioning not implemented for this smearing function")
+            ABI_BUG("iprcel=2** : LDOS preconditioning not implemented for this smearing function")
         end if
     
         fprim = -1/tsmear * delta
@@ -1360,6 +1384,7 @@ contains
         
         ! *************************************************************************
         write(6,*)'chi0diel apply_chi0_ldos'; flush(6) !DEBUG
+        write(6,*)'chi0diel apply_chi0_ldos, size(this%ldos, 1), size(this%ldos, 2)', size(this%ldos, 1), size(this%ldos, 2); flush(6) !DEBUG
         write(6,*)'chi0diel apply_chi0_ldos : this%ldos(1:10, :)', this%ldos(1:10, :); flush(6) !DEBUG
        
         if (abs(this%tdos) > epsilon(this%tdos)) then   !Checking that tdos is not 0.
@@ -1466,10 +1491,10 @@ contains
             option = 1          ! Computes the density.
             ndat = 1            ! Only one FFT.
             tim_fourwf = 0
-            rhoaug_r_ii = zero  ! Initialization for fourwf (accumulation).
             weight_r = 1
             weight_i = 1
             ABI_MALLOC(rhoaug_r_ii, (2, n4, n5, n6))
+            rhoaug_r_ii = zero  ! Initialization for fourwf (accumulation).
 
             call fourwf(1, rhoaug_r_ii(1, :, :, :), this%cg(:, j_cg+1:j_cg+npw_k), dummy_fofgout, dummy_fofrout,  &
             &           gbound, gbound, istwf_k, kg_k, kg_k, dtset%mgfft, mpi_enreg, ndat, dtset%ngfft, npw_k, &
@@ -1772,6 +1797,7 @@ contains
         n4 = dtset%ngfft(4)
         n5 = dtset%ngfft(5)
         n6 = dtset%ngfft(6)
+        write(6,*)'chi0diel compute_weights_chi0_diag : n1, n2, n3, n4, n5, n6', n1, n2, n3, n4, n5, n6; flush(6) !DEBUG
 
         ! Compute the weights = fi' * <rhoii, vec> 
         weights = 0
@@ -2080,7 +2106,7 @@ contains
             call apply_chi0_diag(this, dtset, mpi_enreg, Kxc_vec_r)
             !2.4) IFFT to get chi0_diag*Kxc*rho_g in reciprocal (G) space
             ABI_MALLOC(chi0_diag_Kxc_rho_g, (2, this%nfftprc, dtset%nspden))
-            call fourdp(1, Kxc_vec_r, chi0_diag_Kxc_rho_g, -1, mpi_enreg, this%nfftprc, dtset%nspden, this%ngfftprc, 0)
+            call fourdp(1, chi0_diag_Kxc_rho_g, Kxc_vec_r, -1, mpi_enreg, this%nfftprc, dtset%nspden, this%ngfftprc, 0)
             !2.5) Add this contribution to adjdielmat_rho_g
             adjdielmat_rho_g = adjdielmat_rho_g - chi0_diag_Kxc_rho_g
             ABI_FREE(Kxc_vec_r)
@@ -2193,7 +2219,7 @@ contains
             ABI_FREE(vec_r)
             !2.4) IFFT to get Kxc*chi0_diag*v_g in reciprocal (G) space
             ABI_MALLOC(Kxc_chi0_diag_v_g, (2, this%nfftprc, dtset%nspden))
-            call fourdp(1, Kxc_vec_r, Kxc_chi0_diag_v_g, -1, mpi_enreg, this%nfftprc, dtset%nspden, this%ngfftprc, 0)
+            call fourdp(1, Kxc_chi0_diag_v_g, Kxc_vec_r, -1, mpi_enreg, this%nfftprc, dtset%nspden, this%ngfftprc, 0)
             !2.5) Add this contribution to dielmat_v_g
             dielmat_v_g = dielmat_v_g - Kxc_chi0_diag_v_g
             ABI_FREE(Kxc_vec_r)
@@ -2216,296 +2242,42 @@ contains
     end subroutine apply_dielmat
     !!***
 
-! ---------------- Iterative solvers -------------------------------------------------------
-
-    !****f* m_precon/cg_eigen_solver
+    !****f* m_precon/precon_linsolve
     !! NAME
-    !!  cg_eigen_solver
+    !!  precon_linsolve
     !!
     !! FUNCTION
-    !!  Compute the smallest eigenvalues and corresponding eigenvectors of a matrix using
-    !!  the Conjugate Gradient method to minimize the Rayleigh quotient.
+    !!  Solve (or pseudo-solve) the linear system matvec(est) = rhs, tailored for cases where 
+    !!  'matvec' represents a preconditioner.
+    !!  
+    !!  In case the preconditioner ('matvec') might be ill conditioned (iprcel=203) : 
+    !!      The space X =R^n is decomposed into two orthogonal subspaces X1 and X2 where X1 is
+    !!      spanned by the eigenvectors of matvec associated to an eigenvalue smaller than 'treshold'
+    !!      and X2 is the orthogonal complement of X1.
+    !!      Then 'est' is computed as est = 1/'treshold'*P_1*rhs + est_2 where est_2 is the solution of
+    !!      matvec(est_2) = P_2 rhs in X2 estimated with a GMRES solver.
+    !!      --------------------------------------------------------------------------------
+    !!      This ensures that the GMRES solver operates on a well-conditioned linear system. 
+    !!      It also prevents excessive amplification of problematic modes and ensures that the final 
+    !!      applied operator remains positive definite, thereby preserving the stability of the SCF solution.
+    !!
+    !!  In the general case (when the model dielectric matrix is positive definite) :
+    !!      The linear solver GMRES is used.
     !!
     !! INPUTS
-    !!  n              = Size of the matrix.
-    !!  matvec         = Subroutine that performs matrix-vector multiplication.
-    !!  x0             = Initial guess for the eigenvector.
-    !!  tol            = Convergence tolerance for the residual norm.
-    !!  max_iter       = Maximum number of iterations for the Conjugate Gradient method.
-    !!  max_neig       = Maximum number of eigenvalues to compute.
-    !!  eigenvalue_threshold = Threshold below which to stop computing further eigenvalues.
+    !!  n       = Size of the linear system.
+    !!  matvec  = Subroutine that performs the matrix-vector multiplication.
+    !!  rhs     = Right-hand side vector.
     !!
-    !! OUTPUTS
-    !!  eigenvalues    = Array of computed smallest eigenvalues.
-    !!  eigenvectors   = Matrix of corresponding eigenvectors.
-    !!  n_eig          = Number of computed eigenvalues.
+    !! SIDE EFFECTS
+    !!  est     = On input : initial guess for the solution vector.
+    !!            On output : solution of matvec(est) = rhs at requested tolerance.
     !!
     !! SOURCE
-    subroutine cg_eigen_solver(n, matvec, x0, tol, max_iter, max_neig, eigenvalue_threshold, eigenvalues, eigenvectors, n_eig)
-        ! Input parameters
-        integer, intent(in) :: n, max_iter, max_neig
-        real(dp), intent(in) :: tol, eigenvalue_threshold
-        real(dp), intent(in) :: x0(n)
-        interface
-            subroutine matvec(n_, x, y)
-                integer, intent(in) :: n_
-                double precision, intent(inout), target :: x(n_), y(n_)
-            end subroutine matvec
-        end interface
-
-        ! Output parameters
-        real(dp), intent(out) :: eigenvalues(max_neig)
-        real(dp), intent(out) :: eigenvectors(n, max_neig)
-        integer, intent(out) :: n_eig
-
-        ! Local variables
-        real(dp) :: r(n), p(n), Ap(n), x(n)
-        real(dp) :: residual_norm, rayleigh_quotient
-        integer :: i, j, iter
-        
-        ! *************************************************************************
-        
-        ! Initialize variables
-        x = x0 / sqrt(sum(x0**2))   ! Normalize the initial guess
-        r = x                       ! Residual vector
-        p = r                       ! Search direction
-        residual_norm = sqrt(sum(r**2))
-
-        ! Conjugate Gradient iterations to minimize Rayleigh quotient
-        do iter = 1, max_iter
-            call cg_update(n, matvec, x, r, p, Ap, rayleigh_quotient, residual_norm)
-            if (residual_norm < tol) exit
-        end do
-
-        ! Store the computed eigenvalue and eigenvector
-        eigenvalues(1) = rayleigh_quotient
-        eigenvectors(:, 1) = x
-        n_eig = 1
-
-        ! If more eigenvalues are required, use deflation to compute subsequent eigenvalues
-        do j = 2, max_neig
-            ! Check if the eigenvalue is below the threshold
-            if (eigenvalues(j-1) < eigenvalue_threshold) exit
-
-            ! If it is not, we need to compute more eigenvalues
-            ! Orthogonalize the initial guess against previously computed eigenvectors
-            x = x0
-            do i = 1, j - 1
-                x = x - dot_product(x, eigenvectors(:, i)) * eigenvectors(:, i)
-            end do
-            x = x / sqrt(sum(x**2))
-
-            ! Reset residual and search direction for the next eigenvalue
-            r = x
-            p = r
-            residual_norm = sqrt(sum(r**2))
-
-            do iter = 1, max_iter
-                call cg_update(n, matvec, x, r, p, Ap, rayleigh_quotient, residual_norm)
-                if (residual_norm < tol) exit
-            end do
-
-            eigenvalues(j) = rayleigh_quotient
-            eigenvectors(:, j) = x
-            n_eig = n_eig + 1
-        end do
-
-    end subroutine cg_eigen_solver
-
-    !****f* m_precon/cg_update
-    !! NAME
-    !!  cg_update
-    !!
-    !! FUNCTION
-    !!  Perform a single Conjugate Gradient update step to minimize the Rayleigh quotient.
-    !!
-    !! INPUTS
-    !!  n              = Size of the matrix.
-    !!  matvec         = Subroutine that performs matrix-vector multiplication.
-    !!
-    !! INPUT/OUTPUTS
-    !!  x              = Current solution vector (eigenvector approximation).
-    !!  r              = Residual vector.
-    !!  p              = Search direction vector.
-    !!  Ap             = Result of matrix-vector multiplication (A * p).
-    !!
-    !! OUTPUTS
-    !!  rayleigh_quotient = Current approximation of the eigenvalue.
-    !!  residual_norm     = Norm of the residual vector.
-    !!
-    !! SOURCE
-    subroutine cg_update(n, matvec, x, r, p, Ap, rayleigh_quotient, residual_norm)
-        ! Arguments
+    subroutine precon_linsolve(this, n, matvec, rhs, est)
+        !Arguments ------------------------------------
+        class(precon_object), intent(in) :: this
         integer, intent(in) :: n
-        interface
-            subroutine matvec(n_, x, y)
-                integer, intent(in) :: n_
-                double precision, intent(inout), target :: x(n_), y(n_)
-            end subroutine matvec
-        end interface
-        real(dp), intent(inout) :: x(n), r(n), p(n), Ap(n)
-        real(dp), intent(out) :: rayleigh_quotient, residual_norm
-
-        ! Local variables
-        real(dp) :: alpha, beta
-
-        ! *************************************************************************
-
-        ! Apply the matrix-vector multiplication
-        call matvec(n, p, Ap)
-
-        ! Compute Rayleigh quotient (approximation of eigenvalue)
-        rayleigh_quotient = dot_product(x, Ap) / dot_product(x, x)
-
-        ! Compute alpha (step size)
-        alpha = dot_product(r, r) / dot_product(p, Ap)
-
-        ! Update the solution vector
-        x = x + alpha * p
-
-        ! Update the residual vector
-        r = r - alpha * Ap
-
-        ! Compute residual norm
-        residual_norm = sqrt(sum(r**2))
-
-        ! Compute beta (update factor for search direction)
-        beta = dot_product(r, r) / dot_product(r - alpha * Ap, r - alpha * Ap)
-
-        ! Update the search direction
-        p = r + beta * p
-
-    end subroutine cg_update
-
-! Linear solvers (GMRES)
-
-    subroutine call_FGMRES(n, matvec, rhs, est, gmres_maxiter, gmres_rtol)
-        !Arguments ------------------------------------
-        integer, intent(in) :: n, gmres_maxiter
-        real(dp), intent(in) :: gmres_rtol
-        real(dp),intent(in) :: rhs(:)
-        real(dp),intent(inout) :: est(:)
-        interface
-            subroutine matvec(n_, x, y)
-                integer, intent(in) :: n_
-                double precision, intent(inout), target :: x(n_), y(n_)
-            end subroutine matvec
-        end interface
-        !Local variables-------------------------------
-        !MKL FGMRES
-        integer :: RCI_request, itercount, size_vres
-        integer :: ipar(128)
-        real(dp) :: dpar(128)
-        real(dp), allocatable :: tmp(:)
-
-        ! *************************************************************************
-        
-        !FGMRES initialization
-
-        ABI_MALLOC(tmp, ((2*gmres_maxiter+1)*n + gmres_maxiter*(gmres_maxiter+9)/2 + 1))
-        call dfgmres_init(n, est, rhs, RCI_request, ipar, dpar, tmp)
-        !setting FGMRES parameters
-        ipar(7) = 0              ! control verbosity : no warning message
-        ipar(5) = gmres_maxiter  ! maximum number of iterations
-        ipar(8) = 1              ! dfgmres routine performs the stopping test for the maximum number of iterations ipar(4)≤ipar(5)
-        ipar(9) = 1              ! dfgmres routine performs the residual stopping test dpar(5)≤dpar(4)=dpar(1)*dpar(3)+dpar(2)
-        ipar(10) = 0             ! no user defined stopping tests
-        ipar(11) = 0             ! non-preconditioned GMRES
-        ipar(12) = 1             ! dfgmres routine performs the automatic test dpar(7)≤dpar(8)
-        ipar(15) = gmres_maxiter ! number of the non-restarted FGMRES iterations (no restart here)
-        dpar(1) = gmres_rtol     ! relative tolerance
-        ! dpar(2) = 0.01          ! absolute tolerance  (DFTK default=0.01)
-        
-        !FGMRES iterations
-        
-        call dfgmres_check(n, est, rhs, RCI_request, ipar, dpar, tmp)
-        call dfgmres(n, est, rhs, RCI_request, ipar, dpar, tmp)
-        
-        do
-            if (RCI_request==-1) then
-            !    maximum number of iterations is reached
-                call dfgmres_get(n, est, rhs, RCI_request, ipar, dpar, tmp, itercount)
-                exit
-            else if (RCI_request==0) then
-            !    successful completion of the task
-                call dfgmres_get(n, est, rhs, RCI_request, ipar, dpar, tmp, itercount)
-                exit
-            else  if (RCI_request==1) then
-            !    multiply the matrix P by tmp(ipar(22)) and put the result in tmp(ipar(23))
-                call matvec(n, tmp(ipar(22):ipar(22)+2*size_vres-1), tmp(ipar(23):ipar(23)+2*size_vres-1))
-            !    proceed with FGMRES iterations
-                call dfgmres(2*size_vres, est, rhs, RCI_request, ipar, dpar, tmp)
-        !---------------------------------------------------------------------
-        !  FGMRES Errors
-            else if (RCI_request==-10) then
-                ABI_BUG('FGMRES : attempt to divide by zero')
-                exit
-            else if (RCI_request==-11) then
-                ABI_BUG('FGMRES : infinite cycle')
-                exit
-            else if (RCI_request==-12) then
-                ABI_BUG('FGMRES : errors were found in the method parameters')
-                exit
-            ! RCI_request = 2, 3, 4 should not happen with this choice of parameters
-            else
-                ABI_BUG('FGMRES : RCI_request has unexpected value')
-            end if
-        !---------------------------------------------------------------------
-        end do
-        ABI_FREE(tmp)
-    end subroutine call_FGMRES
-
-    subroutine call_gmresm(n, matvec, est, rhs, gmres_maxiter, gmres_rtol)
-        !Arguments ------------------------------------
-        integer, intent(in) :: n, gmres_maxiter
-        real(dp), intent(in) :: gmres_rtol
-        real(dp),intent(in) :: rhs(n)
-        real(dp),intent(inout) :: est(n)
-        interface
-            subroutine matvec(n_, x, y)
-                integer, intent(in) :: n_
-                double precision, intent(inout), target :: x(n_), y(n_)
-            end subroutine matvec
-        end interface
-        !Local variables-------------------------------
-        integer :: its, info, m
-        real(dp) :: res, del
-        real(dp), allocatable :: h(:, :), v(:, :)
-
-        ! *************************************************************************
-
-        m = gmres_maxiter
-        ABI_MALLOC(h, (m+1, m))
-        ABI_MALLOC(v, (n, m+1))
-        res = gmres_rtol
-        del = 0
-        its = gmres_maxiter  ! No restart
-        info = 1
-        call gmresm(m, n, est, rhs, matvec, psolve, dotprd, h, v, res, del, its, info)
-        ABI_FREE(h)
-        ABI_FREE(v)
-
-        contains
-        ! Dummy :  No preconditioning
-        subroutine psolve(n_, x)
-            integer, intent(in) :: n_
-            real(dp), intent(inout) :: x
-        end subroutine psolve
-        ! Dot product
-        function dotprd(n_, a, b) result(c)
-            integer, intent(in) :: n_
-            real(dp), intent(inout) :: a(n_), b(n_)
-            real(dp) :: c
-            ! ***********************
-            c = dot_product(a, b)
-        end function dotprd
-
-    end subroutine call_gmresm
-
-    subroutine linsolve(n, matvec, rhs, est, gmres_maxiter, gmres_rtol)
-        !Arguments ------------------------------------
-        integer, intent(in) :: n, gmres_maxiter
-        real(dp), intent(in) :: gmres_rtol
         real(dp), intent(in) :: rhs(n)
         real(dp), intent(inout) :: est(n)
         interface
@@ -2514,180 +2286,76 @@ contains
                 double precision, intent(inout), target :: x(n_), y(n_)
             end subroutine matvec
         end interface
-      
+        !Local variables-------------------------------
+        integer :: n_eig, i
+        real(dp), allocatable :: eigenvalues(:), eigenvectors(:, :), rhs_1(:), est_1(:)
+
         ! *************************************************************************
+
+        if (.not. this%is_posdef) then
+
+            ! Step 1 : Compute the smallest eigenvalues and eigenvectors of matvec
+            ABI_MALLOC(eigenvalues, (this%max_neig))
+            ABI_MALLOC(eigenvectors, (n, this%max_neig))
+            call cg_eigen_solver_treshold(n, matvec, rhs, this%eigensolver_rtol, this%eigensolver_maxiter, &
+            &       this%max_neig, this%treshold, eigenvalues, eigenvectors, n_eig)
+
+            ! Step 2 : Project rhs onto the subspace spanned by the computed eigenvectors
+            ABI_MALLOC(rhs_1, (n))
+            rhs_1 = zero
+            do i = 1, n_eig
+                rhs_1 = rhs_1 + dot_product(rhs, eigenvectors(:, i)) * eigenvectors(:, i)
+            end do
+
+            ! Step 3 : Solve the reduced problem in the orthogonal complement X2
+            ! removing the components of est in X1
+            do i = 1, n_eig
+                est = est - dot_product(est, eigenvectors(:, i)) * eigenvectors(:, i)
+            end do
+            call gmres_linear_solver(n, matvec_2, rhs - rhs_1, est, this%gmres_maxiter, this%gmres_rtol)
+            ! removing the spurious components of est in X1
+            do i = 1, n_eig
+                est = est - dot_product(est, eigenvectors(:, i)) * eigenvectors(:, i)
+            end do
+
+            ! Step 3 : Add the "treshold inverse" in the subspace X1
+            do i = 1, n_eig
+                est = est + (1.0_dp / max(this%treshold, eigenvalues(i))) * &
+                &       dot_product(rhs, eigenvectors(:, i)) * eigenvectors(:, i)
+            end do
+
+            ABI_FREE(eigenvalues)
+            ABI_FREE(eigenvectors)
+            ABI_FREE(rhs_1)
+    
+        else
+
+            call gmres_linear_solver(n, matvec, rhs, est, this%gmres_maxiter, this%gmres_rtol)
+
+        end if
+
+        contains
+
+        ! subroutine matvec reduced to X2 --------------------------------------------------
+        subroutine matvec_2(n_, x, y)
+            integer, intent(in) :: n_
+            real(dp), intent(inout), target :: x(n_), y(n_)
+            !Local variables
+            integer :: i_eig
         
-        !TODO : dirty check of MKL availability
-#if defined HAVE_LINALG_MKL_OMATCOPY
-        write(6,*)'using FGMRES'; flush(6) !DEBUG
-        call call_FGMRES(n, matvec, rhs, est, gmres_maxiter, gmres_rtol)
-#else
-        write(6,*)'using gmresm'; flush(6) !DEBUG
-        call call_gmresm(n, matvec, est, rhs, gmres_maxiter, gmres_rtol)
-#endif
-        write(6,*)'chi0diel : gmres done'; flush(6) !DEBUG
-      
-    end subroutine linsolve
+        ! **********************************************************************************
+            
+            do i_eig = 1, n_eig
+                x = x - dot_product(x, eigenvectors(:, i_eig)) * eigenvectors(:, i_eig)
+            end do  ! TODO : we could probably do without this
+            call matvec(n_, x, y)
+            do i_eig = 1, n_eig
+                y = y - dot_product(y, eigenvectors(:, i_eig)) * eigenvectors(:, i_eig)
+            end do
 
-!----------------------------------------------------------------------
-! Openpipeflow.org.  If used in your work, please cite
-! Willis, A. (2017) SoftwareX 6, 124-127.
-! https://doi.org/10.1016/j.softx.2017.05.003 (open access)
-!                                      Thanks in advance! Ashley 2019.
-!----------------------------------------------------------------------
-! solve A x = b for x ;  
-! minimise |Ax-b| subject to constraint |x| < delta .
-! requires lapack routines dgelsy, dgesvd.
-!----------------------------------------------------------------------
-! m	  gmres dimension
-! n 	  dimension of x
-! x	  on input:  guess for x, can be 0
-!         on exit:  solution x, subject to constraint if del>0
-! b	  input b
-! matvec  performs y := A x, call matvec(N,x, y)
-! psolve  preconditioner, solve M x_out = x_in, call psolve(N,x)
-! dotprd  dot product, d = dotprd(n,a,b)
-! h       Hessian matrix,  size (m+1)*m
-! v       Krylov subspace, size n*(m+1)
-! res	  on input: |Ax-b|/|b|<res; 
-!         on exit:  residual reached
-! del     on input: if(del>0) then the x returned is the hookstep
-!         on exit:  norm of next b predicted by hook
-! its	  on input: max num its; 
-!         on exit:  number of its taken
-! info	  on input: if(info==1) print* residuals
-!                   if(info==2) recalc hookstep with new del
-! 	  on exit:  0 sucessful, 1 method breakdown, 2 max its
-!							A.P.Willis 2008
-!----------------------------------------------------------------------
+         end subroutine matvec_2 ! ---------------------------------------------------------
+        
 
- subroutine gmresm(m,n,x,b,matvec,psolve,dotprd,h,v,res,del,its,info)
-   implicit none
-   integer,          intent(in)    :: m
-   integer,          intent(in)    :: n
-   double precision, intent(inout) :: x(n)
-   double precision, intent(in)    :: b(n)
-   external                        :: matvec,psolve
-   double precision, external      :: dotprd
-   double precision, intent(inout) :: h(m+1,m)
-   double precision, intent(inout) :: v(n,m+1)
-   double precision, intent(inout) :: res
-   double precision, intent(inout) :: del
-   integer,          intent(inout) :: its
-   integer,          intent(inout) :: info
-   double precision :: tol,res_,stgn, w(n), z(n)
-   double precision :: h_(m+1,m), y(m+1), p(m+1), work(4*m+1)
-   integer :: imx, piv(m), rank, i
-   double precision, save :: beta
-   integer, save :: j
-   logical :: done   
-
-   if(info==2) then
-      call hookstep(j,h,m,beta,del, y)
-      z = matmul(v(:,1:j),y(1:j))
-      call psolve(n, z)
-      x = z
-      info = 0
-      return
-   end if	 
-
-   tol = res
-   imx = its
-   its = 0
-   v   = 0d0
-
- 1 continue
-   res_ = 1d99
-   stgn = 1d0 - 1d-14
- 
-   beta = dsqrt(dotprd(n,x,x)) 
-   if(beta==0d0)  w = 0d0
-   if(beta/=0d0)  call matvec(n,x, w)
-   w = b - w
-   beta = dsqrt(dotprd(n,w,w)) 
-   v(:,1) = w / beta
-     
-   h = 0d0
-   do j = 1, m
-      its = its + 1
-      z = v(:,j)      
-      call psolve(n, z)
-      call matvec(n, z, w)
-      do i = 1, j
-         h(i,j) = dotprd(n,w,v(1,i))
-         w = w - h(i,j)*v(:,i)
-      end do
-      h(j+1,j) = dsqrt(dotprd(n,w,w))
-      v(:,j+1) = w / h(j+1,j)
-          
-      p(1) = beta
-      p(2:j+1) = 0d0
-      h_(1:j+1,1:j) = h(1:j+1,1:j)
-      !call dgelsy(j+1,j,1,h_(1:m+1, 1:j),m+1,p,m+1,piv,m,rank,work,4*m+1,i)
-      call dgelsy(j+1,j,1,h_,m+1,p,m+1,piv,m,rank,work,4*m+1,i)
-      if(i/=0) stop 'gmresm: dgelsy'
-      y = p
-
-      p(1:j+1) = - matmul(h(1:j+1,1:j),y(1:j))
-      p(1) = p(1) + beta
-      res = dsqrt(dot_product(p(1:j+1),p(1:j+1)))
-      if(info==1) print*, 'gmresm: it=', its,' res=', real(res)
-      
-      done = (res<=tol .or. its==imx .or. res>res_)
-      if(done .or. j==m) then
-        if(del>0d0)  call hookstep(j,h,m,beta,del, y)
-         z = matmul(v(:,1:j),y(1:j))
-         call psolve(n, z)
-         x = x + z
-        if(its==imx) info = 2
-        if(res>res_) info = 1
-        if(res<=tol) info = 0
-         if(done)     return
-        if(del>0d0)  print*, 'gmres: warning! restart affects hookstep'
-         goto 1       ! (j==m) restart
-      end if
-      res_ = res*stgn
-
-   end do   
- 
- end subroutine gmresm
- 
- 
-!-----------------------------------------------------------------
-! replace y with a vector that generates a hookstep
-! c.f. Viswanath (2008) arXiv:0809.1498
-!-----------------------------------------------------------------
- subroutine hookstep(j,h,m,beta,del, y)
-   implicit none
-   integer,          intent(in)    :: j, m
-   double precision, intent(in)    :: h(m+1,j), beta
-   double precision, intent(inout) :: del
-   double precision, intent(out)   :: y(j)
-   double precision :: a(j+1,j), s(j), u(j+1,j+1), vt(j,j), work(5*(j+1))
-   double precision :: p(j+1), q(j), mu, qn
-   integer :: info
-   
-   a = h(1:j+1,1:j)
-   
-   call dgesvd('A','A',j+1,j,a,j+1,s,u,j+1,vt,j,work,5*(j+1),info)
-   if(info/=0) stop 'hookstep: dgesvd'
-   
-   p(1:j) = beta * u(1,1:j)   
-
-   mu = max(s(j)*s(j)*1d-6,1d-99)
-   qn = 1d99
-   do while(qn>del)
-      mu = mu * 1.1d0
-      q = p(1:j)*s/(mu+s*s)
-      qn = dsqrt(dot_product(q,q))
-   end do
-
-   y = matmul(q,vt)
-
-   p = - matmul(h(1:j+1,1:j),y(1:j))
-   p(1) = p(1) + beta
-   del = dsqrt(dot_product(p,p))
- 
- end subroutine hookstep
+    end subroutine precon_linsolve
 
 end module m_precon
