@@ -65,6 +65,7 @@ Core build parameters
   * architecture      : ${abi_cpu_vendor} ${abi_cpu_model} (${abi_cpu_bits} bits)
   * debugging         : ${abi_debug_flavor}
   * optimizations     : ${abi_optim_flavor}
+  * Python            : ${PYTHON}
 
   * MPI    enabled    : ${abi_mpi_enable} (flavor: ${abi_mpi_flavor})
   * MPI    in-place   : ${abi_mpi_inplace_enable}

@@ -119,7 +119,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  integer :: nspinor,nsppol,nsppol_imp,ntypat,nwlo,opt_diag,opt_fk,opt_nondiag
  integer :: opt_rot,rot_type_vee,testcode,testrot,tndim,unt,unt2,useylm
  integer, parameter :: optdb = 0
- logical :: nondiaglevels,triqs
+ logical :: nondiaglevels
  logical(kind=1) :: leg_measure = .true.
  real(dp) :: doccsum,EE,f4of2_sla,f6of2_sla,noise,omega
  type(green_type) :: weiss_for_rot
@@ -1787,12 +1787,11 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
  if (pawprtvol >= 3) then
 !< HACK >
-   if (.not. triqs) then
-     write(message,'(a,2x,a)') ch10,&  ! debug
+   write(message,'(a,2x,a)') ch10,&  ! debug
        & " == Print diagonalized weiss_for_rot function after rotation for small freq in the ctqmc basis"  ! debug
-     call wrtout(std_out,message,'COLL')  ! debug
-     call print_matlu(weiss_for_rot%oper(1)%matlu(:),natom,1)  ! debug
-   end if
+   call wrtout(std_out,message,'COLL')  ! debug
+   call print_matlu(weiss_for_rot%oper(1)%matlu(:),natom,1)  ! debug
+
 !</ HACK >
    write(message,'(a,2x,a)') ch10,&  ! debug
      & " == Print Weiss function for smallest freq in the Slm basis"  ! debug
