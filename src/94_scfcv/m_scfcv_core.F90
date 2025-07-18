@@ -712,7 +712,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &   has_dij=1,has_dijfock=has_dijfock,has_dijhartree=1,has_dijnd=has_dijnd,has_dijso=1,&
 &   has_dijhat=has_dijhat,&
 &   has_dijU=has_dijU,has_pawu_occ=1,has_exexch_pot=1,nucdipmom=dtset%nucdipmom,&
-&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+&   zora=dtset%zora,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    if(dtset%usewvl==1) then
      call paw2wvl_ij(1,paw_ij,wvl%descr)
    end if

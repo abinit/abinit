@@ -1,40 +1,49 @@
-# test DDK and orbital magnetism response with nuclear dipole moment and nspinor 2
+# test ZORA terms with nuclear dipole moment
 # AlP solid
+#
 
-#Use GPU (openMP)
-gpu_option 2
 
-# unconverged, use ecut at least 20 for convergence
+# unconverged, use at least 20 for convergence
 ecut 5
 pawecutdg 10
 
-# limit steps to speed test
-nstep 10
-
 #nuclear magnetic dipole moment on Al site
 #size 1 in a.u. along x axis
-nucdipmom
-3*0.0 1.00000 0.0 0.0
+natnd 1 # one atom in the unit cell has a dipole
+iatnd 2 # it is atom number 2 (the Al atom in this case)
+atndlist  # the value of the dipole
+1.0 0.0 0.0
 
 # Lamb shielding on Al site
 lambsig 0.0D0 766.76D-6
 
-# bands and spinors
-nband 8
-nspinor 2
-pawspnorb 1
+ndtset 8
+udtset 4 2
 
-ndtset 2
+zora1? 0 # no ZORA, normal non-rel calc
+nband1? 4
 
-tolvrs1 1.0D-18
-prtwf1 1
+zora2? 1 # ZORA kinetic energy terms on nuc dip only
+nband2? 4
 
-tolwfr2 1.0D-20
-getwfk2 -1
-rfddk2 1
-rfdir2 1 0 0
-iscf2 -3
-orbmag2 2
+zora3? 2 # ZORA spin terms (SOC and spin-dipole)
+nband3? 8
+nspinor3? 2
+
+zora4? 3 # ZORA kinetic + spin terms
+nband4? 8
+nspinor4? 2
+
+tolvrs?1 1.0D-18
+write_files?1 "wf_1"
+
+tolwfr?2 1.0D-20
+getwfk?2 -1
+rfddk?2 1
+rfdir?2 1 1 1
+iscf?2 -3
+orbmag?2 2
+write_files?2 "None"
 
 istwfk *1
 
@@ -52,6 +61,7 @@ shiftk 3*1/2
 0 1/2 0
 0 0 1/2
 
+nstep 30
 
 prtwf 0
 prteig 0
@@ -64,7 +74,6 @@ usexcnhat 0
 
 paral_atom 0
 paral_kgb 0
-
 
 acell    3*10.3008969711
 
@@ -88,16 +97,15 @@ pseudos="P.xml, Al.xml"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_nvhpc_23.9_elpa
 #%% [files]
 #%% files_to_test =
-#%%   t31.abo, tolnlines= 100, tolabs=  2.7e-2, tolrel= 1.1
+#%%   t44.abo, tolnlines=  12, tolabs=  9.5e-10, tolrel= 1.0
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 4
 #%% [extra_info]
-#%% authors = M. Sarraute, J. Zwanziger
+#%% authors = J. Zwanziger
 #%% keywords = PAW
-#%% description = Orbital magnetism with nspinor 2
+#%% description = Test ZORA terms on chemical shielding in solid AlP
 #%% topics = NMR, MagField
 #%%<END TEST_INFO>
 
