@@ -73,8 +73,6 @@
  diemac 6.0
  ecut 1.40
  ecutsm 0.40
- dilatmx 1.20
- chkdilatmx 0
  ixc 3
  natom  2 nband 4  nbdbuf 0
  nstep 12

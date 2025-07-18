@@ -15,7 +15,6 @@ ndtset  4
 ecut 3 # Must be increased for convergence purposes 
 nstep 10
 ecutsm 0.5
-dilatmx 1.05
 ixc 11
 kptopt 3
 # DATASET 1: ground-state computation
