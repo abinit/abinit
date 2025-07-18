@@ -348,7 +348,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  real(dp),allocatable,target :: gh1(:,:),gs1(:,:),gvnlx1(:,:),gvnlx2(:,:),kinpw1(:),kpg_k(:,:),kpg1_k(:,:)
  real(dp),allocatable,target :: gvnlx1_tmp(:,:)
  real(dp),allocatable :: occ_k(:),occ_kq(:),ph3d(:,:,:),ph3d1(:,:,:),rhotmp(:,:),rocceig(:,:)
- real(dp),allocatable :: vectornd_pac(:,:,:,:,:),vectornd_pac_idir(:,:,:,:)
+ real(dp),allocatable :: vectornd_pac(:,:,:,:,:),vectornd_pac_idir(:,:,:,:),vlocal(:,:,:,:),vtrial_(:,:)
  real(dp),allocatable :: vxctaulocal(:,:,:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylm1_k(:,:),ylmgr1_k(:,:,:),vtmp1(:,:),vxc10(:,:)
  real(dp),allocatable,target :: work(:,:,:),e1kb_work(:,:,:,:)
@@ -560,6 +560,11 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 &  usecprj=usecprj,nucdipmom=dtset%nucdipmom,gpu_option=gpu_option)
  has_vectornd = (with_vectornd .EQ. 1)
  if(has_vectornd) then
+    ! vlocal is needed when vectornd is present, for zora
+    ABI_MALLOC(vlocal,(dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),gs_hamkq%nvloc))
+    ABI_MALLOC(vtrial_,(nfftf,nspden))
+    ! need a mutable version of vtrial 
+    vtrial_=vtrial
     ABI_MALLOC(vectornd_pac,(dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),gs_hamkq%nvloc,3))
     ABI_MALLOC(vectornd_pac_idir,(dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),gs_hamkq%nvloc))
  end if
@@ -601,7 +606,6 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
    call paw_an_reset_flags(paw_an1)
    call paw_ij_reset_flags(paw_ij1,dijhartree=.true.)
  end if
-
 
 !LOOP OVER PERTURBATION TYPES (j1)
  do kpert1=1,mpert1
@@ -881,8 +885,10 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
      ! code assumes explicitly and implicitly that nvloc = 1. This should eventually be generalized.
      if(has_vectornd) then
        call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
+         & dtset%nspden, gs_hamkq%nvloc, 0, pawfgr, mpi_enreg, vtrial_,vlocal)
+       call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
          & dtset%nspden, gs_hamkq%nvloc, 3, pawfgr, mpi_enreg, vectornd,vectornd_pac)
-       call gs_hamkq%load_spin(isppol, vectornd=vectornd_pac)
+       call gs_hamkq%load_spin(isppol, vlocal=vlocal,vectornd=vectornd_pac)
        vectornd_pac_idir(:,:,:,:)=vectornd_pac(:,:,:,:,idir)
        call rf_hamkq%load_spin(isppol, vectornd=vectornd_pac_idir)
      end if
@@ -1943,6 +1949,12 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
    call rf_hamkq%free()
    if (has_vectornd) then
      ABI_FREE(vectornd_pac_idir)
+   end if
+   if (allocated(vlocal)) then
+     ABI_FREE(vlocal)
+   end if
+   if (allocated(vtrial_)) then
+     ABI_FREE(vtrial_)
    end if
    if (has_drho)  then
      ABI_FREE(drhoaug1)
