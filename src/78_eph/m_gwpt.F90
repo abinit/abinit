@@ -194,7 +194,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: n1,n2,n3,n4,n5,n6,nspden, mqmem, m_kq, n_k, restart, root_ncid, spin_ncid, usecprj !,sij_opt
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg_k,nkpg_kq,nkpg_kqmp,nkpg_kmp,imyp, cnt, nvloc, iw_nk, iw_mkq, ndone, nmiss
  integer :: my_ipp, ipp_bz, ipp_ibz, isym_pp, itim_pp, comm_rpt, nqlwl, scr_iomode
- integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt, nb ! nelem,
+ integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt, iqbuf_cnt_bkp, nb ! nelem,
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_qq, wall_qq, gflops_qq, cpu_kk, wall_kk, gflops_kk, cpu_pp, wall_pp, gflops_pp
  !real(dp) :: cpu_all, wall_all, gflops_all, cpu_qq, wall_qq, gflops_qq, cpu_kk, wall_kk, gflops_kk
  real(dp) :: drude_plsmf, my_plsmf
@@ -1748,6 +1748,7 @@ subroutine dump_my_gbuf()
  !     MPI ranks call nf90_put_var, while for those with count=[..., 0], they have 
  !     nothing (zero-length) to write and NetCDF can handles this safely.
 
+ iqbuf_cnt_bkp = iqbuf_cnt
  if (gqk%coords_qkpb_sumbp(3) /= 0) iqbuf_cnt = 0
  if (gqk%pert_ppsum_bsum_comm%me /= 0) iqbuf_cnt = 0
 
@@ -1767,7 +1768,7 @@ subroutine dump_my_gbuf()
 
  ! Only one proc sets the entry in done_qbz_spin to 1 for all the q-points in the buffer.
  !if (all(gqk%coords_qkpb_sumbp(2:3) == [0, 0]))  then
-   do ii=1,iqbuf_cnt
+   do ii=1,iqbuf_cnt_bkp
      iq_bz = iq_buf(2, ii)
      NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_done_qbz_spin"), 1, start=[iq_bz, spin]))
    end do
