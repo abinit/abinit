@@ -28,7 +28,7 @@ ngfft 8 8 8
  timopt -1
  np_spkpt 1
  npband 2
- bandpp 1
+ nblock_lobpcg 4
  npfft 2
  paral_kgb 1
 

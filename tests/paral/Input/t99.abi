@@ -80,7 +80,7 @@ paral_kgb2 1
 np_spkpt2 4
 npband2 2
 npfft2 1
-bandpp2 14
+nblock_lobpcg 1
 
 dmftctqmc_meas 10
 dmftctqmc_basis 0

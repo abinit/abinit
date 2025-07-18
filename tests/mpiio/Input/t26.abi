@@ -31,21 +31,22 @@ iatsph 2
 
 ndtset 6
 
-bandpp 1
-
 # Dataset 1
 # Output the GS WFK with MPI-FFT.
 npband1 1 np_spkpt1 2 npfft1 2
+nblock_lobpcg1 12
 prtdos1 3
 
 # Dataset 2
 # Read the previous GS WFK. Use MPI-FFT but with different number of procs
 npband2 1 np_spkpt2 1 npfft2 4
+nblock_lobpcg2 6
 prtdos2 3
 
 # Dataset 3
 # Read the previous GS WFK in band-only mode.
 npband3 4 np_spkpt3 1 npfft3 1
+nblock_lobpcg3 6
 
 # Dataset 4
 # Read the previous DEN file in band-fft mode
@@ -53,6 +54,7 @@ getwfk4 0
 getden4 -1
 npband4 2 np_spkpt4 1 npfft4 2
 nstep4 5  #   Improves the portability of the test
+nblock_lobpcg4 6
 
 # Dataset 5
 # Read previous WFK file with the simple band-by-band CG solver.
@@ -66,6 +68,7 @@ ngfftdg6 48 48 48
 getden6 -1
 npband6 1 np_spkpt6 1 npfft6 4
 getwfk6 1
+nblock_lobpcg6 12
 
 # SCF parameters
 ecut 15. 

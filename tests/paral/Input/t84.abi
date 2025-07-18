@@ -87,7 +87,7 @@ paral_kgb 1
 np_spkpt 5
 npband 2
 npfft 1
-bandpp 11
+nblock_lobpcg 2
 
 # File access
 # This is to avoid issues with some HDF5 configurations
