@@ -14,8 +14,8 @@ nband      24       # number of (occ and empty) bands to be computed. 48 electro
 # Parallel settings for dataset 1. NB: These variables are not used in the GWR code.
 paral_kgb1  1
 rmm_diis1   1
+nblock_lobpcg1 1
 npband1     4
-bandpp1     6
 npfft1      1
 np_spkpt1      1
 tolwfr1     1.0d-18

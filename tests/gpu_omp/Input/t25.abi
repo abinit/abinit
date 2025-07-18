@@ -1,4 +1,4 @@
-# 'Full' DFPT calculation of third derivatives using Second Order Sternheimer equation
+#nd 'Full' DFPT calculation of third derivatives using Second Order Sternheimer equation
 # Test on AlAs, with PAW pseudopotentials, using OpenMP GPU.
 # (M. Sarraute, 01.2024, variant of v8/t83)
 
@@ -42,7 +42,7 @@
 #*******************************
   occopt    1
    nband    4
-  bandpp    4
+nblock_lobpcg 1
 
 # Plane wave basis set
 #**************************************

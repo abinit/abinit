@@ -35,7 +35,7 @@ toldfe3 1d-10
 # SCF parameters
 ecut 15.
 nband 12
-bandpp 1
+nblock_lobpcg 6
 diemac 12.0d0
 
 kptrlatt 4 0 0 0 4 0 0 0 4
