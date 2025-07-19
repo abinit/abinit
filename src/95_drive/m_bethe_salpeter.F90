@@ -641,15 +641,6 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  optene=4; moved_atm_inside=0; moved_rhor=0; initialized=1; istep=1
 !
 !=== Compute structure factor phases and large sphere cut-off ===
-!WARNING cannot use Dtset%mgfft, this has to be checked better
-!mgfft=MAXVAL(ngfftc(:))
-!allocate(ph1d(2,3*(2*mgfft+1)*Cryst%natom),ph1df(2,3*(2*mgfftf+1)*Cryst%natom))
-! write(std_out,*)' CHECK ',Dtset%mgfftdg,mgfftf
-! if (Dtset%mgfftdg/=mgfftf) then
-!  write(std_out,*)"WARNING Dtset%mgfftf /= mgfftf"
-!  write(std_out,*)'HACKING Dtset%mgfftf'
-!  Dtset%mgfftdg=mgfftf
-! end if
  ABI_MALLOC(ph1d,(2,3*(2*Dtset%mgfft+1)*Cryst%natom))
  ABI_MALLOC(ph1df,(2,3*(2*mgfftf+1)*Cryst%natom))
 

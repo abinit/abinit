@@ -3818,7 +3818,6 @@ end subroutine wfd_change_ngfft
 !!  Test the orthonormalization of the wavefunctions stored in Wfd.
 !!
 !! INPUTS
-!!  Wfd<wfd_t>=wavefunction descriptor.
 !!  Cryst<crystal_t>=Object defining the unit cell and its symmetries.
 !!  Pawtab(ntypat*usepaw)<type(pawtab_type)>=PAW tabulated starting data.
 !!

@@ -1,9 +1,9 @@
-!!****m* ABINIT/m_wqk
+!!****m* ABINIT/m_wkkp
 !! NAME
-!!  m_wqk
+!!  m_wkkp
 !!
 !! FUNCTION
-!!  Compute
+!!  Computation of the matrix elements of the screened interaction W_kk'
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2025 ABINIT group (MG)
@@ -19,7 +19,7 @@
 
 #include "abi_common.h"
 
-module m_wqk
+module m_wkkp
 
  !use, intrinsic :: iso_c_binding
  use defs_basis
@@ -67,7 +67,7 @@ module m_wqk
  private
 !!***
 
- public :: wqk_run  ! Main entry point to compute wqk matrix elements.
+ public :: wkkp_run  ! Main entry point to compute wkkp matrix elements.
 
 !----------------------------------------------------------------------
 
@@ -76,12 +76,12 @@ contains  !=====================================================
 
 !----------------------------------------------------------------------
 
-!!****f* m_wqk/wqk_run
+!!****f* m_wkkp/wkkp_run
 !! NAME
-!!  wqk_run
+!!  wkkp_run
 !!
 !! FUNCTION
-!!  Compute W_qk
+!!  Computation of the matrix elements of the screened interaction W_kk'
 !!
 !! INPUTS
 !! wfk0_path=String with the path to the GS unperturbed WFK file.
@@ -97,8 +97,8 @@ contains  !=====================================================
 !!
 !! SOURCE
 
-subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hdr, &
-                   pawtab, psps, mpi_enreg, comm)
+subroutine wkkp_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hdr, &
+                    pawtab, psps, mpi_enreg, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -125,12 +125,12 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  integer :: bstart_kp, bstop_kp, nband_kp, ik_bz, bmin, bmax, max_nb
  integer :: ikp_ibz, isym_kp, trev_kp, npw_kp, istwf_kp, npw_kp_ibz, istwf_kp_ibz
  integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_k_ibz, istwf_k_ibz
- integer :: m_k, im_k, n_kp, in_kp, root_ncid, prtwqk, ne
+ integer :: m_k, im_k, n_kp, in_kp, root_ncid, prtwkkp, ne
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg_kp,nkpg_k,cnt, edos_intmeth, nqlwl, scr_iomode
  integer :: ikp_bz, my_ikp, my_nkp !, my_iq,
- real(dp) :: cpu_all, wall_all, gflops_all, cpu, wall, gflops, cpu_kp, wall_kp, gflops_kp ! cpu_qq, wall_qq, gflops_qq,
- real(dp) :: edos_step, edos_broad, ecut, e_mk, e_nkp, e_min, e_max, e_step, smear_mk, smear_nkp
- logical :: isirr_k, isirr_kp, qq_is_gamma, remove_exchange, print_time_kp ! print_time_kk
+ real(dp) :: cpu_all, wall_all, gflops_all, cpu, wall, gflops, cpu_kp, wall_kp, gflops_kp
+ real(dp) :: edos_step, edos_broad, ecut, e_mk, e_nkp, e_min, e_max, e_step, smear_mk, smear_nkp, faq
+ logical :: isirr_k, isirr_kp, qq_is_gamma, remove_exchange, print_time_kp
  type(wfd_t) :: wfd
  type(kmesh_t) :: qmesh, kmesh
  type(gsphere_t),target :: gsph_x, gsph_c
@@ -152,7 +152,7 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
 !arrays
  real(dp) :: n0(ebands%nsppol)
  real(dp),allocatable :: qlwl(:,:), kpg_kp(:,:), kpg_k(:,:), ug_kp(:,:,:), ug_k(:,:), cg_work(:,:)
- real(dp),allocatable :: work(:,:,:,:), e_mesh(:), e_args(:), vcart_ibz(:,:,:,:), delta_mk(:), delta_nkp(:,:) !, my_gbuf(:,:,:,:,:,:)
+ real(dp),allocatable :: work(:,:,:,:), e_mesh(:), e_args(:), vcart_ibz(:,:,:,:), wgt_mk(:), wgt_nkp(:,:) !, my_gbuf(:,:,:,:,:,:)
  complex(gwpc),allocatable :: cwork_ur(:), rhotwg_mn_x(:,:,:), rhotwg_mn_c(:,:,:), w_rhotwg_mn_c(:,:,:), vc_sqrt_gx(:), ur_nkp(:,:), ur_mk(:,:)
  complex(gwpc),allocatable :: kxcg(:,:)
  complex(dp),allocatable :: w_ee(:,:)
@@ -208,8 +208,8 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ABI_CALLOC(w_ee, (ne, ne))
  ABI_MALLOC(e_mesh, (ne))
  ABI_MALLOC(e_args, (ne))
- ABI_MALLOC(delta_mk, (ne))
- ABI_MALLOC(delta_nkp, (ne, max_nb))
+ ABI_MALLOC(wgt_mk, (ne))
+ ABI_MALLOC(wgt_nkp, (ne, max_nb))
  e_mesh = linspace(e_min, e_max, ne)
  end associate
 
@@ -244,6 +244,7 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
 
  ! Initialize Coulomb term on the IBZ of the qmesh. Use largest G-sphere.
  call kmesh%init(cryst, wfk_hdr%nkpt, wfk_hdr%kptns, dtset%kptopt)
+ faq = one/(cryst%ucvol*kmesh%nbz)
 
  npw_x = gsph_x%ng; npw_c = gsph_c%ng !; min_npw_xc = min(npw_x, npw_c); max_npw_xc = max(npw_x, npw_c)
  if (gsph_x%ng >= gsph_c%ng) then
@@ -317,6 +318,8 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ! This is the maximum number of PWs for all possible k+q treated.
 
  call ephtk_get_mpw_gmax(nkibz, wfk_hdr%kptns, ecut, cryst%gmet, mpw, gmax, comm)
+ ! FIXME
+ !gmax = 2 * gmax
 
  ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
 
@@ -409,19 +412,55 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
 
  call pstat_proc%print(_PSTAT_ARGS_)
 
- prtwqk = 1
+ prtwkkp = 1
  ! Master creates the netcdf file used to store the results of the calculation.
  if (my_rank == master) then
-   NCF_CHECK(nctk_open_create(root_ncid, strcat(dtfil%filnam_ds(4), "_WQK.nc") , xmpi_comm_self))
+   NCF_CHECK(nctk_open_create(root_ncid, strcat(dtfil%filnam_ds(4), "_WKKP.nc") , xmpi_comm_self))
    NCF_CHECK(cryst%ncwrite(root_ncid))
    NCF_CHECK(ebands%ncwrite(root_ncid))
    NCF_CHECK(edos%ncwrite(root_ncid))
+
+   !ncerr = nctk_def_dims(ncid, [ &
+   !  nctkdim_t("nsppol", gwr%nsppol), nctkdim_t("ntau", gwr%ntau), nctkdim_t("nwr", gwr%nwr), &
+   !  nctkdim_t("smat_bsize1", smat_bsize1), nctkdim_t("smat_bsize2", smat_bsize2) &
+   !  ], defmode=.True.)
+   !NCF_CHECK(ncerr)
+   !ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
+   !  "gwr_completed", "sig_diago", "b1gw", "b2gw", "symsigma", "symchi", "scf_iteration" &
+   !])
+   !NCF_CHECK(ncerr)
+   !ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
+   !  "wr_step", "ecuteps", "ecut", "ecutwfn", "ecutsigx", "gwr_boxcutmin", &
+   !  "cosft_duality_error", "regterm" &
+   !])
+   !NCF_CHECK(ncerr)
+
+   !ncerr = nctk_def_arrays(ncid, [ &
+   !  nctkarr_t("gwr_task", "char", "character_string_length"), &
+   !])
+   !NCF_CHECK(ncerr)
+   !NCF_CHECK(nctk_set_datamode(ncid))
+
+   !ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
+   !  "gwr_completed", "sig_diago", "b1gw", "b2gw", "symsigma", "symchi", "scf_iteration"], &
+   !  [0, merge(1, 0, gwr%sig_diago), gwr%b1gw, gwr%b2gw, gwr%dtset%symsigma, dtset%symchi, gwr%scf_iteration])
+   !NCF_CHECK(ncerr)
+
+   !ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
+   !  "wr_step", "ecuteps", "ecut", "ecutwfn", "ecutsigx", "gwr_boxcutmin", &
+   !  "cosft_duality_error", "regterm"], &
+   !  [gwr%wr_step, dtset%ecuteps, dtset%ecut, dtset%ecutwfn, dtset%ecutsigx, dtset%gwr_boxcutmin, &
+   !   gwr%ft_max_error(1), gwr%ft_max_error(2), gwr%ft_max_error(3), gwr%cosft_duality_error, regterm &
+   !  ])
+   !NCF_CHECK(ncerr)
+   !NCF_CHECK(nf90_put_var(ncid, vid("gwr_task"), trim(dtset%gwr_task)))
+
    NCF_CHECK(nf90_close(root_ncid))
  end if
  call xmpi_barrier(comm)
 
- ! Open WQK.nc file and go to data mode.
- NCF_CHECK(nctk_open_modify(root_ncid, strcat(dtfil%filnam_ds(4), "_WQK.nc") , comm))
+ ! Open WKKP.nc file and go to data mode.
+ NCF_CHECK(nctk_open_modify(root_ncid, strcat(dtfil%filnam_ds(4), "_WKKP.nc") , comm))
  NCF_CHECK(nctk_set_datamode(root_ncid))
 
  mg0 = [1, 1, 1]
@@ -456,9 +495,14 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
 
    ! Rotate from IBZ to BZ and compute ur_nkp for all n_kp bands.
    bstart_kp = fs%bstart_cnt_ibz(1, ikp_ibz); nband_kp = fs%bstart_cnt_ibz(2, ikp_ibz); bstop_kp = bstart_kp + nband_kp - 1
-   ABI_MALLOC(ug_kp, (2, npw_kp*nspinor, nband_kp))
+   ABI_CALLOC(ug_kp, (2, npw_kp*nspinor, nband_kp))
    call wfd%rotate_cg(bstart_kp, nband_kp, spin, kp_ibz, npw_kp, kg_kp, istwf_kp, &
                       cryst, mapl_kp, gbound_kp, work_ngfft, work, ug_kp, urs_kbz=ur_nkp)
+   do ii=1, nband_kp
+     !print *, "isirr_kp:", isirr_kp
+     !print *, "g:", sum(ug_kp(1,:,ii)**2 + ug_kp(2,:,ii)**2)
+     !print *, "r:", sum(abs(ur_nkp(:,ii)) ** 2) / nfft ! * cryst%ucvol /
+   end do
 
    ! Loop over k-points in the energy window.
    do ik_bz=1,fs%nkfs
@@ -547,7 +591,7 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
        e_nkp = ebands%eig(n_kp, ik_ibz, spin)
        e_args = e_mesh - e_nkp
        smear_nkp = 0.1_dp * eV_Ha
-       delta_nkp(:, im_k) = gaussian(e_args, smear_nkp)
+       wgt_nkp(:, im_k) = gaussian(e_args, smear_nkp)
      end do
 
      do n_kp=bstart_kp, bstop_kp
@@ -563,6 +607,7 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
          if (remove_exchange) then
            ctmp_gwpc = ctmp_gwpc + xdotc(npw_x*nspinor, rhotwg_mn_x(:,im_k,in_kp), 1, rhotwg_mn_x(:,im_k,in_kp), 1)
          end if
+         ctmp_gwpc = faq * ctmp_gwpc
          !print *, "ctmp_gwpc:", ctmp_gwpc
          !mu_c = mu_c + ctmp_gwpc * gaussian(e_mk - ebands%fermie, smear_mk) * gaussian(e_mp, smear_mk)
          ! Computes: A := A + alpha * x * y^T
@@ -574,18 +619,6 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
      ABI_FREE(rhotwg_mn_x)
      ABI_FREE(rhotwg_mn_c)
      ABI_FREE(w_rhotwg_mn_c)
-
-     !print_time_kk = my_rank == 0 .and. (iq_bz <= LOG_MODQ .or. mod(iq_bz, LOG_MODQ) == 0)
-     !if (print_time_kk) then
-     !  call cwtime(cpu_qq, wall_qq, gflops_qq, "start")
-     !  call inds2str(0, sjoin(" Computing g^Sigma(k, q) for qq_bz:", ktoa(qq_bz)), iq_bz, gqk%my_nq, gqk%glob_nq, msg)
-     !  call wrtout(std_out, sjoin(msg, ", for spin:", itoa(spin)), pre_newlines=1)
-     !end if
-
-     !if (print_time_kk) then
-     !  call inds2str(2, "My q-point", my_iq, my_nq, qmesh%nbz, msg)
-     !  call cwtime_report(msg, cpu_qq, wall_qq, gflops_qq); if (iq_bz == LOG_MODQ) call wrtout(std_out, "...", do_flush=.True.)
-     !end if
    end do ! ik_bz
 
     if (print_time_kp) then
@@ -604,10 +637,10 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
 
  !call xmpi_sum_master(w_ee, master, comm, ierr)
 
- call cwtime_report(" wqk calculation", cpu_all, wall_all, gflops_all, end_str=ch10)
+ call cwtime_report(" wkkp calculation", cpu_all, wall_all, gflops_all, end_str=ch10)
 
  ! Set vqk_completed to 1 so that we can easily check if restarted is needed.
- !if (prtwqk /= 0) then
+ !if (prtwkkp /= 0) then
  !if (my_rank == master) then
  !  NCF_CHECK(nf90_put_var(root_ncid, root_vid("vqk_completed"), 1))
  !end if
@@ -631,8 +664,8 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ABI_FREE(w_ee)
  ABI_FREE(e_mesh)
  ABI_FREE(e_args)
- ABI_FREE(delta_mk)
- ABI_FREE(delta_nkp)
+ ABI_FREE(wgt_mk)
+ ABI_FREE(wgt_nkp)
 
  call wfd%free(); call vcp%free(); call qmesh%free(); call gsph_x%free(); call gsph_c%free(); call hscr%free(); call edos%free()
  call epsm1%free()
@@ -643,7 +676,7 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ABI_FREE(fstab)
 
  call xmpi_barrier(comm) ! This to make sure that the parallel output of GSTORE is completed
- call cwtime_report(" wqk_run: MPI barrier before returning.", cpu_all, wall_all, gflops_all, end_str=ch10, comm=comm)
+ call cwtime_report(" wkkp_run: MPI barrier before returning.", cpu_all, wall_all, gflops_all, end_str=ch10, comm=comm)
 
 contains
 
@@ -666,8 +699,8 @@ end function root_vid
 !  spin_vid = nctk_idname(spin_ncid, var_name)
 !end function spin_vid
 
-end subroutine wqk_run
+end subroutine wkkp_run
 !!***
 
-end module m_wqk
+end module m_wkkp
 !!***
