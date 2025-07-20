@@ -67,7 +67,7 @@ module m_wkkp
  private
 !!***
 
- public :: wkkp_run  ! Main entry point to compute wkkp matrix elements.
+ public :: wkkp_run  ! Main entry point to compute Wkk' matrix elements.
 
 !----------------------------------------------------------------------
 
@@ -160,12 +160,9 @@ subroutine wkkp_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_h
  type(fstab_t),target,allocatable :: fstab(:)
 !************************************************************************
 
- if (psps%usepaw == 1) then
-   ABI_ERROR("PAW not implemented")
- end if
- if (dtset%nsppol == 2) then
-   ABI_ERROR("nsppol implemented")
- end if
+ ABI_CHECK(psps%usepaw == 0, "PAW not implemented")
+ ABI_CHECK(dtset%nsppol == 1, "nsppol 2 implemented!")
+ ABI_CHECK(dtset%nspinor == 1, "nspinor 2 implemented!")
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm); units = [std_out, ab_out]
  call cwtime(cpu_all, wall_all, gflops_all, "start")
@@ -186,7 +183,7 @@ subroutine wkkp_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_h
    call edos%write(path)
  end if
 
- ! Find Fermi surface k-points
+ ! Find Fermi surface k-points.
  ! TODO: support kptopt, change setup of k-points if tetra: fist tetra weights then k-points on the Fermi surface!
  ABI_MALLOC(fstab, (nsppol))
  call fstab_init(fstab, ebands, cryst, dtset, comm)
@@ -217,7 +214,7 @@ subroutine wkkp_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_h
  ! HANDLE SCREENING
  ! ================
  screen_filepath = dtfil%fnameabi_scr
- ABI_CHECK(dtfil%fnameabi_scr /= ABI_NOFILE, "SCR file must be specified")
+ ABI_CHECK(dtfil%fnameabi_scr /= ABI_NOFILE, "SCR file must be specified in input!")
 
  ! Read g-sphere for correlation and qmesh from SCR file.
  call get_hscr_qmesh_gsph(screen_filepath, dtset, cryst, hscr, qmesh, gsph_c, qlwl, comm)
@@ -421,17 +418,15 @@ subroutine wkkp_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_h
    NCF_CHECK(edos%ncwrite(root_ncid))
 
    !ncerr = nctk_def_dims(ncid, [ &
-   !  nctkdim_t("nsppol", gwr%nsppol), nctkdim_t("ntau", gwr%ntau), nctkdim_t("nwr", gwr%nwr), &
    !  nctkdim_t("smat_bsize1", smat_bsize1), nctkdim_t("smat_bsize2", smat_bsize2) &
    !  ], defmode=.True.)
    !NCF_CHECK(ncerr)
    !ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
-   !  "gwr_completed", "sig_diago", "b1gw", "b2gw", "symsigma", "symchi", "scf_iteration" &
+   !  "gwr_completed", "scf_iteration" &
    !])
    !NCF_CHECK(ncerr)
    !ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
-   !  "wr_step", "ecuteps", "ecut", "ecutwfn", "ecutsigx", "gwr_boxcutmin", &
-   !  "cosft_duality_error", "regterm" &
+   !  "wr_step", "gwr_boxcutmin", "cosft_duality_error", "regterm" &
    !])
    !NCF_CHECK(ncerr)
 
@@ -555,7 +550,6 @@ subroutine wkkp_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_h
      !
      !   k + q = k_bz + g0_bz = IS(k_ibz) + g0_ibz + g0_bz
      !
-
      ! Get Fourier components of the Coulomb interaction in the BZ
      ! In 3D systems, neglecting umklapp: vc(Sq,sG) = vc(q,G) = 4pi/|q+G|**2
      ! The same relation holds for 0-D systems, but not in 1-D or 2D systems. It depends on S.
