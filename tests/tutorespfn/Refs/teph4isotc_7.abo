@@ -448,6 +448,16 @@ P Number of perturbations treated by this CPU: 9
 P Number of CPUs for parallelism over q-points: 1
 P Number of CPUs for parallelism over k-points: 1
 
+
+ Linear tetrahedron method.
+ Mesh step:  10.0 (meV) with npts: 2749
+ From emin:  -5.1 to emax:  22.4 (eV)
+ Number of k-points in the IBZ: 370
+ Fermi level:   7.66392108E+00 (eV)
+ Total electron DOS at Fermi level in states/eV:   7.17582741E-01
+ Total number of electrons at eF:    8.0
+
+
 == END DATASET(S) ==============================================================
 ================================================================================
 

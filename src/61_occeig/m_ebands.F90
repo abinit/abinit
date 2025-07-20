@@ -3562,6 +3562,7 @@ subroutine edos_print(edos, units, header)
    call wrtout(units, msg)
  end if
  write(msg,"(a,f6.1)")" Total number of electrons at eF: ", edos%idos(edos%ief, 0)
+ call wrtout(units, msg)
 
  if (edos%nsppol == 2) then
    write(msg,"(a,es16.8)")"   IDOS(eF) for spin up:  ", edos%idos(edos%ief, 1)
