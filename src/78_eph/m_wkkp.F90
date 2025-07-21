@@ -129,7 +129,7 @@ subroutine wkkp_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_h
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg_kp,nkpg_k,cnt, edos_intmeth, nqlwl, scr_iomode
  integer :: ikp_bz, my_ikp, my_nkp !, my_iq,
  real(dp) :: cpu_all, wall_all, gflops_all, cpu, wall, gflops, cpu_kp, wall_kp, gflops_kp
- real(dp) :: edos_step, edos_broad, ecut, e_mk, e_nkp, e_min, e_max, e_step, smear_mk, smear_nkp, faq
+ real(dp) :: edos_step, edos_broad, e_mk, e_nkp, e_min, e_max, e_step, smear_mk, smear_nkp, faq
  logical :: isirr_k, isirr_kp, qq_is_gamma, remove_exchange, print_time_kp
  type(wfd_t) :: wfd
  type(kmesh_t) :: qmesh, kmesh
@@ -167,14 +167,13 @@ subroutine wkkp_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_h
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm); units = [std_out, ab_out]
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
- nsppol = ebands%nsppol; nspinor = ebands%nspinor; ecut = dtset%ecut ! dtset%dilatmx
+ nsppol = ebands%nsppol; nspinor = ebands%nspinor
 
  ! Compute electron DOS.
  edos_intmeth = 2; if (dtset%prtdos /= 0) edos_intmeth = dtset%prtdos
  edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
  edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
  edos = ebands%get_edos(cryst, edos_intmeth, edos_step, edos_broad, comm)
-
  ! Get DOS per spin channel
  n0(:) = edos%gef(1:edos%nsppol)
  if (my_rank == master) then
@@ -241,7 +240,7 @@ subroutine wkkp_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_h
 
  ! Initialize Coulomb term on the IBZ of the qmesh. Use largest G-sphere.
  call kmesh%init(cryst, wfk_hdr%nkpt, wfk_hdr%kptns, dtset%kptopt)
- faq = one/(cryst%ucvol*kmesh%nbz)
+ faq = one / (cryst%ucvol*kmesh%nbz)
 
  npw_x = gsph_x%ng; npw_c = gsph_c%ng !; min_npw_xc = min(npw_x, npw_c); max_npw_xc = max(npw_x, npw_c)
  if (gsph_x%ng >= gsph_c%ng) then
@@ -295,7 +294,7 @@ subroutine wkkp_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_h
  wfd_istwfk = 1
 
  call wfd%init(cryst, pawtab, psps, keep_ur, dtset%mband, nband, nkibz, nsppol, bks_mask,&
-               dtset%nspden, nspinor, ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ebands%kptns, ngfft,&
+               dtset%nspden, nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ebands%kptns, ngfft,&
                dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 
  call pstat_proc%print(_PSTAT_ARGS_)
@@ -314,7 +313,7 @@ subroutine wkkp_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_h
  ! that will be used to symmetrize the wavefunctions in G-space.
  ! This is the maximum number of PWs for all possible k+q treated.
 
- call ephtk_get_mpw_gmax(nkibz, wfk_hdr%kptns, ecut, cryst%gmet, mpw, gmax, comm)
+ call ephtk_get_mpw_gmax(nkibz, wfk_hdr%kptns, dtset%ecut, cryst%gmet, mpw, gmax, comm)
  ! FIXME
  !gmax = 2 * gmax
 
@@ -466,9 +465,6 @@ subroutine wkkp_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_h
  do ikp_bz=1,fs%nkfs
    my_ikp = ikp_bz; my_nkp = fs%nkfs
 
-   ! Set entry to zero. Important as there are cycle instructions inside these loops
-   ! and we don't want random numbers written to disk.
-   !my_gbuf(:,:,:,:, ikp_bz, iqbuf_cnt) = zero
    print_time_kp = my_rank == 0 .and. (ikp_bz <= LOG_MODK .or. mod(ikp_bz, LOG_MODK) == 0)
    if (print_time_kp) call cwtime(cpu_kp, wall_kp, gflops_kp, "start")
 
@@ -478,14 +474,12 @@ subroutine wkkp_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_h
    trev_kp = fs%indkk_fs(6, ikp_bz); g0_kp = fs%indkk_fs(3:5,ikp_bz)
    isirr_kp = (isym_kp == 1 .and. trev_kp == 0 .and. all(g0_kp == 0))
    mapl_kp = fs%indkk_fs(:, ikp_bz)
-   !print *, "ikp_bz", ikp_bz, " of my_nkp:", my_nkp
 
    kp_ibz = ebands%kptns(:,ikp_ibz)
    istwf_kp_ibz = wfd%istwfk(ikp_ibz); npw_kp_ibz = wfd%npwarr(ikp_ibz)
-   !print *, "ikp_ibz:", ikp_ibz, "kk:", kk, "kp_ibz:", kp_ibz
 
    ! Get npw_kp, kg_kp for this kp_bz.
-   call wfd%get_gvec_gbound(cryst%gmet, ecut, kp_bz, ikp_ibz, isirr_kp, dtset%nloalg, & ! in
+   call wfd%get_gvec_gbound(cryst%gmet, dtset%ecut, kp_bz, ikp_ibz, isirr_kp, dtset%nloalg, & ! in
                             istwf_kp, npw_kp, kg_kp, nkpg_kp, kpg_kp, gbound_kp)        ! out
 
    ! Rotate from IBZ to BZ and compute ur_nkp for all n_kp bands.
@@ -494,9 +488,9 @@ subroutine wkkp_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_h
    call wfd%rotate_cg(bstart_kp, nband_kp, spin, kp_ibz, npw_kp, kg_kp, istwf_kp, &
                       cryst, mapl_kp, gbound_kp, work_ngfft, work, ug_kp, urs_kbz=ur_nkp)
    do ii=1, nband_kp
-     !print *, "isirr_kp:", isirr_kp
-     !print *, "g:", sum(ug_kp(1,:,ii)**2 + ug_kp(2,:,ii)**2)
-     !print *, "r:", sum(abs(ur_nkp(:,ii)) ** 2) / nfft ! * cryst%ucvol /
+    !print *, "isirr_kp:", isirr_kp
+    !print *, "g:", sum(ug_kp(1,:,ii)**2 + ug_kp(2,:,ii)**2)
+    !print *, "r:", sum(abs(ur_nkp(:,ii)) ** 2) / nfft ! * cryst%ucvol /
    end do
 
    ! Loop over k-points in the energy window.
@@ -512,7 +506,7 @@ subroutine wkkp_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_h
      kk_ibz = ebands%kptns(:,ik_ibz)
 
      ! Get npw_k, kg_k for this k.
-     call wfd%get_gvec_gbound(cryst%gmet, ecut, kk_bz, ik_ibz, isirr_k, dtset%nloalg, &  ! in
+     call wfd%get_gvec_gbound(cryst%gmet, dtset%ecut, kk_bz, ik_ibz, isirr_k, dtset%nloalg, &  ! in
                               istwf_k, npw_k, kg_k, nkpg_k, kpg_k, gbound_k)             ! out
      ABI_FREE(kpg_k)
 

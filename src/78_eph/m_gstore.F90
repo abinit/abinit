@@ -1689,7 +1689,7 @@ subroutine gstore_filter_fs_tetra__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kb
  indkk(:) = kbz2ibz(1, :)
 
  rlatt = ebands%kptrlatt; call matr3inv(rlatt, klatt)
- call htetra_init(ktetra, indkk, gstore%cryst%gprimd, klatt, kbz, gstore%nkbz, gstore%kibz, gstore%nkibz, &
+ call ktetra%init(indkk, gstore%cryst%gprimd, klatt, kbz, gstore%nkbz, gstore%kibz, gstore%nkibz, &
                   ierr, error_string, gstore%comm)
  ABI_CHECK(ierr == 0, error_string)
 
