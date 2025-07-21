@@ -429,6 +429,7 @@ type, public :: dataset_type
  integer :: mqgriddg
 !N
  integer :: natom
+ integer :: natnd = 0
  integer :: natpawu
  integer :: natrd
  integer :: natsph
@@ -746,6 +747,8 @@ type, public :: dataset_type
  integer :: xclevel
  integer :: xg_nonlop_option = 0
  integer :: x1rdm  = 0
+!Z
+ integer :: zora = 0
 
 !Integer arrays
  integer :: bdberry(4)
@@ -800,6 +803,7 @@ type, public :: dataset_type
  integer, allocatable ::  dynimage(:)        ! dynimage(nimage or mxnimage)
  integer, allocatable ::  efmas_bands(:,:)   ! efmas_bands(2,nkptgw)
  integer, allocatable ::  iatfix(:,:)        ! iatfix(3,natom)
+ integer, allocatable ::  iatnd(:)           ! iatnd(natnd)
  integer, allocatable ::  iatsph(:)          ! iatsph(natsph)
  integer, allocatable ::  istwfk(:)          ! istwfk(nkpt)
  integer, allocatable ::  kberry(:,:)        ! kberry(3,nberry)
@@ -1020,6 +1024,7 @@ type, public :: dataset_type
  real(dp) :: field_red_axial(3)
  real(dp) :: genafm(3)
  real(dp) :: goprecprm(3)
+ real(dp) :: hspinfield(3)
  real(dp) :: neb_spring(2)
  real(dp) :: pol(3)
  real(dp) :: polcen(3)
@@ -1035,12 +1040,12 @@ type, public :: dataset_type
  real(dp) :: ucrpa_window(2)
  real(dp) :: vcutgeo(3) = [0.0_dp,0.0_dp,0.0_dp]
  real(dp) :: vprtrb(2)
- real(dp) :: zeemanfield(3)
  real(dp) :: mdtemp(2)
 
 !Real allocatables
  real(dp), allocatable :: acell_orig(:,:)   ! acell_orig(3,nimage)
  real(dp), allocatable :: amu_orig(:,:)     ! amu(ntypat,nimage)
+ real(dp), allocatable :: atndlist(:,:)     ! atndlist(3,natnd)
  real(dp), allocatable :: atvshift(:,:,:)   ! atvshift(16,nsppol,natom)
  real(dp), allocatable :: cd_imfrqs(:)      ! cd_imfrqs(cd_customnimfrqs)
  real(dp), allocatable :: cellcharge(:)     ! cellcharge(nimage)
@@ -1934,6 +1939,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%mqgrid             = dtin%mqgrid
  dtout%mqgriddg           = dtin%mqgriddg
  dtout%natom              = dtin%natom
+ dtout%natnd              = dtin%natnd
  dtout%natrd              = dtin%natrd
  dtout%natsph             = dtin%natsph
  dtout%natsph_extra       = dtin%natsph_extra
@@ -2259,6 +2265,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%xc_denpos          = dtin%xc_denpos
  dtout%xc_taupos          = dtin%xc_taupos
  dtout%x1rdm              = dtin%x1rdm
+ dtout%zora               = dtin%zora
 
 !Copy allocated integer arrays from dtin to dtout
  dtout%bdberry(:)         = dtin%bdberry(:)
@@ -2414,6 +2421,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%field_red_axial(:) = dtin%field_red_axial(:)
  dtout%genafm(:)          = dtin%genafm(:)
  dtout%goprecprm(:)       = dtin%goprecprm(:)
+ dtout%hspinfield(:)      = dtin%hspinfield(:)
  dtout%mdtemp(:)          = dtin%mdtemp(:)
  dtout%neb_spring(:)      = dtin%neb_spring(:)
  dtout%polcen(:)          = dtin%polcen(:)
@@ -2427,7 +2435,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%ucrpa_window(:)    = dtin%ucrpa_window(:)
  dtout%vcutgeo(:)         = dtin%vcutgeo(:)
  dtout%vprtrb(:)          = dtin%vprtrb(:)
- dtout%zeemanfield(:)     = dtin%zeemanfield(:)
 
 !Use alloc_copy to allocate and copy the allocatable arrays
 
@@ -2441,6 +2448,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  call alloc_copy(dtin%dynimage, dtout%dynimage)
  call alloc_copy(dtin%efmas_bands, dtout%efmas_bands)
  call alloc_copy(dtin%iatfix, dtout%iatfix)
+ call alloc_copy(dtin%iatnd, dtout%iatnd)
  call alloc_copy(dtin%iatsph, dtout%iatsph)
  call alloc_copy(dtin%istwfk, dtout%istwfk)
  call alloc_copy(dtin%kberry, dtout%kberry)
@@ -2463,6 +2471,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
 !Allocate and copy real allocatable
  call alloc_copy(dtin%acell_orig, dtout%acell_orig)
  call alloc_copy(dtin%amu_orig, dtout%amu_orig)
+ call alloc_copy(dtin%atndlist, dtout%atndlist)
  call alloc_copy(dtin%atvshift, dtout%atvshift)
  call alloc_copy(dtin%cd_imfrqs, dtout%cd_imfrqs)
  call alloc_copy(dtin%cellcharge, dtout%cellcharge)
@@ -2555,6 +2564,7 @@ subroutine dtset_free(dtset)
  ABI_SFREE(dtset%dynimage)
  ABI_SFREE(dtset%efmas_bands)
  ABI_SFREE(dtset%iatfix)
+ ABI_SFREE(dtset%iatnd)
  ABI_SFREE(dtset%iatsph)
  ABI_SFREE(dtset%istwfk)
  ABI_SFREE(dtset%kberry)
@@ -2579,6 +2589,7 @@ subroutine dtset_free(dtset)
 !real allocatable
  ABI_SFREE(dtset%acell_orig)
  ABI_SFREE(dtset%amu_orig)
+ ABI_SFREE(dtset%atndlist)
  ABI_SFREE(dtset%atvshift)
  ABI_SFREE(dtset%cd_imfrqs)
  ABI_SFREE(dtset%cellcharge)
@@ -3544,7 +3555,7 @@ subroutine chkvars(string)
 !<ABINIT_VARS>
 !A
  list_vars=                 ' accuracy acell adpimd adpimd_gamma'
- list_vars=trim(list_vars)//' algalch amu analyze_anh_pot angdeg asr atvshift autoparal'
+ list_vars=trim(list_vars)//' algalch amu analyze_anh_pot angdeg asr atndlist atvshift autoparal'
  list_vars=trim(list_vars)//' auxc_ixc auxc_scal awtr'
 !B
  list_vars=trim(list_vars)//' bandpp bdberry bdeigrf bdgw berryopt berrysav berrystep bfield bmass'
@@ -3664,9 +3675,9 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' gwr_boxcutmin gwr_chi_algo gwr_max_hwtene gwr_regterm gwr_np_kgts gwr_nstep gwr_ntau gwr_fit'
  list_vars=trim(list_vars)//' gwr_rpa_ncut gwr_sigma_algo gwr_task gwr_tolqpe gwr_ucsc_batch'
 !H
- list_vars=trim(list_vars)//' hmcsst hmctt hyb_mixing hyb_mixing_sr hyb_range_dft hyb_range_fock'
+ list_vars=trim(list_vars)//' hmcsst hmctt hspinfield hyb_mixing hyb_mixing_sr hyb_range_dft hyb_range_fock'
 !I
- list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatsph'
+ list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatnd iatsph'
  list_vars=trim(list_vars)//' ibte_abs_tol ibte_alpha_mix ibte_niter ibte_prep '
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
  list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb indata_prefix intxc invovl_blksliced iomode ionmov iqpt'
@@ -3708,7 +3719,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' mep_mxstep mep_solver mem_test mixalch mixprec mixesimgf'
  list_vars=trim(list_vars)//' moldyn mqgrid mqgriddg'
 !N
- list_vars=trim(list_vars)//' natcon natfix natfixx natfixy natfixz'
+ list_vars=trim(list_vars)//' natcon natfix natfixx natfixy natfixz natnd'
  list_vars=trim(list_vars)//' natom natrd natsph natsph_extra natvshift nband nbandkss nbandhf'
  list_vars=trim(list_vars)//' ncell ncellmat ncoeff nbdblock nbdbuf nberry nb_protected nb_per_slice nconeq ncout'
  list_vars=trim(list_vars)//' nc_xccc_gspace nctime ndivk ndivsm ndtset neb_algo neb_cell_algo neb_spring nefield'
@@ -3720,7 +3731,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' npulayit npvel npwkss'
  list_vars=trim(list_vars)//' np_slk nqpt nqptdm nqfd nscforder nshiftk nshiftq nqshft'
  list_vars=trim(list_vars)//' nslice nspden nspinor nsppol nstep nstep_mixed nsym'
- list_vars=trim(list_vars)//' ntime ntimimage ntypalch ntypat nucdipmom nucefg nucfc nwfshist nzchempot'
+ list_vars=trim(list_vars)//' ntime ntimimage ntypalch ntypat'
+ list_vars=trim(list_vars)//' nucdipmom nucefg nucfc nwfshist nzchempot'
 !O
  list_vars=trim(list_vars)//' objaat objbat objaax objbax objan objbn objarf'
  list_vars=trim(list_vars)//' objbrf objaro objbro objatr objbtr occ'
@@ -3840,7 +3852,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' xyzfile x1rdm'
 !Y
 !Z
- list_vars=trim(list_vars)//' zcut zeemanfield znucl'
+ list_vars=trim(list_vars)//' zcut zeemanfield znucl zora'
 
 !List of input variables for which the image index can be added
  list_vars_img=' acell amu angdeg cellcharge dmatpawu jpawu mixalch occ rprim scalecart'

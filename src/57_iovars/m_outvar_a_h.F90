@@ -114,7 +114,7 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  integer,parameter :: nkpt_max=50
  integer :: defo,idtset,ii,iimage,ga_n_rules,nn
  integer :: lpawu1,narr,mxnsp
- integer :: natom,nimfrqs,nimage
+ integer :: natnd,natom,nimfrqs,nimage
  integer :: ntypalch,ntypat,print_constraint,size1,size2,test_write,tmpimg0
  logical :: compute_static_images
  real(dp) :: cpus
@@ -151,6 +151,8 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  natom=dtsets(1)%natom
 !if(multivals%nimage==0)nimage=dtsets(1)%nimage
  nimage=dtsets(1)%nimage
+
+ natnd=dtsets(1)%natnd
 
  nimfrqs=dtsets(1)%cd_customnimfrqs
 !if(multivals%ntypalch==0)ntypalch=dtsets(1)%ntypalch
@@ -218,6 +220,19 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%asr
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'asr','INT',0)
+
+!atndlist
+ dprarr(:,0)=0.0_dp
+ narr=3*natnd ! default size for all datasets
+ do idtset=1,ndtset_alloc       ! specific size for each dataset
+   narrm(idtset)=3*dtsets(idtset)%natnd
+   if (narrm(idtset)>0) then
+     dprarr(1:narrm(idtset),idtset)= reshape(dtsets(idtset)%atndlist(1:3,1:dtsets(idtset)%natnd), [narrm(idtset)])
+   end if
+   if(sum(abs( dtsets(idtset)%atndlist(1:3,1:dtsets(idtset)%natnd))) < tol12 ) narrm(idtset)=0
+ end do
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'atndlist','DPR',multivals%natom)
+
 
 !atvshift
  if(mxvals%natpawu>0)then
@@ -1504,11 +1519,24 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%gwr_tolqpe
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'gwr_tolqpe','ENE',0)
 
+
+!###########################################################
+!### 03. Print all the input variables (H)
+!##
+
  intarr(1,:)=dtsets(:)%hmcsst
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'hmcsst','INT',0)
 
  intarr(1,:)=dtsets(:)%hmctt
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'hmctt','INT',0)
+
+!hspinfield
+ dprarr(1,:)=dtsets(:)%hspinfield(1)
+ dprarr(2,:)=dtsets(:)%hspinfield(2)
+ dprarr(3,:)=dtsets(:)%hspinfield(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'hspinfield','BFI',0)
+
+
 
  intarr(1,:)=dtsets(:)%extfpmd_nbcut
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'extfpmd_nbcut','INT',0)
