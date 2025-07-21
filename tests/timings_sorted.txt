@@ -1,0 +1,691 @@
+v4/Refs/t98.abo +Overall time at end (sec) : cpu=          0.1  wall=          0.1  
+v4/Refs/t99.abo +Overall time at end (sec) : cpu=          0.1  wall=          0.1  
+v1/Refs/t01.abo +Overall time at end (sec) : cpu=          0.2  wall=          0.3  
+v2/Refs/t03.abo +Overall time at end (sec) : cpu=          0.2  wall=          0.2          optdriver           1 optdriver           1
+v1/Refs/t02.abo +Overall time at end (sec) : cpu=          0.3  wall=          0.3  
+v1/Refs/t03.abo +Overall time at end (sec) : cpu=          0.3  wall=          0.3  
+v1/Refs/t04.abo +Overall time at end (sec) : cpu=          0.3  wall=          0.3  
+v1/Refs/t05.abo +Overall time at end (sec) : cpu=          0.3  wall=          0.4  
+v2/Refs/t02.abo +Overall time at end (sec) : cpu=          0.3  wall=          0.3  
+v4/Refs/t93.abo +Overall time at end (sec) : cpu=          0.3  wall=          0.3  
+v5/Refs/t46.abo +Overall time at end (sec) : cpu=          0.3  wall=          0.4  
+v8/Refs/t65.abo +Overall time at end (sec) : cpu=          0.3  wall=          0.3          optdriver           7 optdriver           7
+v9/Refs/t185.abo +Overall time at end (sec) : cpu=          0.3  wall=          0.3  
+v1/Refs/t35.abo +Overall time at end (sec) : cpu=          0.4  wall=          0.4  
+v1/Refs/t36.abo +Overall time at end (sec) : cpu=          0.4  wall=          0.4  
+v1/Refs/t52.abo +Overall time at end (sec) : cpu=          0.4  wall=          0.4  
+v1/Refs/t63.abo +Overall time at end (sec) : cpu=          0.4  wall=          0.4  
+v3/Refs/t21.abo +Overall time at end (sec) : cpu=          0.4  wall=          0.4  
+v3/Refs/t96.abo +Overall time at end (sec) : cpu=          0.4  wall=          0.4  
+v5/Refs/t00.abo +Overall time at end (sec) : cpu=          0.4  wall=          0.4  
+v5/Refs/t11.abo +Overall time at end (sec) : cpu=          0.4  wall=          0.5  
+v5/Refs/t25.abo +Overall time at end (sec) : cpu=          0.4  wall=          0.4          optdriver1          0 optdriver2          1 optdriver3          1 optdriver1          0 optdriver2          1 optdriver3          1
+v6/Refs/t09.abo +Overall time at end (sec) : cpu=          0.4  wall=          0.4  
+v6/Refs/t10.abo +Overall time at end (sec) : cpu=          0.4  wall=          0.4  
+v9/Refs/t199.abo +Overall time at end (sec) : cpu=          0.4  wall=          0.4  
+v1/Refs/t12.abo +Overall time at end (sec) : cpu=          0.5  wall=          0.5  
+v1/Refs/t13.abo +Overall time at end (sec) : cpu=          0.5  wall=          0.5  
+v1/Refs/t14.abo +Overall time at end (sec) : cpu=          0.5  wall=          0.5  
+v1/Refs/t15.abo +Overall time at end (sec) : cpu=          0.5  wall=          0.5  
+v1/Refs/t16.abo +Overall time at end (sec) : cpu=          0.5  wall=          0.5  
+v1/Refs/t17.abo +Overall time at end (sec) : cpu=          0.5  wall=          0.5  
+v1/Refs/t18.abo +Overall time at end (sec) : cpu=          0.5  wall=          0.5  
+v1/Refs/t34.abo +Overall time at end (sec) : cpu=          0.5  wall=          0.5  
+v1/Refs/t46.abo +Overall time at end (sec) : cpu=          0.5  wall=          0.6  
+v2/Refs/t12.abo +Overall time at end (sec) : cpu=          0.5  wall=          0.6  
+v2/Refs/t34.abo +Overall time at end (sec) : cpu=          0.5  wall=          0.5          optdriver1          0 optdriver2          1 optdriver1          0 optdriver2          1
+v3/Refs/t93.abo +Overall time at end (sec) : cpu=          0.5  wall=          0.5  
+v4/Refs/t96.abo +Overall time at end (sec) : cpu=          0.5  wall=          0.6  
+v8/Refs/t03.abo +Overall time at end (sec) : cpu=          0.5  wall=          0.6  
+v9/Refs/t188.abo +Overall time at end (sec) : cpu=          0.5  wall=          0.5  
+v1/Refs/t10.abo +Overall time at end (sec) : cpu=          0.6  wall=          0.7  
+v1/Refs/t19.abo +Overall time at end (sec) : cpu=          0.6  wall=          0.7  
+v1/Refs/t20.abo +Overall time at end (sec) : cpu=          0.6  wall=          0.6  
+v1/Refs/t22.abo +Overall time at end (sec) : cpu=          0.6  wall=          0.6  
+v1/Refs/t28.abo +Overall time at end (sec) : cpu=          0.6  wall=          0.6  
+v1/Refs/t29.abo +Overall time at end (sec) : cpu=          0.6  wall=          0.6  
+v1/Refs/t30.abo +Overall time at end (sec) : cpu=          0.6  wall=          0.7  
+v1/Refs/t38.abo +Overall time at end (sec) : cpu=          0.6  wall=          0.6  
+v1/Refs/t59.abo +Overall time at end (sec) : cpu=          0.6  wall=          0.6  
+v2/Refs/t01.abo +Overall time at end (sec) : cpu=          0.6  wall=          0.7          optdriver1          0 optdriver2          1 optdriver3          1 optdriver1          0 optdriver2          1 optdriver3          1
+v3/Refs/t06.abo +Overall time at end (sec) : cpu=          0.6  wall=          0.7          optdriver1          0 optdriver2          1 optdriver3          1 optdriver1          0 optdriver2          1 optdriver3          1
+v3/Refs/t52.abo +Overall time at end (sec) : cpu=          0.6  wall=          0.6  
+v3/Refs/t62.abo +Overall time at end (sec) : cpu=          0.6  wall=          0.7  
+v4/Refs/t04.abo +Overall time at end (sec) : cpu=          0.6  wall=          0.7  
+v5/Refs/t79.abo +Overall time at end (sec) : cpu=          0.6  wall=          0.7  
+v6/Refs/t16.abo +Overall time at end (sec) : cpu=          0.6  wall=          0.8  
+v9/Refs/t180.abo +Overall time at end (sec) : cpu=          0.6  wall=          0.7  
+v1/Refs/t11.abo +Overall time at end (sec) : cpu=          0.7  wall=          0.7  
+v1/Refs/t47.abo +Overall time at end (sec) : cpu=          0.7  wall=          0.7  
+v1/Refs/t51.abo +Overall time at end (sec) : cpu=          0.7  wall=          0.8  
+v1/Refs/t93.abo +Overall time at end (sec) : cpu=          0.7  wall=          0.7  
+v2/Refs/t08.abo +Overall time at end (sec) : cpu=          0.7  wall=          0.7          optdriver1          0 optdriver2          1 optdriver1          0 optdriver2          1
+v3/Refs/t25.abo +Overall time at end (sec) : cpu=          0.7  wall=          0.7  
+v3/Refs/t58.abo +Overall time at end (sec) : cpu=          0.7  wall=          0.7  
+v4/Refs/t03.abo +Overall time at end (sec) : cpu=          0.7  wall=          0.8  
+v4/Refs/t64.abo +Overall time at end (sec) : cpu=          0.7  wall=          0.8          optdriver1          0 optdriver2          1 optdriver1          0 optdriver2          1
+v4/Refs/t94.abo +Overall time at end (sec) : cpu=          0.7  wall=          0.7  
+v6/Refs/t08.abo +Overall time at end (sec) : cpu=          0.7  wall=          0.7  
+v7/Refs/t14.abo +Overall time at end (sec) : cpu=          0.7  wall=          0.8  
+v9/Refs/t181.abo +Overall time at end (sec) : cpu=          0.7  wall=          0.7  
+v9/Refs/t196.abo +Overall time at end (sec) : cpu=          0.7  wall=          0.7  
+v1/Refs/t00.abo +Overall time at end (sec) : cpu=          0.8  wall=          0.8  
+v1/Refs/t08.abo +Overall time at end (sec) : cpu=          0.8  wall=          0.9  
+v1/Refs/t09.abo +Overall time at end (sec) : cpu=          0.8  wall=          0.8  
+v1/Refs/t23.abo +Overall time at end (sec) : cpu=          0.8  wall=          0.8  
+v1/Refs/t32.abo +Overall time at end (sec) : cpu=          0.8  wall=          0.8  
+v1/Refs/t37.abo +Overall time at end (sec) : cpu=          0.8  wall=          0.8  
+v1/Refs/t53.abo +Overall time at end (sec) : cpu=          0.8  wall=          0.8  
+v1/Refs/t70.abo +Overall time at end (sec) : cpu=          0.8  wall=          0.9  
+v1/Refs/t91.abo +Overall time at end (sec) : cpu=          0.8  wall=          0.9  
+v1/Refs/t94.abo +Overall time at end (sec) : cpu=          0.8  wall=          0.8  
+v4/Refs/t30.abo +Overall time at end (sec) : cpu=          0.8  wall=          0.8  
+v4/Refs/t35.abo +Overall time at end (sec) : cpu=          0.8  wall=          0.9  
+v6/Refs/t04.abo +Overall time at end (sec) : cpu=          0.8  wall=          0.8  
+v7/Refs/t02.abo +Overall time at end (sec) : cpu=          0.8  wall=          0.8  
+v1/Refs/t54.abo +Overall time at end (sec) : cpu=          0.9  wall=          0.9  
+v1/Refs/t81.abo +Overall time at end (sec) : cpu=          0.9  wall=          1.4  
+v2/Refs/t04.abo +Overall time at end (sec) : cpu=          0.9  wall=          1.0          optdriver1          0 optdriver2          0 optdriver3          1 optdriver1          0 optdriver2          0 optdriver3          1
+v2/Refs/t05.abo +Overall time at end (sec) : cpu=          0.9  wall=          0.9          optdriver1          0 optdriver2          1 optdriver3          1 optdriver1          0 optdriver2          1 optdriver3          1
+v2/Refs/t60.abo +Overall time at end (sec) : cpu=          0.9  wall=          1.1  
+v3/Refs/t43.abo +Overall time at end (sec) : cpu=          0.9  wall=          1.0  
+v3/Refs/t78.abo +Overall time at end (sec) : cpu=          0.9  wall=          1.0          optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          1 optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          1
+v5/Refs/t56.abo +Overall time at end (sec) : cpu=          0.9  wall=          0.9  
+v1/Refs/t24.abo +Overall time at end (sec) : cpu=          1.0  wall=          1.1  
+v1/Refs/t90.abo +Overall time at end (sec) : cpu=          1.0  wall=          1.1  
+v2/Refs/t59.abo +Overall time at end (sec) : cpu=          1.0  wall=          1.1  
+v2/Refs/t90.abo +Overall time at end (sec) : cpu=          1.0  wall=          1.0          optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1
+v2/Refs/t96.abo +Overall time at end (sec) : cpu=          1.0  wall=          1.0          optdriver1          0 optdriver2          1 optdriver3          1 optdriver1          0 optdriver2          1 optdriver3          1
+v3/Refs/t13.abo +Overall time at end (sec) : cpu=          1.0  wall=          1.2  
+v3/Refs/t54.abo +Overall time at end (sec) : cpu=          1.0  wall=          1.1  
+v4/Refs/t17.abo +Overall time at end (sec) : cpu=          1.0  wall=          1.1  
+v5/Refs/t81.abo +Overall time at end (sec) : cpu=          1.0  wall=          1.1          optdriver1          0 optdriver2          1 optdriver1          0 optdriver2          1
+v6/Refs/t13.abo +Overall time at end (sec) : cpu=          1.0  wall=          1.0  
+v7/Refs/t61.abo +Overall time at end (sec) : cpu=          1.0  wall=          1.1  
+v7/Refs/t62.abo +Overall time at end (sec) : cpu=          1.0  wall=          1.1  
+v7/Refs/t72.abo +Overall time at end (sec) : cpu=          1.0  wall=          1.0  
+v1/Refs/t31.abo +Overall time at end (sec) : cpu=          1.1  wall=          1.2  
+v1/Refs/t77.abo +Overall time at end (sec) : cpu=          1.1  wall=          1.2  
+v3/Refs/t14.abo +Overall time at end (sec) : cpu=          1.1  wall=          1.1          optdriver8          0 optdriver10         1 optdriver8          0 optdriver10         1
+v3/Refs/t15.abo +Overall time at end (sec) : cpu=          1.1  wall=          1.1          optdriver1          0 optdriver2          1 optdriver1          0 optdriver2          1
+v3/Refs/t46.abo +Overall time at end (sec) : cpu=          1.1  wall=          1.2  
+v3/Refs/t60.abo +Overall time at end (sec) : cpu=          1.1  wall=          1.2  
+v3/Refs/t72.abo +Overall time at end (sec) : cpu=          1.1  wall=          1.1          optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1
+v3/Refs/t94.abo +Overall time at end (sec) : cpu=          1.1  wall=          1.2  
+v4/Refs/t91.abo +Overall time at end (sec) : cpu=          1.1  wall=          1.1  
+v5/Refs/t72.abo +Overall time at end (sec) : cpu=          1.1  wall=          1.1          optdriver1          0 optdriver2          0 optdriver3          3 optdriver4          4 optdriver1          0 optdriver2          0 optdriver3          3 optdriver4          4
+v9/Refs/t35.abo +Overall time at end (sec) : cpu=          1.1  wall=          1.1          optdriver           4 optdriver           4
+v1/Refs/t62.abo +Overall time at end (sec) : cpu=          1.2  wall=          1.4  
+v1/Refs/t78.abo +Overall time at end (sec) : cpu=          1.2  wall=          1.4  
+v2/Refs/t55.abo +Overall time at end (sec) : cpu=          1.2  wall=          1.4  
+v2/Refs/t76.abo +Overall time at end (sec) : cpu=          1.2  wall=          1.4  
+v3/Refs/t56.abo +Overall time at end (sec) : cpu=          1.2  wall=          1.3  
+v3/Refs/t92.abo +Overall time at end (sec) : cpu=          1.2  wall=          1.3          optdriver1          0 optdriver2          0 optdriver3          1 optdriver1          0 optdriver2          0 optdriver3          1
+v4/Refs/t58.abo +Overall time at end (sec) : cpu=          1.2  wall=          1.3          optdriver1          0 optdriver2          1 optdriver1          0 optdriver2          1
+v4/Refs/t72.abo +Overall time at end (sec) : cpu=          1.2  wall=          1.3  
+v5/Refs/t82.abo +Overall time at end (sec) : cpu=          1.2  wall=          1.2          optdriver           1 optdriver           1
+v6/Refs/t20.abo +Overall time at end (sec) : cpu=          1.2  wall=          1.3  
+v1/Refs/t66.abo +Overall time at end (sec) : cpu=          1.3  wall=          1.5  
+v2/Refs/t58.abo +Overall time at end (sec) : cpu=          1.3  wall=          1.5  
+v3/Refs/t09.abo +Overall time at end (sec) : cpu=          1.3  wall=          1.4          optdriver1          0 optdriver2          0 optdriver3          1 optdriver1          0 optdriver2          0 optdriver3          1
+v3/Refs/t48.abo +Overall time at end (sec) : cpu=          1.3  wall=          1.5  
+v4/Refs/t01.abo +Overall time at end (sec) : cpu=          1.3  wall=          1.4  
+v4/Refs/t40.abo +Overall time at end (sec) : cpu=          1.3  wall=          1.3  
+v5/Refs/t05.abo +Overall time at end (sec) : cpu=          1.3  wall=          1.3          optdriver1          0 optdriver2          1 optdriver3          0 optdriver1          0 optdriver2          1 optdriver3          0
+v5/Refs/t09.abo +Overall time at end (sec) : cpu=          1.3  wall=          1.4  
+v5/Refs/t31.abo +Overall time at end (sec) : cpu=          1.3  wall=          1.5  
+v5/Refs/t35.abo +Overall time at end (sec) : cpu=          1.3  wall=          1.4  
+v5/Refs/t57.abo +Overall time at end (sec) : cpu=          1.3  wall=          1.3  
+v6/Refs/t44.abo +Overall time at end (sec) : cpu=          1.3  wall=          1.4  
+v9/Refs/t75.abo +Overall time at end (sec) : cpu=          1.3  wall=          1.3  
+v1/Refs/t75.abo +Overall time at end (sec) : cpu=          1.4  wall=          1.6  
+v2/Refs/t09.abo +Overall time at end (sec) : cpu=          1.4  wall=          1.5          optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          0 optdriver5          1 optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          0 optdriver5          1
+v3/Refs/t07.abo +Overall time at end (sec) : cpu=          1.4  wall=          1.6          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          0 optdriver5          0 optdriver6          1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          0 optdriver5          0 optdriver6          1
+v3/Refs/t95.abo +Overall time at end (sec) : cpu=          1.4  wall=          1.4  
+v4/Refs/t92.abo +Overall time at end (sec) : cpu=          1.4  wall=          1.4  
+v5/Refs/t48.abo +Overall time at end (sec) : cpu=          1.4  wall=          1.5  
+v5/Refs/t75.abo +Overall time at end (sec) : cpu=          1.4  wall=          1.4  
+v6/Refs/t11.abo +Overall time at end (sec) : cpu=          1.4  wall=          1.5  
+v8/Refs/t24.abo +Overall time at end (sec) : cpu=          1.4  wall=          1.5  
+v9/Refs/t19.abo +Overall time at end (sec) : cpu=          1.4  wall=          1.5  
+v9/Refs/t192.abo +Overall time at end (sec) : cpu=          1.4  wall=          1.4  
+v9/Refs/t53.abo +Overall time at end (sec) : cpu=          1.4  wall=          1.5          optdriver           7 optdriver           7
+v1/Refs/t92.abo +Overall time at end (sec) : cpu=          1.5  wall=          1.6  
+v2/Refs/t33.abo +Overall time at end (sec) : cpu=          1.5  wall=          1.6          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          0 optdriver5          0 optdriver6          1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          0 optdriver5          0 optdriver6          1
+v2/Refs/t35.abo +Overall time at end (sec) : cpu=          1.5  wall=          1.6          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1
+v2/Refs/t42.abo +Overall time at end (sec) : cpu=          1.5  wall=          1.6  
+v2/Refs/t92.abo +Overall time at end (sec) : cpu=          1.5  wall=          1.6          optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1
+v2/Refs/t97.abo +Overall time at end (sec) : cpu=          1.5  wall=          1.6  
+v3/Refs/t49.abo +Overall time at end (sec) : cpu=          1.5  wall=          1.6  
+v3/Refs/t65.abo +Overall time at end (sec) : cpu=          1.5  wall=          1.6  
+v4/Refs/t05.abo +Overall time at end (sec) : cpu=          1.5  wall=          1.6  
+v5/Refs/t32.abo +Overall time at end (sec) : cpu=          1.5  wall=          1.7  
+v5/Refs/t49.abo +Overall time at end (sec) : cpu=          1.5  wall=          1.6  
+v5/Refs/t50.abo +Overall time at end (sec) : cpu=          1.5  wall=          1.5  
+v6/Refs/t12.abo +Overall time at end (sec) : cpu=          1.5  wall=          1.6  
+v67mbpt/Refs/t12.abo +Overall time at end (sec) : cpu=          1.5  wall=          1.6          optdriver1          0 optdriver2          3 optdriver3          4 optdriver1          0 optdriver2          3 optdriver3          4
+v9/Refs/t56.abo +Overall time at end (sec) : cpu=          1.5  wall=          1.7          optdriver           7 optdriver           7
+v1/Refs/t79.abo +Overall time at end (sec) : cpu=          1.6  wall=          2.0  
+v2/Refs/t43.abo +Overall time at end (sec) : cpu=          1.6  wall=          1.7  
+v2/Refs/t84.abo +Overall time at end (sec) : cpu=          1.6  wall=          1.7  
+v3/Refs/t08.abo +Overall time at end (sec) : cpu=          1.6  wall=          1.8          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          0 optdriver5          0 optdriver6          1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          0 optdriver5          0 optdriver6          1
+v3/Refs/t70.abo +Overall time at end (sec) : cpu=          1.6  wall=          1.8          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          0 optdriver5          0 optdriver6          1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          0 optdriver5          0 optdriver6          1
+v3/Refs/t71.abo +Overall time at end (sec) : cpu=          1.6  wall=          1.8          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          0 optdriver5          0 optdriver6          1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          0 optdriver5          0 optdriver6          1
+v3/Refs/t87.abo +Overall time at end (sec) : cpu=          1.6  wall=          1.7          optdriver1          0 optdriver2          3 optdriver3          3 optdriver4          3 optdriver1          0 optdriver2          3 optdriver3          3 optdriver4          3
+v5/Refs/t29.abo +Overall time at end (sec) : cpu=          1.6  wall=          1.8          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          0 optdriver5          0 optdriver6          1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          0 optdriver5          0 optdriver6          1
+v8/Refs/t36.abo +Overall time at end (sec) : cpu=          1.6  wall=          1.6          optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1
+v9/Refs/t187.abo +Overall time at end (sec) : cpu=          1.6  wall=          1.7  
+v9/Refs/t91.abo +Overall time at end (sec) : cpu=          1.6  wall=          1.6  
+v1/Refs/t41.abo +Overall time at end (sec) : cpu=          1.7  wall=          1.7  
+v1/Refs/t56.abo +Overall time at end (sec) : cpu=          1.7  wall=          1.8  
+v1/Refs/t69.abo +Overall time at end (sec) : cpu=          1.7  wall=          1.9  
+v1/Refs/t88.abo +Overall time at end (sec) : cpu=          1.7  wall=          2.1  
+v1/Refs/t95.abo +Overall time at end (sec) : cpu=          1.7  wall=          1.8  
+v2/Refs/t74.abo +Overall time at end (sec) : cpu=          1.7  wall=          1.9  
+v3/Refs/t10.abo +Overall time at end (sec) : cpu=          1.7  wall=          1.9          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1
+v3/Refs/t29.abo +Overall time at end (sec) : cpu=          1.7  wall=          1.7  
+v3/Refs/t53.abo +Overall time at end (sec) : cpu=          1.7  wall=          1.9  
+v5/Refs/t30.abo +Overall time at end (sec) : cpu=          1.7  wall=          1.8          optdriver1          0 optdriver2          1 optdriver3          1 optdriver1          0 optdriver2          1 optdriver3          1
+v5/Refs/t34.abo +Overall time at end (sec) : cpu=          1.7  wall=          1.7  
+v5/Refs/t60.abo +Overall time at end (sec) : cpu=          1.7  wall=          1.9  
+v6/Refs/t23.abo +Overall time at end (sec) : cpu=          1.7  wall=          1.8  
+v7/Refs/t73.abo +Overall time at end (sec) : cpu=          1.7  wall=          1.8  
+v9/Refs/t193.abo +Overall time at end (sec) : cpu=          1.7  wall=          1.8  
+v9/Refs/t197.abo +Overall time at end (sec) : cpu=          1.7  wall=          1.7  
+v1/Refs/t33.abo +Overall time at end (sec) : cpu=          1.8  wall=          1.8  
+v2/Refs/t47.abo +Overall time at end (sec) : cpu=          1.8  wall=          2.1  
+v2/Refs/t86.abo +Overall time at end (sec) : cpu=          1.8  wall=          1.8  
+v3/Refs/t01.abo +Overall time at end (sec) : cpu=          1.8  wall=          1.9  
+v3/Refs/t11.abo +Overall time at end (sec) : cpu=          1.8  wall=          1.9          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1
+v3/Refs/t12.abo +Overall time at end (sec) : cpu=          1.8  wall=          1.9          optdriver1          0 optdriver2          1 optdriver3          0 optdriver4          0 optdriver5          0 optdriver6          1 optdriver1          0 optdriver2          1 optdriver3          0 optdriver4          0 optdriver5          0 optdriver6          1
+v4/Refs/t89.abo +Overall time at end (sec) : cpu=          1.8  wall=          1.9  
+v5/Refs/t45.abo +Overall time at end (sec) : cpu=          1.8  wall=          1.8  
+v67mbpt/Refs/t21.abo +Overall time at end (sec) : cpu=          1.8  wall=          1.8          optdriver1          0 optdriver2          0 optdriver3          3 optdriver1          0 optdriver2          0 optdriver3          3
+v9/Refs/t100.abo +Overall time at end (sec) : cpu=          1.8  wall=          1.8  
+v9/Refs/t205.abo +Overall time at end (sec) : cpu=          1.8  wall=          2.0  
+v1/Refs/t65.abo +Overall time at end (sec) : cpu=          1.9  wall=          2.1  
+v1/Refs/t67.abo +Overall time at end (sec) : cpu=          1.9  wall=          2.2  
+v5/Refs/t54.abo +Overall time at end (sec) : cpu=          1.9  wall=          1.9  
+v67mbpt/Refs/t01.abo +Overall time at end (sec) : cpu=          1.9  wall=          2.0          optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          4 optdriver5          4 optdriver6          4 optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          4 optdriver5          4 optdriver6          4
+v67mbpt/Refs/t09.abo +Overall time at end (sec) : cpu=          1.9  wall=          1.9          optdriver1          0 optdriver2          4 optdriver3          4 optdriver1          0 optdriver2          4 optdriver3          4
+v7/Refs/t36.abo +Overall time at end (sec) : cpu=          1.9  wall=          2.0          optdriver1          0 optdriver2          8 optdriver3          0 optdriver1          0 optdriver2          8 optdriver3          0
+v7/Refs/t89.abo +Overall time at end (sec) : cpu=          1.9  wall=          2.2          optdriver1          0 optdriver2          0 optdriver3          7 optdriver4          7 optdriver1          0 optdriver2          0 optdriver3          7 optdriver4          7
+v1/Refs/t55.abo +Overall time at end (sec) : cpu=          2.0  wall=          2.1  
+v2/Refs/t40.abo +Overall time at end (sec) : cpu=          2.0  wall=          2.2  
+v2/Refs/t41.abo +Overall time at end (sec) : cpu=          2.0  wall=          2.1  
+v2/Refs/t56.abo +Overall time at end (sec) : cpu=          2.0  wall=          2.1  
+v2/Refs/t75.abo +Overall time at end (sec) : cpu=          2.0  wall=          2.4  
+v3/Refs/t17.abo +Overall time at end (sec) : cpu=          2.0  wall=          2.1          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1
+v4/Refs/t38.abo +Overall time at end (sec) : cpu=          2.0  wall=          2.1  
+v67mbpt/Refs/t35.abo +Overall time at end (sec) : cpu=          2.0  wall=          2.1          optdriver          99 optdriver          99
+v2/Refs/t85.abo +Overall time at end (sec) : cpu=          2.1  wall=          2.1  
+v3/Refs/t30.abo +Overall time at end (sec) : cpu=          2.1  wall=          2.2          optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          4 optdriver5          4 optdriver6          4 optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          4 optdriver5          4 optdriver6          4
+v3/Refs/t31.abo +Overall time at end (sec) : cpu=          2.1  wall=          2.2          optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          4 optdriver5          4 optdriver6          4 optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          4 optdriver5          4 optdriver6          4
+v5/Refs/t23.abo +Overall time at end (sec) : cpu=          2.1  wall=          2.2          optdriver1          0 optdriver2          0 optdriver3          1 optdriver1          0 optdriver2          0 optdriver3          1
+v7/Refs/t41.abo +Overall time at end (sec) : cpu=          2.1  wall=          2.2          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          1 optdriver6          1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          1 optdriver6          1
+v8/Refs/t25.abo +Overall time at end (sec) : cpu=          2.1  wall=          2.2  
+v9/Refs/t200.abo +Overall time at end (sec) : cpu=          2.1  wall=          2.2  
+v9/Refs/t202.abo +Overall time at end (sec) : cpu=          2.1  wall=          2.2  
+v1/Refs/t80.abo +Overall time at end (sec) : cpu=          2.2  wall=          2.9  
+v2/Refs/t44.abo +Overall time at end (sec) : cpu=          2.2  wall=          2.5  
+v3/Refs/t84.abo +Overall time at end (sec) : cpu=          2.2  wall=          2.4          optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          0 optdriver5          1 optdriver6          1 optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          0 optdriver5          1 optdriver6          1
+v4/Refs/t32.abo +Overall time at end (sec) : cpu=          2.2  wall=          2.2  
+v4/Refs/t75.abo +Overall time at end (sec) : cpu=          2.2  wall=          2.3          optdriver1          0 optdriver2          0 optdriver3          1 optdriver1          0 optdriver2          0 optdriver3          1
+v5/Refs/t36.abo +Overall time at end (sec) : cpu=          2.2  wall=          2.2  
+v5/Refs/t67.abo +Overall time at end (sec) : cpu=          2.2  wall=          2.4          optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          4 optdriver5          3 optdriver6          4 optdriver7          4 optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          4 optdriver5          3 optdriver6          4 optdriver7          4
+v8/Refs/t28.abo +Overall time at end (sec) : cpu=          2.2  wall=          2.3  
+v1/Refs/t21.abo +Overall time at end (sec) : cpu=          2.3  wall=          2.4  
+v1/Refs/t57.abo +Overall time at end (sec) : cpu=          2.3  wall=          2.4  
+v1/Refs/t71.abo +Overall time at end (sec) : cpu=          2.3  wall=          2.4  
+v1/Refs/t72.abo +Overall time at end (sec) : cpu=          2.3  wall=          2.4  
+v1/Refs/t73.abo +Overall time at end (sec) : cpu=          2.3  wall=          2.4  
+v4/Refs/t36.abo +Overall time at end (sec) : cpu=          2.3  wall=          2.4  
+v4/Refs/t95.abo +Overall time at end (sec) : cpu=          2.3  wall=          2.3  
+v6/Refs/t54.abo +Overall time at end (sec) : cpu=          2.3  wall=          2.4          optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5          1 optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5          1
+v1/Refs/t58.abo +Overall time at end (sec) : cpu=          2.4  wall=          2.4  
+v3/Refs/t23.abo +Overall time at end (sec) : cpu=          2.4  wall=          2.4  
+v3/Refs/t83.abo +Overall time at end (sec) : cpu=          2.4  wall=          2.5          optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          5 optdriver6          5 optdriver7          5 optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          5 optdriver6          5 optdriver7          5
+v6/Refs/t50.abo +Overall time at end (sec) : cpu=          2.4  wall=          2.5          optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          1 optdriver7          1 optdriver8          1 optdriver9          1 optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          1 optdriver7          1 optdriver8          1 optdriver9          1
+v7/Refs/t04.abo +Overall time at end (sec) : cpu=          2.4  wall=          2.5  
+v9/Refs/t102.abo +Overall time at end (sec) : cpu=          2.4  wall=          2.5  
+v9/Refs/t108.abo +Overall time at end (sec) : cpu=          2.4  wall=          2.4  
+v9/Refs/t186.abo +Overall time at end (sec) : cpu=          2.4  wall=          2.4  
+v7/Refs/t06.abo +Overall time at end (sec) : cpu=          2.5  wall=          2.7  
+v1/Refs/t86.abo +Overall time at end (sec) : cpu=          2.6  wall=          2.7  
+v2/Refs/t06.abo +Overall time at end (sec) : cpu=          2.6  wall=          2.7          optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1
+v2/Refs/t50.abo +Overall time at end (sec) : cpu=          2.6  wall=          2.7  
+v3/Refs/t20.abo +Overall time at end (sec) : cpu=          2.6  wall=          2.8  
+v4/Refs/t59.abo +Overall time at end (sec) : cpu=          2.6  wall=          2.7          optdriver1          0 optdriver2          0 optdriver3          1 optdriver1          0 optdriver2          0 optdriver3          1
+v5/Refs/t78.abo +Overall time at end (sec) : cpu=          2.6  wall=          2.7  
+v7/Refs/t16.abo +Overall time at end (sec) : cpu=          2.6  wall=          2.6          optdriver1          0 optdriver2          3 optdriver3          3 optdriver1          0 optdriver2          3 optdriver3          3
+v7/Refs/t99.abo +Overall time at end (sec) : cpu=          2.6  wall=          2.6          optdriver1          0 optdriver2          1 optdriver1          0 optdriver2          1
+v1/Refs/t68.abo +Overall time at end (sec) : cpu=          2.7  wall=          3.0  
+v2/Refs/t38.abo +Overall time at end (sec) : cpu=          2.7  wall=          2.8          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          1
+v2/Refs/t45.abo +Overall time at end (sec) : cpu=          2.7  wall=          3.3  
+v3/Refs/t16.abo +Overall time at end (sec) : cpu=          2.7  wall=          2.9          optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          0 optdriver5          0 optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          0 optdriver5          0
+v5/Refs/t59.abo +Overall time at end (sec) : cpu=          2.7  wall=          2.8  
+v6/Refs/t28.abo +Overall time at end (sec) : cpu=          2.7  wall=          2.8  
+v2/Refs/t83.abo +Overall time at end (sec) : cpu=          2.8  wall=          2.9  
+v3/Refs/t39.abo +Overall time at end (sec) : cpu=          2.8  wall=          2.8  
+v3/Refs/t45.abo +Overall time at end (sec) : cpu=          2.8  wall=          3.0  
+v7/Refs/t25.abo +Overall time at end (sec) : cpu=          2.8  wall=          2.9          optdriver           4 optdriver           4
+v9/Refs/t54.abo +Overall time at end (sec) : cpu=          2.8  wall=          2.9          optdriver           7 optdriver           7
+v1/Refs/t83.abo +Overall time at end (sec) : cpu=          2.9  wall=          3.2  
+v4/Refs/t79.abo +Overall time at end (sec) : cpu=          2.9  wall=          3.0          optdriver1          0 optdriver2          0 optdriver3          1 optdriver1          0 optdriver2          0 optdriver3          1
+v5/Refs/t41.abo +Overall time at end (sec) : cpu=          2.9  wall=          3.2  
+v5/Refs/t76.abo +Overall time at end (sec) : cpu=          2.9  wall=          3.0  
+v9/Refs/t198.abo +Overall time at end (sec) : cpu=          2.9  wall=          3.0  
+v1/Refs/t45.abo +Overall time at end (sec) : cpu=          3.0  wall=          3.1  
+v1/Refs/t84.abo +Overall time at end (sec) : cpu=          3.0  wall=          3.3  
+v3/Refs/t51.abo +Overall time at end (sec) : cpu=          3.0  wall=          3.0  
+v3/Refs/t80.abo +Overall time at end (sec) : cpu=          3.0  wall=          3.1          optdriver1          0 optdriver2          0 optdriver3          1 optdriver1          0 optdriver2          0 optdriver3          1
+v4/Refs/t07.abo +Overall time at end (sec) : cpu=          3.0  wall=          3.3  
+v4/Refs/t62.abo +Overall time at end (sec) : cpu=          3.0  wall=          3.1          optdriver1          0 optdriver2          1 optdriver1          0 optdriver2          1
+v6/Refs/t30.abo +Overall time at end (sec) : cpu=          3.0  wall=          3.0  
+v9/Refs/t145.abo +Overall time at end (sec) : cpu=          3.0  wall=          3.1          optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5         10 optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5         10
+v3/Refs/t26.abo +Overall time at end (sec) : cpu=          3.1  wall=          3.1  
+v3/Refs/t74.abo +Overall time at end (sec) : cpu=          3.1  wall=          3.2          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          0 optdriver6          0 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          0 optdriver6          0
+v7/Refs/t26.abo +Overall time at end (sec) : cpu=          3.1  wall=          3.2  
+v9/Refs/t106.abo +Overall time at end (sec) : cpu=          3.1  wall=          3.2  
+v1/Refs/t85.abo +Overall time at end (sec) : cpu=          3.2  wall=          3.4  
+v2/Refs/t51.abo +Overall time at end (sec) : cpu=          3.2  wall=          3.2  
+v2/Refs/t98.abo +Overall time at end (sec) : cpu=          3.2  wall=          3.3          optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5          1 optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5          1
+v3/Refs/t19.abo +Overall time at end (sec) : cpu=          3.2  wall=          3.3          optdriver1          0 optdriver2          1 optdriver1          0 optdriver2          1
+v3/Refs/t81.abo +Overall time at end (sec) : cpu=          3.2  wall=          3.3          optdriver1          0 optdriver2          1 optdriver1          0 optdriver2          1
+v3/Refs/t82.abo +Overall time at end (sec) : cpu=          3.2  wall=          3.2          optdriver1          0 optdriver2          1 optdriver1          0 optdriver2          1
+v9/Refs/t05.abo +Overall time at end (sec) : cpu=          3.2  wall=          3.4          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          1 optdriver6          1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          1 optdriver6          1
+v1/Refs/t76.abo +Overall time at end (sec) : cpu=          3.3  wall=          3.8  
+v1/Refs/t87.abo +Overall time at end (sec) : cpu=          3.3  wall=          3.8  
+v4/Refs/t02.abo +Overall time at end (sec) : cpu=          3.3  wall=          3.4          optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5          1 optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5          1
+v4/Refs/t06.abo +Overall time at end (sec) : cpu=          3.3  wall=          3.5  
+v6/Refs/t78.abo +Overall time at end (sec) : cpu=          3.3  wall=          3.5          optdriver11         0 optdriver12         1 optdriver21         0 optdriver22         1 optdriver31         0 optdriver32         1 optdriver41         0 optdriver42         1 optdriver51         0 optdriver52         1 optdriver61         0 optdriver62         1 optdriver11         0 optdriver12         1 optdriver21         0 optdriver22         1 optdriver31         0 optdriver32         1 optdriver41         0 optdriver42         1 optdriver51         0 optdriver52         1 optdriver61         0 optdriver62         1
+v7/Refs/t80.abo +Overall time at end (sec) : cpu=          3.3  wall=          4.0          optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          1 optdriver7          1 optdriver8          0 optdriver9          1 optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          1 optdriver7          1 optdriver8          0 optdriver9          1
+v1/Refs/t42.abo +Overall time at end (sec) : cpu=          3.4  wall=          3.4  
+v2/Refs/t11.abo +Overall time at end (sec) : cpu=          3.4  wall=          3.6          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          0 optdriver5          1 optdriver6          0 optdriver7          0 optdriver8          1 optdriver9          0 optdriver10         0 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          0 optdriver5          1 optdriver6          0 optdriver7          0 optdriver8          1 optdriver9          0 optdriver10         0
+v4/Refs/t52.abo +Overall time at end (sec) : cpu=          3.4  wall=          3.6          optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          5 optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          5
+v5/Refs/t55.abo +Overall time at end (sec) : cpu=          3.4  wall=          3.5  
+v6/Refs/t35.abo +Overall time at end (sec) : cpu=          3.4  wall=          3.6          optdriver11         0 optdriver12         1 optdriver21         0 optdriver22         1 optdriver31         0 optdriver32         1 optdriver41         0 optdriver42         1 optdriver51         0 optdriver52         1 optdriver61         0 optdriver62         1 optdriver11         0 optdriver12         1 optdriver21         0 optdriver22         1 optdriver31         0 optdriver32         1 optdriver41         0 optdriver42         1 optdriver51         0 optdriver52         1 optdriver61         0 optdriver62         1
+v8/Refs/t47.abo +Overall time at end (sec) : cpu=          3.4  wall=          3.6          optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          5 optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          5
+v9/Refs/t195.abo +Overall time at end (sec) : cpu=          3.4  wall=          3.5  
+v3/Refs/t75.abo +Overall time at end (sec) : cpu=          3.5  wall=          3.6          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          1
+v6/Refs/t43.abo +Overall time at end (sec) : cpu=          3.5  wall=          3.6  
+v7/Refs/t81.abo +Overall time at end (sec) : cpu=          3.5  wall=          3.7          optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1
+v9/Refs/t105.abo +Overall time at end (sec) : cpu=          3.5  wall=          3.6  
+v9/Refs/t34.abo +Overall time at end (sec) : cpu=          3.5  wall=          3.5          optdriver           4 optdriver           4
+v1/Refs/t64.abo +Overall time at end (sec) : cpu=          3.6  wall=          4.1  
+v2/Refs/t26.abo +Overall time at end (sec) : cpu=          3.6  wall=          3.8          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          1 optdriver6          0 optdriver7          1 optdriver8          0 optdriver9          1 optdriver10         0 optdriver11         1 optdriver12         0 optdriver13         1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          1 optdriver6          0 optdriver7          1 optdriver8          0 optdriver9          1 optdriver10         0 optdriver11         1 optdriver12         0 optdriver13         1
+v2/Refs/t94.abo +Overall time at end (sec) : cpu=          3.6  wall=          3.6          optdriver1          0 optdriver2          1 optdriver1          0 optdriver2          1
+v3/Refs/t02.abo +Overall time at end (sec) : cpu=          3.6  wall=          3.8          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          0 optdriver6          1 optdriver7          0 optdriver8          0 optdriver9          0 optdriver10         1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          0 optdriver6          1 optdriver7          0 optdriver8          0 optdriver9          0 optdriver10         1
+v7/Refs/t71.abo +Overall time at end (sec) : cpu=          3.6  wall=          3.7  
+v1/Refs/t39.abo +Overall time at end (sec) : cpu=          3.7  wall=          3.8  
+v1/Refs/t61.abo +Overall time at end (sec) : cpu=          3.7  wall=          4.2  
+v2/Refs/t36.abo +Overall time at end (sec) : cpu=          3.7  wall=          3.8          optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          0 optdriver5          0 optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          0 optdriver5          0
+v2/Refs/t46.abo +Overall time at end (sec) : cpu=          3.7  wall=          4.0  
+v5/Refs/t44.abo +Overall time at end (sec) : cpu=          3.7  wall=          3.8  
+v67mbpt/Refs/t52.abo +Overall time at end (sec) : cpu=          3.7  wall=          3.9          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          1 optdriver6          1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          1 optdriver6          1
+v2/Refs/t99.abo +Overall time at end (sec) : cpu=          3.8  wall=          3.9          optdriver1          0 optdriver2          1 optdriver1          0 optdriver2          1
+v4/Refs/t61.abo +Overall time at end (sec) : cpu=          3.8  wall=          4.3          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          0 optdriver5          0 optdriver6          0 optdriver7          0 optdriver8          0 optdriver9          0 optdriver10         0 optdriver11         0 optdriver12         1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          0 optdriver5          0 optdriver6          0 optdriver7          0 optdriver8          0 optdriver9          0 optdriver10         0 optdriver11         0 optdriver12         1
+v4/Refs/t81.abo +Overall time at end (sec) : cpu=          3.8  wall=          3.8          optdriver1          0 optdriver2          1 optdriver1          0 optdriver2          1
+v5/Refs/t68.abo +Overall time at end (sec) : cpu=          3.8  wall=          3.8          optdriver1          0 optdriver2          3 optdriver3          4 optdriver1          0 optdriver2          3 optdriver3          4
+v9/Refs/t191.abo +Overall time at end (sec) : cpu=          3.8  wall=          3.8  
+v3/Refs/t76.abo +Overall time at end (sec) : cpu=          3.9  wall=          4.0          optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          0 optdriver5          0 optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          0 optdriver5          0
+v3/Refs/t97.abo +Overall time at end (sec) : cpu=          3.9  wall=          4.0  
+v4/Refs/t20.abo +Overall time at end (sec) : cpu=          3.9  wall=          4.0  
+v4/Refs/t65.abo +Overall time at end (sec) : cpu=          3.9  wall=          4.0          optdriver1          0 optdriver2          1 optdriver3          1 optdriver1          0 optdriver2          1 optdriver3          1
+v67mbpt/Refs/t04.abo +Overall time at end (sec) : cpu=          3.9  wall=          4.0          optdriver1          0 optdriver2          0 optdriver3          3 optdriver4          4 optdriver1          0 optdriver2          0 optdriver3          3 optdriver4          4
+v2/Refs/t07.abo +Overall time at end (sec) : cpu=          4.0  wall=          4.2          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1
+v3/Refs/t18.abo +Overall time at end (sec) : cpu=          4.0  wall=          4.3          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          0 optdriver5          1 optdriver6          0 optdriver7          0 optdriver8          1 optdriver9          0 optdriver10         0 optdriver11         1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          0 optdriver5          1 optdriver6          0 optdriver7          0 optdriver8          1 optdriver9          0 optdriver10         0 optdriver11         1
+v5/Refs/t62.abo +Overall time at end (sec) : cpu=          4.0  wall=          4.1  
+v7/Refs/t11.abo +Overall time at end (sec) : cpu=          4.0  wall=          4.0  
+v8/Refs/t30.abo +Overall time at end (sec) : cpu=          4.0  wall=          4.3  
+v67mbpt/Refs/t32.abo +Overall time at end (sec) : cpu=          4.1  wall=          4.2          optdriver          99 optdriver          99
+v1/Refs/t40.abo +Overall time at end (sec) : cpu=          4.3  wall=          4.4  
+v2/Refs/t87.abo +Overall time at end (sec) : cpu=          4.3  wall=          4.8  
+v2/Refs/t91.abo +Overall time at end (sec) : cpu=          4.3  wall=          4.4  
+v3/Refs/t27.abo +Overall time at end (sec) : cpu=          4.3  wall=          4.3  
+v5/Refs/t58.abo +Overall time at end (sec) : cpu=          4.3  wall=          4.3  
+v67mbpt/Refs/t03.abo +Overall time at end (sec) : cpu=          4.3  wall=          4.4          optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          4 optdriver5          4 optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          4 optdriver5          4
+v7/Refs/t64.abo +Overall time at end (sec) : cpu=          4.3  wall=          4.5  
+v1/Refs/t48.abo +Overall time at end (sec) : cpu=          4.4  wall=          4.5  
+v3/Refs/t85.abo +Overall time at end (sec) : cpu=          4.4  wall=          4.6          optdriver1          0 optdriver2          0 optdriver3          1 optdriver1          0 optdriver2          0 optdriver3          1
+v6/Refs/t18.abo +Overall time at end (sec) : cpu=          4.4  wall=          4.4  
+v67mbpt/Refs/t05.abo +Overall time at end (sec) : cpu=          4.4  wall=          4.5          optdriver           4 optdriver           4
+v67mbpt/Refs/t50.abo +Overall time at end (sec) : cpu=          4.4  wall=          4.8          optdriver1          0 optdriver2          0 optdriver3          3 optdriver4         99 optdriver1          0 optdriver2          0 optdriver3          3 optdriver4         99
+v1/Refs/t49.abo +Overall time at end (sec) : cpu=          4.5  wall=          4.7  
+v3/Refs/t73.abo +Overall time at end (sec) : cpu=          4.5  wall=          4.5  
+v4/Refs/t85.abo +Overall time at end (sec) : cpu=          4.5  wall=          4.6          optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          4 optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          4
+v1/Refs/t50.abo +Overall time at end (sec) : cpu=          4.6  wall=          4.8  
+v2/Refs/t93.abo +Overall time at end (sec) : cpu=          4.6  wall=          4.7  
+v6/Refs/t25.abo +Overall time at end (sec) : cpu=          4.6  wall=          4.6  
+v8/Refs/t27.abo +Overall time at end (sec) : cpu=          4.6  wall=          4.8  
+v8/Refs/t32.abo +Overall time at end (sec) : cpu=          4.6  wall=          4.7  
+v4/Refs/t63.abo +Overall time at end (sec) : cpu=          4.7  wall=          4.9          optdriver1          0 optdriver2          1 optdriver1          0 optdriver2          1
+v2/Refs/t95.abo +Overall time at end (sec) : cpu=          4.8  wall=          4.9  
+v4/Refs/t28.abo +Overall time at end (sec) : cpu=          4.9  wall=          4.9  
+v4/Refs/t66.abo +Overall time at end (sec) : cpu=          4.9  wall=          5.0          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1
+v7/Refs/t57.abo +Overall time at end (sec) : cpu=          4.9  wall=          5.0          optdriver1          0 optdriver2          0 optdriver3          1 optdriver1          0 optdriver2          0 optdriver3          1
+v9/Refs/t55.abo +Overall time at end (sec) : cpu=          4.9  wall=          5.3          optdriver           7 optdriver           7
+v6/Refs/t33.abo +Overall time at end (sec) : cpu=          5.0  wall=          5.1  
+v4/Refs/t60.abo +Overall time at end (sec) : cpu=          5.1  wall=          5.2          optdriver1          0 optdriver2          0 optdriver3          1 optdriver1          0 optdriver2          0 optdriver3          1
+v5/Refs/t42.abo +Overall time at end (sec) : cpu=          5.1  wall=          5.2  
+v5/Refs/t70.abo +Overall time at end (sec) : cpu=          5.1  wall=          5.2          optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          4 optdriver5          4 optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          4 optdriver5          4
+v6/Refs/t49.abo +Overall time at end (sec) : cpu=          5.1  wall=          5.3  
+v8/Refs/t84.abo +Overall time at end (sec) : cpu=          5.1  wall=          5.2          optdriver5          1 optdriver6          1 optdriver7          5 optdriver5          1 optdriver6          1 optdriver7          5
+v9/Refs/t150.abo +Overall time at end (sec) : cpu=          5.1  wall=          5.2  
+v9/Refs/t72.abo +Overall time at end (sec) : cpu=          5.1  wall=          5.4  
+v2/Refs/t37.abo +Overall time at end (sec) : cpu=          5.2  wall=          5.4          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          0 optdriver6          1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          0 optdriver6          1
+v3/Refs/t55.abo +Overall time at end (sec) : cpu=          5.2  wall=          5.3  
+v3/Refs/t77.abo +Overall time at end (sec) : cpu=          5.2  wall=          5.4          optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1
+v6/Refs/t14.abo +Overall time at end (sec) : cpu=          5.2  wall=          5.3  
+v6/Refs/t24.abo +Overall time at end (sec) : cpu=          5.2  wall=          5.3  
+v6/Refs/t60.abo +Overall time at end (sec) : cpu=          5.2  wall=          5.2          optdriver1          0 optdriver2          1 optdriver1          0 optdriver2          1
+v9/Refs/t07.abo +Overall time at end (sec) : cpu=          5.2  wall=          5.4          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          1 optdriver6          1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          1 optdriver6          1
+v10/Refs/t01.abo +Overall time at end (sec) : cpu=          5.3  wall=          5.4  
+v3/Refs/t86.abo +Overall time at end (sec) : cpu=          5.3  wall=          5.4          optdriver1          0 optdriver2          0 optdriver3          1 optdriver1          0 optdriver2          0 optdriver3          1
+v4/Refs/t42.abo +Overall time at end (sec) : cpu=          5.3  wall=          5.4  
+v9/Refs/t189.abo +Overall time at end (sec) : cpu=          5.3  wall=          5.4  
+v9/Refs/t73.abo +Overall time at end (sec) : cpu=          5.3  wall=          5.5  
+v9/Refs/t74.abo +Overall time at end (sec) : cpu=          5.3  wall=          5.5  
+v3/Refs/t32.abo +Overall time at end (sec) : cpu=          5.4  wall=          5.4  
+v67mbpt/Refs/t22.abo +Overall time at end (sec) : cpu=          5.4  wall=          5.6          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          3 optdriver5          3 optdriver6          4 optdriver7          4 optdriver8          4 optdriver9          4 optdriver10         4 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          3 optdriver5          3 optdriver6          4 optdriver7          4 optdriver8          4 optdriver9          4 optdriver10         4
+v8/Refs/t31.abo +Overall time at end (sec) : cpu=          5.4  wall=          5.9  
+v8/Refs/t94.abo +Overall time at end (sec) : cpu=          5.4  wall=          5.5  
+v9/Refs/t76.abo +Overall time at end (sec) : cpu=          5.4  wall=          5.6  
+v5/Refs/t08.abo +Overall time at end (sec) : cpu=          5.5  wall=          5.7  
+v7/Refs/t63.abo +Overall time at end (sec) : cpu=          5.5  wall=          5.5  
+v9/Refs/t183.abo +Overall time at end (sec) : cpu=          5.6  wall=          5.7  
+v67mbpt/Refs/t51.abo +Overall time at end (sec) : cpu=          5.7  wall=          6.1          optdriver1          0 optdriver2          0 optdriver3          3 optdriver4         99 optdriver1          0 optdriver2          0 optdriver3          3 optdriver4         99
+v8/Refs/t26.abo +Overall time at end (sec) : cpu=          5.7  wall=          5.9  
+v4/Refs/t08.abo +Overall time at end (sec) : cpu=          5.8  wall=          5.8  
+v67mbpt/Refs/t14.abo +Overall time at end (sec) : cpu=          5.8  wall=          5.9          optdriver1          0 optdriver2          0 optdriver3          3 optdriver4         99 optdriver1          0 optdriver2          0 optdriver3          3 optdriver4         99
+v1/Refs/t44.abo +Overall time at end (sec) : cpu=          5.9  wall=          6.0  
+v9/Refs/t09.abo +Overall time at end (sec) : cpu=          5.9  wall=          6.0          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          1 optdriver6          1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          1 optdriver6          1
+v2/Refs/t30.abo +Overall time at end (sec) : cpu=          6.0  wall=          6.2          optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          0 optdriver6          1 optdriver7          0 optdriver8          1 optdriver9          1 optdriver10         1 optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          0 optdriver6          1 optdriver7          0 optdriver8          1 optdriver9          1 optdriver10         1
+v6/Refs/t68.abo +Overall time at end (sec) : cpu=          6.0  wall=          6.2          optdriver1          0 optdriver2          1 optdriver1          0 optdriver2          1
+v7/Refs/t95.abo +Overall time at end (sec) : cpu=          6.0  wall=          6.2          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          0 optdriver5          0 optdriver6          0 optdriver12         1 optdriver13         1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          0 optdriver5          0 optdriver6          0 optdriver12         1 optdriver13         1
+v67mbpt/Refs/t33.abo +Overall time at end (sec) : cpu=          6.1  wall=          6.1          optdriver          99 optdriver          99
+v7/Refs/t97.abo +Overall time at end (sec) : cpu=          6.1  wall=          6.2  
+v9/Refs/t190.abo +Overall time at end (sec) : cpu=          6.1  wall=          6.2  
+v2/Refs/t49.abo +Overall time at end (sec) : cpu=          6.2  wall=          6.8  
+v7/Refs/t15.abo +Overall time at end (sec) : cpu=          6.3  wall=          6.4  
+v9/Refs/t40.abo +Overall time at end (sec) : cpu=          6.3  wall=          6.4          optdriver1          0 optdriver2          3 optdriver1          0 optdriver2          3
+v7/Refs/t51.abo +Overall time at end (sec) : cpu=          6.4  wall=          6.4          optdriver           1 optdriver           1
+v1/Refs/t74.abo +Overall time at end (sec) : cpu=          6.5  wall=          7.6  
+v5/Refs/t37.abo +Overall time at end (sec) : cpu=          6.5  wall=          6.5  
+v7/Refs/t65.abo +Overall time at end (sec) : cpu=          6.5  wall=          6.6  
+v9/Refs/t33.abo +Overall time at end (sec) : cpu=          6.5  wall=          6.5          optdriver1          0 optdriver2          3 optdriver3          4 optdriver1          0 optdriver2          3 optdriver3          4
+v1/Refs/t43.abo +Overall time at end (sec) : cpu=          6.6  wall=          6.6  
+v5/Refs/t33.abo +Overall time at end (sec) : cpu=          6.6  wall=          6.7  
+v8/Refs/t91.abo +Overall time at end (sec) : cpu=          6.6  wall=          6.7          optdriver1          0 optdriver2          0 optdriver3          3 optdriver4          4 optdriver5          4 optdriver6          4 optdriver1          0 optdriver2          0 optdriver3          3 optdriver4          4 optdriver5          4 optdriver6          4
+v8/Refs/t92.abo +Overall time at end (sec) : cpu=          6.6  wall=          6.7          optdriver1          0 optdriver2          0 optdriver3          3 optdriver4          4 optdriver5          3 optdriver6          4 optdriver1          0 optdriver2          0 optdriver3          3 optdriver4          4 optdriver5          3 optdriver6          4
+v1/Refs/t60.abo +Overall time at end (sec) : cpu=          6.7  wall=          7.5  
+v4/Refs/t23.abo +Overall time at end (sec) : cpu=          6.8  wall=          6.8  
+v4/Refs/t46.abo +Overall time at end (sec) : cpu=          6.8  wall=          6.9  
+v5/Refs/t51.abo +Overall time at end (sec) : cpu=          6.8  wall=          7.0  
+v3/Refs/t50.abo +Overall time at end (sec) : cpu=          6.9  wall=          8.0  
+v6/Refs/t17.abo +Overall time at end (sec) : cpu=          6.9  wall=          7.1  
+v67mbpt/Refs/t19.abo +Overall time at end (sec) : cpu=          6.9  wall=          7.0          optdriver1          0 optdriver2          3 optdriver3          3 optdriver4          3 optdriver5          3 optdriver1          0 optdriver2          3 optdriver3          3 optdriver4          3 optdriver5          3
+v8/Refs/t61.abo +Overall time at end (sec) : cpu=          6.9  wall=          7.0          optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          1 optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          1
+v8/Refs/t81.abo +Overall time at end (sec) : cpu=          6.9  wall=          7.1          optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          1 optdriver7          5 optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          1 optdriver7          5
+v5/Refs/t61.abo +Overall time at end (sec) : cpu=          7.0  wall=          7.1  
+v5/Refs/t80.abo +Overall time at end (sec) : cpu=          7.0  wall=          7.2  
+v6/Refs/t03.abo +Overall time at end (sec) : cpu=          7.0  wall=          7.2  
+v7/Refs/t55.abo +Overall time at end (sec) : cpu=          7.0  wall=          7.2          optdriver11         0 optdriver12         0 optdriver13         1 optdriver21         0 optdriver22         0 optdriver23         1 optdriver31         0 optdriver32         0 optdriver33         1 optdriver11         0 optdriver12         0 optdriver13         1 optdriver21         0 optdriver22         0 optdriver23         1 optdriver31         0 optdriver32         0 optdriver33         1
+v5/Refs/t14.abo +Overall time at end (sec) : cpu=          7.1  wall=          7.2  
+v7/Refs/t59.abo +Overall time at end (sec) : cpu=          7.1  wall=          7.2          optdriver           1 optdriver           1
+v8/Refs/t59.abo +Overall time at end (sec) : cpu=          7.1  wall=          7.4          optdriver1          0 optdriver2          8 optdriver3          8 optdriver4          8 optdriver1          0 optdriver2          8 optdriver3          8 optdriver4          8
+v9/Refs/t30.abo +Overall time at end (sec) : cpu=          7.1  wall=          7.2  
+v7/Refs/t69.abo +Overall time at end (sec) : cpu=          7.2  wall=          7.3  
+v9/Refs/t45.abo +Overall time at end (sec) : cpu=          7.2  wall=          7.2  
+v6/Refs/t64.abo +Overall time at end (sec) : cpu=          7.3  wall=          7.4          optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          5 optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          5
+v8/Refs/t19.abo +Overall time at end (sec) : cpu=          7.3  wall=          7.3  
+v5/Refs/t06.abo +Overall time at end (sec) : cpu=          7.5  wall=          7.5  
+v6/Refs/t65.abo +Overall time at end (sec) : cpu=          7.6  wall=          7.7          optdriver11         0 optdriver12         0 optdriver13         1 optdriver14         1 optdriver15         5 optdriver11         0 optdriver12         0 optdriver13         1 optdriver14         1 optdriver15         5
+v7/Refs/t01.abo +Overall time at end (sec) : cpu=          7.6  wall=          7.6  
+v4/Refs/t86.abo +Overall time at end (sec) : cpu=          7.7  wall=          7.9          optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          4 optdriver5          4 optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          4 optdriver5          4
+v6/Refs/t15.abo +Overall time at end (sec) : cpu=          7.7  wall=          8.2  
+v9/Refs/t13.abo +Overall time at end (sec) : cpu=          7.7  wall=          7.9  
+v8/Refs/t04.abo +Overall time at end (sec) : cpu=          7.8  wall=          7.9  
+v1/Refs/t82.abo +Overall time at end (sec) : cpu=          7.9  wall=          8.3  
+v6/Refs/t42.abo +Overall time at end (sec) : cpu=          8.0  wall=          8.4  
+v6/Refs/t89.abo +Overall time at end (sec) : cpu=          8.0  wall=          8.1          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          1
+v7/Refs/t88.abo +Overall time at end (sec) : cpu=          8.0  wall=          8.4          optdriver           7 optdriver           7
+v3/Refs/t24.abo +Overall time at end (sec) : cpu=          8.1  wall=          8.1  
+v7/Refs/t46.abo +Overall time at end (sec) : cpu=          8.1  wall=          8.2          optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1
+v9/Refs/t71.abo +Overall time at end (sec) : cpu=          8.1  wall=          8.4  
+v2/Refs/t53.abo +Overall time at end (sec) : cpu=          8.2  wall=          9.0  
+v4/Refs/t26.abo +Overall time at end (sec) : cpu=          8.2  wall=          8.3  
+v9/Refs/t77.abo +Overall time at end (sec) : cpu=          8.2  wall=          8.3  
+v2/Refs/t54.abo +Overall time at end (sec) : cpu=          8.3  wall=          9.2  
+v7/Refs/t60.abo +Overall time at end (sec) : cpu=          8.5  wall=          8.7  
+v7/Refs/t66.abo +Overall time at end (sec) : cpu=          8.5  wall=          8.5  
+v4/Refs/t87.abo +Overall time at end (sec) : cpu=          8.6  wall=          8.7          optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          4 optdriver5          4 optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          4 optdriver5          4
+v8/Refs/t86.abo +Overall time at end (sec) : cpu=          8.6  wall=          8.7          optdriver5          1 optdriver6          1 optdriver7          5 optdriver5          1 optdriver6          1 optdriver7          5
+v5/Refs/t74.abo +Overall time at end (sec) : cpu=          8.7  wall=          8.7  
+v9/Refs/t206.abo +Overall time at end (sec) : cpu=          8.7  wall=          8.9  
+v4/Refs/t24.abo +Overall time at end (sec) : cpu=          8.9  wall=          8.9  
+v6/Refs/t58.abo +Overall time at end (sec) : cpu=          9.1  wall=          9.2          optdriver1          0 optdriver2          1 optdriver1          0 optdriver2          1
+v9/Refs/t184.abo +Overall time at end (sec) : cpu=          9.2  wall=          9.3  
+v6/Refs/t21.abo +Overall time at end (sec) : cpu=          9.4  wall=          9.4  
+v5/Refs/t73.abo +Overall time at end (sec) : cpu=          9.5  wall=          9.5  
+v8/Refs/t96.abo +Overall time at end (sec) : cpu=          9.6  wall=          9.8  
+v4/Refs/t67.abo +Overall time at end (sec) : cpu=          9.7  wall=          9.9          optdriver1          0 optdriver2          1 optdriver3          1 optdriver1          0 optdriver2          1 optdriver3          1
+v5/Refs/t69.abo +Overall time at end (sec) : cpu=          9.7  wall=          9.8          optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          4 optdriver5          3 optdriver6          4 optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          4 optdriver5          3 optdriver6          4
+v67mbpt/Refs/t34.abo +Overall time at end (sec) : cpu=          9.7  wall=          9.8          optdriver          99 optdriver          99
+v8/Refs/t55.abo +Overall time at end (sec) : cpu=          9.8  wall=         10.0          optdriver1          0 optdriver2          0 optdriver3          1 optdriver1          0 optdriver2          0 optdriver3          1
+v9/Refs/t11.abo +Overall time at end (sec) : cpu=          9.8  wall=         10.0          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          1 optdriver6          1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          1 optdriver6          1
+v67mbpt/Refs/t15.abo +Overall time at end (sec) : cpu=          9.9  wall=          9.9          optdriver1          0 optdriver2          0 optdriver3         66 optdriver4         66 optdriver5         66 optdriver6         66 optdriver1          0 optdriver2          0 optdriver3         66 optdriver4         66 optdriver5         66 optdriver6         66
+v7/Refs/t13.abo +Overall time at end (sec) : cpu=          9.9  wall=         12.5  
+v9/Refs/t47.abo +Overall time at end (sec) : cpu=          9.9  wall=         10.1          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          1 optdriver6          1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          1 optdriver6          1
+v4/Refs/t09.abo +Overall time at end (sec) : cpu=         10.0  wall=         10.1  
+v5/Refs/t85.abo +Overall time at end (sec) : cpu=         10.0  wall=         10.5          optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          0 optdriver7          1 optdriver8          1 optdriver9          1 optdriver10         1 optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          0 optdriver7          1 optdriver8          1 optdriver9          1 optdriver10         1
+v5/Refs/t24.abo +Overall time at end (sec) : cpu=         10.2  wall=         10.5          optdriver11         0 optdriver12         1 optdriver13         1 optdriver21         0 optdriver22         1 optdriver23         1 optdriver31         0 optdriver32         1 optdriver33         1 optdriver11         0 optdriver12         1 optdriver13         1 optdriver21         0 optdriver22         1 optdriver23         1 optdriver31         0 optdriver32         1 optdriver33         1
+v5/Refs/t26.abo +Overall time at end (sec) : cpu=         10.2  wall=         10.3          optdriver1          0 optdriver2          1 optdriver3          1 optdriver1          0 optdriver2          1 optdriver3          1
+v8/Refs/t66.abo +Overall time at end (sec) : cpu=         10.3  wall=         10.3          optdriver1          0 optdriver2          1 optdriver1          0 optdriver2          1
+v2/Refs/t48.abo +Overall time at end (sec) : cpu=         10.4  wall=         11.9  
+v5/Refs/t96.abo +Overall time at end (sec) : cpu=         10.4  wall=         10.5          optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          1 optdriver7          1 optdriver8          1 optdriver9          1 optdriver10         1 optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          1 optdriver7          1 optdriver8          1 optdriver9          1 optdriver10         1
+v6/Refs/t29.abo +Overall time at end (sec) : cpu=         10.4  wall=         10.5  
+v7/Refs/t70.abo +Overall time at end (sec) : cpu=         10.4  wall=         10.5  
+v8/Refs/t97.abo +Overall time at end (sec) : cpu=         10.4  wall=         10.5  
+v1/Refs/t89.abo +Overall time at end (sec) : cpu=         10.5  wall=         12.1  
+v6/Refs/t06.abo +Overall time at end (sec) : cpu=         10.5  wall=         10.6  
+v9/Refs/t01.abo +Overall time at end (sec) : cpu=         10.5  wall=         10.6  
+v3/Refs/t35.abo +Overall time at end (sec) : cpu=         10.7  wall=         10.7  
+v7/Refs/t09.abo +Overall time at end (sec) : cpu=         10.7  wall=         11.0  
+v3/Refs/t47.abo +Overall time at end (sec) : cpu=         10.8  wall=         11.0  
+v4/Refs/t25.abo +Overall time at end (sec) : cpu=         10.9  wall=         11.0  
+v6/Refs/t66.abo +Overall time at end (sec) : cpu=         10.9  wall=         11.2          optdriver11         0 optdriver12         0 optdriver13         1 optdriver14         1 optdriver15         5 optdriver21         0 optdriver22         0 optdriver23         1 optdriver24         1 optdriver25         5 optdriver31         0 optdriver32         0 optdriver33         1 optdriver34         1 optdriver35         5 optdriver11         0 optdriver12         0 optdriver13         1 optdriver14         1 optdriver15         5 optdriver21         0 optdriver22         0 optdriver23         1 optdriver24         1 optdriver25         5 optdriver31         0 optdriver32         0 optdriver33         1 optdriver34         1 optdriver35         5
+v7/Refs/t67.abo +Overall time at end (sec) : cpu=         11.0  wall=         11.1  
+v8/Refs/t29.abo +Overall time at end (sec) : cpu=         11.0  wall=         11.3  
+v8/Refs/t35.abo +Overall time at end (sec) : cpu=         11.0  wall=         11.0  
+v67mbpt/Refs/t16.abo +Overall time at end (sec) : cpu=         11.1  wall=         11.2          optdriver1          0 optdriver2          0 optdriver3         99 optdriver4         99 optdriver1          0 optdriver2          0 optdriver3         99 optdriver4         99
+v67mbpt/Refs/t37.abo +Overall time at end (sec) : cpu=         11.1  wall=         11.1          optdriver1          0 optdriver2          0 optdriver3          3 optdriver4          3 optdriver1          0 optdriver2          0 optdriver3          3 optdriver4          3
+v7/Refs/t83.abo +Overall time at end (sec) : cpu=         11.2  wall=         11.3          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1
+v8/Refs/t21.abo +Overall time at end (sec) : cpu=         11.2  wall=         11.5  
+v6/Refs/t37.abo +Overall time at end (sec) : cpu=         11.4  wall=         11.6          optdriver1          0 optdriver2          1 optdriver3          0 optdriver4          1 optdriver1          0 optdriver2          1 optdriver3          0 optdriver4          1
+v67mbpt/Refs/t07.abo +Overall time at end (sec) : cpu=         11.5  wall=         11.6          optdriver1          0 optdriver2          3 optdriver3          4 optdriver1          0 optdriver2          3 optdriver3          4
+v7/Refs/t45.abo +Overall time at end (sec) : cpu=         11.6  wall=         11.7          optdriver1          0 optdriver2          1 optdriver1          0 optdriver2          1
+v8/Refs/t83.abo +Overall time at end (sec) : cpu=         11.6  wall=         11.8          optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1
+v5/Refs/t03.abo +Overall time at end (sec) : cpu=         11.7  wall=         12.3  
+v7/Refs/t76.abo +Overall time at end (sec) : cpu=         12.0  wall=         12.2  
+v8/Refs/t22.abo +Overall time at end (sec) : cpu=         12.0  wall=         12.3  
+v9/Refs/t60.abo +Overall time at end (sec) : cpu=         12.0  wall=         13.2          optdriver           7 optdriver           7
+v6/Refs/t61.abo +Overall time at end (sec) : cpu=         12.1  wall=         12.2          optdriver1          0 optdriver2          1 optdriver1          0 optdriver2          1
+v7/Refs/t77.abo +Overall time at end (sec) : cpu=         12.1  wall=         12.3  
+v4/Refs/t97.abo +Overall time at end (sec) : cpu=         12.2  wall=         12.5  
+v5/Refs/t20.abo +Overall time at end (sec) : cpu=         12.3  wall=         12.4  
+v5/Refs/t65.abo +Overall time at end (sec) : cpu=         12.3  wall=         12.4          optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          4 optdriver5          3 optdriver6          4 optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          4 optdriver5          3 optdriver6          4
+v67mbpt/Refs/t08.abo +Overall time at end (sec) : cpu=         12.3  wall=         12.4          optdriver1          0 optdriver2          3 optdriver3          4 optdriver1          0 optdriver2          3 optdriver3          4
+v9/Refs/t29.abo +Overall time at end (sec) : cpu=         12.3  wall=         12.4  
+v7/Refs/t82.abo +Overall time at end (sec) : cpu=         12.4  wall=         12.8          optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          1 optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          1
+v4/Refs/t69.abo +Overall time at end (sec) : cpu=         12.5  wall=         12.6          optdriver1          0 optdriver2          1 optdriver3          1 optdriver1          0 optdriver2          1 optdriver3          1
+v9/Refs/t107.abo +Overall time at end (sec) : cpu=         12.5  wall=         12.8  
+v6/Refs/t72.abo +Overall time at end (sec) : cpu=         12.6  wall=         13.4          optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          1 optdriver7          0 optdriver8          1 optdriver9          1 optdriver10         1 optdriver11         1 optdriver12         1 optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          1 optdriver7          0 optdriver8          1 optdriver9          1 optdriver10         1 optdriver11         1 optdriver12         1
+vdwxc/Refs/t10.abo +Overall time at end (sec) : cpu=         12.9  wall=         13.1  
+v6/Refs/t01.abo +Overall time at end (sec) : cpu=         13.0  wall=         13.1  
+v4/Refs/t21.abo +Overall time at end (sec) : cpu=         13.1  wall=         13.1  
+v6/Refs/t63.abo +Overall time at end (sec) : cpu=         13.2  wall=         13.3          optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          5 optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          5
+v4/Refs/t84.abo +Overall time at end (sec) : cpu=         13.3  wall=         13.4          optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          4 optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          4
+v6/Refs/t26.abo +Overall time at end (sec) : cpu=         13.3  wall=         13.4  
+v7/Refs/t50.abo +Overall time at end (sec) : cpu=         13.5  wall=         13.7          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          0 optdriver6          1 optdriver7          0 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          0 optdriver6          1 optdriver7          0
+v9/Refs/t90.abo +Overall time at end (sec) : cpu=         13.5  wall=         13.6  
+v6/Refs/t07.abo +Overall time at end (sec) : cpu=         13.6  wall=         13.7  
+v7/Refs/t90.abo +Overall time at end (sec) : cpu=         13.6  wall=         13.6          optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          0 optdriver7          1 optdriver8          1 optdriver9          1 optdriver10         1 optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          0 optdriver7          1 optdriver8          1 optdriver9          1 optdriver10         1
+v8/Refs/t17.abo +Overall time at end (sec) : cpu=         13.6  wall=         13.8  
+v6/Refs/t67.abo +Overall time at end (sec) : cpu=         13.7  wall=         14.0          optdriver11         0 optdriver12         0 optdriver13         1 optdriver14         1 optdriver15         5 optdriver21         0 optdriver22         0 optdriver23         1 optdriver24         1 optdriver25         5 optdriver11         0 optdriver12         0 optdriver13         1 optdriver14         1 optdriver15         5 optdriver21         0 optdriver22         0 optdriver23         1 optdriver24         1 optdriver25         5
+v9/Refs/t61.abo +Overall time at end (sec) : cpu=         13.7  wall=         14.2          optdriver1          0 optdriver2          7 optdriver3          7 optdriver1          0 optdriver2          7 optdriver3          7
+v4/Refs/t88.abo +Overall time at end (sec) : cpu=         13.8  wall=         13.9          optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          3 optdriver5          4 optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          3 optdriver5          4
+v67mbpt/Refs/t29.abo +Overall time at end (sec) : cpu=         13.8  wall=         14.1          optdriver1          0 optdriver2          0 optdriver3         99 optdriver1          0 optdriver2          0 optdriver3         99
+v8/Refs/t05.abo +Overall time at end (sec) : cpu=         13.9  wall=         14.0  
+v7/Refs/t98.abo +Overall time at end (sec) : cpu=         14.2  wall=         14.2          optdriver1          0 optdriver2          1 optdriver3          0 optdriver4          1 optdriver1          0 optdriver2          1 optdriver3          0 optdriver4          1
+v9/Refs/t32.abo +Overall time at end (sec) : cpu=         14.2  wall=         14.3          optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          4 optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          4
+v5/Refs/t18.abo +Overall time at end (sec) : cpu=         14.3  wall=         14.4  
+v5/Refs/t63.abo +Overall time at end (sec) : cpu=         14.3  wall=         14.4          optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          3 optdriver5          4 optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          3 optdriver5          4
+v6/Refs/t45.abo +Overall time at end (sec) : cpu=         14.3  wall=         14.5  
+v8/Refs/t90.abo +Overall time at end (sec) : cpu=         14.3  wall=         14.5          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          4 optdriver5          4 optdriver6          4 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          4 optdriver5          4 optdriver6          4
+v8/Refs/t41.abo +Overall time at end (sec) : cpu=         14.4  wall=         14.4          optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          1 optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          1
+v9/Refs/t65.abo +Overall time at end (sec) : cpu=         14.4  wall=         14.6          optdriver1          0 optdriver2          7 optdriver1          0 optdriver2          7
+v5/Refs/t02.abo +Overall time at end (sec) : cpu=         14.5  wall=         15.6  
+v9/Refs/t120.abo +Overall time at end (sec) : cpu=         14.5  wall=         14.6  
+v9/Refs/t37.abo +Overall time at end (sec) : cpu=         14.7  wall=         14.8          optdriver1          0 optdriver2          3 optdriver3          4 optdriver1          0 optdriver2          3 optdriver3          4
+v8/Refs/t60.abo +Overall time at end (sec) : cpu=         14.9  wall=         15.1          optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          0 optdriver5          1 optdriver6          7 optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          0 optdriver5          1 optdriver6          7
+v7/Refs/t23.abo +Overall time at end (sec) : cpu=         15.0  wall=         15.1  
+v8/Refs/t93.abo +Overall time at end (sec) : cpu=         15.0  wall=         15.1          optdriver1          0 optdriver2          3 optdriver3          4 optdriver1          0 optdriver2          3 optdriver3          4
+v4/Refs/t22.abo +Overall time at end (sec) : cpu=         15.3  wall=         15.3  
+v8/Refs/t56.abo +Overall time at end (sec) : cpu=         15.3  wall=         15.5          optdriver1          0 optdriver2          0 optdriver3          1 optdriver1          0 optdriver2          0 optdriver3          1
+v9/Refs/t146.abo +Overall time at end (sec) : cpu=         15.3  wall=         15.5          optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5         10 optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5         10
+v8/Refs/t02.abo +Overall time at end (sec) : cpu=         15.7  wall=         16.0  
+v3/Refs/t34.abo +Overall time at end (sec) : cpu=         15.8  wall=         15.8  
+v2/Refs/t52.abo +Overall time at end (sec) : cpu=         16.6  wall=         17.6  
+v8/Refs/t18.abo +Overall time at end (sec) : cpu=         16.6  wall=         17.0  
+v9/Refs/t147.abo +Overall time at end (sec) : cpu=         16.7  wall=         16.8          optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5         10 optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5         10
+v7/Refs/t05.abo +Overall time at end (sec) : cpu=         16.8  wall=         17.0  
+v8/Refs/t82.abo +Overall time at end (sec) : cpu=         17.0  wall=         17.2          optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          1 optdriver7          5 optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          1 optdriver7          5
+v4/Refs/t27.abo +Overall time at end (sec) : cpu=         17.1  wall=         17.1  
+v5/Refs/t21.abo +Overall time at end (sec) : cpu=         17.1  wall=         17.2          optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver12         0 optdriver13         1 optdriver14         1 optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver12         0 optdriver13         1 optdriver14         1
+v67mbpt/Refs/t41.abo +Overall time at end (sec) : cpu=         17.1  wall=         17.2          optdriver1          0 optdriver2          3 optdriver3          4 optdriver1          0 optdriver2          3 optdriver3          4
+v5/Refs/t07.abo +Overall time at end (sec) : cpu=         17.2  wall=         17.4  
+v6/Refs/t32.abo +Overall time at end (sec) : cpu=         17.2  wall=         17.3  
+v7/Refs/t24.abo +Overall time at end (sec) : cpu=         17.2  wall=         17.3          optdriver           3 optdriver           3
+v6/Refs/t02.abo +Overall time at end (sec) : cpu=         17.3  wall=         17.5  
+v7/Refs/t03.abo +Overall time at end (sec) : cpu=         17.3  wall=         17.5  
+v9/Refs/t31.abo +Overall time at end (sec) : cpu=         17.4  wall=         17.6          optdriver1          0 optdriver2          4 optdriver3          4 optdriver4          4 optdriver1          0 optdriver2          4 optdriver3          4 optdriver4          4
+v9/Refs/t36.abo +Overall time at end (sec) : cpu=         17.5  wall=         17.6          optdriver1          0 optdriver2          3 optdriver3          4 optdriver1          0 optdriver2          3 optdriver3          4
+v67mbpt/Refs/t36.abo +Overall time at end (sec) : cpu=         17.7  wall=         17.9          optdriver1          0 optdriver2          0 optdriver4          3 optdriver5          4 optdriver6          3 optdriver7          4 optdriver11         3 optdriver12         4 optdriver21         3 optdriver22         4 optdriver1          0 optdriver2          0 optdriver4          3 optdriver5          4 optdriver6          3 optdriver7          4 optdriver11         3 optdriver12         4 optdriver21         3 optdriver22         4
+v6/Refs/t46.abo +Overall time at end (sec) : cpu=         17.8  wall=         18.0  
+v1/Refs/t25.abo +Overall time at end (sec) : cpu=         18.0  wall=         18.1  
+v8/Refs/t72.abo +Overall time at end (sec) : cpu=         18.0  wall=         18.1          optdriver           1 optdriver           1
+v6/Refs/t22.abo +Overall time at end (sec) : cpu=         18.1  wall=         18.1  
+v8/Refs/t73.abo +Overall time at end (sec) : cpu=         18.1  wall=         18.2          optdriver           1 optdriver           1
+v8/Refs/t74.abo +Overall time at end (sec) : cpu=         18.1  wall=         18.2          optdriver           1 optdriver           1
+v3/Refs/t37.abo +Overall time at end (sec) : cpu=         18.6  wall=         18.6  
+v5/Refs/t15.abo +Overall time at end (sec) : cpu=         18.7  wall=         18.9  
+v9/Refs/t207.abo +Overall time at end (sec) : cpu=         19.1  wall=         19.4  
+v3/Refs/t42.abo +Overall time at end (sec) : cpu=         19.3  wall=         20.2  
+v10/Refs/t03.abo +Overall time at end (sec) : cpu=         19.5  wall=         19.7  
+v6/Refs/t27.abo +Overall time at end (sec) : cpu=         19.6  wall=         19.7  
+v8/Refs/t88.abo +Overall time at end (sec) : cpu=         19.7  wall=         19.8          optdriver5          1 optdriver6          1 optdriver7          5 optdriver5          1 optdriver6          1 optdriver7          5
+v9/Refs/t201.abo +Overall time at end (sec) : cpu=         19.9  wall=         20.3  
+v9/Refs/t42.abo +Overall time at end (sec) : cpu=         19.9  wall=         20.0          optdriver1          0 optdriver2          1 optdriver1          0 optdriver2          1
+v4/Refs/t29.abo +Overall time at end (sec) : cpu=         20.3  wall=         20.3  
+v5/Refs/t01.abo +Overall time at end (sec) : cpu=         20.4  wall=         21.7  
+v9/Refs/t50.abo +Overall time at end (sec) : cpu=         20.8  wall=         21.0          optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          0 optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          0
+v7/Refs/t43.abo +Overall time at end (sec) : cpu=         21.1  wall=         21.2          optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1
+v3/Refs/t36.abo +Overall time at end (sec) : cpu=         21.2  wall=         21.2  
+v7/Refs/t35.abo +Overall time at end (sec) : cpu=         21.6  wall=         21.7  
+v7/Refs/t12.abo +Overall time at end (sec) : cpu=         21.9  wall=         22.6          optdriver1          0 optdriver2          8 optdriver3          0 optdriver1          0 optdriver2          8 optdriver3          0
+v9/Refs/t44.abo +Overall time at end (sec) : cpu=         21.9  wall=         22.1          optdriver1          0 optdriver2          1 optdriver1          0 optdriver2          1
+v7/Refs/t58.abo +Overall time at end (sec) : cpu=         22.2  wall=         22.5          optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          0 optdriver5          1 optdriver6          1 optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          0 optdriver5          1 optdriver6          1
+v8/Refs/t89.abo +Overall time at end (sec) : cpu=         22.2  wall=         22.3          optdriver5          1 optdriver6          1 optdriver7          5 optdriver5          1 optdriver6          1 optdriver7          5
+v6/Refs/t34.abo +Overall time at end (sec) : cpu=         22.6  wall=         27.1  
+v9/Refs/t140.abo +Overall time at end (sec) : cpu=         22.6  wall=         22.9          optdriver1          0 optdriver2          1 optdriver1          0 optdriver2          1
+v9/Refs/t62.abo +Overall time at end (sec) : cpu=         23.2  wall=         23.4          optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          1 optdriver7          8 optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          1 optdriver7          8
+v3/Refs/t33.abo +Overall time at end (sec) : cpu=         23.9  wall=         24.0  
+v5/Refs/t17.abo +Overall time at end (sec) : cpu=         23.9  wall=         24.2  
+v4/Refs/t56.abo +Overall time at end (sec) : cpu=         24.1  wall=         24.3          optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          1 optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          1
+v67mbpt/Refs/t40.abo +Overall time at end (sec) : cpu=         24.2  wall=         24.3          optdriver1          0 optdriver2          3 optdriver3          4 optdriver1          0 optdriver2          3 optdriver3          4
+v67mbpt/Refs/t06.abo +Overall time at end (sec) : cpu=         24.3  wall=         24.9          optdriver11         0 optdriver12         3 optdriver13         4 optdriver21         0 optdriver22         3 optdriver23         4 optdriver31         0 optdriver32         3 optdriver33         4 optdriver11         0 optdriver12         3 optdriver13         4 optdriver21         0 optdriver22         3 optdriver23         4 optdriver31         0 optdriver32         3 optdriver33         4
+v9/Refs/t22.abo +Overall time at end (sec) : cpu=         24.4  wall=         24.5  
+v8/Refs/t80.abo +Overall time at end (sec) : cpu=         24.5  wall=         24.6          optdriver           1 optdriver           1
+v8/Refs/t95.abo +Overall time at end (sec) : cpu=         24.5  wall=         24.7  
+v9/Refs/t14.abo +Overall time at end (sec) : cpu=         25.5  wall=         25.8  
+v9/Refs/t95.abo +Overall time at end (sec) : cpu=         25.5  wall=         25.6  
+v6/Refs/t31.abo +Overall time at end (sec) : cpu=         25.8  wall=         26.0  
+v7/Refs/t08.abo +Overall time at end (sec) : cpu=         26.1  wall=         26.2  
+v5/Refs/t64.abo +Overall time at end (sec) : cpu=         26.2  wall=         26.4          optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          0 optdriver5          3 optdriver6          4 optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          0 optdriver5          3 optdriver6          4
+v10/Refs/t40.abo +Overall time at end (sec) : cpu=         26.3  wall=         26.8          optdriver11         0 optdriver12         1 optdriver21         0 optdriver22         1 optdriver11         0 optdriver12         1 optdriver21         0 optdriver22         1
+v6/Refs/t47.abo +Overall time at end (sec) : cpu=         26.4  wall=         26.5  
+v8/Refs/t78.abo +Overall time at end (sec) : cpu=         26.9  wall=         27.0          optdriver           1 optdriver           1
+v8/Refs/t79.abo +Overall time at end (sec) : cpu=         27.1  wall=         27.2          optdriver           1 optdriver           1
+v9/Refs/t79.abo +Overall time at end (sec) : cpu=         27.1  wall=         27.3  
+v9/Refs/t112.abo +Overall time at end (sec) : cpu=         27.7  wall=         27.8  
+v6/Refs/t36.abo +Overall time at end (sec) : cpu=         28.0  wall=         28.1          optdriver1          0 optdriver2          1 optdriver1          0 optdriver2          1
+v9/Refs/t94.abo +Overall time at end (sec) : cpu=         28.1  wall=         28.4  
+v5/Refs/t66.abo +Overall time at end (sec) : cpu=         28.2  wall=         28.4          optdriver1          0 optdriver2          0 optdriver3          3 optdriver4          4 optdriver5          4 optdriver1          0 optdriver2          0 optdriver3          3 optdriver4          4 optdriver5          4
+v8/Refs/t20.abo +Overall time at end (sec) : cpu=         28.7  wall=         28.9  
+v9/Refs/t130.abo +Overall time at end (sec) : cpu=         28.8  wall=         28.9  
+v9/Refs/t142.abo +Overall time at end (sec) : cpu=         29.3  wall=         29.6          optdriver1          0 optdriver2          1 optdriver1          0 optdriver2          1
+v7/Refs/t32.abo +Overall time at end (sec) : cpu=         29.5  wall=         29.6  
+v7/Refs/t68.abo +Overall time at end (sec) : cpu=         29.7  wall=         30.0          optdriver1          0 optdriver2          4 optdriver3          4 optdriver4          4 optdriver5          4 optdriver6          4 optdriver7          0 optdriver8          3 optdriver9          4 optdriver10         3 optdriver11         4 optdriver12         3 optdriver13         4 optdriver1          0 optdriver2          4 optdriver3          4 optdriver4          4 optdriver5          4 optdriver6          4 optdriver7          0 optdriver8          3 optdriver9          4 optdriver10         3 optdriver11         4 optdriver12         3 optdriver13         4
+v8/Refs/t12.abo +Overall time at end (sec) : cpu=         29.9  wall=         30.3  
+v9/Refs/t66.abo +Overall time at end (sec) : cpu=         30.8  wall=         31.0          optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          0 optdriver5          1 optdriver6          7 optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          0 optdriver5          1 optdriver6          7
+v8/Refs/t85.abo +Overall time at end (sec) : cpu=         31.1  wall=         31.3          optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1
+v3/Refs/t40.abo +Overall time at end (sec) : cpu=         31.4  wall=         31.8  
+v8/Refs/t75.abo +Overall time at end (sec) : cpu=         32.2  wall=         32.3          optdriver           1 optdriver           1
+v8/Refs/t76.abo +Overall time at end (sec) : cpu=         32.3  wall=         32.4          optdriver           1 optdriver           1
+v9/Refs/t132.abo +Overall time at end (sec) : cpu=         32.3  wall=         32.4  
+v8/Refs/t77.abo +Overall time at end (sec) : cpu=         32.4  wall=         32.6          optdriver           1 optdriver           1
+v7/Refs/t47.abo +Overall time at end (sec) : cpu=         32.5  wall=         32.8          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          1 optdriver6          1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          1 optdriver5          1 optdriver6          1
+v7/Refs/t07.abo +Overall time at end (sec) : cpu=         32.6  wall=         32.8  
+v7/Refs/t79.abo +Overall time at end (sec) : cpu=         32.9  wall=         33.1          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          3 optdriver5          4 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          3 optdriver5          4
+v8/Refs/t57.abo +Overall time at end (sec) : cpu=         33.0  wall=         33.3          optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          0 optdriver5          1 optdriver6          7 optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          0 optdriver5          1 optdriver6          7
+v7/Refs/t78.abo +Overall time at end (sec) : cpu=         33.5  wall=         33.7          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          3 optdriver5          4 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          3 optdriver5          4
+v9/Refs/t104.abo +Overall time at end (sec) : cpu=         34.2  wall=         34.4  
+v8/Refs/t70.abo +Overall time at end (sec) : cpu=         34.5  wall=         34.6          optdriver           1 optdriver           1
+v7/Refs/t22.abo +Overall time at end (sec) : cpu=         35.4  wall=         35.6  
+v67mbpt/Refs/t11.abo +Overall time at end (sec) : cpu=         35.7  wall=         35.9          optdriver1          0 optdriver2          0 optdriver3          3 optdriver4         99 optdriver5         99 optdriver6         99 optdriver7         99 optdriver8         99 optdriver1          0 optdriver2          0 optdriver3          3 optdriver4         99 optdriver5         99 optdriver6         99 optdriver7         99 optdriver8         99
+v67mbpt/Refs/t02.abo +Overall time at end (sec) : cpu=         35.8  wall=         35.9          optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          4 optdriver5          4 optdriver1          0 optdriver2          3 optdriver3          4 optdriver4          4 optdriver5          4
+v9/Refs/t03.abo +Overall time at end (sec) : cpu=         38.3  wall=         38.4  
+v9/Refs/t141.abo +Overall time at end (sec) : cpu=         38.7  wall=         38.9          optdriver1          0 optdriver2          1 optdriver1          0 optdriver2          1
+v9/Refs/t02.abo +Overall time at end (sec) : cpu=         39.1  wall=         39.3  
+v9/Refs/t41.abo +Overall time at end (sec) : cpu=         39.2  wall=         39.5          optdriver1          0 optdriver2          1 optdriver1          0 optdriver2          1
+v6/Refs/t90.abo +Overall time at end (sec) : cpu=         41.0  wall=         41.5          optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          1 optdriver7          0 optdriver8          1 optdriver9          1 optdriver10         1 optdriver11         1 optdriver12         1 optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          1 optdriver7          0 optdriver8          1 optdriver9          1 optdriver10         1 optdriver11         1 optdriver12         1
+v9/Refs/t78.abo +Overall time at end (sec) : cpu=         42.8  wall=         43.1  
+v5/Refs/t71.abo +Overall time at end (sec) : cpu=         43.2  wall=         43.3          optdriver1          0 optdriver2          3 optdriver3          4 optdriver1          0 optdriver2          3 optdriver3          4
+v5/Refs/t77.abo +Overall time at end (sec) : cpu=         44.1  wall=         44.6  
+v7/Refs/t10.abo +Overall time at end (sec) : cpu=         44.4  wall=         44.6  
+v8/Refs/t07.abo +Overall time at end (sec) : cpu=         44.4  wall=         44.6          optdriver1          0 optdriver2          1 optdriver3          1 optdriver1          0 optdriver2          1 optdriver3          1
+v7/Refs/t17.abo +Overall time at end (sec) : cpu=         45.2  wall=         45.4  
+v8/Refs/t69.abo +Overall time at end (sec) : cpu=         46.8  wall=         47.0          optdriver           1 optdriver           1
+v67mbpt/Refs/t31.abo +Overall time at end (sec) : cpu=         47.1  wall=         47.4          optdriver1          0 optdriver2          0 optdriver3         99 optdriver4          0 optdriver5         99 optdriver1          0 optdriver2          0 optdriver3         99 optdriver4          0 optdriver5         99
+v9/Refs/t93.abo +Overall time at end (sec) : cpu=         47.6  wall=         47.9  
+v9/Refs/t131.abo +Overall time at end (sec) : cpu=         48.4  wall=         48.6  
+v9/Refs/t88.abo +Overall time at end (sec) : cpu=         48.5  wall=         48.8  
+v8/Refs/t68.abo +Overall time at end (sec) : cpu=         53.0  wall=         53.1          optdriver           1 optdriver           1
+v2/Refs/t88.abo +Overall time at end (sec) : cpu=         56.2  wall=         57.4  
+v8/Refs/t67.abo +Overall time at end (sec) : cpu=         57.4  wall=         57.6  
+v9/Refs/t89.abo +Overall time at end (sec) : cpu=         58.1  wall=         58.5  
+v7/Refs/t96.abo +Overall time at end (sec) : cpu=         68.9  wall=         69.3          optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          0 optdriver5          0 optdriver6          0 optdriver22         0 optdriver23         0 optdriver24         0 optdriver25         0 optdriver26         0 optdriver12         1 optdriver13         1 optdriver1          0 optdriver2          0 optdriver3          0 optdriver4          0 optdriver5          0 optdriver6          0 optdriver22         0 optdriver23         0 optdriver24         0 optdriver25         0 optdriver26         0 optdriver12         1 optdriver13         1
+v5/Refs/t19.abo +Overall time at end (sec) : cpu=         71.1  wall=         71.3  
+v9/Refs/t148.abo +Overall time at end (sec) : cpu=         73.3  wall=         73.6          optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5         10 optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5         10
+v8/Refs/t87.abo +Overall time at end (sec) : cpu=         77.9  wall=         78.2          optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1
+v8/Refs/t71.abo +Overall time at end (sec) : cpu=         79.1  wall=         79.3  
+v6/Refs/t62.abo +Overall time at end (sec) : cpu=         81.3  wall=         81.7          optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          1 optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          1
+v7/Refs/t85.abo +Overall time at end (sec) : cpu=         81.7  wall=         81.9          optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          1 optdriver7          1 optdriver8          1 optdriver9          1 optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          1 optdriver7          1 optdriver8          1 optdriver9          1
+v9/Refs/t143.abo +Overall time at end (sec) : cpu=         84.4  wall=         84.7          optdriver1          0 optdriver2          1 optdriver1          0 optdriver2          1
+v7/Refs/t27.abo +Overall time at end (sec) : cpu=         89.6  wall=         89.9  
+v5/Refs/t16.abo +Overall time at end (sec) : cpu=        102.2  wall=        102.8  
+v7/Refs/t30.abo +Overall time at end (sec) : cpu=        104.6  wall=        105.0  
+v7/Refs/t29.abo +Overall time at end (sec) : cpu=        114.2  wall=        114.6  
+v8/Refs/t01.abo +Overall time at end (sec) : cpu=        115.0  wall=        118.1  
+v3/Refs/t98.abo +Overall time at end (sec) : cpu=        116.6  wall=        116.7  
+v8/Refs/t44.abo +Overall time at end (sec) : cpu=        119.6  wall=        121.4          optdriver           7 optdriver           7
+v9/Refs/t46.abo +Overall time at end (sec) : cpu=        124.5  wall=        125.0          optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5         10 optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5         10
+v8/Refs/t01_triqs2_0.abo +Overall time at end (sec) : cpu=        131.9  wall=        132.3  
+v7/Refs/t21.abo +Overall time at end (sec) : cpu=        135.5  wall=        135.9  
+v7/Refs/t28.abo +Overall time at end (sec) : cpu=        136.4  wall=        136.9  
+v9/Refs/t57.abo +Overall time at end (sec) : cpu=        208.4  wall=        209.1          optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          1 optdriver7          8 optdriver1          0 optdriver2          0 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          1 optdriver7          8
+v10/Refs/t02.abo +Overall time at end (sec) : cpu=        249.2  wall=        249.3  
+v8/Refs/t51.abo +Overall time at end (sec) : cpu=        250.2  wall=        251.2          optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          1 optdriver1          0 optdriver2          1 optdriver3          1 optdriver4          1 optdriver5          1 optdriver6          1
+v5/Refs/t43.abo +Overall time at end (sec) : cpu=        302.9  wall=        303.6  
+v9/Refs/t92.abo +Overall time at end (sec) : cpu=        797.5  wall=         26.1  
