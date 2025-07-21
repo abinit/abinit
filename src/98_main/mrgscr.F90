@@ -367,7 +367,7 @@ program mrgscr
            qlwl(:,:)=epsm1%Hscr%qlwl(:,1:nqlwl)
          end if
 
-         Dtset%gw_icutcoul=3; Dtset%rcut=zero
+         Dtset%gw_icutcoul=3; Dtset%gw_rcut=zero
          Dtset%vcutgeo=(/zero,zero,zero/);
          Dtset%boxcenter=(/zero,zero,zero/)
 
@@ -383,7 +383,7 @@ program mrgscr
          end if
          dtset%ecutsigx = -one
 
-         call Vcp%init(Gsphere,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,&
+         call Vcp%init(Gsphere,Cryst,Qmesh,Kmesh,Dtset%gw_rcut,Dtset%gw_icutcoul,&
                         Dtset%vcutgeo,Dtset%ecutsigx,Hscr0%npwe,nqlwl,qlwl,comm)
          ABI_FREE(qlwl)
 
@@ -599,7 +599,7 @@ program mrgscr
      ngfft(8)=get_cache_kb()
      nfft = PRODUCT(ngfft(1:3))
 
-     Dtset%gw_icutcoul=3; Dtset%rcut=zero
+     Dtset%gw_icutcoul=3; Dtset%gw_rcut=zero
      Dtset%vcutgeo=(/zero,zero,zero/); Dtset%boxcenter=(/zero,zero,zero/)
      Dtset%ecutsigx = -1
 
@@ -613,7 +613,7 @@ program mrgscr
        qlwl(:,:)=epsm1%Hscr%qlwl(:,1:nqlwl)
      end if
 
-     call Vcp%init(Gsphere,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,&
+     call Vcp%init(Gsphere,Cryst,Qmesh,Kmesh,Dtset%gw_rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,&
                    Hscr0%npwe,nqlwl,qlwl,comm)
      ABI_FREE(qlwl)
 

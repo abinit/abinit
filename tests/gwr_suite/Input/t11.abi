@@ -13,6 +13,7 @@ icutcoul    0
 rcut      5.0
 fock_icutcoul 0
 fock_rcut    0.0
+gw_rcut    5.0
 
 kptopt    1
 ngkpt     1 1 1              # Number of grid points for k-point generation

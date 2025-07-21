@@ -3596,7 +3596,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
    endif
  endif
  do ivcoul_init=1,nvcoul_init
-   rcut = Dtset%rcut
+   rcut = Dtset%gw_rcut
    icutcoul_eff=Dtset%gw_icutcoul
    Sigp%sigma_mixing=one
    if( mod(Dtset%gwcalctyp,10)==5 .or. ivcoul_init==2)then
@@ -3607,7 +3607,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
        Sigp%sigma_mixing=abs(Dtset%hyb_mixing_sr)
        icutcoul_eff=5
      endif
-     if(abs(rcut)<tol6 .and. abs(Dtset%hyb_range_fock)>tol8)rcut=one/Dtset%hyb_range_fock
+     if(abs(rcut)<tol6 .and. abs(Dtset%hyb_range_fock)>tol8) rcut=one/Dtset%hyb_range_fock
    endif
 
    if (ivcoul_init == 1) then
@@ -3625,10 +3625,10 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
      ! Use a temporary Vcp_ks to compute the Coulomb interaction already present
      ! in the Fock part of the Kohn-Sham Hamiltonian
      if (Gsph_x%ng > Gsph_c%ng) then
-       call Vcp_ks%init(Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
+       call Vcp_ks%init(Gsph_x,Cryst,Qmesh,Kmesh,Dtset%fock_rcut,Dtset%fock_icutcoul,Dtset%vcutgeo,&
                         Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,comm)
      else
-       call Vcp_ks%init(Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
+       call Vcp_ks%init(Gsph_c,Cryst,Qmesh,Kmesh,Dtset%fock_rcut,Dtset%fock_icutcoul,Dtset%vcutgeo,&
                         Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,comm)
      end if
 
@@ -4332,7 +4332,7 @@ subroutine setup_vcp(Vcp_ks,Vcp_full,Dtset,Gsph_x,Gsph_c,Cryst,Qmesh,Kmesh,coef_
    ABI_MALLOC(qlwl,(3,nqlwl))
    qlwl(:,:)=Dtset%gw_qlwl(:,1:nqlwl)
  end if
- rcut=Dtset%rcut
+ rcut=Dtset%gw_rcut
  icsing_eff=Dtset%gw_icutcoul
  ! 1st part: Use a Vcp_full to compute the full Coulomb interaction for NOs
  if (Gsph_x%ng > Gsph_c%ng) then
@@ -4360,10 +4360,10 @@ subroutine setup_vcp(Vcp_ks,Vcp_full,Dtset,Gsph_x,Gsph_c,Cryst,Qmesh,Kmesh,coef_
    end if
  end if
  if (Gsph_x%ng > Gsph_c%ng) then
-   call Vcp_ks%init(Gsph_x,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
+   call Vcp_ks%init(Gsph_x,Cryst,Qmesh,Kmesh,rcut,Dtset%fock_icutcoul,Dtset%vcutgeo,&
                     Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,comm)
  else
-   call Vcp_ks%init(Gsph_c,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
+   call Vcp_ks%init(Gsph_c,Cryst,Qmesh,Kmesh,rcut,Dtset%fock_icutcoul,Dtset%vcutgeo,&
                     Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,comm)
  end if
  ABI_FREE(qlwl)

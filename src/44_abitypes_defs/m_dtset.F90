@@ -892,6 +892,7 @@ type, public :: dataset_type
  real(dp) :: frictionbar
  real(dp) :: fxcartfactor
  real(dp) :: ga_opt_percent
+ real(dp) :: gw_rcut
  real(dp) :: gwencomp = 2.0_dp
  real(dp) :: gwls_model_parameter         ! Parameter used in dielectric function model
  real(dp) :: gwr_tolqpe = 0.01 * eV_Ha
@@ -1814,6 +1815,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gw_frqre_inzgrid   = dtin%gw_frqre_inzgrid
  dtout%gw_frqre_tangrid   = dtin%gw_frqre_tangrid
  dtout%gw_invalid_freq    = dtin%gw_invalid_freq
+ dtout%gw_rcut            = dtin%gw_rcut
  dtout%gw_qprange         = dtin%gw_qprange
  dtout%gw_sigxcore        = dtin%gw_sigxcore
 
@@ -3658,7 +3660,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' gwpara gwrpacorr gwgmcorr gw_customnfreqsp gw1rdm'
  list_vars=trim(list_vars)//' gw_frqim_inzgrid gw_frqre_inzgrid gw_frqre_tangrid gw_freqsp'
  list_vars=trim(list_vars)//' gw_icutcoul gw_invalid_freq'
- list_vars=trim(list_vars)//' gw_nqlwl gw_qlwl gw_qprange gw_sigxcore'
+ list_vars=trim(list_vars)//' gw_nqlwl gw_qlwl gw_qprange gw_rcut gw_sigxcore'
  list_vars=trim(list_vars)//' gwls_stern_kmax gwls_kmax_complement gwls_kmax_poles'
  list_vars=trim(list_vars)//' gwls_kmax_analytic gwls_kmax_numeric'
  list_vars=trim(list_vars)//' gwls_list_proj_freq gwls_nseeds gwls_n_proj_freq gwls_recycle'

@@ -17989,30 +17989,48 @@ Variable(
     abivarname="rcut",
     varset="gstate",
     vartype="real",
+    topics=['Coulomb_useful'],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="Radius of the CUT-off for coulomb interaction for Hartree, ion-electron, and ion-ion interactions",
+    added_in_version="before_v9",
+    text=r"""
+Truncation of the Coulomb interaction in real space. The meaning of [[rcut]]
+is governed by the cutoff shape options [[icutcoul]].
+
+If [[rcut]] is zero or negative, the cutoff is automatically calculated so to enclose
+the same volume inside the cutoff as the volume of the solid, i.e primitive cell times the number of k-points.
+""",
+),
+
+Variable(
+    abivarname="gw_rcut",
+    varset="gstate",
+    vartype="real",
     topics=['Coulomb_useful','GWls_compulsory', 'Susceptibility_basic', 'SelfEnergy_basic'],
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="Radius of the CUT-off for coulomb interaction",
     added_in_version="before_v9",
     text=r"""
-Truncation of the Coulomb interaction in real space. The meaning of [[rcut]]
-is governed by the cutoff shape options [[icutcoul]], [[gw_icutcoul]] and/or [[fock_icutcoul]].
+Truncation of the Coulomb interaction in real space. The meaning of [[gw_rcut]]
+is governed by the cutoff shape options [[gw_icutcoul]].
 See complementary information in [[vcutgeo]].
 
 In the method of Ismail-Beigi [[cite:Ismail-Beigi2006]] for one-dimensional systems, the cutoff region is given by the
 Wigner-Seitz cell centered on the axis of the cylinder. The cutoff region is
 thus automatically defined by the unit cell and there is no need to specify
-the value of [[rcut]]. For two-dimensional systems, Ismail-Beigi [[cite:Ismail-Beigi2006]] also fixes the cutoff region,
+the value of [[gw_rcut]]. For two-dimensional systems, Ismail-Beigi [[cite:Ismail-Beigi2006]] also fixes the cutoff region,
 at half the replication length perpendicular to the (truly) periodic plane.
 
-Thus, when the Beigi methods in 1D or 2D are expected, [[rcut]] must be 0.0.
-Using another value of [[rcut]] will prevent the Beigi method to be used.
+Thus, when the Beigi methods in 1D or 2D are expected, [[gw_rcut]] must be 0.0.
+Using another value of [[gw_rcut]] will prevent the Beigi method to be used.
 See complementary information in [[vcutgeo]].
 
 On the other hand, when the Rozzi methods in 1D or 2D are expected, which is the case when one component of [[vcutgeo]] is negative,
-[[rcut]] mut be defined.
+[[gw_rcut]] mut be defined.
 
-If [[rcut]] is negative, the cutoff is automatically calculated so to enclose
+If [[gw_rcut]] is negative, the cutoff is automatically calculated so to enclose
 the same volume inside the cutoff as the volume of the solid, i.e primitive cell times the number of k-points.
 """,
 ),
@@ -18029,7 +18047,6 @@ Variable(
     text=r"""
 Truncation of the Coulomb interaction in real space. The meaning of [[fock_rcut]]
 is governed by the cutoff shape options [[fock_icutcoul]].
-See complementary information in [[vcutgeo]].
 
 If [[fock_rcut]] is zero or negative, the cutoff is automatically calculated so to enclose
 the same volume inside the cutoff as the volume of the solid, i.e primitive cell times the number of k-points.
