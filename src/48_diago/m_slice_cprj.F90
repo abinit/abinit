@@ -111,6 +111,7 @@ module m_slice_cprj
    type(xg_t) :: Allcprj_work
    
    !ARRAYS on slice
+   type(xg_t) :: X_SLICE
    type(xgBlock_t) :: X
    type(xgBlock_t) :: AX
 
@@ -129,6 +130,8 @@ module m_slice_cprj
 
    ! the following is independent of number of vectors, common to slice and spectrum
    type(xg_t) :: proj_work
+
+   type(xg_t) :: X_PROBE
 
    type(xgBlock_t) :: eigenvalues
 
@@ -302,12 +305,16 @@ subroutine slice_allocateAll(slice)
  slice%total_spacedim = total_spacedim
 
  ! transposed arrays (for slice only)
- call xg_init(slice%X_NP,space,total_spacedim,4*slicedim,xmpi_comm_self,me_g0=slice%me_g0_fft)
+ call xg_init(slice%X_NP,space,total_spacedim,2*slicedim,xmpi_comm_self,me_g0=slice%me_g0_fft)
  call xg_setBlock(slice%X_NP,slice%X_next,total_spacedim,slicedim)
  call xg_setBlock(slice%X_NP,slice%X_prev,total_spacedim,slicedim,fcol=slicedim+1)
- call xg_setBlock(slice%X_NP,slice%X,total_spacedim,slicedim,fcol=2*slicedim+1)
- call xg_setBlock(slice%X_NP,slice%AX,total_spacedim,slicedim,fcol=3*slicedim+1)
+
+ call xg_init(slice%X_SLICE,space,total_spacedim,2*slicedim,xmpi_comm_self,me_g0=slice%me_g0_fft)
+ call xg_setBlock(slice%X_SLICE,slice%X,total_spacedim,slicedim)
+ call xg_setBlock(slice%X_SLICE,slice%AX,total_spacedim,slicedim,fcol=slicedim+1)
  ! note: the last two are necessary to set space and me_g0 for slice%X and slice%AX
+ 
+ call xg_init(slice%X_PROBE,space,total_spacedim,slicedim,xmpi_comm_self,me_g0=slice%me_g0_fft)
 
  ! cprj workspaces (for entire spectrum)
  call xg_init(slice%AllAX,space,spacedim,neigenpairs,slice%spacecom,me_g0=slice%me_g0)
@@ -349,6 +356,8 @@ subroutine slice_free(slice)
 ! *********************************************************************
 
  call xg_free(slice%X_NP)
+ call xg_free(slice%X_SLICE)
+ call xg_free(slice%X_PROBE)
  call xg_free(slice%Allcprj_work)
  call xg_free(slice%cprj_work2)
  call xg_free(slice%proj_work)
@@ -512,6 +521,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  integer :: slicedim
  integer :: shift_x,shift_cprj
  integer :: niter, max_niter_restart
+ integer :: nband_slice, nband_slice_buf
  real(dp) :: tolerance
  real(dp) :: tolfilter
  real(dp) :: maxeig, maxeig_global
@@ -589,6 +599,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  ! Set initial vectors from input guess
  slice%eigenvalues = eigen
 
+ ! workspace named "All" will store input and output solution
  slice%AllX = X0
  slice%AllcprjX = cprjX0
 
@@ -603,7 +614,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  flush(901)
  ! ITEST
 
- !A * Psi
+ !Compute A * Psi
  call timab(tim_AX_v,1,tsec)
  call getAX(slice%AllX,slice%AllAX%self)
  call timab(tim_AX_v,2,tsec)
@@ -640,7 +651,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  flush(901)
  ! ITEST
 
-!********************* Compute Rayleigh quotients for every band, and set lambda equal to the largest one *****
+ ! Compute Rayleigh quotients for every band
  call timab(tim_RR_q, 1, tsec)
  call slice_rayleighRitzQuotients(slice, maxeig, mineig, DivResults%self)
  call xmpi_max(maxeig,maxeig_global,slice%spacecom,ierr)
@@ -652,6 +663,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  rayleigh_quotients(1:neigenpairs) = theta_(1,1:neigenpairs)
  permute_cols(1:neigenpairs) = (/ (iband, iband=1,neigenpairs) /)
  call sort_dp(neigenpairs, rayleigh_quotients, permute_cols, tol12)
+ ! store order into theta_
+ theta_(1,1:neigenpairs) = rayleigh_quotients(1:neigenpairs)
 
  ! ITEST
  write(901,*) 'rayleigh quotients='
@@ -667,6 +680,117 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  write(901,*) 'slice%AllAX after perm=', xgBlock_getid(slice%AllAX%self) 
  flush(901)
  ! ITEST 
+
+ ! TODO insert probe here
+ ! 1) Sequential loop on slices. Start with first slice. The first slice
+ !    only needs an upper bound. This is the rayleigh quotient (overestimation)
+ !    at the i-th eigenvalue, where i is the maximum slice width.
+ 
+ ! What we don't want to do; 
+ ! Apply RR to 1,..,nband and choose nband_slice
+ ! What we expect;
+ ! Find vectors of number nband_slice_pad (<nband_slice) to apply RR.
+ ! What we hope;
+ ! That the gain from applying RR to fewer vectors is less than the loss from 
+ ! filtering more vectors, when compared to Chebyshev where everything is on nband.
+ islice = 1
+ nband_slice_buf = 15 ! maximum number of vectors we afford to RR
+ 
+ ! ITEST
+ write(901,*)
+ write(901,*) '====================Slice=================', islice
+ write(901,*) 'Filter maximum buffer of size=', nband_slice_buf
+ flush(901)
+ ! ITEST
+
+ ! Compute |X|^2 colwise L2-norm (before any filter)
+ call xg_init(dist1,SPACE_R,neigenpairs,1)
+ call xgBlock_colwiseNorm2(slice%AllX,dist1%self,comm_loc=xmpi_comm_null)            
+
+ ! ITEST
+ write(901,*) 'probe dist1='
+ call xgBlock_print(dist1%self,901)
+ flush(901)
+ ! ITEST
+
+ ! Start filter up to degree
+ lambda_minus = rayleigh_quotients(nband_slice_buf)
+ lambda_plus = slice%ecut
+ center = (lambda_plus + lambda_minus)*0.5
+ radius = (lambda_plus - lambda_minus)*0.5
+ one_over_r = 1.0/radius
+ two_over_r = 2.0/radius
+ 
+ ! ITEST
+ write(901,*) 'unwanted part of the spectrum=', lambda_minus, lambda_plus
+ flush(901)
+ ! ITEST
+
+ ! Temporarily all slice pointers coincide with entire pointers
+ slice%X = slice%AllX
+ slice%AX = slice%AllAX%self
+ slice%cprjX = slice%AllcprjX
+ slice%cprj_work = slice%Allcprj_work%self
+
+ ! Start loop on degree
+ ndeg_filter = slice%ndeg_filter ! take the degree from abi
+ do ideg = 0, ndeg_filter - 1
+
+    ! ITEST
+    write(901,*) 'polynomial degree=', ideg
+    flush(901)
+    ! ITEST
+
+    call timab(tim_cprj,1,tsec)
+    call xg_nonlop_getcprj(xg_nonlop,slice%AX,slice%cprjX,slice%proj_work%self)
+    call timab(tim_cprj,2,tsec)
+
+    call slice_computeNextOrderChebfiPolynom(slice, ideg, center, one_over_r, two_over_r)
+
+    call timab(tim_swap,1,tsec)
+    call slice_swapInnerBuffers(slice, slice%total_spacedim, neigenpairs)
+    call timab(tim_swap,2,tsec)
+
+    ! Amplify, use for probe only
+    call xgBlock_copy(slice%X, slice%X_PROBE%self)
+    call slice_ampfactorProbe(slice, DivResults%self, lambda_minus, lambda_plus, ndeg_filter)
+    
+    ! ######### Compute probe
+    ! dist2 = |X_PROBE|^2 colwise L2-norm
+    call xg_init(dist2,SPACE_R,neigenpairs,1) ! separate workspace
+    call xgBlock_colwiseNorm2(slice%X_PROBE%self, dist2%self, comm_loc=xmpi_comm_null)
+            
+    ! ITEST
+    write(901,*) 'probe dist2='
+    call xgBlock_print(dist2%self,901)
+    flush(901)
+    ! ITEST
+
+    call xg_free(dist2)
+            
+    !A * Psi for next iteration
+    call timab(tim_AX_v,1,tsec)
+    call getAX(slice%X,slice%AX)
+    call timab(tim_AX_v,2,tsec)
+    call timab(tim_AX_k,1,tsec)
+    call xgBlock_add_diag(slice%X,kin,nspinor,slice%AX)
+    call timab(tim_AX_k,2,tsec)
+    call timab(tim_cprj,1,tsec)
+    call xg_nonlop_getcprj(xg_nonlop,slice%X,slice%cprjX,slice%proj_work%self)
+    call timab(tim_cprj,2,tsec)
+    call timab(tim_AX_nl,1,tsec)
+    call xg_nonlop_getHX(xg_nonlop,slice%AX,slice%cprjX,slice%cprj_work,slice%proj_work%self)
+    call timab(tim_AX_nl,2,tsec)
+
+ end do
+
+ ! reset and free
+ call xg_free(dist1)
+
+ ! Compare this probe to rayleigh quotients. Actually count the number of
+ ! rayleigh quotients in the slice interval. We expect to see that it is 
+ ! not the same as the final converged number
+
 
  ! TODO oracle must be replaced by the bandpass filter degree computation...
 
@@ -1544,6 +1668,44 @@ subroutine slice_ampfactor(slice,DivResults,lambda_minus,lambda_plus,ndeg_filter
 
 end subroutine slice_ampfactor
 !!***
+
+subroutine slice_ampfactorProbe(slice,DivResults,lambda_minus,lambda_plus,ndeg_filter)
+
+  ! Arguments ------------------------------------
+  integer,           intent(in   ) :: ndeg_filter
+  type(xgBlock_t),   intent(in   ) :: DivResults
+  real(dp),          intent(in   ) :: lambda_minus
+  real(dp),          intent(in   ) :: lambda_plus
+  type(slice_t),    intent(inout) :: slice
+
+  ! Local variables-------------------------------
+  ! scalars
+  integer         :: iband
+  real(dp)        :: ampfactor
+  real(dp)        :: eig_per_band
+  type(xgBlock_t) :: X_col
+  real(dp),pointer :: eig(:,:)
+
+  ! *********************************************************************
+
+  ! Apply amplification factor to f(Bm1A)X
+  call xgBlock_reverseMap(DivResults,eig,rows=1,cols=cols(DivResults))
+
+  do iband = 1, cols(DivResults)
+
+    eig_per_band = eig(1,iband)
+
+    !cheb_poly1(x, n, a, b)
+    ampfactor = cheb_poly1(eig_per_band, ndeg_filter, lambda_minus, lambda_plus)
+
+    if(abs(ampfactor) < 1e-3) ampfactor = 1e-3 !just in case, avoid amplifying too much
+
+    call xgBlock_setBlock(slice%X_PROBE%self, X_col, slice%total_spacedim, 1, fcol=iband)
+    call xgBlock_scale(X_col, 1/ampfactor, 1)
+
+  end do
+
+end subroutine slice_ampfactorProbe
 
 !----------------------------------------------------------------------
 
