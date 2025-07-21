@@ -3694,7 +3694,15 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !  prtwant
    if (dt%prtwant/=0) then
      cond_string(1)='prtwant' ; cond_values(1)=dt%prtwant
+     ! wannier function output is not available with paral_kgb algorithm
      call chkint_eq(0,0,cond_string,cond_values,ierr,'paral_kgb',dt%paral_kgb,1,(/0/),iout)
+     ! wannier function output is not available with PAW
+     if (usepaw == 1 .and. dt%wfk_task == WFK_TASK_WANNIER) then
+       write(msg, '(a,a,a)' )&
+        ' prtwant does not function with PAW and wfk_task = wannier',ch10,&
+        ' Action: use norm conserving pseudopotentials'
+       ABI_ERROR(msg)
+     end if
    end if
 #if !defined HAVE_WANNIER90
    if(dt%prtwant==2) then
