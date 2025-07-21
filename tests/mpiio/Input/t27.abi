@@ -38,13 +38,13 @@ prtdos1 3
 # Dataset 2
 # Read the previous GS WFK. Use MPI-FFT but with different number of procs
 npband2 1 np_spkpt2 1 npfft2 4
-nblock_lobpcg2 6
+nblock_lobpcg2 12
 prtdos2 3
 
 # Dataset 3
 # Read the previous GS WFK in band-only mode.
 npband3 4 np_spkpt3 1 npfft3 1
-nblock_lobpcg3 6
+nblock_lobpcg3 3
 
 # Dataset 4
 # Read the previous DEN file in band-fft mode
