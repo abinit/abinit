@@ -537,6 +537,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  real(dp) :: ls, us, cdeg, mu, damp
  real(dp) :: max_dist2
  real(dp) :: prev_mineig
+ real(dp) :: amp_ideg
  real(dp) :: tol12 = 1.0e-12
  real(dp) :: tol_probe = 1.0d0 ! this depends on the residual
  type(xg_t) :: Xsum
@@ -966,6 +967,21 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
    call xgBlock_print(dist2%self,901)
    flush(901)
    ! ITEST
+
+   ! =================== Tested idea
+   ! try to divide by max(f(lambda_plus), f(lambda_minus)) 
+   ! this will make it independent of degree
+    amp_ideg = max(bandpassIndicator_sca(ls,ls,us,ideg),bandpassIndicator_sca(us,ls,us,ideg))
+    call xgBlock_scale(dist2%self, 1.d0/amp_ideg, 1) 
+
+   ! ITEST
+   write(901,*) 'amp_ideg=', amp_ideg 
+   write(901,*) 'probe dist2(scaled by amp_ideg)='
+   call xgBlock_print(dist2%self,901)
+   flush(901)
+   ! ITEST
+
+   ! =================== end tested idea
    
    ! Count kept: n-maximum values until ordered indices are stabilized
    call xgBlock_reverseMap_1d(dist2%self, probe)
@@ -1008,7 +1024,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  write(901,*) 'probe values used to discard indices=', probe(:)
  flush(901)
 
- tol_probe = 0.21d0
+ tol_probe = 0.4d0
  count_mask = count(probe > tol_probe, 1)
 
  write(901,*) 
@@ -2144,6 +2160,51 @@ function cheb_poly1(xx,nn,aa,bb) result(yy)
   end do
 
 end function cheb_poly1
+!!***
+
+function bandpassIndicator_sca(t,a,b,deg) result(f_t)
+
+    implicit none
+
+    !Arguments ------------------------------------
+    real(dp), intent(in ) :: t,a,b
+    integer , intent(in ) :: deg
+
+    real(dp) :: f_t
+    
+    !Local variables-------------------------------
+    real(dp) :: yt0,yt,yt_swap,ck,mu,damp
+    integer  :: i
+    
+    ! *********************************************************************
+
+    ! init cheby of deg=0,1 eval at t
+    yt0 = 1.d0
+    yt = t
+
+    ! init filter for deg=0
+    ck = Pi/(deg+2)
+    mu = 1/Pi*(ACOS(a)-ACOS(b))
+    damp = 1.d0
+    f_t = mu * damp * yt0
+
+    do i=1,deg 
+        
+        ! Update damping and expansion coefficient
+        mu = 2/Pi * (SIN(i*ACOS(a)) - SIN(i*ACOS(b)))/i
+        damp = ((1 - i/(deg+2))*SIN(ck)*COS(i*ck) + 1/(deg+2)*COS(ck)*SIN(i*ck))/SIN(ck)
+
+        ! Sum terms
+        f_t = f_t + mu * damp * yt
+
+        ! Update Chebyshev polynomial
+        yt_swap = yt
+        yt = 2 * t * yt - yt0
+        yt0 = yt_swap
+        
+    end do
+
+end function bandpassIndicator_sca
 !!***
 
 end module m_slice_cprj
