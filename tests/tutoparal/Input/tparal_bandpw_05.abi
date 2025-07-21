@@ -149,9 +149,9 @@ toldfe        1.e-7
 # Parallelization
 # ===============
 paral_kgb     1
+nblock_lobpcg 1
 np_spkpt         4
 npband        16
-bandpp        2   # Change this line according to the tutorial
 npfft         4
 timopt        -3  # Get timing information of the run in the *.abo (output) file
 
