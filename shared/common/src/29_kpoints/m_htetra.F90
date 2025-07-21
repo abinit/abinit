@@ -115,6 +115,8 @@ type, public :: htetra_t
 
   contains
 
+  procedure :: init => htetra_init            ! Initialize the object
+
   procedure :: free  => htetra_free
     ! Free memory
 
@@ -125,7 +127,7 @@ type, public :: htetra_t
     ! Calculate integration weights and their derivatives for a single k-point in the IBZ.
 
   procedure ::  get_onewk_wvals => htetra_get_onewk_wvals
-    ! Similar to tetra_get_onewk_wvals but receives arbitrary list of frequency points.
+    ! Similar to tetra_get_onewk but receives arbitrary list of frequency points.
 
   procedure :: get_onewk_wvals_zinv => htetra_get_onewk_wvals_zinv
     ! Calculate integration weights for 1/(z-E(k)) for a single k-point in the IBZ.
@@ -145,7 +147,6 @@ type, public :: htetra_t
 end type htetra_t
 !!***
 
-public :: htetra_init            ! Initialize the object
 !!***
 
 contains
@@ -185,11 +186,11 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
 
 !Arguments ------------------------------------
 !scalars
+ class(htetra_t),intent(out),target :: tetra
  integer,intent(in) :: nkpt_fullbz, nkpt_ibz, comm
  integer,optional,intent(in) :: opt
  integer,intent(out) :: ierr
  character(len=80),intent(out) :: errorstring
- class(htetra_t),intent(out),target :: tetra
 !arrays
  integer,intent(in) :: bz2ibz(nkpt_fullbz)
  real(dp),intent(in) :: gprimd(3,3),klatt(3,3),kpt_fullbz(3,nkpt_fullbz),kpt_ibz(3,nkpt_ibz)
@@ -207,8 +208,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  integer :: tetra_ibz(4)
  integer :: tetra_shifts(3,4,24,4)  ! 3 dimensions, 4 summits, 24 tetrahedra, 4 main diagonals
  integer :: tetra_shifts_6(3,4,6,1) ! 3 dimensions, 4 summits, 6 tetrahedra, 4 main diagonals
- integer :: main_diagonals(3,4)
- integer :: tetra_mibz(0:4)
+ integer :: main_diagonals(3,4), tetra_mibz(0:4)
  real(dp)  :: k1(3),k2(3),k3(3),diag(3)
 ! *********************************************************************
 
@@ -694,7 +694,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  tetra%opt = 2; if (present(opt)) tetra%opt = opt
 
  select case(tetra%opt)
- case(1)
+ case (1)
    ! For each k-point in the IBZ store 24 tetrahedra each referring to 4 k-points
    do ikibz=1,tetra%nkibz
      !if (mod(ikibz,nprocs) /= my_rank) cycle
@@ -1050,11 +1050,9 @@ pure subroutine get_onetetra_blochl(eig, energies, nene, bcorr, tweight, dweight
 !Arguments ------------------------------------
 !scalars
  integer,intent(in)   :: nene,bcorr
- real(dp) ,intent(in) :: energies(nene)
 !arrays
- real(dp), intent(out) :: tweight(4, nene)
- real(dp), intent(out) :: dweight(4, nene)
- real(dp),intent(in)  :: eig(4)
+ real(dp),intent(in)  :: eig(4), energies(nene)
+ real(dp), intent(out) :: tweight(4, nene), dweight(4, nene)
 
 !Local variables-------------------------------
  integer :: ieps
@@ -1596,7 +1594,6 @@ end subroutine get_onetetetra_lambinvigneron_imag
 !! Calculate integration weights and their derivatives for a single k-point in the IBZ.
 !!
 !! INPUTS
-!! tetra<htetra_t>=Object with tables for tetrahedron method.
 !! ik_ibz=Index of the k-point in the IBZ array
 !! bcorr=1 to include Blochl correction else 0.
 !! nw=number of energies in wvals
@@ -1615,12 +1612,11 @@ subroutine htetra_get_onewk_wvals(tetra, ik_ibz, opt, nw, wvals, max_occ, nkibz,
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ik_ibz,nw,nkibz,opt
- real(dp) ,intent(in) :: max_occ
  class(htetra_t), intent(inout) :: tetra
+ integer,intent(in) :: ik_ibz,nw,nkibz,opt
+ real(dp),intent(in) :: max_occ
 !arrays
- real(dp),intent(in) :: wvals(nw)
- real(dp),intent(in) :: eig_ibz(nkibz)
+ real(dp),intent(in) :: wvals(nw), eig_ibz(nkibz)
  real(dp),intent(out) :: weights(nw, 2)
 
 !Local variables-------------------------------
@@ -1629,8 +1625,7 @@ subroutine htetra_get_onewk_wvals(tetra, ik_ibz, opt, nw, wvals, max_occ, nkibz,
  real(dp) :: tweight
 !arrays
  integer  :: ind_ibz(4),tetra_mibz(0:4)
- real(dp) :: eig(4)
- real(dp) :: tweight_tmp(4,nw),dweight_tmp(4,nw)
+ real(dp) :: eig(4), tweight_tmp(4,nw),dweight_tmp(4,nw)
 ! *********************************************************************
 
  weights = zero
@@ -1655,9 +1650,9 @@ subroutine htetra_get_onewk_wvals(tetra, ik_ibz, opt, nw, wvals, max_occ, nkibz,
 
    ! HM: Here we should only compute what we will use!
    select case (opt)
-   case(0:1)
+   case (0:1)
      call get_onetetra_blochl(eig, wvals, nw, opt, tweight_tmp, dweight_tmp)
-   case(2)
+   case (2)
      call get_onetetetra_lambinvigneron_imag(eig, wvals, nw, dweight_tmp)
      tweight_tmp = zero
    end select
@@ -1697,8 +1692,8 @@ subroutine htetra_get_onewk(tetra, ik_ibz, bcorr, nw, nkibz, eig_ibz, enemin, en
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ik_ibz,nw,nkibz,bcorr
  class(htetra_t), intent(inout) :: tetra
+ integer,intent(in) :: ik_ibz,nw,nkibz,bcorr
  real(dp) ,intent(in) :: enemin,enemax,max_occ
 !arrays
  real(dp),intent(in) :: eig_ibz(nkibz)
@@ -1730,7 +1725,6 @@ end subroutine htetra_get_onewk
 !! P. Lambin and J.P. Vigneron, Phys. Rev. B 29, 3430 (1984).
 !!
 !! INPUTS
-!! tetra<htetra_t>=Object with tables for tetrahedron method.
 !! ik_ibz=Index of the k-point in the IBZ array
 !! bcorr=1 to include Blochl correction else 0.
 !! nw=number of energies in wvals
@@ -1752,9 +1746,9 @@ subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz,
 
 !Arguments ------------------------------------
 !scalars
+ class(htetra_t), intent(inout) :: tetra
  integer,intent(in) :: ik_ibz,nz,nkibz,opt
  real(dp) ,intent(in) :: max_occ
- class(htetra_t), intent(inout) :: tetra
 !arrays
  complex(dp),intent(in) :: zvals(nz)
  real(dp),optional,intent(in) :: erange(2)
@@ -1799,10 +1793,10 @@ subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz,
 
      if (real(zvals(iz)) >= my_erange(1) .and. real(zvals(iz)) <= my_erange(2)) then
        select case(opt)
-       case(1)
+       case (1)
          verm = zvals(iz) - eig
          call SIM0TWOI(cw, VERLI, VERM)
-       case(2)
+       case (2)
          call get_onetetra_lambinvigneron(eig, zvals(iz), cw)
        end select
      else
@@ -1834,8 +1828,8 @@ end subroutine htetra_get_onewk_wvals_zinv
 subroutine htetra_get_delta_mask(tetra, eig_ibz, wvals, nw, nkpt, kmask, comm)
 
 !Arguments
- integer,intent(in) :: nw,nkpt,comm
  class(htetra_t), intent(in) :: tetra
+ integer,intent(in) :: nw,nkpt,comm
  real(dp),intent(in) :: wvals(nw)
  real(dp),intent(in) :: eig_ibz(nkpt)
  integer,intent(out) :: kmask(nkpt)
@@ -1953,9 +1947,9 @@ subroutine htetra_wvals_weights(tetra, eig_ibz, nw, wvals, max_occ, nkpt, opt, t
 
      ! Get tetrahedron weights
      select case (opt)
-     case(0:1)
+     case (0:1)
        call get_onetetra_blochl(eig, wvals, nw, opt, tweight_tmp, dweight_tmp)
-     case(2)
+     case (2)
        call get_onetetetra_lambinvigneron_imag(eig, wvals, nw, dweight_tmp)
        tweight_tmp = zero
      end select
@@ -1972,12 +1966,12 @@ subroutine htetra_wvals_weights(tetra, eig_ibz, nw, wvals, max_occ, nkpt, opt, t
 
  ! Rescale weights
  select case(tetra%opt)
- case(1)
+ case (1)
    do ik_ibz=1,tetra%nkibz
      dweight(:,ik_ibz) = dweight(:,ik_ibz) * tetra%ibz_multiplicity(ik_ibz) / tetra%tetra_total(ik_ibz) / tetra%nkbz
      tweight(:,ik_ibz) = tweight(:,ik_ibz) * tetra%ibz_multiplicity(ik_ibz) / tetra%tetra_total(ik_ibz) / tetra%nkbz
    end do
- case(2)
+ case (2)
    dweight = dweight*tetra%vv / 4.0_dp
    tweight = tweight*tetra%vv / 4.0_dp
  end select
@@ -2004,8 +1998,8 @@ subroutine htetra_wvals_weights_delta(tetra, eig_ibz, nw, wvals, max_occ, nkpt, 
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nw, nkpt, opt, comm
  class(htetra_t), intent(in) :: tetra
+ integer,intent(in) :: nw, nkpt, opt, comm
  real(dp),intent(in) :: max_occ
 !arrays
  real(dp),intent(in) :: eig_ibz(nkpt), wvals(nw)
@@ -2042,9 +2036,9 @@ subroutine htetra_wvals_weights_delta(tetra, eig_ibz, nw, wvals, max_occ, nkpt, 
 
      ! Get tetrahedron weights
      select case (opt)
-     case(0:1)
+     case (0:1)
        call get_onetetra_blochl(eig, wvals, nw, opt, tweight_tmp, dweight_tmp)
-     case(2)
+     case (2)
        call get_onetetetra_lambinvigneron_imag(eig, wvals, nw, dweight_tmp)
      end select
 
@@ -2059,11 +2053,11 @@ subroutine htetra_wvals_weights_delta(tetra, eig_ibz, nw, wvals, max_occ, nkpt, 
 
  ! Rescale weights
  select case(tetra%opt)
- case(1)
+ case (1)
    do ik_ibz=1,tetra%nkibz
      dweight(:,ik_ibz) = dweight(:,ik_ibz) * tetra%ibz_multiplicity(ik_ibz) / tetra%tetra_total(ik_ibz) / tetra%nkbz
    end do
- case(2)
+ case (2)
    dweight = dweight * tetra%vv / 4.0_dp
  end select
 
@@ -2194,7 +2188,7 @@ if (zinv_opt == 1) then
        if (real(zvals(iz)) >= my_erange(1) .and. real(zvals(iz)) <= my_erange(2)) then
 
          select case(zinv_opt)
-         case(1)
+         case (1)
            verm = zvals(iz) - eig
            call SIM0TWOI(cw, VERLI, VERM)
 
@@ -2206,7 +2200,7 @@ if (zinv_opt == 1) then
            !  end do
            !end if
 
-         case(2)
+         case (2)
            call get_onetetra_lambinvigneron(eig, zvals(iz), cw)
          end select
 
@@ -2256,11 +2250,11 @@ endif
 
  ! Rescale weights
  select case(tetra%opt)
- case(1)
+ case (1)
    do ik_ibz=1,tetra%nkibz
      cweight(:,ik_ibz) = cweight(:,ik_ibz) * tetra%ibz_multiplicity(ik_ibz) / tetra%nkbz / tetra%tetra_total(ik_ibz)
    end do
- case(2)
+ case (2)
    cweight = cweight * tetra%vv
  end select
 

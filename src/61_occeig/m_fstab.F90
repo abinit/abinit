@@ -432,7 +432,7 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
  ! fix window around fermie for tetrahedron or gaussian weight calculation
  ! this is spin independent
  nene = 100 ! TODO: make this variable and maybe temperature dependent???
- deltaene = 2 * dtset%eph_fsewin / dble(nene-1)
+ deltaene = two * dtset%eph_fsewin / dble(nene-1)
  ifermi = int(nene / 2)
  enemin = ebands%fermie - dble(ifermi-1)*deltaene
  enemax = enemin + dble(nene-1)*deltaene
@@ -467,7 +467,7 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
    ABI_MALLOC(bz2ibz, (nkbz))
    bz2ibz = full2ebands(1, :)
 
-   call htetra_init(tetra, bz2ibz, cryst%gprimd, klatt, kbz, nkbz, ebands%kptns, nkibz, ierr, errstr, comm)
+   call tetra%init(bz2ibz, cryst%gprimd, klatt, kbz, nkbz, ebands%kptns, nkibz, ierr, errstr, comm)
    ABI_CHECK(ierr == 0, errstr)
    ABI_FREE(bz2ibz)
 
@@ -609,9 +609,6 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, 
    do ib2=1,nband_k
      band2 = ib2 + bstart_k - 1
      if (use_adaptive) then
-       !ori sigma = max(maxval([(abs(dot_product(fs%vk(:, ib2), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
-       !workaround works with both ifort and ifx on oneapi 2024
-       !replace the implicit loop by an explicit one
        do ii=1,3
           abc(ii) = abs(dot_product(fs%vk(:, ib2), fs%kmesh_cartvec(:,ii)))
        end do
@@ -622,9 +619,6 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, 
      do ib1=1,nband_kq
        band1 = ib1 + bstart_kq - 1
        if (use_adaptive) then
-         !ori sigma = max(maxval([(abs(dot_product(fs%vkq(:, ib1), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
-         !replace the implicit loop by an explicit one
-         !workaround works with both ifort and ifx on oneapi 2024
          do ii=1,3
            abc(ii) = abs(dot_product(fs%vkq(:, ib1), fs%kmesh_cartvec(:,ii)))
          end do

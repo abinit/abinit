@@ -128,7 +128,7 @@ type, public :: ephwg_t
   real(dp),allocatable :: eigkbs_ibz(:, :, :)
   ! (nibz, nbcount, nsppol)
   ! Electron eigenvalues in the IBZ for nbcount states
-  ! (not necessarly equal to global nband, see also bstart and bcount)
+  ! (not necessarily equal to global nband, see also bstart and bcount)
 
   type(crystal_t), pointer :: cryst => null()
   ! Pointer to input structure (does not own memory)
@@ -420,8 +420,8 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
  ! Build tetrahedron object using IBZ(k) as the effective IBZ
  ! This means that input data for tetra routines must be provided in lgk%kibz_q
  call self%tetra_k%free()
- call htetra_init(self%tetra_k, indkk(:, 1), cryst%gprimd, self%klatt, self%bz, self%nbz, &
-                  self%lgk%ibz, self%nq_k, ierr, errorstring, comm)
+ call self%tetra_k%init(indkk(:, 1), cryst%gprimd, self%klatt, self%bz, self%nbz, &
+                        self%lgk%ibz, self%nq_k, ierr, errorstring, comm)
  !call tetra_write(self%tetra_k, self%lgk%nibz, self%lgk%ibz, strcat("tetrak_", ktoa(kpoint)))
  ABI_CHECK(ierr == 0, errorstring)
 
@@ -555,8 +555,8 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
  ! Build tetrahedron object using IBZ(k) as the effective IBZ
  ! This means that input data for tetra routines must be provided in lgk%kibz_q
  call self%tetra_k%free()
- call htetra_init(self%tetra_k, bz2lgkibz, cryst%gprimd, self%klatt, self%bz, self%nbz, &
-                  self%lgk%ibz, self%nq_k, ierr, errorstring, comm)
+ call self%tetra_k%init(bz2lgkibz, cryst%gprimd, self%klatt, self%bz, self%nbz, &
+                        self%lgk%ibz, self%nq_k, ierr, errorstring, comm)
  if (ierr /= 0) then
    ABI_ERROR(errorstring)
  end if
