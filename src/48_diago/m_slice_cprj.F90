@@ -523,6 +523,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  integer :: niter, max_niter_restart
  integer :: nband_slice, nband_slice_buf
  integer :: count_mask
+ integer :: icount
  real(dp) :: tolerance
  real(dp) :: tolfilter
  real(dp) :: maxeig, maxeig_global
@@ -535,6 +536,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  real(dp) :: radius
  real(dp) :: ls, us, cdeg, mu, damp
  real(dp) :: max_dist2
+ real(dp) :: prev_mineig
  real(dp) :: tol12 = 1.0e-12
  real(dp) :: tol_probe = 0.1d0
  type(xg_t) :: Xsum
@@ -546,7 +548,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  type(xgBlock_t) :: cprj_work_prev
  type(xgBlock_t) :: eig_part
  type(xgBlock_t) :: X_col, AX_col
- type(xg_t) :: X_kept, AX_kept, cprj_kept
+ type(xg_t) :: X_kept, AX_kept
  type(xgBlock_t) :: X_kept_col, AX_kept_col
  type(xg_t) :: X_part
  type(xg_t) :: AX_part
@@ -557,6 +559,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  integer, allocatable :: permute_cols(:)
  real(dp), allocatable :: rayleigh_quotients(:)
  real(dp), pointer :: probe(:)
+ real(dp), pointer :: lambda_apost(:)
  real(dp), pointer :: dist2_array(:) => null()
  real(dp), pointer :: theta_(:,:) => null()
  !Pointers similar to old Chebfi
@@ -736,11 +739,21 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  ! ITEST
 
  ! Temporarily all slice pointers coincide with entire pointers
- slice%X = slice%AllX
- slice%AX = slice%AllAX%self
+ !slice%X = slice%AllX
+ !slice%AX = slice%AllAX%self
+ call xgBlock_copy(slice%AllX, slice%X)
+ call xgBlock_copy(slice%AllAX%self, slice%AX)
  slice%cprjX = slice%AllcprjX
  slice%cprj_work = slice%Allcprj_work%self
 
+ ! ITEST
+ write(901,*) 
+ write(901,*) 'X id at slice2 init', xgBlock_getid(slice%X)
+ write(901,*) 'AX id at slice2 init', xgBlock_getid(slice%AX)
+ write(901,*) 
+ flush(901)
+ ! ITEST
+ 
  ! Start loop on degree
  ndeg_filter = slice%ndeg_filter ! take the degree from abi
  do ideg = 0, ndeg_filter - 1
@@ -794,7 +807,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
  ! Amplify to finalize filter application
  call timab(tim_amp_f,1,tsec)
- ABI_MALLOC(ndeg_filter_bands,(slicedim))
+ ABI_MALLOC(ndeg_filter_bands,(neigenpairs))
  ndeg_filter_bands(:) = ndeg_filter
  call slice_ampfactor(slice, DivResults%self, lambda_minus, lambda_plus, ndeg_filter_bands)
  ABI_FREE(ndeg_filter_bands)
@@ -822,23 +835,26 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  end if
 
  ! Procedure for keeping selected to new workspaces
- call xg_init(X_kept,space,slice%total_spacedim,count_mask,xmpi_comm_self,me_g0=slice%me_g0_fft)
- call xg_init(AX_kept,space,slice%total_spacedim,count_mask,xmpi_comm_self,me_g0=slice%me_g0_fft)
+ call xg_init(X_kept,slice%space,slice%total_spacedim,count_mask,xmpi_comm_self,me_g0=slice%me_g0_fft)
+ call xg_init(AX_kept,slice%space,slice%total_spacedim,count_mask,xmpi_comm_self,me_g0=slice%me_g0_fft)
+ icount = 1
  do iband=1,neigenpairs
-    if (probe(i) > tol_probe) then
-        call xgBlock_setBlock(X_kept%self, X_kept_col, slice%total_spacedim, 1, fcol=iband)
-        call xgBlock_setBlock(AX_kept%self, AX_kept_col, slice%total_spacedim, 1, fcol=iband)
+    if (probe(iband) > tol_probe) then
+        call xgBlock_setBlock(X_kept%self, X_kept_col, slice%total_spacedim, 1, fcol=icount)
+        call xgBlock_setBlock(AX_kept%self, AX_kept_col, slice%total_spacedim, 1, fcol=icount)
         call xgBlock_setBlock(slice%X, X_col, slice%total_spacedim, 1, fcol=iband)
         call xgBlock_setBlock(slice%AX, AX_col, slice%total_spacedim, 1, fcol=iband)
         call xgBlock_copy(X_col, X_kept_col)
         call xgBlock_copy(AX_col, AX_kept_col)
+        icount = icount + 1
     end if
  end do
 
- ! reset pointers
+ ! reset pointers to temporary (kept)
  slice%X = X_kept%self
  slice%AX = AX_kept%self
- !slice%cprjX = cprjX_kept 
+ ! content is not important, but dimensions 
+ call xgBlock_setBlock(slice%AllcprjX, slice%cprjX, slice%cprjdim, count_mask*nspinor)
 
  call timab(tim_cprj,1,tsec)
  call xg_nonlop_getcprj(xg_nonlop,slice%X,slice%cprjX,slice%proj_work%self)
@@ -849,10 +865,10 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
      slice%blockdim_cprj,ierr,0,tim_RR,ABI_GPU_DISABLED,solve_ax_bx=.true.)
 
  if ( ierr /= 0 ) then
-    ABI_BUG("RayleighRitz did not work")
+    ABI_BUG("TEST slice1 RayleighRitz did not work")
  end if
 
- write(901,*) 'converged eigenvalues='
+ write(901,*) 'converged eigenval1='
  call xgBlock_print(slice%eigenvalues, 901)
  flush(901)
 
@@ -861,6 +877,160 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  call xg_free(dist2)
  call xg_free(X_kept)
  call xg_free(AX_kept)
+
+ ! continue testing .. slice 2
+ islice = 2
+ !nband_slice_buf = 15
+
+ lambda_minus = 0.52870
+ lambda_plus = 1.26658
+ prev_mineig = -1.14
+ center = (slice%ecut + prev_mineig)*0.5
+ radius = (slice%ecut - prev_mineig)*0.5 
+ ls = (lambda_minus - center) / radius
+ us = (lambda_plus - center) / radius
+ one_over_r = 1.0/radius
+ two_over_r = 2.0/radius
+
+ ! ITEST
+ write(901,*)
+ write(901,*) '====================Slice=================', islice
+ write(901,*) 'Probe for vector space of wanted interval=', lambda_minus, lambda_plus
+ flush(901)
+ ! ITEST
+
+ ! Reset pointers for dimensions of nband
+ call xg_setBlock(slice%X_SLICE,slice%X,slice%total_spacedim,neigenpairs)
+ call xg_setBlock(slice%X_SLICE,slice%AX,slice%total_spacedim,neigenpairs,fcol=neigenpairs+1)
+ ! Init workspaces
+ call xgBlock_copy(slice%AllX, slice%X)
+ call xgBlock_copy(slice%AllAX%self, slice%AX)
+ ! the two following ones will be recomputed so whatever
+ slice%cprjX = slice%AllcprjX
+ slice%cprj_work = slice%Allcprj_work%self
+
+ ! ITEST
+ write(901,*) 
+ write(901,*) 'X id at slice2 init', xgBlock_getid(slice%X)
+ write(901,*) 'AX id at slice2 init', xgBlock_getid(slice%AX)
+ write(901,*) 
+ flush(901)
+ ! ITEST
+
+ ! preallocate, will be updated during ideg iterations
+ call xg_init(dist2,SPACE_R,neigenpairs,1)
+ 
+ ! Initialize Chebyshev expansion of indicator function of order ndeg_filter
+ ndeg_filter = 40
+ call xg_init(Xsum,slice%space,slice%total_spacedim,neigenpairs,slice%spacecom,gpu_option=gpu_option)
+ cdeg = Pi/(ndeg_filter+2)
+ mu = 1/Pi*(ACOS(ls)-ACOS(us))
+ damp = 1.d0 ! Jackson damping
+ call xgBlock_saxpy(Xsum%self, mu*damp, slice%X)
+
+ ! Start loop on degree
+ do ideg = 0, ndeg_filter - 1
+
+   ! ITEST
+   write(901,*) 'polynomial degree=', ideg
+   flush(901)
+   ! ITEST
+
+   call timab(tim_cprj,1,tsec)
+   call xg_nonlop_getcprj(xg_nonlop,slice%AX,slice%cprjX,slice%proj_work%self)
+   call timab(tim_cprj,2,tsec)
+
+   call slice_computeNextOrderChebfiPolynom(slice, ideg, center, one_over_r, two_over_r)
+
+   call timab(tim_swap,1,tsec)
+   call slice_swapInnerBuffers(slice, slice%total_spacedim, neigenpairs)
+   call timab(tim_swap,2,tsec)
+
+   ! Accumulate X with weight in Xsum for bandpass filters
+   mu = 2/Pi * (SIN((ideg+1)*ACOS(ls)) - SIN((ideg+1)*ACOS(us)))/(ideg+1)
+   damp = ((1 - (ideg+1)/(ndeg_filter+2))*SIN(cdeg)*COS((ideg+1)*cdeg) + &
+            1/(ndeg_filter+2)*COS(cdeg)*SIN((ideg+1)*cdeg))/SIN(cdeg)
+   call xgBlock_saxpy(Xsum%self, mu*damp, slice%X)
+
+   ! ######### Compute probe
+   ! dist2 = |slice%X|^2 colwise L2-norm
+   call xgBlock_colwiseNorm2(Xsum%self, dist2%self, max_dist2, comm_loc=xmpi_comm_null)
+   !call xgBlock_scale(dist2%self, 1/max_dist2, 1)
+   
+   ! ITEST
+   write(901,*) 'maximum dist2=', max_dist2
+   write(901,*) 'probe dist2(scaled by max)='
+   call xgBlock_print(dist2%self,901)
+   flush(901)
+   ! ITEST
+    
+   ! store final expansion Xsum to X
+   if (ideg==ndeg_filter - 1) then 
+     call xgBlock_copy(Xsum%self, slice%X)
+   end if
+
+   !A * Psi
+   call timab(tim_AX_v,1,tsec)
+   call getAX(slice%X,slice%AX)
+   call timab(tim_AX_v,2,tsec)
+   call timab(tim_AX_k,1,tsec)
+   call xgBlock_add_diag(slice%X,kin,nspinor,slice%AX)
+   call timab(tim_AX_k,2,tsec)
+   call timab(tim_cprj,1,tsec)
+   call xg_nonlop_getcprj(xg_nonlop,slice%X,slice%cprjX,slice%proj_work%self)
+   call timab(tim_cprj,2,tsec)
+   call timab(tim_AX_nl,1,tsec)
+   call xg_nonlop_getHX(xg_nonlop,slice%AX,slice%cprjX,slice%cprj_work,slice%proj_work%self)
+   call timab(tim_AX_nl,2,tsec)
+
+ end do
+
+ ! Apply Rayleigh Ritz on slice (refinement)
+ call xg_RayleighRitz_cprj(xg_nonlop,slice%X,slice%cprjX,slice%AX,slice%eigenvalues,&
+     slice%blockdim_cprj,ierr,0,tim_RR,ABI_GPU_DISABLED,solve_ax_bx=.true.)
+
+ if ( ierr /= 0 ) then
+    ABI_BUG("TEST slice2 RayleighRitz did not work")
+ end if
+
+ ! Count how many eigenvalues converged in wanted interval
+ call xgBlock_reverseMap_1d(slice%eigenvalues, lambda_apost)
+ count_mask = count(lambda_minus < lambda_apost .and. lambda_apost < lambda_plus, 1)
+
+ ! ITEST
+ write(901,*) 'What we want: 15 vectors in ', lambda_minus, lambda_plus
+ write(901,*) 'what we get: converged eigenval2 of number=', count_mask
+ call xgBlock_print(slice%eigenvalues, 901)
+ flush(901)
+ ! ITEST
+
+ ! Compute H-eSX
+ if (slice%paw) then
+    call timab(tim_AX_nl,1,tsec)
+    call xg_nonlop_getHmeSX(xg_nonlop,slice%X,slice%cprjX,slice%AX,slice%eigenvalues,&
+        slice%Allcprj_work%self,slice%cprj_work2%self,no_H=.True.)
+    call timab(tim_AX_nl,2,tsec)
+ end if
+
+ ! Compute residual norm squared
+ call timab(tim_residu, 1, tsec)
+ if (.not.slice%paw) then
+   call xgBlock_yxmax(slice%AX,slice%eigenvalues,slice%X)
+ end if
+ call xgBlock_colwiseNorm2(slice%AX, residu)
+ call timab(tim_residu, 2, tsec)
+
+ ! ITEST
+ write(901,*) 'residu='
+ call xgBlock_print(residu, 901)
+ flush(901)
+ ! ITEST
+
+ call xg_free(Xsum)
+ call xg_free(dist2)
+
+ !!!! ===============
+
 
  ! Compare this probe to rayleigh quotients. Actually count the number of
  ! rayleigh quotients in the slice interval. We expect to see that it is 
