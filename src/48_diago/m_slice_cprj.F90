@@ -522,6 +522,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  integer :: shift_x,shift_cprj
  integer :: niter, max_niter_restart
  integer :: nband_slice, nband_slice_buf
+ integer :: count_mask
  real(dp) :: tolerance
  real(dp) :: tolfilter
  real(dp) :: maxeig, maxeig_global
@@ -533,7 +534,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  real(dp) :: center
  real(dp) :: radius
  real(dp) :: ls, us, cdeg, mu, damp
+ real(dp) :: max_dist2
  real(dp) :: tol12 = 1.0e-12
+ real(dp) :: tol_probe = 0.1d0
  type(xg_t) :: Xsum
  type(xg_t) :: DivResults
  type(xg_t) :: dist1, dist2, dist12
@@ -542,6 +545,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  type(xgBlock_t) :: cprjX_prev
  type(xgBlock_t) :: cprj_work_prev
  type(xgBlock_t) :: eig_part
+ type(xgBlock_t) :: X_col, AX_col
+ type(xg_t) :: X_kept, AX_kept, cprj_kept
+ type(xgBlock_t) :: X_kept_col, AX_kept_col
  type(xg_t) :: X_part
  type(xg_t) :: AX_part
  type(xg_t) :: cprjX_part
@@ -550,6 +556,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  real(dp) :: tsec(2)
  integer, allocatable :: permute_cols(:)
  real(dp), allocatable :: rayleigh_quotients(:)
+ real(dp), pointer :: probe(:)
  real(dp), pointer :: dist2_array(:) => null()
  real(dp), pointer :: theta_(:,:) => null()
  !Pointers similar to old Chebfi
@@ -626,8 +633,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  call timab(tim_AX_nl,2,tsec)
 
  ! ITEST
- write(901,*) 'slice%AllX before ortho=', xgBlock_getid(slice%AllX) 
- write(901,*) 'slice%AllAX before ortho=', xgBlock_getid(slice%AllAX%self) 
+ write(901,*) 'slice%AllX init guess=', xgBlock_getid(slice%AllX) 
+ write(901,*) 'slice%AllAX init guess=', xgBlock_getid(slice%AllAX%self) 
  flush(901)
  ! ITEST
 
@@ -636,9 +643,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  !   gpu_option,AX=slice%AllAX%self)
 
  ! ITEST
- write(901,*) 'slice%AllX after Bortho no1=', xgBlock_getid(slice%AllX) 
- write(901,*) 'slice%AllAX after Bortho no1=', xgBlock_getid(slice%AllAX%self) 
- flush(901)
+ !write(901,*) 'slice%AllX after Bortho no1=', xgBlock_getid(slice%AllX) 
+ !write(901,*) 'slice%AllAX after Bortho no1=', xgBlock_getid(slice%AllAX%self) 
+ !flush(901)
  ! ITEST
 
  ! B-orthonormalize X and AX for all bands(assuming linalg)
@@ -646,9 +653,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  !    gpu_option,AX=slice%AllAX%self)
 
  ! ITEST
- write(901,*) 'slice%AllX after Bortho no2=', xgBlock_getid(slice%AllX) 
- write(901,*) 'slice%AllAX after Bortho no2=', xgBlock_getid(slice%AllAX%self) 
- flush(901)
+ !write(901,*) 'slice%AllX after Bortho no2=', xgBlock_getid(slice%AllX) 
+ !write(901,*) 'slice%AllAX after Bortho no2=', xgBlock_getid(slice%AllAX%self) 
+ !flush(901)
  ! ITEST
 
  ! Compute Rayleigh quotients for every band
@@ -705,7 +712,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
  ! Compute |X|^2 colwise L2-norm (before any filter)
  call xg_init(dist1,SPACE_R,neigenpairs,1)
- call xgBlock_colwiseNorm2(slice%AllX,dist1%self,comm_loc=xmpi_comm_null)            
+ call xgBlock_colwiseNorm2(slice%AllX,dist1%self,comm_loc=xmpi_comm_null)
+ ! preallocate, will be updated during ideg iterations
+ call xg_init(dist2,SPACE_R,neigenpairs,1)
 
  ! ITEST
  write(901,*) 'probe dist1='
@@ -751,22 +760,21 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     call slice_swapInnerBuffers(slice, slice%total_spacedim, neigenpairs)
     call timab(tim_swap,2,tsec)
 
-    ! Amplify, use for probe only
+    ! Amplify, use for probe only for degree ideg
     call xgBlock_copy(slice%X, slice%X_PROBE%self)
-    call slice_ampfactorProbe(slice, DivResults%self, lambda_minus, lambda_plus, ndeg_filter)
+    !call slice_ampfactorProbe(slice, DivResults%self, lambda_minus, lambda_plus, ideg+1)
     
     ! ######### Compute probe
     ! dist2 = |X_PROBE|^2 colwise L2-norm
-    call xg_init(dist2,SPACE_R,neigenpairs,1) ! separate workspace
-    call xgBlock_colwiseNorm2(slice%X_PROBE%self, dist2%self, comm_loc=xmpi_comm_null)
-            
+    call xgBlock_colwiseNorm2(slice%X_PROBE%self, dist2%self, max_dist2, comm_loc=xmpi_comm_null)
+    call xgBlock_scale(dist2%self, 1/max_dist2, 1)
+
     ! ITEST
-    write(901,*) 'probe dist2='
+    write(901,*) 'maximum dist2=', max_dist2
+    write(901,*) 'probe dist2(scaled by max)='
     call xgBlock_print(dist2%self,901)
     flush(901)
     ! ITEST
-
-    call xg_free(dist2)
             
     !A * Psi for next iteration
     call timab(tim_AX_v,1,tsec)
@@ -784,8 +792,75 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
  end do
 
+ ! Amplify to finalize filter application
+ call timab(tim_amp_f,1,tsec)
+ ABI_MALLOC(ndeg_filter_bands,(slicedim))
+ ndeg_filter_bands(:) = ndeg_filter
+ call slice_ampfactor(slice, DivResults%self, lambda_minus, lambda_plus, ndeg_filter_bands)
+ ABI_FREE(ndeg_filter_bands)
+ call timab(tim_amp_f,2,tsec)
+ call timab(tim_cprj,1,tsec)
+ call xg_nonlop_getcprj(xg_nonlop,slice%X,slice%cprjX,slice%proj_work%self)
+ call timab(tim_cprj,2,tsec)
+
+ ! Use dist2%self as probe to select indices
+ ! first count
+ call xgBlock_reverseMap_1d(dist2%self,probe)
+ write(901,*) 
+ write(901,*) 'probe values used to discard indices=', probe(:)
+ flush(901)
+
+ count_mask = count(probe > tol_probe, 1)
+
+ write(901,*) 
+ write(901,*) 'Keep count_mask= out of neigenpairs=', count_mask, neigenpairs
+ flush(901)
+
+ if (nband_slice_buf < count_mask) then
+     write(901,*) 'Number of kept is more than initial guess! Initial guess missed eigenpairs'
+     flush(901)
+ end if
+
+ ! Procedure for keeping selected to new workspaces
+ call xg_init(X_kept,space,slice%total_spacedim,count_mask,xmpi_comm_self,me_g0=slice%me_g0_fft)
+ call xg_init(AX_kept,space,slice%total_spacedim,count_mask,xmpi_comm_self,me_g0=slice%me_g0_fft)
+ do iband=1,neigenpairs
+    if (probe(i) > tol_probe) then
+        call xgBlock_setBlock(X_kept%self, X_kept_col, slice%total_spacedim, 1, fcol=iband)
+        call xgBlock_setBlock(AX_kept%self, AX_kept_col, slice%total_spacedim, 1, fcol=iband)
+        call xgBlock_setBlock(slice%X, X_col, slice%total_spacedim, 1, fcol=iband)
+        call xgBlock_setBlock(slice%AX, AX_col, slice%total_spacedim, 1, fcol=iband)
+        call xgBlock_copy(X_col, X_kept_col)
+        call xgBlock_copy(AX_col, AX_kept_col)
+    end if
+ end do
+
+ ! reset pointers
+ slice%X = X_kept%self
+ slice%AX = AX_kept%self
+ !slice%cprjX = cprjX_kept 
+
+ call timab(tim_cprj,1,tsec)
+ call xg_nonlop_getcprj(xg_nonlop,slice%X,slice%cprjX,slice%proj_work%self)
+ call timab(tim_cprj,2,tsec)
+
+ ! Apply Rayleigh Ritz on slice (refinement)
+ call xg_RayleighRitz_cprj(xg_nonlop,slice%X,slice%cprjX,slice%AX,slice%eigenvalues,&
+     slice%blockdim_cprj,ierr,0,tim_RR,ABI_GPU_DISABLED,solve_ax_bx=.true.)
+
+ if ( ierr /= 0 ) then
+    ABI_BUG("RayleighRitz did not work")
+ end if
+
+ write(901,*) 'converged eigenvalues='
+ call xgBlock_print(slice%eigenvalues, 901)
+ flush(901)
+
  ! reset and free
  call xg_free(dist1)
+ call xg_free(dist2)
+ call xg_free(X_kept)
+ call xg_free(AX_kept)
 
  ! Compare this probe to rayleigh quotients. Actually count the number of
  ! rayleigh quotients in the slice interval. We expect to see that it is 
