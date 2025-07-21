@@ -9,7 +9,7 @@
  use_slk 1
  istwfk 2
  npband 2 np_spkpt 2 npfft 1
- nblock_lobpcg 6
+ nblock_lobpcg 3
  
  ngfft 18 18 18
  ngfftdg 36 36 36
