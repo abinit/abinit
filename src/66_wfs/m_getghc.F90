@@ -249,6 +249,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  real(dp), allocatable            :: ghc3(:,:)
  real(dp), allocatable            :: ghc4(:,:)
  real(dp), allocatable            :: ghc_mGGA(:,:)
+ real(dp), allocatable            :: ghc_mGGA_fft(:,:)
  real(dp), allocatable            :: ghc_vectornd(:,:)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
@@ -975,10 +976,26 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      if (size(gs_ham%vxctaulocal)/=gs_ham%n4*gs_ham%n5*gs_ham%n6*gs_ham%nvloc*4) then
        ABI_BUG('wrong sizes for vxctaulocal!')
      end if
-     ABI_MALLOC(ghc_mGGA,(2,npw_k2*my_nspinor*ndat))
-     call getghc_mGGA(cwavef,ghc_mGGA,gbound_k1,gs_ham%gprimd,istwf_k_,kg_k1,kpt_k1,&
-&     gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,npw_k1,gs_ham%nvloc,&
-&     gs_ham%n4,gs_ham%n5,gs_ham%n6,my_nspinor,gs_ham%vxctaulocal,gs_ham%gpu_option)
+     ABI_MALLOC(ghc_mGGA,(2,npw_k1*my_nspinor*ndat))
+     if (double_rfft_trick) then
+       ABI_MALLOC(kg_k_fft,(3,npw_fft))
+       ABI_MALLOC(cwavef_fft,(2,npw_fft*ndat_))
+       ABI_MALLOC(ghc_mGGA_fft,(2,npw_fft*ndat_))
+       kg_k_fft(:,1:npw_k1) = kg_k1(:,1:npw_k1)
+       kg_k_fft(:,npw_k1+1:npw_fft) = -kg_k1(:,i0:npw_k1)
+       call cwavef_double_rfft_trick_pack(cwavef,cwavef_fft,mpi_enreg%me_g0_fft,ndat,npw_k1)
+       call getghc_mGGA(cwavef_fft,ghc_mGGA_fft,gbound_k1,gs_ham%gprimd,istwf_k_,kg_k_fft,kpt_k1,&
+&       gs_ham%mgfft,mpi_enreg,ndat_,gs_ham%ngfft,npw_fft,gs_ham%nvloc,&
+&       gs_ham%n4,gs_ham%n5,gs_ham%n6,my_nspinor,gs_ham%vxctaulocal,gs_ham%gpu_option)
+       call cwavef_double_rfft_trick_unpack(ghc_mGGA,ghc_mGGA_fft,mpi_enreg%me_g0_fft,ndat,npw_k1)
+       ABI_FREE(kg_k_fft)
+       ABI_FREE(cwavef_fft)
+       ABI_FREE(ghc_mGGA_fft)
+    else
+       call getghc_mGGA(cwavef,ghc_mGGA,gbound_k1,gs_ham%gprimd,istwf_k_,kg_k1,kpt_k1,&
+&       gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,npw_k1,gs_ham%nvloc,&
+&       gs_ham%n4,gs_ham%n5,gs_ham%n6,my_nspinor,gs_ham%vxctaulocal,gs_ham%gpu_option)
+     end if
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET UPDATE FROM(ghc) IF(gs_ham%gpu_option == ABI_GPU_OPENMP)
 #endif
@@ -997,7 +1014,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      if (size(gs_ham%vectornd)/=gs_ham%n4*gs_ham%n5*gs_ham%n6*gs_ham%nvloc*3) then
        ABI_BUG('wrong sizes for vectornd in getghc!')
      end if
-     ABI_MALLOC(ghc_vectornd,(2,npw_k2*my_nspinor*ndat))
+     ABI_MALLOC(ghc_vectornd,(2,npw_k1*my_nspinor*ndat))
      ghc_vectornd=zero
      call getghc_nucdip(cwavef,ghc_vectornd,gbound_k1,istwf_k_,kg_k1,kpt_k1,&
 &     gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,npw_k1,gs_ham%nvloc,&

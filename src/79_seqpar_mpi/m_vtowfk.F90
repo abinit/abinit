@@ -466,7 +466,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
                          mpi_enreg, nband_k, npw_k, my_nspinor, resid_k, rmm_diis_status)
          else
 
-            if ( .not. xg_diago ) then
+           if ( .not. xg_diago ) then
 
              ABI_NVTX_START_RANGE(NVTX_LOBPCG1)
              call lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
@@ -484,7 +484,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
              if (use_subovl==1) call xmpi_sum(subovl,spaceComm,ierr)
              ABI_NVTX_END_RANGE()
 
-          else
+           else
 
              ABI_NVTX_START_RANGE(NVTX_LOBPCG2)
              if (dtset%cprj_in_memory==1) then
@@ -496,7 +496,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
              end if
              ABI_NVTX_END_RANGE()
 
-          end if
+           end if
 
          end if
 
