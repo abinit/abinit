@@ -1008,7 +1008,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  write(901,*) 'probe values used to discard indices=', probe(:)
  flush(901)
 
- tol_probe = 0.25d0
+ tol_probe = 0.21d0
  count_mask = count(probe > tol_probe, 1)
 
  write(901,*) 
