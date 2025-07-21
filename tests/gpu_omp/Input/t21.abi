@@ -42,7 +42,7 @@
 #*******************************
   occopt    1
    nband      4
-nblock_lobpcg 4 # Problably not optimal (LB:07-2025)
+nblock_lobpcg 1
 
 # Plane wave basis set
 #**************************************
