@@ -3625,10 +3625,10 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
      ! Use a temporary Vcp_ks to compute the Coulomb interaction already present
      ! in the Fock part of the Kohn-Sham Hamiltonian
      if (Gsph_x%ng > Gsph_c%ng) then
-       call Vcp_ks%init(Gsph_x,Cryst,Qmesh,Kmesh,Dtset%fock_rcut,Dtset%fock_icutcoul,Dtset%vcutgeo,&
+       call Vcp_ks%init(Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
                         Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,comm)
      else
-       call Vcp_ks%init(Gsph_c,Cryst,Qmesh,Kmesh,Dtset%fock_rcut,Dtset%fock_icutcoul,Dtset%vcutgeo,&
+       call Vcp_ks%init(Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
                         Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,comm)
      end if
 
@@ -4360,10 +4360,10 @@ subroutine setup_vcp(Vcp_ks,Vcp_full,Dtset,Gsph_x,Gsph_c,Cryst,Qmesh,Kmesh,coef_
    end if
  end if
  if (Gsph_x%ng > Gsph_c%ng) then
-   call Vcp_ks%init(Gsph_x,Cryst,Qmesh,Kmesh,rcut,Dtset%fock_icutcoul,Dtset%vcutgeo,&
+   call Vcp_ks%init(Gsph_x,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
                     Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,comm)
  else
-   call Vcp_ks%init(Gsph_c,Cryst,Qmesh,Kmesh,rcut,Dtset%fock_icutcoul,Dtset%vcutgeo,&
+   call Vcp_ks%init(Gsph_c,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
                     Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,comm)
  end if
  ABI_FREE(qlwl)

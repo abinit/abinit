@@ -116,6 +116,10 @@ _ WF disk file :      0.029 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
     fock_icutcoul2          0
     fock_icutcoul3          0
     fock_icutcoul4          3
+        fock_rcut1     0.00000000E+00 Bohr
+        fock_rcut2     0.00000000E+00 Bohr
+        fock_rcut3     4.00000000E+00 Bohr
+        fock_rcut4     0.00000000E+00 Bohr
            getwfk          -1
            istwfk        1    1    1
               ixc1         11
@@ -1194,6 +1198,10 @@ total_energy_dc_eV  : -3.07288733757048E+02
     fock_icutcoul2          0
     fock_icutcoul3          0
     fock_icutcoul4          3
+        fock_rcut1     0.00000000E+00 Bohr
+        fock_rcut2     0.00000000E+00 Bohr
+        fock_rcut3     4.00000000E+00 Bohr
+        fock_rcut4     0.00000000E+00 Bohr
            getwfk          -1
            istwfk        1    1    1
               ixc1         11
