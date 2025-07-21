@@ -1079,6 +1079,9 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%fock_icutcoul
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'fock_icutcoul','INT',0)
 
+ dprarr(1,:)=dtsets(:)%fock_rcut
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'fock_rcut','LEN',0)
+
  dprarr(1,:)=dtsets(:)%freqim_alpha
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'freqim_alpha','DPR',0)
 
@@ -1303,6 +1306,9 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
 
  !dprarr(1,:)  =dtsets(:)%gstore_gstore_erange
  !call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gstore_erange','ENE',0)
+
+ dprarr(1,:)=dtsets(:)%gw_rcut
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'gw_rcut','LEN',0)
 
  dprarr(1,:) = dtsets(:)%gwr_boxcutmin
  call prttagm(dprarr, intarr, iout, jdtset_, 1, marr, narr, narrm, ncid, ndtset_alloc, 'gwr_boxcutmin', 'DPR', 0)

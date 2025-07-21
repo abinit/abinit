@@ -130,6 +130,11 @@ _ WF disk file :      0.417 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
            getwfk3          1
            getwfk4          1
            getwfk5          1
+          gw_rcut1     0.00000000E+00 Bohr
+          gw_rcut2     0.00000000E+00 Bohr
+          gw_rcut3     0.00000000E+00 Bohr
+          gw_rcut4     0.00000000E+00 Bohr
+          gw_rcut5     1.00000000E+00 Bohr
         gwcalctyp1          0
         gwcalctyp2          1
         gwcalctyp3          1
@@ -231,11 +236,6 @@ P           mkmem           3
         optdriver3          3
         optdriver4          3
         optdriver5          3
-             rcut1     0.00000000E+00 Bohr
-             rcut2     0.00000000E+00 Bohr
-             rcut3     0.00000000E+00 Bohr
-             rcut4     0.00000000E+00 Bohr
-             rcut5     1.00000000E+00 Bohr
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -1905,6 +1905,11 @@ meta: {optdriver: 3, gwcalctyp: 1, }
            getwfk3          1
            getwfk4          1
            getwfk5          1
+          gw_rcut1     0.00000000E+00 Bohr
+          gw_rcut2     0.00000000E+00 Bohr
+          gw_rcut3     0.00000000E+00 Bohr
+          gw_rcut4     0.00000000E+00 Bohr
+          gw_rcut5     1.00000000E+00 Bohr
         gwcalctyp1          0
         gwcalctyp2          1
         gwcalctyp3          1
@@ -2006,11 +2011,6 @@ P           mkmem           3
         optdriver3          3
         optdriver4          3
         optdriver5          3
-             rcut1     0.00000000E+00 Bohr
-             rcut2     0.00000000E+00 Bohr
-             rcut3     0.00000000E+00 Bohr
-             rcut4     0.00000000E+00 Bohr
-             rcut5     1.00000000E+00 Bohr
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00

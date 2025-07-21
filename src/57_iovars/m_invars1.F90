@@ -2551,6 +2551,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%gw_invalid_freq=0
    dtsets(idtset)%gw_icutcoul=6
    dtsets(idtset)%gw_qprange=0
+   dtsets(idtset)%gw_rcut=zero   ! Spencer-Alavi value by default
    dtsets(idtset)%gw_sigxcore=0
    dtsets(idtset)%gwls_stern_kmax=1
    dtsets(idtset)%gwls_model_parameter=1.0_dp

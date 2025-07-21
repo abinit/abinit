@@ -1838,7 +1838,7 @@ if(dtset%optdriver==66) then
   call Gsphere%init(Cryst,npw_serial,gvec=gvec)
   call Gsphere%print()
 
-  call Vcp%init(Gsphere,Cryst,Qmesh,Kmesh,dtset%rcut,dtset%gw_icutcoul,dtset%vcutgeo,dtset%ecutsigx,npw_serial,&
+  call Vcp%init(Gsphere,Cryst,Qmesh,Kmesh,dtset%gw_rcut,dtset%gw_icutcoul,dtset%vcutgeo,dtset%ecutsigx,npw_serial,&
                 dtset%nkpt,dtset%kptns,mpi_enreg%comm_world)
 
   ! Since Vcp%vc_sqrt is sorted according to the KSS convention for G vectors
