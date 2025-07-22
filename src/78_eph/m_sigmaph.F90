@@ -584,8 +584,10 @@ contains  !=====================================================
 !!
 !! INPUTS
 !! wfk0_path=String with the path to the GS unperturbed WFK file.
+!! dtfil<datafiles_type>=Variables related to files.
 !! ngfft(18),ngfftf(18)=Coarse and Fine FFT meshes.
 !! dtset<dataset_type>=All input variables for this dataset.
+!! cryst: Crystalline structure
 !! ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
 !! dvdb<dbdb_type>=Database with the DFPT SCF potentials.
 !! ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
