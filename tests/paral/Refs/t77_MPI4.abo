@@ -97,15 +97,15 @@ _ WF disk file :      0.021 Mbytes ; DEN or POT disk file :      0.024 Mbytes.
            getwfk1          0
            getwfk2          0
            getwfk3          2
+          gw_rcut1     0.00000000E+00 Bohr
+          gw_rcut2     0.00000000E+00 Bohr
+          gw_rcut3     9.00000000E+00 Bohr
  gw_customnfreqsp1          0
  gw_customnfreqsp2          0
  gw_customnfreqsp3          1
         gw_freqsp1       0.00000 Hartree
         gw_freqsp2       0.00000 Hartree
         gw_freqsp3      -0.55582 Hartree
-          gw_rcut1     0.00000000E+00 Bohr
-          gw_rcut2     0.00000000E+00 Bohr
-          gw_rcut3     9.00000000E+00 Bohr
       gw_icutcoul1          6
       gw_icutcoul2          6
       gw_icutcoul3          0
@@ -699,15 +699,15 @@ force_length_stats: {min: null, max: null, mean: null, }
            getwfk1          0
            getwfk2          0
            getwfk3          2
+          gw_rcut1     0.00000000E+00 Bohr
+          gw_rcut2     0.00000000E+00 Bohr
+          gw_rcut3     9.00000000E+00 Bohr
  gw_customnfreqsp1          0
  gw_customnfreqsp2          0
  gw_customnfreqsp3          1
         gw_freqsp1       0.00000 Hartree
         gw_freqsp2       0.00000 Hartree
         gw_freqsp3      -0.55582 Hartree
-          gw_rcut1     0.00000000E+00 Bohr
-          gw_rcut2     0.00000000E+00 Bohr
-          gw_rcut3     9.00000000E+00 Bohr
       gw_icutcoul1          6
       gw_icutcoul2          6
       gw_icutcoul3          0

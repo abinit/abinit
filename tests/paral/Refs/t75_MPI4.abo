@@ -178,6 +178,12 @@ _ WF disk file :      0.861 Mbytes ; DEN or POT disk file :      0.846 Mbytes.
            getwfk4          2
            getwfk5          2
            getwfk6          2
+          gw_rcut1     0.00000000E+00 Bohr
+          gw_rcut2     0.00000000E+00 Bohr
+          gw_rcut3     1.05000000E+01 Bohr
+          gw_rcut4     1.05000000E+01 Bohr
+          gw_rcut5     1.05000000E+01 Bohr
+          gw_rcut6     1.05000000E+01 Bohr
         gwcalctyp1          0
         gwcalctyp2          0
         gwcalctyp3         28
@@ -202,12 +208,6 @@ _ WF disk file :      0.861 Mbytes ; DEN or POT disk file :      0.846 Mbytes.
             gwmem4          0
             gwmem5          0
             gwmem6          0
-          gw_rcut1     0.00000000E+00 Bohr
-          gw_rcut2     0.00000000E+00 Bohr
-          gw_rcut3     1.05000000E+01 Bohr
-          gw_rcut4     1.05000000E+01 Bohr
-          gw_rcut5     1.05000000E+01 Bohr
-          gw_rcut6     1.05000000E+01 Bohr
       gw_icutcoul1          6
       gw_icutcoul2          6
       gw_icutcoul3          0
@@ -1317,6 +1317,12 @@ data: !SigmaeeData |
            getwfk4          2
            getwfk5          2
            getwfk6          2
+          gw_rcut1     0.00000000E+00 Bohr
+          gw_rcut2     0.00000000E+00 Bohr
+          gw_rcut3     1.05000000E+01 Bohr
+          gw_rcut4     1.05000000E+01 Bohr
+          gw_rcut5     1.05000000E+01 Bohr
+          gw_rcut6     1.05000000E+01 Bohr
         gwcalctyp1          0
         gwcalctyp2          0
         gwcalctyp3         28
@@ -1341,12 +1347,6 @@ data: !SigmaeeData |
             gwmem4          0
             gwmem5          0
             gwmem6          0
-          gw_rcut1     0.00000000E+00 Bohr
-          gw_rcut2     0.00000000E+00 Bohr
-          gw_rcut3     1.05000000E+01 Bohr
-          gw_rcut4     1.05000000E+01 Bohr
-          gw_rcut5     1.05000000E+01 Bohr
-          gw_rcut6     1.05000000E+01 Bohr
       gw_icutcoul1          6
       gw_icutcoul2          6
       gw_icutcoul3          0
