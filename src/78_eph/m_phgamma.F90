@@ -3070,6 +3070,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  type(ddkop_t) :: ddkop
  type(xcomm_t) :: pert_comm, qs_comm, qpt_comm, bsum_comm, kpt_comm, spin_comm, pkb_comm !, ncwrite_comm
  type(krank_t) :: krank
+ type(htetra_t) :: tetra
  character(len=500) :: msg
  character(len=fnlen) :: path
 !arrays
@@ -3136,7 +3137,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ! Find Fermi surface k-points
  ! TODO: support kptopt, change setup of k-points if tetra: fist tetra weights then k-points on the Fermi surface!
  ABI_MALLOC(fstab, (nsppol))
- call fstab_init(fstab, ebands, cryst, dtset, comm)
+ call fstab_init(fstab, ebands, cryst, dtset, tetra, comm)
+ call tetra%free()
  !if (my_rank == master) call fstab_print(fstab, units)
 
  ! Define q-mesh. eph_ngqpt_fine activates the Fourier interpolation of the DFPT potentials.

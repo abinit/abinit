@@ -73,7 +73,7 @@ module m_eph_driver
  use m_gwpt,            only : gwpt_run
  use m_varpeq,          only : varpeq_run, varpeq_plot
  use m_eph_path,        only : eph_path_run
- use m_wkkp,            only : wkkp_run
+ use m_wkk,             only : wkk_run
 
  implicit none
 
@@ -850,8 +850,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (19)
    ! Compute matrix elements of W_kk'
-   call wkkp_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, wfk0_hdr, &
-                 pawtab, psps, mpi_enreg, comm)
+   call wkk_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, wfk0_hdr, &
+                pawtab, psps, mpi_enreg, comm)
 
  case default
    ABI_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))
@@ -860,17 +860,10 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  !=====================
  !==== Free memory ====
  !=====================
- call cryst%free()
- call dvdb%free()
- call drhodb%free()
- call ddb_hdr%free()
- call ddb%free()
- call ifc%free()
- call wfk0_hdr%free()
- call ebands%free()
- call ebands_kq%free()
- call pawfgr_destroy(pawfgr)
- call destroy_mpi_enreg(mpi_enreg)
+ call cryst%free(); call dvdb%free(); call drhodb%free(); call ddb_hdr%free()
+ call ddb%free(); call ifc%free(); call wfk0_hdr%free()
+ call ebands%free(); call ebands_kq%free()
+ call pawfgr_destroy(pawfgr); call destroy_mpi_enreg(mpi_enreg)
 
  if (allocated(efmasdeg)) call efmasdeg_free_array(efmasdeg)
  if (allocated(efmasval)) call efmasval_free_array(efmasval)

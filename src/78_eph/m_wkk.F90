@@ -49,6 +49,7 @@ module m_wkk
  use m_fftcore,        only : ngfft_seq, sphereboundary, get_kg, print_ngfft
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : kmesh_t, findqg0
+ use m_htetra,         only : htetra_t
  use m_gsphere,        only : gsphere_t
  use m_pawtab,         only : pawtab_type
  use m_io_screening,   only : hscr_t, get_hscr_qmesh_gsph
@@ -141,6 +142,7 @@ subroutine wkk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  type(edos_t) :: edos
  type(epsm1_t) :: epsm1
  type(ddkop_t) :: ddkop
+ type(htetra_t) :: tetra
  character(len=fnlen) :: screen_filepath
  character(len=5000) :: msg, qkp_string
 !arrays
@@ -157,7 +159,7 @@ subroutine wkk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  real(dp),allocatable :: work(:,:,:,:), e_mesh(:), e_args(:), vcart_ibz(:,:,:,:), wgt_mk(:), wgt_nkp(:,:)
  complex(gwpc),allocatable :: cwork_ur(:), rhotwg_mn_x(:,:,:), rhotwg_mn_c(:,:,:), w_rhotwg_mn_c(:,:,:)
  complex(gwpc),allocatable :: vc_sqrt_gx(:), ur_nkp(:,:), ur_mk(:,:), kxcg(:,:)
- complex(dp),allocatable :: w_ee(:,:), ! w_kkp(:,:,:,:)
+ complex(dp),allocatable :: w_ee(:,:) ! w_kkp(:,:,:,:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
  type(fstab_t),target,allocatable :: fstab(:)
 !************************************************************************
@@ -187,7 +189,8 @@ subroutine wkk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ! Find Fermi surface k-points.
  ! TODO: support kptopt, change setup of k-points if tetra: fist tetra weights then k-points on the Fermi surface!
  ABI_MALLOC(fstab, (nsppol))
- call fstab_init(fstab, ebands, cryst, dtset, comm)
+ call fstab_init(fstab, ebands, cryst, dtset, tetra, comm)
+ call tetra%free()
 
  bmin = huge(1); bmax = -1
  do spin=1,nsppol

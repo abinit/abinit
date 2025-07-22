@@ -237,6 +237,7 @@ end subroutine fstab_free
 !! OUTPUT
 !!  fstab(nsppol)=Tables with the correspondence between points of the Fermi surface (FS)
 !!     and the k-points in ebands_t.
+!!  tetra: Tetrahedron object.
 !!
 !! TODO
 !!  Use a different algorithm to select k-points if tetra. First compute tetra weights
@@ -244,7 +245,7 @@ end subroutine fstab_free
 !!
 !! SOURCE
 
-subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
+subroutine fstab_init(fstab, ebands, cryst, dtset, tetra, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -252,6 +253,7 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
  type(ebands_t),intent(in) :: ebands
  type(crystal_t),intent(in) :: cryst
  type(dataset_type),intent(in) :: dtset
+ type(htetra_t),intent(out) :: tetra
 !arrays
  type(fstab_t),target,intent(out) :: fstab(ebands%nsppol)
 
@@ -266,13 +268,12 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
  character(len=80) :: errstr
  character(len=5000) :: msg
  type(fstab_t),pointer :: fs
- type(htetra_t) :: tetra
  type(krank_t) :: krank
 !arrays
  integer :: kptrlatt(3,3)
  integer,allocatable :: full2ebands(:,:),bz2ibz(:), fs2bz(:),indkk(:,:) !,fs2ibz(:)
- real(dp),allocatable :: kbz(:,:), tmp_eigen(:),bdelta(:,:),btheta(:,:)
  real(dp) :: rlatt(3,3), klatt(3,3)
+ real(dp),allocatable :: kbz(:,:), tmp_eigen(:),bdelta(:,:),btheta(:,:)
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
@@ -462,15 +463,14 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
    !end do
  end do
 
+ ABI_MALLOC(bz2ibz, (nkbz))
+ bz2ibz = full2ebands(1, :)
+ call tetra%init(bz2ibz, cryst%gprimd, klatt, kbz, nkbz, ebands%kptns, nkibz, ierr, errstr, comm)
+ ABI_CHECK(ierr == 0, errstr)
+ ABI_FREE(bz2ibz)
+
  if (abs(dtset%eph_intmeth) == 2) then
    ! TODO: compute weights on the fly to reduce memory? nene should be set to zero if not used!
-   ABI_MALLOC(bz2ibz, (nkbz))
-   bz2ibz = full2ebands(1, :)
-
-   call tetra%init(bz2ibz, cryst%gprimd, klatt, kbz, nkbz, ebands%kptns, nkibz, ierr, errstr, comm)
-   ABI_CHECK(ierr == 0, errstr)
-   ABI_FREE(bz2ibz)
-
    ABI_MALLOC(tmp_eigen, (nkibz))
    ABI_MALLOC(btheta, (nene, nkibz))
    ABI_MALLOC(bdelta, (nene, nkibz))
@@ -504,7 +504,6 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
    ABI_FREE(tmp_eigen)
    ABI_FREE(btheta)
    ABI_FREE(bdelta)
-   call tetra%free()
  end if
 
  !ABI_FREE(fs2ibz)
