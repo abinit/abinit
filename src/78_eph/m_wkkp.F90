@@ -1,9 +1,9 @@
-!!****m* ABINIT/m_wkkp
+!!****m* ABINIT/m_wkk
 !! NAME
-!!  m_wkkp
+!!  m_wkk
 !!
 !! FUNCTION
-!!  Computation of the matrix elements of the screened interaction W_kk'
+!!  Computation of the matrix elements of the screened interaction W_kk'.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2025 ABINIT group (MG)
@@ -19,7 +19,7 @@
 
 #include "abi_common.h"
 
-module m_wkkp
+module m_wkk
 
  !use, intrinsic :: iso_c_binding
  use defs_basis
@@ -47,9 +47,7 @@ module m_wkkp
  use m_numeric_tools,  only : arth, linspace ! print_arr
  use m_io_tools,       only : iomode_from_fname
  use m_fftcore,        only : ngfft_seq, sphereboundary, get_kg, print_ngfft
- !use m_krank,          only : krank_t, krank_from_kptrlatt
  use m_crystal,        only : crystal_t
- !use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map
  use m_bz_mesh,        only : kmesh_t, findqg0
  use m_gsphere,        only : gsphere_t
  use m_pawtab,         only : pawtab_type
@@ -67,7 +65,7 @@ module m_wkkp
  private
 !!***
 
- public :: wkkp_run  ! Main entry point to compute Wkk' matrix elements.
+ public :: wkk_run  ! Main entry point to compute Wkk' matrix elements.
 
 !----------------------------------------------------------------------
 
@@ -76,17 +74,20 @@ contains  !=====================================================
 
 !----------------------------------------------------------------------
 
-!!****f* m_wkkp/wkkp_run
+!!****f* m_wkk/wkk_run
 !! NAME
-!!  wkkp_run
+!!  wkk_run
 !!
 !! FUNCTION
 !!  Computation of the matrix elements of the screened interaction W_kk'
+!!  between two Cooper pairs.
 !!
 !! INPUTS
 !! wfk0_path=String with the path to the GS unperturbed WFK file.
+!! dtfil<datafiles_type>=Variables related to files.
 !! ngfft(18),ngfftf(18)=Coarse and Fine FFT meshes.
 !! dtset<dataset_type>=All input variables for this dataset.
+!! cryst: Crystalline structure
 !! ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
 !! wfk_hdr=Header of the WFK file.
 !! pawtab(ntypat*usepaw)<pawtab_type>=Paw tabulated starting data.
@@ -94,10 +95,11 @@ contains  !=====================================================
 !! comm=MPI communicator.
 !!
 !! OUTPUT
+!!  Results are written to file in netcdf format.
 !!
 !! SOURCE
 
-subroutine wkkp_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hdr, &
+subroutine wkk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hdr, &
                     pawtab, psps, mpi_enreg, comm)
 
 !Arguments ------------------------------------
@@ -125,7 +127,7 @@ subroutine wkkp_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_h
  integer :: bstart_kp, bstop_kp, nband_kp, ik_bz, bmin, bmax, max_nb
  integer :: ikp_ibz, isym_kp, trev_kp, npw_kp, istwf_kp, npw_kp_ibz, istwf_kp_ibz
  integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_k_ibz, istwf_k_ibz
- integer :: m_k, im_k, n_kp, in_kp, root_ncid, prtwkkp, ne
+ integer :: m_k, im_k, n_kp, in_kp, root_ncid, wkk_mode, ne
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg_kp,nkpg_k,cnt, edos_intmeth, nqlwl, scr_iomode
  integer :: ikp_bz, my_ikp, my_nkp !, my_iq,
  real(dp) :: cpu_all, wall_all, gflops_all, cpu, wall, gflops, cpu_kp, wall_kp, gflops_kp
@@ -144,7 +146,7 @@ subroutine wkkp_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_h
 !arrays
  integer :: g0_k(3), g0_kp(3), g0_qq(3), units(2), work_ngfft(18), gmax(3), mapl_k(6), mapl_kp(6), mg0(3)
  integer,allocatable :: kg_kp(:,:), kg_k(:,:), gbound_kp(:,:), gbound_k(:,:), gbound_c(:,:), gbound_x(:,:)
- integer,allocatable :: nband(:,:), wfd_istwfk(:) ! iq_buf(:,:), done_qbz_spin(:,:),
+ integer,allocatable :: nband(:,:), wfd_istwfk(:)
  integer, contiguous, pointer :: kg_c(:,:), kg_x(:,:)
  real(dp) :: kk_ibz(3), kk_bz(3), kp_ibz(3), kp_bz(3), qq_bz(3), kk_diff(3) ! qq_ibz(3)
  complex(gwpc) :: ctmp_gwpc, mu_c
@@ -152,10 +154,10 @@ subroutine wkkp_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_h
 !arrays
  real(dp) :: n0(ebands%nsppol)
  real(dp),allocatable :: qlwl(:,:), kpg_kp(:,:), kpg_k(:,:), ug_kp(:,:,:), ug_k(:,:), cg_work(:,:)
- real(dp),allocatable :: work(:,:,:,:), e_mesh(:), e_args(:), vcart_ibz(:,:,:,:), wgt_mk(:), wgt_nkp(:,:) !, my_gbuf(:,:,:,:,:,:)
- complex(gwpc),allocatable :: cwork_ur(:), rhotwg_mn_x(:,:,:), rhotwg_mn_c(:,:,:), w_rhotwg_mn_c(:,:,:), vc_sqrt_gx(:), ur_nkp(:,:), ur_mk(:,:)
- complex(gwpc),allocatable :: kxcg(:,:)
- complex(dp),allocatable :: w_ee(:,:)
+ real(dp),allocatable :: work(:,:,:,:), e_mesh(:), e_args(:), vcart_ibz(:,:,:,:), wgt_mk(:), wgt_nkp(:,:)
+ complex(gwpc),allocatable :: cwork_ur(:), rhotwg_mn_x(:,:,:), rhotwg_mn_c(:,:,:), w_rhotwg_mn_c(:,:,:)
+ complex(gwpc),allocatable :: vc_sqrt_gx(:), ur_nkp(:,:), ur_mk(:,:), kxcg(:,:)
+ complex(dp),allocatable :: w_ee(:,:), ! w_kkp(:,:,:,:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
  type(fstab_t),target,allocatable :: fstab(:)
 !************************************************************************
@@ -194,9 +196,9 @@ subroutine wkkp_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_h
  end do
  max_nb = bmax - bmin + 1
 
+ ! Build linear mesh for W(e,e').
  spin = 1
  associate (fs => fstab(spin))
- ! Build linear mesh for W(e,e').
  e_min = minval(ebands%eig(fs%bmin,:,spin)) - 0.1_dp * eV_Ha
  e_max = maxval(ebands%eig(fs%bmax,:,spin)) + 0.1_dp * eV_Ha
  e_step = 0.002 * eV_Ha
@@ -233,14 +235,14 @@ subroutine wkkp_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_h
  ! Init g-sphere for the exchange part from ecutsigx.
  call gsph_c%extend(cryst, dtset%ecutsigx, gsph_x)
 
+ ! Initialize Coulomb term on the IBZ of the qmesh. Use largest G-sphere.
+ call kmesh%init(cryst, wfk_hdr%nkpt, wfk_hdr%kptns, dtset%kptopt)
+ faq = one / (cryst%ucvol*kmesh%nbz)
+
  ! TODO:
  ! Here we sort the pp_mesh by stars so that we can split the pp wavevectors in blocks and therefore
  ! reduce the number of wavevectors in the IBZ that must be stored in memory.
  !call qmesh%pack_by_stars()
-
- ! Initialize Coulomb term on the IBZ of the qmesh. Use largest G-sphere.
- call kmesh%init(cryst, wfk_hdr%nkpt, wfk_hdr%kptns, dtset%kptopt)
- faq = one / (cryst%ucvol*kmesh%nbz)
 
  npw_x = gsph_x%ng; npw_c = gsph_c%ng !; min_npw_xc = min(npw_x, npw_c); max_npw_xc = max(npw_x, npw_c)
  if (gsph_x%ng >= gsph_c%ng) then
@@ -408,10 +410,10 @@ subroutine wkkp_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_h
 
  call pstat_proc%print(_PSTAT_ARGS_)
 
- prtwkkp = 1
+ wkk_mode = 1
  ! Master creates the netcdf file used to store the results of the calculation.
  if (my_rank == master) then
-   NCF_CHECK(nctk_open_create(root_ncid, strcat(dtfil%filnam_ds(4), "_WKKP.nc") , xmpi_comm_self))
+   NCF_CHECK(nctk_open_create(root_ncid, strcat(dtfil%filnam_ds(4), "_WKK.nc") , xmpi_comm_self))
    NCF_CHECK(cryst%ncwrite(root_ncid))
    NCF_CHECK(ebands%ncwrite(root_ncid))
    NCF_CHECK(edos%ncwrite(root_ncid))
@@ -453,8 +455,8 @@ subroutine wkkp_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_h
  end if
  call xmpi_barrier(comm)
 
- ! Open WKKP.nc file and go to data mode.
- NCF_CHECK(nctk_open_modify(root_ncid, strcat(dtfil%filnam_ds(4), "_WKKP.nc") , comm))
+ ! Open WKK.nc file and go to data mode.
+ NCF_CHECK(nctk_open_modify(root_ncid, strcat(dtfil%filnam_ds(4), "_WKK.nc") , comm))
  NCF_CHECK(nctk_set_datamode(root_ncid))
 
  mg0 = [1, 1, 1]
@@ -623,12 +625,12 @@ subroutine wkkp_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_h
  ABI_FREE(ur_mk)
  !end do ! my_is
 
- !call xmpi_sum_master(w_ee, master, comm, ierr)
+ call xmpi_sum(w_ee, comm, ierr)
 
- call cwtime_report(" wkkp calculation", cpu_all, wall_all, gflops_all, end_str=ch10)
+ call cwtime_report(" wkk calculation", cpu_all, wall_all, gflops_all, end_str=ch10)
 
  ! Set vqk_completed to 1 so that we can easily check if restarted is needed.
- !if (prtwkkp /= 0) then
+ !if (wkk_mode /= 0) then
  !if (my_rank == master) then
  !  NCF_CHECK(nf90_put_var(root_ncid, root_vid("vqk_completed"), 1))
  !end if
@@ -664,7 +666,7 @@ subroutine wkkp_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_h
  ABI_FREE(fstab)
 
  call xmpi_barrier(comm) ! This to make sure that the parallel output of GSTORE is completed
- call cwtime_report(" wkkp_run: MPI barrier before returning.", cpu_all, wall_all, gflops_all, end_str=ch10, comm=comm)
+ call cwtime_report(" wkk_run: MPI barrier before returning.", cpu_all, wall_all, gflops_all, end_str=ch10, comm=comm)
 
 contains
 
@@ -687,8 +689,8 @@ end function root_vid
 !  spin_vid = nctk_idname(spin_ncid, var_name)
 !end function spin_vid
 
-end subroutine wkkp_run
+end subroutine wkk_run
 !!***
 
-end module m_wkkp
+end module m_wkk
 !!***
