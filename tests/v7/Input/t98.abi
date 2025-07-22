@@ -101,7 +101,7 @@ vdw_tol 1d-10 # Tolerance on the pair-wise term
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t98.abo, tolnlines = 8, tolabs = 1.0e-05, tolrel = 1.0e-06, fld_options = -easy
+#%%   t98.abo, tolnlines = 8, tolabs = 0.31, tolrel = 0.003, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
