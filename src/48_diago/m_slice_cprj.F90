@@ -885,9 +885,10 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  islice = 2
  !nband_slice_buf = 15
 
- lambda_minus = 0.51404
- lambda_plus = 1.25348
- prev_mineig = -1.14360
+ lambda_minus = 0.51404 ! assumes sequential, =largest previously converged value
+ lambda_plus = 1.25348 ! can be in parallel, only depends on Rayleigh value
+ prev_mineig = -1.14360 ! assumes sequential, =smallest previously converged value
+ ! TODO add overlap width to filter in [a-w,b+w) for wanted [a,b) for convergence reasons
  center = (slice%ecut + prev_mineig)*0.5
  radius = (slice%ecut - prev_mineig)*0.5 
  ls = (lambda_minus - center) / radius
