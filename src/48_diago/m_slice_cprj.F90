@@ -538,11 +538,12 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  real(dp) :: max_dist2
  real(dp) :: prev_mineig
  real(dp) :: amp_ideg
+ real(dp) :: ein_ideg, eout_ideg
  real(dp) :: tol12 = 1.0e-12
  real(dp) :: tol_probe = 1.0d0 ! this depends on the residual
  type(xg_t) :: Xsum
  type(xg_t) :: DivResults
- type(xg_t) :: dist1, dist2, dist12
+ type(xg_t) :: dist1, dist2, dist3, dist12
  type(xgBlock_t) :: DivResults_part
  type(xgBlock_t) :: X_prev
  type(xgBlock_t) :: cprjX_prev
@@ -563,6 +564,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  real(dp), pointer :: probe(:)
  real(dp), pointer :: lambda_apost(:)
  real(dp), pointer :: dist2_array(:) => null()
+ real(dp), pointer :: dist3_array(:)
  real(dp), pointer :: theta_(:,:) => null()
  !Pointers similar to old Chebfi
  integer,allocatable :: ndeg_filter_slice(:) !Slice variable
@@ -720,6 +722,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  call xgBlock_colwiseNorm2(slice%AllX,dist1%self,comm_loc=xmpi_comm_null)
  ! preallocate, will be updated during ideg iterations
  call xg_init(dist2,SPACE_R,neigenpairs,1)
+ call xg_init(dist3,SPACE_R,neigenpairs,1)
 
  ! ITEST
  write(901,*) 'probe dist1='
@@ -728,8 +731,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  ! ITEST
 
  ! Start filter up to degree
- !lambda_minus = rayleigh_quotients(nband_slice_buf)
- lambda_minus = 0.51404d0
+ lambda_minus = rayleigh_quotients(nband_slice_buf)
+ !lambda_minus = 0.51404d0
  lambda_plus = slice%ecut
  center = (lambda_plus + lambda_minus)*0.5
  radius = (lambda_plus - lambda_minus)*0.5
@@ -787,11 +790,23 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
     ! ITEST
     write(901,*) 'maximum dist2=', max_dist2
-    write(901,*) 'probe dist2(scaled by max)='
+    !write(901,*) 'probe dist2(scaled by max)='
+    write(901,*) 'probe dist2='
     call xgBlock_print(dist2%self,901)
     flush(901)
     ! ITEST
-            
+
+    ! Orthogonal complement
+    call xgBlock_copy(slice%AllX, slice%X_PROBE%self) ! X_PROBE = X
+    call xgBlock_saxpy(slice%X_PROBE%self, dble(-1.0), slice%X) ! X_PROBE = X - f(A)X
+    call xgBlock_colwiseNorm2(slice%X_PROBE%self, dist3%self, comm_loc=xmpi_comm_null)
+
+    ! ITEST
+    write(901,*) 'probe dist3(orthogonal complement)='
+    call xgBlock_print(dist3%self,901)
+    flush(901)
+    ! ITEST
+
     !A * Psi for next iteration
     call timab(tim_AX_v,1,tsec)
     call getAX(slice%X,slice%AX)
@@ -823,10 +838,19 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  ! first count
  call xgBlock_reverseMap_1d(dist2%self,probe)
  write(901,*) 
- write(901,*) 'probe values used to discard indices=', probe(:)
+ write(901,*) 'probe values used to keep indices=', probe(:)
+ flush(901)
+ 
+ call xgBlock_reverseMap_1d(dist3%self, dist3_array) 
+ write(901,*) 
+ write(901,*) 'probe complement values used to discard indices=', dist3_array(:)
  flush(901)
 
- count_mask = count(probe > tol_probe, 1)
+ ! Criterion 3 on value
+ !count_mask = count(probe > tol_probe, 1)
+ 
+ ! Criterion 2 on ortho complement
+ count_mask = count(probe > dist3_array)
 
  write(901,*) 
  write(901,*) 'Keep count_mask(should be 15)= out of neigenpairs=', count_mask, neigenpairs
@@ -842,7 +866,10 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  call xg_init(AX_kept,slice%space,slice%total_spacedim,count_mask,xmpi_comm_self,me_g0=slice%me_g0_fft)
  icount = 1
  do iband=1,neigenpairs
-    if (probe(iband) > tol_probe) then
+    ! Criterion 1
+    !if (probe(iband) > tol_probe) then
+    ! Criterion 2
+    if (probe(iband) > dist3_array(iband)) then
         call xgBlock_setBlock(X_kept%self, X_kept_col, slice%total_spacedim, 1, fcol=icount)
         call xgBlock_setBlock(AX_kept%self, AX_kept_col, slice%total_spacedim, 1, fcol=icount)
         call xgBlock_setBlock(slice%X, X_col, slice%total_spacedim, 1, fcol=iband)
@@ -878,6 +905,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  ! reset and free
  call xg_free(dist1)
  call xg_free(dist2)
+ call xg_free(dist3)
  call xg_free(X_kept)
  call xg_free(AX_kept)
 
@@ -885,8 +913,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  islice = 2
  !nband_slice_buf = 15
 
- lambda_minus = 0.51404 ! assumes sequential, =largest previously converged value
- lambda_plus = 1.25348 ! can be in parallel, only depends on Rayleigh value
+ lambda_minus = 0.51404-0.1 ! assumes sequential, =largest previously converged value
+ lambda_plus = 1.25348+0.1 ! can be in parallel, only depends on Rayleigh value
  prev_mineig = -1.14360 ! assumes sequential, =smallest previously converged value
  ! TODO add overlap width to filter in [a-w,b+w) for wanted [a,b) for convergence reasons
  center = (slice%ecut + prev_mineig)*0.5
@@ -923,9 +951,15 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
  ! preallocate, will be updated during ideg iterations
  call xg_init(dist2,SPACE_R,neigenpairs,1)
+ call xg_init(dist3,SPACE_R,neigenpairs,1)
  
+ ! TODO here tune overlap width from ndeg_filter
+ !               or the inverse ...
+ ! but in anyway these two quantities must be autotuned
+
+
  ! Initialize Chebyshev expansion of indicator function of order ndeg_filter
- ndeg_filter = 60
+ ndeg_filter = 35
  call xg_init(Xsum,slice%space,slice%total_spacedim,neigenpairs,slice%spacecom,gpu_option=gpu_option)
  cdeg = Pi/(ndeg_filter+2)
  mu = 1.d0/Pi*(ACOS(ls)-ACOS(us))
@@ -959,26 +993,39 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
    ! ######### Compute probe
    ! dist2 = |Xsum|^2 colwise L2-norm
    call xgBlock_colwiseNorm2(Xsum%self, dist2%self, max_dist2, comm_loc=xmpi_comm_null)
-   call xgBlock_scale(dist2%self, 1/max_dist2, 1)
+   !call xgBlock_scale(dist2%self, 1/max_dist2, 1)
    
    ! ITEST
    write(901,*) 'maximum dist2=', max_dist2
-   write(901,*) 'probe dist2(scaled by max)='
-   !write(901,*) 'probe dist2='
+   !write(901,*) 'probe dist2(scaled by max)='
+   write(901,*) 'probe dist2='
    call xgBlock_print(dist2%self,901)
+   flush(901)
+   ! ITEST
+
+   ! Orthogonal complement
+   call xgBlock_copy(slice%AllX, slice%X_PROBE%self) ! X_PROBE = X
+   call xgBlock_saxpy(slice%X_PROBE%self, dble(-1.0), slice%X) ! X_PROBE = X_PROBE - f(B^{-1}A)X
+   call xgBlock_colwiseNorm2(slice%X_PROBE%self, dist3%self, comm_loc=xmpi_comm_null)
+
+   ! ITEST
+   write(901,*) 'probe dist3(orthogonal complement)='
+   call xgBlock_print(dist3%self,901)
    flush(901)
    ! ITEST
 
    ! =================== Tested idea
    ! try to divide by max(f(lambda_plus), f(lambda_minus)) 
    ! this will make it independent of degree
-    amp_ideg = max(bandpassIndicator_sca(ls,ls,us,ideg),bandpassIndicator_sca(us,ls,us,ideg))
-    call xgBlock_scale(dist2%self, 1.d0/amp_ideg, 1) 
+   amp_ideg = max(bandpassIndicator_sca(ls,ls,us,ideg+1),bandpassIndicator_sca(us,ls,us,ideg+1))
+   ein_ideg = 1-amp_ideg
+   eout_ideg = amp_ideg
+!   call xgBlock_scale(dist2%self, 1.d0/amp_ideg, 1) 
 
    ! ITEST
-   write(901,*) 'amp_ideg=', amp_ideg 
-   write(901,*) 'probe dist2(scaled by amp_ideg)='
-   call xgBlock_print(dist2%self,901)
+   write(901,*) 'ein,eout=', ein_ideg, eout_ideg
+   !write(901,*) 'probe dist2(scaled by amp_ideg)='
+   !call xgBlock_print(dist2%self,901)
    flush(901)
    ! ITEST
 
@@ -1025,9 +1072,21 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  write(901,*) 'probe values used to discard indices=', probe(:)
  flush(901)
 
- tol_probe = 0.4d0
- count_mask = count(probe > tol_probe, 1)
+ call xgBlock_reverseMap_1d(dist3%self, dist3_array) 
+ write(901,*) 
+ write(901,*) 'probe complement values used to discard indices=', dist3_array(:)
+ flush(901)
 
+ ! Criterion 3 on value
+ !tol_probe = 0.4d0
+ !count_mask = count(probe > tol_probe, 1)
+
+ ! Criterion 2 on ortho complement
+ !count_mask = count(probe > dist3_array .or. ( probe > 1 ))
+
+ ! Criterion 3 take into account error of f
+ count_mask = count( probe > eout_ideg**2 + ((1+ein_ideg)*0.1d0)**2 )
+ 
  write(901,*) 
  write(901,*) 'Keep count_mask(should be 15)= out of neigenpairs=', count_mask, neigenpairs
  flush(901)
@@ -1042,7 +1101,12 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  call xg_init(AX_kept,slice%space,slice%total_spacedim,count_mask,xmpi_comm_self,me_g0=slice%me_g0_fft)
  icount = 1
  do iband=1,neigenpairs
-    if (probe(iband) > tol_probe) then
+    ! Criterion 1
+    !if (probe(iband) > tol_probe) then
+    ! Criterion 2
+    !if (probe(iband) > dist3_array(iband) .or. probe(iband) > 1) then
+    ! Criterion 3
+    if ( probe(iband) > eout_ideg**2 + ((1+ein_ideg)*0.1d0)**2 ) then
         call xgBlock_setBlock(X_kept%self, X_kept_col, slice%total_spacedim, 1, fcol=icount)
         call xgBlock_setBlock(AX_kept%self, AX_kept_col, slice%total_spacedim, 1, fcol=icount)
         call xgBlock_setBlock(slice%X, X_col, slice%total_spacedim, 1, fcol=iband)
@@ -1082,6 +1146,21 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  flush(901)
  ! ITEST
 
+ ! TODO here do the selection-discard procedure to keep eigenpairs in output workspace
+ ! 1) the first eigenpair is starting from previous slice + 1. Can use converged eigenvalues
+ ! like minloc
+ ! 2) the last eigenpair must have low residual. In practice it can be higher that the 
+ !    upper interval limit. This is the case when the upper limit plus overlap width
+ !    is very close to the last eigenvalue.
+ ! 3) we also use a criterion to check that the first eigenvalues of next slice are the 
+ !    the last converged kept in previous slice. This way slices trully overlap in practice.
+
+ ! TODO more testing
+ ! it would be interesting to see if we can further cut the nband=40 to slices of size 10.
+ ! current setting is cutting on size 10. It could be a good idea to give the size as input.
+ ! Then the number of slices, polynomial degree and widths are tuned from there.
+ ! See what is the amplification factor we achieve on the example that converges.
+
  ! Compute H-eSX
  if (slice%paw) then
     call timab(tim_AX_nl,1,tsec)
@@ -1106,6 +1185,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
  call xg_free(Xsum)
  call xg_free(dist2)
+ call xg_free(dist3)
  call xg_free(X_kept)
  call xg_free(AX_kept)
 
