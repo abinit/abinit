@@ -878,6 +878,12 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
    ABI_MALLOC(ham%dimcprj,(0))
  end if
 
+ if (present(use_gbt)) then
+    ham%use_gbt = use_gbt
+ else
+    ham%use_gbt = 0
+ end if
+
 ! ===========================
 ! ==== Non-local factors ====
 ! ===========================
