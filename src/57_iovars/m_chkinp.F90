@@ -93,8 +93,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
  integer :: ipsp,isppol,isym,itypat,iz,jdtset,jj,kk,lpawu,maxiatsph,maxidyn,minplowan_iatom,maxplowan_iatom
  integer :: mband,miniatsph,minidyn,mod10,mpierr,all_nprocs
  integer :: mu,natom,nfft,nfftdg,nkpt,nloc_mem,nlpawu
- integer :: nproc,nthreads,nspden,nspinor,nsppol,optdriver,mismatch_fft_tnons,response
- integer :: fftalg,fftalga,usepaw,usewvl
+ integer :: nproc,nthreads,nspden,nspinor,nsppol,optdriver,mismatch_fft_tnons,response,so_psp
+ integer :: fftalg,fftalga,usepaw,usewvl,use_gbt
  integer :: ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
  logical :: test,twvl,allowed,berryflag
  logical :: wvlbigdft=.false.
@@ -4219,7 +4219,23 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    end if
 
 ! use_gbt
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'use_gbt',dt%usegbt,2,(/0,1/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'use_gbt',dt%use_gbt,2,(/0,1/),iout)
+   if (response/=0) then ! If DFPT is activated, use_gbt must be disabled
+      cond_string(1)='response'; cond_values(1)=response
+      call chkint_eq(1,1,cond_string,cond_values,ierr,'use_gbt',dt%use_gbt,1,(/0/),iout)
+   end if
+   if (dt%usepaw==1) then  ! GBT currently not implemented for PAW
+      cond_string(1)='usepaw' ; cond_values(1)=dt%usepaw
+      call chkint_eq(1,1,cond_string,cond_values,ierr,'use_gbt',dt%use_gbt,1,(/0/),iout)
+   end if
+   if (dt%use_gbt==1) then ! GBT requires nspinor = 2 (non-collinear spin)
+      cond_string(1)='use_gbt'; cond_values(1)=dt%use_gbt
+      call chkint_eq(1,1,cond_string,cond_values,ierr,'nspinor',dt%nspinor,1,(/2/),iout)
+   end if
+   if (any(dt%so_psp==1)) then !  ! GBT is not compatible with SOC
+      cond_string(1)='so_psp'; cond_values(1)=1
+      call chkint_eq(1,1,cond_string,cond_values,ierr,'use_gbt',dt%use_gbt,1,(/0/),iout)
+   end if
 
 !  use_slk
    if (dt%paral_kgb==1) then
