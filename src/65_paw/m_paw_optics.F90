@@ -255,6 +255,7 @@ CONTAINS  !=====================================================================
 !1- Opening of OPT file and header writing
 !----------------------------------------------------------------------------------
 
+ iomode=dtset%iomode
  if (iomode /= NO_FILE_OUT) then
 !  I/O mode is netCDF or Fortran
    iomode=merge(IO_MODE_ETSF,IO_MODE_FORTRAN_MASTER,dtset%iomode==IO_MODE_ETSF)

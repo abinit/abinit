@@ -213,6 +213,11 @@ module m_hamiltonian
    ! if use_gbt=0, use normal non-collinear calculation
    ! if use_gbt=1, use spin spiral calculation
 
+  integer :: zora
+   ! zora=0: no zora terms. zora=1: use available zora terms
+   ! currently this is limited to nuclear dipole moment terms,
+   ! although pawspnorb should eventually be included here as well
+
 ! ===== Integer arrays
 
 #if defined HAVE_GPU && defined HAVE_YAKL
@@ -507,6 +512,10 @@ module m_hamiltonian
   integer :: n4,n5,n6
    ! same as ngfft(4:6)
 
+  integer :: zora
+   ! determines zora term use. 0 means nonrelativistic, 1 means use zora terms
+   ! where available (currently only nuclear dipole moment terms)
+
 ! ===== Real arrays
 
   real(dp), allocatable :: e1kbfr_spin(:,:,:,:,:)
@@ -734,14 +743,13 @@ end subroutine gsham_free
 subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 &                     xred,nfft,mgfft,ngfft,rprimd,nloalg,&
 &                     ph1d,usecprj,comm_atom,mpi_atmtab,mpi_spintab,paw_ij,&  ! optional
-&                     electronpositron,fock,nucdipmom,gpu_option,use_gbt)         ! optional
+&                     electronpositron,fock,nucdipmom,gpu_option,use_gbt.zora)         ! optional
 
 !Arguments ------------------------------------
 !scalars
  class(gs_hamiltonian_type),intent(inout),target :: ham
  integer,intent(in) :: nfft,natom,nspinor,nsppol,nspden,mgfft
- integer,optional,intent(in) :: comm_atom,usecprj,gpu_option
- integer,optional,intent(in) :: use_gbt
+ integer,optional,intent(in) :: comm_atom,usecprj,gpu_option,use_gbt,zora
  type(electronpositron_type),optional,pointer :: electronpositron
  type(fock_type),optional,pointer :: fock
  type(pseudopotential_type),intent(in) :: psps
@@ -756,7 +764,8 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 
 !Local variables-------------------------------
 !scalars
- integer :: my_comm_atom,my_nsppol,itypat,iat,ilmn,indx,isp,cplex_dij,jsp,l_gpu_option
+ integer :: my_comm_atom,my_nsppol,my_zora,itypat,iat,ilmn,indx,isp
+ integer :: cplex_dij,jsp,l_gpu_option
  real(dp) :: ucvol
 !arrays
  integer :: my_spintab(2)
@@ -774,6 +783,7 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  my_spintab=0;my_spintab(1:nsppol)=1;if (present(mpi_spintab)) my_spintab(1:2)=mpi_spintab(1:2)
  my_nsppol=count(my_spintab==1)
  l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option=gpu_option
+ my_zora=0; if (present(zora)) my_zora=zora
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
@@ -838,6 +848,7 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  ham%usepaw     =psps%usepaw
  ham%ucvol      =ucvol
  ham%useylm     =psps%useylm
+ ham%zora       =my_zora
  ham%gpu_option=ABI_GPU_DISABLED ; if(PRESENT(gpu_option)) ham%gpu_option=gpu_option
 
  ham%pspso(:)   =psps%pspso(1:psps%ntypat)
@@ -1418,6 +1429,7 @@ subroutine gsham_copy(gs_hamk_in, gs_hamk_out)
  gs_hamk_out%usecprj = gs_hamk_in%usecprj
  gs_hamk_out%usepaw = gs_hamk_in%usepaw
  gs_hamk_out%useylm = gs_hamk_in%useylm
+ gs_hamk_out%zora = gs_hamk_in%zora
  gs_hamk_out%ngfft = gs_hamk_in%ngfft
  gs_hamk_out%nloalg = gs_hamk_in%nloalg
  gs_hamk_out%ucvol = gs_hamk_in%ucvol
@@ -1692,7 +1704,7 @@ subroutine rfham_init(rf_ham, cplex,gs_Ham,ipert,&
 
 !Local variables-------------------------------
 !scalars
- integer :: cplex_dij1,isp,jsp,my_comm_atom,my_nsppol
+ integer :: cplex_dij1,isp,jsp,my_comm_atom,my_nsppol,my_zora
  logical :: has_e1kbsc_
 !arrays
  integer :: my_spintab(2)
@@ -1717,6 +1729,7 @@ subroutine rfham_init(rf_ham, cplex,gs_Ham,ipert,&
  rf_Ham%nvloc    =gs_Ham%nvloc
  rf_Ham%nsppol   =gs_Ham%nsppol
  rf_Ham%nspinor  =gs_Ham%nspinor
+ rf_Ham%zora     =gs_Ham%zora
 
  rf_Ham%dime1kb1=0
  rf_Ham%dime1kb2=gs_Ham%dimekb2
