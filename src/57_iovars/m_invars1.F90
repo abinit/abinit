@@ -675,6 +675,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ABI_MALLOC(dtsets(idtset)%acell_orig,(3,mxnimage))
    ABI_MALLOC(dtsets(idtset)%algalch,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%amu_orig,(mxntypat,mxnimage))
+   ABI_MALLOC(dtsets(idtset)%atndlist,(3,mxnatom))
    ABI_MALLOC(dtsets(idtset)%cellcharge,(mxnimage))
    ABI_MALLOC(dtsets(idtset)%chrgat,(mxnatom))
    ABI_MALLOC(dtsets(idtset)%constraint_kind,(mxntypat))
@@ -685,6 +686,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ABI_MALLOC(dtsets(idtset)%dmft_shiftself,(mxnatom))
    ABI_MALLOC(dtsets(idtset)%dynimage,(mxnimage))
    ABI_MALLOC(dtsets(idtset)%iatfix,(3,mxnatom))
+   ABI_MALLOC(dtsets(idtset)%iatnd,(mxnatom))
    ABI_MALLOC(dtsets(idtset)%f4of2_sla,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%f6of2_sla,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%jpawu,(mxntypat,mxnimage))
@@ -1002,6 +1004,7 @@ subroutine indefo1(dtset)
 !A
  dtset%acell_orig(:,:)=zero
  dtset%algalch(:)=1
+ dtset%atndlist(:,:)=zero
  dtset%amu_orig(:,:)=-one
  dtset%autoparal=0
 !B
@@ -1024,13 +1027,17 @@ subroutine indefo1(dtset)
  dtset%efmas_n_dirs=0
 !F
  dtset%field_red(:)=zero
+ dtset%field_red_axial(:)=zero
 !G
  dtset%ga_n_rules=1
  dtset%gw_customnfreqsp=0
  dtset%gw_nqlwl=0
  dtset%gwls_n_proj_freq=0
+!H
+ dtset%hspinfield(:)=zero
 !I
  dtset%iatfix(:,:)=0
+ dtset%iatnd(:)=0
  dtset%icoulomb=0
  dtset%imgmov=0
  dtset%ivalence=0
@@ -1050,6 +1057,7 @@ subroutine indefo1(dtset)
  dtset%mkqmem=-1
  dtset%mk1mem=-1
 !N
+ dtset%natnd=0
  dtset%natpawu=0
  dtset%natsph=0
  dtset%natsph_extra=0
@@ -1129,7 +1137,7 @@ subroutine indefo1(dtset)
  dtset%xred_orig(:,:,:)=zero
 !Y
 !Z
- dtset%zeemanfield(:)=zero
+ dtset%zora=0
 
  DBG_EXIT("COLL")
 
@@ -1208,7 +1216,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  integer,parameter :: master = 0
  integer :: chksymbreak,expert_user,found,ierr,iatom,ii,ikpt,iimage,index_blank,index_lower, tread_geo
  integer :: index_typsymb,index_upper,ipsp,iscf,intimage,itypat,leave,marr
- integer :: natom,nkpt,nkpthf,npsp,npspalch, ncid
+ integer :: natnd,natom,nkpt,nkpthf,npsp,npspalch, ncid
  integer :: nqpt,nspinor,nsppol,ntypat,ntypalch,ntyppure,occopt,response
  integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
  integer :: tfband,tnband,tread,tread_alt, my_rank, nprocs
@@ -1219,10 +1227,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  type(atomdata_t) :: atom
 !arrays
  integer :: cond_values(4),vacuum(3)
- integer,allocatable :: iatfix(:,:),intarr(:),istwfk(:),nband(:),typat(:)
+ integer,allocatable :: iatfix(:,:),iatnd(:),intarr(:),istwfk(:),nband(:),typat(:)
  real(dp) :: acell(3),rprim(3,3)
- real(dp),allocatable :: amu(:),chrgat(:),dprarr(:),kpt(:,:),kpthf(:,:),mixalch(:,:),nucdipmom(:,:)
- real(dp),allocatable :: ratsph(:),reaalloc(:),spinat(:,:)
+ real(dp),allocatable :: amu(:),atndlist(:,:),chrgat(:),dprarr(:),kpt(:,:),kpthf(:,:),mixalch(:,:)
+ real(dp),allocatable :: nucdipmom(:,:),ratsph(:),reaalloc(:),spinat(:,:)
  real(dp),allocatable :: vel(:,:),vel_cell(:,:),wtk(:),xred(:,:),znucl(:)
  character(len=32) :: cond_string(4)
  character(len=fnlen) :: key_value
@@ -1428,6 +1436,16 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'jfielddir',tread,'INT')
  if(tread==1) dtset%jfielddir(1:3)=intarr(1:3)
 
+ ! read in natnd and initialize iatnd, atndlist helper variables
+ ! these provide a simpler alternative to inputting the full nucdipmom list
+ natnd=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natnd',tread,'INT')
+ if(tread==1) natnd=intarr(1)
+ dtset%natnd=natnd
+ ABI_MALLOC(iatnd,(natnd))
+ ABI_MALLOC(atndlist,(3,natnd))
+ iatnd(:)=0; atndlist(:,:)=zero
+
  ! We need to know nsppol/nspinor/nspden before calling ingeo
  nsppol=dtset%nsppol
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nsppol',tread,'INT')
@@ -1448,11 +1466,16 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  end if
  dtset%nsppol=nsppol
 
+! here are ZORA, nspinor, pawspnorb flags
+! flag for ZORA (zeroth order regularized approximation for relativistic terms)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'zora',tread,'INT')
+ if (tread == 1) dtset%zora = intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nspinor',tread,'INT')
  if(tread==1) dtset%nspinor=intarr(1)
 
 !Has to read pawspnorb now, in order to adjust nspinor
-!Also, if nspinor=1, turn on spin-orbit coupling by default, here for the PAW case. NC case is treated elsewhere.
+!Also, if nspinor=2, turn on spin-orbit coupling by default, here for the PAW case. NC case is treated elsewhere.
  if (dtset%usepaw>0)then
 !  Change the default value
    if(dtset%nspinor==2)dtset%pawspnorb=1
@@ -1468,6 +1491,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
        call wrtout(iout, msg,'COLL')
      end if
    end if
+ end if
+ if ( (dtset%zora .GT. 1) .OR. (dtset%zora < 0) ) then
+   dtset%nspinor=2
+   dtset%pawspnorb=1
  end if
  nspinor=dtset%nspinor
 
@@ -1513,22 +1540,32 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    end if
  end if
 
-!Read the Zeeman field
- call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'zeemanfield',tread,'BFI')
+!Read the hspinfield
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'hspinfield',tread,'BFI')
+ if(tread==0) then
+    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'zeemanfield',tread,'BFI')
+    if (tread == 1) then
+       write(msg, '(3a)')&
+       'Input variable "zeemanfield" is deprecated.', ch10, &
+       'Its value has been assigned to "hspinfield", please update your input.'   
+       ABI_COMMENT(msg)
+  end if
+end if
+
  if(tread==1) then
    if(dtset%nspden == 2)then
      write(msg,'(7a)')&
-      'A Zeeman field has been specified without noncollinear spins.',ch10,&
+      'A spin magnetic field (hspinfield) has been specified without noncollinear spins.',ch10,&
       'Only the z-component of the magnetic field will be used.'
      ABI_WARNING(msg)
    else if (dtset%nspden == 1)then
      write(msg, '(a,a,a)' )&
-      'A Zeeman field has been specified for a non-spin-polarized calculation.',ch10,&
+      'A spin magnetic field (hspinfield) has been specified for a non-spin-polarized calculation.',ch10,&
       'Action: check the input file.'
      ABI_ERROR(msg)
    end if
 
-   dtset%zeemanfield(1:3) = dprarr(1:3)
+   dtset%hspinfield(1:3) = dprarr(1:3)
  end if
 
 !Initialize geometry of the system, for different images. Also initialize cellcharge_min to be used later for estimating mband_upper..
@@ -1587,9 +1624,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 !call flush(std_out)
 !ENDDEBUG
 
-   call ingeo(acell,amu,bravais,chrgat,dtset,dtset%field_red(1:3),dtset%genafm(1:3),iatfix,&
-    dtset%icoulomb,iimage,iout,jdtset,dtset%jellslab,lenstr,mixalch,&
-    msym,natom,dtset%nimage,dtset%npsp,npspalch,dtset%nspden,dtset%nsppol,&
+   call ingeo(acell,amu,atndlist,bravais,chrgat,dtset,dtset%field_red(1:3),&
+    dtset%field_red_axial(1:3),dtset%genafm(1:3),iatfix,&
+    iatnd,dtset%icoulomb,iimage,iout,jdtset,dtset%jellslab,lenstr,mixalch,&
+    msym,natnd,natom,dtset%nimage,dtset%npsp,npspalch,dtset%nspden,dtset%nsppol,&
     dtset%nsym,ntypalch,dtset%ntypat,nucdipmom,dtset%nzchempot,&
     dtset%pawspnorb,dtset%ptgroupma,ratsph,&
     rprim,dtset%slabzbeg,dtset%slabzend,dtset%spgroup,spinat,&
@@ -1621,6 +1659,17 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    dtset%xred_orig(1:3,1:natom,iimage)=xred
    call mkrdim(dtset%acell_orig(1:3,iimage),dtset%rprim_orig(1:3,1:3,iimage),dtset%rprimd_orig(1:3,1:3,iimage))
 
+   if(allocated(dtset%iatnd)) then
+     ABI_FREE(dtset%iatnd)
+   end if
+   ABI_MALLOC(dtset%iatnd,(natnd))
+   dtset%iatnd(1:natnd)=iatnd(1:natnd)
+   if(allocated(dtset%atndlist)) then
+     ABI_FREE(dtset%atndlist)
+   end if
+   ABI_MALLOC(dtset%atndlist,(3,natnd))
+   dtset%atndlist(1:3,1:natnd)=atndlist(1:3,1:natnd)
+   
 !  Read cellcharge for each image, but use it only to initialize cellcharge_min
 !  The old name 'charge' is still tolerated. Will be removed in due time.
    cellcharge=zero
@@ -1644,6 +1693,13 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    if(cellcharge < cellcharge_min)cellcharge_min=cellcharge
 
  end do
+
+ if(allocated(iatnd)) then
+   ABI_FREE(iatnd)
+ end if
+ if(allocated(atndlist)) then
+   ABI_FREE(atndlist)
+ end if
 
  ABI_FREE(amu)
  ABI_FREE(mixalch)
