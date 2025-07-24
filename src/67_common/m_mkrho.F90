@@ -741,12 +741,12 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                do ib=1,blocksize
                  do ipw=1,npw_k
                    cwftmp=-cwavef(2,ipw+(ib-1)*npw_k,1)*kg_k_cart_block(ipw)
-                   cwavef(2,ipw,1)=cwavef(1,ipw+(ib-1)*npw_k,1)*kg_k_cart_block(ipw)
-                   cwavef(1,ipw,1)=cwftmp
+                   cwavef(2,ipw+(ib-1)*npw_k,1)=cwavef(1,ipw+(ib-1)*npw_k,1)*kg_k_cart_block(ipw)
+                   cwavef(1,ipw+(ib-1)*npw_k,1)=cwftmp
                    if (my_nspinor==2) then
                      cwftmp=-cwavef(2,ipw+(ib-1)*npw_k,2)*kg_k_cart_block(ipw)
-                     cwavef(2,ipw,2)=cwavef(1,ipw+(ib-1)*npw_k,2)*kg_k_cart_block(ipw)
-                     cwavef(1,ipw,2)=cwftmp
+                     cwavef(2,ipw+(ib-1)*npw_k,2)=cwavef(1,ipw+(ib-1)*npw_k,2)*kg_k_cart_block(ipw)
+                     cwavef(1,ipw+(ib-1)*npw_k,2)=cwftmp
                    end if
                  end do
                end do
