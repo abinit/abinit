@@ -1162,8 +1162,8 @@ end subroutine gsham_load_k
 !! SOURCE
 
 subroutine gsham_load_kprime(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
-                                   kg_kp,kpg_kp,kpt_kp,npw_kp,npw_fft_kp,&
-                                   ph3d_kp,compute_gbound,compute_ph3d)
+                             kg_kp,kpg_kp,kpt_kp,npw_kp,npw_fft_kp,&
+                             ph3d_kp,compute_gbound,compute_ph3d)
 
 !Arguments ------------------------------------
 !scalars
