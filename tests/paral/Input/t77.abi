@@ -49,10 +49,10 @@ ndtset 3
 # Parallelisation : GWLS supports parallelism over bands and FFTs (from the ground state implementation),
 # but FFT parallelism tends to have poor efficiency in GWLS.
 # The optimum is usually to set the highest possible npband.
+ nblock_lobpcg3 5
  paral_kgb 1
  npfft 2
  npband 2
- bandpp 1 # old default value
 
 # Cutoff energy
  ecut 1.0

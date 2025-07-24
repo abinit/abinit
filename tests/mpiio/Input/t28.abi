@@ -13,7 +13,7 @@ prtvhxc  1
 prtvxc   1
 
 nband 50
-bandpp 1
+nblock_lobpcg 50 # Very likely not optimal (LB:07-2025)
 
 # === Dataset 1
 np_spkpt1 2 npfft1 2 npspinor1 1 # npband 2
