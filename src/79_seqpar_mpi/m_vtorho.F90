@@ -414,12 +414,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(gs_hamiltonian_type) :: gs_hamk
 !arrays
  integer(int32), ABI_CONTIGUOUS pointer :: kg_k(:,:) => null()
- real(dp) :: dielar(7),dphase_k(3),kpoint(3),qpt(3),rhodum(1),tsec(2),ylmgr_dum(0,0,0)
+ real(dp) :: dielar(7),dphase_k(3),kpoint(3),qpt(3),rhodum(1),tsec(2),ylmgr_dum(0,0,0), kphq(3), kmhq(3)
  real(dp),allocatable :: EigMin(:,:),buffer1(:),cgq(:,:)
  real(dp),allocatable :: cgrkxc(:,:),doccde(:)
  real(dp),allocatable :: dphasek(:,:),ek_k(:),ek_k_nd(:,:,:),eknk(:),eknk_nd(:,:,:,:,:),end_k(:)
- real(dp),allocatable :: enlx_k(:),enlxnk(:),focknk(:),fockfornk(:,:,:),ffnl(:,:,:,:),grnl_k(:,:), xcart(:,:)
- real(dp),allocatable :: grnlnk(:,:)
+ real(dp),allocatable :: enlx_k(:),enlxnk(:),focknk(:),fockfornk(:,:,:),ffnl(:,:,:,:), ffnl_kphq(:,:,:,:)
+ real(dp),allocatable :: grnlnk(:,:), grnl_k(:,:), xcart(:,:)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
  real(c_double), ABI_CONTIGUOUS pointer :: kinpw(:) => null()
@@ -429,7 +429,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp),allocatable :: eig_k(:)
 #endif
 
- real(dp),allocatable :: kpg_k(:,:),occ_k(:),ph3d(:,:,:)
+ real(dp),allocatable :: kinpw_kphq(:)
+ real(dp),allocatable :: kpg_k(:,:),kpg_kphq(:,:),occ_k(:),ph3d(:,:,:), ph3d_kphq(:,:,:)
  real(dp),allocatable :: pwnsfacq(:,:)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
@@ -936,6 +937,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if(paw_dmft%use_dmft==1) ek_k_nd(:,:,:)=zero
        if (optforces>0) grnl_k(:,:)=zero
        kpoint(:)=dtset%kptns(:,ikpt)
+
+       if (dtset%usegbt /= 0) then
+         ! If GBT is on, kpoint becomes k-q/2 so that we can reuse all the calls to mkkin and mkffnl.
+         ! and we only have to deal with k+q/2.
+         kphq = kpoint + half * dtset%qgbt
+         kpoint(:) = dtset%kptns(:,ikpt) - half * dtset%qgbt
+       end if
+
        occ_k(:)=occ(1+bdtot_index:nband_k+bdtot_index)
        resid_k(:) = resid(1+bdtot_index : nband_k+bdtot_index)
        !resid_k(:)=zero
@@ -974,40 +983,74 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if (dtset%cprj_in_memory/=1) then
          nkpg=3*optforces*dtset%nloalg(3)
          ABI_MALLOC(kpg_k,(npw_k,nkpg))
-         if ((mpi_enreg%paral_kgb/=1.or.istep<=1).and.nkpg>0) call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
+         if ((mpi_enreg%paral_kgb/=1.or.istep<=1).and.nkpg>0) then
+           call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
+           if (dtset%usegbt /= 0) then
+             ABI_MALLOC(kpg_kphq,(npw_k,nkpg))
+             call mkkpg(kg_k,kpg_kphq,kphq,nkpg,npw_k)
+           end if
+         end if
        else ! cprj_in_memory = 1
          nkpg=3*optforces
          ABI_MALLOC(kpg_k,(npw_k,nkpg))
-         if (optforces/=0) call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
+         if (optforces/=0) then
+           call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
+           if (dtset%usegbt /= 0) then
+             ABI_MALLOC(kpg_kphq,(npw_k,nkpg))
+             call mkkpg(kg_k,kpg_kphq,kphq,nkpg,npw_k)
+           end if
+         end if
        end if
 
 !      Compute nonlocal form factors ffnl at all (k+G):
        ider=0;idir=0;dimffnl=1
+
        ABI_MALLOC(ffnl,(npw_k,dimffnl,psps%lmnmax,ntypat))
        if (mpi_enreg%paral_kgb/=1.or.istep<=1) then
          call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl,psps%ffspl,&
-&         gmet,gprimd,ider,idir,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,&
-&         psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
-&         npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,&
-&         psps%usepaw,psps%useylm,ylm_k,ylmgr,kinpw=kinpw)
+          gmet,gprimd,ider,idir,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,&
+          psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
+          npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,&
+          psps%usepaw,psps%useylm,ylm_k,ylmgr,kinpw=kinpw)
        end if
 
-!      Load k-dependent part in the Hamiltonian datastructure
-!       - Compute 3D phase factors
-!       - Prepare various tabs in case of band-FFT parallelism
-!       - Load k-dependent quantities in the Hamiltonian
-       ABI_MALLOC(ph3d,(2,npw_k,gs_hamk%matblk))
+       if (dtset%usegbt /= 0) then
+         ! Compute (1/2) (2 Pi)**2 (k+q/2+G)**2:
+         ABI_MALLOC(kinpw_kphq, (npw_k))
+         call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw_kphq,kphq,npw_k,0,0)
 
-       if(usefock_ACE/=0) then
-         call gs_hamk%load_k(kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,&
+         ! TODO: useylm = 1 --> ylm_kphq, ylmgr_kphq
+         ABI_MALLOC(ffnl_kphq,(npw_k,dimffnl,psps%lmnmax,ntypat))
+         call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl_kphq,psps%ffspl,&
+          gmet,gprimd,ider,idir,psps%indlmn,kg_k,kpg_kphq,kphq,psps%lmnmax,&
+          psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
+          npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,&
+          psps%usepaw,psps%useylm,ylm_k,ylmgr,kinpw=kinpw_kphq)
+       end if
+
+       ! Load k-dependent part in the Hamiltonian datastructure
+       !  - Compute 3D phase factors
+       !  - Prepare various tabs in case of band-FFT parallelism
+       !  - Load k-dependent quantities in the Hamiltonian
+       ABI_MALLOC(ph3d,(2,npw_k,gs_hamk%matblk))
+       if (dtset%usegbt /= 0) then
+         ABI_MALLOC(ph3d_kphq,(2,npw_k,gs_hamk%matblk))
+       end if
+
+       if (usefock_ACE/=0) then
+         call gs_hamk%load_k(kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,&
            kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,fockACE_k=fock%fockACE(ikpt,isppol),ph3d_k=ph3d,&
-           compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1),&
-          compute_gbound=(mpi_enreg%paral_kgb/=1))
+           compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1), compute_gbound=(mpi_enreg%paral_kgb/=1))
        else
-         call gs_hamk%load_k(kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,&
+         call gs_hamk%load_k(kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,&
            kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,&
-           compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1),&
-           compute_gbound=(mpi_enreg%paral_kgb/=1))
+           compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1), compute_gbound=(mpi_enreg%paral_kgb/=1))
+
+         if (dtset%usegbt /= 0) then
+           call gs_hamk%load_kprime(kpt_kp=kphq,&
+             kinpw_kp=kinpw_kphq,kpg_kp=kpg_kphq,ffnl_kp=ffnl_kphq,ph3d_kp=ph3d_kphq,&
+             compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1), compute_gbound=(mpi_enreg%paral_kgb/=1))
+         end if
        end if
 
 !      Load band-FFT tabs (transposed k-dependent arrays)
@@ -1104,11 +1147,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !      nonlocal energy, forces,
 !      and update of rhor to this k-point and this spin polarization.
        call vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,&
-&       dtset,eig_k,ek_k,ek_k_nd,end_k,enlx_k,fixed_occ,grnl_k,gs_hamk,&
-&       ibg,icg,ikpt,iscf,isppol,kg_k,kinpw,mband_cprj,mcg,mcgq,mcprj_local,mkgq,&
-&       mpi_enreg,dtset%mpw,natom,nband_k,nbdbuf_eff,dtset%nkpt,istep,nnsclo_now,npw_k,npwarr,&
-&       occ_k,optforces,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,&
-&       rhoaug,paw_dmft,dtset%wtk(ikpt),xg_nonlop,zshift, rmm_diis_status(:,ikpt,isppol))
+         dtset,eig_k,ek_k,ek_k_nd,end_k,enlx_k,fixed_occ,grnl_k,gs_hamk,&
+         ibg,icg,ikpt,iscf,isppol,kg_k,kinpw,mband_cprj,mcg,mcgq,mcprj_local,mkgq,&
+         mpi_enreg,dtset%mpw,natom,nband_k,nbdbuf_eff,dtset%nkpt,istep,nnsclo_now,npw_k,npwarr,&
+         occ_k,optforces,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,&
+         rhoaug,paw_dmft,dtset%wtk(ikpt),xg_nonlop,zshift, rmm_diis_status(:,ikpt,isppol))
        ABI_NVTX_END_RANGE()
 
 ! LB-01/03/2024: Very weird compiler error on eos-nvhpc23.1 if the second call of timab(985,...) is included...
@@ -1131,11 +1174,15 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        else
          ABI_FREE(kinpw)
          ABI_FREE(kg_k)
+         ABI_SFREE(kinpw_kphq)
+         ABI_SFREE(ffnl_kphq)
        end if
 
        ABI_FREE(kpg_k)
+       ABI_SFREE(kpg_kphq)
        ABI_FREE(ylm_k)
        ABI_FREE(ph3d)
+       ABI_SFREE(ph3d_kphq)
        ABI_FREE(cgq)
        ABI_FREE(pwnsfacq)
 
@@ -1258,7 +1305,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if
 
      call timab(986,2,tsec)
-
    end do ! End loop over spins
 
    call timab(988,1,tsec)
@@ -1677,7 +1723,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          write(100, "(a, i5)")  "Nkpt", dtset%nkpt
          write(100, "(a, i5)")  "Nband", dtset%mband
          do ikpt=1,dtset%nkpt
-           write(100,'(a,3f10.4,a,i4,a)' ) ' k-point ', dtset%kptns(1:3,ikpt), ' number ',ikpt,' :'
+           write(100,'(a,3f10.4,a,i4,a)' ) ' k-point ', kpoint, ' number ',ikpt,' :'
            do ii=0,(dtset%mband-1)/12
              write(100,'(12f10.4)') occ(1+ii*12+(ikpt-1)*dtset%mband:min(12+ii*12,dtset%mband)+(ikpt-1)*dtset%mband)
            end do

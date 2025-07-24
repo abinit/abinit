@@ -2006,12 +2006,12 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
 !  kptopt
    call chkint_le(0,0,cond_string,cond_values,ierr,'kptopt',dt%kptopt,4,iout)
-  ! If kptopt < 0, it is only valid when iscf = -2 
+  ! If kptopt < 0, it is only valid when iscf = -2
    if (dt%iscf/=-2) then
-      cond_string(1)='iscf' ; cond_values(1)=dt%iscf 
+      cond_string(1)='iscf' ; cond_values(1)=dt%iscf
       call chkint_ge(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,0,iout)
-   end if   
-  ! If hspinfield is applied, only kptopt = 0, 3, 4 are allowed 
+   end if
+  ! If hspinfield is applied, only kptopt = 0, 3, 4 are allowed
    if (any(abs(dt%hspinfield)>tol8)) then
       cond_string(1) = 'hspinfield(x)' ; cond_values(1) = dt%hspinfield(1)
       cond_string(2) = 'hspinfield(y)' ; cond_values(2) = dt%hspinfield(2)
@@ -4605,6 +4605,20 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      ABI_COMMENT("dipdip can be set to 0 in case of metals whereas dipdip 1 should be used in polar materials.")
    end if
 
+   ! Check features that are not compatible with the generalized Bloch theorem.
+   if (dt%usegbt /= 0) then
+     ABI_CHECK_NOSTOP(optdriver == RUNL_GSTATE, 'GBT can only be used in GS calculations', ierr)
+     ABI_CHECK_NOSTOP(dt%usepaw == 0, 'GBT does not support PAW', ierr)
+     ABI_CHECK_NOSTOP(dt%paral_kgb == 0, 'GBT does not support paral_kgb 1', ierr)
+     ABI_CHECK_NOSTOP(dt%nsym == 1, 'GBT cannot exploit spatial symmetries, please use nsym 1', ierr)
+     ABI_CHECK_NOSTOP(dt%kptopt == 4, 'GBT requires kptopt 4', ierr)
+     ABI_CHECK_NOSTOP(dt%useylm == 0, 'GBT requires useylm 0', ierr)
+     ABI_CHECK_NOSTOP(dt%gpu_option == ABI_GPU_DISABLED, 'GBT is not compatible with GPUs', ierr)
+     ABI_CHECK_NOSTOP(dt%nspinor == 2, 'GBT requires nspinor 2', ierr)
+     ABI_CHECK_NOSTOP(dt%nspden == 4, 'GBT requires nspden 4', ierr)
+     ABI_CHECK_NOSTOP(all(dt%so_psp(1:npsp) == 0), 'GBT requires so_psp == 0', ierr)
+   end if
+
 !  If molecular dynamics or structural optimization is being done
 !  (dt%ionmov>0), make sure not all atoms are fixed
 !  if (dt%ionmov > 0) then
@@ -4632,8 +4646,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
    call dt%free()
    ierr_dtset(idtset)=ierr
-
- end do !  End do loop on idtset
+ end do ! idtset
 
  if (maxval(dtsets(:)%usewvl) > 0) then
    write(msg,'(4a)') ch10,&

@@ -695,7 +695,7 @@ type, public :: dataset_type
  integer :: useric = 0
  integer :: userid = 0
  integer :: userie = 0
- integer :: usegbt
+ integer :: usegbt = 0
  integer :: usewvl
  integer :: usexcnhat_orig
  integer :: useylm
