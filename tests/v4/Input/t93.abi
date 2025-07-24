@@ -7,7 +7,7 @@
 # 1-Parameters governing the convergence:
 # ---------------------------------------
   ecut 3.  nband 6  nline 8  # Prior to v7.11.10 it was nline 10, but this seems too demanding for the accuracy of vm2_ifort15
-  bandpp 1 # old default value
+  nblock_lobpcg 6
   ntime 5  nstep 25
   toldfe 1.d-8
 
