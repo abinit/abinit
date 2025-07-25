@@ -34,8 +34,7 @@ rprim 0.0 1/2 1/2
       1.0 1.0 0.0
 nband1 28 nband2 28 nband3 28 nband4 28
 nband5 60 nband6 60 nband7 60 nband8 60
-bandpp1 14 bandpp2 14 bandpp3 14 bandpp4 14
-bandpp5 30 bandpp6 30 bandpp7 30 bandpp8 30
+nblock_lobpcg 2
 jpawu7 0 0 0
 upawu7 0 0 0
 occopt 7  tsmear 0.015

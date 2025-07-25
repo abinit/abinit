@@ -4,9 +4,10 @@
 gpu_option 2
 
 #Process distribution (parallelism)
-npkpt 1 npband 2 npfft 1 bandpp 32   # 2 MPI processes
+npkpt 1 npband 2 npfft 1
 paral_kgb 1
 wfoptalg 114
+nblock_lobpcg 8
 
 #Plane wave basis
 ecut 6.

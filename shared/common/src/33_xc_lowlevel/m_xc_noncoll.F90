@@ -322,7 +322,10 @@ subroutine rotate_back_mag_dfpt(option,vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsiz
  integer  :: ipt,rotation_method
  logical  :: has_mag_norm
  logical  :: small_angle
- real(dp) :: bxc_over_m,d1,d2,d3,d4,dvdn,dvdz,fact,m_dot_m1,m_norm
+ real(dp) :: bxc_over_m,d1,d2,dvdn,dvdz,fact,m_dot_m1,m_norm
+ ! d3 and d4 were computed below but never used, and caused test
+ ! fail problems
+ !real(dp) :: d3,d4 
  real(dp) :: dvdn_re,dvdn_im,dvdz_re,dvdz_im
  complex(dpc) :: rho_updn
  real(dp) :: mdirx,mdiry,mdirz,mxy,mx1,my1,mz1,wx,wy,wx1,wy1
@@ -378,8 +381,9 @@ subroutine rotate_back_mag_dfpt(option,vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsiz
        rho_updn=(mag(ipt,1)+(zero,one)*mag(ipt,2))
        d1=sqrt(( m_norm+mag(ipt,3))**2+abs(rho_updn)**2)
        d2=sqrt((-m_norm+mag(ipt,3))**2+abs(rho_updn)**2)
-       d3=sqrt(( m_norm-mag(ipt,3))**2+abs(rho_updn)**2)
-       d4=sqrt(( m_norm+mag(ipt,3))**2-abs(rho_updn)**2)
+       ! d3 and d4 are computed here but never used
+       !d3=sqrt(( m_norm-mag(ipt,3))**2+abs(rho_updn)**2)
+       !d4=sqrt(( m_norm+mag(ipt,3))**2-abs(rho_updn)**2)
        u0(1,1)=( m_norm+mag(ipt,3))/d1  ! ( m  + mz)/d1
        u0(2,2)=rho_updn/d2              ! ( mx +imy)/d2
        u0(1,2)=(-m_norm+mag(ipt,3))/d2  ! (-m  + mz)/d2

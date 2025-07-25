@@ -4,7 +4,6 @@ ndtset 4
 
 wfoptalg 114
 nblock_lobpcg 4
-#bandpp     8 # already set by nblock_lobpcg
 
 prtvol     5
 

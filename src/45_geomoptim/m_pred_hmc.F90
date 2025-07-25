@@ -175,6 +175,10 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,mttk_vars,zDEBUG,iex
 
    strain_updated=.FALSE.
    xred_updated=.FALSE.
+
+   etotal_hmc_prev = zero
+   epot_hmc_prev = zero
+
  end if
 
 
