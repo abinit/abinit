@@ -21,7 +21,7 @@ paral_kgb 1
 fftalg 401
 npspinor 2
 npband 2
-bandpp 1
+nblock_lobpcg 16
 
 # === Structure and cell
 natom 2 ntypat 1 typat 2*1
