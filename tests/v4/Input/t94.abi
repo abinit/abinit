@@ -17,7 +17,7 @@
 # ---------------------------------------
   nnsclo 1
   ecut 3.  nband 6  nline 10  ntime 5  nstep 25
-  bandpp 1 # old default value
+  nblock_lobpcg 6
   toldfe 1.d-8
 
 # 4-Options for the choice of calculation:

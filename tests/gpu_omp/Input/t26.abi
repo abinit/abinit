@@ -57,7 +57,7 @@ getwfk -1        # Start from previous wavefunctions to ease convergence
 #Additional (and facultative) variables for Hartree-Fock
 nkpthf  27          # number of k-point in the full-BZ 
 nbandhf  4         # number of occupied states
-bandpp   5
+nblock_lobpcg 1
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "PseudosGTH_pwteter/14si.pspgth"
