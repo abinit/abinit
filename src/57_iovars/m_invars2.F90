@@ -4352,31 +4352,7 @@ if (dtset%usekden==1) then
  if (dtset%use_gbt /= 0) then
   call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'qgbt', tread, 'DPR')
   dtset%qgbt(1:3) = dprarr(1:3)
-  
-!  write(std_out,*) "==== GBT SPIN STRUCTURE INITIALIZATION ===="
-!  write(std_out,*) "qgbt = ", dtset%qgbt(1:3)
-!  write(std_out,*) "usegbt = ", dtset%usegbt
-!  
-!  ref_pos(:) = dtset%xred_orig(:,1,1)
-!  seed_spinat(:) = dtset%spinat(:,1)
-!
-!  write(std_out,*) "ref_pos = ", ref_pos(:)
-!  write(std_out,*) "seed_spinat = ", seed_spinat(:)
-!
-!  do iatom = 1, dtset%natom
-!    delta_r(:) = dtset%xred_orig(:,iatom,1) - ref_pos(:)
-!    qr = two_pi * dot_product(dtset%qgbt(:), delta_r(:))
-!    dtset%spinat(1,iatom) = seed_spinat(1) * cos(qr) - seed_spinat(2) * sin(qr)
-!    dtset%spinat(2,iatom) = seed_spinat(1) * sin(qr) + seed_spinat(2) * cos(qr)
-!    dtset%spinat(3,iatom) = seed_spinat(3)
-!
-!    write(std_out,'(a,i4,a,3f12.6)') "iatom = ", iatom, " delta_r = ", delta_r(:)
-!    write(std_out,'(a,f12.6)') "qr = ", qr
-!    write(std_out,'(a,i4,a,3f12.6)') "spinat(:,", iatom, ") = ", dtset%spinat(:,iatom)
-!  end do
-
  endif
-
 
  ABI_FREE(intarr)
  ABI_FREE(dprarr)

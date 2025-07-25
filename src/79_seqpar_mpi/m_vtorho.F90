@@ -653,7 +653,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
   dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
   paw_ij=paw_ij,ph1d=ph1d,usecprj=usecprj_local,electronpositron=electronpositron,fock=fock,&
   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
-  nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option,usegbt=dtset%usegbt)
+  nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option,use_gbt=dtset%use_gbt)
 
  if (dtset%cprj_in_memory==1) then
    call xg_nonlop_update_weight(xg_nonlop,ucvol) ! ucvol could have changed in mover
@@ -938,9 +938,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if (optforces>0) grnl_k(:,:)=zero
        kpoint(:)=dtset%kptns(:,ikpt)
 
-       if (dtset%usegbt /= 0) then
-         ! If GBT is on, kpoint becomes k-q/2 so that we can reuse all the calls to mkkin and mkffnl.
-         ! and we only have to deal with k+q/2.
+       if (dtset%use_gbt /= 0) then
+         ! If GBT is on, kpoint becomes k-q/2 so that we can reuse all the calls
+         ! to mkkin and mkffnl, and we only have to deal with k+q/2.
          kphq = kpoint + half * dtset%qgbt
          kpoint(:) = dtset%kptns(:,ikpt) - half * dtset%qgbt
        end if
@@ -985,7 +985,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          ABI_MALLOC(kpg_k,(npw_k,nkpg))
          if ((mpi_enreg%paral_kgb/=1.or.istep<=1).and.nkpg>0) then
            call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
-           if (dtset%usegbt /= 0) then
+           if (dtset%use_gbt /= 0) then
              ABI_MALLOC(kpg_kphq,(npw_k,nkpg))
              call mkkpg(kg_k,kpg_kphq,kphq,nkpg,npw_k)
            end if
@@ -995,7 +995,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          ABI_MALLOC(kpg_k,(npw_k,nkpg))
          if (optforces/=0) then
            call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
-           if (dtset%usegbt /= 0) then
+           if (dtset%use_gbt /= 0) then
              ABI_MALLOC(kpg_kphq,(npw_k,nkpg))
              call mkkpg(kg_k,kpg_kphq,kphq,nkpg,npw_k)
            end if
@@ -1014,11 +1014,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
           psps%usepaw,psps%useylm,ylm_k,ylmgr,kinpw=kinpw)
        end if
 
-       if (dtset%usegbt /= 0) then
+       if (dtset%use_gbt /= 0) then
          ! Compute (1/2) (2 Pi)**2 (k+q/2+G)**2:
          ABI_MALLOC(kinpw_kphq, (npw_k))
          call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw_kphq,kphq,npw_k,0,0)
 
+         ! Compute nonlocal form factors ffnl at all (k+q/2+G):
          ! TODO: useylm = 1 --> ylm_kphq, ylmgr_kphq
          ABI_MALLOC(ffnl_kphq,(npw_k,dimffnl,psps%lmnmax,ntypat))
          call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl_kphq,psps%ffspl,&
@@ -1033,7 +1034,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        !  - Prepare various tabs in case of band-FFT parallelism
        !  - Load k-dependent quantities in the Hamiltonian
        ABI_MALLOC(ph3d,(2,npw_k,gs_hamk%matblk))
-       if (dtset%usegbt /= 0) then
+       if (dtset%use_gbt /= 0) then
          ABI_MALLOC(ph3d_kphq,(2,npw_k,gs_hamk%matblk))
        end if
 
@@ -1046,7 +1047,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,&
            compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1), compute_gbound=(mpi_enreg%paral_kgb/=1))
 
-         if (dtset%usegbt /= 0) then
+         if (dtset%use_gbt /= 0) then
            call gs_hamk%load_kprime(kpt_kp=kphq,&
              kinpw_kp=kinpw_kphq,kpg_kp=kpg_kphq,ffnl_kp=ffnl_kphq,ph3d_kp=ph3d_kphq,&
              compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1), compute_gbound=(mpi_enreg%paral_kgb/=1))

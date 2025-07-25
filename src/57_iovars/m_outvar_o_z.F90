@@ -135,7 +135,6 @@ contains
  real(dp),allocatable :: dprarr(:,:),dprarr_images(:,:,:)
  real(dp),allocatable :: xangst(:,:),xcart(:,:),xred(:,:)
  real(dp),allocatable :: xangst_(:,:,:,:),xcart_(:,:,:,:)
-
 ! *************************************************************************
 
 !###########################################################
@@ -680,7 +679,6 @@ contains
 !### 03. Print all the input variables (Q)
 !##
 
-!qgbt
  !dprarr(1,:)=dtsets(:)%qgbt(1)
  !dprarr(2,:)=dtsets(:)%qgbt(2)
  !dprarr(3,:)=dtsets(:)%qgbt(3)
@@ -1650,14 +1648,14 @@ contains
      end if
    end do
    call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,&
-&   narrm,ncid,ndtset_alloc,'ziontypat','DPR',multivals%ntypat,forceprint=2)
+     narrm,ncid,ndtset_alloc,'ziontypat','DPR',multivals%ntypat,forceprint=2)
  end if
 
  do idtset=0,ndtset_alloc
    dprarr(1:npsp,idtset)=dtsets(idtset)%znucl(1:npsp)
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,4,marr,npsp,narrm,ncid,ndtset_alloc,'znucl','DPR',0,forceprint=2)
- 
+
  intarr(1,:)=dtsets(:)%zora
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'zora','INT',0)
 
@@ -1729,7 +1727,6 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
  character(len=4) :: appen
  character(len=16) :: keywd
  character(len=500) :: message
-
 ! *************************************************************************
 
  if(ndtset_alloc<1)then

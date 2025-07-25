@@ -209,9 +209,9 @@ module m_hamiltonian
    ! governs the way the nonlocal operator is to be applied:
    !   1=using Ylm, 0=using Legendre polynomials
 
-  integer :: use_gbt
-   ! if use_gbt=0, use normal non-collinear calculation
-   ! if use_gbt=1, use spin spiral calculation
+  integer :: use_gbt = 0
+   ! 0, use normal non-collinear calculation
+   ! 1, use spin spiral calculation
 
   integer :: zora
    ! zora=0: no zora terms. zora=1: use available zora terms
@@ -742,8 +742,8 @@ end subroutine gsham_free
 
 subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
                      xred,nfft,mgfft,ngfft,rprimd,nloalg,&
-                     ph1d,usecprj,comm_atom,mpi_atmtab,mpi_spintab,paw_ij,&  ! optional
-                     electronpositron,fock,nucdipmom,gpu_option,use_gbt,zora)         ! optional
+                     ph1d,usecprj,comm_atom,mpi_atmtab,mpi_spintab,paw_ij,&   ! optional
+                     electronpositron,fock,nucdipmom,gpu_option,use_gbt,zora) ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -771,7 +771,6 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  integer :: my_spintab(2)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable,target :: ekb_tmp(:,:,:,:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -889,12 +888,6 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  else
    ham%usecprj=0
    ABI_MALLOC(ham%dimcprj,(0))
- end if
-
- if (present(use_gbt)) then
-    ham%use_gbt = use_gbt
- else
-    ham%use_gbt = 0
  end if
 
 ! ===========================
@@ -1039,7 +1032,6 @@ subroutine gsham_load_k(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
  logical :: compute_gbound_
  real(dp) :: arg
  !character(len=500) :: msg
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1206,7 +1198,6 @@ subroutine gsham_load_kprime(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
  logical :: compute_gbound_
  real(dp) :: arg
  !character(len=500) :: msg
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1394,10 +1385,7 @@ subroutine gsham_copy(gs_hamk_in, gs_hamk_out)
 
 !Local variables-------------------------------
  integer :: tmp2i(5)
-#if defined HAVE_FC_ISO_C_BINDING
  type(C_PTR) :: ham_ptr
-#endif
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1431,6 +1419,7 @@ subroutine gsham_copy(gs_hamk_in, gs_hamk_out)
  gs_hamk_out%usecprj = gs_hamk_in%usecprj
  gs_hamk_out%usepaw = gs_hamk_in%usepaw
  gs_hamk_out%useylm = gs_hamk_in%useylm
+ gs_hamk_out%use_gbt = gs_hamk_in%use_gbt
  gs_hamk_out%zora = gs_hamk_in%zora
  gs_hamk_out%ngfft = gs_hamk_in%ngfft
  gs_hamk_out%nloalg = gs_hamk_in%nloalg
@@ -1571,9 +1560,7 @@ subroutine gsham_load_spin(Ham,isppol,vectornd,vlocal,vxctaulocal,with_nonlocal)
  real(dp),optional,intent(in),target :: vlocal(:,:,:,:),vxctaulocal(:,:,:,:,:)
 
 !Local variables-------------------------------
-!scalars
  integer :: jsppol
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1629,9 +1616,7 @@ end subroutine gsham_load_spin
 subroutine rfham_free(rf_Ham)
 
 !Arguments ------------------------------------
-!scalars
  class(rf_hamiltonian_type),intent(inout) :: rf_Ham
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1711,7 +1696,6 @@ subroutine rfham_init(rf_ham, cplex,gs_Ham,ipert,&
 !arrays
  integer :: my_spintab(2)
  real(dp),allocatable,target :: e1kb_tmp(:,:,:,:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1850,9 +1834,7 @@ subroutine rfham_load_spin(rf_Ham,isppol,vectornd,vlocal1,vxctaulocal,with_nonlo
  real(dp),optional,target,intent(in) :: vxctaulocal(:,:,:,:,:)
 
 !Local variables-------------------------------
-!scalars
  integer :: jsppol
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1980,7 +1962,6 @@ subroutine pawdij2ekb(ekb,paw_ij,isppol,comm_atom,mpi_atmtab)
  logical :: my_atmtab_allocated,paral_atom
 !arrays
  integer,pointer :: my_atmtab(:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -2059,7 +2040,6 @@ subroutine pawdij2e1kb(paw_ij1,isppol,comm_atom,mpi_atmtab,e1kbfr,e1kbsc)
  logical :: my_atmtab_allocated,paral_atom
 !arrays
  integer,pointer :: my_atmtab(:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -2176,7 +2156,6 @@ subroutine gspot_transgrid_and_pack(isppol, usepaw, paral_kgb,  nfft, ngfft, nff
  integer :: n1,n2,n3,n4,n5,n6,ispden,ic
  real(dp) :: rhodum(1)
  real(dp),allocatable :: cgrvtrial(:,:), vlocal_tmp(:,:,:)
-
 ! *************************************************************************
 
  ! Coarse mesh.
