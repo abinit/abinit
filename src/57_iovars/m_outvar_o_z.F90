@@ -1657,6 +1657,9 @@ contains
    dprarr(1:npsp,idtset)=dtsets(idtset)%znucl(1:npsp)
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,4,marr,npsp,narrm,ncid,ndtset_alloc,'znucl','DPR',0,forceprint=2)
+ 
+ intarr(1,:)=dtsets(:)%zora
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'zora','INT',0)
 
 !###########################################################
 !## Deallocation for generic arrays, and for n-z variables

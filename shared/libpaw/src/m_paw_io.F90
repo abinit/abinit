@@ -254,10 +254,11 @@ subroutine pawio_print_ij(unit,a_ij,adim,cplex,ndim,opt_l,opt_l_index, &
  end if
 
  ! Test if the matrix contains high values if required
+ nhigh=0
  if (test_value>zero) then
    testval=test_value
    !;if (Ha_or_eV==2) testval=testval*Ha_eV
-   nhigh=0;nhigh=count(abs(prtab(:,:,:))>=testval)
+   nhigh=count(abs(prtab(:,:,:))>=testval)
  end if
 
  if (opt_prtvol/=0 .or. nhigh>0 .or. l_force_print) then

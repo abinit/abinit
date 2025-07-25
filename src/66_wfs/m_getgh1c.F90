@@ -925,7 +925,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    call getgh1ndc(cwave,gh1ndc,gs_hamkq%gbound_k,gs_hamkq%istwf_k,gs_hamkq%kg_k,&
      & gs_hamkq%mgfft,mpi_enreg,ndat,gs_hamkq%ngfft,npw,gs_hamkq%nvloc,&
      & gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,my_nspinor,rf_hamkq%vectornd,&
-     & gs_hamkq%gpu_option)
+     & gs_hamkq%vlocal,rf_hamkq%zora,gs_hamkq%gpu_option)
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET TEAMS DISTRIBUTE &
    !$OMP& MAP(to:gvnlx1_,gh1ndc) PRIVATE(ispinor) &
@@ -2164,28 +2164,31 @@ end subroutine getgh1dqc_setup
 !! SOURCE
 
 subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
-&                      ndat,ngfft,npw_k,nvloc,n4,n5,n6,my_nspinor,vectornd,gpu_option)
+&                      ndat,ngfft,npw_k,nvloc,n4,n5,n6,my_nspinor,&
+&                      vectornd,vlocal,zora,gpu_option)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: istwf_k,mgfft,my_nspinor,ndat,npw_k,nvloc,n4,n5,n6,gpu_option
+ integer,intent(in) :: istwf_k,mgfft,my_nspinor,ndat,npw_k,nvloc,n4,n5,n6,zora
+ integer,intent(in) :: gpu_option
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: gbound_k(2*mgfft+4),kg_k(3,npw_k),ngfft(18)
  real(dp),intent(inout) :: cwavein(2,npw_k*my_nspinor*ndat)
  real(dp),intent(inout) :: gh1ndc(2,npw_k*my_nspinor*ndat)
- real(dp),intent(inout) :: vectornd(n4,n5,n6,nvloc)
+ real(dp),intent(inout) :: vectornd(n4,n5,n6,nvloc),vlocal(n4,n5,n6,nvloc)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tim_fourwf=1
  integer :: idat,ipw,iv1,iv2,nspinortot,shift
- logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
+ logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc,usezora
  real(dp) :: weight=one
+ real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
  !arrays
  real(dp),allocatable :: cwavein1(:,:),cwavein2(:,:)
  real(dp),allocatable :: ghc1(:,:),ghc2(:,:)
- real(dp),allocatable :: work(:,:,:,:)
+ real(dp),allocatable :: vectornd_dir(:,:,:,:),work(:,:,:,:),zk(:,:,:)
 
 ! *********************************************************************
 
@@ -2203,6 +2206,12 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
    nspinor2TreatedByThisProc=(mpi_enreg%me_spinor==1)
  end if
 
+ usezora=((zora.EQ.1).OR.(zora.EQ.3))
+ if(usezora) then
+   ABI_MALLOC(zk,(n4,n5,n6))
+   zk(1:n4,1:1:n5,1:n6)=1.0/(1.0-HalfFineStruct2*vlocal(1:n4,1:n5,1:n6,nvloc))
+ end if
+ 
  ABI_MALLOC(work,(2,n4,n5,n6*ndat))
 
  if (nspinortot==1) then
@@ -2212,10 +2221,17 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
    !$OMP TARGET ENTER DATA MAP(alloc:ghc1) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
 
+   ABI_MALLOC(vectornd_dir,(n4,n5,n6,nvloc))
+   if (usezora) then
+     vectornd_dir(1:n4,1:n5,1:n6,nvloc)=zk(1:n4,1:n5,1:n6)*vectornd(1:n4,1:n5,1:n6,nvloc)
+   else
+     vectornd_dir(1:n4,1:n5,1:n6,nvloc)=vectornd(1:n4,1:n5,1:n6,nvloc)
+   end if
    ! apply vector potential in direction ipert to input wavefunction
-   call fourwf(1,vectornd,cwavein,ghc1,work,gbound_k,gbound_k,&
+   call fourwf(1,vectornd_dir,cwavein,ghc1,work,gbound_k,gbound_k,&
      & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
      & tim_fourwf,weight,weight,gpu_option=gpu_option)
+   ABI_FREE(vectornd_dir)
 
    ! scale by 2\pi
    if(gpu_option==ABI_GPU_DISABLED) then
@@ -2263,9 +2279,16 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
 #endif
      end if
 
-     call fourwf(1,vectornd,cwavein1,ghc1,work,gbound_k,gbound_k,&
+     ABI_MALLOC(vectornd_dir,(n4,n5,n6,nvloc))
+     if (usezora) then
+       vectornd_dir(1:n4,1:n5,1:n6,nvloc)=zk(1:n4,1:n5,1:n6)*vectornd(1:n4,1:n5,1:n6,nvloc)
+     else
+       vectornd_dir(1:n4,1:n5,1:n6,nvloc)=vectornd(1:n4,1:n5,1:n6,nvloc)
+     end if
+     call fourwf(1,vectornd_dir,cwavein1,ghc1,work,gbound_k,gbound_k,&
        & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
        & tim_fourwf,weight,weight,gpu_option=gpu_option)
+     ABI_FREE(vectornd_dir)
 
      if(gpu_option==ABI_GPU_DISABLED) then
        do idat=1,ndat
@@ -2319,9 +2342,16 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
 #endif
      end if
 
-     call fourwf(1,vectornd,cwavein2,ghc2,work,gbound_k,gbound_k,&
+     ABI_MALLOC(vectornd_dir,(n4,n5,n6,nvloc))
+     if (usezora) then
+       vectornd_dir(1:n4,1:n5,1:n6,nvloc)=zk(1:n4,1:n5,1:n6)*vectornd(1:n4,1:n5,1:n6,nvloc)
+     else
+       vectornd_dir(1:n4,1:n5,1:n6,nvloc)=vectornd(1:n4,1:n5,1:n6,nvloc)
+     end if
+     call fourwf(1,vectornd_dir,cwavein2,ghc2,work,gbound_k,gbound_k,&
        & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
        & tim_fourwf,weight,weight,gpu_option=gpu_option)
+     ABI_FREE(vectornd_dir)
 
      if(gpu_option==ABI_GPU_DISABLED) then
        do idat=1,ndat
@@ -2352,6 +2382,9 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
  end if ! nspinortot
 
  ABI_FREE(work)
+ if (usezora) then
+   ABI_FREE(zk)
+ end if
 
 end subroutine getgh1ndc
 !!***
