@@ -1,9 +1,9 @@
 #parallelization
 paral_kgb 1
+nblock_lobpcg 1
 npband 2
 npfft 1
 np_spkpt 4
-bandpp 40
 
 prtden 0 prtwf 0 prteig 0
 ecut 3.

@@ -446,7 +446,7 @@ subroutine tdep_shift_xred(Invar,MPIdata)
   type(Input_type), intent(inout) :: Invar
   type(MPI_enreg_type), intent(in) :: MPIdata
   integer :: natom,ii,iatom,istep,ierr
-  integer :: shift, best_shift
+  integer :: shift,shift_max,shift_best
   double precision :: xi, dist, best_dist
   double precision, allocatable :: x0(:,:)
 
@@ -461,20 +461,21 @@ subroutine tdep_shift_xred(Invar,MPIdata)
   call xmpi_sum(x0,MPIdata%comm_step,ierr)
 
   ! Shift xred from all steps in the same unitcell as the first step
+  shift_max = 1
   do istep=1, Invar%my_nstep
     do iatom=1,natom
       do ii=1,3
         best_dist = abs(Invar%xred(ii,iatom,istep) - x0(ii,iatom))
-        best_shift = 0
-        do shift=-1,1
+        shift_best = 0
+        do shift=-shift_max,shift_max
           xi = Invar%xred(ii,iatom,istep) + shift
           dist = abs(xi - x0(ii,iatom))
           if (dist < best_dist) then
             best_dist = dist
-            best_shift = shift
+            shift_best = shift
           end if
         end do
-        Invar%xred(ii,iatom,istep) = Invar%xred(ii,iatom,istep) + best_shift
+        Invar%xred(ii,iatom,istep) = Invar%xred(ii,iatom,istep) + shift_best
       end do
     end do
   end do
