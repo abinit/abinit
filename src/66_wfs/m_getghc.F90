@@ -35,6 +35,7 @@ module m_getghc
  use defs_abitypes, only : mpi_type
  use m_time,        only : timab
  use m_fstrings,    only : sjoin, itoa
+ use m_cgtools,     only : cg_copy_spin, cg_put_spin
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_getdim, pawcprj_copy
  use m_bandfft_kpt, only : bandfft_kpt, bandfft_kpt_get_ikpt
  use m_hamiltonian, only : gs_hamiltonian_type, KPRIME_H_K, K_H_KPRIME, K_H_K, KPRIME_H_KPRIME
@@ -207,7 +208,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  integer,parameter :: level=114, tim_fourwf=1
  integer :: choice,cplex,cpopt_here,i1,i2,i3,idat,idir,ierr,i0
  integer :: ig,igspinor,istwf_k_,ii,iispinor,ikpt_this_proc,ipw,ispinor,my_nspinor
- integer :: n4,n5,n6,ndat_,nnlout,npw_fft,npw_k1,npw_k2,nspinortot,nspinor_save,option_fft
+ integer :: n4,n5,n6,ndat_,nnlout,npw_fft,npw_k1,npw_k2,nspinortot,option_fft
  integer :: paw_opt,select_k_,shift1,shift2,signs,tim_nonlop
  logical(kind=c_bool) :: k1_eq_k2
  logical :: double_rfft_trick,have_to_reequilibrate,has_fock,local_gvnlxc
@@ -233,16 +234,13 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  real(dp), allocatable            :: cwavef2(:,:)
  real(dp), allocatable            :: cwavef_fft(:,:)
  real(dp), allocatable            :: cwavef_fft_tr(:,:)
- real(dp), allocatable            :: cwavef_k(:,:)
- real(dp), allocatable            :: cwavef_kp(:,:)
+ real(dp), allocatable            :: cwavef_spin(:,:), gvnlxc_spin(:,:)
  real(dp), allocatable            :: ghc1(:,:)
  real(dp), allocatable            :: ghc2(:,:)
  real(dp), allocatable            :: ghc3(:,:)
  real(dp), allocatable            :: ghc4(:,:)
  real(dp), allocatable            :: ghc_mGGA(:,:)
  real(dp), allocatable            :: ghc_vectornd(:,:)
- real(dp), allocatable            :: gvnlxc_k(:,:)
- real(dp), allocatable            :: gvnlxc_kp(:,:)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
  real(c_double), ABI_CONTIGUOUS pointer :: gvnlc(:,:)
@@ -258,8 +256,6 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  real(dp), pointer                :: kpt_k1(:)
  real(dp), pointer                :: kpt_k2(:)
  real(dp), pointer                :: gsc_ptr(:,:)
- real(dp), pointer                :: gsc_ptr_k(:,:)
- real(dp), pointer                :: gsc_ptr_kp(:,:)
  type(fock_common_type),pointer :: fock
  type(pawcprj_type),pointer :: cwaveprj_fock(:,:),cwaveprj_idat(:,:),cwaveprj_nonlop(:,:)
  logical :: transfer_ghc,transfer_gsc,transfer_cwavef,transfer_gvnlxc
@@ -279,7 +275,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  end if
 
  !Select k-dependent objects according to select_k input parameter
- select_k_=1;if (present(select_k)) select_k_=select_k
+ select_k_=KPRIME_H_K;if (present(select_k)) select_k_=select_k
  select case (select_k_)
  case (KPRIME_H_K)
    ! <k^prime|H|k>
@@ -344,6 +340,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  use_cwavef_r=present(cwavef_r)
  n4=gs_ham%n4 ; n5=gs_ham%n5 ; n6=gs_ham%n6
  nspinortot=gs_ham%nspinor
+
  if (use_cwavef_r) then
    ABI_CHECK_IEQ(size(cwavef_r,1), 2, 'wrong size for cwavef_r (dimension 1)')
    ABI_CHECK_IEQ(size(cwavef_r,2), n4, 'wrong size for cwavef_r (dimension 2)')
@@ -413,7 +410,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    ABI_CHECK(associated(gs_ham%vlocal), "We need vlocal in gs_ham!")
 
    ! fourwf can only process with one value of istwf_k
-   if (gs_ham%usegbt == 0) then
+   if (gs_ham%use_gbt == 0) then
      ABI_CHECK(k1_eq_k2, 'vlocal (fourwf) cannot be computed with k/=k^prime!')
    end if
 
@@ -1045,48 +1042,41 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      paw_opt=gs_ham%usepaw ; if (sij_opt/=0) paw_opt=sij_opt+3
      lambda_ndat = lambda
 
-     if (gs_ham%usepaw==0) gsc_ptr => nonlop_dum
-     if (gs_ham%usepaw==1) gsc_ptr => gsc
+     if (gs_ham%use_gbt == 0) then
+       if (gs_ham%usepaw==0) gsc_ptr => nonlop_dum
+       if (gs_ham%usepaw==1) gsc_ptr => gsc
 
-!test GBT
-     if (gs_ham%use_gbt==0) then
        call nonlop(choice,cpopt_here,cwaveprj_nonlop,enlout,gs_ham,idir,lambda_ndat,mpi_enreg,ndat,&
-          nnlout,paw_opt,signs,gsc_ptr,tim_nonlop,cwavef,gvnlxc,select_k=select_k_)
+          nnlout,paw_opt,signs,gsc_ptr,tim_nonlop,cwavef,gvnlxc_,select_k=select_k_)
      else
-       nspinor_save = gs_ham%nspinor
+       ! GBT case
        gs_ham%nspinor = 1
-! Split cwavef and gvnlxc
-       ABI_MALLOC(cwavef_k, (2, npw_k1*ndat))
-       ABI_MALLOC(cwavef_kp, (2, npw_k1*ndat))
-       cwavef_k  = cwavef(:, 1:npw_k1)
-       cwavef_kp = cwavef(:, npw_k1+1:2*npw_k1)
 
-       ABI_MALLOC(gvnlxc_k, (2, npw_k1*ndat))
-       ABI_MALLOC(gvnlxc_kp, (2, npw_k1*ndat))
+       ! Split cwavef and gvnlxc
+       ABI_MALLOC(cwavef_spin, (2, npw_k1*ndat))
+       ABI_MALLOC(gvnlxc_spin, (2, npw_k1*ndat))
 
-       gsc_ptr_k  => gsc_ptr(:, 1:npw_k1)
-       gsc_ptr_kp => gsc_ptr(:, npw_k1+1:2*npw_k1)
+       if (gs_ham%usepaw==0) gsc_ptr => nonlop_dum
+       if (gs_ham%usepaw==1) gsc_ptr => gsc
 
-! First: <k|H|k>
-       call nonlop(choice, -1, cwaveprj, enlout, gs_ham, idir, lambda_ndat, mpi_enreg, ndat, &
-              nnlout, paw_opt, signs, gsc_ptr_k, tim_nonlop, cwavef_k, gvnlxc_k, select_k=3)
+       ! First: <k|H|k>
+       call cg_copy_spin(1, npw_k1, nspinortot, ndat, cwavef, cwavef_spin)
+       call nonlop(choice, cpopt_here, cwaveprj, enlout, gs_ham, idir, lambda_ndat, mpi_enreg, ndat, &
+                   nnlout, paw_opt, signs, gsc_ptr, tim_nonlop, cwavef_spin, gvnlxc_spin, select_k=K_H_K)
+       ! Insert results in the right position.
+       call cg_put_spin(1, npw_k1, nspinortot, ndat, gvnlxc_spin, gvnlxc)
 
-! Second: <k'|H|k'>
-       call nonlop(choice, -1, cwaveprj, enlout, gs_ham, idir, lambda_ndat, mpi_enreg, ndat, &
-              nnlout, paw_opt, signs, gsc_ptr_kp, tim_nonlop, cwavef_kp, gvnlxc_kp, select_k=4)
+       ! Second: <k'|H|k'>
+       call cg_copy_spin(2, npw_k1, nspinortot, ndat, cwavef, cwavef_spin)
+       call nonlop(choice, cpopt_here, cwaveprj, enlout, gs_ham, idir, lambda_ndat, mpi_enreg, ndat, &
+                   nnlout, paw_opt, signs, gsc_ptr, tim_nonlop, cwavef_spin, gvnlxc_spin, select_k=KPRIME_H_KPRIME)
+       ! Insert results in the right position.
+       call cg_put_spin(2, npw_k1, nspinortot, ndat, gvnlxc_spin, gvnlxc)
 
-! Merge results back
-       cwavef(:, 1:npw_k1) = cwavef_k
-       cwavef(:, npw_k1+1:2*npw_k1) = cwavef_kp
-       gvnlxc(:, 1:npw_k1) = gvnlxc_k
-       gvnlxc(:, npw_k1+1:2*npw_k1) = gvnlxc_kp
-
-       gs_ham%nspinor = nspinor_save
-       ABI_FREE(cwavef_k)
-       ABI_FREE(cwavef_kp)
-       ABI_FREE(gvnlxc_k)
-       ABI_FREE(gvnlxc_kp)
-     end if
+       gs_ham%nspinor = 2
+       ABI_FREE(cwavef_spin)
+       ABI_FREE(gvnlxc_spin)
+     end if ! use_gbt
 
      if (gs_ham%usepaw==1 .and. has_fock)then
        if (fock_get_getghc_call(fock)==1) then
@@ -1173,7 +1163,6 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      ! Assemble modified kinetic, local and nonlocal contributions
      ! to <G|H|C(n,k)>. Take also into account build-in debugging.
      if(prtvol/=-level)then
-      if (gs_ham%use_gbt==1) my_nspinor=2
        ! OpenMP GPU
        if(gs_ham%gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD

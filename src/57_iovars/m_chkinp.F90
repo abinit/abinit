@@ -32,7 +32,6 @@ module m_chkinp
 
  use defs_datatypes,   only : pspheader_type
  use defs_abitypes,    only : MPI_type
- use m_io_tools,       only : flush_unit
  use m_numeric_tools,  only : iseven, isdiagmat
  use m_symtk,          only : sg_multable, chkorthsy, symmetrize_xred
  use m_fstrings,       only : string_in, sjoin, itoa
@@ -501,10 +500,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
           '   Better solution: you might shift your atomic positions to better align the FFT grid and the symmetry axes.'
          call wrtout(std_out,msg)
          if(fixed_mismatch==1)then
-           call flush_unit(std_out)
            write(msg, '(a)' )&
            '   ABINIT has detected such a possible shift. See the suggestion given in the COMMENT above (or in output or log file).'
-           call wrtout(std_out,msg)
+           call wrtout(std_out,msg, do_flush=.True.)
          endif
          ierr=ierr+1 ! Previously a warning: for slab geometries arbitrary tnons can appear along the vacuum direction.
                      ! But then simply set chksymtnons=0 ...
@@ -2115,7 +2113,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        'pawujv and/or atvshift found to be 0.0d0.',ch10,&
        'When engaging the linear response procedure, the perturbation strength',ch10,&
        'must be non-zero. Action: change pawujv and/or atvshift to a non-zero value.'
-       call flush_unit(std_out)
        ABI_ERROR(msg)
      end if
    end if
@@ -4239,25 +4236,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      end if
    end if
 
-! use_gbt
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'use_gbt',dt%use_gbt,2,(/0,1/),iout)
-   if (response/=0) then ! If DFPT is activated, use_gbt must be disabled
-      cond_string(1)='response'; cond_values(1)=response
-      call chkint_eq(1,1,cond_string,cond_values,ierr,'use_gbt',dt%use_gbt,1,(/0/),iout)
-   end if
-   if (dt%usepaw==1) then  ! GBT currently not implemented for PAW
-      cond_string(1)='usepaw' ; cond_values(1)=dt%usepaw
-      call chkint_eq(1,1,cond_string,cond_values,ierr,'use_gbt',dt%use_gbt,1,(/0/),iout)
-   end if
-   if (dt%use_gbt==1) then ! GBT requires nspinor = 2 (non-collinear spin)
-      cond_string(1)='use_gbt'; cond_values(1)=dt%use_gbt
-      call chkint_eq(1,1,cond_string,cond_values,ierr,'nspinor',dt%nspinor,1,(/2/),iout)
-   end if
-   if (any(dt%so_psp==1)) then !  ! GBT is not compatible with SOC
-      cond_string(1)='so_psp'; cond_values(1)=1
-      call chkint_eq(1,1,cond_string,cond_values,ierr,'use_gbt',dt%use_gbt,1,(/0/),iout)
-   end if
-
 !  use_slk
    if (dt%paral_kgb==1) then
      call chkint_eq(0,0,cond_string,cond_values,ierr,'use_slk',dt%use_slk,2,(/0,1/),iout)
@@ -4642,7 +4620,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    end if
 
    ! Check features that are not compatible with the generalized Bloch theorem.
-   if (dt%usegbt /= 0) then
+   if (dt%use_gbt /= 0) then
      ABI_CHECK_NOSTOP(optdriver == RUNL_GSTATE, 'GBT can only be used in GS calculations', ierr)
      ABI_CHECK_NOSTOP(dt%usepaw == 0, 'GBT does not support PAW', ierr)
      ABI_CHECK_NOSTOP(dt%paral_kgb == 0, 'GBT does not support paral_kgb 1', ierr)
@@ -4654,6 +4632,25 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      ABI_CHECK_NOSTOP(dt%nspden == 4, 'GBT requires nspden 4', ierr)
      ABI_CHECK_NOSTOP(all(dt%so_psp(1:npsp) == 0), 'GBT requires so_psp == 0', ierr)
      ABI_CHECK_NOSTOP(all(dt%istwfk(1:nkpt) == 1), 'GBT requires istwfk == 1', ierr)
+
+     ! use_gbt
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'use_gbt',dt%use_gbt,2,(/0,1/),iout)
+     if (response/=0) then ! If DFPT is activated, use_gbt must be disabled
+        cond_string(1)='response'; cond_values(1)=response
+        call chkint_eq(1,1,cond_string,cond_values,ierr,'use_gbt',dt%use_gbt,1,(/0/),iout)
+     end if
+     if (dt%usepaw==1) then  ! GBT currently not implemented for PAW
+        cond_string(1)='usepaw' ; cond_values(1)=dt%usepaw
+        call chkint_eq(1,1,cond_string,cond_values,ierr,'use_gbt',dt%use_gbt,1,(/0/),iout)
+     end if
+     if (dt%use_gbt==1) then ! GBT requires nspinor = 2 (non-collinear spin)
+        cond_string(1)='use_gbt'; cond_values(1)=dt%use_gbt
+        call chkint_eq(1,1,cond_string,cond_values,ierr,'nspinor',dt%nspinor,1,(/2/),iout)
+     end if
+     if (any(dt%so_psp==1)) then !  ! GBT is not compatible with SOC
+        cond_string(1)='so_psp'; cond_values(1)=1
+        call chkint_eq(1,1,cond_string,cond_values,ierr,'use_gbt',dt%use_gbt,1,(/0/),iout)
+     end if
    end if
 
 !  If molecular dynamics or structural optimization is being done
@@ -4679,8 +4676,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
 !  Must have nqpt=1 for rfphon=1
 
-!  ** Here ends the checking section **************************************
-
+   ! Here ends the checking section **************************************
    call dt%free()
    ierr_dtset(idtset)=ierr
  end do ! idtset
@@ -4693,8 +4689,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    wvl_hgrid = zero
    twvl = .false.
    do idtset=1,ndtset_alloc
-!    Give an indication to the equivalent ecut corresponding to
-!    given hgrid.
+     ! Give an indication to the equivalent ecut corresponding to given hgrid.
      if (dtsets(idtset)%usewvl == 1 .and. wvl_hgrid /= dtsets(idtset)%wvl_hgrid) then
        write(msg,'(F11.3,A,F16.1,A,F16.1,A)') &
         dtsets(idtset)%wvl_hgrid, " bohr  |", &
@@ -4728,7 +4723,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    'Checking consistency of input data against itself gave ',ierr,' inconsistency.',ch10,&
    'The details of the problem can be found above (or in output or log file).',ch10,&
    'In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
-   call flush_unit(std_out)
    ABI_ERROR(msg)
  end if
  if (ierr>1) then
@@ -4736,7 +4730,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    'Checking consistency of input data against itself gave ',ierr,' inconsistencies.',ch10,&
    'The details of the problems can be found above (or in output or log file), in an earlier WARNING.',ch10,&
    'In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
-   call flush_unit(std_out)
    ABI_ERROR(msg)
  end if
 

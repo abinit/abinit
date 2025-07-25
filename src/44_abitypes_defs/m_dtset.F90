@@ -700,7 +700,7 @@ type, public :: dataset_type
  integer :: usexcnhat_orig
  integer :: useylm
  integer :: useextfpmd = 0
- integer :: use_gbt
+ integer :: use_gbt = 0
  integer :: use_yaml = 0
  integer :: use_slk
  integer :: use_oldchi = 1

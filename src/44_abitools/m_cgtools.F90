@@ -36,6 +36,7 @@
 
 module m_cgtools
 
+ use, intrinsic :: iso_c_binding, only: c_size_t, c_loc
  use defs_basis
  use m_abicore
  use m_errors
@@ -49,8 +50,6 @@ module m_cgtools
  use m_pawcprj,       only : pawcprj_type,pawcprj_axpby,pawcprj_zaxpby
  use m_abi_linalg
 
- use, intrinsic :: iso_c_binding, only: c_size_t, c_loc
-
  implicit none
 
  private
@@ -59,14 +58,12 @@ module m_cgtools
  real(dp),public,parameter :: cg_cone(2)  = (/1._dp,0._dp/)
 
  ! Helper functions.
- !public :: cg_prod
  public :: cg_tocplx
  public :: cg_fromcplx
  public :: cg_kfilter
  public :: cg_setaug_zero
  public :: cg_to_reim
  public :: cg_from_reim
- !public :: cg_times_eigr
 
  ! Blas1
  public :: cg_zcopy
@@ -80,7 +77,6 @@ module m_cgtools
 
  ! Blas2
  public :: cg_zgemv         ! alpha*A*x + beta*y,
- !public :: cg_dgemv
 
  ! Blas3
  public :: cg_zgemm
@@ -136,6 +132,8 @@ module m_cgtools
  public :: cg_zaxpy_many_areal
  public :: cg_set_imag0_to_zero
  public :: cg_randomize             ! Initialize cg_k with random numbers.
+ public :: cg_copy_spin
+ public :: cg_put_spin
 !***
 
 CONTAINS  !========================================================================================
@@ -6239,6 +6237,70 @@ subroutine cg_randomize(istwf_k, npw_k, nspinor, nband_k, me_g0, cg_k)
  end do ! iband
 
 end subroutine cg_randomize
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_cgtools/cg_copy_spin
+!! NAME
+!!  cg_copy_spin
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine cg_copy_spin(spin, npw_k, nspinor, ndat, in_cg, out_cg)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: spin, npw_k, nspinor, ndat
+!arrays
+ real(dp),intent(inout) :: in_cg(2,npw_k,nspinor,ndat)
+ real(dp),intent(out) :: out_cg(2,npw_k,ndat)
+
+!Local variables ------------------------------
+ integer :: idat
+! *************************************************************************
+
+ do idat=1,ndat
+   out_cg(:,:,idat) = in_cg(:,:,spin,idat)
+ end do
+
+end subroutine cg_copy_spin
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_cgtools/cg_put_spin
+!! NAME
+!!  cg_put_spin
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine cg_put_spin(spin, npw_k, nspinor, ndat, in_cg, out_cg)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: spin, npw_k, nspinor, ndat
+!arrays
+ real(dp),intent(inout) :: in_cg(2,npw_k,ndat)
+ real(dp),intent(out) :: out_cg(2,npw_k,nspinor,ndat)
+
+!Local variables ------------------------------
+ integer :: idat
+! *************************************************************************
+
+ do idat=1,ndat
+   out_cg(:,:,spin, idat) = in_cg(:,:,idat)
+ end do
+
+end subroutine cg_put_spin
 !!***
 
 end module m_cgtools

@@ -284,7 +284,7 @@ Variable(
     requires="[[natnd]] > 0 and [[iatnd]]",
     added_in_version="v10.5",
     text=r"""
-Provides a simplified, alternative input to [[nucdipmom]] for the atoms carrying explicit 
+Provides a simplified, alternative input to [[nucdipmom]] for the atoms carrying explicit
 nuclear dipole moments. The number of atoms in the cell with explicit
 nuclear dipoles is [[natnd]]; the list of the atoms is [[iatnd]]; and the components
 of the dipole moment vector on each atom is given in [[atndlist]]. There are 3*[[natnd]]
@@ -7779,8 +7779,8 @@ Variable(
     requires="[[natnd]] > 0",
     added_in_version="v10.5",
     text=r"""
-Together with [[natnd]], provides a simplified, alternative input to [[nucdipmom]] for 
-the atoms carrying explicit nuclear dipole moments. The number of atoms in the cell with 
+Together with [[natnd]], provides a simplified, alternative input to [[nucdipmom]] for
+the atoms carrying explicit nuclear dipole moments. The number of atoms in the cell with
 explicit nuclear dipoles is [[natnd]]; the list of the atoms is [[iatnd]]; and the components
 of the dipole moment vector on each atom is given in [[atndlist]]. This simplified
 list is converted internally to the full [[nucdipmom]] list; either input format
@@ -11237,7 +11237,7 @@ Variable(
     mnemonics="Number of AToms with Nuclear Dipole moment",
     added_in_version="v10.5",
     text=r"""
-Provides a simplified, alternative input to [[nucdipmom]] for the atoms carrying explicit 
+Provides a simplified, alternative input to [[nucdipmom]] for the atoms carrying explicit
 nuclear dipole moments. The number of atoms in the cell with explicit
 nuclear dipoles is [[natnd]]; the list of the atoms is [[iatnd]]; and the components
 of the dipole moment vector on each atom is given in [[atndlist]]. This simplified
@@ -15088,7 +15088,7 @@ zero-order regular approximation to relativistic effects (ZORA)
 can be added without the
 use of specific PAW datasets (pseudopotentials).  If in addition, a
 nuclear magnetic dipole moment (see [[nucdipmom]]) is present, onsite ZORA terms due
-to the electron-nuclear spin interactions are added as well. See also the [[zora]] 
+to the electron-nuclear spin interactions are added as well. See also the [[zora]]
 input keyword.
 
 If [[pawspnorb]] = 1, spin-orbit (and nuclear-electron spin) interactions will be added.
@@ -22727,7 +22727,7 @@ Variable(
     added_in_version="v10.5",
     text=r"""
 ZORA is an effective approximation to the full Dirac equation, which
-delivers reasonable values for relativistic effects at modest 
+delivers reasonable values for relativistic effects at modest
 cost [[cite:Autschbach2013]].
 The ZORA Hamiltonian includes kinetic energy couplings that are
 independent of electron spin, and additional terms depending explicitly
@@ -22739,7 +22739,7 @@ due to nuclear magnetic dipoles (see [[nucdipmom]]).
 [[zora]] 3 activates both kinetic energy and electron spin terms.
 
 Negative values of [[zora]] are present only for debugging purposes. [[zora]] -1 permits only
-spin-orbit coupling, regardless of the presence of nuclear dipoles. [[zora]] -2 permits only 
+spin-orbit coupling, regardless of the presence of nuclear dipoles. [[zora]] -2 permits only
 the electon spin-nuclear dipole through space interaciton, and [[zora]] -3 permits only the
 electron spin-nuclear dipole Fermi-contact-like interaction.
 """,
@@ -25817,5 +25817,33 @@ with the first point being the static limit.
 As a consequence, the full set of frequencies spans the [1, 1 + nfreqim] range.
 """,
 ),
-]
 
+Variable(
+    abivarname="use_gbt",
+    varset="gstate",
+    vartype="integer",
+    topics=['spinpolarisation_basic', 'MagMom_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="USE Generalized Bloch Theorem",
+    added_in_version="10.5.1",
+    text=r"""
+This variable activates the usage of the Generalized Bloch Theorem to compute spin-spirals.
+""",
+),
+
+Variable(
+    abivarname="qgbt",
+    varset="gstate",
+    vartype="real",
+    topics=['spinpolarisation_basic', 'MagMom_useful'],
+    dimensions=[3],
+    defaultval=MultipleValue(number=3, value=0),
+    mnemonics="Q-point for Generalized Bloch Theorem.",
+    added_in_version="10.5.1",
+    text=r"""
+This variable defines the reduced coordinates of the wave-vector of the spin spiral whent [[use_gbt]] /= 0.
+""",
+),
+
+]
