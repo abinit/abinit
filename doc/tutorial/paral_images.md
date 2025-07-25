@@ -103,7 +103,6 @@ remove an electron of the system and thus obtain a protonated molecule
 
 Although this input file will run on a single core, the [[paral_kgb]] keyword is set to 1 
 to activate the LOBPCG [[cite:Bottin2008]] algorithm.
-Note the use of [[bandpp]] 10 to accelerate the convergence.
 
 !!! important
     If your system were larger and required more CPU time, all the usual variables for parallelism
