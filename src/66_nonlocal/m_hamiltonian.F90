@@ -743,7 +743,7 @@ end subroutine gsham_free
 subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 &                     xred,nfft,mgfft,ngfft,rprimd,nloalg,&
 &                     ph1d,usecprj,comm_atom,mpi_atmtab,mpi_spintab,paw_ij,&  ! optional
-&                     electronpositron,fock,nucdipmom,gpu_option,use_gbt.zora)         ! optional
+&                     electronpositron,fock,nucdipmom,gpu_option,use_gbt,zora)         ! optional
 
 !Arguments ------------------------------------
 !scalars
