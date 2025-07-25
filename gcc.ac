@@ -1,0 +1,25 @@
+# MPI settings
+with_mpi="yes"
+enable_mpi_io="no"
+with_fallbacks="yes"
+
+# linear algebra settings
+with_linalg_flavor="netlib"
+LINALG_LIBS="-L/lib/x86_64-linux-gnu -llapack -lblas"
+
+# mandatory libraries
+with_libxc="yes"
+with_hdf5="yes"
+with_netcdf="yes"
+with_netcdf_fortran="yes"
+
+# fast fourier settings
+with_fft_flavor="fftw3"
+FFTW3_CPPFLAGS="-I/usr/include"
+FFTW3_FCFLAGS="-I/usr/include"
+FFTW3_LIBS="-L/usr/lib/x86_64-linux-gnu -lfftw3 -lfftw3f"
+
+# XML2 library (used by multibinit)
+with_libxml2="yes"
+LIBXML2_FCFLAGS="-I/usr/lib/x86_64-linux-gnu/"
+LIBXML2_LIBS="-L/usr/include/libxml2/libxml/ -lxmlf90"
