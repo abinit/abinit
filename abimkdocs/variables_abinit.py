@@ -25838,7 +25838,7 @@ Variable(
     vartype="real",
     topics=['spinpolarisation_basic', 'MagMom_useful'],
     dimensions=[3],
-    defaultval=MultipleValue(number=3, value=0),
+    defaultval=[0, 0, 0],
     mnemonics="Q-point for Generalized Bloch Theorem.",
     added_in_version="10.5.1",
     text=r"""

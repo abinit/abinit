@@ -679,11 +679,6 @@ contains
 !### 03. Print all the input variables (Q)
 !##
 
- !dprarr(1,:)=dtsets(:)%qgbt(1)
- !dprarr(2,:)=dtsets(:)%qgbt(2)
- !dprarr(3,:)=dtsets(:)%qgbt(3)
- !call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'qgbt','DPR',0)
-
 !qmass
  narr=nnos ! default size for all datasets
  do idtset=0,ndtset_alloc       ! specific size for each dataset
