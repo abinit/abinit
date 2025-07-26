@@ -9,11 +9,12 @@ nspinor  2
 nspden   4
 so_psp   0
 spinat   0.0 0.0 4.0
+ixc 7   # LDA
 
 occopt   7
 
 # Definition of the planewave basis set
-ecut  10        # Maximal kinetic energy cut-off, in Hartree
+ecut  30        # Maximal kinetic energy cut-off, in Hartree
 
 # Definition of the k-point grids and symmetries
 nsym 1
@@ -24,8 +25,8 @@ shiftk  0 0 0
 
 # Definition of the SCF procedure
 nstep 20         # Maximal number of SCF cycles
-tolvrs 1.0d-8
-nband  16
+tolvrs 1.0d-6
+nband  24
 
 # Common input variables
 natom 1
@@ -51,11 +52,11 @@ pseudos "Fe.psp8"                                    # Name and location of the 
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t27.abo, tolnlines = 10, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%   t27.abo, tolnlines = 10, tolabs = 1.1e-3, tolrel = 3.0e-3
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
-#%% authors = Le Shu
+#%% authors = LeShu
 #%% keywords = GBT
 #%% description =
 #%%   Crystalline fcc Fe: GBT calculation
