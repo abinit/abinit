@@ -351,9 +351,7 @@ subroutine mkkin(ecut, ecutsm, effmass_free, gmet, kg, kinpw, kpt, npw, idir1, i
 
  l_vecpot = .false.
  if (present(vecpot)) then
-    if (abs(vecpot(1))>tol12 .or. abs(vecpot(2))>tol12 .or. abs(vecpot(3))>tol12) then
-       l_vecpot = .true.
-    end if
+    if (abs(vecpot(1))>tol12 .or. abs(vecpot(2))>tol12 .or. abs(vecpot(3))>tol12) l_vecpot = .true.
  end if
 
  ! htpisq is (1/2) (2 Pi) **2:
@@ -409,27 +407,28 @@ subroutine mkkin(ecut, ecutsm, effmass_free, gmet, kg, kinpw, kpt, npw, idir1, i
             gmet_break(2,3)*(vecpot(2)*gpk3 + vecpot(3)*gpk2) )
    end if
    select case (order)
-   case(0)
+   case (0)
      kinetic=kpg2
      if (l_vecpot) kinetic=kinetic+two_pi*akpg+0.5_dp*asq
-   case(1)
+   case (1)
      dkpg2=htpisq*2.0_dp*&
 &     (gmet_break(idir1,1)*gpk1+gmet_break(idir1,2)*gpk2+gmet_break(idir1,3)*gpk3)
      kinetic=dkpg2
      if (l_vecpot) kinetic=kinetic+two_pi*(gmet_break(idir1,1)*vecpot(1) + &
                                          & gmet_break(idir1,2)*vecpot(2) + &
                                          & gmet_break(idir1,3)*vecpot(3) )
-   case(2)
+   case (2)
      dkpg2=htpisq*2.0_dp*gmet_break(idir1,idir2)
      kinetic=dkpg2
    end select
+
    if(kpg2>ecut-ecutsm)then
      if(kpg2>ecut-tol12)then
        if(order==0) then
-!        Will filter the wavefunction, based on this value, in cgwf.f, getghc.f and precon.f
+         ! Will filter the wavefunction, based on this value, in cgwf.f, getghc.f and precon.f
          kinetic=huge(zero)*1.d-10
        else
-!        The wavefunction has been filtered : no derivative
+         ! The wavefunction has been filtered: no derivative
          kinetic=0
        end if
      else
@@ -451,11 +450,11 @@ subroutine mkkin(ecut, ecutsm, effmass_free, gmet, kg, kinpw, kpt, npw, idir1, i
        if(order>0) dfsm=-3.0_dp*(-1+xx)**2*xx*(2+5*xx)*fsm**2
        if(order>1) ddfsm=6.0_dp*xx**2*(9+xx*(8+xx*(-52+xx*(-3+xx*(137+xx*(-144+45*xx))))))*fsm**3
        select case (order)
-       case(0)
+       case (0)
          kinetic=kpg2*fsm
-       case(1)
+       case (1)
          kinetic=dkpg2*(fsm-ecutsm_inv*kpg2*dfsm)
-       case(2)
+       case (2)
          kinetic=dkpg2*fsm&
 &         -2.0_dp*d1kpg2*dfsm*ecutsm_inv*d2kpg2&
 &         +kpg2*ddfsm*(ecutsm_inv**2)*d1kpg2*d2kpg2&
@@ -501,7 +500,7 @@ end subroutine mkkin
 !!
 !! NOTES
 !! Note that in case of band parallelism, the number of spin-up
-!! and spin-down bands must be equal at each k points
+!! and spin-down bands must be equal at each k point.
 !!
 !! SOURCE
 

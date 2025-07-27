@@ -12,6 +12,7 @@ spinat   0.0 0.0 4.0
 ixc 7   # LDA
 
 occopt   7
+tsmear   0.01
 
 # Definition of the planewave basis set
 ecut  30        # Maximal kinetic energy cut-off, in Hartree

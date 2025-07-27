@@ -5672,7 +5672,7 @@ subroutine pw_orthon_cprj(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,cprj)
        if (abs(re-1)>tol10.or.abs(im)>tol10) then
          write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (re)',re
          write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (im)',im
-         ABI_WARNING('In pw_orthon_cprj : the result should be equal to one!')
+         ABI_WARNING('In pw_orthon_cprj: the result should be equal to one!')
        end if
      end if
    end do
