@@ -13,7 +13,7 @@ keywords = [
 inp_files = [
 "t01.abi",
 "t02.abi",
-"t06.abi",
+#"t06.abi", test DFPT with dilatmx : not allowed anymore
 "t07.abi",
 "t08.abi",
 "t09.abi",
