@@ -4633,25 +4633,10 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      ABI_CHECK_NOSTOP(all(dt%so_psp(1:npsp) == 0), 'GBT requires so_psp == 0', ierr)
      ABI_CHECK_NOSTOP(all(dt%istwfk(1:nkpt) == 1), 'GBT requires istwfk == 1', ierr)
      ABI_CHECK_NOSTOP(dt%usefock == 0, 'GBT with Fock is not coded', ierr)
-
-     ! use_gbt
-     !call chkint_eq(0,0,cond_string,cond_values,ierr,'use_gbt',dt%use_gbt,2,(/0,1/),iout)
-     !if (response/=0) then ! If DFPT is activated, use_gbt must be disabled
-     !   cond_string(1)='response'; cond_values(1)=response
-     !   call chkint_eq(1,1,cond_string,cond_values,ierr,'use_gbt',dt%use_gbt,1,(/0/),iout)
-     !end if
-     !if (dt%usepaw==1) then  ! GBT currently not implemented for PAW
-     !   cond_string(1)='usepaw' ; cond_values(1)=dt%usepaw
-     !   call chkint_eq(1,1,cond_string,cond_values,ierr,'use_gbt',dt%use_gbt,1,(/0/),iout)
-     !end if
-     !if (dt%use_gbt==1) then ! GBT requires nspinor = 2 (non-collinear spin)
-     !   cond_string(1)='use_gbt'; cond_values(1)=dt%use_gbt
-     !   call chkint_eq(1,1,cond_string,cond_values,ierr,'nspinor',dt%nspinor,1,(/2/),iout)
-     !end if
-     !if (any(dt%so_psp==1)) then !  ! GBT is not compatible with SOC
-     !   cond_string(1)='so_psp'; cond_values(1)=1
-     !   call chkint_eq(1,1,cond_string,cond_values,ierr,'use_gbt',dt%use_gbt,1,(/0/),iout)
-     !end if
+     ABI_CHECK_NOSTOP(.not. xc_is_mgga, 'GBT with meta-GGA is not coded', ierr)
+     ABI_CHECK_NOSTOP(dt%ionmov == 0, 'GBT and atomic relaxation not tested', ierr)
+     ! ecutsm is problematic due to kin_kmhq and kin_kphq!
+     ABI_CHECK_NOSTOP(dt%optcell == 0, 'GBT and cell relaxation not coded', ierr)
    end if
 
 !  If molecular dynamics or structural optimization is being done
@@ -4685,7 +4670,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
  if (maxval(dtsets(:)%usewvl) > 0) then
    write(msg,'(4a)') ch10,&
     ' Comparison between wvl_hgrid and ecut',ch10,&
-    '  real-space mesh | eq. Ec around atoms | eq. Ec further from atoms'
+    ' real-space mesh | eq. Ec around atoms | eq. Ec further from atoms'
    ABI_COMMENT(msg)
    wvl_hgrid = zero
    twvl = .false.

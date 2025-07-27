@@ -425,24 +425,20 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(c_double), ABI_CONTIGUOUS pointer :: kinpw(:) => null()
  real(c_double), ABI_CONTIGUOUS pointer :: eig_k(:) => null()
 #else
- real(dp),allocatable :: kinpw(:)
- real(dp),allocatable :: eig_k(:)
+ real(dp),allocatable :: kinpw(:), eig_k(:)
 #endif
 
- real(dp),allocatable :: kinpw_kphq(:)
  real(dp),allocatable :: kpg_k(:,:),kpg_kphq(:,:),occ_k(:),ph3d(:,:,:), ph3d_kphq(:,:,:)
- real(dp),allocatable :: pwnsfacq(:,:)
+ real(dp),allocatable :: pwnsfacq(:,:), kinpw_kphq(:)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
  real(c_double), ABI_CONTIGUOUS pointer :: resid_k(:) => null()
  real(c_double), ABI_CONTIGUOUS pointer :: rhoaug(:,:,:,:) => null()
 #else
- real(dp),allocatable :: resid_k(:)
- real(dp),allocatable :: rhoaug(:,:,:,:)
+ real(dp),allocatable :: resid_k(:), rhoaug(:,:,:,:)
 #endif
 
- real(dp),allocatable :: rhowfg(:,:),rhowfr(:,:),tauwfg(:,:),tauwfr(:,:)
- real(dp),allocatable :: vectornd_pac(:,:,:,:,:)
+ real(dp),allocatable :: rhowfg(:,:),rhowfr(:,:),tauwfg(:,:),tauwfr(:,:), vectornd_pac(:,:,:,:,:)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
  real(real64), ABI_CONTIGUOUS pointer :: vlocal(:,:,:,:) => null()
@@ -1189,7 +1185,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        ABI_SFREE(ph3d_kphq)
        ABI_FREE(cgq)
        ABI_FREE(pwnsfacq)
-
 
        if (berryflag) then
          ! electric field
