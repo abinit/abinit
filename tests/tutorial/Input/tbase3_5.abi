@@ -82,7 +82,6 @@ enunit2  1             # Will output the eigenenergies in eV
 #%% keywords =
 #%% description =
 #%%   Crystalline silicon
-#%%
 #%%   Computation of the band structure.
 #%%   First, a SCF density computation, then a non-SCF band structure calculation.
 #%%<END TEST_INFO>

@@ -1,0 +1,64 @@
+# Crystalline fcc Fe with Generalized Bloch Theorem
+
+# GBT
+use_gbt 1
+qgbt 0.0 0.0 0.5
+
+# SPIN
+nspinor  2
+nspden   4
+so_psp   0
+spinat   0.0 0.0 4.0
+ixc 7   # LDA
+
+occopt   7
+tsmear   0.01
+
+# Definition of the planewave basis set
+ecut  30        # Maximal kinetic energy cut-off, in Hartree
+
+# Definition of the k-point grids and symmetries
+nsym 1
+kptopt 4
+ngkpt 2 2 2
+nshiftk 1
+shiftk  0 0 0
+
+# Definition of the SCF procedure
+nstep 20         # Maximal number of SCF cycles
+tolvrs 1.0d-6
+nband  24
+
+# Common input variables
+natom 1
+ntypat 1
+typat 1
+znucl 26
+xred    0.0000000000    0.0000000000    0.0000000000
+acell    1.0    1.0    1.0
+rprim
+   4.2302629971    0.0000000000    2.4423434801
+   1.4100876657    3.9883302019    2.4423434801
+   0.0000000000    0.0000000000    4.8846869602
+
+pp_dirpath "$ABI_PSPDIR/Psdj_nc_fr_04_pbe_std_psp8"  # This is the path to the directory were
+                                                     # pseudopotentials for tests are stored
+pseudos "Fe.psp8"                                    # Name and location of the pseudopotential
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t27.abo, tolnlines = 10, tolabs = 1.1e-3, tolrel = 3.0e-3
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = LeShu
+#%% keywords = GBT
+#%% description =
+#%%   Crystalline fcc Fe: GBT calculation
+#%%<END TEST_INFO>

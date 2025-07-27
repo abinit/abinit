@@ -209,6 +209,10 @@ module m_hamiltonian
    ! governs the way the nonlocal operator is to be applied:
    !   1=using Ylm, 0=using Legendre polynomials
 
+  integer :: use_gbt = 0
+   ! 0, use normal non-collinear calculation
+   ! 1, use spin spiral calculation
+
   integer :: zora
    ! zora=0: no zora terms. zora=1: use available zora terms
    ! currently this is limited to nuclear dipole moment terms,
@@ -658,6 +662,7 @@ subroutine gsham_free(Ham)
  if (associated(Ham%ph3d_k)) nullify(Ham%ph3d_k)
  if (associated(Ham%ph3d_kp)) nullify(Ham%ph3d_kp)
 
+
 ! Real arrays
  ABI_SFREE(Ham%ekb_spin)
  ABI_SFREE(Ham%sij)
@@ -734,14 +739,14 @@ end subroutine gsham_free
 
 subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
                      xred,nfft,mgfft,ngfft,rprimd,nloalg,&
-                     ph1d,usecprj,comm_atom,mpi_atmtab,mpi_spintab,paw_ij,&  ! optional
-                     electronpositron,fock,nucdipmom,gpu_option,zora)         ! optional
+                     ph1d,usecprj,comm_atom,mpi_atmtab,mpi_spintab,paw_ij,&   ! optional
+                     electronpositron,fock,nucdipmom,gpu_option,use_gbt,zora) ! optional
 
 !Arguments ------------------------------------
 !scalars
  class(gs_hamiltonian_type),intent(inout),target :: ham
  integer,intent(in) :: nfft,natom,nspinor,nsppol,nspden,mgfft
- integer,optional,intent(in) :: comm_atom,usecprj,gpu_option,zora
+ integer,optional,intent(in) :: comm_atom,usecprj,gpu_option,use_gbt,zora
  type(electronpositron_type),optional,pointer :: electronpositron
  type(fock_type),optional,pointer :: fock
  type(pseudopotential_type),intent(in) :: psps
@@ -775,6 +780,8 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  my_nsppol=count(my_spintab==1)
  l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option=gpu_option
  my_zora=0; if (present(zora)) my_zora=zora
+
+ ham%use_gbt = 0; if (present(use_gbt)) ham%use_gbt = use_gbt
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
@@ -1409,6 +1416,7 @@ subroutine gsham_copy(gs_hamk_in, gs_hamk_out)
  gs_hamk_out%usecprj = gs_hamk_in%usecprj
  gs_hamk_out%usepaw = gs_hamk_in%usepaw
  gs_hamk_out%useylm = gs_hamk_in%useylm
+ gs_hamk_out%use_gbt = gs_hamk_in%use_gbt
  gs_hamk_out%zora = gs_hamk_in%zora
  gs_hamk_out%ngfft = gs_hamk_in%ngfft
  gs_hamk_out%nloalg = gs_hamk_in%nloalg

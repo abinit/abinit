@@ -2,10 +2,11 @@
 #GOLD 31 ATOMS
 
 #Process distribution (parallelism)
-npkpt 1 npband 1 npfft 1 bandpp 48   # 1 MPI processes
+npkpt 1 npband 1 npfft 1
 paral_kgb 1
 gpu_option 2
 wfoptalg 114
+nblock_lobpcg 4
 
 #Plane wave basis
 ecut 8.

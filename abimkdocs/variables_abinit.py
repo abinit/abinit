@@ -22744,7 +22744,7 @@ due to nuclear magnetic dipoles (see [[nucdipmom]]).
 
 Negative values of [[zora]] are present only for debugging purposes. [[zora]] -1 permits only
 spin-orbit coupling, regardless of the presence of nuclear dipoles. [[zora]] -2 permits only
-the electron spin-nuclear dipole through space interaciton, and [[zora]] -3 permits only the
+the electon spin-nuclear dipole through space interaction, and [[zora]] -3 permits only the
 electron spin-nuclear dipole Fermi-contact-like interaction.
 """,
 ),
@@ -25821,4 +25821,33 @@ with the first point being the static limit.
 As a consequence, the full set of frequencies spans the [1, 1 + nfreqim] range.
 """,
 ),
+
+Variable(
+    abivarname="use_gbt",
+    varset="gstate",
+    vartype="integer",
+    topics=['spinpolarisation_basic', 'MagMom_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="USE Generalized Bloch Theorem",
+    added_in_version="10.5.1",
+    text=r"""
+This variable activates the usage of the Generalized Bloch Theorem to compute spin-spirals.
+""",
+),
+
+Variable(
+    abivarname="qgbt",
+    varset="gstate",
+    vartype="real",
+    topics=['spinpolarisation_basic', 'MagMom_useful'],
+    dimensions=[3],
+    defaultval=[0, 0, 0],
+    mnemonics="Q-point for Generalized Bloch Theorem.",
+    added_in_version="10.5.1",
+    text=r"""
+This variable defines the reduced coordinates of the wave-vector of the spin spiral whent [[use_gbt]] /= 0.
+""",
+),
+
 ]

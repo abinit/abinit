@@ -700,23 +700,22 @@ contains
  dprarr(3,:)=dtsets(:)%qptn(3)
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'qpt','DPR',0)
 
+ dprarr(1,:)=dtsets(:)%qgbt(1)
+ dprarr(2,:)=dtsets(:)%qgbt(2)
+ dprarr(3,:)=dtsets(:)%qgbt(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'qgbt','DPR',0)
+
 !qptdm
  narr=3*dtsets(1)%nqptdm ! default size for all datasets
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    if(idtset/=0)then
      narrm(idtset)=3*dtsets(idtset)%nqptdm
      if (narrm(idtset)>0)&
-&     dprarr(1:narrm(idtset),idtset)=&
-&     reshape(dtsets(idtset)%qptdm(1:3,&
-&     1:dtsets(idtset)%nqptdm),&
-&     (/ narrm(idtset) /) )
+       dprarr(1:narrm(idtset),idtset)=reshape(dtsets(idtset)%qptdm(1:3,1:dtsets(idtset)%nqptdm), [narrm(idtset)])
    else
      narrm(idtset)=3*mxvals%nqptdm
      if (narrm(idtset)>0)&
-&     dprarr(1:narrm(idtset),idtset)=&
-&     reshape(dtsets(idtset)%qptdm(1:3,&
-&     1:mxvals%nqptdm),&
-&     (/ narrm(idtset) /) )
+     dprarr(1:narrm(idtset),idtset)= reshape(dtsets(idtset)%qptdm(1:3,1:mxvals%nqptdm), [narrm(idtset)])
    end if
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'qptdm','DPR',multivals%nqptdm)
@@ -1247,6 +1246,9 @@ contains
  intarr(1,:)=dtsets(:)%use_nonscf_gkk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_nonscf_gkk','INT',0)
 
+ intarr(1,:)=dtsets(:)%use_gbt
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_gbt','INT',0)
+
  intarr(1,:)=dtsets(:)%usepawu
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'usepawu','INT',0)
 
@@ -1641,7 +1643,7 @@ contains
      end if
    end do
    call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,&
-&   narrm,ncid,ndtset_alloc,'ziontypat','DPR',multivals%ntypat,forceprint=2)
+     narrm,ncid,ndtset_alloc,'ziontypat','DPR',multivals%ntypat,forceprint=2)
  end if
 
  do idtset=0,ndtset_alloc

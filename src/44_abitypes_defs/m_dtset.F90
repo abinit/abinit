@@ -700,6 +700,7 @@ type, public :: dataset_type
  integer :: usexcnhat_orig
  integer :: useylm
  integer :: useextfpmd = 0
+ integer :: use_gbt = 0
  integer :: use_yaml = 0
  integer :: use_slk
  integer :: use_oldchi = 1
@@ -1024,6 +1025,7 @@ type, public :: dataset_type
  real(dp) :: pol(3)
  real(dp) :: polcen(3)
  real(dp) :: pvelmax(3)
+ real(dp) :: qgbt(3)=[0.0_dp,0.0_dp,0.0_dp]
  real(dp) :: qptn(3)
  real(dp) :: red_efield(3)
  real(dp) :: red_dfield(3)
@@ -2178,6 +2180,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%timopt             = dtin%timopt
  dtout%use_gemm_nonlop    = dtin%use_gemm_nonlop
  dtout%useextfpmd         = dtin%useextfpmd
+ dtout%use_gbt            = dtin%use_gbt
  dtout%use_yaml           = dtin%use_yaml   ! This variable activates the Yaml output for testing purposes
                                             ! It will be removed when Yaml output enters production.
  dtout%use_slk            = dtin%use_slk
@@ -2415,8 +2418,9 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%mdtemp(:)          = dtin%mdtemp(:)
  dtout%neb_spring(:)      = dtin%neb_spring(:)
  dtout%polcen(:)          = dtin%polcen(:)
- dtout%qptn(:)            = dtin%qptn(:)
  dtout%pvelmax(:)         = dtin%pvelmax(:)
+ dtout%qgbt(:)            = dtin%qgbt(:)
+ dtout%qptn(:)            = dtin%qptn(:)
  dtout%red_efield(:)      = dtin%red_efield(:)
  dtout%red_dfield(:)      = dtin%red_dfield(:)
  dtout%red_efieldbar(:)   = dtin%red_efieldbar(:)
@@ -3755,7 +3759,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' pseudos ptcharge'
  list_vars=trim(list_vars)//' pvelmax pw_unbal_thresh'
 !Q
- list_vars=trim(list_vars)//' q1shft qmass qprtrb qpt qptdm qptnrm qph1l'
+ list_vars=trim(list_vars)//' q1shft qgbt qmass qprtrb qpt qptdm qptnrm qph1l'
  list_vars=trim(list_vars)//' qptopt quadquad qptrlatt quadmom'
 !R
  list_vars=trim(list_vars)//' random_atpos randomseed ratsm ratsph ratsph_extra rcut'
@@ -3809,7 +3813,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' tolvrs tolwfr tolwfr_diago tphysel ts_option tsmear typat'
 !U
  list_vars=trim(list_vars)//' ucrpa ucrpa_bands ucrpa_window udtset upawu usepead usedmatpu '
- list_vars=trim(list_vars)//' usedmft useexexch usekden use_nonscf_gkk usepawu usepotzero'
+ list_vars=trim(list_vars)//' usedmft useexexch usekden use_gbt use_nonscf_gkk usepawu usepotzero'
  list_vars=trim(list_vars)//' useria userib useric userid userie'
  list_vars=trim(list_vars)//' userra userrb userrc userrd userre'
  list_vars=trim(list_vars)//' usewvl usexcnhat useylm use_gemm_nonlop'

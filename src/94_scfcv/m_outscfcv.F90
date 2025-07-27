@@ -1354,6 +1354,24 @@ if (dtset%prt_lorbmag==1) then
    ! Add energy, forces, stresses
    NCF_CHECK(results_gs_ncwrite(results_gs, ncid, dtset%ecut, dtset%pawecutdg))
 
+   ! Add info on GBT.
+   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
+     "use_gbt" &
+   ], defmode=.True.)
+   NCF_CHECK(ncerr)
+
+   ncerr = nctk_def_arrays(ncid, [ &
+     nctkarr_t("qgbt", "dp", "three") &
+   ])
+   NCF_CHECK(ncerr)
+
+   NCF_CHECK(nctk_set_datamode(ncid))
+   ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
+     "use_gbt"], &
+     [dtset%use_gbt])
+   NCF_CHECK(ncerr)
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qgbt"), dtset%qgbt))
+
    if (allocated(intgden)) then
      ! Write integrated density inside atomic spheres and ratsph(ntypat)=radius of spheres around atoms
      ncerr = nctk_def_arrays(ncid, [ &
