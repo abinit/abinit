@@ -414,6 +414,53 @@ OPTIONAL: Defines if the different [[atdep:order]] are solved together or not :
 ),
 
 Variable(
+    abivarname="tolinbox@atdep",
+    varset="atdep",
+    vartype="real",
+    topics=['aTDEP_expert'],
+    dimensions="scalar",
+    defaultval="5.d-2",
+    mnemonics="TOLerance for shifting atoms in the BOX.",
+    added_in_version="10.5",
+    text="""
+Defines the tolerance criterion when shifting xred so that
+each component falls in the box [-0.5,0.5[.
+""",
+),
+
+Variable(
+    abivarname="tolmatch@atdep",
+    varset="atdep",
+    vartype="real",
+    topics=['aTDEP_expert'],
+    dimensions="scalar",
+    defaultval="5.d-2",
+    mnemonics="TOLerance for MATCHing atom positions.",
+    added_in_version="10.5",
+    text="""
+Defines the tolerance criterion for mathing the average values of xred to the ideal ones.
+""",
+),
+
+
+Variable(
+    abivarname="tolmotif@atdep",
+    varset="atdep",
+    vartype="real",
+    topics=['aTDEP_expert'],
+    dimensions="scalar",
+    defaultval="5.d-2",
+    mnemonics="TOLerance on atoms MOTIF",
+    added_in_version="10.5",
+    text="""
+Defines the tolerance criterion for mathing the motif,
+that is, the relative atom positions in reduced coordinates.
+This is used for finding the unit cell within the average values
+of xred in the supercell.
+""",
+),
+
+Variable(
     abivarname="typat@atdep",
     varset="atdep",
     vartype="integer",

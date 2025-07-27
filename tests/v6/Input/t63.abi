@@ -48,7 +48,6 @@ nsppol 2     spinmagntarget 0.0d0
    diemix 1/3
 
    ecutsm      0.5
-   dilatmx     1.05
 
 
 ndtset 5     jdtset 1 2 3 4 5
@@ -109,14 +108,14 @@ nbdbuf 0
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t63.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors =  F. Da Pieve
 #%% keywords = NC, DFPT, NONLINEAR
-#%% description = 
+#%% description =
 #%%   Si diatomic molecule
 #%%   Test of linear and non-linear response in the non-spin-polarized case.
 #%%   Only four bands are allowed, both spin-up and spin-down, so that

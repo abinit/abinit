@@ -30,7 +30,7 @@ nsppol 1  nspden 2  ! antiferro-magnetic
 nstep 15  tolvrs 1.d-7
 ecut 8. pawecutdg 10.
 diemix 0.5
-bandpp 14
+nblock_lobpcg 2
 wfoptalg 114
 
 # === K-points and syms
@@ -85,7 +85,7 @@ prtden 0  prteig 0  prtwf 0
 #%% [extra_info]
 #%% authors = M. Torrent, M. Sarraute
 #%% keywords = PAW, DFTU
-#%% description = 
+#%% description =
 #%%   NiO - DFT+U - fcc structure - anitferro - PAW
 #%%   Test the use of MPI+GPU
 #%%<END TEST_INFO>

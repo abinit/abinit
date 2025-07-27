@@ -3468,7 +3468,7 @@ subroutine hermit(chmin, chmout, ierr, ndim)
    if( (abs(ch_im) > tol .and. nmesgs<mmesgs) .or. nerrors==2)then
      write(msg, '(3a,i0,a,es20.12,a,es20.12,a)' )&
      ' Input Hermitian matrix has nonzero relative Im part on diagonal:',ch10,&
-     ' for component:',idim,' Im part is: ',ch_im,', Re part is: ',ch_re,'.'
+     ' for component: ',idim,' Im part is: ',ch_im,', Re part is: ',ch_re,'.'
      call wrtout(std_out,msg)
      nmesgs=nmesgs+1
    end if
@@ -3476,7 +3476,7 @@ subroutine hermit(chmin, chmout, ierr, ndim)
    if( ( abs(ch_im) > tol8*abs(ch_re) .and. nmesgs<mmesgs) .or. nerrors==2)then
      write(msg, '(3a,i0,a,es20.12,a,es20.12,a)' )&
      ' Input Hermitian matrix has nonzero relative Im part on diagonal:',ch10,&
-     ' for component',idim,' Im part is',ch_im,', Re part is',ch_re,'.'
+     ' for component: ',idim,' Im part is',ch_im,', Re part is',ch_re,'.'
      call wrtout(std_out,msg)
      nmesgs=nmesgs+1
    end if

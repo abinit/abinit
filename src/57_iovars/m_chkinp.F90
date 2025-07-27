@@ -92,8 +92,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
  integer :: ipsp,isppol,isym,itypat,iz,jdtset,jj,kk,lpawu,maxiatsph,maxidyn,minplowan_iatom,maxplowan_iatom
  integer :: mband,miniatsph,minidyn,mod10,mpierr,all_nprocs
  integer :: mu,natom,nfft,nfftdg,nkpt,nloc_mem,nlpawu
- integer :: nproc,nthreads,nspden,nspinor,nsppol,optdriver,mismatch_fft_tnons,response
- integer :: fftalg,fftalga,usepaw,usewvl
+ integer :: nproc,nthreads,nspden,nspinor,nsppol,optdriver,mismatch_fft_tnons,response,so_psp
+ integer :: fftalg,fftalga,usepaw,usewvl,use_gbt
  integer :: ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
  logical :: test,twvl,allowed,berryflag
  logical :: wvlbigdft=.false.
@@ -502,7 +502,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          if(fixed_mismatch==1)then
            write(msg, '(a)' )&
            '   ABINIT has detected such a possible shift. See the suggestion given in the COMMENT above (or in output or log file).'
-           call wrtout(std_out,msg)
+           call wrtout(std_out,msg, do_flush=.True.)
          endif
          ierr=ierr+1 ! Previously a warning: for slab geometries arbitrary tnons can appear along the vacuum direction.
                      ! But then simply set chksymtnons=0 ...
@@ -631,6 +631,17 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      cond_string(1)='chkdilatmx' ; cond_values(1)=dt%chkdilatmx
 !    Checks that presently chkdilatmx is smaller than 1.15
      call chkdpr(1,1,cond_string,cond_values,ierr,'dilatmx',dt%dilatmx,-1,1.15_dp,iout)
+   end if
+   if (dt%optdriver/=RUNL_GSTATE) then
+     cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
+     ! Checks that presently dilatmx is 1 if optdriver is not GSTATE
+     call chkdpr(1,1,cond_string,cond_values,ierr,'dilatmx',dt%dilatmx,0,1._dp,iout)
+   end if
+   ! Warn the user if dilatmx > 1 and optcell == 0.
+   if (dt%dilatmx>one.and.dt%optcell==0) then
+     write(msg, "(a)") 'dilatmx > 1 and optcell=0, this is a waste of ressources (computational time and memory). &
+     & You should set dilatmx to 1.'
+     ABI_WARNING(msg)
    end if
 
 !  dmatpuopt
@@ -4619,6 +4630,26 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      ABI_COMMENT("dipdip can be set to 0 in case of metals whereas dipdip 1 should be used in polar materials.")
    end if
 
+   ! Check features that are not compatible with the generalized Bloch theorem.
+   if (dt%use_gbt /= 0) then
+     ABI_CHECK_NOSTOP(optdriver == RUNL_GSTATE, 'GBT can only be used in GS calculations', ierr)
+     ABI_CHECK_NOSTOP(dt%usepaw == 0, 'GBT does not support PAW', ierr)
+     ABI_CHECK_NOSTOP(dt%paral_kgb == 0, 'GBT does not support paral_kgb 1', ierr)
+     ABI_CHECK_NOSTOP(dt%nsym == 1, 'GBT cannot exploit spatial symmetries, please use nsym 1', ierr)
+     ABI_CHECK_NOSTOP(dt%kptopt == 4, 'GBT requires kptopt 4', ierr)
+     ABI_CHECK_NOSTOP(dt%useylm == 0, 'GBT requires useylm 0', ierr)
+     ABI_CHECK_NOSTOP(dt%gpu_option == ABI_GPU_DISABLED, 'GBT is not compatible with GPUs', ierr)
+     ABI_CHECK_NOSTOP(dt%nspinor == 2, 'GBT requires nspinor 2', ierr)
+     ABI_CHECK_NOSTOP(dt%nspden == 4, 'GBT requires nspden 4', ierr)
+     ABI_CHECK_NOSTOP(all(dt%so_psp(1:npsp) == 0), 'GBT requires so_psp == 0', ierr)
+     ABI_CHECK_NOSTOP(all(dt%istwfk(1:nkpt) == 1), 'GBT requires istwfk == 1', ierr)
+     ABI_CHECK_NOSTOP(dt%usefock == 0, 'GBT with Fock is not coded', ierr)
+     ABI_CHECK_NOSTOP(.not. xc_is_mgga, 'GBT with meta-GGA is not coded', ierr)
+     ABI_CHECK_NOSTOP(dt%ionmov == 0, 'GBT and atomic relaxation not tested', ierr)
+     ! ecutsm is problematic due to kin_kmhq and kin_kphq!
+     ABI_CHECK_NOSTOP(dt%optcell == 0, 'GBT and cell relaxation not coded', ierr)
+   end if
+
 !  If molecular dynamics or structural optimization is being done
 !  (dt%ionmov>0), make sure not all atoms are fixed
 !  if (dt%ionmov > 0) then
@@ -4642,23 +4673,20 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
 !  Must have nqpt=1 for rfphon=1
 
-!  ** Here ends the checking section **************************************
-
+   ! Here ends the checking section **************************************
    call dt%free()
    ierr_dtset(idtset)=ierr
-
- end do !  End do loop on idtset
+ end do ! idtset
 
  if (maxval(dtsets(:)%usewvl) > 0) then
    write(msg,'(4a)') ch10,&
     ' Comparison between wvl_hgrid and ecut',ch10,&
-    '  real-space mesh | eq. Ec around atoms | eq. Ec further from atoms'
+    ' real-space mesh | eq. Ec around atoms | eq. Ec further from atoms'
    ABI_COMMENT(msg)
    wvl_hgrid = zero
    twvl = .false.
    do idtset=1,ndtset_alloc
-!    Give an indication to the equivalent ecut corresponding to
-!    given hgrid.
+     ! Give an indication to the equivalent ecut corresponding to given hgrid.
      if (dtsets(idtset)%usewvl == 1 .and. wvl_hgrid /= dtsets(idtset)%wvl_hgrid) then
        write(msg,'(F11.3,A,F16.1,A,F16.1,A)') &
         dtsets(idtset)%wvl_hgrid, " bohr  |", &
