@@ -151,14 +151,14 @@ subroutine wkk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  integer,allocatable :: nband(:,:), wfd_istwfk(:)
  integer, contiguous, pointer :: kg_c(:,:), kg_x(:,:)
  real(dp) :: kk_ibz(3), kk_bz(3), kp_ibz(3), kp_bz(3), qq_bz(3), kk_diff(3) ! qq_ibz(3)
- complex(gwpc) :: ctmp_gwpc, mu_c
+ complex(gwpc) :: ctmp_gwpc
  character(len=fnlen) :: path
 !arrays
  real(dp) :: n0(ebands%nsppol)
  real(dp),allocatable :: qlwl(:,:), kpg_kp(:,:), kpg_k(:,:), ug_kp(:,:,:), ug_k(:,:), cg_work(:,:)
  real(dp),allocatable :: work(:,:,:,:), e_mesh(:), e_args(:), vcart_ibz(:,:,:,:), wgt_mk(:), wgt_nkp(:,:)
  complex(gwpc),allocatable :: cwork_ur(:), rhotwg_mn_x(:,:,:), rhotwg_mn_c(:,:,:), w_rhotwg_mn_c(:,:,:)
- complex(gwpc),allocatable :: vc_sqrt_gx(:), ur_nkp(:,:), ur_mk(:,:), kxcg(:,:)
+ complex(gwpc),allocatable :: vc_sqrt_gx(:), ur_nkp(:,:), ur_mk(:,:), kxcg(:,:), mu_mn(:,:)
  complex(dp),allocatable :: w_ee(:,:) ! w_kkp(:,:,:,:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
  type(fstab_t),target,allocatable :: fstab(:)
@@ -464,7 +464,8 @@ subroutine wkk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
 
  mg0 = [1, 1, 1]
  remove_exchange = .True.
- mu_c = zero
+
+ ABI_CALLOC(mu_mn, (bmin:bmax, bmin:bmax))
 
  ! Loop over k'-points in the energy window.
  do ikp_bz=1,fs%nkfs
@@ -602,7 +603,8 @@ subroutine wkk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
          end if
          ctmp_gwpc = faq * ctmp_gwpc
          !print *, "ctmp_gwpc:", ctmp_gwpc
-         !mu_c = mu_c + ctmp_gwpc * gaussian(e_mk - ebands%fermie, smear_mk) * gaussian(e_mp, smear_mk)
+         !mu_mn(m_k, n_kp) = mu_mn(m_k, n_kp) + &
+         !                   ctmp_gwpc * gaussian(e_mk - ebands%fermie, smear_mk) * gaussian(e_mp, smear_mk)
          ! Computes: A := A + alpha * x * y^T
          !w_ee =
          !call dger(ne, ne, alpha, x, incx, y, incy, w_ee, lda)
@@ -628,9 +630,20 @@ subroutine wkk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ABI_FREE(ur_mk)
  !end do ! my_is
 
- call xmpi_sum(w_ee, comm, ierr)
-
  call cwtime_report(" wkk calculation", cpu_all, wall_all, gflops_all, end_str=ch10)
+
+ call xmpi_sum(w_ee, comm, ierr)
+ call xmpi_sum(mu_mn, comm, ierr)
+
+ if (my_rank == master) then
+   !do m_k=bmin, bmax
+   !  do n_kp=bmin, bmax
+   !    call print_arr(units, mu_mn, max_r=max_nb, max_c=max_nb)
+   !  end do
+   !end do
+   !call wrtout(units, sjoin("Re mu: ", ftoa(sum(real(mu_mn)))))
+   !call wrtout(units, sjoin("Im mu: ", ftoa(sum(aimag(mu_mn)))))
+ end if
 
  ! Set vqk_completed to 1 so that we can easily check if restarted is needed.
  !if (wkk_mode /= 0) then
@@ -659,6 +672,7 @@ subroutine wkk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ABI_FREE(e_args)
  ABI_FREE(wgt_mk)
  ABI_FREE(wgt_nkp)
+ ABI_FREE(mu_mn)
 
  call wfd%free(); call vcp%free(); call qmesh%free(); call gsph_x%free(); call gsph_c%free(); call hscr%free(); call edos%free()
  call epsm1%free()
