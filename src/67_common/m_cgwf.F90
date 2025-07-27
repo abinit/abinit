@@ -746,19 +746,19 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
          ! If wfoptalg>=10, the precondition matrix is kept constant during iteration ; otherwise it is recomputed
          if (wfoptalg<10.or.iline==1) then
-           !if (gs_hamk%use_gbt == 0) then
+           if (gs_hamk%use_gbt == 0) then
              call cg_precon(cwavef,zero,istwf_k,gs_hamk%kinpw_k,npw,nspinor,me_g0,optekin,pcon,direc,mpi_enreg%comm_fft)
-           !else
-           !  !print *, "max k-q:", maxval(abs(gs_hamk%kinpw_k))
-           !  call cg_precon(cwavef,zero,istwf_k,gs_hamk%kinpw_k,npw,1,me_g0,optekin,pcon,direc,mpi_enreg%comm_fft)
-           !  !print *, "max k+1:", maxval(abs(gs_hamk%kinpw_kp))
-           !  call cg_precon(cwavef(:,npw+1:),zero,istwf_k,gs_hamk%kinpw_kp,npw,1,me_g0,optekin,pcon,&
-           !                 direc(:,npw+1:),mpi_enreg%comm_fft)
-           !end if
+           else
+             call cg_precon(cwavef,zero,istwf_k,gs_hamk%kinpw_k,npw,1,me_g0,optekin,pcon,direc,mpi_enreg%comm_fft)
+             !call cg_precon(cwavef(:,npw+1:),zero,istwf_k,gs_hamk%kinpw_k,npw,1,me_g0,optekin,pcon,&
+             !               direc(:,npw+1:),mpi_enreg%comm_fft)
+             call cg_precon(cwavef(:,npw+1:),zero,istwf_k,gs_hamk%kinpw_kp,npw,1,me_g0,optekin,pcon,&
+                            direc(:,npw+1:),mpi_enreg%comm_fft)
+           end if
 
-           ! Minimisation of the residual: must precondition twice
-           ! (might make only one call, with modified precon routine - might also make a shift !!!)
            if(wfopta10==2 .or. wfopta10==3)then
+             ! Minimisation of the residual: must precondition twice
+             ! (might make only one call, with modified precon routine - might also make a shift !!!)
              call cg_precon(cwavef,zero,istwf_k,gs_hamk%kinpw_k,npw,nspinor,me_g0,optekin,pcon,direc,mpi_enreg%comm_fft)
              if(iline==1)then
                !$OMP PARALLEL DO
@@ -1168,9 +1168,9 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 &           dtefield%efield_dot,e0_old,e1_old,&
 &           hel,dtefield%fnkpt,dtefield%nstr,dtefield%sdeg,theta)
            deltae = e0 - e0_old
-!          write(std_out,*) 'e0, e0_old, deltae', e0, e0_old, deltae
-!          Check that e0 is decreasing on succeeding lines:
-!          if (deltae > zero) then
+           ! write(std_out,*) 'e0, e0_old, deltae', e0, e0_old, deltae
+           ! Check that e0 is decreasing on succeeding lines:
+           ! if (deltae > zero) then
            if (deltae > tol12 .and. num_warning <= enough_warning) then ! exploring different checks for finit_field
              num_warning = num_warning + 1
              write(msg, '(3a,i8,a,1p,e14.6,a1,3x,a,1p,e14.6,a1)')&
@@ -1181,7 +1181,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            end if
          end if         ! finite_field
 
-!        Check convergence and eventually exit
+         ! Check convergence and eventually exit
          if (iline==1) then
            deold=deltae
          else if (abs(deltae)<tolrde*abs(deold) .and. iline/=nline .and. wfopta10<2)then

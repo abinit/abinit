@@ -1127,7 +1127,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    end if
 
 !  ecutsm
-   call chkdpr(0,0,cond_string,cond_values,ierr,'ecutsm',dt%ecutsm,1,0.0_dp,iout)
+   !call chkdpr(0,0,cond_string,cond_values,ierr,'ecutsm',dt%ecutsm,1,0.0_dp,iout)
+
 !  With non-zero optcell, one must use non-zero ecutsm
    !if(dt%optcell/=0 )then
    !  cond_string(1)='optcell' ; cond_values(1)=dt%optcell
@@ -1141,10 +1142,10 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      ABI_WARNING(msg)
    end if
 
-!  ecutwfn <= ecut. This is also needed for the correct evaluation
-!  of the Kleynman-Bylander form factors as the spline in Psps% is done with ecut
-!  while we need |q+G| up to ecut. enlargement due to the q is already
-!  taken into account by enlarging the spline mesh by around 20%.
+   !  ecutwfn <= ecut. This is also needed for the correct evaluation
+   !  of the Kleynman-Bylander form factors as the spline in Psps% is done with ecut
+   !  while we need |q+G| up to ecut. enlargement due to the q is already
+   !  taken into account by enlarging the spline mesh by around 20%.
    if ( ANY(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE]) ) then
      call chkdpr(0,0,cond_string,cond_values,ierr,'ecutwfn',dt%ecuteps,1,0.0_dp,iout)
      if(dt%ecut<dt%ecutwfn-tol8)then

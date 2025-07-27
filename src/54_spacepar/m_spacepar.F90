@@ -771,7 +771,7 @@ end subroutine hartre
 !! SOURCE
 
 subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,use_ndo,ar_im, &
-&    gpu_thread_limit)
+                       gpu_thread_limit) ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -788,10 +788,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
 !scalars
  integer :: i1,ierr,ipw,jpw,me_g0,nthreads_bak,l_gpu_thread_limit
  character(len=500) :: message
-!arrays
-
 ! *************************************************************************
- me_g0 = mpi_enreg%me_g0
 
  DBG_CHECK(ANY(filter==(/0,1/)),"Wrong filter")
  DBG_CHECK(ANY(nspinor==(/1,2/)),"Wrong nspinor")
@@ -799,14 +796,16 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
 
  if(nspinor==2 .and. istwf_k/=1)then
    write(message,'(a,a,a,i6,a,i6)')&
-&   'When istwf_k/=1, nspinor must be 1,',ch10,&
-&   'however, nspinor=',nspinor,', and istwf_k=',istwf_k
+   'When istwf_k/=1, nspinor must be 1,',ch10,&
+   'however, nspinor=',nspinor,', and istwf_k=',istwf_k
    ABI_BUG(message)
  end if
 
  if(use_ndo==1 .and. (istwf_k==2 .and.me_g0==1)) then
    ABI_BUG('use_ndo==1, not tested, use istwfk=1')
  end if
+
+ me_g0 = mpi_enreg%me_g0
 
  ar=zero
  if(present(ar_im)) ar_im=zero
@@ -821,26 +820,26 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
 !Normal storage mode
  if(istwf_k==1)then
 
-!  No filter
+   ! No filter
    if(filter==0)then
-!$OMP PARALLEL DO REDUCTION(+:ar)
+     !$OMP PARALLEL DO REDUCTION(+:ar)
      do ipw=1,npw
        ar=ar+diag(ipw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
      end do
      if(nspinor==2)then
-!$OMP PARALLEL DO REDUCTION(+:ar) PRIVATE(jpw)
+       !$OMP PARALLEL DO REDUCTION(+:ar) PRIVATE(jpw)
        do ipw=1+npw,2*npw
          jpw=ipw-npw
          ar=ar+diag(jpw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
        end do
      end if
      if(use_ndo==1)then
-!$OMP PARALLEL DO REDUCTION(+:ar_im)
+       !$OMP PARALLEL DO REDUCTION(+:ar_im)
        do ipw=1,npw
          ar_im=ar_im+diag(ipw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
        end do
        if(nspinor == 2) then
-!$OMP PARALLEL DO REDUCTION(+:ar_im) PRIVATE(jpw)
+         !$OMP PARALLEL DO REDUCTION(+:ar_im) PRIVATE(jpw)
          do ipw=1+npw,2*npw
            jpw=ipw-npw
            ar_im=ar_im+diag(jpw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
@@ -848,28 +847,17 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
        end if
      end if
 
-!    !$OMP PARALLEL DO REDUCTION(+:ar,ar_im)
-!    do ipw=1,npw
-!    ar=ar+diag(ipw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
-!    if(use_ndo==1.and.nspinor==2) ar_im=ar_im+diag(ipw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
-!    end do
-!    if(nspinor==2)then
-!    !$OMP PARALLEL DO PRIVATE(ipw) REDUCTION(+:ar,ar_im)
-!    do ipw=1+npw,2*npw
-!    ar=ar+diag(ipw-npw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
-!    if(use_ndo==1.and.nspinor==2) ar_im=ar_im+diag(ipw-npw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
-!    end do
-!    end if
-   else ! will filter
+   else
+     ! will filter
 
-!$OMP PARALLEL DO REDUCTION(+:ar)
+     !$OMP PARALLEL DO REDUCTION(+:ar)
      do ipw=1,npw
        if(diag(ipw)<huge(zero)*1.d-11)then
          ar=ar+diag(ipw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
        end if
      end do
      if(nspinor==2)then
-!$OMP PARALLEL DO REDUCTION(+:ar) PRIVATE(jpw)
+       !$OMP PARALLEL DO REDUCTION(+:ar) PRIVATE(jpw)
        do ipw=1+npw,2*npw
          jpw=ipw-npw
          if(diag(jpw)<huge(zero)*1.d-11)then
@@ -881,14 +869,14 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
        if(.not.present(ar_im)) then
          ABI_BUG("use_ndo true and ar_im not present")
        end if
-!$OMP PARALLEL DO REDUCTION(+:ar_im)
+       !$OMP PARALLEL DO REDUCTION(+:ar_im)
        do ipw=1,npw
          if(diag(ipw)<huge(zero)*1.d-11)then
            ar_im=ar_im+diag(ipw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
          end if
        end do
        if(nspinor == 2) then
-!$OMP PARALLEL DO REDUCTION(+:ar_im) PRIVATE(jpw)
+         !$OMP PARALLEL DO REDUCTION(+:ar_im) PRIVATE(jpw)
          do ipw=1+npw,2*npw
            jpw=ipw-npw
            if(diag(jpw)<huge(zero)*1.d-11)then
@@ -897,24 +885,6 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
          end do
        end if
      end if
-
-
-!    !$OMP PARALLEL DO PRIVATE(ipw) REDUCTION(+:ar,ar_im)
-!    do ipw=1,npw
-!    if(diag(ipw)<huge(zero)*1.d-11)then
-!    ar=ar+diag(ipw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
-!    if(use_ndo==1.and.nspinor==2) ar_im=ar_im+diag(ipw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
-!    end if
-!    end do
-!    if(nspinor==2)then
-!    !$OMP PARALLEL DO PRIVATE(ipw) REDUCTION(+:ar,ar_im)
-!    do ipw=1+npw,2*npw
-!    if(diag(ipw-npw)<huge(zero)*1.d-11)then
-!    ar=ar+diag(ipw-npw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
-!    if(use_ndo==1.and.nspinor==2) ar_im=ar_im+diag(ipw-npw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
-!    end if
-!    end do
-!    end if ! nspinor==2
 
    end if ! filter==0
 
@@ -926,7 +896,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
        ar=half*diag(1)*vect(1,1)*vect1(1,1) ; i1=2
      end if
 
-!$OMP PARALLEL DO REDUCTION(+:ar)
+     !$OMP PARALLEL DO REDUCTION(+:ar)
      do ipw=i1,npw
        ar=ar+diag(ipw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
      end do
@@ -939,7 +909,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
        end if
      end if
 
-!$OMP PARALLEL DO REDUCTION(+:ar)
+     !$OMP PARALLEL DO REDUCTION(+:ar)
      do ipw=i1,npw
        if(diag(ipw)<huge(zero)*1.d-11)then
          ar=ar+diag(ipw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
@@ -954,14 +924,10 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
 !MPIWF need to make reduction on ar and ai .
  if(mpi_enreg%paral_kgb==1)then
    call xmpi_sum(ar,mpi_enreg%comm_bandspinorfft ,ierr)
-   if(present(ar_im))then
-     call xmpi_sum(ar_im,mpi_enreg%comm_bandspinorfft,ierr)
-   end if
+   if (present(ar_im)) call xmpi_sum(ar_im,mpi_enreg%comm_bandspinorfft,ierr)
  end if
 
- if(l_gpu_thread_limit /= 0) then
-   call xomp_set_num_threads(nthreads_bak)
- end if
+ if (l_gpu_thread_limit /= 0) call xomp_set_num_threads(nthreads_bak)
 
 end subroutine meanvalue_g
 !!***
