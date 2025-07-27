@@ -1221,7 +1221,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
              !$OMP PARALLEL DO PRIVATE(igspinor, iispinor) COLLAPSE(2) IF(gemm_nonlop_use_gemm)
              do idat=1,ndat
                do ispinor=1,my_nspinor
-                 iispinor=ispinor;if (mpi_enreg%paral_spinor==1) iispinor=mpi_enreg%me_spinor+1
+                 iispinor=ispinor; if (mpi_enreg%paral_spinor==1) iispinor=mpi_enreg%me_spinor+1
                  if (iispinor == 1) then
                    do ig=1,npw_k2
                      igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
@@ -1276,7 +1276,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
                ghcim=zero
                if (sij_opt==1) gsc(:,igspinor)=zero
              end if
-             iispinor=ispinor;if (mpi_enreg%paral_spinor==1) iispinor=mpi_enreg%me_spinor+1
+             iispinor=ispinor; if (mpi_enreg%paral_spinor==1) iispinor=mpi_enreg%me_spinor+1
              if (sij_opt == 1) then
                write(msg,'(a,3(1x,i5),6(1x,es13.6))') '  1 ', ig, iispinor, igspinor,ghcre,&
                  kinpw_k2(ig),cwavef(1,igspinor),ghc(1,igspinor),gvnlxc_(1,igspinor), gsc(1,igspinor)

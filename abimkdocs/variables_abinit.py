@@ -20022,13 +20022,18 @@ Variable(
     text=r"""
 Sets a tolerance for absolute differences of total energy that, reached TWICE
 successively, will cause one SCF cycle to stop (and ions to be moved).
-Can be specified in Ha (the default), Ry, eV or Kelvin, since [[toldfe]] has
+Can be specified in Ha (the default), Ry, eV, meV or Kelvin, since [[toldfe]] has
 the [[ENERGY]] characteristics (1 Ha = 27.2113845 eV).
 If set to zero, this stopping condition is ignored.
 Effective only when SCF cycles are done ([[iscf]]>0).
 Because of machine precision, it is not worth to try to obtain differences in
-energy that are smaller than about 1.0d-12 of the total energy. To get
-accurate stresses may be quite demanding.
+energy that are smaller than about 1.0d-12 of the total energy.
+To get accurate stresses may be quite demanding.
+
+!!! tip
+
+    In version 10.5.1 and above, it is possible to use a negative value to
+    specify the tolerance in energy per atom e.g. toldfe = -0.1 meV.
 
 When the geometry is optimized (relaxation of atomic positions or primitive
 vectors), the use of [[toldfe]] is to be avoided. The use of [[tolrff]]

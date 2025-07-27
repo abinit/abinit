@@ -1014,10 +1014,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          ABI_MALLOC(kinpw_kphq, (npw_k))
          call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw_kphq,kphq,npw_k,0,0)
 
-         !where (kinpw_kphq >= huge(zero)*1.d-11)
-         !  kinpw_kphq = zero
-         !end where
-
          ! Compute nonlocal form factors ffnl at all (k+q/2+G):
          ! TODO: useylm = 1 --> ylm_kphq, ylmgr_kphq
          ! Also: kinpw_kphq should be passed to vtowfk to filter u_{k+q/2}(g)
@@ -1027,6 +1023,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
           psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
           npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,&
           psps%usepaw,psps%useylm,ylm_k,ylmgr,kinpw=kinpw_kphq)
+
+         !where (kinpw_kphq >= huge(zero)*1.d-11)
+         !  kinpw_kphq = zero
+         !end where
        end if
 
        ! Load k-dependent part in the Hamiltonian datastructure
