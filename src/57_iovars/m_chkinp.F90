@@ -4589,7 +4589,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
      if (ttolwfr==1.and.dt%tolwfr_diago>dt%tolwfr) then
        write(msg, '(2a,2(a,es14.6),a)' )&
-        ' tolwfr diago cannot be bigger than tolwfr !',ch10,&
+        ' tolwfr_diago cannot be bigger than tolwfr !',ch10,&
         ' tolwfr=',dt%tolwfr,' and tolwfr_diago=',dt%tolwfr_diago,&
         ' Action: change the value of tolwfr or tolwfr_diago in the input file.'
        ABI_ERROR_NOSTOP(msg, ierr)
