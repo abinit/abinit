@@ -247,11 +247,9 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  real(dp),allocatable :: gvnlxc(:,:),gvnlx_direc(:,:),gvnlx_dummy(:,:)
  real(dp),allocatable :: pcon(:),pwnsfac_k(:,:),scprod(:,:),scwavef(:,:)
  real(dp),allocatable :: smat_inv(:,:,:),smat_k(:,:,:),smat_k_paw(:,:,:),swork(:,:),vresid(:,:),work(:,:)
- real(dp),pointer :: kinpw(:)
  type(pawcprj_type) :: cprj_dum(1,1)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kb(:,:)
  type(pawcprj_type),allocatable :: cprj_direc(:,:),cprj_band_srt(:,:),cprj_gat(:,:), cprj_fkn(:,:),cprj_ikn(:,:)
-
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -295,7 +293,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  optekin=0;if (wfoptalg>=10) optekin=1
  natom=gs_hamk%natom
  cpopt=-1
- kinpw => gs_hamk%kinpw_k
  num_warning = 0
 
  ABI_MALLOC(pcon,(npw))
@@ -749,12 +746,20 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
          ! If wfoptalg>=10, the precondition matrix is kept constant during iteration ; otherwise it is recomputed
          if (wfoptalg<10.or.iline==1) then
-           call cg_precon(cwavef,zero,istwf_k,kinpw,npw,nspinor,me_g0,optekin,pcon,direc,mpi_enreg%comm_fft)
+           !if (gs_hamk%use_gbt == 0) then
+             call cg_precon(cwavef,zero,istwf_k,gs_hamk%kinpw_k,npw,nspinor,me_g0,optekin,pcon,direc,mpi_enreg%comm_fft)
+           !else
+           !  !print *, "max k-q:", maxval(abs(gs_hamk%kinpw_k))
+           !  call cg_precon(cwavef,zero,istwf_k,gs_hamk%kinpw_k,npw,1,me_g0,optekin,pcon,direc,mpi_enreg%comm_fft)
+           !  !print *, "max k+1:", maxval(abs(gs_hamk%kinpw_kp))
+           !  call cg_precon(cwavef(:,npw+1:),zero,istwf_k,gs_hamk%kinpw_kp,npw,1,me_g0,optekin,pcon,&
+           !                 direc(:,npw+1:),mpi_enreg%comm_fft)
+           !end if
 
            ! Minimisation of the residual: must precondition twice
            ! (might make only one call, with modified precon routine - might also make a shift !!!)
            if(wfopta10==2 .or. wfopta10==3)then
-             call cg_precon(cwavef,zero,istwf_k,kinpw,npw,nspinor,me_g0,optekin,pcon,direc,mpi_enreg%comm_fft)
+             call cg_precon(cwavef,zero,istwf_k,gs_hamk%kinpw_k,npw,nspinor,me_g0,optekin,pcon,direc,mpi_enreg%comm_fft)
              if(iline==1)then
                !$OMP PARALLEL DO
                do ipw=1,npw

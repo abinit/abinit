@@ -2,13 +2,13 @@
 
 # GBT
 use_gbt 1
-qgbt 0.0 0.0 0.5
+qgbt 0.0 0.0 0.02
 
 # SPIN
 nspinor  2
 nspden   4
 so_psp   0
-spinat   0.0 0.0 4.0
+spinat   4.0 0.0 0.0
 ixc 7   # LDA
 
 occopt   7
@@ -57,7 +57,7 @@ pseudos "Fe.psp8"                                    # Name and location of the 
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
-#%% authors = LeShu
+#%% authors = L. Shu
 #%% keywords = GBT
 #%% description =
 #%%   Crystalline fcc Fe: GBT calculation
