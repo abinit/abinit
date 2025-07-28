@@ -15,7 +15,7 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! NOTES
-!!  FOR DEVELOPERS: in order to preserve the portability of libPAW library,
+!!  FOR DEVELOPPERS: in order to preserve the portability of libPAW library,
 !!  please consult ~abinit/src/??_libpaw/libpaw-coding-rules.txt
 !!
 !! SOURCE
@@ -2427,16 +2427,14 @@ subroutine pawdijnd(dijnd,cplex_dij,gprimd,iatom,natom,ndij,nspden,nucdipmom,paw
 
 !Local variables ---------------------------------------
 !scalars
- integer :: angl_size,idir,ii,ij_size,il,ilmn,im,imesh,info
- integer :: jatom,jl,jlmn,jm,klmn,kln,lm_size,lmn2_size,mesh_size
- real(dp) :: rc,rr,rt,rvec_len
+ integer :: angl_size,idir,ii,ij_size,il,ilmn,im,imesh
+ integer :: jl,jlmn,jm,klmn,kln,lm_size,lmn2_size,mesh_size
+ real(dp) :: rc,rr,rt
  real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
  complex(dpc) :: cmatrixelement,lms
  logical :: usezora
 !arrays
-integer :: ipiv(3)
  integer,pointer :: indlmn(:,:),indklmn(:,:)
- real(dp) :: rprimd(3,3),rvec(3),work(3)
  real(dp),allocatable :: ff(:),intgr3(:),v1(:),zk1(:)
  character(len=500) :: msg
 
@@ -2558,19 +2556,6 @@ integer :: ipiv(3)
  end do ! end loop over basis states
 
  LIBPAW_DEALLOCATE(intgr3)
-
- ! loop over other atoms to compute A.A term. Note this is "on-site only" with
- ! phi*phij, no tphi*tphij, because this term is not present in the planewave
- ! getghc
- do jatom=1,natom
-   if (jatom .EQ. iatom) cycle ! no self term
-   if (.NOT. ANY(ABS(nucdipmom(:,jatom))>tol8)) cycle ! skip neighbors without dipoles
-   rprimd=gprimd
-   call dgetrf(3,3,rprimd,3,ipiv,info)
-   call dgetri(3,rprimd,3,ipiv,work,3,info)
-   rvec=MATMUL(rprimd,(xred(:,jatom)-xred(:,iatom)))
-   rvec_len = SQRT(DOT_PRODUCT(rvec,rvec))
- end do
 
  ! in case of ndij > 1, note that there is no spin-flip in this term
  ! so therefore down-down = up-up, and up-down and down-up terms are still zero
