@@ -2940,8 +2940,8 @@ end subroutine realgaunt
 !! NOTE
 !!  dyadic is indexed in voigt-style format:
 !!    (1,1,klm) : xx
-!!    (2,2,klm) : yy
-!!    (3,3,klm) : zz
+!!    (2,2,klm) : xx
+!!    (3,3,klm) : xx
 !!    (2,3,klm) : yz
 !!    (1,3,klm) : xz
 !!    (1,2,klm) : xy

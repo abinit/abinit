@@ -2427,10 +2427,9 @@ subroutine pawdijnd(dijnd,cplex_dij,gprimd,iatom,natom,ndij,nspden,nucdipmom,paw
 
 !Local variables ---------------------------------------
 !scalars
- integer :: angl_size,idir,ignt,ii,ij_size,il,ilmn,im,imesh,info
- integer :: jatom,jl,jlmn,jm,klm,klmn,kln,ll,llmin,llmax,llmm,lm_size,lmn2_size
- integer :: mesh_size,mm
- real(dp) :: aafac,dijaa,dr,rc,rr,rt
+ integer :: angl_size,idir,ii,ij_size,il,ilmn,im,imesh,info
+ integer :: jatom,jl,jlmn,jm,klmn,kln,lm_size,lmn2_size,mesh_size
+ real(dp) :: rc,rr,rt
  real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
  complex(dpc) :: cmatrixelement,lms
  logical :: usezora
@@ -2438,7 +2437,7 @@ subroutine pawdijnd(dijnd,cplex_dij,gprimd,iatom,natom,ndij,nspden,nucdipmom,paw
 integer :: ipiv(3)
  integer,pointer :: indlmn(:,:),indklmn(:,:)
  real(dp) :: rprimd(3,3),rvec(3,1),rvec_len(1),work(3)
- real(dp),allocatable :: aaint(:,:),ff(:),intgr3(:),v1(:),ylm_rvec(:,:),zk1(:)
+ real(dp),allocatable :: ff(:),intgr3(:),v1(:),ylm_rvec(:,:),zk1(:)
  character(len=500) :: msg
 
 ! *************************************************************************
@@ -2519,6 +2518,9 @@ integer :: ipiv(3)
    call simp_gen(intgr3(kln),ff,pawrad)
  end do
  LIBPAW_DEALLOCATE(ff)
+ if(allocated(zk1)) then
+   LIBPAW_DEALLOCATE(zk1)
+ end if
 
  !---------------------------
  ! accumulate matrix elements
@@ -2568,58 +2570,16 @@ integer :: ipiv(3)
    call dgetri(3,rprimd,3,ipiv,work,3,info)
    rvec(1:3,1)=MATMUL(rprimd,(xred(:,jatom)-xred(:,iatom)))
    rvec_len(1) = SQRT(DOT_PRODUCT(rvec(:,1),rvec(:,1)))
-   dr = rvec_len(1)
-   aafac = two*HalfFineStruct2*HalfFineStruct2
-   
+   write(std_out,'(a,4es16.8)')'JWZ debug rvec ',rvec(1,1),rvec(2,1),rvec(3,1),rvec_len(1)
    LIBPAW_ALLOCATE(ylm_rvec,(pawang%l_max*pawang%l_max,1))
    call initylmr(pawang%l_max,1,1,rvec_len,1,rvec,ylm_rvec)
 
-   LIBPAW_ALLOCATE(aaint,(ij_size,pawang%l_size_max))
-   LIBPAW_ALLOCATE(ff,(mesh_size))
-   do ll = 1, pawang%l_size_max
-     do kln=1,ij_size
-       do imesh = 2, mesh_size
-         rr = pawrad%rad(imesh)
-         ff(imesh)=pawtab%phiphj(imesh,kln)*&
-           & rr**(ll-2)/((dr*dr-rr*rr)*dr**ll)
-       end do !imesh
-       if (usezora) ff(2:mesh_size)=ff(2:mesh_size)*zk1(2:mesh_size)
-       call pawrad_deducer0(ff,mesh_size,pawrad)
-       call simp_gen(aaint(kln,ll),ff,pawrad)
-     end do
-   end do
-   LIBPAW_DEALLOCATE(ff)
- 
-   do klmn=1,lmn2_size
-     klm=indklmn(2,klmn); kln=indklmn(2,klmn)
-     llmin = indklmn(3,klmn); llmax=indklmn(4,klmn)
-     dijaa = zero
-     do ll = llmin,llmax
-       do mm=-ll,ll
-         llmm=ll*ll+ll+mm+1
-         ignt=pawang%gntselect(llmm,klm)
-         if (ignt > 0) then
-           dijaa = dijaa + pawang%realgnt(ignt)*ylm_rvec(llmm,1)*&
-             & aaint(kln,ll+1)
-         end if
-       end do ! loop on mm
-     end do ! loop on ll
-     dijaa = dijaa*four_pi*aafac*&
-       & DOT_PRODUCT(nucdipmom(1:3,iatom),nucdipmom(1:3,jatom))
-     dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + dijaa
-   end do ! loop on klmn
-
-   LIBPAW_DEALLOCATE(aaint)
    LIBPAW_DEALLOCATE(ylm_rvec)
  end do
 
  ! in case of ndij > 1, note that there is no spin-flip in this term
  ! so therefore down-down = up-up, and up-down and down-up terms are still zero
  if(ndij > 1) dijnd(:,2)=dijnd(:,1)
- 
- if(allocated(zk1)) then
-   LIBPAW_DEALLOCATE(zk1)
- end if
 
 end subroutine pawdijnd
 !!***
