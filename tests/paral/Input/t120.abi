@@ -94,7 +94,7 @@ write_files "none"
 #%% max_nprocs = 1
 #%% [NCPU_1]
 #%% files_to_test =
-#%%   t120_MPI1.abo, tolnlines=  25, tolabs=  1e-6, tolrel= 1e-4, fld_options = -medium
+#%%   t120_MPI1.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium
 #%% [extra_info]
 #%% authors = F. Brieuc
 #%% keywords = metaGGA, PAW
