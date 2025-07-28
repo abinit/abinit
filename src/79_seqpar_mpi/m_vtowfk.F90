@@ -381,7 +381,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  call timab(39,1,tsec) ! "vtowfk (loop)"
 
  cg_k => cg(:,1+icg:npw_k*my_nspinor*nband_k+icg)
- !print *, "maxval(cg_k):", maxval(abs(cg_k))
 
  do inonsc=1,nnsclo_now
    ABI_NVTX_START_RANGE(NVTX_VTOWFK_EXTRA1)

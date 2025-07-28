@@ -395,6 +395,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    ! Need a Vlocal
    ABI_CHECK(associated(gs_ham%vlocal), "We need vlocal in gs_ham!")
 
+
    ! fourwf can only process with one value of istwf_k
    if (gs_ham%use_gbt == 0) then
      ABI_CHECK(k1_eq_k2, 'vlocal (fourwf) cannot be computed with k/=k^prime!')
@@ -960,6 +961,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    ! Otherwise it is done when adding kinetic term.
    if (type_calc==1.and.filter_dilatmx_loc_) then
 
+     ABI_CHECK(gs_ham%use_gbt == 0, "use_gbt not coded!")
+
      if(gs_ham%gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET TEAMS DISTRIBUTE MAP(to:ghc,kinpw_k2)
@@ -1042,14 +1045,14 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 
        ! Apply Vnl{k-q/2} to u^up
        call cg_copy_spin(1, npw_k1, nspinortot, ndat, cwavef, cwavef_spin)
-       call nonlop(choice, cpopt_here, cwaveprj, enlout, gs_ham, idir, lambda_ndat, mpi_enreg, ndat, &
+       call nonlop(choice, cpopt_here, cwaveprj_nonlop, enlout, gs_ham, idir, lambda_ndat, mpi_enreg, ndat, &
                    nnlout, paw_opt, signs, gsc_ptr, tim_nonlop, cwavef_spin, gvnlxc_spin, select_k=K_H_K)
        ! Insert results in the right position.
        call cg_put_spin(1, npw_k1, nspinortot, ndat, gvnlxc_spin, gvnlxc_)
 
        ! Apply H_{k+q/2} to u^down
        call cg_copy_spin(2, npw_k1, nspinortot, ndat, cwavef, cwavef_spin)
-       call nonlop(choice, cpopt_here, cwaveprj, enlout, gs_ham, idir, lambda_ndat, mpi_enreg, ndat, &
+       call nonlop(choice, cpopt_here, cwaveprj_nonlop, enlout, gs_ham, idir, lambda_ndat, mpi_enreg, ndat, &
                    nnlout, paw_opt, signs, gsc_ptr, tim_nonlop, cwavef_spin, gvnlxc_spin, select_k=KPRIME_H_KPRIME)
        ! Insert results in the right position.
        call cg_put_spin(2, npw_k1, nspinortot, ndat, gvnlxc_spin, gvnlxc_)
