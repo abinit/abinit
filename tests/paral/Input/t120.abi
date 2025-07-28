@@ -37,7 +37,6 @@ nspinor5 2
 nband5 40
 pawspnorb5 0
 
-
 # Simulation box
 acell 3*5.8 angstrom
 rprim  0.0 1/2 1/2
@@ -89,11 +88,13 @@ write_files "none"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% [files]
-#%% files_to_test =
-#%%   t90.abo, tolnlines=  25, tolabs=  1e-6, tolrel= 1e-4, fld_options = -medium
+#%% need_cpp_vars = HAVE_FFTW3 or HAVE_DFTI
 #%% [paral_info]
+#%% nprocs_to_test = 1
 #%% max_nprocs = 1
+#%% [NCPU_1]
+#%% files_to_test =
+#%%   t120_MPI1.abo, tolnlines=  25, tolabs=  1e-6, tolrel= 1e-4, fld_options = -medium
 #%% [extra_info]
 #%% authors = F. Brieuc
 #%% keywords = metaGGA, PAW

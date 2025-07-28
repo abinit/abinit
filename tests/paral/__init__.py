@@ -97,4 +97,5 @@ inp_files = [
 "t99.abi",
 "t100.abi",
 "t101.abi",
+"t120.abi", # Test meta-GGA + PAW + paral_kgb + cprj_in_memory + istwfk
 ]
