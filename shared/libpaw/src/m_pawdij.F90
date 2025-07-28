@@ -39,7 +39,7 @@ MODULE m_pawdij
  use m_pawfgrtab,    only : pawfgrtab_type
  use m_pawrhoij,     only : pawrhoij_type
  use m_paw_finegrid, only : pawgylm, pawexpiqr
- use m_paw_sphharm,  only : initylmr,slxyzs,make_dyadic
+ use m_paw_sphharm,  only : slxyzs,make_dyadic
 
  implicit none
 
@@ -2429,15 +2429,15 @@ subroutine pawdijnd(dijnd,cplex_dij,gprimd,iatom,natom,ndij,nspden,nucdipmom,paw
 !scalars
  integer :: angl_size,idir,ii,ij_size,il,ilmn,im,imesh,info
  integer :: jatom,jl,jlmn,jm,klmn,kln,lm_size,lmn2_size,mesh_size
- real(dp) :: rc,rr,rt
+ real(dp) :: rc,rr,rt,rvec_len
  real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
  complex(dpc) :: cmatrixelement,lms
  logical :: usezora
 !arrays
 integer :: ipiv(3)
  integer,pointer :: indlmn(:,:),indklmn(:,:)
- real(dp) :: rprimd(3,3),rvec(3,1),rvec_len(1),work(3)
- real(dp),allocatable :: ff(:),intgr3(:),v1(:),ylm_rvec(:,:),zk1(:)
+ real(dp) :: rprimd(3,3),rvec(3),work(3)
+ real(dp),allocatable :: ff(:),intgr3(:),v1(:),zk1(:)
  character(len=500) :: msg
 
 ! *************************************************************************
@@ -2568,13 +2568,8 @@ integer :: ipiv(3)
    rprimd=gprimd
    call dgetrf(3,3,rprimd,3,ipiv,info)
    call dgetri(3,rprimd,3,ipiv,work,3,info)
-   rvec(1:3,1)=MATMUL(rprimd,(xred(:,jatom)-xred(:,iatom)))
-   rvec_len(1) = SQRT(DOT_PRODUCT(rvec(:,1),rvec(:,1)))
-   write(std_out,'(a,4es16.8)')'JWZ debug rvec ',rvec(1,1),rvec(2,1),rvec(3,1),rvec_len(1)
-   LIBPAW_ALLOCATE(ylm_rvec,(pawang%l_max*pawang%l_max,1))
-   call initylmr(pawang%l_max,1,1,rvec_len,1,rvec,ylm_rvec)
-
-   LIBPAW_DEALLOCATE(ylm_rvec)
+   rvec=MATMUL(rprimd,(xred(:,jatom)-xred(:,iatom)))
+   rvec_len = SQRT(DOT_PRODUCT(rvec,rvec))
  end do
 
  ! in case of ndij > 1, note that there is no spin-flip in this term
