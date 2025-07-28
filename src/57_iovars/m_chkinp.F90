@@ -634,6 +634,17 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !    Checks that presently chkdilatmx is smaller than 1.15
      call chkdpr(1,1,cond_string,cond_values,ierr,'dilatmx',dt%dilatmx,-1,1.15_dp,iout)
    end if
+   if (dt%optdriver/=RUNL_GSTATE) then
+     cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
+     ! Checks that presently dilatmx is 1 if optdriver is not GSTATE
+     call chkdpr(1,1,cond_string,cond_values,ierr,'dilatmx',dt%dilatmx,0,1._dp,iout)
+   end if
+   ! Warn the user if dilatmx > 1 and optcell == 0.
+   if (dt%dilatmx>one.and.dt%optcell==0) then
+     write(msg, "(a)") 'dilatmx > 1 and optcell=0, this is a waste of ressources (computational time and memory). &
+     & You should set dilatmx to 1.'
+     ABI_WARNING(msg)
+   end if
 
 !  dmatpuopt
    if (dt%usepawu>0) then
@@ -2006,12 +2017,12 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
 !  kptopt
    call chkint_le(0,0,cond_string,cond_values,ierr,'kptopt',dt%kptopt,4,iout)
-  ! If kptopt < 0, it is only valid when iscf = -2 
+  ! If kptopt < 0, it is only valid when iscf = -2
    if (dt%iscf/=-2) then
-      cond_string(1)='iscf' ; cond_values(1)=dt%iscf 
+      cond_string(1)='iscf' ; cond_values(1)=dt%iscf
       call chkint_ge(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,0,iout)
-   end if   
-  ! If hspinfield is applied, only kptopt = 0, 3, 4 are allowed 
+   end if
+  ! If hspinfield is applied, only kptopt = 0, 3, 4 are allowed
    if (any(abs(dt%hspinfield)>tol8)) then
       cond_string(1) = 'hspinfield(x)' ; cond_values(1) = dt%hspinfield(1)
       cond_string(2) = 'hspinfield(y)' ; cond_values(2) = dt%hspinfield(2)

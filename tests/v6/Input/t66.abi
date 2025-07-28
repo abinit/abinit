@@ -46,7 +46,6 @@ ndtset 15    udtset 3 5
    diemix 1/3
 
    ecutsm      0.5
-   dilatmx     1.05
 
 #DATASET1 : scf calculation: GS WF in the BZ
 #********************************************
