@@ -118,6 +118,7 @@ class AboFileAnalysis:
         if status == "succeeded":
             if len(self.dtsets) != len(other_abo_file.dtsets):
                 status = "failed"
+                print ("2 lengths of dtsets = ", len(self.dtsets), len(other_abo_file.dtsets))
                 raise ValueError("ERROR: the two abo files have different dataset numbers!")
 
         if status == "succeeded":

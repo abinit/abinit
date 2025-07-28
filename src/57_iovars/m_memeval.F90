@@ -1889,7 +1889,7 @@ end subroutine memana
 !! driver - respfn - dfpt_looppert - dfpt_scfcv - dfpt_vtorho - dfpt_vtowfk -
 !!     dfpt_cgwf - getghc - fourwf or (nonlop+opernl)
 !!
-!! Also, it is assumed that the potentials are non-local, even if there
+!! Also, it is assumed that the potentials are non-local, even if they
 !!     are local ! It would be necessary to update this routine
 !!     now that the beginning of psp files is read before
 !!     the present call (XG 980502)
@@ -1932,6 +1932,7 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
  integer :: fftalgb,matblk,maxmkmem,mincat,mk1mem,mkmem,mkqmem,mu,n_fftgr
  integer :: narr_fourdp,ngrad,nprocwf
  integer :: my_natom
+ integer :: my_mband
  real(dp) :: mbcg,mbdiskpd,mbdiskwf,mbf_fftgr,mbgylm
  character(len=500) :: msg
  character(len=1) :: firstchar
@@ -1971,6 +1972,9 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
  mkqmem=mkmems(2)
  mk1mem=mkmems(3)
  my_natom=natom;if (mpi_enreg%nproc_atom>1) my_natom=mpi_enreg%my_natom
+ ! TODO: this does not work yet, as nproc_band is not initialized in the DFPT case (paralkgb is 0)
+ ! solution:  around src/57_iovars/m_mpi_setup.F90 line 1341, update to give nproc_band a value
+ my_mband = CEILING(dble(mband)/ max(mpi_enreg%nproc_band,1))
 
  write(msg,'( 4(a,i8),a,4(a,i8) )' ) &
 & '     intxc =',intxc   ,'      iscf =',iscf,&
@@ -1995,6 +1999,11 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
 & '-   mkqmem =',mkqmem ,'        mk1mem =',mk1mem,&
 & '           mpw =',mpw  ,ch10,&
 & '      nfft =',nfft ,'          nkpt =',nkpt
+ call wrtout(iout,msg)
+ call wrtout(std_out,msg)
+
+ write(msg,'(4(3(a,i12),a))') &
+& '- my_mband =',my_mband 
  call wrtout(iout,msg)
  call wrtout(std_out,msg)
 
@@ -2067,13 +2076,13 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
 !kg
  cmpw(18)=3*mkmem              ; dttyp(18)=4
 !cg
- cmpw(19)=2*nspinor*mband*mkmem*nsppol  ; dttyp(19)=8
+ cmpw(19)=2*nspinor*my_mband*mkmem*nsppol  ; dttyp(19)=8
 !kg1
  cmpw(21)=3*mk1mem             ; dttyp(21)=4
 !cgq
- cmpw(22)=2*nspinor*mband*mkqmem*nsppol  ; dttyp(22)=8
+ cmpw(22)=2*nspinor*my_mband*mkqmem*nsppol  ; dttyp(22)=8
 !cg1
- cmpw(23)=2*nspinor*mband*mk1mem*nsppol  ; dttyp(23)=8
+ cmpw(23)=2*nspinor*my_mband*mk1mem*nsppol  ; dttyp(23)=8
 !rhor1,rhog1
  cfft(24)=cplex*nspden+2       ; dttyp(24)=8
 !eigen1
@@ -2103,7 +2112,7 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
 
  if(mkqmem==0)then
 !  cgq_disk
-   cmpw(45)=2*nspinor*mband      ; dttyp(45)=8
+   cmpw(45)=2*nspinor*my_mband      ; dttyp(45)=8
  end if
 !doccde_k,doccde_kq,eig0_k, ..., eig1_k, rocceig
  cadd(47)=(14+3*mband)*mband   ; dttyp(47)=8
@@ -2202,10 +2211,10 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
 
 !Determine the largest array out of cg,cg1,cgq, cg_disk or f_fftgr (f_fftgr_disk)
  if(mkmem==0 .and. mk1mem==0 .and. mkqmem==0)then
-   mbcg=(8*2*mpw*nspinor*mband)/1024._dp**2 + 0.002_dp
+   mbcg=(8*2*mpw*nspinor*my_mband)/1024._dp**2 + 0.002_dp
  else
    maxmkmem=maxval(mkmems(:))
-   mbcg=(8*2*mpw*nspinor*mband*maxmkmem*nsppol)/1024._dp**2 + 0.002_dp
+   mbcg=(8*2*mpw*nspinor*my_mband*maxmkmem*nsppol)/1024._dp**2 + 0.002_dp
  end if
  if(mffmem==0)then
    mbf_fftgr=(8*cplex*nfft*n_fftgr)/1024._dp**2 + 0.002_dp
