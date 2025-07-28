@@ -805,9 +805,9 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 
 !    ===== Need to compute Dijnd
        LIBPAW_ALLOCATE(dijnd,(cplex_dij*lmn2_size,ndij))
-       call pawdijnd(dijnd,cplex_dij,gprimd,iatom,natom,ndij,nspden,nucdipmom(1:3,1:natom),&
+       call pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom(:,iatom),&
          & pawang,pawrad(itypat),pawtab(itypat),pawxcdev,qphase,&
-         & paw_an(iatom)%vh1,paw_an(iatom)%vxc1,xred,znuc(itypat),paw_ij(iatom)%zora)
+         & paw_an(iatom)%vh1,paw_an(iatom)%vxc1,znuc(itypat),paw_ij(iatom)%zora)
        if (dijnd_need) paw_ij(iatom)%dijnd(:,:)=dijnd(:,:)
        if (dij_need) then
          paw_ij(iatom)%dij(1:cplex_dij*lmn2_size,:)= &
@@ -2410,20 +2410,20 @@ end subroutine pawdijhat
 !!
 !! SOURCE
 
-subroutine pawdijnd(dijnd,cplex_dij,gprimd,iatom,natom,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
-    & pawxcdev,qphase,vh1,vxc1,xred,znuc,zora)
+subroutine pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
+    & pawxcdev,qphase,vh1,vxc1,znuc,zora)
 
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: cplex_dij,iatom,natom,ndij,nspden,pawxcdev,qphase,zora
+ integer,intent(in) :: cplex_dij,ndij,nspden,pawxcdev,qphase,zora
  real(dp),intent(in) :: znuc
  type(pawang_type),intent(in) :: pawang
  type(pawrad_type),intent(in) :: pawrad
  type(pawtab_type),target,intent(in) :: pawtab
 !arrays
  real(dp),intent(out) :: dijnd(:,:)
- real(dp),intent(in) :: gprimd(3,3),nucdipmom(3,natom)
- real(dp),intent(in) :: vh1(:,:,:),vxc1(:,:,:),xred(3,natom)
+ real(dp),intent(in) :: nucdipmom(3)
+ real(dp),intent(in) :: vh1(:,:,:),vxc1(:,:,:)
 
 !Local variables ---------------------------------------
 !scalars
@@ -2439,8 +2439,6 @@ subroutine pawdijnd(dijnd,cplex_dij,gprimd,iatom,natom,ndij,nspden,nucdipmom,paw
  character(len=500) :: msg
 
 ! *************************************************************************
-
- write(std_out,'(a)')'JWZ debug entering pawdijnd'
 
 !Useful data
  angl_size=pawang%angl_size
@@ -2543,11 +2541,11 @@ subroutine pawdijnd(dijnd,cplex_dij,gprimd,iatom,natom,ndij,nspden,nucdipmom,paw
    do idir = 1, 3
 
      ! this loop accumulates a dot product so if no dipole moment in direction idir, nothing to do
-     if( ABS(nucdipmom(idir,iatom)) .LT. tol8 ) cycle
+     if( ABS(nucdipmom(idir)) .LT. tol8 ) cycle
 
      call slxyzs(il,im,idir,jl,jm,lms)
 
-     cmatrixelement = FineStructureConstant2*lms*nucdipmom(idir,iatom)*intgr3(kln)
+     cmatrixelement = FineStructureConstant2*lms*nucdipmom(idir)*intgr3(kln)
      dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + real(cmatrixelement)
      dijnd(2*klmn  ,1) = dijnd(2*klmn  ,1) + aimag(cmatrixelement)
 
