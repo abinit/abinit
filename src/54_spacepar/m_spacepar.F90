@@ -757,7 +757,7 @@ end subroutine hartre
 !! INPUTS
 !!  diag(npw)=diagonal operator (real, spin-independent!)
 !!  filter= if 1, need to filter on the value of diag, that must be less than huge(zero)*1.d-11
-!!          otherwise, should be 0
+!!      otherwise, should be 0
 !!  istwf_k=storage mode of the vectors
 !!  npw=number of planewaves of the vector
 !!  nspinor=number of spinor components

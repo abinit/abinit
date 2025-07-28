@@ -4636,6 +4636,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      ABI_CHECK_NOSTOP(optdriver == RUNL_GSTATE, 'GBT can only be used in GS calculations', ierr)
      ABI_CHECK_NOSTOP(dt%usepaw == 0, 'GBT does not support PAW', ierr)
      ABI_CHECK_NOSTOP(dt%paral_kgb == 0, 'GBT does not support paral_kgb 1', ierr)
+     ABI_CHECK_NOSTOP(dt%wfoptalg == 0, 'GBT is only coded for wfoptalg 0', ierr)
      ABI_CHECK_NOSTOP(dt%nsym == 1, 'GBT cannot exploit spatial symmetries, please use nsym 1', ierr)
      ABI_CHECK_NOSTOP(dt%kptopt == 4, 'GBT requires kptopt 4', ierr)
      ABI_CHECK_NOSTOP(dt%useylm == 0, 'GBT requires useylm 0', ierr)

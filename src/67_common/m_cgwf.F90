@@ -750,8 +750,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
              call cg_precon(cwavef,zero,istwf_k,gs_hamk%kinpw_k,npw,nspinor,me_g0,optekin,pcon,direc,mpi_enreg%comm_fft)
            else
              call cg_precon(cwavef,zero,istwf_k,gs_hamk%kinpw_k,npw,1,me_g0,optekin,pcon,direc,mpi_enreg%comm_fft)
-             !call cg_precon(cwavef(:,npw+1:),zero,istwf_k,gs_hamk%kinpw_k,npw,1,me_g0,optekin,pcon,&
-             !               direc(:,npw+1:),mpi_enreg%comm_fft)
              call cg_precon(cwavef(:,npw+1:),zero,istwf_k,gs_hamk%kinpw_kp,npw,1,me_g0,optekin,pcon,&
                             direc(:,npw+1:),mpi_enreg%comm_fft)
            end if
