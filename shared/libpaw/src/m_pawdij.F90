@@ -43,7 +43,7 @@ MODULE m_pawdij
 
  implicit none
 
- private
+ private :: pawdijaa
 
 
 !public procedures.
@@ -2427,18 +2427,16 @@ subroutine pawdijnd(dijnd,cplex_dij,gprimd,iatom,natom,ndij,nspden,nucdipmom,paw
 
 !Local variables ---------------------------------------
 !scalars
- integer :: angl_size,idir,ignt,ii,ij_size,il,ilmn,im,imesh,info
- integer :: jatom,jl,jlmn,jm,klm,klmn,kln,ll,llmin,llmax,llmm,lm_size,lmn2_size
- integer :: mesh_size,mm
- real(dp) :: aafac,dijaa,dr,rc,rr,rt
+ integer :: angl_size,idir,ii,ij_size,il,ilmn,im,imesh
+ integer :: jatom,jl,jlmn,jm,klm,klmn,kln,lm_size,lmn2_size
+ integer :: mesh_size
+ real(dp) :: rc,rr,rt
  real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
  complex(dpc) :: cmatrixelement,lms
  logical :: usezora
 !arrays
-integer :: ipiv(3)
  integer,pointer :: indlmn(:,:),indklmn(:,:)
- real(dp) :: rprimd(3,3),rvec(3,1),rvec_len(1),work(3)
- real(dp),allocatable :: aaint(:,:),ff(:),intgr3(:),v1(:),ylm_rvec(:,:),zk1(:)
+ real(dp),allocatable :: ff(:),intgr3(:),v1(:),zk1(:)
  character(len=500) :: msg
 
 ! *************************************************************************
@@ -2465,8 +2463,8 @@ integer :: ipiv(3)
    LIBPAW_BUG(msg)
  end if
 
+ LIBPAW_ALLOCATE(zk1,(mesh_size))
  if(usezora) then
-   LIBPAW_ALLOCATE(zk1,(mesh_size))
    if (size(vh1,1)/=qphase*mesh_size.or.size(vh1,2)<1.or.size(vh1,3)<1) then
      msg='invalid sizes for vh1!'
      LIBPAW_BUG(msg)
@@ -2563,54 +2561,10 @@ integer :: ipiv(3)
  do jatom=1,natom
    if (jatom .EQ. iatom) cycle ! no self term
    if (.NOT. ANY(ABS(nucdipmom(:,jatom))>tol8)) cycle ! skip neighbors without dipoles
-   rprimd=gprimd
-   call dgetrf(3,3,rprimd,3,ipiv,info)
-   call dgetri(3,rprimd,3,ipiv,work,3,info)
-   rvec(1:3,1)=MATMUL(rprimd,(xred(:,jatom)-xred(:,iatom)))
-   rvec_len(1) = SQRT(DOT_PRODUCT(rvec(:,1),rvec(:,1)))
-   dr = rvec_len(1)
-   aafac = two*HalfFineStruct2*HalfFineStruct2
-   
-   LIBPAW_ALLOCATE(ylm_rvec,(pawang%l_max*pawang%l_max,1))
-   call initylmr(pawang%l_max,1,1,rvec_len,1,rvec,ylm_rvec)
 
-   LIBPAW_ALLOCATE(aaint,(ij_size,pawang%l_size_max))
-   LIBPAW_ALLOCATE(ff,(mesh_size))
-   do ll = 1, pawang%l_size_max
-     do kln=1,ij_size
-       do imesh = 2, mesh_size
-         rr = pawrad%rad(imesh)
-         ff(imesh)=pawtab%phiphj(imesh,kln)*&
-           & rr**(ll-2)/((dr*dr-rr*rr)*dr**ll)
-       end do !imesh
-       if (usezora) ff(2:mesh_size)=ff(2:mesh_size)*zk1(2:mesh_size)
-       call pawrad_deducer0(ff,mesh_size,pawrad)
-       call simp_gen(aaint(kln,ll),ff,pawrad)
-     end do
-   end do
-   LIBPAW_DEALLOCATE(ff)
- 
-   do klmn=1,lmn2_size
-     klm=indklmn(2,klmn); kln=indklmn(2,klmn)
-     llmin = indklmn(3,klmn); llmax=indklmn(4,klmn)
-     dijaa = zero
-     do ll = llmin,llmax
-       do mm=-ll,ll
-         llmm=ll*ll+ll+mm+1
-         ignt=pawang%gntselect(llmm,klm)
-         if (ignt > 0) then
-           dijaa = dijaa + pawang%realgnt(ignt)*ylm_rvec(llmm,1)*&
-             & aaint(kln,ll+1)
-         end if
-       end do ! loop on mm
-     end do ! loop on ll
-     dijaa = dijaa*four_pi*aafac*&
-       & DOT_PRODUCT(nucdipmom(1:3,iatom),nucdipmom(1:3,jatom))
-     dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + dijaa
-   end do ! loop on klmn
+   call pawdijaa(dijnd,gprimd,iatom,jatom,mesh_size,natom,nucdipmom,&
+     & pawang,pawrad,pawtab,usezora,xred,zk1)
 
-   LIBPAW_DEALLOCATE(aaint)
-   LIBPAW_DEALLOCATE(ylm_rvec)
  end do
 
  ! in case of ndij > 1, note that there is no spin-flip in this term
@@ -2625,6 +2579,117 @@ end subroutine pawdijnd
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_pawdij/pawdijaa
+!! NAME
+!! pawdijaa
+!!
+!! FUNCTION
+!! Compute the Dipole-Dipole contribution to the PAW
+!! pseudopotential strength Dij
+!! (for one atom only)
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine pawdijaa(dijnd,gprimd,iatom,jatom,mesh_size,natom,nucdipmom,&
+    & pawang,pawrad,pawtab,usezora,xred,zk1)
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: iatom,jatom,mesh_size,natom
+ logical,intent(in) :: usezora
+ type(pawang_type),intent(in) :: pawang
+ type(pawrad_type),intent(in) :: pawrad
+ type(pawtab_type),target,intent(in) :: pawtab
+!arrays
+ real(dp),intent(in) :: gprimd(3,3),nucdipmom(3,natom),xred(3,natom),zk1(mesh_size)
+ real(dp),intent(inout) :: dijnd(:,:)
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: ignt,ij_size,imesh,info,klm,klmn,kln,ll,llmax,llmin,llmm,mm
+ real(dp) :: dijaa,dr,rr,t1afac
+ real(dp), parameter :: FineStruct4=one/InvFineStruct**4
+!arrays
+ integer :: ipiv(3)
+ integer,pointer :: indklmn(:,:)
+ real(dp) :: rprimd(3,3),rvec(3,1),rvec_len(1),work(3)
+ real(dp),allocatable :: aaint(:,:),ff(:),ylm_rvec(:,:)
+
+! *************************************************************************
+
+!Useful data
+ indklmn => pawtab%indklmn
+ ij_size=pawtab%ij_size
+ 
+ ! obtain rprimd by inversion of gprimd
+ ! have to use elaborate lapack calls because we are inside libpaw
+ rprimd=gprimd
+ call dgetrf(3,3,rprimd,3,ipiv,info)
+ call dgetri(3,rprimd,3,ipiv,work,3,info)
+
+ ! rvec is R2-R1 where R2,R1 are the two atoms with dipoles
+ rvec(1:3,1)=MATMUL(rprimd,(xred(:,jatom)-xred(:,iatom)))
+ rvec_len(1) = SQRT(DOT_PRODUCT(rvec(:,1),rvec(:,1)))
+ dr = rvec_len(1)
+  
+ ! generate Ylm's for rvec 
+ LIBPAW_ALLOCATE(ylm_rvec,(pawang%l_max*pawang%l_max,1))
+ call initylmr(pawang%l_max,1,1,rvec_len,1,rvec,ylm_rvec)
+
+ ! compute radial integrals
+ LIBPAW_ALLOCATE(aaint,(ij_size,pawang%l_size_max))
+ LIBPAW_ALLOCATE(ff,(mesh_size))
+
+ ! note ll = angmom + 1
+ do ll = 1, pawang%l_size_max
+   do kln=1,ij_size
+     do imesh = 2, mesh_size
+       rr = pawrad%rad(imesh)
+       ! integrand for r^(l-1)/dr^(l+1) * 1/(dr^2 - r^2)
+       ff(imesh)=pawtab%phiphj(imesh,kln)*&
+         & rr**(ll-2)/((dr*dr-rr*rr)*dr**ll)
+     end do !imesh
+     if (usezora) ff(2:mesh_size)=ff(2:mesh_size)*zk1(2:mesh_size)
+     call pawrad_deducer0(ff,mesh_size,pawrad)
+     call simp_gen(aaint(kln,ll),ff,pawrad)
+   end do
+ end do
+ LIBPAW_DEALLOCATE(ff)
+
+ ! term Ia factor: 1/2 \alpha^4 4\pi m1\cdot\m2
+ t1afac = half*FineStruct4*four_pi*&
+   & DOT_PRODUCT(nucdipmom(1:3,iatom),nucdipmom(1:3,jatom))
+ do klmn=1,pawtab%lmn2_size
+   klm=indklmn(2,klmn); kln=indklmn(2,klmn)
+   llmin = indklmn(3,klmn); llmax=indklmn(4,klmn)
+   dijaa=zero
+   do ll = llmin,llmax
+     do mm=-ll,ll
+       llmm=ll*ll+ll+mm+1
+       ignt=pawang%gntselect(llmm,klm)
+       if (ignt > 0) then
+         dijaa = dijaa + t1afac*pawang%realgnt(ignt)*ylm_rvec(llmm,1)*aaint(kln,ll+1)
+       end if
+     end do ! loop on mm
+   end do ! loop on ll
+   dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + dijaa
+ end do ! loop on klmn
+
+ LIBPAW_DEALLOCATE(aaint)
+ LIBPAW_DEALLOCATE(ylm_rvec)
+
+end subroutine pawdijaa
+!!***
+
+!----------------------------------------------------------------------
+
 
 !!****f* m_pawdij/pawdijso
 !! NAME
