@@ -3610,8 +3610,8 @@ subroutine cg_precon(cg, eval, istwf_k, kinpw, npw, nspinor, me_g0, optekin, pco
  real(dp),intent(in) :: eval
 !arrays
  real(dp),intent(in) :: cg(2,npw*nspinor),kinpw(npw)
- real(dp),intent(inout) :: vect(2,npw*nspinor)
  real(dp),intent(out) :: pcon(npw)
+ real(dp),intent(inout) :: vect(2,npw*nspinor)
 
 !Local variables-------------------------------
 !scalars

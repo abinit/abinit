@@ -3719,6 +3719,8 @@ if (dtset%usekden==1) then
    else
      dtset%toldfe=dprarr(1)
      if(abs(dprarr(1))>tiny(0._dp))itol=itol+1
+     ! A negative value is interpreted as energy per atom.
+     if (dtset%toldfe < zero) dtset%toldfe = abs(dtset%toldfe) * dtset%natom
    end if
  end if
 

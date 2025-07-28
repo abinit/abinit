@@ -1023,6 +1023,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
           psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
           npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,&
           psps%usepaw,psps%useylm,ylm_k,ylmgr,kinpw=kinpw_kphq)
+
+         !where (kinpw_kphq >= huge(zero)*1.d-11)
+         !  kinpw_kphq = zero
+         !end where
        end if
 
        ! Load k-dependent part in the Hamiltonian datastructure
