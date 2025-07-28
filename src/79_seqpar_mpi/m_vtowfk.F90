@@ -216,14 +216,14 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 ! subovl should be Identity (in that case we should use use_subovl=0)
 ! But this is true only if conjugate gradient algo. converges
  integer :: use_subovl=0, use_subvnlx=0, use_totvnlx=0
- integer :: bandpp_cprj,blocksize,choice,cpopt,iband,iband1
+ integer :: bandpp_cprj,blocksize,choice,cpopt,iband,iband1, filter
  integer :: iblock,iblocksize,ibs,idir,ierr,igs,igsc,ii,inonsc
  integer :: iorder_cprj,ipw,ispinor,iispinor,ispinor_index,istwf_k,iwavef,me_g0,mgsc,my_nspinor,n1,n2,n3 !kk
  integer :: nband_k_cprj,ncols_cprj,nblockbd,ncpgr,ndat,niter,nkpt_max,nnlout,ortalgo,ndat_fft
  integer :: paw_opt,quit,signs,space,spaceComm,tim_nonlop,wfoptalg,wfopta10
  integer :: gpu_option_tmp,nblk_gemm_nonlop,blksize_gemm_nonlop_tmp
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
- real(dp) :: ar,ar_im,eshift,occblock,norm !ar2,
+ real(dp) :: ar,ar2,ar_im,eshift,occblock,norm
  real(dp) :: max_resid,weight,cpu,wall,gflops
  character(len=50) :: iter_name
  character(len=500) :: msg
@@ -823,21 +823,21 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    do iblocksize=1,blocksize
      iband=(iblock-1)*blocksize+iblocksize
 
+     cwavef_iband => cg(:,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg)
+
      ! Compute kinetic energy for band iband.
-     !if (gs_hamk%%use_gbt == 0) then
-     call meanvalue_g(ek_k(iband),kinpw,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
-       cg(:,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),&
-       cg(:,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),0,&
-       gpu_thread_limit=dtset%gpu_thread_limit)
-     !else
-     ! cwavef_iband => cg(:,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),
-     ! Note filter 1 here. Also: this work if paral_kgb 1
-     !call meanvalue_g(ar,gs_ham%kinpw_k,0,istwf_k,mpi_enreg,npw_k,1,&
-     !  cwavef_iband, cwavef_iband, 0, gpu_thread_limit=dtset%gpu_thread_limit)
-     !call meanvalue_g(ar2,gs_ham%kinpw_kp,0,istwf_k,mpi_enreg,npw_k,1,&
-     !  cwavef_iband(:,npw_k+1:), cwavef_iband(:,npw_k+1:),0,gpu_thread_limit=dtset%gpu_thread_limit)
-     !ek_k(iband) = ar + ar2
-     !end if
+     if (gs_hamk%use_gbt == 0) then
+       call meanvalue_g(ek_k(iband),kinpw,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
+         cwavef_iband, cwavef_iband, 0, gpu_thread_limit=dtset%gpu_thread_limit)
+     else
+       ! Note filter 1. Also: this won't work if paral_kgb 1 and/or spinor parallelism
+       filter = 1
+       call meanvalue_g(ar,gs_hamk%kinpw_k,filter,istwf_k,mpi_enreg,npw_k,1,&
+         cwavef_iband, cwavef_iband, 0, gpu_thread_limit=dtset%gpu_thread_limit)
+       call meanvalue_g(ar2,gs_hamk%kinpw_kp,filter,istwf_k,mpi_enreg,npw_k,1,&
+         cwavef_iband(:,npw_k+1:), cwavef_iband(:,npw_k+1:),0,gpu_thread_limit=dtset%gpu_thread_limit)
+       ek_k(iband) = ar + ar2
+     end if
 
      if(ANY(ABS(dtset%nucdipmom)>tol8)) then
        ABI_MALLOC(ghc_vectornd,(2,npw_k*my_nspinor))
