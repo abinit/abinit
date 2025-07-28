@@ -219,7 +219,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  integer :: use_subovl=0
  integer :: use_subvnlx=0
  integer :: use_totvnlx=0
- integer :: bandpp_cprj,blocksize,choice,cpopt,iband,iband1
+ integer :: bandpp_cprj,blocksize,choice,cpopt,fftalg,iband,iband1
  integer :: iblock,iblocksize,ibs,idir,ierr,igs,igsc,ii,inonsc
  integer :: iorder_cprj,ipw,ispinor,ispinor_index,istwf_k,iwavef,me_g0,mgsc,my_nspinor,n1,n2,n3 !kk
  integer :: nband_k_cprj,ncols_cprj,nblockbd,ncpgr,ndat,niter,nkpt_max,nnlout,ortalgo,ndat_fft
@@ -738,7 +738,12 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      ABI_MALLOC_MANAGED(wfraug,(/2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat_fft/))
 #endif
    else
-     ABI_MALLOC(wfraug,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat_fft))
+     fftalg = gs_hamk%ngfft(7)
+     if (gs_hamk%gpu_option==ABI_GPU_DISABLED.and.fftalg/=401) then
+       ABI_MALLOC(wfraug,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6))
+     else
+       ABI_MALLOC(wfraug,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat_fft))
+     end if
    end if
  end if
 
