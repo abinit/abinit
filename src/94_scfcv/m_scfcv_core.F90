@@ -1009,12 +1009,13 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
    if (dtset%xclevel==2.and.dtset%nspden==2.and.dtset%densfor_pred<0) nkxc=19   ! This is not full kxc for mGGA
  end if
 !Eventually need Kxc for preconditioning the SCF. 
- if (precon%need_kxc) then
+ if (precon%use_kxc) then
    nkxc = precon%nkxc
  end if
  if (nkxc>0) then
    call check_kxc(dtset%ixc,dtset%optdriver)
  end if
+ write(6,*)'chi0diel scfcv_core:nfftf,nkxc', nfftf,nkxc; flush(6) !DEBUG
  ABI_MALLOC(kxc,(nfftf,nkxc))
  call precon%init_kxc(kxc)
  
@@ -1924,7 +1925,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      if (modulo(dtset%iprcel,100)>=61.and.(dtset%iprcel<71.or.dtset%iprcel>79).and. &
 &     dtset%iscf<10.and. &
 &     (dtset%iprcel>=100.or.istep==1.or.istep==dielstrt)) optxc=2
-     if (precon%need_kxc) optxc=2 ! Kxc needed for (chi0-based) preconditioning.
+     if (precon%use_kxc) optxc=2 ! Kxc needed for (chi0-based) preconditioning.
      if (dtset%iscf>=10.and.dtset%densfor_pred/=0.and.abs(dtset%densfor_pred)/=5) optxc=2
      if (optxc==2.and.dtset%xclevel==2.and.nkxc==2*min(dtset%nspden,2)-1) optxc=12
    end if

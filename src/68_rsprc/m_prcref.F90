@@ -2389,30 +2389,26 @@ end subroutine dieltcel
 !! chi0diel
 !!
 !! FUNCTION
-!!  Computes the preconditioned residual vrespc = P^-1 vresid where P is a preconditioner 
-!!  based on a model chi0 (contained in the object precon).
-!!  If we are preconditioning potentials, P = (I-chi0*vc) is the model adjoint dielectric matrix.
-!!  If we are preconditioning densities,  P = (I-vc*chi0) is the model dielectric matrix.
+!!  Computes the preconditioned residual vrespc = P^-1 vresid where P is an approximation of the 
+!!  dielectric matrix (if 'optres'=0) or its adjoint (if 'optres'=1) based of a model of the 
+!!  non-interacting susceptibility chi0. The approximation is described by the object 'precon'
+!!  (see the abinit documentation of the input variable 'iprcel').
 !!
 !! INPUTS
 !!  precon        = precon_object that contain the model chi0 operator.
-!!  dtset         =
+!!  dtset         = All input variables for this dataset.
 !!  cplex         = If 1, vresid is REAL, if 2, vresid is COMPLEX.
 !!  mpi_enreg     = Information about MPI parallelization.
 !!  optreal       = 1: vresid is given in the REAL space.
 !!                  2: vresid is given in the RECIPROCAL space.
 !!  optres        = 0: the array vresid contains a potential residual.
 !!                  1: the array vresid contains a density residual.
-!!  gmres_maxiter = Maximum number of (non-restarted) iterations for the GMRES.
-!!  gmres_rtol    = Relative tolerance for the GMRES
 !!  vresid (:, nspden) = residual density/potential in REAL space       (if optreal==1)
 !!                       residual density/potential in RECIPROCAL space (if optreal==2)
 !!
 !! OUTPUT
 !!  vrespc (:, nspden) = preconditioned residual of the density/potential in REAL space
 !!                       in REAL space (optreal==1) or RECIPROCAL space (optreal==2)
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -2428,112 +2424,17 @@ subroutine chi0diel(precon, dtset, cplex, mpi_enreg, optreal, optres, vresid, vr
  real(dp),intent(in) :: vresid(optreal*precon%nfftprc, dtset%nspden)
  real(dp),intent(out) :: vrespc(optreal*precon%nfftprc, dtset%nspden)
 
-!Local variables-------------------------------
-!scalars
- integer :: ispden, start_ispden, end_ispden
- real(dp) :: diemix
-!arrays
- !integer :: 
- real(dp), allocatable :: rhs(:), est(:)
- real(dp), allocatable :: workr(:)
-
 ! *************************************************************************
  write(6,*)'chi0diel start'; flush(6) !DEBUG
 
- if (precon%ngfftprc(10)>1) then
-   ABI_BUG("chi0-based preconditioning (chi0diel) used with fft-grid parallelization")
- end if
+ !if (precon%ngfftprc(10)>1) then
+ !  ABI_BUG("chi0-based preconditioning (chi0diel) used with fft-grid parallelization")
+ !end if
 
-!The preconditioner P^-1 is defined by : 
-!  P = (I-chi0*vc) the model adjoint dielectric matrix 
-!      if we are preconditioning densities (optres=1)
-!  P = (I-vc*chi0) the model dielectric matrix 
-!      if we are preconditioning potentials (optres=0)
-! 
-!The preconditioned density/potential residual vrespc = P^-1 * vresid is computed 
-!by soling the linear equation P * vrespc = vresid approximately with GMRES.
+ call precon%apply_precon(dtset, cplex, mpi_enreg, optreal, optres, vresid, vrespc)
 
-!Right-hand side : rhs is vresid (flattened) in the Fourier space.
- ABI_MALLOC(rhs, (dtset%nspden*2*precon%nfftprc))
-
- do ispden = 1, dtset%nspden
-   !Indices of the ispden component in the flattened (dtset%nspden, 2, precon%nfftprc)-array 'rhs'.
-   start_ispden = 1+(ispden-1)*2*precon%nfftprc
-   end_ispden = ispden*2*precon%nfftprc
-  
-   if (optreal==1) then
-     !vresid is given in the real space : We need to do a fft.
-     ABI_MALLOC(workr, (cplex*precon%nfftprc))    !We need workr here because fourdp needs an 
-     workr(:) = vresid(:, ispden)                 !intent(inout) argument while vresid is intent(in).
-     call fourdp(cplex, rhs(start_ispden:end_ispden), workr, -1, mpi_enreg, precon%nfftprc, 1, precon%ngfftprc, 0)
-     ABI_FREE(workr)
-
-    else
-     !vresid is already given in the Fourier space.
-     rhs(start_ispden:end_ispden) = vresid(:, ispden) 
-    end if
-
- end do
-
-!Initial guess :
- ABI_MALLOC(est, (dtset%nspden*2*precon%nfftprc))
- est = 0
-
-!Resolution with GMRES :
- write(6,*)'chi0diel : dtset%nspden*2*precon%nfftprc ', dtset%nspden*2*precon%nfftprc; flush(6) !DEBUG
- call precon%linsolve(2*precon%nfftprc*dtset%nspden, matvec, rhs, est)
- write(6,*)'chi0diel : est(10:20) ', est(10:20); flush(6) !DEBUG
-
-!Reshaping the final result :
- do ispden = 1, dtset%nspden
-   !Indices of the ispden component in the flattened (2, precon%nfftprc, dtset%nspden)-array 'est'.
-   start_ispden = 1+(ispden-1)*2*precon%nfftprc
-   end_ispden = ispden*2*precon%nfftprc
-
-   if (optreal==1) then
-     !vrespc must be returned in the real space : We need to do a ifft. 
-     call fourdp(cplex, est(start_ispden:end_ispden), vrespc(:, ispden), 1, mpi_enreg, precon%nfftprc, 1, precon%ngfftprc, 0)
-   else
-     !vrespc must be returned in the fourier space.
-     vrespc(:, ispden) = est(start_ispden:end_ispden)
-   end if
-
- end do
-
- ABI_FREE(rhs)
- ABI_FREE(est)
-
-!Simple mixing : TODO diemixmag
+ !Simple mixing : TODO diemixmag
  vrespc = precon%diemix * vrespc
- !vrespc = precon%diemix * vresid  !DEBUG
-
- contains
-
-!Subroutine matvec that apply the preconditioner P. ----------------------------------------
- subroutine matvec(n_, x, y)
-   integer, intent(in) :: n_
-   real(dp), intent(inout), target :: x(n_), y(n_)
-   type(c_ptr) :: x_c, y_c
-   real(dp), pointer :: x_3d(:, :, :), y_3d(:, :, :)
-
-! ******************************************************************************************
-
-   !C pointers to match the flattened arrays x and y to their 3D versions needed by
-   !precon%apply_adjdielmat and precon%apply_dielmat
-   x_c = c_loc(x)
-   call c_f_pointer(x_c, x_3d, shape=[2, precon%nfftprc, dtset%nspden])
-   y_c = c_loc(y)
-   call c_f_pointer(y_c, y_3d, shape=[2, precon%nfftprc, dtset%nspden])
-
-   if (optres==1) then
-   ! We are preconditioning density residual so P = (I-chi0*vc) = adjoint dielectric matrix.
-     call precon%apply_adjdielmat(dtset, mpi_enreg, x_3d, y_3d)
-   else if (optres==0) then
-   ! We are preconditioning potential residual so P = (I-vc*chi0) = dielectric matrix.
-     call precon%apply_dielmat(dtset, mpi_enreg, x_3d, y_3d)
-   end if
-
- end subroutine matvec ! -------------------------------------------------------------------
 
 end subroutine chi0diel
 !!***
