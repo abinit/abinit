@@ -21,7 +21,7 @@ module m_iterative_solvers
 
     implicit none
     private
-    public :: gmres_linear_solver, cg_eigen_solver_treshold
+    public :: cg_linear_solver, gmres_linear_solver, cg_eigen_solver_treshold
  
     contains
 
@@ -71,55 +71,65 @@ module m_iterative_solvers
         integer, intent(out) :: n_eig
 
         ! Local variables
-        real(dp) :: r(n), p(n), Ap(n), x(n)
+        real(dp) :: x(n), Ax(n), p(n), g(n), beta
         real(dp) :: residual_norm, rayleigh_quotient
         integer :: i, j, iter
         
         ! *************************************************************************
         
         ! Initialize variables
-        x = x0 / sqrt(sum(x0**2))   ! Normalize the initial guess
-        r = x                       ! Residual vector
-        p = r                       ! Search direction
-        residual_norm = sqrt(sum(r**2))
+        x = x0
+        call matvec(n, x, Ax)                                   ! Compute initial matrix-vector product
+        rayleigh_quotient = dot_product(x, Ax) / dot_product(x, x)
+        g = 2/dot_product(x, x) * (Ax - rayleigh_quotient * x)  ! Gradient of Rayleigh quotient
+        p = 0
+        beta = 0
 
         ! Conjugate Gradient iterations to minimize Rayleigh quotient
         do iter = 1, max_iter
-            call cg_update(n, matvec, x, r, p, Ap, rayleigh_quotient, residual_norm)
+            call cg_update(n, matvec, x, Ax, p, g, beta, rayleigh_quotient, residual_norm)
+                write(6,*)'chi0diel cg_eigen_solver_treshold : iter, rayleigh_quotient, residual norm', iter, rayleigh_quotient, residual_norm; flush(6) !DEBUG
             if (residual_norm < tol) exit
         end do
 
         ! Store the computed eigenvalue and eigenvector
         eigenvalues(1) = rayleigh_quotient
-        eigenvectors(:, 1) = x
+        eigenvectors(:, 1) = x/norm2(x)
         n_eig = 1
 
         ! If more eigenvalues are required, use deflation to compute subsequent eigenvalues
         do j = 2, max_neig
+            write(6,*)'chi0diel cg_eigen_solver_treshold : eigenvalues(1:j-1)', eigenvalues(1:j-1); flush(6) !DEBUG
+
             ! Check if the eigenvalue is below the threshold
             if (eigenvalues(j-1) < eigenvalue_threshold) exit
 
-            ! If it is not, we need to compute more eigenvalues
+            ! If it is not, we need to compute more eigenvalues :
             ! Orthogonalize the initial guess against previously computed eigenvectors
             x = x0
             do i = 1, j - 1
-                x = x - dot_product(x, eigenvectors(:, i)) * eigenvectors(:, i)
+                x = x - dot_product(p, eigenvectors(:, i))/dot_product(eigenvectors(:, i), eigenvectors(:, i)) * eigenvectors(:, i)
             end do
-            x = x / sqrt(sum(x**2))
 
-            ! Reset residual and search direction for the next eigenvalue
-            r = x
-            p = r
-            residual_norm = sqrt(sum(r**2))
+            ! Initialization
+            call matvec(n, x, Ax)                                   ! Compute initial matrix-vector product
+            rayleigh_quotient = dot_product(x, Ax) / dot_product(x, x)
+            g = 2/dot_product(x, x) * (Ax - rayleigh_quotient * x)  ! Gradient of Rayleigh quotient
+            p = 0
+            beta = 0
 
+            ! Perform conjugate gradient iterations
             do iter = 1, max_iter
-                call cg_update(n, matvec, x, r, p, Ap, rayleigh_quotient, residual_norm)
+                call cg_update(n, matvec, x, Ax, p, g, beta, rayleigh_quotient, residual_norm, eigenvectors(:, 1:j-1))
+                write(6,*)'chi0diel cg_eigen_solver_treshold : iter, rayleigh_quotient, residual norm', iter, rayleigh_quotient, residual_norm; flush(6) !DEBUG
                 if (residual_norm < tol) exit
             end do
 
+            ! Store the computed eigenvalue and eigenvector
             eigenvalues(j) = rayleigh_quotient
-            eigenvectors(:, j) = x
+            eigenvectors(:, j) = x/norm2(x)
             n_eig = n_eig + 1
+
         end do
 
     end subroutine cg_eigen_solver_treshold
@@ -129,69 +139,176 @@ module m_iterative_solvers
     !!  cg_update
     !!
     !! FUNCTION
-    !!  Perform a single Conjugate Gradient update step to minimize the Rayleigh quotient.
+    !!  Perform a single Conjugate Gradient update step to minimize the Rayleigh quotient 
+    !!  of a self-adjoint operator given by matvec. This method is used to approximate 
+    !!  the eigenvalue and eigenvector of the operator.
     !!
     !! INPUTS
-    !!  n              = Size of the matrix.
-    !!  matvec         = Subroutine that performs matrix-vector multiplication.
+    !!  n              = Integer, size of the matrix (number of rows/columns).
+    !!  matvec         = Subroutine, performs matrix-vector multiplication (A * v).
     !!
     !! INPUT/OUTPUTS
     !!  x              = Current solution vector (eigenvector approximation).
-    !!  r              = Residual vector.
-    !!  p              = Search direction vector.
-    !!  Ap             = Result of matrix-vector multiplication (A * p).
+    !!  Ax             = A * x, where A is the operator defined by matvec.
+    !!  p              = Previous search direction vector.
+    !!  g              = Gradient of the Rayleigh-quotient at x.
+    !!  beta           = Scalar, used to update the search direction.
     !!
     !! OUTPUTS
-    !!  rayleigh_quotient = Current approximation of the eigenvalue.
-    !!  residual_norm     = Norm of the residual vector.
+    !!  rayleigh_quotient = Current approximation of the eigenvalue (λ).
+    !!  residual_norm     = Norm of the residual.
+    !!
+    !! NOTES
+    !!  - The input vectors (x, r, p, Ap) must be properly initialized before calling 
+    !!    this subroutine.
+    !!  - The subroutine assumes that the operator is self-adjoint (Hermitian).
     !!
     !! SOURCE
-    subroutine cg_update(n, matvec, x, r, p, Ap, rayleigh_quotient, residual_norm)
+    subroutine cg_update(n, matvec, x, Ax, p, g, beta, rayleigh_quotient, residual_norm, eigenvectors)
         ! Arguments
         integer, intent(in) :: n
+        real(dp), optional, intent(in) :: eigenvectors(:,:)
         interface
             subroutine matvec(n_, x, y)
                 integer, intent(in) :: n_
                 double precision, intent(inout), target :: x(n_), y(n_)
             end subroutine matvec
         end interface
-        real(dp), intent(inout) :: x(n), r(n), p(n), Ap(n)
-        real(dp), intent(out) :: rayleigh_quotient, residual_norm
+        real(dp), intent(inout) :: x(n), Ax(n), g(n), p(n), beta
+        real(dp), intent(inout) :: rayleigh_quotient, residual_norm
 
         ! Local variables
-        real(dp) :: alpha, beta
+        real(dp) :: Ap(n), a, b, c, d, e, f, alpha, alpha_(2)
+        integer :: n_eig, i
+        real(dp) :: y(n)    !DEBUG
 
         ! *************************************************************************
+        if (present(eigenvectors)) then
+            n_eig = size(eigenvectors, 2)   ! Number of eigenvectors already computed
+        else
+            n_eig = 0
+        end if
 
-        ! Apply the matrix-vector multiplication
+        ! Update search direction
+        p = -g + beta*p
+        ! Orthogonalize the search direction against previously computed eigenvectors
+        do i = 1, n_eig
+            p = p - dot_product(p, eigenvectors(:, i))/dot_product(eigenvectors(:, i), eigenvectors(:, i)) * eigenvectors(:, i)
+        end do
+
+        ! Compute A*p
         call matvec(n, p, Ap)
 
-        ! Compute Rayleigh quotient (approximation of eigenvalue)
-        rayleigh_quotient = dot_product(x, Ap) / dot_product(x, x)
+        ! Compute alpha (step size = minimizer of R(x+alpha*p) that is the solution (+) of a quadratic problem)
+        a = dot_product(p, Ap)
+        b = 2*dot_product(x, Ap)
+        c = dot_product(x, Ax)
+        d = dot_product(p, p)
+        e = 2*dot_product(x, p)
+        f = dot_product(x, x)
+        alpha_ = quadratic_roots(a*e-b*d, 2*(f*a-d*c), b*f-c*e)
+        alpha = alpha_(1)
 
-        ! Compute alpha (step size)
-        alpha = dot_product(r, r) / dot_product(p, Ap)
-
-        ! Update the solution vector
+        ! Update solution vector
         x = x + alpha * p
+        Ax = Ax + alpha * Ap
+        
+        ! Update the Rayleigh-quotient
+        rayleigh_quotient = dot_product(x, Ax)/dot_product(x, x)
 
-        ! Update the residual vector
-        r = r - alpha * Ap
+        ! Update the (x-normalized) gradient and beta = dot(g, g)/dot(g_old, g_old)
+        beta = 1/dot_product(g, g)
+        g = 2/norm2(x) * (Ax - rayleigh_quotient * x)
+        beta = beta * dot_product(g, g)
 
-        ! Compute residual norm
-        residual_norm = sqrt(sum(r**2))
-
-        ! Compute beta (update factor for search direction)
-        beta = dot_product(r, r) / dot_product(r - alpha * Ap, r - alpha * Ap)
-
-        ! Update the search direction
-        p = r + beta * p
+        ! Update the residual norm (= norm of the gradient)
+        residual_norm = norm2(g)
 
     end subroutine cg_update
 
+    function quadratic_roots(a, b, c) result(r)
+        ! Arguments
+        real(dp) :: a, b, c
+        real(dp) :: r(2)
+
+        ! Local variables
+        real(dp) :: discriminant, sqrt_discriminant
+
+        ! *************************************************************************
+
+        if (a == 0.0_dp) then
+            r(1) = 0.0_dp
+            r(2) = 0.0_dp
+            return
+        end if
+
+        discriminant = b**2 - 4.0_dp * a * c
+        write(6,*)'chi0diel quadratic_roots : a, b, c, discriminant = ', a, b, c, discriminant; flush(6) !DEBUG
+        if (discriminant < 0.0_dp) then
+            r(1) = 0.0_dp
+            r(2) = 0.0_dp
+            return
+        end if
+
+        sqrt_discriminant = sqrt(discriminant)
+        r(1) = (-b + sqrt_discriminant) / (2.0_dp * a)
+        r(2) = (-b - sqrt_discriminant) / (2.0_dp * a)
+
+        write(6,*)'chi0diel quadratic_roots : a*r(1)**2 + b*r(1) + c = ', a*r(1)**2 + b*r(1)+c; flush(6) !DEBUG
+        write(6,*)'chi0diel quadratic_roots : a*r(2)**2 + b*r(2) + c = ', a*r(2)**2 + b*r(2)+c; flush(6) !DEBUG
+
+    end function quadratic_roots
+
 !-------------------------------------------------------------------------------------------
-! Linear solvers (GMRES)
+! Linear solvers (CG and GMRES)
 !-------------------------------------------------------------------------------------------
+
+    subroutine cg_linear_solver(n, matvec, rhs, est, cg_maxiter, cg_rtol)
+        !Arguments ------------------------------------
+        integer, intent(in) :: n, cg_maxiter
+        real(dp), intent(in) :: cg_rtol
+        real(dp),intent(in) :: rhs(:)
+        real(dp),intent(inout) :: est(:)
+        interface
+            subroutine matvec(n_, x, y)
+                integer, intent(in) :: n_
+                double precision, intent(inout), target :: x(n_), y(n_)
+            end subroutine matvec
+        end interface
+        !Local variables-------------------------------
+        real(dp) :: r(n), p(n), Ap(n)
+        real(dp) :: alpha, beta, rsold, rsnew
+        integer :: iter
+        ! *************************************************************************
+
+        ! Initialize
+        call matvec(n, est, Ap)
+        r = rhs - Ap
+        p = r
+        rsold = dot_product(r, r)
+
+        ! Conjugate Gradient iterations
+        do iter = 1, cg_maxiter
+            call matvec(n, p, Ap)
+            alpha = rsold / dot_product(p, Ap)
+            est = est + alpha * p
+            r = r - alpha * Ap
+            rsnew = dot_product(r, r)
+
+            ! Check for convergence
+            if (sqrt(rsnew) < cg_rtol) exit
+
+            beta = rsnew / rsold
+            p = r + beta * p
+            write(6,*)'cg_linear_solver : alpha, dot_product(p, Ap), beta, rsold, rsnew', alpha, dot_product(p, Ap), beta, rsold, rsnew; flush(6) !DEBUG
+            write(6,*)'cg_linear_solver : sqrt(rsnew)', sqrt(rsnew); flush(6) !DEBUG
+            rsold = rsnew
+        end do
+
+    end subroutine cg_linear_solver
+
+
+
 
     !****f* m_iterative_solvers/call_FGMRES
     !! NAME
@@ -388,8 +505,10 @@ module m_iterative_solvers
         
         !TODO : dirty check of MKL availability
 #if defined HAVE_LINALG_MKL_OMATCOPY
+write(6,*)'chi0diel FGMRES'; flush(6) !DEBUG
         call call_FGMRES(n, matvec, rhs, est, gmres_maxiter, gmres_rtol)
 #else
+write(6,*)'chi0diel gmresm'; flush(6) !DEBUG
         call call_gmresm(n, matvec, est, rhs, gmres_maxiter, gmres_rtol)
 #endif
       
