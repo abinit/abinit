@@ -39,7 +39,7 @@ MODULE m_pawdij
  use m_pawfgrtab,    only : pawfgrtab_type
  use m_pawrhoij,     only : pawrhoij_type
  use m_paw_finegrid, only : pawgylm, pawexpiqr
- use m_paw_sphharm,  only : initylmr,slxyzs,make_dyadic
+ use m_paw_sphharm,  only : initylmr,slxyzs,make_dyadic,realgaunt
 
  implicit none
 
@@ -2441,8 +2441,6 @@ subroutine pawdijnd(dijnd,cplex_dij,gprimd,iatom,natom,ndij,nspden,nucdipmom,paw
 
 ! *************************************************************************
 
- write(std_out,'(a)')'JWZ debug entering pawdijnd'
-
 !Useful data
  angl_size=pawang%angl_size
  indklmn => pawtab%indklmn
@@ -2613,20 +2611,30 @@ subroutine pawdijaa(dijnd,gprimd,iatom,jatom,mesh_size,natom,nucdipmom,&
 
 !Local variables ---------------------------------------
 !scalars
- integer :: ignt,ij_size,imesh,info,klm,klmn,kln,ll,llmax,llmin,llmm,mm
- real(dp) :: dijaa,dr,rr,t1afac
+ integer :: angmom,iaa,ignt_llmm_klm,ignt_l2m2_k_l1m1_llmm
+ integer :: ij_size,imesh,info,k_l1m1_llmm,klm,klmn,kln
+ integer :: l1m1,l2m2,l2,ll,llmax,llmin,llmm,m1,m2,mm,my_lmax,my_lsizemax,my_ngnt
+ real(dp) :: aa1a,aa1b,dr,rr,aa1a_fac,aa1b_fac
  real(dp), parameter :: FineStruct4=one/InvFineStruct**4
 !arrays
  integer :: ipiv(3)
  integer,pointer :: indklmn(:,:)
+ integer,allocatable :: my_gntselect(:,:)
  real(dp) :: rprimd(3,3),rvec(3,1),rvec_len(1),work(3)
- real(dp),allocatable :: aaint(:,:),ff(:),ylm_rvec(:,:)
+ real(dp),allocatable :: aaint(:,:,:),ff(:),my_realgnt(:),ylm_rvec(:,:)
 
 ! *************************************************************************
 
 !Useful data
  indklmn => pawtab%indklmn
  ij_size=pawtab%ij_size
+
+ ! need set of Gaunt integrals one larger than usual
+ my_lmax=pawang%l_max+1
+ my_lsizemax=2*my_lmax-1
+ LIBPAW_ALLOCATE(my_gntselect,((2*my_lmax-1)**2,my_lmax**2*(my_lmax**2+1)/2))
+ LIBPAW_ALLOCATE(my_realgnt,((2*my_lmax-1)**2*my_lmax**4))
+ call realgaunt(my_lmax,my_ngnt,my_gntselect,my_realgnt)
  
  ! obtain rprimd by inversion of gprimd
  ! have to use elaborate lapack calls because we are inside libpaw
@@ -2640,48 +2648,75 @@ subroutine pawdijaa(dijnd,gprimd,iatom,jatom,mesh_size,natom,nucdipmom,&
  dr = rvec_len(1)
   
  ! generate Ylm's for rvec 
- LIBPAW_ALLOCATE(ylm_rvec,(pawang%l_max*pawang%l_max,1))
- call initylmr(pawang%l_max,1,1,rvec_len,1,rvec,ylm_rvec)
+ LIBPAW_ALLOCATE(ylm_rvec,(my_lsizemax**2,1))
+ call initylmr(my_lsizemax,1,1,rvec_len,1,rvec,ylm_rvec)
 
  ! compute radial integrals
- LIBPAW_ALLOCATE(aaint,(ij_size,pawang%l_size_max))
+ LIBPAW_ALLOCATE(aaint,(ij_size,my_lsizemax,2))
  LIBPAW_ALLOCATE(ff,(mesh_size))
 
- ! note ll = angmom + 1
- do ll = 1, pawang%l_size_max
-   do kln=1,ij_size
-     do imesh = 2, mesh_size
-       rr = pawrad%rad(imesh)
-       ! integrand for r^(l-1)/dr^(l+1) * 1/(dr^2 - r^2)
-       ff(imesh)=pawtab%phiphj(imesh,kln)*&
-         & rr**(ll-2)/((dr*dr-rr*rr)*dr**ll)
-     end do !imesh
-     if (usezora) ff(2:mesh_size)=ff(2:mesh_size)*zk1(2:mesh_size)
-     call pawrad_deducer0(ff,mesh_size,pawrad)
-     call simp_gen(aaint(kln,ll),ff,pawrad)
+ do iaa = 1, 2
+   ! note here ll = angmom + 1
+   do ll = 1, my_lsizemax
+     angmom = ll - 1
+     do kln=1,ij_size
+       do imesh = 2, mesh_size
+         rr = pawrad%rad(imesh)
+         ! integrand for r^(angmom-iaa)/dr^(angmom+1) * 1/(dr^2 - r^2)
+         ff(imesh)=pawtab%phiphj(imesh,kln)*&
+           & rr**(angmom-iaa)/((dr*dr-rr*rr)*dr**(angmom+1))
+       end do !imesh
+       if (usezora) ff(2:mesh_size)=ff(2:mesh_size)*zk1(2:mesh_size)
+       call pawrad_deducer0(ff,mesh_size,pawrad)
+       call simp_gen(aaint(kln,ll,iaa),ff,pawrad)
+     end do
    end do
  end do
  LIBPAW_DEALLOCATE(ff)
 
  ! term Ia factor: 1/2 \alpha^4 4\pi m1\cdot\m2
- t1afac = half*FineStruct4*four_pi*&
+ aa1a_fac = half*FineStruct4*four_pi*&
    & DOT_PRODUCT(nucdipmom(1:3,iatom),nucdipmom(1:3,jatom))
+ ! term Ib factor: -1/2 \alpha^4 (4\pi)^2/3 m1\cdot\m2
+ aa1b_fac = -half*FineStruct4*four_pi*four_pi*&
+   & DOT_PRODUCT(nucdipmom(1:3,iatom),nucdipmom(1:3,jatom))/three
  do klmn=1,pawtab%lmn2_size
    klm=indklmn(2,klmn); kln=indklmn(2,klmn)
    llmin = indklmn(3,klmn); llmax=indklmn(4,klmn)
-   dijaa=zero
+   aa1a=zero
+   aa1b=zero
+   ! note ll here is really the angular momentum
    do ll = llmin,llmax
      do mm=-ll,ll
        llmm=ll*ll+ll+mm+1
-       ignt=pawang%gntselect(llmm,klm)
-       if (ignt > 0) then
-         dijaa = dijaa + t1afac*pawang%realgnt(ignt)*ylm_rvec(llmm,1)*aaint(kln,ll+1)
-       end if
+       ignt_llmm_klm=my_gntselect(llmm,klm)
+       if (ignt_llmm_klm > 0) then
+         ! note that aaint second index is angmom + 1, so ll+1 here
+         aa1a = aa1a + aa1a_fac*my_realgnt(ignt_llmm_klm)*ylm_rvec(llmm,1)*aaint(kln,ll+1,1)
+         do m1=-1,1
+           l1m1=1*1+1+m1+1
+           k_l1m1_llmm = MAX(l1m1,llmm)*(MAX(l1m1,llmm)-1)/2 + MIN(l1m1,llmm)
+           do l2=abs(ll-1),abs(ll+1)
+             do m2=-l2,l2
+               l2m2=l2*l2+l2+m2+1
+               ignt_l2m2_k_l1m1_llmm=my_gntselect(l2m2,k_l1m1_llmm)
+               if (ignt_l2m2_k_l1m1_llmm>0) then
+                 aa1b = aa1b + aa1b_fac*&
+                   & my_realgnt(ignt_llmm_klm)*my_realgnt(ignt_l2m2_k_l1m1_llmm)*&
+                   & ylm_rvec(l2m2,1)*ylm_rvec(l1m1,1)*&
+                   & dr*aaint(kln,l2+1,2)
+               end if ! end check on second Gaunt
+             end do ! end loop on m2
+           end do ! end loop on l2
+         end do ! end loop on m1
+       end if ! end check on first Gaunt
      end do ! loop on mm
    end do ! loop on ll
-   dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + dijaa
+   dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + aa1a + aa1b
  end do ! loop on klmn
 
+ LIBPAW_DEALLOCATE(my_gntselect)
+ LIBPAW_DEALLOCATE(my_realgnt)
  LIBPAW_DEALLOCATE(aaint)
  LIBPAW_DEALLOCATE(ylm_rvec)
 
