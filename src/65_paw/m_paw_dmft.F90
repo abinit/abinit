@@ -1640,7 +1640,7 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,filctqmcdatain,filsel
      if (lpawu == -1) cycle
      meshsz = paw_dmft%siz_proj(itypat)
 
-     call simp_gen(int1,pawtab(itypat)%proj(1:meshsz)*pawtab(itypat)%proj(1:meshsz),paw_dmft%radgrid(itypat), &
+     call simp_gen(int1,pawtab(itypat)%proj(1:meshsz)**2,paw_dmft%radgrid(itypat), &
                  & r_for_intg=paw_dmft%radgrid(itypat)%rad(meshsz))
      int1 = sqrt(int1)
 

@@ -1019,7 +1019,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &     is_dfpt,args_gs%jpawu,dtset%lexexch,dtset%lpawu,dtset%nspinor,dtset%ntypat,dtset%optdcmagpawu,pawang,dtset%pawprtvol,&
 &     pawrad,pawtab,args_gs%upawu,dtset%usedmft,dtset%useexexch,dtset%usepawu,ucrpa=dtset%ucrpa,dmft_orbital=dtset%dmft_orbital(:),&
 &     dmft_dc=dtset%dmft_dc,dmft_orbital_filepath=dtset%dmft_orbital_filepath,dmft_yukawa_param=dtset%dmft_yukawa_param,&
-&     dmft_lambda_yukawa=dtset%dmft_lambda_yukawa)
+&     dmft_lambda_yukawa=dtset%dmft_lambda_yukawa,dmft_epsilon_yukawa=dtset%dmft_epsilon_yukawa)
 
    ! DEBUG:
    !if (me == master) call pawtab_print(Pawtab)

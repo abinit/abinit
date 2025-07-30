@@ -327,6 +327,9 @@ MODULE m_pawtab
    ! Gives 1/q d(tTAUcore(q))/dq for q=0
    ! (tTAUcore(q) = FT of pseudo core kinetic density)
 
+  real(dp) :: eps
+  ! Epsilon parameter for Yukawa potential (only used for the exact double counting)
+
   real(dp) :: ex_cc
    ! Exchange energy for the core-core interaction of the Fock operator
 
@@ -1514,8 +1517,8 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
 !Reals (read from psp file)
 !-------------------------------------------------------------------------
-!  beta,dncdq0,d2ncdq0,dnvdq0,dtaucdq0,ex_cc,exccore,sxccore,lamb_shielding,lambda,rpaw,rshp,rcore,rcoretau,shape_sigma
-   nn_dpr=nn_dpr+15
+!  beta,dncdq0,d2ncdq0,dnvdq0,dtaucdq0,eps,ex_cc,exccore,sxccore,lamb_shielding,lambda,rpaw,rshp,rcore,rcoretau,shape_sigma
+   nn_dpr=nn_dpr+16
 
 !Reals (depending on the parameters of the calculation)
 !-------------------------------------------------------------------------
@@ -2278,6 +2281,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    list_dpr(ii)=pawtab%d2ncdq0  ;ii=ii+1
    list_dpr(ii)=pawtab%dnvdq0  ;ii=ii+1
    list_dpr(ii)=pawtab%dtaucdq0  ;ii=ii+1
+   list_dpr(ii)=pawtab%eps  ;ii=ii+1
    list_dpr(ii)=pawtab%ex_cc   ;ii=ii+1
    list_dpr(ii)=pawtab%exccore  ;ii=ii+1
    list_dpr(ii)=pawtab%sxccore  ;ii=ii+1
@@ -2537,6 +2541,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    pawtab%d2ncdq0=list_dpr(ii)  ;ii=ii+1
    pawtab%dnvdq0=list_dpr(ii)  ;ii=ii+1
    pawtab%dtaucdq0=list_dpr(ii)  ;ii=ii+1
+   pawtab%eps=list_dpr(ii)  ;ii=ii+1
    pawtab%ex_cc=list_dpr(ii)  ;ii=ii+1
    pawtab%exccore=list_dpr(ii)  ;ii=ii+1
    pawtab%sxccore=list_dpr(ii)  ;ii=ii+1

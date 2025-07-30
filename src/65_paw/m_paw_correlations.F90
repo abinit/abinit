@@ -121,7 +121,7 @@ CONTAINS  !=====================================================================
 &           nspinor,ntypat,option_interaction,pawang,pawprtvol,pawrad,pawtab,upawu,use_dmft,&
 &           useexexch,usepawu,&
 &           ucrpa,lmagCalc,dmft_orbital,dmft_dc,dmft_orbital_filepath,& ! optional argument
-&           dmft_yukawa_param,dmft_lambda_yukawa) ! optional argument
+&           dmft_yukawa_param,dmft_lambda_yukawa,dmft_epsilon_yukawa) ! optional argument
 
 !Arguments ---------------------------------------------
 !scalars
@@ -145,7 +145,7 @@ CONTAINS  !=====================================================================
  logical,optional,intent(in) :: lmagCalc
  integer,optional,intent(in) :: dmft_yukawa_param
  integer,optional,intent(in) :: dmft_orbital(ntypat)
- real(dp),optional,intent(in) :: dmft_lambda_yukawa
+ real(dp),optional,intent(in) :: dmft_epsilon_yukawa,dmft_lambda_yukawa
  character(len=fnlen),optional,intent(in) :: dmft_orbital_filepath
 !Local variables ---------------------------------------
 !scalars
@@ -250,6 +250,14 @@ CONTAINS  !=====================================================================
    mesh_size=pawtab(itypat)%mesh_size
    int_meshsz=pawrad(itypat)%int_meshsz
    lcur=-1
+
+   if (use_dmft > 0) then
+     if (dmft_dc == 8 .and. (f4of2_sla(itypat) >= -0.1_dp .or. &
+         & f6of2_sla(itypat) >= -0.1_dp) .and. dmft_yukawa_param == 1) then
+       message = "dmft_dc=8 and dmft_yukawa_param=1 not compatible with custom f4of2 and f6of2"
+       ABI_ERROR(message)
+     end if
+   end if
 
 !  PAW+U data
    if (usepawu/=0.or.use_dmft>0) then
@@ -865,7 +873,7 @@ CONTAINS  !=====================================================================
        rstep = pawrad(itypat)%rstep
 
        call pawrad_init(pawrad_tmp,meshsz,mesh_type,rstep,lstep)
-       call simp_gen(int1,pawtab(itypat)%proj(1:meshsz)*pawtab(itypat)%proj(1:meshsz),pawrad_tmp)
+       call simp_gen(int1,pawtab(itypat)%proj(1:meshsz)**2,pawrad_tmp)
 
        write(message,'(a,f6.4)') " Squared norm of the DMFT orbital: ",int1
        call wrtout(std_out,message,"COLL")
@@ -886,26 +894,37 @@ CONTAINS  !=====================================================================
          end if
 
          ABI_MALLOC(pawtab(itypat)%proj2,(meshsz))
-         pawtab(itypat)%proj2(:) = (pawtab(itypat)%proj(:)/int1)*(pawtab(itypat)%proj(:)/int1)
+         pawtab(itypat)%proj2(:) = (pawtab(itypat)%proj(:)/int1)**2
 
          ABI_MALLOC(fk,(lcur+1))
 
-         if (dmft_yukawa_param == 1) then
-           ! Get correspondence U <-> lambda
+         if (dmft_yukawa_param <= 2) then
+           ! Get correspondence U,J <-> lambda,epsilon or U <-> lambda depending on the value of dmft_yukawa_param
            call get_lambda(lcur,pawrad_tmp,pawtab(itypat)%proj2(:),meshsz, &
                          & pawtab(itypat)%upawu,pawtab(itypat)%jpawu,lambda,eps,dmft_yukawa_param)
-         else if (dmft_yukawa_param == 2) then
+         else if (dmft_yukawa_param == 3) then
+           call compute_slater(lcur,pawrad_tmp,pawtab(itypat)%proj2(:),meshsz,zero,one,fk(:))
+           lambda = zero
+           eps    = fk(1) / pawtab(itypat)%upawu
+           fk(:)  = fk(:) / eps
+         else if (dmft_yukawa_param == 4) then
            lambda = dmft_lambda_yukawa
+           eps    = dmft_epsilon_yukawa
          end if
 
          pawtab(itypat)%lambda = lambda
+         pawtab(itypat)%eps    = eps
 
          ! Recompute Slater integrals
-         call compute_slater(lcur,pawrad_tmp,pawtab(itypat)%proj2(:),meshsz,lambda,one,fk(:))
+         if (dmft_yukawa_param /= 3) then
+           call compute_slater(lcur,pawrad_tmp,pawtab(itypat)%proj2(:),meshsz,lambda,eps,fk(:))
+         end if
 
          write(message,'(3a)') ch10," Yukawa parameters for atom type: ",adjustl(tag)
          call wrtout(std_out,message,"COLL")
          write(message,'(a,f9.4)') " Lambda: ",lambda
+         call wrtout(std_out,message,"COLL")
+         write(message,'(a,f9.4)') " Epsilon:",eps
          call wrtout(std_out,message,"COLL")
 
          ! Recompute U tensor with new Slater integrals
