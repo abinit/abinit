@@ -96,7 +96,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
   paramCTQMC.random_name = "";
   paramCTQMC.random_seed = seed_a + rank * seed_b;
   paramCTQMC.length_cycle = cycle_length;
-#if defined HAVE_TRIQS_v3_4
+#if defined HAVE_TRIQS_v4_0
   paramCTQMC.time_invariance = time_invariance;
   paramCTQMC.pauli_prob = pauli_prob;
 #endif
@@ -105,7 +105,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
 
   file qmc_data_hfile;
 
-#if defined HAVE_TRIQS_v3_4
+#if defined HAVE_TRIQS_v4_0
   if (restart == 1 && rank == 0) {
 
     // Check if the configuration file can be read
@@ -159,6 +159,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
     std::vector<int> block_index_list(length);
     std::vector<int> inner_index_list(length);
     std::vector<int> is_dagger_list(length);
+    std::vector<int> lin_index_list(length);
     int displs [nproc] = {0};
     for (int i : range(1,nproc)) displs[i] = displs[i-1] + sendcounts[i-1];
     int tot_size = displs[nproc-1] + sendcounts[nproc-1];
@@ -166,6 +167,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
     std::vector<int> block_index_list_tot(tot_size);
     std::vector<int> inner_index_list_tot(tot_size);
     std::vector<int> is_dagger_list_tot(tot_size);
+    std::vector<int> lin_index_list_tot(tot_size);
 
     if (rank == 0) {
       group grp = qmc_data_hfile;
@@ -174,16 +176,18 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
       h5_read(gr,"block",block_index_list_tot);
       h5_read(gr,"inner",inner_index_list_tot);
       h5_read(gr,"dagger",is_dagger_list_tot);
+      h5_read(gr,"lin",lin_index_list_tot);
     }
 
     MPI_Scatterv(&tau_list_tot[0],&sendcounts[0],displs,MPI_UNSIGNED_LONG_LONG,&tau_list[0],length,MPI_UNSIGNED_LONG_LONG,0,comm);
     MPI_Scatterv(&block_index_list_tot[0],&sendcounts[0],displs,MPI_INTEGER,&block_index_list[0],length,MPI_INTEGER,0,comm);
     MPI_Scatterv(&inner_index_list_tot[0],&sendcounts[0],displs,MPI_INTEGER,&inner_index_list[0],length,MPI_INTEGER,0,comm);
     MPI_Scatterv(&is_dagger_list_tot[0],&sendcounts[0],displs,MPI_INTEGER,&is_dagger_list[0],length,MPI_INTEGER,0,comm);
+    MPI_Scatterv(&lin_index_list_tot[0],&sendcounts[0],displs,MPI_INTEGER,&lin_index_list[0],length,MPI_INTEGER,0,comm);
 
     for (int i : range(length)) {
       bool is_dagger = (is_dagger_list[i] == 1 ? true : false);
-      auto op = op_desc{block_index_list[i],inner_index_list[i],is_dagger,0}; // linear index will be set later, within TRIQS
+      auto op = op_desc{block_index_list[i],inner_index_list[i],is_dagger,lin_index_list[i]};
       time_pt tau = time_pt(tau_list[i],beta);
       paramCTQMC.initial_configuration.insert(tau,op);
     }
@@ -236,7 +240,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
     cout << "   Det Precision warning = " << det_precision_warning << endl;
     cout << "   Det Precision error   = " << det_precision_error << endl;
     cout << "   Det sing. threshold   = " << det_singular_threshold << endl;
-#if defined HAVE_TRIQS_v3_4
+#if defined HAVE_TRIQS_v4_0
     cout << "   Time invariance       = " << time_invariance << endl;
     cout << "   Pauli prob            = " << pauli_prob << endl;
 #endif
@@ -244,7 +248,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
 
   solver.solve(paramCTQMC);
 
-#if defined HAVE_TRIQS_v3_4
+#if defined HAVE_TRIQS_v4_0
   if (rank == 0) cout << endl << "   == Writing CTQMC data on file " << qmc_data_fnamew << endl;
 
   // Write all final configurations
@@ -255,6 +259,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
   std::vector<int> block_index_list(length);
   std::vector<int> inner_index_list(length);
   std::vector<int> is_dagger_list(length);
+  std::vector<int> lin_index_list(length);
   int count = 0;
   for (auto const &o : config) {
     uint64_t tau = floor_div(o.first,tau_0); // trick to get the value of the integer representing the time_pt
@@ -262,10 +267,12 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
     int block_index = op.block_index;
     int inner_index = op.inner_index;
     int is_dagger = (op.dagger ? 1 : 0);
+    int lin_index = op.linear_index;
     tau_list[count] = tau;
     block_index_list[count] = block_index;
     inner_index_list[count] = inner_index;
     is_dagger_list[count] = is_dagger;
+    lin_index_list[count] = lin_index;
     ++count;
   }
   std::vector<int> recvcounts(nproc);
@@ -277,10 +284,12 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
   std::vector<int> block_index_list_tot(tot_size);
   std::vector<int> inner_index_list_tot(tot_size);
   std::vector<int> is_dagger_list_tot(tot_size);
+  std::vector<int> lin_index_list_tot(tot_size);
   MPI_Gatherv(&tau_list[0],length,MPI_UNSIGNED_LONG_LONG,&tau_list_tot[0],&recvcounts[0],displs,MPI_UNSIGNED_LONG_LONG,0,comm);
   MPI_Gatherv(&block_index_list[0],length,MPI_INTEGER,&block_index_list_tot[0],&recvcounts[0],displs,MPI_INTEGER,0,comm);
   MPI_Gatherv(&inner_index_list[0],length,MPI_INTEGER,&inner_index_list_tot[0],&recvcounts[0],displs,MPI_INTEGER,0,comm);
   MPI_Gatherv(&is_dagger_list[0],length,MPI_INTEGER,&is_dagger_list_tot[0],&recvcounts[0],displs,MPI_INTEGER,0,comm);
+  MPI_Gatherv(&lin_index_list[0],length,MPI_INTEGER,&lin_index_list_tot[0],&recvcounts[0],displs,MPI_INTEGER,0,comm);
 
   if (rank == 0) {
 
@@ -298,6 +307,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
     h5_write(gr,"block",block_index_list_tot);
     h5_write(gr,"inner",inner_index_list_tot);
     h5_write(gr,"dagger",is_dagger_list_tot);
+    h5_write(gr,"lin",lin_index_list_tot);
 
     qmc_data_hfilew.close();
   }

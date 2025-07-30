@@ -2608,7 +2608,7 @@ end subroutine ctqmcoutput_printgreen
 
 subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_nd,fw1_nd,leg_measure,iatom)
 
-#if defined HAVE_TRIQS_v3_4 || defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
+#if defined HAVE_TRIQS_v4_0 || defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
  use TRIQS_CTQMC !Triqs module
 #endif
 #if defined HAVE_PYTHON_INVOCATION
@@ -3178,7 +3178,7 @@ end subroutine ctqmc_calltriqs
 
 subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
-#if defined HAVE_TRIQS_v3_4 || defined HAVE_TRIQS_v3_2
+#if defined HAVE_TRIQS_v4_0 || defined HAVE_TRIQS_v3_2
  use TRIQS_CTQMC
 #endif
  use ISO_C_BINDING
@@ -3487,7 +3487,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    ABI_MALLOC(wdlr_tmp,(wdlr_size))
    ndlr_ptr = C_LOC(ndlr)
    wdlr_ptr = C_LOC(wdlr_tmp)
-#if defined HAVE_TRIQS_v3_4 || defined HAVE_TRIQS_v3_2
+#if defined HAVE_TRIQS_v4_0 || defined HAVE_TRIQS_v3_2
    call build_dlr(wdlr_size,ndlr_ptr,wdlr_ptr,paw_dmft%dmft_triqs_lambda,paw_dmft%dmft_triqs_epsilon)
 #endif
    if (ndlr > wdlr_size) then
@@ -3756,7 +3756,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
      call flush_unit(std_out)
 
-#if defined HAVE_TRIQS_v3_4 || defined HAVE_TRIQS_v3_2
+#if defined HAVE_TRIQS_v4_0 || defined HAVE_TRIQS_v3_2
      call Ctqmc_triqs_run(rot_inv,leg_measure,paw_dmft%dmft_triqs_move_shift,paw_dmft%dmft_triqs_move_double, &
                         & density_matrix,paw_dmft%dmft_triqs_time_invariance,paw_dmft%dmft_triqs_use_norm_as_weight, &
                         & (ilam/=ntot.and.integral==1),paw_dmft%dmft_triqs_loc_n_min,paw_dmft%dmft_triqs_loc_n_max, &
