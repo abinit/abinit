@@ -1947,13 +1947,13 @@ end subroutine me_altcalc
    end do
  end do
 
- lm_alpha= -fac*matmul(coup(:,:),matmul(phongreen,coup_tr(:,:)))
+ lm_alpha= fac*matmul(coup(:,:),matmul(phongreen,coup_tr(:,:)))
  
  ipert1= natom + 5
  ipert2= natom + 2
  do idir1= 1, 3
    do idir2= 1, 3
-     ci_alpha(idir1,idir2)= c_blkval(idir1,ipert1,idir2,ipert2)*fac
+     ci_alpha(idir1,idir2)= c_blkval(idir1,ipert1,idir2,ipert2)/ucvol
    end do
  end do 
 

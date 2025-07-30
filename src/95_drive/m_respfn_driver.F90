@@ -1497,7 +1497,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   dyew,dyfrwf,dyfrx1,dyfr_cplex,dyfr_nondiag,dyvdw,d2bbb,d2cart,d2cart_bbb,d2matr,d2nfr,&
 &   eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
 &   gprimd,dtset%mband,mpert,natom,ntypat,outd2,pawbec,pawpiezo,piezofrnl,dtset%prtbbb,&
-&   rfasr,rfpert,rprimd,dtset%typat,ucvol,usevdw,psps%ziontypat)
+&   rfasr,dtset%rfatpol,rfpert,rprimd,dtset%typat,ucvol,usevdw,psps%ziontypat)
 
 !  Output of the dynamical matrix (master only)
    call dfpt_dyout(becfrnl,dtset%berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,&
@@ -3436,7 +3436,7 @@ subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
 & dyfr_cplex,dyfr_nondiag,dyvdw,d2bbb,d2cart,d2cart_bbb,d2matr,d2nfr,&
 & eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
 & gprimd,mband,mpert,natom,ntypat,outd2,pawbec,pawpiezo,piezofrnl,prtbbb,&
-& rfasr,rfpert,rprimd,typat,ucvol,usevdw,zion)
+& rfasr,rfatpol,rfpert,rprimd,typat,ucvol,usevdw,zion)
 
 !Arguments -------------------------------
 !scalars
@@ -3444,7 +3444,7 @@ subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
  integer,intent(in) :: pawbec,pawpiezo,prtbbb,rfasr,usevdw
  real(dp),intent(in) :: ucvol
 !arrays
- integer,intent(in) :: rfpert(mpert),typat(natom)
+ integer,intent(in) :: rfatpol(2),rfpert(mpert),typat(natom)
  integer,intent(inout) :: blkflg(3,mpert,3,mpert)
  integer,intent(out) :: carflg(3,mpert,3,mpert)
  real(dp),intent(in) :: becfrnl(3,natom,3*pawbec)
@@ -3625,6 +3625,39 @@ subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
      ABI_FREE(elfrtot)
    end if
 !  End section for strain perturbation
+
+!  Section for Zeeman field perturbations
+!  (MR: We storage magnetic moments, which are minus the second order total energy derivatives. 
+!  It seems that this change of sign is only necessary for the magnetic moments induced by atomic
+!  displacements. For the electric field ones, it must be changed inside dfpt_nstwf.) 
+   if (rfpert(natom+3)==5) then
+     ipert2= natom+5
+     do idir2= 1, 3
+       do ipert1= 1, natom
+         do idir1= 1, 3
+           if (blkflg(idir1,ipert1,idir2,ipert2)==1) then
+             d2matr(:,idir1,ipert1,idir2,ipert2)= -d2matr(:,idir1,ipert1,idir2,ipert2)
+             d2matr(:,idir2,ipert2,idir1,ipert1)= -d2matr(:,idir2,ipert2,idir1,ipert1)
+           end if
+         end do
+       end do
+     end do 
+   end if
+
+   if (ANY(rfpert(natom+11+1:2*natom+11)==1)) then
+     do ipert2= natom+1+rfatpol(1), natom+1+rfatpol(2) 
+       do idir2= 1, 3
+         do ipert1= 1, natom
+           do idir1= 1, 3
+             if (blkflg(idir1,ipert1,idir2,ipert2)==1) then
+               d2matr(:,idir1,ipert1,idir2,ipert2)= -d2matr(:,idir1,ipert1,idir2,ipert2)
+               d2matr(:,idir2,ipert2,idir1,ipert1)= -d2matr(:,idir2,ipert2,idir1,ipert1)
+             end if
+           end do
+         end do
+       end do 
+     end do
+   end if
 
 !  The second-order matrix has been computed.
 
