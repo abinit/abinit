@@ -1106,7 +1106,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  end if
 
  select case (ioption)
- case(0, 1)
+ case (0, 1)
    call symrhg(1,gprimd,irrzon,mpi_enreg,dtset%nfft,nfftot,dtset%ngfft,dtset%nspden,dtset%nsppol,dtset%nsym,&
                phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel,dtset%tnons)
    if(ioption==1)then
@@ -1118,7 +1118,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
        rhog(:,ifft)=1.0d0/2.0d0*rhog(:,ifft)
      end do
    end if
- case(2)
+ case (2)
    ABI_BUG('kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.')
    !call symtaug(1,gprimd,irrzon,mpi_enreg,dtset%nfft,nfftot,dtset%ngfft,dtset%nspden,dtset%nsppol,dtset%nsym,&
    !dtset%paral_kgb,phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel)

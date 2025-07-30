@@ -25833,7 +25833,7 @@ Variable(
     mnemonics="USE Generalized Bloch Theorem",
     added_in_version="10.5.1",
     text=r"""
-This variable activates the usage of the Generalized Bloch Theorem to compute spin-spirals.
+If set to 1, the generalized Bloch theorem is used to compute spin-spirals.
 """,
 ),
 
@@ -25847,7 +25847,7 @@ Variable(
     mnemonics="Q-point for Generalized Bloch Theorem.",
     added_in_version="10.5.1",
     text=r"""
-This variable defines the reduced coordinates of the wave-vector of the spin spiral whent [[use_gbt]] /= 0.
+Reduced coordinates of the wave-vector $\qq$ of the spin spiral when [[use_gbt]] /= 0.
 """,
 ),
 
