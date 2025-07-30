@@ -395,7 +395,6 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    ! Need a Vlocal
    ABI_CHECK(associated(gs_ham%vlocal), "We need vlocal in gs_ham!")
 
-
    ! fourwf can only process with one value of istwf_k
    if (gs_ham%use_gbt == 0) then
      ABI_CHECK(k1_eq_k2, 'vlocal (fourwf) cannot be computed with k/=k^prime!')

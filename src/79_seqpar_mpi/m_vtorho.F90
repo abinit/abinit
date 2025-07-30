@@ -935,7 +935,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        kpoint(:)=dtset%kptns(:,ikpt)
 
        if (dtset%use_gbt /= 0) then
-         ! If GBT is on, kpoint becomes k-q/2 so that we can reuse all the calls
+         ! If GBT is activate, kpoint becomes k-q/2 so that we can reuse all the calls
          ! to mkkin and mkffnl, and we only have to deal with k+q/2.
          kphq = kpoint + half * dtset%qgbt
          kpoint(:) = dtset%kptns(:,ikpt) - half * dtset%qgbt
@@ -1015,18 +1015,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw_kphq,kphq,npw_k,0,0)
 
          ! Compute nonlocal form factors ffnl at all (k+q/2+G):
-         ! TODO: useylm = 1 --> ylm_kphq, ylmgr_kphq
-         ! Also: kinpw_kphq should be passed to vtowfk to filter u_{k+q/2}(g)
+         ! TODO: useylm = 1 requires ylm_kphq, ylmgr_kphq
+         ! and ylm should be computed with k-q/2.
          ABI_MALLOC(ffnl_kphq,(npw_k,dimffnl,psps%lmnmax,ntypat))
          call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl_kphq,psps%ffspl,&
           gmet,gprimd,ider,idir,psps%indlmn,kg_k,kpg_kphq,kphq,psps%lmnmax,&
           psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
           npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,&
           psps%usepaw,psps%useylm,ylm_k,ylmgr,kinpw=kinpw_kphq)
-
-         !where (kinpw_kphq >= huge(zero)*1.d-11)
-         !  kinpw_kphq = zero
-         !end where
        end if
 
        ! Load k-dependent part in the Hamiltonian datastructure
