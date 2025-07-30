@@ -217,10 +217,10 @@ CONTAINS  !=====================================================================
          grad = gradr*gradr + gradth*gradth + gradphi*gradphi
        end if ! gradient
 
-       call exchange_yukawa(exx,vxx,rho,pawtab%lambda,grad,ixc)
+       call exchange_yukawa(exx,vxx,rho,pawtab%lambda,pawtab%eps,grad,ixc)
        exc(i,j,ir) = exx ; vxc(i,j,ir) = vxx
 
-       call correlation_yukawa(ecc,vcc,rho,pawtab%lambda,grad,ixc)
+       call correlation_yukawa(ecc,vcc,rho,pawtab%lambda,pawtab%eps,grad,ixc)
        exc(i,j,ir) = exc(i,j,ir) + ecc ; vxc(i,j,ir) = vxc(i,j,ir) + vcc
 
      end do ! i
@@ -341,7 +341,8 @@ end subroutine angular_mesh
 !!
 !! INPUTS
 !!  rho = density at current point
-!!  lambda = parameter for Yukawa potential
+!!  lambda = parameter for Yukawa potential (inverse screening length)
+!!  eps = parameter for Yukawa potential (dielectric constant)
 !!  grad = square of the gradient of the density
 !!  ixc = index of the XC functional
 !!
@@ -351,39 +352,39 @@ end subroutine angular_mesh
 !!
 !! SOURCE
 
-subroutine exchange_yukawa(ex,vx,rho,lambda,grad,ixc)
+subroutine exchange_yukawa(ex,vx,rho,lambda,eps,grad,ixc)
 
 !Arguments ------------------------------------
  integer, intent(in) :: ixc
- real(dp), intent(in) :: grad,lambda,rho
+ real(dp), intent(in) :: grad,lambda,eps,rho
  real(dp), intent(out) :: ex,vx
 !Local variables ------------------------------
  logical :: islambda
- real(dp) :: dfdkappa,dfdrho,dfdss,dfx,div,dkappadx,dssdrho
- real(dp) :: dxdrho,fx,fx_pbe,kappa,rhothird,rhotwothird,rsinv,ss,x
- real(dp), parameter :: c0 = (9.0_dp/(4.0_dp*pi*pi))**third * three_quarters
+ real(dp) :: dfdkappa,dfdmu,dfdrho,dfdss,dfx,div,div2,dkappadx,dlogf,dmudx,dssdrho
+ real(dp) :: dxdrho,fx,fx_pbe,kappa,mu,rhothird,rhotwothird,rsinv,ss,x,x2
+ real(dp), parameter :: c0 = (9.0_dp/(4.0_dp*(pi**2)))**third * three_quarters
  real(dp), parameter :: c1 = 1.804_dp
- real(dp), parameter :: kffac = (3.0_dp*pi*pi)**third
- real(dp), parameter :: mu = 0.2195149727645171_dp
- real(dp), parameter :: rsfac = (4.0_dp*pi/3.0_dp)**third
- real(dp), parameter :: twotothird = 2.0_dp**third
- real(dp), parameter :: xfac = (9.0_dp*pi/4.0_dp)**third
+ real(dp), parameter :: kf_fac = (3.0_dp*(pi**2))**third
+ real(dp), parameter :: mu0 = 0.2195149727645171_dp
+ real(dp), parameter :: rsinv_fac = (4.0_dp*pi/3.0_dp)**third
+ real(dp), parameter :: twotwothird = (2.0_dp)**(2.0_dp*third)
+ real(dp), parameter :: x_fac = (9.0_dp*pi/4.0_dp)**third
 !************************************************************************
 
- ! Careful, K. Haule formula is in Ry, and misses a minus sign for Vx
- rhothird = rho**third ; rsinv = rsfac * rhothird
+ rhothird = rho**third ; rsinv = rsinv_fac * rhothird
  islambda = (abs(lambda) > tol10)
 
  ! LDA exchange
  if (islambda) then
-   x = xfac * rsinv / lambda
+   x = x_fac * rsinv / lambda
    call fexchange(x,fx,dfx)
-   ex = - c0 * fx * rsinv
-   vx = 4.0_dp*ex/3.0_dp - c0*x*dfx*rsinv/3.0_dp
  else
-   ex = - c0 * rsinv
-   vx = 4.0_dp * ex / 3.0_dp
+   fx  = 1.0_dp
+   dfx = 0.0_dp
  end if
+
+ ex = - c0 * fx * rsinv / eps
+ vx = 4.0_dp*ex/3.0_dp - c0*x*dfx*rsinv/(3.0_dp*eps)
 
  if (ixc == 7 .or. ixc == -1012) return
 
@@ -394,27 +395,31 @@ subroutine exchange_yukawa(ex,vx,rho,lambda,grad,ixc)
  end if
 
  if (islambda) then
-   x = twotothird * x
-   call fexchange(x,fx,dfx)
+   x2 = x * x
+   kappa = x2 / (x2 + twotwothird)
  else
-   fx  = 1.0_dp
-   dfx = 0.0_dp
+   kappa = 1.0_dp
  end if
- kappa = c1/fx - 1.0_dp
+
+ kappa = c1*kappa/fx - 1.0_dp
  rhotwothird = rhothird * rhothird
- ss = grad / (4.0_dp*rho*rho*rhotwothird*kffac*kffac)
+ ss = grad / (4.0_dp*(rho**2)*rhotwothird*(kf_fac**2))
+ mu = mu0 / fx
  div = 1.0_dp+mu*ss/kappa
+ div2 = div * div
  fx_pbe = 1.0_dp + kappa*(1.0_dp-1.0_dp/div)
- dssdrho = -8.0_dp*third*ss/rho
- dfdss = mu / (div*div)
+ dssdrho = -8.0_dp * third * ss / rho
+ dfdss = mu / div2
+ dfdrho = dfdss * dssdrho
  if (islambda) then
-   dxdrho = third*kffac/(lambda*rhotwothird)
- else
-   dxdrho = zero
+   dlogf = dfx / fx
+   dxdrho = third * x / rho
+   dkappadx = (kappa+1.0_dp) * (2.0_dp*twotwothird/(x*(x2+twotwothird))-dlogf)
+   dfdkappa = 1.0_dp - (1.0_dp+2.0_dp*mu*ss/kappa)/div2
+   dmudx = -mu * dlogf
+   dfdmu = ss / div2
+   dfdrho = dfdrho + (dfdkappa*dkappadx+dfdmu*dmudx)*dxdrho
  end if
- dkappadx = -c1 * twotothird * dfx / (fx*fx)
- dfdkappa = 1.0_dp - (1.0_dp+2.0_dp*mu*ss/kappa)/(div*div)
- dfdrho = dfdss*dssdrho + dfdkappa*dkappadx*dxdrho
  vx = vx*fx_pbe + rho*ex*dfdrho
  ex = ex * fx_pbe
 
@@ -474,7 +479,8 @@ end subroutine fexchange
 !!
 !! INPUTS
 !!  rho = density at current point
-!!  lambda = parameter for Yukawa potential
+!!  lambda = parameter for screened potential (inverse screening length)
+!!  eps = parameter for screened potential (dielectric constant)
 !!  grad = square of the gradient of the density
 !!  ixc = index of the XC functional
 !!
@@ -484,25 +490,25 @@ end subroutine fexchange
 !!
 !! SOURCE
 
-subroutine correlation_yukawa(ec,vc,rho,lambda,grad,ixc)
+subroutine correlation_yukawa(ec,vc,rho,lambda,eps,grad,ixc)
 
 !Arguments ------------------------------------
  integer, intent(in) :: ixc
- real(dp), intent(in) :: grad,lambda,rho
+ real(dp), intent(in) :: eps,grad,lambda,rho
  real(dp), intent(out) :: ec,vc
 !Local variables ------------------------------
  logical :: islambda
  real(dp) :: aa_pbe,alb,alb_pow,arg_log,daadec,decdrho,den,df,dhdaa
- real(dp) :: dhdrho,dhdtt,div,dttdrho,exp_pbe,fx,h_pbe,lg,pade,pow,q0
- real(dp) :: q1,q1p,rhothird,rs,sqr_rs,tt
+ real(dp) :: dhdrho,dhdtt,div,div2,dttdrho,eps2,eps3,exp_pbe,fx,h_pbe,lg,pade,pow,q0
+ real(dp) :: q1,q1p,rhothird,rs,sqr_rs,tt,xx
  real(dp), parameter :: aa = 0.031091_dp,a1 = 0.21370_dp
  real(dp), parameter :: b1 = 7.5957_dp,b2 = 3.5876_dp
  real(dp), parameter :: b3 = 1.6382_dp,b4 = 0.49294_dp
  real(dp), parameter :: a = 0.47808102_dp,b = 0.84449703_dp
  real(dp), parameter :: c = 1.30089155_dp,d = 0.02949437_dp,beta = 1.34835105_dp
- real(dp), parameter :: kffac = (3.0_dp*pi*pi)**third
- real(dp), parameter :: rsfac = (3.0_dp/(4.0_dp*pi))**third
- real(dp), parameter :: beta_pbe = 0.066725_dp,gamma_pbe = (1.0_dp-log(2.0_dp))/(pi*pi)
+ real(dp), parameter :: kf_fac = (3.0_dp*(pi**2))**third
+ real(dp), parameter :: rs_fac = (3.0_dp/(4.0_dp*pi))**third
+ real(dp), parameter :: beta_pbe = 0.066725_dp,gamma_pbe = (1.0_dp-log(2.0_dp))/(pi**2)
 !************************************************************************
 
  if (abs(rho) < tol30) then
@@ -512,10 +518,12 @@ subroutine correlation_yukawa(ec,vc,rho,lambda,grad,ixc)
  end if
 
  rhothird = rho**third
- rs = rsfac / rhothird
+ rs = rs_fac / (rhothird*eps) ! Scaling law for r_s
  sqr_rs = sqrt(rs)
 
- ! LDA correlation for Coulomb potential (PW91 parametrization)
+ eps2 = eps * eps
+
+ ! LDA correlation for rescaled Coulomb potential (PW91 parametrization)
  q0  = -2.0_dp * aa * (1.0_dp+a1*rs)
  q1  = 2.0_dp * aa * (b1*sqr_rs+b2*rs+b3*rs*sqr_rs+b4*rs*rs)
  q1p = aa * (b1/sqr_rs+2._dp*b2+3._dp*b3*sqr_rs+4._dp*b4*rs)
@@ -530,34 +538,37 @@ subroutine correlation_yukawa(ec,vc,rho,lambda,grad,ixc)
  ! Correction factor for Yukawa potential
  ! Parametrization based on data from Savin, "Beyond the Kohn-Sham Determinant"
  pow = c + d*log(1.0_dp+rs)
- alb = a*lambda*(rs**b) ; alb_pow = alb**pow
- fx  = (1.0_dp+alb_pow)**(beta-1.0_dp)
+ alb = a*lambda*eps*(rs**b) ; alb_pow = alb**pow  ! Scaling law for lambda
+ fx  = (1.0_dp+alb_pow)**(-beta-1.0_dp)
  if (islambda) then
-   df = beta * fx * alb_pow * (pow*b/rs+d*log(alb)/(1.0_dp+rs))
+   df = -beta * fx * alb_pow * (pow*b/rs+d*log(alb)/(1.0_dp+rs))
  else
    df = zero
  end if
  fx = fx * (1.0_dp+alb_pow)
 
- vc = vc/fx + ec*rs*df/(3.0_dp*fx*fx)
- ec = ec/fx
+ vc = (vc*fx-ec*rs*df/3.0_dp) / eps2 ! Scaling law
+ ec = ec * fx / eps2
 
  if (ixc == 7 .or. ixc == -1012) return
 
- tt = grad * pi / (rho*rho*16.0_dp*kffac*rhothird)
- exp_pbe = exp(-ec/gamma_pbe)
+ eps3 = eps2 * eps
+ tt = grad * pi / ((rho**2)*16.0_dp*kf_fac*rhothird)
+ exp_pbe = exp(-ec*eps2/gamma_pbe)
  if (abs(exp_pbe-1.0_dp) < tol30) return
 
- aa_pbe = beta_pbe / (gamma_pbe*(exp_pbe-1.0_dp))
- daadec = beta_pbe * exp_pbe / (gamma_pbe*gamma_pbe*(exp_pbe-1.0_dp)*(exp_pbe-1.0_dp))
+ aa_pbe = eps * beta_pbe / (gamma_pbe*(exp_pbe-1.0_dp))
+ daadec = eps3 * beta_pbe * exp_pbe / (gamma_pbe*(exp_pbe-1.0_dp))**2
  decdrho = (vc-ec) / rho
- div = 1.0_dp + aa_pbe*tt + aa_pbe*aa_pbe*tt*tt
- pade = (1.0_dp+aa_pbe*tt) / div
- arg_log = 1.0_dp + beta_pbe*tt*pade/gamma_pbe
- h_pbe = gamma_pbe * log(arg_log)
- dhdaa = -beta_pbe * tt * (2.0_dp*aa_pbe*tt*tt+aa_pbe*aa_pbe*tt*tt*tt) / (div*div*arg_log)
+ xx = aa_pbe * tt
+ div = 1.0_dp + xx + xx**2
+ div2 = div * div
+ pade = (1.0_dp+xx) / div
+ arg_log = 1.0_dp + eps*beta_pbe*tt*pade/gamma_pbe
+ h_pbe = gamma_pbe * log(arg_log) / eps2
+ dhdaa = -beta_pbe * (tt**2) * xx * (2.0_dp+xx) / (eps*div2*arg_log)
  dttdrho = -7.0_dp * tt / (3.0_dp*rho)
- dhdtt = beta_pbe * (pade-tt*(2.0_dp*aa_pbe*aa_pbe*tt+aa_pbe*aa_pbe*aa_pbe*tt*tt)/(div*div)) / arg_log
+ dhdtt = beta_pbe * (pade-(xx**2)*(2.0_dp+xx)/div2) / (arg_log*eps)
  dhdrho = dhdtt*dttdrho + dhdaa*daadec*decdrho
  vc = vc + h_pbe + rho*dhdrho
  ec = ec + h_pbe
