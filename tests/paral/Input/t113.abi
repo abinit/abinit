@@ -103,8 +103,7 @@ upawu       5.5  eV  # Values of U for each angular momentum
 jpawu1      0.00 eV
 jpawu       0.84 eV  # Values of J
 
-dmft_yukawa_param3 2
-dmft_lambda_yukawa 0.0
+dmft_yukawa_param3 3
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -118,6 +117,6 @@ dmft_lambda_yukawa 0.0
 #%% [extra_info]
 #%% authors = E. Castiel, F. Gendron
 #%% keywords = DMFT, TRIQS
-#%% description = DFT+DMFT for Fe : test exact formula for double counting in GGA
+#%% description = DFT+DMFT for Fe : test exact double counting in GGA
 #%% topics = DMFT
 #%%<END TEST_INFO>

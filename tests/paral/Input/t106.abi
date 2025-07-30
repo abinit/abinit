@@ -57,7 +57,7 @@ dmft_mxsf 0.3
 dmft_wanorthnorm 2
 
 dmft_dc 8
-dmft_yukawa_param 1
+dmft_yukawa_param 3
 dmft_triqs_off_diag 1
 dmftqmc_l 150
 dmftqmc_therm 100
