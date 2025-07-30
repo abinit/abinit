@@ -100,7 +100,7 @@ SUBROUTINE VectorComplex_init(this, size)
   FREEIF(this%vec)
   MALLOC(this%vec,(1:size_val))
   this%tail     = 0 
-  this%vec = complex(0.d0,0.d0)
+  this%vec = cmplx(0.d0,0.d0,kind=8)
 END SUBROUTINE VectorComplex_init
 !!***
 

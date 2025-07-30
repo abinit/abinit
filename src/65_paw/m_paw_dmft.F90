@@ -985,6 +985,8 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
    else if (dmft_solv == 7) then
      write(message,'(2a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of TRIQS &
        &(with rotationally invariant interactions)'
+    else if (dmft_solv == 8) then                                                                            
+      write(message,'(2a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of ABINIT'
    else if (dmft_solv == 9) then
      write(message,'(2a)') ch10,' DMFT uses the python invocation of TRIQS, for which you need to &
        & give your personal script'
@@ -1030,7 +1032,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
    write(message,'(a,1x,a)') ch10,"The imaginary part of the Green's function is neglected"
    call wrtout([std_out,ab_out],message,'COLL')
 #endif
- else if (dmft_solv /= 6 .and. dmft_solv /= 7) then
+ else if (dmft_solv /= 6 .and. dmft_solv /= 7 .and. dmft_solv /= 10) then
    write(message,'(a,1x,a)') ch10,"The imaginary part of the Green's function is neglected"
    call wrtout([std_out,ab_out],message,'COLL')
  end if

@@ -281,7 +281,7 @@ SUBROUTINE BathOperatoroffdiagComplex_init(op, flavors, samples, beta, iTech,opt
 
   CALL MatrixHybComplex_init(op%M,op%iTech,size=Global_SIZE*op%flavors,Wmax=samples) !FIXME Should be consistent with ListCagC
   CALL MatrixHybComplex_init(op%M_update,op%iTech,size=Global_SIZE*op%flavors,Wmax=samples) !FIXME Should be consistent with ListCagC
-  op%F       = cmplx(0.d0,0.d0)
+  op%F       = cmplx(0.d0,0.d0,kind=8)
   op%set     = .TRUE.
   
 END SUBROUTINE BathOperatoroffdiagComplex_init
@@ -334,7 +334,7 @@ SUBROUTINE BathOperatoroffdiagComplex_reset(op)
   CALL Vector_clear(op%Qtau)
 
   CALL MatrixHybComplex_clear(op%M) !FIXME Should be consistent with ListCagC
-  op%F       = cmplx(0.d0,0.d0)
+  op%F       = cmplx(0.d0,0.d0,kind=8)
   do iflavor=1,op%flavors
     op%tails(iflavor)=0
     op%Fshift(iflavor)=0
@@ -595,9 +595,9 @@ COMPLEX(KIND=8)  FUNCTION BathOperatoroffdiagComplex_getDetAdd(op,CdagC_1, posit
   !ratio = op%S - DOT_PRODUCT(MATMUL(op%R%vec(1:tail),op%M(op%activeFlavor)%mat(1:tail,1:tail)),op%Q%vec(1:tail))
 
   ! product of matrix R and M(k) is computed now:
-  ratio = cmplx(0.d0,0.d0)
+  ratio = cmplx(0.d0,0.d0,kind=8)
   DO it1 = tailbegin, tailend
-    timec = cmplx(0.d0,0.d0)
+    timec = cmplx(0.d0,0.d0,kind=8)
     DO it2 = tailbegin, tailend
       timec = timec + op%R%vec(it2) * op%M%mat(it2,it1)
     END DO
@@ -777,7 +777,7 @@ COMPLEX(KIND=8) FUNCTION BathOperatoroffdiagComplex_getDetF(op,particle,option)
   INTEGER :: iflavordag,iflavorb
 #include "BathOperatoroffdiagComplex_hybrid.h"
 
-  BathOperatoroffdiagComplex_getDetF = cmplx(1.d0,0.d0) ! pour eviter des divisions par 0
+  BathOperatoroffdiagComplex_getDetF = cmplx(1.d0,0.d0,kind=8) ! pour eviter des divisions par 0
   IF ( PRESENT( particle ) ) THEN
     tail = op%sumtails
     beta = op%beta
@@ -2040,8 +2040,8 @@ SUBROUTINE BathOperatoroffdiagComplex_checkM(op,particle)
   enddo
 
   ! --- Compare M_update and M to check if calculation of M is correct
-  sumMmat =cmplx(0.d0,0.d0)
-  sumCheck=cmplx(0.d0,0.d0)
+  sumMmat =cmplx(0.d0,0.d0,kind=8)
+  sumCheck=cmplx(0.d0,0.d0,kind=8)
   error1 = 0.d0
   errormax = 0.d0
   checkTau = .FALSE.

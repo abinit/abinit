@@ -400,7 +400,7 @@ SUBROUTINE MatrixHybComplex_inverse(this,determinant)
 
   tail = this%tail
   IF ( tail .EQ. 0 ) THEN
-    IF ( PRESENT(determinant) ) determinant = 1.d0
+    IF ( PRESENT(determinant) ) determinant = cmplx(1.d0,0.d0,kind=8)
     RETURN
   END IF
 
@@ -436,8 +436,8 @@ SUBROUTINE MatrixHybComplex_inverse(this,determinant)
 !!        invMatrix%mat(ligne, sys_vir) = (invMatrix%mat(ligne, sys_vir)-reste)/this%mat(ligne_virtuelle,ligne)
 !!    END DO
     !det = det*this%mat(sys_vir,sys)
-    invMatrix(:,sys_vir) = 0.d0
-    invMatrix(sys,sys_vir) = 1.d0
+    invMatrix(:,sys_vir) = cmplx(0.d0,0.d0,kind=8)
+    invMatrix(sys,sys_vir) = cmplx(1.d0,0.d0,kind=8)
     DO colonne = 1, tail-1
       DO ligne=colonne+1,tail
         ligne_virtuelle = pivot(ligne)
@@ -514,7 +514,7 @@ SUBROUTINE MatrixHybComplex_LU(this,pivot,determinant)
   COMPLEX(KIND=8), DIMENSION(:,:), ALLOCATABLE :: mat_tmp
 
   tail = this%tail
-  det = 1.d0
+  det = cmplx(1.d0,0.d0,kind=8)
   FREEIF(pivot_tmp)
   MALLOC(pivot_tmp,(1:tail))
 
@@ -602,7 +602,7 @@ SUBROUTINE MatrixHybComplex_getDet(this,det)
   COMPLEX(KIND=8), INTENT(  OUT) :: det
 
   IF ( this%tail .EQ. 0 ) THEN
-    det = 1.d0
+    det = cmplx(1.d0,0.d0,kind=8)
     RETURN
   END IF
   CALL MatrixHybComplex_LU(this, determinant=det)

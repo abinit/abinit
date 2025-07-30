@@ -291,13 +291,6 @@ SUBROUTINE CtqmcoffdiagInterfaceComplex_run(op,G0omega, Gtau, Gw, D,E,Noise,matU
 
   CALL CtqmcoffdiagComplex_reset(op%Hybrid)
 
-!  ifstream = 42
-!
-!  OPEN(UNIT=ifstream, FILE="Gw.dat")
-!  CALL CtqmcoffdiagComplex_setG0w(Hybrid, ifstream)
-!  CLOSE(ifstream)
-!  
-
   IF ( PRESENT(opt_levels)) &
     CALL CtqmcoffdiagComplex_setMu(op%Hybrid, opt_levels)
 
