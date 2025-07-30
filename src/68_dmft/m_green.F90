@@ -1607,7 +1607,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
     !  write(std_out,*) "1199",green_temp%ks(1,1,9,9)
     !endif
    if (optlog == 1) then
-     freq2 = paw_dmft%omega_lo(ifreq) * paw_dmft%omega_lo(ifreq)
+     freq2 = paw_dmft%omega_lo(ifreq)**2
      trace_tmp = czero
      do isppol=1,nsppol
        do ikpt=1,mkmem

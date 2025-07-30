@@ -228,9 +228,9 @@ CONTAINS  !=====================================================================
 
  end do ! i
 
- write(message,'(4a)') "An error occurred when trying to find a suitable lambda ", &
-                     & "for your input values of upawu.", ch10, &
-                     & "Either try a different value of upawu or use dmft_lambda_yukawa."
+ write(message,'(4a)') "An error occurred when trying to find a suitable lambda and ", &
+                     & "epsilon for your input values of upawu and jpawu.", ch10, &
+                     & "Either try different values or use dmft_lambda_yukawa and dmft_epsilon_yukawa."
 
  if (fkk(1) > upawu) ABI_ERROR(message)
 
@@ -246,9 +246,8 @@ CONTAINS  !=====================================================================
  lambda = lmb_temp
  eps    = one
 
- if (yukawa_param == 1) return
+ if (yukawa_param == 2) return
 
- ! This part finds epsilon (not used anymore)
  if (lpawu > 0) then
 
    ! Default values from scipy
