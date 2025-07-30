@@ -787,6 +787,11 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
            call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_epsilon_yukawa',dt%dmft_epsilon_yukawa,1,zero,iout)
          end if
        end if
+       
+       if (dt%dmft_solv .eq. 10 .and. dt%nspinor .eq. 1) then 
+         write(msg,'(2a)') "dmft_solv == 10 is not implemented for nspinor == 1 "
+         ABI_ERROR(msg)
+       endif
 
        do itypat=1,dt%ntypat
          if (dt%lpawu(itypat)==-1) cycle
@@ -906,7 +911,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      write(msg,'(3a)') &
       & ' dmft_solv=6, or 7 is only relevant if the TRIQS library v3.2>= is linked',ch10,&
       & ' Action: check compilation options'
-     ABI_ERROR(msg)
+     !ABI_ERROR(msg)
    end if
 #endif
 

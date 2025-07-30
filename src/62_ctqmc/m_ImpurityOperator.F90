@@ -112,6 +112,7 @@ PUBLIC  :: ImpurityOperator_overlapSwap
 PUBLIC  :: ImpurityOperator_swap
 PRIVATE :: ImpurityOperator_overlapIJ
 PUBLIC  :: ImpurityOperator_measDE
+PUBLIC  :: ImpurityOperator_measDEComplex
 PUBLIC  :: ImpurityOperator_cleanOverlaps
 PUBLIC  :: ImpurityOperator_measN
 PUBLIC  :: ImpurityOperator_destroy
@@ -383,7 +384,7 @@ END SUBROUTINE ImpurityOperator_setUmat
 !!  ImpurityOperator_setUmatComplex                                             
 !!                                                                       
 !! FUNCTION                                                              
-!!  Set directly the U interaction                                   
+!!  Set directly the complex U interaction                                   
 !!                                                                       
 !! COPYRIGHT                                                             
 !!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)                     
@@ -1647,8 +1648,8 @@ SUBROUTINE ImpurityOperator_measDE(this,DE)
     DO iflavor2 = iflavor1+1, flavors
       !localD = ImpurityOperator_overlapIJ(this,iflavor1,iflavor2)
       localD = this%overlaps(iflavor2,iflavor1)
-      DE(iflavor2,iflavor1) = DE(iflavor2,iflavor1) + localD
-      totalE = totalE + localD * this%mat_U(iflavor1,iflavor2)
+      DE(iflavor2,iflavor1) = DE(iflavor2,iflavor1) + localD  
+      totalE = totalE + localD * real(this%mat_U(iflavor1,iflavor2))
     END DO
   END DO
 
@@ -1656,6 +1657,62 @@ SUBROUTINE ImpurityOperator_measDE(this,DE)
 
 END SUBROUTINE ImpurityOperator_measDE
 !!***
+
+!!****f* ABINIT/m_ImpurityOperator/ImpurityOperator_measDEComplex                             
+!! NAME                                                                                
+!!  ImpurityOperator_measDEComplex                                                            
+!!                                                                                     
+!! FUNCTION                                                                            
+!!  measure double occupancy and interaction energy                                    
+!!                                                                                     
+!! COPYRIGHT                                                                           
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)                                   
+!!  This file is distributed under the terms of the                                    
+!!  GNU General Public License, see ~abinit/COPYING                                    
+!!  or http://www.gnu.org/copyleft/gpl.txt .                                           
+!!                                                                                     
+!! INPUTS                                                                              
+!!  this=ImpurityOperator                                                              
+!!                                                                                     
+!! OUTPUT                                                                              
+!!  DE=array accumulating duoble occupancy and energy                                  
+!!                                                                                     
+!! SIDE EFFECTS                                                                        
+!!                                                                                     
+!! NOTES                                                                               
+!!                                                                                     
+!! SOURCE                                                                              
+
+SUBROUTINE ImpurityOperator_measDEComplex(this,DE)                                 
+                                                                            
+!Arguments ------------------------------------                             
+  TYPE(ImpurityOperator), INTENT(IN) :: this                                
+  COMPLEX(KIND=8), DIMENSION(:,:), INTENT(INOUT) :: DE                     
+!Local variables ------------------------------                             
+  COMPLEX(KIND=8)                               :: localD                   
+  COMPLEX(KIND=8)                               :: totalE                   
+  INTEGER                                       :: iflavor1                 
+  INTEGER                                       :: iflavor2                 
+  INTEGER                                       :: flavors                  
+                                                                            
+  IF ( .NOT. ALLOCATED(this%particles) ) &                                  
+    CALL ERROR("ImpurityOperator_measD : no particle set   ")               
+                                                                            
+  totalE = 0.d0                                                             
+  flavors = this%flavors                                                    
+  DO iflavor1 = 1, flavors                                                  
+    DO iflavor2 = iflavor1+1, flavors                                       
+      !localD = ImpurityOperator_overlapIJ(this,iflavor1,iflavor2)          
+      localD = cmplx(this%overlaps(iflavor2,iflavor1),0.d0,kind=8)                             
+      DE(iflavor2,iflavor1) = DE(iflavor2,iflavor1) + localD                
+      totalE = totalE + localD * this%mat_U(iflavor1,iflavor2)        
+    END DO                                                                  
+  END DO                                                                    
+                                                                            
+  DE(1,1) = DE(1,1) + totalE                                                
+                                                                            
+END SUBROUTINE ImpurityOperator_measDEComplex                                      
+!!***                                                                       
 
 !!****f* ABINIT/m_ImpurityOperator/ImpurityOperator_cleanOverlaps
 !! NAME
@@ -1757,7 +1814,7 @@ DOUBLE PRECISION FUNCTION ImpurityOperator_measN(this,flavor)
     totalC    = totalC    + this%particles(aF)%list(scanning,C_   )
   END DO
 
-  ImpurityOperator_measN = totalC - totalCdag
+  ImpurityOperator_measN = cmplx(totalC - totalCdag,0.d0,kind=8)
 
 END FUNCTION ImpurityOperator_measN
 !!***
@@ -1869,6 +1926,65 @@ SUBROUTINE ImpurityOperator_getErrorOverlap(this,DE)
   DE(2,2) = ABS(totalE1 - totalE2)
 
 END SUBROUTINE ImpurityOperator_getErrorOverlap
+
+ !!****f* ABINIT/m_ImpurityOperator/ImpurityOperator_getErrorOverlapComplex                  
+ !! NAME                                                                              
+ !!  ImpurityOperator_getErrorOverlapComplex                                                 
+ !!                                                                                   
+ !! FUNCTION                                                                          
+ !!  compute error on the overlap (numerical accumulation)                            
+ !!                                                                                   
+ !! COPYRIGHT                                                                         
+ !!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)                                 
+ !!  This file is distributed under the terms of the                                  
+ !!  GNU General Public License, see ~abinit/COPYING                                  
+ !!  or http://www.gnu.org/copyleft/gpl.txt .                                         
+ !!                                                                                   
+ !! INPUTS                                                                            
+ !!  this=ImpurityOperator                                                            
+ !!                                                                                   
+ !! OUTPUT                                                                            
+ !!  DE=save the error                                                                
+ !!                                                                                   
+ !! SIDE EFFECTS                                                                      
+ !!                                                                                   
+ !! NOTES                                                                             
+ !!                                                                                   
+ !! SOURCE                                                                            
+                                                                                      
+ SUBROUTINE ImpurityOperator_getErrorOverlapComplex(this,DE)                                 
+
+!Arguments ------------------------------------                             
+  TYPE(ImpurityOperator), INTENT(INOUT) :: this                             
+  COMPLEX(KIND=8), DIMENSION(:,:), INTENT(INOUT) :: DE                     
+!Local variables ------------------------------                             
+  COMPLEX(KIND=8)                              :: localD1                  
+  COMPLEX(KIND=8)                              :: localD2                  
+  COMPLEX(KIND=8)                              :: totalE1                  
+  COMPLEX(KIND=8)                              :: totalE2                  
+  INTEGER                                       :: iflavor1                 
+  INTEGER                                       :: iflavor2                 
+  INTEGER                                       :: flavors                  
+                                                                            
+  IF ( .NOT. ALLOCATED(this%particles) ) &                                  
+    CALL ERROR("ImpurityOperator_getErrorOverlap : no particle set ")       
+                                                                            
+  totalE1 = cmplx(0.d0,0.d0,kind=8)                                                            
+  totalE2 = cmplx(0.d0,0.d0,kind=8)                                                            
+  flavors = this%flavors                                                    
+  DO iflavor1 = 1, flavors                                                  
+    DO iflavor2 = iflavor1+1, flavors                                       
+      localD1 = ImpurityOperator_overlapIJ(this,iflavor1,iflavor2)          
+      localD2 = this%overlaps(iflavor2,iflavor1)                            
+      totalE1 = totalE1 + localD1 * this%mat_U(iflavor1,iflavor2)           
+      totalE2 = totalE2 + localD2 * this%mat_U(iflavor1,iflavor2)           
+    END DO                                                                  
+  END DO                                                                    
+                                                                            
+  DE(2,2) = ABS(totalE1 - totalE2)                                          
+                                                                            
+END SUBROUTINE ImpurityOperator_getErrorOverlapComplex                             
+
 !!***
 !#ifdef CTQMC_CHECK
 !!****f* ABINIT/m_ImpurityOperator/ImpurityOperator_doCheck
