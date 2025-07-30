@@ -22,6 +22,9 @@
 
 #include "libpaw.h"
 
+#define MATPACK(row,col) (MAX(row,col)*(MAX(row,col)-1)/2 + MIN(row,col))
+#define LMPACK(lqn,mqn) (lqn*lqn+lqn+mqn+1)
+
 MODULE m_pawdij
 
  USE_DEFS
@@ -39,7 +42,7 @@ MODULE m_pawdij
  use m_pawfgrtab,    only : pawfgrtab_type
  use m_pawrhoij,     only : pawrhoij_type
  use m_paw_finegrid, only : pawgylm, pawexpiqr
- use m_paw_sphharm,  only : initylmr,slxyzs,make_dyadic,realgaunt
+ use m_paw_sphharm,  only : initylmr,slxyzs,make_dyadic,realgaunt,s4int
 
  implicit none
 
@@ -2611,23 +2614,25 @@ subroutine pawdijaa(dijnd,gprimd,iatom,jatom,mesh_size,natom,nucdipmom,&
 
 !Local variables ---------------------------------------
 !scalars
- integer :: angmom,iaa,ignt_llmm_klm,ignt_l2m2_k_l1m1_llmm
- integer :: ij_size,imesh,info,k_l1m1_llmm,klm,klmn,kln
- integer :: l1m1,l2m2,l2,ll,llmax,llmin,llmm,m1,m2,mm,my_lmax,my_lsizemax,my_ngnt
+ integer :: angmom,iaa,ignt,ignt23,ij_size,imesh,info
+ integer :: klmn,klm,klm2,klm23,klm3,klm4,kln,l2,l3,l4
+ integer :: m2,m3,m4,my_lmax,my_lsizemax,my_ngnt
  real(dp) :: aa1a,aa1b,dr,rr,aa1a_fac,aa1b_fac
  real(dp), parameter :: FineStruct4=one/InvFineStruct**4
 !arrays
  integer :: ipiv(3)
- integer,pointer :: indklmn(:,:)
+ integer,pointer :: indlmn(:,:),indklmn(:,:)
  integer,allocatable :: my_gntselect(:,:)
- real(dp) :: rprimd(3,3),rvec(3,1),rvec_len(1),work(3)
+ real(dp) :: m1_dot_m2,rprimd(3,3),rvec(3,1),rvec_len(1),work(3)
  real(dp),allocatable :: aaint(:,:,:),ff(:),my_realgnt(:),ylm_rvec(:,:)
 
 ! *************************************************************************
 
 !Useful data
  indklmn => pawtab%indklmn
+ indlmn => pawtab%indlmn
  ij_size=pawtab%ij_size
+ m1_dot_m2 = DOT_PRODUCT(nucdipmom(1:3,iatom),nucdipmom(1:3,jatom))
 
  ! need set of Gaunt integrals one larger than usual
  my_lmax=pawang%l_max+1
@@ -2656,9 +2661,9 @@ subroutine pawdijaa(dijnd,gprimd,iatom,jatom,mesh_size,natom,nucdipmom,&
  LIBPAW_ALLOCATE(ff,(mesh_size))
 
  do iaa = 1, 2
-   ! note here ll = angmom + 1
-   do ll = 1, my_lsizemax
-     angmom = ll - 1
+   ! note here l2 = angmom + 1
+   do l2 = 1, my_lsizemax
+     angmom = l2 - 1
      do kln=1,ij_size
        do imesh = 2, mesh_size
          rr = pawrad%rad(imesh)
@@ -2666,50 +2671,52 @@ subroutine pawdijaa(dijnd,gprimd,iatom,jatom,mesh_size,natom,nucdipmom,&
          ff(imesh)=pawtab%phiphj(imesh,kln)*&
            & rr**(angmom-iaa)/((dr*dr-rr*rr)*dr**(angmom+1))
        end do !imesh
+       ff(2:mesh_size) = four_pi*ff(2:mesh_size)
        if (usezora) ff(2:mesh_size)=ff(2:mesh_size)*zk1(2:mesh_size)
        call pawrad_deducer0(ff,mesh_size,pawrad)
-       call simp_gen(aaint(kln,ll,iaa),ff,pawrad)
+       call simp_gen(aaint(kln,l2,iaa),ff,pawrad)
      end do
    end do
  end do
  LIBPAW_DEALLOCATE(ff)
 
- ! term Ia factor: 1/2 \alpha^4 4\pi m1\cdot\m2
- aa1a_fac = half*FineStruct4*four_pi*&
-   & DOT_PRODUCT(nucdipmom(1:3,iatom),nucdipmom(1:3,jatom))
- ! term Ib factor: -1/2 \alpha^4 (4\pi)^2/3 m1\cdot\m2
- aa1b_fac = -half*FineStruct4*four_pi*four_pi*&
-   & DOT_PRODUCT(nucdipmom(1:3,iatom),nucdipmom(1:3,jatom))/three
+ ! term Ia factor: 1/2 \alpha^4 m1\cdot\m2
+ aa1a_fac = half*FineStruct4*m1_dot_m2
+ ! term Ib factor: -1/2 \alpha^4 (4\pi/3) m1\cdot\m2
+ aa1b_fac = -half*FineStruct4*four_pi*m1_dot_m2/three
+
  do klmn=1,pawtab%lmn2_size
    klm=indklmn(2,klmn); kln=indklmn(2,klmn)
-   llmin = indklmn(3,klmn); llmax=indklmn(4,klmn)
    aa1a=zero
    aa1b=zero
-   ! note ll here is really the angular momentum
-   do ll = llmin,llmax
-     do mm=-ll,ll
-       llmm=ll*ll+ll+mm+1
-       ignt_llmm_klm=my_gntselect(llmm,klm)
-       if (ignt_llmm_klm > 0) then
-         ! note that aaint second index is angmom + 1, so ll+1 here
-         aa1a = aa1a + aa1a_fac*my_realgnt(ignt_llmm_klm)*ylm_rvec(llmm,1)*aaint(kln,ll+1,1)
-         do m1=-1,1
-           l1m1=1*1+1+m1+1
-           k_l1m1_llmm = MAX(l1m1,llmm)*(MAX(l1m1,llmm)-1)/2 + MIN(l1m1,llmm)
-           do l2=abs(ll-1),abs(ll+1)
-             do m2=-l2,l2
-               l2m2=l2*l2+l2+m2+1
-               ignt_l2m2_k_l1m1_llmm=my_gntselect(l2m2,k_l1m1_llmm)
-               if (ignt_l2m2_k_l1m1_llmm>0) then
-                 aa1b = aa1b + aa1b_fac*&
-                   & my_realgnt(ignt_llmm_klm)*my_realgnt(ignt_l2m2_k_l1m1_llmm)*&
-                   & ylm_rvec(l2m2,1)*ylm_rvec(l1m1,1)*&
-                   & dr*aaint(kln,l2+1,2)
-               end if ! end check on second Gaunt
-             end do ! end loop on m2
-           end do ! end loop on l2
-         end do ! end loop on m1
-       end if ! end check on first Gaunt
+
+   ! Term Ia
+   ! note l2 here really is the angular momentum
+   do l2 = indklmn(3,klmn),indklmn(4,klmn)
+     do m2=-l2,l2
+       klm2=LMPACK(l2,m2)
+       ignt=my_gntselect(klm2,klm)
+       if (ignt > 0) then
+         ! note that aaint second index is angmom + 1, so l2+1 here
+         aa1a = aa1a + aa1a_fac*my_realgnt(ignt)*ylm_rvec(klm2,1)*aaint(kln,l2+1,1)
+         
+         do l4=abs(l2-1),l2+1
+           do m4=-l4,l4
+             klm4=LMPACK(l4,m4)
+             l3=1
+             do m3=-l3,l3
+               klm3=LMPACK(l3,m3)
+               klm23=MATPACK(klm2,klm3)
+               ignt23=my_gntselect(klm4,klm23)
+               if (ignt23 > 0) then
+                 aa1b = aa1b + aa1b_fac*aaint(kln,l4+1,2)*&
+                   & dr*ylm_rvec(klm4,1)*ylm_rvec(klm3,1)*&
+                   & my_realgnt(ignt)*my_realgnt(ignt23)
+               end if ! ignt23
+             end do ! m3
+           end do ! m4
+         end do ! l4
+       end if ! ignt
      end do ! loop on mm
    end do ! loop on ll
    dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + aa1a + aa1b
