@@ -3630,7 +3630,7 @@ subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
 !  (MR: We storage magnetic moments, which are minus the second order total energy derivatives. 
 !  It seems that this change of sign is only necessary for the magnetic moments induced by atomic
 !  displacements. For the electric field ones, it must be changed inside dfpt_nstwf.) 
-   if (rfpert(natom+3)==5) then
+   if (rfpert(natom+5)==5) then
      ipert2= natom+5
      do idir2= 1, 3
        do ipert1= 1, natom
