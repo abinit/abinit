@@ -190,16 +190,16 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
 !scalars
  integer, parameter :: PAWU_ALGO_1=1,PAWU_ALGO_2=2
  integer, parameter :: PAWU_FLL=1,PAWU_AMF=2
- integer :: cplex,cplex_dij,cplex_rhoij,has_kxc,has_k3xc,has_vxctau
+ integer :: cplex,cplex_dij,cplex_rhoij,has_core_energies,has_kxc,has_k3xc,has_vxctau
  integer :: iatom,iatom_tot,idum,ierr,ii,ipositron,iq,iq0_dij,iq0_rhoij
  integer :: itypat,itypat0,lm_size,lmn2_size,mesh_size
  integer :: my_comm_atom,ndij,nkxc1,nk3xc1,nsppol,opt_compch,pawu_algo,pawu_dblec
  integer :: qphase,usecore,usekden,usetcore,usepawu,usexcnhat,usenhat,usefock
  logical :: keep_vhartree,my_atmtab_allocated,need_kxc,need_k3xc,need_vxctau
- logical :: non_magnetic_xc,paral_atom,temp_vxc,eijkl_is_sym,rcpaw_has_valdens
+ logical :: non_magnetic_xc,paral_atom,temp_vxc,eijkl_is_sym,rcpaw_has_valdens,usercpaw
  real(dp) :: e1t10,e1xc,e1xcdc,efock,efockdc,eexc,ssxc,eexcdc,eexdctemp
  real(dp) :: eexc_val,ssxc_val,eexcdc_val,eexex,eexexdc,eextemp,ssxtemp,eh2
- real(dp) :: edftumdc,edftumdcdc,edftufll,enucdip,etmp,espnorb,etild1xc,etild1xcdc
+ real(dp) :: edftumdc,edftumdcdc,edftufll,ehnzc,ekincore,enucdip,etmp,espnorb,etild1xc,etild1xcdc
  real(dp) :: s1xc,stild1xc,sxccore,tmp_epaw_xc,extfpmd_rho
  real(dp) :: exccore,exchmix,hyb_mixing_,hyb_mixing_sr_,rdum
  character(len=3) :: pertstrg
@@ -226,8 +226,10 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
 !Various inits
  hyb_mixing_   =zero ; if(present(hyb_mixing))    hyb_mixing_   =hyb_mixing
  hyb_mixing_sr_=zero ; if(present(hyb_mixing_sr)) hyb_mixing_sr_=hyb_mixing_sr
+ usercpaw=.false. ; if (present(rcpaw)) usercpaw=associated(rcpaw)
  usefock=0;if (abs(hyb_mixing_)>tol8.or.abs(hyb_mixing_sr_)>tol8) usefock=1
  usexcnhat=maxval(pawtab(1:ntypat)%usexcnhat)
+ has_core_energies=minval(pawtab(1:ntypat)%has_core_energies)
  usekden=pawxc_get_usekden(ixc)
  usenhat = usexcnhat
  keep_vhartree=(maxval(paw_an(:)%has_vhartree)>0)
@@ -329,6 +331,7 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
    eextemp=zero  ; eexdctemp=zero
    espnorb=zero  ; enucdip=zero
    efock=zero    ; efockdc=zero
+   ekincore=zero ; ehnzc=zero
    if (ipositron/=0) then
      electronpositron%e_paw  =zero
      electronpositron%e_pawdc=zero
@@ -442,10 +445,8 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
 !  ==========================================================
 
    rcpaw_has_valdens=.false.
-   if(present(rcpaw)) then
-     if(associated(rcpaw)) then
-       rcpaw_has_valdens=rcpaw%val(iatom)%has_dens
-     endif
+   if(usercpaw) then
+     rcpaw_has_valdens=rcpaw%val(iatom)%has_dens
    endif
    if(rcpaw_has_valdens) then
      rho1=rcpaw%val(iatom)%rho1
@@ -787,10 +788,8 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
 !  Hartree Dij computation
    if (ipositron/=1) then
      eijkl_is_sym=.true.
-     if(present(rcpaw)) then
-       if(associated(rcpaw)) then
-         eijkl_is_sym=rcpaw%eijkl_is_sym(itypat)
-       endif
+     if(usercpaw) then
+       eijkl_is_sym=rcpaw%eijkl_is_sym(itypat)
      endif
      call pawdijhartree(paw_ij(iatom)%dijhartree,cplex,nspden,pawrhoij(iatom),pawtab(itypat),&
 &     is_sym=eijkl_is_sym)
@@ -802,6 +801,13 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
 !  Hartree energy computation
    if (option/=1) then
      call pawaccenergy_nospin(eh2,pawrhoij(iatom),paw_ij(iatom)%dijhartree,1,qphase,pawtab(itypat))
+   end if
+
+!  Core + nucleus Hartree energy accumulation
+!  Core kinetic energy accumulation
+   if (option/=1) then
+     ehnzc=ehnzc+pawtab(itypat)%ehnzc
+     ekincore=ekincore+pawtab(itypat)%ekincore
    end if
 
 !  Electron-positron calculation:
@@ -1090,12 +1096,15 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
      epawdc=e1xc-e1xcdc-half*eh2-exccore-etild1xc+etild1xcdc+edftumdcdc-eexex-efockdc
      spaw=s1xc-sxccore-stild1xc ! PAW entropy coming from finite-temperature xc functionals
      tmp_epaw_xc=e1xc-exccore-etild1xc!+eexex
-     if(present(rcpaw)) then
-       if(associated(rcpaw)) then
-         epaw=epaw+exccore
-         epawdc=epawdc+exccore
-         tmp_epaw_xc=tmp_epaw_xc+exccore
-       endif
+     if(usercpaw) then
+       epaw=epaw+exccore
+       epawdc=epawdc+exccore
+       tmp_epaw_xc=tmp_epaw_xc+exccore
+     else if (has_core_energies==1) then
+       epaw=epaw+exccore+ekincore+ehnzc
+       epawdc=epawdc+exccore+ekincore+ehnzc
+       tmp_epaw_xc=tmp_epaw_xc+exccore
+       write(100+xmpi_comm_rank(xmpi_world),*) "ekincore,excore,ehnzc=",ekincore,exccore,ehnzc; flush(100+xmpi_comm_rank(xmpi_world))
      endif
    else
      epaw=e1xc-etild1xc+eh2+two*edftumdc
