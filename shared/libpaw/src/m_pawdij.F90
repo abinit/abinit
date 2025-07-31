@@ -42,7 +42,7 @@ MODULE m_pawdij
  use m_pawfgrtab,    only : pawfgrtab_type
  use m_pawrhoij,     only : pawrhoij_type
  use m_paw_finegrid, only : pawgylm, pawexpiqr
- use m_paw_sphharm,  only : initylmr,slxyzs,make_dyadic,realgaunt,s4int
+ use m_paw_sphharm,  only : initylmr,slxyzs,make_dyadic,realgaunt
 
  implicit none
 
@@ -2615,8 +2615,8 @@ subroutine pawdijaa(dijnd,gprimd,iatom,jatom,mesh_size,natom,nucdipmom,&
 !Local variables ---------------------------------------
 !scalars
  integer :: angmom,iaa,ignt,ignt23,ij_size,imesh,info
- integer :: klmn,klm,klm2,klm23,klm3,klm4,kln,l2,l3,l4
- integer :: m1dir,m2dir,m2,m3,m4,my_lmax,my_lsizemax,my_ngnt
+ integer :: klmn,klm,klm2,klm23,klm3,klm3a,klm3b,klm4,kln,l2,l3,l4
+ integer :: m1dir,m2dir,m2,m3,m3a,m3b,m4,my_lmax,my_lsizemax,my_ngnt
  real(dp) :: aa1a,aa1b,aa2a,aa2b,dr,rr,aa1a_fac,aa1b_fac,aa2a_fac,aa2b_fac
  real(dp) :: m1m2,m12d
  real(dp), parameter :: c1=sqrt(four_pi/15.0d0)
@@ -2625,6 +2625,7 @@ subroutine pawdijaa(dijnd,gprimd,iatom,jatom,mesh_size,natom,nucdipmom,&
  real(dp), parameter :: FineStruct4=one/InvFineStruct**4
 !arrays
  integer :: ipiv(3)
+ integer,parameter :: s1map(3)=[1,-1,0]
  integer,pointer :: indlmn(:,:),indklmn(:,:)
  integer,allocatable :: my_gntselect(:,:)
  real(dp) :: d2ij(3,3,9),rprimd(3,3),rvec(3,1),rvec_len(1),work(3)
@@ -2699,12 +2700,14 @@ subroutine pawdijaa(dijnd,gprimd,iatom,jatom,mesh_size,natom,nucdipmom,&
  aa1b_fac = -half*FineStruct4*four_pi*m1m2/three
  ! term IIa factor: -1/2 \alpha^4
  aa2a_fac = -half*FineStruct4
+ ! term IIb factor: 1/2 \alpha^4 (4\pi/3) 
+ aa2b_fac = half*FineStruct4*four_pi/three
 
  do klmn=1,pawtab%lmn2_size
    klm=indklmn(2,klmn); kln=indklmn(2,klmn)
+
    aa1a=zero
    aa1b=zero
-
    ! Term Ia, Ib
    ! note l2 here really is the angular momentum
    do l2 = indklmn(3,klmn),indklmn(4,klmn)
@@ -2736,7 +2739,6 @@ subroutine pawdijaa(dijnd,gprimd,iatom,jatom,mesh_size,natom,nucdipmom,&
    end do ! loop on ll
 
    aa2a=0
-   aa2b=0
    do l2 = indklmn(3,klmn),indklmn(4,klmn)
      do m2=-l2,l2
        klm2=LMPACK(l2,m2)
@@ -2770,7 +2772,39 @@ subroutine pawdijaa(dijnd,gprimd,iatom,jatom,mesh_size,natom,nucdipmom,&
      end do ! loop on mm
    end do ! loop on ll
 
-   dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + aa1a + aa1b + aa2a
+   aa2b=0
+   do l2 = indklmn(3,klmn),indklmn(4,klmn)
+     do m2=-l2,l2
+       klm2=LMPACK(l2,m2)
+       ignt=my_gntselect(klm2,klm)
+       if (ignt > 0) then
+         do l4=abs(l2-1),l2+1
+           do m4=-l4,l4
+             klm4=LMPACK(l4,m4)
+             do m1dir=1,3
+               l3=1; m3a=s1map(m1dir)
+               klm3a=LMPACK(l3,m3a)
+               klm23=MATPACK(klm2,klm3a)
+               ignt23=my_gntselect(klm4,klm23)
+               if (ignt23 > 0) then
+                 do m2dir=1,3
+                   m12d=nucdipmom(m1dir,iatom)*nucdipmom(m2dir,jatom)
+                   if (abs(m12d)<tol8) cycle
+                   m3b=s1map(m2dir)
+                   klm3b=LMPACK(l3,m3b)
+                   aa2b=aa2b+m12d*aa2b_fac*aaint(kln,l4+1,2)*&
+                     dr*my_realgnt(ignt)*my_realgnt(ignt23)*&
+                     ylm_rvec(klm4,1)*ylm_rvec(klm3b,1)
+                 end do ! m2dir
+               end if ! ignt23
+             end do ! m1dir
+           end do ! m4
+         end do ! l4
+       end if ! ignt
+     end do ! loop on mm
+   end do ! loop on ll
+
+   dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + aa1a + aa1b + aa2a + aa2b
 
  end do ! loop on klmn
 

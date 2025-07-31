@@ -57,7 +57,6 @@ MODULE m_paw_sphharm
  public :: realgaunt        ! Compute "real Gaunt coefficients" with "real spherical harmonics"
  public :: nablarealgaunt   ! Compute the integrals Grad(Slimi).Grad(Sjmj) Slkmk of real spherical harmonics
  public :: make_dyadic      ! Compute integrals of S_limi(alpha*1 - \beta*\hat{r}\hat{r})S_ljmj
- public :: s4int            ! Compute integral of product of 4 real spherical harmonics
 
 !Private functions
  private :: create_slm2ylm  ! For a given angular momentum lcor, compute slm2ylm
@@ -2927,58 +2926,6 @@ end subroutine realgaunt
 !!***
 
 !----------------------------------------------------------------------
-
-!!****f* m_pawsphharm/s4int
-!! NAME
-!! s4int
-!!
-!! FUNCTION
-!! compute angular integral of a product of four spherical harmonics
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! NOTE
-!!
-!! SOURCE
-
-subroutine s4int(gntselect,gs1,gs2,l1,m1,l2,m2,l3,m3,l4,m4,ngnt,realgnt,s4)
-
-!Arguments ---------------------------------------------
-!scalars
- integer,intent(in) :: gs1,gs2,l1,l2,l3,l4,m1,m2,m3,m4,ngnt
- real(dp),intent(out) :: s4
-!arrays
- integer,intent(in) :: gntselect(gs1,gs2)
- real(dp),intent(in) :: realgnt(ngnt)
-
-!Local variables ------------------------------
-!scalars
- integer ig34,ig12,klm,klm1,klm12,klm2,klm3,klm34,klm4,ll,mm
-!arrays
-
-!************************************************************************
-
- klm1=LMPACK(l1,m1); klm2=LMPACK(l2,m2)
- klm3=LMPACK(l3,m3); klm4=LMPACK(l4,m4)
- klm12=MATPACK(klm1,klm2); klm34=MATPACK(klm3,klm4)
-  
- s4 = zero
- do ll = MAX(ABS(l3-l4),ABS(l1-l2)),MIN(ABS(l3+l4),ABS(l1+l2))
-   do mm=-ll,ll
-     klm=LMPACK(ll,mm)
-     ig34=gntselect(klm,klm34)
-     ig12=gntselect(klm,klm12)
-     if ( (ig34 > 0) .AND. (ig12 > 0) ) s4=s4+realgnt(ig12)*realgnt(ig34)
-   end do
- end do
-
-end subroutine s4int
-!!***
-
-!----------------------------------------------------------------------
-
 
 !!****f* m_pawsphharm/make_dyadic
 !! NAME
