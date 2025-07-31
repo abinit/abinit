@@ -2616,14 +2616,18 @@ subroutine pawdijaa(dijnd,gprimd,iatom,jatom,mesh_size,natom,nucdipmom,&
 !scalars
  integer :: angmom,iaa,ignt,ignt23,ij_size,imesh,info
  integer :: klmn,klm,klm2,klm23,klm3,klm4,kln,l2,l3,l4
- integer :: m2,m3,m4,my_lmax,my_lsizemax,my_ngnt
- real(dp) :: aa1a,aa1b,dr,rr,aa1a_fac,aa1b_fac
+ integer :: m1dir,m2dir,m2,m3,m4,my_lmax,my_lsizemax,my_ngnt
+ real(dp) :: aa1a,aa1b,aa2a,aa2b,dr,rr,aa1a_fac,aa1b_fac,aa2a_fac,aa2b_fac
+ real(dp) :: m1m2,m12d
+ real(dp), parameter :: c1=sqrt(four_pi/15.0d0)
+ real(dp), parameter :: c2=sqrt(four_pi/5.0d0)
+ real(dp), parameter :: c3=sqrt(four_pi)
  real(dp), parameter :: FineStruct4=one/InvFineStruct**4
 !arrays
  integer :: ipiv(3)
  integer,pointer :: indlmn(:,:),indklmn(:,:)
  integer,allocatable :: my_gntselect(:,:)
- real(dp) :: m1_dot_m2,rprimd(3,3),rvec(3,1),rvec_len(1),work(3)
+ real(dp) :: d2ij(3,3,9),rprimd(3,3),rvec(3,1),rvec_len(1),work(3)
  real(dp),allocatable :: aaint(:,:,:),ff(:),my_realgnt(:),ylm_rvec(:,:)
 
 ! *************************************************************************
@@ -2632,7 +2636,16 @@ subroutine pawdijaa(dijnd,gprimd,iatom,jatom,mesh_size,natom,nucdipmom,&
  indklmn => pawtab%indklmn
  indlmn => pawtab%indlmn
  ij_size=pawtab%ij_size
- m1_dot_m2 = DOT_PRODUCT(nucdipmom(1:3,iatom),nucdipmom(1:3,jatom))
+ m1m2 = DOT_PRODUCT(nucdipmom(1:3,iatom),nucdipmom(1:3,jatom))
+
+ ! spherical harmonic representation of \hat{r}\hat{r}
+ d2ij = zero
+ d2ij(1,2,5)=c1; d2ij(2,1,5)=c1 ! xy/r^2 = c1*S_{2,-2}
+ d2ij(2,3,6)=c1; d2ij(3,2,6)=c1 ! yz/r^2 = c1*S_{2,-1}
+ d2ij(1,3,8)=c1; d2ij(3,1,8)=c1 ! xz/r^2 = c1*S_{2,+1}
+ d2ij(3,3,1)=c3/three;  d2ij(3,3,7)=two*c2/three ! zz/r^2 = c3/3 S_{00} + 2c2/3 S_{20}
+ d2ij(1,1,1)=c3/three;  d2ij(1,1,7)=-c2/three; d2ij(1,1,9)=c1 ! xx/r^2 = c3/3 S_00-c2/3 S_20 + c1 S-{2,2}
+ d2ij(2,2,1)=c3/three;  d2ij(2,2,7)=-c2/three; d2ij(2,2,9)=-c1 ! xx/r^2 = c3/3 S_00-c2/3 S_20 - c1 S-{2,2}
 
  ! need set of Gaunt integrals one larger than usual
  my_lmax=pawang%l_max+1
@@ -2681,16 +2694,18 @@ subroutine pawdijaa(dijnd,gprimd,iatom,jatom,mesh_size,natom,nucdipmom,&
  LIBPAW_DEALLOCATE(ff)
 
  ! term Ia factor: 1/2 \alpha^4 m1\cdot\m2
- aa1a_fac = half*FineStruct4*m1_dot_m2
+ aa1a_fac = half*FineStruct4*m1m2
  ! term Ib factor: -1/2 \alpha^4 (4\pi/3) m1\cdot\m2
- aa1b_fac = -half*FineStruct4*four_pi*m1_dot_m2/three
+ aa1b_fac = -half*FineStruct4*four_pi*m1m2/three
+ ! term IIa factor: -1/2 \alpha^4
+ aa2a_fac = -half*FineStruct4
 
  do klmn=1,pawtab%lmn2_size
    klm=indklmn(2,klmn); kln=indklmn(2,klmn)
    aa1a=zero
    aa1b=zero
 
-   ! Term Ia
+   ! Term Ia, Ib
    ! note l2 here really is the angular momentum
    do l2 = indklmn(3,klmn),indklmn(4,klmn)
      do m2=-l2,l2
@@ -2719,7 +2734,44 @@ subroutine pawdijaa(dijnd,gprimd,iatom,jatom,mesh_size,natom,nucdipmom,&
        end if ! ignt
      end do ! loop on mm
    end do ! loop on ll
-   dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + aa1a + aa1b
+
+   aa2a=0
+   aa2b=0
+   do l2 = indklmn(3,klmn),indklmn(4,klmn)
+     do m2=-l2,l2
+       klm2=LMPACK(l2,m2)
+       ignt=my_gntselect(klm2,klm)
+       if (ignt > 0) then
+         do l4=abs(l2-2),l2+2
+           do m4=-l4,l4
+             klm4=LMPACK(l4,m4)
+             do l3=0,2
+               do m3=-l3,l3
+                 klm3=LMPACK(l3,m3)
+                 klm23=MATPACK(klm2,klm3)
+                 ignt23=my_gntselect(klm4,klm23)
+                 if (ignt23 > 0) then
+                   do m1dir=1,3
+                     do m2dir=1,3
+                       m12d=nucdipmom(m1dir,iatom)*nucdipmom(m2dir,jatom)
+                       if (abs(m12d)<tol8) cycle
+                       if (abs(d2ij(m1dir,m2dir,klm3))<tol8) cycle
+                       aa2a=aa2a+m12d*aa2a_fac*aaint(kln,l4+1,1)*&
+                         & d2ij(m1dir,m2dir,klm3)*ylm_rvec(klm4,1)*&
+                         & my_realgnt(ignt)*my_realgnt(ignt23)
+                     end do ! m2dir
+                   end do ! m1dir
+                 end if ! ignt23
+               end do ! m3
+             end do ! l3
+           end do ! m4
+         end do ! l4
+       end if ! ignt
+     end do ! loop on mm
+   end do ! loop on ll
+
+   dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + aa1a + aa1b + aa2a
+
  end do ! loop on klmn
 
  LIBPAW_DEALLOCATE(my_gntselect)
