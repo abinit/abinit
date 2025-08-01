@@ -66,14 +66,14 @@
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t98.abo, tolnlines = 38, tolabs = 1.1e-03, tolrel = 6.0e-02
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% keywords = NC, DFPT
 #%% authors = Unknown
-#%% description = 
+#%% description =
 #%%   Generate first-order responses for GaAs (zinc-blende).
 #%%   Compute responses at Gamma, in the presence of a non-zero ecutsm and dilatmx.
 #%%   1) ground state calculation, with a k-point sampling in the irreducible

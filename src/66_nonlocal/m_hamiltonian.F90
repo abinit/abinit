@@ -221,7 +221,7 @@ module m_hamiltonian
 ! ===== Integer arrays
 
 #if defined HAVE_GPU && defined HAVE_YAKL
-  integer(c_int32_t), ABI_CONTIGUOUS pointer :: atindx(:) => null()
+  integer(c_int32_t), contiguous, pointer :: atindx(:) => null()
 #else
   integer, allocatable :: atindx(:)
 #endif
@@ -229,7 +229,7 @@ module m_hamiltonian
    ! index table for atoms (see gstate.f)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
-  integer(c_int32_t), ABI_CONTIGUOUS pointer :: atindx1(:) => null()
+  integer(c_int32_t), contiguous, pointer :: atindx1(:) => null()
 #else
   integer, allocatable :: atindx1(:)
 #endif
@@ -246,7 +246,7 @@ module m_hamiltonian
    ! G sphere boundary, for each plane wave at k
 
 #if defined HAVE_GPU && defined HAVE_YAKL
-  integer(c_int32_t), ABI_CONTIGUOUS pointer :: indlmn(:,:,:) => null()
+  integer(c_int32_t), contiguous, pointer :: indlmn(:,:,:) => null()
 #else
   integer(c_int32_t), allocatable :: indlmn(:,:,:)
 #endif
@@ -256,7 +256,7 @@ module m_hamiltonian
    !                                or i=lmn (if useylm=1)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
-  integer(c_int32_t), ABI_CONTIGUOUS pointer :: nattyp(:) => null()
+  integer(c_int32_t), contiguous, pointer :: nattyp(:) => null()
 #else
   integer, allocatable :: nattyp(:)
 #endif
@@ -276,10 +276,10 @@ module m_hamiltonian
    ! pspso(ntypat)
    ! For each type of psp, 1 if no spin-orbit component is taken
    ! into account, 2 if a spin-orbit component is used
-   ! Revelant for NC-psps and PAW
+   ! Relevant for NC-psps and PAW.
 
 #if defined HAVE_GPU && defined HAVE_YAKL
-  integer(c_int32_t), ABI_CONTIGUOUS pointer :: typat(:) => null()
+  integer(c_int32_t), contiguous, pointer :: typat(:) => null()
 #else
   integer, allocatable :: typat(:)
 #endif
@@ -292,20 +292,20 @@ module m_hamiltonian
 
 ! Integer pointers
 
-  integer, ABI_CONTIGUOUS pointer :: gbound_kp(:,:) => null()
+  integer, contiguous, pointer :: gbound_kp(:,:) => null()
    ! gbound_kp(2*mgfft+8,2)
    ! G sphere boundary, for each plane wave at k^prime
 
 #if defined HAVE_GPU && defined HAVE_YAKL
-  integer(int32), ABI_CONTIGUOUS pointer :: kg_k(:,:) => null()
+  integer(int32), contiguous, pointer :: kg_k(:,:) => null()
 #else
-  integer, pointer :: kg_k(:,:) => null()
+  integer, contiguous, pointer :: kg_k(:,:) => null()
 #endif
    ! kg_k(3,npw_fft_k)
    ! G vector coordinates with respect to reciprocal lattice translations
    ! at k
 
-  integer, pointer :: kg_kp(:,:) => null()
+  integer, contiguous, pointer :: kg_kp(:,:) => null()
    ! kg_kp(3,npw_fft_kp)
    ! G vector coordinates with respect to reciprocal lattice translations
    ! at k^prime
@@ -342,7 +342,7 @@ module m_hamiltonian
    ! nuclear dipole moments at each atomic position
 
 #if defined HAVE_GPU && defined HAVE_YAKL
-  real(c_double), ABI_CONTIGUOUS pointer :: ph1d(:,:) => null()
+  real(c_double), contiguous, pointer :: ph1d(:,:) => null()
 #else
   real(dp), allocatable :: ph1d(:,:)
 #endif
@@ -355,7 +355,7 @@ module m_hamiltonian
 
 ! ===== Real pointers
 
-  real(dp), ABI_CONTIGUOUS pointer :: ekb(:,:,:,:) => null()
+  real(dp), contiguous, pointer :: ekb(:,:,:,:) => null()
    ! ekb(dimekb1,dimekb2,nspinor**2,dimekbq)
    !  ->Norm conserving : (Real) Kleinman-Bylander energies (hartree)
    !          for number of basis functions (l,n) (lnmax)
@@ -374,58 +374,58 @@ module m_hamiltonian
    !     with the following relation: D^s2s1_ji = (D^s1s2_ij)^*
    !     where s1,s2 are spinor components
 
-  real(dp), pointer :: ffnl_k(:,:,:,:) => null()
+  real(dp), contiguous, pointer :: ffnl_k(:,:,:,:) => null()
    ! ffnl_k(npw_fft_k,2,dimffnl_k,ntypat)
    ! nonlocal form factors at k
 
-  real(dp), pointer :: ffnl_kp(:,:,:,:) => null()
+  real(dp), contiguous, pointer :: ffnl_kp(:,:,:,:) => null()
    ! ffnl_kp(npw_fft_kp,2,dimffnl_kp,ntypat)
    ! nonlocal form factors at k_prime
 
-  real(dp), pointer :: kinpw_k(:) => null()
+  real(dp), contiguous, pointer :: kinpw_k(:) => null()
    ! kinpw_k(npw_fft_k)
    ! (modified) kinetic energy for each plane wave at k
    ! CAVEAT: In band mode, this array is NOT EQUIVALENT to kinpw(npw_k)
 
-  real(dp), pointer :: kinpw_kp(:) => null()
+  real(dp), contiguous, pointer :: kinpw_kp(:) => null()
    ! kinpw_kp(npw_fft_kp)
    ! (modified) kinetic energy for each plane wave at k^prime
 
-  real(dp), pointer :: kpg_k(:,:) => null()
+  real(dp), contiguous, pointer :: kpg_k(:,:) => null()
    ! kpg_k(3,npw_fft_k)
    ! k+G vector coordinates at k
 
-  real(dp), pointer :: kpg_kp(:,:) => null()
+  real(dp), contiguous, pointer :: kpg_kp(:,:) => null()
    ! kpg_kp(3,npw_fft_kp)
    ! k^prime+G vector coordinates at k^prime
 
-  real(dp), ABI_CONTIGUOUS pointer :: phkpxred(:,:) => null()
+  real(dp), contiguous, pointer :: phkpxred(:,:) => null()
    ! phkpxred(2,natom)
    ! phase factors exp(2 pi k^prime.xred) at k^prime
 
-  real(dp), pointer :: ph3d_k(:,:,:) => null()
+  real(dp), contiguous, pointer :: ph3d_k(:,:,:) => null()
    ! ph3d_k(2,npw_fft_k,matblk)
    ! 3-dim structure factors, for each atom and plane wave at k
 
-  real(dp), pointer :: ph3d_kp(:,:,:) => null()
+  real(dp), contiguous, pointer :: ph3d_kp(:,:,:) => null()
    ! ph3d_kp(2,npw_fft_kp,matblk)
    ! 3-dim structure factors, for each atom and plane wave at k^prime
 
-  real(dp), pointer :: vectornd(:,:,:,:,:) => null()
+  real(dp), contiguous, pointer :: vectornd(:,:,:,:,:) => null()
    ! vectornd(n4,n5,n6,nvloc,3)
    ! vector potential of nuclear magnetic dipoles
    ! in real space, on the augmented fft grid
 
-  real(dp), pointer :: vlocal(:,:,:,:) => null()
+  real(dp), contiguous, pointer :: vlocal(:,:,:,:) => null()
    ! vlocal(n4,n5,n6,nvloc)
    ! local potential in real space, on the augmented fft grid
 
-  real(dp), pointer :: vxctaulocal(:,:,:,:,:) => null()
+  real(dp), contiguous, pointer :: vxctaulocal(:,:,:,:,:) => null()
    ! vxctaulocal(n4,n5,n6,nvloc,4)
    ! derivative of XC energy density with respect to kinetic energy density,
    ! in real space, on the augmented fft grid
 
-  real(dp), ABI_CONTIGUOUS pointer :: xred(:,:) => null()
+  real(dp), contiguous, pointer :: xred(:,:) => null()
    ! xred(3,natom)
    ! reduced coordinates of atoms (dimensionless)
 
@@ -530,45 +530,45 @@ module m_hamiltonian
 
 ! ===== Real pointers
 
-  real(dp), pointer :: dkinpw_k(:) => null()
+  real(dp), contiguous, pointer :: dkinpw_k(:) => null()
    ! dkinpw_k(npw_k)
    ! 1st derivative of the (modified) kinetic energy for each plane wave at k
 
-  real(dp), pointer :: dkinpw_kp(:) => null()
+  real(dp), contiguous, pointer :: dkinpw_kp(:) => null()
    ! dkinpw_kp(npw_kp)
    ! 1st derivative of the (modified) kinetic energy for each plane wave at k^prime
 
-  real(dp), pointer :: ddkinpw_k(:) => null()
+  real(dp), contiguous, pointer :: ddkinpw_k(:) => null()
    ! ddkinpw_k(npw_k)
    ! 2nd derivative of the (modified) kinetic energy for each plane wave at k
 
-  real(dp), pointer :: ddkinpw_kp(:) => null()
+  real(dp), contiguous, pointer :: ddkinpw_kp(:) => null()
    ! ddkinpw_kp(npw_kp)
    ! 2nd derivative of the (modified) kinetic energy for each plane wave at k^prime
 
-  real(dp), pointer :: e1kbfr(:,:,:,:) => null()
+  real(dp), contiguous, pointer :: e1kbfr(:,:,:,:) => null()
    ! Frozen part of 1st derivative of ekb for the considered perturbation
    ! (part not depending on VHxc^(1))
    ! e1kbfr(dime1kb1,dime1kb2,nspinor**2,cplex)
    ! For each spin component, e1kbfr points to e1kbfr_spin(:,:,:,:,my_isppol)
 
-  real(dp), ABI_CONTIGUOUS pointer :: e1kbsc(:,:,:,:) => null()
+  real(dp), contiguous, pointer :: e1kbsc(:,:,:,:) => null()
    ! Self-consistent 1st derivative of ekb for the considered perturbation
    ! (part depending only on self-consistent VHxc^(1))
    ! e1kbsc(dime1kb1,dime1kb2,nspinor**2,cplex)
    ! For each spin component, e1kbfr points to e1kbfr_spin(:,:,:,:,my_isppol)
 
-  real(dp), pointer :: vectornd(:,:,:,:) => null()
+  real(dp), contiguous, pointer :: vectornd(:,:,:,:) => null()
    ! vectornd(n4,n5,n6,nvloc)
    ! vector potential of nuclear magnetic dipoles
    ! in real space, on the augmented fft grid, in direction idir
    ! (the ddk pert direction)
 
-  real(dp), pointer :: vlocal1(:,:,:,:) => null()
+  real(dp), contiguous, pointer :: vlocal1(:,:,:,:) => null()
    ! vlocal1(cplex*n4,n5,n6,nvloc)
    ! 1st-order local potential in real space, on the augmented fft grid
 
-  real(dp), pointer :: vxctaulocal(:,:,:,:,:) => null()
+  real(dp), contiguous, pointer :: vxctaulocal(:,:,:,:,:) => null()
    ! vxctaulocal(n4,n5,n6,nvloc,4)
    ! derivative of XC energy density with respect to kinetic energy density,
    ! in real space, on the augmented fft grid
@@ -598,9 +598,6 @@ CONTAINS  !===========================================================
 !!
 !! FUNCTION
 !!  Clean and destroy gs_hamiltonian_type datastructure
-!!
-!! SIDE EFFECTS
-!!  Ham<gs_hamiltonian_type>=All dynamic memory defined in the structure is deallocated.
 !!
 !! SOURCE
 
@@ -734,7 +731,7 @@ end subroutine gsham_free
 !!
 !! SIDE EFFECTS
 !!  Ham<gs_hamiltonian_type>=Structured datatype almost completely initialized:
-!!   * Basic variables and dimensions are transfered to the structure.
+!!   * Basic variables and dimensions are transferred to the structure.
 !!   * All pointers are allocated with correct dimensions.
 !!   * Quantities that do not depend on the k-point or spin are initialized.
 !!
@@ -883,7 +880,7 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  if (ham%usepaw==1) then
    ham%usecprj=0;if (present(usecprj)) ham%usecprj=usecprj
    ABI_MALLOC(ham%dimcprj,(natom))
-   !Be carefull cprj are ordered by atom type (used in non-local operator)
+   !Be careful cprj are ordered by atom type (used in non-local operator)
    call pawcprj_getdim(ham%dimcprj,natom,ham%nattyp,ham%ntypat,ham%typat,pawtab,'O')
  else
    ham%usecprj=0
@@ -1002,7 +999,7 @@ end subroutine gsham_init
 !!  [ph3d_k]=3-dim structure factors, for each atom and plane wave
 !!
 !! SIDE EFFECTS
-!!  ham<gs_hamiltonian_type>=structured datatype completed with k-dependent quantitites.
+!!  ham<gs_hamiltonian_type>=structured datatype completed with k-dependent quantities.
 !!          Quantities at k^prime are set equal to quantities at k.
 !!    k-dependent scalars and pointers associated
 !!    phkxred=exp(.k.xred) for each atom
@@ -1012,14 +1009,14 @@ end subroutine gsham_init
 !! SOURCE
 
 subroutine gsham_load_k(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
-                              kg_k,kpg_k,kpt_k,npw_k,npw_fft_k,ph3d_k,&
-                              compute_gbound,compute_ph3d)
+                        kg_k,kpg_k,kpt_k,npw_k,npw_fft_k,ph3d_k,&
+                        compute_gbound,compute_ph3d)
 
 !Arguments ------------------------------------
 !scalars
+ class(gs_hamiltonian_type),intent(inout),target :: ham
  integer,intent(in),optional :: npw_k,npw_fft_k,istwf_k
  logical,intent(in),optional :: compute_gbound,compute_ph3d
- class(gs_hamiltonian_type),intent(inout),target :: ham
 !arrays
  integer,intent(in),optional,target :: gbound_k(:,:),kg_k(:,:)
  real(dp),intent(in),optional :: kpt_k(3)
@@ -1059,7 +1056,7 @@ subroutine gsham_load_k(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
    ham%npw_fft_kp = npw_k
  end if
 
-!Pointers to k-dependent quantitites
+!Pointers to k-dependent quantities
  if (present(kinpw_k)) then
    ham%kinpw_k  => kinpw_k
    ham%kinpw_kp => kinpw_k
@@ -1170,7 +1167,7 @@ end subroutine gsham_load_k
 !!  [ph3d_kp]=3-dim structure factors, for each atom and plane wave
 !!
 !! SIDE EFFECTS
-!!  ham<gs_hamiltonian_type>=structured datatype completed with k^prime-dependent quantitites.
+!!  ham<gs_hamiltonian_type>=structured datatype completed with k^prime-dependent quantities.
 !!    k^prime-dependent scalars and pointers associated
 !!    phkpxred=exp(.k^prime.xred) for each atom
 !!    [ham%gbound_kp]=G sphere boundary, for each plane wave
@@ -1184,9 +1181,9 @@ subroutine gsham_load_kprime(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
 
 !Arguments ------------------------------------
 !scalars
+ class(gs_hamiltonian_type),intent(inout),target :: ham
  integer,intent(in),optional :: npw_kp,npw_fft_kp,istwf_kp
  logical,intent(in),optional :: compute_gbound,compute_ph3d
- class(gs_hamiltonian_type),intent(inout),target :: ham
 !arrays
  integer,intent(in),optional,target :: gbound_kp(:,:),kg_kp(:,:)
  real(dp),intent(in),optional :: kpt_kp(3)
@@ -1214,7 +1211,7 @@ subroutine gsham_load_kprime(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
     ham%npw_fft_kp = npw_kp
  end if
 
-!Pointers to k-dependent quantitites
+!Pointers to k-dependent quantities
  if (present(kinpw_kp)) ham%kinpw_kp => kinpw_kp
  if (present(kg_kp))    ham%kg_kp    => kg_kp
  if (present(kpg_kp))   ham%kpg_kp   => kpg_kp
@@ -1291,7 +1288,7 @@ end subroutine gsham_load_kprime
 !! SOURCE
 
 subroutine gsham_eph_setup_k(ham, which_k, kk, istwf_k, npw_k, kg_k, dtset, cryst, psps, &  ! in
-                            nkpg_k, kpg_k, ffnl_k, kinpw_k, ph3d_k, comm)                   ! out
+                             nkpg_k, kpg_k, ffnl_k, kinpw_k, ph3d_k, comm)                  ! out
 
 !Arguments ------------------------------------
 !scalars
@@ -1552,9 +1549,9 @@ subroutine gsham_load_spin(Ham,isppol,vectornd,vlocal,vxctaulocal,with_nonlocal)
 
 !Arguments ------------------------------------
 !scalars
+ class(gs_hamiltonian_type),intent(inout),target :: Ham
  integer,intent(in) :: isppol
  logical,optional,intent(in) :: with_nonlocal
- class(gs_hamiltonian_type),intent(inout),target :: Ham
 !arrays
  real(dp),optional,intent(in),target :: vectornd(:,:,:,:,:)
  real(dp),optional,intent(in),target :: vlocal(:,:,:,:),vxctaulocal(:,:,:,:,:)
@@ -1669,7 +1666,7 @@ end subroutine rfham_free
 !!
 !! SIDE EFFECTS
 !!  rf_Ham<rf_hamiltonian_type>=Structured datatype almost completely initialized:
-!!   * Basic variables and dimensions are transfered to the structure.
+!!   * Basic variables and dimensions are transferred to the structure.
 !!   * All pointers are allocated with correct dimensions.
 !!   * Quantities that do not depend on the k-point or spin are initialized.
 !!
@@ -1825,9 +1822,9 @@ subroutine rfham_load_spin(rf_Ham,isppol,vectornd,vlocal1,vxctaulocal,with_nonlo
 
 !Arguments ------------------------------------
 !scalars
+ class(rf_hamiltonian_type),intent(inout),target :: rf_Ham
  integer,intent(in) :: isppol
  logical,optional,intent(in) :: with_nonlocal
- class(rf_hamiltonian_type),intent(inout),target :: rf_Ham
 !arrays
  real(dp),optional,target,intent(in) :: vlocal1(:,:,:,:)
  real(dp),optional,target,intent(in) :: vectornd(:,:,:,:)
@@ -1890,7 +1887,7 @@ end subroutine rfham_load_spin
 !!  [npw_k]=number of plane waves
 !!
 !! SIDE EFFECTS
-!!  rf_Ham<rf_hamiltonian_type>=structured datatype completed with k-dependent quantitites.
+!!  rf_Ham<rf_hamiltonian_type>=structured datatype completed with k-dependent quantities.
 !!          Quantities at k^prime are set equal to quantities at k.
 !!
 !! SOURCE
@@ -1899,8 +1896,8 @@ subroutine rfham_load_k(rf_Ham,dkinpw_k,ddkinpw_k,npw_k)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in),optional :: npw_k
  class(rf_hamiltonian_type),intent(inout),target :: rf_Ham
+ integer,intent(in),optional :: npw_k
 !arrays
  real(dp),intent(in),optional,target :: dkinpw_k(:),ddkinpw_k(:)
 ! *************************************************************************
@@ -1915,7 +1912,7 @@ subroutine rfham_load_k(rf_Ham,dkinpw_k,ddkinpw_k,npw_k)
    rf_Ham%npw_kp = npw_k
  end if
 
-!Pointers to k-dependent quantitites
+!Pointers to k-dependent quantities
  if (present(dkinpw_k)) then
    rf_Ham%dkinpw_k  => dkinpw_k
    rf_Ham%dkinpw_kp => dkinpw_k

@@ -15,7 +15,7 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! NOTES
-!!  FOR DEVELOPPERS: in order to preserve the portability of libPAW library,
+!!  FOR DEVELOPERS: in order to preserve the portability of libPAW library,
 !!  please consult ~abinit/src/??_libpaw/libpaw-coding-rules.txt
 !!
 !! SOURCE
@@ -81,7 +81,7 @@ CONTAINS
 !!
 !! FUNCTION
 !! Compute the pseudopotential strengths Dij of the PAW non local operator as sum of
-!! several contributions. Can compute first-order strenghts Dij for RF calculations.
+!! several contributions. Can compute first-order strengths Dij for RF calculations.
 !! This routine is a driver calling, for each contribution to Dij, a specific
 !! routines.
 !! Within standard PAW formalism, Dij can be decomposd as follows:
@@ -1693,7 +1693,7 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
          end if
 
 !        ===== Integrate Vxc_ij_1 and Vxc_ij_2 over the angular mesh =====
-!        ===== and accummulate in total Vxc_ij                       =====
+!        ===== and accumulate in total Vxc_ij                       =====
          if (qphase==1) then
            do klmn=1,lmn2_size
              klm=pawtab%indklmn(1,klmn);kln=pawtab%indklmn(2,klmn)
@@ -2096,7 +2096,7 @@ end subroutine pawdijxcm
 !!  ndij= number of spin components
 !!  ngrid=number of points of the real space grid (FFT, WVL, ...) treated by current proc
 !!  ngridtot=total number of points of the real space grid (FFT, WVL, ...)
-!!           For the FFT grid, thi should be equal to ngfft1*ngfft2*ngfft3
+!!           For the FFT grid, this should be equal to ngfft1*ngfft2*ngfft3
 !!  nspden=number of spin density components
 !!  nsppol=number of independent spin WF components
 !!  pawang <type(pawang_type)>=paw angular mesh and related data
@@ -2471,8 +2471,8 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
 &     (size(vxc1,2)/=lm_size.and.pawxcdev/=0)) then
      msg='invalid sizes for vxc1!'
      LIBPAW_BUG(msg)
-   end if 
-   
+   end if
+
    LIBPAW_ALLOCATE(v1,(mesh_size))
    call pawv1(mesh_size,nspden,pawang,pawxcdev,v1,vh1,vxc1)
    zk1 = one/(one - HalfFineStruct2*v1)
@@ -2482,7 +2482,7 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
    !! with better analytic properties at r=0.
    rc=two*HalfFineStruct2
    rt=znuc*rc
-  
+
    ! replace k at short range with Coulomb potential version
    do ii=1,mesh_size
      rr=pawrad%rad(ii)
@@ -2494,7 +2494,7 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
      end if
    end do
  end if
- 
+
  dijnd = zero
 
  !-------------------------------------------------------------------
@@ -2570,7 +2570,7 @@ end subroutine pawdijnd
 !!
 !! FUNCTION
 !! Compute the spin-orbit contribution to the PAW
-!! pseudopotential strength Dij and also the nuclear dipole 
+!! pseudopotential strength Dij and also the nuclear dipole
 !! spin interactions.
 !! (for one atom only)
 !!
@@ -2756,7 +2756,7 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,pawang,pawrad,pawtab,&
 
  LIBPAW_ALLOCATE(z_kernel,(mesh_size))
  LIBPAW_ALLOCATE(z_intgd,(mesh_size))
- 
+
  ! spin-orbit kernel
  if (use_soc) then
    LIBPAW_ALLOCATE(dijso_rad,(ij_size))
@@ -3754,7 +3754,7 @@ subroutine pawdijfr(gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nsppol,nt
    end if
  end if
 
-!Get correct index of strain pertubation
+!Get correct index of strain perturbation
  if (ipert==natom+3) istr = idir
  if (ipert==natom+4) istr = idir + 3
 
@@ -4763,7 +4763,7 @@ end subroutine pawdijfr
 !!  paw_ij(natom)%qphase=2 if exp^(-i.q.r) phase from RF at q<>0, 1 otherwise
 !!  paw_ij(natom)%lmn_size=number of (l,m,n) elements for the paw basis
 !!  paw_ij(natom)%nspden=number of spin-density components
-!!  paw_ij(natom)%nsppol=number of independant spin-density components
+!!  paw_ij(natom)%nsppol=number of independent spin-density components
 !!  paw_ij(natom)%dij(lmn2_size,nspden)=non-symmetrized paw dij quantities
 !!  pawang <type(pawang_type)>=angular mesh discretization and related data
 !!  pawprtvol=control print volume and debugging output for PAW
@@ -5517,7 +5517,7 @@ end subroutine symdij
 !!  paw_ij(natom)%qphase=2 if exp^(-i.q.r) phase from RF at q<>0, 1 otherwise
 !!  paw_ij(natom)%lmn_size=number of (l,m,n) elements for the paw basis
 !!  paw_ij(natom)%nspden=number of spin-density components
-!!  paw_ij(natom)%nsppol=number of independant spin-density components
+!!  paw_ij(natom)%nsppol=number of independent spin-density components
 !!  paw_ij(natom)%dij(lmn2_size,nspden)=non-symmetrized paw dij quantities
 !!  pawang <type(pawang_type)>=angular mesh discretization and related data
 !!  pawprtvol=control print volume and debugging output for PAW

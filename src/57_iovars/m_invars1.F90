@@ -880,7 +880,7 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
      lpawu=maxval(dtsets(ii)%lpawu(:))
      mx%lpawu=max(lpawu,mx%lpawu)
      !dtsets(ii)%natpawu=count(dtsets(ii)%lpawu(dtsets(ii)%typat((/(i1,i1=1,dtsets(ii)%natom)/)))/=-1)
-     ! Old fashon way that should do fine
+     ! Old fashion way that should do fine
      dtsets(ii)%natpawu = 0
      do iatom=1, dtsets(ii)%natom
        if (dtsets(ii)%lpawu(dtsets(ii)%typat(iatom)) /= -1 ) dtsets(ii)%natpawu = dtsets(ii)%natpawu + 1
@@ -973,7 +973,7 @@ subroutine indefo1(dtset)
 !******************************************************************
 
 !Set up default values. All variables to be output in outvars.f
-!should have a default, even if a nonsensible one can be chosen to garantee print in that routine.
+!should have a default, even if a nonsensible one can be chosen to guarantee print in that routine.
 
  DBG_ENTER("COLL")
 
@@ -1320,7 +1320,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
 !Special treatment of _TYPAX (from a XYZ file), taking into account
 !the fact that znucl does NOT depend on the dataset
-!Examine all occurences of '_TYPAX'
+!Examine all occurrences of '_TYPAX'
 
  do
    index_typsymb=index(string(1:lenstr),'_TYPAX')
@@ -1637,7 +1637,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    end if
    ABI_MALLOC(dtset%atndlist,(3,natnd))
    dtset%atndlist(1:3,1:natnd)=atndlist(1:3,1:natnd)
-   
+
 !  Read cellcharge for each image, but use it only to initialize cellcharge_min
 !  The old name 'charge' is still tolerated. Will be removed in due time.
    cellcharge=zero
@@ -2232,7 +2232,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
  DBG_ENTER("COLL")
 
 !Set up default values. All variables to be output in outvars.f
-!should have a default, even if a nonsensible one can be chosen to garantee print in that routine.
+!should have a default, even if a nonsensible one can be chosen to guarantee print in that routine.
 !Some default values are also set at the definition of the input variables (m_dtset.F90).
 
 !These variables have already been initialized, for idtset/=0
@@ -2270,7 +2270,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 !  MG FIXME Sun Sep 6 2015: Many tests fail if IO_MODE_MPI is used as default. IO errors in v1, v2 ...
 !  with np=1 and wonderful deadlocks if np>1.
 
-!  Note that this default value might be overriden for specific datasets later, in case of parallelism
+!  Note that this default value might be overridden for specific datasets later, in case of parallelism
    dtsets(idtset)%iomode=IO_MODE_FORTRAN
 #ifdef HAVE_NETCDF_DEFAULT
    dtsets(idtset)%iomode=IO_MODE_ETSF
@@ -2930,7 +2930,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 
 ! JB:UNINITIALIZED VALUES (not found in this file neither indefo1)
 ! They might be initialized somewhereelse, I don't know.
-! That might cause unitialized error with valgrind depending on the compiler
+! That might cause uninitialized error with valgrind depending on the compiler
 ! chkprim
 ! maxnsym
 ! nsym

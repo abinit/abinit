@@ -53,6 +53,7 @@ module m_sigtk
  public :: sigtk_kcalc_from_erange
  public :: sigtk_kpts_in_erange
  public :: sigtk_sigma_tables
+ public :: sigtk_multiply_by_vc_sqrt
 !!***
 
 
@@ -537,7 +538,7 @@ end subroutine sigtk_kcalc_from_erange
 !! FUNCTION
 !!  Use star functions interpolation and [[einterp]] to interpolate KS energies onto dense k-mesh
 !!  defined by [[sigma_ngkpt]] and [[sigma_shiftk]].
-!!  find k-points inside (electron/hole) pockets according to the values specifed by [[sigma_erange]].
+!!  find k-points inside (electron/hole) pockets according to the values specified by [[sigma_erange]].
 !!  write kerange.nc file with the tables required by abinit to automate nscf band structure calculations
 !!  mainly used to prepare eph calculations in which only selected k-points are nededed (imaginary part of self-energies).
 !!
@@ -983,6 +984,63 @@ subroutine sigtk_sigma_tables(nkcalc, nkibz, nsppol, bstart_ks, bstop_ks, kcalc2
  end do !spin
 
 end subroutine sigtk_sigma_tables
+!!***
+
+!!****f* m_sigtk/sigtk_multiply_by_vc_sqrt
+!! NAME
+!!  sigtk_multiply_by_vc_sqrt
+!!
+!! FUNCTION
+!! Multiply rhotwg vector by the square root of the Coulomb term taking into account nspinor.
+!!
+!! INPUTS
+!!  trans="C" to take the complex conjugate of rhotwg. "N" to use rhotwg directly.
+!!  npw=Number of PWs
+!!  nspinor: Number of spinor components
+!!  ndat=Number of bands in rhotwh
+!!  vc_sqrt: square root of the Coulomb interaction vc(q,g)
+!!
+!! SIDE EFFECTS
+!!  rhotgw:
+!!  In input:  <k+q|e^{-i(q+g)r|k>
+!!  In output: <k+q|e^{-i(q+g)r|k> * vc_sqrt(q, g)
+!!
+!! SOURCE
+
+subroutine sigtk_multiply_by_vc_sqrt(trans, npw, nspinor, ndat, vc_sqrt, rhotwg)
+
+ character(len=1),intent(in) :: trans
+ integer,intent(in) :: npw, nspinor, ndat
+ complex(gwpc),intent(in) :: vc_sqrt(npw)
+ complex(gwpc),intent(inout) :: rhotwg(npw*nspinor, ndat)
+
+!Local variables ------------------------------
+ integer :: ii, spad, idat
+!************************************************************************
+
+ select case (trans)
+ case ("N")
+   do idat=1, ndat
+     do ii=1,nspinor
+       spad = (ii-1) * npw
+       rhotwg(spad+1:spad+npw, idat) = rhotwg(spad+1:spad+npw, idat) * vc_sqrt(1:npw)
+     end do
+   end do
+
+ case ("C")
+   ! Take the complex conjugate of rhotwg.
+   do idat=1, ndat
+     do ii=1,nspinor
+       spad = (ii-1) * npw
+       rhotwg(spad+1:spad+npw, idat) = GWPC_CONJG(rhotwg(spad+1:spad+npw, idat)) * vc_sqrt(1:npw)
+     end do
+   end do
+
+ case default
+   ABI_ERROR(sjoin("Invalid trans", trans))
+ end select
+
+end subroutine sigtk_multiply_by_vc_sqrt
 !!***
 
 end module m_sigtk

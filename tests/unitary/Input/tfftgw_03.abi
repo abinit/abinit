@@ -6,7 +6,7 @@ max_nthreads = 4,
 ndat = 4,
 /
 &SYSTEM
-ecut = 20,        
+ecut = 20,
 rprimd = 20, 0, 0, 0, 20, 0, 0, 0, 20,
 kpoint = 0.1, 0.2, 0.3,
 osc_ecut = 10,
@@ -22,7 +22,7 @@ osc_ecut = 10,
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% keywords = GW
-#%% authors = M. Giantomassi 
-#%% description = 
+#%% authors = M. Giantomassi
+#%% description =
 #%%   Test the FFT routines used in the GW code with complex arguments, ndat=4, up to 4 threads.
 #%%<END TEST_INFO>

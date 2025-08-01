@@ -253,7 +253,7 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  !integer :: ik_ibz, ik_bz, ebands_timrev
  !integer :: iq_bz, iq_ibz !, ikq_ibz, ikq_bz
  !integer :: ncid, spin_ncid, ncerr, gstore_fform
- integer :: phmesh_size !, iw
+ integer :: phmesh_size, units(2) !, iw
  real(dp) :: kt, wmax, cpu, wall, gflops
  real(dp) :: edos_step, edos_broad !, sigma, ecut, eshift, eig0nk
  !character(len=5000) :: msg
@@ -265,10 +265,10 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  type(edos_t) :: edos
 !arrays
  real(dp),allocatable :: ktmesh(:), lambda_ij(:), imag_w(:), imag_2w(:), phmesh(:), a2fw(:)
-
 !----------------------------------------------------------------------
 
  nproc = xmpi_comm_size(gstore%comm); my_rank = xmpi_comm_rank(gstore%comm)
+ units = [std_out, ab_out]
 
  call wrtout(std_out, " Solving isotropic Migdal-Eliashberg equations on the imaginary axis", pre_newlines=2)
  call cwtime(cpu, wall, gflops, "start")
@@ -291,8 +291,7 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  !! Store DOS per spin channel
  !n0(:) = edos%gef(1:edos%nsppol)
  if (my_rank == master) then
-   call edos%print(unit=std_out)
-   !call edos%print(unit=ab_out)
+   call edos%print(units)
    !path = strcat(dtfil%filnam_ds(4), "_EDOS")
    !call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path, ch10))
    !call edos%write(path)
