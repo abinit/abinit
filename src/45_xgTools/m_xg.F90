@@ -1671,7 +1671,7 @@ contains
   !! NAME
   !! xgBlock_gemmR
 
-  subroutine xgBlock_gemmR(transa, transb, alpha, xgBlockA, xgBlockB, beta, xgBlockW, comm)
+  subroutine xgBlock_gemmR(transa, transb, alpha, xgBlockA, xgBlockB, beta, xgBlockW, comm, timing)
 
     character,        intent(in   )           :: transa
     character,        intent(in   )           :: transb
@@ -1681,6 +1681,7 @@ contains
     double precision, intent(in   )           :: beta
     type(xgBlock_t),  intent(inout)           :: xgBlockW
     integer,optional, intent(in)              :: comm
+    logical,optional, intent(in)              :: timing
 
     real(dp)       :: alpha_
     complex(dpc)   :: calpha
@@ -1688,6 +1689,7 @@ contains
     character(kind=1) :: transa_,transb_
     integer           :: K
     double precision  :: tsec(2)
+    logical :: timing_
 
 #if defined HAVE_OPENMP_OFFLOAD
 #if !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
@@ -1701,7 +1703,11 @@ contains
 #endif
 #endif
 
-    call timab(tim_gemm_blas,1,tsec)
+    timing_ = .true.
+    if (present(timing)) then
+      timing_ = timing
+    end if
+    if (timing_) call timab(tim_gemm_blas,1,tsec)
 
     call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
     call xgBlock_check_gpu_option(xgBlockA,xgBlockW)
@@ -1957,14 +1963,14 @@ contains
 
     end if
 
-    call timab(tim_gemm_blas,2,tsec)
+    if (timing_) call timab(tim_gemm_blas,2,tsec)
     ! END CALL GEMM
 
     ! MPI SUM
     if ( present(comm) ) then
-      call timab(tim_gemm_mpi,1,tsec)
+      if (timing_) call timab(tim_gemm_mpi,1,tsec)
       call xgBlock_mpi_sum(xgBlockW,comm=comm)
-      call timab(tim_gemm_mpi,2,tsec)
+      if (timing_) call timab(tim_gemm_mpi,2,tsec)
     end if
 
   end subroutine xgBlock_gemmR
@@ -1975,7 +1981,7 @@ contains
   !! NAME
   !! xgBlock_gemmC
 
-  subroutine xgBlock_gemmC(transa, transb, alpha, xgBlockA, xgBlockB, beta, xgBlockW, comm)
+  subroutine xgBlock_gemmC(transa, transb, alpha, xgBlockA, xgBlockB, beta, xgBlockW, comm, timing)
 
     character,       intent(in   ) :: transa
     character,       intent(in   ) :: transb
@@ -1985,12 +1991,18 @@ contains
     complex(kind=8), intent(in   ) :: beta
     type(xgBlock_t), intent(inout) :: xgBlockW
     integer,optional,intent(in)    :: comm
+    logical,optional,intent(in)    :: timing
 
     integer          :: K
     double precision :: tsec(2)
     character(kind=1) :: transa_,transb_
+    logical :: timing_
 
-    call timab(tim_gemm_blas,1,tsec)
+    timing_ = .true.
+    if (present(timing)) then
+      timing_ = timing
+    end if
+    if (timing_) call timab(tim_gemm_blas,1,tsec)
 
     call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
     call xgBlock_check_gpu_option(xgBlockA,xgBlockW)
@@ -2037,13 +2049,13 @@ contains
         xgBlockW%vecC, xgBlockW%LDim)
     end if
     ! END CALL GEMM
-    call timab(tim_gemm_blas,2,tsec)
+    if (timing_) call timab(tim_gemm_blas,2,tsec)
 
     ! MPI SUM
     if ( present(comm) ) then
-      call timab(tim_gemm_mpi,1,tsec)
+      if (timing_) call timab(tim_gemm_mpi,1,tsec)
       call xgBlock_mpi_sum(xgBlockW,comm=comm)
-      call timab(tim_gemm_mpi,2,tsec)
+      if (timing_) call timab(tim_gemm_mpi,2,tsec)
     end if
 
   end subroutine xgBlock_gemmC
@@ -3803,9 +3815,7 @@ contains
 
     if (nblocks_mpi==1) then
 
-      call timab(tim_gemmcyclic,2,tsec)
-      call xgBlock_gemm('n','n',1.0d0,xgBlockA,xgBlockB,1.d0,xgBlockW)
-      call timab(tim_gemmcyclic,1,tsec)
+      call xgBlock_gemm('n','n',1.0d0,xgBlockA,xgBlockB,1.d0,xgBlockW,timing=.false.)
 
     else
 
@@ -3842,9 +3852,7 @@ contains
         end if
 
         if (iblock_mpi==1) then
-          call timab(tim_gemmcyclic,2,tsec)
-          call xgBlock_gemm('n','n',1.0d0,xgBlockA,subB_mpi%self,1.d0,xgBlockW)
-          call timab(tim_gemmcyclic,1,tsec)
+          call xgBlock_gemm('n','n',1.0d0,xgBlockA,subB_mpi%self,1.d0,xgBlockW,timing=.false.)
         else
           tag = iblock_mpi
           dest = mod(me_comm-(iblock_mpi-1),nblocks_mpi)
@@ -3852,9 +3860,7 @@ contains
           call xgBlock_mpi_isend(xgBlockA,dest,tag,request,comm=comm_)
           source = mod(me_comm+(iblock_mpi-1),nblocks_mpi)
           call xgBlock_mpi_recv(xg_mpi_work%self,source,tag,comm=comm_)
-          call timab(tim_gemmcyclic,2,tsec)
-          call xgBlock_gemm('n','n',1.0d0,xg_mpi_work%self,subB_mpi%self,1.d0,xgBlockW)
-          call timab(tim_gemmcyclic,1,tsec)
+          call xgBlock_gemm('n','n',1.0d0,xg_mpi_work%self,subB_mpi%self,1.d0,xgBlockW,timing=.false.)
         end if
 
         if (iblock_mpi>1) call xmpi_wait(request,ierr)
