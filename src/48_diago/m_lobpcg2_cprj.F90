@@ -459,11 +459,10 @@ module m_lobpcg2_cprj
       call timab(tim_ax_k,2,tsec)
 
       ! B-orthonormalize X, BX and AX
-      call xg_Borthonormalize_cprj(lobpcg%xg_nonlop,blockdim_cprj,lobpcg%X,lobpcg%cprjX,ierr,tim_Bortho_X,&
-        gpu_option,AX=lobpcg%AX)
+      call xg_Borthonormalize_cprj(lobpcg%xg_nonlop,lobpcg%X,lobpcg%cprjX,ierr,tim_Bortho_X,gpu_option,AX=lobpcg%AX)
 
       ! Do first RR on X to get the first eigen values
-      call xg_RayleighRitz_cprj(lobpcg%xg_nonlop,lobpcg%X,lobpcg%cprjX,lobpcg%AX,eigenvaluesN,blockdim_cprj,ierr,&
+      call xg_RayleighRitz_cprj(lobpcg%xg_nonlop,lobpcg%X,lobpcg%cprjX,lobpcg%AX,eigenvaluesN,ierr,&
         & lobpcg%prtvol,tim_RR_X,gpu_option,add_Anl=.True.)
 
       compute_residu = .true.
@@ -565,42 +564,42 @@ module m_lobpcg2_cprj
         ! P with values such as 1e-29 that make the eigenvectors diverge
         if ( iline == 1 .or. minResidu < 1e-27) then
           ! Do RR on XW to get the eigen vectors
-          call xg_Borthonormalize_cprj(lobpcg%xg_nonlop,blockdim_cprj,lobpcg%XW,lobpcg%cprjXW,&
-            & ierr,tim_Bortho_XW,gpu_option,AX=lobpcg%AXW)
+          call xg_Borthonormalize_cprj(lobpcg%xg_nonlop,lobpcg%XW,lobpcg%cprjXW,&
+            & ierr,tim_Bortho_XW,gpu_option,AX=lobpcg%AXW,blockdim_cprj=blockdim_cprj)
           call xgBlock_zero(lobpcg%P)
           call xgBlock_zero(lobpcg%AP)
           call xgBlock_zero(lobpcg%cprjP)
           if ( ierr /= 0 ) then
             ABI_COMMENT("B-orthonormalization (XW) did not work.")
           end if
-          call xg_RayleighRitz_cprj(lobpcg%xg_nonlop,lobpcg%X,lobpcg%cprjX,lobpcg%AX,eigenvaluesN,blockdim_cprj,ierr,&
+          call xg_RayleighRitz_cprj(lobpcg%xg_nonlop,lobpcg%X,lobpcg%cprjX,lobpcg%AX,eigenvaluesN,ierr,&
            & lobpcg%prtvol,tim_RR_XW,gpu_option,tolerance=tolerance,&
            & XW=lobpcg%XW,W=lobpcg%W,cprjXW=lobpcg%cprjXW,cprjW=lobpcg%cprjW,AW=lobpcg%AW,&
            & P=lobpcg%P,cprjP=lobpcg%cprjP,AP=lobpcg%AP,WP=lobpcg%WP,cprjWP=lobpcg%cprjWP,&
-           & AWP=lobpcg%AWP,add_Anl=.True.)
+           & AWP=lobpcg%AWP,blockdim_cprj=blockdim_cprj,add_Anl=.True.)
           if ( ierr /= 0 ) then
             ABI_WARNING("RayleighRitz (XW) did not work, but continue anyway.")
             exit
           end if
         else
           ! B-orthonormalize P, BP
-          call xg_Borthonormalize_cprj(lobpcg%xg_nonlop,blockdim_cprj,lobpcg%XWP%self,lobpcg%cprjXWP%self,&
-            & ierr,tim_Bortho_XWP,gpu_option,AX=lobpcg%AXWP%self)
+          call xg_Borthonormalize_cprj(lobpcg%xg_nonlop,lobpcg%XWP%self,lobpcg%cprjXWP%self,&
+            & ierr,tim_Bortho_XWP,gpu_option,AX=lobpcg%AXWP%self,blockdim_cprj=blockdim_cprj)
           ! Do RR on XWP to get the eigen vectors
           if ( ierr == 0 ) then
-            call xg_RayleighRitz_cprj(lobpcg%xg_nonlop,lobpcg%X,lobpcg%cprjX,lobpcg%AX,eigenvaluesN,blockdim_cprj,ierr,&
+            call xg_RayleighRitz_cprj(lobpcg%xg_nonlop,lobpcg%X,lobpcg%cprjX,lobpcg%AX,eigenvaluesN,ierr,&
              & lobpcg%prtvol,tim_RR_XWP,gpu_option,tolerance=tolerance,&
              & XW=lobpcg%XW,W=lobpcg%W,cprjXW=lobpcg%cprjXW,cprjW=lobpcg%cprjW,AW=lobpcg%AW,&
              & P=lobpcg%P,cprjP=lobpcg%cprjP,AP=lobpcg%AP,WP=lobpcg%WP,cprjWP=lobpcg%cprjWP,&
-             & AWP=lobpcg%AWP,XWP=lobpcg%XWP%self,cprjXWP=lobpcg%cprjXWP%self,add_Anl=.True.)
+             & AWP=lobpcg%AWP,XWP=lobpcg%XWP%self,cprjXWP=lobpcg%cprjXWP%self,blockdim_cprj=blockdim_cprj,add_Anl=.True.)
              if ( ierr /= 0 ) then
                ABI_WARNING("RayleighRitz (XWP) did not work, but continue anyway.")
                exit
              end if
           else
             ABI_COMMENT("B-orthonormalization (XWP) did not work, try on XW.")
-            call xg_Borthonormalize_cprj(lobpcg%xg_nonlop,blockdim_cprj,lobpcg%XW,lobpcg%cprjXW,&
-              & ierr,tim_Bortho_XW,gpu_option,AX=lobpcg%AXW)
+            call xg_Borthonormalize_cprj(lobpcg%xg_nonlop,lobpcg%XW,lobpcg%cprjXW,&
+              & ierr,tim_Bortho_XW,gpu_option,AX=lobpcg%AXW,blockdim_cprj=blockdim_cprj)
             if ( ierr /= 0 ) then
               ABI_COMMENT("B-orthonormalization (XW) did not work.")
             end if
@@ -608,11 +607,11 @@ module m_lobpcg2_cprj
             call xgBlock_zero(lobpcg%AP)
             call xgBlock_zero(lobpcg%cprjP)
             nrestart = nrestart + 1
-            call xg_RayleighRitz_cprj(lobpcg%xg_nonlop,lobpcg%X,lobpcg%cprjX,lobpcg%AX,eigenvaluesN,blockdim_cprj,ierr,&
+            call xg_RayleighRitz_cprj(lobpcg%xg_nonlop,lobpcg%X,lobpcg%cprjX,lobpcg%AX,eigenvaluesN,ierr,&
              & lobpcg%prtvol,tim_RR_XW,gpu_option,tolerance=tolerance,&
              & XW=lobpcg%XW,W=lobpcg%W,cprjXW=lobpcg%cprjXW,cprjW=lobpcg%cprjW,AW=lobpcg%AW,&
              & P=lobpcg%P,cprjP=lobpcg%cprjP,AP=lobpcg%AP,WP=lobpcg%WP,cprjWP=lobpcg%cprjWP,&
-             & AWP=lobpcg%AWP,add_Anl=.True.)
+             & AWP=lobpcg%AWP,blockdim_cprj=blockdim_cprj,add_Anl=.True.)
              if ( ierr /= 0 ) then
                ABI_WARNING("RayleighRitz (XW) did not work, but continue anyway.")
                exit
@@ -739,8 +738,6 @@ module m_lobpcg2_cprj
 
     if (.not.skip) then
 
-      blockdim_cprj = lobpcg%blockdim_cprj*nblock
-
       if ( nblock > 1 ) then
         call timab(tim_cprj,1,tsec)
         call xg_init(cprj_work_all,space(cprjX0),rows(cprjX0),cols(cprjX0),comm(cprjX0))
@@ -748,9 +745,9 @@ module m_lobpcg2_cprj
         call xg_nonlop_getcprj(lobpcg%xg_nonlop,X0,cprjX0,cprj_work_all%self)
         call xg_free(cprj_work_all)
         call timab(tim_cprj,2,tsec)
-        call xg_Borthonormalize_cprj(lobpcg%xg_nonlop,blockdim_cprj,X0,cprjX0,&
+        call xg_Borthonormalize_cprj(lobpcg%xg_nonlop,X0,cprjX0,&
           & ierr,tim_Bortho_Xall,gpu_option,AX=lobpcg%AllAX0%self)
-        call xg_RayleighRitz_cprj(lobpcg%xg_nonlop,X0,cprjX0,lobpcg%AllAX0%self,eigen,blockdim_cprj,ierr,&
+        call xg_RayleighRitz_cprj(lobpcg%xg_nonlop,X0,cprjX0,lobpcg%AllAX0%self,eigen,ierr,&
           & lobpcg%prtvol,tim_RR_Xall,gpu_option,add_Anl=.True.)
       end if
 
@@ -858,7 +855,7 @@ module m_lobpcg2_cprj
 
     ! Add the nonlocal part if paw
     if (lobpcg%xg_nonlop%paw) then
-      call xg_nonlop_getXSX(lobpcg%xg_nonlop,lobpcg%cprjX0,cprjvar,cprj_work,buffer%self,lobpcg%blockdim_cprj)
+      call xg_nonlop_getXSX(lobpcg%xg_nonlop,lobpcg%cprjX0,cprjvar,cprj_work,buffer%self)
     end if
 
     ! sum all process contribution
@@ -869,7 +866,7 @@ module m_lobpcg2_cprj
     call xgBlock_reshape_spinor(cprj_work,cprj_work_spinor,nspinor,COLS2ROWS)
     call xgBlock_reshape_spinor(lobpcg%cprjX0,cprjX0_spinor,nspinor,COLS2ROWS)
     call xgBlock_gemm_mpi_cyclic_permutation(cprjX0_spinor,buffer%self,cprj_work_spinor,&
-      & lobpcg%xg_nonlop%me_band,lobpcg%blockdim_cprj/nspinor,comm=lobpcg%xg_nonlop%comm_band)
+      & lobpcg%xg_nonlop%me_band,blocksize=lobpcg%blockdim_cprj/nspinor,comm=lobpcg%xg_nonlop%comm_band)
     call xgBlock_saxpy(cprjvar,-1.0d0,cprj_work)
 
     call xg_free(buffer)

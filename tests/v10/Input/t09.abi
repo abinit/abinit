@@ -101,6 +101,6 @@ pseudos="P.xml, Al.xml"
 #%% [extra_info]
 #%% authors = L. Baguet
 #%% keywords = PAW,CPRJ
-#%% description = Test oracle and nbdbuf=-101 in chebfi. cprj_in_memory=0 or 1. PAW,istwfk=1.
+#%% description = Test oracle and nbdbuf=-101 in chebfi. cprj_in_memory=0 or 1. PAW,nspinor=2.
 #%%<END TEST_INFO>
  

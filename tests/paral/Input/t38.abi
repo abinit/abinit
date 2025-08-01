@@ -84,5 +84,5 @@ pseudos="P.xml, Al.xml"
 #%% [extra_info]
 #%% authors = L. Baguet
 #%% keywords = PAW,CPRJ
-#%% description = Test cprj_in_memory=1 with xg_nonlop_option=0 or 1 (releveant for chebfi2 only). PAW,nspinor=2,npband=4
+#%% description = Test cprj_in_memory=1 with xg_nonlop_option=0 or 1 (relevant for chebfi2 only). PAW,nspinor=2,npband=4
 #%%<END TEST_INFO>

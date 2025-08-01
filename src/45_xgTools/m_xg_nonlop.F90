@@ -2281,12 +2281,12 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
  subroutine xg_nonlop_mult_cprj(xg_nonlop,cprj_left,cprj_right,res,blocksize)
 
    type(xg_nonlop_t), intent(in) :: xg_nonlop
-   integer, intent(in) :: blocksize
    type(xgBlock_t), intent(in) :: cprj_left,cprj_right
    type(xgBlock_t), intent(inout) :: res
+   integer, intent(in),optional :: blocksize
 
    integer :: space_res
-   integer :: blocksize_spinor,iblock_mpi,nblocks_mpi,shift_row,shift_col,shift_col_mpi
+   integer :: blocksize_,blocksize_spinor,iblock_mpi,nblocks_mpi,shift_row,shift_col,shift_col_mpi
    integer :: iblock_left,iblock_right,nblocks_left,nblocks_right
    integer :: res_nrows,res_ncols,cprjdim
    integer :: nrows_r,nrows_l,ncols_r,ncols_l,nspinor
@@ -2328,6 +2328,17 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
      ABI_ERROR("cols(res)/=nblocks_mpi*cols(cprj_right)")
    end if
 
+   blocksize_ = ncols_r
+   if (present(blocksize)) then
+     if (mod(blocksize,nspinor)/=0) then
+       ABI_ERROR("wrong blocksize (nspinor)")
+     end if
+     if (mod(ncols_l,blocksize / nspinor)/=0) then
+       ABI_ERROR("wrong blocksize")
+     end if
+     blocksize_ = blocksize
+   end if
+
    if (nblocks_mpi==1) then
 
      call timab(tim_mult_cprj_gemm,1,tsec)
@@ -2336,7 +2347,7 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
 
    else
 
-     blocksize_spinor = blocksize / nspinor
+     blocksize_spinor = blocksize_ / nspinor
      nblocks_right = ncols_r / blocksize_spinor
      nblocks_left  = ncols_l / blocksize_spinor
 
@@ -2561,12 +2572,18 @@ subroutine xg_nonlop_getXAX(xg_nonlop,Aij,cprj_left,cprj_right,cprj_work,res,blo
    type(xg_nonlop_t), intent(in) :: xg_nonlop
    type(xgBlock_t), intent(in) :: cprj_left,cprj_right,Aij
    type(xgBlock_t), intent(inout) :: cprj_work,res
-   integer,intent(in) :: blocksize
+   integer,intent(in),optional :: blocksize
+
+   integer :: blocksize_
 
    call xgBlock_zero(cprj_work)
    call xg_nonlop_apply_Aij(xg_nonlop,Aij,cprj_right,cprj_work)
 
-   call xg_nonlop_mult_cprj(xg_nonlop,cprj_left,cprj_work,res,blocksize)
+   blocksize_ = cols(cprj_right)
+   if (present(blocksize)) then
+     blocksize_ = blocksize
+   end if
+   call xg_nonlop_mult_cprj(xg_nonlop,cprj_left,cprj_work,res,blocksize=blocksize_)
 
  end subroutine xg_nonlop_getXAX
 !!***
@@ -2576,12 +2593,18 @@ subroutine xg_nonlop_getXDX(xg_nonlop,diag,cprj_left,cprj_right,cprj_work,res,bl
    type(xg_nonlop_t), intent(in) :: xg_nonlop
    type(xgBlock_t), intent(in) :: cprj_left,cprj_right,diag
    type(xgBlock_t), intent(inout) :: cprj_work,res
-   integer,intent(in) :: blocksize
+   integer,intent(in),optional :: blocksize
+
+   integer :: blocksize_
 
    call xgBlock_zero(cprj_work)
    call xg_nonlop_apply_diag(xg_nonlop,diag,cprj_right,cprj_work)
 
-   call xg_nonlop_mult_cprj(xg_nonlop,cprj_left,cprj_work,res,blocksize)
+   blocksize_ = cols(cprj_right)
+   if (present(blocksize)) then
+     blocksize_ = blocksize
+   end if
+   call xg_nonlop_mult_cprj(xg_nonlop,cprj_left,cprj_work,res,blocksize=blocksize_)
 
  end subroutine xg_nonlop_getXDX
 !!***
@@ -2590,7 +2613,9 @@ subroutine xg_nonlop_getXSX(xg_nonlop,cprj_left,cprj_right,cprj_work,res,blocksi
 
    type(xg_nonlop_t), intent(in) :: xg_nonlop
    type(xgBlock_t), intent(inout) :: cprj_left,cprj_right,cprj_work,res
-   integer,intent(in) :: blocksize
+   integer,intent(in),optional :: blocksize
+
+   integer :: blocksize_
 
    real(dp) :: tsec(2)
 
@@ -2600,7 +2625,11 @@ subroutine xg_nonlop_getXSX(xg_nonlop,cprj_left,cprj_right,cprj_work,res,blocksi
      ABI_ERROR('Not implemented with paw=False.')
    end if
 
-   call xg_nonlop_getXAX(xg_nonlop,xg_nonlop%Sij%self,cprj_left,cprj_right,cprj_work,res,blocksize)
+   blocksize_ = cols(cprj_right)
+   if (present(blocksize)) then
+     blocksize_ = blocksize
+   end if
+   call xg_nonlop_getXAX(xg_nonlop,xg_nonlop%Sij%self,cprj_left,cprj_right,cprj_work,res,blocksize=blocksize_)
 
    call timab(tim_getXSX,2,tsec)
 
@@ -2611,16 +2640,22 @@ subroutine xg_nonlop_getXHX(xg_nonlop,cprj_left,cprj_right,cprj_work,res,blocksi
 
    type(xg_nonlop_t), intent(in) :: xg_nonlop
    type(xgBlock_t), intent(inout) :: cprj_left,cprj_right,cprj_work,res
-   integer,intent(in) :: blocksize
+   integer,intent(in),optional :: blocksize
+
+   integer :: blocksize_
 
    real(dp) :: tsec(2)
 
    call timab(tim_getXHX,1,tsec)
 
+   blocksize_ = cols(cprj_right)
+   if (present(blocksize)) then
+     blocksize_ = blocksize
+   end if
    if (xg_nonlop%paw) then
-     call xg_nonlop_getXAX(xg_nonlop,xg_nonlop%Dij_spin,cprj_left,cprj_right,cprj_work,res,blocksize)
+     call xg_nonlop_getXAX(xg_nonlop,xg_nonlop%Dij_spin,cprj_left,cprj_right,cprj_work,res,blocksize=blocksize_)
    else
-     call xg_nonlop_getXDX(xg_nonlop,xg_nonlop%ekb%self,cprj_left,cprj_right,cprj_work,res,blocksize)
+     call xg_nonlop_getXDX(xg_nonlop,xg_nonlop%ekb%self,cprj_left,cprj_right,cprj_work,res,blocksize=blocksize_)
    end if
 
    call timab(tim_getXHX,2,tsec)
