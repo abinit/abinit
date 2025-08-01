@@ -3627,10 +3627,10 @@ subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
 !  End section for strain perturbation
 
 !  Section for Zeeman field perturbations
-!  (MR: We storage magnetic moments, which are minus the second order total energy derivatives. 
+!  (MR: We store magnetic moments, which are minus the second order total energy derivatives. 
 !  It seems that this change of sign is only necessary for the magnetic moments induced by atomic
-!  displacements. For the electric field ones, it must be changed inside dfpt_nstwf.) 
-   if (rfpert(natom+5)==5) then
+!  displacements. For the electric field ones, it must be already changed inside dfpt_nstwf.) 
+   if (rfpert(natom+5)==1) then
      ipert2= natom+5
      do idir2= 1, 3
        do ipert1= 1, natom
@@ -3645,7 +3645,7 @@ subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
    end if
 
    if (ANY(rfpert(natom+11+1:2*natom+11)==1)) then
-     do ipert2= natom+1+rfatpol(1), natom+1+rfatpol(2) 
+     do ipert2= natom+11+rfatpol(1), natom+11+rfatpol(2) 
        do idir2= 1, 3
          do ipert1= 1, natom
            do idir1= 1, 3
