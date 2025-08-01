@@ -119,7 +119,6 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 !arrays
  integer,allocatable :: intarr(:), sidx(:)
  real(dp),allocatable :: dprarr(:)
-
 !******************************************************************
 
 !write(std_out,"(3a)")" m_invars1%invars0 : enter with string:", ch10, trim(string)
@@ -948,7 +947,7 @@ end subroutine invars1m
 !! indefo1
 !!
 !! FUNCTION
-!! Initialisation phase : defaults values for a first batch of input variables
+!! Initialisation phase: defaults values for a first batch of input variables
 !! (especially dimensions, needed to allocate other parts of dtsets, as well
 !!  as other input variables whose existence is needed for other initialisations to proceed).
 !!

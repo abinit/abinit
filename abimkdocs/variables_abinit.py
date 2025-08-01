@@ -13375,9 +13375,10 @@ allowed x, y and z magnetization (useful only with [[nspinor]] = 2 and
 [[nsppol]] = 1, either because there is spin-orbit without time-reversal
 symmetry - and thus spontaneous magnetization, or with spin-orbit, if one
 allows for spontaneous non-collinear magnetism). Available for
-response functions [[cite:Ricci2019]]. Not yet available for mGGA. Also note that, with [[nspden]] = 4, time-reversal symmetry
-is not taken into account (at present; this has to be checked) and thus
-[[kptopt]] has to be different from 1 or 2.
+response functions [[cite:Ricci2019]]. Not yet available for mGGA.
+Also note that, with [[nspden]] = 4, time-reversal symmetry
+is not taken into account (at present; this has to be checked) and thus [[kptopt]]
+has to be different from 1 or 2 (the default value is 4).
 
 The default ([[nspden]] = [[nsppol]]) does not suit the case of vector magnetization.
 Note that the choice of [[nspden]] has an influence on the treatment of symmetries. See [[symafm]].
@@ -25837,7 +25838,12 @@ Variable(
     mnemonics="USE Generalized Bloch Theorem",
     added_in_version="10.5.1",
     text=r"""
-If set to 1, the generalized Bloch theorem is used to compute spin-spirals.
+If set to 1, the Generalized Bloch Theorem (GBT) is used to compute a spin-spiral with wavevector [[qgbt]].
+The GBT requires [[nspinor]] = 2 but is not compatible with spin-orbit coupling thus one has to
+set [[so_psp]] to zero.
+
+Note that, for the time being, [[use_gbt]] /= 0 is not compatible with PAW.
+Also, one has to use [[useylm]] = 0, [[nsym]] = 1 and [[kptopt]] 4.
 """,
 ),
 
