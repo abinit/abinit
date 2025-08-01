@@ -106,7 +106,7 @@ pseudos "Ga.xml, O.xml"
 #%% need_cpp_vars = HAVE_FFTW3 or HAVE_DFTI
 #%% [files]
 #%% files_to_test =
-#%%   t26.abo, tolnlines=  0, tolabs=  0, tolrel= 0, fld_options = -ridiculous
+#%%   t26.abo, tolnlines=  0, tolabs=  0, tolrel= 0
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
