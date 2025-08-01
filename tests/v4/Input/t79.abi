@@ -30,7 +30,6 @@ tolvrs3   1.0d-8
 # common input data
 
   acell   3*5.42
-dilatmx   1.1
    ecut   18.0
  ecutsm   0.0
   natom   1

@@ -42,7 +42,9 @@ temperature  300
 #OPTIONAL_INPUT_VARIABLES
 ngqpt2 10 10 10
 use_ideal_positions 0
-tolmotifinboxmatch 6d-2 9.d-3 7.d-2
+tolmotif 0.06
+tolinbox 0.009
+tolmatch 0.07
 enunit 1
  
 #%%<BEGIN TEST_INFO>

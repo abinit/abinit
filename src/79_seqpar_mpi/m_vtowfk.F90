@@ -219,7 +219,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  integer :: use_subovl=0
  integer :: use_subvnlx=0
  integer :: use_totvnlx=0
- integer :: bandpp_cprj,blocksize,choice,cpopt,iband,iband1
+ integer :: bandpp_cprj,blocksize,choice,cpopt,fftalg,iband,iband1
  integer :: iblock,iblocksize,ibs,idir,ierr,igs,igsc,ii,inonsc
  integer :: iorder_cprj,ipw,ispinor,ispinor_index,istwf_k,iwavef,me_g0,mgsc,my_nspinor,n1,n2,n3 !kk
  integer :: nband_k_cprj,ncols_cprj,nblockbd,ncpgr,ndat,niter,nkpt_max,nnlout,ortalgo,ndat_fft
@@ -466,7 +466,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
                          mpi_enreg, nband_k, npw_k, my_nspinor, resid_k, rmm_diis_status)
          else
 
-            if ( .not. xg_diago ) then
+           if ( .not. xg_diago ) then
 
              ABI_NVTX_START_RANGE(NVTX_LOBPCG1)
              call lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
@@ -484,7 +484,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
              if (use_subovl==1) call xmpi_sum(subovl,spaceComm,ierr)
              ABI_NVTX_END_RANGE()
 
-          else
+           else
 
              ABI_NVTX_START_RANGE(NVTX_LOBPCG2)
              if (dtset%cprj_in_memory==1) then
@@ -496,7 +496,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
              end if
              ABI_NVTX_END_RANGE()
 
-          end if
+           end if
 
          end if
 
@@ -738,7 +738,12 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      ABI_MALLOC_MANAGED(wfraug,(/2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat_fft/))
 #endif
    else
-     ABI_MALLOC(wfraug,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat_fft))
+     fftalg = gs_hamk%ngfft(7)
+     if (gs_hamk%gpu_option==ABI_GPU_DISABLED.and.fftalg/=401) then
+       ABI_MALLOC(wfraug,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6))
+     else
+       ABI_MALLOC(wfraug,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat_fft))
+     end if
    end if
  end if
 

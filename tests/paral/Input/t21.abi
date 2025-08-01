@@ -52,7 +52,7 @@
  timopt -1
  np_spkpt 1
  npband 2
- bandpp 1
+ nblock_lobpcg 6
  npfft 2
  paral_kgb 1
  iomode 0 # Only for testing purposes 
