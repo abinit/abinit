@@ -2413,8 +2413,8 @@ end subroutine pawdijhat
 !!
 !! SOURCE
 
-subroutine pawdijnd(dijnd,cplex_dij,gprimd,iatom,natom,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
-    & pawxcdev,qphase,vh1,vxc1,xred,znuc,zora)
+subroutine pawdijnd(dijnd,cplex_dij,gprimd,iatom,natom,ndij,nspden,nucdipmom,&
+    & pawang,pawrad,pawtab,pawxcdev,qphase,vh1,vxc1,xred,znuc,zora)
 
 !Arguments ---------------------------------------------
 !scalars
