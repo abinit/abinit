@@ -15,7 +15,7 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! NOTES
-!!  FOR DEVELOPPERS: in order to preserve the portability of libPAW library,
+!!  FOR DEVELOPERS: in order to preserve the portability of libPAW library,
 !!  please consult ~abinit/src/??_libpaw/libpaw-coding-rules.txt
 !!
 !! SOURCE
@@ -46,7 +46,7 @@ MODULE m_pawdij
 
  implicit none
 
- private
+ private :: pawdijaa
 
 
 !public procedures.
@@ -808,9 +808,9 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 
 !    ===== Need to compute Dijnd
        LIBPAW_ALLOCATE(dijnd,(cplex_dij*lmn2_size,ndij))
-       call pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom(:,iatom),&
+       call pawdijnd(dijnd,cplex_dij,gprimd,iatom,natom,ndij,nspden,nucdipmom(1:3,1:natom),&
          & pawang,pawrad(itypat),pawtab(itypat),pawxcdev,qphase,&
-         & paw_an(iatom)%vh1,paw_an(iatom)%vxc1,znuc(itypat),paw_ij(iatom)%zora)
+         & paw_an(iatom)%vh1,paw_an(iatom)%vxc1,xred,znuc(itypat),paw_ij(iatom)%zora)
        if (dijnd_need) paw_ij(iatom)%dijnd(:,:)=dijnd(:,:)
        if (dij_need) then
          paw_ij(iatom)%dij(1:cplex_dij*lmn2_size,:)= &
@@ -2413,25 +2413,26 @@ end subroutine pawdijhat
 !!
 !! SOURCE
 
-subroutine pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
-    & pawxcdev,qphase,vh1,vxc1,znuc,zora)
+subroutine pawdijnd(dijnd,cplex_dij,gprimd,iatom,natom,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
+    & pawxcdev,qphase,vh1,vxc1,xred,znuc,zora)
 
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: cplex_dij,ndij,nspden,pawxcdev,qphase,zora
+ integer,intent(in) :: cplex_dij,iatom,natom,ndij,nspden,pawxcdev,qphase,zora
  real(dp),intent(in) :: znuc
  type(pawang_type),intent(in) :: pawang
  type(pawrad_type),intent(in) :: pawrad
  type(pawtab_type),target,intent(in) :: pawtab
 !arrays
  real(dp),intent(out) :: dijnd(:,:)
- real(dp),intent(in) :: nucdipmom(3)
- real(dp),intent(in) :: vh1(:,:,:),vxc1(:,:,:)
+ real(dp),intent(in) :: gprimd(3,3),nucdipmom(3,natom)
+ real(dp),intent(in) :: vh1(:,:,:),vxc1(:,:,:),xred(3,natom)
 
 !Local variables ---------------------------------------
 !scalars
  integer :: angl_size,idir,ii,ij_size,il,ilmn,im,imesh
- integer :: jl,jlmn,jm,klmn,kln,lm_size,lmn2_size,mesh_size
+ integer :: jatom,jl,jlmn,jm,klm,klmn,kln,lm_size,lmn2_size
+ integer :: mesh_size
  real(dp) :: rc,rr,rt
  real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
  complex(dpc) :: cmatrixelement,lms
@@ -2463,8 +2464,8 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
    LIBPAW_BUG(msg)
  end if
 
+ LIBPAW_ALLOCATE(zk1,(mesh_size))
  if(usezora) then
-   LIBPAW_ALLOCATE(zk1,(mesh_size))
    if (size(vh1,1)/=qphase*mesh_size.or.size(vh1,2)<1.or.size(vh1,3)<1) then
      msg='invalid sizes for vh1!'
      LIBPAW_BUG(msg)
@@ -2517,9 +2518,6 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
    call simp_gen(intgr3(kln),ff,pawrad)
  end do
  LIBPAW_DEALLOCATE(ff)
- if(allocated(zk1)) then
-   LIBPAW_DEALLOCATE(zk1)
- end if
 
  !---------------------------
  ! accumulate matrix elements
@@ -2544,11 +2542,11 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
    do idir = 1, 3
 
      ! this loop accumulates a dot product so if no dipole moment in direction idir, nothing to do
-     if( ABS(nucdipmom(idir)) .LT. tol8 ) cycle
+     if( ABS(nucdipmom(idir,iatom)) .LT. tol8 ) cycle
 
      call slxyzs(il,im,idir,jl,jm,lms)
 
-     cmatrixelement = FineStructureConstant2*lms*nucdipmom(idir)*intgr3(kln)
+     cmatrixelement = FineStructureConstant2*lms*nucdipmom(idir,iatom)*intgr3(kln)
      dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + real(cmatrixelement)
      dijnd(2*klmn  ,1) = dijnd(2*klmn  ,1) + aimag(cmatrixelement)
 
@@ -2558,9 +2556,25 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
 
  LIBPAW_DEALLOCATE(intgr3)
 
+ ! loop over other atoms to compute A.A term. Note this is "on-site only" with
+ ! phi*phij, no tphi*tphij, because this term is not present in the planewave
+ ! getghc
+ do jatom=1,natom
+   if (jatom .EQ. iatom) cycle ! no self term
+   if (.NOT. ANY(ABS(nucdipmom(:,jatom))>tol8)) cycle ! skip neighbors without dipoles
+
+   call pawdijaa(dijnd,gprimd,iatom,jatom,mesh_size,natom,nucdipmom,&
+     & pawang,pawrad,pawtab,usezora,xred,zk1)
+
+ end do
+
  ! in case of ndij > 1, note that there is no spin-flip in this term
  ! so therefore down-down = up-up, and up-down and down-up terms are still zero
  if(ndij > 1) dijnd(:,2)=dijnd(:,1)
+ 
+ if(allocated(zk1)) then
+   LIBPAW_DEALLOCATE(zk1)
+ end if
 
 end subroutine pawdijnd
 !!***
@@ -2803,6 +2817,7 @@ end subroutine pawdijaa
 !!***
 
 !----------------------------------------------------------------------
+
 
 !!****f* m_pawdij/pawdijso
 !! NAME
