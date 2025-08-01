@@ -1450,8 +1450,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:7)=(/-140, 122,-352,-212,-227,-228,-844/)
    case(21)
 !      Estimate different complements in vtowfk
-!      vtowfk(ssdiag) (= vtowfk(loop)  -cgwf-lobpcgwf_old-cgwf_cprj-lobpcgwf2-chebfi - getcprj(vtowfk) - getcsc(subovl))
-     tslots(:9)=(/-588, 39,-22,-530,-1300,-1600,-1640,-1295,-1364/)
+!      vtowfk(ssdiag) (= vtowfk(loop)  -cgwf -lobpcgwf_old -cgwf_cprj -lobpcgwf2 -chebfi
+!         -getcprj(vtowfk) -getcsc(subovl)) -chebfiwf2 -lobpcgwf2_cprj -chebfiwf2_cprj
+     tslots(:12)=(/-588, 39,-22,-530,-1300,-1600,-1640,-1295,-1364,-1750,-2030,-2060/)
    case(22)
 !      vtowfk(contrib) (= vtowfk (afterloop) - nonlop%vtowfk - fourwf%vtowfk )
      tslots(:4)=(/589, 30,-222,-842/)
