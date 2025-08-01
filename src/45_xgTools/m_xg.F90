@@ -3753,11 +3753,11 @@ contains
 
     type(xgBlock_t) , intent(in)    :: xgBlockA,xgBlockB
     type(xgBlock_t) , intent(inout) :: xgBlockW
-    integer,intent(in) :: blocksize,me_comm
-    integer,intent(in),optional :: comm
+    integer,intent(in) :: me_comm
+    integer,intent(in),optional :: blocksize,comm
 
     logical :: multiblock
-    integer :: ierr,comm_,source,dest,tag,request
+    integer :: ierr,blocksize_,comm_,source,dest,tag,request
     integer :: iblock_left,iblock_right,iblock_mpi,nblocks_mpi,nblocks_left,nblocks_right
     integer :: shift_col,shift_row,shift_col_mpi,shift_row_mpi
     double precision :: tsec(2)
@@ -3790,6 +3790,17 @@ contains
       ABI_ERROR('cols(xgBlockB)/=nblocks_mpi*cols(xgBlockW)')
     end if
 
+    blocksize_ = xgBlockA%cols
+    if (present(blocksize)) then
+      if (mod(xgBlockA%cols,blocksize)/=0) then
+        ABI_ERROR('invalid blocksize')
+      end if
+      if (mod(xgBlockB%cols/nblocks_mpi,blocksize)/=0) then
+        ABI_ERROR('invalid blocksize')
+      end if
+      blocksize_ = blocksize
+    end if
+
     if (nblocks_mpi==1) then
 
       call timab(tim_gemmcyclic,2,tsec)
@@ -3798,8 +3809,8 @@ contains
 
     else
 
-      nblocks_left  = xgBlockA%cols / blocksize
-      nblocks_right = xgBlockB%cols / (blocksize*nblocks_mpi)
+      nblocks_left  = xgBlockA%cols / blocksize_
+      nblocks_right = xgBlockB%cols / (blocksize_*nblocks_mpi)
       multiblock = .false.
       if (nblocks_left>1.or.nblocks_right>1) then
         multiblock = .true.
@@ -3808,23 +3819,23 @@ contains
       call xg_init(xg_mpi_work,xgBlockA%space,xgBlockA%rows,xgBlockA%cols,xmpi_comm_null)
       call xg_init(subB_mpi,xgBlockB%space,xgBlockB%rows/nblocks_mpi,xgBlockB%cols/nblocks_mpi,xmpi_comm_null)
       if (multiblock) then
-        call xg_init(subB,xgBlockB%space,blocksize,blocksize,xmpi_comm_null)
+        call xg_init(subB,xgBlockB%space,blocksize_,blocksize_,xmpi_comm_null)
       end if
 
       do iblock_mpi=1,nblocks_mpi
 
-        shift_row_mpi = mod((iblock_mpi-1)+me_comm,nblocks_mpi) * blocksize
-        shift_col_mpi = me_comm * blocksize
+        shift_row_mpi = mod((iblock_mpi-1)+me_comm,nblocks_mpi) * blocksize_
+        shift_col_mpi = me_comm * blocksize_
         if (.not.multiblock) then
           call xgBlock_partialcopy(xgBlockB,subB_mpi%self,shift_row_mpi,shift_col_mpi,BIG2SMALL)
         else
           do iblock_right=1,nblocks_right
             do iblock_left=1,nblocks_left
-              shift_row = shift_row_mpi + (iblock_left-1) * blocksize*nblocks_mpi
-              shift_col = shift_col_mpi + (iblock_right-1) * blocksize*nblocks_mpi
+              shift_row = shift_row_mpi + (iblock_left-1) * blocksize_*nblocks_mpi
+              shift_col = shift_col_mpi + (iblock_right-1) * blocksize_*nblocks_mpi
               call xgBlock_partialcopy(xgBlockB,subB%self,shift_row,shift_col,BIG2SMALL)
-              shift_row = (iblock_left-1) * blocksize
-              shift_col = (iblock_right-1) * blocksize
+              shift_row = (iblock_left-1) * blocksize_
+              shift_col = (iblock_right-1) * blocksize_
               call xgBlock_partialcopy(subB%self,subB_mpi%self,shift_row,shift_col,SMALL2BIG)
             end do
           end do

@@ -154,19 +154,19 @@ module m_xg_ortho_RR
 !!
 !! NAME
 !! xg_Borthonormalize_cprj
-subroutine xg_Borthonormalize_cprj(xg_nonlop,blockdim,X,cprjX,info,timer,gpu_option,AX)
+subroutine xg_Borthonormalize_cprj(xg_nonlop,X,cprjX,info,timer,gpu_option,blockdim_cprj,AX)
 
     integer          , intent(in   ) :: timer,gpu_option
-    integer          , intent(in   ) :: blockdim
     integer          , intent(  out) :: info
     type(xg_nonlop_t), intent(in   ) :: xg_nonlop
     type(xgBlock_t)  , intent(inout) :: X
     type(xgBlock_t)  , intent(inout) :: cprjX
+    integer          , intent(in   ),optional :: blockdim_cprj
     type(xgBlock_t)  , intent(inout),optional :: AX
 
     type(xg_t) :: buffer,cprj_work
     type(xgBlock_t) :: cprjX_spinor,cprj_work_spinor
-    integer :: space_buf
+    integer :: blockdim_cprj_,space_buf
     integer :: spacecom,ncols_cprj,nn,nspinor
     double precision :: tsec(2)
 
@@ -182,6 +182,10 @@ subroutine xg_Borthonormalize_cprj(xg_nonlop,blockdim,X,cprjX,info,timer,gpu_opt
 
     nn = cols(X)
     ncols_cprj = cols(cprjX)
+    blockdim_cprj_ = ncols_cprj
+    if (present(blockdim_cprj)) then
+      blockdim_cprj_ = blockdim_cprj
+    end if
     nspinor = xg_nonlop%nspinor
 
     spacecom = comm(X)
@@ -197,7 +201,7 @@ subroutine xg_Borthonormalize_cprj(xg_nonlop,blockdim,X,cprjX,info,timer,gpu_opt
     call xgBlock_gemm('t','n',1.d0,X,X,0.d0,buffer%self,comm=spacecom)
     call xg_init(cprj_work,space(cprjX),rows(cprjX),ncols_cprj,spacecom)
     if (xg_nonlop%paw) then
-      call xg_nonlop_getXSX(xg_nonlop,cprjX,cprjX,cprj_work%self,buffer%self,blockdim)
+      call xg_nonlop_getXSX(xg_nonlop,cprjX,cprjX,cprj_work%self,buffer%self,blocksize=blockdim_cprj_)
     end if
 
     ! Compute Cholesky decomposition (Upper part)
@@ -227,7 +231,7 @@ subroutine xg_Borthonormalize_cprj(xg_nonlop,blockdim,X,cprjX,info,timer,gpu_opt
       call xgBlock_zero(cprj_work%self)
       call xgBlock_reshape_spinor(cprj_work%self,cprj_work_spinor,nspinor,COLS2ROWS)
       call xgBlock_gemm_mpi_cyclic_permutation(cprjX_spinor,buffer%self,cprj_work_spinor,&
-        & xg_nonlop%me_band,blockdim/nspinor,comm=xg_nonlop%comm_band)
+        & xg_nonlop%me_band,blocksize=blockdim_cprj_/nspinor,comm=xg_nonlop%comm_band)
       call xgBlock_copy(cprj_work%self,cprjX)
     end if
 
@@ -571,12 +575,11 @@ subroutine xg_Borthonormalize_cprj(xg_nonlop,blockdim,X,cprjX,info,timer,gpu_opt
 !!
 !! NAME
 !! xg_RayleighRitz_cprj
-subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,info,prtvol,timer,gpu_option,&
-     tolerance,XW,W,cprjXW,cprjW,AW,P,cprjP,AP,WP,cprjWP,AWP,XWP,cprjXWP,solve_ax_bx,add_Anl)
+subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,info,prtvol,timer,gpu_option,&
+    tolerance,XW,W,cprjXW,cprjW,AW,P,cprjP,AP,WP,cprjWP,AWP,XWP,cprjXWP,blockdim_cprj,solve_ax_bx,add_Anl)
 
     integer          , intent(in   ) :: timer,gpu_option
     integer          , intent(in   ) :: prtvol
-    integer          , intent(in   ) :: blockdim_cprj
     type(xgBlock_t)  , intent(inout) :: eigenvalues
     type(xgBlock_t)  , intent(inout) :: X
     type(xgBlock_t)  , intent(inout) :: cprjX
@@ -598,12 +601,13 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,i
     type(xgBlock_t), intent(inout),optional :: AWP
     type(xgBlock_t), intent(inout),optional :: XWP
     type(xgBlock_t), intent(inout),optional :: cprjXWP
+    integer,intent(in),optional :: blockdim_cprj
     ! End LOBPCG only
     logical, intent(in),optional :: solve_ax_bx
     logical, intent(in),optional :: add_Anl
     integer :: var
     integer :: spacedim
-    integer :: blockdim
+    integer :: blockdim,blockdim_cprj_
     integer :: space_buf
     integer :: subdim
     integer :: spacecom
@@ -655,6 +659,11 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,i
     end if
     spacedim  = rows(X)
     blockdim  = cols(X)
+    ncols_cprj = cols(cprjX)
+    blockdim_cprj_ = ncols_cprj
+    if (present(blockdim_cprj)) then
+      blockdim_cprj_ = blockdim_cprj
+    end if
     space_buf = space(X)
     if (space(X)==SPACE_CR) then
       space_buf = SPACE_R
@@ -730,7 +739,7 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,i
     ! Add the nonlocal part (H)
     call xg_init(cprj_work,space(cprjX),rows(cprjX),cols(cprjX),spacecom)
     if (add_Anl_) then
-      call xg_nonlop_getXHX(xg_nonlop,cprjX,cprjX,cprj_work%self,subsub,blockdim_cprj)
+      call xg_nonlop_getXHX(xg_nonlop,cprjX,cprjX,cprj_work%self,subsub,blocksize=blockdim_cprj_)
     end if
 
     if ( solve_ax_bx_ .or. var /= VAR_X ) then
@@ -739,7 +748,7 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,i
       call xgBlock_gemm('t','n',1.0d0,X,X,0.d0,subsub,comm=spacecom)
       ! Add the nonlocal part (S)
       if (xg_nonlop%paw) then
-        call xg_nonlop_getXSX(xg_nonlop,cprjX,cprjX,cprj_work%self,subsub,blockdim_cprj)
+        call xg_nonlop_getXSX(xg_nonlop,cprjX,cprjX,cprj_work%self,subsub,blocksize=blockdim_cprj_)
       end if
     end if
 
@@ -751,7 +760,7 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,i
 
       ! Add the nonlocal part (H)
       if (add_Anl_) then
-        call xg_nonlop_getXHX(xg_nonlop,cprjXW,cprjW,cprj_work%self,subsub,blockdim_cprj)
+        call xg_nonlop_getXHX(xg_nonlop,cprjXW,cprjW,cprj_work%self,subsub,blocksize=blockdim_cprj_)
       end if
 
       ! Compute XBW and WBW
@@ -759,7 +768,7 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,i
       call xgBlock_gemm('t','n',1.0d0,XW,W,0.d0,subsub,comm=spacecom)
       ! Add the nonlocal part (S)
       if (xg_nonlop%paw) then
-        call xg_nonlop_getXSX(xg_nonlop,cprjXW,cprjW,cprj_work%self,subsub,blockdim_cprj)
+        call xg_nonlop_getXSX(xg_nonlop,cprjXW,cprjW,cprj_work%self,subsub,blocksize=blockdim_cprj_)
       end if
 
     end if
@@ -771,14 +780,14 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,i
 
       ! Add the nonlocal part (H)
       if (add_Anl_) then
-        call xg_nonlop_getXHX(xg_nonlop,cprjXWP,cprjP,cprj_work%self,subsub,blockdim_cprj)
+        call xg_nonlop_getXHX(xg_nonlop,cprjXWP,cprjP,cprj_work%self,subsub,blocksize=blockdim_cprj_)
       end if
 
       call xg_setBlock(subB,subsub,3*blockdim,blockdim,fcol=2*blockdim+1)
       call xgBlock_gemm('t','n',1.0d0,XWP,P,0.d0,subsub,comm=spacecom)
       ! Add the nonlocal part (S)
       if (xg_nonlop%paw) then
-        call xg_nonlop_getXSX(xg_nonlop,cprjXWP,cprjP,cprj_work%self,subsub,blockdim_cprj)
+        call xg_nonlop_getXSX(xg_nonlop,cprjXWP,cprjP,cprj_work%self,subsub,blocksize=blockdim_cprj_)
       end if
     end if
 
@@ -863,7 +872,6 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,i
 
     if ( info == 0 ) then
       call xg_init(Xwork,space(X),spacedim,blockdim,me_g0=me_g0(X))
-      ncols_cprj = cols(cprjX)
       call xg_init(cprjXwork,space(cprjX),cprjdim,ncols_cprj,comm(cprjX))
       call xg_setBlock(cprjXwork,cprj_workX,cprjdim,ncols_cprj)
       call xgBlock_reshape_spinor(cprj_workX,cprj_workX_spinor,nspinor,COLS2ROWS)
@@ -887,7 +895,7 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,i
       else
         call xgBlock_zero(cprj_workX)
         call xgBlock_gemm_mpi_cyclic_permutation(cprjX_spinor,Cwp,cprj_workX_spinor,&
-          & xg_nonlop%me_band,blockdim_cprj/nspinor,comm=xg_nonlop%comm_band)
+          & xg_nonlop%me_band,blocksize=blockdim_cprj_/nspinor,comm=xg_nonlop%comm_band)
       end if
       call xgBlock_copy(cprj_workX,cprjX)
 
@@ -913,10 +921,10 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,i
           if ( var==VAR_XW ) then
             call xgBlock_reshape_spinor(cprjW,cprjW_spinor,nspinor,COLS2ROWS)
             call xgBlock_gemm_mpi_cyclic_permutation(cprjW_spinor,Cwp,cprj_workX_spinor,&
-              & xg_nonlop%me_band,blockdim_cprj/nspinor,comm=xg_nonlop%comm_band)
+              & xg_nonlop%me_band,blocksize=blockdim_cprj_/nspinor,comm=xg_nonlop%comm_band)
           else if ( var==VAR_XWP ) then
             call xgBlock_gemm_mpi_cyclic_permutation(cprjWP_spinor,Cwp,cprj_workX_spinor,&
-              & xg_nonlop%me_band,blockdim_cprj/nspinor,comm=xg_nonlop%comm_band)
+              & xg_nonlop%me_band,blocksize=blockdim_cprj_/nspinor,comm=xg_nonlop%comm_band)
           else
             ABI_ERROR('not implemented')
           end if
