@@ -18,7 +18,7 @@ repos:
       - id: trailing-whitespace
       - id: check-executables-have-shebangs
       - id: check-added-large-files
-        args: ['--maxkb=100']  # 1000 KB = 1 MB
+        args: ['--maxkb=1500']  # 1000 KB = 1 MB
 
   #- repo: https://github.com/astral-sh/ruff-pre-commit
   #  rev: v0.11.12
