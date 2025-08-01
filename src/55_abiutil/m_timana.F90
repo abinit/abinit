@@ -1021,30 +1021,30 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1664) = 'xgTransposer_*@all2all         '
  names(1665) = 'xgTransposer_*@gatherv         '
  names(1666) = 'xgTransposer_@reorganize       '
- names(1667) = 'xgTransposer_init              '
- names(1668) = 'xgTransposer_free              '
- names(1669) = 'xgTransposer_transpose         '
+ names(1667) = 'xgTransposer_init              ';basic(1667)=1
+ names(1668) = 'xgTransposer_free              ';basic(1668)=1
+ names(1669) = 'xgTransposer_transpose         ';basic(1669)=1
 
- names(1670) = 'xgBlock_gemm(blas)             '
- names(1671) = 'xgBlock_trsm                   '
- names(1672) = 'xgBlock_potrf                  '
- names(1673) = 'xgBlock_zero                   '
- names(1674) = 'xgBlock_zero_im_g0             '
- names(1675) = 'xgBlock_heev                   '
- names(1676) = 'xgBlock_heevd                  '
- names(1677) = 'xgBlock_hpev                   '
- names(1678) = 'xgBlock_hpevd                  '
- names(1679) = 'xgBlock_hegv                   '
- names(1680) = 'xgBlock_hegvx                  '
- names(1681) = 'xgBlock_hegvd                  '
- names(1682) = 'xgBlock_hpgv                   '
- names(1683) = 'xgBlock_hpgvx                  '
- names(1684) = 'xgBlock_hpgvd                  '
- names(1685) = 'xgBlock_copy                   '
- names(1686) = 'xgBlock_cshift                 '
- names(1687) = 'xgBlock_pack                   '
- names(1688) = 'xgBlock_gemm(mpi)              '
- names(1689) = 'xgBlock_apply_diag             '
+ names(1670) = 'xgBlock_gemm(blas)             ';basic(1670)=1
+ names(1671) = 'xgBlock_trsm                   ';basic(1671)=1
+ names(1672) = 'xgBlock_potrf                  ';basic(1672)=1
+ names(1673) = 'xgBlock_zero                   ';basic(1673)=1
+ names(1674) = 'xgBlock_zero_im_g0             ';basic(1674)=1
+ names(1675) = 'xgBlock_heev                   ';basic(1675)=1
+ names(1676) = 'xgBlock_heevd                  ';basic(1676)=1
+ names(1677) = 'xgBlock_hpev                   ';basic(1677)=1
+ names(1678) = 'xgBlock_hpevd                  ';basic(1678)=1
+ names(1679) = 'xgBlock_hegv                   ';basic(1679)=1
+ names(1680) = 'xgBlock_hegvx                  ';basic(1680)=1
+ names(1681) = 'xgBlock_hegvd                  ';basic(1681)=1
+ names(1682) = 'xgBlock_hpgv                   ';basic(1682)=1
+ names(1683) = 'xgBlock_hpgvx                  ';basic(1683)=1
+ names(1684) = 'xgBlock_hpgvd                  ';basic(1684)=1
+ names(1685) = 'xgBlock_copy                   ';basic(1685)=1
+ names(1686) = 'xgBlock_cshift                 ';basic(1686)=1
+ names(1687) = 'xgBlock_pack                   ';basic(1687)=1
+ names(1688) = 'xgBlock_gemm(mpi)              ';basic(1688)=1
+ names(1689) = 'xgBlock_apply_diag             ';basic(1689)=1
 
  names(1690) = 'xgScalapack_init               '
  names(1691) = 'xgScalapack_free               '
@@ -1185,22 +1185,22 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  !names(1931)='gsph2box                       '; basic(1931) = 1
 
  ! xg_t (2nd part)
- names(2000)='xgBlock_scale                   '
- names(2001)='xgBlock_colwiseDotProduct       '
- names(2002)='xgBlock_colwiseMul              '
- names(2003)='xgBlock_colwiseCymax            '
- names(2004)='xgBlock_colwiseDivision         '
- names(2005)='xgBlock_colwiseNorm2            '
- names(2006)='xgBlock_saxpy                   '
- names(2007)='xgBlock_minmax                  '
- names(2008)='xgBlock_partialcopy             '
- names(2009)='xgBlock_gemmcyclic              '
- names(2010)='xgBlock_yxmax                   '
- names(2011)='xgBlock_ymax                    '
- names(2012)='xgBlock_add                     '
- names(2013)='xgBlock_add_diag                '
- names(2014)='xgBlock_invert                  '
- names(2015)='xgBlock_invert_sy               '
+ names(2000)='xgBlock_scale                   '; basic(2000) = 1
+ names(2001)='xgBlock_colwiseDotProduct       '; basic(2001) = 1
+ names(2002)='xgBlock_colwiseMul              '; basic(2002) = 1
+ names(2003)='xgBlock_colwiseCymax            '; basic(2003) = 1
+ names(2004)='xgBlock_colwiseDivision         '; basic(2004) = 1
+ names(2005)='xgBlock_colwiseNorm2            '; basic(2005) = 1
+ names(2006)='xgBlock_saxpy                   '; basic(2006) = 1
+ names(2007)='xgBlock_minmax                  '; basic(2007) = 1
+ names(2008)='xgBlock_partialcopy             '; basic(2008) = 1
+ names(2009)='xgBlock_gemmcyclic              '; basic(2009) = 1
+ names(2010)='xgBlock_yxmax                   '; basic(2010) = 1
+ names(2011)='xgBlock_ymax                    '; basic(2011) = 1
+ names(2012)='xgBlock_add                     '; basic(2012) = 1
+ names(2013)='xgBlock_add_diag                '; basic(2013) = 1
+ names(2014)='xgBlock_invert                  '; basic(2014) = 1
+ names(2015)='xgBlock_invert_sy               '; basic(2015) = 1
 
  ! lobpcg2_cprj
  names(2030) = 'lobpcgwf2_cprj                 ';
@@ -1253,14 +1253,14 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(2100)='xg_nonlop                       '
  names(2101)='xg_nonlop%getcprj               '
  names(2102)='xg_nonlop%apply_prj             '
- names(2103)='xg_nonlop%apply_Aij             '
+ names(2103)='xg_nonlop%apply_Aij             '; basic(2103)=1
  names(2104)='xg_nonlop%mult_cprj             '
  names(2105)='xg_nonlop%make_k                '
- names(2106)='xg_nonlop%make_Dij              '
+ names(2106)='xg_nonlop%make_Dij              '; basic(2106)=1
  names(2107)='xg_nonlop%make_Sij              '
- names(2108)='xg_nonlop%make_ekb              '
- names(2109)='xg_nonlop%apply_diag            '
- names(2110)='xg_nonlop%init                  '
+ names(2108)='xg_nonlop%make_ekb              '; basic(2108)=1
+ names(2109)='xg_nonlop%apply_diag            '; basic(2109)=1
+ names(2110)='xg_nonlop%init                  '; basic(2110)=1
 
  names(2120)='xg_nonlop%getXSX                '
  names(2121)='xg_nonlop%getXHX                '
@@ -1984,7 +1984,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(89)
          list(:8)=(/2150,2151,2152,2153,2154,2155,2156,2159/) ; msg='xg_nonlop%forces_stress'
        case(90)
-         list(:36)=(/ (ii,ii=1670,1689,1),(ii,ii=2000,2015,1) /) ; msg='low-level xgBlock type '
+         list(:37)=(/ (ii,ii=1670,1689,1),(ii,ii=2000,2015,1),2103 /) ; msg='low-level xgBlock type '
        case default
          cycle ! This allows one to disable temporarily some partitionings
 

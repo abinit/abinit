@@ -560,8 +560,6 @@ contains
 
 ! Communication in case of distribution over atomic sites
   if (paral_atom) then
-    !call xgBlock_reverseMap(xg_nonlop%Dij%self,Dij_all_)
-    !call xmpi_sum(Dij_all_,xg_nonlop%comm_atom,ierr)
     call xgBlock_mpi_sum(xg_nonlop%Dij%self,comm=xg_nonlop%comm_atom)
   end if
 
@@ -2152,7 +2150,6 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
          Aij_iatom_ = Aij_iatom
        end if
        ! Copy cprj of ONE atom for ALL bands from cprjin to cprin_nlmn
-       !call timab(tim_apply_Aij_copy,1,tsec)
        if (A_with_spin_) then
          do iband=1,ncols_1atom
            cprjin_nlmn_(1:cplex*nlmn,iband) = cprjin_(1+shift:cplex*nlmn+shift,1+nspinor*(iband-1))
@@ -2167,14 +2164,9 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
            cprjin_nlmn_(1:cplex*nlmn,iband) = cprjin_(1+shift:cplex*nlmn+shift,iband)
          end do
        end if
-       !call timab(tim_apply_Aij_copy,2,tsec)
 
-       !call timab(tim_apply_Aij_gemm,1,tsec)
-       !call xgBlock_gemm('n','n',1.0d0,Aij_iatom_,cprjin_nlmn,0.d0,cprjout_nlmn,timing=.false.)
-       call xgBlock_gemm('n','n',1.0d0,Aij_iatom_,cprjin_nlmn,0.d0,cprjout_nlmn)
-       !call timab(tim_apply_Aij_gemm,2,tsec)
+       call xgBlock_gemm('n','n',1.0d0,Aij_iatom_,cprjin_nlmn,0.d0,cprjout_nlmn,timing=.false.)
 
-       !call timab(tim_apply_Aij_copy,1,tsec)
        if (A_with_spin_) then
          do iband=1,ncols_1atom
            cprjout_(1+shift:cplex*nlmn+shift,1+nspinor*(iband-1)) = cprjout_(1+shift:cplex*nlmn+shift,1+nspinor*(iband-1)) &
@@ -2192,7 +2184,6 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
            & + cprjout_nlmn_(1:cplex*nlmn,iband)
          end do
        end if
-       !call timab(tim_apply_Aij_copy,2,tsec)
        shift=shift+cplex*nlmn
      end do
 
