@@ -4,9 +4,8 @@
 #Here, we only test the parallelisation over bands and spins:
 #npband*npfft*np_spkpt=2*1*2=4 processors.
 #In addition, we also test here various features of bandfft-kpt parallelisation
-#In particular, the bandpp, istwfk=2 and wfoptalg=14 variables.
+#In particular istwfk=2 and wfoptalg=14 variables.
 
- bandpp 2
  istwfk 2
  npband 2 np_spkpt 2 npfft 1
 
@@ -31,6 +30,7 @@
  chksymtnons 0
  znucl 6
  nband 12 occ 4*2 8*0
+ nblock_lobpcg 3 # Problably not optimal (LB:07-2025)
  ntypat 1 typat 1 1  natom 2
 
  paral_kgb 1
@@ -60,5 +60,5 @@
 #%%    Here, we only test the parallelisation over bands and spins:
 #%%    npband*npfft*np_spkpt=2*1*2=4 processors.
 #%%    In addition, we also test here various features of bandfft-kpt parallelisation
-#%%    In particular, the bandpp, istwfk=2 and wfoptalg=14 variables.
+#%%    In particular istwfk=2 and wfoptalg=14 variables.
 #%%<END TEST_INFO>

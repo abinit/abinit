@@ -48,7 +48,7 @@ nstep         50       # Maximal number of SCF steps
 # Parallelization
 # ===============
 paral_kgb     1        # Force use of lobpcg WITH parallelism on 1 CPU
-bandpp        10
+nblock_lobpcg 1
 
 # Definition of the path
 # ======================

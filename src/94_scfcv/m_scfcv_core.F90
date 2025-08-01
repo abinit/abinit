@@ -786,7 +786,11 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
    dielar(5)=dtset%diegap;dielar(6)=dtset%dielam
    dielar(7)=dtset%diemix;if (dtset%iscf>=10) dielar(7)=dtset%diemixmag
    ABI_MALLOC(nvresid,(nfftf,dtset%nspden))
-   ABI_MALLOC(nvtauresid,(nfftf,dtset%nspden*usevxctau))
+   if (dtset%iscf>=10) then
+      ABI_MALLOC(nvtauresid,(nfftf,dtset%nspden*dtset%usekden))
+   else
+      ABI_MALLOC(nvtauresid,(nfftf,dtset%nspden*usevxctau))
+   end if
    if (nstep==0) then
     nvresid=zero
     nvtauresid=zero
@@ -2274,28 +2278,33 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  esum=energies%e_kinetic+energies%e_ewald+energies%e_corepsp+energies%e_hartree+energies%e_xc&
  &+energies%e_localpsp+enonlocalpsp+energies%e_fock0&
  &+energies%e_hybcomp_E0+energies%e_hybcomp_v0+energies%e_hybcomp_v+energies%e_vdw_dftd&
- &+energies%e_elecfield+energies%e_magfield
+ &+energies%e_elecfield+energies%e_magfield+energies%e_paw
 
  if (me == 0) then
    write(std_out,'(a1)')' '
    write(std_out,'(a98)')'-------------------------------------------------------------------------------------------------'
    write(std_out,'(a,2(es16.6,a))')' Ekinetic   = : ',energies%e_kinetic    ,' Ha ,',energies%e_kinetic*Ha_eV    ,' eV'
    write(std_out,'(a,2(es16.6,a))')' Evext_l    = : ',energies%e_localpsp   ,' Ha ,',energies%e_localpsp*Ha_eV   ,' eV'
-   write(std_out,'(a,2(es16.6,a))')' Evext_nl   = : ',enonlocalpsp          ,' Ha ,',enonlocalpsp*Ha_eV          ,' eV'
+   if(enonlocalpsp>1.0d-6) then
+      write(std_out,'(a,2(es16.6,a))')' Evext_nl   = : ',enonlocalpsp       ,' Ha ,',enonlocalpsp*Ha_eV          ,' eV'
+   endif
    write(std_out,'(a,2(es16.6,a))')' Epsp_core  = : ',energies%e_corepsp    ,' Ha ,',energies%e_corepsp*Ha_eV      ,' eV'
    write(std_out,'(a,2(es16.6,a))')' Ehartree   = : ',energies%e_hartree    ,' Ha ,',energies%e_hartree*Ha_eV    ,' eV'
    if(dtset%usefock==1) then
-     write(std_out,'(a,2(es16.6,a))')' Efock      = : ',energies%e_fock0      ,' Ha ,',energies%e_fock0*Ha_eV      ,' eV'
+     write(std_out,'(a,2(es16.6,a))')' Efock      = : ',energies%e_fock0    ,' Ha ,',energies%e_fock0*Ha_eV      ,' eV'
    endif
    write(std_out,'(a,2(es16.6,a))')' Exc_ks     = : ',energies%e_xc         ,' Ha ,',energies%e_xc*Ha_eV         ,' eV'
    if(abs(energies%e_vdw_dftd)>1.0d-6) then
-     write(std_out,'(a,2(es16.6,a))')' EvdW-D     = : ',energies%e_vdw_dftd   ,' Ha ,',energies%e_vdw_dftd*Ha_eV   ,' eV'
+     write(std_out,'(a,2(es16.6,a))')' EvdW-D     = : ',energies%e_vdw_dftd ,' Ha ,',energies%e_vdw_dftd*Ha_eV   ,' eV'
    endif
    if(abs(energies%e_elecfield)>1.0d-6) then
-     write(std_out,'(a,2(es16.6,a))')' Eefield    = : ',energies%e_elecfield  ,' Ha ,',energies%e_elecfield*Ha_eV  ,' eV'
+     write(std_out,'(a,2(es16.6,a))')' Eefield    = : ',energies%e_elecfield,' Ha ,',energies%e_elecfield*Ha_eV  ,' eV'
    endif
    if(abs(energies%e_magfield)>1.0d-6) then
-     write(std_out,'(a,2(es16.6,a))')' Emfield    = : ',energies%e_magfield   ,' Ha ,',energies%e_magfield*Ha_eV   ,' eV'
+     write(std_out,'(a,2(es16.6,a))')' Emfield    = : ',energies%e_magfield ,' Ha ,',energies%e_magfield*Ha_eV   ,' eV'
+   endif
+   if(abs(energies%e_paw)>1.0d-6) then
+     write(std_out,'(a,2(es16.6,a))')' Epaw       = : ',energies%e_paw      ,' Ha ,',energies%e_paw*Ha_eV        ,' eV'
    endif
    write(std_out,'(a,2(es16.6,a))')' Enn        = : ',energies%e_ewald      ,' Ha ,',energies%e_ewald*Ha_eV      ,' eV'
    write(std_out,'(a98)')'-------------------------------------------------------------------------------------------------'
