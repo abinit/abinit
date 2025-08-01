@@ -97,7 +97,7 @@ write_files "none"
 #%%   t120_MPI1.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium
 #%% [extra_info]
 #%% authors = F. Brieuc
-#%% keywords = metaGGA, PAW
+#%% keywords = metaGGA, PAW, CPRJ
 #%% description = Tests metaGGA + PAW + cprj_in_memory + paral_kgb + istwf + nspinor . All datasets should give the same results.
 #%%<END TEST_INFO>
 
