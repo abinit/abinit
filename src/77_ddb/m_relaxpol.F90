@@ -131,6 +131,9 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,gred,iatfix,iout,istrfix,&
 
 ! *********************************************************************
 
+! GA: FIXME This routine doesnt actually care about usepaw.
+!           Remove this argument, and pass usepaw=0 to polcart.
+
  rprimd = Crystal%rprimd
  ucvol = Crystal%ucvol
  iwrite = iout > 0
@@ -272,7 +275,7 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,gred,iatfix,iout,istrfix,&
 
 !Transform the polarization to cartesian coordinates
  polunit = 3
- pelev=zero
+ pelev=zero  ! This is a PAW-related quantity, which we ignore here.
  call polcart(red_ptot,pel,pel_cart,pelev,pion,pion_cart,polunit,&
 & ptot_cart,rprimd,ucvol,iout,usepaw)
 

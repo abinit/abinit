@@ -276,9 +276,6 @@ module m_ddb
      ! Compute the phonon frequencies at the specified q-point by performing
      ! a direct diagonalizatin of the dynamical matrix.
 
-    procedure :: get_asrq0 => ddb_get_asrq0
-     ! Return object used to enforce the acoustic sum rule
-
     procedure :: symmetrize_and_transform => ddb_symmetrize_and_transform
      ! Symmetrize, transform cartesian coordinates, and add missing components
 
@@ -393,6 +390,9 @@ module m_ddb
 
  contains
 
+   procedure :: init => asrq0_init
+    ! Init the object from a ddb.
+
    procedure :: apply => asrq0_apply
     ! Impose the acoustic sum rule based on the q=0 block found in the DDB file.
 
@@ -401,18 +401,6 @@ module m_ddb
 
  end type asrq0_t
 !!***
-
- ! TODO: We should use this constants instead of magic numbers!
- ! BTW: Using a different value for NOSTAT and STAT is a non-sense!
- ! They both are 2-th order derivatives of the total energy!
-
- ! Flags used to indentify the block type.
- !integer,private,parameter :: DDB_BLKTYPE_ETOT = 0         ! Total energy
- !integer,private,parameter :: DDB_BLKTYPE_2DE_NOSTAT = 1   ! Second order derivative of the energy (non-stationary expression)
- !integer,private,parameter :: DDB_BLKTYPE_2DE_STAT = 2     ! Second order derivative of the energy (stationary expression)
- !integer,private,parameter :: DDB_BLKTYPE_3DE = 3          ! Third order derivative of the energy
- !integer,private,parameter :: DDB_BLKTYPE_1DE = 4          ! First order derivative of the energy
- !integer,private,parameter :: DDB_BLKTYPE_2DEIG = 5        ! Second order derivative of the eigenvalues
 
 CONTAINS  !===========================================================
 !!***
@@ -1347,9 +1335,9 @@ subroutine ddb_get_block(ddb, iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rfty
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: rftyp
- integer,intent(out) :: iblok
  class(ddb_type),intent(in) :: ddb
+ integer,intent(out) :: iblok
+ integer,intent(in) :: rftyp
 !arrays
  integer,intent(in) :: rfelfd(4),rfphon(4),rfstrs(4)
  real(dp),intent(inout) :: qphnrm(3),qphon(3,3)
@@ -2158,17 +2146,16 @@ end subroutine rdddb9
 !! chkin9
 !!
 !! FUNCTION
-!! Check the value of some input parameters.
-!! Send error message and stop if needed.
-!! Also transform the meaning of atifc
+!! Construct flags for the computation of IFC for each atoms.
+!! Also check that the value of natifc makes sense.
 !!
 !! INPUTS
-!! atifc(natom)=list of the atom ifc to be analysed
+!! atifc(natifc)=list of the atom ifc to be analysed
 !! natifc= number of atom ifc to be analysed
 !! natom= number of atoms
 !!
 !! OUTPUT
-!! atifc(natom) =  atifc(ia) equals 1 if the analysis of ifc
+!! atifcflg(natom) =  atifcflg(ia) equals 1 if the analysis of ifc
 !!  has to be done for atom ia; otherwise 0.
 !!
 !! NOTES
@@ -2176,13 +2163,15 @@ end subroutine rdddb9
 !!
 !! SOURCE
 
-subroutine chkin9(atifc,natifc,natom)
+subroutine chkin9(atifcflg,atifc,natifc,natom)
 
+! GA: FIXME Move this subroutine into m_anaddb_dataset
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: natifc,natom
 !arrays
- integer,intent(inout) :: atifc(natom)
+ integer,intent(in) :: atifc(natifc)
+ integer,intent(out) :: atifcflg(natom)
 
 !Local variables -------------------------
 !scalars
@@ -2201,9 +2190,8 @@ subroutine chkin9(atifc,natifc,natom)
    ABI_ERROR(msg)
  end if
 
+ atifcflg = zero
  if(natifc>=1)then
-   ABI_MALLOC(work,(natom))
-   work(:)=0
 
    do iatifc=1,natifc
      if(atifc(iatifc)<=0.or.atifc(iatifc)>natom)then
@@ -2214,11 +2202,9 @@ subroutine chkin9(atifc,natifc,natom)
         'Action: change atifc in your input file.'
        ABI_ERROR(msg)
      end if
-     work(atifc(iatifc))=1
+     atifcflg(atifc(iatifc))=1
    end do
 
-   atifc(1:natom)=work(:)
-   ABI_FREE(work)
  end if
 
 end subroutine chkin9
@@ -4074,11 +4060,13 @@ end function ddb_get_strten
 
 !----------------------------------------------------------------------
 
-!!****f* m_ddb/ddb_get_asrq0
+!!****f* m_ddb/asrq0_init
 !! NAME
-!!  ddb_get_asrq0
+!!  asrq0_init
 !!
 !! FUNCTION
+!!  Initialize an asrq0 object for the imposition
+!!  of the accoustic sum rule (ASR) at q=0.
 !!  In case the interatomic forces are not calculated, the
 !!  ASR-correction has to be determined here from the Dynamical matrix at Gamma.
 !!  In case the DDB does not contain this information, the subroutine returns iblok=0
@@ -4101,12 +4089,13 @@ end function ddb_get_strten
 !!
 !! SOURCE
 
-type(asrq0_t) function ddb_get_asrq0(ddb, asr, rftyp, xcart) result(asrq0)
+subroutine asrq0_init(asrq0, ddb, asr, rftyp, xcart)
 
 !Arguments -------------------------------
 !scalars
+ class(asrq0_t), intent(out) :: asrq0
+ type(ddb_type),intent(inout) :: ddb
  integer,intent(in) :: asr,rftyp
- class(ddb_type),intent(inout) :: ddb
 !arrays
  real(dp),intent(in) :: xcart(3,ddb%natom)
 
@@ -4179,7 +4168,7 @@ type(asrq0_t) function ddb_get_asrq0(ddb, asr, rftyp, xcart) result(asrq0)
    ABI_ERROR(sjoin("Wrong value for asr:", itoa(asr)))
  end select
 
-end function ddb_get_asrq0
+end subroutine asrq0_init
 !!***
 
 !----------------------------------------------------------------------
@@ -4480,8 +4469,8 @@ subroutine asrq0_apply(asrq0, natom, mpert, msize, xcart, d2cart)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: natom, msize, mpert
  class(asrq0_t),intent(inout) :: asrq0
+ integer,intent(in) :: natom, msize, mpert
 !arrays
  real(dp),intent(in) :: xcart(3,natom)
  real(dp),intent(inout) :: d2cart(2,msize)
@@ -6163,7 +6152,7 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
  integer,parameter :: master=0
  integer :: iddb, iddb_mkpt, iddb_psps
  integer :: dimekb, matom, mband, mblok, mkpt, nsppol
- integer :: mtypat, lmnmax, usepaw, mblktyp, msym
+ integer :: mtypat, lmnmax, usepaw, msym
  integer :: msize, msize_, mpert
  integer :: nblok, iblok, iblok1, iblok2
  integer :: comm
@@ -6186,7 +6175,7 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
  end if
 
  dimekb=0 ; matom=0 ; mband=0  ; mblok=0 ; mkpt=0 ; mpert=0
- msize=0  ; mtypat=0 ; lmnmax=0 ; usepaw=0 ; mblktyp=1
+ msize=0  ; mtypat=0 ; lmnmax=0 ; usepaw=0
  iddb_mkpt = 1 ; iddb_psps = nddb
  msym=192
 
@@ -6218,14 +6207,12 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
    mblok=mblok+ddb_hdr%nblok
 
    ! Figure out if we are merging eig2d files
-   if (is_type_d2eig(ddb_hdr%mblktyp)) then
-     eig2d = .True.
-   end if
+   eig2d = ddb_hdr%has_d2eig
 
    ! Figure out if we are merging d3E blocks and compute msize accordingly
    mpert = max(mpert,ddb_hdr%mpert)
    msize_ = 3 * mpert * 3 * mpert
-   if (is_type_d3E(ddb_hdr%mblktyp)) msize_ = msize_ * 3 * mpert
+   if (ddb_hdr%has_d3E_xx) msize_ = msize_ * 3 * mpert
    msize = max(msize, msize_)
 
    if (ddb_hdr%with_psps>0 .or. ddb_hdr%psps%usepaw > 0) then
@@ -6684,19 +6671,24 @@ subroutine dtqdrp(blkval,ddb_version,lwsym,mpert,natom,lwtens)
 !!
 !! SOURCE
 
- subroutine ddb_lw_copy(ddb, ddb_lw, mpert, natom, ntypat)
+ subroutine ddb_lw_copy(ddb, ddb_lw, ddb_hdr)
 
 !Arguments -------------------------------
 !scalars
  class(ddb_type),intent(inout) :: ddb
  class(ddb_type),intent(out) :: ddb_lw
- integer,intent(in) :: mpert,natom,ntypat
+ type(ddb_hdr_type),intent(in) :: ddb_hdr
 !arrays
 
 !Local variables -------------------------
 !scalars
  integer :: ii,nblok,nsize,cnt
+ integer :: mpert,natom,ntypat
 ! *********************************************************************
+
+ mpert = ddb_hdr%mpert
+ natom = ddb_hdr%natom
+ ntypat = ddb_hdr%ntypat
 
  call ddb%copy(ddb_lw)
  call ddb%free()
