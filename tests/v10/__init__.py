@@ -46,6 +46,7 @@ inp_files = [
     "t81.abi" ,  # Short MD to test restart on next test
     "t82.abi" ,  # Test restart of MD from the HIST of previous test using restartxf -1
     "t83.abi" ,  # Test variable cell nudged elastic band method
+    "t84.abi" ,  # Test nuclear spin dipole coupling by energy difference
     "t104.abi" , # Test Si spectral function and mobilities :step 1 WFK
     "t105.abi" , # Test Si spectral function and mobilities :step 2 merge DDB
     "t106.abi" , # Test Si spectral function and mobilities :step 3 merge DVDB
