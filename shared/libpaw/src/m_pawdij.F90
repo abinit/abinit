@@ -22,6 +22,9 @@
 
 #include "libpaw.h"
 
+#define MATPACK(row,col) (MAX(row,col)*(MAX(row,col)-1)/2 + MIN(row,col))
+#define LMPACK(lqn,mqn) (lqn*lqn+lqn+mqn+1)
+
 MODULE m_pawdij
 
  USE_DEFS
@@ -39,7 +42,7 @@ MODULE m_pawdij
  use m_pawfgrtab,    only : pawfgrtab_type
  use m_pawrhoij,     only : pawrhoij_type
  use m_paw_finegrid, only : pawgylm, pawexpiqr
- use m_paw_sphharm,  only : slxyzs,make_dyadic
+ use m_paw_sphharm,  only : initylmr,slxyzs,make_dyadic,realgaunt
 
  implicit none
 
@@ -2560,6 +2563,243 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
  if(ndij > 1) dijnd(:,2)=dijnd(:,1)
 
 end subroutine pawdijnd
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_pawdij/pawdijaa
+!! NAME
+!! pawdijaa
+!!
+!! FUNCTION
+!! Compute the Dipole-Dipole contribution to the PAW
+!! pseudopotential strength Dij
+!! (for one atom only)
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine pawdijaa(dijnd,gprimd,iatom,jatom,mesh_size,natom,nucdipmom,&
+    & pawang,pawrad,pawtab,usezora,xred,zk1)
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: iatom,jatom,mesh_size,natom
+ logical,intent(in) :: usezora
+ type(pawang_type),intent(in) :: pawang
+ type(pawrad_type),intent(in) :: pawrad
+ type(pawtab_type),target,intent(in) :: pawtab
+!arrays
+ real(dp),intent(in) :: gprimd(3,3),nucdipmom(3,natom),xred(3,natom),zk1(mesh_size)
+ real(dp),intent(inout) :: dijnd(:,:)
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: angmom,iaa,ignt,ignt23,ij_size,imesh,info
+ integer :: klmn,klm,klm2,klm23,klm3,klm3a,klm3b,klm4,kln,l2,l3,l4
+ integer :: m1dir,m2dir,m2,m3,m3a,m3b,m4,my_lmax,my_lsizemax,my_ngnt
+ real(dp) :: aa1a,aa1b,aa2a,aa2b,dr,rr,aa1a_fac,aa1b_fac,aa2a_fac,aa2b_fac
+ real(dp) :: m1m2,m12d
+ real(dp), parameter :: c1=sqrt(four_pi/15.0d0)
+ real(dp), parameter :: c2=sqrt(four_pi/5.0d0)
+ real(dp), parameter :: c3=sqrt(four_pi)
+ real(dp), parameter :: FineStruct4=one/InvFineStruct**4
+!arrays
+ integer :: ipiv(3)
+ integer,parameter :: s1map(3)=[1,-1,0]
+ integer,pointer :: indlmn(:,:),indklmn(:,:)
+ integer,allocatable :: my_gntselect(:,:)
+ real(dp) :: d2ij(3,3,9),rprimd(3,3),rvec(3,1),rvec_len(1),work(3)
+ real(dp),allocatable :: aaint(:,:,:),ff(:),my_realgnt(:),ylm_rvec(:,:)
+
+! *************************************************************************
+
+!Useful data
+ indklmn => pawtab%indklmn
+ indlmn => pawtab%indlmn
+ ij_size=pawtab%ij_size
+ m1m2 = DOT_PRODUCT(nucdipmom(1:3,iatom),nucdipmom(1:3,jatom))
+
+ ! spherical harmonic representation of \hat{r}\hat{r}
+ d2ij = zero
+ d2ij(1,2,5)=c1; d2ij(2,1,5)=c1 ! xy/r^2 = c1*S_{2,-2}
+ d2ij(2,3,6)=c1; d2ij(3,2,6)=c1 ! yz/r^2 = c1*S_{2,-1}
+ d2ij(1,3,8)=c1; d2ij(3,1,8)=c1 ! xz/r^2 = c1*S_{2,+1}
+ d2ij(3,3,1)=c3/three;  d2ij(3,3,7)=two*c2/three ! zz/r^2 = c3/3 S_{00} + 2c2/3 S_{20}
+ d2ij(1,1,1)=c3/three;  d2ij(1,1,7)=-c2/three; d2ij(1,1,9)=c1 ! xx/r^2 = c3/3 S_00-c2/3 S_20 + c1 S-{2,2}
+ d2ij(2,2,1)=c3/three;  d2ij(2,2,7)=-c2/three; d2ij(2,2,9)=-c1 ! xx/r^2 = c3/3 S_00-c2/3 S_20 - c1 S-{2,2}
+
+ ! need set of Gaunt integrals one larger than usual
+ my_lmax=pawang%l_max+1
+ my_lsizemax=2*my_lmax-1
+ LIBPAW_ALLOCATE(my_gntselect,((2*my_lmax-1)**2,my_lmax**2*(my_lmax**2+1)/2))
+ LIBPAW_ALLOCATE(my_realgnt,((2*my_lmax-1)**2*my_lmax**4))
+ call realgaunt(my_lmax,my_ngnt,my_gntselect,my_realgnt)
+ 
+ ! obtain rprimd by inversion of gprimd
+ ! have to use elaborate lapack calls because we are inside libpaw
+ rprimd=gprimd
+ call dgetrf(3,3,rprimd,3,ipiv,info)
+ call dgetri(3,rprimd,3,ipiv,work,3,info)
+
+ ! rvec is R2-R1 where R2,R1 are the two atoms with dipoles
+ rvec(1:3,1)=MATMUL(rprimd,(xred(:,jatom)-xred(:,iatom)))
+ rvec_len(1) = SQRT(DOT_PRODUCT(rvec(:,1),rvec(:,1)))
+ dr = rvec_len(1)
+  
+ ! generate Ylm's for rvec 
+ LIBPAW_ALLOCATE(ylm_rvec,(my_lsizemax**2,1))
+ call initylmr(my_lsizemax,1,1,rvec_len,1,rvec,ylm_rvec)
+
+ ! compute radial integrals
+ LIBPAW_ALLOCATE(aaint,(ij_size,my_lsizemax,2))
+ LIBPAW_ALLOCATE(ff,(mesh_size))
+
+ do iaa = 1, 2
+   ! note here l2 = angmom + 1
+   do l2 = 1, my_lsizemax
+     angmom = l2 - 1
+     do kln=1,ij_size
+       do imesh = 2, mesh_size
+         rr = pawrad%rad(imesh)
+         ! integrand for r^(angmom-iaa)/dr^(angmom+1) * 1/(dr^2 - r^2)
+         ff(imesh)=pawtab%phiphj(imesh,kln)*&
+           & rr**(angmom-iaa)/((dr*dr-rr*rr)*dr**(angmom+1))
+       end do !imesh
+       ff(2:mesh_size) = four_pi*ff(2:mesh_size)
+       if (usezora) ff(2:mesh_size)=ff(2:mesh_size)*zk1(2:mesh_size)
+       call pawrad_deducer0(ff,mesh_size,pawrad)
+       call simp_gen(aaint(kln,l2,iaa),ff,pawrad)
+     end do
+   end do
+ end do
+ LIBPAW_DEALLOCATE(ff)
+
+ ! term Ia factor: 1/2 \alpha^4 m1\cdot\m2
+ aa1a_fac = half*FineStruct4*m1m2
+ ! term Ib factor: -1/2 \alpha^4 (4\pi/3) m1\cdot\m2
+ aa1b_fac = -half*FineStruct4*four_pi*m1m2/three
+ ! term IIa factor: -1/2 \alpha^4
+ aa2a_fac = -half*FineStruct4
+ ! term IIb factor: 1/2 \alpha^4 (4\pi/3) 
+ aa2b_fac = half*FineStruct4*four_pi/three
+
+ do klmn=1,pawtab%lmn2_size
+   klm=indklmn(2,klmn); kln=indklmn(2,klmn)
+
+   aa1a=zero
+   aa1b=zero
+   ! Term Ia, Ib
+   ! note l2 here really is the angular momentum
+   do l2 = indklmn(3,klmn),indklmn(4,klmn)
+     do m2=-l2,l2
+       klm2=LMPACK(l2,m2)
+       ignt=my_gntselect(klm2,klm)
+       if (ignt > 0) then
+         ! note that aaint second index is angmom + 1, so l2+1 here
+         aa1a = aa1a + aa1a_fac*my_realgnt(ignt)*ylm_rvec(klm2,1)*aaint(kln,l2+1,1)
+         
+         do l4=abs(l2-1),l2+1
+           do m4=-l4,l4
+             klm4=LMPACK(l4,m4)
+             l3=1
+             do m3=-l3,l3
+               klm3=LMPACK(l3,m3)
+               klm23=MATPACK(klm2,klm3)
+               ignt23=my_gntselect(klm4,klm23)
+               if (ignt23 > 0) then
+                 aa1b = aa1b + aa1b_fac*aaint(kln,l4+1,2)*&
+                   & dr*ylm_rvec(klm4,1)*ylm_rvec(klm3,1)*&
+                   & my_realgnt(ignt)*my_realgnt(ignt23)
+               end if ! ignt23
+             end do ! m3
+           end do ! m4
+         end do ! l4
+       end if ! ignt
+     end do ! loop on mm
+   end do ! loop on ll
+
+   aa2a=0
+   do l2 = indklmn(3,klmn),indklmn(4,klmn)
+     do m2=-l2,l2
+       klm2=LMPACK(l2,m2)
+       ignt=my_gntselect(klm2,klm)
+       if (ignt > 0) then
+         do l4=abs(l2-2),l2+2
+           do m4=-l4,l4
+             klm4=LMPACK(l4,m4)
+             do l3=0,2
+               do m3=-l3,l3
+                 klm3=LMPACK(l3,m3)
+                 klm23=MATPACK(klm2,klm3)
+                 ignt23=my_gntselect(klm4,klm23)
+                 if (ignt23 > 0) then
+                   do m1dir=1,3
+                     do m2dir=1,3
+                       m12d=nucdipmom(m1dir,iatom)*nucdipmom(m2dir,jatom)
+                       if (abs(m12d)<tol8) cycle
+                       if (abs(d2ij(m1dir,m2dir,klm3))<tol8) cycle
+                       aa2a=aa2a+m12d*aa2a_fac*aaint(kln,l4+1,1)*&
+                         & d2ij(m1dir,m2dir,klm3)*ylm_rvec(klm4,1)*&
+                         & my_realgnt(ignt)*my_realgnt(ignt23)
+                     end do ! m2dir
+                   end do ! m1dir
+                 end if ! ignt23
+               end do ! m3
+             end do ! l3
+           end do ! m4
+         end do ! l4
+       end if ! ignt
+     end do ! loop on mm
+   end do ! loop on ll
+
+   aa2b=0
+   do l2 = indklmn(3,klmn),indklmn(4,klmn)
+     do m2=-l2,l2
+       klm2=LMPACK(l2,m2)
+       ignt=my_gntselect(klm2,klm)
+       if (ignt > 0) then
+         do l4=abs(l2-1),l2+1
+           do m4=-l4,l4
+             klm4=LMPACK(l4,m4)
+             do m1dir=1,3
+               l3=1; m3a=s1map(m1dir)
+               klm3a=LMPACK(l3,m3a)
+               klm23=MATPACK(klm2,klm3a)
+               ignt23=my_gntselect(klm4,klm23)
+               if (ignt23 > 0) then
+                 do m2dir=1,3
+                   m12d=nucdipmom(m1dir,iatom)*nucdipmom(m2dir,jatom)
+                   if (abs(m12d)<tol8) cycle
+                   m3b=s1map(m2dir)
+                   klm3b=LMPACK(l3,m3b)
+                   aa2b=aa2b+m12d*aa2b_fac*aaint(kln,l4+1,2)*&
+                     dr*my_realgnt(ignt)*my_realgnt(ignt23)*&
+                     ylm_rvec(klm4,1)*ylm_rvec(klm3b,1)
+                 end do ! m2dir
+               end if ! ignt23
+             end do ! m1dir
+           end do ! m4
+         end do ! l4
+       end if ! ignt
+     end do ! loop on mm
+   end do ! loop on ll
+
+   dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + aa1a + aa1b + aa2a + aa2b
+
+ end do ! loop on klmn
+
+ LIBPAW_DEALLOCATE(my_gntselect)
+ LIBPAW_DEALLOCATE(my_realgnt)
+ LIBPAW_DEALLOCATE(aaint)
+ LIBPAW_DEALLOCATE(ylm_rvec)
+
+end subroutine pawdijaa
 !!***
 
 !----------------------------------------------------------------------
