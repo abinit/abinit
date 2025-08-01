@@ -707,11 +707,10 @@ end subroutine gruns_free
 !!
 !! SOURCE
 
-subroutine gruns_anaddb(inp, prefix, comm)
+subroutine gruns_anaddb(inp, comm)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
- character(len=*),intent(in) :: prefix
  type(anaddb_dataset_type) :: inp
 
 !Local variables-------------------------------
@@ -725,6 +724,9 @@ subroutine gruns_anaddb(inp, prefix, comm)
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
+ ! GA: FIXME Remove ifcflag for gruneisen parameters calculation. 
+ !     There are no reasons why it would be needed, and removing it
+!      will allow to harmonize the main anaddb routine.
  ABI_CHECK(inp%ifcflag == 1, "Gruneisen requires ifcflag == 1")
 
  call cwtime(cpu, wall, gflops, "start")
@@ -734,7 +736,7 @@ subroutine gruns_anaddb(inp, prefix, comm)
 
  ncid = nctk_noid
  if (my_rank == master) then
-   NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_GRUNS.nc"), xmpi_comm_self), "Creating _GRUNS.nc")
+   NCF_CHECK_MSG(nctk_open_create(ncid, strcat(inp%filename_output, "_GRUNS.nc"), xmpi_comm_self), "Creating _GRUNS.nc")
 
    ! Write structure corresponding to iv0
    NCF_CHECK(gruns%cryst_vol(iv0)%ncwrite(ncid))
@@ -769,7 +771,7 @@ subroutine gruns_anaddb(inp, prefix, comm)
 
  ! Compute gruneisen parameters on the q-mesh.
  if (all(inp%ng2qpt /= 0)) then
-   call gruns_qmesh(gruns, prefix, inp%dosdeltae, inp%ng2qpt, 1, inp%q2shft, ncid, comm)
+   call gruns_qmesh(gruns, inp%filename_output, inp%dosdeltae, inp%ng2qpt, 1, inp%q2shft, ncid, comm)
  else
    ABI_WARNING("Cannot compute Gruneisen parameters on q-mesh because ng2qpt == 0")
  end if
@@ -777,7 +779,7 @@ subroutine gruns_anaddb(inp, prefix, comm)
  ! Compute gruneisen on the q-path.
  if (inp%nqpath /= 0) then
    qpath = kpath_new(inp%qpath, gruns%cryst_vol(iv0)%gprimd, inp%ndivsm)
-   call gruns_qpath(gruns, prefix, qpath, ncid, comm)
+   call gruns_qpath(gruns, inp%filename_output, qpath, ncid, comm)
    call qpath%free()
  else
    ABI_WARNING("Cannot compute Gruneisen parameters on q-path because nqpath == 0")

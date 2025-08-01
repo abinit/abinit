@@ -85,7 +85,7 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
 !scalars
  integer,parameter :: master=0
  integer :: nsym,natom,ntypat,mband,nqpt_fine
- integer :: msize,nsize,mpert,nblok,mtyp
+ integer :: msize,nsize,mpert,nblok
  integer :: rftyp
  integer :: ii,iblok,jblok,iqpt,ipert1,ipert2,idir1,idir2
  integer :: nprocs,my_rank
@@ -140,11 +140,14 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
 
  mband = ddb_hdr%mband
 
- mtyp = max(ddb_hdr%mblktyp, 2)  ! Limited to 2nd derivatives of total energy
- ddb_hdr%mblktyp = mtyp
+ ! Interpolation is limited to 2nd derivatives of total energy
+ ! GA: What??
+ ddb_hdr%has_d3E_xx = .false.
+ ddb_hdr%has_d3E_lw = .false.
+ ddb_hdr%has_d2eig = .false.
 
  mpert = ddb%mpert
- msize = 3 * mpert * 3 * mpert  !; if (mtyp==3) msize=msize*3*mpert
+ msize = 3 * mpert * 3 * mpert  !; if (ddb_hdr%has_d3E_xx) msize=msize*3*mpert
  nsize = 3 * mpert * 3 * mpert
  nblok = nqpt_fine
 
