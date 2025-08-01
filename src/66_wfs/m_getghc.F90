@@ -206,7 +206,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !Local variables-------------------------------
 !scalars
  integer,parameter :: level=114, tim_fourwf=1
- integer :: choice,cplex,cpopt_here,i1,i2,i3,idat,idir,ierr,i0
+ integer :: choice,cplex,cpopt_here,fftalg,i1,i2,i3,idat,idir,ierr,i0
  integer :: ig,igspinor,istwf_k_,ii,iispinor,ikpt_this_proc,ipw,ispinor,my_nspinor
  integer :: n4,n5,n6,ndat_,nnlout,npw_fft,npw_k1,npw_k2,nspinortot,option_fft
  integer :: paw_opt,select_k_,shift1,shift2,signs,tim_nonlop
@@ -227,10 +227,20 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  integer,  allocatable:: dimcprj(:)
  real(dp)                         :: enlout(ndat), lambda_ndat(ndat), tsec(2)
  real(dp), target                 :: nonlop_dum(1,1)
- real(dp), allocatable            :: buff_wf(:,:), cwavef1(:,:), cwavef2(:,:), cwavef_fft(:,:), cwavef_fft_tr(:,:)
+ real(dp), allocatable            :: buff_wf(:,:)
+ real(dp), allocatable            :: cwavef1(:,:)
+ real(dp), allocatable            :: cwavef2(:,:)
+ real(dp), allocatable            :: cwavef_fft(:,:)
+ real(dp), allocatable            :: cwavef_fft_tr(:,:)
+
+ real(dp), allocatable            :: ghc1(:,:)
+ real(dp), allocatable            :: ghc2(:,:)
+ real(dp), allocatable            :: ghc3(:,:)
+ real(dp), allocatable            :: ghc4(:,:)
+ real(dp), allocatable            :: ghc_mGGA(:,:)
+ real(dp), allocatable            :: ghc_mGGA_fft(:,:)
+ real(dp), allocatable            :: ghc_vectornd(:,:)
  real(dp), allocatable            :: cwavef_spin(:,:), gvnlxc_spin(:,:)
- real(dp), allocatable            :: ghc1(:,:), ghc2(:,:), ghc3(:,:),  ghc4(:,:)
- real(dp), allocatable            :: ghc_mGGA(:,:), ghc_vectornd(:,:)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
  real(c_double), ABI_CONTIGUOUS pointer :: gvnlc(:,:)
@@ -471,7 +481,12 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    ! Apply the local potential to the wavefunction
    ! Start from wavefunction in reciprocal space cwavef
    ! End with function ghc in reciprocal space also.
-   ABI_MALLOC(work,(2,gs_ham%n4,gs_ham%n5,gs_ham%n6*ndat))
+   fftalg = gs_ham%ngfft(7)
+   if (gs_ham%gpu_option==ABI_GPU_DISABLED.and.fftalg/=401) then
+     ABI_MALLOC(work,(2,gs_ham%n4,gs_ham%n5,gs_ham%n6))
+   else
+     ABI_MALLOC(work,(2,gs_ham%n4,gs_ham%n5,gs_ham%n6*ndat))
+   end if
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET ENTER DATA MAP(alloc:work) IF(gs_ham%gpu_option==ABI_GPU_OPENMP)
 #endif
@@ -919,10 +934,26 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      ABI_CHECK(k1_eq_k2, 'metaGGA not allowed for k/=k_^prime!')
      ABI_CHECK_IEQ(size(gs_ham%vxctaulocal), gs_ham%n4*gs_ham%n5*gs_ham%n6*gs_ham%nvloc*4, 'wrong sizes for vxctaulocal!')
 
-     ABI_MALLOC(ghc_mGGA,(2,npw_k2*my_nspinor*ndat))
-     call getghc_mGGA(cwavef,ghc_mGGA,gbound_k1,gs_ham%gprimd,istwf_k_,kg_k1,kpt_k1,&
-       gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,npw_k1,gs_ham%nvloc,&
-       gs_ham%n4,gs_ham%n5,gs_ham%n6,my_nspinor,gs_ham%vxctaulocal,gs_ham%gpu_option)
+     ABI_MALLOC(ghc_mGGA,(2,npw_k1*my_nspinor*ndat))
+     if (double_rfft_trick) then
+       ABI_MALLOC(kg_k_fft,(3,npw_fft))
+       ABI_MALLOC(cwavef_fft,(2,npw_fft*ndat_))
+       ABI_MALLOC(ghc_mGGA_fft,(2,npw_fft*ndat_))
+       kg_k_fft(:,1:npw_k1) = kg_k1(:,1:npw_k1)
+       kg_k_fft(:,npw_k1+1:npw_fft) = -kg_k1(:,i0:npw_k1)
+       call cwavef_double_rfft_trick_pack(cwavef,cwavef_fft,mpi_enreg%me_g0_fft,ndat,npw_k1)
+       call getghc_mGGA(cwavef_fft,ghc_mGGA_fft,gbound_k1,gs_ham%gprimd,istwf_k_,kg_k_fft,kpt_k1,&
+&       gs_ham%mgfft,mpi_enreg,ndat_,gs_ham%ngfft,npw_fft,gs_ham%nvloc,&
+&       gs_ham%n4,gs_ham%n5,gs_ham%n6,my_nspinor,gs_ham%vxctaulocal,gs_ham%gpu_option)
+       call cwavef_double_rfft_trick_unpack(ghc_mGGA,ghc_mGGA_fft,mpi_enreg%me_g0_fft,ndat,npw_k1)
+       ABI_FREE(kg_k_fft)
+       ABI_FREE(cwavef_fft)
+       ABI_FREE(ghc_mGGA_fft)
+    else
+       call getghc_mGGA(cwavef,ghc_mGGA,gbound_k1,gs_ham%gprimd,istwf_k_,kg_k1,kpt_k1,&
+&       gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,npw_k1,gs_ham%nvloc,&
+&       gs_ham%n4,gs_ham%n5,gs_ham%n6,my_nspinor,gs_ham%vxctaulocal,gs_ham%gpu_option)
+     end if
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET UPDATE FROM(ghc) IF(gs_ham%gpu_option == ABI_GPU_OPENMP)
 #endif
@@ -939,7 +970,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      if (size(gs_ham%vectornd)/=gs_ham%n4*gs_ham%n5*gs_ham%n6*gs_ham%nvloc*3) then
        ABI_BUG('wrong sizes for vectornd in getghc!')
      end if
-     ABI_MALLOC(ghc_vectornd,(2,npw_k2*my_nspinor*ndat))
+     ABI_MALLOC(ghc_vectornd,(2,npw_k1*my_nspinor*ndat))
      ghc_vectornd=zero
      call getghc_nucdip(cwavef,ghc_vectornd,gbound_k1,istwf_k_,kg_k1,kpt_k1,&
        gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,npw_k1,gs_ham%nvloc,&
@@ -1142,7 +1173,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 #endif
 
      ! Assemble modified kinetic, local and nonlocal contributions
-     ! to <G|H|C(n,k)>. Take also into account build-in debugging.
+     ! to <G|H|C(n,k)>. Take also into account built-in debugging.
      if(prtvol/=-level)then
 
        if (gs_ham%gpu_option == ABI_GPU_OPENMP) then
