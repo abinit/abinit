@@ -855,7 +855,7 @@ module m_lobpcg2_cprj
 
     ! Add the nonlocal part if paw
     if (lobpcg%xg_nonlop%paw) then
-      call xg_nonlop_getXSX(lobpcg%xg_nonlop,lobpcg%cprjX0,cprjvar,cprj_work,buffer%self)
+      call xg_nonlop_getXSY(lobpcg%xg_nonlop,lobpcg%cprjX0,cprjvar,cprj_work,buffer%self)
     end if
 
     ! sum all process contribution

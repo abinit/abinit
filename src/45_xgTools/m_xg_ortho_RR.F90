@@ -201,7 +201,7 @@ subroutine xg_Borthonormalize_cprj(xg_nonlop,X,cprjX,info,timer,gpu_option,block
     call xgBlock_gemm('t','n',1.d0,X,X,0.d0,buffer%self,comm=spacecom)
     call xg_init(cprj_work,space(cprjX),rows(cprjX),ncols_cprj,spacecom)
     if (xg_nonlop%paw) then
-      call xg_nonlop_getXSX(xg_nonlop,cprjX,cprjX,cprj_work%self,buffer%self,blocksize=blockdim_cprj_)
+      call xg_nonlop_getXSY(xg_nonlop,cprjX,cprjX,cprj_work%self,buffer%self,blocksize=blockdim_cprj_)
     end if
 
     ! Compute Cholesky decomposition (Upper part)
@@ -739,7 +739,7 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,info,prtvol,tim
     ! Add the nonlocal part (H)
     call xg_init(cprj_work,space(cprjX),rows(cprjX),cols(cprjX),spacecom)
     if (add_Anl_) then
-      call xg_nonlop_getXHX(xg_nonlop,cprjX,cprjX,cprj_work%self,subsub,blocksize=blockdim_cprj_)
+      call xg_nonlop_getXHY(xg_nonlop,cprjX,cprjX,cprj_work%self,subsub,blocksize=blockdim_cprj_)
     end if
 
     if ( solve_ax_bx_ .or. var /= VAR_X ) then
@@ -748,7 +748,7 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,info,prtvol,tim
       call xgBlock_gemm('t','n',1.0d0,X,X,0.d0,subsub,comm=spacecom)
       ! Add the nonlocal part (S)
       if (xg_nonlop%paw) then
-        call xg_nonlop_getXSX(xg_nonlop,cprjX,cprjX,cprj_work%self,subsub,blocksize=blockdim_cprj_)
+        call xg_nonlop_getXSY(xg_nonlop,cprjX,cprjX,cprj_work%self,subsub,blocksize=blockdim_cprj_)
       end if
     end if
 
@@ -760,7 +760,7 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,info,prtvol,tim
 
       ! Add the nonlocal part (H)
       if (add_Anl_) then
-        call xg_nonlop_getXHX(xg_nonlop,cprjXW,cprjW,cprj_work%self,subsub,blocksize=blockdim_cprj_)
+        call xg_nonlop_getXHY(xg_nonlop,cprjXW,cprjW,cprj_work%self,subsub,blocksize=blockdim_cprj_)
       end if
 
       ! Compute XBW and WBW
@@ -768,7 +768,7 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,info,prtvol,tim
       call xgBlock_gemm('t','n',1.0d0,XW,W,0.d0,subsub,comm=spacecom)
       ! Add the nonlocal part (S)
       if (xg_nonlop%paw) then
-        call xg_nonlop_getXSX(xg_nonlop,cprjXW,cprjW,cprj_work%self,subsub,blocksize=blockdim_cprj_)
+        call xg_nonlop_getXSY(xg_nonlop,cprjXW,cprjW,cprj_work%self,subsub,blocksize=blockdim_cprj_)
       end if
 
     end if
@@ -780,14 +780,14 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,info,prtvol,tim
 
       ! Add the nonlocal part (H)
       if (add_Anl_) then
-        call xg_nonlop_getXHX(xg_nonlop,cprjXWP,cprjP,cprj_work%self,subsub,blocksize=blockdim_cprj_)
+        call xg_nonlop_getXHY(xg_nonlop,cprjXWP,cprjP,cprj_work%self,subsub,blocksize=blockdim_cprj_)
       end if
 
       call xg_setBlock(subB,subsub,3*blockdim,blockdim,fcol=2*blockdim+1)
       call xgBlock_gemm('t','n',1.0d0,XWP,P,0.d0,subsub,comm=spacecom)
       ! Add the nonlocal part (S)
       if (xg_nonlop%paw) then
-        call xg_nonlop_getXSX(xg_nonlop,cprjXWP,cprjP,cprj_work%self,subsub,blocksize=blockdim_cprj_)
+        call xg_nonlop_getXSY(xg_nonlop,cprjXWP,cprjP,cprj_work%self,subsub,blocksize=blockdim_cprj_)
       end if
     end if
 
