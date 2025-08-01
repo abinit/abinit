@@ -153,7 +153,7 @@ program mrgdv
      call get_command_argument(2, dvdb_filepath)
 
      dvdb = dvdb_new(dvdb_filepath, comm)
-     if (prtvol > 0) call dvdb%print(prtvol=prtvol)
+     if (prtvol > 0) call dvdb%print([std_out], "", prtvol=prtvol)
      call dvdb%list_perts([-1, -1, -1], npert_miss)
      call dvdb%free()
 
@@ -194,7 +194,7 @@ program mrgdv
      dvdb = dvdb_new(dvdb_filepath, xmpi_comm_self)
      call ngfft_seq(ngfftf, dvdb%ngfft3_v1(:, 1))
      call dvdb%open_read(ngfftf, xmpi_comm_self)
-     if (prtvol > 0) call dvdb%print(prtvol=prtvol)
+     if (prtvol > 0) call dvdb%print([std_out], "", prtvol)
      call dvdb%list_perts([-1,-1,-1], npert_miss, unit=std_out)
      call dvdb%qdownsample(dump_file, qptopt, ngqpt, comm)
      call dvdb%free()

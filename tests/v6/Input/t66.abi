@@ -110,14 +110,14 @@ d3e_pert3_dir 0 0 0 # For backward compatibility of tests only. Instead one shou
 #%% executable = abinit
 #%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t66.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [paral_info]
 #%% max_nprocs = 5
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords = NC, DFPT
-#%% description = 
+#%% description =
 #%%   He dimer, with bare pseudopotential ixc=0
 #%%   Compute Raman intensity, showing essentially perfect agreement
 #%%   between DFPT and finite-differences, when the number of k points

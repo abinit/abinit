@@ -713,7 +713,7 @@ contains
       xcart_C(:)=zero
       call DGEMV('T',3,3,1.d0,rprimd(:,:),3,xred_I,1,0.d0,xcart_I,1)
       call DGEMV('T',3,3,1.d0,rprimd(:,:),3,xred_C,1,0.d0,xcart_C,1)
-      
+
       write(unt,'(2x,a6,4x,i6,2x,3(f10.6,1x),2x,3(f10.6,1x))')'Ideal ',iatom,xred_I,xcart_I
       write(unt,'(2x,a6,4x,i6,2x,3(f10.6,1x),2x,3(f10.6,1x))')'Center',jatom,xred_C,xcart_C
       write(unt,'(a)')''

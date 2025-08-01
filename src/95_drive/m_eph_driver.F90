@@ -73,6 +73,7 @@ module m_eph_driver
  use m_gwpt,            only : gwpt_run
  use m_varpeq,          only : varpeq_run, varpeq_plot
  use m_eph_path,        only : eph_path_run
+ use m_wkk,             only : wkk_run
 
  implicit none
 
@@ -547,7 +548,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    ! Copy brav variable
    dvdb%brav = dtset%brav
 
-   ! Select algorithm for generating the list of R-points and the weigths used to compute W(r,R)
+   ! Select algorithm for generating the list of R-points and the weights used to compute W(r,R)
    dvdb%rspace_cell = dtset%dvdb_rspace_cell
 
    !call dvdb%load_ddb(dtset%prtvol, comm, ddb=ddb)
@@ -571,7 +572,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    if (.not. dvdb%has_dielt .or. .not. (dvdb%has_zeff .or. dvdb%has_quadrupoles)) then
      if (dvdb%add_lr /= 0) then
        dvdb%add_lr = 0
-       ABI_WARNING("Setting dvdb_add_lr to 0. Long-range term won't be substracted in Fourier interpolation.")
+       ABI_WARNING("Setting dvdb_add_lr to 0. Long-range term won't be subtracted in Fourier interpolation.")
      end if
    end if
 
@@ -584,7 +585,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
 
    if (my_rank == master) then
-     call dvdb%print()
+     call dvdb%print([std_out], "DVDB FILE", dtset%prtvol)
      call dvdb%list_perts([-1, -1, -1], npert_miss)
      ABI_CHECK(npert_miss == 0, sjoin(itoa(npert_miss), "independent perturbation(s) are missing in the DVDB file!"))
    end if
@@ -609,7 +610,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    ! Copy brav variable
    drhodb%brav = dtset%brav
 
-   ! Select algorithm for generating the list of R-points and the weigths used to compute W(r,R)
+   ! Select algorithm for generating the list of R-points and the weights used to compute W(r,R)
    drhodb%rspace_cell = dtset%dvdb_rspace_cell
 
    !call drhodb%load_ddb(dtset%prtvol, comm, ddb=ddb)
@@ -623,7 +624,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    drhodb%has_zeff = .False.; drhodb%zeff = 0; drhodb%zeff_raw = 0
 
    if (my_rank == master) then
-     call drhodb%print()
+     call drhodb%print([std_out], "DRHODB file", 0)
      call drhodb%list_perts([-1, -1, -1], npert_miss)
      ABI_CHECK(npert_miss == 0, sjoin(itoa(npert_miss), "independent perturbation(s) are missing in the DVDB file!"))
    end if
@@ -652,7 +653,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  ! ===========================================
  call pspini(dtset, dtfil, ecore, psp_gencond, gsqcutc_eff, gsqcutf_eff, pawrad, pawtab, psps, cryst%rprimd, comm_mpi=comm)
 
- ! Relase nkpt-based arrays in dtset to decrease memory requirement if dense sampling.
+ ! Release nkpt-based arrays in dtset to decrease memory requirement if dense sampling.
  ! EPH routines should not access them after this point.
  if (all(dtset%eph_task /= [6, 10])) call dtset%free_nkpt_arrays()
 
@@ -844,8 +845,13 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
                  pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (18)
-   ! Compute e-ph matrix elements along a q-path
+   ! Compute e-ph matrix elements along q-path.
    call eph_path_run(dtfil, dtset, cryst, ebands, dvdb, ifc, pawfgr, pawang, pawrad, pawtab, psps, comm)
+
+ case (19)
+   ! Compute matrix elements of W_kk'
+   call wkk_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, wfk0_hdr, &
+                pawtab, psps, mpi_enreg, comm)
 
  case default
    ABI_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))
@@ -854,17 +860,10 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  !=====================
  !==== Free memory ====
  !=====================
- call cryst%free()
- call dvdb%free()
- call drhodb%free()
- call ddb_hdr%free()
- call ddb%free()
- call ifc%free()
- call wfk0_hdr%free()
- call ebands%free()
- call ebands_kq%free()
- call pawfgr_destroy(pawfgr)
- call destroy_mpi_enreg(mpi_enreg)
+ call cryst%free(); call dvdb%free(); call drhodb%free(); call ddb_hdr%free()
+ call ddb%free(); call ifc%free(); call wfk0_hdr%free()
+ call ebands%free(); call ebands_kq%free()
+ call pawfgr_destroy(pawfgr); call destroy_mpi_enreg(mpi_enreg)
 
  if (allocated(efmasdeg)) call efmasdeg_free_array(efmasdeg)
  if (allocated(efmasval)) call efmasval_free_array(efmasval)

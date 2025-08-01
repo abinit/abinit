@@ -1,5 +1,5 @@
-#Test the triple parallelisation. 
-#We cannot check the distribution npband*npfft*np_spkpt=2*2*2=8 processors, 
+#Test the triple parallelisation.
+#We cannot check the distribution npband*npfft*np_spkpt=2*2*2=8 processors,
 #this number being not allowed in the test procedure.
 #Here, we only test the parallelisation over bands and spins:
 #npband*npfft*np_spkpt=2*1*2=4 processors.
@@ -12,9 +12,9 @@
  ngfft 18 18 18
  ngfftdg 36 36 36
 
- occopt 1 
+ occopt 1
  kptopt 0
- nkpt 1 toldfe 1.0d-10 
+ nkpt 1 toldfe 1.0d-10
  nsppol 2    spinmagntarget 0.0d0
  ixc 1
 
@@ -34,7 +34,7 @@
  ntypat 1 typat 1 1  natom 2
 
  paral_kgb 1
- fftalg 401 # XG20160213 Although this is announced to be the default with paral_kgb 1 , 
+ fftalg 401 # XG20160213 Although this is announced to be the default with paral_kgb 1 ,
             # removing this line leads to problems with the automatic tests. To be clarified. See KNOWN_PROBLEM 802.1
 
  pp_dirpath "$ABI_PSPDIR"
@@ -52,7 +52,7 @@
 #%% [extra_info]
 #%% keywords = PAW
 #%% authors = Unknown
-#%% description = 
+#%% description =
 #%%    C-diamond, Bulk, 2 atoms, paral_kgb, with PAW.
 #%%    Test the triple parallelisation.
 #%%    We cannot check the distribution npband*npfft*np_spkpt=2*2*2=8 processors,

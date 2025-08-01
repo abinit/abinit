@@ -1,6 +1,6 @@
 ndtset 2
 nspden 4  nspinor 2  pawspnorb 1 # spin-orbit, non-collinear magnetism
-paral_kgb 1 
+paral_kgb 1
 iomode 1  # enforce MPI-IO for the time being because netcdf with MPI-IO
           # does not support npspinor = 2.
 
@@ -27,8 +27,8 @@ acell 3*5.6533 angstrom # expt value
 rprim 0   1/2 1/2
       1/2 0   1/2
       1/2 1/2 0
-natom 2 
-ntypat 2 
+natom 2
+ntypat 2
 typat 1 2
 znucl  31 33
 xred 3*0 3*1/4
@@ -56,17 +56,17 @@ kptrlatt 2 2 -2
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
 #%% [NCPU_4]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t28_MPI4.abo, tolnlines=100, tolabs=7.5e-4, tolrel=0.3;
 #%%   t28_MPI4o_DS1_DOS_TOTAL, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options = -ridiculous;
 #%%   t28_MPI4o_DS1_DOS_AT0001, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options = -ridiculous;
 #%%   t28_MPI4o_DS2_DOS_AT0001, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options = -ridiculous;
 #%% [extra_info]
-#%% keywords = PAW 
+#%% keywords = PAW
 #%% authors = M. Giantomassi
-#%% description = 
+#%% description =
 #%%  GaAs with PAW and spin-orbit coupling. 2x2x2 K grid; low cut-off for test
 #%%  Test paral_kgb==1 with MPI-FFT/spinor parallelization, the IO of the WFK file,
-#%%  the output of potential files and the calculation of PJDOS in parallel 
+#%%  the output of potential files and the calculation of PJDOS in parallel
 #%%  (PW term + on-site contributions)
 #%%<END TEST_INFO>

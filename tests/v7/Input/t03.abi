@@ -72,17 +72,17 @@ xred 3*0 3*1/4
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t03.abo, tolnlines = 10, tolabs = 0.0015, tolrel = 6.0e-1, fld_options =  -easy
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = J. Zwanziger
 #%% keywords = NC
-#%% description = 
+#%% description =
 #%%   Test berryopt -1 and berryopt 4, with NCPP, with spinors and spin-orbit coupling. This
 #%%   test computes the polarization of GaAs in zero and finite electric field, in three
 #%%   cases: nspinor 1, nspinor 2, and nspinor 2 with spin-orbit coupling (so_psp). HGH
-#%%   norm-conserving pseudopotentials are used. 
+#%%   norm-conserving pseudopotentials are used.
 #%% topics = Berry
 #%%<END TEST_INFO>

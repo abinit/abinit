@@ -280,13 +280,13 @@ module m_bz_mesh
 !! including the operations such as
 !!  -Sq = q+ G0.
 !!
-!! The operations belongin to the little group define an irriducible wedge in the Brillouin zone
+!! The operations belonging to the little group define an irriducible wedge in the Brillouin zone
 !! that is, usually, larger than the irredubile zone defined by the space group.
 !! The two zone coincide when q=0
 !!
 !! TODO
 !! Rationalize most of the arrays, in particular the tables
-!! This structure shoud be rewritten almost from scratch, thus avoid using it
+!! This structure should be rewritten almost from scratch, thus avoid using it
 !! for your developments.
 !!
 !! SOURCE
@@ -318,7 +318,7 @@ module m_bz_mesh
 
   integer,allocatable :: ibz2bz(:)
   ! ibz2bz(nibz_ltg)
-  ! The correspondind index in the BZ array
+  ! The corresponding index in the BZ array
 
   integer,allocatable :: igmG0(:,:,:)
   ! iumklp(npw,2,nsym_sg)
@@ -546,7 +546,6 @@ subroutine kmesh_free(Kmesh)
 
 !Arguments ------------------------------------
  class(kmesh_t),intent(inout) :: Kmesh
-
 ! *********************************************************************
 
  ! integer
@@ -582,7 +581,6 @@ end subroutine kmesh_free
 !! units: unit numbers
 !! [header]=optional header
 !! [prtvol]=verbosity level
-!! [mode_paral]=either "COLL" or "PERS"
 !!
 !! OUTPUT
 !!  Only printing.
@@ -831,7 +829,7 @@ end subroutine setup_k_rotation
 !!
 !! SOURCE
 
-subroutine get_bz_item(Kmesh,ik_bz,kbz,ik_ibz,isym,itim,ph_mkbzt,umklp,isirred)
+subroutine get_bz_item(Kmesh, ik_bz, kbz, ik_ibz, isym, itim, ph_mkbzt, umklp, isirred)
 
 !Arguments ------------------------------------
 !scalars
@@ -847,7 +845,6 @@ subroutine get_bz_item(Kmesh,ik_bz,kbz,ik_ibz,isym,itim,ph_mkbzt,umklp,isirred)
 !Local variables-------------------------------
 !scalars
  character(len=500) :: msg
-
 ! *********************************************************************
 
  if (ik_bz>Kmesh%nbz.or.ik_bz<=0) then
@@ -899,7 +896,6 @@ subroutine get_IBZ_item(Kmesh,ik_ibz,kibz,wtk)
  real(dp),intent(out) :: wtk
 !arrays
  real(dp),intent(out) :: kibz(3)
-
 ! *********************************************************************
 
  if (ik_ibz>Kmesh%nibz.or.ik_ibz<=0) then
@@ -951,7 +947,6 @@ subroutine get_BZ_diff(Kmesh,k1,k2,idiff_bz,g0,nfound)
 !arrays
  integer :: umklp(3)
  real(dp) :: kdiff(3),ktrial(3)
-
 ! *********************************************************************
 
  if (.not.has_BZ_item(Kmesh,k1,ikp,umklp)) then
@@ -1189,7 +1184,7 @@ end function has_IBZ_item
 !!  ik_bz=Index of the k-point in the BZ.
 !!
 !! OUTPUT
-!! Returm TRUE. if the k-point is in the IBZ (NB: a non-zero umklapp is not allowed)
+!! Return TRUE. if the k-point is in the IBZ (NB: a non-zero umklapp is not allowed)
 !!
 !! SOURCE
 
@@ -1203,7 +1198,6 @@ pure logical function bz_mesh_isirred(Kmesh, ik_bz)
 !Local variables-------------------------------
 !scalars
  integer :: isym,itim
-
 ! *********************************************************************
 
  isym = Kmesh%tabo(ik_bz)
@@ -1691,7 +1685,7 @@ subroutine getkptnorm_bycomponent(vect,factor,norm)
 ! *************************************************************************
 
  ! Checking the factor is large enough (skipping zero components, since in this case the product will be 0)
- if(ANY(vect(:)*factor < 1.0 .and. vect(:) > tol7)) then
+ if (ANY(vect(:)*factor < 1.0 .and. vect(:) > tol7)) then
     write(msg,'(a,a,a,a,a,a,a,a)') ' Not able to give unique norm to order vectors',ch10,&
        'This is likely related to a truncation error for a k-point in the input file',ch10,&
        'Always prefer fractional numbers in the input file instead of truncated ones',ch10,&
@@ -2542,7 +2536,6 @@ subroutine littlegroup_free_1D(Ltg)
 
 !Local variables-------------------------------
  integer :: ipt
-
 ! *********************************************************************
 
  do ipt=1,SIZE(Ltg)
@@ -2779,7 +2772,7 @@ end function kpath_new
 !!
 !! FUNCTION
 !!  Return all the versors emanating from the Gamma point.
-
+!!
 !! OUTPUT
 !!  nvers=number of versors
 !!  red_versors(3,nvers)=versors in reduced coords
