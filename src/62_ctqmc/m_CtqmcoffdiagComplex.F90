@@ -41,6 +41,7 @@ MODULE m_CtqmcoffdiagComplex
  USE m_FFTHyb
  USE m_OurRng
  use defs_basis
+ use m_abicore
 #ifdef HAVE_MPI2
  USE mpi
 #endif
@@ -1283,6 +1284,7 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk)
   COMPLEX(KIND=8), DIMENSION(:,:), ALLOCATABLE   :: F_omega_inv
   COMPLEX(KIND=8), DIMENSION(:,:,:), ALLOCATABLE   :: Gomega_tmp
   TYPE(GreenHyboffdiagComplex)                     :: F_tmp
+  CHARACTER(LEN=100) :: message
   !character(len=4) :: tag_proc
   !character(len=30) :: tmpfil
   !INTEGER :: unitnb
@@ -1452,13 +1454,14 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk)
   ! For all iflavor and iflavor2, do the Fourier transformation to have F(tau)
   ! ---------------------------------------------
   if (op%opt_hybri_limit .eq. 0) then
-    write(std_out,*) "  == WARNING: Not using the asymptotic limit of hybridization to enforce F(iw_n) -> -C_ij/iw_n"
+    write(message,'(a,3a,a)') ch10,"== WARNING: Not using the asymptotic limit of hybridization to enforce F(iw_n) -> -C_ij/iw_n"
   else
   ! Take into account asymptotic limit of hybridization function such that F(iw_n) -> -C_ij/iw_n
   ! with C_ij calculated in m_forctqmc.f90
   ! --------------------------------------
-    write(std_out,*) "  == Use asymptotic limit of hybridization function such that F(iw_n) -> -C_ij/iw_n" 
+    write(message,'(a,3a,a)') "== Use asymptotic limit of hybridization function such that F(iw_n) -> -C_ij/iw_n" 
   endif
+  CALL wrtout(std_out,message,'COLL')
   CALL GreenHyboffdiagComplex_backFourier(F_tmp,hybri_limit=op%hybri_limit,opt_hybri_limit=op%opt_hybri_limit)
 
   ! --- Put the result in F
