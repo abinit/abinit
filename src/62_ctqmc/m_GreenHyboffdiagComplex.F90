@@ -556,7 +556,7 @@ SUBROUTINE GreenHyboffdiagComplex_measHybrid(op, Mmatrix, ListCdagC_1, updated,s
            ! write(6,*) "measHybrid ic iflavor1 iflavor2 op%map(iflav1,iflav2) oper",ic,iflavor,iflavorbis,op%map(iflavor,iflavorbis)%listDBLE(iC),op%map(iflavor,iflavorbis)%listDBLE(iC) * op%signvalueold * argument
             op%oper(op%map(iflavor,iflavorbis)%listINT(iC),iflavor,iflavorbis) =                &
                            op%oper(op%map(iflavor,iflavorbis)%listINT(iC),iflavor,iflavorbis) &
-                         + op%map(iflavor,iflavorbis)%listDBLE(iC) * op%signvalueold * argument
+                         + op%map(iflavor,iflavorbis)%listDBLE(iC) * op%signvalueold * op%phasevalueold * argument
            !if(op%map(iflavor,iflavorbis)%listINT(iC)==1.and.iflavor==iflavorbis) then
           !  if(iflavor==iflavorbis) then
           !   !sui!write(6,*) "G(0)", op%map(iflavor,iflavorbis)%listINT(iC),op%map(iflavor,iflavorbis)%listDBLE(iC) * op%signvalueold,op%oper(op%map(iflavor,iflavorbis)%listINT(iC),iflavor,iflavorbis),iflavor

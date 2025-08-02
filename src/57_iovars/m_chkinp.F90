@@ -911,7 +911,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      write(msg,'(3a)') &
       & ' dmft_solv=6, or 7 is only relevant if the TRIQS library v3.2>= is linked',ch10,&
       & ' Action: check compilation options'
-     !ABI_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 #endif
 

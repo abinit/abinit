@@ -904,8 +904,9 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
          end do ! m2                                                       
        end do ! m1                                                         
                                                                          
-       write(*,*)"Sum of Imag part of Rotated Interaction Vee",xsum     
-       write(*,*)"Sum of Imag part of Rotated Interaction Udens",xsum2                        
+       !write(*,*)"Sum of Imag part of Rotated Interaction Vee",xsum     
+       write(message,*) ch10,"=Sum of Imag part of Rotated Interaction Udens",xsum2                        
+       call wrtout(std_out,message,'COLL')
 
      else 
        call vee2udensatom_hu(ndim,udens_atoms(iatom)%mat(:,:,1),vee_rotated(iatom)%mat(:,:,:,:),basis_vee,prtonly=1)
