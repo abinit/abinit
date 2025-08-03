@@ -278,7 +278,7 @@ Variable(
     varset="gstate",
     vartype="real",
     topics=['NMR_basic','MagField_expert'],
-    dimensions=['[[3*natnd]]'],
+    dimensions=['3*[[natnd]]'],
     defaultval=MultipleValue(number=None, value=0),
     mnemonics="ATom Nuclear Dipole moment LIST",
     requires="[[natnd]] > 0 and [[iatnd]]",
@@ -14498,7 +14498,7 @@ Variable(
     not automatically set by [[autoparal]]. For example, consult the [[tutorial:paral_mbt|tutorial on parallelism for Many-Body Perturbation Theory]] to learn how
     to run beyond-GS calculations with MPI. Other tutorials on parallelism are also available.
 
-**If paral_kgb is not expliciely put in the input file**, ABINIT
+**If paral_kgb is not explicitely put in the input file**, ABINIT
 automatically detects if the job has been sent in sequential or in parallel.
 In this last case, it detects the number of processors on which the job has
 been sent and calculates values of [[np_spkpt]], [[npfft]], [[npband]],
@@ -19302,18 +19302,15 @@ Variable(
     mnemonics="SPIN for AToms",
     added_in_version="before_v9",
     text=r"""
-Gives the initial electronic spin-magnetization for each atom, in unit of $\hbar/2$,
-as well as, in case of fixed magnetization calculations (see [[constraint_kind]] and [[magconon]]), the target value of the magnetization.
+Gives the initial electronic spin-magnetization for each atom in Cartesian coordinates, in unit of $\hbar/2$,
+as well as, in case of fixed magnetization calculations (see [[constraint_kind]] and [[magconon]]),
+the target value of the magnetization.
 
-Note that if [[nspden]] = 2, the z-component must be given for each atom, in
-triplets (0 0 z-component).
-For example, the electron of an hydrogen atom can be spin up (0 0 1.0) or spin
-down (0 0 -1.0).
+Note that if [[nspden]] = 2, the z-component must be given for each atom, in triplets (0 0 z-component).
+For example, the electron of an hydrogen atom can be spin up (0 0 1.0) or spin down (0 0 -1.0).
 
-This value is only used to create the first exchange and correlation
-potential.
-It is not checked against the initial occupation numbers [[occ]] for each spin
-channel.
+This value is only used to create the first exchange and correlation potential.
+It is not checked against the initial occupation numbers [[occ]] for each spin channel.
 It is meant to give an easy way to break the spin symmetry, and to allow to
 find stable local spin fluctuations, for example: antiferromagnetism, or the
 spontaneous spatial spin separation of elongated H$_2$ molecule.
@@ -25839,11 +25836,31 @@ Variable(
     added_in_version="10.5.1",
     text=r"""
 If set to 1, the Generalized Bloch Theorem (GBT) is used to compute a spin-spiral with wavevector [[qgbt]].
-The GBT requires [[nspinor]] = 2 but is not compatible with spin-orbit coupling thus one has to
-set [[so_psp]] to zero.
+The GBT requires [[nspinor]] = 2 and [[nspden]] 4, but is not compatible with spin-orbit coupling hence
+[[so_psp]] must be set to zero.
+Also, one has to disable spatial symmetries completely by setting [[nsym]] to 1, and
+time-reversal symmetry as well with [[kptopt]] = 4.
 
-Note that, for the time being, [[use_gbt]] /= 0 is not compatible with PAW.
-Also, one has to use [[useylm]] = 0, [[nsym]] = 1 and [[kptopt]] 4.
+Note that, for the time being, [[use_gbt]] /= 0 requires:
+
+- NC pseudos (no PAW)
+- [[useylm]] = 0
+- [[paral_kgb]] = 0
+- [[wfoptalg]] = 0 (CG eigensolver)
+
+Both LDA and GGA are supported, although GGA tends to be more difficult to converge
+in the non-collinear case.
+In order to reduce the number of SCF iterations and the computational cost,
+we recommend using [[toldfe]] as stopping criterion.
+Also, the convergence of the SCF cycle may be significantly improved by increasing [[nline]] to e.g. 12.
+
+
+!!! important
+
+    The atomic magnetic moment rotates in the x-y plane (Cartesian coords.) while the z-component
+    remains lattice-periodict. For this reason, one should set [[spinat]] so to have non-zero
+    components in the x-y plane.
+
 """,
 ),
 

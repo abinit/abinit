@@ -3218,7 +3218,7 @@ end subroutine dtset_get_ktmesh
 !! Documentation of such input variables is very important, including the
 !! proper echo, in the output file, of what such input variables have done.
 !!
-!! Important information : all the "macro" input variables should be properly
+!! Important information: all the "macro" input variables should be properly
 !! identifiable to be so, and it is proposed to make them start with the string "macro".
 !!
 !! INPUTS
@@ -3254,18 +3254,19 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
 
  do idtset=1,ndtset_alloc
    jdtset=dtsets(idtset)%jdtset
+
    if (dtsets(idtset)%macro_uj>0) then
      dtsets(idtset)%irdwfk   = 1        ! preconverged wave function compulsory
-!    dtsets(idtset)%nline    = maxval((/ int(dtsets(idtset)%natom/2) , 6 /))   ! using default value: \DeltaU< 1%
-!    dtsets(idtset)%nnsclo   = 4        ! using default value: \DeltaU< 1%
+     !dtsets(idtset)%nline    = maxval((/ int(dtsets(idtset)%natom/2) , 6 /))   ! using default value: \DeltaU< 1%
+     !dtsets(idtset)%nnsclo   = 4        ! using default value: \DeltaU< 1%
      dtsets(idtset)%tolvrs   = 10d-8    ! convergence on the potential; 10d-8^= 10d-5 on occupation
      dtsets(idtset)%diemix   = 0.45_dp  ! fastest convergence: dn= E^(-istep * 0.229 )
      dtsets(idtset)%dmatpuopt= 3        ! normalization of the occupation operator
-!    dtsets(idtset)%nstep    = 255      ! expected convergence after 10 \pm 3, 30 as in default normally sufficient
-!    dtsets(idtset)%iscf     = 17       ! mixing on potential, 17: default for PAW
+     !dtsets(idtset)%nstep    = 255      ! expected convergence after 10 \pm 3, 30 as in default normally sufficient
+     !dtsets(idtset)%iscf     = 17       ! mixing on potential, 17: default for PAW
    end if ! macro_uj
 
-  !Read parameters
+   ! Read parameters
    marr=dtsets(idtset)%npsp;if (dtsets(idtset)%npsp<3) marr=3
    marr=max(marr,dtsets(idtset)%nimage)
    ABI_MALLOC(intarr,(marr))
@@ -3425,9 +3426,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
        dtsets(idtset)%prteig=1
        dtsets(idtset)%prtden=1
      elseif(dtsets(idtset)%accuracy>6)then
-       write(msg, '(a,a,a)' )&
-         'accuracy >6 is forbidden !',ch10,&
-         'Action: check your input data file.'
+       write(msg, '(3a)' )'accuracy >6 is forbidden !',ch10,'Action: check your input data file.'
        ABI_ERROR(msg)
      end if
    else
@@ -3436,7 +3435,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
 
    ABI_FREE(intarr)
    ABI_FREE(dprarr)
- end do
+ end do ! idtset
 
 end subroutine macroin
 !!***
