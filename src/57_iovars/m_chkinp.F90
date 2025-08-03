@@ -639,7 +639,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    end if
    ! Warn the user if dilatmx > 1 and optcell == 0.
    if (dt%dilatmx>one.and.dt%optcell==0) then
-     write(msg, "(a)") 'dilatmx > 1 and optcell=0, this is a waste of ressources (computational time and memory). &
+     write(msg, "(a)") 'dilatmx > 1 and optcell=0, this is a waste of resources (computational time and memory). &
      & You should set dilatmx to 1.'
      ABI_WARNING(msg)
    end if
@@ -3820,7 +3820,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      ! Check for calculations that are not implemented with RMM-DIIS
      ABI_CHECK(dt%usefock == 0, "RMM-DIIS with Hartree-Fock or Hybrid Functionals is not implemented")
      ABI_CHECK(dt%wfoptalg /= 1, "RMM-DIIS with Chebyshev is not supported.")
-     ABI_CHECK(dt%gpu_option == ABI_GPU_DISABLED, "RMM-DIIS does not support GPUs.")
+     !ABI_CHECK(dt%gpu_option == ABI_GPU_DISABLED, "RMM-DIIS does not support GPUs.")
      berryflag = any(dt%berryopt == [4, 14, 6, 16, 7, 17])
      ABI_CHECK(.not. berryflag, "RMM-DIIS with Electric field is not supported.")
    end if
@@ -3828,7 +3828,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !  so_psp
    if(usepaw==0)then
      do ipsp=1,npsp
-!      Check that so_psp is between 0 and 3
+       ! Check that so_psp is between 0 and 3
        if ( dt%so_psp(ipsp)<0 .or. dt%so_psp(ipsp)>3 ) then
          write(msg, '(a,i3,a,i3,a,a,a,a,a)' )&
          'so_psp(',ipsp,' ) was input as ',dt%so_psp(ipsp),' .',ch10,&
@@ -3836,7 +3836,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          'Action: modify value of so_psp (old name: so_typat) in input file.'
          ABI_ERROR_NOSTOP(msg, ierr)
        end if
-!      If nspinor=1, the spin-orbit contribution cannot be taken into account
+       ! If nspinor=1, the spin-orbit contribution cannot be taken into account
        if ( nspinor==1 .and. (dt%so_psp(ipsp)==2 .or. dt%so_psp(ipsp)==3) ) then
          write(msg, '(a,i2,a,i3,a,a,a,a,a)' )&
          'so_psp(',ipsp,') was input as ',dt%so_psp(ipsp),', with nspinor=1 and usepaw=0.',ch10,&
@@ -3844,8 +3844,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          'Action: modify value of so_psp (old name: so_typat) or nspinor in input file.'
          ABI_ERROR_NOSTOP(msg, ierr)
        end if
-!      If nspinor=2, the spin-orbit contribution should be present in the pseudopotentials,
-!      unless the user explicitly allows not to treat it.
+       ! If nspinor=2, the spin-orbit contribution should be present in the pseudopotentials,
+       ! unless the user explicitly allows not to treat it.
        if ( nspinor==2 .and. dt%so_psp(ipsp)/=0 .and. pspheads(ipsp)%pspso==0 ) then
          write(msg, '(2(a,i0),9a)' )&
          'so_psp(',ipsp,') was input as ',dt%so_psp(ipsp),', with nspinor=2 and usepaw=0.',ch10,&
@@ -3928,7 +3928,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
 !  string_algo
    call chkint_eq(0,0,cond_string,cond_values,ierr,'string_algo',dt%string_algo,&
-&    2,(/STRING_ALGO_SIMPLIFIED_EQUAL,STRING_ALGO_SIMPLIFIED_ENERGY/),iout)
+     2, [STRING_ALGO_SIMPLIFIED_EQUAL,STRING_ALGO_SIMPLIFIED_ENERGY],iout)
 
 !  symafm
    if(nsppol==1 .and. nspden==2)then
@@ -4226,9 +4226,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    call chkint_eq(0,0,cond_string,cond_values,ierr,'use_rcpaw',dt%use_rcpaw,2,(/0,1/),iout)
    if(dt%use_rcpaw==1) then
      if((dt%npfft/=1).or.(dt%occopt<3).or.(dt%occopt>8).or.&
-       &(dt%stmbias/=zero).or.(dt%spinmagntarget/=-99.99_dp).or.(dt%nsppol==2).or.(dt%nspinor==2).or.&
-       &(dt%nspden>1).or.(dt%usewvl==1).or.(dt%positron/=0).or.(dt%icoulomb/=0).or.(dt%iscf<12).or.&
-       &(dt%usepaw/=1).or.(dt%usepawu==1).or.(dt%usedmft==1)) then
+        (dt%stmbias/=zero).or.(dt%spinmagntarget/=-99.99_dp).or.(dt%nsppol==2).or.(dt%nspinor==2).or.&
+        (dt%nspden>1).or.(dt%usewvl==1).or.(dt%positron/=0).or.(dt%icoulomb/=0).or.(dt%iscf<12).or.&
+        (dt%usepaw/=1).or.(dt%usepawu==1).or.(dt%usedmft==1)) then
        ABI_ERROR('RCPAW: work in progress')
      endif
    endif
@@ -4274,14 +4274,14 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      if (dt%vdw_xc==5) then
 !    Only with PBE, BP86 or BLYP GGA XC
        if(dt%ixc/=11.and.dt%ixc/=-101130.and.dt%ixc/=-130101.and. &
-&         dt%ixc/=18.and.dt%ixc/=-106131.and.dt%ixc/=-131106.and. &
-&         dt%ixc/=19.and.dt%ixc/=-106132.and.dt%ixc/=-132106.and. &
-&         dt%ixc/=-202231.and.dt%ixc/=-231202) then
+          dt%ixc/=18.and.dt%ixc/=-106131.and.dt%ixc/=-131106.and. &
+          dt%ixc/=19.and.dt%ixc/=-106132.and.dt%ixc/=-132106.and. &
+          dt%ixc/=-202231.and.dt%ixc/=-231202) then
          write(msg,'(8a)') ch10,&
-&         ' chkinp: ERROR -',ch10,&
-&         '  Van der Waals DFT-D2 correction (vdw_xc=5) only available for the following XC functionals:',ch10,&
-&         '      GGA-PBE, GGA-BLYP, GGA-BP86, mGGA-TPSS',ch10,&
-&         '  Action: change your pseudopotential file.'
+          ' chkinp: ERROR -',ch10,&
+          '  Van der Waals DFT-D2 correction (vdw_xc=5) only available for the following XC functionals:',ch10,&
+          '      GGA-PBE, GGA-BLYP, GGA-BP86, mGGA-TPSS',ch10,&
+          '  Action: change your pseudopotential file.'
          call wrtout(std_out,msg)
          ierr=ierr+1
        end if
@@ -4300,27 +4300,23 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      if (dt%vdw_xc==6.or.dt%vdw_xc==7) then
 !    Only with PBE, BP86  or BLYP GGA XC
        if(dt%ixc/=11.and.dt%ixc/=-101130.and.dt%ixc/=-130101.and. &
-&         dt%ixc/=18.and.dt%ixc/=-106131.and.dt%ixc/=-131106.and. &
-&         dt%ixc/=19.and.dt%ixc/=-106132.and.dt%ixc/=-132106.and. &
-&         dt%ixc/=-202231.and.dt%ixc/=-231202.and.&
-&         dt%ixc/=14.and.dt%ixc/=-102130.and.dt%ixc/=-130102.and. &
-&         dt%ixc/=-170.and.dt%ixc/=41.and.dt%ixc/=-406) then
-         write(msg,'(4a,i2,5a)') ch10,&
-&         ' chkinp: ERROR -',ch10,&
-&         '  Van der Waals DFT-D correction (vdw_xc=',dt%vdw_xc,') only available for the following XC functionals:',ch10,&
-&         '      GGA-PBE, GGA-BLYP, GGA-BP86, mGGA-TPSS, GGA-RevPBE, PBE0',ch10,&
-&         '  Action: change your pseudopotential file.'
-         call wrtout(std_out,msg)
-         ierr=ierr+1
+          dt%ixc/=18.and.dt%ixc/=-106131.and.dt%ixc/=-131106.and. &
+          dt%ixc/=19.and.dt%ixc/=-106132.and.dt%ixc/=-132106.and. &
+          dt%ixc/=-202231.and.dt%ixc/=-231202.and.&
+          dt%ixc/=14.and.dt%ixc/=-102130.and.dt%ixc/=-130102.and. &
+          dt%ixc/=-170.and.dt%ixc/=41.and.dt%ixc/=-406) then
+         write(msg,'(a,i0,5a)') &
+         'Van der Waals DFT-D correction (vdw_xc=',dt%vdw_xc,') only available for the following XC functionals:',ch10,&
+         '    GGA-PBE, GGA-BLYP, GGA-BP86, mGGA-TPSS, GGA-RevPBE, PBE0',ch10,&
+         'Action: change your pseudopotential file.'
+         ABI_CHECK_NOSTOP(.False., msg, ierr)
        end if
 !       Only up to chemical species 96
        do itypat=1,dt%ntypat
          if (dt%znucl(itypat)<0.or.dt%znucl(itypat)>96) then
-           write(msg,'(4a,i2,1a,f5.1,a)') ch10,&
-&           ' chkinp: ERROR -',ch10,&
-&           '  Van der Waals DFT-D correction (vdw_xc=',dt%vdw_xc,') not available for atom type Z=',dt%znucl(itypat),' !'
-           call wrtout(std_out,msg)
-           ierr=ierr+1
+           write(msg,'(a,i0,1a,f5.1,a)')&
+            'Van der Waals DFT-D correction (vdw_xc=',dt%vdw_xc,') not available for atom type Z=',dt%znucl(itypat),' !'
+           ABI_CHECK_NOSTOP(.False., msg, ierr)
          end if
        end do
      end if

@@ -219,8 +219,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 #endif
  character(len=500) :: msg
 !arrays
- integer,  pointer                :: gbound_k1(:,:), gbound_k2(:,:)
- integer,  pointer                :: kg_k1(:,:), kg_k2(:,:)
+ integer,  contiguous, pointer :: gbound_k1(:,:), gbound_k2(:,:)
+ integer,  contiguous, pointer :: kg_k1(:,:), kg_k2(:,:)
  integer,  ABI_CONTIGUOUS pointer :: indices_pw_fft(:), kg_k_fft(:,:)
  integer,  ABI_CONTIGUOUS pointer :: recvcount_fft(:), recvdisp_fft(:)
  integer,  ABI_CONTIGUOUS pointer :: sendcount_fft(:), senddisp_fft(:)
@@ -232,7 +232,6 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  real(dp), allocatable            :: cwavef2(:,:)
  real(dp), allocatable            :: cwavef_fft(:,:)
  real(dp), allocatable            :: cwavef_fft_tr(:,:)
-
  real(dp), allocatable            :: ghc1(:,:)
  real(dp), allocatable            :: ghc2(:,:)
  real(dp), allocatable            :: ghc3(:,:)
@@ -247,11 +246,11 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  real(c_double), ABI_CONTIGUOUS pointer :: gvnlxc_(:,:)
 #else
  real(dp), allocatable            :: gvnlc(:,:)
- real(dp), pointer                :: gvnlxc_(:,:)
+ real(dp), contiguous, pointer                :: gvnlxc_(:,:)
 #endif
  real(dp), allocatable            :: vlocal_tmp(:,:,:), work(:,:,:,:)
- real(dp), pointer                :: kinpw_k1(:), kinpw_k2(:), kpt_k1(:), kpt_k2(:)
- real(dp), pointer                :: gsc_ptr(:,:)
+ real(dp), contiguous, pointer    :: kinpw_k1(:), kinpw_k2(:), kpt_k1(:), kpt_k2(:)
+ real(dp), contiguous, pointer    :: gsc_ptr(:,:)
  type(fock_common_type),pointer :: fock
  type(pawcprj_type),pointer :: cwaveprj_fock(:,:),cwaveprj_idat(:,:),cwaveprj_nonlop(:,:)
  logical :: transfer_ghc,transfer_gsc,transfer_cwavef,transfer_gvnlxc
