@@ -412,6 +412,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        igs=(ispinor-1)*npw_k
        kinpw_ptr => kinpw
        if (gs_hamk%use_gbt /= 0) then
+         ! Use different kinetic energies for up and down component (this won't work if paral_kgb /= 0)
          if (iispinor == 1) kinpw_ptr => gs_hamk%kinpw_k
          if (iispinor == 2) kinpw_ptr => gs_hamk%kinpw_kp
        end if
@@ -835,6 +836,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        call meanvalue_g(ek_k(iband),kinpw,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
          cwavef_iband, cwavef_iband, 0, gpu_thread_limit=dtset%gpu_thread_limit)
      else
+       ! Treat up and down components separately.
        ! Note filter 1. Also: this won't work if paral_kgb 1 and/or spinor parallelism
        filter = 1
        call meanvalue_g(ar,gs_hamk%kinpw_k,filter,istwf_k,mpi_enreg,npw_k,1,&

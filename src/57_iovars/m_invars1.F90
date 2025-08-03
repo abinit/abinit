@@ -30,6 +30,13 @@ module m_invars1
  use m_nctk
  use m_xomp
  use netcdf
+ use m_gwdefs
+#if defined DEV_YP_VDWXC
+ use m_xc_vdw
+#endif
+#if defined HAVE_GPU
+ use m_gpu_toolbox
+#endif
 
  use m_fstrings, only : inupper, itoa, endswith, strcat, sjoin, startswith
  use m_geometry, only : mkrdim
@@ -38,10 +45,7 @@ module m_invars1
  use m_ingeo,    only : ingeo, invacuum
  use m_matrix,   only : mati3det
  use m_mep,      only : MEP_SOLVER_STEEPEST,NEB_ALGO_IMPROVED_TAN,NEB_CELL_ALGO_NONE,STRING_ALGO_SIMPLIFIED_EQUAL
-
-#if defined HAVE_GPU
- use m_gpu_toolbox
-#endif
+ use m_fftcore,      only : get_cache_kb, fftalg_for_npfft
 
  implicit none
 
@@ -255,17 +259,6 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  ! Loop on datasets, to find natom and mxnatom, as well as useri and userr
  do idtset=1,ndtset_alloc
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
-
-   ! proposal: supercell generation in input string before it is read in
-   ! call expand_supercell_input(jdtset, lenstr, string)
-   !  find supercell, else exit
-   !  determinant = ncells
-   !  copy rprim,    acell,    xred,    xcart,    vel,    typat,   to
-   !       rprim_uc, acell_uc, xred_uc, xcart_uc, vel_uc, typat_uc
-   !     NB: also rprim and angdeg need to be updated in non diagonal case!!!
-   !  generate supercell info for each of these copying out with translation vectors etc...
-   !  set chkprim to 0
-   !  done!
 
    !  Generate the supercell if supercell_latt is specified and update string
    dtsets(idtset)%supercell_latt(:) = 0
@@ -565,7 +558,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 
    gpu_option_string = "" ; intarr(1)=0
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),"gpu_option",tread_gpu_option,'INT_OR_KEY',&
-&              key_value=gpu_option_string)
+               key_value=gpu_option_string)
    if (tread_gpu_option==1) then
      if (len(trim(gpu_option_string))>0) then
        call inupper(gpu_option_string)
@@ -710,10 +703,10 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ABI_MALLOC(dtsets(idtset)%znucl,(npsp))
  end do
 
-!write(std_out,*)' invars0 : nimage, mxnimage = ',dtsets(:)%nimage, mxnimage
-!write(std_out,*)' invars0 : natom = ',dtsets(:)%natom
-!write(std_out,*)' invars0 : mxnatom = ',mxnatom
-!write(std_out,*)' m_invars1%invars0 : exit '; call flush(std_out)
+ !write(std_out,*)' invars0 : nimage, mxnimage = ',dtsets(:)%nimage, mxnimage
+ !write(std_out,*)' invars0 : natom = ',dtsets(:)%natom
+ !write(std_out,*)' invars0 : mxnatom = ',mxnatom
+ !write(std_out,*)' m_invars1%invars0 : exit '; call flush(std_out)
 
 end subroutine invars0
 !!***
@@ -752,7 +745,7 @@ end subroutine invars0
 !! SOURCE
 
 subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
-& msym, ndtset, ndtset_alloc, string, npsp, zionpsp, comm)
+                    msym, ndtset, ndtset_alloc, string, npsp, zionpsp, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -769,13 +762,11 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
 !scalars
  integer :: idtset,ii,jdtset,lpawu,mband_upper,iatom,nat,nsp
 !arrays
- integer,allocatable :: symafm_(:,:),symrel_(:,:,:,:)
- integer,allocatable :: symafm(:),symrel(:,:,:)
+ integer,allocatable :: symafm_(:,:),symrel_(:,:,:,:), symafm(:),symrel(:,:,:)
  real(dp),allocatable :: tnons_(:,:,:),tnons(:,:)
-
 !******************************************************************
 
-!write(std_out,'(a)')' m_invars1%invars1m : enter '; call flush(std_out)
+ !write(std_out,'(a)')' m_invars1%invars1m : enter '; call flush(std_out)
 
  ! Here, allocation of the arrays that depend on msym.
  ABI_MALLOC(symrel_,(3,3,msym,0:ndtset_alloc))
@@ -968,7 +959,6 @@ subroutine indefo1(dtset)
 !Local variables -------------------------------
 !scalars
  !integer :: ii
-
 !******************************************************************
 
 !Set up default values. All variables to be output in outvars.f
@@ -2205,18 +2195,11 @@ end subroutine invars1
 
 subroutine indefo(dtsets, ndtset_alloc, nprocs)
 
- use m_gwdefs
-#if defined DEV_YP_VDWXC
- use m_xc_vdw
-#endif
-
- use m_fftcore,      only : get_cache_kb, fftalg_for_npfft
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ndtset_alloc,nprocs
 !arrays
- type(dataset_type),intent(inout) :: dtsets(0:ndtset_alloc) !vz_i
+ type(dataset_type),intent(inout) :: dtsets(0:ndtset_alloc)
 
 !Local variables -------------------------------
 !scalars
@@ -2225,7 +2208,6 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 #if defined DEV_YP_VDWXC
  type(xc_vdw_type) :: vdw_defaults
 #endif
-
 !******************************************************************
 
  DBG_ENTER("COLL")
@@ -2926,37 +2908,6 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    !  dtsets(idtset)%mixprec = 1
    !  dtsets(idtset)%boxcutmin = 1.1_dp
    !end if
-
-! JB:UNINITIALIZED VALUES (not found in this file neither indefo1)
-! They might be initialized somewhereelse, I don't know.
-! That might cause uninitialized error with valgrind depending on the compiler
-! chkprim
-! maxnsym
-! nsym
-! macro_uj
-! prtpmp
-! timopt
-! useria
-! userib
-! useric
-! userid
-! userie
-! bravais
-! symafm
-! symrel
-! fband
-! nelect
-! userra
-! userrb
-! userrc
-! userrd
-! userre
-! vacwidth
-! genafm
-! kptns
-! rprimd_orig
-! tnons
-
  end do
 
  DBG_EXIT("COLL")

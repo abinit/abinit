@@ -4648,8 +4648,10 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      ABI_CHECK_NOSTOP(dt%usefock == 0, 'GBT with Fock is not coded', ierr)
      ABI_CHECK_NOSTOP(.not. xc_is_mgga, 'GBT with meta-GGA is not coded', ierr)
      ABI_CHECK_NOSTOP(dt%ionmov == 0, 'GBT and atomic relaxation not tested', ierr)
-     ! ecutsm is problematic due to kin_kmhq and kin_kphq!
      ABI_CHECK_NOSTOP(dt%optcell == 0, 'GBT and cell relaxation not coded', ierr)
+     if (all(abs(dt%spinat(1:2, 1:dt%natom)) < tol8)) then
+       ABI_CHECK_NOSTOP(.False., 'at least one spinat(:,iat) should have non-zero x or y components', ierr)
+     end if
    end if
 
 !  If molecular dynamics or structural optimization is being done

@@ -1016,7 +1016,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
          ! Compute nonlocal form factors ffnl at all (k+q/2+G):
          ! TODO: useylm = 1 requires ylm_kphq, ylmgr_kphq
-         ! and ylm should be computed with k-q/2.
+         ! and ylm should be computed with k-q/2 in the caller.
          ABI_MALLOC(ffnl_kphq,(npw_k,dimffnl,psps%lmnmax,ntypat))
          call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl_kphq,psps%ffspl,&
           gmet,gprimd,ider,idir,psps%indlmn,kg_k,kpg_kphq,kphq,psps%lmnmax,&

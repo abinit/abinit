@@ -1063,7 +1063,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
        call nonlop(choice,cpopt_here,cwaveprj_nonlop,enlout,gs_ham,idir,lambda_ndat,mpi_enreg,ndat,&
           nnlout,paw_opt,signs,gsc_ptr,tim_nonlop,cwavef,gvnlxc_,select_k=select_k_)
      else
-       ! GBT case
+       ! GBT case. Treat up and down components separately.
        gs_ham%nspinor = 1
 
        ! Split cwavef and gvnlxc
@@ -1251,6 +1251,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
                end do ! ispinor
              end do ! idat
            else
+             ! GBT. use different kinetic energies for up and down components.
              !$OMP PARALLEL DO PRIVATE(igspinor, iispinor) COLLAPSE(2) IF(gemm_nonlop_use_gemm)
              do idat=1,ndat
                do ispinor=1,my_nspinor
