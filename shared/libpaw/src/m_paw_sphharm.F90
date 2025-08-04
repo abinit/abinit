@@ -20,6 +20,9 @@
 
 #include "libpaw.h"
 
+#define MATPACK(row,col) (MAX(row,col)*(MAX(row,col)-1)/2 + MIN(row,col))
+#define LMPACK(lqn,mqn) (lqn*lqn+lqn+mqn+1)
+
 MODULE m_paw_sphharm
 
  USE_DEFS
