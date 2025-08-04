@@ -24,8 +24,8 @@ lotf_classic 5
   toldfe 1.d-7
   paral_kgb 1
   npband 2
-  bandpp 1
   npfft 2
+  nblock_lobpcg 100 # Very likely not the optimal! (LB:07-2025)
 # 4-Options for the choice of calculation:
 # ----------------------------------------
 

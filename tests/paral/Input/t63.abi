@@ -8,15 +8,17 @@ use_gemm_nonlop 1
 #istwfk  *1
 #mixprec 1
 
-# Dataset 1: band parallelism with bandpp to take advange of use_gemm_nonlop.
+nblock_lobpcg 1
+
+# Dataset 1: band parallelism to take advange of use_gemm_nonlop.
 rmm_diis1  1
-npband1 4 bandpp1 8 npfft1 1
+npband1 4 npfft1 1
 tolvrs1    1.0d-6
 
 # Dataset 1: band + FFT parallelism.
 # Read previous WFK, decrease tolvrs and reconverge with RMM-DIIS only.
 rmm_diis2 -3
-npband2 2 bandpp2 16 npfft2 2
+npband2 2 npfft2 2
 tolvrs2    1.0d-10
 # Added in v9.11:
 tolwfr_diago 1d-30

@@ -70,7 +70,6 @@ ecut  5 # this value is very low but is used here to achieve very low calculatio
         # in a production environment this should be checked carefully for convergence and
         # a more reasonable value is probably around 20
 ecutsm 0.5
-dilatmx 1.05
 ngkpt 6 6 6
 nshiftk 4 # this Monkhorst-Pack shift pattern is used so that the symmetry of the shifted grid
           # is correct. A gamma-centered grid would also have the correct symmetry but would be
