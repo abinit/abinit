@@ -82,7 +82,6 @@ ecut  2.8 # this value is very low but is used here to achieve very low calculat
         # in a production environment this should be checked carefully for convergence and
         # a more reasonable value is probably around 30
 ecutsm 0.5
-dilatmx 1.05
 ngkpt 6 6 6 # must be checked carefully for convergence, Raman calculations converge slowly with kpt
 nshiftk 4 # this Monkhorst-Pack shift pattern is used so that the symmetry of the shifted grid
           # is correct. A gamma-centered grid would also have the correct symmetry but would be

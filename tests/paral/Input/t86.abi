@@ -86,7 +86,7 @@ paral_kgb2 1
 np_spkpt2 1
 npband2 4
 npfft2 1
-bandpp2 8
+nblock_lobpcg2 1
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "23v.paw, 38sr.paw, 8o.paw"

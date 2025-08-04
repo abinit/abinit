@@ -50,7 +50,7 @@
 
 #Parallelization variables
  wfoptalg 4
- bandpp 1 # old default value
+ nblock_lobpcg 20 # Very likely not optimal (LB:07-2025)
  fftalg 401
  densfor_pred 0
  intxc 0

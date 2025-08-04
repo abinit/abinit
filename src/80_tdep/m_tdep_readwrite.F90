@@ -563,7 +563,7 @@ contains
     write(Invar%stdout,'(a,a,a)') '.Version ', version_string,' of ATDEP'
   end if
 
-  write(Invar%stdout,'(a)') '.Copyright (C) 1998-2025 ABINIT group (FB,JB).'
+  write(Invar%stdout,'(a)') '.Copyright (C) 1998-2025 ABINIT group (FB,JB,GA).'
   write(Invar%stdout,'(a)') ' ABINIT comes with ABSOLUTELY NO WARRANTY.'
   write(Invar%stdout,'(a)') ' It is free software, and you are welcome to redistribute it'
   write(Invar%stdout,'(a)') ' under certain conditions (GNU General Public License,'
@@ -810,13 +810,31 @@ contains
   end if
 
 ! tolmotifinboxmatch
-  call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'tolmotifinboxmatch', tread, 'DPR')
+  !call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'tolmotifinboxmatch', tread, 'DPR')
+  !if (tread == 1) then
+  !  Invar%tolmotif = dprarr(1)
+  !  Invar%tolinbox = dprarr(2)
+  !  Invar%tolmatch = dprarr(3)
+  !  write(Invar%stdout,'(1x,a20,f10.5)') ljust('tolmotif',20),Invar%tolmotif
+  !  write(Invar%stdout,'(1x,a20,f10.5)') ljust('tolinbox',20),Invar%tolinbox
+  !  write(Invar%stdout,'(1x,a20,f10.5)') ljust('tolmatch',20),Invar%tolmatch
+  !end if
+
+  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'tolmotif', tread, 'DPR')
   if (tread == 1) then
     Invar%tolmotif = dprarr(1)
-    Invar%tolinbox = dprarr(2)
-    Invar%tolmatch = dprarr(3)
     write(Invar%stdout,'(1x,a20,f10.5)') ljust('tolmotif',20),Invar%tolmotif
+  end if
+
+  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'tolinbox', tread, 'DPR')
+  if (tread == 1) then
+    Invar%tolinbox = dprarr(1)
     write(Invar%stdout,'(1x,a20,f10.5)') ljust('tolinbox',20),Invar%tolinbox
+  end if
+
+  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'tolmatch', tread, 'DPR')
+  if (tread == 1) then
+    Invar%tolmatch = dprarr(1)
     write(Invar%stdout,'(1x,a20,f10.5)') ljust('tolmatch',20),Invar%tolmatch
   end if
 
