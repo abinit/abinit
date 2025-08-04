@@ -99,7 +99,7 @@ pseudos="P.xml, Al.xml"
 #%% max_nprocs = 4
 #%% [NCPU_4]
 #%% files_to_test = 
-#%%   t34_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%%   t34_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -medium
 #%% [extra_info]
 #%% authors = L. Baguet
 #%% keywords = PAW,CPRJ
