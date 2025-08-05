@@ -528,8 +528,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  real(dp) :: tolfilter
  real(dp) :: maxeig, maxeig_global
  real(dp) :: mineig, mineig_global
- real(dp) :: lambda_minus
- real(dp) :: lambda_plus
+ real(dp) :: lambda_minus, alpha_minus
+ real(dp) :: lambda_plus, alpha_plus
+ real(dp) :: overlap_width
  real(dp) :: one_over_r
  real(dp) :: two_over_r
  real(dp) :: center
@@ -717,6 +718,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  flush(901)
  ! ITEST
 
+ !! Perform this in a loop:
+ !! Every slice has its own chebfi workspace.
+
  ! Compute |X|^2 colwise L2-norm (before any filter)
  call xg_init(dist1,SPACE_R,neigenpairs,1)
  call xgBlock_colwiseNorm2(slice%AllX,dist1%self,comm_loc=xmpi_comm_null)
@@ -902,6 +906,12 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  call xgBlock_print(slice%eigenvalues, 901)
  flush(901)
 
+ !! We define two types of operations related to data transfer:
+ ! - SPE2SLI (spectrum to slice): move data from spectrum to slice
+ ! - SLI2SPE (slice to spectrum): move data from slice to spectrum
+ ! 
+ ! At this point do the operation SLI2SPE
+
  ! reset and free
  call xg_free(dist1)
  call xg_free(dist2)
@@ -913,8 +923,11 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  islice = 2
  !nband_slice_buf = 15
 
- lambda_minus = 0.51404-0.1 ! assumes sequential, =largest previously converged value
- lambda_plus = 1.25348+0.1 ! can be in parallel, only depends on Rayleigh value
+ overlap_width = 0.1 ! hard-coded... very sensitive to this choice
+ alpha_minus = 0.51404 ! assumes sequential, =largest previously converged value
+ alpha_plus = 1.25348 ! can be in parallel, only depends on Rayleigh value
+ lambda_minus = alpha_minus-overlap_width 
+ lambda_plus = alpha_plus+overlap_width 
  prev_mineig = -1.14360 ! assumes sequential, =smallest previously converged value
  ! TODO add overlap width to filter in [a-w,b+w) for wanted [a,b) for convergence reasons
  center = (slice%ecut + prev_mineig)*0.5
@@ -927,7 +940,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  ! ITEST
  write(901,*)
  write(901,*) '====================Slice=================', islice
- write(901,*) 'Probe for vector space of wanted interval=', lambda_minus, lambda_plus
+ write(901,*) 'Probe for vector space of wanted interval=', alpha_minus, alpha_plus
+ write(901,*) '                        including overlap=', lambda_minus, lambda_plus
  flush(901)
  ! ITEST
 
@@ -957,6 +971,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  !               or the inverse ...
  ! but in anyway these two quantities must be autotuned
 
+ !! Notice that 35 here is very low!! This is good
+ ! it will be different if we modify overlap_width however.
+ !! Trade-off between the two.
 
  ! Initialize Chebyshev expansion of indicator function of order ndeg_filter
  ndeg_filter = 35
@@ -1137,14 +1154,18 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
  ! Count how many eigenvalues converged in wanted interval
  call xgBlock_reverseMap_1d(slice%eigenvalues, lambda_apost)
- count_mask = count(lambda_minus < lambda_apost .and. lambda_apost < lambda_plus, 1)
+ count_mask = count(alpha_minus < lambda_apost .and. lambda_apost < alpha_plus, 1)
 
  ! ITEST
- write(901,*) 'What we want: 15 vectors in ', lambda_minus, lambda_plus
+ write(901,*) 'What we want: 15 vectors in ', alpha_minus, alpha_plus
  write(901,*) 'what we get: converged eigenval2 of number=', count_mask
  call xgBlock_print(slice%eigenvalues, 901)
  flush(901)
  ! ITEST
+
+ !! Step 4. Merge procedure
+
+
 
  ! TODO here do the selection-discard procedure to keep eigenpairs in output workspace
  ! 1) the first eigenpair is starting from previous slice + 1. Can use converged eigenvalues
