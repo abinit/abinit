@@ -523,7 +523,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  integer :: niter, max_niter_restart
  integer :: nband_slice, nband_slice_buf
  integer :: count_mask
+ integer :: count_rr
  integer :: icount
+ integer :: blockdim_cprj
  real(dp) :: tolerance
  real(dp) :: tolfilter
  real(dp) :: maxeig, maxeig_global
@@ -552,7 +554,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  type(xgBlock_t) :: eig_part
  type(xgBlock_t) :: X_col, AX_col
  type(xg_t) :: X_kept, AX_kept
+ type(xg_t) :: cprj_work_slice, cprj_work2_slice
  type(xgBlock_t) :: X_kept_col, AX_kept_col
+ type(xgBlock_t) :: eigenvalues_slice, residu_slice
  type(xg_t) :: X_part
  type(xg_t) :: AX_part
  type(xg_t) :: cprjX_part
@@ -676,10 +680,10 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  ! Recover column indices of sorted Rayleigh quotients in increasing order
  call xgBlock_reverseMap(DivResults%self, theta_, rows=1, cols=neigenpairs)
  rayleigh_quotients(1:neigenpairs) = theta_(1,1:neigenpairs)
- permute_cols(1:neigenpairs) = (/ (iband, iband=1,neigenpairs) /)
- call sort_dp(neigenpairs, rayleigh_quotients, permute_cols, tol12)
+ !permute_cols(1:neigenpairs) = (/ (iband, iband=1,neigenpairs) /)
+ !call sort_dp(neigenpairs, rayleigh_quotients, permute_cols, tol12)
  ! store order into theta_
- theta_(1,1:neigenpairs) = rayleigh_quotients(1:neigenpairs)
+ !theta_(1,1:neigenpairs) = rayleigh_quotients(1:neigenpairs)
 
  ! ITEST
  write(901,*) 'rayleigh quotients='
@@ -688,12 +692,12 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  ! ITEST
 
  ! Permute columns 1,..,neigenpairs according to order
- call xgBlock_permuteCols(slice%AllX, slice%spacedim, neigenpairs, permute_cols)
- call xgBlock_permuteCols(slice%AllAX%self, slice%spacedim, neigenpairs, permute_cols)
+ !call xgBlock_permuteCols(slice%AllX, slice%spacedim, neigenpairs, permute_cols)
+ !call xgBlock_permuteCols(slice%AllAX%self, slice%spacedim, neigenpairs, permute_cols)
  ! ITEST
- write(901,*) 'slice%AllX after perm=', xgBlock_getid(slice%AllX) 
- write(901,*) 'slice%AllAX after perm=', xgBlock_getid(slice%AllAX%self) 
- flush(901)
+ !write(901,*) 'slice%AllX after perm=', xgBlock_getid(slice%AllX) 
+ !write(901,*) 'slice%AllAX after perm=', xgBlock_getid(slice%AllAX%self) 
+ !flush(901)
  ! ITEST 
 
  ! TODO insert probe here
@@ -923,12 +927,19 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  islice = 2
  !nband_slice_buf = 15
 
- overlap_width = 0.1 ! hard-coded... very sensitive to this choice
- alpha_minus = 0.51404 ! assumes sequential, =largest previously converged value
- alpha_plus = 1.25348 ! can be in parallel, only depends on Rayleigh value
+ !overlap_width = 0.1 ! hard-coded... very sensitive to this choice
+ !alpha_minus = 0.51404 ! assumes sequential, =largest previously converged value
+ alpha_minus = lambda_minus
+ alpha_plus = rayleigh_quotients(neigenpairs) ! can be in parallel, only depends on Rayleigh value
+
+ overlap_width = (alpha_plus - alpha_minus)/8.0
  lambda_minus = alpha_minus-overlap_width 
  lambda_plus = alpha_plus+overlap_width 
- prev_mineig = -1.14360 ! assumes sequential, =smallest previously converged value
+ 
+ call xgBlock_reverseMap(slice%eigenvalues, theta_, rows=1, cols=neigenpairs)
+ prev_mineig = theta_(1,1)
+ !prev_mineig = -1.14360 ! assumes sequential, =smallest previously converged value
+ 
  ! TODO add overlap width to filter in [a-w,b+w) for wanted [a,b) for convergence reasons
  center = (slice%ecut + prev_mineig)*0.5
  radius = (slice%ecut - prev_mineig)*0.5 
@@ -976,7 +987,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  !! Trade-off between the two.
 
  ! Initialize Chebyshev expansion of indicator function of order ndeg_filter
- ndeg_filter = 35
+ ndeg_filter = 25
  call xg_init(Xsum,slice%space,slice%total_spacedim,neigenpairs,slice%spacecom,gpu_option=gpu_option)
  cdeg = Pi/(ndeg_filter+2)
  mu = 1.d0/Pi*(ACOS(ls)-ACOS(us))
@@ -1144,6 +1155,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  call xg_nonlop_getcprj(xg_nonlop,slice%X,slice%cprjX,slice%proj_work%self)
  call timab(tim_cprj,2,tsec)
 
+ ! Number of vectors on which we apply rr
+ count_rr = count_mask
+
  ! Apply Rayleigh Ritz on slice (refinement)
  call xg_RayleighRitz_cprj(xg_nonlop,slice%X,slice%cprjX,slice%AX,slice%eigenvalues,&
      slice%blockdim_cprj,ierr,0,tim_RR,ABI_GPU_DISABLED,solve_ax_bx=.true.)
@@ -1165,7 +1179,25 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
  !! Step 4. Merge procedure
 
+ ! Restrict eigenvalue array
+ call xgBlock_reshape(slice%eigenvalues, 1, neigenpairs) 
+ call xgBlock_setBlock(slice%eigenvalues, eigenvalues_slice, rows=1, cols=count_rr)
+ call xgBlock_reshape(eigenvalues_slice, count_rr, 1)
+ call xgBlock_reshape(slice%eigenvalues, neigenpairs, 1)
 
+ ! Restrict residual array
+ call xgBlock_reshape(residu, 1, neigenpairs) 
+ call xgBlock_setBlock(residu, residu_slice, rows=1, cols=count_rr)
+ call xgBlock_reshape(residu_slice, count_rr, 1)
+ call xgBlock_reshape(residu, neigenpairs, 1)
+
+ write(901,*) 'part='
+ call xgBlock_print(eigenvalues_slice, 901)
+ flush(901)
+ 
+ blockdim_cprj = count_rr*xg_nonlop%nspinor
+ call xg_init(cprj_work_slice,slice%space_cprj,slice%cprjdim,blockdim_cprj,slice%spacecom)
+ call xg_init(cprj_work2_slice,slice%space_cprj,slice%cprjdim,blockdim_cprj,slice%spacecom)
 
  ! TODO here do the selection-discard procedure to keep eigenpairs in output workspace
  ! 1) the first eigenpair is starting from previous slice + 1. Can use converged eigenvalues
@@ -1185,22 +1217,25 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  ! Compute H-eSX
  if (slice%paw) then
     call timab(tim_AX_nl,1,tsec)
-    call xg_nonlop_getHmeSX(xg_nonlop,slice%X,slice%cprjX,slice%AX,slice%eigenvalues,&
-        slice%Allcprj_work%self,slice%cprj_work2%self,no_H=.True.)
+    call xg_nonlop_getHmeSX(xg_nonlop,slice%X,slice%cprjX,slice%AX,eigenvalues_slice,&
+        cprj_work_slice%self,cprj_work2_slice%self,no_H=.True.)
     call timab(tim_AX_nl,2,tsec)
  end if
+
+ call xg_free(cprj_work_slice)
+ call xg_free(cprj_work2_slice)
 
  ! Compute residual norm squared
  call timab(tim_residu, 1, tsec)
  if (.not.slice%paw) then
-   call xgBlock_yxmax(slice%AX,slice%eigenvalues,slice%X)
+   call xgBlock_yxmax(slice%AX,eigenvalues_slice,slice%X)
  end if
- call xgBlock_colwiseNorm2(slice%AX, residu)
+ call xgBlock_colwiseNorm2(slice%AX, residu_slice)
  call timab(tim_residu, 2, tsec)
 
  ! ITEST
- write(901,*) 'residu='
- call xgBlock_print(residu, 901)
+ write(901,*) 'Slice 2: colwiseNorm2 residu='
+ call xgBlock_print(residu_slice, 901)
  flush(901)
  ! ITEST
 
