@@ -239,7 +239,7 @@ subroutine slice_init(slice,neigenpairs,spacedim,cprjdim,tolerance,ecut,bandpp, 
  slice%spectral_cut  = spectral_cut
 
  !!!!! HARDCODED !!!!!
- slice%slicedim = 20 ! hard-coded
+ slice%slicedim = 96 ! hard-coded
  !!!!!!!!!!!!!!!!!!!!!
  
  ABI_CHECK(slice%slicedim == neigenpairs/2, "must change hard-coded quantity to continue")
@@ -526,6 +526,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  integer :: count_rr
  integer :: icount
  integer :: blockdim_cprj
+ integer :: fcol_in, lcol_in
  real(dp) :: tolerance
  real(dp) :: tolfilter
  real(dp) :: maxeig, maxeig_global
@@ -568,6 +569,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  real(dp), allocatable :: rayleigh_quotients(:)
  real(dp), pointer :: probe(:) => null()
  real(dp), pointer :: lambda_apost(:) => null()
+ real(dp), pointer :: lambda_apost_slice(:) => null()
  real(dp), pointer :: dist2_array(:) => null()
  real(dp), pointer :: dist3_array(:) => null()
  real(dp), pointer :: theta_(:,:) => null()
@@ -714,7 +716,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  ! That the gain from applying RR to fewer vectors is less than the loss from 
  ! filtering more vectors, when compared to Chebyshev where everything is on nband.
  islice = 1
- nband_slice_buf = 15 ! maximum number of vectors we afford to RR
+ nband_slice_buf = floor(neigenpairs/2.0) ! maximum number of vectors we afford to RR
  
  ! ITEST
  write(901,*)
@@ -739,8 +741,12 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  flush(901)
  ! ITEST
 
+ ! Alternative cut in the middle of the spectrum
+
  ! Start filter up to degree
  lambda_minus = rayleigh_quotients(nband_slice_buf)
+ !lambda_minus = (maxval(rayleigh_quotients) - minval(rayleigh_quotients)) / 2.0
+
  !lambda_minus = 0.51404d0
  lambda_plus = slice%ecut
  center = (lambda_plus + lambda_minus)*0.5
@@ -798,11 +804,11 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     !call xgBlock_scale(dist2%self, 1/max_dist2, 1)
 
     ! ITEST
-    write(901,*) 'maximum dist2=', max_dist2
-    !write(901,*) 'probe dist2(scaled by max)='
-    write(901,*) 'probe dist2='
-    call xgBlock_print(dist2%self,901)
-    flush(901)
+!    write(901,*) 'maximum dist2=', max_dist2
+!    !write(901,*) 'probe dist2(scaled by max)='
+!    write(901,*) 'probe dist2='
+!    call xgBlock_print(dist2%self,901)
+!    flush(901)
     ! ITEST
 
     ! Orthogonal complement
@@ -811,9 +817,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     call xgBlock_colwiseNorm2(slice%X_PROBE%self, dist3%self, comm_loc=xmpi_comm_null)
 
     ! ITEST
-    write(901,*) 'probe dist3(orthogonal complement)='
-    call xgBlock_print(dist3%self,901)
-    flush(901)
+!    write(901,*) 'probe dist3(orthogonal complement)='
+!    call xgBlock_print(dist3%self,901)
+!    flush(901)
     ! ITEST
 
     !A * Psi for next iteration
@@ -879,6 +885,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     !if (probe(iband) > tol_probe) then
     ! Criterion 2
     if (probe(iband) > dist3_array(iband)) then
+    ! Deactivate criterion
+    !if (.true.) then
         call xgBlock_setBlock(X_kept%self, X_kept_col, slice%total_spacedim, 1, fcol=icount)
         call xgBlock_setBlock(AX_kept%self, AX_kept_col, slice%total_spacedim, 1, fcol=icount)
         call xgBlock_setBlock(slice%X, X_col, slice%total_spacedim, 1, fcol=iband)
@@ -933,7 +941,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  alpha_minus = lambda_minus
  alpha_plus = rayleigh_quotients(neigenpairs) ! can be in parallel, only depends on Rayleigh value
 
- overlap_width = (alpha_plus - alpha_minus)/8.0
+ overlap_width = (alpha_plus - alpha_minus)/4.0
  lambda_minus = alpha_minus-overlap_width 
  lambda_plus = alpha_plus+overlap_width 
  
@@ -988,7 +996,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  !! Trade-off between the two.
 
  ! Initialize Chebyshev expansion of indicator function of order ndeg_filter
- ndeg_filter = 25
+ ndeg_filter = 55
  call xg_init(Xsum,slice%space,slice%total_spacedim,neigenpairs,slice%spacecom,gpu_option=gpu_option)
  cdeg = Pi/(ndeg_filter+2)
  mu = 1.d0/Pi*(ACOS(ls)-ACOS(us))
@@ -1115,15 +1123,16 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
  ! Criterion 3 take into account error of f
  count_mask = count( probe > eout_ideg**2 + ((1+ein_ideg)*0.1d0)**2 )
+ count_mask = neigenpairs
  
  write(901,*) 
  write(901,*) 'Keep count_mask(should be 15)= out of neigenpairs=', count_mask, neigenpairs
  flush(901)
 
- if (nband_slice_buf < count_mask) then
-     write(901,*) 'Number of kept is more than initial guess! Initial guess missed eigenpairs'
-     flush(901)
- end if
+ !if (nband_slice_buf < count_mask) then
+ !    write(901,*) 'Number of kept is more than initial guess! Initial guess missed eigenpairs'
+ !    flush(901)
+ !end if
 
  ! Procedure for keeping selected to new workspaces
  call xg_init(X_kept,slice%space,slice%total_spacedim,count_mask,xmpi_comm_self,me_g0=slice%me_g0_fft)
@@ -1135,7 +1144,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     ! Criterion 2
     !if (probe(iband) > dist3_array(iband) .or. probe(iband) > 1) then
     ! Criterion 3
-    if ( probe(iband) > eout_ideg**2 + ((1+ein_ideg)*0.1d0)**2 ) then
+    !if ( probe(iband) > eout_ideg**2 + ((1+ein_ideg)*0.1d0)**2 ) then
+    ! No criterion
+    if (.true.) then
         call xgBlock_setBlock(X_kept%self, X_kept_col, slice%total_spacedim, 1, fcol=icount)
         call xgBlock_setBlock(AX_kept%self, AX_kept_col, slice%total_spacedim, 1, fcol=icount)
         call xgBlock_setBlock(slice%X, X_col, slice%total_spacedim, 1, fcol=iband)
@@ -1235,11 +1246,16 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  call timab(tim_residu, 2, tsec)
 
  call xgBlock_reverseMap_1d(residu_slice, resid)
+ call xgBlock_reverseMap_1d(eigenvalues_slice, lambda_apost_slice)
+ fcol_in = maxloc(lambda_apost_slice, dim=1, mask=(lambda_apost_slice < alpha_minus)) + 1
+ lcol_in = maxloc(lambda_apost_slice, dim=1, mask=(lambda_apost_slice < alpha_plus))     
  
  ! ITEST
  write(901,*) 'Slice 2: colwiseNorm2 residu='
  call xgBlock_print(residu_slice, 901)
  write(901,*) 'Frobenius norm=', sqrt(sum(resid))
+ write(901,*) 'inside indices [a,b)=', fcol_in, lcol_in, alpha_minus, alpha_plus
+ write(901,*) 'Frobenius norm (inside only)=', sqrt(sum(resid(fcol_in:lcol_in)))
  flush(901)
  ! ITEST
 
