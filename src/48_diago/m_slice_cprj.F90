@@ -566,11 +566,12 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  integer, allocatable :: permute_cols(:)
  integer, allocatable :: sorted_idx(:) ! same as permute_cols but used elsewhere
  real(dp), allocatable :: rayleigh_quotients(:)
- real(dp), pointer :: probe(:)
- real(dp), pointer :: lambda_apost(:)
+ real(dp), pointer :: probe(:) => null()
+ real(dp), pointer :: lambda_apost(:) => null()
  real(dp), pointer :: dist2_array(:) => null()
- real(dp), pointer :: dist3_array(:)
+ real(dp), pointer :: dist3_array(:) => null()
  real(dp), pointer :: theta_(:,:) => null()
+ real(dp), pointer :: resid(:) => null()
  !Pointers similar to old Chebfi
  integer,allocatable :: ndeg_filter_slice(:) !Slice variable
  integer,allocatable :: ndeg_filter_bands(:) !Oracle variable
@@ -1233,9 +1234,12 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  call xgBlock_colwiseNorm2(slice%AX, residu_slice)
  call timab(tim_residu, 2, tsec)
 
+ call xgBlock_reverseMap_1d(residu_slice, resid)
+ 
  ! ITEST
  write(901,*) 'Slice 2: colwiseNorm2 residu='
  call xgBlock_print(residu_slice, 901)
+ write(901,*) 'Frobenius norm=', sqrt(sum(resid))
  flush(901)
  ! ITEST
 
