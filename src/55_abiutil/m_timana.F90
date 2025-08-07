@@ -1985,7 +1985,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(89)
          list(:8)=(/2150,2151,2152,2153,2154,2155,2156,2159/) ; msg='xg_nonlop%forces_stress'
        case(90)
-         list(:37)=(/ (ii,ii=1670,1689,1),(ii,ii=2000,2015,1),2103 /) ; msg='low-level xgBlock type '
+         list(:36)=(/ (ii,ii=1670,1689,1),(ii,ii=2000,2015,1) /) ; msg='low-level xgBlock type '
        case default
          cycle ! This allows one to disable temporarily some partitionings
 
