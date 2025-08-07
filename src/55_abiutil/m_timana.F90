@@ -1269,20 +1269,20 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
  names(2130)='xg_nl%getcprj(gemm)             '
  names(2131)='xg_nl%getcprj(copy)             '
- names(2132)='xg_nl%getcprj(mpi)              '
- names(2133)='xg_nl%getcprj(proj-otf)         '
- names(2134)='xg_nl%getcprj(other)            '
+ names(2132)='xg_nl%getcprj(mpi)              '; basic(2132)=1
+ names(2133)='xg_nl%getcprj(proj-otf)         '; basic(2133)=1
+ names(2134)='xg_nl%getcprj(other)            '; basic(2134)=1
 
  names(2135)='xg_nl%apply_prj(gemm)           '
  names(2136)='xg_nl%apply_prj(copy)           '
- names(2137)='xg_nl%apply_prj(mpi)            '
- names(2138)='xg_nl%apply_prj(proj-otf)       '
- names(2139)='xg_nl%apply_prj(other)          '
+ names(2137)='xg_nl%apply_prj(mpi)            '; basic(2137)=1
+ names(2138)='xg_nl%apply_prj(proj-otf)       '; basic(2138)=1
+ names(2139)='xg_nl%apply_prj(other)          '; basic(2139)=1
 
  names(2140)='xg_nl%multcprj(gemm)            '
  names(2141)='xg_nl%multcprj(copy)            '
- names(2142)='xg_nl%multcprj(mpi)             '
- names(2143)='xg_nl%multcprj(other)           '
+ names(2142)='xg_nl%multcprj(mpi)             '; basic(2142)=1
+ names(2143)='xg_nl%multcprj(other)           '; basic(2143)=1
 
  names(2150)='xg_nonlop_forces_stress         '
  names(2151)='xg_nl_fst%start                 '
