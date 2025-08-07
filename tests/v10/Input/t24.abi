@@ -1,0 +1,54 @@
+!Input file for the anaddb code. Analysis of the AlAs DDB
+
+! ddb file
+ddb_filepath = "t24.ddb.abo"
+
+! output file
+output_file = "t24.abo"
+outdata_prefix = "t24o"
+
+!Flags
+ ifcflag   0     ! Interatomic force constant flag
+
+!Wavevector grid number 1 (coarse grid, from DDB)
+  brav    1      ! Bravais Lattice : 1-S.C., 2-F.C., 3-B.C., 4-Hex.)
+  ngqpt   1 1 1   ! Monkhorst-Pack indices
+  nqshft  1         ! number of q-points in repeated basic q-cell
+  q1shft  3*0.0
+
+!Effective charges
+     asr   6     ! Activate rotational invariance
+ dim_msr 8       ! Treat the system as a molecule
+
+ 
+!Interatomic force constant info
+  dipdip  0      ! Dipole-dipole interaction treatment
+
+!Phonon band structure output for band2eps - See note near end for
+! dealing with gamma LO-TO splitting issue.
+eivec 2
+nph1l 1
+ qph1l 0.0 0.0 0.0 1
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%%  executable = anaddb
+#%%  test_chain = t24.abi
+#%% [shell]
+#%% pre_commands =
+#%%   iw_cp t24.ddb.abo t24.ddb.abo
+#%% [files]
+#%% files_to_test = 
+#%%  t24.abo, tolnlines = 0,  tolabs=  1.2e-09, tolrel= 1.1
+#%% [paral_info]
+#%%  max_nprocs = 1
+#%% [extra_info]
+#%%  authors = B. Van Troeye
+#%%  keywords = Phonons, Acoustic Sum Rules
+#%%  description = Imposition of rotational invariance on IFCs of H2O molecule
+#%%  topics = Phonons
+#%%<END TEST_INFO>
+
