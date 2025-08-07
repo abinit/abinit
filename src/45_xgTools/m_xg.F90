@@ -3815,7 +3815,10 @@ contains
 
     if (nblocks_mpi==1) then
 
-      call xgBlock_gemm('n','n',1.0d0,xgBlockA,xgBlockB,1.d0,xgBlockW,timing=.false.)
+      ! If only one mpi process, use timing from gemm routine
+      call timab(tim_gemmcyclic,2,tsec)
+      call xgBlock_gemm('n','n',1.0d0,xgBlockA,xgBlockB,1.d0,xgBlockW)
+      call timab(tim_gemmcyclic,1,tsec)
 
     else
 

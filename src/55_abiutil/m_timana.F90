@@ -1194,7 +1194,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(2006)='xgBlock_saxpy                   '; basic(2006) = 1
  names(2007)='xgBlock_minmax                  '; basic(2007) = 1
  names(2008)='xgBlock_partialcopy             '; basic(2008) = 1
- names(2009)='xgBlock_gemmcyclic              '; basic(2009) = 1
+ names(2009)='xgBlock_gemmcyclic              '! not basic, contain partialcopy
  names(2010)='xgBlock_yxmax                   '; basic(2010) = 1
  names(2011)='xgBlock_ymax                    '; basic(2011) = 1
  names(2012)='xgBlock_add                     '; basic(2012) = 1
