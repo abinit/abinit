@@ -997,6 +997,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         write(901,*) 
         write(901,*) 'indicator for components in wanted eigenspace=', probe(:)
         write(901,*) 'indicator for components in orthogonal complement=', dist3_array(:)
+        write(901,*) 'eout_ideg=', eout_ideg
+        write(901,*) 'ein_ideg=', ein_ideg
+        write(901,*) 'estimator=', eout_ideg**2 + ((1+ein_ideg)*0.1d0)**2
         flush(901)
         ! ITEST
 
@@ -1073,8 +1076,14 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     ! Number of vectors on which we apply rr
     count_rr = count_mask
 
+    ! Restrict eigenvalue array for size consistancy (essentially keep nonzero entries)
+    call xgBlock_reshape(slice%eigenvalues, 1, neigenpairs) 
+    call xgBlock_setBlock(slice%eigenvalues, eigenvalues_slice, rows=1, cols=count_rr)
+    call xgBlock_reshape(eigenvalues_slice, count_rr, 1)
+    call xgBlock_reshape(slice%eigenvalues, neigenpairs, 1)
+
     ! Apply Rayleigh Ritz on slice (refinement)
-    call xg_RayleighRitz_cprj(xg_nonlop,slice%X,slice%cprjX,slice%AX,slice%eigenvalues,&
+    call xg_RayleighRitz_cprj(xg_nonlop,slice%X,slice%cprjX,slice%AX,eigenvalues_slice,&
         slice%blockdim_cprj,ierr,0,tim_RR,ABI_GPU_DISABLED,solve_ax_bx=.true.)
 
     if ( ierr /= 0 ) then
@@ -1083,17 +1092,11 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
     ! ITEST
     write(901,*) 'converged eigenval='
-    call xgBlock_print(slice%eigenvalues, 901)
+    call xgBlock_print(eigenvalues_slice, 901)
     flush(901)
     ! ITEST
 
-    ! Restrict eigenvalue array for size consistancy (essentially keep nonzero entries)
-    call xgBlock_reshape(slice%eigenvalues, 1, neigenpairs) 
-    call xgBlock_setBlock(slice%eigenvalues, eigenvalues_slice, rows=1, cols=count_rr)
-    call xgBlock_reshape(eigenvalues_slice, count_rr, 1)
-    call xgBlock_reshape(slice%eigenvalues, neigenpairs, 1)
-
-    ! Same for residual array
+    ! Restrict dimension of residual array
     call xgBlock_reshape(residu, 1, neigenpairs) 
     call xgBlock_setBlock(residu, residu_slice, rows=1, cols=count_rr)
     call xgBlock_reshape(residu_slice, count_rr, 1)
@@ -1151,6 +1154,14 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
         lcol_in = maxloc(lambda_apost_slice, dim=1, mask=(lambda_apost_slice < lambda_minus))
 
+        ! if multiple eigenvalue, include it
+        write(901,*) lambda_apost_slice(lcol_in)
+        write(901,*) lambda_apost_slice(lcol_in+1)
+        flush(901)
+        do while (lambda_apost_slice(lcol_in+1) - lambda_apost_slice(lcol_in) < 1.0e-3)
+            lcol_in = lcol_in + 1
+        end do
+
     else
 
         fcol_in = maxloc(lambda_apost_slice, dim=1, mask=(lambda_apost_slice < alpha_minus)) + 1
@@ -1161,8 +1172,12 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
         else
 
+            write(901,*) 'pass', lcol_in
+            flush(901)
             if (count_merge + lcol_in-fcol_in+1 > neigenpairs) then
-                lcol_in = fcol_in + neigenpairs - count_merge + 1
+                lcol_in = fcol_in + neigenpairs - count_merge - 1
+                write(901,*) 'pass', lcol_in, fcol_in, neigenpairs, count_merge
+                flush(901)
             end if
 
         end if
@@ -1335,6 +1350,14 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  end if
  call xgBlock_colwiseNorm2(slice%AllAX%self, residu)
  call timab(tim_residu, 2, tsec)
+
+ ! ITEST
+ call xgBlock_reverseMap_1d(residu, resid)
+ write(901,*) 'Frobenius norm (merged slices)=', sqrt(sum(resid))
+ write(901,*) 'eigen (merged slices)='
+ call xgBlock_print(eigen, 901)
+ flush(901)
+ ! ITEST
 
  if (.not.slice%paw) then
    call timab(tim_enl,1,tsec)
