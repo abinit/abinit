@@ -323,8 +323,7 @@ end subroutine Get_Mem_Dev
    if(nb_devices==1) then
      device=0
    else if(all(gpu_devices_node(1:nb_devices)==-1)) then
-     nprocs_per_gpu=max(1,nproc/nb_devices)
-     device=me/nprocs_per_gpu
+     device=modulo(me,nb_devices)
    else
      jj=nb_devices
      do ii=jj,2,-1
