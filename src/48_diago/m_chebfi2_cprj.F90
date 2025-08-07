@@ -480,6 +480,7 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspin
  real(dp) :: tsec(2)
  !Pointers similar to old Chebfi
  integer,allocatable :: ndeg_filter_bands(:) !Oracle variable
+ real(dp), pointer :: resid_val(:) => null()
  type(xg_nonlop_t) :: xg_nonlop
 
 ! *********************************************************************
@@ -659,6 +660,15 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspin
 
  call xgBlock_colwiseNorm2(chebfi%AX%self, residu)
  call timab(tim_residu, 2, tsec)
+
+ call xgBlock_reverseMap_1d(residu, resid_val)
+
+ ! ITEST
+ write(900,*) 'colwiseNorm2 residu='
+ call xgBlock_print(residu, 900)
+ write(900,*) 'Frobenius norm=', sqrt(sum(resid_val(1:chebfi%nbdbuf)))
+ flush(900)
+ ! ITEST
 
  call timab(tim_copy, 1, tsec)
  call xgBlock_copy(chebfi%X,X0)
