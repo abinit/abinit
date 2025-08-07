@@ -1343,6 +1343,13 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  call xg_nonlop_getHX(xg_nonlop,slice%AllAX%self,slice%AllcprjX,slice%Allcprj_work%self,slice%proj_work%self)
  call timab(tim_AX_nl,2,tsec)
  
+ if (slice%paw) then
+    call timab(tim_AX_nl,1,tsec)
+    call xg_nonlop_getHmeSX(xg_nonlop,slice%AllX,slice%AllcprjX,slice%AllAX%self,slice%eigenvalues,&
+        slice%Allcprj_work%self,slice%cprj_work2%self,no_H=.True.)
+   call timab(tim_AX_nl,2,tsec)
+ end if
+
  ! Compute residual norm squared
  call timab(tim_residu, 1, tsec)
  if (.not.slice%paw) then
@@ -1354,6 +1361,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  ! ITEST
  call xgBlock_reverseMap_1d(residu, resid)
  write(901,*) 'Frobenius norm (merged slices)=', sqrt(sum(resid))
+ write(901,*) 'resid (merged slices)='
+ call xgBlock_print(residu, 901)
  write(901,*) 'eigen (merged slices)='
  call xgBlock_print(eigen, 901)
  flush(901)
