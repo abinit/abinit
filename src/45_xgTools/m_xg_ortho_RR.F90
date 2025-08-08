@@ -827,18 +827,18 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,i
       case (EIGENVD)
         !ITEST
         if (prtvol == 15015015) then
-            write(901,*) 'eigenSolver', eigenSolver
-            write(901,*) 'Using hegvd'
+            write(902,*) 'eigenSolver', eigenSolver
+            write(902,*) 'Using hegvd'
             nrows_B = rows(subB%self)
             ncols_B = cols(subB%self)
-            write(901,*) 'computing cond for Hermitian pd matrix', nrows_B, ncols_B
+            write(902,*) 'computing cond for Hermitian pd matrix', nrows_B, ncols_B
             !# Validation
             !nrows_B = 2
             !#
             call xgBlock_hermitian_pd_cond(subB%self, nrows_B, cond)
-            write(901,*) 'cond(B)=', cond
+            write(902,*) 'cond(B)=', cond
             !# Validation: should be 2.076578056
-            flush(901)
+            flush(902)
         end if
         !ITEST
         if ( prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hegvd"

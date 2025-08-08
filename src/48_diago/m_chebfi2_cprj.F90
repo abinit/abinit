@@ -612,6 +612,8 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspin
 
  call timab(tim_amp_f,1,tsec)
  call chebfi_ampfactor(chebfi, DivResults%self, lambda_minus, lambda_plus, ndeg_filter_bands)
+ ! this results in higher condition number so avoid
+ !call chebfi_ampfactorMax(chebfi, DivResults%self, lambda_minus, lambda_plus, ndeg_filter_bands)
  call timab(tim_amp_f,2,tsec)
 
  call xg_free(DivResults)
@@ -637,8 +639,8 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspin
  call timab(tim_cprj,1,tsec)
  call xg_nonlop_getcprj(xg_nonlop,chebfi%X,chebfi%cprjX,chebfi%cprj_work%self)
  call timab(tim_cprj,2,tsec)
- call xg_RayleighRitz_cprj(chebfi%xg_nonlop,chebfi%X,chebfi%cprjX,chebfi%AX%self,chebfi%eigenvalues,chebfi%blockdim_cprj,ierr,0,&
-   tim_RR,ABI_GPU_DISABLED,solve_ax_bx=.true.)
+ call xg_RayleighRitz_cprj(chebfi%xg_nonlop,chebfi%X,chebfi%cprjX,chebfi%AX%self,chebfi%eigenvalues,&
+     chebfi%blockdim_cprj,ierr,15015015,tim_RR,ABI_GPU_DISABLED,solve_ax_bx=.true.)
 
  ! ITEST
  write(900,*) 'chebfi%X(after RR)=', xgBlock_getid(chebfi%X) 
@@ -929,6 +931,37 @@ subroutine chebfi_ampfactor(chebfi,DivResults,lambda_minus,lambda_plus,ndeg_filt
   end do
 
 end subroutine chebfi_ampfactor
+!!***
+
+subroutine chebfi_ampfactorMax(chebfi,DivResults,lambda_minus,lambda_plus,ndeg_filter_bands)
+
+  ! Arguments ------------------------------------
+  integer,           intent(in   ) :: ndeg_filter_bands(:)
+  type(xgBlock_t),   intent(in   ) :: DivResults
+  real(dp),          intent(in   ) :: lambda_minus
+  real(dp),          intent(in   ) :: lambda_plus
+  type(chebfi_t),    intent(inout) :: chebfi
+
+  ! Local variables-------------------------------
+  ! scalars
+  integer         :: iband
+  real(dp)        :: ampfactor
+  type(xgBlock_t) :: X_part
+  type(xgBlock_t) :: AX_part
+  real(dp),pointer :: eig(:,:)
+
+  ! *********************************************************************
+
+  call xgBlock_reverseMap(DivResults,eig,rows=1,cols=cols(DivResults))
+
+  !cheb_poly1(x, n, a, b)
+  ampfactor = maxval( (/ (cheb_poly1(eig(1,iband), ndeg_filter_bands(iband), lambda_minus, lambda_plus),& 
+      iband=1,cols(DivResults)) /) )
+
+  call xgBlock_scale(chebfi%xXColsRows, 1/ampfactor, 1)
+  call xgBlock_scale(chebfi%xAXColsRows, 1/ampfactor, 1)
+
+end subroutine chebfi_ampfactorMax
 !!***
 
 !----------------------------------------------------------------------
