@@ -540,6 +540,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  integer :: tim_slice_rr
  integer :: tim_slice_pr
  logical :: is_close_to_V
+ real(dp) :: tol_probe
  real(dp) :: tolerance
  real(dp) :: tolfilter
  real(dp) :: ramp
@@ -560,7 +561,6 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  real(dp) :: amp_ideg
  real(dp) :: ein_ideg, eout_ideg
  real(dp) :: tol12 = 1.0e-12
- real(dp) :: tol_probe = 1.0d0 ! this depends on the residual
  type(xg_t) :: Xsum
  type(xg_t) :: DivResults
  type(xg_t) :: dist1, dist2, dist3, dist12
@@ -1070,26 +1070,35 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     ! Old criterion kept for reference
     !count_mask = count(probe > dist3_array .or. ( probe > 1 ))
 
+    tol_probe = 0.3
     if (slice%spectral_cut == 1) then
         
-        if (islice==1) then
-            
-            !count_mask = count( probe > eout_ideg**2 + (ein_ideg*0.1d0)**2 )
-
-        else
-
-            ! Criterion to take into account error of f
-            ! FIXME norm of X? Tolerance? slice=1?
-            !count_mask = count( probe > eout_ideg**2 + ((1+ein_ideg)*0.1d0)**2 )
-            count_mask = count( probe > 0.5) 
-
-        end if
+        !if (islice==1) then
+        !    
+        !    !count_mask = count( probe > eout_ideg**2 + (ein_ideg*0.1d0)**2 )
+        !
+        !else
+        !
+        !    ! Criterion to take into account error of f
+        !    ! FIXME norm of X? Tolerance? slice=1?
+        !    !count_mask = count( probe > eout_ideg**2 + ((1+ein_ideg)*0.1d0)**2 )
+        !    count_mask = count( probe > tol_probe) 
+        !
+        !end if
+        count_mask = count( probe > tol_probe) 
 
     end if
+
+    ! TODO decrease tolerance for probe if not enough vectors after merge
+    do while (count_mask < neigenpairs/nslice .or. count_mask + count_merge < neigenpairs)
+        tol_probe = tol_probe - 0.05
+        count_mask = count( probe > tol_probe) 
+    end do
 
     ! ITEST
     write(901,*) 
     write(901,*) 'Keep count_mask= out of neigenpairs=', count_mask, neigenpairs
+    write(901,*) 'using adapted tolerance=            ', tol_probe
     flush(901)
     ! ITEST
 
@@ -1103,12 +1112,13 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         icount = 1
         do iband=1,neigenpairs
             is_close_to_V = .true.
-            if (islice==1) then
-                !is_close_to_V = probe(iband) > eout_ideg**2 + (ein_ideg*0.1d0)**2
-            else
-                !is_close_to_V = probe(iband) > eout_ideg**2 + ((1+ein_ideg)*0.1d0)**2
-                is_close_to_V = probe(iband) > 0.5
-            end if
+            !if (islice==1) then
+            !    !is_close_to_V = probe(iband) > eout_ideg**2 + (ein_ideg*0.1d0)**2
+            !else
+            !    !is_close_to_V = probe(iband) > eout_ideg**2 + ((1+ein_ideg)*0.1d0)**2
+            !    is_close_to_V = probe(iband) > tol_probe
+            !end if
+            is_close_to_V = probe(iband) > tol_probe
             if (is_close_to_V) then
                 call xgBlock_setBlock(X_kept%self, X_kept_col, slice%total_spacedim, 1, fcol=icount)
                 call xgBlock_setBlock(AX_kept%self, AX_kept_col, slice%total_spacedim, 1, fcol=icount)
@@ -1234,11 +1244,11 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
         lcol_in = maxloc(lambda_apost_slice, dim=1, mask=(lambda_apost_slice < lambda_minus))
 
-        ! If too many columns and not enough for second slice, then reduce
-        ! can happen if guess is too bad
-        if (lcol_in - fcol_in + 1 > neigenpairs / nslice + 20) then
-            lcol_in = neigenpairs / nslice
-        end if
+        !! If too many columns and not enough for second slice, then reduce
+        !! can happen if guess is too bad
+        !if (lcol_in - fcol_in + 1 > neigenpairs / nslice + 20) then
+        !    lcol_in = neigenpairs / nslice
+        !end if
 
         ! if multiple eigenvalue, include it
         write(901,*) lambda_apost_slice(lcol_in)
