@@ -1013,6 +1013,12 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         call timab(tim_cprj,1,tsec)
         call xg_nonlop_getcprj(xg_nonlop,slice%X,slice%cprjX,slice%proj_work%self)
         call timab(tim_cprj,2,tsec)
+        
+        ! update probe
+        call xgBlock_copy(slice%X, slice%X_PROBE%self)
+    
+        ! dist2 = |X_PROBE|^2 colwise L2-norm
+        call xgBlock_colwiseNorm2(slice%X_PROBE%self, dist2%self, max_dist2, comm_loc=xmpi_comm_null)
 
     end if
     
@@ -1064,7 +1070,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         
         if (islice==1) then
             
-            count_mask = count( probe > eout_ideg**2 + (ein_ideg*0.1d0)**2 )
+            !count_mask = count( probe > eout_ideg**2 + (ein_ideg*0.1d0)**2 )
 
         else
 
@@ -1093,7 +1099,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         do iband=1,neigenpairs
             is_close_to_V = .true.
             if (islice==1) then
-                is_close_to_V = probe(iband) > eout_ideg**2 + (ein_ideg*0.1d0)**2
+                !is_close_to_V = probe(iband) > eout_ideg**2 + (ein_ideg*0.1d0)**2
             else
                 is_close_to_V = probe(iband) > eout_ideg**2 + ((1+ein_ideg)*0.1d0)**2
             end if
