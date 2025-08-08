@@ -50,7 +50,7 @@ nstep         12     #   50       # Maximal number of SCF steps
 # Parallelization
 # ===============
 paral_kgb     1        # Force use of lobpcg WITH parallelism on 1 CPU
-bandpp        10
+nblock_lobpcg 1
 npimage       10       # Use 10 CPUs for the image parallelization
 
 # Definition of the path

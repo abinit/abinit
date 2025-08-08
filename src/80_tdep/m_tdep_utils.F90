@@ -65,6 +65,7 @@ module m_tdep_utils
  public :: tdep_MatchIdeal2Average
  public :: tdep_calc_model
  public :: tdep_calc_nbcoeff
+ public :: tdep_write_xred_average
 
 contains
 
@@ -231,7 +232,7 @@ contains
 
 !====================================================================================================
  subroutine tdep_MatchIdeal2Average(distance,Forces_MD,Invar,Lattice,MPIdata,&
-&                              Rlatt_cart,Rlatt4dos,Sym,ucart)
+&                                   Rlatt_cart,Rlatt4dos,Sym,ucart)
 
   type(Input_type),intent(inout) :: Invar
   type(Lattice_type),intent(in) :: Lattice
@@ -257,7 +258,8 @@ contains
   integer, allocatable  :: FromIdeal2Average(:)
   double precision, allocatable  :: xcart(:,:,:)
   double precision, allocatable  :: xcart_ideal(:,:)
-  logical :: ok,must_shift
+  logical :: ok,must_shift,discard_R
+  character(len=500) :: msg
 
   ierr = 0;
 
@@ -278,13 +280,18 @@ contains
   do ii=-max_ijk,max_ijk
     do jj=-max_ijk,max_ijk
       do kk=-max_ijk,max_ijk
+
+        Rlatt(1)=real(ii-1)
+        Rlatt(2)=real(jj-1)
+        Rlatt(3)=real(kk-1)
+
+        discard_R = .false.
         do iatcell=1,Invar%natom_unitcell
-          if (iatcell==1) ok=.false.
-          Rlatt(1)=real(ii-1)
-          Rlatt(2)=real(jj-1)
-          Rlatt(3)=real(kk-1)
-!         Then compute the reduced positions
-          tmp(:)=Rlatt(:)+Invar%xred_unitcell(:,iatcell)
+
+          if (discard_R) cycle
+
+!         Compute the reduced positions
+          tmp(:) = Rlatt(:) + Invar%xred_unitcell(:,iatcell)
           call DGEMV('T',3,3,1.d0,Lattice%multiplicitym1(:,:),3,tmp(:),1,0.d0,xred_tmp(:),1)
 
 !         If the first atom of the pattern is in the [0;1[ range then keep all the
@@ -292,26 +299,26 @@ contains
 !         none are taken.
           if (iatcell==1) then
             if (minval(xred_tmp(:)).lt.0.d0.or.maxval(xred_tmp(:)).ge.(1.d0-1.d-12)) then
+              discard_R = .true.
               cycle
-            else
-              ok=.true.
             end if
-          else
-            if (.not.ok) cycle
           end if
+
+          !GA: Why natom+1 ?
           if (iatom.gt.(Invar%natom+1)) then
             ABI_ERROR('The number of atoms found in the bigbox exceeds natom' )
           end if
-          xred_ideal(:,iatom)=xred_tmp(:)
+
+          xred_ideal(:,iatom) = xred_tmp(:)
           call DGEMV('T',3,3,1.d0,Lattice%multiplicitym1(:,:),3,Rlatt(:),1,0.d0,Rlatt_red(:,1,iatom),1)
-          iatom=iatom+1
+          iatom = iatom + 1
         end do
       end do
     end do
   end do
 
-  if (iatom.lt.Invar%natom) then
-    ABI_ERROR('The number of atoms found in the bigbox is lower than natom')
+  if (iatom.lt.Invar%natom+1) then
+    ABI_ERROR('The number of atoms found in the big box is smaller than natom')
   end if
 
 ! Compute the distances between ideal positions in the SUPERcell
@@ -337,9 +344,9 @@ contains
   ABI_MALLOC(dist_unitcell,(Invar%natom_unitcell,Invar%natom_unitcell,3)); dist_unitcell(:,:,:)=zero
   do iatcell=1,Invar%natom_unitcell
     do jatcell=1,Invar%natom_unitcell
-      tmp(:)=xred_ideal(:,jatcell)-xred_ideal(:,iatcell)
+      tmp(:) = xred_ideal(:,jatcell)-xred_ideal(:,iatcell)
       call tdep_make_inbox(tmp,1,tol8)
-      dist_unitcell(iatcell,jatcell,:)=tmp(:)
+      dist_unitcell(iatcell,jatcell,:) = tmp(:)
     end do
   end do
 
@@ -359,10 +366,12 @@ contains
     end do
   end do
   call xmpi_sum(xred_average,MPIdata%comm_step,ierr)
-  xred_average(:,:)=xred_average(:,:)/real(Invar%nstep_tot)
+  xred_average(:,:) = xred_average(:,:) / real(Invar%nstep_tot)
+
+! Search the basis of atoms in the supercell
+! in order to find iatom_ref
 
   write(Invar%stdout,*)' Search the unitcell basis of atoms in the MD trajectory...'
-! Search the basis of atoms in the supercell
   ok=.false.
   xred_center(:,:)=xred_average(:,:)
   iatcell=1
@@ -370,8 +379,10 @@ contains
     if (Invar%typat(iatom).ne.Invar%typat_unitcell(iatcell)) cycle
     natom_match = 0
     do jatom=1,Invar%natom
+
       tmp(:)=xred_center(:,jatom)-xred_center(:,iatom)
-      call tdep_make_inbox(tmp,1,1d-4)
+      call tdep_make_inbox(tmp,1,Invar%tolinbox)
+
       do jatcell=1,Invar%natom_unitcell
         if (Invar%typat(jatom).ne.Invar%typat_unitcell(jatcell)) cycle
         ndir_match = 0
@@ -391,20 +402,17 @@ contains
       ok=.true.
       exit
     else if (natom_match.gt.Invar%natom_unitcell) then
-      ABI_BUG(' Something wrong: WTF')
+      write(msg,'(5a)') 'Too many atoms match the unit cell.',ch10,&
+                        'Perhaps the value of tolmotif is too large,',ch10,&
+                        'or the value of tolinbox is too small.'
+      ABI_ERROR(msg)
     endif
   end do
   if (.not.ok) then
-    if (MPIdata%iam_master) then
-      open(unit=31,file=trim(Invar%output_prefix)//'_xred_average.xyz')
-      do iatom=1,Invar%natom
-        write(31,'(a,1x,3(f10.6,1x))') 'C',xred_center(:,iatom)
-        write(31,'(a,1x,3(f10.6,1x))') 'I',xred_ideal (:,iatom)
-      end do
-      close(31)
-    end if
-    ABI_ERROR_NOSTOP('The basis of atoms written in input.in file does not appear in the MD trajectory',ierr)
-    ABI_ERROR('Perhaps, you can adjust the tolerance (tolmotif)')
+    call tdep_write_xred_average(Invar,MPIdata,Lattice,xred_ideal,xred_center)
+    write(msg,'(3a)') 'The basis of atoms written in input.in file does not appear in the MD trajectory.',ch10,&
+                      'Perhaps, you can adjust the tolerance (tolmotif).'
+    ABI_ERROR(msg)
   end if
   ABI_FREE(dist_unitcell)
 
@@ -534,28 +542,29 @@ contains
     end if
   end do
 
-! WARNING: VERY IMPORTANT: The positions are displayed/sorted (and used in the following)
-! according to ideal positions xred_ideal.
-  if (MPIdata%iam_master) then
-    open(unit=31,file=trim(Invar%output_prefix)//'_xred_average.xyz')
-    write(31,'(i4)') Invar%natom*2
-    write(31,'(i4)') 1
-!   --> In reduced coordinates
-    do iatom=1,Invar%natom
-      write(31,'(a,1x,3(f10.6,1x))') 'Ired',xred_ideal (:,iatom)
-      write(31,'(a,1x,3(f10.6,1x))') 'Cred',xred_center(:,FromIdeal2Average(iatom))
-    end do
-!   --> In cartesian coordinates
-    do iatom=1,Invar%natom
-      tmp(:)=zero
-      call DGEMV('T',3,3,1.d0,Lattice%rprimd_md(:,:),3,xred_ideal (:,iatom),1,0.d0,tmp(:),1)
-      write(31,'(a,1x,3(f10.6,1x))') 'Icart',tmp(:)
-      tmp(:)=zero
-      call DGEMV('T',3,3,1.d0,Lattice%rprimd_md(:,:),3,xred_center(:,FromIdeal2Average(iatom)),1,0.d0,tmp(:),1)
-      write(31,'(a,1x,3(f10.6,1x))') 'Ccart',tmp(:)
-    end do
-    close(31)
-  end if
+! WARNING: VERY IMPORTANT: The positions are displayed/sorted
+! (and used in the following) according to ideal positions xred_ideal.
+  call tdep_write_xred_average(Invar,MPIdata,Lattice,xred_ideal,xred_center,FromIdeal2Average)
+  !if (MPIdata%iam_master) then
+  !  open(unit=31,file=trim(Invar%output_prefix)//'_xred_average.xyz')
+  !  write(31,'(i4)') Invar%natom*2
+  !  write(31,'(i4)') 1
+! !  --> In reduced coordinates
+  !  do iatom=1,Invar%natom
+  !    write(31,'(a,1x,3(f10.6,1x))') 'Ired',xred_ideal (:,iatom)
+  !    write(31,'(a,1x,3(f10.6,1x))') 'Cred',xred_center(:,FromIdeal2Average(iatom))
+  !  end do
+! !  --> In cartesian coordinates
+  !  do iatom=1,Invar%natom
+  !    tmp(:)=zero
+  !    call DGEMV('T',3,3,1.d0,Lattice%rprimd_md(:,:),3,xred_ideal (:,iatom),1,0.d0,tmp(:),1)
+  !    write(31,'(a,1x,3(f10.6,1x))') 'Icart',tmp(:)
+  !    tmp(:)=zero
+  !    call DGEMV('T',3,3,1.d0,Lattice%rprimd_md(:,:),3,xred_center(:,FromIdeal2Average(iatom)),1,0.d0,tmp(:),1)
+  !    write(31,'(a,1x,3(f10.6,1x))') 'Ccart',tmp(:)
+  !  end do
+  !  close(31)
+  !end if
   ABI_FREE(xred_center)
 
 !FB! Average distances between atoms --> distance_average
@@ -650,6 +659,72 @@ contains
 
  end subroutine tdep_MatchIdeal2Average
 
+!====================================================================================================
+ subroutine tdep_write_xred_average(Invar,MPIdata,Lattice,&
+                                    xred_ideal,xred_center,&
+                                    FromIdeal2Average)
+  type(Input_type), intent(in) :: Invar
+  type(MPI_enreg_type),intent(in) :: MPIdata
+  type(Lattice_type),intent(in) :: Lattice
+  double precision,intent(in) :: xred_ideal(3,Invar%natom)
+  double precision,intent(in) :: xred_center(3,Invar%natom)
+  integer,intent(in),optional :: FromIdeal2Average(Invar%natom)
+
+  integer :: unt
+  !integer :: natom,natom_unitcell
+  integer :: iatom,jatom,ii,jj
+  logical :: with_xcart
+  integer,allocatable :: ideal2average(:)
+  double precision :: rprimd(3,3)
+  double precision :: xred_C(3),xred_I(3),xcart_C(3),xcart_I(3)
+
+  if (MPIdata%iam_master) then
+
+    rprimd(:,:) = Lattice%rprimd_md(:,:)
+
+    ABI_MALLOC(ideal2average,(Invar%natom))
+    ideal2average(:)=0
+    if (present(FromIdeal2Average)) then
+      ideal2average(:) = FromIdeal2Average(:)
+    else
+      do iatom=1,Invar%natom
+        ideal2average(iatom) = iatom
+      end do
+    end if
+
+    unt=31
+    open(unit=unt,file=trim(Invar%output_prefix)//'_xred_average.xyz')
+    write(unt,'(a,i4)') '# natom = ',Invar%natom
+    write(unt,'(a,i4)') '# natom_unitcell = ',Invar%natom_unitcell
+    write(unt,'(a,9(f4.1,1x))') '# multiplicity = ',((Lattice%multiplicity(ii,jj),jj=1,3),ii=1,3 )
+    write(unt,'(a)') '#'
+
+    write(unt,'(a1,1x,a8,2x,a6,2x,2(a5,30x))') '#', 'position', 'iatom', 'xred ', 'xcart'
+    write(unt,'(a)')''
+
+    xred_I = zero
+    xred_C = zero
+    do iatom=1,Invar%natom
+      jatom = ideal2average(iatom)
+      xred_I = xred_ideal (:,iatom)
+      xred_C = xred_center(:,jatom)
+
+      xcart_I(:)=zero
+      xcart_C(:)=zero
+      call DGEMV('T',3,3,1.d0,rprimd(:,:),3,xred_I,1,0.d0,xcart_I,1)
+      call DGEMV('T',3,3,1.d0,rprimd(:,:),3,xred_C,1,0.d0,xcart_C,1)
+      
+      write(unt,'(2x,a6,4x,i6,2x,3(f10.6,1x),2x,3(f10.6,1x))')'Ideal ',iatom,xred_I,xcart_I
+      write(unt,'(2x,a6,4x,i6,2x,3(f10.6,1x),2x,3(f10.6,1x))')'Center',jatom,xred_C,xcart_C
+      write(unt,'(a)')''
+
+    end do
+
+    close(unt)
+    ABI_FREE(ideal2average)
+  end if
+
+ end subroutine tdep_write_xred_average
 !====================================================================================================
  subroutine tdep_calc_model(Forces_MD,Forces_TDEP,Invar,MPIdata,Phi1Ui,Phi2UiUj,&
 &                           Phi3UiUjUk,Phi4UiUjUkUl,U0)

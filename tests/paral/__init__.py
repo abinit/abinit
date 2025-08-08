@@ -110,4 +110,5 @@ inp_files = [
 "t112.abi",
 "t113.abi", # RT-TDDFT (PAW, TDEF, paral_kgb 1)
 "t114.abi", # RT-TDDFT (NC, paral_kgb 1)
+"t120.abi", # Test meta-GGA + PAW + paral_kgb + cprj_in_memory + istwfk
 ]

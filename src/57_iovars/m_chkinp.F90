@@ -634,6 +634,17 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !    Checks that presently chkdilatmx is smaller than 1.15
      call chkdpr(1,1,cond_string,cond_values,ierr,'dilatmx',dt%dilatmx,-1,1.15_dp,iout)
    end if
+   if (dt%optdriver/=RUNL_GSTATE) then
+     cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
+     ! Checks that presently dilatmx is 1 if optdriver is not GSTATE
+     call chkdpr(1,1,cond_string,cond_values,ierr,'dilatmx',dt%dilatmx,0,1._dp,iout)
+   end if
+   ! Warn the user if dilatmx > 1 and optcell == 0.
+   if (dt%dilatmx>one.and.dt%optcell==0) then
+     write(msg, "(a)") 'dilatmx > 1 and optcell=0, this is a waste of ressources (computational time and memory). &
+     & You should set dilatmx to 1.'
+     ABI_WARNING(msg)
+   end if
 
 !  dmatpuopt
    if (dt%usepawu>0) then
@@ -2004,6 +2015,21 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      end do
    end if
 
+!  kptopt
+   call chkint_le(0,0,cond_string,cond_values,ierr,'kptopt',dt%kptopt,4,iout)
+  ! If kptopt < 0, it is only valid when iscf = -2
+   if (dt%iscf/=-2) then
+      cond_string(1)='iscf' ; cond_values(1)=dt%iscf
+      call chkint_ge(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,0,iout)
+   end if
+  ! If hspinfield is applied, only kptopt = 0, 3, 4 are allowed
+   if (any(abs(dt%hspinfield)>tol8)) then
+      cond_string(1) = 'hspinfield(x)' ; cond_values(1) = dt%hspinfield(1)
+      cond_string(2) = 'hspinfield(y)' ; cond_values(2) = dt%hspinfield(2)
+      cond_string(3) = 'hspinfield(z)' ; cond_values(3) = dt%hspinfield(3)
+      call chkint_eq(3,3,cond_string,cond_values,ierr,'kptopt',dt%kptopt,3,(/0,3,4/),iout)
+   end if
+
 !  kssform
    call chkint_eq(0,0,cond_string,cond_values,ierr,'kssform',dt%kssform,3,(/0,1,3/),iout)
 
@@ -2701,7 +2727,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !    nucdipmom requires PAW
      if(usepaw/=1)then
        write(msg, '(3a)' )&
-        'Nuclear dipole moments (variable nucdipmom) input as nonzero but PAW not activated => stop',ch10,&
+        'Nuclear dipole moments (variable nucdipmom or atndlist) input as nonzero but PAW not activated => stop',ch10,&
         'Action: re-run with PAW '
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
@@ -2709,7 +2735,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !    nucdipmom requires complex rhoij
      if(dt%pawcpxocc/=2)then
        write(msg, '(3a)' )&
-       'Nuclear dipole moments (variable nucdipmom) require complex rhoij => stop',ch10,&
+       'Nuclear dipole moments (variable nucdipmom or atndlist) require complex rhoij => stop',ch10,&
        'Action: re-run with pawcpxocc = 2 '
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
@@ -2717,7 +2743,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !    nucdipmom requires no force or stress calculation
      if(dt%optforces/=0 .OR. dt%optstress/=0)then
        write(msg, '(3a)' )&
-       'Nuclear dipole moments (variable nucdipmom) cannot be used with force or stress calculations => stop',ch10,&
+       'Nuclear dipole moments (variable nucdipmom or atndlist) cannot be used with force or stress calculations => stop',ch10,&
        'Action: re-run with optforces = 0 and optstress = 0 '
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
@@ -2725,7 +2751,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !    nucdipmom requires kptopt 0, 3, or 4 (no time reversal symmetry allowed)
      if( (dt%kptopt .EQ. 1) .OR. (dt%kptopt .EQ. 2) ) then
        write(msg, '(a,i4,a,a,a)' )&
-       ' Nuclear dipole moments (variable nucdipmom) break time reveral symmetry but kptopt = ',dt%kptopt,&
+       ' Nuclear dipole moments (variable nucdipmom or atndlist) break time reveral symmetry but kptopt = ',dt%kptopt,&
        ' => stop ',ch10,&
        'Action: re-run with kptopt of 0, 3 or 4'
        ABI_ERROR_NOSTOP(msg, ierr)
@@ -2734,7 +2760,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      ! nucdipmom is not currently compatible with spinat (this is necessary because both are used in symfind)
      if( any(abs(dt%spinat) > tol8) ) then
        write(msg, '(3a)' )&
-        ' Nuclear dipole moments (variable nucdipmom) input as nonzero but spinat is also nonzero => stop',ch10,&
+        ' Nuclear dipole moments (variable nucdipmom or atndlist) input as nonzero but spinat is also nonzero => stop',ch10,&
         'Action: re-run with spinat zero '
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
@@ -3092,8 +3118,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      call chkint_eq(1,1,cond_string,cond_values,ierr,'paral_kgb',dt%paral_kgb,1,(/0/),iout)
   !  require usexcnhat 0
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usexcnhat',dt%usexcnhat_orig,1,(/0/),iout)
-  !  require pawxcdev 0
-  !   call chkint_eq(1,1,cond_string,cond_values,ierr,'pawxcdev',dt%pawxcdev,1,(/0/),iout)
   !  require PAW
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',dt%usepaw,1,(/1/),iout)
   end if
@@ -3681,7 +3705,15 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !  prtwant
    if (dt%prtwant/=0) then
      cond_string(1)='prtwant' ; cond_values(1)=dt%prtwant
+     ! wannier function output is not available with paral_kgb algorithm
      call chkint_eq(0,0,cond_string,cond_values,ierr,'paral_kgb',dt%paral_kgb,1,(/0/),iout)
+     ! wannier function output is not available with PAW
+     if (usepaw == 1 .and. dt%wfk_task == WFK_TASK_WANNIER) then
+       write(msg, '(a,a,a)' )&
+        ' prtwant does not function with PAW and wfk_task = wannier',ch10,&
+        ' Action: use norm conserving pseudopotentials'
+       ABI_ERROR(msg)
+     end if
    end if
 #if !defined HAVE_WANNIER90
    if(dt%prtwant==2) then
@@ -4417,6 +4449,20 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        ABI_ERROR_NOSTOP(msg,ierr)
      end if
    end do
+
+  !  ZORA
+  ! only values of -3,-2,-1,0,1,2,3 are allowed. 0 is the default.
+  call chkint_eq(0,0,cond_string,cond_values,ierr,'zora',dt%zora,7,(/-3,-2,-1,0,1,2,3/),iout)
+  if(dt%zora .NE. 0) then
+     cond_string(1)='zora';cond_values(1)=dt%zora
+  !  require PAW
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',dt%usepaw,1,(/1/),iout)
+  end if
+  if(dt%zora .GT. 1) then
+     cond_string(1)='zora';cond_values(1)=dt%zora
+  !  require nspinor 2
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'nspinor',dt%nspinor,1,(/2/),iout)
+  end if
 
 !  bandFFT
    if(dt%paral_kgb==1.and.dt%optdriver==RUNL_GSTATE) then

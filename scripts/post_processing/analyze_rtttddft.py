@@ -40,7 +40,7 @@ def fourier_direct(time,signal,wcut,nfft):
     Input:
      - time: time (array)
      - signal: signal (array) f(t) to be transformed
-     - wcut: cut-off frequency (in Ha) for the exponential window
+     - wcut: cut-off frequency (in Ha) for the exponential window (if > 0)
      - nfft: number of points to use in the FFT
              if greater than the length of signal then zero-padding is used
     Output:
@@ -52,6 +52,8 @@ def fourier_direct(time,signal,wcut,nfft):
     Indeed the Fourier transform of exp(-wcut*t) is w_cut/(w_cut^2+w^2).
     Thus this window function generates a Lorentzian broadening in frequency
     with a FWHM given by 2*w_cut.
+    If wcut == -1 use a third order polynomial damping function as filter.
+    From Yabana et al., Phys. Stat. Sol. (B) 243,1121 (2006)
     """
     ntime =len(time)
     if len(signal) != ntime:
