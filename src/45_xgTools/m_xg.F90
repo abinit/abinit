@@ -219,6 +219,7 @@ module m_xg
   public :: xgBlock_partialcopy
   public :: xgBlock_permuteCols 
   public :: xgBlock_hermitian_pd_cond ! computes condition number of Hermitian positive definite
+  public :: xgBlock_spd_cond ! condition matrix for symmetric positive definite
   public :: xgBlock_pack
   public :: xgBlock_getSize
   public :: xgBlock_get_gpu_option
@@ -1655,7 +1656,7 @@ contains
       integer :: info
       external :: zheev
 
-      write(901,*) 'space B', xgBlock%space 
+      !write(901,*) 'space B', xgBlock%space 
 
       !# Validation
       ! Fill Hermitian SPD matrix (upper triangle only)
@@ -1667,7 +1668,7 @@ contains
       ! comment following line
 
       ! Copy input since LAPACK overwrites matrix
-      vecC(:,:) = xgBlock%vecC(:,:)
+      vecC(1:n,1:n) = xgBlock%vecC(1:n,1:n)
 
       ! Objects are independent(check)
       !write(901,*) 'temp', vecC(1,11)
@@ -1680,12 +1681,31 @@ contains
       call zheev('N','U', n, vecC, n, w, work, size(work), rwork, info)
       cond2 = maxval(w) / minval(w)
 
-      write(901,*) 'eigenval(=singval)='
-      write(901,*) w
-      flush(901)
+      !write(901,*) 'eigenval(=singval)='
+      !write(901,*) w
+      !flush(901)
 
   end subroutine xgBlock_hermitian_pd_cond
   !!***
+
+  subroutine xgBlock_spd_cond(xgBlock, n, cond2)
+
+      implicit none
+      type(xgBlock_t), intent(in) :: xgBlock
+      integer, intent(in) :: n
+      real(dp), intent(inout) :: cond2
+
+      real(dp) :: vecR(n,n)
+      real(dp) :: w(n)
+      real(dp) :: rwork(8*n)
+      integer :: info
+      external :: dsyev
+     
+      vecR(1:n,1:n) = xgBlock%vecR(1:n,1:n)
+      call dsyev('N','U', n, vecR, n, w, rwork, 8*n, info)
+      cond2 = abs(maxval(w) / minval(w))
+
+  end subroutine xgBlock_spd_cond
 
   !!****f* m_xg/xgBlock_pack
   !!
