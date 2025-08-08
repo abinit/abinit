@@ -68,6 +68,13 @@ module m_slice_cprj
  integer, parameter :: tim_ax_nl        = 2186
  integer, parameter :: tim_enl          = 2187
  integer, parameter :: tim_ortho        = 2188
+ 
+ integer, parameter :: tim_slice1_fi    = 2190
+ integer, parameter :: tim_slice1_rr    = 2191
+ integer, parameter :: tim_slice1_pr    = 2192
+ integer, parameter :: tim_slice2_fi    = 2193
+ integer, parameter :: tim_slice2_rr    = 2194
+ integer, parameter :: tim_slice2_pr    = 2195
 
 !Public 'slice' datatype
 !-------------------------------------------------
@@ -529,6 +536,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  integer :: fcol_in, lcol_in
  integer :: fcol_global
  integer :: ndeg, ndeg_max
+ integer :: tim_slice_fi
+ integer :: tim_slice_rr
+ integer :: tim_slice_pr
  logical :: is_close_to_V
  real(dp) :: tolerance
  real(dp) :: tolfilter
@@ -870,12 +880,26 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     one_over_r = 1.0/radius
     two_over_r = 2.0/radius
 
+    if (islice==1) then
+        tim_slice_fi = tim_slice1_fi
+    else
+        tim_slice_fi = tim_slice2_fi
+    end if
+
     !! ------------------------------------------------------------
     !! 
     !! -                Polynomial degree loop                    -
     !! 
     !! ------------------------------------------------------------
  
+    if (islice==1) then
+        tim_slice_fi = tim_slice1_fi
+    else
+        tim_slice_fi = tim_slice2_fi
+    end if
+
+    call timab(tim_slice_fi,1,tsec)
+    
     if (islice>1) then
     
         ! Initialize Chebyshev expansion of indicator function of order ndeg_filter
@@ -927,6 +951,13 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
                 call xgBlock_saxpy(slice%X_PROBE%self, dble(-1.0), slice%X) ! X_PROBE = X - f(A)X
                 call xgBlock_colwiseNorm2(slice%X_PROBE%self, dist3%self, comm_loc=xmpi_comm_null)
 
+                ! compute ein_ideg, eout_ideg constants as
+                ! ein = f(band1) - 1
+                ! eout = f(lambda_minus)
+                amp_ideg = cheb_poly1(rayleigh_quotients(1), ideg+1, lambda_minus, lambda_plus) 
+                ein_ideg = amp_ideg-1
+                eout_ideg = cheb_poly1(lambda_minus, ideg+1, lambda_minus, lambda_plus)
+
             else
      
                 ! dist2 = |Xsum|^2 colwise L2-norm
@@ -974,6 +1005,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         call timab(tim_amp_f,1,tsec)
         ABI_MALLOC(ndeg_filter_bands,(neigenpairs))
         ndeg_filter_bands(:) = ndeg_filter
+        !call slice_ampfactorMax(slice, DivResults%self, lambda_minus, lambda_plus, ndeg_filter_bands)
         call slice_ampfactor(slice, DivResults%self, lambda_minus, lambda_plus, ndeg_filter_bands)
         ABI_FREE(ndeg_filter_bands)
         call timab(tim_amp_f,2,tsec)
@@ -983,6 +1015,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         call timab(tim_cprj,2,tsec)
 
     end if
+    
+    call timab(tim_slice_fi,2,tsec)
 
     !! ------------------------------------------------------------
     !! 
@@ -990,6 +1024,14 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     !! 
     !! ------------------------------------------------------------
 
+    if (islice==1) then
+        tim_slice_pr = tim_slice1_pr
+    else
+        tim_slice_pr = tim_slice2_pr
+    end if
+
+    call timab(tim_slice_pr,1,tsec)
+    
     if (slice%spectral_cut == 1) then
 
         ! TODO rename variables
@@ -1002,7 +1044,11 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         write(901,*) 'indicator for components in orthogonal complement=', dist3_array(:)
         write(901,*) 'eout_ideg=', eout_ideg
         write(901,*) 'ein_ideg=', ein_ideg
-        write(901,*) 'estimator=', eout_ideg**2 + ((1+ein_ideg)*0.1d0)**2
+        if (islice==1) then
+            write(901,*) 'estimator=', eout_ideg**2 + (ein_ideg*0.1d0)**2
+        else 
+            write(901,*) 'estimator=', eout_ideg**2 + ((1+ein_ideg)*0.1d0)**2
+        end if
         flush(901)
         ! ITEST
 
@@ -1014,12 +1060,20 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     ! Old criterion kept for reference
     !count_mask = count(probe > dist3_array .or. ( probe > 1 ))
 
-    if (slice%spectral_cut == 1 .and. islice>1) then
+    if (slice%spectral_cut == 1) then
         
-        ! Criterion to take into account error of f
-        ! FIXME norm of X? Tolerance? slice=1?
-        count_mask = count( probe > eout_ideg**2 + ((1+ein_ideg)*0.1d0)**2 )
-        
+        if (islice==1) then
+            
+            count_mask = count( probe > eout_ideg**2 + (ein_ideg*0.1d0)**2 )
+
+        else
+
+            ! Criterion to take into account error of f
+            ! FIXME norm of X? Tolerance? slice=1?
+            count_mask = count( probe > eout_ideg**2 + ((1+ein_ideg)*0.1d0)**2 )
+
+        end if
+
     end if
 
     ! ITEST
@@ -1038,7 +1092,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         icount = 1
         do iband=1,neigenpairs
             is_close_to_V = .true.
-            if (islice>1) then
+            if (islice==1) then
+                is_close_to_V = probe(iband) > eout_ideg**2 + (ein_ideg*0.1d0)**2
+            else
                 is_close_to_V = probe(iband) > eout_ideg**2 + ((1+ein_ideg)*0.1d0)**2
             end if
             if (is_close_to_V) then
@@ -1069,12 +1125,20 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     call timab(tim_cprj,1,tsec)
     call xg_nonlop_getcprj(xg_nonlop,slice%X,slice%cprjX,slice%proj_work%self)
     call timab(tim_cprj,2,tsec)
+    
+    call timab(tim_slice_pr,2,tsec)
 
     !! ------------------------------------------------------------
     !! 
     !! -               Apply Rayleigh-Ritz step                   -
     !! 
     !! ------------------------------------------------------------
+
+    if (islice==1) then
+        tim_slice_rr = tim_slice1_rr
+    else
+        tim_slice_rr = tim_slice2_rr
+    end if
 
     ! Number of vectors on which we apply rr
     count_rr = count_mask
@@ -1088,7 +1152,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     ! Apply Rayleigh Ritz on slice (refinement)
     ! prtvol = 15015015 to print condition number of overlap matrix
     call xg_RayleighRitz_cprj(xg_nonlop,slice%X,slice%cprjX,slice%AX,eigenvalues_slice,&
-        slice%blockdim_cprj,ierr,15015015,tim_RR,ABI_GPU_DISABLED,solve_ax_bx=.true.)
+        slice%blockdim_cprj,ierr,15015015,tim_slice_rr,ABI_GPU_DISABLED,solve_ax_bx=.true.)
 
     if ( ierr /= 0 ) then
         ABI_BUG("RayleighRitz did not work")
@@ -1143,7 +1207,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     write(901,*) 'Frobenius norm=', sqrt(sum(resid))
     flush(901)
     ! ITEST
-
+    
     !! ------------------------------------------------------------
     !! 
     !! -                Slice to Global operation                 -
@@ -1780,6 +1844,37 @@ subroutine slice_ampfactor(slice,DivResults,lambda_minus,lambda_plus,ndeg_filter
   end do
 
 end subroutine slice_ampfactor
+!!***
+
+subroutine slice_ampfactorMax(slice,DivResults,lambda_minus,lambda_plus,ndeg_filter_bands)
+
+  ! Arguments ------------------------------------
+  integer,           intent(in   ) :: ndeg_filter_bands(:)
+  type(xgBlock_t),   intent(in   ) :: DivResults
+  real(dp),          intent(in   ) :: lambda_minus
+  real(dp),          intent(in   ) :: lambda_plus
+  type(slice_t),    intent(inout) :: slice
+
+  ! Local variables-------------------------------
+  ! scalars
+  integer         :: iband
+  real(dp)        :: ampfactor
+  type(xgBlock_t) :: X_part
+  type(xgBlock_t) :: AX_part
+  real(dp),pointer :: eig(:,:)
+
+  ! *********************************************************************
+
+  call xgBlock_reverseMap(DivResults,eig,rows=1,cols=cols(DivResults))
+
+  !cheb_poly1(x, n, a, b)
+  ampfactor = maxval( (/ (cheb_poly1(eig(1,iband), ndeg_filter_bands(iband), lambda_minus, lambda_plus),& 
+      iband=1,cols(DivResults)) /) )
+
+  call xgBlock_scale(slice%X, 1/ampfactor, 1)
+  call xgBlock_scale(slice%AX, 1/ampfactor, 1)
+
+end subroutine slice_ampfactorMax
 !!***
 
 subroutine slice_ampfactorProbe(slice,DivResults,lambda_minus,lambda_plus,ndeg_filter)
