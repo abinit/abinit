@@ -588,6 +588,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  integer, allocatable :: sorted_idx(:) ! same as permute_cols but used elsewhere
  real(dp), allocatable :: rayleigh_quotients(:)
  real(dp), pointer :: probe(:) => null()
+ real(dp), pointer :: X0_norm2(:) => null()
  real(dp), pointer :: lambda_apost(:) => null()
  real(dp), pointer :: lambda_apost_slice(:) => null()
  real(dp), pointer :: dist2_array(:) => null()
@@ -725,9 +726,10 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
  ! Compute |X|^2 colwise L2-norm (before any filter)
  call xgBlock_colwiseNorm2(slice%AllX,dist1%self,comm_loc=xmpi_comm_null)
+ call xgBlock_reverseMap_1d(dist1%self,X0_norm2)
 
  ! ITEST
- write(901,*) 'norm2 ||X||='
+ write(901,*) 'norm2(squared) ||X||='
  call xgBlock_print(dist1%self,901)
  flush(901)
  ! ITEST
@@ -881,12 +883,6 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     one_over_r = 1.0/radius
     two_over_r = 2.0/radius
 
-    if (islice==1) then
-        tim_slice_fi = tim_slice1_fi
-    else
-        tim_slice_fi = tim_slice2_fi
-    end if
-
     !! ------------------------------------------------------------
     !! 
     !! -                Polynomial degree loop                    -
@@ -1006,7 +1002,10 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         call xgBlock_reverseMap_1d(dist2%self,probe)
         !call xgBlock_reverseMap_1d(dist3%self, dist3_array)
 
-        ! Normalize probe to get a pivot between 0 and 1
+        ! Normalize by norm of initial X
+        probe(:) = probe(:) / sqrt(X0_norm2(:))
+
+        ! Scale probe to get a pivot between 0 and 1
         ! useful for absolute probe
         probe(:) = probe(:) / maxval(probe)
 
@@ -1071,26 +1070,30 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 !        end do
         !tol_probe = sum(probe)/neigenpairs*0.3
         tol_probe = -1
-        count_mask = count( probe > tol_probe )
+        !count_mask = count( probe > tol_probe )
+        count_mask = neigenpairs - 3*slice%nbdbuf
         ! TODO perform Alternating method where we adjust sizes upper and lower by alternating
         ! between the two
+        write(901,*) 'fixed tolerance using nbdbuf=', 3*slice%nbdbuf
+        flush(901)
  
     else
         
         ! Add vectors: Decrease tolerance for probe if not enough vectors after merge
         icount = 1
-        do while (count_mask < neigenpairs/nslice .or. count_mask + count_merge < neigenpairs)
+        do while (count_mask < 1.3*neigenpairs/nslice .or. count_mask + count_merge < neigenpairs)
             tol_probe = tol_probe - tol_step
             count_mask = count( probe > tol_probe)
             write(901,*) '#icount, tol_probe=, count_mask=', icount, tol_probe, count_mask
             icount = icount + 1
         end do
+        write(901,*) 'refined tolerance, #iterations=', tol_probe, icount
+        flush(901)
 
     end if
 
     ! ITEST
     write(901,*) 'Keep count_mask= out of neigenpairs=', count_mask, neigenpairs
-    write(901,*) 'refined tolerance, #iterations=', tol_probe, icount
     write(901,*) 
     flush(901)
     ! ITEST
@@ -1105,13 +1108,13 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         icount = 1
         do iband=1,neigenpairs
             is_close_to_V = .true.
-            !if (islice==1) then
+            if (islice==1) then
             !    !is_close_to_V = probe(iband) > eout_ideg**2 + (ein_ideg*0.1d0)**2
-            !else
+                 is_close_to_V = iband < neigenpairs - 3*slice%nbdbuf + 1
+            else
             !    !is_close_to_V = probe(iband) > eout_ideg**2 + ((1+ein_ideg)*0.1d0)**2
-            !    is_close_to_V = probe(iband) > tol_probe
-            !end if
-            is_close_to_V = probe(iband) > tol_probe
+                 is_close_to_V = probe(iband) > tol_probe
+            end if
             if (is_close_to_V) then
                 call xgBlock_setBlock(X_kept%self, X_kept_col, slice%total_spacedim, 1, fcol=icount)
                 call xgBlock_setBlock(AX_kept%self, AX_kept_col, slice%total_spacedim, 1, fcol=icount)
@@ -1164,14 +1167,26 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     call xgBlock_reshape(eigenvalues_slice, count_rr, 1)
     call xgBlock_reshape(slice%eigenvalues, neigenpairs, 1)
 
+    ! Orthonormalize
+    !call xg_Borthonormalize_cprj(xg_nonlop,slice%blockdim_cprj,slice%X,slice%cprjX,&
+    !    ierr,tim_ortho,gpu_option,AX=slice%AX)
+
     ! Apply Rayleigh Ritz on slice (refinement)
     ! prtvol = 15015015 to print condition number of overlap matrix
     call xg_RayleighRitz_cprj(xg_nonlop,slice%X,slice%cprjX,slice%AX,eigenvalues_slice,&
         slice%blockdim_cprj,ierr,15015015,tim_slice_rr,ABI_GPU_DISABLED,solve_ax_bx=.true.)
-
+    
     if ( ierr /= 0 ) then
         ABI_BUG("RayleighRitz did not work")
     end if
+
+    ! restart!
+!    call xg_RayleighRitz_cprj(xg_nonlop,slice%X,slice%cprjX,slice%AX,eigenvalues_slice,&
+!        slice%blockdim_cprj,ierr,15015015,tim_slice_rr,ABI_GPU_DISABLED,solve_ax_bx=.true.)
+
+!    if ( ierr /= 0 ) then
+!        ABI_BUG("RayleighRitz did not work")
+!    end if
 
     ! ITEST
     write(901,*) 'converged eigenval='
@@ -1245,13 +1260,19 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
         if (lcol_in < count_rr) then
         
-            ! if multiple eigenvaluei is at endpoint, include its multiplicities
-            write(901,*) lambda_apost_slice(lcol_in)
-            write(901,*) lambda_apost_slice(lcol_in+1)
+            ! if multiple eigenvalue is at endpoint, backwards !remove! its multiplicities
+            write(901,*) 'last      =', lambda_apost_slice(lcol_in), lcol_in
+            write(901,*) 'after last=', lambda_apost_slice(lcol_in+1)
             flush(901)
             do while (lambda_apost_slice(lcol_in+1) - lambda_apost_slice(lcol_in) < 1.0e-3)
-                lcol_in = lcol_in + 1
+                lcol_in = lcol_in - 1
+                write(901,*) 'is multiple eigenvalue, force to include it', lcol_in
+                flush(901)
             end do
+            lcol_in = lcol_in - 2 
+            ! plus some extra space
+            write(901,*) 'safety:', lcol_in
+            flush(901)
 
         end if
 
@@ -1308,6 +1329,13 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     if (count_merge > neigenpairs) then
 
         ABI_WARNING("Attempting to merge more bands than possible")
+
+    end if
+
+    if (count_merge < neigenpairs .and. islice==nslice) then
+    
+        write(901,*) 'missing eigenvalues!'
+        flush(901)
 
     end if
     
@@ -1436,7 +1464,15 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  call timab(tim_AX_nl,1,tsec)
  call xg_nonlop_getHX(xg_nonlop,slice%AllAX%self,slice%AllcprjX,slice%Allcprj_work%self,slice%proj_work%self)
  call timab(tim_AX_nl,2,tsec)
- 
+
+ ! restart!
+! call xg_RayleighRitz_cprj(xg_nonlop,slice%AllX,slice%AllcprjX,slice%AllAX%self,eigen,&
+!     slice%all_blockdim_cprj,ierr,15015015,tim_slice_rr,ABI_GPU_DISABLED,solve_ax_bx=.true.)
+
+! if ( ierr /= 0 ) then
+!     ABI_BUG("RayleighRitz did not work")
+! end if
+
  if (slice%paw) then
     call timab(tim_AX_nl,1,tsec)
     call xg_nonlop_getHmeSX(xg_nonlop,slice%AllX,slice%AllcprjX,slice%AllAX%self,slice%eigenvalues,&
