@@ -540,6 +540,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  integer :: tim_slice_rr
  integer :: tim_slice_pr
  logical :: is_close_to_V
+ real(dp) :: tol_step
  real(dp) :: tol_probe
  real(dp) :: tolerance
  real(dp) :: tolfilter
@@ -1028,7 +1029,14 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     !count_mask = count(probe > dist3_array .or. ( probe > 1 ))
 
     !tol_probe = 0.3
-    tol_probe = sum(probe)/neigenpairs ! initialize with average value
+    ! Initialize with quantity that is very small
+    tol_probe = sum(probe)/neigenpairs ! initialize with average value (a little less)
+    tol_step = tol_probe * 0.05 ! step is 10%
+    write(901,*) 'initial tolerance (average)=', tol_probe
+    write(901,*) 'starting refinement with step=', tol_step
+    flush(901)
+
+    ! Adaptive refinement
     if (slice%spectral_cut == 1) then
         
         !if (islice==1) then
@@ -1043,22 +1051,47 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         !    count_mask = count( probe > tol_probe) 
         !
         !end if
-        count_mask = count( probe > tol_probe) 
+        count_mask = count( probe > tol_probe ) 
+
+    end if
+    
+    write(901,*) 
+    write(901,*) 'initial count_mask=', count_mask
+    flush(901)
+
+    if (islice==1) then
+
+        ! Discard vectors: Increase tolerance for probe if too many vectors in slice
+!        icount = 1
+!        do while(count_mask > 1.4*neigenpairs/nslice) ! maximum columns in block
+!            tol_probe = tol_probe + tol_step
+!            count_mask = count( probe > tol_probe)
+!            write(901,*) '#icount, tol_probe=, count_mask=', icount, tol_probe, count_mask
+!            icount = icount + 1
+!        end do
+        !tol_probe = sum(probe)/neigenpairs*0.3
+        tol_probe = -1
+        count_mask = count( probe > tol_probe )
+        ! TODO perform Alternating method where we adjust sizes upper and lower by alternating
+        ! between the two
+ 
+    else
+        
+        ! Add vectors: Decrease tolerance for probe if not enough vectors after merge
+        icount = 1
+        do while (count_mask < neigenpairs/nslice .or. count_mask + count_merge < neigenpairs)
+            tol_probe = tol_probe - tol_step
+            count_mask = count( probe > tol_probe)
+            write(901,*) '#icount, tol_probe=, count_mask=', icount, tol_probe, count_mask
+            icount = icount + 1
+        end do
 
     end if
 
-    ! TODO decrease tolerance for probe if not enough vectors after merge
-    icount = 1
-    do while (count_mask < neigenpairs/nslice .or. count_mask + count_merge < neigenpairs)
-        tol_probe = tol_probe - 0.05
-        count_mask = count( probe > tol_probe)
-        icount = icount + 1
-    end do
-
     ! ITEST
-    write(901,*) 
     write(901,*) 'Keep count_mask= out of neigenpairs=', count_mask, neigenpairs
-    write(901,*) 'using refined tolerance, #iterations=', tol_probe, icount
+    write(901,*) 'refined tolerance, #iterations=', tol_probe, icount
+    write(901,*) 
     flush(901)
     ! ITEST
 
@@ -1210,13 +1243,17 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         !    lcol_in = neigenpairs / nslice
         !end if
 
-        ! if multiple eigenvalue, include it
-        write(901,*) lambda_apost_slice(lcol_in)
-        write(901,*) lambda_apost_slice(lcol_in+1)
-        flush(901)
-        do while (lambda_apost_slice(lcol_in+1) - lambda_apost_slice(lcol_in) < 1.0e-3)
-            lcol_in = lcol_in + 1
-        end do
+        if (lcol_in < count_rr) then
+        
+            ! if multiple eigenvaluei is at endpoint, include its multiplicities
+            write(901,*) lambda_apost_slice(lcol_in)
+            write(901,*) lambda_apost_slice(lcol_in+1)
+            flush(901)
+            do while (lambda_apost_slice(lcol_in+1) - lambda_apost_slice(lcol_in) < 1.0e-3)
+                lcol_in = lcol_in + 1
+            end do
+
+        end if
 
     else
 
@@ -1257,6 +1294,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     write(901,*) '======================================'
     write(901,*) 'count_merged=', count_merge
     write(901,*) 'count_slice =', count_slice
+    write(901,*) 'count_rr    =', count_rr
     write(901,*) 'fcol_in     =', fcol_in
     write(901,*) 'lcol_in     =', lcol_in
     write(901,*) 'lambda_fcol =', lambda_apost_slice(fcol_in)
