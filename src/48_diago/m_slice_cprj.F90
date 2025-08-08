@@ -938,44 +938,6 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
         end if
 
-        if (slice%spectral_cut == 1) then
-            if (islice==1) then
-
-                call xgBlock_copy(slice%X, slice%X_PROBE%self)
-    
-                ! dist2 = |X_PROBE|^2 colwise L2-norm
-                call xgBlock_colwiseNorm2(slice%X_PROBE%self, dist2%self, max_dist2, comm_loc=xmpi_comm_null)
-
-                ! dist3 = Orthogonal complement
-                call xgBlock_copy(slice%AllX, slice%X_PROBE%self) ! X_PROBE = X
-                call xgBlock_saxpy(slice%X_PROBE%self, dble(-1.0), slice%X) ! X_PROBE = X - f(A)X
-                call xgBlock_colwiseNorm2(slice%X_PROBE%self, dist3%self, comm_loc=xmpi_comm_null)
-
-                ! compute ein_ideg, eout_ideg constants as
-                ! ein = f(band1) - 1
-                ! eout = f(lambda_minus)
-                amp_ideg = cheb_poly1(rayleigh_quotients(1), ideg+1, lambda_minus, lambda_plus) 
-                ein_ideg = amp_ideg-1
-                eout_ideg = cheb_poly1(lambda_minus, ideg+1, lambda_minus, lambda_plus)
-
-            else
-     
-                ! dist2 = |Xsum|^2 colwise L2-norm
-                call xgBlock_colwiseNorm2(Xsum%self, dist2%self, max_dist2, comm_loc=xmpi_comm_null)
-   
-                ! dist3 = Orthogonal complement
-                call xgBlock_copy(slice%AllX, slice%X_PROBE%self) ! X_PROBE = X
-                call xgBlock_saxpy(slice%X_PROBE%self, dble(-1.0), slice%X) ! X_PROBE = X_PROBE - f(B^{-1}A)X
-                call xgBlock_colwiseNorm2(slice%X_PROBE%self, dist3%self, comm_loc=xmpi_comm_null)
-
-                ! compute ein_ideg, eout_ideg constants
-                amp_ideg = max(bandpassIndicator_sca(ls_in,ls,us,ideg+1),bandpassIndicator_sca(us_in,ls,us,ideg+1))
-                ein_ideg = 1-amp_ideg
-                eout_ideg = max(bandpassIndicator_sca(ls,ls,us,ideg+1),bandpassIndicator_sca(us,ls,us,ideg+1))
-
-            end if
-        end if
-
         if (islice>1 .and. ideg==ndeg_filter - 1) then 
         
             ! store final expansion Xsum to X
@@ -1012,13 +974,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         
         call timab(tim_cprj,1,tsec)
         call xg_nonlop_getcprj(xg_nonlop,slice%X,slice%cprjX,slice%proj_work%self)
-        call timab(tim_cprj,2,tsec)
-        
-        ! update probe
-        call xgBlock_copy(slice%X, slice%X_PROBE%self)
-    
-        ! dist2 = |X_PROBE|^2 colwise L2-norm
-        call xgBlock_colwiseNorm2(slice%X_PROBE%self, dist2%self, max_dist2, comm_loc=xmpi_comm_null)
+        call timab(tim_cprj,2,tsec) 
 
     end if
     
@@ -1037,12 +993,17 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     end if
 
     call timab(tim_slice_pr,1,tsec)
+
+    ! Compute probe
+    ! dist2 = |X_PROBE|^2 colwise L2-norm
+    call xgBlock_copy(slice%X, slice%X_PROBE%self)
+    call xgBlock_colwiseNorm2(slice%X_PROBE%self, dist2%self, max_dist2, comm_loc=xmpi_comm_null)
     
     if (slice%spectral_cut == 1) then
 
         ! TODO rename variables
         call xgBlock_reverseMap_1d(dist2%self,probe)
-        call xgBlock_reverseMap_1d(dist3%self, dist3_array)
+        !call xgBlock_reverseMap_1d(dist3%self, dist3_array)
 
         ! Normalize probe to get a pivot between 0 and 1
         ! useful for absolute probe
@@ -1051,14 +1012,10 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         ! ITEST
         write(901,*) 
         write(901,*) 'indicator for components in wanted eigenspace=', probe(:)
-        write(901,*) 'indicator for components in orthogonal complement=', dist3_array(:)
-        write(901,*) 'eout_ideg=', eout_ideg
-        write(901,*) 'ein_ideg=', ein_ideg
-        if (islice==1) then
-            write(901,*) 'estimator=', eout_ideg**2 + (ein_ideg*0.1d0)**2
-        else 
-            write(901,*) 'estimator=', eout_ideg**2 + ((1+ein_ideg)*0.1d0)**2
-        end if
+        !write(901,*) 'indicator for components in orthogonal complement=', dist3_array(:)
+        !write(901,*) 'eout_ideg=', eout_ideg
+        !write(901,*) 'ein_ideg=', ein_ideg
+        !write(901,*) 'estimator=', eout_ideg**2 + ((1+ein_ideg)*0.1d0)**2
         flush(901)
         ! ITEST
 
@@ -1070,7 +1027,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     ! Old criterion kept for reference
     !count_mask = count(probe > dist3_array .or. ( probe > 1 ))
 
-    tol_probe = 0.3
+    !tol_probe = 0.3
+    tol_probe = sum(probe)/neigenpairs ! initialize with average value
     if (slice%spectral_cut == 1) then
         
         !if (islice==1) then
@@ -1090,15 +1048,17 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     end if
 
     ! TODO decrease tolerance for probe if not enough vectors after merge
+    icount = 1
     do while (count_mask < neigenpairs/nslice .or. count_mask + count_merge < neigenpairs)
         tol_probe = tol_probe - 0.05
-        count_mask = count( probe > tol_probe) 
+        count_mask = count( probe > tol_probe)
+        icount = icount + 1
     end do
 
     ! ITEST
     write(901,*) 
     write(901,*) 'Keep count_mask= out of neigenpairs=', count_mask, neigenpairs
-    write(901,*) 'using adapted tolerance=            ', tol_probe
+    write(901,*) 'using refined tolerance, #iterations=', tol_probe, icount
     flush(901)
     ! ITEST
 
