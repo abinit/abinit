@@ -217,7 +217,8 @@ module m_xg
   public :: xgBlock_get ! LB-06/03/24: Be careful, this routine is not used (so not tested)
   public :: xgBlock_copy ! IL-10/03/25: on GPU- Contains hidden one-way OMP calls (implicit H2D or D2H) 
   public :: xgBlock_partialcopy
-  public :: xgBlock_permuteCols
+  public :: xgBlock_permuteCols 
+  public :: xgBlock_hermitian_pd_cond ! computes condition number of Hermitian positive definite
   public :: xgBlock_pack
   public :: xgBlock_getSize
   public :: xgBlock_get_gpu_option
@@ -1625,6 +1626,66 @@ contains
 
   end subroutine xgBlock_permuteCols
 !!***
+
+  !!****f* m_xg/xgBlock_hermitian_pd_cond
+  !!
+  !! NAME
+  !! xgBlock_hermitian_pf_cond
+  !!
+  !! FUNCTION
+  !! Condition number with 2-norm.
+  !! kappa2(A) 
+  !!
+  !! Convention: 
+  !! for compatibility with xg_RayleighRitz_cprj, 
+  !! xgBlock stores the upper triangle of matrix
+  !! uplo = 'u'
+
+  subroutine xgBlock_hermitian_pd_cond(xgBlock, n, cond2)
+
+      implicit none
+      type(xgBlock_t), intent(in) :: xgBlock
+      integer, intent(in) :: n
+      real(dp), intent(inout) :: cond2
+     
+      complex(dpc) :: vecC(n,n)
+      real(dp) :: w(n)
+      complex(dp) :: work(2*n)
+      real(dp) :: rwork(3*n-2)
+      integer :: info
+      external :: zheev
+
+      write(901,*) 'space B', xgBlock%space 
+
+      !# Validation
+      ! Fill Hermitian SPD matrix (upper triangle only)
+      !vecC(1,1) = (4.0_dp, 0.0_dp)
+      !vecC(1,2) = (1.0_dp, 0.5_dp)
+      !vecC(2,1) = dconjg(vecC(1,2))
+      !vecC(2,2) = (3.0_dp, 0.0_dp)
+      !#
+      ! comment following line
+
+      ! Copy input since LAPACK overwrites matrix
+      vecC(:,:) = xgBlock%vecC(:,:)
+
+      ! Objects are independent(check)
+      !write(901,*) 'temp', vecC(1,11)
+      !write(901,*) 'ref', xgBlock%vecC(1,11)
+      !vecC(1,11) = 2222
+      !write(901,*) 'new temp', vecC(1,11)
+      !write(901,*) 'new ref', xgBlock%vecC(1,11)
+      !flush(901)
+
+      call zheev('N','U', n, vecC, n, w, work, size(work), rwork, info)
+      cond2 = maxval(w) / minval(w)
+
+      write(901,*) 'eigenval(=singval)='
+      write(901,*) w
+      flush(901)
+
+  end subroutine xgBlock_hermitian_pd_cond
+  !!***
 
   !!****f* m_xg/xgBlock_pack
   !!

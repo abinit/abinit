@@ -86,6 +86,7 @@ module m_slice_cprj
    integer :: slicedim                      ! Number of eigen values/vectors we want in one slice
    integer :: paral_slice                   ! slice parallelization strategy (off)
    integer :: spectral_cut                  ! how to cut the eigenvalue spectral interval (off)
+   integer :: nbdbuf                        ! Number of bands in the buffer
    real(dp) :: tolerance                    ! Tolerance on the residu to stop the minimization
    real(dp) :: ecut                         ! Ecut for Chebfi oracle
    real(dp) :: tolfilter                    ! Polynomial filter wanted amplification
@@ -179,7 +180,7 @@ module m_slice_cprj
 !! SOURCE
 
 subroutine slice_init(slice,neigenpairs,spacedim,cprjdim,tolerance,ecut,bandpp, &
-                      ndeg_filter,space,space_cprj,eigenProblem,spacecom,me_g0,paw,&
+                      ndeg_filter,nbdbuf,space,space_cprj,eigenProblem,spacecom,me_g0,paw,&
                       nslice,tolfilter,paral_slice,spectral_cut,&
                       xg_nonlop,me_g0_fft)
 
@@ -190,6 +191,7 @@ subroutine slice_init(slice,neigenpairs,spacedim,cprjdim,tolerance,ecut,bandpp, 
  integer          , intent(in   ) :: me_g0_fft
  integer          , intent(in   ) :: neigenpairs
  integer          , intent(in   ) :: ndeg_filter
+ integer          , intent(in   ) :: nbdbuf
  integer          , intent(in   ) :: space
  integer          , intent(in   ) :: space_cprj
  integer          , intent(in   ) :: spacecom
@@ -226,6 +228,7 @@ subroutine slice_init(slice,neigenpairs,spacedim,cprjdim,tolerance,ecut,bandpp, 
  end if
  slice%ecut          = ecut
  slice%ndeg_filter   = ndeg_filter
+ slice%nbdbuf        = nbdbuf
  slice%eigenProblem  = eigenProblem
  slice%me_g0         = me_g0
  slice%me_g0_fft     = me_g0_fft
@@ -1083,8 +1086,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     call xgBlock_reshape(slice%eigenvalues, neigenpairs, 1)
 
     ! Apply Rayleigh Ritz on slice (refinement)
+    ! prtvol = 15015015 to print condition number of overlap matrix
     call xg_RayleighRitz_cprj(xg_nonlop,slice%X,slice%cprjX,slice%AX,eigenvalues_slice,&
-        slice%blockdim_cprj,ierr,0,tim_RR,ABI_GPU_DISABLED,solve_ax_bx=.true.)
+        slice%blockdim_cprj,ierr,15015015,tim_RR,ABI_GPU_DISABLED,solve_ax_bx=.true.)
 
     if ( ierr /= 0 ) then
         ABI_BUG("RayleighRitz did not work")
@@ -1360,7 +1364,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
  ! ITEST
  call xgBlock_reverseMap_1d(residu, resid)
- write(901,*) 'Frobenius norm (merged slices)=', sqrt(sum(resid))
+ write(901,*) 'Frobenius norm (merged slices)=', sqrt(sum(resid(1:slice%nbdbuf)))
  write(901,*) 'resid (merged slices)='
  call xgBlock_print(residu, 901)
  write(901,*) 'eigen (merged slices)='
