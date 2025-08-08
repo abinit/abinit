@@ -205,7 +205,7 @@ subroutine slicewf_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  call xg_init(cprj_xgx0,space_cprj,xg_nonlop%cprjdim,nband_cprj*nspinor,comm=l_mpi_enreg%comm_band)
 
  call slice_init(slice,nband,npw*nspinor,cprjdim,dtset%tolwfr_diago,dtset%ecut, &
-&                 mpi_enreg%bandpp, dtset%nline, space,space_cprj,1, &
+&                 mpi_enreg%bandpp, dtset%nline, dtset%nbdbuf, space,space_cprj,1, &
 &                 l_mpi_enreg%comm_band,me_g0,paw,&
 &                 dtset%nslice,dtset%tolfilter,dtset%paral_slice,dtset%spectral_cut,&
 &                 xg_nonlop,me_g0_fft)
