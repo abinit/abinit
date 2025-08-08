@@ -969,9 +969,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
                 call xgBlock_colwiseNorm2(slice%X_PROBE%self, dist3%self, comm_loc=xmpi_comm_null)
 
                 ! compute ein_ideg, eout_ideg constants
-                amp_ideg = max(bandpassIndicator_sca(ls,ls,us,ideg+1),bandpassIndicator_sca(us,ls,us,ideg+1))
+                amp_ideg = max(bandpassIndicator_sca(ls_in,ls,us,ideg+1),bandpassIndicator_sca(us_in,ls,us,ideg+1))
                 ein_ideg = 1-amp_ideg
-                eout_ideg = amp_ideg
+                eout_ideg = max(bandpassIndicator_sca(ls,ls,us,ideg+1),bandpassIndicator_sca(us,ls,us,ideg+1))
 
             end if
         end if
@@ -1042,7 +1042,11 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
         ! TODO rename variables
         call xgBlock_reverseMap_1d(dist2%self,probe)
-        call xgBlock_reverseMap_1d(dist3%self, dist3_array) 
+        call xgBlock_reverseMap_1d(dist3%self, dist3_array)
+
+        ! Normalize probe to get a pivot between 0 and 1
+        ! useful for absolute probe
+        probe(:) = probe(:) / maxval(probe)
 
         ! ITEST
         write(901,*) 
@@ -1076,7 +1080,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
             ! Criterion to take into account error of f
             ! FIXME norm of X? Tolerance? slice=1?
-            count_mask = count( probe > eout_ideg**2 + ((1+ein_ideg)*0.1d0)**2 )
+            !count_mask = count( probe > eout_ideg**2 + ((1+ein_ideg)*0.1d0)**2 )
+            count_mask = count( probe > 0.5) 
 
         end if
 
@@ -1101,7 +1106,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
             if (islice==1) then
                 !is_close_to_V = probe(iband) > eout_ideg**2 + (ein_ideg*0.1d0)**2
             else
-                is_close_to_V = probe(iband) > eout_ideg**2 + ((1+ein_ideg)*0.1d0)**2
+                !is_close_to_V = probe(iband) > eout_ideg**2 + ((1+ein_ideg)*0.1d0)**2
+                is_close_to_V = probe(iband) > 0.5
             end if
             if (is_close_to_V) then
                 call xgBlock_setBlock(X_kept%self, X_kept_col, slice%total_spacedim, 1, fcol=icount)
@@ -1227,6 +1233,12 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     if (islice==1) then
 
         lcol_in = maxloc(lambda_apost_slice, dim=1, mask=(lambda_apost_slice < lambda_minus))
+
+        ! If too many columns and not enough for second slice, then reduce
+        ! can happen if guess is too bad
+        if (lcol_in - fcol_in + 1 > neigenpairs / nslice + 20) then
+            lcol_in = neigenpairs / nslice
+        end if
 
         ! if multiple eigenvalue, include it
         write(901,*) lambda_apost_slice(lcol_in)
