@@ -1081,6 +1081,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
        call cg_put_spin(1, npw_k1, nspinortot, ndat, gvnlxc_spin, gvnlxc_)
 
        ! Apply H_{k+q/2} to u^down
+       !gvnlxc_spin = zero
        call cg_copy_spin(2, npw_k1, nspinortot, ndat, cwavef, cwavef_spin)
        call nonlop(choice, cpopt_here, cwaveprj_nonlop, enlout, gs_ham, idir, lambda_ndat, mpi_enreg, ndat, &
                    nnlout, paw_opt, signs, gsc_ptr, tim_nonlop, cwavef_spin, gvnlxc_spin, select_k=KPRIME_H_KPRIME)
