@@ -526,7 +526,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    end if
 
    if(response==0)then
-     write(message, '(a,1p,e15.7,a)'  ) ' scprqt: <Vxc>=',vxcavg,' hartree'
+     write(message, '(a,1p,e15.7,a)'  ) ' scprqt: <Vxc>=',vxcavg,' Hartree'
      call wrtout(std_out,message)
    end if
 
