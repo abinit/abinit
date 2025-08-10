@@ -10,7 +10,7 @@
 !!  in which the back-scattering term is completely ignored and the Momentum-Relaxation Time Approximation (MRTA)
 !!  in which backscattering is partly accounter for by multiplying the e-ph self-energy integrand function
 !!  by the efficiency factor alpha that depends on the incoming/outgoing electron group velocity.
-!!  The implementation assumes e-ph scattering although additional scattering mechanims (e.g. ionized impurities)
+!!  The implementation assumes e-ph scattering although additional scattering mechanisms (e.g. ionized impurities)
 !!  can be easily included once an appropriate model is added to the ab-initio e-ph scattering rates.
 !!
 !! COPYRIGHT
@@ -207,11 +207,11 @@ type,public :: rta_t
 
    real(dp),allocatable :: l0(:,:,:,:,:,:), l1(:,:,:,:,:,:), l2(:,:,:,:,:,:)
    ! (3, 3, nw, nsppol, ntemp, nrta)
-   ! Onsager coeficients in Cartesian coordinates
+   ! Onsager coefficients in Cartesian coordinates
 
    real(dp),allocatable :: l11_mu(:,:,:,:,:), l12_mu(:,:,:,:,:), l22_mu(:,:,:,:,:)
    ! (3, 3, nsppol, ntemp, nrta)
-   ! Onsager coeficients in Cartesian coordinates, calculated at the correct mu (at the exact temperature)
+   ! Onsager coefficients in Cartesian coordinates, calculated at the correct mu (at the exact temperature)
 
    real(dp),allocatable :: sigma(:,:,:,:,:,:)
    real(dp),allocatable :: seebeck(:,:,:,:,:,:)
@@ -577,7 +577,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
  ! Do we really need this option? Can't we replace it with sigma_ngkpt and eph_task 7?
 
  if (any(dtset%transport_ngkpt /= 0)) then
-   ! Perform further downsampling (usefull for debugging purposes)
+   ! Perform further downsampling (useful for debugging purposes)
    call wrtout(units, " Downsampling the k-mesh before computing transport:")
    call wrtout(units, sjoin(" Using transport_ngkpt: ", ltoa(dtset%transport_ngkpt)))
    kptrlatt = 0
@@ -651,7 +651,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
 
  ! TODO: Implement possible change of sigma_erange, useful for convergence studies
  !   1) Run sigmaph with relatively large sigma_erange.
- !   2) Decrease energy window in the trasport part to analyze the behaviour of transport tensors.
+ !   2) Decrease energy window in the transport part to analyze the behaviour of transport tensors.
 
  ! sigmaph is not needed anymore. Free it.
  sigmaph%ncid = nctk_noid
@@ -689,7 +689,7 @@ subroutine compute_rta(self, cryst, dtset, dtfil, comm)
 
 !Local variables ------------------------------
  integer,parameter :: nvecs0 = 0, master = 0
- integer :: nsppol, nkibz, ib, ik_ibz, iw, spin, ii, jj, itemp, irta, itens, iscal, cnt
+ integer :: nsppol, nkibz, ib, ik_ibz, iw, spin, ii, jj, itemp, irta, itens_, iscal, cnt
  integer :: ntens, edos_intmeth, ifermi, iel, nvals, my_rank
  integer :: ncid
  !character(len=500) :: msg
@@ -795,8 +795,7 @@ subroutine compute_rta(self, cryst, dtset, dtfil, comm)
                                              brange=[self%bmin, self%bmax], erange=[emin, emax])
 
  if (my_rank == master) then
-   call self%edos%print(unit=std_out, header="Computation of DOS, VV_DOS and VVTAU_DOS")
-   call self%edos%print(unit=ab_out,  header="Computation of DOS, VV_DOS and VVTAU_DOS")
+   call self%edos%print([std_out, ab_out], header="Computation of DOS, VV_DOS and VVTAU_DOS")
  end if
 
  call cwtime_report(" compute_rta_edos", cpu, wall, gflops)
@@ -812,11 +811,11 @@ subroutine compute_rta(self, cryst, dtset, dtfil, comm)
    do spin=1,nsppol
      do itemp=1,self%ntemp+1
 
-       itens = itemp + (irta - 1) * (self%ntemp + 1)
+       itens_ = itemp + (irta - 1) * (self%ntemp + 1)
        if (itemp == 1) then
-         self%vv_dos(:,:,:,spin) = out_tensdos(:, 1, :, :, itens, spin)
+         self%vv_dos(:,:,:,spin) = out_tensdos(:, 1, :, :, itens_, spin)
        else
-         self%vvtau_dos(:,:,:, itemp-1, spin, irta) = out_tensdos(:, 1, :, :, itens, spin)
+         self%vvtau_dos(:,:,:, itemp-1, spin, irta) = out_tensdos(:, 1, :, :, itens_, spin)
        end if
 
      end do
@@ -1746,7 +1745,7 @@ end subroutine rta_free
 !!
 !! INPUTS
 !! dtfil<datafiles_type>=variables related to files.
-!! ngfftc(18)=Coarse FFT meshe
+!! ngfftc(18)=Coarse FFT mesh
 !! dtset<dataset_type>=All input variables for this dataset.
 !! ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
 !! cryst<crystal_t>=Crystalline structure
@@ -2058,9 +2057,8 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
      end do
    end do
 
-   call wrtout(std_out, sjoin(" Begin IBTE looop for itemp:", itoa(itemp), ", KT:", ftoa(kT / kb_HaK), "[K]"), &
+   call wrtout(std_out, sjoin(" Begin IBTE loop for itemp:", itoa(itemp), ", KT:", ftoa(kT / kb_HaK), "[K]"), &
                pre_newlines=1, newlines=1)
-
 
    ! iter = 0 --> Compute SERTA transport tensors just for initial reference.
    call ibte_calc_tensors(ibte, cryst, itemp, kT, mu_e, fkn_serta, onsager, sig_p, mob_p, fsum_eh, comm, iet)
@@ -2154,7 +2152,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
                 end do ! iq_sum
               end do ! band_k
 
-              ! Symmetrize intermediate results using the operations of the litte group of k.
+              ! Symmetrize intermediate results using the operations of the little group of k.
               sym_vec = zero
               do isym_lgk=1,sr_p%lgk_nsym
                 isym = sr_p%lgk_sym2glob(1, isym_lgk)
@@ -2554,7 +2552,7 @@ end subroutine ibte_driver
 !!
 !! FUNCTION
 !!   calculate transport tensors within iBTE method, from v x F expressions for current and sigma etc
-!!   this routine now stays in atomic units to accomodate calculation of sigma and seebeck
+!!   this routine now stays in atomic units to accommodate calculation of sigma and seebeck
 !!
 !! INPUTS
 !! cryst<crystal_t>=Crystalline structure
@@ -2572,7 +2570,7 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
  real(dp),intent(in) :: fk(3, self%ebands%nkpt, self%bmin:self%bmax, self%nsppol)
  real(dp),intent(out) :: sigma_eh(3,3,2,self%nsppol), mob_eh(3,3,2,self%nsppol)
  real(dp),intent(out) :: fsum_eh(3,2,self%nsppol), onsager(3,3,3,self%nsppol)
- integer,intent(in) :: comm, iet !iet to know wich tensor we calculate, 1 for L11, 2 for L12 and 3 for L21 and L22
+ integer,intent(in) :: comm, iet !iet to know which tensor we calculate, 1 for L11, 2 for L12 and 3 for L21 and L22
 
 !Local variables ------------------------------
 !scalars
@@ -2600,8 +2598,8 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
  ! with the same the Fermi level. In all the other cases, indeed, we assume that tau does not depend on ef.
  !
 
- !TODO: rewrite this beacause every L (onsager coeff) is given with a minus sign and it's just the case for L11 and L22 normally
- ! Fortunately these minus signs compensate each other in the code or are supressed by putting a -1 factor in front of sbk and PI
+ !TODO: rewrite this because every L (onsager coeff) is given with a minus sign and it's just the case for L11 and L22 normally
+ ! Fortunately these minus signs compensate each other in the code or are suppressed by putting a -1 factor in front of sbk and PI
  ! It is not because of the sign of e !
  cnt = 0
  do spin=1,nsppol

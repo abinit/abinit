@@ -3513,12 +3513,10 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
          if (narr_eff/=0) then
 
            if (print_out) write(iout,full_format) token,trim(appen),(trim(strarr(iarr,idtset)),iarr=1,narr_eff)
-!#ifdef HAVE_NETCDF
 !           if (print_netcdf) then
 !             call write_var_netcdf(intarr(1:narr_eff,idtset),&
 !&             dprarr(1:narr_eff,idtset),marr,narr_eff,abs(ncid),typevarphys,token//appen)
 !           end if
-!#endif
          end if
 
        end do

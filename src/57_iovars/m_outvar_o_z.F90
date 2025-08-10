@@ -135,7 +135,6 @@ contains
  real(dp),allocatable :: dprarr(:,:),dprarr_images(:,:,:)
  real(dp),allocatable :: xangst(:,:),xcart(:,:),xred(:,:)
  real(dp),allocatable :: xangst_(:,:,:,:),xcart_(:,:,:,:)
-
 ! *************************************************************************
 
 !###########################################################
@@ -503,7 +502,7 @@ contains
    intarr(1:mxvals%natom,0)=(/ (ii,ii=1,mxvals%natom) /)
    call prttagm(dprarr,intarr,iout,jdtset_,4,marr,natom,narrm,ncid,ndtset_alloc,'prtatlist','INT',0)
  else
-!  This thing will disapear with new generalized prttagm
+!  This thing will disappear with new generalized prttagm
  end if
 
  intarr(1,:)=dtsets(:)%prtbbb
@@ -701,23 +700,22 @@ contains
  dprarr(3,:)=dtsets(:)%qptn(3)
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'qpt','DPR',0)
 
+ dprarr(1,:)=dtsets(:)%qgbt(1)
+ dprarr(2,:)=dtsets(:)%qgbt(2)
+ dprarr(3,:)=dtsets(:)%qgbt(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'qgbt','DPR',0)
+
 !qptdm
  narr=3*dtsets(1)%nqptdm ! default size for all datasets
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    if(idtset/=0)then
      narrm(idtset)=3*dtsets(idtset)%nqptdm
      if (narrm(idtset)>0)&
-&     dprarr(1:narrm(idtset),idtset)=&
-&     reshape(dtsets(idtset)%qptdm(1:3,&
-&     1:dtsets(idtset)%nqptdm),&
-&     (/ narrm(idtset) /) )
+       dprarr(1:narrm(idtset),idtset)=reshape(dtsets(idtset)%qptdm(1:3,1:dtsets(idtset)%nqptdm), [narrm(idtset)])
    else
      narrm(idtset)=3*mxvals%nqptdm
      if (narrm(idtset)>0)&
-&     dprarr(1:narrm(idtset),idtset)=&
-&     reshape(dtsets(idtset)%qptdm(1:3,&
-&     1:mxvals%nqptdm),&
-&     (/ narrm(idtset) /) )
+     dprarr(1:narrm(idtset),idtset)= reshape(dtsets(idtset)%qptdm(1:3,1:mxvals%nqptdm), [narrm(idtset)])
    end if
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'qptdm','DPR',multivals%nqptdm)
@@ -1248,6 +1246,9 @@ contains
  intarr(1,:)=dtsets(:)%use_nonscf_gkk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_nonscf_gkk','INT',0)
 
+ intarr(1,:)=dtsets(:)%use_gbt
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_gbt','INT',0)
+
  intarr(1,:)=dtsets(:)%usepawu
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'usepawu','INT',0)
 
@@ -1642,14 +1643,14 @@ contains
      end if
    end do
    call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,&
-&   narrm,ncid,ndtset_alloc,'ziontypat','DPR',multivals%ntypat,forceprint=2)
+     narrm,ncid,ndtset_alloc,'ziontypat','DPR',multivals%ntypat,forceprint=2)
  end if
 
  do idtset=0,ndtset_alloc
    dprarr(1:npsp,idtset)=dtsets(idtset)%znucl(1:npsp)
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,4,marr,npsp,narrm,ncid,ndtset_alloc,'znucl','DPR',0,forceprint=2)
- 
+
  intarr(1,:)=dtsets(:)%zora
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'zora','INT',0)
 
@@ -1718,10 +1719,9 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
  integer :: multi_tsmear
  integer :: print,tnkpt
  logical, allocatable :: test_multiimages(:)
- character(len=4) :: appen
+ character(len=4) :: append
  character(len=16) :: keywd
  character(len=500) :: message
-
 ! *************************************************************************
 
  if(ndtset_alloc<1)then
@@ -1920,7 +1920,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
      end if
      if(dtsets(idtset)%iscf/=-2)then
        jdtset=jdtset_(idtset)
-       call appdig(jdtset,'',appen)
+       call appdig(jdtset,'',append)
        do iimage=1,nimagem(idtset)
          if(iimage==1 .or. test_multiimages(idtset) )then
            keywd=trim(token)//trim(strimg(iimage))
@@ -1933,7 +1933,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
                  nban=dtsets(idtset)%nband(ikpsp)
                  if(ikpsp==1)then
                    write(iout, '(1x,a16,a,1x,(t22,6f10.6))' )&
-&                   trim(keywd),appen,results_out(idtset)%occ(iban:iban+nban-1,iimage)
+&                   trim(keywd),append,results_out(idtset)%occ(iban:iban+nban-1,iimage)
                  else
                    write(iout, '((t22,6f10.6))' )results_out(idtset)%occ(iban:iban+nban-1,iimage)
                  end if
@@ -1945,7 +1945,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
 !            The number of bands is identical for all k points and spin
              nban=dtsets(idtset)%nband(1)
              write(iout, '(1x,a16,a,1x,(t22,6f10.6))' )&
-&             trim(keywd),appen,results_out(idtset)%occ(1:nban,iimage)
+&             trim(keywd),append,results_out(idtset)%occ(1:nban,iimage)
 !            if occopt==1, the occ might differ with the spin
              if(dtsets(idtset)%nsppol/=1)then
                write(iout, '((t22,6f10.6))' ) &

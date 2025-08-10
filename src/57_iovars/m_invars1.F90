@@ -29,8 +29,13 @@ module m_invars1
  use m_dtset
  use m_nctk
  use m_xomp
-#ifdef HAVE_NETCDF
  use netcdf
+ use m_gwdefs
+#if defined DEV_YP_VDWXC
+ use m_xc_vdw
+#endif
+#if defined HAVE_GPU
+ use m_gpu_toolbox
 #endif
 
  use m_fstrings, only : inupper, itoa, endswith, strcat, sjoin, startswith
@@ -40,10 +45,7 @@ module m_invars1
  use m_ingeo,    only : ingeo, invacuum
  use m_matrix,   only : mati3det
  use m_mep,      only : MEP_SOLVER_STEEPEST,NEB_ALGO_IMPROVED_TAN,NEB_CELL_ALGO_NONE,STRING_ALGO_SIMPLIFIED_EQUAL
-
-#if defined HAVE_GPU
- use m_gpu_toolbox
-#endif
+ use m_fftcore,      only : get_cache_kb, fftalg_for_npfft
 
  implicit none
 
@@ -121,12 +123,9 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 !arrays
  integer,allocatable :: intarr(:), sidx(:)
  real(dp),allocatable :: dprarr(:)
-
 !******************************************************************
 
-!DEBUG
 !write(std_out,"(3a)")" m_invars1%invars0 : enter with string:", ch10, trim(string)
-!ENDDEBUG
 
  marr=max(9,ndtset_alloc,2)
  ABI_MALLOC(dprarr,(marr))
@@ -243,6 +242,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  dtsets(:)%ntypat=1 ; dtsets(0)%ntypat=0    ! Will always echo ntypat
  dtsets(:)%macro_uj=0
  dtsets(:)%maxnsym=384
+ dtsets(:)%use_gbt=0
  dtsets(:)%useria=0
  dtsets(:)%userib=0
  dtsets(:)%useric=0
@@ -259,17 +259,6 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  ! Loop on datasets, to find natom and mxnatom, as well as useri and userr
  do idtset=1,ndtset_alloc
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
-
-   ! proposal: supercell generation in input string before it is read in
-   ! call expand_supercell_input(jdtset, lenstr, string)
-   !  find supercell, else exit
-   !  determinant = ncells
-   !  copy rprim,    acell,    xred,    xcart,    vel,    typat,   to
-   !       rprim_uc, acell_uc, xred_uc, xcart_uc, vel_uc, typat_uc
-   !     NB: also rprim and angdeg need to be updated in non diagonal case!!!
-   !  generate supercell info for each of these copying out with translation vectors etc...
-   !  set chkprim to 0
-   !  done!
 
    !  Generate the supercell if supercell_latt is specified and update string
    dtsets(idtset)%supercell_latt(:) = 0
@@ -384,6 +373,10 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useextfpmd',tread,'INT')
    if(tread==1) dtsets(idtset)%useextfpmd=intarr(1)
 
+   ! Read use_gbt
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gbt',tread,'INT')
+   if (tread==1) dtsets(idtset)%use_gbt=intarr(1)
+
    ! Read user* variables
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useria',tread,'INT')
    if(tread==1) dtsets(idtset)%useria=intarr(1)
@@ -480,15 +473,6 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  pp_dirpath = ""
  call intagm(dprarr, intarr, 0, marr, 1, string(1:lenstr), 'pp_dirpath', tread, 'KEY', key_value=pp_dirpath)
  if (tread == 1) then
-!! XG2020_07_20 Now, the replacement of environment variables is done at the level of the parser
-!  if (pp_dirpath(1:1) == "$") then
-!    shell_var = pp_dirpath(2:)
-!    call get_environment_variable(shell_var, pp_dirpath, status=ierr)
-!    if (ierr == -1) ABI_ERROR(sjoin(shell_var, "is present but string too short for the environment variable"))
-!    if (ierr == +1) ABI_ERROR(sjoin(shell_var, "variable is not defined!"))
-!    if (ierr == +2) ABI_ERROR(sjoin(shell_var, "used in input file but processor does not support environment variables"))
-!    call wrtout(std_out, sjoin(shell_var, "found in env. Assuming pseudos located in:",  pp_dirpath))
-!  end if
    if (.not. endswith(pp_dirpath, "/")) pp_dirpath = strcat(pp_dirpath, "/")
  end if
 
@@ -517,8 +501,8 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    end do
    if (cnt /= npsp) then
      write(msg,'(4a)')&
-&      "Not enough pseudopotentials in input `pseudos` string, expecting npsp: ",itoa(npsp),ch10,&
-&      "Perhaps the separator (=a comma) is missing between pseudopotentials in input `pseudos` string."
+      "Not enough pseudopotentials in input `pseudos` string, expecting npsp: ",itoa(npsp),ch10,&
+      "Perhaps the separator (=a comma) is missing between pseudopotentials in input `pseudos` string."
      ABI_ERROR(msg)
    end if
 
@@ -574,7 +558,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 
    gpu_option_string = "" ; intarr(1)=0
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),"gpu_option",tread_gpu_option,'INT_OR_KEY',&
-&              key_value=gpu_option_string)
+               key_value=gpu_option_string)
    if (tread_gpu_option==1) then
      if (len(trim(gpu_option_string))>0) then
        call inupper(gpu_option_string)
@@ -594,49 +578,49 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 #if defined HAVE_GPU
    if (idev<=0) then
      write(msg,'(5a)')&
-&     'Input variable gpu_option is on (/=0),',ch10,&
-&     'but no available GPU device has been detected !',ch10,&
-&     'Action: change the input variable gpu_option.'
+     'Input variable gpu_option is on (/=0),',ch10,&
+     'but no available GPU device has been detected !',ch10,&
+     'Action: change the input variable gpu_option.'
      ABI_ERROR(msg)
    end if
    if(gpu_option==ABI_GPU_OPENMP) then
 #if !defined HAVE_OPENMP_OFFLOAD
      write(msg,'(7a)')&
-&     'Input variable gpu_option is set to use OpenMP GPU backend but abinit hasn''t been built',ch10,&
-&     'with OpenMP GPU offloading enabled!',ch10,&
-&     'Action: change the input variable gpu_option',ch10,&
-&     '        or re-compile ABINIT with OpenMP GPU offloading enabled.'
+     'Input variable gpu_option is set to use OpenMP GPU backend but abinit hasn''t been built',ch10,&
+     'with OpenMP GPU offloading enabled!',ch10,&
+     'Action: change the input variable gpu_option',ch10,&
+     '        or re-compile ABINIT with OpenMP GPU offloading enabled.'
      ABI_ERROR(msg)
 #endif
 #if defined HAVE_OPENMP_OFFLOAD
      if(xomp_get_num_devices() == 0) then
        write(msg,'(13a)')&
-&       'Input variable gpu_option is set to use OpenMP GPU backend ',ch10,&
-&       'but no GPU is visible by OpenMP.',ch10,&
-&       'It usually happens when env variable OMP_TARGET_OFFLOAD is set to DISABLED (not default) ',ch10,&
-&       'or if there are inconsistencies between GPU driver and compiler ',ch10,&
-&       'as to which CUDA version is supported.',ch10,&
-&       'Action: check the value OMP_TARGET_OFFLOAD is not set to DISABLED,',ch10,&
-&       '        otherwise make sure CUDA/HIP version you use is supported by BOTH your driver and compiler.'
+       'Input variable gpu_option is set to use OpenMP GPU backend ',ch10,&
+       'but no GPU is visible by OpenMP.',ch10,&
+       'It usually happens when env variable OMP_TARGET_OFFLOAD is set to DISABLED (not default) ',ch10,&
+       'or if there are inconsistencies between GPU driver and compiler ',ch10,&
+       'as to which CUDA version is supported.',ch10,&
+       'Action: check the value OMP_TARGET_OFFLOAD is not set to DISABLED,',ch10,&
+       '        otherwise make sure CUDA/HIP version you use is supported by BOTH your driver and compiler.'
        ABI_ERROR(msg)
      end if
 #endif
    else if(gpu_option==ABI_GPU_KOKKOS) then
 #if !defined HAVE_KOKKOS || !defined HAVE_YAKL
      write(msg,'(7a)')&
-&     'Input variable gpu_option is set to use Kokkos backend but abinit hasn''t been built',ch10,&
-&     'with Kokkos and/or YAKL dependencies enabled!',ch10,&
-&     'Action: change the input variable gpu_option',ch10,&
-&     '        or re-compile ABINIT with BOTH Kokkos and YAKL enabled.'
+     'Input variable gpu_option is set to use Kokkos backend but abinit hasn''t been built',ch10,&
+     'with Kokkos and/or YAKL dependencies enabled!',ch10,&
+     'Action: change the input variable gpu_option',ch10,&
+     '        or re-compile ABINIT with BOTH Kokkos and YAKL enabled.'
      ABI_ERROR(msg)
 #endif
    end if
 #else
    write(msg,'(7a)')&
-&   'Input variable gpu_option is on',ch10,&
-&   'but ABINIT hasn''t been built with GPU mode enabled!',ch10,&
-&   'Action: change the input variable gpu_option',ch10,&
-&   '        or re-compile ABINIT with GPU enabled.'
+   'Input variable gpu_option is on',ch10,&
+   'but ABINIT hasn''t been built with GPU mode enabled!',ch10,&
+   'Action: change the input variable gpu_option',ch10,&
+   '        or re-compile ABINIT with GPU enabled.'
    ABI_ERROR(msg)
 #endif
  end if
@@ -719,13 +703,10 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ABI_MALLOC(dtsets(idtset)%znucl,(npsp))
  end do
 
-!DEBUG
-!write(std_out,*)' invars0 : nimage, mxnimage = ',dtsets(:)%nimage, mxnimage
-!write(std_out,*)' invars0 : natom = ',dtsets(:)%natom
-!write(std_out,*)' invars0 : mxnatom = ',mxnatom
-!write(std_out,*)' m_invars1%invars0 : exit '
-!call flush(std_out)
-!ENDDEBUG
+ !write(std_out,*)' invars0 : nimage, mxnimage = ',dtsets(:)%nimage, mxnimage
+ !write(std_out,*)' invars0 : natom = ',dtsets(:)%natom
+ !write(std_out,*)' invars0 : mxnatom = ',mxnatom
+ !write(std_out,*)' m_invars1%invars0 : exit '; call flush(std_out)
 
 end subroutine invars0
 !!***
@@ -764,7 +745,7 @@ end subroutine invars0
 !! SOURCE
 
 subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
-& msym, ndtset, ndtset_alloc, string, npsp, zionpsp, comm)
+                    msym, ndtset, ndtset_alloc, string, npsp, zionpsp, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -781,16 +762,11 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
 !scalars
  integer :: idtset,ii,jdtset,lpawu,mband_upper,iatom,nat,nsp
 !arrays
- integer,allocatable :: symafm_(:,:),symrel_(:,:,:,:)
- integer,allocatable :: symafm(:),symrel(:,:,:)
+ integer,allocatable :: symafm_(:,:),symrel_(:,:,:,:), symafm(:),symrel(:,:,:)
  real(dp),allocatable :: tnons_(:,:,:),tnons(:,:)
-
 !******************************************************************
 
-!DEBUG
-!write(std_out,'(a)')' m_invars1%invars1m : enter '
-!call flush(std_out)
-!ENDDEBUG
+ !write(std_out,'(a)')' m_invars1%invars1m : enter '; call flush(std_out)
 
  ! Here, allocation of the arrays that depend on msym.
  ABI_MALLOC(symrel_,(3,3,msym,0:ndtset_alloc))
@@ -837,7 +813,7 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
    tnons(:,:)=tnons_(:,:,0)
 
    call invars1(dtsets(idtset)%bravais,dtsets(idtset),iout,jdtset,lenstr,&
-&   mband_upper,msym,npsp,string,symafm,symrel,tnons,zionpsp, comm)
+                mband_upper,msym,npsp,string,symafm,symrel,tnons,zionpsp, comm)
 
    mband_upper_ (idtset)=mband_upper
    symafm_(:,idtset)=symafm(:)
@@ -894,7 +870,7 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
      lpawu=maxval(dtsets(ii)%lpawu(:))
      mx%lpawu=max(lpawu,mx%lpawu)
      !dtsets(ii)%natpawu=count(dtsets(ii)%lpawu(dtsets(ii)%typat((/(i1,i1=1,dtsets(ii)%natom)/)))/=-1)
-     ! Old fashon way that should do fine
+     ! Old fashion way that should do fine
      dtsets(ii)%natpawu = 0
      do iatom=1, dtsets(ii)%natom
        if (dtsets(ii)%lpawu(dtsets(ii)%typat(iatom)) /= -1 ) dtsets(ii)%natpawu = dtsets(ii)%natpawu + 1
@@ -952,10 +928,7 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
  ABI_FREE(symrel)
  ABI_FREE(tnons)
 
-!DEBUG
-!write(std_out,'(a)')' m_invars1%invars1m : exit '
-!call flush(std_out)
-!ENDDEBUG
+ !write(std_out,'(a)')' m_invars1%invars1m : exit '; call flush(std_out)
 
 end subroutine invars1m
 !!***
@@ -965,7 +938,7 @@ end subroutine invars1m
 !! indefo1
 !!
 !! FUNCTION
-!! Initialisation phase : defaults values for a first batch of input variables
+!! Initialisation phase: defaults values for a first batch of input variables
 !! (especially dimensions, needed to allocate other parts of dtsets, as well
 !!  as other input variables whose existence is needed for other initialisations to proceed).
 !!
@@ -986,11 +959,10 @@ subroutine indefo1(dtset)
 !Local variables -------------------------------
 !scalars
  !integer :: ii
-
 !******************************************************************
 
 !Set up default values. All variables to be output in outvars.f
-!should have a default, even if a nonsensible one can be chosen to garantee print in that routine.
+!should have a default, even if a nonsensible one can be chosen to guarantee print in that routine.
 
  DBG_ENTER("COLL")
 
@@ -1231,13 +1203,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  character(len=fnlen) :: key_value
  character(len=len(string)) :: geo_string
  type(geo_t) :: geo
-
 !************************************************************************
 
-!DEBUG
-!write(std_out,'(a)')' m_invars1%invars1 : enter '
-!call flush(std_out)
-!ENDDEBUG
+ !write(std_out,'(a)')' m_invars1%invars1 : enter '; call flush(std_out)
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
@@ -1341,7 +1309,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
 !Special treatment of _TYPAX (from a XYZ file), taking into account
 !the fact that znucl does NOT depend on the dataset
-!Examine all occurences of '_TYPAX'
+!Examine all occurrences of '_TYPAX'
 
  do
    index_typsymb=index(string(1:lenstr),'_TYPAX')
@@ -1481,8 +1449,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    else
      if(dtset%nspinor==2)then
        write(msg, '(4a)' ) ch10,&
-&       ' invars1: COMMENT -',ch10,&
-&       '  With nspinor=2 and usepaw=1, pawspnorb=1 has been switched on by default.'
+       ' invars1: COMMENT -',ch10,&
+       '  With nspinor=2 and usepaw=1, pawspnorb=1 has been switched on by default.'
        call wrtout(iout, msg,'COLL')
      end if
    end if
@@ -1538,14 +1506,14 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 !Read the hspinfield
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'hspinfield',tread,'BFI')
  if(tread==0) then
-    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'zeemanfield',tread,'BFI')
-    if (tread == 1) then
-       write(msg, '(3a)')&
-       'Input variable "zeemanfield" is deprecated.', ch10, &
-       'Its value has been assigned to "hspinfield", please update your input.'   
-       ABI_COMMENT(msg)
-  end if
-end if
+   call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'zeemanfield',tread,'BFI')
+   if (tread == 1) then
+     write(msg, '(3a)')&
+      'Input variable "zeemanfield" is deprecated.', ch10, &
+      'Its value has been assigned to "hspinfield", please update your input.'
+     ABI_COMMENT(msg)
+   end if
+ end if
 
  if(tread==1) then
    if(dtset%nspden == 2)then
@@ -1614,10 +1582,7 @@ end if
    spinat(1:3,1:natom)=dtset%spinat(1:3,1:natom)
    znucl(1:dtset%npsp)=dtset%znucl(1:dtset%npsp)
 
-!DEBUG
-!write(std_out,'(a)')' m_invars1%invars1 : before ingeo '
-!call flush(std_out)
-!ENDDEBUG
+   !write(std_out,'(a)')' m_invars1%invars1 : before ingeo '; call flush(std_out)
 
    call ingeo(acell,amu,atndlist,bravais,chrgat,dtset,dtset%field_red(1:3),&
     dtset%field_red_axial(1:3),dtset%genafm(1:3),iatfix,&
@@ -1629,10 +1594,7 @@ end if
     string,dtset%supercell_latt,symafm,dtset%symmorphi,symrel,tnons,dtset%tolsym,&
     typat,vel,vel_cell,xred,znucl, comm)
 
-!DEBUG
-!write(std_out,'(a)')' m_invars1%invars1 : after ingeo '
-!call flush(std_out)
-!ENDDEBUG
+   !write(std_out,'(a)')' m_invars1%invars1 : after ingeo '; call flush(std_out)
 
    dtset%chrgat(1:natom)=chrgat(1:natom)
    dtset%iatfix(1:3,1:natom)=iatfix(1:3,1:natom)
@@ -1664,7 +1626,7 @@ end if
    end if
    ABI_MALLOC(dtset%atndlist,(3,natnd))
    dtset%atndlist(1:3,1:natnd)=atndlist(1:3,1:natnd)
-   
+
 !  Read cellcharge for each image, but use it only to initialize cellcharge_min
 !  The old name 'charge' is still tolerated. Will be removed in due time.
    cellcharge=zero
@@ -1686,7 +1648,6 @@ end if
    endif
 
    if(cellcharge < cellcharge_min)cellcharge_min=cellcharge
-
  end do
 
  if(allocated(iatnd)) then
@@ -1704,12 +1665,9 @@ end if
 
  ! Examine whether there is some vacuum space in the unit cell
  call invacuum(jdtset,lenstr,natom,dtset%rprimd_orig(1:3,1:3,intimage),string,vacuum,&
-& dtset%xred_orig(1:3,1:natom,intimage))
+                dtset%xred_orig(1:3,1:natom,intimage))
 
-!DEBUG
-!write(std_out,'(a)')' m_invars1%invars1 : after invacuum '
-!call flush(std_out)
-!ENDDEBUG
+!write(std_out,'(a)')' m_invars1%invars1 : after invacuum '; call flush(std_out)
 
 !write(std_out,*)' invars1: before inkpts, dtset%mixalch_orig(1:npspalch,1:ntypalch,:)=',&
 !dtset%mixalch_orig(1:npspalch,1:ntypalch,1:dtset%nimage)
@@ -1781,7 +1739,6 @@ end if
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr), "getkerange_filepath", tread, 'KEY', key_value=key_value)
  if (tread==1) dtset%getkerange_filepath = key_value
 
-#ifdef HAVE_NETCDF
  if (dtset%getkerange_filepath /= ABI_NOFILE) then
    ! Get number of k-points in sigma_erange energy windows.
    !dtset%kptopt = 0
@@ -1792,7 +1749,6 @@ end if
    end if
    call xmpi_bcast(nkpt, master, comm, ierr)
  end if
-#endif
 
  dtset%nkpt = nkpt
 
@@ -1809,10 +1765,7 @@ end if
  ! test that the value of nkpt is OK, if kptopt/=0
  ! Set up dummy arrays istwfk, kpt, wtk
 
-!DEBUG
-!write(std_out,'(a)')' m_invars1%invars1 : before nkpt/=0 '
-!call flush(std_out)
-!ENDDEBUG
+ !write(std_out,'(a)')' m_invars1%invars1 : before nkpt/=0 '; call flush(std_out)
 
  if(nkpt/=0 .or. dtset%kptopt/=0)then
    ABI_MALLOC(istwfk,(nkpt))
@@ -1841,10 +1794,7 @@ end if
    ! Use the first image to predict k and/or q points, except if an intermediate image is available
    intimage=1; if(dtset%nimage>2)intimage=(1+dtset%nimage)/2
 
-!DEBUG
-!write(std_out,'(a)')' m_invars1%invars1 : before inqpt'
-!call flush(std_out)
-!ENDDEBUG
+   !write(std_out,'(a)')' m_invars1%invars1 : before inqpt'; call flush(std_out)
 
    ! Find the q-point, if any.
    if(nqpt/=0)then
@@ -1860,10 +1810,7 @@ end if
      occopt,dtset%qptn,response,dtset%rprimd_orig(1:3,1:3,intimage),dtset%shiftk,&
      string,symafm,symrel,vacuum,wtk,comm)
 
-!DEBUG
-!write(std_out,'(a)')' m_invars1%invars1 : after inkpts'
-!call flush(std_out)
-!ENDDEBUG
+   !write(std_out,'(a)')' m_invars1%invars1 : after inkpts'; call flush(std_out)
 
    ABI_FREE(istwfk)
    ABI_FREE(kpt)
@@ -1875,10 +1822,7 @@ end if
    dtset%nkpthf=nkpthf
  end if
 
-!DEBUG
-!write(std_out,'(a)')' m_invars1%invars1 : after nkpt/=0 '
-!call flush(std_out)
-!ENDDEBUG
+ !write(std_out,'(a)')' m_invars1%invars1 : after nkpt/=0 '; call flush(std_out)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nqptdm',tread,'INT')
  if(tread==1) dtset%nqptdm=intarr(1)
@@ -1945,10 +1889,7 @@ end if
 
 !---------------------------------------------------------------------------
 
-!DEBUG
-!write(std_out,'(a)')' m_invars1%invars1 : before nnos '
-!call flush(std_out)
-!ENDDEBUG
+ !write(std_out,'(a)')' m_invars1%invars1 : before nnos '; call flush(std_out)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nnos',tread,'INT')
  if(tread==1) dtset%nnos=intarr(1)
@@ -2220,10 +2161,7 @@ end if
  ABI_FREE(intarr)
  ABI_FREE(dprarr)
 
-!DEBUG
-!write(std_out,'(a)')' m_invars1%invars1 : exit '
-!call flush(std_out)
-!ENDDEBUG
+!write(std_out,'(a)')' m_invars1%invars1 : exit '; call flush(std_out)
 
 end subroutine invars1
 !!***
@@ -2257,18 +2195,11 @@ end subroutine invars1
 
 subroutine indefo(dtsets, ndtset_alloc, nprocs)
 
- use m_gwdefs
-#if defined DEV_YP_VDWXC
- use m_xc_vdw
-#endif
-
- use m_fftcore,      only : get_cache_kb, fftalg_for_npfft
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ndtset_alloc,nprocs
 !arrays
- type(dataset_type),intent(inout) :: dtsets(0:ndtset_alloc) !vz_i
+ type(dataset_type),intent(inout) :: dtsets(0:ndtset_alloc)
 
 !Local variables -------------------------------
 !scalars
@@ -2277,13 +2208,12 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 #if defined DEV_YP_VDWXC
  type(xc_vdw_type) :: vdw_defaults
 #endif
-
 !******************************************************************
 
  DBG_ENTER("COLL")
 
 !Set up default values. All variables to be output in outvars.f
-!should have a default, even if a nonsensible one can be chosen to garantee print in that routine.
+!should have a default, even if a nonsensible one can be chosen to guarantee print in that routine.
 !Some default values are also set at the definition of the input variables (m_dtset.F90).
 
 !These variables have already been initialized, for idtset/=0
@@ -2321,7 +2251,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 !  MG FIXME Sun Sep 6 2015: Many tests fail if IO_MODE_MPI is used as default. IO errors in v1, v2 ...
 !  with np=1 and wonderful deadlocks if np>1.
 
-!  Note that this default value might be overriden for specific datasets later, in case of parallelism
+!  Note that this default value might be overridden for specific datasets later, in case of parallelism
    dtsets(idtset)%iomode=IO_MODE_FORTRAN
 #ifdef HAVE_NETCDF_DEFAULT
    dtsets(idtset)%iomode=IO_MODE_ETSF
@@ -2812,6 +2742,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%pw_unbal_thresh=40._dp
 !  Q
    dtsets(idtset)%qmass(:)=ten
+   dtsets(idtset)%qgbt(3)=zero
    dtsets(idtset)%qprtrb(1:3)=0
    dtsets(idtset)%qptdm(:,:)=zero
    dtsets(idtset)%quadmom(:) = zero
@@ -2977,37 +2908,6 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    !  dtsets(idtset)%mixprec = 1
    !  dtsets(idtset)%boxcutmin = 1.1_dp
    !end if
-
-! JB:UNINITIALIZED VALUES (not found in this file neither indefo1)
-! They might be initialized somewhereelse, I don't know.
-! That might cause unitialized error with valgrind depending on the compiler
-! chkprim
-! maxnsym
-! nsym
-! macro_uj
-! prtpmp
-! timopt
-! useria
-! userib
-! useric
-! userid
-! userie
-! bravais
-! symafm
-! symrel
-! fband
-! nelect
-! userra
-! userrb
-! userrc
-! userrd
-! userre
-! vacwidth
-! genafm
-! kptns
-! rprimd_orig
-! tnons
-
  end do
 
  DBG_EXIT("COLL")

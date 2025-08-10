@@ -250,10 +250,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 !arrays
  integer :: vacuum(3)
  integer,allocatable :: iatcon(:),natcon(:), intarr(:)
- real(dp) :: tsec(2)
+ real(dp) :: qgbt(3), tsec(2)
  real(dp),allocatable :: dmatpawu_tmp(:), dprarr(:)
  type(libxc_functional_type) :: xcfunc(2)
-
 ! *************************************************************************
 
  call timab(191,1,tsec)
@@ -835,7 +834,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) dtset%ecut=dprarr(1)
 
  ! With planewaves, ecut must use positive ecut
- ! Must perform the check here instad of chkinp else the code sigfaults in mpi_setup before calling chkinp
+ ! Must perform the check here instead of chkinp else the code sigfaults in mpi_setup before calling chkinp
  if(dtset%usewvl==0)then
    if (dtset%ecut < tol2) then
      write(msg, '(3a)' )&
@@ -863,7 +862,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'tmesh',tread,'DPR')
  if(tread==1) dtset%tmesh=dprarr(1:3)
- ABI_CHECK(all(dtset%tmesh >= zero), sjoin("Invalid tmesh containg T < 0:", ltoa(dtset%tmesh)))
+ ABI_CHECK(all(dtset%tmesh >= zero), sjoin("Invalid tmesh containing T < 0:", ltoa(dtset%tmesh)))
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tsmear',tread,'ENE')
  if(tread==1) dtset%tsmear=dprarr(1)
@@ -1868,7 +1867,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      dtset%hyb_range_fock=dtset%hyb_range_dft
    end if
  end if
- ! Hybrids: auxilliary functional
+ ! Hybrids: auxiliary functional
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'auxc_scal',tread,'DPR')
  if(tread==1) dtset%auxc_scal=dprarr(1)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'auxc_ixc',tread,'INT')
@@ -1965,8 +1964,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optforces',tread,'INT')
      if (dtset%optforces/=0.or.intarr(1)/=0) then
        dtset%iscf=dtset%iscf-10
-       msg='Automatically switching to potential mixing (iscf<10), because XC functional doesnt provide Kxc!'
-       ABI_COMMENT(msg)
+       ABI_COMMENT('Automatically switching to potential mixing (iscf<10), because XC functional doe snot provide Kxc!')
      end if
    end if
  end if
@@ -3015,7 +3013,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  end if
  if (dtset%usekden == 1 .and. dtset%nimage == 1) dtset%prtkden = 1
 
-! Some variables need usekden before beeing red
+! Some variables need usekden before being red
 if (dtset%usekden==1) then
    dtset%getkden=dtset%getden
    dtset%irdkden=dtset%irdden
@@ -3721,6 +3719,8 @@ if (dtset%usekden==1) then
    else
      dtset%toldfe=dprarr(1)
      if(abs(dprarr(1))>tiny(0._dp))itol=itol+1
+     ! A negative value is interpreted as energy per atom.
+     if (dtset%toldfe < zero) dtset%toldfe = abs(dtset%toldfe) * dtset%natom
    end if
  end if
 
@@ -4348,6 +4348,11 @@ if (dtset%usekden==1) then
  if (dtset%optdriver == RUNL_WFK .and. dtset%wfk_task == WFK_TASK_NONE) then
     ABI_ERROR(sjoin("A valid wfk_task must be specified when optdriver= ", itoa(dtset%optdriver), ", Received:", key_value))
  end if
+
+ if (dtset%use_gbt /= 0) then
+  call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'qgbt', tread, 'DPR')
+  dtset%qgbt(1:3) = dprarr(1:3)
+ endif
 
  ABI_FREE(intarr)
  ABI_FREE(dprarr)

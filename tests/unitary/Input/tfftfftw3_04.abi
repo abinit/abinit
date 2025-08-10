@@ -11,12 +11,12 @@ rprimd = 20, 0, 0, 0, 20, 0, 0, 0, 20,
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = fftprof
-#%% need_cpp_vars = HAVE_FFT_FFTW3, HAVE_OPENMP
+#%% need_cpp_vars = HAVE_FFTW3, HAVE_OPENMP
 #%% [files]
 #%% files_to_test = tfftfftw3_04.stdout, tolnlines=0, tolabs=0.0, tolrel=0.0
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
-#%% authors = M. Giantomassi 
+#%% authors = M. Giantomassi
 #%% description = Unit tests for FFTW3 routines (fftalg=112, ndat=4, nthreads=4)
 #%%<END TEST_INFO>

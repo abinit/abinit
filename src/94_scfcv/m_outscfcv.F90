@@ -76,7 +76,7 @@ module m_outscfcv
  !use m_mlwfovlp,         only : mlwfovlp
  use m_wfd_wannier,      only : wfd_run_wannier
  use m_datafordmft,      only : datafordmft
- use m_mkrho,            only : read_atomden
+ use m_mkrho,            only : read_atomden, gbt_times_qr
  use m_positron,         only : poslifetime, posdoppler
  use m_optics_vloc,      only : optics_vloc
  use m_green,            only : green_type,compute_green,&
@@ -930,8 +930,16 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !Output of integrated density inside atomic spheres
  if ((dtset%prtdensph==1.and.dtset%usewvl==0) .or. sum(abs(dtset%hspinfield)) > tol10) then
    ABI_MALLOC(intgden, (nspden, natom))
+
+   ! Multiply off-diagonal terms of the spin density matrix by e^{-iqr} before computing atomic mag.
+   !if (dtset%use_gbt /= 0) call gbt_times_qr(nfft, nspden, ngfft, mpi_enreg, -dtset%qgbt, rhor)
+
    call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,&
                       ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
+
+   ! Back to periodic rhor
+   !if (dtset%use_gbt /= 0) call gbt_times_qr(nfft, nspden, ngfft, mpi_enreg, dtset%qgbt, rhor)
+
    !  for rhomag:
    !    in collinear case component 1 is total density and 2 is _magnetization_ up-down
    !    in non collinear case component 1 is total density, and 2:4 are the magnetization vector
@@ -1353,6 +1361,24 @@ if (dtset%prt_lorbmag==1) then
    NCF_CHECK(ebands%ncwrite(ncid))
    ! Add energy, forces, stresses
    NCF_CHECK(results_gs_ncwrite(results_gs, ncid, dtset%ecut, dtset%pawecutdg))
+
+   ! Add info on GBT.
+   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
+     "use_gbt" &
+   ], defmode=.True.)
+   NCF_CHECK(ncerr)
+
+   ncerr = nctk_def_arrays(ncid, [ &
+     nctkarr_t("qgbt", "dp", "three") &
+   ])
+   NCF_CHECK(ncerr)
+
+   NCF_CHECK(nctk_set_datamode(ncid))
+   ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
+     "use_gbt"], &
+     [dtset%use_gbt])
+   NCF_CHECK(ncerr)
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qgbt"), dtset%qgbt))
 
    if (allocated(intgden)) then
      ! Write integrated density inside atomic spheres and ratsph(ntypat)=radius of spheres around atoms

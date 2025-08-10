@@ -1,4 +1,4 @@
-# Ge diamond with slighty displaced atoms (to have non-zero forces)
+# Ge diamond with slightly displaced atoms (to have non-zero forces)
 # test metaGGA + PAW + paral_kgb + istwfk + cprj_in_memory + nspinor
 # DS 1: paral_kgb 0 + cprj_in_memory 0 + istwfk 1
 # DS 2: paral_kgb 0 + cprj_in_memory 0 + istwfk > 1
@@ -9,28 +9,28 @@
 
 ndtset 5
 
-#DS 1 
-paral_kgb1 0 
+#DS 1
+paral_kgb1 0
 cprj_in_memory1 0
 istwfk1 1
 
 #DS 2
-paral_kgb2 0 
+paral_kgb2 0
 cprj_in_memory2 0
 istwfk2 2
 
 #DS 3
-paral_kgb3 1 
+paral_kgb3 1
 cprj_in_memory3 0
 istwfk3 2
 
 #DS 4
-paral_kgb4 1 
+paral_kgb4 1
 cprj_in_memory4 1
 istwfk4 2
 
 #DS 5
-paral_kgb5 1 
+paral_kgb5 1
 cprj_in_memory5 1
 istwfk5 1
 nspinor5 2
@@ -41,10 +41,10 @@ pawspnorb5 0
 acell 3*5.8 angstrom
 rprim  0.0 1/2 1/2
        1/2 0.0 1/2
-       1/2 1/2 0.0 
+       1/2 1/2 0.0
 
 # Atom types and positions
-# Slightly displaced the second atom to have non-zero forces 
+# Slightly displaced the second atom to have non-zero forces
 ntypat 1
 znucl 32
 pp_dirpath="$ABI_PSPDIR/"
@@ -79,7 +79,7 @@ tolvrs 1e-10
 wfoptalg 114 # LOBPCG
 
 # Output
-write_files "none" 
+write_files "none"
 
 
 ##############################################################
@@ -100,4 +100,3 @@ write_files "none"
 #%% keywords = metaGGA, PAW
 #%% description = Tests metaGGA + PAW + cprj_in_memory + paral_kgb + istwf + nspinor . All datasets should give the same results.
 #%%<END TEST_INFO>
-

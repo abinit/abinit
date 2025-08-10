@@ -1,5 +1,3 @@
-from __future__ import print_function, division, absolute_import #, unicode_literals
-
 import os
 import sys
 import time
@@ -7,15 +5,12 @@ import time
 from subprocess import Popen
 from .subprocesswithtimeout import SubProcessWithTimeout
 
+# The ConfigParser module has been renamed to configparser in Python 3
+from configparser import NoOptionError
 try:
-    from ConfigParser import SafeConfigParser, NoOptionError
+    from configparser import SafeConfigParser
 except ImportError:
-    # The ConfigParser module has been renamed to configparser in Python 3
-    from configparser import NoOptionError
-    try:
-        from configparser import SafeConfigParser
-    except ImportError:
-        from configparser import ConfigParser as SafeConfigParser
+    from configparser import ConfigParser as SafeConfigParser
 
 import logging
 logger = logging.getLogger(__name__)

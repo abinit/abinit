@@ -93,7 +93,7 @@ contains
 !! bravais(11)=characteristics of Bravais lattice (see symlatt.F90)
 !! chrgat(natom)=target charge for each atom. Not always used, it depends on the value of constraint_kind
 !! field_red(3)=applied field direction in reduced coordinates
-!! field_red_axial(3) = direction of applied axial (pseudo-)vector field 
+!! field_red_axial(3) = direction of applied axial (pseudo-)vector field
 !!                      (e.g., magnetic field) expressed in reduced coordinates
 !! genafm(3)=magnetic translation generator (in case of Shubnikov group type IV)
 !! iatfix(3,natom)=indices for atoms fixed along some (or all) directions
@@ -921,7 +921,7 @@ end do
      ! and the corresponding Bravais lattice is activated.
      do try_primitive=1,1
 
-       invar_z=0 ; if(jellslab/=0 .or. nzchempot/=0)invar_z=2 
+       invar_z=0 ; if(jellslab/=0 .or. nzchempot/=0)invar_z=2
        call symfind_expert(gprimd,msym,natom,nptsym,nspden,nsym,&
        pawspnorb,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,dtset%usepaw,xred,&
        chrgat=chrgat,nucdipmom=nucdipmom,invardir_red=dtset%field_red,invaraxial_red=dtset%field_red_axial,invar_z=invar_z)
@@ -1129,7 +1129,7 @@ end do
      write(msg, '(a,a,a,i0,a,i4,a,a,a)' )&
        'The input variables natfix, natfixx, natfixy and natfixz must be',ch10,&
        'between 0 and natom (= ',natom,'), while one of them is ',natfix,'.',ch10,&
-       'Action: correct that occurence in your input file.'
+       'Action: correct that occurrence in your input file.'
      ABI_ERROR(msg)
    end if
 
@@ -1169,7 +1169,7 @@ end do
          write(msg, '(a,a,a,i0,a,a,a)' )&
            'The input variables iatfix, iatfixx, iatfixy and iatfixz must be',ch10,&
            'between 1 and natom, while one of them is ',intarr(ii),'.',ch10,&
-           'Action: correct that occurence in your input file.'
+           'Action: correct that occurrence in your input file.'
          ABI_ERROR(msg)
        end if
        ! Finally set the value of the internal iatfix array
@@ -1893,11 +1893,11 @@ end subroutine ingeobld
 !!
 !! FUNCTION
 !! Computes the atomic position of all the atoms in the unit cell starting
-!! with the symmetry operations and the atoms from the asymetric unit cell.
+!! with the symmetry operations and the atoms from the asymmetric unit cell.
 !!
 !! INPUTS
 !!  chrgat(natom)=target charge for each atom. Not always used, it depends on the value of constraint_kind
-!!  natrd = number of atoms in the assymetric unit cell
+!!  natrd = number of atoms in the asymmetric unit cell
 !!  natom = total number of atoms (to be checked)
 !!  nsym = number of symmetry operations
 !!  symafm(nsym)=(anti)ferromagnetic part of symmetry operations
@@ -1911,7 +1911,7 @@ end subroutine ingeobld
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!  At input, for the assymetric unit cell
+!!  At input, for the asymmetric unit cell
 !!  nucdipmom(3,1:natrd)=nuclear magnetic dipole moments of the atoms
 !!  spinat(3,1:natrd)=spin-magnetization of the atoms
 !!  typat(1:natrd)=type integer for each atom in cell
@@ -1965,7 +1965,7 @@ subroutine fillcell(chrgat,natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons
 !Cycle over all the symmetry operations
  do ii=1,nsym
 
-!  Cycle over all the atoms in the assymetric unit cell
+!  Cycle over all the atoms in the asymmetric unit cell
    do jj=1,natrd
 
 !    Symmetry operation application

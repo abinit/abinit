@@ -423,7 +423,7 @@ Variable(
     mnemonics="TOLerance for shifting atoms in the BOX.",
     added_in_version="10.5",
     text="""
-Defines the tolerance criterion when shifting xred so that 
+Defines the tolerance criterion when shifting xred so that
 each component falls in the box [-0.5,0.5[.
 """,
 ),
@@ -555,7 +555,7 @@ Variable(
     mnemonics="DEBUG MODE",
     added_in_version="10.4",
     text="""
-OPTIONAL: A non-zero value activates debug mode for atdep. 
+OPTIONAL: A non-zero value activates debug mode for atdep.
 """,
 ),
 

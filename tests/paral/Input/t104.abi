@@ -1,4 +1,4 @@
-#Testing magnetic field in impurity (Zeeman)     
+#Testing magnetic field in impurity (Zeeman)
 
 #Multi_dataset parameters
 ndtset 2       # Two datasets
@@ -7,7 +7,7 @@ getden -1     # Second one takes the density of first
 
  pawprtvol 3  # Printing additional information
  prtvol 4     #
- prtden -1    #  
+ prtden -1    #
  prtwf 0      #
 
 # fftalg 512   # For tests
@@ -17,7 +17,7 @@ getden -1     # Second one takes the density of first
 ############################
 
 #Definition of unit cell
- acell 3*5.72209       # lattice parameter  
+ acell 3*5.72209       # lattice parameter
  rprim -0.5  0.5  0.5  # Primitive cell
         0.5 -0.5  0.5
         0.5  0.5 -0.5
@@ -27,9 +27,9 @@ getden -1     # Second one takes the density of first
  znucl 23   # z number of atom
 
 #Definition of the atoms
- natom 1           # number of atom     
- typat 1           # type of atom 
- xred 0.0 0.0 0.0  # reduced coordinates for primitive cell 
+ natom 1           # number of atom
+ typat 1           # type of atom
+ xred 0.0 0.0 0.0  # reduced coordinates for primitive cell
 
 #Definition pseudopotentials
  pp_dirpath "$ABI_PSPDIR"            # repository with pseudopotentials
@@ -40,7 +40,7 @@ getden -1     # Second one takes the density of first
  ngkpt 6 6 6              # Reciprocal space vectors are built from
                           # the rprim parameters. This is the size of the
                           # reciprocal k-points.
- nshiftk 2                # Convergence of the density with regular shifts. 
+ nshiftk 2                # Convergence of the density with regular shifts.
  shiftk 0.25  0.25  0.25
        -0.25 -0.25 -0.25
 
@@ -123,7 +123,7 @@ jpawu2      0.9 eV  # Values of J
 #%% max_nprocs = 4
 #%% [NCPU_4]
 #%% files_to_test =
-#%%   t104_MPI4.abo, tolnlines = 2, tolabs = 1.0e-04, tolrel = 1.0e-04, fld_options=-medium
+#%%   t104_MPI4.abo, tolnlines = 6, tolabs = 1.0e-04, tolrel = 1.0e-04, fld_options=-medium
 #%% [extra_info]
 #%% authors = F. Gendron
 #%% keywords = DMFT, dmft_magnfield

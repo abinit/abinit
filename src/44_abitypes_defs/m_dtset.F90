@@ -67,7 +67,7 @@ module m_dtset
 !! creation/destruction/copy routines, declared in another part of ABINIT,
 !! that might need to take into account your modification.
 !!
-!! Variables should be declared on separated lines in order to reduce the occurence of git conflicts.
+!! Variables should be declared on separated lines in order to reduce the occurrence of git conflicts.
 !! The name of the variable can exceed 16 characters
 !!
 !! Since all these input variables are described in the abinit_help.html and
@@ -324,7 +324,7 @@ type, public :: dataset_type
  integer :: gw_icutcoul
  integer :: gw_invalid_freq
  integer :: gw_nqlwl
- integer :: gw_qprange
+ integer :: gw_qprange = 0
  integer :: gw_sigxcore = 0
 
  integer :: gwr_nstep = 50
@@ -700,6 +700,7 @@ type, public :: dataset_type
  integer :: usexcnhat_orig
  integer :: useylm
  integer :: useextfpmd = 0
+ integer :: use_gbt = 0
  integer :: use_yaml = 0
  integer :: use_slk
  integer :: use_oldchi = 1
@@ -1024,6 +1025,7 @@ type, public :: dataset_type
  real(dp) :: pol(3)
  real(dp) :: polcen(3)
  real(dp) :: pvelmax(3)
+ real(dp) :: qgbt(3)=[0.0_dp,0.0_dp,0.0_dp]
  real(dp) :: qptn(3)
  real(dp) :: red_efield(3)
  real(dp) :: red_dfield(3)
@@ -1135,10 +1137,10 @@ type, public :: dataset_type
    ! Free arrays that depend on input nkpt (used in EPH code)
 
  procedure :: get_npert_rbz => dtset_get_npert_rbz
-   ! Get the number of effective pertubation done in looper3, nkpt_rbz, nband_rbz
+   ! Get the number of effective perturbation done in looper3, nkpt_rbz, nband_rbz
 
  procedure :: testsusmat => dtset_testsusmat
-   ! Test wether a new susceptibility matrix and/or a new dielectric matrix must be computed
+   ! Test whether a new susceptibility matrix and/or a new dielectric matrix must be computed
 
  procedure :: get_crystal => dtset_get_crystal
    ! Build crystal_t object from dtset and image index.
@@ -2178,6 +2180,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%timopt             = dtin%timopt
  dtout%use_gemm_nonlop    = dtin%use_gemm_nonlop
  dtout%useextfpmd         = dtin%useextfpmd
+ dtout%use_gbt            = dtin%use_gbt
  dtout%use_yaml           = dtin%use_yaml   ! This variable activates the Yaml output for testing purposes
                                             ! It will be removed when Yaml output enters production.
  dtout%use_slk            = dtin%use_slk
@@ -2415,8 +2418,9 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%mdtemp(:)          = dtin%mdtemp(:)
  dtout%neb_spring(:)      = dtin%neb_spring(:)
  dtout%polcen(:)          = dtin%polcen(:)
- dtout%qptn(:)            = dtin%qptn(:)
  dtout%pvelmax(:)         = dtin%pvelmax(:)
+ dtout%qgbt(:)            = dtin%qgbt(:)
+ dtout%qptn(:)            = dtin%qptn(:)
  dtout%red_efield(:)      = dtin%red_efield(:)
  dtout%red_dfield(:)      = dtin%red_dfield(:)
  dtout%red_efieldbar(:)   = dtin%red_efieldbar(:)
@@ -2751,13 +2755,13 @@ end subroutine find_getdtset
 !! dtset_get_npert_rbz
 !!
 !! FUNCTION
-!! Get the number of effective pertubation done in looper3, nkpt_rbz, nband_rbz
+!! Get the number of effective perturbation done in looper3, nkpt_rbz, nband_rbz
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!
 !! OUTPUT
-!!  npert=number of effective pertubation done in looper3
+!!  npert=number of effective perturbation done in looper3
 !!  nkpt_rbz= nkpt in the reduced brillouin zone
 !!  nband_rbz= nband in the reduced brillouin zone
 !!
@@ -3086,7 +3090,7 @@ end subroutine dtset_get_npert_rbz
 !! dtset_testsusmat
 !!
 !! FUNCTION
-!! Test wether a new susceptibility matrix and/or a new dielectric matrix must be computed
+!! Test whether a new susceptibility matrix and/or a new dielectric matrix must be computed
 !! and return the logical result
 !!
 !! INPUTS
@@ -3214,7 +3218,7 @@ end subroutine dtset_get_ktmesh
 !! Documentation of such input variables is very important, including the
 !! proper echo, in the output file, of what such input variables have done.
 !!
-!! Important information : all the "macro" input variables should be properly
+!! Important information: all the "macro" input variables should be properly
 !! identifiable to be so, and it is proposed to make them start with the string "macro".
 !!
 !! INPUTS
@@ -3250,18 +3254,19 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
 
  do idtset=1,ndtset_alloc
    jdtset=dtsets(idtset)%jdtset
+
    if (dtsets(idtset)%macro_uj>0) then
      dtsets(idtset)%irdwfk   = 1        ! preconverged wave function compulsory
-!    dtsets(idtset)%nline    = maxval((/ int(dtsets(idtset)%natom/2) , 6 /))   ! using default value: \DeltaU< 1%
-!    dtsets(idtset)%nnsclo   = 4        ! using default value: \DeltaU< 1%
+     !dtsets(idtset)%nline    = maxval((/ int(dtsets(idtset)%natom/2) , 6 /))   ! using default value: \DeltaU< 1%
+     !dtsets(idtset)%nnsclo   = 4        ! using default value: \DeltaU< 1%
      dtsets(idtset)%tolvrs   = 10d-8    ! convergence on the potential; 10d-8^= 10d-5 on occupation
      dtsets(idtset)%diemix   = 0.45_dp  ! fastest convergence: dn= E^(-istep * 0.229 )
      dtsets(idtset)%dmatpuopt= 3        ! normalization of the occupation operator
-!    dtsets(idtset)%nstep    = 255      ! expected convergence after 10 \pm 3, 30 as in default normally suficient
-!    dtsets(idtset)%iscf     = 17       ! mixing on potential, 17: default for PAW
+     !dtsets(idtset)%nstep    = 255      ! expected convergence after 10 \pm 3, 30 as in default normally sufficient
+     !dtsets(idtset)%iscf     = 17       ! mixing on potential, 17: default for PAW
    end if ! macro_uj
 
-  !Read parameters
+   ! Read parameters
    marr=dtsets(idtset)%npsp;if (dtsets(idtset)%npsp<3) marr=3
    marr=max(marr,dtsets(idtset)%nimage)
    ABI_MALLOC(intarr,(marr))
@@ -3421,9 +3426,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
        dtsets(idtset)%prteig=1
        dtsets(idtset)%prtden=1
      elseif(dtsets(idtset)%accuracy>6)then
-       write(msg, '(a,a,a)' )&
-         'accuracy >6 is forbidden !',ch10,&
-         'Action: check your input data file.'
+       write(msg, '(3a)' )'accuracy >6 is forbidden !',ch10,'Action: check your input data file.'
        ABI_ERROR(msg)
      end if
    else
@@ -3432,7 +3435,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
 
    ABI_FREE(intarr)
    ABI_FREE(dprarr)
- end do
+ end do ! idtset
 
 end subroutine macroin
 !!***
@@ -3755,7 +3758,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' pseudos ptcharge'
  list_vars=trim(list_vars)//' pvelmax pw_unbal_thresh'
 !Q
- list_vars=trim(list_vars)//' q1shft qmass qprtrb qpt qptdm qptnrm qph1l'
+ list_vars=trim(list_vars)//' q1shft qgbt qmass qprtrb qpt qptdm qptnrm qph1l'
  list_vars=trim(list_vars)//' qptopt quadquad qptrlatt quadmom'
 !R
  list_vars=trim(list_vars)//' random_atpos randomseed ratsm ratsph ratsph_extra rcut'
@@ -3809,7 +3812,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' tolvrs tolwfr tolwfr_diago tphysel ts_option tsmear typat'
 !U
  list_vars=trim(list_vars)//' ucrpa ucrpa_bands ucrpa_window udtset upawu usepead usedmatpu '
- list_vars=trim(list_vars)//' usedmft useexexch usekden use_nonscf_gkk usepawu usepotzero'
+ list_vars=trim(list_vars)//' usedmft useexexch usekden use_gbt use_nonscf_gkk usepawu usepotzero'
  list_vars=trim(list_vars)//' useria userib useric userid userie'
  list_vars=trim(list_vars)//' userra userrb userrc userrd userre'
  list_vars=trim(list_vars)//' usewvl usexcnhat useylm use_gemm_nonlop'

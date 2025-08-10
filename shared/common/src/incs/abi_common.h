@@ -312,8 +312,6 @@
 #define ABI_ERROR_NODUMP(msg) call msg_hndl(msg, "ERROR", "PERS", NODUMP=.TRUE. _FILE_LINE_ARGS_)
 #define ABI_ERROR_NOSTOP(msg, ierr) \
    ierr=ierr+1; call msg_hndl(msg, "ERROR", "PERS", NOSTOP=.TRUE. _FILE_LINE_ARGS_)
-#define MSG_ERROR_NOSTOP_IF(condition, msg, ierr) \
-   if (condition)  then NEWLINE ABI_ERROR_NOSTOP(msg, ierr) NEWLINE endif
 
 #define NCF_CHECK(ncerr) if (ncerr/=nf90_noerr) call netcdf_check(ncerr,"No msg from caller" _FILE_LINE_ARGS_)
 #define NCF_CHECK_MSG(ncerr,msg) if (ncerr/=nf90_noerr) call netcdf_check(ncerr,msg _FILE_LINE_ARGS_)

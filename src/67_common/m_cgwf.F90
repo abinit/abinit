@@ -223,7 +223,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  real(dp),intent(out) :: resid(nband)
 
 !Local variables-------------------------------
- integer,parameter :: level=113,tim_getghc=1,tim_projbd=1,type_calc=0
+ integer,parameter :: level=113,tim_getghc=1,tim_projbd=1,type_calc=0, enough_warning = 3
  integer,save :: nskip=0
  integer :: choice,counter,cpopt,ddkflag,dimenlc1,dimenlr1,dimenl2,iat,iatom,itypat
  integer :: iband,ibandmin,ibandmax,me_g0
@@ -231,7 +231,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  integer :: ikpt2,ikpt2f,ikptf,iline,iproc,ipw,ispinor,istwf_k,isubh,isubo,itrs
  integer :: job,mcg_q,me_distrb,natom,ncpgr,nblock,nproc_distrb,npw_k2
  integer :: optekin,paw_opt,signs,shiftbd,sij_opt,spaceComm_distrb
- integer :: useoverlap,wfopta10,gpu_option_save
+ integer :: useoverlap,wfopta10,gpu_option_save, num_warning
  real(dp) :: chc,costh,deltae,deold,dhc,dhd,diff,dotgg,dotgp,doti,dotr
  real(dp) :: dphase_aux2,e0,e0_old,e1,e1_old,eval,gamma
  real(dp) :: lam0,lamold,root,sinth,sintn,swap,tan2th,theta,thetam, xnorm
@@ -247,11 +247,9 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  real(dp),allocatable :: gvnlxc(:,:),gvnlx_direc(:,:),gvnlx_dummy(:,:)
  real(dp),allocatable :: pcon(:),pwnsfac_k(:,:),scprod(:,:),scwavef(:,:)
  real(dp),allocatable :: smat_inv(:,:,:),smat_k(:,:,:),smat_k_paw(:,:,:),swork(:,:),vresid(:,:),work(:,:)
- real(dp),pointer :: kinpw(:)
  type(pawcprj_type) :: cprj_dum(1,1)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kb(:,:)
  type(pawcprj_type),allocatable :: cprj_direc(:,:),cprj_band_srt(:,:),cprj_gat(:,:), cprj_fkn(:,:),cprj_ikn(:,:)
-
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -295,7 +293,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  optekin=0;if (wfoptalg>=10) optekin=1
  natom=gs_hamk%natom
  cpopt=-1
- kinpw => gs_hamk%kinpw_k
+ num_warning = 0
 
  ABI_MALLOC(pcon,(npw))
  ABI_MALLOC(ghc,(2,npw*nspinor))
@@ -540,7 +538,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
      ! Compute (or extract) <g|H|c>
      if (gen_eigenpb.and.(inonsc==1)) then
 
-!$OMP PARALLEL DO PRIVATE(ipw)
+       !$OMP PARALLEL DO PRIVATE(ipw)
        do ipw=1,npw*nspinor
          ghc(1,ipw)=xnorm*ghc_all(1,ipw+icg_shift-icg)
          ghc(2,ipw)=xnorm*ghc_all(2,ipw+icg_shift-icg)
@@ -552,7 +550,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
        sij_opt=0
        call getghc(cpopt,cwavef,cprj_dum,ghc,gsc_dummy,gs_hamk,gvnlxc, eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
      end if
-
 
      ! Minimisation of the residual: compute <G|(H-zshift)^2|C iband,k>
      if(wfopta10==2 .or. wfopta10==3) then
@@ -589,10 +586,10 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            if (iline==1) then
              lamold=lam0
            else
-             if (lam0 > lamold+tol12) then
-               write(msg, '(a,i8,a,1p,e14.6,a1,3x,a,1p,e14.6,a1)')&
-                'New trial energy at line ',iline,' = ',lam0,ch10,&
-                'is higher than former =',lamold,ch10
+             if (lam0 > lamold+tol12 .and. num_warning <= enough_warning) then
+               num_warning = num_warning + 1
+               write(msg, '(a,i0,a,e14.6,a,e14.6)')&
+                'New trial energy at line: ',iline,' = ',lam0,' is higher than former: ',lamold
                ABI_WARNING(msg)
              end if
              lamold=lam0
@@ -607,13 +604,13 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            eval=chc
            if (gen_eigenpb) then
 
-!$OMP PARALLEL DO
+             !$OMP PARALLEL DO
              do ipw=1,npw*nspinor
                vresid(1,ipw)=ghc(1,ipw)-chc*scwavef(1,ipw)
                vresid(2,ipw)=ghc(2,ipw)-chc*scwavef(2,ipw)
              end do
            else
-!$OMP PARALLEL DO
+             !$OMP PARALLEL DO
              do ipw=1,npw*nspinor
                vresid(1,ipw)=ghc(1,ipw)-chc*cwavef(1,ipw)
                vresid(2,ipw)=ghc(2,ipw)-chc*cwavef(2,ipw)
@@ -622,13 +619,13 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          else
            call dotprod_g(eval,doti,istwf_k,npw*nspinor,1,cwavef,ghcws,me_g0,mpi_enreg%comm_spinorfft)
            if (gen_eigenpb) then
-!$OMP PARALLEL DO
+             !$OMP PARALLEL DO
              do ipw=1,npw*nspinor
                vresid(1,ipw)=ghcws(1,ipw)-eval*scwavef(1,ipw)
                vresid(2,ipw)=ghcws(2,ipw)-eval*scwavef(2,ipw)
              end do
            else
-!$OMP PARALLEL DO
+             !$OMP PARALLEL DO
              do ipw=1,npw*nspinor
                vresid(1,ipw)=ghcws(1,ipw)-eval*cwavef(1,ipw)
                vresid(2,ipw)=ghcws(2,ipw)-eval*cwavef(2,ipw)
@@ -749,14 +746,20 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
          ! If wfoptalg>=10, the precondition matrix is kept constant during iteration ; otherwise it is recomputed
          if (wfoptalg<10.or.iline==1) then
-           call cg_precon(cwavef,zero,istwf_k,kinpw,npw,nspinor,me_g0,optekin,pcon,direc,mpi_enreg%comm_fft)
+           if (gs_hamk%use_gbt == 0) then
+             call cg_precon(cwavef,zero,istwf_k,gs_hamk%kinpw_k,npw,nspinor,me_g0,optekin,pcon,direc,mpi_enreg%comm_fft)
+           else
+             call cg_precon(cwavef,zero,istwf_k,gs_hamk%kinpw_k,npw,1,me_g0,optekin,pcon,direc,mpi_enreg%comm_fft)
+             call cg_precon(cwavef(:,npw+1:),zero,istwf_k,gs_hamk%kinpw_kp,npw,1,me_g0,optekin,pcon,&
+                            direc(:,npw+1:),mpi_enreg%comm_fft)
+           end if
 
-           ! Minimisation of the residual: must precondition twice
-           ! (might make only one call, with modified precon routine - might also make a shift !!!)
            if(wfopta10==2 .or. wfopta10==3)then
-             call cg_precon(cwavef,zero,istwf_k,kinpw,npw,nspinor,me_g0,optekin,pcon,direc,mpi_enreg%comm_fft)
+             ! Minimisation of the residual: must precondition twice
+             ! (might make only one call, with modified precon routine - might also make a shift !!!)
+             call cg_precon(cwavef,zero,istwf_k,gs_hamk%kinpw_k,npw,nspinor,me_g0,optekin,pcon,direc,mpi_enreg%comm_fft)
              if(iline==1)then
-!$OMP PARALLEL DO
+               !$OMP PARALLEL DO
                do ipw=1,npw
                  pcon(ipw)=pcon(ipw)**2
                  pcon(ipw)=pcon(ipw)**2
@@ -766,7 +769,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          else
            do ispinor=1,nspinor
              igs=(ispinor-1)*npw
-!$OMP PARALLEL DO
+             !$OMP PARALLEL DO
              do ipw=1+igs,npw+igs
                direc(1,ipw)=direc(1,ipw)*pcon(ipw-igs)
                direc(2,ipw)=direc(2,ipw)*pcon(ipw-igs)
@@ -830,7 +833,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            ! call dotprod_g(dotgmg,doti,istwf_k,mpi_enreg,npw*nspinor,1,direcp,direc_tmp)
            ! direcp=direc;gamma=dotgmg/dotgp;dotgp=dotgmg
 
-!$OMP PARALLEL DO
+           !$OMP PARALLEL DO
            do ipw=1,npw*nspinor
              conjgr(1,ipw)=direc(1,ipw)+gamma*conjgr(1,ipw)
              conjgr(2,ipw)=direc(2,ipw)+gamma*conjgr(2,ipw)
@@ -853,13 +856,13 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          ! that direc --> conjgr
          if(istwf_k==1)then
 
-!$OMP PARALLEL DO
+           !$OMP PARALLEL DO
            do ipw=1,npw*nspinor
              direc(1,ipw)=conjgr(1,ipw)-(dotr*cwavef(1,ipw)-doti*cwavef(2,ipw))
              direc(2,ipw)=conjgr(2,ipw)-(dotr*cwavef(2,ipw)+doti*cwavef(1,ipw))
            end do
          else
-!$OMP PARALLEL DO
+           !$OMP PARALLEL DO
            do ipw=1,npw*nspinor
              direc(1,ipw)=conjgr(1,ipw)-dotr*cwavef(1,ipw)
              direc(2,ipw)=conjgr(2,ipw)-dotr*cwavef(2,ipw)
@@ -1004,7 +1007,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
                icg1 = 0 ; ddkflag = 0
                if (gen_eigenpb) then
-!$OMP PARALLEL DO
+                 !$OMP PARALLEL DO
                  do ipw=1,npw*nspinor
                    direc_tmp(1,ipw)=direc(1,ipw)*xnorm
                    direc_tmp(2,ipw)=direc(2,ipw)*xnorm
@@ -1089,7 +1092,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
          sintn=sinth*xnorm
 
-!$OMP PARALLEL DO
+         !$OMP PARALLEL DO
          do ipw=1,npw*nspinor
            cwavef(1,ipw)=cwavef(1,ipw)*costh+direc(1,ipw)*sintn
            cwavef(2,ipw)=cwavef(2,ipw)*costh+direc(2,ipw)*sintn
@@ -1105,7 +1108,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
 
          if (use_subvnlx==1) then
-!$OMP PARALLEL DO
+           !$OMP PARALLEL DO
            do ipw=1,npw*nspinor
              gvnlxc(1,ipw)=gvnlxc(1,ipw)*costh + gvnlx_direc(1,ipw)*sintn
              gvnlxc(2,ipw)=gvnlxc(2,ipw)*costh + gvnlx_direc(2,ipw)*sintn
@@ -1114,7 +1117,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          end if
 
          if (gen_eigenpb) then
-!$OMP PARALLEL DO
+           !$OMP PARALLEL DO
            do ipw=1,npw*nspinor
              scwavef(1,ipw)=scwavef(1,ipw)*costh+gs_direc(1,ipw)*sintn
              scwavef(2,ipw)=scwavef(2,ipw)*costh+gs_direc(2,ipw)*sintn
@@ -1138,7 +1141,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
          if(wfopta10==2 .or. wfopta10==3)then
            ! Need to keep track of ghcws, in order to avoid recomputing it
-!$OMP PARALLEL DO
+           !$OMP PARALLEL DO
            do ipw=1,npw*nspinor
              ghcws(1,ipw)=ghcws(1,ipw)*costh + gh_direcws(1,ipw)*sintn
              ghcws(2,ipw)=ghcws(2,ipw)*costh + gh_direcws(2,ipw)*sintn
@@ -1163,12 +1166,11 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 &           dtefield%efield_dot,e0_old,e1_old,&
 &           hel,dtefield%fnkpt,dtefield%nstr,dtefield%sdeg,theta)
            deltae = e0 - e0_old
-!          DEBUG
-!          write(std_out,*) 'e0, e0_old, deltae', e0, e0_old, deltae
-!          ENDDEBUG
-!          Check that e0 is decreasing on succeeding lines:
-!          if (deltae > zero) then
-           if (deltae > tol12) then ! exploring different checks for finit_field
+           ! write(std_out,*) 'e0, e0_old, deltae', e0, e0_old, deltae
+           ! Check that e0 is decreasing on succeeding lines:
+           ! if (deltae > zero) then
+           if (deltae > tol12 .and. num_warning <= enough_warning) then ! exploring different checks for finit_field
+             num_warning = num_warning + 1
              write(msg, '(3a,i8,a,1p,e14.6,a1,3x,a,1p,e14.6,a1)')&
              '  (electric field)',ch10,&
              '  New trial energy at line',iline,' = ',e0,ch10,&
@@ -1177,14 +1179,13 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            end if
          end if         ! finite_field
 
-!        Check convergence and eventually exit
+         ! Check convergence and eventually exit
          if (iline==1) then
            deold=deltae
          else if (abs(deltae)<tolrde*abs(deold) .and. iline/=nline .and. wfopta10<2)then
            if(prtvol>=10)then
              write(msg, '(a,i4,1x,a,1p,e12.4,a,e12.4,a)' ) &
-              ' cgwf: line',iline,&
-              ' deltae=',deltae,' < tolrde*',deold,' =>skip lines'
+              ' cgwf: line',iline,' deltae=',deltae,' < tolrde*',deold,' =>skip lines'
              call wrtout(std_out,msg,'PERS')
            end if
            nskip=nskip+2*(nline-iline)  ! Number of one-way 3D ffts skipped
@@ -2522,6 +2523,8 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psp
  real(dp) :: ylmgr_dum(1,1,1)
  real(dp),allocatable :: ph1d(:,:), ylm_k(:,:)
 ! *************************************************************************
+
+ ABI_CHECK(gs_ham_k%use_gbt == 0, "use_gbt /= 0 not coded")
 
  ! See vtorho.F90 for the sequence of calls needed to initialize the GS Hamiltonian.
  ! The Hamiltonian has references to the _k arrays allocated here and returned
