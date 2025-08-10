@@ -1,8 +1,8 @@
 
 .Version 10.4.5.4 of ABINIT, released Jul 2025.
-.(MPI version, prepared for a x86_64_linux_gnu12.3 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu12.3 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 18 Jul 2025.
 - ( at 10h07 )
-  
+
 - input  file    -> /tmp/abinit/dilatmx-gs-only_fftwopenblas_prof/Test_suite/tutorespfn_telast_6/telast_6.abi
 - output file    -> telast_6.abo
 - root for input  files -> telast_6i
@@ -1877,7 +1877,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     118.296     118.257
 
 ================================================================================
 
-=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)
 ================================================================================
 
 --- Iteration: (1/5) Internal Cycle: (1/1)
@@ -2236,7 +2236,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
            Absolute (Ha)=-3.80806E-12
            Relative     =-1.60839E-12
 
- At Broyd/MD step   4, gradients are converged : 
+ At Broyd/MD step   4, gradients are converged :
   max grad (force/stress) = 3.4865E-10 < tolmxf= 1.0000E-06 ha/bohr (free atoms)
 
 ================================================================================
@@ -2617,7 +2617,7 @@ meta: {optdriver: 1, rfstrs: 3, }
 
  symkchk : k-point set has full space-group symmetry.
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   4
@@ -2748,90 +2748,90 @@ tolerances: {tolvrs: 1.00E-12, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
-  cartesian coordinates for strain terms (1/ucvol factor 
-   for elastic tensor components not included) 
+  cartesian coordinates for strain terms (1/ucvol factor
+   for elastic tensor components not included)
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   2    3         0.0000000000         0.0000000000
    1    1   3    3         0.0000000000         0.0000000000
    1    1   1    4        -0.0000000000         0.0000000000
    1    1   1    5        -0.0000000000         0.0000000000
-  
+
    2    1   1    3         0.0000000000         0.0000000000
    2    1   3    3         0.0000000000         0.0000000000
    2    1   1    4        -0.0000000000         0.0000000000
    2    1   1    5        -0.0000000000         0.0000000000
-  
+
    3    1   1    3         0.0000000000         0.0000000000
    3    1   2    3         0.0000000000         0.0000000000
    3    1   1    4         0.0000000000         0.0000000000
    3    1   1    5         0.0000000000         0.0000000000
-  
+
    1    3   2    1         0.0000000000         0.0000000000
    1    3   3    1         0.0000000000         0.0000000000
-  
+
    2    3   1    1         0.0000000000         0.0000000000
    2    3   3    1         0.0000000000         0.0000000000
-  
+
    3    3   1    1         0.0000000000         0.0000000000
    3    3   2    1         0.0000000000         0.0000000000
-  
+
    1    4   1    4         0.4219495157         0.0000000000
    1    4   1    5         0.0000000000         0.0000000000
-  
+
    2    4   1    4         0.2517901164         0.0000000000
    2    4   1    5         0.0000000000         0.0000000000
-  
+
    3    4   1    4         0.2517901164         0.0000000000
    3    4   1    5         0.0000000000         0.0000000000
-  
+
    1    5   1    4        -0.0000000000         0.0000000000
    1    5   1    5         0.1511633702         0.0000000000
-  
+
    2    5   1    4         0.0000000000         0.0000000000
    2    5   1    5         0.0000000000         0.0000000000
-  
+
    3    5   1    4         0.0000000000         0.0000000000
    3    5   1    5        -0.0000000000         0.0000000000
-  
-  
+
+
   Rigid-atom elastic tensor , in cartesian coordinates,
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    4         0.0038448527         0.0000000000
    1    4   1    5         0.0000000000         0.0000000000
-  
+
    2    4   1    4         0.0022943406         0.0000000000
    2    4   1    5         0.0000000000         0.0000000000
-  
+
    3    4   1    4         0.0022943406         0.0000000000
    3    4   1    5         0.0000000000         0.0000000000
-  
+
    1    5   1    4        -0.0000000000         0.0000000000
    1    5   1    5         0.0013774181         0.0000000000
-  
+
    2    5   1    4         0.0000000000         0.0000000000
    2    5   1    5         0.0000000000         0.0000000000
-  
+
    3    5   1    4         0.0000000000         0.0000000000
    3    5   1    5        -0.0000000000         0.0000000000
-  
+
   Internal strain coupling parameters, in cartesian coordinates,
-   zero average net force deriv. has been imposed  
+   zero average net force deriv. has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    4        -0.0000000000         0.0000000000
    1    1   1    5        -0.0000000000         0.0000000000
-  
+
    2    1   1    4        -0.0000000000         0.0000000000
    2    1   1    5        -0.0000000000         0.0000000000
-  
+
    3    1   1    4        -0.0000000000         0.0000000000
    3    1   1    5        -0.0000000000         0.0000000000
 
@@ -2865,7 +2865,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     118.527     118.488
 
 ================================================================================
 
-=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)
 ================================================================================
 
 --- Iteration: (1/5) Internal Cycle: (1/1)
@@ -3135,7 +3135,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
            Absolute (Ha)=-5.51064E-08
            Relative     =-2.32740E-08
 
- At Broyd/MD step   3, gradients are converged : 
+ At Broyd/MD step   3, gradients are converged :
   max grad (force/stress) = 3.0599E-08 < tolmxf= 1.0000E-06 ha/bohr (free atoms)
 
 ================================================================================
@@ -3519,7 +3519,7 @@ meta: {optdriver: 1, rfstrs: 3, }
 
  symkchk : k-point set has full space-group symmetry.
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   4
@@ -3650,90 +3650,90 @@ tolerances: {tolvrs: 1.00E-12, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
-  cartesian coordinates for strain terms (1/ucvol factor 
-   for elastic tensor components not included) 
+  cartesian coordinates for strain terms (1/ucvol factor
+   for elastic tensor components not included)
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   2    3         0.0000000000         0.0000000000
    1    1   3    3         0.0000000000         0.0000000000
    1    1   1    4        -0.0000000000         0.0000000000
    1    1   1    5         0.0000000000         0.0000000000
-  
+
    2    1   1    3         0.0000000000         0.0000000000
    2    1   3    3         0.0000000000         0.0000000000
    2    1   1    4         0.0000000000         0.0000000000
    2    1   1    5        -0.0000000000         0.0000000000
-  
+
    3    1   1    3         0.0000000000         0.0000000000
    3    1   2    3         0.0000000000         0.0000000000
    3    1   1    4         0.0000000000         0.0000000000
    3    1   1    5         0.0000000000         0.0000000000
-  
+
    1    3   2    1         0.0000000000         0.0000000000
    1    3   3    1         0.0000000000         0.0000000000
-  
+
    2    3   1    1         0.0000000000         0.0000000000
    2    3   3    1         0.0000000000         0.0000000000
-  
+
    3    3   1    1         0.0000000000         0.0000000000
    3    3   2    1         0.0000000000         0.0000000000
-  
+
    1    4   1    4         0.4839638069         0.0000000000
    1    4   1    5         0.0000000000         0.0000000000
-  
+
    2    4   1    4         0.2291945904         0.0000000000
    2    4   1    5         0.0000000000         0.0000000000
-  
+
    3    4   1    4         0.2291945904         0.0000000000
    3    4   1    5         0.0000000000         0.0000000000
-  
+
    1    5   1    4        -0.0000000000         0.0000000000
    1    5   1    5         0.1487692926         0.0000000000
-  
+
    2    5   1    4         0.0000000000         0.0000000000
    2    5   1    5         0.0000000000         0.0000000000
-  
+
    3    5   1    4         0.0000000000         0.0000000000
    3    5   1    5        -0.0000000000         0.0000000000
-  
-  
+
+
   Rigid-atom elastic tensor , in cartesian coordinates,
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    4         0.0044099341         0.0000000000
    1    4   1    5         0.0000000000         0.0000000000
-  
+
    2    4   1    4         0.0020884476         0.0000000000
    2    4   1    5         0.0000000000         0.0000000000
-  
+
    3    4   1    4         0.0020884476         0.0000000000
    3    4   1    5         0.0000000000         0.0000000000
-  
+
    1    5   1    4        -0.0000000000         0.0000000000
    1    5   1    5         0.0013556030         0.0000000000
-  
+
    2    5   1    4         0.0000000000         0.0000000000
    2    5   1    5         0.0000000000         0.0000000000
-  
+
    3    5   1    4         0.0000000000         0.0000000000
    3    5   1    5        -0.0000000000         0.0000000000
-  
+
   Internal strain coupling parameters, in cartesian coordinates,
-   zero average net force deriv. has been imposed  
+   zero average net force deriv. has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    4        -0.0000000000         0.0000000000
    1    1   1    5        -0.0000000000         0.0000000000
-  
+
    2    1   1    4        -0.0000000000         0.0000000000
    2    1   1    5        -0.0000000000         0.0000000000
-  
+
    3    1   1    4        -0.0000000000         0.0000000000
    3    1   1    5        -0.0000000000         0.0000000000
 
@@ -3767,7 +3767,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     118.574     118.531
 
 ================================================================================
 
-=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)
 ================================================================================
 
 --- Iteration: (1/5) Internal Cycle: (1/1)
@@ -4036,7 +4036,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
            Absolute (Ha)=-2.61303E-09
            Relative     =-1.10360E-09
 
- At Broyd/MD step   3, gradients are converged : 
+ At Broyd/MD step   3, gradients are converged :
   max grad (force/stress) = 1.7500E-07 < tolmxf= 1.0000E-06 ha/bohr (free atoms)
 
 ================================================================================
@@ -4434,7 +4434,7 @@ meta: {optdriver: 1, rfstrs: 3, }
 
  symkchk : k-point set has full space-group symmetry.
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   4
@@ -4565,96 +4565,96 @@ tolerances: {tolvrs: 1.00E-12, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
-  cartesian coordinates for strain terms (1/ucvol factor 
-   for elastic tensor components not included) 
+  cartesian coordinates for strain terms (1/ucvol factor
+   for elastic tensor components not included)
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   2    3         0.0000000000         0.0000000000
    1    1   3    3         0.0000000000         0.0000000000
    1    1   1    4         0.0000000000         0.0000000000
    1    1   1    5         0.0000000000         0.0000000000
-  
+
    2    1   1    3         0.0000000000         0.0000000000
    2    1   3    3         0.0000000000         0.0000000000
    2    1   1    4        -0.0000000000         0.0000000000
    2    1   1    5         0.0000000000         0.0000000000
-  
+
    3    1   1    3         0.0000000000         0.0000000000
    3    1   2    3         0.0000000000         0.0000000000
    3    1   1    4         0.0000000000         0.0000000000
    3    1   1    5         0.0000000000         0.0000000000
-  
+
    1    3   2    1         0.0000000000         0.0000000000
    1    3   3    1         0.0000000000         0.0000000000
-  
+
    2    3   1    1         0.0000000000         0.0000000000
    2    3   3    1         0.0000000000         0.0000000000
-  
+
    3    3   1    1         0.0000000000         0.0000000000
    3    3   2    1         0.0000000000         0.0000000000
-  
+
    1    4   1    4         0.4820842499         0.0000000000
    1    4   1    5         0.0000000000         0.0000000000
-  
+
    2    4   1    4         0.2296739007         0.0000000000
    2    4   1    5         0.0000000000         0.0000000000
-  
+
    3    4   1    4         0.2296739007         0.0000000000
    3    4   1    5         0.0000000000         0.0000000000
-  
+
    1    5   1    4        -0.0000000000         0.0000000000
    1    5   1    5         0.1486764270         0.0000000000
-  
+
    2    5   1    4         0.0000000000         0.0000000000
    2    5   1    5         0.0000000000         0.0000000000
-  
+
    3    5   1    4         0.0000000000         0.0000000000
    3    5   1    5        -0.0000000000         0.0000000000
-  
-  
+
+
   Rigid-atom elastic tensor , in cartesian coordinates,
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    4         0.0043928074         0.0000000000
    1    4   1    5         0.0000000000         0.0000000000
-  
+
    2    4   1    4         0.0020928151         0.0000000000
    2    4   1    5         0.0000000000         0.0000000000
-  
+
    3    4   1    4         0.0020928151         0.0000000000
    3    4   1    5         0.0000000000         0.0000000000
-  
+
    1    5   1    4        -0.0000000000         0.0000000000
    1    5   1    5         0.0013547568         0.0000000000
-  
+
    2    5   1    4         0.0000000000         0.0000000000
    2    5   1    5         0.0000000000         0.0000000000
-  
+
    3    5   1    4         0.0000000000         0.0000000000
    3    5   1    5        -0.0000000000         0.0000000000
-  
+
   Internal strain coupling parameters, in cartesian coordinates,
-   zero average net force deriv. has been imposed  
+   zero average net force deriv. has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    4        -0.0000000000         0.0000000000
    1    1   1    5        -0.0000000000         0.0000000000
-  
+
    2    1   1    4        -0.0000000000         0.0000000000
    2    1   1    5        -0.0000000000         0.0000000000
-  
+
    3    1   1    4        -0.0000000000         0.0000000000
    3    1   1    5        -0.0000000000         0.0000000000
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell11    7.5853232925E+00  7.5853232925E+00  7.5853232925E+00 Bohr
             acell12    7.5853232925E+00  7.5853232925E+00  7.5853232925E+00 Bohr
@@ -6237,7 +6237,7 @@ P          mk1mem34      2000
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Metric tensor formulation of strain in density-functional perturbation theory, 
+- [1] Metric tensor formulation of strain in density-functional perturbation theory,
 - D. R. Hamann, X. Wu, K. M. Rabe, and D. Vanderbilt, Phys. Rev. B71, 035117 (2005).
 - Comment: Non-vanishing rfstrs. Strong suggestion to cite this paper in your publications.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2005
@@ -6260,7 +6260,7 @@ P          mk1mem34      2000
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -6277,12 +6277,12 @@ P          mk1mem34      2000
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -6300,7 +6300,7 @@ P          mk1mem34      2000
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

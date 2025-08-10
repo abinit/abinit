@@ -21,7 +21,7 @@ osc_ecut = 10,
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% keywords = GW
-#%% authors = M. Giantomassi 
-#%% description = 
+#%% authors = M. Giantomassi
+#%% description =
 #%%   Test the FFT routines used in the GW code with (complex arguments, no threads).
 #%%<END TEST_INFO>

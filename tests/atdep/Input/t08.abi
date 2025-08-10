@@ -28,13 +28,13 @@ tolmotif 0.05
 tolinbox 0.03
 tolmatch 0.05
 enunit 1
- 
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = atdep
 #%% md_hist = t08
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t08.abo, tolnlines = 1, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
 #%%   t08_omega.dat, tolnlines = 5, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
 #%%   t08_thermo.dat, tolnlines = 5, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
@@ -43,7 +43,7 @@ enunit 1
 #%% [extra_info]
 #%% authors = F. Bottin & J. Bouchet
 #%% keywords = atdep
-#%% description = 
+#%% description =
 #%%   test aTDEP (2nd order)
 #%%   Plutonium (fcc) with 54 atoms at T = 1200 K. The supercell in a SQS.
 #%% topics = aTDEP

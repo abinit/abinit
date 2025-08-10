@@ -91,14 +91,14 @@
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t02.abo, tolnlines = 16, tolabs = 1.100e-03, tolrel = 4.0e-02, fld_options =  -medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords = NC, DFPT
-#%% description = 
+#%% description =
 #%%   2. Generate first-order responses for GaAs (zinc-blende) (from test v2 #98).
 #%%   Compute responses at Gamma:
 #%%   1) Ground state calculation, with a k-point sampling in the IBZ only;

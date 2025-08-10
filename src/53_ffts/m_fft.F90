@@ -1350,12 +1350,28 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
      !  call wrtout(ount,"Warning: fourdp with FFTW3-wrappers, cplex=2 and ndat>1, might crash if MKL is used")
      !  !CYCLE
      !end if
+
+     ! MG: June 24. 2025
+     ! dfti_seqfourdp does not work as expected when cplex= 1 and ngfft(1:3) != ngfft(4:6)
+     ! very likely do the use of r->c, c->r transforms.
+     ! I don't know if it's a bug as the error seems to depend on the mkl version.
+     ! To bypass this problem, we change the params on the fly so that ngfft(1:3) == ngfft(4:6)
+     ! when FFT_DFTI is used.
+     ! Note however that we never call fourdp with ngfft(1:3) != ngftt(4:6) so this is not a serious problem.
+     ! An additional check is done inside dfti_seqfourdp
+
+     !
+     if (fftalga == FFT_DFTI) then
+       ldx=nx; ldy=ny; ldz=nz
+       ldxyz = ldx*ldy*ldz
+     endif
+
      ABI_MALLOC(fofg,     (2*ldxyz*ndat))
      ABI_MALLOC(fofr_ref, (cplex*ldxyz*ndat))
      ABI_MALLOC(fofr,     (cplex*ldxyz*ndat))
 
      call RANDOM_NUMBER(fofr_ref)
-     !call cg_setaug_zero(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,fofr_ref)
+     call cg_setaug_zero(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,fofr_ref)
      fofr = fofr_ref
 
      select case (fftalga)
@@ -1372,7 +1388,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
        continue
      end select
 
-     !call cg_setaug_zero(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,fofr)
+     call cg_setaug_zero(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,fofr)
 
      ierr = COUNT(ABS(fofr - fofr_ref) > ATOL_DP)
      nfailed = nfailed + ierr
@@ -1382,6 +1398,11 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
      if (ierr /= 0) then
        max_abserr = MAXVAL(ABS(fofr - fofr_ref))
        write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
+
+       !write(std_out, *)"abs_diff fofr fofr_ref"
+       !do ifft=1,cplex*ldxyz*ndat
+       !  write(std_out, *)abs(fofr(ifft) - fofr_ref(ifft)), fofr(ifft), fofr_ref(ifft)
+       !end do
      else
        write(msg,"(a)")" OK"
      end if
@@ -1390,6 +1411,13 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
      ABI_FREE(fofg)
      ABI_FREE(fofr_ref)
      ABI_FREE(fofr)
+
+    if (fftalga == FFT_DFTI) then
+      ! Revert changes. See comment above.
+      ldx=pars(4,iset); ldy=pars(5,iset); ldz=pars(6,iset)
+      ldxyz = ldx*ldy*ldz
+    endif
+
    end do
  end do
 
@@ -1650,13 +1678,12 @@ end function fftu_utests
 !!
 !! SOURCE
 
-function fftbox_mpi_utests(fftalg, cplex, ndat, nthreads, comm_fft, unit) result(nfailed)
+integer function fftbox_mpi_utests(fftalg, cplex, ndat, nthreads, comm_fft, unit) result(nfailed)
 
 !Arguments -----------------------------------
 !scalars
  integer,intent(in) :: fftalg,cplex,ndat,nthreads,comm_fft
  integer,optional,intent(in) :: unit
- integer :: nfailed
 
 !Local variables-------------------------------
 !scalars
@@ -1806,12 +1833,11 @@ end function fftbox_mpi_utests
 !!
 !! SOURCE
 
-function fftu_mpi_utests(fftalg, ecut, rprimd, ndat, nthreads, comm_fft, paral_kgb, unit) result(nfailed)
+integer function fftu_mpi_utests(fftalg, ecut, rprimd, ndat, nthreads, comm_fft, paral_kgb, unit) result(nfailed)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fftalg,ndat,nthreads,comm_fft,paral_kgb
- integer :: nfailed
  integer,optional,intent(in) :: unit
  real(dp),intent(in) :: ecut
 !arrays
@@ -2117,13 +2143,13 @@ function fftu_mpi_utests(fftalg, ecut, rprimd, ndat, nthreads, comm_fft, paral_k
 
    ! Compute fofg_out = <G|pot(r)|fofg>
    call fourwf_mpi(cplex,pot,fofg,fofg_out,fofr,&
-&    gbound_k,gbound_k,istwfk_one,kg_k,kg_k,me_g0,mgfft,ngfft,fftabs,n1,n2,n3,&
-&    npw_k,npw_k,n4,n5,n6,ndat,2,weight_r,weight_i,comm_fft,cplexwf=cplexwf)
+     gbound_k,gbound_k,istwfk_one,kg_k,kg_k,me_g0,mgfft,ngfft,fftabs,n1,n2,n3,&
+     npw_k,npw_k,n4,n5,n6,ndat,2,weight_r,weight_i,comm_fft,cplexwf=cplexwf)
 
    ! Compute fofg = <G|1/pot(r)|fofg_out>
    call fourwf_mpi(cplex,invpot,fofg_out,fofg,fofr,&
-&    gbound_k,gbound_k,istwfk_one,kg_k,kg_k,me_g0,mgfft,ngfft,fftabs,n1,n2,n3,&
-&    npw_k,npw_k,n4,n5,n6,ndat,2,weight_r,weight_i,comm_fft,cplexwf=cplexwf)
+     gbound_k,gbound_k,istwfk_one,kg_k,kg_k,me_g0,mgfft,ngfft,fftabs,n1,n2,n3,&
+     npw_k,npw_k,n4,n5,n6,ndat,2,weight_r,weight_i,comm_fft,cplexwf=cplexwf)
 
    ! Check if we got the initial u(g) within ATOL_DP
    ierr = COUNT(ABS(fofg - ref_fofg) > ATOL_DP)

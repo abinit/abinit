@@ -1,4 +1,3 @@
-from __future__ import print_function, division, absolute_import
 
 import sys
 import os
@@ -10,6 +9,7 @@ import tarfile
 import re
 import warnings
 import json
+import pickle
 
 from pprint import pprint
 from base64 import b64encode
@@ -17,19 +17,9 @@ from socket import gethostname
 from subprocess import Popen, PIPE
 from multiprocessing import Process, Queue, Lock, Manager, current_process
 from threading import Thread
-
-# Handle py2, py3k differences.
-py2 = sys.version_info[0] <= 2
-if py2:
-    import cPickle as pickle
-    from StringIO import StringIO
-    from ConfigParser import SafeConfigParser, NoOptionError, ParsingError as CPError
-    from Queue import Empty as EmptyQueueError
-else:
-    import pickle
-    from io import StringIO
-    from configparser import ConfigParser, ParsingError as CPError
-    from queue import Empty as EmptyQueueError
+from io import StringIO
+from configparser import ConfigParser, ParsingError as CPError
+from queue import Empty as EmptyQueueError
 
 from .jobrunner import TimeBomb
 from .tools import RestrictedShell, unzip, tail_file, pprint_table, Patcher, Editor
@@ -159,22 +149,13 @@ def lazy__str__(func):
 # Helper functions for performing IO
 
 def lazy_read(fname):
-    if not py2:
-        with open(fname, "rt", encoding="utf-8") as fh:
-            return fh.read()
-
-    else:
-        with open(fname, "rt") as fh:
-            return fh.read()
+    with open(fname, "rt", encoding="utf-8") as fh:
+        return fh.read()
 
 
 def lazy_readlines(fname):
-    if not py2:
-        with open(fname, "rt", encoding="utf-8") as fh:
-            return fh.readlines()
-    else:
-        with open(fname, "rt") as fh:
-            return fh.readlines()
+    with open(fname, "rt", encoding="utf-8") as fh:
+        return fh.readlines()
 
 
 def rm_rf(top, exclude_paths=None):
@@ -695,25 +676,7 @@ class AbinitTestInfoParser:
             raise self.Error("%s does not contain any valid testcnf section!" % inp_fname)
 
         # Interface in python 3 is richer so we rebuilt part of it
-        if py2:
-            class MySafeConfigParser(SafeConfigParser):
-                """Wrap the get method of SafeConfigParser to disable the interpolation of raw_options."""
-                raw_options = {"description"}
-
-                def get(self, section, option, raw=False, vars=None):
-                    if option in self.raw_options and section == TESTCNF_KEYWORDS[option][2]:
-                        logger.debug("Disabling interpolation for section = %s, option = %s" % (section, option))
-                        return SafeConfigParser.get(self, section, option, raw=True, vars=vars)
-                    else:
-                        return SafeConfigParser.get(self, section, option, raw, vars)
-
-                def read_string(self, string, source='<string>'):
-                    s = StringIO(string)
-                    SafeConfigParser.readfp(self, s, filename=source)
-
-            self.parser = MySafeConfigParser(defaults)
-        else:
-            self.parser = ConfigParser(defaults, interpolation=None)
+        self.parser = ConfigParser(defaults, interpolation=None)
 
         try:
             self.parser.read_string("".join(lines), source=inp_fname)

@@ -3837,7 +3837,7 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
 !Local variables-------------------------------
  character(len=500) :: bndfmt, occfmt, wtkfmt, zatfmt, typfmt
 !scalars
- integer,parameter :: mwarning=5,nkpt_max=5
+ integer,parameter :: mwarning=3,nkpt_max=5
  integer :: bantot,bantot_eff,ii,ipsp,isppol,istart,istop,isym,itest,iwarning
  integer :: jj,mu,natom,nelm,nkpt,npsp,nsppol,nsym,ntypat,tatty,tband,tdg
  integer :: tecut,tgrid,tkpt,tlmn,tng,tpaw,tprim,tpsch,tpseu,tspinor,tsym,twfk
@@ -4286,7 +4286,7 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
        ABI_WARNING(msg)
        tkpt=1 ; iwarning=iwarning+1
        if(iwarning>=mwarning)then
-         call wrtout(std_out,'The number of warning messages is sufficient ... stop writing them.',mode_paral)
+         call wrtout(std_out,'The number of comment messages is sufficient ... stop writing them.',mode_paral)
          exit
        end if
      end if
@@ -4347,7 +4347,7 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
    do ii=1,bantot
      if (abs( hdr%occ(ii)-hdr0%occ(ii) )>tol6) then
        write(msg,'(a,i0,a,1p,e15.7,a,e15.7)')'band,k: ',ii,', input occ=',hdr%occ(ii),' disk occ=',hdr0%occ(ii)
-       ABI_WARNING(msg)
+       ABI_COMMENT(msg)
        tband=1 ; iwarning=iwarning+1
        if(iwarning>=mwarning)then
          call wrtout(std_out,'The number of warning msgs is sufficient ... stop writing them.',mode_paral)

@@ -526,7 +526,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    end if
 
    if(response==0)then
-     write(message, '(a,1p,e15.7,a)'  ) ' scprqt: <Vxc>=',vxcavg,' hartree'
+     write(message, '(a,1p,e15.7,a)'  ) ' scprqt: <Vxc>=',vxcavg,' Hartree'
      call wrtout(std_out,message)
    end if
 
@@ -1533,8 +1533,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
    if (directE_avail) then
      info = 'Components of total free energy in Hartree'
      if(testdmft) info = 'Components of total energy in Hartree'
-     edoc = yamldoc_open('EnergyTerms', info=trim(adjustl(info)), &
-                         width=20, real_fmt='(es21.14)')
+     edoc = yamldoc_open('EnergyTerms', info=trim(adjustl(info)), width=20, real_fmt='(es21.14)')
      call edoc%add_real('kinetic', energies%e_kinetic)
      if(abs(energies%e_extfpmd)>tiny(zero)) call edoc%add_real('extfpmd',energies%e_extfpmd)
      if (ipositron/=1) then
@@ -1706,7 +1705,6 @@ subroutine prtene(dtset,energies,iout,usepaw)
      call dc_edoc%add_real('electron_positron_interaction', energies%e_electronpositron)
    end if
 
-
    write(msg, '(a,es21.14)' ) '    >>>> Etotal (DC)= ',etotaldc
    !call wrtout(iout,msg)
    call dc_edoc%add_real('total_energy_dc', etotaldc)
@@ -1788,7 +1786,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
    end if
  end if
 
-!Write components of total energies in Yaml format.
+ ! Write components of total energies in Yaml format.
  call edoc%write_and_free(iout)
  if(optdc >= 1) call dc_edoc%write_and_free(iout)
  if(write_entropy) call sdoc%write_and_free(iout)

@@ -7,7 +7,6 @@ Command line interface to difflib.py providing diffs in four formats:
 * unified:  highlights clusters of changes in an inline format.
 * html:     generates side by side comparison with change highlights.
 """
-from __future__ import print_function, division, absolute_import, unicode_literals
 
 import sys
 import os

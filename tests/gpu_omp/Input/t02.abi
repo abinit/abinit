@@ -85,7 +85,7 @@ prtden 0  prteig 0  prtwf 0
 #%% [extra_info]
 #%% authors = M. Torrent, M. Sarraute
 #%% keywords = PAW, DFTU
-#%% description = 
+#%% description =
 #%%   NiO - DFT+U - fcc structure - anitferro - PAW
 #%%   Test the use of MPI+GPU
 #%%<END TEST_INFO>

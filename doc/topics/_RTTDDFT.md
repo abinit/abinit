@@ -11,6 +11,7 @@ This page gives some information on how to perform a real-time time-dependent DF
     RT-TDDFT is under active development and should thus be used with caution!
 
 ## Introduction
+
 The goal of TDDFT is usually to describe the electronic response to an external time-dependent perturbation.
 To do so, real-time TDDFT numerically integrates the time-dependent Kohn-Sham (TDKS) equations in _real-time_ and
 thus gives access to the time evolution of the electronic density directly.
@@ -27,6 +28,7 @@ A detailed description of TDDFT including real-time propagation schemes can be f
 in the book of C. Ullrich [[cite:Ullrich2011]].
 
 ## Implementation in ABINIT
+
 ABINIT implements RT-TDDFT in the so-called adiabatic approximation using the standard XC functionals
 developed for ground state calculations. The implementation works with LDA and GGA functionals.
 *It has not yet been tested for other types (meta-GGAs, hybrids) and is thus most probably not compatible for now.*
