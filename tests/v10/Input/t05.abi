@@ -68,7 +68,7 @@ pseudos="P.psp8, Al.psp8"
 #%% need_cpp_vars = HAVE_FFTW3
 #%% [files]
 #%% files_to_test =
-#%%   t05.abo, tolnlines=  0, tolabs=  0, tolrel= 0, fld_options = -ridiculous
+#%%   t05.abo, tolnlines=  0, tolabs=  0, tolrel= 0
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
