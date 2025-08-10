@@ -3657,8 +3657,7 @@ subroutine cg_precon(cg, eval, istwf_k, kinpw, npw, nspinor, me_g0, optekin, pco
  call timab(48,2,tsec)
 
  if(ek0<1.0d-10)then
-   write(msg,'(3a)')'The mean kinetic energy of a wavefunction vanishes.',ch10,'It is reset to 0.1 Ha.'
-   ABI_WARNING(msg)
+   ABI_WARNING('The mean kinetic energy of a wavefunction vanishes. It is reset to 0.1 Ha.')
    ek0=0.1_dp
  end if
 

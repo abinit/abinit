@@ -1871,7 +1871,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
    end if
  end if
 
-if(present(strs_intgden) .and. option<10 .and. ratsm2>tol12) then
+ if(present(strs_intgden) .and. option<10 .and. ratsm2>tol12) then
    if(mpi_enreg%nproc_fft>1)then
      call timab(48,1,tsec)
      call xmpi_sum(strs_intgden,mpi_enreg%comm_fft,ierr)
@@ -1913,11 +1913,8 @@ if(present(strs_intgden) .and. option<10 .and. ratsm2>tol12) then
    endif
  endif
 
-!DEBUG BUT KEEP
- if(.false.)then
-   call printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,'DEN.vtk')
- endif
-!ENDDEBUG
+ !DEBUG BUT KEEP
+ !if(.false.) call printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,'DEN.vtk')
 
 end subroutine calcdenmagsph
 !!***

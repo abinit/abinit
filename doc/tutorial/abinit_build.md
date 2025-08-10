@@ -1000,7 +1000,7 @@ To compile the Fortran bindings, execute:
 cd netcdf-fortran-4.5.2
 ./configure --prefix=$HOME/local/ \
             FC=$HOME/local/bin/mpif90 \
-            LDFLAGS=-L$HOME/local/lib CPPFLAGS=-I$HOME/local/include
+            LDFLAGS=-L$HOME/local/lib FCFLAGS=-I$HOME/local/include
 ```
 
 where **FC** points to our *mpif90* wrapper (**CC** is not needed here).
