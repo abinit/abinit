@@ -932,13 +932,13 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    ABI_MALLOC(intgden, (nspden, natom))
 
    ! Multiply off-diagonal terms of the spin density matrix by e^{-iqr} before computing atomic mag.
-   if (dtset%use_gbt /= 0) call gbt_times_qr(nfft, nspden, ngfft, mpi_enreg, -dtset%qgbt, rhor)
+   !if (dtset%use_gbt /= 0) call gbt_times_qr(nfft, nspden, ngfft, mpi_enreg, -dtset%qgbt, rhor)
 
    call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,&
                       ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
 
    ! Back to periodic rhor
-   if (dtset%use_gbt /= 0) call gbt_times_qr(nfft, nspden, ngfft, mpi_enreg, dtset%qgbt, rhor)
+   !if (dtset%use_gbt /= 0) call gbt_times_qr(nfft, nspden, ngfft, mpi_enreg, dtset%qgbt, rhor)
 
    !  for rhomag:
    !    in collinear case component 1 is total density and 2 is _magnetization_ up-down
