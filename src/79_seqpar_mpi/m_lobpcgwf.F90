@@ -67,10 +67,7 @@ module m_lobpcgwf
 
  ! For use in getghc_gsc1
  integer,save  :: l_cpopt
- integer,save  :: l_npw
- integer,save  :: l_nspinor
  logical,save  :: l_paw
- integer, save :: l_paral_kgb
  integer,save  :: l_prtvol
  integer,save  :: l_sij_opt
  type(mpi_type),pointer,save :: l_mpi_enreg
@@ -128,12 +125,9 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  ! Set module variables
  l_paw = (gs_hamk%usepaw==1)
  l_cpopt=-1;l_sij_opt=0;if (l_paw) l_sij_opt=1
- l_npw = npw
- l_nspinor = nspinor
  l_prtvol = prtvol
  l_mpi_enreg => mpi_enreg
  l_gs_hamk => gs_hamk
- l_paral_kgb = dtset%paral_kgb
 
 !Variables
  blockdim=nband/dtset%nblock_lobpcg
@@ -170,11 +164,11 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
    me_g0 = 0
    me_g0_fft = 0
    if (gs_hamk%istwf_k == 2) then
-     if (l_mpi_enreg%me_g0 == 1) me_g0 = 1
-     if (l_mpi_enreg%me_g0_fft == 1) me_g0_fft = 1
+     if (mpi_enreg%me_g0 == 1) me_g0 = 1
+     if (mpi_enreg%me_g0_fft == 1) me_g0_fft = 1
    end if
  end if
- call xgBlock_map(xgx0,cg,space,l_npw*l_nspinor,nband,comm=l_mpi_enreg%comm_bandspinorfft,me_g0=me_g0,&
+ call xgBlock_map(xgx0,cg,space,npw*nspinor,nband,comm=mpi_enreg%comm_bandspinorfft,me_g0=me_g0,&
    & gpu_option=dtset%gpu_option)
 
  call xgBlock_map_1d(xg_precond,pcon,SPACE_R,npw,gpu_option=dtset%gpu_option)
@@ -192,8 +186,8 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
    call xgBlock_map_1d(xgocc,occ,SPACE_R,nband,gpu_option=dtset%gpu_option)
  end if
 
- call lobpcg_init(lobpcg,nband,l_npw*l_nspinor,blockdim,dtset%tolwfr_diago,dtset%nline,&
-   space,l_mpi_enreg%comm_bandspinorfft,l_paral_kgb,l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
+ call lobpcg_init(lobpcg,nband,npw*nspinor,blockdim,dtset%tolwfr_diago,dtset%nline,&
+   space,mpi_enreg%comm_bandspinorfft,dtset%paral_kgb,mpi_enreg%comm_spinorfft,mpi_enreg%comm_band,&
    me_g0,me_g0_fft,gs_hamk%gpu_option,gpu_thread_limit=dtset%gpu_thread_limit)
 
  ! Run lobpcg
@@ -214,7 +208,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
 #endif
 
    !Call nonlop
-   if (l_paral_kgb==0) then
+   if (dtset%paral_kgb==0) then
 
      call nonlop(choice,l_cpopt,cprj_dum,enl_out,l_gs_hamk,0,eig,mpi_enreg,nband,1,paw_opt,&
 &                signs,gsc_dummy,l_tim_getghc,cg,gvnlxc)
@@ -224,14 +218,11 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
      !$OMP TARGET UPDATE FROM(cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
      do iblock=1,nband/blockdim
-       shift = (iblock-1)*blockdim*l_npw*l_nspinor
+       shift = (iblock-1)*blockdim*npw*nspinor
        call prep_nonlop(choice,l_cpopt,cprj_dum, &
-&        enl_out((iblock-1)*blockdim+1:iblock*blockdim),l_gs_hamk,0,&
+&        enl_out((iblock-1)*blockdim+1:iblock*blockdim),gs_hamk,0,&
 &        eig((iblock-1)*blockdim+1:iblock*blockdim),blockdim,mpi_enreg,1,paw_opt,signs,&
-&        gsc_dummy,l_tim_getghc, &
-&        cg(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
-!&        l_gvnlxc(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
-&        gvnlxc(:,:),&
+&        gsc_dummy,l_tim_getghc,cg(:,shift+1:shift+blockdim*npw*nspinor),gvnlxc(:,:),&
 &        already_transposed=.false.)
      end do
    end if

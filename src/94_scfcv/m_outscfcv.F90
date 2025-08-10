@@ -76,7 +76,7 @@ module m_outscfcv
  !use m_mlwfovlp,         only : mlwfovlp
  use m_wfd_wannier,      only : wfd_run_wannier
  use m_datafordmft,      only : datafordmft
- use m_mkrho,            only : read_atomden
+ use m_mkrho,            only : read_atomden, gbt_times_qr
  use m_positron,         only : poslifetime, posdoppler
  use m_optics_vloc,      only : optics_vloc
  use m_green,            only : green_type,compute_green,&
@@ -930,8 +930,16 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !Output of integrated density inside atomic spheres
  if ((dtset%prtdensph==1.and.dtset%usewvl==0) .or. sum(abs(dtset%hspinfield)) > tol10) then
    ABI_MALLOC(intgden, (nspden, natom))
+
+   ! Multiply off-diagonal terms of the spin density matrix by e^{-iqr} before computing atomic mag.
+   !if (dtset%use_gbt /= 0) call gbt_times_qr(nfft, nspden, ngfft, mpi_enreg, -dtset%qgbt, rhor)
+
    call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,&
                       ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
+
+   ! Back to periodic rhor
+   !if (dtset%use_gbt /= 0) call gbt_times_qr(nfft, nspden, ngfft, mpi_enreg, dtset%qgbt, rhor)
+
    !  for rhomag:
    !    in collinear case component 1 is total density and 2 is _magnetization_ up-down
    !    in non collinear case component 1 is total density, and 2:4 are the magnetization vector
