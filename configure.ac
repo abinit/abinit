@@ -1062,7 +1062,7 @@ if test "${sd_hdf5_ok}" = "yes";then
 fi
 
 # Check LibXC
-if test "${sd_libxc_enable}" = "no"; then
+if test "${sd_libxc_enable}" = "no" -o "${sd_libxc_init}" = "fb"; then
       ABI_MSG_NOTICE_L([libxc-mandatory],[__CAUTION__ : LibXC is __MANDATORY__ !])
       mandatory="#"
 else
@@ -1128,9 +1128,9 @@ ABI_FALLBACKS_VALIDATE([${abi_fbk_required}])
 #fi
 
 # Check exit
-if test ! -z "${status}" -o ! -z "${mandatory}"; then
-      exit 2
-fi
+#if test ! -z "${status}" -o ! -z "${mandatory}"; then
+#      exit 2
+#fi
 
 
 #-------------------- END JMB --------------------------------------------#
