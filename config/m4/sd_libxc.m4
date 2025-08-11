@@ -217,7 +217,8 @@ AC_DEFUN([SD_LIBXC_INIT], [
   # Override the default configuration if the ESL Bundle is available
   # Note: The setting of the build flags is done once for all
   #       ESL-bundled packages
-  if test "${sd_libxc_init}" = "def" -a ! -z "${ESL_BUNDLE_PREFIX}"; then
+
+  if test "${sd_libxc_init}" = "def" -o "${sd_libxc_init}" = "pkg" && test -n "${ESL_BUNDLE_PREFIX}"; then
     sd_libxc_init="esl"
     sd_libxc_cppflags=""
     sd_libxc_cflags=""
@@ -274,15 +275,19 @@ AC_DEFUN([SD_LIBXC_DETECT], [
       AC_DEFINE([HAVE_LIBXC], 1,
         [Define to 1 if you have the LibXC library.])
     else
-      if test "${sd_libxc_status}" = "optional" -a \
-              "${sd_libxc_init}" = "def"; then
-        sd_libxc_enable="no"
+        sd_libxc_ok="yes"
         sd_libxc_cppflags=""
-        sd_libxc_cflags=""
+        sd_libxc_cflags="-I ${ac_abs_confdir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/libxc/6.0.0/include"
         sd_libxc_fcflags=""
         sd_libxc_ldflags=""
-        sd_libxc_libs=""
+        sd_libxc_kxc_ok="yes"
+        sd_libxc_libs="-L${ac_abs_confdir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/libxc/6.0.0/lib -lxc -lxcf03"
+      if test "${sd_libxc_status}" = "optional" -a \
+              "${sd_libxc_init}" = "def"; then
+ 
+            sd_libxc_init='fb'
       else
+        sd_libxc_init='fb'
         if test "${sd_netcdf_policy}" = "fail"; then
               AC_MSG_FAILURE([invalid LibXC configuration])
         else
@@ -302,6 +307,7 @@ AC_DEFUN([SD_LIBXC_DETECT], [
 
 
                     # ------------------------------------ #
+
 
 
 #
