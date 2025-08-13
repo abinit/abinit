@@ -40,8 +40,8 @@
  optcell8 1 ecutsm8 0.5 dilatmx8 1.1
 
  occopt9 1
- nkpt9 1 istwfk9 1 toldfe9 1.0d-10 
- nsppol9 2    
+ nkpt9 1 istwfk9 1 toldfe9 1.0d-10
+ nsppol9 2
  spinmagntarget9  0.0d0
  ixc9 1
 
@@ -62,7 +62,7 @@
  timopt 0
  np_spkpt 1
  npband 2
- bandpp 1
+ nblock_lobpcg 6 # Problably not optimal (LB:07-2025)
  npfft 2
  paral_kgb 1
 
@@ -82,7 +82,7 @@
 #%% [extra_info]
 #%% keywords = PAW
 #%% authors = Unknown
-#%% description = 
+#%% description =
 #%%    C-diamond, Bulk, 2 atoms, paral_kgb, with PAW.
 #%%    Test of ground state with different occs(7 and 0),
 #%%    and also ionmov 2. Only with 0 and 4 procs.

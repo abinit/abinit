@@ -894,7 +894,6 @@ subroutine frohlich_calc_zpr(self)
  integer :: iqdir, nu
  integer :: iband, jband
  integer :: lwork, info
- logical :: sign_warn
 !arrays
  real(dp), allocatable :: efmas_qdir(:,:)
  real(dp), allocatable :: invefmas_avg(:)
@@ -1005,7 +1004,7 @@ subroutine frohlich_calc_zpr(self)
    endif
  enddo
 
- if (.not. sign_warn) then
+ if (.not. self%sign_warn) then
    self%zpr = -sum(self%zpr_band(:)) / self%ndeg
    self%sqrt_efmas_tot = sum(self%sqrt_efmas_avg(:)) / self%ndeg
    self%enpol_wc = -self%sqrt_efmas_tot*sum(self%dielavg(:))

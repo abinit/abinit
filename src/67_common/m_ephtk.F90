@@ -45,8 +45,8 @@ module m_ephtk
  public :: ephtk_gam_atm2qnu          ! Compute phonon linewidths from gamma matrix in reduced coordinates.
  public :: ephtk_gkknu_from_atm       ! Transform the gkk matrix elements from (atom, red_direction) basis to phonon-mode basis.
  public :: ephtk_update_ebands        ! Update ebands according to dtset%occopt, tsmear, mbpt_sciss, eph_fermie, eph_extrael
- public :: ephtk_get_mpw_gmax
- public :: ephtk_v1atm_to_vqnu        !  Receive potentials in atomic representation and return potential in phonon representation
+ public :: ephtk_get_mpw_gmax         ! Compute maximum number of plane-waves over k and k+q where k and k+q are in the BZ.
+ public :: ephtk_v1atm_to_vqnu        ! Receive potentials in atomic representation and return potential in phonon representation
 !!***
 
  real(dp),public,parameter :: EPHTK_WTOL = tol6
@@ -460,7 +460,7 @@ end subroutine ephtk_update_ebands
 !!  ephtk_get_mpw_gmax
 !!
 !! FUNCTION
-!! mpw is the maximum number of plane-waves over k and k+q where k and k+q are in the BZ.
+!! Compute maximum number of plane-waves over k and k+q where k and k+q are in the BZ.
 !! we also need the max components of the G-spheres (k, k+q) in order to allocate the workspace array work
 !! used to symmetrize the wavefunctions in G-space.
 !! Note that we loop over the full BZ instead of the IBZ(k)

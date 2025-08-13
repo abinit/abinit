@@ -7,11 +7,11 @@ authors: MT, GG, JB
 ## String method for the computation of minimum energy paths, in parallel.
 
 This tutorial aims at showing how to use the parallelism on images, by performing a calculation of a minimum energy
-path (MEP) using the string method. 
+path (MEP) using the string method.
 
 You will learn how to run the string method on a parallel architecture and
 what are the main input variables that govern convergence and numerical
-efficiency of the parallelism on *images*. Other algorithms use images, 
+efficiency of the parallelism on *images*. Other algorithms use images,
 e.g. path-integral molecular dynamics, hyperdynamics, linear combination of images, ... with different values of [[imgmov]].
 The parallelism on images can be used for all these algorithms.
 
@@ -52,9 +52,9 @@ tutorials. Why not work_paral_images?*
     or the use of a specific submission file.
 
 !!! tip
-    
+
     In this tutorial, most of the images and plots are easily obtained using the post-processing tool
-    [qAgate](https://github.com/piti-diablotin/qAgate) or [agate](https://github.com/piti-diablotin/agate), 
+    [qAgate](https://github.com/piti-diablotin/qAgate) or [agate](https://github.com/piti-diablotin/agate),
     its core engine.
     Any post-process tool will work though !!
 
@@ -82,7 +82,7 @@ are in white, the O atom is in red and the N atom in blue).
 ![final state](paral_images_assets/Initial2.png)
 
 !!! tip
-    To obtain these images, open the `timages_01.abi` and `timages_02.abi` files with `agate` 
+    To obtain these images, open the `timages_01.abi` and `timages_02.abi` files with `agate`
     or `qAgate`
 
 Before using the string method, it is necessary to optimize the initial and
@@ -101,9 +101,8 @@ is larger along x so that the periodic images of the system are separated by
 remove an electron of the system and thus obtain a protonated molecule
 (neutrality is recovered by adding a uniform compensating charge background).
 
-Although this input file will run on a single core, the [[paral_kgb]] keyword is set to 1 
+Although this input file will run on a single core, the [[paral_kgb]] keyword is set to 1
 to activate the LOBPCG [[cite:Bottin2008]] algorithm.
-Note the use of [[bandpp]] 10 to accelerate the convergence.
 
 !!! important
     If your system were larger and required more CPU time, all the usual variables for parallelism
@@ -137,14 +136,14 @@ should obtain the following positions:
                7.9555913454E+00 -1.4851844626E+00  1.1974660442E+00
                8.2294855730E+00  1.6454040992E+00  8.0048724879E-01
                5.5879660323E+00  1.1438061815E-01 -2.5524007156E-01
-    
+
     ```
 
 
 ## 3 Related keywords
 
 Once you have properly optimized the initial and final states of the process,
-you can turn to the computation of the MEP. 
+you can turn to the computation of the MEP.
 Let us first have a look at the related keywords.
 
 [[imgmov]]
@@ -152,7 +151,7 @@ Let us first have a look at the related keywords.
         For the string method, choose 2.
 
 [[nimage]]
-:       gives the number of replicas of the unit cell including the initial and final ones. Note that when [[nimage]]>1, 
+:       gives the number of replicas of the unit cell including the initial and final ones. Note that when [[nimage]]>1,
         the default value of several print input variables changes from one to zero. You might want to explicitly set [[prtgsr]] to 1
         to print the _GSR file, and get some visualization possibilities using Abipy.
 
@@ -196,7 +195,7 @@ correspond to the initial and final states, 10 are evolving). [[nimage]] is
 thus set to 12. The [[npimage]] variable is not used yet (no parallelism over
 images) and [[ntimimage]] is set to 1 (only one time step).
 
-Since the parallelism over the images is not used, this calculation still 
+Since the parallelism over the images is not used, this calculation still
 runs over 1 CPU core.
 
 ## 5 Computation of the MEP using parallelism over images
@@ -230,7 +229,7 @@ presence of the NH<sub>3</sub> molecule.
 !!! tip
     Note that the total energy of each of the 12 replicas of the simulation cell
     can be found at the end of the output file in the section:
-    
+
     ```
     -outvars: echo values of variables after computation  --------
     ```
@@ -251,7 +250,7 @@ Total energy as a function of OH distance for the path computed with 12 images
 and [[tolimg]]=0.0001 (which is very close to the x coordinate of the proton:
 first coordinate of xcart  for the 8th atom in the output file).
 
-The keyword [[npimage]] can be automatically set by ABINIT if [[autoparal]] is set to 1. 
+The keyword [[npimage]] can be automatically set by ABINIT if [[autoparal]] is set to 1.
 
 Let us test this functionality. Edit again the `timages_04.abi` file and comment
 the [[npimage]] line, then add [[autoparal]]=1. Then run the calculation again over 10 CPU cores.
@@ -267,16 +266,16 @@ the path ([[nimage]]) and the convergence criterion ([[tolimg]]).
 1. [[nimage]]
 
     Increase the number of images to 22 (2 fixed + 20 evolving) and recompute the
-    MEP. 
-    Don't forget to update [[dynimage]] to `0 20*1 0` ! And you have 20 CPU cores 
+    MEP.
+    Don't forget to update [[dynimage]] to `0 20*1 0` ! And you have 20 CPU cores
     available then set [[npimage]] to 20 and run ABINIT over 20 CPU cores.
     The graph below superimposes the previous MEP (grey curve, calculated
     with 12 images) and the new one obtained by using 22 images (cyan curve). You
     can see that the global profile is almost not modified as well as the energy
     barrier.
-    
+
     ![curve 2](paral_images_assets/curve2.png)
-    
+
     Total energy as a function of OH distance for the path computed with 12 images
     and [[tolimg]]=0.0001 (grey curve) and the one computed with 22 images and
     [[tolimg]]=0.0001 (red curve).
@@ -290,25 +289,25 @@ the path ([[nimage]]) and the convergence criterion ([[tolimg]]).
             :plot xy x="distance 1 8 dunit=A" y="etotal eunit=eV"
             ```
         Replace `plot` with `print` to get the `gnuplot` script.
-    
+
     The following animation is made by putting together the 22
     images obtained at the end of this calculation, from (_i_) to (_f_) and then from
     (_f_) to (_i_). It allows to visualize the MEP.
 
     !!! tip
         Open the `timages_04o_HIST.nc` file with `agate` or `qAgate` to produce this animation.
-    
+
   <video id="video_string" controls autoplay loop style="width: 100%;">
   <source src="../paral_images_assets/stringvideo.mp4" type="video/mp4">
   <source src="../paral_images_assets/stringvideo.webm" type="video/webm">
   You browser does not support the video tag. Download the file [here](paral_images_assets/stringvideo.mp4).
   </video>
-    
+
 2. [[tolimg]]
 
     Come back to [[nimage]]=12. First you can increase [[tolimg]] to 0.001 and
     recompute the MEP. This will be much faster than in the previous case.
-    
+
     Then you should decrease [[tolimg]] to 0.00001 and recompute the MEP. To gain
     CPU time, you can start your calculation by using the 12 images obtained at
     the end of the calculation that used [[tolimg]] = 0.0001. In your input file,
@@ -317,8 +316,8 @@ the path ([[nimage]]) and the convergence criterion ([[tolimg]]).
     You can copy them directly from the output file obtained at the previous
     section. The graph below superimposes the path obtained with 12 images and
     [[tolimg]]=0.001 (grey curve) and the one with 12 images and [[tolimg]]=0.0001 (cyan curve).
-    
+
     ![image](paral_images_assets/curve3.png)
-    
+
     Total energy as a function of OH distance for the path computed with 12 images
     and [[tolimg]]=0.0001 (cyan curve) and the one computed with 12 images and [[tolimg]]=0.001 (grey curve).

@@ -82,10 +82,9 @@ module m_fstab
    ! |2| for tetrahedra.
    !     2 for the optimized tetrahedron method.
    !    -2 for the linear tetrahedron method.
-   !
 
    integer :: nene = -1
-   ! Number of chemical potential values used for inelastic integration
+   ! Number of chemical potential values used for inelastic integration.
 
    real(dp) :: eph_fsmear
    ! Gaussian broadening. Negative value activates adaptive gaussian broadening.
@@ -238,6 +237,7 @@ end subroutine fstab_free
 !! OUTPUT
 !!  fstab(nsppol)=Tables with the correspondence between points of the Fermi surface (FS)
 !!     and the k-points in ebands_t.
+!!  tetra: Tetrahedron object.
 !!
 !! TODO
 !!  Use a different algorithm to select k-points if tetra. First compute tetra weights
@@ -245,7 +245,7 @@ end subroutine fstab_free
 !!
 !! SOURCE
 
-subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
+subroutine fstab_init(fstab, ebands, cryst, dtset, tetra, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -253,6 +253,7 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
  type(ebands_t),intent(in) :: ebands
  type(crystal_t),intent(in) :: cryst
  type(dataset_type),intent(in) :: dtset
+ type(htetra_t),intent(out) :: tetra
 !arrays
  type(fstab_t),target,intent(out) :: fstab(ebands%nsppol)
 
@@ -267,13 +268,12 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
  character(len=80) :: errstr
  character(len=5000) :: msg
  type(fstab_t),pointer :: fs
- type(htetra_t) :: tetra
  type(krank_t) :: krank
 !arrays
  integer :: kptrlatt(3,3)
  integer,allocatable :: full2ebands(:,:),bz2ibz(:), fs2bz(:),indkk(:,:) !,fs2ibz(:)
- real(dp),allocatable :: kbz(:,:), tmp_eigen(:),bdelta(:,:),btheta(:,:)
  real(dp) :: rlatt(3,3), klatt(3,3)
+ real(dp),allocatable :: kbz(:,:), tmp_eigen(:),bdelta(:,:),btheta(:,:)
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
@@ -433,7 +433,7 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
  ! fix window around fermie for tetrahedron or gaussian weight calculation
  ! this is spin independent
  nene = 100 ! TODO: make this variable and maybe temperature dependent???
- deltaene = 2 * dtset%eph_fsewin / dble(nene-1)
+ deltaene = two * dtset%eph_fsewin / dble(nene-1)
  ifermi = int(nene / 2)
  enemin = ebands%fermie - dble(ifermi-1)*deltaene
  enemax = enemin + dble(nene-1)*deltaene
@@ -463,15 +463,14 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
    !end do
  end do
 
+ ABI_MALLOC(bz2ibz, (nkbz))
+ bz2ibz = full2ebands(1, :)
+ call tetra%init(bz2ibz, cryst%gprimd, klatt, kbz, nkbz, ebands%kptns, nkibz, ierr, errstr, comm)
+ ABI_CHECK(ierr == 0, errstr)
+ ABI_FREE(bz2ibz)
+
  if (abs(dtset%eph_intmeth) == 2) then
    ! TODO: compute weights on the fly to reduce memory? nene should be set to zero if not used!
-   ABI_MALLOC(bz2ibz, (nkbz))
-   bz2ibz = full2ebands(1, :)
-
-   call htetra_init(tetra, bz2ibz, cryst%gprimd, klatt, kbz, nkbz, ebands%kptns, nkibz, ierr, errstr, comm)
-   ABI_CHECK(ierr == 0, errstr)
-   ABI_FREE(bz2ibz)
-
    ABI_MALLOC(tmp_eigen, (nkibz))
    ABI_MALLOC(btheta, (nene, nkibz))
    ABI_MALLOC(bdelta, (nene, nkibz))
@@ -505,7 +504,6 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
    ABI_FREE(tmp_eigen)
    ABI_FREE(btheta)
    ABI_FREE(bdelta)
-   call tetra%free()
  end if
 
  !ABI_FREE(fs2ibz)
@@ -514,6 +512,8 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
  ABI_FREE(full2ebands)
 
  call cwtime_report(" fstab_init%fs_weights:", cpu, wall, gflops)
+
+ if (xmpi_comm_rank(comm) == 0) call fstab_print(fstab, [std_out, ab_out])
 
 end subroutine fstab_init
 !!***
@@ -608,9 +608,6 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, 
    do ib2=1,nband_k
      band2 = ib2 + bstart_k - 1
      if (use_adaptive) then
-       !ori sigma = max(maxval([(abs(dot_product(fs%vk(:, ib2), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
-       !workaround works with both ifort and ifx on oneapi 2024
-       !replace the implicit loop by an explicit one
        do ii=1,3
           abc(ii) = abs(dot_product(fs%vk(:, ib2), fs%kmesh_cartvec(:,ii)))
        end do
@@ -621,9 +618,6 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, 
      do ib1=1,nband_kq
        band1 = ib1 + bstart_kq - 1
        if (use_adaptive) then
-         !ori sigma = max(maxval([(abs(dot_product(fs%vkq(:, ib1), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
-         !replace the implicit loop by an explicit one
-         !workaround works with both ifort and ifx on oneapi 2024
          do ii=1,3
            abc(ii) = abs(dot_product(fs%vkq(:, ib1), fs%kmesh_cartvec(:,ii)))
          end do
@@ -662,63 +656,70 @@ end subroutine fstab_get_dbldelta_weights
 !!  Print info on the object.
 !!
 !! INPUTS
-!! [unit]=the unit number for output
+!! units=unit numbers for output
 !! [prtvol]=verbosity level
-!!
-!! OUTPUT
-!!  Only printing.
 !!
 !! SOURCE
 
-subroutine fstab_print(fstab, header, unit, prtvol)
+subroutine fstab_print(fstab, units, header, prtvol)
 
 !Arguments ------------------------------------
 !scalars
- integer,optional,intent(in) :: prtvol,unit
- character(len=*),optional,intent(in) :: header
  class(fstab_t),target,intent(in) :: fstab(:)
+ integer,intent(in) :: units(:)
+ character(len=*),optional,intent(in) :: header
+ integer,optional,intent(in) :: prtvol
 
 !Local variables-------------------------------
 !scalars
- integer :: my_unt,my_prtvol,spin
- class(fstab_t),pointer :: fs
+ integer :: my_prtvol,spin
  character(len=5000) :: msg
 ! *************************************************************************
 
- my_unt = std_out; if (present(unit)) my_unt = unit
  my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
 
  msg = ' ==== Fermi surface info ==== '
  if (PRESENT(header)) msg=' ==== '//TRIM(ADJUSTL(header))//' ==== '
- write(my_unt, "(a)")trim(msg)
+ call wrtout(units, msg)
 
- if (fstab(1)%eph_intmeth == 1) then
+ select case (fstab(1)%eph_intmeth)
+ case (1)
    if (fstab(1)%eph_fsmear > zero) then
-     write(my_unt,"(a,f5.1,a)")" FS integration done with gaussian method and broadening:", &
+     write(msg,"(a,f5.1,a)")" FS integration done with gaussian method and broadening:", &
        fstab(1)%eph_fsmear * Ha_eV, " (meV)"
    else
-     write(my_unt,"(a)")" FS integration done with adaptive gaussian method"
+     write(msg,"(a)")" FS integration done with adaptive gaussian method"
    end if
- else if (fstab(1)%eph_intmeth == 2) then
-   write(my_unt,"(a)")" FS integration done with tetrahedron method"
- else if (fstab(1)%eph_intmeth == -2) then
-   write(my_unt,"(a)")" FS integration done with optimized tetrahedron method"
- else
+ case (2)
+   write(msg,"(a)")" FS integration done with tetrahedron method"
+ case (-2)
+   write(msg,"(a)")" FS integration done with optimized tetrahedron method"
+ case default
    ABI_ERROR(sjoin("Invalid value for eph_intmeth:", itoa(fstab(1)%eph_intmeth)))
- end if
+ end select
 
- write(my_unt,"(a,i0)")" Total number of k-points in the full mesh: ",fstab(1)%nktot
- !write(my_unt,"(a,f5.1)")" Energy window: ",fstab(1)%eph_fsewin * Ha_eV, " (eV)
+ call wrtout(units, msg)
+
+ write(msg,"(a,i0)")" Total number of k-points in the full mesh: ",fstab(1)%nktot
+ call wrtout(units, msg)
+ !write(msg,"(a,f5.1)")" Energy window: ",fstab(1)%eph_fsewin * Ha_eV, " (eV)
+ !call wrtout(units, msg)
 
  do spin=1,size(fstab)
-   fs => fstab(spin)
-   write(my_unt,"(a,i0)")" For spin: ",spin
-   write(my_unt,"(a,i0,a,f5.1,a)") &
+   associate (fs => fstab(spin))
+   write(msg,"(a,i0)")" For spin: ",spin
+   call wrtout(units, msg)
+   write(msg,"(a,i0,a,f5.1,a)") &
      "    Number of BZ k-points close to the Fermi surface: ",fs%nkfs," [", (100.0_dp * fs%nkfs) / fs%nktot, " %]"
-   write(my_unt,"(a,i0)")"    Maximum number of bands crossing the Fermi level: ",fs%maxnb
-   write(my_unt,"(2(a,i0))")"    min band: ", minval(fs%bstart_cnt_ibz(1,:), mask=fs%bstart_cnt_ibz(1,:) /= -1)
-   write(my_unt,"(2(a,i0))")"    Max band: ", maxval(fs%bstart_cnt_ibz(1,:) + fs%bstart_cnt_ibz(2,:) - 1, &
+   call wrtout(units, msg)
+   write(msg,"(a,i0)")"    Maximum number of bands crossing the Fermi level: ",fs%maxnb
+   call wrtout(units, msg)
+   write(msg,"(2(a,i0))")"    min band: ", minval(fs%bstart_cnt_ibz(1,:), mask=fs%bstart_cnt_ibz(1,:) /= -1)
+   call wrtout(units, msg)
+   write(msg,"(2(a,i0))")"    Max band: ", maxval(fs%bstart_cnt_ibz(1,:) + fs%bstart_cnt_ibz(2,:) - 1, &
                                                      mask=fs%bstart_cnt_ibz(1,:) /= -1)
+   call wrtout(units, msg)
+   end associate
  end do
 
 end subroutine fstab_print

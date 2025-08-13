@@ -47,7 +47,7 @@ gpu_option 2
 istwfk *1
 
 wfoptalg 114
-bandpp 1
+nblock_lobpcg 4 # Problably not optimal (LB:07-2025)
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "si_ps.736.pbe"

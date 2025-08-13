@@ -274,6 +274,28 @@ See also the variables [[chneut]] and [[chneut@anaddb]], that govern the imposit
 ),
 
 Variable(
+    abivarname="atndlist",
+    varset="gstate",
+    vartype="real",
+    topics=['NMR_basic','MagField_expert'],
+    dimensions=['3*[[natnd]]'],
+    defaultval=MultipleValue(number=None, value=0),
+    mnemonics="ATom Nuclear Dipole moment LIST",
+    requires="[[natnd]] > 0 and [[iatnd]]",
+    added_in_version="v10.5",
+    text=r"""
+Provides a simplified, alternative input to [[nucdipmom]] for the atoms carrying explicit
+nuclear dipole moments. The number of atoms in the cell with explicit
+nuclear dipoles is [[natnd]]; the list of the atoms is [[iatnd]]; and the components
+of the dipole moment vector on each atom is given in [[atndlist]]. There are 3*[[natnd]]
+entries in [[atndlist]]: the Cartesian x, y, and z components of the dipole moment to be
+assigned to each of the [[natnd]] atoms in the list. This simplified
+list is converted internally to the full [[nucdipmom]] list; either input format
+can be used.
+""",
+),
+
+Variable(
     abivarname="atvshift",
     varset="ffield",
     vartype="real",
@@ -4310,7 +4332,7 @@ Variable(
     mnemonics="Electron-PHonon: FROHLICH Model",
     added_in_version="before_v9",
     text=r"""
-Only relevant for [[optdriver]]=7 and [[eph_task]]=6, 10.
+Only relevant for [[optdriver]]=7 and [[eph_task]] = 6 or 10.
 If set to 1, use the dynamical matrix at Gamma, the Born effective charges, the dielectric tensor, as well as
 the effective masses (must give a _EFMAS file as input, see [[prtefmas]] and [[getefmas]] or [[irdefmas]]),
 as the parameters of a Frohlich Hamiltonian.
@@ -4485,7 +4507,7 @@ The choice is among:
          the user has to provide the full list of q-points in the input, [[ph_ndivsm]] is not used to generate the q-path.
 * 6 --> Estimate correction to the ZPR in polar materials using the generalized Frohlich model. Requires EFMAS.nc file. See [[cite:Miglio2020]].
 * 7 --> Compute phonon limited transport in semiconductors using lifetimes taken from SIGEPH.nc file. See [[cite:Brunin2020b]].
-* 8 --> Compute phonon limited transport by solving the (linearized) IBTE using collision terms taken from SIGEPH.nc file.
+* 8 --> Compute phonon limited transport by solving the linearized IBTE using collision terms taken from SIGEPH.nc file.
         Requires [[ibte_prep]] = 1 when computing the imaginary part of the e-ph self-energy with [[eph_task]] == -4.
 * 9 --> Compute cumulant from SIGEPH.nc file specified via [[getsigeph_filepath]].
 * 10 --> Compute polaron effective mass, using the generalized Frohlich model, in the triply-degenerate VB or CB cubic case.
@@ -4496,7 +4518,7 @@ The choice is among:
          The k-mesh must be equal to the one associated to the input WFK file, the q-mesh is specified
          by [[eph_ngqpt_fine]] (NB: the q-mesh must be a sub-mesh of the k-mesh or equal).
 * 12 --> Migdal-Eliashberg equations (isotropic case).
-* -12 --> Migdal-Eliashberg equations (anisotropic case). IN DEVELOPMENT.
+* -12 --> Migdal-Eliashberg equations (anisotropic case). UNDER DEVELOPMENT.
 * 13 --> Variational polaron equations
 * -13 --> Compute polaron wavefunctions and atomic displacements in the supercell and write results to files
 * 14 --> Compute the molecular Berry curvature from GSTORE.nc. No support for metals or non-collinear magnetism yet. Reference: [[cite:Saparov2022]], [[cite:Coh2023]].
@@ -4507,8 +4529,9 @@ The choice is among:
               An array D(R) with the decay of the W(R,r) as a function of R is computed and saved to file
               In the second case (-15) the q-points are taken directly from the DVDB file.
 * 16, -16 --> test_phrotation TO BE DOCUMENTED.
-* 17 --> Compute e-ph matrix elements with the GWPT formalism  IN DEVELOPMENT.
-* 18 --> Compute e-ph matrix g(k,q) along high-symmetry path. See [[eph_fix_wavevec]] and other related variables.
+* 17 --> Compute e-ph matrix elements with the GWPT formalism  UNDER DEVELOPMENT.
+* 18 --> Compute e-ph matrix g(k,q) along a high-symmetry path. See [[eph_fix_wavevec]] and other related variables.
+* 19 --> Compute matrix elements of the screened interaction W between two Cooper pairs.
 
 !!! important
 
@@ -7745,6 +7768,27 @@ along x, y or z directions, or a combination of these. See the variable
 [[iatfix]] for more information.
 """,
 ),
+
+Variable(
+    abivarname="iatnd",
+    varset="gstate",
+    vartype="integer",
+    topics=['NMR_basic','MagField_expert'],
+    dimensions=['[[natnd]]'],
+    defaultval=0,
+    mnemonics="list of AToms with Nuclear Dipole moment",
+    requires="[[natnd]] > 0",
+    added_in_version="v10.5",
+    text=r"""
+Together with [[natnd]], provides a simplified, alternative input to [[nucdipmom]] for
+the atoms carrying explicit nuclear dipole moments. The number of atoms in the cell with
+explicit nuclear dipoles is [[natnd]]; the list of the atoms is [[iatnd]]; and the components
+of the dipole moment vector on each atom is given in [[atndlist]]. This simplified
+list is converted internally to the full [[nucdipmom]] list; either input format
+can be used.
+""",
+),
+
 
 Variable(
     abivarname="iatsph",
@@ -11185,6 +11229,26 @@ When [[natfixz]] > 0, [[natfixz]] entries should be provided in array [[iatfixz]
 ),
 
 Variable(
+    abivarname="natnd",
+    varset="gstate",
+    vartype="integer",
+    topics=['NMR_basic','MagField_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Number of AToms with Nuclear Dipole moment",
+    added_in_version="v10.5",
+    text=r"""
+Provides a simplified, alternative input to [[nucdipmom]] for the atoms carrying explicit
+nuclear dipole moments. The number of atoms in the cell with explicit
+nuclear dipoles is [[natnd]]; the list of the atoms is [[iatnd]]; and the components
+of the dipole moment vector on each atom is given in [[atndlist]]. This simplified
+list is converted internally to the full [[nucdipmom]] list; either input format
+can be used.
+""",
+),
+
+
+Variable(
     abivarname="natom",
     varset="basic",
     vartype="integer",
@@ -13311,9 +13375,10 @@ allowed x, y and z magnetization (useful only with [[nspinor]] = 2 and
 [[nsppol]] = 1, either because there is spin-orbit without time-reversal
 symmetry - and thus spontaneous magnetization, or with spin-orbit, if one
 allows for spontaneous non-collinear magnetism). Available for
-response functions [[cite:Ricci2019]]. Not yet available for mGGA. Also note that, with [[nspden]] = 4, time-reversal symmetry
-is not taken into account (at present; this has to be checked) and thus
-[[kptopt]] has to be different from 1 or 2.
+response functions [[cite:Ricci2019]]. Not yet available for mGGA.
+Also note that, with [[nspden]] = 4, time-reversal symmetry
+is not taken into account (at present; this has to be checked) and thus [[kptopt]]
+has to be different from 1 or 2 (the default value is 4).
 
 The default ([[nspden]] = [[nsppol]]) does not suit the case of vector magnetization.
 Note that the choice of [[nspden]] has an influence on the treatment of symmetries. See [[symafm]].
@@ -13597,6 +13662,8 @@ moment values are entered in atomic units, as vectors in the Cartesian (not crys
 coordinate frame. For reference, note that
 one Bohr magneton has value $1/2$ in atomic units, while one nuclear
 Bohr magneton has value $2.7321\times 10^{-4}$ in atomic units.
+
+A simplified input to these values is provided by the variables [[natnd]], [[iatnd]], and [[atndlist]].
 """,
 ),
 
@@ -14431,7 +14498,7 @@ Variable(
     not automatically set by [[autoparal]]. For example, consult the [[tutorial:paral_mbt|tutorial on parallelism for Many-Body Perturbation Theory]] to learn how
     to run beyond-GS calculations with MPI. Other tutorials on parallelism are also available.
 
-**If paral_kgb is not expliciely put in the input file**, ABINIT
+**If paral_kgb is not explicitely put in the input file**, ABINIT
 automatically detects if the job has been sent in sequential or in parallel.
 In this last case, it detects the number of processors on which the job has
 been sent and calculates values of [[np_spkpt]], [[npfft]], [[npband]],
@@ -15022,8 +15089,10 @@ When PAW is activated, the **spin-orbit coupling** as derived from the
 zero-order regular approximation to relativistic effects (ZORA)
 can be added without the
 use of specific PAW datasets (pseudopotentials).  If in addition, a
-nuclear magnetic dipole moment (see [[nucdipmom]]) is present, ZORA terms due
-to the electron-nuclear spin interactions are added as well.
+nuclear magnetic dipole moment (see [[nucdipmom]]) is present, onsite ZORA terms due
+to the electron-nuclear spin interactions are added as well. See also the [[zora]]
+input keyword.
+
 If [[pawspnorb]] = 1, spin-orbit (and nuclear-electron spin) interactions will be added.
 If the wavefunction is spinorial (that is, if [[nspinor]] = 2), there is no
 reason not to include the spin-orbit interaction, so that the default value of
@@ -15042,7 +15111,7 @@ magnetization [[nspden]] = 4, the time-reversal symmetry is broken.
 The use of [[kptopt]] = 1 or [[kptopt]] = 2 is thus forbidden. It is advised to
 use [[kptopt]] = 3 (no symmetry used to generate k-points) or [[kptopt]] = 4 (only
 spatial symmetries used to generate k-points).
-Be careful if you choose to use [[kptopt]] = 0 (k-points given by hand); Time-
+Be careful if you choose [[kptopt]] = 0 (k-points given by hand); Time-
 reversal symmetry has to be avoided.
 An artificial scaling of the spin-orbit can be introduced thanks to the [[spnorbscl]] input variable.
 """,
@@ -19233,18 +19302,15 @@ Variable(
     mnemonics="SPIN for AToms",
     added_in_version="before_v9",
     text=r"""
-Gives the initial electronic spin-magnetization for each atom, in unit of $\hbar/2$,
-as well as, in case of fixed magnetization calculations (see [[constraint_kind]] and [[magconon]]), the target value of the magnetization.
+Gives the initial electronic spin-magnetization for each atom in Cartesian coordinates, in unit of $\hbar/2$,
+as well as, in case of fixed magnetization calculations (see [[constraint_kind]] and [[magconon]]),
+the target value of the magnetization.
 
-Note that if [[nspden]] = 2, the z-component must be given for each atom, in
-triplets (0 0 z-component).
-For example, the electron of an hydrogen atom can be spin up (0 0 1.0) or spin
-down (0 0 -1.0).
+Note that if [[nspden]] = 2, the z-component must be given for each atom, in triplets (0 0 z-component).
+For example, the electron of an hydrogen atom can be spin up (0 0 1.0) or spin down (0 0 -1.0).
 
-This value is only used to create the first exchange and correlation
-potential.
-It is not checked against the initial occupation numbers [[occ]] for each spin
-channel.
+This value is only used to create the first exchange and correlation potential.
+It is not checked against the initial occupation numbers [[occ]] for each spin channel.
 It is meant to give an easy way to break the spin symmetry, and to allow to
 find stable local spin fluctuations, for example: antiferromagnetism, or the
 spontaneous spatial spin separation of elongated H$_2$ molecule.
@@ -19958,13 +20024,18 @@ Variable(
     text=r"""
 Sets a tolerance for absolute differences of total energy that, reached TWICE
 successively, will cause one SCF cycle to stop (and ions to be moved).
-Can be specified in Ha (the default), Ry, eV or Kelvin, since [[toldfe]] has
+Can be specified in Ha (the default), Ry, eV, meV or Kelvin, since [[toldfe]] has
 the [[ENERGY]] characteristics (1 Ha = 27.2113845 eV).
 If set to zero, this stopping condition is ignored.
 Effective only when SCF cycles are done ([[iscf]]>0).
 Because of machine precision, it is not worth to try to obtain differences in
-energy that are smaller than about 1.0d-12 of the total energy. To get
-accurate stresses may be quite demanding.
+energy that are smaller than about 1.0d-12 of the total energy.
+To get accurate stresses may be quite demanding.
+
+!!! tip
+
+    In version 10.5.1 and above, it is possible to use a negative value to
+    specify the tolerance in energy per atom e.g. toldfe = -0.1 meV.
 
 When the geometry is optimized (relaxation of atomic positions or primitive
 vectors), the use of [[toldfe]] is to be avoided. The use of [[tolrff]]
@@ -22650,6 +22721,37 @@ Charge of the pseudo-ion (defined as the number of valence electrons that are ne
 screen exactly the pseudopotential).
 """,
 ),
+
+Variable(
+    abivarname="zora",
+    varset="paw",
+    vartype="integer",
+    topics=['PAW_useful', 'spinpolarisation_useful'],
+    dimensions="scalar",
+    defaultval="0",
+    mnemonics="Zeroth Order Regularized Approximation",
+    requires="[[usepaw]] == 1",
+    added_in_version="v10.5",
+    text=r"""
+ZORA is an effective approximation to the full Dirac equation, which
+delivers reasonable values for relativistic effects at modest
+cost [[cite:Autschbach2013]].
+The ZORA Hamiltonian includes kinetic energy couplings that are
+independent of electron spin, and additional terms depending explicitly
+on electron spin. The default, [[zora]] 0, provides the usual nonrelativistic calculation.
+[[zora]] 1 activates kinetic energy terms, which currently include only those
+due to nuclear magnetic dipoles (see [[nucdipmom]]).
+[[zora]] 2 activates the spin-dependent terms, which include both spin-orbit couplings
+(so identical to [[pawspnorb]] 1) and terms arising from nuclear magnetic dipoles if present.
+[[zora]] 3 activates both kinetic energy and electron spin terms.
+
+Negative values of [[zora]] are present only for debugging purposes. [[zora]] -1 permits only
+spin-orbit coupling, regardless of the presence of nuclear dipoles. [[zora]] -2 permits only
+the electon spin-nuclear dipole through space interaction, and [[zora]] -3 permits only the
+electron spin-nuclear dipole Fermi-contact-like interaction.
+""",
+),
+
 
 Variable(
     abivarname="znucl",
@@ -25720,6 +25822,59 @@ This is particularly useful when performing CD or AC computations.
 Note that in the case of AC, the total SCR file is supposed to contain 1 + [[nfreqim]] frequencies
 with the first point being the static limit.
 As a consequence, the full set of frequencies spans the [1, 1 + nfreqim] range.
+""",
+),
+
+Variable(
+    abivarname="use_gbt",
+    varset="gstate",
+    vartype="integer",
+    topics=['spinpolarisation_basic', 'MagMom_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="USE Generalized Bloch Theorem",
+    added_in_version="10.5.1",
+    text=r"""
+If set to 1, the Generalized Bloch Theorem (GBT) is used to compute a spin-spiral with wavevector [[qgbt]].
+The GBT requires [[nspinor]] = 2 and [[nspden]] 4, but is not compatible with spin-orbit coupling hence
+[[so_psp]] must be set to zero.
+Also, one has to disable spatial symmetries completely by setting [[nsym]] to 1, and
+time-reversal symmetry as well with [[kptopt]] = 4.
+
+Note that, for the time being, [[use_gbt]] /= 0 requires:
+
+- NC pseudos (no PAW)
+- [[useylm]] = 0
+- [[paral_kgb]] = 0
+- [[wfoptalg]] = 0 (CG eigensolver)
+
+Both LDA and GGA are supported, although GGA tends to be more difficult to converge
+in the non-collinear case.
+In order to reduce the number of SCF iterations and the computational cost,
+we recommend using [[toldfe]] as stopping criterion.
+Also, the convergence of the SCF cycle may be significantly improved by increasing [[nline]] to e.g. 12.
+
+
+!!! important
+
+    The atomic magnetic moment rotates in the x-y plane (Cartesian coords.) while the z-component
+    remains lattice-periodict. For this reason, one should set [[spinat]] so to have non-zero
+    components in the x-y plane.
+
+""",
+),
+
+Variable(
+    abivarname="qgbt",
+    varset="gstate",
+    vartype="real",
+    topics=['spinpolarisation_basic', 'MagMom_useful'],
+    dimensions=[3],
+    defaultval=[0, 0, 0],
+    mnemonics="Q-point for Generalized Bloch Theorem.",
+    added_in_version="10.5.1",
+    text=r"""
+Reduced coordinates of the wave-vector $\qq$ of the spin spiral when [[use_gbt]] /= 0.
 """,
 ),
 
