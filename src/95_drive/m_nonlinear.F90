@@ -910,10 +910,12 @@ el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.
  if (psps%usepaw==1)then
    cplex=1;ipert=0;option=1
    nzlmopt=0;if (dtset%pawnzlm>0) nzlmopt=-1
-   call pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,dtset%ixc,my_natom,natom,dtset%nspden,&
+   call pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,gprimd,ipert,dtset%ixc,&
+     & my_natom,natom,dtset%nspden,&
 &   ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_ij,pawang,dtset%pawprtvol,&
 &   pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,&
-&   dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp, &
+&   dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,xred,&
+&   ucvol,psps%znuclpsp, &
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
 
    call timab(561,1,tsec)

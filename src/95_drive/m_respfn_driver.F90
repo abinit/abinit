@@ -707,7 +707,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call paw_ij_init(paw_ij,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%pawspnorb,&
 &   natom,dtset%ntypat,dtset%typat,pawtab,has_dij=1,has_dijhartree=1,has_dijnd=has_dijnd,&
 &   has_dijso=1,has_dijU=has_diju,has_pawu_occ=1,has_exexch_pot=1,&
-&   nucdipmom=dtset%nucdipmom,&
+&   nucdipmom=dtset%nucdipmom,zora=dtset%zora,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
 
  else ! PAW vs NCPP
@@ -990,10 +990,11 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    cplex=1;ipert=0;option=1
    nzlmopt=0;if (dtset%pawnzlm>0) nzlmopt=-1
 
-   call pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,dtset%ixc,my_natom,natom,dtset%nspden,&
+   call pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,gprimd,ipert,&
+     & dtset%ixc,my_natom,natom,dtset%nspden,&
 &   ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_ij,pawang,dtset%pawprtvol,&
 &   pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,&
-&   dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp, &
+&   dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,xred,ucvol,psps%znuclpsp, &
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
 
    call timab(561,1,tsec)

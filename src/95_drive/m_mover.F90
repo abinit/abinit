@@ -1031,8 +1031,7 @@ real(dp) :: k0(3)
 
  call abihist_free(hist)
 
-
-   call abihist_free(hist_prev)
+ call abihist_free(hist_prev)
  call abimover_destroy(ab_mover)
  call abiforstr_fin(preconforstr)
 

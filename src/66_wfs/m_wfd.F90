@@ -1477,9 +1477,9 @@ end function wfd_xdotc
 
 !----------------------------------------------------------------------
 
-!!****f* m_wfd/wfd_get_gvec_kq
+!!****f* m_wfd/wfd_get_gvec_gbound
 !! NAME
-!! wfd_get_gvec_kq
+!! wfd_get_gvec_gbound
 !!
 !! FUNCTION
 !! Return the g-sphere centered on kq and gbound_kq,
@@ -3818,7 +3818,6 @@ end subroutine wfd_change_ngfft
 !!  Test the orthonormalization of the wavefunctions stored in Wfd.
 !!
 !! INPUTS
-!!  Wfd<wfd_t>=wavefunction descriptor.
 !!  Cryst<crystal_t>=Object defining the unit cell and its symmetries.
 !!  Pawtab(ntypat*usepaw)<type(pawtab_type)>=PAW tabulated starting data.
 !!
@@ -4216,8 +4215,9 @@ subroutine wfd_rotate_cg(wfd, band, ndat, spin, kk_ibz, npw_kbz, kg_kbz, istwf_k
  if (isirr_k) then
    do idat=1,ndat
      ! Copy u_k(G)
-     call wfd%copy_cg(band, ik_ibz, spin, cgs_kbz(:,:,idat))
-     if (present(urs_kbz)) call wfd%get_ur(band, ik_ibz, spin, urs_kbz(:,idat))
+     ib = band + idat - 1
+     call wfd%copy_cg(ib, ik_ibz, spin, cgs_kbz(:,:,idat))
+     if (present(urs_kbz)) call wfd%get_ur(ib, ik_ibz, spin, urs_kbz(:,idat))
    end do
 
  else
@@ -4226,7 +4226,7 @@ subroutine wfd_rotate_cg(wfd, band, ndat, spin, kk_ibz, npw_kbz, kg_kbz, istwf_k
    ABI_MALLOC(cg_kirr, (2, npw_kirr*wfd%nspinor))
 
    do idat=1,ndat
-     ib = band + idat -1
+     ib = band + idat - 1
      call wfd%copy_cg(ib, ik_ibz, spin, cg_kirr)
      call cgtk_rotate(cryst, kk_ibz, isym_k, trev_k, g0_k, wfd%nspinor, ndat1, &
                       wfd%npwarr(ik_ibz), wfd%kdata(ik_ibz)%kg_k, &

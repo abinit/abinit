@@ -584,8 +584,10 @@ contains  !=====================================================
 !!
 !! INPUTS
 !! wfk0_path=String with the path to the GS unperturbed WFK file.
+!! dtfil<datafiles_type>=Variables related to files.
 !! ngfft(18),ngfftf(18)=Coarse and Fine FFT meshes.
 !! dtset<dataset_type>=All input variables for this dataset.
+!! cryst: Crystalline structure
 !! ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
 !! dvdb<dbdb_type>=Database with the DFPT SCF potentials.
 !! ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
@@ -3413,8 +3415,7 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
      path = strcat(dtfil%filnam_ds(4), "_EDOS")
      call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path))
      call edos%write(path)
-     call edos%print(unit=std_out)
-     !call edos%print(unit=ab_out)
+     call edos%print([std_out])
    end if
    call cwtime_report(" sigmaph_new: ebands", cpu, wall, gflops)
  end if

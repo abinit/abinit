@@ -1,0 +1,102 @@
+# Ge diamond with slightly displaced atoms (to have non-zero forces)
+# test metaGGA + PAW + paral_kgb + istwfk + cprj_in_memory + nspinor
+# DS 1: paral_kgb 0 + cprj_in_memory 0 + istwfk 1
+# DS 2: paral_kgb 0 + cprj_in_memory 0 + istwfk > 1
+# DS 3: paral_kgb 1 + cprj_in_memory 0 + istwfk > 1
+# DS 4: paral_kgb 1 + cprj_in_memory 1 + istwfk > 1
+# DS 5: paral_kgb 1 + cprj_in_memory 1 + istwfk 1 + nspinor 2
+# All datasets should give the same results
+
+ndtset 5
+
+#DS 1
+paral_kgb1 0
+cprj_in_memory1 0
+istwfk1 1
+
+#DS 2
+paral_kgb2 0
+cprj_in_memory2 0
+istwfk2 2
+
+#DS 3
+paral_kgb3 1
+cprj_in_memory3 0
+istwfk3 2
+
+#DS 4
+paral_kgb4 1
+cprj_in_memory4 1
+istwfk4 2
+
+#DS 5
+paral_kgb5 1
+cprj_in_memory5 1
+istwfk5 1
+nspinor5 2
+nband5 40
+pawspnorb5 0
+
+# Simulation box
+acell 3*5.8 angstrom
+rprim  0.0 1/2 1/2
+       1/2 0.0 1/2
+       1/2 1/2 0.0
+
+# Atom types and positions
+# Slightly displaced the second atom to have non-zero forces
+ntypat 1
+znucl 32
+pp_dirpath="$ABI_PSPDIR/"
+pseudos="Ge.GGA-PBE-paw-kden-nonrel.xml"
+ixc -645642
+natom 2
+typat *1
+xred
+  -0.001  -0.001  -0.001
+   0.251   0.251   0.251
+
+# Nb of bands and occupation
+nband  20
+nbdbuf 2
+occopt 3
+tsmear 300 K
+
+# Basis set (probably unconverged)
+ecut 12
+pawecutdg 24
+
+# K-point grid (unrealistic)
+# Gamma point only for testing
+kptopt 3
+ngkpt 1 1 1
+nshiftk 1
+shiftk 0 0 0
+
+# Convergence
+nstep 20
+tolvrs 1e-10
+wfoptalg 114 # LOBPCG
+
+# Output
+write_files "none"
+
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% need_cpp_vars = HAVE_FFTW3 or HAVE_DFTI
+#%% [paral_info]
+#%% nprocs_to_test = 1
+#%% max_nprocs = 1
+#%% [NCPU_1]
+#%% files_to_test =
+#%%   t120_MPI1.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium
+#%% [extra_info]
+#%% authors = F. Brieuc
+#%% keywords = metaGGA, PAW
+#%% description = Tests metaGGA + PAW + cprj_in_memory + paral_kgb + istwf + nspinor . All datasets should give the same results.
+#%%<END TEST_INFO>

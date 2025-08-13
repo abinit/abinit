@@ -1,9 +1,9 @@
 #parallelization
 paral_kgb 1
+nblock_lobpcg 2
 npband 16
 npfft 2
 np_spkpt 1
-bandpp 4
 
 prtden 0 prtwf 0 prteig 0
 ecut 3.
@@ -28,7 +28,7 @@ rprim 1 0 0
  0 1 0
 0 0 1
 natom 256 ntypat 1 typat 256*1 znucl 13.0
-nband 520
+nband 512
 xred
   0.00000000E+00  0.00000000E+00  0.00000000E+00
   0.00000000E+00  0.12500000E+00  0.12500000E+00

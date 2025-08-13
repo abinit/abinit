@@ -36,14 +36,17 @@ inp_files = [
     "t24.abi" ,  # same as v10[10], with dilatxm>1, istwfk>1 (with DFTI).
     "t25.abi" ,  # same as v10[10], with dilatxm>1, istwfk>1 (without DFTI).
     "t26.abi" ,  # test cprj_in_memory when atoms are not ordered by type.
-    "t30.abi" ,  # test axial vector symmetry under zeeman field
+    "t27.abi" ,  # test GBT for the spin spiral
+    "t30.abi" ,  # test axial vector symmetry with hspinfield along x,y and z directions.
     "t40.abi" ,  # test orbmag calculation when using spatial symmetries for GS nuclear dipole
     "t41.abi" ,  # test orbmag calculation using R2SCAN mGGA
     "t42.abi" ,  # test orbmag calculation using R2SCAN mGGA, nspinor 2, zora
     "t43.abi" ,  # test quadrupoles calculation with xcnlcc
+    "t44.abi" ,  # test all zora input values on orbmag calculation
     "t81.abi" ,  # Short MD to test restart on next test
     "t82.abi" ,  # Test restart of MD from the HIST of previous test using restartxf -1
     "t83.abi" ,  # Test variable cell nudged elastic band method
+    "t84.abi" ,  # Test nuclear spin dipole coupling by energy difference
     "t104.abi" , # Test Si spectral function and mobilities :step 1 WFK
     "t105.abi" , # Test Si spectral function and mobilities :step 2 merge DDB
     "t106.abi" , # Test Si spectral function and mobilities :step 3 merge DVDB

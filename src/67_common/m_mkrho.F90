@@ -778,8 +778,8 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                    !$OMP PARALLEL DO PRIVATE(ipw,cwftmp)
                    do ipw=1,npw_k
                      cwftmp=-cwavef(2,ipw+(ib-1)*npw_k,1)*kg_k_cart_block(ipw)
-                     cwavef(2,ipw,1)=cwavef(1,ipw+(ib-1)*npw_k,1)*kg_k_cart_block(ipw)
-                     cwavef(1,ipw,1)=cwftmp
+                     cwavef(2,ipw+(ib-1)*npw_k,1)=cwavef(1,ipw+(ib-1)*npw_k,1)*kg_k_cart_block(ipw)
+                     cwavef(1,ipw+(ib-1)*npw_k,1)=cwftmp
                    end do
                  end do
                  if (my_nspinor==2) then
@@ -788,8 +788,8 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                      !$OMP PARALLEL DO PRIVATE(ipw,cwftmp)
                      do ipw=1,npw_k
                        cwftmp=-cwavef(2,ipw+(ib-1)*npw_k,2)*kg_k_cart_block(ipw)
-                       cwavef(2,ipw,2)=cwavef(1,ipw+(ib-1)*npw_k,2)*kg_k_cart_block(ipw)
-                       cwavef(1,ipw,2)=cwftmp
+                       cwavef(2,ipw+(ib-1)*npw_k,2)=cwavef(1,ipw+(ib-1)*npw_k,2)*kg_k_cart_block(ipw)
+                       cwavef(1,ipw+(ib-1)*npw_k,2)=cwftmp
                      end do
                    end do
                  end if
@@ -798,12 +798,12 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                  do ib=1,blocksize
                    do ipw=1,npw_k
                      cwftmp=-cwavef(2,ipw+(ib-1)*npw_k,1)*kg_k_cart_block(ipw)
-                     cwavef(2,ipw,1)=cwavef(1,ipw+(ib-1)*npw_k,1)*kg_k_cart_block(ipw)
-                     cwavef(1,ipw,1)=cwftmp
+                     cwavef(2,ipw+(ib-1)*npw_k,1)=cwavef(1,ipw+(ib-1)*npw_k,1)*kg_k_cart_block(ipw)
+                     cwavef(1,ipw+(ib-1)*npw_k,1)=cwftmp
                      if (my_nspinor==2) then
                        cwftmp=-cwavef(2,ipw+(ib-1)*npw_k,2)*kg_k_cart_block(ipw)
-                       cwavef(2,ipw,2)=cwavef(1,ipw+(ib-1)*npw_k,2)*kg_k_cart_block(ipw)
-                       cwavef(1,ipw,2)=cwftmp
+                       cwavef(2,ipw+(ib-1)*npw_k,2)=cwavef(1,ipw+(ib-1)*npw_k,2)*kg_k_cart_block(ipw)
+                       cwavef(1,ipw+(ib-1)*npw_k,2)=cwftmp
                      end if
                    end do
                  end do
@@ -1106,7 +1106,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  end if
 
  select case (ioption)
- case(0, 1)
+ case (0, 1)
    call symrhg(1,gprimd,irrzon,mpi_enreg,dtset%nfft,nfftot,dtset%ngfft,dtset%nspden,dtset%nsppol,dtset%nsym,&
                phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel,dtset%tnons)
    if(ioption==1)then
@@ -1118,7 +1118,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
        rhog(:,ifft)=1.0d0/2.0d0*rhog(:,ifft)
      end do
    end if
- case(2)
+ case (2)
    ABI_BUG('kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.')
    !call symtaug(1,gprimd,irrzon,mpi_enreg,dtset%nfft,nfftot,dtset%ngfft,dtset%nspden,dtset%nsppol,dtset%nsym,&
    !dtset%paral_kgb,phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel)

@@ -35,7 +35,7 @@
  occopt 7
  tsmear 0.01
  nband 4
- bandpp 4
+ nblock_lobpcg 1
  nbdbuf 0
 
  nstep 6

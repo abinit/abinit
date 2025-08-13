@@ -3070,10 +3070,11 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  type(ddkop_t) :: ddkop
  type(xcomm_t) :: pert_comm, qs_comm, qpt_comm, bsum_comm, kpt_comm, spin_comm, pkb_comm !, ncwrite_comm
  type(krank_t) :: krank
+ type(htetra_t) :: tetra
  character(len=500) :: msg
  character(len=fnlen) :: path
 !arrays
- integer :: g0_k(3),g0bz_kq(3),g0_kq(3),symq(4,2,cryst%nsym)
+ integer :: g0_k(3),g0bz_kq(3),g0_kq(3),symq(4,2,cryst%nsym), units(2)
  integer :: indkk_kq(6,1), work_ngfft(18),gmax(3),my_gmax(3),gamma_ngqpt(3) !g0ibz_kq(3),
  integer,allocatable :: kg_k(:,:),kg_kq(:,:),gtmp(:,:),nband(:,:),wfd_istwfk(:), my_pinfo(:,:), pert_table(:,:) !, qibz_done(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3), lf(2),rg(2),res(2), vk(3), vkq(3), wminmax(2), n0(ebands%nsppol)
@@ -3082,10 +3083,10 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  real(dp),allocatable :: grad_berry(:,:), kpg_kq(:,:), kpg_k(:,:)
  real(dp),allocatable :: ffnl_k(:,:,:,:), ffnl_kq(:,:,:,:), ph3d_k(:,:,:), ph3d_kq(:,:,:)
  real(dp),allocatable :: v1scf(:,:,:,:), tgam(:,:,:), gkk_atm(:,:,:,:) !,gkq_nu(:,:,:,:)
- real(dp),allocatable :: bras_kq(:,:,:), kets_k(:,:,:), h1kets_kq(:,:,:), cgwork(:,:)
+ real(dp),allocatable :: bras_kq(:,:,:), kets_k(:,:,:), h1kets_kq(:,:,:), cg_work(:,:)
  real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1(:,:,:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:), gvnlx1(:,:), work(:,:,:,:)
- real(dp),allocatable :: gs1c_kq(:,:), v1_work(:,:,:,:), vcar_ibz(:,:,:,:)
+ real(dp),allocatable :: gs1c_kq(:,:), v1_work(:,:,:,:), vcart_ibz(:,:,:,:)
  real(dp),allocatable :: wt_ek(:,:), wt_ekq(:,:), dbldelta_wts(:,:)
  real(dp),allocatable :: tgamvv_in(:,:,:,:),  vv_kk(:,:,:), tgamvv_out(:,:,:,:), vv_kkq(:,:,:), tmp_vals_ee(:,:,:,:,:), emesh(:)
  !real(dp) :: ylmgr_k_dum(1,1,1), ylmgr_kq_dum(1,1,1), ylmgr_dum(1,1,1)
@@ -3107,6 +3108,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
+ units = [std_out, ab_out]
 
  ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor; nspden = dtset%nspden
@@ -3127,20 +3129,17 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ! Store DOS per spin channel
  n0(:) = edos%gef(1:edos%nsppol)
  if (my_rank == master) then
-   call edos%print(unit=ab_out)
+   call edos%print(units)
    path = strcat(dtfil%filnam_ds(4), "_EDOS")
-   call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path, ch10))
    call edos%write(path)
  end if
 
  ! Find Fermi surface k-points
  ! TODO: support kptopt, change setup of k-points if tetra: fist tetra weights then k-points on the Fermi surface!
  ABI_MALLOC(fstab, (nsppol))
- call fstab_init(fstab, ebands, cryst, dtset, comm)
- if (my_rank == master) then
-   call fstab_print(fstab, unit=std_out)
-   call fstab_print(fstab, unit=ab_out)
- end if
+ call fstab_init(fstab, ebands, cryst, dtset, tetra, comm)
+ call tetra%free()
+ !if (my_rank == master) call fstab_print(fstab, units)
 
  ! Define q-mesh. eph_ngqpt_fine activates the Fourier interpolation of the DFPT potentials.
  gamma_ngqpt = ifc%ngqpt; if (all(dtset%eph_ngqpt_fine /= 0)) gamma_ngqpt = dtset%eph_ngqpt_fine
@@ -3298,8 +3297,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
  path = strcat(dtfil%filnam_ds(4), "_A2F.nc")
  ncid = nctk_noid
- if (my_rank == master) then
 
+ if (my_rank == master) then
    write(std_out, "(/,a)")" === MPI parallelism ==="
    !write(std_out, "(2(a,i0))")"P Allocating and summing bands from my_bsum_start: ", self%my_bsum_start, &
    !    " up to my_bsum_stop: ", self%my_bsum_stop
@@ -3555,8 +3554,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ABI_MALLOC(tgam, (2, natom3, natom3))
  ABI_MALLOC(displ_cart, (2, 3, cryst%natom, natom3))
  ABI_MALLOC(displ_red, (2, 3, cryst%natom, natom3))
-
  ABI_CALLOC(dummy_vtrial, (nfftf, nspden))
+
  ! TODO: Save data to netcdf file for each q in IBZ and then read data to build a2Fw once all big
  ! datastructures (wfd, dvdb) have been deallocated.
  ! As a side effect, one can also implement restart over q-points
@@ -3564,7 +3563,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ! Create ddkop object to compute group velocities if needed.
  !
  !   1) precompute group velocities in the IBZ and the ihave_ikibz_spin file (common to all procs)
- !   2) Use symmetries to reconstruct v_kq from vcar_ibz
+ !   2) Use symmetries to reconstruct v_kq from vcart_ibz
  !
  ! NB: All procs store in memory the same set of Bloch states inside the energy window.
 
@@ -3576,8 +3575,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    ii = min(ii, fstab(spin)%bmin)
    jj = max(jj, fstab(spin)%bmax)
  end do
- ABI_CALLOC(vcar_ibz, (3, ii:jj, nkibz, nsppol))
- ABI_MALLOC(cgwork, (2, mpw * wfd%nspinor))
+ ABI_CALLOC(vcart_ibz, (3, ii:jj, nkibz, nsppol))
+ ABI_MALLOC(cg_work, (2, mpw * wfd%nspinor))
 
  cnt = 0
  do spin=1,nsppol
@@ -3594,11 +3593,10 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
      do band_k=fs%bmin,fs%bmax
        if (.not. bks_mask(band_k, ik_ibz, spin)) cycle
-       !if (.not. wfd%ihave_ug(band_k, ik_ibz, spin)) cycle
-       call wfd%copy_cg(band_k, ik_ibz, spin, cgwork)
+       call wfd%copy_cg(band_k, ik_ibz, spin, cg_work)
        eig0nk = ebands%eig(band_k, ik_ibz, spin)
-       vk = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, wfd%nspinor, cgwork, cwaveprj0)
-       vcar_ibz(:, band_k, ik_ibz, spin) = vk
+       vk = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, wfd%nspinor, cg_work, cwaveprj0)
+       vcart_ibz(:, band_k, ik_ibz, spin) = vk
 
        ! TODO: Use ebands_get_edos_matrix_elements
        ! reald(dp) :: vv_fs(3,3,nsppol)
@@ -3619,15 +3617,15 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    end do
  end do ! spin
 
- call xmpi_sum(vcar_ibz, comm, ierr)
- ABI_FREE(cgwork)
+ call xmpi_sum(vcart_ibz, comm, ierr)
+ ABI_FREE(cg_work)
  call cwtime_report(" Velocities", cpu, wall, gflops)
 
  ABI_FREE(bks_mask)
 
  ! Write v_nk to disk.
 ! if (my_rank == master) then
-!   NCF_CHECK(nf90_put_var(sigma%ncid, nctk_idname(sigma%ncid, "vcar_ibz"), vcar_ibz))
+!   NCF_CHECK(nf90_put_var(sigma%ncid, nctk_idname(sigma%ncid, "vcart_ibz"), vcart_ibz))
 ! end if
 
  if (dtset%eph_transport > 0) then
@@ -3879,7 +3877,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
          !call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kk, istwf_k, npw_k, kg_k)
          do ib_k=1,nband_k
            band_k = ib_k + bstart_k - 1
-           vk = vcar_ibz(:, band_k, ik_ibz, spin)
+           vk = vcart_ibz(:, band_k, ik_ibz, spin)
            if (.not. isirr_k) then
              vk = matmul(transpose(cryst%symrel_cart(:,:,isym_k)), vk)
              if (trev_k /= 0) vk = -vk
@@ -3892,7 +3890,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
          !call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kq, istwf_kq, npw_kq, kg_kq)
          do ib_kq=1,nband_kq
            band_kq = ib_kq + bstart_kq - 1
-           vkq = vcar_ibz(:, band_kq, ikq_ibz, spin)
+           vkq = vcart_ibz(:, band_kq, ikq_ibz, spin)
            if (.not. isirr_kq) then
              vkq = matmul(transpose(cryst%symrel_cart(:,:,isym_kq)), vkq)
              if (trev_kq /= 0) vkq = -vkq
@@ -3972,9 +3970,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
            band_k = ib_k + bstart_k - 1
            sigma = fs%eph_fsmear
            if (fs%eph_fsmear < zero) then
-             !ori sigma = max(maxval([(abs(dot_product(fs%vk(:, ib_k), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
-             !replace the implicit loop by an explicit one
-             !workaround works with both ifort and ifx on oneapi 2024
              do ii=1,3
                abc(ii) = abs(dot_product(fs%vk(:, ib_k), fs%kmesh_cartvec(:,ii)))
              end do
@@ -3987,9 +3982,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
            band_kq = ib_kq + bstart_kq - 1
            sigma = fs%eph_fsmear
            if (fs%eph_fsmear < zero) then
-             !ori sigma = max(maxval([(abs(dot_product(fs%vkq(:, ib_kq), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
-             !replace the implicit loop by an explicit one
-             !workaround works with both ifort and ifx on oneapi 2024
              do ii=1,3
                abc(ii) = abs(dot_product(fs%vkq(:, ib_kq), fs%kmesh_cartvec(:,ii)))
              end do
@@ -4087,7 +4079,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ABI_FREE(displ_cart)
  ABI_FREE(displ_red)
  !ABI_FREE(qibz_done)
- ABI_SFREE(vcar_ibz)
+ ABI_SFREE(vcart_ibz)
  call krank%free()
 
  ABI_SFREE(tgamvv_in)

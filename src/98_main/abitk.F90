@@ -283,7 +283,7 @@ program abitk
 
    if (command == "ebands_edos") then
      edos = ebands%get_edos(cryst, intmeth, step, broad, comm)
-     call edos%print(std_out, header="Electron DOS")
+     call edos%print([std_out], header="Electron DOS")
      out_path = strcat(basename(path), "_EDOS")
      call wrtout(std_out, sjoin("Writing electron DOS to file:", out_path))
      call edos%write(out_path)
@@ -418,7 +418,7 @@ program abitk
    ABI_CHECK(get_arg("broad", broad, msg, default=0.06 * eV_Ha) == 0, msg)
 
    edos = ebands%get_edos(cryst, intmeth, step, broad, comm)
-   call edos%print(std_out, header="Electron DOS")
+   call edos%print([std_out], header="Electron DOS")
    call edos%get_carriers(ntemp, kTmesh, mu_e, n_ehst)
 
    !write(msg, "(a16,a32,a32)") 'Temperature [K]', 'e/h density [cm^-3]', 'e/h mobility [cm^2/Vs]'

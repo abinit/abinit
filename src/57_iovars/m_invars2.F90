@@ -250,7 +250,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 !arrays
  integer :: vacuum(3)
  integer,allocatable :: iatcon(:),natcon(:), intarr(:)
- real(dp) :: tsec(2)
+ real(dp) :: qgbt(3), tsec(2)
  real(dp),allocatable :: dmatpawu_tmp(:), dprarr(:)
  type(libxc_functional_type) :: xcfunc(2)
 ! *************************************************************************
@@ -3719,6 +3719,8 @@ if (dtset%usekden==1) then
    else
      dtset%toldfe=dprarr(1)
      if(abs(dprarr(1))>tiny(0._dp))itol=itol+1
+     ! A negative value is interpreted as energy per atom.
+     if (dtset%toldfe < zero) dtset%toldfe = abs(dtset%toldfe) * dtset%natom
    end if
  end if
 
@@ -4346,6 +4348,11 @@ if (dtset%usekden==1) then
  if (dtset%optdriver == RUNL_WFK .and. dtset%wfk_task == WFK_TASK_NONE) then
     ABI_ERROR(sjoin("A valid wfk_task must be specified when optdriver= ", itoa(dtset%optdriver), ", Received:", key_value))
  end if
+
+ if (dtset%use_gbt /= 0) then
+  call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'qgbt', tread, 'DPR')
+  dtset%qgbt(1:3) = dprarr(1:3)
+ endif
 
  ABI_FREE(intarr)
  ABI_FREE(dprarr)
