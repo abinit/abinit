@@ -1707,7 +1707,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
            endif
 ! GBT
            if (nspden==4 .and. use_gbt==1) then
-             qr = two_pi * (qgbt(1)*dble(i1)/dble(n1) + qgbt(1)*dble(i2)/dble(n2) + qgbt(1)*dble(i3)/dble(n3))
+             qr = two_pi * (qgbt(1)*dble(i1)/dble(n1) + qgbt(2)*dble(i2)/dble(n2) + qgbt(3)*dble(i3)/dble(n3))
              rhor_local(ifft_local,1) = rhor(ifft_local,1)
              mx = rhor(ifft_local,2)
              my = rhor(ifft_local,3)
