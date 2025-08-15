@@ -474,7 +474,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
  ABI_MALLOC(v_constr_dft_r, (nfft,dtset%nspden))
  v_constr_dft_r = zero
  if (dtset%magconon==1.or.dtset%magconon==2) then
-   call mag_penalty(constrained_dft,mpi_enreg,rhor,v_constr_dft_r,xred)
+   call mag_penalty(constrained_dft,mpi_enreg,rhor,v_constr_dft_r,xred,dtset%qgbt,dtset%use_gbt)
  end if
 
  if (optres==0) then
@@ -507,7 +507,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
      !If constrained_dft, must take into account the constraints, and recompute the residual and the new potential
      if( any(dtset%constraint_kind(:)/=0))then
        call constrained_residual(constrained_dft,energies%e_constrained_dft,&
-&        grcondft,intgres,mpi_enreg,rhor,strscondft,vresidnew,xred)
+&        grcondft,intgres,mpi_enreg,rhor,strscondft,vresidnew,xred,dtset%qgbt,dtset%use_gbt)
        vnew(:,1:dtset%nspden)=vtrial(:,1:dtset%nspden)+vresidnew(:,1:dtset%nspden)
      endif
 

@@ -935,7 +935,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    !if (dtset%use_gbt /= 0) call gbt_times_qr(nfft, nspden, ngfft, mpi_enreg, -dtset%qgbt, rhor)
 
    call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,&
-                      ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
+                      ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,dtset%qgbt,dtset%use_gbt,intgden=intgden,rhomag=rhomag)
 
    ! Back to periodic rhor
    !if (dtset%use_gbt /= 0) call gbt_times_qr(nfft, nspden, ngfft, mpi_enreg, dtset%qgbt, rhor)
@@ -1009,7 +1009,7 @@ if (dtset%prt_lorbmag==1) then
  if (dtset%magconon /= 0) then
 !  calculate final value of terms for magnetic constraint: "energy" term, lagrange multiplier term, and atomic contributions
    call mag_penalty_e(dtset%magconon,dtset%magcon_lambda,mpi_enreg,&
-&   natom,nfft,ngfft,nspden,ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%spinat,dtset%typat,xred)
+&   natom,nfft,ngfft,nspden,ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%spinat,dtset%typat,xred,dtset%qgbt,dtset%use_gbt)
  end if
 
  call timab(1167,2,tsec)
