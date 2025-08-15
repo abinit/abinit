@@ -1,8 +1,8 @@
 
-.Version 10.5.1.5 of ABINIT, released Jul 2025.
-.(MPI version, prepared for a aarch64_darwin23.6.0_gnu14.2 computer)
+.Version 10.3.4.2 of ABINIT, released Jul 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 28 Jul 2025.
-- ( at 11h26 )
+.Starting date : Fri 15 Aug 2025.
+- ( at 21h20 )
   
-- input  file    -> /Users/giantomassi/git_repos/abinit_gbt/_build/tests/Test_suite/v10_t27/t27.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/leshu_gbt/tests/TestBot_MPI1/v10_t27/t27.abi
 - output file    -> t27.abo
 - root for input  files -> t27i
 - root for output files -> t27o
@@ -43,7 +43,7 @@ _ WF disk file :      1.892 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
@@ -52,7 +52,7 @@ _ WF disk file :      1.892 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      5.58470000E+01
              ecut      3.00000000E+01 Hartree
--          fftalg         312
+-          fftalg         512
            istwfk        1    1    1    1    1    1    1    1
               ixc           7
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -156,8 +156,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.16198
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/giantomassi/git_repos/abinit_gbt/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/Fe.psp8
-- pspatm: opening atomic psp file    /Users/giantomassi/git_repos/abinit_gbt/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/Fe.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/leshu_gbt/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/Fe.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/leshu_gbt/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/Fe.psp8
 - Fe    ONCVPSP-3.3.0  r_core=   1.26437   1.20546   1.56719
 - 26.00000  16.00000    180420                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -243,9 +243,9 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
  Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.00000       14.045260      3.088737    0.022486    0.028368
+    1   2.00000       14.045260      3.089521    0.022492    0.028368
  ---------------------------------------------------------------------
- Total magnetization (spheres)       3.088737    0.022486    0.028368
+ Total magnetization (spheres)       3.089521    0.022492    0.028368
  Total magnetization (exact)         3.238660    0.023576    0.029702
 ================================================================================
 
@@ -286,18 +286,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  5.69516052338123E+01
-hartree             :  3.14483541321796E+01
-xc                  : -1.74962024980932E+01
+kinetic             :  5.69516052338121E+01
+hartree             :  3.14483541321794E+01
+xc                  : -1.74962024980931E+01
 Ewald energy        : -8.49541326797210E+01
 psp_core            :  2.91406453042844E+00
 local_psp           : -1.07098224858441E+02
-non_local_psp       : -6.69859430742358E+00
+non_local_psp       : -6.69859430742354E+00
 internal            : -1.24933130447259E+02
-'-kT*entropy'       : -5.07623607188046E-03
-total_energy        : -1.24938206683330E+02
-total_energy_eV     : -3.39974150084012E+03
-band_energy         : -1.16555138214281E+01
+'-kT*entropy'       : -5.07623607188098E-03
+total_energy        : -1.24938206683331E+02
+total_energy_eV     : -3.39974150084013E+03
+band_energy         : -1.16555138214282E+01
 ...
 
 
@@ -313,14 +313,14 @@ band_energy         : -1.16555138214281E+01
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      5.58470000E+01
              ecut      3.00000000E+01 Hartree
            etotal     -1.2493820668E+02
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            istwfk        1    1    1    1    1    1    1    1
               ixc           7
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -385,7 +385,7 @@ P           mkmem           8
           spgroup           1
            spinat      4.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten      6.7893186112E-03  6.8052945070E-03  6.7266873988E-03
-                       3.8533142172E-05  5.4548156828E-05 -2.2166804595E-05
+                       3.8533142173E-05  5.4548156828E-05 -2.2166804595E-05
            tolvrs      1.00000000E-06
             typat      1
           use_gbt           1
@@ -432,7 +432,7 @@ P           mkmem           8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -449,12 +449,12 @@ P           mkmem           8
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -472,7 +472,7 @@ P           mkmem           8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -487,20 +487,15 @@ P           mkmem           8
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         11.8  wall=         11.9
+- Proc.   0 individual time (sec): cpu=         18.7  wall=         18.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.8  wall=         11.9
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
--   There were 68 allocations and 68 deallocations in C code
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 1365986 allocations and 1365986 deallocations in Fortran
--   Remaining memory at the end of the calculation is 0
++Overall time at end (sec) : cpu=         18.7  wall=         18.8
