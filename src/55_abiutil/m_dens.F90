@@ -23,7 +23,6 @@
 MODULE m_dens
 
  use defs_basis
- use m_dtset
  use m_errors
  use m_abicore
  use m_xmpi
@@ -800,7 +799,7 @@ end subroutine constrained_dft_free
 
 !Arguments ------------------------------------
 !scalars
- integer :: use_gbt 
+ integer, intent(in) :: use_gbt
  real(dp),intent(out) :: e_constrained_dft
  type(constrained_dft_t),intent(in) :: c_dft
  type(MPI_type),intent(in) :: mpi_enreg
@@ -1532,12 +1531,12 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  type(MPI_type),intent(in) :: mpi_enreg
  integer,intent(in)        :: option
  integer,intent(in)        :: cplex
- integer,intent(in),optional :: use_gbt
+ integer,intent(in)        :: use_gbt
 !arrays
  integer,intent(in)  :: ngfft(18),typat(natom)
  real(dp),intent(in) :: ratsph(ntypat),rhor(cplex*nfft,nspden),rprimd(3,3)
  real(dp),intent(in) :: xred(3,natom)
- real(dp),intent(in),optional   :: qgbt(3)
+ real(dp),intent(in) :: qgbt(3)
  real(dp),intent(out),optional  :: dentot(nspden)
  real(dp),intent(out),optional  :: gr_intgden(3,nspden,natom)
  real(dp),intent(out),optional  :: intgden(nspden,natom)
@@ -1551,9 +1550,9 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  integer :: neighbor_overlap,n2a,n2b,n3,n3a,n3b,nfftot
  integer :: jfft
  real(dp),parameter :: delta=0.99_dp
- real(dp) :: difx,dify,difz,r2,r2atsph,rr1,rr2,rr3,rx,ry,rz,qr,mx,my,mz,rhor_local(cplex*nfft,nspden)
+ real(dp) :: difx,dify,difz,r2,r2atsph,rr1,rr2,rr3,rx,ry,rz,qr,mx,my,mz,rhor_local(nspden)
  real(dp) :: dfsm,fact,fsm,ratsm2,ucvol
- logical   :: grid_found
+ logical  :: grid_found
 !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  integer :: overlap_ij(natom,natom)
@@ -1563,23 +1562,17 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  real(dp) :: dist_ij(natom,natom),intgden_(nspden,natom)
  real(dp) :: my_xred(3, natom), rmet(3,3),xshift(3, natom)
  real(dp), allocatable :: fsm_atom(:,:)
-
 !real(dp) :: rprimd_mod(3,3),strain
-
 ! *************************************************************************
+
+ ABI_CHECK_IEQ(cplex, 1, "cplex != 1 won't work here!")
 
  n1=ngfft(1);n2=ngfft(2);n3=ngfft(3)
  nfftot=n1*n2*n3
  intgden_=zero
- if(present(intgden))then
-   intgden=zero
- endif
- if(present(gr_intgden))then
-   gr_intgden=zero
- endif
- if(present(strs_intgden))then
-   strs_intgden=zero
- endif
+ if(present(intgden)) intgden=zero
+ if(present(gr_intgden)) gr_intgden=zero
+ if(present(strs_intgden)) strs_intgden=zero
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
@@ -1630,15 +1623,13 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
    end if
  end if
 
- if(.not.(grid_found)) then
-   ABI_BUG("Unable to find an allocated distrib for this fft grid")
- end if
+ ABI_CHECK(grid_found, "Unable to find an allocated distrib for this fft grid")
 
 !Loop over atoms
 !-------------------------------------------
  do iatom=1,natom
 
-!  Define a "box" around the atom
+!  Define a "box" around the atom that extends outside of the unit cell
    r2atsph=1.0000001_dp*ratsph(typat(iatom))**2
    rr1=sqrt(r2atsph*gmet(1,1))
    rr2=sqrt(r2atsph*gmet(2,2))
@@ -1705,25 +1696,26 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
              if(neighbor_overlap==0)intgf2(iatom,iatom)=intgf2(iatom,iatom)+fsm*fsm
              if(neighbor_overlap==1)fsm_atom(ifft_local,iatom)=fsm_atom(ifft_local,iatom)+fsm
            endif
-! GBT
-           if (nspden==4 .and. use_gbt==1) then
+
+           if (nspden==4 .and. use_gbt /= 0) then
+             ! If GBT is on, we have to include the e^{iq.r} phase
              qr = two_pi * (qgbt(1)*dble(i1)/dble(n1) + qgbt(2)*dble(i2)/dble(n2) + qgbt(3)*dble(i3)/dble(n3))
-             rhor_local(ifft_local,1) = rhor(ifft_local,1)
+             rhor_local(1) = rhor(ifft_local,1)
              mx = rhor(ifft_local,2)
              my = rhor(ifft_local,3)
              mz = rhor(ifft_local,4)
-! e^-iqr :cos(qr)-isin(qr)
-             rhor_local(ifft_local,2) = cos(qr)*mx - sin(qr)*my ! mx
-             rhor_local(ifft_local,3) = sin(qr)*mx + cos(qr)*my ! my
-             rhor_local(ifft_local,4) = mz
+             ! e^-iqr :cos(qr)-isin(qr)
+             rhor_local(2) = cos(qr)*mx - sin(qr)*my ! mx
+             rhor_local(3) = sin(qr)*mx + cos(qr)*my ! my
+             rhor_local(4) = mz
            else
-                   rhor_local(ifft_local,1:nspden) = rhor(ifft_local,1:nspden)
-           end if 
+             rhor_local(1:nspden) = rhor(ifft_local,1:nspden)
+           end if
 !          Integral of density or potential residual
-           intg(1:nspden)=intg(1:nspden)+fsm*rhor_local(ifft_local,1:nspden)
+           intg(1:nspden)=intg(1:nspden)+fsm*rhor_local(1:nspden)
            if((present(gr_intgden).or.present(strs_intgden)).and. option<10 .and. ratsm2>tol12)then
              do ispden=1,nspden
-               fact=dfsm*rhor_local(ifft_local,ispden)
+               fact=dfsm*rhor_local(ispden)
                if(present(gr_intgden))then
                  gr_intg(1,ispden)=gr_intg(1,ispden)+difx*fact
                  gr_intg(2,ispden)=gr_intg(2,ispden)+dify*fact
@@ -1924,13 +1916,8 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
      call timab(48,2,tsec)
    end if
 
-   if(present(dentot))then
-     dentot(:)=rhomag_(1,:)
-   endif
-
-   if(present(rhomag))then
-     rhomag(:,:)=rhomag_(:,:)
-   endif
+   if(present(dentot)) dentot(:)=rhomag_(1,:)
+   if(present(rhomag)) rhomag(:,:)=rhomag_(:,:)
  endif
 
  !DEBUG BUT KEEP

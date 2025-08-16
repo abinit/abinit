@@ -19302,9 +19302,9 @@ Variable(
     mnemonics="SPIN for AToms",
     added_in_version="before_v9",
     text=r"""
-Gives the initial electronic spin-magnetization for each atom in Cartesian coordinates, in unit of $\hbar/2$,
+Gives the **initial** electronic spin-magnetization for each atom in Cartesian coordinates, in unit of $\hbar/2$,
 as well as, in case of fixed magnetization calculations (see [[constraint_kind]] and [[magconon]]),
-the target value of the magnetization.
+the **target value** of the magnetization.
 
 Note that if [[nspden]] = 2, the z-component must be given for each atom, in triplets (0 0 z-component).
 For example, the electron of an hydrogen atom can be spin up (0 0 1.0) or spin down (0 0 -1.0).
@@ -25848,8 +25848,7 @@ Note that, for the time being, [[use_gbt]] /= 0 requires:
 - [[paral_kgb]] = 0
 - [[wfoptalg]] = 0 (CG eigensolver)
 
-Both LDA and GGA are supported, although GGA tends to be more difficult to converge
-in the non-collinear case.
+Both LDA and GGA are supported, although GGA tends to be more difficult to converge in the non-collinear case.
 In order to reduce the number of SCF iterations and the computational cost,
 we recommend using [[toldfe]] as stopping criterion.
 Also, the convergence of the SCF cycle may be significantly improved by increasing [[nline]] to e.g. 12.
@@ -25861,6 +25860,9 @@ Also, the convergence of the SCF cycle may be significantly improved by increasi
     remains lattice-periodict. For this reason, one should set [[spinat]] so to have non-zero
     components in the x-y plane.
 
+Note that [[spinat]] gives the **initial** electronic spin-magnetization for each atom and the final
+atomic magnetization may differ from [[spinat]], unless one uses GBT in conjunction with contrained DFT
+to specify a **target value** of the magnetization (see [[constraint_kind]] and [[magconon]]).
 """,
 ),
 

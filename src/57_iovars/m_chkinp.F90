@@ -32,7 +32,7 @@ module m_chkinp
 
  use defs_datatypes,   only : pspheader_type
  use defs_abitypes,    only : MPI_type
- use m_numeric_tools,  only : iseven, isdiagmat
+ use m_numeric_tools,  only : iseven, isdiagmat, wrap2_zero_one
  use m_symtk,          only : sg_multable, chkorthsy, symmetrize_xred
  use m_fstrings,       only : string_in, sjoin, itoa
  use m_geometry,       only : metric
@@ -106,11 +106,10 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
  integer :: gpu_devices(12)=(/-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2/)
  integer,allocatable :: ierr_dtset(:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3)
- real(dp),allocatable :: frac(:,:),tnons_new(:,:),xred(:,:)
+ real(dp),allocatable :: frac(:,:),tnons_new(:,:),xred(:,:), my_xred(:,:), xshift(:,:)
  character(len=32) :: cond_string(4)
  character(len=32) :: input_name
  type(libxc_functional_type) :: xcfunc(2)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -4652,6 +4651,19 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      if (all(abs(dt%spinat(1:2, 1:dt%natom)) < tol8)) then
        ABI_CHECK_NOSTOP(.False., 'at least one spinat(:,iat) should have non-zero x or y components', ierr)
      end if
+
+     ! in calcdenmagsph we wrap the atoms in the first unit cell assuming the magnetization is periodic
+     ! but this is not the case wheh GBT is used. So make sure all atomic sites are in the first unit cell.
+     ABI_MALLOC(my_xred, (3, dt%natom))
+     ABI_MALLOC(xshift, (3, dt%natom))
+     call wrap2_zero_one(dt%xred_orig(:,1:dt%natom,1), my_xred, xshift)
+
+     if (any(abs(dt%xred_orig(:,1:dt%natom,1) - my_xred) > tol6)) then
+       ABI_CHECK_NOSTOP(.False., "GBT requires fractional coordinates to be in the unit cell when computing mx, my!", ierr)
+     end if
+
+     ABI_FREE(my_xred)
+     ABI_FREE(xshift)
    end if
 
 !  If molecular dynamics or structural optimization is being done
