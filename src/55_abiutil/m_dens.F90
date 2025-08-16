@@ -1565,7 +1565,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
 !real(dp) :: rprimd_mod(3,3),strain
 ! *************************************************************************
 
- ABI_CHECK_IEQ(cplex, 1, "cplex != 1 won't work here!")
+ !MG NOTE: the computation of intg is clearly wrong when cplex = 2 (DFPT)
 
  n1=ngfft(1);n2=ngfft(2);n3=ngfft(3)
  nfftot=n1*n2*n3
