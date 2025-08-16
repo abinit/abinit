@@ -328,6 +328,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  ! Open GSTORE.nc file and go to data mode.
  NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, comm))
+ !NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, xmpi_comm_self))
  NCF_CHECK(nctk_set_datamode(root_ncid))
 
  call gstore%get_missing_qbz_spin(done_qbz_spin, ndone, nmiss)
@@ -339,8 +340,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! Init gsph_c for the correlated part.
  screen_filepath = dtfil%fnameabi_scr
  ABI_CHECK(dtfil%fnameabi_scr /= ABI_NOFILE, "SCR file must be specified")
-
-
 
  ! Read g-sphere for correlation and pp_mesh from SCR file.
  call get_hscr_qmesh_gsph(screen_filepath , dtset, cryst, hscr, pp_mesh, gsph_c, qlwl, comm)
@@ -1337,7 +1336,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              !print *, "For kk, ", kk, "pp:", pp, "idir, ipert", idir, ipert
 
              ! Set up local potential vlocal1_qq with proper dimensioning, from vtrial1 taking into account the spin
-             ! and prepare application of the NL part. Each MPI rank prepares its own potentials.
+             ! and prepare application of the NL part. Each MPI rank prepares its own potential.
              call rf_transgrid_and_pack(spin, nspden, psps%usepaw, cplex, nfftf, nfft, ngfft, nvloc, &
                                         pawfgr, mpi_enreg, vtrial, v1scf_qq(:,:,:,imyp), vlocal, vlocal1_qq(:,:,:,:,imyp))
 

@@ -3820,7 +3820,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      ! Check for calculations that are not implemented with RMM-DIIS
      ABI_CHECK(dt%usefock == 0, "RMM-DIIS with Hartree-Fock or Hybrid Functionals is not implemented")
      ABI_CHECK(dt%wfoptalg /= 1, "RMM-DIIS with Chebyshev is not supported.")
-     !ABI_CHECK(dt%gpu_option == ABI_GPU_DISABLED, "RMM-DIIS does not support GPUs.")
+     ABI_CHECK(dt%gpu_option == ABI_GPU_DISABLED, "RMM-DIIS does not support GPUs.")
      berryflag = any(dt%berryopt == [4, 14, 6, 16, 7, 17])
      ABI_CHECK(.not. berryflag, "RMM-DIIS with Electric field is not supported.")
    end if
