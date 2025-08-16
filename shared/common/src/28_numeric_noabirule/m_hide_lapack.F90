@@ -395,7 +395,7 @@ subroutine wrap_ZHEEV(jobz, uplo, n, a, w, comm)
     a = czero
     call slk_matrix_to_global_dpc_2D(Slk_vec,"All",a) ! Fill the entries calculated by this node.
     call Slk_vec%free()
-    call xmpi_sum(a,comm,ierr)                        ! Fill the remaing entries of the global matrix
+    call xmpi_sum(a,comm,ierr)                        ! Fill the remaining entries of the global matrix
    end if
 
    call Slk_processor%free()
@@ -573,7 +573,7 @@ subroutine xheev_cplex(jobz, uplo, cplex, n, a, w, msg, ierr, comm)
    ! a = czero
    ! call slk_matrix_to_global_dpc_2D(Slk_vec,"All",a) ! Fill the entries calculated by this node.
    ! call Slk_vec%free()
-   ! call xmpi_sum(a,comm,ierr)                        ! Fill the remaing entries of the global matrix
+   ! call xmpi_sum(a,comm,ierr)                        ! Fill the remaining entries of the global matrix
    !end if
    !
    !call Slk_processor%free()
@@ -716,7 +716,7 @@ end subroutine wrap_CHPEV
 !! [comm]=MPI communicator for ScaLAPACK inversion. Only available if the code has been compiled with Scalapack support.
 !!        To avoid wasting CPU time the scalapack initialization is avoided if the number of processors in 1,
 !!        in this case the sequential LAPACK routine is called. Note that scalapack does not provide native
-!!        support for packed symmetric matrices. Threfore we have to distribute the full matrix among the nodes.
+!!        support for packed symmetric matrices. Therefore we have to distribute the full matrix among the nodes.
 !!        in order to perform the calculation in parallel.
 !!
 !! OUTPUT
@@ -832,7 +832,7 @@ subroutine wrap_ZHPEV(jobz, uplo, n, ap, w, z, ldz, comm)
     z = zero
     call slk_matrix_to_global_dpc_2D(Slk_vec,"All",z) ! Fill the entries calculated by this node.
     call Slk_vec%free()
-    call xmpi_sum(z,comm,ierr)                        ! Fill the remaing entries of the global matrix
+    call xmpi_sum(z,comm,ierr)                        ! Fill the remaining entries of the global matrix
    end if
 
    call Slk_processor%free()
@@ -1001,7 +1001,7 @@ subroutine wrap_ZHEGV(itype, jobz, uplo, n, a, b, w, comm)
    if (firstchar(jobz,(/"V","v"/))) then ! A is overwritten with the eigenvectors
      a = czero
      call slk_matrix_to_global_dpc_2D(Slk_matA,"All",a) ! Fill the entries calculated by this node.
-     call xmpi_sum(a,comm,ierr)                         ! Fill the remaing entries of the global matrix
+     call xmpi_sum(a,comm,ierr)                         ! Fill the remaining entries of the global matrix
    end if
 
    call Slk_matA%free()
@@ -1024,14 +1024,13 @@ end subroutine wrap_ZHEGV
 !! FUNCTION
 !!  xhegv_cplex computes all the  eigenvalues, and  optionally, the eigenvectors of a
 !!  (real generalized symmetric-definite| complex generalized  Hermitian-definite)
-!!  eigenproblem, of  the form
+!!  eigenproblem, of the form
 !!        A*x=(lambda)*B*x  (1),
 !!       A*Bx=(lambda)*x,   (2), or
 !!      B*A*x=(lambda)*x    (3).
 !!  Here A and B are assumed to be (symmetric|Hermitian) and B is also positive definite.
 !!
 !! INPUTS
-!!
 !!  ITYPE   (input) INTEGER Specifies the problem type to be solved:
 !!          = 1:  A*x = (lambda)*B*x
 !!          = 2:  A*B*x = (lambda)*x
@@ -1079,7 +1078,6 @@ end subroutine wrap_ZHEGV
 !!
 !!          If JOBZ = "N", then on exit the upper triangle (if UPLO="U") or the lower triangle
 !!          (if UPLO="L") of A, including the diagonal, is destroyed.
-!!
 !!
 !!  B       (input/output) REAL(DP) array, dimension (CPLEX,N, N)
 !!          On entry, the (real symmetric|Hermitian) positive definite matrix B.
@@ -1221,7 +1219,7 @@ subroutine xhegv_cplex(itype, jobz, uplo, cplex, n, a, b, w, msg, ierr, comm)
   ! if (firstchar(jobz,(/"V","v"/))) then ! A is overwritten with the eigenvectors
   !  a = czero
   !  call slk_matrix_to_global_dpc_2D(Slk_matA,"All",a) ! Fill the entries calculated by this node.
-  !  call xmpi_sum(a,comm,ierr)                         ! Fill the remaing entries of the global matrix
+  !  call xmpi_sum(a,comm,ierr)                         ! Fill the remaining entries of the global matrix
   ! end if
 
   ! call Slk_matA%free()
@@ -1443,7 +1441,7 @@ subroutine wrap_ZHEEVX(jobz,range,uplo,n,a,vl,vu,il,iu,abstol,m,w,z,ldz,comm)
     z = czero
     call slk_matrix_to_global_dpc_2D(Slk_vec,"All",z) ! Fill the entries calculated by this node.
     call Slk_vec%free()
-    call xmpi_sum(z,comm,ierr)                        ! Fill the remaing entries of the global matrix
+    call xmpi_sum(z,comm,ierr)                        ! Fill the remaining entries of the global matrix
    end if
 
    call Slk_processor%free()
@@ -1700,7 +1698,7 @@ subroutine xheevx_cplex(jobz, range, uplo, cplex, n, a, vl, vu, il, iu, &
   !  z = czero
   !  call slk_matrix_to_global_dpc_2D(Slk_vec,"All",z) ! Fill the entries calculated by this node.
   !  call Slk_vec%free()
-  !  call xmpi_sum(z,comm,ierr)                        ! Fill the remaing entries of the global matrix
+  !  call xmpi_sum(z,comm,ierr)                        ! Fill the remaining entries of the global matrix
   ! end if
 
   ! call Slk_processor%free()
@@ -1946,7 +1944,7 @@ subroutine wrap_ZHEGVX(itype,jobz,range,uplo,n,a,b,vl,vu,il,iu,abstol,m,w,z,ldz,
      z = czero
      call slk_matrix_to_global_dpc_2D(Slk_vec,"All",z) ! Fill the entries calculated by this node.
      call Slk_vec%free()
-     call xmpi_sum(z,comm,ierr)                        ! Fill the remaing entries of the global matrix
+     call xmpi_sum(z,comm,ierr)                        ! Fill the remaining entries of the global matrix
    end if
 
    call Slk_processor%free()
@@ -2244,7 +2242,7 @@ subroutine xhegvx_cplex(itype, jobz, range, uplo, cplex, n, a, b, &
   !  z = czero
   !  call slk_matrix_to_global_dpc_2D(Slk_vec,"All",z) ! Fill the entries calculated by this node.
   !  call Slk_vec%free()
-  !  call xmpi_sum(z,comm,ierr)                        ! Fill the remaing entries of the global matrix
+  !  call xmpi_sum(z,comm,ierr)                        ! Fill the remaining entries of the global matrix
   ! end if
 
   ! call Slk_processor%free()
@@ -2637,7 +2635,7 @@ subroutine cginv(a, n, comm)
   call PCGETRI(Slk_mat%sizeb_global(1),Slk_mat%buffer_cplx_sp,1,1,Slk_mat%descript%tab,ipiv,&
 &  work,lwork,iwork,liwork,info)
 
-  ABI_CHECK(info==0,"PZGETRI: Error during compuation of workspace size")
+  ABI_CHECK(info==0,"PZGETRI: Error during computation of workspace size")
 
   lwork = NINT(DBLE(work(1))); liwork=iwork(1)
   ABI_FREE(work)
@@ -2664,7 +2662,7 @@ subroutine cginv(a, n, comm)
   !! call slk_matrix_to_global_dpc_2D(Slk_mat,"All",a)  ! Fill the entries calculated by this node.
   call Slk_mat%free()
 
-  call xmpi_sum(a,comm,ierr)                         ! Fill the remaing entries of the global matrix
+  call xmpi_sum(a,comm,ierr)                         ! Fill the remaining entries of the global matrix
   call Slk_processor%free()
 
   RETURN
@@ -2793,7 +2791,7 @@ subroutine zginv(a, n, comm)
    call slk_matrix_to_global_dpc_2D(Slk_mat,"All",a)  ! Fill the entries calculated by this node.
    call Slk_mat%free()
 
-   call xmpi_sum(a,comm,ierr)                         ! Fill the remaing entries of the global matrix
+   call xmpi_sum(a,comm,ierr)                         ! Fill the remaining entries of the global matrix
    call Slk_processor%free()
 
    return
@@ -2925,7 +2923,7 @@ subroutine zhpd_invert(uplo, a, n, comm)
    call slk_matrix_to_global_dpc_2D(Slk_mat,uplo,a)  ! Fill the entries calculated by this node.
    call Slk_mat%free()
 
-   call xmpi_sum(a,comm,ierr)                         ! Fill the remaing entries of the global matrix
+   call xmpi_sum(a,comm,ierr)                         ! Fill the remaining entries of the global matrix
    call Slk_processor%free()
 
    RETURN
@@ -3236,12 +3234,8 @@ end subroutine jacobi
 !!  respectively. This routine is used in combination with lubksb to solve
 !!  linear equations or invert a matrix.
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! NOTES
-!!   This routine is depreacted, use lapack API
+!!   This routine is deprecated, use lapack API
 !!
 !! SOURCE
 

@@ -178,6 +178,7 @@ subroutine wkk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
  edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
  edos = ebands%get_edos(cryst, edos_intmeth, edos_step, edos_broad, comm)
+
  ! Get DOS per spin channel
  n0(:) = edos%gef(1:edos%nsppol)
  if (my_rank == master) then
@@ -314,7 +315,7 @@ subroutine wkk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
 
  ! TODO
  ! mpw is the maximum number of plane-waves over k and k+q where k and k+q are in the BZ.
- ! we also need the max components of the G-spheres (k, k+q) in order to allocate the workspace array work
+ ! We also need the max components of the G-spheres (k, k+q) in order to allocate the workspace array work
  ! that will be used to symmetrize the wavefunctions in G-space.
  ! This is the maximum number of PWs for all possible k+q treated.
 
@@ -682,7 +683,7 @@ subroutine wkk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  end do
  ABI_FREE(fstab)
 
- call xmpi_barrier(comm) ! This to make sure that the parallel output of GSTORE is completed
+ call xmpi_barrier(comm) ! This to make sure that the parallel output of WKK is completed
  call cwtime_report(" wkk_run: MPI barrier before returning.", cpu_all, wall_all, gflops_all, end_str=ch10, comm=comm)
 
 contains

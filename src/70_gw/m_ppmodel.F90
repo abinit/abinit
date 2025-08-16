@@ -73,12 +73,12 @@ module m_ppmodel
  type,public :: ppmodel_t
 
    integer :: dm2_botsq
-   ! =npwc if ppmodel=1,2;
+   ! =npwc if ppmodel=1,2
    ! =1    if ppmodel=3,4
 
    integer :: dm_eig
-   ! =npwc if ppmodel=3
    ! =0    if ppmodel=1,2,4
+   ! =npwc if ppmodel=3
 
    integer :: dm2_otq
    ! =npwc if ppmodel=1,2
@@ -475,8 +475,6 @@ subroutine ppm_init(ppm, mqmem, nqibz, npwe, ppmodel, drude_plsmf, invalid_freq)
  !character(len=500) :: msg
 ! *********************************************************************
 
- DBG_ENTER("COLL")
-
  ppm%nqibz = nqibz; ppm%mqmem = mqmem; ppm%invalid_freq = invalid_freq
  !call wrtout(std_out, sjoin(' ppm%mqmem:', itoa(ppm%mqmem), 'ppm%nqibz:', itoa(ppm%nqibz)))
  ltest = (ppm%mqmem == 0 .or. ppm%mqmem == ppm%nqibz)
@@ -534,8 +532,6 @@ subroutine ppm_init(ppm, mqmem, nqibz, npwe, ppmodel, drude_plsmf, invalid_freq)
  end do
 
  call pstat_proc%print(_PSTAT_ARGS_)
-
- DBG_EXIT("COLL")
 
 end subroutine ppm_init
 !!***
@@ -605,8 +601,6 @@ subroutine ppm_setup(ppm, Cryst, Qmesh, npwe, nomega, omega, epsm1, nfftf, gvec,
  real(dp) :: qpt(3)
 ! *************************************************************************
 
- DBG_ENTER("COLL")
-
  !@ppmodel_t
  !
  ! === if iqiA is present, then consider only one qpoint to save memory ===
@@ -671,8 +665,6 @@ subroutine ppm_setup(ppm, Cryst, Qmesh, npwe, nomega, omega, epsm1, nfftf, gvec,
  case default
    ABI_BUG(sjoin('Wrong ppm%model:',itoa(ppm%model)))
  end select
-
- DBG_EXIT("COLL")
 
 end subroutine ppm_setup
 !!***
@@ -1078,8 +1070,6 @@ subroutine cppm1par(npwc, nomega, omega, omegaplasma, epsm1, omegatw, bigomegatw
  complex(gwpc) :: AA,omegatwsq,diff,ratio,epsm1_io0,epsm1_ioe0
 ! *************************************************************************
 
- DBG_ENTER("COLL")
-
  ! Find omega=0 and omega=imag (closest to omegaplasma) to fit the ppm parameters
  minomega=1.0d-3; io0=0
  do io=1,nomega
@@ -1144,8 +1134,6 @@ subroutine cppm1par(npwc, nomega, omega, omegaplasma, epsm1, omegatw, bigomegatw
    ' cppm1par : omega twiddle minval [eV]  = ',MINVAL(ABS(omegatw))*Ha_eV,ch10,&
    '            omega twiddle min location = ',MINLOC(ABS(omegatw)),ch10
  call wrtout(std_out,msg)
-
- DBG_EXIT("COLL")
 
 end subroutine cppm1par
 !!***
@@ -1647,48 +1635,47 @@ subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
 !arrays
  real(dp) :: b1(3),b2(3),b3(3),gppq(3),gpq(3),qlist(3,1)
  real(dp),allocatable :: eigval(:),qplusg(:),rhog_dp(:,:),tmp_rhor(:)
- complex(dpc),allocatable :: chi(:,:),chitmp(:,:),chitmps(:,:),eigvec(:,:)
- complex(dpc),allocatable :: mm(:,:),mtemp(:,:),rhog(:), rhogg(:,:),tmp1(:),zz2(:,:)
+ complex(dpc),allocatable :: chi(:,:),chitmps(:,:)
+ complex(dpc),allocatable :: mm(:,:),mtemp(:,:),rhog(:), tmp1(:),zz2(:,:)
 !*************************************************************************
-
- DBG_ENTER("COLL")
-
- call initmpi_seq(MPI_enreg_seq)
- call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfftf(2),ngfftf(3),'all')
 
  b1=two_pi*gprimd(:,1); b2=two_pi*gprimd(:,2); b3=two_pi*gprimd(:,3)
 
  ! Calculate density in G space rhog(G)
- ABI_MALLOC(rhog_dp,(2,nfftf))
- ABI_MALLOC(rhog,(nfftf))
-
- ABI_MALLOC_OR_DIE(rhogg,(npwc,npwc), ierr)
- !
- ! Conduct FFT tho(r)-->rhog(G)
  ! FIXME this has to be fixed, rho(G) should be passed instead of doing FFT for each q
+ call initmpi_seq(MPI_enreg_seq)
+ call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfftf(2),ngfftf(3),'all')
+
+ ABI_MALLOC(rhog_dp, (2,nfftf))
+
+ ! Conduct FFT tho(r)-->rhog(G)
  ABI_MALLOC(tmp_rhor,(nfftf))
  tmp_rhor=rhor ! To avoid having to use intent(inout).
  call fourdp(1,rhog_dp,tmp_rhor,-1,MPI_enreg_seq,nfftf,1,ngfftf,0)
  ABI_FREE(tmp_rhor)
+ call destroy_mpi_enreg(MPI_enreg_seq)
 
+ ABI_MALLOC(rhog, (nfftf))
  rhog(1:nfftf)=CMPLX(rhog_dp(1,1:nfftf),rhog_dp(2,1:nfftf))
  ABI_FREE(rhog_dp)
- !
+
  ! Calculate the FFT index of each (G-Gp) vector and assign the value
  ! of the correspondent density simultaneously
  ngfft1=ngfftf(1)
  ngfft2=ngfftf(2)
  ngfft3=ngfftf(3)
 
+ ABI_MALLOC_OR_DIE(mm, (npwc,npwc), ierr)
+
  ierr=0
  do ig=1,npwc
    do igp=1,npwc
      gmgp_idx = g2ifft(gvec(:,ig)-gvec(:,igp),ngfftf)
      if (gmgp_idx/=0) then
-       rhogg(ig,igp)=rhog(gmgp_idx)
+       mm(ig,igp)=rhog(gmgp_idx)
      else
        ierr=ierr+1
-       rhogg(ig,igp)=czero
+       mm(ig,igp)=czero
      end if
    end do
  end do
@@ -1703,8 +1690,6 @@ subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
  ABI_FREE(rhog)
 
  ! Now we have rhogg, calculate the M matrix (q+G1).(q+G2) n(G1-G2)
- ABI_MALLOC_OR_DIE(mm,(npwc,npwc), ierr)
-
  do ig=1,npwc
    gpq(:)=gvec(:,ig)+qpt
    do igp=1,npwc
@@ -1715,67 +1700,57 @@ subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
          ( gpq(1)*b1(ii) +gpq(2)*b2(ii) +gpq(3)*b3(ii))*&
          (gppq(1)*b1(ii)+gppq(2)*b2(ii)+gppq(3)*b3(ii))
      end do
-     mm(ig,igp)=rhogg(ig,igp)*qpg_dot_qpgp
+     mm(ig,igp) = mm(ig,igp)*qpg_dot_qpgp
    end do !igp
  end do !ig
 
- !MG TODO too much memory in chi, we can do all this stuff inside a loop
- ABI_MALLOC_OR_DIE(chitmp,(npwc,npwc), ierr)
- ABI_MALLOC_OR_DIE(chi,(npwc,npwc), ierr)
- ABI_MALLOC(qplusg,(npwc))
- !
- ! Extract the full polarizability from \tilde \epsilon^{-1}
+ ! Extract the reducible polarizability chi from \tilde \epsilon^{-1}: e^{-1} = 1 + v chi
  ! \tilde\epsilon^{-1}_{G1 G2} = \delta_{G1 G2} + 4\pi \frac{\chi_{G1 G2}}{|q+G1| |q+G2|}
- chitmp(:,:)=epsm1(:,:)
+ !MG TODO too much memory in chi, we can do all this stuff inside a loop
+ ABI_MALLOC_OR_DIE(chi, (npwc,npwc), ierr)
+ ABI_MALLOC(qplusg, (npwc))
 
+ chi(:,:)=epsm1(:,:)
  qlist(:,1) = qpt
  call cmod_qpg(1,1,qlist,npwc,gvec,gprimd,qplusg) !MG TODO here take care of small q
 
  do ig=1,npwc
-   chitmp(ig,ig)=chitmp(ig,ig)-one
+   chi(ig,ig)=chi(ig,ig)-one
  end do
+
  do ig=1,npwc
    do igp=1,npwc
-     chi(ig,igp)=chitmp(ig,igp)*qplusg(ig)*qplusg(igp)/four_pi
+     chi(ig,igp)=chi(ig,igp)*qplusg(ig)*qplusg(igp)/four_pi
    end do
  end do
- ABI_FREE(chitmp)
- !
- ! === Solve chi*X = Lambda M*X where Lambda=-1/em(q)**2 ===
- ABI_MALLOC(eigval,(npwc))
 
- ABI_MALLOC_OR_DIE(eigvec,(npwc,npwc), ierr)
- ABI_MALLOC_OR_DIE(mtemp,(npwc,npwc), ierr)
- ABI_MALLOC_OR_DIE(chitmps,(npwc,npwc), ierr)
- !
- ! Copy chi and mm into working arrays
- chitmps(:,:)=chi(:,:)
+ ! Solve chi*X = Lambda M*X where Lambda=-1/em(q)**2
+ ABI_MALLOC(eigval, (npwc))
+ ABI_MALLOC_OR_DIE(mtemp, (npwc,npwc), ierr)
+
+ ! Copy mm into working array as xhegv changes input matrices
  mtemp(:,:)=mm(:,:)
 
- call xhegv(1,"Vectors","Upper",npwc,chitmps,mtemp,eigval)
- !
- ! Eigenvectors are normalized as : X_i^* M X_j = \delta_{ij}
- eigvec(:,:)=chitmps(:,:)
+ call xhegv(1,"Vectors","Upper",npwc,chi,mtemp,eigval)
  ABI_FREE(mtemp)
- ABI_FREE(chitmps)
- !
- ! === Calculate the plasmon pole parameters ===
- ABI_MALLOC(tmp1,(npwc))
 
- ABI_MALLOC_OR_DIE(zz2,(npwc,npwc), ierr)
- !
- ! good check:
- ! the lowest plasmon energy on gamma should be
+ ! Now chi contains the eigenvectors.
+ ! Eigenvectors are normalized as: X_i^* M X_j = \delta_{ij}
+
+ ! Calculate the plasmon pole parameters
+ ! good check: the lowest plasmon energy on gamma should be
  ! close to experimental plasma energy within an error of 10%
  ! this error can be reduced further if one includes the non local
  ! commutators in the calculation of the polarizability at q==0
- zz2(:,:)=(0.0,0.0)
+
+ ABI_MALLOC(tmp1,(npwc))
+ ABI_MALLOC_OR_DIE(zz2, (npwc, npwc), ierr)
+ zz2(:,:)= zero
 
  qlist(:,1) = qpt
  call cmod_qpg(1,1,qlist,npwc,gvec,gprimd,qplusg) !MG TODO here take care of small q
 
  do ii=1,npwc
-   !
    ! keeping in mind that the above matrix is negative definite
    ! we might have a small problem with the eigval that correspond to large G vectors
    ! i.e. DM band index, where the eigevalues become very small with
@@ -1793,13 +1768,13 @@ subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
        ABI_ERROR(msg)
      end if
    end if
-   !
-   ! === Save plasmon energies ===
-   omegatw(ii)=SQRT(-1/eigval(ii))
-   !
+
+   ! Save plasmon energies
+   omegatw(ii)=SQRT(-one/eigval(ii))
+
    ! Calculate and save scaled plasmon-pole eigenvectors
    ! defined as \sqrt{4\pi} \frac{Mx}{\sqrt{\tilde\omega} |q+G|}
-   tmp1(:)=eigvec(:,ii)
+   tmp1(:)=chi(:,ii)
 
    do ig=1,npwc
      do igp=1,npwc
@@ -1812,20 +1787,16 @@ subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
  end do
 
  ABI_FREE(tmp1)
- ABI_FREE(eigvec)
  ABI_FREE(eigval)
  ABI_FREE(zz2)
  ABI_FREE(qplusg)
  ABI_FREE(chi)
- ABI_FREE(rhogg)
  ABI_FREE(mm)
-
- call destroy_mpi_enreg(MPI_enreg_seq)
 
  bar=REPEAT('-',80)
  write(msg,'(3a)')bar,ch10,' plasmon energies vs q vector shown for lowest 10 bands                 '
  call wrtout(std_out,msg)
- write(msg,'(2x,5x,10f7.3)')(REAL(omegatw(ig))*Ha_eV, ig=1,10)
+ write(msg,'(2x,5x,10f7.3)')(REAL(omegatw(ig))*Ha_eV, ig=1,min(10, npwc))
  call wrtout(std_out,msg)
  write(msg,'(a)')bar
  call wrtout(std_out,msg)
@@ -1834,8 +1805,6 @@ subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
   ' cppm4par : omega twiddle minval [eV]  = ',MINVAL(ABS(omegatw))*Ha_eV,ch10,&
   '            omega twiddle min location = ',MINLOC(ABS(omegatw))
  call wrtout(std_out,msg)
-
- DBG_EXIT("COLL")
 
 end subroutine cppm4par
 !!***
@@ -1951,7 +1920,7 @@ end subroutine cqratio
 !!
 !!  === model==1,2 ====
 !!
-!!    ket(G,omega) = Sum_G2       conjg(rhotw(G)) * Omega(G,G2) * rhotw(G2)
+!!    ket(G,omega) = Sum_G2                  Omega(G,G2) * rhotw(G2)
 !!                            ---------------------------------------------------
 !!                             2 omegatw(G,G2) (omega-E_i + omegatw(G,G2)(2f-1))
 !!
@@ -2099,6 +2068,7 @@ subroutine ppm_calc_sigc(ppm, nspinor, npwc, nomega, rhotwgp, botsq, otq, &
      end do !ii DM bands
      sigcme(ios)=ct*half
    end do !ios
+
    ABI_FREE(rhotwgdpcc)
 
  case default
@@ -2277,8 +2247,6 @@ subroutine ppm_new_setup(ppm, iq_ibz, Cryst, Qmesh, npwe, nomega, omega, epsm1_g
  real(dp) :: qpt(3)
 ! *************************************************************************
 
- DBG_ENTER("COLL")
-
  if (ppm%has_qibz(iq_ibz) /= PPM_TAB_ALLOCATED) then
    ABI_ERROR(sjoin("ppmodel tables for iq_ibz:", itoa(iq_ibz), "are not allocated! has_qibz=", itoa(ppm%has_qibz(iq_ibz))))
  end if
@@ -2331,8 +2299,6 @@ subroutine ppm_new_setup(ppm, iq_ibz, Cryst, Qmesh, npwe, nomega, omega, epsm1_g
  case default
    ABI_BUG(sjoin('Wrong ppm%model:', itoa(ppm%model)))
  end select
-
- DBG_EXIT("COLL")
 
 end subroutine ppm_new_setup
 !!***
