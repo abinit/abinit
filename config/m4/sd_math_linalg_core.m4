@@ -107,7 +107,6 @@ AC_DEFUN([_SD_LINALG_CHECK_LIBS], [
   else
     sd_linalg_has_scalapack="no"
   fi
-  AC_MSG_NOTICE([DONE checking FOR MPI... xxx])
   AC_SUBST(sd_linalg_has_scalapack)
 
   # Validate the MPI linear algebra support
@@ -415,13 +414,13 @@ AC_DEFUN([_SD_LINALG_EXPLORE], [
 
   # Checkpoint: validate the MPI linear algebra support
   if test "${sd_mpi_enable}" = "yes"; then
-    if test \( "${sd_linalg_has_blacs}" = "yes" -o \
-               "${sd_linalg_has_scalapack}" = "yes" \) -o \
-               "${sd_linalg_has_plasma}" = "yes"; then
-      sd_linalg_mpi_ok="yes"
-    else
-       
-      sd_linalg_mpi_ok="no"
+     if test "${sd_linalg_has_blacs}" = "yes" || \
+        test "${sd_linalg_has_scalapack}" = "yes" || \
+        test "${sd_linalg_has_lapack}" = "yes" || \
+        test "${sd_linalg_has_plasma}" = "yes"; then
+           sd_linalg_mpi_ok="yes"
+         else   
+          sd_linalg_mpi_ok="no"
     fi
   fi
 
@@ -438,14 +437,12 @@ AC_DEFUN([_SD_LINALG_EXPLORE], [
       LDFLAGS="${LDFLAGS} ${sd_mpi_ldflags} ${sd_linalg_ldflags}"
       LIBS="${sd_linalg_libs} ${sd_mpi_libs} ${LIBS}"
       _SD_LINALG_SET_VENDOR_FLAGS([${tmp_linalg_vendor}])
-      AC_MSG_NOTICE(['xxxx check ELPA xxxx'])
       # Look for ELPA
       tmp_linalg_elpa_proceed=`echo "${sd_linalg_vendor_provided}" | grep "elpa"`
       if test "${tmp_linalg_elpa_proceed}" != "" -a \
               "${sd_linalg_has_elpa}" != "yes"; then
 
         AC_MSG_CHECKING([${tmp_linalg_vendor} libraries for ELPA])
-        AC_MSG_NOTICE(['xxxx check ELPA xxxx libs ${sd_linalg_vendor_elpa_libs}'])
         if test "${sd_linalg_vendor_elpa_libs}" = ""; then
           AC_MSG_RESULT([none required])
         else
