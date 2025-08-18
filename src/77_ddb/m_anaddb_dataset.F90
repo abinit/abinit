@@ -233,7 +233,7 @@ module m_anaddb_dataset
 
   contains
 
-    procedure :: init => anaddb_init
+    procedure :: init => anaddb_dtset_init
      ! Construct the object from the dtset.
 
     procedure :: free => anaddb_dtset_free
@@ -2235,10 +2235,10 @@ end subroutine outvars_anaddb
 
 !----------------------------------------------------------------------
 
-!!****f*m_anaddb_dataset/anaddb_init
+!!****f*m_anaddb_dataset/anaddb_dtset_init
 !!
 !! NAME
-!! anaddb_init
+!! anaddb_dtset_init
 !!
 !! FUNCTION
 !! Initialize the code ppddb9: write heading and make the first i/os
@@ -2262,7 +2262,7 @@ end subroutine outvars_anaddb
 !!
 !! SOURCE
 
-subroutine anaddb_init(dtset, input_path)
+subroutine anaddb_dtset_init(dtset, input_path)
 
 !Arguments-------------------------------
  class(anaddb_dataset_type), intent(inout):: dtset
@@ -2390,7 +2390,7 @@ subroutine anaddb_init(dtset, input_path)
    ABI_CHECK(ierr == 0, sjoin("Error", itoa(ierr), "while trying to create directory", dirpath))
  end if
 
-end subroutine anaddb_init
+end subroutine anaddb_dtset_init
 !!***
 
 !!****f*m_anaddb_dataset/anaddb_dtset_bcast_files

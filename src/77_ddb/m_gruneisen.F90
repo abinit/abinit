@@ -711,7 +711,7 @@ subroutine gruns_anaddb(inp, comm)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
- type(anaddb_dataset_type) :: inp
+ type(anaddb_dataset_type),intent(inout) :: inp
 
 !Local variables-------------------------------
 !scalars
@@ -724,9 +724,6 @@ subroutine gruns_anaddb(inp, comm)
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
- ! GA: FIXME Remove ifcflag for gruneisen parameters calculation. 
- !     There are no reasons why it would be needed, and removing it
-!      will allow to harmonize the main anaddb routine.
  ABI_CHECK(inp%ifcflag == 1, "Gruneisen requires ifcflag == 1")
 
  call cwtime(cpu, wall, gflops, "start")
