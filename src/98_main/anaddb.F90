@@ -192,46 +192,44 @@ program anaddb
  ! ASR-correction (asrq0%d2asr) has to be determined here from the Dynamical matrix at Gamma.
  call asrq0%init(ddb, dtset%asr, dtset%rfmeth, crystal%xcart)
 
+ ! GA: The code block below was part of anaddb, just after initialization of asrq0..
+ !     I dont quite understand the message, but I think this part was meant to be removed.
+ !     I'm leaving this here just in case. 2025-08-18
+ ! ------------------------------------------
  ! TODO: This is to maintain the previous behaviour in which all the arrays were initialized to zero.
  ! In the new version asrq0%d2asr is always computed if the Gamma block is present
  ! and this causes changes in [v5][t28]
- ! GA: Who wrote this? Should I try to remove this?
- !     At least I should move this inside get_asrq0
  if (.not. (dtset%ifcflag == 0 .or. dtset%instrflag /= 0 .or. dtset%elaflag /= 0)) then
    asrq0%d2asr = zero
    if (asrq0%asr == 3 .or. asrq0%asr == 4) then
      asrq0%singular = zero; asrq0%uinvers = zero; asrq0%vtinvers = zero
    end if
  end if
+ ! ------------------------------------------
 
 
 ! =========================================================================== !
 ! Open netcdf output and write basic quantities
- call driver%open_write_nc(ana_ncid, dtset, crystal, comm)
 
+ call driver%open_write_nc(ana_ncid, dtset, crystal, comm)
 
 ! =========================================================================== !
 ! Calculation of Gruneisen parameters.
-! GA: FIXME Move this
+
  if (dtset%gruns_nddbs /= 0) then
    call gruns_anaddb(dtset, comm)
-   goto 50
  end if
 
 ! =========================================================================== !
 ! Compute dielectric tensor, born effective charges, and quadrupoles,
 ! and write them to netcdf output.
 ! These tensors are passed to Ifc.
- !if (dtset%ifcflag /= 0 .or. dtset%dieflag /= 0 .or. ddb_hdr%has_d3E_lw) then
- call driver%electric_tensors(dtset, crystal, ddb, ddb_lw, ddb_hdr, ana_ncid, comm)
- !end if
+ if (driver%do_electric_tensors) then
+   call driver%electric_tensors(dtset, crystal, ddb, ddb_lw, ddb_hdr, ana_ncid, comm)
+ end if
 
 ! =========================================================================== !
 ! Structural response at fixed polarization
-! =========================================================================== !
-! GA: This block does not require IFC
-!     As far as I can tell, I can run it independently and skip the rest.
-!     See tests v4[71,74,77]
  if (dtset%polflag == 1) then
    call driver%structural_response(dtset, crystal, ddb)
  end if
@@ -240,17 +238,14 @@ program anaddb
 ! Compute non-linear optical susceptibilities and, if dtset%nlflag < 3,
 ! First-order change in the linear dielectric susceptibility
 ! induced by an atomic displacement
-! =========================================================================== !
  if (dtset%nlflag > 0) then
    call driver%susceptibilities(dtset, ddb, ana_ncid, comm)
  end if
 
 ! =========================================================================== !
 ! Interatomic Forces Calculation
-! =========================================================================== !
- ! GA: TODO cleanup
- if (dtset%ifcflag == 1) then
-   ! ifc to be calculated for interpolation
+
+ if (driver%do_ifc) then
    write(msg, '(a, a, (80a), a, a, a, a)' ) ch10, ('=',ii = 1, 80), ch10, ch10, &
     ' Calculation of the interatomic forces ',ch10
    call wrtout(units, msg)
@@ -278,24 +273,23 @@ program anaddb
  end if
 
 ! =========================================================================== !
-! Phonon density of states calculation. Start if interatomic forces have been calculated
+! Phonon density of states
 ! =========================================================================== !
 
- if (dtset%ifcflag == 1 .and. any(dtset%prtdos==[1, 2])) then
+ if (driver%do_phonon_dos) then
    call driver%phdos(dtset, crystal, Ifc, comm)
  end if
 
 ! =========================================================================== !
+! Phonon density of states and thermodynamical properties calculation
 
- ! Phonon density of states and thermodynamical properties calculation
- ! Start if interatomic forces and thermal flags are on
  if (dtset%ifcflag == 1 .and. any(dtset%thmflag==[1, 2])) then
    call driver%harmonic_thermo(dtset, crystal, Ifc, ddb, comm)
  end if
 
 ! =========================================================================== !
+! Output phonon frequencies for BoltzTrap
 
- ! Output phonon frequencies for BoltzTrap
  if (iam_master .and. dtset%ifcflag == 1 .and. dtset%outboltztrap == 1) then
    call ifc%outphbtrap(crystal, dtset%ng2qpt, 1, dtset%q2shft, dtset%prefix_outdata)
  end if
@@ -314,7 +308,7 @@ program anaddb
 ! =========================================================================== !
 
  ! Phonon band structure
- if (dtset%nph1l /= 0 .or. dtset%nqpath /= 0) then
+ if (driver%do_phonon_bs) then
    call mkphbs(Ifc, crystal, dtset, ddb, asrq0, dtset%prefix_outdata, comm)
  end if
 
@@ -325,8 +319,7 @@ program anaddb
 
 
 ! =========================================================================== !
-! Thermal flags
-! =========================================================================== !
+! Thermal corrections to eigenvalues
 
  if (dtset%thmflag >= 3 .and. dtset%thmflag <= 8) then
    call thmeig(dtset, ddb, crystal, ab_out, crystal%natom, dtset%mpert, dtset%msize, asrq0%d2asr, comm)
@@ -342,10 +335,9 @@ program anaddb
 
  ! Compute the dielectric function and oscillator strength.
  ! This is needed for the subsequent parts.
- if ((dtset%dieflag /= 0 .and. dtset%dieflag /= 2) .or. dtset%nph2l /= 0 .or. dtset%nlflag == 1) then
+ if (driver%do_dielectric_q0) then
    call driver%dielectric_q0(dtset, crystal, ifc, ddb, asrq0, ana_ncid, comm)
  end if
-
 
 ! =========================================================================== !
 ! Non-linear response: electrooptic and Raman (q = Gamma, TO modes only)
@@ -362,7 +354,7 @@ program anaddb
 ! (can include non-analyticities in the DM)
 ! =========================================================================== !
 
- if (dtset%nph2l /= 0) then
+ if (driver%do_dielectric_nonana) then
    call driver%dielectric_nonana(dtset, crystal, ddb, ana_ncid, comm)
  end if
 
@@ -393,8 +385,6 @@ program anaddb
  end if
 
  ! ========================================================================== !
-
- 50 continue
 
  ! Close netcdf file
  if (iam_master) then

@@ -75,19 +75,41 @@ module m_anaddb_driver
    integer:: mpert
    integer:: usepaw  ! GA: TODO Remove usepaw
 
+   logical:: do_ifc=.false.
+   logical:: do_electric_tensors=.false.
+   logical:: do_dielectric_q0=.false.
+   logical:: do_dielectric_nonana=.false.
+   logical:: do_phonon_dos=.false.
+   logical:: do_phonon_bs=.false.
+
    real(dp):: epsinf(3, 3)
    real(dp):: dchide(3,3,3)
    real(dp):: dielt_rlx(3, 3)
    real(dp):: elast(6, 6)
 
    real(dp), allocatable:: d2cart(:,:)
+   ! d2cart(2,msize)
+
    real(dp), allocatable:: displ(:)
+   ! displ(2*3*natom*3*natom)
+
    real(dp), allocatable:: phfrq(:)
+   ! phfrq(3*natom)
+
    real(dp), allocatable:: instrain(:,:)
+   ! instrain(3*natom,6)
+
    real(dp), allocatable:: dchidt(:,:,:,:)
+   ! dchidt(natom,3,3,3)
+
    real(dp), allocatable:: fact_oscstr(:,:,:)
+   ! fact_oscstr(2,3,3*natom)
+
    real(dp), allocatable:: zeff(:,:,:)
+   ! zeff(3,3,natom)
+
    real(dp), allocatable:: qdrp_cart(:,:,:,:)
+   ! qdrp_cart(3,3,3,natom)
 
  contains
 
@@ -170,11 +192,52 @@ subroutine anaddb_driver_init(driver, dtset)
 
 ! ************************************************************************
 
+ ! Set control flags
+ if (dtset%ifcflag == 1) then
+   driver%do_ifc = .true. 
+ end if
+
+ if (dtset%ifcflag /= 0 .or. dtset%dieflag /= 0 &
+&    .or. dtset%nph2l /= 0 .or. dtset%nlflag /= 0 &
+&    .or. dtset%piezoflag /= 0 .or. dtset%flexoflag /= 0 &
+&    .or. dtset%polflag /= 0) then
+   driver%do_electric_tensors = .true.
+ end if
+
+ if ((dtset%dieflag /= 0 .and. dtset%dieflag /= 2) &
+&    .or. dtset%nph2l /= 0 .or. dtset%nlflag == 1 &
+&    .or. dtset%piezoflag /= 0) then
+   driver%do_dielectric_q0 = .true.
+ end if
+
+ if (dtset%nph2l /= 0) then
+   driver%do_dielectric_nonana = .true. 
+ end if
+
+ if (dtset%ifcflag == 1 .and. any(dtset%prtdos==[1, 2])) then
+   driver%do_phonon_dos = .true.
+ end if
+
+ if (dtset%nph1l /= 0 .or. dtset%nqpath /= 0) then
+   driver%do_phonon_bs = .true. 
+ end if
+
+ if (dtset%gruns_nddbs /= 0) then
+   driver%do_ifc = .false. 
+   driver%do_electric_tensors = .false.
+   driver%do_dielectric_q0 = .false.
+   driver%do_dielectric_nonana = .false. 
+   driver%do_phonon_bs = .false. 
+   driver%do_phonon_dos = .false.
+ end if
+
+ ! Copy dimensions
  driver%natom = dtset%natom
  driver%msize = dtset%msize
  driver%mpert = dtset%mpert
  driver%usepaw = dtset%usepaw
 
+ ! Allocate memory
  ABI_MALLOC(driver%d2cart, (2, driver%msize))
  ABI_MALLOC(driver%displ, (2*3*driver%natom*3*driver%natom))
  ABI_MALLOC(driver%phfrq, (3*driver%natom))
@@ -184,16 +247,13 @@ subroutine anaddb_driver_init(driver, dtset)
  ABI_MALLOC(driver%zeff, (3, 3, driver%natom))
  ABI_MALLOC(driver%qdrp_cart, (3, 3, 3, driver%natom))
 
+ ! oscillator strength and Lyddane-Sachs-Teller relation
+ ABI_MALLOC(driver%fact_oscstr, (2, 3, 3*driver%natom))
+
  ! Susceptibilities
  if (dtset%nlflag > 0) then
    ABI_MALLOC(driver%dchidt, (driver%natom, 3, 3, 3))
  end if
-
- ! oscillator strength and Lyddane-Sachs-Teller relation
- if ((dtset%dieflag /= 0 .and. dtset%dieflag /= 2) .or. dtset%nph2l /= 0 .or. dtset%nlflag == 1) then
-   ABI_MALLOC(driver%fact_oscstr, (2, 3, 3*driver%natom))
- end if
-
 
 end subroutine anaddb_driver_init
 !!***
@@ -419,7 +479,7 @@ subroutine anaddb_driver_structural_response(driver, dtset, crystal, ddb)
  class(anaddb_driver_type), intent(inout):: driver
  type(anaddb_dataset_type), intent(in):: dtset
  type(crystal_t), intent(in):: crystal
- type(ddb_type), intent(in):: ddb
+ type(ddb_type), intent(inout):: ddb
 
 !Local variables -------------------------------
  integer:: iblok
@@ -429,14 +489,13 @@ subroutine anaddb_driver_structural_response(driver, dtset, crystal, ddb)
  integer:: rfelfd(4), rfphon(4), rfstrs(4)
  real(dp):: red_ptot(3)
  real(dp):: pel(3)
- real(dp):: qphnrm(3), qphon(3, 3), strten(6)
+ real(dp):: strten(6)
  real(dp) :: targetpol(3)
+ real(dp):: qphnrm(3), qphon(3, 3)
  integer, allocatable:: d2flg(:)
  real(dp), allocatable:: gred(:,:)
 
 ! ************************************************************************
-
- ! Note: d2cart could be a local variable here
 
  msize = dtset%msize
  ABI_MALLOC(d2flg, (msize))
@@ -448,7 +507,9 @@ subroutine anaddb_driver_structural_response(driver, dtset, crystal, ddb)
  rfelfd(1:2)=2
  rfstrs(1:2)=0
 
+ !write(std_out,*)"ddb%mpert",ddb%mpert
  call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, dtset%rfmeth)
+ !iblok = ddb%get_dielt_zeff(crystal, dtset%rfmeth, dtset%chneut, dtset%selectz, driver%epsinf, driver%zeff)
 
  if(iblok /= 0)then
    ! Save the second-order derivatives
@@ -864,10 +925,16 @@ subroutine anaddb_driver_dielectric_q0(driver, dtset, crystal, ifc, ddb, asrq0, 
    ! Look for the information in the DDB
    rfphon(1:2)=1; rfelfd(1:2)=2; rfstrs(1:2)=0
    call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, dtset%rfmeth)
-   ! Copy the dynamical matrix in d2cart
-   driver%d2cart(:,1:dtset%msize)=ddb%val(:,:,iblok)
-   ! Eventually impose the acoustic sum rule
-   call asrq0%apply(crystal%natom, dtset%mpert, dtset%msize, crystal%xcart, driver%d2cart)
+   if (iblok == 0) then
+     driver%d2cart(:,1:dtset%msize)=zero
+     ! GA: I notice this situation happen in test tutorespfn[telast_3]
+     !     and I dont understand why the block is not found.
+   else
+     ! Copy the dynamical matrix in d2cart
+     driver%d2cart(:,1:dtset%msize)=ddb%val(:,:,iblok)
+     ! Eventually impose the acoustic sum rule
+     call asrq0%apply(crystal%natom, dtset%mpert, dtset%msize, crystal%xcart, driver%d2cart)
+   end if
 
  end if  ! end of the generation of the dynamical matrix at gamma.
  !***************************************************************
@@ -1178,31 +1245,29 @@ subroutine anaddb_driver_elastic_tensor(driver, dtset, crystal, ddb, asrq0, ana_
   ' Calculation of the elastic and compliances tensor (Voigt notation)',ch10
  call wrtout(units, msg)
 
- if (any(dtset%elaflag == [1, 2, 3, 4, 5])) then
-   call wrtout(std_out, 'so extract the elastic constant from the 2DTE')
+ call wrtout(std_out, 'so extract the elastic constant from the 2DTE')
 
-   ! look after the blok no. that contains the stress tensor
-   qphon(:,1)=zero; qphnrm(1)=zero
-   rfphon(1:2)=0; rfelfd(1:2)=0; rfstrs(1:2)=0
+ ! look after the blok no. that contains the stress tensor
+ qphon(:,1)=zero; qphnrm(1)=zero
+ rfphon(1:2)=0; rfelfd(1:2)=0; rfstrs(1:2)=0
 
-   call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, BLKTYP_d1E_xx)
-   iblok_stress = iblok
+ call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, BLKTYP_d1E_xx)
+ iblok_stress = iblok
 
-   ! look after the blok no.iblok that contains the elastic tensor
-   qphon(:,1)=zero; qphnrm(1)=zero
-   rfphon(1:2)=0; rfelfd(1:2)=0; rfstrs(1:2)=3
+ ! look after the blok no.iblok that contains the elastic tensor
+ qphon(:,1)=zero; qphnrm(1)=zero
+ rfphon(1:2)=0; rfelfd(1:2)=0; rfstrs(1:2)=3
 
-   ! for both diagonal and shear parts
-   call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, dtset%rfmeth)
-   if (iblok == 0) then
-     ABI_ERROR("DDB file must contain both uniaxial and shear strain when elaflag != 0, Check your calculations")
-   end if
-
-   ! print the elastic tensor
-   call ddb_elast(dtset, crystal, ddb%val, compl, compl_clamped, compl_stress, asrq0%d2asr, &
-     driver%elast, elast_clamped, elast_stress, iblok, iblok_stress, &
-     driver%instrain, ab_out, dtset%mpert, crystal%natom, ddb%nblok, ana_ncid)
+ ! for both diagonal and shear parts
+ call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, dtset%rfmeth)
+ if (iblok == 0) then
+   ABI_ERROR("DDB file must contain both uniaxial and shear strain when elaflag != 0, Check your calculations")
  end if
+
+ ! print the elastic tensor
+ call ddb_elast(dtset, crystal, ddb%val, compl, compl_clamped, compl_stress, asrq0%d2asr, &
+   driver%elast, elast_clamped, elast_stress, iblok, iblok_stress, &
+   driver%instrain, ab_out, dtset%mpert, crystal%natom, ddb%nblok, ana_ncid)
 
 end subroutine anaddb_driver_elastic_tensor
 !!***
