@@ -162,7 +162,10 @@ contains
  nmdir=sum(mpdir(:))
  ndim=nmat*nmdir
  fs2rs=1
+ qphon=zero
+ qphon(:,1)=ddb%qpt(1:3,1)
  qeq0=(sqrt(sum(qphon(:,1)**2))<tol8)
+ qphnrm(:)=ddb%nrm(1,1)
  optgb=0
  ABI_MALLOC(omega,(nomega))
  ABI_MALLOC(phfrq,(3*natom,nomega))
