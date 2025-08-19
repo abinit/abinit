@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 19 Aug 2025.
-- ( at 20h45 )
+- ( at 23h59 )
   
 
 ================================================================================
@@ -29,8 +29,8 @@
          asr         1
  Interatomic Force Constants Inputs :
       dipdip         0
-      dipqua         1
-      quadqu         1
+     dipquad         0
+    quadquad         0
       ifcana         0
       ifcout         0
  Description of grid 1 :
@@ -85,7 +85,6 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.031  and twall      0.031 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        1
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -196,6 +195,6 @@
 
 ================================================================================
 
-+Total cpu time      0.146  and wall time      0.146 sec
++Total cpu time      0.139  and wall time      0.139 sec
 
  anaddb : the run completed successfully.

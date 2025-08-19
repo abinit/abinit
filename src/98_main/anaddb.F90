@@ -137,7 +137,7 @@ program anaddb
  end if
 
 ! ========================================================================== !
-! Read input
+! Read input variables
 
  call dtset%read_input(comm)
 
@@ -147,13 +147,12 @@ program anaddb
    goto 100
  end if
 
-
 ! ========================================================================== !
 ! Open output file
 
  if (iam_master) then
    call isfile(dtset%filename_output, 'new')
-   if (open_file(dtset%filename_output, msg, unit = ab_out, form='formatted',status='new') /= 0) then
+   if (open_file(dtset%filename_output, msg, unit=ab_out, form='formatted', status='new') /= 0) then
      ABI_ERROR(msg)
    end if
    rewind (unit = ab_out)
@@ -171,42 +170,23 @@ program anaddb
  call driver%init(dtset)
 
 ! =========================================================================== !
-! Read the DDB information, also perform some checks, and symmetrize partially the DDB
+! Read the DDB information and symmetrize partially the DDB
 
  write(msg, '(a, a)' )' read the DDB information and perform some checks',ch10
  call wrtout(units, msg)
 
  call ddb%from_file(dtset%filename_ddb, ddb_hdr, crystal, comm, prtvol=dtset%prtvol)
 
- ! Change the bravais lattice if needed (deprecated)
+ ! Change the bravais lattice if needed
  call ddb%set_brav(dtset%brav)
 
- ! MR: a new ddb is necessary for the longwave quantities due to incompability of it with automatic reshapes
- ! that ddb%val and ddb%flg experience when passed as arguments of some routines
+ ! Copy the long-wave ddb
  if (ddb_hdr%has_d3E_lw) then
    call ddb_lw_copy(ddb, ddb_lw, ddb_hdr)
  end if
 
  ! Acoustic Sum Rule
- ! In case the interatomic forces are not calculated, the
- ! ASR-correction (asrq0%d2asr) has to be determined here from the Dynamical matrix at Gamma.
  call asrq0%init(ddb, dtset%asr, dtset%rfmeth, crystal%xcart)
-
- ! GA: The code block below was part of anaddb, just after initialization of asrq0..
- !     I dont quite understand the message, but I think this part was meant to be removed.
- !     I'm leaving this here just in case. 2025-08-18
- ! ------------------------------------------
- ! TODO: This is to maintain the previous behaviour in which all the arrays were initialized to zero.
- ! In the new version asrq0%d2asr is always computed if the Gamma block is present
- ! and this causes changes in [v5][t28]
- !if (.not. (dtset%ifcflag == 0 .or. dtset%instrflag /= 0 .or. dtset%elaflag /= 0)) then
- !  asrq0%d2asr = zero
- !  if (asrq0%asr == 3 .or. asrq0%asr == 4) then
- !    asrq0%singular = zero; asrq0%uinvers = zero; asrq0%vtinvers = zero
- !  end if
- !end if
- ! ------------------------------------------
-
 
 ! =========================================================================== !
 ! Open netcdf output and write basic quantities
@@ -221,9 +201,7 @@ program anaddb
  end if
 
 ! =========================================================================== !
-! Compute dielectric tensor, born effective charges, and quadrupoles,
-! and write them to netcdf output.
-! These tensors are passed to Ifc.
+! Compute dielectric tensor, born effective charges, and quadrupoles.
  if (driver%do_electric_tensors) then
    call driver%electric_tensors(dtset, crystal, ddb, ddb_lw, ddb_hdr, ana_ncid, comm)
  end if
@@ -235,29 +213,17 @@ program anaddb
  end if
 
 ! =========================================================================== !
-! Compute non-linear optical susceptibilities and, if dtset%nlflag < 3,
-! First-order change in the linear dielectric susceptibility
-! induced by an atomic displacement
+! Compute non-linear optical susceptibilities
+! and first-order change in the linear dielectric susceptibility
  if (dtset%nlflag > 0) then
    call driver%susceptibilities(dtset, ddb, ana_ncid, comm)
  end if
 
 ! =========================================================================== !
 ! Interatomic Forces Calculation
-
  if (driver%do_ifc) then
-   write(msg, '(a, a, (80a), a, a, a, a)' ) ch10, ('=',ii = 1, 80), ch10, ch10, &
-    ' Calculation of the interatomic forces ',ch10
-   call wrtout(units, msg)
-
-   ! TODO : check if this wrtout should be removed in latest merge 17 feb 2017
-   call timein(tcpu, twall)
-   write(msg, '(a, f11.3, a, f11.3, a)' )'-begin at tcpu',tcpu-tcpui, '  and twall',twall-twalli, ' sec'
-   call wrtout(units, msg)
-
    call driver%interatomic_force_constants(Ifc, dtset, crystal, ddb, ana_ncid, comm)
  end if
-
 
 ! =========================================================================== !
 ! Electron-phonon section
@@ -274,7 +240,6 @@ program anaddb
 
 ! =========================================================================== !
 ! Phonon density of states
-! =========================================================================== !
 
  if (driver%do_phonon_dos) then
    call driver%phdos(dtset, crystal, Ifc, comm)
@@ -296,7 +261,7 @@ program anaddb
 
 ! =========================================================================== !
 ! Lattice Wannier functions
-! =========================================================================== !
+
  if (dtset%ifcflag == 1 .and. dtset%lwfflag > 0 ) then
    call driver%lattice_wannier(dtset, crystal, Ifc, comm)
  endif
@@ -317,14 +282,12 @@ program anaddb
    call ddb_interpolate(Ifc, crystal, dtset, ddb, ddb_hdr, asrq0, dtset%prefix_outdata, comm)
  end if
 
-
 ! =========================================================================== !
 ! Thermal corrections to eigenvalues
 
  if (dtset%thmflag >= 3 .and. dtset%thmflag <= 8) then
    call thmeig(dtset, ddb, crystal, ab_out, crystal%natom, dtset%mpert, dtset%msize, asrq0%d2asr, comm)
  end if
-
 
 ! =========================================================================== !
 ! q = Gamma quantities (without non-analycities):
@@ -341,18 +304,13 @@ program anaddb
 
 ! =========================================================================== !
 ! Non-linear response: electrooptic and Raman (q = Gamma, TO modes only)
-! =========================================================================== !
 
- ! Raman susceptibilities and electrooptic coefficients
  if (dtset%nlflag == 1) then
    call driver%nonlinear_response(dtset, crystal, ana_ncid, comm)
  end if
 
-
 ! =========================================================================== !
-! Calculation of properties associated to the second list of wv: nph2l /= 0
-! (can include non-analyticities in the DM)
-! =========================================================================== !
+! Non-analyticity in the dynamical matrix
 
  if (driver%do_dielectric_nonana) then
    call driver%dielectric_nonana(dtset, crystal, ddb, ana_ncid, comm)
@@ -363,8 +321,7 @@ program anaddb
 ! Linear response with strain: elastic, piezo, etc
 ! =========================================================================== !
 
- ! Compute internal strain
- ! This is needed for subsequent calls
+ ! Internal strain (needed for the other linear response functions)
  if (dtset%instrflag /= 0) then
    call driver%internal_strain(dtset, ddb, asrq0)
  end if
@@ -384,15 +341,15 @@ program anaddb
    call driver%flexoelectric_tensor(dtset, crystal, ddb, ddb_lw, ddb_hdr, asrq0)
  end if
 
- ! ========================================================================== !
+! =========================================================================== !
+! Close netcdf file
 
- ! Close netcdf file
  if (iam_master) then
    NCF_CHECK(nf90_close(ana_ncid))
  end if
 
- ! ========================================================================== !
- ! Free memory
+! =========================================================================== !
+! Free memory
 
  call asrq0%free()
  call ifc%free()
@@ -403,8 +360,8 @@ program anaddb
  call driver%free()
  call dtset%free()
 
- ! ========================================================================== !
- ! Output timing and memory reports then close files
+! =========================================================================== !
+! Output timing and memory reports, then close output files
 
  call timein(tcpu, twall)
  tsec(1)=tcpu-tcpui; tsec(2)=twall-twalli

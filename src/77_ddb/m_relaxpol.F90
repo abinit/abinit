@@ -82,7 +82,6 @@ contains
 !!          = 0: do not relax cell parameters
 !! strten(6) = stress tensor in cartesian coordinates
 !! targetpol(3) = target value of the polarization
-!! usepaw = 1 if PAW in use, 0 else (needed for polcart)
 !!
 !! OUTPUT
 !!
@@ -96,12 +95,12 @@ contains
 
 subroutine relaxpol(Crystal,blkflg,blkval,etotal,gred,iatfix,iout,istrfix,&
 & mpert,msize,natfix,natom,nstrfix,pel,red_ptot,relaxat,relaxstr,&
-& strten,targetpol,usepaw)
+& strten,targetpol)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: iout,mpert,msize,natfix,natom,nstrfix
- integer,intent(in) :: relaxat,relaxstr,usepaw
+ integer,intent(in) :: relaxat,relaxstr
  real(dp),intent(in) :: etotal
  type(crystal_t),intent(in) :: Crystal
 !arrays
@@ -115,6 +114,7 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,gred,iatfix,iout,istrfix,&
 !scalars
  integer :: flag,iatom,idir,ii,index,index1,index_tild,info,ipert,istrain
  integer :: itypat,jdir,job,jpert,polunit,posi,posj,sizef
+ integer :: usepaw
  logical :: iwrite
  real(dp) :: e1,fmax,poltmp,sigmax,tol,value,ucvol
  character(len=500) :: message
@@ -131,9 +131,7 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,gred,iatfix,iout,istrfix,&
 
 ! *********************************************************************
 
-! GA: FIXME This routine doesnt actually care about usepaw.
-!           Remove this argument, and pass usepaw=0 to polcart.
-
+ usepaw = 0
  rprimd = Crystal%rprimd
  ucvol = Crystal%ucvol
  iwrite = iout > 0

@@ -1,8 +1,8 @@
 
-.Version 10.3.3.2 of ANADDB, released Nov 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.1.4.3 of ANADDB, released Jul 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,9 +14,9 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 24 Nov 2024.
-- ( at 07h30 )
-
+.Starting date : Wed 20 Aug 2025.
+- ( at 00h01 )
+  
 
 ================================================================================
 
@@ -30,8 +30,8 @@
       prtvol         1
  Interatomic Force Constants Inputs :
       dipdip         1
-      dipqua         1
-      quadqu         1
+     dipquad         0
+    quadquad         0
       ifcana         0
       ifcout         0
  Description of grid 1 :
@@ -94,13 +94,13 @@ Computation of Gruneisen parameter with central finite difference:
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges
+ Dielectric Tensor and Effective Charges 
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges
+   and impose the ASR on the effective charges 
 
- Effective charge tensors after
+ Effective charge tensors after 
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -168,13 +168,13 @@ Computation of Gruneisen parameter with central finite difference:
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges
+ Dielectric Tensor and Effective Charges 
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges
+   and impose the ASR on the effective charges 
 
- Effective charge tensors after
+ Effective charge tensors after 
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -242,13 +242,13 @@ Computation of Gruneisen parameter with central finite difference:
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges
+ Dielectric Tensor and Effective Charges 
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges
+   and impose the ASR on the effective charges 
 
- Effective charge tensors after
+ Effective charge tensors after 
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -299,6 +299,6 @@ Computation of Gruneisen parameter with central finite difference:
 
 ================================================================================
 
-+Total cpu time     45.471  and wall time     45.477 sec
++Total cpu time     45.521  and wall time     45.527 sec
 
  anaddb : the run completed successfully.

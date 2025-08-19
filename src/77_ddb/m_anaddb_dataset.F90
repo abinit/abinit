@@ -142,8 +142,6 @@ module m_anaddb_dataset
   integer:: natom
   integer:: msize
   integer:: mpert
-  integer:: ntypat
-  integer:: usepaw  ! GA: TODO Remove usepaw
 
   integer:: ngqpt(9)             ! ngqpt(9) instead of ngqpt(3) is needed in wght9.f
   integer:: istrfix(6)
@@ -1999,8 +1997,8 @@ subroutine outvars_anaddb(dtset, nunit)
  if(dtset%ifcflag /= 0)then
    write(nunit, '(a)')' Interatomic Force Constants Inputs :'
    write(nunit, '(3x, a9, 3i10)')'   dipdip',dtset%dipdip
-   write(nunit, '(3x, a9, 3i10)')'   dipquad',dtset%dipquad
-   write(nunit, '(3x, a9, 3i10)')'   quadquad',dtset%quadquad
+   write(nunit, '(3x, a9, 3i10)')'  dipquad',dtset%dipquad
+   write(nunit, '(3x, a9, 3i10)')' quadquad',dtset%quadquad
    if(dtset%nsphere /= 0)write(nunit, '(3x, a9, 3i10)')'  nsphere',dtset%nsphere
    if(abs(dtset%rifcsph)>tol10)write(nunit, '(3x, a9, E16.6)')'  nsphere',dtset%rifcsph
    write(nunit, '(3x, a9, 3i10)')'   ifcana',dtset%ifcana
@@ -2577,10 +2575,8 @@ subroutine anaddb_dtset_read_input(dtset, comm)
  call ddb_hdr%open_read(dtset%filename_ddb, comm=comm, dimonly = 1)
 
  dtset%natom = ddb_hdr%natom
- dtset%ntypat = ddb_hdr%ntypat
  dtset%mpert = ddb_hdr%mpert
  dtset%msize = ddb_hdr%msize
- dtset%usepaw = ddb_hdr%usepaw
 
  ! Read the input file, and store the information in a long string of characters
  ! strlen from defs_basis module
@@ -2605,15 +2601,13 @@ subroutine anaddb_dtset_read_input(dtset, comm)
  call invars9(dtset, dtset%lenstr, dtset%natom, dtset%input_string)
 
  ! Set some inputs depending on what the ddb contains
- !if (.not. ddb_hdr%has_d3E_lw) then
- !  ! The default value is 1.
- !  ! Here we set the flags to zero if Q*is not available.
- !  ! GA: I think this check is correct, but originally it was done
- !  ! by checking for a non-zero value of 
- !  ! iblock_quadrupoles = ddb_lw%get_quadrupoles(ddb_hdr%ddb_version, lwsym, BLKTYP_d3E_lw, qdrp_cart)
- !  dtset%dipquad = 0
- !  dtset%quadquad = 0
- !end if
+ if (.not. ddb_hdr%has_d3E_lw) then
+   ! The default value is 1.
+   ! Here we set the flags to zero if Q*is not available.
+   ! iblock_quadrupoles = ddb_lw%get_quadrupoles(ddb_hdr%ddb_version, 1, BLKTYP_d3E_lw, qdrp_cart)
+   dtset%dipquad = 0
+   dtset%quadquad = 0
+ end if
 
  call ddb_hdr%free()
 
