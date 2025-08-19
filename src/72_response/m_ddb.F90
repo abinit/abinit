@@ -1140,13 +1140,17 @@ end subroutine ddb_set_etotal
 !!   1 -> No rescaling.
 !!   other -> Check and rescale.
 !!
-!!  Note that the meaning of brav is
+!!  The meaning of brav is
 !!    1 or -1 -> simple lattice
 !!    2 -> face-centered cubic
 !!    3 -> body-centered lattice
 !!    4 -> hexagonal lattice (D6h)
 !!
 !! OUTPUT
+!!
+!! NOTE
+!!  The use of brav is deprecated, but it is still used for initializing IFC.
+!!  We should try to remove its occurence.
 !!
 !! SOURCE
 
@@ -6668,6 +6672,11 @@ subroutine dtqdrp(blkval,ddb_version,lwsym,mpert,natom,lwtens)
 !!
 !! OUTPUT
 !! ddb_lw= ddb block datastructure
+!!
+!! NOTE
+!!  A new ddb is necessary for the longwave quantities in anaddb
+!!  due to incompability of it with automatic reshapes that ddb%val and ddb%flg
+!!  experience when passed as arguments of some routines.
 !!
 !! SOURCE
 

@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ANADDB, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.1.4.3 of ANADDB, released Jul 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,9 +14,9 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h11 )
-
+.Starting date : Tue 19 Aug 2025.
+- ( at 23h59 )
+  
 
 ================================================================================
 
@@ -32,8 +32,8 @@
    symdynmat         0
  Interatomic Force Constants Inputs :
       dipdip         0
-      dipqua         1
-      quadqu         1
+     dipquad         0
+    quadquad         0
      nsphere    0.800000E+01
       ifcana         1
       ifcout         0
@@ -97,9 +97,8 @@
 
 ================================================================================
 
- Calculation of the interatomic forces
+ Calculation of the interatomic forces 
 
--begin at tcpu      0.040  and twall      0.072 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -115,7 +114,7 @@
 
 ================================================================================
 
- Properties based on electron-phonon coupling
+ Properties based on electron-phonon coupling 
 
  Found     4 symmetries that leave the perturbation invariant.
  Found     4 symmetries that leave the perturbation invariant.
@@ -185,7 +184,7 @@
 
 ================================================================================
 
- Calculation of phonon density of states
+ Calculation of phonon density of states 
 
  Average speed of sound partial sums:    -0.6590764220E-03 (at units)
 -                                   =          -1.4419 [km/s]
@@ -194,17 +193,17 @@
 -                                 =    -0.3577529331E+01 (THz)
 -Debye temperature from partial sums:    -0.1716941248E+03 (K)
 
- Average speed of sound:     0.3008288818E-04 (at units)
+ Average speed of sound:     0.3008288818E-04 (at units) 
 -                      =           0.0658 [km/s]
 
- Debye frequency from DOS:     0.2481772260E-04 (Ha)
+ Debye frequency from DOS:     0.2481772260E-04 (Ha) 
 -                        =     0.1632927703E+00 (THz)
 -Debye temperature from DOS:     0.7836807667E+01 (K)
 
 
 ================================================================================
 
- Treat the first list of vectors
+ Treat the first list of vectors 
 
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
@@ -213,7 +212,7 @@
  Phonon frequencies in cm-1    :
 -  0.000000E+00  0.000000E+00  0.000000E+00
 
- Eigendisplacements
+ Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
@@ -248,7 +247,7 @@
  Phonon frequencies in cm-1    :
 - -2.479366E+02 -2.479366E+02  2.701868E+02
 
- Eigendisplacements
+ Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
@@ -272,7 +271,7 @@
  Phonon frequencies in cm-1    :
 - -2.479366E+02 -2.479366E+02  2.701868E+02
 
- Eigendisplacements
+ Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
@@ -296,7 +295,7 @@
  Phonon frequencies in cm-1    :
 - -2.085317E+02 -2.085317E+02  4.017677E+02
 
- Eigendisplacements
+ Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
@@ -320,7 +319,7 @@
  Phonon frequencies in cm-1    :
 - -2.479366E+02 -2.479366E+02  2.701868E+02
 
- Eigendisplacements
+ Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
@@ -344,7 +343,7 @@
  Phonon frequencies in cm-1    :
 - -2.085317E+02 -2.085317E+02  4.017677E+02
 
- Eigendisplacements
+ Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
@@ -368,7 +367,7 @@
  Phonon frequencies in cm-1    :
 - -2.085317E+02 -2.085317E+02  4.017677E+02
 
- Eigendisplacements
+ Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
@@ -392,7 +391,7 @@
  Phonon frequencies in cm-1    :
 - -2.479366E+02 -2.479366E+02  2.701868E+02
 
- Eigendisplacements
+ Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
@@ -410,10 +409,10 @@
 ;  1  2.60331046E-03  2.60331046E-03  2.60331046E-03
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
 -
-- Proc.   0 individual time (sec): cpu=          1.3  wall=          1.5
+- Proc.   0 individual time (sec): cpu=          1.2  wall=          1.3
 
 ================================================================================
 
-+Total cpu time      1.287  and wall time      1.542 sec
++Total cpu time      1.235  and wall time      1.271 sec
 
  anaddb : the run completed successfully.

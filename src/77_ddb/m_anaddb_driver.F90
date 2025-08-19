@@ -73,7 +73,6 @@ module m_anaddb_driver
    integer:: natom
    integer:: msize
    integer:: mpert
-   integer:: usepaw  ! GA: TODO Remove usepaw
 
    logical:: do_ifc=.false.
    logical:: do_electric_tensors=.false.
@@ -236,7 +235,6 @@ subroutine anaddb_driver_init(driver, dtset)
  driver%natom = dtset%natom
  driver%msize = dtset%msize
  driver%mpert = dtset%mpert
- driver%usepaw = dtset%usepaw
 
  ! Allocate memory
  ABI_MALLOC(driver%d2cart, (2, driver%msize))
@@ -413,14 +411,6 @@ subroutine anaddb_driver_electric_tensors(driver, dtset, crystal, ddb, ddb_lw, d
    iblok_quadrupoles = ddb_lw%get_quadrupoles(ddb_hdr%ddb_version, lwsym, BLKTYP_d3E_lw, driver%qdrp_cart)
  end if
 
- ! The default value is 1. Here we set the flags to zero if Q*is not available.
- ! GA: FIXME This change of variable value happens after outputting the input.
- !           It should happen before, but I will need to update tests when I change this.
- if (iblok_quadrupoles == 0) then
-   dtset%dipquad = 0
-   dtset%quadquad = 0
- end if
-
  ! Get the electronic dielectric tensor (epsinf) and Born effective charges (zeff)
  ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
  iblok = ddb%get_dielt_zeff(crystal, dtset%rfmeth, dtset%chneut, dtset%selectz, driver%epsinf, driver%zeff)
@@ -553,11 +543,10 @@ subroutine anaddb_driver_structural_response(driver, dtset, crystal, ddb)
 
  targetpol(:) = dtset%targetpol
 
- !GA: FIXME: Remove usepaw
  call relaxpol(crystal, d2flg, driver%d2cart, etotal, gred, dtset%iatfix, &
 &   ab_out, dtset%istrfix, dtset%mpert, dtset%msize, dtset%natfix, crystal%natom, &
 &   dtset%nstrfix, pel, red_ptot, dtset%relaxat, dtset%relaxstr, &
-&   strten, targetpol, dtset%usepaw)
+&   strten, targetpol)
 
  ABI_SFREE(gred)
  ABI_FREE(d2flg)
@@ -652,9 +641,19 @@ subroutine anaddb_driver_interatomic_force_constants(driver, ifc, dtset, crystal
  integer:: my_rank
  integer:: ii
  type(ifc_type):: Ifc_coarse
+ character(len = 500):: msg
  integer:: ngqpt_coarse(3)
+ integer:: units(2)
 
 ! ************************************************************************
+
+ units = [std_out, ab_out]
+
+! ************************************************************************
+
+  write(msg, '(a, a, (80a), a, a, a, a)' ) ch10, ('=',ii = 1, 80), ch10, ch10, &
+    ' Calculation of the interatomic forces ',ch10
+  call wrtout(units, msg)
 
  if (any(dtset%qrefine(:) > 1)) then
    ! Gaal-Nagy's algorithm in PRB 73 014117 [[cite:GaalNagy2006]]
