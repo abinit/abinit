@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ANADDB, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.1.4.3 of ANADDB, released Jul 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,9 +14,9 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h11 )
-
+.Starting date : Tue 19 Aug 2025.
+- ( at 20h45 )
+  
 
 ================================================================================
 
@@ -83,9 +83,9 @@
 
 ================================================================================
 
- Calculation of the interatomic forces
+ Calculation of the interatomic forces 
 
--begin at tcpu      0.029  and twall      0.029 sec
+-begin at tcpu      0.031  and twall      0.031 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -101,7 +101,7 @@
 
 ================================================================================
 
- Treat the first list of vectors
+ Treat the first list of vectors 
 
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
@@ -186,19 +186,19 @@
 
  For checking purposes, write ten values in the present file.
        Index    Energy (in Ha)      DOS
-         1     -1.151435E-06      1.057855E+04
-        51      6.345553E-04      0.000000E+00
-       101      1.270262E-03      0.000000E+00
-       151      1.905969E-03      0.000000E+00
-       201      2.541676E-03      0.000000E+00
-       251      3.177382E-03      1.573386E-06
-       301      3.813089E-03      0.000000E+00
-       351      4.448796E-03      1.938508E-06
-       401      5.084502E-03      0.000000E+00
-       451      5.720209E-03      9.866630E+01
-
+         1      0.000000E+00      1.057855E+04
+        51      6.355914E-04      0.000000E+00
+       101      1.271183E-03      0.000000E+00
+       151      1.906774E-03      0.000000E+00
+       201      2.542366E-03      0.000000E+00
+       251      3.177957E-03      1.191252E-06
+       301      3.813548E-03      0.000000E+00
+       351      4.449140E-03      1.642731E-06
+       401      5.084731E-03      0.000000E+00
+       451      5.720322E-03      1.012819E+02
+ 
 --------------------------------------------------------------------------------
-
+ 
  Electron-phonon change of electronic structure.
  The temperature-dependent values are written in the _TBS file.
  Here follows, for each electronic wavevector and band :
@@ -206,56 +206,56 @@
 
  Kpt number      1, with reduced coordinates :    2.500000E-01    2.500000E-01    2.500000E-01
      1        1.970638E-03        3.463287E-06
-     2       -3.291344E-03       -5.274903E-06
-     3       -3.291344E-03       -5.274902E-06
+     2       -3.291344E-03       -5.274902E-06
+     3       -3.291343E-03       -5.274901E-06
      4       -3.291344E-03       -5.274903E-06
 
  Kpt number      2, with reduced coordinates :   -2.500000E-01    2.500000E-01    2.500000E-01
      1       -1.775400E-03       -2.462430E-06
-     2        2.646823E-03        4.758163E-06
+     2        2.646822E-03        4.758162E-06
      3        6.495856E-04        1.204686E-06
-     4        6.495857E-04        1.204686E-06
+     4        6.495856E-04        1.204686E-06
 
  Kpt number      3, with reduced coordinates :    2.500000E-01   -2.500000E-01    2.500000E-01
      1       -1.775400E-03       -2.462430E-06
-     2        2.646823E-03        4.758163E-06
+     2        2.646822E-03        4.758162E-06
      3        6.495856E-04        1.204686E-06
      4        6.495856E-04        1.204686E-06
 
  Kpt number      4, with reduced coordinates :   -2.500000E-01   -2.500000E-01    2.500000E-01
      1       -1.775400E-03       -2.462430E-06
-     2        2.646823E-03        4.758163E-06
+     2        2.646822E-03        4.758162E-06
      3        6.495856E-04        1.204686E-06
      4        6.495857E-04        1.204686E-06
 
  Kpt number      5, with reduced coordinates :    2.500000E-01    2.500000E-01   -2.500000E-01
      1       -1.775400E-03       -2.462430E-06
-     2        2.646823E-03        4.758163E-06
-     3        6.495857E-04        1.204686E-06
+     2        2.646822E-03        4.758162E-06
+     3        6.495856E-04        1.204686E-06
      4        6.495856E-04        1.204686E-06
 
  Kpt number      6, with reduced coordinates :   -2.500000E-01    2.500000E-01   -2.500000E-01
      1       -1.775400E-03       -2.462430E-06
-     2        2.646823E-03        4.758163E-06
-     3        6.495857E-04        1.204686E-06
-     4        6.495857E-04        1.204686E-06
+     2        2.646822E-03        4.758162E-06
+     3        6.495856E-04        1.204686E-06
+     4        6.495856E-04        1.204686E-06
 
  Kpt number      7, with reduced coordinates :    2.500000E-01   -2.500000E-01   -2.500000E-01
      1       -1.775400E-03       -2.462430E-06
-     2        2.646823E-03        4.758163E-06
+     2        2.646822E-03        4.758162E-06
      3        6.495857E-04        1.204686E-06
      4        6.495856E-04        1.204686E-06
 
  Kpt number      8, with reduced coordinates :   -2.500000E-01   -2.500000E-01   -2.500000E-01
-     1        1.970638E-03        3.463287E-06
-     2       -3.291344E-03       -5.274903E-06
-     3       -3.291343E-03       -5.274902E-06
-     4       -3.291344E-03       -5.274903E-06
+     1        1.970638E-03        3.463286E-06
+     2       -3.291344E-03       -5.274902E-06
+     3       -3.291343E-03       -5.274901E-06
+     4       -3.291344E-03       -5.274902E-06
 -
 - Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
 
 ================================================================================
 
-+Total cpu time      0.080  and wall time      0.080 sec
++Total cpu time      0.084  and wall time      0.084 sec
 
  anaddb : the run completed successfully.
