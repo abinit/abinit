@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ANADDB, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.1.4.3 of ANADDB, released Jul 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,9 +14,9 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h11 )
-
+.Starting date : Tue 19 Aug 2025.
+- ( at 20h45 )
+  
 
 ================================================================================
 
@@ -83,9 +83,9 @@
 
 ================================================================================
 
- Calculation of the interatomic forces
+ Calculation of the interatomic forces 
 
--begin at tcpu      0.040  and twall      0.040 sec
+-begin at tcpu      0.031  and twall      0.031 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        1
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -94,7 +94,7 @@
 
 ================================================================================
 
- Treat the first list of vectors
+ Treat the first list of vectors 
 
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
@@ -140,19 +140,19 @@
 
  For checking purposes, write ten values in the present file.
        Index    Energy (in Ha)      DOS
-         1     -1.329004E-06      8.462819E+04
-        51      6.343954E-04      0.000000E+00
-       101      1.270120E-03      0.000000E+00
-       151      1.905844E-03      0.000000E+00
-       201      2.541569E-03      0.000000E+00
-       251      3.177293E-03      1.313482E-05
-       301      3.813017E-03      0.000000E+00
-       351      4.448742E-03      1.591456E-05
-       401      5.084466E-03      0.000000E+00
-       451      5.720191E-03      7.864489E+02
-
+         1      0.000000E+00      8.462844E+04
+        51      6.355913E-04      0.000000E+00
+       101      1.271183E-03      0.000000E+00
+       151      1.906774E-03      0.000000E+00
+       201      2.542365E-03      0.000000E+00
+       251      3.177956E-03      9.528310E-06
+       301      3.813548E-03      0.000000E+00
+       351      4.449139E-03      1.314670E-05
+       401      5.084730E-03      0.000000E+00
+       451      5.720321E-03      8.105805E+02
+ 
 --------------------------------------------------------------------------------
-
+ 
  Electron-phonon change of electronic structure.
  The temperature-dependent values are written in the _TBS file.
  Here follows, for each electronic wavevector and band :
@@ -160,42 +160,42 @@
 
  Kpt number      1, with reduced coordinates :    5.000000E-01    5.000000E-01    5.000000E-01
      1       -1.775401E-03       -2.462433E-06
-     2       -1.775401E-03       -2.462433E-06
+     2       -1.775401E-03       -2.462432E-06
      3       -1.775401E-03       -2.462433E-06
-     4       -1.775401E-03       -2.462433E-06
-     5       -1.775401E-03       -2.462433E-06
+     4       -1.775401E-03       -2.462432E-06
+     5       -1.775401E-03       -2.462432E-06
      6       -1.775401E-03       -2.462433E-06
-     7        1.970636E-03        3.463285E-06
-     8        1.970636E-03        3.463285E-06
-     9       -3.291344E-03       -5.274905E-06
-    10       -3.291344E-03       -5.274905E-06
+     7        1.970636E-03        3.463284E-06
+     8        1.970636E-03        3.463284E-06
+     9       -3.291344E-03       -5.274904E-06
+    10       -3.291344E-03       -5.274904E-06
     11       -3.291344E-03       -5.274904E-06
-    12       -3.291344E-03       -5.274905E-06
-    13       -3.291344E-03       -5.274905E-06
+    12       -3.291344E-03       -5.274904E-06
+    13       -3.291344E-03       -5.274904E-06
     14       -3.291344E-03       -5.274904E-06
     15        2.646835E-03        4.758183E-06
     16        2.646835E-03        4.758183E-06
-    17        2.646834E-03        4.758182E-06
+    17        2.646834E-03        4.758181E-06
     18        2.646834E-03        4.758182E-06
     19        2.646835E-03        4.758183E-06
-    20        2.646835E-03        4.758184E-06
-    21        6.495688E-04        1.204658E-06
+    20        2.646835E-03        4.758183E-06
+    21        6.495687E-04        1.204658E-06
     22        6.495687E-04        1.204658E-06
-    23        6.495688E-04        1.204658E-06
-    24        6.495688E-04        1.204658E-06
-    25        6.495684E-04        1.204658E-06
-    26        6.495687E-04        1.204658E-06
-    27        6.495684E-04        1.204658E-06
+    23        6.495687E-04        1.204658E-06
+    24        6.495687E-04        1.204658E-06
+    25        6.495684E-04        1.204657E-06
+    26        6.495686E-04        1.204658E-06
+    27        6.495684E-04        1.204657E-06
     28        6.495686E-04        1.204658E-06
     29        6.495687E-04        1.204658E-06
-    30        6.495687E-04        1.204658E-06
+    30        6.495685E-04        1.204657E-06
     31        6.495686E-04        1.204658E-06
-    32        6.495690E-04        1.204659E-06
+    32        6.495689E-04        1.204659E-06
 -
-- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.2
+- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
 
 ================================================================================
 
-+Total cpu time      0.167  and wall time      0.167 sec
++Total cpu time      0.146  and wall time      0.146 sec
 
  anaddb : the run completed successfully.

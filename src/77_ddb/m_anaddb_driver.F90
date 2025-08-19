@@ -198,6 +198,7 @@ subroutine anaddb_driver_init(driver, dtset)
  end if
 
  if (dtset%ifcflag /= 0 .or. dtset%dieflag /= 0 &
+&    .or. dtset%dipdip /= 0 .or. dtset%dipquad /= 0 .or. dtset%quadquad /= 0 &
 &    .or. dtset%nph2l /= 0 .or. dtset%nlflag /= 0 &
 &    .or. dtset%piezoflag /= 0 .or. dtset%flexoflag /= 0 &
 &    .or. dtset%polflag /= 0) then
