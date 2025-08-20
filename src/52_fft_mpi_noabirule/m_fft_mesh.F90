@@ -297,7 +297,6 @@ subroutine setmesh(gmet, gvec, ngfft, npwvec, npwsigx, npwwfn, nfftot, method, m
  !integer,allocatable :: pfactors(:),powers(:)
  integer,pointer :: symrel(:,:,:)
  real(dp),pointer :: tnons(:,:)
-
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -502,7 +501,7 @@ subroutine setmesh(gmet, gvec, ngfft, npwvec, npwsigx, npwwfn, nfftot, method, m
      end do
    end do rd
    !
-   ! * Warn if not compatibile with tnons or rotational part.
+   ! Warn if not compatible with tnons or rotational part.
    if (.not.fft_ok) then
      ABI_WARNING('FFT mesh is not compatible with non-symmorphic translations')
    end if
@@ -644,7 +643,6 @@ pure function check_rot_fft(nsym,symrel,nr1,nr2,nr3)
 
 !local variables
  integer :: is
-
 !************************************************************************
 
  ! The grid is compatible with the symmetries (only rotational part) if
@@ -1031,7 +1029,6 @@ elemental integer function ig2gfft(ig, ng) result (gc)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ig,ng
-
 !************************************************************************
 
  ! Use the following indexing (N means ngfft of the adequate direction)
@@ -1077,9 +1074,7 @@ pure integer function g2ifft(gg,ngfft) result (gidx)
  integer,intent(in) :: gg(3),ngfft(3)
 
 !Local variables-------------------------------
-!scalars
  integer :: n1,n2,n3,ig1,ig2,ig3
-
 !************************************************************************
 
  ! Use the following indexing (N means ngfft of the adequate direction)
@@ -1132,10 +1127,8 @@ pure subroutine get_gfft(ngfft, kpt, gmet, gsq_max, gfft)
  real(dp),intent(in) :: kpt(3), gmet(3,3)
 
 !Local variables-------------------------------
-!scalars
  integer :: ifft,g1,g2,g3,i1,i2,i3
  real(dp) :: dsq
-
 !************************************************************************
 
  ifft=0; gsq_max=smallest_real

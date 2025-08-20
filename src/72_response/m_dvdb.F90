@@ -1058,7 +1058,7 @@ integer function dvdb_get_pinfo(db, iqpt, cplex, pinfo) result(nperts)
         nperts = nperts + 1
         pinfo(:, nperts) = [idir, ipert, idir + (ipert-1)*3]
         if (cplex == 0) cplex = db%cplex_v1(iv1)
-        ABI_CHECK(cplex == db%cplex_v1(iv1), "cplex should be constant for given q!")
+        ABI_CHECK_IEQ(cplex, db%cplex_v1(iv1), "cplex should be constant for given q!")
       end if
     end do
  end do
@@ -1686,7 +1686,7 @@ pcase_loop: &
      ! IS(q) = q + G0
      ! we want q so we have to multiply by exp(iG0r) in real space.
      if (any(g0_qpt /= 0)) then
-       ABI_CHECK(cplex==2, "cplex == 1")
+       ABI_CHECK_IEQ(cplex, 2, "cplex != 2")
        if (debug) write(std_out,*)"Found not zero g0_qpt", g0_qpt ! for idir: ", idir, ", ipert: ", ipert
        call times_eigr(g0_qpt, ngfft, nfft, 1, v1scf(:,ispden,pcase))
      end if
@@ -1871,7 +1871,7 @@ subroutine v1phq_rotate(cryst, qpt_ibz, isym, itimrev, g0q, ngfft, cplex, nfft, 
  ! Keep track of total time spent.
  call timab(1804, 1, tsec)
 
- ABI_CHECK(cplex == 2, "cplex != 2")
+ ABI_CHECK_IEQ(cplex, 2, "cplex != 2")
 
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  natom3 = 3 * cryst%natom; tsign = 3-2*itimrev
@@ -2022,7 +2022,7 @@ subroutine v1phq_rotate_myperts(cryst, qpt_ibz, isym, itimrev, g0q, ngfft, cplex
  ! Keep track of total time spent.
  call timab(1804, 1, tsec)
 
- ABI_CHECK(cplex == 2, "cplex != 2")
+ ABI_CHECK_IEQ(cplex, 2, "cplex != 2")
 
  natom3 = 3 * cryst%natom; tsign = 3-2*itimrev
 

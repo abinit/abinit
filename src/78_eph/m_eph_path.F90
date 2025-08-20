@@ -125,7 +125,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  integer :: natom, natom3, nsppol, nspden, nspinor, qptopt, comm_cart, me_cart
  integer :: nfft,nfftf,mgfft,mgfftf, my_npert, my_ip, idir, ipert, ipc, ncerr, ncid, my_nkpath, my_nqpath
  integer :: in_k, im_kq, my_is, my_ik, my_iq, nband, nb_in_g, ii, band_n, band_m, bstart, bstop, my_nspins, np, tot_nscf_ierr
- !integer :: linalg_max_size
  real(dp) :: cpu_all,wall_all,gflops_all, eig0nk, eshift
  logical :: qq_is_gamma, need_ftinterp, gen_eigenpb, use_cg_k, use_cg_kq, use_cache
  type(gs_hamiltonian_type) :: gs_ham_k, gs_ham_kq
@@ -227,7 +226,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      else
        call xmpi_distrib_2d(np, priority, nk_path, natom3, kpt_comm%nproc, pert_comm%nproc, ierr)
      end if
-     ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(np), " with priority: ", priority))
+     ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(np), " with priority: ", priority, ". Decrease nprocs"))
    end if
 
    ! Consistency check
@@ -278,7 +277,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
    call dvdb%set_pert_distrib(my_npert, natom3, my_pinfo, pert_table, pert_comm%value)
    ABI_FREE(my_pinfo)
    ABI_FREE(pert_table)
-   ABI_WARNING("Parallelism over perturbations should be tested.")
+   ABI_WARNING("Parallelism over perturbations should be tested!")
  end if
 
  ! Load KS potential from file.
@@ -292,6 +291,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
  ! Open the DVDB file
  call dvdb%open_read(ngfftf, xmpi_comm_self)
+ ABI_CHECK(dvdb%has_fields("pot1", msg), msg)
 
  ! Check if the q-points are present in the DVDB
  qptopt = dtset%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
@@ -413,7 +413,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
  call xmpi_barrier(comm) ! Make sure the nc file has been written by master before continuing.
 
- ! All procs open GPATH here
+ ! All procs open GPATH here.
  NCF_CHECK(nctk_open_modify(ncid, gpath_path, comm))
 
  ! The cache allows one the reuse the wavefunctions of the previous k/q to init the NSCF cycle
@@ -455,7 +455,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      NCF_CHECK(nf90_put_var(ncid, vid("all_eigens_k"), eig_k, start=[1,ik,spin]))
      !end if
 
-     ! Make sure all procs in pert_comm have the same wavefunctions at k
+     ! Make sure all procs in pert_comm have the same wavefunctions at k.
      call xmpi_bcast(cg_k, master, pert_comm%value, ierr)
      if (psps%usepaw == 1) call xmpi_bcast(gsc_k, master, pert_comm%value, ierr)
 
@@ -492,7 +492,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        ! This to have the same gauge when qq = 0.
        if (qq_is_gamma) cg_kq = cg_k
 
-       ! Make sure all procs in pert_comm have the same wavefunctions at k+q
+       ! Make sure all procs in pert_comm have the same wavefunctions at k+q.
        call xmpi_bcast(cg_kq, master, pert_comm%value, ierr)
        if (psps%usepaw == 1) call xmpi_bcast(gsc_kq, master, pert_comm%value, ierr)
 
@@ -623,10 +623,10 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  if (my_rank == master) then
    if (tot_nscf_ierr == 0) then
      call wrtout(units, &
-                 sjoin("Computation of g(k,q) completed. All NSCF runs converged within tolwfr", ftoa(dtset%tolwfr)))
+       sjoin("Computation of g(k,q) completed. All NSCF runs converged within tolwfr", ftoa(dtset%tolwfr)))
    else
      call wrtout(units, &
-                 sjoin("WARNING:", itoa(tot_nscf_ierr), "NSCF runs did not converge within tolwfr", ftoa(dtset%tolwfr), ". Increase nstep!"))
+       sjoin("WARNING:", itoa(tot_nscf_ierr), "NSCF runs did not converge within tolwfr", ftoa(dtset%tolwfr), ". Increase nstep!"))
    end if
  end if
 
@@ -666,7 +666,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      ABI_FREE(eig_kq)
 
    else
-     ! (nk_path > 1)
+     ! nk_path > 1
      ABI_MALLOC(eig_k, (nband))
      do spin=1,nsppol
        call wrtout(units, sjoin(" Energies_k in eV for spin:", itoa(spin)))

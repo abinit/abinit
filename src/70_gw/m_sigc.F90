@@ -99,11 +99,11 @@ contains
 !!  eig(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=KS or QP energies for k-points, bands and spin
 !!  occ(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=occupation numbers, for each k point in IBZ, each band and spin
 !!  Paw_pwff<pawpwff_t>=Form factor used to calculate the onsite mat. elements of a plane wave.
-!! allQP_sym(Wfd%nkibz,Wfd%nsppol)<esymm_t>=Datatype collecting data on the irreducible representaions of the
+!! allQP_sym(Wfd%nkibz,Wfd%nsppol)<esymm_t>=Datatype collecting data on the irreducible representations of the
 !!    little group of kcalc in the KS representation as well as the symmetry of the bdgw_k states.
 !! Sr=sigma_t (see the definition of this structured datatype)
 !! use_aerhor=1 is aepaw_rhor is used, 0 otherwise.
-!! aepaw_rhor(rho_nfftot,Wfd%nspden*use_aerhor)=AE PAW density used to generate PPmodel paramenters if mqmem==0
+!! aepaw_rhor(rho_nfftot,Wfd%nspden*use_aerhor)=AE PAW density used to generate PPmodel parameters if mqmem==0
 !!
 !! OUTPUT
 !!
@@ -782,7 +782,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
              call xmpi_sum(neig, Wfd%comm, ierr)
              call xmpi_sum(ac_epsm1cqwz2, Wfd%comm, ierr)
            else
-             ! No neeed to MPI_SUM ac_epsm1cqwz2_win as we're using MPI shared memory.
+             ! No need to MPI_SUM ac_epsm1cqwz2_win as we're using MPI shared memory.
              call xmpi_sum(neig, epsm1%shared_comm%value, ierr)
              call xmpi_win_fence(XMPI_MODE_NOSUCCEED, ac_epsm1cqwz2_win, ierr) ! Close the RMA epoch.
            end if
@@ -868,7 +868,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          ! * The oscillator is evaluated at q=O as it is considered constant in the small cube around Gamma
          !   while the Colulomb term is integrated out.
          ! * In the scalar case we have nonzero contribution only if ib_sum==jb
-         ! * For nspinor==2 evalute <ib_sum,up|jb,up> and <ib_sum,dwn|jb,dwn>,
+         ! * For nspinor==2 evaluate <ib_sum,up|jb,up> and <ib_sum,dwn|jb,dwn>,
          !   impose orthonormalization since npwwfn might be < npwvec.
          if (ik_bz==jk_bz) then
            if (nspinor==1) then
@@ -1122,7 +1122,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                      omegame0i2_ac = omegame0i_ac*omegame0i_ac
                      do iiw=1,epsm1%nomega_i_conv
                         sigctmp(io,iab) = sigctmp(io,iab) + &
-                        piinv * conv_rhotw_epsm1_rhotw(jb,kb,iiw) * omegame0i_ac / (omegame0i2_ac + conv_omegap2(iiw)) * conv_gl_wts(iiw) / conv_gl_knots(iiw)**2
+                        piinv * conv_rhotw_epsm1_rhotw(jb,kb,iiw) * &
+                        omegame0i_ac / (omegame0i2_ac + conv_omegap2(iiw)) * conv_gl_wts(iiw) / conv_gl_knots(iiw)**2
                      end do
                   else
                      select case (epsm1%hscr%iw_mesh_type)
@@ -1130,15 +1131,17 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                         omegame0i2_ac = omegame0i_ac*omegame0i_ac
                         do iiw=1,epsm1%nomega_i
                            sigctmp(io,iab) = sigctmp(io,iab) + &
-                           piinv * rhotw_epsm1_rhotw(jb,kb,iiw) * omegame0i_ac / (omegame0i2_ac + omegap2(iiw)) * gl_wts(iiw) / gl_knots(iiw)**2
+                           piinv * rhotw_epsm1_rhotw(jb,kb,iiw) * &
+                           omegame0i_ac / (omegame0i2_ac + omegap2(iiw)) * gl_wts(iiw) / gl_knots(iiw)**2
                         end do
                      case ("minimax")
-                        ! NB: Sigma_c along the im ag. axis has a -1/2pi factor.
+                        ! NB: Sigma_c along the imag. axis has a -1/2pi factor.
                         ! Here the -1 factor disappears because we have performed an EIGEN decomposition of -(epsm1-1).
                          do iiw=1,epsm1%nomega_i
                            sigctmp(io,iab) = sigctmp(io,iab) + &
                              (piinv / two) * rhotw_epsm1_rhotw(jb,kb,iiw) * ( &
-                                (one / (omegame0i_ac + omegap_cplx(iiw))) + (one / (omegame0i_ac - omegap_cplx(iiw)))) * epsm1%hscr%omega_wgs(epsm1%nomega_r+iiw)
+                                (one / (omegame0i_ac + omegap_cplx(iiw))) + (one / (omegame0i_ac - omegap_cplx(iiw)))) * &
+                                epsm1%hscr%omega_wgs(epsm1%nomega_r+iiw)
                          end do
                      case default
                         ABI_ERROR(sjoin("Invalid iw_mesh_type:", epsm1%hscr%iw_mesh_type))
@@ -1148,6 +1151,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
              end do
 
            else
+             ! All other cases (not AC)
              do iab=1,Sigp%nsig_ab
                spadc1 = spinor_padc(1, iab); spadc2 = spinor_padc(2, iab)
                do io=1,nomega_sigc
@@ -1277,7 +1281,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  call xmpi_sum(sigc, Wfd%comm, ierr)
  call timab(441,2,tsec) ! xmpi_sum
 
- ! Multiply by constants. In 3D systems sqrt(4pi) is included in vc_sqrt_qbz ===
+ ! Multiply by constants. In 3D systems sqrt(4pi) is included in vc_sqrt_qbz.
  sigcme_tmp = sigcme_tmp /(Cryst%ucvol*Kmesh%nbz)
  sigc       = sigc       /(Cryst%ucvol*Kmesh%nbz)
 
@@ -1604,7 +1608,7 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
  integer :: i,j
  real(dp) :: rt_imag,rt_real,local_one,local_zero
  real(dp) :: intsign,temp1,temp2,temp3,temp4
- real(dp) :: alph,inv_alph,beta,alphsq,betasq,inv_beta
+ real(dp) :: alpha,inv_alph,beta,alphsq,betasq,inv_beta
  real(dp) :: re_intG,re_intK,im_intG,im_intK,GKttab,tau,ttil
  real(dp) :: ref,imf,r,s,r2,s2
  complex(dpc) :: ct,domegaleft,domegaright
@@ -1744,11 +1748,11 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
 
    case (TRAPEZOID)
      ! Trapezoidal rule Transform omega coordinates
-     alph     = plasmafreq
-     alphsq   = alph*alph
-     inv_alph = one/alph
+     alpha     = plasmafreq
+     alphsq   = alpha*alpha
+     inv_alph = one/alpha
 
-     xtab(1:nomegaei+1) = AIMAG(omega_imag(:))/(AIMAG(omega_imag(:)) + alph)
+     xtab(1:nomegaei+1) = AIMAG(omega_imag(:))/(AIMAG(omega_imag(:)) + alpha)
      xtab(nomegaei+2)   = one
 
      ! Efficient trapezoidal rule with BLAS calls
@@ -1765,7 +1769,7 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
        logdown(:)   = ABS(((alphsq+tbetasq(:))*xtab(io  )-two*tbetasq(:)) &
                       *xtab(io  )+tbetasq(:))
        ! Trapezoid integration weights
-       weight(io,:)  = CMPLX(-(half*alph*tbeta(:)*LOG(logup(:)/logdown(:)) + tbetasq(:) &
+       weight(io,:)  = CMPLX(-(half*alpha*tbeta(:)*LOG(logup(:)/logdown(:)) + tbetasq(:) &
                           *right(:))/(alphsq+tbetasq(:)),zero)
        weight2(io,:) = CMPLX(-right(:),zero)
        ! Linear interpolation coefficients for each section (sum over ig)
@@ -1775,14 +1779,14 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
      end do
 
      ! Calculate weights for asymptotic behaviour
-     atermr(:)   = alph*tinv_beta(:)
+     atermr(:)   = alpha*tinv_beta(:)
      aterml(:)   = inv_alph*tinv_beta(:)*((alphsq+tbetasq(:))*xtab(nomegaei+1)-tbetasq(:))
      logup(:)    = alphsq*xtab(nomegaei+1)*xtab(nomegaei+1)
      logdown(:)  = ABS(((alphsq+tbetasq(:))*xtab(nomegaei+1)-two*tbetasq(:)) &
                    *xtab(nomegaei+1)+tbetasq(:))
      right(:)     = ATAN((atermr(:)-aterml(:))/(one+atermr(:)*aterml(:)))
      weight (nomegaei+1,:) = CMPLX(-(half*(alphsq*tinv_beta(:)*LOG(logdown(:)/logup(:)) &
-      - tbeta(:)*LOG(xtab(nomegaei+1)*xtab(nomegaei+1))) - alph*right(:)),zero)
+      - tbeta(:)*LOG(xtab(nomegaei+1)*xtab(nomegaei+1))) - alpha*right(:)),zero)
      tfone(:,nomegaei+1) = -(zero-epsrho_imag(:,nomegaei+1)*AIMAG(omega_imag(nomegaei+1))) &
                            /(one-xtab(nomegaei+1))
 
@@ -1798,11 +1802,11 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
    case (NSPLINE)
      ! Natural spline followed by Gauss-Kronrod
      ! Transform omega coordinates
-     alph     = plasmafreq
-     alphsq   = alph*alph
-     inv_alph = one/alph
+     alpha     = plasmafreq
+     alphsq   = alpha*alpha
+     inv_alph = one/alpha
 
-     xtab(1:nomegaei+1) = AIMAG(omega_imag(:))/(AIMAG(omega_imag(:)) + alph)
+     xtab(1:nomegaei+1) = AIMAG(omega_imag(:))/(AIMAG(omega_imag(:)) + alpha)
      xtab(nomegaei+2)   = one
 
 ! Gauss-Kronrod integration of spline fit of f(t)/(1-t) in transformed space
@@ -1860,7 +1864,7 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
          io = 1; re_intG = zero; re_intK = zero; im_intG = zero; im_intK = zero
          do ii=1,GK_LEVEL
            do
-             GKttab = two*alph*xtab(io+1)/(beta-(beta-alph)*xtab(io+1))-one
+             GKttab = two*alpha*xtab(io+1)/(beta-(beta-alpha)*xtab(io+1))-one
              if (GKttab > KronN(ii)) EXIT
              io = io + 1
            end do
@@ -1868,7 +1872,7 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
            temp2     = temp1 - half
            temp3     = temp2*temp2
            temp4     = half/(temp3 + quarter)
-           ttil      = beta*temp1/(alph-(alph-beta)*temp1)
+           ttil      = beta*temp1/(alpha-(alpha-beta)*temp1)
            tau       = ttil - xtab(io)
            ref       = ftab (io) + tau*(y (1,io)+tau*(y (2,io)+tau*y (3,io)))
            fint (ii) = -ref*(one-ttil)*temp4
