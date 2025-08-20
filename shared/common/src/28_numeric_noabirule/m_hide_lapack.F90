@@ -236,7 +236,6 @@ subroutine wrap_CHEEV(jobz, uplo, n, a, w)
 !arrays
  real(sp),allocatable :: rwork(:)
  complex(spc),allocatable :: work(:)
-
 !************************************************************************
 
  lwork = MAX(1,2*n-1)
@@ -661,7 +660,6 @@ subroutine wrap_CHPEV(jobz, uplo, n, ap, w, z, ldz)
 !arrays
  real(sp),allocatable :: rwork(:)
  complex(spc),allocatable :: work(:)
-
 !************************************************************************
 
  ABI_MALLOC(work, (MAX(1,2*n-1)))
@@ -853,7 +851,7 @@ end subroutine wrap_ZHPEV
 !!  wrap_ZHEGV
 !!
 !! FUNCTION
-!!  wrap_ZHEGV computes all the  eigenvalues, and  optionally, the eigenvectors of a  complex generalized
+!!  wrap_ZHEGV computes all the eigenvalues, and optionally, the eigenvectors of a complex generalized
 !!  Hermitian-definite eigenproblem, of  the form
 !!        A*x=(lambda)*B*x  (1),
 !!       A*Bx=(lambda)*x,   (2), or
@@ -861,7 +859,6 @@ end subroutine wrap_ZHPEV
 !!  Here A and B are assumed to be Hermitian and B is also positive definite.
 !!
 !! INPUTS
-!!
 !!  ITYPE   (input) INTEGER Specifies the problem type to be solved:
 !!          = 1:  A*x = (lambda)*B*x
 !!          = 2:  A*B*x = (lambda)*x
@@ -899,7 +896,6 @@ end subroutine wrap_ZHPEV
 !!          Z**H*B*Z  = I; if ITYPE = 3, Z**H*inv(B)*Z = I.
 !!          If JOBZ = "N", then on exit the upper triangle (if UPLO="U") or the lower triangle
 !!          (if UPLO="L") of A, including the diagonal, is destroyed.
-!!
 !!
 !!  B       (input/output) COMPLEX*16 array, dimension (LDB, N)
 !!          On entry, the Hermitian positive definite matrix B.
@@ -1378,7 +1374,6 @@ subroutine wrap_ZHEEVX(jobz,range,uplo,n,a,vl,vu,il,iu,abstol,m,w,z,ldz,comm)
  type(slkmat_dp_t)    :: Slk_mat,Slk_vec
  type(slk_processor_t) :: Slk_processor
 #endif
-
 !************************************************************************
 
  use_scalapack=.FALSE.
@@ -1605,7 +1600,6 @@ subroutine xheevx_cplex(jobz, range, uplo, cplex, n, a, vl, vu, il, iu, &
  !type(slkmat_dp_t)    :: Slk_mat,Slk_vec
  !type(slk_processor_t) :: Slk_processor
 #endif
-
 !************************************************************************
 
  use_scalapack=.FALSE.
@@ -1868,7 +1862,6 @@ subroutine wrap_ZHEGVX(itype,jobz,range,uplo,n,a,b,vl,vu,il,iu,abstol,m,w,z,ldz,
  type(slkmat_dp_t)    :: Slk_matA,Slk_matB,Slk_vec
  type(slk_processor_t) :: Slk_processor
 #endif
-
 !************************************************************************
 
  use_scalapack=.FALSE.
@@ -2125,7 +2118,6 @@ subroutine xhegvx_cplex(itype, jobz, range, uplo, cplex, n, a, b, &
  !type(slkmat_dp_t)    :: Slk_matA,Slk_matB,Slk_vec
  !type(slk_processor_t) :: Slk_processor
 #endif
-
 !************************************************************************
 
  use_scalapack=.FALSE.
@@ -2341,7 +2333,6 @@ subroutine wrap_CGEEV(jobvl, jobvr, n, a, lda, w, vl, ldvl, vr, ldvr)
 !arrays
  real(sp),allocatable :: rwork(:)
  complex(spc),allocatable :: work(:)
-
 !************************************************************************
 
  lwork = MAX(1,2*n)
@@ -2456,7 +2447,6 @@ subroutine wrap_ZGEEV(jobvl,jobvr,n,a,lda,w,vl,ldvl,vr,ldvr)
 !arrays
  real(dp),allocatable :: rwork(:)
  complex(dpc),allocatable :: work(:)
-
 !************************************************************************
 
  use_scalapack=.FALSE.
@@ -3329,12 +3319,6 @@ END SUBROUTINE ludcmp
 !!  b will begin with many zero elements, so it is efficient for use in
 !!  matrix inversion.
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
 !! NOTES
 !!  This routine is deprecated, use lapack API
 !!
@@ -3386,13 +3370,8 @@ END SUBROUTINE LUBKSB
 !!  This routine is the clone of zgefa.F90 using real*8 a(2) instead of complex*16
 !!  for the purpose of ABINIT
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
 !! NOTES
+!!  This routine is deprecated, use lapack API
 !!
 !! SOURCE
 
@@ -3570,13 +3549,8 @@ end subroutine dzgedi
 !!   This routine is the clone of zgefa.F90 using real*8 a(2) instead of complex*16
 !!   for the purpose of ABINIT (2008,TD)
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
 !! NOTES
+!!  This routine is deprecated, use lapack API
 !!
 !! SOURCE
 
@@ -3768,7 +3742,6 @@ subroutine test_xginv(msize,skinds,do_check,Tres,comm)
  Tres%max_abserr = max_abserr
 
  ABI_FREE(cmat_dpc)
-
  ABI_SFREE(cmat_dpc_check)
 
 end subroutine test_xginv
@@ -3850,7 +3823,6 @@ subroutine xhesv_cplex(UPLO, cplex, N, NRHS, A, B, msg, info)
  integer :: lwork, lda, ldb
  integer,allocatable :: ipiv(:)
  real(dp),allocatable :: work(:,:)
-
 !************************************************************************
 
  if (all(cplex /= [1, 2])) then
