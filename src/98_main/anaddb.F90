@@ -83,30 +83,30 @@ program anaddb
 
 ! ========================================================================== !
 
- ! Change communicator for I/O (mandatory!)
+! Change communicator for I/O (mandatory!)
  call abi_io_redirect(new_io_comm = xmpi_world)
 
- ! These units are defined in defs_basis
+! These units are defined in defs_basis
  units = [std_out, ab_out]
 
- ! Initialize MPI
+! Initialize MPI
  call xmpi_init()
 
- ! MPI variables
+! MPI variables
  comm = xmpi_world; nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  iam_master = (my_rank == master)
 
- ! Parse command line arguments.
+! Parse command line arguments.
  args = args_parser(); if (args%exit /= 0) goto 100
 
- ! Initialize memory profiling if activated at configure time.
- ! if a full report is desired, set the argument of abimem_init to "2" instead of "0" via the command line.
- ! note that the file can easily be multiple GB in size so don't use this option normally
+! Initialize memory profiling if activated at configure time.
+! if a full report is desired, set the argument of abimem_init to "2" instead of "0" via the command line.
+! note that the file can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
  call abimem_init(args%abimem_level, limit_mb = args%abimem_limit_mb)
 #endif
 
- ! Initialisation of the timing
+! Initialisation of the timing
  call timein(tcpui, twalli)
 
  if (iam_master) then
@@ -116,17 +116,18 @@ program anaddb
 
  start_datetime = asctime()
 
- ! Zero out all accumulators of time and init timers
+! Zero out all accumulators of time and init timers
  call timab(1, 0, tsec)
 
- ! Initialise the code: write heading, and read names of files.
+! Initialise the code: write heading, and read names of files.
  if (iam_master) then
    call dtset%init(args%input_path)
  end if
- ! Broadcast file names to all
+
+! Broadcast file names
  call dtset%bcast_files(comm)
 
- ! make log file for non-master procs
+! make log file for non-master procs
  if (.not. iam_master) then
    call int2char4(my_rank, procstr)
    ABI_CHECK((procstr(1:1)/='#'), 'Bug: string length too short!')
@@ -138,7 +139,6 @@ program anaddb
 
 ! ========================================================================== !
 ! Read input variables
-
  call dtset%read_input(comm)
 
  if (args%dry_run /= 0) then
@@ -149,7 +149,6 @@ program anaddb
 
 ! ========================================================================== !
 ! Open output file
-
  if (iam_master) then
    call isfile(dtset%filename_output, 'new')
    if (open_file(dtset%filename_output, msg, unit=ab_out, form='formatted', status='new') /= 0) then
@@ -166,68 +165,75 @@ program anaddb
  end if
 
 ! =========================================================================== !
+
 ! Initialize driver
  call driver%init(dtset)
 
-! =========================================================================== !
 ! Read the DDB information and symmetrize partially the DDB
-
  write(msg, '(a, a)' )' read the DDB information and perform some checks',ch10
  call wrtout(units, msg)
 
  call ddb%from_file(dtset%filename_ddb, ddb_hdr, crystal, comm, prtvol=dtset%prtvol)
 
- ! Change the bravais lattice if needed
+! Change the bravais lattice if needed
  call ddb%set_brav(dtset%brav)
 
- ! Copy the long-wave ddb
+! Copy the long-wave ddb
  if (ddb_hdr%has_d3E_lw) then
    call ddb_lw_copy(ddb, ddb_lw, ddb_hdr)
  end if
 
- ! Acoustic Sum Rule
+! Acoustic Sum Rule
  call asrq0%init(ddb, dtset%asr, dtset%rfmeth, crystal%xcart)
 
-! =========================================================================== !
 ! Open netcdf output and write basic quantities
-
  call driver%open_write_nc(ana_ncid, dtset, crystal, comm)
 
 ! =========================================================================== !
-! Calculation of Gruneisen parameters.
 
- if (dtset%gruns_nddbs /= 0) then
-   call gruns_anaddb(dtset, comm)
- end if
-
-! =========================================================================== !
-! Compute dielectric tensor, born effective charges, and quadrupoles.
+! Compute dielectric tensor, Born effective charges, and quadrupoles.
  if (driver%do_electric_tensors) then
    call driver%electric_tensors(dtset, crystal, ddb, ddb_lw, ddb_hdr, ana_ncid, comm)
  end if
 
-! =========================================================================== !
 ! Structural response at fixed polarization
  if (dtset%polflag == 1) then
    call driver%structural_response(dtset, crystal, ddb)
  end if
 
-! =========================================================================== !
 ! Compute non-linear optical susceptibilities
 ! and first-order change in the linear dielectric susceptibility
  if (dtset%nlflag > 0) then
    call driver%susceptibilities(dtset, ddb, ana_ncid, comm)
  end if
 
-! =========================================================================== !
-! Interatomic Forces Calculation
+! Interatomic force constants
  if (driver%do_ifc) then
    call driver%interatomic_force_constants(Ifc, dtset, crystal, ddb, ana_ncid, comm)
  end if
 
+! Phonon density of states
+ if (driver%do_phonon_dos) then
+   call driver%phdos(dtset, crystal, Ifc, comm)
+ end if
+
+! Phonon density of states and thermodynamical properties calculation
+ if (dtset%ifcflag == 1 .and. any(dtset%thmflag==[1, 2])) then
+   call driver%harmonic_thermo(dtset, crystal, Ifc, ddb, comm)
+ end if
+
+! Phonon band structure
+ if (driver%do_phonon_bs) then
+   call mkphbs(Ifc, crystal, dtset, ddb, asrq0, dtset%prefix_outdata, comm)
+ end if
+
+! DDB interpolation
+ if (dtset%prtddb == 1 .and. dtset%ifcflag == 1) then
+   call ddb_interpolate(Ifc, crystal, dtset, ddb, ddb_hdr, asrq0, comm)
+ end if
+
 ! =========================================================================== !
 ! Electron-phonon section
-! =========================================================================== !
 
  if (dtset%elphflag == 1) then
    call elphon(dtset, crystal, Ifc, comm)
@@ -238,119 +244,76 @@ program anaddb
    call driver%thermal_supercell(dtset, crystal, ifc)
  end if
 
-! =========================================================================== !
-! Phonon density of states
-
- if (driver%do_phonon_dos) then
-   call driver%phdos(dtset, crystal, Ifc, comm)
- end if
-
-! =========================================================================== !
-! Phonon density of states and thermodynamical properties calculation
-
- if (dtset%ifcflag == 1 .and. any(dtset%thmflag==[1, 2])) then
-   call driver%harmonic_thermo(dtset, crystal, Ifc, ddb, comm)
- end if
-
-! =========================================================================== !
-! Output phonon frequencies for BoltzTrap
-
- if (iam_master .and. dtset%ifcflag == 1 .and. dtset%outboltztrap == 1) then
-   call ifc%outphbtrap(crystal, dtset%ng2qpt, 1, dtset%q2shft, dtset%prefix_outdata)
- end if
-
-! =========================================================================== !
-! Lattice Wannier functions
-
- if (dtset%ifcflag == 1 .and. dtset%lwfflag > 0 ) then
-   call driver%lattice_wannier(dtset, crystal, Ifc, comm)
- endif
-
-! =========================================================================== !
-! Treat the first list of vectors (without non-analyticities)
-! (print the phonon freq. at each qpt (and eigenvectors if asked by the user)
-! and the mode characters (Gamma only as of 12.04.2020)
-! =========================================================================== !
-
- ! Phonon band structure
- if (driver%do_phonon_bs) then
-   call mkphbs(Ifc, crystal, dtset, ddb, asrq0, dtset%prefix_outdata, comm)
- end if
-
- ! Interpolate the DDB onto the first list of vectors and write the file.
- if (dtset%prtddb == 1 .and. dtset%ifcflag == 1) then
-   call ddb_interpolate(Ifc, crystal, dtset, ddb, ddb_hdr, asrq0, dtset%prefix_outdata, comm)
- end if
-
-! =========================================================================== !
-! Thermal corrections to eigenvalues
-
+! Thermal corrections to eigenvalues (old)
  if (dtset%thmflag >= 3 .and. dtset%thmflag <= 8) then
    call thmeig(dtset, ddb, crystal, ab_out, crystal%natom, dtset%mpert, dtset%msize, asrq0%d2asr, comm)
  end if
 
 ! =========================================================================== !
-! q = Gamma quantities (without non-analycities):
-! - Dielectric constant calculations (diefalg options)
-! and related properties: mode effective charges, oscillator strength
-! - Raman tensor (at q = 0 with only TO modes) and EO coef. (nlflag)
-! =========================================================================== !
 
- ! Compute the dielectric function and oscillator strength.
- ! This is needed for the subsequent parts.
+! Compute the dielectric function and oscillator strength.
  if (driver%do_dielectric_q0) then
    call driver%dielectric_q0(dtset, crystal, ifc, ddb, asrq0, ana_ncid, comm)
  end if
 
-! =========================================================================== !
 ! Non-linear response: electrooptic and Raman (q = Gamma, TO modes only)
-
  if (dtset%nlflag == 1) then
    call driver%nonlinear_response(dtset, crystal, ana_ncid, comm)
  end if
 
-! =========================================================================== !
 ! Non-analyticity in the dynamical matrix
-
  if (driver%do_dielectric_nonana) then
    call driver%dielectric_nonana(dtset, crystal, ddb, ana_ncid, comm)
  end if
 
-
 ! =========================================================================== !
-! Linear response with strain: elastic, piezo, etc
-! =========================================================================== !
+! Linear response with strain
 
- ! Internal strain (needed for the other linear response functions)
+! Internal strain (needed for the other linear response functions)
  if (dtset%instrflag /= 0) then
    call driver%internal_strain(dtset, ddb, asrq0)
  end if
 
- ! Elastic tensor
+! Elastic tensor
  if (dtset%elaflag /= 0) then
    call driver%elastic_tensor(dtset, crystal, ddb, asrq0, ana_ncid)
  end if
 
- ! Piezoelectric tensor
+! Piezoelectric tensor
  if (dtset%piezoflag /= 0 .or. dtset%dieflag == 4 .or. dtset%elaflag == 4) then
    call driver%piezoelectric_tensor(dtset, crystal, ddb, ana_ncid)
  end if
 
- ! Flexoelectric tensor
+! Flexoelectric tensor
  if (dtset%flexoflag /= 0) then
    call driver%flexoelectric_tensor(dtset, crystal, ddb, ddb_lw, ddb_hdr, asrq0)
  end if
 
 ! =========================================================================== !
-! Close netcdf file
 
+ ! Gruneisen parameters
+ if (dtset%gruns_nddbs /= 0) then
+   call gruns_anaddb(dtset, comm)
+ end if
+
+ ! Lattice Wannier functions
+ if (dtset%ifcflag == 1 .and. dtset%lwfflag > 0 ) then
+   call driver%lattice_wannier(dtset, crystal, Ifc, comm)
+ endif
+
+ ! Output phonon frequencies for BoltzTrap
+ if (iam_master .and. dtset%ifcflag == 1 .and. dtset%outboltztrap == 1) then
+   call ifc%outphbtrap(crystal, dtset%ng2qpt, 1, dtset%q2shft, dtset%prefix_outdata)
+ end if
+
+! =========================================================================== !
+! Close netcdf file
  if (iam_master) then
    NCF_CHECK(nf90_close(ana_ncid))
  end if
 
 ! =========================================================================== !
 ! Free memory
-
  call asrq0%free()
  call ifc%free()
  call crystal%free()
