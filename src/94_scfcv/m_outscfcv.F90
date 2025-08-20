@@ -76,7 +76,7 @@ module m_outscfcv
  !use m_mlwfovlp,         only : mlwfovlp
  use m_wfd_wannier,      only : wfd_run_wannier
  use m_datafordmft,      only : datafordmft
- use m_mkrho,            only : read_atomden, gbt_times_qr
+ use m_mkrho,            only : read_atomden
  use m_positron,         only : poslifetime, posdoppler
  use m_optics_vloc,      only : optics_vloc
  use m_green,            only : green_type,compute_green,&
@@ -931,14 +931,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  if ((dtset%prtdensph==1.and.dtset%usewvl==0) .or. sum(abs(dtset%hspinfield)) > tol10) then
    ABI_MALLOC(intgden, (nspden, natom))
 
-   ! Multiply off-diagonal terms of the spin density matrix by e^{-iqr} before computing atomic mag.
-   !if (dtset%use_gbt /= 0) call gbt_times_qr(nfft, nspden, ngfft, mpi_enreg, -dtset%qgbt, rhor)
-
    call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,&
-                      ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
-
-   ! Back to periodic rhor
-   !if (dtset%use_gbt /= 0) call gbt_times_qr(nfft, nspden, ngfft, mpi_enreg, dtset%qgbt, rhor)
+                      ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,dtset%qgbt,dtset%use_gbt,intgden=intgden,rhomag=rhomag)
 
    !  for rhomag:
    !    in collinear case component 1 is total density and 2 is _magnetization_ up-down
@@ -1009,7 +1003,7 @@ if (dtset%prt_lorbmag==1) then
  if (dtset%magconon /= 0) then
 !  calculate final value of terms for magnetic constraint: "energy" term, lagrange multiplier term, and atomic contributions
    call mag_penalty_e(dtset%magconon,dtset%magcon_lambda,mpi_enreg,&
-&   natom,nfft,ngfft,nspden,ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%spinat,dtset%typat,xred)
+&   natom,nfft,ngfft,nspden,ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%spinat,dtset%typat,xred,dtset%qgbt,dtset%use_gbt)
  end if
 
  call timab(1167,2,tsec)
