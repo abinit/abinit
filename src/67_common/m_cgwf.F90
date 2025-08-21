@@ -70,7 +70,7 @@ module m_cgwf
 !! nscf_t
 !!
 !! FUNCTION
-!!  Simplied interface to the cgwf routine to perform NSCF calculations
+!!  Simplified interface to the cgwf routine to perform NSCF calculations
 !!  starting from the KS potential read from file.
 !!
 !! SOURCE
@@ -597,7 +597,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          end if
 
          ! Compute residual vector:
-         ! Note that vresid is precomputed to garantee cancellation of errors
+         ! Note that vresid is precomputed to guarantee cancellation of errors
          ! and allow residuals to reach values as small as 1.0d-24 or better.
 
          if (wfopta10<=1) then
@@ -826,7 +826,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
              call wrtout(std_out,msg,'PERS')
            end if
 
-           ! Note: another way to compute gamma: Polak, Ribiere no real improvement ; to be more carrefully tested
+           ! Note: another way to compute gamma: Polak, Ribiere no real improvement ; to be more carefully tested
            ! call dotprod_g(dotgg,doti,istwf_k,mpi_enreg,npw*nspinor,1,direc,direc_tmp)
            ! !direcp must be set to zero at the beginning
            ! direcp=direc-direcp
@@ -969,7 +969,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            end if
 
          else
-           ! In case the eletric field is on, the line minimization has to be done numerically
+           ! In case the electric field is on, the line minimization has to be done numerically
 
            ! Compute determinant of the overlap matrix where in the band-th line
            ! the wavefunction is replaced by the search direction
@@ -1272,7 +1272,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
    end do
  end if
 
- ! Debugging ouputs
+ ! Debugging outputs
  if(prtvol==-level)then
    isubh=1
    if (use_subvnlx==1) write(msg,'(a)') ' cgwf : isubh  subham(isubh:isubh+1)  subvnlx(isubh:isubh+1)'
@@ -2395,7 +2395,7 @@ subroutine nscf_init(nscf, dtset, dtfil, cryst, comm)
 
  pot_cryst = pot_hdr%get_crystal()
  if (cryst%compare(pot_cryst, header=" Comparing input crystal with POT crystal") /= 0) then
-   ABI_ERROR("Crystal structure from WFK and POT do not agree! Check messages above!")
+   ABI_ERROR("Crystal structure from WFK and POT files do not agree! Check messages above!")
  end if
  call pot_cryst%free(); call pot_hdr%free()
 
@@ -2442,7 +2442,7 @@ subroutine nscf_setup_spin(nscf, isppol, dtset, pawfgr, gs_ham_k, vlocal)
  !==== Initialize most of the Hamiltonian ====
  ! Allocate all arrays and initialize quantities that do not depend on k and spin.
 
- ! FFT meshes from input file, not necessarly equal to the ones found in the external files.
+ ! FFT meshes from input file, not necessary equal to the ones found in the external files.
  nfftf = product(nscf%ngfftf(1:3)); mgfftf = maxval(nscf%ngfftf(1:3))
  nfft = product(nscf%ngfft(1:3)) ; mgfft = maxval(nscf%ngfft(1:3))
  n1 = nscf%ngfft(1); n2 = nscf%ngfft(2); n3 = nscf%ngfft(3); n4 = nscf%ngfft(4); n5 = nscf%ngfft(5); n6 = nscf%ngfft(6)
@@ -2495,8 +2495,8 @@ end subroutine nscf_setup_spin
 !!
 !! SOURCE
 
-subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psps, pawtab, pawfgr, &
-                          npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal, cg_k, gsc_k, gs_ham_k)
+subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psps, pawtab, pawfgr, &  ! in
+                          npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal, cg_k, gsc_k, gs_ham_k) ! out
 
 !Arguments ------------------------------------
  class(nscf_t),intent(inout) :: nscf
@@ -2533,7 +2533,7 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psp
  !==== Initialize most of the Hamiltonian ====
  ! Allocate all arrays and initialize quantities that do not depend on k and spin.
 
- ! FFT meshes from input file, not necessarly equal to the ones found in the external files.
+ ! FFT meshes from input file, not necessary equal to the ones found in the external files.
  nfftf = product(nscf%ngfftf(1:3)); mgfftf = maxval(nscf%ngfftf(1:3))
  nfft = product(nscf%ngfft(1:3)) ; mgfft = maxval(nscf%ngfft(1:3))
  n1 = nscf%ngfft(1); n2 = nscf%ngfft(2); n3 = nscf%ngfft(3); n4 = nscf%ngfft(4); n5 = nscf%ngfft(5); n6 = nscf%ngfft(6)
@@ -2670,7 +2670,7 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
  ! See vtorho.F90 for the sequence of calls required to initialize the GS Hamiltonian.
  associate (mpi_enreg => nscf%mpi_enreg, kg_k => gs_ham_k%kg_k)
 
- ! FFT meshes from input file, not necessarly equal to the ones found in the external files.
+ ! FFT meshes from input file, not necessary equal to the ones found in the external files.
  nfftf = product(nscf%ngfftf(1:3)); mgfftf = maxval(nscf%ngfftf(1:3))
  nfft = product(nscf%ngfft(1:3)) ; mgfft = maxval(nscf%ngfft(1:3))
  n1 = nscf%ngfft(1); n2 = nscf%ngfft(2); n3 = nscf%ngfft(3); n4 = nscf%ngfft(4); n5 = nscf%ngfft(5); n6 = nscf%ngfft(6)
@@ -2688,7 +2688,7 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
    call cg_envlop(cg_k, dtset%ecut, cryst%gmet, icg0, kg_k, kpt, mcg, nband_k, npw_k, nspinor)
  end if
 
- ! Ortoghonalize input trial states (this is important, even whe cg_k is already initialized from a previous k-point.
+ ! Ortoghonalize input trial states (this is important, even when cg_k is already initialized from a previous k-point.
  call pw_orthon(icg0, igsc0, istwf_k, mcg, mgsc, npwsp, nband_k, ortalgo_3, gsc_k, dtset%usepaw, cg_k, me_g0, xmpi_comm_self)
 
  !call cg_kfilter(npw_k, nspinor, nband_k, gs_ham_k%kinpw_k, cg_k)
