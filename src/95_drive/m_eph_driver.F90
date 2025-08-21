@@ -150,7 +150,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  integer,parameter :: master = 0, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0, with_cplex1 = 1, with_cplex2 = 2
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf
  integer :: iblock_dielt_zeff, iblock_dielt, iblock_quadrupoles, ddb_nqshift, ierr, npert_miss
- integer :: omp_ncpus, work_size, nks_per_proc, mtyp, mpert, lwsym, qptopt, ncid
+ integer :: omp_ncpus, work_size, nks_per_proc, lwsym, qptopt, ncid
  real(dp):: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff
  real(dp) :: cpu,wall,gflops
@@ -417,17 +417,15 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  ! Change the bravais lattice if needed
  call ddb%set_brav(dtset%brav)
 
- mtyp = ddb_hdr%mblktyp
- mpert = ddb_hdr%mpert
-
  ! MR: a new ddb is necessary for the longwave quantities due to incompability of it with automatic reshapes
  ! that ddb%val and ddb%flg experience when passed as arguments of some routines
  ! GA: Should replace with ddb_hdr%with_d3E_lw
  iblock_quadrupoles = 0
  qdrp_cart = zero
- if (mtyp == BLKTYP_d3E_lw) then
+ if (ddb_hdr%has_d3E_lw) then
    lwsym = 1
-   call ddb_lw_copy(ddb, ddb_lw, mpert, dtset%natom, dtset%ntypat)
+   call ddb_lw_copy(ddb, ddb_lw, ddb_hdr)
+   ! GA: FIXME Bad interface
    iblock_quadrupoles = ddb_lw%get_quadrupoles(ddb_hdr%ddb_version, lwsym, BLKTYP_d3E_lw, qdrp_cart)
    call ddb_lw%free()
  end if
