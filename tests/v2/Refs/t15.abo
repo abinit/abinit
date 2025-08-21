@@ -36,8 +36,8 @@
        frmax         1.00000000E+01
  Interatomic Force Constants Inputs :
       dipdip         1
-      dipqua         1
-      quadqu         1
+     dipquad         0
+    quadquad         0
       ifcana         1
       ifcout        16
       natifc         2

@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ANADDB, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.1.4.3 of ANADDB, released Jul 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,9 +14,9 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h10 )
-
+.Starting date : Tue 19 Aug 2025.
+- ( at 23h58 )
+  
 
 ================================================================================
 
@@ -35,8 +35,8 @@
        frmax         1.00000000E+01
  Interatomic Force Constants Inputs :
       dipdip         1
-      dipqua         1
-      quadqu         1
+     dipquad         0
+    quadquad         0
       ifcana         1
       ifcout        16
       natifc         2
@@ -106,11 +106,11 @@
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges
+ Dielectric Tensor and Effective Charges 
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges
+   and impose the ASR on the effective charges 
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -126,7 +126,7 @@
        3               2       -0.000000        0.000000
        3               3        0.085186        0.000000
 
- Effective charge tensors after
+ Effective charge tensors after 
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -161,9 +161,8 @@
 
 ================================================================================
 
- Calculation of the interatomic forces
+ Calculation of the interatomic forces 
 
--begin at tcpu      0.056  and twall      0.056 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  2.50000000E-01
@@ -177,22 +176,22 @@
 
  The interatomic forces have been obtained
 
- Analysis of interatomic force constants
+ Analysis of interatomic force constants 
 
  Are given : column(1-3), the total force constant
        then  column(4-6), the Ewald part
        then  column(7-9), the short-range part
  Column 1, 4 and 7 are related to the displacement
-       of the generic atom along x,
+       of the generic atom along x,               
  column 2, 5 and 8 are related to the displacement
-       of the generic atom along y,
+       of the generic atom along y,               
  column 3, 6 and 9 are related to the displacement
-       of the generic atom along z.
+       of the generic atom along z.               
 
  generic atom number   1
  with cartesian coordinates  4.22193766E+00 -1.80063414E-09  1.64714407E+00
 
- Third atom defining local coordinates :
+ Third atom defining local coordinates : 
      ib =    4   irpt =   18
 
    1 interaction with atom     1 cell      18
@@ -204,7 +203,7 @@
  Traces (and ratios) :
   1.47814                  -0.39647                   1.87461
   1.00000                  -0.26822                   1.26822
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :       -0.000000        0.904526        0.426419
  Second local vector :       -1.000000       -0.000000       -0.000000
  Third  local vector :        0.000000       -0.426419        0.904526
@@ -225,7 +224,7 @@
  Traces (and ratios) :
  -0.35016                   0.11771                  -0.46786
   1.00000                  -0.33615                   1.33615
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :       -0.604501       -0.720549       -0.339687
  Second local vector :        0.398628       -0.642806        0.654137
  Third  local vector :       -0.689691        0.260018        0.675808
@@ -246,7 +245,7 @@
  Traces (and ratios) :
  -0.35016                   0.11771                  -0.46786
   1.00000                  -0.33615                   1.33615
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :       -0.604501        0.720549        0.339687
  Second local vector :        0.398457        0.642742       -0.654305
  Third  local vector :       -0.689790       -0.260177       -0.675646
@@ -267,7 +266,7 @@
  Traces (and ratios) :
  -0.31468                   0.09449                  -0.40917
   1.00000                  -0.30026                   1.30026
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :        0.602696        0.314655       -0.733314
  Second local vector :       -0.104920       -0.879747       -0.463720
  Third  local vector :       -0.791043        0.356422       -0.497206
@@ -288,7 +287,7 @@
  Traces (and ratios) :
  -0.31468                   0.09449                  -0.40917
   1.00000                  -0.30026                   1.30026
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :        0.602696       -0.314655        0.733314
  Second local vector :       -0.104547        0.879916        0.463485
  Third  local vector :       -0.791093       -0.356006        0.497425
@@ -309,7 +308,7 @@
  Traces (and ratios) :
  -0.05157                  -0.00319                  -0.04839
   1.00000                   0.06178                   0.93822
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :        0.499404        0.643651       -0.579922
  Second local vector :       -0.326355        0.759825        0.562280
  Third  local vector :        0.802551       -0.091545        0.589518
@@ -330,7 +329,7 @@
  Traces (and ratios) :
  -0.05157                  -0.00319                  -0.04839
   1.00000                   0.06178                   0.93822
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :        0.499404       -0.643651        0.579922
  Second local vector :       -0.326348       -0.759824       -0.562285
  Third  local vector :        0.802554        0.091551       -0.589514
@@ -351,7 +350,7 @@
  Traces (and ratios) :
  -0.05157                  -0.00319                  -0.04839
   1.00000                   0.06178                   0.93822
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :       -0.307716        0.754322        0.579922
  Second local vector :        0.793988       -0.132283        0.593367
  Third  local vector :        0.524303        0.643039       -0.558217
@@ -372,7 +371,7 @@
  Traces (and ratios) :
  -0.05157                  -0.00319                  -0.04839
   1.00000                   0.06178                   0.93822
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :       -0.307716       -0.754322       -0.579922
  Second local vector :        0.793987        0.132284       -0.593368
  Third  local vector :        0.524305       -0.643039        0.558216
@@ -393,7 +392,7 @@
  Traces (and ratios) :
  -0.00663                  -0.00591                  -0.00073
   1.00000                   0.89027                   0.10973
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :       -0.548881       -0.493046        0.675007
  Second local vector :        0.336820       -0.869517       -0.361238
  Third  local vector :        0.765037        0.029079        0.643330
@@ -414,7 +413,7 @@
  Traces (and ratios) :
  -0.00663                  -0.00591                  -0.00073
   1.00000                   0.89028                   0.10972
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :       -0.548881        0.493046       -0.675007
  Second local vector :        0.336937        0.869512        0.361139
  Third  local vector :        0.764985       -0.029212       -0.643385
@@ -435,7 +434,7 @@
  Traces (and ratios) :
   0.00142                   0.00466                  -0.00323
   1.00000                   3.26914                  -2.26914
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :        0.425545        0.890706       -0.159857
  Second local vector :        0.407348       -0.346283       -0.845078
  Third  local vector :       -0.808071        0.294501       -0.510186
@@ -456,7 +455,7 @@
  Traces (and ratios) :
   0.00142                   0.00466                  -0.00323
   1.00000                   3.26913                  -2.26913
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :        0.425545       -0.890706        0.159857
  Second local vector :        0.407353        0.346285        0.845074
  Third  local vector :       -0.808069       -0.294499        0.510192
@@ -477,7 +476,7 @@
  Traces (and ratios) :
  -0.00534                  -0.00333                  -0.00201
   1.00000                   0.62401                   0.37599
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :        0.163223        0.731527        0.661987
  Second local vector :       -0.953690        0.288819       -0.084012
  Third  local vector :       -0.252652       -0.617618        0.744792
@@ -498,7 +497,7 @@
  Traces (and ratios) :
  -0.00534                  -0.00333                  -0.00201
   1.00000                   0.62399                   0.37601
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :        0.163223       -0.731527       -0.661987
  Second local vector :       -0.953688       -0.288824        0.084018
  Third  local vector :       -0.252659        0.617616       -0.744792
@@ -519,7 +518,7 @@
  Traces (and ratios) :
   0.00971                   0.00373                   0.00598
   1.00000                   0.38419                   0.61581
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :       -0.482175       -0.433126       -0.761518
  Second local vector :       -0.190804       -0.796453        0.573808
  Third  local vector :       -0.855045        0.421977        0.301388
@@ -534,7 +533,7 @@
  generic atom number   4
  with cartesian coordinates  2.38494923E+00  2.18964010E+00  2.67940342E+00
 
- Third atom defining local coordinates :
+ Third atom defining local coordinates : 
      ib =    3   irpt =   30
 
    1 interaction with atom     4 cell      18
@@ -546,7 +545,7 @@
  Traces (and ratios) :
   0.77850                  -0.16085                   0.93935
   1.00000                  -0.20662                   1.20662
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :       -0.307716        0.754322        0.579922
  Second local vector :        0.848964       -0.057533        0.525309
  Third  local vector :        0.429617        0.653979       -0.622689
@@ -567,7 +566,7 @@
  Traces (and ratios) :
  -0.35016                   0.11771                  -0.46786
   1.00000                  -0.33615                   1.33615
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :        0.604501       -0.720549       -0.339687
  Second local vector :       -0.743514       -0.663412        0.084095
  Third  local vector :       -0.285947        0.201727       -0.936771
@@ -588,7 +587,7 @@
  Traces (and ratios) :
  -0.31469                   0.09449                  -0.40917
   1.00000                  -0.30026                   1.30026
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :        0.028848        0.679277        0.733314
  Second local vector :       -0.901247        0.334984       -0.274845
  Third  local vector :       -0.432345       -0.652968        0.621860
@@ -609,7 +608,7 @@
  Traces (and ratios) :
  -0.03369                  -0.02895                  -0.00474
   1.00000                   0.85930                   0.14070
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :        0.000000       -0.904526       -0.426419
  Second local vector :        0.474069       -0.375457        0.796424
  Third  local vector :       -0.880488       -0.202152        0.428808
@@ -630,7 +629,7 @@
  Traces (and ratios) :
  -0.02615                  -0.01448                  -0.01167
   1.00000                   0.55385                   0.44615
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :       -0.341491        0.197160        0.918973
  Second local vector :        0.741228       -0.544685        0.392299
  Third  local vector :        0.577897        0.815136        0.039865
@@ -651,7 +650,7 @@
  Traces (and ratios) :
  -0.02130                  -0.01217                  -0.00914
   1.00000                   0.57105                   0.42895
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :        0.736857       -0.630028        0.245167
  Second local vector :        0.415011        0.707821        0.571625
  Third  local vector :       -0.533674       -0.319458        0.783031
@@ -672,7 +671,7 @@
  Traces (and ratios) :
  -0.02130                  -0.01217                  -0.00914
   1.00000                   0.57105                   0.42895
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :       -0.177192        0.953151        0.245167
  Second local vector :        0.969018        0.125410        0.212783
  Third  local vector :        0.172068        0.275275       -0.945842
@@ -693,7 +692,7 @@
  Traces (and ratios) :
  -0.01388                  -0.00400                  -0.00988
   1.00000                   0.28796                   0.71204
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :        0.724872       -0.239074       -0.646069
  Second local vector :        0.674499        0.436968        0.595072
  Third  local vector :        0.140045       -0.867123        0.478001
@@ -714,7 +713,7 @@
  Traces (and ratios) :
  -0.01388                  -0.00400                  -0.00988
   1.00000                   0.28797                   0.71203
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :        0.569480        0.508220        0.646069
  Second local vector :        0.794922       -0.540581       -0.275447
  Third  local vector :        0.209265        0.670436       -0.711845
@@ -735,7 +734,7 @@
  Traces (and ratios) :
  -0.00051                   0.00515                  -0.00566
   1.00000                 -10.16803                  11.16803
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :       -0.294959        0.170295       -0.940212
  Second local vector :        0.867653        0.459886       -0.188900
  Third  local vector :        0.400222       -0.871495       -0.283404
@@ -756,7 +755,7 @@
  Traces (and ratios) :
   0.00358                   0.00643                  -0.00285
   1.00000                   1.79556                  -0.79556
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :       -0.744049        0.578051       -0.335035
  Second local vector :       -0.066569       -0.563100       -0.823703
  Third  local vector :       -0.664800       -0.590573        0.457454
@@ -777,7 +776,7 @@
  Traces (and ratios) :
   0.00358                   0.00643                  -0.00285
   1.00000                   1.79556                  -0.79556
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :        0.744049        0.578051       -0.335035
  Second local vector :        0.024968        0.477049        0.878522
  Third  local vector :        0.667658       -0.662028        0.340515
@@ -798,7 +797,7 @@
  Traces (and ratios) :
  -0.00663                  -0.00591                  -0.00073
   1.00000                   0.89028                   0.10972
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :       -0.701431        0.228822       -0.675007
  Second local vector :       -0.682291        0.058274        0.728755
  Third  local vector :        0.206090        0.971723        0.115248
@@ -819,7 +818,7 @@
  Traces (and ratios) :
   0.00271                   0.00645                  -0.00374
   1.00000                   2.38333                  -1.38333
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :       -0.850084       -0.490796        0.190987
  Second local vector :        0.415753       -0.402796        0.815417
  Third  local vector :       -0.323275        0.772577        0.546460
@@ -840,7 +839,7 @@
  Traces (and ratios) :
   0.00143                   0.00466                  -0.00323
   1.00000                   3.26809                  -2.26809
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :       -0.425545        0.890706       -0.159857
  Second local vector :       -0.129834        0.114728        0.984876
  Third  local vector :        0.895575        0.439864        0.066822
@@ -861,7 +860,7 @@
  Traces (and ratios) :
   0.00239                   0.00444                  -0.00204
   1.00000                   1.85374                  -0.85374
- Transformation to local coordinates
+ Transformation to local coordinates 
  First  local vector :       -0.841612       -0.187433       -0.506515
  Second local vector :       -0.062928       -0.897429        0.436648
  Third  local vector :       -0.536403        0.399363        0.743492
@@ -875,8 +874,8 @@
 
 ================================================================================
 
- Calculation of phonon density of states,
-    thermodynamical properties,
+ Calculation of phonon density of states, 
+    thermodynamical properties, 
     and Debye-Waller factors.
 
        Homogeneous q point set in the B.Z.
@@ -1852,7 +1851,7 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
 
 ================================================================================
 
- Treat the first list of vectors
+ Treat the first list of vectors 
 
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
@@ -1876,7 +1875,7 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
  the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
         degenerate with vibration mode #   2
-  2.0 -0.0 -1.0  0.0 -1.0  0.0
+  2.0  0.0 -1.0  0.0 -1.0  0.0
  Symmetry characters of vibration mode #   3
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #   4
@@ -1903,15 +1902,15 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  17
         degenerate with vibration mode #  18
-  2.0  0.0 -1.0  0.0 -1.0 -0.0
+  2.0 -0.0 -1.0 -0.0 -1.0  0.0
  Symmetry characters of vibration mode #  19
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  20
         degenerate with vibration mode #  21
-  2.0 -0.0 -1.0 -0.0 -1.0  0.0
+  2.0  0.0 -1.0  0.0 -1.0 -0.0
  Symmetry characters of vibration mode #  22
         degenerate with vibration mode #  23
-  2.0 -0.0 -1.0  0.0 -1.0  0.0
+  2.0 -0.0 -1.0 -0.0 -1.0  0.0
  Symmetry characters of vibration mode #  24
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  25
@@ -2166,92 +2165,92 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
 
 ================================================================================
 
-
- Mode effective charges
- Mode number.    x            y            z            length
+  
+ Mode effective charges 
+ Mode number.    x            y            z            length 
 -     1         -0.000001    -0.001275     0.000000     0.001275
 -     2         -0.001275     0.000001    -0.000000     0.001275
 ;     3         -0.000000     0.000000    -0.001975     0.001975
--     4         -0.053769    -0.047744    -0.000000     0.071907
--     5         -0.047744     0.053769     0.000000     0.071907
+-     4         -0.053923    -0.047570    -0.000000     0.071907
+-     5         -0.047570     0.053923     0.000000     0.071907
 ;     6         -0.000000    -0.000000     0.000035     0.000035
--     7         -0.257336    -0.467715     0.000000     0.533835
--     8         -0.467715     0.257336    -0.000000     0.533835
+-     7         -0.257246    -0.467765     0.000000     0.533835
+-     8         -0.467765     0.257246    -0.000000     0.533835
 ;     9          0.000000    -0.000000     1.884827     1.884827
 ;    10         -0.000000    -0.000000    -0.000774     0.000774
--    11         -0.765113    -1.288850    -0.000000     1.498843
--    12         -1.288850     0.765113     0.000000     1.498843
--    13          2.142942    -1.049166    -0.000000     2.385990
--    14          1.049166     2.142942     0.000000     2.385990
+-    11         -0.765098    -1.288859    -0.000000     1.498843
+-    12         -1.288859     0.765098     0.000000     1.498843
+-    13          2.142960    -1.049129    -0.000000     2.385990
+-    14          1.049129     2.142960     0.000000     2.385990
 ;    15         -0.000000    -0.000000    -0.000776     0.000776
 ;    16          0.000000    -0.000000     2.440426     2.440426
--    17         -0.653936     0.302544     0.000000     0.720532
--    18         -0.302544    -0.653936    -0.000000     0.720532
+-    17         -0.653959     0.302495     0.000000     0.720532
+-    18         -0.302495    -0.653959    -0.000000     0.720532
 ;    19          0.000000    -0.000000     3.074391     3.074391
--    20          1.682015    -0.765654    -0.000000     1.848080
--    21          0.765654     1.682015     0.000000     1.848080
--    22          5.017332    -2.273264     0.000000     5.508299
--    23          2.273264     5.017332    -0.000000     5.508299
+-    20          1.681995    -0.765699    -0.000000     1.848080
+-    21          0.765699     1.681995     0.000000     1.848080
+-    22          5.017364    -2.273194     0.000000     5.508299
+-    23          2.273194     5.017364    -0.000000     5.508299
 ;    24          0.000000    -0.000000    -5.310555     5.310555
 ;    25          0.000000     0.000000     0.000088     0.000088
--    26         -0.506388    -1.120679    -0.000000     1.229776
--    27         -1.120679     0.506388     0.000000     1.229776
-
+-    26         -0.506392    -1.120677    -0.000000     1.229776
+-    27         -1.120677     0.506392     0.000000     1.229776
+  
  Oscillator strengths (in a.u. ; 1 a.u.=253.2638413 m3/s2). Set to zero if abs()<tol14.
  Mode number.       xx          yy          zz          xy          xz          yz          trace
--   1     Real    0.0000E+00  4.4517E-11  0.0000E+00  4.1043E-14  0.0000E+00  0.0000E+00  4.4517E-11
+-   1     Real    0.0000E+00  4.4517E-11  0.0000E+00  3.7623E-14  0.0000E+00  0.0000E+00  4.4517E-11
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--   2     Real    4.4517E-11  0.0000E+00  0.0000E+00 -4.1043E-14  0.0000E+00  0.0000E+00  4.4517E-11
+-   2     Real    4.4517E-11  0.0000E+00  0.0000E+00 -3.7623E-14  0.0000E+00  0.0000E+00  4.4517E-11
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;   3     Real    0.0000E+00  0.0000E+00  1.0686E-10  0.0000E+00  0.0000E+00  0.0000E+00  1.0686E-10
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--   4     Real    9.6594E-08  7.6161E-08  0.0000E+00  8.5771E-08  0.0000E+00  0.0000E+00  1.7276E-07
+-   4     Real    9.7150E-08  7.5605E-08  0.0000E+00  8.5703E-08  0.0000E+00  0.0000E+00  1.7276E-07
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--   5     Real    7.6161E-08  9.6594E-08  0.0000E+00 -8.5771E-08  0.0000E+00  0.0000E+00  1.7276E-07
+-   5     Real    7.5605E-08  9.7150E-08  0.0000E+00 -8.5703E-08  0.0000E+00  0.0000E+00  1.7276E-07
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;   6     Real    0.0000E+00  0.0000E+00  3.6660E-14  0.0000E+00  0.0000E+00  0.0000E+00  3.6660E-14
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--   7     Real    2.1515E-06  7.1073E-06  0.0000E+00  3.9104E-06  0.0000E+00  0.0000E+00  9.2588E-06
+-   7     Real    2.1500E-06  7.1088E-06  0.0000E+00  3.9095E-06  0.0000E+00  0.0000E+00  9.2588E-06
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--   8     Real    7.1073E-06  2.1515E-06  0.0000E+00 -3.9104E-06  0.0000E+00  0.0000E+00  9.2588E-06
+-   8     Real    7.1088E-06  2.1500E-06  0.0000E+00 -3.9095E-06  0.0000E+00  0.0000E+00  9.2588E-06
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;   9     Real    0.0000E+00  0.0000E+00  1.1530E-04  0.0000E+00  0.0000E+00  0.0000E+00  1.1530E-04
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;  10     Real    0.0000E+00  0.0000E+00  1.7179E-11  0.0000E+00  0.0000E+00  0.0000E+00  1.7179E-11
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  11     Real    1.7010E-05  4.8267E-05  0.0000E+00  2.8653E-05  0.0000E+00  0.0000E+00  6.5276E-05
+-  11     Real    1.7009E-05  4.8267E-05  0.0000E+00  2.8653E-05  0.0000E+00  0.0000E+00  6.5276E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  12     Real    4.8267E-05  1.7010E-05  0.0000E+00 -2.8653E-05  0.0000E+00  0.0000E+00  6.5276E-05
+-  12     Real    4.8267E-05  1.7009E-05  0.0000E+00 -2.8653E-05  0.0000E+00  0.0000E+00  6.5276E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  13     Real    1.4309E-04  3.4299E-05  0.0000E+00 -7.0057E-05  0.0000E+00  0.0000E+00  1.7739E-04
+-  13     Real    1.4310E-04  3.4297E-05  0.0000E+00 -7.0055E-05  0.0000E+00  0.0000E+00  1.7739E-04
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  14     Real    3.4299E-05  1.4309E-04  0.0000E+00  7.0057E-05  0.0000E+00  0.0000E+00  1.7739E-04
+-  14     Real    3.4297E-05  1.4310E-04  0.0000E+00  7.0055E-05  0.0000E+00  0.0000E+00  1.7739E-04
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;  15     Real    0.0000E+00  0.0000E+00  2.0170E-11  0.0000E+00  0.0000E+00  0.0000E+00  2.0170E-11
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;  16     Real    0.0000E+00  0.0000E+00  1.7979E-04  0.0000E+00  0.0000E+00  0.0000E+00  1.7979E-04
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  17     Real    1.0660E-05  2.2817E-06  0.0000E+00 -4.9317E-06  0.0000E+00  0.0000E+00  1.2941E-05
+-  17     Real    1.0660E-05  2.2809E-06  0.0000E+00 -4.9311E-06  0.0000E+00  0.0000E+00  1.2941E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  18     Real    2.2817E-06  1.0660E-05  0.0000E+00  4.9317E-06  0.0000E+00  0.0000E+00  1.2941E-05
+-  18     Real    2.2809E-06  1.0660E-05  0.0000E+00  4.9311E-06  0.0000E+00  0.0000E+00  1.2941E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;  19     Real    0.0000E+00  0.0000E+00  2.0306E-04  0.0000E+00  2.5344E-14 -2.1642E-14  2.0306E-04
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  20     Real    6.6012E-05  1.3678E-05  0.0000E+00 -3.0049E-05 -3.0363E-14  1.3821E-14  7.9690E-05
+-  20     Real    6.6010E-05  1.3680E-05  0.0000E+00 -3.0050E-05 -3.0363E-14  1.3822E-14  7.9690E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  21     Real    1.3678E-05  6.6012E-05  0.0000E+00  3.0049E-05  0.0000E+00  0.0000E+00  7.9690E-05
+-  21     Real    1.3680E-05  6.6010E-05  0.0000E+00  3.0050E-05  0.0000E+00  0.0000E+00  7.9690E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  22     Real    7.7185E-04  1.5845E-04  0.0000E+00 -3.4971E-04  8.3115E-14 -3.7658E-14  9.3030E-04
+-  22     Real    7.7186E-04  1.5844E-04  0.0000E+00 -3.4970E-04  8.3146E-14 -3.7670E-14  9.3030E-04
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  23     Real    1.5845E-04  7.7185E-04  0.0000E+00  3.4971E-04 -1.6581E-14 -3.6596E-14  9.3030E-04
+-  23     Real    1.5844E-04  7.7186E-04  0.0000E+00  3.4970E-04 -1.6587E-14 -3.6610E-14  9.3030E-04
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
-;  24     Real    0.0000E+00  0.0000E+00  8.5779E-04  0.0000E+00 -3.3410E-14  4.2662E-14  8.5779E-04
+;  24     Real    0.0000E+00  0.0000E+00  8.5779E-04  0.0000E+00 -3.3435E-14  4.2688E-14  8.5779E-04
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;  25     Real    0.0000E+00  0.0000E+00  2.4068E-13  0.0000E+00  0.0000E+00  0.0000E+00  2.4068E-13
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  26     Real    8.1781E-06  4.0054E-05  0.0000E+00  1.8099E-05  0.0000E+00  1.0191E-14  4.8232E-05
+-  26     Real    8.1782E-06  4.0054E-05  0.0000E+00  1.8099E-05  0.0000E+00  1.0190E-14  4.8232E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  27     Real    4.0054E-05  8.1781E-06  0.0000E+00 -1.8099E-05 -3.1655E-14  1.4304E-14  4.8232E-05
+-  27     Real    4.0054E-05  8.1782E-06  0.0000E+00 -1.8099E-05 -3.1655E-14  1.4304E-14  4.8232E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 
  Electronic dielectric tensor
@@ -2272,11 +2271,11 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
       4.75336339     -0.00000000      0.00000000
      -0.00000000      4.75336339     -0.00000000
       0.00000000     -0.00000000      5.01028496
-
+ 
 
 ================================================================================
 
- Treat the second list of vectors
+ Treat the second list of vectors 
 
 
   Phonon at Gamma, with non-analyticity in the
@@ -2300,10 +2299,10 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
  Direction                     Dielectric constant
    0.00000   0.00000   1.00000      5.01028515
 -
-- Proc.   0 individual time (sec): cpu=         15.8  wall=         16.0
+- Proc.   0 individual time (sec): cpu=         16.2  wall=         16.2
 
 ================================================================================
 
-+Total cpu time     15.841  and wall time     15.981 sec
++Total cpu time     16.165  and wall time     16.169 sec
 
  anaddb : the run completed successfully.
