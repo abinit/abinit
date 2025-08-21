@@ -1309,6 +1309,14 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        end if
      end if
 
+     if (dt%eph_task == 18) then
+       ! Compute e-ph matrix elements along q-path.
+       if (dt%nbdbuf == 0) then
+         msg = "nbdbuf > 0 is required for NSCF. Adjust nband and nbdbuf to converge only the bands of interests"
+         ABI_ERROR_NOSTOP(msg, ierr)
+       end if
+     end if
+
    end if ! RUNL_EPH
 
    if (any(dt%eph_np_pqbks /= 0)) then
@@ -4649,7 +4657,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      end if
 
      ! in calcdenmagsph we wrap the atoms in the first unit cell assuming the magnetization is periodic
-     ! but this is not the case wheh GBT is used. So make sure all atomic sites are in the first unit cell.
+     ! but this is not the case when GBT is used. So make sure all atomic sites are in the first unit cell.
      ABI_MALLOC(my_xred, (3, dt%natom))
      ABI_MALLOC(xshift, (3, dt%natom))
      call wrap2_zero_one(dt%xred_orig(:,1:dt%natom,1), my_xred, xshift)

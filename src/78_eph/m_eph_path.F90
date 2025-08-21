@@ -152,10 +152,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
 !************************************************************************
 
- ! TODO:
- ! 1) Add possibility of selecting bands
- ! 2) Save g^2 in nc format without any average. This operation will be performed by Abipy (need ph freqs and eigenergies)
-
  if (psps%usepaw == 1) then
    ABI_ERROR("PAW not implemented")
    ABI_UNUSED((/pawang%nsym, pawrad(1)%mesh_size/))
@@ -266,6 +262,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  call xmpi_split_block(nq_path, qpt_comm%value, my_nqpath, my_iq_inds)
  call xmpi_split_block(natom3, pert_comm%value, my_npert, my_iperts)
  ABI_FREE(my_iperts)
+
+ ! Idle processors are not supported (tested).
  ABI_CHECK_IGEQ(my_nkpath, 1, "Too many procs for k-points.")
  ABI_CHECK_IGEQ(my_nqpath, 1, "Too many procs for q-points.")
  ABI_CHECK_IGEQ(my_npert, 1, "Too many procs for perturbations.")
@@ -436,8 +434,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      ! Compute u_{nk}(g)
      ! NB: The Hamiltonian has pointers to the _k arrays in output so we cannot deallocate them till the end.
      ! This is the reason why we use vlocal_k (vlocal_kq) although this term does not depend on k
-     call nscf%setup_kpt(spin, kk, istwfk_1, nband, cryst, dtset, psps, pawtab, pawfgr, &
-                         npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal_k, cg_k, gsc_k, gs_ham_k)
+     call nscf%setup_kpt(spin, kk, istwfk_1, nband, cryst, dtset, psps, pawtab, pawfgr, &              ! in
+                         npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal_k, cg_k, gsc_k, gs_ham_k) ! out
 
      ! cache.
      use_cg_k = (my_ik > 1 .and. ucache_k%use_cache)
@@ -469,8 +467,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        kq = kk + qq
 
        ! Compute u_{m k+q}(g)
-       call nscf%setup_kpt(spin, kq, istwfk_1, nband, cryst, dtset, psps, pawtab, pawfgr, &
-                           npw_kq, kg_kq, kpg_kq, ph3d_kq, kinpw_kq, ffnl_kq, vlocal_kq, cg_kq, gsc_kq, gs_ham_kq)
+       call nscf%setup_kpt(spin, kq, istwfk_1, nband, cryst, dtset, psps, pawtab, pawfgr, &                         ! in
+                           npw_kq, kg_kq, kpg_kq, ph3d_kq, kinpw_kq, ffnl_kq, vlocal_kq, cg_kq, gsc_kq, gs_ham_kq)  ! out
 
        ! cache.
        use_cg_kq = (my_iq > 1 .and. ucache_kq%use_cache)
@@ -481,8 +479,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
          use_cg_kq = .True.; cg_kq = cg_k
        end if
 
-       call nscf%solve_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, gs_ham_kq, &
-                           use_cg_kq, npw_kq, cg_kq, gsc_kq, eig_kq, msg, ierr)
+       call nscf%solve_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, gs_ham_kq, & ! in
+                           use_cg_kq, npw_kq, cg_kq, gsc_kq, eig_kq, msg, ierr)         ! out
 
        ABI_WARNING_IF(ierr /= 0, msg)
        tot_nscf_ierr = tot_nscf_ierr + ierr
@@ -531,12 +529,15 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
        !===== Load the k/k+q dependent parts of the Hamiltonian
        ! Load k-dependent part in the Hamiltonian datastructure
-       call gs_ham_kq%load_k(kpt_k=kk, npw_k=npw_k, istwf_k=istwfk_1, kg_k=kg_k, kpg_k=kpg_k, &
-                            ph3d_k=ph3d_k, ffnl_k=ffnl_k, compute_ph3d=.false., compute_gbound=.true.)
+       !call gs_ham_kq%load_k(kpt_k=kk, npw_k=npw_k, istwf_k=istwfk_1, kg_k=kg_k, kpg_k=kpg_k, &
+       !                      ph3d_k=ph3d_k, ffnl_k=ffnl_k, compute_ph3d=.false., compute_gbound=.true.)
 
        ! Load k+q-dependent part in the Hamiltonian datastructure
-       call gs_ham_kq%load_kprime(kpt_kp=kq, npw_kp=npw_kq, istwf_kp=istwfk_1, kg_kp=kg_kq, kpg_kp=kpg_kq, &
-                                  ph3d_kp=ph3d_kq, ffnl_kp=ffnl_kq, compute_ph3d=.false., compute_gbound=.true.)
+       !call gs_ham_kq%load_kprime(kpt_kp=kq, npw_kp=npw_kq, istwf_kp=istwfk_1, kg_kp=kg_kq, kpg_kp=kpg_kq, &
+       !                           ph3d_kp=ph3d_kq, ffnl_kp=ffnl_kq, compute_ph3d=.false., compute_gbound=.true.)
+
+       call gs_ham_k%load_kprime(kpt_kp=kq, npw_kp=npw_kq, istwf_kp=istwfk_1, kg_kp=kg_kq, kpg_kp=kpg_kq, &
+                                 ph3d_kp=ph3d_kq, ffnl_kp=ffnl_kq, compute_ph3d=.true., compute_gbound=.true.)
 
        ! Loop over my atomic perturbations: apply H1_{kappa, alpha} and compute gkq_atm.
        gkq_atm = zero
@@ -548,7 +549,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
                                     pawfgr, nscf%mpi_enreg, nscf%vtrial, v1scf(:,:,:,my_ip), vlocal, vlocal1)
 
          ! Prepare application of the NL part.
-         call rf_ham_kq%init(cplex, gs_ham_kq, ipert, has_e1kbsc=.true.)
+         call rf_ham_kq%init(cplex, gs_ham_k, ipert, has_e1kbsc=.true.)
          call rf_ham_kq%load_spin(spin, vlocal1=vlocal1, with_nonlocal=.true.)
 
          ! Calculate dvscf * psi_k, results stored in h1kets_kq on the k+q sphere.
@@ -560,7 +561,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
            eshift = eig0nk - dtset%dfpt_sciss
 
            call getgh1c(berryopt0, cg_k(:,:,band_n), cwaveprj0, h1kets_kq(:,:,in_k), &
-                        grad_berry, gs1c, gs_ham_kq, gvnlx1, idir, ipert, [eshift], nscf%mpi_enreg, ndat1, optlocal, &
+                        grad_berry, gs1c, gs_ham_k, gvnlx1, idir, ipert, [eshift], nscf%mpi_enreg, ndat1, optlocal, &
                         optnl, opt_gvnlx1, rf_ham_kq, sij_opt, tim_getgh1c, usevnl)
          end do
 
@@ -682,7 +683,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      ABI_FREE(eig_k)
    end if
 
-   ! TODO: Average matrix elements over degenerate states (electrons at k, k+q, and phonons ???
+
+   ! Save g^2 in nc format without any average. This operation will be performed by Abipy (need ph freqs and eigenergies)
    call wrtout(units, " Writing sqrt(1/N_b^2 \sum_{mn} |g_{mn,nu}(k, q)|^2) in meV for testing purpose.", pre_newlines=2)
    write(msg, "(1x,4(a5,1x),a16)") "nu","iq", "ik", "spin", "|g| in meV"
    call wrtout(units, msg)
@@ -693,6 +695,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        do iq=1, nq_path
          if (all(iq /= [1, nq_path])) cycle
          NCF_CHECK(nf90_get_var(ncid, vid("gkq2_nu"), gkq2_nu, start=[1,1,1,iq,ik,spin]))
+         ! TODO: Average matrix elements over degenerate states (electrons at k, k+q, and phonons ???
          !call epth_gkq2_nu_average(natom3, bstart, nb, phfreqs, eig_k, eig_kq, gkq2_nu)
          do nu=1,natom3
            write(msg, "(1x,4(i5,1x),es16.6)") nu, iq, ik, spin, sqrt(sum(gkq2_nu(:,:, nu)) / nb_in_g**2) * Ha_meV
