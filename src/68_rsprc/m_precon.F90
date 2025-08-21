@@ -470,12 +470,13 @@ contains
         ! *************************************************************************
         
         n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
-        i1 = modulo((ifft-1), n1) + 1
-        i2 = modulo((ifft-1)/n1, n2) + 1
-        i3 = ((ifft-1)/n1)/n2 + 1
-        g(1) = modulo(i1-1 + n1/2, n1) - n1/2
-        g(2) = modulo(i2-1 + n2/2, n2) - n2/2
-        g(3) = modulo(i3-1 + n3/2, n3) - n3/2
+        ! (ifft-1) = (i1-1) + (i2-1)*n1 + (i3-1)*n1*n2
+        i1 = modulo(ifft-1, n1) +1
+        i2 = modulo((ifft-1)/n1, n2) +1
+        i3 = ((ifft-1)/n1)/n2 +1
+        g(1) = i1 - (i1/(n1/2+2))*n1-1
+        g(2) = i2 - (i2/(n2/2+2))*n2-1
+        g(3) = i3 - (i3/(n3/2+2))*n3-1
 
     end function get_g_vector
 
@@ -534,6 +535,7 @@ contains
     !!
     !! SOURCE
     subroutine to_pauli(this, opt, v)
+        !TODO : delete
         class(precon_object), intent(in) :: this
         !Arguments ------------------------------------
         real(dp), intent(inout) ::  v(:, :, :)
@@ -647,6 +649,7 @@ contains
     !!
     !! SOURCE
     subroutine from_pauli(this, opt, v)
+        !TODO : delete
         class(precon_object), intent(in) :: this
         !Arguments ------------------------------------
         real(dp), intent(inout) ::  v(:, :, :)
@@ -745,9 +748,66 @@ contains
         end if
     end subroutine from_pauli_r
 
-    !****f* m_precon/apply_vc
+    !****f* m_precon/apply_vc_pauli
     !! NAME
-    !!  apply_vc
+    !!  apply_vc_pauli
+    !!
+    !! FUNCTION
+    !!  Apply the Coulomb kernel vc to a vector (in place) in the Pauli basis.
+    !!
+    !! INPUTS
+    !!
+    !! SIDE EFFECTS
+    !!  vec_r (nfftprc, nspden) = Vector (in direct space) to which the Coulomb kernel vc is applied (in place).
+    !!                            When nspden > 1 vec_r is in the Pauli basis.
+    !!
+    !! SOURCE
+    subroutine apply_vc_pauli(this, dtset, mpi_enreg, vec_r)
+        !Arguments ------------------------------------
+        class(precon_object), intent(in) :: this
+        type(dataset_type),intent(in) :: dtset
+        type(MPI_type), intent(in) :: mpi_enreg
+        !arrays
+        real(dp), intent(inout) :: vec_r(this%nfftprc, dtset%nspden)
+        
+        !Local variables-------------------------------
+        integer :: ifft, ispden, cplex
+        real(dp) :: g_cart_2
+        integer :: n1, n2, n3   !DEBUG
+        real(dp) :: vec_g(2, this%nfftprc, 1)
+        
+        ! *************************************************************************
+        
+        !In the sigma_0, 1, 2, 3 (pauli) basis :
+        !   The sigma_0 component of the density is multiplied by 4pi/G^2
+        !   and the rest is 0.
+
+        cplex = 1   ! vec is REAL
+        ! FFT
+        call fourdp(cplex, vec_g, vec_r(:, 1), -1, mpi_enreg, this%nfftprc, 1, this%ngfftprc, 0)
+       
+        ispden = 1
+        do ifft = 2, this%nfftprc
+            g_cart_2 = norm2(two_pi * matmul(this%gprimd, get_g_vector(ifft, this%ngfftprc)))**2
+            vec_g(:, ifft, ispden) = (2*two_pi/g_cart_2) * vec_g(:, ifft, ispden)
+        end do
+
+        ! iFFT
+        call fourdp(cplex, vec_g, vec_r(:, 1), 1, mpi_enreg, this%nfftprc, 1, this%ngfftprc, 0)
+        
+        do ispden = 2, dtset%nspden
+            vec_r(:, ispden) = 0
+        end do
+
+        !DEBUG
+        n1=this%ngfftprc(1) ; n2=this%ngfftprc(2) ; n3=this%ngfftprc(3) !DEBUG
+        write(6,*)'chi0diel apply_vc n1*n2*n3, this%nfftprc', n1, n2, n3, n1*n2*n3, this%nfftprc; flush(6) !DEBUG
+
+    end subroutine apply_vc_pauli
+
+        !****f* m_precon/apply_vc_pauli
+    !! NAME
+    !!  apply_vc_pauli
     !!
     !! FUNCTION
     !!  Apply the Coulomb kernel vc to a vector (in place).
@@ -755,35 +815,23 @@ contains
     !! INPUTS
     !!
     !! SIDE EFFECTS
-    !!  vec_g (2, nfftprc, nspden) = Vector (in G-space) to which the Coulomb kernel vc is applied (in place).
-    !!                               When nspden > 1 vec_g is in the Pauli basis.
+    !!  vec_r (nfftprc, nspden) = Vector (in direct space) to which the Coulomb kernel vc is applied (in place).
+    !!                            When nspden > 1 vec_r is in the default Abinit spin-basis.
     !!
     !! SOURCE
-    subroutine apply_vc(this, dtset, vec_g)
+    subroutine apply_vc(this, dtset, mpi_enreg, vec_r)
         !Arguments ------------------------------------
         class(precon_object), intent(in) :: this
         type(dataset_type),intent(in) :: dtset
+        type(MPI_type), intent(in) :: mpi_enreg
         !arrays
-        real(dp), intent(inout) :: vec_g(2, this%nfftprc, dtset%nspden)
-        
-        !Local variables-------------------------------
-        integer :: ifft, ispden
-        real(dp) :: g_cart_2
+        real(dp), intent(inout) :: vec_r(this%nfftprc, dtset%nspden)
         
         ! *************************************************************************
         
-        !In the sigma_0, 1, 2, 3 (pauli) basis :
-        !   The sigma_0 component of the density is multiplied by 4pi/G^2
-        !   and the rest is 0.
-        ispden = 1
-        do ifft = 2, this%nfftprc
-            g_cart_2 = norm2(two_pi * matmul(this%gprimd, get_g_vector(ifft, this%ngfftprc)))**2
-            vec_g(:, ifft, ispden) = (2*two_pi/g_cart_2) * vec_g(:, ifft, ispden)
-        end do
-
-        do ispden = 2, dtset%nspden
-            vec_g(:, :, ispden) = 0
-        end do
+        call to_pauli_r(this, 1, vec_r)                 ! Convert vec_g to the Pauli basis
+        call apply_vc(this, dtset, mpi_enreg, vec_r)    ! Apply vc in place
+        call from_pauli_r(this, 0, vec_r)               ! Convert vec_g back to the default Abinit spin-basis
 
     end subroutine apply_vc
 
@@ -807,7 +855,7 @@ contains
     !! SOURCE
     subroutine apply_kxc(this, dtset, mpi_enreg, vec_r, Kxc_vec_r)
         !Arguments ------------------------------------
-        class(precon_object), intent(inout) :: this
+        class(precon_object), intent(in) :: this
         !scalars
         type(dataset_type),intent(in) :: dtset
         type(MPI_type),intent(in) :: mpi_enreg
@@ -879,52 +927,44 @@ contains
     !!  mpi_enreg   = Informations about MPI parallelization.
     !!
     !! SIDE EFFECTS
-    !!  vec_g (2, nfftprc, nspden) = Vector (in G-space) to which the kernel is applied (in place).
-    !!                               When nspden > 1 vec_g is in the default Abinit spin-basis.
+    !!  vec_r (nfftprc, nspden) = Vector (in direct space) to which the kernel is applied (in place).
+    !!                            When nspden > 1 vec_r is in the default Abinit spin-basis.
     !!
     !! SOURCE
-    subroutine apply_kernel(this, dtset, mpi_enreg, vec_g)
+    subroutine apply_kernel(this, dtset, mpi_enreg, vec_r)
         !Arguments ------------------------------------
         class(precon_object), intent(inout) :: this
         !scalars
         type(dataset_type),intent(in) :: dtset
         type(MPI_type),intent(in) :: mpi_enreg
         !arrays
-        real(dp), intent(inout) :: vec_g(2, this%nfftprc, dtset%nspden)
+        real(dp), intent(inout) :: vec_r(this%nfftprc, dtset%nspden)
         
         !Local variables-------------------------------
-        real(dp), allocatable :: Kxc_vec_g(:, :, :), Kxc_vec_r(:, :), vec_r(:, :)
+        real(dp), allocatable :: Kxc_vec_r(:, :)
 
         ! *************************************************************************
         write(6,*)'chi0diel apply_kernel'; flush(6) !DEBUG
         
         ! RPA : LDOS/Kerker model - only vc
         if (.not. this%use_kxc) then
-            call to_pauli(this, 1, vec_g)       ! Convert vec_g to the Pauli basis
-            call apply_vc(this, dtset, vec_g)   ! Apply vc in place
-            call from_pauli(this, 0, vec_g)     ! Convert vec_g back to the default Abinit spin-basis
-            ! TODO : make apply_vc work in the default Abinit spin-basis
+            
+            call apply_vc(this, dtset, mpi_enreg, vec_r)    ! Apply vc in place
 
         ! No RPA : vc and Kxc
         else
-            ! IFFT to get vec in real space
-            ABI_MALLOC(vec_r, (this%nfftprc, dtset%nspden))
-            call fourdp(1, vec_g, vec_r, -1, mpi_enreg, this%nfftprc, dtset%nspden, this%ngfftprc, 0)
-            ! Apply vc in place
-            call to_pauli(this, 1, vec_g)       ! Convert vec_g to the Pauli basis
-            call apply_vc(this, dtset, vec_g)   ! Apply vc in place
-            call from_pauli(this, 0, vec_g)     ! Convert vec_g back to the default Abinit spin-basis
+            
             ! Apply Kxc
             ABI_MALLOC(Kxc_vec_r, (this%nfftprc, dtset%nspden))
             call apply_Kxc(this, dtset, mpi_enreg, vec_r, Kxc_vec_r)
-            ABI_FREE(vec_r)
-            ! FFT to get Kxc_vec in reciprocal (G) space
-            ABI_MALLOC(Kxc_vec_g, (2, this%nfftprc, dtset%nspden))
-            call fourdp(1, Kxc_vec_g, Kxc_vec_r, -1, mpi_enreg, this%nfftprc, dtset%nspden, this%ngfftprc, 0)
+            
+            ! Apply vc in place
+            call apply_vc(this, dtset, mpi_enreg, vec_r)    ! Apply vc in place
+            
+            ! Add Kxc_vec_r to vec_r
+            vec_r = vec_r + Kxc_vec_r
             ABI_FREE(Kxc_vec_r)
-            ! Add Kxc_vec_g to vec_g
-            vec_g = vec_g + Kxc_vec_g
-            ABI_FREE(Kxc_vec_g)
+
         end if
 
     end subroutine apply_kernel
@@ -1335,23 +1375,22 @@ contains
 
     end subroutine save_applied_op_r
 
-    !****f* m_precon/apply_chi0_ldos
+    !****f* m_precon/apply_chi0_ldos_pauli
     !! NAME
     !!  apply_chi0_ldos
     !!
     !! FUNCTION
-    !!  Apply the ldos model chi0 operator to the vector vec_g (in place).
+    !!  Apply the ldos model chi0 operator to the vector vec_r (in place) in the Pauli basis.
     !!
     !! INPUTS
     !!  mpi_enreg    = Information about MPI parallelization.
-    !!  ispden       = Index of spin-density component.
     !!
     !! SIDE EFFECTS
-    !!  vec_g (2, nfftprc, nspden) = Vector (in G-space) to which the model chi0 operator is applied (in place).
-    !!                               When nspden > 1 vec_g is in the Pauli basis.
+    !!  vec_r (nfftprc, nspden) = Vector (in direct space) to which the model chi0 operator is applied (in place).
+    !!                            When nspden > 1 vec_r is in the Pauli basis.
     !!
     !! SOURCE
-    subroutine apply_chi0_ldos(this, dtset, mpi_enreg, vec_g)
+    subroutine apply_chi0_ldos_pauli(this, dtset, mpi_enreg, vec_r)
 
         !Arguments ------------------------------------
         class(precon_object), intent(in) :: this
@@ -1359,15 +1398,14 @@ contains
         !scalars
         type(MPI_type), intent(in) :: mpi_enreg
         !arrays
-        real(dp), intent(inout) :: vec_g(2, this%nfftprc, dtset%nspden)
+        real(dp), intent(inout) :: vec_r(this%nfftprc, dtset%nspden)
        
         !Local variables-------------------------------
         !scalars
         integer :: cplex
         integer :: ispden
         !arrays
-        real(dp), allocatable :: work_r(:), vec_r_1(:)
-        real(dp), allocatable :: work_g(:, :)
+        real(dp), allocatable :: work_r(:, :)
         
         ! *************************************************************************
         write(6,*)'chi0diel apply_chi0_ldos'; flush(6) !DEBUG
@@ -1375,31 +1413,150 @@ contains
         !write(6,*)'chi0diel apply_chi0_ldos : this%ldos(1:10, :)', this%ldos(1:10, :); flush(6) !DEBUG
        
         if (abs(this%tdos) > epsilon(this%tdos)) then   !Checking that tdos is not 0.
-            cplex = 1
-            ABI_MALLOC(vec_r_1, (cplex*this%nfftprc))    
-            ABI_MALLOC(work_r, (cplex*this%nfftprc))
+            ABI_MALLOC(work_r, (this%nfftprc, dtset%nspden))
             
-            !1) ifft to get (the sigma_0 component of) vec in the real space
-            ispden = 1
-            call fourdp(cplex, vec_g(:, :, ispden), vec_r_1, 1, mpi_enreg, this%nfftprc, 1, this%ngfftprc, 0)
-
+            !1) chi0(v)(r)_1 = sum_ispden ldos_ispden(r)*v_ispden(r).
+            work_r(:, 1) = 0
             do ispden = 1, dtset%nspden
-                !2) chi0(v)(r)_ispden = -ldos_ispden(r)*v_1(r) + 1/dos * ldos_ispden(r)*integral(ldos_1(r')*v_1(r')*dr')
-                work_r = -this%ldos(:, ispden)*vec_r_1 &
-                                + 1/this%tdos * dot_product(this%ldos(:, 1), vec_r_1)*this%dvol * this%ldos(:, ispden)
-
-                !3) fft to get vec back in the reciprocal space
-                call fourdp(cplex, vec_g(:, :, ispden), work_r, -1, mpi_enreg, this%nfftprc, 1, this%ngfftprc, 0)
+                work_r(:, 1) = work_r(:, 1) - this%ldos(:, ispden)*vec_r(:, ispden)
             end do
-            !write(6,*)'chi0diel apply_chi0_ldos : vec_g(1, 1:10, :)', vec_g(1, 1:10, :); flush(6) !DEBUG
-
+            !2) chi0(v)(r)_ispden = -ldos_ispden(r)*v_1(r) for ispden>1.
+            do ispden = 2, dtset%nspden
+                work_r(:, ispden) = -this%ldos(:, ispden)*vec_r(:, 1)
+            end do
+            !3) Apply the part comming from the variations of the Fermi-level.
+            call apply_chi0_dfermie(this, dtset, mpi_enreg, vec_r)
+            vec_r = work_r + vec_r
+            
             ABI_FREE(work_r)
-            ABI_FREE(vec_r_1)
         else 
-            vec_g = 0
+            vec_r = 0
         end if
 
+    end subroutine apply_chi0_ldos_pauli
+
+        !****f* m_precon/apply_chi0_ldos_pauli
+    !! NAME
+    !!  apply_chi0_ldos
+    !!
+    !! FUNCTION
+    !!  Apply the ldos model chi0 operator to the vector vec_r (in place).
+    !!
+    !! INPUTS
+    !!  mpi_enreg    = Information about MPI parallelization. TODO
+    !!
+    !! SIDE EFFECTS
+    !!  vec_r (nfftprc, nspden) = Vector (in direct space) to which the model chi0 operator is applied (in place).
+    !!                            When nspden > 1 vec_r is in the default Abinit spin-basis.
+    !!
+    !! SOURCE
+    subroutine apply_chi0_ldos(this, dtset, mpi_enreg, vec_r)
+
+        !Arguments ------------------------------------
+        class(precon_object), intent(in) :: this
+        type(dataset_type),intent(in) :: dtset
+        !scalars
+        type(MPI_type), intent(in) :: mpi_enreg
+        !arrays
+        real(dp), intent(inout) :: vec_r(this%nfftprc, dtset%nspden)
+        
+        ! *************************************************************************
+
+        call to_pauli_r(this, 0, vec_r)                 ! Convert vec_g to the Pauli basis
+        call apply_vc(this, dtset, mpi_enreg, vec_r)    ! Apply vc in place
+        call from_pauli_r(this, 1, vec_r)               ! Convert vec_g back to the default Abinit spin-basis
+
     end subroutine apply_chi0_ldos
+
+    !!****f* ABINIT/apply_adjdielmat_ldos
+    !! NAME
+    !!  apply_adjdielmat
+    !!
+    !! FUNCTION
+    !!  Apply the ldos- adjoint dielectric matrix I-chi0_ldos*vc to the density rho_r (given in the direct space).
+    !!
+    !! INPUTS
+    !!  dtset       = All input variables for this dataset.
+    !!  mpi_enreg   = Information about MPI parallelization.
+    !!  rho_r       = Density vector (in direct space).
+    !!
+    !! OUTPUT
+    !!  adjdielmat_rho_r = adjdielmat * rho_r
+    !!
+    !! NOTES
+    !!
+    !! SOURCE
+    subroutine apply_adjdielmat_ldos(this, dtset, mpi_enreg, rho_r, adjdielmat_rho_r)
+
+        !Arguments ------------------------------------
+        class(precon_object) :: this
+        !scalars
+        type(dataset_type),intent(in) :: dtset
+        type(MPI_type),intent(in) :: mpi_enreg
+        !arrays
+        real(dp), intent(in) :: rho_r(this%nfftprc, dtset%nspden)
+        real(dp), intent(inout) :: adjdielmat_rho_r(this%nfftprc, dtset%nspden)
+        
+        ! *************************************************************************
+
+        adjdielmat_rho_r = rho_r
+        !1)  Convert rho_r to the Pauli basis
+        call to_pauli_r(this, 1, adjdielmat_rho_r)
+        !2) Apply vc (in the Pauli basis)
+        call apply_vc_pauli(this, dtset, mpi_enreg, adjdielmat_rho_r)
+        !3) Apply chi0_ldos (in the Pauli basis)
+        call apply_chi0_ldos_pauli(this, dtset, mpi_enreg, adjdielmat_rho_r)
+        !4) adjdielmat_rho_r = rho_r - vc * chi0 * rho_r = adjdielmat * rho_r
+        adjdielmat_rho_r = rho_r - adjdielmat_rho_r
+        !5) Convert adjdielmat_rho_r back to the default Abinit spin-basis
+        call from_pauli_r(this, 1, adjdielmat_rho_r)  
+
+    end subroutine apply_adjdielmat_ldos
+
+    !!****f* ABINIT/apply_dielmat_ldos
+    !! NAME
+    !!  apply_adjdielmat
+    !!
+    !! FUNCTION
+    !!  Apply the ldos- dielectric matrix I-vc*chi0_ldos to the potential v_r (given in the direct space).
+    !!
+    !! INPUTS
+    !!  dtset       = All input variables for this dataset.
+    !!  mpi_enreg   = Information about MPI parallelization.
+    !!  v_r       = Density vector (in direct space).
+    !!
+    !! OUTPUT
+    !!  dielmat_v_r = dielmat * v_r
+    !!
+    !! NOTES
+    !!
+    !! SOURCE
+    subroutine apply_dielmat_ldos(this, dtset, mpi_enreg, v_r, dielmat_v_r)
+
+        !Arguments ------------------------------------
+        class(precon_object) :: this
+        !scalars
+        type(dataset_type),intent(in) :: dtset
+        type(MPI_type),intent(in) :: mpi_enreg
+        !arrays
+        real(dp), intent(in) :: v_r(this%nfftprc, dtset%nspden)
+        real(dp), intent(inout) :: dielmat_v_r(this%nfftprc, dtset%nspden)
+        
+        ! *************************************************************************
+
+        dielmat_v_r = v_r
+        !1)  Convert v_r to the Pauli basis
+        call to_pauli_r(this, 1, dielmat_v_r)
+        !2) Apply chi0_ldos (in the Pauli basis)
+        call apply_chi0_ldos_pauli(this, dtset, mpi_enreg, dielmat_v_r)
+        !3) Apply vc (in the Pauli basis)
+        call apply_vc_pauli(this, dtset, mpi_enreg, dielmat_v_r)
+        !4) dielmat_v_r = v_r - vc * chi0 * v_r = adjdielmat * v_r
+        dielmat_v_r = v_r - dielmat_v_r
+        !5) Convert dielmat_v_r back to the default Abinit spin-basis
+        call from_pauli_r(this, 1, dielmat_v_r)  
+
+    end subroutine apply_dielmat_ldos
 
     !****f* m_precon/compute_rhoii_coll
     !! NAME
@@ -1747,7 +1904,7 @@ contains
     !!                            When nspden > 1 vec_r is in the default Abinit spin-basis.
     !!
     !! OuTPUTS
-    !!  weights(:) = Weights needed for the application of the model chi0 to vec_r. To be used in apply_chi0_diag.
+    !!  weights(:) = Weights needed for the application of the model chi0 to vec_r. To be used in apply_chi0_deigvals.
     !!
     !! SOURCE
     subroutine compute_weights_chi0_diag(this, dtset, mpi_enreg, vec_r, weights)
@@ -1902,9 +2059,9 @@ contains
         
     end subroutine compute_weights_chi0_diag
 
-    !****f* m_precon/apply_chi0_diag
+    !****f* m_precon/apply_chi0_deigvals
     !! NAME
-    !!  apply_chi0_mag
+    !!  apply_chi0_deigvals
     !!
     !! FUNCTION
     !!  Apply the diagonal model chi0 operator to the vector vec_r.
@@ -1919,7 +2076,7 @@ contains
     !!
     !! SOURCE
     ! TODO : Name 
-    subroutine apply_chi0_diag(this, dtset, mpi_enreg, vec_r)
+    subroutine apply_chi0_deigvals(this, dtset, mpi_enreg, vec_r)
 
         !Arguments ------------------------------------
         class(precon_object), intent(in) :: this
@@ -1930,11 +2087,28 @@ contains
         real(dp), intent(inout) :: vec_r(this%nfftprc, dtset%nspden)
        
         !Local variables-------------------------------
+        integer :: nfftot
         !arrays
-        real(dp), allocatable :: weights(:)
+        real(dp), allocatable :: weights(:), vec_g(:, :, :)
 
         ! *************************************************************************
-        write(6,*)'chi0diel apply_chi0_diag'; flush(6) !DEBUG
+        write(6,*)'chi0diel apply_chi0_deigvals'; flush(6) !DEBUG
+
+        !0) To ensure that chi0_diag is self-adjoint, the input vec_r is symmetrized with symrhg
+        ABI_MALLOC(vec_g, (2, this%nfftprc, dtset%nspden))
+        nfftot = this%ngfftprc(1) * this%ngfftprc(2) * this%ngfftprc(3)
+        call symrhg(1, this%gprimd, this%irrzon, mpi_enreg, dtset%nfft, nfftot, dtset%ngfft, dtset%nspden, dtset%nsppol, &
+        &   dtset%nsym, this%phnons, vec_g, vec_r, this%rprimd, dtset%symafm, dtset%symrel, dtset%tnons)
+        ABI_FREE(vec_g)
+        ! symrhg returns densities in tot/up basis in collinear spin
+        if (dtset%nspden==2) then   !tot/up to up/down
+            vec_r(:, 2) = vec_r(:, 1) - vec_r(:, 2) ! down = tot - up
+            vec_r(:, 1) = vec_r(:, 1) - vec_r(:, 2) ! up = tot - down
+        end if
+        if (dtset%nspden==4) then
+            ! TODO
+        end if
+        ! TODO : antiferromagnetic case ... (nsppol=1&nspden=2)
 
         !1) Computing the weights : weight_i = sum_i fi' * <rhoii, vec>
         ABI_MALLOC(weights, (dtset%mband*dtset%nkpt*dtset%nsppol))
@@ -1944,7 +2118,46 @@ contains
         call compute_weighted_density(this, dtset, mpi_enreg, weights, vec_r)
         ABI_FREE(weights)
 
-    end subroutine apply_chi0_diag
+    end subroutine apply_chi0_deigvals
+
+    !****f* m_precon/apply_chi0_dfermie
+    !! NAME
+    !!  apply_chi0_dfermie
+    !!
+    !! FUNCTION
+    !!  
+    !!
+    !! INPUTS
+    !!  dtset       = All input variables for this dataset.
+    !!  mpi_enreg   = Information about MPI parallelization.
+    !!
+    !! SIDE EFFECTS
+    !!  vec_r (nfftprc, nspden) = Vector (in real space) to which the model chi0 operator is applied (in place).
+    !!                            When nspden > 1 vec_r is in the Pauli spin-basis.
+    !!
+    !! SOURCE
+    subroutine apply_chi0_dfermie(this, dtset, mpi_enreg, vec_r)
+
+        !Arguments ------------------------------------
+        class(precon_object), intent(in) :: this
+        !scalars
+        type(dataset_type),intent(in) :: dtset
+        type(MPI_type), intent(in) :: mpi_enreg
+        !arrays
+        real(dp), intent(inout) :: vec_r(this%nfftprc, dtset%nspden)
+       
+        !Local variables-------------------------------
+        integer :: ispden, jspden
+
+        ! *************************************************************************
+        write(6,*)'chi0diel apply_chi0_dfermie'; flush(6) !DEBUG
+        do ispden = 1, dtset%nspden
+            do jspden = 1, dtset%nspden
+                vec_r(:, ispden) = 1/this%tdos * dot_product(this%ldos(:, jspden), vec_r(:, jspden))*this%dvol * this%ldos(:, ispden)
+            end do
+        end do
+
+    end subroutine apply_chi0_dfermie
 
     !****f* m_precon/apply_chi0
     !! NAME
@@ -1959,11 +2172,11 @@ contains
     !!  ispden      = Index of spin-density component.
     !!
     !! SIDE EFFECTS
-    !!  vec_g (2, nfftprc, nspden) = Vector (in G-space) to which the model chi0 operator is applied (in place).
-    !!                               When nspden > 1 vec_g is in the default Abinit spin-basis.
+    !!  vec_r (nfftprc, nspden) = Vector (in direct space) to which the model chi0 operator is applied (in place).
+    !!                               When nspden > 1 vec_r is in the default Abinit spin-basis.
     !!
     !! SOURCE
-    subroutine apply_chi0(this, dtset, mpi_enreg, vec_g)
+    subroutine apply_chi0(this, dtset, mpi_enreg, vec_r)
 
         !Arguments ------------------------------------
         class(precon_object) :: this
@@ -1971,7 +2184,7 @@ contains
         type(dataset_type),intent(in) :: dtset
         type(MPI_type), intent(in) :: mpi_enreg
         !arrays
-        real(dp), intent(inout) :: vec_g(2, this%nfftprc, dtset%nspden)
+        real(dp), intent(inout) :: vec_r(this%nfftprc, dtset%nspden)
        
         !Local variables-------------------------------
         !scalars
@@ -1982,20 +2195,19 @@ contains
        
         !Kerker
         if (this%iprcel == 201) then
-            call to_pauli(this, 0, vec_g)       ! Convert vec_g to the Pauli basis
-            ispden = 1
-            vec_g(:, :, ispden) = (-1/(4*pi*(this%dielng)**2)) * vec_g(:, :, ispden)
-            do ispden = 2, dtset%nspden
-                vec_g(:, :, ispden) = 0
-            end do
-            call from_pauli(this, 1, vec_g)     ! Convert vec_g back to the default Abinit spin-basis
+            ! TODO
+            !call to_pauli(this, 0, vec_g)       ! Convert vec_g to the Pauli basis
+            !ispden = 1
+            !vec_g(:, :, ispden) = (-1/(4*pi*(this%dielng)**2)) * vec_g(:, :, ispden)
+            !do ispden = 2, dtset%nspden
+            !    vec_g(:, :, ispden) = 0
+            !end do
+            !call from_pauli(this, 1, vec_g)     ! Convert vec_g back to the default Abinit spin-basis
         end if
         
         !LDOS model
         if (this%iprcel == 202) then
-            call to_pauli(this, 0, vec_g)       ! Convert vec_g to the Pauli basis
-            call apply_chi0_ldos(this, dtset, mpi_enreg, vec_g)
-            call from_pauli(this, 1, vec_g)     ! Convert vec_g back to the default Abinit spin-basis
+            call apply_chi0_ldos(this, dtset, mpi_enreg, vec_r)
         end if
 
     end subroutine apply_chi0
@@ -2005,21 +2217,21 @@ contains
     !!  apply_adjdielmat
     !!
     !! FUNCTION
-    !!  Apply the adjoint dielectric matrix I-chi0*vc to the density rho_g (given in the Fourier space)
+    !!  Apply the adjoint dielectric matrix I-chi0*vc to the density rho_r (given in the Fourier space)
     !!  with a model chi0 operator.
     !!
     !! INPUTS
     !!  dtset       = All input variables for this dataset.
     !!  mpi_enreg   = Information about MPI parallelization.
-    !!  rho_g       = Density vector (in G-space).
+    !!  rho_r       = Density vector (in direct space).
     !!
     !! OUTPUT
-    !!  adjdielmat_rho_g = adjdielmat * rho_g
+    !!  adjdielmat_rho_r = adjdielmat * rho_r
     !!
     !! NOTES
     !!
     !! SOURCE
-    subroutine apply_adjdielmat(this, dtset, mpi_enreg, rho_g, adjdielmat_rho_g)
+    subroutine apply_adjdielmat(this, dtset, mpi_enreg, rho_r, adjdielmat_rho_r)
 
         !Arguments ------------------------------------
         class(precon_object) :: this
@@ -2027,94 +2239,59 @@ contains
         type(dataset_type),intent(in) :: dtset
         type(MPI_type),intent(in) :: mpi_enreg
         !arrays
-        real(dp), intent(inout) :: rho_g(2, this%nfftprc, dtset%nspden)
-        real(dp), intent(out) :: adjdielmat_rho_g(2, this%nfftprc, dtset%nspden)
+        real(dp), intent(in) :: rho_r(this%nfftprc, dtset%nspden)
+        real(dp), intent(inout) :: adjdielmat_rho_r(this%nfftprc, dtset%nspden)
         !Local variables-------------------------------
-        integer :: ispden
-        real(dp), allocatable :: vec_r(:, :), Kxc_vec_r(:, :), chi0_diag_Kxc_rho_g(:, :, :)
+        real(dp), allocatable :: chi0_kxc_rho_r(:, :), kxc_rho_r(:, :)
         
         ! *************************************************************************
         write(6,*)'chi0diel apply_adjdielmat'; flush(6) !DEBUG
 
         if (this%iprcel == 200) then
         ! P=I : No preconditioning
-            adjdielmat_rho_g = rho_g
+            adjdielmat_rho_r = rho_r
 
         elseif (this%iprcel == 202) then
         ! More efficient implementation for the LDOS preconditioner.
-            adjdielmat_rho_g = rho_g
-            !Components G=0 set to 0
-            do ispden=1,dtset%nspden
-                adjdielmat_rho_g(:, 1, ispden) = 0
-            end do
-            !1)  Convert rho_g to the Pauli basis
-            call to_pauli(this, 1, adjdielmat_rho_g)
-            !1) Apply vc (in the Pauli basis)
-            call apply_vc(this, dtset, adjdielmat_rho_g)
-            !2) Apply chi0_ldos (in the Pauli basis)
-            call apply_chi0_ldos(this, dtset, mpi_enreg, adjdielmat_rho_g)
-            !4) adjdielmat_rho_g = rho_g - K * chi0 * rho_g = adjdielmat * rho_g
-            adjdielmat_rho_g = rho_g - adjdielmat_rho_g
-            !5) Convert adjdielmat_rho_g back to the default Abinit spin-basis
-            call from_pauli(this, 1, adjdielmat_rho_g)  
-            !Components G=0 unchanged (This is a security but I am not shure that it is usefull)
-            do ispden=1,dtset%nspden
-                adjdielmat_rho_g(:, 1, ispden) = rho_g(:, 1, ispden)
-            end do
+            call apply_adjdielmat_ldos(this, dtset, mpi_enreg, rho_r, adjdielmat_rho_r)
 
         elseif (this%iprcel == 203) then
         ! When iprcel = 203 , P = (I - chi0_ldos*vc - chi0_diag*Kxc)
             
-            !1) Compute adjdielmat_rho_g = rho_g - chi0_ldos * vc *rho_g
-            
-            ! Work in place in adjdielmat_rho_g
-            adjdielmat_rho_g = rho_g
-            !1.1) Convert vec_g to the Pauli basis
-            call to_pauli(this, 1, adjdielmat_rho_g)
-            !1.2) Apply vc (in place)
-            call apply_vc(this, dtset, adjdielmat_rho_g)
-            !1.3) Apply chi0_ldos (in place)
-            call apply_chi0_ldos(this, dtset, mpi_enreg, adjdielmat_rho_g)
-            !1.4) Convert vec_g back to the default Abinit spin-basis
-            call from_pauli(this, 1, adjdielmat_rho_g)
-            !1.5) adjdielmat_rho_g = rho_g - vc * chi0_ldos * rho_g = adjdielmat * rho_g
-            !adjdielmat_rho_g = rho_g - adjdielmat_rho_g
-            !DEBUG
+            !1) Compute adjdielmat_rho_r = rho_r - chi0_ldos * vc *rho_r
+            !call apply_adjdielmat_ldos(this, dtset, mpi_enreg, rho_r, adjdielmat_rho_r)
+            adjdielmat_rho_r = rho_r
 
-            !2) Add -(chi0_diag * Kxc * rho_g) to adjdielmat_rho_g
+            !2) Add -(chi0_diag * Kxc * rho_r) to adjdielmat_rho_r
+            ABI_MALLOC(kxc_rho_r, (this%nfftprc, dtset%nspden))
+            ABI_MALLOC(chi0_kxc_rho_r, (this%nfftprc, dtset%nspden))
             
-            !2.1) FFT to get rho_g in real space
-            ABI_MALLOC(vec_r, (this%nfftprc, dtset%nspden))
-            call fourdp(1, rho_g, vec_r, 1, mpi_enreg, this%nfftprc, dtset%nspden, this%ngfftprc, 0)
             !2.2) Apply Kxc to vec_r
-            ABI_MALLOC(Kxc_vec_r, (this%nfftprc, dtset%nspden))
-            call apply_kxc(this, dtset, mpi_enreg, vec_r, Kxc_vec_r)
-            ABI_FREE(vec_r)
-            !2.3) Apply chi0_diag to Kxc_vec_r (in place)
-            call apply_chi0_diag(this, dtset, mpi_enreg, Kxc_vec_r)
-            !2.4) IFFT to get chi0_diag*Kxc*rho_g in reciprocal (G) space
-            ABI_MALLOC(chi0_diag_Kxc_rho_g, (2, this%nfftprc, dtset%nspden))
-            call fourdp(1, chi0_diag_Kxc_rho_g, Kxc_vec_r, -1, mpi_enreg, this%nfftprc, dtset%nspden, this%ngfftprc, 0)
-            !2.5) Add this contribution to adjdielmat_rho_g
-            adjdielmat_rho_g = adjdielmat_rho_g - chi0_diag_Kxc_rho_g
-            ABI_FREE(Kxc_vec_r)
-            ABI_FREE(chi0_diag_Kxc_rho_g)
+            call apply_kxc(this, dtset, mpi_enreg, rho_r, kxc_rho_r)
+            !2.3) Apply chi0_deigvals + chi0_dfermie to Kxc*vec_r (in place)
+            chi0_kxc_rho_r = kxc_rho_r
+            call apply_chi0_deigvals(this, dtset, mpi_enreg, chi0_kxc_rho_r)
+            call apply_chi0_dfermie(this, dtset, mpi_enreg, kxc_rho_r)
+            chi0_kxc_rho_r = chi0_kxc_rho_r + kxc_rho_r
+            !2.5) Add this contribution to adjdielmat_rho_r
+            adjdielmat_rho_r = adjdielmat_rho_r - chi0_kxc_rho_r
+            
+            ABI_FREE(chi0_kxc_rho_r)
+            ABI_FREE(kxc_rho_r)
 
         else
         ! In the general case, P = (I - K*chi0_model) where K and chi0_model are defined 
         ! in the subroutine apply_kernel and apply_chi0 (depending on iprcel).
             
-            adjdielmat_rho_g = rho_g
+            adjdielmat_rho_r = rho_r
             !1) Apply the Kernel (vc or vc + Kxc depending on iprcel)
-            call apply_kernel(this, dtset, mpi_enreg, adjdielmat_rho_g)
+            call apply_kernel(this, dtset, mpi_enreg, adjdielmat_rho_r)
             !2) Applythe model chi0 operator
-            call apply_chi0(this, dtset, mpi_enreg, adjdielmat_rho_g)
-            !3) adjdielmat_rho_g = rho_g - K * chi0 * rho_g = adjdielmat * rho_g
-            adjdielmat_rho_g = rho_g - adjdielmat_rho_g
+            call apply_chi0(this, dtset, mpi_enreg, adjdielmat_rho_r)
+            !3) adjdielmat_rho_r = rho_r - K * chi0 * rho_r = adjdielmat * rho_r
+            adjdielmat_rho_r = rho_r - adjdielmat_rho_r
             
         end if
-        write(6,*)'chi0diel apply_adjdielmat - rho_g(:, 1:10, :)', rho_g(:, 1:10, :); flush(6) !DEBUG
-        write(6,*)'chi0diel apply_adjdielmat - dielmat_rho_g(:, 1:10, :)', adjdielmat_rho_g(:, 1:10, :); flush(6) !DEBUG
         
     end subroutine apply_adjdielmat
     !!***
@@ -2124,22 +2301,22 @@ contains
     !!  apply_dielmat
     !!
     !! FUNCTION
-    !!  Apply the dielectric matrix I-vc*chi0 to the potential v_g (given in the Fourier space) 
+    !!  Apply the dielectric matrix I-vc*chi0 to the potential v_r (given in the direct/real space), 
     !!  with a model chi0 operator (contained in precon).
     !!
     !! INPUTS
     !!  dtset       = All input variables for this dataset.
     !!  mpi_enreg   = Information about MPI parallelization.
-    !!  v_g         = Potential vector (in G-space)
-    !!                When nspden > 1 vec_g is in the default Abinit spin-basis.
+    !!  v_r         = Potential vector (in real space)
+    !!                When nspden > 1 vec_r is in the default Abinit spin-basis.
     !!
     !! OUTPUT
-    !!  dielmat_v_g = dielmat * v_g
+    !!  dielmat_v_r = dielmat * v_r
     !!
     !! NOTES
     !!
     !! SOURCE
-    subroutine apply_dielmat(this, dtset, mpi_enreg, v_g, dielmat_v_g)
+    subroutine apply_dielmat(this, dtset, mpi_enreg, v_r, dielmat_v_r)
     
         !Arguments ------------------------------------
         class(precon_object) :: this
@@ -2147,94 +2324,59 @@ contains
         type(dataset_type),intent(in) :: dtset
         type(MPI_type),intent(in) :: mpi_enreg
         !arrays
-        real(dp), intent(inout) ::  v_g(2, this%nfftprc, dtset%nspden)
-        real(dp), intent(out) :: dielmat_v_g(2, this%nfftprc, dtset%nspden)
+        real(dp), intent(in) ::  v_r(this%nfftprc, dtset%nspden)
+        real(dp), intent(inout) :: dielmat_v_r(this%nfftprc, dtset%nspden)
         !Local variables-------------------------------
-        integer :: ispden
-        real(dp), allocatable :: vec_r(:, :), Kxc_vec_r(:, :), Kxc_chi0_diag_v_g(:, :, :)
+        real(dp), allocatable :: kxc_chi0_v_r(:, :), chi0_v_r(:, :)
         
         ! *************************************************************************
         write(6,*)'chi0diel apply_dielmat'; flush(6) !DEBUG
 
         if (this%iprcel == 200) then
         ! P=I : No preconditioning
-            dielmat_v_g = v_g
+            dielmat_v_r = v_r
         
         elseif (this%iprcel == 202) then
         ! More efficient implementation for the LDOS preconditioner.
-            dielmat_v_g = v_g
-            !Components G=0 set to 0
-            do ispden=1,dtset%nspden
-                dielmat_v_g(:, 1, ispden) = 0
-            end do
-            !1)  Convert v_g to the Pauli basis
-            call to_pauli(this, 0, dielmat_v_g)  
-            !2) Apply chi0_ldos (in the Pauli basis)
-            call apply_chi0_ldos(this, dtset, mpi_enreg, dielmat_v_g)
-            !3) Apply vc (in the Pauli basis)
-            call apply_vc(this, dtset, dielmat_v_g)
-            !4) dielmat_v_g = v_g - K * chi0 * v_g = dielmat * v_g
-            dielmat_v_g = v_g - dielmat_v_g
-            !5) Convert dielmat_v_g back to the default Abinit spin-basis
-            call from_pauli(this, 0, dielmat_v_g)  
-            !Components G=0 unchanged (This is a security but I am not shure that it is usefull)
-            do ispden=1,dtset%nspden
-                dielmat_v_g(:, 1, ispden) = v_g(:, 1, ispden)
-            end do
+            call apply_dielmat_ldos(this, dtset, mpi_enreg, v_r, dielmat_v_r) 
 
         elseif (this%iprcel == 203) then
         ! When iprcel = 203 , P = (I - vc*chi0_ldos - Kxc*chi0_diag)
             
-            !1) Compute dielmat_v_g = v_g - vc * chi0_ldos *v_g
-            
-            ! Work in place in dielmat_v_g
-            dielmat_v_g = v_g
-            !1.1) Convert vec_g to the Pauli basis
-            call to_pauli(this, 0, dielmat_v_g)
-            !1.2) Apply chi0_ldos (in place)
-            call apply_chi0_ldos(this, dtset, mpi_enreg, dielmat_v_g)
-            !1.3) Apply vc (in place)
-            call apply_vc(this, dtset, dielmat_v_g)
-            !1.4) Convert vec_g back to the default Abinit spin-basis
-            call from_pauli(this, 0, dielmat_v_g)
-            !1.5) dielmat_v_g = v_g - vc * chi0_ldos * v_g = dielmat * v_g
-            !dielmat_v_g = v_g - dielmat_v_g
-            !DEBUG
+            !1) Compute dielmat_v_r = v_r - vc * chi0_ldos *v_r
+            dielmat_v_r = v_r
+            !call apply_dielmat_ldos(this, dtset, mpi_enreg, v_r, dielmat_v_r) 
 
-            !2) Add -(Kxc * chi0_diag * v_g) to dielmat_v_g
+            !2) Add -(Kxc * chi0_deigvals * v_r) to dielmat_v_r
             
-            !2.1) FFT to get v_g in real space
-            ABI_MALLOC(vec_r, (this%nfftprc, dtset%nspden))
-            call fourdp(1, v_g, vec_r, 1, mpi_enreg, this%nfftprc, dtset%nspden, this%ngfftprc, 0)
-            !2.2) Apply chi0_diag to vec_r (in place)
-            call apply_chi0_diag(this, dtset, mpi_enreg, vec_r)
-            !2.3) Apply Kxc to vec_r
-            ABI_MALLOC(Kxc_vec_r, (this%nfftprc, dtset%nspden))
-            call apply_kxc(this, dtset, mpi_enreg, vec_r, Kxc_vec_r)
-            ABI_FREE(vec_r)
-            !2.4) IFFT to get Kxc*chi0_diag*v_g in reciprocal (G) space
-            ABI_MALLOC(Kxc_chi0_diag_v_g, (2, this%nfftprc, dtset%nspden))
-            call fourdp(1, Kxc_chi0_diag_v_g, Kxc_vec_r, -1, mpi_enreg, this%nfftprc, dtset%nspden, this%ngfftprc, 0)
-            !2.5) Add this contribution to dielmat_v_g
-            dielmat_v_g = dielmat_v_g - Kxc_chi0_diag_v_g
-            ABI_FREE(Kxc_vec_r)
-            ABI_FREE(Kxc_chi0_diag_v_g)
+            !2.1) Apply chi0_deigvals + chi0_dfermie to v_r
+            ABI_MALLOC(kxc_chi0_v_r, (this%nfftprc, dtset%nspden))
+            ABI_MALLOC(chi0_v_r, (this%nfftprc, dtset%nspden))
+            kxc_chi0_v_r = v_r
+            chi0_v_r = v_r
+            call apply_chi0_deigvals(this, dtset, mpi_enreg, chi0_v_r)
+            call apply_chi0_dfermie(this, dtset, mpi_enreg, kxc_chi0_v_r)
+            chi0_v_r = kxc_chi0_v_r + chi0_v_r
+            !2.2) Apply Kxc to chi0*v_r
+            call apply_kxc(this, dtset, mpi_enreg, chi0_v_r, kxc_chi0_v_r)
+            !2.3) Add this contribution to dielmat_v_r
+            dielmat_v_r = dielmat_v_r - kxc_chi0_v_r
+            ABI_FREE(kxc_chi0_v_r)
+            ABI_FREE(chi0_v_r)
 
         else
         ! In the general case, P = (I - K*chi0_model) where K and chi0_model are defined 
         ! in the subroutine apply_kernel and apply_chi0 (depending on iprcel).
             
-            dielmat_v_g = v_g
-            !1) Applythe model chi0 operator
-            call apply_chi0(this, dtset, mpi_enreg, dielmat_v_g)
+            dielmat_v_r = v_r
+            !1) Apply the model chi0 operator
+            call apply_chi0(this, dtset, mpi_enreg, dielmat_v_r)
             !2) Apply the Kernel (vc or vc + Kxc depending on iprcel)
-            call apply_kernel(this, dtset, mpi_enreg, dielmat_v_g)
-            !3) dielmat_v_g = v_g - K * chi0 * v_g = dielmat * v_g
-            dielmat_v_g = v_g - dielmat_v_g
+            call apply_kernel(this, dtset, mpi_enreg, dielmat_v_r)
+            !3) dielmat_v_r = v_r - K * chi0 * v_r = dielmat * v_r
+            dielmat_v_r = v_r - dielmat_v_r
             
         end if
-        !write(6,*)'chi0diel apply_dielmat - v_g(:, 1:10, :)', v_g(:, 1:10, :); flush(6) !DEBUG
-        !write(6,*)'chi0diel apply_dielmat - dielmat_v_g(:, 1:10, :)', dielmat_v_g(:, 1:10, :); flush(6) !DEBUG
         
     end subroutine apply_dielmat
     !!***
@@ -2257,7 +2399,6 @@ contains
     !!
     !! INPUTS
     !!  dtset      = All input variables for this dataset.
-    !!  cplex      = Integer flag indicating whether the input is complex.
     !!  mpi_enreg  = Information about MPI parallelization.
     !!  optreal    = Integer flag indicating whether the input is in real space (1) or reciprocal space (2).
     !!  optres     = Integer flag indicating whether we are preconditioning densities (1) or potentials (0).
@@ -2271,12 +2412,12 @@ contains
     !!  in the rest of this file, to match the shape needed in 'm_prcref'.
     !!
     !! SOURCE
-    subroutine apply_precon(this, dtset, cplex, mpi_enreg, optreal, optres, vresid, vrespc)
+    subroutine apply_precon(this, dtset, mpi_enreg, optreal, optres, vresid, vrespc)
         !Arguments ------------------------------------
         class(precon_object), intent(in) :: this
         type(dataset_type),intent(in) :: dtset
         type(MPI_type),intent(in) :: mpi_enreg
-        integer :: cplex, optreal, optres
+        integer :: optreal, optres
         !arrays
         real(dp), intent(in) :: vresid(optreal*this%nfftprc, dtset%nspden)
         real(dp), intent(inout) :: vrespc(optreal*this%nfftprc, dtset%nspden)
@@ -2286,82 +2427,89 @@ contains
         !arrays
         real(dp), allocatable :: rhs(:), est(:), P_rhs(:)
         real(dp), allocatable :: work_g(:, :, :)
-        real(dp) :: test1(2, this%nfftprc, dtset%nspden), test2(2, this%nfftprc, dtset%nspden)
-        real(dp) :: diel_test1(2, this%nfftprc, dtset%nspden), diel_test2(2, this%nfftprc, dtset%nspden)
-        real(dp) :: adjdiel_test1(2, this%nfftprc, dtset%nspden), adjdiel_test2(2, this%nfftprc, dtset%nspden)
-        real(dp) :: vc_test1(2, this%nfftprc, dtset%nspden), vc_test2(2, this%nfftprc, dtset%nspden)
-        real(dp) :: chi0ldos_test1(2, this%nfftprc, dtset%nspden), chi0ldos_test2(2, this%nfftprc, dtset%nspden)
-        real(dp) :: chi0diag_test1(this%nfftprc, dtset%nspden), chi0diag_test2(this%nfftprc, dtset%nspden)
+
+        !DEBUG
+        real(dp) :: test1(this%nfftprc, dtset%nspden), test2(this%nfftprc, dtset%nspden)
+        real(dp) :: diel_test1(this%nfftprc, dtset%nspden), diel_test2(this%nfftprc, dtset%nspden)
+        real(dp) :: adjdiel_test1(this%nfftprc, dtset%nspden), adjdiel_test2(this%nfftprc, dtset%nspden)
+        real(dp) :: Kxc_test1(this%nfftprc, dtset%nspden), Kxc_test2(this%nfftprc, dtset%nspden)
+        real(dp) :: chi0diel_test1(this%nfftprc, dtset%nspden), chi0diel_test2(this%nfftprc, dtset%nspden)
+        real(dp) :: chi0diel_Kxc_test1(this%nfftprc, dtset%nspden), chi0diel_Kxc_test2(this%nfftprc, dtset%nspden)
+        real(dp) :: Kxc_chi0diel_test1(this%nfftprc, dtset%nspden), Kxc_chi0diel_test2(this%nfftprc, dtset%nspden)
 
         ! *************************************************************************
 
         ! The preconditioned density/potential residual vrespc = P^-1 * vresid is computed 
-        ! by soling the linear equation P * vrespc = vresid approximately with GMRES.
+        ! by sovling the linear equation P * vrespc = vresid approximately with GMRES.
 
-        n = dtset%nspden*2*this%nfftprc
+        n = dtset%nspden*1*this%nfftprc
         
-        !0) Convert the input to Fourier space if needed.
-        if (optreal==1) then
-            ! vresid is given in the real space : We need to do a fft.
-            vrespc = vresid     ! We use vrespc as input for fourdp because the input needs to be 'inout'.
-            ABI_MALLOC(work_g, (2, this%nfftprc, dtset%nspden))     ! TODO : Do without work_g ? (Use c-pointers to deal with the shape disparities)
-            call fourdp(cplex, work_g, vrespc, -1, mpi_enreg, this%nfftprc, dtset%nspden, this%ngfftprc, 0)
+        !0) Convert the input to direct/real space if needed.
+        if (optreal==0) then
+            ! vresid is given in the Fourier space : We need to do a ifft.
+            ! TODO : Is passing vresid directly ok ? It does not have the required shape ((2*nfft, nspden) for (2, nfft, nspden))
+            ABI_MALLOC(work_g, (2, this%nfftprc, dtset%nspden))
+            work_g = reshape(vresid, (/2,this%nfftprc, dtset%nspden/))
+            call fourdp(1, work_g, vrespc(1:n, :), 1, mpi_enreg, this%nfftprc, dtset%nspden, this%ngfftprc, 0)
         end if
 
-        !1) Right-hand side : rhs is vresid (flattened) in the Fourier space.
+        !1) Right-hand side : rhs is vresid (flattened) in the direct/real space.
         ABI_MALLOC(rhs, (n))
         write(6,*)'chi0diel apply_precon 0'; flush(6) !DEBUG
         do ispden = 1, dtset%nspden
-            ! Indices of the ispden component in the flattened (2, this%nfftprc, dtset%nspden)-array 'rhs'.
-            start_ispden = 1+(ispden-1)*2*this%nfftprc
-            end_ispden = ispden*2*this%nfftprc
+            ! Indices of the ispden component in the flattened (this%nfftprc, dtset%nspden)-array 'rhs'.
+            start_ispden = 1+(ispden-1)*this%nfftprc
+            end_ispden = ispden*this%nfftprc
             if (optreal==1) then
-                rhs(start_ispden:end_ispden) = reshape(work_g(:, :, ispden), (/2*this%nfftprc/))
+                ! vresid is already given in direct space
+                rhs(start_ispden:end_ispden) = vresid(:, ispden)
             else
-                ! vresid is already given in the Fourier space.
-                rhs(start_ispden:end_ispden) = vresid(:, ispden) 
+                ! vresid is given in the Fourier space, we have stored its ifft in vrespc.
+                rhs(start_ispden:end_ispden) = vrespc(1:n, ispden)! TODO
             end if
         end do
 
-        if (optreal==1) then
-            ABI_FREE(work_g)
-        end if
-       
         !2) Initial guess :
         ABI_MALLOC(est, (n))
         est = 0
         !est = rhs
         ! Is est = rhs a better starting point ?
 
-        ! TODO : work in Pauli or tot/spin basis for nspden>2 because the operators are not self-adjoint in the default abinit basis.
         call random_number(test1)
         call random_number(test2)
         call apply_dielmat(this, dtset, mpi_enreg, test1, diel_test1)
         call apply_dielmat(this, dtset, mpi_enreg, test2, diel_test2)
         call apply_adjdielmat(this, dtset, mpi_enreg, test1, adjdiel_test1)
         call apply_adjdielmat(this, dtset, mpi_enreg, test2, adjdiel_test2)
-        vc_test1 = test1
-        vc_test2 = test2
-        call apply_vc(this, dtset, vc_test1)
-        call apply_vc(this, dtset, vc_test2)
-        chi0ldos_test1 = test1
-        chi0ldos_test2 = test2
-        call apply_chi0_ldos(this, dtset, mpi_enreg, chi0ldos_test1)
-        call apply_chi0_ldos(this, dtset, mpi_enreg, chi0ldos_test2)
-        chi0diag_test1 = test1(1, :, :)
-        chi0diag_test2 = test2(1, :, :)
-        call apply_chi0_diag(this, dtset, mpi_enreg, chi0diag_test1)
-        call apply_chi0_diag(this, dtset, mpi_enreg, chi0diag_test2)
+        call apply_kxc(this, dtset, mpi_enreg, test1, Kxc_test1)
+        call apply_kxc(this, dtset, mpi_enreg, test2, Kxc_test2)
+        chi0diel_test1 = test1
+        chi0diel_test2 = test2
+        call apply_chi0_deigvals(this, dtset, mpi_enreg, chi0diel_test1)
+        call apply_chi0_deigvals(this, dtset, mpi_enreg, chi0diel_test2)
+        chi0diel_kxc_test1 = kxc_test1
+        chi0diel_kxc_test2 = kxc_test2
+        call apply_chi0_deigvals(this, dtset, mpi_enreg, chi0diel_kxc_test1)
+        call apply_chi0_deigvals(this, dtset, mpi_enreg, chi0diel_kxc_test2)
+        call apply_kxc(this, dtset, mpi_enreg, chi0diel_test1, Kxc_chi0diel_test1)
+        call apply_kxc(this, dtset, mpi_enreg, chi0diel_test2, Kxc_chi0diel_test2)
+
         write(6,*)'chi0diel apply_precon dot_product(test2, adjdiel_test1), dot_product(diel_test2, test1)', dot_product(reshape(test2, (/n/)), reshape(adjdiel_test1, (/n/))), dot_product(reshape(diel_test2, (/n/)), reshape(test1, (/n/))); flush(6) !DEBUG
         write(6,*)'chi0diel apply_precon dot_product(adjdiel_test2, test1), dot_product(test2, diel_test1), ', dot_product(reshape(adjdiel_test2, (/n/)), reshape(test1, (/n/))), dot_product(reshape(test2, (/n/)), reshape(diel_test1, (/n/))); flush(6) !DEBUG
-        write(6,*)'chi0diel apply_precon dot_product(vc_test2, test1), dot_product(test2, vc_test1), ', dot_product(reshape(vc_test2, (/n/)), reshape(test1, (/n/))), dot_product(reshape(test2, (/n/)), reshape(vc_test1, (/n/))); flush(6) !DEBUG
-        write(6,*)'chi0diel apply_precon dot_product(chi0ldos_test2, test1), dot_product(test2, chi0ldos_test1), ', dot_product(reshape(chi0ldos_test2, (/n/)), reshape(test1, (/n/))), dot_product(reshape(test2, (/n/)), reshape(chi0ldos_test1, (/n/))); flush(6) !DEBUG
-        write(6,*)'chi0diel apply_precon dot_product(chi0diag_test2, test1), dot_product(test2, chi0diag_test1), ', dot_product(reshape(chi0diag_test2, (/n/2/)), reshape(test1(1, :, :), (/n/2/))), dot_product(reshape(test2(1, :, :), (/n/2/)), reshape(chi0diag_test1, (/n/2/))); flush(6) !DEBUG
+        write(6,*)'chi0diel apply_precon dot_product(test1, Kxc_test2), dot_product(Kxc_test1, test2)', dot_product(reshape(test1, (/n/)), reshape(Kxc_test2, (/n/))), dot_product(reshape(Kxc_test1, (/n/)), reshape(test2, (/n/))); flush(6) !DEBUG
+        write(6,*)'chi0diel apply_precon dot_product(test1, chi0diel_test2), dot_product(chi0diel_test1, test2)', dot_product(reshape(test1, (/n/)), reshape(chi0diel_test2, (/n/))), dot_product(reshape(chi0diel_test1, (/n/)), reshape(test2, (/n/))); flush(6) !DEBUG
+        write(6,*)'chi0diel apply_precon dot_product(test1, chi0diel_kxc_test2), dot_product(chi0diel_kxc_test1, test2)', dot_product(reshape(test1, (/n/)), reshape(chi0diel_kxc_test2, (/n/))), dot_product(reshape(chi0diel_kxc_test1, (/n/)), reshape(test2, (/n/))); flush(6) !DEBUG
+        write(6,*)'chi0diel apply_precon dot_product(Kxc_chi0diel_test1, test2), dot_product(test1, Kxc_chi0diel_test2)', dot_product(reshape(Kxc_chi0diel_test1, (/n/)), reshape(test2, (/n/))), dot_product(reshape(test1, (/n/)), reshape(Kxc_chi0diel_test2, (/n/))); flush(6) !DEBUG
+        write(6,*)'chi0diel apply_precon dot_product(test1, test2-chi0diel_kxc_test2), dot_product(test1-chi0diel_kxc_test1, test2)', dot_product(reshape(test1, (/n/)), reshape(test2-chi0diel_kxc_test2, (/n/))), dot_product(reshape(test1-chi0diel_kxc_test1, (/n/)), reshape(test2, (/n/))); flush(6) !DEBUG
+        write(6,*)'chi0diel apply_precon dot_product(test1-Kxc_chi0diel_test1, test2), dot_product(test1, test2-Kxc_chi0diel_test2)', dot_product(reshape(test1-Kxc_chi0diel_test1, (/n/)), reshape(test2, (/n/))), dot_product(reshape(test1, (/n/)), reshape(test2-Kxc_chi0diel_test2, (/n/))); flush(6) !DEBUG
+
+        write(6,*)'chi0diel apply_precon norm2(Kxc_test1-Kxc_test2), norm2(kxc_chi0diel_test1-Kxc_test1)', norm2(Kxc_test1-Kxc_test2), norm2(kxc_chi0diel_test1-Kxc_test1); flush(6) !DEBUG
 
         !3) Resolution of the linear system :
             write(6,*)'chi0diel linsolve : '; flush(6) !DEBUG
         if (.not. this%is_posdef) then
             write(6,*)'chi0diel linsolve with CG'; flush(6) !DEBUG
+            ! P is ill-conditionned :
             ! Ridge/Tikhonov regularization and CG : 
             ! We solve (P^*P + ridge_param*I) * est = P * rhs
             ! (P^*P + ridge_param*I) is self-adjoint and can be solved with CG.
@@ -2370,6 +2518,7 @@ contains
             call cg_linear_solver(n, ridge_matvec, P_rhs, est, (this%linsolve_maxiter-1)/2+1, this%linsolve_rtol)
             ABI_FREE(P_rhs)
         else
+            ! P is well conditionned :
             ! GMRES (P is not self-adjoint)
             write(6,*)'chi0diel linsolve with GMRES'; flush(6) !DEBUG
             call gmres_linear_solver(n, matvec, rhs, est, this%linsolve_maxiter, this%linsolve_rtol)
@@ -2378,15 +2527,18 @@ contains
        
        !4) Reshaping the final result :
         do ispden = 1, dtset%nspden
-            ! Indices of the ispden component in the flattened (2, this%nfftprc, dtset%nspden)-array 'est'.
-            start_ispden = 1+(ispden-1)*2*this%nfftprc
-            end_ispden = ispden*2*this%nfftprc
+            ! Indices of the ispden component in the flattened (this%nfftprc, dtset%nspden)-array 'est'.
+            start_ispden = 1+(ispden-1)*this%nfftprc
+            end_ispden = ispden*this%nfftprc
             if (optreal==1) then
-                ! vrespc must be returned in the real space : We need to do a ifft. 
-                call fourdp(cplex, est(start_ispden:end_ispden), vrespc(:, ispden), 1, mpi_enreg, this%nfftprc, 1, this%ngfftprc, 0)
-            else
-                ! vrespc must be returned in the fourier space.
+                ! vrespc must be returned in the direct/real space.
                 vrespc(:, ispden) = est(start_ispden:end_ispden)
+            else
+                ! vrespc must be returned in the fourier space, we need to do a fft.
+                call fourdp(1, work_g, est(start_ispden:end_ispden), -1, mpi_enreg, this%nfftprc, 1, this%ngfftprc, 0)
+                vrespc = reshape(work_g, (/2*this%nfftprc, dtset%nspden/))
+                ! TODO :  the ffts could be donne in parallel
+                ! TODO :  using work_g could maybe be avoided using c-pointers
             end if
         end do
        
@@ -2401,23 +2553,23 @@ contains
             integer, intent(in) :: n_
             real(dp), intent(inout), target :: x(n_), y(n_)
             type(c_ptr) :: x_c, y_c
-            real(dp), pointer :: x_3d(:, :, :), y_3d(:, :, :)
+            real(dp), pointer :: x_2d(:, :), y_2d(:, :)
         
         ! **********************************************************************************
         
             ! C-pointers to match the flattened arrays x and y to their 3D versions needed by
             ! 'apply_adjdielmat' and 'apply_dielmat'.
             x_c = c_loc(x)
-            call c_f_pointer(x_c, x_3d, shape=[2, this%nfftprc, dtset%nspden])
+            call c_f_pointer(x_c, x_2d, shape=[this%nfftprc, dtset%nspden])
             y_c = c_loc(y)
-            call c_f_pointer(y_c, y_3d, shape=[2, this%nfftprc, dtset%nspden])
+            call c_f_pointer(y_c, y_2d, shape=[this%nfftprc, dtset%nspden])
         
             if (optres==1) then
                 ! We are preconditioning density residual so P models the adjoint dielectric matrix.
-                call this%apply_adjdielmat(dtset, mpi_enreg, x_3d, y_3d)
+                call this%apply_adjdielmat(dtset, mpi_enreg, x_2d, y_2d)
             else if (optres==0) then
                 ! We are preconditioning potential residual so P models the dielectric matrix.
-                call this%apply_dielmat(dtset, mpi_enreg, x_3d, y_3d)
+                call this%apply_dielmat(dtset, mpi_enreg, x_2d, y_2d)
             end if
         
         end subroutine matvec ! ------------------------------------------------------------
@@ -2427,31 +2579,31 @@ contains
             integer, intent(in) :: n_
             real(dp), intent(inout), target :: x(n_), y(n_)
             type(c_ptr) :: x_c, y_c
-            real(dp), pointer :: x_3d(:, :, :), y_3d(:, :, :), temp_3d(:, :, :)
+            real(dp), pointer :: x_2d(:, :), y_2d(:, :), temp_2d(:, :)
         
         ! **********************************************************************************
         
             ! C pointers to match the flattened arrays x and y to their 3D versions needed by
             ! 'apply_adjdielmat' and 'apply_dielmat'.
             x_c = c_loc(x)
-            call c_f_pointer(x_c, x_3d, shape=[2, this%nfftprc, dtset%nspden])
+            call c_f_pointer(x_c, x_2d, shape=[this%nfftprc, dtset%nspden])
             y_c = c_loc(y)
-            call c_f_pointer(y_c, y_3d, shape=[2, this%nfftprc, dtset%nspden])
-            ABI_MALLOC(temp_3d, (2, this%nfftprc, dtset%nspden))  ! Temporary array for intermediate result
+            call c_f_pointer(y_c, y_2d, shape=[this%nfftprc, dtset%nspden])
+            ABI_MALLOC(temp_2d, (this%nfftprc, dtset%nspden))  ! Temporary array for intermediate result
         
             if (optres==1) then
                 ! We are preconditioning density residual so P models the adjoint dielectric matrix.
-                call this%apply_adjdielmat(dtset, mpi_enreg, x_3d, temp_3d)
-                call this%apply_dielmat(dtset, mpi_enreg, temp_3d, y_3d)
+                call this%apply_adjdielmat(dtset, mpi_enreg, x_2d, temp_2d)
+                call this%apply_dielmat(dtset, mpi_enreg, temp_2d, y_2d)
             else if (optres==0) then
                 ! We are preconditioning potential residual so P models the dielectric matrix.
-                call this%apply_dielmat(dtset, mpi_enreg, x_3d, temp_3d)
-                call this%apply_adjdielmat(dtset, mpi_enreg, temp_3d, y_3d)
+                call this%apply_dielmat(dtset, mpi_enreg, x_2d, temp_2d)
+                call this%apply_adjdielmat(dtset, mpi_enreg, temp_2d, y_2d)
             end if
-            y_3d = y_3d + this%ridge_param*x_3d
-            ABI_FREE(temp_3d)
+            y_2d = y_2d + this%ridge_param*x_2d
+            ABI_FREE(temp_2d)
 
-         end subroutine ridge_matvec ! ---------------------------------------------------------
+        end subroutine ridge_matvec ! ---------------------------------------------------------
         
     end subroutine apply_precon
 
