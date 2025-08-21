@@ -456,8 +456,7 @@ subroutine prcref(atindx,dielar,dielinv,&
      ABI_FREE(work2)
 
    else if (dtset%iprcel>=200 .and. dtset%iprcel<300) then
-      cplex=optreal
-      call chi0diel(precon, dtset, cplex, mpi_enreg, optreal, optres, vresid, vrespc)
+      call chi0diel(precon, dtset, mpi_enreg, optreal, optres, vresid, vrespc)
 !    Other choice ?
  
    else
@@ -1109,8 +1108,7 @@ end subroutine prcref
      ABI_FREE(work2)
 
    else if (dtset%iprcel>=200 .and. dtset%iprcel<300) then
-     cplex=optreal
-     call chi0diel(precon, dtset, cplex, mpi_enreg, optreal, optres, vresid, vrespc)
+     call chi0diel(precon, dtset, mpi_enreg, optreal, optres, vresid, vrespc)
  
 !    Other choice ?
    else
@@ -2397,7 +2395,6 @@ end subroutine dieltcel
 !! INPUTS
 !!  precon        = precon_object that contain the model chi0 operator.
 !!  dtset         = All input variables for this dataset.
-!!  cplex         = If 1, vresid is REAL, if 2, vresid is COMPLEX.
 !!  mpi_enreg     = Information about MPI parallelization.
 !!  optreal       = 1: vresid is given in the REAL space.
 !!                  2: vresid is given in the RECIPROCAL space.
@@ -2412,12 +2409,12 @@ end subroutine dieltcel
 !!
 !! SOURCE
 
-subroutine chi0diel(precon, dtset, cplex, mpi_enreg, optreal, optres, vresid, vrespc)
+subroutine chi0diel(precon, dtset, mpi_enreg, optreal, optres, vresid, vrespc)
 
 !Arguments ------------------------------------
  type(precon_object) :: precon
 !scalars
- integer,intent(in) :: cplex, optreal, optres
+ integer,intent(in) :: optreal, optres
  type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
 !arrays
@@ -2431,7 +2428,7 @@ subroutine chi0diel(precon, dtset, cplex, mpi_enreg, optreal, optres, vresid, vr
  !  ABI_BUG("chi0-based preconditioning (chi0diel) used with fft-grid parallelization")
  !end if
 
- call precon%apply_precon(dtset, cplex, mpi_enreg, optreal, optres, vresid, vrespc)
+ call precon%apply_precon(dtset, mpi_enreg, optreal, optres, vresid, vrespc)
 
  !Simple mixing : TODO diemixmag
  vrespc = precon%diemix * vrespc
