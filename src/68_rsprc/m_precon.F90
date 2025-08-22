@@ -82,7 +82,7 @@ module m_precon
         !Logical variables :
         logical :: use_ldos
         logical :: use_kxc
-        logical :: is_posdef
+        logical :: use_ridgereg
 
         !For LDOS preconditioner :
         real(dp) :: tdos
@@ -221,9 +221,8 @@ contains
             this%use_kxc = .false.                      ! this%use_kxc = .true. activates the use of the exchange and correlation kernel.
                                                         ! If this%use_kxc = .false. the RPA will be used.
             if (this%iprcel == 203) this%use_kxc = .true.
-            this%is_posdef = .true.                     ! this%is_posdef = .false. activates the use of an adapted linear solver.
-            if (this%iprcel == 203) this%is_posdef = .false.
-            this%is_posdef = .false.    !DEBUG
+            this%use_ridgereg = .false.                     ! this%use_ridgereg = .false. activates the use of an adapted linear solver.
+            if (this%iprcel == 203) this%use_ridgereg = .true.
             ! Other than here, iprcel is only used in apply_chi0, apply_dielmat and apply_adjdielmat.
             
             !PAW :
@@ -2259,8 +2258,7 @@ contains
         ! When iprcel = 203 , P = (I - chi0_ldos*vc - chi0_diag*Kxc)
             
             !1) Compute adjdielmat_rho_r = rho_r - chi0_ldos * vc *rho_r
-            !call apply_adjdielmat_ldos(this, dtset, mpi_enreg, rho_r, adjdielmat_rho_r)
-            adjdielmat_rho_r = rho_r
+            call apply_adjdielmat_ldos(this, dtset, mpi_enreg, rho_r, adjdielmat_rho_r)
 
             !2) Add -(chi0_diag * Kxc * rho_r) to adjdielmat_rho_r
             ABI_MALLOC(kxc_rho_r, (this%nfftprc, dtset%nspden))
@@ -2344,8 +2342,7 @@ contains
         ! When iprcel = 203 , P = (I - vc*chi0_ldos - Kxc*chi0_diag)
             
             !1) Compute dielmat_v_r = v_r - vc * chi0_ldos *v_r
-            dielmat_v_r = v_r
-            !call apply_dielmat_ldos(this, dtset, mpi_enreg, v_r, dielmat_v_r) 
+            call apply_dielmat_ldos(this, dtset, mpi_enreg, v_r, dielmat_v_r) 
 
             !2) Add -(Kxc * chi0_deigvals * v_r) to dielmat_v_r
             
@@ -2428,15 +2425,6 @@ contains
         real(dp), allocatable :: rhs(:), est(:), P_rhs(:)
         real(dp), allocatable :: work_g(:, :, :)
 
-        !DEBUG
-        real(dp) :: test1(this%nfftprc, dtset%nspden), test2(this%nfftprc, dtset%nspden)
-        real(dp) :: diel_test1(this%nfftprc, dtset%nspden), diel_test2(this%nfftprc, dtset%nspden)
-        real(dp) :: adjdiel_test1(this%nfftprc, dtset%nspden), adjdiel_test2(this%nfftprc, dtset%nspden)
-        real(dp) :: Kxc_test1(this%nfftprc, dtset%nspden), Kxc_test2(this%nfftprc, dtset%nspden)
-        real(dp) :: chi0diel_test1(this%nfftprc, dtset%nspden), chi0diel_test2(this%nfftprc, dtset%nspden)
-        real(dp) :: chi0diel_Kxc_test1(this%nfftprc, dtset%nspden), chi0diel_Kxc_test2(this%nfftprc, dtset%nspden)
-        real(dp) :: Kxc_chi0diel_test1(this%nfftprc, dtset%nspden), Kxc_chi0diel_test2(this%nfftprc, dtset%nspden)
-
         ! *************************************************************************
 
         ! The preconditioned density/potential residual vrespc = P^-1 * vresid is computed 
@@ -2475,39 +2463,9 @@ contains
         !est = rhs
         ! Is est = rhs a better starting point ?
 
-        call random_number(test1)
-        call random_number(test2)
-        call apply_dielmat(this, dtset, mpi_enreg, test1, diel_test1)
-        call apply_dielmat(this, dtset, mpi_enreg, test2, diel_test2)
-        call apply_adjdielmat(this, dtset, mpi_enreg, test1, adjdiel_test1)
-        call apply_adjdielmat(this, dtset, mpi_enreg, test2, adjdiel_test2)
-        call apply_kxc(this, dtset, mpi_enreg, test1, Kxc_test1)
-        call apply_kxc(this, dtset, mpi_enreg, test2, Kxc_test2)
-        chi0diel_test1 = test1
-        chi0diel_test2 = test2
-        call apply_chi0_deigvals(this, dtset, mpi_enreg, chi0diel_test1)
-        call apply_chi0_deigvals(this, dtset, mpi_enreg, chi0diel_test2)
-        chi0diel_kxc_test1 = kxc_test1
-        chi0diel_kxc_test2 = kxc_test2
-        call apply_chi0_deigvals(this, dtset, mpi_enreg, chi0diel_kxc_test1)
-        call apply_chi0_deigvals(this, dtset, mpi_enreg, chi0diel_kxc_test2)
-        call apply_kxc(this, dtset, mpi_enreg, chi0diel_test1, Kxc_chi0diel_test1)
-        call apply_kxc(this, dtset, mpi_enreg, chi0diel_test2, Kxc_chi0diel_test2)
-
-        write(6,*)'chi0diel apply_precon dot_product(test2, adjdiel_test1), dot_product(diel_test2, test1)', dot_product(reshape(test2, (/n/)), reshape(adjdiel_test1, (/n/))), dot_product(reshape(diel_test2, (/n/)), reshape(test1, (/n/))); flush(6) !DEBUG
-        write(6,*)'chi0diel apply_precon dot_product(adjdiel_test2, test1), dot_product(test2, diel_test1), ', dot_product(reshape(adjdiel_test2, (/n/)), reshape(test1, (/n/))), dot_product(reshape(test2, (/n/)), reshape(diel_test1, (/n/))); flush(6) !DEBUG
-        write(6,*)'chi0diel apply_precon dot_product(test1, Kxc_test2), dot_product(Kxc_test1, test2)', dot_product(reshape(test1, (/n/)), reshape(Kxc_test2, (/n/))), dot_product(reshape(Kxc_test1, (/n/)), reshape(test2, (/n/))); flush(6) !DEBUG
-        write(6,*)'chi0diel apply_precon dot_product(test1, chi0diel_test2), dot_product(chi0diel_test1, test2)', dot_product(reshape(test1, (/n/)), reshape(chi0diel_test2, (/n/))), dot_product(reshape(chi0diel_test1, (/n/)), reshape(test2, (/n/))); flush(6) !DEBUG
-        write(6,*)'chi0diel apply_precon dot_product(test1, chi0diel_kxc_test2), dot_product(chi0diel_kxc_test1, test2)', dot_product(reshape(test1, (/n/)), reshape(chi0diel_kxc_test2, (/n/))), dot_product(reshape(chi0diel_kxc_test1, (/n/)), reshape(test2, (/n/))); flush(6) !DEBUG
-        write(6,*)'chi0diel apply_precon dot_product(Kxc_chi0diel_test1, test2), dot_product(test1, Kxc_chi0diel_test2)', dot_product(reshape(Kxc_chi0diel_test1, (/n/)), reshape(test2, (/n/))), dot_product(reshape(test1, (/n/)), reshape(Kxc_chi0diel_test2, (/n/))); flush(6) !DEBUG
-        write(6,*)'chi0diel apply_precon dot_product(test1, test2-chi0diel_kxc_test2), dot_product(test1-chi0diel_kxc_test1, test2)', dot_product(reshape(test1, (/n/)), reshape(test2-chi0diel_kxc_test2, (/n/))), dot_product(reshape(test1-chi0diel_kxc_test1, (/n/)), reshape(test2, (/n/))); flush(6) !DEBUG
-        write(6,*)'chi0diel apply_precon dot_product(test1-Kxc_chi0diel_test1, test2), dot_product(test1, test2-Kxc_chi0diel_test2)', dot_product(reshape(test1-Kxc_chi0diel_test1, (/n/)), reshape(test2, (/n/))), dot_product(reshape(test1, (/n/)), reshape(test2-Kxc_chi0diel_test2, (/n/))); flush(6) !DEBUG
-
-        write(6,*)'chi0diel apply_precon norm2(Kxc_test1-Kxc_test2), norm2(kxc_chi0diel_test1-Kxc_test1)', norm2(Kxc_test1-Kxc_test2), norm2(kxc_chi0diel_test1-Kxc_test1); flush(6) !DEBUG
-
         !3) Resolution of the linear system :
             write(6,*)'chi0diel linsolve : '; flush(6) !DEBUG
-        if (.not. this%is_posdef) then
+        if (this%use_ridgereg) then
             write(6,*)'chi0diel linsolve with CG'; flush(6) !DEBUG
             ! P is ill-conditionned :
             ! Ridge/Tikhonov regularization and CG : 
