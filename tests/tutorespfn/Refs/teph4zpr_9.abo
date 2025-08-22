@@ -1,8 +1,8 @@
 
 .Version 10.1.6.1 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a aarch64_darwin23.6.0_gnu14.2 computer) 
+.(MPI version, prepared for a aarch64_darwin23.6.0_gnu14.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Sat 28 Sep 2024.
 - ( at 13h48 )
-  
+
 - input  file    -> /Users/giantomassi/git_repos/abinit/_build/tests/Test_suite/tutorespfn_teph4zpr_1-teph4zpr_2-teph4zpr_3-teph4zpr_4-teph4zpr_5-teph4zpr_6-teph4zpr_7-teph4zpr_8-teph4zpr_9/teph4zpr_9.abi
 - output file    -> teph4zpr_9.abo
 - root for input  files -> teph4zpr_9i
@@ -264,11 +264,11 @@ meta: {optdriver: 7, eph_task: 18, }
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -284,7 +284,7 @@ meta: {optdriver: 7, eph_task: 18, }
        3               2       -0.000000        0.000000
        3               3       -0.085945        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -487,15 +487,15 @@ qpoints:
      1     1     1     1     0.000000E+00
      2     1     1     1     0.000000E+00
      3     1     1     1     0.000000E+00
-     4     1     1     1     1.137653E-04
-     5     1     1     1     1.975894E-04
-     6     1     1     1     2.293568E-05
+     4     1     1     1     1.116081E-04
+     5     1     1     1     1.979283E-04
+     6     1     1     1     1.803285E-05
      1    42     1     1     0.000000E+00
      2    42     1     1     0.000000E+00
      3    42     1     1     0.000000E+00
-     4    42     1     1     1.137653E-04
-     5    42     1     1     1.975894E-04
-     6    42     1     1     2.293568E-05
+     4    42     1     1     1.116081E-04
+     5    42     1     1     1.979283E-04
+     6    42     1     1     1.803285E-05
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -546,11 +546,11 @@ meta: {optdriver: 7, eph_task: 18, }
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -566,7 +566,7 @@ meta: {optdriver: 7, eph_task: 18, }
        3               2       -0.000000        0.000000
        3               3       -0.085945        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -746,14 +746,14 @@ qpoints:
 
  Writing sqrt(1/N_b^2 \sum_{mn} |g_{mn,nu}(k, q)|^2) in meV for testing purpose.
     nu    iq    ik  spin       |g| in meV
-     1     1     1     1     2.052242E+01
-     2     1     1     1     2.052179E+01
-     3     1     1     1     4.203240E+01
-     4     1     1     1     1.140998E+01
-     5     1     1     1     1.140998E+01
-     6     1     1     1     5.872131E+02
-     1     1    42     1     2.052242E+01
-     2     1    42     1     2.052179E+01
+     1     1     1     1     4.292006E+02
+     2     1     1     1     8.767541E+01
+     3     1     1     1     1.992612E+02
+     4     1     1     1     2.564393E+02
+     5     1     1     1     6.300621E+01
+     6     1     1     1     5.310871E+02
+     1     1    42     1     2.052240E+01
+     2     1    42     1     2.052181E+01
      3     1    42     1     4.203240E+01
      4     1    42     1     1.140998E+01
      5     1    42     1     1.140998E+01
@@ -761,7 +761,7 @@ qpoints:
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      1.59994000E+01  2.43050000E+01
@@ -884,7 +884,7 @@ P           mkmem          72
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -901,12 +901,12 @@ P           mkmem          72
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -924,7 +924,7 @@ P           mkmem          72
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -939,7 +939,7 @@ P           mkmem          72
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
