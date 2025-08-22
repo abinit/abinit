@@ -5166,6 +5166,7 @@ subroutine gqk_filter_erange(gqk, gstore, erange)
  enddo
 
  call krank_kpts%free()
+
 end subroutine gqk_filter_erange
 !!***
 

@@ -77,7 +77,7 @@ module m_cgwf
 
  type,public :: nscf_t
 
-   integer :: paral_kgb0 = 9
+   integer :: paral_kgb0 = 0
 
    integer :: ngfft(18), ngfftf(18)
    ! FFT meshes (coarse and fine)
@@ -2332,10 +2332,9 @@ end subroutine make_grad_berry
 !!
 !! INPUT
 !! dtset<dataset_type>=All input variables for this dataset.
+!! dtfil<datafiles_type>=Variables related to files.
 !! cryst=Crystalline structure
 !! comm=MPI communicator.
-!!
-!! OUTPUT
 !!
 !! SOURCE
 
@@ -2363,7 +2362,7 @@ subroutine nscf_init(nscf, dtset, dtfil, cryst, comm)
  units = [std_out, ab_out]
  ABI_CHECK(dtset%usepaw == 0, "PAW not implemented!")
  if (dtset%usekden /= 0) then
-   ABI_ERROR("nscf_init with mgga not yet coded")
+   ABI_ERROR("nscf_init with MGGA not yet coded")
  end if
 
  call wrtout(units, sjoin(" Reading KS GS potential from: ", dtfil%filpotin))
@@ -2371,7 +2370,7 @@ subroutine nscf_init(nscf, dtset, dtfil, cryst, comm)
  ABI_CHECK(fform /= 0, "hdr_read_from_fname returned fform 0")
  ABI_CHECK(fform_contains(fform, "vtrial", msg), msg)
 
- ! Init FFT mesh from file as we don't want to interpolate the potential
+ ! Init FFT mesh from file as we don't want to interpolate the potential.
  call ngfft_seq(nscf%ngfftf, pot_hdr%ngfft)
  call ngfft_seq(nscf%ngfft, pot_hdr%ngfft)
  call pot_hdr%free()
@@ -2542,7 +2541,7 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psp
  ! Compute g-sphere for this k-point from ecut
  call get_kg(kpt, istwf_k, dtset%ecut, cryst%gmet, npw_k, kg_k)
 
- ! Compute kinetic energy.
+ ! Compute kinetic energy for this k-point.
  ABI_MALLOC(kinpw_k, (npw_k))
  call mkkin(dtset%ecut, dtset%ecutsm, dtset%effmass_free, cryst%gmet, kg_k, kinpw_k, kpt, npw_k, 0, 0)
 
@@ -2694,13 +2693,14 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
  !call cg_kfilter(npw_k, nspinor, nband_k, gs_ham_k%kinpw_k, cg_k)
 
  ! linalg initialisation (required by subdiago)
- linalg_max_size=maxval(dtset%nband(:))
+ linalg_max_size = maxval(dtset%nband(:))
  call abi_linalg_init(linalg_max_size, RUNL_GSTATE, dtset%wfoptalg, nscf%paral_kgb0,&
                       dtset%gpu_option, dtset%use_slk, dtset%np_slk, nscf%mpi_enreg%comm_bandspinorfft)
 
  ABI_MALLOC(subham, (nband_k*(nband_k+1)))
  ABI_MALLOC(evec, (2*nband_k, nband_k))
 
+ ! NSCF iterations.
  ierr = 1; msg = ""
  do inonsc=1,dtset%nstep
 
