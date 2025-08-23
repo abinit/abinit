@@ -541,7 +541,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        ! In this routine we have to use gs_ham_k to have {k+q}_H0_k.
        ! Using gs_ham_kq would be wrong as it would lead to {k+q}_H0_{k+q}.
 
-       call gs_ham_k%load_kprime(kpt_kp=kq, npw_kp=npw_kq, istwf_kp=istwfk_1, kg_kp=kg_kq, kpg_kp=kpg_kq, &
+       call gs_ham_k%load_kprime(kpt_kp=kq, npw_kp=npw_kq, istwf_kp=istwfk_1, kg_kp=kg_kq, kpg_kp=kpg_kq, kinpw_kp=kinpw_kq, &
                                  ph3d_kp=ph3d_kq, ffnl_kp=ffnl_kq, compute_ph3d=.true., compute_gbound=.true.)
 
        ! Loop over my atomic perturbations: apply H1_{kappa, alpha} and compute gkq_atm.
@@ -590,7 +590,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
        ! Write |g|^2 for this q.
        !if (pert_comm%me == master) then
-       gkq2_nu = gkq_nu(1,:,:,:)**2 + gkq_nu(2,:,:,:)** 2
+       gkq2_nu = gkq_nu(1,:,:,:)**2 + gkq_nu(2,:,:,:)**2
        NCF_CHECK(nf90_put_var(ncid, vid("gkq2_nu"), gkq2_nu, start=[1,1,1,iq,ik,spin]))
        !end if
 
