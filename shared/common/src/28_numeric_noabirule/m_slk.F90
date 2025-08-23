@@ -396,7 +396,7 @@ module m_slk
  public :: slk_array_locmem_mb                 ! Compute memory allocated for an array of slkmat_dp_t elements
 
  ! External functions.
-#ifdef HAVE_LINALG_SCALAPACK
+#if defined(HAVE_LINALG_SCALAPACK) || defined(HAVE_LINALG_ELPA)
  integer,external :: indxl2g, numroc
  real(dp),external :: PDLAMCH
  real(dp),external :: PDLATRA

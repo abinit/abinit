@@ -118,10 +118,9 @@ AC_DEFUN([SD_NETCDF_INIT], [
             AC_PATH_TOOL(PKG_CONFIG,pkg-config)
             if "$PKG_CONFIG" --exists netcdf; then
                   AC_MSG_RESULT([yes])
-                  #sd_netcdf_init="pkg"
+                  sd_netcdf_init="pkg"
            else
                   AC_MSG_RESULT([no])
-                  sd_netcdf_init="def"
            fi
         fi
      fi
@@ -173,9 +172,9 @@ AC_DEFUN([SD_NETCDF_INIT], [
         ;;
 
       pkg)
-        TMP_netcdf_CPPFLAGS=`$PKG_CONFIG --cflags --keep-system-cflags netcdf`
+        TMP_netcdf_CPPFLAGS=`$PKG_CONFIG --cflags netcdf`
         TMP_netcdf_FFFLAGS="${TMP_netcdf_CPPFLAGS}"
-        TMP_netcdf_LIBS=`$PKG_CONFIG --libs  --keep-system-libs netcdf`
+        TMP_netcdf_LIBS=`$PKG_CONFIG --libs netcdf`
         sd_netcdf_cppflags="${TMP_netcdf_CPPFLAGS} "
         sd_netcdf_cflags="${TMP_netcdf_CPPFLAGS}"
         sd_netcdf_cxxflags="${TMP_netcdf_CPPFLAGS}"

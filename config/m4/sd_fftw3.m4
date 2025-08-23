@@ -192,10 +192,6 @@ AC_DEFUN([SD_FFTW3_INIT], [
            sd_fftw3_libs="-lfftw3_threads -lpthread -lfftw3f_threads ${sd_fftw3_libs}"
            sd_fftw3_ldflags="-lfftw3_threads -lpthread -lfftw3f_threads ${sd_fftw3_ldflags}"
         fi
-        #if test "${sd_mpi_enable}" = "yes"; then
-        #   sd_fftw3_libs="-lfftw3_mpi -lfftw3f_mpi -lm ${sd_fftw3_libs}"
-        #   sd_fftw3_ldflags="-lfftw3_mpi -lm -lfftw3f_mpi ${sd_fftw3_ldflags}"
-        #fi
         ;;
 
       *)
