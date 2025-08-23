@@ -5000,11 +5000,9 @@ subroutine gqk_get_erange_mask(gqk, gstore, erange, my_states, glob_states)
 !scalars
  class(ebands_t), pointer :: ebands
  type(gaps_t) :: gaps
- logical :: assume_gap
- integer :: my_ik, ik_ibz, ik_glob
- integer :: ib, bstart
- integer :: gap_err, ierr
+ integer :: my_ik, ik_ibz, ik_glob, ib, bstart, gap_err, ierr
  real(dp) :: vmax, cmin, eig
+ logical :: assume_gap
 !----------------------------------------------------------------------
 
  ebands => gstore%ebands
@@ -5090,16 +5088,11 @@ subroutine gqk_filter_erange(gqk, gstore, erange)
  class(ebands_t), pointer :: ebands
  type(krank_t) :: krank_kpts
  logical :: skip_nk, skip_mkq, skip_q
- integer :: my_ik, ik_glob
- integer :: my_iq, ikq, ipert
- integer :: ib, jb !, bstart
- integer :: ierr
+ integer :: my_ik, ik_glob, my_iq, ikq, ipert, ierr, ib, jb !, bstart
  real(dp) :: wtq
 !arrays
- integer :: my_states(gqk%nb, gqk%my_nk)
- integer :: glob_states(gqk%nb, gqk%glob_nk)
- real(dp) :: kpt(3), qpt(3), kpq(3)
- real(dp) :: kpts(3, gqk%glob_nk), my_qpts(3, gqk%my_nq)
+ integer :: my_states(gqk%nb, gqk%my_nk), glob_states(gqk%nb, gqk%glob_nk)
+ real(dp) :: kpt(3), qpt(3), kpq(3), kpts(3, gqk%glob_nk), my_qpts(3, gqk%my_nq)
 !----------------------------------------------------------------------
 
  ebands => gstore%ebands

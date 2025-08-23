@@ -210,14 +210,14 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
    np = comm_my_is(my_is)%nproc; priority = "12"
 
    if (any(dtset%eph_np_pqbks /= 0)) then
-     ! Take grid from input.
+     ! Take MPI grid from input.
      pert_comm%nproc = dtset%eph_np_pqbks(1)
      qpt_comm%nproc  = dtset%eph_np_pqbks(2)
      ABI_CHECK(dtset%eph_np_pqbks(3) == 1, "Band parallelism not implemented in eph_path")
      kpt_comm%nproc = dtset%eph_np_pqbks(4)
 
    else
-     ! Automatic grid generation.
+     ! Automatic MPI grid generation.
      if (nk_path == 1) then
        call xmpi_distrib_2d(np, priority, nq_path, natom3, qpt_comm%nproc, pert_comm%nproc, ierr)
      else
@@ -240,7 +240,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      ABI_ERROR(msg)
    end if
 
-   ! For each spin treated by this rank, create cartesian communicator of rank ndims.
+   ! For each spin treated by this rank, create MPI cartesian communicator of rank ndims.
    periods(:) = .False.; reorder = .False.
    dims = [pert_comm%nproc, qpt_comm%nproc, kpt_comm%nproc]
 
@@ -288,11 +288,11 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  nfft = product(ngfft(1:3)) ; mgfft = maxval(ngfft(1:3))
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3); n4 = ngfft(4); n5 = ngfft(5); n6 = ngfft(6)
 
- ! Open the DVDB file and make sure we have POT1.
+ ! Open the DVDB file and make sure we have POT1 files.
  call dvdb%open_read(ngfftf, xmpi_comm_self)
  ABI_CHECK(dvdb%has_fields("pot1", msg), msg)
 
- ! Check if all the q-points are present in the DVDB
+ ! Check if all the q-points are present in the DVDB.
  qptopt = dtset%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
  call dvdb%need_ftinterp(nq_path, qpath%points, qptopt, qmap_symrec, need_ftinterp)
 
@@ -434,7 +434,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      ik = my_ik_inds(my_ik); kk = kpath%points(:, ik)
 
      ! Compute u_{nk}(g)
-     ! NB: The Hamiltonian has pointers to the _k arrays in output so we cannot deallocate them till the end.
+     ! NB: The Hamiltonian has pointers to the *_k arrays in output so we cannot deallocate them till the end.
      ! This is the reason why we use vlocal_k (vlocal_kq) although this term does not depend on k
      call nscf%setup_kpt(spin, kk, istwfk_1, nband, cryst, dtset, psps, pawtab, pawfgr, &              ! in
                          npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal_k, cg_k, gsc_k, gs_ham_k) ! out
@@ -538,8 +538,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        !call gs_ham_kq%load_kprime(kpt_kp=kq, npw_kp=npw_kq, istwf_kp=istwfk_1, kg_kp=kg_kq, kpg_kp=kpg_kq, &
        !                           ph3d_kp=ph3d_kq, ffnl_kp=ffnl_kq, compute_ph3d=.false., compute_gbound=.true.)
 
-       ! In this routine we have to use gs_ham_k to have {k+q}_H1_k.
-       ! Using gs_ham_kq would be wrong as it would lead to {k+q}_H1_{k+q}.
+       ! In this routine we have to use gs_ham_k to have {k+q}_H0_k.
+       ! Using gs_ham_kq would be wrong as it would lead to {k+q}_H0_{k+q}.
 
        call gs_ham_k%load_kprime(kpt_kp=kq, npw_kp=npw_kq, istwf_kp=istwfk_1, kg_kp=kg_kq, kpg_kp=kpg_kq, &
                                  ph3d_kp=ph3d_kq, ffnl_kp=ffnl_kq, compute_ph3d=.true., compute_gbound=.true.)
