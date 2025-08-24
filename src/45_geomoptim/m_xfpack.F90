@@ -146,8 +146,7 @@ subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
    ABI_BUG(message)
  end if
  
- if( (optcell==2 .or. optcell==3) &
-& .and. ndim/=3*natom+6)then
+ if( (optcell==2 .or. optcell==3) .and. ndim/=3*natom+6) then
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=2 or 3, ndim MUST be equal to 3*natom+6,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+6=',3*natom+6,'.'

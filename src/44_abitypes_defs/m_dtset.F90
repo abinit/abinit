@@ -640,7 +640,6 @@ type, public :: dataset_type
  integer :: rfphon
  integer :: rfstrs
  integer :: rfstrs_ref
- integer :: rfuser
  integer :: rf2_dkdk
  integer :: rf2_dkde
  integer :: rmm_diis = 0
@@ -2140,7 +2139,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%rfphon             = dtin%rfphon
  dtout%rfstrs             = dtin%rfstrs
  dtout%rfstrs_ref         = dtin%rfstrs_ref
- dtout%rfuser             = dtin%rfuser
  dtout%rf2_dkdk           = dtin%rf2_dkdk
  dtout%rf2_dkde           = dtin%rf2_dkde
  dtout%rmm_diis           = dtin%rmm_diis
@@ -2820,7 +2818,6 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
  if(dtset%rfphon==1)rfpert(dtset%rfatpol(1):dtset%rfatpol(2))=1
 
  if(dtset%rfddk==1)rfpert(dtset%natom+1)=1
- if(dtset%rfddk==2)rfpert(dtset%natom+6)=1
 
  if(dtset%rf2_dkdk/=0) rfpert(dtset%natom+10)=1
  if(dtset%rf2_dkde/=0) rfpert(dtset%natom+11)=1
@@ -2830,9 +2827,6 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
 
  if(dtset%rfstrs==1.or.dtset%rfstrs==3)rfpert(dtset%natom+3)=1
  if(dtset%rfstrs==2.or.dtset%rfstrs==3)rfpert(dtset%natom+4)=1
-
- if(dtset%rfuser==1.or.dtset%rfuser==3)rfpert(dtset%natom+6)=1
- if(dtset%rfuser==2.or.dtset%rfuser==3)rfpert(dtset%natom+7)=1
 
  if(dtset%rfmagn==1) rfpert(dtset%natom+5)=1
 
@@ -3766,7 +3760,7 @@ subroutine chkvars(string)
 !list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar restartxf rfasr'
  list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar restartxf'
  list_vars=trim(list_vars)//' rfatpol rfddk rfdir rfelfd rfmagn rfmeth rfphon'
- list_vars=trim(list_vars)//' rfstrs rfstrs_ref rfuser rf2_dkdk rf2_dkde rf2_pert1_dir rf2_pert2_dir rhoqpmix rifcsph rprim'
+ list_vars=trim(list_vars)//' rfstrs rfstrs_ref rf2_dkdk rf2_dkde rf2_pert1_dir rf2_pert2_dir rhoqpmix rifcsph rprim'
  list_vars=trim(list_vars)//' rmm_diis rmm_diis_savemem'
  list_vars=trim(list_vars)//' rcpaw_scenergy rcpaw_nfrpaw rcpaw_frocc rcpaw_tolnc rcpaw_nfrtnc rcpaw_frtypat'
 !S
