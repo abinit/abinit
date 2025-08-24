@@ -3494,7 +3494,7 @@ subroutine irreducible_set_pert(indsym,mpert,natom,nsym,pertsy,rfdir,rfpert,symq
                    sym1(ii,jj)=symrec(ii,jj,isym)
                  end do
                end do
-             else if(ipert1==(natom+2) .or. ipert1==(natom+6))then
+             else if(ipert1==(natom+2))then
                ipesy1=ipert1
                do ii=1,3
                  do jj=1,3
