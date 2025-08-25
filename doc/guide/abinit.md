@@ -14,7 +14,7 @@ Some additional specialized documentation is not available on the Web, but insid
 advanced users only.
 
 <a id="intro"></a>
-## 1 How to run the code?
+## 1 How to run the code
 
 The main executable file is called abinit. Supposing that the input file is
 called **run.abi**, and that the executable is placed in your working directory,
@@ -45,7 +45,7 @@ See e.g. [[output_file]] or [[topic:Control]].
 
 Variations of the above commands could be needed, depending on the flavor of Unix that is used
 on the platform that is considered for running the code.
-If you do not underderstand the standard Unix syntax above, please get familiarized with Unix before continuing.
+If you do not understand the standard Unix syntax above, please get familiarized with Unix before continuing.
 
 <a id="2"></a>
 ## 2 The underlying theoretical framework and algorithms
@@ -145,7 +145,7 @@ after those needed will also be ignored. For example,
 
 A given variable is identified by the parser by having at least one blank
 before it and after it (again, multiple blanks are irrelevant).
-ABINIT has also some (very limited) interpretor capabilities:
+ABINIT has also some (very limited) interpreter capabilities:
 
   * It can identify one slash sign (/) being placed between two numbers
     (without a separating blank) as being the definition of a fraction
@@ -708,7 +708,7 @@ Let us mention a few of them: [[getwfk]], [[getwfq]], [[getddk]], [[get1wf]],
   * [[getwfk]] allows to take the output wavefunctions of a previous dataset and use them as input wavefunctions
   * [[getwfq]], [[getddk]] and [[get1wf]] do similar things for response function calculations
   * [[getden]] does the same for the density; [[getcell]] does the same for [[acell]] and [[rprim]]
-  * [[getxred]] and [[getxcart]] do the same for the atomic positions, either in reduced coordinates, or in cartesian coordinates.
+  * [[getxred]] and [[getxcart]] do the same for the atomic positions, either in reduced coordinates, or in Cartesian coordinates.
 
 The different variables corresponding to each dataset are echoed using the
 same indexing convention as for the input step. For the last echo of the code
@@ -861,8 +861,8 @@ of [[ntime]], the code output more information:
   * The squared residuals for each band are reported, k point by k point.
   * Then the fractional or reduced coordinates are given,
   * followed by the energy gradients,
-  * followed by the cartesian coordinates in Angstroms,
-  * followed by the cartesian forces in Hartree/Bohr and eV/Angstrom.
+  * followed by the Cartesian coordinates in Angstroms,
+  * followed by the Cartesian forces in Hartree/Bohr and eV/Angstrom.
   * Also are given the rms force ( **frms** ) and the maximum absolute value of any force component ( **max** ).
   * Next are the length scales of the unit cell in Bohr and in Angstroms.
   * Next are the eigenvalues of each band for each k point, in eV or Hartree or both depending on the choice of [[enunit]].
@@ -1139,7 +1139,7 @@ pseudopotential (see [[prtvpsp]]) or the XC potential (see [[prtvxc]]), These
 are defined on the real space grid in Hartree energy units. The underlying
 grid is as described above. **cplex** is the
 number of complex components of the potential (**cplex**=1 for GS calculations -the
-density is real-, and **cplex**=1 or 2 for RF, depending on wether q=0 or not).
+density is real-, and **cplex**=1 or 2 for RF, depending on whether q=0 or not).
 If [[nspden]]=2, the different components are the
 spin-up potential and the spin-down potential.
 
