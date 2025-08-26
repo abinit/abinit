@@ -5041,18 +5041,18 @@ Possible values of [[fock_icutcoul]] are from 0 to 5, but currently are availabl
 options 0 and 5. Option 5 is hard coded as the method to be applied to HSE functionals.
 
 Like for [[icutcoul]], for 1-dimensional and 2-dimensional systems, the geometry of the system has to be specified explicitly.
-This is done thanks to [[vcutgeo]]. For 0-, 1- and 2-dimensional systems, a cut-off length has to be provided, thanks to [[rcut]].
+This is done thanks to [[vcutgeo]]. For 0-, 1- and 2-dimensional systems, a cut-off length has to be provided, thanks to [[fock_rcut]].
 
-  * 0 --> Sphere (molecules, but also 3D-crystals, see below). See [[rcut]].
-  * 1 --> (W.I.P.) cylinder (nanowires, nanotubes). See [[vcutgeo]] and [[rcut]].
-  * 2 --> (W.I.P) Surface. See [[vcutgeo]] and [[rcut]].
+  * 0 --> Sphere (molecules, but also 3D-crystals, see below). See [[fock_rcut]].
+  * 1 --> (W.I.P.) cylinder (nanowires, nanotubes). See [[vcutgeo]] and [[fock_rcut]].
+  * 2 --> (W.I.P) Surface. See [[vcutgeo]] and [[fock_rcut]].
   * 3 --> (W.I.P) 3D crystal (Coulomb interaction without cut-off).
   * 4 --> (W.I.P.)ERF, long-range only Coulomb interaction.
   * 5 --> ERFC, short-range only Coulomb interaction (e.g. as used in the HSE functional).
 
 Note that Spencer and Alavi showed that the
 spherical cutoff can efficiently be used also for 3D systems [[cite:Spencer2008]].
-In the latter case, use a negative value for the cutoff radius of the sphere ([[rcut]]<0),
+In the latter case, use a negative value for the cutoff radius of the sphere ([[fock_rcut]]<0),
 which is automatically calculated so that the volume enclosed in the sphere is
 equal to the volume of the solid.
 """,
@@ -17994,31 +17994,67 @@ Variable(
     abivarname="rcut",
     varset="gstate",
     vartype="real",
+    topics=['Coulomb_useful'],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="Radius of the CUT-off for coulomb interaction for Hartree, ion-electron, and ion-ion interactions",
+    added_in_version="before_v9",
+    text=r"""
+Truncation of the Coulomb interaction in real space. The meaning of [[rcut]]
+is governed by the cutoff shape options [[icutcoul]].
+
+If [[rcut]] is zero or negative, the cutoff is automatically calculated so to enclose
+the same volume inside the cutoff as the volume of the solid, i.e primitive cell times the number of k-points.
+""",
+),
+
+Variable(
+    abivarname="gw_rcut",
+    varset="gstate",
+    vartype="real",
     topics=['Coulomb_useful','GWls_compulsory', 'Susceptibility_basic', 'SelfEnergy_basic'],
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="Radius of the CUT-off for coulomb interaction",
     added_in_version="before_v9",
     text=r"""
-Truncation of the Coulomb interaction in real space. The meaning of [[rcut]]
-is governed by the cutoff shape options [[icutcoul]], [[gw_icutcoul]] and/or [[fock_icutcoul]].
+Truncation of the Coulomb interaction in real space. The meaning of [[gw_rcut]]
+is governed by the cutoff shape options [[gw_icutcoul]].
 See complementary information in [[vcutgeo]].
 
 In the method of Ismail-Beigi [[cite:Ismail-Beigi2006]] for one-dimensional systems, the cutoff region is given by the
 Wigner-Seitz cell centered on the axis of the cylinder. The cutoff region is
 thus automatically defined by the unit cell and there is no need to specify
-the value of [[rcut]]. For two-dimensional systems, Ismail-Beigi [[cite:Ismail-Beigi2006]] also fixes the cutoff region,
+the value of [[gw_rcut]]. For two-dimensional systems, Ismail-Beigi [[cite:Ismail-Beigi2006]] also fixes the cutoff region,
 at half the replication length perpendicular to the (truly) periodic plane.
 
-Thus, when the Beigi methods in 1D or 2D are expected, [[rcut]] must be 0.0.
-Using another value of [[rcut]] will prevent the Beigi method to be used.
+Thus, when the Beigi methods in 1D or 2D are expected, [[gw_rcut]] must be 0.0.
+Using another value of [[gw_rcut]] will prevent the Beigi method to be used.
 See complementary information in [[vcutgeo]].
 
 On the other hand, when the Rozzi methods in 1D or 2D are expected, which is the case when one component of [[vcutgeo]] is negative,
-[[rcut]] mut be defined.
+[[gw_rcut]] mut be defined.
 
-If [[rcut]] is negative, the cutoff is automatically calculated so to enclose
-the same volume inside the cutoff as the volume of the primitive cell.
+If [[gw_rcut]] is negative, the cutoff is automatically calculated so to enclose
+the same volume inside the cutoff as the volume of the solid, i.e primitive cell times the number of k-points.
+""",
+),
+
+Variable(
+    abivarname="fock_rcut",
+    varset="gstate",
+    vartype="real",
+    topics=['Coulomb_useful'],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="Radius of the CUT-off for coulomb interaction for FOCK operator",
+    added_in_version="before_v9",
+    text=r"""
+Truncation of the Coulomb interaction in real space. The meaning of [[fock_rcut]]
+is governed by the cutoff shape options [[fock_icutcoul]].
+
+If [[fock_rcut]] is zero or negative, the cutoff is automatically calculated so to enclose
+the same volume inside the cutoff as the volume of the solid, i.e primitive cell times the number of k-points.
 """,
 ),
 

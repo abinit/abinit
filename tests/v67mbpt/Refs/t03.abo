@@ -149,6 +149,11 @@ _ WF disk file :      0.510 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
            getwfk3          1
            getwfk4          1
            getwfk5          1
+          gw_rcut1     0.00000000E+00 Bohr
+          gw_rcut2     0.00000000E+00 Bohr
+          gw_rcut3     0.00000000E+00 Bohr
+          gw_rcut4     0.00000000E+00 Bohr
+          gw_rcut5     5.00000000E+00 Bohr
          gw_nqlwl1          0
          gw_nqlwl2          1
          gw_nqlwl3          0
@@ -209,11 +214,6 @@ P           mkmem           5
         prtsuscep3          0
         prtsuscep4          0
         prtsuscep5          0
-             rcut1     0.00000000E+00 Bohr
-             rcut2     0.00000000E+00 Bohr
-             rcut3     0.00000000E+00 Bohr
-             rcut4     0.00000000E+00 Bohr
-             rcut5     5.00000000E+00 Bohr
           spgroup         123
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                       -1  0  0   0  1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
@@ -1142,6 +1142,11 @@ data: !SigmaeeData |
            getwfk3          1
            getwfk4          1
            getwfk5          1
+          gw_rcut1     0.00000000E+00 Bohr
+          gw_rcut2     0.00000000E+00 Bohr
+          gw_rcut3     0.00000000E+00 Bohr
+          gw_rcut4     0.00000000E+00 Bohr
+          gw_rcut5     5.00000000E+00 Bohr
          gw_nqlwl1          0
          gw_nqlwl2          1
          gw_nqlwl3          0
@@ -1202,11 +1207,6 @@ P           mkmem           5
         prtsuscep3          0
         prtsuscep4          0
         prtsuscep5          0
-             rcut1     0.00000000E+00 Bohr
-             rcut2     0.00000000E+00 Bohr
-             rcut3     0.00000000E+00 Bohr
-             rcut4     0.00000000E+00 Bohr
-             rcut5     5.00000000E+00 Bohr
           spgroup         123
            strten1     1.0196350837E-04  1.0196350837E-04  2.8900953302E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
