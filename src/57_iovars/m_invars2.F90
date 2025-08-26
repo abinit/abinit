@@ -1086,6 +1086,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcut',tread,'LEN')
  if(tread==1) dtset%rcut=dprarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fock_rcut',tread,'LEN')
+ if(tread==1) dtset%fock_rcut=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gw_rcut',tread,'LEN')
+ if(tread==1) dtset%gw_rcut=dprarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'zcut',tread,'ENE')
  if(tread==1) dtset%zcut = dprarr(1)
 
@@ -1612,6 +1618,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'icutcoul',tread,'INT')
  if(tread==1) dtset%icutcoul=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fock_icutcoul',tread,'INT')
+ if(tread==1) dtset%fock_icutcoul=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'imgwfstor',tread,'INT')
  if(tread==1) dtset%imgwfstor=intarr(1)
@@ -2156,6 +2165,18 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%optstress=intarr(1)
  else if (xc_is_pot_only) then
    dtset%optstress=0
+ end if
+ ! ABINIT cannot calculate stress when fock_icutcoul is not zero (not implemented)
+ if (dtset%optstress==1.and.dtset%fock_icutcoul/=0) then
+   write(msg, '(3a)' ) &
+        'Stress can only be calculated (as of today) when fock_icutcoul=0',ch10,&
+        'If you really want the stress, change fock_icutcoul.'
+   if(tread==1) then
+     ABI_ERROR(msg)
+   else
+     ABI_COMMENT(msg)
+     dtset%optstress=0
+   endif
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optnlxccc',tread,'INT')

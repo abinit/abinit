@@ -1391,10 +1391,10 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
 
  ! Compute Coulomb term on the largest G-sphere.
  if (Gsph_x%ng > Gsph_c%ng ) then
-   call Vcp%init(Gsph_x,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Gsph_x%ng,&
+   call Vcp%init(Gsph_x,Cryst,Qmesh,Kmesh,Dtset%gw_rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Gsph_x%ng,&
      nqlwl,qlwl,comm)
  else
-   call Vcp%init(Gsph_c,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Gsph_c%ng,&
+   call Vcp%init(Gsph_c,Cryst,Qmesh,Kmesh,Dtset%gw_rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Gsph_c%ng,&
      nqlwl,qlwl,comm)
  end if
 
@@ -1997,10 +1997,10 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh, &
 
  ! Compute Coulomb term on the largest G-sphere.
  if (Gsph_x%ng > Gsph_c%ng ) then
-   call Vcp_dense%init(Gsph_x,Cryst,Qmesh_dense,Kmesh_dense,Dtset%rcut,Dtset%gw_icutcoul,&
+   call Vcp_dense%init(Gsph_x,Cryst,Qmesh_dense,Kmesh_dense,Dtset%gw_rcut,Dtset%gw_icutcoul,&
                        Dtset%vcutgeo,Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,comm)
  else
-   call Vcp_dense%init(Gsph_c,Cryst,Qmesh_dense,Kmesh_dense,Dtset%rcut,Dtset%gw_icutcoul,&
+   call Vcp_dense%init(Gsph_c,Cryst,Qmesh_dense,Kmesh_dense,Dtset%gw_rcut,Dtset%gw_icutcoul,&
                        Dtset%vcutgeo,Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,comm)
  end if
 

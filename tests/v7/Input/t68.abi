@@ -43,32 +43,32 @@ pawecutdg  40
 # Dataset2: Calculation of the 1st PBE0-1/3 iteration
 optdriver2  4 
  gw_icutcoul2 0   # Will use the spherical average
-     rcut2 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
+  gw_rcut2 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
 
 
 # Dataset3: Calculation of the 2nd PBE0-1/3 iteration
 optdriver3  4
    getqps3 -1
  gw_icutcoul3 0   # Will use the spherical average
-     rcut3 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
+  gw_rcut3 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
 
 # Dataset4: Calculation of the 3rd PBE0-1/3 iteration
 optdriver4  4
    getqps4 -1
  gw_icutcoul4 0   # Will use the spherical average
-     rcut4 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
+  gw_rcut4 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
 
 # Dataset5: Calculation of the 4th PBE0-1/3 iteration
 optdriver5  4
    getqps5 -1
  gw_icutcoul5 0   # Will use the spherical average
-     rcut5 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
+  gw_rcut5 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
 
 # Dataset6: Calculation of the 5th PBE0-1/3 iteration
 optdriver6  4
    getqps6 -1
  gw_icutcoul6 0   # Will use the spherical average
-     rcut6 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
+  gw_rcut6 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
 
 
 # Dataset7: PBE0-1/3 stand alone calculation
@@ -85,7 +85,7 @@ gwcalctyp9  0
    getscr9 -1
 gw_qprange9 0
  gw_icutcoul9 0   # Will use the spherical average
-     rcut9 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
+  gw_rcut9 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
 
 
 # Dataset10: Computation of the dielectric matrix on top of scPBE0-1/3 in the Kohn-Sham basis
@@ -100,7 +100,7 @@ gwcalctyp11  20
    getqps11  6
    getscr11 -1
  gw_icutcoul11 0   # Will use the spherical average
-     rcut11 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
+  gw_rcut11 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
 
 # Dataset12: Computation of the dielectric matrix on top of scPBE0-1/3 in the planewave basis
 optdriver12  3
@@ -117,7 +117,7 @@ gwcalctyp13  0
    getscr13 -1
 gw_qprange13 0
  gw_icutcoul13 0   # Will use the spherical average
-     rcut13 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
+  gw_rcut13 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
 
 
 # Definition of the unit cell: fcc
