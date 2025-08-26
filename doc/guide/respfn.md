@@ -549,7 +549,7 @@ parameter cplex is 1 when q=0 and 2 when q/=0 . Indeed, for q=0, the density
 change is a real quantity, while it is complex in general when q/=0 .
 
 <a id="ipertcase"></a>
-**6.XX. Summary of output file numbering**
+**6.5. Summary of output file numbering**
 
 As noted in [[#1|Section 1]], the various perturbations and directions are indexed by
 a combination of **ipert** and **idir**, to form a unique index **ipertcase**.
@@ -582,7 +582,7 @@ Note that because of ABINIT's intelligent use of symmetry, not every one of thes
 is always produced, because some of them would be redundant. 
 
 <a id="ddb"></a>
-**6.5. The derivative database (DDB)**
+**6.6. The derivative database (DDB)**
 
 It is made of two parts. The first should allow one to unambiguously identify
 the run that has generated the DDB, while the second part contains the 2DTE,

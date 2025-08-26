@@ -67,7 +67,7 @@ In this example:
 
 The model.DDB (or model.XML) file contains the system definition and the list of the total energy derivatives
 with respect to three kind of perturbations: phonons, electric field and strain.
-The _optional_ XML file contains the list of coefficients obtained by fitting a polynomila to the energy.
+The _optional_ XML file contains the list of coefficients obtained by fitting a polynomial to the energy.
 The last file is mandatory to obtain the "model_anharmonic.XML" file.
 
 ### 1.2 Running the code
@@ -127,9 +127,9 @@ To generate the training set, the user requires to get some experience in [[topi
 Alternatively, the user can generate the training set configurations by means of phonon population procedure
 at fixed temperature (DDB file mandatory) activated by imposing [[abinit:ionmov]]=27.
 
-### 3.3 How to bound a model
+### 3.3 How to set bounds on a model
 
-MULTIBINIT includes an automatic binding process.
+MULTIBINIT includes an automatic process to set bounds on a model.
 Have a look at the [[topic:BoundingProcess]],
 where input variables and selected input files are mentioned.
 Later, a <!-- [[lesson:lattice_model | tutorial]]--> tutorial will be available.
