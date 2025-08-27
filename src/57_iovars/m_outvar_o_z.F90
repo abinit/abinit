@@ -864,9 +864,6 @@ contains
  intarr(1,:)=dtsets(:)%rfstrs_ref
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfstrs_ref','INT',0)
 
- intarr(1,:)=dtsets(:)%rfuser
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfuser','INT',0)
-
  intarr(1,:)=dtsets(:)%rf2_dkdk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rf2_dkdk','INT',0)
 

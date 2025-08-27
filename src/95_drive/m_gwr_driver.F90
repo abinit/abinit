@@ -1187,7 +1187,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  nqibz_ = 1; nqbz_ = 1; qbz_ = zero; nkbz_ = 1
  ! TODO: MC technique does not seem to work as expected, even in the legacy code.
  call vcgen%init(cryst, ebands%kptrlatt, nkbz_, nqibz_, nqbz_, qbz_, &
-                 dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, comm)
+                 dtset%gw_rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, comm)
 
  ! NB: npweps = m_npw
  ABI_MALLOC(sqrt_vc, (m_npw))

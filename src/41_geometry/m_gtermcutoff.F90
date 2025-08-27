@@ -225,12 +225,13 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 
  SELECT CASE (TRIM(mode))
 
-   CASE('SPHERE') ! Spencer-Alavi method
+   CASE('SPHERE') ! Spherical cutoff
 
      ! Calculate rcut for each method
      if(rcut>tol4) then
          rcut_loc = rcut
      else
+         ! Spencer-Alavi method
          rcut_loc = (three*nkpt*ucvol/four_pi)**(one/three)
      endif
 
@@ -239,7 +240,6 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
           gcutoff(ig)=0.0
        else
           gcutoff(ig)=one-cos(rcut_loc*sqrt(four_pi/gpq2(ig)))
-          !gcutoff(ig)=one-cos(rcut_loc/sqrt(gpq2(ii)))
       end if
      end do
 

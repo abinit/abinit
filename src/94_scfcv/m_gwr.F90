@@ -1608,7 +1608,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gw_icutcoul = dtset%gw_icutcoul
  !if (gw_icutcoul == 16) gw_icutcoul = 6
  call gwr%vcgen%init(cryst, ks_ebands%kptrlatt, gwr%nkbz, gwr%nqibz, gwr%nqbz, gwr%qbz, &
-                     dtset%rcut, gw_icutcoul, dtset%vcutgeo, vc_ecut, gwr%comm%value)
+                     dtset%gw_rcut, gw_icutcoul, dtset%vcutgeo, vc_ecut, gwr%comm%value)
 
  ! Now we know the value of g_ngfft. Setup tables for zero-padded FFTs.
  ! Build descriptors for Green's functions and tchi and setup tables for zero-padded FFTs.
