@@ -613,17 +613,17 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
    stringfile='_1WF' ; stringvar='ddk'
    call mkfilename(filnam,fnamewffddk,dtset%getddk,idtset,dtset%irdddk,jdtset_,ndtset,stringfile,stringvar,will_read)
 
-   ! According to getdelfd, build _1WF file name, referred as fnamewffdelfd
+   ! According to getdelfd and irddelfd, build _1WF file name, referred as fnamewffdelfd
    stringfile='_1WF' ; stringvar='delfd'
-   call mkfilename(filnam,fnamewffdelfd,dtset%getdelfd,idtset,0,jdtset_,ndtset,stringfile,stringvar,will_read)
+   call mkfilename(filnam,fnamewffdelfd,dtset%getdelfd,idtset,dtset%irddelfd,jdtset_,ndtset,stringfile,stringvar,will_read)
 
-   ! According to getdkdk, build _1WF file name, referred as fnamewffdkdk
+   ! According to getdkdk and irddkdk, build _1WF file name, referred as fnamewffdkdk
    stringfile='_1WF' ; stringvar='dkdk'
-   call mkfilename(filnam,fnamewffdkdk,dtset%getdkdk,idtset,0,jdtset_,ndtset,stringfile,stringvar,will_read)
+   call mkfilename(filnam,fnamewffdkdk,dtset%getdkdk,idtset,dtset%irddkdk,jdtset_,ndtset,stringfile,stringvar,will_read)
 
-   ! According to getdkde, build _1WF file name, referred as fnamewffdkde
+   ! According to getdkde and irddkde, build _1WF file name, referred as fnamewffdkde
    stringfile='_1WF' ; stringvar='dkde'
-   call mkfilename(filnam,fnamewffdkde,dtset%getdkde,idtset,0,jdtset_,ndtset,stringfile,stringvar,will_read)
+   call mkfilename(filnam,fnamewffdkde,dtset%getdkde,idtset,dtset%irddkde,jdtset_,ndtset,stringfile,stringvar,will_read)
  end if
 
 !-------------------------------------------------------------------------------------------
