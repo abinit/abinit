@@ -640,7 +640,6 @@ type, public :: dataset_type
  integer :: rfphon
  integer :: rfstrs
  integer :: rfstrs_ref
- integer :: rfuser
  integer :: rf2_dkdk
  integer :: rf2_dkde
  integer :: rmm_diis = 0
@@ -882,6 +881,7 @@ type, public :: dataset_type
  real(dp) :: exchmix
  real(dp) :: fband
  real(dp) :: fermie_nest = zero
+ real(dp) :: fock_rcut
  real(dp) :: focktoldfe
  real(dp) :: freqim_alpha
  real(dp) :: freqremin = zero
@@ -892,6 +892,7 @@ type, public :: dataset_type
  real(dp) :: frictionbar
  real(dp) :: fxcartfactor
  real(dp) :: ga_opt_percent
+ real(dp) :: gw_rcut
  real(dp) :: gwencomp = 2.0_dp
  real(dp) :: gwls_model_parameter         ! Parameter used in dielectric function model
  real(dp) :: gwr_tolqpe = 0.01 * eV_Ha
@@ -1721,6 +1722,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gwr_ucsc_batch     = dtin%gwr_ucsc_batch
  dtout%fockoptmix         = dtin%fockoptmix
  dtout%fock_icutcoul      = dtin%fock_icutcoul
+ dtout%fock_rcut          = dtin%fock_rcut
  dtout%freqim_alpha       = dtin%freqim_alpha
  dtout%freqremin          = dtin%freqremin
  dtout%freqremax          = dtin%freqremax
@@ -1814,6 +1816,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gw_frqre_inzgrid   = dtin%gw_frqre_inzgrid
  dtout%gw_frqre_tangrid   = dtin%gw_frqre_tangrid
  dtout%gw_invalid_freq    = dtin%gw_invalid_freq
+ dtout%gw_rcut            = dtin%gw_rcut
  dtout%gw_qprange         = dtin%gw_qprange
  dtout%gw_sigxcore        = dtin%gw_sigxcore
 
@@ -2140,7 +2143,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%rfphon             = dtin%rfphon
  dtout%rfstrs             = dtin%rfstrs
  dtout%rfstrs_ref         = dtin%rfstrs_ref
- dtout%rfuser             = dtin%rfuser
  dtout%rf2_dkdk           = dtin%rf2_dkdk
  dtout%rf2_dkde           = dtin%rf2_dkde
  dtout%rmm_diis           = dtin%rmm_diis
@@ -2820,7 +2822,6 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
  if(dtset%rfphon==1)rfpert(dtset%rfatpol(1):dtset%rfatpol(2))=1
 
  if(dtset%rfddk==1)rfpert(dtset%natom+1)=1
- if(dtset%rfddk==2)rfpert(dtset%natom+6)=1
 
  if(dtset%rf2_dkdk/=0) rfpert(dtset%natom+10)=1
  if(dtset%rf2_dkde/=0) rfpert(dtset%natom+11)=1
@@ -2830,9 +2831,6 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
 
  if(dtset%rfstrs==1.or.dtset%rfstrs==3)rfpert(dtset%natom+3)=1
  if(dtset%rfstrs==2.or.dtset%rfstrs==3)rfpert(dtset%natom+4)=1
-
- if(dtset%rfuser==1.or.dtset%rfuser==3)rfpert(dtset%natom+6)=1
- if(dtset%rfuser==2.or.dtset%rfuser==3)rfpert(dtset%natom+7)=1
 
  if(dtset%rfmagn==1) rfpert(dtset%natom+5)=1
 
@@ -3634,7 +3632,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' fit_nfixcoeff fit_nimposecoeff fit_rangePower fit_SPCoupling fit_SPC_maxS'
  list_vars=trim(list_vars)//' fit_tolGF fit_tolMSDE fit_tolMSDF fit_tolMSDFS fit_tolMSDS fit_max_nbody'
  list_vars=trim(list_vars)//' fit_weight_T'
- list_vars=trim(list_vars)//' fockoptmix focktoldfe fockdownsampling fock_icutcoul'
+ list_vars=trim(list_vars)//' fockoptmix focktoldfe fockdownsampling fock_icutcoul fock_rcut'
  list_vars=trim(list_vars)//' freqim_alpha freqremax freqremin freqspmax'
  list_vars=trim(list_vars)//' freqspmin friction frictionbar frzfermi fxcartfactor'
  list_vars=trim(list_vars)//' f4of2_sla f6of2_sla'
@@ -3659,7 +3657,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' gwpara gwrpacorr gwgmcorr gw_customnfreqsp gw1rdm'
  list_vars=trim(list_vars)//' gw_frqim_inzgrid gw_frqre_inzgrid gw_frqre_tangrid gw_freqsp'
  list_vars=trim(list_vars)//' gw_icutcoul gw_invalid_freq'
- list_vars=trim(list_vars)//' gw_nqlwl gw_qlwl gw_qprange gw_sigxcore'
+ list_vars=trim(list_vars)//' gw_nqlwl gw_qlwl gw_qprange gw_rcut gw_sigxcore'
  list_vars=trim(list_vars)//' gwls_stern_kmax gwls_kmax_complement gwls_kmax_poles'
  list_vars=trim(list_vars)//' gwls_kmax_analytic gwls_kmax_numeric'
  list_vars=trim(list_vars)//' gwls_list_proj_freq gwls_nseeds gwls_n_proj_freq gwls_recycle'
@@ -3766,7 +3764,7 @@ subroutine chkvars(string)
 !list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar restartxf rfasr'
  list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar restartxf'
  list_vars=trim(list_vars)//' rfatpol rfddk rfdir rfelfd rfmagn rfmeth rfphon'
- list_vars=trim(list_vars)//' rfstrs rfstrs_ref rfuser rf2_dkdk rf2_dkde rf2_pert1_dir rf2_pert2_dir rhoqpmix rifcsph rprim'
+ list_vars=trim(list_vars)//' rfstrs rfstrs_ref rf2_dkdk rf2_dkde rf2_pert1_dir rf2_pert2_dir rhoqpmix rifcsph rprim'
  list_vars=trim(list_vars)//' rmm_diis rmm_diis_savemem'
  list_vars=trim(list_vars)//' rcpaw_scenergy rcpaw_nfrpaw rcpaw_frocc rcpaw_tolnc rcpaw_nfrtnc rcpaw_frtypat'
 !S

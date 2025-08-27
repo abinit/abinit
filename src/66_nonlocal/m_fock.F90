@@ -110,6 +110,10 @@ module m_fock
     !==0 if the normal Fock operator is to be created and/or used
     !==1 if the ACE operator is to be created and/or used
 
+  integer :: fock_icutcoul
+    ! contains input variable fock_icutcoul that specifies the treatment of the Coulomb interaction (cutoff in real-space,
+    ! divergence treatment etc.)
+
   integer ABI_PRIVATE :: getghc_call_ = 1
   ! 1 if fock_getghc should be called in getghc, 0 otherwise
 
@@ -146,6 +150,9 @@ module m_fock
 
   real(dp) :: hyb_range_fock
     ! hybrid range for separation, used in the fock contribution
+
+  real(dp) :: rcut
+    ! contains input variable rcut that specifies the cutoff radius for spherical cutoff
 
   real(dp) :: e_fock0
     ! contribution of the Fock term to energy (computed and stored here in case of ACE)
@@ -629,12 +636,15 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
      ABI_MALLOC(fockcommon%forces_ikpt,(3,dtset%natom,nband))
      ABI_MALLOC(fockcommon%forces,(3,dtset%natom))
      fockcommon%forces=zero
-   endif
+   end if
    use_ACE=1 ! Default. Normal users do not have access to this variable, although the next line allows experts to make tests.
    if(dtset%userie==1729)use_ACE=0 ! Hidden possibility to disable ACE
 
    fockcommon%use_ACE=use_ACE
    call fockbz_create(fockbz,mgfft,dtset%mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_ACE)
+
+   fockcommon%fock_icutcoul = dtset%fock_icutcoul
+   fockcommon%rcut = dtset%fock_rcut
 
 !* Initialize %mband, %mkpt, %mkptband = size of arrays
    fockcommon%mband=mband
@@ -1136,7 +1146,7 @@ subroutine fock_updateikpt(fock,ikpt,isppol)
 !* Set all the Fock contributions to the forces to 0.d0.
    if ((fock%optfor).and.(fock%use_ACE==0)) then
      fock%forces_ikpt=zero
-   endif
+   end if
 
 end subroutine fock_updateikpt
 !!***
@@ -1228,7 +1238,7 @@ subroutine fock_common_destroy(fock)
  if (allocated(fock%pawfgrtab)) then
     call pawfgrtab_free(fock%pawfgrtab)
     ABI_FREE(fock%pawfgrtab)
- endif
+ end if
 
  ! Put the integer to 0
  fock%ieigen=0
@@ -1237,7 +1247,7 @@ subroutine fock_common_destroy(fock)
 
  if (allocated(fock%symrec)) then
     ABI_FREE(fock%symrec)
- endif
+ end if
 
 !* [description of divergence in |q+G|=0]
 !* Put the real (dp) to 0
@@ -1267,7 +1277,7 @@ subroutine fock_BZ_destroy(fock)
  if (allocated(fock%cwaveocc_prj)) then
    call pawcprj_free(fock%cwaveocc_prj)
    ABI_FREE(fock%cwaveocc_prj)
- endif
+ end if
  ! Deallocate integer arrays
 
  ABI_SFREE(fock%kg_bz)
@@ -1393,7 +1403,7 @@ subroutine fock_calc_ene(dtset,fock,fock_energy,ikpt,nband,occ)
 !* accumulate Fock contributions to the forces.
 !     if (fock%optfor) then
        fock%forces(:,:)=fock%forces(:,:)+occ(iband)*dtset%wtk(ikpt)*fock%forces_ikpt(:,:,iband)
-!     endif
+!     end if
    end if
  end do
 
@@ -1957,23 +1967,19 @@ end subroutine fock_print
 !! bare_vqg
 !!
 !! FUNCTION
-!! Compute bare coulomb term in G-space on the FFT mesh i.e. 4pi/(G+q)**2
+!! Compute bare coulomb term in G-space on the FFT mesh i.e. 4pi/(G+q)**2 for a specified qpoint
 !!
 !! INPUTS
-!!  qphon(3)=reduced coordinates for the phonon wavelength (needed if cplex==2).
-!!  gsqcut=cutoff value on G**2 for sphere inside fft box. (gsqcut=(boxcut**2)*ecut/(2.d0*(Pi**2))
-!!  icutcoul=Option for the Coulomb potential cutoff technique
-!!  divgq0= value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq. Used if q = Gamma
+!!  qpoint(3)=reduced coordinates for the phonon wavelength
+!!  fockcommon=all the technical details of the Fock operator
 !!  gmet(3,3)=metrix tensor in G space in Bohr**-2.
-!!  izero=if 1, unbalanced components of V(q,g) are set to zero # Used by the PAW library
-!!  hyb_mixing=hybrid mixing coefficient for the Fock contribution
-!!  hyb_mixing_sr=hybrid mixing coefficient for the short-range Fock contribution
-!!  hyb_range_fock=hybrid range for separation
 !!  nfft=Total number of FFT grid points.
+!!  nkpt_bz=total number of kpoints in the full BZ
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
+!!  ucvol=unitcell volume
 !!
 !! OUTPUT
-!!  vqg(nfft)=4pi/(G+q)**2, G=0 component is set to divgq0/pi if q = Gamma.
+!!  vqg(nfft)=4pi/(G+q)**2, G=0 component is set to an analytic value if q = Gamma.
 !!
 !! NOTES
 !!  This routine operates on the full FFT mesh. DO NOT PASS MPI_TYPE
@@ -1982,171 +1988,50 @@ end subroutine fock_print
 !!
 !! SOURCE
 
-subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_fock,nfft,nkpt_bz,ngfft,ucvol,vqg)
+subroutine bare_vqg(qpoint,fockcommon,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: izero,nfft,nkpt_bz
- real(dp),intent(in) :: gsqcut,hyb_mixing,hyb_mixing_sr,hyb_range_fock,ucvol
+ type(fock_common_type),intent(in) :: fockcommon
+ integer,intent(in) :: nfft,nkpt_bz
+ real(dp),intent(in) :: ucvol
 !arrays
  integer,intent(in) :: ngfft(18)
- real(dp),intent(in) :: qphon(3)
+ real(dp),intent(in) :: qpoint(3)
  real(dp),intent(inout) :: gmet(3,3)
  real(dp),intent(out) ::  vqg(nfft)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: cplex1=1
- integer :: i1,i2,i23,i3,id1,id2,id3
- integer :: ig,ig1min,ig1,ig1max,ig2,ig2min,ig2max,ig3,ig3min,ig3max
- integer :: ii,ii1,ing,n1,n2,n3,qeq0,qeq05
- real(dp),parameter :: tolfix=1.000000001e0_dp ! Same value as the one used in hartre
- real(dp) :: cutoff,gs,rcut,divgq0,gqg2p3,gqgm12,gqgm13,gqgm23,gs2,gs3
- !character(len=500) :: msg
- logical  :: shortrange
-!arrays
- integer :: id(3)
- real(dp),allocatable :: gq(:,:)
+ integer :: izero
+ real(dp) :: rcut,gqgm12,gqgm13,gqgm23,gs2,gs3
+ real(dp) ::  vqg_sr(nfft)
 
 ! *************************************************************************
 
- if (abs(hyb_mixing_sr)>tol8.and.abs(hyb_range_fock)<tol8) then
+ if (abs(fockcommon%hyb_mixing_sr)>tol8.and.abs(fockcommon%hyb_range_fock)<tol8) then
    ABI_BUG('SR mixing<>0 while range separation=0!')
  end if
 
-!Treatment of the divergence at q+g=zero
-!For the time being, only Spencer-Alavi scheme...
- rcut= (three*nkpt_bz*ucvol/four_pi)**(one/three)
- divgq0= two_pi*rcut**two
+ izero = fockcommon%usepaw
 
-!Initialize a few quantities
- n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
- cutoff=gsqcut*tolfix
- vqg=zero
+ vqg = zero
 
-!Some peculiar values of q
- qeq0=0; if(qphon(1)**2+qphon(2)**2+qphon(3)**2<1.d-15) qeq0=1
- qeq05=0
- if (qeq0==0) then
-   if (abs(abs(qphon(1))-half)<tol12.or.abs(abs(qphon(2))-half)<tol12.or. &
-&   abs(abs(qphon(3))-half)<tol12) qeq05=1
+ if (abs(fockcommon%hyb_mixing)>tol8) then
+    call barevcoul(fockcommon%rcut,fockcommon%fock_icutcoul,qpoint,fockcommon%gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,izero,vqg)
+    ! Rescale the interaction with the factor hyb_mixing
+    vqg = vqg * fockcommon%hyb_mixing
  end if
 
-!In order to speed the routine, precompute the components of g+q
-!Also check if the booked space was large enough...
- ABI_MALLOC(gq,(3,max(n1,n2,n3)))
- do ii=1,3
-   id(ii)=ngfft(ii)/2+2
-   do ing=1,ngfft(ii)
-     ig=ing-(ing/id(ii))*ngfft(ii)-1
-     gq(ii,ing)=ig+qphon(ii)
-   end do
- end do
- ig1max=-1;ig2max=-1;ig3max=-1
- ig1min=n1;ig2min=n2;ig3min=n3
-
- id1=n1/2+2;id2=n2/2+2;id3=n3/2+2
-
- if (abs(hyb_mixing)>tol8) then
-    shortrange=.false.
-    rcut= (three*nkpt_bz*ucvol/four_pi)**(one/three)
-    call barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg,shortrange)
-    vqg=vqg*hyb_mixing
-    if (hyb_range_fock>tol8)then
-       vqg(1)=hyb_mixing*divgq0+hyb_mixing*(pi/hyb_range_fock**2)
-    endif
+ if (abs(fockcommon%hyb_mixing_sr)>tol8) then
+    rcut= one / fockcommon%hyb_range_fock
+    vqg_sr = zero
+    call barevcoul(rcut,fockcommon%fock_icutcoul,qpoint,fockcommon%gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,izero,vqg_sr,shortrange=.true.)
+    ! Rescale the interaction with the factor hyb_mixing_sr and add it to the full range one
+    vqg = vqg + vqg_sr * fockcommon%hyb_mixing_sr
  end if
 
- if (abs(hyb_mixing_sr)>tol8) then
-    shortrange=.true.
-    rcut=hyb_range_fock
-    call barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg,shortrange)
-    vqg=vqg*hyb_mixing_sr
-!    if (hyb_range_fock>tol8)then
-!       vqg(1)=hyb_mixing*divgq0+hyb_mixing_sr*pi/hyb_range_fock**2
-!    endif
- end if
 
- ! Triple loop on each dimension
- do i3=1,n3
-   ig3=i3-(i3/id3)*n3-1
-   ! Precompute some products that do not depend on i2 and i1
-   gs3=gq(3,i3)*gq(3,i3)*gmet(3,3)
-   gqgm23=gq(3,i3)*gmet(2,3)*2
-   gqgm13=gq(3,i3)*gmet(1,3)*2
-
-   do i2=1,n2
-     ig2=i2-(i2/id2)*n2-1
-     gs2=gs3+ gq(2,i2)*(gq(2,i2)*gmet(2,2)+gqgm23)
-     gqgm12=gq(2,i2)*gmet(1,2)*2
-     gqg2p3=gqgm13+gqgm12
-
-     i23=n1*(i2-1 +(n2)*(i3-1))
-     ! Do the test that eliminates the Gamma point outside of the inner loop
-     ii1=1
-     if (i23==0 .and. qeq0==1  .and. ig2==0 .and. ig3==0) then
-       ii1=2
-       ! value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq
-       vqg(1+i23)=hyb_mixing*divgq0
-
-!      Note the combination of Spencer-Alavi and Erfc screening
-       if (abs(hyb_range_fock)>tol8)then
-         vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*(pi/hyb_range_fock**2)
-!        This would give a combination of Spencer-Alavi and Erfc screening,
-!        unfortunately, it modifies also the tests for pure HSE06, so was not retained.
-!        vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*min(divgq0,pi/(hyb_range_fock**2))
-       endif
-
-     end if
-
-     ! Final inner loop on the first dimension (note the lower limit)
-     do i1=ii1,n1
-       gs=gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
-
-       ii=i1+i23
-
-       if(gs<=cutoff)then
-         ! Identify min/max indexes (to cancel unbalanced contributions later)
-         ! Count (q+g)-vectors with similar norm
-         if ((qeq05==1).and.(izero==1)) then
-           ig1=i1-(i1/id1)*n1-1
-           ig1max=max(ig1max,ig1); ig1min=min(ig1min,ig1)
-           ig2max=max(ig2max,ig2); ig2min=min(ig2min,ig2)
-           ig3max=max(ig3max,ig3); ig3min=min(ig3min,ig3)
-         end if
-
-       end if ! Cut-off
-     end do ! End loop on i1
-   end do ! End loop on i2
- end do ! End loop on i3
-
-
- if (izero==1) then
-   ! Set contribution of unbalanced components to zero
-   if (qeq0==1) then !q=0
-     call zerosym(vqg,cplex1,n1,n2,n3)
-   else if (qeq05==1) then
-     !q=1/2; this doesn't work in parallel
-     ig1=-1;if (mod(n1,2)==0) ig1=1+n1/2
-     ig2=-1;if (mod(n2,2)==0) ig2=1+n2/2
-     ig3=-1;if (mod(n3,2)==0) ig3=1+n3/2
-     if (abs(abs(qphon(1))-half)<tol12) then
-       if (abs(ig1min)<abs(ig1max)) ig1=abs(ig1max)
-       if (abs(ig1min)>abs(ig1max)) ig1=n1-abs(ig1min)
-     end if
-     if (abs(abs(qphon(2))-half)<tol12) then
-       if (abs(ig2min)<abs(ig2max)) ig2=abs(ig2max)
-       if (abs(ig2min)>abs(ig2max)) ig2=n2-abs(ig2min)
-     end if
-     if (abs(abs(qphon(3))-half)<tol12) then
-       if (abs(ig3min)<abs(ig3max)) ig3=abs(ig3max)
-       if (abs(ig3min)>abs(ig3max)) ig3=n3-abs(ig3min)
-     end if
-     call zerosym(vqg,cplex1,n1,n2,n3,ig1=ig1,ig2=ig2,ig3=ig3)
-   end if
- end if
-
- ABI_FREE(gq)
 
 end subroutine bare_vqg
 !!***
@@ -2159,12 +2044,8 @@ end subroutine bare_vqg
 !! Compute Fock energy contribution to stress tensor (Cartesian coordinates).
 !!
 !! INPUTS
-!!  gsqcut=cutoff value on $G^2$ for (large) sphere inside fft box.
-!!  $gsqcut=(boxcut^2)*ecut/(2._dp*(\pi^2))$
+!!  fockcommon= basic information for fock calculations
 !!  gprimd(3,3)=reciprocal space dimensional primitive translations
-!!  hyb_mixing=hybrid mixing coefficient for the Fock contribution
-!!  hyb_mixing_sr=hybrid mixing coefficient for the short-range Fock contribution
-!!  hyb_range_fock=hybrid range for separation
 !!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
@@ -2173,7 +2054,6 @@ end subroutine bare_vqg
 !!  rhog(2,nfft)=Fourier transform of charge density (bohr^-3)
 !!  rhog2(2,nfft)= optional argument: Fourier transform of a second charge density (bohr^-3)
 !!  ucvol=unit cell volume (bohr^3)
-!!  vqg(nfft)=4pi/(G+q)**2
 !!
 !! OUTPUT
 !!  fockstr(6)=components of Fock part of stress tensor
@@ -2183,34 +2063,36 @@ end subroutine bare_vqg
 !!
 !! SOURCE
 
-subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock,mpi_enreg,nfft,ngfft,&
+subroutine strfock(fockcommon,gprimd,fockstr,mpi_enreg,nfft,ngfft,&
                    nkpt_bz,ndat,rhog,ucvol,qphon,&
-                   rhog2,gpu_option) ! optional argument
+                   rhog2,gpu_option) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,nkpt_bz,ndat
  integer,intent(in),optional :: gpu_option
- real(dp),intent(in) :: gsqcut,hyb_mixing,hyb_mixing_sr,hyb_range_fock,ucvol
+ real(dp),intent(in) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: gprimd(3,3),rhog(2,nfft,ndat),qphon(3)
  real(dp),intent(in),optional :: rhog2(2,nfft,ndat)
  real(dp),intent(out) :: fockstr(6,ndat)
+ type(fock_common_type),intent(in) :: fockcommon
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: im=2,re=1
  integer :: i1,i2,i3,id1,id2,id3,ierr,ig1,ig2,ig3,ii,irho2,idat,me_fft,n1,n2,n3,nproc_fft
- real(dp) :: arg,cutoff,gsquar,rcut,rhogsq,tolfix=1.000000001_dp,tot,tot1,divgq0
+ real(dp) :: arg,cutoff,gsquar,rcut,rhogsq,tolfix=1.000000001_dp,tot,tot1
+ logical :: rcut_spencer_alavi
 #ifdef HAVE_OPENMP_OFFLOAD
  ! Cray has trouble with reduction on array, so we use 6 scalars instead
  real(dp) :: fockstr1,fockstr2,fockstr3,fockstr4,fockstr5,fockstr6
 #endif
  !character(len=500) :: msg
 !arrays
- real(dp) :: gcart(3),tsec(2)
+ real(dp) :: gcart(3),tsec(2),gmet(3,3),vqg(nfft)
  real(dp), allocatable :: v_gcart(:,:,:,:)
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
@@ -2219,22 +2101,31 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
 
  call timab(568,1,tsec)
 
- if (abs(hyb_mixing_sr)>tol8.and.abs(hyb_range_fock)<tol8) then
+ if (abs(fockcommon%hyb_mixing_sr)>tol8.and.abs(fockcommon%hyb_range_fock)<tol8) then
    ABI_BUG('strfock: SR mixing<>0 while range separation=0!')
  end if
+
+ gmet = MATMUL(TRANSPOSE(gprimd),gprimd)
+ call bare_vqg(qphon,fockcommon,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
 
  !if(gpu_option==ABI_GPU_DISABLED) then
    fockstr(:,:)=zero
  !else(gpu_option==ABI_GPU_OPENMP) then
  !  gpu_set_to_zero(fockstr, 6*ndat)
  !end if
- rcut= (three*nkpt_bz*ucvol/four_pi)**(one/three)
- irho2=0;if (present(rhog2)) irho2=1
- divgq0=two_pi/three*rcut**2
 
-!Conduct looping over all fft grid points to find G vecs inside gsqcut
-!Include G**2 on surface of cutoff sphere as well as inside:
- cutoff=gsqcut*tolfix
+ ! fockcommon%rcut is zero, rcut is a function of the cell volume (Spencer-Alavi scheme)
+ ! Therefore gives a contribution to the stress 
+ rcut_spencer_alavi = fockcommon%rcut<tol8
+ if(rcut_spencer_alavi) then
+   rcut = (three*nkpt_bz*ucvol/four_pi)**(one/three)
+ else
+   rcut = fockcommon%rcut
+ endif
+ irho2=0;if (present(rhog2)) irho2=1
+
+!Conduct looping over all fft grid points to find G vecs inside fockcommon%gsqcut
+
  n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
  me_fft=ngfft(11)
  nproc_fft=ngfft(10)
@@ -2267,6 +2158,9 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
          gcart(3)=gprimd(3,1)*(dble(ig1)+qphon(1))+gprimd(3,2)*(dble(ig2)+qphon(2))+gprimd(3,3)*(dble(ig3)+qphon(3))
 !        Compute |G+q|^2
          gsquar=gcart(1)**2+gcart(2)**2+gcart(3)**2
+
+
+
 !        take |rho(G)|^2 for complex rhog
          if (irho2==0) then
            rhogsq=rhog(re,ii,idat)**2+rhog(im,ii,idat)**2
@@ -2275,26 +2169,31 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
          end if
 !        Case G=0:
          if(gsquar<tol10) then
-           if (abs(hyb_mixing_sr)>tol8) cycle
-           if (abs(hyb_mixing)>tol8) then
-             fockstr(1,idat)=fockstr(1,idat)+hyb_mixing*divgq0*rhogsq
-             fockstr(2,idat)=fockstr(2,idat)+hyb_mixing*divgq0*rhogsq
-             fockstr(3,idat)=fockstr(3,idat)+hyb_mixing*divgq0*rhogsq
+           if (abs(fockcommon%hyb_mixing_sr)>tol8) cycle
+           if (abs(fockcommon%hyb_mixing)>tol8) then
+             if (rcut_spencer_alavi) then
+               ! vqg(1) already contains the factor fockcommon%hyb_mixing
+               fockstr(1,idat)=fockstr(1,idat)+vqg(1)/3.0_dp*rhogsq
+               fockstr(2,idat)=fockstr(2,idat)+vqg(1)/3.0_dp*rhogsq
+               fockstr(3,idat)=fockstr(3,idat)+vqg(1)/3.0_dp*rhogsq
+             endif
              cycle
            end if
          end if
 
-!        Spencer-Alavi screening
-         if (abs(hyb_mixing)>tol8) then
+!        Spherical cutoff screening
+         if (abs(fockcommon%hyb_mixing)>tol8) then
            arg=two_pi*rcut*sqrt(gsquar)
-           tot=hyb_mixing*rhogsq*piinv/(gsquar**2)*(1-cos(arg)-arg*sin(arg)/two)
-           tot1=hyb_mixing*rhogsq/three*rcut*sin(arg)/sqrt(gsquar)
+           tot=fockcommon%hyb_mixing*rhogsq*piinv/(gsquar**2)*(1-cos(arg)-arg*sin(arg)/two)
+           if (rcut_spencer_alavi) then
+             tot1=fockcommon%hyb_mixing*rhogsq/three*rcut*sin(arg)/sqrt(gsquar)
+           end if
          end if
 
 !        Erfc screening
-         if (abs(hyb_mixing_sr)>tol8) then
-           arg=-gsquar*pi**2/(hyb_range_fock**2)
-           tot=tot+hyb_mixing_sr*rhogsq*piinv/(gsquar**2)*(1.d0-exp(arg)*(1-arg))
+         if (abs(fockcommon%hyb_mixing_sr)>tol8) then
+           arg=-gsquar*pi**2/(fockcommon%hyb_range_fock**2)
+           tot=tot+fockcommon%hyb_mixing_sr*rhogsq*piinv/(gsquar**2)*(1.d0-exp(arg)*(1-arg))
          end if
          fockstr(1,idat)=fockstr(1,idat)+tot*gcart(1)*gcart(1)+tot1
          fockstr(2,idat)=fockstr(2,idat)+tot*gcart(2)*gcart(2)+tot1
@@ -2354,25 +2253,30 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
            rhogsq=rhog(re,ii,idat)**2+rhog(im,ii,idat)**2
   !        Case G=0:
            if(gsquar<tol10) then
-             if (abs(hyb_mixing)>tol8 .and. abs(hyb_mixing_sr)<tol8) then
-               fockstr1=fockstr1+hyb_mixing*divgq0*rhogsq
-               fockstr2=fockstr2+hyb_mixing*divgq0*rhogsq
-               fockstr3=fockstr3+hyb_mixing*divgq0*rhogsq
+             if (abs(fockcommon%hyb_mixing)>tol8 .and. abs(fockcommon%hyb_mixing_sr)<tol8) then
+               ! vqg(1) already contains the factor fockcommon%hyb_mixing
+               if (rcut_spencer_alavi) then
+                 fockstr1=fockstr1+vqg(1)/3.0_dp*rhogsq
+                 fockstr2=fockstr2+vqg(1)/3.0_dp*rhogsq
+                 fockstr3=fockstr3+vqg(1)/3.0_dp*rhogsq
+               end if
              end if
 
            else
 
-    !        Spencer-Alavi screening
-             if (abs(hyb_mixing)>tol8) then
+    !        Spherical cutoff screening
+             if (abs(fockcommon%hyb_mixing)>tol8) then
                arg=two_pi*rcut*sqrt(gsquar)
-               tot=hyb_mixing*rhogsq*piinv/(gsquar**2)*(1-cos(arg)-arg*sin(arg)/two)
-               tot1=hyb_mixing*rhogsq/three*rcut*sin(arg)/sqrt(gsquar)
+               tot=fockcommon%hyb_mixing*rhogsq*piinv/(gsquar**2)*(1-cos(arg)-arg*sin(arg)/two)
+               if (rcut_spencer_alavi) then
+                 tot1=fockcommon%hyb_mixing*rhogsq/three*rcut*sin(arg)/sqrt(gsquar)
+               end if
              end if
 
     !        Erfc screening
-             if (abs(hyb_mixing_sr)>tol8) then
-               arg=-gsquar*pi**2/(hyb_range_fock**2)
-               tot=tot+hyb_mixing_sr*rhogsq*piinv/(gsquar**2)*(1.d0-exp(arg)*(1-arg))
+             if (abs(fockcommon%hyb_mixing_sr)>tol8) then
+               arg=-gsquar*pi**2/(fockcommon%hyb_range_fock**2)
+               tot=tot+fockcommon%hyb_mixing_sr*rhogsq*piinv/(gsquar**2)*(1.d0-exp(arg)*(1-arg))
              end if
              fockstr1=fockstr1+tot*v_gcart(1,i1,i2,i3)*v_gcart(1,i1,i2,i3)+tot1
              fockstr2=fockstr2+tot*v_gcart(2,i1,i2,i3)*v_gcart(2,i1,i2,i3)+tot1
