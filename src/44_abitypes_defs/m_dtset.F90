@@ -362,6 +362,9 @@ type, public :: dataset_type
  integer :: irandom
  integer :: irdchkprdm = 0
  integer :: irdddb = 0
+ integer :: irddkdk = 0
+ integer :: irddkde = 0
+ integer :: irddelfd = 0
  integer :: irddvdb = 0
  integer :: irddrhodb = 0
  integer :: irdddk = 0
@@ -1881,6 +1884,9 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%irddrhodb          = dtin%irddrhodb
  dtout%irdddk             = dtin%irdddk
  dtout%irdden             = dtin%irdden
+ dtout%irddkdk            = dtin%irddkdk
+ dtout%irddkde            = dtin%irddkde
+ dtout%irddelfd           = dtin%irddelfd
  dtout%irdefmas           = dtin%irdefmas
  dtout%irdhaydock         = dtin%irdhaydock
  dtout%irdkden            = dtin%irdkden
@@ -3673,10 +3679,9 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
  list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb indata_prefix intxc invovl_blksliced iomode ionmov iqpt'
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'
- list_vars=trim(list_vars)//' irdbseig irdbsreso irdchkprdm irdddb irdddk irdden irdkden irddvdb irddrhodb irdefmas'
- list_vars=trim(list_vars)//' irdhaydock irdpawden irdqps'
- list_vars=trim(list_vars)//' irdscr irdsuscep irdwfk irdwfq ird1den'
- list_vars=trim(list_vars)//' irdwfkfine'
+ list_vars=trim(list_vars)//' irdbseig irdbsreso irdchkprdm irdddb irdddk irdden irdkden irddkdk irddkde irddelfd' 
+ list_vars=trim(list_vars)//' irddvdb irddrhodb irdefmas'
+ list_vars=trim(list_vars)//' irdhaydock irdpawden irdqps irdscr irdsuscep irdwfk irdwfq ird1den irdwfkfine'
  list_vars=trim(list_vars)//' ird1wf iscf isecur istatimg istatr'
  list_vars=trim(list_vars)//' istatshft istwfk ixc ixc_sigma ixcpositron ixcrot irdvdw ivalence'
 !J

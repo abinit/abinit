@@ -24,7 +24,7 @@ If you have never used another electronic structure code or a Quantum
 Chemistry package, you should complete such reading by going (at your own
 pace) through the Chaps. 1 to 13 , and appendices L and M of R.M. Martin's book [[cite:Martin2004]].
 
-After having gone through the present New User's Guide, you should follow the [ABINIT tutorial](/tutorial/).
+After having gone through the present New User's Guide, you should follow the [ABINIT tutorials](/tutorial/).
 
 ## Introduction
 
@@ -34,7 +34,7 @@ density and electronic structure of systems made of electrons and nuclei
 pseudopotentials and a planewave basis, or augmented plane waves, or even wavelets.
 
 Some possibilities of ABINIT go beyond Density Functional Theory,
-i.e. the many-body perturbation theory (GW approximation the Bethe-Salpether
+i.e. the many-body perturbation theory (GW approximation the Bethe-Salpeter
 equation), Time-Dependent Density Functional Theory, Dynamical Mean-Field
 Theory, the Allen-Heine-Cardona theory to find temperature-dependent electronic structure.
 
@@ -266,7 +266,7 @@ input file, are listed below:
 [[rfphon]]
 :       when = 1: will do response calculation to atomic displacements
 
-**Specification of the numerical convergency of the calculation:**
+**Specification of the numerical convergence of the calculation:**
 
 [[nstep]]
 :    maximal number of self-consistent cycles (on the order of 20)
@@ -307,7 +307,7 @@ There are also different temporary files, also constructed from a "root" name.
 Amongst these files, there is a "status" file, summarizing the current status of advancement of the
 code, in long jobs. The [[help:abinit|ABINIT help file]] contains more details.
 
-## What does the code do?
+## What the code does
 
 The simplest sort of job computes an electronic structure for a fixed set of
 atomic positions within a periodic unit cell. By electronic structure, we mean
@@ -356,7 +356,6 @@ capabilities, but the one with the largest last digit is more debugged than
 the other: version 8.8.3 is more debugged than 8.8.2, but no new features has
 been added (so likely, no additional bug!).
 
-In order to start using ABINIT, please follow [[tutorial:index|this tutorial.]]
-To learn how to compile the code from source, please consult the following guide:
+In order to start using ABINIT, please follow [[tutorial:index|the tutorials.]]
+The tutorials also include information about how to compile the code from source.
 
-<embed src="https://wiki.abinit.org/lib/exe/fetch.php?media=build:installing_abinit.pdf" type="application/pdf" width="100%" height="480px">
