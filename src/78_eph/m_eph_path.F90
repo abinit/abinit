@@ -177,7 +177,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  case ("q")
    kpath = kpath_new(dtset%kptbounds(:,1:dtset%nkpath), cryst%gprimd, dtset%ndivsm)
    nk_path = kpath%npts
-   call qpath%print(units, header=sjoin("k-point path for g(k,q) with fixed q:", ktoa(dtset%eph_fix_wavevec)), prtvol=dtset%prtvol)
+   call kpath%print(units, header=sjoin("k-point path for g(k,q) with fixed q:", ktoa(dtset%eph_fix_wavevec)), prtvol=dtset%prtvol)
    fake_path(:,1) = dtset%eph_fix_wavevec; fake_path(:,2) = dtset%eph_fix_wavevec + one
    qpath = kpath_new(fake_path, cryst%gprimd, 0)
    nq_path = 1
@@ -194,11 +194,11 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
  ! The values of eph_path_brange must be validated at this level!
  ABI_CHECK_IRANGE(bstart, 1, nband, "Wrong eph_path_brange(1)")
- ABI_CHECK_IRANGE(bstop, 1, nband, "Wrong eph_path_brange(2)t")
+ ABI_CHECK_IRANGE(bstop, 1, nband, "Wrong eph_path_brange(2)")
  ABI_CHECK_IGEQ(bstop, bstart, "eph_path_brange(2) < eph_path_brange(1)")
  call wrtout(units, sjoin("Computing g with eph_path_brange:", ltoa([bstart, bstop])))
 
- ! Distribute spins iside input comm.
+ ! Distribute spins inside input comm.
  call xmpi_split_nsppol(comm, nsppol, my_nspins, my_spins, comm_my_is)
 
  ! ==================
@@ -387,8 +387,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
    NCF_CHECK(ncerr)
 
    ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-    "nelect", "fermie"], &
-    [wfk_ebands%nelect, wfk_ebands%fermie &
+     "nelect", "fermie"], &
+     [wfk_ebands%nelect, wfk_ebands%fermie &
    ])
    NCF_CHECK(ncerr)
 
@@ -411,7 +411,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  ! Make sure the nc file has been written by master before continuing.
  call xmpi_barrier(comm)
 
- ! All procs open GPATH here.
+ ! All procs open the GPATH file here.
  ! FIXME
  !NCF_CHECK(nctk_open_modify(ncid, gpath_path, comm))
  NCF_CHECK(nctk_open_modify(ncid, gpath_path, xmpi_comm_self))
@@ -439,7 +439,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      call nscf%setup_kpt(spin, kk, istwfk_1, nband, cryst, dtset, psps, pawtab, pawfgr, &              ! in
                          npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal_k, cg_k, gsc_k, gs_ham_k) ! out
 
-     ! cache to initialize u_{nk}(g).
+     ! Cache to initialize u_{nk}(g).
      use_cg_k = (my_ik > 1 .and. ucache_k%use_cache)
      if (use_cg_k) call ucache_k%get_kpt(kk, istwfk_1, npw_k, nspinor, nband, kg_k, cg_k)
 
@@ -476,13 +476,13 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        use_cg_kq = (my_iq > 1 .and. ucache_kq%use_cache)
        if (use_cg_kq) call ucache_kq%get_kpt(kq, istwfk_1, npw_kq, nspinor, nband, kg_kq, cg_kq)
 
-       ! We can use cg_k as input for the NSCF for a very quick return
+       ! We can use cg_k as input for the NSCF for a very quick return.
        if (qq_is_gamma) then
          use_cg_kq = .True.; cg_kq = cg_k
        end if
 
-       call nscf%solve_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, gs_ham_kq, & ! in
-                           use_cg_kq, npw_kq, cg_kq, gsc_kq, eig_kq, msg, ierr)         ! out
+       call nscf%solve_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, gs_ham_kq, &
+                           use_cg_kq, npw_kq, cg_kq, gsc_kq, eig_kq, msg, ierr)
 
        ABI_WARNING_IF(ierr /= 0, msg)
        tot_nscf_ierr = tot_nscf_ierr + ierr
@@ -529,17 +529,16 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        ! Allocate vlocal1 with correct cplex. Note nvloc.
        ABI_MALLOC(vlocal1, (cplex*n4, n5, n6, gs_ham_kq%nvloc))
 
-       !===== Load the k/k+q dependent parts of the Hamiltonian
-       ! Load k-dependent part in the Hamiltonian datastructure
+       ! Load the k/k+q dependent parts of the Hamiltonian
+       ! NB: In this routine we have to use gs_ham_k to have {k+q}_H0_k.
+       ! Using gs_ham_kq would be wrong as it would lead to {k+q}_H0_{k+q}.
+
        !call gs_ham_kq%load_k(kpt_k=kk, npw_k=npw_k, istwf_k=istwfk_1, kg_k=kg_k, kpg_k=kpg_k, &
        !                      ph3d_k=ph3d_k, ffnl_k=ffnl_k, compute_ph3d=.false., compute_gbound=.true.)
 
        ! Load k+q-dependent part in the Hamiltonian datastructure
        !call gs_ham_kq%load_kprime(kpt_kp=kq, npw_kp=npw_kq, istwf_kp=istwfk_1, kg_kp=kg_kq, kpg_kp=kpg_kq, &
        !                           ph3d_kp=ph3d_kq, ffnl_kp=ffnl_kq, compute_ph3d=.false., compute_gbound=.true.)
-
-       ! In this routine we have to use gs_ham_k to have {k+q}_H0_k.
-       ! Using gs_ham_kq would be wrong as it would lead to {k+q}_H0_{k+q}.
 
        call gs_ham_k%load_kprime(kpt_kp=kq, npw_kp=npw_kq, istwf_kp=istwfk_1, kg_kp=kg_kq, kpg_kp=kpg_kq, kinpw_kp=kinpw_kq, &
                                  ph3d_kp=ph3d_kq, ffnl_kp=ffnl_kq, compute_ph3d=.true., compute_gbound=.true.)
@@ -558,7 +557,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
          call rf_ham_kq%load_spin(spin, vlocal1=vlocal1, with_nonlocal=.true.)
 
          ! Calculate dvscf * psi_k, results stored in h1kets_kq on the k+q sphere.
-         ! Compute H(1) applied to GS wavefunction Psi(0)
+         ! Compute H(1) applied to GS wavefunction Psi(0).
          do in_k=1,nb_in_g
            band_n = in_k + bstart - 1
            eig0nk = eig_k(band_n)
@@ -586,6 +585,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        ! Collect gkq_atm inside pert_comm so that all procs can operate on the data.
        if (pert_comm%nproc > 1) call xmpi_sum(gkq_atm, pert_comm%value, ierr)
 
+       ! From atom to phonon mode representation. Results stored in gkq_nu
        call ephtk_gkknu_from_atm(nb_in_g, nb_in_g, 1, natom, gkq_atm, phfreqs, displ_red, gkq_nu)
 
        ! Write |g|^2 for this q.
@@ -629,10 +629,11 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  if (my_rank == master) then
    if (tot_nscf_ierr == 0) then
      call wrtout(units, &
-       sjoin("Computation of g(k,q) completed. All NSCF runs converged within tolwfr", ftoa(dtset%tolwfr)))
+       sjoin("Computation of g(k,q) completed. All NSCF runs converged within tolwfr", ftoa(dtset%tolwfr)), pre_newlines=1)
    else
-     call wrtout(units, &
-       sjoin("WARNING:", itoa(tot_nscf_ierr), "NSCF runs did not converge within tolwfr", ftoa(dtset%tolwfr), ". Increase nstep!"))
+     msg = sjoin("WARNING:", itoa(tot_nscf_ierr), "NSCF runs did not converge within tolwfr", ftoa(dtset%tolwfr), ". Increase nstep!")
+     call wrtout(ab_out, msg)
+     ABI_WARNING(msg)
    end if
  end if
 
