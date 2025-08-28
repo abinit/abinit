@@ -1185,7 +1185,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  integer :: index_typsymb,index_upper,ipsp,iscf,intimage,itypat,leave,marr
  integer :: natnd,natom,nkpt,nkpthf,npsp,npspalch, ncid
  integer :: nqpt,nspinor,nsppol,ntypat,ntypalch,ntyppure,occopt,response
- integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
+ integer :: rfddk,rfelfd,rfphon,rfstrs,rf2_dkdk,rf2_dkde,rfmagn
  integer :: tfband,tnband,tread,tread_alt, my_rank, nprocs
  real(dp) :: cellcharge,cellcharge_min, fband,kptnrm,kptrlen,sum_spinat,zelect,zval
  character(len=1) :: blank=' ',string1
@@ -1226,7 +1226,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
 !---------------------------------------------------------------------------
 
- rfddk=0; rfelfd=0; rfphon=0; rfmagn=0; rfstrs=0; rfuser=0; rf2_dkdk=0; rf2_dkde=0
+ rfddk=0; rfelfd=0; rfphon=0; rfmagn=0; rfstrs=0; rf2_dkdk=0; rf2_dkde=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfddk',tread,'INT')
  if(tread==1) rfddk=intarr(1)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfelfd',tread,'INT')
@@ -1237,15 +1237,13 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(tread==1) rfphon=intarr(1)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfstrs',tread,'INT')
  if(tread==1) rfstrs=intarr(1)
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfuser',tread,'INT')
- if(tread==1) rfuser=intarr(1)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rf2_dkdk',tread,'INT')
  if(tread==1) rf2_dkdk=intarr(1)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rf2_dkde',tread,'INT')
  if(tread==1) rf2_dkde=intarr(1)
 
  response=0
- if(rfddk/=0.or.rf2_dkdk/=0.or.rf2_dkde/=0.or.rfelfd/=0.or.rfphon/=0.or.rfstrs/=0.or.rfuser/=0.or.rfmagn/=0)response=1
+ if(rfddk/=0.or.rf2_dkdk/=0.or.rf2_dkde/=0.or.rfelfd/=0.or.rfphon/=0.or.rfstrs/=0.or.rfmagn/=0)response=1
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optdriver',tread,'INT')
  if (tread==1) then
@@ -2444,7 +2442,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%focktoldfe=zero
    dtsets(idtset)%fockoptmix=0
    dtsets(idtset)%fockdownsampling(:)=1
-   dtsets(idtset)%fock_icutcoul=3
+   dtsets(idtset)%fock_icutcoul=0  ! Spherical-cutoff for legacy reasons
+   dtsets(idtset)%fock_rcut=zero   ! Spencer-Alavi by default
    dtsets(idtset)%freqim_alpha=five
    dtsets(idtset)%friction=0.001_dp
    dtsets(idtset)%frictionbar=0.001_dp
@@ -2480,6 +2479,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%gw_invalid_freq=0
    dtsets(idtset)%gw_icutcoul=6
    dtsets(idtset)%gw_qprange=0
+   dtsets(idtset)%gw_rcut=zero   ! Spencer-Alavi value by default
    dtsets(idtset)%gw_sigxcore=0
    dtsets(idtset)%gwls_stern_kmax=1
    dtsets(idtset)%gwls_model_parameter=1.0_dp
@@ -2773,7 +2773,6 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%rfphon=0
    dtsets(idtset)%rfstrs=0
    dtsets(idtset)%rfstrs_ref=0
-   dtsets(idtset)%rfuser=0
    dtsets(idtset)%rf2_dkdk=0
    dtsets(idtset)%rf2_dkde=0
    dtsets(idtset)%rf2_pert1_dir(1:3)=1
