@@ -178,6 +178,12 @@ _ WF disk file :      0.861 Mbytes ; DEN or POT disk file :      0.846 Mbytes.
            getwfk4          2
            getwfk5          2
            getwfk6          2
+          gw_rcut1     0.00000000E+00 Bohr
+          gw_rcut2     0.00000000E+00 Bohr
+          gw_rcut3     1.05000000E+01 Bohr
+          gw_rcut4     1.05000000E+01 Bohr
+          gw_rcut5     1.05000000E+01 Bohr
+          gw_rcut6     1.05000000E+01 Bohr
         gwcalctyp1          0
         gwcalctyp2          0
         gwcalctyp3         28
@@ -295,12 +301,6 @@ P           mkmem           1
            ppmfrq4     0.00000000E+00 Hartree
            ppmfrq5     5.00000000E-01 Hartree
            ppmfrq6     0.00000000E+00 Hartree
-             rcut1     0.00000000E+00 Bohr
-             rcut2     0.00000000E+00 Bohr
-             rcut3     1.05000000E+01 Bohr
-             rcut4     1.05000000E+01 Bohr
-             rcut5     1.05000000E+01 Bohr
-             rcut6     1.05000000E+01 Bohr
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -1315,6 +1315,12 @@ data: !SigmaeeData |
            getwfk4          2
            getwfk5          2
            getwfk6          2
+          gw_rcut1     0.00000000E+00 Bohr
+          gw_rcut2     0.00000000E+00 Bohr
+          gw_rcut3     1.05000000E+01 Bohr
+          gw_rcut4     1.05000000E+01 Bohr
+          gw_rcut5     1.05000000E+01 Bohr
+          gw_rcut6     1.05000000E+01 Bohr
         gwcalctyp1          0
         gwcalctyp2          0
         gwcalctyp3         28
@@ -1432,12 +1438,6 @@ P           mkmem           1
            ppmfrq4     0.00000000E+00 Hartree
            ppmfrq5     5.00000000E-01 Hartree
            ppmfrq6     0.00000000E+00 Hartree
-             rcut1     0.00000000E+00 Bohr
-             rcut2     0.00000000E+00 Bohr
-             rcut3     1.05000000E+01 Bohr
-             rcut4     1.05000000E+01 Bohr
-             rcut5     1.05000000E+01 Bohr
-             rcut6     1.05000000E+01 Bohr
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00

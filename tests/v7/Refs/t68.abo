@@ -289,6 +289,19 @@ _ WF disk file :      0.120 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
            getwfk11         1
            getwfk12         7
            getwfk13         7
+          gw_rcut1     0.00000000E+00 Bohr
+          gw_rcut2    -1.00000000E+00 Bohr
+          gw_rcut3    -1.00000000E+00 Bohr
+          gw_rcut4    -1.00000000E+00 Bohr
+          gw_rcut5    -1.00000000E+00 Bohr
+          gw_rcut6    -1.00000000E+00 Bohr
+          gw_rcut7     0.00000000E+00 Bohr
+          gw_rcut8     0.00000000E+00 Bohr
+          gw_rcut9    -1.00000000E+00 Bohr
+          gw_rcut10    0.00000000E+00 Bohr
+          gw_rcut11   -1.00000000E+00 Bohr
+          gw_rcut12    0.00000000E+00 Bohr
+          gw_rcut13   -1.00000000E+00 Bohr
         gwcalctyp1         25
         gwcalctyp2         25
         gwcalctyp3         25
@@ -645,19 +658,6 @@ P           mkmem           6
         optdriver13         4
         pawecutdg      4.00000000E+01 Hartree
            prtvol           2
-             rcut1     0.00000000E+00 Bohr
-             rcut2    -1.00000000E+00 Bohr
-             rcut3    -1.00000000E+00 Bohr
-             rcut4    -1.00000000E+00 Bohr
-             rcut5    -1.00000000E+00 Bohr
-             rcut6    -1.00000000E+00 Bohr
-             rcut7     0.00000000E+00 Bohr
-             rcut8     0.00000000E+00 Bohr
-             rcut9    -1.00000000E+00 Bohr
-             rcut10    0.00000000E+00 Bohr
-             rcut11   -1.00000000E+00 Bohr
-             rcut12    0.00000000E+00 Bohr
-             rcut13   -1.00000000E+00 Bohr
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -4955,6 +4955,19 @@ data: !SigmaeeData |
            getwfk11         1
            getwfk12         7
            getwfk13         7
+          gw_rcut1     0.00000000E+00 Bohr
+          gw_rcut2    -1.00000000E+00 Bohr
+          gw_rcut3    -1.00000000E+00 Bohr
+          gw_rcut4    -1.00000000E+00 Bohr
+          gw_rcut5    -1.00000000E+00 Bohr
+          gw_rcut6    -1.00000000E+00 Bohr
+          gw_rcut7     0.00000000E+00 Bohr
+          gw_rcut8     0.00000000E+00 Bohr
+          gw_rcut9    -1.00000000E+00 Bohr
+          gw_rcut10    0.00000000E+00 Bohr
+          gw_rcut11   -1.00000000E+00 Bohr
+          gw_rcut12    0.00000000E+00 Bohr
+          gw_rcut13   -1.00000000E+00 Bohr
         gwcalctyp1         25
         gwcalctyp2         25
         gwcalctyp3         25
@@ -5311,19 +5324,6 @@ P           mkmem           6
         optdriver13         4
         pawecutdg      4.00000000E+01 Hartree
            prtvol           2
-             rcut1     0.00000000E+00 Bohr
-             rcut2    -1.00000000E+00 Bohr
-             rcut3    -1.00000000E+00 Bohr
-             rcut4    -1.00000000E+00 Bohr
-             rcut5    -1.00000000E+00 Bohr
-             rcut6    -1.00000000E+00 Bohr
-             rcut7     0.00000000E+00 Bohr
-             rcut8     0.00000000E+00 Bohr
-             rcut9    -1.00000000E+00 Bohr
-             rcut10    0.00000000E+00 Bohr
-             rcut11   -1.00000000E+00 Bohr
-             rcut12    0.00000000E+00 Bohr
-             rcut13   -1.00000000E+00 Bohr
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00

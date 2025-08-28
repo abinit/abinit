@@ -383,10 +383,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  min_npw_xc = min(npw_x, npw_c)
  max_npw_xc = max(npw_x, npw_c)
  if (gsph_x%ng >= gsph_c%ng) then
-   call vcp%init(gsph_x, cryst, pp_mesh, kmesh, dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, gsph_x%ng, &
+   call vcp%init(gsph_x, cryst, pp_mesh, kmesh, dtset%gw_rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, gsph_x%ng, &
                  nqlwl, qlwl, comm)
  else
-   call vcp%init(gsph_c, cryst, pp_mesh, kmesh, dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, gsph_c%ng, &
+   call vcp%init(gsph_c, cryst, pp_mesh, kmesh, dtset%gw_rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, gsph_c%ng, &
                  nqlwl, qlwl, comm)
  end if
  ABI_FREE(qlwl)

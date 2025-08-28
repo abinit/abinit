@@ -1984,7 +1984,7 @@ end subroutine ugb_collect_cprj
 !!  hyb_from_wfk_file
 !!
 !! FUNCTION
-!!  Read the WFK file compute with HYBRID functionql
+!!  Read the WFK file compute with HYBRID functional
 !!
 !! SOURCE
 
