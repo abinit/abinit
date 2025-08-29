@@ -401,6 +401,15 @@ subroutine outvar_i_n (dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%irdddk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdddk','INT',0)
+ 
+ intarr(1,:)=dtsets(:)%irddelfd
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irddelfd','INT',0)
+
+ intarr(1,:)=dtsets(:)%irddkdk
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irddkdk','INT',0)
+ 
+ intarr(1,:)=dtsets(:)%irddkde
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irddkde','INT',0)
 
  intarr(1,:)=dtsets(:)%irdden
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdden','INT',0)
