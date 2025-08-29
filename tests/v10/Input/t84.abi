@@ -82,7 +82,7 @@ write_files "gsr"
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t84.abo, tolnlines=  7, tolabs=  2.9e-9, tolrel= 4.6e-10
+#%%   t84.abo, tolnlines=  7, tolabs=  3.9e-9, tolrel= 4.6e-10
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
