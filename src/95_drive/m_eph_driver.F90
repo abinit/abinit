@@ -236,7 +236,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  gstore_filepath = dtfil%filgstorein
  sigeph_filepath = dtfil%filsigephin
 
- use_wfk = all(dtset%eph_task /= [0, 5, -5, 6, +15, -15, -16, 16, 18])
+ use_wfk = all(dtset%eph_task /= [0, 5, -5, 6, +15, -15, -16, 16])
  use_wfq = ((dtset%irdwfq /= 0 .or. dtset%getwfq /= 0 .or. dtset%getwfq_filepath /= ABI_NOFILE) .and. dtset%eph_frohlichm /= 1)
 
  ! If eph_task is needed and ird/get variables are not provided, assume WFQ == WFK
