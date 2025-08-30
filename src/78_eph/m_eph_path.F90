@@ -3,7 +3,7 @@
 !!  m_eph_path
 !!
 !! FUNCTION
-!!  Compute the e-ph matrix elements g(k,q) along an arbitrary path either in k- or q-space.
+!!  Compute e-ph matrix elements g(k,q) along an arbitrary path either in k- or q-space.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2024 ABINIT group (MG)
@@ -84,8 +84,8 @@ contains  !=====================================================
 !! dtfil<datafiles_type>=Variables related to files.
 !! dtset<dataset_type>=All input variables for this dataset.
 !! cryst<crystal_t>=crystal structure parameters
-!! dvdb<dbdb_type>=Database with the DFPT SCF potentials.
 !! wfk_ebands: electron bands from the input WFK file (used to propagate nelect and fermie to GPATH.nc)
+!! dvdb<dbdb_type>=Database with the DFPT SCF potentials.
 !! ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
 !! pawfgr <type(pawfgr_type)>=fine grid parameters and related data
 !! pawang<pawang_type)>=PAW angular mesh and related data.
@@ -186,7 +186,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
    ABI_ERROR(sjoin("Invalid value of eph_fix_korq:", dtset%eph_fix_korq))
  end select
 
- ! Define band range and nb_in_g from eph_path_brange
+ ! Define band range and nb_in_g from eph_path_brange.
  nband = dtset%mband; bstart = dtset%eph_path_brange(1); bstop = dtset%eph_path_brange(2)
  if (bstart <= 0) bstart = 1
  if (bstop <= 0) bstop = nband
@@ -472,7 +472,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        call nscf%setup_kpt(spin, kq, istwfk_1, nband, cryst, dtset, psps, pawtab, pawfgr, &                         ! in
                            npw_kq, kg_kq, kpg_kq, ph3d_kq, kinpw_kq, ffnl_kq, vlocal_kq, cg_kq, gsc_kq, gs_ham_kq)  ! out
 
-       ! Cache for u_{m k+q}(g)
+       ! Cache for u_{m k+q}(g).
        use_cg_kq = (my_iq > 1 .and. ucache_kq%use_cache)
        if (use_cg_kq) call ucache_kq%get_kpt(kq, istwfk_1, npw_kq, nspinor, nband, kg_kq, cg_kq)
 
@@ -510,7 +510,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
          end if
        end if
 
-       ! if PAW, one has to solve a generalized eigenproblem
+       ! if PAW, one has to solve a generalized eigenproblem.
        gen_eigenpb = psps%usepaw == 1; sij_opt = 0; if (gen_eigenpb) sij_opt = 1
        ABI_MALLOC(gs1c, (2, npw_kq*nspinor*((sij_opt+1)/2)))
        ABI_MALLOC(h1kets_kq, (2, npw_kq*nspinor, nb_in_g))
@@ -518,7 +518,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        ! ====================================
        ! Get DFPT potentials for this q-point
        ! ====================================
-       ! After this branch we have allocated v1scf(cplex, nfftf, nspden, my_npert))
+       ! After this branch we have allocated v1scf(cplex, nfftf, nspden, my_npert)).
        if (need_ftinterp) then
          call dvdb%get_ftqbz(qq, cplex, nfftf, ngfftf, v1scf, pert_comm%value)
        else
@@ -539,6 +539,9 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        ! Load k+q-dependent part in the Hamiltonian datastructure
        !call gs_ham_kq%load_kprime(kpt_kp=kq, npw_kp=npw_kq, istwf_kp=istwfk_1, kg_kp=kg_kq, kpg_kp=kpg_kq, &
        !                           ph3d_kp=ph3d_kq, ffnl_kp=ffnl_kq, compute_ph3d=.false., compute_gbound=.true.)
+
+       call gs_ham_k%load_k(kpt_k=kk, npw_k=npw_k, istwf_k=istwfk_1, kg_k=kg_k, kpg_k=kpg_k, kinpw_k=kinpw_k, &
+                            ph3d_k=ph3d_k, ffnl_k=ffnl_k, compute_ph3d=.true., compute_gbound=.true.)
 
        call gs_ham_k%load_kprime(kpt_kp=kq, npw_kp=npw_kq, istwf_kp=istwfk_1, kg_kp=kg_kq, kpg_kp=kpg_kq, kinpw_kp=kinpw_kq, &
                                  ph3d_kp=ph3d_kq, ffnl_kp=ffnl_kq, compute_ph3d=.true., compute_gbound=.true.)
@@ -696,9 +699,9 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
    do spin=1,nsppol
      do ik=1, nk_path
-       if (all(ik /= [1, nk_path])) cycle
+       if (all(ik /= [1, 2, nk_path-1, nk_path])) cycle
        do iq=1, nq_path
-         if (all(iq /= [1, nq_path])) cycle
+         if (all(iq /= [1, 2, nq_path-1, nq_path])) cycle
          NCF_CHECK(nf90_get_var(ncid, vid("gkq2_nu"), gkq2_nu, start=[1,1,1,iq,ik,spin]))
          ! TODO: Average matrix elements over degenerate states (electrons at k, k+q, and phonons ???
          !call epth_gkq2_nu_average(natom3, bstart, nb, phfreqs, eig_k, eig_kq, gkq2_nu)
