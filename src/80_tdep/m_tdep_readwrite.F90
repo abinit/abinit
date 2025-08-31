@@ -183,7 +183,7 @@ contains
   character (len=10) :: time
   character (len=5) :: zone
   character(len=500) :: msg
-  character(len=500) :: ncfilename,inputfilename
+  character(len=fnlen) :: ncfilename,inputfilename
   character(len=strlen):: string, raw_string
 ! arrays
   character(len=3),parameter :: month_names(12)=(/'Jan','Feb','Mar','Apr','May','Jun',&
@@ -262,7 +262,7 @@ contains
       ! Read input
       string = repeat(" ", strlen)
       raw_string = repeat(" ", strlen)
-      call instrng(input_path, lenstr, 1, strlen, string, raw_string)
+      call instrng(inputfilename, lenstr, 1, strlen, string, raw_string)
       ! To make case-insensitive, map characters to upper case.
       call inupper(string(1:lenstr))
 
@@ -345,7 +345,7 @@ contains
 
   string = repeat(" ", strlen)
   raw_string = repeat(" ", strlen)
-  call instrng(input_path, lenstr, 1, strlen, string, raw_string)
+  call instrng(inputfilename, lenstr, 1, strlen, string, raw_string)
   ! To make case-insensitive, map characters to upper case.
   call inupper(string(1:lenstr))
 
