@@ -277,11 +277,11 @@ AC_DEFUN([SD_LIBXC_DETECT], [
     else
         sd_libxc_ok="yes"
         sd_libxc_cppflags=""
-        sd_libxc_cflags="-I ${ac_abs_confdir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/libxc/6.0.0/include"
+        sd_libxc_cflags="-I ${ac_abs_confdir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/libxc/${abi_fallback_libxc_version}}/include"
         sd_libxc_fcflags=""
         sd_libxc_ldflags=""
-        sd_libxc_kxc_ok="yes"
-        sd_libxc_libs="-L${ac_abs_confdir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/libxc/6.0.0/lib -lxc -lxcf03"
+        sd_libxc_kxc_ok="no"
+        sd_libxc_libs="-L${ac_abs_confdir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/libxc/${abi_fallback_libxc_version}/lib -lxc"
       if test "${sd_libxc_status}" = "optional" -a \
               "${sd_libxc_init}" = "def"; then
  
