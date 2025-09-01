@@ -50,7 +50,7 @@ module m_phonons
  use m_dynmat,          only : gtdyn9, dfpt_phfrq, dfpt_prtph, &
                                pheigvec_normalize, massmult_and_breaksym, phdispl_from_eigvec, phangmom_from_eigvec
  use m_atprj,           only : atprj_type
- use m_bz_mesh,         only : isamek, make_path, kpath_t, kpath_new
+ use m_bz_mesh,         only : isamek, make_path, kpath_t
  use m_ifc,             only : ifc_type
  use m_anaddb_dataset,  only : anaddb_dataset_type
  use m_kpts,            only : kpts_ibz_from_kptrlatt, get_full_kgrid, kpts_map, kpts_timrev_from_kptopt
@@ -2870,7 +2870,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  natom = cryst%natom
- qpath = kpath_new(dtset%ph_qpath(:,1:dtset%ph_nqpath), cryst%gprimd, dtset%ph_ndivsm)
+ call qpath%init(dtset%ph_qpath(:,1:dtset%ph_nqpath), cryst%gprimd, dtset%ph_ndivsm)
  nqpts = qpath%npts
 
  ABI_CALLOC(phfrqs, (3*natom,nqpts))

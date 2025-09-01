@@ -72,7 +72,7 @@ module m_phgamma
  use m_cgtools,        only : cg_zdotc
  use m_kg,             only : getph, mkkpg
  use m_dynmat,         only : symdyma, ftgam_init, ftgam, asrif9
- use m_bz_mesh,        only : kpath_t, kpath_new
+ use m_bz_mesh,        only : kpath_t
  use m_special_funcs,  only : fermi_dirac
  use m_kpts,           only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt, listkk, kpts_timrev_from_kptopt, kpts_map
  use defs_elphon,      only : complete_gamma !, complete_gamma_tr
@@ -1473,7 +1473,7 @@ subroutine phgamma_linwid(gams, cryst, ifc, ndivsm, nvert, qverts, basename, nci
  natom = cryst%natom; natom3 = gams%natom3; nsppol = gams%nsppol; nrpt = gams%nrpt
 
  ! Define the q-path along which phonon linwid will be interpolated.
- qpath = kpath_new(qverts, cryst%gprimd, ndivsm)
+ call qpath%init(qverts, cryst%gprimd, ndivsm)
  nqpt = qpath%npts
 
  ! Allocate workspace arrays for MPI.
@@ -1555,9 +1555,7 @@ subroutine phgamma_linwid(gams, cryst, ifc, ndivsm, nvert, qverts, basename, nci
          write(unt,'(i8,3es16.6)' )iqpt,omega,gamma_spin(1),lambda_spin(1)
        else
          write(unt,'(i8,es20.6,6es16.6)' )iqpt,omega,&
-            sum(gamma_spin),sum(lambda_spin),&
-            gamma_spin(1),lambda_spin(1),&
-            gamma_spin(2),lambda_spin(2)
+            sum(gamma_spin),sum(lambda_spin),gamma_spin(1),lambda_spin(1),gamma_spin(2),lambda_spin(2)
        end if
      end do
    end do

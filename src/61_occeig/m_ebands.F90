@@ -56,7 +56,7 @@ module m_ebands
  use m_occ,            only : getnel, newocc, occ_fd
  use m_nesting,        only : mknesting
  use m_crystal,        only : crystal_t
- use m_bz_mesh,        only : isamek, kpath_t, kpath_new, littlegroup_t, kmesh_t
+ use m_bz_mesh,        only : isamek, kpath_t, littlegroup_t, kmesh_t
  use m_fftcore,        only : get_kg
 
  implicit none
@@ -5845,7 +5845,7 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_range, prefix, co
    call alloc_copy(dtset%kptbounds, bounds)
  end if
 
- kpath = kpath_new(bounds, cryst%gprimd, ndivsm)
+ call kpath%init(bounds, cryst%gprimd, ndivsm)
  call kpath%print([std_out], header="Interpolating energies on k-path")
  ABI_FREE(bounds)
 

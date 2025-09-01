@@ -593,7 +593,7 @@ end subroutine eph_gkk
 
 subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
 
- use m_bz_mesh, only : kpath_t, kpath_new
+ use m_bz_mesh, only : kpath_t
 
 !Arguments ------------------------------------
  class(dvdb_t),intent(inout) :: dvdb
@@ -639,7 +639,7 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
  bounds(:, 5) = tol3 * [+0.00000,  +0.00000, +0.00000] !  # $\Gamma$
  bounds(:, 6) = tol3 * [+0.50000,  +0.25000, +0.75000] !  # W
 
- qpath = kpath_new(bounds, dvdb%cryst%gprimd, dtset%ndivsm)
+ call qpath%init(bounds, dvdb%cryst%gprimd, dtset%ndivsm)
 
  units = [std_out, ab_out]
 
