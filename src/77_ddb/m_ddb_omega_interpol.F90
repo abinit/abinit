@@ -39,7 +39,7 @@ module m_ddb_omega_interpol
  use m_macroave,        only : POLINT
  use m_io_tools,        only : open_file
  use m_cgtools,         only : fxphas_seq
- use m_dynmat,          only : pheigvec_normalize
+ use m_dynmat,          only : pheigvec_normalize,phdispl_from_eigvec
  use m_numeric_tools,   only : polcoe
 
  implicit none
@@ -114,7 +114,7 @@ contains
  real(dp), allocatable :: dint_fsddb(:,:),int_fsddb(:,:,:),int_rsddb(:,:,:)
  real(dp), allocatable :: omega(:),omegacalc(:)
  real(dp), allocatable :: w0hessian(:,:),w0berry(:,:)
- real(dp), allocatable :: eigvec(:,:,:,:,:),eigvec_fm(:,:,:,:,:),phfrq(:,:)
+ real(dp), allocatable :: displ(:),eigvec(:),eigvec_fm(:,:,:,:,:),phfrq(:,:)
  real(dp), allocatable :: mode_phonspec(:,:),phonspec(:)
  real(dp), allocatable :: coeffs(:,:,:)
  complex(dpc), allocatable :: dummysus(:,:)
@@ -125,10 +125,10 @@ contains
  complex(dpc), allocatable :: bc_barmagsus(:,:),bc_ss(:,:),bc_sp(:,:)
  complex(dpc), allocatable :: ci_alpha(:,:,:),lm_alpha(:,:,:)
  complex(dpc), allocatable :: ci_localpha(:,:,:),lm_localpha(:,:,:)
- complex(dpc), allocatable :: ci_epsilon(:,:,:),lm_epsilon(:,:,:)
+ complex(dpc), allocatable :: ci_epsilon(:,:,:),lm_epsilon(:,:,:),lm_epsilon_nm(:,:,:,:)
  complex(dpc), allocatable :: ci_mchi(:,:,:),lm_mchi(:,:,:)
- complex(dpc), allocatable :: modemm(:,:,:),modevec(:,:,:),modezf(:,:,:)
- complex(dpc), allocatable :: zeff(:,:),zeff_tr(:,:),modezeff(:,:,:)
+ complex(dpc), allocatable :: modemm(:,:,:),modedisp(:,:,:),modezf(:,:,:)
+ complex(dpc), allocatable :: zeff(:,:),zeff_tr(:,:),modemeff(:,:,:),modezeff(:,:,:)
  complex(dpc), allocatable :: fmzeff(:,:),fmzeff_tr(:,:)
  complex(dpc), allocatable :: magphongreen(:,:),phongreen(:,:),phongreen_fm(:,:)
  complex(dpc), allocatable :: macmagsus(:,:,:)
@@ -174,10 +174,11 @@ contains
  ABI_MALLOC(phongreen,(3*natom,3*natom))
  ABI_MALLOC(phongreen_fm,(3*natom,3*natom))
  ABI_MALLOC(mode_phonspec,(3*natom,nomega))
- ABI_MALLOC(eigvec,(2,3,natom,3,natom))
+ ABI_MALLOC(displ,(2*3*natom*3*natom))
+ ABI_MALLOC(eigvec,(2*3*natom*3*natom))
  ABI_MALLOC(eigvec_fm,(2,3,natom,3,natom))
  ABI_MALLOC(modemm,(ndim,3*natom,nomega))
- ABI_MALLOC(modevec,(3*natom,3*natom,nomega))
+ ABI_MALLOC(modedisp,(3*natom,3*natom,nomega))
  ABI_MALLOC(modezf,(ndim,3*natom,nomega))
  ABI_MALLOC(fmzeff_tr,(3*natom,3))
  ABI_MALLOC(zeff,(3,3*natom))
@@ -190,8 +191,10 @@ contains
  ABI_MALLOC(lm_localpha,(ndim,3,nomega))
  ABI_MALLOC(ci_epsilon,(3,3,nomega))
  ABI_MALLOC(lm_epsilon,(3,3,nomega))
+ ABI_MALLOC(lm_epsilon_nm,(3,3,3*natom,nomega))
  ABI_MALLOC(ci_mchi,(3,3,nomega))
  ABI_MALLOC(lm_mchi,(3,3,nomega))
+ ABI_MALLOC(modemeff,(3,3*natom,nomega))
  ABI_MALLOC(modezeff,(3,3*natom,nomega))
  ABI_MALLOC(dummysus,(ndim,ndim))
  ABI_MALLOC(magsus,(ndim,ndim,nomega))
@@ -328,7 +331,7 @@ contains
    !Calculate the phonon propagator (Green's function) and spectral function
    !and the lattice-mediated contributions to the different susceptibilities.
    if (mpopt==1) then
-     call phonon_green(amu,eigvec,eta,int_fsddb,& 
+     call phonon_green(amu,displ,eigvec,eta,int_fsddb,& 
    & mode_phonspec(:,iw),mpert,natom,ntypat,omega(iw),&
    & phfrq(:,iw),phongreen,phonspec(iw),typat)
 
@@ -336,20 +339,25 @@ contains
    & lm_alpha(:,:,iw),lm_epsilon(:,:,iw),lm_localpha(:,:,iw),lm_magsus(:,:,iw),lm_mchi(:,:,iw),magsus(:,:,iw),mpert,mmom(:,:,iw),&
    & mmom_tr(:,:,iw),natom,ndim,phongreen,ucvol,zeff)
    else if (mpopt==2) then
-     call phonon_green(amu,eigvec,eta,int_rsddb,& 
+     call phonon_green(amu,displ,eigvec,eta,int_rsddb,& 
    & mode_phonspec(:,iw),mpert,natom,ntypat,omega(iw),&
    & phfrq(:,iw),phongreen,phonspec(iw),typat)
 
      call ri_d2etot(int_rsddb,ci_alpha(:,:,iw),ci_epsilon(:,:,iw),ci_localpha(:,:,iw),ci_mchi(:,:,iw),&
    & lm_alpha(:,:,iw),lm_epsilon(:,:,iw),lm_localpha(:,:,iw),lm_magsus(:,:,iw),lm_mchi(:,:,iw),magsus(:,:,iw),mpert,mmom(:,:,iw),&
    & mmom_tr(:,:,iw),natom,ndim,phongreen,ucvol,zeff)
+
+     call lm_normal_modes(int_rsddb,displ,eta,lm_epsilon_nm(:,:,:,iw),&
+   & mmom(:,:,iw),modemm(:,:,iw),modedisp(:,:,iw),modemeff(:,:,iw),modezeff(:,:,iw),modezf(:,:,iw),&
+   & mpert,natom,ndim,omega(iw),phfrq(:,iw),phongreen,ucvol,zfield(:,:,iw))
+
    end if
 
    !Calculate the mode-resolved magnetic moments and zeeman field
-   call mode_mmom(amu,eigvec,mmom(:,:,iw),modemm(:,:,iw),modevec(:,:,iw),modezf(:,:,iw),natom,ndim,ntypat,typat,zfield(:,:,iw))
+   !call mode_mmom(amu,eigvec,mmom(:,:,iw),modemm(:,:,iw),modedisp(:,:,iw),modezf(:,:,iw),natom,ndim,ntypat,typat,zfield(:,:,iw))
 
    !Calculate the mode-resolved Born effective charges
-   call mode_zeff(amu,eigvec,modezeff(:,:,iw),natom,ntypat,typat,zeff)
+   !call mode_zeff(amu,eigvec,modezeff(:,:,iw),natom,ntypat,typat,zeff)
 
 !     !Calculate here the phonons contribution to the spin susceptibility
 !     if (dissip==0) then
@@ -830,7 +838,7 @@ contains
 !! close(mmspec_unit)
 !
 !Dielectric susceptibility
- diel_filename=trim(outfilename_radix)//"_DIELSUS"
+ diel_filename=trim(outfilename_radix)//"_DIELTENS"
  if (open_file(diel_filename, msg, newunit=diel_unit) /= 0) then
    ABI_ERROR(msg)
  end if
@@ -889,6 +897,34 @@ contains
  &  omega(iw), ((aimag(lm_epsilon(i,j,iw)+ci_epsilon(i,j,iw)),j=1,3),i=1,3)
     call wrtout(diel_unit,msg,'COLL')
  end do
+ write(diel_unit,*) ' '
+
+ write(diel_unit,*) '#'
+ write(diel_unit,*) '# Phonon modes contribution to dielectric tensor' 
+ write(diel_unit,*) '#'
+
+ do imode= 1, 3*natom
+   write(diel_unit,*) ' '
+   write(diel_unit,*) '#  Real part of dielectric tensor due to phonon mode:', imode
+   write(msg,'(a,a)') ch10,&
+ &           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
+   call wrtout(diel_unit,msg,'COLL')
+   do iw=1,nomega
+      write(msg,pfmt) &
+   &  omega(iw), ((real(lm_epsilon_nm(i,j,imode,iw)),j=1,3),i=1,3)
+      call wrtout(diel_unit,msg,'COLL')
+   end do
+   write(diel_unit,*) ' '
+   write(diel_unit,*) '#  Imaginary part of dielectric tensor due to phonon mode:', imode
+   write(msg,'(a,a)') ch10,&
+ &           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
+   call wrtout(diel_unit,msg,'COLL')
+   do iw=1,nomega
+      write(msg,pfmt) &
+   &  omega(iw), ((aimag(lm_epsilon_nm(i,j,imode,iw)),j=1,3),i=1,3)
+      call wrtout(diel_unit,msg,'COLL')
+   end do
+ end do 
 
  close(diel_unit)
 
@@ -1029,7 +1065,7 @@ contains
    write(phon_unit,'(a,i3)') '#  Real part of phonon eigenmode:', imode
    do iw=1,nomega
      write(msg,pfmt) &
-   & omega(iw), (real(modevec(i,imode,iw)),i=1,3*natom)
+   & omega(iw), (real(modedisp(i,imode,iw)),i=1,3*natom)
      call wrtout(phon_unit,msg,'COLL')
    end do
 
@@ -1037,7 +1073,7 @@ contains
    write(phon_unit,'(a,i3)') '#  Imaginary part of phonon eigenmode:', imode
    do iw=1,nomega
      write(msg,pfmt) &
-   & omega(iw), (aimag(modevec(i,imode,iw)),i=1,3*natom)
+   & omega(iw), (aimag(modedisp(i,imode,iw)),i=1,3*natom)
      call wrtout(phon_unit,msg,'COLL')
    end do
  end do
@@ -1106,10 +1142,11 @@ contains
  ABI_FREE(phongreen_fm)
  ABI_FREE(phonspec)
  ABI_FREE(mode_phonspec)
+ ABI_FREE(displ)
  ABI_FREE(eigvec)
  ABI_FREE(eigvec_fm)
  ABI_FREE(modemm)
- ABI_FREE(modevec)
+ ABI_FREE(modedisp)
  ABI_FREE(modezf)
  ABI_FREE(fmzeff_tr)
  ABI_FREE(zeff)
@@ -1117,6 +1154,7 @@ contains
  ABI_FREE(genzeff_tr)
  ABI_FREE(ri_genelsus)
  ABI_FREE(modezeff)
+ ABI_FREE(modemeff)
  ABI_SFREE(w0hessian)
  ABI_SFREE(w0berry)
  ABI_SFREE(coeffs)
@@ -1169,7 +1207,7 @@ contains
 #include "abi_common.h"
 
 
-subroutine phonon_green(amu,eigvec,eta,blkval,& 
+subroutine phonon_green(amu,displ,eigvec,eta,blkval,& 
 & mode_phonspec,mpert,natom,ntypat,omega,&
 & phfrq,phongreen,phonspec,typat)
 
@@ -1187,9 +1225,10 @@ subroutine phonon_green(amu,eigvec,eta,blkval,&
 !arrays
  integer, intent(in)  :: typat(natom)
  real(dp), intent(in) :: amu(ntypat)
- real(dp),intent(in)  :: blkval(2,3,mpert,3,mpert,1)
- real(dp),intent(out) :: eigvec(2*3*natom*3*natom)
- real(dp),intent(out) :: phfrq(3*natom)
+ real(dp), intent(in)  :: blkval(2,3,mpert,3,mpert,1)
+ real(dp), intent(out) :: displ(2*3*natom*3*natom)
+ real(dp), intent(out) :: eigvec(2*3*natom*3*natom)
+ real(dp), intent(out) :: phfrq(3*natom)
  real(dp), intent(out) :: mode_phonspec(3*natom)
  complex(dpc), intent(out) :: phongreen(3*natom,3*natom)
 
@@ -1346,6 +1385,9 @@ subroutine phonon_green(amu,eigvec,eta,blkval,&
 !Normalise the eigenvectors
  call pheigvec_normalize(natom, eigvec)
 
+ ! Get the phonon displacements
+ call phdispl_from_eigvec(natom, ntypat, typat, amu, eigvec, displ)
+
  ABI_FREE(ifc)
  ABI_FREE(ifc_w2mass)
  ABI_FREE(ipiv)
@@ -1357,6 +1399,211 @@ subroutine phonon_green(amu,eigvec,eta,blkval,&
  DBG_EXIT("COLL")
 
 end subroutine phonon_green
+!!***
+
+!!****f* ABINIT/lm_normal_modes
+!! NAME
+!!  lm_normal_modes
+!!
+!! FUNCTION
+!!  Calculates the lattice-mediated contributions of the different type of
+!!  susceptibilities by projecting the calculation on the contributions of 
+!!  the phonon modes. 
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2024 ABINIT group (FIXME: add author)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  amu(ntypat)= atomic masses
+!!  blkval(2,3,mpert,3,mpert,1)= array with second-order derivatives
+!!  displ(2,3,natom,3,natom)= phonon eigendisplacements
+!!  mmom(ndim,(natom+2)*3)= first-order magnetic moments
+!!  natom= number of atoms in the cell
+!!  ndim= dimension of the penalized degrees of freedom
+!!  ntypat= number of atom types in the cell
+!!  phongreen(3*natom,3*natom)= phonon Green's function
+!!  typat(natom)= array with the type of atoms in the cell
+!!
+!! OUTPUT
+!!  modemm(ndim,3*natom)= mode-resolved local magnetic moments
+!!  modezf(ndim,3*natom)= mode-resolved local Zeeman fields
+!!  modemeff(3,3*natom)= mode-resolved magnetic Born charges
+!!  modezeff(3,3*natom)= mode-resolved electric Born charges
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+subroutine lm_normal_modes(blkval,displ,eta,lm_epsilon_nm,&
+& mmom,modemm,modedisp,modemeff, &
+& modezeff,modezf,mpert,natom,ndim,omega,phfrq,phongreen,ucvol,zfield)
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in)  :: mpert,natom,ndim 
+ real(dp), intent(in) :: eta,omega,ucvol
+!arrays
+ real(dp), intent(in) :: blkval(2,3,mpert,3,mpert,1)
+ real(dp), intent(in) :: displ(2*3*natom*3*natom)
+ real(dp), intent(in) :: phfrq(3*natom)
+ complex(dpc), intent(in) :: mmom(ndim,(natom+5)*3)
+ complex(dpc), intent(in) :: phongreen(3*natom,3*natom)
+ complex(dpc), intent(in) :: zfield(ndim,(natom+5)*3)
+ complex(dpc), intent(out) :: lm_epsilon_nm(3,3,3*natom)
+ complex(dpc), intent(out) :: modemm(ndim,3*natom)
+ complex(dpc), intent(out) :: modedisp(3*natom,3*natom)
+ complex(dpc), intent(out) :: modemeff(3,3*natom)
+ complex(dpc), intent(out) :: modezeff(3,3*natom)
+ complex(dpc), intent(out) :: modezf(ndim,3*natom)
+
+!Local variables-------------------------------
+!scalars
+ integer :: i1,iat1,iat2,idir1,idir2,icol,im,imode,index,ipert,ipert1,ipert2,irow,jmode,jpert
+ integer :: pdim
+ real(dp) :: fac
+ complex(dpc) :: cplx_eta,cplx_w2
+!arrays
+ real(dp), allocatable :: mass(:)
+ complex(dpc),allocatable :: c_blkval(:,:,:,:),norm(:)
+ complex(dpc),allocatable :: zeff(:,:), zeff_tr(:,:), modezeff_tr(:,:)
+ complex(dpc),allocatable :: meff(:,:), meff_tr(:,:), modemeff_tr(:,:)
+!character(len=500) :: msg                   
+
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+!Define the complex eigendisplacementes array
+do imode=1,3*natom
+   do idir1=1,3
+     do ipert1=1,natom
+       i1=idir1+(ipert1-1)*3
+       index=i1+3*natom*(imode-1)
+       modedisp(i1,imode)= cmplx(displ(2*index-1),displ(2*index),16)
+     end do
+   end do
+ end do
+
+ ABI_MALLOC(norm,(3*natom))
+ do imode= 1, 3*natom
+   norm(imode)= sqrt(dot_product(modedisp(:,imode),modedisp(:,imode)))
+ end do 
+
+!Compute the mode-resolved macroscopic quantities
+!(Born and magnetic charges)
+ pdim= 3*natom
+ ABI_MALLOC(c_blkval,(3,mpert,3,mpert))
+ c_blkval= cmplx(blkval(1,:,:,:,:,1),blkval(2,:,:,:,:,1),16)
+
+!Born charges
+ ABI_MALLOC(zeff,(3,pdim))
+ ABI_MALLOC(zeff_tr,(pdim,3))
+ ABI_MALLOC(modezeff_tr,(pdim,3))
+ ABI_MALLOC(meff,(3,pdim))
+ ABI_MALLOC(meff_tr,(pdim,3))
+ ABI_MALLOC(modemeff_tr,(pdim,3))
+ modezeff(:,:)=(zero,zero)
+ modemeff(:,:)=(zero,zero)
+ modezeff_tr(:,:)=(zero,zero)
+ modemeff_tr(:,:)=(zero,zero)
+ ipert= natom + 2
+ jpert= natom + 5
+ do im= 1, 3
+   do iat2= 1, natom
+     do idir2= 1, 3
+       imode= (iat2-1)*3 + idir2
+       do iat1= 1, natom
+         do idir1= 1, 3
+           irow= (iat1-1)*3 + idir1
+
+           !Electric Born charges
+           zeff(im,irow)= c_blkval(im,ipert,idir1,iat1)
+           zeff_tr(irow,im)= c_blkval(idir1,iat1,im,ipert)
+           modezeff(im,imode)= modezeff(im,imode) + zeff(im,irow)* &
+         & modedisp(irow,imode)
+           modezeff_tr(imode,im)= modezeff_tr(imode,im) + zeff_tr(irow,im)* &
+         & conjg(modedisp(irow,imode))
+
+           !Magnetic Born charges
+           meff(im,irow)= c_blkval(im,jpert,idir1,iat1)
+           meff_tr(irow,im)= c_blkval(idir1,iat1,im,jpert)
+           modemeff(im,imode)= modemeff(im,imode) + meff(im,irow)* &
+         & modedisp(irow,imode)
+           modemeff_tr(imode,im)= modemeff_tr(imode,im) + meff_tr(irow,im)* &
+         & conjg(modedisp(irow,imode))
+
+         end do
+       end do
+     end do
+   end do
+ end do
+ ABI_FREE(zeff)
+ ABI_FREE(zeff_tr)
+ ABI_FREE(meff)
+ ABI_FREE(meff_tr)
+
+!Compute the mode-resolved local magnetic moments and fields
+ modemm(:,:)=(zero,zero)
+ modezf(:,:)=(zero,zero)
+ do im= 1, ndim
+   do iat2= 1, natom
+     do idir2= 1, 3
+       imode= (iat2-1)*3 + idir2
+       do iat1= 1, natom
+         do idir1= 1, 3
+           irow= (iat1-1)*3 + idir1
+           modemm(im,imode)= modemm(im,imode) +  mmom(im,irow)*modedisp(irow,imode)
+           modezf(im,imode)= modezf(im,imode) +  zfield(im,irow)*modedisp(irow,imode)
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!Compute the normal modes contribution to the susceptibilities
+ cplx_eta= cmplx(0.0_dp,eta)
+ cplx_w2= (omega+cplx_eta)**2
+
+!Dielectric tensor
+ fac= -four_pi/ucvol
+ do idir1= 1, 3
+   do idir2= 1, 3
+     do imode= 1, pdim
+       lm_epsilon_nm(idir1,idir2,imode)= fac*modezeff(idir1,imode)*modezeff_tr(imode,idir2)/ &
+     & (cplx_w2 - phfrq(imode)**2)
+     end do
+   end do
+ end do
+
+ ABI_FREE(norm)
+ ABI_FREE(c_blkval)
+ ABI_FREE(modezeff_tr)
+ ABI_FREE(modemeff_tr)
+
+ DBG_EXIT("COLL")
+
+end subroutine lm_normal_modes
 !!***
 
 !!****f* ABINIT/mode_mmom
@@ -1403,7 +1650,7 @@ end subroutine phonon_green
 #include "abi_common.h"
 
 
-subroutine mode_mmom(amu,eigvec,mmom,modemm,modevec,modezf,natom,ndim,ntypat,typat,zfield)
+subroutine mode_mmom(amu,eigvec,mmom,modemm,modedisp,modezf,natom,ndim,ntypat,typat,zfield)
 
  use defs_basis
  use m_errors
@@ -1421,7 +1668,7 @@ subroutine mode_mmom(amu,eigvec,mmom,modemm,modevec,modezf,natom,ndim,ntypat,typ
  complex(dpc), intent(in) :: mmom(ndim,(natom+5)*3)
  complex(dpc), intent(in) :: zfield(ndim,(natom+5)*3)
  complex(dpc), intent(out) :: modemm(ndim,3*natom)
- complex(dpc), intent(out) :: modevec(3*natom,3*natom)
+ complex(dpc), intent(out) :: modedisp(3*natom,3*natom)
  complex(dpc), intent(out) :: modezf(ndim,3*natom)
 
 !Local variables-------------------------------
@@ -1452,7 +1699,7 @@ subroutine mode_mmom(amu,eigvec,mmom,modemm,modevec,modezf,natom,ndim,ntypat,typ
      do iat1= 1, natom
        do idir1= 1, 3
          irow= (iat1-1)*3 + idir1
-         modevec(irow,imode)= cmplx(eigvec(1,idir1,iat1,idir2,iat2),eigvec(2,idir1,iat1,idir2,iat2),16)
+         modedisp(irow,imode)= cmplx(eigvec(1,idir1,iat1,idir2,iat2),eigvec(2,idir1,iat1,idir2,iat2),16)
        end do
      end do
    end do
@@ -1468,8 +1715,8 @@ subroutine mode_mmom(amu,eigvec,mmom,modemm,modevec,modezf,natom,ndim,ntypat,typ
        do iat1= 1, natom
          do idir1= 1, 3
            irow= (iat1-1)*3 + idir1
-           modemm(im,imode)= modemm(im,imode) +  mass(iat1)*mmom(im,irow)*modevec(irow,imode)
-           modezf(im,imode)= modezf(im,imode) +  mass(iat1)*zfield(im,irow)*modevec(irow,imode)
+           modemm(im,imode)= modemm(im,imode) +  mass(iat1)*mmom(im,irow)*modedisp(irow,imode)
+           modezf(im,imode)= modezf(im,imode) +  mass(iat1)*zfield(im,irow)*modedisp(irow,imode)
          end do
        end do
      end do
