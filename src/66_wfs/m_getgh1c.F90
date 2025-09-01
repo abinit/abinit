@@ -174,7 +174,6 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 #ifdef HAVE_OPENMP_OFFLOAD
  logical :: map_gh1c,map_gs1c,map_cwave,map_gvnlx1_
 #endif
-
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -282,13 +281,13 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 #endif
  end if
  has_mGGA1=( (ipert .EQ. natom+1) .AND. ASSOCIATED(rf_hamkq%vxctaulocal) )
+
 !======================================================================
 !== Apply the 1st-order local potential to the wavefunction
 !======================================================================
-
-!Phonon perturbation
-!or Electric field perturbation
-!or Strain perturbation
+! Phonon perturbation or
+! Electric field perturbation or
+! Strain perturbation
 !-------------------------------------------
  if (ipert<=natom+5.and.ipert/=natom+1.and.optlocal>0) then !SPr deb
 
@@ -885,10 +884,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    ABI_BUG('need dkinpw allocated!')
  end if
 
- if (has_kin) then    ! This is the correct line
-!DEBUG
-!if (.false.)then
-!ENDDEBUG
+ if (has_kin) then
 !  Remember that npw=npw1 for ddk perturbation
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(ipws) MAP(to:cwave,gvnlx1_,dkinpw,kinpw1) &
@@ -1712,7 +1708,6 @@ end subroutine getdc1
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
 !!  Currently two Hamiltonian gradients at (q=0) are implemented:
 !!     ipert<=natom -> 		    first q-derivative along reduced coordinates directions
 !!                     		    of the atomic displacement perturbation hamiltonian

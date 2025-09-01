@@ -124,7 +124,6 @@ function normv_rdp_vector(xv,met,space) result(res)
  character(len=1),intent(in) :: space
 !arrays
  real(dp),intent(in) :: met(3,3),xv(3)
-
 ! *************************************************************************
 
  res =  (xv(1)*met(1,1)*xv(1) + xv(2)*met(2,2)*xv(2) + xv(3)*met(3,3)*xv(3)  &
@@ -168,7 +167,6 @@ function normv_int_vector(xv, met, space) result(res)
 !arrays
  real(dp),intent(in) :: met(3,3)
  integer,intent(in) :: xv(3)
-
 ! *************************************************************************
 
  res =  ( xv(1)*met(1,1)*xv(1) + xv(2)*met(2,2)*xv(2) + xv(3)*met(3,3)*xv(3)  &
@@ -214,7 +212,6 @@ function normv_int_vector_array(xv,met,space) result(res)
  !this awful trick is needed to avoid problems with abilint
  real(dp) :: res(SIZE(xv(1,:)))
  !real(dp) :: res(SIZE(xv,DIM=2))
-
 ! *************************************************************************
 
  res(:) = ( xv(1,:)*met(1,1)*xv(1,:) + xv(2,:)*met(2,2)*xv(2,:) + xv(3,:)*met(3,3)*xv(3,:)  &
@@ -260,7 +257,6 @@ function normv_rdp_vector_array(xv,met,space) result(res)
  !this awful trick is needed to avoid problems with abilint
  real(dp) :: res(SIZE(xv(1,:)))
  !real(dp) :: res(SIZE(xv,DIM=2))
-
 ! *************************************************************************
 
  res(:) = ( xv(1,:)*met(1,1)*xv(1,:) + xv(2,:)*met(2,2)*xv(2,:) + xv(3,:)*met(3,3)*xv(3,:)  &
@@ -305,7 +301,6 @@ real(dp) function vdotw_rr_vector(xv,xw,met,space) result(res)
  character(len=1),intent(in) :: space
 !arrays
  real(dp),intent(in) :: met(3,3),xv(3),xw(3)
-
 ! *************************************************************************
 
  res = (  met(1,1)* xv(1)*xw(1)                &
@@ -356,7 +351,6 @@ complex(dp) function vdotw_rc_vector(xv, xw, met, space) result(res)
 !arrays
  real(dp),intent(in) :: met(3,3),xv(3)
  complex(dpc),intent(in) :: xw(3)
-
 ! *************************************************************************
 
  res = (  met(1,1)* xv(1)*xw(1)                &
@@ -538,17 +532,17 @@ end subroutine wedge_product
 !!  center(3)=The Wigner-Seitz cell is centered on this point in reduced coordinates.
 !!  rmet(3,3)=Real space metric ($\textrm{bohr}^{2}$).
 !!  kptrlatt(3)=Values defining the supercell.
-!!  prtvol=If different from 0 print out the points falling inside the W-S cell and the correponding weights.
+!!  prtvol=If different from 0 print out the points falling inside the W-S cell and the corresponding weights.
 !!  lmax(3)=see Notes below.
 !!
 !! OUTPUT
 !!  npts=number of points falling inside the Wigner-Seitz cell
-!!  irvec(3,npts)=Reduced coordinated of the points inside the W-S cell (sorted by lenght)
-!!  ndegen(npts)=Weigths associated to each point.
-!!  rmods(npts)=Lenght of the irvec
+!!  irvec(3,npts)=Reduced coordinated of the points inside the W-S cell (sorted by length)
+!!  ndegen(npts)=Weights associated to each point.
+!!  rmods(npts)=length of the irvec
 !!
 !! SIDE EFFECTS
-!!  irvec, ndegen and rmods  are allocated with the correct
+!!  irvec, ndegen and rmods are allocated with the correct
 !!  size inside the routine and returned to the caller.
 !!
 !! NOTES
@@ -579,15 +573,14 @@ subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, rmods
 !scalars
  integer :: in1,in2,in3,l1,l2,l3,ii,icount,n1,n2,n3
  integer :: l0,l1_max,l2_max,l3_max,nl,verbose,mm1,mm2,mm3,ir
- real(dp) :: tot,dist_min
  real(dp),parameter :: TOL_DIST=tol7
+ real(dp) :: tot,dist_min
  character(len=500) :: msg
 !arrays
  integer,allocatable :: iperm(:), swap2(:,:), swap1(:)
  real(dp),parameter :: gammak(3) = zero
  real(dp) :: diff(3)
  real(dp),allocatable :: dist(:)
-
 ! *************************************************************************
 
  verbose = 0; if (present(prtvol)) verbose = prtvol
@@ -661,7 +654,7 @@ subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, rmods
    tot = tot + one/ndegen(ii)
  end do
  if (ABS(tot-(n1*n2*n3)) > tol8) then
-   write(msg,'(a,es16.8,a,i0)')'Something wrong in the generation of WS mesh: tot ',tot,' /= ',n1*n2*n3
+   write(msg,'(a,es16.8,a,i0)')'Something wrong in the generation of the WS mesh: tot: ',tot,' /= n1*n2*n3: ',n1*n2*n3
    ABI_ERROR(msg)
  end if
 
@@ -727,7 +720,6 @@ subroutine phdispl_cart2red(natom, gprimd, displ_cart, displ_red)
 !Local variables-------------------------
 !scalars
  integer :: nbranch,jbranch,iatom,idir,ibranch,kdir,k1
-
 ! *************************************************************************
 
  displ_red = zero
@@ -947,7 +939,6 @@ pure function spinrot_cmat(spinrot)
 !Arguments ------------------------------------
  real(dp),intent(in) :: spinrot(4)
  complex(dpc) :: spinrot_cmat(2,2)
-
 ! *************************************************************************
 
  ! Build rotation matrix from spinrot:
@@ -1021,7 +1012,6 @@ subroutine rotmat(xaxis, zaxis, inversion_flag, umat)
  character(len=500) :: msg
 !arrays
  real(dp) :: yaxis(3)
-
 ! *************************************************************************
 
  xmod = NORM2(xaxis(:))
@@ -1109,7 +1099,6 @@ subroutine fixsym(iatfix,indsym,natom,nsym)
 !scalars
  integer :: iatom,isym,jatom
  character(len=500) :: msg
-
 ! *************************************************************************
 
  if (nsym > 1) then
@@ -1148,7 +1137,6 @@ pure real(dp) function det3r(rprimd)
 
 !Arguments ------------------------------------
  real(dp),intent(in) :: rprimd(3,3)
-
 ! *************************************************************************
 
  ! Compute unit cell volume
@@ -1201,7 +1189,6 @@ subroutine metric(gmet, gprimd, iout, rmet, rprimd, ucvol)
  character(len=500) :: msg
 !arrays
  real(dp) :: angle(3)
-
 ! *************************************************************************
 
  ! Compute unit cell volume
@@ -1303,7 +1290,6 @@ subroutine mkradim(acell,rprim,rprimd)
 !scalars
  integer :: ii,jj
  real(dp) :: rprim_maxabs
-
 ! *************************************************************************
 
 !Use a representation based on normalised rprim vectors
@@ -1406,7 +1392,7 @@ end subroutine chkrprimd
 !!  rprimd_orig = original primitive vectors (usually the input variable)
 !!
 !! OUTPUT
-!!  dilatmx_errmsg=Emptry string if calculation can continue.
+!!  dilatmx_errmsg=Empty string if calculation can continue.
 !!            If the calculation cannot continue, dilatmx_errmsg will contain
 !!            the message that should be reported in the output file.
 !!
@@ -1436,7 +1422,6 @@ subroutine chkdilatmx(chkdilatmx_,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
 !arrays
  real(dp) :: eigval(3),gprimd_orig(3,3),met(3,3),old_to_new(3,3)
  character(len=500) :: msg
-
 ! *************************************************************************
 
 !Generates gprimd
@@ -1516,7 +1501,6 @@ subroutine mkrdim(acell,rprim,rprimd)
 !Local variables-------------------------------
 !scalars
  integer :: ii,jj
-
 ! *************************************************************************
 
  do ii=1,3
@@ -1565,7 +1549,6 @@ subroutine xcart2xred(natom,rprimd,xcart,xred)
  integer :: iatom,mu
 !arrays
  real(dp) :: gprimd(3,3)
-
 ! *************************************************************************
 
  call matr3inv(rprimd,gprimd)
@@ -1662,7 +1645,6 @@ subroutine gred2fcart(favg,Favgz_null,fcart,gred,gprimd,natom)
 !Local variables-------------------------------
 !scalars
  integer :: iatom,mu
-
 ! *************************************************************************
 
 !Note conversion to cartesian coordinates (bohr) AND
@@ -1724,7 +1706,6 @@ subroutine fcart2gred(fcart,gred,rprimd,natom)
 !Local variables-------------------------------
 !scalars
  integer :: iatom,mu
-
 ! *************************************************************************
 
 !MT, april 2012: the coding was not consistent with gred2fcart
@@ -1798,7 +1779,6 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
  real(dp) :: bab(3),bac(3),dif(3),rmet(3,3)
  real(dp),allocatable :: sqrlength(:),xcart(:,:)
  character(len=8),allocatable :: iden(:)
-
 ! *************************************************************************
 
 !Initialize the file
@@ -1859,27 +1839,26 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
    if(ndig>4)then
      close(temp_unit)
      write(msg, '(a,i8,a,a)' )&
-&     'bonds_lgth_angles cannot handle more than 9999 atoms, while natom=',natom,ch10,&
-&     'Action: decrease natom, or contact ABINIT group.'
+     'bonds_lgth_angles cannot handle more than 9999 atoms, while natom=',natom,ch10,&
+     'Action: decrease natom, or contact ABINIT group.'
      ABI_BUG(msg)
    end if
  end do
 
 !Compute cartesian coordinates, and print reduced and cartesian coordinates
-!then print coordinates in angstrom, with the format neede for xmol
+!then print coordinates in angstrom, with the format needed for xmol
  ABI_MALLOC(xcart,(3,natom))
  call xred2xcart(natom,rprimd,xcart,xred)
 
  do ia=1,natom
    write(msg, '(a,a,3f10.5,a,3f10.5)' ) &
-&   '   ',iden(ia),(xred(ii,ia)+tol10,ii=1,3),&
-&   '    ',(xcart(ii,ia)+tol10,ii=1,3)
+   '   ',iden(ia),(xred(ii,ia)+tol10,ii=1,3),&
+   '    ',(xcart(ii,ia)+tol10,ii=1,3)
    call wrtout(temp_unit,msg)
  end do
 
  write(msg, '(a,a,a,a,i4,a)' )ch10,&
-& ' XMOL data : natom, followed by cartesian coordinates in Angstrom',&
-& ch10,ch10,natom,ch10
+ ' XMOL data : natom, followed by cartesian coordinates in Angstrom',ch10,ch10,natom,ch10
  call wrtout(temp_unit,msg)
 
  do ia=1,natom
@@ -2127,7 +2106,6 @@ subroutine randomcellpos(natom,npsp,ntypat,random_atpos,ratsph,rprim,rprimd,typa
  real(dp) ::  cosang,aa,cc,a2
  character(len=500) :: msg
  type(atomdata_t) :: atom
-
 ! *************************************************************************
 
 !DEBUG
@@ -2344,7 +2322,6 @@ subroutine shellstruct(xred,rprimd,natom,magv,distv,smult,sdisv,nsh,atp,prtvol)
  integer                      :: iperm(natom),jperm(natom)
  real(dp)                     :: distvh(natom,natom)
  real(dp)                     :: magvv(natom)
-
 ! *************************************************************************
 
  if (present(magv)) then
@@ -2442,7 +2419,7 @@ end subroutine shellstruct
 !!  option= 1 output ion-ion distances / 2 output ordering of ion-ion
 !!          distances / 3 output variables in varlist
 !!          according to ion-ion distances * magnetic ordering
-!!          magv magnetic ordering of atoms given als 1 and -1, if not
+!!          magv magnetic ordering of atoms given also 1 and -1, if not
 !!          given fm is assumed
 !!  varlist=List of variables
 !!  magv(natom)= magnetic ordering of atoms
@@ -2474,7 +2451,6 @@ subroutine ioniondist(natom,rprimd,xred,inm,option,varlist,magv,atp,prtvol)
  integer                      :: interq(natom)
  real(dp)                     :: hxcart(3,natom),distm(natom,natom)
  real(dp)                     :: magvv(natom)
-
 ! *************************************************************************
 
  hxcart=matmul(rprimd,xred)
@@ -2523,7 +2499,7 @@ subroutine ioniondist(natom,rprimd,xred,inm,option,varlist,magv,atp,prtvol)
    call prmat(distm,natom,natom,natom,std_out)
  end if
 
- distm=anint(distm*10000_dp)/10000_dp           ! rounding needed else distm(iatom,jatom)/= distm(1,kdum) sometimes fails
+ distm=anint(distm*10000_dp)/10000_dp ! rounding needed else distm(iatom,jatom)/= distm(1,kdum) sometimes fails
 
  do iatom=1,natom
    if (option==1) then
@@ -2593,7 +2569,6 @@ function dist2(v1,v2,rprimd,option)
  real(dp) :: corner(3),dred(3),dtot(3),dv(3),dwrap(3),sh(3)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp) :: vprimd(3,3)
-
 ! *************************************************************************
 
  if (.not.PRESENT(rprimd)) then
@@ -2711,7 +2686,7 @@ subroutine remove_inversion(nsym,symrel,tnons,nsym_out,symrel_out,tnons_out,pinv
 
  ABI_WARNING('Removing inversion related symmetrie from initial set')
 
- ! Find the occurence of the inversion symmetry.
+ ! Find the occurrence of the inversion symmetry.
  call set2unit(inversion) ; inversion=-inversion
 
  is_inv=0; found=.FALSE.
@@ -2909,7 +2884,6 @@ subroutine symredcart(aprim,bprim,symcart,symred)
  real(dp) :: symtmp
 !arrays
  real(dp) :: work(3,3)
-
 ! *************************************************************************
 
  work=zero
@@ -2977,36 +2951,33 @@ subroutine strainsym(nsym,rprimd0,rprimd,rprimd_symm,symrel)
  real(dp) :: rprimd0_inv(3,3),strain(3,3),strain_symm(3,3),tmp_mat(3,3),symrel_db(3,3)
 !**************************************************************************
 
-!copy initial rprimd input and construct inverse
+ !copy initial rprimd input and construct inverse
  rprimd0_inv = rprimd0
  call matrginv(rprimd0_inv,3,3)
 
-!define strain as rprimd = strain * rprimd0 (in cartesian frame)
-!so strain = rprimd * rprimd0^{-1}
-!transform to triclinic frame with rprimd0^{-1} * strain * rprimd0
-!giving strain as rprimd0^{-1} * rprimd
+ !define strain as rprimd = strain * rprimd0 (in cartesian frame)
+ !so strain = rprimd * rprimd0^{-1}
+ !transform to triclinic frame with rprimd0^{-1} * strain * rprimd0
+ !giving strain as rprimd0^{-1} * rprimd
  call dgemm('N','N',3,3,3,one,rprimd0_inv,3,rprimd,3,zero,strain,3)
 
-!loop over symmetry elements to obtain symmetrized strain matrix
+ !loop over symmetry elements to obtain symmetrized strain matrix
  strain_symm = zero
  do isym = 1, nsym
-
-!  this loop accumulates symrel^{-1}*strain*symrel into strain_symm
-
-!  mati3inv gives the inverse transpose of symrel
+   ! this loop accumulates symrel^{-1}*strain*symrel into strain_symm
+   ! mati3inv gives the inverse transpose of symrel
    call mati3inv(symrel(:,:,isym),symrel_it)
    symrel_db = dble(symrel(:,:,isym))
    call dgemm('N','N',3,3,3,one,strain,3,symrel_db,3,zero,tmp_mat,3)
    symrel_db = dble(symrel_it)
    call dgemm('T','N',3,3,3,one,symrel_db,3,tmp_mat,3,one,strain_symm,3)
-
  end do
 
-!normalize by number of symmetry operations
+ !normalize by number of symmetry operations
  strain_symm = strain_symm/dble(nsym)
 
 !this step is equivalent to r_new = r_old * strain * r_old^{-1} * r_old,
-!that is, convert strain back to cartesian frame and then multipy by r_old,
+!that is, convert strain back to cartesian frame and then multiply by r_old,
 !to get the r_new primitive vectors
 
  call dgemm('N','N',3,3,3,one,rprimd0,3,strain_symm,3,zero,rprimd_symm,3)
@@ -3051,11 +3022,10 @@ subroutine stresssym(gprimd,nsym,stress,sym)
  real(dp) :: summ,tmp
 !arrays
  real(dp) :: rprimd(3,3),rprimdt(3,3),strfrac(6),tensor(3,3),tt(3,3)
-
 !*************************************************************************
 
 !Obtain matrix of real space dimensional primitive translations
-!(inverse tranpose of gprimd), and its transpose
+!(inverse transpose of gprimd), and its transpose
  call matr3inv(gprimd,rprimd)
  rprimdt=transpose(rprimd)
 
@@ -3187,7 +3157,6 @@ subroutine strconv(frac,gprimd,cart)
  integer :: ii,jj
 !arrays
  real(dp) :: work1(3,3),work2(3,3)
-
 ! *************************************************************************
 
  work1(1,1)=frac(1)
@@ -3860,9 +3829,9 @@ end subroutine d3lwsym
 !!  rfpert(3,mpert,3,mpert,3,mpert) = array defining the type of perturbations
 !!       that have to be computed
 !!    At the input :
-!!       1   ->   element has to be computed explicitely
+!!       1   ->   element has to be computed explicitly
 !!    At the output :
-!!       1   ->   element has to be computed explicitely
+!!       1   ->   element has to be computed explicitly
 !!      -1   ->   use symmetry operations to obtain the corresponding element
 !!      -2   ->   element is zero by symmetry
 !!
@@ -4064,7 +4033,7 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 
                end do    ! close loop on symmetries
 
-!              If the elemetn i1pert,i2pert,i3pert is not symmetric
+!              If the element i1pert,i2pert,i3pert is not symmetric
 !              to a basis element, it is a basis element
 
                if (pertsy(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) > -1) then

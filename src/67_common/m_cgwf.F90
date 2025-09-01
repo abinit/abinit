@@ -82,8 +82,6 @@ module m_cgwf
    integer :: ngfft(18), ngfftf(18)
    ! FFT meshes (coarse and fine)
 
-   !integer :: nfft, nfftf
-
    type(mpi_type) :: mpi_enreg
    ! Info on parallelism.
 
@@ -2328,7 +2326,7 @@ end subroutine make_grad_berry
 !!  nscf_init
 !!
 !! FUNCTION
-!!   Initialize the object.
+!!  Initialize the object.
 !!
 !! INPUT
 !! dtset<dataset_type>=All input variables for this dataset.
@@ -2370,7 +2368,7 @@ subroutine nscf_init(nscf, dtset, dtfil, cryst, comm)
  ABI_CHECK(fform /= 0, "hdr_read_from_fname returned fform 0")
  ABI_CHECK(fform_contains(fform, "vtrial", msg), msg)
 
- ! Init FFT mesh from file as we don't want to interpolate the potential.
+ ! Init FFT mesh from file as we don't want to interpolate the KS potential.
  call ngfft_seq(nscf%ngfftf, pot_hdr%ngfft)
  call ngfft_seq(nscf%ngfft, pot_hdr%ngfft)
  call pot_hdr%free()
@@ -2389,8 +2387,8 @@ subroutine nscf_init(nscf, dtset, dtfil, cryst, comm)
  nfftf = product(nscf%ngfftf(1:3))
  ABI_MALLOC(nscf%vtrial, (nfftf, dtset%nspden))
 
- call read_rhor(dtfil%filpotin, cplex1, dtset%nspden, nfftf, nscf%ngfftf, pawread0, nscf%mpi_enreg, nscf%vtrial, pot_hdr, pot_pawrhoij, comm, &
-                allow_interp=.False., want_varname="vtrial")
+ call read_rhor(dtfil%filpotin, cplex1, dtset%nspden, nfftf, nscf%ngfftf, pawread0, nscf%mpi_enreg, &
+                nscf%vtrial, pot_hdr, pot_pawrhoij, comm, allow_interp=.False., want_varname="vtrial")
 
  pot_cryst = pot_hdr%get_crystal()
  if (cryst%compare(pot_cryst, header=" Comparing input crystal with POT crystal") /= 0) then
@@ -2410,11 +2408,11 @@ end subroutine nscf_init
 !! INPUT
 !! isppol=Spin index.
 !! dtset<dataset_type>=All input variables for this dataset.
-!! pawfgr <type(pawfgr_type)>=fine grid parameters and related data
-!! gs_ham_k <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
+!! pawfgr=<type(pawfgr_type)>=fine grid parameters and related data
+!! gs_ham_k=<type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
 !!
 !! OUTPUT
-!! vlocal
+!! vlocal: KS potential for this spin.
 !!
 !! SOURCE
 
@@ -2430,7 +2428,6 @@ subroutine nscf_setup_spin(nscf, isppol, dtset, pawfgr, gs_ham_k, vlocal)
  real(dp),allocatable,intent(out) :: vlocal(:,:,:,:)
 
 !Local variables ------------------------------
-!scalars
  integer :: nvloc, n1, n2, n3, n4, n5, n6, nfft, nfftf, mgfft, mgfftf
 ! *************************************************************************
 
@@ -2474,7 +2471,7 @@ end subroutine nscf_setup_spin
 !!
 !! FUNCTION
 !!  Prepare call to nscf_solve_kpt.
-!!  Computes k-dependent temms, gs_ham_k and allocates wavefunction block for this k-point
+!!  Compute k-dependent terms, gs_ham_k and allocate wavefunction block for this k-point
 !!
 !! INPUT
 !! isppol=Spin index
@@ -2487,7 +2484,7 @@ end subroutine nscf_setup_spin
 !!
 !! OUTPUT
 !!  kg_k=
-!!  cg_g
+!!  cg_k
 !!  gsc_k
 !!  eig_k
 !!  gs_ham_k <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
@@ -2616,18 +2613,20 @@ end subroutine nscf_setup_kpt
 !! INPUT
 !! isppol=Spin index
 !! kpt(3)=K-point
+!! cryst=Crystalline structure
 !! dtset<dataset_type>=All input variables for this dataset.
 !! dtfil <type(datafiles_type)>=variables related to files
-!! cryst=Crystalline structure
 !! gs_ham_k <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
+!! use_cg_k: True if input cg_k should be used to initialize the eigensolver.
+!! npw_k=Number of planewaves
 !!
 !! OUTPUT
-!!  kg_k=
-!!  cg_g
-!!  gsc_k
-!!  eig_k
-!!  msg
-!!  ierr
+!!  kg_k=g-vectors for this k-point
+!!  cg_k=Wavefunction block.
+!!  gsc_k=<g|S|c> for PAW
+!!  eig_k=Eigenvalues
+!!  msg=Error message
+!!  ierr=Exit statue
 !!
 !! SOURCE
 

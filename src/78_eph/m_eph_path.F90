@@ -52,7 +52,7 @@ module m_eph_path
  use m_pawtab,         only : pawtab_type
  use m_pawfgr,         only : pawfgr_type
  use m_cgwf,           only : nscf_t
- use m_bz_mesh,        only : kpath_t, kpath_new
+ use m_bz_mesh,        only : kpath_t
  use m_wfd,            only : u0_cache_t
 
  implicit none
@@ -75,9 +75,9 @@ contains  !=====================================================
 !!  Compute e-ph matrix elements g(k,q) along an arbitrary path either in k- or q-space.
 !!  Wavefunctions at k and k+q are computed non-self-consistently by invoking the CG eigensolver
 !!  starting from the GS potential read from file.
-!!  The DFPT potential at q are usually obtained via Fourier interpolation but it is also possible
+!!  The DFPT potentials at q are usually obtained via Fourier interpolation, but it is also possible
 !!  to use fully ab-initio potentials provided the DVDB file contains all the q-points along the path.
-!!  This requires performing DFPT calculations for all the q-points and then merging
+!!  This requires performing DFPT calculations for all the q-points, and then merging
 !!  all the POT1 files with the mrgdv utility.
 !!
 !! INPUTS
@@ -167,19 +167,19 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  ! Build (k/q)-path. NB: Input variables have been already checked for consistency in chkinp.
  select case (dtset%eph_fix_korq)
  case ("k")
-   qpath = kpath_new(dtset%ph_qpath(:,1:dtset%ph_nqpath), cryst%gprimd, dtset%ph_ndivsm)
+   call qpath%init(dtset%ph_qpath(:,1:dtset%ph_nqpath), cryst%gprimd, dtset%ph_ndivsm)
    nq_path = qpath%npts
    call qpath%print(units, header=sjoin("q-point path for g(k,q) with fixed k:", ktoa(dtset%eph_fix_wavevec)), prtvol=dtset%prtvol)
    fake_path(:,1) = dtset%eph_fix_wavevec; fake_path(:,2) = dtset%eph_fix_wavevec + one
-   kpath = kpath_new(fake_path, cryst%gprimd, 0)
+   call kpath%init(fake_path, cryst%gprimd, 0)
    nk_path = 1
 
  case ("q")
-   kpath = kpath_new(dtset%kptbounds(:,1:dtset%nkpath), cryst%gprimd, dtset%ndivsm)
+   call kpath%init(dtset%kptbounds(:,1:dtset%nkpath), cryst%gprimd, dtset%ndivsm)
    nk_path = kpath%npts
    call kpath%print(units, header=sjoin("k-point path for g(k,q) with fixed q:", ktoa(dtset%eph_fix_wavevec)), prtvol=dtset%prtvol)
    fake_path(:,1) = dtset%eph_fix_wavevec; fake_path(:,2) = dtset%eph_fix_wavevec + one
-   qpath = kpath_new(fake_path, cryst%gprimd, 0)
+   call qpath%init(fake_path, cryst%gprimd, 0)
    nq_path = 1
 
  case default
@@ -297,7 +297,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  call dvdb%need_ftinterp(nq_path, qpath%points, qptopt, qmap_symrec, need_ftinterp)
 
  if (.not. need_ftinterp .and. dtset%eph_use_ftinterp /= 0) then
-   ABI_WARNING("Enforcing FT interpolation for q-points even if it's not strictly needed.")
+   ABI_COMMENT("Enforcing FT interpolation for q-points even if it's not strictly needed.")
    need_ftinterp = .True.
  end if
 
@@ -334,16 +334,10 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
    ! Write dimensions.
    ncerr = nctk_def_dims(ncid, [ &
-      nctkdim_t("nspinor", nspinor), &
-      nctkdim_t("nspden", nspden), &
-      nctkdim_t("nsppol", nsppol), &
-      nctkdim_t("nq_path", nq_path), &
-      nctkdim_t("nk_path", nk_path), &
-      nctkdim_t("nband", nband), &
-      nctkdim_t("nb_in_g", nb_in_g), &
-      nctkdim_t("natom", cryst%natom), &
-      nctkdim_t("natom3", natom3), &
-      nctkdim_t("number_of_phonon_modes", natom3) &
+      nctkdim_t("nspinor", nspinor), nctkdim_t("nspden", nspden), nctkdim_t("nsppol", nsppol), &
+      nctkdim_t("nq_path", nq_path), nctkdim_t("nk_path", nk_path), &
+      nctkdim_t("nband", nband), nctkdim_t("nb_in_g", nb_in_g), &
+      nctkdim_t("natom", cryst%natom), nctkdim_t("natom3", natom3), nctkdim_t("number_of_phonon_modes", natom3) &
    ], defmode=.True.)
    NCF_CHECK(ncerr)
 
@@ -408,7 +402,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
    NCF_CHECK(nf90_close(ncid))
  end if ! master
 
- ! Make sure the nc file has been written by master before continuing.
+ ! Make sure the netcdf file has been written by master before continuing.
  call xmpi_barrier(comm)
 
  ! All procs open the GPATH file here.
@@ -510,7 +504,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
          end if
        end if
 
-       ! if PAW, one has to solve a generalized eigenproblem.
+       ! For PAW, one has to solve a generalized eigenproblem.
        gen_eigenpb = psps%usepaw == 1; sij_opt = 0; if (gen_eigenpb) sij_opt = 1
        ABI_MALLOC(gs1c, (2, npw_kq*nspinor*((sij_opt+1)/2)))
        ABI_MALLOC(h1kets_kq, (2, npw_kq*nspinor, nb_in_g))
@@ -529,7 +523,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        ! Allocate vlocal1 with correct cplex. Note nvloc.
        ABI_MALLOC(vlocal1, (cplex*n4, n5, n6, gs_ham_kq%nvloc))
 
-       ! Load the k/k+q dependent parts of the Hamiltonian
+       ! Load the k/k+q dependent parts of the Hamiltonian.
        ! NB: In this routine we have to use gs_ham_k to have {k+q}_H0_k.
        ! Using gs_ham_kq would be wrong as it would lead to {k+q}_H0_{k+q}.
 
@@ -588,7 +582,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        ! Collect gkq_atm inside pert_comm so that all procs can operate on the data.
        if (pert_comm%nproc > 1) call xmpi_sum(gkq_atm, pert_comm%value, ierr)
 
-       ! From atom to phonon mode representation. Results stored in gkq_nu
+       ! From atom to phonon mode representation. Results stored in gkq_nu.
        call ephtk_gkknu_from_atm(nb_in_g, nb_in_g, 1, natom, gkq_atm, phfreqs, displ_red, gkq_nu)
 
        ! Write |g|^2 for this q.
@@ -629,12 +623,13 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
  call xmpi_sum(tot_nscf_ierr, comm, ierr)
  tot_nscf_ierr = int(tot_nscf_ierr / dble(pert_comm%nproc))
+
  if (my_rank == master) then
    if (tot_nscf_ierr == 0) then
      call wrtout(units, &
-       sjoin("Computation of g(k,q) completed. All NSCF runs converged within tolwfr", ftoa(dtset%tolwfr)), pre_newlines=1)
+       sjoin("Computation of g(k,q) completed. All NSCF runs converged within tolwfr: ", ftoa(dtset%tolwfr)), pre_newlines=1)
    else
-     msg = sjoin("WARNING:", itoa(tot_nscf_ierr), "NSCF runs did not converge within tolwfr", ftoa(dtset%tolwfr), ". Increase nstep!")
+     msg = sjoin("WARNING:", itoa(tot_nscf_ierr), "NSCF runs did not converge within tolwfr: ", ftoa(dtset%tolwfr), ". Increase nstep!")
      call wrtout(ab_out, msg)
      ABI_WARNING(msg)
    end if
@@ -659,7 +654,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      call wrtout(units, sjoin(char(9), itoa(iq), ktoa(qpath%points(:,iq))))
    end do
 
-   ! Write KS eigenvalues
+   ! Write KS eigenvalues.
    if (nq_path > 1) then
      ABI_MALLOC(eig_kq, (nband))
      do spin=1,nsppol
@@ -703,8 +698,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        do iq=1, nq_path
          if (all(iq /= [1, 2, nq_path-1, nq_path])) cycle
          NCF_CHECK(nf90_get_var(ncid, vid("gkq2_nu"), gkq2_nu, start=[1,1,1,iq,ik,spin]))
-         ! TODO: Average matrix elements over degenerate states (electrons at k, k+q, and phonons ???
-         !call epth_gkq2_nu_average(natom3, bstart, nb, phfreqs, eig_k, eig_kq, gkq2_nu)
          do nu=1,natom3
            write(msg, "(1x,4(i5,1x),es16.6)") nu, iq, ik, spin, sqrt(sum(gkq2_nu(:,:, nu)) / nb_in_g**2) * Ha_meV
            call wrtout(units, msg)
@@ -727,13 +720,14 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  ABI_FREE(gkq2_nu)
  ABI_FREE(displ_cart)
  ABI_FREE(displ_red)
+ ABI_FREE(comm_my_is)
+ ABI_FREE(my_spins)
+
  call pawcprj_free(cwaveprj0)
  ABI_FREE(cwaveprj0)
  do my_is=1,my_nspins
    call comm_my_is(my_is)%free()
  end do
- ABI_FREE(comm_my_is)
- ABI_FREE(my_spins)
 
  call qpath%free(); call kpath%free(); call ucache_k%free(); call ucache_kq%free()
  call qpt_comm%free(); call kpt_comm%free(); call pert_comm%free(); call nscf%free()
