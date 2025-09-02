@@ -509,6 +509,7 @@ ref(1)=trim(ref(1))//&
   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#MacEnulty2024'
  priority(46)=20
 
+<<<<<<< HEAD
  ref(47)=' First-principles responses of solids to atomic displacements and homogeneous electric fields:,'//ch10//&
   ' implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).'
  comment(47)=' Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.'//ch10//&
@@ -528,13 +529,22 @@ ref(1)=trim(ref(1))//&
   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2005'
  priority(49)=18
 
- ref(50)= ' Black-box inhomogeneous preconditioning for self-consistent field iterations in density functional theory.'//ch10//&
+ ref(50)=' Black-box inhomogeneous preconditioning for self-consistent field iterations in density functional theory.'//ch10//&
   ' M.F. Herbst and A. Levitt, Journal of Physics: Condensed Matter, 33(8) 085503 (2020).'
  comment(50)=' Comment: to be cited in case the LDOS-preconditioner is used (iprcel=202).'//ch10//&
   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#herbst2020'
  priority(50)=20
 
 !---------------------------------------------------------------------------------------------
+=======
+ ref(47)=' Black-box inhomogeneous preconditioning for self-consistent field iterations in density functional theory.'//ch10//&
+ ' M.F. Herbst and A. Levitt, Journal of Physics: Condensed Matter, 33(8) 085503 (2020).'
+comment(47)=' Comment: to be cited in case the LDOS-preconditioner is used (iprcel=202).'//ch10//&
+ ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#herbst2020'
+priority(47)=20
+ 
+ !---------------------------------------------------------------------------------------------
+>>>>>>> b900ccf503 (acknowledgment)
 !Determine the papers to be cited
 
 !Generic papers, not subject to conditions for citations
