@@ -813,6 +813,38 @@ subroutine cart29(blkflg,blkval,carflg,d2cart,&
    end do
  end do
 
+!!MRoyo: For magnetic Zeeman perturbations, apply a negative sign to get induced magnetic moments
+!!Macroscopic Zeeman
+! ipert1=natom+5 
+! do idir1=1,3
+!   do ipert2= 1, natom+6 !exclude local Zeemans, to be done below
+!     do idir2=1,3
+!       do ii=1,2
+!         d2cart(ii,idir1,ipert1,idir2,ipert2)=&
+!&         -one*d2cart(ii,idir1,ipert1,idir2,ipert2)
+!         d2cart(ii,idir2,ipert2,idir1,ipert1)=&
+!&         -one*d2cart(ii,idir2,ipert2,idir1,ipert1)
+!       end do
+!     end do
+!   end do
+! end do
+!
+!!Local Zeemans
+! do ipert1= natom+12,2*natom+11 
+!   do idir1=1,3
+!     do ipert2= 1, mpert
+!       do idir2=1,3
+!         do ii=1,2
+!           d2cart(ii,idir1,ipert1,idir2,ipert2)=&
+!&           -one*d2cart(ii,idir1,ipert1,idir2,ipert2)
+!           d2cart(ii,idir2,ipert2,idir1,ipert1)=&
+!&           -one*d2cart(ii,idir2,ipert2,idir1,ipert1)
+!         end do
+!       end do
+!     end do
+!   end do
+! end do 
+
 end subroutine cart29
 !!***
 
