@@ -2125,10 +2125,11 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
 
        if(option==1)then
          if (any(qgbt /= zero)) then
-            write(msg, '(a,f12.6,f12.6,f12.6)') ' Cell sum of sphere magnetization   ', sum_mag_x,sum_mag_y,sum_mag_z
-            call wrtout(units,msg)
-            write(msg, '(a,f12.6,f12.6,f12.6)') ' Integral of periodic magnetization ', mag_x,mag_y,mag_z
-            call wrtout(units,msg)
+           write(msg, '(a,f12.6,f12.6,f12.6)') ' Cell sum of sphere magnetization', sum_mag_x, sum_mag_y, sum_mag_z
+           call wrtout(units,msg)
+
+           write(msg, '(a,f10.6,f12.6,f12.6)') ' Integral of periodic magnetization', mag_x, mag_y, mag_z
+           call wrtout(units,msg)
          else
            write(msg, '(a,f12.6,f12.6,f12.6)') ' Total magnetization (spheres)   ', sum_mag_x,sum_mag_y,sum_mag_z
            call wrtout(units,msg)

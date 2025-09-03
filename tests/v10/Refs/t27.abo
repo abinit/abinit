@@ -245,8 +245,8 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
     1   2.00000       14.045260      3.089521    0.022492    0.028368
  ---------------------------------------------------------------------
- Total magnetization (spheres)       3.089521    0.022492    0.028368
- Total magnetization (exact)         3.238660    0.023576    0.029702
+ Cell sum of sphere magnetization    3.089521    0.022492    0.028368
+ Integral of periodic magnetization  3.238660    0.023576    0.029702
 ================================================================================
 
  ----iterations are completed or convergence reached----
