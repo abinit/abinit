@@ -1442,7 +1442,7 @@ contains
    else if (opt==2) then
      call wrtout([ab_out,std_out], ' Relaxed-spin magnetic Born effective charges')
    end if
-   call wrtout([ab_out,std_out], ' atom   dir     B-dir        Real              Imag')
+   call wrtout([ab_out,std_out], ' B-dir      atom   dir        Real              Imag')
 
    ipert1= ddb%natom + 5
    do idir1= 1, 3
