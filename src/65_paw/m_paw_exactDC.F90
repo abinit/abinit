@@ -253,6 +253,8 @@ CONTAINS  !=====================================================================
  edc = edc + excint
  edcdc = zero
 
+ ! Careful, vdc(i,j) as defined here is the i,j-th matrix element of the TRANSPOSE of vdc !
+
  do m1=1,ndim
    do m=1,ndim
      call simp_gen(vxcf,vxci(:,m,m1)*pawtab%proj2(:),pawrad,r_for_intg=pawrad%rad(meshsz))
