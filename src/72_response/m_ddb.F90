@@ -2032,6 +2032,11 @@ subroutine rdddb9(ddb,ddb_hdr,ddbun,&
      tmpval(1,:,:,:,:,1,1) = reshape(ddb%val(1,1:nsize,iblok), shape = (/3,mpert,3,mpert/))
      tmpval(2,:,:,:,:,1,1) = reshape(ddb%val(2,1:nsize,iblok), shape = (/3,mpert,3,mpert/))
 
+     do i2pert= natom+11+1, 2*natom+11
+       tmpval(1,:,i1pert,:,i2pert,1,1)= -one*tmpval(1,:,i1pert,:,i2pert,1,1)
+       tmpval(1,:,i2pert,:,i1pert,1,1)= -one*tmpval(1,:,i2pert,:,i1pert,1,1)
+     end do 
+
      ! Then apply symmetry operations
      call d2sym3(tmpflg,tmpval,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timrev,1)
 

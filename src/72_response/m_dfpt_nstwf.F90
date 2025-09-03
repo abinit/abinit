@@ -2268,6 +2268,11 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !            the operator $-i \frac{d}{dk}.
              if (ipert==dtset%natom+2) gvnlx1(:,:) = -gvnlx1(:,:)
 
+!            MRoyo 030925 :
+!            3) Case ipert1=natom+2 and ipert=natom+5 or ipert=natom+12:2*natom+11
+!            the computation of mixed derivatives wrt to Zeeman and electric fields needs $i \frac{d}{dk}.
+             if (ipert==dtset%natom+5.or.(ipert>=dtset%natom+12.and.ipert<=2*dtset%natom+11)) gvnlx1(:,:) = -gvnlx1(:,:)
+
 !            <G|Vnl1|Cnk> is contained in gvnlx1
 !            construct the matrix element (<uj2|vj1|u0>)complex conjug and add it to the 2nd-order matrix
              call dotprod_g(dotr,doti,istwf_k,npw1_k*dtset%nspinor,2,cwavef,gvnlx1,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)

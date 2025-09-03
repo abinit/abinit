@@ -3337,7 +3337,7 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
 
  if (rfmagn==2) then
    write(iout,*)' '
-   write(iout,*)' Local spin susceptibility, in cartesian coordinates'
+   write(iout,*)' Local magnetic susceptibility, in cartesian coordinates'
    write(iout,*)' (from local Zeeman field response)'
    write(iout,*)'    j1       j2             matrix element'
    write(iout,*)' dir pert dir pert     real part    imaginary part'
@@ -3625,39 +3625,6 @@ subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
      ABI_FREE(elfrtot)
    end if
 !  End section for strain perturbation
-
-!  Section for Zeeman field perturbations
-!  (MR: We store magnetic moments, which are minus the second order total energy derivatives. 
-!  It seems that this change of sign is only necessary for the magnetic moments induced by atomic
-!  displacements. For the electric field ones, it must be already changed inside dfpt_nstwf.) 
-   if (rfpert(natom+5)==1) then
-     ipert2= natom+5
-     do idir2= 1, 3
-       do ipert1= 1, natom
-         do idir1= 1, 3
-           if (blkflg(idir1,ipert1,idir2,ipert2)==1) then
-             d2matr(:,idir1,ipert1,idir2,ipert2)= -d2matr(:,idir1,ipert1,idir2,ipert2)
-             d2matr(:,idir2,ipert2,idir1,ipert1)= -d2matr(:,idir2,ipert2,idir1,ipert1)
-           end if
-         end do
-       end do
-     end do 
-   end if
-
-   if (ANY(rfpert(natom+11+1:2*natom+11)==1)) then
-     do ipert2= natom+11+rfatpol(1), natom+11+rfatpol(2) 
-       do idir2= 1, 3
-         do ipert1= 1, natom
-           do idir1= 1, 3
-             if (blkflg(idir1,ipert1,idir2,ipert2)==1) then
-               d2matr(:,idir1,ipert1,idir2,ipert2)= -d2matr(:,idir1,ipert1,idir2,ipert2)
-               d2matr(:,idir2,ipert2,idir1,ipert1)= -d2matr(:,idir2,ipert2,idir1,ipert1)
-             end if
-           end do
-         end do
-       end do 
-     end do
-   end if
 
 !  The second-order matrix has been computed.
 
