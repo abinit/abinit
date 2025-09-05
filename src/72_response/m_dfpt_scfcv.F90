@@ -882,10 +882,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      call paw_an_reset_flags(paw_an1) ! Force the recomputation of on-site potentials
      call paw_ij_reset_flags(paw_ij1,self_consistent=.true.) ! Force the recomputation of Dij
      option=0;if (dtset%iscf>0.and.dtset%iscf<10.and.nstep>0) option=1
-     call pawdenpot(dum,el_temp,epaw1,epawdc1_dum,spaw1_dum,ipert,dtset%ixc,my_natom,dtset%natom,&
+     call pawdenpot(dum,el_temp,epaw1,epawdc1_dum,spaw1_dum,gprimd,ipert,dtset%ixc,my_natom,dtset%natom,&
 &     dtset%nspden,psps%ntypat,dtset%nucdipmom,nzlmopt,option,paw_an1,paw_an,paw_ij1,pawang,&
 &     dtset%pawprtvol,pawrad,pawrhoij1,dtset%pawspnorb,pawtab,dtset%pawxcdev,&
-&     dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp, &
+&     dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,xred,ucvol,psps%znuclpsp, &
 &     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
 !    First-order Dij computation
@@ -1088,10 +1088,11 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
        if (istep>1) nzlmopt=dtset%pawnzlm
        call paw_an_reset_flags(paw_an1) ! Force the recomputation of on-site potentials
        option=2
-       call pawdenpot(dum,el_temp,epaw1,epawdc1_dum,spaw1_dum,ipert,dtset%ixc,my_natom,dtset%natom,dtset%nspden,&
+       call pawdenpot(dum,el_temp,epaw1,epawdc1_dum,spaw1_dum,gprimd,ipert,dtset%ixc,&
+         & my_natom,dtset%natom,dtset%nspden,&
 &       psps%ntypat,dtset%nucdipmom,nzlmopt,option,paw_an1,paw_an,paw_ij1,pawang,dtset%pawprtvol,&
 &       pawrad,pawrhoij1,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%spnorbscl,&
-&       dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp,&
+&       dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,xred,ucvol,psps%znuclpsp,&
 &       mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
      end if
 
@@ -1436,7 +1437,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      prtopt=idir+1;
      call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
 &     dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
-&     prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
+&     prtopt,cplex,dtset%qgbt,dtset%use_gbt,intgden=intgden,dentot=dentot,rhomag=rhomag)
      call  prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,[ab_out],prtopt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
    end if
  end if

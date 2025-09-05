@@ -7,7 +7,7 @@
 # 1-Parameters governing the convergence:
 # ---------------------------------------
   ecut 3.  nband 6  nline 8  # Prior to v7.11.10 it was nline 10, but this seems too demanding for the accuracy of vm2_ifort15
-  bandpp 1 # old default value
+  nblock_lobpcg 6
   ntime 5  nstep 25
   toldfe 1.d-8
 
@@ -45,13 +45,13 @@
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t93.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = 
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   Test of Ca, simple cubic , 2  k-point. Testing GS  energy and lobpcg algorithm.
 #%%<END TEST_INFO>

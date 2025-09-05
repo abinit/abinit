@@ -1689,7 +1689,7 @@ subroutine gstore_filter_fs_tetra__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kb
  indkk(:) = kbz2ibz(1, :)
 
  rlatt = ebands%kptrlatt; call matr3inv(rlatt, klatt)
- call htetra_init(ktetra, indkk, gstore%cryst%gprimd, klatt, kbz, gstore%nkbz, gstore%kibz, gstore%nkibz, &
+ call ktetra%init(indkk, gstore%cryst%gprimd, klatt, kbz, gstore%nkbz, gstore%kibz, gstore%nkibz, &
                   ierr, error_string, gstore%comm)
  ABI_CHECK(ierr == 0, error_string)
 
@@ -3189,8 +3189,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  real(dp) :: ecut, eshift, eig0nk, weight_q, weight_k
  logical :: gen_eigenpb, isirr_k, isirr_kq, isirr_q, print_time, need_ftinterp, qq_is_gamma
  type(wfd_t) :: wfd
- type(gs_hamiltonian_type) :: gs_hamkq
- type(rf_hamiltonian_type) :: rf_hamkq
+ type(gs_hamiltonian_type) :: gs_ham_kq
+ type(rf_hamiltonian_type) :: rf_ham_kq
  type(ddkop_t) :: ddkop
  type(gqk_t),pointer :: gqk
  character(len=500) :: msg
@@ -3354,14 +3354,14 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ! Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_hamk.
  ! PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
 
- call gs_hamkq%init(psps, pawtab, nspinor, nsppol, nspden, natom, &
+ call gs_ham_kq%init(psps, pawtab, nspinor, nsppol, nspden, natom, &
    dtset%typat, cryst%xred, nfft, mgfft, ngfft, cryst%rprimd, dtset%nloalg, &
    comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab, mpi_spintab=mpi_enreg%my_isppoltab, &
    usecprj=usecprj, ph1d=ph1d, nucdipmom=dtset%nucdipmom, gpu_option=dtset%gpu_option)
 
  ! Allocate vlocal. Note nvloc
  ! I set vlocal to huge to trigger possible bugs (DFPT routines should not access the data)
- ABI_MALLOC(vlocal, (n4, n5, n6, gs_hamkq%nvloc))
+ ABI_MALLOC(vlocal, (n4, n5, n6, gs_ham_kq%nvloc))
  vlocal = huge(one)
 
  ! Allocate work space arrays.
@@ -3604,16 +3604,16 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      end if
 
      ! Allocate vlocal1 with correct cplex. Note nvloc and my_npert.
-     ABI_MALLOC(vlocal1, (cplex*n4, n5, n6, gs_hamkq%nvloc, my_npert))
+     ABI_MALLOC(vlocal1, (cplex*n4, n5, n6, gs_ham_kq%nvloc, my_npert))
 
      ! Set up local potential vlocal1 with proper dimensioning from vtrial1 taking into account the spin.
      do my_ip=1,my_npert
-       call rf_transgrid_and_pack(spin, nspden, psps%usepaw, cplex, nfftf, nfft, ngfft, gs_hamkq%nvloc,&
+       call rf_transgrid_and_pack(spin, nspden, psps%usepaw, cplex, nfftf, nfft, ngfft, gs_ham_kq%nvloc,&
                                   pawfgr, mpi_enreg, dummy_vtrial, v1scf(:,:,:,my_ip), vlocal, vlocal1(:,:,:,:,my_ip))
      end do
 
      ! Continue to initialize the GS Hamiltonian
-     call gs_hamkq%load_spin(spin, vlocal=vlocal, with_nonlocal=.true.)
+     call gs_ham_kq%load_spin(spin, vlocal=vlocal, with_nonlocal=.true.)
 
      ! Loop over my k-points
      do my_ik=1,gqk%my_nk
@@ -3673,11 +3673,11 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        call wfd%sym_ug_kg(ecut, kq_bz, kq_ibz, bstart_kq, nband_kq, spin, mpw, indkk_kq(:,1), cryst, &
                           work_ngfft, work, istwf_kq, npw_kq, kg_kq, bras_kq)
 
-       call gs_hamkq%eph_setup_k("k" , kk_bz, istwf_k, npw_k, kg_k, dtset, cryst, psps, &
-                                 nkpg_k, kpg_k, ffnl_k, kinpw_k, ph3d_k, gqk%pert_comm%value)
+       call gs_ham_kq%eph_setup_k("k" , kk_bz, istwf_k, npw_k, kg_k, dtset, cryst, psps, &
+                                  nkpg_k, kpg_k, ffnl_k, kinpw_k, ph3d_k, gqk%pert_comm%value)
 
-       call gs_hamkq%eph_setup_k("kq", kq_bz, istwf_k, npw_kq, kg_kq, dtset, cryst, psps, &
-                                 nkpg_kq, kpg_kq, ffnl_kq, kinpw_kq, ph3d_kq, gqk%pert_comm%value)
+       call gs_ham_kq%eph_setup_k("kq", kq_bz, istwf_k, npw_kq, kg_kq, dtset, cryst, psps, &
+                                  nkpg_kq, kpg_kq, ffnl_kq, kinpw_kq, ph3d_kq, gqk%pert_comm%value)
 
        ABI_MALLOC(gs1c_kq, (2, npw_kq*nspinor*((sij_opt+1)/2)))
 
@@ -3687,8 +3687,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
          idir = dvdb%my_pinfo(1, my_ip); ipert = dvdb%my_pinfo(2, my_ip); ipc = dvdb%my_pinfo(3, my_ip)
 
          ! Prepare application of the NL part.
-         call rf_hamkq%init(cplex, gs_hamkq, ipert, has_e1kbsc=.true.)
-         call rf_hamkq%load_spin(spin, vlocal1=vlocal1(:,:,:,:,my_ip), with_nonlocal=.true.)
+         call rf_ham_kq%init(cplex, gs_ham_kq, ipert, has_e1kbsc=.true.)
+         call rf_ham_kq%load_spin(spin, vlocal1=vlocal1(:,:,:,:,my_ip), with_nonlocal=.true.)
 
          ! Calculate dvscf * psi_k, results stored in h1kets_kq on the k+q sphere.
          ! Compute H(1) applied to GS wavefunction Psi(0)
@@ -3699,11 +3699,11 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
            eshift = eig0nk - dtset%dfpt_sciss
 
            call getgh1c(berryopt0, kets_k(:,:,in_k), cwaveprj0, h1kets_kq(:,:,in_k), &
-                        grad_berry, gs1c_kq, gs_hamkq, gvnlx1, idir, ipert, (/eshift/), mpi_enreg, ndat1, optlocal, &
-                        optnl, opt_gvnlx1, rf_hamkq, sij_opt, tim_getgh1c, usevnl)
+                        grad_berry, gs1c_kq, gs_ham_kq, gvnlx1, idir, ipert, [eshift], mpi_enreg, ndat1, optlocal, &
+                        optnl, opt_gvnlx1, rf_ham_kq, sij_opt, tim_getgh1c, usevnl)
          end do
 
-         call rf_hamkq%free()
+         call rf_ham_kq%free()
 
          ! Calculate <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation. No need to handle istwf_kq because it's always 1.
 !$OMP PARALLEL DO COLLAPSE(2)
@@ -3818,9 +3818,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ABI_FREE(pheigvec_qibz)
  ABI_FREE(done_qbz_spin)
 
- call ddkop%free()
- call gs_hamkq%free()
- call wfd%free()
+ call ddkop%free(); call gs_ham_kq%free(); call wfd%free()
  call pawcprj_free(cwaveprj0)
  ABI_FREE(cwaveprj0)
 
@@ -5002,11 +5000,9 @@ subroutine gqk_get_erange_mask(gqk, gstore, erange, my_states, glob_states)
 !scalars
  class(ebands_t), pointer :: ebands
  type(gaps_t) :: gaps
- logical :: assume_gap
- integer :: my_ik, ik_ibz, ik_glob
- integer :: ib, bstart
- integer :: gap_err, ierr
+ integer :: my_ik, ik_ibz, ik_glob, ib, bstart, gap_err, ierr
  real(dp) :: vmax, cmin, eig
+ logical :: assume_gap
 !----------------------------------------------------------------------
 
  ebands => gstore%ebands
@@ -5092,16 +5088,11 @@ subroutine gqk_filter_erange(gqk, gstore, erange)
  class(ebands_t), pointer :: ebands
  type(krank_t) :: krank_kpts
  logical :: skip_nk, skip_mkq, skip_q
- integer :: my_ik, ik_glob
- integer :: my_iq, ikq, ipert
- integer :: ib, jb !, bstart
- integer :: ierr
+ integer :: my_ik, ik_glob, my_iq, ikq, ipert, ierr, ib, jb !, bstart
  real(dp) :: wtq
 !arrays
- integer :: my_states(gqk%nb, gqk%my_nk)
- integer :: glob_states(gqk%nb, gqk%glob_nk)
- real(dp) :: kpt(3), qpt(3), kpq(3)
- real(dp) :: kpts(3, gqk%glob_nk), my_qpts(3, gqk%my_nq)
+ integer :: my_states(gqk%nb, gqk%my_nk), glob_states(gqk%nb, gqk%glob_nk)
+ real(dp) :: kpt(3), qpt(3), kpq(3), kpts(3, gqk%glob_nk), my_qpts(3, gqk%my_nq)
 !----------------------------------------------------------------------
 
  ebands => gstore%ebands
@@ -5168,6 +5159,7 @@ subroutine gqk_filter_erange(gqk, gstore, erange)
  enddo
 
  call krank_kpts%free()
+
 end subroutine gqk_filter_erange
 !!***
 

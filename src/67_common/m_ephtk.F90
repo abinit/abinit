@@ -369,13 +369,6 @@ subroutine ephtk_gkknu_from_atm(nb1, nb2, nk, natom, gkq_atm, phfrq, displ_red, 
    end do
 
    gkq_nu(:,:,:,:,nu) = gkq_nu(:,:,:,:,nu) / sqrt(two * phfrq(nu))
-
-   ! Perform the transformation using array operations
-   !gkq_nu(1,:,:,:,nu) = sum(gkq_atm(1,:,:,:,:) * displ_red(1,:,nu) - gkq_atm(2,:,:,:,:) * displ_red(2,:,nu), dim=5)
-   !gkq_nu(2,:,:,:,nu) = sum(gkq_atm(1,:,:,:,:) * displ_red(2,:,nu) + gkq_atm(2,:,:,:,:) * displ_red(1,:,nu), dim=5)
-   !! Apply the normalization factor
-   !factor = one / sqrt(two * phfrq(nu))
-   !gkq_nu(:,:,:,:,nu) = gkq_nu(:,:,:,:,nu) * factor
  end do
 
 end subroutine ephtk_gkknu_from_atm

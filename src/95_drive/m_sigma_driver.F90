@@ -840,11 +840,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    !  Calculate onsite vxc with and without core charge.
    nzlmopt=-1; option=0; compch_sph=greatest_real
    call pawdenpot(compch_sph,el_temp,KS_energies%e_paw,KS_energies%e_pawdc,&
-     KS_energies%entropy_paw,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
+     KS_energies%entropy_paw,Cryst%gprimd,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
      Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,KS_Paw_an,KS_Paw_an,KS_paw_ij,&
      Pawang,Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,&
      Pawtab,Dtset%pawxcdev,Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,&
-     Cryst%ucvol,Psps%znuclpsp,epaw_xc=KS_energies%e_pawxc)
+     Cryst%xred,Cryst%ucvol,Psps%znuclpsp,epaw_xc=KS_energies%e_pawxc)
 
  else
    ABI_MALLOC(ks_nhatgr, (0, 0, 0))
@@ -1685,7 +1685,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    select case (dtset%gwgamma)
    case (0)
-     id_required=4; ikxc=0; approx_type=0; option_test=0; dim_kxcg=0
+     id_required = 4; ikxc = 0; approx_type = 0; option_test = 0; dim_kxcg = 0
      ABI_MALLOC(kxcg, (nfftf_tot,dim_kxcg))
 
    case (1, 2)
@@ -3595,7 +3595,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
    endif
  endif
  do ivcoul_init=1,nvcoul_init
-   rcut = Dtset%rcut
+   rcut = Dtset%gw_rcut
    icutcoul_eff=Dtset%gw_icutcoul
    Sigp%sigma_mixing=one
    if( mod(Dtset%gwcalctyp,10)==5 .or. ivcoul_init==2)then
@@ -3606,7 +3606,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
        Sigp%sigma_mixing=abs(Dtset%hyb_mixing_sr)
        icutcoul_eff=5
      endif
-     if(abs(rcut)<tol6 .and. abs(Dtset%hyb_range_fock)>tol8)rcut=one/Dtset%hyb_range_fock
+     if(abs(rcut)<tol6 .and. abs(Dtset%hyb_range_fock)>tol8) rcut=one/Dtset%hyb_range_fock
    endif
 
    if (ivcoul_init == 1) then
@@ -4271,11 +4271,11 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,qp_ebands, &
  el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
 
  call pawdenpot(qp_compch_sph,el_temp,QP_energies%e_paw,QP_energies%e_pawdc,&
-   QP_energies%entropy_paw,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
+   QP_energies%entropy_paw,Cryst%gprimd,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
    Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,QP_paw_an,QP_paw_an,&
    QP_paw_ij,Pawang,Dtset%pawprtvol,Pawrad,QP_pawrhoij,Dtset%pawspnorb,&
    Pawtab,Dtset%pawxcdev,Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,&
-   Cryst%ucvol,Psps%znuclpsp)
+   Cryst%xred,Cryst%ucvol,Psps%znuclpsp)
 
 end subroutine paw_qpscgw
 !!***
@@ -4331,7 +4331,7 @@ subroutine setup_vcp(Vcp_ks,Vcp_full,Dtset,Gsph_x,Gsph_c,Cryst,Qmesh,Kmesh,coef_
    ABI_MALLOC(qlwl,(3,nqlwl))
    qlwl(:,:)=Dtset%gw_qlwl(:,1:nqlwl)
  end if
- rcut=Dtset%rcut
+ rcut=Dtset%gw_rcut
  icsing_eff=Dtset%gw_icutcoul
  ! 1st part: Use a Vcp_full to compute the full Coulomb interaction for NOs
  if (Gsph_x%ng > Gsph_c%ng) then

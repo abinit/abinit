@@ -131,9 +131,6 @@ should use a diagonalisation routine for non-hermitian matrices.
         text=r"""
 The actual numbers of the atoms for which the interatomic force constant have
 to be written and eventually analysed.
-
-WARNING: there will be an in-place change of meaning of atifc (this is
-confusing, and should be taken away in one future version - sorry for this).
 """,
     ),
 

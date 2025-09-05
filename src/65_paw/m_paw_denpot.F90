@@ -88,6 +88,7 @@ CONTAINS  !=====================================================================
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation (optional argument)
 !!  [hyb_mixing, hyb_mixing_sr]= -- optional-- mixing factors for the global (resp. screened) XC hybrid functional
 !!  el_temp=electronic temperature (hartree)
+!!  gprimd=reciprocal lattice translations
 !!  ipert=index of perturbation (used only for RF calculation ; set ipert<=0 for GS calculations.
 !!  ixc= choice of exchange-correlation scheme (see above, and below)
 !!  mpi_atmtab(:)=--optional-- indexes of the atoms treated by current proc
@@ -120,6 +121,7 @@ CONTAINS  !=====================================================================
 !!  xclevel= XC functional level
 !!  xc_denpos= lowest allowed density (usually for the computation of the XC functionals)
 !!  xc_taupos= lowest allowed kinetic energy density (for mGGA XC functionals)
+!!  xred=atom positions in reduced coordinates
 !!  znucl(ntypat)=gives the nuclear charge for all types of atoms
 !!
 !! OUTPUT
@@ -155,10 +157,10 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
+subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,gprimd,ipert,ixc,&
 & my_natom,natom,nspden,ntypat,nucdipmom,nzlmopt,option,paw_an,paw_an0,&
 & paw_ij,pawang,pawprtvol,pawrad,pawrhoij,pawspnorb,pawtab,pawxcdev,spnorbscl,&
-& xclevel,xc_denpos,xc_taupos,ucvol,znucl,&
+& xclevel,xc_denpos,xc_taupos,xred,ucvol,znucl,&
 & electronpositron,mpi_atmtab,comm_atom,vpotzero,hyb_mixing,hyb_mixing_sr,epaw_xc,&
 & rcpaw,extfpmd) ! optional arguments
 
@@ -177,7 +179,7 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
  type(extfpmd_type),pointer, intent(in), optional :: extfpmd
 !arrays
  integer,optional,target,intent(in) :: mpi_atmtab(:)
- real(dp),intent(in) :: nucdipmom(3,natom),znucl(ntypat)
+ real(dp),intent(in) :: gprimd(3,3),nucdipmom(3,natom),xred(3,natom),znucl(ntypat)
  real(dp),intent(out),optional :: vpotzero(2)
  type(paw_an_type),intent(inout) :: paw_an(my_natom)
  type(paw_an_type), intent(in) :: paw_an0(my_natom)
@@ -314,6 +316,10 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
    return
  end if
 
+ ! at line 1142 below, spaw may be used before it is set,
+ ! which breaks some compilers. Set it here to zero,
+ ! it will be recomputed if needed below
+ spaw=zero
 !Init energies
  if (option/=1) then
    e1xc=zero     ; e1xcdc=zero
@@ -822,7 +828,8 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
 !  Equation 10 (density) and up to 43 (Hartree potential of density)
 !    of Kresse and Joubert PRB 59 1758 (1999) [[cite:Kresse1999]]
    keep_vhartree=(paw_an(iatom)%has_vhartree>0)
-   if ((pawspnorb>0.and.ipert==0.and.ipositron/=1).or.keep_vhartree) then
+   if ((pawspnorb>0.and.ipert==0.and.ipositron/=1).or.keep_vhartree.or.&
+     (any(abs(nucdipmom(:,iatom))>tol8))) then
 
      !In the first clause case, would it not be simpler just to turn on has_vhartree?
      if (.not. allocated(paw_an(iatom)%vh1)) then
@@ -917,13 +924,16 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
 
 !    Compute nuclear dipole contribution to Dij if necessary
      if (paw_ij(iatom)%has_dijnd/=2) then
-       call pawdijnd(paw_ij(iatom)%dijnd,cplex_dij,ndij,nucdipmom(:,iatom),pawrad(itypat),pawtab(itypat))
+       call pawdijnd(paw_ij(iatom)%dijnd,cplex_dij,gprimd,iatom,natom,ndij,nspden,&
+         & nucdipmom(1:3,1:natom),pawang,pawrad(itypat),pawtab(itypat),pawxcdev,qphase,&
+         & paw_an(iatom)%vh1,paw_an(iatom)%vxc1,xred,znucl(itypat),paw_ij(iatom)%zora)
        paw_ij(iatom)%has_dijnd=2
      end if
 
 !    Compute nuclear dipole contribution to energy
      if (option/=1) then
-       call pawaccenergy_nospin(enucdip,pawrhoij(iatom),paw_ij(iatom)%dijnd,cplex_dij,1,pawtab(itypat))
+       call pawaccenergy_nospin(enucdip,pawrhoij(iatom),paw_ij(iatom)%dijnd,&
+         & cplex_dij,1,pawtab(itypat))
      end if
 
    end if
@@ -935,15 +945,17 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
 
 !    Compute spin-orbit contribution to Dij
      if (option/=2.or.cplex_rhoij==2) then
-       call pawdijso(paw_ij(iatom)%dijso,cplex_dij,cplex,ndij,nspden,pawang,pawrad(itypat),pawtab(itypat), &
-&                    pawxcdev,spnorbscl,paw_an(iatom)%vh1,paw_an(iatom)%vxc1,znucl(itypat),&
-&                    nucdipmom=nucdipmom(1:3,iatom))
+       call pawdijso(paw_ij(iatom)%dijso,cplex_dij,cplex,ndij,nspden,pawang,&
+         & pawrad(itypat),pawtab(itypat),pawxcdev,spnorbscl,paw_an(iatom)%vh1,&
+         & paw_an(iatom)%vxc1,znucl(itypat),paw_ij(iatom)%zora,&
+         & nucdipmom=nucdipmom(1:3,iatom))
        paw_ij(iatom)%has_dijso=2
      end if
 
 !    Compute spin-orbit contribution to on-site energy
      if (option/=1.and.cplex_rhoij==2) then
-       call pawaccenergy(espnorb,pawrhoij(iatom),paw_ij(iatom)%dijso,cplex_dij,qphase,ndij,pawtab(itypat))
+       call pawaccenergy(espnorb,pawrhoij(iatom),paw_ij(iatom)%dijso,&
+         & cplex_dij,qphase,ndij,pawtab(itypat))
      end if
 
    end if

@@ -588,11 +588,11 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    nzlmopt=-1; option=0; compch_sph=greatest_real
 
    call pawdenpot(compch_sph,el_temp,KS_energies%e_paw,KS_energies%e_pawdc,&
-     KS_energies%entropy_paw,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
+     KS_energies%entropy_paw,Cryst%gprimd,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
      Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,KS_Paw_an,KS_Paw_an,KS_paw_ij,&
      Pawang,Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,&
      Pawtab,Dtset%pawxcdev,Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,&
-     Cryst%ucvol,Psps%znuclpsp,epaw_xc=KS_energies%e_pawxc)
+     Cryst%xred,Cryst%ucvol,Psps%znuclpsp,epaw_xc=KS_energies%e_pawxc)
  end if !PAW
 
  if (.not.allocated(ks_nhatgr))  then
@@ -641,15 +641,6 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  optene=4; moved_atm_inside=0; moved_rhor=0; initialized=1; istep=1
 !
 !=== Compute structure factor phases and large sphere cut-off ===
-!WARNING cannot use Dtset%mgfft, this has to be checked better
-!mgfft=MAXVAL(ngfftc(:))
-!allocate(ph1d(2,3*(2*mgfft+1)*Cryst%natom),ph1df(2,3*(2*mgfftf+1)*Cryst%natom))
-! write(std_out,*)' CHECK ',Dtset%mgfftdg,mgfftf
-! if (Dtset%mgfftdg/=mgfftf) then
-!  write(std_out,*)"WARNING Dtset%mgfftf /= mgfftf"
-!  write(std_out,*)'HACKING Dtset%mgfftf'
-!  Dtset%mgfftdg=mgfftf
-! end if
  ABI_MALLOC(ph1d,(2,3*(2*Dtset%mgfft+1)*Cryst%natom))
  ABI_MALLOC(ph1df,(2,3*(2*mgfftf+1)*Cryst%natom))
 
@@ -1400,10 +1391,10 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
 
  ! Compute Coulomb term on the largest G-sphere.
  if (Gsph_x%ng > Gsph_c%ng ) then
-   call Vcp%init(Gsph_x,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Gsph_x%ng,&
+   call Vcp%init(Gsph_x,Cryst,Qmesh,Kmesh,Dtset%gw_rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Gsph_x%ng,&
      nqlwl,qlwl,comm)
  else
-   call Vcp%init(Gsph_c,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Gsph_c%ng,&
+   call Vcp%init(Gsph_c,Cryst,Qmesh,Kmesh,Dtset%gw_rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Gsph_c%ng,&
      nqlwl,qlwl,comm)
  end if
 
@@ -2006,10 +1997,10 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh, &
 
  ! Compute Coulomb term on the largest G-sphere.
  if (Gsph_x%ng > Gsph_c%ng ) then
-   call Vcp_dense%init(Gsph_x,Cryst,Qmesh_dense,Kmesh_dense,Dtset%rcut,Dtset%gw_icutcoul,&
+   call Vcp_dense%init(Gsph_x,Cryst,Qmesh_dense,Kmesh_dense,Dtset%gw_rcut,Dtset%gw_icutcoul,&
                        Dtset%vcutgeo,Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,comm)
  else
-   call Vcp_dense%init(Gsph_c,Cryst,Qmesh_dense,Kmesh_dense,Dtset%rcut,Dtset%gw_icutcoul,&
+   call Vcp_dense%init(Gsph_c,Cryst,Qmesh_dense,Kmesh_dense,Dtset%gw_rcut,Dtset%gw_icutcoul,&
                        Dtset%vcutgeo,Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,comm)
  end if
 

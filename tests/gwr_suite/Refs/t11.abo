@@ -99,6 +99,7 @@ _ WF disk file :      1.326 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
            getden1          0
            getden2          0
            getden3          1
+          gw_rcut      5.00000000E+00 Bohr
       gw_icutcoul           0
          icutcoul           0
            istwfk        1
@@ -619,6 +620,7 @@ my_nband: 20
            getden1          0
            getden2          0
            getden3          1
+          gw_rcut      5.00000000E+00 Bohr
       gw_icutcoul           0
          icutcoul           0
            istwfk        1

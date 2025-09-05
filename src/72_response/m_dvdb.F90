@@ -1058,7 +1058,7 @@ integer function dvdb_get_pinfo(db, iqpt, cplex, pinfo) result(nperts)
         nperts = nperts + 1
         pinfo(:, nperts) = [idir, ipert, idir + (ipert-1)*3]
         if (cplex == 0) cplex = db%cplex_v1(iv1)
-        ABI_CHECK(cplex == db%cplex_v1(iv1), "cplex should be constant for given q!")
+        ABI_CHECK_IEQ(cplex, db%cplex_v1(iv1), "cplex should be constant for given q!")
       end if
     end do
  end do
@@ -1686,7 +1686,7 @@ pcase_loop: &
      ! IS(q) = q + G0
      ! we want q so we have to multiply by exp(iG0r) in real space.
      if (any(g0_qpt /= 0)) then
-       ABI_CHECK(cplex==2, "cplex == 1")
+       ABI_CHECK_IEQ(cplex, 2, "cplex != 2")
        if (debug) write(std_out,*)"Found not zero g0_qpt", g0_qpt ! for idir: ", idir, ", ipert: ", ipert
        call times_eigr(g0_qpt, ngfft, nfft, 1, v1scf(:,ispden,pcase))
      end if
@@ -1871,7 +1871,7 @@ subroutine v1phq_rotate(cryst, qpt_ibz, isym, itimrev, g0q, ngfft, cplex, nfft, 
  ! Keep track of total time spent.
  call timab(1804, 1, tsec)
 
- ABI_CHECK(cplex == 2, "cplex != 2")
+ ABI_CHECK_IEQ(cplex, 2, "cplex != 2")
 
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  natom3 = 3 * cryst%natom; tsign = 3-2*itimrev
@@ -2022,7 +2022,7 @@ subroutine v1phq_rotate_myperts(cryst, qpt_ibz, isym, itimrev, g0q, ngfft, cplex
  ! Keep track of total time spent.
  call timab(1804, 1, tsec)
 
- ABI_CHECK(cplex == 2, "cplex != 2")
+ ABI_CHECK_IEQ(cplex, 2, "cplex != 2")
 
  natom3 = 3 * cryst%natom; tsign = 3-2*itimrev
 
@@ -3219,13 +3219,12 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
  integer :: iqst,nqst,itimrev,tsign,isym,ix,iy,iz,nq1,nq2,nq3,r1,r2,r3
  integer :: nproc,my_rank,ifft,cnt,ierr
  character(len=500) :: msg
- real(dp) :: dksqmax
+ real(dp) :: dksqmax, cpu, wall, gflops
  logical :: isirr_q, found
 !arrays
  integer :: qptrlatt(3,3),g0q(3)
  integer,allocatable :: indqq(:,:),iperm(:),bz2ibz_sort(:),nqsts(:),iqs_dvdb(:)
  real(dp) :: qpt_bz(3),shift(3)
- real(dp) :: cpu, wall, gflops
  real(dp),allocatable :: qibz(:,:),qbz(:,:),wtq(:),emiqr(:,:)
  real(dp),allocatable :: v1r_qibz(:,:,:,:),v1r_qbz(:,:,:,:), v1r_lr(:,:)
 ! *************************************************************************
@@ -5803,7 +5802,7 @@ subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_filepath, ddb)
  end if
 
  ! Read the quadrupoles
- iblock_quadrupoles = ddb_ptr%get_quadrupoles(ddb_hdr%ddb_version,1, 3, dvdb%qstar)
+ iblock_quadrupoles = ddb_ptr%get_quadrupoles(ddb_hdr%ddb_version,1,BLKTYP_d3E_xx,dvdb%qstar)
  if (iblock_quadrupoles /=0) dvdb%has_quadrupoles = .True.
 
  ABI_FREE(zeff)

@@ -76,7 +76,6 @@ module m_chebfi2_cprj
    integer :: space_cprj
    integer :: spacedim                      ! Space dimension for one vector
    integer :: cprjdim                       ! cprj dimension
-   integer :: blockdim_cprj                 !
    integer :: total_spacedim                ! Maybe not needed
    integer :: neigenpairs                   ! Number of eigen values/vectors we want
    integer :: ndeg_filter                   ! Degree of the polynomial filter
@@ -199,7 +198,6 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,cprjdim,tolerance,ecut,bandpp
  chebfi%neigenpairs   = neigenpairs
  chebfi%spacedim      = spacedim
  chebfi%cprjdim       = cprjdim
- chebfi%blockdim_cprj = bandpp*xg_nonlop%nspinor
  if (tolerance > 0.0) then
    chebfi%tolerance = tolerance
  else
@@ -275,8 +273,8 @@ subroutine chebfi_allocateAll(chebfi)
  call xg_setBlock(chebfi%X_NP,chebfi%X_prev,total_spacedim,chebfi%bandpp,fcol=chebfi%bandpp+1)
 
  call xg_init(chebfi%AX,space,spacedim,neigenpairs,chebfi%spacecom,me_g0=chebfi%me_g0)
- call xg_init(chebfi%cprj_work ,space_cprj,chebfi%cprjdim,chebfi%blockdim_cprj,chebfi%spacecom)
- call xg_init(chebfi%cprj_work2,space_cprj,chebfi%cprjdim,chebfi%blockdim_cprj,chebfi%spacecom)
+ call xg_init(chebfi%cprj_work ,space_cprj,chebfi%cprjdim,chebfi%bandpp*nspinor,chebfi%spacecom)
+ call xg_init(chebfi%cprj_work2,space_cprj,chebfi%cprjdim,chebfi%bandpp*nspinor,chebfi%spacecom)
 
  call xg_init(chebfi%proj_work,space,chebfi%xg_nonlop%max_npw_k,chebfi%xg_nonlop%cprjdim,chebfi%spacecom,me_g0=chebfi%me_g0)
 
@@ -615,7 +613,7 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspin
  call timab(tim_cprj,1,tsec)
  call xg_nonlop_getcprj(xg_nonlop,chebfi%X,chebfi%cprjX,chebfi%cprj_work%self)
  call timab(tim_cprj,2,tsec)
- call xg_RayleighRitz_cprj(chebfi%xg_nonlop,chebfi%X,chebfi%cprjX,chebfi%AX%self,chebfi%eigenvalues,chebfi%blockdim_cprj,ierr,0,&
+ call xg_RayleighRitz_cprj(chebfi%xg_nonlop,chebfi%X,chebfi%cprjX,chebfi%AX%self,chebfi%eigenvalues,ierr,0,&
    tim_RR,ABI_GPU_DISABLED,solve_ax_bx=.true.)
 
  if (chebfi%paw) then

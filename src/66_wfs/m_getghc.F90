@@ -25,7 +25,6 @@
 module m_getghc
 
  use, intrinsic :: iso_c_binding
-
  use defs_basis
  use m_errors
  use m_abicore
@@ -35,6 +34,8 @@ module m_getghc
 
  use defs_abitypes, only : mpi_type
  use m_time,        only : timab
+ use m_fstrings,    only : sjoin, itoa
+ use m_cgtools,     only : cg_copy_spin, cg_put_spin
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_getdim, pawcprj_copy
  use m_bandfft_kpt, only : bandfft_kpt, bandfft_kpt_get_ikpt
  use m_hamiltonian, only : gs_hamiltonian_type, KPRIME_H_K, K_H_KPRIME, K_H_K, KPRIME_H_KPRIME
@@ -43,26 +44,21 @@ module m_getghc
  use m_nonlop,      only : nonlop
  use m_gemm_nonlop_projectors, only : gemm_nonlop_use_gemm
  use m_fft,         only : fourwf
-
  use m_ompgpu_fourwf,      only : ompgpu_fourwf_work_mem
  use m_gemm_nonlop,        only : gemm_nonlop_ompgpu_work_mem
 
 #if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
-
 #ifdef HAVE_FFTW3_THREADS
  use m_fftw3,       only : fftw3_spawn_threads_here, fftw3_use_lib_threads
 #endif
-
 #if defined HAVE_GPU_CUDA
  use m_gpu_toolbox
 #endif
-
 #if defined HAVE_YAKL
  use gator_mod
 #endif
-
 #ifdef HAVE_KOKKOS
  use m_manage_kokkos, only : assemble_energy_contribution_kokkos
 #endif
@@ -91,13 +87,12 @@ contains
 !! Returns work memory requirement for getghc_ompgpu
 !!
 !! INPUTS
-!!
 !! gs_ham <type(gs_hamiltonian_type)>=contains dimensions of FFT domain
 !! ndat=size of batch for fourwf and nonlop processing
 !!
 !! OUTPUT
-!!
 !! req_mem=amount in bytes of required memory for getghc_ompgpu
+
 function getghc_ompgpu_work_mem(gs_ham, ndat) result(req_mem)
 
  type(gs_hamiltonian_type),intent(in),target :: gs_ham
@@ -158,10 +153,10 @@ end function getghc_ompgpu_work_mem
 !!            2: non-local+Fock+kinetic only (added to the existing Hamiltonian)
 !!            3: local + kinetic only (added to the existing Hamiltonian)
 !! ===== Optional inputs =====
-!!   [kg_fft_k(3,:)]=optional, (k+G) vector coordinates to be used for the FFT tranformation
+!!   [kg_fft_k(3,:)]=optional, (k+G) vector coordinates to be used for the FFT transformation
 !!                   instead of the one contained in gs_ham datastructure.
 !!                   Typically used for real WF (in parallel) which are FFT-transformed 2 by 2.
-!!   [kg_fft_kp(3,:)]=optional, (k^prime+G) vector coordinates to be used for the FFT tranformation
+!!   [kg_fft_kp(3,:)]=optional, (k^prime+G) vector coordinates to be used for the FFT transformation
 !!   [select_k]=optional, option governing the choice of k points to be used.
 !!             gs_ham datastructure contains quantities needed to apply Hamiltonian
 !!             in reciprocal space between 2 kpoints, k and k^prime (equal in most cases);
@@ -210,26 +205,22 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 
 !Local variables-------------------------------
 !scalars
- logical :: filter_dilatmx_loc_
- integer,parameter :: level=114,re=1,im=2,tim_fourwf=1
- integer :: choice,cplex,cpopt_here,i1,i2,i3,idat,idir,ierr,i0
+ integer,parameter :: level=114, tim_fourwf=1
+ integer :: choice,cplex,cpopt_here,fftalg,i1,i2,i3,idat,idir,ierr,i0
  integer :: ig,igspinor,istwf_k_,ii,iispinor,ikpt_this_proc,ipw,ispinor,my_nspinor
  integer :: n4,n5,n6,ndat_,nnlout,npw_fft,npw_k1,npw_k2,nspinortot,option_fft
  integer :: paw_opt,select_k_,shift1,shift2,signs,tim_nonlop
  logical(kind=c_bool) :: k1_eq_k2
  logical :: double_rfft_trick,have_to_reequilibrate,has_fock,local_gvnlxc
- logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc,use_cwavef_r
+ logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc,use_cwavef_r, filter_dilatmx_loc_
  real(dp) :: ghcim,ghcre,weight
 #ifdef HAVE_OPENMP_OFFLOAD
  complex(dpc), parameter :: cminusone  = (-1._dp,0._dp)
 #endif
  character(len=500) :: msg
-
 !arrays
- integer,  pointer                :: gbound_k1(:,:)
- integer,  pointer                :: gbound_k2(:,:)
- integer,  pointer                :: kg_k1(:,:)
- integer,  pointer                :: kg_k2(:,:)
+ integer,  contiguous, pointer :: gbound_k1(:,:), gbound_k2(:,:)
+ integer,  contiguous, pointer :: kg_k1(:,:), kg_k2(:,:)
  integer,  ABI_CONTIGUOUS pointer :: indices_pw_fft(:), kg_k_fft(:,:)
  integer,  ABI_CONTIGUOUS pointer :: recvcount_fft(:), recvdisp_fft(:)
  integer,  ABI_CONTIGUOUS pointer :: sendcount_fft(:), senddisp_fft(:)
@@ -241,104 +232,89 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  real(dp), allocatable            :: cwavef2(:,:)
  real(dp), allocatable            :: cwavef_fft(:,:)
  real(dp), allocatable            :: cwavef_fft_tr(:,:)
-
  real(dp), allocatable            :: ghc1(:,:)
  real(dp), allocatable            :: ghc2(:,:)
  real(dp), allocatable            :: ghc3(:,:)
  real(dp), allocatable            :: ghc4(:,:)
  real(dp), allocatable            :: ghc_mGGA(:,:)
+ real(dp), allocatable            :: ghc_mGGA_fft(:,:)
  real(dp), allocatable            :: ghc_vectornd(:,:)
+ real(dp), allocatable            :: cwavef_spin(:,:), gvnlxc_spin(:,:)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
  real(c_double), ABI_CONTIGUOUS pointer :: gvnlc(:,:)
-#else
- real(dp), allocatable            :: gvnlc(:,:)
-#endif
-
- real(dp), allocatable            :: vlocal_tmp(:,:,:)
- real(dp), allocatable            :: work(:,:,:,:)
-
-#if defined HAVE_GPU && defined HAVE_YAKL
  real(c_double), ABI_CONTIGUOUS pointer :: gvnlxc_(:,:)
 #else
- real(dp), pointer                :: gvnlxc_(:,:)
+ real(dp), allocatable            :: gvnlc(:,:)
+ real(dp), contiguous, pointer                :: gvnlxc_(:,:)
 #endif
-
- real(dp), pointer                :: kinpw_k1(:)
- real(dp), pointer                :: kinpw_k2(:)
- real(dp), pointer                :: kpt_k1(:)
- real(dp), pointer                :: kpt_k2(:)
- real(dp), pointer                :: gsc_ptr(:,:)
+ real(dp), allocatable            :: vlocal_tmp(:,:,:), work(:,:,:,:)
+ real(dp), contiguous, pointer    :: kinpw_k1(:), kinpw_k2(:), kpt_k1(:), kpt_k2(:)
+ real(dp), contiguous, pointer    :: gsc_ptr(:,:)
  type(fock_common_type),pointer :: fock
  type(pawcprj_type),pointer :: cwaveprj_fock(:,:),cwaveprj_idat(:,:),cwaveprj_nonlop(:,:)
  logical :: transfer_ghc,transfer_gsc,transfer_cwavef,transfer_gvnlxc
  real(c_double), parameter        :: hugevalue = huge(zero)*1.d-11
-
 ! *********************************************************************
 
  DBG_ENTER("COLL")
 
-!Keep track of total time spent in getghc:
+ !Keep track of total time spent in getghc:
  call timab(350+tim_getghc,1,tsec)
  ABI_NVTX_START_RANGE(NVTX_GETGHC)
 
-!Structured debugging if prtvol==-level
+ !Structured debugging if prtvol==-level
  if(prtvol==-level)then
    write(msg,'(80a,a,a)') ('=',ii=1,80),ch10,' getghc : enter, debugging '
    call wrtout(std_out,msg,'PERS')
  end if
 
-!Select k-dependent objects according to select_k input parameter
- select_k_=1;if (present(select_k)) select_k_=select_k
- if (select_k_==KPRIME_H_K) then
-!  <k^prime|H|k>
+ !Select k-dependent objects according to select_k input parameter
+ select_k_=KPRIME_H_K;if (present(select_k)) select_k_=select_k
+ select case (select_k_)
+ case (KPRIME_H_K)
+   ! <k^prime|H|k>
    npw_k1    =  gs_ham%npw_fft_k ; npw_k2    =  gs_ham%npw_fft_kp
    kpt_k1    => gs_ham%kpt_k     ; kpt_k2    => gs_ham%kpt_kp
    kg_k1     => gs_ham%kg_k      ; kg_k2     => gs_ham%kg_kp
    gbound_k1 => gs_ham%gbound_k  ; gbound_k2 => gs_ham%gbound_kp
    kinpw_k1  => gs_ham%kinpw_k   ; kinpw_k2  => gs_ham%kinpw_kp
- else if (select_k_==K_H_KPRIME) then
-!  <k|H|k^prime>
+ case (K_H_KPRIME)
+   ! <k|H|k^prime>
    npw_k1    =  gs_ham%npw_fft_kp; npw_k2    =  gs_ham%npw_fft_k
    kpt_k1    => gs_ham%kpt_kp    ; kpt_k2    => gs_ham%kpt_k
    kg_k1     => gs_ham%kg_kp     ; kg_k2     => gs_ham%kg_k
    gbound_k1 => gs_ham%gbound_kp ; gbound_k2 => gs_ham%gbound_k
    kinpw_k1  => gs_ham%kinpw_kp  ; kinpw_k2  => gs_ham%kinpw_k
- else if (select_k_==K_H_K) then
-!  <k|H|k>
+ case (K_H_K)
+   ! <k|H|k>
    npw_k1    =  gs_ham%npw_fft_k ; npw_k2    =  gs_ham%npw_fft_k
    kpt_k1    => gs_ham%kpt_k     ; kpt_k2    => gs_ham%kpt_k
    kg_k1     => gs_ham%kg_k      ; kg_k2     => gs_ham%kg_k
    gbound_k1 => gs_ham%gbound_k  ; gbound_k2 => gs_ham%gbound_k
    kinpw_k1  => gs_ham%kinpw_k   ; kinpw_k2  => gs_ham%kinpw_k
- else if (select_k_==KPRIME_H_KPRIME) then
-!  <k^prime|H|k^prime>
+ case (KPRIME_H_KPRIME)
+   ! <k^prime|H|k^prime>
    npw_k1    =  gs_ham%npw_fft_kp; npw_k2    =  gs_ham%npw_fft_kp
    kpt_k1    => gs_ham%kpt_kp    ; kpt_k2    => gs_ham%kpt_kp
    kg_k1     => gs_ham%kg_kp     ; kg_k2     => gs_ham%kg_kp
    gbound_k1 => gs_ham%gbound_kp ; gbound_k2 => gs_ham%gbound_kp
    kinpw_k1  => gs_ham%kinpw_kp  ; kinpw_k2  => gs_ham%kinpw_kp
- end if
+ case default
+   ABI_ERROR(sjoin("Invalid select_k: ", itoa(select_k_)))
+ end select
+
  k1_eq_k2=(all(abs(kpt_k1(:)-kpt_k2(:))<tol8))
 
-!Check sizes
+ ! Check sizes
  my_nspinor=max(1,gs_ham%nspinor/mpi_enreg%nproc_spinor)
- if (size(cwavef)<2*npw_k1*my_nspinor*ndat) then
-   !print *, size(cwavef)<2*npw_k1*my_nspinor*ndat
-   ABI_BUG('wrong size for cwavef!')
- end if
- if (size(ghc)<2*npw_k2*my_nspinor*ndat) then
-   ABI_BUG('wrong size for ghc!')
- end if
+ ABI_CHECK_IGEQ(size(cwavef), 2*npw_k1*my_nspinor*ndat, 'wrong size for cwavef!')
+ ABI_CHECK_IGEQ(size(ghc), 2*npw_k2*my_nspinor*ndat, 'wrong size for ghc!')
  if (sij_opt==1) then
-   if (size(gsc)<2*npw_k2*my_nspinor*ndat) then
-     ABI_BUG('wrong size for gsc!')
-   end if
+   ABI_CHECK_IGEQ(size(gsc), 2*npw_k2*my_nspinor*ndat, 'wrong size for gsc!')
  end if
  if (gs_ham%usepaw==1.and.cpopt>=0) then
-   if (size(cwaveprj)<gs_ham%natom*my_nspinor*ndat) then
-     ABI_BUG('wrong size for cwaveprj!')
-   end if
+   ABI_CHECK_IGEQ(size(cwaveprj), gs_ham%natom*my_nspinor*ndat, 'wrong size for cwaveprj!')
  end if
  if (any(type_calc == [0, 2, 3])) then
    local_gvnlxc = size(gvnlxc)<=1
@@ -353,32 +329,22 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    else
      gvnlxc_ => gvnlxc
    end if
-   if (size(gvnlxc_)<2*npw_k2*my_nspinor*ndat) then
-     ABI_BUG('wrong size for gvnlxc!')
-   end if
+   ABI_CHECK_IGEQ(size(gvnlxc_), 2*npw_k2*my_nspinor*ndat, 'wrong size for gvnlxc!')
  end if
+
  use_cwavef_r=present(cwavef_r)
  n4=gs_ham%n4 ; n5=gs_ham%n5 ; n6=gs_ham%n6
  nspinortot=gs_ham%nspinor
+
  if (use_cwavef_r) then
-   if (size(cwavef_r,1)/=2) then
-     ABI_BUG('wrong size for cwavef_r (dimension 1)')
-   end if
-   if (size(cwavef_r,2)/=n4) then
-     ABI_BUG('wrong size for cwavef_r (dimension 2)')
-   end if
-   if (size(cwavef_r,3)/=n5) then
-     ABI_BUG('wrong size for cwavef_r (dimension 3)')
-   end if
-   if (size(cwavef_r,4)/=n6) then
-     ABI_BUG('wrong size for cwavef_r (dimension 4)')
-   end if
-   if (size(cwavef_r,5)/=nspinortot) then
-     ABI_BUG('wrong size for cwavef_r (dimension 5)')
-   end if
+   ABI_CHECK_IEQ(size(cwavef_r,1), 2, 'wrong size for cwavef_r (dimension 1)')
+   ABI_CHECK_IEQ(size(cwavef_r,2), n4, 'wrong size for cwavef_r (dimension 2)')
+   ABI_CHECK_IEQ(size(cwavef_r,3), n5, 'wrong size for cwavef_r (dimension 3)')
+   ABI_CHECK_IEQ(size(cwavef_r,4), n6, 'wrong size for cwavef_r (dimension 4)')
+   ABI_CHECK_IEQ(size(cwavef_r,5), nspinortot, 'wrong size for cwavef_r (dimension 5)')
  end if
 
-!Eventually overwrite plane waves data for FFT
+ !Eventually overwrite plane waves data for FFT
  if (present(kg_fft_k)) then
    kg_k1 => kg_fft_k ; kg_k2 => kg_fft_k
    npw_k1=size(kg_k1,2) ; npw_k2=size(kg_k2,2)
@@ -387,16 +353,16 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    kg_k2 => kg_fft_kp ; npw_k2=size(kg_k2,2)
  end if
 
-!paral_kgb constraint
+ !paral_kgb constraint
  if (mpi_enreg%paral_kgb==1.and.(.not.k1_eq_k2)) then
    ABI_BUG('paral_kgb=1 not allowed for k/=k_^prime!')
  end if
 
-!Do we add Fock exchange term ?
+ !Do we add Fock exchange term ?
  has_fock = associated(gs_ham%fockcommon)
  if (has_fock) fock => gs_ham%fockcommon
 
-!Parallelization over spinors management
+ !Parallelization over spinors management
  if (mpi_enreg%paral_spinor==0) then
    shift1=npw_k1;shift2=npw_k2
    nspinor1TreatedByThisProc=.true.
@@ -427,27 +393,24 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 #endif
  end if
 
-
-!============================================================
-! Application of the local potential
-!============================================================
+ !============================================================
+ ! Application of the local potential
+ !============================================================
 
  ABI_NVTX_START_RANGE(NVTX_GETGHC_LOCPOT)
 
  if (any(type_calc == [0, 1, 3])) then
 
-!  Need a Vlocal
-   if (.not.associated(gs_ham%vlocal)) then
-     ABI_BUG("We need vlocal in gs_ham!")
+   ! Need a Vlocal
+   ABI_CHECK(associated(gs_ham%vlocal), "We need vlocal in gs_ham!")
+
+   ! fourwf can only process with one value of istwf_k
+   if (gs_ham%use_gbt == 0) then
+     ABI_CHECK(k1_eq_k2, 'vlocal (fourwf) cannot be computed with k/=k^prime!')
    end if
 
-!  fourwf can only process with one value of istwf_k
-   if (.not.k1_eq_k2) then
-     ABI_BUG('vlocal (fourwf) cannot be computed with k/=k^prime!')
-   end if
-
-!  Eventually adjust load balancing for FFT (by changing FFT distrib)
-!  Not that have_to_reequilibrate can be true only if mpi_enreg%nproc_fft>1
+   ! Eventually adjust load balancing for FFT (by changing FFT distrib)
+   ! Not that have_to_reequilibrate can be true only if mpi_enreg%nproc_fft>1
    have_to_reequilibrate=.false.
    if (mpi_enreg%paral_kgb==1) then
      ikpt_this_proc=bandfft_kpt_get_ikpt()
@@ -459,9 +422,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    ! LB-08-2024 : double_rfft_trick works only for paral_kgb=1, but I don't know why...
    ! Note that the trick can be activated only if nspinortot=1 (if =2 then istwf_k=1), so gs_ham%nvloc=1 too
    if (double_rfft_trick) then
-     if (mpi_enreg%nproc_fft>1) then
-       ABI_ERROR('double_rfft_trick inside getghc is not implemented for npfft>1')
-     end if
+     ABI_CHECK(mpi_enreg%nproc_fft == 1, 'double_rfft_trick inside getghc is not implemented for npfft>1')
      istwf_k_ = 1
      ndat_ = ndat / 2
      if (modulo(ndat,2)/=0) ndat_=ndat_+1
@@ -479,7 +440,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    end if
 
    if (have_to_reequilibrate.and.double_rfft_trick) then
-     ABI_ERROR("In getghc : have_to_reequilibrate cannot be activated with double_rfft_trick")
+     ABI_ERROR("In getghc: have_to_reequilibrate cannot be activated with double_rfft_trick")
    end if
 
    if (have_to_reequilibrate) then
@@ -503,8 +464,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      end do
      if(ndat > 1) then
        call xmpi_alltoallv(buff_wf,2*ndat*sendcount_fft,2*ndat*senddisp_fft,  &
-&       cwavef_fft_tr,2*ndat*recvcount_fft, 2*ndat*recvdisp_fft, mpi_enreg%comm_fft,ierr)
-!      We need to transpose data
+        cwavef_fft_tr,2*ndat*recvcount_fft, 2*ndat*recvdisp_fft, mpi_enreg%comm_fft,ierr)
+       ! We need to transpose data
        do idat=1,ndat
          do ipw = 1 ,npw_fft
            cwavef_fft(1:2,  ipw + npw_fft*(idat-1)) = cwavef_fft_tr(1:2,  idat + ndat*(ipw-1))
@@ -512,14 +473,19 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
        end do
      else
        call xmpi_alltoallv(buff_wf,2*sendcount_fft,2*senddisp_fft,  &
-&       cwavef_fft,2*recvcount_fft, 2*recvdisp_fft, mpi_enreg%comm_fft,ierr)
+        cwavef_fft,2*recvcount_fft, 2*recvdisp_fft, mpi_enreg%comm_fft,ierr)
      end if
    end if
 
-!  Apply the local potential to the wavefunction
-!  Start from wavefunction in reciprocal space cwavef
-!  End with function ghc in reciprocal space also.
-   ABI_MALLOC(work,(2,gs_ham%n4,gs_ham%n5,gs_ham%n6*ndat))
+   ! Apply the local potential to the wavefunction
+   ! Start from wavefunction in reciprocal space cwavef
+   ! End with function ghc in reciprocal space also.
+   fftalg = gs_ham%ngfft(7)
+   if (gs_ham%gpu_option==ABI_GPU_DISABLED.and.fftalg/=401) then
+     ABI_MALLOC(work,(2,gs_ham%n4,gs_ham%n5,gs_ham%n6))
+   else
+     ABI_MALLOC(work,(2,gs_ham%n4,gs_ham%n5,gs_ham%n6*ndat))
+   end if
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET ENTER DATA MAP(alloc:work) IF(gs_ham%gpu_option==ABI_GPU_OPENMP)
 #endif
@@ -533,12 +499,11 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
        if(gs_ham%gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
          !$OMP TARGET ENTER DATA MAP(alloc:cwavef1,cwavef2)
-
-         !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(idat) MAP(to:cwavef1,cwavef2,cwavef)
+         !$OMP TARGET TEAMS DISTRIBUTE MAP(to:cwavef1,cwavef2,cwavef)
          do idat=1,ndat
-           !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ipw,ig)
+           !$OMP PARALLEL DO COLLAPSE(2)
            do ipw=1,npw_k1
-             do ig=1,im
+             do ig=1,2
                cwavef1(ig,ipw+(idat-1)*npw_k1)=cwavef(ig,ipw+(idat-1)*my_nspinor*npw_k1)
                cwavef2(ig,ipw+(idat-1)*npw_k1)=cwavef(ig,ipw+(idat-1)*my_nspinor*npw_k1+shift1)
              end do
@@ -553,8 +518,6 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
            end do
          end do
        end if
-!      call cg_zcopy(npw_k1*ndat,cwavef(1,1),cwavef1)
-!      call cg_zcopy(npw_k1*ndat,cwavef(1,1+shift1),cwavef2)
      end if
    else
      option_fft=3
@@ -565,7 +528,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    end if
 
    if (gs_ham%nvloc==1) then
-!  Treat scalar local potentials
+     !  Treat scalar local potentials
 
      if (nspinortot==1) then
 
@@ -581,14 +544,14 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
        end if
        if (have_to_reequilibrate.or.double_rfft_trick) then
          call fourwf(1,gs_ham%vlocal,cwavef_fft,cwavef_fft,work,gbound_k1,gbound_k2,&
-&         istwf_k_,kg_k_fft,kg_k_fft,gs_ham%mgfft,mpi_enreg,ndat_,gs_ham%ngfft,&
-&         npw_fft,npw_fft,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,&
-&         weight,weight,gpu_option=gs_ham%gpu_option)
+          istwf_k_,kg_k_fft,kg_k_fft,gs_ham%mgfft,mpi_enreg,ndat_,gs_ham%ngfft,&
+          npw_fft,npw_fft,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,&
+          weight,weight,gpu_option=gs_ham%gpu_option)
        else
          call fourwf(1,gs_ham%vlocal,cwavef,ghc,work,gbound_k1,gbound_k2,&
-&         istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat_,gs_ham%ngfft,&
-&         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,&
-&         weight,weight,gpu_option=gs_ham%gpu_option)
+          istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat_,gs_ham%ngfft,&
+          npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,&
+          weight,weight,gpu_option=gs_ham%gpu_option)
        end if
 
      else
@@ -614,16 +577,16 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          !$OMP TARGET ENTER DATA MAP(alloc:ghc1) IF(gs_ham%gpu_option==ABI_GPU_OPENMP)
 #endif
          call fourwf(1,gs_ham%vlocal,cwavef1,ghc1,work,gbound_k1,gbound_k2,&
-&         istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,&
-&         weight,weight,gpu_option=gs_ham%gpu_option)
+          istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
+          npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,&
+          weight,weight,gpu_option=gs_ham%gpu_option)
          if(gs_ham%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-           !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(idat) MAP(to:ghc,ghc1)
+           !$OMP TARGET TEAMS DISTRIBUTE MAP(to:ghc,ghc1)
            do idat=1,ndat
-             !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ipw,ig)
+             !$OMP PARALLEL DO COLLAPSE(2)
              do ipw =1, npw_k2
-               do ig =1, im
+               do ig =1,2
                  ghc(ig,ipw+(idat-1)*my_nspinor*npw_k2)=ghc1(ig,ipw+(idat-1)*npw_k2)
                end do
              end do
@@ -658,16 +621,17 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          !$OMP TARGET ENTER DATA MAP(alloc:ghc2) IF(gs_ham%gpu_option==ABI_GPU_OPENMP)
 #endif
          call fourwf(1,gs_ham%vlocal,cwavef2,ghc2,work,gbound_k1,gbound_k2,&
-&         istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
-&         gpu_option=gs_ham%gpu_option)
+           istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
+           npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
+           gpu_option=gs_ham%gpu_option)
+
          if(gs_ham%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-           !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(idat) MAP(to:ghc,ghc2)
+           !$OMP TARGET TEAMS DISTRIBUTE MAP(to:ghc,ghc2)
            do idat=1,ndat
-             !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ipw,ig)
+             !$OMP PARALLEL DO COLLAPSE(2)
              do ipw=1,npw_k2
-               do ig =1, im
+               do ig =1,2
                  ghc(ig,ipw+(idat-1)*my_nspinor*npw_k2+shift2)=ghc2(ig,ipw+(idat-1)*npw_k2)
                end do
              end do
@@ -689,8 +653,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      end if ! nspinortot
 
    else if (gs_ham%nvloc==4) then
-!    Treat non-collinear local potentials
-
+     ! Treat non-collinear local potentials
      ! Note: for this case we have ndat_=ndat
      ABI_MALLOC(ghc1,(2,npw_k2*ndat))
      ABI_MALLOC(ghc2,(2,npw_k2*ndat))
@@ -712,7 +675,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      else
        ABI_MALLOC(vlocal_tmp,(gs_ham%n4,gs_ham%n5,gs_ham%n6))
      end if
-!    ghc1=v11*phi1
+     ! ghc1=v11*phi1
      if (nspinor1TreatedByThisProc) then
        if (use_cwavef_r) then
          do i3=1,n6
@@ -740,11 +703,11 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          end do
        end if
        call fourwf(1,vlocal_tmp,cwavef1,ghc1,work,gbound_k1,gbound_k2,&
-&       istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
-&       gpu_option=gs_ham%gpu_option)
+         istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
+         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
+         gpu_option=gs_ham%gpu_option)
      end if
-!    ghc2=v22*phi2
+     ! ghc2=v22*phi2
      if (nspinor2TreatedByThisProc) then
        if (use_cwavef_r) then
          do i3=1,n6
@@ -775,9 +738,9 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 #endif
        end if
        call fourwf(1,vlocal_tmp,cwavef2,ghc2,work,gbound_k1,gbound_k2,&
-&       istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
-&       gpu_option=gs_ham%gpu_option)
+         istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
+         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
+         gpu_option=gs_ham%gpu_option)
      end if
      ABI_FREE(vlocal_tmp)
      cplex=2
@@ -786,7 +749,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      else
        ABI_MALLOC(vlocal_tmp,(cplex*gs_ham%n4,gs_ham%n5,gs_ham%n6))
      end if
-!    ghc3=(re(v12)-im(v12))*phi1
+     ! ghc3=(re(v12)-im(v12))*phi1
      if (nspinor1TreatedByThisProc) then
        if (use_cwavef_r) then
          do i3=1,n6
@@ -811,11 +774,11 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          end do
        end if
        call fourwf(cplex,vlocal_tmp,cwavef1,ghc3,work,gbound_k1,gbound_k2,&
-&       istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
-&       gpu_option=gs_ham%gpu_option)
+         istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
+         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
+         gpu_option=gs_ham%gpu_option)
      end if
-!    ghc4=(re(v12)+im(v12))*phi2
+     ! ghc4=(re(v12)+im(v12))*phi2
      if (nspinor2TreatedByThisProc) then
        if (use_cwavef_r) then
          do i3=1,n6
@@ -840,19 +803,19 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          end do
        end if
        call fourwf(cplex,vlocal_tmp,cwavef2,ghc4,work,gbound_k1,gbound_k2,&
-&       istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
-&       gpu_option=gs_ham%gpu_option)
+         istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
+         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
+         gpu_option=gs_ham%gpu_option)
      end if
      ABI_FREE(vlocal_tmp)
-!    Build ghc from pieces
-!    (v11,v22,Re(v12)+iIm(v12);Re(v12)-iIm(v12))(psi1;psi2): matrix product
+     ! Build ghc from pieces
+     ! (v11,v22,Re(v12)+iIm(v12);Re(v12)-iIm(v12))(psi1;psi2): matrix product
      if (mpi_enreg%paral_spinor==0) then
        if(gs_ham%gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET TEAMS DISTRIBUTE MAP(to:ghc,ghc1,ghc2,ghc3,ghc4) PRIVATE(idat)
+         !$OMP TARGET TEAMS DISTRIBUTE MAP(to:ghc,ghc1,ghc2,ghc3,ghc4)
          do idat=1,ndat
-           !$OMP PARALLEL DO PRIVATE(ipw)
+           !$OMP PARALLEL DO
            do ipw=1,npw_k2
              ghc(1,ipw+(idat-1)*my_nspinor*npw_k2)       =ghc1(1,ipw+(idat-1)*npw_k2)+ghc4(1,ipw+(idat-1)*npw_k2)
              ghc(2,ipw+(idat-1)*my_nspinor*npw_k2)       =ghc1(2,ipw+(idat-1)*npw_k2)+ghc4(2,ipw+(idat-1)*npw_k2)
@@ -875,18 +838,18 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
        if(gs_ham%gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
          if (nspinor1TreatedByThisProc) then
-           !$OMP TARGET TEAMS DISTRIBUTE MAP(to:ghc,ghc1,ghc4) PRIVATE(idat)
+           !$OMP TARGET TEAMS DISTRIBUTE MAP(to:ghc,ghc1,ghc4)
            do idat=1,ndat
-             !$OMP PARALLEL DO PRIVATE(ipw)
+             !$OMP PARALLEL DO
              do ipw=1,npw_k2
                ghc(1,ipw+(idat-1)*my_nspinor*npw_k2)=ghc1(1,ipw+(idat-1)*npw_k2)+ghc4(1,ipw+(idat-1)*npw_k2)
                ghc(2,ipw+(idat-1)*my_nspinor*npw_k2)=ghc1(2,ipw+(idat-1)*npw_k2)+ghc4(2,ipw+(idat-1)*npw_k2)
              end do
            end do
          else if (nspinor2TreatedByThisProc) then
-           !$OMP TARGET TEAMS DISTRIBUTE MAP(to:ghc,ghc2,ghc3) PRIVATE(idat)
+           !$OMP TARGET TEAMS DISTRIBUTE MAP(to:ghc,ghc2,ghc3)
            do idat=1,ndat
-             !$OMP PARALLEL DO PRIVATE(ipw)
+             !$OMP PARALLEL DO
              do ipw=1,npw_k2
                ghc(1,ipw+(idat-1)*my_nspinor*npw_k2+shift2)=ghc3(1,ipw+(idat-1)*npw_k2)+ghc2(1,ipw+(idat-1)*npw_k2)
                ghc(2,ipw+(idat-1)*my_nspinor*npw_k2+shift2)=ghc3(2,ipw+(idat-1)*npw_k2)+ghc2(2,ipw+(idat-1)*npw_k2)
@@ -938,7 +901,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      ABI_FREE(cwavef_fft)
    end if
 
-!  Retrieve eventually original FFT distrib
+   ! Retrieve eventually original FFT distrib
    if(have_to_reequilibrate) then
      ! Note: for this case we have ndat_=ndat
      if(ndat > 1 ) then
@@ -948,10 +911,10 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          end do
        end do
        call xmpi_alltoallv(cwavef_fft_tr,2*ndat*recvcount_fft, 2*ndat*recvdisp_fft, &
-&       buff_wf,2*ndat*sendcount_fft,2*ndat*senddisp_fft, mpi_enreg%comm_fft,ierr)
+         buff_wf,2*ndat*sendcount_fft,2*ndat*senddisp_fft, mpi_enreg%comm_fft,ierr)
      else
        call xmpi_alltoallv(cwavef_fft,2*recvcount_fft, 2*recvdisp_fft, &
-&       buff_wf,2*sendcount_fft,2*senddisp_fft, mpi_enreg%comm_fft,ierr)
+         buff_wf,2*sendcount_fft,2*senddisp_fft, mpi_enreg%comm_fft,ierr)
      end if
      do idat=1,ndat
        do ipw = 1 ,npw_k2
@@ -965,18 +928,31 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      end if
    end if
 
-!  Add metaGGA contribution
+   ! Add metaGGA contribution
    if (associated(gs_ham%vxctaulocal)) then
-     if (.not.k1_eq_k2) then
-       ABI_BUG('metaGGA not allowed for k/=k_^prime!')
+     ABI_CHECK(k1_eq_k2, 'metaGGA not allowed for k/=k_^prime!')
+     ABI_CHECK_IEQ(size(gs_ham%vxctaulocal), gs_ham%n4*gs_ham%n5*gs_ham%n6*gs_ham%nvloc*4, 'wrong sizes for vxctaulocal!')
+
+     ABI_MALLOC(ghc_mGGA,(2,npw_k1*my_nspinor*ndat))
+     if (double_rfft_trick) then
+       ABI_MALLOC(kg_k_fft,(3,npw_fft))
+       ABI_MALLOC(cwavef_fft,(2,npw_fft*ndat_))
+       ABI_MALLOC(ghc_mGGA_fft,(2,npw_fft*ndat_))
+       kg_k_fft(:,1:npw_k1) = kg_k1(:,1:npw_k1)
+       kg_k_fft(:,npw_k1+1:npw_fft) = -kg_k1(:,i0:npw_k1)
+       call cwavef_double_rfft_trick_pack(cwavef,cwavef_fft,mpi_enreg%me_g0_fft,ndat,npw_k1)
+       call getghc_mGGA(cwavef_fft,ghc_mGGA_fft,gbound_k1,gs_ham%gprimd,istwf_k_,kg_k_fft,kpt_k1,&
+&       gs_ham%mgfft,mpi_enreg,ndat_,gs_ham%ngfft,npw_fft,gs_ham%nvloc,&
+&       gs_ham%n4,gs_ham%n5,gs_ham%n6,my_nspinor,gs_ham%vxctaulocal,gs_ham%gpu_option)
+       call cwavef_double_rfft_trick_unpack(ghc_mGGA,ghc_mGGA_fft,mpi_enreg%me_g0_fft,ndat,npw_k1)
+       ABI_FREE(kg_k_fft)
+       ABI_FREE(cwavef_fft)
+       ABI_FREE(ghc_mGGA_fft)
+    else
+       call getghc_mGGA(cwavef,ghc_mGGA,gbound_k1,gs_ham%gprimd,istwf_k_,kg_k1,kpt_k1,&
+&       gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,npw_k1,gs_ham%nvloc,&
+&       gs_ham%n4,gs_ham%n5,gs_ham%n6,my_nspinor,gs_ham%vxctaulocal,gs_ham%gpu_option)
      end if
-     if (size(gs_ham%vxctaulocal)/=gs_ham%n4*gs_ham%n5*gs_ham%n6*gs_ham%nvloc*4) then
-       ABI_BUG('wrong sizes for vxctaulocal!')
-     end if
-     ABI_MALLOC(ghc_mGGA,(2,npw_k2*my_nspinor*ndat))
-     call getghc_mGGA(cwavef,ghc_mGGA,gbound_k1,gs_ham%gprimd,istwf_k_,kg_k1,kpt_k1,&
-&     gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,npw_k1,gs_ham%nvloc,&
-&     gs_ham%n4,gs_ham%n5,gs_ham%n6,my_nspinor,gs_ham%vxctaulocal,gs_ham%gpu_option)
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET UPDATE FROM(ghc) IF(gs_ham%gpu_option == ABI_GPU_OPENMP)
 #endif
@@ -989,17 +965,15 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 
    !  Add nuclear dipole moment contribution
    if (associated(gs_ham%vectornd)) then
-     if (.not.k1_eq_k2) then
-       ABI_BUG('nuclear dipole vector potential not allowed for k/=k_^prime!')
-     end if
+     ABI_CHECK(k1_eq_k2, 'nuclear dipole vector potential not allowed for k/=k_^prime!')
      if (size(gs_ham%vectornd)/=gs_ham%n4*gs_ham%n5*gs_ham%n6*gs_ham%nvloc*3) then
        ABI_BUG('wrong sizes for vectornd in getghc!')
      end if
-     ABI_MALLOC(ghc_vectornd,(2,npw_k2*my_nspinor*ndat))
+     ABI_MALLOC(ghc_vectornd,(2,npw_k1*my_nspinor*ndat))
      ghc_vectornd=zero
      call getghc_nucdip(cwavef,ghc_vectornd,gbound_k1,istwf_k_,kg_k1,kpt_k1,&
-&     gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,npw_k1,gs_ham%nvloc,&
-&     gs_ham%n4,gs_ham%n5,gs_ham%n6,my_nspinor,gs_ham%vectornd,gs_ham%gpu_option)
+       gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,npw_k1,gs_ham%nvloc,&
+       gs_ham%n4,gs_ham%n5,gs_ham%n6,my_nspinor,gs_ham%vectornd,gs_ham%vlocal,gs_ham%zora,gs_ham%gpu_option)
 
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET UPDATE FROM(ghc) IF(gs_ham%gpu_option == ABI_GPU_OPENMP)
@@ -1016,33 +990,28 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    ! Otherwise it is done when adding kinetic term.
    if (type_calc==1.and.filter_dilatmx_loc_) then
 
+     ABI_CHECK(gs_ham%use_gbt == 0, "use_gbt not coded!")
+
      if(gs_ham%gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET TEAMS DISTRIBUTE &
-       !$OMP& PRIVATE(idat) MAP(to:ghc,kinpw_k2)
+       !$OMP TARGET TEAMS DISTRIBUTE MAP(to:ghc,kinpw_k2)
        do idat=1,ndat
-         !$OMP PARALLEL DO PRIVATE(igspinor,ig) COLLAPSE(2)
+         !$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2)
          do ispinor=1,my_nspinor
            do ig=1,npw_k2
              igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
-             if(kinpw_k2(ig)>huge(zero)*1.d-11)then
-               ghc(re,igspinor)=zero
-               ghc(im,igspinor)=zero
-             end if
+             if(kinpw_k2(ig)>huge(zero)*1.d-11) ghc(:,igspinor)=zero
            end do ! ig
          end do ! ispinor
        end do
 #endif
      else
        do idat=1,ndat
-         !$OMP PARALLEL DO PRIVATE(igspinor,ig) COLLAPSE(2) IF(gemm_nonlop_use_gemm)
+         !$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2) IF(gemm_nonlop_use_gemm)
          do ispinor=1,my_nspinor
            do ig=1,npw_k2
              igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
-             if(kinpw_k2(ig)>huge(zero)*1.d-11)then
-               ghc(re,igspinor)=zero
-               ghc(im,igspinor)=zero
-             end if
+             if(kinpw_k2(ig)>huge(zero)*1.d-11) ghc(:,igspinor)=zero
            end do ! ig
          end do ! ispinor
        end do
@@ -1053,12 +1022,10 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 
  ABI_NVTX_END_RANGE()
 
-
  if (any(type_calc == [0, 2, 3])) then
-
-!============================================================
-! Application of the non-local potential and the Fock potential
-!============================================================
+   !============================================================
+   ! Application of the non-local potential and the Fock potential
+   !============================================================
 
    ABI_NVTX_START_RANGE(NVTX_GETGHC_NLOCPOT)
 
@@ -1071,8 +1038,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          if (cpopt<2) then
            ABI_MALLOC(cwaveprj_fock,(gs_ham%natom,my_nspinor*ndat))
            ABI_MALLOC(dimcprj,(gs_ham%natom))
-           call pawcprj_getdim(dimcprj,gs_ham%natom,gs_ham%nattyp,gs_ham%ntypat,&
-&           gs_ham%typat,fock%pawtab,'O')
+           call pawcprj_getdim(dimcprj,gs_ham%natom,gs_ham%nattyp,gs_ham%ntypat,gs_ham%typat,fock%pawtab,'O')
            call pawcprj_alloc(cwaveprj_fock,0,dimcprj)
            ABI_FREE(dimcprj)
          else
@@ -1089,10 +1055,42 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      paw_opt=gs_ham%usepaw ; if (sij_opt/=0) paw_opt=sij_opt+3
      lambda_ndat = lambda
 
-     if (gs_ham%usepaw==0) gsc_ptr => nonlop_dum
-     if (gs_ham%usepaw==1) gsc_ptr => gsc
-     call nonlop(choice,cpopt_here,cwaveprj_nonlop,enlout,gs_ham,idir,lambda_ndat,mpi_enreg,ndat,&
-&     nnlout,paw_opt,signs,gsc_ptr,tim_nonlop,cwavef,gvnlxc_,select_k=select_k_)
+     if (gs_ham%use_gbt == 0) then
+       if (gs_ham%usepaw==0) gsc_ptr => nonlop_dum
+       if (gs_ham%usepaw==1) gsc_ptr => gsc
+
+       call nonlop(choice,cpopt_here,cwaveprj_nonlop,enlout,gs_ham,idir,lambda_ndat,mpi_enreg,ndat,&
+          nnlout,paw_opt,signs,gsc_ptr,tim_nonlop,cwavef,gvnlxc_,select_k=select_k_)
+     else
+       ! GBT case. Treat up and down components separately.
+       gs_ham%nspinor = 1
+
+       ! Split cwavef and gvnlxc
+       ABI_MALLOC(cwavef_spin, (2, npw_k1*ndat))
+       ABI_MALLOC(gvnlxc_spin, (2, npw_k1*ndat))
+
+       if (gs_ham%usepaw==0) gsc_ptr => nonlop_dum
+       if (gs_ham%usepaw==1) gsc_ptr => gsc
+
+       ! Apply Vnl{k-q/2} to u^up
+       call cg_copy_spin(1, npw_k1, nspinortot, ndat, cwavef, cwavef_spin)
+       call nonlop(choice, cpopt_here, cwaveprj_nonlop, enlout, gs_ham, idir, lambda_ndat, mpi_enreg, ndat, &
+                   nnlout, paw_opt, signs, gsc_ptr, tim_nonlop, cwavef_spin, gvnlxc_spin, select_k=K_H_K)
+       ! Insert results in the right position.
+       call cg_put_spin(1, npw_k1, nspinortot, ndat, gvnlxc_spin, gvnlxc_)
+
+       ! Apply H_{k+q/2} to u^down
+       !gvnlxc_spin = zero
+       call cg_copy_spin(2, npw_k1, nspinortot, ndat, cwavef, cwavef_spin)
+       call nonlop(choice, cpopt_here, cwaveprj_nonlop, enlout, gs_ham, idir, lambda_ndat, mpi_enreg, ndat, &
+                   nnlout, paw_opt, signs, gsc_ptr, tim_nonlop, cwavef_spin, gvnlxc_spin, select_k=KPRIME_H_KPRIME)
+       ! Insert results in the right position.
+       call cg_put_spin(2, npw_k1, nspinortot, ndat, gvnlxc_spin, gvnlxc_)
+
+       gs_ham%nspinor = 2
+       ABI_FREE(cwavef_spin)
+       ABI_FREE(gvnlxc_spin)
+     end if ! use_gbt
 
      if (gs_ham%usepaw==1 .and. has_fock)then
        if (fock_get_getghc_call(fock)==1) then
@@ -1114,7 +1112,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
        endif
      endif
 
-!    Calculation of the Fock exact exchange contribution from the Fock or ACE operator
+     ! Calculation of the Fock exact exchange contribution from the Fock or ACE operator
      if (has_fock) then
        if (fock_get_getghc_call(fock)==1) then
          if (gs_ham%usepaw==0) cwaveprj_idat => cwaveprj
@@ -1145,9 +1143,9 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 
    ABI_NVTX_END_RANGE()
 
-!============================================================
-! Assemble kinetic, local, nonlocal and Fock contributions
-!============================================================
+   !============================================================
+   ! Assemble kinetic, local, nonlocal and Fock contributions
+   !============================================================
 
    ABI_NVTX_START_RANGE(NVTX_GETGHC_KIN)
 
@@ -1176,55 +1174,41 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 #endif
 #endif
 
-     !  Assemble modified kinetic, local and nonlocal contributions
-     !  to <G|H|C(n,k)>. Take also into account build-in debugging.
+     ! Assemble modified kinetic, local and nonlocal contributions
+     ! to <G|H|C(n,k)>. Take also into account built-in debugging.
      if(prtvol/=-level)then
 
-       ! OpenMP GPU
-       if(gs_ham%gpu_option == ABI_GPU_OPENMP) then
+       if (gs_ham%gpu_option == ABI_GPU_OPENMP) then
+         ! OpenMP GPU
 #ifdef HAVE_OPENMP_OFFLOAD
          if (k1_eq_k2) then
-           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
-           !$OMP& PRIVATE(idat,ispinor) &
-           !$OMP& MAP(to:ghc,kinpw_k2,gvnlxc_,gsc,cwavef) MAP(tofrom:kinpw_k2)
+           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(to:ghc,kinpw_k2,gvnlxc_,gsc,cwavef) MAP(tofrom:kinpw_k2)
            do idat=1,ndat
              do ispinor=1,my_nspinor
-               !$OMP PARALLEL DO PRIVATE(ig,igspinor)
+               !$OMP PARALLEL DO PRIVATE(igspinor)
                do ig=1,npw_k2
                  igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
                  if(kinpw_k2(ig)<huge(zero)*1.d-11)then
-                   ghc(re,igspinor) = ghc(re,igspinor) + kinpw_k2(ig)*cwavef(re,igspinor) + gvnlxc_(re,igspinor)
-                   ghc(im,igspinor) = ghc(im,igspinor) + kinpw_k2(ig)*cwavef(im,igspinor) + gvnlxc_(im,igspinor)
+                   ghc(:,igspinor) = ghc(:,igspinor) + kinpw_k2(ig)*cwavef(:,igspinor) + gvnlxc_(:,igspinor)
                  else
-                   ghc(re,igspinor)=zero
-                   ghc(im,igspinor)=zero
-                   if (sij_opt==1) then
-                     gsc(re,igspinor)=zero
-                     gsc(im,igspinor)=zero
-                   end if
+                   ghc(:,igspinor)=zero
+                   if (sij_opt==1) gsc(:,igspinor)=zero
                  end if
                end do ! ig
              end do ! ispinor
            end do ! idat
          else
-           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
-           !$OMP& PRIVATE(idat,ispinor) &
-           !$OMP& MAP(to:ghc,gvnlxc_,gsc) MAP(tofrom:kinpw_k2)
+           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(to:ghc,gvnlxc_,gsc) MAP(tofrom:kinpw_k2)
            do idat=1,ndat
              do ispinor=1,my_nspinor
-               !$OMP PARALLEL DO PRIVATE(ig,igspinor)
+               !$OMP PARALLEL DO PRIVATE(igspinor)
                do ig=1,npw_k2
                  igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
                  if(kinpw_k2(ig)<huge(zero)*1.d-11)then
-                   ghc(re,igspinor)= ghc(re,igspinor) + gvnlxc_(re,igspinor)
-                   ghc(im,igspinor)= ghc(im,igspinor) + gvnlxc_(im,igspinor)
+                   ghc(:,igspinor)= ghc(:,igspinor) + gvnlxc_(:,igspinor)
                  else
-                   ghc(re,igspinor)=zero
-                   ghc(im,igspinor)=zero
-                   if (sij_opt==1) then
-                     gsc(re,igspinor)=zero
-                     gsc(im,igspinor)=zero
-                   end if
+                   ghc(:,igspinor)=zero
+                   if (sij_opt==1) gsc(:,igspinor)=zero
                  end if
                end do ! ig
              end do ! ispinor
@@ -1232,57 +1216,82 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          end if
 #endif
 
-       !CPU (+ Kokkos eventually)
        else
-         do idat=1,ndat
-           if (k1_eq_k2) then
-             !$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2) IF(gemm_nonlop_use_gemm)
+
+         !CPU (+ Kokkos eventually)
+         if (k1_eq_k2) then
+           !$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2) IF(gemm_nonlop_use_gemm)
+           do idat=1,ndat
              do ispinor=1,my_nspinor
                do ig=1,npw_k2
                  igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
                  if(kinpw_k2(ig)<huge(zero)*1.d-11)then
-                   ghc(re,igspinor) = ghc(re,igspinor) + kinpw_k2(ig)*cwavef(re,igspinor) + gvnlxc_(re,igspinor)
-                   ghc(im,igspinor) = ghc(im,igspinor) + kinpw_k2(ig)*cwavef(im,igspinor) + gvnlxc_(im,igspinor)
+                   ghc(:,igspinor) = ghc(:,igspinor) + kinpw_k2(ig)*cwavef(:,igspinor) + gvnlxc_(:,igspinor)
                  else
-                   ghc(re,igspinor)=zero
-                   ghc(im,igspinor)=zero
-                   if (sij_opt==1) then
-                     gsc(re,igspinor)=zero
-                     gsc(im,igspinor)=zero
-                   end if
+                   ghc(:,igspinor)=zero
+                   if (sij_opt==1) gsc(:,igspinor)=zero
                  end if
                end do ! ig
              end do ! ispinor
+           end do ! idat
+         else
+           if (gs_ham%use_gbt == 0) then
+             !$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2) IF(gemm_nonlop_use_gemm)
+             do idat=1,ndat
+               do ispinor=1,my_nspinor
+                 do ig=1,npw_k2
+                   igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
+                   if(kinpw_k2(ig)<huge(zero)*1.d-11)then
+                     ghc(:,igspinor)= ghc(:,igspinor) + gvnlxc_(:,igspinor)
+                   else
+                     ghc(:,igspinor)=zero
+                     if (sij_opt==1) gsc(:,igspinor)=zero
+                   end if
+                 end do ! ig
+               end do ! ispinor
+             end do ! idat
            else
-             !$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2) IF(gemm_nonlop_use_gemm)
-             do ispinor=1,my_nspinor
-               do ig=1,npw_k2
-                 igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
-                 if(kinpw_k2(ig)<huge(zero)*1.d-11)then
-                   ghc(re,igspinor)= ghc(re,igspinor) + gvnlxc_(re,igspinor)
-                   ghc(im,igspinor)= ghc(im,igspinor) + gvnlxc_(im,igspinor)
-                 else
-                   ghc(re,igspinor)=zero
-                   ghc(im,igspinor)=zero
-                   if (sij_opt==1) then
-                     gsc(re,igspinor)=zero
-                     gsc(im,igspinor)=zero
-                   end if
+             ! GBT. use different kinetic energies for up and down components.
+             !$OMP PARALLEL DO PRIVATE(igspinor, iispinor) COLLAPSE(2) IF(gemm_nonlop_use_gemm)
+             do idat=1,ndat
+               do ispinor=1,my_nspinor
+                 iispinor=ispinor; if (mpi_enreg%paral_spinor==1) iispinor=mpi_enreg%me_spinor+1
+                 if (iispinor == 1) then
+                   do ig=1,npw_k2
+                     igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
+                     if(gs_ham%kinpw_k(ig)<huge(zero)*1.d-11)then
+                       ghc(:,igspinor) = ghc(:,igspinor) + gs_ham%kinpw_k(ig)*cwavef(:,igspinor) + gvnlxc_(:,igspinor)
+                     else
+                       ghc(:,igspinor)=zero
+                       if (sij_opt==1) gsc(:,igspinor)=zero
+                     end if
+                   end do ! ig
+                else
+                   do ig=1,npw_k2
+                     igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
+                     if(gs_ham%kinpw_kp(ig)<huge(zero)*1.d-11)then
+                       ghc(:,igspinor) = ghc(:,igspinor) + gs_ham%kinpw_kp(ig)*cwavef(:,igspinor) + gvnlxc_(:,igspinor)
+                     else
+                       ghc(:,igspinor)=zero
+                       if (sij_opt==1) gsc(:,igspinor)=zero
+                     end if
+                   end do ! ig
                  end if
-               end do ! ig
-             end do ! ispinor
+               end do ! ispinor
+             end do ! idat
            end if
-         end do ! idat
+         end if
+
        end if ! gs_ham%gpu_option
 
      else
-       !    Here, debugging section
+       ! Here, debugging section
 #ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET UPDATE FROM(ghc,gsc,cwavef,gvnlxc_) IF(gs_ham%gpu_option == ABI_GPU_OPENMP)
 #endif
        call wrtout(std_out,' getghc : components of ghc ','PERS')
        write(msg,'(a)')&
-         &     'icp ig ispinor igspinor re/im     ghc        kinpw         cwavef      glocc        gvnlxc  gsc'
+         'icp ig ispinor igspinor re/im     ghc        kinpw         cwavef      glocc        gvnlxc  gsc'
        call wrtout(std_out,msg,'PERS')
        do idat=1,ndat
          do ispinor=1,my_nspinor
@@ -1290,38 +1299,34 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
              igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
              if(kinpw_k2(ig)<huge(zero)*1.d-11)then
                if (k1_eq_k2) then
-                 ghcre=kinpw_k2(ig)*cwavef(re,igspinor)+ghc(re,igspinor)+gvnlxc_(re,igspinor)
-                 ghcim=kinpw_k2(ig)*cwavef(im,igspinor)+ghc(im,igspinor)+gvnlxc_(im,igspinor)
+                 ghcre=kinpw_k2(ig)*cwavef(1,igspinor)+ghc(1,igspinor)+gvnlxc_(1,igspinor)
+                 ghcim=kinpw_k2(ig)*cwavef(2,igspinor)+ghc(2,igspinor)+gvnlxc_(2,igspinor)
                else
-                 ghcre=ghc(re,igspinor)+gvnlxc_(re,igspinor)
-                 ghcim=ghc(im,igspinor)+gvnlxc_(im,igspinor)
+                 ghcre=ghc(1,igspinor)+gvnlxc_(1,igspinor)
+                 ghcim=ghc(2,igspinor)+gvnlxc_(2,igspinor)
                end if
              else
                ghcre=zero
                ghcim=zero
-               if (sij_opt==1) then
-                 gsc(re,igspinor)=zero
-                 gsc(im,igspinor)=zero
-               end if
+               if (sij_opt==1) gsc(:,igspinor)=zero
              end if
-             iispinor=ispinor;if (mpi_enreg%paral_spinor==1) iispinor=mpi_enreg%me_spinor+1
+             iispinor=ispinor; if (mpi_enreg%paral_spinor==1) iispinor=mpi_enreg%me_spinor+1
              if (sij_opt == 1) then
                write(msg,'(a,3(1x,i5),6(1x,es13.6))') '  1 ', ig, iispinor, igspinor,ghcre,&
-                 &             kinpw_k2(ig),cwavef(re,igspinor),ghc(re,igspinor),gvnlxc_(re,igspinor), gsc(re,igspinor)
+                 kinpw_k2(ig),cwavef(1,igspinor),ghc(1,igspinor),gvnlxc_(1,igspinor), gsc(1,igspinor)
                call wrtout(std_out,msg,'PERS')
                write(msg,'(a,3(1x,i5),6(1x,es13.6))') '  2 ', ig, iispinor, igspinor,ghcim,&
-                 &             kinpw_k2(ig),cwavef(im,igspinor),ghc(im,igspinor),gvnlxc_(im,igspinor), gsc(im,igspinor)
+                 kinpw_k2(ig),cwavef(2,igspinor),ghc(2,igspinor),gvnlxc_(2,igspinor), gsc(2,igspinor)
                call wrtout(std_out,msg,'PERS')
              else
                write(msg,'(a,3(1x,i5),6(1x,es13.6))') '  1 ', ig, iispinor, igspinor,ghcre,&
-                 &             kinpw_k2(ig),cwavef(re,igspinor),ghc(re,igspinor),gvnlxc_(re,igspinor)
+                 kinpw_k2(ig),cwavef(1,igspinor),ghc(1,igspinor),gvnlxc_(1,igspinor)
                call wrtout(std_out,msg,'PERS')
                write(msg,'(a,3(1x,i5),6(1x,es13.6))') '  2 ', ig, iispinor, igspinor,ghcim,&
-                 &             kinpw_k2(ig),cwavef(im,igspinor),ghc(im,igspinor),gvnlxc_(im,igspinor)
+                 kinpw_k2(ig),cwavef(2,igspinor),ghc(2,igspinor),gvnlxc_(2,igspinor)
                call wrtout(std_out,msg,'PERS')
              end if
-             ghc(re,igspinor)=ghcre
-             ghc(im,igspinor)=ghcim
+             ghc(:,igspinor) = [ghcre, ghcim]
            end do ! ig
          end do ! ispinor
        end do ! idat
@@ -1338,8 +1343,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      if(gs_ham%gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET DATA USE_DEVICE_ADDR(gvnlc,gvnlxc_)
-       call abi_gpu_xaxpy(1, 2*npw_k2*my_nspinor*ndat, cminusone, &
-       &    c_loc(gvnlc), 1, c_loc(gvnlxc_), 1)
+       call abi_gpu_xaxpy(1, 2*npw_k2*my_nspinor*ndat, cminusone, c_loc(gvnlc), 1, c_loc(gvnlxc_), 1)
        !$OMP END TARGET DATA
        !$OMP TARGET EXIT DATA MAP(delete:gvnlc) IF(gs_ham%gpu_option == ABI_GPU_OPENMP)
 #endif
@@ -1372,10 +1376,9 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      end if
    end if
 
-!  Structured debugging : if prtvol=-level, stop here.
-   if(prtvol==-level)then
-     write(msg,'(a,i0,a)')' getghc : exit prtvol=-',level,', debugging mode => stop '
-     ABI_ERROR(msg)
+   ! Structured debugging: if prtvol=-level, stop here.
+   if (prtvol == -level) then
+     ABI_ERROR(sjoin(' getghc: exit prtvol=-',itoa(level),', debugging mode => stop '))
    end if
 
    if (type_calc==0.or.type_calc==2) then
@@ -1399,9 +1402,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 
 end subroutine getghc
 !!***
-!----------------------------------------------------------------------
 
-!!***
+!----------------------------------------------------------------------
 
 !!****f* ABINIT/getghc_nucdip
 !!
@@ -1426,7 +1428,7 @@ end subroutine getghc
 !! ngfft(18)=contain all needed information about 3D FFT
 !! npw_k=number of planewaves in basis for given k point.
 !! nvloc=number of spin components of vxctaulocal
-!! n4,n5,n6=for dimensionning of vxctaulocal
+!! n4,n5,n6=for dimensioning of vxctaulocal
 !! gpu_option= GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !! vectornd(n4,n5,n6,nvloc,3)= local potential corresponding to the vector potential of the array
 !!  of nuclear magnetic dipoles, in real space, on the augmented fft grid.
@@ -1443,31 +1445,31 @@ end subroutine getghc
 !! SOURCE
 
 subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi_enreg,&
-&                      ndat,ngfft,npw_k,nvloc,n4,n5,n6,my_nspinor,vectornd,gpu_option)
+&                      ndat,ngfft,npw_k,nvloc,n4,n5,n6,my_nspinor,vectornd,vlocal,zora,gpu_option)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: istwf_k,mgfft,my_nspinor,ndat,npw_k,nvloc,n4,n5,n6,gpu_option
+ integer,intent(in) :: istwf_k,mgfft,my_nspinor,ndat,npw_k,nvloc,n4,n5,n6,gpu_option,zora
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: gbound_k(2*mgfft+4),kg_k(3,npw_k),ngfft(18)
  real(dp),intent(in) :: kpt(3)
  real(dp),intent(inout) :: cwavef(2,npw_k*my_nspinor*ndat)
  real(dp),intent(inout) :: ghc_vectornd(2,npw_k*my_nspinor*ndat)
- real(dp),intent(inout) :: vectornd(n4,n5,n6,nvloc,3)
+ real(dp),intent(inout) :: vectornd(n4,n5,n6,nvloc,3),vlocal(n4,n5,n6,nvloc)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tim_fourwf=1
  integer :: idat,idir,ipw,iv1,iv2,nspinortot,shift
- logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
+ logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc,usezora
+ real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
  real(dp) :: weight=one
  !arrays
  real(dp),allocatable :: cwavef1(:,:),cwavef2(:,:)
  real(dp),allocatable :: gcwavef(:,:,:),gcwavef1(:,:,:),gcwavef2(:,:,:)
- real(dp),allocatable :: ghc1(:,:),ghc2(:,:),kgkpk(:,:)
- real(dp),allocatable :: work(:,:,:,:)
-
+ real(dp),allocatable :: ghc1(:,:),ghc2(:,:),kgkpk(:,:),vectornd_dir(:,:,:,:)
+ real(dp),allocatable :: work(:,:,:,:),zk(:,:,:)
 ! *********************************************************************
 
  ghc_vectornd(:,:)=zero
@@ -1482,6 +1484,12 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
    shift=0
    nspinor1TreatedByThisProc=(mpi_enreg%me_spinor==0)
    nspinor2TreatedByThisProc=(mpi_enreg%me_spinor==1)
+ end if
+
+ usezora=((zora.EQ.1).OR.(zora.EQ.3))
+ if(usezora) then
+   ABI_MALLOC(zk,(n4,n5,n6))
+   zk(1:n4,1:1:n5,1:n6)=1.0/(1.0-HalfFineStruct2*vlocal(1:n4,1:n5,1:n6,nvloc))
  end if
 
  ABI_MALLOC(work,(2,n4,n5,n6*ndat))
@@ -1514,13 +1522,23 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
     gcwavef = gcwavef*two_pi
 
     !  STEP2: Compute sum of (grad components of vectornd)*(grad components of cwavef)
+    ABI_MALLOC(vectornd_dir,(n4,n5,n6,nvloc))
     do idir=1,3
-      call fourwf(1,vectornd(:,:,:,:,idir),gcwavef(:,:,idir),ghc1,work,gbound_k,gbound_k,&
+      if (usezora) then
+        vectornd_dir(1:n4,1:n5,1:n6,nvloc)=zk(1:n4,1:n5,1:n6)*vectornd(1:n4,1:n5,1:n6,nvloc,idir)
+      else
+        vectornd_dir(1:n4,1:n5,1:n6,nvloc)=vectornd(1:n4,1:n5,1:n6,nvloc,idir)
+      end if
+      call fourwf(1,vectornd_dir,gcwavef(:,:,idir),ghc1,work,gbound_k,gbound_k,&
            istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
            &     tim_fourwf,weight,weight,gpu_option=gpu_option)
+!      call fourwf(1,vectornd(:,:,:,:,idir),gcwavef(:,:,idir),ghc1,work,gbound_k,gbound_k,&
+!           istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+!           &     tim_fourwf,weight,weight,gpu_option=gpu_option)
 !!$OMP PARALLEL DO
       ghc_vectornd=ghc_vectornd+ghc1
     end do ! idir
+    ABI_FREE(vectornd_dir)
     ABI_FREE(gcwavef)
     ABI_FREE(ghc1)
 
@@ -1561,8 +1579,14 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
        gcwavef1 = gcwavef1*two_pi
 
        !  STEP2: Compute sum of (grad components of vectornd)*(grad components of cwavef)
+       ABI_MALLOC(vectornd_dir,(n4,n5,n6,nvloc))
        do idir=1,3
-         call fourwf(1,vectornd(:,:,:,:,idir),gcwavef1(:,:,idir),ghc1,work,gbound_k,gbound_k,&
+         if (usezora) then
+           vectornd_dir(1:n4,1:n5,1:n6,nvloc)=zk(1:n4,1:n5,1:n6)*vectornd(1:n4,1:n5,1:n6,nvloc,idir)
+         else
+           vectornd_dir(1:n4,1:n5,1:n6,nvloc)=vectornd(1:n4,1:n5,1:n6,nvloc,idir)
+         end if
+         call fourwf(1,vectornd_dir,gcwavef1(:,:,idir),ghc1,work,gbound_k,gbound_k,&
            & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
            & tim_fourwf,weight,weight,gpu_option=gpu_option)
 !!$OMP PARALLEL DO
@@ -1572,6 +1596,7 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
              &  ghc1(1:2,iv1:iv2)
          end do
        end do ! idir
+       ABI_FREE(vectornd_dir)
        ABI_FREE(gcwavef1)
        ABI_FREE(ghc1)
 
@@ -1596,8 +1621,14 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
        gcwavef2 = gcwavef2*two_pi
 
        !  STEP2: Compute sum of (grad components of vectornd)*(grad components of cwavef)
+       ABI_MALLOC(vectornd_dir,(n4,n5,n6,nvloc))
        do idir=1,3
-         call fourwf(1,vectornd(:,:,:,:,idir),gcwavef2(:,:,idir),ghc2,work,gbound_k,gbound_k,&
+         if (usezora) then
+           vectornd_dir(1:n4,1:n5,1:n6,nvloc)=zk(1:n4,1:n5,1:n6)*vectornd(1:n4,1:n5,1:n6,nvloc,idir)
+         else
+           vectornd_dir(1:n4,1:n5,1:n6,nvloc)=vectornd(1:n4,1:n5,1:n6,nvloc,idir)
+         end if
+         call fourwf(1,vectornd_dir,gcwavef2(:,:,idir),ghc2,work,gbound_k,gbound_k,&
            & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
            & tim_fourwf,weight,weight,gpu_option=gpu_option)
 !!$OMP PARALLEL DO
@@ -1607,6 +1638,7 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
              & ghc2(1:2,iv1:iv2)
          end do
        end do ! idir
+       ABI_FREE(vectornd_dir)
        ABI_FREE(gcwavef2)
        ABI_FREE(ghc2)
 
@@ -1619,6 +1651,9 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
  end if ! nspinortot
 
  ABI_FREE(work)
+ if(usezora) then
+   ABI_FREE(zk)
+ end if
 
 end subroutine getghc_nucdip
 !!***
@@ -1685,7 +1720,6 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
  real(dp),allocatable :: ghc1(:,:),ghc2(:,:)
  real(dp),allocatable :: lcwavef(:,:),lcwavef1(:,:),lcwavef2(:,:)
  real(dp),allocatable :: work(:,:,:,:)
-
 ! *********************************************************************
 
  ghc_mGGA(:,:)=zero
@@ -1914,14 +1948,6 @@ end subroutine getghc_mGGA
 !! OUTPUT
 !! cwavef_fft(2,npw_fft*my_nspinor*ndat)=planewave coefficients of wavefunction (istwfk=1)
 !!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 !!
 subroutine cwavef_double_rfft_trick_pack(cwavef,cwavef_fft,me_g0,ndat,npw_k)
@@ -2020,14 +2046,6 @@ end subroutine cwavef_double_rfft_trick_pack
 !! OUTPUT
 !! cwavef(2,npw_fft*my_nspinor*(2*ndat))=planewave coefficients of wavefunction (istwfk=2)
 !!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 !!
 subroutine cwavef_double_rfft_trick_unpack(cwavef,cwavef_fft,me_g0,ndat,npw_k)
@@ -2105,6 +2123,8 @@ subroutine cwavef_double_rfft_trick_unpack(cwavef,cwavef_fft,me_g0,ndat,npw_k)
  cwavef(:,:) = half*cwavef(:,:)
 
 end subroutine cwavef_double_rfft_trick_unpack
+!!***
+
 !!****f* ABINIT/getgsc
 !! NAME
 !! getgsc
@@ -2172,7 +2192,6 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
  real(dp) :: enlout_dum(ndat),tsec(2)
  real(dp), ABI_CONTIGUOUS pointer :: cwavef(:,:),scwavef(:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
-
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -2298,10 +2317,10 @@ end subroutine getgsc
 !!            2: non-local+kinetic only (added to the existing Hamiltonian)
 !!            3: local + kinetic only (added to the existing Hamiltonian)
 !! ===== Optional inputs =====
-!!   [kg_fft_k(3,:)]=optional, (k+G) vector coordinates to be used for the FFT tranformation
+!!   [kg_fft_k(3,:)]=optional, (k+G) vector coordinates to be used for the FFT transformation
 !!                   instead of the one contained in gs_ham datastructure.
 !!                   Typically used for real WF (in parallel) which are FFT-transformed 2 by 2.
-!!   [kg_fft_kp(3,:)]=optional, (k^prime+G) vector coordinates to be used for the FFT tranformation
+!!   [kg_fft_kp(3,:)]=optional, (k^prime+G) vector coordinates to be used for the FFT transformation
 !!   [select_k]=optional, option governing the choice of k points to be used.
 !!             gs_ham datastructure contains quantities needed to apply Hamiltonian
 !!             in reciprocal space between 2 kpoints, k and k^prime (equal in most cases);
@@ -2360,10 +2379,9 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
  integer :: spacedim, spacedim_prj
  logical :: fftw3_use_lib_threads_sav
  integer :: select_k_default
-
  ! *************************************************************************
 
- select_k_default = 1; if ( present(select_k) ) select_k_default = select_k
+ select_k_default = 1; if (present(select_k)) select_k_default = select_k
  filter_dilatmx_loc_ = .true.; if ( present(filter_dilatmx_loc) ) filter_dilatmx_loc_ = filter_dilatmx_loc
 
  spacedim     = size(cwavef  ,dim=2)/ndat

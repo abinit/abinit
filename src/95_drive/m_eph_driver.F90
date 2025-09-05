@@ -73,7 +73,7 @@ module m_eph_driver
  use m_gwpt,            only : gwpt_run
  use m_varpeq,          only : varpeq_run, varpeq_plot
  use m_eph_path,        only : eph_path_run
- use m_wqk,             only : wqk_run
+ use m_wkk,             only : wkk_run
 
  implicit none
 
@@ -150,7 +150,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  integer,parameter :: master = 0, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0, with_cplex1 = 1, with_cplex2 = 2
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf
  integer :: iblock_dielt_zeff, iblock_dielt, iblock_quadrupoles, ddb_nqshift, ierr, npert_miss
- integer :: omp_ncpus, work_size, nks_per_proc, mtyp, mpert, lwsym, qptopt, ncid
+ integer :: omp_ncpus, work_size, nks_per_proc, lwsym, qptopt, ncid
  real(dp):: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff
  real(dp) :: cpu,wall,gflops
@@ -417,17 +417,15 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  ! Change the bravais lattice if needed
  call ddb%set_brav(dtset%brav)
 
- mtyp = ddb_hdr%mblktyp
- mpert = ddb_hdr%mpert
-
  ! MR: a new ddb is necessary for the longwave quantities due to incompability of it with automatic reshapes
  ! that ddb%val and ddb%flg experience when passed as arguments of some routines
  ! GA: Should replace with ddb_hdr%with_d3E_lw
  iblock_quadrupoles = 0
  qdrp_cart = zero
- if (mtyp == BLKTYP_d3E_lw) then
+ if (ddb_hdr%has_d3E_lw) then
    lwsym = 1
-   call ddb_lw_copy(ddb, ddb_lw, mpert, dtset%natom, dtset%ntypat)
+   call ddb_lw_copy(ddb, ddb_lw, ddb_hdr)
+   ! GA: FIXME Bad interface
    iblock_quadrupoles = ddb_lw%get_quadrupoles(ddb_hdr%ddb_version, lwsym, BLKTYP_d3E_lw, qdrp_cart)
    call ddb_lw%free()
  end if
@@ -845,13 +843,13 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
                  pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (18)
-   ! Compute e-ph matrix elements along a q-path
+   ! Compute e-ph matrix elements along q-path.
    call eph_path_run(dtfil, dtset, cryst, ebands, dvdb, ifc, pawfgr, pawang, pawrad, pawtab, psps, comm)
 
  case (19)
-   ! Compute matrix elements of W_qk
-   call wqk_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, wfk0_hdr, &
-                pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+   ! Compute matrix elements of W_kk'
+   call wkk_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, wfk0_hdr, &
+                pawtab, psps, mpi_enreg, comm)
 
  case default
    ABI_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))
@@ -860,17 +858,10 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  !=====================
  !==== Free memory ====
  !=====================
- call cryst%free()
- call dvdb%free()
- call drhodb%free()
- call ddb_hdr%free()
- call ddb%free()
- call ifc%free()
- call wfk0_hdr%free()
- call ebands%free()
- call ebands_kq%free()
- call pawfgr_destroy(pawfgr)
- call destroy_mpi_enreg(mpi_enreg)
+ call cryst%free(); call dvdb%free(); call drhodb%free(); call ddb_hdr%free()
+ call ddb%free(); call ifc%free(); call wfk0_hdr%free()
+ call ebands%free(); call ebands_kq%free()
+ call pawfgr_destroy(pawfgr); call destroy_mpi_enreg(mpi_enreg)
 
  if (allocated(efmasdeg)) call efmasdeg_free_array(efmasdeg)
  if (allocated(efmasval)) call efmasval_free_array(efmasval)

@@ -328,6 +328,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  ! Open GSTORE.nc file and go to data mode.
  NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, comm))
+ !NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, xmpi_comm_self))
  NCF_CHECK(nctk_set_datamode(root_ncid))
 
  call gstore%get_missing_qbz_spin(done_qbz_spin, ndone, nmiss)
@@ -339,8 +340,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! Init gsph_c for the correlated part.
  screen_filepath = dtfil%fnameabi_scr
  ABI_CHECK(dtfil%fnameabi_scr /= ABI_NOFILE, "SCR file must be specified")
-
-
 
  ! Read g-sphere for correlation and pp_mesh from SCR file.
  call get_hscr_qmesh_gsph(screen_filepath , dtset, cryst, hscr, pp_mesh, gsph_c, qlwl, comm)
@@ -384,10 +383,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  min_npw_xc = min(npw_x, npw_c)
  max_npw_xc = max(npw_x, npw_c)
  if (gsph_x%ng >= gsph_c%ng) then
-   call vcp%init(gsph_x, cryst, pp_mesh, kmesh, dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, gsph_x%ng, &
+   call vcp%init(gsph_x, cryst, pp_mesh, kmesh, dtset%gw_rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, gsph_x%ng, &
                  nqlwl, qlwl, comm)
  else
-   call vcp%init(gsph_c, cryst, pp_mesh, kmesh, dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, gsph_c%ng, &
+   call vcp%init(gsph_c, cryst, pp_mesh, kmesh, dtset%gw_rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, gsph_c%ng, &
                  nqlwl, qlwl, comm)
  end if
  ABI_FREE(qlwl)
@@ -1256,6 +1255,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              omegame0i_nk = omegas_nk - qp_ene(ib_sum, ikmp_ibz, spin)
              !print *, "omegame0i_nk:", omegame0i_nk
 
+             !MG FIXME: Note that the i/two_pi factor in the self-energy is included in calc_sigc
+             !so we should not double count it.
              vec_gwc_nk(:,:,n_k) = zero
              call ppm%calc_sigc(nspinor, npw_c, nw_nk, rhotwg_c, botsq_pbz, otq_pbz, &
                                 omegame0i_nk, dtset%zcut, theta_mu_minus_e0i, dmeig_pbz, npw_c, vec_gwc_nk(:,:,n_k), sigcme_nk)
@@ -1337,7 +1338,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              !print *, "For kk, ", kk, "pp:", pp, "idir, ipert", idir, ipert
 
              ! Set up local potential vlocal1_qq with proper dimensioning, from vtrial1 taking into account the spin
-             ! and prepare application of the NL part. Each MPI rank prepares its own potentials.
+             ! and prepare application of the NL part. Each MPI rank prepares its own potential.
              call rf_transgrid_and_pack(spin, nspden, psps%usepaw, cplex, nfftf, nfft, ngfft, nvloc, &
                                         pawfgr, mpi_enreg, vtrial, v1scf_qq(:,:,:,imyp), vlocal, vlocal1_qq(:,:,:,:,imyp))
 

@@ -247,6 +247,9 @@ module m_bz_mesh
 
  contains
 
+  procedure :: init => kpath_init
+   ! Construct a new path
+
   procedure :: free => kpath_free
    ! Free memory
 
@@ -258,7 +261,7 @@ module m_bz_mesh
 
  end type kpath_t
 
- public :: kpath_new        ! Construct a new path
+
  public :: make_path        ! Construct a normalized path. TODO: Remove it as it's deprecated
 !!***
 
@@ -546,7 +549,6 @@ subroutine kmesh_free(Kmesh)
 
 !Arguments ------------------------------------
  class(kmesh_t),intent(inout) :: Kmesh
-
 ! *********************************************************************
 
  ! integer
@@ -830,7 +832,7 @@ end subroutine setup_k_rotation
 !!
 !! SOURCE
 
-subroutine get_bz_item(Kmesh,ik_bz,kbz,ik_ibz,isym,itim,ph_mkbzt,umklp,isirred)
+subroutine get_bz_item(Kmesh, ik_bz, kbz, ik_ibz, isym, itim, ph_mkbzt, umklp, isirred)
 
 !Arguments ------------------------------------
 !scalars
@@ -846,7 +848,6 @@ subroutine get_bz_item(Kmesh,ik_bz,kbz,ik_ibz,isym,itim,ph_mkbzt,umklp,isirred)
 !Local variables-------------------------------
 !scalars
  character(len=500) :: msg
-
 ! *********************************************************************
 
  if (ik_bz>Kmesh%nbz.or.ik_bz<=0) then
@@ -898,7 +899,6 @@ subroutine get_IBZ_item(Kmesh,ik_ibz,kibz,wtk)
  real(dp),intent(out) :: wtk
 !arrays
  real(dp),intent(out) :: kibz(3)
-
 ! *********************************************************************
 
  if (ik_ibz>Kmesh%nibz.or.ik_ibz<=0) then
@@ -950,7 +950,6 @@ subroutine get_BZ_diff(Kmesh,k1,k2,idiff_bz,g0,nfound)
 !arrays
  integer :: umklp(3)
  real(dp) :: kdiff(3),ktrial(3)
-
 ! *********************************************************************
 
  if (.not.has_BZ_item(Kmesh,k1,ikp,umklp)) then
@@ -1202,7 +1201,6 @@ pure logical function bz_mesh_isirred(Kmesh, ik_bz)
 !Local variables-------------------------------
 !scalars
  integer :: isym,itim
-
 ! *********************************************************************
 
  isym = Kmesh%tabo(ik_bz)
@@ -1690,7 +1688,7 @@ subroutine getkptnorm_bycomponent(vect,factor,norm)
 ! *************************************************************************
 
  ! Checking the factor is large enough (skipping zero components, since in this case the product will be 0)
- if(ANY(vect(:)*factor < 1.0 .and. vect(:) > tol7)) then
+ if (ANY(vect(:)*factor < 1.0 .and. vect(:) > tol7)) then
     write(msg,'(a,a,a,a,a,a,a,a)') ' Not able to give unique norm to order vectors',ch10,&
        'This is likely related to a truncation error for a k-point in the input file',ch10,&
        'Always prefer fractional numbers in the input file instead of truncated ones',ch10,&
@@ -1711,7 +1709,7 @@ end subroutine getkptnorm_bycomponent
 !!
 !! FUNCTION
 !!  Generate a normalized path given the extrema.
-!!  See also kpath_t and kpath_new (recommended API).
+!!  See also kpath_t and kpath_init (recommended API).
 !!
 !! INPUTS
 !!  nbounds=Number of extrema defining the path.
@@ -2541,7 +2539,6 @@ subroutine littlegroup_free_1D(Ltg)
 
 !Local variables-------------------------------
  integer :: ipt
-
 ! *********************************************************************
 
  do ipt=1,SIZE(Ltg)
@@ -2701,9 +2698,9 @@ end function box_len
 
 !----------------------------------------------------------------------
 
-!!****f* m_bz_mesh/kpath_new
+!!****f* m_bz_mesh/kpath_init
 !! NAME
-!! kpath_new
+!! kpath_init
 !!
 !! FUNCTION
 !!  Create a normalized path given the extrema.
@@ -2716,10 +2713,11 @@ end function box_len
 !!
 !! SOURCE
 
-type(kpath_t) function kpath_new(bounds, gprimd, ndivsm) result(kpath)
+subroutine kpath_init(kpath, bounds, gprimd, ndivsm)
 
 !Arguments ------------------------------------
 !scalars
+ class(kpath_t),intent(out) :: kpath
  integer,intent(in) :: ndivsm
 !!arrays
  real(dp),intent(in) :: bounds(:,:),gprimd(3,3)
@@ -2767,7 +2765,7 @@ type(kpath_t) function kpath_new(bounds, gprimd, ndivsm) result(kpath)
    kpath%bounds2kpt(ii+1) = sum(kpath%ndivs(:ii)) + 1
  end do
 
-end function kpath_new
+end subroutine kpath_init
 !!***
 
 !----------------------------------------------------------------------
@@ -2778,7 +2776,7 @@ end function kpath_new
 !!
 !! FUNCTION
 !!  Return all the versors emanating from the Gamma point.
-
+!!
 !! OUTPUT
 !!  nvers=number of versors
 !!  red_versors(3,nvers)=versors in reduced coords
