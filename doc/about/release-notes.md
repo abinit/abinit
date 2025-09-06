@@ -1,7 +1,7 @@
 ## v10.4
 
 Version 10.4, released on May 15, 2025.
-<!-- Release notes updated on July 6, 2025. -->
+<!-- Release notes updated on September 5, 2025. -->
 
 These release notes
 are relative to modifications/improvements of ABINIT v10.4 with respect to v10.2.
@@ -9,11 +9,11 @@ are relative to modifications/improvements of ABINIT v10.4 with respect to v10.2
 EXCEPT MR1087, 1088, 1090, 1091, 1092, 1095, 1097, 1100, 1104, 1106, 1114, 1115, that had already been included in v10.2,
 and EXCEPT MR1160, 1165, 1168, 1170, 1172 and 1173  that will be included in v10.6 .  
 For release v10.4.3, also MR1176 to 1182 are included, as well as MR1184-1186, MR1188 and MR1190. However, MR1183 and MR1187 will be included in v10.6.
-For release v10.4.5, also MR1188 to 1190, MR1193, MR1195, MR1197-1199, MR1203 are included. However, MR1191-1192, MR1194, MR1196, MR1200-1202, MR1205-12010 will be included in v10.6.
+For release v10.4.5, also MR1188 to 1190, MR1193, MR1195, MR1197-1199, MR1203 are included. However, MR1191-1192, MR1194, MR1196, MR1200-1202, MR1205-1210 will be included in v10.6.
+For release v10.4.7, also MR1219 and MR1225 are included.
 -->
-<!-- (with some late contributions until XXX 2024). -->
 
-Many thanks to the contributors to the ABINIT project between October 2024 and July 2025 !
+Many thanks to the contributors to the ABINIT project between October 2024 and August 2025 !
 The list of contributors includes:
 
 G. Allemand, B. Amadon, G. Antonius, M. Azizi, L. Baguet, S. Bandyopadhyay, L. Bastogne,
@@ -589,8 +589,10 @@ By M. Azizi (MR1086)
 * Include [[nbdbuf]] in the check of the last occupancy in vtorho (and correct the exit condition for [[nsppol]]=2)
 * xmpi_distrib_2D: fix edge case where the code would try to distribute n points over N>n processes
 * m_krank: add support for non-diagonal [[kptrlatt]] in krank_from_kptrlatt()
+* mGGA : Fix calculation of kinetic energy density with paral_kgb 1 ; Fix GGA + usekden 1 in PAW ; Fix meta-GGA when istwfk = 2 and bandpp > 1 ; Fix mistake in blocksize in case nstep 0 and wfoptalg 114 ; Adding one test in paral to test meta-GGA + PAW in different cases.
+* restores the previous behaviour implemented by get_fastest_devices when GPUs were equal in performance, that was broken by MR1197.
 
-By L. Baguet (MR1127), M. Mignolet (MR1118)
+By L. Baguet (MR1127), M. Mignolet (MR1118), F. Brieuc (MR1219), M. Sarraute (MR1225).
 
 * * *
 
