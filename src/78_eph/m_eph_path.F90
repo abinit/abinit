@@ -132,7 +132,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  type(nscf_t) :: nscf
  type(kpath_t) :: qpath, kpath
  type(xcomm_t) :: kpt_comm, qpt_comm, pert_comm
- type(xcomm_t),allocatable :: comm_my_is(:)
  type(u0_cache_t) :: ucache_kq, ucache_k
  character(len=fnlen) :: gpath_path
  character(len=5000) :: msg
@@ -150,6 +149,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  real(dp),allocatable :: kpg_kq(:,:), ph3d_kq(:,:,:), ffnl_kq(:,:,:,:), vlocal_kq(:,:,:,:), real_vec(:)
  logical :: reorder, periods(ndims), keepdim(ndims)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
+ type(xcomm_t),allocatable :: comm_my_is(:)
 !************************************************************************
 
  if (psps%usepaw == 1) then
@@ -398,7 +398,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
    ! Compute non-analytic phonons for q--> 0 in polar materials.
    if (nq_path > 1 .and. (any(ifc%zeff /= zero))) call ifc%calcnwrite_nana_terms_qpath(qpath, cryst, ncid, units)
-
    NCF_CHECK(nf90_close(ncid))
  end if ! master
 
@@ -420,8 +419,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  ! Loop over spins (MPI parallelized)
  do my_is=1,my_nspins
    spin = my_spins(my_is)
-
-   !call nscf%setup_spin(spin, dtset, pawfgr, gs_ham_k, vlocal)
 
    ! Loop over k-points in k-path (MPI parallelized).
    do my_ik=1,my_nkpath

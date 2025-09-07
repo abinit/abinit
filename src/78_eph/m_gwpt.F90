@@ -137,7 +137,7 @@ contains  !=====================================================
 !!
 !!  2) The routines used to symmetrize wavefunctions and DFPT scattering potentials
 !!     expect in input symmetry tables generated using different conventions.
-!!     For the wavefunctions we use the symrel convention while for the scattering potentials we use the symrec convention.
+!!     For the wavefunctions, we use the symrel convention while for the scattering potentials we use the symrec convention.
 !!     We encode this in the name of the variable using e.g. mapc_qq for the symrec convention (C) and mapl_k convention (L)
 !!
 !!  3) The DFPT routines operate on double-precision wavefunctions stored in arrays with real/imag part e.g. cg(1:2,npw_k)
@@ -391,7 +391,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  end if
  ABI_FREE(qlwl)
 
- if (my_rank == master)  then
+ if (my_rank == master) then
    call kmesh%print(units, header="K-mesh for wavefunctions", prtvol=dtset%prtvol)
    !call pp_mesh%print(units, header="", prtvol=dtset%prtvol)
    call gsph_x%print(units, dtset%prtvol, header="G-sphere for exchange")
@@ -727,7 +727,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                 allow_interp=.True., want_varname="density")
  den_cryst = den_hdr%get_crystal()
  if (cryst%compare(den_cryst, header=" Comparing input crystal with DEN crystal") /= 0) then
-   ABI_ERROR("Crystal structure from WFK and DEN do not agree! Check messages above!")
+   ABI_ERROR("Crystal structures from WFK and DEN do not agree! Check messages above!")
  end if
  call den_cryst%free(); call den_hdr%free()
 
@@ -739,7 +739,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call ppm%print(units)
 
  ! Read symmetrized em1 from file and build ppmodel parameters.
- ! TODO: MPI-shared memory + compute my set of pp-vectors on ppm%new_setup
+ ! TODO: MPI-shared memory + compute my set of pp-vectors in ppm%new_setup
  scr_iomode = iomode_from_fname(screen_filepath)
  ABI_MALLOC(epsm1_ggw, (npw_c, npw_c, hscr%nomega))
 
