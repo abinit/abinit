@@ -14498,7 +14498,7 @@ Variable(
     not automatically set by [[autoparal]]. For example, consult the [[tutorial:paral_mbt|tutorial on parallelism for Many-Body Perturbation Theory]] to learn how
     to run beyond-GS calculations with MPI. Other tutorials on parallelism are also available.
 
-**If paral_kgb is not explicitely put in the input file**, ABINIT
+**If paral_kgb is not explicitly set in the input file**, ABINIT
 automatically detects if the job has been sent in sequential or in parallel.
 In this last case, it detects the number of processors on which the job has
 been sent and calculates values of [[np_spkpt]], [[npfft]], [[npband]],
@@ -22752,7 +22752,7 @@ due to nuclear magnetic dipoles (see [[nucdipmom]]).
 
 Negative values of [[zora]] are present only for debugging purposes. [[zora]] -1 permits only
 spin-orbit coupling, regardless of the presence of nuclear dipoles. [[zora]] -2 permits only
-the electon spin-nuclear dipole through space interaction, and [[zora]] -3 permits only the
+the electron spin-nuclear dipole through space interaction, and [[zora]] -3 permits only the
 electron spin-nuclear dipole Fermi-contact-like interaction.
 """,
 ),
@@ -24763,7 +24763,7 @@ The first entry gives the first band to be included while the second index speci
 Note that the array depends on the value of [[nsppol]] thus one has to provide four integers for the
 two different spin channels when [[nsppol]] == 2.
 
-If not specified in input, ABINIT will use all the bands from 1 up to the maximum number of bands
+If not specified in input, ABINIT will use all the bands from 1 up to the maximum number of bands [[nband]]
 unless additional filters are activated, see [[gstore_kfilter]] and [[gstore_erange]].
 """,
 ),
@@ -25866,7 +25866,7 @@ Also, the convergence of the SCF cycle may be significantly improved by increasi
     components in the x-y plane.
 
 Note that [[spinat]] gives the **initial** electronic spin-magnetization for each atom and the final
-atomic magnetization may differ from [[spinat]], unless one uses GBT in conjunction with contrained DFT
+atomic magnetization may differ from [[spinat]], unless one uses GBT in conjunction with constrained DFT
 to specify a **target value** of the magnetization (see [[constraint_kind]] and [[magconon]]).
 """,
 ),
