@@ -23,7 +23,7 @@
  xred  3*0.00d0
        3*0.25d0
  znucl 14  nband 4
- bandpp 1 # this test crash on buda2_gnu_8.5_cuda with nblock_lobpcg=1 (bandpp=4)
+ nblock_lobpcg 4 # this test crash on buda2_gnu_8.5_cuda with nblock_lobpcg=1
 
 #K-points and symmmetries
  kptopt 1 ngkpt 2 2 2

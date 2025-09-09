@@ -818,9 +818,11 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    nzlmopt=-1; option=0; compch_sph=greatest_real
    call pawdenpot(compch_sph,el_temp,KS_energies%e_paw,KS_energies%e_pawdc,KS_energies%entropy_paw,&
-    ipert,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,&
+    Cryst%gprimd,ipert,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,Cryst%ntypat,Dtset%nucdipmom,&
+    nzlmopt,option,&
     Paw_an,Paw_an,Paw_ij,Pawang,Dtset%pawprtvol,Pawrad,Pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,&
-    Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,Cryst%ucvol,Psps%znuclpsp,epaw_xc=KS_energies%e_pawxc)
+    Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,&
+    Cryst%xred,Cryst%ucvol,Psps%znuclpsp,epaw_xc=KS_energies%e_pawxc)
    call timab(320,2,tsec) ! screening(paw
  else
    ABI_MALLOC(Paw_ij,(0))
@@ -1951,7 +1953,7 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
  ABI_FREE(gvec_kss)
 
  ! FIXME this wont work if nqptdm/=0
- call Vcp%init(Gsph_epsG0,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecuteps,Ep%npwe,Ep%nqlwl,&
+ call Vcp%init(Gsph_epsG0,Cryst,Qmesh,Kmesh,Dtset%gw_rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecuteps,Ep%npwe,Ep%nqlwl,&
                Ep%qlwl,comm)
 
 #if 0

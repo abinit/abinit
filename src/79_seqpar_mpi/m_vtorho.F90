@@ -414,34 +414,31 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(gs_hamiltonian_type) :: gs_hamk
 !arrays
  integer(int32), ABI_CONTIGUOUS pointer :: kg_k(:,:) => null()
- real(dp) :: dielar(7),dphase_k(3),kpoint(3),qpt(3),rhodum(1),tsec(2),ylmgr_dum(0,0,0)
+ real(dp) :: dielar(7),dphase_k(3),kpoint(3),qpt(3),rhodum(1),tsec(2),ylmgr_dum(0,0,0), kphq(3), kmhq(3)
  real(dp),allocatable :: EigMin(:,:),buffer1(:),cgq(:,:)
  real(dp),allocatable :: cgrkxc(:,:),doccde(:)
  real(dp),allocatable :: dphasek(:,:),ek_k(:),ek_k_nd(:,:,:),eknk(:),eknk_nd(:,:,:,:,:),end_k(:)
- real(dp),allocatable :: enlx_k(:),enlxnk(:),focknk(:),fockfornk(:,:,:),ffnl(:,:,:,:),grnl_k(:,:), xcart(:,:)
- real(dp),allocatable :: grnlnk(:,:)
+ real(dp),allocatable :: enlx_k(:),enlxnk(:),focknk(:),fockfornk(:,:,:),ffnl(:,:,:,:), ffnl_kphq(:,:,:,:)
+ real(dp),allocatable :: grnlnk(:,:), grnl_k(:,:), xcart(:,:)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
  real(c_double), ABI_CONTIGUOUS pointer :: kinpw(:) => null()
  real(c_double), ABI_CONTIGUOUS pointer :: eig_k(:) => null()
 #else
- real(dp),allocatable :: kinpw(:)
- real(dp),allocatable :: eig_k(:)
+ real(dp),allocatable :: kinpw(:), eig_k(:)
 #endif
 
- real(dp),allocatable :: kpg_k(:,:),occ_k(:),ph3d(:,:,:)
- real(dp),allocatable :: pwnsfacq(:,:)
+ real(dp),allocatable :: kpg_k(:,:),kpg_kphq(:,:),occ_k(:),ph3d(:,:,:), ph3d_kphq(:,:,:)
+ real(dp),allocatable :: pwnsfacq(:,:), kinpw_kphq(:)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
  real(c_double), ABI_CONTIGUOUS pointer :: resid_k(:) => null()
  real(c_double), ABI_CONTIGUOUS pointer :: rhoaug(:,:,:,:) => null()
 #else
- real(dp),allocatable :: resid_k(:)
- real(dp),allocatable :: rhoaug(:,:,:,:)
+ real(dp),allocatable :: resid_k(:), rhoaug(:,:,:,:)
 #endif
 
- real(dp),allocatable :: rhowfg(:,:),rhowfr(:,:),tauwfg(:,:),tauwfr(:,:)
- real(dp),allocatable :: vectornd_pac(:,:,:,:,:)
+ real(dp),allocatable :: rhowfg(:,:),rhowfr(:,:),tauwfg(:,:),tauwfr(:,:), vectornd_pac(:,:,:,:,:)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
  real(real64), ABI_CONTIGUOUS pointer :: vlocal(:,:,:,:) => null()
@@ -575,11 +572,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    if (optres==1) then
      nvresid=rhor ; tauresid=taur
    end if
-!  NC and plane waves
+   ! NC and plane waves
    if (psps%usepaw==0 .and. dtset%usewvl==0) then
      rhor=zero ; taur=zero
-!  PAW
    else if(psps%usepaw==1) then
+     ! PAW
      ABI_MALLOC(rhowfr,(dtset%nfft,dtset%nspden))
      ABI_MALLOC(rhowfg,(2,dtset%nfft))
      ABI_MALLOC(tauwfr,(dtset%nfft,dtset%nspden*dtset%usekden))
@@ -652,7 +649,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
   dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
   paw_ij=paw_ij,ph1d=ph1d,usecprj=usecprj_local,electronpositron=electronpositron,fock=fock,&
   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
-  nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option)
+  nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option,use_gbt=dtset%use_gbt)
 
  if (dtset%cprj_in_memory==1) then
    call xg_nonlop_update_weight(xg_nonlop,ucvol) ! ucvol could have changed in mover
@@ -756,11 +753,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 #endif
  else
 
-!===================================================================
-! PLANE WAVES - Standard VTORHO procedure
-!===================================================================
+   !===================================================================
+   ! PLANE WAVES - Standard VTORHO procedure
+   !===================================================================
 
-!  Electric field: allocate dphasek
+   !  Electric field: allocate dphasek
    nkpt1 = dtset%nkpt
    if ( berryflag ) then
      ABI_MALLOC(dphasek,(3,dtset%nkpt*dtset%nsppol))
@@ -796,7 +793,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      nbdbuf_eff = 0
    end if
 
-!  LOOP OVER SPINS
+   ! LOOP OVER SPINS
    do isppol=1,dtset%nsppol
      call timab(982,1,tsec)
 
@@ -811,6 +808,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
                                    dtset%nspden, gs_hamk%nvloc, 1, pawfgr, mpi_enreg, vtrial, vlocal)
+     !vlocal = zero
      call gs_hamk%load_spin(isppol, vlocal=vlocal, with_nonlocal=.true.)
 
      if (with_vxctau) then
@@ -883,16 +881,16 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        call timab(997,2,tsec)
 
-!      In case of MPI // of a finite field calculation
-!      build the cgq array that stores the wavefunctions for the
-!      neighbours of ikpt, and the pwnsfacq array that stores the
-!      corresponding phase factors (in case of tnons)
+       ! In case of MPI // of a finite field calculation
+       ! build the cgq array that stores the wavefunctions for the
+       ! neighbours of ikpt, and the pwnsfacq array that stores the
+       ! corresponding phase factors (in case of tnons)
        ABI_MALLOC(cgq,(2,mcgq))
        ABI_MALLOC(pwnsfacq,(2,mkgq))
        if ( berryflag ) then
          call cgq_builder(berryflag,cg,cgq,dtefield,dtset,ikpt,ikpt_loc,isppol,mcg,mcgq,&
-&         me_distrb,mkgq,mpi_enreg,my_nspinor,nband_k,nproc_distrb,&
-&         npwarr,pwnsfac,pwnsfacq,pwind_alloc,spaceComm_distrb)
+           me_distrb,mkgq,mpi_enreg,my_nspinor,nband_k,nproc_distrb,&
+           npwarr,pwnsfac,pwnsfacq,pwind_alloc,spaceComm_distrb)
          if (ikpt_loc > dtset%mkmem) then
            ABI_FREE(cgq)
            ABI_FREE(pwnsfacq)
@@ -904,12 +902,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        if (mpi_enreg%paral_kgb==1) my_bandfft_kpt => bandfft_kpt(my_ikpt)
        call bandfft_kpt_set_ikpt(ikpt,mpi_enreg)
-!      my_ikpt = ikpt
-!       if (mpi_enreg%paral_kgb==1) then
-!        my_ikpt = mpi_enreg%my_kpttab(ikpt)
-!         my_bandfft_kpt => bandfft_kpt(my_ikpt)
-!         call bandfft_kpt_set_ikpt(ikpt,mpi_enreg)
-!       end if
+       !my_ikpt = ikpt
+       !if (mpi_enreg%paral_kgb==1) then
+       ! my_ikpt = mpi_enreg%my_kpttab(ikpt)
+       !  my_bandfft_kpt => bandfft_kpt(my_ikpt)
+       !  call bandfft_kpt_set_ikpt(ikpt,mpi_enreg)
+       !end if
 
        ABI_MALLOC(ek_k,(nband_k))
        ABI_MALLOC(ek_k_nd,(2,nband_k,nband_k*paw_dmft%use_dmft))
@@ -936,6 +934,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if(paw_dmft%use_dmft==1) ek_k_nd(:,:,:)=zero
        if (optforces>0) grnl_k(:,:)=zero
        kpoint(:)=dtset%kptns(:,ikpt)
+
+       if (dtset%use_gbt /= 0) then
+         ! If GBT is activate, kpoint becomes k-q/2 so that we can reuse all the calls
+         ! to mkkin and mkffnl, and we only have to deal with k+q/2.
+         kphq = kpoint + half * dtset%qgbt
+         kpoint(:) = dtset%kptns(:,ikpt) - half * dtset%qgbt
+       end if
+
        occ_k(:)=occ(1+bdtot_index:nband_k+bdtot_index)
        resid_k(:) = resid(1+bdtot_index : nband_k+bdtot_index)
        !resid_k(:)=zero
@@ -957,9 +963,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          end do
        end if
 
-!      Set up remaining of the Hamiltonian
-
-!      Compute (1/2) (2 Pi)**2 (k+G)**2:
+       ! Set up remaining of the Hamiltonian
+       ! Compute (1/2) (2 Pi)**2 (k+G)**2:
        if(dtset%gpu_option==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
          ABI_MALLOC_MANAGED(kinpw,(/npw_k/))
@@ -969,48 +974,92 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end if
 
        call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
+       !kinpw = zero
 
-!      Compute (k+G) vectors (only if useylm=1)
+       ! Compute (k+G) vectors (only if useylm=1)
        if (dtset%cprj_in_memory/=1) then
          nkpg=3*optforces*dtset%nloalg(3)
          ABI_MALLOC(kpg_k,(npw_k,nkpg))
-         if ((mpi_enreg%paral_kgb/=1.or.istep<=1).and.nkpg>0) call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
+         if ((mpi_enreg%paral_kgb/=1.or.istep<=1).and.nkpg>0) then
+           call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
+           if (dtset%use_gbt /= 0) then
+             ABI_MALLOC(kpg_kphq,(npw_k,nkpg))
+             call mkkpg(kg_k,kpg_kphq,kphq,nkpg,npw_k)
+           end if
+         end if
        else ! cprj_in_memory = 1
          nkpg=3*optforces
          ABI_MALLOC(kpg_k,(npw_k,nkpg))
-         if (optforces/=0) call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
+         if (optforces/=0) then
+           call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
+           if (dtset%use_gbt /= 0) then
+             ABI_MALLOC(kpg_kphq,(npw_k,nkpg))
+             call mkkpg(kg_k,kpg_kphq,kphq,nkpg,npw_k)
+           end if
+         end if
        end if
 
-!      Compute nonlocal form factors ffnl at all (k+G):
+       ! Compute nonlocal form factors ffnl at all (k+G):
        ider=0;idir=0;dimffnl=1
+
        ABI_MALLOC(ffnl,(npw_k,dimffnl,psps%lmnmax,ntypat))
        if (mpi_enreg%paral_kgb/=1.or.istep<=1) then
          call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl,psps%ffspl,&
-&         gmet,gprimd,ider,idir,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,&
-&         psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
-&         npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,&
-&         psps%usepaw,psps%useylm,ylm_k,ylmgr,kinpw=kinpw)
+          gmet,gprimd,ider,idir,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,&
+          psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
+          npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,&
+          psps%usepaw,psps%useylm,ylm_k,ylmgr,kinpw=kinpw)
+          !ffnl = zero
        end if
 
-!      Load k-dependent part in the Hamiltonian datastructure
-!       - Compute 3D phase factors
-!       - Prepare various tabs in case of band-FFT parallelism
-!       - Load k-dependent quantities in the Hamiltonian
+       if (dtset%use_gbt /= 0) then
+         ! Compute (1/2) (2 Pi)**2 (k+q/2+G)**2:
+         ABI_MALLOC(kinpw_kphq, (npw_k))
+         call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw_kphq,kphq,npw_k,0,0)
+         !kinpw_kphq = zero
+
+         ! Compute nonlocal form factors ffnl at all (k+q/2+G):
+         ! TODO: useylm = 1 requires ylm_kphq, ylmgr_kphq
+         ! and ylm should be computed with k-q/2 in the caller.
+         ABI_MALLOC(ffnl_kphq,(npw_k,dimffnl,psps%lmnmax,ntypat))
+         call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl_kphq,psps%ffspl,&
+          gmet,gprimd,ider,idir,psps%indlmn,kg_k,kpg_kphq,kphq,psps%lmnmax,&
+          psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
+          npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,&
+          psps%usepaw,psps%useylm,ylm_k,ylmgr,kinpw=kinpw_kphq)
+          !ffnl_kphq = zero
+       end if
+
+       ! Load k-dependent part in the Hamiltonian datastructure
+       !  - Compute 3D phase factors
+       !  - Prepare various tabs in case of band-FFT parallelism
+       !  - Load k-dependent quantities in the Hamiltonian
        ABI_MALLOC(ph3d,(2,npw_k,gs_hamk%matblk))
-
-       if(usefock_ACE/=0) then
-         call gs_hamk%load_k(kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,&
-           kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,fockACE_k=fock%fockACE(ikpt,isppol),ph3d_k=ph3d,&
-           compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1),&
-          compute_gbound=(mpi_enreg%paral_kgb/=1))
-       else
-         call gs_hamk%load_k(kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,&
-           kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,&
-           compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1),&
-           compute_gbound=(mpi_enreg%paral_kgb/=1))
+       if (dtset%use_gbt /= 0) then
+         ABI_MALLOC(ph3d_kphq,(2,npw_k,gs_hamk%matblk))
        end if
 
-!      Load band-FFT tabs (transposed k-dependent arrays)
+       if (usefock_ACE/=0) then
+         call gs_hamk%load_k(kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,&
+           kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,fockACE_k=fock%fockACE(ikpt,isppol),ph3d_k=ph3d,&
+           compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1), compute_gbound=(mpi_enreg%paral_kgb/=1))
+
+           if (dtset%use_gbt /= 0) then
+             ABI_ERROR("GBT with fock_ace not implemented")
+           end if
+       else
+         call gs_hamk%load_k(kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,&
+           kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,&
+           compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1), compute_gbound=(mpi_enreg%paral_kgb/=1))
+
+         if (dtset%use_gbt /= 0) then
+           call gs_hamk%load_kprime(kpt_kp=kphq,&
+             kinpw_kp=kinpw_kphq,kpg_kp=kpg_kphq,ffnl_kp=ffnl_kphq,ph3d_kp=ph3d_kphq,&
+             compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1), compute_gbound=(mpi_enreg%paral_kgb/=1))
+         end if
+       end if
+
+       ! Load band-FFT tabs (transposed k-dependent arrays)
        if (mpi_enreg%paral_kgb==1) then
          if (istep<=1) call prep_bandfft_tabs(gs_hamk,ikpt,dtset%mkmem,mpi_enreg)
          call gs_hamk%load_k(npw_fft_k=my_bandfft_kpt%ndatarecv, &
@@ -1022,7 +1071,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            ph3d_k   =my_bandfft_kpt%ph3d_gather)
        end if
 
-!      If OpenMP GPU, load "hamiltonian" on GPU device
+       ! If OpenMP GPU, load "hamiltonian" on GPU device
        if (gs_hamk%gpu_option == ABI_GPU_OPENMP) then
          if(dtset%paral_kgb==0) then
            call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,gs_hamk%ffnl_k,gs_hamk%ph3d_k)
@@ -1044,7 +1093,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          gemm_nonlop_is_distributed = (dtset%gpu_nl_distrib/=0 .and. nblk_gemm_nonlop > 0)
        end if
 
-!      Build inverse of overlap matrix for chebfi
+       ! Build inverse of overlap matrix for chebfi
        if (dtset%cprj_in_memory==0) then
          if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. istep <= 1) then
             call make_invovl(gs_hamk, dimffnl, ffnl, ph3d, mpi_enreg)
@@ -1076,7 +1125,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        call timab(984,2,tsec)
 
-!      Update the value of ikpt,isppol in fock_exchange and allocate the memory space to perform HF calculation.
+       ! Update the value of ikpt,isppol in fock_exchange and allocate the memory space to perform HF calculation.
        if (usefock) call fock_updateikpt(fock%fock_common,ikpt,isppol)
        if (psps%usepaw==1 .and. usefock) then
          if ((fock%fock_common%optfor).and.(usefock_ACE==0)) fock%fock_common%forces_ikpt=zero
@@ -1099,16 +1148,15 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end if
 
        ABI_NVTX_START_RANGE(NVTX_VTOWFK)
-!      Compute the eigenvalues, wavefunction, residuals,
-!      contributions to kinetic energy, nuclear dipole energy,
-!      nonlocal energy, forces,
-!      and update of rhor to this k-point and this spin polarization.
+       ! Compute the eigenvalues, wavefunction, residuals,
+       ! contributions to kinetic energy, nuclear dipole energy, nonlocal energy, forces,
+       ! and update of rhor to this k-point and this spin polarization.
        call vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,&
-&       dtset,eig_k,ek_k,ek_k_nd,end_k,enlx_k,fixed_occ,grnl_k,gs_hamk,&
-&       ibg,icg,ikpt,iscf,isppol,kg_k,kinpw,mband_cprj,mcg,mcgq,mcprj_local,mkgq,&
-&       mpi_enreg,dtset%mpw,natom,nband_k,nbdbuf_eff,dtset%nkpt,istep,nnsclo_now,npw_k,npwarr,&
-&       occ_k,optforces,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,&
-&       rhoaug,paw_dmft,dtset%wtk(ikpt),xg_nonlop,zshift, rmm_diis_status(:,ikpt,isppol))
+         dtset,eig_k,ek_k,ek_k_nd,end_k,enlx_k,fixed_occ,grnl_k,gs_hamk,&
+         ibg,icg,ikpt,iscf,isppol,kg_k,kinpw,mband_cprj,mcg,mcgq,mcprj_local,mkgq,&
+         mpi_enreg,dtset%mpw,natom,nband_k,nbdbuf_eff,dtset%nkpt,istep,nnsclo_now,npw_k,npwarr,&
+         occ_k,optforces,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,&
+         rhoaug,paw_dmft,dtset%wtk(ikpt),xg_nonlop,zshift, rmm_diis_status(:,ikpt,isppol))
        ABI_NVTX_END_RANGE()
 
 ! LB-01/03/2024: Very weird compiler error on eos-nvhpc23.1 if the second call of timab(985,...) is included...
@@ -1131,19 +1179,23 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        else
          ABI_FREE(kinpw)
          ABI_FREE(kg_k)
+         ABI_SFREE(kinpw_kphq)
+         ABI_SFREE(ffnl_kphq)
        end if
 
        ABI_FREE(kpg_k)
+       ABI_SFREE(kpg_kphq)
        ABI_FREE(ylm_k)
        ABI_FREE(ph3d)
+       ABI_SFREE(ph3d_kphq)
        ABI_FREE(cgq)
        ABI_FREE(pwnsfacq)
 
-!      electric field
        if (berryflag) then
+         ! electric field
          dphasek(:,ikpt + (isppol - 1)*dtset%nkpt) = dphase_k(:)
 
-!        The overlap matrices for all first neighbours of ikpt are no more up to date
+         ! The overlap matrices for all first neighbours of ikpt are no more up to date
          do idir = 1, 3
            do ifor = 1, 2
              ikpt1 = dtefield%ikpt_dk(dtefield%i2fbz(ikpt),ifor,idir)
@@ -1154,7 +1206,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          end do
        end if  ! berryflag
 
-!      Save eigenvalues (hartree), residuals (hartree**2)
+       ! Save eigenvalues (hartree), residuals (hartree**2)
        eigen(1+bdtot_index : nband_k+bdtot_index) = eig_k(:)
        eknk (1+bdtot_index : nband_k+bdtot_index) = ek_k (:)
        if(usefock) then
@@ -1167,11 +1219,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        enlxnk(1+bdtot_index : nband_k+bdtot_index) = enlx_k(:)
 
        if(iscf>0 .or. iscf==-3)then
-!        Accumulate sum over k points for band, nonlocal and kinetic energies,
-!        also accumulate gradients of Enonlocal:
+         ! Accumulate sum over k points for band, nonlocal and kinetic energies,
+         ! also accumulate gradients of Enonlocal:
          do iband=1,nband_k
            if (abs(occ_k(iband))>tol8) then
-             energies%e_kinetic     = energies%e_kinetic     + dtset%wtk(ikpt)*occ_k(iband)*ek_k(iband)
+             energies%e_kinetic     = energies%e_kinetic   + dtset%wtk(ikpt)*occ_k(iband)*ek_k(iband)
              energies%e_nucdip     = energies%e_nucdip     + dtset%wtk(ikpt)*occ_k(iband)*end_k(iband)
              energies%e_eigenvalues = energies%e_eigenvalues + dtset%wtk(ikpt)*occ_k(iband)*eig_k(iband)
              energies%e_nlpsp_vfock = energies%e_nlpsp_vfock + dtset%wtk(ikpt)*occ_k(iband)*enlx_k(iband)
@@ -1183,7 +1235,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            end if
          end do
 
-!        Calculate Fock contribution to the total energy if required
+         ! Calculate Fock contribution to the total energy if required
          if ((psps%usepaw==1).and.(usefock)) then
            if ((fock%fock_common%optfor).and.(usefock_ACE==0)) then
              !WARNING : this routine actually does NOT compute the Fock contrib to total energy, but modifies the force ONLY.
@@ -1219,10 +1271,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          ABI_FREE(resid_k)
        end if
 
-!      Keep track of total number of bands (all k points so far, even for k points not treated by me)
+       ! Keep track of total number of bands (all k points so far, even for k points not treated by me)
        bdtot_index=bdtot_index+nband_k
 
-!      Also shift array memory if dtset%mkmem/=0
+       ! Also shift array memory if dtset%mkmem/=0
        if (dtset%mkmem/=0) then
          ibg=ibg+my_nspinor*nband_cprj_k
          icg=icg+npw_k*my_nspinor*nband_k
@@ -1237,8 +1289,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call xmpi_sum(rhoaug,mpi_enreg%comm_bandspinorfft,ierr) !Sum the contributions over bands/FFT/spinors
      end if
 
-!    Transfer density on augmented fft grid to normal fft grid in real space
-!    Also take into account the spin.
+     ! Transfer density on augmented fft grid to normal fft grid in real space
+     ! Also take into account the spin.
      if(iscf>0.or.iscf==-3)then
        if (psps%usepaw==0) then
          call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,rhor,rhoaug(:,:,:,1),1)
@@ -1258,7 +1310,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if
 
      call timab(986,2,tsec)
-
    end do ! End loop over spins
 
    call timab(988,1,tsec)
@@ -1306,17 +1357,17 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
    doccde(:)=zero
 
-!  Treat now varying occupation numbers, in the self-consistent case
+   ! Treat now varying occupation numbers, in the self-consistent case
    if((.not.fixed_occ) .and. (iscf>0.or.iscf==-3)) then
 
-!    Parallel case
+     ! Parallel case
      if (mpi_enreg%nproc_spkpt>1) then
 
        call timab(989,1,tsec)
 
-!      If needed, exchange the values of eigen,resid,eknk,enlxnk,grnlnk
+       ! If needed, exchange the values of eigen,resid,eknk,enlxnk,grnlnk
        ABI_MALLOC(buffer1,((4+3*natom*optforces+dtset%usefock+3*natom*dtset%usefock*optforces)*mbdkpsp))
-!      Pack eigen,resid,eknk,enlxnk,grnlnk in buffer1
+       ! Pack eigen,resid,eknk,enlxnk,grnlnk in buffer1
        buffer1(1          :  mbdkpsp)=eigen(:)
        buffer1(1+  mbdkpsp:2*mbdkpsp)=resid(:)
        buffer1(1+2*mbdkpsp:3*mbdkpsp)=eknk(:)
@@ -1333,16 +1384,16 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            buffer1(index1+1:index1+3*natom*mbdkpsp)=reshape(fockfornk,(/(3*natom)*mbdkpsp/) )
          end if
        end if
-!      Build sum of everything
+       ! Build sum of everything
        call timab(48,1,tsec)
        call xmpi_sum(buffer1,mpi_enreg%comm_kpt,ierr)
-!      if(mpi_enreg%paral_kgb/=1.and.paw_dmft%use_dmft==1) then
+       ! if(mpi_enreg%paral_kgb/=1.and.paw_dmft%use_dmft==1) then
        if(paw_dmft%use_dmft==1) then
          call xmpi_sum(eknk_nd(:,:,:,:,:),mpi_enreg%comm_kpt,ierr)
        end if
        call timab(48,2,tsec)
 
-!      Unpack eigen,resid,eknk,enlxnk,grnlnk in buffer1
+       ! Unpack eigen,resid,eknk,enlxnk,grnlnk in buffer1
        eigen(:) =buffer1(1          :  mbdkpsp)
        resid(:) =buffer1(1+  mbdkpsp:2*mbdkpsp)
        eknk(:)  =buffer1(1+2*mbdkpsp:3*mbdkpsp)
@@ -1363,10 +1414,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      end if ! nproc_spkpt>1
 
-!    Compute extfpmd energy shift
+     ! Compute extfpmd energy shift
      if(associated(extfpmd)) then
        call extfpmd%compute_eshift(eigen,eknk,dtset%mband,&
-&       dtset%nband,dtset%nfft,dtset%nkpt,dtset%nsppol,dtset%nspden,dtset%wtk,vtrial)
+         dtset%nband,dtset%nfft,dtset%nkpt,dtset%nsppol,dtset%nspden,dtset%wtk,vtrial)
      end if
 
      ! RCPAW
@@ -1677,7 +1728,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          write(100, "(a, i5)")  "Nkpt", dtset%nkpt
          write(100, "(a, i5)")  "Nband", dtset%mband
          do ikpt=1,dtset%nkpt
-           write(100,'(a,3f10.4,a,i4,a)' ) ' k-point ', dtset%kptns(1:3,ikpt), ' number ',ikpt,' :'
+           write(100,'(a,3f10.4,a,i4,a)' ) ' k-point ', kpoint, ' number ',ikpt,' :'
            do ii=0,(dtset%mband-1)/12
              write(100,'(12f10.4)') occ(1+ii*12+(ikpt-1)*dtset%mband:min(12+ii*12,dtset%mband)+(ikpt-1)*dtset%mband)
            end do
@@ -1819,15 +1870,16 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
              end if
 
              energies%e_eigenvalues = energies%e_eigenvalues + &
-&             dtset%wtk(ikpt)*occ(bdtot_index)*eigen(bdtot_index)
+               dtset%wtk(ikpt)*occ(bdtot_index)*eigen(bdtot_index)
              energies%e_kinetic = energies%e_kinetic + &
-&             dtset%wtk(ikpt)*occ(bdtot_index)*eknk(bdtot_index)
+               dtset%wtk(ikpt)*occ(bdtot_index)*eknk(bdtot_index)
              energies%e_nlpsp_vfock = energies%e_nlpsp_vfock + &
-&             dtset%wtk(ikpt)*occ(bdtot_index)*enlxnk(bdtot_index)
+               dtset%wtk(ikpt)*occ(bdtot_index)*enlxnk(bdtot_index)
+
              if (usefock) then
                energies%e_fock=energies%e_fock + half*focknk(bdtot_index)*occ(bdtot_index)*dtset%wtk(ikpt)
                if (optforces>0) fock%fock_common%forces(:,:)=fock%fock_common%forces(:,:)+&
-&               dtset%wtk(ikpt)*occ(bdtot_index)*fockfornk(:,:,bdtot_index)
+                 dtset%wtk(ikpt)*occ(bdtot_index)*fockfornk(:,:,bdtot_index)
              end if
              if (optforces>0) grnl(:)=grnl(:)+dtset%wtk(ikpt)*occ(bdtot_index)*grnlnk(:,bdtot_index)
            end if
@@ -1836,12 +1888,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
              do iband1=1,nband_k
                if((paw_dmft%band_in(iband).and.paw_dmft%band_in(iband1)).or. &
                 & (paw_dmft%dmft_use_all_bands.and.iband==iband1)) then
-!                write(std_out,*) "II+", isppol,ikpt,iband,iband1
+                 ! write(std_out,*) "II+", isppol,ikpt,iband,iband1
                  ekindmft2=ekindmft2  +  dtset%wtk(ikpt)*paw_dmft%occnd(1,iband,iband1,ikpt,isppol)*&
-&                 eknk_nd(1,iband,iband1,ikpt,isppol)
+                   eknk_nd(1,iband,iband1,ikpt,isppol)
                  ekindmft2=ekindmft2  -  dtset%wtk(ikpt)*paw_dmft%occnd(2,iband,iband1,ikpt,isppol)*&
-&                 eknk_nd(2,iband,iband1,ikpt,isppol)
-!                write(std_out,*) "II", occnd(1,iband,iband1,ikpt,isppol),eknk_nd(isppol,ikpt,iband,iband1)
+                   eknk_nd(2,iband,iband1,ikpt,isppol)
+                 ! write(std_out,*) "II", occnd(1,iband,iband1,ikpt,isppol),eknk_nd(isppol,ikpt,iband,iband1)
                end if
              end do
            end if
@@ -1853,11 +1905,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if(associated(extfpmd)) then
        extfpmd%nelect=zero
        call extfpmd%compute_nelect(energies%e_fermie,dtset%nband,extfpmd%nelect,dtset%nkpt,&
-&       dtset%nspinor,dtset%nsppol,dtset%wtk)
+         dtset%nspinor,dtset%nsppol,dtset%wtk)
        call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%nkpt,dtset%nspinor,&
-&       dtset%nsppol,dtset%nband,dtset%wtk)
+         dtset%nsppol,dtset%nband,dtset%wtk)
        call extfpmd%compute_entropy(energies%entropy_extfpmd,energies%e_fermie,dtset%nkpt,&
-&       dtset%nsppol,dtset%nspinor,dtset%wtk,dtset%nband)
+         dtset%nsppol,dtset%nspinor,dtset%wtk,dtset%nband)
      end if
 
      if(paw_dmft%use_dmft==1) then
@@ -1876,26 +1928,24 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            "-----------------------------------------------"
          call wrtout(std_out,msg)
        end if
-!       if(paw_dmft%use_dmft==1.and.mpi_enreg%paral_kgb==1) paw_dmft%use_dmft=0
+       ! if(paw_dmft%use_dmft==1.and.mpi_enreg%paral_kgb==1) paw_dmft%use_dmft=0
      end if
 
      ABI_NVTX_START_RANGE(NVTX_MKRHO)
 
      if (psps%usepaw==0) then
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
-&       rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-&       extfpmd=extfpmd)
+       rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,extfpmd=extfpmd)
      else
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
-&       rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-&       extfpmd=extfpmd)
+       rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,extfpmd=extfpmd)
      end if
 
      ABI_NVTX_END_RANGE()
      call timab(992,2,tsec)
 
-!    Treat fixed occupation numbers or non-self-consistent case
    else
+     ! Treat fixed occupation numbers or non-self-consistent case
 
      if (mpi_enreg%nproc_spkpt>1) then
 
@@ -1989,14 +2039,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !    Compute extended plane waves contributions
      if(associated(extfpmd)) then
        call extfpmd%compute_eshift(eigen,eknk,dtset%mband,dtset%nband,&
-&       dtset%nfft,dtset%nkpt,dtset%nsppol,dtset%nspden,dtset%wtk,vtrial)
+         dtset%nfft,dtset%nkpt,dtset%nsppol,dtset%nspden,dtset%wtk,vtrial)
        extfpmd%nelect=zero
        call extfpmd%compute_nelect(energies%e_fermie,dtset%nband,extfpmd%nelect,dtset%nkpt,&
-&       dtset%nspinor,dtset%nsppol,dtset%wtk)
+         dtset%nspinor,dtset%nsppol,dtset%wtk)
        call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%nkpt,dtset%nspinor,&
-&       dtset%nsppol,dtset%nband,dtset%wtk)
+         dtset%nsppol,dtset%nband,dtset%wtk)
        call extfpmd%compute_entropy(energies%entropy_extfpmd,energies%e_fermie,dtset%nkpt,&
-&       dtset%nsppol,dtset%nspinor,dtset%wtk,dtset%nband)
+         dtset%nsppol,dtset%nspinor,dtset%wtk,dtset%nband)
        ! CHECK number of electrons integrating rhor.
        ! write(0,*) sum(rhor(:,:))*extfpmd%ucvol/dtset%nfft
      end if
@@ -2070,10 +2120,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    if(dtset%usekden==1 .and. (iscf > 0 .or. iscf==-3 ) )then
      if (psps%usepaw==0) then
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
-&       taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+         taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
      else
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
-&      tauwfg,tauwfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+        tauwfg,tauwfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
      end if
    end if
 

@@ -14,6 +14,7 @@ add_library(77_ddb STATIC
   m_ddb_internalstr.F90
   m_a2ftr.F90
   m_anaddb_dataset.F90
+  m_anaddb_driver.F90
   m_atprj.F90
   m_band2eps_dataset.F90
   m_gruneisen.F90

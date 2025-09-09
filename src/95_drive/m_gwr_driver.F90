@@ -521,11 +521,11 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    !  Calculate onsite vxc with and without core charge.
    nzlmopt=-1; option=0; compch_sph=greatest_real
    call pawdenpot(compch_sph,el_temp,KS_energies%e_paw,KS_energies%e_pawdc,&
-     KS_energies%entropy_paw,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
+     KS_energies%entropy_paw,Cryst%gprimd,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
      Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,KS_Paw_an,KS_Paw_an,KS_paw_ij,&
      Pawang,Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,&
      Pawtab,Dtset%pawxcdev,Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,&
-     Cryst%ucvol,Psps%znuclpsp,epaw_xc=KS_energies%e_pawxc)
+     Cryst%xred,Cryst%ucvol,Psps%znuclpsp,epaw_xc=KS_energies%e_pawxc)
 
  else
    ABI_MALLOC(ks_nhatgr, (0, 0, 0))
@@ -1187,7 +1187,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  nqibz_ = 1; nqbz_ = 1; qbz_ = zero; nkbz_ = 1
  ! TODO: MC technique does not seem to work as expected, even in the legacy code.
  call vcgen%init(cryst, ebands%kptrlatt, nkbz_, nqibz_, nqbz_, qbz_, &
-                 dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, comm)
+                 dtset%gw_rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, comm)
 
  ! NB: npweps = m_npw
  ABI_MALLOC(sqrt_vc, (m_npw))

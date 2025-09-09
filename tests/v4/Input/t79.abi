@@ -30,7 +30,6 @@ tolvrs3   1.0d-8
 # common input data
 
   acell   3*5.42
-dilatmx   1.1
    ecut   18.0
  ecutsm   0.0
   natom   1
@@ -64,9 +63,9 @@ nshiftk   1
 #%% [extra_info]
 #%% authors = D. R. Hamann
 #%% keywords = NC, DFPT
-#%% description = 
+#%% description =
 #%%   Test of the strain perturbation with spin polarization and metallic
-#%%   occupation of states 
+#%%   occupation of states
 #%%   Fe in the bcc structure.  This tests both the introduction of spin
 #%%   polarization into strain response function calculations and an
 #%%   improved treatment of the first-order fermi energy for Q=0 metallic

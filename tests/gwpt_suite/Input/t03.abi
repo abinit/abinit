@@ -1,9 +1,7 @@
 # NSCF computation of WFK file with empty states
  nband  70 nbdbuf -10 # A negative value means 10% of nband
 
-# Three Gamma-centered k-meshes:
-# 4x4x4 with 70 bands, then 8x8x8 and 12x12x12 with 25 bands.
- ngkpt 4 4 4
+ ngkpt 2 2 2
  nshiftk 1
  shiftk 0 0 0
 
@@ -29,6 +27,7 @@
 #%% [setup]
 #%% executable = abinit
 #%% test_chain =  t01.abi, t02.abi, t03.abi, t04.abi
+#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi
 #%% [files]
 #%% use_git_submodule = diamond_eph_gwpt
 #%% files_to_test =

@@ -35,7 +35,7 @@ ppmfrq3      0.5
 inclvkb3      0
 
 gw_icutcoul3    0
-rcut3        10.5
+gw_rcut3       10.5
 ####################################
 #  DATASET 4: sigma
 ####################################
@@ -54,7 +54,7 @@ ecutwfn4      6.
 ecutsigx4     6.
 
 gw_icutcoul4    0
-rcut4        10.5
+gw_rcut4       10.5
 
 nkptgw4       1
 kptgw4        0. 0. 0.
@@ -78,7 +78,7 @@ ppmfrq5      0.5
 inclvkb5      0
 
 gw_icutcoul5    0
-rcut5        10.5
+gw_rcut5       10.5
 ####################################
 #  DATASET 6: sigma
 ####################################
@@ -98,7 +98,7 @@ ecutwfn6      6.
 ecutsigx6     6.
 
 gw_icutcoul6    0
-rcut6        10.5
+gw_rcut6       10.5
 
 nkptgw6       1
 kptgw6        0. 0. 0.

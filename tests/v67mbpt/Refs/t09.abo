@@ -92,6 +92,9 @@ _ WF disk file :      0.349 Mbytes ; DEN or POT disk file :      0.979 Mbytes.
            getwfk1          0
            getwfk2          1
            getwfk3          1
+          gw_rcut1     0.00000000E+00 Bohr
+          gw_rcut2     0.00000000E+00 Bohr
+          gw_rcut3    -1.00000000E+00 Bohr
         gwcalctyp1          0
         gwcalctyp2         25
         gwcalctyp3         25
@@ -131,9 +134,6 @@ P           mkmem           1
         optdriver1          0
         optdriver2          4
         optdriver3          4
-             rcut1     0.00000000E+00 Bohr
-             rcut2     0.00000000E+00 Bohr
-             rcut3    -1.00000000E+00 Bohr
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -736,6 +736,9 @@ data: !SigmaeeData |
            getwfk1          0
            getwfk2          1
            getwfk3          1
+          gw_rcut1     0.00000000E+00 Bohr
+          gw_rcut2     0.00000000E+00 Bohr
+          gw_rcut3    -1.00000000E+00 Bohr
         gwcalctyp1          0
         gwcalctyp2         25
         gwcalctyp3         25
@@ -775,9 +778,6 @@ P           mkmem           1
         optdriver1          0
         optdriver2          4
         optdriver3          4
-             rcut1     0.00000000E+00 Bohr
-             rcut2     0.00000000E+00 Bohr
-             rcut3    -1.00000000E+00 Bohr
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00

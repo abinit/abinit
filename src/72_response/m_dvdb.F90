@@ -238,7 +238,7 @@ module m_dvdb
    ! 2 --> Call v1phq_complete after interpolation of the potentials in ftinterp_qpt
 
   integer :: rspace_cell = 0
-   ! Flag defining the algorithm for generating the list of R-points and the weigths used to go from W(r,R) to v1scf(r,q)
+   ! Flag defining the algorithm for generating the list of R-points and the weights used to go from W(r,R) to v1scf(r,q)
    ! 0 --> Use unit supercell for R space. All weights set to 1.
    ! 1 --> Use Wigner-Seitz super cell and atom dependent weights (same algo as for dynmat)
 
@@ -310,7 +310,7 @@ module m_dvdb
   real(dp),allocatable :: zeff(:,:,:)
   ! zeff(3, 3, natom)
   ! Effective charges on each atom, versus electric field and atomic displacement in Cartesian coordinates.
-  ! Used to deal with the long-range componenent in the Fourier interpolation.
+  ! Used to deal with the long-range component in the Fourier interpolation.
 
   real(dp),allocatable :: zeff_raw(:,:,:)
   ! Raw Effective charges i.e. values before enforcing the charge-neutrality condition.
@@ -554,7 +554,7 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
      if (new%version > 1) read(unt, err=10, iomsg=msg) new%rhog1_g0(:, iv1)
 
      ! Check whether this q-point is already in the list.
-     ! Assume qpoints are grouped so invert the iq loop for better performace.
+     ! Assume qpoints are grouped so invert the iq loop for better performance.
      ! This is gonna be slow if lots of q-points and perturbations are not grouped.
      iq_found = 0
      do iq=nqpt,1,-1
@@ -879,135 +879,133 @@ end function dvdb_has_fields
 !!  Print info on the object.
 !!
 !! INPUTS
-!! [unit]=the unit number for output
-!! [prtvol]=verbosity level
-!! [mode_paral]=either "COLL" or "PERS"
-!!
-!! OUTPUT
-!!  Only printing.
+!! units=Unit numbers for output.
+!! header=Header string
+!! prtvol=verbosity level
 !!
 !! SOURCE
 
-subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
+subroutine dvdb_print(db, units, header, prtvol)
 
 !Arguments ------------------------------------
 !scalars
- integer,optional,intent(in) :: prtvol,unit
- character(len=4),optional,intent(in) :: mode_paral
- character(len=*),optional,intent(in) :: header
  class(dvdb_t),intent(in) :: db
+ integer,intent(in) :: units(:), prtvol
+ character(len=*),intent(in) :: header
 
 !Local variables-------------------------------
-!scalars
- integer :: my_unt,my_prtvol,iv1,iq,idir,ipert,iatom
- character(len=4) :: my_mode
- character(len=500) :: msg
+ integer :: iv1,iq,idir,ipert,iatom
+ character(len=5000) :: msg
 ! *************************************************************************
 
- my_unt = std_out; if (present(unit)) my_unt = unit
- my_prtvol = 0   ; if (present(prtvol)) my_prtvol = prtvol
- my_mode = 'COLL'; if (present(mode_paral)) my_mode = mode_paral
+ if (len_trim(header) == 0) then
+   msg = ' ==== Info on the dvdb% object ==== '
+ else
+   msg = ' ==== '//trim(adjustl(header))//' ==== '
+ end if
+ call wrtout(units, msg)
 
- msg=' ==== Info on the dvdb% object ==== '
- if (present(header)) msg=' ==== '//trim(adjustl(header))//' ==== '
- call wrtout(my_unt,msg,my_mode)
-
- write(my_unt,"(a)")sjoin(" DVDB version:", itoa(db%version))
- write(my_unt,"(a)")sjoin(" File path:", db%path)
- write(my_unt,"(a)")sjoin(" Number of v1scf potentials:", itoa(db%numv1))
- write(my_unt,"(a)")sjoin(" Number of q-points in DVDB: ", itoa(db%nqpt))
- ! TODO
- !if (with_mpi) then
- write(my_unt,"(a)")sjoin("-P Number of CPUs for parallelism over perturbations:", itoa(db%nprocs_pert))
- write(my_unt,"(a)")sjoin("-P Number of perturbations treated by this CPU:", itoa(db%my_npert))
- !end if
- write(my_unt,"(a)")sjoin(" Option for symmetrization of v1scf(r):", itoa(db%symv1))
- write(my_unt,"(a)")" List of q-points: min(10, nqpt)"
+ call wrtout(units, sjoin(" DVDB version:", itoa(db%version)))
+ call wrtout(units, sjoin(" File path:", db%path))
+ call wrtout(units, sjoin(" Number of v1scf potentials:", itoa(db%numv1)))
+ call wrtout(units, sjoin(" Number of q-points in DVDB: ", itoa(db%nqpt)))
+ call wrtout(units, sjoin("-P Number of CPUs for parallelism over perturbations:", itoa(db%nprocs_pert)))
+ call wrtout(units, sjoin("-P Number of perturbations treated by this CPU:", itoa(db%my_npert)))
+ call wrtout(units, sjoin(" Option for symmetrization of v1scf(r):", itoa(db%symv1)))
+ call wrtout(units, " List of q-points: min(10, nqpt)")
  do iq=1,min(db%nqpt, 10)
-   write(my_unt,"(a)")sjoin("[", itoa(iq),"]", ktoa(db%qpts(:,iq)))
+   call wrtout(units, sjoin("[", itoa(iq),"]", ktoa(db%qpts(:,iq))))
  end do
- if (db%nqpt > 10) write(my_unt,"(a)")"..."
+ if (db%nqpt > 10) call wrtout(units, "...")
 
- write(my_unt,"(a)")sjoin(" Have dielectric tensor:", yesno(db%has_dielt))
- write(my_unt,"(a)")sjoin(" Have Born effective charges:", yesno(db%has_zeff))
- write(my_unt,"(a)")sjoin(" Have quadrupoles:", yesno(db%has_quadrupoles))
- write(my_unt,"(a)")sjoin(" Have electric field:", yesno(db%has_efield))
- write(my_unt,"(a)")sjoin(" Treatment of long-range part in V1scf (add_lr):", itoa(db%add_lr))
- write(my_unt,"(a, f6.1)")" Damping factor for Gaussian filter (qdamp):", db%qdamp
+ call wrtout(units, sjoin(" Have dielectric tensor:", yesno(db%has_dielt)))
+ call wrtout(units, sjoin(" Have Born effective charges:", yesno(db%has_zeff)))
+ call wrtout(units, sjoin(" Have quadrupoles:", yesno(db%has_quadrupoles)))
+ call wrtout(units, sjoin(" Have electric field:", yesno(db%has_efield)))
+ call wrtout(units, sjoin(" Treatment of long-range part in V1scf (add_lr):", itoa(db%add_lr)))
+ write(msg,"(a, f6.1)")" Damping factor for Gaussian filter (qdamp):", db%qdamp
+ call wrtout(units, msg)
 
  if (db%has_dielt) then
-   write(my_unt, '(a,3(/,3es16.6))') ' Dielectric tensor in Cart coords:', &
-     db%dielt(1,1), db%dielt(1,2), db%dielt(1,3), &
-     db%dielt(2,1), db%dielt(2,2), db%dielt(2,3), &
+   write(msg, '(a,3(a,3es16.6))') ' Dielectric tensor in Cart coords:', ch10, &
+     db%dielt(1,1), db%dielt(1,2), db%dielt(1,3), ch10, &
+     db%dielt(2,1), db%dielt(2,2), db%dielt(2,3), ch10, &
      db%dielt(3,1), db%dielt(3,2), db%dielt(3,3)
+   call wrtout(units, msg)
  end if
+
  if (db%has_zeff) then
-   call print_zeff(my_unt, db%zeff, db%cryst, title=' Born effectives charges in Cart coords:')
-   !call print_zeff(my_unt, db%zeff_raw, db%cryst, title=' Born effectives charges before chneut: ')
+   call print_zeff(units, db%cryst, db%zeff, title=' Born effectives charges in Cart coords:')
+   !call print_zeff(units, db%zeff_raw, db%cryst, title=' Born effectives charges before chneut: ')
  end if
+
  if (db%has_quadrupoles) then
-   write(my_unt, '(a)') ' Dynamical Quadrupoles in Cartesian Coordinates: '
+   call wrtout(units, ' Dynamical Quadrupoles in Cartesian Coordinates:')
    do iatom=1,db%natom
      do idir=1,3
-       write(my_unt,'(2(a,i0),3(/,3es16.6))')' Q* for iatom: ', iatom, ' idir: ', idir, &
-         db%qstar(1,1,idir,iatom), db%qstar(1,2,idir,iatom), db%qstar(1,3,idir,iatom), &
-         db%qstar(2,1,idir,iatom), db%qstar(2,2,idir,iatom), db%qstar(2,3,idir,iatom), &
+       write(msg,'(2(a,i0), 3(a,3es16.6))')' Q* for iatom: ', iatom, ' idir: ', idir,  ch10, &
+         db%qstar(1,1,idir,iatom), db%qstar(1,2,idir,iatom), db%qstar(1,3,idir,iatom), ch10, &
+         db%qstar(2,1,idir,iatom), db%qstar(2,2,idir,iatom), db%qstar(2,3,idir,iatom), ch10, &
          db%qstar(3,1,idir,iatom), db%qstar(3,2,idir,iatom), db%qstar(3,3,idir,iatom)
+       call wrtout(units, msg)
      end do
    end do
 
-   write(my_unt,"(a)")" Dynamical quadrupoles sum rule: \sum_\iatom Q_{beta,gamma}{iatom,idir} = 0 for nonpolar materials"
+   call wrtout(units, " Dynamical quadrupoles sum rule: \sum_\iatom Q_{beta,gamma}{iatom,idir} = 0 for nonpolar materials")
    do idir=1,3
-     write(my_unt,'(a,i0,/,3(/,3es16.6))')" Sum rule for idir: ", idir, &
-       sum(db%qstar(1,1,idir,:)), sum(db%qstar(1,2,idir,:)), sum(db%qstar(1,3,idir,:)), &
-       sum(db%qstar(2,1,idir,:)), sum(db%qstar(2,2,idir,:)), sum(db%qstar(2,3,idir,:)), &
+     write(msg,'(a,i0,a,3(a,3es16.6))')" Sum rule for idir: ", idir, ch10, ch10, &
+       sum(db%qstar(1,1,idir,:)), sum(db%qstar(1,2,idir,:)), sum(db%qstar(1,3,idir,:)), ch10, &
+       sum(db%qstar(2,1,idir,:)), sum(db%qstar(2,2,idir,:)), sum(db%qstar(2,3,idir,:)), ch10, &
        sum(db%qstar(3,1,idir,:)), sum(db%qstar(3,2,idir,:)), sum(db%qstar(3,3,idir,:))
+     call wrtout(units, msg)
    end do
  end if
 
- if (my_prtvol > 0) then
+ if (prtvol > 0) then
    call db%cryst%print(header="Crystal structure in DVDB file")
-   write(my_unt,"(a)")"FFT mesh for potentials on file:"
-   write(my_unt,"(a)")"q-point, idir, ipert, ngfft(:3)"
+   call wrtout(units, "FFT mesh for potentials on file:")
+   call wrtout(units, "q-point, idir, ipert, ngfft(:3)")
    do iv1=1,db%numv1
      idir = db%iv_pinfoq(1, iv1); ipert = db%iv_pinfoq(2, iv1); iq = db%iv_pinfoq(4, iv1)
-     write(my_unt,"(a)")sjoin(ktoa(db%qpts(:,iq)), itoa(idir), itoa(ipert), ltoa(db%ngfft3_v1(:,iv1)))
+     call wrtout(units, sjoin(ktoa(db%qpts(:,iq)), itoa(idir), itoa(ipert), ltoa(db%ngfft3_v1(:,iv1))))
    end do
  end if
 
 contains
 
-subroutine print_zeff(unt, zeff, cryst, title)
+subroutine print_zeff(units, cryst, zeff, title)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: unt
- character(len=*),optional,intent(in) :: title
+ integer,intent(in) :: units(:)
  type(crystal_t),intent(in) :: cryst
  real(dp),intent(in) :: zeff(3,3,cryst%natom)
+ character(len=*),optional,intent(in) :: title
 
 !Local variables-------------------------------
-!scalars
  integer :: iatom
+ character(len=5000) :: msg
 ! *************************************************************************
 
  if (present(title)) then
-   write(unt, "(a)")trim(title)
+   call wrtout(units, trim(title))
  else
-   write(unt, '(a)') ' Born effectives charges in Cartesian coordinates: '
+   call wrtout(units, ' Born effectives charges in Cartesian coordinates: ')
  end if
 
  do iatom=1,cryst%natom
-   write(unt,'(a,i0,1x,2a,3(/,3es16.6),a)')' iatom: ', iatom, ", type: ", cryst%symbol_iatom(iatom), &
-     zeff(1,1,iatom), zeff(1,2,iatom), zeff(1,3,iatom), &
-     zeff(2,1,iatom), zeff(2,2,iatom), zeff(2,3,iatom), &
+   write(msg, '(a,i0,1x,2a,3(a,3es16.6),a)')' iatom: ', iatom, ", type: ", cryst%symbol_iatom(iatom), ch10, &
+     zeff(1,1,iatom), zeff(1,2,iatom), zeff(1,3,iatom), ch10, &
+     zeff(2,1,iatom), zeff(2,2,iatom), zeff(2,3,iatom), ch10, &
      zeff(3,1,iatom), zeff(3,2,iatom), zeff(3,3,iatom), ch10
+   call wrtout(units, msg)
  end do
 
- write(unt,'(2a,3(/,3es16.6),a)')ch10,' Fulfillment of charge neutrality, \sum_{atom} Z^*_{ij,atom} = 0', &
-   sum(zeff(1,1,:)), sum(zeff(1,2,:)), sum(zeff(1,3,:)), &
-   sum(zeff(2,1,:)), sum(zeff(2,2,:)), sum(zeff(2,3,:)), &
+ write(msg,'(2a,3(a,3es16.6),a)')ch10,' Fulfillment of charge neutrality, \sum_{atom} Z^*_{ij,atom} = 0', ch10, &
+   sum(zeff(1,1,:)), sum(zeff(1,2,:)), sum(zeff(1,3,:)), ch10, &
+   sum(zeff(2,1,:)), sum(zeff(2,2,:)), sum(zeff(2,3,:)), ch10, &
    sum(zeff(3,1,:)), sum(zeff(3,2,:)), sum(zeff(3,3,:)), ch10
+ call wrtout(units, msg)
 
 end subroutine print_zeff
 
@@ -1311,7 +1309,7 @@ end subroutine dvdb_readsym_allv1
 !!  qbz(3)=Q-point in BZ.
 !!  qbz2db(6)=Symmetry mapping qbz --> DVDB qpoints produced using the SYMREC convention.
 !!    Note that qbz2db(1) should give the index in the set of q-points in the DVDB
-!!    that is not necessarly ORDERED as the IBZ computed by the Abinit routines.
+!!    that is not necessarily ORDERED as the IBZ computed by the Abinit routines.
 !!  nfft=Number of fft-points treated by this processors
 !!  ngfft(18)=contain all needed information about 3D FFT
 !!  comm=MPI communicator (either xmpi_comm_self or comm for perturbations.
@@ -1425,7 +1423,7 @@ end subroutine dvdb_readsym_qbz
 !!  nfft=Number of fft-points treated by this processors
 !!  ngfft(18)=contain all needed information about 3D FFT
 !!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
-!!  kxc(nfftf,nkxc)=second derivative of the exchange-correlation functionnal
+!!  kxc(nfftf,nkxc)=second derivative of the exchange-correlation functional
 !!  non_magnetic_xc=true if density/potential is handled as non-magnetic
 !!  usexcnhat=0, the exchange-correlation potential does not include the compensation charge density
 !!  comm=MPI communicator (either xmpi_comm_self or comm for perturbations
@@ -1954,7 +1952,7 @@ subroutine v1phq_rotate(cryst, qpt_ibz, isym, itimrev, g0q, ngfft, cplex, nfft, 
    call xmpi_ibcast(v1r_qbz(:,:,mu), root, comm, requests_v1r_qbz(mu), ierr)
  end do ! mu
 
- ! Relase all requests
+ ! Release all requests
  call xmpi_waitall(requests, ierr)
  call xmpi_waitall(requests_v1r_qbz, ierr)
 
@@ -2188,7 +2186,7 @@ end subroutine v1phq_symmetrize
 !!  rotate_fqg
 !!
 !! FUNCTION
-!!  Rotate density/pontential infg_q(g) in g-space to obtain outfg_{ISq}(g)
+!!  Rotate density/potential infg_q(g) in g-space to obtain outfg_{ISq}(g)
 !!
 !! INPUTS
 !!  itirev=2 if time-reversal symmetry should be used, 1 otherwise.
@@ -2371,7 +2369,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qptopt, nqshift, qshift, nfft, ngfft, 
  db%comm_rpt = comm_rpt; db%nprocs_rpt = xmpi_comm_size(db%comm_rpt); db%me_rpt = xmpi_comm_rank(db%comm_rpt)
 
  if (db%add_lr >= 4) then
-   call wrtout(std_out, " Skipping construction of W(R,r) because add_lr >= 4. Wll use LR part only!")
+   call wrtout(std_out, " Skipping construction of W(R,r) because add_lr >= 4. Will use LR part only!")
    return
  end if
 
@@ -2479,7 +2477,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qptopt, nqshift, qshift, nfft, ngfft, 
        ABI_CHECK(all(g0q == 0), "gamma point with g0q /= 0")
 
        if (db%add_lr /= 0) then
-         ! Substract the long-range part of the potential.
+         ! Subtract the long-range part of the potential.
          do imyp=1,db%my_npert
            ipc = db%my_pinfo(3, imyp)
            do ispden=1,db%nspden
@@ -2514,7 +2512,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qptopt, nqshift, qshift, nfft, ngfft, 
        call times_eikr(qpt_bz, ngfft, nfft, db%nspden * db%natom3, v1r_qbz)
 
        if (db%add_lr /= 0) then
-         ! Substract the long-range part of the potential.
+         ! Subtract the long-range part of the potential.
          do imyp=1,db%my_npert
            ipc = db%my_pinfo(3, imyp)
            do ispden=1,db%nspden
@@ -3001,7 +2999,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
    end do ! ispden
 
    ! Be careful with Gamma-point and cplex!
-   if (db%symv1 == 1) then !(.and. reveiver == -1 .or. receiver == db%comm_rpt%my_rank)
+   if (db%symv1 == 1) then !(.and. receiver == -1 .or. receiver == db%comm_rpt%my_rank)
      call v1phq_symmetrize(db%cryst, idir, ipert, symq, ngfft, cplex2, nfft, db%nspden, db%nsppol, &
                            db%mpi_enreg, ov1r(:,:,:,imyp))
    end if
@@ -3119,7 +3117,7 @@ end subroutine dvdb_get_ftqbz
 !!  nfft=Number of fft-points treated by this processors
 !!  ngfft(18)=contain all needed information about 3D FFT
 !!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
-!!  kxc(nfftf,nkxc)=second derivative of the exchange-correlation functionnal
+!!  kxc(nfftf,nkxc)=second derivative of the exchange-correlation functional
 !!  non_magnetic_xc=true if density/potential is handled as non-magnetic
 !!  usexcnhat=0, the exchange-correlation potential does not include the compensation charge density
 !!  comm=MPI communicator (either xmpi_comm_self or comm for perturbations
@@ -3221,13 +3219,12 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
  integer :: iqst,nqst,itimrev,tsign,isym,ix,iy,iz,nq1,nq2,nq3,r1,r2,r3
  integer :: nproc,my_rank,ifft,cnt,ierr
  character(len=500) :: msg
- real(dp) :: dksqmax
+ real(dp) :: dksqmax, cpu, wall, gflops
  logical :: isirr_q, found
 !arrays
  integer :: qptrlatt(3,3),g0q(3)
  integer,allocatable :: indqq(:,:),iperm(:),bz2ibz_sort(:),nqsts(:),iqs_dvdb(:)
  real(dp) :: qpt_bz(3),shift(3)
- real(dp) :: cpu, wall, gflops
  real(dp),allocatable :: qibz(:,:),qbz(:,:),wtq(:),emiqr(:,:)
  real(dp),allocatable :: v1r_qibz(:,:,:,:),v1r_qbz(:,:,:,:), v1r_lr(:,:)
 ! *************************************************************************
@@ -3412,7 +3409,7 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
        ABI_CHECK(nqsts(iq_ibz) == 1, "cplex_qibz == 1 and nq nqst /= 1 (should be gamma)")
        ABI_CHECK(all(g0q == 0), "gamma point with g0q /= 0")
 
-       ! Substract the long-range part of the potential
+       ! Subtract the long-range part of the potential
        if (db%add_lr /= 0) then
          do ispden=1,db%nspden
            v1r_qibz(1,:,ispden,ipert) = v1r_qibz(1,:,ispden,ipert) - v1r_lr(1,:)
@@ -3457,7 +3454,7 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
        ! Multiply by e^{iqpt_bz.r}
        call times_eikr(qpt_bz, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
 
-       ! Substract the long-range part of the potential
+       ! Subtract the long-range part of the potential
        if (db%add_lr /= 0) then
          do ispden=1,db%nspden
            v1r_qbz(1,:,ispden,ipert) = v1r_qbz(1,:,ispden,ipert) - v1r_lr(1,:)
@@ -4445,7 +4442,7 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
 
  ! List available perturbations.
  dvdb = dvdb_new(dvdb_filepath, xmpi_comm_self)
- call dvdb%print()
+ call dvdb%print([std_out], "", 0)
  call dvdb%list_perts([-1, -1, -1], npert_miss)
  call dvdb%free()
 
@@ -4607,7 +4604,7 @@ subroutine dvdb_test_v1rsym(db_path, symv1scf, comm)
  db = dvdb_new(db_path, comm)
  db%debug = .True.
  db%symv1 = symv1scf
- call db%print()
+ call db%print([std_out], "", 0)
  !call db%list_perts([-1,-1,-1], npert_miss)
 
  call ngfft_seq(ngfft, db%ngfft3_v1(:,1))
@@ -4743,7 +4740,7 @@ subroutine dvdb_test_v1complete(dvdb_filepath, symv1scf, dump_path, comm)
  dvdb = dvdb_new(dvdb_filepath, comm)
  dvdb%debug = .false.
  dvdb%symv1 = symv1scf
- call dvdb%print()
+ call dvdb%print([std_out], "", 0)
  call dvdb%list_perts([-1,-1,-1], npert_miss)
 
  call ngfft_seq(ngfft, dvdb%ngfft3_v1(:,1))
@@ -4977,8 +4974,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
  units = [std_out, ab_out]
 
  call wrtout(units, " Computing average over the unit cell of the periodic part of the DFPT potentials", newlines=2)
- call dvdb%print(unit=std_out)
- !call dvdb%print(unit=ab_out)
+ call dvdb%print([std_out], "", 0)
 
  ! Define FFT mesh
  ngfft = dvdb%ngfft
@@ -5360,7 +5356,7 @@ subroutine dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1, dvdb_ngqpt, dvd
    ABI_WARNING("ddb_filepath was not provided --> Setting dvdb_add_lr to zero")
  end if
 
- call dvdb%print()
+ call dvdb%print([std_out], "", 0)
 
  ! Define FFT mesh for real space representation.
  call ngfft_seq(ngfft, dvdb%ngfft3_v1(:,1))
@@ -5801,12 +5797,12 @@ subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_filepath, ddb)
  if (dvdb%has_dielt .and. (dvdb%has_zeff .or. dvdb%has_quadrupoles)) then
    if (dvdb%add_lr == 0)  then
      call wrtout([std_out, ab_out], &
-       " WARNING: dvdb_add_lr set to 0. Long-range term won't be substracted in Fourier interpolation.")
+       " WARNING: dvdb_add_lr set to 0. Long-range term won't be subtracted in Fourier interpolation.")
    end if
  end if
 
  ! Read the quadrupoles
- iblock_quadrupoles = ddb_ptr%get_quadrupoles(ddb_hdr%ddb_version,1, 3, dvdb%qstar)
+ iblock_quadrupoles = ddb_ptr%get_quadrupoles(ddb_hdr%ddb_version,1,BLKTYP_d3E_xx,dvdb%qstar)
  if (iblock_quadrupoles /=0) dvdb%has_quadrupoles = .True.
 
  ABI_FREE(zeff)
@@ -5821,7 +5817,7 @@ end subroutine dvdb_load_ddb
 !!  dvdb_load_efield
 !!
 !! FUNCTION
-!!  Load first oder derivatives wrt the electric file from files
+!!  Load first order derivatives wrt the electric file from files
 !!
 !! INPUTS
 !!  pot_paths=List of strings with paths to POT1 files.
@@ -6034,7 +6030,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
  call dvdb%open_read(ngfftf, xmpi_comm_self)
 
  ! Besides perturbations with same q-points won't be contiguous on file --> IO is gonna be inefficient.
- call dvdb%print(prtvol=dtset%prtvol)
+ call dvdb%print([std_out], "", dtset%prtvol)
 
  natom = cryst%natom
  natom3 = 3 * natom

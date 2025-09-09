@@ -44,7 +44,6 @@
 
  ecut 5.0
  ecutsm 1.0
- dilatmx 1.10
 
  nband  3
  nbdbuf 1
