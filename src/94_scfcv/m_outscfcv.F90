@@ -938,12 +938,12 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
    if (dtset%prtdensph==1.and.dtset%usewvl==0) then
      if(all(dtset%constraint_kind(:)==0))then
-       call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,units,1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
+       call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,units,1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%znucl)
      else
-       call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,units,1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%ziontypat)
+       call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,units,1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%znucl,dtset%ziontypat)
      endif
      if(any(dtset%constraint_kind(:)/=0))then
-       call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,units,21,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
+       call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,units,21,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%znucl)
      endif
    end if !end prtdensph==1 .and. usewvl==0
 
@@ -961,7 +961,7 @@ if (dtset%prt_lorbmag==1) then
         if (dtset%usepawu .ne. 0)then
             call loc_orbmom_cal(1,0,dmatdum,0,0,indsym,my_natom,dtset%natom,dtset%natpawu,&
             &   dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,paw_ij,pawang,pawrad,dtset%pawprtvol,&
-            &   pawrhoij,pawtab,dtset%spinat,dtset%symafm,dtset%typat,0,dtset%usepawu,&
+            &   pawrhoij,pawtab,dtset%spinat,dtset%symafm,dtset%typat,0,dtset%usepawu,dtset%znucl,&
             &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
         else
             write (msg,'(a)')" "
@@ -1001,7 +1001,7 @@ if (dtset%prt_lorbmag==1) then
  if (dtset%magconon /= 0) then
 !  calculate final value of terms for magnetic constraint: "energy" term, lagrange multiplier term, and atomic contributions
    call mag_penalty_e(dtset%magconon,dtset%magcon_lambda,mpi_enreg,&
-&   natom,nfft,ngfft,nspden,ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%spinat,dtset%typat,xred)
+&   natom,nfft,ngfft,nspden,ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%spinat,dtset%typat,xred,dtset%znucl)
  end if
 
  call timab(1167,2,tsec)

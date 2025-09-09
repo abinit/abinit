@@ -42,6 +42,8 @@ MODULE m_paw_correlations
  use m_paw_yukawa,  only : compute_slater,get_lambda
  use m_paral_atom,  only : get_my_atmtab,free_my_atmtab
  use m_copy,        only : alloc_copy
+ use m_geometry,    only : vcart2ylm
+ use m_atomdata 
 
  implicit none
 
@@ -3125,7 +3127,7 @@ end subroutine setrhoijpbe0
 
 subroutine loc_orbmom_cal(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym,my_natom,natom,&
 &                     natpawu,nspinor,nsppol,nsym,ntypat,paw_ij,pawang,pawrad,pawprtvol,pawrhoij,pawtab,&
-&                     spinat,symafm,typat,useexexch,usepawu, &
+&                     spinat,symafm,typat,useexexch,usepawu,znucl, &
 &                     mpi_atmtab,comm_atom,orb_mom_atom,maxmag,difmag) ! optional arguments (parallelism)
 
 !Arguments ---------------------------------------------
@@ -3143,6 +3145,7 @@ subroutine loc_orbmom_cal(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,in
  type(paw_ij_type),intent(in) :: paw_ij(my_natom)
  type(pawrhoij_type),intent(in) :: pawrhoij(my_natom)
  type(pawtab_type),intent(in) :: pawtab(ntypat)
+ real(dp),intent(in) :: znucl(ntypat)
  integer,pointer :: my_atmtab(:)
  real(dp),intent(inout), optional :: orb_mom_atom(10,3,natom),maxmag,difmag
  real(dp):: orb_mom_atom0(10,3,natom)
@@ -3156,10 +3159,12 @@ character(len=5) :: orb_char
  complex(dpc),allocatable :: op_l(:,:,:),cmfoccmat(:,:,:)
  real(dp) :: orb_mom(3)
  real(dp) :: sum_orb_mom(3)
+ real(dp) :: orbmag_r, orbmag_theta, orbmag_phi
  complex(dpc) :: my_sls_val
  character(len=500) :: message
  type(paw_ij_type), ABI_CONTIGUOUS pointer :: paw_ij_all(:)
  type(pawrhoij_type),ABI_CONTIGUOUS pointer :: pawrhoij_all(:)
+ type(atomdata_t) :: atom
  !!****************************************************************
     type(pawtab_type),allocatable :: pawtab_tmp(:)
     type(pawrad_type) :: pawrad(ntypat)
@@ -3174,11 +3179,11 @@ if (.not. present(orb_mom_atom)) then
     call wrtout([std_out, ab_out], message)
    write(message,*) 'Integrated orbital magnetic moments inside the PAW spheres:'
     call wrtout([std_out, ab_out], message)
-   write(message,*) '--------------------------------------------------'
+   write(message,*) '--------------------------------------------------------------------------------------------'
     call wrtout([std_out, ab_out], message)
-   write(message,*) 'Atom  orbital   orbmag(x)   orbmag(y)   orbmag(z)  '
+   write(message,*) '   Atom  orbital   |orbmag|    orbmag(x)   orbmag(y)   orbmag(z)  orbmag(theta) orbmag(phi)  '
     call wrtout([std_out, ab_out], message)
-    write(message,*) '--------------------------------------------------'
+   write(message,*) '--------------------------------------------------------------------------------------------'
     call wrtout([std_out, ab_out], message)
 else
     orb_mom_atom0=orb_mom_atom
@@ -3393,11 +3398,14 @@ call  setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym,nato
              end if
 
   sum_orb_mom=sum_orb_mom+orb_mom
+
+call vcart2ylm(orb_mom, orbmag_r, orbmag_theta, orbmag_phi)
+call atomdata_from_znucl(atom, znucl(typat(my_iatom)))
 if (.not. present(orb_mom_atom)) then
   if (my_lcur==1) then
-      write(message,'(i5,a8,3f12.6)') my_iatom, orb_char(my_lcur:my_lcur), orb_mom(1),orb_mom(2),orb_mom(3)
+      write(message,'(i5,a3,a8,3f12.6,3f13.6)') my_iatom,atom%symbol, orb_char(my_lcur:my_lcur),orbmag_r, orb_mom(1),orb_mom(2),orb_mom(3),orbmag_theta,orbmag_phi
   else
-      write(message,'(a5,a8,3f12.6)') '', orb_char(my_lcur:my_lcur), orb_mom(1),orb_mom(2),orb_mom(3)
+      write(message,'(a5,a11,3f12.6,3f13.6)') '', orb_char(my_lcur:my_lcur), orbmag_r,orb_mom(1),orb_mom(2),orb_mom(3) ,orbmag_theta,orbmag_phi
   end if
 
   call wrtout([std_out, ab_out], message)
@@ -3412,16 +3420,17 @@ endif
 
 end do    !!!!!!!!! END DO lcur
 if (.not. present(orb_mom_atom)) then
-    write(message,*) '--------------------------------------------------'
+    write(message,*) '--------------------------------------------------------------------------------------------'
     call wrtout([std_out, ab_out], message)
 endif
 end do   !!!!!!!!! END DO natoms
 
 
+call vcart2ylm(sum_orb_mom(1:3), orbmag_r, orbmag_theta, orbmag_phi)
 if (.not. present(orb_mom_atom)) then
-    write(message,'(a,3f12.6)') ' Total (sum) ', sum_orb_mom(1),sum_orb_mom(2),sum_orb_mom(3)
+    write(message,'(a,3f12.6,3f13.6)') ' Total (sum)    ', orbmag_r,sum_orb_mom(1),sum_orb_mom(2),sum_orb_mom(3),orbmag_theta, orbmag_phi
     call wrtout([std_out, ab_out], message)
-    write(message,*) '--------------------------------------------------'
+    write(message,*) '--------------------------------------------------------------------------------------------'
     call wrtout([std_out, ab_out], message)
     write(message,*) ' '
     call wrtout([std_out, ab_out], message)

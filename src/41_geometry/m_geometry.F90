@@ -76,7 +76,9 @@ MODULE m_geometry
  public :: wedge_basis        ! compute rprimd x gprimd vectors needed for generalized cross product
  public :: wedge_product      ! compute wedge product given wedge basis
  public :: d3lwsym
- public :: sylwtens             ! Determines the set of irreductible elements of the spatial-dispersion tensors
+ public :: sylwtens           ! Determines the set of irreductible elements of the spatial-dispersion tensors
+ public :: vcart2ylm          ! Convert Cartesian vector to spherical coordinates for Y_lm
+
 
  interface normv
   module procedure normv_rdp_vector
@@ -4113,6 +4115,60 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
  ABI_FREE(pertsy)
 
 end subroutine sylwtens
+!!***
+!!****f* m_geometry/vcart2ylm
+!! NAME
+!! vcart2ylm
+!!
+!! FUNCTION
+!! Convert a 3D Cartesian vector into spherical coordinates (r, theta, phi)
+!! suitable for spherical harmonics calculations (Y_lm).
+!! Angles are returned in degrees.
+!!
+!! INPUTS
+!!  vector(3) = Cartesian vector (x, y, z)
+!!
+!! OUTPUTS
+!!  length = radial distance r = sqrt(x^2+y^2+z^2)
+!!  theta  = polar angle (from +z axis), in degrees
+!!  phi    = azimuthal angle (from +x axis in xy-plane), in degrees
+!!
+!! NOTES
+!!  - If the vector magnitude is very small (<1e-9), theta and phi are set to 0.
+!!  - Uses the physics/Y_lm convention: theta = polar, phi = azimuth.
+!!  - phi is computed using atan2 to account for the correct quadrant.
+!!  - This routine assumes input vector is real(8).
+!!  - Can be easily extended to arrays of vectors.
+
+subroutine vcart2ylm(vector, length, theta, phi)
+
+!Arguments ---------------------------------------------
+!arrays
+  real(8),intent(in) :: vector(3)
+!scalars
+  real(8),intent(out) :: length, theta, phi
+
+! Local 
+  real(8):: pi 
+  real(8):: x, y, z
+
+  pi=4.0d0*datan(1.0d0)
+  ! Compute spherical coordinates
+  length = sqrt(vector(1)**2+vector(2)**2+vector(3)**2)
+
+  if (length > tol8) then
+     theta = acos(vector(3) / length) * 180.d0 / pi
+     if (abs(vector(1)) > tol8 .or. abs(vector(2)) > tol8) then
+        phi = atan2(vector(2), vector(1)) * 180.d0 / pi
+     else
+        phi = 0.d0
+     end if
+  else
+     theta = 0.d0
+     phi   = 0.d0
+  end if
+
+end subroutine vcart2ylm
 !!***
 
 end module  m_geometry
