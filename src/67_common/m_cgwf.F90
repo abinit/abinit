@@ -2471,16 +2471,16 @@ end subroutine nscf_setup_spin
 !!
 !! FUNCTION
 !!  Prepare call to nscf_solve_kpt.
-!!  Compute k-dependent terms, gs_ham_k and allocate wavefunction block for this k-point
+!!  Compute k-dependent terms, gs_ham_k and allocate wavefunction block for this k-point.
 !!
 !! INPUT
 !! isppol=Spin index
 !! kpt(3)=K-point
 !! dtset<dataset_type>=All input variables for this dataset.
-!! cryst=Crystalline structure
+!! cryst=Crystalline structure.
 !! psps<pseudopotential_type>=Variables related to pseudopotentials.
 !! pawtab(ntypat*usepaw)<pawtab_type>=Paw tabulated starting data.
-!! pawfgr <type(pawfgr_type)>=fine grid parameters and related data
+!! pawfgr <type(pawfgr_type)>=fine grid parameters and related data.
 !!
 !! OUTPUT
 !!  kg_k=
@@ -2513,17 +2513,17 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psp
 !Local variables ------------------------------
 !scalars
  integer,parameter :: nkpt1 = 1, use_subovl0 = 0, ider0 = 0, idir0 = 0, mkmem1 = 1, useylmgr0 = 0, optder0=0
- integer :: nvloc, nkpg, n1, n2, n3, n4, n5, n6, nfft, nfftf, mgfft, mgfftf, nspinor
+ integer :: nvloc, nkpg, n1, n2, n3, n4, n5, n6, nfft, nfftf, mgfft, mgfftf, nspinor, ncomp
  !character(len=500) :: msg
 !arrays
  real(dp) :: ylmgr_dum(1,1,1)
  real(dp),allocatable :: ph1d(:,:), ylm_k(:,:)
 ! *************************************************************************
 
- ABI_CHECK(gs_ham_k%use_gbt == 0, "use_gbt /= 0 not coded")
+ ABI_CHECK_IEQ(gs_ham_k%use_gbt, 0, "use_gbt /= 0 not coded")
 
  ! See vtorho.F90 for the sequence of calls needed to initialize the GS Hamiltonian.
- ! The Hamiltonian has references to the _k arrays allocated here and returned
+ ! The Hamiltonian has references to the _k arrays that allocated here and returned to the caller.
  associate (mpi_enreg => nscf%mpi_enreg)
 
  !==== Initialize most of the Hamiltonian ====
@@ -2562,8 +2562,10 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psp
  nvloc = gs_ham_k%nvloc
  ABI_CALLOC(vlocal, (n4, n5, n6, nvloc))
 
+ ! ncomp=Number of extra components in vtrial and vlocal (e.g. 1 if LDA/GGA pot, 4 for Meta-GGA, etc).
+ ncomp = 1
  call gspot_transgrid_and_pack(isppol, psps%usepaw, nscf%paral_kgb0, nfft, nscf%ngfft, nfftf, &
-                               dtset%nspden, gs_ham_k%nvloc, 1, pawfgr, mpi_enreg, nscf%vtrial, vlocal)
+                               dtset%nspden, gs_ham_k%nvloc, ncomp, pawfgr, mpi_enreg, nscf%vtrial, vlocal)
 
  call gs_ham_k%load_spin(isppol, vlocal=vlocal, with_nonlocal=.true.)
 
@@ -2595,6 +2597,7 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psp
                       kinpw_k=kinpw_k, kg_k=kg_k, kpg_k=kpg_k, ffnl_k=ffnl_k, ph3d_k=ph3d_k, &
                       compute_ph3d=(nscf%paral_kgb0/=1), compute_gbound=(nscf%paral_kgb0/=1))
 
+ ! Allocate output buffers.
  ABI_MALLOC(cg_k, (2, npw_k*nspinor, nband_k))
  ABI_MALLOC(gsc_k, (2, npw_k*nspinor, nband_k*dtset%usepaw))
 
@@ -2682,13 +2685,12 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
  if (.not. use_cg_k) then
    ! Initialize the wavefunctions with random numbers.
    call cg_randomize(istwf_k, npw_k, nspinor, nband_k, me_g0, cg_k)
-   ! Multiply with envelope function to reduce kinetic energy
+   ! Multiply with envelope function to reduce kinetic energy.
    call cg_envlop(cg_k, dtset%ecut, cryst%gmet, icg0, kg_k, kpt, mcg, nband_k, npw_k, nspinor)
  end if
 
  ! Ortoghonalize input trial states (this is important, even when cg_k is already initialized from a previous k-point.
  call pw_orthon(icg0, igsc0, istwf_k, mcg, mgsc, npwsp, nband_k, ortalgo_3, gsc_k, dtset%usepaw, cg_k, me_g0, xmpi_comm_self)
-
  !call cg_kfilter(npw_k, nspinor, nband_k, gs_ham_k%kinpw_k, cg_k)
 
  ! linalg initialisation (required by subdiago)

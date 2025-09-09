@@ -213,7 +213,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      ! Take MPI grid from input.
      pert_comm%nproc = dtset%eph_np_pqbks(1)
      qpt_comm%nproc  = dtset%eph_np_pqbks(2)
-     ABI_CHECK(dtset%eph_np_pqbks(3) == 1, "Band parallelism not implemented in eph_path")
+     ABI_CHECK_IEQ(dtset%eph_np_pqbks(3), 1, "Band parallelism not implemented in eph_path")
      kpt_comm%nproc = dtset%eph_np_pqbks(4)
 
    else
@@ -453,7 +453,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      ! Allocate vlocal. Note nvloc
      ABI_MALLOC(vlocal, (n4, n5, n6, gs_ham_k%nvloc))
 
-     ! Loop over q-points in q-path (MPI parallelized)
+     ! Loop over q-points in q-path (MPI parallelized).
      ! All procs in pert_comm enter this loop with the same ik/iq indices.
      do my_iq=1,my_nqpath
        iq = my_iq_inds(my_iq); qq = qpath%points(:,iq); qq_is_gamma = sum(qq**2) < tol14
@@ -531,11 +531,13 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        !call gs_ham_kq%load_kprime(kpt_kp=kq, npw_kp=npw_kq, istwf_kp=istwfk_1, kg_kp=kg_kq, kpg_kp=kpg_kq, &
        !                           ph3d_kp=ph3d_kq, ffnl_kp=ffnl_kq, compute_ph3d=.false., compute_gbound=.true.)
 
-       call gs_ham_k%load_k(kpt_k=kk, npw_k=npw_k, istwf_k=istwfk_1, kg_k=kg_k, kpg_k=kpg_k, kinpw_k=kinpw_k, &
-                            ph3d_k=ph3d_k, ffnl_k=ffnl_k, compute_ph3d=.true., compute_gbound=.true.)
+       call gs_ham_k%print([std_out], "gs_ham_k before load_kprim", dtset%prtvol)
+       !call gs_ham_k%load_k(kpt_k=kk, npw_k=npw_k, istwf_k=istwfk_1, kg_k=kg_k, kpg_k=kpg_k, kinpw_k=kinpw_k, &
+       !                     ph3d_k=ph3d_k, ffnl_k=ffnl_k, compute_ph3d=.true., compute_gbound=.true.)
 
        call gs_ham_k%load_kprime(kpt_kp=kq, npw_kp=npw_kq, istwf_kp=istwfk_1, kg_kp=kg_kq, kpg_kp=kpg_kq, kinpw_kp=kinpw_kq, &
                                  ph3d_kp=ph3d_kq, ffnl_kp=ffnl_kq, compute_ph3d=.true., compute_gbound=.true.)
+       call gs_ham_k%print([std_out], "gs_ham_k after load", dtset%prtvol)
 
        ! Loop over my atomic perturbations: apply H1_{kappa, alpha} and compute gkq_atm.
        gkq_atm = zero
@@ -717,7 +719,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  ABI_FREE(gkq2_nu)
  ABI_FREE(displ_cart)
  ABI_FREE(displ_red)
- ABI_FREE(comm_my_is)
  ABI_FREE(my_spins)
 
  call pawcprj_free(cwaveprj0)
@@ -725,6 +726,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  do my_is=1,my_nspins
    call comm_my_is(my_is)%free()
  end do
+ ABI_FREE(comm_my_is)
 
  call qpath%free(); call kpath%free(); call ucache_k%free(); call ucache_kq%free()
  call qpt_comm%free(); call kpt_comm%free(); call pert_comm%free(); call nscf%free()

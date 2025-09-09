@@ -538,12 +538,13 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      end if
      nullify(cwaveprj_ptr)
 
-!  Norm-conserving psps:
+
    else
-!    Compute only derivatives due to projectors |p_i>^(1)
+     ! Norm-conserving psps:
+     ! Compute only derivatives due to projectors |p_i>^(1)
      cpopt=-1 ; choice=2 ; signs=2 ; paw_opt=0
      call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamkq,idir,lambda,mpi_enreg,ndat,nnlout,&
-&     paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnlx1_,iatom_only=ipert)
+       paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnlx1_,iatom_only=ipert)
      if (sij_opt==1) then
        if(gs_hamkq%gpu_option/=ABI_GPU_OPENMP) then
          !$OMP PARALLEL DO
@@ -1386,33 +1387,33 @@ subroutine getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kpoint, kpq, idir, ipe
    else
      select case(idir)
      ! Diagonal terms:
-     case(1)
+     case (1)
        idir1 = 1
        idir2 = 1
-     case(2)
+     case (2)
        idir1 = 2
        idir2 = 2
-     case(3)
+     case (3)
        idir1 = 3
        idir2 = 3
      ! Upper triangular terms:
-     case(4)
+     case (4)
        idir1 = 2
        idir2 = 3
-     case(5)
+     case (5)
        idir1 = 1
        idir2 = 3
-     case(6)
+     case (6)
        idir1 = 1
        idir2 = 2
      ! Lower triangular terms:
-     case(7)
+     case (7)
        idir1 = 3
        idir2 = 2
-     case(8)
+     case (8)
        idir1 = 3
        idir2 = 1
-     case(9)
+     case (9)
        idir1 = 2
        idir2 = 1
      end select
@@ -2015,9 +2016,9 @@ subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qd
    if (ipert<=natom) then
      ider=0;idir0=0
      call mkffnl(psps%dimekb,dimffnlk,psps%ekb,ffnlk,psps%ffspl,&
-   & gmet,gprimd,ider,idir0,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,&
-   & psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,npw_k,ntypat,&
-   & psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_dum)
+      gmet,gprimd,ider,idir0,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,&
+      psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,npw_k,ntypat,&
+      psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_dum)
    end if
  else
    ABI_CHECK(all(shape(ffnlk) == [npw_k, dimffnlk, psps%lmnmax, ntypat]), "Wrong shape in input ffnlk")
@@ -2045,8 +2046,8 @@ subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qd
  if (reuse_ffnl1_ == 0) then
    ABI_MALLOC(ffnl1,(npw1_k,dimffnl1,psps%lmnmax,ntypat))
    call mkffnl(psps%dimekb,dimffnl1,psps%ekb,ffnl1,psps%ffspl,gmet,gprimd,ider,idir0,&
-  & psps%indlmn,kg1_k,kpg1_k,kpq,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg1,&
-  & npw1_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm1_k,ylmgr1_k)
+    psps%indlmn,kg1_k,kpg1_k,kpq,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg1,&
+    npw1_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm1_k,ylmgr1_k)
  else
    ABI_CHECK(all(shape(ffnl1) == [npw1_k, dimffnl1, psps%lmnmax, ntypat]), "Wrong shape in input ffnl1")
  end if
