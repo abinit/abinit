@@ -1251,7 +1251,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            !    \int de' Wc_{gg'}(pp, e') / (omega - e_{bsum, kmp) - e')
            !
            ! Store results in vec_gwc_nk(:,:,n_k).
-           ! vec_gwc_nk(:,:,n_k will corresponds to sum_g' \int de' Wc_{gg'}(pp, e') / (omega - e_{bsum, kmp) - e') <bsum,k-p|e^{-i(p+g')}r|n,k>
+           ! vec_gwc_nk(:,:,n_k) will corresponds to sum_g' \int de' Wc_{gg'}(pp, e') / (omega - e_{bsum, kmp) - e') <bsum,k-p|e^{-i(p+g')}r|n,k>
            if (gqk%pert_comm%nproc > 1) vec_gwc_nk = zero
 
            do n_k=gqk%bstart, gqk%bstop ! do n_k=gqk%n_start, gqk%n_stop
@@ -1260,7 +1260,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              ! Compute <bsum,k-p|e^{-i(p+G')}r|n,k> * vc_sqrt(p,G')
              cwork_ur = ur_kmp * ur_nk(:,n_k)
 
-             ! Siyu: I need to ask Matteo about the following code; Does calc_sigc only calcualte the correlation part of the self-energy?
              if (need_x_kmp) then
                call fft_ur(npw_x, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_x, gbound_x, cwork_ur, rhotwg_x)
                call sigtk_multiply_by_vc_sqrt("N", npw_x, nspinor, 1, vc_sqrt_gx, rhotwg_x)
@@ -1532,7 +1531,7 @@ if (.not. qq_is_gamma) then
                !cycle
              end if
 
-             ! Siyu: For debug, gks_atm2 and gks_atm should be consistent
+             ! For debug, gks_atm2 and gks_atm should be consistent
              if (pp_is_gamma) then
               ib = ib_sum - gqk%bstart + 1
               gks_atm2(:,:,ib,ipc) = stern_kqmp%eig1_k(:, gqk%bstart:gqk%bstop, ib_sum)
@@ -1543,8 +1542,6 @@ if (.not. qq_is_gamma) then
              do n_k=gqk%bstart, gqk%bstop ! do n_k=gqk%m_start, gqk%m_stop
 
                ! <Delta_{-q} psi_{bsum,k+q-p}|e^{-i(p+G')r}|n,k>
-               ! cwork_ur = full_ur1_kqmp * ur_nk(:,n_k)
-               ! Siyu: on 05/09/2025, Matteo and I both agree the above is wrong while the below is correct
                cwork_ur = full_ur1_kmp * ur_nk(:,n_k)
 
                if (need_x_kmp) then
@@ -1564,7 +1561,7 @@ if (.not. qq_is_gamma) then
                  if (need_x_kmp) then
                    ! TODO recheck
                    xdot_tmp = - xdotc(npw_x*nspinor, vec_gx_mkq(:,m_kq), 1, rhotwg_x, 1)
-                   ctmp_gwpc = ctmp_gwpc + xdot_tmp ! * theta_mu_minus_e0i !
+                   ctmp_gwpc = ctmp_gwpc + xdot_tmp ! * theta_mu_minus_e0i ! theta_mu_minus_e0i is only needed for metals
                  end if
 
                  gsig_atm(1, m_kq, n_k, ipc) = gsig_atm(1, m_kq, n_k, ipc) +  real(ctmp_gwpc)
