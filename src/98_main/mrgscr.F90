@@ -17,14 +17,11 @@
 !! If the number of SCR files to be merged is equal to 1, the program checks
 !! the integrity of the file reporting the list of missing q-points.
 !! Note that the list of required q-points depends on the k-mesh
-!! used during the calculation of the KSS file. We assume indeed that the same k-mesh
+!! used during the calculation of the WFK file. We assume indeed that the same k-mesh
 !! is used during the calculation of the matrix elements of sigma.
 !!
 !! INPUTS
 !!  (Main program)
-!!
-!! OUTPUT
-!!  Only checking and writing
 !!
 !! SOURCE
 
@@ -99,7 +96,7 @@ program mrgscr
  type(hscr_t),pointer :: Hscr0
  type(hscr_t),target :: Hscr_merge
  type(MPI_type) :: MPI_enreg
- type(kmesh_t) :: Kmesh,Qmesh
+ type(kmesh_t) :: Kmesh, Qmesh
  type(crystal_t) :: Cryst
  type(gsphere_t) :: Gsphere
  type(ppmodel_t) :: PPm
@@ -118,8 +115,7 @@ program mrgscr
  complex(dpc),allocatable :: omega(:),em1_ppm(:),epsm1_eigen(:,:),ppm_eigen(:,:),rhoggp(:,:)
  character(len=fnlen),allocatable :: filenames(:)
  type(pawrhoij_type),allocatable :: pawrhoij(:)
- type(hscr_t),target,allocatable :: Hscr_file(:) ! Cannot use allocatable as pathscale5 miscompiles the code
-
+ type(hscr_t),target,allocatable :: Hscr_file(:)
 ! *************************************************************************
 
  ! Change communicator for I/O (mandatory!)
@@ -177,7 +173,6 @@ program mrgscr
      if (nctk_try_fort_or_ncfile(filenames(ifile), msg) /= 0) then
        ABI_ERROR(msg)
      end if
-
    end do
  end if
 
@@ -239,7 +234,7 @@ program mrgscr
      call ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, hscr_merge)
 
    case default
-     ABI_ERROR("Invalid choice!")
+     ABI_ERROR(sjoin("Invalid choice!", itoa(choice)))
    end select
 
  end if ! nfiles>1
@@ -367,7 +362,7 @@ program mrgscr
            qlwl(:,:)=epsm1%Hscr%qlwl(:,1:nqlwl)
          end if
 
-         Dtset%gw_icutcoul=3; Dtset%rcut=zero
+         Dtset%gw_icutcoul=3; Dtset%gw_rcut=zero
          Dtset%vcutgeo=(/zero,zero,zero/);
          Dtset%boxcenter=(/zero,zero,zero/)
 
@@ -383,7 +378,7 @@ program mrgscr
          end if
          dtset%ecutsigx = -one
 
-         call Vcp%init(Gsphere,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,&
+         call Vcp%init(Gsphere,Cryst,Qmesh,Kmesh,Dtset%gw_rcut,Dtset%gw_icutcoul,&
                         Dtset%vcutgeo,Dtset%ecutsigx,Hscr0%npwe,nqlwl,qlwl,comm)
          ABI_FREE(qlwl)
 
@@ -599,7 +594,7 @@ program mrgscr
      ngfft(8)=get_cache_kb()
      nfft = PRODUCT(ngfft(1:3))
 
-     Dtset%gw_icutcoul=3; Dtset%rcut=zero
+     Dtset%gw_icutcoul=3; Dtset%gw_rcut=zero
      Dtset%vcutgeo=(/zero,zero,zero/); Dtset%boxcenter=(/zero,zero,zero/)
      Dtset%ecutsigx = -1
 
@@ -613,7 +608,7 @@ program mrgscr
        qlwl(:,:)=epsm1%Hscr%qlwl(:,1:nqlwl)
      end if
 
-     call Vcp%init(Gsphere,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,&
+     call Vcp%init(Gsphere,Cryst,Qmesh,Kmesh,Dtset%gw_rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,&
                    Hscr0%npwe,nqlwl,qlwl,comm)
      ABI_FREE(qlwl)
 
@@ -739,6 +734,7 @@ program mrgscr
              else
                call PPm%init(epsm1%mqmem,epsm1%nqibz,epsm1%npwe,ppmodel,drude_plsmf,Dtset%gw_invalid_freq)
              end if
+
              call PPm%setup(Cryst,Qmesh,epsm1%npwe,epsm1%nomega,epsm1%omega,epsm1%epsm1,nfft,Gsphere%gvec,ngfft,rhor(:,1),iqibz)
 
              call PPm%get_eigenvalues(iqibz,epsm1%Hscr%zcut,epsm1%nomega,epsm1%omega,Vcp,ppm_eigen)
@@ -778,6 +774,7 @@ program mrgscr
          write(std_out,'(a)') ' Enter the number of frequency points in the'
          write(std_out,'(a)') '  interval 0 - freqremax (0 means same as input file ): '
          read(std_in,*) nfreqre
+
          if (nfreqre==0) then
            nfreqre   = epsm1%nomega_r
            nfreqim   = epsm1%nomega_i
@@ -984,7 +981,8 @@ program mrgscr
              write(unt_dump2,'(a,I0)') '# Number of frequencies: ',nfreqre
              write(unt_dump2,'(a,f12.6)') '# Maximum frequency    : ',freqremax
              write(unt_dump2,'(a)') '# Columns:'
-             write(unt_dump2,'(3a)') '#  ig1      ig2   I(epsilon)',&
+             write(unt_dump2,'(3a)') &
+               '#  ig1      ig2   I(epsilon)',&
                '   I(eps_PPM)   Re[n(G-G'')]    Im[n(G-G'')]    qratio      I1*C_qGG''',&
                ' Re[Omegatwsq] Im[Omegatwsq]   Re[omegatw]   Im[omegatw]    |G|    1/2|G|^2'
 
@@ -1020,8 +1018,7 @@ program mrgscr
                    ftab(1:nfreqre) = real_omega(1:nfreqre)*AIMAG(epsm1%epsm1(ig1,ig2,1:nfreqre,iqibz))
                  end if
 
-                 call cspint(ftab,real_omega,nfreqre,real_omega(1),&
-                   real_omega(nfreqre),ysp,eint,work,eps_diff)
+                 call cspint(ftab,real_omega,nfreqre,real_omega(1),real_omega(nfreqre),ysp,eint,work,eps_diff)
 
                  if (ig1==ig2) then
                    factor = -two*pi*pi*REAL(rhoggp(ig1,ig2))*qratio(ig1,ig2)
@@ -1139,7 +1136,7 @@ program mrgscr
        nfreqre = 0
 
      case default
-       ABI_ERROR("Invalid choice!")
+       ABI_ERROR(sjoin("Invalid choice!", itoa(choice)))
      end select
 
      ! Add imaginary frequencies if any
@@ -1224,10 +1221,6 @@ program mrgscr
      call ioscr_wremove(filenames(1), hscr_file(1), fname_out, nfreq_tot, freq_indx, hscr_merge)
 
      ABI_FREE(freq_indx)
-
-   case (6)
-     ! Model screening -------------------------------------------------------------
-     ABI_ERROR("Model screening has been removed")
 
    case default
      ! Bail if choice is wrong

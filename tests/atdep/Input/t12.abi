@@ -31,14 +31,17 @@ bzpath 4
 special_qpt "G K M G"
 use_ideal_positions 1
 ngqpt1 6 6 6
-tolmotifinboxmatch 5.d-2 3.d-2 5.d-2
- 
+tolmotif 0.05
+tolinbox 0.03
+tolmatch 0.05
+
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = atdep
 #%% md_hist = t12
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t12.abo, tolnlines = 1, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
 #%%   t12_omega.dat, tolnlines = 5, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
 #%%   t12_thermo.dat, tolnlines = 5, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
@@ -47,7 +50,7 @@ tolmotifinboxmatch 5.d-2 3.d-2 5.d-2
 #%% [extra_info]
 #%% authors = F. Bottin & J. Bouchet
 #%% keywords = atdep
-#%% description = 
+#%% description =
 #%%   test aTDEP (2nd order)
 #%%   Titanium (hcp) with 512 atoms at T = 300 K. Restart with IFC coming from ANADDB.
 #%% topics = aTDEP

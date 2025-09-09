@@ -19,7 +19,7 @@ ecut 10.0
 
 occopt 7
 nband 12
-bandpp 6
+nblock_lobpcg 1
 
 # PAW
 pawecutdg 20

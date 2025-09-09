@@ -72,7 +72,7 @@ contains  !=====================================================
 !!  eph_path_run
 !!
 !! FUNCTION
-!!  Compute e-ph matrix elements g(k,q) along an arbitray path either in k- or q-space.
+!!  Compute e-ph matrix elements g(k,q) along an arbitrary path either in k- or q-space.
 !!  Wavefunctions at k and k+q are computed non self-consistently starting from the GS potential read
 !!  from file by invoking the CG eigensolver.
 !!  The DFPT potential at q are usually obtained via Fourier interpolation but it is also possible
@@ -81,6 +81,7 @@ contains  !=====================================================
 !!  all the POT1 files with the mrgdv utility.
 !!
 !! INPUTS
+!! dtfil<datafiles_type>=Variables related to files.
 !! dtset<dataset_type>=All input variables for this dataset.
 !! cryst<crystal_t>=crystal structure parameters
 !! dvdb<dbdb_type>=Database with the DFPT SCF potentials.
@@ -277,7 +278,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
    call dvdb%set_pert_distrib(my_npert, natom3, my_pinfo, pert_table, pert_comm%value)
    ABI_FREE(my_pinfo)
    ABI_FREE(pert_table)
-   ABI_WARNING("Parallelism over pertubations should be tested.")
+   ABI_WARNING("Parallelism over perturbations should be tested.")
  end if
 
  ! Load KS potential from file.
@@ -433,7 +434,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      ik = my_ik_inds(my_ik); kk = kpath%points(:, ik)
 
      ! Compute u_{nk}(g)
-     ! NB: The Hamiltonian has pointers to the _k arrays in output so we cannot dellocate them till the end.
+     ! NB: The Hamiltonian has pointers to the _k arrays in output so we cannot deallocate them till the end.
      ! This is the reason why we use vlocal_k (vlocal_kq) although this term does not depend on k
      call nscf%setup_kpt(spin, kk, istwfk_1, nband, cryst, dtset, psps, pawtab, pawfgr, &
                          npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal_k, cg_k, gsc_k, gs_ham_k)

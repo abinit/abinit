@@ -3,7 +3,6 @@ Implement the steps to extract data from an Abinit output file.
 Extract lines associated with their "meta character" (that makes sense in
 fldiff), and valid YAML documents associated with their iteration context.
 """
-from __future__ import print_function, division, unicode_literals
 import re
 
 from .yaml_tools import Document, is_available as has_yaml

@@ -681,7 +681,7 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
  call wrtout(units, sjoin(ch10, "- Results stored in: ", out_ncpath))
  call wrtout(std_out, sjoin(" Using qpt:", ktoa(qpt)))
  !call wrtout(units, " Use `abiopen.py out_V1QAVG.nc -e` to visualize results")
- call dvdb%print(unit=std_out)
+ call dvdb%print([std_out], "", 0)
 
  ! Define FFT mesh
  ngfft = dvdb%ngfft
@@ -757,7 +757,7 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
    call dvdb%ftinterp_qpt(qpt, nfft, ngfft, v1scf, dvdb%comm_rpt)
  end if
 
- ! Compute scattering potential the in phonon representations instead ot atomic one.
+ ! Compute scattering potential the in phonon representations instead of atomic one.
  ! v1_qnu = \sum_{ka} phdispl{ka}(q,nu) D_{ka,q} V_scf(r)
  ! NOTE: prefactor 1/sqrt(2 w(q,nu)) is not included in the potentials saved to file.
  ! v1_qnu(2, nfft, nspden, natom3), v1scf(cplex, nfft, nspden, natom3)

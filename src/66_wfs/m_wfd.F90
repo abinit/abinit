@@ -118,7 +118,7 @@ module m_wfd
 
    integer,allocatable :: kg_k(:,:)
    ! kg_k(3,npw)
-   ! G vector coordinates in reduced cordinates.
+   ! G vector coordinates in reduced coordinates.
 
    integer,allocatable :: gbound(:,:)
    ! gbound(2*mgfft+8,2))
@@ -1477,9 +1477,9 @@ end function wfd_xdotc
 
 !----------------------------------------------------------------------
 
-!!****f* m_wfd/wfd_get_gvec_kq
+!!****f* m_wfd/wfd_get_gvec_gbound
 !! NAME
-!! wfd_get_gvec_kq
+!! wfd_get_gvec_gbound
 !!
 !! FUNCTION
 !! Return the g-sphere centered on kq and gbound_kq,
@@ -1646,7 +1646,7 @@ subroutine wfd_copy_cg(wfd, band, ik_ibz, spin, cg)
 
 !Local variables ------------------------------
 !scalars
- integer :: siz
+ integer :: csiz
  type(wave_t),pointer :: wave
  character(len=500) :: msg
 !************************************************************************
@@ -1658,12 +1658,12 @@ subroutine wfd_copy_cg(wfd, band, ik_ibz, spin, cg)
    ABI_ERROR(msg)
  end if
 
- siz = wfd%npwarr(ik_ibz) * wfd%nspinor
+ csiz = wfd%npwarr(ik_ibz) * wfd%nspinor
 #ifdef HAVE_GW_DPC
- call zcopy(siz, wave%ug, 1, cg, 1)
+ call zcopy(csiz, wave%ug, 1, cg, 1)
 #else
- cg(1,1:siz) = dble(wave%ug)
- cg(2,1:siz) = aimag(wave%ug)
+ cg(1,1:csiz) = dble(wave%ug)
+ cg(2,1:csiz) = aimag(wave%ug)
 #endif
 
 end subroutine wfd_copy_cg
@@ -1804,7 +1804,7 @@ subroutine wfd_print(Wfd, units, header, prtvol)
  write(msg,'(3(a,i0,a))')&
    '  Max number of G-vectors ............... ',mpw,ch10,&
    '  Total number of FFT points ............ ',Wfd%nfftot,ch10,&
-   '  Number of FFT points treated by me .... ',Wfd%nfft,ch10
+   '-  Number of FFT points treated by me .... ',Wfd%nfft,ch10
  call wrtout(units, msg)
 
  call print_ngfft(units, Wfd%ngfft, 'FFT mesh for wavefunctions', prtvol=my_prtvol)
@@ -2094,7 +2094,7 @@ subroutine wave_free(Wave, what)
  my_what="ALL"; if (present(what)) my_what=toupper(what)
 
  if (.not.firstchar(my_what, ["A", "G", "R", "C"] )) then
-   ABI_ERROR(sjoin("Unknow what:", what))
+   ABI_ERROR(sjoin("Unknown what:", what))
  end if
 
  if (firstchar(my_what, ["A", "G"])) then
@@ -3217,7 +3217,7 @@ end function wfdgw_iterator_bks
 !!
 !! INPUTS
 !!  Wfd<wfd_t>=
-!!  [bks_mask(Wfd%mband,Wfd%nkibz,Wfd%nsppol)]=Mask used to skip selecter (b,k,s) entries.
+!!  [bks_mask(Wfd%mband,Wfd%nkibz,Wfd%nsppol)]=Mask used to skip selected (b,k,s) entries.
 !!  [got(Wfd%nproc)]=The number of tasks already assigned to the nodes.
 !!
 !! OUTPUT
@@ -3818,7 +3818,6 @@ end subroutine wfd_change_ngfft
 !!  Test the orthonormalization of the wavefunctions stored in Wfd.
 !!
 !! INPUTS
-!!  Wfd<wfd_t>=wavefunction descriptor.
 !!  Cryst<crystal_t>=Object defining the unit cell and its symmetries.
 !!  Pawtab(ntypat*usepaw)<type(pawtab_type)>=PAW tabulated starting data.
 !!
@@ -4216,8 +4215,9 @@ subroutine wfd_rotate_cg(wfd, band, ndat, spin, kk_ibz, npw_kbz, kg_kbz, istwf_k
  if (isirr_k) then
    do idat=1,ndat
      ! Copy u_k(G)
-     call wfd%copy_cg(band, ik_ibz, spin, cgs_kbz(:,:,idat))
-     if (present(urs_kbz)) call wfd%get_ur(band, ik_ibz, spin, urs_kbz(:,idat))
+     ib = band + idat - 1
+     call wfd%copy_cg(ib, ik_ibz, spin, cgs_kbz(:,:,idat))
+     if (present(urs_kbz)) call wfd%get_ur(ib, ik_ibz, spin, urs_kbz(:,idat))
    end do
 
  else
@@ -4226,7 +4226,7 @@ subroutine wfd_rotate_cg(wfd, band, ndat, spin, kk_ibz, npw_kbz, kg_kbz, istwf_k
    ABI_MALLOC(cg_kirr, (2, npw_kirr*wfd%nspinor))
 
    do idat=1,ndat
-     ib = band + idat -1
+     ib = band + idat - 1
      call wfd%copy_cg(ib, ik_ibz, spin, cg_kirr)
      call cgtk_rotate(cryst, kk_ibz, isym_k, trev_k, g0_k, wfd%nspinor, ndat1, &
                       wfd%npwarr(ik_ibz), wfd%kdata(ik_ibz)%kg_k, &
@@ -4380,7 +4380,7 @@ end subroutine wfd_sym_ug_kg
 !!  All the wavefunction are stored on each node, only the spin is distributed.
 !!
 !! INPUTS
-!!  Wfd<wfd_t>=Initialized wavefunction descritptor.
+!!  Wfd<wfd_t>=Initialized wavefunction descriptor.
 !!  wfk_fname=Name of the WFK file.
 !!
 !! OUTPUT
