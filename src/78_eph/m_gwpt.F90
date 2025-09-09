@@ -1082,6 +1082,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
          pp = pp_mesh%bz(:,ipp_bz)
          pp_is_gamma = sum(pp**2) < tol14
+
+         ! Debug, include only pp=Gamma
+         !if (.not. pp_is_gamma) cycle
+
          qkp_string = sjoin("While treating qpt: ", ktoa(qpt), "kpt:", ktoa(kk), "pp:", ktoa(pp), ch10)
 
          ! Symmetry tables and g-sphere centered on k-p.
@@ -1247,7 +1251,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            !    \int de' Wc_{gg'}(pp, e') / (omega - e_{bsum, kmp) - e')
            !
            ! Store results in vec_gwc_nk(:,:,n_k).
-           ! Siyu: I think (?) ppm%calc_sigc gives sum_g' \int de' Wc_{gg'}(pp, e') / (omega - e_{bsum, kmp) - e') <bsum,k-p|e^{-i(p+G')}r|n,k> ?
+           ! vec_gwc_nk(:,:,n_k will corresponds to sum_g' \int de' Wc_{gg'}(pp, e') / (omega - e_{bsum, kmp) - e') <bsum,k-p|e^{-i(p+g')}r|n,k>
            if (gqk%pert_comm%nproc > 1) vec_gwc_nk = zero
 
            do n_k=gqk%bstart, gqk%bstop ! do n_k=gqk%n_start, gqk%n_stop
@@ -1413,9 +1417,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              ABI_FREE(ph3d_kmp)
              ABI_SFREE(ph3d1_kqmp)
 
+             ! Debug: Mute Delta_{q} (stern_kmp) by 
+             !full_ur1_kqmp = zero
+
              ! TODO: The last states may fail to converge and we have to decide how to handle this.
              if (ierr /= 0) then
-               !ABI_WARNING(sjoin("Stern at +q", qkp_string, msg))
+               ABI_WARNING(sjoin("Stern at +q", qkp_string, msg))
                full_cg1_kqmp = zero; full_ur1_kqmp = zero
                !cycle
              end if
@@ -1441,24 +1448,18 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                else
                  call fft_ur(npw_c, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_c, gbound_c, cwork_ur, rhotwg_c)
                  rhotwg_c(:) = GWPC_CONJG(rhotwg_c)
-                 call sigtk_multiply_by_vc_sqrt("C", npw_c, nspinor, 1, vc_sqrt_gx, rhotwg_c)
+                 call sigtk_multiply_by_vc_sqrt("N", npw_c, nspinor, 1, vc_sqrt_gx, rhotwg_c)
                end if
 
-               ! Siyu: I am not sure why we take the average only when m_kq /= n_k (?)
-               ! Li's paper says [Sigma(Enk) + Sigma(Emk+q])/2
                do n_k=gqk%bstart, gqk%bstop ! do n_k=gqk%n_start, gqk%n_stop
-                 if (m_kq == n_k) then
-                   ctmp_gwpc = sum(rhotwg_c(:) * vec_gwc_nk(:,1,n_k))
-                 else
-                   ! Take the average
-                   iw_mkq = m_kq - gqk%bstart + 2
-                   ctmp_gwpc = half * sum(rhotwg_c(:) * (vec_gwc_nk(:,1,n_k) + vec_gwc_nk(:,iw_mkq,n_k)))
-                 end if
+                  ! Take the average
+                  iw_mkq = m_kq - gqk%bstart + 1
+                  ctmp_gwpc = half * sum(rhotwg_c(:) * (vec_gwc_nk(:,1,n_k) + vec_gwc_nk(:,iw_mkq,n_k)))
 
                  if (need_x_kqmp) then
                    ! TODO recheck
                    xdot_tmp = - xdotc(npw_x*nspinor, rhotwg_x, 1, vec_gx_nk(:,n_k), 1)
-                   ctmp_gwpc = ctmp_gwpc + xdot_tmp ! * theta_mu_minus_e0i  ! Siyu: (I think) here the exchange part of self-energy is included
+                   ctmp_gwpc = ctmp_gwpc + xdot_tmp ! * theta_mu_minus_e0i  ! theta_mu_minus_e0i is only needed for metals
                  end if
 
                  gsig_atm(1, m_kq, n_k, ipc) = gsig_atm(1, m_kq, n_k, ipc) + real(ctmp_gwpc)
@@ -1521,9 +1522,12 @@ if (.not. qq_is_gamma) then
              ABI_FREE(ph3d_kqmp)
              ABI_SFREE(ph3d1_kmp)
 
+             ! Debug: Mute Delta_{-q} (stern_kqmp) by 
+             !full_ur1_kmp = zero
+
              ! TODO: The last states may fail to converge and we have to decide how to handle this.
              if (ierr /= 0) then
-               !ABI_WARNING(sjoin("Stern at -q:", qkp_string, msg))
+               ABI_WARNING(sjoin("Stern at -q:", qkp_string, msg))
                full_cg1_kmp = zero; full_ur1_kmp = zero
                !cycle
              end if
@@ -1553,18 +1557,14 @@ if (.not. qq_is_gamma) then
                end if
 
                do m_kq=gqk%bstart, gqk%bstop ! do m_kq=gqk%n_start, gqk%n_stop
-                 if (m_kq == n_k) then
-                   ctmp_gwpc = sum(rhotwg_c(:) * vec_gwc_mkq(:,1,m_kq))
-                 else
-                   ! Take the average
-                   iw_nk = n_k - gqk%bstart + 2
-                   ctmp_gwpc = half * sum(rhotwg_c(:) * (vec_gwc_mkq(:,1,m_kq) + vec_gwc_mkq(:,iw_nk,m_kq)))
-                 end if
+                  ! Take the average
+                  iw_nk = n_k - gqk%bstart + 1
+                  ctmp_gwpc = half * sum(rhotwg_c(:) * (vec_gwc_mkq(:,1,m_kq) + vec_gwc_mkq(:,iw_nk,m_kq)))
 
                  if (need_x_kmp) then
-                   xdot_tmp = - xdotc(npw_x*nspinor, vec_gx_mkq(:,m_kq), 1, rhotwg_x, 1)
                    ! TODO recheck
-                   ctmp_gwpc = ctmp_gwpc + xdot_tmp ! * theta_mu_minus_e0i ! Siyu: (I think) here the exchange part of self-energy is included
+                   xdot_tmp = - xdotc(npw_x*nspinor, vec_gx_mkq(:,m_kq), 1, rhotwg_x, 1)
+                   ctmp_gwpc = ctmp_gwpc + xdot_tmp ! * theta_mu_minus_e0i !
                  end if
 
                  gsig_atm(1, m_kq, n_k, ipc) = gsig_atm(1, m_kq, n_k, ipc) +  real(ctmp_gwpc)
@@ -1628,6 +1628,7 @@ end if ! .not qq_is_gamma.
        ! TODO gks_atm and gks_nsu
        call c_f_pointer(c_loc(gsig_atm), gsig_atm_cplx, [nb, nb, natom3])
        !gsig_atm_cplx = gsig_atm_cplx * (j_dpc / (two_pi * pp_mesh%nbz))
+       !TODO: it may be that pp_mesh should be replaced by the kk_mesh (they are not always the same)
        gsig_atm = gsig_atm / (cryst%ucvol * pp_mesh%nbz)
 
        if (dtset%useria == 0) then
