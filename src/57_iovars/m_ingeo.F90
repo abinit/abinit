@@ -131,9 +131,9 @@ contains
 !!
 !! SOURCE
 
-subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_red,field_red_axial,&
-  genafm,iatfix,icoulomb,iimage,iout,jdtset,jellslab,lenstr,mixalch,&
-  msym,natom,nimage,npsp,npspalch,nspden,nsppol,nsym,ntypalch,ntypat,&
+subroutine ingeo (acell,amu,atndlist,bravais,chrgat,dtset,field_red,field_red_axial,&
+  genafm,iatfix,iatnd,icoulomb,iimage,iout,jdtset,jellslab,lenstr,mixalch,&
+  msym,natnd,natom,nimage,npsp,npspalch,nspden,nsppol,nsym,ntypalch,ntypat,&
   nucdipmom,nzchempot,pawspnorb,&
   ptgroupma,ratsph,rprim,slabzbeg,slabzend,spgroup,spinat,string,supercell_lattice,symafm,&
   symmorphi,symrel,tnons,tolsym,typat,vel,vel_cell,xred,znucl,comm)
@@ -141,7 +141,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_red,field_red_axial,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iimage,iout,jdtset,lenstr,msym
- integer,intent(in) :: nimage,npsp,npspalch,nspden,nsppol
+ integer,intent(in) :: natnd,nimage,npsp,npspalch,nspden,nsppol
  integer,intent(in) :: ntypalch,ntypat,nzchempot,pawspnorb,comm
  integer,intent(inout) :: natom,symmorphi
  integer,intent(out) :: icoulomb,jellslab,ptgroupma,spgroup !vz_i
@@ -151,14 +151,14 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_red,field_red_axial,&
 !arrays
  integer,intent(in) :: supercell_lattice(3)
  integer,intent(out) :: bravais(11),iatfix(3,natom) !vz_i
- integer,intent(inout) :: symafm(msym) !vz_i
+ integer,intent(inout) :: iatnd(natnd),symafm(msym) !vz_i
  integer,intent(inout) :: symrel(3,3,msym) !vz_i
  integer,intent(out) :: typat(natom)
- real(dp),intent(inout) :: chrgat(natom)
- real(dp),intent(inout) :: nucdipmom(3,natom)
- real(dp),intent(in) :: ratsph(ntypat)
+ real(dp),intent(inout) :: atndlist(3,natnd),chrgat(natom)
+ real(dp),intent(inout) :: nucdipmom(3,natom),ratsph(ntypat)
  real(dp),intent(inout) :: spinat(3,natom)
- real(dp),intent(out) :: acell(3),amu(ntypat),field_red(3),field_red_axial(3),genafm(3),mixalch(npspalch,ntypalch)
+ real(dp),intent(out) :: acell(3),amu(ntypat),field_red(3),field_red_axial(3)
+ real(dp),intent(out) :: genafm(3),mixalch(npspalch,ntypalch)
  real(dp),intent(inout) :: rprim(3,3),tnons(3,msym) !vz_i
  real(dp),intent(out) :: vel(3,natom),vel_cell(3,3),xred(3,natom)
  real(dp),intent(in) :: znucl(npsp)
@@ -186,8 +186,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_red,field_red_axial,&
  integer,allocatable :: ptsymrel(:,:,:),typat_read(:)
  real(dp) :: angdeg(3), field_xred(3),gmet(3,3),gprimd(3,3),rmet(3,3),rcm(3)
  real(dp) :: rprimd(3,3),rprimd_read(3,3),rprimd_new(3,3),rprimd_primitive(3,3),scalecart(3)
- real(dp),allocatable :: mass_psp(:)
- real(dp),allocatable :: tnons_cart(:,:),tnons_new(:,:),translations(:,:)
+ real(dp),allocatable :: mass_psp(:),tnons_cart(:,:),tnons_new(:,:),translations(:,:)
  real(dp),allocatable :: xcart(:,:),xcart_read(:,:),xred_read(:,:),dprarr(:)
 
 ! *************************************************************************
@@ -576,10 +575,19 @@ end do
      ABI_ERROR(msg)
    end if
 
-   ! nucdipmom is read for each atom, from 1 to natom
-   call intagm(dprarr,intarr,jdtset,marr,3*natom,string(1:lenstr),'nucdipmom',tread,'DPR')
-   if(tread==1) then
-     nucdipmom(1:3,1:natom) = reshape( dprarr(1:3*natom), [3, natom])
+   ! nucdipmom is read for each irreducible atom, from 1 to natom
+   nucdipmom=zero
+   if(natnd > 0) then
+     call intagm(dprarr,intarr,jdtset,marr,natnd,string(1:lenstr),'iatnd',tread,'INT')
+     if(tread==1) iatnd(1:natnd)=intarr(1:natnd)
+     call intagm(dprarr,intarr,jdtset,marr,3*natnd,string(1:lenstr),'atndlist',tread,'DPR')
+     if(tread==1) atndlist(1:3,1:natnd)=reshape(dprarr(1:3*natnd),[3,natnd])
+     do ii=1,natnd
+       nucdipmom(1:3,iatnd(ii))=atndlist(1:3,ii)
+     end do
+   else
+     call intagm(dprarr,intarr,jdtset,marr,3*natom,string(1:lenstr),'nucdipmom',tread,'DPR')
+     if(tread==1)nucdipmom(1:3,1:natom) = reshape( dprarr(1:3*natom) , [3, natom])
    end if
 
    ! Will use the geometry builder
@@ -616,8 +624,19 @@ end do
    if(tread==1)spinat(1:3,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natrd])
 
    ! nucdipmom is read for each irreducible atom, from 1 to natrd
-   call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'nucdipmom',tread,'DPR')
-   if(tread==1)nucdipmom(1:3,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natrd])
+   nucdipmom=zero
+   if(natnd > 0) then
+     call intagm(dprarr,intarr,jdtset,marr,natnd,string(1:lenstr),'iatnd',tread,'INT')
+     if(tread==1) iatnd(1:natnd)=intarr(1:natnd)
+     call intagm(dprarr,intarr,jdtset,marr,3*natnd,string(1:lenstr),'atndlist',tread,'DPR')
+     if(tread==1) atndlist(1:3,1:natnd)=reshape(dprarr(1:3*natnd),[3,natnd])
+     do ii=1,natnd
+       nucdipmom(1:3,iatnd(ii))=atndlist(1:3,ii)
+     end do
+   else
+     call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'nucdipmom',tread,'DPR')
+     if(tread==1)nucdipmom(1:3,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natrd])
+   end if
 
    ! Compute xred/typat and spinat for the supercell
    if(multiplicity > 1)then

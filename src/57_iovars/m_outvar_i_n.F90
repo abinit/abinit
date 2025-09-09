@@ -118,7 +118,7 @@ subroutine outvar_i_n (dtsets,iout,&
  integer :: allowed,allowed_sum,iatom,idtset,ii,iimage,ikpt,kptopt,narr
  integer :: multival,multi_natfix,multi_natfixx,multi_natfixy,multi_natfixz
  integer :: multi_atsph,multi_occopt
- integer :: natfix,natfixx,natfixy,natfixz,natom
+ integer :: natfix,natfixx,natfixy,natfixz,natnd,natom
  integer :: ndtset_kptopt,nimage,nqpt,nkpt_eff
  integer :: ntypalch,ntypat,size1,size2,tnkpt
  real(dp) :: kpoint
@@ -161,6 +161,8 @@ subroutine outvar_i_n (dtsets,iout,&
  ntypalch=dtsets(1)%ntypalch
 !if(multivals%ntypat==0)ntypat=dtsets(1)%ntypat
  ntypat=dtsets(1)%ntypat
+
+ natnd=dtsets(1)%natnd
 
 !###########################################################
 !### 02. Specific treatment for partially fixed atoms. Also compute multi_occopt for nband
@@ -301,6 +303,16 @@ subroutine outvar_i_n (dtsets,iout,&
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,&
 & narrm,ncid,ndtset_alloc,'iatfixz','INT',multi_natfixz)
+
+!iatnd
+ intarr = 0
+ narr=natom ! default size for all datasets
+ do idtset=0,ndtset_alloc       ! specific size for each dataset
+   narrm(idtset)=dtsets(idtset)%natnd
+   if(idtset==0)narrm(idtset)=mxvals%natom
+   intarr(1:narrm(idtset),idtset)= dtsets(idtset)%iatnd(1:narrm(idtset))
+ end do
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'iatnd','INT',multivals%natom)
 
 !iatsph
  multi_atsph=1
@@ -858,6 +870,9 @@ subroutine outvar_i_n (dtsets,iout,&
 
  intarr(1,:)=natfixz_(:)
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'natfixz','INT',0)
+ 
+ intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%natnd
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'natnd','INT',0)
 
  intarr(1,:)=dtsets(0:ndtset_alloc)%natom
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'natom','INT',0,forceprint=2)
