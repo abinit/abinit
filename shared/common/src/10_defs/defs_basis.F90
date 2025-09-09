@@ -259,6 +259,7 @@ module defs_basis
 !EB suppress *0.5_dp  ! Atomic unit of induction field (in Tesla) * mu_B (in atomic units).
  real(dp), parameter :: mu_B_SI=9.274009994D-24   ! Bohr magneton in SI
  real(dp), parameter :: mu_B = 0.5_dp             ! Bohr magneton in atomic units
+ real(dp), parameter :: mu_0_SI = 1.25663706127d-6  ! Vacuum permeability in atomic units
 
 !Complex constants
  !double precision
