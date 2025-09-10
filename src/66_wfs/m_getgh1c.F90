@@ -35,7 +35,7 @@ module m_getgh1c
  use defs_abitypes, only : MPI_type
  use defs_datatypes, only : pseudopotential_type
  use m_time,        only : timab
- use m_fstrings,    only : sjoin, ltoa
+ use m_fstrings,    only : sjoin, ltoa, itoa
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, &
                            pawcprj_copy, pawcprj_lincom, pawcprj_axpby, pawcprj_mpi_sum
  use m_kg,          only : kpgstr, mkkin, mkkpg, mkkin_metdqdq
@@ -215,26 +215,16 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 
  ! Check sizes
  my_nspinor=max(1,gs_hamkq%nspinor/mpi_enreg%nproc_spinor)
- if (size(cwave)<2*npw*my_nspinor*ndat) then
-   ABI_BUG('wrong size for cwave!')
- end if
- if (size(gh1c)<2*npw1*my_nspinor*ndat) then
-   ABI_BUG('wrong size for gh1c!')
- end if
+ ABI_CHECK_IGEQ(size(cwave), 2*npw*my_nspinor*ndat, 'wrong size for cwave!')
+ ABI_CHECK_IGEQ(size(gh1c), 2*npw1*my_nspinor*ndat, 'wrong size for gh1c!')
  if (usevnl/=0) then
-   if (size(gvnlx1)<2*npw1*my_nspinor*ndat) then
-     ABI_BUG('wrong size for gvnlx1!')
-   end if
+   ABI_CHECK_IGEQ(size(gvnlx1), 2*npw1*my_nspinor*ndat, 'wrong size for gvnlx1!')
  end if
  if (sij_opt==1) then
-   if (size(gs1c)<2*npw1*my_nspinor*ndat) then
-     ABI_BUG('wrong size for gs1c!')
-   end if
+   ABI_CHECK_IGEQ(size(gs1c), 2*npw1*my_nspinor*ndat, 'wrong size for gs1c!')
  end if
  if (berryopt>=4) then
-   if (size(grad_berry)<2*npw1*my_nspinor*ndat) then
-     ABI_BUG('wrong size for grad_berry!')
-   end if
+   ABI_CHECK_IGEQ(size(grad_berry), 2*npw1*my_nspinor*ndat, 'wrong size for grad_berry!')
  end if
 
  ! PAW: specific treatment for usecprj input arg
@@ -244,9 +234,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    if (size(cwaveprj)==0) usecprj=0
    if (usecprj/=0) then
      ncpgr=cwaveprj(1,1)%ncpgr
-     if (size(cwaveprj)<gs_hamkq%natom*my_nspinor*ndat) then
-       ABI_BUG('wrong size for cwaveprj!')
-     end if
+     ABI_CHECK_IGEQ(size(cwaveprj), gs_hamkq%natom*my_nspinor*ndat, 'wrong size for cwaveprj!')
      if(gs_hamkq%usepaw==1.and.(ipert>=0.and.(ipert<=natom.or.ipert==natom+3.or.ipert==natom+4))) then
        if (ncpgr/=1)then
          ABI_BUG('Projected WFs (cprj) derivatives are not correctly stored !')
@@ -303,6 +291,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,ndat,gs_hamkq%ngfft,&
        npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
        gpu_option=gs_hamkq%gpu_option)
+
      if(gs_hamkq%nspinor==2)then
        ABI_MALLOC(cwave_sp,(2,npw))
        ABI_MALLOC(gh1c_sp,(2,npw1))
@@ -322,7 +311,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        end do
        ABI_FREE(cwave_sp)
        ABI_FREE(gh1c_sp)
-     end if
+     end if ! nspinor == 2
+
    else
      ! Non-Collinear magnetism for nvloc=4
      if (gs_hamkq%nspinor==2) then

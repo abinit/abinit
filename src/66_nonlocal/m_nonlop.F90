@@ -260,13 +260,13 @@ contains
 !!      not available
 !! ==== if (signs==2) ====
 !! --if (paw_opt=0)
-!!    vectout(2,npwout*my_nspinor*ndat)=result of the aplication of the concerned operator
+!!    vectout(2,npwout*my_nspinor*ndat)=result of the application of the concerned operator
 !!                or one of its derivatives to the input vect.
 !!      if (choice=22) <G|d2V_nonlocal/d(atm. pos)dq|vect_in> (at q=0)
 !!      if (choice=25) <G|d3V_nonlocal/d(atm. pos)dqdq|vect_in> (at q=0)
 !!      if (choice=33) <G|d2V_nonlocal/d(strain)dq|vect_in> (at q=0)
 !! --if (paw_opt=0, 1 or 4)
-!!    vectout(2,npwout*my_nspinor*ndat)=result of the aplication of the concerned operator
+!!    vectout(2,npwout*my_nspinor*ndat)=result of the application of the concerned operator
 !!                or one of its derivatives to the input vect.:
 !!      if (choice=1)  <G|V_nonlocal|vect_in>
 !!      if (choice=2)  <G|dV_nonlocal/d(atm. pos)|vect_in>
@@ -289,7 +289,7 @@ contains
 !!      if (choice=8)  <G|d2[V_nonlocal-lamdba.(I+S)]/d(k)d(k)|vect_in>
 !!      if (choice=81) <G|d[d(right[V_nonlocal-lamdba.(I+S)]/d(k)]/d(k)|vect_in>
 !! --if (paw_opt=3 or 4)
-!!    svectout(2,npwout*my_nspinor*ndat)=result of the aplication of Sij (overlap matrix)
+!!    svectout(2,npwout*my_nspinor*ndat)=result of the application of Sij (overlap matrix)
 !!                  or one of its derivatives to the input vect.:
 !!      if (choice=1)  <G|I+S|vect_in>
 !!      if (choice=2)  <G|dS/d(atm. pos)|vect_in>
@@ -444,6 +444,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  end if
  nkpgin=0;nkpgout=0;nullify(kpgin);nullify(kpgout)
  nullify(ph3din);nullify(ph3dout)
+ !print *, "in nonlop with select_k:", select_k_
 
  if (select_k_==KPRIME_H_K) then
 !  ===== <k^prime|Vnl|k> =====
@@ -1076,7 +1077,7 @@ end subroutine nonlop
 !!    not available
 !! ==== if (signs==2) ====
 !! --if (paw_opt=0, 1 or 4)
-!!    vectout(2,npwout*nspinor)=result of the aplication of the concerned operator
+!!    vectout(2,npwout*nspinor)=result of the application of the concerned operator
 !!                or one of its derivatives to the input vect.:
 !!      if (choice=1) <G|V_nonlocal|vect_start>
 !!      if (choice=2) <G|dV_nonlocal/d(atm coord)|vect_start>
@@ -1087,7 +1088,7 @@ end subroutine nonlop
 !!      if (choice=2) <G|d[V_nonlocal-lamdba.(I+S)]/d(atm coord)|vect_start>
 !!      if (choice=3) <G|d[V_nonlocal-lamdba.(I+S)]/d(strain)|vect_start>
 !! --if (paw_opt=3 or 4)
-!!    svectout(2,npwout*nspinor)=result of the aplication of Sij (overlap matrix)
+!!    svectout(2,npwout*nspinor)=result of the application of Sij (overlap matrix)
 !!                  or one of its derivatives to the input vect.:
 !!      if (choice=1) <G|I+S|vect_start>
 !!      if (choice=2) <G|dS/d(atm coord)|vect_start>
