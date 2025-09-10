@@ -133,7 +133,8 @@ contains
 
 subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
                    gvnlx1,idir,ipert,lambda,mpi_enreg,ndat,optlocal,optnl,opt_gvnlx1,&
-                   rf_hamkq,sij_opt,tim_getgh1c,usevnl,conj)
+                   rf_hamkq,sij_opt,tim_getgh1c,usevnl, &
+                   conj) ! optional
 
 !Arguments ------------------------------------
 !scalars
