@@ -25858,7 +25858,6 @@ In order to reduce the number of SCF iterations and the computational cost,
 we recommend using [[toldfe]] as stopping criterion.
 Also, the convergence of the SCF cycle may be significantly improved by increasing [[nline]] to e.g. 12.
 
-
 !!! important
 
     The atomic magnetic moment rotates in the x-y plane (Cartesian coords.) while the z-component
@@ -25868,6 +25867,18 @@ Also, the convergence of the SCF cycle may be significantly improved by increasi
 Note that [[spinat]] gives the **initial** electronic spin-magnetization for each atom and the final
 atomic magnetization may differ from [[spinat]], unless one uses GBT in conjunction with constrained DFT
 to specify a **target value** of the magnetization (see [[constraint_kind]] and [[magconon]]).
+
+!!! important
+
+    The NC pseudopotentials provided by PseudoDojo are designed as a compromise between accuracy and efficiency,
+    and may not always be sufficient to capture the finer details of magnon dispersion or atomic magnetization
+    (even the stringent version).
+    In such cases, NC pseudopotentials with smaller core radii close to the maximum of the all-electron wavefunctions
+    are usually required for the d or f channels, though this comes at the cost of a higher [[ecut]] value.
+
+    For this reason, we recommend comparing NC results with other ab initio codes that implement the GBT using
+    either all-electron or PAW methods, and, when necessary, generating customized pseudopotentials for the magnetic species,
+    starting from the input files available on the PseudoDojo website.
 """,
 ),
 

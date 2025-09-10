@@ -364,7 +364,6 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      nctkarr_t("phdispl_cart", "dp", "two, three, natom, natom3, nq_path"), &
      nctkarr_t("eph_fix_korq", "c", "one"), &
      nctkarr_t("eph_fix_wavevec", "dp", "three") &
-     !nctkarr_t("gstore_gmode", "c", "fnlen"), &                    ! FIXME fnlen
    ])
    NCF_CHECK(ncerr)
 
@@ -424,9 +423,9 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
    do my_ik=1,my_nkpath
      ik = my_ik_inds(my_ik); kk = kpath%points(:, ik)
 
-     ! Compute u_{nk}(g)
-     ! NB: The Hamiltonian has pointers to the *_k arrays in output so we cannot deallocate them till the end.
-     ! This is the reason why we use vlocal_k (vlocal_kq) although this term does not depend on k
+     ! Prepare NSCF run at k.
+     ! gs_ham_k has pointers to the *_k arrays in output so we cannot deallocate them till the end.
+     ! This is the reason why we use vlocal_k although this term does not depend on k
      call nscf%setup_kpt(spin, kk, istwfk_1, nband, cryst, dtset, psps, pawtab, pawfgr, &              ! in
                          npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal_k, cg_k, gsc_k, gs_ham_k) ! out
 
@@ -434,6 +433,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      use_cg_k = (my_ik > 1 .and. ucache_k%use_cache)
      if (use_cg_k) call ucache_k%get_kpt(kk, istwfk_1, npw_k, nspinor, nband, kg_k, cg_k)
 
+     ! Compute u_{nk}(g)
      call nscf%solve_kpt(spin, kk, istwfk_1, nband, cryst, dtset, dtfil, gs_ham_k, &
                          use_cg_k, npw_k, cg_k, gsc_k, eig_k, msg, ierr)
 
@@ -459,7 +459,9 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        iq = my_iq_inds(my_iq); qq = qpath%points(:,iq); qq_is_gamma = sum(qq**2) < tol14
        kq = kk + qq
 
-       ! Compute u_{m k+q}(g)
+       ! Prepare NSCF run at k+q
+       ! gs_ham_kq has pointers to the *_kq arrays in output so we cannot deallocate them till the end.
+       ! This is the reason why we use vlocal_kq although this term does not depend on k+q.
        call nscf%setup_kpt(spin, kq, istwfk_1, nband, cryst, dtset, psps, pawtab, pawfgr, &                         ! in
                            npw_kq, kg_kq, kpg_kq, ph3d_kq, kinpw_kq, ffnl_kq, vlocal_kq, cg_kq, gsc_kq, gs_ham_kq)  ! out
 
@@ -472,6 +474,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
          use_cg_kq = .True.; cg_kq = cg_k
        end if
 
+       ! Compute u_{m k+q}(g)
        call nscf%solve_kpt(spin, kq, istwfk_1, nband, cryst, dtset, dtfil, gs_ham_kq, &
                            use_cg_kq, npw_kq, cg_kq, gsc_kq, eig_kq, msg, ierr)
 
@@ -531,13 +534,13 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        !call gs_ham_kq%load_kprime(kpt_kp=kq, npw_kp=npw_kq, istwf_kp=istwfk_1, kg_kp=kg_kq, kpg_kp=kpg_kq, &
        !                           ph3d_kp=ph3d_kq, ffnl_kp=ffnl_kq, compute_ph3d=.false., compute_gbound=.true.)
 
-       call gs_ham_k%print([std_out], "gs_ham_k before load_kprim", dtset%prtvol)
+       !call gs_ham_k%print([std_out], "gs_ham_k before load_kprime", dtset%prtvol)
        !call gs_ham_k%load_k(kpt_k=kk, npw_k=npw_k, istwf_k=istwfk_1, kg_k=kg_k, kpg_k=kpg_k, kinpw_k=kinpw_k, &
        !                     ph3d_k=ph3d_k, ffnl_k=ffnl_k, compute_ph3d=.true., compute_gbound=.true.)
 
        call gs_ham_k%load_kprime(kpt_kp=kq, npw_kp=npw_kq, istwf_kp=istwfk_1, kg_kp=kg_kq, kpg_kp=kpg_kq, kinpw_kp=kinpw_kq, &
                                  ph3d_kp=ph3d_kq, ffnl_kp=ffnl_kq, compute_ph3d=.true., compute_gbound=.true.)
-       call gs_ham_k%print([std_out], "gs_ham_k after load", dtset%prtvol)
+       !call gs_ham_k%print([std_out], "gs_ham_k after load", dtset%prtvol)
 
        ! Loop over my atomic perturbations: apply H1_{kappa, alpha} and compute gkq_atm.
        gkq_atm = zero
@@ -565,10 +568,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
                         optnl, opt_gvnlx1, rf_ham_kq, sij_opt, tim_getgh1c, usevnl)
          end do ! in_k
 
-         call rf_ham_kq%free()
-
          ! Calculate <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation. No need to handle istwf_kq because it's always 1.
-!$OMP PARALLEL DO COLLAPSE(2) PRIVATE(band_m)
+         !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(band_m)
          do in_k=1,nb_in_g
            do im_kq=1,nb_in_g
              band_m = im_kq + bstart - 1
@@ -603,7 +604,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        ABI_FREE(cg_kq)
        ABI_FREE(gsc_kq)
        ABI_FREE(h1kets_kq)
-       call gs_ham_kq%free()
+       call gs_ham_kq%free(); call rf_ham_kq%free()
      end do ! my_iq
 
      ABI_FREE(vlocal)
