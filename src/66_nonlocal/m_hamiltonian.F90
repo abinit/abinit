@@ -522,12 +522,12 @@ module m_hamiltonian
   real(dp), allocatable :: e1kbfr_spin(:,:,:,:,:)
    ! e1kbfr_spin(dimekb1,dimekb2,nspinor**2,cplex,my_nsppol)
    ! Contains the values of e1kbfr array for all spins treated by current process
-   ! See e1kbfr description ; e1kbfr is pointer to e1kbfr_spin(:,:,:,:,isppol)
+   ! See e1kbfr description; e1kbfr is pointer to e1kbfr_spin(:,:,:,:,isppol)
 
   real(dp), allocatable :: e1kbsc_spin(:,:,:,:,:)
    ! e1kbsc_spin(dimekb1,dimekb2,nspinor**2,cplex,my_nsppol)
    ! Contains the values of e1kbsc array for all spins treated by current process
-   ! See e1kbsc description ; e1kbsc is pointer to e1kbsc_spin(:,:,:,:,isppol)
+   ! See e1kbsc description; e1kbsc is pointer to e1kbsc_spin(:,:,:,:,isppol)
 
 ! ===== Real pointers
 
@@ -1289,12 +1289,12 @@ end subroutine gsham_load_kprime
 !!
 !! SOURCE
 
-subroutine gsham_eph_setup_k(ham, which_k, kk, istwf_k, npw_k, kg_k, dtset, cryst, psps, &  ! in
+subroutine gsham_eph_setup_k(gs_ham, which_k, kk, istwf_k, npw_k, kg_k, dtset, cryst, psps, &  ! in
                              nkpg_k, kpg_k, ffnl_k, kinpw_k, ph3d_k, comm)                  ! out
 
 !Arguments ------------------------------------
 !scalars
- class(gs_hamiltonian_type),intent(inout) :: ham
+ class(gs_hamiltonian_type),intent(inout) :: gs_ham
  character(len=*),intent(in) :: which_k
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
@@ -1332,16 +1332,16 @@ subroutine gsham_eph_setup_k(ham, which_k, kk, istwf_k, npw_k, kg_k, dtset, crys
  ABI_CALLOC(kinpw_k, (npw_k))
  call mkkin(dtset%ecut, dtset%ecutsm, dtset%effmass_free, cryst%gmet, kg_k, kinpw_k, kk, npw_k, 0, 0)
 
- ABI_MALLOC(ph3d_k, (2, npw_k, ham%matblk))
+ ABI_MALLOC(ph3d_k, (2, npw_k, gs_ham%matblk))
 
  ! Load the k dependent parts of the Hamiltonian
  select case (which_k)
  case ("k")
-   call ham%load_k(kpt_k=kk, npw_k=npw_k, istwf_k=istwf_k, kg_k=kg_k, kpg_k=kpg_k, kinpw_k=kinpw_k, &
-                   ph3d_k=ph3d_k, ffnl_k=ffnl_k, compute_ph3d=.true., compute_gbound=.true.)
+   call gs_ham%load_k(kpt_k=kk, npw_k=npw_k, istwf_k=istwf_k, kg_k=kg_k, kpg_k=kpg_k, kinpw_k=kinpw_k, &
+                      ph3d_k=ph3d_k, ffnl_k=ffnl_k, compute_ph3d=.true., compute_gbound=.true.)
  case ("kq")
-   call ham%load_kprime(kpt_kp=kk, npw_kp=npw_k, istwf_kp=istwf_k, kg_kp=kg_k, kpg_kp=kpg_k, kinpw_kp=kinpw_k, &
-                        ph3d_kp=ph3d_k, ffnl_kp=ffnl_k, compute_ph3d=.true., compute_gbound=.true.)
+   call gs_ham%load_kprime(kpt_kp=kk, npw_kp=npw_k, istwf_kp=istwf_k, kg_kp=kg_k, kpg_kp=kpg_k, kinpw_kp=kinpw_k, &
+                           ph3d_kp=ph3d_k, ffnl_kp=ffnl_k, compute_ph3d=.true., compute_gbound=.true.)
  case default
    ABI_ERROR(sjoin("Invalid value for which_k:", which_k))
  end select
@@ -1718,8 +1718,8 @@ end subroutine rfham_free
 !!
 !! SOURCE
 
-subroutine rfham_init(rf_ham, cplex,gs_Ham,ipert,&
-                      comm_atom,mpi_atmtab,mpi_spintab,paw_ij1,has_e1kbsc) ! optional arguments
+subroutine rfham_init(rf_ham, cplex, gs_Ham, ipert,&
+                      comm_atom, mpi_atmtab, mpi_spintab, paw_ij1, has_e1kbsc) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -1865,7 +1865,7 @@ end subroutine rfham_init
 !! SOURCE
 
 subroutine rfham_load_spin(rf_Ham, isppol, &
-                           vectornd,vlocal1,vxctaulocal,with_nonlocal) ! optional
+                           vectornd, vlocal1, vxctaulocal, with_nonlocal) ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -1896,8 +1896,8 @@ subroutine rfham_load_spin(rf_Ham, isppol, &
  end if
 
  if (present(vxctaulocal)) then
-    ABI_CHECK_IEQ(size(vxctaulocal), rf_Ham%n4*rf_Ham%n5*rf_Ham%n6*rf_Ham%nvloc*4, "Wrong vxctaulocal")
-    rf_Ham%vxctaulocal => vxctaulocal
+   ABI_CHECK_IEQ(size(vxctaulocal), rf_Ham%n4*rf_Ham%n5*rf_Ham%n6*rf_Ham%nvloc*4, "Wrong vxctaulocal")
+   rf_Ham%vxctaulocal => vxctaulocal
  end if
 
  ! Retrieve non-local factors for this spin component
@@ -2130,7 +2130,7 @@ subroutine pawdij2e1kb(paw_ij1,isppol,comm_atom,mpi_atmtab,e1kbfr,e1kbsc)
          iatom_tot=iatom;if (paral_atom) iatom_tot=my_atmtab(iatom)
          qphase=paw_ij1(iatom)%qphase
          dimdij1=paw_ij1(iatom)%cplex_dij*paw_ij1(iatom)%lmn2_size
-         ABI_CHECK(dimdij1<=dime1kb1,'BUG: size of paw_ij1%dij>dime1kb1!')
+         ABI_CHECK(dimdij1<=dime1kb1, 'BUG: size of paw_ij1%dij>dime1kb1!')
          e1kbsc(1:dimdij1,iatom_tot,ispden,1)=paw_ij1(iatom)%dij  (1:dimdij1,isp) &
 &                                            -paw_ij1(iatom)%dijfr(1:dimdij1,isp)
          if (qphase==2) e1kbsc(1:dimdij1,iatom_tot,ispden,2)=paw_ij1(iatom)%dij  (dimdij1+1:2*dimdij1,isp) &
