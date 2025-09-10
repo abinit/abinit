@@ -3181,7 +3181,7 @@ if (.not. present(orb_mom_atom)) then
     call wrtout([std_out, ab_out], message)
    write(message,*) '--------------------------------------------------------------------------------------------'
     call wrtout([std_out, ab_out], message)
-   write(message,*) '   Atom  orbital   |orbmag|    orbmag(x)   orbmag(y)   orbmag(z)  orbmag(theta) orbmag(phi)  '
+   write(message,*) '   Atom  orbital   |orbmag|    orbmag(x)   orbmag(y)   orbmag(z) orbmag(theta) orbmag(phi)  '
     call wrtout([std_out, ab_out], message)
    write(message,*) '--------------------------------------------------------------------------------------------'
     call wrtout([std_out, ab_out], message)
@@ -3403,9 +3403,9 @@ call vcart2ylm(orb_mom, orbmag_r, orbmag_theta, orbmag_phi)
 call atomdata_from_znucl(atom, znucl(typat(my_iatom)))
 if (.not. present(orb_mom_atom)) then
   if (my_lcur==1) then
-      write(message,'(i5,a3,a8,3f12.6,3f13.6)') my_iatom,atom%symbol, orb_char(my_lcur:my_lcur),orbmag_r, orb_mom(1),orb_mom(2),orb_mom(3),orbmag_theta,orbmag_phi
+      write(message,'(i5,a3,a8,4f12.6,2f13.6)') my_iatom,atom%symbol, orb_char(my_lcur:my_lcur),orbmag_r, orb_mom(1),orb_mom(2),orb_mom(3),orbmag_theta,orbmag_phi
   else
-      write(message,'(a5,a11,3f12.6,3f13.6)') '', orb_char(my_lcur:my_lcur), orbmag_r,orb_mom(1),orb_mom(2),orb_mom(3) ,orbmag_theta,orbmag_phi
+      write(message,'(a5,a11,4f12.6,2f13.6)') '', orb_char(my_lcur:my_lcur), orbmag_r,orb_mom(1),orb_mom(2),orb_mom(3) ,orbmag_theta,orbmag_phi
   end if
 
   call wrtout([std_out, ab_out], message)
@@ -3428,7 +3428,9 @@ end do   !!!!!!!!! END DO natoms
 
 call vcart2ylm(sum_orb_mom(1:3), orbmag_r, orbmag_theta, orbmag_phi)
 if (.not. present(orb_mom_atom)) then
-    write(message,'(a,3f12.6,3f13.6)') ' Total (sum)    ', orbmag_r,sum_orb_mom(1),sum_orb_mom(2),sum_orb_mom(3),orbmag_theta, orbmag_phi
+    write(message,'(a,3f12.6)') ' Sum (cart.coord.)          ', sum_orb_mom(1),sum_orb_mom(2),sum_orb_mom(3)
+    call wrtout([std_out, ab_out], message)
+    write(message,'(a,1f11.6,a,2f13.6)') '     (sph.coord.)', orbmag_r,'                                    ',orbmag_theta, orbmag_phi
     call wrtout([std_out, ab_out], message)
     write(message,*) '--------------------------------------------------------------------------------------------'
     call wrtout([std_out, ab_out], message)

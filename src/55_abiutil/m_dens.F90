@@ -2060,10 +2060,12 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
        call wrtout(units,msg)
        do iatom=1,natom
          call atomdata_from_znucl(atom, znucl(typat(iatom)))
-         write(msg, '(i5,a3,f15.5,f20.8)' ) iatom,atom%symbol,ratsph(typat(iatom)),intgden(1,1,iatom)
+         write(msg, '(i5,f15.5,f20.8)' ) iatom,ratsph(typat(iatom)),intgden(1,1,iatom)
+         !write(msg, '(i5,a3,f15.5,f20.8)' ) iatom,atom%symbol,ratsph(typat(iatom)),intgden(1,1,iatom)
          if(option==21)then
            ! There is a change of sign to get the gradient wrt chrgat.
-           write(msg, '(i5,a3,f15.5,f20.8)' ) iatom,atom%symbol,ratsph(typat(iatom)),-intgden(1,1,iatom)
+           write(msg, '(i5,f15.5,f20.8)' ) iatom,ratsph(typat(iatom)),-intgden(1,1,iatom)
+           !write(msg, '(i5,a3,f15.5,f20.8)' ) iatom,atom%symbol,ratsph(typat(iatom)),-intgden(1,1,iatom)
          endif
          !If option=1, print atomic charge
          if(option==1 .and. present(ziontypat))then
