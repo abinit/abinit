@@ -3205,7 +3205,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  real(dp),allocatable :: grad_berry(:,:), kinpw_k(:), kinpw_kq(:), kpg_kq(:,:), kpg_k(:,:)
  real(dp),allocatable :: ffnl_k(:,:,:,:), ffnl_kq(:,:,:,:), ph3d_k(:,:,:), ph3d_kq(:,:,:)
  real(dp),allocatable :: v1scf(:,:,:,:), gkq_atm(:,:,:,:), gkq_nu(:,:,:,:)
- real(dp),allocatable :: bras_kq(:,:,:), kets_k(:,:,:), h1kets_kq(:,:,:), cgwork(:,:)
+ real(dp),allocatable :: bras_kq(:,:,:), kets_k(:,:,:), h1_kets_kq(:,:,:), cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1(:,:,:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:), gvnlx1(:,:), work(:,:,:,:)
  real(dp),allocatable :: gs1c_kq(:,:), vk_cart_ibz(:,:,:) !, vkmat_cart_ibz(:,:,:,:)
@@ -3535,7 +3535,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    nb = gqk%nb
    ABI_MALLOC(bras_kq, (2, mpw*nspinor, nb))
    ABI_MALLOC(kets_k, (2, mpw*nspinor, nb))
-   ABI_MALLOC(h1kets_kq, (2, mpw*nspinor, nb))
+   ABI_MALLOC(h1_kets_kq, (2, mpw*nspinor, nb))
 
    ABI_MALLOC(iq_buf, (2, qbuf_size))
    ABI_MALLOC(gkq_atm, (2, nb, nb, natom3))
@@ -3690,7 +3690,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
          call rf_ham_kq%init(cplex, gs_ham_kq, ipert, has_e1kbsc=.true.)
          call rf_ham_kq%load_spin(spin, vlocal1=vlocal1(:,:,:,:,my_ip), with_nonlocal=.true.)
 
-         ! Calculate dvscf * psi_k, results stored in h1kets_kq on the k+q sphere.
+         ! Calculate dvscf * psi_k, results stored in h1_kets_kq on the k+q sphere.
          ! Compute H(1) applied to GS wavefunction Psi(0)
          do in_k=1,nband_k
            band_k = in_k + bstart_k - 1
@@ -3698,7 +3698,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
            ! Use scissor shift on 0-order eigenvalue
            eshift = eig0nk - dtset%dfpt_sciss
 
-           call getgh1c(berryopt0, kets_k(:,:,in_k), cwaveprj0, h1kets_kq(:,:,in_k), &
+           call getgh1c(berryopt0, kets_k(:,:,in_k), cwaveprj0, h1_kets_kq(:,:,in_k), &
                         grad_berry, gs1c_kq, gs_ham_kq, gvnlx1, idir, ipert, [eshift], mpi_enreg, ndat1, optlocal, &
                         optnl, opt_gvnlx1, rf_ham_kq, sij_opt, tim_getgh1c, usevnl)
          end do
@@ -3709,7 +3709,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 !$OMP PARALLEL DO COLLAPSE(2)
          do in_k=1,nband_k
            do im_kq=1,nband_kq
-             gkq_atm(:, im_kq, in_k, ipc) = cg_zdotc(npw_kq*nspinor, bras_kq(1,1,im_kq), h1kets_kq(1,1,in_k))
+             gkq_atm(:, im_kq, in_k, ipc) = cg_zdotc(npw_kq*nspinor, bras_kq(1,1,im_kq), h1_kets_kq(1,1,in_k))
            end do
          end do
 
@@ -3781,7 +3781,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    ABI_FREE(my_gbuf)
    ABI_FREE(bras_kq)
    ABI_FREE(kets_k)
-   ABI_FREE(h1kets_kq)
+   ABI_FREE(h1_kets_kq)
    ABI_FREE(gkq_atm)
    ABI_FREE(gkq_nu)
  end do ! my_is
@@ -3794,7 +3794,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_completed"), 1))
  !end if
  NCF_CHECK(nf90_sync(root_ncid))
- call xmpi_barrier(gstore%comm)
+ !call xmpi_barrier(gstore%comm)
  NCF_CHECK(nf90_close(root_ncid))
  call xmpi_barrier(gstore%comm)
 

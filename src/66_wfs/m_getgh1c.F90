@@ -1225,7 +1225,6 @@ subroutine getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kpoint, kpq, idir, ipe
  !real(dp) :: cpu, wall, gflops
 !arrays
  real(dp) :: ylmgr_dum(1,1,1), tsec(2)
-
 ! *************************************************************************
 
  ! MG: This routine is called **many times** in the EPH code for phonon and DDK perturbations
@@ -1436,8 +1435,8 @@ subroutine getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kpoint, kpq, idir, ipe
    call gs_hamkq%load_k(ffnl_k=ffnl1)
  end if
 
-  ! Load k+q-dependent part in the Hamiltonian datastructure
-  ! Note: istwf_k is imposed to 1 for RF calculations (should use istwf_kq instead)
+ ! Load k+q-dependent part in the Hamiltonian datastructure
+ ! Note: istwf_k is imposed to 1 for RF calculations (should use istwf_kq instead)
  call gs_hamkq%load_kprime(kpt_kp=kpq,npw_kp=npw1_k,istwf_kp=istwf_k,&
    kinpw_kp=kinpw1,kg_kp=kg1_k,kpg_kp=kpg1_k,ffnl_kp=ffnl1,compute_gbound=.true.)
 
@@ -1696,8 +1695,6 @@ end subroutine getdc1
 !!  gh1dqc(2,npw1*nspinor)= <G|dH^(1)/dq_{\gamma}|C> on the k+q sphere
 !!  gvloc1dqc(2,npw1*nspinor)= local potential part of gh1dqc
 !!  gvnl1dqc(2,npw1*nspinor)= non local potential part of gh1dqc
-!!
-!! SIDE EFFECTS
 !!
 !! NOTES
 !!  Currently two Hamiltonian gradients at (q=0) are implemented:
