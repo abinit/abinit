@@ -566,7 +566,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
      ABI_MALLOC(gvnlx1_saved,(2,npw1*nspinor))
      gvnlx1_saved(:,:) = gvnlx1(:,:)
    end if
-   call getgh1c(berryopt,cwave0,cwaveprj0,gh1c,gberry,gs1c,gs_hamkq,gvnlx1,idir,ipert,(/eshift/),&
+   call getgh1c(berryopt,cwave0,cwaveprj0,gh1c,gberry,gs1c,gs_hamkq,gvnlx1,idir,ipert,[eshift],&
      mpi_enreg,1,optlocal,optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
 
    if (gen_eigenpb) then

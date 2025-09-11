@@ -2600,7 +2600,6 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psp
  ! Allocate output buffers.
  ABI_MALLOC(cg_k, (2, npw_k*nspinor, nband_k))
  ABI_MALLOC(gsc_k, (2, npw_k*nspinor, nband_k*dtset%usepaw))
-
  end associate
 
 end subroutine nscf_setup_kpt
@@ -2726,7 +2725,8 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
    ! Exit loop over inonsc if converged
    if (max_resid < dtset%tolwfr) then
      ierr = 0
-     msg = sjoin(" NSCF for kpt:", ktoa(kpt), " completed in", itoa(inonsc), "steps. max_resid:", ftoa(max_resid))
+     msg = sjoin(" NSCF for kpt:", ktoa(kpt), "spin:", itoa(isppol))
+     msg = sjoin(msg, ", completed in: ", itoa(inonsc), "steps. max_resid:", ftoa(max_resid))
      call wrtout(std_out, msg)
 
      ! Print energies and residuals
@@ -2742,7 +2742,8 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
  end do ! inonsc (NON SELF-CONSISTENT LOOP)
 
  if (ierr /= 0) then
-   msg = sjoin(" NSCF run for kpt:", ktoa(kpt), "didn't converge after", itoa(dtset%nstep), " steps", ch10)
+   msg = sjoin(" NSCF run for kpt:", ktoa(kpt), "spin", itoa(isppol))
+   msg = sjoin(msg, " didn't converge after", itoa(dtset%nstep), " steps", ch10)
    msg = sjoin(msg, "max_resid:", ftoa(max_resid), " >= tolwfr:", ftoa(dtset%tolwfr))
  end if
 

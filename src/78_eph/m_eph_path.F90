@@ -144,7 +144,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  real(dp),allocatable :: grad_berry(:,:), kinpw_k(:), kinpw_kq(:)
  real(dp),allocatable :: cg_k(:,:,:), cg_kq(:,:,:), gsc_k(:,:,:), gsc_kq(:,:,:),eig_k(:), eig_kq(:)
  real(dp),allocatable :: v1scf(:,:,:,:), vlocal1(:,:,:,:), vlocal(:,:,:,:), gkq_atm(:,:,:,:), gkq_nu(:,:,:,:), gkq2_nu(:,:,:)
- real(dp),allocatable :: gvnlx1(:,:), gs1c(:,:), h1kets_kq(:,:,:), displ_cart(:,:,:,:),displ_red_qq(:,:,:,:)
+ real(dp),allocatable :: gvnlx1(:,:), gs1c(:,:), h1_kets_kq(:,:,:), displ_cart(:,:,:,:),displ_red_qq(:,:,:,:)
  real(dp),allocatable :: kpg_k(:,:), ph3d_k(:,:,:), ffnl_k(:,:,:,:), vlocal_k(:,:,:,:)
  real(dp),allocatable :: kpg_kq(:,:), ph3d_kq(:,:,:), ffnl_kq(:,:,:,:), vlocal_kq(:,:,:,:), real_vec(:)
  logical :: reorder, periods(ndims), keepdim(ndims)
@@ -422,6 +422,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
    ! Loop over k-points in k-path (MPI parallelized).
    do my_ik=1,my_nkpath
      ik = my_ik_inds(my_ik); kk = kpath%points(:, ik)
+     !print *, "ik, kk", ik, kk
 
      ! Prepare NSCF run at k.
      ! gs_ham_k has pointers to the *_k arrays in output so we cannot deallocate them till the end.
@@ -458,6 +459,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      do my_iq=1,my_nqpath
        iq = my_iq_inds(my_iq); qq = qpath%points(:,iq); qq_is_gamma = sum(qq**2) < tol14
        kq = kk + qq
+       !print *, "iq, kq", iq, kq
 
        ! Prepare NSCF run at k+q.
        ! gs_ham_kq has pointers to the *_kq arrays in output so we cannot deallocate them till the end.
@@ -507,7 +509,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        ! For PAW, one has to solve a generalized eigenproblem.
        gen_eigenpb = psps%usepaw == 1; sij_opt = 0; if (gen_eigenpb) sij_opt = 1
        ABI_MALLOC(gs1c, (2, npw_kq*nspinor*((sij_opt+1)/2)))
-       ABI_MALLOC(h1kets_kq, (2, npw_kq*nspinor, nb_in_g))
+       ABI_MALLOC(h1_kets_kq, (2, npw_kq*nspinor, nb_in_g))
 
        ! ====================================
        ! Get DFPT potentials for this q-point
@@ -546,7 +548,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
          ! Load k-dependent part in the 1st-order Hamiltonian datastructure
          !call rf_ham_kq%load_k(npw_k=npw_k)
 
-         ! Calculate dvscf * psi_k, results stored in h1kets_kq on the k+q sphere.
+         ! Calculate dvscf * psi_k, results stored in h1_kets_kq on the k+q sphere.
          ! Compute H(1) applied to GS wavefunction Psi(0).
          do in_k=1,nb_in_g
            band_n = in_k + bstart - 1
@@ -554,7 +556,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
            ! Use scissor shift on 0-order eigenvalue.
            eshift = eig0nk - dtset%dfpt_sciss
 
-           call getgh1c(berryopt0, cg_k(:,:,band_n), cwaveprj0, h1kets_kq(:,:,in_k), &
+           call getgh1c(berryopt0, cg_k(:,:,band_n), cwaveprj0, h1_kets_kq(:,:,in_k), &
                         grad_berry, gs1c, gs_ham_k, gvnlx1, idir, ipert, [eshift], nscf%mpi_enreg, ndat1, optlocal, &
                         optnl, opt_gvnlx1, rf_ham_kq, sij_opt, tim_getgh1c, usevnl)
          end do ! in_k
@@ -562,10 +564,10 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
          ! Calculate <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation. No need to handle istwf_kq because it's always 1.
          !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(band_m)
          do in_k=1,nb_in_g
-           !print *, "maxval(abs(h1kets_kq(:,:,in_k))): ", maxval(abs(h1kets_kq(:,:,in_k)))
+           !print *, "maxval(abs(h1_kets_kq(:,:,in_k))): ", maxval(abs(h1_kets_kq(:,:,in_k)))
            do im_kq=1,nb_in_g
              band_m = im_kq + bstart - 1
-             gkq_atm(:, im_kq, in_k, ipc) = cg_zdotc(npw_kq*nspinor, cg_kq(:,:,band_m), h1kets_kq(:,:,in_k))
+             gkq_atm(:, im_kq, in_k, ipc) = cg_zdotc(npw_kq*nspinor, cg_kq(:,:,band_m), h1_kets_kq(:,:,in_k))
            end do
          end do
 
@@ -576,9 +578,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
        ! From atom to phonon mode representation. Results stored in gkq_nu.
        call ephtk_gkknu_from_atm(nb_in_g, nb_in_g, 1, natom, gkq_atm, phfreqs, displ_red_qq, gkq_nu)
-       !print *, "gkq_atm:", gkq_atm
-       !print *, "displ_red_qq:", displ_red_qq
-       !print *, "gkq_nu:", gkq_nu
+       !print *, "gkq_atm:", gkq_atm; print *, "displ_red_qq:", displ_red_qq; print *, "gkq_nu:", gkq_nu
 
        ! Write |g|^2 for this q.
        !if (pert_comm%me == master) then
@@ -598,7 +598,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        ABI_FREE(eig_kq)
        ABI_FREE(cg_kq)
        ABI_FREE(gsc_kq)
-       ABI_FREE(h1kets_kq)
+       ABI_FREE(h1_kets_kq)
        call gs_ham_kq%free(); call rf_ham_kq%free()
      end do ! my_iq
 
@@ -726,6 +726,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  call qpt_comm%free(); call kpt_comm%free(); call pert_comm%free(); call nscf%free()
 
  call cwtime_report(" eph_path: MPI barrier before returning.", cpu_all, wall_all, gflops_all, end_str=ch10, comm=comm)
+ !stop
 
 contains
  integer function vid(var_name)

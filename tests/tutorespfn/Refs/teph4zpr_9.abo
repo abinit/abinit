@@ -30,12 +30,12 @@
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       2
     occopt =       1   xclevel =       2
--    mband =          20        mffmem =           1         mkmem =          72
+-    mband =          18        mffmem =           1         mkmem =          72
        mpw =        1304          nfft =       32768          nkpt =          72
 ================================================================================
-P This job should need less than                      41.415 Mbytes of memory.
+P This job should need less than                      38.525 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :     28.654 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
+_ WF disk file :     25.789 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
 
  DATASET    2 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
@@ -46,12 +46,12 @@ _ WF disk file :     28.654 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       2
     occopt =       1   xclevel =       2
--    mband =          20        mffmem =           1         mkmem =          72
+-    mband =          18        mffmem =           1         mkmem =          72
        mpw =        1304          nfft =       32768          nkpt =          72
 ================================================================================
-P This job should need less than                      41.415 Mbytes of memory.
+P This job should need less than                      45.380 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :     28.654 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
+_ WF disk file :     25.789 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -138,7 +138,7 @@ _ WF disk file :     28.654 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
           kptrlen      6.81917288E+01
 P           mkmem          72
             natom           2
-            nband          20
+            nband          18
            nbdbuf           8
            ndtset           2
            ndivsm1          0
@@ -151,7 +151,6 @@ P           mkmem          72
               occ      2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        2.000000  2.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000
         optdriver           7
         ph_ndivsm1          5
         ph_ndivsm2         20
@@ -187,7 +186,7 @@ P           mkmem          72
                        1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
                        0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
                       -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
-           tolwfr      1.00000000E-20
+           tolwfr      1.00000000E-22
             typat      2  1
            useylm1          0
            useylm2          1
@@ -222,7 +221,7 @@ P           mkmem          72
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
-dimensions: {natom: 2, nkpt: 72, mband: 20, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1304, }
+dimensions: {natom: 2, nkpt: 72, mband: 18, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1304, }
 cutoff_energies: {ecut:  35.0, pawecutdg:  -1.0, }
 electrons: {nelect:   1.60000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 7, eph_task: 18, }
@@ -428,7 +427,7 @@ Phonon frequencies in meV along reduced direction: [ 2.5000E-02,  2.5000E-02,  5
  5    4.548501E+01
  6    8.381291E+01
 
-Computation of g(k,q) completed. All NSCF runs converged within tolwfr: 1.000000E-20
+Computation of g(k,q) completed. All NSCF runs converged within tolwfr: 1.000000E-22
 kpoints:
 	 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 qpoints:
@@ -477,16 +476,16 @@ qpoints:
  Energies_kq in eV for spin: 1
  ene:   -6.803079E+01   -3.475922E+01   -3.475922E+01   -3.475922E+01   -1.256368E+01    4.489774E+00    4.489774E+00    4.489775E+00
  ene:    8.968733E+00    2.026551E+01    2.026551E+01    2.026551E+01    2.396501E+01    2.594326E+01    2.594326E+01    2.827164E+01
- ene:    2.827164E+01    2.827164E+01    4.210632E+01    4.211650E+01
+ ene:    2.827164E+01    2.827164E+01
  ene:   -6.803067E+01   -3.476177E+01   -3.476050E+01   -3.476050E+01   -1.254580E+01    4.382741E+00    4.470150E+00    4.470151E+00
  ene:    9.090957E+00    1.995954E+01    2.030498E+01    2.030498E+01    2.435534E+01    2.551227E+01    2.598207E+01    2.833179E+01
- ene:    2.833179E+01    2.865491E+01    4.167512E+01    4.205176E+01
+ ene:    2.833179E+01    2.865491E+01
  ene:   -6.803067E+01   -3.476210E+01   -3.476063E+01   -3.476002E+01   -1.254616E+01    4.372890E+00    4.470340E+00    4.482917E+00
  ene:    9.088146E+00    1.996546E+01    2.030323E+01    2.030656E+01    2.434375E+01    2.563232E+01    2.585284E+01    2.833155E+01
- ene:    2.836285E+01    2.863335E+01    4.162079E+01    4.205332E+01
+ ene:    2.836285E+01    2.863335E+01
  ene:   -6.803079E+01   -3.475922E+01   -3.475922E+01   -3.475922E+01   -1.256368E+01    4.489774E+00    4.489774E+00    4.489775E+00
  ene:    8.968733E+00    2.026551E+01    2.026551E+01    2.026551E+01    2.396501E+01    2.594326E+01    2.594326E+01    2.827164E+01
- ene:    2.827164E+01    2.827164E+01    4.210632E+01    4.211650E+01
+ ene:    2.827164E+01    2.827164E+01
 
 
  Writing sqrt(1/N_b^2 \sum_{mn} |g_{mn,nu}(k, q)|^2) in meV for testing purpose.
@@ -494,9 +493,9 @@ qpoints:
      1     1     1     1     0.000000E+00
      2     1     1     1     0.000000E+00
      3     1     1     1     0.000000E+00
-     4     1     1     1     1.116031E-04
-     5     1     1     1     1.979312E-04
-     6     1     1     1     1.803115E-05
+     4     1     1     1     1.116085E-04
+     5     1     1     1     1.979345E-04
+     6     1     1     1     1.803062E-05
      1     2     1     1     1.870414E+01
      2     2     1     1     1.870484E+01
      3     2     1     1     2.595196E+01
@@ -512,9 +511,9 @@ qpoints:
      1    42     1     1     0.000000E+00
      2    42     1     1     0.000000E+00
      3    42     1     1     0.000000E+00
-     4    42     1     1     1.116031E-04
-     5    42     1     1     1.979312E-04
-     6    42     1     1     1.803115E-05
+     4    42     1     1     1.116085E-04
+     5    42     1     1     1.979345E-04
+     6    42     1     1     1.803062E-05
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -523,7 +522,7 @@ qpoints:
 
 --- !DatasetInfo
 iteration_state: {dtset: 2, }
-dimensions: {natom: 2, nkpt: 72, mband: 20, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1304, }
+dimensions: {natom: 2, nkpt: 72, mband: 18, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1304, }
 cutoff_energies: {ecut:  35.0, pawecutdg:  -1.0, }
 electrons: {nelect:   1.60000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 7, eph_task: 18, }
@@ -714,7 +713,7 @@ P Cartesian grid for spin 1: (pert_comm%nproc, qpt_comm%nproc, kpt_comm%nproc) =
  Reading KS GS potential from: MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc
  Cannot find all q-points in the DVDB --> Activating Fourier interpolation.
 
-Computation of g(k,q) completed. All NSCF runs converged within tolwfr: 1.000000E-20
+Computation of g(k,q) completed. All NSCF runs converged within tolwfr: 1.000000E-22
 kpoints:
 	 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 	 2 [ 3.5714E-02,  0.0000E+00,  3.5714E-02]
@@ -763,16 +762,16 @@ qpoints:
  Energies_k in eV for spin: 1
  ene:   -6.803079E+01   -3.475922E+01   -3.475922E+01   -3.475922E+01   -1.256368E+01    4.489774E+00    4.489774E+00    4.489775E+00
  ene:    8.968733E+00    2.026551E+01    2.026551E+01    2.026551E+01    2.396501E+01    2.594326E+01    2.594326E+01    2.827164E+01
- ene:    2.827164E+01    2.827164E+01    4.210632E+01    4.212325E+01
+ ene:    2.827164E+01    2.827164E+01
  ene:   -6.803067E+01   -3.476177E+01   -3.476050E+01   -3.476050E+01   -1.254580E+01    4.382741E+00    4.470150E+00    4.470151E+00
  ene:    9.090957E+00    1.995954E+01    2.030498E+01    2.030498E+01    2.435534E+01    2.551227E+01    2.598207E+01    2.833179E+01
- ene:    2.833179E+01    2.865491E+01    4.167425E+01    4.205176E+01
+ ene:    2.833179E+01    2.865491E+01
  ene:   -6.803067E+01   -3.476210E+01   -3.476063E+01   -3.476002E+01   -1.254616E+01    4.372890E+00    4.470340E+00    4.482917E+00
  ene:    9.088146E+00    1.996546E+01    2.030323E+01    2.030656E+01    2.434375E+01    2.563232E+01    2.585284E+01    2.833155E+01
- ene:    2.836285E+01    2.863335E+01    4.162079E+01    4.205332E+01
+ ene:    2.836285E+01    2.863335E+01
  ene:   -6.803079E+01   -3.475922E+01   -3.475922E+01   -3.475922E+01   -1.256368E+01    4.489774E+00    4.489774E+00    4.489775E+00
  ene:    8.968733E+00    2.026551E+01    2.026551E+01    2.026551E+01    2.396501E+01    2.594326E+01    2.594326E+01    2.827164E+01
- ene:    2.827164E+01    2.827164E+01    4.210632E+01    4.210773E+01
+ ene:    2.827164E+01    2.827164E+01
 
 
  Writing sqrt(1/N_b^2 \sum_{mn} |g_{mn,nu}(k, q)|^2) in meV for testing purpose.
@@ -828,7 +827,7 @@ qpoints:
           kptrlen      6.81917288E+01
 P           mkmem          72
             natom           2
-            nband          20
+            nband          18
            nbdbuf           8
            ndtset           2
            ndivsm1          0
@@ -841,7 +840,6 @@ P           mkmem          72
               occ      2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        2.000000  2.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000
         optdriver           7
         ph_ndivsm1          5
         ph_ndivsm2         20
@@ -881,7 +879,7 @@ P           mkmem          72
                        1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
                        0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
                       -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
-           tolwfr      1.00000000E-20
+           tolwfr      1.00000000E-22
             typat      2  1
            useylm1          0
            useylm2          1
