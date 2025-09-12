@@ -58,7 +58,7 @@ module defs_abitypes
 !!
 !! SOURCE
 
- type MPI_type
+ type mpi_type
 
 ! WARNING : if you modify this datatype, please check whether there might be creation/destruction/copy routines,
 ! declared in another part of ABINIT, that might need to take into account your modification.
@@ -79,7 +79,7 @@ module defs_abitypes
   ! world communicator MPI COMM WORLD
 
   integer :: me
-  ! rank my processor in the group of all processors
+  ! rank of my processor in the group of all processors
 
   integer :: nproc
   ! number of processors
@@ -334,7 +334,7 @@ module defs_abitypes
    integer :: ngfft3_ionic
    ! End wavelet additions
 
- end type MPI_type
+ end type mpi_type
 !!***
 
 end module defs_abitypes

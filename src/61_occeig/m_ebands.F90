@@ -41,7 +41,6 @@ module m_ebands
  use m_dtset
  use m_yaml
 
-
  use defs_datatypes,   only : ebands_base_t
  use m_copy,           only : alloc_copy
  use m_io_tools,       only : file_exists, open_file

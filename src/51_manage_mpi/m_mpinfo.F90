@@ -47,6 +47,11 @@ MODULE m_mpinfo
  include 'mpif.h'
 #endif
 
+!type, extends(mpi_type_base_t), public :: mpi_type
+!contains
+!end type mpi_type
+!!***
+
  public :: init_mpi_enreg        ! Initialise a mpi_enreg structure with dataset independent values.
  public :: nullify_mpi_enreg     ! nullify a mpi_enreg datastructure
  public :: destroy_mpi_enreg     ! Free memory
