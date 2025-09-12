@@ -1746,7 +1746,6 @@ subroutine stern_init(stern, dtset, npw_k, npw_kq, nspinor, nband, nband_me, fer
  type(mpi_type),intent(in) :: mpi_enreg
 
 !Local variables ------------------------------
-!scalars
  integer :: natom, usepaw
 ! *************************************************************************
 
