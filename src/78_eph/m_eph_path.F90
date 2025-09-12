@@ -499,7 +499,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        !if (my_ik == 1 .and. pert_comm%me == master) then
        if (my_ik == 1) then
          NCF_CHECK(nf90_put_var(ncid, vid("all_eigens_kq"), eig_kq, start=[1,iq,spin]))
-         ! Write phonons for this q.
+         ! Write phonons for this qpt.
          if (spin == 1) then
            NCF_CHECK(nf90_put_var(ncid, vid("phfreqs"), phfreqs_ev, start=[1,iq]))
            NCF_CHECK(nf90_put_var(ncid, vid("phdispl_cart"), displ_cart, start=[1,1,1,1,iq]))
@@ -559,12 +559,12 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
            call getgh1c(berryopt0, cg_k(:,:,band_n), cwaveprj0, h1_kets_kq(:,:,in_k), &
                         grad_berry, gs1c, gs_ham_k, gvnlx1, idir, ipert, [eshift], nscf%mpi_enreg, ndat1, optlocal, &
                         optnl, opt_gvnlx1, rf_ham_kq, sij_opt, tim_getgh1c, usevnl)
+           !print *, "maxval(abs(h1_kets_kq(:,:,in_k))): ", maxval(abs(h1_kets_kq(:,:,in_k)))
          end do ! in_k
 
          ! Calculate <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation. No need to handle istwf_kq because it's always 1.
          !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(band_m)
          do in_k=1,nb_in_g
-           !print *, "maxval(abs(h1_kets_kq(:,:,in_k))): ", maxval(abs(h1_kets_kq(:,:,in_k)))
            do im_kq=1,nb_in_g
              band_m = im_kq + bstart - 1
              gkq_atm(:, im_kq, in_k, ipc) = cg_zdotc(npw_kq*nspinor, cg_kq(:,:,band_m), h1_kets_kq(:,:,in_k))
@@ -630,7 +630,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      call wrtout(units, &
        sjoin("Computation of g(k,q) completed. All NSCF runs converged within tolwfr: ", ftoa(dtset%tolwfr)), pre_newlines=1)
    else
-     msg = sjoin("WARNING:", itoa(tot_nscf_ierr), "NSCF runs did not converge within tolwfr: ", ftoa(dtset%tolwfr), ". Increase nstep!")
+     msg = sjoin("WARNING:", itoa(tot_nscf_ierr), "NSCF runs did not converge within tolwfr: ", ftoa(dtset%tolwfr))
+     msg = sjoin(msg, ". Use nbdbuf and/or increase nstep!")
      call wrtout(ab_out, msg)
      ABI_WARNING(msg)
    end if
