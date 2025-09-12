@@ -503,9 +503,7 @@ subroutine ddb_init(ddb, dtset, nblok, mpert, &
  end if
 
  ! TODO: Allocate d2eig here instead of leaving it to the calling routine.
- if (with_d2eig_) then
-    call ddb%malloc_d2eig(ddb%nband*ddb%nsppol, ddb%nkpt)
- end if
+ if (with_d2eig_) call ddb%malloc_d2eig(ddb%nband*ddb%nsppol, ddb%nkpt)
 
  if (present(kpt)) then
    do ikpt=1,ddb%nkpt
@@ -614,8 +612,6 @@ end subroutine ddb_copy
 !!         Should actually correspond to the maximum number of bands for one kpoint
 !!         multiplied by the number of spin polarization (mband*nsppol).
 !!
-!! OUTPUT
-!!
 !! SOURCE
 
 subroutine ddb_malloc(ddb, msize, nblok, natom, ntypat, mpert, nkpt, nband)
@@ -714,8 +710,7 @@ subroutine ddb_set_qpt(ddb, iblok, qpt, qpt2, qpt3)
  integer,intent(in) :: iblok
 !arrays
  real(dp), intent(in) :: qpt(3)
- real(dp), intent(in),optional :: qpt2(3)
- real(dp), intent(in),optional :: qpt3(3)
+ real(dp), intent(in),optional :: qpt2(3), qpt3(3)
 ! ************************************************************************
 
  ddb%qpt(1:3,iblok) = qpt(1:3)
@@ -748,8 +743,6 @@ end subroutine ddb_set_qpt
 !!  d2matr=the second-order derivative matrix.
 !!  flg=flag to indicate presence of a given element.
 !!
-!! OUTPUT
-!!
 !! SOURCE
 
 subroutine ddb_set_d2matr(ddb, iblok, d2matr, flg)
@@ -763,7 +756,6 @@ subroutine ddb_set_d2matr(ddb, iblok, d2matr, flg)
  integer, intent(in) :: flg(3,ddb%mpert,3,ddb%mpert)
 
 !Local variables -------------------------
-!scalars
  integer :: idir1,idir2,ii,ipert1,ipert2
 ! ************************************************************************
 
@@ -814,7 +806,6 @@ subroutine ddb_get_d2matr(ddb, iblok, d2matr, flg)
  integer, allocatable, intent(out) :: flg(:,:,:,:)
 
 !Local variables -------------------------
-!scalars
  integer :: ii,idir1,idir2,ipert1,ipert2
 ! ************************************************************************
 
@@ -855,8 +846,6 @@ end subroutine ddb_get_d2matr
 !!  gred=the gradient of the total energy with respect
 !!       to change of reduced coordinates
 !!  iblok=index of the block being set.
-!!
-!! OUTPUT
 !!
 !! SOURCE
 
@@ -958,7 +947,6 @@ subroutine ddb_set_strten(ddb, strten, iblok)
  integer,intent(in) :: iblok
 
 !Local variables -------------------------
-!scalars
  integer :: indx
 ! ************************************************************************
 
@@ -1002,7 +990,6 @@ subroutine ddb_get_d1matr(ddb, iblok, d1matr, flg)
 !scalars
 
 !Local variables -------------------------
-!scalars
  integer :: ii,idir1,ipert1
 ! ************************************************************************
 
@@ -1053,7 +1040,6 @@ subroutine ddb_set_d1matr(ddb, iblok, d1matr, flg)
  integer,intent(in) :: iblok
 
 !Local variables -------------------------
-!scalars
  integer :: ii,ipert1,idir1
 ! ************************************************************************
 
@@ -1083,8 +1069,6 @@ end subroutine ddb_set_d1matr
 !!  etotal=the total energy.
 !!  iblok=index of the block we are setting.
 !!
-!! OUTPUT
-!!
 !! SOURCE
 
 subroutine ddb_set_etotal(ddb, etotal, iblok)
@@ -1093,7 +1077,7 @@ subroutine ddb_set_etotal(ddb, etotal, iblok)
 !array
  class(ddb_type),intent(inout) :: ddb
 !scalars
- real(dp), intent(in) :: etotal
+ real(dp),intent(in) :: etotal
  integer,intent(in) :: iblok
 ! ************************************************************************
 

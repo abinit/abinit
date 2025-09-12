@@ -1119,7 +1119,6 @@ subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvl
  real(dp) :: rhodum(1) !, tsec(2)
  real(dp), ABI_CONTIGUOUS pointer :: vtrial_ptr(:,:),vtrial1_ptr(:,:)
  real(dp),allocatable :: cgrvtrial(:,:),cgrvtrial1(:,:),vlocal_tmp(:,:,:),vlocal1_tmp(:,:,:)
-
 ! *************************************************************************
 
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
@@ -1170,7 +1169,7 @@ subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvl
    end if
    ABI_FREE(vlocal_tmp)
    ABI_FREE(vlocal1_tmp)
- end if !nspden
+ end if ! nspden
 
 end subroutine rf_transgrid_and_pack
 !!***
@@ -1741,7 +1740,6 @@ subroutine getgh1dqc(cwave,cwaveprj,gh1dqc,gvloc1dqc,gvnl1dqc,gs_hamkq,&
  real(dp) :: enlout(1),svectout_dum(1,1)
  real(dp),ABI_CONTIGUOUS pointer :: gvnl1dqc_(:,:)
  real(dp), allocatable :: work(:,:,:,:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1970,8 +1968,6 @@ subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qd
  integer,parameter :: gamma(3,3)=reshape((/1,6,5,6,2,4,5,4,3/),(/3,3/))
  real(dp) :: ylmgr_dum(1,1,1)
  real(dp),allocatable :: ffnl1_tmp(:,:,:,:)
-
-
 ! *************************************************************************
 
  reuse_ffnlk_ = 0; if (present(reuse_ffnlk)) reuse_ffnlk_ = reuse_ffnlk
