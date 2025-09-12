@@ -28,12 +28,12 @@ module m_atm2fft
  use m_abicore
  use m_errors
  use m_xmpi
- use m_distribfft
  use m_dtset
 
  use defs_abitypes, only : mpi_type
  use m_time,        only : timab
  use defs_datatypes,only : pseudopotential_type
+ use m_distribfft,  only : distribfft_type
  use m_gtermcutoff, only : termcutoff
  use m_pawtab,      only : pawtab_type
  use m_fft,         only : zerosym, fourdp
@@ -248,7 +248,6 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  real(dp),allocatable :: grv_indx(:,:),phim_igia(:),phre_igia(:),workn(:,:)
  real(dp),allocatable :: gcutoff(:)
  real(dp),allocatable :: workv(:,:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -268,7 +267,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
    my_distribfft => distribfft
  else
    my_distribfft => my_distribfft_
-   call init_distribfft_seq(my_distribfft,'f',n2,n3,'fourdp')
+   call my_distribfft%init_seq('f',n2,n3,'fourdp')
  end if
  if (n2==my_distribfft%n2_coarse) then
    fftn2_distrib => my_distribfft%tab_fftdp2_distrib
@@ -878,7 +877,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  end if
 
  if (.not.present(distribfft)) then
-   call destroy_distribfft(my_distribfft)
+   call my_distribfft%free()
  end if
 
  DBG_EXIT("COLL")
@@ -1134,7 +1133,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
      iatom=ipert;iatm=atindx(iatom)
      itypat=typat(iatom)
    else
-      !sum of all (strain pertubation)
+      !sum of all (strain perturbation)
      iatom  = 1
      iatm   = 1
      itypat = 1
@@ -1156,7 +1155,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
      my_distribfft => distribfft
    else
      my_distribfft => my_distribfft_
-     call init_distribfft_seq(my_distribfft_,'f',n2,n3,'fourdp')
+     call my_distribfft_%init_seq('f',n2,n3,'fourdp')
    end if
    if (n2==my_distribfft%n2_coarse) then
      fftn2_distrib => my_distribfft%tab_fftdp2_distrib
@@ -1537,7 +1536,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
    end if
 
    if (.not.present(distribfft)) then
-     call destroy_distribfft(my_distribfft)
+     call my_distribfft%free()
    end if
 
 !  End the condition of non-electric-field

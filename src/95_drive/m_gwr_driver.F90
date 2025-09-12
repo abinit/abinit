@@ -36,7 +36,6 @@ module m_gwr_driver
  use m_dtset
  use m_dtfil
  use m_wfk
- use m_distribfft
  use netcdf
  use m_nctk
 
@@ -337,8 +336,8 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
 
  ! Fake MPI_type for the sequential part.
  call initmpi_seq(mpi_enreg_seq)
- call init_distribfft_seq(mpi_enreg_seq%distribfft, 'c', ngfftc(2), ngfftc(3), 'all')
- call init_distribfft_seq(mpi_enreg_seq%distribfft, 'f', ngfftf(2), ngfftf(3), 'all')
+ call mpi_enreg_seq%distribfft%init_seq('c', ngfftc(2), ngfftc(3), 'all')
+ call mpi_enreg_seq%distribfft%init_seq('f', ngfftf(2), ngfftf(3), 'all')
 
  ! ===========================================
  ! === Open and read pseudopotential files ===

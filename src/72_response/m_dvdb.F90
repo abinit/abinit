@@ -33,7 +33,6 @@ module m_dvdb
  use m_abicore
  use m_errors
  use m_xmpi
- use m_distribfft
  use m_nctk
  use m_sort
  use netcdf
@@ -712,8 +711,8 @@ subroutine dvdb_open_read(db, ngfft, comm)
 
  ! Initialize tables to call fourdp in sequential
  db%ngfft = ngfft
- call init_distribfft_seq(db%mpi_enreg%distribfft, 'c', ngfft(2), ngfft(3), 'all')
- call init_distribfft_seq(db%mpi_enreg%distribfft, 'f', ngfft(2), ngfft(3), 'all')
+ call db%mpi_enreg%distribfft%init_seq('c', ngfft(2), ngfft(3), 'all')
+ call db%mpi_enreg%distribfft%init_seq('f', ngfft(2), ngfft(3), 'all')
 
  ! Open the file.
  select case (db%iomode)

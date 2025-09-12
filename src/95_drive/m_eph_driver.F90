@@ -39,7 +39,6 @@ module m_eph_driver
  use m_phonons
  use m_nctk
  use m_wfk
- use m_distribfft
  use netcdf
 
  use defs_datatypes,    only : pseudopotential_type
@@ -636,8 +635,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  ! Fake MPI_type for the sequential part.
  call initmpi_seq(mpi_enreg)
- call init_distribfft_seq(mpi_enreg%distribfft, 'c', ngfftc(2), ngfftc(3), 'all')
- call init_distribfft_seq(mpi_enreg%distribfft, 'f', ngfftf(2), ngfftf(3), 'all')
+ call mpi_enreg%distribfft%init_seq('c', ngfftc(2), ngfftc(3), 'all')
+ call mpi_enreg%distribfft%init_seq('f', ngfftf(2), ngfftf(3), 'all')
 
  ! I am not sure yet the EFMAS file will be needed as soon as eph_frohlichm/=0. To be decided later.
  if (dtset%eph_frohlichm /= 0) then

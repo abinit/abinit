@@ -37,7 +37,7 @@ module m_special_funcs
  public :: clp               ! x-1, if x>1/2, x+1, if x<-1/2
  public :: factorial         ! Calculates N! returning a real.
  public :: permutations      ! Returns N!/(N-k) if N>=0 and N-k>0 else 0.
- public :: binomcoeff        ! Binominal coefficient n!/(n-k)!
+ public :: binomcoeff        ! Binomial coefficient n!/(n-k)!
  public :: laguerre          ! Laguerre Polynomial(x,n,a).
  public :: RadFnH            ! Atomic radial function(r,n,l,Z).
  public :: iradfnh           ! Norm of atomic radial function(a,b,n,l,Z).
@@ -97,6 +97,12 @@ module m_special_funcs
    ! bess_spl_der(nx,mlang)
    ! the second derivatives of the cubic spline.
 
+ !contains
+
+   !procedure :: init => jlspline_new         ! Create new object.
+   !procedure :: free => jlspline_free        ! Free memory.
+   !procedure :: eval => jlspline_integral    ! Compute integral.
+
  end type jlspline_t
 !!***
 
@@ -130,7 +136,7 @@ module m_special_funcs
     ! g(x) is set to zero if x > xmin.
 
    real(dp) :: step, stepm1, step2div6
-    ! Step of the linear mesh used in spline and associated coeffients.
+    ! Step of the linear mesh used in spline and associated coefficients.
 
    real(dp),allocatable :: xvals(:)
     ! xvals(nspline)
@@ -172,7 +178,6 @@ pure function clp(x)
 !scalars
  real(dp) :: clp
  real(dp),intent(in) :: x
-
 ! **********************************************************************
 
  if(x > half) then
@@ -212,7 +217,6 @@ elemental function factorial(nn)
 !scalars
  integer :: ii
  real(dp) :: ff
-
 ! *********************************************************************
 
  ff=one
@@ -254,7 +258,6 @@ pure function permutations(nn,kk)
 !scalars
  integer :: ii
  real(dp) :: pp
-
 ! *********************************************************************
 
  if ((nn>=0).and.((nn-kk)>=0)) then
@@ -286,7 +289,6 @@ end function permutations
 !! OUTPUT
 !!   binomcoeff= n!/( k!* (n-k)!)  (real dp)
 !!
-!!
 !! SOURCE
 
 elemental function binomcoeff(n,k)
@@ -295,7 +297,6 @@ elemental function binomcoeff(n,k)
 !scalars
  integer,intent(in) :: n,k
  real(dp) :: binomcoeff
-
 ! *********************************************************************
 
  binomcoeff=factorial(n)/(factorial(k)*factorial(n-k))
@@ -320,7 +321,6 @@ end function binomcoeff
 !! OUTPUT
 !!   Laguerre(x,n,a) (dp)
 !!
-!!
 !! SOURCE
 
 function laguerre(x,n,a)
@@ -337,7 +337,6 @@ function laguerre(x,n,a)
 
 !arrays
  real(dp),allocatable :: ff(:)
-
 ! *********************************************************************
 
  if (present(n)) then
@@ -380,9 +379,7 @@ end function laguerre
 !! OUTPUT
 !!  RadFnH(r,n,l,Z) (dp)
 !!
-!!
 !! SOURCE
-
 
 function RadFnH(r,n,l,Z)
 
@@ -397,7 +394,6 @@ function RadFnH(r,n,l,Z)
 !scalars
  integer   :: nn,ll
  real(dp)  :: ff,rr,ZZ
-
 ! *********************************************************************
 
  if (present(n)) then
@@ -447,7 +443,6 @@ end function RadFnH
 !! OUTPUT
 !!  IRadFnH(a,b,n,l,Z) (dp)
 !!
-!!
 !! SOURCE
 
 recursive function IRadFnH(a,b,n,l,Z,m) result(x)
@@ -462,7 +457,6 @@ recursive function IRadFnH(a,b,n,l,Z,m) result(x)
 !scalars
  integer   :: nn,ll,mm
  real(dp)  :: h,bb,ZZ,x
-
 ! *********************************************************************
 
  if (present(n)) then
@@ -563,7 +557,6 @@ elemental function lorentzian(arg, sigma)
 !scalars
  real(dp),intent(in) :: arg, sigma
  real(dp) :: lorentzian
-
 ! *********************************************************************
 
  lorentzian = piinv * sigma / (arg ** 2 + sigma ** 2)
@@ -631,7 +624,6 @@ elemental function abi_derf(yy) result(derf_yy)
  real(dp), parameter :: &
 &  sqrpi=.5641895835477563e0_dp, xbig=13.3e0_dp, xlarge=6.375e0_dp, xmin=1.0e-10_dp
  real(dp) ::  res,xden,xi,xnum,xsq,xx
-
 ! ******************************************************************
 
  xx = yy
@@ -865,8 +857,6 @@ end function abi_derfc
 !!
 !! OUTPUT
 !!
-!! SIDE EFFECTS
-!!
 !! NOTES
 !!
 !! SOURCE
@@ -1052,7 +1042,6 @@ subroutine besjm(arg,besjx,cosx,nn,nx,sinx,xx)
  real(dp),parameter :: oo945=1.d0/945.d0
  real(dp) :: bot,rr,rsq,top
  character(len=500) :: message
-
 ! *************************************************************************
 
  if (nn==0) then
@@ -1228,7 +1217,6 @@ subroutine sbf8(nm,xx,sb_out)
  real(dp) :: fn,sn,xi,xn,xs
 !arrays
  real(dp),allocatable :: sb(:)
-
 ! *************************************************************************
 
  if(xx<= 1.0e-36_dp) then
@@ -1297,7 +1285,6 @@ function fermi_dirac(energy, mu, temperature)
 !Local variables-------------------------------
 !scalars
  real(dp) :: arg
-
 ! *************************************************************************
 
  fermi_dirac = zero
@@ -1342,7 +1329,6 @@ function bose_einstein(energy, temperature)
 !scalars
  real(dp) :: arg
  character(len=500) :: message
-
 ! *************************************************************************
 
  bose_einstein = zero
@@ -1380,7 +1366,9 @@ end function bose_einstein
 !!  dip12=resulting function
 !!
 !! SOURCE
+
 function dip12(gamma)
+
 ! Arguments -------------------------------
 ! Scalars
  real(dp),intent(in) :: gamma
@@ -1388,7 +1376,6 @@ function dip12(gamma)
 ! Local variables -------------------------
 ! Scalars
  real(dp) :: d,dip12,dy
-
 ! *********************************************************************
 
  if (gamma.lt.3.) then
@@ -1456,6 +1443,7 @@ end function dip12
 !!
 !! SOURCE
 function dip32(gamma)
+
 ! Arguments -------------------------------
 ! Scalars
  real(dp),intent(in) :: gamma
@@ -1463,7 +1451,6 @@ function dip32(gamma)
 ! Local variables -------------------------
 ! Scalars
  real(dp) :: d,dip32,dval
-
 ! *********************************************************************
 
  if (gamma.GT.1.75) then
@@ -1537,6 +1524,7 @@ end function dip32
 !!
 !! SOURCE
 function djp12(xcut,gamma)
+
 ! Arguments -------------------------------
 ! Scalars
  real(dp),intent(in) :: xcut,gamma
@@ -1549,7 +1537,6 @@ function djp12(xcut,gamma)
  integer :: i,ind,iq,k,nm,np,nq
 ! Arrays
  real(dp) :: dq(5),df(101),dy(101)
-
 ! *********************************************************************
 
  dh=0.2D+0
@@ -1665,6 +1652,7 @@ end function djp12
 !!
 !! SOURCE
 function djp32(xcut,gamma)
+
 ! Arguments -------------------------------
 ! Scalars
  real(dp),intent(in) :: xcut,gamma
@@ -1678,7 +1666,6 @@ function djp32(xcut,gamma)
  integer :: i,ind,iq,k,nm,np,nq
 ! Arrays
  real(dp) :: dq(5),df(101),dy(101)
-
 ! *********************************************************************
 
  dh=0.2D+0
@@ -1801,7 +1788,9 @@ end function djp32
 !!  d2Ax=d^2Ax(t)/dt^2
 !!
 !! SOURCE
+
 subroutine tildeAx(t,Ax,dAx,d2Ax)
+
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: t
@@ -1832,7 +1821,6 @@ subroutine tildeAx(t,Ax,dAx,d2Ax)
  real(dp) :: v,dv,d2v
  real(dp) :: dydt,d2ydt2
  real(dp) :: num,den,fit,dnum,d2num,dden,d2den,dfit,d2fit
-
 ! *************************************************************************
 
  y = twothird/t**threehalf
@@ -1904,7 +1892,9 @@ end subroutine tildeAx
 !!  d2Bx=d^2Bx(t)/dt^2
 !!
 !! SOURCE
+
 subroutine tildeBx(t,Bx,dBx,d2Bx)
+
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: t
@@ -1939,7 +1929,6 @@ subroutine tildeBx(t,Bx,dBx,d2Bx)
  real(dp) :: v,dv,d2v
  real(dp) :: dydt,d2ydt2
  real(dp) :: num,den,fit,dnum,d2num,dden,d2den,dfit,d2fit
-
 ! *************************************************************************
 
  y = twothird/t**threehalf
@@ -2023,7 +2012,9 @@ end subroutine tildeBx
 !!  dBcdt=dBc(rs,t)/dt
 !!
 !! SOURCE
+
 subroutine tildeBc(iflag,rs,t,Bc,dBcdrs,dBcdt)
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iflag
@@ -2068,7 +2059,6 @@ subroutine tildeBc(iflag,rs,t,Bc,dBcdrs,dBcdt)
  real(dp),parameter :: sevenhalf = 7.d0/2.d0
  real(dp) :: rsn,rsd,u,du
  real(dp) :: num,den,dnumdrs,dnumdt,ddendrs,ddendt
-
 ! *************************************************************************
 
  if(iflag==5.or.iflag==6.or.iflag==7.or.iflag==8) then
@@ -2132,7 +2122,6 @@ elemental function k_fermi(rhor)
 !Local variables-------------------------------
 !scalars
  real(dp),parameter :: pisq=pi**2
-
 ! *************************************************************************
 
  k_fermi = (three*pisq*rhor)**third
@@ -2164,7 +2153,6 @@ elemental function k_thfermi(rhor)
 !Local variables-------------------------------
 !scalars
  real(dp),parameter :: pisq=pi**2
-
 ! *************************************************************************
 
  k_thfermi = SQRT(four*k_fermi(rhor)*piinv)
@@ -2187,7 +2175,6 @@ pure function levi_civita_3() result(ee)
 
 !Arguments ------------------------------------
  integer :: ee(3,3,3)
-
 ! *************************************************************************
 
  ee = 0
@@ -2235,7 +2222,6 @@ type(jlspline_t) function jlspline_new(nx, delta, mlang) result(new)
  real(dp) :: yp1,ypn
 !arrays
  real(dp),allocatable :: cosbessx(:),sinbessx(:)
-
 ! *********************************************************************
 
  if (nx < 2) then
@@ -2300,15 +2286,9 @@ subroutine jlspline_free(jlspl)
 
 ! *********************************************************************
 
- if (allocated(jlspl%xx)) then
-   ABI_FREE(jlspl%xx)
- end if
- if (allocated(jlspl%bess_spl)) then
-   ABI_FREE(jlspl%bess_spl)
- end if
- if (allocated(jlspl%bess_spl_der)) then
-   ABI_FREE(jlspl%bess_spl_der)
- end if
+ ABI_SFREE(jlspl%xx)
+ ABI_SFREE(jlspl%bess_spl)
+ ABI_SFREE(jlspl%bess_spl_der)
 
 end subroutine jlspline_free
 !!***
@@ -2423,7 +2403,7 @@ end function gspline_new
 !!  self<gspline_t>=Object used to spline the gaussian approximant
 !!  x0=Shift to be given to xmesh
 !!  nx=Number of points in input mesh.
-!!  xmesh(nx)=Frequency points (not necessarly linear).
+!!  xmesh(nx)=Frequency points (not necessary linear).
 !!
 !! OUTPUT
 !!  weights(nx,2)=First slice contains the gaussian approximant on xmesh.
@@ -2435,9 +2415,9 @@ pure subroutine gspline_eval(self, x0, nx, xmesh, weights)
 
 !Arguments ------------------------------------
 !scalars
+ class(gspline_t),intent(in) :: self
  integer,intent(in) :: nx
  real(dp),intent(in) :: x0
- type(gspline_t),intent(in) :: self
 !arrays
  real(dp),intent(in) :: xmesh(nx)
  real(dp),intent(out) :: weights(nx,2)
@@ -2448,7 +2428,6 @@ pure subroutine gspline_eval(self, x0, nx, xmesh, weights)
  real(dp) :: xx,absx,aa,bb,cc,dd
  logical :: isneg
  !real(dp) :: int_values(nx)
-
 ! *************************************************************************
 
  do ix=1,nx
@@ -2491,25 +2470,16 @@ end subroutine gspline_eval
 !! FUNCTION
 !!  Free dynamic memory
 !!
-!! INPUTS
-!!  self<gspline_t>=Object used to spline the gaussian approximant
-!!
 !! SOURCE
 
 subroutine gspline_free(self)
 
 !Arguments ------------------------------------
-!scalars
- type(gspline_t),intent(inout) :: self
-
+ class(gspline_t),intent(inout) :: self
 ! *************************************************************************
 
- if (allocated(self%xvals)) then
-   ABI_FREE(self%xvals)
- end if
- if (allocated(self%svals)) then
-   ABI_FREE(self%svals)
- end if
+ ABI_SFREE(self%xvals)
+ ABI_SFREE(self%svals)
 
 end subroutine gspline_free
 !!***

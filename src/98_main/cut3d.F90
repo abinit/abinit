@@ -58,7 +58,6 @@ program cut3d
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_fftcore,         only : ngfft_seq
  use m_fft_mesh,        only : denpot_project
- use m_distribfft,      only : init_distribfft_seq
  use m_ioarr,           only : fftdatar_write
  use m_io_tools,        only : flush_unit, file_exists, open_file, is_open, get_unit, read_string
 
@@ -759,8 +758,8 @@ program cut3d
            ngfft(4:6) = ngfft(1:3)
            nfft = product(ngfft(1:3))
            cplex = 1
-           call init_distribfft_seq(mpi_enreg%distribfft, 'c', ngfft(2), ngfft(3), 'all')
-           call init_distribfft_seq(mpi_enreg%distribfft, 'f', ngfft(2), ngfft(3), 'all')
+           call mpi_enreg%distribfft%init_seq('c', ngfft(2), ngfft(3), 'all')
+           call mpi_enreg%distribfft%init_seq('f', ngfft(2), ngfft(3), 'all')
 
            call fftdatar_write(varname,filnam,IO_MODE_ETSF,hdr,cryst,ngfft,cplex,nfft,nspden,grid_full,mpi_enreg)
            call cryst%free()

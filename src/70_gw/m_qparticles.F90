@@ -28,7 +28,6 @@ MODULE m_qparticles
  use m_hdr
  use m_errors
  use m_nctk
- use m_distribfft
 
  use defs_datatypes,   only : pseudopotential_type
  use defs_abitypes,    only : MPI_type
@@ -417,9 +416,9 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
          cplex_fft =1 ! Real quantities.
          optin     =0 ! Input is taken from rhor.
          optout    =0 ! Output is only in real space.
-         call destroy_distribfft(MPI_enreg%distribfft)
-         call init_distribfft(MPI_enreg%distribfft,'c',MPI_enreg%nproc_fft,ngfftf(2),ngfftf(3))
-         call init_distribfft(MPI_enreg%distribfft,'f',MPI_enreg%nproc_fft,ngfft_found(2),ngfft_found(3))
+         call MPI_enreg%distribfft%free()
+         call MPI_enreg%distribfft%init('c',MPI_enreg%nproc_fft,ngfftf(2),ngfftf(3))
+         call MPI_enreg%distribfft%init('f',MPI_enreg%nproc_fft,ngfft_found(2),ngfft_found(3))
 
          call fourier_interpol(cplex_fft,nspden,optin,optout,nfft_found,ngfft_found,nfftot,ngfftf,&
            MPI_enreg,rhor_tmp,rhor_out,rhogdum,rhogdum)

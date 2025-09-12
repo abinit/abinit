@@ -35,7 +35,6 @@ module m_screening_driver
  use libxc_functionals
  use m_hdr
  use m_dtfil
- use m_distribfft
  use m_crystal
 
  use defs_datatypes,  only : pseudopotential_type
@@ -307,8 +306,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  ! We can intialize MPI_enreg and fft distrib here, now ngfft are known
  call initmpi_seq(MPI_enreg_seq) ! Fake MPI_type for the sequential part.
- call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfftc(2),ngfftc(3),'all')
- call init_distribfft_seq(MPI_enreg_seq%distribfft,'f',ngfftf(2),ngfftf(3),'all')
+ call MPI_enreg_seq%distribfft%init_seq('c',ngfftc(2),ngfftc(3),'all')
+ call MPI_enreg_seq%distribfft%init_seq('f',ngfftf(2),ngfftf(3),'all')
 
 !=============================================
 !==== Open and read pseudopotential files ====

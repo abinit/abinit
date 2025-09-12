@@ -1834,7 +1834,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
      ABI_MALLOC(npwarr1,(nkpt))
      ABI_MALLOC(kg,(3,mpw*mkmem))
      ABI_MALLOC(npwtot1,(nkpt))
-     call init_distribfft_seq(mpi_enreg%distribfft,'c',ngfft(2),ngfft(3),'all')
+     call mpi_enreg%distribfft%init_seq('c',ngfft(2),ngfft(3),'all')
 
 !    Create positions index for pw
      call kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kpt,mkmem,nband,nkpt,&
@@ -2067,7 +2067,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
      ABI_FREE(npwtot1)
      ABI_FREE(kpgnorm)
      ABI_FREE(ylm_k)
-     call destroy_distribfft(mpi_enreg%distribfft)
+     call mpi_enreg%distribfft%free()
    end if
 
    write(std_out,*)
