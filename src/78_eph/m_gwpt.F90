@@ -1134,12 +1134,13 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            NOT_IMPLEMENTED_ERROR()
          end if
 
-         ! =========================================================
-         ! Get GS wavefunctions at k+q-p and store them in stern_kmp.
-         ! =========================================================
+         ! =======================
+         ! Delta_{qka} psi_{n'k-p}
+         ! =======================
          call stern_kmp%init(dtset, npw_kmp, npw_kqmp, nspinor, nbsum, nband_me, fermie1_idir_ipert, &
                              stern_use_cache, work_ngfft, mpi_enreg, stern_comm)
 
+         ! Use symmetries to reconstruct GS wavefunctions at k+q-p and store them in stern_kmp.
          do ib_sum=my_bsum_start(spin), my_bsum_stop(spin)
            call wfd%rotate_cg(ib_sum, ndat1, spin, kqmp_ibz, npw_kqmp, kg_kqmp, istwf_kqmp, &
                               cryst, mapl_kqmp, gbound_kqmp, work_ngfft, work, cg_kqmp)
@@ -1149,12 +1150,13 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            stern_kmp%cgq(:,:,ii) = cg_kqmp(:,1:npw_kqmp*nspinor)
          end do ! ib_sum
 
-         ! ========================================================
-         ! Get GS wavefunctions at k-p and store them in stern_kqmp
-         ! ========================================================
+         ! ==========================
+         ! Delta_{-qka} psi_{n'k+q-p}
+         ! ==========================
          call stern_kqmp%init(dtset, npw_kqmp, npw_kmp, nspinor, nbsum, nband_me, fermie1_idir_ipert, &
                               stern_use_cache, work_ngfft, mpi_enreg, stern_comm)
 
+         ! Use symmetries to reconstruct GS wavefunctions at k-p and store them in stern_kqmp.
          do ib_sum=my_bsum_start(spin), my_bsum_stop(spin)
            call wfd%rotate_cg(ib_sum, ndat1, spin, kmp_ibz, npw_kmp, kg_kmp, istwf_kmp, &
                               cryst, mapl_kmp, gbound_kmp, work_ngfft, work, cg_kmp)
