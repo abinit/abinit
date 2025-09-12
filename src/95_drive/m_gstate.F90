@@ -395,9 +395,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !when using BigDFT to ensure success on inca_gcc44_sdebug
  if ((dtset%vdw_xc>=5.and.dtset%vdw_xc<=7).or.dtset%usewvl==1) then
    results_gs%ngrvdw=dtset%natom
-   if (allocated(results_gs%grvdw)) then
-     ABI_FREE(results_gs%grvdw)
-   end if
+   ABI_SFREE(results_gs%grvdw)
    ABI_MALLOC(results_gs%grvdw,(3,dtset%natom))
    results_gs%grvdw(:,:)=zero
  end if
@@ -1380,7 +1378,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   resid,results_gs,scf_history,fatvshift,&
 &   symrec,taug,taur,wvl,ylm,ylmgr,paw_dmft,wffnew,wffnow,xg_nonlop)
 
-   call dtfil_init_time(dtfil,0)
+   call dtfil%init_time(0)
 
    write(msg,'(a,80a)')ch10,('=',mu=1,80)
    call wrtout([std_out, ab_out], msg)
@@ -1757,12 +1755,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  ABI_FREE(cprj)
 
  ! deallocate efield
- call destroy_efield(dtefield)
+ call dtefield%free()
 
-!deallocate Recursion
- if (dtset%userec == 1) then
-   call CleanRec(rec_set)
- end if
+ if (dtset%userec == 1) call CleanRec(rec_set)
 
  call hdr%free()
  call ebands%free()

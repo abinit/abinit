@@ -4,7 +4,6 @@
 !!
 !! FUNCTION
 !!
-!!
 !! COPYRIGHT
 !!  Copyright (C) 1998-2025 ABINIT group (FJ, MT)
 !!  This file is distributed under the terms of the
