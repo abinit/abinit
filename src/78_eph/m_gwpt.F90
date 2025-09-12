@@ -1537,7 +1537,7 @@ if (.not. qq_is_gamma) then
              ABI_SFREE(ph3d1_kmp)
 
              ! Debug: Mute Delta_{-q} (stern_kqmp) by 
-             full_ur1_kmp = zero
+             !full_ur1_kmp = zero
 
              ! TODO: The last states may fail to converge and we have to decide how to handle this.
              if (ierr /= 0) then
@@ -1580,7 +1580,7 @@ if (.not. qq_is_gamma) then
 
                  if (need_x_kmp) then
                    ! TODO recheck
-                   xdot_tmp = - xdotc(npw_x*nspinor, vec_gx_mkq(:,m_kq), 1, rhotwg_x, 1)
+                   xdot_tmp = - xdotu(npw_x*nspinor, vec_gx_mkq(:,m_kq), 1, rhotwg_x, 1)
                    ctmp_gwpc = ctmp_gwpc + xdot_tmp ! * theta_mu_minus_e0i ! theta_mu_minus_e0i is only needed for metals
                  end if
 
