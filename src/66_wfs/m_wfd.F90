@@ -32,7 +32,6 @@ module m_wfd
  use m_crystal
  use m_wfk
  use m_hdr
- use m_distribfft
  use m_cgtools
  use m_ebands
 
@@ -915,7 +914,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
 
  ! Sequential MPI datatype to be passed to abinit routines.
  call initmpi_seq(Wfd%MPI_enreg)
- call init_distribfft(Wfd%MPI_enreg%distribfft,'c',Wfd%MPI_enreg%nproc_fft,ngfft(2),ngfft(3))
+ call Wfd%MPI_enreg%distribfft%init('c',Wfd%MPI_enreg%nproc_fft,ngfft(2),ngfft(3))
 
  ! TODO: To simply high-level API.
  !wfd%cryst => cryst
@@ -3760,8 +3759,8 @@ subroutine wfd_change_ngfft(Wfd, Cryst, Psps, new_ngfft)
  Wfd%nfft   = Wfd%nfftot ! No FFT parallelism.
 
  ! Re-initialize fft distribution
- call destroy_distribfft(Wfd%MPI_enreg%distribfft)
- call init_distribfft(Wfd%MPI_enreg%distribfft,'c',Wfd%MPI_enreg%nproc_fft,new_ngfft(2),new_ngfft(3))
+ call Wfd%MPI_enreg%distribfft%free()
+ call Wfd%MPI_enreg%distribfft%init('c',Wfd%MPI_enreg%nproc_fft,new_ngfft(2),new_ngfft(3))
 
  ABI_REMALLOC(Wfd%ph1d,(2,3*(2*Wfd%mgfft+1)*Cryst%natom))
  call getph(Cryst%atindx,Cryst%natom,Wfd%ngfft(1),Wfd%ngfft(2),Wfd%ngfft(3),Wfd%ph1d,Cryst%xred)

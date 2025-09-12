@@ -1190,7 +1190,7 @@ subroutine cppm2par(qpt, npwc, epsm1, ngfftf, gvec, gprimd, rhor, nfftf, gmet, b
 !*************************************************************************
 
  call initmpi_seq(MPI_enreg_seq)
- call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfftf(2),ngfftf(3),'all')
+ call MPI_enreg_seq%distribfft%init_seq('c',ngfftf(2),ngfftf(3),'all')
 
  ! Calculate qratio(npwec,npvec) = (q+G).(q+Gp)/|q+G|^2 ===
  ABI_MALLOC_OR_DIE(qratio,(npwc,npwc), ierr)
@@ -1389,7 +1389,7 @@ subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
 
  ! Fake MPI_type for the sequential part.
  call initmpi_seq(MPI_enreg_seq)
- call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfftf(2),ngfftf(3),'all')
+ call MPI_enreg_seq%distribfft%init_seq('c',ngfftf(2),ngfftf(3),'all')
 
  qiszero = (ALL(ABS(qpt)<1.0e-3))
 
@@ -1634,7 +1634,7 @@ subroutine cppm4par(qpt, npwc, epsm1, ngfftf, gvec, gprimd, rhor, nfftf, bigomeg
  ! Calculate density in G space rhog(G)
  ! FIXME this has to be fixed, rho(G) should be passed instead of doing FFT for each q
  call initmpi_seq(MPI_enreg_seq)
- call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfftf(2),ngfftf(3),'all')
+ call MPI_enreg_seq%distribfft%init_seq('c',ngfftf(2),ngfftf(3),'all')
 
  ABI_MALLOC(rhog_dp, (2,nfftf))
 

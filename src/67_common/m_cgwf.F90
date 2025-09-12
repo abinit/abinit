@@ -1248,9 +1248,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
  end do ! iblock End loop over block of bands
 
- if (allocated(dimlmn_srt)) then
-   ABI_FREE(dimlmn_srt)
- end if
+ ABI_SFREE(dimlmn_srt)
 
  if (finite_field .and. gs_hamk%usepaw == 1) then ! store updated cprjs for this kpt
    ! switch from ikptf to ikpt
@@ -1303,27 +1301,15 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  ABI_FREE(gvnlx_direc)
  ABI_FREE(vresid)
  ABI_FREE(gs_direc)
-
- if (gen_eigenpb) then
-   ABI_FREE(scwavef)
-   ABI_FREE(direc_tmp)
- end if
-
- if (gen_eigenpb.and.(inonsc==1)) then
-   ABI_FREE(ghc_all)
- end if
-
- if(wfopta10==2.or.wfopta10==3) then
-   ABI_FREE(ghcws)
-   ABI_FREE(gh_direcws)
- end if
  ABI_FREE(gvnlx_dummy)
-
- if(wfopta10==2.or.wfopta10==3) then
-   ABI_FREE(work)
- end if
-
  ABI_FREE(swork)
+
+ ABI_SFREE(scwavef)
+ ABI_SFREE(direc_tmp)
+ ABI_SFREE(ghc_all)
+ ABI_SFREE(ghcws)
+ ABI_SFREE(gh_direcws)
+ ABI_SFREE(work)
 
  if (finite_field) then
    ABI_FREE(cg1_k)
@@ -2381,8 +2367,8 @@ subroutine nscf_init(nscf, dtset, dtfil, cryst, comm)
  end if
 
  call initmpi_seq(nscf%mpi_enreg)
- call init_distribfft_seq(nscf%mpi_enreg%distribfft, 'c', nscf%ngfft(2), nscf%ngfft(3), 'all')
- call init_distribfft_seq(nscf%mpi_enreg%distribfft, 'f', nscf%ngfftf(2), nscf%ngfftf(3), 'all')
+ call nscf%mpi_enreg%distribfft%init_seq('c', nscf%ngfft(2), nscf%ngfft(3), 'all')
+ call nscf%mpi_enreg%distribfft%init_seq('f', nscf%ngfftf(2), nscf%ngfftf(3), 'all')
 
  ! Read KS potential from file.
  nfftf = product(nscf%ngfftf(1:3))

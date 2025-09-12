@@ -177,7 +177,7 @@ subroutine destroy_mpi_enreg(MPI_enreg)
 ! *********************************************************************
 
  if (associated(mpi_enreg%distribfft)) then
-   call destroy_distribfft(mpi_enreg%distribfft)
+   call mpi_enreg%distribfft%free()
    ABI_FREE(mpi_enreg%distribfft)
    nullify(mpi_enreg%distribfft)
  end if
@@ -286,7 +286,7 @@ subroutine copy_mpi_enreg(MPI_enreg1, MPI_enreg2)
    if (.not.associated(mpi_enreg2%distribfft)) then
      ABI_MALLOC(mpi_enreg2%distribfft,)
    end if
-   call copy_distribfft(mpi_enreg1%distribfft,mpi_enreg2%distribfft)
+   call mpi_enreg1%distribfft%copy(mpi_enreg2%distribfft)
  end if
 
  if (allocated(mpi_enreg1%proc_distrb)) then
@@ -404,7 +404,7 @@ subroutine set_mpi_enreg_fft(MPI_enreg,comm_fft,distribfft,me_g0,paral_kgb)
    mpi_enreg%me_g0_fft=1
  end if
  if (associated(mpi_enreg%distribfft)) then
-   call destroy_distribfft(mpi_enreg%distribfft)
+   call mpi_enreg%distribfft%free()
    ABI_FREE(mpi_enreg%distribfft)
  end if
  mpi_enreg%distribfft => distribfft

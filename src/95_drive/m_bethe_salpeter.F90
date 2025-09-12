@@ -30,7 +30,6 @@ module m_bethe_salpeter
  use m_xmpi
  use m_errors
  use m_nctk
- use m_distribfft
  use netcdf
  use m_hdr
  use m_dtset
@@ -291,8 +290,8 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
  ! Fake MPI_type for the sequential part.
  call initmpi_seq(MPI_enreg_seq)
- call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfftc(2),ngfftc(3),'all')
- call init_distribfft_seq(MPI_enreg_seq%distribfft,'f',ngfftf(2),ngfftf(3),'all')
+ call MPI_enreg_seq%distribfft%init_seq('c',ngfftc(2),ngfftc(3),'all')
+ call MPI_enreg_seq%distribfft%init_seq('f',ngfftf(2),ngfftf(3),'all')
 
  ! ===========================================
  ! === Open and read pseudopotential files ===

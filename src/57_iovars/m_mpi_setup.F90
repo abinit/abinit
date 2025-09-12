@@ -817,7 +817,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
        end if
      end if
 
-   end do  ! End the loop on the three possiblities mkmem, mkqmem, mk1mem.
+   end do  ! End the loop on the three possibilities mkmem, mkqmem, mk1mem.
 
    if(dtsets(idtset)%paral_kgb==1) mpi_enregs(idtset)%paralbd=0
 
@@ -1001,7 +1001,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    fftalg=ngfft(7); fftalga=fftalg/100; fftalgc=mod(fftalg,10)
 
    ! Initialize tables for MPI-FFT.
-   call init_distribfft(mpi_enregs(idtset)%distribfft,'c',mpi_enregs(idtset)%nproc_fft,ngfft(2),ngfft(3))
+   call mpi_enregs(idtset)%distribfft%init('c',mpi_enregs(idtset)%nproc_fft,ngfft(2),ngfft(3))
 
    if(response/=0)then
 !    This value of mpw is used in the first part of respfn.f
@@ -1065,7 +1065,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      dtsets(idtset)%nfftdg=nfftdg
 !    Compute fft distribution for fine grid
      fftalg=ngfft(7); fftalga=fftalg/100; fftalgc=mod(fftalg,10)
-     call init_distribfft(mpi_enregs(idtset)%distribfft,'f', mpi_enregs(idtset)%nproc_fft,ngfftdg(2),ngfftdg(3))
+     call mpi_enregs(idtset)%distribfft%init('f', mpi_enregs(idtset)%nproc_fft,ngfftdg(2),ngfftdg(3))
    end if
 
    dtsets(idtset)%mpw=mpw
@@ -1145,13 +1145,13 @@ end subroutine mpi_setup
 !! INPUTS
 !!  dtsets(0:ndtset_alloc)=<type datafiles_type>contains all input variables,
 !!   for all datasets; at this stage only datasets with index lower than
-!!   idtset are already initalized
+!!   idtset are already initialized
 !!  filnam(5)=character strings giving file names
 !!  idtset=number of the current dataset
 !!  mpi_enreg=information about MPI parallelization
 !!  mband=maximum number of bands.
 !!  ndtset_alloc=number of datasets, corrected for allocation of at least one data set
-!!  tread(11)=flags indicating wether parallel input parameters were read from input file
+!!  tread(11)=flags indicating whether parallel input parameters were read from input file
 !!            tread(1)  : paral_kgb      tread(6) : npfft
 !!            tread(2)  : npimage        tread(7) : npband
 !!            tread(3)  : nppert         tread(8) : bandpp
@@ -1696,8 +1696,8 @@ end subroutine mpi_setup
    dtset%npband   = max(1,dtset%npband)
    dtset%bandpp   = max(1,dtset%bandpp)
    write(msg,'(a,i0,2a,i0,a)')  &
-&  'Your input dataset does not let Abinit find an appropriate process distribution with nCPUs=',nproc*nthreads,ch10, &
-&  'Try to comment all the np* vars and set max_ncpus=',nthreads*nproc,' to have advices on process distribution.'
+  'Your input dataset does not let Abinit find an appropriate process distribution with nCPUs=',nproc*nthreads,ch10, &
+  'Try to comment all the np* vars and set max_ncpus=',nthreads*nproc,' to have advice on process distribution.'
    ABI_WARNING(msg)
    if (max_ncpus>0) call wrtout(ab_out,msg, do_flush=.True.)
    iexit=iexit+1
