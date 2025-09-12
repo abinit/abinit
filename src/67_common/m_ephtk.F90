@@ -343,7 +343,7 @@ subroutine ephtk_gkknu_from_atm(nb1, nb2, nk, natom, gkq_atm, phfrq, displ_red, 
 !scalars
  integer,intent(in) :: nb1, nb2, nk, natom
 !arrays
- real(dp),intent(in) :: phfrq(3*natom),displ_red(2,3*natom,3*natom)
+ real(dp),intent(in) :: phfrq(3*natom), displ_red(2,3*natom,3*natom)
  real(dp),intent(in) :: gkq_atm(2,nb1,nb2,nk,3*natom)
  real(dp),intent(out) :: gkq_nu(2,nb1,nb2,nk,3*natom)
 
@@ -358,7 +358,7 @@ subroutine ephtk_gkknu_from_atm(nb1, nb2, nk, natom, gkq_atm, phfrq, displ_red, 
    ! Ignore negative or too small frequencies
    if (phfrq(nu) < EPHTK_WTOL) cycle
 
-   ! Transform the gkk from (atom, reduced direction) basis to phonon mode representation
+   ! Transform the gkk from (atom, reduced direction) basis to phonon mode representation.
    do ipc=1,3*natom
      gkq_nu(1,:,:,:,nu) = gkq_nu(1,:,:,:,nu) &
        + gkq_atm(1,:,:,:,ipc) * displ_red(1,ipc,nu) &

@@ -1220,7 +1220,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    kg_k = wfd%kdata(ik_ibz)%kg_k
    ABI_MALLOC(kg_kq, (3, mpw))
 
-   call gs_ham_kq%eph_setup_k("k" , kk, istwfk_1, npw_k, kg_k, dtset, cryst, psps, &
+   call gs_ham_kq%eph_setup_k("k", kk, istwfk_1, npw_k, kg_k, dtset, cryst, psps, &
                               nkpg, kpg_k, ffnl_k, kinpw_k, ph3d_k, sigma%pert_comm%value)
 
    call cwtime_report(" Setup kcalc", cpu_setk, wall_setk, gflops_setk)

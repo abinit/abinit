@@ -70,8 +70,8 @@ module m_cgwf
 !! nscf_t
 !!
 !! FUNCTION
-!!  Simplified interface to the cgwf routine to perform NSCF calculations
-!!  starting from the KS potential read from file.
+!!  Simplified interface to the cgwf routine (congjugate gradient) to perform
+!!  NSCF calculations starting from the KS potential read from file.
 !!
 !! SOURCE
 
@@ -105,6 +105,7 @@ module m_cgwf
 
    procedure :: free => nscf_free
     ! Free dynamic memory.
+
  end type nscf_t
 !!***
 
@@ -2476,8 +2477,10 @@ end subroutine nscf_setup_spin
 !! INPUT
 !! isppol=Spin index
 !! kpt(3)=K-point
-!! dtset<dataset_type>=All input variables for this dataset.
+!! istwf_k=wavefunction storage.
+!! nband_k=Number of bands.
 !! cryst=Crystalline structure.
+!! dtset<dataset_type>=All input variables for this dataset.
 !! psps<pseudopotential_type>=Variables related to pseudopotentials.
 !! pawtab(ntypat*usepaw)<pawtab_type>=Paw tabulated starting data.
 !! pawfgr <type(pawfgr_type)>=fine grid parameters and related data.
@@ -2487,7 +2490,7 @@ end subroutine nscf_setup_spin
 !!  cg_k
 !!  gsc_k
 !!  eig_k
-!!  gs_ham_k <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
+!!  gs_ham_k=all data for the Hamiltonian at k-point kpt.
 !!
 !! SOURCE
 
@@ -2551,6 +2554,7 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psp
  ABI_MALLOC(ph1d, (2,3*(2*mgfft+1)*cryst%natom))
  call getph(cryst%atindx, cryst%natom, n1, n2, n3, ph1d, cryst%xred)
 
+ ! Initi GS Hamiltonian.
  call gs_ham_k%init(psps, pawtab, nspinor, dtset%nsppol, dtset%nspden, cryst%natom, &
                     dtset%typat, cryst%xred, nfft, mgfft, nscf%ngfft, cryst%rprimd, dtset%nloalg, &
                     comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab, mpi_spintab=mpi_enreg%my_isppoltab, &
@@ -2623,12 +2627,12 @@ end subroutine nscf_setup_kpt
 !! npw_k=Number of planewaves
 !!
 !! OUTPUT
-!!  kg_k=g-vectors for this k-point
-!!  cg_k=Wavefunction block.
-!!  gsc_k=<g|S|c> for PAW
-!!  eig_k=Eigenvalues
-!!  msg=Error message
-!!  ierr=Exit statue
+!! kg_k=g-vectors for this k-point
+!! cg_k=Wavefunction block.
+!! gsc_k=<g|S|c> for PAW
+!! eig_k=Eigenvalues.
+!! msg=Error message.
+!! ierr=Exit status.
 !!
 !! SOURCE
 
