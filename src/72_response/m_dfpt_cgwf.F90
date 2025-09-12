@@ -302,7 +302,6 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
  real(dp),pointer :: kinpw1(:)
  type(pawcprj_type),allocatable :: conjgrprj(:,:)
  type(pawcprj_type) :: cprj_dummy(1,1)
-
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -1634,7 +1633,6 @@ subroutine full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_band
  real(dp) :: facti,factr,eta,delta_E,inv_delta_E,gkkr
 !arrays
  real(dp) :: tsec(2)
-
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -1751,6 +1749,7 @@ subroutine stern_init(stern, dtset, npw_k, npw_kq, nspinor, nband, nband_me, fer
 !scalars
  integer :: natom, usepaw
 ! *************************************************************************
+
  natom = dtset%natom; usepaw = dtset%usepaw
 
  stern%npw_k = npw_k; stern%npw_kq = npw_kq; stern%nspinor = nspinor; stern%nband = nband; stern%dtset => dtset

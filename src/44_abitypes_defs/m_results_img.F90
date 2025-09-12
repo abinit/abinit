@@ -12,10 +12,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -64,7 +60,6 @@ MODULE m_results_img
 !! This structured datatype contains the results of a GS calculation
 !! for a given image of the cell:
 !!   energy, forces, stresses,positions, velocities, cell parameter, alchemical mixing parameters
-
 !!
 !! SOURCE
 
@@ -163,11 +158,9 @@ subroutine init_results_img(natom,npspalch,nspden,nsppol,ntypalch,ntypat,results
  integer,intent(in) :: natom,npspalch,nspden,nsppol,ntypalch,ntypat
 !arrays
  type(results_img_type),intent(inout) :: results_img(:)
-!Local variables-------------------------------
-!scalars
- integer :: ii,results_img_size
-!arrays
 
+!Local variables-------------------------------
+ integer :: ii,results_img_size
 !************************************************************************
 
  !@results_img_type
@@ -177,7 +170,6 @@ subroutine init_results_img(natom,npspalch,nspden,nsppol,ntypalch,ntypat,results
  if (results_img_size>0) then
 
    do ii=1,results_img_size
-
      results_img(ii)%natom  =natom
      results_img(ii)%npspalch  =npspalch
      results_img(ii)%nspden    =nspden
@@ -186,7 +178,7 @@ subroutine init_results_img(natom,npspalch,nspden,nsppol,ntypalch,ntypat,results
      results_img(ii)%ntypat    =ntypat
 
      ABI_MALLOC(results_img(ii)%results_gs,)
-     call init_results_gs(natom,nspden,nsppol,results_img(ii)%results_gs)
+     call results_img(ii)%results_gs%init(natom,nspden,nsppol)
 
      ABI_MALLOC(results_img(ii)%acell,(3))
      results_img(ii)%acell=zero
@@ -202,7 +194,6 @@ subroutine init_results_img(natom,npspalch,nspden,nsppol,ntypalch,ntypat,results
      results_img(ii)%vel  =zero
      ABI_MALLOC(results_img(ii)%vel_cell,(3,3))
      results_img(ii)%vel_cell=zero
-
    end do
  end if
 
@@ -218,24 +209,15 @@ end subroutine init_results_img
 !! FUNCTION
 !!  Clean and destroy an array of results_img datastructures
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!  results_img(:)=<type(results_img_type)>=results_img datastructure array
-!!
 !! SOURCE
 
 subroutine destroy_results_img(results_img)
 
 !Arguments ------------------------------------
-!arrays
  type(results_img_type),intent(inout) :: results_img(:)
-!Local variables-------------------------------
-!scalars
- integer :: ii,results_img_size
 
+!Local variables-------------------------------
+ integer :: ii,results_img_size
 !************************************************************************
 
  !@results_img_type
@@ -253,31 +235,17 @@ subroutine destroy_results_img(results_img)
      results_img(ii)%ntypat=0
 
      if (associated(results_img(ii)%results_gs)) then
-       call destroy_results_gs(results_img(ii)%results_gs)
+       call results_img(ii)%results_gs%free()
        ABI_FREE(results_img(ii)%results_gs)
      end if
 
-     if (allocated(results_img(ii)%acell))  then
-       ABI_FREE(results_img(ii)%acell)
-     end if
-     if (allocated(results_img(ii)%amu))  then
-       ABI_FREE(results_img(ii)%amu)
-     end if
-     if (allocated(results_img(ii)%mixalch))  then
-       ABI_FREE(results_img(ii)%mixalch)
-     end if
-     if (allocated(results_img(ii)%rprim))  then
-       ABI_FREE(results_img(ii)%rprim)
-     end if
-     if (allocated(results_img(ii)%xred))   then
-       ABI_FREE(results_img(ii)%xred)
-     end if
-     if (allocated(results_img(ii)%vel))    then
-       ABI_FREE(results_img(ii)%vel)
-     end if
-     if (allocated(results_img(ii)%vel_cell))    then
-       ABI_FREE(results_img(ii)%vel_cell)
-     end if
+     ABI_SFREE(results_img(ii)%acell)
+     ABI_SFREE(results_img(ii)%amu)
+     ABI_SFREE(results_img(ii)%mixalch)
+     ABI_SFREE(results_img(ii)%rprim)
+     ABI_SFREE(results_img(ii)%xred)
+     ABI_SFREE(results_img(ii)%vel)
+     ABI_SFREE(results_img(ii)%vel_cell)
    end do
 
  end if
@@ -294,24 +262,15 @@ end subroutine destroy_results_img
 !! FUNCTION
 !!  Nullify an array of results_img datastructures
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!  results_img(:)=<type(results_img_type)>=results_img datastructure array
-!!
 !! SOURCE
 
 subroutine nullify_results_img(results_img)
 
 !Arguments ------------------------------------
-!arrays
  type(results_img_type),intent(inout) :: results_img(:)
-!Local variables-------------------------------
-!scalars
- integer :: ii,results_img_size
 
+!Local variables-------------------------------
+ integer :: ii,results_img_size
 !************************************************************************
 
  !@results_img_type
@@ -343,25 +302,17 @@ end subroutine nullify_results_img
 !! FUNCTION
 !!  Copy a results_img datastructure into another
 !!
-!! INPUTS
-!!  results_img_in=<type(results_img_type)>=input results_img datastructure
-!!
-!! OUTPUT
-!!  results_img_out=<type(results_img_type)>=output results_img datastructure
-!!
 !! SOURCE
 
-subroutine copy_results_img(results_img_in,results_img_out)
+subroutine copy_results_img(results_img_in, results_img_out)
 
 !Arguments ------------------------------------
-!arrays
- type(results_img_type),intent(in) :: results_img_in
- type(results_img_type),intent(inout) :: results_img_out !vz_i
+ class(results_img_type),intent(in) :: results_img_in
+ class(results_img_type),intent(inout) :: results_img_out
+
 !Local variables-------------------------------
-!scalars
  integer :: natom_in,natom_out,npspalch_in,npspalch_out,ntypalch_in,ntypalch_out
  integer :: nspden_in, nspden_out, nsppol_in, nsppol_out,ntypat_in,ntypat_out
-
 !************************************************************************
 
  !@results_img_type
@@ -380,15 +331,9 @@ subroutine copy_results_img(results_img_in,results_img_out)
  ntypat_out=results_img_out%ntypat
 
  if (natom_in>natom_out) then
-   if (allocated(results_img_out%xred))   then
-     ABI_FREE(results_img_out%xred)
-   end if
-   if (allocated(results_img_out%vel))    then
-     ABI_FREE(results_img_out%vel)
-   end if
-   if (allocated(results_img_out%vel_cell))    then
-     ABI_FREE(results_img_out%vel_cell)
-   end if
+   ABI_SFREE(results_img_out%xred)
+   ABI_SFREE(results_img_out%vel)
+   ABI_SFREE(results_img_out%vel_cell)
 
    if (allocated(results_img_in%xred))   then
      ABI_MALLOC(results_img_out%xred,(3,natom_in))
@@ -402,9 +347,7 @@ subroutine copy_results_img(results_img_in,results_img_out)
  end if
 
  if (npspalch_in>npspalch_out .or. ntypalch_in>ntypalch_out) then
-   if (allocated(results_img_out%mixalch))   then
-     ABI_FREE(results_img_out%mixalch)
-   end if
+   ABI_SFREE(results_img_out%mixalch)
  endif
 
  if (ntypat_in>ntypat_out) then
@@ -420,12 +363,12 @@ subroutine copy_results_img(results_img_in,results_img_out)
  results_img_out%ntypalch  =results_img_in%ntypalch
  results_img_out%ntypat  =results_img_in%ntypat
 
- call copy_results_gs(results_img_in%results_gs,results_img_out%results_gs)
+ call results_img_in%results_gs%copy(results_img_out%results_gs)
 
  if (allocated(results_img_in%acell)) results_img_out%acell(:)=results_img_in%acell(:)
  if (allocated(results_img_in%amu))   results_img_out%amu(1:ntypat_in)=results_img_in%amu(1:ntypat_in)
  if (allocated(results_img_in%mixalch)) &
-&   results_img_out%mixalch(1:npspalch_in,1:ntypalch_in)=results_img_in%mixalch(1:npspalch_in,1:ntypalch_in)
+    results_img_out%mixalch(1:npspalch_in,1:ntypalch_in)=results_img_in%mixalch(1:npspalch_in,1:ntypalch_in)
  if (allocated(results_img_in%rprim))   results_img_out%rprim(:,:)=results_img_in%rprim(:,:)
  if (allocated(results_img_in%xred))    results_img_out%xred(:,1:natom_in)=results_img_in%xred(:,1:natom_in)
  if (allocated(results_img_in%vel))     results_img_out%vel(:,1:natom_in)=results_img_in%vel(:,1:natom_in)
@@ -458,7 +401,7 @@ end subroutine copy_results_img
 !! SOURCE
 
 subroutine gather_results_img(mpi_enreg,results_img,results_img_all,&
-&                 master,allgather,only_one_per_img) ! optional arguments
+                              master,allgather,only_one_per_img) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -480,7 +423,6 @@ subroutine gather_results_img(mpi_enreg,results_img,results_img_all,&
 !arrays
  integer,allocatable :: iimg(:),nimage_all(:),rbufshft(:),rsize_img_all(:)
  real(dp),allocatable :: rbuffer(:),rbuffer_all(:)
-
 !************************************************************************
 
  !@results_img_type
@@ -580,8 +522,7 @@ subroutine gather_results_img(mpi_enreg,results_img,results_img_all,&
      rbuffer(ibufr+33:ibufr+35)=results_img(jj)%vel_cell(1:3,2)
      rbuffer(ibufr+36:ibufr+38)=results_img(jj)%vel_cell(1:3,3)
      ibufr=ibufr+38
-     call energies_to_array(results_img(jj)%results_gs%energies,&
-&                           rbuffer(ibufr+1:ibufr+n_energies),1)
+     call results_img(jj)%results_gs%energies%to_array(rbuffer(ibufr+1:ibufr+n_energies),1)
      ibufr=ibufr+n_energies
      rbuffer(ibufr+1:ibufr+3*natom)=reshape(results_img(jj)%results_gs%fcart(1:3,1:natom),(/3*natom/))
      ibufr=ibufr+3*natom
@@ -664,8 +605,7 @@ subroutine gather_results_img(mpi_enreg,results_img,results_img_all,&
        results_img_all(jj)%vel_cell(1:3,2)=rbuffer_all(ibufr+33:ibufr+35)
        results_img_all(jj)%vel_cell(1:3,3)=rbuffer_all(ibufr+36:ibufr+38)
        ibufr=ibufr+38
-       call energies_to_array(results_img_all(jj)%results_gs%energies,&
-&                             rbuffer_all(ibufr+1:ibufr+n_energies),-1)
+       call results_img_all(jj)%results_gs%energies%to_array(rbuffer_all(ibufr+1:ibufr+n_energies),-1)
        ibufr=ibufr+n_energies
        results_img_all(jj)%amu(1:ntypat)=rbuffer_all(ibufr+1:ibufr+ntypat)
        results_img_all(jj)%results_gs%fcart(1:3,1:natom)= &
@@ -721,7 +661,6 @@ subroutine gather_results_img(mpi_enreg,results_img,results_img_all,&
 !  Free memory
    ABI_FREE(rbufshft)
    ABI_FREE(rbuffer_all)
-
  end if
 
 end subroutine gather_results_img
@@ -774,7 +713,6 @@ subroutine gather_array_img_1D(array_img,array_img_all,mpi_enreg,&
 !arrays
  integer,allocatable :: iimg(:),nimage_all(:),rbufshft(:),rsize_img_all(:)
  real(dp),allocatable :: rbuffer(:),rbuffer_all(:)
-
 !************************************************************************
 
  !@results_img_type
@@ -926,7 +864,6 @@ subroutine gather_array_img_2D(array_img,array_img_all,mpi_enreg,&
 !arrays
  integer,allocatable :: iimg(:),nimage_all(:),rbufshft(:),rsize_img_all(:)
  real(dp),allocatable :: rbuffer(:),rbuffer_all(:)
-
 !************************************************************************
 
  !@results_img_type
@@ -1078,7 +1015,6 @@ subroutine scatter_array_img(array_img,array_img_all,mpi_enreg,&
 !arrays
  integer,allocatable :: iimg(:),nimage_all(:),rbufshft(:),rsize_img_all(:)
  real(dp),allocatable :: rbuffer(:),rbuffer_all(:)
-
 !************************************************************************
 
  !@results_img_type
@@ -1201,8 +1137,6 @@ end subroutine scatter_array_img
 !!  xcart(3,natom,nimage)=cartesian coordinates of atoms in each image
 !!  xred(3,natom,nimage)=reduced coordinates of atoms in each image
 !!
-!! SIDE EFFECTS
-!!
 !! SOURCE
 
 subroutine get_geometry_img(results_img,etotal,natom,nimage,fcart,rprimd,strten,xcart,xred)
@@ -1214,11 +1148,10 @@ subroutine get_geometry_img(results_img,etotal,natom,nimage,fcart,rprimd,strten,
  real(dp),intent(out) :: etotal(nimage),fcart(3,natom,nimage),rprimd(3,3,nimage)
  real(dp),intent(out) :: strten(6,nimage),xcart(3,natom,nimage),xred(3,natom,nimage)
  type(results_img_type),intent(in) :: results_img(nimage)
+
 !Local variables-------------------------------
 !scalars
  integer :: iimage
-!arrays
-
 !************************************************************************
 
  do iimage=1,nimage

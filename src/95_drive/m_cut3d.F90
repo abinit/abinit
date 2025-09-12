@@ -39,7 +39,7 @@ MODULE m_cut3d
  use m_matrix,           only : matr3inv
  use m_fstrings,         only : int2char10, sjoin, itoa
  use m_geometry,         only : xcart2xred, metric
- use m_special_funcs,    only : jlspline_t, jlspline_new, jlspline_free, jlspline_integral
+ use m_special_funcs,    only : jlspline_t
  use m_pptools,          only : print_fofr_ri, print_fofr_xyzri , print_fofr_cube
  use m_mpinfo,           only : destroy_mpi_enreg, initmpi_seq
  use m_cgtools,          only : cg_getspin
@@ -1314,11 +1314,11 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
 
    select case (inpopt)
 
-   case(1)
+   case (1)
      write(std_out,*) '    -> X-Coord   Y-Coord   Z-Coord:'
      read(std_in,*) cent
      exit
-   case(2)
+   case (2)
      write(std_out,*) '    -> X-Coord   Y-Coord   Z-Coord:'
      read(std_in,*) cent
      do mu=1,3
@@ -1359,7 +1359,6 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
      read(std_in,*) planetype
 
      select case(planetype)
-
      case (1)
        exit
      case (2)
@@ -1782,7 +1781,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
      mband=maxval(nband)
      mpw=maxval(npwarr)
      mcg=mpw*nspinor*mband
-     if (allocated (cg_k))   then
+     if (allocated (cg_k))then
        ABI_FREE(cg_k)
        ABI_FREE(eig_k)
        ABI_FREE(occ_k)
@@ -1987,7 +1986,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !      Initialize general Bessel function array on uniform grid xx, from 0 to (2 \pi |k+G|_{max} |r_{max}|)
        ABI_MALLOC(rint,(nradintmax))
 
-       jlspl = jlspline_new(mbess, bessint_delta, mlang)
+       call jlspl%init(mbess, bessint_delta, mlang)
 
        ABI_MALLOC(bess_fit,(mpw,nradintmax,mlang))
        ABI_MALLOC(xfit,(npw_k))
@@ -2053,8 +2052,8 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        ABI_FREE(yfit)
        ABI_FREE(xfit)
        ABI_FREE(bess_fit)
-       call jlspline_free(jlspl)
        ABI_FREE(rint)
+       call jlspl%free()
      end if ! ratsph < 0     = end if for atomic sphere analysis
 
      ABI_FREE(cgcband)
@@ -2201,7 +2200,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        close(unout)
        exit
 
-     case(6) ! coord(x,y,z) data I
+     case (6) ! coord(x,y,z) data I
        write(std_out,*)
        write(std_out,*) 'Give 1 file of 3D formatted data'
        write(std_out,*) 'The first three columns are the x,y,z positions(Angstrom)'
@@ -2214,7 +2213,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        close(unout)
        exit
 
-     case(7) !OpenDX format, data R and data I
+     case (7) !OpenDX format, data R and data I
        write(std_out,*)
        write(std_out,*) 'Give 2 files of 3D formatted data'
        write(std_out,*) 'The file is ready to be use with OpenDX'
@@ -2269,7 +2268,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        ABI_FREE(filename)
        exit
 
-     case(8) ! OpenDX format, data R and data I
+     case (8) ! OpenDX format, data R and data I
        write(std_out,*)
        write(std_out,*) 'Give 2 files of 3D formatted data'
        write(std_out,*) 'The file is ready to be use with OpenDX'
@@ -2320,7 +2319,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        ABI_FREE(filename)
        exit
 
-     case(9) !OpenDX format, data R and data I
+     case (9) !OpenDX format, data R and data I
        write(std_out,*)
        write(std_out,*) 'Give 2 files of 3D formatted data'
        write(std_out,*) 'The file is ready to be use with OpenDX'
@@ -2371,7 +2370,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        ABI_FREE(filename)
        exit
 
-     case(10)           !OpenDX format, data R and data I, atoms positions, lattice and cell
+     case (10)           !OpenDX format, data R and data I, atoms positions, lattice and cell
        write(std_out,*)
        write(std_out,*) 'Give 5 files of formatted data'
        write(std_out,*) 'The files are ready to be use with Data Explorer'
@@ -2511,7 +2510,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*)
        exit
 
-     case(11)
+     case (11)
        write(std_out,*)
        write(std_out,*) 'Give 1 files of formatted data'
        write(std_out,*) 'The files are ready to be used with XCrysDen'
@@ -2669,15 +2668,11 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
        write(std_out,*)
        exit
-
-
-     case(12)
+     case (12)
        write(std_out,*)"NetCDF output is not available anymore"
        exit
 
-!        ************************************************************
-
-     case(13)
+     case (13)
        write(std_out,*)
        write(std_out,*) 'Give 1 files of formatted data'
        write(std_out,*) 'The files are ready to be used with XCrysDen'
@@ -2777,8 +2772,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*)
        exit
 
-     case(14) ! CUBE file format from GAUSSIAN
-
+     case (14) ! CUBE file format from GAUSSIAN
        write(std_out,*)
        write(std_out,*) 'Output a cube file of 3D volumetric data'
        write(std_out,*)
@@ -2790,7 +2784,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        close(unout)
        exit
 
-     case(0)
+     case (0)
        write(std_out,*)' Exit inner loop'
        select_exit = 1
 

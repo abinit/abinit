@@ -97,18 +97,14 @@ module m_special_funcs
    ! bess_spl_der(nx,mlang)
    ! the second derivatives of the cubic spline.
 
- !contains
+ contains
 
-   !procedure :: init => jlspline_new         ! Create new object.
-   !procedure :: free => jlspline_free        ! Free memory.
-   !procedure :: eval => jlspline_integral    ! Compute integral.
+   procedure :: init => jlspline_init         ! Create new object.
+   procedure :: free => jlspline_free        ! Free memory.
+   procedure :: eval => jlspline_integral    ! Compute integral.
 
  end type jlspline_t
 !!***
-
- public :: jlspline_new         ! Create new object.
- public :: jlspline_free        ! Free memory.
- public :: jlspline_integral    ! Compute integral.
 
 !!****t* m_special_funcs/gspline_t
 !! NAME
@@ -129,7 +125,7 @@ module m_special_funcs
    real(dp) :: sigma
     ! Broadening parameter.
 
-   real(dp) :: xmin,xmax
+   real(dp) :: xmin, xmax
     ! Min and max x in spline mesh. Only positive xs are stored in memory
     ! The values at -x are reconstructed by symmetry.
     ! xmin is usually zero, xmax is the point where the gaussian == tol16.
@@ -146,12 +142,13 @@ module m_special_funcs
     ! svals(nspline,4)
     ! Internal tables with spline data.
 
+ contains
+
+    procedure :: init => gspline_init      ! Creation method.
+    procedure :: eval => gspline_eval      ! Evaluate interpolant
+    procedure :: free => gspline_free      ! Free memory.
  end type gspline_t
 !!***
-
- public :: gspline_new       ! Creation method.
- public :: gspline_eval      ! Evaluate interpolant
- public :: gspline_free      ! Free memory.
 
 CONTAINS  !===========================================================
 !!***
@@ -1318,17 +1315,14 @@ end function fermi_dirac
 !!
 !! SOURCE
 
-function bose_einstein(energy, temperature)
+real(dp) function bose_einstein(energy, temperature)
 
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: energy, temperature
- real(dp) :: bose_einstein
 
 !Local variables-------------------------------
-!scalars
  real(dp) :: arg
- character(len=500) :: message
 ! *************************************************************************
 
  bose_einstein = zero
@@ -1337,12 +1331,10 @@ function bose_einstein(energy, temperature)
    if(arg > tol12 .and. arg < 600._dp)then
      bose_einstein = one / (exp(arg)  - one)
    else if (arg < tol12) then
-     write(message,'(a)') 'No Bose Einstein for negative energies'
-     ABI_WARNING(message)
+     ABI_WARNING('No Bose Einstein for negative energies')
    end if
  else
-   write(message,'(a)') 'No Bose Einstein for negative or 0 T'
-   ABI_WARNING(message)
+   ABI_WARNING('No Bose Einstein for negative or 0 T')
  end if
 
 
@@ -1367,7 +1359,7 @@ end function bose_einstein
 !!
 !! SOURCE
 
-function dip12(gamma)
+real(dp) function dip12(gamma)
 
 ! Arguments -------------------------------
 ! Scalars
@@ -1375,7 +1367,7 @@ function dip12(gamma)
 
 ! Local variables -------------------------
 ! Scalars
- real(dp) :: d,dip12,dy
+ real(dp) :: d,dy
 ! *********************************************************************
 
  if (gamma.lt.3.) then
@@ -1442,15 +1434,15 @@ end function dip12
 !!  dip32=resulting function
 !!
 !! SOURCE
-function dip32(gamma)
+
+real(dp) function dip32(gamma)
 
 ! Arguments -------------------------------
-! Scalars
  real(dp),intent(in) :: gamma
 
 ! Local variables -------------------------
 ! Scalars
- real(dp) :: d,dip32,dval
+ real(dp) :: d,dval
 ! *********************************************************************
 
  if (gamma.GT.1.75) then
@@ -1502,6 +1494,7 @@ function dip32(gamma)
    & (3.8144E-06+d*7.4446E-07)))))))))
  end if
  dip32=dip32*1.32934038
+
 end function dip32
 !!***
 
@@ -1523,12 +1516,12 @@ end function dip32
 !!  djp12=resulting function
 !!
 !! SOURCE
-function djp12(xcut,gamma)
+
+real(dp) function djp12(xcut, gamma)
 
 ! Arguments -------------------------------
 ! Scalars
  real(dp),intent(in) :: xcut,gamma
- real(dp) :: djp12
 
 ! Local variables -------------------------
 ! Scalars
@@ -1630,6 +1623,7 @@ function djp12(xcut,gamma)
    end if
  end if
  djp12=dip12(gamma)-xcut*dsqrt(xcut)/1.5D+0
+
 end function djp12
 !!***
 
@@ -1651,12 +1645,12 @@ end function djp12
 !!  djp32=resulting function
 !!
 !! SOURCE
-function djp32(xcut,gamma)
+
+real(dp) function djp32(xcut,gamma)
 
 ! Arguments -------------------------------
 ! Scalars
  real(dp),intent(in) :: xcut,gamma
- real(dp) :: djp32
 
 ! Local variables -------------------------
 ! Scalars
@@ -1764,6 +1758,7 @@ function djp32(xcut,gamma)
    end if
  end if
  djp32=dip32(gamma)-xcut*xcut*DSQRT(xcut)/2.5D+0
+
 end function djp32
 !!***
 
@@ -1868,6 +1863,7 @@ subroutine tildeAx(t,Ax,dAx,d2Ax)
  if(Ax/=Ax) Ax=zero
  if(dAx/=dAx) dAx=zero
  if(d2Ax/=d2Ax) d2Ax=zero
+
 end subroutine tildeAx
 !!***
 
@@ -1899,6 +1895,7 @@ subroutine tildeBx(t,Bx,dBx,d2Bx)
 !scalars
  real(dp),intent(in) :: t
  real(dp),intent(out) :: Bx,dBx,d2Bx
+
 !Local variables ------------------------------
 !scalars
  real(dp),parameter :: a2 = -3.4341427276599950_dp
@@ -1986,6 +1983,7 @@ subroutine tildeBx(t,Bx,dBx,d2Bx)
  if(Bx/=Bx) Bx=zero
  if(dBx/=dBx) dBx=zero
  if(d2Bx/=d2Bx) d2Bx=zero
+
 end subroutine tildeBx
 !!***
 
@@ -2020,6 +2018,7 @@ subroutine tildeBc(iflag,rs,t,Bc,dBcdrs,dBcdt)
  integer,intent(in) :: iflag
  real(dp),intent(in) :: rs,t
  real(dp),intent(out) :: Bc,dBcdrs,dBcdt
+
 !Local variables ------------------------------
 !scalars
  real(dp),parameter :: alpha_n = 0.50000000000000D+00
@@ -2095,6 +2094,7 @@ subroutine tildeBc(iflag,rs,t,Bc,dBcdrs,dBcdt)
    if(dBcdt/=dBcdt) dBcdt=zero
    !
  endif
+
 end subroutine tildeBc
 !!***
 
@@ -2189,9 +2189,9 @@ pure function levi_civita_3() result(ee)
 end function levi_civita_3
 !!***
 
-!!****f* m_special_funcs/jlspline_new
+!!****f* m_special_funcs/jlspline_init
 !! NAME
-!! jlspline_new
+!! jlspline_init
 !!
 !! FUNCTION
 !! Pre-calculate the j_v(y) for recip_ylm on regular grid
@@ -2209,10 +2209,11 @@ end function levi_civita_3
 !!
 !! SOURCE
 
-type(jlspline_t) function jlspline_new(nx, delta, mlang) result(new)
+subroutine jlspline_init(new, nx, delta, mlang)
 
 !Arguments ------------------------------------
 !scalars
+ class(jlspline_t),intent(inout) :: new
  integer,intent(in) :: nx,mlang
  real(dp),intent(in) :: delta
 
@@ -2265,7 +2266,7 @@ type(jlspline_t) function jlspline_new(nx, delta, mlang) result(new)
  ABI_FREE(sinbessx)
  ABI_FREE(cosbessx)
 
-end function jlspline_new
+end subroutine jlspline_init
 !!***
 
 !----------------------------------------------------------------------
@@ -2282,8 +2283,7 @@ end function jlspline_new
 subroutine jlspline_free(jlspl)
 
 !Arguments ------------------------------------
- type(jlspline_t),intent(inout) :: jlspl
-
+ class(jlspline_t),intent(inout) :: jlspl
 ! *********************************************************************
 
  ABI_SFREE(jlspl%xx)
@@ -2310,9 +2310,9 @@ end subroutine jlspline_free
 real(dp) function jlspline_integral(jlspl, il, qq, powr, nr, rcut)  result(res)
 
 !Arguments ------------------------------------
+ class(jlspline_t),intent(in) :: jlspl
  integer,intent(in) :: il,nr,powr
  real(dp),intent(in) :: qq, rcut
- type(jlspline_t),intent(in) :: jlspl
 
 !Local variables ---------------------------------------
  integer :: ierr
@@ -2340,9 +2340,9 @@ real(dp) function jlspline_integral(jlspl, il, qq, powr, nr, rcut)  result(res)
 end function jlspline_integral
 !!***
 
-!!****f* m_special_funcs/gspline_new
+!!****f* m_special_funcs/gspline_init
 !! NAME
-!!  gspline_new
+!!  gspline_init
 !!
 !! FUNCTION
 !!  Build object to spline the gaussian approximant and its primitive.
@@ -2352,14 +2352,14 @@ end function jlspline_integral
 !!
 !! SOURCE
 
-type (gspline_t) function gspline_new(sigma) result(new)
+subroutine gspline_init(new, sigma)
 
 !Arguments ------------------------------------
 !scalars
+ class(gspline_t),intent(out) :: new
  real(dp),intent(in) :: sigma
 
 !Local variables ------------------------------
-!scalars
  integer :: ii
  real(dp) :: ybcbeg, ybcend
 ! *************************************************************************
@@ -2389,7 +2389,7 @@ type (gspline_t) function gspline_new(sigma) result(new)
  call spline(new%xvals, new%svals(:,3), new%nspline, new%svals(1,1), new%svals(new%nspline, 1), new%svals(:,4))
  !do ii=1,new%nspline; write(98,*)new%xvals(ii),new%svals(ii,3),new%svals(ii,4); end do
 
-end function gspline_new
+end subroutine gspline_init
 !!***
 
 !!****f* m_special_funcs/gspline_eval

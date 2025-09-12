@@ -40,7 +40,7 @@ module defs_abitypes
 
  use defs_basis
  use m_abicore
- use m_distribfft
+ use m_distribfft, only : distribfft_type
 
  implicit none
 !!***

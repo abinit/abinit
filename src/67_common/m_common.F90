@@ -47,7 +47,7 @@ module m_common
 
  use m_fstrings,          only : indent, endswith, sjoin, itoa
  use m_electronpositron,  only : electronpositron_type
- use m_energies,          only : energies_type, energies_eval_eint
+ use m_energies,          only : energies_type
  use m_pair_list,         only : pair_list
  use m_geometry,          only : mkrdim, metric
  use m_kg,                only : getcut
@@ -1502,7 +1502,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
 
  optdc=-1;ipositron=merge(0,2,dtset%positron==0)
  if (abs(energies%e_ewald)<1.e-15_dp.and.abs(energies%e_hartree)<1.e-15_dp) ipositron=1
- call energies_eval_eint(energies,dtset,usepaw,optdc,etotal,etotaldc)
+ call energies%eval_eint(dtset,usepaw,optdc,etotal,etotaldc)
 
  call entropy(dtset,energies)
  eent=energies%e_entropy

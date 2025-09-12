@@ -55,7 +55,7 @@ module m_sigma_driver
  use m_fft,           only : fourdp
  use m_ioarr,         only : fftdatar_write, read_rhor
  use m_ebands,        only : ebands_t, gaps_t
- use m_energies,      only : energies_type, energies_init
+ use m_energies,      only : energies_type
  use m_bz_mesh,       only : kmesh_t, littlegroup_t, littlegroup_free, isamek, get_ng0sh
  use m_gsphere,       only : gsphere_t, merge_and_sort_kg, setshells
  use m_kg,            only : getph, getcut
@@ -350,7 +350,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  ! === Some variables need to be initialized/nullify at start ===
  usexcnhat = 0
- call energies_init(KS_energies)
+ call KS_energies%init()
  call mkrdim(acell, rprim, rprimd)
  call metric(gmet,gprimd,ab_out,rmet,rprimd,ucvol)
  !
@@ -1058,7 +1058,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  else
    ! Self-consistent GW.
    ! Read the unitary matrix and the QP energies of the previous step from the QPS file.
-   call energies_init(QP_energies)
+   call QP_energies%init()
    QP_energies%e_corepsp=ecore/Cryst%ucvol
 
    ! m_ks_to_qp(ib,jb,k,s) := <\psi_{ib,k,s}^{KS}|\psi_{jb,k,s}^{QP}>

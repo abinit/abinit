@@ -46,7 +46,7 @@ module m_outscfcv
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
  use m_oper,             only : oper_type,init_oper,destroy_oper
  use m_crystal,          only : crystal_t, prt_cif
- use m_results_gs,       only : results_gs_type, results_gs_ncwrite
+ use m_results_gs,       only : results_gs_type
  use m_ioarr,            only : ioarr, fftdatar_write
  use m_matlu,            only : copy_matlu,destroy_matlu,init_matlu,matlu_type
  use m_nucprop,          only : calc_efg,calc_fc
@@ -1354,7 +1354,7 @@ if (dtset%prt_lorbmag==1) then
    NCF_CHECK(crystal%ncwrite(ncid))
    NCF_CHECK(ebands%ncwrite(ncid))
    ! Add energy, forces, stresses
-   NCF_CHECK(results_gs_ncwrite(results_gs, ncid, dtset%ecut, dtset%pawecutdg))
+   NCF_CHECK(results_gs%ncwrite(ncid, dtset%ecut, dtset%pawecutdg))
 
    ! Add info on GBT.
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
@@ -1409,21 +1409,18 @@ if (dtset%prt_lorbmag==1) then
 
  call timab(1154,2,tsec)
 
- if(allocated(efg)) then
-   ABI_FREE(efg)
- end if
-
  ABI_SFREE_PTR(elfr)
  ABI_SFREE_PTR(grhor)
  ABI_SFREE_PTR(lrhor)
 
+ ABI_SFREE(efg)
  ABI_SFREE(intgden)
 
  call crystal%free()
  call ebands%free()
 
  ! Destroy atom table used for parallelism
- call free_my_atmtab(my_atmtab,my_atmtab_allocated)
+ call free_my_atmtab(my_atmtab, my_atmtab_allocated)
 
  call timab(1150,2,tsec) ! outscfcv
 
