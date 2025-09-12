@@ -45,7 +45,7 @@ module m_epjdos
  use m_io_tools,       only : open_file
  use m_numeric_tools,  only : simpson, simpson_int
  use m_fstrings,       only : int2char4, strcat
- use m_special_funcs,  only : jlspline_t, jlspline_new, jlspline_free, jlspline_integral
+ use m_special_funcs,  only : jlspline_t
  use m_kpts,           only : tetra_from_kptrlatt
  use m_kg,             only : ph1d3d, getph
  use m_gsphere,        only : getkpgnorm
@@ -678,7 +678,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 10 continue
    integral_DOS=sum(total_dos(nene,:,2))
    write(msg, '(a,es16.8)' ) ' tetrahedron : integrate to',integral_DOS
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
  end do ! isppol
 
  ! Close files.
@@ -922,7 +922,6 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
  complex(dpc),allocatable :: tmppsia(:,:),tmppsim(:,:),dotc(:)
  integer, allocatable :: ispinors(:)
  complex(dpc),allocatable :: values(:,:,:,:)
-
 ! *************************************************************************
 
  ! Workspace array (used to reduce the number of MPI communications)
@@ -1435,7 +1434,6 @@ subroutine sphericaldens(fofg,gnorm,nfft,rmax,sphfofg)
 !scalars
  integer :: ifft
  real(dp) :: factor,int0yy,rmax_2pi,yy
-
 ! *************************************************************************
 
  rmax_2pi=two_pi*rmax
@@ -1507,13 +1505,15 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
  character(len=fnlen) :: tmpfil
  type(atomdata_t) :: atom
 !arrays
+ integer :: units(2)
  integer,allocatable :: unitfatbands_arr(:,:)
  real(dp),allocatable :: eigenvalues(:,:,:)
  character(len=2) :: symbol
-
 !*************************************************************************
 
  DBG_ENTER("COLL")
+
+ units = [std_out, ab_out]
 
  ndosfraction = dos%ndosfraction; mbesslang = dos%mbesslang
 
@@ -1546,8 +1546,7 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
  write(msg,'(a,a,a,a,i5,a,a,1000i5)') ch10," ***** Print of fatbands activated ****** ",ch10,&
   "  Number of atom: natsph = ",natsph,ch10, &
   "  atoms  are             = ",(dtset%iatsph(iat),iat=1,natsph)
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+ call wrtout(units, msg)
  iall=0;inbfatbands=0
 
  if(pawfatbnd==1) then
@@ -1557,11 +1556,10 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
    write(msg,'(3a)')"  (fatbands are in eV and are given for each value of L and M)",ch10
    inbfatbands=(mbesslang-1)**2
  end if
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+ call wrtout(units, msg)
 
  write(msg,'(a,e12.5,a,e12.5,a)') "  Fermi energy is ",ebands%fermie*Ha_eV," eV = ",ebands%fermie," Ha"
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out,msg)
 
 !--------------  OPEN AND NAME FILES FOR FATBANDS
  ABI_MALLOC(unitfatbands_arr,(natsph*inbfatbands,dtset%nsppol))
@@ -1600,7 +1598,7 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
          end if
 
          write(msg,'(a,a,a,i4)') 'opened file : ', trim(tmpfil), ' unit', unitfatbands_arr(iall,isppol)
-         call wrtout(std_out,msg,'COLL')
+         call wrtout(std_out,msg)
          write(msg,'(9a)') "# ",ch10,"# ABINIT package : FATBAND file ", ch10,&
            "# It contains, for each band: the eigenvalues in eV (and the character of the band) as a function of the k-point",&
            ch10,"# This file can be read with xmgrace (http://plasma-gate.weizmann.ac.il/Grace/)  ",ch10,"#  "
@@ -1937,19 +1935,16 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
  real(dp),allocatable :: cplx_1lm_1atom(:,:,:,:)
  real(dp),allocatable :: xred_sph(:,:),znucl_sph(:),phkxred(:,:)
  complex(dpc) :: cgcmat(2,2)
-
 !*************************************************************************
 
-!DEBUG
 !write(std_out, '(a)') ' m_epjdos%partial_dos_fractions : enter '
-!ENDDEBUG
 
  if(dtset%natsph==dtset%natom)then
    write(msg, '(a)') ' Compute the partial DOS fractions. This can be time-consuming. Think using natsph and iatsph.'
  else
    write(msg, '(a)') ' Compute the partial DOS fractions.'
  endif
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out,msg)
 
  ! for the moment, only support projection on angular momenta
  if (dos%partial_dos_flag /= 1 .and. dos%partial_dos_flag /= 2) then
@@ -2062,7 +2057,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
    ABI_MALLOC(bess_fit,(dtset%mpw,nradintmax,dos%mbesslang))
 
    ! initialize general Bessel function array on uniform grid xx, from 0 to (2 \pi |k+G|_{max} |r_{max}|)
-   jlspl = jlspline_new(mbess, bessint_delta, dos%mbesslang)
+   call jlspl%init(mbess, bessint_delta, dos%mbesslang)
 
    ABI_MALLOC(xred_sph, (3, natsph_tot))
    do iatom=1,dtset%natsph
@@ -2276,7 +2271,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
    ABI_FREE(xred_sph)
    ABI_FREE(znucl_sph)
 
-   call jlspline_free(jlspl)
+   call jlspl%free()
    call destroy_mpi_enreg(mpi_enreg_seq)
 
  !##############################################################
@@ -2441,7 +2436,6 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
  real(dp) :: tsec(2)
  real(dp),allocatable :: int1(:,:),int2(:,:),int1m2(:,:)
  type(pawcprj_type),allocatable :: cprj_k(:,:)
-
 !******************************************************************************************
 
  DBG_ENTER("COLL")
@@ -2689,10 +2683,10 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
      do il = 0, mbesslang-1
        do im = 1, il
          dos%fractions_m(:,:,:,mbesslang**2*(iat-1)+il**2+il+1+im) = &
-&         (dos%fractions_m(:,:,:,mbesslang**2*(iat-1)+il**2+il+1+im) + &
-&         dos%fractions_m(:,:,:,mbesslang**2*(iat-1)+il**2+il+1-im))/2
+           (dos%fractions_m(:,:,:,mbesslang**2*(iat-1)+il**2+il+1+im) + &
+           dos%fractions_m(:,:,:,mbesslang**2*(iat-1)+il**2+il+1-im))/2
          dos%fractions_m(:,:,:,mbesslang**2*(iat-1)+il**2+il+1-im) = &
-&         dos%fractions_m(:,:,:,mbesslang**2*(iat-1)+il**2+il+1+im)
+           dos%fractions_m(:,:,:,mbesslang**2*(iat-1)+il**2+il+1+im)
        end do
      end do
    end do !iatom

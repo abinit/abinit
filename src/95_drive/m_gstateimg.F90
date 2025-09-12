@@ -1324,8 +1324,8 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimi
 !Set up a results_gs datastructure with the linear combination of images
  nspden=resimg_all(1)%results_gs%nspden
  nsppol=resimg_all(1)%results_gs%nsppol
- call init_results_gs(natom,nspden,nsppol,results_gs_lincomb)
- call copy_results_gs(resimg_all(1)%results_gs,results_gs_lincomb)
+ call results_gs_lincomb%init(natom,nspden,nsppol)
+ call resimg_all(1)%results_gs%copy(results_gs_lincomb)
  results_gs_lincomb%etotal=etotal
  results_gs_lincomb%entropy=entropy
  results_gs_lincomb%fermie=fermie
@@ -1348,7 +1348,7 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimi
  call results_gs_lincomb%yaml_write(ab_out, info="Linear combination of ground state results")
 
 !Destroy result_gs_lincomb
- call destroy_results_gs(results_gs_lincomb)
+ call results_gs_lincomb%free()
 
 !Store fcart and strten in hist_1geo
  m1geo_param%hist_1geo%fcart(:,:,ihist)=fcart(:,:)

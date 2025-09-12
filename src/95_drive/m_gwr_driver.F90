@@ -48,7 +48,7 @@ module m_gwr_driver
  use m_fftcore,         only : print_ngfft, get_kg
  use m_fft,             only : fourdp
  use m_ioarr,           only : read_rhor
- use m_energies,        only : energies_type, energies_init
+ use m_energies,        only : energies_type
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
@@ -298,7 +298,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
 
  ! Some variables need to be initialized/nullify at start
  usexcnhat = 0
- call energies_init(KS_energies)
+ call KS_energies%init()
 
 !Get electronic temperature from dtset
  el_temp = merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)

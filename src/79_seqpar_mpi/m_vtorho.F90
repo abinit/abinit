@@ -67,7 +67,7 @@ module m_vtorho
  use m_paw_correlations,   only : setnoccmmp
  use m_paw_occupancies,    only : pawmkrhoij
  use m_paw_mkrho,          only : pawmkrho
- use m_results_gs,         only : results_gs_type, results_gs_ncwrite
+ use m_results_gs,         only : results_gs_type
  use m_oper,               only : oper_type,init_oper,destroy_oper
  use m_io_tools,           only : flush_unit
  use m_abi2big,            only : wvl_occ_abi2big, wvl_rho_abi2big, wvl_occopt_abi2big, wvl_eigen_abi2big
@@ -222,8 +222,7 @@ contains
 !!  pwind(pwind_alloc,2,3) = array used to compute
 !!           the overlap matrix smat between k-points (see initberry.f)
 !!  pwind_alloc = first dimension of pwind
-!!  pwnsfac(2,pwind_alloc) = phase factors for non-symmorphic translations
-!!                           (see initberry.f)
+!!  pwnsfac(2,pwind_alloc) = phase factors for non-symmorphic translations (see initberry.f)
 !!  results_gs <type(results_gs_type)>=results (energy and its components,
 !!     forces and its components, the stress tensor) of a ground-state
 !!     computation (should be made a pure output quantity)
@@ -468,7 +467,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(ebands_t) :: ebands
  real(dp), allocatable :: occnd_tmp(:)
 #endif
-
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -2425,7 +2423,6 @@ subroutine wvl_nscf_loop()
  logical,parameter :: do_scf=.false. !do not do a SCF cycle
  logical,parameter :: wvlbigdft=.false.
  real(dp) :: dum,eexctx,eh,ekin,eloc,enl,esicdc,evxc,exc
-
 ! *************************************************************************
 
    DBG_ENTER("COLL")
@@ -2522,7 +2519,6 @@ subroutine wvl_nscf_loop_bigdft()
  logical,parameter :: do_scf=.false. !do not do a SCF cycle
  logical,parameter :: wvlbigdft=.true.
  real(dp) :: eexctx,eh,ekin,eloc,enl,esicdc,evxc,exc
-
 ! *************************************************************************
 
    DBG_ENTER("COLL")
@@ -2599,7 +2595,6 @@ subroutine e_eigen(eigen,e_eigenvalues,mband,nband,nkpt,nsppol,occ,wtk)
 !Local variables-------------------------------
  integer :: ib,iband,ii,ikpt,isppol,nband_k
  real(dp) :: wtk_k
-
 ! *************************************************************************
 
    DBG_ENTER("COLL")
@@ -2628,10 +2623,6 @@ subroutine e_eigen(eigen,e_eigenvalues,mband,nband,nkpt,nsppol,occ,wtk)
 !!
 !! FUNCTION
 !!  Computes occupations for the wavelet case
-!!
-!! INPUTS
-!!
-!! OUTPUT
 !!
 !! NOTES
 !! for the wvlbigdft case, see the routine 'wvl_occ_bigdft'
@@ -2673,12 +2664,6 @@ subroutine wvl_occ()
 !!  Computes occupations for the wavelet case
 !!  Using BigDFT routines
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
 !! NOTES
 !! for the wvlbigdft case, see the routine 'wvl_occ_bigdft'
 !!
@@ -2719,12 +2704,6 @@ subroutine wvl_occ_bigdft()
 !!  Computes occupations for the wavelet case
 !!  Using BigDFT routines
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
 !! NOTES
 !! for the wvlbigdft case, see the routine 'wvl_occ_bigdft'
 !!
@@ -2738,7 +2717,6 @@ subroutine wvl_comm_eigen()
 #if defined HAVE_BIGDFT
  integer:: ikpt,norb,shift
 #endif
-
 ! *************************************************************************
 
    DBG_ENTER("COLL")
@@ -2813,15 +2791,11 @@ end subroutine vtorho
 !!   dtefield <type(efield_type)> = efield variables
 !!   mpi_enreg=information about MPI parallelization
 !!
-!! TODO
-!!
-!! NOTES
-!!
 !! SOURCE
 
 subroutine cgq_builder(berryflag,cg,cgq,dtefield,dtset,ikpt,ikpt_loc,isppol,mcg,mcgq,&
-&                      me_distrb,mkgq,mpi_enreg,my_nspinor,nband_k,nproc_distrb,&
-&                      npwarr,pwnsfac,pwnsfacq,pwind_alloc,spaceComm_distrb)
+                       me_distrb,mkgq,mpi_enreg,my_nspinor,nband_k,nproc_distrb,&
+                       npwarr,pwnsfac,pwnsfacq,pwind_alloc,spaceComm_distrb)
 
 !Arguments ------------------------------------
  integer,intent(in) :: ikpt,ikpt_loc,isppol,me_distrb,mcg,mcgq,mkgq,my_nspinor,nband_k
@@ -2844,7 +2818,6 @@ subroutine cgq_builder(berryflag,cg,cgq,dtefield,dtset,ikpt,ikpt_loc,isppol,mcg,
  integer,allocatable :: flag_send(:,:), flag_receive(:)
  real(dp) :: tsec(2)
  real(dp),allocatable :: buffer(:,:)
-
 ! *************************************************************************
 
  if (mcgq==0.or.mkgq==0) return
@@ -2962,15 +2935,10 @@ subroutine cgq_builder(berryflag,cg,cgq,dtefield,dtset,ikpt,ikpt_loc,isppol,mcg,
              end if ! if send cgq
 
            end if ! end check that his_source == me
-
          end if ! end check on jkpt > 0 and jsppol > 0
-
        end if ! end check on me = dest else if me != dest
-
      end do ! end loop over dest = 0, nproc-1
-
    end do !end loop over ifor
-
  end do !end loop over idir
 
  call timab(983,2,tsec)

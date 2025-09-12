@@ -42,7 +42,7 @@ module m_screening_driver
  use m_time,          only : timab
  use m_io_tools,      only : open_file, file_exists, iomode_from_fname
  use m_fstrings,      only : int2char10, sjoin, strcat, itoa, ltoa, itoa
- use m_energies,      only : energies_type, energies_init
+ use m_energies,      only : energies_type
  use m_numeric_tools, only : print_arr, coeffs_gausslegint, c2r
  use m_geometry,      only : normv, vdotw, mkrdim, metric
  use m_gwdefs,        only : GW_TOLQ0, GW_TOLQ, em1params_t, GW_Q0_DEFAULT
@@ -285,7 +285,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  call xmpi_bcast(wfk_fname, master, comm, ierr)
 
  ! Some variables need to be initialized/nullify at start
- call energies_init(KS_energies)
+ call KS_energies%init()
  usexcnhat=0
 
  call mkrdim(acell,rprim,rprimd)
