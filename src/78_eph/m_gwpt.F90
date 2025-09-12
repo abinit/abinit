@@ -436,10 +436,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  gmax = gmax + 4 ! FIXME: this is to account for umklapp, should also consider Gamma-only and istwfk
  gmax = 2*gmax + 1
 
- if (dtset%userie == 124) then
-   ! Debugging section have all states on each MPI rank.
-   bks_mask = .True.; call wrtout(std_out, " Storing all bands for debugging purposes.")
- end if
+ !if (dtset%userie == 124) then
+ !  ! Debugging section have all states on each MPI rank.
+ !  bks_mask = .True.; call wrtout(std_out, " Storing all bands for debugging purposes.")
+ !end if
 
  ! Impose istwfk=1 for all k points. This is also done in respfn (see inkpts)
  ! wfd_read_wfk will handle a possible conversion if WFK contains istwfk /= 1.
@@ -1084,7 +1084,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          pp_is_gamma = sum(pp**2) < tol14
 
          ! Debug, include only pp=Gamma
-         if (.not. pp_is_gamma) cycle
+         if (dtset%userie /= 0) then
+            if (.not. pp_is_gamma) cycle
+         end if
 
          qkp_string = sjoin("While treating qpt: ", ktoa(qpt), "kpt:", ktoa(kk), "pp:", ktoa(pp), ch10)
 
@@ -1454,6 +1456,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                   print *, "|rhotwg_x|^2,+q,ib=", ib_sum, sum(abs(rhotwg_x)*abs(rhotwg_x))
 
                do n_k=gqk%bstart, gqk%bstop ! do n_k=gqk%n_start, gqk%n_stop
+                if (m_kq == 1 .AND. n_k == 1 .AND. ipc == 1) &
+                  print *, "|vec_gwc_nk|^2,+q,ib=", ib_sum, sum(abs(vec_gwc_nk(:, 1, n_k))*abs(vec_gwc_nk(:, 1, n_k)))
+                if (m_kq == 1 .AND. n_k == 1 .AND. ipc == 1) &
+                  print *, "|rhotwg_c|^2,+q,ib=", ib_sum, sum(abs(rhotwg_c)*abs(rhotwg_c))
+
                   ! Take the average
                   iw_mkq = m_kq - gqk%bstart + 1
                   ctmp_gwpc = half * sum(rhotwg_c(:) * (vec_gwc_nk(:,1,n_k) + vec_gwc_nk(:,iw_mkq,n_k)))
@@ -1472,6 +1479,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                  ! print *, vec_gx_nk(:,n_k)
                   print *, '+qq', qpt
                   print *, 'ib_sum', ib_sum
+                  print *, 'correlation contribution,+q:', ctmp_gwpc
                   print *, 'exchange contribution,+q:', xdot_tmp
                  ! call sleep(10)
                  end if
@@ -1574,6 +1582,11 @@ if (.not. qq_is_gamma) then
                   print *, "|rhotwg_x|^2,-q,ib=", ib_sum, sum(abs(rhotwg_x)*abs(rhotwg_x))
 
                do m_kq=gqk%bstart, gqk%bstop ! do m_kq=gqk%n_start, gqk%n_stop
+                if (n_k == 1 .AND. m_kq == 1 .AND. ipc == 1) &
+                  print *, "|vec_gwc_mkq|^2,-q,ib=", ib_sum, sum(abs(vec_gwc_mkq(:, 1, m_kq))*abs(vec_gwc_mkq(:, 1, m_kq)))
+                  if (n_k == 1 .AND. m_kq == 1 .AND. ipc == 1) &
+                  print *, "|rhotwg_c|^2,-q,ib=", ib_sum, sum(abs(rhotwg_c)*abs(rhotwg_c))
+
                   ! Take the average
                   iw_nk = n_k - gqk%bstart + 1
                   ctmp_gwpc = half * sum(rhotwg_c(:) * (vec_gwc_mkq(:,1,m_kq) + vec_gwc_mkq(:,iw_nk,m_kq)))
@@ -1592,6 +1605,7 @@ if (.not. qq_is_gamma) then
                  ! print *, vec_gx_mkq(:,m_kq)
                   print *, '-qq', -qpt 
                   print *, 'ib_sum', ib_sum
+                  print *, 'correlation contribution,-q:', ctmp_gwpc
                   print *, 'exchange contribution,-q:', xdot_tmp
                  ! call sleep(10)
                  end if
