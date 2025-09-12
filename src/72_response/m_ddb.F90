@@ -447,7 +447,6 @@ subroutine ddb_init(ddb, dtset, nblok, mpert, &
 !Local variables -------------------------------
  integer :: msize_, ii, ikpt
  logical :: with_d0E_, with_d1E_, with_d2E_, with_d3E_, with_d2eig_
-
 ! ************************************************************************
 
  with_d0E_   = .false. ; if (present(with_d0E))   with_d0E_ = with_d0E
@@ -534,7 +533,6 @@ subroutine ddb_free(ddb)
 
 !Arguments -------------------------------
  class(ddb_type),intent(inout) :: ddb
-
 ! ************************************************************************
 
  !integer
@@ -566,7 +564,6 @@ end subroutine ddb_free
 subroutine ddb_copy(iddb, oddb)
 
 !Arguments -------------------------------
-!array
  class(ddb_type),intent(in) :: iddb
  class(ddb_type),intent(out) :: oddb
 ! ************************************************************************
@@ -624,11 +621,9 @@ end subroutine ddb_copy
 subroutine ddb_malloc(ddb, msize, nblok, natom, ntypat, mpert, nkpt, nband)
 
 !Arguments -------------------------------
-!array
  class(ddb_type),intent(inout) :: ddb
  integer,intent(in) :: msize,nblok,natom,ntypat,mpert
  integer,intent(in),optional :: nkpt,nband
-
 ! ************************************************************************
 
  ddb%msize = msize
@@ -679,10 +674,8 @@ end subroutine ddb_malloc
 subroutine ddb_malloc_d2eig(ddb, mband, nkpt)
 
 !Arguments -------------------------------
-!array
  class(ddb_type),intent(inout) :: ddb
  integer,intent(in) :: mband, nkpt
-
 ! ************************************************************************
 
   ddb%nband = mband / ddb%nsppol
@@ -717,14 +710,12 @@ end subroutine ddb_malloc_d2eig
 subroutine ddb_set_qpt(ddb, iblok, qpt, qpt2, qpt3)
 
 !Arguments -------------------------------
-!array
  class(ddb_type),intent(inout) :: ddb
+ integer,intent(in) :: iblok
+!arrays
  real(dp), intent(in) :: qpt(3)
  real(dp), intent(in),optional :: qpt2(3)
  real(dp), intent(in),optional :: qpt3(3)
-!scalars
- integer,intent(in) :: iblok
-
 ! ************************************************************************
 
  ddb%qpt(1:3,iblok) = qpt(1:3)
@@ -764,17 +755,16 @@ end subroutine ddb_set_qpt
 subroutine ddb_set_d2matr(ddb, iblok, d2matr, flg)
 
 !Arguments -------------------------------
- class(ddb_type),intent(inout) :: ddb
 !scalars
+ class(ddb_type),intent(inout) :: ddb
  integer,intent(in) :: iblok
-!array
+!arrays
  real(dp), intent(in) :: d2matr(2,3,ddb%mpert,3,ddb%mpert)
  integer, intent(in) :: flg(3,ddb%mpert,3,ddb%mpert)
 
 !Local variables -------------------------
 !scalars
  integer :: idir1,idir2,ii,ipert1,ipert2
-
 ! ************************************************************************
 
  ii=0
@@ -816,17 +806,16 @@ end subroutine ddb_set_d2matr
 subroutine ddb_get_d2matr(ddb, iblok, d2matr, flg)
 
 !Arguments -------------------------------
-!array
+!scalars
  class(ddb_type),intent(inout) :: ddb
  integer,intent(in) :: iblok
+!arrays
  real(dp), allocatable, intent(out) :: d2matr(:,:,:,:,:)
  integer, allocatable, intent(out) :: flg(:,:,:,:)
-!scalars
 
 !Local variables -------------------------
 !scalars
  integer :: ii,idir1,idir2,ipert1,ipert2
-
 ! ************************************************************************
 
  ABI_MALLOC(d2matr, (2,3,ddb%mpert,3,ddb%mpert))
@@ -874,16 +863,14 @@ end subroutine ddb_get_d2matr
 subroutine ddb_set_gred(ddb, gred, iblok)
 
 !Arguments -------------------------------
-!array
- class(ddb_type),intent(inout) :: ddb
- real(dp), intent(in) :: gred(3,ddb%natom)
 !scalars
+ class(ddb_type),intent(inout) :: ddb
  integer,intent(in) :: iblok
+!arrays
+ real(dp), intent(in) :: gred(3,ddb%natom)
 
 !Local variables -------------------------
-!scalars
  integer :: idir, iatom, indx
-
 ! ************************************************************************
 
  ddb%typ(iblok) = BLKTYP_d1E_xx
@@ -929,9 +916,7 @@ subroutine ddb_set_pel(ddb, pel, flg, iblok)
  integer,intent(in) :: iblok
 
 !Local variables -------------------------
-!scalars
  integer :: idir, indx
-
 ! ************************************************************************
 
  ddb%typ(iblok) = BLKTYP_d1E_xx
@@ -975,7 +960,6 @@ subroutine ddb_set_strten(ddb, strten, iblok)
 !Local variables -------------------------
 !scalars
  integer :: indx
-
 ! ************************************************************************
 
  ddb%typ(iblok) = BLKTYP_d1E_xx
@@ -1020,7 +1004,6 @@ subroutine ddb_get_d1matr(ddb, iblok, d1matr, flg)
 !Local variables -------------------------
 !scalars
  integer :: ii,idir1,ipert1
-
 ! ************************************************************************
 
  ABI_MALLOC(d1matr, (2,3,ddb%mpert))
@@ -1072,7 +1055,6 @@ subroutine ddb_set_d1matr(ddb, iblok, d1matr, flg)
 !Local variables -------------------------
 !scalars
  integer :: ii,ipert1,idir1
-
 ! ************************************************************************
 
  ii=0
@@ -1113,7 +1095,6 @@ subroutine ddb_set_etotal(ddb, etotal, iblok)
 !scalars
  real(dp), intent(in) :: etotal
  integer,intent(in) :: iblok
-
 ! ************************************************************************
 
  ddb%typ(iblok) = BLKTYP_d0E_xx
@@ -1166,7 +1147,6 @@ subroutine ddb_set_brav(ddb, brav)
 !scalars
  real(dp) :: factor
  character(len=500) :: msg
-
 ! *************************************************************************
 
  ! Renormalize rprim to possibly satisfy the constraint abs(rprim(1,2))=half when abs(brav)/=1
@@ -1582,7 +1562,6 @@ end subroutine ddb_get_block
 !!
 !! SOURCE
 
-
 subroutine gamma9(gamma,qphon,qphnrm,qtol)
 
 !Arguments -------------------------------
@@ -1591,7 +1570,6 @@ subroutine gamma9(gamma,qphon,qphnrm,qtol)
  real(dp),intent(in) :: qphnrm,qtol
 !arrays
  real(dp),intent(in) :: qphon(3)
-
 ! *********************************************************************
 
  if( (abs(qphon(1))<qtol .and. abs(qphon(2))<qtol .and. abs(qphon(3))<qtol) .or. abs(qphnrm)<qtol ) then
@@ -1667,7 +1645,6 @@ subroutine ddb_read_block_txt(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
  real(dp) :: ai,ar
  character(len=32) :: name
  character(len=500) :: msg
-
 ! *********************************************************************
 
  ! Zero every flag
@@ -1888,7 +1865,6 @@ subroutine ddb_read_d2eig(ddb, ddb_hdr, iblok_store, iblok_read, comm)
  integer,parameter :: master=0
  integer :: comm_
  character(len=500) :: msg
-
 ! *********************************************************************
 
   if (present(comm)) then
@@ -1956,7 +1932,6 @@ subroutine ddb_read_d2eig_txt(ddb, unddb, iblok)
 !Local variables -------------------------
 !scalars
  integer :: iblok_eig2d
-
 ! *********************************************************************
 
   iblok_eig2d = 1
@@ -2068,7 +2043,6 @@ subroutine rdddb9(ddb,ddb_hdr,unddb,&
  real(dp),parameter :: tolsym8=tol8
 !arrays
  real(dp) :: gprimd(3,3),rprimd(3,3)
-
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -2183,7 +2157,6 @@ subroutine chkin9(atifcflg,atifc,natifc,natom)
  character(len=500) :: msg
 !arrays
  integer,allocatable :: work(:)
-
 ! *********************************************************************
 
  if(natifc>natom)then
@@ -2397,7 +2370,6 @@ subroutine ddb_from_file(ddb, filename, ddb_hdr, crystal, comm, prtvol, raw)
  character(len=fnlen) :: filename_
  integer :: prtvol_
  character(len=500) :: msg
-
 ! ************************************************************************
 
  DBG_ENTER("COLL")
@@ -2480,7 +2452,6 @@ subroutine ddb_read_txt(ddb, filename, ddb_hdr, crystal, comm, prtvol, raw)
  integer,allocatable :: symrec(:,:,:),symrel(:,:,:),symafm(:),indsym(:,:,:),typat(:)
  real(dp) :: acell(3),gmet(3,3),gprim(3,3),rmet(3,3),rprim(3,3)
  real(dp),allocatable :: amu(:),xcart(:),xred(:,:),zion(:),znucl(:),tnons(:,:)
-
 ! ************************************************************************
 
  DBG_ENTER("COLL")
@@ -2665,7 +2636,6 @@ subroutine ddb_read_nc(ddb, filename, ddb_hdr, crystal, comm, prtvol, raw)
 
 !arrays
  !character(len=132),allocatable :: title(:)
-
 ! ************************************************************************
 
  DBG_ENTER("COLL")
@@ -2873,7 +2843,6 @@ subroutine ddb_merge_blocks(ddb1, ddb2, iblok1, iblok2)
  integer, allocatable  :: d1flg(:,:)
  integer, allocatable  :: d2flg(:,:,:,:)
  integer, allocatable  :: d3flg(:,:,:,:,:,:)
-
 ! ************************************************************************
 
   ! Note that ddb and ddb2 may have a different values for mpert
@@ -3056,7 +3025,6 @@ subroutine carttransf(blkflg,blkval2,carflg,gprimd,iqpt,mband, mpert,msize,natom
 integer :: iatom1,iatom2,iband,idir1,idir2,ikpt, index
 !arrays
 real(dp),allocatable :: blkflgtmp(:,:,:,:,:), blkval2tmp(:,:,:,:,:,:), d2cart(:,:,:,:,:)
-
 ! *********************************************************************
 
  ! Start by allocating local arrays
@@ -3154,7 +3122,6 @@ subroutine carteig2d(blkflg,blkval,carflg,d2cart,gprimd,iblok,mpert,natom,nblok,
 !arrays
  integer :: flg1(3),flg2(3)
  real(dp) :: vec1(3),vec2(3)
-
 ! *********************************************************************
 
  ! First, copy the data blok in place.
@@ -3248,7 +3215,6 @@ subroutine dtech9(blkval,dielt,iblok,mpert,natom,nblok,zeff,unit)
 !scalars
  integer :: depl,elec,elec1,elec2,iatom, unt
  character(len=1000) :: msg
-
 ! *********************************************************************
 
  unt = std_out; if (present(unit)) unt = unit
@@ -3335,7 +3301,6 @@ subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr,nlflag)
  integer :: voigtindex(6,2)
  real(dp) :: d3cart(2,3,mpert,3,mpert,3,mpert),dvoigt(3,6),sumrule(3,3,3)
  real(dp) :: wghtat(natom)
-
 ! *********************************************************************
 
  d3cart(1,:,:,:,:,:,:) = reshape(blkval(1,:),shape = (/3,mpert,3,mpert,3,mpert/))
@@ -3499,7 +3464,6 @@ integer function ddb_get_etotal(ddb, etotal) result(iblok)
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
  real(dp) :: qphnrm(3),qphon(3,3)
-
 ! *********************************************************************
 
  ! Extract the block with the total energy
@@ -3574,7 +3538,6 @@ integer function ddb_get_dielt_zeff(ddb, crystal, rftyp, chneut, selectz, dielt,
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
  real(dp) :: qphnrm(3),qphon(3,3), my_zeff_raw(3,3,crystal%natom)
-
 ! *********************************************************************
 
  units = [std_out, ab_out]
@@ -3662,7 +3625,6 @@ integer function ddb_get_dielt(ddb, rftyp, dielt) result(iblok)
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
  real(dp) :: qphnrm(3),qphon(3,3)
  real(dp),allocatable :: tmpval(:,:,:,:)
-
 ! *********************************************************************
 
  ! Look for the Gamma Block in the DDB
@@ -3747,7 +3709,6 @@ integer function ddb_get_quadrupoles(ddb, ddb_version, lwsym, rftyp, quadrupoles
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
  integer :: rfqvec(4)
  real(dp) :: qphnrm(3),qphon(3,3)
-
 ! *********************************************************************
 
  ! Look for the Gamma Block in the DDB
@@ -3827,7 +3788,6 @@ integer function ddb_get_dchidet(ddb, ramansr, nlflag, dchide, dchidt) result(ib
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
  real(dp) :: qphnrm(3),qphon(3,3)
-
 ! *********************************************************************
 
  qphon(:,:) = zero
@@ -3898,7 +3858,6 @@ integer function ddb_get_pel(ddb, pel, relaxat, relaxstr) result(iblok)
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
  real(dp) :: qphnrm(3),qphon(3,3)
-
 ! *********************************************************************
 
  natom = ddb%natom
@@ -3962,7 +3921,6 @@ integer function ddb_get_gred(ddb, gred, relaxat, relaxstr) result(iblok)
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
  real(dp) :: qphnrm(3),qphon(3,3)
-
 ! *********************************************************************
 
  natom = ddb%natom
@@ -4036,7 +3994,6 @@ integer function ddb_get_strten(ddb, strten, relaxat, relaxstr) result(iblok)
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
  real(dp) :: qphnrm(3),qphon(3,3)
-
 ! *********************************************************************
 
  natom = ddb%natom
@@ -4111,7 +4068,6 @@ subroutine asrq0_init(asrq0, ddb, asr, rftyp, xcart)
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
  real(dp) :: qphnrm(3),qphon(3,3)
  real(dp),allocatable :: d2asr_res(:,:,:,:,:),d2cart(:,:)
-
 ! ************************************************************************
 
  asrq0%asr = asr; asrq0%natom = ddb%natom
@@ -4223,7 +4179,6 @@ subroutine ddb_symmetrize_and_transform(ddb, crystal, iblok)
  real(dp) :: gprimd(3,3),qpt(3),rprimd(3,3)
  real(dp),allocatable :: d2cart(:,:,:,:,:),d3cart(:,:,:,:,:,:,:)
  real(dp),allocatable :: tmpval(:,:,:,:,:,:,:)
-
 ! ************************************************************************
 
  mpert = ddb%mpert
@@ -4411,7 +4366,6 @@ subroutine ddb_diagoq(ddb, crystal, qpt, asrq0, symdynmat, rftyp, phfrq, displ_c
  integer :: rfphon(4),rfelfd(4),rfstrs(4)
  real(dp) :: qphnrm(3), qphon_padded(3,3),d2cart(2,ddb%msize),my_qpt(3)
  real(dp) :: eigvec(2,3,crystal%natom,3*crystal%natom),eigval(3*crystal%natom)
-
 ! ************************************************************************
 
  ! Use my_qpt because dfpt_phfrq can change the q-point (very bad design)
@@ -4478,7 +4432,6 @@ subroutine asrq0_apply(asrq0, natom, mpert, msize, xcart, d2cart)
 !arrays
  real(dp),intent(in) :: xcart(3,natom)
  real(dp),intent(inout) :: d2cart(2,msize)
-
 ! ************************************************************************
 
  if (asrq0%asr /= 0 .and. asrq0%iblok == 0) then
@@ -4516,7 +4469,6 @@ subroutine asrq0_free(asrq0)
 
 !Arguments -------------------------------
  class(asrq0_t),intent(inout) :: asrq0
-
 ! ************************************************************************
 
  ! real
@@ -4592,7 +4544,6 @@ subroutine ddb_write_block_txt(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
  integer :: iband,idir1,idir2,idir3,ii,ikpt,ipert1,ipert2,ipert3
  integer :: nelmts
  logical :: eig2d_
-
 ! *********************************************************************
 
  ! GA: Remove choice option.
@@ -4773,7 +4724,6 @@ subroutine ddb_write(ddb, ddb_hdr, filename, with_psps, comm)
 !Local variables-------------------------------
  character(len=fnlen) :: filename_
  integer :: iomode
-
 ! ************************************************************************
 
  call ddb_hdr%get_iomode(filename, 2, iomode, filename_)
@@ -4819,7 +4769,6 @@ subroutine ddb_write_txt(ddb, ddb_hdr, filename, with_psps, comm)
 !scalars
  integer :: iblok
  integer,parameter :: master=0, choice=2
-
 ! ************************************************************************
 
   if (present(comm)) then
@@ -4864,7 +4813,6 @@ subroutine ddb_write_d2eig(ddb, ddb_hdr, iblok, comm)
 !scalars
  integer,parameter :: master=0
  character(len=500) :: msg
-
 ! ************************************************************************
 
   if (present(comm)) then
@@ -4923,7 +4871,6 @@ subroutine ddb_write_d2eig_nc(ddb, ncid, iblok, comm)
  real(dp), allocatable :: matrix_d2eig(:,:,:,:,:,:,:)
  real(dp), allocatable :: matrix_d2eig_isppol(:,:,:,:,:,:,:)
  integer, allocatable :: flg_d2eig(:,:,:,:)
-
 ! ************************************************************************
 
 
@@ -5029,7 +4976,6 @@ subroutine ddb_write_d2eig_txt(ddb, unddb, iblok)
 !scalars
  integer,parameter :: iblok_eig2d=1
  integer,parameter :: choice=2
-
 ! ************************************************************************
 
   ! GA: This routine is redundant with outbsd.
@@ -5082,7 +5028,6 @@ subroutine ddb_write_nc(ddb, ddb_hdr, filename, comm, with_psps)
  real(dp),allocatable :: matrix_d1E(:,:,:)
  real(dp),allocatable :: matrix_d2E(:,:,:,:,:)
  real(dp),allocatable :: matrix_d3E(:,:,:,:,:,:,:)
-
 ! ************************************************************************
 
  if (present(comm)) then
@@ -5285,7 +5230,6 @@ subroutine ddb_read_d0E_nc(ddb, ncid, iblok, iblok_d0E)
 !arrays
  integer :: flg(1)
  real(dp) :: val(1)
-
 ! ************************************************************************
 
  ncid_d0E = nctk_idgroup(ncid, 'd0E')
@@ -5335,7 +5279,6 @@ subroutine ddb_read_d1E_nc(ddb, ncid, iblok, iblok_d1E)
 !arrays
  integer,allocatable :: flg_d1E(:,:)
  real(dp),allocatable :: matrix_d1E(:,:,:)
-
 ! ************************************************************************
 
  ncid_d1E = nctk_idgroup(ncid, 'd1E')
@@ -5392,7 +5335,6 @@ subroutine ddb_read_d2E_nc(ddb, ncid, iblok, iblok_d2E)
  real(dp) :: qpt(3)
  integer,allocatable :: flg_d2E(:,:,:,:)
  real(dp),allocatable :: matrix_d2E(:,:,:,:,:)
-
 ! ************************************************************************
 
  ncid_d2E = nctk_idgroup(ncid, 'd2E')
@@ -5456,7 +5398,6 @@ subroutine ddb_read_d3E_nc(ddb, ncid, iblok, iblok_d3E)
  real(dp) :: qpt(3), nrm(3)
  real(dp),allocatable :: matrix_d3E(:,:,:,:,:,:,:)
  integer,allocatable :: flg_d3E(:,:,:,:,:,:)
-
 ! ************************************************************************
 
  ncid_d3E = nctk_idgroup(ncid, 'd3E')
@@ -5539,7 +5480,6 @@ subroutine ddb_read_d2eig_nc(ddb, ncid, iblok, iblok_d2eig)
  real(dp),allocatable :: nrm(:)
  real(dp),allocatable :: matrix_d2eig(:,:,:,:,:,:,:)
  real(dp),allocatable :: matrix_d2eig_isppol(:,:,:,:,:,:,:)
-
 ! ************************************************************************
 
  ncid_d2eig = nctk_idgroup(ncid, 'd2eig')
@@ -5680,7 +5620,6 @@ subroutine ddb_set_d3matr(ddb, iblok, d3matr, flg, lw)
 !Local variables -------------------------
 !scalars
  integer :: idir1,idir2,idir3,ipert1,ipert2,ipert3,index,mpert
-
 ! ************************************************************************
 
  mpert = ddb%mpert
@@ -5750,7 +5689,6 @@ subroutine ddb_get_d3matr(ddb, iblok, d3matr, flg)
 !Local variables -------------------------
 !scalars
  integer :: ii,idir1,idir2,idir3,ipert1,ipert2,ipert3
-
 ! ************************************************************************
 
  ABI_MALLOC(d3matr, (2,3,ddb%mpert,3,ddb%mpert,3,ddb%mpert))
@@ -5815,7 +5753,6 @@ subroutine ddb_get_d2eig(ddb, d2eig, flg, iblok)
 !Local variables -------------------------
 !scalars
  integer :: ii,idir1,idir2,ipert1,ipert2,iband,ikpt
-
 ! ************************************************************************
 
  ABI_MALLOC(d2eig, (2,3,ddb%mpert,3,ddb%mpert,ddb%nband,ddb%nkpt))
@@ -5879,7 +5816,6 @@ subroutine ddb_set_d2eig(ddb, iblok, d2eig, flg)
 !Local variables -------------------------
 !scalars
  integer :: idir1,idir2,ipert1,ipert2,index,iband,ikpt,ii
-
 ! ************************************************************************
 
  do ikpt=1,ddb%nkpt
@@ -5939,7 +5875,6 @@ subroutine ddb_set_d2eig_reshape(ddb, iblok, d2eig, flg, blktyp)
 !Local variables -------------------------
 !scalars
  integer :: idir1,idir2,ipert1,ipert2,index,iband,ikpt,ii,mband
-
 ! ************************************************************************
 
  ddb%typ(iblok) = BLKTYP_d2eig_re
@@ -6003,7 +5938,6 @@ subroutine ddb_to_dtset(comm, dtset, filename, psps)
  integer :: mxnimage,unddb
 !integer :: ii, nn
  type(ddb_hdr_type) :: ddb_hdr
-
 ! ************************************************************************
 
  ABI_UNUSED(psps%usepaw)
@@ -6166,7 +6100,6 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
  type(ddb_type) :: ddb, ddb2
  type(ddb_hdr_type) :: ddb_hdr, ddb_hdr2
  type(crystal_t) :: crystal
-
 ! ************************************************************************
 
  comm = xmpi_world
@@ -6818,7 +6751,6 @@ subroutine symdm9(ddb, dynmat, gprimd, indsym, mpert, natom, nqpt, nsym, rfmeth,
  integer :: qmiss_(nqpt)
  real(dp) :: qq(3),qsym(6),ss(3,3)
  real(dp),allocatable :: ddd(:,:,:,:,:)
-
 ! *********************************************************************
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)

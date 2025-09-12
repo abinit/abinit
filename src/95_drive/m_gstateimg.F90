@@ -341,8 +341,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  ABI_MALLOC(list_dynimage,(dtset%ndynimage))
  do itimimage=1,ntimimage_stored
    res_img => results_img(:,itimimage)
-   call init_results_img(dtset%natom,dtset%npspalch,dtset%nspden,dtset%nsppol,dtset%ntypalch,&
-&   dtset%ntypat,res_img)
+   call init_results_img(dtset%natom,dtset%npspalch,dtset%nspden,dtset%nsppol,dtset%ntypalch, dtset%ntypat,res_img)
    do iimage=1,nimage
      res_img(iimage)%acell(:)     =acell_img(:,iimage)
      res_img(iimage)%amu(:)       =amu_img(:,iimage)
@@ -368,8 +367,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  scf_initialized=0
  history_size=-1
  if (dtset%ntimimage<=1) then
-   if (dtset%usewvl==0.and.dtset%ionmov>0.and. &
-&   (abs(dtset%densfor_pred)==5.or.abs(dtset%densfor_pred)==6)) then
+   if (dtset%usewvl==0.and.dtset%ionmov>0.and. (abs(dtset%densfor_pred)==5.or.abs(dtset%densfor_pred)==6)) then
       history_size=2
       if(dtset%extrapwf==2) history_size=3
     end if
@@ -453,7 +451,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
          res_img(iimage)%results_gs%etotal=hist_prev(iimage)%etot(ih)
          res_img(iimage)%results_gs%energies%entropy=hist_prev(iimage)%entropy(ih)
          call fcart2gred(res_img(iimage)%results_gs%fcart,res_img(iimage)%results_gs%gred,&
-&         hist_prev(iimage)%rprimd(:,:,ih),dtset%natom)
+           hist_prev(iimage)%rprimd(:,:,ih),dtset%natom)
          hist_prev(iimage)%ihist=hist_prev(iimage)%ihist+1
        end do
        !PI-QTB: skip a record in random force file
@@ -472,22 +470,22 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      if (dtset%prtvolimg<2) then
        msg=ch10;if (itimimage >1) write(msg,'(2a)') ch10,ch10
        write(msg,'(5a)') trim(msg),&
-&       '================================================================================',&
-&       ch10,' ',trim(imagealgo_str(dtset%imgmov))
+         '================================================================================',&
+         ch10,' ',trim(imagealgo_str(dtset%imgmov))
      else
        msg='';if (itimimage >1) msg=ch10
        write(msg,'(5a)') trim(msg),&
-&       '--------------------------------------------------------------------------------',&
-&       ch10,' ',trim(imagealgo_str(dtset%imgmov))
+         '--------------------------------------------------------------------------------',&
+         ch10,' ',trim(imagealgo_str(dtset%imgmov))
      end if
      if (dtset%imgmov==2) then
        write(msg,'(6a)') trim(msg),' (',trim(stgalgo_str(mep_param%string_algo)),' + ',&
-&                        trim(mepsolver_str(mep_param%mep_solver)),')'
+                         trim(mepsolver_str(mep_param%mep_solver)),')'
      end if
      if (dtset%imgmov==5) then
        ii=merge(mep_param%neb_algo,1,mep_param%neb_algo/=2.or.itimimage>=mep_param%cineb_start)
        write(msg,'(6a)') trim(msg),' (',trim(nebalgo_str(ii)),' + ',&
-&                        trim(mepsolver_str(mep_param%mep_solver)),')'
+                         trim(mepsolver_str(mep_param%mep_solver)),')'
      end if
      if (dtset%ntimimage==1) write(msg,'(2a)')    trim(msg),' FOR 1 TIME STEP'
      if (dtset%ntimimage >1) write(msg,'(2a,i5)') trim(msg),' - TIME STEP ',itimimage
@@ -519,8 +517,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 
 !      Change file names according to image index (if nimage>1)
        if (dtset%nimage>1) then
-         call dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset,mpi_enreg,ndtset,&
-&         image_index=ii)
+         call dtfil%init(dtset,filnam,filstat,idtset,jdtset,mpi_enreg,ndtset,image_index=ii)
          if (itimimage>1) then
            dtfil%ireadwf=0;dtfil%ireadden=0;dtfil%ireadkden=0
          end if
@@ -552,16 +549,16 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
        occ(:)       =occ_img(:,iimage)
 
        call args_gs_init(args_gs, &
-&       res_img(iimage)%amu(:),dtset%cellcharge(ii),res_img(iimage)%mixalch(:,:),&
-&       dtset%dmatpawu(:,:,:,:,ii),dtset%upawu(:,ii),dtset%jpawu(:,ii),&
-&       dtset%rprimd_orig(:,:,ii))
+         res_img(iimage)%amu(:),dtset%cellcharge(ii),res_img(iimage)%mixalch(:,:),&
+         dtset%dmatpawu(:,:,:,:,ii),dtset%upawu(:,ii),dtset%jpawu(:,ii),dtset%rprimd_orig(:,:,ii))
 
        call timab(1205,2,tsec)
 
        call gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,scf_initialized(iimage),itimimage_gstate,&
-&       mpi_enreg,npwtot,occ,pawang,pawrad,pawtab,psps,&
-&       res_img(iimage)%results_gs,&
-&       rprim,scf_history(iimage),vel,vel_cell,wvl,xred)
+         mpi_enreg,npwtot,occ,pawang,pawrad,pawtab,psps,&
+         res_img(iimage)%results_gs,&
+         rprim,scf_history(iimage),vel,vel_cell,wvl,xred)
+
        itimimage_gstate=itimimage_gstate+1
 
        call timab(1206,1,tsec)
@@ -758,9 +755,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  ABI_FREE(xred)
  ABI_FREE(list_dynimage)
 
- if (allocated(amass)) then
-   ABI_FREE(amass)
- end if
+ ABI_SFREE(amass)
 
  do itimimage=1,ntimimage_stored
    call destroy_results_img(results_img(:,itimimage))

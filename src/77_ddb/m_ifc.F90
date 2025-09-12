@@ -274,7 +274,6 @@ subroutine ifc_free(ifc)
 
 !Arguments ------------------------------------
  class(ifc_type),intent(inout) :: ifc
-
 ! ************************************************************************
 
  ABI_SFREE(ifc%amu)
@@ -964,7 +963,6 @@ subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
 !arrays
  real(dp) :: my_qpt(3),eigvec(2,3,Crystal%natom,3*Crystal%natom),eigval(3*Crystal%natom)
  real(dp) :: d2cart(2,3,Ifc%mpert,3,Ifc%mpert),tsec(2)
-
 ! ************************************************************************
 
  ! Keep track of total time spent.
@@ -1076,7 +1074,6 @@ subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq, comm)
  real(dp) :: dddq(2,3*cryst%natom,3*cryst%natom,3),dot(2),qfd(3)
  real(dp) :: omat(2,3*cryst%natom,3*cryst%natom)
  real(dp) :: dyew(2,3*cryst%natom,3*cryst%natom)
-
 ! ************************************************************************
 
  ABI_UNUSED((/comm/))
