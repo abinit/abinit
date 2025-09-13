@@ -1,5 +1,5 @@
 
-.Version 10.4.5.5 of ABINIT, released Jul 2025.
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 Jun 2025.
-- ( at 13h05 )
+.Starting date : Sat 13 Sep 2025.
+- ( at 10h31 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v8_t71-t72-t73-t74-t75-t76-t77-t78-t79-t80/t76.abi
 - output file    -> t76.abo
@@ -33,6 +33,7 @@
 -    mband =          42        mffmem =           1         mkmem =           8
 -   mkqmem =           8        mk1mem =           8           mpw =         167
       nfft =        6075          nkpt =           8
+- my_mband =          42
 ================================================================================
 P This job should need less than                       9.747 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -230,20 +231,20 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1  -3931.7161684474     -3.932E+03 1.213E+02 1.602E+04 2.247E-02 2.247E-02
- ETOT  2  -4190.7044526984     -2.590E+02 3.214E+01 1.961E+02 1.442E-02 3.689E-02
- ETOT  3  -4218.3145752140     -2.761E+01 2.854E+00 5.726E+01 5.493E-03 4.239E-02
- ETOT  4  -4226.8029656329     -8.488E+00 2.316E+00 7.887E+00 1.246E-02 5.485E-02
- ETOT  5  -4229.7220444733     -2.919E+00 3.937E-01 1.608E+00 4.359E-03 5.921E-02
- ETOT  6  -4230.7788942642     -1.057E+00 3.335E-01 8.400E-01 9.621E-03 6.883E-02
- ETOT  7  -4231.1734770618     -3.946E-01 5.880E-02 4.318E-02 3.263E-03 7.209E-02
- ETOT  8  -4231.3215646262     -1.481E-01 4.920E-02 6.859E-02 6.358E-03 7.845E-02
- ETOT  9  -4231.3784641590     -5.690E-02 8.464E-03 2.712E-02 2.916E-03 8.136E-02
- ETOT 10  -4231.4004421025     -2.198E-02 7.188E-03 2.016E-02 3.986E-03 8.535E-02
- ETOT 11  -4231.4091308162     -8.689E-03 1.211E-03 3.120E-03 3.296E-03 8.865E-02
- ETOT 12  -4231.4128065563     -3.676E-03 1.023E-03 5.659E-03 1.427E-03 9.007E-02
- ETOT 13  -4231.4141541315     -1.348E-03 1.746E-04 9.297E-04 3.003E-03 9.307E-02
- ETOT 14  -4231.4148368348     -6.827E-04 1.462E-04 7.945E-04 1.380E-03 9.445E-02
+-ETOT  1  -3931.7161684474     -3.932E+03 1.213E+02 1.602E+04 2.277E-02 2.277E-02
+ ETOT  2  -4190.7044526984     -2.590E+02 3.214E+01 1.961E+02 1.441E-02 3.718E-02
+ ETOT  3  -4218.3145752140     -2.761E+01 2.854E+00 5.726E+01 5.462E-03 4.264E-02
+ ETOT  4  -4226.8029656329     -8.488E+00 2.316E+00 7.887E+00 1.238E-02 5.502E-02
+ ETOT  5  -4229.7220444733     -2.919E+00 3.937E-01 1.608E+00 4.333E-03 5.935E-02
+ ETOT  6  -4230.7788942642     -1.057E+00 3.335E-01 8.400E-01 9.616E-03 6.897E-02
+ ETOT  7  -4231.1734770618     -3.946E-01 5.880E-02 4.318E-02 3.277E-03 7.225E-02
+ ETOT  8  -4231.3215646262     -1.481E-01 4.920E-02 6.859E-02 6.424E-03 7.867E-02
+ ETOT  9  -4231.3784641590     -5.690E-02 8.464E-03 2.712E-02 2.974E-03 8.164E-02
+ ETOT 10  -4231.4004421025     -2.198E-02 7.188E-03 2.016E-02 4.090E-03 8.573E-02
+ ETOT 11  -4231.4091308162     -8.689E-03 1.211E-03 3.120E-03 3.444E-03 8.918E-02
+ ETOT 12  -4231.4128065563     -3.676E-03 1.023E-03 5.659E-03 1.488E-03 9.066E-02
+ ETOT 13  -4231.4141541315     -1.348E-03 1.746E-04 9.297E-04 3.200E-03 9.386E-02
+ ETOT 14  -4231.4148368348     -6.827E-04 1.462E-04 7.945E-04 1.487E-03 9.535E-02
 -open ddk wf file :t76i_1WF13
 
  scprqt:  WARNING -
@@ -251,16 +252,16 @@ tolerances: {tolvrs: 1.00E-08, }
   potential residual=  7.945E-04 exceeds tolvrs=  1.000E-08
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
- Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.00000       -0.000259     -0.000171    0.000026    0.000155
-    2   2.00000        0.000251      0.000180   -0.000007   -0.000158
-    3   2.00000       -0.018975      0.094451    0.005350    0.011901
-    4   2.00000        0.018972     -0.094453   -0.005353   -0.011903
- ---------------------------------------------------------------------
- Total magnetization (spheres)       0.000007    0.000016   -0.000005
- Total magnetization (exact)         0.000010    0.000025   -0.000009
+    Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
+    1 Mn   2.00000       -0.000259      0.000232   -0.000171    0.000026    0.000155   48.187059  171.471254
+    2 Mn   2.00000        0.000251      0.000240    0.000180   -0.000007   -0.000158  131.384352   -2.127239
+    3  O   2.00000       -0.018975      0.095348    0.094451    0.005350    0.011901   82.829613    3.241951
+    4  O   2.00000        0.018972      0.095350   -0.094453   -0.005353   -0.011903   97.170909 -176.756509
+ ------------------------------------------------------------------------------------------------------------
+ Total magnetization (spheres)          0.000018    0.000007    0.000016   -0.000005  104.518269   67.220396
+ Total magnetization (exact)            0.000028    0.000010    0.000025   -0.000009  107.891844   67.513784
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -557,10 +558,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         16.5  wall=         16.6
+- Proc.   0 individual time (sec): cpu=         16.8  wall=         16.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         16.5  wall=         16.6
++Overall time at end (sec) : cpu=         16.8  wall=         16.8

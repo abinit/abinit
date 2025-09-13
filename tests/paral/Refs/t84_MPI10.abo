@@ -1,5 +1,5 @@
 
-.Version 10.4.5.4 of ABINIT, released Jul 2025.
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 10 Jul 2025.
-- ( at 15h59 )
+.Starting date : Sat 13 Sep 2025.
+- ( at 10h44 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI10/paral_t84_MPI10/t84.abi
 - output file    -> t84_MPI10.abo
@@ -348,13 +348,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
- Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.35000       11.747141      0.000000    0.000000   -0.000000
- ---------------------------------------------------------------------
- Total magnetization (spheres)       0.000000    0.000000   -0.000000
- Total magnetization (exact)         0.000000    0.000000   -0.000000
+    Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
+    1  V   2.35000       11.747141      0.000000    0.000000    0.000000   -0.000000    0.000000    0.000000
+ ------------------------------------------------------------------------------------------------------------
+ Total magnetization (spheres)          0.000000    0.000000    0.000000   -0.000000    0.000000    0.000000
+ Total magnetization (exact)            0.000000    0.000000    0.000000   -0.000000    0.000000    0.000000
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -1156,13 +1156,13 @@ force_length_stats: {min: null, max: null, mean: null, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
- Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.35000       11.751049      0.000000    0.000000    0.000000
- ---------------------------------------------------------------------
- Total magnetization (spheres)       0.000000    0.000000    0.000000
- Total magnetization (exact)        -0.000000    0.000000    0.000000
+    Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
+    1  V   2.35000       11.751049      0.000000    0.000000    0.000000    0.000000    0.000000    0.000000
+ ------------------------------------------------------------------------------------------------------------
+ Total magnetization (spheres)          0.000000    0.000000    0.000000    0.000000    0.000000    0.000000
+ Total magnetization (exact)            0.000000   -0.000000    0.000000    0.000000    0.000000    0.000000
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -2062,10 +2062,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         94.0  wall=         94.5
+- Proc.   0 individual time (sec): cpu=         94.3  wall=         94.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        944.1  wall=        944.8
++Overall time at end (sec) : cpu=        947.2  wall=        948.5

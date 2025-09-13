@@ -1,5 +1,5 @@
 
-.Version 10.4.5.4 of ABINIT, released Jul 2025.
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 10 Jul 2025.
-- ( at 15h54 )
+.Starting date : Sat 13 Sep 2025.
+- ( at 10h39 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI4/paral_t104_MPI4/t104.abi
 - output file    -> t104_MPI4.abo
@@ -519,14 +519,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.20000     5.592263     5.592263     11.184526    -0.000000
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1  V   2.20000     5.592263     5.592263     11.184526    -0.000000
+ ------------------------------------------------------------------------------------------------------------
   Sum:              5.592263     5.592263     11.184526    -0.000000
- Total magnetization (from the atomic spheres):            -0.000000
- Total magnetization (exact up - dn):                      -0.000000
+ Total magnetization (from the atomic spheres):               -0.000000
+ Total magnetization (exact up - dn):                         -0.000000
 
 
  PAW TEST:
@@ -1389,14 +1389,14 @@ force_length_stats: {min: null, max: null, mean: null, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.20000     5.515585     5.705389     11.220974    -0.189804
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1  V   2.20000     5.515585     5.705389     11.220974    -0.189804
+ ------------------------------------------------------------------------------------------------------------
   Sum:              5.515585     5.705389     11.220974    -0.189804
- Total magnetization (from the atomic spheres):            -0.189804
- Total magnetization (exact up - dn):                      -0.225882
+ Total magnetization (from the atomic spheres):               -0.189804
+ Total magnetization (exact up - dn):                         -0.225882
 
 
  PAW TEST:
@@ -2657,10 +2657,10 @@ P           mkmem          10
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         22.6  wall=         22.6
+- Proc.   0 individual time (sec): cpu=         23.0  wall=         23.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         90.3  wall=         90.5
++Overall time at end (sec) : cpu=         92.1  wall=         92.5

@@ -1,5 +1,5 @@
 
-.Version 10.4.5.5 of ABINIT, released Jul 2025.
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 Jun 2025.
-- ( at 12h51 )
+.Starting date : Sat 13 Sep 2025.
+- ( at 10h16 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/fast_t17-t19-t20-t21-t23/t21.abi
 - output file    -> t21.abo
@@ -420,15 +420,15 @@ force_length_stats: {min:   1.77516741E-02, max:   1.77516741E-02, mean:   1.775
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.951584     0.610130      1.561714     0.341454
-    2   2.00000     0.951584     0.610130      1.561714     0.341454
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Si   2.00000     0.951584     0.610130      1.561714     0.341454
+    2 Si   2.00000     0.951584     0.610130      1.561714     0.341454
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.903169     1.220260      3.123429     0.682909
- Total magnetization (from the atomic spheres):             0.682909
- Total magnetization (exact up - dn):                       2.000000
+ Total magnetization (from the atomic spheres):                0.682909
+ Total magnetization (exact up - dn):                          2.000000
 
 
 ---OUTPUT-----------------------------------------------------------------------
@@ -519,15 +519,15 @@ force_length_stats: {min:   1.77516702E-02, max:   1.77516702E-02, mean:   1.775
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.951584     0.610130      1.561714     0.341454
-    2   2.00000     0.951584     0.610130      1.561714     0.341454
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Si   2.00000     0.951584     0.610130      1.561714     0.341454
+    2 Si   2.00000     0.951584     0.610130      1.561714     0.341454
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.903169     1.220260      3.123429     0.682909
- Total magnetization (from the atomic spheres):             0.682909
- Total magnetization (exact up - dn):                       2.000000
+ Total magnetization (from the atomic spheres):                0.682909
+ Total magnetization (exact up - dn):                          2.000000
 
 
 ---OUTPUT-----------------------------------------------------------------------
@@ -766,15 +766,15 @@ force_length_stats: {min:   9.27751934E-03, max:   9.27751934E-03, mean:   9.277
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.954079     0.609981      1.564059     0.344098
-    2   2.00000     0.954079     0.609981      1.564059     0.344098
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Si   2.00000     0.954079     0.609981      1.564059     0.344098
+    2 Si   2.00000     0.954079     0.609981      1.564059     0.344098
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.908157     1.219961      3.128118     0.688196
- Total magnetization (from the atomic spheres):             0.688196
- Total magnetization (exact up - dn):                       2.000000
+ Total magnetization (from the atomic spheres):                0.688196
+ Total magnetization (exact up - dn):                          2.000000
 
 
 ---OUTPUT-----------------------------------------------------------------------
@@ -1049,15 +1049,15 @@ force_length_stats: {min:   3.96019083E-02, max:   3.96019083E-02, mean:   3.960
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.955249     0.607643      1.562892     0.347606
-    2   2.00000     0.955249     0.607643      1.562892     0.347606
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Si   2.00000     0.955249     0.607643      1.562892     0.347606
+    2 Si   2.00000     0.955249     0.607643      1.562892     0.347606
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.910498     1.215286      3.125785     0.695212
- Total magnetization (from the atomic spheres):             0.695212
- Total magnetization (exact up - dn):                       2.000000
+ Total magnetization (from the atomic spheres):                0.695212
+ Total magnetization (exact up - dn):                          2.000000
 
 
 ---OUTPUT-----------------------------------------------------------------------
@@ -1332,15 +1332,15 @@ force_length_stats: {min:   4.51419194E-03, max:   4.51419194E-03, mean:   4.514
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.941250     0.604025      1.545275     0.337226
-    2   2.00000     0.941250     0.604025      1.545275     0.337226
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Si   2.00000     0.941250     0.604025      1.545275     0.337226
+    2 Si   2.00000     0.941250     0.604025      1.545275     0.337226
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.882501     1.208049      3.090550     0.674452
- Total magnetization (from the atomic spheres):             0.674452
- Total magnetization (exact up - dn):                       2.000000
+ Total magnetization (from the atomic spheres):                0.674452
+ Total magnetization (exact up - dn):                          2.000000
 
 
 ---OUTPUT-----------------------------------------------------------------------
@@ -1561,15 +1561,15 @@ force_length_stats: {min:   3.94011823E-03, max:   3.94011823E-03, mean:   3.940
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.922277     0.589143      1.511420     0.333134
-    2   2.00000     0.922277     0.589143      1.511420     0.333134
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Si   2.00000     0.922277     0.589143      1.511420     0.333134
+    2 Si   2.00000     0.922277     0.589143      1.511420     0.333134
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.844554     1.178286      3.022840     0.666268
- Total magnetization (from the atomic spheres):             0.666268
- Total magnetization (exact up - dn):                       2.000000
+ Total magnetization (from the atomic spheres):                0.666268
+ Total magnetization (exact up - dn):                          2.000000
 
 
 ---OUTPUT-----------------------------------------------------------------------
@@ -1808,15 +1808,15 @@ force_length_stats: {min:   1.51647676E-03, max:   1.51647676E-03, mean:   1.516
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.921594     0.587943      1.509537     0.333651
-    2   2.00000     0.921594     0.587943      1.509537     0.333651
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Si   2.00000     0.921594     0.587943      1.509537     0.333651
+    2 Si   2.00000     0.921594     0.587943      1.509537     0.333651
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.843188     1.175885      3.019073     0.667303
- Total magnetization (from the atomic spheres):             0.667303
- Total magnetization (exact up - dn):                       2.000000
+ Total magnetization (from the atomic spheres):                0.667303
+ Total magnetization (exact up - dn):                          2.000000
 
 
 ---OUTPUT-----------------------------------------------------------------------
@@ -2019,15 +2019,15 @@ force_length_stats: {min:   1.34538643E-03, max:   1.34538643E-03, mean:   1.345
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.921540     0.587853      1.509393     0.333688
-    2   2.00000     0.921540     0.587853      1.509393     0.333688
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Si   2.00000     0.921540     0.587853      1.509393     0.333688
+    2 Si   2.00000     0.921540     0.587853      1.509393     0.333688
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.843081     1.175706      3.018787     0.667375
- Total magnetization (from the atomic spheres):             0.667375
- Total magnetization (exact up - dn):                       2.000000
+ Total magnetization (from the atomic spheres):                0.667375
+ Total magnetization (exact up - dn):                          2.000000
 
 
 ---OUTPUT-----------------------------------------------------------------------
@@ -2248,15 +2248,15 @@ force_length_stats: {min:   7.23913583E-04, max:   7.23913583E-04, mean:   7.239
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.931469     0.597299      1.528768     0.334171
-    2   2.00000     0.931469     0.597299      1.528768     0.334171
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Si   2.00000     0.931469     0.597299      1.528768     0.334171
+    2 Si   2.00000     0.931469     0.597299      1.528768     0.334171
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.862938     1.194597      3.057536     0.668341
- Total magnetization (from the atomic spheres):             0.668341
- Total magnetization (exact up - dn):                       2.000000
+ Total magnetization (from the atomic spheres):                0.668341
+ Total magnetization (exact up - dn):                          2.000000
 
 
 ---OUTPUT-----------------------------------------------------------------------
@@ -2459,15 +2459,15 @@ force_length_stats: {min:   5.66299062E-04, max:   5.66299062E-04, mean:   5.662
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.931427     0.597220      1.528647     0.334206
-    2   2.00000     0.931427     0.597220      1.528647     0.334206
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Si   2.00000     0.931427     0.597220      1.528647     0.334206
+    2 Si   2.00000     0.931427     0.597220      1.528647     0.334206
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.862853     1.194441      3.057294     0.668412
- Total magnetization (from the atomic spheres):             0.668412
- Total magnetization (exact up - dn):                       2.000000
+ Total magnetization (from the atomic spheres):                0.668412
+ Total magnetization (exact up - dn):                          2.000000
 
 
 ---OUTPUT-----------------------------------------------------------------------
@@ -2670,15 +2670,15 @@ force_length_stats: {min:   3.54117835E-04, max:   3.54117835E-04, mean:   3.541
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.931368     0.597114      1.528482     0.334254
-    2   2.00000     0.931368     0.597114      1.528482     0.334254
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Si   2.00000     0.931368     0.597114      1.528482     0.334254
+    2 Si   2.00000     0.931368     0.597114      1.528482     0.334254
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.862736     1.194228      3.056965     0.668508
- Total magnetization (from the atomic spheres):             0.668508
- Total magnetization (exact up - dn):                       2.000000
+ Total magnetization (from the atomic spheres):                0.668508
+ Total magnetization (exact up - dn):                          2.000000
 
 
 ---OUTPUT-----------------------------------------------------------------------
@@ -2881,15 +2881,15 @@ force_length_stats: {min:   2.57697095E-04, max:   2.57697095E-04, mean:   2.576
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.941878     0.605369      1.547247     0.336509
-    2   2.00000     0.941878     0.605369      1.547247     0.336509
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Si   2.00000     0.941878     0.605369      1.547247     0.336509
+    2 Si   2.00000     0.941878     0.605369      1.547247     0.336509
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.883756     1.210738      3.094494     0.673018
- Total magnetization (from the atomic spheres):             0.673018
- Total magnetization (exact up - dn):                       2.000000
+ Total magnetization (from the atomic spheres):                0.673018
+ Total magnetization (exact up - dn):                          2.000000
 
 
 ---OUTPUT-----------------------------------------------------------------------
@@ -3092,15 +3092,15 @@ force_length_stats: {min:   1.71221021E-04, max:   1.71221021E-04, mean:   1.712
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.941859     0.605327      1.547186     0.336532
-    2   2.00000     0.941859     0.605327      1.547186     0.336532
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Si   2.00000     0.941859     0.605327      1.547186     0.336532
+    2 Si   2.00000     0.941859     0.605327      1.547186     0.336532
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.883718     1.210654      3.094372     0.673063
- Total magnetization (from the atomic spheres):             0.673063
- Total magnetization (exact up - dn):                       2.000000
+ Total magnetization (from the atomic spheres):                0.673063
+ Total magnetization (exact up - dn):                          2.000000
 
 
 ---OUTPUT-----------------------------------------------------------------------
@@ -3312,218 +3312,219 @@ P           mkmem           1
 
  Test the timer : 
   a combined call timab(*,1,tsec) + timab(*,2,tsec) is 
-- CPU time =    1.3370E-06 sec,    Wall time =    1.3370E-06 sec
+- CPU time =    1.3213E-06 sec,    Wall time =    1.3215E-06 sec
 
-- Total cpu        time (s,m,h):          3.1        0.05      0.001
-- Total wall clock time (s,m,h):          3.2        0.05      0.001
+- Total cpu        time (s,m,h):          3.4        0.06      0.001
+- Total wall clock time (s,m,h):          3.5        0.06      0.001
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0
 -
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            3.1, wall_time =            3.2
+- cpu_time =            3.4, wall_time =            3.5
 -
 - routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
 -                                                                                (-1=no count)
-- ewald                                     0.799  25.5         0.800  24.7             13      -1.00        1.00       1.00
-- stress                                    0.630  20.1         0.630  19.5             13      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)                        0.613  19.6         0.614  19.0             13      -1.00        1.00       1.00
-- fourwf%(pot)                              0.309   9.9         0.310   9.6           3563      -1.00        1.00       1.00
-- xc:pot/=fourdp                            0.239   7.6         0.240   7.4            116      -1.00        1.00       1.00
-- pspini                                    0.158   5.1         0.159   4.9              1      -1.00        1.00       1.00
-- timing timab                              0.116   3.7         0.116   3.6             12      -1.00        1.00       1.00
-- fourdp                                    0.089   2.8         0.089   2.8           1161      -1.00        1.00       1.00
-- fourwf%(den)                              0.059   1.9         0.143   4.4            832      -1.00        0.41       0.41
-- nonlop(apply)                             0.043   1.4         0.043   1.3           3563      -1.00        0.99       0.99
-- get_dtsets_pspheads                       0.033   1.1         0.033   1.0              1      -1.00        1.00       1.00
-- scfcv-scprqt                              0.025   0.8         0.025   0.8            103      -1.00        0.99       0.99
-- projbd                                    0.021   0.7         0.021   0.6           5094      -1.00        0.99       0.99
-- getghc(/=fourXX,nonlop,fock_XX)           0.019   0.6         0.018   0.6             -1      -1.00        1.09       1.09
-- abinit(chkinp,chkvars)                    0.018   0.6         0.018   0.6              1      -1.00        1.00       1.00
-- abinit(outvars)                           0.017   0.5         0.017   0.5              1      -1.00        1.00       1.00
-- vtowfk(ssdiag)                            0.016   0.5         0.016   0.5             -1      -1.00        1.00       1.00
-- abinit(after driver)                      0.015   0.5         0.015   0.5              1      -1.00        0.99       0.99
-- mkcore                                    0.011   0.4         0.011   0.3             39      -1.00        1.00       1.00
-- forces                                    0.011   0.3         0.011   0.3             13      -1.00        1.00       1.00
-- abinit(init,iofn1,herald)                 0.009   0.3         0.009   0.3              1      -1.00        0.97       0.97
-- vtowfk(contrib)                           0.008   0.3         0.008   0.3            206      -1.00        1.01       1.01
-- mkffnl                                    0.003   0.1         0.003   0.1            232      -1.00        1.00       1.00
-- nonlop(forstr)                            0.003   0.1         0.003   0.1            104      -1.00        1.00       1.00
-- vtowfk  (1)                               0.002   0.1         0.002   0.1            206      -1.00        1.02       1.02
-- symrhg(no FFT)                            0.001   0.0         0.001   0.0            104      -1.00        0.98       0.98
-- mkrho/=                                   0.001   0.0         0.001   0.0              2      -1.00        1.01       1.01
+- ewald                                     0.803  23.5         0.804  22.9             13      -1.00        1.00       1.00
+- stress                                    0.654  19.1         0.654  18.6             13      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)                        0.636  18.6         0.636  18.1             13      -1.00        1.00       1.00
+- fourwf%(pot)                              0.313   9.2         0.314   8.9           3563      -1.00        1.00       1.00
+- xc:pot/=fourdp                            0.259   7.6         0.259   7.4            116      -1.00        1.00       1.00
+- pspini                                    0.161   4.7         0.161   4.6              1      -1.00        1.00       1.00
+- timing timab                              0.114   3.3         0.114   3.3             12      -1.00        1.00       1.00
+- fourdp                                    0.095   2.8         0.096   2.7           1161      -1.00        0.99       0.99
+- get_dtsets_pspheads                       0.076   2.2         0.076   2.2              1      -1.00        1.00       1.00
+- fourwf%(den)                              0.064   1.9         0.125   3.6            832      -1.00        0.51       0.51
+- nonlop(apply)                             0.046   1.4         0.047   1.3           3563      -1.00        0.99       0.99
+- getghc(/=fourXX,nonlop,fock_XX)           0.034   1.0         0.032   0.9             -1      -1.00        1.05       1.05
+- scfcv-scprqt                              0.030   0.9         0.030   0.9            103      -1.00        1.00       1.00
+- abinit(chkinp,chkvars)                    0.021   0.6         0.021   0.6              1      -1.00        1.00       1.00
+- projbd                                    0.021   0.6         0.021   0.6           5094      -1.00        0.99       0.99
+- abinit(outvars)                           0.020   0.6         0.020   0.6              1      -1.00        1.00       1.00
+- vtowfk(ssdiag)                            0.019   0.6         0.019   0.5             -1      -1.00        1.00       1.00
+- abinit(after driver)                      0.017   0.5         0.017   0.5              1      -1.00        0.99       0.99
+- mkcore                                    0.012   0.3         0.012   0.3             39      -1.00        1.00       1.00
+- forces                                    0.012   0.3         0.012   0.3             13      -1.00        1.00       1.00
+- abinit(init,iofn1,herald)                 0.011   0.3         0.012   0.4              1      -1.00        0.91       0.91
+- vtowfk(contrib)                           0.010   0.3         0.010   0.3            206      -1.00        1.01       1.01
+- mkffnl                                    0.004   0.1         0.004   0.1            232      -1.00        1.00       1.00
+- nonlop(forstr)                            0.003   0.1         0.003   0.1            104      -1.00        0.99       0.99
+- vtowfk  (1)                               0.002   0.1         0.002   0.1            206      -1.00        1.01       1.01
+- symrhg(no FFT)                            0.001   0.0         0.001   0.0            104      -1.00        0.99       0.99
+- mkrho/=                                   0.001   0.0         0.001   0.0              2      -1.00        1.02       1.02
 - inwffil(excl. calls)                      0.001   0.0         0.001   0.0              1      -1.00        1.00       1.00
-- newkpt(excl. rwwf   )                     0.000   0.0         0.000   0.0             -1      -1.00        1.01       1.01
-- wfsinp(excl. calls)                       0.000   0.0         0.000   0.0              1      -1.00        0.93       0.93
-- initwf(after rwwf)                        0.000   0.0         0.000   0.0              2      -1.00        0.97       0.97
-- kpgsph                                    0.000   0.0         0.000   0.0              2      -1.00        1.13       1.13
-- others (127)                              0.000   0.0         0.000   0.0             -1      -1.00        0.00       0.00
+- newkpt(excl. rwwf   )                     0.000   0.0         0.000   0.0             -1      -1.00        1.02       1.02
+- wfsinp(excl. calls)                       0.000   0.0         0.000   0.0              1      -1.00        1.02       1.02
+- kpgsph                                    0.000   0.0         0.000   0.0              2      -1.00        1.05       1.05
+- initwf(after rwwf)                        0.000   0.0         0.000   0.0              2      -1.00        0.98       0.98
+- others (178)                              0.000   0.0         0.000   0.0             -1      -1.00        1.43       1.43
 -<END_TIMER>
 -
-- subtotal                                  3.269 104.4         3.355 103.7                                  0.97       0.97
+- subtotal                                  3.439 100.6         3.504  99.8                                  0.98       0.98
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           3.1, wall_time =           3.2
+- cpu_time =           3.4, wall_time =           3.5
 -
 - routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
 -                                                                                (-1=no count)
-- ewald                                     0.799  25.5         0.800  24.7             13      -1.00        1.00       1.00
-- stress                                    0.630  20.1         0.630  19.5             13      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)                        0.613  19.6         0.614  19.0             13      -1.00        1.00       1.00
-- fourwf%(pot)                              0.309   9.9         0.310   9.6           3563      -1.00        1.00       1.00
-- xc:pot/=fourdp                            0.239   7.6         0.240   7.4            116      -1.00        1.00       1.00
-- pspini                                    0.158   5.1         0.159   4.9              1      -1.00        1.00       1.00
-- timing timab                              0.116   3.7         0.116   3.6             12      -1.00        1.00       1.00
-- fourdp                                    0.089   2.8         0.089   2.8           1161      -1.00        1.00       1.00
-- fourwf%(den)                              0.059   1.9         0.143   4.4            832      -1.00        0.41       0.41
-- nonlop(apply)                             0.043   1.4         0.043   1.3           3563      -1.00        0.99       0.99
-- get_dtsets_pspheads                       0.033   1.1         0.033   1.0              1      -1.00        1.00       1.00
-- scfcv-scprqt                              0.025   0.8         0.025   0.8            103      -1.00        0.99       0.99
-- projbd                                    0.021   0.7         0.021   0.6           5094      -1.00        0.99       0.99
-- getghc(/=fourXX,nonlop,fock_XX)           0.019   0.6         0.018   0.6             -1      -1.00        1.09       1.09
-- abinit(chkinp,chkvars)                    0.018   0.6         0.018   0.6              1      -1.00        1.00       1.00
-- abinit(outvars)                           0.017   0.5         0.017   0.5              1      -1.00        1.00       1.00
-- vtowfk(ssdiag)                            0.016   0.5         0.016   0.5             -1      -1.00        1.00       1.00
-- abinit(after driver)                      0.015   0.5         0.015   0.5              1      -1.00        0.99       0.99
-- mkcore                                    0.011   0.4         0.011   0.3             39      -1.00        1.00       1.00
-- forces                                    0.011   0.3         0.011   0.3             13      -1.00        1.00       1.00
-- abinit(init,iofn1,herald)                 0.009   0.3         0.009   0.3              1      -1.00        0.97       0.97
-- vtowfk(contrib)                           0.008   0.3         0.008   0.3            206      -1.00        1.01       1.01
-- mkffnl                                    0.003   0.1         0.003   0.1            232      -1.00        1.00       1.00
-- nonlop(forstr)                            0.003   0.1         0.003   0.1            104      -1.00        1.00       1.00
-- vtowfk  (1)                               0.002   0.1         0.002   0.1            206      -1.00        1.02       1.02
-- symrhg(no FFT)                            0.001   0.0         0.001   0.0            104      -1.00        0.98       0.98
-- mkrho/=                                   0.001   0.0         0.001   0.0              2      -1.00        1.01       1.01
+- ewald                                     0.803  23.5         0.804  22.9             13      -1.00        1.00       1.00
+- stress                                    0.654  19.1         0.654  18.6             13      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)                        0.636  18.6         0.636  18.1             13      -1.00        1.00       1.00
+- fourwf%(pot)                              0.313   9.2         0.314   8.9           3563      -1.00        1.00       1.00
+- xc:pot/=fourdp                            0.259   7.6         0.259   7.4            116      -1.00        1.00       1.00
+- pspini                                    0.161   4.7         0.161   4.6              1      -1.00        1.00       1.00
+- timing timab                              0.114   3.3         0.114   3.3             12      -1.00        1.00       1.00
+- fourdp                                    0.095   2.8         0.096   2.7           1161      -1.00        0.99       0.99
+- get_dtsets_pspheads                       0.076   2.2         0.076   2.2              1      -1.00        1.00       1.00
+- fourwf%(den)                              0.064   1.9         0.125   3.6            832      -1.00        0.51       0.51
+- nonlop(apply)                             0.046   1.4         0.047   1.3           3563      -1.00        0.99       0.99
+- getghc(/=fourXX,nonlop,fock_XX)           0.034   1.0         0.032   0.9             -1      -1.00        1.05       1.05
+- scfcv-scprqt                              0.030   0.9         0.030   0.9            103      -1.00        1.00       1.00
+- abinit(chkinp,chkvars)                    0.021   0.6         0.021   0.6              1      -1.00        1.00       1.00
+- projbd                                    0.021   0.6         0.021   0.6           5094      -1.00        0.99       0.99
+- abinit(outvars)                           0.020   0.6         0.020   0.6              1      -1.00        1.00       1.00
+- vtowfk(ssdiag)                            0.019   0.6         0.019   0.5             -1      -1.00        1.00       1.00
+- abinit(after driver)                      0.017   0.5         0.017   0.5              1      -1.00        0.99       0.99
+- mkcore                                    0.012   0.3         0.012   0.3             39      -1.00        1.00       1.00
+- forces                                    0.012   0.3         0.012   0.3             13      -1.00        1.00       1.00
+- abinit(init,iofn1,herald)                 0.011   0.3         0.012   0.4              1      -1.00        0.91       0.91
+- vtowfk(contrib)                           0.010   0.3         0.010   0.3            206      -1.00        1.01       1.01
+- mkffnl                                    0.004   0.1         0.004   0.1            232      -1.00        1.00       1.00
+- nonlop(forstr)                            0.003   0.1         0.003   0.1            104      -1.00        0.99       0.99
+- vtowfk  (1)                               0.002   0.1         0.002   0.1            206      -1.00        1.01       1.01
+- symrhg(no FFT)                            0.001   0.0         0.001   0.0            104      -1.00        0.99       0.99
+- mkrho/=                                   0.001   0.0         0.001   0.0              2      -1.00        1.02       1.02
 - inwffil(excl. calls)                      0.001   0.0         0.001   0.0              1      -1.00        1.00       1.00
-- newkpt(excl. rwwf   )                     0.000   0.0         0.000   0.0             -1      -1.00        1.01       1.01
-- wfsinp(excl. calls)                       0.000   0.0         0.000   0.0              1      -1.00        0.93       0.93
-- initwf(after rwwf)                        0.000   0.0         0.000   0.0              2      -1.00        0.97       0.97
-- kpgsph                                    0.000   0.0         0.000   0.0              2      -1.00        1.13       1.13
-- others (127)                              0.000   0.0         0.000   0.0             -1      -1.00        0.00       0.00
+- newkpt(excl. rwwf   )                     0.000   0.0         0.000   0.0             -1      -1.00        1.02       1.02
+- wfsinp(excl. calls)                       0.000   0.0         0.000   0.0              1      -1.00        1.02       1.02
+- kpgsph                                    0.000   0.0         0.000   0.0              2      -1.00        1.05       1.05
+- initwf(after rwwf)                        0.000   0.0         0.000   0.0              2      -1.00        0.98       0.98
+- others (178)                              0.000   0.0         0.000   0.0             -1      -1.00        1.43       1.43
 -<END_TIMER>
 
-- subtotal                                  3.269 104.4         3.355 103.7                                  0.97       0.97
+- subtotal                                  3.439 100.6         3.504  99.8                                  0.98       0.98
 
  Partitioning of abinit
-- abinit                                    3.130 100.0         3.236 100.0              1                   0.97       0.97
+- abinit                                    3.418 100.0         3.512 100.0              1                   0.97       0.97
  
-- abinit(init,iofn1,herald)                 0.009   0.3         0.009   0.3              1                   0.97       0.97
-- get_dtsets_pspheads                       0.033   1.1         0.033   1.0              1                   1.00       1.00
-- abinit(outvars)                           0.017   0.5         0.017   0.5              1                   1.00       1.00
-- abinit(chkinp,chkvars)                    0.018   0.6         0.018   0.6              1                   1.00       1.00
-- driver                                    2.919  93.2         3.024  93.5              1                   0.97       0.97
-- abinit(after driver)                      0.015   0.5         0.015   0.5              1                   0.99       0.99
-- timing timab                              0.116   3.7         0.116   3.6             12                   1.00       1.00
-- (other)                                   0.004   0.1         0.004   0.1             -1                   0.99       0.99
+- abinit(init,iofn1,herald)                 0.011   0.3         0.012   0.4              1                   0.91       0.91
+- get_dtsets_pspheads                       0.076   2.2         0.076   2.2              1                   1.00       1.00
+- abinit(outvars)                           0.020   0.6         0.020   0.6              1                   1.00       1.00
+- abinit(chkinp,chkvars)                    0.021   0.6         0.021   0.6              1                   1.00       1.00
+- driver                                    3.152  92.2         3.245  92.4              1                   0.97       0.97
+- abinit(after driver)                      0.017   0.5         0.017   0.5              1                   0.99       0.99
+- timing timab                              0.114   3.3         0.114   3.3             12                   1.00       1.00
+- (other)                                   0.006   0.2         0.006   0.2             -1                   1.00       1.00
 
-- subtotal                                  3.130 100.0         3.236 100.0                                  0.97       0.97
+- subtotal                                  3.418 100.0         3.512 100.0                                  0.97       0.97
 
  Partitioning of driver
-- driver                                    2.919  93.2         3.024  93.5              1                   0.97       0.97
+- driver                                    3.152  92.2         3.245  92.4              1                   0.97       0.97
  
-- (other)                                   2.918  93.2         3.024  93.4             -1                   0.97       0.97
+- (other)                                   3.151  92.2         3.244  92.4             -1                   0.97       0.97
 
-- subtotal                                  2.919  93.2         3.024  93.5                                  0.97       0.97
+- subtotal                                  3.152  92.2         3.245  92.4                                  0.97       0.97
 
  Partitioning of gstateimg+gstate
-- gstateimg                                 2.918  93.2         3.024  93.4              1                   0.97       0.97
+- gstateimg                                 3.151  92.2         3.244  92.4              1                   0.97       0.97
  
-- gstate(1)                                 0.001   0.0         0.001   0.0              2                   1.00       1.00
-- gstate(pspini)                            0.158   5.1         0.159   4.9              1                   1.00       1.00
-- gstate(init rhor rhog)                    0.019   0.6         0.103   3.2              1                   0.18       0.18
-- gstate(...scfcv)                          2.736  87.4         2.758  85.2              1                   0.99       0.99
+- gstate(1)                                 0.002   0.0         0.002   0.0              2                   1.00       1.00
+- gstate(pspini)                            0.161   4.7         0.161   4.6              1                   1.00       1.00
+- gstate(init rhor rhog)                    0.022   0.7         0.083   2.4              1                   0.27       0.27
+- gstate(...scfcv)                          2.962  86.7         2.994  85.3              1                   0.99       0.99
 - gstate(clnup1)                            0.002   0.1         0.002   0.1              1                   1.00       1.00
 
-- subtotal                                  2.918  93.2         3.024  93.4                                  0.97       0.97
+- subtotal                                  3.151  92.2         3.243  92.4                                  0.97       0.97
 
  Partitioning of scfcv_core
-- scfcv_core                                2.725  87.1         2.747  84.9             13                   0.99       0.99
+- scfcv_core                                2.944  86.1         2.976  84.7             13                   0.99       0.99
  
-- scfcv_core(before nstep loop)             0.001   0.0         0.001   0.0             13                   1.01       1.01
-- scfcv_core(setvtr)                        0.855  27.3         0.855  26.4            103                   1.00       1.00
-- scfcv_core(vtorho(f))                     0.571  18.2         0.571  17.7            103                   1.00       1.00
-- scfcv-scprqt                              0.025   0.8         0.025   0.8            103                   0.99       0.99
-- scfcv_core(rhotov)                        0.307   9.8         0.307   9.5            103                   1.00       1.00
-- scfcv_core(mix pot)                       0.050   1.6         0.050   1.5             90                   1.00       1.00
-- scfcv_core(afterscfloop)                  0.646  20.6         0.646  20.0             13                   1.00       1.00
-- scfcv_core(outscfcv)                      0.264   8.4         0.285   8.8             13                   0.93       0.93
-- (other)                                   0.005   0.2         0.005   0.1             -1                   1.02       1.02
+- scfcv_core(before nstep loop)             0.003   0.1         0.003   0.1             13                   1.00       1.00
+- scfcv_core(ini moved atm inside)          0.001   0.0         0.001   0.0            103                   1.02       1.02
+- scfcv_core(setvtr)                        0.873  25.5         0.874  24.9            103                   1.00       1.00
+- scfcv_core(vtorho(f))                     0.605  17.7         0.605  17.2            103                   1.00       1.00
+- scfcv-scprqt                              0.030   0.9         0.030   0.9            103                   1.00       1.00
+- scfcv_core(rhotov)                        0.325   9.5         0.326   9.3            103                   1.00       1.00
+- scfcv_core(mix pot)                       0.061   1.8         0.061   1.7             90                   1.00       1.00
+- scfcv_core(afterscfloop)                  0.673  19.7         0.674  19.2             13                   1.00       1.00
+- scfcv_core(outscfcv)                      0.363  10.6         0.394  11.2             13                   0.92       0.92
+- (other)                                   0.007   0.2         0.006   0.2             -1                   1.02       1.02
 
-- subtotal                                  2.725  87.1         2.747  84.9                                  0.99       0.99
+- subtotal                                  2.944  86.1         2.976  84.7                                  0.99       0.99
 
  Partitioning of rhotov
-- rhotov                                    0.306   9.8         0.306   9.5            103                   1.00       1.00
+- rhotov                                    0.325   9.5         0.325   9.3            103                   1.00       1.00
  
-- rhotov(rhotoxc)                           0.273   8.7         0.273   8.4            103                   1.00       1.00
+- rhotov(rhotoxc)                           0.288   8.4         0.288   8.2            103                   1.00       1.00
 - rhotov(dotprod_vn)                        0.001   0.0         0.001   0.0            103                   0.98       0.98
-- rhotov(other)                             0.016   0.5         0.016   0.5            103                   1.00       1.00
-- (other)                                   0.016   0.5         0.016   0.5             -1                   1.00       1.00
+- rhotov(other)                             0.017   0.5         0.018   0.5            103                   1.00       1.00
+- (other)                                   0.018   0.5         0.018   0.5             -1                   1.00       1.00
 
-- subtotal                                  0.306   9.8         0.306   9.5                                  1.00       1.00
+- subtotal                                  0.325   9.5         0.325   9.3                                  1.00       1.00
 
  Partitioning of vtorho
-- vtorho                                    0.571  18.2         0.571  17.6            103                   1.00       1.00
+- vtorho                                    0.605  17.7         0.605  17.2            103                   1.00       1.00
  
-- vtorho(bef. spin loop)                    0.001   0.0         0.001   0.0            103                   0.99       0.99
-- vtorho(bef. kpt  loop)                    0.005   0.2         0.005   0.2            206                   1.00       1.00
-- vtorho(bef. vtowfk)                       0.006   0.2         0.006   0.2            206                   1.00       1.00
-- vtowfk                                    0.497  15.9         0.497  15.4            206                   1.00       1.00
+- vtorho(bef. spin loop)                    0.002   0.1         0.002   0.1            103                   0.99       0.99
+- vtorho(bef. kpt  loop)                    0.006   0.2         0.006   0.2            206                   1.00       1.00
+- vtorho(bef. vtowfk)                       0.008   0.2         0.008   0.2            206                   1.00       1.00
+- vtowfk                                    0.526  15.4         0.527  15.0            206                   1.00       1.00
 - vtorho(aft. kpt loop)                     0.004   0.1         0.004   0.1            206                   1.00       1.00
-- vtorho(mkrho 2)                           0.054   1.7         0.054   1.7            206                   1.00       1.00
+- vtorho(mkrho 2)                           0.055   1.6         0.055   1.6            206                   1.00       1.00
 - (other)                                   0.002   0.1         0.002   0.1             -1                   1.09       1.09
 
-- subtotal                                  0.571  18.2         0.571  17.6                                  1.00       1.00
+- subtotal                                  0.605  17.7         0.605  17.2                                  1.00       1.00
 
  Partitioning of vtowfk
-- vtowfk                                    0.497  15.9         0.497  15.4            206                   1.00       1.00
+- vtowfk                                    0.526  15.4         0.527  15.0            206                   1.00       1.00
  
-- vtowfk  (1)                               0.002   0.1         0.002   0.1            206                   1.02       1.02
-- cgwf                                      0.430  13.7         0.430  13.3            254                   1.00       1.00
-- vtowfk(subdiago)                          0.005   0.2         0.005   0.1            254                   0.99       0.99
-- vtowfk(pw_orthon)                         0.007   0.2         0.007   0.2            254                   1.00       1.00
-- vtowfk(2)                                 0.005   0.1         0.004   0.1             -1                   1.01       1.01
-- fourwf%vtowfk                             0.041   1.3         0.042   1.3            824                   1.00       1.00
-- vtowfk(nonlocalpart)                      0.001   0.0         0.001   0.0            206                   1.01       1.01
-- vtowfk(3)                                 0.008   0.2         0.008   0.2             -1                   1.01       1.01
+- vtowfk  (1)                               0.002   0.1         0.002   0.1            206                   1.01       1.01
+- cgwf                                      0.453  13.2         0.453  12.9            254                   1.00       1.00
+- vtowfk(subdiago)                          0.007   0.2         0.007   0.2            254                   1.00       1.00
+- vtowfk(pw_orthon)                         0.007   0.2         0.007   0.2            254                   1.01       1.01
+- vtowfk(2)                                 0.006   0.2         0.006   0.2             -1                   1.01       1.01
+- fourwf%vtowfk                             0.043   1.2         0.043   1.2            824                   1.00       1.00
+- vtowfk(nonlocalpart)                      0.001   0.0         0.001   0.0            206                   0.99       0.99
+- vtowfk(3)                                 0.009   0.3         0.009   0.2             -1                   1.01       1.01
 
-- subtotal                                  0.497  15.9         0.497  15.4                                  1.00       1.00
+- subtotal                                  0.526  15.4         0.527  15.0                                  1.00       1.00
 
  Partitioning of cgwf
-- cgwf                                      0.430  13.7         0.430  13.3            254                   1.00       1.00
+- cgwf                                      0.453  13.2         0.453  12.9            254                   1.00       1.00
  
-- getghc%cgwf                               0.371  11.9         0.371  11.5           3563                   1.00       1.00
-- cgwf-O(npw)                               0.038   1.2         0.038   1.2             -1                   1.00       1.00
-- projbd%cgwf                               0.021   0.7         0.021   0.6           5094                   0.99       0.99
+- getghc%cgwf                               0.393  11.5         0.393  11.2           3563                   1.00       1.00
+- cgwf-O(npw)                               0.039   1.1         0.039   1.1             -1                   1.00       1.00
+- projbd%cgwf                               0.021   0.6         0.021   0.6           5094                   0.99       0.99
 
-- subtotal                                  0.430  13.7         0.430  13.3                                  1.00       1.00
+- subtotal                                  0.453  13.2         0.453  12.9                                  1.00       1.00
 
  Partitioning of getghc
-- getghc                                    0.371  11.9         0.371  11.5           3563                   1.00       1.00
+- getghc                                    0.393  11.5         0.393  11.2           3563                   1.00       1.00
  
-- fourwf%getghc                             0.309   9.9         0.310   9.6           3563                   1.00       1.00
-- nonlop%getghc                             0.043   1.4         0.043   1.3           3563                   0.99       0.99
-- getghc(/=fourXX,nonlop,fock_XX)           0.019   0.6         0.018   0.6             -1                   1.09       1.09
+- fourwf%getghc                             0.313   9.2         0.314   8.9           3563                   1.00       1.00
+- nonlop%getghc                             0.046   1.4         0.047   1.3           3563                   0.99       0.99
+- getghc(/=fourXX,nonlop,fock_XX)           0.034   1.0         0.032   0.9             -1                   1.05       1.05
 
-- subtotal                                  0.371  11.9         0.371  11.5                                  1.00       1.00
+- subtotal                                  0.393  11.5         0.393  11.2                                  1.00       1.00
 
  Partitioning of fourwf (upwards partitioning)
-- fourwf                                    0.368  11.8         0.454  14.0           4395                   0.81       0.81
+- fourwf                                    0.377  11.0         0.439  12.5           4395                   0.86       0.86
  
-- fourwf%getghc                             0.309   9.9         0.310   9.6           3563                   1.00       1.00
-- fourwf%vtowfk                             0.041   1.3         0.042   1.3            824                   1.00       1.00
-- fourwf%mkrho                              0.018   0.6         0.102   3.1              8                   0.17       0.17
+- fourwf%getghc                             0.313   9.2         0.314   8.9           3563                   1.00       1.00
+- fourwf%vtowfk                             0.043   1.2         0.043   1.2            824                   1.00       1.00
+- fourwf%mkrho                              0.021   0.6         0.082   2.3              8                   0.26       0.26
 
-- subtotal                                  0.368  11.8         0.454  14.0                                  0.81       0.81
+- subtotal                                  0.377  11.0         0.439  12.5                                  0.86       0.86
 
  Partitioning of mkrho (upwards partitioning)
-- mkrho                                     0.019   0.6         0.103   3.2              1                   0.18       0.18
+- mkrho                                     0.022   0.7         0.083   2.4              1                   0.27       0.27
  
-- mkrho%gstate                              0.019   0.6         0.103   3.2              1                   0.18       0.18
+- mkrho%gstate                              0.022   0.7         0.083   2.4              1                   0.27       0.27
 
-- subtotal                                  0.019   0.6         0.103   3.2                                  0.18       0.18
+- subtotal                                  0.022   0.7         0.083   2.4                                  0.27       0.27
 
  Partitioning of inwffil
 - inwffil                                   0.001   0.0         0.001   0.0              1                   1.00       1.00
@@ -3532,106 +3533,107 @@ P           mkmem           1
 - subtotal                                  0.001   0.0         0.001   0.0                                  1.00       1.00
 
  Partitioning of wfsinp
-- wfsinp                                    0.000   0.0         0.000   0.0              1                   0.99       0.99
+- wfsinp                                    0.000   0.0         0.000   0.0              1                   1.00       1.00
  
 
-- subtotal                                  0.000   0.0         0.000   0.0                                  0.99       0.99
+- subtotal                                  0.000   0.0         0.000   0.0                                  1.00       1.00
 
  Partitioning of initwf
-- initwf                                    0.000   0.0         0.000   0.0              2                   1.00       1.00
+- initwf                                    0.000   0.0         0.000   0.0              2                   1.01       1.01
  
 
-- subtotal                                  0.000   0.0         0.000   0.0                                  0.98       0.98
+- subtotal                                  0.000   0.0         0.000   0.0                                  1.00       1.00
 
  Partitioning of newkpt
 - newkpt                                    0.000   0.0         0.000   0.0              1                   1.00       1.00
  
 
-- subtotal                                  0.000   0.0         0.000   0.0                                  1.01       1.01
+- subtotal                                  0.000   0.0         0.000   0.0                                  1.02       1.02
 
  Partitioning of newvtr
-- newvtr                                    0.050   1.6         0.050   1.5             90                   1.00       1.00
+- newvtr                                    0.060   1.8         0.060   1.7             90                   1.00       1.00
  
-- newvtr(before selection)                  0.003   0.1         0.003   0.1             90                   0.98       0.98
-- newvtr(bef. prcref_PMA)                   0.001   0.0         0.001   0.0             90                   0.98       0.98
-- newvtr(call prcref_PMA)                   0.001   0.0         0.001   0.0             90                   0.98       0.98
-- newvtr(aft. prcref_PMA)                   0.040   1.3         0.040   1.2             90                   1.00       1.00
+- newvtr(before selection)                  0.003   0.1         0.003   0.1             90                   1.00       1.00
+- newvtr(bef. prcref_PMA)                   0.002   0.1         0.002   0.1             90                   0.98       0.98
+- newvtr(call prcref_PMA)                   0.001   0.0         0.001   0.0             90                   0.99       0.99
+- newvtr(aft. prcref_PMA)                   0.049   1.4         0.049   1.4             90                   1.00       1.00
 - newvtr(mean potential)                    0.003   0.1         0.003   0.1             90                   1.00       1.00
-- (other)                                   0.001   0.0         0.001   0.0             -1                   1.09       1.09
+- (other)                                   0.002   0.1         0.002   0.0             -1                   1.09       1.09
 
-- subtotal                                  0.050   1.6         0.050   1.5                                  1.00       1.00
+- subtotal                                  0.060   1.8         0.060   1.7                                  1.00       1.00
 
  Partitioning of fourdp (upwards partitioning)
-- fourdp                                    0.089   2.8         0.089   2.8           1161                   1.00       1.00
+- fourdp                                    0.095   2.8         0.096   2.7           1161                   0.99       0.99
  
-- fourdp%(other)                            0.089   2.8         0.089   2.8           1161                   1.00       1.00
+- fourdp%(other)                            0.095   2.8         0.096   2.7           1161                   0.99       0.99
 
-- subtotal                                  0.089   2.8         0.089   2.8                                  1.00       1.00
+- subtotal                                  0.095   2.8         0.096   2.7                                  0.99       0.99
 
  Partitioning of afterscfloop
-- afterscfloop                              0.646  20.6         0.646  20.0             13                   1.00       1.00
+- afterscfloop                              0.673  19.7         0.673  19.2             13                   1.00       1.00
  
-- afterscfloop(forstr)                      0.646  20.6         0.646  20.0             13                   1.00       1.00
+- afterscfloop(wvl)                         0.001   0.0         0.001   0.0             13                   1.00       1.00
+- afterscfloop(forstr)                      0.671  19.6         0.672  19.1             13                   1.00       1.00
 
-- subtotal                                  0.646  20.6         0.646  20.0                                  1.00       1.00
+- subtotal                                  0.673  19.7         0.673  19.2                                  1.00       1.00
 
  Partitioning of forstr
-- forstr                                    0.646  20.6         0.646  20.0             13                   1.00       1.00
+- forstr                                    0.671  19.6         0.672  19.1             13                   1.00       1.00
  
-- forstr(forstrnps)                         0.005   0.2         0.005   0.1             13                   1.00       1.00
-- forstr(forces)                            0.011   0.3         0.011   0.3             13                   1.00       1.00
-- forstr(stress)                            0.630  20.1         0.630  19.5             13                   1.00       1.00
+- forstr(forstrnps)                         0.006   0.2         0.006   0.2             13                   1.00       1.00
+- forstr(forces)                            0.012   0.3         0.012   0.3             13                   1.00       1.00
+- forstr(stress)                            0.654  19.1         0.654  18.6             13                   1.00       1.00
 
-- subtotal                                  0.645  20.6         0.646  20.0                                  1.00       1.00
+- subtotal                                  0.671  19.6         0.672  19.1                                  1.00       1.00
 
  Partitioning of forstrnps
-- forstrnps                                 0.005   0.1         0.005   0.1             13                   1.00       1.00
+- forstrnps                                 0.006   0.2         0.006   0.2             13                   1.00       1.00
  
 - forstrnps(bef.loop band)                  0.001   0.0         0.001   0.0             26                   1.00       1.00
-- forstrnps(nonlop+prep_ba                  0.003   0.1         0.003   0.1            104                   1.00       1.00
+- forstrnps(nonlop+prep_ba                  0.004   0.1         0.004   0.1            104                   1.00       1.00
 
-- subtotal                                  0.004   0.1         0.004   0.1                                  1.00       1.00
+- subtotal                                  0.005   0.2         0.005   0.2                                  1.00       1.00
 
  Partitioning of outscfcv
-- outscfcv                                  0.264   8.4         0.285   8.8             13                   0.93       0.93
+- outscfcv                                  0.363  10.6         0.394  11.2             13                   0.92       0.92
  
-- outscfcv(preparation)                     0.002   0.1         0.002   0.0             13                   1.00       1.00
-- outscfcv([PAW]prtden)                     0.004   0.1         0.004   0.1             13                   1.00       1.00
-- outscfcv(output GSR)                      0.254   8.1         0.275   8.5             13                   0.92       0.92
+- outscfcv(preparation)                     0.003   0.1         0.003   0.1             13                   1.00       1.00
+- outscfcv([PAW]prtden)                     0.008   0.2         0.008   0.2             13                   1.00       1.00
+- outscfcv(output GSR)                      0.347  10.2         0.378  10.8             13                   0.92       0.92
 - outscfcv(calcdenmagsph)                   0.002   0.1         0.002   0.1             13                   1.00       1.00
-- outscfcv(prt_ebands)                      0.001   0.0         0.001   0.0             13                   1.00       1.00
+- outscfcv(prt_ebands)                      0.002   0.1         0.002   0.1             13                   0.99       0.99
 
-- subtotal                                  0.263   8.4         0.284   8.8                                  0.93       0.93
+- subtotal                                  0.363  10.6         0.393  11.2                                  0.92       0.92
 -
 -Synchronisation (=leave_test) and MPI calls 
-- communic.MPI                              0.004   0.1         0.004   0.1           5239                   1.01       1.01
+- communic.MPI                              0.004   0.1         0.004   0.1           5239                   1.03       1.03
 -
-- forstrnps:synchr                          0.000   0.0         0.000   0.0             26                   0.89       0.89
-- wfsinp:synchro                            0.000   0.0         0.000   0.0              1                   1.01       1.01
-- mkrho :MPIrhor                            0.000   0.0         0.000   0.0              1                   0.92       0.92
-- subtotal                                  0.000   0.0         0.000   0.0                                  0.93       0.93
+- forstrnps:synchr                          0.000   0.0         0.000   0.0             26                   1.00       1.00
+- wfsinp:synchro                            0.000   0.0         0.000   0.0              1                   1.00       1.00
+- mkrho :MPIrhor                            0.000   0.0         0.000   0.0              1                   1.02       1.02
+- subtotal                                  0.000   0.0         0.000   0.0                                  1.00       1.00
 
  Additional information
-- timana(1)                                 0.000   0.0         0.000   0.0              1                   0.98       0.98
-- total timab                               0.158   5.1         0.158   4.9         118290                   1.00       1.00
-- fourwf                                    0.368  11.8         0.454  14.0           4395                   0.81       0.81
-- mklocl(2)                                 0.003   0.1         0.003   0.1             13                   1.00       1.00
-- nonlop(forstr)                            0.003   0.1         0.003   0.1            104                   1.00       1.00
-- nonlop(total)                             0.046   1.5         0.046   1.4           3667                   0.99       0.99
-- xc:fourdp                                 0.070   2.2         0.070   2.2            928                   1.00       1.00
+- timana(1)                                 0.000   0.0         0.000   0.0              1                   1.00       1.00
+- total timab                               0.156   4.6         0.156   4.5         118290                   1.00       1.00
+- fourwf                                    0.377  11.0         0.439  12.5           4395                   0.86       0.86
+- mklocl(2)                                 0.004   0.1         0.004   0.1             13                   1.00       1.00
+- nonlop(forstr)                            0.003   0.1         0.003   0.1            104                   0.99       0.99
+- nonlop(total)                             0.050   1.5         0.050   1.4           3667                   0.99       0.99
+- xc:fourdp                                 0.073   2.1         0.073   2.1            928                   1.00       1.00
 
 
  Detailed analysis of some time consuming routines 
                                   tcpu    ncalls  tcpu/ncalls    ndata tcpu/ncalls/ndata
                                  (sec)                (msec)              (microsec)
-- fourwf%(pot)                   0.309      3563       0.087     24000       0.004
-- fourwf%(den)                   0.059       832       0.071     12000       0.006
-- fourdp                         0.089      1161       0.076     12000       0.006
-- nonlop(apply)                  0.043      3563       0.012      1350       0.009
+- fourwf%(pot)                   0.313      3563       0.088     24000       0.004
+- fourwf%(den)                   0.064       832       0.077     12000       0.006
+- fourdp                         0.095      1161       0.082     12000       0.007
+- nonlop(apply)                  0.046      3563       0.013      1350       0.010
 - nonlop(forces)                 0.000         0
-- nonlop(forstr)                 0.003       104       0.028      1350       0.021
+- nonlop(forstr)                 0.003       104       0.033      1350       0.024
 - projbd                         0.021      5094       0.004      2700       0.002
-- xc:pot/=fourdp                 0.239       116       2.062     24000       0.086
+- xc:pot/=fourdp                 0.259       116       2.231     24000       0.093
 - RayleighRitz@diago             0.000         0
 
 ================================================================================
@@ -3716,10 +3718,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.1  wall=          3.2
+- Proc.   0 individual time (sec): cpu=          3.4  wall=          3.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered 106 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.1  wall=          3.2
++Overall time at end (sec) : cpu=          3.4  wall=          3.5

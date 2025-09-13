@@ -1,5 +1,5 @@
 
-.Version 10.4.5.5 of ABINIT, released Jul 2025.
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 Jun 2025.
-- ( at 13h06 )
+.Starting date : Sat 13 Sep 2025.
+- ( at 10h32 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v8_t71-t72-t73-t74-t75-t76-t77-t78-t79-t80/t78.abi
 - output file    -> t78.abo
@@ -33,6 +33,7 @@
 -    mband =          42        mffmem =           1         mkmem =           8
 -   mkqmem =           8        mk1mem =           8           mpw =         167
       nfft =        6075          nkpt =           8
+- my_mband =          42
 ================================================================================
 P This job should need less than                       9.747 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -227,34 +228,34 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1   246.44103509479     -1.406E+03 1.082E-01 1.451E+05 2.701E-03 2.701E-03
- ETOT  2   24.567180060662     -2.219E+02 1.028E-01 2.110E+03 8.121E-03 5.420E-03
- ETOT  3   21.188696350923     -3.378E+00 1.914E-02 5.172E+01 3.925E-03 1.496E-03
- ETOT  4   20.971372988607     -2.173E-01 7.960E-03 7.711E+00 5.564E-04 2.052E-03
- ETOT  5   20.894469887548     -7.690E-02 4.043E-03 1.116E+00 2.031E-03 2.925E-05
- ETOT  6   20.864420953008     -3.005E-02 2.051E-03 1.123E-01 8.870E-05 8.069E-05
- ETOT  7   20.850410367712     -1.401E-02 1.200E-03 3.044E-01 1.741E-03 1.809E-03
- ETOT  8   20.842732156560     -7.678E-03 6.180E-04 5.507E-03 8.502E-05 1.724E-03
- ETOT  9   20.839055260329     -3.677E-03 3.639E-04 9.981E-02 1.416E-03 3.141E-03
- ETOT 10   20.836881458240     -2.174E-03 1.943E-04 3.651E-03 2.549E-04 2.886E-03
- ETOT 11   20.835841238062     -1.040E-03 1.158E-04 4.838E-02 6.973E-04 3.583E-03
- ETOT 12   20.835193213521     -6.480E-04 6.170E-05 8.153E-03 2.141E-04 3.369E-03
+-ETOT  1   246.44103509479     -1.406E+03 1.082E-01 1.451E+05 3.225E-03 3.225E-03
+ ETOT  2   24.567180060662     -2.219E+02 1.028E-01 2.110E+03 3.238E-03 6.463E-03
+ ETOT  3   21.188696350923     -3.378E+00 1.914E-02 5.172E+01 4.675E-03 1.788E-03
+ ETOT  4   20.971372988607     -2.173E-01 7.960E-03 7.711E+00 6.498E-04 2.438E-03
+ ETOT  5   20.894469887548     -7.690E-02 4.043E-03 1.116E+00 2.400E-03 3.818E-05
+ ETOT  6   20.864420953008     -3.005E-02 2.051E-03 1.123E-01 6.746E-05 1.055E-04
+ ETOT  7   20.850410367712     -1.401E-02 1.200E-03 3.044E-01 2.062E-03 2.168E-03
+ ETOT  8   20.842732156560     -7.678E-03 6.180E-04 5.507E-03 9.892E-05 2.069E-03
+ ETOT  9   20.839055260329     -3.677E-03 3.639E-04 9.981E-02 1.686E-03 3.755E-03
+ ETOT 10   20.836881458240     -2.174E-03 1.943E-04 3.651E-03 3.044E-04 3.450E-03
+ ETOT 11   20.835841238062     -1.040E-03 1.158E-04 4.838E-02 8.285E-04 4.279E-03
+ ETOT 12   20.835193213521     -6.480E-04 6.170E-05 8.153E-03 2.562E-04 4.023E-03
 
  scprqt:  WARNING -
   nstep=   12 was not enough SCF cycles to converge;
   potential residual=  8.153E-03 exceeds tolvrs=  1.000E-08
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
- Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.00000        0.000028     -0.000001    0.000000    0.000000
-    2   2.00000       -0.000028      0.000000   -0.000000   -0.000000
-    3   2.00000        0.112692      0.003369   -0.001889   -0.001123
-    4   2.00000       -0.112692     -0.003369    0.001889    0.001123
- ---------------------------------------------------------------------
- Total magnetization (spheres)       0.000000   -0.000000   -0.000000
- Total magnetization (exact)         0.000000    0.000000   -0.000000
+    Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
+    1 Mn   2.00000        0.000028      0.000001   -0.000001    0.000000    0.000000   70.907452  153.446150
+    2 Mn   2.00000       -0.000028      0.000001    0.000000   -0.000000   -0.000000  113.506251  -18.687194
+    3  O   2.00000        0.112692      0.004023    0.003369   -0.001889   -0.001123  106.214211  -29.279031
+    4  O   2.00000       -0.112692      0.004022   -0.003369    0.001889    0.001123   73.785466  150.721291
+ ------------------------------------------------------------------------------------------------------------
+ Total magnetization (spheres)          0.000000    0.000000   -0.000000   -0.000000  106.767150   -1.535540
+ Total magnetization (exact)            0.000000    0.000000    0.000000   -0.000000  112.159245   70.038883
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -528,10 +529,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         13.7  wall=         13.7
+- Proc.   0 individual time (sec): cpu=         13.7  wall=         13.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         13.7  wall=         13.7
++Overall time at end (sec) : cpu=         13.7  wall=         13.8
