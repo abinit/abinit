@@ -385,7 +385,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  integer,allocatable :: dimcprj_srt(:)
  real(dp),allocatable :: hpsi_tmp(:),xcart(:,:)
 #endif
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")

@@ -61,11 +61,8 @@ module m_epjdos
  private
 !!***
 
- public :: dos_calcnwrite      ! Calculate DOS and write results to file(s).
  public :: recip_ylm           ! Project input wavefunctions (real space) on to Ylm
  public :: dens_in_sph         ! Calculate integrated density in sphere around each atom
- public :: partial_dos_fractions   ! Calculate partial DOS fractions to feed to the tetrahedron method (PW part)
- public :: partial_dos_fractions_paw ! Calculate PAW contributions to the partial DOS fractions.
 !!***
 
 !----------------------------------------------------------------------
@@ -134,27 +131,39 @@ module m_epjdos
    real(dp),allocatable :: fractions_pawt1(:,:,:,:)
    ! fractions_pawt1(nkpt,mband,nsppol,ndosfraction))
 
-   contains
+ contains
+
+   procedure :: init => epjdos_init
+     ! Create new object
+
+   procedure :: calcnwrite => epjdos_calcnwrite
+     ! Calculate DOS and write results to file(s).
+
+   procedure :: partial_dos_fractions => partial_dos_fractions
+     ! Calculate partial DOS fractions to feed to the tetrahedron method (PW part)
+
+   procedure :: partial_dos_fractions_paw => partial_dos_fractions_paw
+     ! Calculate PAW contributions to the partial DOS fractions.
+
+   procedure :: prtfatbands => epjdos_prtfatbands
+     ! Print PJDOS contributions in xmgrace format.
+
+   procedure :: ncwrite => epjdos_ncwrite
+     ! Write PJDOS contributions to netcdf file.
 
    procedure :: free => epjdos_free
    ! Free dynamic memory
 
  end type epjdos_t
 
- public :: epjdos_new         ! Create new object
-
-
- public :: prtfatbands        ! Print PJDOS contributions in xmgrace format.
- public :: fatbands_ncwrite   ! Write PJDOS contributions to netcdf file.
-
 !----------------------------------------------------------------------
 
 contains  !============================================================
 !!***
 
-!!****f* m_epjdos/epjdos_new
+!!****f* m_epjdos/epjdos_init
 !! NAME
-!!  epjdos_new
+!!  epjdos_init
 !!
 !! FUNCTION
 !!  Create new object from dataset input variables.
@@ -166,9 +175,10 @@ contains  !============================================================
 !!
 !! SOURCE
 
-type(epjdos_t) function epjdos_new(dtset, psps, pawtab) result(new)
+subroutine epjdos_init(new, dtset, psps, pawtab)
 
 !Arguments ------------------------------------
+ class(epjdos_t),intent(inout) :: new
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*psps%usepaw)
@@ -176,12 +186,9 @@ type(epjdos_t) function epjdos_new(dtset, psps, pawtab) result(new)
 !Local variables-------------------------------
 !scalars
  integer :: ierr,itypat,iat
-
 ! *********************************************************************
 
-!DEBUG
 !write(std_out,*)' m_epjdos%epjdos_new, enter '
-!ENDDEBUG
 
  new%nkpt = dtset%nkpt; new%mband = dtset%mband; new%nsppol = dtset%nsppol
 
@@ -259,11 +266,9 @@ type(epjdos_t) function epjdos_new(dtset, psps, pawtab) result(new)
    new%fractions_paw1 = zero; new%fractions_pawt1 = zero
  end if
 
-!DEBUG
 !write(std_out,*)' m_epjdos%epjdos_new, exit '
-!ENDDEBUG
 
-end function epjdos_new
+end subroutine epjdos_init
 !!***
 
 !!****f* m_epjdos/epjdos_free
@@ -271,7 +276,7 @@ end function epjdos_new
 !!  epjdos_free
 !!
 !! FUNCTION
-!!  deallocate memory
+!!  Deallocate memory
 !!
 !! SOURCE
 
@@ -279,7 +284,6 @@ subroutine epjdos_free(self)
 
 !Arguments ------------------------------------
  class(epjdos_t),intent(inout) :: self
-
 ! *********************************************************************
 
  ! integer
@@ -294,9 +298,9 @@ subroutine epjdos_free(self)
 end subroutine epjdos_free
 !!***
 
-!!****f* m_epjdos/dos_calcnwrite
+!!****f* m_epjdos/epjdos_calcnwrite
 !! NAME
-!! dos_calcnwrite
+!! epjdos_calcnwrite
 !!
 !! FUNCTION
 !! calculate DOS and write results to file(s)
@@ -329,16 +333,16 @@ end subroutine epjdos_free
 !!
 !! SOURCE
 
-subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
+subroutine epjdos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 
 !Arguments ------------------------------------
 !scalars
+ class(epjdos_t),intent(in) :: dos
  integer,intent(in) :: comm
  character(len=*),intent(in) :: fildata
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: crystal
  type(ebands_t),intent(in) :: ebands
- type(epjdos_t),intent(in) :: dos
 
 !Local variables-------------------------------
 !scalars
@@ -357,14 +361,10 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  integer,allocatable :: unt_atsph(:)
  real(dp) :: list_dp(3)
  real(dp),allocatable :: tmp_eigen(:),total_dos(:,:,:),eig_dos(:,:)
- real(dp),allocatable :: dos_m(:,:,:),dos_paw1(:,:,:),dos_pawt1(:,:,:)
- real(dp),allocatable :: wdt(:,:)
-
+ real(dp),allocatable :: dos_m(:,:,:),dos_paw1(:,:,:),dos_pawt1(:,:,:), wdt(:,:)
 ! *********************************************************************
 
-!DEBUG
 !write(std_out,*)' m_epjdos%dos_calcncwrite, enter '
-!ENDDEBUG
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm); iam_master = (my_rank == master)
 
@@ -713,9 +713,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  write(msg,'(2(a,f8.2),a)')" tetrahedron: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
  call wrtout(std_out,msg,"PERS")
 
-!DEBUG
-!write(std_out,*)' m_epjdos%dos_calcncwrite, exit '
-!ENDDEBUG
+ !write(std_out,*)' m_epjdos%dos_calcncwrite, exit '
 
 contains
 
@@ -831,7 +829,7 @@ subroutine write_extra_headers()
 
 end subroutine write_extra_headers
 
-end subroutine dos_calcnwrite
+end subroutine epjdos_calcnwrite
 !!***
 
 !!****f* m_epjdos/recip_ylm
@@ -904,24 +902,18 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
 
 !Local variables-------------------------------
 !scalars
- integer :: ilm,iat,ipw,ixint,ll,mm,il,jlm,ierr,lm_size,itypat
- integer :: ispinor
- integer :: ipauli, is, isp
- integer :: my_nspinor
+ integer :: ilm,iat,ipw,ixint,ll,mm,il,jlm,ierr,lm_size,itypat, ispinor,ipauli, is, isp, my_nspinor
  real(dp),parameter :: invsqrt2=one/sqrt2
  real(dp) :: sum_all, dr, fact
  type(atomdata_t) :: atom
  character(len=500) :: msg
 !arrays
  integer :: ilang(mlang**2)
- real(dp) :: c1(2),c2(2)
- real(dp) :: sum_1atom(natsph),sum_1ll(mlang),sum_1lm(mlang**2)
- real(dp) :: func(nradintmax)
- real(dp) :: func_cplx(nradintmax,2)
- complex(dpc) :: vect(npw_k)
- complex(dpc),allocatable :: tmppsia(:,:),tmppsim(:,:),dotc(:)
  integer, allocatable :: ispinors(:)
- complex(dpc),allocatable :: values(:,:,:,:)
+ real(dp) :: c1(2),c2(2), sum_1atom(natsph),sum_1ll(mlang),sum_1lm(mlang**2)
+ real(dp) :: func(nradintmax), func_cplx(nradintmax,2)
+ complex(dpc) :: vect(npw_k)
+ complex(dpc),allocatable :: tmppsia(:,:),tmppsim(:,:),dotc(:), values(:,:,:,:)
 ! *************************************************************************
 
  ! Workspace array (used to reduce the number of MPI communications)
@@ -1257,9 +1249,7 @@ subroutine dens_in_sph(cmax,cg,gmet,istwfk,kg_k,natom,ngfft,mpi_enreg,npw_k,&
  integer :: ngfft_here(18)
  integer,allocatable :: garr(:,:),gbound(:,:)
  real(dp),allocatable :: denpot(:,:,:),fofgout(:,:),fofr(:,:,:,:),gnorm(:)
- real(dp),allocatable :: ph3d(:,:,:),phkxred(:,:),rhog(:,:),rhor(:)
- real(dp),allocatable :: sphrhog(:,:)
-
+ real(dp),allocatable :: ph3d(:,:,:),phkxred(:,:),rhog(:,:),rhor(:), sphrhog(:,:)
 ! *********************************************************************
 
  n1=ngfft(1)
@@ -1294,9 +1284,11 @@ subroutine dens_in_sph(cmax,cg,gmet,istwfk,kg_k,natom,ngfft,mpi_enreg,npw_k,&
  denpot(:,:,:)=zero
  ABI_MALLOC(fofgout,(2,npw_k))
  ABI_MALLOC(fofr,(2,n4,n5,n6))
+
  call fourwf(cplex,denpot,cg,fofgout,fofr,gbound,gbound, &
-& istwfk,kg_k,kg_k,mgfft,mpi_enreg,1,ngfft_here,npw_k,&
-& npw_k,n4,n5,n6,1,tim_fourwf,weight,weight)
+   istwfk,kg_k,kg_k,mgfft,mpi_enreg,1,ngfft_here,npw_k,&
+   npw_k,n4,n5,n6,1,tim_fourwf,weight,weight)
+
  ABI_FREE(fofgout)
  ABI_FREE(fofr)
  ABI_FREE(gbound)
@@ -1454,9 +1446,9 @@ subroutine sphericaldens(fofg,gnorm,nfft,rmax,sphfofg)
 end subroutine sphericaldens
 !!***
 
-!!****f* m_epjdos/prtfatbands
+!!****f* m_epjdos/epjdos_prtfatbands
 !! NAME
-!! prtfatbands
+!! epjdos_prtfatbands
 !!
 !! FUNCTION
 !! Print dos_fractions_m in order to plot easily fatbands
@@ -1481,12 +1473,12 @@ end subroutine sphericaldens
 !!
 !! SOURCE
 
-subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
+subroutine epjdos_prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
 
 !Arguments ------------------------------------
 !scalars
+ class(epjdos_t),intent(in) :: dos
  integer,intent(in) :: pawfatbnd
- type(epjdos_t),intent(in) :: dos
  type(ebands_t),intent(in) :: ebands
  type(dataset_type),intent(in) :: dtset
  character(len=fnlen),intent(in) :: fildata
@@ -1514,7 +1506,6 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
  DBG_ENTER("COLL")
 
  units = [std_out, ab_out]
-
  ndosfraction = dos%ndosfraction; mbesslang = dos%mbesslang
 
  if(dos%prtdosm.ne.0) then
@@ -1622,8 +1613,6 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
    ABI_ERROR("error1 ")
  end if
 
-
-
 !--------------  WRITE FATBANDS IN FILES
  if (pawfatbnd>0) then
    ! Store eigenvalues with nkpt as first dimension for efficiency reasons
@@ -1677,19 +1666,19 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
  ABI_FREE(unitfatbands_arr)
 
  call cwtime(cpu,wall,gflops,"stop")
- write(msg,'(2(a,f8.2),a)')" prtfatbands: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
+ write(msg,'(2(a,f8.2),a)')" epjdos_prtfatbands: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
  call wrtout(std_out,msg,"PERS")
 
  DBG_EXIT("COLL")
 
-end subroutine prtfatbands
+end subroutine epjdos_prtfatbands
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_epjdos/fatbands_ncwrite
+!!****f* m_epjdos/epjdos_ncwrite
 !! NAME
-!! fatbands_ncwrite
+!! epjdos_ncwrite
 !!
 !! FUNCTION
 !!  Write PJDOS contributions to netcdf file.
@@ -1708,12 +1697,12 @@ end subroutine prtfatbands
 !!
 !! SOURCE
 
-subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid)
+subroutine epjdos_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid)
 
 !Arguments ------------------------------------
 !scalars
+ class(epjdos_t),intent(in) :: dos
  integer,intent(in) :: ncid
- type(epjdos_t),intent(in) :: dos
  type(crystal_t),intent(in) :: crystal
  type(ebands_t),intent(in) :: ebands
  type(hdr_type),intent(in) :: hdr
@@ -1830,7 +1819,7 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
  end if
 
  call cwtime(cpu,wall,gflops,"stop")
- write(msg,'(2(a,f8.2),a)')" fatbands_ncwrite: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
+ write(msg,'(2(a,f8.2),a)')" epjdos_ncwrite: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
  call wrtout(std_out,msg,"PERS")
 
 contains
@@ -1839,7 +1828,7 @@ contains
    vid = nctk_idname(ncid, vname)
  end function vid
 
-end subroutine fatbands_ncwrite
+end subroutine epjdos_ncwrite
 !!***
 
 !!****f* m_epjdos/partial_dos_fractions
@@ -1894,8 +1883,8 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
 
 !Arguments ------------------------------------
 !scalars
+ class(epjdos_t),intent(inout) :: dos
  integer,intent(in) :: mcg,collect
- type(epjdos_t),intent(inout) :: dos
  type(MPI_type),intent(inout) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: crystal
@@ -1911,12 +1900,9 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
  integer :: shift_b,shift_sk,iat,iatom,iband,ierr,ikpt,ilang,ioffkg,is1, is2, isoff
  integer :: ipw,isppol,ixint,mbess,mcg_disk,me_kpt,shift_cg
  integer :: mgfft,my_nspinor,n1,n2,n3,natsph_tot,npw_k,nradintmax
- integer :: rc_ylm,itypat,nband_k
- integer :: abs_shift_b
- integer :: unit_procar, ipauli
+ integer :: rc_ylm,itypat,nband_k, abs_shift_b, unit_procar, ipauli
  real(dp),parameter :: bessint_delta = 0.1_dp
- real(dp) :: arg,bessarg,bessargmax,kpgmax,rmax
- real(dp) :: cpu,wall,gflops
+ real(dp) :: arg,bessarg,bessargmax,kpgmax,rmax, cpu,wall,gflops
  character(len=500) :: msg
  character(len=4) :: ikproc_str
  character(len=fnlen) :: filename
@@ -1927,17 +1913,15 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
  integer,allocatable :: iatsph(:),nradint(:),atindx(:),typat_extra(:),kg_k(:,:)
  real(dp) :: kpoint(3),spin(3),ylmgr_dum(1)
  real(dp) :: xfit(dtset%mpw),yfit(dtset%mpw)
- real(dp),allocatable :: ylm_k(:,:)
- real(dp),allocatable :: bess_fit(:,:,:)
+ real(dp),allocatable :: ylm_k(:,:), bess_fit(:,:,:)
  real(dp),allocatable :: cg_1band(:,:),cg_1kpt(:,:),kpgnorm(:),ph1d(:,:)
  real(dp),allocatable :: ph3d(:,:,:),ratsph(:),rint(:),sum_1ll_1atom(:,:,:)
- real(dp),allocatable :: sum_1lm_1atom(:,:,:)
- real(dp),allocatable :: cplx_1lm_1atom(:,:,:,:)
+ real(dp),allocatable :: sum_1lm_1atom(:,:,:), cplx_1lm_1atom(:,:,:,:)
  real(dp),allocatable :: xred_sph(:,:),znucl_sph(:),phkxred(:,:)
  complex(dpc) :: cgcmat(2,2)
 !*************************************************************************
 
-!write(std_out, '(a)') ' m_epjdos%partial_dos_fractions : enter '
+! write(std_out, '(a)') ' m_epjdos%partial_dos_fractions : enter '
 
  if(dtset%natsph==dtset%natom)then
    write(msg, '(a)') ' Compute the partial DOS fractions. This can be time-consuming. Think using natsph and iatsph.'
@@ -2347,15 +2331,12 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
    ABI_WARNING('only partial_dos==1 or 2 is coded')
  end if
 
-!DEBUG
-!write(std_out,*) ' m_epjdos%partial_dos_fractions : exit '
-!ENDDEBUG
-
  if (dtset%prtprocar /= 0) close(unit_procar)
 
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2),a)')" partial_dos_fractions: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
  call wrtout(std_out,msg,"PERS")
+ !write(std_out,*) ' m_epjdos%partial_dos_fractions : exit '
 
 end subroutine partial_dos_fractions
 !!***
@@ -2412,10 +2393,10 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
 
 !Arguments ------------------------------------
 !scalars
+ class(epjdos_t),intent(inout) :: dos
  integer,intent(in) :: mcprj,mkmem
  type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
- type(epjdos_t),intent(inout) :: dos
 !arrays
  integer,intent(in) :: dimcprj(dtset%natom)
  type(pawcprj_type),intent(in) :: cprj(dtset%natom,mcprj)
@@ -2507,8 +2488,7 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
 !  the next reduction (at the end of the following loop).
  if (nproc_spkptband>1) then
    one_over_nproc=one/real(nproc_spkptband,kind=dp)
-!$OMP  PARALLEL DO COLLAPSE(4) &
-!$OMP& DEFAULT(SHARED) PRIVATE(ilang,isppol,iband,ikpt)
+!$OMP  PARALLEL DO COLLAPSE(4) DEFAULT(SHARED) PRIVATE(ilang,isppol,iband,ikpt)
    do ilang=1,ndosfraction
      do isppol=1,dtset%nsppol
        do iband=1,dtset%mband
@@ -2520,9 +2500,9 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
      end do
    end do
 !$OMP END PARALLEL DO
+
    if (fatbands_flag==1.or.prtdosm==1.or.prtdosm==2) then
-!$OMP  PARALLEL DO COLLAPSE(4) &
-!$OMP& DEFAULT(SHARED) PRIVATE(ilang,isppol,iband,ikpt)
+!$OMP  PARALLEL DO COLLAPSE(4) DEFAULT(SHARED) PRIVATE(ilang,isppol,iband,ikpt)
      do ilang=1,ndosfraction*mbesslang
        do isppol=1,dtset%nsppol
          do iband=1,dtset%mband
