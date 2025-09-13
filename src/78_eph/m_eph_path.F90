@@ -21,7 +21,6 @@
 
 module m_eph_path
 
- use, intrinsic :: iso_c_binding
  use defs_basis
  use m_abicore
  use m_xmpi
@@ -119,7 +118,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: istwfk_1 = 1, tim_getgh1c = 1, berryopt0 = 0, useylmgr1 = 0, master = 0, ndims=3, paral_kgb0 = 0, ndat1 = 1
+ integer,parameter :: istwfk_1 = 1, tim_getgh1c = 1, berryopt0 = 0, master = 0, ndims = 3, ndat1 = 1
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1, nu
  integer :: spin, iq, ik, nk_path, nq_path, ierr, npw_k, npw_kq, my_rank, nprocs, n1, n2, n3, n4, n5, n6, cplex
  integer :: natom, natom3, nsppol, nspden, nspinor, qptopt, comm_cart, me_cart
@@ -410,8 +409,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
  ! The cache allows one the reuse the wavefunctions of the previous k/q to init the NSCF cycle
  ! It usually reduces the number of iterations by 3-4 but it requires more memory.
- tot_nscf_ierr = 0
- use_cache = .True. !; use_cache = .False.
+ tot_nscf_ierr = 0; use_cache = .True. !; use_cache = .False.
  call ucache_k%init(use_cache .and. my_nkpath > 1, ngfft)
  call ucache_kq%init(use_cache .and. my_nqpath > 1, ngfft)
 

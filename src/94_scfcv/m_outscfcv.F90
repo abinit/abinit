@@ -65,8 +65,7 @@ module m_outscfcv
  use m_paw_optics,       only : optics_paw,optics_paw_core
  use m_paw_tools,        only : pawprt
  use m_numeric_tools,    only : simpson_int
- use m_epjdos,           only : dos_calcnwrite, partial_dos_fractions, partial_dos_fractions_paw, &
-                                epjdos_t, epjdos_new, prtfatbands, fatbands_ncwrite
+ use m_epjdos,           only : epjdos_t
  use m_paral_atom,       only : get_my_atmtab, free_my_atmtab
  use m_io_kss,           only : outkss
  use m_multipoles,       only : multipoles_out, out1dm
@@ -884,18 +883,18 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !Generate DOS using the tetrahedron method or using Gaussians
 !FIXME: Should centralize all calculations of DOS here in outscfcv
  if (dtset%prtdos>=2.or.dtset%pawfatbnd>0) then
-   dos = epjdos_new(dtset, psps, pawtab)
+   call dos%init(dtset, psps, pawtab)
 
    if (dos%partial_dos_flag>=1 .or. dos%fatbands_flag==1)then
      ! Generate fractions for partial DOSs if needed partial_dos 1,2,3,4  give different decompositions
      collect = 1 !; if (psps%usepaw==1 .and. dos%partial_dos_flag /= 2) collect = 0
      if ((psps%usepaw==0.or.dtset%pawprtdos/=2) .and. dos%partial_dos_flag>=1) then
-       call partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,collect,mpi_enreg)
+       call dos%partial_dos_fractions(crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,collect,mpi_enreg)
      end if
 
      if (psps%usepaw==1 .and. dos%partial_dos_flag /= 2) then
        ! TODO: update partial_dos_fractions_paw for extra atoms - no PAW contribution normally, but check bounds and so on.
-       call partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enreg,pawrad,pawtab)
+       call dos%partial_dos_fractions_paw(cprj,dimcprj,dtset,mcprj,mkmem,mpi_enreg,pawrad,pawtab)
      end if
 
    else
@@ -904,19 +903,19 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
 !  Here, print out fatbands for the k-points given in file appended _FATBANDS
    if (me == master .and. dtset%pawfatbnd>0 .and. dos%fatbands_flag==1) then
-     call prtfatbands(dos,dtset,ebands,dtfil%fnameabo_app_fatbands,dtset%pawfatbnd,pawtab)
+     call dos%prtfatbands(dtset,ebands,dtfil%fnameabo_app_fatbands,dtset%pawfatbnd,pawtab)
    end if
 
 !  Here, computation and output of DOS and partial DOS  _DOS
    if (dos%fatbands_flag == 0 .and. dos%prtdos /= 4) then
-     call dos_calcnwrite(dos,dtset,crystal,ebands,dtfil%fnameabo_app_dos,comm)
+     call dos%calcnwrite(dtset,crystal,ebands,dtfil%fnameabo_app_dos,comm)
    end if
 
    ! Write netcdf file with dos% results.
    if (me == master) then
      fname = trim(dtfil%filnam_ds(4))//'_FATBANDS.nc'
      NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
-     call fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid)
+     call dos%ncwrite(crystal, ebands, hdr, dtset, psps, pawtab, ncid)
      NCF_CHECK(nf90_close(ncid))
    end if
 
