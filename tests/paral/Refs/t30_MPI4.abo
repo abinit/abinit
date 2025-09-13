@@ -1,5 +1,5 @@
 
-.Version 10.4.5.4 of ABINIT, released Jul 2025.
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 10 Jul 2025.
-- ( at 15h52 )
+.Starting date : Sat 13 Sep 2025.
+- ( at 10h38 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI4/paral_t30_MPI4/t30.abi
 - output file    -> t30_MPI4.abo
@@ -281,15 +281,15 @@ force_length_stats: {min:   4.07811661E-01, max:   4.07811661E-01, mean:   4.078
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.11202     0.715539     0.715539      1.431077    -0.000000
-    2   1.11202     0.720875     0.720875      1.441749    -0.000000
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1  C   1.11202     0.715539     0.715539      1.431077    -0.000000
+    2  C   1.11202     0.720875     0.720875      1.441749    -0.000000
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.436413     1.436413      2.872826    -0.000000
- Total magnetization (from the atomic spheres):            -0.000000
- Total magnetization (exact up - dn):                      -0.000000
+ Total magnetization (from the atomic spheres):               -0.000000
+ Total magnetization (exact up - dn):                         -0.000000
 
 
  PAW TEST:
@@ -599,15 +599,15 @@ force_length_stats: {min:   4.07811659E-01, max:   4.07811659E-01, mean:   4.078
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.11202     0.715539     0.715539      1.431077     0.000000
-    2   1.11202     0.720875     0.720875      1.441749     0.000000
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1  C   1.11202     0.715539     0.715539      1.431077     0.000000
+    2  C   1.11202     0.720875     0.720875      1.441749     0.000000
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.436413     1.436413      2.872826     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                       0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                          0.000000
 
 
  PAW TEST:
@@ -987,10 +987,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          0.7  wall=          0.7
+- Proc.   0 individual time (sec): cpu=          0.8  wall=          0.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.7  wall=          2.7
++Overall time at end (sec) : cpu=          3.0  wall=          3.0
