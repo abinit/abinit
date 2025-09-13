@@ -1754,19 +1754,16 @@ subroutine getgh1dqc(cwave,cwaveprj,gh1dqc,gvloc1dqc,gvnl1dqc,gs_hamkq,&
 
 !Compatibility tests
  if (mpi_enreg%paral_spinor==1) then
-   msg='Not compatible with parallelization over spinorial components !'
-   ABI_BUG(msg)
+   ABI_BUG('Not compatible with parallelization over spinor components !')
  end if
 
 !Check sizes
  my_nspinor=max(1,gs_hamkq%nspinor/mpi_enreg%nproc_spinor)
  if (size(cwave)<2*npw*my_nspinor) then
-   msg='wrong size for cwave!'
-   ABI_BUG(msg)
+   ABI_BUG('wrong size for cwave!')
  end if
  if (size(gh1dqc)<2*npw1*my_nspinor) then
-   msg='wrong size for gh1dqc!'
-   ABI_BUG(msg)
+   ABI_BUG('wrong size for gh1dqc!')
  end if
 
 !=============================================================================
