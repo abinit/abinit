@@ -1231,7 +1231,7 @@ subroutine dtfil_init_img(dtfil,dtset,dtsets,idtset,jdtset,ndtset,ndtset_alloc)
 
 !Arguments ------------------------------------
 !scalars
- class(datafiles_type),intent(out) :: dtfil
+ class(datafiles_type),intent(inout) :: dtfil
  type(dataset_type),intent(in) :: dtset
  integer, intent(in) :: idtset,ndtset,ndtset_alloc
 !arrays
