@@ -1,5 +1,5 @@
 
-.Version 10.4.5.5 of ABINIT, released Jul 2025.
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 Jun 2025.
-- ( at 13h04 )
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h19 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v9_t02/t02.abi
 - output file    -> t02.abo
@@ -751,15 +751,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.10000     8.302896     6.011057     14.313953     2.291838
-    2   2.10000     8.302896     6.011057     14.313953     2.291838
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Fe   2.10000     8.302896     6.011057     14.313953     2.291838
+    2 Fe   2.10000     8.302896     6.011057     14.313953     2.291838
+ ------------------------------------------------------------------------------------------------------------
   Sum:             16.605792    12.022115     28.627907     4.583677
- Total magnetization (from the atomic spheres):             4.583677
- Total magnetization (exact up - dn):                       4.460118
+ Total magnetization (from the atomic spheres):                4.583677
+ Total magnetization (exact up - dn):                          4.460118
 
 
  PAW TEST:
@@ -1098,24 +1098,24 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)   Atomic charge
-    1   2.10000     8.296943     6.016943     14.313887     2.280000      1.686113
-    2   2.10000     8.296943     6.016943     14.313887     2.280000      1.686113
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)   Atomic charge
+    1 Fe   2.10000     8.296943     6.016943     14.313887     2.280000      1.686113
+    2 Fe   2.10000     8.296943     6.016943     14.313887     2.280000      1.686113
+ ------------------------------------------------------------------------------------------------------------
   Sum:             16.593887    12.033887     28.627774     4.560000
- Total magnetization (from the atomic spheres):             4.560000
- Total magnetization (exact up - dn):                       4.436926
+ Total magnetization (from the atomic spheres):                4.560000
+ Total magnetization (exact up - dn):                          4.436926
 
 
  Gradient with respect to target (=torque)       (scalar + magnetic field):
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
- Atom    Radius       grchrg        T(z)      up torque  down torque
-    1   2.10000    -0.000000    -0.000148     -0.000148     0.000148
-    2   2.10000    -0.000000    -0.000148     -0.000148     0.000148
- ---------------------------------------------------------------------
+    Atom    Radius       grchrg        T(z)      up torque  down torque
+    1 Fe   2.10000    -0.000000    -0.000148     -0.000148     0.000148
+    2 Fe   2.10000    -0.000000    -0.000148     -0.000148     0.000148
+ ------------------------------------------------------------------------------------------------------------
   Sum:              0.000000    -0.000296     -0.000296     0.000296
 
 
@@ -1460,24 +1460,24 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)   Atomic charge
-    1   2.10000     8.282781     6.032780     14.315561     2.250001      1.684439
-    2   2.10000     8.306072     6.006072     14.312143     2.300000      1.687857
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)   Atomic charge
+    1 Fe   2.10000     8.282781     6.032780     14.315561     2.250001      1.684439
+    2 Fe   2.10000     8.306072     6.006072     14.312143     2.300000      1.687857
+ ------------------------------------------------------------------------------------------------------------
   Sum:             16.588852    12.038852     28.627704     4.550001
- Total magnetization (from the atomic spheres):             4.550001
- Total magnetization (exact up - dn):                       4.427151
+ Total magnetization (from the atomic spheres):                4.550001
+ Total magnetization (exact up - dn):                          4.427151
 
 
  Gradient with respect to target (=torque)       (scalar + magnetic field):
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
- Atom    Radius       grchrg        T(z)      up torque  down torque
-    1   2.10000    -0.000000    -0.000579     -0.000579     0.000579
-    2   2.10000    -0.000000     0.000169      0.000169    -0.000169
- ---------------------------------------------------------------------
+    Atom    Radius       grchrg        T(z)      up torque  down torque
+    1 Fe   2.10000    -0.000000    -0.000579     -0.000579     0.000579
+    2 Fe   2.10000    -0.000000     0.000169      0.000169    -0.000169
+ ------------------------------------------------------------------------------------------------------------
   Sum:              0.000000    -0.000410     -0.000410     0.000410
 
 
@@ -1837,24 +1837,24 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)   Atomic charge
-    1   2.10000     8.241654     6.078347     14.320001     2.163308      1.679999
-    2   2.10000     8.285081     5.914919     14.200001     2.370162      1.799999
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)   Atomic charge
+    1 Fe   2.10000     8.241654     6.078347     14.320001     2.163308      1.679999
+    2 Fe   2.10000     8.285081     5.914919     14.200001     2.370162      1.799999
+ ------------------------------------------------------------------------------------------------------------
   Sum:             16.526735    11.993266     28.520001     4.533470
- Total magnetization (from the atomic spheres):             4.533470
- Total magnetization (exact up - dn):                       4.406153
+ Total magnetization (from the atomic spheres):                4.533470
+ Total magnetization (exact up - dn):                          4.406153
 
 
  Gradient with respect to target (=torque)       (scalar + magnetic field):
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
- Atom    Radius       grchrg        T(z)      up torque  down torque
-    1   2.10000     0.026988     0.000000     -0.026988    -0.026988
-    2   2.10000     0.071332     0.000000     -0.071332    -0.071332
- ---------------------------------------------------------------------
+    Atom    Radius       grchrg        T(z)      up torque  down torque
+    1 Fe   2.10000     0.026988     0.000000     -0.026988    -0.026988
+    2 Fe   2.10000     0.071332     0.000000     -0.071332    -0.071332
+ ------------------------------------------------------------------------------------------------------------
   Sum:             -0.098321     0.000000     -0.098321    -0.098321
 
 
@@ -2223,24 +2223,24 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)   Atomic charge
-    1   2.10000     8.285001     6.035000     14.320001     2.250000      1.679999
-    2   2.10000     8.250001     5.950002     14.200003     2.300000      1.799997
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)   Atomic charge
+    1 Fe   2.10000     8.285001     6.035000     14.320001     2.250000      1.679999
+    2 Fe   2.10000     8.250001     5.950002     14.200003     2.300000      1.799997
+ ------------------------------------------------------------------------------------------------------------
   Sum:             16.535002    11.985002     28.520004     4.550000
- Total magnetization (from the atomic spheres):             4.550000
- Total magnetization (exact up - dn):                       4.422048
+ Total magnetization (from the atomic spheres):                4.550000
+ Total magnetization (exact up - dn):                          4.422048
 
 
  Gradient with respect to target (=torque)       (scalar + magnetic field):
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
- Atom    Radius       grchrg        T(z)      up torque  down torque
-    1   2.10000     0.024916     0.001315     -0.023601    -0.026231
-    2   2.10000     0.073445    -0.001120     -0.074565    -0.072326
- ---------------------------------------------------------------------
+    Atom    Radius       grchrg        T(z)      up torque  down torque
+    1 Fe   2.10000     0.024916     0.001315     -0.023601    -0.026231
+    2 Fe   2.10000     0.073445    -0.001120     -0.074565    -0.072326
+ ------------------------------------------------------------------------------------------------------------
   Sum:             -0.098361     0.000195     -0.098166    -0.098557
 
 
@@ -3214,10 +3214,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         23.9  wall=         24.0
+- Proc.   0 individual time (sec): cpu=         23.8  wall=         23.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and  22 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         23.9  wall=         24.0
++Overall time at end (sec) : cpu=         23.8  wall=         23.9

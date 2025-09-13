@@ -1,5 +1,5 @@
 
-.Version 10.4.5.5 of ABINIT, released Jul 2025.
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 Jun 2025.
-- ( at 13h12 )
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h26 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI4/paral_t28_MPI4/t28.abi
 - output file    -> t28_MPI4.abo
@@ -909,18 +909,18 @@ tolerances: {tolvrs: 1.00E-07, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
- ETOT  1  -144.19888935528    -1.442E+02 1.411E-02 1.083E+00 4.671E-02 4.671E-02
- ETOT  2  -144.18750731608     1.138E-02 1.737E-04 2.759E-01 1.339E-02 5.882E-02
- ETOT  3  -144.19028046727    -2.773E-03 1.317E-04 8.369E-02 1.059E-02 4.822E-02
- ETOT  4  -144.19191939596    -1.639E-03 6.882E-04 9.164E-03 2.123E-02 2.786E-02
- ETOT  5  -144.19276767639    -8.483E-04 2.728E-05 2.175E-03 1.542E-02 1.260E-02
- ETOT  6  -144.19282225761    -5.458E-05 5.200E-05 4.807E-04 6.392E-03 6.208E-03
- ETOT  7  -144.19283985597    -1.760E-05 3.307E-05 6.366E-05 5.068E-03 1.638E-03
- ETOT  8  -144.19285289926    -1.304E-05 2.796E-05 3.153E-05 4.327E-04 1.205E-03
- ETOT  9  -144.19288346500    -3.057E-05 1.790E-06 6.167E-06 5.629E-04 6.422E-04
- ETOT 10  -144.19288637871    -2.914E-06 7.824E-08 1.299E-06 3.211E-04 3.211E-04
- ETOT 11  -144.19288628811     9.059E-08 1.584E-07 2.429E-07 2.214E-04 9.974E-05
- ETOT 12  -144.19288654654    -2.584E-07 3.322E-08 8.212E-08 4.627E-05 5.347E-05
+ ETOT  1  -144.19888935528    -1.442E+02 1.411E-02 1.083E+00 5.689E-02 5.689E-02
+ ETOT  2  -144.18750731608     1.138E-02 1.737E-04 2.759E-01 1.443E-02 6.703E-02
+ ETOT  3  -144.19028046727    -2.773E-03 1.317E-04 8.369E-02 1.007E-02 5.697E-02
+ ETOT  4  -144.19191939596    -1.639E-03 6.882E-04 9.164E-03 2.226E-02 3.470E-02
+ ETOT  5  -144.19276767639    -8.483E-04 2.728E-05 2.175E-03 1.892E-02 1.591E-02
+ ETOT  6  -144.19282225761    -5.458E-05 5.200E-05 4.807E-04 7.754E-03 8.181E-03
+ ETOT  7  -144.19283985597    -1.760E-05 3.307E-05 6.366E-05 6.545E-03 1.729E-03
+ ETOT  8  -144.19285289926    -1.304E-05 2.796E-05 3.153E-05 4.439E-04 1.285E-03
+ ETOT  9  -144.19288346500    -3.057E-05 1.790E-06 6.167E-06 5.992E-04 6.860E-04
+ ETOT 10  -144.19288637871    -2.914E-06 7.824E-08 1.299E-06 3.575E-04 3.285E-04
+ ETOT 11  -144.19288628811     9.059E-08 1.584E-07 2.429E-07 2.281E-04 1.003E-04
+ ETOT 12  -144.19288654654    -2.584E-07 3.322E-08 8.212E-08 4.511E-05 5.522E-05
 
  At SCF step   12       nres2   =  8.21E-08 < tolvrs=  1.00E-07 =>converged.
 
@@ -959,14 +959,14 @@ force_length_stats: {min:   1.50712884E-03, max:   1.50712884E-03, mean:   1.507
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
- Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.60648       12.858563      0.000003   -0.000053   -0.000014
-    2   2.60648       12.858607     -0.000003    0.000046    0.000008
- ---------------------------------------------------------------------
- Total magnetization (spheres)       0.000000   -0.000007   -0.000006
- Total magnetization (exact)        -0.000001    0.000000    0.000003
+    Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
+    1 Bi   2.60648       12.858563      0.000055    0.000003   -0.000053   -0.000014  104.192502  -87.123716
+    2 Bi   2.60648       12.858607      0.000047   -0.000003    0.000046    0.000008   80.462080   93.240508
+ ------------------------------------------------------------------------------------------------------------
+ Total magnetization (spheres)          0.000009    0.000000   -0.000007   -0.000006  128.148858  -89.410723
+ Total magnetization (exact)            0.000003   -0.000001    0.000000    0.000003   10.759206  157.635230
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -1715,10 +1715,10 @@ P           mkmem2          8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          7.5  wall=          7.5
+- Proc.   0 individual time (sec): cpu=          7.1  wall=          7.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         30.1  wall=         30.1
++Overall time at end (sec) : cpu=         28.1  wall=         28.2

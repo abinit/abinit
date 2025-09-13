@@ -1,5 +1,5 @@
 
-.Version 10.4.5.4 of ABINIT, released Jul 2025.
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 10 Jul 2025.
-- ( at 15h43 )
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h17 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v7_t21/t21.abi
 - output file    -> t21.abo
@@ -320,13 +320,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
- Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.53946       16.644612      0.000000   -0.000000    0.000000
- ---------------------------------------------------------------------
- Total magnetization (spheres)       0.000000   -0.000000    0.000000
- Total magnetization (exact)         0.000000    0.000000   -0.000000
+    Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
+    1 Gd   2.53946       16.644612      0.000000    0.000000   -0.000000    0.000000    0.000000    0.000000
+ ------------------------------------------------------------------------------------------------------------
+ Total magnetization (spheres)          0.000000    0.000000   -0.000000    0.000000    0.000000    0.000000
+ Total magnetization (exact)            0.000000    0.000000    0.000000   -0.000000    0.000000    0.000000
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -1110,13 +1110,13 @@ force_length_stats: {min: null, max: null, mean: null, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
- Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.53946       16.455774     -0.000000    0.000000   -0.000000
- ---------------------------------------------------------------------
- Total magnetization (spheres)      -0.000000    0.000000   -0.000000
- Total magnetization (exact)         0.000000    0.000000    0.000000
+    Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
+    1 Gd   2.53946       16.455774      0.000000   -0.000000    0.000000   -0.000000    0.000000    0.000000
+ ------------------------------------------------------------------------------------------------------------
+ Total magnetization (spheres)          0.000000   -0.000000    0.000000   -0.000000    0.000000    0.000000
+ Total magnetization (exact)            0.000000    0.000000    0.000000    0.000000    0.000000    0.000000
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -1959,10 +1959,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         19.0  wall=         19.0
+- Proc.   0 individual time (sec): cpu=         19.3  wall=         19.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered  14 WARNINGs and  14 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         19.0  wall=         19.0
+.Delivered   9 WARNINGs and  17 COMMENTs to log file.
++Overall time at end (sec) : cpu=         19.3  wall=         19.3

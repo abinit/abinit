@@ -1,5 +1,5 @@
 
-.Version 10.4.5.5 of ABINIT, released Jul 2025.
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 Jun 2025.
-- ( at 13h13 )
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h27 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI4/paral_t56_MPI4/t56.abi
 - output file    -> t56_MPI4.abo
@@ -49,6 +49,7 @@ _ WF disk file :      0.230 Mbytes ; DEN or POT disk file :      0.124 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           4
 -   mkqmem =           4        mk1mem =           4           mpw =         311
       nfft =        8000          nkpt =          16
+- my_mband =          12
 ================================================================================
 P This job should need less than                       4.788 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -366,14 +367,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     3.773074     2.189350      5.962423     1.583724
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Fe   2.00000     3.773074     2.189350      5.962423     1.583724
+ ------------------------------------------------------------------------------------------------------------
   Sum:              3.773074     2.189350      5.962423     1.583724
- Total magnetization (from the atomic spheres):             1.583724
- Total magnetization (exact up - dn):                       1.582355
+ Total magnetization (from the atomic spheres):                1.583724
+ Total magnetization (exact up - dn):                          1.582355
 
 ================================================================================
 
@@ -536,14 +537,14 @@ tolerances: {tolvrs: 1.00E-10, }
 
  At SCF step   12       vres2   =  6.13E-12 < tolvrs=  1.00E-10 =>converged.
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000    -0.000004     0.000004     -0.000000    -0.000008
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Fe   2.00000    -0.000004     0.000004     -0.000000    -0.000008
+ ------------------------------------------------------------------------------------------------------------
   Sum:             -0.000004     0.000004     -0.000000    -0.000008
- Total magnetization (from the atomic spheres):            -0.000008
- Total magnetization (exact up - dn):                      -0.000007
+ Total magnetization (from the atomic spheres):               -0.000008
+ Total magnetization (exact up - dn):                         -0.000007
 
 ================================================================================
 
@@ -821,69 +822,68 @@ P          mk1mem2          4
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          6.2        0.10      0.002
-- Total wall clock time (s,m,h):          6.5        0.11      0.002
+- Total cpu        time (s,m,h):          4.9        0.08      0.001
+- Total wall clock time (s,m,h):          5.0        0.08      0.001
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0
 -
 -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            1.6, wall_time =            1.6
+- cpu_time =            1.2, wall_time =            1.3
 -
 - routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
 -                                                                                (-1=no count)
-- fourwf%(pot)                              0.381   6.1         0.383   5.9           4055      -1.00        1.00       1.00
-- pspini                                    0.253   4.1         0.253   3.9              2      -1.00        1.00       1.00
-- vtorho(MPI)                               0.138   2.2         0.138   2.1             20      -1.00        1.00       1.00
-- get_dtsets_pspheads                       0.127   2.1         0.127   2.0              1      -1.00        1.00       1.00
-- nonlop(apply)                             0.057   0.9         0.057   0.9           3479      -1.00        0.99       0.99
-- projbd                                    0.048   0.8         0.048   0.8           6430      -1.00        0.99       0.99
-- fourwf%(G->r)                             0.044   0.7         0.044   0.7            908      -1.00        1.00       1.00
-- abinit(chkinp,chkvars)                    0.042   0.7         0.042   0.6              1      -1.00        1.00       1.00
-- abinit(outvars)                           0.040   0.6         0.040   0.6              1      -1.00        1.00       1.00
-- dfpt_cgwf-O(npw)                          0.033   0.5         0.032   0.5             -1      -1.00        1.01       1.01
-- fourdp                                    0.033   0.5         0.094   1.5            303      -1.00        0.35       0.35
-- dfpt_vtowfk (1)                          -0.003  -0.1        -0.003  -0.0             48      -1.00        1.00       1.00
-- others (147)                              0.206   3.3         0.205   3.2             -1      -1.00        1.00       1.00
+- fourwf%(pot)                              0.373   7.6         0.375   7.5           4055      -1.00        1.00       1.00
+- pspini                                    0.156   3.2         0.156   3.1              2      -1.00        1.00       1.00
+- vtorho(MPI)                               0.064   1.3         0.065   1.3             20      -1.00        1.00       1.00
+- get_dtsets_pspheads                       0.064   1.3         0.064   1.3              1      -1.00        1.00       1.00
+- nonlop(apply)                             0.051   1.0         0.052   1.0           3479      -1.00        0.99       0.99
+- projbd                                    0.049   1.0         0.049   1.0           6430      -1.00        0.99       0.99
+- fourwf%(G->r)                             0.043   0.9         0.043   0.9            908      -1.00        0.99       0.99
+- dfpt_cgwf-O(npw)                          0.032   0.7         0.032   0.6             -1      -1.00        1.01       1.01
+- fourdp                                    0.032   0.7         0.058   1.1            303      -1.00        0.55       0.55
+- getghc(/=fourXX,nonlop,fock_XX)           0.031   0.6         0.029   0.6             -1      -1.00        1.06       1.06
+- mkrho/=                                   0.026   0.5         0.026   0.5             42      -1.00        1.00       1.00
+- abinit(outvars)                           0.026   0.5         0.026   0.5              1      -1.00        1.00       1.00
+- dfpt_vtowfk (1)                          -0.003  -0.1        -0.003  -0.1             48      -1.00        1.00       1.00
+- others (197)                              0.173   3.5         0.174   3.5             -1      -1.00        1.00       1.00
 -<END_TIMER>
 -
-- subtotal                                  1.398  22.5         1.461  22.6                                  0.96       0.96
+- subtotal                                  1.119  22.7         1.145  22.8                                  0.98       0.98
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           6.2, wall_time =           6.5
+- cpu_time =           4.9, wall_time =           5.0
 -
 - routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
 -                                                                                (-1=no count)
-- fourwf%(pot)                              1.372  22.1         1.377  21.3          13238      -1.00        1.00       1.00
-- pspini                                    0.910  14.7         0.910  14.1              8      -1.00        1.00       1.00
-- dfpt_vtorho:MPI                           0.539   8.7         0.539   8.4             52      -1.00        1.00       1.00
-- get_dtsets_pspheads                       0.413   6.7         0.415   6.4              4      -1.00        1.00       1.00
-- abinit(chkinp,chkvars)                    0.331   5.3         0.331   5.1              4      -1.00        1.00       1.00
-- vtorho(MPI)                               0.313   5.1         0.313   4.9             80      -1.00        1.00       1.00
-- nonlop(apply)                             0.200   3.2         0.202   3.1          11510      -1.00        0.99       0.99
-- projbd                                    0.170   2.7         0.171   2.7          20908      -1.00        0.99       0.99
-- fourdp                                    0.145   2.3         0.389   6.0           1212      -1.00        0.37       0.37
-- fourwf%(G->r)                             0.132   2.1         0.132   2.1           2728      -1.00        1.00       1.00
-- newkpt(excl. rwwf   )                     0.104   1.7         0.104   1.6             -4      -1.00        1.00       1.00
-- dfpt_cgwf-O(npw)                          0.094   1.5         0.092   1.4             -4      -1.00        1.01       1.01
-- mkrho/=                                   0.077   1.2         0.077   1.2            168      -1.00        1.00       1.00
-- xc:pot/=fourdp                            0.076   1.2         0.076   1.2            212      -1.00        1.00       1.00
-- getghc(/=fourXX,nonlop,fock_XX)           0.066   1.1         0.061   0.9             -4      -1.00        1.09       1.09
-- nonlop(forces)                            0.062   1.0         0.063   1.0           2160      -1.00        0.99       0.99
-- abinit(outvars)                           0.053   0.9         0.054   0.8              4      -1.00        1.00       1.00
-- symrhg(no FFT)                            0.050   0.8         0.050   0.8            408      -1.00        1.00       1.00
-- abinit(init,iofn1,herald)                 0.044   0.7         0.045   0.7              4      -1.00        0.98       0.98
-- fourwf%(den)                              0.043   0.7         0.043   0.7            670      -1.00        1.00       1.00
-- dfpt_vtowfk(contrib)                      0.038   0.6         0.037   0.6             -4      -1.00        1.01       1.01
-- dfpt_dyxc1                                0.032   0.5         0.032   0.5              4      -1.00        1.00       1.00
-- ewald                                     0.032   0.5         0.032   0.5              4      -1.00        1.00       1.00
-- others (136)                              0.175   2.8         0.175   2.7             -1      -1.00        1.00       1.00
+- fourwf%(pot)                              1.229  24.9         1.233  24.5          13238      -1.00        1.00       1.00
+- pspini                                    0.621  12.6         0.621  12.3              8      -1.00        1.00       1.00
+- dfpt_vtorho:MPI                           0.519  10.5         0.519  10.3             52      -1.00        1.00       1.00
+- get_dtsets_pspheads                       0.253   5.1         0.253   5.0              4      -1.00        1.00       1.00
+- vtorho(MPI)                               0.222   4.5         0.222   4.4             80      -1.00        1.00       1.00
+- nonlop(apply)                             0.169   3.4         0.170   3.4          11510      -1.00        0.99       0.99
+- projbd                                    0.158   3.2         0.159   3.2          20908      -1.00        0.99       0.99
+- abinit(chkinp,chkvars)                    0.146   3.0         0.146   2.9              4      -1.00        1.00       1.00
+- fourdp                                    0.130   2.6         0.232   4.6           1212      -1.00        0.56       0.56
+- fourwf%(G->r)                             0.127   2.6         0.128   2.5           2728      -1.00        1.00       1.00
+- getghc(/=fourXX,nonlop,fock_XX)           0.103   2.1         0.098   1.9             -4      -1.00        1.05       1.05
+- dfpt_cgwf-O(npw)                          0.090   1.8         0.089   1.8             -4      -1.00        1.01       1.01
+- mkrho/=                                   0.069   1.4         0.069   1.4            168      -1.00        1.00       1.00
+- xc:pot/=fourdp                            0.067   1.4         0.067   1.3            212      -1.00        1.00       1.00
+- nonlop(forces)                            0.052   1.0         0.052   1.0           2160      -1.00        0.99       0.99
+- symrhg(no FFT)                            0.046   0.9         0.047   0.9            408      -1.00        1.00       1.00
+- abinit(init,iofn1,herald)                 0.037   0.8         0.038   0.7              4      -1.00        0.99       0.99
+- fourwf%(den)                              0.037   0.7         0.037   0.7            670      -1.00        1.00       1.00
+- abinit(outvars)                           0.036   0.7         0.036   0.7              4      -1.00        1.00       1.00
+- dfpt_vtowfk(contrib)                      0.035   0.7         0.034   0.7             -4      -1.00        1.01       1.01
+- dfpt_dyxc1                                0.032   0.7         0.032   0.6              4      -1.00        1.00       1.00
+- others (189)                              0.188   3.8         0.188   3.7             -1      -1.00        1.00       1.00
 -<END_TIMER>
 
-- subtotal                                  5.472  88.2         5.721  88.7                                  0.96       0.96
+- subtotal                                  4.367  88.6         4.472  88.8                                  0.98       0.98
 
 ================================================================================
 
@@ -963,10 +963,10 @@ P          mk1mem2          4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.6  wall=          1.6
+- Proc.   0 individual time (sec): cpu=          1.2  wall=          1.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.3  wall=          6.5
++Overall time at end (sec) : cpu=          5.0  wall=          5.1

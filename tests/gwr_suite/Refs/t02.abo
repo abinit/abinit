@@ -1,5 +1,5 @@
 
-.Version 10.4.5.4 of ABINIT, released Jul 2025.
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 10 Jul 2025.
-- ( at 15h32 )
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h05 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/gwr_suite_t02/t02.abi
 - output file    -> t02.abo
@@ -425,15 +425,15 @@ force_length_stats: {min:   8.26585173E-28, max:   8.26585173E-28, mean:   8.265
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.892533     0.892533      1.785065     0.000000
-    2   2.00000     0.864548     0.864548      1.729097     0.000000
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Si   2.00000     0.892533     0.892533      1.785065     0.000000
+    2 Si   2.00000     0.864548     0.864548      1.729097     0.000000
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.757081     1.757081      3.514162     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                       0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                          0.000000
 
 ================================================================================
 
@@ -1451,24 +1451,25 @@ P           mkmem           3
 -
 - routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
 -                                                                                (-1=no count)
-- gwr_build_sigmac                          3.192  44.6         3.193  44.4              1      -1.00        1.00       1.00
-- gwr_build_tchi                            2.312  32.3         2.315  32.2              2      -1.00        1.00       1.00
-- gwr_init                                  0.366   5.1         0.369   5.1              3      -1.00        0.99       0.99
+- gwr_build_sigmac                          3.098  43.2         3.099  42.9              1      -1.00        1.00       1.00
+- gwr_build_tchi                            2.410  33.6         2.415  33.5              2      -1.00        1.00       1.00
+- gwr_init                                  0.374   5.2         0.376   5.2              3      -1.00        0.99       0.99
 - pspini                                    0.188   2.6         0.188   2.6              4      -1.00        1.00       1.00
-- get_dtsets_pspheads                       0.187   2.6         0.187   2.6              1      -1.00        1.00       1.00
-- gwr_build_head_wings                      0.132   1.8         0.132   1.8              2      -1.00        1.00       1.00
-- timing timab                              0.118   1.6         0.118   1.6             12      -1.00        1.00       1.00
-- fourwf%(pot)                              0.100   1.4         0.130   1.8           1588      -1.00        0.77       0.77
+- get_dtsets_pspheads                       0.179   2.5         0.179   2.5              1      -1.00        1.00       1.00
+- gwr_build_head_wings                      0.133   1.9         0.134   1.9              2      -1.00        0.99       0.99
+- timing timab                              0.114   1.6         0.114   1.6             12      -1.00        1.00       1.00
+- fourwf%(pot)                              0.100   1.4         0.132   1.8           1588      -1.00        0.76       0.76
 - gwr_rpa_energy                            0.096   1.3         0.096   1.3              1      -1.00        1.00       1.00
-- gwr_build_wc                              0.072   1.0         0.074   1.0              1      -1.00        0.97       0.97
-- ugb_from_diago                            0.057   0.8         0.057   0.8              6      -1.00        1.00       1.00
-- abinit(outvars)                           0.049   0.7         0.049   0.7              1      -1.00        1.00       1.00
+- gwr_build_wc                              0.078   1.1         0.081   1.1              1      -1.00        0.97       0.97
+- ugb_from_diago                            0.060   0.8         0.060   0.8              6      -1.00        1.00       1.00
 - abinit(after driver)                      0.049   0.7         0.049   0.7              1      -1.00        1.00       1.00
+- abinit(outvars)                           0.048   0.7         0.048   0.7              1      -1.00        1.00       1.00
+- gwr_build_green                           0.044   0.6         0.044   0.6              2      -1.00        1.00       1.00
 - ewald                                     0.037   0.5         0.037   0.5              4      -1.00        1.00       1.00
-- others (145)                              0.167   2.3         0.168   2.3             -1      -1.00        0.99       0.99
+- others (195)                              0.138   1.9         0.138   1.9             -1      -1.00        1.00       1.00
 -<END_TIMER>
 -
-- subtotal                                  7.121  99.6         7.162  99.5                                  0.99       0.99
+- subtotal                                  7.146  99.7         7.191  99.6                                  0.99       0.99
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
@@ -1478,24 +1479,25 @@ P           mkmem           3
 -
 - routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
 -                                                                                (-1=no count)
-- gwr_build_sigmac                          3.192  44.6         3.193  44.4              1      -1.00        1.00       1.00
-- gwr_build_tchi                            2.312  32.3         2.315  32.2              2      -1.00        1.00       1.00
-- gwr_init                                  0.366   5.1         0.369   5.1              3      -1.00        0.99       0.99
+- gwr_build_sigmac                          3.098  43.2         3.099  42.9              1      -1.00        1.00       1.00
+- gwr_build_tchi                            2.410  33.6         2.415  33.5              2      -1.00        1.00       1.00
+- gwr_init                                  0.374   5.2         0.376   5.2              3      -1.00        0.99       0.99
 - pspini                                    0.188   2.6         0.188   2.6              4      -1.00        1.00       1.00
-- get_dtsets_pspheads                       0.187   2.6         0.187   2.6              1      -1.00        1.00       1.00
-- gwr_build_head_wings                      0.132   1.8         0.132   1.8              2      -1.00        1.00       1.00
-- timing timab                              0.118   1.6         0.118   1.6             12      -1.00        1.00       1.00
-- fourwf%(pot)                              0.100   1.4         0.130   1.8           1588      -1.00        0.77       0.77
+- get_dtsets_pspheads                       0.179   2.5         0.179   2.5              1      -1.00        1.00       1.00
+- gwr_build_head_wings                      0.133   1.9         0.134   1.9              2      -1.00        0.99       0.99
+- timing timab                              0.114   1.6         0.114   1.6             12      -1.00        1.00       1.00
+- fourwf%(pot)                              0.100   1.4         0.132   1.8           1588      -1.00        0.76       0.76
 - gwr_rpa_energy                            0.096   1.3         0.096   1.3              1      -1.00        1.00       1.00
-- gwr_build_wc                              0.072   1.0         0.074   1.0              1      -1.00        0.97       0.97
-- ugb_from_diago                            0.057   0.8         0.057   0.8              6      -1.00        1.00       1.00
-- abinit(outvars)                           0.049   0.7         0.049   0.7              1      -1.00        1.00       1.00
+- gwr_build_wc                              0.078   1.1         0.081   1.1              1      -1.00        0.97       0.97
+- ugb_from_diago                            0.060   0.8         0.060   0.8              6      -1.00        1.00       1.00
 - abinit(after driver)                      0.049   0.7         0.049   0.7              1      -1.00        1.00       1.00
+- abinit(outvars)                           0.048   0.7         0.048   0.7              1      -1.00        1.00       1.00
+- gwr_build_green                           0.044   0.6         0.044   0.6              2      -1.00        1.00       1.00
 - ewald                                     0.037   0.5         0.037   0.5              4      -1.00        1.00       1.00
-- others (145)                              0.167   2.3         0.168   2.3             -1      -1.00        0.99       0.99
+- others (195)                              0.138   1.9         0.138   1.9             -1      -1.00        1.00       1.00
 -<END_TIMER>
 
-- subtotal                                  7.121  99.6         7.162  99.5                                  0.99       0.99
+- subtotal                                  7.146  99.7         7.191  99.6                                  0.99       0.99
 
 ================================================================================
 

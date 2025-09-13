@@ -1,6 +1,6 @@
 
-.Version 10.5.4.4 of ABINIT, released Jul 2025.
-.(sequential version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 18 Jul 2025.
-- ( at 12h04 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_dilatmx-gs-only/tests/TestBot_MPI1/v4_t79/t79.abi
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h14 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v4_t79/t79.abi
 - output file    -> t79.abo
 - root for input  files -> t79i
 - root for output files -> t79o
@@ -65,6 +65,7 @@ _ WF disk file :      0.154 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
 -    mband =           8        mffmem =           1         mkmem =           4
 -   mkqmem =           4        mk1mem =           4           mpw =         312
       nfft =        5832          nkpt =           4
+- my_mband =           8
 ================================================================================
 P This job should need less than                       3.740 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -256,8 +257,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     18.000   => boxcut(ratio)=   2.00790
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_dilatmx-gs-only/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_dilatmx-gs-only/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
 -  Troullier-Martins psp for element  Fe        Thu Oct 27 17:35:05 EDT 1994
 - 26.00000   8.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -287,21 +288,21 @@ solver: {iscf: 7, nstep: 50, nline: 4, wfoptalg: 0, }
 tolerances: {tolvrs: 1.00E-10, }
 ...
 
-     iter   Etot(hartree)     deltaE(h) residm    vres2    magn
- ETOT  1  -23.473436351518    -2.35E+01 9.13E-02 2.33E+03 1.999
- ETOT  2  -23.924741149104    -4.51E-01 5.38E-04 1.35E+03 0.619
- ETOT  3  -24.675183914411    -7.50E-01 2.44E-02 1.01E+01 1.563
- ETOT  4  -24.682948991098    -7.77E-03 7.80E-02 5.92E-01 1.837
- ETOT  5  -24.685983592369    -3.03E-03 3.31E-03 4.07E-01 2.203
- ETOT  6  -24.691414158671    -5.43E-03 1.87E-04 3.55E-02 3.250
- ETOT  7  -24.691002497743     4.12E-04 2.60E-05 9.45E-02 3.076
- ETOT  8  -24.691273807595    -2.71E-04 3.95E-05 8.22E-02 3.416
- ETOT  9  -24.691424656508    -1.51E-04 1.51E-06 1.63E-02 3.367
- ETOT 10  -24.691469881221    -4.52E-05 2.81E-06 1.71E-03 3.282
- ETOT 11  -24.691476889568    -7.01E-06 2.51E-07 1.80E-05 3.309
- ETOT 12  -24.691476957639    -6.81E-08 6.70E-09 2.56E-06 3.307
- ETOT 13  -24.691476968791    -1.12E-08 2.00E-10 4.42E-08 3.307
- ETOT 14  -24.691476968989    -1.98E-10 1.86E-10 2.07E-11 3.306
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -23.473436351518    -2.347E+01 9.133E-02 2.329E+03 1.887E+00 1.887E+00
+ ETOT  2  -23.924741149104    -4.513E-01 5.379E-04 1.349E+03 1.276E+00 6.104E-01
+ ETOT  3  -24.675183914411    -7.504E-01 2.444E-02 1.008E+01 8.711E-01 1.482E+00
+ ETOT  4  -24.682948991098    -7.765E-03 7.797E-02 5.923E-01 2.623E-01 1.744E+00
+ ETOT  5  -24.685983592369    -3.035E-03 3.309E-03 4.068E-01 3.455E-01 2.089E+00
+ ETOT  6  -24.691414158671    -5.431E-03 1.875E-04 3.546E-02 9.605E-01 3.050E+00
+ ETOT  7  -24.691002497743     4.117E-04 2.600E-05 9.447E-02 1.637E-01 2.886E+00
+ ETOT  8  -24.691273807595    -2.713E-04 3.949E-05 8.225E-02 3.161E-01 3.202E+00
+ ETOT  9  -24.691424656508    -1.508E-04 1.505E-06 1.630E-02 4.768E-02 3.155E+00
+ ETOT 10  -24.691469881221    -4.522E-05 2.806E-06 1.707E-03 7.944E-02 3.075E+00
+ ETOT 11  -24.691476889568    -7.008E-06 2.513E-07 1.803E-05 2.506E-02 3.100E+00
+ ETOT 12  -24.691476957639    -6.807E-08 6.704E-09 2.558E-06 1.463E-03 3.099E+00
+ ETOT 13  -24.691476968791    -1.115E-08 2.001E-10 4.421E-08 7.747E-04 3.098E+00
+ ETOT 14  -24.691476968989    -1.984E-10 1.861E-10 2.070E-11 1.210E-04 3.098E+00
 
  At SCF step   14       vres2   =  2.07E-11 < tolvrs=  1.00E-10 =>converged.
 
@@ -338,14 +339,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     4.565602     1.467602      6.033205     3.098000
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Fe   2.00000     4.565602     1.467602      6.033205     3.098000
+ ------------------------------------------------------------------------------------------------------------
   Sum:              4.565602     1.467602      6.033205     3.098000
- Total magnetization (from the atomic spheres):             3.098000
- Total magnetization (exact up - dn):                       3.306432
+ Total magnetization (from the atomic spheres):                3.098000
+ Total magnetization (exact up - dn):                          3.306432
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -493,14 +495,15 @@ force_length_stats: {min: null, max: null, mean: null, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     4.565602     1.467602      6.033205     3.098000
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Fe   2.00000     4.565602     1.467602      6.033205     3.098000
+ ------------------------------------------------------------------------------------------------------------
   Sum:              4.565602     1.467602      6.033205     3.098000
- Total magnetization (from the atomic spheres):             3.098000
- Total magnetization (exact up - dn):                       3.306432
+ Total magnetization (from the atomic spheres):                3.098000
+ Total magnetization (exact up - dn):                          3.306432
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -588,18 +591,28 @@ solver: {iscf: 7, nstep: 50, nline: 4, wfoptalg: 0, }
 tolerances: {tolvrs: 1.00E-08, }
 ...
 
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   14.568906586878     -6.619E+01 1.703E-01 4.110E+03
- ETOT  2   11.417478552940     -3.151E+00 8.989E-02 1.328E+03
- ETOT  3   9.9415914792259     -1.476E+00 8.708E-03 3.099E+00
- ETOT  4   9.9322637828311     -9.328E-03 9.460E-05 4.772E-01
- ETOT  5   9.9294677128320     -2.796E-03 3.727E-06 8.413E-02
- ETOT  6   9.9285680662893     -8.996E-04 7.471E-07 1.575E-03
- ETOT  7   9.9285504267603     -1.764E-05 1.661E-08 7.388E-06
- ETOT  8   9.9285504067729     -1.999E-08 3.247E-10 1.307E-07
- ETOT  9   9.9285504065506     -2.223E-10 9.203E-12 1.371E-09
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
+-ETOT  1   14.568906586878     -6.619E+01 1.703E-01 4.110E+03 1.985E+00 1.985E+00
+ ETOT  2   11.417478552940     -3.151E+00 8.989E-02 1.328E+03 5.775E-01 2.562E+00
+ ETOT  3   9.9415914792259     -1.476E+00 8.708E-03 3.099E+00 3.458E-01 2.908E+00
+ ETOT  4   9.9322637828311     -9.328E-03 9.460E-05 4.772E-01 2.638E-01 3.172E+00
+ ETOT  5   9.9294677128320     -2.796E-03 3.727E-06 8.413E-02 1.624E-01 3.334E+00
+ ETOT  6   9.9285680662893     -8.996E-04 7.471E-07 1.575E-03 1.523E-01 3.487E+00
+ ETOT  7   9.9285504267603     -1.764E-05 1.661E-08 7.388E-06 2.400E-02 3.511E+00
+ ETOT  8   9.9285504067729     -1.999E-08 3.247E-10 1.307E-07 6.250E-04 3.511E+00
+ ETOT  9   9.9285504065506     -2.223E-10 9.203E-12 1.371E-09 5.649E-05 3.511E+00
 
  At SCF step    9       vres2   =  1.37E-09 < tolvrs=  1.00E-08 =>converged.
+ Integrated electronic and magnetization densities in atomic spheres:
+ ------------------------------------------------------------------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Fe   2.00000     2.011943    -1.499313      0.512631     3.511256
+ ------------------------------------------------------------------------------------------------------------
+  Sum:              2.011943    -1.499313      0.512631     3.511256
+ Total magnetization (from the atomic spheres):                3.511256
+ Total magnetization (exact up - dn):                          3.760129
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -649,17 +662,27 @@ solver: {iscf: 7, nstep: 50, nline: 4, wfoptalg: 0, }
 tolerances: {tolvrs: 1.00E-08, }
 ...
 
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   6.7742258679851     -4.072E+01 1.105E+00 2.113E+03
- ETOT  2   4.6678725877460     -2.106E+00 3.536E-02 3.652E+02
- ETOT  3   4.1459934506454     -5.219E-01 1.657E-03 1.491E+00
- ETOT  4   4.1426629768293     -3.330E-03 6.371E-04 2.753E-01
- ETOT  5   4.1424100507868     -2.529E-04 2.831E-05 4.611E-04
- ETOT  6   4.1424092891325     -7.617E-07 2.197E-05 1.679E-06
- ETOT  7   4.1424092865086     -2.624E-09 2.037E-06 1.259E-07
- ETOT  8   4.1424092863665     -1.421E-10 2.314E-06 1.673E-10
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
+-ETOT  1   6.7742258679851     -4.072E+01 1.105E+00 2.113E+03 7.301E-07 7.301E-07
+ ETOT  2   4.6678725877460     -2.106E+00 3.536E-02 3.652E+02 3.761E-07 3.540E-07
+ ETOT  3   4.1459934506454     -5.219E-01 1.657E-03 1.491E+00 5.108E-08 4.051E-07
+ ETOT  4   4.1426629768293     -3.330E-03 6.371E-04 2.753E-01 1.351E-09 4.037E-07
+ ETOT  5   4.1424100507868     -2.529E-04 2.831E-05 4.611E-04 3.397E-08 3.697E-07
+ ETOT  6   4.1424092891325     -7.617E-07 2.197E-05 1.679E-06 1.669E-08 3.864E-07
+ ETOT  7   4.1424092865086     -2.624E-09 2.037E-06 1.259E-07 3.426E-08 3.522E-07
+ ETOT  8   4.1424092863665     -1.421E-10 2.314E-06 1.673E-10 1.404E-08 3.381E-07
 
  At SCF step    8       vres2   =  1.67E-10 < tolvrs=  1.00E-08 =>converged.
+ Integrated electronic and magnetization densities in atomic spheres:
+ ------------------------------------------------------------------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Fe   2.00000     0.000000    -0.000000      0.000000     0.000000
+ ------------------------------------------------------------------------------------------------------------
+  Sum:              0.000000    -0.000000      0.000000     0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                          0.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -705,17 +728,17 @@ tolerances: {tolvrs: 1.00E-08, }
    1    1   3    3         0.0000000000         0.0000000000
    1    1   1    4         0.0000000261         0.0000000000
    1    1   1    5         0.0000000097         0.0000000000
-
+  
    2    1   1    3         0.0000000000         0.0000000000
    2    1   3    3         0.0000000000         0.0000000000
    2    1   1    4        -0.0000000415         0.0000000000
    2    1   1    5        -0.0000000063         0.0000000000
-
+  
    3    1   1    3         0.0000000000         0.0000000000
    3    1   2    3         0.0000000000         0.0000000000
    3    1   1    4        -0.0000000334         0.0000000000
    3    1   1    5        -0.0000000274         0.0000000000
-
+  
    1    3   2    1         0.0000000000         0.0000000000
    1    3   3    1         0.0000000000         0.0000000000
   
@@ -724,45 +747,45 @@ tolerances: {tolvrs: 1.00E-08, }
   
    3    3   1    1         0.0000000000         0.0000000000
    3    3   2    1         0.0000000000         0.0000000000
-
+  
    1    4   1    4         9.9285507402         0.0000000000
    1    4   1    5         0.0000000450         0.0000000000
-
+  
    2    4   1    4         3.0755456475         0.0000000000
    2    4   1    5         0.0000000332         0.0000000000
-
+  
    3    4   1    4         3.0755456414         0.0000000000
    3    4   1    5         0.0000000331         0.0000000000
-
+  
    1    5   1    4         0.0000000022         0.0000000000
    1    5   1    5         4.1424088849         0.0000000000
-
+  
    2    5   1    4         0.0000000002         0.0000000000
    2    5   1    5         0.0000000010         0.0000000000
-
+  
    3    5   1    4        -0.0000000023         0.0000000000
    3    5   1    5        -0.0000000023         0.0000000000
-
-
+  
+  
   Rigid-atom elastic tensor , in cartesian coordinates,
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    4   1    4         0.1247148003         0.0000000000
    1    4   1    5         0.0000000006         0.0000000000
-
+  
    2    4   1    4         0.0386326334         0.0000000000
    2    4   1    5         0.0000000004         0.0000000000
-
+  
    3    4   1    4         0.0386326334         0.0000000000
    3    4   1    5         0.0000000004         0.0000000000
-
+  
    1    5   1    4         0.0000000000         0.0000000000
    1    5   1    5         0.0520337470         0.0000000000
-
+  
    2    5   1    4         0.0000000000         0.0000000000
    2    5   1    5         0.0000000000         0.0000000000
-
+  
    3    5   1    4        -0.0000000000         0.0000000000
    3    5   1    5        -0.0000000000         0.0000000000
   
@@ -931,77 +954,10 @@ P          mk1mem3          4
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          2.1        0.03      0.001
-- Total wall clock time (s,m,h):          2.1        0.03      0.001
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0
--
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            2.1, wall_time =            2.1
--
-- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
--                                                                                (-1=no count)
-- fourwf%(pot)                              0.496  24.2         0.495  23.7           6343      -1.00        1.00       1.00
-- ewald                                     0.273  13.3         0.273  13.1              2      -1.00        1.00       1.00
-- pspini                                    0.157   7.7         0.157   7.5              3      -1.00        1.00       1.00
-- stress                                    0.119   5.8         0.119   5.7              1      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)                        0.118   5.7         0.117   5.6              1      -1.00        1.01       1.01
-- timing timab                              0.116   5.7         0.116   5.6             10      -1.00        1.00       1.00
-- get_dtsets_pspheads                       0.089   4.4         0.089   4.3              1      -1.00        1.00       1.00
-- nonlop(apply)                             0.081   4.0         0.080   3.8           5527      -1.00        1.02       1.02
-- fourwf%(G->r)                             0.077   3.8         0.069   3.3           1870      -1.00        1.12       1.12
-- projbd                                    0.061   3.0         0.066   3.2           9966      -1.00        0.93       0.93
-- dfpt_cgwf-O(npw)                          0.057   2.8         0.070   3.3             -1      -1.00        0.81       0.81
-- getghc(/=fourXX,nonlop,fock_XX)           0.044   2.1         0.034   1.6             -1      -1.00        1.29       1.29
-- abinit(outvars)                           0.037   1.8         0.037   1.8              1      -1.00        0.99       0.99
-- abinit(after driver)                      0.036   1.7         0.035   1.7              1      -1.00        1.02       1.02
-- fourdp                                    0.033   1.6         0.070   3.3            341      -1.00        0.47       0.47
-- nonlop(forces)                            0.028   1.4         0.022   1.1            864      -1.00        1.27       1.27
-- dfpt_vtowfk(contrib)                      0.025   1.2         0.027   1.3             -1      -1.00        0.92       0.92
-- abinit(chkinp,chkvars)                    0.020   1.0         0.019   0.9              1      -1.00        1.03       1.03
-- fourwf%(den)                              0.015   0.7         0.016   0.8            354      -1.00        0.96       0.96
-- dfpt_vtorho-kpt loop                      0.015   0.7         0.013   0.6             38      -1.00        1.15       1.15
-- vtowfk(ssdiag)                            0.014   0.7         0.015   0.7             -1      -1.00        0.91       0.91
-- dfpt_vtowfk (1)                          -0.009  -0.4        -0.009  -0.4            102      -1.00        0.96       0.96
-- others (137)                              0.050   2.4         0.048   2.3             -1      -1.00        1.04       1.04
--<END_TIMER>
--
-- subtotal                                  1.951  95.1         1.978  94.6                                  0.99       0.99
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           2.1, wall_time =           2.1
--
-- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
--                                                                                (-1=no count)
-- fourwf%(pot)                              0.496  24.2         0.495  23.7           6343      -1.00        1.00       1.00
-- ewald                                     0.273  13.3         0.273  13.1              2      -1.00        1.00       1.00
-- pspini                                    0.157   7.7         0.157   7.5              3      -1.00        1.00       1.00
-- stress                                    0.119   5.8         0.119   5.7              1      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)                        0.118   5.7         0.117   5.6              1      -1.00        1.01       1.01
-- timing timab                              0.116   5.7         0.116   5.6             10      -1.00        1.00       1.00
-- get_dtsets_pspheads                       0.089   4.4         0.089   4.3              1      -1.00        1.00       1.00
-- nonlop(apply)                             0.081   4.0         0.080   3.8           5527      -1.00        1.02       1.02
-- fourwf%(G->r)                             0.077   3.8         0.069   3.3           1870      -1.00        1.12       1.12
-- projbd                                    0.061   3.0         0.066   3.2           9966      -1.00        0.93       0.93
-- dfpt_cgwf-O(npw)                          0.057   2.8         0.070   3.3             -1      -1.00        0.81       0.81
-- getghc(/=fourXX,nonlop,fock_XX)           0.044   2.1         0.034   1.6             -1      -1.00        1.29       1.29
-- abinit(outvars)                           0.037   1.8         0.037   1.8              1      -1.00        0.99       0.99
-- abinit(after driver)                      0.036   1.7         0.035   1.7              1      -1.00        1.02       1.02
-- fourdp                                    0.033   1.6         0.070   3.3            341      -1.00        0.47       0.47
-- nonlop(forces)                            0.028   1.4         0.022   1.1            864      -1.00        1.27       1.27
-- dfpt_vtowfk(contrib)                      0.025   1.2         0.027   1.3             -1      -1.00        0.92       0.92
-- abinit(chkinp,chkvars)                    0.020   1.0         0.019   0.9              1      -1.00        1.03       1.03
-- fourwf%(den)                              0.015   0.7         0.016   0.8            354      -1.00        0.96       0.96
-- dfpt_vtorho-kpt loop                      0.015   0.7         0.013   0.6             38      -1.00        1.15       1.15
-- vtowfk(ssdiag)                            0.014   0.7         0.015   0.7             -1      -1.00        0.91       0.91
-- others (138)                              0.041   2.0         0.039   1.9             -1      -1.00        1.06       1.06
--<END_TIMER>
 
-- subtotal                                  1.951  95.1         1.978  94.6                                  0.99       0.99
 
 ================================================================================
 
@@ -1090,10 +1046,10 @@ P          mk1mem3          4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.1  wall=          2.1
+- Proc.   0 individual time (sec): cpu=          1.8  wall=          1.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered  15 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.1  wall=          2.1
+.Delivered   3 WARNINGs and  10 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.8  wall=          1.8

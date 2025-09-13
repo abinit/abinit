@@ -1,5 +1,5 @@
 
-.Version 10.4.5.4 of ABINIT, released Jul 2025.
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 10 Jul 2025.
-- ( at 15h45 )
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h19 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v9_t11-t12/t11.abi
 - output file    -> t11.abo
@@ -91,6 +91,7 @@ _ WF disk file :      3.093 Mbytes ; DEN or POT disk file :      0.714 Mbytes.
 -    mband =          30        mffmem =           1         mkmem =          16
 -   mkqmem =          16        mk1mem =          16           mpw =         211
       nfft =        5832          nkpt =          16
+- my_mband =          30
 ================================================================================
 P This job should need less than                      12.782 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -108,6 +109,7 @@ _ WF disk file :      3.093 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
 -    mband =          30        mffmem =           1         mkmem =          16
 -   mkqmem =          16        mk1mem =          16           mpw =         211
       nfft =        5832          nkpt =          16
+- my_mband =          30
 ================================================================================
 P This job should need less than                      12.782 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -125,6 +127,7 @@ _ WF disk file :      3.093 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
 -    mband =          30        mffmem =           1         mkmem =          16
 -   mkqmem =          16        mk1mem =          16           mpw =         211
       nfft =        5832          nkpt =          16
+- my_mband =          30
 ================================================================================
 P This job should need less than                      12.782 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -599,15 +602,15 @@ force_length_stats: {min:   1.01609254E-28, max:   1.01609254E-28, mean:   1.016
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.10359     5.609481     5.609481     11.218961    -0.000000
-    2   2.10392     6.399747     6.399747     12.799495     0.000000
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ga   2.10359     5.609481     5.609481     11.218961    -0.000000
+    2 As   2.10392     6.399747     6.399747     12.799495     0.000000
+ ------------------------------------------------------------------------------------------------------------
   Sum:             12.009228    12.009228     24.018456     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                      -0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                         -0.000000
 
 
  PAW TEST:
@@ -915,15 +918,15 @@ force_length_stats: {min: null, max: null, mean: null, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.10359     5.609481     5.609481     11.218961    -0.000000
-    2   2.10392     6.399747     6.399747     12.799495     0.000000
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ga   2.10359     5.609481     5.609481     11.218961    -0.000000
+    2 As   2.10392     6.399747     6.399747     12.799495     0.000000
+ ------------------------------------------------------------------------------------------------------------
   Sum:             12.009228    12.009228     24.018456     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                      -0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                         -0.000000
 
 
  PAW TEST:
@@ -1181,15 +1184,15 @@ force_length_stats: {min: null, max: null, mean: null, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.10359     5.609481     5.609481     11.218961    -0.000000
-    2   2.10392     6.399747     6.399747     12.799495     0.000000
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ga   2.10359     5.609481     5.609481     11.218961    -0.000000
+    2 As   2.10392     6.399747     6.399747     12.799495     0.000000
+ ------------------------------------------------------------------------------------------------------------
   Sum:             12.009228    12.009228     24.018456     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                      -0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                         -0.000000
 
 
  PAW TEST:
@@ -2101,10 +2104,10 @@ P          mk1mem6         16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          6.0  wall=          6.0
+- Proc.   0 individual time (sec): cpu=          6.1  wall=          6.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  38 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.0  wall=          6.0
++Overall time at end (sec) : cpu=          6.1  wall=          6.1

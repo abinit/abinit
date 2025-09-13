@@ -1,5 +1,5 @@
 
-.Version 10.4.5.4 of ABINIT, released Jul 2025.
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 10 Jul 2025.
-- ( at 15h45 )
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h19 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v8_t90/t90.abi
 - output file    -> t90.abo
@@ -940,14 +940,14 @@ force_length_stats: {min:   2.37556778E-29, max:   2.37556778E-29, mean:   2.375
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
- Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.00000        1.713391     -0.000000   -0.000000    0.000000
-    2   2.00000        1.713391     -0.000000    0.000000   -0.000000
- ---------------------------------------------------------------------
- Total magnetization (spheres)      -0.000000   -0.000000    0.000000
- Total magnetization (exact)        -0.000000    0.000000   -0.000000
+    Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
+    1 Si   2.00000        1.713391      0.000000   -0.000000   -0.000000    0.000000    0.000000    0.000000
+    2 Si   2.00000        1.713391      0.000000   -0.000000    0.000000   -0.000000    0.000000    0.000000
+ ------------------------------------------------------------------------------------------------------------
+ Total magnetization (spheres)          0.000000   -0.000000   -0.000000    0.000000    0.000000    0.000000
+ Total magnetization (exact)            0.000000   -0.000000    0.000000   -0.000000    0.000000    0.000000
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1993,10 +1993,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          8.5  wall=          8.6
+- Proc.   0 individual time (sec): cpu=          8.6  wall=          8.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  15 WARNINGs and  17 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.5  wall=          8.6
++Overall time at end (sec) : cpu=          8.6  wall=          8.7
