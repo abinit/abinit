@@ -344,7 +344,7 @@ contains
 subroutine fockbz_create(fockbz,mgfft,mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_ACE)
 
 !Arguments ------------------------------------
- class(fock_BZ_type), intent(inout) :: fockbz
+ type(fock_BZ_type), intent(inout) :: fockbz
  integer, intent(in) :: mgfft,mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_ACE
 ! *************************************************************************
 
@@ -1119,7 +1119,7 @@ end subroutine fock_init
 subroutine fock_updateikpt(fock,ikpt,isppol)
 
 !Arguments ------------------------------------
- class(fock_common_type),pointer :: fock
+ type(fock_common_type),pointer :: fock
  integer, intent(in) :: ikpt,isppol
 ! *************************************************************************
 
@@ -1194,7 +1194,7 @@ end subroutine fock_set_ieigen
 subroutine fock_destroy(fock)
 
 !Arguments ------------------------------------
- class(fock_type),pointer :: fock
+ type(fock_type),pointer :: fock
 ! *************************************************************************
 
  if (fock%fock_common%use_ACE/=0) then
@@ -1210,7 +1210,7 @@ end subroutine fock_destroy
 subroutine fock_common_destroy(fock)
 
 !Arguments ------------------------------------
- class(fock_common_type),pointer :: fock
+ type(fock_common_type),pointer :: fock
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1254,7 +1254,7 @@ end subroutine fock_common_destroy
 subroutine fock_BZ_destroy(fock)
 
 !Arguments ------------------------------------
- class(fock_BZ_type),pointer :: fock
+ type(fock_BZ_type),pointer :: fock
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1846,7 +1846,7 @@ integer function fock_set_getghc_call(fock, new) result(old)
 
 !Arguments ------------------------------------
 !scalars
- class(fock_common_type),intent(inout) :: fock
+ type(fock_common_type),intent(inout) :: fock
  integer,intent(in) :: new
 ! *************************************************************************
 
@@ -1870,7 +1870,7 @@ end function fock_set_getghc_call
 pure integer function fock_get_getghc_call(fock)
 
 !Arguments ------------------------------------
- class(fock_common_type),intent(in) :: fock
+ type(fock_common_type),intent(in) :: fock
 ! *************************************************************************
 
  fock_get_getghc_call = fock%getghc_call_
@@ -2052,7 +2052,7 @@ subroutine strfock(fockcommon,gprimd,fockstr,mpi_enreg,nfft,ngfft,&
 
 !Arguments ------------------------------------
 !scalars
- class(fock_common_type),intent(in) :: fockcommon
+ type(fock_common_type),intent(in) :: fockcommon
  integer,intent(in) :: nfft,nkpt_bz,ndat
  integer,intent(in),optional :: gpu_option
  real(dp),intent(in) :: ucvol

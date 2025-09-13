@@ -4173,9 +4173,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        call chkint_eq(1,1,cond_string,cond_values,ierr,'lpawu',dt%lpawu(itypat),5,(/-1,0,1,2,3/),iout)
      end do
      if(dt%pawspnorb>0) then
-       write(msg,'(3a)' ) &
-       'DFT+U+SpinOrbit is still on test ',ch10,&
-       '(not yet in production)'
+       write(msg,'(3a)' ) 'DFT+U+SpinOrbit is still on test ',ch10,'(not yet in production)'
        ABI_WARNING(msg)
      end if
    end if
@@ -4284,11 +4282,10 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
           dt%ixc/=18.and.dt%ixc/=-106131.and.dt%ixc/=-131106.and. &
           dt%ixc/=19.and.dt%ixc/=-106132.and.dt%ixc/=-132106.and. &
           dt%ixc/=-202231.and.dt%ixc/=-231202) then
-         write(msg,'(8a)') ch10,&
-          ' chkinp: ERROR -',ch10,&
-          '  Van der Waals DFT-D2 correction (vdw_xc=5) only available for the following XC functionals:',ch10,&
-          '      GGA-PBE, GGA-BLYP, GGA-BP86, mGGA-TPSS',ch10,&
-          '  Action: change your pseudopotential file.'
+         write(msg,'(6a)') ch10,&
+          'Van der Waals DFT-D2 correction (vdw_xc=5) only available for the following XC functionals:',ch10,&
+          '    GGA-PBE, GGA-BLYP, GGA-BP86, mGGA-TPSS',ch10,&
+          'Action: change your pseudopotential file.'
          call wrtout(std_out,msg)
          ierr=ierr+1
        end if
@@ -4363,7 +4360,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        ABI_ERROR_NOSTOP('Istwfk > 2 not compatible with wfoptalg 1. Use chebfi V2 instead (wfoptalg=111).', ierr)
      end if
      if(dt%ecutsm > 0) then
-       ABI_ERROR_NOSTOP('Ecutsm > 0 not yet compatible with wfoptalg 1', ierr)
+       ABI_ERROR_NOSTOP('ecutsm > 0 not yet compatible with wfoptalg 1', ierr)
      end if
    end if
 
@@ -4550,7 +4547,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      enddo
      if (npsp /= dt%ntypat) then
        write(msg, '(a,a,a,a,I0,a,I0,a,a,a)' ) ch10,&
-       'wvl_wfs_set:  consistency checks failed,', ch10, &
+       'consistency checks failed,', ch10, &
        'dtset%npsp (', npsp, ') /= dtset%ntypat (', dt%ntypat, ').', ch10, &
        'No alchemy pseudo are allowed with wavelets.'
        ABI_ERROR_NOSTOP(msg,ierr)
@@ -4732,21 +4729,21 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
  if (ierr==1) then
    write(msg,'(6a)')ch10,&
-   'Checking consistency of input data against itself revealed some problem(s).',ch10,&
-   'So, stopping. The details of the problem(s) are given in the error file or the standard output file (= "log" file).',ch10,&
-   'In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
+     'Checking consistency of input data against itself revealed some problem(s).',ch10,&
+     'So, stopping. The details of the problem(s) are given in the error file or the standard output file (= "log" file).',ch10,&
+     'In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
    call wrtout(iout,msg)
    write(msg,'(a,i0,5a)')&
-   'Checking consistency of input data against itself gave ',ierr,' inconsistency.',ch10,&
-   'The details of the problem can be found above (or in output or log file).',ch10,&
-   'In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
+     'Checking consistency of input data against itself gave ',ierr,' inconsistency.',ch10,&
+     'The details of the problem can be FOUND ABOVE (or in output or log file).',ch10,&
+     'In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
    ABI_ERROR(msg)
  end if
  if (ierr>1) then
    write(msg,'(a,i0,5a)')&
-   'Checking consistency of input data against itself gave ',ierr,' inconsistencies.',ch10,&
-   'The details of the problems can be found above (or in output or log file), in an earlier WARNING.',ch10,&
-   'In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
+     'Checking consistency of input data against itself gave ',ierr,' inconsistencies.',ch10,&
+     'The details of the problems can be FOUND ABOVE (or in output or log file), in an earlier WARNING.',ch10,&
+     'In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
    ABI_ERROR(msg)
  end if
 

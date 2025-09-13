@@ -217,12 +217,6 @@ end subroutine destroy_mpi_enreg
 !! FUNCTION
 !!  Copy a mpi_enreg datastructure into another
 !!
-!! INPUTS
-!!  MPI_enreg1<MPI_type>=input mpi_enreg datastructure
-!!
-!! OUTPUT
-!!  MPI_enreg2<MPI_type>=output mpi_enreg datastructure
-!!
 !! SOURCE
 
 subroutine copy_mpi_enreg(MPI_enreg1, MPI_enreg2)
@@ -232,7 +226,6 @@ subroutine copy_mpi_enreg(MPI_enreg1, MPI_enreg2)
  class(MPI_type),intent(out) :: MPI_enreg2
 
 !Local variables-------------------------------
-!scalars
  integer :: sz1,sz2,sz3
 ! *********************************************************************
 

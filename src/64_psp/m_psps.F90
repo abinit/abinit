@@ -167,8 +167,6 @@ end subroutine test_xml_xmlpaw_upf
 !! pspheads(npsp)=<type pspheader_type>all the important information from the
 !!   pseudopotential file header, as well as the psp file name
 !!
-!! OUTPUT
-!!
 !! SIDE EFFECTS
 !! psps=<type pseudopotential_type>the pseudopotentials description
 !!
@@ -493,7 +491,7 @@ end subroutine psps_init_from_dtset
 subroutine psps_free(psps)
 
 !Arguments ------------------------------------
- type(pseudopotential_type),intent(inout) :: psps
+ class(pseudopotential_type),intent(inout) :: psps
 
 !Local variables-------------------------------
  integer :: ii
@@ -907,9 +905,8 @@ end subroutine psps_ncwrite_path
 subroutine psps_ncwrite(psps, ncid)
 
 !Arguments ------------------------------------
-!scalars
+ class(pseudopotential_type),intent(in) :: psps
  integer,intent(in) :: ncid
- type(pseudopotential_type),intent(in) :: psps
 
 !Local variables-------------------------------
 !scalars
@@ -1116,28 +1113,21 @@ end subroutine psps_ncwrite
 !!
 !! INPUTS
 !!
-!! OUTPUT
-!!
 !! SOURCE
 
 subroutine psps_ncread(psps, ncid)
 
 !Arguments ------------------------------------
- type(pseudopotential_type),intent(inout) :: psps
+ class(pseudopotential_type),intent(inout) :: psps
  integer,intent(in) :: ncid
 
 !Local variables-------------------------------
 !scalars
- integer :: ipsp,itypat
- integer :: ncerr
- integer :: with_xccc
- integer :: with_xcctau
-
+ integer :: ipsp,itypat, ncerr, with_xccc, with_xcctau
 ! *********************************************************************
 
  ! Note: Some dimensions and variables are written conditionally,
  !       so try to read those but ignore errors
-
  call psps_free(psps)
 
  psps%dimekb         = zero
@@ -1371,7 +1361,6 @@ subroutine psp2params_copy(gth_paramsin, gth_paramsout)
 !Arguments ------------------------------------
  class(pseudopotential_gth_type),intent(in) :: gth_paramsin
  class(pseudopotential_gth_type),intent(inout) :: gth_paramsout
-
 ! *********************************************************************
 
  if (allocated(gth_paramsin%psppar)) then
@@ -1412,9 +1401,7 @@ end subroutine psp2params_copy
 subroutine psp2params_free(gth_params)
 
 !Arguments ------------------------------------
-!scalars
- type(pseudopotential_gth_type),intent(inout) :: gth_params
-
+ class(pseudopotential_gth_type),intent(inout) :: gth_params
 ! *********************************************************************
 
  ABI_SFREE(gth_params%set)
