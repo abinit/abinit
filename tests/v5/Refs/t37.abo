@@ -1,5 +1,5 @@
 
-.Version 10.4.5.5 of ABINIT, released Jul 2025.
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 Jun 2025.
-- ( at 13h01 )
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h15 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v5_t37/t37.abi
 - output file    -> t37.abo
@@ -337,17 +337,17 @@ force_length_stats: {min:   0.00000000E+00, max:   1.15012388E-31, mean:   5.750
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.30000     9.243163     7.631360     16.874523     1.611803
-    2   2.30000     7.631360     9.243163     16.874523    -1.611803
-    3   2.30000     3.545093     3.545093      7.090186     0.000000
-    4   2.30000     3.545093     3.545093      7.090186     0.000000
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ni   2.30000     9.243163     7.631360     16.874523     1.611803
+    2 Ni   2.30000     7.631360     9.243163     16.874523    -1.611803
+    3  O   2.30000     3.545093     3.545093      7.090186     0.000000
+    4  O   2.30000     3.545093     3.545093      7.090186     0.000000
+ ------------------------------------------------------------------------------------------------------------
   Sum:             23.964709    23.964709     47.929418     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                      -0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                         -0.000000
 
 
  PAW TEST:
@@ -854,10 +854,10 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          4.4  wall=          4.4
+- Proc.   0 individual time (sec): cpu=          4.5  wall=          4.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.4  wall=          4.4
++Overall time at end (sec) : cpu=          4.5  wall=          4.6

@@ -1,5 +1,5 @@
 
-.Version 10.4.5.5 of ABINIT, released Jul 2025.
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 Jun 2025.
-- ( at 13h00 )
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h15 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v5_t08/t08.abi
 - output file    -> t08.abo
@@ -700,17 +700,17 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.30000     8.905409     8.892705     17.798115     0.012704
-    2   2.30000     8.893358     8.899955     17.793312    -0.006597
-    3   1.21105     1.116119     1.108585      2.224704     0.007535
-    4   1.21105     1.116119     1.108585      2.224704     0.007535
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ni   2.30000     8.905409     8.892705     17.798115     0.012704
+    2 Ni   2.30000     8.893358     8.899955     17.793312    -0.006597
+    3  O   1.21105     1.116119     1.108585      2.224704     0.007535
+    4  O   1.21105     1.116119     1.108585      2.224704     0.007535
+ ------------------------------------------------------------------------------------------------------------
   Sum:             20.031006    20.009830     40.040835     0.021176
- Total magnetization (from the atomic spheres):             0.021176
- Total magnetization (exact up - dn):                       0.060385
+ Total magnetization (from the atomic spheres):                0.021176
+ Total magnetization (exact up - dn):                          0.060385
 
 
  PAW TEST:
@@ -1390,17 +1390,17 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.30000     8.887386     8.889782     17.777168    -0.002396
-    2   2.30000     8.875242     8.900240     17.775482    -0.024998
-    3   1.21105     1.103439     1.137547      2.240986    -0.034109
-    4   1.21105     1.103439     1.137547      2.240986    -0.034109
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ni   2.30000     8.887386     8.889782     17.777168    -0.002396
+    2 Ni   2.30000     8.875242     8.900240     17.775482    -0.024998
+    3  O   1.21105     1.103439     1.137547      2.240986    -0.034109
+    4  O   1.21105     1.103439     1.137547      2.240986    -0.034109
+ ------------------------------------------------------------------------------------------------------------
   Sum:             19.969506    20.065117     40.034622    -0.095611
- Total magnetization (from the atomic spheres):            -0.095611
- Total magnetization (exact up - dn):                      -0.249365
+ Total magnetization (from the atomic spheres):               -0.095611
+ Total magnetization (exact up - dn):                         -0.249365
 
 
  PAW TEST:
@@ -2156,17 +2156,17 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.30000     8.906852     8.894914     17.801766     0.011939
-    2   2.30000     8.894331     8.901138     17.795470    -0.006807
-    3   1.21105     1.114535     1.107468      2.222003     0.007067
-    4   1.21105     1.114535     1.107468      2.222003     0.007067
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ni   2.30000     8.906852     8.894914     17.801766     0.011939
+    2 Ni   2.30000     8.894331     8.901138     17.795470    -0.006807
+    3  O   1.21105     1.114535     1.107468      2.222003     0.007067
+    4  O   1.21105     1.114535     1.107468      2.222003     0.007067
+ ------------------------------------------------------------------------------------------------------------
   Sum:             20.030254    20.010988     40.041241     0.019266
- Total magnetization (from the atomic spheres):             0.019266
- Total magnetization (exact up - dn):                       0.055225
+ Total magnetization (from the atomic spheres):                0.019266
+ Total magnetization (exact up - dn):                          0.055225
 
 
  PAW TEST:
@@ -2922,17 +2922,17 @@ force_length_stats: {min:   5.75061939E-32, max:   1.72518582E-31, mean:   8.625
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.30000     8.912940     8.914748     17.827689    -0.001808
-    2   2.30000     8.904952     8.923245     17.828196    -0.018293
-    3   1.21105     1.082872     1.112604      2.195477    -0.029732
-    4   1.21105     1.082872     1.112604      2.195477    -0.029732
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ni   2.30000     8.912940     8.914748     17.827689    -0.001808
+    2 Ni   2.30000     8.904952     8.923245     17.828196    -0.018293
+    3  O   1.21105     1.082872     1.112604      2.195477    -0.029732
+    4  O   1.21105     1.082872     1.112604      2.195477    -0.029732
+ ------------------------------------------------------------------------------------------------------------
   Sum:             19.983637    20.063201     40.046838    -0.079565
- Total magnetization (from the atomic spheres):            -0.079565
- Total magnetization (exact up - dn):                      -0.209339
+ Total magnetization (from the atomic spheres):               -0.079565
+ Total magnetization (exact up - dn):                         -0.209339
 
 
  PAW TEST:

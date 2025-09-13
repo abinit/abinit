@@ -1,5 +1,5 @@
 
-.Version 10.4.5.5 of ABINIT, released Jul 2025.
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 Jun 2025.
-- ( at 12h59 )
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h14 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v3_t12/t12.abi
 - output file    -> t12.abo
@@ -49,6 +49,7 @@ _ WF disk file :      0.011 Mbytes ; DEN or POT disk file :      0.148 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
 -   mkqmem =           1        mk1mem =           1           mpw =         559
       nfft =        9600          nkpt =           1
+- my_mband =           1
 ================================================================================
 P This job should need less than                       2.930 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -122,6 +123,7 @@ _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.075 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
 -   mkqmem =           1        mk1mem =           1           mpw =         559
       nfft =        9600          nkpt =           1
+- my_mband =           1
 ================================================================================
 P This job should need less than                       2.931 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -533,15 +535,15 @@ force_length_stats: {min:   2.67229629E-02, max:   2.67229629E-02, mean:   2.672
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.574120     0.102786      0.676905     0.471334
-    2   2.00000     0.102786     0.574120      0.676905    -0.471334
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1  H   2.00000     0.574120     0.102786      0.676905     0.471334
+    2  H   2.00000     0.102786     0.574120      0.676905    -0.471334
+ ------------------------------------------------------------------------------------------------------------
   Sum:              0.676905     0.676905      1.353811     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                       0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                          0.000000
 
 ================================================================================
 
@@ -682,15 +684,15 @@ tolerances: {tolvrs: 1.00E-08, }
 
  At SCF step   13       vres2   =  3.89E-09 < tolvrs=  1.00E-08 =>converged.
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000    -2.208178     1.704211     -0.503967    -3.912389
-    2   2.00000     2.121307    -1.940786      0.180521     4.062093
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1  H   2.00000    -2.208178     1.704211     -0.503967    -3.912389
+    2  H   2.00000     2.121307    -1.940786      0.180521     4.062093
+ ------------------------------------------------------------------------------------------------------------
   Sum:             -0.086871    -0.236575     -0.323446     0.149704
- Total magnetization (from the atomic spheres):             0.149704
- Total magnetization (exact up - dn):                       0.000000
+ Total magnetization (from the atomic spheres):                0.149704
+ Total magnetization (exact up - dn):                          0.000000
 
 ================================================================================
 
@@ -754,15 +756,15 @@ tolerances: {tolvrs: 1.00E-08, }
 
  At SCF step   13       vres2   =  3.89E-09 < tolvrs=  1.00E-08 =>converged.
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     1.940786    -2.121307     -0.180521     4.062093
-    2   2.00000    -1.704211     2.208178      0.503967    -3.912389
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1  H   2.00000     1.940786    -2.121307     -0.180521     4.062093
+    2  H   2.00000    -1.704211     2.208178      0.503967    -3.912389
+ ------------------------------------------------------------------------------------------------------------
   Sum:              0.236575     0.086871      0.323446     0.149704
- Total magnetization (from the atomic spheres):             0.149704
- Total magnetization (exact up - dn):                      -0.000000
+ Total magnetization (from the atomic spheres):                0.149704
+ Total magnetization (exact up - dn):                         -0.000000
 
 ================================================================================
 
@@ -1000,15 +1002,15 @@ force_length_stats: {min:   2.67229630E-02, max:   2.67229630E-02, mean:   2.672
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.574120     0.102786      0.676905     0.471334
-    2   2.00000     0.102786     0.574120      0.676905    -0.471334
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1  H   2.00000     0.574120     0.102786      0.676905     0.471334
+    2  H   2.00000     0.102786     0.574120      0.676905    -0.471334
+ ------------------------------------------------------------------------------------------------------------
   Sum:              0.676905     0.676905      1.353811    -0.000000
- Total magnetization (from the atomic spheres):            -0.000000
- Total magnetization (exact up - dn):                      -0.000000
+ Total magnetization (from the atomic spheres):               -0.000000
+ Total magnetization (exact up - dn):                         -0.000000
 
 ================================================================================
 
@@ -1160,15 +1162,15 @@ force_length_stats: {min:   2.66793629E-02, max:   2.66793629E-02, mean:   2.667
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.570917     0.101148      0.672065     0.469769
-    2   2.00000     0.102609     0.574281      0.676890    -0.471672
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1  H   2.00000     0.570917     0.101148      0.672065     0.469769
+    2  H   2.00000     0.102609     0.574281      0.676890    -0.471672
+ ------------------------------------------------------------------------------------------------------------
   Sum:              0.673526     0.675429      1.348955    -0.001903
- Total magnetization (from the atomic spheres):            -0.001903
- Total magnetization (exact up - dn):                       0.000000
+ Total magnetization (from the atomic spheres):               -0.001903
+ Total magnetization (exact up - dn):                          0.000000
 
 ================================================================================
 
@@ -1320,15 +1322,15 @@ force_length_stats: {min:   2.67666252E-02, max:   2.67666252E-02, mean:   2.676
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.571070     0.102434      0.673504     0.468636
-    2   2.00000     0.102963     0.573958      0.676920    -0.470995
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1  H   2.00000     0.571070     0.102434      0.673504     0.468636
+    2  H   2.00000     0.102963     0.573958      0.676920    -0.470995
+ ------------------------------------------------------------------------------------------------------------
   Sum:              0.674032     0.676392      1.350424    -0.002359
- Total magnetization (from the atomic spheres):            -0.002359
- Total magnetization (exact up - dn):                      -0.000000
+ Total magnetization (from the atomic spheres):               -0.002359
+ Total magnetization (exact up - dn):                         -0.000000
 
 ================================================================================
 
@@ -1470,15 +1472,15 @@ tolerances: {tolvrs: 1.00E-08, }
 
  At SCF step   13       vres2   =  3.89E-09 < tolvrs=  1.00E-08 =>converged.
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000    -2.208178     1.704211     -0.503967    -3.912389
-    2   2.00000     2.121307    -1.940786      0.180521     4.062093
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1  H   2.00000    -2.208178     1.704211     -0.503967    -3.912389
+    2  H   2.00000     2.121307    -1.940786      0.180521     4.062093
+ ------------------------------------------------------------------------------------------------------------
   Sum:             -0.086871    -0.236575     -0.323446     0.149704
- Total magnetization (from the atomic spheres):             0.149704
- Total magnetization (exact up - dn):                       0.000000
+ Total magnetization (from the atomic spheres):                0.149704
+ Total magnetization (exact up - dn):                          0.000000
 
 ================================================================================
 
@@ -2009,10 +2011,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.2  wall=          1.2
+- Proc.   0 individual time (sec): cpu=          1.2  wall=          1.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  48 WARNINGs and  19 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.2  wall=          1.2
++Overall time at end (sec) : cpu=          1.2  wall=          1.3

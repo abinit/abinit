@@ -1,5 +1,5 @@
 
-.Version 10.4.5.5 of ABINIT, released Jul 2025.
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 Jun 2025.
-- ( at 12h59 )
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h14 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v2_t54/t54.abi
 - output file    -> t54.abo
@@ -4531,15 +4531,15 @@ force_length_stats: {min:   1.22621648E+01, max:   1.22621648E+01, mean:   1.226
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.367354     0.367611      0.734965    -0.000258
-    2   2.00000     0.367611     0.367354      0.734965     0.000258
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Mg   2.00000     0.367354     0.367611      0.734965    -0.000258
+    2 Mg   2.00000     0.367611     0.367354      0.734965     0.000258
+ ------------------------------------------------------------------------------------------------------------
   Sum:              0.734965     0.734965      1.469931     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                       0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                          0.000000
 
 ================================================================================
 
@@ -5374,10 +5374,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          6.0  wall=          6.1
+- Proc.   0 individual time (sec): cpu=          6.1  wall=          6.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  48 WARNINGs and  83 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.0  wall=          6.1
++Overall time at end (sec) : cpu=          6.1  wall=          6.1

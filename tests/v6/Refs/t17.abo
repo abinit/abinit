@@ -1,5 +1,5 @@
 
-.Version 10.4.5.5 of ABINIT, released Jul 2025.
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  9 Jul 2025.
-- ( at 12h01 )
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h15 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v6_t17/t17.abi
 - output file    -> t17.abo
@@ -412,14 +412,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     1.060850     0.457903      1.518753     0.602946
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Bi   2.00000     1.060850     0.457903      1.518753     0.602946
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.060850     0.457903      1.518753     0.602946
- Total magnetization (from the atomic spheres):             0.602946
- Total magnetization (exact up - dn):                       3.000000
+ Total magnetization (from the atomic spheres):                0.602946
+ Total magnetization (exact up - dn):                          3.000000
 
  Collinear magnetization     0.3000000000E+01 (in # of spins, without 1/2 for magnetic moment)
  Spin magnetic energy -m.B =    -0.1500000000E+01 Ha
@@ -587,14 +587,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     1.060849     0.457904      1.518753     0.602944
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Bi   2.00000     1.060849     0.457904      1.518753     0.602944
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.060849     0.457904      1.518753     0.602944
- Total magnetization (from the atomic spheres):             0.602944
- Total magnetization (exact up - dn):                       3.000000
+ Total magnetization (from the atomic spheres):                0.602944
+ Total magnetization (exact up - dn):                          3.000000
 
  Collinear magnetization     0.3000000000E+01 (in # of spins, without 1/2 for magnetic moment)
  Spin magnetic energy -m.B =    -0.1500000000E+01 Ha
@@ -776,13 +776,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
- Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.00000        1.275229     -0.000005   -0.000001    1.275229
- ---------------------------------------------------------------------
- Total magnetization (spheres)      -0.000005   -0.000001    1.275229
- Total magnetization (exact)        -0.000011   -0.000003    5.000000
+    Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
+    1 Bi   2.00000        1.275229      1.275229   -0.000005   -0.000001    1.275229    0.000223 -163.386040
+ ------------------------------------------------------------------------------------------------------------
+ Total magnetization (spheres)          1.275229   -0.000005   -0.000001    1.275229    0.000223 -163.386040
+ Total magnetization (exact)            5.000000   -0.000011   -0.000003    5.000000    0.000134 -163.494621
  Magnetization vector    -0.1118867224E-04   -0.3315378334E-05    0.5000000000E+01 (in # of spins, without 1/2 for magnetic moment)
  Spin magnetic energy -m.B =    -0.2500000000E+01 Ha
 ================================================================================
@@ -883,7 +883,7 @@ tolerances: {toldfe: 1.00E-07, }
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
  ETOT  1  -5.0646811711824    -5.065E+00 6.697E-06 1.136E-08 1.275E+00 1.275E+00
- ETOT  2  -5.0646811711836    -1.152E-12 1.987E-06 3.931E-09 3.278E-07 1.275E+00
+ ETOT  2  -5.0646811711836    -1.152E-12 1.987E-06 3.931E-09 3.007E-07 1.275E+00
  ETOT  3  -5.0646811711839    -3.118E-13 2.363E-07 4.068E-10 3.940E-07 1.275E+00
 
  At SCF step    3, etot is converged : 
@@ -950,13 +950,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
- Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.00000        1.275219     -0.000000   -0.000000    1.275219
- ---------------------------------------------------------------------
- Total magnetization (spheres)      -0.000000   -0.000000    1.275219
- Total magnetization (exact)        -0.000001   -0.000000    5.000000
+    Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
+    1 Bi   2.00000        1.275219      1.275219   -0.000000   -0.000000    1.275219    0.000011 -163.592596
+ ------------------------------------------------------------------------------------------------------------
+ Total magnetization (spheres)          1.275219   -0.000000   -0.000000    1.275219    0.000011 -163.592596
+ Total magnetization (exact)            5.000000   -0.000001   -0.000000    5.000000    0.000007 -163.708365
  Magnetization vector    -0.5502842367E-06   -0.1608271688E-06    0.5000000000E+01 (in # of spins, without 1/2 for magnetic moment)
  Spin magnetic energy -m.B =    -0.2500000000E+01 Ha
 ================================================================================
@@ -1130,13 +1130,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
- Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.00000        1.275229     -0.000005   -0.000001    1.275229
- ---------------------------------------------------------------------
- Total magnetization (spheres)      -0.000005   -0.000001    1.275229
- Total magnetization (exact)        -0.000011   -0.000003    5.000000
+    Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
+    1 Bi   2.00000        1.275229      1.275229   -0.000005   -0.000001    1.275229    0.000223 -163.386040
+ ------------------------------------------------------------------------------------------------------------
+ Total magnetization (spheres)          1.275229   -0.000005   -0.000001    1.275229    0.000223 -163.386040
+ Total magnetization (exact)            5.000000   -0.000011   -0.000003    5.000000    0.000134 -163.494621
  Magnetization vector    -0.1118867224E-04   -0.3315378334E-05    0.5000000000E+01 (in # of spins, without 1/2 for magnetic moment)
  Spin magnetic energy -m.B =    -0.2500000000E+01 Ha
 ================================================================================
@@ -1237,7 +1237,7 @@ tolerances: {toldfe: 1.00E-07, }
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
  ETOT  1  -5.0646811711824    -5.065E+00 6.697E-06 1.136E-08 1.275E+00 1.275E+00
- ETOT  2  -5.0646811711836    -1.152E-12 1.987E-06 3.931E-09 3.278E-07 1.275E+00
+ ETOT  2  -5.0646811711836    -1.152E-12 1.987E-06 3.931E-09 3.007E-07 1.275E+00
  ETOT  3  -5.0646811711839    -3.118E-13 2.363E-07 4.068E-10 3.940E-07 1.275E+00
 
  At SCF step    3, etot is converged : 
@@ -1304,13 +1304,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
- Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.00000        1.275219     -0.000000   -0.000000    1.275219
- ---------------------------------------------------------------------
- Total magnetization (spheres)      -0.000000   -0.000000    1.275219
- Total magnetization (exact)        -0.000001   -0.000000    5.000000
+    Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
+    1 Bi   2.00000        1.275219      1.275219   -0.000000   -0.000000    1.275219    0.000011 -163.592596
+ ------------------------------------------------------------------------------------------------------------
+ Total magnetization (spheres)          1.275219   -0.000000   -0.000000    1.275219    0.000011 -163.592596
+ Total magnetization (exact)            5.000000   -0.000001   -0.000000    5.000000    0.000007 -163.708365
  Magnetization vector    -0.5502842367E-06   -0.1608271688E-06    0.5000000000E+01 (in # of spins, without 1/2 for magnetic moment)
  Spin magnetic energy -m.B =    -0.2500000000E+01 Ha
 ================================================================================
@@ -1623,10 +1623,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.4  wall=          3.5
+- Proc.   0 individual time (sec): cpu=          3.3  wall=          3.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered  25 WARNINGs and  26 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.4  wall=          3.5
+.Delivered  23 WARNINGs and  28 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.3  wall=          3.4

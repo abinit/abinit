@@ -1,5 +1,5 @@
 
-.Version 10.4.5.5 of ABINIT, released Jul 2025.
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue  8 Jul 2025.
-- ( at 12h04 )
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h19 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v9_t03/t03.abi
 - output file    -> t03.abo
@@ -328,22 +328,22 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500. mag(i)=approximate local magnetic moment.
- Atom    Radius     Total density     mag(x)      mag(y)      mag(z)   Atomic charge
-    1   2.10000       14.473286      0.000000   -0.000000    2.250000      1.526714
-    2   2.10000       14.469246     -0.000000    0.000000    2.300000      1.530754
- ---------------------------------------------------------------------
- Total magnetization (spheres)      -0.000000    0.000000    4.550000
- Total magnetization (exact)         0.000000   -0.000000    4.410755
+    Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)   Atomic charge
+    1 Fe   2.10000       14.473286      2.250000    0.000000   -0.000000    2.250000    0.000000    0.000000      1.526714
+    2 Fe   2.10000       14.469246      2.300000   -0.000000    0.000000    2.300000    0.000000    0.000000      1.530754
+ ------------------------------------------------------------------------------------------------------------
+ Total magnetization (spheres)          4.550000   -0.000000    0.000000    4.550000    0.000000    0.000000
+ Total magnetization (exact)            4.410755    0.000000   -0.000000    4.410755    0.000000    0.000000
 
  Gradient with respect to target (=torque)       (scalar + magnetic field):
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
- Atom    Radius       Torque          T(x)        T(y)        T(z)
-    1   2.10000       -0.000000     -0.000000    0.000000   -0.000704
-    2   2.10000       -0.000000     -0.000000    0.000000    0.000174
- ---------------------------------------------------------------------
+    Atom    Radius       Torque          T(x)        T(y)        T(z)
+    1 Fe   2.10000       -0.000000      0.000704   -0.000000    0.000000   -0.000704  180.000000    0.000000
+    2 Fe   2.10000       -0.000000      0.000174   -0.000000    0.000000    0.000174    0.000000    0.000000
+ ------------------------------------------------------------------------------------------------------------
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -1015,10 +1015,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         22.3  wall=         23.1
+- Proc.   0 individual time (sec): cpu=         22.2  wall=         22.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         22.3  wall=         23.1
++Overall time at end (sec) : cpu=         22.2  wall=         22.2

@@ -1,5 +1,5 @@
 
-.Version 10.4.5.5 of ABINIT, released Jul 2025.
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 Jun 2025.
-- ( at 12h59 )
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h14 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v2_t51/t51.abi
 - output file    -> t51.abo
@@ -210,15 +210,15 @@ force_length_stats: {min:   6.58959349E-01, max:   6.58959349E-01, mean:   6.589
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     4.047681     3.014267      7.061949     1.033414
-    2   2.00000     4.047682     3.014268      7.061949     1.033414
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1  O   2.00000     4.047681     3.014267      7.061949     1.033414
+    2  O   2.00000     4.047682     3.014268      7.061949     1.033414
+ ------------------------------------------------------------------------------------------------------------
   Sum:              8.095363     6.028535     14.123898     2.066828
- Total magnetization (from the atomic spheres):             2.066828
- Total magnetization (exact up - dn):                       1.995081
+ Total magnetization (from the atomic spheres):                2.066828
+ Total magnetization (exact up - dn):                          1.995081
 
 ================================================================================
 

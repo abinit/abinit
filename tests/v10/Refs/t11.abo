@@ -1,4 +1,5 @@
-.Version 10.5.4.5 of ABINIT, released Jul 2025.
+
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -13,18 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri  1 Aug 2025.
-- ( at 15h55 )
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h12 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_xg-tools-beautifications/tests/TestBot_MPI1/v10_t11/t11.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v10_t11/t11.abi
 - output file    -> t11.abo
 - root for input  files -> t11i
 - root for output files -> t11o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_xg-tools-beautifications/tests/Pspdir/Psdj_paw_pbe_std/P.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/P.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_xg-tools-beautifications/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -298,9 +299,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_xg-tools-beautifications/tests/Pspdir/Psdj_paw_pbe_std/P.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_xg-tools-beautifications/tests/Pspdir/Psdj_paw_pbe_std/P.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_xg-tools-beautifications/tests/Pspdir/Psdj_paw_pbe_std/P.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/P.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/P.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/P.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90690075
@@ -318,9 +319,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_xg-tools-beautifications/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_xg-tools-beautifications/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_xg-tools-beautifications/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90363307
@@ -351,22 +352,22 @@ solver: {iscf: 17, nstep: 15, nline: 8, wfoptalg: 114, }
 tolerances: {tolvrs: 1.00E-20, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -8.6675710414256    -8.668E+00 1.005E-07 1.393E+00 9.448E-03 9.448E-03
- ETOT  2  -8.6585069690255     9.064E-03 1.119E-06 1.743E-01 2.278E-03 7.170E-03
- ETOT  3  -8.6576377267599     8.692E-04 1.576E-06 2.000E-02 1.129E-03 6.041E-03
- ETOT  4  -8.6577744045653    -1.367E-04 1.184E-07 1.123E-03 2.392E-04 5.802E-03
- ETOT  5  -8.6578456748342    -7.127E-05 3.301E-08 9.857E-05 8.498E-05 5.886E-03
- ETOT  6  -8.6578584907685    -1.282E-05 2.268E-08 9.636E-06 2.844E-05 5.866E-03
- ETOT  7  -8.6578599233871    -1.433E-06 1.616E-08 1.346E-06 9.523E-06 5.861E-03
- ETOT  8  -8.6578600790057    -1.556E-07 9.531E-10 2.645E-07 7.570E-06 5.868E-03
- ETOT  9  -8.6578601210312    -4.203E-08 2.060E-10 1.315E-07 6.332E-06 5.868E-03
- ETOT 10  -8.6578601498938    -2.886E-08 5.473E-10 5.141E-08 1.053E-05 5.874E-03
- ETOT 11  -8.6578601592579    -9.364E-09 2.079E-10 1.396E-08 7.867E-06 5.880E-03
- ETOT 12  -8.6578601621217    -2.864E-09 1.400E-10 1.993E-09 6.898E-06 5.884E-03
- ETOT 13  -8.6578601625156    -3.940E-10 3.212E-12 3.478E-10 1.141E-06 5.884E-03
- ETOT 14  -8.6578601625350    -1.934E-11 2.597E-13 6.531E-11 3.314E-07 5.885E-03
- ETOT 15  -8.6578601625164     1.859E-11 8.701E-14 9.225E-12 1.539E-07 5.885E-03
+     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
+ ETOT  1  -8.6675710414256    -8.668E+00 1.005E-07 1.393E+00 9.448E-03 9.448E-03 2.731E-01 2.731E-01
+ ETOT  2  -8.6585069690255     9.064E-03 1.119E-06 1.743E-01 2.278E-03 7.170E-03 2.330E-02 2.498E-01
+ ETOT  3  -8.6576377267599     8.692E-04 1.576E-06 2.000E-02 1.129E-03 6.041E-03 3.102E-03 2.529E-01
+ ETOT  4  -8.6577744045653    -1.367E-04 1.184E-07 1.123E-03 2.392E-04 5.802E-03 3.282E-03 2.562E-01
+ ETOT  5  -8.6578456748342    -7.127E-05 3.301E-08 9.857E-05 8.498E-05 5.886E-03 1.948E-03 2.582E-01
+ ETOT  6  -8.6578584907685    -1.282E-05 2.268E-08 9.636E-06 2.844E-05 5.866E-03 9.517E-04 2.591E-01
+ ETOT  7  -8.6578599233871    -1.433E-06 1.616E-08 1.346E-06 9.523E-06 5.861E-03 2.253E-04 2.593E-01
+ ETOT  8  -8.6578600790057    -1.556E-07 9.531E-10 2.645E-07 7.570E-06 5.868E-03 5.038E-05 2.593E-01
+ ETOT  9  -8.6578601210312    -4.203E-08 2.060E-10 1.315E-07 6.332E-06 5.868E-03 2.518E-05 2.593E-01
+ ETOT 10  -8.6578601498938    -2.886E-08 5.473E-10 5.141E-08 1.053E-05 5.874E-03 3.079E-05 2.593E-01
+ ETOT 11  -8.6578601592579    -9.364E-09 2.079E-10 1.396E-08 7.867E-06 5.880E-03 4.878E-06 2.593E-01
+ ETOT 12  -8.6578601621217    -2.864E-09 1.400E-10 1.993E-09 6.898E-06 5.884E-03 7.793E-06 2.593E-01
+ ETOT 13  -8.6578601625156    -3.940E-10 3.212E-12 3.478E-10 1.141E-06 5.884E-03 4.367E-06 2.593E-01
+ ETOT 14  -8.6578601625350    -1.934E-11 2.597E-13 6.531E-11 3.314E-07 5.885E-03 6.067E-07 2.593E-01
+ ETOT 15  -8.6578601625164     1.859E-11 8.701E-14 9.225E-12 1.539E-07 5.885E-03 4.064E-07 2.593E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -8.51409646E-04  sigma(3 2)=  7.27582253E-05
@@ -408,15 +409,15 @@ force_length_stats: {min:   7.94789084E-03, max:   7.94789084E-03, mean:   7.947
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.90690     1.454356     1.195067      2.649423     0.259290
-    2   1.90363     0.449726     0.337495      0.787221     0.112231
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1  P   1.90690     1.454356     1.195067      2.649423     0.259290
+    2 Al   1.90363     0.449726     0.337495      0.787221     0.112231
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.904082     1.532561      3.436644     0.371521
- Total magnetization (from the atomic spheres):             0.371521
- Total magnetization (exact up - dn):                       1.000002
+ Total magnetization (from the atomic spheres):                0.371521
+ Total magnetization (exact up - dn):                          1.000002
 
 
  PAW TEST:
@@ -639,22 +640,22 @@ solver: {iscf: 17, nstep: 15, nline: 8, wfoptalg: 114, }
 tolerances: {tolvrs: 1.00E-20, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -8.6675710414256    -8.668E+00 1.005E-07 1.393E+00 9.448E-03 9.448E-03
- ETOT  2  -8.6585069690208     9.064E-03 1.119E-06 1.743E-01 2.278E-03 7.170E-03
- ETOT  3  -8.6576377267457     8.692E-04 1.576E-06 2.000E-02 1.129E-03 6.041E-03
- ETOT  4  -8.6577744045657    -1.367E-04 1.184E-07 1.123E-03 2.392E-04 5.802E-03
- ETOT  5  -8.6578456748280    -7.127E-05 3.301E-08 9.857E-05 8.497E-05 5.886E-03
- ETOT  6  -8.6578584907653    -1.282E-05 2.268E-08 9.636E-06 2.844E-05 5.866E-03
- ETOT  7  -8.6578599233874    -1.433E-06 1.616E-08 1.346E-06 9.523E-06 5.861E-03
- ETOT  8  -8.6578600790064    -1.556E-07 9.531E-10 2.645E-07 7.570E-06 5.868E-03
- ETOT  9  -8.6578601210313    -4.202E-08 2.059E-10 1.315E-07 6.332E-06 5.868E-03
- ETOT 10  -8.6578601498940    -2.886E-08 5.473E-10 5.141E-08 1.053E-05 5.874E-03
- ETOT 11  -8.6578601592579    -9.364E-09 2.079E-10 1.396E-08 7.867E-06 5.880E-03
- ETOT 12  -8.6578601621217    -2.864E-09 1.400E-10 1.993E-09 6.898E-06 5.884E-03
- ETOT 13  -8.6578601625156    -3.939E-10 3.213E-12 3.478E-10 1.141E-06 5.884E-03
- ETOT 14  -8.6578601625349    -1.930E-11 2.595E-13 6.531E-11 3.314E-07 5.885E-03
- ETOT 15  -8.6578601625164     1.859E-11 8.699E-14 9.224E-12 1.539E-07 5.885E-03
+     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
+ ETOT  1  -8.6675710414256    -8.668E+00 1.005E-07 1.393E+00 9.448E-03 9.448E-03 2.731E-01 2.731E-01
+ ETOT  2  -8.6585069690208     9.064E-03 1.119E-06 1.743E-01 2.278E-03 7.170E-03 2.330E-02 2.498E-01
+ ETOT  3  -8.6576377267457     8.692E-04 1.576E-06 2.000E-02 1.129E-03 6.041E-03 3.102E-03 2.529E-01
+ ETOT  4  -8.6577744045657    -1.367E-04 1.184E-07 1.123E-03 2.392E-04 5.802E-03 3.282E-03 2.562E-01
+ ETOT  5  -8.6578456748280    -7.127E-05 3.301E-08 9.857E-05 8.497E-05 5.886E-03 1.948E-03 2.582E-01
+ ETOT  6  -8.6578584907653    -1.282E-05 2.268E-08 9.636E-06 2.844E-05 5.866E-03 9.517E-04 2.591E-01
+ ETOT  7  -8.6578599233874    -1.433E-06 1.616E-08 1.346E-06 9.523E-06 5.861E-03 2.253E-04 2.593E-01
+ ETOT  8  -8.6578600790064    -1.556E-07 9.531E-10 2.645E-07 7.570E-06 5.868E-03 5.038E-05 2.593E-01
+ ETOT  9  -8.6578601210313    -4.202E-08 2.059E-10 1.315E-07 6.332E-06 5.868E-03 2.518E-05 2.593E-01
+ ETOT 10  -8.6578601498940    -2.886E-08 5.473E-10 5.141E-08 1.053E-05 5.874E-03 3.079E-05 2.593E-01
+ ETOT 11  -8.6578601592579    -9.364E-09 2.079E-10 1.396E-08 7.867E-06 5.880E-03 4.877E-06 2.593E-01
+ ETOT 12  -8.6578601621217    -2.864E-09 1.400E-10 1.993E-09 6.898E-06 5.884E-03 7.793E-06 2.593E-01
+ ETOT 13  -8.6578601625156    -3.939E-10 3.213E-12 3.478E-10 1.141E-06 5.884E-03 4.367E-06 2.593E-01
+ ETOT 14  -8.6578601625349    -1.930E-11 2.595E-13 6.531E-11 3.314E-07 5.885E-03 6.067E-07 2.593E-01
+ ETOT 15  -8.6578601625164     1.859E-11 8.699E-14 9.224E-12 1.539E-07 5.885E-03 4.064E-07 2.593E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -8.51409645E-04  sigma(3 2)=  7.27582252E-05
@@ -696,15 +697,15 @@ force_length_stats: {min:   7.94789084E-03, max:   7.94789084E-03, mean:   7.947
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.90690     1.454356     1.195067      2.649423     0.259290
-    2   1.90363     0.449726     0.337495      0.787221     0.112231
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1  P   1.90690     1.454356     1.195067      2.649423     0.259290
+    2 Al   1.90363     0.449726     0.337495      0.787221     0.112231
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.904082     1.532561      3.436644     0.371521
- Total magnetization (from the atomic spheres):             0.371521
- Total magnetization (exact up - dn):                       1.000002
+ Total magnetization (from the atomic spheres):                0.371521
+ Total magnetization (exact up - dn):                          1.000002
 
 
  PAW TEST:
@@ -927,22 +928,22 @@ solver: {iscf: 17, nstep: 15, nline: 8, wfoptalg: 111, }
 tolerances: {tolvrs: 1.00E-20, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -8.6675707411124    -8.668E+00 6.819E-05 1.393E+00 9.445E-03 9.445E-03
- ETOT  2  -8.6585067618091     9.064E-03 1.703E-07 1.744E-01 2.281E-03 7.165E-03
- ETOT  3  -8.6576377007065     8.691E-04 4.798E-07 2.000E-02 1.110E-03 6.054E-03
- ETOT  4  -8.6577743891890    -1.367E-04 1.883E-07 1.123E-03 2.528E-04 5.802E-03
- ETOT  5  -8.6578457891398    -7.140E-05 2.818E-08 9.761E-05 8.466E-05 5.886E-03
- ETOT  6  -8.6578585065776    -1.272E-05 6.246E-09 9.546E-06 2.809E-05 5.866E-03
- ETOT  7  -8.6578599226661    -1.416E-06 9.651E-10 1.352E-06 9.052E-06 5.861E-03
- ETOT  8  -8.6578600792008    -1.565E-07 1.858E-10 2.627E-07 7.859E-06 5.868E-03
- ETOT  9  -8.6578601214293    -4.223E-08 4.822E-11 1.311E-07 6.792E-06 5.868E-03
- ETOT 10  -8.6578601500779    -2.865E-08 6.676E-11 5.070E-08 1.032E-05 5.874E-03
- ETOT 11  -8.6578601592435    -9.166E-09 2.708E-11 1.400E-08 7.651E-06 5.880E-03
- ETOT 12  -8.6578601621298    -2.886E-09 1.711E-11 1.910E-09 7.217E-06 5.884E-03
- ETOT 13  -8.6578601625052    -3.754E-10 6.221E-13 3.844E-10 7.631E-07 5.884E-03
- ETOT 14  -8.6578601625338    -2.851E-11 7.229E-14 6.158E-11 5.677E-07 5.885E-03
- ETOT 15  -8.6578601625164     1.732E-11 7.154E-15 1.072E-11 9.840E-08 5.885E-03
+     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
+ ETOT  1  -8.6675707411124    -8.668E+00 6.819E-05 1.393E+00 9.445E-03 9.445E-03 2.732E-01 2.732E-01
+ ETOT  2  -8.6585067618091     9.064E-03 1.703E-07 1.744E-01 2.281E-03 7.165E-03 2.332E-02 2.498E-01
+ ETOT  3  -8.6576377007065     8.691E-04 4.798E-07 2.000E-02 1.110E-03 6.054E-03 3.109E-03 2.529E-01
+ ETOT  4  -8.6577743891890    -1.367E-04 1.883E-07 1.123E-03 2.528E-04 5.802E-03 3.268E-03 2.562E-01
+ ETOT  5  -8.6578457891398    -7.140E-05 2.818E-08 9.761E-05 8.466E-05 5.886E-03 1.955E-03 2.582E-01
+ ETOT  6  -8.6578585065776    -1.272E-05 6.246E-09 9.546E-06 2.809E-05 5.866E-03 9.506E-04 2.591E-01
+ ETOT  7  -8.6578599226661    -1.416E-06 9.651E-10 1.352E-06 9.052E-06 5.861E-03 2.239E-04 2.593E-01
+ ETOT  8  -8.6578600792008    -1.565E-07 1.858E-10 2.627E-07 7.859E-06 5.868E-03 5.010E-05 2.593E-01
+ ETOT  9  -8.6578601214293    -4.223E-08 4.822E-11 1.311E-07 6.792E-06 5.868E-03 2.564E-05 2.593E-01
+ ETOT 10  -8.6578601500779    -2.865E-08 6.676E-11 5.070E-08 1.032E-05 5.874E-03 3.021E-05 2.593E-01
+ ETOT 11  -8.6578601592435    -9.166E-09 2.708E-11 1.400E-08 7.651E-06 5.880E-03 4.968E-06 2.593E-01
+ ETOT 12  -8.6578601621298    -2.886E-09 1.711E-11 1.910E-09 7.217E-06 5.884E-03 7.376E-06 2.593E-01
+ ETOT 13  -8.6578601625052    -3.754E-10 6.221E-13 3.844E-10 7.631E-07 5.884E-03 4.243E-06 2.593E-01
+ ETOT 14  -8.6578601625338    -2.851E-11 7.229E-14 6.158E-11 5.677E-07 5.885E-03 6.207E-07 2.593E-01
+ ETOT 15  -8.6578601625164     1.732E-11 7.154E-15 1.072E-11 9.840E-08 5.885E-03 3.269E-07 2.593E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -8.51409744E-04  sigma(3 2)=  7.27581320E-05
@@ -984,15 +985,15 @@ force_length_stats: {min:   7.94788284E-03, max:   7.94788284E-03, mean:   7.947
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.90690     1.454356     1.195067      2.649423     0.259290
-    2   1.90363     0.449726     0.337495      0.787221     0.112231
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1  P   1.90690     1.454356     1.195067      2.649423     0.259290
+    2 Al   1.90363     0.449726     0.337495      0.787221     0.112231
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.904082     1.532562      3.436644     0.371520
- Total magnetization (from the atomic spheres):             0.371520
- Total magnetization (exact up - dn):                       1.000002
+ Total magnetization (from the atomic spheres):                0.371520
+ Total magnetization (exact up - dn):                          1.000002
 
 
  PAW TEST:
@@ -1215,22 +1216,22 @@ solver: {iscf: 17, nstep: 15, nline: 8, wfoptalg: 111, }
 tolerances: {tolvrs: 1.00E-20, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -8.6675707411124    -8.668E+00 6.819E-05 1.393E+00 9.445E-03 9.445E-03
- ETOT  2  -8.6585067618089     9.064E-03 1.703E-07 1.744E-01 2.281E-03 7.165E-03
- ETOT  3  -8.6576377007067     8.691E-04 4.798E-07 2.000E-02 1.110E-03 6.054E-03
- ETOT  4  -8.6577743891887    -1.367E-04 1.883E-07 1.123E-03 2.528E-04 5.802E-03
- ETOT  5  -8.6578457891397    -7.140E-05 2.818E-08 9.761E-05 8.466E-05 5.886E-03
- ETOT  6  -8.6578585065776    -1.272E-05 6.246E-09 9.546E-06 2.809E-05 5.866E-03
- ETOT  7  -8.6578599226662    -1.416E-06 9.651E-10 1.352E-06 9.052E-06 5.861E-03
- ETOT  8  -8.6578600792007    -1.565E-07 1.858E-10 2.627E-07 7.859E-06 5.868E-03
- ETOT  9  -8.6578601214293    -4.223E-08 4.822E-11 1.311E-07 6.792E-06 5.868E-03
- ETOT 10  -8.6578601500780    -2.865E-08 6.676E-11 5.070E-08 1.032E-05 5.874E-03
- ETOT 11  -8.6578601592435    -9.165E-09 2.708E-11 1.400E-08 7.651E-06 5.880E-03
- ETOT 12  -8.6578601621298    -2.886E-09 1.711E-11 1.910E-09 7.217E-06 5.884E-03
- ETOT 13  -8.6578601625052    -3.753E-10 6.221E-13 3.844E-10 7.631E-07 5.884E-03
- ETOT 14  -8.6578601625338    -2.861E-11 7.229E-14 6.158E-11 5.677E-07 5.885E-03
- ETOT 15  -8.6578601625163     1.746E-11 7.154E-15 1.072E-11 9.840E-08 5.885E-03
+     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
+ ETOT  1  -8.6675707411124    -8.668E+00 6.819E-05 1.393E+00 9.445E-03 9.445E-03 2.732E-01 2.732E-01
+ ETOT  2  -8.6585067618089     9.064E-03 1.703E-07 1.744E-01 2.281E-03 7.165E-03 2.332E-02 2.498E-01
+ ETOT  3  -8.6576377007067     8.691E-04 4.798E-07 2.000E-02 1.110E-03 6.054E-03 3.109E-03 2.529E-01
+ ETOT  4  -8.6577743891887    -1.367E-04 1.883E-07 1.123E-03 2.528E-04 5.802E-03 3.268E-03 2.562E-01
+ ETOT  5  -8.6578457891397    -7.140E-05 2.818E-08 9.761E-05 8.466E-05 5.886E-03 1.955E-03 2.582E-01
+ ETOT  6  -8.6578585065776    -1.272E-05 6.246E-09 9.546E-06 2.809E-05 5.866E-03 9.506E-04 2.591E-01
+ ETOT  7  -8.6578599226662    -1.416E-06 9.651E-10 1.352E-06 9.052E-06 5.861E-03 2.239E-04 2.593E-01
+ ETOT  8  -8.6578600792007    -1.565E-07 1.858E-10 2.627E-07 7.859E-06 5.868E-03 5.010E-05 2.593E-01
+ ETOT  9  -8.6578601214293    -4.223E-08 4.822E-11 1.311E-07 6.792E-06 5.868E-03 2.564E-05 2.593E-01
+ ETOT 10  -8.6578601500780    -2.865E-08 6.676E-11 5.070E-08 1.032E-05 5.874E-03 3.021E-05 2.593E-01
+ ETOT 11  -8.6578601592435    -9.165E-09 2.708E-11 1.400E-08 7.651E-06 5.880E-03 4.969E-06 2.593E-01
+ ETOT 12  -8.6578601621298    -2.886E-09 1.711E-11 1.910E-09 7.217E-06 5.884E-03 7.376E-06 2.593E-01
+ ETOT 13  -8.6578601625052    -3.753E-10 6.221E-13 3.844E-10 7.631E-07 5.884E-03 4.243E-06 2.593E-01
+ ETOT 14  -8.6578601625338    -2.861E-11 7.229E-14 6.158E-11 5.677E-07 5.885E-03 6.207E-07 2.593E-01
+ ETOT 15  -8.6578601625163     1.746E-11 7.154E-15 1.072E-11 9.840E-08 5.885E-03 3.268E-07 2.593E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -8.51409744E-04  sigma(3 2)=  7.27581320E-05
@@ -1272,15 +1273,15 @@ force_length_stats: {min:   7.94788284E-03, max:   7.94788284E-03, mean:   7.947
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.90690     1.454356     1.195067      2.649423     0.259290
-    2   1.90363     0.449726     0.337495      0.787221     0.112231
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1  P   1.90690     1.454356     1.195067      2.649423     0.259290
+    2 Al   1.90363     0.449726     0.337495      0.787221     0.112231
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.904082     1.532562      3.436644     0.371520
- Total magnetization (from the atomic spheres):             0.371520
- Total magnetization (exact up - dn):                       1.000002
+ Total magnetization (from the atomic spheres):                0.371520
+ Total magnetization (exact up - dn):                          1.000002
 
 
  PAW TEST:
@@ -1503,22 +1504,22 @@ solver: {iscf: 17, nstep: 15, nline: 8, wfoptalg: 111, }
 tolerances: {tolvrs: 1.00E-20, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -8.6675707411124    -8.668E+00 6.819E-05 1.393E+00
- ETOT  2  -8.6585067618089     9.064E-03 1.703E-07 1.744E-01
- ETOT  3  -8.6576377007067     8.691E-04 4.798E-07 2.000E-02
- ETOT  4  -8.6577743891887    -1.367E-04 1.883E-07 1.123E-03
- ETOT  5  -8.6578457891397    -7.140E-05 2.818E-08 9.761E-05
- ETOT  6  -8.6578585065776    -1.272E-05 6.246E-09 9.546E-06
- ETOT  7  -8.6578599226662    -1.416E-06 9.651E-10 1.352E-06
- ETOT  8  -8.6578600792007    -1.565E-07 1.858E-10 2.627E-07
- ETOT  9  -8.6578601214293    -4.223E-08 4.822E-11 1.311E-07
- ETOT 10  -8.6578601500780    -2.865E-08 6.676E-11 5.070E-08
- ETOT 11  -8.6578601592435    -9.165E-09 2.708E-11 1.400E-08
- ETOT 12  -8.6578601621298    -2.886E-09 1.711E-11 1.910E-09
- ETOT 13  -8.6578601625052    -3.753E-10 6.221E-13 3.844E-10
- ETOT 14  -8.6578601625338    -2.861E-11 7.229E-14 6.158E-11
- ETOT 15  -8.6578601625163     1.746E-11 7.154E-15 1.072E-11
+     iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
+ ETOT  1  -8.6675707411124    -8.668E+00 6.819E-05 1.393E+00 2.732E-01 2.732E-01
+ ETOT  2  -8.6585067618089     9.064E-03 1.703E-07 1.744E-01 2.332E-02 2.498E-01
+ ETOT  3  -8.6576377007067     8.691E-04 4.798E-07 2.000E-02 3.109E-03 2.529E-01
+ ETOT  4  -8.6577743891887    -1.367E-04 1.883E-07 1.123E-03 3.268E-03 2.562E-01
+ ETOT  5  -8.6578457891397    -7.140E-05 2.818E-08 9.761E-05 1.955E-03 2.582E-01
+ ETOT  6  -8.6578585065776    -1.272E-05 6.246E-09 9.546E-06 9.506E-04 2.591E-01
+ ETOT  7  -8.6578599226662    -1.416E-06 9.651E-10 1.352E-06 2.239E-04 2.593E-01
+ ETOT  8  -8.6578600792007    -1.565E-07 1.858E-10 2.627E-07 5.010E-05 2.593E-01
+ ETOT  9  -8.6578601214293    -4.223E-08 4.822E-11 1.311E-07 2.564E-05 2.593E-01
+ ETOT 10  -8.6578601500780    -2.865E-08 6.676E-11 5.070E-08 3.021E-05 2.593E-01
+ ETOT 11  -8.6578601592435    -9.165E-09 2.708E-11 1.400E-08 4.969E-06 2.593E-01
+ ETOT 12  -8.6578601621298    -2.886E-09 1.711E-11 1.910E-09 7.376E-06 2.593E-01
+ ETOT 13  -8.6578601625052    -3.753E-10 6.221E-13 3.844E-10 4.243E-06 2.593E-01
+ ETOT 14  -8.6578601625338    -2.861E-11 7.229E-14 6.158E-11 6.207E-07 2.593E-01
+ ETOT 15  -8.6578601625163     1.746E-11 7.154E-15 1.072E-11 3.268E-07 2.593E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -8.51409744E-04  sigma(3 2)=  7.27581320E-05
@@ -1560,15 +1561,15 @@ force_length_stats: {min:   7.94788284E-03, max:   7.94788284E-03, mean:   7.947
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.90690     1.454356     1.195067      2.649423     0.259290
-    2   1.90363     0.449726     0.337495      0.787221     0.112231
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1  P   1.90690     1.454356     1.195067      2.649423     0.259290
+    2 Al   1.90363     0.449726     0.337495      0.787221     0.112231
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.904082     1.532562      3.436644     0.371520
- Total magnetization (from the atomic spheres):             0.371520
- Total magnetization (exact up - dn):                       1.000002
+ Total magnetization (from the atomic spheres):                0.371520
+ Total magnetization (exact up - dn):                          1.000002
 
 
  PAW TEST:
@@ -1791,22 +1792,22 @@ solver: {iscf: 17, nstep: 15, nline: 8, wfoptalg: 111, }
 tolerances: {tolvrs: 1.00E-20, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -8.6675707411124    -8.668E+00 6.819E-05 1.393E+00
- ETOT  2  -8.6585067618089     9.064E-03 1.703E-07 1.744E-01
- ETOT  3  -8.6576377007067     8.691E-04 4.798E-07 2.000E-02
- ETOT  4  -8.6577743891887    -1.367E-04 1.883E-07 1.123E-03
- ETOT  5  -8.6578457891397    -7.140E-05 2.818E-08 9.761E-05
- ETOT  6  -8.6578585065776    -1.272E-05 6.246E-09 9.546E-06
- ETOT  7  -8.6578599226662    -1.416E-06 9.651E-10 1.352E-06
- ETOT  8  -8.6578600792007    -1.565E-07 1.858E-10 2.627E-07
- ETOT  9  -8.6578601214293    -4.223E-08 4.822E-11 1.311E-07
- ETOT 10  -8.6578601500780    -2.865E-08 6.676E-11 5.070E-08
- ETOT 11  -8.6578601592435    -9.165E-09 2.708E-11 1.400E-08
- ETOT 12  -8.6578601621298    -2.886E-09 1.711E-11 1.910E-09
- ETOT 13  -8.6578601625052    -3.753E-10 6.221E-13 3.844E-10
- ETOT 14  -8.6578601625338    -2.861E-11 7.229E-14 6.158E-11
- ETOT 15  -8.6578601625163     1.746E-11 7.154E-15 1.072E-11
+     iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
+ ETOT  1  -8.6675707411124    -8.668E+00 6.819E-05 1.393E+00 2.732E-01 2.732E-01
+ ETOT  2  -8.6585067618089     9.064E-03 1.703E-07 1.744E-01 2.332E-02 2.498E-01
+ ETOT  3  -8.6576377007067     8.691E-04 4.798E-07 2.000E-02 3.109E-03 2.529E-01
+ ETOT  4  -8.6577743891887    -1.367E-04 1.883E-07 1.123E-03 3.268E-03 2.562E-01
+ ETOT  5  -8.6578457891397    -7.140E-05 2.818E-08 9.761E-05 1.955E-03 2.582E-01
+ ETOT  6  -8.6578585065776    -1.272E-05 6.246E-09 9.546E-06 9.506E-04 2.591E-01
+ ETOT  7  -8.6578599226662    -1.416E-06 9.651E-10 1.352E-06 2.239E-04 2.593E-01
+ ETOT  8  -8.6578600792007    -1.565E-07 1.858E-10 2.627E-07 5.010E-05 2.593E-01
+ ETOT  9  -8.6578601214293    -4.223E-08 4.822E-11 1.311E-07 2.564E-05 2.593E-01
+ ETOT 10  -8.6578601500780    -2.865E-08 6.676E-11 5.070E-08 3.021E-05 2.593E-01
+ ETOT 11  -8.6578601592435    -9.165E-09 2.708E-11 1.400E-08 4.969E-06 2.593E-01
+ ETOT 12  -8.6578601621298    -2.886E-09 1.711E-11 1.910E-09 7.376E-06 2.593E-01
+ ETOT 13  -8.6578601625052    -3.753E-10 6.221E-13 3.844E-10 4.243E-06 2.593E-01
+ ETOT 14  -8.6578601625338    -2.861E-11 7.229E-14 6.158E-11 6.207E-07 2.593E-01
+ ETOT 15  -8.6578601625163     1.746E-11 7.154E-15 1.072E-11 3.268E-07 2.593E-01
 
  scprqt:  WARNING -
   nstep=   15 was not enough SCF cycles to converge;
@@ -1839,15 +1840,15 @@ force_length_stats: {min:   7.94788284E-03, max:   7.94788284E-03, mean:   7.947
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.90690     1.454356     1.195067      2.649423     0.259290
-    2   1.90363     0.449726     0.337495      0.787221     0.112231
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1  P   1.90690     1.454356     1.195067      2.649423     0.259290
+    2 Al   1.90363     0.449726     0.337495      0.787221     0.112231
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.904082     1.532562      3.436644     0.371520
- Total magnetization (from the atomic spheres):             0.371520
- Total magnetization (exact up - dn):                       1.000002
+ Total magnetization (from the atomic spheres):                0.371520
+ Total magnetization (exact up - dn):                          1.000002
 
 
  PAW TEST:
@@ -2225,10 +2226,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         15.6  wall=         15.7
+- Proc.   0 individual time (sec): cpu=         15.4  wall=         15.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and  49 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         15.6  wall=         15.7
++Overall time at end (sec) : cpu=         15.4  wall=         15.4

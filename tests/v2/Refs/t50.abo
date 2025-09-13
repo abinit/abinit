@@ -1,5 +1,5 @@
 
-.Version 10.4.5.5 of ABINIT, released Jul 2025.
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 Jun 2025.
-- ( at 12h59 )
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h13 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v2_t50/t50.abi
 - output file    -> t50.abo
@@ -234,15 +234,15 @@ force_length_stats: {min:   6.59265733E-01, max:   6.59265733E-01, mean:   6.592
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     4.047692     3.014287      7.061979     1.033404
-    2   2.00000     4.047692     3.014287      7.061979     1.033404
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1  O   2.00000     4.047692     3.014287      7.061979     1.033404
+    2  O   2.00000     4.047692     3.014287      7.061979     1.033404
+ ------------------------------------------------------------------------------------------------------------
   Sum:              8.095383     6.028574     14.123958     2.066809
- Total magnetization (from the atomic spheres):             2.066809
- Total magnetization (exact up - dn):                       1.995085
+ Total magnetization (from the atomic spheres):                2.066809
+ Total magnetization (exact up - dn):                          1.995085
 
 ================================================================================
 
@@ -407,15 +407,15 @@ force_length_stats: {min:   6.58651019E-01, max:   6.58651019E-01, mean:   6.586
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     4.047680     3.014241      7.061921     1.033439
-    2   2.00000     4.047680     3.014241      7.061921     1.033439
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1  O   2.00000     4.047680     3.014241      7.061921     1.033439
+    2  O   2.00000     4.047680     3.014241      7.061921     1.033439
+ ------------------------------------------------------------------------------------------------------------
   Sum:              8.095360     6.028482     14.123842     2.066878
- Total magnetization (from the atomic spheres):             2.066878
- Total magnetization (exact up - dn):                       1.995081
+ Total magnetization (from the atomic spheres):                2.066878
+ Total magnetization (exact up - dn):                          1.995081
 
 ================================================================================
 
@@ -645,10 +645,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.4  wall=          1.4
+- Proc.   0 individual time (sec): cpu=          1.3  wall=          1.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered   9 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.4  wall=          1.4
+.Delivered   4 WARNINGs and  11 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.3  wall=          1.4

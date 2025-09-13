@@ -1,5 +1,5 @@
 
-.Version 10.4.5.4 of ABINIT, released Jul 2025.
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 10 Jul 2025.
-- ( at 15h43 )
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h16 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v67mbpt_t29/t29.abi
 - output file    -> t29.abo
@@ -373,15 +373,15 @@ force_length_stats: {min:   4.75113557E-29, max:   4.75113557E-29, mean:   4.751
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.81165     0.656880     0.656880      1.313761     0.000000
-    2   1.81165     0.656880     0.656880      1.313761     0.000000
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Si   1.81165     0.656880     0.656880      1.313761     0.000000
+    2 Si   1.81165     0.656880     0.656880      1.313761     0.000000
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.313761     1.313761      2.627522     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                      -0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                         -0.000000
 
 
  PAW TEST:
@@ -633,15 +633,15 @@ force_length_stats: {min: null, max: null, mean: null, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.81165     0.656880     0.656880      1.313761     0.000000
-    2   1.81165     0.656880     0.656880      1.313761     0.000000
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Si   1.81165     0.656880     0.656880      1.313761     0.000000
+    2 Si   1.81165     0.656880     0.656880      1.313761     0.000000
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.313761     1.313761      2.627522     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                      -0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                         -0.000000
 
 
  PAW TEST:
@@ -1331,10 +1331,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         17.4  wall=         17.4
+- Proc.   0 individual time (sec): cpu=         17.3  wall=         17.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  12 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.4  wall=         17.4
++Overall time at end (sec) : cpu=         17.3  wall=         17.3

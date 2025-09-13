@@ -1,5 +1,5 @@
 
-.Version 10.4.5.5 of ABINIT, released Jul 2025.
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 Jun 2025.
-- ( at 13h05 )
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h19 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v9_t14/t14.abi
 - output file    -> t14.abo
@@ -1945,14 +1945,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.11532     7.777516     7.271231     15.048747     0.506285
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Fe   2.11532     7.777516     7.271231     15.048747     0.506285
+ ------------------------------------------------------------------------------------------------------------
   Sum:              7.777516     7.271231     15.048747     0.506285
- Total magnetization (from the atomic spheres):             0.506285
- Total magnetization (exact up - dn):                       0.496136
+ Total magnetization (from the atomic spheres):                0.506285
+ Total magnetization (exact up - dn):                          0.496136
 
 
  PAW TEST:
@@ -3230,13 +3230,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
- Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.11532       15.048749      0.000000    0.000000    0.505607
- ---------------------------------------------------------------------
- Total magnetization (spheres)       0.000000    0.000000    0.505607
- Total magnetization (exact)        -0.000000   -0.000000    0.496020
+    Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
+    1 Fe   2.11532       15.048749      0.505607    0.000000    0.000000    0.505607    0.000000    0.000000
+ ------------------------------------------------------------------------------------------------------------
+ Total magnetization (spheres)          0.505607    0.000000    0.000000    0.505607    0.000000    0.000000
+ Total magnetization (exact)            0.496020   -0.000000   -0.000000    0.496020    0.000000    0.000000
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -4562,13 +4562,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
- Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.11532       15.048751      0.505486    0.000000   -0.000000
- ---------------------------------------------------------------------
- Total magnetization (spheres)       0.505486    0.000000   -0.000000
- Total magnetization (exact)         0.495925    0.000000   -0.000000
+    Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
+    1 Fe   2.11532       15.048751      0.505486    0.505486    0.000000   -0.000000   90.000000    0.000000
+ ------------------------------------------------------------------------------------------------------------
+ Total magnetization (spheres)          0.505486    0.505486    0.000000   -0.000000   90.000000    0.000000
+ Total magnetization (exact)            0.495925    0.495925    0.000000   -0.000000   90.000000    0.000000
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -5894,13 +5894,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
- Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.11532       15.048742      0.000000    0.505608   -0.000000
- ---------------------------------------------------------------------
- Total magnetization (spheres)       0.000000    0.505608   -0.000000
- Total magnetization (exact)         0.000000    0.496020   -0.000000
+    Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
+    1 Fe   2.11532       15.048742      0.505608    0.000000    0.505608   -0.000000   90.000000   90.000000
+ ------------------------------------------------------------------------------------------------------------
+ Total magnetization (spheres)          0.505608    0.000000    0.505608   -0.000000   90.000000   90.000000
+ Total magnetization (exact)            0.496020    0.000000    0.496020   -0.000000   90.000000   90.000000
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -6348,7 +6348,7 @@ tolerances: {tolwfr: 1.00E-12, }
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
 
- ETOT  1  -122.58395876456    -1.226E+02 2.186E+01 1.768E+01 1.109E+00 1.109E+00
+ ETOT  1  -122.58395876456    -1.226E+02 2.186E+01 1.768E+01 1.568E+00 1.568E+00
 
  prteigrs : about to open file t14o_DS5_EIG
  Fermi (or HOMO) energy (hartree) =   0.63810   Average Vxc (hartree)=  -0.58131
@@ -6418,7 +6418,7 @@ tolerances: {tolwfr: 1.00E-12, }
    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    0.76650
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
 
- ETOT  2  -124.32528150464    -1.741E+00 3.142E-01 5.932E+00 3.102E-01 7.983E-01
+ ETOT  2  -124.32528150464    -1.741E+00 3.142E-01 5.932E+00 4.387E-01 1.129E+00
 
  prteigrs : about to open file t14o_DS5_EIG
  Fermi (or HOMO) energy (hartree) =   0.46849   Average Vxc (hartree)=  -0.59257
@@ -6488,7 +6488,7 @@ tolerances: {tolwfr: 1.00E-12, }
    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    0.07949    0.00962
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
 
- ETOT  3  -124.35591200692    -3.063E-02 5.508E-02 2.419E+00 3.767E-02 7.606E-01
+ ETOT  3  -124.35591200692    -3.063E-02 5.508E-02 2.419E+00 5.327E-02 1.076E+00
 
  prteigrs : about to open file t14o_DS5_EIG
  Fermi (or HOMO) energy (hartree) =   0.36619   Average Vxc (hartree)=  -0.59977
@@ -6558,7 +6558,7 @@ tolerances: {tolwfr: 1.00E-12, }
    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    0.03532    0.00715
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
 
- ETOT  4  -124.33619748278     1.971E-02 3.274E-02 1.227E+00 1.809E-01 5.798E-01
+ ETOT  4  -124.33619748278     1.971E-02 3.274E-02 1.227E+00 2.558E-01 8.199E-01
 
  prteigrs : about to open file t14o_DS5_EIG
  Fermi (or HOMO) energy (hartree) =   0.44835   Average Vxc (hartree)=  -0.59443
@@ -6628,7 +6628,7 @@ tolerances: {tolwfr: 1.00E-12, }
    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    0.00001    0.00000
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
 
- ETOT  5  -124.33655028876    -3.528E-04 5.502E-03 1.954E-01 1.813E-01 3.984E-01
+ ETOT  5  -124.33655028876    -3.528E-04 5.502E-03 1.954E-01 2.564E-01 5.635E-01
 
  prteigrs : about to open file t14o_DS5_EIG
  Fermi (or HOMO) energy (hartree) =   0.42345   Average Vxc (hartree)=  -0.59671
@@ -6698,7 +6698,7 @@ tolerances: {tolwfr: 1.00E-12, }
    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    0.00000    0.00000
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
 
- ETOT  6  -124.33794618193    -1.396E-03 1.195E-03 8.349E-02 4.743E-02 3.510E-01
+ ETOT  6  -124.33794618193    -1.396E-03 1.195E-03 8.349E-02 6.707E-02 4.964E-01
 
  prteigrs : about to open file t14o_DS5_EIG
  Fermi (or HOMO) energy (hartree) =   0.42439   Average Vxc (hartree)=  -0.59740
@@ -6768,7 +6768,7 @@ tolerances: {tolwfr: 1.00E-12, }
    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    0.00000    0.00000
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
 
- ETOT  7  -124.33791103852     3.514E-05 2.995E-03 6.586E-03 5.617E-03 3.566E-01
+ ETOT  7  -124.33791103852     3.514E-05 2.995E-03 6.586E-03 7.944E-03 5.044E-01
 
  prteigrs : about to open file t14o_DS5_EIG
  Fermi (or HOMO) energy (hartree) =   0.43392   Average Vxc (hartree)=  -0.59680
@@ -6838,7 +6838,7 @@ tolerances: {tolwfr: 1.00E-12, }
    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    0.00000    0.00000
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
 
- ETOT  8  -124.33784827227     6.277E-05 2.751E-03 1.764E-04 1.490E-03 3.581E-01
+ ETOT  8  -124.33784827227     6.277E-05 2.751E-03 1.764E-04 2.108E-03 5.065E-01
 
  prteigrs : about to open file t14o_DS5_EIG
  Fermi (or HOMO) energy (hartree) =   0.43040   Average Vxc (hartree)=  -0.59699
@@ -6908,7 +6908,7 @@ tolerances: {tolwfr: 1.00E-12, }
    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    0.00000    0.00000
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
 
- ETOT  9  -124.33785053287    -2.261E-06 7.909E-04 2.082E-05 3.896E-04 3.577E-01
+ ETOT  9  -124.33785053287    -2.261E-06 7.909E-04 2.082E-05 5.510E-04 5.059E-01
 
  prteigrs : about to open file t14o_DS5_EIG
  Fermi (or HOMO) energy (hartree) =   0.42972   Average Vxc (hartree)=  -0.59703
@@ -6978,7 +6978,7 @@ tolerances: {tolwfr: 1.00E-12, }
    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    0.00000    0.00000
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
 
- ETOT 10  -124.33785061558    -8.271E-08 2.141E-04 4.574E-07 1.863E-04 3.576E-01
+ ETOT 10  -124.33785061558    -8.271E-08 2.141E-04 4.574E-07 2.635E-04 5.057E-01
 
  prteigrs : about to open file t14o_DS5_EIG
  Fermi (or HOMO) energy (hartree) =   0.42986   Average Vxc (hartree)=  -0.59702
@@ -7048,7 +7048,7 @@ tolerances: {tolwfr: 1.00E-12, }
    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    0.00000    0.00000
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
 
- ETOT 11  -124.33785056406     5.152E-08 1.264E-04 3.165E-07 4.882E-05 3.575E-01
+ ETOT 11  -124.33785056406     5.152E-08 1.264E-04 3.165E-07 6.904E-05 5.056E-01
 
  prteigrs : about to open file t14o_DS5_EIG
  Fermi (or HOMO) energy (hartree) =   0.42986   Average Vxc (hartree)=  -0.59702
@@ -7118,7 +7118,7 @@ tolerances: {tolwfr: 1.00E-12, }
    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    0.00000    0.00000
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
 
- ETOT 12  -124.33785056824    -4.176E-09 1.616E-05 7.131E-09 1.822E-05 3.575E-01
+ ETOT 12  -124.33785056824    -4.176E-09 1.616E-05 7.131E-09 2.576E-05 5.056E-01
 
  prteigrs : about to open file t14o_DS5_EIG
  Fermi (or HOMO) energy (hartree) =   0.42987   Average Vxc (hartree)=  -0.59702
@@ -7226,13 +7226,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
- Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.11532       15.048741      0.357523    0.357523   -0.000000
- ---------------------------------------------------------------------
- Total magnetization (spheres)       0.357523    0.357523   -0.000000
- Total magnetization (exact)         0.350743    0.350743   -0.000000
+    Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
+    1 Fe   2.11532       15.048741      0.505614    0.357523    0.357523   -0.000000   90.000000   45.000000
+ ------------------------------------------------------------------------------------------------------------
+ Total magnetization (spheres)          0.505614    0.357523    0.357523   -0.000000   90.000000   45.000000
+ Total magnetization (exact)            0.496026    0.350743    0.350743   -0.000000   90.000000   45.000000
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -8068,10 +8068,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         14.0  wall=         14.1
+- Proc.   0 individual time (sec): cpu=         13.9  wall=         14.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered  10 WARNINGs and  30 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         14.0  wall=         14.1
++Overall time at end (sec) : cpu=         13.9  wall=         14.0

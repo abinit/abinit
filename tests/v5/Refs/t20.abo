@@ -1,5 +1,5 @@
 
-.Version 10.4.5.5 of ABINIT, released Jul 2025.
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 Jun 2025.
-- ( at 13h00 )
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h15 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v5_t20/t20.abi
 - output file    -> t20.abo
@@ -420,17 +420,17 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.30000     9.243162     7.631357     16.874519     1.611805
-    2   2.30000     7.631357     9.243162     16.874519    -1.611805
-    3   2.30000     3.545095     3.545095      7.090189    -0.000000
-    4   2.30000     3.545095     3.545095      7.090189    -0.000000
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ni   2.30000     9.243162     7.631357     16.874519     1.611805
+    2 Ni   2.30000     7.631357     9.243162     16.874519    -1.611805
+    3  O   2.30000     3.545095     3.545095      7.090189    -0.000000
+    4  O   2.30000     3.545095     3.545095      7.090189    -0.000000
+ ------------------------------------------------------------------------------------------------------------
   Sum:             23.964709    23.964709     47.929418     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                       0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                          0.000000
 
 
  PAW TEST:
@@ -970,17 +970,17 @@ force_length_stats: {min: null, max: null, mean: null, }
   (fatbands are in eV and are given for each value of L and M)
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.30000     9.243162     7.631357     16.874519     1.611805
-    2   2.30000     7.631357     9.243162     16.874519    -1.611805
-    3   2.30000     3.545095     3.545095      7.090189    -0.000000
-    4   2.30000     3.545095     3.545095      7.090189    -0.000000
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ni   2.30000     9.243162     7.631357     16.874519     1.611805
+    2 Ni   2.30000     7.631357     9.243162     16.874519    -1.611805
+    3  O   2.30000     3.545095     3.545095      7.090189    -0.000000
+    4  O   2.30000     3.545095     3.545095      7.090189    -0.000000
+ ------------------------------------------------------------------------------------------------------------
   Sum:             23.964709    23.964709     47.929418     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                       0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                          0.000000
 
 
  PAW TEST:
@@ -1550,10 +1550,10 @@ P           mkmem2         16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          8.1  wall=          8.2
+- Proc.   0 individual time (sec): cpu=          8.2  wall=          8.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.1  wall=          8.2
++Overall time at end (sec) : cpu=          8.2  wall=          8.2

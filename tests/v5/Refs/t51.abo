@@ -1,5 +1,5 @@
 
-.Version 10.4.5.5 of ABINIT, released Jul 2025.
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 Jun 2025.
-- ( at 13h01 )
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h15 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v5_t51-t52-t53/t51.abi
 - output file    -> t51.abo
@@ -499,14 +499,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     1.060851     0.457904      1.518755     0.602947
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Bi   2.00000     1.060851     0.457904      1.518755     0.602947
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.060851     0.457904      1.518755     0.602947
- Total magnetization (from the atomic spheres):             0.602947
- Total magnetization (exact up - dn):                       3.000000
+ Total magnetization (from the atomic spheres):                0.602947
+ Total magnetization (exact up - dn):                          3.000000
 
 ================================================================================
 
@@ -672,14 +672,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     1.056600     0.461824      1.518424     0.594776
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Bi   2.00000     1.056600     0.461824      1.518424     0.594776
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.056600     0.461824      1.518424     0.594776
- Total magnetization (from the atomic spheres):             0.594776
- Total magnetization (exact up - dn):                       2.958029
+ Total magnetization (from the atomic spheres):                0.594776
+ Total magnetization (exact up - dn):                          2.958029
 
 ================================================================================
 
@@ -786,14 +786,14 @@ tolerances: {toldfe: 1.00E-07, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
- ETOT  1  -5.4597622193270    -5.460E+00 6.393E-03 9.929E+00 6.008E-01 6.008E-01
- ETOT  2  -5.4667771475956    -7.015E-03 4.000E-06 1.518E+00 1.548E-02 6.163E-01
- ETOT  3  -5.4668626552119    -8.551E-05 1.710E-06 4.698E-01 6.326E-03 6.099E-01
+ ETOT  1  -5.4597622193270    -5.460E+00 6.393E-03 9.929E+00 6.010E-01 6.010E-01
+ ETOT  2  -5.4667771475956    -7.015E-03 4.000E-06 1.518E+00 1.527E-02 6.163E-01
+ ETOT  3  -5.4668626552119    -8.551E-05 1.710E-06 4.698E-01 6.339E-03 6.099E-01
  ETOT  4  -5.4668878103624    -2.516E-05 2.653E-07 1.166E-01 4.446E-03 6.055E-01
- ETOT  5  -5.4668955542941    -7.744E-06 5.590E-08 6.414E-03 2.333E-03 6.032E-01
- ETOT  6  -5.4668961306864    -5.764E-07 6.331E-09 1.975E-04 1.356E-04 6.030E-01
- ETOT  7  -5.4668961595120    -2.883E-08 7.901E-10 2.254E-05 4.310E-05 6.030E-01
- ETOT  8  -5.4668961633103    -3.798E-09 1.012E-10 5.053E-06 2.220E-05 6.029E-01
+ ETOT  5  -5.4668955542941    -7.744E-06 5.590E-08 6.414E-03 2.334E-03 6.032E-01
+ ETOT  6  -5.4668961306864    -5.764E-07 6.331E-09 1.975E-04 1.358E-04 6.030E-01
+ ETOT  7  -5.4668961595120    -2.883E-08 7.901E-10 2.254E-05 4.308E-05 6.030E-01
+ ETOT  8  -5.4668961633103    -3.798E-09 1.012E-10 5.053E-06 2.219E-05 6.030E-01
 
  At SCF step    8, etot is converged : 
   for the second time, diff in etot=  3.798E-09 < toldfe=  1.000E-07
@@ -859,13 +859,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
- Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.00000        1.518753      0.000178    0.002969    0.602950
- ---------------------------------------------------------------------
- Total magnetization (spheres)       0.000178    0.002969    0.602950
- Total magnetization (exact)         0.000883    0.014775    2.999963
+    Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
+    1 Bi   2.00000        1.518753      0.602957    0.000178    0.002969    0.602950    0.282671   86.578491
+ ------------------------------------------------------------------------------------------------------------
+ Total magnetization (spheres)          0.602957    0.000178    0.002969    0.602950    0.282671   86.578491
+ Total magnetization (exact)            3.000000    0.000883    0.014775    2.999963    0.282681   86.580839
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1031,13 +1031,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
- Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.00000        1.518428      0.000175    0.002929    0.594765
- ---------------------------------------------------------------------
- Total magnetization (spheres)       0.000175    0.002929    0.594765
- Total magnetization (exact)         0.000870    0.014568    2.957960
+    Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
+    1 Bi   2.00000        1.518428      0.594772    0.000175    0.002929    0.594765    0.282676   86.582202
+ ------------------------------------------------------------------------------------------------------------
+ Total magnetization (spheres)          0.594772    0.000175    0.002929    0.594765    0.282676   86.582202
+ Total magnetization (exact)            2.957996    0.000870    0.014568    2.957960    0.282676   86.582174
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1136,14 +1136,14 @@ tolerances: {toldfe: 1.00E-07, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
- ETOT  1  -5.4597622193270    -5.460E+00 6.393E-03 9.929E+00 6.008E-01 6.008E-01
- ETOT  2  -5.4667771475956    -7.015E-03 4.000E-06 1.518E+00 1.548E-02 6.163E-01
- ETOT  3  -5.4668626552119    -8.551E-05 1.710E-06 4.698E-01 6.326E-03 6.099E-01
+ ETOT  1  -5.4597622193270    -5.460E+00 6.393E-03 9.929E+00 6.010E-01 6.010E-01
+ ETOT  2  -5.4667771475956    -7.015E-03 4.000E-06 1.518E+00 1.527E-02 6.163E-01
+ ETOT  3  -5.4668626552119    -8.551E-05 1.710E-06 4.698E-01 6.339E-03 6.099E-01
  ETOT  4  -5.4668878103624    -2.516E-05 2.653E-07 1.166E-01 4.446E-03 6.055E-01
- ETOT  5  -5.4668955542941    -7.744E-06 5.590E-08 6.414E-03 2.333E-03 6.032E-01
- ETOT  6  -5.4668961306864    -5.764E-07 6.331E-09 1.975E-04 1.356E-04 6.030E-01
- ETOT  7  -5.4668961595120    -2.883E-08 7.901E-10 2.254E-05 4.310E-05 6.030E-01
- ETOT  8  -5.4668961633103    -3.798E-09 1.012E-10 5.053E-06 2.220E-05 6.029E-01
+ ETOT  5  -5.4668955542941    -7.744E-06 5.590E-08 6.414E-03 2.334E-03 6.032E-01
+ ETOT  6  -5.4668961306864    -5.764E-07 6.331E-09 1.975E-04 1.358E-04 6.030E-01
+ ETOT  7  -5.4668961595120    -2.883E-08 7.901E-10 2.254E-05 4.308E-05 6.030E-01
+ ETOT  8  -5.4668961633103    -3.798E-09 1.012E-10 5.053E-06 2.219E-05 6.030E-01
 
  At SCF step    8, etot is converged : 
   for the second time, diff in etot=  3.798E-09 < toldfe=  1.000E-07
@@ -1209,13 +1209,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
- Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.00000        1.518753      0.000178    0.002969    0.602950
- ---------------------------------------------------------------------
- Total magnetization (spheres)       0.000178    0.002969    0.602950
- Total magnetization (exact)         0.000883    0.014775    2.999963
+    Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
+    1 Bi   2.00000        1.518753      0.602957    0.000178    0.002969    0.602950    0.282671   86.578491
+ ------------------------------------------------------------------------------------------------------------
+ Total magnetization (spheres)          0.602957    0.000178    0.002969    0.602950    0.282671   86.578491
+ Total magnetization (exact)            3.000000    0.000883    0.014775    2.999963    0.282681   86.580839
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1381,13 +1381,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
- Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.00000        1.518428      0.000175    0.002929    0.594765
- ---------------------------------------------------------------------
- Total magnetization (spheres)       0.000175    0.002929    0.594765
- Total magnetization (exact)         0.000870    0.014568    2.957960
+    Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
+    1 Bi   2.00000        1.518428      0.594772    0.000175    0.002929    0.594765    0.282676   86.582202
+ ------------------------------------------------------------------------------------------------------------
+ Total magnetization (spheres)          0.594772    0.000175    0.002929    0.594765    0.282676   86.582202
+ Total magnetization (exact)            2.957996    0.000870    0.014568    2.957960    0.282676   86.582174
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1785,10 +1785,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.2  wall=          3.3
+- Proc.   0 individual time (sec): cpu=          3.3  wall=          3.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered  23 WARNINGs and  22 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.2  wall=          3.3
+.Delivered  21 WARNINGs and  24 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.3  wall=          3.3

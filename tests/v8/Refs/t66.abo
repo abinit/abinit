@@ -1,5 +1,5 @@
 
-.Version 10.4.5.5 of ABINIT, released Jul 2025.
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 Jun 2025.
-- ( at 13h04 )
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h18 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v8_t66/t66.abi
 - output file    -> t66.abo
@@ -49,6 +49,7 @@ _ WF disk file :      1.989 Mbytes ; DEN or POT disk file :      0.124 Mbytes.
 -    mband =          22        mffmem =           1         mkmem =           8
 -   mkqmem =           8        mk1mem =           8           mpw =         370
       nfft =        8000          nkpt =           8
+- my_mband =          22
 ================================================================================
 P This job should need less than                       9.505 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -346,14 +347,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     4.496153     1.611719      6.107872     2.884434
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Fe   2.00000     4.496153     1.611719      6.107872     2.884434
+ ------------------------------------------------------------------------------------------------------------
   Sum:              4.496153     1.611719      6.107872     2.884434
- Total magnetization (from the atomic spheres):             2.884434
- Total magnetization (exact up - dn):                       3.325184
+ Total magnetization (from the atomic spheres):                2.884434
+ Total magnetization (exact up - dn):                          3.325184
 
 ================================================================================
 
@@ -507,24 +508,16 @@ tolerances: {toldfe: 1.00E-06, }
  At SCF step   11, etot is converged : 
   for the second time, diff in etot=  9.651E-10 < toldfe=  1.000E-06
 
- ------------------------------------------------------------------------
- Integrals of the first order density n^(1) and magnetization m^(1):
- ------------------------------------------------------------------------
-
-     n^(1)    =   0.00000000E+00
-     m^(1)    =   0.30177205E+02
-
- ------------------------------------------------------------------------
-
+ ---------------------------------------------------------------------------
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000    12.849999   -11.164985      1.685014    24.014983
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Fe   2.00000    12.849999   -11.164985      1.685014    24.014983
+ ------------------------------------------------------------------------------------------------------------
   Sum:             12.849999   -11.164985      1.685014    24.014983
- Total magnetization (from the atomic spheres):            24.014983
- Total magnetization (exact up - dn):                      30.177205
+ Total magnetization (from the atomic spheres):               24.014983
+ Total magnetization (exact up - dn):                         30.177205
 
 ================================================================================
 
@@ -822,10 +815,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          6.9  wall=          7.0
+- Proc.   0 individual time (sec): cpu=          7.0  wall=          7.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.9  wall=          7.0
++Overall time at end (sec) : cpu=          7.0  wall=          7.1
