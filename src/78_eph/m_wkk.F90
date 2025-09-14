@@ -59,7 +59,7 @@ module m_wkk
  use m_pstat,          only : pstat_proc
  use m_sigtk,          only : sigtk_multiply_by_vc_sqrt
  use m_screening,      only : epsm1_t
- use m_ddk,            only : ddkop_t, ddkop_new
+ use m_ddk,            only : ddkop_t
 
  implicit none
 
@@ -323,7 +323,7 @@ subroutine wkk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ! FIXME
  !gmax = 2 * gmax
 
- ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
+ call ddkop%init(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
 
 #if 0
  call cwtime(cpu, wall, gflops, "start", msg=" Computing v_nk matrix elements for all states on the FS...")

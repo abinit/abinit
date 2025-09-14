@@ -21,9 +21,6 @@
 
 #include "abi_common.h"
 
-! TODO: Remove file
-!#include "libtetra.h"
-
 module m_krank
 
  use defs_basis

@@ -201,6 +201,12 @@ type, public :: gqk_t
   ! 3 * natom
   ! Mainly used to dimension arrays
 
+  ! TODO
+  ! These new entries will be used to implement band distribution
+  !integer :: m_start = -1, m_stop = -1, m_nb = -1
+  !integer :: n_start = -1, n_stop = -1, n_nb = -1
+  !integer :: nb_kq, nb_k
+
   integer :: nb = -1
   ! Number of bands included in the calculation for this spin
   ! Global as this dimension is not MPI-distributed due to (m, n) pairs.
@@ -209,12 +215,6 @@ type, public :: gqk_t
   integer :: bstart = -1, bstop = -1
   ! The first band starts at bstart.
   ! The last band is bstop (NB: These are global indices)
-
-  ! TODO
-  ! These new entries will be used to implement band distribution
-  !integer :: m_start = -1, m_stop = -1, m_nb = -1
-  !integer :: n_start = -1, n_stop = -1, n_nb = -1
-  !integer :: nb_kq, nb_k
 
   integer :: my_npert = -1
   ! Number of perturbations treated by this MPI rank.
@@ -278,7 +278,7 @@ type, public :: gqk_t
   ! Contiguous indices.
 
   ! FIXME: I don't remember why I decided to have my_npert as first dimension
-  ! now it seems much more more natural to me to have
+  ! now it seems much more more natural to me to have:
 
   ! (nb, nb, my_npert, my_nk, my_nq) or
   ! (nb, nb, my_npert, my_nq, my_nk)
@@ -3442,7 +3442,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  end if
 
  ! Create ddkop object to compute group velocities (if needed)
- ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
+ call ddkop%init(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
 
  if (gstore%with_vk /= 0 .and. ndone == 0) then
    call wrtout(std_out, " Computing and writing velocity operator matrix elements in the IBZ", pre_newlines=1)
