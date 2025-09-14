@@ -8,7 +8,7 @@
 !!  wrt k, and the corresponding wave functions
 !!
 !! COPYRIGHT
-!! Copyright (C) 2016-2025 ABINIT group (MJV, HM, MG)
+!! Copyright (C) 2016-2025 ABINIT group (MG, HM, MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -122,6 +122,9 @@ MODULE m_ddk
 
  contains
 
+   procedure :: init => ddkop_init
+    ! Build object
+
    procedure :: setup_spin_kpoint => ddkop_setup_spin_kpoint
     ! Prepare application of dH/dk for given spin, k-point.
 
@@ -141,12 +144,6 @@ MODULE m_ddk
     ! Free memory.
 
  end type ddkop_t
-
- public :: ddkop_new   ! Build object
-
- !interface ddkop_t
- !  procedure ddkop_new
- !end interface ddkop_t
 !!***
 
 !!****t* m_ddk/ddkstore_t
@@ -189,8 +186,6 @@ MODULE m_ddk
 
  end type ddkstore_t
 !!***
-
- !public :: ddkop_new   ! Build object
 
 CONTAINS
 
@@ -246,7 +241,6 @@ subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfft
  complex(dpc) :: vg(3), vr(3)
  complex(gwpc),allocatable :: ihrc(:,:), ug_c(:), ug_v(:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
-
 !************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
@@ -384,7 +378,7 @@ subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfft
  end if
 
  if (dtset%useria /= 666) then
-   ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
+   call ddkop%init(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
    !if (my_rank == master) call ddkop%print(ab_out)
  end if
 
@@ -625,9 +619,7 @@ end subroutine ddkstore_compute_ddk
 subroutine ddkstore_free(self)
 
 !Arguments ------------------------------------
-!scalars
  class(ddkstore_t),intent(inout) :: self
-
 !************************************************************************
 
  ABI_SFREE(self%vdiago)
@@ -646,10 +638,6 @@ end subroutine ddkstore_free
 !! FUNCTION
 !!  Convert ddk matrix element from reduced coordinates to cartesian coordinates.
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! SOURCE
 
 pure subroutine ddk_red2car(rprimd, vred, vcar)
@@ -661,7 +649,6 @@ pure subroutine ddk_red2car(rprimd, vred, vcar)
 
 !Local variables -------------------------------
  real(dp) :: vtmp(2,3)
-
 !************************************************************************
 
  ! Go to Cartesian coordinates (same as pmat2cart routine)
@@ -680,9 +667,9 @@ end subroutine ddk_red2car
 
 !----------------------------------------------------------------------
 
-!!****f* m_ddk/ddkop_new
+!!****f* m_ddk/ddkop_init
 !! NAME
-!!  ddkop_new
+!!  ddkop_init
 !!
 !! FUNCTION
 !!  Build new object. Use dtset%inclvkb to determine whether non-local part should be included.
@@ -700,10 +687,12 @@ end subroutine ddk_red2car
 !!
 !! SOURCE
 
-type(ddkop_t) function ddkop_new(dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngfft) result(new)
+
+subroutine ddkop_init(new, dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngfft)
 
 !Arguments ------------------------------------
 !scalars
+ class(ddkop_t),intent(out) :: new
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
  type(pseudopotential_type),intent(in) :: psps
@@ -717,7 +706,6 @@ type(ddkop_t) function ddkop_new(dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngf
 !scalars
  integer,parameter :: cplex1 = 1
  integer :: nfft, mgfft, idir
-
 ! *************************************************************************
 
  ABI_CHECK(dtset%usepaw == 0, "PAW not tested/implemented!")
@@ -753,7 +741,7 @@ type(ddkop_t) function ddkop_new(dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngf
    call new%rf_hamkq(idir)%init(cplex1, new%gs_hamkq(idir), new%ipert, has_e1kbsc=.true.)
  end do
 
-end function ddkop_new
+end subroutine ddkop_init
 !!***
 
 !----------------------------------------------------------------------
@@ -798,7 +786,6 @@ subroutine ddkop_setup_spin_kpoint(self, dtset, cryst, psps, spin, kpoint, istwf
  integer :: npwarr(nkpt1), dummy_nband(nkpt1*nsppol1)
  integer :: idir, nkpg, nkpg1, useylmgr1, optder !, nylmgr1
  real(dp),allocatable :: ylm_k(:,:),ylmgr1_k(:,:,:)
-
 !************************************************************************
 
  ABI_CHECK(npw_k <= self%mpw, "npw_k > mpw!")
@@ -889,7 +876,6 @@ subroutine ddkop_apply(self, eig0nk, npw_k, nspinor, cwave, cwaveprj)
 !arrays
  real(dp) :: grad_berry(2,(berryopt0/4)), gvnlx1(2,usevnl0)
  real(dp),pointer :: dkinpw(:),kinpw1(:)
-
 !************************************************************************
 
  self%eig0nk = eig0nk
@@ -967,7 +953,6 @@ function ddkop_get_braket(self, eig0mk, istwf_k, npw_k, nspinor, brag, mode) res
 !arrays
  real(dp) :: dotarr(2), vk_red(2, 3)
  character(len=50) :: my_mode
-
 !************************************************************************
 
  if (self%usepaw == 0) then
@@ -1037,7 +1022,6 @@ function ddkop_get_vdiag(self, eig0nk, istwf_k, npw_k, nspinor, cwave, cwaveprj,
  character(len=50) :: my_mode
 !arrays
  real(dp) :: cvk(2, 3)
-
 !************************************************************************
 
  my_mode = "cart"; if (present(mode)) my_mode = mode
@@ -1074,8 +1058,6 @@ function ddkop_get_vnondiag(self, eig0nk_bra, istwf_k, npw_k, nspinor, cwave_bra
 
 !Local variables-------------------------------
  character(len=50) :: my_mode
-!arrays
-
 !************************************************************************
 
  my_mode = "cart"; if (present(mode)) my_mode = mode
@@ -1094,8 +1076,6 @@ end function ddkop_get_vnondiag
 !! FUNCTION
 !!  Free memory
 !!
-!! INPUTS
-!!
 !! SOURCE
 
 subroutine ddkop_free(self)
@@ -1105,9 +1085,7 @@ subroutine ddkop_free(self)
  class(ddkop_t),intent(inout) :: self
 
 !Local variables-------------------------------
-!scalars
  integer :: idir
-
 !************************************************************************
 
  ABI_SFREE(self%gh1c)
@@ -1138,9 +1116,7 @@ end subroutine ddkop_free
 subroutine ham_targets_free(self)
 
 !Arguments ------------------------------------
-!scalars
  class(ham_targets_t),intent(inout) :: self
-
 !************************************************************************
 
  ABI_SFREE(self%ffnlk)

@@ -173,7 +173,7 @@ module m_gwr
                              slk_array_locmem_mb, block_dist_1d, slk_pgemm
  use m_wfk,           only : wfk_read_ebands, wfk_t
  use m_wfd,           only : wfd_t, wfdgw_t
- use m_ddk,           only : ddkop_t, ddkop_new
+ use m_ddk,           only : ddkop_t
  use m_pawtab,        only : pawtab_type
  use m_pawcprj,       only : pawcprj_type
  use m_vcoul,         only : vcgen_t
@@ -7582,7 +7582,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  ABI_MALLOC(rhotwg, (npwe * dim_rtwg))
 
  ! TODO: use ddkop instead of commutator so that we can handle SOC terms.
- ddkop = ddkop_new(dtset, gwr%cryst, gwr%pawtab, gwr%psps, gwr%mpi_enreg, u_mpw, u_ngfft)
+ call ddkop%init(dtset, gwr%cryst, gwr%pawtab, gwr%psps, gwr%mpi_enreg, u_mpw, u_ngfft)
 
  ABI_CHECK_IEQ(dtset%symchi, 1, "symchi 0 not implemented")
  if (dtset%nspinor == 2) then
