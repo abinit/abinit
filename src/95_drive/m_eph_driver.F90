@@ -695,9 +695,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
 
  !case (24)
- !  call gstore%from_ncpath(dtfil%filgstorein, with_cplex1, dtset, cryst, ebands, ifc, comm)
- !  call gstore_sigeph(gstore, dtset, dtfil, ebands)
- !  call gstore%free()
+ !  call gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
 
  case (5, -5)
    ! Interpolate the DFPT potential.
