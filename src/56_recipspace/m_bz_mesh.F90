@@ -362,6 +362,7 @@ module m_bz_mesh
    procedure :: init => littlegroup_init
    procedure :: print => littlegroup_print
    procedure :: free => littlegroup_free_0D
+   !procedure :: find => littlegroup_find
 
  end type littlegroup_t
 

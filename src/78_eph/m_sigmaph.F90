@@ -69,7 +69,7 @@ module m_sigmaph
  use m_cgtools,        only : cg_zdotc, cg_real_zdotc, cg_zgemm
  use m_crystal,        only : crystal_t
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map
- use m_occ,            only : occ_fd, occ_be !occ_dfde,
+ use m_occ,            only : occ_fd, occ_be
  use m_kg,             only : getph, mkkpg, mkkin
  use m_bz_mesh,        only : isamek
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack
@@ -676,8 +676,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom), dotri(2),qq_ibz(3)
  real(dp) :: vk(3), vkq(3), tsec(2), eminmax(2)
  real(dp) :: zpr_frohl_sphcorr(3*cryst%natom), vec_natom3(2, 3*cryst%natom)
- real(dp) :: wqnu,nqnu,gkq2,gkq2_pf,eig0nk,eig0mk,eig0mkq,f_mkq, f_nk
- real(dp) :: gdw2, gdw2_stern, rtmp
+ real(dp) :: wqnu,nqnu,gkq2,gkq2_pf,eig0nk,eig0mk,eig0mkq,f_mkq,f_nk, gdw2, gdw2_stern, rtmp
  real(dp) :: fermie1_idir_ipert(3,cryst%natom)
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:),kinpw_k(:), kinpw_kq(:),kpg_kq(:,:),kpg_k(:,:)
@@ -2021,7 +2020,7 @@ end if
                                (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta)
                    else
                       cfact =  (two * nqnu + one) / (eig0nk - eig0mkq + sigma%ieta)
-                   endif
+                   end if
                  endif
 
                  if (sigma%imag_only) then
@@ -3304,17 +3303,11 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  new%mu_e(:) = ebands%fermie
 
  if (dtset%eph_fermie == zero) then
-   ! TODO: Optimize this part
-   ! grep "TIME" /home/acad/ucl-naps/gbrunin/GaP_FHI/mobility/conv_fine/v9/k144x144x144/q288x288x288/log | grep get_mu get_mu_e completed. cpu: 06:02 [minutes] , wall: 06:02 [minutes] <<< TIME
-
-   call cwtime(cpu, wall, gflops, "start")
    if (new%use_doublegrid) then
      call ebands_dense%get_muT_with_fd(new%ntemp, new%ktmesh, dtset%spinmagntarget, dtset%prtvol, new%mu_e, comm)
    else
      call ebands%get_muT_with_fd(new%ntemp, new%ktmesh, dtset%spinmagntarget, dtset%prtvol, new%mu_e, comm)
    end if
-
-   call cwtime_report(" get_mu_e", cpu, wall, gflops)
  endif
 
  call ebands_dense%free()
@@ -4170,7 +4163,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
    ! Pack points in *shells* to minimise cache misses.
    compute_lgk = .not. (self%qint_method > 0 .and. .not. self%use_doublegrid)
    if (compute_lgk) then
-     lgk = lgroup_new(cryst, kk, self%timrev, self%nqbz, self%qbz, self%nqibz, self%qibz, comm)
+     call lgk%init(cryst, kk, self%timrev, self%nqbz, self%qbz, self%nqibz, self%qibz, comm)
      lgk_ptr => lgk
    else
      ! Avoid this call to lgroup new. Use lgk already computed in self%ephwg

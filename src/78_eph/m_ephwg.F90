@@ -221,7 +221,6 @@ type(ephwg_t) function ephwg_new( &
  integer :: out_kptrlatt(3,3)
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom), phfrq(3*cryst%natom)
  real(dp),allocatable :: out_kibz(:,:), out_wtk(:)
-
 !----------------------------------------------------------------------
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -295,7 +294,6 @@ type(ephwg_t) function ephwg_from_ebands(cryst, ifc, ebands, bstart, nbcount, co
 
 !Local variables-------------------------------
  real(dp),allocatable :: eig_ibz(:, :, :)
-
 !----------------------------------------------------------------------
 
  if (bstart == 1 .and. nbcount == ebands%mband) then
@@ -352,7 +350,6 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
  type(krank_t) :: krank
 !arrays
  integer,allocatable :: indkk(:,:)
-
 !----------------------------------------------------------------------
 
  do_mapping = .true.; if (present(skip_mapping)) do_mapping = .not. skip_mapping
@@ -361,7 +358,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
 
  ! Get little group of the (external) kpoint.
  call self%lgk%free()
- self%lgk = lgroup_new(self%cryst, kpoint, self%timrev, self%nbz, self%bz, self%nibz, self%ibz, comm)
+ call self%lgk%init(self%cryst, kpoint, self%timrev, self%nbz, self%bz, self%nibz, self%ibz, comm)
 
  if (prtvol > 0) call self%lgk%print()
  self%nq_k = self%lgk%nibz
@@ -478,7 +475,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
 
  ! Get little group of the (external) kpoint.
  call self%lgk%free()
- self%lgk = lgroup_new(self%cryst, kpoint, self%timrev, self%nbz, self%bz, self%nibz, self%ibz, comm)
+ call self%lgk%init(self%cryst, kpoint, self%timrev, self%nbz, self%bz, self%nibz, self%ibz, comm)
  if (prtvol > 0) call self%lgk%print()
  self%nq_k = self%lgk%nibz
 
@@ -651,7 +648,6 @@ subroutine ephwg_get_deltas(self, band, spin, nu, nene, eminmax, bcorr, deltaw_p
 !arrays
  real(dp) :: wme0(nene)
  real(dp),allocatable :: thetaw(:,:), pme_k(:,:)
-
 !----------------------------------------------------------------------
 
  ib = band - self%bstart + 1
@@ -743,7 +739,6 @@ subroutine ephwg_get_deltas_wvals(self, band, spin, nu, neig, eig, bcorr, deltaw
  real(dp) :: wme0(neig)
 !arrays
  real(dp),allocatable :: pme_k(:,:)
-
 !----------------------------------------------------------------------
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -819,7 +814,6 @@ subroutine ephwg_get_deltas_qibzk(self, nu, nene, eminmax, bcorr, dt_weights, co
  real(dp),parameter :: max_occ1 = one
 !arrays
  real(dp),allocatable :: eigen_in(:)
-
 !----------------------------------------------------------------------
 
  ABI_MALLOC(eigen_in, (self%nq_k))
@@ -973,7 +967,6 @@ subroutine ephwg_free(self)
 
 !Arguments ------------------------------------
  class(ephwg_t),intent(inout) :: self
-
 !----------------------------------------------------------------------
 
  ! integer

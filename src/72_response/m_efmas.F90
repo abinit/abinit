@@ -1020,7 +1020,6 @@ end subroutine efmas_ncread
 
       ABI_FREE(eig2_diag)
       ABI_FREE(eig2_diag_cart)
-
     end do !ideg
 
     ABI_FREE(cg1_pert2)

@@ -694,8 +694,13 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      end if
    end if
 
+ !case (24)
+ !  call gstore%from_ncpath(dtfil%filgstorein, with_cplex1, dtset, cryst, ebands, ifc, comm)
+ !  call gstore_sigeph(gstore, dtset, dtfil, ebands)
+ !  call gstore%free()
+
  case (5, -5)
-   ! Interpolate the phonon potential.
+   ! Interpolate the DFPT potential.
    call dvdb%interpolate_and_write(dtset, dtfil%fnameabo_dvdb, ngfftc, ngfftf, cryst, &
                                    ifc%ngqpt, ifc%nqshft, ifc%qshft, comm)
 
@@ -837,18 +842,16 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (17)
    ! Compute e-ph matrix elements with the GWPT formalism.
-   ABI_CHECK(dtset%useylm == 0, "useylm != 0 not implemented/tested")
    call gwpt_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, drhodb, ifc, wfk0_hdr, &
                  pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (18)
-   ! Compute e-ph matrix elements along q-path.
+   ! Compute e-ph matrix elements along path in the BZ
    call eph_path_run(dtfil, dtset, cryst, ebands, dvdb, ifc, pawfgr, pawang, pawrad, pawtab, psps, comm)
 
  case (19)
    ! Compute matrix elements of W_kk'
-   call wkk_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, wfk0_hdr, &
-                pawtab, psps, mpi_enreg, comm)
+   call wkk_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, wfk0_hdr, pawtab, psps, mpi_enreg, comm)
 
  case default
    ABI_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))
