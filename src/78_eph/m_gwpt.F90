@@ -249,7 +249,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),allocatable :: ylm_k(:,:), ylm_kq(:,:), ylm_kmp(:,:), ylm_kqmp(:,:)
  real(dp),allocatable :: ylmgr_kq(:,:,:), ylmgr_kmp(:,:,:), ylmgr_kqmp(:,:,:)
  real(dp),allocatable :: vtrial(:,:), work(:,:,:,:), rhor(:,:), vxc(:,:), kxc(:,:)
- real(dp),allocatable :: omegame0i_nk(:), omegame0i_mkq(:), omegas_nk(:), omegas_mkq(:), my_gbuf(:,:,:,:,:,:)
+ real(dp),allocatable :: omegame0i_nk(:), omegame0i_mkq(:), omegas_nk(:), omegas_mkq(:), my_gbuf(:,:,:,:,:,:), my_gbuf_ks(:,:,:,:,:,:)
  real(dp),allocatable :: cg_kmp(:,:), cg_kqmp(:,:), cg1_kqmp(:,:), cg1_kmp(:,:), full_cg1_kqmp(:,:), full_cg1_kmp(:,:)
  complex(dp), contiguous, pointer :: cvxc1_qq_ptr(:,:,:)
  complex(gwpc),allocatable :: ur_kmp(:), ur_kqmp(:), cwork_ur(:), rhotwg_c(:), rhotwg_x(:), vc_sqrt_gx(:)
@@ -841,6 +841,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
    ! Inside the loops we compute gsig_nu(2, nb, nb, natom3)
    ABI_MALLOC_OR_DIE(my_gbuf, (gqk%cplex, nb, nb, natom3, gqk%my_nk, qbuf_size), ierr)
+   ABI_MALLOC_OR_DIE(my_gbuf_ks, (gqk%cplex, nb, nb, natom3, gqk%my_nk, qbuf_size), ierr)
 
    ! Allocate memory to deal with frequencies in Sigma(w).
    nw_nk = 1 + (gqk%bstop - gqk%bstart + 1)
@@ -978,6 +979,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! Set entry to zero. Important as there are cycle instructions inside these loops
        ! and we don't want random numbers written to disk.
        my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = zero
+       my_gbuf_ks(:,:,:,:, my_ik, iqbuf_cnt) = zero
        gks_atm = zero
        gks_atm2 = zero
 
@@ -1677,8 +1679,8 @@ end if ! .not qq_is_gamma.
 
        ! TODO gks_atm and gks_nsu
        !TODO: it may be that pp_mesh should be replaced by the kk_mesh (they are not always the same)
-       !gsig_atm = gsig_atm / (cryst%ucvol * pp_mesh%nbz)
-       gsig_atm = gsig_atm / pp_mesh%nbz
+       gsig_atm = gsig_atm / (cryst%ucvol * pp_mesh%nbz)
+       !gsig_atm = gsig_atm / pp_mesh%nbz
 
        ! DEBUG
        print *, ' '
@@ -1701,15 +1703,18 @@ end if ! .not qq_is_gamma.
        select case (gstore%gmode)
        case (GSTORE_GMODE_PHONON)
          ! FIXME Perhaps it's gonna be easier if we only support GMODE_ATOM
-         ! Get g^{Sigma} in the phonon representation.
+         ! Get g^{Sigma} and g^{KS} in the phonon representation.
          call ephtk_gkknu_from_atm(nb, nb, 1, natom, gsig_atm, phfr_qq, displ_red_qq, gsig_nu)
+         call ephtk_gkknu_from_atm(nb, nb, 1, natom, gks_atm, phfr_qq, displ_red_qq, gks_nu)
 
          ! Save e-ph matrix elements in the buffer.
          select case (gqk%cplex)
          case (1)
            my_gbuf(1,:,:,:, my_ik, iqbuf_cnt) = gsig_nu(1,:,:,:)**2 + gsig_nu(2,:,:,:)**2
+           my_gbuf_ks(1,:,:,:, my_ik, iqbuf_cnt) = gks_nu(1,:,:,:)**2 + gks_nu(2,:,:,:)**2
          case (2)
            my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gsig_nu
+           my_gbuf_ks(:,:,:,:, my_ik, iqbuf_cnt) = gks_nu
          end select
 
        case (GSTORE_GMODE_ATOM)
@@ -1717,8 +1722,10 @@ end if ! .not qq_is_gamma.
          select case (gqk%cplex)
          case (1)
            my_gbuf(1,:,:,:, my_ik, iqbuf_cnt) = gsig_atm(1,:,:,:)**2 + gsig_atm(2,:,:,:)** 2
+           my_gbuf_ks(1,:,:,:, my_ik, iqbuf_cnt) = gks_atm(1,:,:,:)**2 + gks_atm(2,:,:,:)** 2
          case (2)
            my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gsig_atm
+           my_gbuf_ks(:,:,:,:, my_ik, iqbuf_cnt) = gks_atm
          end select
 
        case default
@@ -1752,6 +1759,7 @@ end if ! .not qq_is_gamma.
    ABI_FREE(ur_mkq)
    ABI_FREE(iq_buf)
    ABI_FREE(my_gbuf)
+   ABI_FREE(my_gbuf_ks)
    ABI_FREE(gsig_atm)
    ABI_FREE(gsig_nu)
    ABI_FREE(gks_atm)
@@ -1781,7 +1789,7 @@ end if ! .not qq_is_gamma.
  call xmpi_barrier(comm)
 
  ! Output some of the results to ab_out for testing purposes
- call gstore%print_for_abitests(dtset)
+ call gstore%print_for_abitests(dtset, with_ks=.True.)
 
  ! Free memory
  ABI_FREE(kg_k)
@@ -1878,8 +1886,15 @@ subroutine dump_my_gbuf()
  !print *, "                  count; ", [gqk%cplex, gqk%nb, gqk%nb, gqk%natom3, gqk%my_nk, iqbuf_cnt]
  !print *, "my_gbuf", my_gbuf(:,:,:,natom3,1,1)
 
+ ! Output g^Sigma
  ! NB: this is an individual IO operation
  ncerr = nf90_put_var(spin_ncid, spin_vid("gvals"), my_gbuf, &
+                      start=[1, 1, 1, 1, gqk%my_kstart, iq_glob], &
+                      count=[gqk%cplex, gqk%nb, gqk%nb, gqk%natom3, gqk%my_nk, iqbuf_cnt])
+ NCF_CHECK(ncerr)
+
+ ! Output g^KS
+ ncerr = nf90_put_var(spin_ncid, spin_vid("gvals_ks"), my_gbuf_ks, &
                       start=[1, 1, 1, 1, gqk%my_kstart, iq_glob], &
                       count=[gqk%cplex, gqk%nb, gqk%nb, gqk%natom3, gqk%my_nk, iqbuf_cnt])
  NCF_CHECK(ncerr)

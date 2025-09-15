@@ -1569,7 +1569,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
             else
               stern%cgq(:, :, ibsum_kq) = bra_kq
             end if
-         end do
+         end do ! ibsum_kq
 
          cgq_request = xmpi_request_null
 
@@ -1747,7 +1747,7 @@ end if
 
            ! Save data for Debye-Waller that is performed outside the q-loop.
            if (q_is_gamma) stern_dw(:,:,:,ib_k) = stern_ppb(:,:,:,ib_k)
-         end do
+         end do ! ib_k
 
          ABI_FREE(cg1s_kq)
          ABI_FREE(h1kets_kq_allperts)
@@ -1788,7 +1788,7 @@ end if
              !if (dtset%prteliash /= 0) then
              !end if
            end do
-         end do
+         end do ! imyp
 
          ABI_FREE(stern_ppb)
          call timab(1910, 2, tsec)
