@@ -103,7 +103,7 @@ contains
  integer :: mmag_unit,mmom_unit,mmspec_unit,nblok,ndim 
  integer :: nmat,nmdir,nwcalc,optgb,phon_unit,prtopt
  integer :: locmagsus_unit,zeff_unit,zeffspec_unit,zfield_unit
- real(dp) :: omegastp,convfac
+ real(dp) :: mcell,omegastp,convfac
  character(len=5000) :: msg,pfmt
  character(len=fnlen) :: alpha_filename
  character(len=fnlen) :: diel_filename,mmag_filename,locmagsus_filename,mmom_filename,mmspec_filename
@@ -214,6 +214,9 @@ contains
  ABI_MALLOC(int_fsddb,(2,ddb%msize,1))
  ABI_MALLOC(int_rsddb,(2,ddb%msize,1))
  ABI_MALLOC(ri_mmom,(ndim,3,nomega))
+
+!Compute total cell mass
+ mcell= sum(amu(typat(:)))*amu_emass
 
 !For linear interpolation detect the w=0 Hessians and Berry curvatures
  if (omegaflag == 1) then
@@ -342,7 +345,7 @@ contains
    & magsus(:,:,iw),mpert,mmom(:,:,iw),mmom_tr(:,:,iw),natom,ndim,phongreen,ucvol,zeff)
 
      call lm_normal_modes(int_fsddb,displ,eta,lm_alpha_nm(:,:,:,iw),lm_epsilon_nm(:,:,:,iw),lm_mchi_nm(:,:,:,iw), &
-   & mmom(:,:,iw),modemm(:,:,iw),modedisp(:,:,iw),modemeff(:,:,iw),modezeff(:,:,iw),modezf(:,:,iw),&
+   & mcell,mmom(:,:,iw),modemm(:,:,iw),modedisp(:,:,iw),modemeff(:,:,iw),modezeff(:,:,iw),modezf(:,:,iw),&
    & mpert,natom,ndim,omega(iw),phfrq(:,iw),ucvol,zfield(:,:,iw))
 
    else if (mpopt==2) then
@@ -355,7 +358,7 @@ contains
    & magsus(:,:,iw),mpert,mmom(:,:,iw),mmom_tr(:,:,iw),natom,ndim,phongreen,ucvol,zeff)
 
      call lm_normal_modes(int_rsddb,displ,eta,lm_alpha_nm(:,:,:,iw),lm_epsilon_nm(:,:,:,iw),lm_mchi_nm(:,:,:,iw), &
-   & mmom(:,:,iw),modemm(:,:,iw),modedisp(:,:,iw),modemeff(:,:,iw),modezeff(:,:,iw),modezf(:,:,iw),&
+   & mcell,mmom(:,:,iw),modemm(:,:,iw),modedisp(:,:,iw),modemeff(:,:,iw),modezeff(:,:,iw),modezf(:,:,iw),&
    & mpert,natom,ndim,omega(iw),phfrq(:,iw),ucvol,zfield(:,:,iw))
 
    end if
@@ -1366,7 +1369,7 @@ end subroutine phonon_green
 #include "abi_common.h"
 
 subroutine lm_normal_modes(blkval,displ,eta,lm_alpha_nm,lm_epsilon_nm,lm_mchi_nm, &
-& mmom,modemm,modedisp,modemeff,modezeff,modezf,mpert,natom,ndim,omega,phfrq,ucvol,zfield)
+& mcell,mmom,modemm,modedisp,modemeff,modezeff,modezf,mpert,natom,ndim,omega,phfrq,ucvol,zfield)
 
  use defs_basis
  use m_errors
@@ -1377,7 +1380,7 @@ subroutine lm_normal_modes(blkval,displ,eta,lm_alpha_nm,lm_epsilon_nm,lm_mchi_nm
 !Arguments ------------------------------------
 !scalars
  integer, intent(in)  :: mpert,natom,ndim 
- real(dp), intent(in) :: eta,omega,ucvol
+ real(dp), intent(in) :: eta,mcell,omega,ucvol
 !arrays
  real(dp), intent(in) :: blkval(2,3,mpert,3,mpert,1)
  real(dp), intent(in) :: displ(2*3*natom*3*natom)
@@ -1535,12 +1538,20 @@ do imode=1,3*natom
  end do
 
 !Normalize mode-projected quantities
- do imode= 1, natom*3
-   modezeff(:,imode)= modezeff(:,imode) / norm(imode)
-   modemeff(:,imode)= modemeff(:,imode) / norm(imode)
-   modemm(:,imode)= modemm(:,imode) / norm(imode)
-   modezf(:,imode)= modezf(:,imode) / norm(imode)
- end do
+! do imode= 1, natom*3
+!   modezeff(:,imode)= modezeff(:,imode) / norm(imode)
+!   modemeff(:,imode)= modemeff(:,imode) / norm(imode)
+!   modemm(:,imode)= modemm(:,imode) / norm(imode)
+!   modezf(:,imode)= modezf(:,imode) / norm(imode)
+! end do
+
+!Apply a cell mass factor to the mode-resolved Born charges
+ fac= sqrt(mcell)
+ modezeff= modezeff*fac
+ modemeff= modemeff*fac
+ modemm= modemm*fac
+ modezf= modezf*fac
+ 
 
  ABI_FREE(norm)
  ABI_FREE(c_blkval)
