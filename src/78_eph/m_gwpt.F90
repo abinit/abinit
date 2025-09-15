@@ -82,6 +82,7 @@ module m_gwpt
  use m_ebands,         only : ebands_t
  use m_pstat,          only : pstat_proc
  use m_ppmodel,        only : ppmodel_t
+ use m_lgroup,         only : lgroup_t
 
  implicit none
 
@@ -199,7 +200,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),ABI_CONTIGUOUS pointer :: qp_ene(:,:,:), qp_occ(:,:,:)
  real(dp) :: ecut,weight_q,bigexc,bigsxc,vxcavg ! ediff, eshift, q0rad, bz_vol,
  logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, qq_is_gamma, pp_is_gamma, isirr_q
- logical :: stern_use_cache, stern_has_band_para, use_ftinterp
+ logical :: stern_use_cache, stern_has_band_para, use_ftinterp, use_lgk
  logical :: print_time_qq, print_time_kk, print_time_pp, non_magnetic_xc, need_x_kmp, need_x_kqmp
  complex(dpc) :: ieta
  type(wfd_t) :: wfd
@@ -215,11 +216,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  type(vcoul_t) :: vcp
  type(gstore_t),target :: gstore
  type(gqk_t),pointer :: gqk
- !type(lgroup_t),allocatable :: lg_myk(:)
+ type(lgroup_t),allocatable :: lg_myk(:)
  type(xcdata_type) :: xcdata
  type(ppmodel_t) :: ppm
  character(len=fnlen) :: screen_filepath, gstore_filepath
- character(len=5000) :: msg, qkp_string
+ character(len=5000) :: msg, qkp_string, qq_bz_string, kk_string, pp_string
 !arrays
  integer :: nbsum, my_bsum_start(dtset%nsppol), my_bsum_stop(dtset%nsppol), my_nbsum(dtset%nsppol)
  integer :: g0_k(3), g0_q(3), g0_kq(3), g0_kmp(3), g0_kqmp(3), units(2), work_ngfft(18), gmax(3)
@@ -813,6 +814,17 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
               cryst%rprimd, usexcnhat, vxc, vxcavg, dum_xccc3d, xcdata)
  call pstat_proc%print(_PSTAT_ARGS_)
 
+ ! Here we decide if q can be reduced to the IBZ(k)
+ use_lgk = .False.
+ if (gstore%qzone == "bz") then
+   use_lgk = .True.
+ end if
+ use_lgk = .False.
+
+ if (use_lgk) then
+   call wrtout(units, " Only q-points in the IBZ_k will be computed.")
+ end if
+
  ! ===================================================
  ! Loop over MPI distributed spins in Sigma (gqk%comm)
  ! ===================================================
@@ -861,18 +873,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_MALLOC_OR_DIE(vec_gx_mkq, (npw_x*nspinor, gqk%bstart:gqk%bstop), ierr)
 
    ! Compute the little group of the k-point so that we can compute g(k,q) only for q in the IBZ_k
-   timrev = kpts_timrev_from_kptopt(ebands%kptopt)
-   !ABI_MALLOC(lg_myk, (gqk%my_nk))
-   !do my_ik=1,gqk%my_nk
-   !  kk = gqk%my_kpts(:, my_ik)
-   !  call lg_myk(my_ik)%init(cryst, kk, timrev, gstore%nqbz, gstore%qbz, gstore%nqibz, gstore%qibz, xmpi_comm_self)
-   !end do
-   !ii = lg_myk(my_ik)%findq_ibzk(qpt)
-   !if (ii == -1) cycle
-   !do my_ik=1,gqk%my_nk
-   !  call lg_myk(my_ik)%free()
-   !end do
-   !ABI_FREE(lg_myk)
+   if (use_lgk) then
+     timrev = kpts_timrev_from_kptopt(ebands%kptopt)
+     ABI_MALLOC(lg_myk, (gqk%my_nk))
+     do my_ik=1,gqk%my_nk
+       kk = gqk%my_kpts(:, my_ik)
+       call lg_myk(my_ik)%init(cryst, kk, timrev, gstore%nqbz, gstore%qbz, gstore%nqibz, gstore%qibz, xmpi_comm_self)
+     end do
+   end if
 
    ! ============================================================
    ! Loop over MPI distributed q-points in Sigma_q (gqk%qpt_comm)
@@ -882,8 +890,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
      if (dtset%userib /= 0 .and. (any(abs(qq_bz - [0.5, 0.0, 0.0]) > tol14))) cycle
 
-     qq_is_gamma = sum(qq_bz**2) < tol14
      iq_bz = gqk%my_q2bz(my_iq)
+     qq_is_gamma = sum(qq_bz**2) < tol14
+     qq_bz_string = ktoa(qq_bz)
 
      ! Handle possible restart.
      if (done_qbz_spin(iq_bz, spin) == 1) then
@@ -902,7 +911,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      print_time_qq = my_rank == 0 .and. (my_iq <= LOG_MODQ .or. mod(my_iq, LOG_MODQ) == 0)
      if (print_time_qq) then
        call cwtime(cpu_qq, wall_qq, gflops_qq, "start")
-       call inds2str(0, sjoin(" Computing g^Sigma(k, q) for qq_bz:", ktoa(qq_bz)), my_iq, gqk%my_nq, gqk%glob_nq, msg)
+       call inds2str(0, sjoin(" Computing g^Sigma(k, q) for qq_bz:", qq_bz_string), my_iq, gqk%my_nq, gqk%glob_nq, msg)
        call wrtout(std_out, sjoin(msg, ", for spin:", itoa(spin)), pre_newlines=1)
      end if
      !print *, "iq_ibz:", iq_ibz, "qq_bz:", qq_bz, "qq_ibz:", qq_ibz
@@ -972,6 +981,15 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              any(abs(gqk%my_kpts(:, my_ik) - [-0.25, 0.0, 0.0]) > tol14)) cycle
        end if
 
+       if (use_lgk) then
+         ii = lg_myk(my_ik)%findq_ibzk(qq_bz)
+         if (ii == -1) then
+           call wrtout(std_out, sjoin(" iq_bz:", itoa(iq_bz), qq_bz_string, " not in IBZ_k --> skipping iteration"))
+           cycle
+           ! TODO: Check fillvalue (should be zero)
+         end if
+       end if
+
        ! NB: All procs in gqk%pert_comm and gqk%bsum_com and gqk%pp_sum_comm enter this section.
        iqbuf_cnt = 1 + mod(my_iq - 1, qbuf_size)
        iq_buf(:, iqbuf_cnt) = [my_iq, iq_bz]
@@ -985,8 +1003,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
        ! Symmetry indices for kk.
        kk = gqk%my_kpts(:, my_ik)
+       kk_string = ktoa(kk)
 
-       call inds2str(0, sjoin(" Computing g^Sigma(k, q) for kpt:", ktoa(kk)), my_ik, gqk%my_nk, gqk%glob_nk, msg)
+       call inds2str(0, sjoin(" Computing g^Sigma(k, q) for kpt:", kk_string), my_ik, gqk%my_nk, gqk%glob_nk, msg)
        call wrtout(std_out, sjoin(msg, ", for spin:", itoa(spin)), pre_newlines=1)
 
        ! The k-point and the symmetries relating the BZ k-point to the IBZ.
@@ -1092,13 +1111,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          if (print_time_pp) call cwtime(cpu_pp, wall_pp, gflops_pp, "start")
 
          pp = pp_mesh%bz(:,ipp_bz); pp_is_gamma = sum(pp**2) < tol14
+         pp_string = ktoa(pp)
 
          ! Debug, include only pp=Gamma
          if (dtset%userie /= 0) then
             if (.not. pp_is_gamma) cycle
          end if
 
-         qkp_string = sjoin("While treating qq_bz: ", ktoa(qq_bz), "kpt:", ktoa(kk), "pp:", ktoa(pp), ch10)
+         qkp_string = sjoin("While treating qq_bz: ", qq_bz_string, "kpt:", kk_string, "pp:", pp_string, ch10)
 
          ! Symmetry tables and g-sphere centered on k-p.
          kmp = kk - pp
@@ -1777,6 +1797,13 @@ end if ! .not qq_is_gamma.
    ABI_FREE(vec_gx_mkq)
    ABI_FREE(sigcme_nk)
    ABI_FREE(sigcme_mkq)
+
+   if (use_lgk) then
+     do my_ik=1,gqk%my_nk
+       call lg_myk(my_ik)%free()
+     end do
+     ABI_FREE(lg_myk)
+   end if
  end do ! my_is
 
  call cwtime_report(" gwpt_eph full calculation", cpu_all, wall_all, gflops_all, end_str=ch10)

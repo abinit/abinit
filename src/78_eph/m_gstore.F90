@@ -488,6 +488,13 @@ type, public :: gstore_t
   ! (nqibz)
   ! q-points weights in the IBZ
 
+  ! TODO: Use MPI shared memory
+  real(dp),allocatable :: qbz(:,:)
+  ! q-points in the BZ.
+
+  !real(dp),allocatable :: kbz(:,:)
+  ! k-points in the BZ.
+
   !integer :: qptrlatt(3, 3) = -1  ! kptrlatt(3, 3) = -1,
    ! k-mesh and q-mesh
 
@@ -1043,8 +1050,6 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  call xmpi_barrier(gstore%comm)
 
  ABI_FREE(wtk)
- ABI_FREE(kbz)
- ABI_FREE(qbz)
  ABI_FREE(qibz2bz)
  ABI_FREE(kibz2bz)
  ABI_FREE(select_qbz_spin)
@@ -1053,6 +1058,13 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  ABI_FREE(kglob2bz)
  ABI_FREE(qbz2ibz)
  ABI_FREE(kbz2ibz)
+
+ ! TODO: Use MPI shared memory
+ !call alloc_copy(kbz, gstore%kbz)
+ ABI_FREE(kbz)
+
+ call alloc_copy(qbz, gstore%qbz)
+ ABI_FREE(qbz)
 
  call cwtime_report(" gstore_init:", cpu, wall, gflops)
  call pstat_proc%print(_PSTAT_ARGS_)
@@ -2718,6 +2730,8 @@ subroutine gstore_free(gstore)
  ABI_SFREE(gstore%glob_nk_spin)
  ABI_SFREE(gstore%glob_nq_spin)
  ABI_SFREE(gstore%erange_spin)
+ ABI_SFREE(gstore%qbz)
+ !ABI_SFREE(gstore%kbz)
 
  if (gstore%ebands_owns_memory) call gstore%ebands%free()
 
@@ -4134,10 +4148,12 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
 
    ABI_MALLOC(gstore%qibz, (3, gstore%nqibz))
    ABI_MALLOC(gstore%wtq, (gstore%nqibz))
+   ABI_MALLOC(gstore%qbz, (3, gstore%nqbz))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_brange_spin"), brange_spin))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_erange_spin"), gstore%erange_spin))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_qibz"), gstore%qibz))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_wtq"), gstore%wtq))
+   NCF_CHECK(nf90_get_var(ncid, vid("gstore_qbz"), gstore%qbz))
 
    ABI_MALLOC(qbz2ibz, (6, gstore%nqbz))
    ABI_MALLOC(kbz2ibz, (6, gstore%nkbz))
@@ -5232,7 +5248,8 @@ end subroutine gqk_filter_erange
 
 subroutine gstore_sigeph(gstore, dtset, dtfil, ebands)
 
- use m_occ, only : occ_be, occ_fd
+ use m_occ,       only : occ_be, occ_fd
+ use m_lgroup,    only : lgroup_t
 
 !Arguments ------------------------------------
 !scalars
@@ -5244,14 +5261,14 @@ subroutine gstore_sigeph(gstore, dtset, dtfil, ebands)
 !Local variables-------------------------------
  integer,parameter :: master = 0
  integer :: spin, my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, ntemp, gap_err, my_rank
- integer :: it, ik_ibz, ikq_ibz, band_k, band_kq, timrev
+ integer :: it, ik_ibz, ikq_ibz, band_k, band_kq, timrev, ii
  real(dp) :: wqnu, gkq2, weight_qq
  real(dp) :: eig0nk, eig0mk, eig0mkq ! gdw2, gdw2_stern, rtmp !,nqnu,gkq2,gkq2_pf,
  !real(dp) :: cpu, wall, gflops
- logical :: use_syms
+ logical :: use_lgk
  complex(dpc) :: ieta !, sig_cplx
  type(gaps_t) :: gaps
- !type(lgroup_t) :: lg_myk
+ type(lgroup_t) :: lg_myk
 !arrays
  integer :: units(2)
  real(dp) :: kk(3), qpt(3)
@@ -5298,7 +5315,8 @@ subroutine gstore_sigeph(gstore, dtset, dtfil, ebands)
  ABI_MALLOC(cfact, (ntemp))
 
  ieta = + j_dpc * dtset%zcut
- use_syms = dtset%symsigma /= 0
+ !use_lgk = dtset%symsigma /= 0
+ use_lgk = .True.
 
  ! Loop over collinear spins.
  do my_is=1,gstore%my_nspins
@@ -5323,8 +5341,8 @@ subroutine gstore_sigeph(gstore, dtset, dtfil, ebands)
      ! TODO: Little group symmetries.
      ! Compute the little group of the k-point so that we can compute g(k,q) only for q in the IBZ_k
      timrev = kpts_timrev_from_kptopt(ebands%kptopt)
-     if (use_syms) then
-       !call lg_myk%init(cryst, kk, timrev, gstore%nqbz, gstore%qbz, gstore%nqibz, gstore%qibz, xmpi_comm_self)
+     if (use_lgk) then
+       call lg_myk%init(gstore%cryst, kk, timrev, gstore%nqbz, gstore%qbz, gstore%nqibz, gstore%qibz, xmpi_comm_self)
      end if
 
      ! Sum over q-points.
@@ -5339,9 +5357,10 @@ subroutine gstore_sigeph(gstore, dtset, dtfil, ebands)
 
        ! weight_qq should be redefined here
        weight_qq = one / gstore%nqbz
-       if (use_syms) then
-         !ii = lg_myk%findq_ibzk(qpt); if (ii == -1) cycle
-         !weight_qq = lg_myk%weights(ii)
+       if (use_lgk) then
+         ii = lg_myk%findq_ibzk(qpt)
+         if (ii == -1) cycle
+         weight_qq = lg_myk%weights(ii)
        end if
 
        ! Sum over phonon modes.
@@ -5390,7 +5409,7 @@ subroutine gstore_sigeph(gstore, dtset, dtfil, ebands)
        end do ! im_kq
      end do ! my_iq
    end do ! my_ik
-   !call lg_myk%free()
+   call lg_myk%free()
    !call xmpi_sum(foobar, gstore%comm, ierr)
    end associate
  end do ! my_is
