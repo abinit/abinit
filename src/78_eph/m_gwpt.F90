@@ -192,7 +192,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: n1,n2,n3,n4,n5,n6,nspden, mqmem, m_kq, n_k, restart, root_ncid, spin_ncid, usecprj !,sij_opt
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg_k,nkpg_kq,nkpg_kqmp,nkpg_kmp,imyp, cnt, nvloc, iw_nk, iw_mkq, ndone, nmiss
  integer :: my_ipp, ipp_bz, ipp_ibz, isym_pp, itim_pp, comm_rpt, nqlwl, scr_iomode
- integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt, nb
+ integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt, nb, timrev
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_qq, wall_qq, gflops_qq, cpu_kk, wall_kk, gflops_kk, cpu_pp, wall_pp, gflops_pp
  real(dp) :: drude_plsmf, my_plsmf
  real(dp) :: fact_spin, theta_mu_minus_e0i, tol_empty, tol_empty_in !, e_mkq, e_nk ! e0i,
@@ -215,6 +215,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  type(vcoul_t) :: vcp
  type(gstore_t),target :: gstore
  type(gqk_t),pointer :: gqk
+ !type(lgroup_t),allocatable :: lg_myk(:)
  type(xcdata_type) :: xcdata
  type(ppmodel_t) :: ppm
  character(len=fnlen) :: screen_filepath, gstore_filepath
@@ -290,6 +291,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_ERROR("PAW not implemented")
    ABI_UNUSED((/pawang%nsym, pawrad(1)%mesh_size/))
  end if
+
+ ABI_CHECK(dtset%useylm == 0, "useylm != 0 not implemented/tested")
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm); units = [std_out, ab_out]
  call cwtime(cpu_all, wall_all, gflops_all, "start")
@@ -856,6 +859,20 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_MALLOC_OR_DIE(vec_gx_nk, (npw_x*nspinor,  gqk%bstart:gqk%bstop), ierr)
    ABI_MALLOC_OR_DIE(vec_gx_mkq, (npw_x*nspinor, gqk%bstart:gqk%bstop), ierr)
 
+   ! Compute the little group of the k-point so that we can compute g(k,q) only for q in the IBZ_k
+   timrev = kpts_timrev_from_kptopt(ebands%kptopt)
+   !ABI_MALLOC(lg_myk, (gqk%my_nk))
+   !do my_ik=1,gqk%my_nk
+   !  kk = gqk%my_kpts(:, my_ik)
+   !  call lg_myk(my_ik)%init(cryst, kk, timrev, gstore%nqbz, gstore%qbz, gstore%nqibz, gstore%qibz, xmpi_comm_self)
+   !end do
+   !ii = lg_myk(my_ik)%findq_ibzk(qpt)
+   !if (ii == -1) cycle
+   !do my_ik=1,gqk%my_nk
+   !  call lg_myk(my_ik)%free()
+   !end do
+   !ABI_FREE(lg_myk)
+
    ! ============================================================
    ! Loop over MPI distributed q-points in Sigma_q (gqk%qpt_comm)
    ! ============================================================
@@ -947,7 +964,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      ! =============================================================
      ! Loop over k-points in the e-ph matrix elements (gqk%kpt_comm)
      ! =============================================================
-
      do my_ik=1,gqk%my_nk
 
        if (dtset%userib /= 0) then

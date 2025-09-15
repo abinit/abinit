@@ -482,7 +482,7 @@ type(gaps_t) function ebands_get_gaps(ebands, ierr) result(gaps)
    ! Here I try to compute the gaps of an intrinsic semiconductor at low T with Fermi-Dirac.
    ! This might still fail though and the caller should handle that.
    call gaps%free()
-   call ebands_copy(ebands, tmp_ebands)
+   call ebands%copy(tmp_ebands)
    tsmear = 0.01_dp * eV_Ha
    call ebands_set_scheme(tmp_ebands, occopt3, tsmear, spinmagntarget_, prtvol0, update_occ=.False.)
    ! Remove extrael to go back to intrinsic system
@@ -493,7 +493,7 @@ type(gaps_t) function ebands_get_gaps(ebands, ierr) result(gaps)
    ! Try to compute gaps the again with new Fermi level at FD T = tsmear computed from update_occ.
    ! Return ierr
    call get_gaps_(tmp_ebands, gaps, ierr)
-   call ebands_free(tmp_ebands)
+   call tmp_ebands%free()
  end if
 
 end function ebands_get_gaps
@@ -1070,7 +1070,7 @@ subroutine ebands_copy(ibands, obands)
  class(ebands_t),intent(out) :: obands
 ! *********************************************************************
 
- call ebands_free(obands)
+ call obands%free()
 
  ! Copy scalars
  obands%bantot       = ibands%bantot
@@ -1137,9 +1137,9 @@ subroutine ebands_move_alloc(from_ebands, to_ebands)
  class(ebands_t),intent(inout) :: to_ebands
 ! *********************************************************************
 
- call ebands_free(to_ebands)
- call ebands_copy(from_ebands, to_ebands)
- call ebands_free(from_ebands)
+ call to_ebands%free()
+ call from_ebands%copy(to_ebands)
+ call from_ebands%free()
 
 end subroutine ebands_move_alloc
 !!***
@@ -2678,7 +2678,7 @@ subroutine ebands_get_muT_with_fd(self, ntemp, kTmesh, spinmagntarget, prtvol, m
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  call cwtime(cpu, wall, gflops, "start")
 
- call ebands_copy(self, tmp_ebands)
+ call self%copy(tmp_ebands)
 
  mu_e = zero
 
@@ -2710,7 +2710,7 @@ subroutine ebands_get_muT_with_fd(self, ntemp, kTmesh, spinmagntarget, prtvol, m
    end if
  end do ! it
 
- call ebands_free(tmp_ebands)
+ call tmp_ebands%free()
  call xmpi_sum(mu_e, comm, ierr)
 
  call cwtime_report(" ebands_get_muT_with_fd", cpu, wall, gflops, end_str=ch10)
@@ -4085,7 +4085,7 @@ type(ebands_t) function ebands_chop(self, bstart, bstop) result(new)
  ABI_CHECK_ILEQ(bstart, bstop, "bstart should be <= bstop")
 
  ! First copy the bands
- call ebands_copy(self, new)
+ call self%copy(new)
 
  ! Now chop them
  ABI_FREE(new%eig)
@@ -5856,7 +5856,7 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_range, prefix, co
    call ebands_write(ebands_kpath, dtset%prtebands, strcat(prefix, tag), kptbounds=kpath%bounds)
  end if
 
- call ebands_free(ebands_kpath)
+ call ebands_kpath%free()
  call kpath%free()
 
 end subroutine ebands_interpolate_kpath

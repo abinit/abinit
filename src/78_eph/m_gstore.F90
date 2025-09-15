@@ -17,7 +17,7 @@
 !!
 !!  g(q, k) is therefore a sloppy notation for:
 !!
-!!          g(q, k) = <k + q, m, spin| \Delta_{q, \nu} V^{spin}_{scf} | k, n, spin>
+!!          g(q, k) = <k+q,m,spin| \Delta_{q, \nu} V^{spin}_{scf} |k,n,spin>
 !!
 !!  There are lots of technical details that should be discussed but, roughly speaking,
 !!  the gstore API allows one to:
@@ -27,8 +27,10 @@
 !!     thus one has to select the appropriate zones beforehand.
 !!
 !!   - filter bands and/or k/q wavevectors according to some criterion.
-!!     In superconductors, for instance, only k/k+q states on the Fermi surface are needed.
+!!     In superconductors, for instance, only k/k+q states on the Fermi surface are usually needed.
 !!     In semiconductors, one can include only k, k+q inside an energy window around the band edge.
+!!     for transport properties or just the |n,k,spin> states at the band edges while <k+q,m,spin|
+!!     have q in the BZ and m=1,nband
 !!
 !!  - whether the code should compute and store the complex valued g or |g|^2.
 !!    Expression depending of |g|^2 are gauge-invariant provided that all degenerate states are summed over.
@@ -41,11 +43,11 @@
 !!  At the level of the API, we have three different routines.
 !!
 !!      1) gstore_new builds the object, defines the BZ sampling type (e.g. k in the IBZ, q in the BZ)
-!!         and implements filtering techniques. The MPI grid is automatically generated at this level
+!!         and implements filtering techniques. The MPI grid is automatically generated at this level.
 !!
-!!      2) gstore_compute evaluates the e-ph matrix elements in parallel and dumps the results to GSTORE.nc
+!!      2) gstore_compute evaluates the e-ph matrix elements in parallel and dumps the results to GSTORE.nc.
 !!
-!!      3) gstore%from_ncpath reconstructs the object from GSTORE.nc
+!!      3) gstore%from_ncpath reconstructs the object from a GSTORE.nc file.
 !!
 !!  In a typical scenario, one uses eph_task 11 to generate GSTORE.nc i.e. steps 1) and 2).
 !!  Then one introduces a new value of eph_task in which we read the object from file and call
@@ -284,7 +286,7 @@ type, public :: gqk_t
   ! (nb, nb, my_npert, my_nq, my_nk)
 
   complex(dp), allocatable :: my_g(:,:,:,:,:)
-  ! (my_npert, nb, my_nq, nb, my_nk)
+  ! (my_npert, nb_kq, my_nq, nb_k, my_nk)
   ! (       p, b1_kq,     q, b2_k, k)  -->  <k+q, b1| D_{q,p}H |k, b2>
   ! e-ph matrix elements g (local buffer). Allocated if cplex == 2
 
@@ -378,7 +380,7 @@ type, public :: gqk_t
 !!    - metadata such as kzone, qzone and kfilter that are needed to interpret
 !!      the storage mode used for the g(k, q)
 !!
-!! NB: the e-ph matrix element are stored in gstore%qqk(my_is) where my_is counts the number of spins treated by this MPI processor.
+!! NB: the e-ph matrix element are stored in gstore%gqk(my_is) where my_is counts the number of spins treated by this MPI processor.
 !!
 !! NOTES
 !!
@@ -2059,7 +2061,6 @@ subroutine recompute_select_qbz_spin(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, k
      end if
 
      do ii=1,len_kpts_ptr
-
        ! get the k-index in BZ
        select case (gstore%kzone)
        case ("bz")
@@ -2527,7 +2528,7 @@ subroutine gstore_get_lambda_iso_iw(gstore, nw, imag_w, lambda)
 
 !Local variables-------------------------------
  integer :: my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr
- real(dp) :: g2, w_nuq, weight_k, weight_q
+ real(dp) :: g2, wqnu, weight_k, weight_q
  type(gqk_t), pointer :: gqk
 !arrays
  real(dp) :: qpt(3)
@@ -2561,10 +2562,10 @@ subroutine gstore_get_lambda_iso_iw(gstore, nw, imag_w, lambda)
          do im_kq=1,gqk%nb
            do my_ip=1,gqk%my_npert
              g2 = g2_pmnk(my_ip, im_kq, in_k, my_ik)
-             ! TODO: handle w_nuq ~ 0
-             w_nuq = gqk%my_wnuq(my_ip, my_iq)
+             ! TODO: handle wqnu ~ 0
+             wqnu = gqk%my_wnuq(my_ip, my_iq)
              lambda(:) = lambda(:) + &
-               two * w_nuq / (imag_w(:) ** 2 + w_nuq ** 2) * g2 * weight_k * weight_q * dbldelta_q(im_kq, in_k, my_ik)
+               two * wqnu / (imag_w(:) ** 2 + wqnu ** 2) * g2 * weight_k * weight_q * dbldelta_q(im_kq, in_k, my_ik)
            end do
          end do
        end do
@@ -2608,7 +2609,7 @@ subroutine gstore_get_a2fw(gstore, nw, wmesh, a2fw)
 
 !Local variables-------------------------------
  integer :: my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr
- real(dp) :: g2, w_nuq, weight_k, weight_q, cpu, wall, gflops
+ real(dp) :: g2, wqnu, weight_k, weight_q, cpu, wall, gflops
  type(gqk_t), pointer :: gqk
 !arrays
  real(dp) :: qpt(3)
@@ -2642,8 +2643,8 @@ subroutine gstore_get_a2fw(gstore, nw, wmesh, a2fw)
      end do
 
      do my_ip=1,gqk%my_npert
-       w_nuq = gqk%my_wnuq(my_ip, my_iq)
-       deltaw_nuq = gaussian(wmesh - w_nuq, gstore%dtset%ph_smear)
+       wqnu = gqk%my_wnuq(my_ip, my_iq)
+       deltaw_nuq = gaussian(wmesh - wqnu, gstore%dtset%ph_smear)
        do my_ik=1,gqk%my_nk
          weight_k = gqk%my_wtk(my_ik)
          do in_k=1,gqk%nb
@@ -2890,7 +2891,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
    ABI_CHECK(isdiagmat(ebands%kptrlatt), "kptrlatt must be diagonal when tetra is used.")
    ABI_CHECK(ebands%nshiftk == 1, "nshiftk must be 1 when tetra is used")
    nge = get_diag(ebands%kptrlatt); ngw = nge
-   ABI_CHECK(nkbz == product(nge(1:3)), "Wrong nge")
+   ABI_CHECK_IEQ(nkbz, product(nge(1:3)), "Wrong nge")
 
    ! Compute eig_k and eig_kq in full BZ for the relevant bands around Ef.
    ABI_MALLOC(kmesh, (3, nkbz))
@@ -2973,7 +2974,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
    end do
 
    ! FIXME: bug if k-point (and q-point) parallelism.
-   ABI_CHECK(cnt == gqk%my_nk, sjoin("cnt != my_nk, ", itoa(cnt), itoa(gqk%my_nk)))
+   ABI_CHECK_IEQ(cnt, gqk%my_nk, sjoin("cnt != my_nk, ", itoa(cnt), itoa(gqk%my_nk)))
    call my_krank%free()
    !call cwtime_report(" transfer", cpu, wall, gflops)
 
@@ -4245,7 +4246,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  !
  ! In memory, we have allocated:
  !
- !    my_g(my_npert, nb, my_nq, nb, my_nk) if with_cplex == 2 (complex array)
+ !    my_g(my_npert, nb_kq, my_nq, nb_k, my_nk) if with_cplex == 2 (complex array)
  !
  ! or
  !
@@ -5051,6 +5052,7 @@ subroutine gqk_get_erange_mask(gqk, gstore, erange, my_states, glob_states)
  call xmpi_sum(glob_states, gqk%kpt_comm%value, ierr)
 
  call gaps%free()
+
 end subroutine gqk_get_erange_mask
 !!***
 
@@ -5161,6 +5163,181 @@ subroutine gqk_filter_erange(gqk, gstore, erange)
  call krank_kpts%free()
 
 end subroutine gqk_filter_erange
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gstore/gstore_sigeph
+!! NAME
+!!  gstore_sigeph
+!!
+!! FUNCTION
+!!  Compute matrix elements of the e-ph self-energy (Fan Migdal + Debye Waller).
+!!  using precomputed e-ph matrix elements.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine gstore_sigeph(gstore, dtset, dtfil, ebands)
+
+ use m_occ, only : occ_be, occ_fd
+
+!Arguments ------------------------------------
+!scalars
+ class(gstore_t), intent(in) :: gstore
+ type(dataset_type),intent(in) :: dtset
+ type(datafiles_type),intent(in) :: dtfil
+ type(ebands_t),intent(in) :: ebands
+
+!Local variables-------------------------------
+ integer,parameter :: master = 0
+ integer :: spin, my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, ntemp, gap_err, my_rank
+ integer :: it, ik_ibz, ikq_ibz, band_k, band_kq, timrev
+ real(dp) :: wqnu, gkq2, weight_qq
+ real(dp) :: eig0nk, eig0mk, eig0mkq ! gdw2, gdw2_stern, rtmp !,nqnu,gkq2,gkq2_pf,
+ !real(dp) :: cpu, wall, gflops
+ logical :: use_syms
+ complex(dpc) :: ieta !, sig_cplx
+ type(gaps_t) :: gaps
+ !type(lgroup_t) :: lg_myk
+!arrays
+ integer :: units(2)
+ real(dp) :: kk(3), qpt(3)
+ real(dp),allocatable :: mu_e(:), kTmesh(:), nqnu(:), f_mkq(:), f_nk(:)
+ complex(dpc),allocatable :: cfact(:)
+ !real(dp),allocatable :: g2_pmnk(:,:,:,:)
+!----------------------------------------------------------------------
+
+ units = [std_out, ab_out]
+ my_rank = xmpi_comm_rank(gstore%comm)
+
+ !call wrtout(std_out, sjoin(" Computing a^2F(w) with ph_smear:", ftoa(gstore%dtset%ph_smear * Ha_meV), "(meV)"), pre_newlines=1)
+ ABI_CHECK(gstore%qzone == "bz", "gstore_sigeph assumes qzone == `bz`")
+
+ ! Build (linear) mesh of K * temperatures. tsmesh(1:3) = [start, step, num]
+ call dtset%get_ktmesh(ntemp, kTmesh)
+
+ ! Compute the chemical potential at the different physical temperatures with Fermi-Dirac.
+ ! TODO: One should check that nband is > nbocc to avoid inaccuracies in mu_e.
+ ABI_MALLOC(mu_e, (ntemp))
+ mu_e(:) = ebands%fermie
+ if (dtset%eph_fermie == zero) then
+   call ebands%get_muT_with_fd(ntemp, ktmesh, dtset%spinmagntarget, dtset%prtvol, mu_e, gstore%comm)
+ end if
+
+ gaps = ebands%get_gaps(gap_err)
+ if (gap_err /= 0) then
+   ABI_ERROR("Cannot compute fundamental and direct gap (likely metal)")
+ end if
+
+ if (my_rank == master) then
+   call gaps%print(units, kTmesh=ktmesh, mu_e=mu_e, header="Gaps, band edges and relative position wrt Fermi level")
+ end if
+ call gaps%free()
+
+ ABI_MALLOC(nqnu, (ntemp))
+ ABI_MALLOC(f_nk, (ntemp))
+ ABI_MALLOC(f_mkq, (ntemp))
+ ABI_MALLOC(cfact, (ntemp))
+
+ ieta = + j_dpc * dtset%zcut
+ use_syms = dtset%symsigma /= 0
+
+ do my_is=1,gstore%my_nspins
+   associate (gqk => gstore%gqk(my_is))
+   spin = gstore%my_spins(my_is)
+
+   ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
+   ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
+
+   do my_ik=1,gqk%my_nk
+     kk = gqk%my_kpts(:, my_ik); ik_ibz = gqk%my_k2ibz(1, my_ik)
+
+     ! TODO: Little group symmetries.
+     ! Compute the little group of the k-point so that we can compute g(k,q) only for q in the IBZ_k
+     timrev = kpts_timrev_from_kptopt(ebands%kptopt)
+     !if (use_syms) then
+     !  call lg_myk%init(cryst, kk, timrev, gstore%nqbz, gstore%qbz, gstore%nqibz, gstore%qibz, xmpi_comm_self)
+     !end if
+
+     ! Sum over q-points.
+     do my_iq=1,gqk%my_nq
+       call gqk%myqpt(my_iq, gstore, weight_qq, qpt)
+
+       !if (kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, gqk%my_nk, gqk%my_kpts, my_kqmap, qpt=qpt) /= 0) then
+       !  ABI_ERROR(sjoin("Cannot map k+q to IBZ with qpt:", ktoa(qpt)))
+       !end if
+       !ikq_ibz ??
+
+       ! weight_qq should be redefined here
+       weight_qq = one / gstore%nqbz
+       !if (use_syms) then
+       !  ii = lg_myk%findq_ibzk(qpt); if (ii == -1) cycle
+       !  weight_qq = lg_myk%weights(ii)
+       !end if
+
+       ! Sum over phonon modes.
+       do my_ip=1,gqk%my_npert
+         wqnu = gqk%my_wnuq(my_ip, my_iq)
+         nqnu(:) = occ_be(wqnu, kTmesh, zero)
+
+         ! Copy data to improve memory access in the loops below.
+         ! (my_npert, nb, my_nq, nb, my_nk)
+         !g2_pmnk = gqk%my_g2(my_ip,:,my_iq,:,my_ik)
+
+         ! Sum over bands.
+         do im_kq=1,gqk%nb ! gqk%nb_kq
+           band_kq = im_kq - gqk%bstart + 1
+           eig0mkq = ebands%eig(band_kq, ikq_ibz, spin)
+
+           ! Compute electronic occ for all Temps (note mu_e(it) Fermi level)
+           do it=1,ntemp
+             f_mkq(it) = occ_fd(eig0mkq, kTmesh(it), mu_e(it))
+           end do
+
+           ! Loop over the n index in |n,k>.
+           do in_k=1,gqk%nb ! gqk%nb_k
+             band_k = in_k - gqk%bstart + 1
+             eig0nk = ebands%eig(band_k, ik_ibz, spin)
+
+             ! Compute electronic occ for all Temps (note mu_e(it) Fermi level)
+             do it=1,ntemp
+               f_nk(it) = occ_fd(eig0nk, kTmesh(it), mu_e(it))
+             end do ! it
+
+             if (dtset%eph_ahc_type == 1) then
+               cfact(:) =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + ieta) + &
+                           (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + ieta)
+             else
+               cfact(:) =  (two * nqnu + one) / (eig0nk - eig0mkq + ieta)
+             end if
+
+             ! Re + Im self-energy
+             ! (my_npert, nb_kq, my_nq, nb_k, my_nk)
+             gkq2 = gqk%my_g2(my_ip, im_kq, my_iq, in_k, my_ik)
+             cfact = cfact * gkq2 * weight_qq
+           end do ! in_k
+         end do ! my_ik
+       end do ! im_kq
+     end do ! my_iq
+   end do ! my_ik
+   !call lg_myk%free()
+   end associate
+ end do ! my_is
+
+ ABI_FREE(mu_e)
+ ABI_FREE(kTmesh)
+ ABI_FREE(nqnu)
+ ABI_FREE(f_nk)
+ ABI_FREE(f_mkq)
+ ABI_FREE(cfact)
+
+ !call xmpi_sum(foobar, gstore%comm, ierr)
+
+end subroutine gstore_sigeph
 !!***
 
 end module m_gstore

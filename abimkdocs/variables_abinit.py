@@ -4314,8 +4314,7 @@ Variable(
     characteristics=['[[ENERGY]]'],
     added_in_version="before_v9",
     text=r"""
-This variable can be used to change artificially the value of the Fermi level when
-performing e-ph calculations.
+This variable can be used to change artificially the value of the Fermi level when performing e-ph calculations.
 The variable has effect only if set to a non-zero value.
 This option is mutually exclusive with [[eph_extrael]] and [[eph_doping]].
 When [[eph_fermie]] is used the number of temperatures specified by [[tmesh]] cannot be greater than one.
@@ -24717,8 +24716,11 @@ This input variable can be used to introduce a filter in the electronic wavevect
 when computing the e-ph matrix elements with [[eph_task]] == 11.
 Possible values are:
 
-    "none" --> No filter is applied.
-    "fs_tetra" --> Use tetrahedron method to filter k/k+q states on the Fermi surface.
+- "none" --> No filter is applied (default)
+- "fs_tetra" --> Use tetrahedron method to filter k/k+q states on the Fermi surface.
+- "qprange" --> Use [[gw_qprange]] to select k-points. If [[gw_qprange]] is not given in input
+   the code automatically selects the k-points associated to the direct and the fundamental KS gap
+   as computed from the WFK file.
 
 Note that it is possible to use another filter based on the position of the energy states wrt to either
 the CBM/VBM or the position wrt to the Fermi level via [[gstore_erange]].
@@ -24740,8 +24742,8 @@ This input variable specifies the representation used to store the e-ph matrix e
 
 Possible values are:
 
-    "phonon" --> Store e-ph matrix elements in the phonon representation (collective displacement)
-    "atom" -->  Store e-ph matrix elements in the atom representation (displacement of a single atom along one of the reduced directions)
+- "phonon" --> Store e-ph matrix elements in the phonon representation (collective displacement)
+- "atom" -->  Store e-ph matrix elements in the atom representation (displacement of a single atom along one of the reduced directions)
 """,
 ),
 
@@ -24759,7 +24761,6 @@ Variable(
 This input variable can be used to specify the band range
 when computing the GSTORE.nc file with [[eph_task]] == 11.
 The first entry gives the first band to be included while the second index specifies the last band.
-
 Note that the array depends on the value of [[nsppol]] thus one has to provide four integers for the
 two different spin channels when [[nsppol]] == 2.
 
@@ -24868,7 +24869,6 @@ on the basis of their KS energy $\ee_\nk$.
 
 If both entries in [[gstore_erange]] are negative, the code assumes a metal and only states within the energy
 window [efermi - abs(gstore_erange(1)), efermi + abs(gstore_erange(2)] are included in the calculation.
-
 Positive (or zero) values are used in semiconductors to define an energy range with respect to the band edges.
 In this case, the first entry given the position of the holes with respect to the CBM while the second entry
 gives the position of electrons with respect to the VBM (energy differences are **always positive**, even for holes).
@@ -24964,11 +24964,11 @@ The choice is among:
 
     At the time of writing, the following features are **not yet supported** in GWR:
 
+    * PAW method.
     * Calculations with [[nspinor]] == 2.
     * Metallic systems as the our minimax meshes assume systems with an energy gap.
     * Temperature effects at the electronic level are not taken into account as we work with the T = 0 formalism.
     * Only $\Gamma$-centered $\kk$-meshes are supported in GWR.
-    * PAW method.
 """,
 ),
 
@@ -25066,8 +25066,7 @@ If encountering out-of-memory issues with the supercell method, it is advisable 
 To optimize performance, utilize all available cores, prioritizing g-parallelism followed by k-parallelism.
 
 The two algorithms are equivalent in the case of $\Gamma$-only sampling.
-
-See also [[gwr_chi_algo]]
+See also [[gwr_chi_algo]].
 """,
 ),
 
@@ -25114,25 +25113,6 @@ The default value (-1.0) instructs the code to use all available [nband]] states
 See also [[inclvkb]] for the inclusion of the contribution given by the non-local part of pseudopotential.
 """,
 ),
-
-
-#Variable(
-#    abivarname="gwr_regterm",
-#    varset="gwr",
-#    vartype="real",
-#    topics=['GWR_expert'],
-#    dimensions=[1],
-#    defaultval=-1.0,
-#    mnemonics="GWR REGularization TERM",
-#    requires="[[optdriver]] == 6",
-#    added_in_version="9.8.0",
-#    text=r"""
-#TODO: To be described.
-#Negative value means automatic regularization.
-#Zero to deactivate it.
-#Positive to use specific value.
-#""",
-#),
 
 
 Variable(
