@@ -663,7 +663,8 @@ end subroutine kpts_pack_in_stars
 !!
 !! SOURCE
 
-integer function kpts_map(mode, kptopt, cryst, krank, nkpt2, kpt2, map, qpt, dksqmax_tol) result(ierr)
+integer function kpts_map(mode, kptopt, cryst, krank, nkpt2, kpt2, map, &
+                          qpt, dksqmax_tol) result(ierr) ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -696,13 +697,13 @@ integer function kpts_map(mode, kptopt, cryst, krank, nkpt2, kpt2, map, qpt, dks
  end if
 
  select case (mode)
- case("symrel")
+ case ("symrel")
    ! Note symrel and use_symrec = .False.
    ! These are the conventions for the symmetrization of the wavefunctions used in cgtk_rotate.
    call krank%get_mapping(nkpt2, kpt2, dksqmax, cryst%gmet, map, &
                           nsym, cryst%symafm, cryst%symrel, timrev, use_symrec=.False., qpt=my_qpt)
 
- case("symrec")
+ case ("symrec")
    ! Note symrec and use_symrec = .True.
    ! These are the conventions for the symmetrization of the DVDB as well as the conventions
    ! used in several BZ routines.
