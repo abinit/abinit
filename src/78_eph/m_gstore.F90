@@ -140,7 +140,7 @@ module m_gstore
 
  use defs_abitypes,    only : mpi_type
  use m_time,           only : cwtime, cwtime_report, sec2str
- use m_fstrings,       only : tolower, itoa, ftoa, sjoin, ktoa, ltoa, strcat, replace_ch0, yesno
+ use m_fstrings,       only : tolower, itoa, ftoa, sjoin, ktoa, ltoa, strcat, replace_ch0, yesno, string_in
  !use m_yaml,          only : yamldoc_t
  use m_numeric_tools,  only : arth, get_diag, isdiagmat
  use m_krank,          only : krank_t, krank_new, krank_from_kptrlatt, get_ibz2bz, star_from_ibz_idx
@@ -258,6 +258,10 @@ type, public :: gqk_t
   integer,allocatable :: my_q2bz(:)
   ! (my_nq)
   ! Mapping my_iq index --> iq_bz index in the full BZ
+
+  !integer,allocatable :: my_k2glob(:)
+  ! (my_nk)
+  ! Mapping my_ik index --> global index in the g(q, k) matrix.
 
   !integer,allocatable :: my_q2glob(:)
   ! (my_nq)
@@ -1006,6 +1010,15 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      gstore_fill_dp = zero
      if (gstore%kfilter == "none") gstore_fill_dp = -huge(one)
      NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("gvals"), NF90_FILL, gstore_fill_dp))
+
+     ! In GWPT gvals is used for g^Sigma so we declare another array to store g^KS
+     if (dtset%eph_task == 17) then
+       ncerr = nctk_def_arrays(spin_ncid, [ &
+         nctkarr_t("gvals_ks", "dp", "gstore_cplex, nb, nb, natom3, glob_nk, glob_nq") &
+       ])
+       NCF_CHECK(ncerr)
+       NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("gvals_ks"), NF90_FILL, gstore_fill_dp))
+     end if
 
      select case(gstore%with_vk)
      case (1)
@@ -4504,26 +4517,29 @@ end subroutine gstore_check_restart
 !!
 !! SOURCE
 
-subroutine gstore_print_for_abitests(gstore, dtset)
+subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
 
 !Arguments ------------------------------------
  class(gstore_t),intent(in) :: gstore
  type(dataset_type),intent(in) :: dtset
+ logical,optional,intent(in) :: with_ks
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
  integer :: root_ncid, spin_ncid, gstore_completed, spin, nb, ik_glob, iq_glob, ipc, cplex, ncerr, natom3
  integer :: glob_nq, glob_nk, im_kq, in_k ! ib, ik_ibz,
- real(dp) :: g2
- !character(len=500) :: msg
+ logical :: with_ks__
+ real(dp) :: g2, g2_ks
 !arrays
  integer,allocatable :: done_qbz_spin(:,:)
- real(dp),allocatable :: gslice_mn(:,:,:) !,vk_cart_ibz(:,:,:), vkmat_cart_ibz(:,:,:,:)
+ real(dp),allocatable :: gslice_mn(:,:,:), gslice_ks_mn(:,:,:)  !,vk_cart_ibz(:,:,:), vkmat_cart_ibz(:,:,:,:)
 ! *************************************************************************
 
  ! Only master prints to ab_out
  if (xmpi_comm_rank(gstore%comm) /= master) return
+
+ with_ks__ = .False.; if (present(with_ks)) with_ks__ = with_ks
 
  natom3 = dtset%natom * 3
  NCF_CHECK(nctk_open_read(root_ncid, gstore%path, xmpi_comm_self))
@@ -4583,9 +4599,15 @@ subroutine gstore_print_for_abitests(gstore, dtset)
 
    cplex = dtset%gstore_cplex
    ABI_MALLOC(gslice_mn, (cplex, nb, nb))
+   ABI_MALLOC(gslice_ks_mn, (cplex, nb, nb))
 
    write(ab_out,"(a)") " E-PH matrix elements:"
-   write(ab_out, "(1x,5(a5,1x),a16)") "iq","ik", "mode", "im_kq", "in_k", "|g|^2 in Ha^2"
+   if (with_ks__) then
+     write(ab_out, "(1x,5(a5,1x),2(a16))") "iq","ik", "mode", "im_kq", "in_k", "|g^SE|^2 in Ha^2", "|g^KS|^2 in Ha^2"
+   else
+     write(ab_out, "(1x,5(a5,1x),a16)") "iq","ik", "mode", "im_kq", "in_k", "|g|^2 in Ha^2"
+   end if
+
    do iq_glob=1,glob_nq
      if (iq_glob /= 1 .and. iq_glob /= glob_nq) cycle  ! Write the first and the last q-point.
      do ik_glob=1,glob_nk
@@ -4595,21 +4617,48 @@ subroutine gstore_print_for_abitests(gstore, dtset)
          ncerr = nf90_get_var(spin_ncid, spin_vid("gvals"), gslice_mn, &
                               start=[1,1,1,ipc,ik_glob,iq_glob], count=[cplex,nb,nb,1,1,1])
          NCF_CHECK(ncerr)
+
          write(ab_out, "(3(a,1x,i0,1x))")" |g(k,q)|^2 in Ha^2 for iq:", iq_glob, "ik:", ik_glob, "mode:", ipc
-         write(ab_out, "(1x,5(a5,1x),a16)")"iq","ik", "mode", "im_kq", "in_k", "|g|^2 in Ha^2"
-         do im_kq=1,nb
-           do in_k=1,nb
-             if (cplex == 1) g2 = gslice_mn(1, im_kq, in_k)
-             if (cplex == 2) g2 = gslice_mn(1, im_kq, in_k)**2 + gslice_mn(2, im_kq, in_k)**2
-             write(ab_out, "(1x,5(i5,1x),es16.6)") iq_glob, ik_glob, ipc, im_kq, in_k, g2
+
+         if (.not. with_ks__) then
+           write(ab_out, "(1x,5(a5,1x),a16)")"iq","ik", "mode", "im_kq", "in_k", "|g|^2 in Ha^2"
+           do im_kq=1,nb
+             do in_k=1,nb
+               if (cplex == 1) g2 = gslice_mn(1, im_kq, in_k)
+               if (cplex == 2) g2 = gslice_mn(1, im_kq, in_k)**2 + gslice_mn(2, im_kq, in_k)**2
+               write(ab_out, "(1x,5(i5,1x),es16.6)") iq_glob, ik_glob, ipc, im_kq, in_k, g2
+             end do
            end do
-         end do
+        else
+          ! g^SE and g^KS
+          ncerr = nf90_get_var(spin_ncid, spin_vid("gvals_ks"), gslice_ks_mn, &
+                               start=[1,1,1,ipc,ik_glob,iq_glob], count=[cplex,nb,nb,1,1,1])
+          NCF_CHECK(ncerr)
+          write(ab_out, "(1x,5(a5,1x),2a16)")"iq","ik", "mode", "im_kq", "in_k", "|g^SE|^2 in Ha^2", "|g^KS|^2 in Ha^2"
+          do im_kq=1,nb
+            do in_k=1,nb
+              if (cplex == 1) then
+                g2 = gslice_mn(1, im_kq, in_k)
+                g2_ks = gslice_ks_mn(1, im_kq, in_k)
+              end if
+              if (cplex == 2) then
+                g2 = gslice_mn(1, im_kq, in_k)**2 + gslice_mn(2, im_kq, in_k)**2
+                g2_ks = gslice_ks_mn(1, im_kq, in_k)**2 + gslice_ks_mn(2, im_kq, in_k)**2
+              end if
+              write(ab_out, "(1x,5(i5,1x),2(es16.6))") iq_glob, ik_glob, ipc, im_kq, in_k, g2, g2_ks
+            end do
+          end do
+        end if
+
        end do
      end do
    end do
 
    ABI_FREE(gslice_mn)
+   ABI_FREE(gslice_ks_mn)
  end do
+
+ !write(ab_out,*)ch10, ch10
 
  NCF_CHECK(nf90_close(root_ncid))
 
@@ -5209,13 +5258,18 @@ subroutine gstore_sigeph(gstore, dtset, dtfil, ebands)
  real(dp),allocatable :: mu_e(:), kTmesh(:), nqnu(:), f_mkq(:), f_nk(:)
  complex(dpc),allocatable :: cfact(:)
  !real(dp),allocatable :: g2_pmnk(:,:,:,:)
+ complex(dpc),allocatable :: vals_e0ks(:,:,:)
 !----------------------------------------------------------------------
 
  units = [std_out, ab_out]
  my_rank = xmpi_comm_rank(gstore%comm)
 
- !call wrtout(std_out, sjoin(" Computing a^2F(w) with ph_smear:", ftoa(gstore%dtset%ph_smear * Ha_meV), "(meV)"), pre_newlines=1)
+ call wrtout(std_out, " Computing Fan-Migdal + DW self-energy from GSTORE.nc", pre_newlines=1)
+
  ABI_CHECK(gstore%qzone == "bz", "gstore_sigeph assumes qzone == `bz`")
+ if (gstore%check_cplex_qkzone_gmode(1, "bz", "ibz", "phonon") /= 0) then
+   ABI_ERROR("The gstore object is inconsistent with gstore_sigeph. See messages above.")
+ end if
 
  ! Build (linear) mesh of K * temperatures. tsmesh(1:3) = [start, step, num]
  call dtset%get_ktmesh(ntemp, kTmesh)
@@ -5246,22 +5300,32 @@ subroutine gstore_sigeph(gstore, dtset, dtfil, ebands)
  ieta = + j_dpc * dtset%zcut
  use_syms = dtset%symsigma /= 0
 
+ ! Loop over collinear spins.
  do my_is=1,gstore%my_nspins
    associate (gqk => gstore%gqk(my_is))
    spin = gstore%my_spins(my_is)
 
+   ! vals_e0ks(ntemp, max_nbcalc, nk_glob, nsppol)
+   ! Sigma_eph(omega=eKS, kT, band) for given (ikcalc, spin).
+   ! Fan-Migdal + Debye-Waller
+   ABI_CALLOC(vals_e0ks, (ntemp, gqk%nb, gqk%glob_nk))  ! nb_k
+   ABI_FREE(vals_e0ks)
+
    ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
    ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
 
+   ! Loop over k-points in |n,k>
    do my_ik=1,gqk%my_nk
      kk = gqk%my_kpts(:, my_ik); ik_ibz = gqk%my_k2ibz(1, my_ik)
+     ! FIXME
+     !glob_ik
 
      ! TODO: Little group symmetries.
      ! Compute the little group of the k-point so that we can compute g(k,q) only for q in the IBZ_k
      timrev = kpts_timrev_from_kptopt(ebands%kptopt)
-     !if (use_syms) then
-     !  call lg_myk%init(cryst, kk, timrev, gstore%nqbz, gstore%qbz, gstore%nqibz, gstore%qibz, xmpi_comm_self)
-     !end if
+     if (use_syms) then
+       !call lg_myk%init(cryst, kk, timrev, gstore%nqbz, gstore%qbz, gstore%nqibz, gstore%qibz, xmpi_comm_self)
+     end if
 
      ! Sum over q-points.
      do my_iq=1,gqk%my_nq
@@ -5270,14 +5334,15 @@ subroutine gstore_sigeph(gstore, dtset, dtfil, ebands)
        !if (kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, gqk%my_nk, gqk%my_kpts, my_kqmap, qpt=qpt) /= 0) then
        !  ABI_ERROR(sjoin("Cannot map k+q to IBZ with qpt:", ktoa(qpt)))
        !end if
+       ! FIXME
        !ikq_ibz ??
 
        ! weight_qq should be redefined here
        weight_qq = one / gstore%nqbz
-       !if (use_syms) then
-       !  ii = lg_myk%findq_ibzk(qpt); if (ii == -1) cycle
-       !  weight_qq = lg_myk%weights(ii)
-       !end if
+       if (use_syms) then
+         !ii = lg_myk%findq_ibzk(qpt); if (ii == -1) cycle
+         !weight_qq = lg_myk%weights(ii)
+       end if
 
        ! Sum over phonon modes.
        do my_ip=1,gqk%my_npert
@@ -5304,9 +5369,9 @@ subroutine gstore_sigeph(gstore, dtset, dtfil, ebands)
              eig0nk = ebands%eig(band_k, ik_ibz, spin)
 
              ! Compute electronic occ for all Temps (note mu_e(it) Fermi level)
-             do it=1,ntemp
-               f_nk(it) = occ_fd(eig0nk, kTmesh(it), mu_e(it))
-             end do ! it
+             !do it=1,ntemp
+             !  f_nk(it) = occ_fd(eig0nk, kTmesh(it), mu_e(it))
+             !end do ! it
 
              if (dtset%eph_ahc_type == 1) then
                cfact(:) =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + ieta) + &
@@ -5315,16 +5380,18 @@ subroutine gstore_sigeph(gstore, dtset, dtfil, ebands)
                cfact(:) =  (two * nqnu + one) / (eig0nk - eig0mkq + ieta)
              end if
 
-             ! Re + Im self-energy
+             ! Re + Im of Fan-Migdal self-energy
              ! (my_npert, nb_kq, my_nq, nb_k, my_nk)
              gkq2 = gqk%my_g2(my_ip, im_kq, my_iq, in_k, my_ik)
              cfact = cfact * gkq2 * weight_qq
+             !se%vals_e0ks(:, in_k, ik_glob) = se%vals_e0ks(:, in_k, ik_glob) + cfact
            end do ! in_k
          end do ! my_ik
        end do ! im_kq
      end do ! my_iq
    end do ! my_ik
    !call lg_myk%free()
+   !call xmpi_sum(foobar, gstore%comm, ierr)
    end associate
  end do ! my_is
 
@@ -5334,8 +5401,6 @@ subroutine gstore_sigeph(gstore, dtset, dtfil, ebands)
  ABI_FREE(f_nk)
  ABI_FREE(f_mkq)
  ABI_FREE(cfact)
-
- !call xmpi_sum(foobar, gstore%comm, ierr)
 
 end subroutine gstore_sigeph
 !!***
