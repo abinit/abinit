@@ -1335,7 +1335,6 @@ subroutine pack_eneocc(nkpt, nsppol, mband, nband, bantot, array3d, vect)
 
 !Local variables-------------------------------
  integer :: spin,ikpt,band,idx
-
 ! *************************************************************************
 
  vect(:)=zero
@@ -1644,7 +1643,6 @@ integer function ebands_vcbm_range_from_gaps(ebands, gaps, erange, e_lowhigh, ba
  integer :: band, ik, spin, band_low, band_high
  real(dp) :: cmin, vmax, ee, elow, ehigh
  integer,allocatable :: ib_work(:,:,:)
-
 ! *************************************************************************
 
  ABI_MALLOC(ib_work, (2, ebands%nkpt, ebands%nsppol))
@@ -1809,7 +1807,6 @@ pure function ebands_get_occupied(ebands, tol_occ) result(occ_idx)
 !Local variables-------------------------------
  integer :: band,ikpt,spin,idx,nband_k
  real(dp) :: tol_
-
 ! *************************************************************************
 
  tol_=tol8; if (PRESENT(tol_occ)) tol_=tol_occ
@@ -2015,7 +2012,6 @@ subroutine ebands_get_erange(ebands, nkpts, kpoints, band_range, emin, emax)
 !scalars
  integer :: spin,ik,ikpt,cnt
  type(krank_t) :: krank
-
 ! *************************************************************************
 
  krank = krank_new(ebands%nkpt, ebands%kptns)
@@ -2072,9 +2068,7 @@ pure function ebands_nelect_per_spin(ebands) result(nelect_per_spin)
  real(dp) :: nelect_per_spin(ebands%nsppol)
 
 !Local variables-------------------------------
-!scalars
  integer :: iband,ikpt,spin
-
 ! *************************************************************************
 
  nelect_per_spin = ebands%nelect
@@ -2127,7 +2121,6 @@ function ebands_get_minmax(ebands, arr_name) result(minmax)
  real(dp) :: datum
 !arrays
  real(dp), ABI_CONTIGUOUS pointer :: rdata(:,:,:)
-
 ! *************************************************************************
 
  select case (tolower(arr_name))
@@ -2289,7 +2282,6 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol, fermie_to_
 !arrays
  real(dp) :: nelect_spin(ebands%nsppol),condbottom(ebands%nsppol),valencetop(ebands%nsppol)
  real(dp),allocatable :: doccde(:),occ(:),eigen(:)
-
 ! *************************************************************************
 
  my_prtvol = 0; if (PRESENT(prtvol )) my_prtvol = prtvol
@@ -2453,7 +2445,6 @@ subroutine ebands_set_scheme(ebands, occopt, tsmear, spinmagntarget, prtvol, upd
  logical,optional,intent(in) :: update_occ
 
 !Local variables-------------------------------
-!scalars
  logical :: my_update_occ
 ! *************************************************************************
 
@@ -5319,8 +5310,7 @@ subroutine ebands_prtbltztrp_tau_out(eigen, tempermin, temperinc, ntemper, fermi
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: nsym, nband, nkpt, nsppol, nspinor, ntemper
- real(dp), intent(in) :: tempermin, temperinc
- real(dp), intent(in) :: nelec
+ real(dp), intent(in) :: tempermin, temperinc, nelec
  character(len=fnlen), intent(in) :: fname_radix
 !arrays
  real(dp), intent(in) :: fermie(ntemper)
@@ -5337,7 +5327,6 @@ subroutine ebands_prtbltztrp_tau_out(eigen, tempermin, temperinc, ntemper, fermi
  real(dp),parameter :: ha2ryd = two
  character(len=500) :: msg
  character(len=fnlen) :: filename,appendix
-
 ! *************************************************************************
 
 !input file for boltztrap: general info, Ef, Nelec, etc...

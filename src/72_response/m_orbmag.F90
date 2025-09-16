@@ -12,10 +12,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! NOTES
 !! These routines implement the theory developed in Zwanziger, Torrent, Gonze
 !! Phys Rev B 107, 165157 (2023). This paper will be referred to the comments as ZTG23.
@@ -56,9 +52,7 @@ module m_orbmag
   use m_mkffnl,           only : mkffnl
   use m_mpinfo,           only : proc_distrb_cycle,proc_distrb_nband
   use m_nctk
-#ifdef HAVE_NETCDF
   use netcdf
-#endif
   use m_nonlop,           only : nonlop
   use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_free,pawcprj_getdim, pawcprj_get, pawcprj_put
   use m_pawdij,           only : pawv1
@@ -87,8 +81,8 @@ module m_orbmag
 
 
   ! these parameters name the various output terms
-  
-  ! these parameters name the various output terms                                             
+
+  ! these parameters name the various output terms
   integer,parameter :: chern_nterms=3
   integer,parameter :: ibcc=1,ibvv1=2,ibvv2=3
   integer,parameter :: orbmag_nterms=6
@@ -105,27 +99,27 @@ module m_orbmag
   ! local datatype for orbmag data on kpt mesh, for eventual output to netcdf
   type,private :: orbmag_mesh_type
     ! scalars
-    
+
     integer :: mband, nkpt, nsppol
     ! number of bands, kpts, spin polarizations
 
     integer :: natom, ntypat
     ! atoms and types of atoms
-    
+
     integer :: chern_nterms
     ! number of chern terms to store on the kpt mesh
     ! CC, VV1, VV2
 
     integer :: orbmag_nterms
     ! number of orbmag terms to store on the kpt mesh
-    ! CC, VV1, VV2, NL, L_R, B.M 
+    ! CC, VV1, VV2, NL, L_R, B.M
 
     real(dp),allocatable :: lambsig(:)
     ! lambsig(ntypat)
-    
+
     real(dp),allocatable :: nucdipmom(:,:)
     ! nucdipmom(3,natom)
-    
+
     real(dp),allocatable :: cmesh(:,:,:,:,:)
     ! 3 for the 3 directions
     ! cmesh(mband,nkpt,nsppol,3,chern_terms)
@@ -133,7 +127,7 @@ module m_orbmag
     real(dp),allocatable :: omesh(:,:,:,:,:)
     ! 3 for the 3 directions
     ! omesh(mband,nkpt,nsppol,3,orbmag_terms)
-  
+
   end type orbmag_mesh_type
 
   ! local datatype for various onsite terms. Probably overkill, but convenient.
@@ -207,13 +201,6 @@ CONTAINS  !=====================================================================
 !! This routine computes the orbital magnetization and Berry curvature based on input
 !! wavefunctions and DDK wavefuntions.
 !!
-!! COPYRIGHT
-!! Copyright (C) 2003-2025 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
 !! INPUTS
 !!  cg(2,mcg)=all ground state wavefunctions
 !!  cg1(2,mcg1,3)=all DDK wavefunctions in all 3 directions
@@ -241,7 +228,7 @@ CONTAINS  !=====================================================================
 !!  rprimd(3,3)=real space translation vectors
 !!  usevxctau=1 if kinetic energy density contribution has to be included (mGGA)
 !!  vtrial(nfftf,dtset%nspden)=GS potential (Hartree)
-!!  vxctau(nfftf,nspden,4*usevxctau)=derivative of e_xc with respect to kinetic energy density, for mGGA  
+!!  vxctau(nfftf,nspden,4*usevxctau)=derivative of e_xc with respect to kinetic energy density, for mGGA
 !!  ylm(mpw*mkmem_rbz,psps%mpsang*psps%mpsang*psps%useylm)=all ylm's
 !!  ylmgr(mpw*mkmem_rbz,3,psps%mpsang*psps%mpsang*psps%useylm)=gradients of ylm's
 !!
@@ -372,7 +359,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  call make_d(atindx,dterm,dtset,crystal%gprimd,paw_ij,pawrad,pawtab,psps)
 
  ! number of terms to store on the kpt mesh
- ! CC, VV1, VV2, NL, L_R, B.M 
+ ! CC, VV1, VV2, NL, L_R, B.M
  call orbmag_mesh_alloc(dtset,orbmag_mesh)
  orbmag_mesh%nucdipmom=dtset%nucdipmom
  ! if user input lambsig specifically in the input file, use it
@@ -570,7 +557,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
      nl1_option = 1 ! LR
      call orbmag_nl1_k(atindx,cprj_k,dimlmn,dterm,dtset,ikpt,isppol,mcprjk,mkmem_rbz,&
        & nband_k,nl1_option,orbmag_mesh,pawtab)
-     
+
      ! ZTG23 Eq. 43
      nl1_option = 2 ! BM
      call orbmag_nl1_k(atindx,cprj_k,dimlmn,dterm,dtset,ikpt,isppol,mcprjk,mkmem_rbz,&
@@ -615,7 +602,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  ABI_MALLOC(orbmag_terms,(dtset%mband,dtset%nsppol,3,orbmag_nterms))
  ABI_MALLOC(chern_terms,(dtset%mband,dtset%nsppol,3,chern_nterms))
  call sum_orbmag_mesh(chern_terms,crystal,dtset,ebands_k,mpi_enreg,orbmag_mesh,orbmag_terms)
- 
+
  !! collect orbmag_mesh if distributed over different processes
  if (nproc > 1) then
    buff_size=size(orbmag_mesh%omesh)
@@ -645,7 +632,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
    ABI_FREE(buffer1)
    ABI_FREE(buffer2)
  end if
- 
+
  ! compute trace over filled states of each term
  ABI_MALLOC(orbmag_trace,(3,orbmag_nterms))
  ABI_MALLOC(chern_trace,(3,chern_nterms))
@@ -663,7 +650,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  ! get the Lamb term
  call lamb_core(atindx,dtset,omlamb,pawtab)
 
- ! output raw data to netcdf file for more detailed postprocessing 
+ ! output raw data to netcdf file for more detailed postprocessing
  if (me == master) then
    fname = trim(dtfil%filnam_ds(4))//'_ORBMAG.nc'
    NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
@@ -713,23 +700,10 @@ end subroutine orbmag
 !! FUNCTION
 !! sum terms in orbmag_mesh
 !!
-!! COPYRIGHT
-!! Copyright (C) 2003-2024 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
 !! INPUTS
 !!
 !! OUTPUT
 !!   orbmag_terms(mband,nsppol,3,nterms)
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -760,7 +734,7 @@ subroutine sum_orbmag_mesh(chern_terms,crystal,dtset,ebands_k,mpi_enreg,orbmag_m
   spaceComm=mpi_enreg%comm_cell
   nproc=xmpi_comm_size(spaceComm)
   me = mpi_enreg%me_kpt
-  
+
   chern_terms = zero
   orbmag_terms = zero
   do isppol = 1, dtset%nsppol
@@ -857,13 +831,6 @@ end subroutine sum_orbmag_mesh
 !! FUNCTION
 !! make NL(1) term at k
 !!
-!! COPYRIGHT
-!! Copyright (C) 2003-2025 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
 !!  cprj_k(dtset%natom,mcprjk)<type(pawcprj_type)>=cprj for cg_k
@@ -953,13 +920,6 @@ end subroutine orbmag_nl1_k
 !! FUNCTION
 !! make NL term at k
 !!
-!! COPYRIGHT
-!! Copyright (C) 2003-2025 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
 !!  cprj_k(dtset%natom,mcprjk)<type(pawcprj_type)>=cprj for cg_k
@@ -1039,7 +999,7 @@ subroutine orbmag_nl_k(atindx,cprj_k,dimlmn,dterm,dtset,eig_k,ikpt,isppol,&
 
        end do !gdir
      end do !bdir
-     
+
      orbmag_mesh%omesh(nn,ikpt,isppol,adir,innl) = real(m1)
 
    end do !nn
@@ -1057,13 +1017,6 @@ end subroutine orbmag_nl_k
 !!
 !! FUNCTION
 !! computes <P_c du/dk|H + E*S|P_c du/dk> term in orbital magnetism
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2025 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
@@ -1143,7 +1096,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gs_hamk,ikpt,isp
 
  do adir = 1, 3
    do nn = 1, nband_k
-     
+
      m1 = czero
      m1_mu = czero
      b1 = czero
@@ -1182,7 +1135,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gs_hamk,ikpt,isp
 
      orbmag_mesh%omesh(nn,ikpt,isppol,adir,incc) = real(m1 + m1_mu)
      orbmag_mesh%cmesh(nn,ikpt,isppol,adir,ibcc) = real(b1)
-     
+
    end do !nn
  end do !adir
 
@@ -1203,13 +1156,6 @@ end subroutine orbmag_cc_k
 !!
 !! FUNCTION
 !! orbmag_vv_k
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2025 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
@@ -1362,7 +1308,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gs_hamk,&
 
        end do !gdir
      end do !bdir
-     
+
      orbmag_mesh%cmesh(nn,ikpt,isppol,adir,ibvv1) = real(b1)
      orbmag_mesh%cmesh(nn,ikpt,isppol,adir,ibvv2) = real(bv2b)
 
@@ -1390,13 +1336,6 @@ end subroutine orbmag_vv_k
 !! FUNCTION
 !! compute Pc|cg1> from |cg1> and |cg>
 !!
-!! COPYRIGHT
-!! Copyright (C) 2003-2025 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
 !!  cg_k(2,mcgk)=ground state wavefunctions at this k point
@@ -1417,10 +1356,6 @@ end subroutine orbmag_vv_k
 !!
 !! OUTPUT
 !!  pcg1_k(2,mcgk,3)=cg1_k projected on conduction space
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
 !!
 !! NOTES
 !! see Audouze et al PRB 78, 035105 (2008) Eq. 40
@@ -1525,13 +1460,6 @@ end subroutine make_pcg1
 !! FUNCTION
 !! add core electron contribution to the orbital magnetic moment
 !!
-!! COPYRIGHT
-!! Copyright (C) 2003-2025 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
 !! INPUTS
 !!  atindx(dtset%natom)=index table for atoms (see gstate.f)
 !!  dtset <type(dataset_type)>=all input variables for this dataset
@@ -1539,10 +1467,6 @@ end subroutine make_pcg1
 !!
 !! OUTPUT
 !!  omlamb(2,3)=contribution of Lamb shielding to magnetic moment
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
 !!
 !! NOTES
 !!  lamb shielding of core electrons contributes -m.lambsig to orbital magnetic
@@ -1594,13 +1518,6 @@ end subroutine lamb_core
 !! FUNCTION
 !! Onsite part of matrix element <u_n|dp>a_ij<dp|u_m>
 !!
-!! COPYRIGHT
-!! Copyright (C) 2003-2025 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
 !! INPUTS
 !!  aij(dtset%natom,lmn2max,ndij)=(complex)scalar ij couplings
 !!  atindx(natom)=index table for atoms (see gstate.f)
@@ -1617,10 +1534,6 @@ end subroutine lamb_core
 !! txt=(complex) computed matrix element
 !!
 !! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
 !!
 !! NOTES
 !! computes on-site \sum_{Rij}<u|d_bdir p_i>aij<d_gdir p_j|u> for generic aij input
@@ -1698,13 +1611,6 @@ end subroutine txt_me
 !! FUNCTION
 !! Onsite part of matrix element <u_n|a_ij|u_m>
 !!
-!! COPYRIGHT
-!! Copyright (C) 2003-2025 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
 !! INPUTS
 !!  aij(dtset%natom,lmn2max,ndij)=(complex)scalar ij couplings
 !!  atindx(natom)=index table for atoms (see gstate.f)
@@ -1717,10 +1623,6 @@ end subroutine txt_me
 !!
 !! OUTPUT
 !! tt=(complex) computed matrix element
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
 !!
 !! NOTES
 !! computes on-site \sum_{Rij}<u|p_i>aij<p_j|u> for generic aij input
@@ -1797,13 +1699,6 @@ end subroutine tt_me
 !! FUNCTION
 !! Transfer pawtab%sij to dterm, as complex, solely for convenience
 !!
-!! COPYRIGHT
-!! Copyright (C) 2003-2025 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
 !!  dtset <type(dataset_type)>=all input variables for this dataset
@@ -1813,8 +1708,6 @@ end subroutine tt_me
 !!
 !! SIDE EFFECTS
 !!  dterm <type(dterm_type)> data related to onsite interactions
-!!
-!! TODO
 !!
 !! NOTES
 !! Transfer pawtab%sij to dterm, as complex, solely for convenience
@@ -1865,13 +1758,6 @@ end subroutine dterm_qij
 !! FUNCTION
 !! Compute onsite <A0.AN>
 !!
-!! COPYRIGHT
-!! Copyright (C) 2003-2025 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
 !!  dtset <type(dataset_type)>=all input variables for this dataset
@@ -1886,8 +1772,6 @@ end subroutine dterm_qij
 !!
 !! SIDE EFFECTS
 !!  dterm <type(dterm_type)> data related to onsite interactions
-!!
-!! TODO
 !!
 !! NOTES
 !! ZTG23 Eq. 43
@@ -1992,13 +1876,6 @@ end subroutine dterm_BM
 !! FUNCTION
 !! Compute onsite <L_R/2>
 !!
-!! COPYRIGHT
-!! Copyright (C) 2003-2025 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
 !!  dtset <type(dataset_type)>=all input variables for this dataset
@@ -2010,8 +1887,6 @@ end subroutine dterm_BM
 !!
 !! SIDE EFFECTS
 !!  dterm <type(dterm_type)> data related to onsite interactions
-!!
-!! TODO
 !!
 !! NOTES
 !! ZTG23 text after Eq 42, the on-site angular momentum
@@ -2103,13 +1978,6 @@ end subroutine dterm_LR
 !! FUNCTION
 !! Only printing. This routine outputs orbmag terms to the normal abi out file
 !!
-!! COPYRIGHT
-!! Copyright (C) 2003-2025 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  orbmag_terms(dtset%mband,dtset%nsppol,3,nterms)=all computed terms per band of orb mag
@@ -2118,10 +1986,6 @@ end subroutine dterm_LR
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -2270,63 +2134,25 @@ end subroutine orbmag_output
 !! FUNCTION
 !! free space in dterm_type
 !!
-!! COPYRIGHT
-!! Copyright (C) 2003-2025 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!! dterm <type(dterm_type)> data related to onsite interactions
-!!
-!! TODO
-!!
-!! NOTES
-!!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine dterm_free(dterm)
 
   !Arguments ------------------------------------
   !scalars
-  type(dterm_type),intent(inout) :: dterm
-
-  !arrays
-
-  !Local variables -------------------------
-  !scalars
-
-  !arrays
+  class(dterm_type),intent(inout) :: dterm
 !--------------------------------------------------------------------
 
-  if(allocated(dterm%aij)) then
-    ABI_FREE(dterm%aij)
-  end if
+  ABI_SFREE(dterm%aij)
   dterm%has_aij=0
 
-  if(allocated(dterm%qij)) then
-    ABI_FREE(dterm%qij)
-  end if
+  ABI_SFREE(dterm%qij)
   dterm%has_qij=0
 
-  if(allocated(dterm%LR)) then
-    ABI_FREE(dterm%LR)
-  end if
+  ABI_SFREE(dterm%LR)
   dterm%has_LR=0
 
-  if(allocated(dterm%BM)) then
-    ABI_FREE(dterm%BM)
-  end if
+  ABI_SFREE(dterm%BM)
   dterm%has_BM=0
 
 end subroutine dterm_free
@@ -2339,13 +2165,6 @@ end subroutine dterm_free
 !! FUNCTION
 !! allocate space in dterm_type
 !!
-!! COPYRIGHT
-!! Copyright (C) 2003-2025 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
 !! INPUTS
 !!  lmnmax=max value of lmn over all psps
 !!  lmn2max=max value of lmn2 over all psps
@@ -2357,15 +2176,6 @@ end subroutine dterm_free
 !! SIDE EFFECTS
 !! dterm <type(dterm_type)> data related to onsite interactions
 !!
-!! TODO
-!!
-!! NOTES
-!!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom,ndij)
@@ -2373,14 +2183,7 @@ subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom,ndij)
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: lmnmax,lmn2max,natom,ndij
-  type(dterm_type),intent(inout) :: dterm
-
-  !arrays
-
-  !Local variables -------------------------
-  !scalars
-
-  !arrays
+  class(dterm_type),intent(inout) :: dterm
 !--------------------------------------------------------------------
 
   dterm%lmnmax = lmnmax
@@ -2388,28 +2191,16 @@ subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom,ndij)
   dterm%natom = natom
   dterm%ndij = ndij
 
-  if(allocated(dterm%aij)) then
-    ABI_FREE(dterm%aij)
-  end if
-  ABI_MALLOC(dterm%aij,(natom,lmn2max,ndij))
+  ABI_REMALLOC(dterm%aij,(natom,lmn2max,ndij))
   dterm%has_aij=1
 
-  if(allocated(dterm%qij)) then
-    ABI_FREE(dterm%qij)
-  end if
-  ABI_MALLOC(dterm%qij,(natom,lmn2max,ndij))
+  ABI_REMALLOC(dterm%qij,(natom,lmn2max,ndij))
   dterm%has_qij=1
 
-  if(allocated(dterm%LR)) then
-    ABI_FREE(dterm%LR)
-  end if
-  ABI_MALLOC(dterm%LR,(natom,lmn2max,ndij,3))
+  ABI_REMALLOC(dterm%LR,(natom,lmn2max,ndij,3))
   dterm%has_LR=1
 
-  if(allocated(dterm%BM)) then
-    ABI_FREE(dterm%BM)
-  end if
-  ABI_MALLOC(dterm%BM,(natom,lmn2max,ndij,3))
+  ABI_REMALLOC(dterm%BM,(natom,lmn2max,ndij,3))
   dterm%has_BM=1
 
 end subroutine dterm_alloc
@@ -2422,13 +2213,6 @@ end subroutine dterm_alloc
 !! FUNCTION
 !! allocate space in orbmag_mesh_type
 !!
-!! COPYRIGHT
-!! Copyright (C) 2003-2024 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
 !! INPUTS
 !!  lmnmax=max value of lmn over all psps
 !!  lmn2max=max value of lmn2 over all psps
@@ -2440,15 +2224,6 @@ end subroutine dterm_alloc
 !! SIDE EFFECTS
 !! orbmag_mesh <type(orbmag_mesh_type)> data related to orbmag terms on kpt mesh
 !!
-!! TODO
-!!
-!! NOTES
-!!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine orbmag_mesh_alloc(dtset,orbmag_mesh)
@@ -2456,14 +2231,7 @@ subroutine orbmag_mesh_alloc(dtset,orbmag_mesh)
   !Arguments ------------------------------------
   !scalars
   type(dataset_type),intent(in) :: dtset
-  type(orbmag_mesh_type),intent(inout) :: orbmag_mesh
-
-  !arrays
-
-  !Local variables -------------------------
-  !scalars
-
-  !arrays
+  class(orbmag_mesh_type),intent(inout) :: orbmag_mesh
 !--------------------------------------------------------------------
 
   orbmag_mesh%mband = dtset%mband
@@ -2474,26 +2242,11 @@ subroutine orbmag_mesh_alloc(dtset,orbmag_mesh)
   orbmag_mesh%chern_nterms = chern_nterms
   orbmag_mesh%orbmag_nterms = orbmag_nterms
 
-  if(allocated(orbmag_mesh%lambsig)) then
-    ABI_FREE(orbmag_mesh%lambsig)
-  end if
-  ABI_MALLOC(orbmag_mesh%lambsig,(orbmag_mesh%ntypat))
-  
-  if(allocated(orbmag_mesh%nucdipmom)) then
-    ABI_FREE(orbmag_mesh%nucdipmom)
-  end if
-  ABI_MALLOC(orbmag_mesh%nucdipmom,(3,orbmag_mesh%natom))
-  
-  if(allocated(orbmag_mesh%cmesh)) then
-    ABI_FREE(orbmag_mesh%cmesh)
-  end if
-  ABI_MALLOC(orbmag_mesh%cmesh,(orbmag_mesh%mband,orbmag_mesh%nkpt,orbmag_mesh%nsppol,3,chern_nterms))
+  ABI_REMALLOC(orbmag_mesh%lambsig,(orbmag_mesh%ntypat))
+  ABI_REMALLOC(orbmag_mesh%nucdipmom,(3,orbmag_mesh%natom))
+  ABI_REMALLOC(orbmag_mesh%cmesh,(orbmag_mesh%mband,orbmag_mesh%nkpt,orbmag_mesh%nsppol,3,chern_nterms))
   orbmag_mesh%cmesh=zero
-  
-  if(allocated(orbmag_mesh%omesh)) then
-    ABI_FREE(orbmag_mesh%omesh)
-  end if
-  ABI_MALLOC(orbmag_mesh%omesh,(orbmag_mesh%mband,orbmag_mesh%nkpt,orbmag_mesh%nsppol,3,orbmag_nterms))
+  ABI_REMALLOC(orbmag_mesh%omesh,(orbmag_mesh%mband,orbmag_mesh%nkpt,orbmag_mesh%nsppol,3,orbmag_nterms))
   orbmag_mesh%omesh=zero
 
 end subroutine orbmag_mesh_alloc
@@ -2506,28 +2259,8 @@ end subroutine orbmag_mesh_alloc
 !! FUNCTION
 !! free space in orbmag_mesh_type
 !!
-!! COPYRIGHT
-!! Copyright (C) 2003-2024 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! SIDE EFFECTS
 !! orbmag_mesh <type(orbmag_mesh_type)> data related to orbmag terms on kpt mesh
-!!
-!! TODO
-!!
-!! NOTES
-!!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2535,31 +2268,13 @@ subroutine orbmag_mesh_free(orbmag_mesh)
 
   !Arguments ------------------------------------
   !scalars
-  type(orbmag_mesh_type),intent(inout) :: orbmag_mesh
-
-  !arrays
-
-  !Local variables -------------------------
-  !scalars
-
-  !arrays
+  class(orbmag_mesh_type),intent(inout) :: orbmag_mesh
 !--------------------------------------------------------------------
 
-  if(allocated(orbmag_mesh%lambsig)) then
-    ABI_FREE(orbmag_mesh%lambsig)
-  end if
-  
-  if(allocated(orbmag_mesh%nucdipmom)) then
-    ABI_FREE(orbmag_mesh%nucdipmom)
-  end if
- 
-  if(allocated(orbmag_mesh%cmesh)) then
-    ABI_FREE(orbmag_mesh%cmesh)
-  end if
-
-  if(allocated(orbmag_mesh%omesh)) then
-    ABI_FREE(orbmag_mesh%omesh)
-  end if
+    ABI_SFREE(orbmag_mesh%lambsig)
+    ABI_SFREE(orbmag_mesh%nucdipmom)
+    ABI_SFREE(orbmag_mesh%cmesh)
+    ABI_SFREE(orbmag_mesh%omesh)
 
 end subroutine orbmag_mesh_free
 !!***
@@ -2571,13 +2286,6 @@ end subroutine orbmag_mesh_free
 !! FUNCTION
 !! transfer paw_ij to dterm%aij in more convenient format
 !!
-!! COPYRIGHT
-!! Copyright (C) 2003-2025 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
 !!  dtset <type(dataset_type)>=all input variables for this dataset
@@ -2588,15 +2296,6 @@ end subroutine orbmag_mesh_free
 !!
 !! SIDE EFFECTS
 !! dterm <type(dterm_type)> data related to onsite interactions
-!!
-!! TODO
-!!
-!! NOTES
-!!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2650,13 +2349,6 @@ end subroutine dterm_aij
 !! FUNCTION
 !! this is a driver to compute different onsite terms, in convenient (complex) format
 !!
-!! COPYRIGHT
-!! Copyright (C) 2003-2025 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
 !!  dtset <type(dataset_type)>=all input variables for this dataset
@@ -2670,15 +2362,6 @@ end subroutine dterm_aij
 !!
 !! SIDE EFFECTS
 !!  dterm <type(dterm_type)> data related to onsite interactions
-!!
-!! TODO
-!!
-!! NOTES
-!!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2740,13 +2423,6 @@ end subroutine make_d
 !! FUNCTION
 !! estimate Fermi energy as max value of all occupied bands/kpts
 !!
-!! COPYRIGHT
-!! Copyright (C) 2003-2025 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  eigen0(dtset%mband*dtset%nkpt*dtset%nsppol)=ground state eigenvalues at each band and kpt
@@ -2755,16 +2431,6 @@ end subroutine make_d
 !!
 !! OUTPUT
 !!  fermie=maximum energy (real(dp)) found over all occupied input bands
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
-!!  this routine is parallelized over kpts only, not bands
-!!
-!! PARENTS
-!!      m_orbmag
 !!
 !! CHILDREN
 !!
@@ -2862,14 +2528,12 @@ subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh)
  type(orbmag_mesh_type),intent(in) :: orbmag_mesh
 !arrays
 
-#ifdef HAVE_NETCDF
 !Local variables-------------------------------
 !scalars
  integer :: ncerr,fform
  real(dp) :: cpu,wall,gflops
  character(len=500) :: msg
 !arrays
-
 !*************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
@@ -2893,7 +2557,7 @@ subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh)
    nctkdim_t("ndir",3),&
    nctkdim_t("natom",dtset%natom)],defmode=.True.)
  NCF_CHECK(ncerr)
- 
+
  ncerr = nctk_def_arrays(ncid, [&
    nctkarr_t("chern_mesh", "dp", "mband, nkpt, nsppol, ndir, chern_nterms"),&
    nctkarr_t("orbmag_mesh", "dp", "mband, nkpt, nsppol, ndir, orbmag_nterms"),&
@@ -2907,11 +2571,10 @@ subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh)
  NCF_CHECK(nf90_put_var(ncid, vid("orbmag_mesh"), orbmag_mesh%omesh))
  NCF_CHECK(nf90_put_var(ncid, vid("nucdipmom"), orbmag_mesh%nucdipmom))
  NCF_CHECK(nf90_put_var(ncid, vid("lambsig"), orbmag_mesh%lambsig))
- 
+
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2),a)')" orbmag_ncwrite: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
  call wrtout(std_out,msg,"PERS")
-#endif
 
 contains
  integer function vid(vname)
@@ -2921,6 +2584,5 @@ contains
 
 end subroutine orbmag_ncwrite
 !!***
-
 
 end module m_orbmag
