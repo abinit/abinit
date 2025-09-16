@@ -6,7 +6,7 @@
 !!   Routines to compute <Proj_i|Cnk> with |Cnk> expressed in reciprocal space.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (MT)
+!!  Copyright (C) 1998-2025 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -157,7 +157,7 @@ contains
  real(dp),allocatable :: gx(:,:,:,:)
  real(dp),allocatable :: vgx(:,:,:),vdgxdt(:,:,:)
  real(dp), pointer :: kpg_(:,:),ph3d_(:,:,:)
- real(dp), allocatable :: temp_realvec(:)
+ real(dp), allocatable :: temp_realvec_r(:),temp_realvec_i(:)
  real(dp) :: d2gxdt_dum_in(1,1,1,1,1)
 
 ! *********************************************************************
@@ -199,14 +199,16 @@ contains
  if (size(ffnl,1)/=npw_k.or.size(ffnl,3)/=lmnmax) then
    ABI_BUG('Incorrect size for ffnl!')
  end if
- if (size(ph3d)>0) then
+ if (size(ph3d,dim=1)>0) then
    if (size(ph3d,2)/=npw_k) then
      ABI_BUG('Incorrect size for ph3d!')
    end if
  end if
 
  no_opernla_mv = nloalg(1)==4.or.nloalg(1)==8.or.nloalg(1)==10 ! have to be consistent with nonlop_ylm
- no_opernla_gemm = (.not. gemm_nonlop_use_gemm) .or. choice==4 .or. choice==6 .or. ndat==1
+ no_opernla_gemm = (.not. gemm_nonlop_use_gemm) &
+ &    .or. choice==4 .or. choice==6 .or. ndat==1 &
+ &    .or. l_gpu_option/=gemm_nonlop_gpu_option
 
 !Define dimensions of projected scalars
  dimffnl=size(ffnl,2)
@@ -419,7 +421,11 @@ contains
    end if
 
    if (cplex /= 2) then
-     ABI_MALLOC(temp_realvec,(npw_k*nspinor*ndat))
+     ABI_MALLOC(temp_realvec_r,(npw_k*nspinor*ndat))
+     ABI_MALLOC(temp_realvec_i,(npw_k*nspinor*ndat))
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET ENTER DATA MAP(alloc:temp_realvec_r,temp_realvec_i) IF (l_gpu_option==ABI_GPU_OPENMP)
+#endif
    end if
 
    call opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
@@ -429,8 +435,16 @@ contains
    &       -1,0,cpopt,&
    &       nprojs,&
    &       cwavef,&
-   &       temp_realvec,&
+   &       temp_realvec_r,temp_realvec_i,&
    &       l_gpu_option,.false.)
+
+   if (cplex /= 2) then
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET EXIT DATA MAP(delete:temp_realvec_r,temp_realvec_i) IF (l_gpu_option==ABI_GPU_OPENMP)
+#endif
+     ABI_FREE(temp_realvec_r)
+     ABI_FREE(temp_realvec_i)
+   end if
 
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET UPDATE FROM(vgx,vdgxdt) IF (l_gpu_option==ABI_GPU_OPENMP)
@@ -797,7 +811,7 @@ contains
  dimlmn=0  ! Type-sorted cprj
  if (one_atom) then
    itypat=typat(iatom)
-   dimlmn(ia+1:ia+nattyp(itypat))=count(indlmn_atm(3,:,itypat)>0)
+   dimlmn(1:nattyp(itypat))=count(indlmn_atm(3,:,itypat)>0)
  else
    ia=0
    do itypat=1,ntypat0
@@ -1171,45 +1185,43 @@ contains
 !!***
 
  subroutine xg_cprj_copy(cprj,xg_cprj,xg_nonlop,option)
- 
-   implicit none
- 
+
    integer, intent(in) :: option
    type(pawcprj_type),intent(inout)   :: cprj(:,:)
    type(xgBlock_t), intent(inout) :: xg_cprj
    type(xg_nonlop_t), intent(in)  :: xg_nonlop
- 
+
    real(dp),pointer :: cprj_contiguous(:,:)
    integer :: cplex,iatom,iband,iband_spin,ilmn,ispinor
    integer :: natom,nband_cprj,nlmn,nspinor
    integer :: start,end,space_cprj
    integer,allocatable :: nlmn_shift(:)
- 
+
    if (option/=XG_TO_CPRJ.and.option/=CPRJ_TO_XG) then
      ABI_ERROR('Bad option')
    end if
- 
+
    natom   = xg_nonlop%natom
    nspinor = xg_nonlop%nspinor
- 
+
    nband_cprj   = cols(xg_cprj)/nspinor
- 
+
    if (size(cprj,1)/=natom) then
      ABI_ERROR('Bad size for cprj (for dim=1)')
    end if
    if (size(cprj,2)/=nband_cprj*nspinor) then
      ABI_ERROR('Bad size for cprj (for dim=2)')
    end if
- 
+
    space_cprj = space(xg_cprj)
    cplex=2;if (space_cprj==SPACE_R) cplex=1
- 
+
    call xgBlock_reverseMap(xg_cprj,cprj_contiguous)
- 
+
    if (size(cprj_contiguous,1)/=cplex*xg_nonlop%cprjdim) then
      ABI_ERROR('Bad size for cprj_contiguous (for dim=1)')
    end if
- 
+
    ABI_MALLOC(nlmn_shift,(natom))
    nlmn_shift(1) = 0
    ! Check nlm for every atom and fill nlmn_shift
@@ -1276,7 +1288,7 @@ contains
    end if
 
    ABI_FREE(nlmn_shift)
- 
+
  end subroutine xg_cprj_copy
 
 end module m_cgprj

@@ -7,7 +7,7 @@
 !!  the xcdata_type used to drive the computation of the XC energy, potential, kernel, etc.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2024 ABINIT group (XG)
+!!  Copyright (C) 2017-2025 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -219,8 +219,6 @@ end subroutine xcdata_init
 !!  [usefock = 1 if the XC functional needs the Fock operator]
 !!  xclevel= 0 if no XC functional except possibly Fock; 1 if LDA; 2 if GGA ; 3 for TDDFT kernel tests
 !!
-!! SIDE EFFECTS
-!!
 !! SOURCE
 
 subroutine get_xclevel(ixc, xclevel, usefock)
@@ -239,7 +237,9 @@ subroutine get_xclevel(ixc, xclevel, usefock)
 
  xclevel=0 ; if(present(usefock)) usefock=0
  if( ( 1<=ixc .and. ixc<=10).or.(30<=ixc .and. ixc<=39).or.(ixc==50) )xclevel=1 ! LDA
+ if ( ( ixc==51) ) xclevel=1 ! temperature-dependant LDA functionals (TLDA)
  if( (11<=ixc .and. ixc<=19).or.(23<=ixc .and. ixc<=29).or. ixc==1402000)xclevel=2 ! GGA
+ if ( ( ixc==60) ) xclevel=2 ! temperature-dependant GGA functionals (TGGA)
  if( 20<=ixc .and. ixc<=22 )xclevel=3 ! ixc for TDDFT kernel tests
  if(present(usefock))then
    if( ixc>=40 .and. ixc<=42 )usefock=1 ! Hartree-Fock or internal hybrid functionals

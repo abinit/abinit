@@ -8,7 +8,7 @@
 !! from the Kubo-Greenwood formula.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2024 ABINIT group (FJ,SMazevet)
+!! Copyright (C) 2006-2025 ABINIT group (FJ,SMazevet)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,12 +31,10 @@
 program conducti
 
  use defs_basis
+ USE_MPI
  use m_xmpi
  use m_errors
  use m_abicore
-#if defined HAVE_MPI2
- use mpi
-#endif
  use m_conducti
 
  use m_io_tools,  only : open_file
@@ -110,7 +108,6 @@ program conducti
  call xmpi_bcast(incpaw,master,comm,mpierr)
  call xmpi_bcast(filnam,master,comm,mpierr)
  call xmpi_bcast(filnam_out,master,comm,mpierr)
-
 !Call main routine
  if (incpaw==1) then
    if (my_rank==master) then
@@ -141,7 +138,7 @@ program conducti
  tsec(2)=twall-twalli
  if (my_rank==0) then
    write(std_out, '(a,a,a,f13.1,a,f13.1)' ) &
-&   '-',ch10,'- Proc.   0 individual time (sec): cpu=',tsec(1),'  wall=',tsec(2)
+    '-',ch10,'- Proc.   0 individual time (sec): cpu=',tsec(1),'  wall=',tsec(2)
  end if
 
  call abinit_doctor("__conducti")

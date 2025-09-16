@@ -82,7 +82,6 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_gnu_13.2_serial
 #%% [files]
 #%% files_to_test = 
 #%%   t92.abo, tolnlines = 5, tolabs = 1.1e-9, tolrel = 4.0e-02

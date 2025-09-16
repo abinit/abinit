@@ -6,7 +6,7 @@
 !!  This module contains basic tools to operate on vectors expressed in reduced coordinates.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2024 ABINIT group (AB)
+!! Copyright (C) 2008-2025 ABINIT group (AB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -57,8 +57,6 @@ CONTAINS  !===========================================================
 
 
  subroutine SortC(FX, FY, FZ, Vector, CoefC, NV, Weights)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -159,8 +157,6 @@ CONTAINS  !===========================================================
 
  subroutine NewK(XX, YY, ZZ, FX, FY, FZ, NKVal)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: FX, FY, FZ
@@ -241,8 +237,6 @@ CONTAINS  !===========================================================
 !! SOURCE
 
 subroutine getargs(folds, fname)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -365,14 +359,11 @@ end subroutine getargs
 
  subroutine progress(ikpt, nkpt, kpt)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: ikpt, nkpt
 !arrays
  real(dp), intent(in) :: kpt(3)
-
 ! *************************************************************************
 
  write(std_out, '(a,i10, a1)', advance='no') ''//achar(27)//'[97m',100*ikpt/nkpt,'%'//achar(27)//'[0m'

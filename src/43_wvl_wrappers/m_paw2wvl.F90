@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2024 ABINIT group (T. Rangel, MT)
+!!  Copyright (C) 2011-2025 ABINIT group (T. Rangel, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -63,8 +63,6 @@ contains
 !! SOURCE
 
 subroutine paw2wvl(pawtab,proj,wvl)
-
- implicit none
 
 !Arguments ------------------------------------
  type(pawtab_type),intent(in)::pawtab(:)
@@ -343,7 +341,6 @@ subroutine paw2wvl_ij(option,paw_ij,wvl)
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : nullify_paw_ij_objects
 #endif
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in)::option
@@ -451,13 +448,8 @@ end subroutine paw2wvl_ij
 
 subroutine wvl_paw_free(wvl)
 
- implicit none
-
 !Arguments ------------------------------------
  type(wvl_internal_type),intent(inout) :: wvl
-
-!Local variables-------------------------------
-
 ! *************************************************************************
 
 #if defined HAVE_BIGDFT
@@ -524,7 +516,6 @@ subroutine wvl_cprjreorder(wvl,atm_indx)
  use BigDFT_API,only : cprj_objects,cprj_paw_alloc,cprj_clean
  use dynamic_memory
 #endif
- implicit none
 
 !Arguments ------------------------------------
 !scalars

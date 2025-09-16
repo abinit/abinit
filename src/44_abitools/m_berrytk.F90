@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2024 ABINIT  group (MVeithen)
+!!  Copyright (C) 2000-2025 ABINIT  group (MVeithen)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -676,6 +676,9 @@ subroutine polcart(red_ptot,pel,pel_cart,pelev,pion,pion_cart,polunit,&
  character(len=500) :: message
 !arrays
  real(dp) :: pel_mks(3),pelev_mks(3),pion_mks(3),ptot(3),ptot_mks(3)
+
+! GA: - The input/ouput description above is wrong.
+!     - Why do we care whether we used PAW?
 
 ! ***********************************************************************
 !!REC Note ptot has already been folded and kept onto same branch

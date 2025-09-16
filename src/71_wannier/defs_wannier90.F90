@@ -6,7 +6,7 @@
 !! This module contains interfaces for wannier90 lib.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2024 ABINIT group (BA, MT)
+!! Copyright (C) 2004-2025 ABINIT group (BA, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -43,7 +43,6 @@ module defs_wannier90
      proj_x_loc,proj_zona_loc,exclude_bands_loc)
 #endif
   use defs_basis
-  implicit none
   character(len=*), intent(in) :: seed__name
   integer, dimension(3), intent(in) :: mp_grid_loc
   integer, intent(in) :: num_kpts_loc
@@ -71,7 +70,7 @@ module defs_wannier90
   integer, dimension(num_bands_tot), intent(out) :: exclude_bands_loc
 #ifndef HAVE_WANNIER90_V1
   !WANNIER90_V2
-  integer, dimension(num_bands_tot), optional, intent(out) :: proj_s_loc  
+  integer, dimension(num_bands_tot), optional, intent(out) :: proj_s_loc
   real(dp), dimension(3,num_bands_tot), optional, intent(out) :: proj_s_qaxis_loc
 #endif
   end subroutine wannier_setup

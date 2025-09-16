@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2024 ABINIT group
+!! Copyright (C) 2008-2025 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -69,7 +69,6 @@ subroutine appdig(integ,string,strinn)
  character(len=2) :: ncha
  character(len=8) :: form
  !character(len=500) :: msg
-
 ! *************************************************************************
 
  ! Check that integer is nonnegative

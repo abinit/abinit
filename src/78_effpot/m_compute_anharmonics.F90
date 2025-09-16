@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group ()
+!!  Copyright (C) 2008-2025 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -65,7 +65,6 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
  use m_multibinit_dataset, only : multibinit_dtset_type
  use m_strain
  use m_fstrings, only : itoa,int2char4,ftoa
-  implicit none
 
  !Arguments ------------------------------------
  !scalars

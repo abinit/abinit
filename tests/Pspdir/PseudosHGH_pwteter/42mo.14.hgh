@@ -1,6 +1,6 @@
-Hartwigsen-Goedecker-Hutter psp for Mo,  from PRB58, 3641 (1998) 
+Hartwigsen-Goedecker-Hutter psp for Mo,  from PRB58, 3641 (1998)
    42  14  010605 zatom,zion,pspdat
- 3 1   2 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well 
+ 3 1   2 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well
   0.430000   16.237452    1.496536    0.000000   0.000000 rloc, c1, c2, c3, c4
   0.376255    3.362426   -5.289276    0.000000          rs, h11s, h22s, h33s
   0.361734   -0.379571   -4.067713    0.000000          rp, h11p, h22p, h33p

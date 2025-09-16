@@ -7,7 +7,7 @@
 !!  in the Recursion Mathod
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2024 ABINIT group (MMancini)
+!! Copyright (C) 2002-2025 ABINIT group (MMancini)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,8 +29,6 @@ module m_rec_tools
  use m_abicore
 
  use defs_rectypes, only : recparall_type
-
- implicit none
 
  private
 
@@ -65,8 +63,6 @@ CONTAINS  !===========================================================
 !!
 !! SOURCE
 subroutine get_pt0_pt1(ngfft,gratio,inf,sup,recpar)
-
- implicit none
 
 !Arguments ------------------------------------
   integer,intent(in)        :: gratio
@@ -121,8 +117,6 @@ end subroutine get_pt0_pt1
 !! SOURCE
 
 subroutine reshape_pot(trasl,nfft,nfftrec,ngfft,ngfftrec,pot,potloc)
-
- implicit none
 
  !Arguments ------------------------------------
  integer,  intent(in) :: nfft,nfftrec
@@ -183,8 +177,6 @@ subroutine trottersum(dim_trott,error,&
      &                facrec0,coeef_mu,exp1,&
      &                an,bn2,&
      &                N,D,Nold,Dold)
-
- implicit none
 
  !Arguments ------------------------------------
  !scalars

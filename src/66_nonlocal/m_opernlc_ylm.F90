@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (MT)
+!!  Copyright (C) 2008-2025 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -200,7 +200,12 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
    ABI_CHECK(cplex_fac==cplex,"BUG: invalid cplex_fac/=cplex!")
 !$OMP PARALLEL &
 !$OMP PRIVATE(ispinor,ispinor_index,ia,ilmn,iln,enl_)
+#ifdef FC_NVHPC
+!FIXME Compiler bug since v24.1~24.9
+!$OMP DO COLLAPSE(2)
+#else
 !$OMP DO COLLAPSE(3)
+#endif
    do ispinor=1,nspinor
      do ia=1,nincat
        do ilmn=1,nlmn

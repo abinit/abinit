@@ -9,7 +9,7 @@
 !!  Main entry point for client code that needs to read the DDB data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2024 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, SP, GA, MMignolet)
+!! Copyright (C) 2011-2025 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, SP, GA, MMignolet)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,19 +31,18 @@ module m_ddb
  use m_ddb_hdr
  use m_dtset
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_io_tools,       only : iomode_from_fname
  use defs_datatypes,   only : pseudopotential_type
  use m_fstrings,       only : sjoin, itoa, ktoa, endswith
  use m_numeric_tools,  only : mkherm
- use m_symtk,          only : mati3inv, matr3inv, littlegroup_q, symatm
+ use m_matrix,         only : mati3inv, matr3inv
+ use m_symtk,          only : littlegroup_q, symatm
  use m_io_tools,       only : get_unit
  use m_copy,           only : alloc_copy
  use m_geometry,       only : phdispl_cart2red, mkrdim, xred2xcart, metric
- use m_crystal,        only : crystal_t, crystal_init
+ use m_crystal,        only : crystal_t
  use m_dynmat,         only : cart29, d2sym3, cart39, d3sym, chneu9, asria_calc, asria_corr,&
                               msria_calc, msria_apply, asrprs, dfpt_phfrq, sytens
  use m_pawtab,         only : pawtab_type, pawtab_nullify, pawtab_free
@@ -147,6 +146,7 @@ module m_ddb
   !      (5 => 2nd-order derivatives of eigenvalues)
   !      (33 => long wave third order derivatives of total energy)
   !      (85 => Molecular Berry curvature, 2nd-order derivative)
+  ! See m_ddb_hdr for the definition of various block types
 
   real(dp),allocatable :: amu(:)
   ! amu(ntypat)
@@ -277,9 +277,6 @@ module m_ddb
      ! Compute the phonon frequencies at the specified q-point by performing
      ! a direct diagonalizatin of the dynamical matrix.
 
-    procedure :: get_asrq0 => ddb_get_asrq0
-     ! Return object used to enforce the acoustic sum rule
-
     procedure :: symmetrize_and_transform => ddb_symmetrize_and_transform
      ! Symmetrize, transform cartesian coordinates, and add missing components
 
@@ -376,6 +373,10 @@ module m_ddb
    integer :: natom
     ! Number of atoms.
 
+   real(dp),allocatable :: dcdq(:,:,:,:,:)
+   ! dcdq,(3,3,natom,3,natom))
+   ! IFCs derivatives computed from real-space IFCs moments or long-wavelength driver
+
    real(dp),allocatable :: d2asr(:,:,:,:,:)
    ! d2asr,(2,3,natom,3,natom))
    ! In case the interatomic forces are not calculated, the
@@ -398,6 +399,9 @@ module m_ddb
 
  contains
 
+   procedure :: init => asrq0_init
+    ! Init the object from a ddb.
+
    procedure :: apply => asrq0_apply
     ! Impose the acoustic sum rule based on the q=0 block found in the DDB file.
 
@@ -406,18 +410,6 @@ module m_ddb
 
  end type asrq0_t
 !!***
-
- ! TODO: We should use this constants instead of magic numbers!
- ! BTW: Using a different value for NOSTAT and STAT is a non-sense!
- ! They both are 2-th order derivatives of the total energy!
-
- ! Flags used to indentify the block type.
- !integer,private,parameter :: DDB_BLKTYPE_ETOT = 0         ! Total energy
- !integer,private,parameter :: DDB_BLKTYPE_2DE_NOSTAT = 1   ! Second order derivative of the energy (non-stationary expression)
- !integer,private,parameter :: DDB_BLKTYPE_2DE_STAT = 2     ! Second order derivative of the energy (stationary expression)
- !integer,private,parameter :: DDB_BLKTYPE_3DE = 3          ! Third order derivative of the energy
- !integer,private,parameter :: DDB_BLKTYPE_1DE = 4          ! First order derivative of the energy
- !integer,private,parameter :: DDB_BLKTYPE_2DEIG = 5        ! Second order derivative of the eigenvalues
 
 CONTAINS  !===========================================================
 !!***
@@ -522,7 +514,7 @@ subroutine ddb_init(ddb, dtset, nblok, mpert, &
 
  ! TODO: Allocate d2eig here instead of leaving it to the calling routine.
  if (with_d2eig_) then
-    call ddb%malloc_d2eig(ddb%nband, ddb%nkpt)
+    call ddb%malloc_d2eig(ddb%nband*ddb%nsppol, ddb%nkpt)
  end if
 
  if (present(kpt)) then
@@ -585,8 +577,7 @@ subroutine ddb_copy(iddb, oddb)
 !Arguments -------------------------------
 !array
  class(ddb_type),intent(in) :: iddb
- type(ddb_type),intent(out) :: oddb
-
+ class(ddb_type),intent(out) :: oddb
 ! ************************************************************************
 
  ! Copy dimensions and static variables.
@@ -1158,13 +1149,17 @@ end subroutine ddb_set_etotal
 !!   1 -> No rescaling.
 !!   other -> Check and rescale.
 !!
-!!  Note that the meaning of brav is
+!!  The meaning of brav is
 !!    1 or -1 -> simple lattice
 !!    2 -> face-centered cubic
 !!    3 -> body-centered lattice
 !!    4 -> hexagonal lattice (D6h)
 !!
 !! OUTPUT
+!!
+!! NOTE
+!!  The use of brav is deprecated, but it is still used for initializing IFC.
+!!  We should try to remove its occurence.
 !!
 !! SOURCE
 
@@ -1353,9 +1348,9 @@ subroutine ddb_get_block(ddb, iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rfty
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: rftyp
- integer,intent(out) :: iblok
  class(ddb_type),intent(in) :: ddb
+ integer,intent(out) :: iblok
+ integer,intent(in) :: rftyp
 !arrays
  integer,intent(in) :: rfelfd(4),rfphon(4),rfstrs(4)
  real(dp),intent(inout) :: qphnrm(3),qphon(3,3)
@@ -1976,12 +1971,7 @@ subroutine ddb_read_d2eig_txt(ddb, unddb, iblok)
   iblok_eig2d = 1
   if (present(iblok)) iblok_eig2d = iblok
 
-   ! GA: Here, nband should really be nband * nsppol.
-   !     but this is the responsibility of the calling routine
-   !     see thmeig and merge_ddb
-   !     FIXME This is inconsistent with ddb_malloc_d2eig...
-   !     I think I should change this with ddb%nband * ddb%nsppol
-  call ddb%read_block_txt(iblok_eig2d,ddb%nband,ddb%mpert,ddb%msize,ddb%nkpt,unddb,&
+  call ddb%read_block_txt(iblok_eig2d,ddb%nband*ddb%nsppol,ddb%mpert,ddb%msize,ddb%nkpt,unddb,&
                       ddb%eig2dval(:,:,:,:),ddb%kpt(:,:))
 
 end subroutine ddb_read_d2eig_txt
@@ -2063,10 +2053,10 @@ subroutine rdddb9(ddb,ddb_hdr,unddb,&
 !   and
 !    the allocation allocate(kpt(3,nkpt)) is strange
 !scalars
+ class(ddb_type),intent(inout) :: ddb
  integer,intent(in) :: unddb,mband,mpert,msize,msym
  integer,intent(inout) :: natom,nkpt,nsym,ntypat
  real(dp),intent(out) :: ucvol
- type(ddb_type),intent(inout) :: ddb
  type(ddb_hdr_type),intent(inout) :: ddb_hdr
  integer,optional,intent(in) :: raw
 !arrays
@@ -2169,17 +2159,16 @@ end subroutine rdddb9
 !! chkin9
 !!
 !! FUNCTION
-!! Check the value of some input parameters.
-!! Send error message and stop if needed.
-!! Also transform the meaning of atifc
+!! Construct flags for the computation of IFC for each atoms.
+!! Also check that the value of natifc makes sense.
 !!
 !! INPUTS
-!! atifc(natom)=list of the atom ifc to be analysed
+!! atifc(natifc)=list of the atom ifc to be analysed
 !! natifc= number of atom ifc to be analysed
 !! natom= number of atoms
 !!
 !! OUTPUT
-!! atifc(natom) =  atifc(ia) equals 1 if the analysis of ifc
+!! atifcflg(natom) =  atifcflg(ia) equals 1 if the analysis of ifc
 !!  has to be done for atom ia; otherwise 0.
 !!
 !! NOTES
@@ -2187,13 +2176,15 @@ end subroutine rdddb9
 !!
 !! SOURCE
 
-subroutine chkin9(atifc,natifc,natom)
+subroutine chkin9(atifcflg,atifc,natifc,natom)
 
+! GA: FIXME Move this subroutine into m_anaddb_dataset
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: natifc,natom
 !arrays
- integer,intent(inout) :: atifc(natom)
+ integer,intent(in) :: atifc(natifc)
+ integer,intent(out) :: atifcflg(natom)
 
 !Local variables -------------------------
 !scalars
@@ -2212,9 +2203,8 @@ subroutine chkin9(atifc,natifc,natom)
    ABI_ERROR(msg)
  end if
 
+ atifcflg = zero
  if(natifc>=1)then
-   ABI_MALLOC(work,(natom))
-   work(:)=0
 
    do iatifc=1,natifc
      if(atifc(iatifc)<=0.or.atifc(iatifc)>natom)then
@@ -2225,11 +2215,9 @@ subroutine chkin9(atifc,natifc,natom)
         'Action: change atifc in your input file.'
        ABI_ERROR(msg)
      end if
-     work(atifc(iatifc))=1
+     atifcflg(atifc(iatifc))=1
    end do
 
-   atifc(1:natom)=work(:)
-   ABI_FREE(work)
  end if
 
 end subroutine chkin9
@@ -2434,14 +2422,18 @@ subroutine ddb_from_file(ddb, filename, ddb_hdr, crystal, comm, prtvol, raw)
  end if
 
  ! Print out info on the crystal
- if (prtvol_ >= 0) then
+ if (prtvol_ >= -1) then
 
-   call ddb_hdr%crystal%print(unit=ab_out)
    call ddb_hdr%crystal%print(unit=std_out)
+   if (prtvol_ >= 0) then
+     call ddb_hdr%crystal%print(unit=ab_out)
+   end if
 
    write(msg, '(2a,i0,a)' )ch10,' DDB file with ',ddb%nblok,' blocks has been read.'
    call wrtout(std_out,msg)
-   call wrtout(ab_out,msg)
+   if (prtvol_ >= 0) then
+     call wrtout(ab_out,msg)
+   end if
 
  end if
 
@@ -2618,7 +2610,7 @@ subroutine ddb_read_txt(ddb, filename, ddb_hdr, crystal, comm, prtvol, raw)
  !end do
 
  !! Warning znucl is dimensioned with ntypat = nspsp hence alchemy is not supported here
- !call crystal_init(ddb%amu,Crystal,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
+ !call crystal%init(ddb%amu,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
  !  zion,znucl,timrev,use_antiferro,.FALSE.,title,&
  !  symrel=symrel(:,:,1:nsym),tnons=tnons(:,1:nsym),symafm=symafm(1:nsym))
 
@@ -2711,7 +2703,7 @@ subroutine ddb_read_nc(ddb, filename, ddb_hdr, crystal, comm, prtvol, raw)
    ! Copy dimensions from header and allocate arrays
    call ddb%malloc(ddb_hdr%msize, ddb_hdr%nblok, ddb_hdr%natom, &
                    ddb_hdr%ntypat, ddb_hdr%mpert,&
-                   ddb_hdr%nkpt, ddb_hdr%mband)
+                   ddb_hdr%nkpt, ddb_hdr%mband*ddb_hdr%nsppol)
 
    ! Copy arrays from header
    ddb%typ(:) = ddb_hdr%typ(:)
@@ -2817,7 +2809,6 @@ logical function ddb_can_merge_blocks(ddb1, ddb2, iblok1, iblok2) result(can_mer
  integer :: nq, ii, blktyp
  real(dp),parameter :: qtol=2.0d-8
  real(dp) :: diff
-
 ! ************************************************************************
 
   can_merge = .false.
@@ -2875,7 +2866,7 @@ subroutine ddb_merge_blocks(ddb1, ddb2, iblok1, iblok2)
 !Arguments -------------------------------
 !array
  class(ddb_type),intent(inout) :: ddb1
- type(ddb_type),intent(inout) :: ddb2
+ class(ddb_type),intent(inout) :: ddb2
  integer,intent(in) :: iblok1
  integer,intent(in) :: iblok2
 
@@ -3508,8 +3499,8 @@ integer function ddb_get_etotal(ddb, etotal) result(iblok)
 
 !Arguments -------------------------------
 !scalars
- real(dp),intent(out) :: etotal
  class(ddb_type),intent(in) :: ddb
+ real(dp),intent(out) :: etotal
 
 !Local variables -------------------------
 !scalars
@@ -4082,11 +4073,13 @@ end function ddb_get_strten
 
 !----------------------------------------------------------------------
 
-!!****f* m_ddb/ddb_get_asrq0
+!!****f* m_ddb/asrq0_init
 !! NAME
-!!  ddb_get_asrq0
+!!  asrq0_init
 !!
 !! FUNCTION
+!!  Initialize an asrq0 object for the imposition
+!!  of the accoustic sum rule (ASR) at q=0.
 !!  In case the interatomic forces are not calculated, the
 !!  ASR-correction has to be determined here from the Dynamical matrix at Gamma.
 !!  In case the DDB does not contain this information, the subroutine returns iblok=0
@@ -4112,20 +4105,18 @@ end function ddb_get_strten
 !!
 !! SOURCE
 
-type(asrq0_t) function ddb_get_asrq0(ddb,asr,rftyp,crystal,dim_msr,comm,d2dq) result(asrq0)
+subroutine asrq0_init(asrq0, ddb,  asr, rftyp, crystal, dim_msr)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: asr,comm,rftyp
+ integer,intent(in) :: asr,dim_msr,rftyp
  class(ddb_type),intent(inout) :: ddb
  type(crystal_t),intent(in) :: crystal
- integer,intent(in) :: dim_msr
-!arrays
- real(dp),intent(in),optional :: d2dq(3,ddb%natom,3,ddb%natom,3)
+ class(asrq0_t), intent(out) :: asrq0
 !Local variables-------------------------------
 !scalars
  integer :: dims,iblok
- !character(len=500) :: msg
+ character(len=500) :: msg
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
  real(dp) :: qphnrm(3),qphon(3,3)
@@ -4188,18 +4179,18 @@ type(asrq0_t) function ddb_get_asrq0(ddb,asr,rftyp,crystal,dim_msr,comm,d2dq) re
 
    ABI_FREE(d2cart)
    ABI_FREE(d2asr_res)
- case (6)  
-   if (present(d2dq)) then
-      call msria_calc(asr,crystal,asrq0%d2asr,ddb%val(:,:,iblok),d2dq,asrq0%d2dqmsr,dim_msr,ddb%mpert,ddb%natom)
-   end if
-   !call arsr_recip(asr,asrq0%d2asr,ddb%val(:,:,iblok),asrq0%d2dqmsr,dcdq,asrq0%dim_msr,ddb%mpert,&
-   !        ddb%natom,crystal%xcart,crystal%xred,crystal%indsym,crystal%nsym,crystal%symrel,crystal%symafm,&
-   !        crystal%symrec,crystal%rprimd,crystal%gprimd,ddb%gprim,asrq0%qpt_msr)
+ case (6) 
+   if (ALLOCATED(dcdq)) then 
+     call msria_calc(asr,crystal,asrq0%d2asr,ddb%val(:,:,iblok),&
+          asrq0%dcdq,asrq0%d2dqmsr,dim_msr,ddb%mpert,ddb%natom)
+   else
+       write(msg,'(a)')' IFCs derivatives not read from long-wavelength driver, will compute ASR+MSR later'
+       call wrtout(std_out,msg)      
  case default
    ABI_ERROR(sjoin("Wrong value for asr:", itoa(asr)))
  end select
 
-end function ddb_get_asrq0
+end subroutine asrq0_init
 !!***
 
 !----------------------------------------------------------------------
@@ -4501,20 +4492,19 @@ end subroutine ddb_diagoq
 !!
 !! SOURCE
 
-subroutine asrq0_apply(asrq0, natom, mpert, msize, d2cart, qphon, crystal, dcdq, phi1,phi2,d2cdq)
+subroutine asrq0_apply(asrq0, natom, mpert, msize, qphon, crystal, d2cart)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: natom, msize, mpert
  class(asrq0_t),intent(inout) :: asrq0
  type(crystal_t),intent(in) :: crystal        
 !arrays
  real(dp),intent(in) :: qphon(3,3)
  real(dp),intent(inout) :: d2cart(2,msize)
- real(dp),intent(in),optional :: dcdq(3,natom,3,natom,3)
- real(dp),intent(in),optional :: d2cdq(3,natom,3,natom,3,3)
- real(dp),intent(in),optional :: phi1(3,natom,3,natom,3)
- real(dp),intent(in),optional :: phi2(3,natom,3,3,3)
+ !real(dp),intent(in),optional :: dcdq(3,natom,3,natom,3)
+ !real(dp),intent(in),optional :: d2cdq(3,natom,3,natom,3,3)
+ !real(dp),intent(in),optional :: phi1(3,natom,3,natom,3)
+ !real(dp),intent(in),optional :: phi2(3,natom,3,3,3)
 
 
 ! ************************************************************************
@@ -4533,11 +4523,11 @@ subroutine asrq0_apply(asrq0, natom, mpert, msize, d2cart, qphon, crystal, dcdq,
    ! Impose acoustic sum rule plus rotational symmetry for 0D and 1D systems
    call asrprs(asrq0%asr,2,3,asrq0%uinvers,asrq0%vtinvers,asrq0%singular,d2cart,mpert,natom,crystal%xcart)
  case (6)
-   if (present(phi1)) then
-      call msria_apply(asrq0%asr,asrq0%d2asr,asrq0%d2dqmsr,d2cart,mpert,natom,qphon,crystal,dcdq,phi1,phi2,d2cdq)
-   else
-      call msria_apply(asrq0%asr,asrq0%d2asr,asrq0%d2dqmsr,d2cart,mpert,natom,qphon,crystal,dcdq)
-   end if
+   !if (present(phi1)) then
+   call msria_apply(asrq0%asr,asrq0%d2asr,asrq0%d2dqmsr,d2cart,mpert,natom,qphon,crystal,asrq0%dcdq)
+   !else
+   !   call msria_apply(asrq0%asr,asrq0%d2asr,asrq0%d2dqmsr,d2cart,mpert,natom,qphon,crystal,dcdq)
+   !end if
  case default
    ABI_ERROR(sjoin("Wrong value for asr:", itoa(asrq0%asr)))
  end select
@@ -4799,8 +4789,8 @@ end subroutine ddb_write_block_txt
 !!  ddb_hdr=ddb header object.
 !!  filename=name of the file being written (abo_DS*_DDB)
 !!  with_psps
-!!      1-> include information on pseudopoentials
-!!      0-> do not include information on pseudopoentials
+!!      1-> include information on pseudopotentials
+!!      0-> do not include information on pseudopotentials
 !!  comm=MPI communicator
 !!
 !! SOURCE
@@ -5133,8 +5123,6 @@ subroutine ddb_write_nc(ddb, ddb_hdr, filename, comm, with_psps)
    if (xmpi_comm_rank(comm) /= master) return
  end if
 
-#ifdef HAVE_NETCDF
-
  ! =====================
  ! Header and dimensions
  ! =====================
@@ -5294,10 +5282,6 @@ subroutine ddb_write_nc(ddb, ddb_hdr, filename, comm, with_psps)
 
    end if
  end do
-
-#else
- ABI_ERROR("NETCDF support required to write DDB.nc file.")
-#endif
 
 end subroutine ddb_write_nc
 !!***
@@ -6206,12 +6190,12 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
  integer,parameter :: master=0
  integer :: iddb, iddb_mkpt, iddb_psps
  integer :: dimekb, matom, mband, mblok, mkpt, nsppol
- integer :: mtypat, lmnmax, usepaw, mblktyp, msym
+ integer :: mtypat, lmnmax, usepaw, msym
  integer :: msize, msize_, mpert
  integer :: nblok, iblok, iblok1, iblok2
  integer :: comm
  logical :: eig2d, can_merge
- integer,parameter :: prtvol=0
+ integer,parameter :: prtvol=-1
  character(len=500) :: msg
  type(ddb_type) :: ddb, ddb2
  type(ddb_hdr_type) :: ddb_hdr, ddb_hdr2
@@ -6229,7 +6213,7 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
  end if
 
  dimekb=0 ; matom=0 ; mband=0  ; mblok=0 ; mkpt=0 ; mpert=0
- msize=0  ; mtypat=0 ; lmnmax=0 ; usepaw=0 ; mblktyp=1
+ msize=0  ; mtypat=0 ; lmnmax=0 ; usepaw=0
  iddb_mkpt = 1 ; iddb_psps = nddb
  msym=192
 
@@ -6261,14 +6245,12 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
    mblok=mblok+ddb_hdr%nblok
 
    ! Figure out if we are merging eig2d files
-   if (is_type_d2eig(ddb_hdr%mblktyp)) then
-     eig2d = .True.
-   end if
+   eig2d = ddb_hdr%has_d2eig
 
    ! Figure out if we are merging d3E blocks and compute msize accordingly
    mpert = max(mpert,ddb_hdr%mpert)
    msize_ = 3 * mpert * 3 * mpert
-   if (is_type_d3E(ddb_hdr%mblktyp)) msize_ = msize_ * 3 * mpert
+   if (ddb_hdr%has_d3E_xx) msize_ = msize_ * 3 * mpert
    msize = max(msize, msize_)
 
    if (ddb_hdr%with_psps>0 .or. ddb_hdr%psps%usepaw > 0) then
@@ -6332,9 +6314,6 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
      ! Compare the current DDB and input DDB information.
      ! In case of an inconsistency, halt the execution.
      call wrtout(std_out, ' compare the current and input DDB information')
-
-
-     ! GA: Maybe the problem is that we are comparing uninitialized pawtab
      call ddb_hdr%compare(ddb_hdr2)
 
    else
@@ -6728,22 +6707,31 @@ subroutine dtqdrp(blkval,ddb_version,lwsym,mpert,natom,lwtens)
 !! OUTPUT
 !! ddb_lw= ddb block datastructure
 !!
+!! NOTE
+!!  A new ddb is necessary for the longwave quantities in anaddb
+!!  due to incompability of it with automatic reshapes that ddb%val and ddb%flg
+!!  experience when passed as arguments of some routines.
+!!
 !! SOURCE
 
- subroutine ddb_lw_copy(ddb,ddb_lw,mpert,natom,ntypat)
+ subroutine ddb_lw_copy(ddb, ddb_lw, ddb_hdr)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: mpert,natom,ntypat
+ class(ddb_type),intent(inout) :: ddb
+ class(ddb_type),intent(out) :: ddb_lw
+ type(ddb_hdr_type),intent(in) :: ddb_hdr
 !arrays
- type(ddb_type),intent(inout) :: ddb
- type(ddb_type),intent(out) :: ddb_lw
 
 !Local variables -------------------------
 !scalars
  integer :: ii,nblok,nsize,cnt
-
+ integer :: mpert,natom,ntypat
 ! *********************************************************************
+
+ mpert = ddb_hdr%mpert
+ natom = ddb_hdr%natom
+ ntypat = ddb_hdr%ntypat
 
  call ddb%copy(ddb_lw)
  call ddb%free()
@@ -6840,7 +6828,7 @@ subroutine symdm9(ddb, dynmat, gprimd, indsym, mpert, natom, nqpt, nsym, rfmeth,
 
 !Arguments -------------------------------
 !scalars
- type(ddb_type),intent(in) :: ddb
+ class(ddb_type),intent(in) :: ddb
  integer,intent(in) :: mpert,natom,nqpt,nsym,rfmeth,comm
 !arrays
  integer,intent(in) :: indsym(4,nsym,natom),symrec(3,3,nsym),symrel(3,3,nsym)

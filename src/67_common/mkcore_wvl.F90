@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2016-2024 ABINIT group (MT,TRangel)
+!!  Copyright (C) 2016-2025 ABINIT group (MT,TRangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,6 +35,8 @@ module m_mkcore_wvl
  use m_pawrad,      only : pawrad_type, pawrad_init, pawrad_free
  use m_pawtab,      only : pawtab_type
  use m_drivexc,     only : mkdenpos
+
+ implicit none
 
  private
 !!***
@@ -1041,7 +1043,7 @@ end module m_mkcore_wvl
 !%% !!  FIXME: add description.
 !%% !!
 !%% !! COPYRIGHT
-!%% !!  Copyright (C) 2012-2024 ABINIT group (TRangel)
+!%% !!  Copyright (C) 2012-2025 ABINIT group (TRangel)
 !%% !!  This file is distributed under the terms of the
 !%% !!  GNU General Public License, see ~abinit/COPYING
 !%% !!  or http://www.gnu.org/copyleft/gpl.txt .

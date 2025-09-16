@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2024 ABINIT group (MG)
+ * Copyright (C) 2009-2025 ABINIT group (MG)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ void clib_mallinfo
   *uordblks = info.uordblks;
   *fordblks = info.fordblks;
 #else
-  *arena    = -1.0; 
+  *arena    = -1.0;
   *hblkhd   = -1.0;
   *usmblks  = -1.0;
   *fsmblks  = -1.0;

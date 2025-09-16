@@ -1,10 +1,15 @@
 # coding: utf-8
 from __future__ import print_function, division, unicode_literals, absolute_import
-from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
+
+try:
+    from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
+except ImportError:
+    # This is needed for importing this module within Abipy.
+    from abipy.abio.abivar_database.variables import ValueWithUnit, MultipleValue, Range
 
 executable = "anaddb"
 
-#from abipy.abio.abivar_database.variables import ValueWithUnit, MultipleValue, Range, ValueWithConditions
+
 ValueWithConditions = dict
 Variable = dict
 
@@ -57,7 +62,7 @@ of uniaxial crystals, the z-axis should be chosen along the optical axis.
         added_in_version="before_v9",
         text=r"""
 Governs the imposition of the Acoustic Sum Rule (ASR) in the ANADDB application.
-Note that there is a similar input variable [[asr]] for ABINIT. 
+Note that there is a similar input variable [[asr]] for ABINIT.
 
   * 0 --> no ASR for interatomic force constants is imposed.
   * 1 or 2 --> the ASR for interatomic force constants is imposed by modifying
@@ -118,7 +123,7 @@ exactly the same likely due to an extra symmetrisation in the
 diagonalisation routine. Of course, when the matrix at Gamma has been
 generated from IFCs coming from dynamical matrices none of which are Gamma,
 the breaking of the ASR is rather severe. In order to clear the situation, one
-should use a diagonalisation routine for non-hermitian matrices. 
+should use a diagonalisation routine for non-hermitian matrices.
 ).
 """,
     ),
@@ -135,9 +140,6 @@ should use a diagonalisation routine for non-hermitian matrices.
         text=r"""
 The actual numbers of the atoms for which the interatomic force constant have
 to be written and eventually analysed.
-
-WARNING: there will be an in-place change of meaning of atifc (this is
-confusing, and should be taken away in one future version - sorry for this).
 """,
     ),
 
@@ -959,7 +961,7 @@ the matrix in local coordinates).
   * 0 --> do all calculations directly from the DDB, without the use of the interatomic force constant.
   * 1 --> calculate and use the interatomic force constants for interpolating the phonon spectrum
     and dynamical matrices at every q wavevector, and eventually analyse the interatomic force constants,
-    according to the informations given by [[anaddb:atifc]], [[anaddb:dipdip]], [[anaddb:ifcana]], [[anaddb:ifcout]],
+    according to the information given by [[anaddb:atifc]], [[anaddb:dipdip]], [[anaddb:ifcana]], [[anaddb:ifcout]],
     [[anaddb:natifc]], [[anaddb:nsphere]], [[anaddb:rifcsph]]
 
 More detailed explanations: if the dynamical matrices are known on a regular
@@ -2482,7 +2484,7 @@ the small sphere around the Gamma point (Bohr$^{-1}$). The second entry gives th
 absolute tolerance in kilometer/second. The speed of sound is evaluated by
 performing a spherical average on the small sphere using Lebedev-Laikov grids
 (typical values for q-radius: 0.1 Bohr$^{-1}$) The number of radial points is
-increased until the integration converges twice withing the tolerance
+increased until the integration converges twice within the tolerance
 specified by the user (typical values for tolkms: 0.05 km/s).
 
 The default values will not work.

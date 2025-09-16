@@ -7,9 +7,9 @@
 !!  with support of different external library (scalapack, elpa, plasma, magma, ... )
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2024 ABINIT group (LNguyen,FDahm,MT)
+!!  Copyright (C) 2012-2025 ABINIT group (LNguyen,FDahm,MT)
 !!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~ABINIT/Infos/copyright
+!!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! SOURCE
@@ -22,6 +22,7 @@
 
 module m_abi_linalg
 
+ USE_MPI
  use defs_basis
  use m_errors
  use m_abicore
@@ -46,10 +47,6 @@ module m_abi_linalg
 
 #if defined HAVE_MPI1
  include 'mpif.h'
-#endif
-
-#if defined HAVE_MPI2
- use mpi
 #endif
 
  use m_time,  only : timab
@@ -104,7 +101,7 @@ module m_abi_linalg
  integer,save,public :: slk_communicator=xmpi_comm_null
  integer,save,public :: slk_complement_communicator=xmpi_comm_null
 #ifdef HAVE_LINALG_SCALAPACK
- type(processor_scalapack),save,public :: slk_processor
+ type(slk_processor_t),save,public :: slk_processor
 #endif
 
 !Plasma can be activated via command line
@@ -144,7 +141,9 @@ module m_abi_linalg
  !----------------------------------------------------------------------
 
  public :: gpu_set_to_zero
+ public :: gpu_set_to_zero_complex
  public :: gpu_copy
+ public :: gpu_copy_complex
 
 !BLAS INTERFACE
  !public :: abi_zgemm
@@ -152,6 +151,7 @@ module m_abi_linalg
 
  interface abi_xgemm
     module procedure abi_zgemm_2d
+    module procedure abi_zgemm_2dd
     module procedure abi_d2zgemm
  end interface abi_xgemm
 
@@ -251,6 +251,7 @@ module m_abi_linalg
 
  public :: abi_zgemm
  public :: abi_zgemm_2d
+ public :: abi_zgemm_2dd
  public :: abi_zgemm_2r
  interface abi_zgemm  ! No x_cplx stuff here!
     module procedure abi_zgemm_2d

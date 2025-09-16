@@ -41,8 +41,8 @@
 # Bands
 #*******************************
   occopt    1
-   nband    4
-   bandpp   4
+   nband      4
+nblock_lobpcg 1
 
 # Plane wave basis set
 #**************************************
@@ -114,7 +114,7 @@
 #%% executable = abinit
 #%% test_chain = t21.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%    t21.abo, tolnlines = 0 , tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -easy;
 #%% [paral_info]
 #%% max_nprocs = 2

@@ -7,7 +7,7 @@
 !!  depends on sort_tetra and on m_kpt_rank
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2024 ABINIT group (MJV)
+!!  Copyright (C) 2010-2025 ABINIT group (MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,9 +35,7 @@ module m_tetrahedron
  USE_MEMORY_PROFILING
  USE_MSG_HANDLING
  use m_krank
-#ifdef HAVE_MPI2
- use mpi
-#endif
+ USE_MPI
 #ifdef HAVE_LIBTETRA_ABINIT
  use m_io_tools, only : open_file
  use m_xmpi

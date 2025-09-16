@@ -1,6 +1,6 @@
 # Test entropy in DMFT
 # _== Convergency and starting
-# DATASET 1: LDA 
+# DATASET 1: LDA
 # DATASET 2: LDA+DMFT
 ndtset 2
 jdtset 1 2
@@ -13,7 +13,7 @@ ecut      16 # low cutoff !
 pawecutdg 30
 tolvrs 1.0d-7
 nband     23
-occopt 3 tsmear 0.0036749 
+occopt 3 tsmear 0.0036749
 #npulayit 30
 
 ##### PHYSICAL PARAMETERS
@@ -24,14 +24,14 @@ natom 5 ntypat 3 typat 1 2 3 3 3  ## Mixing to test robustess of etotdmft
 znucl  23.0 38.0 8.0
 # Sr V O*3
 xred 0.00 0.00 0.00
-     0.50 0.50 0.50 
-     0.50 0.00 0.00 
-     0.00 0.50 0.00 
-     0.00 0.00 0.50 
+     0.50 0.50 0.50
+     0.50 0.00 0.00
+     0.00 0.50 0.00
+     0.00 0.00 0.50
 acell   3*7.2605
 rprim 1.0 0.0 0.0
       0.0 1.0 0.0
-      0.0 0.0 1.0 
+      0.0 0.0 1.0
 
 # == Points k and symetries
 kptopt 4
@@ -51,7 +51,7 @@ dmftbandf 23 # t2g bands only
 dmft_nwlo 100
 dmft_nwli 100000
 dmft_iter 1
-dmftcheck 0  
+dmftcheck 0
 dmft_rslf 1
 dmft_mxsf 0.7
 dmft_dc 1
@@ -64,6 +64,7 @@ dmft_solv 5 # CTQMC
 dmftqmc_l 50
 dmftqmc_n 1.d6
 dmftqmc_therm 10000
+dmftctqmc_gmove 100
 
 # == Entropy calculation
 dmft_entropy 1
@@ -76,7 +77,7 @@ dmatpuopt  1   # The density matrix: the simplest expression.
 lpawu  2 -1 -1
 upawu1  0.00  0.0  0.0  eV
 upawu2  3.1333333333333333  0.0  0.0  eV
-f4of2_sla3  0.0  0.0  0.0 
+f4of2_sla3  0.0  0.0  0.0
 jpawu2  0.7583333333333333  0.0  0.0  eV
 
  pp_dirpath "$ABI_PSPDIR"
@@ -89,14 +90,14 @@ jpawu2  0.7583333333333333  0.0  0.0  eV
 #%% [files]
 #%% files_to_test =
 #%%                  t30.abo,  tolnlines =120, tolabs =0.005, tolrel = 3.5e-01, fld_options=-medium ;
-#%% [shell] 
-#%% post_commands = 
+#%% [shell]
+#%% post_commands =
 #%%    ww_cp t30o_DS2_WFK t31o_DS1_WFK;
 #%%    ww_cp t30o_DS2_data4EntropyDMFT t31o_DS2_data4EntropyDMFT;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
-#%% authors = B. Amadon, J. Bieder 
+#%% authors = B. Amadon, J. Bieder
 #%% keywords = PAW, DMFT, CTQMC
 #%% description = Test entropy calculation for SrVO3 within DMFT
 #%%<END TEST_INFO>

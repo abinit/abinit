@@ -8,7 +8,7 @@
 !!  which leads to excellent CPU efficiency and OpenMP scalability.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2024 ABINIT group (AL,MS)
+!! Copyright (C) 2014-2025 ABINIT group (AL,MS)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,7 +32,7 @@ module m_gemm_nonlop_gpu
 
  use m_abi_linalg  ! copy_on_gpu, copy_from_gpu, alloc_on_gpu, dealloc_on_gpu, gpu_memset, gpu_allocated
  use defs_abitypes, only : MPI_type
- use m_opernlc_ylm_allwf_cpu, only : opernlc_ylm_allwf_cpu
+ use m_opernlc_ylm_allwf, only : opernlc_ylm_allwf
  use m_pawcprj, only : pawcprj_type
  use m_gemm_nonlop_projectors
  use m_hamiltonian, only : KPRIME_H_K, K_H_KPRIME, K_H_K, KPRIME_H_KPRIME
@@ -69,7 +69,6 @@ module m_gemm_nonlop_gpu
    !> data_in and data_out must be pointers in device memory
    subroutine extract_real_part(data_out, data_in, size) bind(c, name='cuda_extract_real_part')
      use, intrinsic :: iso_c_binding
-     implicit none
      type(c_ptr),             value :: data_out
      type(c_ptr),             value :: data_in
      integer(kind=c_int32_t), value :: size
@@ -79,7 +78,6 @@ module m_gemm_nonlop_gpu
    !> data_in and data_out must be pointers in device memory
    subroutine extract_imag_part(data_out, data_in, size) bind(c, name='cuda_extract_imag_part')
      use, intrinsic :: iso_c_binding
-     implicit none
      type(c_ptr),             value :: data_out
      type(c_ptr),             value :: data_in
      integer(kind=c_int32_t), value :: size
@@ -89,7 +87,6 @@ module m_gemm_nonlop_gpu
    !> data_in and data_out must be pointers in device memory
    subroutine insert_real_part(data_out, data_in, size) bind(c, name='cuda_insert_real_part')
      use, intrinsic :: iso_c_binding
-     implicit none
      type(c_ptr),             value :: data_out
      type(c_ptr),             value :: data_in
      integer(kind=c_int32_t), value :: size
@@ -99,7 +96,6 @@ module m_gemm_nonlop_gpu
    !> data_in and data_out must be pointers in device memory
    subroutine insert_imag_part(data_out, data_in, size) bind(c, name='cuda_insert_imag_part')
      use, intrinsic :: iso_c_binding
-     implicit none
      type(c_ptr),             value :: data_out
      type(c_ptr),             value :: data_in
      integer(kind=c_int32_t), value :: size
@@ -108,7 +104,6 @@ module m_gemm_nonlop_gpu
    !> data_in and data_out must be pointers in device memory
    subroutine fix_realvec(data, npw_in, ndat_nspinor, option) bind(c, name='cuda_fix_realvec')
      use, intrinsic :: iso_c_binding
-     implicit none
      type(c_ptr),                    intent(inout) :: data
      integer(kind=c_int32_t), value, intent(in)    :: npw_in
      integer(kind=c_int32_t), value, intent(in)    :: ndat_nspinor
@@ -179,7 +174,7 @@ module m_gemm_nonlop_gpu
   integer :: idat, nprojs, shift, iatom, nlmn, ierr, ibeg, iend, ikin, ikout
   integer :: cplex, cplex_enl, cplex_fac
   integer :: iatm, ndgxdt, ndgxdtfac, nd2gxdt, nd2gxdtfac, optder, itypat, ilmn
-  integer :: cplex_dgxdt(1), cplex_d2gxdt(1)
+  integer :: cplex_dgxdt(9), cplex_d2gxdt(18)
   logical :: local_vectproj
   real(dp) :: dgxdt_dum_in(1,1,1,1,1), dgxdt_dum_out(1,1,1,1,1),dgxdt_dum_out2(1,1,1,1,1)
   real(dp) :: d2gxdt_dum_in(1,1,1,1,1), d2gxdt_dum_out(1,1,1,1,1),d2gxdt_dum_out2(1,1,1,1,1)
@@ -555,13 +550,18 @@ module m_gemm_nonlop_gpu
           call copy_from_gpu(  projections_cpu, gemm_nonlop_gpu_data%projections_gpu, &
             &              INT(cplex,     c_size_t) * nprojs * nspinor*ndat * dp)
 
-          call opernlc_ylm_allwf_cpu(atindx1, cplex, cplex_enl, cplex_fac, &
+          call opernlc_ylm_allwf(atindx1, cplex, cplex_dgxdt, cplex_d2gxdt,&
+            &                  cplex_enl, cplex_fac, &
+            &                  dgxdt_dum_in, dgxdt_dum_out, dgxdt_dum_out2, &
+            &                  d2gxdt_dum_in, d2gxdt_dum_out, d2gxdt_dum_out2, &
             &                  dimenl1, dimenl2, dimekbq, enl, &
-            &                  projections_cpu(:, ibeg:iend, 1:nspinor*ndat), &
-            &                  vnl_projections_cpu(:, ibeg:iend, 1:nspinor*ndat), &
-            &                  s_projections_cpu(:, ibeg:iend, 1:nspinor*ndat), &
-            &                  iatm, indlmn(:,:,itypat), itypat, ndat, lambda, mpi_enreg, natom, &
-            &                  nattyp(itypat), nlmn, nspinor, nspinortot, paw_opt, sij_typ)
+            &                  projections_cpu, &
+            &                  vnl_projections_cpu, &
+            &                  s_projections_cpu, &
+            &                  iatm, indlmn(:,:,itypat), itypat, lambda, mpi_enreg, natom, &
+            &                  ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,&
+            &                  nattyp(itypat), nlmn, nspinor, nspinortot, optder, paw_opt, sij_typ, &
+            &                  ndat, ibeg-1, iend, nprojs, 1, ABI_GPU_DISABLED)
 
           call copy_on_gpu(  s_projections_cpu, gemm_nonlop_gpu_data%  s_projections_gpu, &
             &              INT(cplex,     c_size_t) * nprojs * nspinor*ndat * dp)

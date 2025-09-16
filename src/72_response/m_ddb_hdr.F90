@@ -7,7 +7,7 @@
 !!  to handle the header of the DDB files.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2024 ABINIT group (GA, MJV, XG, MT, MM, MVeithen, MG, PB, JCC, MMignolet)
+!! Copyright (C) 2011-2025 ABINIT group (GA, MJV, XG, MT, MM, MVeithen, MG, PB, JCC, MMignolet)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,9 +29,7 @@ MODULE m_ddb_hdr
  use m_dtset
  use m_crystal
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use defs_datatypes, only : pseudopotential_type
  use m_copy,      only : alloc_copy
@@ -139,6 +137,8 @@ MODULE m_ddb_hdr
                             ! ddb_hdr reading is first called with msym=192
                             ! for dimensions only, then it is called with
                             ! actual number of sym.
+                            ! See also comment in dfpt_phfrq
+                            ! TODO: try to eliminate msym as much as possible.
    integer :: mtypat
    integer :: mpert
    integer :: msize
@@ -157,19 +157,13 @@ MODULE m_ddb_hdr
    integer :: usepaw
 
    integer :: nblok         ! Number of blocks in the ddb
+   logical :: has_d0E_xx=.false.
+   logical :: has_d1E_xx=.false.
+   logical :: has_d2E_xx=.false.
+   logical :: has_d3E_xx=.false.
+   logical :: has_d3E_lw=.false.   ! Note that d3E_xx is implied by d3E_lw
+   logical :: has_d2eig=.false.
 
-   ! GA: FIXME mblktyp doesnt make sense.
-   ! Instead, we should have logical variables has_d2eig, has_d3E, etc.
-   ! MMig; I agree mblktyp does not make much sense and its not even always
-   ! treated properly throughout the code
-   ! The logical variables seems like a good idea to me
-   integer :: mblktyp       ! Max block type
-                            ! 0 = Total energy
-                            ! 1 = 2nd derivatives (non-stat.)
-                            ! 2 = 2nd derivatives (stationary)
-                            ! 3 = 3rd derivatives
-                            ! 4 = 1st derivatives
-                            ! 5 = 2nd eigenvalue derivatives
    real(dp) :: dilatmx
    real(dp) :: ecut
    real(dp) :: ecutsm
@@ -238,7 +232,10 @@ MODULE m_ddb_hdr
  contains
 
    procedure :: init => ddb_hdr_init
-    ! Initialize object
+    ! Initialize object.
+
+   procedure :: init_from_crystal => ddb_hdr_init_from_crystal
+    ! Initialize object from a crystal.
 
    procedure :: malloc => ddb_hdr_malloc
     ! Allocate dynamic memory.
@@ -297,6 +294,110 @@ MODULE m_ddb_hdr
  end type ddb_hdr_type
 
 CONTAINS  !===========================================================
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddb_hdr/ddb_hdr_init_from_crystal
+!! NAME
+!! ddb_hdr_init_from_crystal
+!!
+!! FUNCTION
+!!   Initialize a ddb_hdr object from a crystal.
+!!   This creates a minimal ddb_hdr with no information whatsoever
+!!   about the parameters that created the ddb.
+!!
+!! INPUTS
+!!   ddb_hdr=the new ddb_hdr object
+!!   crystal=crystal object
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine ddb_hdr_init_from_crystal(ddb_hdr, crystal)
+
+!Arguments ------------------------------------
+ class(ddb_hdr_type),intent(inout) :: ddb_hdr
+ type(crystal_t),intent(inout) :: crystal
+
+!Local variables -------------------------
+
+! ************************************************************************
+
+ ddb_hdr%nblok = 1
+ ddb_hdr%ddb_version = DDB_VERSION
+ ddb_hdr%dscrpt = ''
+
+ ddb_hdr%with_psps = 0
+ ddb_hdr%with_dfpt_vars = 0
+
+ ddb_hdr%matom = crystal%natom
+ ddb_hdr%natom = crystal%natom
+ ddb_hdr%msym = crystal%nsym
+ ddb_hdr%nsym = crystal%nsym
+ ddb_hdr%mtypat = crystal%ntypat
+ ddb_hdr%ntypat = crystal%ntypat
+
+ ddb_hdr%mband = 1
+ ddb_hdr%mkpt = 1
+ ddb_hdr%nkpt = 1
+ ddb_hdr%mpert = crystal%natom
+ ddb_hdr%msize = 3*ddb_hdr%mpert*3*ddb_hdr%mpert
+
+ ddb_hdr%intxc = 0
+ ddb_hdr%iscf = 0
+ ddb_hdr%ixc = 0
+ ddb_hdr%nspden = 1
+ ddb_hdr%nspinor = 1
+ ddb_hdr%nsppol = 1
+ ddb_hdr%occopt = 0
+ ddb_hdr%usepaw = 0
+
+ ddb_hdr%dilatmx = 0
+ ddb_hdr%ecut = 0
+ ddb_hdr%ecutsm = 0
+ ddb_hdr%kptnrm = 1
+ ddb_hdr%pawecutdg = 0
+ ddb_hdr%dfpt_sciss = 0
+ ddb_hdr%tolwfr = 0
+ ddb_hdr%tphysel = 0
+ ddb_hdr%tsmear = 0
+
+ ddb_hdr%ngfft = zero
+ ddb_hdr%acell = one
+
+ call ddb_hdr%malloc()
+
+ ddb_hdr%rprim(:,:) = crystal%rprimd(:,:)
+ ddb_hdr%symafm(:) = crystal%symafm(:)
+ ddb_hdr%symrel(:,:,:) = crystal%symrel(:,:,:)
+ ddb_hdr%tnons(:,:) = crystal%tnons(:,:)
+ ddb_hdr%typat(:) = crystal%typat(:)
+ ddb_hdr%amu(:) = crystal%amu(:)
+ ddb_hdr%xred(:,:) = crystal%xred(:,:)
+ ddb_hdr%zion(:) = crystal%zion(:)
+ ddb_hdr%znucl(:) = crystal%znucl(:)
+
+ call crystal%copy(ddb_hdr%crystal)
+
+ ! Pseudopotential info will not be written by this header,
+ ! but we still need to initialize certain dimensions and arrays
+ ! because they will be passed to psddb8
+ ddb_hdr%psps%dimekb = zero
+ ddb_hdr%psps%lmnmax = zero
+ ddb_hdr%psps%useylm = zero
+ ddb_hdr%psps%usepaw = zero
+ ABI_MALLOC(ddb_hdr%psps%ekb,(ddb_hdr%psps%dimekb,ddb_hdr%ntypat))
+ ABI_MALLOC(ddb_hdr%psps%indlmn,(6,ddb_hdr%psps%lmnmax,ddb_hdr%ntypat))
+ ABI_MALLOC(ddb_hdr%psps%pspso,(ddb_hdr%ntypat))
+ ABI_MALLOC(ddb_hdr%pawtab,(ddb_hdr%ntypat*ddb_hdr%psps%usepaw))
+ call pawtab_nullify(ddb_hdr%pawtab)
+ ddb_hdr%psps%ekb = zero
+ ddb_hdr%psps%indlmn = zero
+ ddb_hdr%psps%pspso = zero
+
+end subroutine ddb_hdr_init_from_crystal
 !!***
 
 !----------------------------------------------------------------------
@@ -486,7 +587,7 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, dscrpt, &
    end do
  end if
 
- call crystal_init(dtset%amu_orig(:,1), ddb_hdr%crystal, &
+ call ddb_hdr%crystal%init(dtset%amu_orig(:,1), &
 & dtset%spgroup, dtset%natom, dtset%npsp, psps%ntypat, &
 & dtset%nsym, dtset%rprimd_orig(:,:,1), dtset%typat, &
 & ddb_hdr%xred, dtset%ziontypat, dtset%znucl, 1, &
@@ -611,7 +712,7 @@ subroutine ddb_hdr_get_block_dims(ddb_hdr)
  ! GA: mpert is stored in netcdf format but not in text format.
 
  ! Compute msize
- if (is_type_d3E(ddb_hdr%mblktyp)) then
+ if (ddb_hdr%has_d3E_xx) then
    ddb_hdr%msize=3*ddb_hdr%mpert*3*ddb_hdr%mpert*3*ddb_hdr%mpert
  else
    ddb_hdr%msize=3*ddb_hdr%mpert*3*ddb_hdr%mpert
@@ -1336,6 +1437,8 @@ subroutine ddb_hdr_open_write_nc(ddb_hdr, filename, with_psps, with_dfpt_vars)
    &])
  NCF_CHECK(ncerr)
 
+NCF_CHECK(nf90_put_var(ncid_d2E, nctk_idname(ncid_d2E, 'd2E_block_types'), blktyp_d2E))
+
  ABI_FREE(blktyp_d2E)
 
  ! -----------------------
@@ -1596,10 +1699,11 @@ subroutine ddb_hdr_open_read_txt(ddb_hdr, filename, comm, &
  integer :: unddb
  integer :: spgroup, timrev, npsp
  integer :: choice
- integer :: ii, mblktyp,nblok
+ integer :: ii, nblok
  integer :: matom_l,mtypat_l,mband_l,mkpt_l,msym_l,nsppol_l
  integer :: dimekb_l,lmnmax_l,usepaw_l
  integer :: comm_l
+ logical :: has_d0E_xx,has_d1E_xx,has_d2E_xx,has_d3E_xx,has_d3E_lw,has_d2eig
 !arrays
  real(dp):: rprimd(3,3)
 
@@ -1615,8 +1719,9 @@ subroutine ddb_hdr_open_read_txt(ddb_hdr, filename, comm, &
  ! Open the DDB once and read the dimensions from header
  ! =====================================================
 
- call ddb_getdims(filename,comm_l,dimekb_l,lmnmax_l,mband_l,mblktyp, &
-&       msym_l,matom_l,nblok,mkpt_l,nsppol_l,mtypat_l,usepaw_l)
+ call ddb_getdims(filename,comm_l,dimekb_l,lmnmax_l,mband_l, &
+&       msym_l,matom_l,nblok,mkpt_l,nsppol_l,mtypat_l,usepaw_l,&
+&       has_d0E_xx, has_d1E_xx, has_d2E_xx, has_d3E_xx, has_d3E_lw, has_d2eig)
 
 
  ! When merging ddbs, we want to open a header with fixed dimensions.
@@ -1641,7 +1746,12 @@ subroutine ddb_hdr_open_read_txt(ddb_hdr, filename, comm, &
  ddb_hdr%nsppol = nsppol_l
 
  ddb_hdr%nblok = nblok
- ddb_hdr%mblktyp = mblktyp
+ ddb_hdr%has_d0E_xx = has_d0E_xx
+ ddb_hdr%has_d1E_xx = has_d1E_xx
+ ddb_hdr%has_d2E_xx = has_d2E_xx
+ ddb_hdr%has_d3E_xx = has_d3E_xx
+ ddb_hdr%has_d3E_lw = has_d3E_lw
+ ddb_hdr%has_d2eig = has_d2eig
 
  ddb_hdr%psps%dimekb = dimekb_l
  ddb_hdr%psps%ntypat = mtypat_l
@@ -1795,7 +1905,7 @@ subroutine ddb_hdr_open_read_txt(ddb_hdr, filename, comm, &
    spgroup = 1
    timrev = 2
 
-   call crystal_init(ddb_hdr%amu, ddb_hdr%crystal, &
+   call ddb_hdr%crystal%init(ddb_hdr%amu, &
 &   spgroup, ddb_hdr%natom, npsp, ddb_hdr%ntypat, &
 &   ddb_hdr%nsym, rprimd, ddb_hdr%typat, &
 &   ddb_hdr%xred, ddb_hdr%zion, ddb_hdr%znucl, timrev, &
@@ -1850,6 +1960,7 @@ subroutine ddb_hdr_open_read_nc(ddb_hdr, filename, comm, &
  integer :: comm_
  integer :: natom_file, ntypat_file, mband_file, nkpt_file, nsym_file
  integer :: mband_, nkpt_
+ integer :: blktyp
  integer :: ncerr
 !arrays
  integer :: ngfft(3)
@@ -1990,10 +2101,22 @@ subroutine ddb_hdr_open_read_nc(ddb_hdr, filename, comm, &
    ABI_MALLOC(ddb_hdr%typ,(ddb_hdr%nblok))
    NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, 'block_types'), ddb_hdr%typ))
 
-   ! TODO: mblktyp should be removed
-   ddb_hdr%mblktyp=0
    do iblok=1,ddb_hdr%nblok
-     ddb_hdr%mblktyp = max(ddb_hdr%mblktyp, ddb_hdr%typ(iblok))
+     blktyp = ddb_hdr%typ(iblok)
+     if (is_type_d0E(blktyp)) then
+       ddb_hdr%has_d0E_xx=.true.
+     else if (is_type_d1E(blktyp)) then
+       ddb_hdr%has_d1E_xx=.true.
+     else if (is_type_d2E(blktyp)) then
+       ddb_hdr%has_d2E_xx=.true.
+     else if (is_type_d3E(blktyp)) then
+       ddb_hdr%has_d3E_xx=.true.
+       if (blktyp == BLKTYP_d3E_lw) then
+         ddb_hdr%has_d3E_lw=.true.
+       end if
+     else if (is_type_d2eig(blktyp)) then
+       ddb_hdr%has_d2eig=.true.
+     end if
    end do
 
    ! Overwrite dimensions if requested
@@ -2182,10 +2305,8 @@ subroutine ddb_hdr_close(ddb_hdr, comm)
     ddb_hdr%has_open_file_txt = .false.
   end if
   if (ddb_hdr%has_open_file_nc) then
-#ifdef HAVE_NETCDF
     ncerr = nf90_close(ddb_hdr%ncid)
     ddb_hdr%has_open_file_nc = .false.
-#endif
   end if
 
 end subroutine ddb_hdr_close
@@ -2656,7 +2777,12 @@ subroutine ddb_hdr_bcast_dim(ddb_hdr, comm)
  call xmpi_bcast(ddb_hdr%nspden, master, comm, ierr)
 
  call xmpi_bcast(ddb_hdr%nblok, master, comm, ierr)
- call xmpi_bcast(ddb_hdr%mblktyp, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%has_d0E_xx, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%has_d1E_xx, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%has_d2E_xx, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%has_d3E_xx, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%has_d3E_lw, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%has_d2eig, master, comm, ierr)
 
  call xmpi_bcast(ddb_hdr%mpert, master, comm, ierr)
  call xmpi_bcast(ddb_hdr%msize, master, comm, ierr)
@@ -3958,7 +4084,6 @@ end subroutine ioddb8_in
 !! lmnmax=if useylm=1, max number of (l,m,n) comp. over all type of psps
 !!       =if useylm=0, max number of (l,n)   comp. over all type of psps
 !! mband=maximum number of bands
-!! mblktyp=largest block type
 !! msym=maximum number of symmetries
 !! natom=number of atoms
 !! nblok=number of bloks in the DDB
@@ -3969,13 +4094,15 @@ end subroutine ioddb8_in
 !!
 !! SOURCE
 
-subroutine ddb_getdims(filename,comm,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,nsppol,ntypat,usepaw)
+subroutine ddb_getdims(filename,comm,dimekb,lmnmax,mband,msym,natom,nblok,nkpt,nsppol,ntypat,usepaw,&
+&                      has_d0E_xx, has_d1E_xx, has_d2E_xx, has_d3E_xx, has_d3E_lw, has_d2eig)
 
 !Arguments -------------------------------
 !scalars
  character(len=*),intent(in) :: filename
  integer,intent(in) :: comm
- integer,intent(out) :: msym,dimekb,lmnmax,mband,mblktyp,natom,nblok,nkpt,ntypat,nsppol,usepaw
+ integer,intent(out) :: msym,dimekb,lmnmax,mband,natom,nblok,nkpt,ntypat,nsppol,usepaw
+ logical,intent(out) :: has_d0E_xx,has_d1E_xx,has_d2E_xx,has_d3E_xx,has_d3E_lw,has_d2eig
 
 !Local variables-------------------------------
 !scalars
@@ -3987,7 +4114,8 @@ subroutine ddb_getdims(filename,comm,dimekb,lmnmax,mband,mblktyp,msym,natom,nblo
  ! Master node reads dims from file and then broadcast.
  if (xmpi_comm_rank(comm) == master) then
    unddb = get_unit()
-   call inprep8(filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,nsppol,ntypat,usepaw)
+   call inprep8(filename,unddb,dimekb,lmnmax,mband,msym,natom,nblok,nkpt,nsppol,ntypat,usepaw,&
+                has_d0E_xx, has_d1E_xx, has_d2E_xx, has_d3E_xx, has_d3E_lw, has_d2eig)
  end if
 
  ! couldnt we use ddb_hdr_bcast_dim here?
@@ -3995,7 +4123,6 @@ subroutine ddb_getdims(filename,comm,dimekb,lmnmax,mband,mblktyp,msym,natom,nblo
    call xmpi_bcast(dimekb, master, comm, ierr)
    call xmpi_bcast(lmnmax, master, comm, ierr)
    call xmpi_bcast(mband, master, comm, ierr)
-   call xmpi_bcast(mblktyp, master, comm, ierr)
    call xmpi_bcast(msym, master, comm, ierr)
    call xmpi_bcast(natom, master, comm, ierr)
    call xmpi_bcast(nblok, master, comm, ierr)
@@ -4003,11 +4130,17 @@ subroutine ddb_getdims(filename,comm,dimekb,lmnmax,mband,mblktyp,msym,natom,nblo
    call xmpi_bcast(ntypat, master, comm, ierr)
    call xmpi_bcast(nsppol, master, comm, ierr)
    call xmpi_bcast(usepaw, master, comm, ierr)
+   call xmpi_bcast(has_d0E_xx, master, comm, ierr)
+   call xmpi_bcast(has_d1E_xx, master, comm, ierr)
+   call xmpi_bcast(has_d2E_xx, master, comm, ierr)
+   call xmpi_bcast(has_d3E_xx, master, comm, ierr)
+   call xmpi_bcast(has_d3E_lw, master, comm, ierr)
+   call xmpi_bcast(has_d2eig, master, comm, ierr)
  end if
 
  ! Maximum number of perturbations and size of matrix.
  !mpert=natom+6
- !msize=3*mpert*3*mpert; if (mblktyp==3) msize=msize*3*mpert
+ !msize=3*mpert*3*mpert; if (has_d3E_xx) msize=msize*3*mpert
 
 end subroutine ddb_getdims
 !!***
@@ -4032,7 +4165,6 @@ end subroutine ddb_getdims
 !! lmnmax=if useylm=1, max number of (l,m,n) comp. over all type of psps
 !!       =if useylm=0, max number of (l,n)   comp. over all type of psps
 !! mband=maximum number of bands
-!! mblktyp=largest block type
 !! msym=maximum number of symmetries
 !! natom=number of atoms
 !! nblok=number of bloks in the DDB
@@ -4043,15 +4175,16 @@ end subroutine ddb_getdims
 !! SOURCE
 
 
-subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
-& nsppol,ntypat,usepaw)
+subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,msym,natom,nblok,nkpt,&
+&                   nsppol,ntypat,usepaw,&
+&                   has_d0E_xx, has_d1E_xx, has_d2E_xx, has_d3E_xx, has_d3E_lw, has_d2eig)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: unddb
- integer, intent(out) :: msym
- integer,intent(out) :: dimekb,lmnmax,mband,mblktyp,natom,nblok,nkpt,ntypat,nsppol,usepaw
  character(len=*),intent(in) :: filename
+ integer,intent(in) :: unddb
+ integer,intent(out) :: dimekb,lmnmax,mband,msym,natom,nblok,nkpt,ntypat,nsppol,usepaw
+ logical, intent(out) :: has_d0E_xx,has_d1E_xx,has_d2E_xx,has_d3E_xx,has_d3E_lw,has_d2eig
 
 !Local variables -------------------------
 !scalars
@@ -4459,30 +4592,47 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,
 
 !Now, the type of each blok, in turn
 ! GA: Certain types of block are not expected to mix (3 and 5)
- mblktyp=1
+ has_d0E_xx=.false.
+ has_d1E_xx=.false.
+ has_d2E_xx=.false.
+ has_d3E_xx=.false.
+ has_d3E_lw=.false.
+ has_d2eig=.false.
+
  if(nblok>=1)then
    do iblok=1,nblok
 
      read(unddb,*)
      read(unddb, '(a32,12x,i12)' )blkname,nelmts
-     if(blkname==' 2nd derivatives (non-stat.)  - ' .or.  blkname==' 2rd derivatives (non-stat.)  - ')then
-       blktyp=BLKTYP_d2E_ns
-     else if(blkname==' 2nd derivatives (stationary) - ' .or. blkname==' 2rd derivatives (stationary) - ')then
-       blktyp=BLKTYP_d2E_st
-     else if(blkname==' 2nd derivatives (MBC)        - ') then
+
      ! wouldn't it be better to use conditions like:
      ! else if(blkname==DESCR_d2E_mbc) then
+     ! GA: yes.
+     if(blkname==' 2nd derivatives (non-stat.)  - ' .or.  blkname==' 2rd derivatives (non-stat.)  - ')then
+       blktyp=BLKTYP_d2E_ns
+       has_d2E_xx=.true.
+     else if(blkname==' 2nd derivatives (stationary) - ' .or. blkname==' 2rd derivatives (stationary) - ')then
+       blktyp=BLKTYP_d2E_st
+       has_d2E_xx=.true.
+     else if(blkname==' 2nd derivatives (MBC)        - ') then
        blktyp=BLKTYP_d2E_mbc
+       has_d2E_xx=.true.
      else if(blkname==' 3rd derivatives              - ')then
        blktyp=BLKTYP_d3E_xx
+       has_d3E_xx=.true.
      else if(blkname==' Total energy                 - ')then
        blktyp=BLKTYP_d0E_xx
+       has_d0E_xx=.true.
      else if(blkname==' 1st derivatives              - ')then
        blktyp=BLKTYP_d1E_xx
+       has_d1E_xx=.true.
      else if(blkname==' 2nd eigenvalue derivatives   - ' .or. blkname==' 2rd eigenvalue derivatives   - ')then
        blktyp=BLKTYP_d2eig_re
+       has_d2eig=.true.
      else if(blkname==' 3rd derivatives (long wave)  - ')then
        blktyp=BLKTYP_d3E_lw
+       has_d3E_lw=.true.
+       has_d3E_xx=.true.  ! Note that d3E_xx is implied by d3E_lw
      else
        write(message, '(a,a,a,a,a,a,a,a,a)' )&
 &       'The following string appears in the DDB in place of',' the block type description :',ch10,blkname,ch10,&
@@ -4500,10 +4650,8 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,
        read(unddb,*)
        read(unddb,*)
        read(unddb,*)
-       mblktyp=blktyp
      else if (is_type_d2eig(blktyp)) then
        read(unddb,*)
-       mblktyp=BLKTYP_d2eig_re
      end if
 
 !    Read every element

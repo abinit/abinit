@@ -6,7 +6,7 @@
 !!  This module provides helper functions for MPI-IO operations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2024 ABINIT group (MG)
+!! Copyright (C) 2009-2025 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,9 +26,7 @@ MODULE m_mpiotk
  use m_abicore
  use m_errors
  use m_xmpi
-#if defined HAVE_MPI2 && defined HAVE_MPI_IO
- use mpi
-#endif
+ USE_MPI
 
  use iso_c_binding
 

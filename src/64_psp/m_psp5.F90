@@ -6,7 +6,7 @@
 !! Initialize pspcod=5 ("Phoney pseudopotentials" with Hamman grid):
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, FrD, FJ, MT)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, FrD, FJ, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -99,8 +99,6 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
 &                  lloc,lmax,lmnmax,lnmax,mmax,mpsang,mpssoang,mqgrid,&
 &                  nproj,n1xccc,pspso,qchrg,qgrid,rcpsp,rms,&
 &                  useylm,vlspl,xcccrc,xccc1d,zion,znucl)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

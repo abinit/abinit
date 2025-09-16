@@ -1,0 +1,94 @@
+# Added by runtests.py
+output_file = "t84.abo"
+indata_prefix = "t84i"
+outdata_prefix = "t84o"
+tmpdata_prefix = "t84t"
+# end runtests.py section
+
+# compute total energy with two nuclear magnetic dipoles, in
+# two configurations. This is useful for computing the nuclear spin
+# coupling as measured in NMR. The test is for the IF molecule.
+
+ndtset 2
+
+# in general, need more spin orientations to map out the
+# full coupling tensor
+
+## xx terms
+#nucdipmom1
+#1.0 0.0 0.0
+#1.0 0.0 0.0
+#nucdipmom2
+#1.0 0.0 0.0
+#-1.0 0.0 0.0
+## zz terms
+#
+# Here have the up-up configuration (along z) and the 
+# up-down. Down-down and down-up are symmetric.
+nucdipmom1
+0.0 0.0 1.0
+0.0 0.0 1.0
+nucdipmom2
+0.0 0.0 1.0
+0.0 0.0 -1.0
+
+# best to use always all spin-relativistic corrections 
+nspinor 2
+zora 3
+
+pawcpxocc 2
+optforces 0
+optstress 0
+usexcnhat 0
+paral_atom 0
+
+natom 2
+ntypat 2
+typat 1 2
+znucl 53 9
+
+# cell is a box containing one IF molecule, bond along z direction
+# acell should be checked by convergence
+acell 3*20.0
+xcart
+0.0 0.0 0.0
+0.0 0.0 1.87 Angstrom
+
+# only a single k pt necessary for a molecule in an empty box
+nkpt 1
+kptopt 0
+kpt 3*0.0
+
+# nstep kept small for time, usually this will have to be larger
+nstep 20
+
+# this ecut is much too small, should be checked for convergence in
+# production runs
+ecut 5
+pawecutdg 10.0
+
+# we are only converging the total energy but we need it to be very precise
+toldfe 1.0D-10
+
+pp_dirpath="$ABI_PSPDIR/Psdj_paw_pbe_std/"
+pseudos "I.xml,F.xml"
+
+write_files "gsr"
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t84.abo, tolnlines=  7, tolabs=  3.9e-9, tolrel= 4.6e-10
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = J. Zwanziger
+#%% keywords = PAW
+#%% description = compute spin dipole couplings by energy difference
+#%% topics = NMR, MagField
+#%%<END TEST_INFO>
+

@@ -2,10 +2,11 @@
 #GOLD 31 ATOMS
 
 #Process distribution (parallelism)
-  npkpt 1 npband 2 npfft 1 bandpp 24   # 2 MPI processes
+  npkpt 1 npband 2 npfft 1
 paral_kgb 1
 gpu_option 2
 wfoptalg 114
+nblock_lobpcg 8
 
 #Plane wave basis
 ecut 8.
@@ -85,6 +86,7 @@ pseudos "au.hpc.paw"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi
 #%% [paral_info]
 #%% nprocs_to_test = 2
 #%% max_nprocs = 2

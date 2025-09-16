@@ -6,7 +6,7 @@
 !!   Simple argument parser used in main programs
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (MG)
+!!  Copyright (C) 2008-2025 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -300,14 +300,20 @@ type(args_t) function args_parser() result(args)
        write(std_out,*)"=============================="
        write(std_out,*)"=== Options for developers ==="
        write(std_out,*)"=============================="
-       write(std_out,*)"--abimem-level NUM         Set memory profiling level. Requires HAVE_MEM_PROFILING"
+       write(std_out,*)"--abimem-level NUM         Set memory profiling level. Requires HAVE_MEM_PROFILING in config.h"
+       write(std_out,*)"       0 -> no file abimem.mocc is created, only memory allocation counters running."
+       write(std_out,*)"       1 -> light version. Only memory peaks are written."
+       write(std_out,*)"       2 -> file abimem.mocc is created with full information inside."
+       write(std_out,*)"       3 -> Write info only if allocation/deallocation is larger or smaller than limit_mb"
+       write(std_out,*)"            depending on of the sign of abimem-limit-mb."
+       write(std_out,*)"    NOTE: By default, only master node writes, use negative values to make all MPI procs write info to disk."
        write(std_out,*)"--abimem-limit-mb NUM      Log malloc/free only if size > limit in Megabytes. Requires abimem-level 3"
        write(std_out,*)"--fft-ialltoall[=yesno]    Use non-blocking ialltoall in MPI-FFT (used only if ndat > 1 and MPI2+)."
        write(std_out,*)"--gnu-mtrace               Enable mtrace (requires GNU and clib)."
        write(std_out,*)"--ieee-halt                Halt the code if one of the *usual* IEEE exceptions is raised."
        write(std_out,*)"--ieee-signal              Signal the occurrence of the *usual* IEEE exceptions."
        ! Multibinit
-       write(std_out,*)"--F03                      Run F03 mode (for Multibinit only)."
+       write(std_out,*)"--F03                      Run F03 mode (Multibinit only)."
      end if
      args%exit = args%exit + 1
 

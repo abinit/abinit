@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (DC)
+!!  Copyright (C) 2008-2025 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,7 +23,8 @@ module m_ab7_symmetry
   use defs_basis
   use m_abicore
 
-  use m_symtk,     only : mati3inv, mati3det, symatm, symcharac
+  use m_matrix,    only : mati3inv, mati3det
+  use m_symtk,     only : symatm, symcharac
   use m_symfind,   only : symfind, symanal, symlatt
   use m_geometry,  only : metric
   use m_spgdata,   only : spgdata
@@ -44,6 +45,7 @@ module m_ab7_symmetry
 
      logical :: withField
      real(dp) :: field(3)
+     real(dp) :: field_axial(3)
 
      logical :: withJellium
 
@@ -500,10 +502,10 @@ contains
     end if
   end subroutine symmetry_set_spin_orbit
 
-  subroutine symmetry_set_field(id, field, errno)
+  subroutine symmetry_set_field(id, field, field_axial, errno)
 
     integer, intent(in) :: id
-    real(dp), intent(in) :: field(3)
+    real(dp), intent(in) :: field(3), field_axial(3)
     integer, intent(out) :: errno
 
     type(symmetry_list), pointer :: token
@@ -519,7 +521,8 @@ contains
 
     token%data%withField = .true.
     token%data%field = field
-
+    token%data%field_axial = field_axial
+    
     ! We unset all the computed symmetries
     token%data%nBravSym = -1
     if (token%data%auto) then
@@ -725,7 +728,7 @@ contains
        call symfind(sym%gprimd, AB7_MAX_SYMMETRIES, &
             & sym%nAtoms, sym%nBravSym, sym%withSpin, sym%nSym, 0, sym%bravSym, spinAt_, &
             & symAfm_, sym_, transNon_, sym%tolsym, sym%typeAt, &
-            & use_inversion, sym%xRed, invardir_red=sym%field, invar_z=invar_z)
+            & use_inversion, sym%xRed, invardir_red=sym%field, invaraxial_red=sym%field_axial, invar_z=invar_z)
        if (AB_DBG) write(std_err,*) "AB symmetry: call ABINIT OK."
        if (AB_DBG) write(std_err, "(A,I3)") "  nSym:", sym%nSym
        if (associated(sym%sym))  then

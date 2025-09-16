@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2024 ABINIT group (MG)
+!! Copyright (C) 2009-2025 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,22 +32,21 @@ MODULE m_clib
  public :: clib_mtrace
  public :: clib_print_mallinfo
  public :: clib_ulimit_stack    ! Set stack size limit to maximum allowed value.
- public :: clib_getpid
- public :: clib_setenv
+ public :: clib_getpid          ! Get process id
+ public :: clib_sleep           ! Sleep for a certain number of seconds.
+ public :: clib_setenv          ! Set env variable.
  public :: clib_mkdir_if_needed
-
-
-!FIXME the interfaces below have been commented out since abilint
-! JB : because interface must have a name in abilint
+ public :: clib_lock_file_by_name
+ public :: clib_close_fd
 
 ! ===================================================
 ! ==== Fortran-bindings declared in fsi_posix.c ====
 ! ===================================================
 
  interface
-    subroutine c_mkdir_if_needed(path, ierr) bind(C, name="c_mkdir_if_needed")
+    subroutine c_mkdir_if_needed(dirpath, ierr) bind(C, name="c_mkdir_if_needed")
       import
-      character(kind=c_char), dimension(*), intent(in) :: path
+      character(kind=c_char), dimension(*), intent(in) :: dirpath
       integer(c_int),intent(out) :: ierr
     end subroutine c_mkdir_if_needed
  end interface
@@ -58,6 +57,22 @@ MODULE m_clib
      character(kind=c_char),intent(in) :: oldname(*)
      character(kind=c_char),intent(in) :: newname(*)
    end function c_rename
+ end interface
+
+ interface
+    subroutine clib_lock_file_by_name(filename, fd, ierr) bind(C, name="c_lock_file_by_name")
+      import
+      character(kind=c_char), dimension(*), intent(in) :: filename
+      integer(c_int),intent(out) :: fd
+      integer(c_int),intent(out) :: ierr
+    end subroutine clib_lock_file_by_name
+ end interface
+
+ interface
+    subroutine clib_close_fd(fd) bind(C, name="c_close_fd")
+      import
+      integer(c_int),intent(in) :: fd
+    end subroutine clib_close_fd
  end interface
 
  interface
@@ -81,6 +96,14 @@ MODULE m_clib
      integer(c_int) :: clib_getpid
    end function clib_getpid
  end interface
+
+ interface
+   subroutine clib_sleep(seconds) bind(C, name="sleep")
+     import
+     integer(c_int), value :: seconds  ! This is unsigned int in C
+   end subroutine clib_sleep
+ end interface
+
 
 ! =================================================
 ! ==== Fortran-bindings declared in mallinfo.c ====
@@ -242,13 +265,13 @@ end subroutine clib_mkdir_if_needed
 !!  clib_setenv
 !!
 !! FUNCTION
-!!       The setenv() function adds the variable name to the environment
-!!       with the value value, if name does not already exist.  If name
-!!       does exist in the environment, then its value is changed to value
-!!       if overwrite is nonzero; if overwrite is zero, then the value of
-!!       name is not changed (and setenv() returns a success status).
-!!       This function makes copies of the strings pointed to by name and
-!!       value (by contrast with putenv(3)).
+!!   The setenv() function adds the variable name to the environment
+!!   with the value value, if name does not already exist.  If name
+!!   does exist in the environment, then its value is changed to value
+!!   if overwrite is nonzero; if overwrite is zero, then the value of
+!!   name is not changed (and setenv() returns a success status).
+!!   This function makes copies of the strings pointed to by name and
+!!   value (by contrast with putenv(3)).
 !!
 !! SOURCE
 

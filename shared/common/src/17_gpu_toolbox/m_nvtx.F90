@@ -9,7 +9,7 @@
 !! This module should (TBC) only be activated when GPU execution is enabled.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2024 ABINIT group
+!!  Copyright (C) 2010-2025 ABINIT group
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -65,15 +65,15 @@ module m_nvtx
 
   interface nvtxRangePush
      ! push range with custom label and standard color
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU_MARKERS_NVTX
      subroutine nvtxRangePushA(name) bind(C, name='nvtxRangePushA')
-#elif defined HAVE_GPU_HIP
+#elif defined HAVE_GPU_MARKERS_ROCTX
      subroutine nvtxRangePushA(name) bind(C, name='roctxRangePushA')
 #endif
        use, intrinsic :: iso_c_binding
        character(kind=C_CHAR) :: name(256)
      end subroutine nvtxRangePushA
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU_MARKERS_NVTX
      ! push range with custom label and custom color
      subroutine nvtxRangePushEx(event) bind(C, name='nvtxRangePushEx')
        use, intrinsic :: iso_c_binding
@@ -84,9 +84,9 @@ module m_nvtx
   end interface nvtxRangePush
 
   interface nvtxRangePop
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU_MARKERS_NVTX
      subroutine nvtxRangePop() bind(C, name='nvtxRangePop')
-#elif defined HAVE_GPU_HIP
+#elif defined HAVE_GPU_MARKERS_ROCTX
      subroutine nvtxRangePop() bind(C, name='roctxRangePop')
 #endif
      end subroutine nvtxRangePop
@@ -121,7 +121,7 @@ contains
        tempName(i) = trimmed_name(i:i)
     enddo
 
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU_MARKERS_NVTX
     if ( .not. present(id)) then
        call nvtxRangePush(tempName)
     else
@@ -129,7 +129,7 @@ contains
        event%message=c_loc(tempName)
        call nvtxRangePushEx(event)
     end if
-#elif defined HAVE_GPU_HIP
+#elif defined HAVE_GPU_MARKERS_ROCTX
     call nvtxRangePush(tempName)
 #endif
 

@@ -7,7 +7,7 @@
 !!    charge density (i.e. n^hat(r)).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2024 ABINIT group (FJ, MT, MG, TRangel)
+!! Copyright (C) 2018-2025 ABINIT group (FJ, MT, MG, TRangel)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -118,16 +118,14 @@ CONTAINS  !=====================================================================
 subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 &          my_natom,natom,nfft,ngfft,nhatgrdim,nspden,ntypat,pawang,pawfgrtab,&
 &          pawgrnhat,pawnhat,pawrhoij,pawrhoij0,pawtab,qphon,rprimd,ucvol,usewvl,xred,&
-&          mpi_atmtab,comm_atom,comm_fft,mpi_comm_wvl,me_g0,paral_kgb,distribfft) ! optional arguments
-
- implicit none
+&          mpi_atmtab,comm_atom,comm_fft,mpi_comm_wvl,me_g0,paral_kgb,distribfft,gpu_thread_limit) ! optional arguments
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: cplex,ider,idir,ipert,izero,my_natom,natom,nfft
  integer,intent(in)  :: usewvl
  integer,intent(in) :: nhatgrdim,nspden,ntypat
- integer,optional,intent(in) :: me_g0,comm_atom,comm_fft,mpi_comm_wvl,paral_kgb
+ integer,optional,intent(in) :: me_g0,comm_atom,comm_fft,mpi_comm_wvl,paral_kgb,gpu_thread_limit
  real(dp),intent(in) :: ucvol
  real(dp),intent(inout) :: compch_fft
  type(distribfft_type),optional,intent(in),target :: distribfft
@@ -341,6 +339,7 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
                ilslm=ils*ils+ils+mm+1
                if (pawang%gntselect(ilslm,klm)>0) then
                  ro_ql(1)=ro(1)*pawtab(itypat)%qijl(ilslm,klmn)
+                 !$OMP PARALLEL DO PRIVATE(ic)
                  do ic=1,nfgd
                    pawnhat_atm(ic)=pawnhat_atm(ic)+ro_ql(1)*pawfgrtab(iatom)%gylm(ic,ilslm)
                  end do
@@ -353,6 +352,7 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
                ilslm=ils*ils+ils+mm+1
                if (pawang%gntselect(ilslm,klm)>0) then
                  ro_ql(1:2)=ro(1:2)*pawtab(itypat)%qijl(ilslm,klmn)
+                 !$OMP PARALLEL DO PRIVATE(ic,jc)
                  do ic=1,nfgd
                    jc=2*ic-1
                    pawnhat_atm(jc:jc+1)=pawnhat_atm(jc:jc+1)+ro_ql(1:2)*pawfgrtab(iatom)%gylm(ic,ilslm)
@@ -481,11 +481,13 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 !    Add the contribution of the atom to the compensation charge
      if (compute_nhat) then
        if (cplex==1) then
+         !$OMP PARALLEL DO PRIVATE(kc)
          do ic=1,nfgd
            kc=pawfgrtab(iatom)%ifftsph(ic)
            pawnhat(kc,ispden)=pawnhat(kc,ispden)+pawnhat_atm(ic)
          end do
        else
+         !$OMP PARALLEL DO PRIVATE(jc)
          do ic=1,nfgd
            jc=2*ic-1;kc=2*pawfgrtab(iatom)%ifftsph(ic)-1
            pawnhat(kc:kc+1,ispden)=pawnhat(kc:kc+1,ispden)+pawnhat_atm(jc:jc+1)
@@ -494,11 +496,13 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
      end if
      if (compute_grad) then
        if (cplex==1) then
+         !$OMP PARALLEL DO PRIVATE(kc)
          do ic=1,nfgd
            kc=pawfgrtab(iatom)%ifftsph(ic)
            pawgrnhat(kc,ispden,1:3)=pawgrnhat(kc,ispden,1:3)+pawgrnhat_atm(ic,1:3)
          end do
        else
+         !$OMP PARALLEL DO PRIVATE(jc,ii)
          do ic=1,nfgd
            jc=2*ic-1;kc=2*pawfgrtab(iatom)%ifftsph(ic)-1
            do ii=1,3
@@ -605,7 +609,8 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 !----- Computation of compensation charge over real space grid
  if (compute_nhat.and.ipert==0) then
    nfftot=PRODUCT(ngfft(1:3))
-   call mean_fftr(pawnhat,tmp_compch_fft,nfft,nfftot,1,mpi_comm_sphgrid)
+   call mean_fftr(pawnhat,tmp_compch_fft,nfft,nfftot,1,&
+   &    mpi_comm_sphgrid=mpi_comm_sphgrid,gpu_thread_limit=gpu_thread_limit)
    compch_fft = tmp_compch_fft(1)
    compch_fft=compch_fft*ucvol
  end if
@@ -668,8 +673,6 @@ end subroutine pawmknhat
 subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nhat12_grdim,&
 &          nspinor,ntypat,ndat1,ndat2,pawang,pawfgrtab,grnhat12,nhat12,nattyp,pawtab, &
 &          gprimd,grnhat_12,qphon,xred,atindx,mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,distribfft,gpu_option) ! optional arguments
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1264,8 +1267,8 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
          end do
        case (ABI_GPU_OPENMP)
 #ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET DATA USE_DEVICE_PTR(nhat12_atm,nhat12)
-         call abi_gpu_xaxpy(2, nfft*ndat2*ndat1*(nspinor**2),&
+         !$OMP TARGET DATA USE_DEVICE_ADDR(nhat12_atm,nhat12)
+         call abi_gpu_xaxpy(1, 2*nfft*ndat2*ndat1*nspinor*nspinor,&
          &    cone,c_loc(nhat12_atm(:,:,:,:,:,ia)),1,c_loc(nhat12),1)
          !$OMP END TARGET DATA
 #endif
@@ -1330,7 +1333,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
      grnhat_12=-grnhat_12
    case (ABI_GPU_OPENMP)
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET DATA USE_DEVICE_PTR(grnhat_12)
+     !$OMP TARGET DATA USE_DEVICE_ADDR(grnhat_12)
      call abi_gpu_xscal(1, size(grnhat_12),cminusone,c_loc(grnhat_12),1)
      !$OMP END TARGET DATA
 #endif
@@ -1405,8 +1408,6 @@ end subroutine pawmknhat_psipsi_ndat
 subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nhat12_grdim,&
 &          nspinor,ntypat,ndat1,ndat2,pawang,pawfgrtab,grnhat12,nhat12,pawtab, &
 &          gprimd,grnhat_12,qphon,xred,atindx,mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,distribfft,gpu_option,nattyp) ! optional arguments
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1835,8 +1836,6 @@ end subroutine pawmknhat_psipsi
 subroutine pawnhatfr(ider,idir,ipert,my_natom,natom,nspden,ntypat,&
 &                    pawang,pawfgrtab,pawrhoij,pawtab,rprimd, &
 &                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2437,7 +2436,7 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
          prod=prod*ucvol/dble(ngridtot)
        else if(gpu_option_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET DATA USE_DEVICE_PTR(prod)
+         !$OMP TARGET DATA USE_DEVICE_ADDR(prod)
          call abi_gpu_xscal(1,qphase*lm_size*ndat*nattyp,scal,c_loc(prod),1)
          !$OMP END TARGET DATA
 #endif
@@ -2731,8 +2730,6 @@ subroutine pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,iband1,iband2,ispinor1
 &                    pawang,pawtab,ph3d_diel,typat,wfprod,wfraug, &
 &                    mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,distribfft) ! optional arguments (parallelism)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: iband1,iband2,ispinor1,ispinor2,istwf_k,lmax_diel,mgfftdiel
@@ -2995,8 +2992,6 @@ subroutine nhatgrid(atindx1,gmet,my_natom,natom,nattyp,ngfft,ntypat,&
 & optcut,optgr0,optgr1,optgr2,optrad,pawfgrtab,pawtab,rprimd,typat,ucvol,xred, &
 & mpi_atmtab,comm_atom,comm_fft,distribfft,typord) ! optional arguments (parallelism)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: my_natom,natom,ntypat,optcut,optgr0,optgr1,optgr2,optrad
@@ -3228,8 +3223,6 @@ end subroutine nhatgrid
 subroutine wvl_nhatgrid(atindx1,geocode,h,i3s,natom,natom_tot,&
 & nattyp,ntypat,n1,n1i,n2,n2i,n3,n3pi,optcut,optgr0,optgr1,optgr2,optrad,&
 & pawfgrtab,pawtab,psppar,rprimd,shift,xred)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars

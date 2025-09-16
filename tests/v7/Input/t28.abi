@@ -68,7 +68,7 @@ dmftctqmc_meas    1   # modulo de mesure E
 dmftctqmc_mrka    0   # markov analysis
 dmftctqmc_mov     0   # movie
 dmftctqmc_order   050   # perturbation
-dmftctqmc_config  1
+dmftctqmc_localprop  1
 
 dmft_rslf 1
 dmft_read_occnd 0
@@ -96,7 +96,7 @@ jpawu  0.0000  # values in Hartree
 #%% [files]
 #%% files_to_test =
 ###%%                  t28.abo,      tolnlines =7, tolabs =2.0e-6 , tolrel = 1.4e-05, fld_options=-medium ;
-#%%                  t28.abo,      tolnlines =7, tolabs =1.1e-4 , tolrel = 0.0001198, fld_options=-easy ;
+#%%                  t28.abo,      tolnlines =7, tolabs =1.1e-4 , tolrel = 2.0e-4, fld_options=-easy ;
 #%% [shell] 
 #%% post_commands = 
 #%%    ww_cp t28o_DS1_WFK t29i_DS2_WFK;

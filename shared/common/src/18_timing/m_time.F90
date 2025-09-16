@@ -7,7 +7,7 @@
 !! and functions to get cpu and wall time.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2024 ABINIT group (MG, XG, MT, TD)
+!! Copyright (C) 2009-2025 ABINIT group (MG, XG, MT, TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,9 +25,7 @@ module m_time
  use m_abicore
  use m_errors
  use, intrinsic :: iso_c_binding
-#if defined HAVE_MPI2
- use mpi
-#endif
+ USE_MPI
  use m_xmpi
  use m_clib
 
@@ -116,7 +114,6 @@ function asctime()
  character(len=3),parameter :: day_names(7)=(/'Mon','Tue','Wed','Thu','Fri','Sat','Sun'/)
  character(len=3),parameter :: month_names(12)=(/'Jan','Feb','Mar','Apr','May','Jun',&
 &                                                'Jul','Aug','Sep','Oct','Nov','Dec'/)
-
 ! *************************************************************************
 
 !Get year, month and day
@@ -173,7 +170,6 @@ pure function sec2str(time_s) result(str)
 
 !Local variables-------------------------------
  integer :: days,hours,minutes,seconds
-
 ! *************************************************************************
 
  days    = time_s / 86400
@@ -221,7 +217,6 @@ real(dp) pure function str2sec(str) result(time)
 
 !Local variables-------------------------------
  integer :: days,hours,minutes,seconds,dash,i,j
-
 ! *************************************************************************
 
  days = 0; hours = 0; minutes = 0; seconds = 0
@@ -316,7 +311,6 @@ function abi_cpu_time() result(cpu)
 #else
  integer :: count_now,count_max,count_rate
 #endif
-
 ! *************************************************************************
 
 !Machine-dependent timers
@@ -381,7 +375,6 @@ function abi_wtime() result(wall)
 !arrays
  integer :: values(8)
 #endif
-
 ! *************************************************************************
 
 #ifndef HAVE_MPI
@@ -485,7 +478,6 @@ subroutine cwtime(cpu, wall, gflops, start_or_stop, msg, comm)
  integer(C_LONG_LONG) :: flops
  real(C_FLOAT) :: real_time,proc_time,mflops
  real(dp) :: vals(3)
-
 ! *************************************************************************
 
  if (present(msg)) call wrtout(std_out, msg)
@@ -555,9 +547,7 @@ subroutine cwtime_report(tag, cpu, wall, gflops, pre_str, end_str, out_wall, com
  real(dp),optional,intent(out) :: out_wall
 
 !Local variables-------------------------------
-!scalars
  character(len=500) :: avg_type
-
 ! *************************************************************************
 
  if (present(comm)) then
@@ -610,7 +600,6 @@ end subroutine cwtime_report
 subroutine timein(cpu,wall)
 
 !Arguments ------------------------------------
-!scalars
  real(dp),intent(out) :: cpu,wall
 ! *************************************************************************
 
@@ -654,12 +643,11 @@ subroutine time_accu(nn,return_ncount,tottim,totflops,totftimes)
 !Local variables-------------------------------
 !scalars
  character(len=500) :: msg
-
 ! *************************************************************************
 
-!Check that nn lies in sensible bounds
+! Check that nn lies in sensible bounds
  if (nn<0.or.nn>TIMER_SIZE) then
-   write(msg,'(a,i6,a,i8,a)')' dim TIMER_SIZE=',TIMER_SIZE,' but input nn=',nn,'.'
+   write(msg,'(a,i0,a,i0,a)')' dim TIMER_SIZE=',TIMER_SIZE,' but input nn=',nn,'.'
    ABI_BUG(msg)
  end if
 
@@ -690,9 +678,7 @@ end subroutine time_accu
 subroutine time_set_papiopt(opt)
 
 !Arguments ------------------------------------
-!scalars
  integer,intent(in) :: opt
-
 ! *************************************************************************
 
  papiopt = opt
@@ -714,9 +700,7 @@ end subroutine time_set_papiopt
 function time_get_papiopt()
 
 !Arguments ------------------------------------
-!scalars
  integer :: time_get_papiopt
-
 ! *************************************************************************
 
  time_get_papiopt = papiopt
@@ -732,23 +716,20 @@ end function time_get_papiopt
 !!  Timing subroutine. Calls machine-dependent "timein" which returns elapsed cpu and wall clock times in sec.
 !!  Depending on value of "option" routine will:
 !!
-!!  (0) Zero all accumulators
-!!  (1 or -1) Start with new incremental time slice for accumulator n using explicit call to timein (or PAPI)
-!!  (2 or -2) Stop time slice; add time to accumulator n also increase by one the counter for this accumulator
-!!  (3) DEPRECATED Start with new incremental time slice for accumulator n
-!!        using stored values for cpu, wall, and PAPI infos ( ! do not use for stop )
-!!        Typically used immediately after a call to timab for another counter with option=2. This saves one call to timein.
-!!  (4) Report time slice for accumlator n (not full time accumlated)
-!!  (5) Option to suppress timing (nn should be 0) or reenable it (nn /=0)
-!!  For negative options : same action than positive values, except for -1 and -2, 
+!!  0: Zero all accumulators
+!!  1 or -1: Start with new incremental time slice for accumulator n using explicit call to timein (or PAPI)
+!!  2 or -2: Stop time slice; add time to accumulator n also increase by one the counter for this accumulator
+!!  3:  DEPRECATED Start with new incremental time slice for accumulator n
+!!      using stored values for cpu, wall, and PAPI infos ( ! do not use for stop )
+!!      Typically used immediately after a call to timab for another counter with option=2. This saves one call to timein.
+!!  4: Report time slice for accumlator n (not full time accumlated)
+!!  5: Option to suppress timing (nn should be 0) or reenable it (nn /=0)
+!!  For negative options: same action than positive values, except for -1 and -2,
 !!    use stored values for cpu, wall, and PAPI infos ( ! do not use for stop ), instead of calling "timein".
 !!    Typically used immediately after a call to timab for another counter with option=2 or 1. This saves one call to timein.
 !!
-!!
-!!  If, on first entry, subroutine is not being initialized, it
-!!  will automatically initialize as well as rezero accumulator n.
-!!  However, initialization SHOULD be done explicitly by the user
-!!  so that it can be done near the top of his/her main routine.
+!!  If, on first entry, subroutine is not being initialized, it will automatically initialize as well as rezero accumulator n.
+!!  However, initialization SHOULD be done explicitly by the user so that it can be done near the top of his/her main routine.
 !!
 !! INPUTS
 !!  nn=index of accumulator (distinguish what is being timed); NOT used if option=0
@@ -756,10 +737,8 @@ end function time_get_papiopt
 !!
 !! OUTPUT
 !!  on option=4:
-!!    tottim(2,nn)=accumulated time for accumulator nn; otherwise
-!!     tottim is a dummy variable.
-!!    option gives the number of times that the
-!!     accumulator has been incremented
+!!    tottim(2,nn)=accumulated time for accumulator nn; otherwise tottim is a dummy variable.
+!!    option gives the number of times that the accumulator has been incremented
 !!
 !! SOURCE
 !!

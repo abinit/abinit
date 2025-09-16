@@ -7,7 +7,7 @@
 !! used to define fft grids within Abinit
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2024 ABINIT group (LG, PMA)
+!! Copyright (C) 2000-2025 ABINIT group (LG, PMA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,7 +26,7 @@
 
 module defs_fftdata
 
-  use defs_basis 
+  use defs_basis
 
   implicit none
 
@@ -34,8 +34,7 @@ module defs_fftdata
   integer, parameter :: ndata=231
   integer, parameter :: mg=65536   ! biggest value in the latter tables (ifftdata and ifftsizes)
 
-  ! The factors 2, 7 and higher than 8 are forbidden
-  ! 8 is to be the favored factor
+  ! The factors 2, 7 and higher than 8 are forbidden 8 is to be the favored factor
   ! The factor 6 is only allowed in the first place!
   ! These data have to be coherent with the one in getng.F90
   integer, parameter :: ifftdata1_40(280)   = (/     &
@@ -153,13 +152,11 @@ CONTAINS  !===========================================================
 !!
 !! OUTPUT
 !!  n_out=Output N value
-!!  ierr=Status error 
+!!  ierr=Status error
 !!
 !! SOURCE
 
 subroutine size_goed_fft(m_in,n_out,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -170,7 +167,6 @@ subroutine size_goed_fft(m_in,n_out,ierr)
 !scalars
  integer :: ii,nbest
  character(len=500) :: msg
-
 ! *************************************************************************
 
    ierr = 0
@@ -179,18 +175,18 @@ subroutine size_goed_fft(m_in,n_out,ierr)
 
    if (nbest<2) then
      write(msg,'(4a,i8)')ch10,&
-&     ' size_goed_fft : BUG-',ch10,&
-&     ' nbest = ',nbest
+      ' size_goed_fft : BUG-',ch10,&
+      ' nbest = ',nbest
      write(std_out,*)msg
-     ierr = 1 
+     ierr = 1
      RETURN
    end if
 
    if (nbest>ifftsizes(ndata)) then
      write(msg,'(4a,i8,2a)')ch10,&
-&     ' size_goed_fft : ERROR-',ch10,&
-&     ' nbest = ',nbest,ch10,&
-&     ' is larger than any allowable FFT'
+      ' size_goed_fft : ERROR-',ch10,&
+      ' nbest = ',nbest,ch10,&
+      ' is larger than any allowable FFT'
      write(std_out,*)msg
      ierr = 2
      RETURN

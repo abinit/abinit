@@ -6,7 +6,7 @@
 !!  Routines to precondition residual potential (or density) and forces.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, MT, PMA)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, MT, PMA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -41,6 +41,8 @@ module m_prcref
  use m_mpinfo,   only : ptabs_fourdp, destroy_mpi_enreg, initmpi_seq
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
+ use m_rcpaw,    only : rcpaw_type
+ use m_extfpmd,  only : extfpmd_type
  use m_fftcore,  only : kgindex
  use m_fft,      only : zerosym, indirect_parallel_fourier, fourdp
  use m_kg,       only : getph
@@ -182,7 +184,7 @@ subroutine prcref(atindx,dielar,dielinv,&
 &  mgfft,moved_atm_inside,mpi_enreg,my_natom,&
 &  nattyp,nfft,nfftprc,ngfft,ngfftprc,nkxc,npawmix,npwdiel,ntypat,n1xccc,&
 &  optreal,optres,pawrhoij,pawtab,ph1d,psps,rhog,rhoijrespc,rhor,rprimd,&
-&  susmat,vhartr,vpsp,vresid,vrespc,vxc,wvl,wvl_den,xred)
+&  susmat,vhartr,vpsp,vresid,vrespc,vxc,wvl,wvl_den,xred,rcpaw,extfpmd)
 
 !Arguments-------------------------------
 !scalars
@@ -194,6 +196,9 @@ subroutine prcref(atindx,dielar,dielinv,&
  type(pseudopotential_type),intent(in) :: psps
  type(wvl_internal_type), intent(in) :: wvl
  type(wvl_denspot_type), intent(inout) :: wvl_den
+ type(rcpaw_type),intent(inout),pointer :: rcpaw
+ type(extfpmd_type),intent(inout),pointer :: extfpmd
+
 !arrays
  integer,intent(in) :: atindx(dtset%natom),ffttomix(nfft*(1-nfftprc/nfft))
  integer,intent(in) :: kg_diel(3,npwdiel),nattyp(ntypat),ngfft(18),ngfftprc(18)
@@ -216,7 +221,7 @@ subroutine prcref(atindx,dielar,dielinv,&
  integer :: coredens_method,cplex,dielop,iatom,ier,ifft,ii,index,ipw1
  integer :: ipw2,iq,iq0,ispden,klmn,kmix,n1,n2,n3,n3xccc,nfftot,nk3xc,optatm
  integer :: optdyfr,opteltfr,optgr,option,optn,optn2,optstr,optv,vloc_method
- real(dp) :: ai,ar,diemix,diemixmag,eei,enxc
+ real(dp) :: ai,ar,diemix,diemixmag,eei,bigexc,bigsxc
  real(dp) :: mixfac
  real(dp) :: mixfac_eff,mixfacmag,ucvol,vxcavg
  logical :: computediel,non_magnetic_xc
@@ -225,7 +230,7 @@ subroutine prcref(atindx,dielar,dielinv,&
 !arrays
  integer :: qprtrb(3)
  integer,allocatable :: indpw_prc(:)
- real(dp) :: dummy6(6),dummy7(6),gprimd(3,3),qphon(3),rmet(3,3),strsxc(6)
+ real(dp) :: dummy6(6),dummy7(6),gprimd(3,3),qphon(3),rmet(3,3)
  real(dp) :: vmean(dtset%nspden),vprtrb(2)
  real(dp),allocatable :: dummy(:),dummy1(:),dummy2(:),dummy3(:),dummy4(:),dummy5(:),dummy8(:),dummy9(:)
  real(dp),allocatable :: dyfrlo_indx(:,:,:),dyfrx2(:,:,:)
@@ -451,16 +456,20 @@ subroutine prcref(atindx,dielar,dielinv,&
  end if
 !#######################################################################
 
-!3) PAW only : precondition the rhoij quantities (augmentation
+!3) PAW : precondition the rhoij quantities (augmentation
 !occupancies) residuals. Use a simple preconditionning
 !with the same mixing factor as the model dielectric function.
+! RCPAW : precondition the core occupations residuals
+!with the same mixing factor as the model dielectric function
+! Extfpmd : precondition the extfpmd number of electrons
+!with the same mixing factor as the model dielectric function
 
+ if (istep>=dielstrt.and.dtset%iprcel>=21.and.dtset%iprcel<30) then
+   mixfac=one;mixfacmag=one
+ else
+   mixfac=dielar(4);mixfacmag=abs(dielar(7))
+ end if
  if (psps%usepaw==1.and.my_natom>0) then
-   if (istep>=dielstrt.and.dtset%iprcel>=21.and.dtset%iprcel<30) then
-     mixfac=one;mixfacmag=one
-   else
-     mixfac=dielar(4);mixfacmag=abs(dielar(7))
-   end if
    if (pawrhoij(1)%cplex_rhoij==1) then
      index=0
      do iatom=1,my_natom
@@ -491,6 +500,21 @@ subroutine prcref(atindx,dielar,dielinv,&
      end do
    end if
  end if
+
+ if (psps%usepaw==1.and.associated(rcpaw)) then
+   mixfac_eff=mixfac!;if (ispden>1) mixfac_eff=mixfacmag
+   do iatom=1,rcpaw%ntypat
+     if(rcpaw%atm(iatom)%zcore_orig>zero) then
+       rcpaw%atm(iatom)%occ_respc=mixfac_eff*rcpaw%atm(iatom)%occ_res
+     endif
+   enddo
+ endif
+
+ if(associated(extfpmd)) then
+   mixfac_eff=mixfac!;if (ispden>1) mixfac_eff=mixfacmag
+   extfpmd%nelect_respc=mixfac_eff*extfpmd%nelect_res
+ endif
+
 
 !#######################################################################
 
@@ -624,8 +648,8 @@ subroutine prcref(atindx,dielar,dielinv,&
 !    Prepare the call to rhotoxc
      call xcdata_init(xcdata,dtset=dtset)
      nk3xc=1 ; non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
-     call rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft,&
-&     work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor_wk,rprimd,strsxc,1,&
+     call rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft,&
+&     work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor_wk,rprimd,1,&
 &     vxc_wk,vxcavg,xccc3d,xcdata,vhartr=vhartr_wk)
      ABI_FREE(xccc3d)
 
@@ -853,7 +877,7 @@ end subroutine prcref
  integer :: coredens_method,cplex,dielop,iatom,ier,ifft,ii,index,ipw1
  integer :: ipw2,ispden,klmn,kmix,n1,n2,n3,n3xccc,nfftot,nk3xc,optatm
  integer :: optdyfr,opteltfr,optgr,option,optn,optn2,optstr,optv,vloc_method
- real(dp) :: ai,ar,diemix,diemixmag,eei,enxc
+ real(dp) :: ai,ar,diemix,diemixmag,eei,bigexc,bigsxc
  real(dp) :: mixfac
  real(dp) :: mixfac_eff,mixfacmag,ucvol,vxcavg
  logical :: computediel,non_magnetic_xc
@@ -862,7 +886,7 @@ end subroutine prcref
 !arrays
  integer :: qprtrb(3)
  integer,allocatable :: indpw_prc(:)
- real(dp) :: dummy6(6),gprimd(3,3),qphon(3),rmet(3,3),strsxc(6)
+ real(dp) :: dummy6(6),gprimd(3,3),qphon(3),rmet(3,3)
  real(dp) :: vmean(dtset%nspden),vprtrb(2)
  real(dp),allocatable :: dummy_in(:)
  real(dp) :: dummy_out1(0),dummy_out2(0),dummy_out3(0),dummy_out4(0),dummy_out5(0),dummy_out6(0),dummy_out7(0)
@@ -1247,8 +1271,8 @@ end subroutine prcref
    call xcdata_init(xcdata,dtset=dtset)
    nk3xc=1 ; non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
    ABI_MALLOC(work,(0))
-   call rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft,&
-&   work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor_wk,rprimd,strsxc,1,&
+   call rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft,&
+&   work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor_wk,rprimd,1,&
 &   vxc_wk,vxcavg,xccc3d,xcdata,vhartr=vhartr_wk)
    ABI_FREE(work)
    ABI_FREE(xccc3d)
@@ -2955,7 +2979,7 @@ end subroutine cgpr
 !! first bracket the minimum then perform the minimization
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, MT)
+!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

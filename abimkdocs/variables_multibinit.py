@@ -3,8 +3,12 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 
 executable = "multibinit"
 
-from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
-#from abipy.abio.abivar_database.variables import ValueWithUnit, MultipleValue, Range, ValueWithConditions
+try:
+    from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
+except ImportError:
+    # This is needed for importing this module within Abipy
+    from abipy.abio.abivar_database.variables import ValueWithUnit, MultipleValue, Range
+
 ValueWithConditions = dict
 Variable = dict
 
@@ -39,29 +43,30 @@ Variable(
 """,
 ),
 
-Variable(
-    abivarname="dipdip_range@multibinit",
-    varset="multibinit",
-    vartype="integer",
-    topics=['LatticeModel_expert'],
-    dimensions=[3],
-    defaultval=0,
-    mnemonics="Dipole-Dipole range",
-    added_in_version="before_v9",
-    text=r"""
-Depending of the cases, the range of the dipole-dipole interaction will be parameted by:
-
-* dipdip_range if superior to ncell and superior to short-range interaction
-* ncell if dipdip_range inferior to ncell
-* short-range if dipdip_range inferior to short-range interaction
-
-For example:
-
-    * if dipdip_range = 2 2 2 and the short range interaction if 3 3 3, the dipdip interaction will be set on 3 3 3
-
-    * if ncell = 15 15 15 and the dipdip_range is 6 6 6, the dipdip interaction will be set on 15 15 15
-""",
-),
+## Deprecated.
+#Variable(
+#    abivarname="dipdip_range@multibinit",
+#    varset="multibinit",
+#    vartype="integer",
+#    topics=['LatticeModel_expert'],
+#    dimensions=[3],
+#    defaultval=0,
+#    mnemonics="Dipole-Dipole range",
+#    added_in_version="before_v9",
+#    text=r"""
+#Depending of the cases, the range of the dipole-dipole interaction will be parameted by:
+#
+#* dipdip_range if superior to ncell and superior to short-range interaction
+#* ncell if dipdip_range inferior to ncell
+#* short-range if dipdip_range inferior to short-range interaction
+#
+#For example:
+#
+#    * if dipdip_range = 2 2 2 and the short range interaction if 3 3 3, the dipdip interaction will be set on 3 3 3
+#
+#    * if ncell = 15 15 15 and the dipdip_range is 6 6 6, the dipdip interaction will be set on 15 15 15
+#""",
+#),
 
 
 Variable(
@@ -71,7 +76,7 @@ Variable(
     topics=['LatticeModel_useful'],
     dimensions="scalar",
     defaultval=0.0,
-    mnemonics="Energy of the refences structure",
+    mnemonics="Energy of the references structure",
     characteristics=['[[ENERGY]]'],
     added_in_version="before_v9",
     text=r"""
@@ -131,7 +136,7 @@ Variable(
     text=r"""
 Flag to initialize spin state.
 
-* 1 --> The LWF amplitudes are homogenous random numbers between -0.1 to 0.1 Bohr.
+* 1 --> The LWF amplitudes are homogeneous random numbers between -0.1 to 0.1 Bohr.
 
 * 2 --> The LWF amplitudes are 0.
 
@@ -302,10 +307,6 @@ The corresponding _lwf_hist.nc  file has the corresponding temperature in the fi
 ),
 
 
-
-
-
-
 Variable(
     abivarname="ncoeff@multibinit",
     varset="multibinit",
@@ -382,7 +383,7 @@ Variable(
 * 0 --> do nothing (Default)
 * 1 --> Print the Goal-Function Values (GF) for all coefficients on a given processor
         at a given fit iteration into a csv file. Each iteration each processor
-        prints a csv file. The colums are the GF on Energy, Force+Stresses, Forces, Stresses.
+        prints a csv file. The columns are the GF on Energy, Force+Stresses, Forces, Stresses.
 """,
 ),
 
@@ -426,7 +427,7 @@ Variable(
     mnemonics="Prt test-set evaluation into file ph_test.nc",
     added_in_version="before_v9",
     text=r"""
-Flag to activate the printing of the evaluation of the effective potential on to a test set into  a seperate netcdf file called ph_test.nc.
+Flag to activate the printing of the evaluation of the effective potential on to a test set into a separate netcdf file called ph_test.nc.
 
 Forces, Energies, Stresses and Atomic Positions are written in ph_test.nc.
 """,
@@ -477,7 +478,7 @@ Variable(
     mnemonics="FIT FACTORS for Goal Function of Energy, Forces, and Stresses",
     added_in_version="v9",
     text=r"""
-Specifies three factors for Energy, Forces and Stresses in the calcluation of the Goal Function which is to be minimized during the
+Specifies three factors for Energy, Forces and Stresses in the calcukation of the Goal Function which is to be minimized during the
 fit process allowing to change the relative weight of the three quantities.
 
 Default value is 1 1 1, equally balancing energy, forces and stresses.
@@ -571,6 +572,23 @@ Variable(
 Set the range of the powers for the anharmonic coefficients
 """,
 ),
+
+
+
+Variable(
+    abivarname="fit_max_nbody@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['FitProcess_basic'],
+    dimensions=['max([[multibinit:fit_rangePower]])-min([[multibinit:fit_rangePower]])+1'],
+    defaultval=0,
+    mnemonics="FIT MAXimum Number of BODY for the coefficients",
+    added_in_version="before_v9",
+    text=r"""
+For terms of every order specified in [[multibinit:fit_rangePower]], set the maximum of the number of bodies involved. The number of values should be the same as the number of orders. This can reduce the number of terms generated, so that the high order terms can be generated within a reasonable time. Note that each atomic motion in one direction and each strain component count as one body.
+""",
+),
+
 
 Variable(
     abivarname="fit_cutoff@multibinit",
@@ -802,6 +820,32 @@ Indices of the banned coefficients during the fit process of the model
 ),
 
 Variable(
+    abivarname="fit_weight_T@multibinit",
+    varset="multibinit",
+    vartype="float",
+    topics=['FitProcess_expert'],
+    dimensions='scalar',
+    defaultval=-0.1,
+    mnemonics="FIT WEIGHT characteristic Temperature",
+    added_in_version="before_v9",
+    text=r"""
+A temperature-like parameter to tune the weights of the structures in the training set.
+If the value is negative or 0, this weight scheme is not used and all structures in the training set are seen as equally important.
+
+If it is positive:
+For each structure in the training set, the average of the norm of the forces on the atoms are evaluated, and
+the weight is evaluated as exp(-average(norm(force))/(kb T)). And then it is normalized so that the average of the weights is 1.
+With this weight scheme, the structure with large forces are seen as less important than the structure with small forces.
+For small fit_weight_T, the weight are more biased to the structures with low forces.
+This can be useful when the structure near local minima and saddle points (in which the forces are close to 0) need to the emphasized.
+Note that if the fig_weight_T is too small, the algorithm becomes inefficient as a large part of the training set has very low weight and are wasted.
+""",
+),
+
+
+
+
+Variable(
     abivarname="ts_option@multibinit",
     varset="multibinit",
     vartype="integer",
@@ -813,7 +857,7 @@ Variable(
     text=r"""
 * 0 --> the Training is hist from ABINIT
 
-* 1 --> the Training contains -1 * stress  (usualy output from VASP)
+* 1 --> the Training contains -1 * stress  (usually output from VASP)
 """,
 ),
 
@@ -848,7 +892,8 @@ Flag to activate the bound process:
 
 * 0 --> Do not activate the bound process
 
-* 1 --> This option will generate all the possible combinations of coefficients from 1 to [[multibinit:bound_maxCoeff]]. Some constrains are imposed during the generation and the fit of the coefficients, they have to be positive and with even power. Finaly, the code will try all the possible combinations and try to find a bounded model.
+* 1 --> This option will generate all the possible combinations of coefficients from 1 to [[multibinit:bound_maxCoeff]]. Some constrains are imposed during the generation and the fit of the coefficients, they have to be positive and with even power.
+Finally, the code will try all the possible combinations and try to find a bounded model.
 
 * 2 -->  **new version** This option will generate a set of coefficients with a power range defined by [[multibinit:bound_rangePower]] and keep only the coefficients with even power. Then the procedure is similar to the fit process with the constrains to only keep positive coefficients. The bound process will select the coefficients one by one up to [[multibinit:bound_maxCoeff]] and try if the model is bound at each step of the process.
 
@@ -871,6 +916,27 @@ Variable(
 Number of maximum additional coefficients for the bound process
 """,
 ),
+
+Variable(
+        abivarname="bound_option@multibinit",
+        varset="multibinit",
+        vartype="integer",
+        topics=['BoundingProcess_basic'],
+        dimensions="scalar",
+        defaultval=1,
+        mnemonics="BOUND OPTION",
+        added_in_version="v10",
+        text=r"""
+Type of bounding terms.
+Bounding terms are needed if the polynomial with all even terms are negative, or the polynomial contains odd terms. There are two strategies to generate bounding terms:
+
+* 1 -->  The bounding term should include all the types of displacement in the term to be bounded.
+* 2 -->  The bounding term can include the terms with only part of the displacement types.
+
+For example, for a polynomial term x^2y^1, the bounding terms of order 4 will include $x^4$ with option 2, but not with option 1.
+""",
+),
+
 
 Variable(
     abivarname="bound_penalty@multibinit",
@@ -1062,7 +1128,8 @@ Within the HMC algorithm [[cite:Duane1987]], the trial states are generated via 
 **Purpose:** Molecular dynamics
 **Cell optimization:** No (Use [[optcell]]=0 only)
 **Related variables:** The time step ([[dtion]]), the temperatures
-([[multibinit:temperature]]). The time step should be small enough to make the energy conserved. The temperature is set to intialize the velocities of the atoms, which is in principle not preserved during the NVE run.
+([[multibinit:temperature]]). The time step should be small enough to make the energy conserved.
+The temperature is set to initialize the velocities of the atoms, which is in principle not preserved during the NVE run.
 
 * 102 --> NVT ensemble with Langevin algorithm. [[cite:Vanden2006]] .
 **Purpose:** Molecular dynamics
@@ -1072,7 +1139,8 @@ Within the HMC algorithm [[cite:Duane1987]], the trial states are generated via 
 The atoms are coupled to the heat bath, which is represented by a gauss noise  in the forces, whose amplitude is defined by the temperature, and a friction term.
 
 
-* 103 --> NVT ensemble. The temperature is approached by scaling the velocity of atoms. The method is proposed by Berendsen et al. in  J. Chem. Phys., 81 3684–3690 (1984) [[cite:Berendsen1984]]. Note that this method does NOT generate properly the thermostated ensemble. It does not have the correct distribution of the kinetic energy but have the correct average.  However, it approches the target temperature exponentially without oscillation, for which the steps can be easily controlled.
+* 103 --> NVT ensemble. The temperature is approached by scaling the velocity of atoms. The method is proposed by Berendsen et al. in  J. Chem. Phys., 81 3684–3690 (1984) [[cite:Berendsen1984]]. Note that this method does NOT generate properly the thermostated ensemble. It does not have the correct distribution of the kinetic energy but have the correct average.
+However, it approaches the target temperature exponentially without oscillation, for which the steps can be easily controlled.
 **Purpose:** Molecular dynamics
 **Cell optimization:** No (Use [[optcell]]=0 only)
 **Related variables:** The time step ([[dtion]]), the temperatures
@@ -1100,10 +1168,10 @@ Variable(
     topics=['DynamicsMultibinit_basic'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="DYNamics CHeK SYMmetry",
+    mnemonics="DYNamics CHecK SYMmetry",
     added_in_version="v9",
     text=r"""
-Flag to activate symmetry finder and imposition of symmetry of the restart structure before dynamics run, when restartxf is negativ.
+Flag to activate symmetry finder and imposition of symmetry of the restart structure before dynamics run, when restartxf is negative.
 Useful to do symmetry constrained relaxation with structural realxations algorithms.
 Be cautious to use it with large number of atoms, symmetry detection might take a long time.
 
@@ -1139,6 +1207,150 @@ Variable(
 See [[abinit:dtion]]
 """,
 ),
+
+Variable(
+    abivarname="efield_type@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Electric FIELD TYPE for Multibinit",
+    added_in_version="v10",
+    text=r"""
+Set the electric field option for Multibinit.
+
+* 0 --> no electric field
+
+* 1 --> Homogeneous electric field. The electric field is constant in time and in space during the dynamics. This corresponds to the classical previous version
+
+* 2 --> Allows the computation of time modulated electric fields with the functional form cos(2*pi*t/T+phi)
+
+* 3 --> Allows the computation of spatially modulated electric fields with the functional form cos(2*pi*x/l_x+2*pi*y/l_y+2*pi*z/l_z+phi)
+
+* 4 --> Allows the computation of spatially and time modulated electric fields with the functional form cos(2*pi*x/l_x+2*pi*y/l_y+2*pi*z/l_z+2*pi*t/T+phi)
+
+* 5 --> Allows the computation of Gaussian like distributed electric fields.
+
+* 6 --> Allows the computation of 2 spatially modulated electric fields with the functional form of 3 at the same time."""
+),
+
+Variable(
+    abivarname="efield@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions=[3, "[[multibinit:nefield]]"],
+    defaultval=[0.0, 0.0, 0.0],
+    mnemonics="Electric FIELD magnitude for Multibinit",
+    added_in_version="before v9",
+    text=r"""
+Set the magnitude for the electric field.
+For efield_type 6, multiple ([[multibinit:nefield]])  efield values  are allowed, the format is
+Ex1, Ey1, Ez1,
+Ex2, Ey2, Ez2
+"""
+),
+
+
+Variable(
+    abivarname="efield_background@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions=[3],
+    defaultval=[0.0, 0.0, 0.0],
+    mnemonics="Electric FIELD magnitude for BACKGROUND field in Multibinit when efield_type is > 1",
+    added_in_version="v10",
+    text=r"""
+Set the magnitude for the background homogeneous electric field when efield_type > 1 in MB"""
+),
+
+Variable(
+    abivarname="efield_lambda@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions=[3, "[[multibinit:nefield]]"],
+    defaultval=[0.0, 0.0, 0.0],
+    mnemonics="Electric FIELD periodicity LAMBDA.",
+    added_in_version="v10",
+    text=r"""
+Set the periodicity in real space for spatially inhomogeneous vector fields. 0.0 is interpreted as infinite.
+For efield_type 6, multiple ([[multibinit:nefield]])  efield_lambda values  are allowed, the format is
+λx1, λy1, λz1,
+λx2, λy2, λz2
+"""
+),
+
+Variable(
+    abivarname="efield_period@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=1000000000000000.0,
+    mnemonics="Electric FIELD PERIOD.",
+    added_in_version="v10",
+    text=r"""
+Set the periodicity in time for time modulated electric fields"""
+),
+
+Variable(
+    abivarname="efield_phase@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions=["[[multibinit:nefield]]"],
+    defaultval=0.0,
+    mnemonics="Electric FIELD PHASE shift.",
+    added_in_version="v10",
+    text=r"""
+Set the phase shift for spatially or time modulated fields.
+For efield_type 6, multiple ([[multibinit:nefield]])  efield_phase values  are allowed.
+"""
+),
+
+
+Variable(
+    abivarname="efield_gmean@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions=[3],
+    defaultval= [0.0, 0.0, 0.0],
+    mnemonics="Electric FIELD Gaussian MEAN.",
+    added_in_version="v10",
+    text=r"""
+Set the mean value for the Gaussian distributed electric field."""
+),
+
+Variable(
+    abivarname="efield_gvel@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions=[3],
+    defaultval= [0.0, 0.0, 0.0],
+    mnemonics="Electric FIELD Gaussian VELocity.",
+    added_in_version="v10",
+    text=r"""
+Set the velocity of the center of the Gaussian distributed field."""
+),
+
+Variable(
+    abivarname="efield_sigma@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0.01,
+    mnemonics="Electric FIELD gaussian SIGMA.",
+    added_in_version="v10",
+    text=r"""
+Set the standard deviation of the Gaussian field."""
+),
+
 
 Variable(
     abivarname="latt_friction@multibinit",
@@ -1279,6 +1491,23 @@ Variable(
 ),
 
 
+Variable(
+    abivarname="nefield@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="Number of Electric FEIELDs",
+    added_in_version="v10",
+    text=r"""
+Number of Electric fields to be used in the dynamics when efield_type 6.
+Currently only 2 efields are allowed.
+""",
+),
+
+
+
 
 Variable(
     abivarname="ntime@multibinit",
@@ -1329,10 +1558,10 @@ Variable(
     topics=['DynamicsMultibinit_basic'],
     dimensions="scalar",
     defaultval=1,
-    mnemonics="NetCdf TIME between output of molecular dynamics informations ",
+    mnemonics="NetCdf TIME between output of molecular dynamics information",
     added_in_version="before_v9",
     text=r"""
-Set the number of step between output the molecular dynamics informations in the NetCDF file
+Set the number of step between output the molecular dynamics information in the NetCDF file
 """,
 ),
 
@@ -1828,7 +2057,7 @@ Variable(
     topics=['SpinDynamicsMultibinit_basic'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="SPIN Single Ion Anistropy ADD",
+    mnemonics="SPIN Single Ion Anisotropy ADD",
     added_in_version="before_v9",
     text=r"""
 Add single ion anisotropy term to the spin model hamiltonian.
@@ -1852,10 +2081,10 @@ Variable(
     topics=['SpinDynamicsMultibinit_basic'],
     dimensions="scalar",
     defaultval=0.0,
-    mnemonics="SPIN Single Ion Anistropy K1 AMPtitude",
+    mnemonics="SPIN Single Ion Anisotropy K1 AMPtitude",
     added_in_version="before_v9",
     text=r"""
-User defined amplitude of single ion anistropy. Only used when [[multibinit:spin_sia_add]] is not 0.
+User defined amplitude of single ion anisotropy. Only used when [[multibinit:spin_sia_add]] is not 0.
 The direction is defined with [[multibinit:spin_sia_k1dir]]. The unit is Ha. To use eV or Ry as unit,
 put eV or Ry at the end.
 """,
@@ -1869,10 +2098,10 @@ Variable(
     topics=['SpinDynamicsMultibinit_basic'],
     dimensions=[3],
     defaultval=[0.0,0.0,1.0],
-    mnemonics="SPIN Single Ion Anistropy K1 DIRection",
+    mnemonics="SPIN Single Ion Anisotropy K1 DIRection",
     added_in_version="before_v9",
     text=r"""
-User defined direction of single ion anistropy. Only used when [[multibinit:spin_sia_add]] is not 0.
+User defined direction of single ion anisotropy. Only used when [[multibinit:spin_sia_add]] is not 0.
 It will be automatically normalized to 1.0.  The amplitude is defined with [[multibinit:spin_sia_k1amp]].
 Default value: [0.0, 0.0,1.0].
 """,
@@ -1924,7 +2153,7 @@ Variable(
     mnemonics="SPIN WRITE TRAJectory to spinhist.nc file",
     added_in_version="before_v9",
     text="""
-Switch for writting of spin trajectory file. 0: off. 1 on.
+Switch for writing of spin trajectory file. 0: off. 1 on.
 The trajectory is needed for postprocessing of correlation functions.
 """,
 ),
@@ -2049,7 +2278,7 @@ Variable(
     mnemonics="FACTORS for Goal Function of Energy, Forces, and Stresses during optimization of coefficients",
     added_in_version="v9",
     text=r"""
-Specifies three factors for Energy, Forces and Stresses in the calcluation of the Goal Function which is to be minimized during the
+Specifies three factors for Energy, Forces and Stresses in the calculation of the Goal Function which is to be minimized during the
 optimization process allowing to change the relative weight of the three quantities.
 
 Default value is 1 1 1, equally balancing energy, forces and stresses.
@@ -2078,7 +2307,7 @@ Variable(
     topics=['FitProcess_expert'],
     dimensions=['[[multibinit:opt_ncoeff]]'],
     defaultval=0,
-    mnemonics="OPTimize Cofficients",
+    mnemonics="OPTimize Coefficients",
     added_in_version="before_v9",
     text=r"""
 Indices of the terms to refit in the effective potential.
@@ -2100,7 +2329,8 @@ It should be 0, or a large positive integer.
 The default value 0 means it will use the current clock time.
 DO NOT set this number unless you want to repeat the previous result. If a series
 of dynamics is done with the same seed, the results could be wrong due to the
-artificial periodicity of the random number that is generated. Even [[randomseed@multibinit]] is set, it is not guranteed
+artificial periodicity of the random number that is generated.
+Even [[randomseed@multibinit]] if set, it is not guaranteed
 that the previous result can be recovered, as the generation of numbers is also affected by the number of
 processors, type of type of CPU, compiler,  and version of MULTIBINIT.
 """,
@@ -2176,9 +2406,6 @@ See also [[outdata_prefix@abinit]] and [[outdata_prefix@anaddb]]
 
 """
 ),
-
-
-
 
 
 ]

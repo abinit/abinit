@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (MG, MMignolet)
+!!  Copyright (C) 2008-2025 ABINIT group (MG, MMignolet)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,7 +32,7 @@ module m_berry_curvature
 
  use m_time,            only : cwtime, cwtime_report
  use m_fstrings,        only : strcat, sjoin, ktoa
- use defs_datatypes,    only : ebands_t
+ use m_ebands,          only : ebands_t
  use m_kpts,            only : kpts_timrev_from_kptopt, kpts_map, smpbz
  use m_ddb_hdr,         only : ddb_hdr_type, BLKTYP_d2E_mbc
  use m_ddb,             only : ddb_type
@@ -127,7 +127,7 @@ subroutine berry_curvature(gstore, dtset, dtfil)
 
  if (my_rank == master) then
    call wrtout(std_out, " Computing berry curvature", pre_newlines=2)
-   call gstore%print(std_out, header="Gstore", prtvol=dtset%prtvol)
+   call gstore%print([std_out], header="Gstore", prtvol=dtset%prtvol)
  end if
 
  ! Consistency check
@@ -226,9 +226,9 @@ subroutine berry_curvature(gstore, dtset, dtfil)
 
            ! Loop over perturbations and accumulate.
            do my_ip1=1,gqk%my_npert
-             ipc1 = gqk%my_iperts(my_ip1)
+             ipc1 = gqk%my_pertcases(my_ip1)
              do my_ip2=1,gqk%my_npert
-               ipc2 = gqk%my_iperts(my_ip2)
+               ipc2 = gqk%my_pertcases(my_ip2)
                ! my_g(my_npert, nb, my_nq, nb, my_nk)
 
                ! 1st term

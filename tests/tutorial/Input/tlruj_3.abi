@@ -19,14 +19,14 @@ tlruj_2.o_DS1_LRUJ.nc tlruj_2.o_DS2_LRUJ.nc tlruj_2.o_DS3_LRUJ.nc tlruj_2.o_DS4_
 #%% executable = lruj
 #%% test_chain = tlruj_1.abi,tlruj_2.abi,tlruj_3.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   tlruj_3.stdout, tolnlines = 10, tolabs = 1.01e-03, tolrel = 1.01e-03, fld_options =  -medium
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = L. MacEnulty
-#%% keywords = PAW, DFTU,LRUJ,UJDET,linear,response,Hubbard U
-#%% description = 
+#%% keywords = PAW,DFTU,LRUJ,Hubbard-U
+#%% description =
 #%%   AFII NiO 4-atom cell | LRUJ utility | LMac 2022
 #%%   Linear Response Hubbard U and Hund's J (LRUJ)
 #%%   post-processing utility for the determination of

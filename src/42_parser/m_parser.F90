@@ -6,7 +6,7 @@
 !! This module contains (low-level) procedures to parse and validate input files.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2024 ABINIT group (XG, MJV, MT)
+!! Copyright (C) 2008-2025 ABINIT group (XG, MJV, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,9 +26,7 @@ module m_parser
  use m_errors
  use m_atomdata
  use m_xmpi
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_nctk
  !use m_nctk,      only : write_var_netcdf    ! FIXME Deprecated
 
@@ -217,14 +215,13 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master=0, option1= 1
+ integer,parameter :: master = 0, option1 = 1
  integer :: marr,tread,lenstr_noxyz,ierr
  character(len=strlen) :: string_raw, string_with_comments
  character(len=500) :: msg
 !arrays
  integer :: intarr(1)
  real(dp) :: dprarr(1)
-
 ! *************************************************************************
 
  ! Read the input file, and store the information in a long string of characters
@@ -233,6 +230,8 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
  if (xmpi_comm_rank(comm) == master) then
 
    ! strlen from defs_basis module
+   string = repeat(" ", strlen)
+   string_with_comments = repeat(" ", strlen)
    call instrng(filnamin, lenstr, option1, strlen, string, string_with_comments)
 
    ! Copy original file, without change of case
@@ -248,7 +247,7 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
    ! Need string_raw to deal properly with xyz filenames
    ! TODO: This capabilty can now be implemented via the structure:"xyx:path" variable
    lenstr_noxyz = lenstr
-   call importxyz(lenstr,string_raw,string,strlen)
+   call importxyz(lenstr, string_raw, string, strlen)
 
    ! Make sure we don't have unmatched quotation marks
    if (mod(char_count(string(:lenstr), '"'), 2) /= 0) then
@@ -277,15 +276,22 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
  end if
 
  ! Save input string in global variable so that we can access it in ntck_open_create
- ! XG20200720: Why not saving string ? string_raw is less processed than string ...
+ ! XG20200720: Why not saving string? string_raw is less processed than string ...
  ! MG: Because we don't want a processed string without comments.
  ! Abipy may use the commented section to extract additional metadata e.g. the pseudos md5
+
+ ! The Fortran compiler may limit the length of character string constants to a specific maximum e.g.
+ ! intel16 has a 7198 limit so we allocate INPUT_STRING here.
+ if (allocated(INPUT_STRING)) then
+   ABI_FREE_SCALAR(INPUT_STRING)
+ end if
+
+ ABI_MALLOC_TYPE_SCALAR(character(len=len_trim(string_with_comments)), INPUT_STRING)
  INPUT_STRING = trim(string_with_comments)
 
+ !write(std_out, *)"len_trim(string_with_comments):", len_trim(string_with_comments)
  !write(std_out,'(4a)')"string_with_comments", ch10, trim(string_with_comments), ch10
- !write(std_out,'(4a)')"INPUT_STRING", ch10, trim(INPUT_STRING), ch10
- !write(std_out,'(a)')string(:lenstr)
- !stop
+ !write(std_out,'(4a)')"INPUT_STRING", ch10, trim(INPUT_STRING), ch10; write(std_out,'(a)')string(:lenstr); stop
 
 end subroutine parsefile
 !!***
@@ -335,7 +341,6 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
  logical :: logi
  character(len=500) :: msg
  character(len=100) :: iomsg
-
 ! *************************************************************************
 
  !write(std_out,*)'inread: enter with string(1:ndig): ',string(1:ndig)
@@ -501,8 +506,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string, raw_string)
  integer,intent(in) :: option,strln
  integer,intent(out) :: lenstr
  character(len=*),intent(in) :: filnam
- character(len=*),intent(out) :: string
- character(len=*),intent(out) :: raw_string
+ character(len=*),intent(out) :: string, raw_string
 
 !Local variables-------------------------------
  character :: blank=' '
@@ -519,7 +523,6 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string, raw_string)
  character(len=fnlen) :: shell_var, shell_value
  character(len=fnlen+20) :: line
  character(len=strlen),pointer :: string_inc, raw_string_inc
-
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -768,7 +771,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string, raw_string)
 
  !write(std_out,'(a,a)')' incomprs : 1, string=',string(:lenstr)
 
-!Substitute environment variables, if any
+ ! Substitute environment variables, if any. Example "$ABI_PSPDIR"
  b0=0
  do
    b0=b0+1
@@ -786,7 +789,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string, raw_string)
    if(b2/=0)then
      shell_var=string(b1+1:b1+b2-1)
      !write(std_out,'(a,a)')' shell_var=',shell_var(:b2-1)
-     call get_environment_variable(shell_var(:b2-1),shell_value,status=ierr,length=len_val)
+     call get_environment_variable(shell_var(:b2-1), shell_value, status=ierr, length=len_val)
      if (ierr == -1) ABI_ERROR(sjoin(shell_var(:b2-1), "is present but value of environment variable is too long"))
      if (ierr == +1) ABI_ERROR(sjoin(shell_var(:b2-1), "environment variable is not defined!"))
      if (ierr == +2) ABI_ERROR(sjoin(shell_var(:b2-1), "used in input file but processor does not support environment variables"))
@@ -857,9 +860,6 @@ end subroutine instrng
 !! INPUTS
 !!  string=character string to be modified
 !!
-!! OUTPUT
-!!  (see side effects)
-!!
 !! SIDE EFFECTS
 !!  string=same character string with ASCII (decimal) 0-31 replaced by 32.
 !!
@@ -874,7 +874,6 @@ subroutine inreplsp(string)
 !Local variables-------------------------------
 !scalars
  integer :: ilenth,length
-
 ! *************************************************************************
 
  ! Get length of string. Proceed only if string has nonzero length
@@ -935,7 +934,6 @@ subroutine incomprs(string,length)
  integer :: bb,f1,ii,jj,kk,l1,lbef,lcut,lold,stringlen
 !arrays
  character(len=500) :: msg
-
 ! *************************************************************************
 
  ! String length determined by calling program declaration of "string"
@@ -957,12 +955,14 @@ subroutine incomprs(string,length)
      ! Continue with parsing
      ! l1 is set to last nonblank, nontab character position
      l1=length
+
+     ! find first non blank character
      do ii=1,l1
        if (string(ii:ii)/=blank) exit
      end do
-
      ! f1 is set to first nonblank, nontab character position
      f1=ii
+
      ! lbef is number of characters in string starting at
      ! first nonblank, nontab and going to last
      lbef=l1-f1+1
@@ -1008,7 +1008,10 @@ subroutine incomprs(string,length)
        length=lcut+1
        string(length:length)=blank
      end if
+     ! remove trailing characters left from the recursive string shifts
+     string(length:stringlen)=blank
    end if
+
  end if
 
 end subroutine incomprs
@@ -1142,7 +1145,6 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 !arrays
  integer,allocatable :: int1(:),int2(:)
  real(dp),allocatable :: dpr1(:),dpr2(:)
-
 ! *************************************************************************
 
  ABI_CHECK(marr >= narr, sjoin("marr", itoa(marr)," < narr ", itoa(narr), "for token:", token))
@@ -1721,7 +1723,6 @@ subroutine intagm_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,
 !arrays
  integer, allocatable :: intarr(:)
  real(dp),allocatable :: dprarr(:),dp_data_after(:),dp_data_before(:)
-
 ! *************************************************************************
 
 !Nothing to do in case of a single image
@@ -1735,8 +1736,7 @@ subroutine intagm_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,
  tread_current=0
  write(stringimage,'(i10)') iimage
  token_img=trim(token)//'_'//trim(adjustl(stringimage))//'img'
- call intagm(dprarr,intarr,jdtset,marr,size1,string(1:lenstr),&
-&            token_img,tread_current,typevarphys)
+ call intagm(dprarr,intarr,jdtset,marr,size1,string(1:lenstr), token_img,tread_current,typevarphys)
  if (tread_current==1)then
    dp_data(1:size1)=dprarr(1:size1)
    tread_ok=1
@@ -1744,8 +1744,7 @@ subroutine intagm_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,
  if (tread_current==0.and.iimage==nimage) then
 !  If the image is the last one, try to read data for last image (_lastimg)
    token_img=trim(token)//'_lastimg'
-   call intagm(dprarr,intarr,jdtset,marr,size1,string(1:lenstr),&
-&              token_img,tread_current,typevarphys)
+   call intagm(dprarr,intarr,jdtset,marr,size1,string(1:lenstr), token_img,tread_current,typevarphys)
    if (tread_current==1)then
      dp_data(1:size1)=dprarr(1:size1)
      tread_ok=1
@@ -1764,8 +1763,7 @@ subroutine intagm_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,
      iimage_before=iimage_before-1
      write(stringimage,'(i10)') iimage_before
      token_img=trim(token)//'_'//trim(adjustl(stringimage))//'img'
-     call intagm(dprarr,intarr,jdtset,marr,size1,string(1:lenstr),&
-&                token_img,tread_before,typevarphys)
+     call intagm(dprarr,intarr,jdtset,marr,size1,string(1:lenstr), token_img,tread_before,typevarphys)
      if (tread_before==1) dp_data_before(1:size1)=dprarr(1:size1)
    end do
    if (tread_before==0) then
@@ -1779,13 +1777,11 @@ subroutine intagm_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,
      iimage_after=iimage_after+1
      write(stringimage,'(i10)') iimage_after
      token_img=trim(token)//'_'//trim(adjustl(stringimage))//'img'
-     call intagm(dprarr,intarr,jdtset,marr,size1,string(1:lenstr),&
-&                token_img,tread_after,typevarphys)
+     call intagm(dprarr,intarr,jdtset,marr,size1,string(1:lenstr), token_img,tread_after,typevarphys)
      if (tread_after==1) dp_data_after(1:size1)=dprarr(1:size1)
      if (tread_after==0.and.iimage_after==nimage) then
        token_img=trim(token)//'_lastimg'
-       call intagm(dprarr,intarr,jdtset,marr,size1,string(1:lenstr),&
-&                  token_img,tread_after,typevarphys)
+       call intagm(dprarr,intarr,jdtset,marr,size1,string(1:lenstr), token_img,tread_after,typevarphys)
        if (tread_after==1) dp_data_after(1:size1)=dprarr(1:size1)
      end if
    end do
@@ -1797,14 +1793,12 @@ subroutine intagm_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,
 !  Interpolate image data
    if (tread_before==1.or.tread_after==1) then
      alpha=real(iimage-iimage_before,dp)/real(iimage_after-iimage_before,dp)
-     dp_data(1:size1)=dp_data_before(1:size1) &
-&                    +alpha*(dp_data_after(1:size1)-dp_data_before(1:size1))
+     dp_data(1:size1)=dp_data_before(1:size1) + alpha*(dp_data_after(1:size1)-dp_data_before(1:size1))
      tread_ok=1
    end if
 
    ABI_FREE(dp_data_before)
    ABI_FREE(dp_data_after)
-
  end if
 
  ABI_FREE(intarr)
@@ -1847,7 +1841,6 @@ subroutine intagm_img_2D(dp_data,iimage,jdtset,lenstr,nimage,size1,size2,string,
 !arrays
  integer, allocatable :: intarr(:)
  real(dp),allocatable :: dprarr(:),dp_data_after(:,:),dp_data_before(:,:)
-
 ! *************************************************************************
 
 !Nothing to do in case of a single image
@@ -1861,8 +1854,7 @@ subroutine intagm_img_2D(dp_data,iimage,jdtset,lenstr,nimage,size1,size2,string,
  tread_current=0
  write(stringimage,'(i10)') iimage
  token_img=trim(token)//'_'//trim(adjustl(stringimage))//'img'
- call intagm(dprarr,intarr,jdtset,marr,size1*size2,string(1:lenstr),&
-&            token_img,tread_current,typevarphys)
+ call intagm(dprarr,intarr,jdtset,marr,size1*size2,string(1:lenstr), token_img,tread_current,typevarphys)
  if (tread_current==1)then
    dp_data(1:size1,1:size2)=reshape( dprarr(1:size1*size2),(/size1,size2/) )
    tread_ok=1
@@ -1870,8 +1862,7 @@ subroutine intagm_img_2D(dp_data,iimage,jdtset,lenstr,nimage,size1,size2,string,
  if (tread_current==0.and.iimage==nimage) then
 !  In the image is the last one, try to read data for last image (_lastimg)
    token_img=trim(token)//'_lastimg'
-   call intagm(dprarr,intarr,jdtset,marr,size1*size2,string(1:lenstr),&
-&              token_img,tread_current,typevarphys)
+   call intagm(dprarr,intarr,jdtset,marr,size1*size2,string(1:lenstr), token_img,tread_current,typevarphys)
    if (tread_current==1)then
      dp_data(1:size1,1:size2)=reshape( dprarr(1:size1*size2),(/size1,size2/) )
      tread_ok=1
@@ -1890,10 +1881,8 @@ subroutine intagm_img_2D(dp_data,iimage,jdtset,lenstr,nimage,size1,size2,string,
      iimage_before=iimage_before-1
      write(stringimage,'(i10)') iimage_before
      token_img=trim(token)//'_'//trim(adjustl(stringimage))//'img'
-     call intagm(dprarr,intarr,jdtset,marr,size1*size2,string(1:lenstr),&
-&                token_img,tread_before,typevarphys)
-     if (tread_before==1) &
-&      dp_data_before(1:size1,1:size2)=reshape( dprarr(1:size1*size2),(/size1,size2/) )
+     call intagm(dprarr,intarr,jdtset,marr,size1*size2,string(1:lenstr), token_img,tread_before,typevarphys)
+     if (tread_before==1) dp_data_before(1:size1,1:size2)=reshape( dprarr(1:size1*size2),(/size1,size2/) )
    end do
    if (tread_before==0) then
      iimage_before=1
@@ -1906,16 +1895,12 @@ subroutine intagm_img_2D(dp_data,iimage,jdtset,lenstr,nimage,size1,size2,string,
      iimage_after=iimage_after+1
      write(stringimage,'(i10)') iimage_after
      token_img=trim(token)//'_'//trim(adjustl(stringimage))//'img'
-     call intagm(dprarr,intarr,jdtset,marr,size1*size2,string(1:lenstr),&
-&                token_img,tread_after,typevarphys)
-     if (tread_after==1) &
-&      dp_data_after(1:size1,1:size2)=reshape( dprarr(1:size1*size2),(/size1,size2/) )
+     call intagm(dprarr,intarr,jdtset,marr,size1*size2,string(1:lenstr), token_img,tread_after,typevarphys)
+     if (tread_after==1) dp_data_after(1:size1,1:size2)=reshape( dprarr(1:size1*size2),(/size1,size2/) )
      if (tread_after==0.and.iimage_after==nimage) then
        token_img=trim(token)//'_lastimg'
-       call intagm(dprarr,intarr,jdtset,marr,size1*size2,string(1:lenstr),&
-&                  token_img,tread_after,typevarphys)
-       if (tread_after==1) &
-&        dp_data_after(1:size1,1:size2)=reshape( dprarr(1:size1*size2),(/size1,size2/) )
+       call intagm(dprarr,intarr,jdtset,marr,size1*size2,string(1:lenstr), token_img,tread_after,typevarphys)
+       if (tread_after==1) dp_data_after(1:size1,1:size2)=reshape( dprarr(1:size1*size2),(/size1,size2/) )
      end if
    end do
    if (tread_after==0) then
@@ -1927,13 +1912,12 @@ subroutine intagm_img_2D(dp_data,iimage,jdtset,lenstr,nimage,size1,size2,string,
    if (tread_before==1.or.tread_after==1) then
      alpha=real(iimage-iimage_before,dp)/real(iimage_after-iimage_before,dp)
      dp_data(1:size1,1:size2)=dp_data_before(1:size1,1:size2) &
-&       +alpha*(dp_data_after(1:size1,1:size2)-dp_data_before(1:size1,1:size2))
+        +alpha*(dp_data_after(1:size1,1:size2)-dp_data_before(1:size1,1:size2))
      tread_ok=1
    end if
 
    ABI_FREE(dp_data_before)
    ABI_FREE(dp_data_after)
-
  end if
 
  ABI_FREE(intarr)
@@ -1997,7 +1981,6 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
  real(dp) :: factor,real8
  character(len=3) :: typevar
  character(len=500*4) :: msg
-
 ! *************************************************************************
 
 !DEBUG
@@ -2084,14 +2067,14 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
      ! If no second blank is found put the second blank just beyond strln
      if(b2==0) b2=strln-b1+1
 
-!DEBUG
-! if(trim(cs)==' UPAWU1')then
-!     write(std_out,*)' inarray : strln=',strln
-!     write(std_out,*)' inarray : b1=',b1,' b2=',b2
-!     write(std_out,*)' inarray : string(b1+1:)=',string(b1+1:)
-!     write(std_out,*)' typevarphys==',typevarphys
-! endif
-!ENDDEBUG
+     !DEBUG
+     !if(trim(cs)==' UPAWU1')then
+     !    write(std_out,*)' inarray : strln=',strln
+     !    write(std_out,*)' inarray : b1=',b1,' b2=',b2
+     !    write(std_out,*)' inarray : string(b1+1:)=',string(b1+1:)
+     !    write(std_out,*)' typevarphys==',typevarphys
+     !endif
+     !ENDDEBUG
 
      ! Identify the presence of a non-digit character
      asciichar=iachar(string(b1+1:b1+1))
@@ -2120,7 +2103,13 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
        else if(typevarphys=='BFI' .and. b2>=2)then
          if(string(b1+1:b1+2)=='T ' .or. string(b1+1:b1+2)=='TE') factor=BField_Tesla
        else if (typevarphys=='TIM' .and. b2>=2) then
-         if( string(b1+1:b1+2)=='SE' .or. string(b1+1:b1+2)=='S ') factor=one/Time_Sec
+         if(string(b1+1:b1+2)=='SE' .or. string(b1+1:b1+2)=='S ') then
+            factor=one/Time_Sec
+         else if(string(b1+1:b1+2)=='FS') then
+            factor=tol15/Time_Sec
+         else if(string(b1+1:b1+2)=='AS') then
+            factor=tol17/Time_Sec
+         endif
        endif
 
        dprarr(1:narr)=dprarr(1:narr)*factor
@@ -2136,8 +2125,7 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
 
 !DEBUG
 ! if(trim(cs)==' UPAWU1')then
-!   write(std_out,*)' dprarr(1:narr)==',dprarr(1:narr)
-!   stop
+!   write(std_out,*)' dprarr(1:narr)==',dprarr(1:narr) stop
 ! endif
 !write(std_out,*)' inarray : exit '
 !ENDDEBUG
@@ -2187,7 +2175,6 @@ subroutine importxyz(lenstr,string_raw,string_upper,strln)
  character(len=2) :: dtset_char
  character(len=500) :: msg
  character(len=fnlen) :: xyz_fname
-
 !************************************************************************
 
  index_already_done=1
@@ -2225,6 +2212,7 @@ subroutine importxyz(lenstr,string_raw,string_upper,strln)
      ABI_ERROR(msg)
    end if
 
+   ! this chops off the space or the quote?
    index_xyz_fname_end=index_xyz_fname_end+index_xyz_fname-1
 
    index_already_done=index_xyz_fname_end
@@ -2242,6 +2230,7 @@ subroutine importxyz(lenstr,string_raw,string_upper,strln)
    ! erase the file name from string_upper
    string_upper(index_xyz_fname:index_xyz_fname_end-1) = blank
  end do
+
 
  if (index_already_done > 1) then
    ! Initialize xyz_fname to a blank line
@@ -2313,7 +2302,6 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
  integer, save :: atomspecies(200) = 0
  character(len=500), save :: znuclstring = ""
  character(len=2),allocatable :: elementtype(:)
-
 !************************************************************************
 
  lenstr_new=lenstr
@@ -2736,17 +2724,13 @@ end subroutine chkint_eq
 !! minmax_value=see the description of minmax_flag
 !! unit=unit number for clean output file
 !!
-!! OUTPUT
-!!  (only side effect)
-!!
 !! SIDE EFFECT
 !! ierr= switch it to 1 if an error was detected. No action otherwise.
 !!
 !! NOTES
 !! cond_values(cond_number) or list_values(list_number)
 !! must be between -99 and 999 to be printed correctly.
-!!
-!! for the time being, at most 3 conditions are allowed.
+!! For the time being, at most 3 conditions are allowed.
 !!
 !! SOURCE
 
@@ -2816,16 +2800,12 @@ end subroutine chkint_ge
 !! minmax_value=see the description of minmax_flag
 !! unit=unit number for clean output file
 !!
-!! OUTPUT
-!!  (only side effect)
-!!
 !! SIDE EFFECT
 !! ierr= switch it to 1 if an error was detected. No action otherwise.
 !!
 !! NOTES
 !! cond_values(cond_number) or list_values(list_number)
 !! must be between -99 and 999 to be printed correctly.
-!!
 !! for the time being, at most 3 conditions are allowed.
 !!
 !! SOURCE
@@ -2897,9 +2877,6 @@ end subroutine chkint_le
 !! list_number=number of NOT allowed values (maximum 40).
 !! list_values=list of allowed values
 !! unit=unit number for clean output file
-!!
-!! OUTPUT
-!!  (only side effect)
 !!
 !! SIDE EFFECT
 !! ierr= switch it to 1 if an error was detected. No action otherwise.
@@ -2983,9 +2960,6 @@ end subroutine chkint_ne
 !! minmax_value=see the description of minmax_flag
 !! unit=unit number for clean output file
 !!
-!! OUTPUT
-!!  (only side effect)
-!!
 !! SIDE EFFECT
 !! ierr= switch it to 1 if an error was detected. No action otherwise.
 !!
@@ -3029,7 +3003,6 @@ subroutine chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
 !scalars
  integer :: icond
  character(len=500) :: msg
-
 !******************************************************************
 
  if(cond_number<0 .or. cond_number>4)then
@@ -3214,7 +3187,6 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
  character(len=50) :: format_dp,format_int,full_format
  character(len=48) :: format_str
  character(len=500) :: msg
-
 ! *************************************************************************
 
 !###########################################################
@@ -3323,12 +3295,10 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
          if (narr_eff/=0) then
 
            if (print_out) write(iout,full_format) token,trim(appen),intarr(1:narr_eff,idtset)
-#ifdef HAVE_NETCDF
            if (print_netcdf) then
              call write_var_netcdf(intarr(1:narr_eff,idtset),&
-&             dprarr(1:narr_eff,idtset),marr,narr_eff,abs(ncid),typevarphys,token//appen)
+               dprarr(1:narr_eff,idtset),marr,narr_eff,abs(ncid),typevarphys,token//appen)
            end if
-#endif
          end if
 
        end do
@@ -3462,12 +3432,10 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
            else
              if (print_out) write(iout,full_format) token,trim(appen),dprarr(1:narr_eff,idtset)*scale_factor,trim(out_unit)
            end if
-#ifdef HAVE_NETCDF
            if (print_netcdf) then
              call write_var_netcdf(intarr(1:narr_eff,idtset),dprarr(1:narr_eff,idtset),&
                marr,narr_eff,abs(ncid),'DPR',token//trim(appen))
            end if
-#endif
 
          end if
 
@@ -3545,12 +3513,10 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
          if (narr_eff/=0) then
 
            if (print_out) write(iout,full_format) token,trim(appen),(trim(strarr(iarr,idtset)),iarr=1,narr_eff)
-!#ifdef HAVE_NETCDF
 !           if (print_netcdf) then
 !             call write_var_netcdf(intarr(1:narr_eff,idtset),&
 !&             dprarr(1:narr_eff,idtset),marr,narr_eff,abs(ncid),typevarphys,token//appen)
 !           end if
-!#endif
          end if
 
        end do
@@ -3621,7 +3587,6 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
  character(len=*), parameter :: format_1a ='",a16,a,t22,'
  character(len=*), parameter :: format_2  ='",t22,'
  character(len=*), parameter :: long_dpr  ='3es18.10)'
-
 ! *************************************************************************
 
 !Test whether for this variable, the content of different images differ.
@@ -3710,13 +3675,11 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
                write(iout,full_format) &
 &               trim(keywd),appen,dprarr_images(1:narrm(idtset),iimage,idtset)
              end if
-#ifdef HAVE_NETCDF
              if (print_netcdf) then
                call write_var_netcdf(intarr_images(1:narrm(idtset),iimage,idtset),&
 &               dprarr_images(1:narrm(idtset),iimage,idtset),&
 &               marr,narrm(idtset),ncid,'DPR',trim(keywd)//appen)
              end if
-#endif
            else
 
              if (print_out) then
@@ -3725,14 +3688,11 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
                write(iout,full_format) &
 &               trim(keywd),dprarr_images(1:narrm(idtset),iimage,idtset)
              end if
-#ifdef HAVE_NETCDF
              if (print_netcdf) then
                call write_var_netcdf(intarr_images(1:narrm(idtset),iimage,idtset),&
 &               dprarr_images(1:narrm(idtset),iimage,idtset),&
 &               marr,narrm(idtset),abs(ncid),'DPR',trim(keywd))
              end if
-#endif
-
            end if
          end if
        end do
@@ -3782,7 +3742,6 @@ subroutine chkvars_in_string(protocol, list_vars, list_vars_img, list_logicals, 
 !scalars
  integer :: index_blank,index_current,index_endfullword, index_endword,index_endwordnow,index_list_vars
  character(len=500) :: msg
-
 !************************************************************************
 
  !write(std_out,"(3a)")"Checking vars in string:", ch10, trim(string)
@@ -3902,7 +3861,6 @@ end subroutine chkvars_in_string
 !! SOURCE
 
 type(geo_t) function geo_from_abivar_string(string, comm) result(new)
-!type(geo_t) function geo_from_structure_string(string, comm) result(new)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: string
@@ -3911,7 +3869,6 @@ type(geo_t) function geo_from_abivar_string(string, comm) result(new)
 !Local variables-------------------------------
  integer :: ii
  character(len=len(string)) :: prefix
-
 !************************************************************************
 
  !print *, "in geo_from_abivar_string: `", trim(string), "`"
@@ -3983,7 +3940,6 @@ type(geo_t) function geo_from_abivars_path(path, comm) result(new)
  real(dp) :: acell(3), rprim(3,3)
  real(dp),allocatable :: dprarr(:)
  character(len=5),allocatable :: symbols(:)
-
 !************************************************************************
 
  ! Master node reads string and broadcasts
@@ -4072,7 +4028,6 @@ subroutine typat_from_symbols(symbols, ntypat, typat)
 
 !Local variables-------------------------------
  integer :: ii, jj, nstr, found
-
 !************************************************************************
 
  nstr = size(symbols)
@@ -4118,7 +4073,6 @@ type(geo_t) function geo_from_poscar_path(path, comm) result(new)
  integer,parameter :: master = 0
  integer :: unt, my_rank
  character(len=500) :: msg
-
 !************************************************************************
 
  my_rank = xmpi_comm_rank(comm)
@@ -4161,7 +4115,6 @@ type(geo_t) function geo_from_poscar_unit(unit) result(new)
  logical,allocatable :: duplicated(:)
  character(len=5),allocatable :: symbols(:), dupe_symbols(:)
  real(dp),allocatable :: xcart(:,:)
-
 !************************************************************************
 
  ! Example of POSCAR (with 6 figures --> space group won't be recognized by Abinit
@@ -4328,7 +4281,6 @@ subroutine geo_print_abivars(self, unit)
 
 !Local variables-------------------------------
  integer :: ii, iatom, itypat
-
 !************************************************************************
 
  if (unit == dev_null) return
@@ -4371,12 +4323,10 @@ type(geo_t) function geo_from_netcdf_path(path, comm) result(new)
  integer, parameter :: master = 0
  integer :: ncid, npsp, dimid, itime
  logical :: has_nimage
-
 !************************************************************************
 
  new%fileformat = "netcdf"
 
-#ifdef HAVE_NETCDF
  if (xmpi_comm_rank(comm) == master) then
    NCF_CHECK(nctk_open_read(ncid, path, xmpi_comm_self))
 
@@ -4426,7 +4376,6 @@ type(geo_t) function geo_from_netcdf_path(path, comm) result(new)
 
    NCF_CHECK(nf90_close(ncid))
  end if
-#endif
 
  call new%bcast(master, comm)
  !call new%print_abivars(std_out)
@@ -4451,7 +4400,6 @@ subroutine geo_bcast(self, master, comm)
 
 !Local variables-------------------------------
  integer :: ierr, my_rank, list_int(2)
-
 !************************************************************************
 
  if (xmpi_comm_size(comm) == 1) return
@@ -4488,7 +4436,6 @@ subroutine geo_malloc(self)
 
 !Arguments ------------------------------------
  class(geo_t),intent(inout) :: self
-
 !************************************************************************
 
  ABI_MALLOC(self%typat, (self%natom))
@@ -4511,7 +4458,6 @@ subroutine geo_free(self)
 
 !Arguments ------------------------------------
  class(geo_t),intent(inout) :: self
-
 !************************************************************************
 
  ABI_SFREE(self%typat)
@@ -4559,7 +4505,6 @@ subroutine get_acell_rprim(lenstr, string, jdtset, iimage, nimage, marr, acell, 
  integer,allocatable :: intarr(:)
  real(dp) :: angdeg(3)
  real(dp),allocatable :: dprarr(:)
-
 !************************************************************************
 
  ABI_MALLOC(intarr, (marr))

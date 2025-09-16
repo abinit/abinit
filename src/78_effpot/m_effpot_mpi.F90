@@ -9,7 +9,7 @@
 !! This module is still experimental
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2024 ABINIT group (AM)
+!! Copyright (C) 2010-2025 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -109,8 +109,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine effpot_mpi_init(index_rpt,sc_size,effpot_mpi,natom,ndiv,nrpt,comm)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -284,8 +282,6 @@ end subroutine effpot_mpi_init
 !! SOURCE
 
 subroutine effpot_mpi_free(effpot_mpi)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars

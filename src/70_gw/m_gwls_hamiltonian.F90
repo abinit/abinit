@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2024 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2025 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -22,12 +22,9 @@
 
 module m_gwls_hamiltonian
 
-! local modules
 use m_gwls_utility
 use m_gwls_wf
 use m_dtset
-
-! abinit modules
 use m_bandfft_kpt
 use m_cgtools
 use defs_basis
@@ -35,17 +32,17 @@ use m_abicore
 use m_xmpi
 use m_pawang
 use m_errors
-use m_ab7_mixing
+use m_abi_mixing
 use m_mpinfo
 use m_crystal
 
 use defs_abitypes,      only : MPI_type
 use m_io_tools,         only : get_unit
-use m_hamiltonian,      only : gs_hamiltonian_type, copy_hamiltonian
+use m_hamiltonian,      only : gs_hamiltonian_type
 use m_pawcprj,          only : pawcprj_type
 use m_vcoul,            only : vcoul_t
 use m_gsphere,          only : gsphere_t
-use m_bz_mesh,          only : kmesh_t, find_qmesh
+use m_bz_mesh,          only : kmesh_t
 use m_fft,              only : fftpac, fourwf
 use m_getghc,           only : getghc
 use m_io_kss,           only : make_gvec_kss
@@ -1025,7 +1022,7 @@ real(dp), intent(in), optional :: cte
 !mpi_enreg,        T
 !ndat,             Fixed to 1     (# of FFTs to do in //)
 !dtset%prtvol,     T
-!sij_opt,          Fixed to 0     (PAW dependant : 0-><G|H|C> ; 1-><G|H|C> & <G|S|C> ; -1-><G|H-cte.S|C>)
+!sij_opt,          Fixed to 0     (PAW dependent : 0-><G|H|C> ; 1-><G|H|C> & <G|S|C> ; -1-><G|H-cte.S|C>)
 !tim_getghc,       Fixed to 0     (identity of the timer of the calling subroutine. 1:cgwf 5:lobpcg)
 !type_calc)        Fixed to 0     (0:whole H N:some part only)
 
@@ -1375,119 +1372,45 @@ call Vcp%free()
 call bandfft_kpt_destroy_array(bandfft_kpt,mpi_enreg)
 call destroy_mpi_enreg(mpi_enreg)
 
-!NOTE : the syntax if(allocated(a)) ABI_FREE(a) result in an error if "a" is not allocated; since the macro replace
-!ABI_MALLOC by more than one line of text, the second lines and up get outside the if... if() then syntax is equired.
-if(allocated(cg)) then
-  ABI_FREE(cg)
-end if
-if(allocated(gbound)) then
-  ABI_FREE(gbound)
-end if
-if(allocated(kg_k)) then
-  ABI_FREE(kg_k)
-end if
-if(allocated(ffnl)) then
-  ABI_FREE(ffnl)
-end if
-if(allocated(ph3d)) then
-  ABI_FREE(ph3d)
-end if
-if(allocated(kinpw)) then
-  ABI_FREE(kinpw)
-end if
-if(allocated(vxc)) then
-  ABI_FREE(vxc)
-end if
-if(allocated(vlocal)) then
-  ABI_FREE(vlocal)
-end if
-if(allocated(conjgrprj)) then
-  ABI_FREE(conjgrprj)
-end if
-if(allocated(istwfk)) then
-  ABI_FREE(istwfk)
-end if
-if(allocated(dummy2)) then
-  ABI_FREE(dummy2)
-end if
-if(allocated(dummy3)) then
-  ABI_FREE(dummy3)
-end if
-if(allocated(eig)) then
-  ABI_FREE(eig)
-end if
-if(allocated(scprod2)) then
-  ABI_FREE(scprod2)
-end if
-if(allocated(pcon)) then
-  ABI_FREE(pcon)
-end if
-if(allocated(psik1)) then
-  ABI_FREE(psik1)
-end if
-if(allocated(psik2)) then
-  ABI_FREE(psik2)
-end if
-if(allocated(psik3)) then
-  ABI_FREE(psik3)
-end if
-if(allocated(psik4)) then
-  ABI_FREE(psik4)
-end if
-if(allocated(psikb1)) then
-  ABI_FREE(psikb1)
-end if
-if(allocated(psikb2)) then
-  ABI_FREE(psikb2)
-end if
-if(allocated(psikb3)) then
-  ABI_FREE(psikb3)
-end if
-if(allocated(psikb4)) then
-  ABI_FREE(psikb4)
-end if
-if(allocated(psig1)) then
-  ABI_FREE(psig1)
-end if
-if(allocated(psig2)) then
-  ABI_FREE(psig2)
-end if
-if(allocated(psig3)) then
-  ABI_FREE(psig3)
-end if
-if(allocated(psig4)) then
-  ABI_FREE(psig4)
-end if
-if(allocated(psir1)) then
-  ABI_FREE(psir1)
-end if
-if(allocated(psir2)) then
-  ABI_FREE(psir2)
-end if
-if(allocated(psir3)) then
-  ABI_FREE(psir3)
-end if
-if(allocated(psidg)) then
-  ABI_FREE(psidg)
-end if
-if(allocated(vxc_dg)) then
-  ABI_FREE(vxc_dg)
-end if
-if(allocated(denpot)) then
-  ABI_FREE(denpot)
-end if
-if(allocated(kernel_wavefunctions_FFT)) then
-  ABI_FREE(kernel_wavefunctions_FFT)
-end if
-if(allocated(valence_wavefunctions_FFT)) then
-  ABI_FREE(valence_wavefunctions_FFT)
-end if
+ABI_SFREE(cg)
+ABI_SFREE(gbound)
+ABI_SFREE(kg_k)
+ABI_SFREE(ffnl)
+ABI_SFREE(ph3d)
+ABI_SFREE(kinpw)
+ABI_SFREE(vxc)
+ABI_SFREE(vlocal)
+ABI_SFREE(conjgrprj)
+ABI_SFREE(istwfk)
+ABI_SFREE(dummy2)
+ABI_SFREE(dummy3)
+ABI_SFREE(eig)
+ABI_SFREE(scprod2)
+ABI_SFREE(pcon)
+ABI_SFREE(psik1)
+ABI_SFREE(psik2)
+ABI_SFREE(psik3)
+ABI_SFREE(psik4)
+ABI_SFREE(psikb1)
+ABI_SFREE(psikb2)
+ABI_SFREE(psikb3)
+ABI_SFREE(psikb4)
+ABI_SFREE(psig1)
+ABI_SFREE(psig2)
+ABI_SFREE(psig3)
+ABI_SFREE(psig4)
+ABI_SFREE(psir1)
+ABI_SFREE(psir2)
+ABI_SFREE(psir3)
+ABI_SFREE(psidg)
+ABI_SFREE(vxc_dg)
+ABI_SFREE(denpot)
+ABI_SFREE(kernel_wavefunctions_FFT)
+ABI_SFREE(valence_wavefunctions_FFT)
 if(associated(gvec)) then
   ABI_FREE(gvec)
 end if
-if(allocated(vc_sqrt)) then
-  ABI_FREE(vc_sqrt)
-end if
+ABI_SFREE(vc_sqrt)
 
 end subroutine destroy_H
 !!***
@@ -1497,7 +1420,7 @@ end subroutine destroy_H
 !!  build_H
 !!
 !! FUNCTION
-!!  .
+!! Arguments of gw_sternheimer, received as argument by build_H
 !!
 !! INPUTS
 !!
@@ -1507,11 +1430,8 @@ end subroutine destroy_H
 
 subroutine build_H(dtset2,mpi_enreg2,cpopt2,cg2,gs_hamk2,kg_k2,kinpw2)
 
-!use m_bandfft_kpt
-use m_cgtools
 use m_wfutils
 
-!Arguments of gw_sternheimer, reveived as argument by build_H-------------------------
 type(dataset_type),  intent(in) :: dtset2
 type(MPI_type),   intent(in) :: mpi_enreg2
 type(gs_hamiltonian_type), intent(inout) :: gs_hamk2
@@ -1550,7 +1470,7 @@ dtset = dtset2%copy()
 
 call copy_mpi_enreg(mpi_enreg2,mpi_enreg)
 
-call copy_hamiltonian(gs_hamk,gs_hamk2)
+call gs_hamk2%copy(gs_hamk)
 
 !Then we copy the standard types
 cpopt   = cpopt2
@@ -1594,7 +1514,7 @@ istwfk(:)=dtset%istwfk
 !Initializing variables from gs_hamk
 ucvol = gs_hamk%ucvol
 ABI_MALLOC(gbound,(2*mgfft+8,2))
-!gbound = gs_hamk%gbound_k !Must be done later for bandft paralelism
+!gbound = gs_hamk%gbound_k !Must be done later for bandft parallelism
 
 !Parameters which need to be set by hand for now...
 weight           = 1           ! The weight of the k-pts, which sum to 1.
@@ -1683,7 +1603,7 @@ ispden           = 1           !When required, the spin index to be used. We don
 !     The data is now distributed properly to do parallel FFTs! Each row in the diagram above corresponds to FFTs done
 !     in parallel over nproc_fft processors, on a given band. There are M rows running thus in parallel!
 !
-!     The underlying ABINIT routines are equiped to handle FFT parallelism, not band distributed parallelism.
+!     The underlying ABINIT routines are equipped to handle FFT parallelism, not band distributed parallelism.
 !     prep_getghc.F90 and lobpgcwf.F90 show how to rearange information to be able to apply basic ABINIT routines.
 !
 !     The code below is inspired / guessed from lobpcgwf and prep_getghc. WE ASSUME THERE IS NO SPINORS!  CODE SHOULD
@@ -1862,7 +1782,7 @@ close(io_unit_debug)
 
 ! Finishing the construction of vxc (transcribing it from the double real grid (for the density)
 ! to the single real grid (for the wfs).
-! Assummes we only need one spin component; one transcription per spin being needed.
+! Assumes we only need one spin component; one transcription per spin being needed.
 if(allocated(vxc_dg)) then
   ABI_MALLOC(vxc,(n4,n5,n6,dtset%nspden))
   vxc = zero
@@ -1876,10 +1796,10 @@ title(i) = "Bloup" ! The clean way would be to get the psps structure in this mo
 ! (build_vxc is called from a place in GS calculations where it is available;
 ! should be the easiest way). For now, this allows the code to run.
 end do
-call crystal_init(dtset%amu_orig(:,1),Cryst,dtset%spgroup,dtset%natom,dtset%npsp,&
-&                 dtset%ntypat,dtset%nsym,dtset%rprimd_orig(:,:,1),dtset%typat,&
-&                 dtset%xred_orig(:,:,1),dtset%ziontypat,dtset%znucl,timrev,.false.,.false.,title,&
-&                 dtset%symrel,dtset%tnons,dtset%symafm)
+call cryst%init(dtset%amu_orig(:,1),dtset%spgroup,dtset%natom,dtset%npsp,&
+                  dtset%ntypat,dtset%nsym,dtset%rprimd_orig(:,:,1),dtset%typat,&
+                  dtset%xred_orig(:,:,1),dtset%ziontypat,dtset%znucl,timrev,.false.,.false.,title,&
+                  dtset%symrel,dtset%tnons,dtset%symafm)
 ABI_FREE(title)
 call Cryst%print()
 
@@ -1888,10 +1808,9 @@ if(dtset%optdriver==66) then
 
   !Set up of the k-points and tables in the whole BZ
   call Kmesh%init(Cryst,dtset%nkpt,dtset%kptns,dtset%kptopt,wrap_1zone=.false.)
-  call Kmesh%print("K-mesh for the wavefunctions",std_out)
-  call find_qmesh(Qmesh,Cryst,Kmesh)
-  call Qmesh%print("Q-mesh for the screening function",std_out)
-
+  call Kmesh%print([std_out], header="K-mesh for the wavefunctions")
+  call Qmesh%find_qmesh(Cryst,Kmesh)
+  call Qmesh%print([std_out], header="Q-mesh for the screening function")
 
   !------------------------------
   !Building the vc_sqrt structure
@@ -1906,13 +1825,12 @@ if(dtset%optdriver==66) then
 
   ecut_eff = dtset%ecut*(dtset%dilatmx)**2
   call make_gvec_kss(dtset%nkpt,dtset%kptns,ecut_eff,dtset%symmorphi,dtset%nsym,dtset%symrel,dtset%tnons,Cryst%gprimd,&
-  &                      dtset%prtvol,npw_serial,gvec,ierr)
+                        dtset%prtvol,npw_serial,gvec,ierr)
 
   call Gsphere%init(Cryst,npw_serial,gvec=gvec)
+  call Gsphere%print([std_out], 0)
 
-  call Gsphere%print()
-
-  call Vcp%init(Gsphere,Cryst,Qmesh,Kmesh,dtset%rcut,dtset%gw_icutcoul,dtset%vcutgeo,dtset%ecutsigx,npw_serial,&
+  call Vcp%init(Gsphere,Cryst,Qmesh,Kmesh,dtset%gw_rcut,dtset%gw_icutcoul,dtset%vcutgeo,dtset%ecutsigx,npw_serial,&
                 dtset%nkpt,dtset%kptns,mpi_enreg%comm_world)
 
   ! Since Vcp%vc_sqrt is sorted according to the KSS convention for G vectors
@@ -1924,12 +1842,11 @@ if(dtset%optdriver==66) then
   vc_sqrt=zero
   k=0
   do i=1,npw_k
-  do j=1,npw_serial
-  if(all(kg_k(:,i)==gvec(:,j))) k=j
+    do j=1,npw_serial
+      if(all(kg_k(:,i)==gvec(:,j))) k=j
+     end do
+    vc_sqrt(i)=Vcp%vc_sqrt(k,1)
   end do
-  vc_sqrt(i)=Vcp%vc_sqrt(k,1)
-  end do
-
 end if
 
 !--------------------------------------------------------------------------------

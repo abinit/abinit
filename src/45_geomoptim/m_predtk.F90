@@ -6,7 +6,7 @@
 !!  Low-level procedures used by 45_geomoptim routines
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, SE)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -66,8 +66,6 @@ contains
 !! SOURCE
 
 function fdtion(ab_mover,itime,xcart,fcart,vel)
-
-  implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -149,8 +147,6 @@ function fdtion(ab_mover,itime,xcart,fcart,vel)
 !! SOURCE
 
 subroutine prtxvf(fcart,gred,iatfix,iout,natom,prtvel,vel,xcart,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

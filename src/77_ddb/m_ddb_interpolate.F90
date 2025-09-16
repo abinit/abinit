@@ -7,7 +7,7 @@
 !! the interatomic force constants and write the result in a DDB file.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (GA)
+!!  Copyright (C) 2008-2025 ABINIT group (GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,9 +30,7 @@ module m_ddb_interpolate
  use m_ddb_hdr
  use m_ifc
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_anaddb_dataset, only : anaddb_dataset_type
  use m_bz_mesh,         only : make_path
@@ -69,7 +67,7 @@ contains
 !!
 !! SOURCE
 
-subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
+subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, comm)
 
 !Arguments -------------------------------
 !scalars
@@ -80,14 +78,13 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
  type(ddb_hdr_type),intent(inout) :: ddb_hdr
  type(asrq0_t),intent(inout) :: asrq0
  integer,intent(in) :: comm
- character(len=*),intent(in) :: prefix
 !arrays
 
 !Local variables -------------------------
 !scalars
  integer,parameter :: master=0
  integer :: nsym,natom,ntypat,mband,nqpt_fine
- integer :: msize,nsize,mpert,nblok,mtyp
+ integer :: msize,nsize,mpert,nblok
  integer :: rftyp
  integer :: ii,iblok,jblok,iqpt,ipert1,ipert2,idir1,idir2
  integer :: nprocs,my_rank
@@ -142,11 +139,14 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
 
  mband = ddb_hdr%mband
 
- mtyp = max(ddb_hdr%mblktyp, 2)  ! Limited to 2nd derivatives of total energy
- ddb_hdr%mblktyp = mtyp
+ ! Interpolation is limited to 2nd derivatives of total energy
+ ! GA: What??
+ ddb_hdr%has_d3E_xx = .false.
+ ddb_hdr%has_d3E_lw = .false.
+ ddb_hdr%has_d2eig = .false.
 
  mpert = ddb%mpert
- msize = 3 * mpert * 3 * mpert  !; if (mtyp==3) msize=msize*3*mpert
+ msize = 3 * mpert * 3 * mpert  !; if (ddb_hdr%has_d3E_xx) msize=msize*3*mpert
  nsize = 3 * mpert * 3 * mpert
  nblok = nqpt_fine
 
@@ -211,12 +211,13 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
    end if
 
    ! Eventually impose the acoustic sum rule based on previously calculated d2asr
-   call asrq0%apply(natom, ddb%mpert, ddb%msize, d2cart, qpt_padded, crystal)
+   call asrq0%apply(natom, ddb%mpert, ddb%msize, qpt_padded, crystal, d2cart)
 
    ! Transform d2cart into reduced coordinates.
    call d2cart_to_red(d2cart,d2red,crystal%gprimd,crystal%rprimd,mpert, &
 &   natom,ntypat,crystal%typat,crystal%ucvol,crystal%zion)
 
+   ! TODO (GA): Should replace this with ddb_set_d2matr
    ! Store the dynamical matrix into a block of the new ddb
    jblok = iqpt
    ddb_new%val(1,1:nsize,jblok) = reshape(d2red(1,:,:,:,:), shape = (/nsize/))
@@ -273,11 +274,11 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
  if (my_rank == master) then
 
    ! GA: TODO choice of txt vs. nc should be set by user
-   ddb_out_filename = strcat(prefix, "_DDB")
+   ddb_out_filename = strcat(inp%prefix_outdata, "_DDB")
 
    call ddb_new%write_txt(ddb_hdr, ddb_out_filename)
 
-   ddb_out_nc_filename = strcat(prefix, "_DDB.nc")
+   ddb_out_nc_filename = strcat(inp%prefix_outdata, "_DDB.nc")
    call ddb_new%write_nc(ddb_hdr, ddb_out_nc_filename)
 
    ! Write one separate nc file for each q-point

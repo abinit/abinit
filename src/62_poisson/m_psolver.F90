@@ -6,7 +6,7 @@
 !!  Poisson solver
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR,TRangel).
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR,TRangel).
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -91,7 +91,6 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
  use BigDFT_API, only : XC_potential,ELECTRONIC_DENSITY,coulomb_operator
  use poisson_solver, only : H_potential
 #endif
-  implicit none
 
   !Arguments ------------------------------------
   !scalars
@@ -527,7 +526,6 @@ subroutine psolver_hartree(enhartr, hgrid, icoulomb, me, mpi_comm, nfft, ngfft, 
  use BigDFT_API,     only : coulomb_operator
  use poisson_solver, only : H_potential
 #endif
-  implicit none
 
   !Arguments ------------------------------------
   !scalars
@@ -653,7 +651,6 @@ subroutine psolver_kernel(hgrid, iaction,  icoulomb, &
 #else
  use defs_wvltypes,  only : coulomb_operator
 #endif
-  implicit none
 
 !Arguments ------------------------------------
   !scalars

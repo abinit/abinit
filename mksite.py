@@ -39,9 +39,15 @@ def get_abinit_version():
             abinit_version = f.read().strip().lower()
             print(abinit_version)
 
+    if os.path.exists('.current_version'):
+        with open('.current_version','r') as f:
+            abinit_version = f.read().strip().lower()
+            print(abinit_version)
+
     if abinit_version == "unknown" and os.path.exists('.tarball-version'):
         with open('.tarball-version','r') as f:
             abinit_version = f.read().strip().lower()
+            print(abinit_version)
 
     if abinit_version == "unknown":
         print("[get_abinit_version] Can't find either .version or .tarball-version, will run git-version-gen")

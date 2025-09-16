@@ -6,7 +6,7 @@
 !! Contains the predictor for LOTF (ionmov==23)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, JCC, SE)
+!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, JCC, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -52,7 +52,7 @@ CONTAINS !===========================================================
  !! Lotf ensemble molecular dynamics.
  !!
  !! COPYRIGHT
- !! Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, JCC, SE)
+ !! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, JCC, SE)
  !! This file is distributed under the terms of the
  !! GNU General Public License, see ~abinit/COPYING
  !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -78,7 +78,6 @@ CONTAINS !===========================================================
  subroutine pred_lotf(ab_mover,hist,itime,icycle,zDEBUG,iexit)
 
  use m_geometry,       only : xred2xcart
-  implicit none
 
   !Arguments ------------------------
   type(abimover),intent(in)       :: ab_mover
@@ -219,7 +218,7 @@ CONTAINS !===========================================================
     !--call the LOTF initialization
     call init_lotf(itime,ab_mover%natom,acell,rprimd,xcart)
 
-    !--Application of Gauss' principle of least constraint according to 
+    !--Application of Gauss' principle of least constraint according to
     ! Fei Zhang's algorithm (J. Chem. Phys. 106, 1997, p.6102 [[cite:Zhang1997]])
     !--v2gauss is twice the kinetic energy
     call vel_to_gauss(vel,ab_mover%amass,v2gauss)

@@ -6,15 +6,19 @@
 #include "abi_common.h"
 
 module m_tdep_readwrite
-  
+
   use defs_basis
   use m_errors
   use m_abicore
   use m_xmpi
   use m_abihist
+  use m_parser
+  use m_fstrings,  only : inupper,ljust,next_token
   use m_abimover, only : abimover
 
  implicit none
+
+  character(len=6),public,parameter :: version_string = '   4.0'
 
   type Input_type
 
@@ -64,6 +68,7 @@ module m_tdep_readwrite
     double precision :: multiplicity(3,3)
     double precision, allocatable :: amu(:)
     double precision, allocatable :: born_charge(:)
+    double precision, allocatable :: znucl(:)
     double precision, allocatable :: qpt(:,:)
     double precision, allocatable :: xred_ideal(:,:)
     double precision, allocatable :: xred_unitcell(:,:)
@@ -72,10 +77,10 @@ module m_tdep_readwrite
     double precision, allocatable :: etot(:)
     double precision, allocatable :: weights(:)
     character (len=2), allocatable :: special_qpt(:)
-    character (len=200) :: output_prefix
-    character (len=200) :: input_prefix
-    character (len=200) :: foo
-    
+    character (len=fnlen) :: output_prefix
+    character (len=fnlen) :: input_prefix
+    character (len=fnlen) :: output_file
+
   end type Input_type
 
   type MPI_enreg_type
@@ -135,11 +140,11 @@ contains
   write(stdout,'(a)') ' For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.'
   write(stdout,'(a)') ' '
   write(stdout,'(a)') ' [1] a-TDEP: Temperature Dependent Effective Potential for Abinit '
-  write(stdout,'(a)') ' -- Lattice dynamic properties including anharmonicity' 
+  write(stdout,'(a)') ' -- Lattice dynamic properties including anharmonicity'
   write(stdout,'(a)') ' F. Bottin, J. Bieder and J. Bouchet, Comput. Phys. Comm. 254, 107301 (2020).' ! [[cite:Bottin2020]]
   write(stdout,'(a)') ' Strong suggestion to cite this paper in your publications.'
   write(stdout,'(a)') ' '
-  write(stdout,'(a)') ' [2] Thermal evolution of vibrational properties of alpha-U' 
+  write(stdout,'(a)') ' [2] Thermal evolution of vibrational properties of alpha-U'
   write(stdout,'(a)') ' J. Bouchet and F. Bottin, Phys. Rev. B 92, 174108 (2015).' ! [[cite:Bouchet2015]]
   write(stdout,'(a)') ' Strong suggestion to cite this paper in your publications.'
   write(stdout,'(a)') ' '
@@ -149,63 +154,51 @@ contains
   write(stdout,'(a)') ' [4] Temperature dependent effective potential method for accurate free energy calculations of solids'
   write(stdout,'(a)') ' O. Hellman, P. Steneteg, I.A. Abrikosov and S.I. Simak, Phys. Rev. B 87, 104111 (2013).' ! [[cite:Hellman2013]]
 
- end subroutine tdep_print_Aknowledgments 
+ end subroutine tdep_print_Aknowledgments
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- subroutine tdep_read_input(Hist,Invar)
+!----------------------------------------------------------------------
+
+ subroutine tdep_read_input(input_path,Hist,Invar)
 
 #if defined HAVE_NETCDF
  use netcdf
 #endif
 
+! Arguments-------------------------------
+  character(len=*), intent(in):: input_path
   type(Input_type),intent(out) :: Invar
   type(abihist), intent(out) :: Hist
 
-  integer :: values(8)  
+! Local variables-------------------------
+! scalars
+  integer :: values(8)
   integer :: ncid, ncerr, me,ierr,master
   integer :: nimage, mdtime, natom_id,nimage_id,time_id,xyz_id,six_id
   integer :: ntypat_id,iatcell
-  integer :: ii,jj,tmp,shift,iatom,itypat,sum_alloy1,sum_alloy2
-  double precision :: version_value,dtion,amu_average,born_average
-  character (len=30):: string,NormalMode,DebugMode,use_ideal_positions
-  character (len=30):: born_charge,dielec_constant,tolmotifinboxmatch,TheEnd,bzpath,use_weights
-  character (len=30):: order,slice,enunit,readifc,together,alloy,nproc,bzlength,ngqpt1,ngqpt2,dosdeltae
+  integer :: ii,jj,shift,iatom,itypat,sum_alloy1,sum_alloy2
+  integer:: lenstr, marr, jdtset, tread
+  logical :: has_nimage
+  double precision :: dtion,amu_average,born_average
   character (len=8) :: date
   character (len=10) :: time
   character (len=5) :: zone
+  character(len=500) :: msg
+  character(len=fnlen) :: ncfilename,inputfilename
+  character(len=strlen):: string, raw_string
+! arrays
   character(len=3),parameter :: month_names(12)=(/'Jan','Feb','Mar','Apr','May','Jun',&
 &                                                 'Jul','Aug','Sep','Oct','Nov','Dec'/)
-  character(len=500) :: ncfilename,inputfilename
+  integer, allocatable:: intarr(:)
   integer, allocatable :: typat_unitcell_tmp(:)
-  logical :: has_nimage
-  double precision :: rprimd_mdt(3,3)
-  real(dp), allocatable :: znucl(:),xred_unitcell_tmp(:,:),amu_tmp(:),born_charge_tmp(:)
+  real(dp), allocatable :: xred_unitcell_tmp(:,:),amu_tmp(:),born_charge_tmp(:),znucl_tmp(:)
+  real(dp), allocatable:: dprarr(:)
 
-! Define output files  
-  Invar%stdout=8
-  Invar%stdlog=6
+! *********************************************************************
 
-! Define Keywords
-  NormalMode='NormalMode'
-  DebugMode='DebugMode'
-  use_ideal_positions='use_ideal_positions'
-  born_charge='born_charge'
-  dielec_constant='dielec_constant'
-  dosdeltae='dosdeltae'
-  bzpath='bzpath'
-  bzlength='bzlength'
-  order='order'
-  slice='slice'
-  enunit='enunit'
-  readifc='readifc'
-  together='together'
-  alloy='alloy'
-  nproc='nproc'
-  ngqpt1='ngqpt1'
-  ngqpt2='ngqpt2'
-  use_weights='use_weights'
-  tolmotifinboxmatch='tolmotifinboxmatch'
-  TheEnd='TheEnd'
+! Define output files
+  Invar%stdout=ab_out
+  Invar%stdlog=std_out
+
 ! Define default values
   Invar%angle_alpha=90.d0
   Invar%bzpath=0
@@ -228,42 +221,87 @@ contains
   Invar%netcdf=.false.
   Invar%use_ideal_positions=0
   Invar%use_weights=0
-  version_value=3.d0
-! In order to have an accuracy better than 1meV  
+! In order to have an accuracy better than 1meV
   Invar%ngqpt1(:)=8
   Invar%ngqpt2(:)=32
-  Invar%foo='foo'
 
   me = xmpi_comm_rank(xmpi_world)
   if (me==0) then
-    open(unit=7,file=trim(Invar%foo))
-    open(unit=Invar%stdlog,file='atdep.log')
-    write(Invar%stdlog,'(a)',err=10) ' Give name for input file '
-    read(*, '(a)',err=10) inputfilename
-    if ( inputfilename == "" ) inputfilename='input.in'
-    write(Invar%stdlog, '(a)',err=10) '.'//trim(inputfilename)
-10   continue
-!   Check if a NetCDF file is available
-    write(Invar%stdlog,'(a)',err=11) ' Give root name for generic input files (NetCDF or ASCII)'
-    read(*, '(a)',err=11) Invar%input_prefix
-    if ( Invar%input_prefix == "" ) then
-      ncfilename='HIST.nc'
+
+    if (len_trim(input_path) == 0) then
+
+      write(std_out, "(2a)")" DeprecationWarning: ",ch10
+      write(std_out, "(a)") "     The files file has been deprecated in Abinit10 and will be removed in Abinit11."
+      write(std_out, "(2a)")"     Use the syntax `atdep t01.abi` where t01.abi is an atdep input,",ch10
+      write(std_out, "(2a)")"     and use input variables output_file, indata_prefix, outdata_prefix.",ch10
+
+      write(Invar%stdlog,'(a)',err=10) ' Give name for input file '
+      read(*, '(a)',err=10) inputfilename
+      if ( inputfilename == "" ) inputfilename='input.in'
+      write(Invar%stdlog, '(a)',err=10) '.'//trim(inputfilename)
+10     continue
+!     Check if a NetCDF file is available
+      write(Invar%stdlog,'(a)',err=11) ' Give root name for generic input files (NetCDF or ASCII)'
+      read(*, '(a)',err=11) Invar%input_prefix
+      if ( Invar%input_prefix == "" ) then
+        ncfilename='HIST.nc'
+      else
+        ncfilename=trim(Invar%input_prefix)//'_HIST.nc'
+      end if
+      write(Invar%stdlog, '(a)',err=11) '.'//trim(Invar%input_prefix)
+11     continue
+      write(Invar%stdlog,'(a)', err=12)' Give root name for generic output files:'
+      read (*, '(a)', err=12) Invar%output_prefix
+      if ( Invar%output_prefix == "" ) Invar%output_prefix = 'atdep'
+      write (Invar%stdlog, '(a)', err=12 ) '.'//trim(Invar%output_prefix)
+12     continue
+      Invar%output_file = trim(Invar%output_prefix)//'.abo'
     else
-      ncfilename=trim(Invar%input_prefix)//'HIST.nc'  
-    end if  
-    write(Invar%stdlog, '(a)',err=11) '.'//trim(Invar%input_prefix)
-11   continue
-    write(Invar%stdlog,'(a)', err=12)' Give root name for generic output files:'
-    read (*, '(a)', err=12) Invar%output_prefix
-    if ( Invar%output_prefix == "" ) then
-      open(unit=Invar%stdout,file='atdep.abo')
-    else
-      open(unit=Invar%stdout,file=trim(Invar%output_prefix)//'.abo')
-    end if  
-    write (Invar%stdlog, '(a)', err=12 ) '.'//trim(Invar%output_prefix)
-12   continue
-    if ( inputfilename == "" ) inputfilename='input.in'
-    if ( ncfilename == "" ) ncfilename='HIST.nc'
+      inputfilename = input_path
+
+      ! Read input
+      string = repeat(" ", strlen)
+      raw_string = repeat(" ", strlen)
+      call instrng(inputfilename, lenstr, 1, strlen, string, raw_string)
+      ! To make case-insensitive, map characters to upper case.
+      call inupper(string(1:lenstr))
+
+      marr = 3
+      ABI_MALLOC(intarr, (marr))
+      ABI_MALLOC(dprarr, (marr))
+      jdtset = 0
+
+      call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), &
+                  "indata_prefix", tread, 'KEY', key_value=Invar%input_prefix)
+      if (tread == 0) then
+        Invar%input_prefix = ''
+        ncfilename='HIST.nc'
+      else
+        ncfilename=trim(Invar%input_prefix)//'_HIST.nc'
+      end if
+      write(Invar%stdlog, "(2a)")"- Root name for input files: ", trim(Invar%input_prefix)
+
+      call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), &
+                  "outdata_prefix", tread, 'KEY', key_value=Invar%output_prefix)
+      if (tread == 0) then
+        Invar%output_prefix = 'atdep'
+      end if
+      write(Invar%stdlog, "(2a)")"- Root name for output files: ", trim(Invar%output_prefix)
+
+      call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), &
+                  "output_file", tread, 'KEY', key_value=Invar%output_file)
+      if (tread == 0) then
+        Invar%output_file = trim(Invar%output_prefix) // '.abo'
+      end if
+      write(Invar%stdlog, "(2a)")"- Main output file: ", trim(Invar%output_file)
+
+      ABI_FREE(intarr)
+      ABI_FREE(dprarr)
+
+    end if
+
+    open(unit=Invar%stdout,file=trim(Invar%output_file))
+
   end if !me
 
   master = 0
@@ -289,9 +327,8 @@ contains
 &       natom_id,ntypat_id,nimage_id,time_id,xyz_id,six_id,has_nimage)
     ABI_MALLOC(Invar%amu,(Invar%ntypat)); Invar%amu(:)=zero
     ABI_MALLOC(Invar%typat,(Invar%natom)); Invar%typat(:)=zero
-    ABI_MALLOC(znucl,(Invar%ntypat)) ; znucl(:)=zero
-    call read_csts_hist(ncid,dtion,Invar%typat,znucl,Invar%amu)
-    ABI_FREE(znucl)
+    ABI_MALLOC(Invar%znucl,(Invar%ntypat)) ; Invar%znucl(:)=zero
+    call read_csts_hist(ncid,dtion,Invar%typat,Invar%znucl,Invar%amu)
 
     ! Need to close NetCDF file because it is going to be reopened by read_md_hist
     ncerr = nf90_close(ncid)
@@ -303,19 +340,230 @@ contains
   end if
 #endif
 
+! =========================================================================== !
+! Read input file
+
+  string = repeat(" ", strlen)
+  raw_string = repeat(" ", strlen)
+  call instrng(inputfilename, lenstr, 1, strlen, string, raw_string)
+  ! To make case-insensitive, map characters to upper case.
+  call inupper(string(1:lenstr))
+
+! marr is the aximum array size. It is thus a hard-coded maximum value
+! for 3 * (number of atoms)
+  marr = 9000
+  ABI_MALLOC(intarr, (marr))
+  ABI_MALLOC(dprarr, (marr))
+  jdtset = 0
+
+! Mandatory input variables
+! -------------------------
+
+! Bravais lattice
+  call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'brav', tread, 'INT')
+  if (tread == 0) then
+    write(msg,*)&
+     'Variable "brav" is mandatory, but was not found in input file.'
+    ABI_ERROR(msg)
+  end if
+  Invar%bravais(1:2) = intarr(1:2)
+
+! Angle alpha
+  if ((Invar%bravais(1).eq.2).or.(Invar%bravais(1).eq.5)) then
+    call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'angle', tread, 'DPR')
+    if (tread == 0) then
+      write(msg,*)&
+       'Variable "angle" is mandatory for this bravais lattice,',ch10,&
+       'but was not found in input file.'
+      ABI_ERROR(msg)
+    end if
+    Invar%angle_alpha = dprarr(1)
+  else
+    Invar%angle_alpha=90.d0
+  end if
+
+! natom_unitcell
+  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'natom_unitcell', tread, 'INT')
+  if (tread == 0) then
+    write(msg,*)&
+     'Variable "natom_unitcell" is mandatory, but was not found in input file.'
+    ABI_ERROR(msg)
+  end if
+  Invar%natom_unitcell = intarr(1)
+  if (3*Invar%natom_unitcell.gt.marr) then
+    write(msg,*)&
+     'Maximum number of atoms exceeded. Modify source code to circumvent problem.'
+    ABI_ERROR(msg)
+  end if
+
+! xred_unitcell
+  ABI_MALLOC(Invar%xred_unitcell,(3,Invar%natom_unitcell)); Invar%xred_unitcell(:,:)=zero
+  call intagm(dprarr, intarr, jdtset, marr, 3*Invar%natom_unitcell, string(1:lenstr), 'xred_unitcell', tread, 'DPR')
+  if (tread == 0) then
+    write(msg,*)&
+     'Variable "xred_unitcell" is mandatory, but was not found in input file.'
+    ABI_ERROR(msg)
+  end if
+  Invar%xred_unitcell(:,:) = reshape(dprarr(1:3*Invar%natom_unitcell),(/3,Invar%natom_unitcell/))
+  do ii=1,3
+    do iatcell=1,Invar%natom_unitcell
+      if ((Invar%xred_unitcell(ii,iatcell).le.(-0.5)).or.(Invar%xred_unitcell(ii,iatcell).gt.(0.5))) then
+        do while (Invar%xred_unitcell(ii,iatcell).le.(-0.5))
+          Invar%xred_unitcell(ii,iatcell)=Invar%xred_unitcell(ii,iatcell)+1.d0
+        end do
+        do while (Invar%xred_unitcell(ii,iatcell).gt.(0.5))
+          Invar%xred_unitcell(ii,iatcell)=Invar%xred_unitcell(ii,iatcell)-1.d0
+        end do
+      end if
+    end do
+  end do
+
+! typat_unitcell
+  ABI_MALLOC(Invar%typat_unitcell,(Invar%natom_unitcell)); Invar%typat_unitcell(:)=0
+  call intagm(dprarr, intarr, jdtset, marr, Invar%natom_unitcell, string(1:lenstr), 'typat_unitcell', tread, 'INT')
+  if (tread == 0) then
+    write(msg,*)&
+     'Variable "typat_unitcell" is mandatory, but was not found in input file.'
+    ABI_ERROR(msg)
+  end if
+  Invar%typat_unitcell(:) = intarr(1:Invar%natom_unitcell)
+
+  if (Invar%netcdf) then
+    Invar%rprimd_md(:,:)=TRANSPOSE(Hist%rprimd(:,:,Hist%ihist))
+  else
+! ntypat
+    call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'ntypat', tread, 'INT')
+    if (tread == 1) then
+      Invar%ntypat = intarr(1)
+    else
+      write(msg,*)&
+       'The NetCDF file .nc is not used.',ch10,&
+       'The variable "ntypat" is thus mandatory.',ch10,&
+       'ACTION : Please modify your input file'
+      ABI_ERROR(msg)
+    end if
+
+! amu
+    ABI_MALLOC(Invar%amu,(Invar%ntypat)); Invar%amu(:)=zero
+    call intagm(dprarr, intarr, jdtset, marr, Invar%ntypat, string(1:lenstr), 'amu', tread, 'DPR')
+    if (tread == 1) then
+      Invar%amu = dprarr(1:Invar%ntypat)
+    else
+      write(msg,*)&
+       'The NetCDF file .nc is not used.',ch10,&
+       'The variable "amu" is thus mandatory.',ch10,&
+       'ACTION : Please modify your input file'
+      ABI_ERROR(msg)
+    end if
+
+! rprimd_md
+    call intagm(dprarr, intarr, jdtset, marr, 9, string(1:lenstr), 'rprimd', tread, 'LEN')
+    if (tread == 1) then
+      Invar%rprimd_md(:,:) = TRANSPOSE(reshape(dprarr(1:9),(/3, 3/)))
+    else
+      write(msg,*)&
+       'The NetCDF file .nc is not used.',ch10,&
+       'The variable "rprimd" is thus mandatory.',ch10,&
+       'ACTION : Please modify your input file'
+      ABI_ERROR(msg)
+    end if
+
+! natom
+    call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'natom', tread, 'INT')
+    if (tread == 1) then
+      Invar%natom = intarr(1)
+    else
+      write(msg,*)&
+       'The NetCDF file .nc is not used.',ch10,&
+       'The variable "natom" is thus mandatory.',ch10,&
+       'ACTION : Please modify your input file'
+      ABI_ERROR(msg)
+    end if
+
+! typat
+    ABI_MALLOC(Invar%typat,(Invar%natom)); Invar%typat(:)=0
+    call intagm(dprarr, intarr, jdtset, marr, Invar%natom, string(1:lenstr), 'typat', tread, 'INT')
+    if (tread == 1) then
+      Invar%typat = intarr(1:Invar%natom)
+    else
+      write(msg,*)&
+       'The NetCDF file .nc is not used.',ch10,&
+       'The variable "typat" is thus mandatory.',ch10,&
+       'ACTION : Please modify your input file'
+      ABI_ERROR(msg)
+    end if
+
+  end if
+
+! multiplicity
+  call intagm(dprarr, intarr, jdtset, marr, 9, string(1:lenstr), 'multiplicity', tread, 'DPR')
+  if (tread == 1) then
+    Invar%multiplicity(:,:) = TRANSPOSE(reshape(dprarr(1:9),(/3, 3/)))
+  else
+    write(msg,*)&
+     'Variable "multiplicity" is mandatory, but was not found in input file.'
+    ABI_ERROR(msg)
+  end if
+
+! temperature
+  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'temperature', tread, 'DPR')
+  if (tread == 1) then
+    Invar%temperature = dprarr(1)
+  else
+    write(msg,*)&
+     'Variable "temperature" is mandatory, but was not found in input file.'
+    ABI_ERROR(msg)
+  end if
+
+! nstep_max
+  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'nstep_max', tread, 'INT')
+  if (tread == 1) then
+    Invar%nstep_max = intarr(1)
+  else
+    write(msg,*)&
+     'Variable "nstep_max" is mandatory, but was not found in input file.'
+    ABI_ERROR(msg)
+  end if
+
+! nstep_min
+  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'nstep_min', tread, 'INT')
+  if (tread == 1) then
+    Invar%nstep_min = intarr(1)
+  else
+    write(msg,*)&
+     'Variable "nstep_min" is mandatory, but was not found in input file.'
+    ABI_ERROR(msg)
+  end if
+
+! rcut
+  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'rcut', tread, 'LEN')
+  if (tread == 1) then
+    Invar%rcut = dprarr(1)
+  else
+    write(msg,*)&
+     'Variable "rcut" is mandatory, but was not found in input file.'
+    ABI_ERROR(msg)
+  end if
+
+! debug_mode (optional)
+  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'debug_mode', tread, 'INT')
+  if (tread == 1) then
+    if (intarr(1).ne.0) Invar%debug = .true.
+  end if
+
+! =========================================================================== !
+! Output header and mandatory input variables
+
 ! Write version, copyright, date...
   write(Invar%stdout,*) ' '
-  open(unit=40,file=inputfilename)
-  read(40,*) string
-  if (string.eq.NormalMode) then
-    write(Invar%stdout,'(a,f6.1,a)') '.Version ', version_value,' of PHONONS'
-  else if (string.eq.DebugMode) then
-    Invar%debug=.true.
-    write(Invar%stdout,'(a,f6.1,a)') '.Version ', version_value,' of PHONONS (Debug)'
+
+  if (Invar%debug) then
+    write(Invar%stdout,'(a,a,a)') '.Version ', version_string,' of ATDEP (Debug)'
   else
-    ABI_ERROR('Please use recent format for the input file')
-  end if  
-  write(Invar%stdout,'(a)') '.Copyright (C) 1998-2024 ABINIT group (FB,JB).'
+    write(Invar%stdout,'(a,a,a)') '.Version ', version_string,' of ATDEP'
+  end if
+
+  write(Invar%stdout,'(a)') '.Copyright (C) 1998-2025 ABINIT group (FB,JB,GA).'
   write(Invar%stdout,'(a)') ' ABINIT comes with ABSOLUTELY NO WARRANTY.'
   write(Invar%stdout,'(a)') ' It is free software, and you are welcome to redistribute it'
   write(Invar%stdout,'(a)') ' under certain conditions (GNU General Public License,'
@@ -331,240 +579,278 @@ contains
   call date_and_time(date,time,zone,values)
   write(Invar%stdout,'(/,a,i2,1x,a,1x,i4,a)') '.Starting date : ',values(3),month_names(values(2)),values(1),'.'
 
-! Read (and echo) of input variables from the input.in input file
   write(Invar%stdout,*) ' '
   write(Invar%stdout,*) '#############################################################################'
   write(Invar%stdout,*) '######################### ECHO OF INPUT FILE ################################'
   write(Invar%stdout,*) '#############################################################################'
-! Define unit cell  
-  read(40,*) string
-  write(Invar%stdout,'(a)') ' ======================= Define the unitcell =================================' 
-  read(40,*) string,Invar%bravais(1),Invar%bravais(2)
-  write(Invar%stdout,'(1x,a20,1x,i4,1x,i4)') string,Invar%bravais(1),Invar%bravais(2)
+
+  write(Invar%stdout,'(a)') ' ======================= Define the unitcell ================================='
+  write(Invar%stdout,'(1x,a20,1x,i4,1x,i4)') ljust('brav',20),Invar%bravais(1),Invar%bravais(2)
   if ((Invar%bravais(1).eq.2).or.(Invar%bravais(1).eq.5)) then
-    read(40,*) string,Invar%angle_alpha
-    write(Invar%stdout,'(1x,a20,1x,f15.10)') string,Invar%angle_alpha
-  else
-    !read(40,*)
-    Invar%angle_alpha=90.d0
+    write(Invar%stdout,'(1x,a20,1x,f15.10)') 'angle',Invar%angle_alpha
   end if
-  read(40,*) string,Invar%natom_unitcell
-  write(Invar%stdout,'(1x,a20,1x,i4)') string,Invar%natom_unitcell
-  ABI_MALLOC(Invar%xred_unitcell,(3,Invar%natom_unitcell)); Invar%xred_unitcell(:,:)=zero
-  read(40,*) string,Invar%xred_unitcell(:,:)
-! Check that atoms (defined in the input.in file) are set correctly in the unitcell
-  do ii=1,3
-    do iatcell=1,Invar%natom_unitcell
-      if ((Invar%xred_unitcell(ii,iatcell).le.(-0.5)).or.(Invar%xred_unitcell(ii,iatcell).gt.(0.5))) then
-        do while (Invar%xred_unitcell(ii,iatcell).le.(-0.5))
-          Invar%xred_unitcell(ii,iatcell)=Invar%xred_unitcell(ii,iatcell)+1.d0
-        end do  
-        do while (Invar%xred_unitcell(ii,iatcell).gt.(0.5))
-          Invar%xred_unitcell(ii,iatcell)=Invar%xred_unitcell(ii,iatcell)-1.d0
-        end do  
-      endif
-    end do
-  end do
-  write(Invar%stdout,'(1x,a20)') string
+  write(Invar%stdout,'(1x,a20,1x,i4)') ljust('natom_unitcell',20),Invar%natom_unitcell
+  write(Invar%stdout,'(1x,a20)') ljust('xred_unitcell',20)
   do ii=1,Invar%natom_unitcell
     write(Invar%stdout,'(22x,3(f15.10,1x))') (Invar%xred_unitcell(jj,ii), jj=1,3)
-  end do  
-  ABI_MALLOC(Invar%typat_unitcell,(Invar%natom_unitcell)); Invar%typat_unitcell(:)=0 
-  read(40,*) string,Invar%typat_unitcell(:)
-  write(Invar%stdout,'(1x,a20,20(1x,i4))') string,(Invar%typat_unitcell(jj),jj=1,Invar%natom_unitcell)
-! To avoid some troubles and inconsistency between the .in and .nc files, when we use NetCDF or not.    
-  if (Invar%netcdf) then
-    read(40,*) string
-    backspace(40)
-    if (string.eq.'ntypat') then
-      write(Invar%stdlog,'(1x,a)') 'When the NetCDF file .nc is used, the ntypat keywork is not allowed.' 
-      ABI_ERROR('ACTION : Please modify your input file')
-    end if  
-    string='ntypat'
-  else
-    read(40,*) string
-    backspace(40)
-    if (string.ne.'ntypat') then
-      write(Invar%stdlog,'(1x,a)') 'The NetCDF file .nc is not used.' 
-      write(Invar%stdlog,'(1x,a,1x,a)') 'In your input file, the code search the ntypat keywork but found :',string
-      ABI_ERROR('ACTION : Please modify your input file')
-    end if  
-    read(40,*) string,Invar%ntypat
-  end if  
-  write(Invar%stdout,'(1x,a20,1x,i4)') string,Invar%ntypat
-  if (Invar%netcdf) then
-    string='amu'
-  else  
-    ABI_MALLOC(Invar%amu,(Invar%ntypat)); Invar%amu(:)=zero
-    read(40,*) string,Invar%amu(:)
-  end if  
-  write(Invar%stdout,'(1x,a20,20(1x,f15.10))') string,(Invar%amu(jj),jj=1,Invar%ntypat)
-! Define supercell (as a function of the unitcell defined above)
-  read(40,*) string
-  write(Invar%stdout,'(a)') ' ======================= Define the supercell ================================' 
-  if (Invar%netcdf) then
-    Invar%rprimd_md(:,:)=Hist%rprimd(:,:,Hist%ihist)
-!   Transpose rprimd (which is defined column-line)
-    do ii=1,3
-      do jj=1,3
-        rprimd_mdt(ii,jj)=Invar%rprimd_md(jj,ii)
-      end do
-    end do
-    Invar%rprimd_md(:,:)=rprimd_mdt(:,:)
-    string='rprimd'
-  else
-    read(40,*) string,Invar%rprimd_md(1,:),Invar%rprimd_md(2,:),Invar%rprimd_md(3,:)
-  end if  
-  write(Invar%stdout,'(1x,a20)') string
+  end do
+  write(Invar%stdout,'(1x,a20,20(1x,i4))') ljust('typat_unitcell',20),(Invar%typat_unitcell(jj),jj=1,Invar%natom_unitcell)
+  write(Invar%stdout,'(1x,a20,1x,i4)') ljust('ntypat',20),Invar%ntypat
+  write(Invar%stdout,'(1x,a20,20(1x,f15.10))') ljust('amu',20),(Invar%amu(jj),jj=1,Invar%ntypat)
+
+! znucl (optional)
+  if (.not.Invar%netcdf) then
+    call intagm(dprarr, intarr, jdtset, marr, Invar%ntypat, string(1:lenstr), 'znucl', tread, 'DPR')
+    if (tread == 1) then
+      ABI_MALLOC(Invar%znucl,(Invar%ntypat)); Invar%znucl(:)=zero
+      Invar%znucl = dprarr(1:Invar%ntypat)
+      write(Invar%stdout,'(1x,a20,20(1x,f15.10))') ljust('znucl',20),(Invar%znucl(jj),jj=1,Invar%ntypat)
+    end if
+  end if
+
+
+  write(Invar%stdout,'(a)') ' ======================= Define the supercell ================================'
+  write(Invar%stdout,'(1x,a20)') ljust('rprimd',20)
   do ii=1,3
     write(Invar%stdout,'(22x,3(f15.10,1x))') (Invar%rprimd_md(ii,jj),jj=1,3)
-  end do  
-  read(40,*) string,Invar%multiplicity(1,:),Invar%multiplicity(2,:),Invar%multiplicity(3,:)
-  write(Invar%stdout,'(1x,a20)') string
+  end do
+  write(Invar%stdout,'(1x,a20)') ljust('multiplicity',20)
   do ii=1,3
     write(Invar%stdout,'(22x,3(f15.10,1x))') (Invar%multiplicity(ii,jj),jj=1,3)
-  end do  
-  if (Invar%netcdf) then
-    string='natom'
-  else
-    read(40,*) string,Invar%natom
-  end if
-  write(Invar%stdout,'(1x,a20,1x,i4)') string,Invar%natom
-  if (Invar%netcdf) then
-    string='typat'
-  else
-    ABI_MALLOC(Invar%typat,(Invar%natom)); Invar%typat(:)=0 
-    read(40,*) string,Invar%typat(:)
-  end if  
-  write(Invar%stdout,'(1x,a20)') string
+  end do
+  write(Invar%stdout,'(1x,a20,1x,i4)') ljust('natom',20),Invar%natom
+  write(Invar%stdout,'(1x,a20)') ljust('typat',20)
   do ii=1,Invar%natom,10
     if (ii+9.lt.Invar%natom) then
       write(Invar%stdout,'(22x,10(i4,1x))') (Invar%typat(ii+jj-1),jj=1,10)
     else
       write(Invar%stdout,'(22x,10(i4,1x))') (Invar%typat(jj),jj=ii,Invar%natom)
-    end if  
-  end do  
-  read(40,*) string,Invar%temperature
-  write(Invar%stdout,'(1x,a20,1x,f15.10)') string,Invar%temperature
-! Define phonons computational details
-  read(40,*) string
-  write(Invar%stdout,'(a)') ' ======================= Define computational details ========================' 
-  read(40,*) string,Invar%nstep_max
-  write(Invar%stdout,'(1x,a20,1x,i5)') string,Invar%nstep_max
-  read(40,*) string,Invar%nstep_min
-  write(Invar%stdout,'(1x,a20,1x,i5)') string,Invar%nstep_min
-  read(40,*) string,Invar%rcut
-  write(Invar%stdout,'(1x,a20,1x,f15.10)') string,Invar%rcut
-! Optional input variables  
-  read(40,*) string
-  write(Invar%stdout,'(a)') ' ======================= Optional input variables ============================' 
-  do ii=1,100
-    read(40,*) string
-    backspace(40)
-    if (string.eq.dosdeltae) then
-      read(40,*) string,Invar%dosdeltae
-      write(Invar%stdout,'(1x,a20,1x,f15.10)') string,Invar%dosdeltae
-    else if (string.eq.use_ideal_positions) then  
-      read(40,*) string,Invar%use_ideal_positions
-      write(Invar%stdout,'(1x,a20,1x,i4)') string,Invar%use_ideal_positions
-    else if (string.eq.born_charge) then  
-      ABI_MALLOC(Invar%born_charge,(Invar%ntypat)); Invar%born_charge(:)=0.d0
-      Invar%loto=.true.
-      read(40,*) string,Invar%born_charge(:)
-      write(Invar%stdout,'(1x,a20,20(1x,f15.10))') string,(Invar%born_charge(jj),jj=1,Invar%ntypat)
-    else if (string.eq.dielec_constant) then  
-      read(40,*) string,Invar%dielec_constant
-      write(Invar%stdout,'(1x,a20,1x,f15.10)') string,Invar%dielec_constant
-    else if (string.eq.bzpath) then  
-      read(40,*) string,Invar%bzpath
-      write(Invar%stdout,'(1x,a20,1x,i4)') string,Invar%bzpath
-      if (Invar%bzpath.lt.0) then
-        ABI_MALLOC(Invar%qpt,(3,abs(Invar%bzpath))); Invar%qpt(:,:)=zero
-        write(Invar%stdout,'(a)') ' Q points as given in the input file:'
-        do jj=1,abs(Invar%bzpath)
-          read(40,*) Invar%qpt(:,jj)
-          write(Invar%stdout,'(22x,3(f15.10,1x))') Invar%qpt(:,jj)
-        end do  
-      else if (Invar%bzpath.gt.0) then
-        ABI_MALLOC(Invar%special_qpt,(Invar%bzpath))
-        backspace(40)
-        read(40,*) string,tmp,(Invar%special_qpt(jj),jj=1,Invar%bzpath)
-        write(Invar%stdout,'(a,1x,a2,10("-",a2))') ' Special q-points: ',Invar%special_qpt(:)
-      end if
-    else if (string.eq.order) then  
-      read(40,*) string,Invar%order
-      backspace(40)
-      if (Invar%order.eq.3) then
-        read(40,*) string,Invar%order,Invar%rcut3
-        write(Invar%stdout,'(1x,a20,1x,i4,1x,f15.10)') string,Invar%order,Invar%rcut3
-        if (Invar%rcut3.gt.Invar%rcut) then
-          ABI_ERROR('The cutoff radius of the third order cannot be greater than the second order one.')
-        end if  
-      else if (Invar%order.eq.4) then
-        read(40,*) string,Invar%order,Invar%rcut3,Invar%rcut4
-        write(Invar%stdout,'(1x,a20,1x,i4,2(1x,f15.10))') string,Invar%order,Invar%rcut3,Invar%rcut4
-        if (Invar%rcut4.gt.Invar%rcut) then
-          ABI_ERROR('The cutoff radius of the fourth order cannot be greater than the second order one.')
-        end if  
-      else
-        ABI_ERROR('Only the 3rd and 4th orders are allowed. Change your input file.')
-      end if
-    else if (string.eq.slice) then  
-      read(40,*) string,Invar%slice
-      write(Invar%stdout,'(1x,a20,1x,i4)') string,Invar%slice
-    else if (string.eq.enunit) then  
-      read(40,*) string,Invar%enunit
-      if (Invar%enunit.eq.0) write(Invar%stdout,'(1x,a20,1x,i4,1x,a)') string,Invar%enunit,'(Phonon frequencies in meV)'
-      if (Invar%enunit.eq.1) write(Invar%stdout,'(1x,a20,1x,i4,1x,a)') string,Invar%enunit,'(Phonon frequencies in cm-1)'
-      if (Invar%enunit.eq.2) write(Invar%stdout,'(1x,a20,1x,i4,1x,a)') string,Invar%enunit,'(Phonon frequencies in mHa)'
-      if (Invar%enunit.eq.3) write(Invar%stdout,'(1x,a20,1x,i4,1x,a)') string,Invar%enunit,'(Phonon frequencies in THz)'
-    else if (string.eq.nproc) then  
-      read(40,*) string,Invar%nproc(1),Invar%nproc(2)
-      write(Invar%stdout,'(1x,a20,1x,i4,1x,i4)') string,Invar%nproc(1),Invar%nproc(2)
-    else if (string.eq.readifc) then  
-      read(40,*) string,Invar%readifc
-      if (Invar%readifc.eq.1) then
-        backspace(40)
-        read(40,*) string,Invar%readifc,Invar%tolread
-        write(Invar%stdout,'(1x,a20,1x,i4,1x,f15.10)') string,Invar%readifc,Invar%tolread
-      else  
-        write(Invar%stdout,'(1x,a20,1x,i4)') string,Invar%readifc
-      end if  
-    else if (string.eq.alloy) then  
-      read(40,*) string,Invar%alloy,Invar%ityp_alloy1,Invar%ityp_alloy2
-      write(Invar%stdout,'(1x,a20,1x,3(i4,1x))') string,Invar%alloy,Invar%ityp_alloy1,Invar%ityp_alloy2
-    else if (string.eq.together) then  
-      read(40,*) string,Invar%together
-      write(Invar%stdout,'(1x,a20,1x,i4)') string,Invar%together
-    else if (string.eq.bzlength) then  
-      read(40,*) string,Invar%bzlength
-      write(Invar%stdout,'(1x,a20,1x,i4)') string,Invar%bzlength
-      ABI_MALLOC(Invar%lgth_segments,(Invar%bzlength))
-      backspace(40)
-      read(40,*) string,tmp,(Invar%lgth_segments(jj),jj=1,Invar%bzlength)
-      write(Invar%stdout,'(a,1x,i3,10("-",i3))') ' Length of BZ : ',Invar%lgth_segments(:)
-    else if (string.eq.ngqpt1) then  
-      read(40,*) string,Invar%ngqpt1(:)
-      write(Invar%stdout,'(1x,a20,1x,3(i4,1x))') string,Invar%ngqpt1(:)
-    else if (string.eq.ngqpt2) then  
-      read(40,*) string,Invar%ngqpt2(:)
-      write(Invar%stdout,'(1x,a20,1x,3(i4,1x))') string,Invar%ngqpt2(:)
-    else if (string.eq.tolmotifinboxmatch) then  
-      read(40,*) string,Invar%tolmotif,Invar%tolinbox,Invar%tolmatch
-      write(Invar%stdout,'(1x,a20,f10.5)') 'tolmotif            ',Invar%tolmotif
-      write(Invar%stdout,'(1x,a20,f10.5)') 'tolinbox            ',Invar%tolinbox
-      write(Invar%stdout,'(1x,a20,f10.5)') 'tolmatch            ',Invar%tolmatch
-    else if (string.eq.use_weights) then
-      read(40,*) string,Invar%use_weights
-      write(Invar%stdout,'(1x,a20,1x,i4)') string,Invar%use_weights
-    else if (string.eq.TheEnd) then
-      exit
-    else 
-      write(Invar%stdout,'(a,1x,a)') 'This keyword is not allowed',string
-      ABI_ERROR('A keyword is not allowed. See the log file.')
-    end if  
+    end if
   end do
-! Output very important informations 
+
+  write(Invar%stdout,'(a)') ' ======================= Define computational details ========================'
+  write(Invar%stdout,'(1x,a20,1x,i5)') ljust('nstep_max',20),Invar%nstep_max
+  write(Invar%stdout,'(1x,a20,1x,i5)') ljust('nstep_min',20),Invar%nstep_min
+  write(Invar%stdout,'(1x,a20,1x,f15.10)') ljust('rcut',20),Invar%rcut
+  write(Invar%stdout,'(1x,a20,1x,f15.10)') ljust('temperature',20),Invar%temperature
+
+
+! =========================================================================== !
+! Optional input variables
+
+  write(Invar%stdout,'(a)') ' ======================= Optional input variables ============================'
+
+! dosdeltae
+  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'dosdeltae', tread, 'ENE')
+  if (tread == 1) then
+    Invar%dosdeltae = dprarr(1)
+    write(Invar%stdout,'(1x,a20,1x,f15.10)') ljust('dosdeltae',20),Invar%dosdeltae
+  end if
+
+! use_ideal_positions
+  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'use_ideal_positions', tread, 'INT')
+  if (tread == 1) then
+    Invar%use_ideal_positions = intarr(1)
+    write(Invar%stdout,'(1x,a20,1x,i4)') ljust('use_ideal_positions',20),Invar%use_ideal_positions
+  end if
+
+! born_charge
+  call intagm(dprarr, intarr, jdtset, marr, Invar%ntypat, string(1:lenstr), 'born_charge', tread, 'DPR')
+  if (tread == 1) then
+    ABI_MALLOC(Invar%born_charge,(Invar%ntypat)); Invar%born_charge(:)=zero
+    Invar%loto=.true.
+    Invar%born_charge = dprarr(1:Invar%ntypat)
+    write(Invar%stdout,'(1x,a20,20(1x,f15.10))') ljust('born_charge',20),(Invar%born_charge(jj),jj=1,Invar%ntypat)
+  end if
+
+! dielec_constant
+  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'dielec_constant', tread, 'DPR')
+  if (tread == 1) then
+    Invar%dielec_constant = dprarr(1)
+    write(Invar%stdout,'(1x,a20,1x,f15.10)') ljust('dielec_constant',20),Invar%dielec_constant
+  end if
+
+! bzpath
+  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'bzpath', tread, 'INT')
+  if (tread == 1) then
+    Invar%bzpath = intarr(1)
+    write(Invar%stdout,'(1x,a20,1x,i4)') ljust('bzpath',20),Invar%bzpath
+
+    if (Invar%bzpath.lt.0) then
+      ABI_MALLOC(Invar%qpt,(3,abs(Invar%bzpath))); Invar%qpt(:,:)=zero
+
+      call intagm(dprarr, intarr, jdtset, marr, 1+3*abs(Invar%bzpath), string(1:lenstr), 'bzpath', tread, 'DPR')
+      Invar%qpt(:,:) = reshape(dprarr(2:1+3*abs(Invar%bzpath)), (/3,abs(Invar%bzpath)/))
+
+      write(Invar%stdout,'(a)') ' Q points as given in the input file:'
+      do jj=1,abs(Invar%bzpath)
+        write(Invar%stdout,'(22x,3(f15.10,1x))') Invar%qpt(:,jj)
+      end do
+
+    else if (Invar%bzpath.gt.0) then
+      ABI_MALLOC(Invar%special_qpt,(Invar%bzpath))
+      call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'special_qpt', tread, 'KEY', key_value=msg)
+      if (tread == 1) then
+        jj = 1
+        do ii=1,Invar%bzpath
+          Invar%special_qpt(ii) = "  "
+          ierr = next_token(msg,jj,Invar%special_qpt(ii))
+          !jj = 2*ii-1
+          !Invar%special_qpt(ii) = msg(jj:jj)
+        end do
+        write(Invar%stdout,'(a,1x,a2,10("-",a2))') ' Special q-points: ',Invar%special_qpt(:)
+      else
+        write(msg,*)&
+         'Variable bzpath > 0, but variable "special_qpt" was not found in input file.'
+        ABI_ERROR(msg)
+      end if
+    end if
+  end if
+
+! order
+  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'order', tread, 'INT')
+  if (tread == 1) then
+    Invar%order = intarr(1)
+    if (Invar%order.eq.3) then
+      call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'order', tread, 'DPR')
+      Invar%rcut3 = dprarr(2)
+      write(Invar%stdout,'(1x,a20,1x,i4,1x,f15.10)') ljust('order',20),Invar%order,Invar%rcut3
+      if (Invar%rcut3.gt.Invar%rcut) then
+        ABI_ERROR('The cutoff radius of the third order cannot be greater than the second order one.')
+      end if
+    else if (Invar%order.eq.4) then
+      call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'order', tread, 'DPR')
+      Invar%rcut3 = dprarr(2)
+      Invar%rcut4 = dprarr(3)
+      write(Invar%stdout,'(1x,a20,1x,i4,2(1x,f15.10))') ljust('order',20),Invar%order,Invar%rcut3,Invar%rcut4
+      if (Invar%rcut4.gt.Invar%rcut) then
+        ABI_ERROR('The cutoff radius of the fourth order cannot be greater than the second order one.')
+      end if
+    else
+      ABI_ERROR('Only the 3rd and 4th orders are allowed. Change your input file.')
+    end if
+  end if
+
+! slice
+  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'slice', tread, 'INT')
+  if (tread == 1) then
+    Invar%slice = intarr(1)
+    write(Invar%stdout,'(1x,a20,1x,i4)') ljust('slice',20),Invar%slice
+  end if
+
+! enunit
+  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'enunit', tread, 'INT')
+  if (tread == 1) then
+    Invar%enunit = intarr(1)
+    if (Invar%enunit.eq.0) write(Invar%stdout,'(1x,a20,1x,i4,1x,a)') ljust('enunit',20),Invar%enunit,'(Phonon frequencies in meV)'
+    if (Invar%enunit.eq.1) write(Invar%stdout,'(1x,a20,1x,i4,1x,a)') ljust('enunit',20),Invar%enunit,'(Phonon frequencies in cm-1)'
+    if (Invar%enunit.eq.2) write(Invar%stdout,'(1x,a20,1x,i4,1x,a)') ljust('enunit',20),Invar%enunit,'(Phonon frequencies in mHa)'
+    if (Invar%enunit.eq.3) write(Invar%stdout,'(1x,a20,1x,i4,1x,a)') ljust('enunit',20),Invar%enunit,'(Phonon frequencies in THz)'
+  end if
+
+! nproc
+  call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'nproc', tread, 'INT')
+  if (tread == 1) then
+    Invar%nproc(1:2) = intarr(1:2)
+    write(Invar%stdout,'(1x,a20,1x,i4,1x,i4)') ljust('nproc',20),Invar%nproc(1),Invar%nproc(2)
+  end if
+
+! readifc
+  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'readifc', tread, 'INT')
+  if (tread == 1) then
+    Invar%readifc = intarr(1)
+    if (Invar%readifc.eq.1) then
+      call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'readifc', tread, 'DPR')
+      Invar%tolread = dprarr(1)
+      write(Invar%stdout,'(1x,a20,1x,i4,1x,f15.10)') ljust('readifc',20),Invar%readifc,Invar%tolread
+    else
+      write(Invar%stdout,'(1x,a20,1x,i4)') ljust('readifc',20),Invar%readifc
+    end if
+  end if
+
+! alloy
+  call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'alloy', tread, 'INT')
+  if (tread == 1) then
+    Invar%alloy = intarr(1)
+    Invar%ityp_alloy1 = intarr(2)
+    Invar%ityp_alloy2 = intarr(3)
+    write(Invar%stdout,'(1x,a20,1x,3(i4,1x))') ljust('alloy',20),Invar%alloy,Invar%ityp_alloy1,Invar%ityp_alloy2
+  end if
+
+! together
+  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'together', tread, 'INT')
+  if (tread == 1) then
+    Invar%together = intarr(1)
+    write(Invar%stdout,'(1x,a20,1x,i4)') ljust('together',20),Invar%together
+  end if
+
+! bzlength
+  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'bzlength', tread, 'INT')
+  if (tread == 1) then
+    Invar%bzlength = intarr(1)
+    write(Invar%stdout,'(1x,a20,1x,i4)') ljust('bzlength',20),Invar%bzlength
+    ABI_MALLOC(Invar%lgth_segments,(Invar%bzlength))
+    call intagm(dprarr, intarr, jdtset, marr, 1+Invar%bzlength, string(1:lenstr), 'bzlength', tread, 'DPR')
+    Invar%lgth_segments = dprarr(2:1+Invar%bzlength)
+    write(Invar%stdout,'(a,1x,i3,10("-",i3))') ' Length of BZ : ',Invar%lgth_segments(:)
+  end if
+
+! ngqpt1
+  call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'ngqpt1', tread, 'INT')
+  if (tread == 1) then
+    Invar%ngqpt1 = intarr(1:3)
+    write(Invar%stdout,'(1x,a20,1x,3(i4,1x))') ljust('ngqpt1',20),Invar%ngqpt1(:)
+  end if
+
+! ngqpt2
+  call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'ngqpt2', tread, 'INT')
+  if (tread == 1) then
+    Invar%ngqpt2 = intarr(1:3)
+    write(Invar%stdout,'(1x,a20,1x,3(i4,1x))') ljust('ngqpt2',20),Invar%ngqpt2(:)
+  end if
+
+! tolmotifinboxmatch
+  !call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'tolmotifinboxmatch', tread, 'DPR')
+  !if (tread == 1) then
+  !  Invar%tolmotif = dprarr(1)
+  !  Invar%tolinbox = dprarr(2)
+  !  Invar%tolmatch = dprarr(3)
+  !  write(Invar%stdout,'(1x,a20,f10.5)') ljust('tolmotif',20),Invar%tolmotif
+  !  write(Invar%stdout,'(1x,a20,f10.5)') ljust('tolinbox',20),Invar%tolinbox
+  !  write(Invar%stdout,'(1x,a20,f10.5)') ljust('tolmatch',20),Invar%tolmatch
+  !end if
+
+  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'tolmotif', tread, 'DPR')
+  if (tread == 1) then
+    Invar%tolmotif = dprarr(1)
+    write(Invar%stdout,'(1x,a20,f10.5)') ljust('tolmotif',20),Invar%tolmotif
+  end if
+
+  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'tolinbox', tread, 'DPR')
+  if (tread == 1) then
+    Invar%tolinbox = dprarr(1)
+    write(Invar%stdout,'(1x,a20,f10.5)') ljust('tolinbox',20),Invar%tolinbox
+  end if
+
+  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'tolmatch', tread, 'DPR')
+  if (tread == 1) then
+    Invar%tolmatch = dprarr(1)
+    write(Invar%stdout,'(1x,a20,f10.5)') ljust('tolmatch',20),Invar%tolmatch
+  end if
+
+! use_weights
+  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'use_weights', tread, 'INT')
+  if (tread == 1) then
+    Invar%use_weights = intarr(1)
+    write(Invar%stdout,'(1x,a20,1x,i4)') ljust('use_weights',20),Invar%use_weights
+  end if
+
+  ABI_FREE(intarr)
+  ABI_FREE(dprarr)
+
+! =========================================================================== !
+! Output other information and perform some checks
+
   if (Invar%use_ideal_positions.eq.0) then
     write(Invar%stdout,'(a)') ' USE AVERAGE POSITIONS TO COMPUTE SPECTRUM'
   else if (Invar%use_ideal_positions.eq.1) then
@@ -576,73 +862,75 @@ contains
 
 ! Allowed values
   if ((Invar%together.ne.1).and.(Invar%together.ne.0)) then
-    ABI_ERROR('STOP: The value of input variable TOGETHER is not allowed') 
-  end if  
+    ABI_ERROR('STOP: The value of input variable TOGETHER is not allowed')
+  end if
   if ((Invar%alloy.ne.1).and.(Invar%alloy.ne.0)) then
-    ABI_ERROR('STOP: The value of input variable ALLOY is not allowed') 
-  end if  
+    ABI_ERROR('STOP: The value of input variable ALLOY is not allowed')
+  end if
   if (Invar%alloy.ge.1) then
     if ((Invar%ityp_alloy1.lt.1).or.(Invar%ityp_alloy2.lt.1).or.&
-&       (Invar%ityp_alloy1.gt.Invar%natom_unitcell).or.(Invar%ityp_alloy2.gt.Invar%natom_unitcell)) then     
-      ABI_ERROR('STOP: The value of input variables IALLOY are not allowed') 
-    end if  
-  end if  
-  
+&       (Invar%ityp_alloy1.gt.Invar%natom_unitcell).or.(Invar%ityp_alloy2.gt.Invar%natom_unitcell)) then
+      ABI_ERROR('STOP: The value of input variables IALLOY are not allowed')
+    end if
+  end if
+
 ! Incompatible variables :
   if ((Invar%readifc.eq.1).and.(Invar%together.eq.1).and.(Invar%order.gt.2)) then
     ABI_ERROR('STOP: readifc=1, together=1 and order=3 or 4 are incompatible')
-  end if  
+  end if
 
-! If alloy=1 (VCA), redefine all the data depending on (n)typat(_unitcell) and natom_unitcell
+! =========================================================================== !
+! Treat virtual crystal approximation (VCA) when alloy=1.
+! Redefine all the data depending on (n)typat(_unitcell) and natom_unitcell
+
   if (Invar%alloy.eq.1) then
     sum_alloy1=0
     sum_alloy2=0
     do iatom=1,Invar%natom
       if (Invar%typat(iatom).eq.Invar%ityp_alloy1) then
-        sum_alloy1=sum_alloy1+1      
-      end if  
+        sum_alloy1=sum_alloy1+1
+      end if
       if (Invar%typat(iatom).eq.Invar%ityp_alloy2) then
-        sum_alloy2=sum_alloy2+1      
-      end if  
+        sum_alloy2=sum_alloy2+1
+      end if
     end do
     amu_average   =(Invar%amu        (Invar%ityp_alloy1)*sum_alloy1+&
 &                   Invar%amu        (Invar%ityp_alloy2)*sum_alloy2)/(sum_alloy1+sum_alloy2)
     if (Invar%loto) then
       born_average=(Invar%born_charge(Invar%ityp_alloy1)*sum_alloy1+&
 &                   Invar%born_charge(Invar%ityp_alloy2)*sum_alloy2)/(sum_alloy1+sum_alloy2)
-    end if  
+    end if
     shift=0
     do iatom=1,Invar%natom_unitcell
       if (Invar%typat_unitcell(iatom).lt.max(Invar%ityp_alloy1,Invar%ityp_alloy2)) then
         Invar%typat_unitcell (iatom-shift)=Invar%typat_unitcell (iatom)
         Invar%xred_unitcell(:,iatom-shift)=Invar%xred_unitcell(:,iatom)
       else if (Invar%typat_unitcell(iatom).eq.max(Invar%ityp_alloy1,Invar%ityp_alloy2)) then
-        shift=shift+1      
+        shift=shift+1
       else if (Invar%typat_unitcell(iatom).gt.max(Invar%ityp_alloy1,Invar%ityp_alloy2)) then
         Invar%typat_unitcell (iatom-shift)=Invar%typat_unitcell (iatom) - 1
         Invar%xred_unitcell(:,iatom-shift)=Invar%xred_unitcell(:,iatom)
-      end if  
-    end do  
+      end if
+    end do
     Invar%natom_unitcell=Invar%natom_unitcell-shift
-!    write(6,*) 'natom_unitcell=',Invar%natom_unitcell
     do iatom=1,Invar%natom
       if (Invar%typat(iatom).ge.max(Invar%ityp_alloy1,Invar%ityp_alloy2)) then
         Invar%typat(iatom)=Invar%typat(iatom) - 1
-      end if  
-    end do  
+      end if
+    end do
     do itypat=1,Invar%ntypat
       if (itypat.eq.min(Invar%ityp_alloy1,Invar%ityp_alloy2)) then
         Invar%amu          (itypat)=amu_average
         if (Invar%loto) then
           Invar%born_charge(itypat)=born_average
-        end if  
+        end if
       else if (itypat.gt.max(Invar%ityp_alloy1,Invar%ityp_alloy2)) then
         Invar%amu          (itypat-1)=Invar%amu        (itypat)
         if (Invar%loto) then
           Invar%born_charge(itypat-1)=Invar%born_charge(itypat)
-        end if  
-      end if  
-    end do  
+        end if
+      end if
+    end do
     Invar%ntypat=Invar%ntypat-1
 !    write(6,*) 'ntypat=',Invar%ntypat
     ABI_MALLOC(typat_unitcell_tmp,(  Invar%natom_unitcell))
@@ -668,57 +956,57 @@ contains
     Invar%amu            (:)=amu_tmp            (:)
     if (Invar%loto) then
       Invar%born_charge  (:)=born_charge_tmp (:)
-    end if  
+    end if
+    if (allocated(Invar%znucl)) then
+      ABI_MALLOC(znucl_tmp,(Invar%ntypat))
+      znucl_tmp(:) = Invar%znucl(1:Invar%ntypat)
+      ABI_REMALLOC(Invar%znucl,(Invar%ntypat))
+      Invar%znucl(:) = znucl_tmp(:)
+      ABI_FREE(znucl_tmp)
+    end if
     ABI_FREE(typat_unitcell_tmp)
     ABI_FREE(xred_unitcell_tmp)
     ABI_FREE(amu_tmp)
     if (Invar%loto) then
       ABI_FREE(born_charge_tmp)
-    end if  
-!    write(6,*)'typat_unitcell=',(Invar%typat_unitcell(ii),ii=1,Invar%natom_unitcell)
-!    write(6,*)'xred_unitcell =',(Invar%xred_unitcell(:,ii),ii=1,Invar%natom_unitcell)
-!    write(6,*)'typat=',(Invar%typat(ii),ii=1,Invar%natom)
-!    write(6,*)'amu=',(Invar%amu(ii),ii=1,Invar%ntypat)
+    end if
 
-    write(Invar%stdout,'(a)') ' ==================== Virtual Crystal Approximation ==========================' 
-    write(Invar%stdout,'(a)') ' ================ Several input variables are modified =======================' 
+    write(Invar%stdout,'(a)') ' ==================== Virtual Crystal Approximation =========================='
+    write(Invar%stdout,'(a)') ' ================ Several input variables are modified ======================='
     write(Invar%stdout,'(a)') ' --> Beginning of the modifications'
-    write(Invar%stdout,'(1x,a20,1x,i4)') 'ntypat',Invar%ntypat
-    write(Invar%stdout,'(1x,a20,1x,i4)') 'natom_unitcell',Invar%natom_unitcell
-    write(Invar%stdout,'(1x,a20,20(1x,f15.10))') 'amu',(Invar%amu(jj),jj=1,Invar%ntypat)
-    write(Invar%stdout,'(1x,a20,20(1x,i4))') 'typat_unitcell',(Invar%typat_unitcell(jj),jj=1,Invar%natom_unitcell)
-    write(Invar%stdout,'(1x,a20)') 'xred_unitcell'
+    write(Invar%stdout,'(1x,a20,1x,i4)') ljust('ntypat',20),Invar%ntypat
+    write(Invar%stdout,'(1x,a20,1x,i4)') ljust('natom_unitcell',20),Invar%natom_unitcell
+    write(Invar%stdout,'(1x,a20,20(1x,f15.10))') ljust('amu',20),(Invar%amu(jj),jj=1,Invar%ntypat)
+    write(Invar%stdout,'(1x,a20,20(1x,i4))') ljust('typat_unitcell',20),(Invar%typat_unitcell(jj),jj=1,Invar%natom_unitcell)
+    write(Invar%stdout,'(1x,a20)') ljust('xred_unitcell',20)
     do ii=1,Invar%natom_unitcell
       write(Invar%stdout,'(22x,3(f15.10,1x))') (Invar%xred_unitcell(jj,ii), jj=1,3)
-    end do  
+    end do
     if (Invar%loto) then
-      write(Invar%stdout,'(1x,a20,20(1x,f15.10))') 'born_charge',(Invar%born_charge(jj),jj=1,Invar%ntypat)
+      write(Invar%stdout,'(1x,a20,20(1x,f15.10))') ljust('born_charge',20),(Invar%born_charge(jj),jj=1,Invar%ntypat)
     end if
-    write(Invar%stdout,'(1x,a20)') 'typat'
+    write(Invar%stdout,'(1x,a20)') ljust('typat',20)
     do ii=1,Invar%natom,10
       if (ii+9.lt.Invar%natom) then
         write(Invar%stdout,'(22x,10(i4,1x))') (Invar%typat(ii+jj-1),jj=1,10)
       else
         write(Invar%stdout,'(22x,10(i4,1x))') (Invar%typat(jj),jj=ii,Invar%natom)
-      end if  
-    end do  
+      end if
+    end do
     write(Invar%stdout,'(a)') ' --> End of the modifications'
     write(Invar%stdout,'(a)') ' '
   end if
 
 ! Compute Nstep as a function of the slice
   Invar%nstep_tot=int(float(Invar%nstep_max-Invar%nstep_min)/float(Invar%slice)+1)
-  close(40)
-
   write(Invar%stdlog,*) 'nstep_tot=',Invar%nstep_tot
 
 
  end subroutine tdep_read_input
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- subroutine tdep_distrib_data(Hist,Invar,MPIdata)
+! ---------------------------------------------------------------------------
 
-  implicit none 
+ subroutine tdep_distrib_data(Hist,Invar,MPIdata)
 
   type(Input_type), intent(inout) :: Invar
   type(MPI_enreg_type), intent(in) :: MPIdata
@@ -726,9 +1014,9 @@ contains
 
   integer :: this_istep,istep,iatom,jstep
   double precision :: tmp1,tmp2,tmp3
-  
+
   Invar%my_nstep=MPIdata%my_nstep
- 
+
 ! Read xred.dat, fcart.dat and etot.dat ASCII files or extract them from the HIST.nc netcdf file.
   write(Invar%stdout,'(a)') ' '
   ABI_MALLOC(Invar%xred,(3,Invar%natom,Invar%my_nstep))  ; Invar%xred(:,:,:)=0.d0
@@ -738,7 +1026,7 @@ contains
   this_istep=0
   jstep=0
   if (Invar%use_weights.eq.1) then
-    open(unit=30,file=trim(Invar%input_prefix)//'weights.dat')
+    open(unit=30,file=trim(Invar%input_prefix)//'_weights.dat')
   else if (Invar%use_weights.eq.0) then
     Invar%weights=1.0d0/real(Invar%nstep_tot)
   endif
@@ -754,12 +1042,12 @@ contains
         Invar%fcart(:,:,this_istep)=Hist%fcart(:,:,istep)
         Invar%etot(this_istep)     =Hist%etot     (istep)
       end if
-    end do !istep  
+    end do !istep
     write(Invar%stdout,'(a)') ' The positions, forces and energies are extracted from the NetCDF file: HIST.nc'
   else
-    open(unit=60,file=trim(Invar%input_prefix)//'fcart.dat')
-    open(unit=50,file=trim(Invar%input_prefix)//'xred.dat')
-    open(unit=40,file=trim(Invar%input_prefix)//'etot.dat')
+    open(unit=60,file=trim(Invar%input_prefix)//'_fcart.dat')
+    open(unit=50,file=trim(Invar%input_prefix)//'_xred.dat')
+    open(unit=40,file=trim(Invar%input_prefix)//'_etot.dat')
     do istep=1,Invar%nstep_min-1
       if (Invar%use_weights.eq.1) then
          read(30,*) tmp1
@@ -769,7 +1057,7 @@ contains
         read(50,*) tmp1,tmp2,tmp3
         read(60,*) tmp1,tmp2,tmp3
       end do
-    end do 
+    end do
     do istep=Invar%nstep_min,Invar%nstep_max
       if (mod(istep-Invar%nstep_min,Invar%slice).ne.0) then
         if (Invar%use_weights.eq.1) then
@@ -801,7 +1089,7 @@ contains
             read(50,*) Invar%xred (1,iatom,this_istep),Invar%xred (2,iatom,this_istep),Invar%xred (3,iatom,this_istep)
             read(60,*) Invar%fcart(1,iatom,this_istep),Invar%fcart(2,iatom,this_istep),Invar%fcart(3,iatom,this_istep)
           end do
-        end if !my_step  
+        end if !my_step
       end if !slice
     end do !istep
     close(40)
@@ -812,14 +1100,13 @@ contains
   end if !netcdf
   if (Invar%use_weights.eq.1) then
     close(30)
-  end if  
+  end if
 
  end subroutine tdep_distrib_data
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !FB subroutine tdep_init_MPIshell(Invar,MPIdata)
 !FB
-!FB  implicit none 
 !FB
 !FB  type(Input_type), intent(in) :: Invar
 !FB  type(MPI_enreg_type), intent(in) :: MPIdata
@@ -829,14 +1116,12 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_init_MPIdata(Invar,MPIdata)
 
-  implicit none 
-
   type(Input_type), intent(in) :: Invar
   type(MPI_enreg_type), intent(out) :: MPIdata
   integer :: ii,remain,ierr,iproc,istep
   integer, allocatable :: tab_step(:)
   character(len=500) :: message
-  
+
 #if defined HAVE_MPI
   integer :: dimcart,commcart_2d,me_cart_2d
   logical :: reorder
@@ -851,7 +1136,7 @@ contains
   if (MPIdata%nproc_step*MPIdata%nproc_shell.ne.MPIdata%nproc) then
     ABI_WARNING('The parallelization is performed over steps')
     MPIdata%nproc_step = xmpi_comm_size(xmpi_world)
-  end if  
+  end if
 
   MPIdata%master         = 0
   MPIdata%iam_master     =.false.
@@ -893,7 +1178,7 @@ contains
   ABI_FREE(coords)
   if ((MPIdata%me_shell == MPIdata%master).and.(MPIdata%me_step == MPIdata%master)) then
     MPIdata%iam_master = .true.
-  end if  
+  end if
 
   ABI_MALLOC(keepdim,(dimcart))
 ! Create the communicator for shell distribution
@@ -933,7 +1218,7 @@ contains
   write(Invar%stdout,'(a,1x,i4)') '                               to nstep_max=',Invar%nstep_max
   if (Invar%slice.ne.1) then
     write(Invar%stdout,'(a,1x,i4)') '                                    by using a slice=',Invar%slice
-  end if  
+  end if
   write(Invar%stdout,'(a,1x,i4)') ' So, the real number of time steps is nstep=',Invar%nstep_tot
   if (MPIdata%nproc_step.gt.1) then
     write(Invar%stdout,'(a,1000(1x,i5))') '-Distribution of number of steps wrt the number of processors=',MPIdata%nstep_all(:)
@@ -974,8 +1259,6 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_destroy_mpidata(MPIdata)
 
-  implicit none 
-
   type(MPI_enreg_type), intent(inout) :: MPIdata
 
   ABI_FREE(MPIdata%shft_step)
@@ -988,8 +1271,6 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_destroy_invar(Invar)
 
-  implicit none 
-
   type(Input_type), intent(inout) :: Invar
 
   ABI_FREE(Invar%amu)
@@ -1000,10 +1281,10 @@ contains
     ABI_FREE(Invar%qpt)
   else if (Invar%bzpath.gt.0) then
     ABI_FREE(Invar%special_qpt)
-    end if  
-  if (Invar%bzlength.gt.0) then 
+    end if
+  if (Invar%bzlength.gt.0) then
     ABI_FREE(Invar%lgth_segments)
-  end if  
+  end if
   ABI_FREE(Invar%xred)
   ABI_FREE(Invar%fcart)
   ABI_FREE(Invar%etot)
@@ -1011,7 +1292,10 @@ contains
   ABI_FREE(Invar%xred_ideal)
   if (Invar%loto) then
     ABI_FREE(Invar%born_charge)
-  end if  
+  end if
+  if (allocated(Invar%znucl)) then
+    ABI_FREE(Invar%znucl)
+  end if
 
  end subroutine tdep_destroy_invar
 

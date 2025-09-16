@@ -3,11 +3,11 @@
 !! m_lattice_lwf_mover
 !!
 !! FUNCTION
-!! This module contains the mover for coupled lattice lwf dynamics 
+!! This module contains the mover for coupled lattice lwf dynamics
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2024 ABINIT group (hexu)
+!! Copyright (C) 2001-2025 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,6 +35,8 @@ module  m_lattice_lwf_mover
   use m_lattice_mover, only: lattice_mover_t
   use m_lwf_mover, only: lwf_mover_t
   use m_hashtable_strval, only: hash_table_t
+
+  implicit none
 
   private
 
@@ -99,7 +101,7 @@ contains
             & "Epot(Ha/uc)", "ETOT(Ha/uc)"
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
-    
+
     nstep=floor(self%lattice_mover%thermal_time/self%lattice_mover%dt)
     do i =1, nstep
        call self%lattice_mover%run_one_step(effpot=effpot, displacement=self%lattice_mover%displacement, &

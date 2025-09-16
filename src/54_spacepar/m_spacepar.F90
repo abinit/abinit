@@ -7,7 +7,7 @@
 !!  Unlike the procedures in m_cgtools, the routines declared in this module can use mpi_type.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (XG, BA, MT, DRH, DCA, GMR, MJV, JWZ)
+!!  Copyright (C) 2008-2025 ABINIT group (XG, BA, MT, DRH, DCA, GMR, MJV, JWZ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,11 +26,13 @@ module m_spacepar
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_xomp
  use m_sort
 
  use m_time,            only : timab
  use defs_abitypes,     only : MPI_type
- use m_symtk,           only : mati3inv, sg_multable, symdet, symatm, matr3inv
+ use m_matrix,          only : mati3inv, matr3inv
+ use m_symtk,           only : sg_multable, symdet, symatm
  use m_geometry,        only : metric, normv, symredcart,wedge_basis,wedge_product
  use m_gtermcutoff,     only : termcutoff
  use m_mpinfo,          only : ptabs_fourdp
@@ -66,7 +68,7 @@ contains
 !! make_vectornd
 !!
 !! FUNCTION
-!! For nuclear dipole moments m, compute vector potential A(r) = (m x (r-R))/|r-R|^3
+!! For nuclear dipole moments m, compute vector potential A(r) = \alpha^2(m x (r-R))/|r-R|^3
 !! in r space. This is done by computing A(G) followed by FFT.
 !!
 !! NOTES
@@ -149,7 +151,8 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nspden,nu
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  nproc_fft = mpi_enreg%nproc_fft; me_fft = mpi_enreg%me_fft
 
- prefac = -four_pi*j_dpc/(ucvol*two_pi)
+ ! the two_pi in the denominator arises from using G.G=2\pi gmet below
+ prefac = -four_pi*j_dpc*FineStructureConstant2/(ucvol*two_pi)
 
  ! Get the distrib associated with this fft_grid
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
@@ -754,12 +757,12 @@ end subroutine hartre
 !! INPUTS
 !!  diag(npw)=diagonal operator (real, spin-independent!)
 !!  filter= if 1, need to filter on the value of diag, that must be less than huge(zero)*1.d-11
-!!          otherwise, should be 0
+!!      otherwise, should be 0
 !!  istwf_k=storage mode of the vectors
 !!  npw=number of planewaves of the vector
 !!  nspinor=number of spinor components
 !!  vect(2,npw*nspinor)=vector
-!!  vect1(2,npw*nspinor*use_ndo)=vector1 (=vector in most of the cases)
+!!  vect1(2,npw*nspinor)=vector1 (=vector in most of the cases)
 !!  use_ndo = says if vect=/vect1
 !!
 !! OUTPUT
@@ -767,11 +770,13 @@ end subroutine hartre
 !!
 !! SOURCE
 
-subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,use_ndo,ar_im)
+subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,use_ndo,ar_im, &
+                       gpu_thread_limit) ! optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: filter,istwf_k,npw,nspinor,use_ndo
+ integer,intent(in),optional :: gpu_thread_limit
  real(dp),intent(out) :: ar
  real(dp),intent(out),optional :: ar_im
  type(MPI_type),intent(in) :: mpi_enreg
@@ -781,12 +786,9 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
 
 !Local variables-------------------------------
 !scalars
- integer :: i1,ierr,ipw,jpw,me_g0
+ integer :: i1,ierr,ipw,jpw,me_g0,nthreads_bak,l_gpu_thread_limit
  character(len=500) :: message
-!arrays
-
 ! *************************************************************************
- me_g0 = mpi_enreg%me_g0
 
  DBG_CHECK(ANY(filter==(/0,1/)),"Wrong filter")
  DBG_CHECK(ANY(nspinor==(/1,2/)),"Wrong nspinor")
@@ -794,8 +796,8 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
 
  if(nspinor==2 .and. istwf_k/=1)then
    write(message,'(a,a,a,i6,a,i6)')&
-&   'When istwf_k/=1, nspinor must be 1,',ch10,&
-&   'however, nspinor=',nspinor,', and istwf_k=',istwf_k
+   'When istwf_k/=1, nspinor must be 1,',ch10,&
+   'however, nspinor=',nspinor,', and istwf_k=',istwf_k
    ABI_BUG(message)
  end if
 
@@ -803,32 +805,41 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
    ABI_BUG('use_ndo==1, not tested, use istwfk=1')
  end if
 
+ me_g0 = mpi_enreg%me_g0
+
  ar=zero
  if(present(ar_im)) ar_im=zero
+
+ l_gpu_thread_limit=0; if(present(gpu_thread_limit)) l_gpu_thread_limit=gpu_thread_limit
+
+ if(l_gpu_thread_limit /= 0) then
+   nthreads_bak=xomp_get_num_threads(open_parallel=.True.)
+   call xomp_set_num_threads(min(l_gpu_thread_limit,nthreads_bak))
+ end if
 
 !Normal storage mode
  if(istwf_k==1)then
 
-!  No filter
+   ! No filter
    if(filter==0)then
-!$OMP PARALLEL DO REDUCTION(+:ar)
+     !$OMP PARALLEL DO REDUCTION(+:ar)
      do ipw=1,npw
        ar=ar+diag(ipw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
      end do
      if(nspinor==2)then
-!$OMP PARALLEL DO REDUCTION(+:ar) PRIVATE(jpw)
+       !$OMP PARALLEL DO REDUCTION(+:ar) PRIVATE(jpw)
        do ipw=1+npw,2*npw
          jpw=ipw-npw
          ar=ar+diag(jpw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
        end do
      end if
      if(use_ndo==1)then
-!$OMP PARALLEL DO REDUCTION(+:ar_im)
+       !$OMP PARALLEL DO REDUCTION(+:ar_im)
        do ipw=1,npw
          ar_im=ar_im+diag(ipw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
        end do
        if(nspinor == 2) then
-!$OMP PARALLEL DO REDUCTION(+:ar_im) PRIVATE(jpw)
+         !$OMP PARALLEL DO REDUCTION(+:ar_im) PRIVATE(jpw)
          do ipw=1+npw,2*npw
            jpw=ipw-npw
            ar_im=ar_im+diag(jpw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
@@ -836,28 +847,17 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
        end if
      end if
 
-!    !$OMP PARALLEL DO REDUCTION(+:ar,ar_im)
-!    do ipw=1,npw
-!    ar=ar+diag(ipw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
-!    if(use_ndo==1.and.nspinor==2) ar_im=ar_im+diag(ipw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
-!    end do
-!    if(nspinor==2)then
-!    !$OMP PARALLEL DO PRIVATE(ipw) REDUCTION(+:ar,ar_im)
-!    do ipw=1+npw,2*npw
-!    ar=ar+diag(ipw-npw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
-!    if(use_ndo==1.and.nspinor==2) ar_im=ar_im+diag(ipw-npw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
-!    end do
-!    end if
-   else ! will filter
+   else
+     ! will filter
 
-!$OMP PARALLEL DO REDUCTION(+:ar)
+     !$OMP PARALLEL DO REDUCTION(+:ar)
      do ipw=1,npw
        if(diag(ipw)<huge(zero)*1.d-11)then
          ar=ar+diag(ipw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
        end if
      end do
      if(nspinor==2)then
-!$OMP PARALLEL DO REDUCTION(+:ar) PRIVATE(jpw)
+       !$OMP PARALLEL DO REDUCTION(+:ar) PRIVATE(jpw)
        do ipw=1+npw,2*npw
          jpw=ipw-npw
          if(diag(jpw)<huge(zero)*1.d-11)then
@@ -869,14 +869,14 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
        if(.not.present(ar_im)) then
          ABI_BUG("use_ndo true and ar_im not present")
        end if
-!$OMP PARALLEL DO REDUCTION(+:ar_im)
+       !$OMP PARALLEL DO REDUCTION(+:ar_im)
        do ipw=1,npw
          if(diag(ipw)<huge(zero)*1.d-11)then
            ar_im=ar_im+diag(ipw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
          end if
        end do
        if(nspinor == 2) then
-!$OMP PARALLEL DO REDUCTION(+:ar_im) PRIVATE(jpw)
+         !$OMP PARALLEL DO REDUCTION(+:ar_im) PRIVATE(jpw)
          do ipw=1+npw,2*npw
            jpw=ipw-npw
            if(diag(jpw)<huge(zero)*1.d-11)then
@@ -885,24 +885,6 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
          end do
        end if
      end if
-
-
-!    !$OMP PARALLEL DO PRIVATE(ipw) REDUCTION(+:ar,ar_im)
-!    do ipw=1,npw
-!    if(diag(ipw)<huge(zero)*1.d-11)then
-!    ar=ar+diag(ipw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
-!    if(use_ndo==1.and.nspinor==2) ar_im=ar_im+diag(ipw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
-!    end if
-!    end do
-!    if(nspinor==2)then
-!    !$OMP PARALLEL DO PRIVATE(ipw) REDUCTION(+:ar,ar_im)
-!    do ipw=1+npw,2*npw
-!    if(diag(ipw-npw)<huge(zero)*1.d-11)then
-!    ar=ar+diag(ipw-npw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
-!    if(use_ndo==1.and.nspinor==2) ar_im=ar_im+diag(ipw-npw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
-!    end if
-!    end do
-!    end if ! nspinor==2
 
    end if ! filter==0
 
@@ -914,7 +896,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
        ar=half*diag(1)*vect(1,1)*vect1(1,1) ; i1=2
      end if
 
-!$OMP PARALLEL DO REDUCTION(+:ar)
+     !$OMP PARALLEL DO REDUCTION(+:ar)
      do ipw=i1,npw
        ar=ar+diag(ipw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
      end do
@@ -927,7 +909,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
        end if
      end if
 
-!$OMP PARALLEL DO REDUCTION(+:ar)
+     !$OMP PARALLEL DO REDUCTION(+:ar)
      do ipw=i1,npw
        if(diag(ipw)<huge(zero)*1.d-11)then
          ar=ar+diag(ipw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
@@ -942,10 +924,10 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
 !MPIWF need to make reduction on ar and ai .
  if(mpi_enreg%paral_kgb==1)then
    call xmpi_sum(ar,mpi_enreg%comm_bandspinorfft ,ierr)
-   if(present(ar_im))then
-     call xmpi_sum(ar_im,mpi_enreg%comm_bandspinorfft,ierr)
-   end if
+   if (present(ar_im)) call xmpi_sum(ar_im,mpi_enreg%comm_bandspinorfft,ierr)
  end if
+
+ if (l_gpu_thread_limit /= 0) call xomp_set_num_threads(nthreads_bak)
 
 end subroutine meanvalue_g
 !!***
@@ -1516,7 +1498,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
  real(dp) :: tsec(2)
  real(dp),allocatable :: magngx(:,:),magngy(:,:),magngz(:,:)
  real(dp),allocatable :: rhosu1_arr(:),rhosu2_arr(:),work(:)
- real(dp),allocatable :: symafm_used(:),symrec_cart(:,:,:),symrel_cart(:,:,:),tnons_used(:,:)
+ real(dp),allocatable :: symafm_used(:),symrec_cart(:,:,:),symrel_cart(:,:,:),tnons_used(:,:),sym_det(:)
 
 !*************************************************************************
 !
@@ -1719,6 +1701,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
        ABI_MALLOC(symrel_cart,(3,3,nsym_used))
        ABI_MALLOC(symafm_used,(nsym_used))
        ABI_MALLOC(tnons_used,(3,nsym_used))
+       ABI_MALLOC(sym_det,(nsym_used))
        jsym=0
        do isym=1,nsym
          if (symafm(isym)/=1.and.(.not.afm_noncoll)) cycle
@@ -1727,6 +1710,12 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
          symafm_used(jsym)=dble(symafm(isym))
          call symredcart(rprimd,gprimd,symrel_cart(:,:,jsym),symrel(:,:,isym))
          call matr3inv(symrel_cart(:,:,jsym),symrec_cart(:,:,jsym))
+         sym_det(jsym) = symrel_cart(1,1,isym)*symrel_cart(2,2,isym)*symrel_cart(3,3,isym)+&
+                   &     symrel_cart(2,1,isym)*symrel_cart(3,2,isym)*symrel_cart(1,3,isym)+&
+                   &     symrel_cart(1,2,isym)*symrel_cart(2,3,isym)*symrel_cart(3,1,isym) - &
+                   &    (symrel_cart(3,1,isym)*symrel_cart(2,2,isym)*symrel_cart(1,3,isym)+&
+                   &     symrel_cart(2,1,isym)*symrel_cart(1,2,isym)*symrel_cart(3,3,isym)+&
+                   &     symrel_cart(3,2,isym)*symrel_cart(2,3,isym)*symrel_cart(1,1,isym))
        end do
 
        numpt=count(irrzon(:,1,imagn)>0)
@@ -1798,12 +1787,12 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 !            The magnetization should transform as a vector in real space
 !            However, one acts with the INVERSE of the symmetry operation.
 !            => Inverse[symrel_cart] = Transpose[symrel_cart] because symrel_cart is unitary   ?!?!?
-             mxr=symrel_cart(1,1,jsym)*magngx(1,indsy)+symrel_cart(1,2,jsym)*magngy(1,indsy)+symrel_cart(1,3,jsym)*magngz(1,indsy)
-             mxi=symrel_cart(1,1,jsym)*magngx(2,indsy)+symrel_cart(1,2,jsym)*magngy(2,indsy)+symrel_cart(1,3,jsym)*magngz(2,indsy)
-             myr=symrel_cart(2,1,jsym)*magngx(1,indsy)+symrel_cart(2,2,jsym)*magngy(1,indsy)+symrel_cart(2,3,jsym)*magngz(1,indsy)
-             myi=symrel_cart(2,1,jsym)*magngx(2,indsy)+symrel_cart(2,2,jsym)*magngy(2,indsy)+symrel_cart(2,3,jsym)*magngz(2,indsy)
-             mzr=symrel_cart(3,1,jsym)*magngx(1,indsy)+symrel_cart(3,2,jsym)*magngy(1,indsy)+symrel_cart(3,3,jsym)*magngz(1,indsy)
-             mzi=symrel_cart(3,1,jsym)*magngx(2,indsy)+symrel_cart(3,2,jsym)*magngy(2,indsy)+symrel_cart(3,3,jsym)*magngz(2,indsy)
+             mxr=sym_det(jsym)*(symrel_cart(1,1,jsym)*magngx(1,indsy)+symrel_cart(1,2,jsym)*magngy(1,indsy)+symrel_cart(1,3,jsym)*magngz(1,indsy))
+             mxi=sym_det(jsym)*(symrel_cart(1,1,jsym)*magngx(2,indsy)+symrel_cart(1,2,jsym)*magngy(2,indsy)+symrel_cart(1,3,jsym)*magngz(2,indsy))
+             myr=sym_det(jsym)*(symrel_cart(2,1,jsym)*magngx(1,indsy)+symrel_cart(2,2,jsym)*magngy(1,indsy)+symrel_cart(2,3,jsym)*magngz(1,indsy))
+             myi=sym_det(jsym)*(symrel_cart(2,1,jsym)*magngx(2,indsy)+symrel_cart(2,2,jsym)*magngy(2,indsy)+symrel_cart(2,3,jsym)*magngz(2,indsy))
+             mzr=sym_det(jsym)*(symrel_cart(3,1,jsym)*magngx(1,indsy)+symrel_cart(3,2,jsym)*magngy(1,indsy)+symrel_cart(3,3,jsym)*magngz(1,indsy))
+             mzi=sym_det(jsym)*(symrel_cart(3,1,jsym)*magngx(2,indsy)+symrel_cart(3,2,jsym)*magngy(2,indsy)+symrel_cart(3,3,jsym)*magngz(2,indsy))
 
 !            mxr=symrel_cart(1,1,jsym)*magngx(1,indsy)+symrel_cart(2,1,jsym)*magngy(1,indsy)+symrel_cart(3,1,jsym)*magngz(1,indsy)
 !            mxi=symrel_cart(1,1,jsym)*magngx(2,indsy)+symrel_cart(2,1,jsym)*magngy(2,indsy)+symrel_cart(3,1,jsym)*magngz(2,indsy)
@@ -1878,12 +1867,12 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 !            phi=phnons(2,iup,imagn);if (rep==1) phi=phi*symafm_used(jsym) !(see irrzg.F90)
 !            The magnetization should transform as a vector in real space
 !            => symrel_cart  ?!?
-             mxr=symrec_cart(1,1,jsym)*magxsu1+symrec_cart(2,1,jsym)*magysu1+symrec_cart(3,1,jsym)*magzsu1
-             mxi=symrec_cart(1,1,jsym)*magxsu2+symrec_cart(2,1,jsym)*magysu2+symrec_cart(3,1,jsym)*magzsu2
-             myr=symrec_cart(1,2,jsym)*magxsu1+symrec_cart(2,2,jsym)*magysu1+symrec_cart(3,2,jsym)*magzsu1
-             myi=symrec_cart(1,2,jsym)*magxsu2+symrec_cart(2,2,jsym)*magysu2+symrec_cart(3,2,jsym)*magzsu2
-             mzr=symrec_cart(1,3,jsym)*magxsu1+symrec_cart(2,3,jsym)*magysu1+symrec_cart(3,3,jsym)*magzsu1
-             mzi=symrec_cart(1,3,jsym)*magxsu2+symrec_cart(2,3,jsym)*magysu2+symrec_cart(3,3,jsym)*magzsu2
+             mxr=sym_det(jsym)*(symrec_cart(1,1,jsym)*magxsu1+symrec_cart(2,1,jsym)*magysu1+symrec_cart(3,1,jsym)*magzsu1)
+             mxi=sym_det(jsym)*(symrec_cart(1,1,jsym)*magxsu2+symrec_cart(2,1,jsym)*magysu2+symrec_cart(3,1,jsym)*magzsu2)
+             myr=sym_det(jsym)*(symrec_cart(1,2,jsym)*magxsu1+symrec_cart(2,2,jsym)*magysu1+symrec_cart(3,2,jsym)*magzsu1)
+             myi=sym_det(jsym)*(symrec_cart(1,2,jsym)*magxsu2+symrec_cart(2,2,jsym)*magysu2+symrec_cart(3,2,jsym)*magzsu2)
+             mzr=sym_det(jsym)*(symrec_cart(1,3,jsym)*magxsu1+symrec_cart(2,3,jsym)*magysu1+symrec_cart(3,3,jsym)*magzsu1)
+             mzi=sym_det(jsym)*(symrec_cart(1,3,jsym)*magxsu2+symrec_cart(2,3,jsym)*magysu2+symrec_cart(3,3,jsym)*magzsu2)
 !            mxr=symrel_cart(1,1,jsym)*magxsu1+symrel_cart(1,2,jsym)*magysu1+symrel_cart(1,3,jsym)*magzsu1
 !            mxi=symrel_cart(1,1,jsym)*magxsu2+symrel_cart(1,2,jsym)*magysu2+symrel_cart(1,3,jsym)*magzsu2
 !            myr=symrel_cart(2,1,jsym)*magxsu1+symrel_cart(2,2,jsym)*magysu1+symrel_cart(2,3,jsym)*magzsu1
@@ -1905,6 +1894,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
        ABI_FREE(rhosu2_arr)
        ABI_FREE(symrec_cart)
        ABI_FREE(symrel_cart)
+       ABI_FREE(sym_det)
        ABI_FREE(symafm_used)
        ABI_FREE(tnons_used)
 
@@ -2626,7 +2616,7 @@ end subroutine setsym
 !!  The calculation is performed in reduced reciprocal space coordinates.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2024 ABINIT group (FIXME: add author)
+!!  Copyright (C) 2021-2025 ABINIT group (FIXME: add author)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2653,8 +2643,6 @@ end subroutine setsym
 !! SOURCE
 
 subroutine hartredq(cplex,gmet,gsqcut,mpi_enreg,nfft,ngfft,qdir,rhog,vqgradhart)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

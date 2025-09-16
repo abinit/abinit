@@ -9,7 +9,7 @@
 !!  using the perturbative approach.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2024 ABINIT group (MG)
+!! Copyright (C) 2008-2025 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -200,15 +200,10 @@ CONTAINS  !=====================================================================
 !! FUNCTION
 !!  Set all flags in melflags_t to 0.
 !!
-!! INPUTS
-!!
-!! SOURCE
-
 subroutine melflags_reset(Mflags)
 
 !Arguments ------------------------------------
  class(melflags_t),intent(inout) :: Mflags
-
 ! *************************************************************************
 
  Mflags%has_kinetic         = 0
@@ -247,7 +242,6 @@ subroutine melflags_copy(Mflags_in, Mflags_out)
 !Arguments ------------------------------------
  class(melflags_t),intent(in)    :: Mflags_in
  class(melflags_t),intent(inout) :: Mflags_out
-
 ! *************************************************************************
 
  call Mflags_out%reset()
@@ -282,7 +276,6 @@ subroutine melements_free(Mels)
 
 !Arguments ------------------------------------
  class(melements_t),intent(inout) :: Mels
-
 ! *************************************************************************
 
  ! integer arrays
@@ -337,7 +330,6 @@ subroutine my_select_melements(Mels, aname, flag_p, arr_p)
  type(melements_t),target,intent(in) :: Mels
 !arrays
  complex(dpc),ABI_CONTIGUOUS pointer :: arr_p(:,:,:,:)
-
 ! *************************************************************************
 
  SELECT CASE (tolower(aname))
@@ -409,7 +401,6 @@ subroutine melements_init(Mels, Mflags_in, nsppol, nspden, nspinor, nkibz, kibz,
 
 !Local variables-------------------------------
  integer :: ikibz,isppol,bmin,bmax,b1,b2
-
 ! *************************************************************************
 
  ! Copy flags.
@@ -519,7 +510,6 @@ subroutine melements_herm(Mels, aname)
 !arrays
  integer,parameter :: trsp_idx(2:4) = [2,4,3]
  complex(dpc),ABI_CONTIGUOUS pointer :: arr_p(:,:,:,:)
-
 ! *************************************************************************
 
  ! === Symmetrize matrix elements ===
@@ -603,7 +593,6 @@ subroutine melements_mpisum(Mels, comm, aname)
  !character(len=500) :: msg
 !arrays
  complex(dpc),ABI_CONTIGUOUS pointer :: arr_p(:,:,:,:)
-
 ! *************************************************************************
 
  do iname=1,NNAMES
@@ -656,8 +645,7 @@ subroutine melements_print(Mels, names_list, header, unit, prtvol, mode_paral)
  character(len=4),optional,intent(in) :: mode_paral
 
 !Local variables-------------------------------
- integer :: my_unt,my_prtvol,max_r,max_c,ii
- integer :: isppol,ikibz,iab,ib,b1,b2,my_nkeys,ikey
+ integer :: my_unt,my_prtvol,max_r,max_c,ii, isppol,ikibz,iab,ib,b1,b2,my_nkeys,ikey
  integer,pointer :: flag_p
  character(len=4) :: my_mode
  character(len=NAMELEN) :: key
@@ -671,7 +659,6 @@ subroutine melements_print(Mels, names_list, header, unit, prtvol, mode_paral)
    complex(dpc),ABI_CONTIGUOUS pointer :: arr_p(:,:,:,:)
  end type rarr_dpc4
  type(rarr_dpc4),allocatable :: data_p(:)
-
 ! *************************************************************************
 
  !@melements_t
@@ -681,30 +668,30 @@ subroutine melements_print(Mels, names_list, header, unit, prtvol, mode_paral)
 
  if (Mels%nspinor == 2) ABI_WARNING("nspinor=2 not coded")
 
- if (PRESENT(names_list)) then
+ if (present(names_list)) then
    my_nkeys=SIZE(names_list)
-   ABI_MALLOC(my_keys,(my_nkeys))
+   ABI_MALLOC(my_keys, (my_nkeys))
    my_keys = names_list
  else
-   my_nkeys=NNAMES
-   ABI_MALLOC(my_keys,(NNAMES))
+   my_nkeys = NNAMES
+   ABI_MALLOC(my_keys, (NNAMES))
    my_keys = ANAMES
  end if
 
- ABI_MALLOC(data_p,(my_nkeys))
- ABI_MALLOC(tab,(my_nkeys))
- tab=0
+ ABI_MALLOC(data_p, (my_nkeys))
+ ABI_MALLOC(tab, (my_nkeys))
+ tab = 0
 
  my_nkeys=0; str = "  ib"; ii=4
- do ikey=1,SIZE(my_keys)
+ do ikey=1,size(my_keys)
    key = my_keys(ikey)
    call my_select_melements(Mels,key,flag_p,data_p(ikey)%arr_p)
-   if (flag_p==2) then
-     my_nkeys=my_nkeys+1
-     tab(my_nkeys)=ikey
+   if (flag_p == 2) then
+     my_nkeys = my_nkeys+1
+     tab(my_nkeys) = ikey
      str(ii+1:)=" "//TRIM(tolower(key))
      ii = ii+MAX(1+LEN_TRIM(key),10)
-     ABI_CHECK(ii<490,"I'm gonna SIGFAULT!")
+     ABI_CHECK(ii <490, "I'm gonna SIGFAULT!")
    end if
  end do
 
@@ -728,7 +715,7 @@ subroutine melements_print(Mels, names_list, header, unit, prtvol, mode_paral)
     b1 = Mels%bands_idx(1,ikibz,isppol)
     b2 = Mels%bands_idx(2,ikibz,isppol)
 
-    if (Mels%flags%only_diago==1.or.my_prtvol==0) then
+    if (Mels%flags%only_diago==1 .or. my_prtvol==0) then
       ! Print only the diagonal.
       write(msg,'(a)')str
       call wrtout(my_unt,msg,my_mode)
@@ -762,8 +749,8 @@ subroutine melements_print(Mels, names_list, header, unit, prtvol, mode_paral)
         write(msg,'(3a)')" **** Off-diagonal elements of ",TRIM(my_keys(tab(ikey)))," **** "
         call wrtout(my_unt,msg,my_mode)
         do iab=1,Mels%nspinor**2
-          mat = data_p(tab(ikey))%arr_p(b1:b2,b1:b2,ikibz,iab)*Ha_eV
-          call print_arr(mat,max_r,max_c,my_unt,my_mode)
+          mat = data_p(tab(ikey))%arr_p(b1:b2,b1:b2,ikibz,iab) * Ha_eV
+          call print_arr([my_unt], mat, max_r, max_c)
         end do
         write(msg,'(a)')ch10
         call wrtout(my_unt,msg,my_mode)
@@ -818,7 +805,6 @@ subroutine melements_zero(Mels, irrep_tab, aname)
  character(len=NAMELEN) :: key
 !arrays
  complex(dpc),ABI_CONTIGUOUS pointer :: arr_p(:,:,:,:)
-
 ! *************************************************************************
 
  do iname=1,NNAMES
@@ -889,7 +875,6 @@ end subroutine melements_zero
 !!scalars
 ! integer :: ik,ib,spin
 ! real(dp) :: wtk,occ_bks
-!
 !! *************************************************************************
 !
 ! ex_energy = zero

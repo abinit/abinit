@@ -8,11 +8,17 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 import sys
 import os
 import argparse
+import platform
 
+from socket import gethostname
 from fkiss import termcolor
 from fkiss.tools import print_dataframe
 from fkiss.project import FortranFile, AbinitProject
 from fkiss.termcolor import cprint
+
+
+__version__ = "0.2.0"
+_my_name = os.path.basename(__file__) + "-" + __version__
 
 
 def get_epilog():
@@ -84,7 +90,7 @@ def get_parser():
     #copts_parser.add_argument('--loglevel', default="ERROR", type=str,
     #    help="Set the loglevel. Possible values: CRITICAL, ERROR (default), WARNING, INFO, DEBUG.")
     copts_parser.add_argument('--no-colors', default=False, action="store_true", help='Disable ASCII colors')
-    copts_parser.add_argument('-j', "--jobs", type=int, default=2,  help="Number of python processes to use.")
+    copts_parser.add_argument('-j', "--jobs", type=int, default=4,  help="Number of python processes to use.")
 
     # Parent parser for commands that operating on pandas dataframes
     pandas_parser = argparse.ArgumentParser(add_help=False)
@@ -207,6 +213,13 @@ def main():
         cprint("py2.x CANNOT USE jobs > 1. Setting jobs to 1. Use py3k", "yellow")
         options.jobs = 1
 
+    ncpus_detected = os.cpu_count()
+    system, node, release, version, machine, processor = platform.uname()
+
+    cprint("Running on %s -- system %s -- ncpus %s -- Python %s -- %s" % (
+          gethostname(), system, ncpus_detected, platform.python_version(), _my_name),
+          color='green', attrs=['underline'])
+
     #if options.command == "robodoc":
     #    from fkiss.mkrobodoc_dirs import mkrobodoc_files
     #    return mkrobodoc_files(".")
@@ -253,7 +266,7 @@ def main():
             cprint("Source tree changed. Need to parse source files again to rebuild dependency graph...", "yellow")
 
     if needs_reload:
-	# Parse the source and save new object.
+        # Parse the source and save new object.
         proj = AbinitProject(".", processes=options.jobs, verbose=options.verbose)
         proj.pickle_dump()
 
@@ -265,11 +278,14 @@ def main():
             cprint("validate returned retcode: %s. Aborting now" % retcode, "red")
             return retcode
 
-        #all_mods = proj.find_allmods("dummy_tests.F90")
-        #for mod in all_mods: print(mod.basename)
+        #retcode = proj.check_abirules(verbose=options.verbose)
+        #if retcode != 0:
+        #    cprint("check_abirules returned retcode: %s. Aborting now" % retcode, "red")
+        #    return retcode
 
         proj.write_binaries_conf(verbose=options.verbose, dryrun=False)
         proj.write_buildsys_files(verbose=options.verbose, dryrun=False)
+        proj.update_corelibs(verbose=options.verbose, dryrun=False)
 
     elif options.command == "print":
         if options.what is None:

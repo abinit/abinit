@@ -6,7 +6,7 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2019-2024 ABINIT group (MR,MS)
+!!  Copyright (C) 2019-2025 ABINIT group (MR,MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -56,7 +56,7 @@ contains
 !!  asr= if /=0 acustic sume rule is imposed on the dynamical matrix
 !!  d2asr(2,3,natom,3,natom)=ASR-correction
 !!  ddb<type(ddb_type)>=2nd order derivative database.
-!!  ddb<type(ddb_type)>=Long wave 3rd order derivative database.
+!!  ddb_lw<type(ddb_type)>=Long wave 3rd order derivative database.
 !!  ddb_version = 8 digit integer giving date. To mantain compatibility with old DDB files.
 !!  Crystal<type(crystal_t)>=Crystal structure parameters
 !!  filnamddb = name of the ddb file
@@ -76,8 +76,6 @@ contains
 !! SOURCE
 
 subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,ddb_version,crystal,filnamddb,flexoflg,prtvol,zeff)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1441,7 +1439,7 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,ddb_version,intstrn,lattflex
 !!
 !! SOURCE
 
-subroutine ddb_phi1(ddb,ddb_lw,ddb_version,crystal,filnamddb,phi1,phi2)
+subroutine ddb_phi1(ddb,ddb_lw,ddb_version,crystal,filnamddb,phi1)
 
  implicit none
 
@@ -1452,8 +1450,8 @@ subroutine ddb_phi1(ddb,ddb_lw,ddb_version,crystal,filnamddb,phi1,phi2)
  type(crystal_t),intent(in) :: crystal
  character(len=fnlen) :: filnamddb
 !arrays
- real(dp),intent(out) :: phi1(3,ddb%natom,3,ddb%natom,3)
- real(dp),intent(out) :: phi2(3,ddb%natom,3,3,3)
+ real(dp),intent(out) :: phi1(:,:,:,:,:)
+ !real(dp),intent(out) :: phi2(3,ddb%natom,3,3,3)
 
 !Local variables-------------------------------
  integer,parameter :: cvrsio8=20100401
@@ -1479,6 +1477,7 @@ subroutine ddb_phi1(ddb,ddb_lw,ddb_version,crystal,filnamddb,phi1,phi2)
  rfphon(1)=1
  rfphon(2)=1
  rfqvec(3)=1
+ ABI_MALLOC(phi1, (3,ddb%natom,3,ddb%natom,3))
 
  write(msg, '(2a)' ) ch10," Extract the Phi^(1) coeficients from 3DTE"
  call wrtout(std_out,msg,'COLL')
@@ -1497,9 +1496,9 @@ subroutine ddb_phi1(ddb,ddb_lw,ddb_version,crystal,filnamddb,phi1,phi2)
 !Define the factors to apply if DDB file has been created with the old version of
 !the longwave driver.
  if (ddb_version <= cvrsio8) then
-   fac=-two
+   fac=two
  else
-   fac=-one
+   fac=one
  end if
 
 !Extraction of Phi^(1) tensor
@@ -1509,9 +1508,9 @@ subroutine ddb_phi1(ddb,ddb_lw,ddb_version,crystal,filnamddb,phi1,phi2)
 !Define the factors to apply if DDB file has been created with the old version of
 !the longwave driver.
  if (ddb_version <= cvrsio8) then
-   fac=-two
+   fac=two
  else
-   fac=one
+   fac=-one
  end if
 
  do istrs=1,6
@@ -1553,19 +1552,19 @@ do qvecd=1,3
 ! end do
 
 !Now convert back to type-II in order to obtain the frozen ion Lagrange elastic tensor.
- phi2(:,:,:,:,:)=zero
- do iatd=1,3
-   do qvecd=1,3
-     do strsd1=1,3
-       do strsd2=1,3
-         do iat=1,ddb%natom
-           phi2(iatd,iat,qvecd,strsd1,strsd2)=sqrbkt_t1(iatd,iat,strsd1,qvecd,strsd2) + &
-         & sqrbkt_t1(iatd,iat,strsd2,strsd1,qvecd)-sqrbkt_t1(iatd,iat,qvecd,strsd2,strsd1)
-         end do
-       end do
-     end do
-   end do
- end do
+ !phi2(:,:,:,:,:)=zero
+ !do iatd=1,3
+ !  do qvecd=1,3
+ !    do strsd1=1,3
+ !      do strsd2=1,3
+ !        do iat=1,ddb%natom
+ !          phi2(iatd,iat,qvecd,strsd1,strsd2)=sqrbkt_t1(iatd,iat,strsd1,qvecd,strsd2) + &
+ !        & sqrbkt_t1(iatd,iat,strsd2,strsd1,qvecd)-sqrbkt_t1(iatd,iat,qvecd,strsd2,strsd1)
+ !        end do
+ !      end do
+ !    end do
+ !  end do
+ !end do
  DBG_EXIT("COLL")
  end subroutine ddb_phi1
  !!***

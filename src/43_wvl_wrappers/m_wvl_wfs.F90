@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DC)
+!!  Copyright (C) 1998-2025 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -80,7 +80,6 @@ subroutine wvl_wfs_set(alphadiis, spinmagntarget, kpt, me, natom, nband, nkpt, n
        & input_variables, check_linear_and_create_Lzd, check_communications, &
        & INPUT_IG_OFF, nullify_locreg_descriptors
 #endif
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -251,7 +250,6 @@ end subroutine wvl_wfs_set
 subroutine derfcf(derfc_yy,yy)
 
  use m_special_funcs,  only : abi_derfc
- implicit none
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: yy
@@ -283,7 +281,6 @@ end subroutine derfcf
 subroutine derf_ab(derf_yy,yy)
 
  use m_special_funcs,  only : abi_derf
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -326,7 +323,6 @@ subroutine wvl_wfs_free(wfs)
       & deallocate_orbs, deallocate_comms
  use dynamic_memory
 #endif
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -384,7 +380,6 @@ end subroutine wvl_wfs_free
 subroutine wvl_wfs_lr_copy(wfs, wvl)
 
  use defs_wvltypes
- implicit none
 
 !Arguments ------------------------------------
 !scalars

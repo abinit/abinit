@@ -6,7 +6,7 @@
 !!  Initialize pseudopotential datastructures from files.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MT, FrD, AF, DRH, YP)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, MT, FrD, AF, DRH, YP)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -61,6 +61,7 @@ module m_pspini
 !!***
 
  public :: pspini
+ public :: pspcor
 !!***
 
 contains
@@ -77,7 +78,7 @@ contains
 !! Also compute ecore=[Sum(i) zion(i)] * [Sum(i) epsatm(i)] by calling pspcor.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MT)
+!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -140,7 +141,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 !Local variables-------------------------------
 !scalars
  integer,parameter :: npspmax=50
- integer,save :: dimekb_old=0,ifirst=1,ixc_old=-1,lmnmax_old=0,lnmax_old=0
+ integer,save :: dimekb_old=0,ifirst=1,ixc_old=-1,lmnmax_old=0,lnmax_old=0,use_rcpaw_old=0
  integer,save :: mpssoang_old=0,mqgridff_old=0,mqgridvl_old=0,optnlxccc_old=-1
  integer,save :: paw_size_old=-1,pawxcdev_old=-1,positron_old=-2,usekden_old=-1,usepaw_old=-1
  integer,save :: usexcnhat_old=-1,usewvl_old=-1,useylm_old=-1
@@ -218,12 +219,12 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  paw_options=0;paw_size=0
  if (psps%usepaw==1) then
    paw_size=size(pawtab)
-   has_kij=(dtset%positron/=0.or.abs(dtset%effmass_free-one)>tol8.or.dtset%orbmag>0)
+   has_kij=(dtset%positron/=0.or.abs(dtset%effmass_free-one)>tol8.or.dtset%orbmag>0.or.dtset%use_rcpaw==1)
    has_tvale=.true. ! Will be modified later (depending on PAW dataset format)
    has_nabla=.false.
    has_shapefncg=(dtset%optdriver==RUNL_GSTATE.and.((dtset%iprcel>=20.and.dtset%iprcel<70).or.dtset%iprcel>=80))
    has_wvl=(dtset%usewvl==1.or.dtset%icoulomb/=0)
-   has_tproj=(dtset%usewvl==1) ! projectors will be free at the end of the psp reading
+   has_tproj=(dtset%usewvl==1.or.dtset%use_rcpaw==1) ! projectors will be free at the end of the psp reading
    has_vminushalf=(maxval(dtset%ldaminushalf)==1)
    has_coretau=(dtset%usekden>=1)
    if (has_kij)       paw_options(1)=1
@@ -285,6 +286,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 & .or. sum(new_pspso(:))/=0                &
 & .or. mtypalch>0                          &
 & .or. (dtset%usewvl==1.and.psps%usepaw==1)&
+& .or. (use_rcpaw_old==1)&
 & ) gencond=1
 
  if (present(comm_mpi).and.psps%usepaw==1) then
@@ -588,10 +590,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
    ABI_FREE(vlspl)
    ABI_FREE(xccc1d)
    ABI_FREE(xcctau1d)
-
-   if (.not.psps%vlspl_recipSpace) then
-     ABI_FREE(dvlspl)
-   end if
+   ABI_FREE(dvlspl)
 
  end if !  End condition of new computation needed
 
@@ -602,6 +601,9 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 !but epsatm is needed, so should be in the psp datastructure.
 !Compute pseudo correction energy. Will differ from an already
 !computed one if the number of atom differ ...
+ do ipsp=1,npsp
+   psps%epsatm(ipsp)=epsatm(ipsp)
+ enddo
  call pspcor(ecore,epsatm,dtset%natom,ntypat,dtset%typat,psps%ziontypat)
  if(abs(ecore_old-ecore)>tol8*abs(ecore_old+ecore))then
    write(msg, '(2x,es15.8,t50,a)' ) ecore,'ecore*ucvol(ha*bohr**3)'
@@ -639,6 +641,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  usekden_old = dtset%usekden
  usexcnhat_old=dtset%usexcnhat_orig
  paw_size_old=paw_size
+ use_rcpaw_old=dtset%use_rcpaw
  ecore_old=ecore
  paw_options_old(:)=paw_options(:)
 
@@ -844,7 +847,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 !scalars
  integer :: ii,il,ilmn,iln,iln0,lloc,lmax,me,mmax
  integer :: paral_mode,pspcod,pspdat,pspxc,useupf,usexml,xmlpaw,unt
- real(dp) :: maxrad,qchrg,r2well,zion,znucl
+ real(dp) :: maxrad,qchrg,r2well,zion,znucl,el_temp
  logical,parameter :: nc_debug = .False.
  !logical,parameter :: nc_debug = .True.
  character(len=500) :: msg,errmsg
@@ -880,6 +883,8 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 
  nctab%has_tvale = .False.; nctab%has_tcore = .False.
  pspcod = -1
+!Get electronic temperature from dtset
+ el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
 
  if (me==0) then
 !  Dimensions of form factors and Vloc q grids must be the same in Norm-Conserving case
@@ -1161,7 +1166,8 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 &      lmax,psps%lnmax,mmax,psps%mqgrid_ff,psps%mqgrid_vl,&
 &      pawrad,pawtab,dtset%pawxcdev,psps%qgrid_ff,psps%qgrid_vl,&
 &      dtset%usewvl,dtset%usexcnhat_orig,vlspl,xcccrc,dtset%xclevel,&
-&      dtset%xc_denpos,zion,psps%znuclpsp(ipsp),xc_taupos=dtset%xc_taupos)
+&      dtset%xc_denpos,zion,psps%znuclpsp(ipsp),&
+&      xc_taupos=dtset%xc_taupos,el_temp=el_temp)
 
    else if (pspcod==8)then
 
@@ -1209,7 +1215,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 &     dtset%pawxcdev,psps%qgrid_ff,psps%qgrid_vl,dtset%usewvl,&
 &     dtset%usexcnhat_orig,vlspl,xcccrc,&
 &     dtset%xclevel,dtset%xc_denpos,pspheads_tmp%zionpsp,psps%znuclpsp(ipsp),&
-&     xc_taupos=dtset%xc_taupos)
+&     xc_taupos=dtset%xc_taupos,el_temp=el_temp)
      call paw_setup_free(paw_setuploc)
    end if
 

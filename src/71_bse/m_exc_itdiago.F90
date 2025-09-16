@@ -6,7 +6,7 @@
 !!  Iterative diagonalization of the BSE Hamiltonian with band-by-band conjugate gradient method
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (MG)
+!!  Copyright (C) 2008-2025 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,10 +28,8 @@ MODULE m_exc_itdiago
  use m_abicore
  use m_linalg_interfaces
  use m_hdr
+ USE_MPI
  use m_xmpi
-#ifdef HAVE_MPI2
- use mpi
-#endif
 
  use m_io_tools,      only : open_file
  use m_time,          only : cwtime

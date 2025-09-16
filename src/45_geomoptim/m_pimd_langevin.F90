@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2024 ABINIT group (GG,MT)
+!!  Copyright (C) 2011-2025 ABINIT group (GG,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +27,7 @@ module m_pimd_langevin
  use m_pimd
  use m_random_zbq
 
- use m_symtk,     only : matr3inv
+ use m_matrix,    only : matr3inv
  use m_geometry,  only : xcart2xred, xred2xcart
 
 
@@ -94,8 +94,6 @@ contains
 subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,&
 &          rprimd,rprimd_next,rprimd_prev,stressin,trotter,vel,vel_cell,&
 &          volume,xred,xred_next,xred_prev)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -528,8 +526,6 @@ end subroutine pimd_langevin_npt
 
 subroutine pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,&
 &                            rprimd,stressin,trotter,vel,volume,xred,xred_next,xred_prev)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

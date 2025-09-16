@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2024 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2025 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -24,6 +24,7 @@ sources = [
 "m_rttddft_propagate.F90",
 "m_rttddft_propagators.F90",
 "m_rttddft_properties.F90",
+"m_rttddft_tdef.F90",
 "m_rttddft_tdks.F90",
  ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.

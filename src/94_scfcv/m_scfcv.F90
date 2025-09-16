@@ -6,7 +6,7 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2024 ABINIT group (JB)
+!!  Copyright (C) 2014-2025 ABINIT group (JB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -72,7 +72,7 @@ module m_scfcv
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2024 ABINIT group (JB)
+!!  Copyright (C) 2014-2025 ABINIT group (JB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -620,7 +620,7 @@ subroutine scfcv_runWEntropyDMFT(this,electronpositron,itimes,rhog,rhor,rprimd,x
  end do !!! End loop for entropy DMFT
 
  ! GATHER DATA HERE OR INSIDE THE NEXT CALL ?
- call entropyDMFT_computeEntropy(this%entropyDMFT,this%results_gs%energies%entropy)
+ call entropyDMFT_computeEntropy(this%entropyDMFT,this%results_gs%energies%entropy_ks)
  !-----------------------------------------------------
  ! This call should be done inside destroy_sc_dmft
  !if ( this%dtset%usedmft /= 0 ) then

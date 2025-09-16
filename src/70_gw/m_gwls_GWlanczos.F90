@@ -6,7 +6,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2024 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2025 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -18,7 +18,6 @@
 #endif
 
 #include "abi_common.h"
-
 
 module m_gwls_GWlanczos
 !----------------------------------------------------------------------------------------------------
@@ -42,8 +41,6 @@ use m_pawang
 use m_errors
 
 use m_io_tools,         only : get_unit
-use m_paw_dmft,         only : paw_dmft_type
-use m_ebands,           only : ebands_init, ebands_free
 
 implicit none
 save
@@ -78,8 +75,6 @@ subroutine get_seeds(first_seed, nseeds, seeds)
 ! This subroutine compute the seeds using the eigenstates of the Hamiltonian
 !
 !----------------------------------------------------------------------------------------------------
-implicit none
-
 integer,      intent(in)  :: first_seed, nseeds
 complex(dpc), intent(out) :: seeds(npw_k,nseeds)
 
@@ -176,7 +171,6 @@ subroutine block_lanczos_algorithm(mpi_communicator,matrix_function,kmax,nseeds,
 !
 !
 !----------------------------------------------------------------------------------------------------
-implicit none
 
 !-----------------------------------------
 ! interface with implicit matrix function
@@ -470,8 +464,6 @@ subroutine diagonalize_lanczos_banded(kmax,nseeds,Hsize,alpha,beta,Lbasis,eigenv
 ! Given the result of the Lanczos algorithm, this subroutine diagonalize the banded
 ! matrix as well as updates the basis.
 !-----------------------------------------------------------------------------------
-implicit none
-
 integer, intent(in)  :: kmax        ! number of Lanczos blocks
 integer, intent(in)  :: nseeds      ! size of each blocks
 integer, intent(in)  :: Hsize       ! size of the Hilbert space in which the matrix lives

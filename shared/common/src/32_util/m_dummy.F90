@@ -6,7 +6,7 @@
 !!  Dummy module, to detect unused values
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2024 ABINIT group (XG)
+!!  Copyright (C) 2017-2025 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -58,8 +58,6 @@
 
  subroutine test_unused_arg(used_arg,unused_arg)
 
- implicit none
-
 !Local variables-------------------------------
 !scalars
  integer, intent(inout) :: used_arg
@@ -93,8 +91,6 @@
 
  subroutine test_same_actual_arg(dummy_out1,dummy_out2,used_arg)
 
- implicit none
-
 !Local variables-------------------------------
 !scalars
  integer, intent(in) :: used_arg
@@ -124,8 +120,6 @@
 !! SOURCE
 
  subroutine test_dummy(dummy_out1,used_arg)
-
- implicit none
 
 !Local variables-------------------------------
 !scalars

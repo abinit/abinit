@@ -7,7 +7,7 @@
 !! physical constants, as well as associated datatypes and methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2024 ABINIT group (HM, XG,XW, EB)
+!! Copyright (C) 2000-2025 ABINIT group (HM, XG,XW, EB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -82,12 +82,14 @@ module defs_basis
  integer, parameter :: fnlen=264     ! maximum length of file name variables
  integer, parameter :: strlen=2000000 ! maximum length of input string
 
- ! The input file used to run the code, set by parsefile.
+ ! The input file used to run the code, allocated and set by parsefile.
  ! It will be added to the netcdf files in ntck_open_create
- character(len=strlen), save :: INPUT_STRING = ""
+ character(len=:), allocatable, save :: INPUT_STRING
 
- integer, parameter :: md5_slen = 32 ! lenght of strings storing the pseudos' md5 checksum.
+ integer, parameter :: md5_slen = 32 ! length of strings storing the pseudos' md5 checksum.
  character(len=md5_slen),parameter :: md5_none = "None"
+
+ integer, parameter :: abi_slen=80 ! maximum length of string variables
 
 !Some constants:
 
@@ -121,7 +123,7 @@ module defs_basis
  integer,public,parameter :: ABI_RECL=524288  ! 2**19
 
  integer,public,parameter :: MAX_NSHIFTK = 210
- ! Maximun number of shifts in input k-mesh.
+ ! Maximum number of shifts in input k-mesh.
 
 !Real dp constants
  real(dp), parameter :: zero=0._dp
@@ -192,7 +194,7 @@ module defs_basis
  real(dp), parameter :: tol14=0.00000000000001_dp
  real(dp), parameter :: tol15=0.000000000000001_dp
  real(dp), parameter :: tol16=0.0000000000000001_dp
- real(dp), parameter :: tol17=0.00000000000000010_dp
+ real(dp), parameter :: tol17=0.00000000000000001_dp
  real(dp), parameter :: tol18=0.000000000000000001_dp
  real(dp), parameter :: tol19=0.0000000000000000001_dp
  real(dp), parameter :: tol20=0.00000000000000000001_dp
@@ -218,7 +220,7 @@ module defs_basis
  ! Max Memory in Mb available for a MPI processor
  ! This quantity might be used at runtime to determine how to distribute memory.
  ! The default value (2Gb) can be changed at runtime via the command line interface.
- real(dp), protected :: mem_per_cpu_mb = two * 1024_dp
+ real(dp), save, protected :: mem_per_cpu_mb = two * 1024_dp
 
 !Real physical constants
 !Revised fundamental constants from http://physics.nist.gov/cuu/Constants/index.html
@@ -285,7 +287,7 @@ module defs_basis
 
  ! File used to dump the error message in m_error.
  ! Extremely useful when we run on many CPUs since logging, in this case, is automatically disabled
- ! As a consequence, we get error messages in the main log only if the problem is encoutered by the master node!
+ ! As a consequence, we get error messages in the main log only if the problem is encountered by the master node!
  ! Note that the file is removed in xmpi_init (if present).
  character(len=fnlen),parameter :: ABI_MPIABORTFILE="__ABI_MPIABORTFILE__"
 
@@ -329,6 +331,7 @@ module defs_basis
  integer,public,parameter :: WFK_TASK_KPTS_ERANGE= 8
  integer,public,parameter :: WFK_TASK_CHECK_SYMTAB = 9
  integer,public,parameter :: WFK_TASK_WANNIER = 10
+ integer,public,parameter :: WFK_TASK_PSEUDOBANDS = 11
 
 ! Flags defining the method used for performing IO (input variable iomode)
  integer, parameter, public :: IO_MODE_FORTRAN_MASTER = -1
@@ -357,7 +360,7 @@ module defs_basis
  integer,parameter,public :: ABI_GPU_UNKNOWN  =-1
  ! Not using any GPU implementation, implies running on CPU
  integer,parameter,public :: ABI_GPU_DISABLED = 0
- ! Legacy GPU implementation relying on NVIDIA CUDA kernels, not prefered
+ ! Legacy GPU implementation relying on NVIDIA CUDA kernels, not preferred
  integer,parameter,public :: ABI_GPU_LEGACY   = 1
  ! GPU implementation relying on OpenMP v5 "TARGET" construct
  integer,parameter,public :: ABI_GPU_OPENMP   = 2
@@ -453,7 +456,6 @@ subroutine abi_log_status_state(new_do_write_log,new_do_write_status)
 
 !Arguments ------------------------------------
  logical,optional,intent(in) :: new_do_write_log,new_do_write_status
-
 !************************************************************************
 
  if (PRESENT(new_do_write_log))    do_write_log   =new_do_write_log
@@ -484,7 +486,6 @@ subroutine abi_io_redirect(new_ab_out,new_std_out,new_io_comm)
 
 !Arguments ------------------------------------
  integer,optional,intent(in) :: new_std_out,new_ab_out,new_io_comm
-
 !************************************************************************
 
  if (PRESENT(new_ab_out))  ab_out  = new_ab_out
@@ -515,7 +516,6 @@ subroutine print_kinds(unit)
 
 !Local variables-------------------------------
  integer :: my_unt
-
 ! *********************************************************************
 
  my_unt=std_out; if (PRESENT(unit)) my_unt = unit
@@ -561,7 +561,6 @@ integer pure function str2wfktask(str) result(wfk_task)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: str
-
 !************************************************************************
 
  select case (str)
@@ -583,8 +582,10 @@ integer pure function str2wfktask(str) result(wfk_task)
    wfk_task = WFK_TASK_OPTICS_FULLBZ
  case ("check_symtab")
    wfk_task = WFK_TASK_CHECK_SYMTAB
-case ("wannier")
+ case ("wannier")
    wfk_task = WFK_TASK_WANNIER
+ case ("pseudobands")
+   wfk_task = WFK_TASK_PSEUDOBANDS
  case default
    wfk_task = WFK_TASK_NONE
  end select
@@ -607,7 +608,6 @@ subroutine set_mem_per_cpu_mb(mem_mb)
 
 !Arguments-------------------------------------
  real(dp),intent(in) :: mem_mb
-
 ! *********************************************************************
 
  !print *, "Setting mem_per_cpu_mb to", mem_mb

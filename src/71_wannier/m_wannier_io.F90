@@ -38,16 +38,15 @@ module m_wannier_io
 #endif
 
   use m_dtset, only : dataset_type
-  use defs_datatypes, only : pseudopotential_type, ebands_t
   use defs_abitypes, only : MPI_type
   use m_fft, only: fourwf
   use m_io_tools,        only : open_file, get_unit
   use m_fftcore,  only : sphereboundary
-  use m_pawtab,   only : pawtab_type
-  use m_pawcprj,  only : pawcprj_type
   use m_abstract_wf, only: abstract_wf, cg_cprj, wfd_wf
+  use m_ebands,   only : ebands_t
 
   implicit none
+
   private
 
   public :: write_Amn
@@ -200,7 +199,6 @@ contains
     integer :: n1tmp, n2tmp, n3tmp, jj1, jj2, jj3, ipw, ispinor
     character(len=1000) :: msg
 
-    ABI_UNUSED(nspinor)
     if(usepaw==1) then
        write(msg, '( a,a,a,a,a,a,a,a,a)')ch10,&
             &     "   WARNING: The UNK matrices will not contain the correct wavefunctions ",ch10,&
@@ -246,9 +244,13 @@ contains
           ABI_MALLOC(fofgout,(2,npw_k))
 
           !iun_plot=1000+ikpt+ikpt*(isppol-1)
-          write(wfnname,'("UNK",I5.5,".",I1)') ikpt, isppol
+          if (nspinor == 1) then
+            write(wfnname,'("UNK",I5.5,".",I1)') ikpt, isppol
+          else if (nspinor == 2) then
+            write(wfnname,'("UNK",I5.5,".NC")') ikpt
+          end if
           if (open_file(trim(wfnname), msg, newunit=iun_plot, &
-                       form="unformatted", status="unknown", action="write") /= 0) then
+                  form="unformatted", status="unknown", action="write") /= 0) then
              ABI_ERROR(msg)
           endif
 
@@ -277,18 +279,19 @@ contains
           do iband=1,mband
              if(band_in(iband,isppol)) then
                 ! TODO: check if this is the right order.
-                do ispinor = 1, nsppol
-                   do ipw = 1, npw_k
+                do ispinor = 1, nspinor
+                  cwavef = zero
+                  do ipw = 1, npw_k
                       !do ig=1,npw_k*dtset%nspinor
                       !cwavef(1,ig)=cg(1,ipw+iwav(ispinor, iband,ikpt,isppol))
                       !cwavef(2,ig)=cg(2,ipw+iwav(ispinor, iband,ikpt,isppol))
-                      ig = ipw + (ispinor-1)*npw_k
+                      !ig = ipw + (ispinor-1)*npw_k
+                      ig = ipw 
                       cwavef(1,ig)=mywfc%cg_elem(1,ipw, ispinor, iband, ikpt, isppol)
                       cwavef(2,ig)=mywfc%cg_elem(2,ipw, ispinor, iband, ikpt, isppol)
-                   end do
-                end do
-                tim_fourwf=0
-                call fourwf(cplex,denpot,cwavef,fofgout,fofr,&
+                  end do
+                  tim_fourwf=0
+                  call fourwf(cplex,denpot,cwavef,fofgout,fofr,&
                      &           gbound,gbound,mywfc%hdr%istwfk(ikpt),kg_k,kg_k,mgfft,&
                      &           mpi_enreg,1,ngfft,npw_k,npw_k,n4,n5,n6,0,&
                      &           tim_fourwf,weight,weight,gpu_option=dtset%gpu_option)
@@ -300,8 +303,9 @@ contains
                 !          end do !jj2
                 !          end do !jj3
                 !          unformatted (must be one record)
-                write(iun_plot) (((fofr(1,jj1,jj2,jj3),fofr(2,jj1,jj2,jj3),&
+                  write(iun_plot) (((fofr(1,jj1,jj2,jj3),fofr(2,jj1,jj2,jj3),&
                                    jj1=1,n1,spacing),jj2=1,n2,spacing),jj3=1,n3,spacing)
+                end do !ispinor
              end if !iband
           end do ! iband
           ABI_FREE(cwavef)

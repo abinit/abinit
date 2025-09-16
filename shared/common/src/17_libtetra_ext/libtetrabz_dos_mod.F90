@@ -41,7 +41,7 @@ SUBROUTINE libtetrabz_dos(ltetra,bvec,nb,nge,eig,ngw,wght,ne,e0,comm)
   !
   use, intrinsic :: iso_c_binding
   USE libtetrabz_common, ONLY : libtetrabz_initialize, libtetrabz_interpol_indx, libtetrabz_mpisum_dv
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER(C_INT),INTENT(IN) :: ltetra, nb, nge(3), ngw(3), ne
   REAL(C_DOUBLE),INTENT(IN) :: bvec(9), eig(nb,PRODUCT(nge(1:3))), e0(ne)
@@ -97,7 +97,7 @@ SUBROUTINE libtetrabz_intdos(ltetra,bvec,nb,nge,eig,ngw,wght,ne,e0,comm)
   !
   use, intrinsic :: iso_c_binding
   USE libtetrabz_common, ONLY : libtetrabz_initialize, libtetrabz_interpol_indx, libtetrabz_mpisum_dv
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER(C_INT),INTENT(IN) :: ltetra, nb, nge(3), ngw(3), ne
   REAL(C_DOUBLE),INTENT(IN) :: bvec(9), eig(nb,PRODUCT(nge(1:3))), e0(ne)
@@ -154,7 +154,7 @@ SUBROUTINE libtetrabz_dos_main(wlsm,nt_local,ik_global,ik_local,nb,nkBZ,eig,ne,e
   USE libtetrabz_common, ONLY : libtetrabz_sort, &
   &                             libtetrabz_triangle_a1, libtetrabz_triangle_b1, &
   &                             libtetrabz_triangle_b2, libtetrabz_triangle_c1
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: nt_local, nb, nkBZ, nk_local, ne, &
   &                     ik_global(20,nt_local), ik_local(20,nt_local)
@@ -242,7 +242,7 @@ SUBROUTINE libtetrabz_intdos_main(wlsm,nt_local,ik_global,ik_local,nb,nkBZ,eig,n
   &                             libtetrabz_tsmall_b2, libtetrabz_tsmall_b3, &
   &                             libtetrabz_tsmall_c1, libtetrabz_tsmall_c2, &
   &                             libtetrabz_tsmall_c3
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: nt_local, nb, nkBZ, nk_local, ne, &
   &                     ik_global(20,nt_local), ik_local(20,nt_local)

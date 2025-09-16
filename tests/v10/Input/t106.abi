@@ -1,0 +1,24 @@
+t107o_DS20_DVDB
+4
+t104o_DS3_POT1
+t104o_DS4_POT1
+t104o_DS4_POT2
+t104o_DS5_POT1
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgdv
+#%% test_chain = t104.abi, t105.abi, t106.abi, t107.abi
+#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi
+#%% need_cpp_vars = HAVE_NETCDF_MPI
+#%% [files]
+#%% files_to_test =
+#%%   t106.stdout, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [shell]
+#%% [extra_info]
+#%% authors = R. Gupta M. Verstraete
+#%% keywords = NC, DFPT, EPH
+#%% description = Merge the DFPT POT files produced in t104.abi
+#%%<END TEST_INFO>

@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (MG)
+!!  Copyright (C) 2008-2025 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,11 +34,8 @@ module m_migdal_eliashberg
 
  use m_time,            only : cwtime, cwtime_report, sec2str
  use m_fstrings,        only : strcat, sjoin !, tolower, itoa, ftoa, ktoa, ltoa, strcat
- !use m_numeric_tools,  only : arth, get_diag
  use m_copy,            only : alloc_copy
- use defs_datatypes ,   only : ebands_t
- !use m_kpts,           only : kpts_timrev_from_kptopt
- use m_ebands,          only : edos_t, ebands_get_edos
+ use m_ebands,          only : ebands_t, edos_t
  use m_gstore,          only : gstore_t
 
  implicit none
@@ -256,7 +253,7 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  !integer :: ik_ibz, ik_bz, ebands_timrev
  !integer :: iq_bz, iq_ibz !, ikq_ibz, ikq_bz
  !integer :: ncid, spin_ncid, ncerr, gstore_fform
- integer :: phmesh_size !, iw
+ integer :: phmesh_size, units(2) !, iw
  real(dp) :: kt, wmax, cpu, wall, gflops
  real(dp) :: edos_step, edos_broad !, sigma, ecut, eshift, eig0nk
  !character(len=5000) :: msg
@@ -268,10 +265,10 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  type(edos_t) :: edos
 !arrays
  real(dp),allocatable :: ktmesh(:), lambda_ij(:), imag_w(:), imag_2w(:), phmesh(:), a2fw(:)
-
 !----------------------------------------------------------------------
 
  nproc = xmpi_comm_size(gstore%comm); my_rank = xmpi_comm_rank(gstore%comm)
+ units = [std_out, ab_out]
 
  call wrtout(std_out, " Solving isotropic Migdal-Eliashberg equations on the imaginary axis", pre_newlines=2)
  call cwtime(cpu, wall, gflops, "start")
@@ -289,13 +286,12 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  edos_intmeth = 2; if (dtset%prtdos /= 0) edos_intmeth = dtset%prtdos
  edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
  edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
- edos = ebands_get_edos(ebands, cryst, edos_intmeth, edos_step, edos_broad, gstore%comm)
+ edos = ebands%get_edos(cryst, edos_intmeth, edos_step, edos_broad, gstore%comm)
 
  !! Store DOS per spin channel
  !n0(:) = edos%gef(1:edos%nsppol)
  if (my_rank == master) then
-   call edos%print(unit=std_out)
-   !call edos%print(unit=ab_out)
+   call edos%print(units)
    !path = strcat(dtfil%filnam_ds(4), "_EDOS")
    !call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path, ch10))
    !call edos%write(path)
@@ -309,7 +305,7 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
 
  ! Compute Eliashberg function a2F(w)
  ABI_MALLOC(a2fw, (phmesh_size))
- call gstore%get_a2fw(dtset, phmesh_size, phmesh, a2fw)
+ call gstore%get_a2fw(phmesh_size, phmesh, a2fw)
 
  ncid = nctk_noid
  if (my_rank == master) then
@@ -348,7 +344,7 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
    ABI_MALLOC(imag_2w, (2 * niw))
 
    !call wrtout(std_out, " Computing lambda_iso_iw...")
-   !call gstore%get_lambda_iso_iw(dtset, 2 * niw, imag_2w, lambda_ij)
+   !call gstore%get_lambda_iso_iw(2 * niw, imag_2w, lambda_ij)
    ABI_FREE(imag_2w)
 
    !call iso%solve(itemp, kt, niw, imag_w, lambda_ij)

@@ -10,7 +10,7 @@
 !! Mol. Phys., 1996, Vol. 87, pp. 1117-1157 [[cite:Martyna1996]]
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, JCC, JYR, SE)
+!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, JCC, JYR, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -82,8 +82,6 @@ contains
 !! SOURCE
 
 subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -612,8 +610,6 @@ end subroutine pred_isothermal
 
 subroutine isotemp(amass,dtion,ekin,iatfix,ktemp,mttk_vars,natom,nnos,qmass,vel)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom
@@ -745,8 +741,6 @@ end subroutine isotemp
 
  subroutine isopress(amass,bmass,dtion,ekin,iatfix,ktemp,mttk_vars,natom,nnos,qmass,&
    & strten,strtarget,ucvol,vel,vlogv)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -915,7 +909,6 @@ end subroutine isopress
    & qmass,strten,strtarget,ucvol,vel)
 
  use m_linalg_interfaces
- implicit none
 
 !Arguments ------------------------------------
 !scalars

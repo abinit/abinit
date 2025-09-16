@@ -8,7 +8,7 @@
 !!  involving delta functions. Different approaches are available.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (MG, HM)
+!!  Copyright (C) 2008-2025 ABINIT group (MG, HM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,9 +31,7 @@ module m_ephwg
  use m_dtset
  use m_htetra
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_crystal
  use m_ifc
  use m_lgroup
@@ -41,9 +39,8 @@ module m_ephwg
  use m_eph_double_grid
  use m_krank
 
- use defs_datatypes,    only : ebands_t
  use m_time,            only : cwtime, cwtime_report
- use m_symtk,           only : matr3inv
+ use m_matrix,          only : matr3inv
  use m_numeric_tools,   only : arth, inrange, wrap2_pmhalf
  use m_special_funcs,   only : gaussian
  use m_fstrings,        only : strcat, ltoa, itoa, ftoa, ktoa, sjoin
@@ -131,7 +128,7 @@ type, public :: ephwg_t
   real(dp),allocatable :: eigkbs_ibz(:, :, :)
   ! (nibz, nbcount, nsppol)
   ! Electron eigenvalues in the IBZ for nbcount states
-  ! (not necessarly equal to global nband, see also bstart and bcount)
+  ! (not necessarily equal to global nband, see also bstart and bcount)
 
   type(crystal_t), pointer :: cryst => null()
   ! Pointer to input structure (does not own memory)
@@ -423,8 +420,8 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
  ! Build tetrahedron object using IBZ(k) as the effective IBZ
  ! This means that input data for tetra routines must be provided in lgk%kibz_q
  call self%tetra_k%free()
- call htetra_init(self%tetra_k, indkk(:, 1), cryst%gprimd, self%klatt, self%bz, self%nbz, &
-                  self%lgk%ibz, self%nq_k, ierr, errorstring, comm)
+ call self%tetra_k%init(indkk(:, 1), cryst%gprimd, self%klatt, self%bz, self%nbz, &
+                        self%lgk%ibz, self%nq_k, ierr, errorstring, comm)
  !call tetra_write(self%tetra_k, self%lgk%nibz, self%lgk%ibz, strcat("tetrak_", ktoa(kpoint)))
  ABI_CHECK(ierr == 0, errorstring)
 
@@ -558,8 +555,8 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
  ! Build tetrahedron object using IBZ(k) as the effective IBZ
  ! This means that input data for tetra routines must be provided in lgk%kibz_q
  call self%tetra_k%free()
- call htetra_init(self%tetra_k, bz2lgkibz, cryst%gprimd, self%klatt, self%bz, self%nbz, &
-                  self%lgk%ibz, self%nq_k, ierr, errorstring, comm)
+ call self%tetra_k%init(bz2lgkibz, cryst%gprimd, self%klatt, self%bz, self%nbz, &
+                        self%lgk%ibz, self%nq_k, ierr, errorstring, comm)
  if (ierr /= 0) then
    ABI_ERROR(errorstring)
  end if

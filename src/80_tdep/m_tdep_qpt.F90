@@ -43,7 +43,6 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_make_specialqpt(Invar,Lattice,MPIdata,Qpt,QptBound)
 
-  implicit none
   integer :: qpt_tot,qptbound_tot
   double precision :: zeta,eta,delta,mu,nu,angle_alpha
   type(Input_type),intent(in) :: Invar
@@ -245,7 +244,7 @@ contains
     write(Invar%stdout,*) 'Generate the BZ path using the Q points defined by default'
     if (MPIdata%iam_master) then
       write(40,*)         'Generate the BZ path using the Q points defined by default'
-    end if  
+    end if
     if ((Invar%bravais(1).eq.2).and.(Invar%bravais(2).eq.0)) then
 !     MONO: G-Y-H-C-E-M1-A-X-H1
 !FB      qpt_tot=9
@@ -400,7 +399,7 @@ contains
     write(Invar%stdout,*) 'Generate the BZ path using the Q points given in the input file'
     if (MPIdata%iam_master) then
       write(40,*)         'Generate the BZ path using the Q points given in the input file'
-    end if  
+    end if
     qpt_tot=Invar%bzpath
     ABI_MALLOC(Qpt%special_qpt,(qpt_tot))
     Qpt%special_qpt(:)=Invar%special_qpt(:)
@@ -411,7 +410,6 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_make_qptpath(Invar,Lattice,MPIdata,Qpt)
 
-  implicit none
   integer :: ii,jj,kk,nqpt,iqpt,qpt_tot,tmp_int
   logical :: IsThisAllowed
   type(Input_type),intent(in) :: Invar
@@ -421,7 +419,7 @@ contains
   type(QptBound_type), allocatable :: QptBound(:)
 
   nqpt=0
-  if (MPIdata%iam_master) open(unit=40,file=trim(Invar%output_prefix)//'qpt.dat')
+  if (MPIdata%iam_master) open(unit=40,file=trim(Invar%output_prefix)//'_qpt.dat')
   write(Invar%stdout,*) ' '
   write(Invar%stdout,*) '#############################################################################'
   write(Invar%stdout,*) '########################## Q points generation  #############################'
@@ -470,7 +468,7 @@ contains
     if (qpt_tot.gt.1) then
       ABI_MALLOC(Qpt%lgth_segments,(qpt_tot-1)); Qpt%lgth_segments(:)=0
       do ii=1,qpt_tot-1
-        Qpt%lgth_segments(ii)=int(dsqrt((Qpt%special_cart(ii,1)-Qpt%special_cart(ii+1,1))**2+&
+        Qpt%lgth_segments(ii)=nint(dsqrt((Qpt%special_cart(ii,1)-Qpt%special_cart(ii+1,1))**2+&
 &                                       (Qpt%special_cart(ii,2)-Qpt%special_cart(ii+1,2))**2+&
 &                                       (Qpt%special_cart(ii,3)-Qpt%special_cart(ii+1,3))**2)*100*2*pi)
       end do
@@ -478,7 +476,7 @@ contains
       tmp_int=Qpt%lgth_segments(1)
       do ii=1,qpt_tot-1
         if (Invar%bzlength.eq.0) then
-          Qpt%lgth_segments(ii)=int(real(Qpt%lgth_segments(ii))/real(tmp_int)*100)
+          Qpt%lgth_segments(ii)=nint(real(Qpt%lgth_segments(ii)*100)/real(tmp_int))
         else if (Invar%bzlength.gt.0) then
           Qpt%lgth_segments(ii)=Invar%lgth_segments(ii)
         else if (Invar%bzlength.lt.0) then
@@ -576,7 +574,6 @@ contains
 
  subroutine tdep_destroy_qpt(Qpt)
 
-  implicit none
   type(Qpoints_type),intent(inout) :: Qpt
 
   ABI_FREE(Qpt%special_qpt)

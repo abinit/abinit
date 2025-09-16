@@ -6,7 +6,7 @@
 !! Main routine for conducting Density-Functional Theory calculations or Many-Body Perturbation Theory calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MKV, MT)
+!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, MKV, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -83,9 +83,7 @@ program abinit
  use m_errors
  use m_argparse
  use m_nctk
-#if defined HAVE_MPI2
- use mpi
-#endif
+ USE_MPI
 
  use defs_datatypes,only : pspheader_type
  use defs_abitypes, only : MPI_type
@@ -110,6 +108,8 @@ program abinit
  use m_outvars,       only : outvars
  use m_out_spg_anal,  only : out_spg_anal
  use m_driver,        only : driver
+ use m_common,        only : get_dtsets_pspheads
+ use m_pstat,         only : pstat_proc
 
 #ifdef HAVE_GPU
  use m_gpu_toolbox
@@ -119,7 +119,7 @@ program abinit
  use m_manage_cuda
 #endif
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -127,8 +127,6 @@ program abinit
  use BigDFT_API,    only : bigdft_init_errors,bigdft_init_timing_categories,&
  &                         f_timing_initialize,f_timing_reset,wvl_timing => timing
 #endif
-
- use m_common, only : get_dtsets_pspheads
 
  implicit none
 
@@ -187,7 +185,6 @@ program abinit
 
 !0) Change communicator for I/O (mandatory!)
  call abi_io_redirect(new_io_comm=xmpi_world)
- !call xlf_set_sighandler()
 
 !------------------------------------------------------------------------------
 
@@ -204,7 +201,6 @@ program abinit
 #ifdef HAVE_MEM_PROFILING
  call abimem_init(args%abimem_level, limit_mb=args%abimem_limit_mb)
 #endif
-
 
 !------------------------------------------------------------------------------
 
@@ -255,8 +251,7 @@ program abinit
    call wrtout([std_out, ab_out], msg)
  end if
 
- msg=' abinit : after writing the name of files '
- call wrtout(std_out,msg,'PERS')
+ call wrtout(std_out, ' abinit : after writing the name of files ','PERS')
 
  ! Test if the netcdf library supports MPI-IO
  call nctk_test_mpiio()
@@ -384,7 +379,7 @@ program abinit
 #endif
 
 !Enable GPU markers (NVTX/ROCTX) if required
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  NVTX_INIT()
 #endif
 
@@ -602,8 +597,7 @@ program abinit
  print_mem_report = 1
  do ii=1,ndtset_alloc
    if ((dtsets(ii)%usewvl == 1) .or. (dtsets(ii)%icoulomb > 0)) then
-     print_mem_report = 0
-     exit
+     print_mem_report = 0; exit
    end if
  end do
 
@@ -626,6 +620,8 @@ program abinit
 #endif
 
  call xpapi_shutdown()
+
+ call pstat_proc%print(comm=xmpi_world _FILE_LINE_ARGS_)
 
  ! Writes information on file about the memory before ending mpi module, if memory profiling is enabled
  call abinit_doctor(filnam(4), print_mem_report=print_mem_report)

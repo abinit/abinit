@@ -7,7 +7,7 @@
 !!  It also defines generic interfaces for single or double precision FFTs.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2024 ABINIT group (MG, MM, GZ, MT, MF, XG, PT, FF)
+!! Copyright (C) 2009-2025 ABINIT group (MG, MM, GZ, MT, MF, XG, PT, FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,6 +29,7 @@ MODULE m_fft
  use m_abicore
  use m_errors
  use m_xomp
+ USE_MPI
  use m_xmpi
  use m_cplxtools
  use m_cgtools
@@ -36,9 +37,6 @@ MODULE m_fft
  use m_sg2002
  use m_fftw3
  use m_dfti
-#if defined HAVE_MPI2
- use mpi
-#endif
 
  use defs_abitypes,   only : MPI_type
  use defs_fftdata,    only : mg
@@ -126,7 +124,7 @@ MODULE m_fft
 
  type,public :: fftbox_plan3_t
 
-   integer :: fftalg = 112       ! The library to call.
+   integer :: fftalg = 112       ! The library to call on the CPU
    integer :: fftcache = 16      ! Cache size in kB. Only used in SG routines.
    integer :: nfft = -1          ! Total number of points in the FFT box.
    integer :: ldxyz = -1         ! Physical dimension of the array to transform
@@ -274,7 +272,6 @@ subroutine fft_allow_ialltoall(bool)
 
 !Arguments ------------------------------------
  logical,intent(in) :: bool
-
 ! *************************************************************************
 
  ALLOW_IALLTOALL = bool
@@ -308,7 +305,6 @@ subroutine fftbox_plan3_init(plan, batch_size, dims, embed, fftalg, fftcache, gp
  integer,intent(in) :: batch_size, fftalg, fftcache, gpu_option
 !arrays
  integer,intent(in) :: dims(3), embed(3)
-
 ! *************************************************************************
 
  plan%batch_size = batch_size
@@ -339,7 +335,6 @@ subroutine fftbox_plan3_from_ngfft(plan, ngfft, batch_size, gpu_option)
 !Arguments ------------------------------------
  class(fftbox_plan3_t),intent(out) :: plan
  integer,intent(in) :: ngfft(18), batch_size, gpu_option
-
 ! *************************************************************************
 
  call plan%init(batch_size, ngfft(1:3), ngfft(4:6), ngfft(7), ngfft(8), gpu_option)
@@ -362,7 +357,6 @@ subroutine fftbox_plan3_free(plan)
 
 !Arguments ------------------------------------
  class(fftbox_plan3_t),target,intent(inout) :: plan
-
 ! *************************************************************************
 
  ABI_UNUSED(plan%ldxyz)
@@ -415,7 +409,6 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, iscale)
  integer,optional,intent(in) :: ndat, iscale
 !arrays
  complex(spc),target,intent(inout) :: ff(*)
-
 ! *************************************************************************
 
  integer :: ndat__, iscale__
@@ -468,7 +461,6 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, iscale)
  integer,optional,intent(in) :: ndat, iscale
 !arrays
  complex(dpc),target,intent(inout) :: ff(*)
-
 ! *************************************************************************
 
  integer :: ndat__, iscale__
@@ -521,7 +513,6 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign, ndat, iscale)
 !arrays
  complex(spc),target,intent(in) :: ff(*)
  complex(spc),target,intent(inout) :: gg(*)
-
 ! *************************************************************************
 
  integer :: ndat__, iscale__
@@ -574,7 +565,6 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, iscale)
 !arrays
  complex(dpc),target,intent(in) :: ff(*)
  complex(dpc),target,intent(inout) :: gg(*)
-
 ! *************************************************************************
 
  integer :: ndat__, iscale__
@@ -622,7 +612,6 @@ subroutine fft_ug_sp(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gb
 
 !Local variables-------------------------------
  complex(sp),contiguous,pointer :: ug_cplx(:), ur_cplx(:)
-
 ! *************************************************************************
 
  call C_F_pointer(c_loc(ug), ug_cplx, shape=[npw_k*nspinor*ndat])
@@ -658,7 +647,6 @@ subroutine fft_ug_dp(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gb
 
 !Local variables-------------------------------
  complex(dp),contiguous,pointer :: ug_cplx(:), ur_cplx(:)
-
 ! *************************************************************************
 
  call C_F_pointer(c_loc(ug), ug_cplx, shape=[npw_k*nspinor*ndat])
@@ -683,7 +671,7 @@ end subroutine fft_ug_dp
 !! npw_k=number of plane waves for this k-point.
 !! nfft=Number of FFT points.
 !! nspinor=number of spinorial components
-!! ndat=Numer of wavefunctions to transform.
+!! ndat=Number of wavefunctions to transform.
 !! mgfft=Max number of FFT divisions
 !! ngfft(18)=information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! istwfk=Option describing the storage of the wavefunction. (at present must be 1)
@@ -705,7 +693,6 @@ subroutine fft_ug_spc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, g
  integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2),kg_k(3,npw_k)
  complex(spc),intent(in) :: ug(*)  !npw_k*nspinor*ndat)
  complex(spc),intent(out) :: ur(*) !nfft*nspinor*ndat)
-
 ! *************************************************************************
 
 #include "fftug_driver.finc"
@@ -727,7 +714,7 @@ end subroutine fft_ug_spc
 !! npw_k=number of plane waves for this k-point.
 !! nfft=Number of FFT points.
 !! nspinor=number of spinorial components
-!! ndat=Numer of wavefunctions to transform.
+!! ndat=Number of wavefunctions to transform.
 !! mgfft=Max number of FFT divisions
 !! ngfft(18)=information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! istwfk=Option describing the storage of the wavefunction. (at present must be 1)
@@ -749,7 +736,6 @@ subroutine fft_ug_dpc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, g
  integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2),kg_k(3,npw_k)
  complex(dpc),intent(in) :: ug(*)  !npw_k*nspinor*ndat)
  complex(dpc),intent(out) :: ur(*) !nfft*nspinor*ndat)
-
 ! *************************************************************************
 
 #include "fftug_driver.finc"
@@ -783,7 +769,6 @@ subroutine fft_ur_dp(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gb
 
 !Local variables-------------------------------
  complex(dp),contiguous,pointer :: ug_cplx(:), ur_cplx(:)
-
 ! *************************************************************************
 
  call C_F_pointer(c_loc(ug), ug_cplx, shape=[npw_k*nspinor*ndat])
@@ -833,7 +818,6 @@ subroutine fft_ur_spc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, g
  integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2),kg_k(3,npw_k)
  complex(spc),intent(inout) :: ur(*) !nfft*nspinor*ndat)
  complex(spc),intent(out) :: ug(*)   !npw_k*nspinor*ndat)
-
 ! *************************************************************************
 
 #include "fftur_driver.finc"
@@ -881,7 +865,6 @@ subroutine fft_ur_dpc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, g
  integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2),kg_k(3,npw_k)
  complex(dpc),intent(inout) :: ur(*) ! nfft*nspinor*ndat)
  complex(dpc),intent(out) :: ug(*)   ! npw_k*nspinor*ndat)
-
 ! *************************************************************************
 
 #include "fftur_driver.finc"
@@ -931,7 +914,6 @@ subroutine fftpad_spc(ff, ngfft, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, 
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: fofr(:,:),ftarr(:,:)
-
 ! *************************************************************************
 
  fftalg=ngfft(7); fftalga=fftalg/100; fftalgc=MOD(fftalg,10)
@@ -1025,7 +1007,6 @@ subroutine fftpad_dpc(ff, ngfft, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, 
  real(dp),allocatable :: fofr(:,:,:,:,:)
  real(dp),allocatable :: fofrvz(:,:) !vz_d
  real(dp),ABI_CONTIGUOUS pointer :: fpt_ftarr(:,:,:,:,:)
-
 ! *************************************************************************
 
  fftalg=ngfft(7); fftalga=fftalg/100; fftalgc=MOD(fftalg,10)
@@ -1122,7 +1103,6 @@ subroutine fft_poisson(ngfft, cplex, nx, ny, nz, ldx, ldy, ldz, ndat, vg, nr)
 
 !Local variables-------------------------------
  integer :: fftalga, fftcache
-
 ! *************************************************************************
 
  fftalga = ngfft(7)/100; fftcache = ngfft(8)
@@ -1166,7 +1146,6 @@ subroutine fft_use_lib_threads(logvar)
 !Arguments ------------------------------------
 !scalars
  logical,intent(in) :: logvar
-
 ! *************************************************************************
 
  call dfti_use_lib_threads(logvar)
@@ -1219,7 +1198,6 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
  real(dp),allocatable :: fofg(:),fofr_ref(:),fofr(:)
  complex(dpc),allocatable :: ff(:),ff_ref(:),gg(:)
  complex(spc),allocatable :: ffsp(:),ff_refsp(:),ggsp(:)
-
 ! *************************************************************************
 
  nfailed = 0
@@ -1372,12 +1350,28 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
      !  call wrtout(ount,"Warning: fourdp with FFTW3-wrappers, cplex=2 and ndat>1, might crash if MKL is used")
      !  !CYCLE
      !end if
+
+     ! MG: June 24. 2025
+     ! dfti_seqfourdp does not work as expected when cplex= 1 and ngfft(1:3) != ngfft(4:6)
+     ! very likely do the use of r->c, c->r transforms.
+     ! I don't know if it's a bug as the error seems to depend on the mkl version.
+     ! To bypass this problem, we change the params on the fly so that ngfft(1:3) == ngfft(4:6)
+     ! when FFT_DFTI is used.
+     ! Note however that we never call fourdp with ngfft(1:3) != ngftt(4:6) so this is not a serious problem.
+     ! An additional check is done inside dfti_seqfourdp
+
+     !
+     if (fftalga == FFT_DFTI) then
+       ldx=nx; ldy=ny; ldz=nz
+       ldxyz = ldx*ldy*ldz
+     endif
+
      ABI_MALLOC(fofg,     (2*ldxyz*ndat))
      ABI_MALLOC(fofr_ref, (cplex*ldxyz*ndat))
      ABI_MALLOC(fofr,     (cplex*ldxyz*ndat))
 
      call RANDOM_NUMBER(fofr_ref)
-     !call cg_setaug_zero(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,fofr_ref)
+     call cg_setaug_zero(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,fofr_ref)
      fofr = fofr_ref
 
      select case (fftalga)
@@ -1394,7 +1388,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
        continue
      end select
 
-     !call cg_setaug_zero(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,fofr)
+     call cg_setaug_zero(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,fofr)
 
      ierr = COUNT(ABS(fofr - fofr_ref) > ATOL_DP)
      nfailed = nfailed + ierr
@@ -1404,6 +1398,11 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
      if (ierr /= 0) then
        max_abserr = MAXVAL(ABS(fofr - fofr_ref))
        write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
+
+       !write(std_out, *)"abs_diff fofr fofr_ref"
+       !do ifft=1,cplex*ldxyz*ndat
+       !  write(std_out, *)abs(fofr(ifft) - fofr_ref(ifft)), fofr(ifft), fofr_ref(ifft)
+       !end do
      else
        write(msg,"(a)")" OK"
      end if
@@ -1412,6 +1411,13 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
      ABI_FREE(fofg)
      ABI_FREE(fofr_ref)
      ABI_FREE(fofr)
+
+    if (fftalga == FFT_DFTI) then
+      ! Revert changes. See comment above.
+      ldx=pars(4,iset); ldy=pars(5,iset); ldz=pars(6,iset)
+      ldxyz = ldx*ldy*ldz
+    endif
+
    end do
  end do
 
@@ -1465,7 +1471,6 @@ function fftu_utests(ecut, ngfft, rprimd, ndat, nthreads, unit) result(nfailed)
  complex(spc),allocatable :: ugsp(:),ug_refsp(:),ursp(:)
  complex(dpc),allocatable :: ug(:),ug_ref(:),ur(:)
  type(MPI_type) :: MPI_enreg_seq
-
 ! *************************************************************************
 
  ount = std_out; if (PRESENT(unit)) ount = unit
@@ -1673,13 +1678,12 @@ end function fftu_utests
 !!
 !! SOURCE
 
-function fftbox_mpi_utests(fftalg, cplex, ndat, nthreads, comm_fft, unit) result(nfailed)
+integer function fftbox_mpi_utests(fftalg, cplex, ndat, nthreads, comm_fft, unit) result(nfailed)
 
 !Arguments -----------------------------------
 !scalars
  integer,intent(in) :: fftalg,cplex,ndat,nthreads,comm_fft
  integer,optional,intent(in) :: unit
- integer :: nfailed
 
 !Local variables-------------------------------
 !scalars
@@ -1687,8 +1691,7 @@ function fftbox_mpi_utests(fftalg, cplex, ndat, nthreads, comm_fft, unit) result
  integer :: ierr,old_nthreads,ount,iset,mpierr,nfft,me_fft
  integer :: nproc_fft,fftalga,fftalgc,n1,n2,n3,n4,n5,n6
  real(dp),parameter :: ATOL_DP=tol12
- real(dp) :: max_abserr
- real(dp) ::  ctime,wtime,gflops
+ real(dp) :: max_abserr, ctime, wtime, gflops
  character(len=500) :: msg,info,library,cplex_mode,padding_mode
  type(distribfft_type),target :: fftabs
 !arrays
@@ -1696,7 +1699,6 @@ function fftbox_mpi_utests(fftalg, cplex, ndat, nthreads, comm_fft, unit) result
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp),allocatable :: fofg(:,:),fofr(:),fofr_copy(:)
-
 ! *************************************************************************
 
  ount = std_out; if (PRESENT(unit)) ount = unit
@@ -1743,7 +1745,7 @@ function fftbox_mpi_utests(fftalg, cplex, ndat, nthreads, comm_fft, unit) result
    ngfft(12)=ngfft(2)/nproc_fft    ! n2proc
    ngfft(13)=ngfft(3)/nproc_fft    ! n3proc
 
-   !call print_ngfft(ngfft,"ngfft for MPI-fourdp",unit=std_out,mode_paral="COLL",prtvol=0)
+   !call print_ngfft([std_out], ngfft, header="ngfft for MPI-fourdp", prtvol=0)
 
    ! Allocate arrays, fill fofr with random numbers and keep a copy.
    nfft = (n1 * n2 * n3) / nproc_fft
@@ -1831,12 +1833,11 @@ end function fftbox_mpi_utests
 !!
 !! SOURCE
 
-function fftu_mpi_utests(fftalg, ecut, rprimd, ndat, nthreads, comm_fft, paral_kgb, unit) result(nfailed)
+integer function fftu_mpi_utests(fftalg, ecut, rprimd, ndat, nthreads, comm_fft, paral_kgb, unit) result(nfailed)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fftalg,ndat,nthreads,comm_fft,paral_kgb
- integer :: nfailed
  integer,optional,intent(in) :: unit
  real(dp),intent(in) :: ecut
 !arrays
@@ -1865,7 +1866,6 @@ function fftu_mpi_utests(fftalg, ecut, rprimd, ndat, nthreads, comm_fft, paral_k
  real(dp),allocatable :: fofg(:,:),ref_fofg(:,:),fofg_out(:,:),fofr(:,:,:,:)
  real(dp),allocatable :: density(:,:,:),pot(:,:,:),invpot(:,:,:)
  real(dp),allocatable :: full_fofg(:,:),istwf_fofg(:,:)
-
 ! *************************************************************************
 
  nfailed = 0
@@ -1920,7 +1920,7 @@ function fftu_mpi_utests(fftalg, ecut, rprimd, ndat, nthreads, comm_fft, paral_k
    !ngfft(4:6) = ngfft(1:3)
    n4 = ngfft(4); n5 = ngfft(5); n6 = ngfft(6)
 
-   call print_ngfft(ngfft,"ngfft for MPI-fourwf",unit=std_out,mode_paral="COLL",prtvol=0)
+   call print_ngfft([std_out], ngfft, header="ngfft for MPI-fourwf", prtvol=0)
 
    ! Compute FFT distribution tables.
    call init_distribfft(fftabs,"c",nproc_fft,n2,n3)
@@ -2143,13 +2143,13 @@ function fftu_mpi_utests(fftalg, ecut, rprimd, ndat, nthreads, comm_fft, paral_k
 
    ! Compute fofg_out = <G|pot(r)|fofg>
    call fourwf_mpi(cplex,pot,fofg,fofg_out,fofr,&
-&    gbound_k,gbound_k,istwfk_one,kg_k,kg_k,me_g0,mgfft,ngfft,fftabs,n1,n2,n3,&
-&    npw_k,npw_k,n4,n5,n6,ndat,2,weight_r,weight_i,comm_fft,cplexwf=cplexwf)
+     gbound_k,gbound_k,istwfk_one,kg_k,kg_k,me_g0,mgfft,ngfft,fftabs,n1,n2,n3,&
+     npw_k,npw_k,n4,n5,n6,ndat,2,weight_r,weight_i,comm_fft,cplexwf=cplexwf)
 
    ! Compute fofg = <G|1/pot(r)|fofg_out>
    call fourwf_mpi(cplex,invpot,fofg_out,fofg,fofr,&
-&    gbound_k,gbound_k,istwfk_one,kg_k,kg_k,me_g0,mgfft,ngfft,fftabs,n1,n2,n3,&
-&    npw_k,npw_k,n4,n5,n6,ndat,2,weight_r,weight_i,comm_fft,cplexwf=cplexwf)
+     gbound_k,gbound_k,istwfk_one,kg_k,kg_k,me_g0,mgfft,ngfft,fftabs,n1,n2,n3,&
+     npw_k,npw_k,n4,n5,n6,ndat,2,weight_r,weight_i,comm_fft,cplexwf=cplexwf)
 
    ! Check if we got the initial u(g) within ATOL_DP
    ierr = COUNT(ABS(fofg - ref_fofg) > ATOL_DP)
@@ -2325,7 +2325,6 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  real(dp),allocatable :: work1(:,:,:,:),work2(:,:,:,:),work3(:,:,:,:)
  real(dp),allocatable :: work4(:,:,:,:),work_sum(:,:,:,:)
  real(dp),pointer :: weight_ptr_r(:),weight_ptr_i(:)
-
 ! *************************************************************************
 
  ! Accumulate timing
@@ -2396,8 +2395,8 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
    else if(gpu_option_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
      call ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
-       kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
-       weight_ptr_r,weight_ptr_i) !,use_ndo,fofginb)
+       kg_kin,kg_kout,mgfft,me_g0,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
+       weight_ptr_r,weight_ptr_i,use_ndo=use_ndo,fofginb=fofginb)
 #endif
    end if
    if (.not.present(weight_array_r)) then
@@ -3001,7 +3000,6 @@ subroutine fourdp(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft, tim_fo
  real(dp) :: tsec(2)
  real(dp),allocatable :: work1(:,:,:,:,:),work2(:,:,:,:,:)
  real(dp),allocatable :: workf(:,:,:,:,:),workr(:,:,:,:,:)
-
 ! *************************************************************************
 
  !ABI_CHECK(ndat == 1, "ndat != 1 should be tested")
@@ -3403,7 +3401,6 @@ subroutine ccfft(ngfft,isign,n1,n2,n3,n4,n5,n6,ndat,option,work1,work2,comm_fft)
  integer :: fftalg,fftalga,fftalgb,fftalgc,fftcache
  integer :: nd2proc,nd3proc,nproc_fft
  character(len=500) :: msg
-
 !*************************************************************************
 
  !print *, "in ccfft"
@@ -3468,7 +3465,7 @@ end subroutine ccfft
 !! cplex=1 if fofr is real, 2 if fofr is complex
 !! nfft=(effective) number of FFT grid points (for this processor)
 !! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
-!! ndat=Numbre of FFT transforms
+!! ndat=Number of FFT transforms
 !! isign=sign of Fourier transform exponent: current convention uses
 !!    +1 for transforming from G to r
 !!    -1 for transforming from r to G.
@@ -3502,7 +3499,6 @@ subroutine fourdp_mpi(cplex,nfft,ngfft,ndat,isign,&
 !scalars
  integer :: fftalg,fftalga,fftalgc
  character(len=500) :: msg
-
 ! *************************************************************************
 
  fftalg=ngfft(7); fftalga=fftalg/100 ; fftalgc=mod(fftalg,10)
@@ -3649,7 +3645,6 @@ subroutine fourwf_mpi(cplex,denpot,fofgin,fofgout,fofr,&
 ! real(dp) :: tsec(2)
  real(dp) :: weight_array_r(ndat), weight_array_i(ndat)
  real(dp),allocatable :: workf(:,:,:,:)
-
 ! *************************************************************************
 
  !call timab(540,1,tsec)
@@ -4092,7 +4087,6 @@ subroutine fftmpi_u(npw_k,n4,n5,n6,ndat,mgfft,ngfft,&
 !arrays
  integer :: dummy_kg(0,0)
  real(dp) :: dummy_denpot(0,0,0),dummy_fofg(0,0)
-
 ! *************************************************************************
 
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
@@ -4152,7 +4146,6 @@ subroutine zerosym(array,cplex,n1,n2,n3, &
  integer :: nproc_fft,n1sel,nn12,n2sel,n3sel,r2
  !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
-
 ! **********************************************************************
 
  me_fft=0;nproc_fft=1
@@ -4209,7 +4202,7 @@ subroutine zerosym(array,cplex,n1,n2,n3, &
      do i2=1,n2
        ifft=ifft+n1
        if (nproc_fft>1) then
-         ! MPIWF: consider ifft only if it is treated by the current proc and compute its adress
+         ! MPIWF: consider ifft only if it is treated by the current proc and compute its address
          j=ifft-1;j1=modulo(j,n1);j2=modulo(j/n1,n2);j3=j/(n1*n2) !;r2=modulo(j2,nd2)
          if(fftn2_distrib(j2+1)==me_fft) then ! MPIWF this ifft is to be treated by me_fft
            r2= ffti2_local(j2+1) - 1
@@ -4230,7 +4223,7 @@ subroutine zerosym(array,cplex,n1,n2,n3, &
      do i1=1,n1
        ifft=ifft+1
        if (nproc_fft>1) then
-         ! MPIWF: consider ifft only if it is treated by the current proc and compute its adress
+         ! MPIWF: consider ifft only if it is treated by the current proc and compute its address
          j=ifft-1;j1=modulo(j,n1);j2=modulo(j/n1,n2);j3=j/(n1*n2);
          if(fftn2_distrib(j2+1)==me_fft) then ! MPIWF this ifft is to be treated by me_fft
            r2= ffti2_local(j2+1) - 1
@@ -4251,7 +4244,7 @@ subroutine zerosym(array,cplex,n1,n2,n3, &
      do i1=1,n1
        ifft=ifft+1
        if (nproc_fft>1) then
-         ! MPIWF: consider ifft only if it is treated by the current proc and compute its adress
+         ! MPIWF: consider ifft only if it is treated by the current proc and compute its address
          j=ifft-1;j1=modulo(j,n1);j2=modulo(j/n1,n2);j3=j/(n1*n2)
          if(fftn2_distrib(j2+1)==me_fft) then ! MPIWF this ifft is to be treated by me_fft
            r2= ffti2_local(j2+1) - 1
@@ -4322,7 +4315,6 @@ subroutine fourdp_6d(cplex,matrix,isign,MPI_enreg,nfft,ngfft,tim_fourdp)
  integer :: n1,n2,n3
 !arrays
  real(dp),allocatable :: fofg(:,:),fofr(:)
-
 ! *************************************************************************
 
 !TODO check normalization factor, it is better if we use the GW conventions.
@@ -4445,7 +4437,6 @@ subroutine fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,nd1,nd2,nd3,ngfft,aa,bb,optio
  !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
-
 ! *************************************************************************
 
  me_fft=ngfft(11); nproc_fft=ngfft(10)
@@ -4545,10 +4536,10 @@ end subroutine fftpac
 !! We first order the right hand side data according to the processor
 !! in which they are going to be located in the left hand side.
 !! This is done is a way such that  a mpi_alltoall put the data on the correct processor.
-!! We also transfer their future adress. A final ordering put everything in place
+!! We also transfer their future address. A final ordering put everything in place
 !!
 !! INPUTS
-!!  index(sizeindex)= global adress for the transfer from right to left
+!!  index(sizeindex)= global address for the transfer from right to left
 !!  left(2,nleft)=left hand side
 !!  mpi_enreg=information about MPI parallelization
 !!  ngleft(18)=contain all needed information about 3D FFT for the left hand side
@@ -4557,10 +4548,10 @@ end subroutine fftpac
 !!  see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nleft=second dimension of left array (for this processor)
 !!  nright=second dimension of right array (for this processor)
-!!  sizeindex=size of the index array (different form nright, because it is global to all proccessors)
+!!  sizeindex=size of the index array (different form nright, because it is global to all processors)
 !!
 !! OUTPUT
-!!  left(2,nleft)=the elements of the right hand side, at the correct palce in the correct processor
+!!  left(2,nleft)=the elements of the right hand side, at the correct place in the correct processor
 !!
 !! NOTES
 !!  A lot of things to improve.
@@ -4591,8 +4582,8 @@ subroutine indirect_parallel_Fourier(index,left,mpi_enreg,ngleft,ngright,nleft,n
  integer, ABI_CONTIGUOUS pointer :: fftn2r_distrib(:),ffti2r_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3r_distrib(:),ffti3r_local(:)
  real(dp),allocatable :: right_send(:,:),right_recv(:,:)
-
 ! *************************************************************************
+
  n1r=ngright(1);n2r=ngright(2);n3r=ngright(3)
  n1l=ngleft(1) ;n2l=ngleft(2) ;n3l=ngleft(3)
  nproc_fft=mpi_enreg%nproc_fft; me_fft=mpi_enreg%me_fft
@@ -4774,7 +4765,6 @@ subroutine uplan_init(uplan, npw, nspinor, batch_size, ngfft, istwfk, kg_k, kind
 !arrays
  integer,intent(in) :: ngfft(18)
  integer,target,intent(in) :: kg_k(3,npw)
-
 ! *************************************************************************
 
  uplan%npw = npw
@@ -4848,11 +4838,10 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, isign, iscale)
 
 !Local variables-------------------------------
  integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
-
 ! *************************************************************************
 
  ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
- ABI_CHECK_IEQ(sp, uplan%kind, "Incosistent kind!")
+ ABI_CHECK_IEQ(sp, uplan%kind, "Inconsistent kind!")
 
  isign__ = +1; if (present(isign)) isign__ = isign
  iscale__ = 0; if (present(iscale)) iscale__ = iscale
@@ -4905,11 +4894,10 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, isign, iscale)
 
 !Local variables-------------------------------
  integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
-
 ! *************************************************************************
 
  ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
- ABI_CHECK_IEQ(dp, uplan%kind, "Incosistent kind!")
+ ABI_CHECK_IEQ(dp, uplan%kind, "Inconsistent kind!")
 
  isign__ = +1; if (present(isign)) isign__ = isign
  iscale__ = 0; if (present(iscale)) iscale__ = iscale
@@ -4962,11 +4950,10 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, isign, iscale)
 
 !Local variables-------------------------------
  integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
-
 ! *************************************************************************
 
  ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
- ABI_CHECK_IEQ(sp, uplan%kind, "Incosistent kind!")
+ ABI_CHECK_IEQ(sp, uplan%kind, "Inconsistent kind!")
 
  isign__ = -1; if (present(isign)) isign__ = isign
  iscale__ = 1; if (present(iscale)) iscale__ = iscale
@@ -5020,7 +5007,7 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, isign, iscale)
 ! *************************************************************************
 
  ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
- ABI_CHECK_IEQ(dp, uplan%kind, "Incosistent kind!")
+ ABI_CHECK_IEQ(dp, uplan%kind, "Inconsistent kind!")
 
  isign__ = -1; if (present(isign)) isign__ = isign
  iscale__ = 1; if (present(iscale)) iscale__ = iscale

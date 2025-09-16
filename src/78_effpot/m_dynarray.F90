@@ -15,7 +15,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2024 ABINIT group (hexu)
+!! Copyright (C) 2010-2025 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,13 +30,12 @@
 #include "abi_common.h"
 
 module m_dynamic_array
-
   use defs_basis
   use m_abicore
   use m_errors
   use m_mathfuncs, only: array_morethan, binsearch_left_integerlist,binsearch_left_integer
   use m_mergesort, only: MergeSort, MergeSort2D
-
+  use m_xmpi, only: xmpi_sum, xmpi_allgather, xmpi_allgatherv
   implicit none
   private
 !!***
@@ -54,6 +53,9 @@ module m_dynamic_array
     real(dp), allocatable :: data(:)
   CONTAINS
     procedure :: push => real_array_type_push
+    procedure :: sort => real_array_type_sort
+    procedure :: from_static => real_array_type_from_static
+    procedure :: allgatherv => real_array_type_allgatherv
     procedure :: finalize => real_array_type_finalize
   end type real_array_type
 
@@ -73,8 +75,11 @@ module m_dynamic_array
     integer, allocatable :: data(:)
   CONTAINS
     procedure :: push => int_array_type_push
+    procedure :: concate => int_array_type_concate
     procedure :: finalize => int_array_type_finalize
     procedure :: sort => int_array_type_sort
+    procedure :: tostatic => int_array_type_tostatic
+    procedure :: allgatherv => int_array_type_allgatherv
   end type int_array_type
 !!***
 
@@ -119,6 +124,8 @@ CONTAINS
   !end subroutine mpi_gather_int_array
 
 
+
+
 !****f* m_dynarray/real_array_type_push
 !!
 !! NAME
@@ -146,13 +153,67 @@ subroutine real_array_type_push(self, val)
       self%capacity = self%size + self%size / 4 + 8
       ABI_MALLOC(temp, (self%capacity))
       temp(:self%size-1) = self%data
-      !temp gets deallocated
       ABI_MOVE_ALLOC(temp, self%data)
     end if
     self%data(self%size)=val
 
 end subroutine real_array_type_push
 !!***
+
+subroutine int_array_type_from_static(self, A)
+  class(int_array_type), intent(inout):: self
+  integer, intent(in) :: A(:)
+  integer :: n
+  n=size(A)
+  self%size=n
+  self%capacity=n
+  ABI_MALLOC(self%data, (n))
+  self%data(:) = A
+end subroutine int_array_type_from_static
+
+subroutine real_array_type_from_static(self, A)
+  class(real_array_type), intent(inout):: self
+  real(dp), intent(in) :: A(:)
+  integer :: n
+  n=size(A)
+  self%size=n
+  self%capacity=n
+  ABI_MALLOC(self%data, (n))
+  self%data(:) = A
+end subroutine real_array_type_from_static
+
+subroutine real_array_type_sort(self, order)
+  class(real_array_type), intent(inout):: self
+  real(dp):: work((self%size+1)/2)
+  integer, optional, intent(inout):: order(self%size)
+  integer :: work_order((self%size+1)/2)
+  call MergeSort(self%data(:self%size), work, order, work_order)
+end subroutine real_array_type_sort
+
+subroutine real_array_type_allgatherv(self,buff, comm, nproc)
+  class(real_array_type), intent(inout):: self
+  integer, intent(in) :: comm, nproc
+  real(dp), allocatable, intent(out) :: buff(:)
+  real(dp), allocatable :: tmp(:)
+  integer :: disps(nproc), sizes(nproc)
+  integer :: totsize, ierr, i
+  totsize=self%size
+  call xmpi_sum(totsize, comm, ierr)
+  ABI_MALLOC(buff, (totsize))
+  call xmpi_allgather(self%size, sizes, comm, ierr)
+  disps(1)=0
+  do i=2, nproc
+    disps(i)=disps(i-1)+sizes(i-1)
+  end do
+  ABI_MALLOC(tmp, (self%size))
+  if(self%size>0) then
+    tmp(:)=self%data(:self%size)
+  end if
+  call xmpi_allgatherv(tmp, self%size, buff, sizes, disps, comm, ierr  )
+  ABI_FREE(tmp)
+end subroutine real_array_type_allgatherv
+
+
 
 !****f* m_disarray/real_array_type_finalize
 !!
@@ -290,6 +351,33 @@ subroutine int_array_type_sort(self, order)
 end subroutine int_array_type_sort
 
 
+!****f* m_dynarray/int_array_type_concate
+!!
+!! NAME
+!! int_array_type_concate
+!!
+!! FUNCTION
+!! concate int_array to a int_array_type
+!!
+!! INPUTS
+!! self = int_array_type object
+!! array= array to be concateed
+!! OUTPUT
+!! int_array<type(real_array_type)()> = int_array_type data
+!! SOURCE
+subroutine int_array_type_concate(self, array)
+  class(int_array_type), intent(inout):: self
+  class(int_array_type), intent(in):: array
+  integer :: i
+  do i=1, array%size
+    call self%push(array%data(i))
+  end do
+end subroutine int_array_type_concate
+!!***
+
+
+
+
 
 !****f* m_dynarray/int_array_type_finalize
 !!
@@ -313,6 +401,28 @@ subroutine int_array_type_finalize(self)
 
 end subroutine int_array_type_finalize
 
+subroutine int_array_type_allgatherv(self,buff, comm, nproc)
+  class(int_array_type), intent(inout):: self
+  integer, intent(in) :: comm, nproc
+  integer, allocatable, intent(out) :: buff(:)
+  integer, allocatable :: tmp(:)
+  integer :: disps(nproc), sizes(nproc)
+  integer :: totsize, ierr, i
+  totsize=self%size
+  call xmpi_sum(totsize, comm, ierr)
+  ABI_MALLOC(buff, (totsize))
+  call xmpi_allgather(self%size, sizes, comm, ierr)
+  disps(1)=0
+  do i=2, nproc
+    disps(i)=disps(i-1)+sizes(i-1)
+  end do
+  ABI_MALLOC(tmp, (self%size))
+  if(self%size>0) then
+    tmp(:)=self%data(:self%size)
+  end if
+  call xmpi_allgatherv(tmp, self%size, buff, sizes, disps, comm, ierr  )
+  ABI_FREE(tmp)
+end subroutine int_array_type_allgatherv
 
 !==================================================================
 
@@ -377,6 +487,19 @@ subroutine int2d_array_type_concate(self, array)
   end do
 end subroutine int2d_array_type_concate
 !!***
+
+subroutine int_array_type_tostatic(self, a)
+  class(int_array_type), intent(inout):: self
+  integer, allocatable :: a(:)
+  if(self%size>0) then
+    ABI_MALLOC(a, (self%size))
+    a(:) = self%data(:self%size)
+  else
+    ABI_MALLOC(a, (self%size))
+  end if
+end subroutine int_array_type_tostatic
+!!***
+
 
 
 subroutine int2d_array_type_tostatic(self, a, size1)

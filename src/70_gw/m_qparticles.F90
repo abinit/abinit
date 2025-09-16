@@ -8,7 +8,7 @@
 !!  of KS states.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2024 ABINIT group (FB, MG)
+!! Copyright (C) 2008-2025 ABINIT group (FB, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,8 +30,7 @@ MODULE m_qparticles
  use m_nctk
  use m_distribfft
 
-
- use defs_datatypes,   only : pseudopotential_type, ebands_t
+ use defs_datatypes,   only : pseudopotential_type
  use defs_abitypes,    only : MPI_type
  use m_io_tools,       only : open_file, file_exists, isncfile
  use m_fstrings,       only : int2char10, itoa, sjoin
@@ -39,7 +38,7 @@ MODULE m_qparticles
  use m_gwdefs,         only : sigparams_t
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : kmesh_t
- use m_ebands,         only : ebands_get_valence_idx
+ use m_ebands,         only : ebands_t
  use m_sigma,          only : sigma_t
  use m_pawtab,         only : pawtab_type
  use m_pawrhoij,       only : pawrhoij_type, pawrhoij_alloc, pawrhoij_io, pawrhoij_inquire_dim
@@ -53,7 +52,7 @@ MODULE m_qparticles
  public :: rdqps             ! Read a QPS file.
  public :: show_QP           ! Report the components of a QP amplitude in terms of KS eigenstates.
  public :: rdgw              ! Read GW corrections from an external file.
- public :: updt_m_ks_to_qp  ! Updates the matrix of unitary transformation from lda to qp states.
+ public :: updt_m_ks_to_qp   ! Update the matrix of unitary transformation from lda to qp states.
 
 CONTAINS  !=======================================================================================
 !!***
@@ -133,7 +132,6 @@ subroutine wrqps(fname,Sigp,Cryst,Kmesh,Psps,Pawtab,Pawrhoij,nspden,nscf,nfftot,
 !arrays
  integer,allocatable :: nlmn_type(:)
  complex(dpc),allocatable :: mtmp(:,:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -293,13 +291,12 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
  real(dp),allocatable :: en_tmp(:)
  real(dp),allocatable :: rhor_tmp(:,:)
  complex(dpc),allocatable :: mtmp(:,:),utest(:,:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
 
- ABI_CHECK(ALL(BSt%nband==BSt%nband(1)),"No. of bands must be constant")
- ABI_CHECK(dimrho==0.or.dimrho==1,'dimrho must be 0 or 1')
+ ABI_CHECK(ALL(BSt%nband==BSt%nband(1)), "No. of bands must be constant")
+ ABI_CHECK(dimrho==0.or.dimrho==1, 'dimrho must be 0 or 1')
 
  ! This does not work in parallel !!?
  !% my_rank = xmpi_comm_rank(MPI_enreg%spaceComm)
@@ -473,13 +470,13 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
          RETURN
        end if
 
-       ABI_CHECK(natomR ==Cryst%natom, "mismatch in natom")
-       ABI_CHECK(ntypatR==Cryst%ntypat,"mismatch in ntypat")
-       ABI_MALLOC(nlmn_type,(ntypatR))
-       ABI_MALLOC(typatR,(ntypatR))
+       ABI_CHECK(natomR == Cryst%natom, "mismatch in natom")
+       ABI_CHECK(ntypatR == Cryst%ntypat,"mismatch in ntypat")
+       ABI_MALLOC(nlmn_type, (ntypatR))
+       ABI_MALLOC(typatR, (ntypatR))
 
        read(unqps,*)(typatR(iatom), iatom=1,natomR)
-       ABI_CHECK(ALL(Cryst%typat==typatR),"mismatch in typat")
+       ABI_CHECK(ALL(Cryst%typat==typatR), "mismatch in typat")
 
        read(unqps,*)(nlmn_type(itypat), itypat=1,ntypatR)
        do itypat =1,Cryst%ntypat
@@ -776,7 +773,7 @@ subroutine rdgw(Bst,fname,igwene,extrapolate)
    end if
 
    ABI_MALLOC(vbik,(BSt%nkpt,BSt%nsppol))
-   vbik(:,:) = ebands_get_valence_idx(BSt)
+   vbik(:,:) = BSt%get_valence_idx()
 
    do is=1,Bst%nsppol
      do ik=1,Bst%nkpt
@@ -900,12 +897,12 @@ subroutine updt_m_ks_to_qp(Sigp,Kmesh,nscf,Sr,m_ks_to_qp)
  integer :: ik,is
 !arrays
  complex(dpc),allocatable :: mtmp(:,:)
-
 ! *************************************************************************
 
- if (nscf>=0) then
+ if (nscf >= 0) then
    ! Calculate the new m_ks_to_qp
-   ABI_MALLOC(mtmp,(Sigp%nbnds,Sigp%nbnds))
+   ABI_CHECK(Sr%needs_eigvec_qp, "needs_eigvec should be true")
+   ABI_MALLOC(mtmp, (Sigp%nbnds,Sigp%nbnds))
    do is=1,Sigp%nsppol
      do ik=1,Kmesh%nibz
        mtmp(:,:)=m_ks_to_qp(:,:,ik,is)

@@ -20,7 +20,7 @@
 !! * vel2hist
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2024 ABINIT group (XG, SE)
+!! Copyright (C) 2001-2025 ABINIT group (XG, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -191,6 +191,7 @@ subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
  logical,intent(in) :: isVUsed,isARused
  type(abihist),intent(inout) :: hist
 
+
 ! ***************************************************************
 
 !Initialize indexes
@@ -206,6 +207,7 @@ subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
 !Allocate all the histories
  ABI_MALLOC(hist%acell,(3,mxhist))
  ABI_MALLOC(hist%rprimd,(3,3,mxhist))
+
  ABI_MALLOC(hist%xred,(3,natom,mxhist))
  ABI_MALLOC(hist%fcart,(3,natom,mxhist))
  ABI_MALLOC(hist%strten,(6,mxhist))
@@ -925,7 +927,7 @@ character(len= 500) :: msg
      diff = zero
      if (abs(x) > tol12 .and. abs(y) > tol12) then
        diff=2*abs(x-y)/(abs(x)+abs(y))
-     end if 
+     end if
      if (diff>maxdiff) maxdiff=diff
    end do
  end do
@@ -942,7 +944,7 @@ character(len= 500) :: msg
      diff = zero
      if (abs(x) > tol12 .and. abs(y) > tol12) then
        diff=2*abs(x-y)/(abs(x)+abs(y))
-     end if 
+     end if
      if (diff>maxdiff) maxdiff=diff
    end do
  end do

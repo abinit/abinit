@@ -13,7 +13,7 @@
 !!        evaluations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (MS)
+!!  Copyright (C) 2008-2025 ABINIT group (MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -80,7 +80,6 @@ CONTAINS  !=====================================================================
 
  interface
    subroutine fcn(m, n, x, fvec, iflag, y, nfqre, nfqim, bsign, csign, multi_x_exp)
-     implicit none
      integer, parameter         :: dp = KIND(1.0d0)
      integer, intent(in)        :: m, n
      real (dp), intent(in)      :: x(n)
@@ -253,7 +252,6 @@ CONTAINS  !=====================================================================
 
  interface
    subroutine fcn(m, n, x, fvec, iflag, y, nfqre, nfqim, bsign, csign, multi_x_exp)
-     implicit none
      integer, parameter         :: dp = KIND(1.0d0)
      integer, intent(in)        :: m, n
      real (dp), intent(in)      :: x(n)
@@ -1456,7 +1454,6 @@ CONTAINS  !=====================================================================
 
  interface
    subroutine fcn(m, n, x, fvec, iflag, y, nfqre, nfqim, bsign, csign, multi_x_exp)
-     implicit none
      integer, parameter         :: dp = KIND(1.0d0)
      integer, intent(in)        :: m, n
      real (dp), intent(in)      :: x(n)
