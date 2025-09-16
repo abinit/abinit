@@ -59,9 +59,7 @@ MODULE m_forctqmc
  use m_special_funcs, only : sbf8
  use m_splines, only : spline2_complex
 
-#ifdef HAVE_NETCDF
  use netcdf !If calling TRIQS via python invocation, write a .nc file
-#endif
 
  implicit none
 
@@ -2805,11 +2803,6 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
 
  !Calling interfaced TRIQS solver subroutine from src/67_triqs_ext package
  if (paw_dmft%dmft_solv==9) then
-#ifndef HAVE_NETCDF
-  write(message,'(2a)') ch10,' NETCDF requiered! ABINIT communicates with the python script through netcdf.'
-  call wrtout(std_out,message,'COLL')
-  ABI_ERROR(message)
-#else
 #ifndef HAVE_PYTHON_INVOCATION
   write(message,'(23a)') ch10,' Python invocation flag requiered! You need to install ABINIT with ',&
    'enable_python_invocation = yes" in your "configure.ac" file.'
@@ -2982,7 +2975,6 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
   ABI_FREE(new_im_g_iw)
   ABI_FREE(new_g_tau)
   ABI_FREE(new_gl)
-#endif
 #endif
  elseif(paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) then
   !Calling interfaced TRIQS solver subroutine from src/01_triqs_ext package

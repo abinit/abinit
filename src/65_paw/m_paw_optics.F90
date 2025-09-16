@@ -732,7 +732,6 @@ CONTAINS  !=====================================================================
          if (.not.iomode_etsf_mpiio) then
            if (i_am_master) then
              if (iomode==IO_MODE_ETSF) then
-#ifdef HAVE_NETCDF
                if (nc_unlimited) then
                  nc_start_6=[1,1,1,ikpt,isppol,1] ; nc_count_6=[2,3,mband,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1]
                  NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
@@ -743,7 +742,6 @@ CONTAINS  !=====================================================================
                  nc_start_5=[1,1,1,ikpt,isppol] ; nc_count_5=[2,3,(mband*(mband+1))/2,1,1] ; nc_stride_5=[1,1,1,1,1]
                  NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_5,stride=nc_stride_5,count=nc_count_5))
                end if
-#endif
              else
                bsize=nband_k**2;if (store_half_dipoles) bsize=(nband_k*(nband_k+1))/2
                write(ount)(psinablapsi(1:2,1,ib),ib=1,bsize)

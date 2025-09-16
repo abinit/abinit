@@ -28,11 +28,11 @@ MODULE m_ifc
  use m_xmpi
  use m_sort
  use m_cgtools
- use m_nctk
  use m_ddb
  use m_ddb_hdr
  use m_symkpt
  use netcdf
+ use m_nctk
 
  use m_io_tools,    only : open_file
  use m_numeric_tools, only : arth
@@ -59,8 +59,6 @@ MODULE m_ifc
  public :: defwrite_nonana_terms
  ! Write to ncfile the phonon frequencies and displacements for q --> 0
  ! in the presence of non-analytical behaviour.
-
-
 !!***
 
 !!****t* m_ifc/ifc_type
@@ -351,10 +349,10 @@ end subroutine ifc_free
 !! SOURCE
 
 subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
-  rfmeth,ngqpt_in,nqshft,q1shft,dielt,zeff,qdrp_cart,nsphere,rifcsph,&
-  prtsrlr,enunit, & ! TODO: TO BE REMOVED
-  comm, &
-  Ifc_coarse,dipquad,quadquad,prtout) ! Optional
+                    rfmeth,ngqpt_in,nqshft,q1shft,dielt,zeff,qdrp_cart,nsphere,rifcsph,&
+                    prtsrlr,enunit, & ! TODO: TO BE REMOVED
+                    comm, &
+                    Ifc_coarse,dipquad,quadquad,prtout) ! Optional
 
 !Arguments ------------------------------------
  class(ifc_type),intent(inout) :: Ifc
@@ -365,7 +363,6 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  type(ifc_type),optional,intent(in) :: Ifc_coarse
  integer,optional,intent(in) :: dipquad, quadquad
  logical, optional, intent(in) :: prtout
-
 !arrays
  integer,intent(in) :: ngqpt_in(3)
  real(dp),intent(in) :: q1shft(3,nqshft)
@@ -379,12 +376,10 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 !scalars
  integer,parameter :: timrev1=1,iout0=0,chksymbreak0=0
  integer :: mpert,iout,iqpt,mqpt,nsym,ntypat,iq_ibz,iq_bz,ii,natom
- integer :: nqbz,option,plus,sumg0,irpt,irpt_new
- integer :: nprocs,my_rank,my_ierr,ierr
+ integer :: nqbz,option,plus,sumg0,irpt,irpt_new, nprocs,my_rank,my_ierr,ierr
  logical :: prtout_
  real(dp),parameter :: qphnrm=one
- real(dp) :: xval,cpu,wall,gflops,rcut_min
- real(dp) :: r_inscribed_sphere,toldist
+ real(dp) :: xval,cpu,wall,gflops,rcut_min,r_inscribed_sphere,toldist
  character(len=500*4) :: msg
  type(ifc_type) :: ifc_tmp
 !arrays
@@ -398,7 +393,6 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  real(dp),allocatable :: dyew(:,:,:,:,:),out_d2cart(:,:,:,:,:)
  real(dp),allocatable :: dynmatfull(:,:,:,:,:,:),dynmat_sr(:,:,:,:,:,:),dynmat_lr(:,:,:,:,:,:) ! for OmegaSRLR
  real(dp),allocatable :: wtq(:),wtq_folded(:),qbz(:,:)
-
 !******************************************************************
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -612,7 +606,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    write(msg, '(3a,es14.4,2a,i0, 14a)' ) &
     'The sum of the weight is not equal to nqpt.',ch10,&
     'The sum of the weights is: ',sum(ifc_tmp%wghatm),ch10,&
-    'The number of q points is: ',nqbz, ch10, &
+    'The number of q-points is: ',nqbz, ch10, &
     'This might have several sources.',ch10,&
     'If toldist is larger than 1.0e-8, the atom positions might be loose.',ch10,&
     'and the q point weights not computed properly.',ch10,&
@@ -779,20 +773,16 @@ subroutine ifc_from_file(ifc, dielt,filename,natom,ngqpt,nqshift,qshift,ucell_dd
  character(len=500) :: msg
  type(ddb_type) :: ddb
  type(ddb_hdr_type) :: ddb_hdr
-
 !******************************************************************
 
  !check if ddb file exists
  inquire(file=filename, exist=file_exists)
 
  if (file_exists .eqv. .true.)then
-
    !Reading the ddb
    call ddb%from_file(filename, ddb_hdr, ucell_ddb, comm)
    call ddb_hdr%free()
-
    natom = ddb%natom
-
  else
    ABI_ERROR(sjoin("File:", filename, "is not present in the directory"))
  end if
@@ -1161,7 +1151,6 @@ subroutine ifc_get_phmesh(ifc, ph_wstep, phmesh_size, phmesh)
  integer,intent(out) :: phmesh_size
 !arrays
  real(dp),allocatable,intent(out) :: phmesh(:)
-
 !******************************************************************
 
  phmesh_size = nint((ifc%omega_minmax(2) - ifc%omega_minmax(1) ) / ph_wstep) + 1
@@ -1221,7 +1210,6 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
  real(dp) :: qred(3),qvers_cart(3),qvers_red(3),quad(3),prev_quad(3),vs(7,3)
  real(dp) :: phfrqs(3*crystal%natom),dwdq(3,3*crystal%natom)
  real(dp) :: displ_cart(2,3*crystal%natom,3*crystal%natom),eigvec(2,3*crystal%natom,3*crystal%natom)
-
 ! *********************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
@@ -1429,9 +1417,7 @@ subroutine ifc_autocutoff(ifc, crystal, comm)
 !arrays
  real(dp) :: displ_cart(2*3*ifc%natom*3*ifc%natom)
  real(dp) :: qred(3),qred_vers(3),phfrqs(3*ifc%natom) !,dwdq(3,3*ifc%natom)
- real(dp),allocatable :: ref_phfrq(:,:),cut_phfrq(:,:)
- real(dp),allocatable :: save_wghatm(:,:,:),save_atmfrc(:,:,:,:,:)
-
+ real(dp),allocatable :: ref_phfrq(:,:),cut_phfrq(:,:), save_wghatm(:,:,:),save_atmfrc(:,:,:,:,:)
 ! *********************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
@@ -1578,7 +1564,6 @@ subroutine corsifc9(acell,gprim,natom,nrpt,nsphere,rifcsph,rcan,rprim,rpt,rcut_m
 !arrays
  integer,allocatable :: list(:)
  real(dp),allocatable :: dist(:,:,:),wkdist(:)
-
 ! *********************************************************************
 
  ! Compute the distances between atoms
@@ -1708,7 +1693,7 @@ subroutine ifc_write(Ifc,ifcana,atifcflg,ifcout,prt_ifc,ncid,prefix,&
  real(dp) :: detdlt
  real(dp) :: maxdist_tdep
  character(len=fnlen) :: filename
- character(len=500) :: message
+ character(len=500) :: msg
  character(len=4) :: str1, str2
 !arrays
  integer,allocatable :: list(:),indngb(:)
@@ -1716,13 +1701,9 @@ subroutine ifc_write(Ifc,ifcana,atifcflg,ifcout,prt_ifc,ncid,prefix,&
  real(dp),allocatable :: dist(:,:,:),wkdist(:),rsiaf(:,:,:),sriaf(:,:,:),vect(:,:,:)
  real(dp),allocatable :: posngb(:,:),wghia(:)
  real(dp) :: gprimd(3,3),rprimd(3,3)
-
 ! *********************************************************************
 
- iout = ab_out
- if (present(unit_out)) then
-   iout = unit_out
- end if
+ iout = ab_out; if (present(unit_out)) iout = unit_out
  dielt = ifc%dielt
 
  ! Compute the distances between atoms
@@ -1738,9 +1719,9 @@ subroutine ifc_write(Ifc,ifcana,atifcflg,ifcout,prt_ifc,ncid,prefix,&
 
  ! Calculating the determinant of the dielectric tensor
  detdlt=dielt(1,1)*dielt(2,2)*dielt(3,3)+dielt(1,3)*dielt(2,1)*&
-& dielt(3,2)+dielt(1,2)*dielt(2,3)*dielt(3,1)-dielt(1,3)*&
-& dielt(2,2)*dielt(3,1)-dielt(1,1)*dielt(2,3)*dielt(3,2)-&
-& dielt(1,2)*dielt(2,1)*dielt(3,3)
+        dielt(3,2)+dielt(1,2)*dielt(2,3)*dielt(3,1)-dielt(1,3)*&
+        dielt(2,2)*dielt(3,1)-dielt(1,1)*dielt(2,3)*dielt(3,2)-&
+        dielt(1,2)*dielt(2,1)*dielt(3,3)
 
 ! echo to log file
  write(std_out,'(a)' )' ifc_write: analysis of interatomic force constants '
@@ -1779,10 +1760,10 @@ subroutine ifc_write(Ifc,ifcana,atifcflg,ifcout,prt_ifc,ncid,prefix,&
 
  if (ifcout>Ifc%natom*Ifc%nrpt .or. ifcout == -1) then
    ifcout1=Ifc%natom*Ifc%nrpt
-   write(message, '(3a,i0,a)' )&
-&   'The value of ifcout exceeds the number of atoms in the big box.', ch10, &
-&   'Output limited to ',Ifc%natom*Ifc%nrpt,' atoms.'
-   ABI_WARNING(message)
+   write(msg, '(3a,i0,a)' )&
+    'The value of ifcout exceeds the number of atoms in the big box.', ch10, &
+    'Output limited to ',Ifc%natom*Ifc%nrpt,' atoms.'
+   ABI_WARNING(msg)
  else
    ifcout1=ifcout
  end if
@@ -1790,19 +1771,19 @@ subroutine ifc_write(Ifc,ifcana,atifcflg,ifcout,prt_ifc,ncid,prefix,&
  ! set up file for real space ifc output, if required
  if (prt_ifc == 1) then
    filename = trim(prefix)//'_ifcinfo.dat'
-   if (open_file(trim(filename), message, newunit=unit_ifc, status="replace") /= 0) then
-     ABI_ERROR(message)
+   if (open_file(trim(filename), msg, newunit=unit_ifc, status="replace") /= 0) then
+     ABI_ERROR(msg)
    end if
    write(iout, '(a,a)' )ch10,&
-&   '  NOTE: Open file _ifcinfo.dat, for the output of interatomic force constants. This is because prt_ifc==1. '
+    '  NOTE: Open file _ifcinfo.dat, for the output of interatomic force constants. This is because prt_ifc==1. '
 
    filename = trim(prefix)//'_forceconstants.dat'
-   if (open_file(trim(filename), message, newunit=unit_tdep, status="replace") /= 0) then
-     ABI_ERROR(message)
+   if (open_file(trim(filename), msg, newunit=unit_tdep, status="replace") /= 0) then
+     ABI_ERROR(msg)
    end if
    write(iout, '(a,a,a)' )ch10,&
-&   '  NOTE: Open file _forceconstants.dat, for the output of interatomic force',&
-&   ' constants in TDEP format. This is because prt_ifc==1. '
+    '  NOTE: Open file _forceconstants.dat, for the output of interatomic force',&
+    ' constants in TDEP format. This is because prt_ifc==1. '
    ! Print necessary stuff for TDEP
    write(unit_tdep,"(1X,I10,15X,'How many atoms per unit cell')") Ifc%natom
 
@@ -1976,8 +1957,8 @@ subroutine ifc_write(Ifc,ifcana,atifcflg,ifcout,prt_ifc,ncid,prefix,&
    close(unit_tdep)
 
    filename = trim(prefix)//'_lotosplitting.dat'
-   if (open_file(trim(filename), message, newunit=unit_tdep, status="replace") /= 0) then
-     ABI_ERROR(message)
+   if (open_file(trim(filename), msg, newunit=unit_tdep, status="replace") /= 0) then
+     ABI_ERROR(msg)
    end if
    write(unit_tdep,'(3es28.16)') dielt(:,1)
    write(unit_tdep,'(3es28.16)') dielt(:,2)
@@ -2049,7 +2030,7 @@ end subroutine ifc_write
 !! SOURCE
 
 subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
-& dist,invdlt,detdlt,rsiaf,sriaf,vect,indngb,posngb)
+                      dist,invdlt,detdlt,rsiaf,sriaf,vect,indngb,posngb)
 
 !Arguments -------------------------------
 !scalars
@@ -2067,14 +2048,11 @@ subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
 !Local variables -------------------------
 !scalars
  integer :: flag,ib,ii,index,jj,kk,mu,nu,irpt
- real(dp) :: ew1,rsq,scprod,trace1,trace2,trace3
- real(dp) :: yy,dist1
- character(len=500) :: message
+ real(dp) :: ew1,rsq,scprod,trace1,trace2,trace3, yy,dist1
+ character(len=500) :: msg
 !arrays
  real(dp) :: ewiaf0(3,3),ewiaf1(3,3),ewloc(3,3),ifcloc(3,3)
- real(dp) :: rcart(3),rdiff(3),rsloc(3,3)
- real(dp) :: srloc(3,3),vect1(3),vect2(3),vect3(3),work(3),xx(3)
-
+ real(dp) :: rcart(3),rdiff(3),rsloc(3,3), srloc(3,3),vect1(3),vect2(3),vect3(3),work(3),xx(3)
 ! *********************************************************************
 
  if(ifcana==1)then
@@ -2116,10 +2094,10 @@ subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
      if(flag==1)exit
    end do
    if(flag==0)then
-     write(message, '(3a)' )&
-&     'Unable to find a third atom not aligned with the two selected ones.',ch10,&
-&     'The local analysis (longitudinal/transverse) will not be done. The two transverse vectors are set to zero.'
-     ABI_WARNING(message)
+     write(msg, '(3a)' )&
+      'Unable to find a third atom not aligned with the two selected ones.',ch10,&
+      'The local analysis (longitudinal/transverse) will not be done. The two transverse vectors are set to zero.'
+     ABI_WARNING(msg)
      vect2(:)=zero ; vect3(:)=zero
    else
      vect2(1)=work(1)/scprod**0.5
@@ -2233,11 +2211,11 @@ subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
        end do
      else
        if (ia/=ib)then
-         write(message, '(a,a,a,a,a,i5,a,i5,a)' )&
-&         'The distance between two atoms vanishes.',ch10,&
-&         'This is not allowed.',ch10,&
-&         'Action: check the input for the atoms number',ia,' and',ib,'.'
-         ABI_ERROR(message)
+         write(msg, '(a,a,a,a,a,i5,a,i5,a)' )&
+           'The distance between two atoms vanishes.',ch10,&
+           'This is not allowed.',ch10,&
+           'Action: check the input for the atoms number',ia,' and',ib,'.'
+         ABI_ERROR(msg)
        end if
      end if
 
@@ -2269,9 +2247,9 @@ subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
      if (iout > 0) then
        do nu=1,3
          write(iout, '(1x,3(3f9.5,1x))' )&
-&         (rsiaf(mu,nu,ii) +tol10,mu=1,3),&
-&         (ewiaf1(mu,nu)+tol10,mu=1,3),&
-&         (sriaf(mu,nu,ii) +tol10,mu=1,3)
+           (rsiaf(mu,nu,ii) +tol10,mu=1,3),&
+           (ewiaf1(mu,nu)+tol10,mu=1,3),&
+           (sriaf(mu,nu,ii) +tol10,mu=1,3)
 
 !       transfer short range and long range
          do mu=1,3
@@ -2381,9 +2359,8 @@ subroutine omega_decomp(amu,natom,ntypat,typat,dynmatfl,dynmatsr,dynmatlr,iqpt,n
  real(dp),parameter :: break_symm=1.0d-12
  real(dp) :: fac
 !arrays
+ real(dp) :: omegafl, omegasr, omegalr, sumfl,sumlr,sumsr,asr
  real(dp) :: nearidentity(3,3)
- real(dp) :: omegafl, omegasr, omegalr
- real(dp) :: sumfl,sumlr,sumsr,asr
 ! *********************************************************************
 
 !write(ab_out,*)''
@@ -2403,13 +2380,10 @@ subroutine omega_decomp(amu,natom,ntypat,typat,dynmatfl,dynmatsr,dynmatlr,iqpt,n
    end do
  end do
 
-
-!This slight breaking of the symmetry allows the
-!results to be more portable between machines
+!This slight breaking of the symmetry allows the results to be more portable between machines
  nearidentity(:,:)=1.0
  nearidentity(1,1)=1.0+break_symm
  nearidentity(3,3)=1.0-break_symm
-
 
 !Include Mass
  do ipert1=1,natom
@@ -2572,7 +2546,6 @@ subroutine ifc_outphbtrap(ifc, cryst, ngqpt, nqshft, qshft, basename)
  real(dp) :: d2cart(2,3,cryst%natom,3,cryst%natom),displ(2*3*cryst%natom*3*cryst%natom)
  real(dp) :: phfrq(3*cryst%natom),qphon(3)
  real(dp),allocatable :: qbz(:,:),qibz(:,:),wtq(:)
-
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -2677,7 +2650,6 @@ subroutine ifc_printbxsf(ifc, cryst, ngqpt, nqshft, qshft, path, comm)
  integer :: qptrlatt(3,3),dummy_symafm(cryst%nsym)
  real(dp) :: displ_cart(2,3*cryst%natom,3*cryst%natom)
  real(dp),allocatable :: qibz(:,:),wtq(:),qbz(:,:),freqs_qibz(:,:)
-
 ! *********************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
@@ -2906,8 +2878,6 @@ end subroutine ifc_calcnwrite_nana_terms_qpath
 !! OUTPUT
 !!  ddb = DDB object
 !!
-!! NOTES
-!!
 !! SOURCE
 
 subroutine ifc_to_ddb(ifc, ddb, crystal)
@@ -2923,17 +2893,13 @@ subroutine ifc_to_ddb(ifc, ddb, crystal)
  integer :: jj,iqpt,idir1,idir2,ipert1,ipert2
  integer :: mpert,msize
  integer :: nqibz,nqbz
- integer,parameter :: qptopt=1
- integer,parameter :: nqshft=1
+ integer,parameter :: qptopt=1, nqshft=1
  real(dp) :: qj,qptnrm
 !arrays
  integer :: qptrlatt(3,3)
- real(dp) :: qpt(3)
- real(dp) :: qshft(1,3)
+ real(dp) :: qpt(3), qshft(1,3)
  integer,allocatable :: flg(:,:,:,:)
- real(dp),allocatable :: qibz(:,:),qbz(:,:), wtq(:)
- real(dp),allocatable :: d2cart(:,:,:,:,:),d2red(:,:,:,:,:)
-
+ real(dp),allocatable :: qibz(:,:),qbz(:,:), wtq(:), d2cart(:,:,:,:,:),d2red(:,:,:,:,:)
 ! *********************************************************************
 
   ! Initialize DDB with minimal info
@@ -3087,7 +3053,6 @@ subroutine defwrite_nonana_terms(ncid, iq_dir, ndirs, qdirs_cart, natom, phfrq, 
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "non_analytical_directions"), qdirs_cart))
 
  case ("write")
-
    NCF_CHECK(nf90_inq_varid(ncid, "non_analytical_phonon_modes", na_phmodes_varid))
    NCF_CHECK(nf90_put_var(ncid,na_phmodes_varid,phfrq*Ha_eV,start=[1, iq_dir], count=[3*natom, 1]))
    NCF_CHECK(nf90_inq_varid(ncid, "non_analytical_phdispl_cart", na_phdispl_varid))

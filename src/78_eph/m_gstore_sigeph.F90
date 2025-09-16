@@ -3,6 +3,8 @@
 !! m_gstore
 !!
 !! FUNCTION
+!!  Compute matrix elements of the e-ph self-energy (Fan Migdal + Debye Waller).
+!!  using precomputed e-ph matrix elements.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2025 ABINIT group (MG)
@@ -31,10 +33,8 @@ module m_gstore_sigeph
  use m_nctk
  !use m_ddb
  !use m_dvdb
- use m_crystal,       only : crystal_t
- !use m_fft
+ use m_crystal,        only : crystal_t
  !use m_hamiltonian
- !use m_pawcprj
  use m_dtset,          only : dataset_type
  use m_dtfil,          only : datafiles_type
  !use m_wfd
@@ -49,8 +49,7 @@ module m_gstore_sigeph
  !use m_kg,             only : getph
  !use defs_datatypes,   only : pseudopotential_type
  !use m_hdr,            only : hdr_type, fform_from_ext
- use m_ebands, only : ebands_t, gaps_t
- !use m_matrix,         only : matr3inv
+ use m_ebands,         only : ebands_t, gaps_t
  use m_kpts,           only : kpts_timrev_from_kptopt, kpts_map !, kpts_sort, kpts_pack_in_stars, kptrlatt_from_ngkpt
  !use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack
  use m_ifc,            only : ifc_type
@@ -60,14 +59,14 @@ module m_gstore_sigeph
  !use m_pawtab,         only : pawtab_type
  !use m_pawfgr,         only : pawfgr_type
  !use m_pstat,          only : pstat_proc
- use m_occ,             only : occ_be, occ_fd
- use m_lgroup,          only : lgroup_t
- use m_gstore,          only : gstore_t !, gqk_t
+ use m_occ,            only : occ_be, occ_fd
+ use m_lgroup,         only : lgroup_t
+ use m_gstore,         only : gstore_t
 
  implicit none
 
  private
-
+ public :: gstore_sigeph
 !!***
 
 !----------------------------------------------------------------------
@@ -78,18 +77,16 @@ module m_gstore_sigeph
 !!
 !! FUNCTION
 !!
-!! NOTES
-!!
 !! SOURCE
 
-type, public :: seph_t
-
-  integer :: nsppol
-   ! Number of independent spin polarizations.
-
-!contains
-
-end type seph_t
+!! type, public :: seph_t
+!!
+!!   integer :: nsppol
+!!    ! Number of independent spin polarizations.
+!!
+!! !contains
+!!
+!! end type seph_t
 !!***
 
 contains
@@ -137,7 +134,7 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
 !arrays
  integer :: units(2), my_kqmap(6)
  real(dp) :: kk(3), qpt(3), kq(3)
- real(dp),allocatable :: mu_e(:), kTmesh(:), nqnu(:), f_mkq(:), f_nk(:)
+ real(dp),allocatable :: mu_e(:), kTmesh(:), nqnu(:), f_mkq(:) !, f_nk(:)
  complex(dpc),allocatable :: cfact(:)
  !real(dp),allocatable :: g2_pmnk(:,:,:,:)
  complex(dpc),allocatable :: vals_e0ks(:,:,:)
@@ -148,8 +145,7 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
 
  call wrtout(std_out, " Computing Fan-Migdal + DW self-energy from GSTORE.nc", pre_newlines=1)
 
- call gstore%from_ncpath(dtfil%filgstorein, with_cplex1, dtset, cryst, ebands, ifc, comm)
- call gstore%free()
+ call gstore%from_ncpath(dtfil%filgstorein, with_cplex1, dtset, cryst, ebands, ifc, comm, gvals_vname="gvals")
 
  ABI_CHECK(gstore%qzone == "bz", "gstore_sigeph assumes qzone == `bz`")
  if (gstore%check_cplex_qkzone_gmode(1, "bz", "ibz", "phonon") /= 0) then
@@ -178,7 +174,7 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
  call gaps%free()
 
  ABI_MALLOC(nqnu, (ntemp))
- ABI_MALLOC(f_nk, (ntemp))
+ !ABI_MALLOC(f_nk, (ntemp))
  ABI_MALLOC(f_mkq, (ntemp))
  ABI_MALLOC(cfact, (ntemp))
 
@@ -186,19 +182,22 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
  !use_lgk = dtset%symsigma /= 0
  use_lgk = .True.
 
+ ! Compute electronic occ for all Temps (note mu_e(it) Fermi level)
+ !do it=1,ntemp
+ !  f_nk(it) = occ_fd(eig0nk, kTmesh(it), mu_e(it))
+ !end do ! it
+
  ! Loop over collinear spins.
  do my_is=1,gstore%my_nspins
    associate (gqk => gstore%gqk(my_is), cryst => gstore%cryst)
    spin = gstore%my_spins(my_is)
+   ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
+   ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
 
    ! vals_e0ks(ntemp, max_nbcalc, nk_glob, nsppol)
    ! Sigma_eph(omega=eKS, kT, band) for given (ikcalc, spin).
    ! Fan-Migdal + Debye-Waller
    ABI_CALLOC(vals_e0ks, (ntemp, gqk%nb, gqk%glob_nk))  ! nb_k
-   ABI_FREE(vals_e0ks)
-
-   ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
-   ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
 
    ! Loop over k-points in |n,k>
    do my_ik=1,gqk%my_nk
@@ -219,15 +218,14 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
        ! weight_qq is computed here. It depends whether we are assuming over the full BZ or IBZ_k.
        weight_qq = one / gstore%nqbz
        if (use_lgk) then
-         ii = lg_myk%findq_ibzk(qpt)
-         if (ii == -1) cycle
+         ii = lg_myk%findq_ibzk(qpt); if (ii == -1) cycle
          weight_qq = lg_myk%weights(ii)
        end if
 
        ! Find the image of kq in the IBZ.
        kq = kk + qpt
        if (kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, 1, kq, my_kqmap) /= 0) then
-         ABI_ERROR(sjoin("Cannot map k+q to IBZ with qpt:", ktoa(qpt)))
+         ABI_ERROR(sjoin("Cannot map k+q to IBZ with k+q:", ktoa(kq)))
        end if
        ikq_ibz = my_kqmap(1)
 
@@ -255,11 +253,6 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
              band_k = in_k - gqk%bstart + 1
              eig0nk = ebands%eig(band_k, ik_ibz, spin)
 
-             ! Compute electronic occ for all Temps (note mu_e(it) Fermi level)
-             !do it=1,ntemp
-             !  f_nk(it) = occ_fd(eig0nk, kTmesh(it), mu_e(it))
-             !end do ! it
-
              if (dtset%eph_ahc_type == 1) then
                cfact(:) =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + ieta) + &
                            (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + ieta)
@@ -271,23 +264,33 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
              ! (my_npert, nb_kq, my_nq, nb_k, my_nk)
              gkq2 = gqk%my_g2(my_ip, im_kq, my_iq, in_k, my_ik)
              cfact = cfact * gkq2 * weight_qq
-             !se%vals_e0ks(:, in_k, ik_glob) = se%vals_e0ks(:, in_k, ik_glob) + cfact
+             vals_e0ks(:, in_k, glob_ik) = vals_e0ks(:, in_k, glob_ik) + cfact
+             !dvals_de0ks(:, in_k, glob_ik) = se%dvals_de0ks(:, in_k, glob_ik) + ??
            end do ! in_k
          end do ! my_ik
        end do ! im_kq
      end do ! my_iq
    end do ! my_ik
+
+   call xmpi_sum(vals_e0ks, gqk%comm%value, ierr)
+   !call xmpi_sum(dvals_de0ks, gqk%comm%value, ierr)
+
+   ! Average self-energy matrix elements in the degenerate subspace.
+
+   ABI_FREE(vals_e0ks)
    call lg_myk%free()
-   !call xmpi_sum(foobar, gstore%comm, ierr)
    end associate
  end do ! my_is
 
  ABI_FREE(mu_e)
  ABI_FREE(kTmesh)
  ABI_FREE(nqnu)
- ABI_FREE(f_nk)
+ !ABI_FREE(f_nk)
  ABI_FREE(f_mkq)
  ABI_FREE(cfact)
+ call gstore%free()
+
+ ! TODO: Sternheimer with KS states.
 
 end subroutine gstore_sigeph
 !!***

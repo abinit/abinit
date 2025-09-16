@@ -1224,7 +1224,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        ABI_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)
      end if
 
-     ! TODO: Activate this check and update the two EPH tests that started to faiild
+     ! TODO: Activate this check and update the two EPH tests that started to failed
      ! We need "enough" valence states to compute the mu(T) in semiconductors
      if ((dt%nsppol == 1 .and. dt%nspinor == 1 .and. dt%nband(1) <= zval/two) .or. &
          (dt%nsppol == 2 .and. dt%nband(1) <= zval) .or. &   ! Magnetic semiconductors are not easy to predict!
@@ -1307,6 +1307,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        if (dt%ecutsigx <= 0) then
          ABI_ERROR_NOSTOP("ecutsigx must be specified if GWPT is activated", ierr)
        end if
+       if (any(dt%ppmodel == [3, 4])) then
+         ABI_ERROR_NOSTOP("GWPT does not support ppmodel 3 or 4", ierr)
+       end if
      end if
 
      if (dt%eph_task == 18) then
@@ -1384,7 +1387,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    !  fockoptmix
    call chkint_eq(0,0,cond_string,cond_values,ierr,'fockoptmix',&
      dt%fockoptmix,12,[0,1,11,201,211,301,401,501,601,701,801,901],iout)
-   if(dt%paral_kgb/=0)then
+
+   if (dt%paral_kgb/=0) then
      cond_string(1)='paral_kgb' ; cond_values(1)=dt%paral_kgb
      ! Make sure that dt%fockoptmix is 0, 1 or 11 (wfmixalg==0)
      call chkint_eq(1,1,cond_string,cond_values,ierr,'fockoptmix',dt%fockoptmix,3,(/0,1,11/),iout)
@@ -1610,11 +1614,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
    ! gwpara
    call chkint_eq(0,0,cond_string,cond_values,ierr,'gwpara',dt%gwpara,3,[0,1,2],iout)
-   !if(dt%chkparal/=0.and.(dt%gwpara==0.and.(dt%optdriver==RUNL_SCREENING.and.dt%optdriver==RUNL_SIGMA))) then
-   !    cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
-   !    cond_string(2)='chkparal' ; cond_values(2)=dt%chkparal
-   !    call chkint_eq(2,2,cond_string,cond_values,ierr,'gwpara',dt%gwpara,1,(/0/),iout)
-   !end if
 
    ! gwrpacorr
    if(dt%gwrpacorr>0) then
@@ -2914,29 +2913,29 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
         [RUNL_GSTATE,RUNL_RESPFN,RUNL_SCREENING,RUNL_SIGMA,RUNL_BSE,RUNL_WFK,RUNL_NONLINEAR,RUNL_RTTDDFT,RUNL_GWR],iout)
    end if
 
-!  Linear and Non-linear response calculations
-   !Non-linear response not compatible with spinors
+   !  Linear and Non-linear response calculations
+   ! Non-linear response not compatible with spinors
    if(nspinor/=1)then
      cond_string(1)='nspinor' ; cond_values(1)=nspinor
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,2,(/RUNL_NONLINEAR,RUNL_LONGWAVE/),iout)
    end if
-   !Non-linear response only for insulators
+   ! Non-linear response only for insulators
    if(dt%occopt/=1 .and. dt%occopt/=2)then
      cond_string(1)='occopt' ; cond_values(1)=dt%occopt
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,2,(/RUNL_NONLINEAR,RUNL_LONGWAVE/),iout)
    end if
-   !Non-linear response not compatible with mkmem=0
+   ! Non-linear response not compatible with mkmem=0
    if(dt%mkmem==0)then
      cond_string(1)='mkmem' ; cond_values(1)=dt%mkmem
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
-   !Longwave needs all k-points
+   ! Longwave needs all k-points
    if(dt%kptopt==1 .or. dt%kptopt==4) then
      cond_string(1)='kptopt' ; cond_values(1)=dt%kptopt
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
    end if
 
-   !dkdk and dkde non-linear response only for occopt=1 (insulators)
+   ! dkdk and dkde non-linear response only for occopt=1 (insulators)
    if (dt%rf2_dkdk==1 .or. dt%rf2_dkdk==2 .or. dt%rf2_dkdk==3) then
      cond_string(1)='rf2_dkdk' ; cond_values(1)=dt%rf2_dkdk
      call chkint_eq(1,1,cond_string,cond_values,ierr,'occopt',dt%occopt,1,(/1/),iout)
@@ -2955,13 +2954,13 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      call chkint_eq(1,1,cond_string,cond_values,ierr,'useylm',dt%useylm,1,(/1/),iout)
    end if
 
-   !PEAD non-linear response only for occopt=1 (insulators)
+   ! PEAD non-linear response only for occopt=1 (insulators)
    if(dt%usepead==0.and.dt%optdriver==RUNL_NONLINEAR)then
      cond_string(1)='usepead'   ; cond_values(1)=dt%usepead
      cond_string(2)='optdriver' ; cond_values(2)=dt%optdriver
      call chkint_eq(1,2,cond_string,cond_values,ierr,'occopt',dt%occopt,1,(/1/),iout)
    end if
-   !PAW non-linear response only with DFPT (PEAD not allowed)
+   ! PAW non-linear response only with DFPT (PEAD not allowed)
    if(usepaw==1.and.dt%optdriver==RUNL_NONLINEAR)then
      cond_string(1)='usepaw'    ; cond_values(1)=usepaw
      cond_string(2)='optdriver' ; cond_values(2)=dt%optdriver
@@ -2970,7 +2969,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      cond_string(2)='optdriver' ; cond_values(2)=dt%optdriver
      call chkint_eq(1,2,cond_string,cond_values,ierr,'pawxcdev',dt%pawxcdev,1,(/0/),iout)
    end if
-   !Non-linear response not compatible with autoparal
+   ! Non-linear response not compatible with autoparal
    if(dt%optdriver==RUNL_NONLINEAR)then
      cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
      call chkint_eq(1,1,cond_string,cond_values,ierr,'autoparal',dt%autoparal,1,(/0/),iout)
@@ -3025,7 +3024,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    !Longwave calculation only compatible with nonlinear core corrections for quadrupoles and NOA
    if(dt%optdriver==RUNL_LONGWAVE.and.dt%lw_flexo/=0)then
      do ipsp=1,npsp
-  !    Check that xccc is zero
+       !  Check that xccc is zero
        if (pspheads(ipsp)%xccc/=0) then
          write(msg, '(5a,i0,3a)' )&
          'For a longwave calculation of flexoelectric properties it is not possible',ch10,&
@@ -3036,7 +3035,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        end if
      end do
    end if
-   !Longwave calculation function only for useylm=1
+   ! Longwave calculation function only for useylm=1
    if(dt%optdriver==RUNL_LONGWAVE.and.dt%useylm/=1.and.(dt%lw_qdrpl/=0.or.dt%lw_flexo/=0))then
     write(msg, '(3a,2a,2a)' )&
      'A longwave calculation can only be run with the input variable useylm/=1',ch10 ,&
@@ -3045,12 +3044,12 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      'Action: change "useylm" value in your input file.'
      ABI_ERROR_NOSTOP(msg, ierr)
    end if
-   !Longwave calculation not compatible with PAW
+   ! Longwave calculation not compatible with PAW
    if(dt%optdriver==RUNL_LONGWAVE)then
      cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',dt%usepaw,1,(/0/),iout)
    endif
-   !Longwave calculation not compatible with spin-dependent calculations
+   ! Longwave calculation not compatible with spin-dependent calculations
    if(dt%nsppol/=1.or.dt%nspden/=1)then
      cond_string(1)='nsppol' ; cond_values(1)=dt%nsppol
      cond_string(2)='nspden' ; cond_values(2)=dt%nspden
@@ -3743,7 +3742,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      call chkint_eq(1,1,cond_string,cond_values,ierr,'prtwf_full',dt%prtwf_full,1,(/0/),iout)
    end if
 
-
 !  random_atpos
    call chkint_eq(0,0,cond_string,cond_values,ierr,'random_atpos',dt%random_atpos,5,(/0,1,2,3,4/),iout)
 
@@ -4416,18 +4414,18 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        end do
        do ia=1,natom-1
          do ib=ia+1,natom
-           if( abs(frac(1,ia)-frac(1,ib))<1.0d-6 .and. &
-&           abs(frac(2,ia)-frac(2,ib))<1.0d-6 .and. &
-&           abs(frac(3,ia)-frac(3,ib))<1.0d-6         ) then
+           if (abs(frac(1,ia)-frac(1,ib))<1.0d-6 .and. &
+               abs(frac(2,ia)-frac(2,ib))<1.0d-6 .and. &
+               abs(frac(3,ia)-frac(3,ib))<1.0d-6 ) then
              if(iimage>1)then
                write(msg,'(2a,i5)') ch10,' The following was observed for image=',iimage
                call wrtout(iout,msg)
                call wrtout(std_out,msg)
              end if
-             write(msg, '(a,i4,a,i4,a,a,a,a,a,a)' )&
-&             'Atoms number',ia,' and',ib,' are located at the same point',' of the unit cell',ch10,&
-&             '(periodic images are taken into account).',ch10,&
-&             'Action: change the coordinate of one of these atoms in the input file.'
+             write(msg, '(a,i0,a,i0,6a)') &
+              'Atoms number',ia,' and',ib,' are located at the same point',' of the unit cell',ch10,&
+              '(periodic images are taken into account).',ch10,&
+              'Action: change the coordinate of one of these atoms in the input file.'
              ABI_ERROR_NOSTOP(msg,ierr)
            end if
          end do
@@ -4448,7 +4446,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      end if
    end do
 
-  !  ZORA
+  ! ZORA
   ! only values of -3,-2,-1,0,1,2,3 are allowed. 0 is the default.
   call chkint_eq(0,0,cond_string,cond_values,ierr,'zora',dt%zora,7,(/-3,-2,-1,0,1,2,3/),iout)
   if(dt%zora .NE. 0) then
@@ -4458,7 +4456,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
   end if
   if(dt%zora .GT. 1) then
      cond_string(1)='zora';cond_values(1)=dt%zora
-  !  require nspinor 2
+     ! require nspinor 2
      call chkint_eq(1,1,cond_string,cond_values,ierr,'nspinor',dt%nspinor,1,(/2/),iout)
   end if
 

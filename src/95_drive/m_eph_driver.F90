@@ -34,11 +34,10 @@ module m_eph_driver
  use m_dtfil
  use m_ddb
  use m_ddb_hdr
- use m_dvdb
+ use m_dvdb,            only : dvdb_t
  use m_ifc
  use m_phonons
  use m_nctk
- use m_wfk
  use netcdf
 
  use defs_datatypes,    only : pseudopotential_type
@@ -47,6 +46,7 @@ module m_eph_driver
  use m_time,            only : cwtime, cwtime_report
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa
  use m_fftcore,         only : print_ngfft
+ use m_wfk,             only : wfk_read_ebands
  use m_rta,             only : rta_driver, ibte_driver
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_pawang,          only : pawang_type
@@ -66,7 +66,8 @@ module m_eph_driver
  use m_ephtk,           only : ephtk_update_ebands
  use m_gstore,          only : gstore_t
  use m_migdal_eliashberg, only : migdal_eliashberg_iso !, migdal_eliashberg_aniso
- use m_berry_curvature,  only : berry_curvature
+ use m_gstore_sigeph,   only : gstore_sigeph
+ use m_berry_curvature, only : berry_curvature
  use m_cumulant,        only : cumulant_driver
  use m_frohlich,        only : frohlich_t, frohlichmodel_zpr, frohlichmodel_polaronmass
  use m_gwpt,            only : gwpt_run
@@ -527,7 +528,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  ! Initialize the object used to read DeltaVscf
  if (use_dvdb) then
-   dvdb = dvdb_new(dvdb_filepath, comm)
+   call dvdb%init(dvdb_filepath, comm)
    ABI_CHECK(dvdb%has_fields("pot1", msg), sjoin(dvdb_filepath, msg))
 
    ! DVDB cryst comes from DPPT --> no time-reversal if q /= 0
@@ -590,8 +591,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  if (use_drhodb) then
    ! Store DRHODB as a DVDB object
-   drhodb = dvdb_new(drhodb_filepath, comm)
-   !ABI_CHECK(dvdb%has_fields("den1", msg), sjoin(drhodb_filepath, msg))
+   call drhodb%init(drhodb_filepath, comm)
+   ABI_CHECK(drhodb%has_fields("den1", msg), sjoin(drhodb_filepath, msg))
 
    ! DVDB cryst comes from DPPT --> no time-reversal if q /= 0
    ! Change the value so that we use the same as the GS part.
@@ -694,8 +695,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      end if
    end if
 
- !case (24)
- !  call gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
+ case (24)
+   call gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
 
  case (5, -5)
    ! Interpolate the DFPT potential.
