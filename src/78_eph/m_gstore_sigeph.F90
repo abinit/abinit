@@ -122,22 +122,24 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
 
 !Local variables-------------------------------
  integer,parameter :: master = 0, with_cplex1 = 1, max_ntemp = 50
- integer :: spin, my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, ntemp, gap_err, my_rank
+ integer :: spin, my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, ntemp, gap_err, my_rank, ip1, ip2
  integer :: it, ik_ibz, ikq_ibz, band_k, band_kq, timrev, ii, ikcalc, natom, natom3, nsppol
  real(dp) :: wqnu, gkq2, weight_q, eig0nk, eig0mk, eig0mkq, ediff, gmod2, hmod2, gdw2, gdw2_stern, rtmp !,nqnu,gkq2,gkq2_pf,
  !real(dp) :: cpu, wall, gflops
  logical :: use_lgk, q_is_gamma, intra_band, same_band, imag_only
- complex(dp) :: ieta !, sig_cplx
+ complex(dp) :: ieta, cfact !, sig_cplx
+ character(len=500) :: gvals_vname
  type(gaps_t) :: gaps
  type(lgroup_t) :: lg_myk
  type(gstore_t) :: gstore
 !arrays
  integer :: units(2), my_kqmap(6)
+ integer,allocatable :: phmodes_skip(:)
  real(dp) :: kk(3), qpt(3), kq(3)
  real(dp),allocatable :: gkq_atm(:,:,:),gkq_nu(:,:,:) !,gkq0_atm(:,:,:,:), gaussw_qnu(:)
- real(dp),allocatable :: rfact(:), mu_e(:), kTmesh(:), nqnu(:), f_mkq(:) !, f_nk(:),  g2_pmnk(:,:,:,:)
+ real(dp),allocatable :: rfact_t(:), mu_e(:), kTmesh(:), nqnu(:), f_mkq(:) !, f_nk(:),  g2_pmnk(:,:,:,:)
  real(dp),allocatable :: displ_nu_cart(:,:,:), displ_nu_red(:,:,:)
- complex(dp),allocatable :: cfact(:), vals_e0ks(:,:,:), dvals_de0ks(:,:,:), tpp_red(:,:) !, fmw_frohl_sphcorr(:,:,:,:), cfact_wr(:),
+ complex(dp),allocatable :: cfact_t(:), vals_e0ks(:,:,:), dvals_de0ks(:,:,:), tpp_red(:,:) !, fmw_frohl_sphcorr(:,:,:,:), cfact_wr(:),
 !----------------------------------------------------------------------
 
  units = [std_out, ab_out]
@@ -148,12 +150,13 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
  imag_only = .False.
 
  ! To compute the DW term in the RIA, we need the complex g in the atom representation
+ gvals_vname = "gvals"
+ gvals_vname = "gvals_ks" ! TODO: Input variable?
  call gstore%from_ncpath(dtfil%filgstorein, with_cplex1, dtset, cryst, ebands, ifc, comm, &
-             gvals_vname="gvals", read_dw=.True.)
+             with_gmode="phonon", gvals_vname=gvals_vname, read_dw=.True.)
 
  ABI_CHECK(gstore%qzone == "bz", "gstore_sigeph assumes qzone == `bz`")
  if (gstore%check_cplex_qkzone_gmode(1, "bz", "ibz", "phonon") /= 0) then
- !if (gstore%check_cplex_qkzone_gmode(with_cplex1, "bz", "ibz", "atom") /= 0) then
    ABI_ERROR("The gstore object is inconsistent with gstore_sigeph. See messages above.")
  end if
 
@@ -181,8 +184,8 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
  ABI_MALLOC(nqnu, (ntemp))
  !ABI_MALLOC(f_nk, (ntemp))
  ABI_MALLOC(f_mkq, (ntemp))
- ABI_MALLOC(cfact, (ntemp))
- ABI_MALLOC(rfact, (ntemp))
+ ABI_MALLOC(cfact_t, (ntemp))
+ ABI_MALLOC(rfact_t, (ntemp))
 
  ieta = + j_dpc * dtset%zcut
  !use_lgk = dtset%symsigma /= 0
@@ -197,6 +200,10 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
  ABI_MALLOC(displ_nu_cart, (2, 3, natom))
  ABI_MALLOC(displ_nu_red, (2, 3, natom))
  ABI_MALLOC(tpp_red, (natom3, natom3))
+
+ ! Setup a mask to skip accumulating the contribution of certain phonon modes.
+ !call ephtk_set_phmodes_skip(dtset%natom, dtset%eph_phrange, phmodes_skip)
+ !ABI_FREE(phmodes_skip)
 
  ! Loop over collinear spins.
  do my_is=1,gstore%my_nspins
@@ -244,6 +251,9 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
        ! Sum over phonon modes.
        do my_ip=1,gqk%my_npert
          wqnu = gqk%my_wnuq(my_ip, my_iq)
+         ! Ignore unstable modes or modes that should be skipped.
+         if (wqnu < EPHTK_WTOL) cycle
+
          nqnu(:) = occ_be(wqnu, kTmesh, zero)
          !print *, "wqnu", wqnu
 
@@ -252,19 +262,12 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
 
          ! For the DW, we need gkq_atm at q = 0, for all atomic perturbations
 
-         !ABI_MALLOC(gkq_atm, (2, nbcalc_ks, natom3))
-         !ABI_MALLOC(gkq_nu, (2, nbcalc_ks, natom3))
-         !!gkq_atm = gqk%my_g(my_ip, im_kq, my_iq, in_k, my_ik)
-         !call ephtk_gkknu_from_atm(1, nbcalc_ks, 1, natom, gkq_atm, phfrq, displ_red, gkq_nu)
-         !ABI_FREE(gkq_atm)
-         !ABI_FREE(gkq_nu)
-
          ! Copy data to improve memory access in the loops below.
          ! (my_npert, nb, my_nq, nb, my_nk)
          !g2_pmnk = gqk%my_g2(my_ip,:,my_iq,:,my_ik)
 
          ! Compute T_pp'(q,nu) matrix in reduced coordinates.
-         if (q_is_gamma) call sigtk_dw_tpp_red(natom, displ_nu_red, tpp_red)
+         call sigtk_dw_tpp_red(natom, displ_nu_red, tpp_red)
 
          ! Sum over bands.
          do im_kq=1,gqk%nb ! gqk%nb_kq
@@ -285,40 +288,62 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
              !same_band = ibsum_kq == band_ks
 
              if (dtset%eph_ahc_type == 1) then
-               cfact(:) =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + ieta) + &
-                           (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + ieta)
+               cfact_t(:) =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + ieta) + &
+                             (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + ieta)
              else
-               cfact(:) =  (two * nqnu + one) / (eig0nk - eig0mkq + ieta)
+               cfact_t(:) =  (two * nqnu + one) / (eig0nk - eig0mkq + ieta)
              end if
 
              ! Re + Im of Fan-Migdal self-energy
              ! (my_npert, nb_kq, my_nq, nb_k, my_nk)
              gkq2 = weight_q * gqk%my_g2(my_ip, im_kq, my_iq, in_k, my_ik)
-             vals_e0ks(:, in_k, ikcalc) = vals_e0ks(:, in_k, ikcalc) + cfact * gkq2
+             vals_e0ks(:, in_k, ikcalc) = vals_e0ks(:, in_k, ikcalc) + cfact_t * gkq2
              !print *, "gkq2", gkq2
 
              ! Derivative of sigma
-             ! Accumulate d(Re Sigma) / dw(w=eKS) for state ib_k
+             ! Accumulate d(Re Sigma) / dw(w=eKS) for state in_k
              !cfact(x) =  (nqnu + f_mkq      ) / (x - eig0mkq + wqnu + sigma%ieta) + &
              !            (nqnu - f_mkq + one) / (x - eig0mkq - wqnu + sigma%ieta)
              gmod2 = (eig0nk - eig0mkq + wqnu) ** 2
              hmod2 = (eig0nk - eig0mkq - wqnu) ** 2
-             rfact(:) = (nqnu + f_mkq      ) * (-gmod2 + aimag(ieta)**2) / (gmod2 + aimag(ieta)**2) ** 2 + &
+             rfact_t(:) = (nqnu + f_mkq      ) * (-gmod2 + aimag(ieta)**2) / (gmod2 + aimag(ieta)**2) ** 2 + &
                         (nqnu - f_mkq + one) * (-hmod2 + aimag(ieta)**2) / (hmod2 + aimag(ieta)**2) ** 2
 
-             dvals_de0ks(:, in_k, ikcalc) = dvals_de0ks(:, in_k, ikcalc) + gkq2 * rfact
+             dvals_de0ks(:, in_k, ikcalc) = dvals_de0ks(:, in_k, ikcalc) + gkq2 * rfact_t
 
-             if (q_is_gamma) then
-               ! Accumulate DW for each T, add it to Sigma(e0) and Sigma(w) as well
-               ! - (2 n_{q\nu} + 1) * gdw2 / (e_nk - e_mk)
-               gdw2 = zero
-               if (abs(ediff) > EPHTK_WTOL) then
-                 cfact(:) = - weight_q * gdw2 * (two * nqnu + one)  / (ediff + ieta)
-               else
-                 cfact(:) = zero
-               endif
-               vals_e0ks(:, in_k, ikcalc) = vals_e0ks(:, in_k, ikcalc) + real(cfact)
-             end if
+             ! Compute DW term following XG paper. Check prefactor.
+             ! gkq0_atm(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
+             ! (nb_k, nb_kq, natom3, my_nk)
+             associate (gkq0_atm => gqk%my_gq0nm_atm(:,:,:,my_ik))
+             gdw2 = zero
+             do ip2=1,natom3
+               do ip1=1,natom3
+                 cfact = ( &
+                   + real(gkq0_atm(in_k, im_kq, ip1)) * real(gkq0_atm(in_k, im_kq, ip2)) &
+                   + aimag(gkq0_atm(in_k, im_kq, ip1)) * aimag(gkq0_atm(in_k, im_kq, ip2)) &
+                   + real(gkq0_atm(in_k, im_kq, ip2)) * real(gkq0_atm(in_k, im_kq, ip1)) &
+                   + aimag(gkq0_atm(in_k, im_kq, ip2)) * aimag(gkq0_atm(in_k, im_kq, ip1)) &
+                  !+ gkq0_atm(1, in_k, im_kq, ip1) * gkq0_atm(1, in_k, im_kq, ip2) &
+                  !+ gkq0_atm(2, in_k, im_kq, ip1) * gkq0_atm(2, in_k, im_kq, ip2) &
+                  !+ gkq0_atm(1, in_k, im_kq, ip2) * gkq0_atm(1, in_k, im_kq, ip1) &
+                  !+ gkq0_atm(2, in_k, im_kq, ip2) * gkq0_atm(2, in_k, im_kq, ip1) &
+                 )
+                 !
+                 gdw2 = gdw2 + real(tpp_red(ip1,ip2) * cfact)
+               end do
+             end do
+             end associate
+             gdw2 = gdw2 / (four * two * wqnu)
+             !print *, "gdw2", gdw2
+
+             ! Accumulate DW for each T, add it to Sigma(e0) and Sigma(w) as well
+             ! - (2 n_{q\nu} + 1) * gdw2 / (e_nk - e_mk)
+             if (abs(ediff) > EPHTK_WTOL) then
+               cfact_t(:) = - weight_q * gdw2 * (two * nqnu + one)  / (ediff + ieta)
+             else
+               cfact_t(:) = zero
+             endif
+             vals_e0ks(:, in_k, ikcalc) = vals_e0ks(:, in_k, ikcalc) + real(cfact_t)
            end do ! in_k
 
          end do ! im_kq
@@ -346,8 +371,8 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
  ABI_FREE(nqnu)
  !ABI_FREE(f_nk)
  ABI_FREE(f_mkq)
- ABI_FREE(cfact)
- ABI_FREE(rfact)
+ ABI_FREE(cfact_t)
+ ABI_FREE(rfact_t)
  ABI_FREE(displ_nu_cart)
  ABI_FREE(displ_nu_red)
  ABI_FREE(tpp_red)

@@ -4198,7 +4198,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    ! The only conversion I can think of is: atom --> phonon.
    if (gstore%gmode /= with_gmode) then
      if (gstore%gmode == GSTORE_GMODE_ATOM .and. with_gmode == GSTORE_GMODE_PHONON) then
-       from_atm_to_nu = .True.
+       from_atm_to_nu = .True.; gstore%gmode = GSTORE_GMODE_PHONON ! change gmode here
      else
        ABI_ERROR(sjoin("Conversion from gstore%gmode: ", gstore%gmode, "to:", with_gmode, " is not yet supported"))
      end if
