@@ -3949,7 +3949,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  real(dp) :: qq_ibz(3)
  real(dp),allocatable :: gwork_q(:,:,:,:,:), slice_bb(:,:,:)
  real(dp),allocatable :: phfreqs_ibz(:,:), pheigvec_cart_ibz(:,:,:,:,:), pheigvec_cart_qbz(:,:,:,:), displ_cart_qbz(:,:,:,:)
- real(dp),allocatable :: displ_red_qbz(:,:,:,:)
+ real(dp),allocatable :: displ_red_qbz(:,:,:,:), gmn_nu(:,:,:,:)
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
@@ -4177,6 +4177,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  ABI_MALLOC(pheigvec_cart_ibz, (2, 3, cryst%natom, cryst%natom * 3, gstore%nqibz))
  ABI_MALLOC(pheigvec_cart_qbz, (2, 3, cryst%natom, cryst%natom * 3))
  ABI_MALLOC(displ_cart_qbz, (2, 3, cryst%natom, cryst%natom * 3))
+ ABI_MALLOC(displ_red_qbz, (2, 3, cryst%natom, natom3))
 
  NCF_CHECK(nctk_open_read(ncid, gstore%path, gstore%comm))
 
@@ -4188,37 +4189,13 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  NCF_CHECK(nf90_get_var(ncid, vid("pheigvec_cart_ibz"), pheigvec_cart_ibz))
  NCF_CHECK(nf90_close(ncid))
 
- call wrtout(std_out, " Computing and storing phonons in the full BZ by rotating the data in the IBZ...")
-#if 0
- do my_is=1,gstore%my_nspins
-   gqk => gstore%gqk(my_is)
-
-   ABI_MALLOC(gqk%my_wnuq, (gqk%my_npert, gqk%my_nq))
-   ABI_MALLOC(gqk%my_displ_cart, (2, 3, cryst%natom, gqk%my_npert, gqk%my_nq))
-
-   do my_iq=1,gqk%my_nq
-     iq_ibz = gqk%my_q2ibz(1, my_iq); isym_q = gqk%my_q2ibz(2, my_iq)
-     trev_q = gqk%my_q2ibz(6, my_iq); g0_q = gqk%my_q2ibz(3:5, my_iq)
-     !isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
-     isirr_q = (isym_q == 1 .and. trev_q == 0)
-     tsign_q = 1; if (trev_q == 1) tsign_q = -1
-     qq_ibz = gstore%qibz(:, iq_ibz)
-     call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_cart_ibz(:,:,:,:,iq_ibz), pheigvec_cart_qbz, displ_cart_qbz)
-
-     ! Save my frequencies and my ph displacements
-     gqk%my_wnuq(:, my_iq) = phfreqs_ibz(gqk%my_pertcases(:), iq_ibz)
-     gqk%my_displ_cart(:,:,:,:,my_iq) = displ_cart_qbz(:,:,:,gqk%my_pertcases(:))
-   end do ! my_iq
- end do ! my_is
-#endif
-
  ! =========================
  ! Load e-ph matrix elements
  ! =========================
 
  from_atm_to_nu = .False.
  if (present(with_gmode)) then
-   ! Well, the only conversion I can think of is: atom --> phonon.
+   ! The only conversion I can think of is: atom --> phonon.
    if (gstore%gmode /= with_gmode) then
      if (gstore%gmode == GSTORE_GMODE_ATOM .and. with_gmode == GSTORE_GMODE_PHONON) then
        from_atm_to_nu = .True.
@@ -4244,6 +4221,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
      ABI_MALLOC_OR_DIE(gwork_q, (gstore_cplex, gqk%nb, gqk%nb, gqk%natom3, gqk%glob_nk), ierr)
      ABI_MALLOC(slice_bb, (gstore_cplex, gqk%nb, gqk%nb))
 
+     ! Read my_gq0nm_atm matrix elements for DW.
      if (read_dw__) then
         ! Find the index of q = 0.
         iq_glob = -1
@@ -4270,39 +4248,49 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
             end do
           end do
         end do
-
      end if ! read_dw__
 
+     if (from_atm_to_nu) then
+       ABI_MALLOC(gmn_nu, (2, gqk%nb, gqk%nb, 3*natom))
+     end if
+
+     ! Read my e-ph matrix elements.
      do my_iq=1,gqk%my_nq
         iq_glob = my_iq + gqk%my_qstart - 1
 
+        !call wrtout(std_out, " Computing and storing phonons in the full BZ by rotating the data in the IBZ...")
         iq_ibz = gqk%my_q2ibz(1, my_iq); isym_q = gqk%my_q2ibz(2, my_iq)
         trev_q = gqk%my_q2ibz(6, my_iq); g0_q = gqk%my_q2ibz(3:5, my_iq)
         !isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
         isirr_q = (isym_q == 1 .and. trev_q == 0)
         tsign_q = 1; if (trev_q == 1) tsign_q = -1
         qq_ibz = gstore%qibz(:, iq_ibz)
-        call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_cart_ibz(:,:,:,:,iq_ibz), pheigvec_cart_qbz, displ_cart_qbz)
+        call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_cart_ibz(:,:,:,:,iq_ibz), pheigvec_cart_qbz, displ_cart_qbz, &
+                             displ_red_qbz=displ_red_qbz)
 
-        !ABI_MALLOC(displ_red, (2, 3, cryst%natom, natom3))
-        !call ephtk_gkknu_from_atm(1, nbcalc_ks, 1, natom, gkq_atm, phfrq, displ_red, gkq_nu)
-        !ABI_FREE(displ_red)
-
-        ! Save my frequencies and my ph displacements
+        ! Save my frequencies and my phonono displacements
         gqk%my_wnuq(:, my_iq) = phfreqs_ibz(gqk%my_pertcases(:), iq_ibz)
         gqk%my_displ_cart(:,:,:,:,my_iq) = displ_cart_qbz(:,:,:,gqk%my_pertcases(:))
 
         ! Read q-slice (individual IO)
-        ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_vname__), gwork_q, start=[1, 1, 1, 1, 1, iq_glob]) ! count=[])
+        ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_vname__), gwork_q, start=[1, 1, 1, 1, 1, iq_glob])
         NCF_CHECK(ncerr)
 
         do my_ik=1,gqk%my_nk
           ik_glob = my_ik + gqk%my_kstart - 1
+
+          if (from_atm_to_nu) then
+            ! Here we convert from g(k,q)_atm to g(k,q)_phonon and replace data in gwork_q at ik_glob
+            call ephtk_gkknu_from_atm(gqk%nb, gqk%nb, 1, natom, gwork_q(:,:,:,:, ik_glob), &
+                                      phfreqs_ibz(:, iq_ibz), displ_red_qbz, gmn_nu)
+            gwork_q(:,:,:,:, ik_glob) = gmn_nu
+          end if
+
           do my_ip=1,gqk%my_npert
             ipert = gqk%my_pertcases(my_ip)
             slice_bb = gwork_q(:,:,:, ipert, ik_glob)
 
-            ! Put data in the right place and handle conversion g --> |g|^2
+            ! Put data in the right place and handle conversion g --> |g|^2.
             if (with_cplex == gstore_cplex) then
               if (with_cplex == 1) gqk%my_g2(my_ip,:,my_iq,:,my_ik) = slice_bb(1,:,:)
               if (with_cplex == 2) gqk%my_g(my_ip,:,my_iq,:,my_ik) = slice_bb(1,:,:) + j_dpc * slice_bb(2,:,:)
@@ -4321,6 +4309,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
 
      ABI_FREE(gwork_q)
      ABI_FREE(slice_bb)
+     ABI_SFREE(gmn_nu)
 
      ! ==============================================
      ! Read matrix elements of the velocity operator
@@ -4349,10 +4338,10 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
 
  ABI_FREE(qglob2bz)
  ABI_FREE(qbz2ibz)
-
  ABI_FREE(phfreqs_ibz)
- ABI_SFREE(pheigvec_cart_ibz)
- ABI_SFREE(displ_cart_qbz)
+ ABI_FREE(pheigvec_cart_ibz)
+ ABI_FREE(displ_cart_qbz)
+ ABI_FREE(displ_red_qbz)
  ABI_FREE(pheigvec_cart_qbz)
 
  call xmpi_barrier(gstore%comm)
