@@ -262,7 +262,7 @@ subroutine herald(code_name,code_version,iout)
  jdn=jdn+2-ja+int(quarter*ja)
  day=mod(jdn,7)+1
 
-!Print date in nice format (* new format *)
+ ! Print date in nice format (* new format *)
  write(iout, '(/,a,a,1x,i2,1x,a,1x,i4,a,/,a,i2.2,a,i2.2,a)' ) &
  '.Starting date : ',day_names(day),dd,month_names(mm),year,'.','- ( at ',values(5),'h',values(6),' )'
  write(iout,*)' '

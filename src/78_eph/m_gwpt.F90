@@ -181,7 +181,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,parameter :: useylmgr = 0, useylmgr1 = 0, master = 0, ndat1 = 1, with_cplex0 = 0, n3xccc0 = 0
  integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
  integer :: band, band_me, nband_me, stern_comm, nkpt, my_rank, nsppol, iq_ibz, iq_bz, my_npert
- integer :: cplex,drho_cplex,nkxc,nk3xc,option,usexcnhat,db_iqpt,natom,natom3,ipc,nspinor,nprocs !, gsum_master
+ integer :: cplex,drho_cplex,nkxc,nk3xc,option,usexcnhat,db_iqpt,natom,natom3,ipc,nspinor,nproc !, gsum_master
  integer :: ib_sum, ii, ib, u1_band !,u1c_ib_k,  jj, iw !ib_kq, band_ks, ib_k, ibsum_kq, u1_master, ip
  integer :: my_is, spin, idir,ipert, ig, max_npw_xc, min_npw_xc, npw_x, npw_c, nw_nk, nw_mkq
  integer :: my_pp_start_spin(dtset%nsppol), my_pp_stop_spin(dtset%nsppol), my_npp(dtset%nsppol)
@@ -193,7 +193,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: n1,n2,n3,n4,n5,n6,nspden, mqmem, m_kq, n_k, restart, root_ncid, spin_ncid, usecprj !,sij_opt
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg_k,nkpg_kq,nkpg_kqmp,nkpg_kmp,imyp, cnt, nvloc, iw_nk, iw_mkq, ndone, nmiss
  integer :: my_ipp, ipp_bz, ipp_ibz, isym_pp, itim_pp, comm_rpt, nqlwl, scr_iomode
- integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt, nb, timrev
+ integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt, nb, timrev, iq_start, my_nqibz
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_qq, wall_qq, gflops_qq, cpu_kk, wall_kk, gflops_kk, cpu_pp, wall_pp, gflops_pp
  real(dp) :: drude_plsmf, my_plsmf
  real(dp) :: fact_spin, theta_mu_minus_e0i, tol_empty, tol_empty_in !, e_mkq, e_nk ! e0i,
@@ -229,9 +229,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), kg_kmp(:,:), kg_kqmp(:,:), my_pp_inds(:)
  integer,allocatable :: gbound_k(:,:), gbound_kq(:,:), gbound_kmp(:,:), gbound_kqmp(:,:), gbound_c(:,:), gbound_x(:,:)
  integer,allocatable :: nband(:,:), wfd_istwfk(:), count_bk(:,:), qibz2dvdb(:)
- integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:)
+ integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:), my_iqibz_inds(:)
  integer(i1b),allocatable :: itreat_qibz(:)
  integer, ABI_CONTIGUOUS pointer :: kg_c(:,:), kg_x(:,:)
+ real(dp) :: cpu, wall, gflops !, cpu_q, wall_q, gflops_q, cpu_all, wall_all, gflops_all
  real(dp) :: eig0nk
  complex(gwpc) :: ctmp_gwpc, xdot_tmp
 !arrays
@@ -244,13 +245,16 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),allocatable :: ph3d_kmp(:,:,:), ph3d1_kqmp(:,:,:), ph3d_kqmp(:,:,:), ph3d1_kmp(:,:,:)
  real(dp),allocatable, target :: vxc1_qq(:,:,:,:)
  real(dp),target,allocatable :: gsig_atm(:,:,:,:)
+ real(dp),allocatable :: displ_cart_qibz(:,:,:,:), displ_red_qibz(:,:,:,:), pheigvec_qibz(:,:,:,:)
+ !real(dp),allocatable :: displ_cart_qbz(:,:,:,:), displ_red_qbz(:,:,:,:), pheigvec_qbz(:,:,:,:)
  real(dp),allocatable :: gsig_nu(:,:,:,:), gxc_atm(:,:,:,:), gxc_nu(:,:,:,:), gks_atm(:,:,:,:), gks_atm2(:,:,:,:), gks_nu(:,:,:,:)
  real(dp),allocatable :: cg_work(:,:), ug_k(:,:), ug_kq(:,:)
  real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1_qq(:,:,:,:,:), v1scf_qq(:,:,:,:), vlocal1_mqq(:,:,:,:,:), v1scf_mq(:,:,:,:)
  real(dp),allocatable :: ylm_k(:,:), ylm_kq(:,:), ylm_kmp(:,:), ylm_kqmp(:,:)
  real(dp),allocatable :: ylmgr_kq(:,:,:), ylmgr_kmp(:,:,:), ylmgr_kqmp(:,:,:)
  real(dp),allocatable :: vtrial(:,:), work(:,:,:,:), rhor(:,:), vxc(:,:), kxc(:,:)
- real(dp),allocatable :: omegame0i_nk(:), omegame0i_mkq(:), omegas_nk(:), omegas_mkq(:), my_gbuf(:,:,:,:,:,:), my_gbuf_ks(:,:,:,:,:,:)
+ real(dp),allocatable :: omegame0i_nk(:), omegame0i_mkq(:), omegas_nk(:), omegas_mkq(:)
+ real(dp),allocatable :: my_gbuf(:,:,:,:,:,:), my_gbuf_ks(:,:,:,:,:,:), buf_wqnu(:,:), buf_eigvec_cart(:,:,:,:,:)
  real(dp),allocatable :: cg_kmp(:,:), cg_kqmp(:,:), cg1_kqmp(:,:), cg1_kmp(:,:), full_cg1_kqmp(:,:), full_cg1_kmp(:,:)
  complex(dp), contiguous, pointer :: cvxc1_qq_ptr(:,:,:)
  complex(gwpc),allocatable :: ur_kmp(:), ur_kqmp(:), cwork_ur(:), rhotwg_c(:), rhotwg_x(:), vc_sqrt_gx(:)
@@ -295,7 +299,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  ABI_CHECK(dtset%useylm == 0, "useylm != 0 not implemented/tested")
 
- my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm); units = [std_out, ab_out]
+ my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm); units = [std_out, ab_out]
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  ! Copy important dimensions
@@ -332,6 +336,49 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  call gstore%get_missing_qbz_spin(done_qbz_spin, ndone, nmiss)
  !call wrtout(units, sjoin("- Number of q-points/spin completed:", itoa(count(done_qbz_spin == 1)), "/", itoa(sigma%nkcalc)))
+
+ ! NB: Write phonon data here as we are not guaranteed to have all the IBZ q-points
+ ! inside the loop over my_iq if filtering has been used.
+ ! TODO: Similar piece of code in gstore_compute, should write method...
+ ! FIXME: Something wrong here
+ !if (ndone == 0) then
+   call wrtout(std_out, " Computing phonon frequencies and displacements in the IBZ", pre_newlines=1)
+   call cwtime(cpu, wall, gflops, "start")
+
+   call xmpi_split_block(gstore%nqibz, gstore%comm, my_nqibz, my_iqibz_inds)
+   ABI_MALLOC(buf_wqnu, (natom3, my_nqibz))
+   ABI_MALLOC(buf_eigvec_cart, (2, 3, natom, natom3, my_nqibz))
+   ABI_MALLOC(displ_cart_qibz, (2, 3, cryst%natom, natom3))
+
+   do ii=1,my_nqibz
+     iq_ibz = my_iqibz_inds(ii)
+     call ifc%fourq(cryst, gstore%qibz(:, iq_ibz), buf_wqnu(:,ii), displ_cart_qibz, &
+                    out_eigvec=buf_eigvec_cart(:,:,:,:,ii))
+   end do
+
+   if (nproc > 1 .and. gstore%nqibz >= nproc) then
+     NCF_CHECK(nctk_set_collective(root_ncid, root_vid("phfreqs_ibz")))
+     NCF_CHECK(nctk_set_collective(root_ncid, root_vid("pheigvec_cart_ibz")))
+   end if
+   call xmpi_barrier(gstore%comm)
+
+   if (my_nqibz > 0) then
+     iq_start = my_iqibz_inds(1)
+     ncerr = nf90_put_var(root_ncid, root_vid("phfreqs_ibz"), buf_wqnu, start=[1, iq_start], count=[natom3, my_nqibz])
+     NCF_CHECK(ncerr)
+     ncerr = nf90_put_var(root_ncid, root_vid("pheigvec_cart_ibz"), buf_eigvec_cart, &
+                          start=[1,1,1,1,iq_start], count=[2, 3, natom, natom3, my_nqibz])
+     NCF_CHECK(ncerr)
+   end if
+
+   ABI_FREE(displ_cart_qibz)
+   ABI_FREE(my_iqibz_inds)
+   ABI_FREE(buf_wqnu)
+   ABI_FREE(buf_eigvec_cart)
+   call cwtime_report(" Phonon computation + output", cpu, wall, gflops)
+ !else
+ !  call wrtout(std_out, sjoin(" Restarting GSTORE calculation. Found: ", itoa(ndone), " (qpt, spin) entries already computed"))
+ !end if
 
  ! ================
  ! HANDLE SCREENING

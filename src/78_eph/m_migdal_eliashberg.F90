@@ -293,9 +293,6 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  ! Compute phonon frequency mesh.
  call gstore%ifc%get_phmesh(dtset%ph_wstep, phmesh_size, phmesh)
 
- ! Compute and store my phonon quantities
- call gstore%calc_my_phonons(store_phdispl=.False.)
-
  ! Compute Eliashberg function a2F(w)
  ABI_MALLOC(a2fw, (phmesh_size))
  call gstore%get_a2fw(phmesh_size, phmesh, a2fw)
