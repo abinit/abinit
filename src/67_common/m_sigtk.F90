@@ -54,6 +54,7 @@ module m_sigtk
  public :: sigtk_kpts_in_erange
  public :: sigtk_sigma_tables
  public :: sigtk_multiply_by_vc_sqrt
+ public :: sigtk_dw_tpp_red
 !!***
 
 
@@ -1041,6 +1042,46 @@ subroutine sigtk_multiply_by_vc_sqrt(trans, npw, nspinor, ndat, vc_sqrt, rhotwg)
  end select
 
 end subroutine sigtk_multiply_by_vc_sqrt
+!!***
+
+!!****f* m_sigtk/sigtk_dw_tpp_red
+!! NAME
+!!  sigtk_dw_tpp_red
+!!
+!! FUNCTION
+!!  Compute T_pp'(q,nu) matrix in reduced coordinates.
+!!
+!! INPUTS
+!!
+!! OUTPUTS
+!!
+!! SOURCE
+
+pure subroutine sigtk_dw_tpp_red(natom, displ_red, tpp_red)
+
+ integer,intent(in) :: natom
+ real(dp),intent(in) :: displ_red(2, 3, natom)
+ complex(dp),intent(out) :: tpp_red(3*natom,3*natom)
+
+!Local variables ------------------------------
+ integer :: ip1, ip2, idir1, idir2, ipert1, ipert2
+ complex(dp) :: dka, dkap, dkpa, dkpap
+!************************************************************************
+
+ do ip2=1,natom*3
+   idir2 = mod(ip2-1, 3) + 1; ipert2 = (ip2 - idir2) / 3 + 1
+   do ip1=1,natom*3
+     idir1 = mod(ip1-1, 3) + 1; ipert1 = (ip1 - idir1) / 3 + 1
+     ! (k,a) (k,a')* + (k',a) (k',a')*
+     dka   = dcmplx(displ_red(1, idir1, ipert1), displ_red(2, idir1, ipert1))
+     dkap  = dcmplx(displ_red(1, idir2, ipert1), displ_red(2, idir2, ipert1))
+     dkpa  = dcmplx(displ_red(1, idir1, ipert2), displ_red(2, idir1, ipert2))
+     dkpap = dcmplx(displ_red(1, idir2, ipert2), displ_red(2, idir2, ipert2))
+     tpp_red(ip1, ip2) = dka * dconjg(dkap) + dkpa * dconjg(dkpap)
+   end do
+ end do
+
+end subroutine sigtk_dw_tpp_red
 !!***
 
 end module m_sigtk

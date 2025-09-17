@@ -111,7 +111,6 @@ subroutine getcut(boxcut, ecut, gmet, gsqcut, iboxcut, iout, kpt, ngfft)
  character(len=1000) :: msg
 !arrays
  integer :: gbound(3)
-
 ! *************************************************************************
 
  ! This is to treat the case in which ecut has not been initialized e.g. for wavelet computations.
@@ -158,7 +157,7 @@ subroutine getcut(boxcut, ecut, gmet, gsqcut, iboxcut, iout, kpt, ngfft)
      if (boxcut<1.0_dp) then
        write(msg, '(9a,f12.6,6a)' )&
        'Choice of acell, ngfft, and ecut',ch10,&
-       '===> basis sphere extends BEYOND fft box !',ch10,&
+       '===> basis sphere extends BEYOND FFT box !',ch10,&
        'Recall that boxcut=Gcut(box)/Gcut(sphere)  must be > 1.',ch10,&
        'Action: try larger ngfft or smaller ecut.',ch10,&
        'Note that ecut=effcut/boxcut**2 and effcut=',effcut+tol8,ch10,&
@@ -184,7 +183,7 @@ subroutine getcut(boxcut, ecut, gmet, gsqcut, iboxcut, iout, kpt, ngfft)
        write(msg, '(15a)' ) ch10,&
        ' getcut : WARNING -',ch10,&
        '  Note that boxcut < 1.5; this usually means',ch10,&
-       '  that the forces are being fairly strongly affected by',' the smallness of the fft box.',ch10,&
+       '  that the forces are being fairly strongly affected by',' the smallness of the FFT box.',ch10,&
        '  Be sure to test with larger ngfft(1:3) values.',ch10,&
        '  This situation might happen when optimizing the cell parameters.',ch10,&
        '  Your starting geometry might be crazy.',ch10,&
@@ -245,7 +244,6 @@ subroutine getmpw(ecut,exchn2n3d,gmet,istwfk,kptns,mpi_enreg,mpw,nkpt)
 !arrays
  integer,allocatable :: kg(:,:)
  real(dp) :: kpoint(3)
-
 ! *************************************************************************
 
 !An upper bound for mpw, might be obtained as follows
@@ -346,7 +344,6 @@ subroutine mkkin(ecut, ecutsm, effmass_free, gmet, kg, kinpw, kpt, npw, idir1, i
  logical  :: l_vecpot
 !arrays
  real(dp) :: gmet_break(3,3) !, tsec(2)
-
 ! *************************************************************************
 
  l_vecpot = .false.
@@ -525,7 +522,6 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
  character(len=500) :: msg
 !arrays
  real(dp) :: kpoint(3)
-
 ! *************************************************************************
 
 !Define me
@@ -538,7 +534,7 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
        nband_down=nband(ikpt+nkpt)
        if(nband_k/=nband_down)then
          write(msg,'(a,a,a,a,a,a,a,a,i4,a,i4,a,a,a,i4,a,a,a)')ch10,&
-         ' kpgio : ERROR -',ch10,&
+         ' kpgio: ERROR -',ch10,&
          '  Band parallel case, one must have same number',ch10,&
          '  of spin up and spin down bands, but input is :',ch10,&
          '  nband(up)=',nband_k,', nband(down)=',nband_down,',',ch10,&
@@ -663,7 +659,6 @@ subroutine ph1d3d(iatom, jatom, kg_k, matblk, natom, npw_k, n1, n2, n3, phkxred,
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: ph1kxred(:,:)
-
 ! *************************************************************************
 
  if(matblk-1 < jatom-iatom)then
@@ -757,7 +752,6 @@ subroutine getph(atindx, natom, n1, n2, n3, ph1d, xred)
  integer :: i1,i2,i3,ia,ii,ph1d_size1,ph1d_size2,ph1d_sizemin
  !character(len=500) :: msg
  real(dp) :: arg
-
 ! *************************************************************************
 
  ph1d_size1=size(ph1d,1); ph1d_size2=size(ph1d,2)
@@ -952,7 +946,6 @@ subroutine mkkpg(kg, kpg, kpt, nkpg, npw)
  character(len=500) :: msg
 !arrays
  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
-
 ! *************************************************************************
 
  if (nkpg==0) return
@@ -1181,8 +1174,7 @@ subroutine mkkpgcart(gprimd,kg,kpgcar,kpt,nkpg,npw)
 
 !-- Compute (k+G) --
  ABI_MALLOC(kpg,(npw,nkpg))
-!$OMP PARALLEL DO COLLAPSE(2) &
-!$OMP PRIVATE(mu,ipw)
+!$OMP PARALLEL DO COLLAPSE(2)
  do ipw=1,npw
    do mu=1,3
      kpg(ipw,mu)=kpt(mu)+dble(kg(mu,ipw))
@@ -1190,16 +1182,15 @@ subroutine mkkpgcart(gprimd,kg,kpgcar,kpt,nkpg,npw)
  end do
 !$OMP END PARALLEL DO
 
-!$OMP PARALLEL DO &
-!$OMP PRIVATE(ipw)
+!$OMP PARALLEL DO
  do ipw=1,npw
    kpgcar(ipw,1)=kpg(ipw,1)*gprimd(1,1)+kpg(ipw,2)*gprimd(1,2)+kpg(ipw,3)*gprimd(1,3)
    kpgcar(ipw,2)=kpg(ipw,1)*gprimd(2,1)+kpg(ipw,2)*gprimd(2,2)+kpg(ipw,3)*gprimd(2,3)
    kpgcar(ipw,3)=kpg(ipw,1)*gprimd(3,1)+kpg(ipw,2)*gprimd(3,2)+kpg(ipw,3)*gprimd(3,3)
  end do
 !$OMP END PARALLEL DO
- ABI_FREE(kpg)
 
+ ABI_FREE(kpg)
  DBG_EXIT("COLL")
 
 end subroutine mkkpgcart
@@ -1227,7 +1218,6 @@ end subroutine mkkpgcart
 !!  dqdqkinpw(npw)=d/deps(istr) ( (1/2)*(2 pi)**2 * (k+G)**2 )
 !!
 !! NOTES
-!!
 !!  **Since the 2nd derivative w.r.t q-vector is calculated along cartesian
 !!    directions, the 1/twopi**2 factor (that in the rest of the code is applied
 !!    in the reduced to cartesian derivative conversion process) is here
@@ -1257,12 +1247,10 @@ subroutine mkkin_metdqdq(dqdqkinpw,effmass,gprimd,idir,kg,kpt,npw,qdir)
 !Local variables -------------------------
 !scalars
  integer :: beta,delta,gamma,ig,ka,kb
- real(dp) :: delbd,delbg,deldg
- real(dp) :: dkinetic,gpk1,gpk2,gpk3,htpi
- real(dp) :: gpkc(3)
+ real(dp) :: delbd,delbg,deldg, dkinetic,gpk1,gpk2,gpk3,htpi
 !arrays
- integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
-
+ real(dp) :: gpkc(3)
+ integer,parameter :: idx(18) = [1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2]
 ! *********************************************************************
 
 !htpi is (1/2) (2 Pi):
@@ -1291,8 +1279,7 @@ subroutine mkkin_metdqdq(dqdqkinpw,effmass,gprimd,idir,kg,kpt,npw,qdir)
    gpkc(2)=gprimd(2,1)*gpk1+gprimd(2,2)*gpk2+gprimd(2,3)*gpk3
    gpkc(3)=gprimd(3,1)*gpk1+gprimd(3,2)*gpk2+gprimd(3,3)*gpk3
 
-   dkinetic=htpi*(2.0_dp*deldg*gpkc(beta)+delbg*gpkc(delta)+ &
- & delbd*gpkc(gamma))
+   dkinetic=htpi*(2.0_dp*deldg*gpkc(beta)+delbg*gpkc(delta)+ delbd*gpkc(gamma))
 
    dqdqkinpw(ig)=dkinetic/effmass
  end do

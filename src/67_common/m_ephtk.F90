@@ -284,8 +284,7 @@ subroutine ephtk_gam_atm2qnu(natom3, displ_red, gam_atm, gam_qnu)
 
 !Arguments -------------------------------
  integer, intent(in)  :: natom3
- real(dp), intent(in)  :: displ_red(2,natom3,natom3)
- real(dp), intent(in)  :: gam_atm(2,natom3,natom3)
+ real(dp), intent(in)  :: displ_red(2,natom3,natom3), gam_atm(2,natom3,natom3)
  real(dp), intent(out) :: gam_qnu(natom3)
 
 !Local variables -------------------------

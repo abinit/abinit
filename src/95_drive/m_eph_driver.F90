@@ -779,15 +779,10 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (13)
    ! Variational polaron equations.
-   if (gstore_filepath /= ABI_NOFILE) then
-     call wrtout(units, sjoin(" Computing variational polaron equations from pre-existent GSTORE file:", gstore_filepath))
-     call gstore%from_ncpath(gstore_filepath, with_cplex2, dtset, cryst, ebands, ifc, comm)
-     call varpeq_run(gstore, dtset, dtfil)
-     call gstore%free()
-   else
-     gstore_path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
-     ABI_ERROR(sjoin("Cannot find GSTORE file:", gstore_path))
-   end if
+   call wrtout(units, sjoin(" Computing variational polaron equations from pre-existent GSTORE file:", gstore_filepath))
+   call gstore%from_ncpath(gstore_filepath, with_cplex2, dtset, cryst, ebands, ifc, comm)
+   call varpeq_run(gstore, dtset, dtfil)
+   call gstore%free()
 
  case (-13)
    ! Compute polaron wavefunctions and atomic displacements in the supercell and write results to files.
