@@ -1619,7 +1619,7 @@ if (.not. qq_is_gamma) then
                   !call sleep(10)
                  end if
 
-                 gsig_atm(1, m_kq, n_k, ipc) = gsig_atm(1, m_kq, n_k, ipc) +  real(ctmp_gwpc)
+                 gsig_atm(1, m_kq, n_k, ipc) = gsig_atm(1, m_kq, n_k, ipc) + real(ctmp_gwpc)
                  gsig_atm(2, m_kq, n_k, ipc) = gsig_atm(2, m_kq, n_k, ipc) + aimag(ctmp_gwpc)
 
                  ! DEBUG
@@ -1673,9 +1673,15 @@ end if ! .not qq_is_gamma.
 
        ! Here we are outside of the loop over pp_sum, band_sum and perturbations.
        ! Collect gsig_atm and gks_atm inside pert_ppsum_comm so that all procs can operate on the data.
-       call xmpi_sum_master(gsig_atm, master, gqk%pert_ppsum_bsum_comm%value, ierr)
-       call xmpi_sum_master(gks_atm , master, gqk%pert_ppsum_bsum_comm%value, ierr)
-       call xmpi_sum_master(gks_atm2, master, gqk%pert_ppsum_bsum_comm%value, ierr)
+       !call xmpi_sum_master(gsig_atm, master, gqk%pert_ppsum_bsum_comm%value, ierr)
+       !call xmpi_sum_master(gks_atm , master, gqk%pert_ppsum_bsum_comm%value, ierr)
+       !call xmpi_sum_master(gks_atm2, master, gqk%pert_ppsum_bsum_comm%value, ierr)
+       ! SC: not sure why, but xmpi_sum_master sometimes causes gvals to be filled
+       ! with zeros and none in the GSTORE.nc file when running in parallel (observed 
+       ! on my desktop, lemaitre4, and lucia). 
+       call xmpi_sum(gsig_atm, gqk%pert_ppsum_bsum_comm%value, ierr)
+       call xmpi_sum(gks_atm, gqk%pert_ppsum_bsum_comm%value, ierr)
+       call xmpi_sum(gks_atm2, gqk%pert_ppsum_bsum_comm%value, ierr)
 
        ! TODO gks_atm and gks_nsu
        !TODO: it may be that pp_mesh should be replaced by the kk_mesh (they are not always the same)
