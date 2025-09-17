@@ -57,6 +57,8 @@ MODULE m_geometry
  public :: chkdilatmx         ! check if dilatation of unit cell is consistent with initial G-sphere
  public :: xcart2xred         ! From cart coords to reduced
  public :: xred2xcart         ! From reduced coords to cart.
+ public :: kcart2kred         ! Convert cartesian k-vaetor into reduced k-vector
+ public :: kred2kcart         ! Convert reduced k-vaetor into cartesian k-vector
  public :: gred2fcart         ! Convert reduced gradients into cartesian forces
  public :: fcart2gred         ! Convert cartesian forces into reduced gradients
  public :: bonds_lgth_angles  ! Write GEO file
@@ -1621,6 +1623,103 @@ subroutine xred2xcart(natom, rprimd, xcart, xred)
  end do
 
 end subroutine xred2xcart
+!!***
+
+!!****f* m_geometry/kcart2kred
+!! NAME
+!! kcart2kred
+!!
+!! FUNCTION
+!! Convert from cartesian k-vectors kcart(3,nkpt)
+!! to dimensionless reduced coordinates kred(3,nkpt) by using
+!!    kred(:,ikpt) = binv(:,:) * kcart(:,ikpt)
+!! where the reciprocal lattice vectors are:
+!!    bprimd = two_pi * transpose(inv(rprimd))
+!! and binv is the inverse of bprimd.
+!! Note that the reverse operation is done by kred2kcart
+!!
+!! INPUTS
+!!  rprimd(3,3)=dimensional real space primitive translations (Bohr)
+!!  kcart(3,nkpt)=k-vector in cartesian coordinates
+!!
+!! OUTPUT
+!!  kred(3,nkpt)=k-vector in dimensionless reduced coordinates
+!!
+!! SOURCE
+
+subroutine kcart2kred(nkpt,rprimd,kcart,kred)
+
+!Arguments ------------------------------------
+!Local variables
+ integer,intent(in) :: nkpt
+!arrays
+ real(dp),intent(in) :: rprimd(3,3),kcart(3,nkpt)
+ real(dp),intent(out) :: kred(3,nkpt)
+ 
+!Local variables-------------------------------
+!scalars
+ integer :: ikpt,mu
+!arrays
+ real(dp) :: gprimd(3,3),bprimd(3,3),binv(3,3)
+! *************************************************************************
+
+ call matr3inv(rprimd, gprimd)
+ bprimd(:,:) = two_pi * transpose(gprimd(:,:))
+ call matr3inv(bprimd, binv)
+
+ do ikpt=1,nkpt
+   do mu=1,3
+      kred(mu,ikpt) = binv(mu,1)*kcart(1,ikpt)+binv(mu,2)*kcart(2,ikpt)+binv(mu,3)*kcart(3,ikpt)
+   end do
+ end do
+
+end subroutine kcart2kred
+!!***
+
+!!****f* m_geometry/kred2kcart
+!! NAME
+!! kred2kcart
+!!
+!! FUNCTION
+!! Convert from dimensionless reduced k-vectors kred(3,nkpt)
+!! to cartesian k-vectors kcart(3,nkpt) by using
+!!    kcart(:,ikpt) = bprimd(:,:) * kred(:,ikpt)
+!! where bprimd is the reciprocal lattice vectors
+!! Note that the reverse operation is done by kcart2kred
+!!
+!! INPUTS
+!!  rprimd(3,3)=dimensional real space primitive translations (Bohr)
+!!  kred(3,nkpt)=k-vectors in dimensionless reduced coordinates
+!!
+!! OUTPUT
+!!  kcart(3,nkpt)=k-vectors in cartesian coordinates
+!!
+!! SOURCE
+
+subroutine kred2kcart(nkpt,rprimd,kred,kcart)
+
+!Arguments ------------------------------------
+!Local variables
+ integer,intent(in) :: nkpt
+!arrays
+ real(dp),intent(in) :: rprimd(3,3),kred(3,nkpt)
+ real(dp),intent(out) :: kcart(3,nkpt)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ikpt,mu
+!arrays
+ real(dp) :: gprimd(3,3),bprimd(3,3)
+! *************************************************************************
+
+ call matr3inv(rprimd, gprimd)
+ bprimd(:,:) = two_pi * transpose(gprimd(:,:))
+  
+ do ikpt=1,nkpt
+  kcart(mu,ikpt) = bprimd(1,mu)*kred(1,ikpt)+bprimd(2,mu)*kred(2,ikpt)+bprimd(3,mu)*kred(3,ikpt)
+ end do
+
+end subroutine kred2kcart
 !!***
 
 !!****f* m_geometry/gred2fcart
