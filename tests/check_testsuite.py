@@ -1,17 +1,12 @@
 #!/usr/bin/env python
 """Script for checking the ABINIT automatic tests."""
-from __future__ import print_function, division, absolute_import #, unicode_literals
 
 import sys
 import os
 
 from pprint import pprint
 from optparse import OptionParser
-
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from io import StringIO
+from io import StringIO
 
 pack_dir, tail = os.path.split(os.path.abspath(__file__))
 pack_dir, tail = os.path.split(pack_dir)

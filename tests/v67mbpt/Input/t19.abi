@@ -70,7 +70,7 @@ gwcomp5     1        # Extrapolar trick to accelerate convergence vs. empty band
 gwencomp5   1.00
 
 gw_icutcoul5   4       # long-range only electron-electron interaction
-rcut5        1.00
+gw_rcut5     1.00
 
 ###############################################
 # Data common to the different datasets

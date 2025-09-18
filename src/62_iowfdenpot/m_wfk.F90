@@ -79,7 +79,6 @@ module m_wfk
  use m_numeric_tools,only : mask2blocks, stats_t, stats_eval, wrap2_pmhalf
  use m_cgtk,         only : cgtk_rotate, cgtk_rotate_symrec
  use m_fftcore,      only : get_kg, ngfft_seq
- use m_distribfft,   only : init_distribfft_seq
  use m_mpinfo,       only : destroy_mpi_enreg, initmpi_seq
  use m_rwwf,         only : rwwf
  use m_kpts,         only : listkk, kpts_timrev_from_kptopt
@@ -4846,8 +4845,8 @@ subroutine wfk_prof(wfk_fname, formeig, nband, comm)
        !Fake MPI_type for the sequential part.
        ngfft(1:6) = (/12,12,12,13,13,13/)
        call initmpi_seq(MPI_enreg_seq)
-       call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfft(2),ngfft(3),'all')
-       call init_distribfft_seq(MPI_enreg_seq%distribfft,'f',ngfft(2),ngfft(3),'all')
+       call MPI_enreg_seq%distribfft%init_seq('c',ngfft(2),ngfft(3),'all')
+       call MPI_enreg_seq%distribfft%init_seq('f',ngfft(2),ngfft(3),'all')
 
        call WffOpen(iomode,comm,wfk_fname,ierr,wff,master,my_rank,wfk_unt) !,spaceComm_mpiio) ! optional argument
        ABI_CHECK(ierr==0,"ierr!=0")

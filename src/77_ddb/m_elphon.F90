@@ -111,7 +111,7 @@ contains
 !!     rpt(3,nprt) =canonical positions of R points in the unit cell
 !!     nrpt =number of real space points used to integrate IFC (for interpolation of dynamical matrices)
 !!     wghatm(natom,natom,nrpt) =Weight for the pair of atoms and the R vector
-!! filnam(8)=character strings giving file names
+!! anaddb_dtset%prefix_outdata=character strings giving file names
 !! comm=MPI communicator.
 !!
 !! OUTPUT
@@ -127,7 +127,7 @@ contains
 !!
 !! SOURCE
 
-subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
+subroutine elphon(anaddb_dtset,Cryst,Ifc,comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -135,8 +135,6 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
  type(crystal_t),intent(in) :: Cryst
  type(ifc_type),intent(inout) :: Ifc
  integer,intent(in) :: comm
-!arrays
- character(len=fnlen),intent(in) :: filnam(8)
 
 !Local variables-------------------------------
 !scalars
@@ -201,15 +199,15 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 !==================================
 
  if (master == me) then
-   gkk_fname = filnam(5)
+   gkk_fname = anaddb_dtset%filename_gkk
    ABI_CHECK(len_trim(gkk_fname) > 0, "gkk_fname is not defined")
    if (open_file(gkk_fname,message,newunit=unitgkk,form="unformatted",status="old",action="read") /=0) then
      ABI_ERROR(message)
    end if
  end if
 
- elph_base_name=trim(filnam(8))//"_ep"
- ddkfilename=trim(filnam(7))
+ elph_base_name=trim(anaddb_dtset%prefix_outdata)//"_ep"
+ ddkfilename=trim(anaddb_dtset%filename_ddk)
  ABI_CHECK(len_trim(ddkfilename) > 0, "ddkfilename is not defined")
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

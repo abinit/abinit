@@ -22,7 +22,6 @@ module m_vtorhorec
 
  use defs_basis
  use defs_rectypes
- use m_distribfft
  use m_xmpi
  use m_pretty_rec
  use m_errors
@@ -522,9 +521,9 @@ subroutine vtorhorec(dtset,&
    ABI_MALLOC(ablocal_f,(1:rset%pawfgr%nfft,0:nrec,2))
    ABI_MALLOC(ablocal_1,(1:rset%par%npt,0:nrec,2))
 
-   call destroy_distribfft(rset%mpi%distribfft)
-   call init_distribfft(rset%mpi%distribfft,'c',rset%mpi%nproc_fft,rset%pawfgr%ngfftc(2) ,rset%pawfgr%ngfftc(3))
-   call init_distribfft(rset%mpi%distribfft,'f',rset%mpi%nproc_fft,rset%pawfgr%ngfft(2) ,rset%pawfgr%ngfft(3))
+   call rset%mpi%distribfft%free()
+   call rset%mpi%distribfft%init('c',rset%mpi%nproc_fft,rset%pawfgr%ngfftc(2) ,rset%pawfgr%ngfftc(3))
+   call rset%mpi%distribfft%init('f',rset%mpi%nproc_fft,rset%pawfgr%ngfft(2) ,rset%pawfgr%ngfft(3))
 
    rholocal_f = zero; ablocal_f = zero; ablocal_2 = zero
 
@@ -871,9 +870,9 @@ subroutine vtorhorec(dtset,&
  end if
 
 !--------------------------------------------------------
- call destroy_distribfft(rset%mpi%distribfft)
- call init_distribfft(rset%mpi%distribfft,'c',rset%mpi%nproc_fft,rset%ngfftrec(2),rset%ngfftrec(3))
- call init_distribfft(rset%mpi%distribfft,'f',rset%mpi%nproc_fft,dtset%ngfft(2),dtset%ngfft(3))
+ call rset%mpi%distribfft%free()
+ call rset%mpi%distribfft%init('c',rset%mpi%nproc_fft,rset%ngfftrec(2),rset%ngfftrec(3))
+ call rset%mpi%distribfft%init('f',rset%mpi%nproc_fft,dtset%ngfft(2),dtset%ngfft(3))
 
 !--Printing results
  write(msg,'(3a,f15.10)')&
@@ -971,10 +970,7 @@ subroutine entropyrec(an,bn2,nrec,trotter,ent_out,multce,debug_rec, &
 !arrays
  real(dp) :: tsec(2)
  real(dp) :: iif,factor
-
-
 ! *************************************************************************
-
 
  call timab(610,1,tsec)
 

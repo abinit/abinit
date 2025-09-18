@@ -1,15 +1,15 @@
-#Test the triple parallelisation. 
-#We cannot check the distribution npband*npfft*np_spkpt=2*2*2=8 processors, 
+#Test the triple parallelisation.
+#We cannot check the distribution npband*npfft*np_spkpt=2*2*2=8 processors,
 #this number being not allowed in the test procedure.
 #Here, we only test the parallelisation over FFT and kpoints:
 #npband*npfft*np_spkpt=1*2*2=4 processors.
 #In test tY.in we check other distributions for guarantee.
 
  use_slk 1
- bandpp 1
  istwfk 30*1
  npband 1 np_spkpt 2 npfft 2
- 
+ nblock_lobpcg 12
+
  ngfft 18 18 18
  ngfftdg 36 36 36
 
@@ -17,7 +17,7 @@
  kptrlatt 4 0 0 0 4 0 0 0 4
  nshiftk 4 shiftk 1/2 1/2 1/2 1/2 0.0 0.0 0.0 1/2 0.0 0.0 0.0 1/2
  ionmov 3 ntime 3 toldff 1.2d-7 tolmxf 1.0d-5
- optcell 1 ecutsm 0.5 dilatmx 1.1 
+ optcell 1 ecutsm 0.5 dilatmx 1.1
  ixc 1
 
  ecut 15. pawecutdg 50
@@ -35,7 +35,7 @@
  ntypat 1 typat 1 1  natom 2
 
  paral_kgb 1
- iomode 0    # Only for testing purposes 
+ iomode 0    # Only for testing purposes
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "6c_lda.paw"
@@ -52,7 +52,7 @@
 #%% [extra_info]
 #%% keywords = PAW
 #%% authors = Unknown
-#%% description = 
+#%% description =
 #%%   C-diamond, Bulk, 2 atoms, paral_kgb, with PAW.
 #%%   Test the triple parallelisation.
 #%%   We cannot check the distribution npband*npfft*np_spkpt=2*2*2=8 processors,

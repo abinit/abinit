@@ -35,7 +35,6 @@ module m_screening_driver
  use libxc_functionals
  use m_hdr
  use m_dtfil
- use m_distribfft
  use m_crystal
 
  use defs_datatypes,  only : pseudopotential_type
@@ -43,7 +42,7 @@ module m_screening_driver
  use m_time,          only : timab
  use m_io_tools,      only : open_file, file_exists, iomode_from_fname
  use m_fstrings,      only : int2char10, sjoin, strcat, itoa, ltoa, itoa
- use m_energies,      only : energies_type, energies_init
+ use m_energies,      only : energies_type
  use m_numeric_tools, only : print_arr, coeffs_gausslegint, c2r
  use m_geometry,      only : normv, vdotw, mkrdim, metric
  use m_gwdefs,        only : GW_TOLQ0, GW_TOLQ, em1params_t, GW_Q0_DEFAULT
@@ -286,7 +285,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  call xmpi_bcast(wfk_fname, master, comm, ierr)
 
  ! Some variables need to be initialized/nullify at start
- call energies_init(KS_energies)
+ call KS_energies%init()
  usexcnhat=0
 
  call mkrdim(acell,rprim,rprimd)
@@ -307,8 +306,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  ! We can intialize MPI_enreg and fft distrib here, now ngfft are known
  call initmpi_seq(MPI_enreg_seq) ! Fake MPI_type for the sequential part.
- call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfftc(2),ngfftc(3),'all')
- call init_distribfft_seq(MPI_enreg_seq%distribfft,'f',ngfftf(2),ngfftf(3),'all')
+ call MPI_enreg_seq%distribfft%init_seq('c',ngfftc(2),ngfftc(3),'all')
+ call MPI_enreg_seq%distribfft%init_seq('f',ngfftf(2),ngfftf(3),'all')
 
 !=============================================
 !==== Open and read pseudopotential files ====
@@ -818,9 +817,11 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    nzlmopt=-1; option=0; compch_sph=greatest_real
    call pawdenpot(compch_sph,el_temp,KS_energies%e_paw,KS_energies%e_pawdc,KS_energies%entropy_paw,&
-    ipert,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,&
+    Cryst%gprimd,ipert,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,Cryst%ntypat,Dtset%nucdipmom,&
+    nzlmopt,option,&
     Paw_an,Paw_an,Paw_ij,Pawang,Dtset%pawprtvol,Pawrad,Pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,&
-    Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,Cryst%ucvol,Psps%znuclpsp,epaw_xc=KS_energies%e_pawxc)
+    Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,&
+    Cryst%xred,Cryst%ucvol,Psps%znuclpsp,epaw_xc=KS_energies%e_pawxc)
    call timab(320,2,tsec) ! screening(paw
  else
    ABI_MALLOC(Paw_ij,(0))
@@ -1951,7 +1952,7 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
  ABI_FREE(gvec_kss)
 
  ! FIXME this wont work if nqptdm/=0
- call Vcp%init(Gsph_epsG0,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecuteps,Ep%npwe,Ep%nqlwl,&
+ call Vcp%init(Gsph_epsG0,Cryst,Qmesh,Kmesh,Dtset%gw_rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecuteps,Ep%npwe,Ep%nqlwl,&
                Ep%qlwl,comm)
 
 #if 0

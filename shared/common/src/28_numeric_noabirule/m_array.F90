@@ -3,8 +3,8 @@
 !! m_array
 !!
 !! FUNCTION
-!!   This module provides data types that can be used to construct ragged arrays
-!!   and helper functions to print/write the array in different formats.
+!!  This module provides data types that can be used to construct ragged arrays
+!!  and helper functions to print/write the array in different formats.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2025 ABINIT group (MG)
@@ -26,9 +26,7 @@ MODULE m_array
  use m_abicore
  use m_errors
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_numeric_tools, only : c2r
 
@@ -58,7 +56,7 @@ MODULE m_array
 
 !!****t* m_array/array2_gwpc_type
 !! NAME
-!! array2_gwpc_type
+!! array2_gwpc_t
 !!
 !! FUNCTION
 !!  A datatype used to construct ragged 2D-arrays with KIND=gwpc
@@ -67,6 +65,11 @@ MODULE m_array
 
  type,public :: array2_gwpc_t
    complex(gwpc),allocatable :: vals(:,:)
+
+ contains
+
+   procedure :: free => array2_gwpc_free
+
  end type array2_gwpc_t
 
  interface array_free
@@ -76,7 +79,7 @@ MODULE m_array
  public :: array_free       ! Free memory
 !!***
 
-CONTAINS
+contains
 
 !!****f* m_array/array2_gwpc_free
 !! NAME
@@ -90,8 +93,7 @@ CONTAINS
 subroutine array2_gwpc_free(Array)
 
 !Arguments ------------------------------------
- type(array2_gwpc_t),intent(inout) :: Array
-
+ class(array2_gwpc_t),intent(inout) :: Array
 ! *********************************************************************
 
  ABI_SFREE(Array%vals)
@@ -114,4 +116,3 @@ end subroutine array2_gwpc_free
 #include "farray_ncwrite.finc"
 
 END MODULE m_array
-

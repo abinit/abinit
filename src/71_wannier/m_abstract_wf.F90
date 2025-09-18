@@ -675,7 +675,7 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
     type(pawcprj_type), pointer :: cprj(:, :)
     ABI_UNUSED_A(self)
     ABI_UNUSED_A(cprj)
-    ABI_ERROR("The function abstract_wf%get_cg_ptr is not implemented")
+    ABI_ERROR("The function abstract_wf%get_cprj_ptr is not implemented")
   end function abstract_wf_get_cprj_ptr
 
 !-----------------------------------------------------------------------------

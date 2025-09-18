@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ANADDB, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.1.4.3 of ANADDB, released Jul 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,9 +14,9 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h14 )
-
+.Starting date : Wed 20 Aug 2025.
+- ( at 00h02 )
+  
 
 ================================================================================
 
@@ -33,8 +33,8 @@
        frmax         1.00000000E+01
  Interatomic Force Constants Inputs :
       dipdip         1
-      dipqua         1
-      quadqu         1
+     dipquad         0
+    quadquad         0
       ifcana         0
       ifcout         0
  Description of grid 1 :
@@ -79,11 +79,11 @@
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges
+ Dielectric Tensor and Effective Charges 
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges
+   and impose the ASR on the effective charges 
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -99,7 +99,7 @@
        3               2        0.000000        0.000000
        3               3        0.000103        0.000000
 
- Effective charge tensors after
+ Effective charge tensors after 
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -134,9 +134,8 @@
 
 ================================================================================
 
- Calculation of the interatomic forces
+ Calculation of the interatomic forces 
 
--begin at tcpu      0.071  and twall      0.071 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :      180
  greater than 80, so only write 20 of them
@@ -165,7 +164,7 @@
 
 ================================================================================
 
- Calculation of phonon density of states
+ Calculation of phonon density of states 
 
  Average speed of sound partial sums:     0.2090212568E-02 (at units)
 -                                   =           4.5727 [km/s]
@@ -174,17 +173,17 @@
 -                                 =     0.5825706802E+01 (THz)
 -Debye temperature from partial sums:     0.2795894983E+03 (K)
 
- Average speed of sound:     0.1827915833E-02 (at units)
+ Average speed of sound:     0.1827915833E-02 (at units) 
 -                      =           3.9989 [km/s]
 
- Debye frequency from DOS:     0.7743001300E-03 (Ha)
+ Debye frequency from DOS:     0.7743001300E-03 (Ha) 
 -                        =     0.5094650115E+01 (THz)
 -Debye temperature from DOS:     0.2445043526E+03 (K)
 
 
 ================================================================================
 
- Treat the first list of vectors
+ Treat the first list of vectors 
 
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
@@ -208,47 +207,47 @@
  the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
-  3.0 -1.0  0.0 -1.0  0.0 -1.0
+  3.0 -1.0  0.0 -1.0 -0.0 -1.0
  Symmetry characters of vibration mode #   4
         degenerate with vibration mode #   5
-  2.0  0.0 -1.0  0.0 -1.0 -0.0
+  2.0 -0.0 -1.0 -0.0 -1.0  0.0
  Symmetry characters of vibration mode #   6
   1.0  1.0  1.0  1.0  1.0  1.0
  Symmetry characters of vibration mode #   7
         degenerate with vibration mode #   8
-  2.0  0.0 -1.0  0.0 -1.0 -0.0
+  2.0 -0.0 -1.0 -0.0 -1.0  0.0
  Symmetry characters of vibration mode #   9
   1.0  1.0  1.0  1.0  1.0  1.0
  Symmetry characters of vibration mode #  10
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  11
         degenerate with vibration mode #  12
-  2.0  0.0 -1.0 -0.0 -1.0 -0.0
+  2.0  0.0 -1.0  0.0 -1.0 -0.0
  Symmetry characters of vibration mode #  13
         degenerate with vibration mode #  14
-  2.0  0.0 -1.0  0.0 -1.0 -0.0
+  2.0 -0.0 -1.0  0.0 -1.0  0.0
  Symmetry characters of vibration mode #  15
   1.0  1.0  1.0  1.0  1.0  1.0
  Symmetry characters of vibration mode #  16
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  17
         degenerate with vibration mode #  18
-  2.0  0.0 -1.0 -0.0 -1.0 -0.0
+  2.0 -0.0 -1.0  0.0 -1.0 -0.0
  Symmetry characters of vibration mode #  19
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  20
         degenerate with vibration mode #  21
-  2.0 -0.0 -1.0  0.0 -1.0 -0.0
+  2.0  0.0 -1.0  0.0 -1.0 -0.0
  Symmetry characters of vibration mode #  22
         degenerate with vibration mode #  23
-  2.0  0.0 -1.0  0.0 -1.0 -0.0
+  2.0 -0.0 -1.0  0.0 -1.0 -0.0
  Symmetry characters of vibration mode #  24
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  25
   1.0  1.0  1.0  1.0  1.0  1.0
  Symmetry characters of vibration mode #  26
         degenerate with vibration mode #  27
-  2.0  0.0 -1.0  0.0 -1.0 -0.0
+  2.0 -0.0 -1.0  0.0 -1.0  0.0
 
   Phonon wavevector (reduced coordinates) :  0.16667  0.00000  0.00000
  Phonon energies in Hartree :
@@ -462,47 +461,47 @@
  the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
-  3.0 -1.0  0.0 -1.0  0.0 -1.0
+  3.0 -1.0  0.0 -1.0 -0.0 -1.0
  Symmetry characters of vibration mode #   4
         degenerate with vibration mode #   5
-  2.0  0.0 -1.0  0.0 -1.0 -0.0
+  2.0 -0.0 -1.0 -0.0 -1.0  0.0
  Symmetry characters of vibration mode #   6
   1.0  1.0  1.0  1.0  1.0  1.0
  Symmetry characters of vibration mode #   7
         degenerate with vibration mode #   8
-  2.0  0.0 -1.0  0.0 -1.0 -0.0
+  2.0 -0.0 -1.0 -0.0 -1.0  0.0
  Symmetry characters of vibration mode #   9
   1.0  1.0  1.0  1.0  1.0  1.0
  Symmetry characters of vibration mode #  10
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  11
         degenerate with vibration mode #  12
-  2.0  0.0 -1.0 -0.0 -1.0 -0.0
+  2.0  0.0 -1.0  0.0 -1.0 -0.0
  Symmetry characters of vibration mode #  13
         degenerate with vibration mode #  14
-  2.0  0.0 -1.0  0.0 -1.0 -0.0
+  2.0 -0.0 -1.0  0.0 -1.0  0.0
  Symmetry characters of vibration mode #  15
   1.0  1.0  1.0  1.0  1.0  1.0
  Symmetry characters of vibration mode #  16
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  17
         degenerate with vibration mode #  18
-  2.0  0.0 -1.0 -0.0 -1.0 -0.0
+  2.0 -0.0 -1.0  0.0 -1.0 -0.0
  Symmetry characters of vibration mode #  19
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  20
         degenerate with vibration mode #  21
-  2.0 -0.0 -1.0  0.0 -1.0 -0.0
+  2.0  0.0 -1.0  0.0 -1.0 -0.0
  Symmetry characters of vibration mode #  22
         degenerate with vibration mode #  23
-  2.0  0.0 -1.0  0.0 -1.0 -0.0
+  2.0 -0.0 -1.0  0.0 -1.0 -0.0
  Symmetry characters of vibration mode #  24
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  25
   1.0  1.0  1.0  1.0  1.0  1.0
  Symmetry characters of vibration mode #  26
         degenerate with vibration mode #  27
-  2.0  0.0 -1.0  0.0 -1.0 -0.0
+  2.0 -0.0 -1.0  0.0 -1.0  0.0
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.16667
  Phonon energies in Hartree :
@@ -895,37 +894,37 @@
 
 ================================================================================
 
-
- Mode effective charges
- Mode number.    x            y            z            length
+  
+ Mode effective charges 
+ Mode number.    x            y            z            length 
 -     1         -0.000000    -0.000001    -0.000000     0.000001
 -     2         -0.000000    -0.000000     0.000005     0.000005
 -     3         -0.000001     0.000000    -0.000000     0.000001
--     4          0.015023    -0.002426    -0.000000     0.015217
--     5          0.002426     0.015023    -0.000000     0.015217
+-     4          0.015028    -0.002396    -0.000000     0.015217
+-     5          0.002396     0.015028    -0.000000     0.015217
 ;     6         -0.000000     0.000000    -0.000000     0.000000
--     7          0.240004    -0.277789    -0.000000     0.367109
--     8          0.277789     0.240004     0.000000     0.367109
-;     9          0.000000    -0.000000     0.000000     0.000000
+-     7          0.240019    -0.277776    -0.000000     0.367109
+-     8          0.277776     0.240019     0.000000     0.367109
+;     9          0.000000    -0.000000    -0.000000     0.000000
 ;    10          0.000000     0.000000     1.862737     1.862737
--    11         -0.849998     1.263282    -0.000000     1.522622
--    12          1.263282     0.849998    -0.000000     1.522622
--    13          2.223495     1.122942    -0.000000     2.490969
--    14          1.122942    -2.223495     0.000000     2.490969
-;    15          0.000000     0.000000    -0.000000     0.000000
+-    11         -0.849689     1.263490    -0.000000     1.522622
+-    12          1.263490     0.849689    -0.000000     1.522622
+-    13          2.223670     1.122594    -0.000000     2.490969
+-    14          1.122594    -2.223670     0.000000     2.490969
+;    15          0.000000     0.000000     0.000000     0.000000
 ;    16          0.000000     0.000000     2.609041     2.609041
--    17          0.706120     0.269409    -0.000000     0.755769
--    18         -0.269409     0.706120    -0.000000     0.755769
+-    17          0.706327     0.268864    -0.000000     0.755769
+-    18         -0.268864     0.706327    -0.000000     0.755769
 ;    19         -0.000000    -0.000000    -1.913084     1.913084
--    20         -1.757799    -0.708496     0.000000     1.895211
--    21          0.708496    -1.757799     0.000000     1.895211
--    22          5.280601     2.086303     0.000000     5.677800
--    23          2.086303    -5.280601    -0.000000     5.677800
+-    20         -1.757595    -0.709002     0.000000     1.895211
+-    21          0.709002    -1.757595     0.000000     1.895211
+-    22          5.280459     2.086664     0.000000     5.677800
+-    23          2.086664    -5.280459    -0.000000     5.677800
 ;    24         -0.000000    -0.000000     5.830963     5.830963
 ;    25         -0.000000     0.000000     0.000000     0.000000
--    26         -0.228464     0.582928    -0.000000     0.626100
--    27          0.582928     0.228464    -0.000000     0.626100
-
+-    26         -0.228446     0.582936    -0.000000     0.626100
+-    27          0.582936     0.228446    -0.000000     0.626100
+  
  Oscillator strengths (in a.u. ; 1 a.u.=253.2638413 m3/s2). Set to zero if abs()<tol14.
  Mode number.       xx          yy          zz          xy          xz          yz          trace
 -   1     Real    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
@@ -934,53 +933,53 @@
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 -   3     Real    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--   4     Real    7.5611E-09  1.9724E-10  0.0000E+00 -1.2212E-09  0.0000E+00  0.0000E+00  7.7583E-09
+-   4     Real    7.5660E-09  1.9226E-10  0.0000E+00 -1.2061E-09  0.0000E+00  0.0000E+00  7.7583E-09
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--   5     Real    1.9724E-10  7.5611E-09  0.0000E+00  1.2212E-09  0.0000E+00  0.0000E+00  7.7583E-09
+-   5     Real    1.9226E-10  7.5660E-09  0.0000E+00  1.2061E-09  0.0000E+00  0.0000E+00  7.7583E-09
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;   6     Real    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--   7     Real    1.8912E-06  2.5335E-06  0.0000E+00 -2.1889E-06  0.0000E+00  0.0000E+00  4.4247E-06
+-   7     Real    1.8914E-06  2.5333E-06  0.0000E+00 -2.1890E-06  0.0000E+00  0.0000E+00  4.4247E-06
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--   8     Real    2.5335E-06  1.8912E-06  0.0000E+00  2.1889E-06  0.0000E+00  0.0000E+00  4.4247E-06
+-   8     Real    2.5333E-06  1.8914E-06  0.0000E+00  2.1890E-06  0.0000E+00  0.0000E+00  4.4247E-06
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;   9     Real    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;  10     Real    0.0000E+00  0.0000E+00  1.1308E-04  0.0000E+00  0.0000E+00  0.0000E+00  1.1308E-04
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  11     Real    2.1792E-05  4.8136E-05  0.0000E+00 -3.2388E-05  0.0000E+00  0.0000E+00  6.9928E-05
+-  11     Real    2.1776E-05  4.8152E-05  0.0000E+00 -3.2382E-05  0.0000E+00  0.0000E+00  6.9928E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  12     Real    4.8136E-05  2.1792E-05  0.0000E+00  3.2388E-05  0.0000E+00  0.0000E+00  6.9928E-05
+-  12     Real    4.8152E-05  2.1776E-05  0.0000E+00  3.2382E-05  0.0000E+00  0.0000E+00  6.9928E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  13     Real    1.5463E-04  3.9440E-05  0.0000E+00  7.8094E-05  0.0000E+00  0.0000E+00  1.9407E-04
+-  13     Real    1.5466E-04  3.9416E-05  0.0000E+00  7.8076E-05  0.0000E+00  0.0000E+00  1.9407E-04
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  14     Real    3.9440E-05  1.5463E-04  0.0000E+00 -7.8094E-05  0.0000E+00  0.0000E+00  1.9407E-04
+-  14     Real    3.9416E-05  1.5466E-04  0.0000E+00 -7.8076E-05  0.0000E+00  0.0000E+00  1.9407E-04
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;  15     Real    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;  16     Real    0.0000E+00  0.0000E+00  2.0880E-04  0.0000E+00  0.0000E+00  0.0000E+00  2.0880E-04
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  17     Real    1.1841E-05  1.7237E-06  0.0000E+00  4.5179E-06  0.0000E+00  0.0000E+00  1.3565E-05
+-  17     Real    1.1848E-05  1.7168E-06  0.0000E+00  4.5101E-06  0.0000E+00  0.0000E+00  1.3565E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  18     Real    1.7237E-06  1.1841E-05  0.0000E+00 -4.5179E-06  0.0000E+00  0.0000E+00  1.3565E-05
+-  18     Real    1.7168E-06  1.1848E-05  0.0000E+00 -4.5101E-06  0.0000E+00  0.0000E+00  1.3565E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
-;  19     Real    0.0000E+00  0.0000E+00  7.5330E-05  0.0000E+00  1.4458E-14  1.4645E-14  7.5330E-05
+;  19     Real    0.0000E+00  0.0000E+00  7.5330E-05  0.0000E+00  1.4457E-14  1.4645E-14  7.5330E-05
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  20     Real    6.9723E-05  1.1327E-05  0.0000E+00  2.8103E-05 -1.8254E-14  0.0000E+00  8.1050E-05
+-  20     Real    6.9707E-05  1.1343E-05  0.0000E+00  2.8119E-05 -1.8253E-14  0.0000E+00  8.1050E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  21     Real    1.1327E-05  6.9723E-05  0.0000E+00 -2.8103E-05  0.0000E+00  0.0000E+00  8.1050E-05
+-  21     Real    1.1343E-05  6.9707E-05  0.0000E+00 -2.8119E-05  0.0000E+00  0.0000E+00  8.1050E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  22     Real    8.5705E-04  1.3378E-04  0.0000E+00  3.3861E-04  6.7262E-14  2.6574E-14  9.9083E-04
+-  22     Real    8.5700E-04  1.3383E-04  0.0000E+00  3.3866E-04  6.7262E-14  2.6580E-14  9.9083E-04
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  23     Real    1.3378E-04  8.5705E-04  0.0000E+00 -3.3861E-04 -1.2962E-14  3.2807E-14  9.9083E-04
+-  23     Real    1.3383E-04  8.5700E-04  0.0000E+00 -3.3866E-04 -1.2959E-14  3.2793E-14  9.9083E-04
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
-;  24     Real    0.0000E+00  0.0000E+00  1.0434E-03  0.0000E+00 -4.9296E-14 -5.3751E-14  1.0434E-03
+;  24     Real    0.0000E+00  0.0000E+00  1.0434E-03  0.0000E+00 -4.9299E-14 -5.3743E-14  1.0434E-03
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;  25     Real    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  26     Real    1.6759E-06  1.0911E-05  0.0000E+00 -4.2761E-06  0.0000E+00  0.0000E+00  1.2586E-05
+-  26     Real    1.6756E-06  1.0911E-05  0.0000E+00 -4.2758E-06  0.0000E+00  0.0000E+00  1.2586E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  27     Real    1.0911E-05  1.6759E-06  0.0000E+00  4.2761E-06  0.0000E+00  0.0000E+00  1.2586E-05
+-  27     Real    1.0911E-05  1.6756E-06  0.0000E+00  4.2758E-06  0.0000E+00  0.0000E+00  1.2586E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 
  Electronic dielectric tensor
@@ -1001,12 +1000,12 @@
       4.56421303      0.00000000     -0.00000000
       0.00000000      4.56421303      0.00000000
      -0.00000000      0.00000000      4.78376787
-
+ 
 -
-- Proc.   0 individual time (sec): cpu=         11.8  wall=         11.8
+- Proc.   0 individual time (sec): cpu=         11.9  wall=         11.9
 
 ================================================================================
 
-+Total cpu time     11.776  and wall time     11.810 sec
++Total cpu time     11.884  and wall time     11.887 sec
 
  anaddb : the run completed successfully.

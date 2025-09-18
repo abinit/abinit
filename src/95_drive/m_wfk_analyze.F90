@@ -133,7 +133,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 !scalars
  character(len=8),intent(in) :: codvsn
  type(datafiles_type),intent(in) :: dtfil
- type(dataset_type),intent(in) :: dtset
+ type(dataset_type),intent(inout) :: dtset
  type(pawang_type),intent(inout) :: pawang
  type(pseudopotential_type),intent(inout) :: psps
 !arrays
@@ -242,8 +242,8 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 
  ! Fake MPI_type for the sequential part.
  call initmpi_seq(mpi_enreg)
- call init_distribfft_seq(mpi_enreg%distribfft,'c',ngfftc(2),ngfftc(3),'all')
- call init_distribfft_seq(mpi_enreg%distribfft,'f',ngfftf(2),ngfftf(3),'all')
+ call mpi_enreg%distribfft%init_seq('c',ngfftc(2),ngfftc(3),'all')
+ call mpi_enreg%distribfft%init_seq('f',ngfftf(2),ngfftf(3),'all')
 
  ! ===========================================
  ! === Open and read pseudopotential files ===
@@ -357,7 +357,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 
    if (dtset%wfk_task == WFK_TASK_OPTICS_FULLBZ) then
      ! Calculate the DDK matrix elements from the WFK file in the full BZ.
-     ! This is needed fo computing non-linear properties in optics as symmetries are not
+     ! This is needed for computing non-linear properties in optics as symmetries are not
      ! implemented correctly.
      ds%only_diago = .False.
      call ds%compute_ddk(outwfk_path, dtfil%filnam_ds(4), dtset, psps, pawtab, ngfftc, comm)

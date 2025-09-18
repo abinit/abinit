@@ -48,7 +48,7 @@ module m_cgtk
 
  public :: cgtk_rotate         ! Recostruct wfs in the BZ from IBZ using symmetry tables generated
                                ! with the the symrel^T conventions.
- public :: cgtk_rotate_symrec  ! Similat to cgtk_rotate but assumes symrec conventions.
+ public :: cgtk_rotate_symrec  ! Similar to cgtk_rotate but assumes symrec conventions.
  public :: cgtk_change_gsphere
  public :: cgtk_fixphase
 !!***
@@ -88,7 +88,7 @@ contains
 !!  kg1(3,npw1), kg2(3,npw2) = G vectors in cg1, and cg2.
 !!  istwf1, istwf2= Storage mode for cg1 and cg2
 !!  work_ngfft(18)= Specifies the size of the workspace array work.
-!!   IMPORTANT: must be large enough to accoung for all possible shifts of the g-sphere.
+!!   IMPORTANT: must be large enough to account for all possible shifts of the g-sphere.
 !!   The caller is responsible for computing the max size needed to handle all the possible symmetrization.
 !!  cg1(2, npw1, nspinor, ndat)=Wavefunctions in the IBZ
 !!
@@ -124,7 +124,6 @@ subroutine cgtk_rotate(cryst, kpt1, isym, itimrev, g0, nspinor, ndat, &
  integer :: symrec(3,3), symrel(3,3)
  real(dp) :: phktnons(2,1), tau(3), spinrot(4), tsec(2)
  real(dp),allocatable :: phase1d(:,:), phase3d(:,:), wavef1(:,:)
-
 !************************************************************************
 
  ! Keep track of total time spent.
@@ -274,7 +273,6 @@ subroutine cgtk_rotate_symrec(cryst, kpt1, isym, itimrev, g0, nspinor, ndat, &
  integer :: symrec(3,3), symrec_inv(3,3), symrel(3,3), symrel_inv(3,3)
  real(dp) :: phktnons(2,1), tau(3), spinrot(4), tsec(2), kpt2(3)
  real(dp),allocatable :: phase1d(:,:), phase3d(:,:), wavef1(:,:)
-
 !************************************************************************
 
  ! Keep track of total time spent.
@@ -397,7 +395,7 @@ end subroutine cgtk_rotate_symrec
 !!  istwf1, istwf2 = Storage mode of (input, output) wavefunctions.
 !!  kg1(3,npw1), kg2(3,npw2) = Input/Output G-sphere
 !!  cg1(2,npw1,ndat) = Input wavefunctions on kg1 sphere with istwf1 mode.
-!!  work_ngfft(18)=Specify work dimensions. Must be large enough to accomodate kg1 and kg2
+!!  work_ngfft(18)=Specify work dimensions. Must be large enough to accommodate kg1 and kg2
 !!
 !! OUTPUT
 !!  cg2(2,npw2,ndat) = Output wavefunctions on kg2 sphere with istwf2 mode.
@@ -418,7 +416,6 @@ subroutine cgtk_change_gsphere(ndat, npw1, istwf1, kg1, cg1, npw2, istwf2, kg2, 
  real(dp),intent(out) :: work(2,work_ngfft(4),work_ngfft(5),work_ngfft(6))
 
 !Local variables ------------------------------
-!scalars
  integer :: n1,n2,n3,n4,n5,n6,idat
 !************************************************************************
 

@@ -456,7 +456,7 @@ Change the input yaml files or the python code
                 self.ignored_paths.append(dest)
 
     def generate_page_with_ac_examples(self):
-        """Generate markdown pages with all ac exaples found in config-examples."""
+        """Generate markdown pages with all ac examples found in config-examples."""
         dirpath = os.path.join(self.root, "build", "config-examples")
         md_lines = []
         app = md_lines.append

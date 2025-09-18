@@ -77,7 +77,7 @@ class WikiLinks(Pattern):
         #page_rpath = "??"
         #if hasattr(self.md, 'Meta') and "rpath" in self.md.Meta:
         #    page_rpath = self.md.Meta["rpath"][0]
-        # Remove quotes (neeeded in py2.7 because mkdocs does not use pyyaml to parse meta).
+        # Remove quotes (needed in py2.7 because mkdocs does not use pyyaml to parse meta).
         #if "authors" in self.md.Meta:
         #    print("authors", self.md.Meta["authors"])
         website = Website.get()

@@ -161,7 +161,6 @@ module m_gwr
  use m_fftcore,       only : get_kg, sphereboundary, getng, print_ngfft, fftcore_set_mixprec, ngfft_seq
  use m_cgtk,          only : cgtk_rotate
  use m_mpinfo,        only : initmpi_seq, destroy_mpi_enreg
- use m_distribfft,    only : init_distribfft_seq
  use m_kg,            only : getcut
  use m_fft,           only : fftbox_plan3_t, uplan_t, fft_ug, fft_ur, fourdp
  use m_fft_mesh,      only : calc_ceikr, calc_ceigr, ctimes_eikr
@@ -1608,7 +1607,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gw_icutcoul = dtset%gw_icutcoul
  !if (gw_icutcoul == 16) gw_icutcoul = 6
  call gwr%vcgen%init(cryst, ks_ebands%kptrlatt, gwr%nkbz, gwr%nqibz, gwr%nqbz, gwr%qbz, &
-                     dtset%rcut, gw_icutcoul, dtset%vcutgeo, vc_ecut, gwr%comm%value)
+                     dtset%gw_rcut, gw_icutcoul, dtset%vcutgeo, vc_ecut, gwr%comm%value)
 
  ! Now we know the value of g_ngfft. Setup tables for zero-padded FFTs.
  ! Build descriptors for Green's functions and tchi and setup tables for zero-padded FFTs.

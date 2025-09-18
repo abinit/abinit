@@ -21,7 +21,7 @@
 !!  Moreover one has to reinstate the old functional before returning so that the other routines
 !!  will continue to used the previous ixc. This task can be accomplished with the following pseudocode
 !!
-!!   ! Reinitialize the libxc module with the overriden values
+!!   ! Reinitialize the libxc module with the overridden values
 !!   if (old_ixc<0)  call libxc_functionals_end()
 !!   if (new_ixc<0) call libxc_functionals_init(new_ixc,nspden)
 !!   ! Compute XC stuff here.
@@ -50,12 +50,11 @@ MODULE m_kxc
  use m_dtset
 
  use defs_abitypes,   only : MPI_type
- use m_io_tools,      only : open_file
- use m_pptools,       only : printxsf
+ use m_fstrings,      only : sjoin, itoa
  use m_numeric_tools, only : hermitianize
  use m_fft_mesh,      only : g2ifft
  use m_fft,           only : fourdp_6d, fourdp
- use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
+ use m_mpinfo,        only : initmpi_seq, destroy_mpi_enreg
  use m_spacepar,      only : hartre
  use m_rhotoxc,       only : rhotoxc
  use m_dfpt_mkvxc,    only : dfpt_mkvxc
@@ -114,35 +113,27 @@ subroutine kxc_rpa(gsq,krpa,npw,option,rcut_coulomb)
 !Local variables -------------------------------------------------------
 !scalars
  integer :: ipw
-
 !***********************************************************************
 
  if (option == 0) then
-
-!  Compute the bare Hartree kernel.
-
+   !  Compute the bare Hartree kernel.
    do ipw = 1,npw
-
      if (gsq(ipw) > tol12) then
        krpa(ipw) = four_pi/gsq(ipw)
      else
-       krpa(ipw) = 0._dp
+       krpa(ipw) = zero
      end if
-
    end do
 
  else
 
-!  Compute the Hartree kernel with a cut-off in real space beyond rcut_coulomb:
-
+   !  Compute the Hartree kernel with a cut-off in real space beyond rcut_coulomb:
    do ipw = 1,npw
-
      if (gsq(ipw) > tol12) then
        krpa(ipw) = (four_pi/gsq(ipw))*(1._dp-cos(sqrt(gsq(ipw))*rcut_coulomb))
      else
        krpa(ipw) = two_pi*rcut_coulomb**2
      end if
-
    end do
 
  end if
@@ -158,11 +149,14 @@ end subroutine kxc_rpa
 !!
 !! FUNCTION
 !! In a planewave basis set, the matrix of a local xc kernel:
+!!
 !!  $f_{\rm xc}(\vec{r},\vec{r}') = f(\vec{r})\delta(\vec{r}-\vec{r}')$
+!!
 !! is just:
+!!
 !!  $f_{\rm xc}(\vec{G},\vec{G}') = f(\vec{G}-\vec{G}')$.
-!! This subroutine calculates the matrix of such a local xc kernel
-!! given $f(\vec{G})$ on the FFT grid.
+!!
+!! This subroutine calculates the matrix of such a local xc kernel given $f(\vec{G})$ on the FFT grid.
 !!
 !! INPUTS
 !!  ispxc = 1 for the up-up spin channel.
@@ -195,21 +189,18 @@ subroutine kxc_local(ispxc,kg_diel,kxc,kxcg,nfft,ngfft,npwdiel,nspden,option)
  real(dp),intent(out) :: kxc(2,npwdiel,nspden,npwdiel,nspden)
 
 !Local variables -------------------------------------------------------
-!For debbuging purposes:
+!For debugging purposes:
 !real(dp) :: c1,c2,c3
 !scalars
  integer :: i1,i2,i3,ifft,ipw1,ipw2,ipwstart,isp1,isp2,j1,j2,j3,k1,k2,k3,n1,n2
  integer :: n3
  logical :: ok
- character(len=500) :: message
-
+ character(len=500) :: msg
 !***********************************************************************
 
-!Check input parameters.
-
+ !Check input parameters.
  if (nspden > 2) then
-   message =' kxc_local does not work yet for nspden > 2.'
-   ABI_ERROR(message)
+   ABI_ERROR('kxc_local does not work yet for nspden > 2.')
  end if
 
  isp1 = 1
@@ -240,8 +231,8 @@ subroutine kxc_local(ispxc,kg_diel,kxc,kxcg,nfft,ngfft,npwdiel,nspden,option)
  end if
 
  if (.not.ok) then
-   write (message,'(2(a,i0))')'  The input ispxc = ',ispxc,' is not compatible with nspden = ',nspden
-   ABI_BUG(message)
+   write (msg,'(2(a,i0))')'  The input ispxc = ',ispxc,' is not compatible with nspden = ',nspden
+   ABI_BUG(msg)
  end if
 
  if (option == 0) then
@@ -252,26 +243,24 @@ subroutine kxc_local(ispxc,kg_diel,kxc,kxcg,nfft,ngfft,npwdiel,nspden,option)
    ipwstart = 1
  end if
 
-!Calculate the xc matrix.
-
+ ! Calculate the xc matrix.
  n1 = ngfft(1) ; n2 = ngfft(2) ; n3 = ngfft(3)
 
  do ipw2 = ipwstart,npwdiel
-
    j1 = kg_diel(1,ipw2) ; j2 = kg_diel(2,ipw2) ; j3 = kg_diel(3,ipw2)
 
-!  Fill the diagonal.
+   !Fill the diagonal.
 
    kxc(:,ipw2,isp1,ipw2,isp2) = kxcg(:,1)
 
-!  Fill the off-diagonal elements.
+   !Fill the off-diagonal elements.
 
    do ipw1 = ipw2+1,npwdiel
 
      i1 = kg_diel(1,ipw1) ; i2 = kg_diel(2,ipw1) ; i3 = kg_diel(3,ipw1)
 
-!    Compute the difference between G vectors.
-!    The use of two mod calls handles both i1-j1 >= n1 AND i1-j1 < 0.
+     ! Compute the difference between G vectors.
+     ! The use of two mod calls handles both i1-j1 >= n1 AND i1-j1 < 0.
 
      k1 = mod(n1+mod(i1-j1,n1),n1)
      k2 = mod(n2+mod(i2-j2,n2),n2)
@@ -284,13 +273,10 @@ subroutine kxc_local(ispxc,kg_diel,kxc,kxcg,nfft,ngfft,npwdiel,nspden,option)
 
      kxc(1,ipw2,isp1,ipw1,isp2) =  kxcg(1,ifft)
      kxc(2,ipw2,isp1,ipw1,isp2) = -kxcg(2,ifft)
-
    end do
-
  end do
 
-!If needed, copy the up-down to the down-up spin channel.
-
+ ! If needed, copy the up-down to the down-up spin channel.
  if (ispxc == 2) then
    do ipw2 = 1,npwdiel
      do ipw1 = 1,npwdiel
@@ -364,11 +350,8 @@ end subroutine kxc_local
 !!  kxcg(2,nfft,*) = the AL(S)DA kernel in reciprocal space, on the FFT grid
 !!   (the third dimension is 2*nspden-1 if option = 1, and 1 if option = 2).
 !!
-!! SIDE EFFECTS
-!!
 !! WARNINGS
-!! Current restrictions are:
-!!  a - Spin-polarized case not tested.
+!!  Spin-polarized case not tested.
 !!
 !! SOURCE
 
@@ -397,57 +380,50 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
  logical :: non_magnetic_xc
  real(dp),parameter :: gsqcut=1._dp
  real(dp) :: el_temp,bigexc,bigsxc,rhocuttot,rhomin,vxcavg
- character(len=500) :: message
+ character(len=500) :: msg
  type(xcdata_type) :: xcdata
 !arrays
  real(dp) :: dum(0)
  real(dp),parameter   :: dummyvgeo(3)=zero
  real(dp),allocatable :: kxcr(:,:),rhog(:,:),rhorcut(:,:),vhartree(:)
  real(dp),allocatable :: vxc(:,:),xccc3d(:)
-
 !***********************************************************************
-!For debugging purposes (see tests below):
 
+!For debugging purposes (see tests below):
 !ftest(i1,n1,k1) = 0._dp+1._dp*cos(k1*two_pi*float(i1)/float(n1))
 
-!***********************************************************************
-
-!Check input parameters.
-
+ ! Check input parameters.
  if (nspden > 2) then
-   message = ' kxc_alda does not work yet for nspden > 2.'
-   ABI_ERROR(message)
+   ABI_ERROR('kxc_alda does not work yet for nspden > 2.')
  end if
 
-!Allocate memory.
-
- ABI_MALLOC(rhorcut,(nfft,nspden))
- ABI_MALLOC(rhog,(2,nfft))
- ABI_MALLOC(vhartree,(nfft))
- ABI_MALLOC(vxc,(nfft,nspden))
+ ! Allocate memory.
+ ABI_MALLOC(rhorcut, (nfft,nspden))
+ ABI_MALLOC(rhog, (2,nfft))
+ ABI_MALLOC(vhartree, (nfft))
+ ABI_MALLOC(vxc, (nfft,nspden))
 
  call xcdata_init(xcdata,dtset=dtset,intxc=0,ixc=ixc,nspden=nspden)
 
  non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
 
- ! Reinitialize the libxc module with the overriden values
+ ! Reinitialize the libxc module with the overridden values
  if (dtset%ixc<0) then
    call libxc_functionals_end()
  end if
+
  if (ixc<0) then
    el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
    call libxc_functionals_init(ixc,dtset%nspden,el_temp=el_temp,xc_tb09_c=dtset%xc_tb09_c)
  end if
 
-!to be adjusted for the call to rhotoxc
+ !to be adjusted for the call to rhotoxc
  nk3xc=1
 
-!Cut-off the density.
-
+ ! Cut-off the density.
  rhorcut(:,:) = rhor(:,:)
 
  do isp = 1,nspden
-
    rhomin = maxval(rhorcut(:,isp))*rhocut
 
    ncut = 0
@@ -462,18 +438,17 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
    end do
 
    if (ncut > 0) then
-     write (message,'(a,es10.3,3a,i1,a,i6,a,f6.3,3a,f6.3,a)') &
-&     'rhocut = ',rhocut,'.',ch10,&
-&     'For isp = ',isp,' the density was cut-off at ',ncut,' (',100._dp*float(ncut)/float(ifft),'%) grid points.',ch10,&
-&     'These points account for ',100._dp*rhocuttot/sum(rhor(:,isp)),'% of the total density.'
-     ABI_WARNING(message)
+     write (msg,'(a,es10.3,3a,i1,a,i6,a,f6.3,3a,f6.3,a)') &
+      'rhocut = ',rhocut,'.',ch10,&
+      'For isp = ',isp,' the density was cut-off at ',ncut,' (',100._dp*float(ncut)/float(ifft),'%) grid points.',ch10,&
+      'These points account for ',100._dp*rhocuttot/sum(rhor(:,isp)),'% of the total density.'
+     ABI_WARNING(msg)
    end if
 
  end do
 
-!Calculate the AL(S)DA kernel in real space.
-
- rhog(:,:) = 0._dp !We do not need the Hartree potential.
+ ! Calculate the AL(S)DA kernel in real space.
+ rhog(:,:) = zero !We do not need the Hartree potential.
  tim_fourdp=0
 
  if ((option == 1).or.((option == 2).and.(nspden == 2))) then
@@ -487,7 +462,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 
    call hartre(1,gsqcut,3,0,mpi_enreg,nfft,ngfft,1,zero,rhog,rprimd,dummyvgeo,vhartree)
    call rhotoxc(bigexc,bigsxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
-&   optionrhoxc,rhorcut,rprimd,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
+    optionrhoxc,rhorcut,rprimd,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
 
 !  DEBUG
 !  fx for tests.
@@ -546,22 +521,18 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 
    kxcr(:,2) = 0.5_dp*kxcr(:,2)
 
-!  Calculate the Fourier transform of the up-down channel of the AL(S)DA kernel.
-
+   ! Calculate the Fourier transform of the up-down channel of the AL(S)DA kernel.
    call fourdp(1,kxcg(:,:,1),kxcr(:,2),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
 
  else
-   write (message,'(4a,i0)')'  Invalid option = ',option
-   ABI_ERROR(message)
+   ABI_ERROR(sjoin("Invalid option:", itoa(option)))
  end if
 
-!DEBUG
-!write(std_out,*) ' kxc_alda:  Exc  = ',bigexc
-!write(std_out,*) ' kxc_alda:  Sxc  = ',bigsxc
-!write(std_out,*) ' kxc_alda: <Vxc> = ',vxcavg
-!ENDDEBUG
+ !write(std_out,*)' kxc_alda:  Exc  = ',bigexc
+ !write(std_out,*)' kxc_alda:  Sxc  = ',bigsxc
+ !write(std_out,*)' kxc_alda: <Vxc> = ',vxcavg
 
-! Revert libxc module to the original settings
+ ! Revert libxc module to the original settings
  if (ixc<0) then
    call libxc_functionals_end()
  end if
@@ -570,7 +541,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
    call libxc_functionals_init(dtset%ixc,dtset%nspden,el_temp=el_temp,xc_tb09_c=dtset%xc_tb09_c)
  end if
 
-!Free memory.
+ ! Free memory.
  ABI_FREE(rhorcut)
  ABI_FREE(rhog)
  ABI_FREE(vhartree)
@@ -592,7 +563,7 @@ end subroutine kxc_alda
 !! (Phys. Rev. Lett. 76, 1212 (1996) [[cite:Petersilka1996]]).
 !!
 !! INPUTS
-!!  gmet=reciprocal space metrix (bohr**-2)
+!!  gmet=reciprocal space metric (bohr**-2)
 !!  npw=number of plane waves
 !!  rcut_coulomb=real space cutoff radius for Coulomb interaction (bohr)
 !!  susmat(2,npw,npw)=density weighted squared density matrix in reciprocal space
@@ -641,13 +612,9 @@ subroutine kxc_pgg(gmet,kg,khxcg,npw,rcut_coulomb,susmat,ucvol)
  integer :: kgmax(3)
  integer,allocatable :: index_g_inv(:,:,:),jgarr(:)
  real(dp),allocatable :: gsq(:),sumg(:),vcoul(:)
-
 ! *************************************************************************
 
-!DEBUG
-!write(std_out,*) '%kxc_pgg: enter'
-!write(std_out,*) 'npw=',npw
-!ENDDEBUG
+!write(std_out,*) '%kxc_pgg: enter', 'npw=',npw
 
 !tpisq is (2 Pi) **2:
  tpisq=(two_pi)**2
@@ -658,28 +625,21 @@ subroutine kxc_pgg(gmet,kg,khxcg,npw,rcut_coulomb,susmat,ucvol)
      kgmax(jj)=max( kg(jj,ipw1), kgmax(jj) )
    end do
  end do
+ !write(std_out,*) 'kgmax:',kgmax(1:3)
 
-!DEBUG
-!write(std_out,*) 'kgmax:',kgmax(1:3)
-!ENDDEBUG
-
-!Perform allocations
+ ! Perform allocations
  ABI_MALLOC(index_g_inv,(-2*kgmax(1):2*kgmax(1),-2*kgmax(2):2*kgmax(2),-2*kgmax(3):2*kgmax(3)))
  ABI_MALLOC(jgarr,(npw))
  ABI_MALLOC(gsq,(npw))
  ABI_MALLOC(sumg,(2))
  ABI_MALLOC(vcoul,(npw))
 
-!DEBUG
-!write(std_out,*) '%kxc_pg: creating plane wave index and coulomb potential'
-!ENDDEBUG
+ !write(std_out,*) '%kxc_pg: creating plane wave index and coulomb potential'
  index_g_inv(:,:,:)=0
  do ipw1=1,npw
    index_g_inv(kg(1,ipw1),kg(2,ipw1),kg(3,ipw1))=ipw1
 
-!  DEBUG
-!  write(std_out,'(i5,2x,3i3,2x,i4)') ipw1,kg(1,ipw1),kg(2,ipw1),kg(3,ipw1)
-!  ENDDEBUG
+   !write(std_out,'(i5,2x,3i3,2x,i4)') ipw1,kg(1,ipw1),kg(2,ipw1),kg(3,ipw1)
 
    kg_red1=dble(kg(1,ipw1))
    kg_red2=dble(kg(2,ipw1))
@@ -696,11 +656,8 @@ subroutine kxc_pgg(gmet,kg,khxcg,npw,rcut_coulomb,susmat,ucvol)
 
  end do
 
-!DEBUG
-!write(std_out,*) '%kxc_pg: starting convolution integral'
-!ENDDEBUG
-
-!loop over G1,G2 components of the density matrix
+ !write(std_out,*) '%kxc_pg: starting convolution integral'
+ !loop over G1,G2 components of the density matrix
  do ipw2=1,npw
    ikg21=kg(1,ipw2)
    ikg22=kg(2,ipw2)
@@ -718,12 +675,11 @@ subroutine kxc_pgg(gmet,kg,khxcg,npw,rcut_coulomb,susmat,ucvol)
      ikg12=kg(2,ipw1)
      ikg13=kg(3,ipw1)
 
-!    do the convolution integral
+     ! do the convolution integral
      sumg(:)=0._dp
      do ii=1,npw
 
        if( jgarr(ii) /= 0 ) then
-
          i1=ikg11-kg(1,ii)
          i2=ikg12-kg(2,ii)
          i3=ikg13-kg(3,ii)
@@ -736,34 +692,27 @@ subroutine kxc_pgg(gmet,kg,khxcg,npw,rcut_coulomb,susmat,ucvol)
 !        jg=index_g_inv(j1,j2,j3)
 
          if( ig /= 0 ) then
-
            jg=jgarr(ii)
 
-!          DEBUG
 !          write(std_out,'(i5,2x,3i3,1x,3i3,2x,2i4)') ii,i1,i2,i3,&
 !          &                                             kg(1,jg),kg(2,jg),kg(3,jg),&
 !          &                                             ig,jg
-!          ENDDEBUG
 
            sumg(1)=sumg(1)+susmat(1,ig,jg)*vcoul(ii)
            sumg(2)=sumg(2)+susmat(2,ig,jg)*vcoul(ii)
 
          end if
-
        end if
 
      end do
      khxcg(:,ipw1,ipw2)=-sumg(:)*ucvol
 
-!    DEBUG
 !    if(ipw1==ipw2) write(std_out,'(2i4,2(1x,es14.6))') ipw1,ipw2,khxcg(1,ipw1,ipw1),vcoul(ipw1)
 !    write(std_out,'(2i4,3(1x,es14.6))') ipw1,ipw2,khxcg(1:2,ipw1,ipw2),vcoul(ipw1)
-!    ENDDEBUG
 
    end do
  end do
 
-!DEBUG
 !verify hermiticity, note: ipw1 loop above must end at npw
 !write(std_out,*) '%kxc_pgg: check hermiticity of pgg kernel'
 !do ipw2=1,npw,max(2,npw/10)
@@ -773,9 +722,8 @@ subroutine kxc_pgg(gmet,kg,khxcg,npw,rcut_coulomb,susmat,ucvol)
 !&   khxcg(2,ipw1,ipw2)+khxcg(2,ipw2,ipw1)
 !end do
 !end do
-!ENDDEBUG
 
-!Impose hermiticity
+ ! Impose hermiticity
  write(std_out,*) '%kxc_pg: imposing hermiticity'
  do ipw2=1,npw
    do ipw1=ipw2+1,npw
@@ -784,9 +732,7 @@ subroutine kxc_pgg(gmet,kg,khxcg,npw,rcut_coulomb,susmat,ucvol)
    end do
  end do
 
-!DEBUG
 !write(std_out,'(a10,2(1x,es20.12))') '+ex_pgg? ', 0.5_dp*khxcg(1,1,1)/ucvol
-!ENDDEBUG
 
  ABI_FREE(index_g_inv)
  ABI_FREE(jgarr)
@@ -794,9 +740,7 @@ subroutine kxc_pgg(gmet,kg,khxcg,npw,rcut_coulomb,susmat,ucvol)
  ABI_FREE(sumg)
  ABI_FREE(vcoul)
 
-!DEBUG
 !write(std_out,*) '%kxc_pgg: done'
-!ENDDEBUG
 
 end subroutine kxc_pgg
 !!***
@@ -809,8 +753,7 @@ end subroutine kxc_pgg
 !!
 !! FUNCTION
 !!  Compute the linear (ixceok = 1) or non-linear (ixceok = 2)
-!!  energy optimized kernel of Dobson and Wang, in reciprocal
-!!  space, on the FFT grid.
+!!  energy optimized kernel of Dobson and Wang, in reciprocal space, on the FFT grid.
 !!  See J. Dobson and J. Wang, Phys. Rev. B 62, 10038 (2000) [[cite:Dobson2000]].
 !!
 !! INPUTS
@@ -826,10 +769,6 @@ end subroutine kxc_pgg
 !!           relative to max(rhor(:,:)).
 !! OUTPUT
 !!  kxcg(2,nfft,2*nspden-1) = the EOK kernel in reciprocal space, on the FFT grid.
-!!
-!! SIDE EFFECTS
-!!
-!! WARNINGS
 !!
 !! SOURCE
 
@@ -851,46 +790,40 @@ subroutine kxc_eok(ixceok,kxcg,mpi_enreg,nfft,ngfft,nspden,rhor,rhocut)
  integer :: ifft,ikxc,ncut,nkxc,nlop,tim_fourdp
  real(dp),parameter :: rslim=50._dp,dummyvgeo(3)=zero
  real(dp) :: a2,a3,a4,rho,rhocuttot,rhomin,rs
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp),allocatable :: kxcr(:,:)
-
 !***********************************************************************
 
-!Check input parameters.
-
+ ! Check input parameters.
  if (nspden > 1) then
-   message = ' kxc_eok does not work yet for nspden > 1.'
-   ABI_ERROR(message)
+   ABI_ERROR('kxc_eok does not work yet for nspden > 1.')
  end if
 
-!Values of a2, a3 and a4 for case 1
+ ! Values of a2, a3 and a4 for case 1
  a2 = 0.0_dp
  a3 = 0.0_dp
  a4 = 0.0_dp
 
  select case (ixceok)
-   case (1)
-     a2 = -0.51887_dp
-     a3 =  4.9359d-03
-     a4 = -5.9603d-05
-   case (2)
-     a2 = -0.50044_dp
-     a3 =  4.9653d-03
-     a4 = -3.3660d-05
-   case default
-     message =  ' kxc_eok: ixceok /= 1 (linear EOK) or 2 (non-linear EOK).'
-     ABI_ERROR(message)
+ case (1)
+   a2 = -0.51887_dp
+   a3 =  4.9359d-03
+   a4 = -5.9603d-05
+ case (2)
+   a2 = -0.50044_dp
+   a3 =  4.9653d-03
+   a4 = -3.3660d-05
+ case default
+   ABI_ERROR(' kxc_eok: ixceok /= 1 (linear EOK) or 2 (non-linear EOK).')
  end select
 
-!Allocate memory.
-
+ !Allocate memory.
  nkxc = 2*nspden-1
 
  ABI_MALLOC(kxcr,(nfft,nkxc))
 
-!Calculate the energy optimized kernel in real space.
-
+ ! Calculate the energy optimized kernel in real space.
  nlop = 0
 
  rhomin = rhocut*maxval(rhor(:,:))
@@ -899,7 +832,6 @@ subroutine kxc_eok(ixceok,kxcg,mpi_enreg,nfft,ngfft,nspden,rhor,rhocut)
  rhocuttot = 0._dp
 
  do ifft = 1,nfft
-
    rho = rhor(ifft,1)
 
    if (rho < rhomin) then
@@ -916,30 +848,27 @@ subroutine kxc_eok(ixceok,kxcg,mpi_enreg,nfft,ngfft,nspden,rhor,rhocut)
    end if
 
    kxcr(ifft,1) = a2*rs**2+a3*rs**3+a4*rs**4
-
  end do
 
  if (ncut > 0) then
-   write (message,'(a,es10.3,3a,i1,a,i6,a,f6.3,3a,f6.3,a)') &
-&   'rhocut = ',rhocut,'.',ch10,&
-&   'For isp = ',1,' the density was cut-off at ',ncut,' (',100._dp*float(ncut)/float(ifft),'%) grid points.',ch10,&
-&   'These points account for ',100._dp*rhocuttot/sum(rhor(:,1)),'% of the total density.'
-   ABI_WARNING(message)
+   write (msg,'(a,es10.3,3a,i1,a,i6,a,f6.3,3a,f6.3,a)') &
+   'rhocut = ',rhocut,'.',ch10,&
+   'For isp = ',1,' the density was cut-off at ',ncut,' (',100._dp*float(ncut)/float(ifft),'%) grid points.',ch10,&
+   'These points account for ',100._dp*rhocuttot/sum(rhor(:,1)),'% of the total density.'
+   ABI_WARNING(msg)
  end if
 
  if (nlop > 0) then
-   write (message,'(a,f6.2,a,i6,a,f6.3,a)') &
-&   'rs still exceeds ',rslim,' Bohr at ',nlop,' (',100._dp*float(nlop)/float(ifft),'%) grid points (after cut-off).'
-   ABI_WARNING(message)
+   write (msg,'(a,f6.2,a,i6,a,f6.3,a)') &
+   'rs still exceeds ',rslim,' Bohr at ',nlop,' (',100._dp*float(nlop)/float(ifft),'%) grid points (after cut-off).'
+   ABI_WARNING(msg)
  end if
 
-!Calculate the Fourier transform of the energy optimized kernel.
+ ! Calculate the Fourier transform of the energy optimized kernel.
  tim_fourdp=0
  do ikxc = 1,nkxc
    call fourdp(1,kxcg(:,:,ikxc),kxcr(:,ikxc),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
  end do
-
-!Free memory.
 
  ABI_FREE(kxcr)
 
@@ -954,7 +883,7 @@ end subroutine kxc_eok
 !!
 !! FUNCTION
 !! Calculate the exchange-correlation kernel in reciprocal space.
-!! Require density in real space on the *full* FFT mesh
+!! Require density in real space on the FFT mesh. MPI-FFT is not supported.
 !!
 !! INPUTS
 !! Dtset<dataset_type>=all input variables in this dataset
@@ -998,10 +927,10 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 !Local variables ------------------------------
 !scalars
  integer :: cplex,i1,i2,i3,ig,igp,iq,ir,n3xccc,ngfft1,ngfft2,izero
- integer :: ngfft3,nkxc,option,ikxc,nk3xc,my_rank,master,unt_dmp
+ integer :: ngfft3,nkxc,option,ikxc,nk3xc,my_rank,master
  logical :: non_magnetic_xc
  real(dp) :: el_temp,bigexc,bigsxc,expo,gpqx,gpqy,gpqz,gsqcut,vxcavg
- character(len=500) :: msg,fname
+ character(len=500) :: fname ! msg,
  type(xcdata_type) :: xcdata
  type(MPI_type) :: MPI_enreg_seq
 !arrays
@@ -1009,29 +938,24 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  real(dp),parameter   :: dummyvgeo(3)=zero
  real(dp),allocatable :: kxcpw_g(:,:),kxcr(:,:),phas(:,:,:)
  real(dp),allocatable :: rhog(:,:),vhartr(:),kxcpw_r(:,:),vxclda(:,:)
- real(dp),allocatable :: xccc3d(:),xx(:,:)
- real(dp),allocatable :: my_kxcg(:,:)
-
+ real(dp),allocatable :: xccc3d(:),xx(:,:),  my_kxcg(:,:)
 !************************************************************************
 
- ABI_CHECK(Dtset%nsppol==1,'nsppol/=1 not coded')
- ABI_CHECK(Dtset%nspden==1,'nsppol/=1 not coded')
- ABI_CHECK(nfft_tot==PRODUCT(ngfft(1:3)),"mismatch in nfftot")
+ ABI_CHECK_IEQ(Dtset%nsppol, 1, 'nsppol/=1 not coded')
+ ABI_CHECK_IEQ(Dtset%nspden, 1, 'nspden /= 1 not coded')
+ ABI_CHECK_IEQ(nfft_tot, PRODUCT(ngfft(1:3)), "mismatch in nfftot")
 
-!Fake MPI_type for the sequential part.
+ ! Fake MPI_type for the sequential part.
  call initmpi_seq(MPI_enreg_seq)
- call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfft(2),ngfft(3),'all')
+ call MPI_enreg_seq%distribfft%init_seq('c',ngfft(2),ngfft(3),'all')
  my_rank = xmpi_comm_rank(comm)
- master=0
+ master  =0
 
- write(msg,'(a,i3)') ' kxc_driver: calculating exchange-correlation kernel using ixc = ',ixc
- call wrtout(std_out,msg,'COLL')
-
+ call wrtout(std_out,sjoin(' kxc_driver: calculating exchange-correlation kernel using ixc: ', itoa(ixc)))
  call xcdata_init(xcdata,dtset=Dtset,intxc=0,ixc=ixc,nspden=nspden)
 
- if (ALL(xcdata%xclevel/=(/1,2/))) then
-   write(msg,'(a,i0)')"Unsupported xclevel = ",xcdata%xclevel
-   ABI_ERROR(msg)
+ if (all(xcdata%xclevel /= [1,2])) then
+   ABI_ERROR(sjoin("Unsupported xclevel: ", itoa(xcdata%xclevel)))
  end if
 
  ngfft1=ngfft(1)
@@ -1046,20 +970,20 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
    nkxc= 2*min(nspden,2)-1
  else                        ! GGA case
    nkxc=12*min(nspden,2)-5   ! 7 or 19
-   ABI_CHECK(dtset%xclevel==2,"Functional should be GGA")
+   ABI_CHECK_IEQ(dtset%xclevel, 2,"Functional should be GGA")
    ABI_ERROR("GGA functional not tested")
  end if
 
- ABI_MALLOC(kxcr,(nfft_tot,nkxc))
+ ABI_MALLOC(kxcr, (nfft_tot,nkxc))
 
-!gsqcut and rhog are zeroed because they are not used by rhotoxc if 1<=ixc<=16 and option=0
+ ! gsqcut and rhog are zeroed because they are not used by rhotoxc if 1<=ixc<=16 and option=0
  gsqcut=zero
 
  ABI_MALLOC(rhog,(2,nfft_tot))
  ABI_MALLOC(vhartr,(nfft_tot))
  rhog(:,:)=zero
-!MG FIXME this is the 3D core electron density for XC core correction (bohr^-3)
-!should implement the non linear core correction
+ !MG FIXME this is the 3D core electron density for XC core correction (bohr^-3)
+ !should implement the non linear core correction
  n3xccc=0
  ABI_MALLOC(xccc3d,(n3xccc))
  ABI_MALLOC(vxclda,(nfft_tot,nspden))
@@ -1067,11 +991,11 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  option=2 ! 2 for Hxc and kxcr (no paramagnetic part if nspden=1)
  qphon =zero
 
-!to be adjusted for the call to rhotoxc
+ ! to be adjusted for the call to rhotoxc
  nk3xc=1
  izero=0
 
- ! Reinitialize the libxc module with the overriden values
+ ! Reinitialize the libxc module with the overridden values
  if (dtset%ixc<0) then
    call libxc_functionals_end()
  end if
@@ -1082,33 +1006,28 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 
  call hartre(1,gsqcut,3,izero,MPI_enreg_seq,nfft_tot,ngfft,1,zero,rhog,Cryst%rprimd,dummyvgeo,vhartr)
 
-!Compute the kernel.
+ ! Compute the XC kernel.
  call rhotoxc(bigexc,bigsxc,kxcr,MPI_enreg_seq,nfft_tot,ngfft,&
-& dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,&
-& n3xccc,option,rhor,Cryst%rprimd,&
-& 1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
+   dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,&
+   n3xccc,option,rhor,Cryst%rprimd,&
+   1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
 
  ABI_FREE(rhog)
  ABI_FREE(vhartr)
-!DEBUG print Kxc
+
+ ! print Kxc
  if (present(dbg_mode)) then
    if (dbg_mode .and. my_rank==master) then
      fname = 'xc_Kxc.xsf'
-     if (open_file(fname,msg,newunit=unt_dmp,status='unknown',form='formatted') /= 0) then
-       ABI_ERROR(msg)
-     end if
-     call printxsf(ngfft1,ngfft2,ngfft3,kxcr(:,1),Cryst%rprimd,(/zero,zero,zero/),&
-&     Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xcart,Cryst%znucl,unt_dmp,0)
-     close(unt_dmp)
+     call cryst%write_xsf_data(fname, ngfft1, ngfft2, ngfft3, kxcr(:,1))
    end if
+
  end if
-!DEBUG
 
  ABI_FREE(xccc3d)
  ABI_FREE(vxclda)
 
  ABI_MALLOC(my_kxcg,(2,nfft_tot))
-
  do ikxc=1,nkxc
    call fourdp(1,my_kxcg,kxcr(:,ikxc),-1,MPI_enreg_seq,nfft_tot,1,ngfft,0)
    kxcg(:,ikxc)=CMPLX(my_kxcg(1,:),my_kxcg(2,:))
@@ -1132,7 +1051,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 
    kxcg = czero
 
-!  find the coordinates for all r in the FFT grid
+   ! find the coordinates for all r in the FFT grid
    ir=0
    do i3=1,ngfft3
      do i2=1,ngfft2
@@ -1147,7 +1066,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 
    do iq=1,1
 
-!    Calculate at once exp(i(G+q).r), for all possible q,G,r
+     ! Calculate at once exp(i(G+q).r), for all possible q,G,r
      do ig=1,npw
        gpqx=dble(gvec(1,ig))
        gpqy=dble(gvec(2,ig))
@@ -1159,21 +1078,18 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
        end do
      end do
 
-!    Calculate $K(G,G'',q)=\frac{1}{nfft_tot}\sum_{r} exp(-i(q+G_{2}).r_{2} kxcr(r_{1}r_{2}) exp(i(q+G_{1}).r_{1} $
-
+     ! Calculate $K(G,G'',q)=\frac{1}{nfft_tot}\sum_{r} exp(-i(q+G_{2}).r_{2} kxcr(r_{1}r_{2}) exp(i(q+G_{1}).r_{1} $
      do igp=1,npw
-
        kxcpw_r(:,:)=zero
 
        call dfpt_mkvxc(cplex,ixc,kxcr,MPI_enreg_seq,nfft_tot,ngfft,dum,0,dum,0,nkxc,non_magnetic_xc,&
-&       nspden,n3xccc,option,qphon(:),phas(:,igp,:),Cryst%rprimd,1,kxcpw_r,xccc3d)
+         nspden,n3xccc,option,qphon(:),phas(:,igp,:),Cryst%rprimd,1,kxcpw_r,xccc3d)
 
-!      FFT the first index to --> to G space
+       ! FFT the first index to --> to G space
        call fourdp(cplex,kxcpw_g(:,:),kxcpw_r(:,1),-1,MPI_enreg_seq,nfft_tot,1,ngfft,0)
 
-!      kxcg(:,igp,iq)=CMPLX(kxcpw_g(1,igfft(:)),kxcpw_g(2,igfft(:)))
-!      kxcg(:,igp)=CMPLX(kxcpw_g(1,igfft(:)),kxcpw_g(2,igfft(:)))
-
+       !kxcg(:,igp,iq)=CMPLX(kxcpw_g(1,igfft(:)),kxcpw_g(2,igfft(:)))
+       !kxcg(:,igp)=CMPLX(kxcpw_g(1,igfft(:)),kxcpw_g(2,igfft(:)))
      end do ! igp
    end do ! iq
 
@@ -1183,7 +1099,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
    ABI_FREE(kxcpw_g)
  end if !xclevel==2
 
-! Revert libxc module to the original settings
+ ! Revert libxc module to the original settings
  if (ixc<0) then
    call libxc_functionals_end()
  end if
@@ -1232,7 +1148,7 @@ end subroutine kxc_driver
 !! SOURCE
 
 subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
-&                  npw,nqibz,qibz,fxc_ADA,gvec,comm,kappa_init,dbg_mode)
+                   npw,nqibz,qibz,fxc_ADA,gvec,comm,kappa_init,dbg_mode)
 
 !Arguments ------------------------------------
 !scalars
@@ -1252,7 +1168,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 !scalars
  integer :: i1,i2,i3,ig,igp,ir,irp,n3xccc,ngfft1,ngfft2,izero !,isp
  integer :: ngfft3,nkxc,option,ikxc,ierr,nproc
- integer :: nk3xc,igrid,iqbz,my_rank,master,unt_dmp,gmgp_idx
+ integer :: nk3xc,igrid,iqbz,my_rank,master,gmgp_idx
  logical :: non_magnetic_xc
  real(dp) :: el_temp,bigexc,bigsxc,gsqcut,ucvol !,rs,Kx,Kc
  real(dp) :: vxcavg,kappa,abs_qpg_sq,abs_qpgp_sq
@@ -1273,14 +1189,13 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  real(dp),allocatable :: rvec(:,:),my_fxc_ADA_rrp(:,:)
  real(dp) :: rmrp(3),abs_rmrp
  integer :: n1,n2,n3,ig_idx_fft(npw)
-
 ! ************************************************************************
 
- ABI_CHECK(Dtset%nsppol==1,'nsppol/=1 not coded')
- ABI_CHECK(nspden==1,'nsppol/=1 not coded')
- ABI_CHECK(nfft==PRODUCT(ngfft(1:3)),"mismatch in nfftot")
+ ABI_CHECK_IEQ(Dtset%nsppol, 1,'nsppol/=1 not coded')
+ ABI_CHECK_IEQ(nspden, 1, 'nspden /=1 not coded')
+ ABI_CHECK_IEQ(nfft, PRODUCT(ngfft(1:3)), "mismatch in nfftot")
 
-!Fake MPI_type for the sequential part.
+ ! Fake MPI_type for the sequential part.
  call initmpi_seq(MPI_enreg_seq)
 
  my_rank = xmpi_comm_rank(comm)
@@ -1288,23 +1203,23 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  master=0
 
  write(msg,'(a,i3)') ' kxc_ADA: calculating exchange-correlation kernel using ixc = ',ixc
- call wrtout(std_out,msg,'COLL')
- call wrtout(std_out,' kxc_ADA: using smeared density','COLL')
+ call wrtout(std_out,msg)
+ call wrtout(std_out,' kxc_ADA: using smeared density')
 
  if (.not.present(kappa_init)) then
    kappa = 2.1_dp
  else
    kappa = kappa_init
  end if
+
  write(msg,'(a,F10.3)') ' kxc_ADA: inverse smearing length, kappa = ',kappa
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out,msg)
  inv_kappa_sq = one/(kappa*kappa)
 
  call xcdata_init(xcdata,dtset=dtset,intxc=0,ixc=ixc,nspden=nspden)
 
  if (ALL(xcdata%xclevel/=(/1,2/))) then
-   write(msg,'(a,i0)')"Unsupported xclevel = ",xcdata%xclevel
-   ABI_ERROR(msg)
+   ABI_ERROR(sjoin("Unsupported xclevel: ", itoa(xcdata%xclevel)))
  end if
 
  ngfft1=ngfft(1)
@@ -1319,7 +1234,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
    nkxc= 2*min(Dtset%nspden,2)-1
  else                             ! GGA case
    nkxc=12*min(Dtset%nspden,2)-5  ! 7 or 19
-   ABI_CHECK(dtset%xclevel==2,"Functional should be GGA")
+   ABI_CHECK_IEQ(dtset%xclevel, 2,"Functional should be GGA")
    ABI_ERROR("GGA functional not implemented for ADA vertex")
  end if
 
@@ -1331,8 +1246,8 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  ABI_MALLOC(rhog,(2,nfft))
  ABI_MALLOC(vhartr,(nfft))
  rhog(:,:)=zero
-!MG FIXME this is the 3D core electron density for XC core correction (bohr^-3)
-!should implement the non linear core correction
+ !MG FIXME this is the 3D core electron density for XC core correction (bohr^-3)
+ !should implement the non linear core correction
  n3xccc=0
  ABI_MALLOC(xccc3d,(n3xccc))
  ABI_MALLOC(vxclda,(nfft,nspden))
@@ -1340,25 +1255,19 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  option=2 ! 2 for Hxc and kxcr (no paramagnetic part if nspden=1)
  qphon(:)=zero
 
-!to be adjusted for the call to rhotoxc
+ !to be adjusted for the call to rhotoxc
  nk3xc=1
 
-!Compute the kernel.
+ !Compute the kernel.
  izero=0
 
-!DEBUG print density
+ ! print density
  if (present(dbg_mode)) then
    if (dbg_mode.and.my_rank==master) then
      fname = 'xc_ADA_den.xsf'
-     if (open_file(fname,msg,newunit=unt_dmp,status='unknown',form='formatted') /= 0) then
-       ABI_ERROR(msg)
-     end if
-     call printxsf(ngfft1,ngfft2,ngfft3,rhor(:,1),Cryst%rprimd,(/zero,zero,zero/),&
-&     Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xcart,Cryst%znucl,unt_dmp,0)
-     close(unt_dmp)
+     call cryst%write_xsf_data(fname, ngfft1, ngfft2, ngfft3, rhor(:,1))
    end if
  end if
-!DEBUG
 
 !Calculate the smeared density
  ABI_MALLOC(my_rhor,(nfft,nspden))
@@ -1371,21 +1280,15 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 !my_rhor(:,isp) = rhotilder(:,isp)
 !end do
 
-!DEBUG print smeared density
+ ! print smeared density
  if (present(dbg_mode)) then
    if (dbg_mode.and.my_rank==master) then
      fname = 'xc_ADA_smeared_den.xsf'
-     if (open_file(fname,msg,newunit=unt_dmp,status='unknown',form='formatted') /= 0) then
-       ABI_ERROR(msg)
-     end if
-     call printxsf(ngfft1,ngfft2,ngfft3,my_rhor(:,1),Cryst%rprimd,(/zero,zero,zero/),&
-&     Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xcart,Cryst%znucl,unt_dmp,0)
-     close(unt_dmp)
+     call cryst%write_xsf_data(fname, ngfft1, ngfft2, ngfft3, my_rhor(:,1))
    end if
  end if
-!DEBUG
 
- ! Reinitialize the libxc module with the overriden values
+ ! Reinitialize the libxc module with the overridden values
  if (dtset%ixc<0) then
    call libxc_functionals_end()
  end if
@@ -1433,19 +1336,13 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 !end do
 !END DEBUG
 
-!DEBUG print Kxc
+ ! print Kxc
  if (present(dbg_mode)) then
    if (dbg_mode.and.my_rank==master) then
      fname = 'xc_ADA_Kxc.xsf'
-     if (open_file(fname,msg,newunit=unt_dmp,status='unknown',form='formatted') /= 0) then
-       ABI_ERROR(msg)
-     end if
-     call printxsf(ngfft1,ngfft2,ngfft3,kxcr(:,1),Cryst%rprimd,(/zero,zero,zero/),&
-&     Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xcart,Cryst%znucl,unt_dmp,0)
-     close(unt_dmp)
+     call cryst%write_xsf_data(fname, ngfft1, ngfft2, ngfft3, kxcr(:,1))
    end if
  end if
-!DEBUG
 
  ABI_FREE(xccc3d)
  ABI_FREE(vxclda)
@@ -1455,24 +1352,24 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 
  do ikxc=1,nkxc
    call fourdp(1,my_kxcg,kxcr(:,ikxc),-1,MPI_enreg_seq,nfft,1,ngfft,0)
-!  kxcg(:,ikxc)=CMPLX(my_kxcg(1,:),my_kxcg(2,:))
+   !kxcg(:,ikxc)=CMPLX(my_kxcg(1,:),my_kxcg(2,:))
  end do
 !TODO Check symmetry of kxcg
 
-!set up ADA vertex
+ !set up ADA vertex
  ABI_MALLOC(my_fxc_ADA_ggpq,(npw,npw,nqibz))
  my_fxc_ADA_ggpq = czero
-!Calculate f_xc(R,R')=(kappa^2/2)K_xc[\tilde{n}](G-G')
-!x(1/(kappa^2+|q+G|^2) + 1/(kappa^2+|q+G'|^2
-!First get G vectors and indices
+
+ !Calculate f_xc(R,R')=(kappa^2/2)K_xc[\tilde{n}](G-G')
+ !x(1/(kappa^2+|q+G|^2) + 1/(kappa^2+|q+G'|^2
+ !First get G vectors and indices
 
  ierr=0
  do iqbz=1,nqibz
    q_point(:) = qibz(:,iqbz)
-!
    do ig=1,npw
      do igp=1,npw
-!      Calculate |q+G| and |q+G'|
+       ! Calculate |q+G| and |q+G'|
        qpg(:) = two_pi*MATMUL(Cryst%gprimd,q_point(:)+gvec(:,ig))
        qpgp(:) = two_pi*MATMUL(Cryst%gprimd,q_point(:)+gvec(:,igp))
        abs_qpg_sq = 1.0_dp/(1.0_dp+dot_product(qpg,qpg)*inv_kappa_sq)
@@ -1489,8 +1386,8 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
    end do
    if (ierr/=0) then
      write(msg,'(a,i4,3a)')&
-&     ' Found ',ierr,' G1-G2 vectors falling outside the FFT box. ',ch10,&
-&     ' Enlarge the FFT mesh to get rid of this problem. '
+      ' Found ',ierr,' G1-G2 vectors falling outside the FFT box. ',ch10,&
+      ' Enlarge the FFT mesh to get rid of this problem. '
      ABI_WARNING(msg)
    end if
  end do
@@ -1500,7 +1397,6 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 !do iqbz=1,nqibz
 !call hermitianize(my_fxc_ADA_ggpq(:,:,iqbz),"All")
 !end do
-
 
 !DEBUG check symmetry
  if (.FALSE.) then
@@ -1587,8 +1483,8 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 !    Multiply with q-point phase factors exp(-iq.r)*f_xc(r,r')*exp(iq.r')
      do ir=1,nfft
        do irp=1,nfft
-!        Calculate q (variables defined for other purposes
-!        are being re-used as dummy variables)
+         ! Calculate q (variables defined for other purposes
+         ! are being reused as dummy variables)
          q_point(:) = qibz(:,iqbz)
          qpg(:) = two_pi*MATMUL(Cryst%gprimd,q_point(:))
          abs_qpg_sq = dot_product(qpg(:),rvec(:,ir))
@@ -1645,12 +1541,13 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
    call libxc_functionals_init(dtset%ixc,dtset%nspden,el_temp=el_temp,xc_tb09_c=dtset%xc_tb09_c)
  end if
 
- call destroy_mpi_enreg(MPI_enreg_seq)
  ABI_FREE(my_kxcg)
  ABI_FREE(my_rhor)
  ABI_FREE(rhotilder)
  ABI_FREE(rhog)
  ABI_FREE(kxcr)
+
+ call destroy_mpi_enreg(MPI_enreg_seq)
 
 end subroutine kxc_ADA
 !!***

@@ -52,7 +52,7 @@
  timopt -1
  np_spkpt 1
  npband 2
- bandpp 1
+ nblock_lobpcg 6 # Problably not optimal (LB:07-2025)
  npfft 2
  paral_kgb 1
 
@@ -75,9 +75,9 @@
 #%% [NCPU_4]
 #%% files_to_test = t21_MPI4.abo, tolnlines=   10,   tolabs=  2.6e-2,      tolrel= 4.0e-1, fld_options = -easy
 #%% [extra_info]
-#%% keywords = NC 
+#%% keywords = NC
 #%% authors = Unknown
-#%% description = 
+#%% description =
 #%%   Si, Bulk, 2 atoms , paral_kgb.
 #%%   Test of ground state with different occs(7 and 0),
 #%%   and also ionmov 2. Only with 0 and 4 procs.

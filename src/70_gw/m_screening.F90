@@ -498,14 +498,13 @@ end subroutine epsm1_print
 !!  the same symmetry as the crystal.
 !!
 !! INPUTS
+!!  iq_bz=Index of the q-point in the BZ where epsilon^-1 is required.
 !!  nomega=Number of frequencies required. All frequencies from 1 up to nomega are symmetrized.
 !!  npwc=Number of G vectors in symmetrized matrix, has to be smaller than epsm1%npwe.
-!!  remove_exchange=If .TRUE., return e^{-1}-1 namely remove the exchange part.
-!!  epsm1<epsm1_t>=Data structure containing the inverse dielectric matrix.
 !!  Gsph<gsphere_t>=data related to the G-sphere
 !!  Qmesh<kmesh_t>=Structure defining the q-mesh used for epsm1.
-!!  iq_bz=Index of the q-point in the BZ where epsilon^-1 is required.
-!!
+!!  remove_exchange=If .TRUE., return e^{-1}-1 namely remove the exchange part.
+
 !! OUTPUT
 !!  epsm1_qbz(npwc,npwc,nomega)=The inverse dielectric matrix at the q-point defined by iq_bz.
 !!   Exchange part can be subtracted out.
@@ -531,7 +530,7 @@ end subroutine epsm1_print
 !!
 !! SOURCE
 
-subroutine Epsm1_rotate_iqbz(epsm1, iq_bz, nomega, npwc, Gsph, Qmesh, remove_exchange) !, epsm1_qbz)
+subroutine Epsm1_rotate_iqbz(epsm1, iq_bz, nomega, npwc, Gsph, Qmesh, remove_exchange)
 
 !Arguments ------------------------------------
 !scalars
@@ -540,12 +539,10 @@ subroutine Epsm1_rotate_iqbz(epsm1, iq_bz, nomega, npwc, Gsph, Qmesh, remove_exc
  logical,intent(in) :: remove_exchange
  type(gsphere_t),target,intent(in) :: Gsph
  type(kmesh_t),intent(in) :: Qmesh
-!arrays
- !complex(gwpc),intent(out) :: epsm1_qbz(npwc,npwc,nomega)
 
 !Local variables-------------------------------
 !scalars
- integer :: iw,ii,jj,iq_ibz,itim_q,isym_q,iq_loc,sg1,sg2, ierr
+ integer :: iw,ii,jj,iq_ibz,itim_q,isym_q,iq_loc,sg1,sg2, ierr, g0(3)
  complex(gwpc) :: phmsg1t,phmsg2t_star
 !arrays
  real(dp) :: qbz(3)
@@ -555,7 +552,8 @@ subroutine Epsm1_rotate_iqbz(epsm1, iq_bz, nomega, npwc, Gsph, Qmesh, remove_exc
  ABI_CHECK(epsm1%npwe >= npwc, 'Too many G-vectors required')
 
  ! Get iq_ibz, and symmetries from iq_ibz.
- call Qmesh%get_BZ_item(iq_bz, qbz, iq_ibz, isym_q, itim_q)
+ call Qmesh%get_BZ_item(iq_bz, qbz, iq_ibz, isym_q, itim_q, umklp=g0)
+ ABI_CHECK(all(g0 == 0), "non-zero g0 is not coded")
 
  ! If out-of-memory, only epsm1%espm1(:,:,:,1) has been allocated and filled.
  iq_loc = iq_ibz; if (epsm1%mqmem == 0) iq_loc=1
@@ -576,7 +574,7 @@ subroutine Epsm1_rotate_iqbz(epsm1, iq_bz, nomega, npwc, Gsph, Qmesh, remove_exc
      end do
    end do
  end do
- !
+
  ! Account for time-reversal
  if (itim_q==2) then
 !!$OMP PARALLEL DO IF (nomega > 1)
@@ -614,14 +612,12 @@ end subroutine Epsm1_rotate_iqbz
 !!  via an auxiliary work array of shape (npwc,npwc)
 !!
 !! INPUTS
+!!  iq_bz=Index of the q-point in the BZ where epsilon^-1 is required.
 !!  nomega=Number of frequencies required. All frequencies from 1 up to nomega are symmetrized.
 !!  npwc=Number of G vectors in symmetrized matrix, has to be smaller than epsm1%npwe.
-!!  remove_exchange=If .TRUE., return e^{-1}-1 namely remove the exchange part.
-!!  epsm1<epsm1_t>=Data structure containing the inverse dielectric matrix.
-!!  Gsph<gsphere_t>=data related to the G-sphere
 !!  Gsph<gsphere_t>=data related to the G-sphere
 !!  Qmesh<kmesh_t>=Structure defining the q-mesh used for epsm1.
-!!  iq_bz=Index of the q-point in the BZ where epsilon^-1 is required.
+!!  remove_exchange=If .TRUE., return e^{-1}-1 namely remove the exchange part.
 !!
 !! OUTPUT
 !!  epsm1%epsm1(npwc,npwc,nomega,iq_loc) symmetrised
@@ -645,19 +641,19 @@ end subroutine Epsm1_rotate_iqbz
 !!
 !! SOURCE
 
-subroutine Epsm1_rotate_iqbz_inplace(epsm1,iq_bz,nomega,npwc,Gsph,Qmesh,remove_exchange)
+subroutine Epsm1_rotate_iqbz_inplace(epsm1, iq_bz, nomega, npwc, Gsph, Qmesh, remove_exchange)
 
 !Arguments ------------------------------------
 !scalars
  class(epsm1_t),intent(inout) :: epsm1
- integer,intent(in) :: iq_bz,nomega,npwc
- logical,intent(in) :: remove_exchange
+ integer,intent(in) :: iq_bz, nomega, npwc
  type(gsphere_t),target,intent(in) :: Gsph
  type(kmesh_t),intent(in) :: Qmesh
+ logical,intent(in) :: remove_exchange
 
 !Local variables-------------------------------
 !scalars
- integer :: iw,ii,jj,iq_ibz,itim_q,isym_q,iq_loc,sg1,sg2
+ integer :: iw,ii,jj,iq_ibz,itim_q,isym_q,iq_loc,sg1,sg2, g0(3)
 !arrays
  real(dp) :: qbz(3)
  complex(gwpc) :: phmsg1t,phmsg2t_star
@@ -670,7 +666,8 @@ subroutine Epsm1_rotate_iqbz_inplace(epsm1,iq_bz,nomega,npwc,Gsph,Qmesh,remove_e
  ABI_MALLOC(work, (npwc, npwc))
 
  ! Get iq_ibz, and symmetries from iq_ibz.
- call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q)
+ call qmesh%get_BZ_item(iq_bz,qbz, iq_ibz, isym_q, itim_q, umklp=g0)
+ ABI_CHECK(all(g0 == 0), "non-zero g0 is not coded")
 
  ! If out-of-memory, only epsm1%espm1(:,:,:,1) has been allocated and filled.
  iq_loc=iq_ibz; if (epsm1%mqmem==0) iq_loc=1
@@ -737,8 +734,8 @@ subroutine epsm1_from_file(epsm1, fname, mqmem, npwe_asked, comm)
 
 !Arguments ------------------------------------
  class(epsm1_t),intent(inout) :: epsm1
- integer,intent(in) :: mqmem,npwe_asked,comm
  character(len=*),intent(in) :: fname
+ integer,intent(in) :: mqmem,npwe_asked,comm
 
 !Local variables-------------------------------
 !scalars
@@ -764,8 +761,8 @@ subroutine epsm1_from_file(epsm1, fname, mqmem, npwe_asked, comm)
  epsm1%fform      = fform
  epsm1%Tordering  = epsm1%Hscr%Tordering
 
- !TODO these quantitities should be checked and initiliazed in epsm1_mkdump
- !BEGIN HARCODED
+ !TODO these quantitities should be checked and initialized in epsm1_mkdump
+ !BEGIN HARDCODED
  epsm1%nI       = 1
  epsm1%nJ       = 1
  epsm1%ikxc     = 0
@@ -856,19 +853,19 @@ end subroutine epsm1_from_file
 !!
 !! SOURCE
 
-subroutine epsm1_mkdump(epsm1,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
-                        ikxc_required,option_test,fname_dump,iomode,&
-                        nfftot,ngfft,comm,fxc_ADA)
+subroutine epsm1_mkdump(epsm1, Vcp, npwe, gvec, nkxc, kxcg, id_required, approx_type, &
+                        ikxc_required, option_test, fname_dump, iomode, nfftot, ngfft, comm, &
+                        fxc_ADA) ! optional
 
 !Arguments ------------------------------------
 !scalars
  class(epsm1_t),intent(inout) :: epsm1
- integer,intent(in) :: id_required,approx_type,option_test,ikxc_required,nkxc
- integer,intent(in) :: iomode,nfftot,npwe,comm
+ integer,intent(in) :: id_required, approx_type, option_test, ikxc_required, nkxc
+ integer,intent(in) :: iomode, nfftot, npwe, comm
  type(vcoul_t),intent(in) :: Vcp
  character(len=*),intent(in) :: fname_dump
 !arrays
- integer,intent(in) :: ngfft(18),gvec(3,npwe)
+ integer,intent(in) :: ngfft(18), gvec(3,npwe)
  complex(gwpc),intent(in) :: kxcg(nfftot,nkxc)
  complex(gwpc),intent(in), optional :: fxc_ADA(npwe*epsm1%nI,npwe*epsm1%nJ,epsm1%nqibz)
 
@@ -1187,6 +1184,14 @@ subroutine epsm1_malloc_epsm1_qbz(epsm1, npwc, nomega)
 end subroutine epsm1_malloc_epsm1_qbz
 !!***
 
+!----------------------------------------------------------------------
+
+!!****f* m_screening/epsm1_free_epsm1_qbz
+!! NAME
+!!  epsm1_free_epsm1_qbz
+!!
+!! FUNCTION
+!!  Free the internal buffer %epsm1_qbz
 
 subroutine epsm1_free_epsm1_qbz(epsm1)
 
@@ -1520,7 +1525,7 @@ subroutine make_epsm1_driver(iq_ibz, dim_wing, npwe, nI, nJ, nomega, omega,&
  use_MPI = .FALSE.
  use_MPI = nprocs >= nomega  ! Parallelism is not used
 
- ! FIXME: MPI mode is termporarly disabled here because we need to know if
+ ! FIXME: MPI mode is temporarily disabled here because we need to know if
  ! screening is allocated in shared memory or not.
  ! Perhaps now it makes mores sense to use Scalapack/ELPA instead of parallelizing the loop over frequencies
  !use_MPI = .FALSE.
@@ -1573,9 +1578,9 @@ subroutine make_epsm1_driver(iq_ibz, dim_wing, npwe, nI, nJ, nomega, omega,&
 
  if (use_mpi_shared_win) call xmpi_win_fence(XMPI_MODE_NOPRECEDE, epsm1_win, ierr) ! Start the RMA epoch.
 
- SELECT CASE (approx_type)
+ select case (approx_type)
 
- CASE (0)
+ case (0)
    ! RPA: \tepsilon = 1 - Vc^{1/2} chi0 Vc^{1/2}
    ! vc_sqrt contains vc^{1/2}(q,G), complex-valued to allow for a possible cutoff.
    do io=1,nomega
@@ -1592,7 +1597,7 @@ subroutine make_epsm1_driver(iq_ibz, dim_wing, npwe, nI, nJ, nomega, omega,&
      end if
    end do ! nomega
 
- CASE (1)
+ case (1)
    ! Vertex correction from Adiabatic TDDFT. chi_{G1,G2} = [\delta -\chi0 (vc+kxc)]^{-1}_{G1,G3} \chi0_{G3,G2}
    ABI_CHECK(Vcp%nqlwl==1,"nqlwl/=1 not coded")
    ABI_CHECK(nkxc==1,"nkxc/=1 not coded")
@@ -1641,7 +1646,7 @@ subroutine make_epsm1_driver(iq_ibz, dim_wing, npwe, nI, nJ, nomega, omega,&
      call print_arr([std_out], chi0(:,:,io))
    end do
 
- CASE (2)
+ case (2)
    ! ADA nonlocal vertex correction contained in fxc_ADA
    ABI_WARNING('Entered fxc_ADA branch: EXPERIMENTAL!')
    ! Test that argument was passed
@@ -1668,7 +1673,7 @@ subroutine make_epsm1_driver(iq_ibz, dim_wing, npwe, nI, nJ, nomega, omega,&
      call print_arr([std_out], chi0(:,:,io))
    end do
 
- CASE (4)
+ case (4)
    ! Bootstrap vertex kernel by Sharma [[cite:Sharma2011]]
    ABI_MALLOC_OR_DIE(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
    ABI_MALLOC_OR_DIE(vfxc_boot0,(npwe*nI,npwe*nJ), ierr)
@@ -1752,7 +1757,7 @@ subroutine make_epsm1_driver(iq_ibz, dim_wing, npwe, nI, nJ, nomega, omega,&
      call print_arr([std_out], chi0(:,:,io))
    end do
 
- CASE (5)
+ case (5)
    ! One-shot scalar bootstrap approximation
    ABI_MALLOC_OR_DIE(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
    ABI_MALLOC_OR_DIE(chi0_save,(npwe*nI,npwe*nJ,nomega), ierr)
@@ -1798,7 +1803,7 @@ subroutine make_epsm1_driver(iq_ibz, dim_wing, npwe, nI, nJ, nomega, omega,&
      call print_arr([std_out], chi0(:,:,io))
    end do
 
- CASE (6)
+ case (6)
    ! RPA bootstrap by Rigamonti [[cite:Rigamonti2015]] and Berger [[cite:Berger2015]]
    ABI_MALLOC_OR_DIE(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
    ABI_MALLOC_OR_DIE(chi0_save,(npwe*nI,npwe*nJ,nomega), ierr)
@@ -1876,7 +1881,7 @@ subroutine make_epsm1_driver(iq_ibz, dim_wing, npwe, nI, nJ, nomega, omega,&
      call print_arr([std_out], chi0(:,:,io))
    end do
 
- CASE (7)
+ case (7)
    ! LR+ALDA hybrid vertex kernel by Tal
    ! First ALDA
    ABI_CHECK(Vcp%nqlwl==1,"nqlwl/=1 not coded")
@@ -1963,9 +1968,9 @@ subroutine make_epsm1_driver(iq_ibz, dim_wing, npwe, nI, nJ, nomega, omega,&
      call print_arr([std_out], chi0(:,:,io))
    end do
 
- CASE DEFAULT
+ case default
    ABI_BUG(sjoin('Wrong approx_type:',itoa(approx_type)))
- END SELECT
+ end select
 
  if (use_mpi_shared_win) call xmpi_win_fence(XMPI_MODE_NOSUCCEED, epsm1_win, ierr) ! Close the RMA epoch.
 
@@ -2360,7 +2365,7 @@ end subroutine atddft_symepsm1
 !!  npwe=Number of G-vectors in chi0.
 !!  nI,nJ=Number of rows/columns in chi0_ij (1,1 in collinear case)
 !!  dim_wing=Dimension of the wings (0 or 3 if q-->0)
-!!  kxcg_mat_sr=Short-range fxc kernel used in the TE epsilon^-1
+!!  kxcg_mat_sr=Short-range fxc kernel used in the test-electron epsilon^-1
 !!  option_test=Only for TDDFT:
 !!   == 0 for TESTPARTICLE ==
 !!   == 1 for TESTELECTRON ==
@@ -2548,7 +2553,7 @@ end subroutine atddft_hyb_symepsm1
 !! chi0_uwing(npwe*n2,nomega,3)  Input:  the lower and upper wings of the polarizability
 !!                               Output: the "lower" and "upper" wings of the inverse dieletric matrix. See notes below.
 !! chi0_head(3,3,nomega)= Input: the polarizability tensor in Cartesian coordinates.
-!!                        Ouput: The "head" of the inverse dieletric matrix. See notes below.
+!!                        Output: The "head" of the inverse dieletric matrix. See notes below.
 !!
 !! NOTES
 !!  Matrix inversion in block form.
@@ -2773,7 +2778,7 @@ subroutine lebedev_laikov_int()
  do ll=0,lmax,2
    !allocate(tmp_momenta(-ll:ll))
    do mm=-ll,ll
-     ! MG: Commented becase it causes problems with the new version of abilint
+     ! MG: Commented because it causes problems with the new version of abilint
      !call lebedev_quadrature(ylmstar_over_qTq,(/ll,mm/),real_pars,cplx_pars,ang_int,ierr,accuracy)
      write(std_out,*)ll,mm,ang_int
      !tmp_momenta(mm) = ang_int
@@ -3024,7 +3029,7 @@ subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsp
 
  ! Fake MPI_type for the sequential part.
  call initmpi_seq(MPI_enreg_seq)
- call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfft(2),ngfft(3),'all')
+ call MPI_enreg_seq%distribfft%init_seq('c',ngfft(2),ngfft(3),'all')
 
  nprocs = xmpi_comm_size(comm)
  call xmpi_split_work(npw,comm,my_gstart,my_gstop)

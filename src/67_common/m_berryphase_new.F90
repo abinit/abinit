@@ -202,12 +202,11 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
  integer :: response,shiftbd,source,spaceComm,tag
  integer :: jj,jstr,kk,ineigh_str
  integer :: istep,jstep,kpt_mark(dtefield%fnkpt),nkstr,nstr,iunmark,berrystep
- integer :: jkpt2, jkpt2i
+ integer :: jkpt2, jkpt2i, me
  real(dp) :: det_mod,dkinv,dphase,dtm_real,dtm_imag,fac,gmod,phase0
  real(dp) :: pol,polbtot,polion,politot,poltot,rho
  logical :: calc_epaw3_force,calc_epaw3_stress,efield_flag
  integer :: polflag, ddkflag
-
 !!REC start
  integer :: jump
  real(dp),save :: pol0(3)
@@ -216,7 +215,7 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
 !!REC end
  real(dp) :: dphase_new,dphase_init
  character(len=fnlen) :: fiwf1o
- character(len=500) :: message
+ character(len=500) :: msg
  type(wvl_wf_type) :: wfs
  type(wvl_internal_type) :: wvl
  integer,allocatable :: dimlmn(:),ikpt1_recv(:), sflag_k(:)!,pwind_k(:)
@@ -242,10 +241,6 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
 ! real(dp) :: tot_r, tot_i
 ! real(dp),allocatable :: bra(:,:),ket(:,:)
 ! complex(dpc) :: cpb,cpk,cterm
-
-!BEGIN TF_CHANGES
- integer :: me
-!END TF_CHANGES
 ! ***********************************************************************
 
 !DEBUG
@@ -281,10 +276,10 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
  pwnsfac_k(4,:) = 0.0_dp ! ket imag
 
  if (maxval(dtset%istwfk(:)) /= 1) then
-   write(message, '(a,a,a)' )&
+   write(msg, '(3a)' )&
     'This routine does not work yet with istwfk /= 1.',ch10,&
     'This should have been tested previously ...'
-   ABI_BUG(message)
+   ABI_BUG(msg)
  end if
 
  if (usepaw == 1 .and. usecprj /= 1) then
@@ -387,8 +382,8 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
    end if
 
    if ( efield_flag ) then
-     write(message,'(2a,i5,2a)')ch10,' nkpt = ',nkpt,ch10,' copy cprj to dtefield%cprj '
-     call wrtout(std_out,message,'COLL')
+     write(msg,'(2a,i5,2a)')ch10,' nkpt = ',nkpt,ch10,' copy cprj to dtefield%cprj '
+     call wrtout(std_out,msg,'COLL')
 
      do isppol = 1, nsppol
 
@@ -521,18 +516,18 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
    gpard(:) = dk(1)*gprimd(:,1) + dk(2)*gprimd(:,2) + dk(3)*gprimd(:,3)
    gmod = sqrt(dot_product(gpard,gpard))
 
-   write(message,'(a,a,a,3f9.5,a,a,3f9.5,a)')ch10,&
+   write(msg,'(a,a,a,3f9.5,a,a,3f9.5,a)')ch10,&
 &   ' Computing the polarization (Berry phase) for reciprocal vector:',ch10,&
 &   dk(:),' (in reduced coordinates)',ch10,&
 &   gpard(1:3),' (in cartesian coordinates - atomic units)'
-   call wrtout(std_out,message,'COLL')
-   if (unit_out /= 0) call wrtout(unit_out,message,'COLL')
+   call wrtout(std_out,msg,'COLL')
+   if (unit_out /= 0) call wrtout(unit_out,msg,'COLL')
 
-   write(message,'(a,i5,a,a,i5)')&
+   write(msg,'(a,i5,a,a,i5)')&
 &   ' Number of strings: ',dtefield%nstr(idir),ch10,&
 &   ' Number of k points in string:', dtefield%nkstr(idir)
-   call wrtout(std_out,message,'COLL')
-   if (unit_out /= 0) call wrtout(unit_out,message,'COLL')
+   call wrtout(std_out,msg,'COLL')
+   if (unit_out /= 0) call wrtout(unit_out,msg,'COLL')
 
 !  Check whether the polarization or the ddk must be computed
 
@@ -552,12 +547,12 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
      cg1(:,:) = zero
      dkinv = one/(two*dk(idir))
 
-     write(message,'(a,a,a,3f9.5,a,a,3f9.5,a)')ch10,&
+     write(msg,'(a,a,a,3f9.5,a,a,3f9.5,a)')ch10,&
 &     ' Computing the ddk (Berry phase) for reciprocal vector:',ch10,&
 &     dk(:),' (in reduced coordinates)',ch10,&
 &     gpard(1:3),' (in cartesian coordinates - atomic units)'
-     call wrtout(std_out,message,'COLL')
-     if (unit_out /= 0) call wrtout(unit_out,message,'COLL')
+     call wrtout(std_out,msg,'COLL')
+     if (unit_out /= 0) call wrtout(unit_out,msg,'COLL')
    end if
 
 ! From smatrix routine: det_inv_smat = type of calculation
@@ -978,15 +973,15 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
                ! This avoid the code to stop for phonons under E-field too.
                ! TODO: Since the same is done in m_cgwf.F90 and in m_berryphase_new.F90,
                ! rationalization should be done with one single module.
-               write(message,'(a,i5,a,a,a)')&
+               write(msg,'(a,i5,a,a,a)')&
 &               '  For k-point #',ikpt1,',',ch10,&
 &               '  the determinant of the overlap matrix is found to be 0. Fixing...'
                 ! Try this:
-                write(std_out,*)message,dtm_k(1:2)
+                write(std_out,*)msg,dtm_k(1:2)
                 if(abs(dtm_k(1))<=1d-12)dtm_k(1)=1d-12
                 if(abs(dtm_k(2))<=1d-12)dtm_k(2)=1d-12
                 write(std_out,*)' Changing to:',dtm_k(1:2)
-!               ABI_BUG(message)
+!               ABI_BUG(msg)
              end if
 
              dtm_mult(1,ikpt1+(isppol-1)*dtefield%fnkpt,istep) = dtm_k(1)
@@ -1121,12 +1116,12 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
      do istep = 1,berrystep
 
        if(berrystep==1) then
-         write(message,'(a,a)')ch10,' Compute the electronic contribution to polarization'
-         call wrtout(std_out,message,'COLL')
+         write(msg,'(a,a)')ch10,' Compute the electronic contribution to polarization'
+         call wrtout(std_out,msg,'COLL')
        else
-         write(message,'(a,a,i4,a)')ch10,&
+         write(msg,'(a,a,i4,a)')ch10,&
          ' Compute the electronic contribution to polarization for a step of istep=',istep,'*dk'
-         call wrtout(std_out,message,'COLL')
+         call wrtout(std_out,msg,'COLL')
        end if
 
        if(istep /= 1) then
@@ -1144,18 +1139,18 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
          end do
 !        Check that the string length is a divisor of nkpt
          if(mod(dtefield%fnkpt,nkstr) /= 0) then
-           write(message,'(a,i5,a,i5,a,i7)')&
+           write(msg,'(a,i5,a,i5,a,i7)')&
 &           '  For istep = ', istep,&
 &           '  The string length = ',nkstr,&
 &           ', is not a divisor of fnkpt =',dtefield%fnkpt
-           ABI_BUG(message)
+           ABI_BUG(msg)
          end if
          nstr = dtefield%fnkpt/nkstr
 
-         write(message,'(a,i1,a,i2,a,i3,a,i6)')&
+         write(msg,'(a,i1,a,i2,a,i3,a,i6)')&
 &         '  berryphase_new: for direction ',idir, ' and istep ', istep, ', nkstr = ',nkstr,', nstr = ',nstr
-         call wrtout(std_out,message,'COLL')
-         call wrtout(ab_out,message,'COLL')
+         call wrtout(std_out,msg,'COLL')
+         call wrtout(ab_out,msg,'COLL')
 
          ABI_MALLOC(idxkstr_mult,(nkstr,nstr))
          iunmark = 1
@@ -1190,8 +1185,8 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
 
        ABI_MALLOC(det_string,(2,nstr))
        ABI_MALLOC(polberry,(nstr))
-       write(message,'(a,10x,a,10x,a)')ch10,'istr','polberry(istr)'
-       call wrtout(std_out,message,'COLL')
+       write(msg,'(a,10x,a,10x,a)')ch10,'istr','polberry(istr)'
+       call wrtout(std_out,msg,'COLL')
 
        polbtot = zero
        do isppol = 1, nsppol
@@ -1316,11 +1311,11 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
 !                  ENDDEBUG
                    dphase_new=dphase_new-two*Pi*real(jj,dp)
                    if(jj/=0)then
-                     write(message,'(6a)') ch10,&
+                     write(msg,'(6a)') ch10,&
 &                     ' berryphase_new : WARNING -',ch10,&
 &                     '  the berry phase has some huge variation in the space of strings of k-points',ch10,&
 &                     '  ABINIT is trying to correct the berry phase, but it is highly experimental'
-                     call wrtout(std_out,message,'PERS')
+                     call wrtout(std_out,msg,'PERS')
                    end if
 !                  if(jj/=0)write(std_out,'(i4,e15.4,e15.4,e15.4,e15.4)')jstr, det_string(:,jstr),dphase_new,dphase_new-dphase
                    dphase=dphase_new
@@ -1359,25 +1354,25 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
              polb(isppol)=polb(isppol)+coef(jstep,istep)*polb_mult(isppol,jstep)
            end do
 
-           write(message,'(10x,i6,7x,e16.9)')istr,polberry(istr)
-           call wrtout(std_out,message,'COLL')
+           write(msg,'(10x,i6,7x,e16.9)')istr,polberry(istr)
+           call wrtout(std_out,msg,'COLL')
 
          end do
 
          if(berrystep>1)then
-           write(message,'(9x,a,7x,e16.9,1x,a,i4,a,i4,a)')&
+           write(msg,'(9x,a,7x,e16.9,1x,a,i4,a,i4,a)')&
 &           'total',polb_mult(isppol,istep),'(isppol=',isppol,', istep=',istep,')'!,ch10
-           call wrtout(std_out,message,'COLL')
+           call wrtout(std_out,msg,'COLL')
 
-           write(message,'(3x,a,7x,e16.9,1x,a,i4,a,i4,a,a)')&
+           write(msg,'(3x,a,7x,e16.9,1x,a,i4,a,i4,a,a)')&
 &           '+correction',polb(isppol),'(isppol=',isppol,', istep=1..',istep,')',ch10
-           call wrtout(std_out,message,'COLL')
+           call wrtout(std_out,msg,'COLL')
 
          else
 
-           write(message,'(9x,a,7x,e16.9,1x,a,i4,a)')&
+           write(msg,'(9x,a,7x,e16.9,1x,a,i4,a)')&
 &           'total',polb_mult(isppol,istep),'(isppol=',isppol,')'!,ch10
-           call wrtout(std_out,message,'COLL')
+           call wrtout(std_out,msg,'COLL')
          end if
 
          polbtot = polbtot + polb(isppol)
@@ -1396,11 +1391,11 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
 
        call xred2xcart(natom,rprimd,xcart,xred)
        politot = zero
-       write(message,'(a)')' Compute the ionic contributions'
-       call wrtout(std_out,message,'COLL')
+       write(msg,'(a)')' Compute the ionic contributions'
+       call wrtout(std_out,msg,'COLL')
 
-       write(message,'(a,2x,a,2x,a,15x,a)')ch10,'itom', 'itypat', 'polion'
-       call wrtout(std_out,message,'COLL')
+       write(msg,'(a,2x,a,2x,a,15x,a)')ch10,'itom', 'itypat', 'polion'
+       call wrtout(std_out,msg,'COLL')
 
        do iatom = 1, natom
          itypat = typat(iatom)
@@ -1411,16 +1406,16 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
 !        Fold into interval (-1,1)
          polion = polion - 2_dp*nint(polion/2_dp)
          politot = politot + polion
-         write(message,'(2x,i2,5x,i2,10x,e16.9)') iatom,itypat,polion
-         call wrtout(std_out,message,'COLL')
+         write(msg,'(2x,i2,5x,i2,10x,e16.9)') iatom,itypat,polion
+         call wrtout(std_out,msg,'COLL')
        end do
 
 !      Fold into interval [-1,1] again
        politot = politot - 2_dp*nint(politot/2_dp)
        pion(idir) = politot
 
-       write(message,'(9x,a,7x,es19.9)') 'total',politot
-       call wrtout(std_out,message,'COLL')
+       write(msg,'(9x,a,7x,es19.9)') 'total',politot
+       call wrtout(std_out,msg,'COLL')
 
 
 !      ==========================================================================
@@ -1430,41 +1425,41 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
        poltot = politot + polbtot
 
        if (berrystep==1)then
-         write(message,'(a,a)')ch10,' Summary of the results'
-         call wrtout(std_out,message,'COLL')
-         if (unit_out /= 0) call wrtout(unit_out,message,'COLL')
+         write(msg,'(a,a)')ch10,' Summary of the results'
+         call wrtout(std_out,msg,'COLL')
+         if (unit_out /= 0) call wrtout(unit_out,msg,'COLL')
        else
-         write(message,'(a,a,i4)')ch10,' Summary of the results for istep =',istep
-         call wrtout(std_out,message,'COLL')
-         if (unit_out /= 0) call wrtout(unit_out,message,'COLL')
+         write(msg,'(a,a,i4)')ch10,' Summary of the results for istep =',istep
+         call wrtout(std_out,msg,'COLL')
+         if (unit_out /= 0) call wrtout(unit_out,msg,'COLL')
        end if
 
-       write(message,'(a,es19.9)')' Electronic Berry phase ' ,polbtot
-       call wrtout(std_out,message,'COLL')
-       if (unit_out /= 0) call wrtout(unit_out,message,'COLL')
+       write(msg,'(a,es19.9)')' Electronic Berry phase ' ,polbtot
+       call wrtout(std_out,msg,'COLL')
+       if (unit_out /= 0) call wrtout(unit_out,msg,'COLL')
 
-       write(message,'(a,es19.9)')'            Ionic phase ', politot
-       call wrtout(std_out,message,'COLL')
-       if (unit_out /= 0) call wrtout(unit_out,message,'COLL')
+       write(msg,'(a,es19.9)')'            Ionic phase ', politot
+       call wrtout(std_out,msg,'COLL')
+       if (unit_out /= 0) call wrtout(unit_out,msg,'COLL')
 
-       write(message,'(a,es19.9)')'            Total phase ', poltot
-       call wrtout(std_out,message,'COLL')
-       if (unit_out /= 0) call wrtout(unit_out,message,'COLL')
+       write(msg,'(a,es19.9)')'            Total phase ', poltot
+       call wrtout(std_out,msg,'COLL')
+       if (unit_out /= 0) call wrtout(unit_out,msg,'COLL')
 
 !      REC start
        if(abs(dtset%polcen(idir))>tol8)then
          poltot = poltot-dtset%polcen(idir)
-         write(message,'(a,f15.10)') &
+         write(msg,'(a,f15.10)') &
 &         '    Translating Polarization by P0 for centrosymmetric cell: ',dtset%polcen(idir)
-         call wrtout(std_out,message,'COLL')
-         if (unit_out /= 0) call wrtout(unit_out,message,'COLL')
+         call wrtout(std_out,msg,'COLL')
+         if (unit_out /= 0) call wrtout(unit_out,msg,'COLL')
        end if
 !      REC end
 
        poltot = poltot - 2.0_dp*nint(poltot/2._dp)
-       write(message,'(a,es19.9)')'    Remapping in [-1,1] ', poltot
-       call wrtout(std_out,message,'COLL')
-       if (unit_out /= 0) call wrtout(unit_out,message,'COLL')
+       write(msg,'(a,es19.9)')'    Remapping in [-1,1] ', poltot
+       call wrtout(std_out,msg,'COLL')
+       if (unit_out /= 0) call wrtout(unit_out,msg,'COLL')
 
 !      ! REC and HONG
 !      =====================================================================================
@@ -1486,12 +1481,12 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
          jump=-nint(dtset%red_dfield(idir) - poltot)   ! red_efield = red_dfield - poltot
 
          if(jump /= 0)then
-           write(message,'(a,i1,a,es19.9,a,i2)') &
+           write(msg,'(a,i1,a,es19.9,a,i2)') &
 &           ' P(',idir,') Shifted polarization branch to minimize red_efield &
 &           k from ',poltot, ' by ',jump
-           call wrtout(std_out,message,'COLL')
+           call wrtout(std_out,msg,'COLL')
            if (unit_out /= 0) then
-             call wrtout(unit_out,message,'COLL')
+             call wrtout(unit_out,msg,'COLL')
            end if
            poltot=poltot-jump
          end if
@@ -1508,14 +1503,14 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
          if(lexist)then
            if(idir==1)then
              if(mpi_enreg%me==0)then
-               if (open_file('POLSAVE',message,newunit=unt,status='OLD') /= 0) then
-                 ABI_ERROR(message)
+               if (open_file('POLSAVE',msg,newunit=unt,status='OLD') /= 0) then
+                 ABI_ERROR(msg)
                end if
                read(unt,*)pol0
-               write(message,'(a,3f20.12)')'Reading old polarization:',pol0
-               call wrtout(std_out,message,'COLL')
+               write(msg,'(a,3f20.12)')'Reading old polarization:',pol0
+               call wrtout(std_out,msg,'COLL')
                if (unit_out /= 0) then
-                 call wrtout(unit_out,message,'COLL')
+                 call wrtout(unit_out,msg,'COLL')
                end if
                close(unt)
              end if
@@ -1526,11 +1521,11 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
          end if
          jump=nint(poltot-pol0(idir))
          if(jump /= 0)then
-           write(message,'(a,i1,a,es19.9,a,i2)') &
+           write(msg,'(a,i1,a,es19.9,a,i2)') &
 &           ' P(',idir,') jumped to new branch. Shifting bac&
 &           k from ',poltot, ' by ',jump
-           call wrtout(std_out,message,'COLL')
-           if (unit_out /= 0) call wrtout(unit_out,message,'COLL')
+           call wrtout(std_out,msg,'COLL')
+           if (unit_out /= 0) call wrtout(unit_out,msg,'COLL')
            poltot=poltot-jump
          end if
 
@@ -1550,12 +1545,12 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
        red_ptot(idir)=poltot !!REC
        pol = fac*red_ptot(idir)/ucvol !!REC
        ptot(idir)=red_ptot(idir)/ucvol !!REC
-       write(message,'(a,a,es19.9,a,a,a,es19.9,a,a)')ch10,&
+       write(msg,'(a,a,es19.9,a,a,a,es19.9,a,a)')ch10,&
 &       '           Polarization ', pol,' (a.u. of charge)/bohr^2',ch10,&
 &       '           Polarization ', pol*(e_Cb)/(Bohr_Ang*1d-10)**2,&
 &       ' C/m^2',ch10
-       call wrtout(std_out,message,'COLL')
-       if (unit_out /= 0) call wrtout(unit_out,message,'COLL')
+       call wrtout(std_out,msg,'COLL')
+       if (unit_out /= 0) call wrtout(unit_out,msg,'COLL')
 
        ABI_FREE(idxkstr_mult)
 
@@ -1568,8 +1563,8 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
  !!REC start
  if (dtset%berrysav == 1) then
    if(mpi_enreg%me==0)then
-     if (open_file('POLSAVE',message,newunit=unt,status='UNKNOWN') /= 0) then
-       ABI_ERROR(message)
+     if (open_file('POLSAVE',msg,newunit=unt,status='UNKNOWN') /= 0) then
+       ABI_ERROR(msg)
      end if
      write(unt,'(3F20.12)') pol0
      close(unt)
@@ -1761,7 +1756,7 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
 
   !Local variables -------------------------
   !scalars
-  character(len=500) :: message
+  character(len=500) :: msg
   integer :: ctocprj_choice,iatom,ii,iorder_cprj,mcg13,mcprj,my_nspinor,ncpgr
   integer :: optberry,usecprj
   logical :: calc_epaw3_force, calc_epaw3_stress, efield, save_cg13
@@ -1788,8 +1783,8 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
   mcprj=my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol/mpi_enreg%nproc_band
   !Just to be sure
   if (efield.and.mpi_enreg%nproc_band/=1) then
-    message='Berry phase calculations are not designed for band parallelization!'
-    ABI_BUG(message)
+    msg='Berry phase calculations are not designed for band parallelization!'
+    ABI_BUG(msg)
   end if
 
   ncpgr = 0
@@ -1868,13 +1863,13 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
         end do
 
         !    !write the field parameters: D, E, P, d, e, p, dbar, ebar, pbar
-        write(message,'(a,a)')   ch10, 'scfcv: Constant reduced ebar-field:'
+        write(msg,'(a,a)')   ch10, 'scfcv: Constant reduced ebar-field:'
 
-        call wrtout(std_out,message,'COLL')
+        call wrtout(std_out,msg,'COLL')
         call prtefield(dtset,dtefield,std_out,rprimd)
 
         if(dtset%prtvol>=10)then
-           call wrtout(ab_out,message,'COLL')
+           call wrtout(ab_out,msg,'COLL')
            call prtefield(dtset,dtefield,ab_out,rprimd)
         end if
 
@@ -1898,23 +1893,23 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
   if (efield .and. (scfcv_level == 1) ) then ! do this each scf step
 
      if (dtset%prtvol >= 10)then
-        write(message,'(6(a),3(e16.9,2x),a,a,3(e16.9,2x))')ch10,&
+        write(msg,'(6(a),3(e16.9,2x),a,a,3(e16.9,2x))')ch10,&
              &     ' scfcv: New value of the polarization:',ch10,&
              &     ' (reduced coordinates, a. u.)',ch10,&
              &     '     Electronic berry phase:       ', (pel_cg(ii), ii = 1, 3)
-        call wrtout(ab_out,message,'COLL')
-        call wrtout(std_out,message,'COLL')
+        call wrtout(ab_out,msg,'COLL')
+        call wrtout(std_out,msg,'COLL')
         if(psps%usepaw==1) then
-           write(message,'(a,3(e16.9,2x))')&
+           write(msg,'(a,3(e16.9,2x))')&
                 &       '     ...includes PAW on-site term: ', (pelev(ii), ii = 1, 3)
-           call wrtout(ab_out,message,'COLL')
-           call wrtout(std_out,message,'COLL')
+           call wrtout(ab_out,msg,'COLL')
+           call wrtout(std_out,msg,'COLL')
         end if
-        write(message,'(a,3(e16.9,2x),a,a,3(e16.9,2x))')&
+        write(msg,'(a,3(e16.9,2x),a,a,3(e16.9,2x))')&
              &     '     Ionic:                        ', (pion(ii), ii = 1, 3), ch10, &
              &     '     Total:                        ', (red_ptot(ii), ii = 1, 3) !!REC
-        call wrtout(ab_out,message,'COLL')
-        call wrtout(std_out,message,'COLL')
+        call wrtout(ab_out,msg,'COLL')
+        call wrtout(std_out,msg,'COLL')
      end if ! end prtvol >= 10 output
 
      ptot_cart(:)=zero
@@ -1931,11 +1926,11 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
      if (dtset%berryopt == 4) then
 
         !    !write the field parameters: D, E, P, d, e, p, dbar, ebar, pbar
-        write(message,'(a,a)')   ch10, 'scfcv: Constant unreduced E-field:'
-        call wrtout(std_out,message,'COLL')
+        write(msg,'(a,a)')   ch10, 'scfcv: Constant unreduced E-field:'
+        call wrtout(std_out,msg,'COLL')
         call prtefield(dtset,dtefield,std_out,rprimd)
         if(dtset%prtvol>=10)then
-           call wrtout(ab_out,message,'COLL')
+           call wrtout(ab_out,msg,'COLL')
            call prtefield(dtset,dtefield,ab_out,rprimd)
         end if
      end if ! end berryopt 4 output
@@ -1974,11 +1969,11 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
            dtset%efield(:) = efield_test_cart(:)
 
            !      !write the field parameters: D, E, P, d, e, p, dbar, ebar, pbar
-           write(message,'(a,a)')   ch10, 'scfcv: Constant unreduced D-field  - updating E-field:'
-           call wrtout(std_out,message,'COLL')
+           write(msg,'(a,a)')   ch10, 'scfcv: Constant unreduced D-field  - updating E-field:'
+           call wrtout(std_out,msg,'COLL')
            call prtefield(dtset,dtefield,std_out,rprimd)
            if(dtset%prtvol>=10)then
-              call wrtout(ab_out,message,'COLL')
+              call wrtout(ab_out,msg,'COLL')
               call prtefield(dtset,dtefield,ab_out,rprimd)
            end if
 
@@ -1989,11 +1984,11 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
 
         else
 
-           write(message,'(a,a)')   ch10, 'scfcv: Constant unreduced D-field  - Pre E-field:'
-           call wrtout(std_out,message,'COLL')
+           write(msg,'(a,a)')   ch10, 'scfcv: Constant unreduced D-field  - Pre E-field:'
+           call wrtout(std_out,msg,'COLL')
            call prtefield(dtset,dtefield,std_out,rprimd)
            if(dtset%prtvol>=10)then
-              call wrtout(ab_out,message,'COLL')
+              call wrtout(ab_out,msg,'COLL')
               call prtefield(dtset,dtefield,ab_out,rprimd)
            end if
 
@@ -2037,11 +2032,11 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
            dtset%efield(:) = efield_test_cart(:)
 
            !      !write the field parameters: D, E, P, d, e, p, dbar, ebar, pbar
-           write(message,'(a,a)')   ch10, 'scfcv: Constant reduced d-field  - updating E-field:'
-           call wrtout(std_out,message,'COLL')
+           write(msg,'(a,a)')   ch10, 'scfcv: Constant reduced d-field  - updating E-field:'
+           call wrtout(std_out,msg,'COLL')
            call prtefield(dtset,dtefield,std_out,rprimd)
            if(dtset%prtvol>=10)then
-              call wrtout(ab_out,message,'COLL')
+              call wrtout(ab_out,msg,'COLL')
               call prtefield(dtset,dtefield,ab_out,rprimd)
            end if
 
@@ -2053,11 +2048,11 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
 
         else
 
-           write(message,'(a,a)')   ch10, 'scfcv: Constant reduced d-field  - Pre E-field:'
-           call wrtout(std_out,message,'COLL')
+           write(msg,'(a,a)')   ch10, 'scfcv: Constant reduced d-field  - Pre E-field:'
+           call wrtout(std_out,msg,'COLL')
            call prtefield(dtset,dtefield,std_out,rprimd)
            if(dtset%prtvol>=10)then
-              call wrtout(ab_out,message,'COLL')
+              call wrtout(ab_out,msg,'COLL')
               call prtefield(dtset,dtefield,ab_out,rprimd)
            end if
 
@@ -2090,17 +2085,17 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
                  red_efield2(ii)=dtset%ddamp*(dtset%red_dfield(ii) - red_ptot(ii)) +  &
                       &           (1.0d0-dtset%ddamp)*red_efield2_old(ii)         ! d(ii) is fixed, update e(ii)  may need ddamping here
 
-                 !          write(message,'(a,a,i5,a,i5)')   ch10, 'direction  ', ii,'   for fixed d, value is (2)  ', dtset%jfielddir(ii)
-                 !          call wrtout(ab_out,message,'COLL')
-                 !          call wrtout(std_out,message,'COLL')
+                 !          write(msg,'(a,a,i5,a,i5)')   ch10, 'direction  ', ii,'   for fixed d, value is (2)  ', dtset%jfielddir(ii)
+                 !          call wrtout(ab_out,msg,'COLL')
+                 !          call wrtout(std_out,msg,'COLL')
 
               else if (dtset%jfielddir(ii) ==1 ) then   ! direction under fixed ebar
                  red_efield2(ii)= (ucvol/(4*pi))*dot_product(dtset%efield(:),gprimd(:,ii)) !  update e which is not fixed
                  dtset%red_dfield(ii)=red_ptot(ii) +  (ucvol/(4*pi))*dot_product(dtset%efield(:),gprimd(:,ii))  ! update d
 
-                 !          write(message,'(a,a,i5,a,i5)')   ch10, 'direction  ', ii,'   for fixed ebar, value is (1)  ', dtset%jfielddir(ii)
-                 !          call wrtout(ab_out,message,'COLL')
-                 !          call wrtout(std_out,message,'COLL')
+                 !          write(msg,'(a,a,i5,a,i5)')   ch10, 'direction  ', ii,'   for fixed ebar, value is (1)  ', dtset%jfielddir(ii)
+                 !          call wrtout(ab_out,msg,'COLL')
+                 !          call wrtout(std_out,msg,'COLL')
 
               end if
            end do
@@ -2115,23 +2110,23 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
            !      the other is from fixed d part.
            !      This may need to be optimized !!
 
-           write(message,'(a,a,a,a,3(es16.9,2x),a)')   ch10, 'Reduced efield from fixed ebar:', ch10, &
+           write(msg,'(a,a,a,a,3(es16.9,2x),a)')   ch10, 'Reduced efield from fixed ebar:', ch10, &
                 &       '       e:  ', (red_efield1(ii),ii=1,3), ch10
 
-           !      call wrtout(ab_out,message,'COLL')
-           call wrtout(std_out,message,'COLL')
+           !      call wrtout(ab_out,msg,'COLL')
+           call wrtout(std_out,msg,'COLL')
 
-           write(message,'(a,a,a,a,3(es16.9,2x),a)')   ch10, 'Reduced efield from fixed d:', ch10, &
+           write(msg,'(a,a,a,a,3(es16.9,2x),a)')   ch10, 'Reduced efield from fixed d:', ch10, &
                 &       '       e:  ', (red_efield2(ii),ii=1,3), ch10
 
-           !      call wrtout(ab_out,message,'COLL')
-           call wrtout(std_out,message,'COLL')
+           !      call wrtout(ab_out,msg,'COLL')
+           call wrtout(std_out,msg,'COLL')
 
-           write(message,'(a,a,a,a,3(es16.9,2x),a)')   ch10, 'Average reduced efield:', ch10, &
+           write(msg,'(a,a,a,a,3(es16.9,2x),a)')   ch10, 'Average reduced efield:', ch10, &
                 &       '       e:  ', (dtset%red_efield(ii),ii=1,3), ch10
 
-           !      call wrtout(ab_out,message,'COLL')
-           call wrtout(std_out,message,'COLL')
+           !      call wrtout(ab_out,msg,'COLL')
+           call wrtout(std_out,msg,'COLL')
 
            !      to calculate unreduced E
            do ii=1,3
@@ -2159,11 +2154,11 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
            dtset%efield(:) = efield_test_cart(:)
 
            !      !write the field parameters: D, E, P, d, e, p, dbar, ebar, pbar
-           write(message,'(a,a)')   ch10, 'scfcv: Constant reduced ebar and d-field  - updating E-field:'
-           call wrtout(std_out,message,'COLL')
+           write(msg,'(a,a)')   ch10, 'scfcv: Constant reduced ebar and d-field  - updating E-field:'
+           call wrtout(std_out,msg,'COLL')
            call prtefield(dtset,dtefield,std_out,rprimd)
            if(dtset%prtvol>=10)then
-              call wrtout(ab_out,message,'COLL')
+              call wrtout(ab_out,msg,'COLL')
               call prtefield(dtset,dtefield,ab_out,rprimd)
            end if
 
@@ -2176,11 +2171,11 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
 
         else
 
-           write(message,'(a,a)')   ch10, 'scfcv: Constant reduced ebar and d-field  - Pre E-field:'
-           call wrtout(std_out,message,'COLL')
+           write(msg,'(a,a)')   ch10, 'scfcv: Constant reduced ebar and d-field  - Pre E-field:'
+           call wrtout(std_out,msg,'COLL')
            call prtefield(dtset,dtefield,std_out,rprimd)
            if(dtset%prtvol>=10)then
-              call wrtout(ab_out,message,'COLL')
+              call wrtout(ab_out,msg,'COLL')
               call prtefield(dtset,dtefield,ab_out,rprimd)
            end if
 
@@ -2241,7 +2236,7 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
   ! Do not modify the length of this string
   !scalars
   integer :: idir,ii
-  character(len=1500) :: message
+  character(len=1500) :: msg
   character(len=7)   :: flag_field(3)
 
   real(dp) ::    ucvol
@@ -2286,31 +2281,31 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
         red_pbar(idir)  = (4*pi/ucvol)*dot_product(dtefield%red_ptot1(:),rmet(:,idir))
      end do
 
-     !MGNAG: This message is too long and causes
+     !MGNAG: This msg is too long and causes
      ! Runtime Error: wrtout_cpp.f90, line 893: Buffer overflow on output
      ! with NAG in test seq_tsv6_125 where we write to std_out!
      ! I cannot change the RECLEN of std_out!
 
-     write(message,'(a,a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ' (a. u.)', ch10,&
+     write(msg,'(a,a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ' (a. u.)', ch10,&
           &   '       E:  ', (dtset%efield(ii), ii=1,3), ch10, &
           &   '       P:  ', (ptot_cart(ii), ii=1,3)
-     call wrtout(iunit,message,'COLL')
+     call wrtout(iunit,msg,'COLL')
 
-     write(message,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10,&
+     write(msg,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10,&
           &   '    ebar:  ', (dtset%red_efieldbar(ii),ii=1,3), ch10, &   !!HONG need to change
           &  '    pbar:  ', (red_pbar(ii),ii=1,3)
-     call wrtout(iunit,message,'COLL')
+     call wrtout(iunit,msg,'COLL')
 
-     write(message,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10,&
+     write(msg,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10,&
           &   '       e:  ', (dtset%red_efield(ii),ii=1,3), ch10, &
           &   '       p:  ', (dtefield%red_ptot1(ii), ii=1,3)
-     call wrtout(iunit,message,'COLL')
+     call wrtout(iunit,msg,'COLL')
 
-     write(message,'(a,a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a)') ch10,&
+     write(msg,'(a,a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a)') ch10,&
           &   ' (S.I.), that is V/m for E, and C/m^2 for P', ch10, &
           &   '-      E:  ', (dtset%efield(ii)*(Ha_J/(e_Cb*Bohr_Ang*1d-10)), ii=1,3), ch10, &    !(Ha_J/(e_Cb*Bohr_Ang*1d-10))= 5.14220652*1d+11
           &  '       P:  ', (ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2, ii=1,3),ch10
-     call wrtout(iunit,message,'COLL')
+     call wrtout(iunit,msg,'COLL')
 
   end if ! berryopt ==4
 
@@ -2340,35 +2335,35 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
         dtset%red_dfield(idir)  =(ucvol/(4*pi))*dot_product(dtset%dfield(:),gprimd(:,idir))
      end do
 
-     write(message,'(a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ' (a. u.)', ch10,&
+     write(msg,'(a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ' (a. u.)', ch10,&
           &   '       e:  ', (dtset%red_efield(ii),ii=1,3), ch10, &
           &   '       p:  ', (dtefield%red_ptot1(ii), ii=1,3), ch10, &
           &   '       d:  ', (dtset%red_dfield(ii),ii = 1, 3), ch10, &
           &   ' e  +  p:  ', (dtset%red_efield(ii)+dtefield%red_ptot1(ii),ii=1,3)
-     call wrtout(iunit,message,'COLL')
+     call wrtout(iunit,msg,'COLL')
 
-     write(message,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10,&
+     write(msg,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10,&
           &   '    ebar:  ', (dtset%red_efieldbar(ii),ii=1,3), ch10, &   !!HONG need to change
           &  '    pbar:  ', (red_pbar(ii),ii=1,3), ch10, &
           &   '    dbar:  ', (red_dbar(ii),ii=1,3), ch10, &
           &   ' eba+pba:  ', (dtset%red_efieldbar(ii)+red_pbar(ii),ii=1,3)
-     call wrtout(iunit,message,'COLL')
+     call wrtout(iunit,msg,'COLL')
 
-     write(message,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10, &
+     write(msg,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10, &
           &   '       E:  ', (dtset%efield(ii), ii=1,3), ch10, &
           &   '       P:  ', (ptot_cart(ii), ii=1,3), ch10, &
           &   '       D:  ', (dtset%dfield(ii),ii = 1, 3), ch10, &
           &   'E+4*pi*P:  ', (dtset%efield(ii)+4.0d0*pi*ptot_cart(ii),ii=1,3)
-     call wrtout(iunit,message,'COLL')
+     call wrtout(iunit,msg,'COLL')
 
-     write(message,'(a,a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a)') ch10,&
+     write(msg,'(a,a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a)') ch10,&
 &     ' (S.I.), that is V/m for E, and C/m^2 for P and D', ch10, &
 &     '-      E:  ', (dtset%efield(ii)*(Ha_J/(e_Cb*Bohr_Ang*1d-10)), ii=1,3), ch10,& !(Ha_J/(e_Cb*Bohr_Ang*1d-10))= 5.14220652*1d+11
 &     '       P:  ', (ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2, ii=1,3), ch10,&
 &     '       D:  ', ((1.0d0/(4*pi))*dtset%dfield(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2,ii = 1, 3),ch10,&
 &     'eps0*E+P:  ', (dtset%efield(ii)*eps0*(Ha_J/(e_Cb*Bohr_Ang*1d-10))+ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2,ii=1,3),ch10
         ! eps0*(Ha_J/(e_Cb*Bohr_Ang*1d-10))=8.854187817620*5.14220652*1d-1
-     call wrtout(iunit,message,'COLL')
+     call wrtout(iunit,msg,'COLL')
 
      !MGNAG Runtime Error: wrtout_cpp.f90, line 896: Buffer overflow on output
 
@@ -2391,27 +2386,27 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
         red_pbar(idir)  = (4*pi/ucvol)*dot_product(dtefield%red_ptot1(:),rmet(:,idir))
      end do
 
-     write(message,'(a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))')  ' (a. u.)', ch10,&
+     write(msg,'(a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))')  ' (a. u.)', ch10,&
           &   '   ebar0:  ', (dtset%red_efieldbar(ii),ii=1,3), ch10, &
           &   '    ebar:  ', (red_efieldbar_lc(ii),ii=1,3), ch10, &
           &   '    pbar:  ', (red_pbar(ii),ii=1,3)
-     call wrtout(iunit,message,'COLL')
+     call wrtout(iunit,msg,'COLL')
 
-     write(message,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10, &
+     write(msg,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10, &
           &   '       e:  ', (dtset%red_efield(ii),ii=1,3), ch10, &
           &   '       p:  ', (dtefield%red_ptot1(ii), ii=1,3)
-     call wrtout(iunit,message,'COLL')
+     call wrtout(iunit,msg,'COLL')
 
-     write(message,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10, &
+     write(msg,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10, &
           &   '       E:  ', (dtefield%efield2(ii), ii=1,3), ch10, &
           &   '       P:  ', (ptot_cart(ii), ii=1,3)
-     call wrtout(iunit,message,'COLL')
+     call wrtout(iunit,msg,'COLL')
 
-     write(message,'(a,a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a)') ch10, &
+     write(msg,'(a,a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a)') ch10, &
           &   ' (S.I.), that is V/m for E, and C/m^2 for P', ch10, &
           &   '-      E:  ', (dtefield%efield2(ii)*(Ha_J/(e_Cb*Bohr_Ang*1d-10)), ii=1,3), ch10, &    !(Ha_J/(e_Cb*Bohr_Ang*1d-10))= 5.14220652*1d+11
           &  '       P:  ', (ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2, ii=1,3),ch10
-     call wrtout(iunit,message,'COLL')
+     call wrtout(iunit,msg,'COLL')
 
 
   end if  ! berryopt ==14
@@ -2444,34 +2439,34 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
         dtset%dfield(idir)  =(4*pi/ucvol)*dot_product(dtset%red_dfield(:),rprimd(:,idir))
      end do
 
-     write(message,'(a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ' (a. u.)', ch10,&
+     write(msg,'(a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ' (a. u.)', ch10,&
           &   '       e:  ', (dtset%red_efield(ii),ii=1,3), ch10, &
           &   '       p:  ', (dtefield%red_ptot1(ii), ii=1,3), ch10, &
           &   '       d:  ', (dtset%red_dfield(ii),ii = 1, 3), ch10, &
           &   ' e  +  p:  ', (dtset%red_efield(ii)+dtefield%red_ptot1(ii),ii=1,3)
-     call wrtout(iunit,message,'COLL')
+     call wrtout(iunit,msg,'COLL')
 
-     write(message,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10, &
+     write(msg,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10, &
           &   '    ebar:  ', (dtset%red_efieldbar(ii),ii=1,3), ch10, &
           &   '    pbar:  ', (red_pbar(ii),ii=1,3), ch10, &
           &   '    dbar:  ', (red_dfieldbar(ii),ii=1,3), ch10, &
           &   ' eba+pba:  ', (dtset%red_efieldbar(ii)+red_pbar(ii),ii=1,3)
-     call wrtout(iunit,message,'COLL')
+     call wrtout(iunit,msg,'COLL')
 
-     write(message,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10, &
+     write(msg,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10, &
           &   '       E:  ', (dtset%efield(ii), ii=1,3), ch10, &
           &   '       P:  ', (ptot_cart(ii), ii=1,3), ch10, &
           &   '       D:  ', (dtset%dfield(ii),ii = 1, 3), ch10, &
           &   'E+4*pi*P:  ', (dtset%efield(ii)+4.0d0*pi*ptot_cart(ii),ii=1,3)
-     call wrtout(iunit,message,'COLL')
+     call wrtout(iunit,msg,'COLL')
 
-     write(message,'(a,a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a)') ch10, &
+     write(msg,'(a,a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a)') ch10, &
 &     ' (S.I.), that is V/m for E, and C/m^2 for P and D', ch10, &
 &     '-      E:  ', (dtset%efield(ii)*(Ha_J/(e_Cb*Bohr_Ang*1d-10)), ii=1,3), ch10, &    !(Ha_J/(e_Cb*Bohr_Ang*1d-10))= 5.14220652*1d+11
 &     '       P:  ', (ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2, ii=1,3), ch10, &
 &     '       D:  ', ((1.0d0/(4*pi))*dtset%dfield(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2,ii = 1, 3), ch10, &
 &     'eps0*E+P:  ', (dtset%efield(ii)*eps0*(Ha_J/(e_Cb*Bohr_Ang*1d-10))+ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2,ii=1,3),ch10
-     call wrtout(iunit,message,'COLL')
+     call wrtout(iunit,msg,'COLL')
 
   end if  ! berryopt ==16
 
@@ -2533,43 +2528,43 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
         end if
      end do
 
-     write(message,'(a,a,a,6x,a,11x,a,11x,a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') &
+     write(msg,'(a,a,a,6x,a,11x,a,11x,a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') &
           &   ' (a. u.)', ch10,&
           &   '           ', (flag_field(ii),ii=1,3),ch10, &
           &   '   ebar0:  ', (dtset%red_efieldbar(ii),ii=1,3), ch10, &
           &   '    ebar:  ', (red_efieldbar_lc(ii),ii=1,3), ch10, &
           &   '       d:  ', (dtset%red_dfield(ii),ii = 1, 3), ch10, &
           &   ' e  +  p:  ', (red_efield_lc(ii)+dtefield%red_ptot1(ii),ii=1,3)
-     call wrtout(iunit,message,'COLL')
+     call wrtout(iunit,msg,'COLL')
 
-     write(message,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10, &
+     write(msg,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10, &
           &   '       e:  ', (red_efield_lc(ii),ii=1,3), ch10, &
           &   '       p:  ', (dtefield%red_ptot1(ii), ii=1,3), ch10, &
           &   '       d:  ', (dtset%red_dfield(ii),ii = 1, 3), ch10, &
           &   ' e  +  p:  ', (red_efield_lc(ii)+dtefield%red_ptot1(ii),ii=1,3)
-     call wrtout(iunit,message,'COLL')
+     call wrtout(iunit,msg,'COLL')
 
-     write(message,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10, &
+     write(msg,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10, &
           &   '    ebar:  ', (red_efieldbar_lc(ii),ii=1,3), ch10, &
           &   '    pbar:  ', (red_pbar(ii),ii=1,3), ch10, &
           &   '    dbar:  ', (red_dfieldbar(ii),ii=1,3), ch10, &
           &   ' eba+pba:  ', (red_efieldbar_lc(ii)+red_pbar(ii),ii=1,3)
-     call wrtout(iunit,message,'COLL')
+     call wrtout(iunit,msg,'COLL')
 
-     write(message,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10, &
+     write(msg,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10, &
           &   '       E:  ', (dtefield%efield2(ii), ii=1,3), ch10, &
           &   '       P:  ', (ptot_cart(ii), ii=1,3), ch10, &
           &   '       D:  ', (dtset%dfield(ii),ii = 1, 3), ch10, &
           &   'E+4*pi*P:  ', (dtset%efield(ii)+4.0d0*pi*ptot_cart(ii),ii=1,3)
-     call wrtout(iunit,message,'COLL')
+     call wrtout(iunit,msg,'COLL')
 
-     write(message,'(a,a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a)')  ch10, &
+     write(msg,'(a,a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a)')  ch10, &
 &     ' (S.I.), that is V/m for E, and C/m^2 for P and D', ch10, &
 &     '       E:  ', (dtefield%efield2(ii)*(Ha_J/(e_Cb*Bohr_Ang*1d-10)), ii=1,3), ch10,& !(Ha_J/(e_Cb*Bohr_Ang*1d-10))= 5.14220652*1d+11
 &     '       P:  ', (ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2, ii=1,3), ch10, &
 &     '       D:  ', ((1.0d0/(4*pi))*dtset%dfield(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2,ii = 1, 3), ch10, &
 &     'eps0*E+P:  ', (dtefield%efield2(ii)*eps0*(Ha_J/(e_Cb*Bohr_Ang*1d-10))+ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2,ii=1,3),ch10
-     call wrtout(iunit,message,'COLL')
+     call wrtout(iunit,msg,'COLL')
 
   end if  ! berryopt ==17
 
@@ -2747,10 +2742,10 @@ end subroutine init_e_field_vars
 !! SOURCE
 
 subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
-     &              mkmem,mpi_enreg,mpw,natom,nkpt,npwarr,nsppol,&
-     &              nsym,ntypat,occ,pawang,pawrad,pawtab,psps,&
-     &              pwind,pwind_alloc,pwnsfac,&
-     &              rprimd,symrec,typat,usepaw,xred)
+                     mkmem,mpi_enreg,mpw,natom,nkpt,npwarr,nsppol,&
+                     nsym,ntypat,occ,pawang,pawrad,pawtab,psps,&
+                     pwind,pwind_alloc,pwnsfac,&
+                     rprimd,symrec,typat,usepaw,xred)
 
   !Arguments ------------------------------------
   !scalars
@@ -2789,7 +2784,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
   ! rmetlcl(3,3)=real-space metric (same as rmet in metric.F90)
   ! gmetlcl(3,3)= same as gmet in metric.F90
   ! ucvol = volume of the unit cell in Bohr**3
-  character(len=500) :: message
+  character(len=500) :: msg
   logical :: calc_epaw3_force,calc_epaw3_stress,fieldflag
   !arrays
   integer :: dg(3),iadum(3),iadum1(3),neigh(6)
@@ -2799,7 +2794,6 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
   real(dp) :: delta_str3(2), dstr(2),dk_str(2,2,3)
   real(dp) :: tsec(2)
   real(dp),allocatable :: calc_expibi(:,:),calc_qijb(:,:,:),spkpt(:,:)
-
   ! *************************************************************************
 
   DBG_ENTER("COLL")
@@ -2844,12 +2838,12 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
      ABI_MALLOC(dtefield%fkptns,(3,dtefield%fnkpt))
      dtefield%fkptns(1:3,1:dtefield%fnkpt)=dtset%kpt(1:3,1:dtefield%fnkpt)
      if(dtset%kptopt==0)then
-        write(message,'(10a)') ch10,&
+        write(msg,'(10a)') ch10,&
              &     ' initberry : WARNING -',ch10,&
              &     '  you have defined manually the k-point grid with kptopt = 0',ch10,&
              &     '  the berry phase calculation works only with a regular k-points grid,',ch10,&
              &     '  abinit doesn''t check if your grid is regular...'
-        call wrtout(std_out,message,'PERS')
+        call wrtout(std_out,msg,'PERS')
      end if
   end if
 
@@ -3075,17 +3069,16 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
 
         if (fieldflag) then
            if (nband_k /= mband_occ_k) then
-              write(message,'(a,a,a)')&
+              write(msg,'(a,a,a)')&
                    &         '  In a finite electric field, nband must be equal ',ch10,&
                    &         '  to the number of valence bands.'
-              ABI_ERROR(message)
+              ABI_ERROR(msg)
            end if
         end if
 
         if (ikpt > 1) then
            if (dtefield%nband_occ(isppol) /= mband_occ_k) then
-              message = "The number of valence bands is not the same for every k-point of present spin channel"
-              ABI_ERROR(message)
+              ABI_ERROR("The number of valence bands is not the same for every k-point of present spin channel")
            end if
         else
            dtefield%mband_occ         = max(dtefield%mband_occ, mband_occ_k)
@@ -3155,10 +3148,10 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
         !    dtefield%efield_dot(2) = dot_product(dtset%efield(:),rprimd(:,2))
         !    dtefield%efield_dot(3) = dot_product(dtset%efield(:),rprimd(:,3))
 
-        write(message,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
+        write(msg,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
              &     ' initberry: Reduced electric field (ebar)',ch10,&
              &     '  red_efieldbar(1:3) = ',dtset%red_efieldbar(1:3),ch10
-        call wrtout(std_out,message,'COLL')
+        call wrtout(std_out,msg,'COLL')
 
      end if
 
@@ -3168,10 +3161,10 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
            dtset%red_dfield(ii)= (dot_product(dtset%dfield(:),gprimdlc(:,ii)))*ucvol_local/(4.d0*pi)
         end do
 
-        write(message,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
+        write(msg,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
              &     ' initberry: Reduced electric displacement field',ch10,&
              &     '  red_dfield(1:3) = ',dtset%red_dfield(1:3),ch10
-        call wrtout(std_out,message,'COLL')
+        call wrtout(std_out,msg,'COLL')
 
      end if
 
@@ -3188,15 +3181,15 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
         !    dtefield%efield_dot(2) = dtset%red_efieldbar(2)
         !    dtefield%efield_dot(3) = dtset%red_efieldbar(3)
 
-        write(message,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
+        write(msg,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
              &     ' initberry: Unreduced electric field (a.u.)',ch10,&
              &     '  efield(1:3) = ',dtset%efield(1:3),ch10
-        call wrtout(std_out,message,'COLL')
+        call wrtout(std_out,msg,'COLL')
 
-        write(message,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
+        write(msg,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
              &     ' initberry: Reduced electric field (ebar)',ch10,&
              &     '  red_efieldbar(1:3) = ',dtset%red_efieldbar(1:3),ch10
-        call wrtout(std_out,message,'COLL')
+        call wrtout(std_out,msg,'COLL')
 
      end if
 
@@ -3222,20 +3215,20 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
         !    dtefield%efield_dot(3) = dtset%red_efieldbar(3)
 
 
-        write(message,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
+        write(msg,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
              &     ' initberry: Unreduced electric displacement field (a.u.)',ch10,&
              &     '  dfield(1:3) = ',dtset%dfield(1:3),ch10
-        call wrtout(std_out,message,'COLL')
+        call wrtout(std_out,msg,'COLL')
 
-        write(message,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
+        write(msg,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
              &     ' initberry: Unreduced electric field (a.u.)',ch10,&
              &     '  efield(1:3) = ',dtset%efield(1:3),ch10
-        call wrtout(std_out,message,'COLL')
+        call wrtout(std_out,msg,'COLL')
 
-        write(message,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
+        write(msg,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
              &     ' initberry: Reduced electric field (ebar)',ch10,&
              &     '  red_efieldbar(1:3) = ',dtset%red_efieldbar(1:3),ch10
-        call wrtout(std_out,message,'COLL')
+        call wrtout(std_out,msg,'COLL')
 
      end if
 
@@ -3250,26 +3243,26 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
            dtefield%efield_dot(idir) = dtset%red_efieldbar(idir)
         end do
 
-        write(message,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
+        write(msg,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
              &     ' initberry: Reduced electric field (ebar)',ch10,&
              &     '  red_efieldbar(1:3) = ',dtset%red_efieldbar(1:3),ch10
-        call wrtout(std_out,message,'COLL')
+        call wrtout(std_out,msg,'COLL')
 
 
-        write(message,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
+        write(msg,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
              &     ' initberry: Unreduced electric field (a.u.)',ch10,&
              &     '  efield(1:3) = ',dtset%efield(1:3),ch10
-        call wrtout(std_out,message,'COLL')
+        call wrtout(std_out,msg,'COLL')
 
-        write(message,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
+        write(msg,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
              &     ' initberry: Reduced electric displacement field (a.u.)',ch10,&
              &     '  red_dfield(1:3) = ',dtset%red_dfield(1:3),ch10
-        call wrtout(std_out,message,'COLL')
+        call wrtout(std_out,msg,'COLL')
 
-        write(message,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
+        write(msg,'(a,a,a,a,3(2x,f16.9),a)')ch10,&
              &     ' initberry: Unreduced electric displacement field (a.u.)',ch10,&
              &     '  dfield(1:3) = ',dtset%dfield(1:3),ch10
-        call wrtout(std_out,message,'COLL')
+        call wrtout(std_out,msg,'COLL')
 
 
      end if
@@ -3365,10 +3358,10 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
 
         !    Check that the string length is a divisor of nkpt
         if(mod(dtefield%fnkpt,nkstr) /= 0) then
-           write(message,'(a,i5,a,i7)')&
+           write(msg,'(a,i5,a,i7)')&
                 &       ' The string length = ',nkstr,&
                 &       ', is not a divisor of fnkpt =',dtefield%fnkpt
-           ABI_BUG(message)
+           ABI_BUG(msg)
         end if
 
         dtefield%nkstr(idir) = nkstr
@@ -3376,11 +3369,11 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
 
      end if      ! dtset%rfdir(idir) == 1
 
-     write(message,'(a,i1,a,i3,a,i6)')&
+     write(msg,'(a,i1,a,i3,a,i6)')&
           &   '  initberry: for direction ',idir,', nkstr = ',dtefield%nkstr(idir),&
           &   ', nstr = ',dtefield%nstr(idir)
-     call wrtout(std_out,message,'COLL')
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
 
   end do     ! close loop over idir
 
@@ -4024,26 +4017,24 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
      eg_ev = eg*Ha_eV
 
      if (dtset%optcell ==0 .and. (dtset%berryopt == 4 .or. dtset%berryopt == 14)) then
-        write(message,'(a,a,a,a,a,a,a,a,f7.2,a,a)')ch10,&
+        write(msg,'(a,a,a,a,a,a,a,a,f7.2,a,a)')ch10,&
              &     ' initberry: COMMENT - ',ch10,&
              &     '  As a rough estimate,',ch10,&
              &     '  to be below the critical field, the bandgap of your system',ch10,&
              &     '  should be larger than ',eg_ev,' eV.',ch10
-        call wrtout(ab_out,message,'COLL')
-        call wrtout(std_out,message,'COLL')
+        call wrtout(ab_out,msg,'COLL')
+        call wrtout(std_out,msg,'COLL')
 
      else
 
-        write(message,'(a,a,a,a,a,a,a)') ch10,&
+        write(msg,'(a,a,a,a,a,a,a)') ch10,&
              &     ' initberry: COMMENT - ',ch10,&
              &     '  The estimation of critical electric field should be checked after calculation.',ch10,&
              &     '  It is printed out just after total energy.' ,ch10
 
-        call wrtout(ab_out,message,'COLL')
-        call wrtout(std_out,message,'COLL')
-
+        call wrtout(ab_out,msg,'COLL')
+        call wrtout(std_out,msg,'COLL')
      end if
-
   end if
 
   ABI_FREE(kg1_k)
@@ -4055,7 +4046,6 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
 
 end subroutine initberry
 !!***
-
 
 end module m_berryphase_new
 !!***

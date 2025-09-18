@@ -227,7 +227,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  end if
 
  do idtset=1,ndtset_alloc
-   call init_results_respfn(dtsets,ndtset_alloc,results_respfn)
+   call results_respfn%init(dtsets,ndtset_alloc)
  end do
 
  call timab(641,2,tsec)
@@ -408,9 +408,9 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 !  Treat the file names (get variables)
 
 !  In the case of multiple images, the file names will be overwritten later (for each image)
-   call dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enregs(idtset),ndtset)
+   call dtfil%init(dtset,filnam,filstat,idtset,jdtset_,mpi_enregs(idtset),ndtset)
    if (dtset%optdriver==RUNL_GSTATE.and.dtset%nimage>1) then
-     call dtfil_init_img(dtfil,dtset,dtsets,idtset,jdtset_,ndtset,ndtset_alloc)
+     call dtfil%init_img(dtset,dtsets,idtset,jdtset_,ndtset,ndtset_alloc)
    end if
 
 !  ****************************************************************************
@@ -944,7 +944,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  call elpa_func_uninit()
 #endif
 
- !PSP deallocation
  call psps_free(psps)
 
  !XG 121126 : One should not use dtset or idtset in this section, as these might not be defined for all processors.
@@ -962,8 +961,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
  ABI_FREE(jdtset_)
 
-!Results_respfn deallocation
- call destroy_results_respfn(results_respfn)
+ call results_respfn%free()
 
  call timab(644,2,tsec)
  call timab(640,2,tsec)

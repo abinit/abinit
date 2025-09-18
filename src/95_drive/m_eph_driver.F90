@@ -39,7 +39,6 @@ module m_eph_driver
  use m_phonons
  use m_nctk
  use m_wfk
- use m_distribfft
  use netcdf
 
  use defs_datatypes,    only : pseudopotential_type
@@ -73,6 +72,7 @@ module m_eph_driver
  use m_gwpt,            only : gwpt_run
  use m_varpeq,          only : varpeq_run, varpeq_plot
  use m_eph_path,        only : eph_path_run
+ use m_wkk,             only : wkk_run
 
  implicit none
 
@@ -149,7 +149,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  integer,parameter :: master = 0, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0, with_cplex1 = 1, with_cplex2 = 2
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf
  integer :: iblock_dielt_zeff, iblock_dielt, iblock_quadrupoles, ddb_nqshift, ierr, npert_miss
- integer :: omp_ncpus, work_size, nks_per_proc, mtyp, mpert, lwsym, qptopt, ncid
+ integer :: omp_ncpus, work_size, nks_per_proc, lwsym, qptopt, ncid
  real(dp):: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff
  real(dp) :: cpu,wall,gflops
@@ -416,17 +416,15 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  ! Change the bravais lattice if needed
  call ddb%set_brav(dtset%brav)
 
- mtyp = ddb_hdr%mblktyp
- mpert = ddb_hdr%mpert
-
  ! MR: a new ddb is necessary for the longwave quantities due to incompability of it with automatic reshapes
  ! that ddb%val and ddb%flg experience when passed as arguments of some routines
  ! GA: Should replace with ddb_hdr%with_d3E_lw
  iblock_quadrupoles = 0
  qdrp_cart = zero
- if (mtyp == BLKTYP_d3E_lw) then
+ if (ddb_hdr%has_d3E_lw) then
    lwsym = 1
-   call ddb_lw_copy(ddb, ddb_lw, mpert, dtset%natom, dtset%ntypat)
+   call ddb_lw_copy(ddb, ddb_lw, ddb_hdr)
+   ! GA: FIXME Bad interface
    iblock_quadrupoles = ddb_lw%get_quadrupoles(ddb_hdr%ddb_version, lwsym, BLKTYP_d3E_lw, qdrp_cart)
    call ddb_lw%free()
  end if
@@ -547,7 +545,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    ! Copy brav variable
    dvdb%brav = dtset%brav
 
-   ! Select algorithm for generating the list of R-points and the weigths used to compute W(r,R)
+   ! Select algorithm for generating the list of R-points and the weights used to compute W(r,R)
    dvdb%rspace_cell = dtset%dvdb_rspace_cell
 
    !call dvdb%load_ddb(dtset%prtvol, comm, ddb=ddb)
@@ -571,7 +569,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    if (.not. dvdb%has_dielt .or. .not. (dvdb%has_zeff .or. dvdb%has_quadrupoles)) then
      if (dvdb%add_lr /= 0) then
        dvdb%add_lr = 0
-       ABI_WARNING("Setting dvdb_add_lr to 0. Long-range term won't be substracted in Fourier interpolation.")
+       ABI_WARNING("Setting dvdb_add_lr to 0. Long-range term won't be subtracted in Fourier interpolation.")
      end if
    end if
 
@@ -584,7 +582,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
 
    if (my_rank == master) then
-     call dvdb%print()
+     call dvdb%print([std_out], "DVDB FILE", dtset%prtvol)
      call dvdb%list_perts([-1, -1, -1], npert_miss)
      ABI_CHECK(npert_miss == 0, sjoin(itoa(npert_miss), "independent perturbation(s) are missing in the DVDB file!"))
    end if
@@ -609,7 +607,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    ! Copy brav variable
    drhodb%brav = dtset%brav
 
-   ! Select algorithm for generating the list of R-points and the weigths used to compute W(r,R)
+   ! Select algorithm for generating the list of R-points and the weights used to compute W(r,R)
    drhodb%rspace_cell = dtset%dvdb_rspace_cell
 
    !call drhodb%load_ddb(dtset%prtvol, comm, ddb=ddb)
@@ -623,7 +621,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    drhodb%has_zeff = .False.; drhodb%zeff = 0; drhodb%zeff_raw = 0
 
    if (my_rank == master) then
-     call drhodb%print()
+     call drhodb%print([std_out], "DRHODB file", 0)
      call drhodb%list_perts([-1, -1, -1], npert_miss)
      ABI_CHECK(npert_miss == 0, sjoin(itoa(npert_miss), "independent perturbation(s) are missing in the DVDB file!"))
    end if
@@ -637,8 +635,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  ! Fake MPI_type for the sequential part.
  call initmpi_seq(mpi_enreg)
- call init_distribfft_seq(mpi_enreg%distribfft, 'c', ngfftc(2), ngfftc(3), 'all')
- call init_distribfft_seq(mpi_enreg%distribfft, 'f', ngfftf(2), ngfftf(3), 'all')
+ call mpi_enreg%distribfft%init_seq('c', ngfftc(2), ngfftc(3), 'all')
+ call mpi_enreg%distribfft%init_seq('f', ngfftf(2), ngfftf(3), 'all')
 
  ! I am not sure yet the EFMAS file will be needed as soon as eph_frohlichm/=0. To be decided later.
  if (dtset%eph_frohlichm /= 0) then
@@ -652,7 +650,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  ! ===========================================
  call pspini(dtset, dtfil, ecore, psp_gencond, gsqcutc_eff, gsqcutf_eff, pawrad, pawtab, psps, cryst%rprimd, comm_mpi=comm)
 
- ! Relase nkpt-based arrays in dtset to decrease memory requirement if dense sampling.
+ ! Release nkpt-based arrays in dtset to decrease memory requirement if dense sampling.
  ! EPH routines should not access them after this point.
  if (all(dtset%eph_task /= [6, 10])) call dtset%free_nkpt_arrays()
 
@@ -844,8 +842,13 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
                  pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (18)
-   ! Compute e-ph matrix elements along a q-path
+   ! Compute e-ph matrix elements along q-path.
    call eph_path_run(dtfil, dtset, cryst, ebands, dvdb, ifc, pawfgr, pawang, pawrad, pawtab, psps, comm)
+
+ case (19)
+   ! Compute matrix elements of W_kk'
+   call wkk_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, wfk0_hdr, &
+                pawtab, psps, mpi_enreg, comm)
 
  case default
    ABI_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))
@@ -854,17 +857,10 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  !=====================
  !==== Free memory ====
  !=====================
- call cryst%free()
- call dvdb%free()
- call drhodb%free()
- call ddb_hdr%free()
- call ddb%free()
- call ifc%free()
- call wfk0_hdr%free()
- call ebands%free()
- call ebands_kq%free()
- call pawfgr_destroy(pawfgr)
- call destroy_mpi_enreg(mpi_enreg)
+ call cryst%free(); call dvdb%free(); call drhodb%free(); call ddb_hdr%free()
+ call ddb%free(); call ifc%free(); call wfk0_hdr%free()
+ call ebands%free(); call ebands_kq%free()
+ call pawfgr_destroy(pawfgr); call destroy_mpi_enreg(mpi_enreg)
 
  if (allocated(efmasdeg)) call efmasdeg_free_array(efmasdeg)
  if (allocated(efmasval)) call efmasval_free_array(efmasval)

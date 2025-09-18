@@ -111,6 +111,6 @@ pseudos          "Psdj_paw_pw_std/La.xml, Psdj_paw_pw_std/Cu.xml, Psdj_paw_pw_st
 #%%    tw90_6_MPI4.abo, tolnlines=5, tolabs=7.00e-05, tolrel=1.10e+00, fld_options=-medium
 #%% [extra_info]
 #%% authors = O. Gingras
-#%% keywords = wannier90, la2cuo4, PAW
+#%% keywords = wannier90, PAW
 #%% description = Test interface with Wannier90 (PAW pseudopotentials)
 #%%<END TEST_INFO>

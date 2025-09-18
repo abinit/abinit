@@ -40,7 +40,7 @@ gw_icutcoul2  16
 optdriver3  4
 getwfk3     1
 gw_icutcoul3  15
-rcut3       8.
+gw_rcut3       8.
 
 #################
 ### DATASET 4 ###
@@ -48,7 +48,7 @@ rcut3       8.
 optdriver4  4
 getwfk4     1
 gw_icutcoul4  14
-rcut4       8.
+gw_rcut4       8.
 
 # Definition of the unit cell: fcc
 acell  3*10.217

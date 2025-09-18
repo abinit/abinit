@@ -130,7 +130,7 @@ subroutine chebfiwf2_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 
  logical :: paw
 
- integer :: space, space_cprj, blockdim, cprjdim, nband_cprj
+ integer :: space, space_cprj, cprjdim, nband_cprj
  integer :: me_g0,me_g0_fft
 
  integer, parameter :: tim_chebfiwf2 = 2060
@@ -150,9 +150,6 @@ subroutine chebfiwf2_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  l_gs_hamk => gs_hamk
 
  cprjdim = xg_nonlop%cprjdim
-
-!Variables
- blockdim=mpi_enreg%nproc_band*mpi_enreg%bandpp
  nband_cprj=nband/mpi_enreg%nproc_band
 
 !Depends on istwfk

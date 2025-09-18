@@ -322,7 +322,10 @@ subroutine rotate_back_mag_dfpt(option,vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsiz
  integer  :: ipt,rotation_method
  logical  :: has_mag_norm
  logical  :: small_angle
- real(dp) :: bxc_over_m,d1,d2,d3,d4,dvdn,dvdz,fact,m_dot_m1,m_norm
+ real(dp) :: bxc_over_m,d1,d2,dvdn,dvdz,fact,m_dot_m1,m_norm
+ ! d3 and d4 were computed below but never used, and caused test
+ ! fail problems
+ !real(dp) :: d3,d4
  real(dp) :: dvdn_re,dvdn_im,dvdz_re,dvdz_im
  complex(dpc) :: rho_updn
  real(dp) :: mdirx,mdiry,mdirz,mxy,mx1,my1,mz1,wx,wy,wx1,wy1
@@ -378,8 +381,9 @@ subroutine rotate_back_mag_dfpt(option,vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsiz
        rho_updn=(mag(ipt,1)+(zero,one)*mag(ipt,2))
        d1=sqrt(( m_norm+mag(ipt,3))**2+abs(rho_updn)**2)
        d2=sqrt((-m_norm+mag(ipt,3))**2+abs(rho_updn)**2)
-       d3=sqrt(( m_norm-mag(ipt,3))**2+abs(rho_updn)**2)
-       d4=sqrt(( m_norm+mag(ipt,3))**2-abs(rho_updn)**2)
+       ! d3 and d4 are computed here but never used
+       !d3=sqrt(( m_norm-mag(ipt,3))**2+abs(rho_updn)**2)
+       !d4=sqrt(( m_norm+mag(ipt,3))**2-abs(rho_updn)**2)
        u0(1,1)=( m_norm+mag(ipt,3))/d1  ! ( m  + mz)/d1
        u0(2,2)=rho_updn/d2              ! ( mx +imy)/d2
        u0(1,2)=(-m_norm+mag(ipt,3))/d2  ! (-m  + mz)/d2
@@ -411,7 +415,7 @@ subroutine rotate_back_mag_dfpt(option,vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsiz
        v1tmp(1,1)=cmplx(real(vxc1_in(ipt,1),kind=dp),zero)
        v1tmp(2,2)=cmplx(real(vxc1_in(ipt,2),kind=dp),zero)
 
-       !Tranforming the rhor1 with U0
+       !Transforming the rhor1 with U0
        rho1_updn(1,1)=half*(rho1(ipt,1)+rho1(ipt,4))
        rho1_updn(2,2)=half*(rho1(ipt,1)-rho1(ipt,4))
        rho1_updn(1,2)=half*(rho1(ipt,2)-(zero,one)*rho1(ipt,3))
@@ -453,7 +457,7 @@ subroutine rotate_back_mag_dfpt(option,vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsiz
 ! Analytical expression of U rotation matrix
 !----------------------------------------
  case (2)
-   !Alternative method (explicitely calculated rotation matrices)
+   !Alternative method (explicitly calculated rotation matrices)
    !Vxc^(1) =   phixc^(1).Id +                                               // <= change of "electrostatic" XC potential  (phixc^(1) is denoted dvdn)
    !          + bxc^(1)*( Udag^(0).sigma_z.U^(0) )  +                        // <= this part describes the change of XC magnetic field magnitude bxc^(1)
    !          + bxc^(0)*( Udag^(1).sigma_z.U^(0) + Udag^(0).sigma_z.U^(1) )  // <= remaining terms describe the cost of magnetization rotation
@@ -688,7 +692,7 @@ subroutine rotate_back_mag_dfpt(option,vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsiz
          vxc1_out(ipt,4)=-dvdz*mdiry   ! Imaginary part, minus sign comes from sigma_y
 
          if (option/=0) then
-           !Add remaining contributions comming from the change of magnetization direction
+           !Add remaining contributions coming from the change of magnetization direction
            !projection of m^(1) on gs magnetization direction
            m_dot_m1=(mdirx*rho1(ipt,2)+mdiry*rho1(ipt,3)+mdirz*rho1(ipt,4))
 
