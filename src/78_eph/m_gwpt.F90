@@ -861,7 +861,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
               cryst%rprimd, usexcnhat, vxc, vxcavg, dum_xccc3d, xcdata)
  call pstat_proc%print(_PSTAT_ARGS_)
 
- ! Here we decide if q can be reduced to the IBZ(k)
+ ! Here we decide if the q-points can be reduced to the IBZ(k)
  use_lgk = .False.
  if (gstore%qzone == "bz") then
    use_lgk = .True.
@@ -1744,8 +1744,8 @@ end if ! .not qq_is_gamma.
        !call xmpi_sum_master(gks_atm , master, gqk%pert_ppsum_bsum_comm%value, ierr)
        !call xmpi_sum_master(gks_atm2, master, gqk%pert_ppsum_bsum_comm%value, ierr)
        ! SC: not sure why, but xmpi_sum_master sometimes causes gvals to be filled
-       ! with zeros and none in the GSTORE.nc file when running in parallel (observed 
-       ! on my desktop, lemaitre4, and lucia). 
+       ! with zeros and none in the GSTORE.nc file when running in parallel (observed
+       ! on my desktop, lemaitre4, and lucia).
        call xmpi_sum(gsig_atm, gqk%pert_ppsum_bsum_comm%value, ierr)
        call xmpi_sum(gks_atm, gqk%pert_ppsum_bsum_comm%value, ierr)
        call xmpi_sum(gks_atm2, gqk%pert_ppsum_bsum_comm%value, ierr)

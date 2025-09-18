@@ -5,7 +5,6 @@
 !! FUNCTION
 !!  This module implements the gstore_t object that allows one to **precompute"" the e-ph matrix elements g
 !!  and store them in memory with a MPI-distributed data structure.
-!!
 !!  This approach is the most CPU-efficient one when one has to deal with
 !!  algorithms in which the same g(q, k) is required several (many) times.
 !!  Typical examples are iterative solvers for non-linear equations that are called inside a loop over T.
@@ -17,7 +16,7 @@
 !!
 !!  g(q, k) is therefore a sloppy notation for:
 !!
-!!          g(q, k) = <k+q,m,spin| \Delta_{q, \nu} V^{spin}_{scf} |k,n,spin>
+!!          g(q, k) = <k+q,m,spin| \Delta_{q,\nu} V^{spin}_{scf} |k,n,spin>
 !!
 !!  There are lots of technical details that should be discussed but, roughly speaking,
 !!  the gstore API allows one to:
@@ -30,7 +29,7 @@
 !!     In superconductors, for instance, only k/k+q states on the Fermi surface are usually needed.
 !!     In semiconductors, one can include only k, k+q inside an energy window around the band edge.
 !!     for transport properties or just the |n,k,spin> states at the band edges while <k+q,m,spin|
-!!     have q in the BZ and m=1,nband
+!!     have q in the BZ and m=1,nband.
 !!
 !!  - whether the code should compute and store the complex valued g or |g|^2.
 !!    Expression depending of |g|^2 are gauge-invariant provided that all degenerate states are summed over.
@@ -70,7 +69,7 @@
 !!              |         |         |
 !!              |--------------------
 !!
-!!  Each processor stores all the (band_1, band_2) transitions for a given (q, k) pair.
+!!  Each processor stores all the (band_kq, band_k) transitions for a given (q, k) pair.
 !!
 !!  Perturbations can be optionally distributed along a third axis (pert_comm).
 !!  Note, however, that the parallelism over perturbations is not expected to be the most efficient
@@ -80,21 +79,20 @@
 !!  For electronic properties, one usually uses k-points in the IBZ and q-points in the BZ.
 !!  hence the parallelism over q-points is the most efficient one in terms of wall-time.
 !!  Keep in mind, however, that the k-point parallelism allows one to reduce the memory allocated for the
-!!  wavefunctions. Using some procs for k-point is also beneficial in terms of performance
-!!  as we can reduce load imbalance with the number of procs in qpt_comm does not divide nqbz.
+!!  wavefunctions. Using some procs for k-points is also beneficial in terms of performance
+!!  as we can reduce load imbalance is the number of procs in qpt_comm does not divide nqbz.
 !!
 !!  NB: If nsppol == 2, we create two gqk objects, one for each spin.
 !!  The reason is that dimensions such as the number of effective bands/q-points/k-points
-!!  depends on spin if filters are employed.
+!!  depends on the collinear spin when filters are employed.
 !!
 !! TODO
-!!  1) Introduce new communicator to distribute (band_1, band_2)
-!!  2) Implement possibility of reading a subset of data from a larger gstore ?
+!!  1) Implement possibility of reading a subset of data from a larger gstore ?
 !!  2) Optimize v^1_loc|psi_nk> by precomputing <r|psi_nk> before the loop over my_npert
 !!     Big speedup is expected, especially if one loops first over k and then q, provided
 !!     the interpolation of v^1_q does not start to dominate
 !!  3) Use similar trick in dfpt_cgw for H^0 |psi_nk>
-!!  4) Operate on multiple n states in getgh1c (need big refactoring of getgh1c though)
+!!  4) Operate on multiple n states in getgh1c (new version of getgh1c allows it)
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2025 ABINIT group (MG)
@@ -141,7 +139,6 @@ module m_gstore
  use defs_abitypes,    only : mpi_type
  use m_time,           only : cwtime, cwtime_report, sec2str
  use m_fstrings,       only : tolower, itoa, ftoa, sjoin, ktoa, ltoa, strcat, replace_ch0, yesno, string_in
- !use m_yaml,          only : yamldoc_t
  use m_numeric_tools,  only : arth, get_diag, isdiagmat
  use m_krank,          only : krank_t, krank_new, krank_from_kptrlatt, get_ibz2bz, star_from_ibz_idx
  use m_io_tools,       only : iomode_from_fname, file_exists
@@ -283,16 +280,16 @@ type, public :: gqk_t
   ! List of perturbation indices treated by this MPI proc.
   ! Contiguous indices.
 
+  complex(dp), allocatable :: my_g(:,:,:,:,:)
+  ! (my_npert, nb_kq, my_nq, nb_k, my_nk)
+  ! (       p, b1_kq,     q, b2_k, k)  -->  <k+q, b1| D_{q,p}H |k, b2>
+  ! e-ph matrix elements g (local buffer). Allocated if cplex == 2
+
   ! FIXME: I don't remember why I decided to have my_npert as first dimension
   ! now it seems much more more natural to me to have:
 
   ! (nb, nb, my_npert, my_nk, my_nq) or
   ! (nb, nb, my_npert, my_nq, my_nk)
-
-  complex(dp), allocatable :: my_g(:,:,:,:,:)
-  ! (my_npert, nb_kq, my_nq, nb_k, my_nk)
-  ! (       p, b1_kq,     q, b2_k, k)  -->  <k+q, b1| D_{q,p}H |k, b2>
-  ! e-ph matrix elements g (local buffer). Allocated if cplex == 2
 
   complex(dp), allocatable :: my_gq0nm_atm(:,:,:,:)
   ! (nb_k, nb_kq, natom3, my_nk)
@@ -391,8 +388,6 @@ type, public :: gqk_t
 !!      the storage mode used for the g(k, q)
 !!
 !! NB: the e-ph matrix element are stored in gstore%gqk(my_is) where my_is counts the number of spins treated by this MPI processor.
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -601,7 +596,7 @@ end type gstore_t
 !!***
 
 public :: gstore_check_restart
-  ! Check whether restart is possible.
+ ! Check whether restart is possible.
 
 contains
 !!***
@@ -660,7 +655,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  natom3 = 3 * cryst%natom; nsppol = ebands%nsppol
  units = [std_out, ab_out]
 
- call wrtout(std_out, " gstore_init: building gstore_t object...")
+ call wrtout(std_out, " gstore_init: building gstore_t instance...")
  call pstat_proc%print(_PSTAT_ARGS_)
 
  ! Set basic parameters.
@@ -976,6 +971,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    end if
    NCF_CHECK(ncerr)
 
+   ! Write data
    NCF_CHECK(nctk_set_datamode(ncid))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_with_vk"), gstore%with_vk))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_qptopt"), gstore%qptopt))
@@ -985,7 +981,6 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_kfilter"), trim(gstore%kfilter)))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_gmode"), trim(gstore%gmode)))
 
-   ! Write arrays
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_qibz"), gstore%qibz))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_qbz"), gstore%qbz))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_wtq"), gstore%wtq))
@@ -1167,7 +1162,7 @@ subroutine gstore_distribute_spins(gstore, mband, gstore_brange, nproc_spin, com
    if (nsppol == 2 .and. nprocs > 1) then
      color = xmpi_undefined
      if (spin == 1 .and. my_rank <= (nprocs - 1) / 2) color = 1
-     if (spin == 2 .and. my_rank > (nprocs - 1) / 2) color = 1
+     if (spin == 2 .and. my_rank >  (nprocs - 1) / 2) color = 1
    end if
 
    call xmpi_comm_split(comm, color, my_rank, comm_spin(spin), ierr)
@@ -1561,8 +1556,7 @@ subroutine gstore_malloc__(gstore, with_cplex, max_nq, qglob2bz, max_nk, kglob2b
 !scalars
  class(gstore_t),target,intent(inout) :: gstore
  integer,intent(in) :: with_cplex, max_nq, max_nk
- integer,intent(in) :: qglob2bz(max_nq, gstore%nsppol)
- integer,intent(in) :: kglob2bz(max_nk, gstore%nsppol)
+ integer,intent(in) :: qglob2bz(max_nq, gstore%nsppol), kglob2bz(max_nk, gstore%nsppol)
  integer,intent(in) :: qbz2ibz(6, gstore%nqbz), kbz2ibz(6, gstore%nkbz)
 
 !Local variables-------------------------------
@@ -2268,7 +2262,7 @@ end subroutine gstore_fill_bks_mask
 !! gstore_fill_bks_mask_with_pp
 !!
 !! FUNCTION
-!!  Fill the bks_mask array defining the set of states that should be read from file
+!!  Fill the bks_mask array defining the set of states that should be read from the WFK file
 !!  by this MPI rank when computing the GWPT e-ph matrix elements.
 !!
 !! INPUTS
@@ -2406,7 +2400,7 @@ end subroutine gstore_fill_bks_mask_pp_mesh
 subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax)
 
 !Arguments ------------------------------------
- class(gstore_t),target,intent(in) :: gstore
+ class(gstore_t),intent(in) :: gstore
  real(dp),intent(in) :: ecut
  integer,intent(out) :: mpw, gmax(3)
 
@@ -2414,7 +2408,6 @@ subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax)
  integer,parameter :: istwfk1 = 1
  integer :: my_is, my_ik, my_iq, spin, onpw, ierr, my_mpw, ipx, ipy, ipz, pp_max
  real(dp) :: weight_q, cpu, wall, gflops
- type(gqk_t),pointer :: gqk
 !arrays
  integer :: my_gmax(3)
  integer,allocatable :: gtmp(:,:)
@@ -2428,7 +2421,7 @@ subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax)
  call cwtime(cpu, wall, gflops, "start")
 
  do my_is=1,gstore%my_nspins
-   gqk => gstore%gqk(my_is)
+   associate (gqk => gstore%gqk(my_is))
    spin = gstore%my_spins(my_is)
    do my_ik=1,gqk%my_nk
      kk = gqk%my_kpts(:, my_ik)
@@ -2450,10 +2443,10 @@ subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax)
            end do
          end do
        end do
-
      end do ! my_iq
 
    end do ! my_ik
+   end associate
  end do ! my_is
 
  my_mpw = mpw; call xmpi_max(my_mpw, mpw, gstore%comm, ierr)
@@ -2483,7 +2476,7 @@ end subroutine gstore_get_mpw_gmax
 subroutine gstore_get_lambda_iso_iw(gstore, nw, imag_w, lambda)
 
 !Arguments ------------------------------------
- class(gstore_t),target,intent(inout) :: gstore
+ class(gstore_t),intent(inout) :: gstore
  integer,intent(in) :: nw
  real(dp),intent(in) :: imag_w(nw)
  real(dp),intent(out) :: lambda(nw)
@@ -2491,7 +2484,6 @@ subroutine gstore_get_lambda_iso_iw(gstore, nw, imag_w, lambda)
 !Local variables-------------------------------
  integer :: my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr
  real(dp) :: g2, wqnu, weight_k, weight_q
- type(gqk_t), pointer :: gqk
 !arrays
  real(dp) :: qpt(3)
  real(dp),allocatable :: dbldelta_q(:,:,:), g2_pmnk(:,:,:,:)
@@ -2500,9 +2492,10 @@ subroutine gstore_get_lambda_iso_iw(gstore, nw, imag_w, lambda)
  ABI_CHECK(gstore%qzone == "bz", "gstore_get_lambda_iso_iw assumes qzone == `bz`")
  lambda = zero
 
- do my_is=1,gstore%my_nspins
-   gqk => gstore%gqk(my_is)
+ !if (gstore%check_cplex_qkzone_gmode(cplex1, "bz", kzone, gmode, kfilter) result(ierr)
 
+ do my_is=1,gstore%my_nspins
+   associate (gqk => gstore%gqk(my_is))
    ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
    ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
 
@@ -2518,7 +2511,6 @@ subroutine gstore_get_lambda_iso_iw(gstore, nw, imag_w, lambda)
      g2_pmnk = gqk%my_g2(:,:,my_iq,:,:)
 
      do my_ik=1,gqk%my_nk
-       !weight_k = gqk%my_kweight(my_ik, gstore)
        weight_k = gqk%my_wtk(my_ik)
        do in_k=1,gqk%nb
          do im_kq=1,gqk%nb
@@ -2536,11 +2528,11 @@ subroutine gstore_get_lambda_iso_iw(gstore, nw, imag_w, lambda)
 
    ABI_FREE(dbldelta_q)
    ABI_FREE(g2_pmnk)
+   end associate
  end do ! my_is
 
  ! Take into account collinear spin
  lambda = lambda * (two / (gstore%nsppol * gstore%dtset%nspinor))
-
  call xmpi_sum(lambda, gstore%comm, ierr)
 
 end subroutine gstore_get_lambda_iso_iw
@@ -2553,7 +2545,7 @@ end subroutine gstore_get_lambda_iso_iw
 !! gstore_get_a2fw
 !!
 !! FUNCTION
-!!  Compute a^2F(omega)
+!!  Compute Eliashberg function a^2F(omega).
 !!
 !! INPUTS
 !!
@@ -2564,7 +2556,7 @@ end subroutine gstore_get_lambda_iso_iw
 subroutine gstore_get_a2fw(gstore, nw, wmesh, a2fw)
 
 !Arguments ------------------------------------
- class(gstore_t),target,intent(inout) :: gstore
+ class(gstore_t),intent(inout) :: gstore
  integer,intent(in) :: nw
  real(dp),intent(in) :: wmesh(nw)
  real(dp),intent(out) :: a2fw(nw)
@@ -2572,7 +2564,6 @@ subroutine gstore_get_a2fw(gstore, nw, wmesh, a2fw)
 !Local variables-------------------------------
  integer :: my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr
  real(dp) :: g2, wqnu, weight_k, weight_q, cpu, wall, gflops
- type(gqk_t), pointer :: gqk
 !arrays
  real(dp) :: qpt(3)
  real(dp),allocatable :: dbldelta_q(:,:,:), g2_mnkp(:,:,:,:), deltaw_nuq(:)
@@ -2583,11 +2574,10 @@ subroutine gstore_get_a2fw(gstore, nw, wmesh, a2fw)
  call cwtime(cpu, wall, gflops, "start")
 
  ABI_MALLOC(deltaw_nuq, (nw))
+
  a2fw = zero
-
  do my_is=1,gstore%my_nspins
-   gqk => gstore%gqk(my_is)
-
+   associate (gqk => gstore%gqk(my_is))
    ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
    ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
 
@@ -2621,6 +2611,7 @@ subroutine gstore_get_a2fw(gstore, nw, wmesh, a2fw)
 
    ABI_FREE(dbldelta_q)
    ABI_FREE(g2_mnkp)
+   end associate
  end do ! my_is
 
  ABI_FREE(deltaw_nuq)
@@ -2866,7 +2857,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
 
    ! Technical problems:
    !
-   ! 1) libtetrabz works with the BZ and assume a certaing ordering of the k-points (see below)
+   ! 1) libtetrabz works with the BZ and assumes a certaing ordering of the k-points (see below)
    !    so we have to fill the array with eig_k and eig_kq from the IBZ by remapping the libtetra kk
    !    to the Abinit IBZ
 
@@ -2991,17 +2982,10 @@ subroutine gqk_free(gqk)
  call gqk%wan%free()
 
  ! Free MPI communicators
- call gqk%kpt_comm%free()
- call gqk%qpt_comm%free()
- call gqk%qpt_kpt_comm%free()
- call gqk%pert_comm%free()
- call gqk%band_comm%free()
- call gqk%qpt_pert_comm%free()
- call gqk%pert_ppsum_comm%free()
- call gqk%pert_ppsum_bsum_comm%free()
- call gqk%comm%free()
- call gqk%bsum_comm%free()
- call gqk%pp_sum_comm%free()
+ call gqk%kpt_comm%free(); call gqk%qpt_comm%free(); call gqk%qpt_kpt_comm%free()
+ call gqk%pert_comm%free(); call gqk%band_comm%free(); call gqk%qpt_pert_comm%free()
+ call gqk%pert_ppsum_comm%free(); call gqk%pert_ppsum_bsum_comm%free()
+ call gqk%comm%free(); call gqk%bsum_comm%free(); call gqk%pp_sum_comm%free()
 
 end subroutine gqk_free
 !!***
@@ -3018,19 +3002,19 @@ end subroutine gqk_free
 subroutine gstore_get_missing_qbz_spin(gstore, done_qbz_spin, ndone, nmiss)
 
 !Arguments ------------------------------------
- class(gstore_t),target,intent(in) :: gstore
+ class(gstore_t),intent(in) :: gstore
  integer,intent(in) :: done_qbz_spin(gstore%nqbz, gstore%nsppol)
  integer,intent(out) :: ndone, nmiss
 
 !Local variables ------------------------------
 !scalars
  integer :: my_is, my_iq, iq_bz, spin, ierr, nscale
- type(gqk_t),pointer :: gqk
 !----------------------------------------------------------------------
 
  nmiss = 0
  do my_is=1,gstore%my_nspins
-   spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is)
+   associate (gqk => gstore%gqk(my_is))
+   spin = gstore%my_spins(my_is)
    do my_iq=1,gqk%my_nq
      iq_bz = gqk%my_q2bz(my_iq)
      if (done_qbz_spin(iq_bz, spin) == 0) nmiss = nmiss + 1
@@ -3040,6 +3024,7 @@ subroutine gstore_get_missing_qbz_spin(gstore, done_qbz_spin, ndone, nmiss)
    nscale = (gqk%pert_comm%nproc * gqk%bsum_comm%nproc * gqk%pp_sum_comm%nproc)
    nmiss = nmiss / nscale
    ndone = ndone / nscale
+   end associate
  end do ! my_is
 
  call xmpi_sum(ndone, gstore%comm, ierr)
@@ -3060,7 +3045,7 @@ end subroutine gstore_get_missing_qbz_spin
 subroutine gstore_set_perts_distrib(gstore, cryst, dvdb, my_npert)
 
 !Arguments ------------------------------------
- class(gstore_t),target,intent(in) :: gstore
+ class(gstore_t),intent(in) :: gstore
  type(crystal_t),intent(in) :: cryst
  type(dvdb_t),intent(inout) :: dvdb
  integer,intent(out) :: my_npert
@@ -3068,14 +3053,14 @@ subroutine gstore_set_perts_distrib(gstore, cryst, dvdb, my_npert)
 !Local variables ------------------------------
 !scalars
  integer :: my_is, spin
- type(gqk_t),pointer :: gqk
 !arrays
  integer,allocatable :: my_pinfo(:,:), pert_table(:,:)
 !----------------------------------------------------------------------
 
  my_npert = cryst%natom * 3
  do my_is=1,gstore%my_nspins
-   spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is)
+   associate (gqk => gstore%gqk(my_is))
+   spin = gstore%my_spins(my_is)
    if (gqk%pert_comm%nproc > 1) then
      ! Activate parallelism over perturbations
      ! Build table with list of perturbations treated by this MPI rank inside pert_comm.
@@ -3088,6 +3073,7 @@ subroutine gstore_set_perts_distrib(gstore, cryst, dvdb, my_npert)
      ABI_FREE(my_pinfo)
      ABI_FREE(pert_table)
    end if
+   end associate
  end do
 
 end subroutine gstore_set_perts_distrib
