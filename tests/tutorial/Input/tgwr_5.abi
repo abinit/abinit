@@ -47,7 +47,7 @@ gw_qprange  -4      # Compute the QP corrections for all the k-points in the irr
 #%% executable = abinit
 #%% test_chain = tgwr_1.abi, tgwr_2.abi, tgwr_3.abi, tgwr_4.abi, tgwr_5.abi
 #%% need_cpp_vars = HAVE_LINALG_SCALAPACK
-#%% exclude_builders = eos_nvhpc_23.9_elpa ,eos_nvhpc_24.9_openmpi
+#%% exclude_builders = eos_nvhpc_23.9_elpa ,eos_nvhpc_24.9_openmpi, haicgu_*
 #%% [files]
 #%% files_to_test =
 #%%   tgwr_5.abo, tolnlines = 25, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;

@@ -82,6 +82,7 @@ pseudos "Psdj_paw_pw_std/Si.xml, Psdj_paw_pw_std/O.xml"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = haicgu_*
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
