@@ -163,9 +163,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
 !Local variables ------------------------------
 !scalars
+ integer,parameter :: spinor_idxs(2,4)=RESHAPE([1,1,2,2,1,2,2,1], [2,4])
  integer,parameter :: tim_fourdp2=2,ndat1=1
  integer :: npw_k,iab,ib,ib1,ib2,ierr,ig,ii,iik,itim_q,i1,i2,npls,ib_sum
- integer :: ik_bz,ik_ibz,io,iiw,isym_q,iq_bz,iq_ibz,spin,isym,jb,is_idx
+ integer :: ik_bz,ik_ibz,io,iiw,isym_q,iq_bz,iq_ibz,spin,isym,jb,is_idx,iiab,jiab
  integer :: band,band1,band2,idle,rank,jik,jk_bz,jk_ibz,kb,nspinor
  integer :: nomega_tot,nq_summed,ibsp,dimcprj_gw,npwc
  integer :: spad,spadc1,spadc2,irow,my_nbks,ndegs,wtqm,wtqp,mod10, iwc,ifft
@@ -212,7 +213,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  type(esymm_t),pointer :: QP_sym(:)
  integer :: neig(epsm1%nomega_i)
  real(gwp),allocatable :: epsm1_eig(:)
- complex(gwpc),allocatable :: epsm1_sqrt_rhotw(:,:), rhotw_epsm1_rhotw(:,:,:), conv_rhotw_epsm1_rhotw(:,:,:)
+ complex(gwpc),allocatable :: epsm1_sqrt_rhotw(:,:), rhotw_eqsm1_sqrt(:,:), rhotw_epsm1_rhotw(:,:,:,:), conv_rhotw_epsm1_rhotw(:,:,:,:)
  complex(dpc) :: tmp_rhotw_epsm1_rhotw(epsm1%nomega_i), tmp_conv_rhotw_epsm1_rhotw(epsm1%nomega_i_conv)
 !************************************************************************
 
@@ -284,7 +285,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
       end if
     end do
    end if
-   if (Wfd%nspinor == 2) ABI_WARNING("Symmetrization with nspinor = 2 not implemented")
+   if (Wfd%nspinor == 2) then
+    ABI_WARNING("Symmetrization with nspinor = 2 not implemented")
+    ! can_symmetrize = .FALSE.
+   end if
  end if
 
  ! Print type of calculation.
@@ -435,8 +439,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
  if (mod10 == SIG_GW_AC) then
    ! Calculate Gauss-Legendre quadrature knots and weights for analytic continuation.
-   ABI_MALLOC(rhotw_epsm1_rhotw, (minbnd:maxbnd, minbnd:maxbnd, epsm1%nomega_i))
-   ABI_MALLOC(conv_rhotw_epsm1_rhotw, (minbnd:maxbnd, minbnd:maxbnd, epsm1%nomega_i_conv))
+   ABI_MALLOC(rhotw_epsm1_rhotw, (minbnd:maxbnd, minbnd:maxbnd, epsm1%nomega_i, Sigp%nsig_ab))
+   ABI_MALLOC(conv_rhotw_epsm1_rhotw, (minbnd:maxbnd, minbnd:maxbnd, epsm1%nomega_i_conv, Sigp%nsig_ab))
 
    select case (epsm1%hscr%iw_mesh_type)
    case ("gauss_legendre")
@@ -909,51 +913,63 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        call timab(443,1,tsec) ! ac_lrk_appl
 
        if (mod10 == SIG_GW_AC) then
-         rhotw_epsm1_rhotw(:,:,:) = czero_gw
-         do iiw=1,epsm1%nomega_i
-           ABI_MALLOC(epsm1_sqrt_rhotw, (neig(iiw), minbnd:maxbnd))
-           ! epsm1_sqrt_rhotw = SQRT(epsm1) * rho_tw
-           call xgemm('C','N',neig(iiw),maxbnd-minbnd+1,npwc,cone_gw,ac_epsm1cqwz2(:,:,iiw),npwc,&
-                      rhotwg_ki,npwc,czero_gw,epsm1_sqrt_rhotw,neig(iiw))
+         rhotw_epsm1_rhotw(:,:,:,:) = czero_gw
+         do iab=1,Sigp%nsig_ab
+            do iiw=1,epsm1%nomega_i
+              ABI_MALLOC(epsm1_sqrt_rhotw, (neig(iiw), minbnd:maxbnd))
+              ABI_MALLOC(rhotw_eqsm1_sqrt, (minbnd:maxbnd, neig(iiw)))
+              ! epsm1_sqrt_rhotw = SQRT(epsm1) * rho_tw
+              ! rhotw_eqsm1_sqrt = rho_tw^H * SQRT(epsm1)
+              iiab = spinor_idxs(1,iab); jiab = spinor_idxs(2,iab)
 
-           call xherk('L','C',maxbnd-minbnd+1,neig(iiw),one_gw,epsm1_sqrt_rhotw,neig(iiw),zero_gw,&
-                      rhotw_epsm1_rhotw(:,:,iiw), maxbnd-minbnd+1)
-
-           ! Get the upper part of rhotw_epsm1_rhotw that is hermitian by construction
-           do jb=minbnd,maxbnd
-             do kb=jb+1,maxbnd
-               rhotw_epsm1_rhotw(jb,kb,iiw) = CONJG(rhotw_epsm1_rhotw(kb,jb,iiw))
-             end do
-           end do
-           ABI_FREE(epsm1_sqrt_rhotw)
-         end do
-         if (epsm1%nomega_i_conv > 0) then
-            do jb=minbnd,maxbnd
-               do kb=minbnd,maxbnd
-                  select case (epsm1%hscr%iw_mesh_type)
-                  case ("gauss_legendre")
-                     tmp_rhotw_epsm1_rhotw = rhotw_epsm1_rhotw(jb,kb,epsm1%nomega_i:1:-1)
-                     tmp_omegap = omegap(epsm1%nomega_i:1:-1)
-                     tmp_conv_omegap = conv_omegap(epsm1%nomega_i_conv:1:-1)
-                     call spline_c(epsm1%nomega_i, epsm1%nomega_i_conv, &
-                                    tmp_omegap, tmp_conv_omegap, &
-                                    tmp_conv_rhotw_epsm1_rhotw, &
-                                    tmp_rhotw_epsm1_rhotw, &
-                                    extrapolate=.TRUE.)
-                  case ("minimax")
-                     tmp_rhotw_epsm1_rhotw = rhotw_epsm1_rhotw(jb,kb,:)
-                     tmp_omegap = omegap(:)
-                     tmp_conv_omegap = conv_omegap(epsm1%nomega_i_conv:1:-1)
-                     call spline_c(epsm1%nomega_i, epsm1%nomega_i_conv, &
-                                    tmp_omegap, tmp_conv_omegap, &
-                                    tmp_conv_rhotw_epsm1_rhotw, &
-                                    tmp_rhotw_epsm1_rhotw, &
-                                    extrapolate=.TRUE.)
-                  end select
-                  conv_rhotw_epsm1_rhotw(jb,kb,:) = tmp_conv_rhotw_epsm1_rhotw(epsm1%nomega_i_conv:1:-1)
-               end do
+              call xgemm('C','N',neig(iiw),maxbnd-minbnd+1,npwc,cone_gw,ac_epsm1cqwz2(:,:,iiw),npwc,&
+                        rhotwg_ki((iiab-1)*npwc+1:iiab*npwc,:),npwc,czero_gw,epsm1_sqrt_rhotw,neig(iiw))
+              call xgemm('C','N',maxbnd-minbnd+1,neig(iiw),npwc,cone_gw,&
+                        rhotwg_ki((jiab-1)*npwc+1:jiab*npwc,:),npwc,ac_epsm1cqwz2(:,:,iiw),npwc,czero_gw,&
+                        rhotw_eqsm1_sqrt,maxbnd-minbnd+1)
+              call xgemm('N','N',maxbnd-minbnd+1, maxbnd-minbnd+1, neig(iiw), cone_gw, &
+                         rhotw_eqsm1_sqrt, maxbnd-minbnd+1, epsm1_sqrt_rhotw, neig(iiw), &
+                         czero_gw, rhotw_epsm1_rhotw(:,:,iiw,iab), maxbnd-minbnd+1)
+            !   call xherk('L','C',maxbnd-minbnd+1,neig(iiw),one_gw,epsm1_sqrt_rhotw,neig(iiw),zero_gw,&
+            !              rhotw_epsm1_rhotw(:,:,iiw,iab), maxbnd-minbnd+1)
+   
+              ! Get the upper part of rhotw_epsm1_rhotw that is hermitian by construction
+              do jb=minbnd,maxbnd
+                do kb=jb+1,maxbnd
+                  rhotw_epsm1_rhotw(jb,kb,iiw,iab) = CONJG(rhotw_epsm1_rhotw(kb,jb,iiw,iab))
+                end do
+              end do
+              ABI_FREE(epsm1_sqrt_rhotw)
+              ABI_FREE(rhotw_eqsm1_sqrt)
             end do
-         end if
+            if (epsm1%nomega_i_conv > 0) then
+               do jb=minbnd,maxbnd
+                  do kb=minbnd,maxbnd
+                     select case (epsm1%hscr%iw_mesh_type)
+                     case ("gauss_legendre")
+                        tmp_rhotw_epsm1_rhotw = rhotw_epsm1_rhotw(jb,kb,epsm1%nomega_i:1:-1,iab)
+                        tmp_omegap = omegap(epsm1%nomega_i:1:-1)
+                        tmp_conv_omegap = conv_omegap(epsm1%nomega_i_conv:1:-1)
+                        call spline_c(epsm1%nomega_i, epsm1%nomega_i_conv, &
+                                       tmp_omegap, tmp_conv_omegap, &
+                                       tmp_conv_rhotw_epsm1_rhotw, &
+                                       tmp_rhotw_epsm1_rhotw, &
+                                       extrapolate=.TRUE.)
+                     case ("minimax")
+                        tmp_rhotw_epsm1_rhotw = rhotw_epsm1_rhotw(jb,kb,:,iab)
+                        tmp_omegap = omegap(:)
+                        tmp_conv_omegap = conv_omegap(epsm1%nomega_i_conv:1:-1)
+                        call spline_c(epsm1%nomega_i, epsm1%nomega_i_conv, &
+                                       tmp_omegap, tmp_conv_omegap, &
+                                       tmp_conv_rhotw_epsm1_rhotw, &
+                                       tmp_rhotw_epsm1_rhotw, &
+                                       extrapolate=.TRUE.)
+                     end select
+                     conv_rhotw_epsm1_rhotw(jb,kb,:,iab) = tmp_conv_rhotw_epsm1_rhotw(epsm1%nomega_i_conv:1:-1)
+                  end do
+               end do
+            end if
+         end do ! iab
          call timab(443,2,tsec) ! ac_lrk_appl
        end if
 
@@ -1122,7 +1138,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                      omegame0i2_ac = omegame0i_ac*omegame0i_ac
                      do iiw=1,epsm1%nomega_i_conv
                         sigctmp(io,iab) = sigctmp(io,iab) + &
-                        piinv * conv_rhotw_epsm1_rhotw(jb,kb,iiw) * &
+                        piinv * conv_rhotw_epsm1_rhotw(jb,kb,iiw,iab) * &
                         omegame0i_ac / (omegame0i2_ac + conv_omegap2(iiw)) * conv_gl_wts(iiw) / conv_gl_knots(iiw)**2
                      end do
                   else
@@ -1131,7 +1147,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                         omegame0i2_ac = omegame0i_ac*omegame0i_ac
                         do iiw=1,epsm1%nomega_i
                            sigctmp(io,iab) = sigctmp(io,iab) + &
-                           piinv * rhotw_epsm1_rhotw(jb,kb,iiw) * &
+                           piinv * rhotw_epsm1_rhotw(jb,kb,iiw,iab) * &
                            omegame0i_ac / (omegame0i2_ac + omegap2(iiw)) * gl_wts(iiw) / gl_knots(iiw)**2
                         end do
                      case ("minimax")
@@ -1139,7 +1155,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                         ! Here the -1 factor disappears because we have performed an EIGEN decomposition of -(epsm1-1).
                          do iiw=1,epsm1%nomega_i
                            sigctmp(io,iab) = sigctmp(io,iab) + &
-                             (piinv / two) * rhotw_epsm1_rhotw(jb,kb,iiw) * ( &
+                             (piinv / two) * rhotw_epsm1_rhotw(jb,kb,iiw,iab) * ( &
                                 (one / (omegame0i_ac + omegap_cplx(iiw))) + (one / (omegame0i_ac - omegap_cplx(iiw)))) * &
                                 epsm1%hscr%omega_wgs(epsm1%nomega_r+iiw)
                          end do

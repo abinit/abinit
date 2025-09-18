@@ -325,7 +325,7 @@ subroutine solve_dyson(ikcalc, minbnd, maxbnd, nomega_sigc, dtset, Sigp, Kmesh, 
    ! =============================
    ! === Analytic Continuation ===
    ! =============================
-   ABI_CHECK(Sr%nsig_ab == 1, "AC with spinor not implemented")
+  !  ABI_CHECK(Sr%nsig_ab == 1, "AC with spinor not implemented")
 
    ! Index of the KS or QP energy in sigme_tmp
    !ie0 = sr%nomega_r + Sr%nomega4sd/2+1
@@ -393,7 +393,7 @@ subroutine solve_dyson(ikcalc, minbnd, maxbnd, nomega_sigc, dtset, Sigp, Kmesh, 
        ! Solve the QP equation with Newton-Rapson starting from e0
        ! Find root of E^0-V_xc-V_U+Sig_x+Sig_c(z)-z, i.e E^qp.
        alphac_pm = zero; betar_pm = zero; zcut_pm = zero
-       call spade%init(sr%nomega_i, sr%omega_i, sigcme(:,jb,jb,spin), alphac_pm, betar_pm, zcut_pm)
+       call spade%init(sr%nomega_i, sr%omega_i, SUM(sigcme(:,jb,jb,:), DIM=2), alphac_pm, betar_pm, zcut_pm)
 
        ! Note vxc[n_val] instead of vxc[n_val + n_nlcc] with the model core charge.
        vxc_val = ks_me%vxcval(jb, jb, ik_ibz, spin)
@@ -422,10 +422,10 @@ subroutine solve_dyson(ikcalc, minbnd, maxbnd, nomega_sigc, dtset, Sigp, Kmesh, 
        do io=1,Sr%nomega_r
          zz=Sr%omega_r(io)
          if (REAL(zz) > zero) then
-           tmpcdp(:) = sigcme(:,jb,jb,spin)
+           tmpcdp(:) = SUM(sigcme(:,jb,jb,:), DIM=2)
            Sr%sigcme(jb,ik_ibz,io,spin) = pade(Sr%nomega_i, Sr%omega_i, tmpcdp, zz)
          else
-           tmpcdp(:) = CONJG(sigcme(:,jb,jb,spin))
+           tmpcdp(:) = CONJG(SUM(sigcme(:,jb,jb,:), DIM=2))
            Sr%sigcme(jb,ik_ibz,io,spin) = pade(Sr%nomega_i, CONJG(Sr%omega_i), tmpcdp, zz)
          end if
          Sr%sigxcme(jb,ik_ibz,io,spin) = Sr%sigxme(jb,ik_ibz,spin) + Sr%sigcme(jb,ik_ibz,io,spin)
