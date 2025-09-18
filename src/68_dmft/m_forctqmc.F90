@@ -3190,11 +3190,11 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  type(self_type), intent(inout) :: self,self_new
  type(hu_type), intent(inout) :: hu(paw_dmft%ntypat)
 !Local variables ------------------------------
- integer :: basis,i,iatom,iblock,iflavor,iflavor1,iflavor2,ifreq,ilam,ileg,im,im1,integral,isppol,isub
+ integer :: basis,i,iatom,iblock,iflavor,iflavor1,iflavor2,ifreq,ilam,ilam_prev,ileg,im,im1,integral,isppol,isub
  integer :: itau,itypat,iw,l,len_t,lpawu,myproc,natom,ncon,ndim,nflavor,nflavor_max,ngauss,nleg,nmoments
  integer :: nspinor,nsppol,nsub,ntau,ntot,nwlo,p,pad_elam,pad_lambda,read_data,rot_type_vee,tndim,unt,verbo,wdlr_size
  integer, target :: ndlr
- logical :: density_matrix,entropy,leg_measure,nondiag,off_diag,rot_inv
+ logical :: density_matrix,entropy,leg_measure,lexist,nondiag,off_diag,rot_inv
  real(dp) :: besp,bespp,beta,dx,elam,emig_tot,err,err_,fact,fact2,tau,tol,xtau,xx
  complex(dpc) :: mself_1,mself_2,occ_tmp,u_nl
  complex(dpc), target :: eu
@@ -3214,10 +3214,10 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  type(matlu_type), pointer :: matlu_pt(:) => null()
  type(vee_type), target, allocatable :: vee_rot(:)
  character(len=1) :: tag_block4
- character(len=2) :: tag_block,tag_block3,tag_lam
+ character(len=2) :: tag_block,tag_block3,tag_lam,tag_lam_prev
  character(len=4) :: tag_at
  character(len=14) :: tag_elam,tag_lambda
- character(len=500) :: stringfile,tag_block2,tag_lam2
+ character(len=500) :: stringfile,stringfile_prev,tag_block2,tag_lam2,tag_lam_prev2
  character(len=10000) :: message
  character(len=fnlen), target :: fname_data,fname_dataw,fname_histo
 ! ************************************************************************
@@ -3552,7 +3552,8 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    do isub=1,nsub
      ! For each interval, the Gauss-Legendre grid of size ngauss is mapped from the
      ! t-world where t in [-1,1] to the x-world where x in [x_{isub},x_{isub+1}]
-     lam_list((isub-1)*ngauss+1:isub*ngauss) = (dble(isub)*two+tpoints(:)-one) * dx * half
+     ! We want an array sorted in descending order. No need to flip the tweights, as they are symmetric.
+     lam_list(ntot-isub*ngauss:ntot-(isub-1)*ngauss-1) = (dble(isub)*two+tpoints(ngauss:1:-1)-one) * dx * half
    end do ! ilam
 
  end if ! integral and entropy
@@ -3731,15 +3732,34 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
      else
        write(tag_lam,'(i2)') ilam
      end if
+
+     ilam_prev = merge(ntot,merge(1,ilam-1,ilam==ntot),ilam==1) ! Index of the previous integration point
+
+     if (ilam_prev < 10) then
+       write(tag_lam_prev,'("0",i1)') ilam_prev
+     else
+       write(tag_lam_prev,'(i2)') ilam_prev
+     end if
+
      tag_lam2 = ""
      if (ilam /= ntot) tag_lam2 = "_ilam" // tag_lam
 
+     tag_lam_prev2 = ""
+     if (ilam_prev /= ntot) tag_lam_prev2 = "_ilam" // tag_lam_prev
+
      read_data = paw_dmft%dmft_triqs_read_ctqmcdata
      stringfile = "_iatom" // tag_at // trim(adjustl(tag_lam2)) // ".h5"
+     stringfile_prev = "_iatom" // tag_at // trim(adjustl(tag_lam_prev2)) // ".h5"
+
      if (paw_dmft%idmftloop == 1) then
        read_data = 0
        if (paw_dmft%dmft_triqs_read_ctqmcdata == 1 .and. paw_dmft%ireadctqmcdata == 1) read_data = 1
        fname_data = trim(adjustl(paw_dmft%filctqmcdatain)) // stringfile
+       inquire(file=trim(fname_data),exist=lexist)
+       if ((.not. lexist) .and. ntot > 1) then ! try to restart from config of previous integration point instead
+         if (read_data == 1) read_data = 2 ! to indicate not to use the value qmc_therm for warmup
+         fname_data = trim(adjustl(paw_dmft%filapp)) // "_CTQMC_DATA" // stringfile_prev
+       end if
      else
        fname_data = trim(adjustl(paw_dmft%filapp)) // "_CTQMC_DATA" // stringfile
      end if
@@ -4064,7 +4084,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
        write(message,'(a,3(3x,2a),a,12x,a,6x,2a,8x,a)') ch10,repeat("=",39),ch10,"== Summary of thermodynamic integration", &
             & ch10,repeat("=",39),ch10,ch10,"Lambda","<dH/dlambda>",ch10,repeat("-",29)
        call wrtout(std_out,message,'COLL')
-       do i=1,ntot-1
+       do i=ntot-1,1,-1
          write(tag_lambda,'(f14.4)') lam_list(i)
          write(tag_elam,'(f14.4)') elam_list(i)
          tag_lambda = adjustl(tag_lambda)
