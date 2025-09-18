@@ -1276,7 +1276,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          call ppm%get_qbz(gsph_c, pp_mesh, ipp_bz, botsq_pbz, otq_pbz, dmeig_pbz)
          !ABI_CHECK_IEQ(npw_c, ppm%npwc, "npwc")
 
-         ! Need transpose of PPM matrices.
+         ! Need transpose of PPM matrices when summing over G index.
          if (ppm%dm2_botsq /= 0) then
            call alloc_copy(botsq_pbz, trans_botsq_pbz)
            call sqmat_itranspose(npw_c, trans_botsq_pbz)
@@ -1632,8 +1632,8 @@ if (.not. qq_is_gamma) then
 
              ! For debug, gks_atm2 and gks_atm should be consistent
              if (pp_is_gamma) then
-              ib = ib_sum - gqk%bstart + 1
-              gks_atm2(:,:,ib,ipc) = stern_kqmp%eig1_k(:, gqk%bstart:gqk%bstop, ib_sum)
+               ib = ib_sum - gqk%bstart + 1
+               gks_atm2(:,:,ib,ipc) = stern_kqmp%eig1_k(:, gqk%bstart:gqk%bstop, ib_sum)
              end if
 
              full_ur1_kmp = GWPC_CONJG(full_ur1_kmp)
