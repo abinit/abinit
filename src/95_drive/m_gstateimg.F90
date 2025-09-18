@@ -304,9 +304,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  isVused=is_pimd;isARused=(dtset%optcell/=0)
  if (use_hist) then
    !Read history from file (and broadcast if MPI)
-#if defined HAVE_NETCDF
    use_hist_prev=(dtset%restartxf==-1.and.nimage>0)
-#endif
    hist_filename=trim(dtfil%filnam_ds(4))//'_HIST.nc'
    if (use_hist_prev)then
      ABI_MALLOC(hist_prev,(nimage))
@@ -627,7 +625,6 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 &   dtset%nimage,mpi_enreg%paral_img,dtset%prtvolimg,dyn=dtset%dynimage)
 
 !  Write hist datastructure in HIST file
-#if defined HAVE_NETCDF
    if (use_hist.and.mpi_enreg%me_cell==0) then
      ifirst=merge(0,1,itimimage>1)
      call write_md_hist_img(hist,hist_filename,ifirst,itimimage,dtset%natom,dtset%ntypat,&
@@ -635,7 +632,6 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 &     nimage=dtset%nimage,imgmov=dtset%imgmov,mdtemp=dtset%mdtemp,comm_img=mpi_enreg%comm_img,&
 &     imgtab=mpi_enreg%my_imgtab)
    end if
-#endif
 
 !  TESTS WHETHER ONE CONTINUES THE LOOP
 !  Here we calculate the change in energy, and exit if delta_energy < tolimg
@@ -1039,7 +1035,6 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
  integer,save :: idum=5
  logical :: is_pimd
  character(len=500) :: msg
-
 ! *************************************************************************
 
  is_pimd=(imgmov==9.or.imgmov==10.or.imgmov==13)
@@ -1169,7 +1164,6 @@ subroutine predict_copy(itimimage_eff,list_dynimage,ndynimage,nimage,&
 !Local variables-------------------------------
 !scalars
  integer :: idynimage,iimage,next_itimimage
-
 ! *************************************************************************
 
  next_itimimage=itimimage_eff+1
@@ -1256,7 +1250,6 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimi
  real(dp),allocatable :: fcart(:,:),vel(:,:),xred(:,:)
  logical :: DEBUG=.FALSE.
  type(results_img_type),pointer :: resimg_all(:)
-
 ! *************************************************************************
 
  natom=m1geo_param%ab_mover%natom

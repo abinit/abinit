@@ -134,7 +134,6 @@ type(krank_t) function krank_from_kptrlatt(nkpt, kpts, kptrlatt, compute_invrank
  integer :: ii, jj, ikpt, max_linear_density, opt=0
  logical :: compute_invrank_
  real(dp) :: min_kpt
-
 ! *********************************************************************
 
  opt=0
@@ -144,7 +143,7 @@ type(krank_t) function krank_from_kptrlatt(nkpt, kpts, kptrlatt, compute_invrank
        ABI_ERROR("kptrlatt with zero matrix element on the diagonal!")
      end if
      if (ii /= jj .and. kptrlatt(ii, jj) /= 0) then
-       ! ABI_WARNING("kptrlatt with non-zero off-diagonal matrix elements is not supported")
+       !ABI_WARNING("kptrlatt with non-zero off-diagonal matrix elements is not supported")
        opt=1
      end if
    end do
@@ -208,7 +207,6 @@ type(krank_t) function krank_new(nkpt, kpts, &
  character(len=500) :: msg
 !arrays
  real(dp) :: symkpt(3)
-
 ! *********************************************************************
 
  compute_invrank_ = .True.; if (present(compute_invrank)) compute_invrank_ = compute_invrank
@@ -386,9 +384,7 @@ integer function krank_get_index(krank, kpt) result(ikpt)
  real(dp),intent(in) :: kpt(3)
 
 !Local variables-------------------------------
-!scalars
  integer :: kpt_rank
-
 ! *************************************************************************
 
  kpt_rank = krank%get_rank(kpt)
@@ -418,9 +414,7 @@ end function krank_get_index
 type(krank_t) function krank_copy(krank_in) result(krank_out)
 
 !Arguments ------------------------------------
-!scalars
  class(krank_t), intent(in) :: krank_in
-
 ! *********************************************************************
 
  krank_out%max_linear_density = krank_in%max_linear_density
@@ -457,7 +451,6 @@ subroutine krank_free(krank)
 
 !Arguments ------------------------------------
  class(krank_t), intent(inout) :: krank
-
 ! *********************************************************************
 
  ABI_SFREE(krank%invrank)
@@ -498,7 +491,6 @@ subroutine krank_print(krank, unout)
  integer, intent(in) :: unout
 !arrays
  class(krank_t), intent(in) :: krank
-
 ! *********************************************************************
 
   write(unout, *)
@@ -574,7 +566,6 @@ subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, sy
  integer :: dkint(3), my_symmat(3, 3, nsym)
  !integer,allocatable :: rank2ikpt(:), rank2symtime(:)
  real(dp) :: kpt1a(3), dk(3), my_qpt(3)
-
 ! *************************************************************************
 
  my_use_symrec = .False.; if (present(use_symrec)) my_use_symrec = use_symrec

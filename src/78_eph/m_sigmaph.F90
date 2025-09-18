@@ -52,12 +52,12 @@ module m_sigmaph
  use netcdf
  use m_nctk
  use m_rf2
- use m_dtset
- use m_dtfil
  use m_clib
  use m_mkffnl
 
  use defs_abitypes,    only : mpi_type
+ use m_dtfil,          only : datafiles_type
+ use m_dtset,          only : dataset_type
  use defs_datatypes,   only : pseudopotential_type
  use m_time,           only : cwtime, cwtime_report, timab, sec2str
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
@@ -83,7 +83,6 @@ module m_sigmaph
  use m_dfpt_cgwf,      only : stern_t
  use m_phonons,        only : phstore_t
  use m_pstat,          only : pstat_proc
- use m_initylmg,       only : initylmg_k
 
  implicit none
 
@@ -998,7 +997,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  ! Precompute phonon frequencies and eigenvectors in the IBZ.
  ! These quantities are then used to symmetrize quantities for q in the IBZ(k) in order
- ! to reduce the number of calls to ifc%fourq (expensive if dipdip == 1)
+ ! to reduce the number of calls to ifc%fourq (expensive if dipdip == 1).
 
  use_ifc_fourq = .False. !use_ifc_fourq = .True. !use_ifc_fourq = dtset%userib == 123
  call phstore%init(cryst, ifc, sigma%nqibz, sigma%qibz, use_ifc_fourq, sigma%pert_comm%value)
@@ -2304,18 +2303,7 @@ end if
            nqnu_tlist = occ_be(wqnu, sigma%kTmesh(:), zero)
 
            ! Compute T_pp'(q,nu) matrix in reduced coordinates.
-           do ip2=1,natom3
-             idir2 = mod(ip2-1, 3) + 1; ipert2 = (ip2 - idir2) / 3 + 1
-             do ip1=1,natom3
-               idir1 = mod(ip1-1, 3) + 1; ipert1 = (ip1 - idir1) / 3 + 1
-               ! (k,a) (k,a')* + (k',a) (k',a')*
-               dka   = dcmplx(displ_red(1, idir1, ipert1, nu), displ_red(2, idir1, ipert1, nu))
-               dkap  = dcmplx(displ_red(1, idir2, ipert1, nu), displ_red(2, idir2, ipert1, nu))
-               dkpa  = dcmplx(displ_red(1, idir1, ipert2, nu), displ_red(2, idir1, ipert2, nu))
-               dkpap = dcmplx(displ_red(1, idir2, ipert2, nu), displ_red(2, idir2, ipert2, nu))
-               tpp_red(ip1, ip2) = dka * dconjg(dkap) + dkpa * dconjg(dkpap)
-             end do
-           end do
+           call sigtk_dw_tpp_red(natom, displ_red(:,:,:,nu), tpp_red)
 
            ! Sum over my bands and add (static) DW contribution for the different temperatures.
            do ibsum=sigma%my_bsum_start, sigma%my_bsum_stop
@@ -2485,9 +2473,6 @@ end if
    ABI_FREE(kinpw_k)
    ABI_FREE(ph3d_k)
 
-   !call abimem_report("end kcalc_loop", std_out)
-   !call wrtout(std_out, sjoin("xmpi_count_requests", itoa(xmpi_count_requests)))
-
    call cwtime_report(" One ikcalc k-point", cpu_ks, wall_ks, gflops_ks)
    call pstat_proc%print(_PSTAT_ARGS_)
  end do ! my_ikcalc
@@ -2515,8 +2500,7 @@ end if
  ABI_FREE(gaussw_qnu)
  ABI_SFREE(vcar_ibz)
 
- call gs_ham_kq%free(); call wfd%free(); call phstore%free()
- call u1c%free(); call sigma%free()
+ call gs_ham_kq%free(); call wfd%free(); call phstore%free(); call u1c%free(); call sigma%free()
  call pawcprj_free(cwaveprj0)
  ABI_FREE(cwaveprj0)
  call pawcprj_free(cwaveprj)
@@ -2558,7 +2542,6 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  type(dataset_type),intent(in) :: dtset
  type(ebands_t),intent(in) :: ebands
  type(ifc_type),intent(in) :: ifc
- !type(dvdb_t),intent(in) :: dvdb
  type(datafiles_type),intent(in) :: dtfil
 
 !Local variables ------------------------------
@@ -2567,8 +2550,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  integer :: my_rank,my_nshiftq,cnt,nprocs,ik_ibz,ndeg, iq_ibz, qptopt, qtimrev
  integer :: ii, ierr, spin, gap_err, ikcalc, qprange_, bstop !it,
  integer :: jj, bstart, natom, natom3 !, ip, iatom, idir, pertcase,
- integer :: isym_k, trev_k, mband, nrest, color
- integer :: kptopt
+ integer :: isym_k, trev_k, mband, nrest, color, kptopt
  logical :: downsample
  character(len=fnlen) :: wfk_fname_dense
  character(len=5000) :: msg
@@ -2582,8 +2564,6 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  integer :: intp_kptrlatt(3,3), g0_k(3), units(2), indkk_k(6,1), band_block(2), qptrlatt(3,3)
  integer,allocatable :: temp(:,:), degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:), iperm(:)
  real(dp):: params(4), my_shiftq(3,1), kk(3), intp_shiftk(3)
-! integer :: inwr, jnwr, min_nwr
-! integer :: array_nwr(12)
 #ifdef HAVE_MPI
  integer,parameter :: ndims = 5
  integer :: comm_cart, me_cart
@@ -2669,23 +2649,6 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  !dtset%freqspmin
  new%nwr = dtset%nfreqsp; new%wr_step = zero
  if (new%nwr > 0) then
-!   ! For fft to work in some machines nwr must be a multiple of 3 or 5 only
-!   array_nwr(:) = 1
-!   min_nwr = new%nwr
-!   do inwr=1,12
-!     do jnwr=1,inwr
-!       array_nwr(jnwr) = 3
-!     end do
-!     if (ABS(product(array_nwr) - new%nwr) < min_nwr .and. product(array_nwr) - new%nwr > zero) min_nwr = product(array_nwr)- new%nwr
-!     if (product(array_nwr) > new%nwr) go to 1010
-!     do jnwr=1, inwr
-!       array_nwr(jnwr) = 5
-!       if (ABS(product(array_nwr) - new%nwr) < min_nwr .and. product(array_nwr) - new%nwr > zero) min_nwr = product(array_nwr)- new%nwr
-!     end do
-!
-!   end do
-
-!   1010 new%nwr = new%nwr + min_nwr
    if (mod(new%nwr, 2) == 0) new%nwr = new%nwr + 1
    new%wr_step = two * eV_Ha / (new%nwr - 1)
    if (dtset%freqspmax /= zero) new%wr_step = dtset%freqspmax / (new%nwr - 1)
@@ -2705,12 +2668,10 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
  ! TODO: nkcalc should be spin dependent (similar piece of code in m_gwr).
  if (dtset%nkptgw /= 0) then
-
    ! Treat the k-points and bands specified in the input file via kptgw and bdgw.
    call sigtk_kcalc_from_nkptgw(dtset, mband, new%nkcalc, new%kcalc, new%bstart_ks, new%nbcalc_ks)
 
  else
-
    if (any(abs(dtset%sigma_erange) > zero)) then
      ! Use sigma_erange and (optionally) sigma_ngkpt
      call sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, new%nkcalc, new%kcalc, new%bstart_ks, new%nbcalc_ks, comm)
@@ -4789,7 +4750,6 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
          " [K], mu_e: ", self%mu_e(it) * Ha_eV
      end if
      if (self%imag_only) then
-       ! TODO: Add tau^SERTA, tau^MRTA, and v tau, ps instead of fmts?
        write(ab_out,"(a)")"   B    eKS    SE2(eKS)  TAU(eKS)  DeKS"
      else
        write(ab_out,"(a)")"   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP"

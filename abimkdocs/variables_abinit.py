@@ -24628,11 +24628,10 @@ This input variable specifies whether the EPH code should store $|g|^2$ or $g$
 when computing the e-ph matrix elements ([[eph_task]] == 11)
 Possible values are:
 
-    1 --> compute and store $|g|^2$ in GSTORE.nc.
-          Use this option to reduce the size of the file but keep in mind
-          that the GSTORE can only be used to compute expressions in which
-          only $|g|^2$ is needed.
-    2 --> compute and store complex $g$ in GSTORE.nc (default)
+1 --> compute and store $|g|^2$ in GSTORE.nc.
+      Use this option to reduce the size of the file but keep in mind
+      that the GSTORE can only be used to compute expressions in which only $|g|^2$ is needed.
+2 --> compute and store complex $g$ in GSTORE.nc (default)
 """,
 ),
 

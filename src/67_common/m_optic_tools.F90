@@ -1671,7 +1671,6 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
        chi2tota  = inter2wa + inter1wa + intra2wa + intra1wa + intra1wSa
        chi2full = chi2tot + chi2tota
      end if ! .not.do_antiresonant
-#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_inter2w"),     c2r(inter2w),   start=start4, count=count4))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_inter1w"),     c2r(inter1w),   start=start4, count=count4))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_intra2w"),     c2r(intra2w),   start=start4, count=count4))
@@ -1688,7 +1687,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
        NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_chi2tot_AR"),  c2r(chi2tota),  start=start4, count=count4))
        NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_chi2full"),    c2r(chi2full),  start=start4, count=count4))
      end if ! .not.do_antiresonant
-#endif
+
      ABI_FREE(chi2tot)
      ! Addition AR
      if (.not.do_antiresonant) then

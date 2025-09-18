@@ -3569,8 +3569,7 @@ subroutine test_phrotation(ifc, cryst, qptopt, ngqpt, comm)
  real(dp) :: eigvec_out(2,3*cryst%natom,3*cryst%natom) !eigvec_ibz(2,3*cryst%natom,3*cryst%natom),
  real(dp) :: eigvec_bz(2,3*cryst%natom,3*cryst%natom), displ_cart_qbz(2,3*cryst%natom,3*cryst%natom)
  real(dp) :: d2cart(2,3*cryst%natom,3*cryst%natom), d2tmp(2,3*cryst%natom,3*cryst%natom)
- real(dp),allocatable :: wtq_ibz(:), qbz(:,:), qibz(:,:)
- real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
+ real(dp),allocatable :: wtq_ibz(:), qbz(:,:), qibz(:,:), displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp),allocatable :: phfreqs_qibz(:,:), displ_cart_ibz(:,:,:,:),eigvec_ibz(:,:,:,:)
 !************************************************************************
 
