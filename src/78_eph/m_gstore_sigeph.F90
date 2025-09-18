@@ -132,10 +132,10 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
 
  ! The Fan-Migdal SE requires |g(k,q)| in the phonon representation but
  ! to compute the DW term in the RIA, we need complex g in the atom representation.
- gvals_vname = "gvals"
- !gvals_vname = "gvals_ks" ! TODO: Input variable?
+ !gvals_vname = "gvals"
+ gvals_vname = "gvals_ks" ! TODO: Input variable?
  call gstore%from_ncpath(dtfil%filgstorein, with_cplex1, dtset, cryst, ebands, ifc, comm, &
-             with_gmode="phonon", gvals_vname=gvals_vname, read_dw=.True.)
+                         with_gmode="phonon", gvals_vname=gvals_vname, read_dw=.True.)
 
  ABI_CHECK(gstore%qzone == "bz", "gstore_sigeph assumes qzone == `bz`")
 
@@ -206,7 +206,7 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
 
      ! Compute the little group of the k-point so that we can compute g(k,q) only for q in the IBZ_k.
      if (use_lgk) then
-        timrev = kpts_timrev_from_kptopt(ebands%kptopt)
+       timrev = kpts_timrev_from_kptopt(ebands%kptopt)
        call lg_myk%init(cryst, kk, timrev, gstore%nqbz, gstore%qbz, gstore%nqibz, gstore%qibz, xmpi_comm_self)
      end if
 
@@ -371,10 +371,10 @@ subroutine write_results__(ntemp, gqk)
  integer,parameter :: max_ntemp = 50
 #if 1
  integer :: band_k,ik_ibz,ib_val,ib_cond,jj, ideg,ib,it,ii,iw,nstates
- integer :: nq_ibzk_eff, nelem, imyq, iq_ibz_k, sr_ncid
- logical :: iwrite
+ !integer :: nq_ibzk_eff, nelem, imyq, iq_ibz_k, sr_ncid
+ !logical :: iwrite
  real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond,qpe_oms,qpe_oms_val,qpe_oms_cond
- real(dp) :: cpu, wall, gflops, invsig2fmts, tau, ravg2
+ !real(dp) :: invsig2fmts, tau, ravg2
  complex(dpc) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2,cavg3,cavg4
  !character(len=5000) :: msg
  integer :: grp_ncid, ncerr
@@ -389,13 +389,6 @@ subroutine write_results__(ntemp, gqk)
  !real(dp) :: gfw_avg(self%phmesh_size, 3)
  complex(dpc) :: qpoms_enes(ntemp, gqk%nb),qp_enes(ntemp, gqk%nb) ! nb_k
 ! *************************************************************************
-
- ! Compute QP energies and Gaps (Note that I'm assuming a non-magnetic semiconductor!)
- ib_val = nint(ebands%nelect / (two / ebands%nspinor)); ib_cond = ib_val + 1
- kse_val = huge(one) * tol6; kse_cond = huge(one) * tol6
- qp_enes = huge(one) * tol6; qpoms_enes = huge(one) * tol6
- ks_enes = huge(one) * tol6; ze0_vals = huge(one) * tol6
- ks_gap = -one; qpoms_gaps = -one; qp_gaps = -one
 
  ! Write legend.
  if (spin == 1) then
@@ -415,112 +408,118 @@ subroutine write_results__(ntemp, gqk)
    write(ab_out,"(a)")" "
  end if
 
+ ! Compute QP energies and Gaps (Note that I'm assuming a non-magnetic semiconductor!)
+ ib_val = nint(ebands%nelect / (two / ebands%nspinor)); ib_cond = ib_val + 1
+
  do ikcalc=1,gqk%glob_nk
    ik_bz = gstore%kglob2bz(ikcalc, spin)
    ik_ibz = gstore%kbz2ibz(1, ik_bz)
    kcalc = gstore%kbz(:, ik_bz)
 
+   kse_val = huge(one) * tol6; kse_cond = huge(one) * tol6
+   qp_enes = huge(one) * tol6; qpoms_enes = huge(one) * tol6
+   ks_enes = huge(one) * tol6; ze0_vals = huge(one) * tol6
+   ks_gap = -one; qpoms_gaps = -one; qp_gaps = -one
+
    do it=1,ntemp
-   ! Write header.
-   if (it <= max_ntemp) then
-     if (nsppol == 1) then
-       write(ab_out,"(3a,f6.1,a,f8.3)") &
-         "K-point: ", trim(ktoa(kcalc)), ", T: ", kTmesh(it) / kb_HaK, &
-         " [K], mu_e: ", mu_e(it) * Ha_eV
-     else
-       write(ab_out,"(3a,i1,a,f6.1,a,f8.3)") &
-         "K-point: ", trim(ktoa(kcalc)), ", spin: ", spin, ", T: ",kTmesh(it) / kb_HaK, &
-         " [K], mu_e: ", mu_e(it) * Ha_eV
-     end if
-     if (imag_only) then
-       write(ab_out,"(a)")"   B    eKS    SE2(eKS)  TAU(eKS)  DeKS"
-     else
-       write(ab_out,"(a)")"   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP"
-     end if
-   end if
 
-   do in_k=1,gqk%nb ! gqk%nb_k
-     !print *, "Re SE (eV), Z:", real(vals_e0ks(it, in_k, ikcalc)) * Ha_eV, real(dvals_de0ks(it, in_k, ikcalc))
-
-     band_k = in_k - gqk%bstart + 1
-     kse = ebands%eig(band_k, ik_ibz, spin)
-     ks_enes(in_k) = kse
-     sig0c = vals_e0ks(it, in_k, ikcalc)
-     dw = dw_vals(it, in_k, ikcalc)
-     fan0 = real(sig0c) - dw
-     ! Compute QP energies with On-the-Mass-Shell approximation and first renormalization i.e. Z(eKS)
-
-     ! TODO: Note that here I use the full Sigma including the imaginary part
-     !zc = one / (one - dvals_de0ks(it, in_k))
-     zc = one / (one - real(dvals_de0ks(it, in_k, ikcalc)))
-     ze0_vals(it, in_k) = real(zc)
-     qpe = kse + real(zc) * real(sig0c)
-     qpe_oms = kse + real(sig0c)
-
-     if (in_k == 1) then
-       kse_prev = kse; qpe_prev = qpe
-     end if
-     if (band_k == ib_val) then
-       kse_val = kse; qpe_val = qpe; qpe_oms_val = qpe_oms
-     end if
-     if (band_k == ib_cond) then
-       kse_cond = kse; qpe_cond = qpe; qpe_oms_cond = qpe_oms
-     end if
-
+     ! Write header.
      if (it <= max_ntemp) then
-       if (imag_only) then
-         ! 1/tau  = 2 Imag(Sigma)
-         !invsig2fmts = Time_Sec * 1e+15 / two
-         !tau = 999999.0_dp
-         !if (abs(aimag(sig0c)) > tol16) tau = invsig2fmts / abs(aimag(sig0c))
-         !tau = min(tau, 999999.0_dp)
-         !write(ab_out, "(i4,2(f8.3,1x),f8.1,1x,f8.3)") &
-         !    band_k, kse * Ha_eV, aimag(sig0c) * Ha_eV, tau, (kse - kse_prev) * Ha_eV
+       if (nsppol == 1) then
+         write(ab_out,"(3a,f6.1,a,f8.3)") &
+           "K-point: ", trim(ktoa(kcalc)), ", T: ", kTmesh(it) / kb_HaK, &
+           " [K], mu_e: ", mu_e(it) * Ha_eV
        else
-         write(ab_out, "(i4, 10(f8.3,1x))") &
-           band_k, kse * Ha_eV, real(qpe) * Ha_eV, (real(qpe) - kse) * Ha_eV, &
-           real(sig0c) * Ha_eV, aimag(sig0c) * Ha_eV, real(zc), &
-           fan0 * Ha_eV, dw * Ha_eV, (kse - kse_prev) * Ha_eV, real(qpe - qpe_prev) * Ha_eV
+         write(ab_out,"(3a,i1,a,f6.1,a,f8.3)") &
+           "K-point: ", trim(ktoa(kcalc)), ", spin: ", spin, ", T: ",kTmesh(it) / kb_HaK, &
+           " [K], mu_e: ", mu_e(it) * Ha_eV
+       end if
+       if (imag_only) then
+         write(ab_out,"(a)")"   B    eKS    SE2(eKS)  TAU(eKS)  DeKS"
+       else
+         write(ab_out,"(a)")"   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP"
        end if
      end if
 
-     if (in_k > 1) then
-       kse_prev = kse; qpe_prev = qpe
-     end if
-     qpoms_enes(it, in_k) = qpe_oms
-     qp_enes(it, in_k) = qpe
-     if (kse_val /= huge(one) * tol6 .and. kse_cond /= huge(one) * tol6) then
-       ! We have enough states to compute the gap.
-       if (it == 1) ks_gap = kse_cond - kse_val
-       qpoms_gaps(it) = qpe_oms_cond - qpe_oms_val
-       qp_gaps(it) = real(qpe_cond - qpe_val)
-     end if
+     do in_k=1,gqk%nb ! gqk%nb_k
+       !print *, "Re SE (eV), Z:", real(vals_e0ks(it, in_k, ikcalc)) * Ha_eV, real(dvals_de0ks(it, in_k, ikcalc))
+       band_k = in_k - gqk%bstart + 1
+       kse = ebands%eig(band_k, ik_ibz, spin)
+       ks_enes(in_k) = kse
+       sig0c = vals_e0ks(it, in_k, ikcalc)
+       dw = dw_vals(it, in_k, ikcalc)
+       fan0 = real(sig0c) - dw
+       ! Compute QP energies with On-the-Mass-Shell approximation and first renormalization i.e. Z(eKS)
+       ! TODO: Note that here I use the full Sigma including the imaginary part
+       !zc = one / (one - dvals_de0ks(it, in_k))
+       zc = one / (one - real(dvals_de0ks(it, in_k, ikcalc)))
+       ze0_vals(it, in_k) = real(zc)
+       qpe = kse + real(zc) * real(sig0c)
+       qpe_oms = kse + real(sig0c)
+       if (in_k == 1) then
+         kse_prev = kse; qpe_prev = qpe
+       end if
+       if (band_k == ib_val) then
+         kse_val = kse; qpe_val = qpe; qpe_oms_val = qpe_oms
+       end if
+       if (band_k == ib_cond) then
+         kse_cond = kse; qpe_cond = qpe; qpe_oms_cond = qpe_oms
+       end if
 
-   ! Print KS and QP gaps.
-   if (it <= max_ntemp) then
-     if (.not. imag_only) then
+       if (it <= max_ntemp) then
+         if (imag_only) then
+           ! 1/tau  = 2 Imag(Sigma)
+           !invsig2fmts = Time_Sec * 1e+15 / two
+           !tau = 999999.0_dp
+           !if (abs(aimag(sig0c)) > tol16) tau = invsig2fmts / abs(aimag(sig0c))
+           !tau = min(tau, 999999.0_dp)
+           !write(ab_out, "(i4,2(f8.3,1x),f8.1,1x,f8.3)") &
+           !    band_k, kse * Ha_eV, aimag(sig0c) * Ha_eV, tau, (kse - kse_prev) * Ha_eV
+         else
+           write(ab_out, "(i4, 10(f8.3,1x))") &
+             band_k, kse * Ha_eV, real(qpe) * Ha_eV, (real(qpe) - kse) * Ha_eV, &
+             real(sig0c) * Ha_eV, aimag(sig0c) * Ha_eV, real(zc), &
+             fan0 * Ha_eV, dw * Ha_eV, (kse - kse_prev) * Ha_eV, real(qpe - qpe_prev) * Ha_eV
+         end if
+       end if
+
+       if (in_k > 1) then
+         kse_prev = kse; qpe_prev = qpe
+       end if
+       qpoms_enes(it, in_k) = qpe_oms
+       qp_enes(it, in_k) = qpe
        if (kse_val /= huge(one) * tol6 .and. kse_cond /= huge(one) * tol6) then
-         write(ab_out, "(a)")" "
-         write(ab_out, "(a,f8.3,1x,2(a,i0),a)")" KS gap: ",ks_gap * Ha_eV, &
-           "(assuming bval:", ib_val, " ==> bcond:", ib_cond, ")"
-         write(ab_out, "(2(a,f8.3),a)")" QP gap: ",qp_gaps(it) * Ha_eV," (OTMS: ",qpoms_gaps(it) * Ha_eV, ")"
-         write(ab_out, "(2(a,f8.3),a)")" QP_gap - KS_gap: ",(qp_gaps(it) - ks_gap) * Ha_eV,&
-             " (OTMS: ",(qpoms_gaps(it) - ks_gap) * Ha_eV, ")"
-         write(ab_out, "(a)")" "
+         ! We have enough states to compute the gap.
+         if (it == 1) ks_gap = kse_cond - kse_val
+         qpoms_gaps(it) = qpe_oms_cond - qpe_oms_val
+         qp_gaps(it) = real(qpe_cond - qpe_val)
        end if
-     else
-       if (kse_val /= huge(one) * tol6 .and. kse_cond /= huge(one) * tol6) then
-         write(ab_out, "(a)")" "
-         write(ab_out, "(a,f8.3,1x,2(a,i0),a)")" KS gap: ",ks_gap * Ha_eV, "(assuming bval:",ib_val," ==> bcond:",ib_cond,")"
-         write(ab_out, "(a)")" "
+     end do ! in_k
+
+     ! Print KS and QP gaps.
+     if (it <= max_ntemp) then
+       if (.not. imag_only) then
+         if (kse_val /= huge(one) * tol6 .and. kse_cond /= huge(one) * tol6) then
+           write(ab_out, "(a)")" "
+           write(ab_out, "(a,f8.3,1x,2(a,i0),a)")" KS gap: ",ks_gap * Ha_eV, &
+             "(assuming bval:", ib_val, " ==> bcond:", ib_cond, ")"
+           write(ab_out, "(2(a,f8.3),a)")" QP gap: ",qp_gaps(it) * Ha_eV," (OTMS: ",qpoms_gaps(it) * Ha_eV, ")"
+           write(ab_out, "(2(a,f8.3),a)")" QP_gap - KS_gap: ",(qp_gaps(it) - ks_gap) * Ha_eV,&
+               " (OTMS: ",(qpoms_gaps(it) - ks_gap) * Ha_eV, ")"
+           write(ab_out, "(a)")" "
+         end if
+       else
+         if (kse_val /= huge(one) * tol6 .and. kse_cond /= huge(one) * tol6) then
+           write(ab_out, "(a)")" "
+           write(ab_out, "(a,f8.3,1x,2(a,i0),a)")" KS gap: ",ks_gap * Ha_eV, "(assuming bval:",ib_val," ==> bcond:",ib_cond,")"
+           write(ab_out, "(a)")" "
+         end if
        end if
+
+       write(ab_out, "(a)")repeat("=", 92)
      end if
 
-     write(ab_out, "(a)")repeat("=", 92)
-   end if
-
- end do ! in_k
- end do ! it
+   end do ! it
  end do ! ikcalc
 
  if (ntemp > max_ntemp) then
