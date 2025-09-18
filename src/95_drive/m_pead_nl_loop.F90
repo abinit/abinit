@@ -29,9 +29,7 @@ module m_pead_nl_loop
  use m_hdr
  use m_dtset
  use m_dtfil
-#if defined HAVE_MPI2
- use mpi
-#endif
+ USE_MPI
 
  use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type

@@ -251,8 +251,6 @@ CONTAINS
 
 subroutine nullify_wvl_data(wvl)
 
- implicit none
-
 !Arguments ------------------------------------
  type(wvl_data) , intent(inout)  :: wvl
 
@@ -326,7 +324,6 @@ subroutine nullify_wvl_data(wvl)
 
 pure function comms_cubic_null() result(comms)
 
-  implicit none
   type(comms_cubic) :: comms
 ! *************************************************************************
    nullify(comms%ncntd)

@@ -72,4 +72,7 @@ inp_files = [
 "t48.abi", # Gd, nsppol==1, nspden==4, nspinor==2
 "t49.abi", # Ce, GS LDA, dtset#1
 "t50.abi", # Ce, DMFT CTQMC, dtset#2
+#Other
+"t51.abi", # test CHEBFI (istwfk==1, npband==1, paral_kgb==1) with gpu_thread_limit set to 64
+"t52.abi", # PAW, GS, CGWF,       (Fe,  nspinor==2, nspden==4, paral_kgb==1), with fixed_occ
 ]

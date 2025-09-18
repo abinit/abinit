@@ -11,7 +11,7 @@ We start with a brief overview of the self-trapped polaron formation problem, fo
 introducion to the theoretical formalism of the Variational Polaron Equations.
 Then we demonstrate the practical aspects of computation of various polaronc properties using
 small hole and large electron polarons in LiF as examples.
-We also showcase the capabilites of |AbiPy| to post-process the resutls and perform typical
+We also showcase the capabilities of |AbiPy| to post-process the results and perform typical
 convergence studies.
 
 It is assumed the user has already completed the two tutorials [RF1](/tutorial/rf1) and [RF2](/tutorial/rf2),
@@ -25,72 +25,77 @@ This lesson should take about 2 hours.
 ## Formalism
 
 ### **Self-trapped polarons**
+
 In many condensed matter systems, interaction with phonons leads to the formation of **polarons**,
 when a particle couples to the lattice vibrations of a system.
 Instead of a free particle, it becomes a **quasiparitcle** with altered physical properties -- a polaron.
 In general, this notion applies to any particle irrespective of its type and statistics: electrons, holes,
 excitions, magnons and so on.
-In present formalism, we treat only **electron** and **hole polarons**, which formation is mediated by the **electron-phonon coupling**.
+In the present formalism, we treat only **electron** and **hole polarons**, which formation is mediated by the **electron-phonon coupling**.
 
-Depending on the strenght of the electron-phonon coupling, one can distignuish differnet regimes of the polaron formation.
+Depending on the strength of the electron-phonon coupling, one can distinguish different regimes.
 In the weak-coupling limit, a charge carrier is coherent with phonon oscillations, dragging the associated phonon cloud.
 This primarily leads to the band renormalization, and the physics can be captured by the [ZPR calculations](/tutorial/eph4zpr).
-In the limit of strong-coupling, the picture is different: a carrier is trapped in the potential well, created by self-induced by lattice deformation
+In the limit of strong-coupling, the picture is different: a carrier is trapped in the potential well, created by lattice deformation
 -- a phenomena called self-trapping or autolocalization.
-This leads to the occurence of a localized polaronic state inside the bandgap, and may switch the transport regime from a band-like to a hopping transport.
-The intermediate regime between the strong-coupling and weak-coupling limits is the most challenging to address and requies advanced techniques.
-In present formalism, we treat only **strong-coupling** regime of polaron formation, i.e. **self-trapped polarons**.
+This leads to the occurrence of a localized polaronic state inside the bandgap, and may switch the transport regime from a band-like to hopping transport.
+The intermediate regime between the strong-coupling and the weak-coupling limit is the most challenging to address and requires advanced techniques.
+In the present formalism, we treat only the **strong-coupling** regime of polaron formation, i.e. **self-trapped polarons**.
 
-The probabilty of a self-trapped electorn or hole polaron formation can be described by its **binding energy**:
+The probability of a self-trapped electron or hole polaron formation can be described by its **binding energy**:
 
 \begin{equation}
 \label{eq:epol}
     E_\mathrm{pol} = E\left( N \pm 1, \Delta \mathbf{\tau} \right) - E\left( N \pm 1, \Delta \mathbf{\tau} \equiv 0 \right),
 \end{equation}
 
-which is the difference of total energy of a charged system with $N \pm 1$ electrons in **distorted** polaronic geometry and pristine one.
-Here, lattice distortion is deonted by $\Delta \tau$ -- colletctive atomic displacements from theiir equilibrium positions.
+which is the difference of total energy of a charged system with $N \pm 1$ electrons in the **distorted** polaronic geometry and the pristine one.
+Here, the lattice distortion is denoted by $\Delta \tau$ -- collective atomic displacements from their equilibrium positions.
 A stable polaronic configuration corresponds to $E_\mathrm{pol} < 0$.
 
-Schematically, it can be illustrated by the follwoing configurational diagram for total energy of a system with $N\pm1$ electrons as a function of lattice distortion.
+Schematically, it can be illustrated by the following configurational diagram for total energy of a system
+with $N\pm1$ electrons as a function of lattice distortion.
 
 ![](eph4vpq_assets/epol.png)
 
-This figure also contains some foreshadowing as it uses LiF to illustrate both configurations of extra electron in the system: delocalized and polaronic one.
-At the end of the tutorial, the user will learn how to generate such figures themselves.
+This figure also contains some foreshadowing as it uses LiF to illustrate both configurations
+of an extra electron in the system: delocalized and polaronic one.
+By the end of the tutorial, the user will learn how to generate such figures themselves.
 
 From the configurational diagram, it is seen that $E_\mathrm{pol}$ can be decomposed into two contributions:
 the **phonon energy** $E_\mathrm{ph}$ arising purely from the lattice distortion, and the **charge localization energy** $\varepsilon_\mathrm{loc}$,
 which accounts for both electronic contribution and electron-phonon coupling.
 Physically, the latter term corresponds to the energy of the localized polaronic state inside the bandgap, computed from the VBM/CBM in case of hole/electron polaron.
 
-During the tutorial, the aformentioned quantities and other properties, characterizing the polaron formation, are computed within a Variational Polaron Equations, implemented in ABINIT.
+During the tutorial, the aforementioned quantities and other properties, characterizing the polaron formation, are computed within a Variational Polaron Equations, implemented in ABINIT.
 
 ### **Variational Polaron Equations**
 
-In DFT, the common approach to the polaronic problem is a direct geometry relaxtion of a charged system with a compensating jellium background.
-This approach is powerful and straightforward, but requires supercell calculations, making it prohibitive for polarons with large spatial extension.
-Also, standard DFT favors delocalization to due the self-interaction, and self-interaction corrections or special approaches have to be used to localize polarons [[cite:Falletta2022]].
+In DFT, the common approach to the polaronic problem is a direct geometry relaxation of a charged system with a compensating jellium background.
+This approach is powerful and straightforward, but requires supercell calculations,
+making it prohibitive for polarons with large spatial extension.
+Also, standard DFT favors delocalization due the self-interaction, and self-interaction corrections
+and special approaches have to be used to localize polarons [[cite:Falletta2022]].
 
-However, it possible to avoid the need of charge supercell relaxation by transofrming the problem of polaron formation into the reciprocal space.
-This formlaism was presented by Sio and coworkers in 2019 [[cite:Sio2019]], and required solution of an effective polaronic Hamiltionian, parametrized from
-first-principles calculations.
-For the undrlying theory behing this formalism and derivations, the user may be interested to consult the original paper.
+However, it possible to avoid the need of charged supercell relaxation by reformulating the problem of polaron formation in reciprocal space.
+This formalism was presented by Sio and coworkers in 2019 [[cite:Sio2019]], and required the solution of
+an effective polaronic Hamiltionian, parametrized from first-principles calculations.
+For the underlying theory behind this formalism and derivations, the user may be interested to consult the original paper.
 
 We take on the approach presented by Sio and coworkers, albeit we reformulate it into a **variational** form.
-We refer to this formalism as **Varitional Polaron Equations** or, simply, **VarPEq**.
+We refer to this formalism as **Variational Polaron Equations** or, simply, **VarPEq**.
 The derivations of our formalism and relevant discussions can be found in [[cite:Vasilchenko2022]].
 In this approach, we utilize a variational expression for the polaron binding energy, enabling the application of efficient gradient-based optimization techniques.
 Moreover, as we demonstrate in the tutorial, explicit treatment of the gradient allows us to probe systems for multiple degenerate polaronic states.
 
 !!! important
 
-    In what follows, we assume uniform, equal and $\Gamma$-centred $\mathbf{k}$- and $\mathbf{q}$-meshes
+    In what follows, we assume uniform, equal and $\Gamma$-centred $\kk$- and $\qq$-meshes
     for electron and phonon subspace.
-    Howver, in principle, it is enough for these meshed to be commensurate.
+    However, in principle, it is enough for these meshes to be commensurate.
 
-The polaron fromation is modeled in reciprocal space, where the BvK supercell is represented by the correspnding
-$\mathbf{k}$-sampling of the Brillouin Zone, i.e. $2\times2\times2$ $\mathbf{k}$-mesh corresponds to a $2\times2\times2$ supercell.
+The polaron formation is modeled in reciprocal space, where the BvK supercell is represented by the corresponding
+$\kk$-sampling of the Brillouin Zone, i.e. a $2\times2\times2$ $\kk$-mesh corresponds to a $2\times2\times2$ supercell.
 The polaron binding energy in a supercell of size $N_p$ is given by the variational expression
 
 \begin{equation}
@@ -157,14 +162,14 @@ Charge localization $\varepsilon_\mathrm{loc}$ is represented by the Lagrange mu
     \sum_{n\mathbf{k}} |A_{n\mathbf{k}}|^2 = N_p
 \end{equation}
 
-Eqs. (\ref{eq:varpeq}-\ref{eq:polaron_tau}) depend on the input paramters, that can be computed within a unit cell of a system:
+Eqs. (\ref{eq:varpeq}-\ref{eq:polaron_tau}) depend on the input parameters, that can be computed within a unit cell of a system:
 
 * electronic bands $\varepsilon_{n\mathbf{k}}$ and Kohn-Sham wavefunctions $\psi_{n\mathbf{k}}$;
 * phonon dispersion $\omega_{\mathbf{q}\nu}$ and eigenmodes $e_{\kappa \alpha, \nu}(\mathbf{q})$;
 * electron-phonon matrix elements $g_{mn\nu}(\mathbf{k, q})$.
 
 The variational expression can be optimized self-consistently.
-At any charge disribution $\boldsymbol{A}$, one can calculate the optimal deformation potential as
+At any charge distribution $\boldsymbol{A}$, one can calculate the optimal deformation potential as
 
 \begin{equation} \label{eq:phgrad}
     B_{\mathbf{q}\nu} \left( \boldsymbol{A} \right)
@@ -174,7 +179,7 @@ At any charge disribution $\boldsymbol{A}$, one can calculate the optimal deform
     A_{n\mathbf{k}}.
 \end{equation}
 
-Then, optimal charge localization is given by the Lagrange multiplier
+Then, the optimal charge localization is given by the Lagrange multiplier
 
 \begin{equation}
     \varepsilon_{\rm loc}
@@ -207,22 +212,22 @@ The gradient of $E_\mathrm{pol}$ with respect to the electronic degrees of freed
 \label{eq:elgrad}
 \end{equation}
 
-From this gradient, a new charge disribution $\boldsymbol{A}$ can be determined.
-Eqs. (\ref{eq:phgrad}-\ref{eq:elgrad}) consitute building blocks of any gradient-based algorithm for the binidng energy optimization.
-In ABINIT, we utilize preconditioned conjugate gradient algorithm [[cite:Payne1992]].
-
-After the variational expression is minimized, optimal $\boldsymbol{A}$ and $\boldsymbol{B}$ coefficients are determined and polaron in real space can be reconstructud via Eqs. (\ref{eq:polaron_phi}),(\ref{eq:polaron_tau}).
-
+From this gradient, a new charge distribution $\boldsymbol{A}$ can be determined.
+Eqs. (\ref{eq:phgrad}-\ref{eq:elgrad}) constitute the building blocks of any gradient-based algorithm for the binding energy optimization.
+In ABINIT, we employ the preconditioned conjugate gradient algorithm [[cite:Payne1992]].
+After the variational expression is minimized, the optimal $\boldsymbol{A}$ and $\boldsymbol{B}$ coefficients are determined and
+the polaron in real space can be reconstructed via Eqs. (\ref{eq:polaron_phi}),(\ref{eq:polaron_tau}).
 Schematically, the optimization process is described in the following chart:
 
-![](eph4vpq_assets/flow.pdf){: style="width:600px"}
+![](eph4vpq_assets/flow.png){: style="width:600px"}
 
 
-## Typical workflow for self-trpped polaron calculations
+## Typical workflow for self-trapped polaron calculations
 
 
-As description of the VarPEq formalism suggests, prior to the actual polaron calculations, one needs to obtain required input paramters,
-describing electronic and phonon subspace, and electron-phonon coupling.
+As the description of the VarPEq formalism suggests, prior to the actual polaron calculations,
+one needs to obtain the required input parameters,
+describing the electronic and phonon subspaces, and the electron-phonon coupling.
 
 A typical workflow for self-trapped polaron calculations involves the following steps
 (see the [introductory e-ph tutorial](/tutorial/eph_intro)):
@@ -237,21 +242,21 @@ A typical workflow for self-trapped polaron calculations involves the following 
    Remember to compute $\bm{\epsilon}^{\infty}$, $\bm{Z}^*$ (polar materials) and the dynamical quadrupoles
    $\bm{Q}^*$ as these quantities are needed for an accurate interpolation of phonon frequencies and DFPT potentials.
 
-3. **NSCF computation** of a WFK file on a much denser $\kk$-mesh represeting a BvK suprcell hosting a polaron.
+3. **NSCF computation** of a WFK file on a much denser $\kk$-mesh representing a BvK supercell hosting a polaron.
    The NSCF run uses the DEN file produced in step #1.
-   Compute **at least one** unnocupied electronic state, so later one the code will check if a system has a gap.
+   Compute **at least one** unnocupied electronic state, so later on the code can check if a system has a gap.
 
-4. **Merge the partial DDB and POT files** with *mrgddb* and *mrgdvdb*, respectively.
+4. **Merge the partial DDB and POT files** with *mrgddb* and *mrgdv*, respectively.
 
 5. **Compute a GSTORE file** with [[eph_task]] 11.
-   This step perorms the interpolation of phonon frequencies and DFPT potentials and computes the electron-phonon
-   matrix elements $g_{mn\nu}(\mathbf{k,q})$ on arbitrary [[eph_ngqpt_fine]] $\mathbf{q}$-mesh for a set
-   of bands [[gstore_brange]] or within an energy window [[gstore_erange]] near the band edges.
+   This step performs the interpolation of phonon frequencies and DFPT potentials and computes the electron-phonon
+   matrix elements $g_{mn\nu}(\mathbf{k,q})$ on an arbitrary [[eph_ngqpt_fine]] $\mathbf{q}$-mesh for a set
+   of bands [[gstore_brange]] or within an energy window [[gstore_erange]] near the band edge.
    The resulting GSTORE.nc **is mandatory** for VarPEq calculations.
 
 !!! warning
 
-    GSTORE computation requires ABINIT to be configures with support for parallel I/O for HDF5 and NetCDF libraries.
+    GSTORE computation requires ABINIT to be configured with support for parallel I/O for HDF5 and NetCDF libraries.
     See, for example, the corresponding section in the installation [tutorial](/tutorial/abinit_build)
 
     To verify, whether the installed libraries and ABINIT support the parallel I/O, try issuing
@@ -268,7 +273,7 @@ A typical workflow for self-trapped polaron calculations involves the following 
 6. Start from the WFK, DDB and GSTORE.nc files produced in steps #3-5
    to perform **VarPEq calculations** with [[eph_task]] 13.
 
-7. **Visualize polaron wavefuction and displacements** using the VPQ.nc file prodcued in step #6
+7. **Visualize polaron wavefuction and displacements** using the VPQ.nc file produced in step #6
    and [[eph_task]] -13.
 
 
@@ -288,7 +293,7 @@ cd Work_eph4vpq
 In this tutorial, we prefer to focus on the use of the EPH code hence
 we will be using **precomputed** DDB and POT files to bypass the DFPT part.
 We also provide a DEN.nc file to initialize the NSCF calculations and a GSR.nc file
-with electronic bands on a k-path for |AbiPy| post-processing.
+with electronic bands on a $\kk$-path for |AbiPy| post-processing.
 
 
 If *git* is installed on your machine, one can easily fetch the entire repository (29 MB) with:
@@ -322,9 +327,8 @@ mv LiF_eph_varpeq-master LiF_eph_varpeq
     The directory with the precomputed files must be located in the same working directory
     in which you will be executing the tutorial and must be named `LiF_eph_varpeq`.
 
-The script used to precompute the files is available
-[here](https://github.com/abinit/LiF_eph_varpeq/blob/main/run.sh),
-with the neccary `*abi` files are provided in the same repository.
+The script used to precompute the files is available [here](https://github.com/abinit/LiF_eph_varpeq/blob/main/run.sh),
+with the necessary `*abi` files provided in the same repository.
 
 Note that several parameters have been tuned to reach a reasonable **compromise between accuracy
 and computational cost** so do not expect the results obtained at the end of the lesson to be fully converged.
@@ -340,12 +344,16 @@ $\bm{Z}^*$ and $\bm{\ee}^\infty$ are also computed with the same underconverged 
     as a prototypical insulator for polaron calculations.
     In systems with Fm$\overline{3}$m space group, $\boldsymbol{Q} \equiv 0$ by symmetry.
 
+    To check if a system has non-zero quadrupole, one can use the following command:
+
+        abistruct.py has_quad FILE
+
+    where FILE is any file providing a structure in ABINIT format (e.g. netcdf output files or .abi files)
 
 ## How to extract useful info from the output files
 
-
-For post-processing, this tutorial will rely heavily on AbiPy toolkit.
-The installation notes and some examples can be found can be found in the |AbiPy| repository.
+For post-processing, this tutorial will rely heavily on the AbiPy toolkit.
+The installation notes and some examples can be found in the |AbiPy| repository.
 
 As an example, to plot the band structure using the GS eigenvalues stored in the GSR.nc file of the tutorial's repo,
 use the |abiopen| script provided by AbiPy with the `-e` option:
@@ -357,12 +365,11 @@ abiopen.py LiF_eph_varpeq/ebandso_GSR.nc -e
 ![](eph4vpq_assets/LiF_ebands.png)
 
 Note the VBM is triply degenerate if SOC is not used.
-This suggests that we will use last three occupied bands for hole polaron calculations.
-As the CBM has no degenercies, only the first unnocupied band will be considered in electron polaron calculations.
+This suggests that we will have to use last three occupied bands for hole polaron calculations.
+As the CBM has no degeneracy, only the first unoccupied band will be considered in electron polaron calculations.
 
 
 ## How to merge partial DDB files with mrgddb
-
 
 Normally, after DFPT calculations, we need to merge partial DDB files.
 This has already been done in the repository at the end of the
@@ -395,7 +402,7 @@ Has total energy: False
 Has forces: False
 Has stress tensor: False
 
-Has (at least one) atomic pertubation: True
+Has (at least one) atomic perturbation: True
 Has (at least one diagonal) electric-field perturbation: True
 Has (at least one) Born effective charge: True
 Has (all) strain terms: False
@@ -438,7 +445,6 @@ that produces the following figure:
 !!! important
 
     In this case, the small breaking of the acoustic sum rule is mainly due the too low cutoff energy employed in our calculations.
-
     In production, one should perform convergence tests wrt [[ecut]] and $\qq$-mesh but since the goal of this lesson is to teach you how
     to run polaron calculations, **we ignore this problem and continue with the other examples**.
 
@@ -460,14 +466,15 @@ and the following input file:
 
 {% dialog tests/tutorespfn/Input/teph4vpq_1.abi %}
 
-This can also be achieved by calling *mrgdv* with *merge* argument, output filename and wildcard for the POT files
+This can also be achieved by calling *mrgdv* with the *merge* argument, output filename and wildcard for the POT files
+
 ```sh
 mrgdv merge teph4vpq_1_DVDB LiF_eph_varpeq/dfpt*POT*nc
 ```
 
 !!! tip
 
-    The number at the end of the POT file corresponds to the (*idir*, *ipert*) pertubation for that
+    The number at the end of the POT file corresponds to the (*idir*, *ipert*) perturbation for that
     particular $\qq$-point. The *pertcase* index is computed as:
 
     ```fortran
@@ -482,7 +489,7 @@ mrgdv merge teph4vpq_1_DVDB LiF_eph_varpeq/dfpt*POT*nc
     - *ipert* = *natom* + 3 corresponds the uniaxial stress (Cartesian directions)
     - *ipert* = *natom* + 4 corresponds the shear stress.   (Cartesian directions)
 
-    All DFPT POT files with 1 <= pertcase <= 3 x [[natom]] therefore correspond to atomic pertubations
+    All DFPT POT files with 1 <= pertcase <= 3 x [[natom]] therefore correspond to atomic perturbations
     for a given $\qq$-point.
 
     The value of *pertcase* and *qpt* are reported in the ABINIT header.
@@ -547,19 +554,21 @@ If all the independent entries are available, the code prints the following mess
 
     If you don't get this message, the DVDB **cannot be used** by the EPH code.
     In this case, check carefully your DFPT input files and the list of POT files that have been merged.
+
     Also, note that it is not possible to change the value of [[nsym]] at the level of the EPH calculation
     as symmetries are automatically inherited from the previous GS/DFPT calculations.
+    To perform calculations without symmetries, one should set [[nsym]] to 1 (no spatial symmetries)
+    and use [[kptopt]] 4 to disable time-reversal symmetry in all the input files.
 
 ## Computing the WFK files
 
 At this point we have all the ingredients (**DDB** and **DVDB**) required to compute/interpolate
-the e-ph scattering potentials and we can finally start to generate the WFK files.
+the e-ph scattering potentials, and we can finally start to generate the WFK files.
 
 For our first NSCF calculation, we compute wavefunctions on $\Gamma$-centered $\kk$-meshes (3x3x3, 4x4x4, 5x5x5, and 13x13x13)
 with 6 bands (5 occupied + 1 unnocupied).
 The first three wavefunctions will be used in calculations of small hole polaron in LiF.
 The latter will be used for the large electron polaron in LiF.
-
 Note the use of [[getden_filepath]] to read the precomputed DEN.nc file instead of [[getden]] or [[irdden]].
 
 You may now run the NSCF calculation by issuing:
@@ -574,11 +583,9 @@ with the input file given by:
 
 ## Small hole polaron: computing the GSTORE files
 
-
 For **our first GSTORE calculation**, we compute the electron-phonon matrix elements
 required for the small hole polaron optimization.
-With this example, we discuss the most important `gstore_` input variables and the concept
-of the GSTORE file.
+With this example, we discuss the most important `gstore_` input variables and the concept of the GSTORE file.
 First of all, you may want to start immediately the computation by issuing:
 
 ```sh
@@ -599,25 +606,25 @@ with the following input file:
 
     The EPH code will automatically distribute the workload using a predefined distribution scheme
     (not necessarily the most efficient in terms of memory and wall-time).
+    The input variable [[eph_np_pqbks]] can be used to specify manually the distribution scheme.
 
 !!! warning
 
     GSTORE calculations imply various level of the MPI parallelism and parallel IO.
     At the time of writing this tutorial, the bottleneck
-    for number of MPI processes is the number of $\mathbf{k}/\mathbf{q}$-points in the irreducible
-    wedge of BZ. Specifing more may lead to idle processes that are handled differently by different compileres.
+    for number of MPI processes is the number of $\mathbf{k}/\mathbf{q}$-points in the IBZ.
+    Specifying more may lead to idle processes that are handled differently by different compileres.
 
-    Ase we use [[ndtset]] mode to compute three GSTORE files in a single run, the first dataset (3x3x3 $\kk/\qq$-mesh)
+    As we use [[ndtset]] mode to compute three GSTORE files in a single run, the first dataset (3x3x3 $\kk/\qq$-mesh)
     will be the limiting factor, and **here the maximum number of allowed MPI processes** is 4.
-    In production, it is **highly recommended** to compute seperate GSTORE files in individual runs.
+    In production, it is **highly recommended** to compute separate GSTORE files in individual runs.
 
 
 Let's now discuss the meaning of the different variables in more detail.
 We use [[optdriver]] 7 to enter the EPH code while [[eph_task]] 11 activates
 the computation of the electron-phonon matrix elements via interpolation of the DFPT scattering potentials.
 
-The paths to the external files (**DDB**, **WFK**, **DVDB**) are specified
-with the three variables:
+The paths to the external files (**DDB**, **WFK**, **DVDB**) are specified with the three variables:
 
 - [[getddb_filepath]]
 - [[getwfk_filepath]]
@@ -630,15 +637,15 @@ This is an excerpt of the input file:
  gstore_cplex  2     # Complex e-ph matrix elements   (mandatory for VarPEq)
  gstore_kzone  "bz"  # Use full BZ for k and q meshes (mandatory for VarPEq)
  gstore_qzone  "bz"
- gstore_brange 3 5  # Bands participating in the hole polaron formation:
-                    # from 3 to 5 (triply degenerate valence band maximum)
+ gstore_brange 3 5   # Bands participating in the hole polaron formation:
+                     # from 3 to 5 (triply degenerate valence band maximum)
 # Wavefunction
 # Read the WFK file from the preparatory run
  getwfk_filepath1 "teph4vpq_2o_DS1_WFK"  # 3x3x3 k-mesh
  getwfk_filepath2 "teph4vpq_2o_DS2_WFK"  # 4x4x4 k-mesh
  getwfk_filepath3 "teph4vpq_2o_DS3_WFK"  # 5x5x5 k-mesh
 
- ngkpt1   3 3 3  # These parameters have to consistent with the WFK file
+ ngkpt1   3 3 3  # These parameters have to be consistent with the WFK file
  ngkpt2   4 4 4
  ngkpt3   5 5 5
  ...
@@ -670,17 +677,17 @@ As [[eph_ngqpt_fine]] differs from [[ddb_ngqpt]], the code will automatically ac
 the interpolation of the DFPT potentials as discussed in the [introduction to the EPH code](/tutorial/eph_intro).
 
 Polaron calculations require complex electron-phonon matrix elements, hence [[gstore_cplex]] 2 is used.
-As we will deal with small hole polaron, and the VBM in LiF is triply-degenerate, we select last three occupied bands
+As we will deal with small hole polaron, and the VBM in LiF is triply-degenerate, we select the last three occupied bands
 via [[gstore_brange]] variable.
 
 !!! important
 
-    At present, at the level of poalron computations, no symmetry is assumed for the electron-phonon matrix elements.
-    Hence they need to be computed on full BZ for $\kk$ and $\qq$ vectors.
+    At present, at the level of polaron computations, no symmetry is assumed for the electron-phonon matrix elements.
+    Hence these terms have to be computed in the full BZ for $\kk$ and $\qq$ vectors.
     This behaviour is specified by the [[gstore_kzone]] and [[gstore_qzone]] variables.
-    As a result, for some systems GSTORE files may be require a relatively large amount of phyical memory.
+    As a result, for some systems GSTORE files may require a relatively large amount of phyical memory.
 
-    In principle, it is possible to utilize symmetries for matrix elements, albeit it requires correct treatment of
+    In principle, it is possible to utilize symmetries for matrix elements, albeit this requires the correct treatment of
     the scattering between degenerate states via degenerate phonons [[cite:Li2024]].
     This feature, however, is not yet implemented.
 
@@ -715,13 +722,11 @@ For each DATASET we find a section that summarizes the gstore parameters:
  gqk_my_nq: -1
 ```
 
-Then we find another section related to MPI parallelism.
-In this case we are running in sequential but the output will change if we run in parallel
-(see also [[eph_np_pqbks]]).
+Then we find another section related to the MPI parallelism.
+In this case we are running in sequential but the output will change if we run in parallel (see also [[eph_np_pqbks]]).
 The final message informs the user that the EPH code will either read the qpts from file
-(if the DVDB contains all of them, in case
-[[eph_ngqpt_fine]] is not defined in the input) or interpolate the scattering potentials
-from [[ddb_ngqpt]] to [[eph_ngqpt_fine]].
+(if the DVDB contains all of them, in case [[eph_ngqpt_fine]] is not defined in the input)
+or interpolate the scattering potentials from [[ddb_ngqpt]] to [[eph_ngqpt_fine]].
 
 ```md
   === MPI distribution ===
@@ -743,7 +748,7 @@ or
 
 Finally, we have the section with the squared absolute values of specific matrix elements are printed.
 This is mostly done for regression tests of ABINIT. Note, however, the `gstore_completed: 1` tag.
-This indicates that all the matrix elments have been computed for the corresponding GSTORE file.
+This indicates that all the matrix elements have been computed for the corresponding GSTORE file.
 
 ```md
  gstore_completed: 1
@@ -804,18 +809,23 @@ gstore_glob_spin_nq[0]: 27
 
 !!! important
 
-    Pay attention to the gstore_completed tag. If `False`, some matrix elements may have not been computed!
+    Pay attention to the gstore_completed tag. If set to False, some matrix elements may not have been computed.
+    This typically occurs if the job was interrupted, for example due to a timeout.
+
+	To restart a gstore computation, simply instruct the code to read the incomplete GSTORE.nc file
+    using [[getgstore_filepath]], and rerun the same input file with [[optdriver]] = 11.
+    If needed, you can disable this automatic restart capability by setting [[eph_restart]] to 0.
+
 
 ## Small hole polaron: variational optimization of binding energy
 
-
-At this point we have all the ingredients to start **our first VarPEq calcualation**.
+At this point we have all the ingredients to start **our first VarPEq calculation**.
 This will be done for three $\kk/\qq$-meshes of incrementally increasing sampling:
 3x3x3, 4x4x4, and 5x5x5, which represent a supercell hosting the polaron.
-For each mesh, we have already computed the mandatoy input: **WFK** and **GSTORE** files.
-We will also need the same **DDB** file used in GSTORE calcualations.
+For each mesh, we have already computed the mandatory inputs: **WFK** and **GSTORE** files.
+We will also need the same **DDB** file used in the GSTORE calculations.
 
-With this example, we discuss the most important `vpq_` input variables and the concept of VarPEq calculations.
+With this example, we can discuss the most important `vpq_` input variables and the concept of VarPEq calculations.
 First of all, you may want to start the computation immediately by issuing:
 
 ```sh
@@ -828,19 +838,19 @@ with the following input file:
 
 !!! tip
 
-    In this example, the GSTORE files have already been computed and will be rereloaded from disk.
-    The EPH code will automatically distribute the workload and memory using a predifined distribution scheme.
+    In this example, the GSTORE files have already been computed and will be reloaded from disk.
+    The EPH code will automatically distribute the workload and memory using a predefined distribution scheme.
 
-    The manual parallelism is possible over $\kk$-, $\qq$-points, pertubations and spin indices.
+    The manual parallelism is possible over $\kk$-, $\qq$-points, perturbations and spin indices.
     See the related [[eph_np_pqbks]] input variable.
 
 
-!!! imporant
+!!! important
 
     We use [[ndtset]] mode to perform three polaron calculations in a single run.
     Hence, the first dataset (3x3x3 $\kk/\qq$-mesh) will be limiting factor for parallelism:
-    max 6 procs over pertubations (2*[[natom]]), and max 9 procs for $\kk/\qq$-vectors each.
-    In production, it is **highly recommended** to compute seperate GSTORE files in individual runs.
+    max 6 procs over perturbations (2*[[natom]]), and max 9 procs for $\kk/\qq$-vectors each.
+    In production, it is **highly recommended** to compute separate GSTORE files in individual runs.
 
 Let's now discuss the meaning of the different variables in more detail.
 As usual, we use [[optdriver]] 7 to enter the EPH code while [[eph_task]] 13 activates
@@ -900,26 +910,27 @@ This is an excerpt of the input file:
                            # NOTE: for the input parameters used to produce
                            # the DDB file, consult the LiF_eph_varpeq/dfpt.abi
 ```
+
 The mesh for electrons ([[ngkpt]], [[nshiftk]] and [[shiftk]]) must
 correspond to the one used for the input WFK file.
 [[ddb_ngqpt]] is set to 3x3x3 as this is the $\qq$-mesh used in the DFPT part to generate the DDB and DVDB files used previously in GSTORE.
 
 Polaron calculations require an explicit [[vpq_pkind]] variable specification which tells the code which polaron we are dealing with (here, `"hole"`).
-In principle, this is **the only mandatory** `vpq_` variable, and others take default values if not specfied.
+In principle, this is **the only mandatory** `vpq_` variable, and other inputs take default values if not specified.
 
-In our example, intial guess for electronic coefficients $\boldsymbol{A}$ is given by the combination of [[vpq_aseed]] and [[vpq_gpr_energy]] variables.
-[[vpq_nstates]] variable gives the number of polaronic states.
+In our example, the initial guess for the electronic coefficients $\boldsymbol{A}$ is given by the combination of [[vpq_aseed]] and [[vpq_gpr_energy]] variables.
+The [[vpq_nstates]] variable gives the number of polaronic states.
 For each state, the solver will iterate until it converges on the gradient norm specified by the [[vpq_tolgrs]] variable OR reaches the maximum number of iterations [[vpq_nstep]].
 
-Here, we also use Fr\"ohlich correction for the electron-phonon matrix divergence at $\Gamma$.
+Here, we also use a Fr\"ohlich correction for the electron-phonon matrix divergence at $\Gamma$.
 For a fixed $\kk/\qq$-mesh, this trick brings the solution closer to the infinite-mesh limit, and also facilitates the convergence of our algorithm.
-One activates this correction via [[vpq_avg_g]] tag and specification of the [[eph_frohl_ntheta]] variable.
+One activates this correction via [[vpq_avg_g]] tag and the specification of the [[eph_frohl_ntheta]] variable.
 
 We can now have a look at the main output file:
 
 {% dialog tests/tutorespfn/Refs/teph4vpq_4.abo %}
 
-Since first we load the GSTORE files, we find a section that summarizes the gstore parametes and MPI parallelism:
+Since first we load the GSTORE files, we find a section that summarizes the gstore parameters and MPI parallelism:
 
 ```md
  Computing variational polaron equations from pre-existent GSTORE file: teph4vpq\_3o\_DS1_GSTORE.nc
@@ -932,7 +943,7 @@ Since first we load the GSTORE files, we find a section that summarizes the gsto
   ...
 ```
 
-The following section promts the parameters of the VarPEq optimization and other related quantities:
+The following section prompts the parameters of the VarPEq optimization and other related quantities:
 
 ```md
   === Variational Polaron Equations ===
@@ -1016,14 +1027,16 @@ And, finally, the code enters the solver and prints the optimization log at the 
  Saving results to: teph4vpq_4o_DS1_VPQ.nc
 ```
 
-In the log above, one can see the convergence of the polaron binding energy `E_pol`, its indivudual electornic, phonon and electron-phonon terms `E_el`, `E_ph`, and `E_elph`, as well as charge localization energy `epsilon`.
+In the log above, one can see the convergence of the polaron binding energy `E_pol`, its individual electronic,
+phonon and electron-phonon terms `E_el`, `E_ph`, and `E_elph`, as well as charge localization energy `epsilon`.
 The `||grad||` column shows the evolution of the gradient norm over the iterations.
 
 !!! tip
 
     Note, however, that this log is given to get a first glimpse on the behaviour of the solver.
-    Complete results, including optimized $\boldsymbol{A}$ and $\boldsymbol{B}$ coefficients are saved in the VPQ NetCDF at the end of computation.
-    We will heavily rely on these files for post-processing.
+    Complete results, including optimized $\boldsymbol{A}$ and $\boldsymbol{B}$ coefficients are saved
+    in the VPQ NetCDF at the end of computation.
+    We will heavily rely on these netcdf files for post-processing.
 
 The calculation has produced the following output files (e.g. for the first DATASET):
 
@@ -1033,24 +1046,23 @@ $ ls teph4vpq_4o_DS1*
 teph4vpq_4o_DS1_EBANDS.agr teph4vpq_4o_DS1_PHDOS.nc   teph4vpq_4o_DS1_VPQ.nc
 ```
 
-where the most imporant is VPQ.nc -- a NetCDF file with the optimization log,
+where the most important is VPQ.nc -- a NetCDF file with the optimization log,
 optimized $\boldsymbol{A}$ and $\boldsymbol{B}$ coefficients and other relevant data.
-We will heavily rely on these files and |AbiPy| toolkit for post-processing of our results.
+We will heavily rely on these files and the |AbiPy| toolkit for post-processing our results.
 As usual, one can use |abiopen| with the `-e` option (`--expose`) to print a summary to terminal and visualize the optimization log:
 
 ![](eph4vpq_assets/LiF_hole_scf.png)
 
 The subplot on the left shows the evolution of the gradient norm.
 Two subplots on the right show the convergence of energy terms and their log-scale difference wrt final values.
-As the bidning energy $E_\mathrm{pol}$ is the only variational quantity, on these two subplots it is shown by solid lines.
+As the binding energy $E_\mathrm{pol}$ is the only variational quantity, on these two subplots it is shown by solid lines.
 
 
 ## Small hole polaron: extrapolation to the infinite-size supercell
 
-
-As seen from our calculations, small hole polaron is already being localized at 3x3x3 $\kk/\qq$-mesh (3x3x3 supercell).
-However, to evalute its binding energy in the infinite-size limit $N_p \to \infty$,
-we need to perform the extrapoltion wrt inverse supercell size (that's why we have optimized polaron for multiple meshes!):
+As seen from our calculations, the small hole polaron is already being localized at 3x3x3 $\kk/\qq$-mesh (3x3x3 supercell).
+However, to evaluate its binding energy in the infinite-size limit $N_p \to \infty$,
+we need to perform the extrapolation wrt inverse supercell size (that's why we have optimized polaron for multiple meshes!):
 
 \begin{equation}
 \label{eq:makovpayne}
@@ -1061,9 +1073,9 @@ we need to perform the extrapoltion wrt inverse supercell size (that's why we ha
 To fit the parameters of Eq. (\ref{eq:makovpayne}) to the optimized data, one can use any suitable software or library of choice.
 In this tutorial, however -- just as in other examples -- we will rely on the capabilities of AbiPy as a Python module.
 
-AbiPy provides a `Robot` class that can be used to analzye multiple NetCDF files produced in ABINIT calculations.
+AbiPy provides a `Robot` class that can be used to analyze multiple NetCDF files produced in ABINIT calculations.
 In particular, we will be interested in the `VpqRobot`.
-The following Python scritps gives an example on how to use this class with relevant methods:
+The following Python script gives an example on how to use this class with the relevant methods:
 
 ```python
 from abipy.eph.vpq import VpqRobot
@@ -1081,15 +1093,15 @@ print(df)
 robot.plot_kconv(nfit=3)
 ```
 
-It imports the `VpqRobot` dataclass from the module and initializes it with the list of VPQ files.
+It imports the `VpqRobot` class from the module and initializes it with the list of VPQ files.
 Then, a pandas dataframe with optimized data for each VPQ file is returned via the `get_final_results_df` method.
 One can use this dataframe to perform further data analysis and create custom publication-ready figures.
-We then use a `plot_kconv` method that peforms the fitting of Eq. (\ref{eq:makovpayne})
-parametes to the data in the robot, and plots the following figure:
+We then use a `plot_kconv` method that performs the fitting of Eq. (\ref{eq:makovpayne})
+parameters to the data in the robot, and plots the following figure:
 
 !!! tip
 
-    For formal arguments of the methods and their meaning, user can invoke the Python `help()` funtion.
+    For formal arguments of the methods and their meaning, user can invoke the Python `help()` function.
     E.g. calling `help(VpqRobot.plot_kconv)` gives the method's docstring:
 
     ```sh
@@ -1105,8 +1117,7 @@ parametes to the data in the robot, and plots the following figure:
 
 The extrapolated values $E_\mathrm{pol}$ = -2.03 eV and $\varepsilon_\mathrm{loc}$ = 4.99 eV differ from a fully converged values of $E_\mathrm{pol}$ = -1.94 eV and $\varepsilon_\mathrm{loc}$ = 4.68 eV.
 This is mainly due to the low [[ecut]] and sampling of $\kk/\qq$-meshes used to produce the input parameters for the solver.
-Also, one has to impose lower [[vpq_tolgrs]] convergence threshold and use denser meshes for extrapoltion.
-
+Also, one has to impose lower [[vpq_tolgrs]] convergence threshold and use denser meshes for extrapolation.
 
 Now, let's try to perform the same calculations as in `teph4vpq_4.abi` but without the long-range corrections for the matrix elements at $\Gamma$.
 The input is the same, but with the [[vpq_avg_g]] tag set to 0:
@@ -1119,7 +1130,7 @@ As usual, run this example with:
 abinit teph4vpq_5.abi > teph4vpq_5.log 2> err &
 ```
 
-Upon completion, we can modify our Python script to inclue the new VPQ files in our robot.
+Upon completion, we can modify our Python script to include the new VPQ files in our robot.
 
 ```python
 from abipy.eph.vpq import VpqRobot
@@ -1139,14 +1150,15 @@ robot = VpqRobot.from_files(vpq_files)
 robot.plot_kconv(nfit=3)
 ```
 
-The robot is smart enough (but stupid nonetheless, so **trust your own judgemenet**) to detect 2 different kind of calculations and peform seperate extrapoltion for each case.
+The robot is smart enough (but stupid nonetheless, so **trust your own judgemenet**) to detect 2 different kind
+of calculations and perform separate extrapolation for each case.
 It produces the following figure:
 
 ![](eph4vpq_assets/LiF_hole_extr1.png)
 
 In principle, extrapolated values for $E_\mathrm{pol}$ and $\varepsilon_\mathrm{loc}$ have to agree whether or not the LR correction is employed.
 The discrepancy here is mainly due to the relatively high value of [[vpq_tolgrs]]
-and coarse $\kk/\qq$-meshes used for extrapoltion.
+and the coarse $\kk/\qq$-meshes used for extrapolation.
 
 ??? note "Exercise"
 
@@ -1158,25 +1170,25 @@ Note, however, how adding the LR correction brings the values of $E_\mathrm{pol}
 !!! warning
 
     For delocalized polarons, i.e. there is no binding, adding LR correction will anyway give the negative value of $E_\mathrm{pol}$,
-    solely due to the long-range corrections that vanish in the limit of $N_p \to \infty$.
+    solely due to the long-range correction that vanishes in the limit of $N_p \to \infty$.
     Without the LR correction, $E_\mathrm{pol}$ is zero for a delocalized particle.
-
-    As a result, one alway needs to check the extrapolation to the infinite-size limit and reach $\kk/\qq$-meshes (suprcells) large
+    As a result, one always needs to check the extrapolation to the infinite-size limit and reach $\kk/\qq$-meshes (supercells) large
     enough to host a polaron.
 
 
-## Small hole polaron: multiple states and visualiziation
-
+## Small hole polaron: multiple states and visualization
 
 For now, we have probed our system for a single polaronic state.
-However, our method supports the search for multiple polaroic states:
+However, our method supports the search for multiple polaronic states:
 once solutions with charge localization $\boldsymbol{A}^i, i < n$ are found, we find the next one $\boldsymbol{A}^{n}$ by imposing
 an orthogonality constraint wrt $\boldsymbol{A}^i, i < n$.
 
 This is similar to the approach used to compute multiple electornic bands [[cite:Payne1992]].
-In polaron problem, however, this procedure does not give an optimized solution for $\boldsymbol{A}^n$, as polaronic states are not necessarily orthogonal to each other.
-Rather, it brings next solution far away from the all the previous ones.
-After this is achieved, i.e. the solver is stuck at a constrained-induced stationary point, the constraint can be removed, and a new solution is found.
+In polaron problem, however, this procedure does not give an optimized solution for $\boldsymbol{A}^n$,
+as polaronic states are not necessarily orthogonal to each other.
+Rather, it brings the next solution far away from all the previous ones.
+After this is achieved, i.e. the solver is stuck at a constrained-induced stationary point,
+the constraint can be removed, and a new solution is found.
 
 Here we will utilize this approach to demonstrate that there exist multiple variational solutions for hole polaron in LiF.
 
@@ -1192,18 +1204,18 @@ abinit teph4vpq_6.abi > teph4vpq_6.log 2> err &
 
 Note that [[vpq_nstates]] variable is now 3.
 Also, two new `vpq_` variables are introduced, [[vpq_nstep_ort]] and [[vpq_translate]].
-The former states how many orthogonalization steps are to be perormed.
-After [[vpq_nstep_ort]] steps, the orthogonality constraint is lifted, and algorithm relaxes to a solution
+The former defines how many orthogonalization steps are to be performed.
+After [[vpq_nstep_ort]] steps, the orthogonality constraint is lifted, and the algorithm relaxes to a solution
 from a starting point for $\boldsymbol{A}$ that is far away from the previous ones.
-The [[vpq_translate]] tag turns on the translation of polaronic solutions, i.e. we peform $n$-th orthogonalization
-wrt computed $\boldsymbol{A}^i, i < n$ and their translated images within supercell.
-This is rather important point, as polaronc can localize at any equivalent atomic site within a supercell,
-and we have to eliminate this trivial solutions.
+The [[vpq_translate]] tag turns on the translation of polaronic solutions, i.e. we perform $n$-th orthogonalization
+wrt computed $\boldsymbol{A}^i, i < n$ and their translated images within the supercell.
+This is rather important point, as polarons can localize at any equivalent atomic site within a supercell,
+and we have to eliminate these trivial solutions.
 
 
 !!! important
 
-    At large $\kk/\qq$ meshes the translation of polaronic solutions can be **computatinally prohibitive**
+    At large $\kk/\qq$ meshes the translation of polaronic solutions can be **computationally prohibitive**
     due to the large supercell size.
 
 
@@ -1223,7 +1235,7 @@ Note the difference in the initial prompt
    * spin 1/1, pstate 3/3...
 ```
 
-Also, there are now three optimization logs for each state, which are a bit different when the orthogonalization is peformed.
+Also, there are now three optimization logs for each state, which are a bit different when the orthogonalization is performed.
 For example, for state 2:
 
 ```md
@@ -1278,14 +1290,14 @@ For example, for state 2:
 
 Note the `(o)` tag for optimization step with the orthogonality constraint.
 Also, check the gradient norm, which is indeed stuck at a constrained-induced stationary point
-before the cosntraint is lifted.
+before the constraint is lifted.
 
 All results are gathered in a single *VPQ* NetCDF file.
 As before, we can visualize the convergence of our method using |abiopen| with the `-e` option (`--expose`):
 
 ![](eph4vpq_assets/LiF_hole_pstate3.png)
 
-The $E_\mathrm{pol}$ values for each state differ slighly:
+The $E_\mathrm{pol}$ values for each state differ slightly:
 
 ```sh
 $ grep "E_pol (eV)" teph4vpq_6.abo
@@ -1308,14 +1320,13 @@ As usual, run this example with:
 abinit teph4vpq_7.abi > teph4vpq_7.log 2> err &
 ```
 
-This calculations requrie the **VPQ** NetCDF file produced in the previous calculations,
-as well as corresponding **WFK**, **DDB**, **DVDB** and **GSTORE** files.
+This calculations requires the **VPQ** NetCDF file produced in the previous calculations,
+as well as the corresponding **WFK**, **DDB**, **DVDB** and **GSTORE** files.
 Note the new [[getvpq_filepath]] variable.
 
-The code responsible for producing `.xsf` files with visualiziation data is enetered via
-the [[eph_task]] -13 variable.
+The code responsible for producing `.xsf` files with visualization data is activated via the [[eph_task]] -13 variable.
 The variable [[vpq_mesh_fact]] specifies the resolution downsampling of the charge distribution isosurface.
-Increasing its value will reduce memory requirements by losing some fine feautres of the isosurface.
+Increasing its value will reduce memory requirements by losing some fine features of the isosurface.
 For small polarons [[vpq_mesh_fact]] 1 (no downsampling) is perfectly fine, but for the sake of tutorial we will use the downsampling anyaway.
 
 This calculation has produced the following `.xsf` files:
@@ -1332,47 +1343,48 @@ For each state, we have
 
 - POLARON.xsf --> polaron charge distribution in pristine geometry;
 - POLARON_DISPL.xsf --> polaron charge distribution with distorted geometry;
-- POLARON_DISPL_VECTORS.xsf --> pristine geomerty with displacement vectors shown as forces.
+- POLARON_DISPL_VECTORS.xsf --> pristine geometry with displacement vectors shown as forces.
 
 
-One can use software that can read `.xsf` file format (e.g. VESTA) to viualize this output.
+One can use software that can read `.xsf` file format (e.g. VESTA) to visualize these outputs.
 The following figure shows the charge distribution of each polaronic state:
 
-![](eph4vpq_assets/LiF_hole_polaron3.pdf)
+![](eph4vpq_assets/LiF_hole_polaron3.png)
 
-Note that that state 1 and 3 are instances of a **triply-degenerate hole polaron**,
+Note that state 1 and 3 are instances of a **triply-degenerate hole polaron**,
 and oriented along two different directions of the <100> cubic family.
-That's why they are close in binding energy (\~ 0.1 % differnece), and the difference may decrease if we ask for stricter convergence with [[vpq_tolgrs]].
+That's why they are close in binding energy (\~ 0.1 % difference), and the difference may decrease
+if we ask for stricter convergence with [[vpq_tolgrs]].
 These polarons have $D_{4h}$ point group symmetry.
 
 However, state 2 possesses **different symmetry** ($D_{2h}$ point group) and is oriented along one of 6 direction of the <110> cubic family.
 
 Having **multiple** and **degenerate** polaronic solutions for a single system is not surprising.
-This happens due to the degeneracy of electronic states and can be seen already at level of generalized Frohlich model [[cite:Vasilchenko2024]].
-In *ab initio* calculations this behaviour may be even more complex.
+This happens due to the degeneracy of electronic states and can be seen already at the level of generalized Frohlich model [[cite:Vasilchenko2024]].
+In *ab initio* calculations, this behaviour may be even more complex.
 
-Also, note that these polarons localize on fluorine atoms and can occupy **any fluorine site** -- that's why we had to additionaly treat the translational invariance.
-
-!!! tip
-
-    If you want to manually translate the polarons at visualiziation step, use the [[vpq_trvec]] variable.
+Also, note that these polarons localize on fluorine atoms and can occupy **any fluorine site** --
+that's why we had to addittionaly treat the translational invariance.
 
 !!! tip
 
-    Obtained solutions can be used as starting points for calculations with other $\kk/\qq$-meshes.
+    If you want to manually translate the polarons at visualization step, use the [[vpq_trvec]] variable.
+
+!!! tip
+
+    Obtained solutions can be used as a starting point for calculations with other $\kk/\qq$-meshes.
     For this, one has to provide the **VPQ** file via [[getvpq_filepath]], select a pstate via
     [[vpq_select]] and activate the interpolation using the [[vpq_interp]] tag.
 
-    This way, one can try to propagate a solution through a series of calculations on progressively inreasing
+    This way, one can try to propagate a solution through a series of calculations on progressively increasing
     meshes and achieve consistent localization of polaron.
     However, as the potential energy surfaces of polarons possess multiple minima, it is still recommended
-    to check consistency of the solutions between meshes.
+    to check the consistency of the solutions between meshes.
 
 
 Finally, let's look at the AbiPy capabilities to analyze individual contributions of the electronic bands
 and phonon modes to the polaron formation.
-This can be done with the `VpqFile` class which loads the **VPQ** NetCDF files and provides post-process
-tools.
+This can be done with the `VpqFile` class which loads the **VPQ** NetCDF files and provides post-process tools.
 With the following Python scripts
 
 ```python
@@ -1397,38 +1409,37 @@ for polaron in vpq.polaron_spin:
     polaron.plot_bqnu_with_ddb(ddb_file)
 ```
 
-we can generate the following figures (it make take some time):
+we can generate the following figures (it may take some time):
 
 ![](eph4vpq_assets/LiF_hole_coeffs.png)
 
 For each state, left and right figure show the contribution of the electronic bands and phonon modes to the polaron formation, respectively.
-$\boldsymbol{A}$ and $\boldsymbol{B}$ coefficients are interpolated on $\kk/\qq$ paths -- that's why we see such dense sampling even our coefficients have been obtained on 3x3x3 $\kk/\qq$ meshes.
+$\boldsymbol{A}$ and $\boldsymbol{B}$ coefficients are interpolated on $\kk/\qq$ paths -- that's why
+we see such dense sampling although our coefficients have been obtained on 3x3x3 $\kk/\qq$ meshes.
 These results are unconverged mainly due to the coarse mesh of the calculation, but still provide qualitative insights.
 
 Note the difference between the $\boldsymbol{A}$ contribution for each state.
-Even for the degenerate states 1 and 3 it is different, which is mainly due to the fact that we used high-symmetry paths of the **pristine crystal** to plot them.
-With polaron, we have a **symmetry-breaking** effect, and one have to use **special high-symmetry paths** for each polaron.
-For states 1 and 3, for example, one of the three $\Gamma-X$ direction becomes inequivalent with two others.
+Even for the degenerate states 1 and 3 it is different, which is mainly due to the fact that
+we used high-symmetry paths of the **pristine crystal** to plot them.
+With polarons, we have a **symmetry-breaking** effect, and one have to use **special high-symmetry paths** for each polaron.
+For states 1 and 3, for example, one of the three $\Gamma-X$ direction becomes inequivalent with the two others.
 For state 2, the same will hold for the set of $\Gamma-K$ directions.
 
-This inequivalency can also be seen in A-DOS, which have been computed with (red) and without symmetries (golden).
+This inequivalency can also be seen in the A-DOS, which have been computed with (red) and without symmetries (golden).
 If $\boldsymbol{A}$ coefficients have possesed the same symmetry as the crystal, these DOS would have been identical.
-
 However, the detailed symmetry analysis of polarons is beyond the scope of this tutorial.
 
 
 ## Large electron polaron
 
-
 Conceptually, calculations of large polarons follow the same flow as for small polarons.
-The main difference is in the size of $\kk/\qq$-meshes we have to employ in the calculations,
+The main difference is in the size of $\kk/\qq$-meshes we have to employ
 as large polarons require large hosting supercells.
 Here, we will obtain large electron polaron in LiF on 13x13x13 $\kk/\qq$-mesh.
 
-Again, we will need **DDB**, **WFK** and **GSTORE** files to launch VarPEq optimization.
+Again, we will need **DDB**, **WFK** and **GSTORE** files to launch the VarPEq optimization.
 The first two files are already available:
-**DDB** has been precomputed, and we also have obtained
-**WFK** on 13x13x13 $\kk$-mesh at the NSCF step.
+**DDB** has been precomputed, and we also have obtained **WFK** on 13x13x13 $\kk$-mesh at the NSCF step.
 
 First, let's launch the gstore calculation with the input file
 
@@ -1444,22 +1455,24 @@ While the calculation is running, let's examine the input file.
 The main difference with our previous gstore runs, is the [[gstore_erange]] variable.
 We use it to select the energy window near the CBM, so matrix elements $g_{mn\nu}(\kk,\qq)$
 will be computed **ONLY** for wavevectors $\kk$ and scattering $\kk+\qq$ inside this window.
-Energy filtering may **significantly** reduce the memeory requirements and computational time.
+Energy filtering may **significantly** reduce memory requirements and computational time.
 
 Of course, we could have used [[gstore_brange]] to select the entire conduction band.
-However, as large polarons are **localized in reciproal space**, states contributing to the polaron formation, are confined within energy window near the band edges.
+However, as large polarons are **localized in reciprocal space**, states contributing to the polaron formation,
+are confined within an energy window near the band edge.
 
 !!! important
 
     Of course, in production calculations, one has to perform convergence studies wrt [[gstore_erange]].
     This can be done at a fixed $\kk/\qq$-mesh by increasing the energy window and monitoring the convergence
-    of polaron energy terms.
+    of the polaron energy terms.
 
     In this example, 1 eV window is a bit too small for convergence.
 
 !!! tip
 
-    One can also use energy filtering at the step of computing the WFK files.
+    One can also use energy filtering at the step of computing the WFK files
+    to achieve extra-dense meshes.
     See the corresponding section of the [mobility tutorial](/tutorial/eph4mob).
 
 
@@ -1475,16 +1488,16 @@ abinit teph4vpq_9.abi > teph4vpq_9.log 2> err &
 ??? note "Exercise"
 
     Try using AbiPy to analyze to results stored in the teph4vpq_9o_VPQ.nc file
-    the same we have deomonstrated for small polarons.
+    the same we have demonstrated for small polarons.
     Do these results match your expectations?
     Keep in mind that our calculations are underconverged.
 
     Of course, skip the extrapolation part, as we have not computed large polarons on
     progressively increasing meshes.
-    Or do these calculations yourself if you are intrested!
+    Or do these calculations yourself if you are interested!
 
 
-Finally, we can visualize the large polaron via the follwoing input
+Finally, we can visualize the large polaron via the following input
 
 {% dialog tests/tutorespfn/Input/teph4vpq_10.abi %}
 
@@ -1495,7 +1508,7 @@ abinit teph4vpq_10.abi > teph4vpq_10.log 2> err &
 This produces usual `*xsf` files that can be used for viauslization.
 If we open `teph4vpq_10o_pstate_1_POLARON.xsf` in VESTA, the following charge distribution can bee seen:
 
-![](eph4vpq_assets/LiF_large.pdf)
+![](eph4vpq_assets/LiF_large.png)
 
 
 <!--

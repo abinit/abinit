@@ -37,7 +37,7 @@ ndtset 10    udtset 2 5
 #Parameters of the SCF cycles
 #****************************
 #  nstep       100
-   nstep       26 
+   nstep       26
 
 
 #Plane wave basis
@@ -48,7 +48,6 @@ ndtset 10    udtset 2 5
    diemix 1/3
 
    ecutsm      0.5
-   dilatmx     1.05
 
 #DATASET1 : scf calculation: GS WF in the BZ
 #********************************************
@@ -112,14 +111,14 @@ d3e_pert3_dir 0 0 0 # For backward compatibility of tests only. Instead one shou
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t67.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords =  NC, DFPT
-#%% description = 
+#%% description =
 #%%   Charged (He dimer)+, with bare pseudopotential. ixc=7
 #%%   Compute Raman intensity, showing essentially perfect agreement
 #%%   between DFPT and finite-differences, when the number of k points
@@ -129,6 +128,6 @@ d3e_pert3_dir 0 0 0 # For backward compatibility of tests only. Instead one shou
 #%%   Finite-differences: 0.022275
 #%%   The DFPT with ngkpt 320 1 1 gives 0.022279 .
 #%%   (To obtain the finite-difference results, one has to reactivate the dtset 15 case)
-#%%   Cannot be executed on more that 1 MPI proc due to different values of nband_k 
+#%%   Cannot be executed on more that 1 MPI proc due to different values of nband_k
 #%% topics = nonlinear
 #%%<END TEST_INFO>

@@ -164,7 +164,7 @@ module m_parser
    ! Allocate memory
 
    procedure :: bcast => geo_bcast
-   ! Brodcast object
+   ! Broadcast object
 
    procedure :: print_abivars => geo_print_abivars
    !  Print Abinit variables corresponding to POSCAR
@@ -245,7 +245,7 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
 
    ! Might import data from xyz file(s) into string
    ! Need string_raw to deal properly with xyz filenames
-   ! TODO: This capabilty can now be implemented via the structure:"xyx:path" variable
+   ! TODO: This capability can now be implemented via the structure:"xyx:path" variable
    lenstr_noxyz = lenstr
    call importxyz(lenstr, string_raw, string, strlen)
 
@@ -341,7 +341,6 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
  logical :: logi
  character(len=500) :: msg
  character(len=100) :: iomsg
-
 ! *************************************************************************
 
  !write(std_out,*)'inread: enter with string(1:ndig): ',string(1:ndig)
@@ -524,7 +523,6 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string, raw_string)
  character(len=fnlen) :: shell_var, shell_value
  character(len=fnlen+20) :: line
  character(len=strlen),pointer :: string_inc, raw_string_inc
-
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -641,28 +639,28 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string, raw_string)
    end if
 
    if (ii>0) then
-     ! Check for the occurence of a minus sign followed by a blank
+     ! Check for the occurrence of a minus sign followed by a blank
      ij=index(line(1:ii),'- ')
      if (ij>0 .and. option==1) then
        write(msg, '(3a,i0,11a)' ) &
        'It is observed in the input file:, ',TRIM(filnam),' line number ',iline,',',ch10,&
-       'the occurence of a minus sign followed',ch10,&
+       'the occurrence of a minus sign followed',ch10,&
        'by a blank. This is forbidden.',ch10,&
        'If the minus sign is meaningful, do not leave a blank',ch10,&
        'between it and the number to which it applies.',ch10,&
        'Otherwise, remove it.'
        ABI_ERROR(msg)
      end if
-     ! Check for the occurence of a tab
+     ! Check for the occurrence of a tab
      ij=index(line(1:ii),char(9))
      if (ij>0 .and. option==1 ) then
        write(msg, '(3a,i0,3a)' ) &
-        'The occurence of a tab, in the input file: ',TRIM(filnam),' line number ',iline,',',ch10,&
+        'The occurrence of a tab, in the input file: ',TRIM(filnam),' line number ',iline,',',ch10,&
         'is observed. This sign is confusing, and has been forbidden.'
        ABI_ERROR(msg)
      end if
 
-     ! Check for the occurence of a include statement
+     ! Check for the occurrence of a include statement
      include_found=.false.
      if (option==1) then
        ! Look for include statement
@@ -773,7 +771,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string, raw_string)
 
  !write(std_out,'(a,a)')' incomprs : 1, string=',string(:lenstr)
 
-!Substitute environment variables, if any
+ ! Substitute environment variables, if any. Example "$ABI_PSPDIR"
  b0=0
  do
    b0=b0+1
@@ -791,7 +789,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string, raw_string)
    if(b2/=0)then
      shell_var=string(b1+1:b1+b2-1)
      !write(std_out,'(a,a)')' shell_var=',shell_var(:b2-1)
-     call get_environment_variable(shell_var(:b2-1),shell_value,status=ierr,length=len_val)
+     call get_environment_variable(shell_var(:b2-1), shell_value, status=ierr, length=len_val)
      if (ierr == -1) ABI_ERROR(sjoin(shell_var(:b2-1), "is present but value of environment variable is too long"))
      if (ierr == +1) ABI_ERROR(sjoin(shell_var(:b2-1), "environment variable is not defined!"))
      if (ierr == +2) ABI_ERROR(sjoin(shell_var(:b2-1), "used in input file but processor does not support environment variables"))
@@ -807,7 +805,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string, raw_string)
  do
    b1 = index(string(1:lenstr), '//')
    if(b1/=0)then
-     !See whether there are preceeding and following '"'
+     !See whether there are preceding and following '"'
      do sign=-1,1,2
        isign=(1+sign)/2  !  0 for minus sign, 1 for plus sign
        do ii=1,lenstr
@@ -862,9 +860,6 @@ end subroutine instrng
 !! INPUTS
 !!  string=character string to be modified
 !!
-!! OUTPUT
-!!  (see side effects)
-!!
 !! SIDE EFFECTS
 !!  string=same character string with ASCII (decimal) 0-31 replaced by 32.
 !!
@@ -879,7 +874,6 @@ subroutine inreplsp(string)
 !Local variables-------------------------------
 !scalars
  integer :: ilenth,length
-
 ! *************************************************************************
 
  ! Get length of string. Proceed only if string has nonzero length
@@ -905,7 +899,7 @@ end subroutine inreplsp
 !! the ASCII collating sequence (SP is hex 20, dec 32).
 !! The use of llt is needed e.g. on the IBM 9000 because it does not
 !! handle tab characters sensibly in its AIX fortran.
-!! Also replace occurences of '=' by a SP.
+!! Also replace occurrences of '=' by a SP.
 !! (2) Removes all repeated blanks, ignoring trailing blanks
 !! after first (returns nontrailing final length in arg 'length').
 !! (3) Makes first character in string NONBLANK.  This is done
@@ -940,7 +934,6 @@ subroutine incomprs(string,length)
  integer :: bb,f1,ii,jj,kk,l1,lbef,lcut,lold,stringlen
 !arrays
  character(len=500) :: msg
-
 ! *************************************************************************
 
  ! String length determined by calling program declaration of "string"
@@ -1075,14 +1068,14 @@ end subroutine incomprs
 !!  the first character in the input file.  This is checked in the calling
 !!  subroutine 'input'. Calls inread which performs internal read from
 !!  specified string.  Also calls upper which maps characters to all upper case.
-!!  Also checks whether there is an occurence of blank//'token'//digit,
+!!  Also checks whether there is an occurrence of blank//'token'//digit,
 !!  in which case the input file might be erroneous, so stops.
 !!
 !! If jdtset is a positive number:
 !!
 !!  (1) First search for modified string, blank//'token'//jdtset//blank
 !!
-!!  (2a) if the occurence of (1) is not found,
+!!  (2a) if the occurrence of (1) is not found,
 !!       look for other modified strings,
 !!       blank//'token'//'?'//unities//blank
 !!       or
@@ -1144,7 +1137,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
  integer :: itoken_2times,itoken_colon,itoken_plus,itoken_times,number,opttoken
  integer :: sum_token,toklen,trial_cslen,trial_jdtset,unities
  integer :: ds_input_
- character(len=4) :: appen
+ character(len=4) :: append
  character(len=3) :: typevar
  character(len=500) :: msg
  character(len=fnlen) :: cs,cs1,cs1colon,cs1plus,cs1times,cs2colon,cs2plus
@@ -1152,7 +1145,6 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 !arrays
  integer,allocatable :: int1(:),int2(:)
  real(dp),allocatable :: dpr1(:),dpr2(:)
-
 ! *************************************************************************
 
  ABI_CHECK(marr >= narr, sjoin("marr", itoa(marr)," < narr ", itoa(narr), "for token:", token))
@@ -1188,8 +1180,8 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
    ! (1) try to find the token with dataset number appended
    if (jdtset > 0) then
 
-     call appdig(jdtset,'',appen)
-     cs=blank//token(1:toklen)//trim(appen)//blank
+     call appdig(jdtset,'',append)
+     cs=blank//token(1:toklen)//trim(append)//blank
      if(jdtset<10) then
        cslen=toklen+3
      else if(jdtset<100) then
@@ -1203,13 +1195,13 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      call inupper(cs)
      ! Absolute index of blank//token//blank in string:
      itoken=index(string,cs(1:cslen))
-     ! Look for another occurence of the same token in string, if so, leaves:
+     ! Look for another occurrence of the same token in string, if so, leaves:
      itoken2=index(string,cs(1:cslen), BACK=.true. )
      if(itoken/=itoken2)then
        write(msg, '(7a)' )&
-       'There are two occurences of the keyword "',cs(1:cslen),'" in the input file.',ch10,&
+       'There are two occurrences of the keyword "',cs(1:cslen),'" in the input file.',ch10,&
        'This is confusing, so it has been forbidden.',ch10,&
-       'Action: remove one of the two occurences.'
+       'Action: remove one of the two occurrences.'
        ABI_ERROR(msg)
      end if
 
@@ -1224,20 +1216,20 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
    if (jdtset>0 .and. opttoken==0)then
 
      ! Use the metacharacter for the dozens, and save in cs and itoken
-     write(appen,'(i1)')unities
-     cs=blank//token(1:toklen)//'?'//trim(appen)//blank
+     write(append,'(i1)')unities
+     cs=blank//token(1:toklen)//'?'//trim(append)//blank
      cslen=toklen+4
      ! Map token to all upper case (make case-insensitive):
      call inupper(cs)
      ! Absolute index of blank//token//blank in string:
      itoken=index(string,cs(1:cslen))
-     ! Look for another occurence of the same token in string, if so, leaves:
+     ! Look for another occurrence of the same token in string, if so, leaves:
      itoken2=index(string,cs(1:cslen), BACK=.true. )
      if(itoken/=itoken2)then
        write(msg, '(7a)' )&
-        'There are two occurences of the keyword: "',cs(1:cslen),'" in the input file.',ch10,&
+        'There are two occurrences of the keyword: "',cs(1:cslen),'" in the input file.',ch10,&
         'This is confusing, so it has been forbidden.',ch10,&
-        'Action: remove one of the two occurences.'
+        'Action: remove one of the two occurrences.'
        ABI_ERROR(msg)
      end if
      if(itoken/=0) then
@@ -1246,20 +1238,20 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      end if
 
      ! Use the metacharacter for the units, and save in cs1 and itoken1
-     write(appen,'(i0)')dozens
-     cs1=blank//token(1:toklen)//trim(appen)//'?'//blank
-     cs1len=toklen+len(trim(appen))+3
+     write(append,'(i0)')dozens
+     cs1=blank//token(1:toklen)//trim(append)//'?'//blank
+     cs1len=toklen+len(trim(append))+3
      ! Map token to all upper case (make case-insensitive):
      call inupper(cs1)
      ! Absolute index of blank//token//blank in string:
      itoken1=index(string,cs1(1:cs1len))
-     ! Look for another occurence of the same token in string, if so, leaves:
+     ! Look for another occurrence of the same token in string, if so, leaves:
      itoken2=index(string,cs1(1:cs1len), BACK=.true. )
      if(itoken1/=itoken2)then
        write(msg, '(7a)' )&
-       'There are two occurences of the keyword "',cs1(1:cs1len),'" in the input file.',ch10,&
+       'There are two occurrences of the keyword "',cs1(1:cs1len),'" in the input file.',ch10,&
        'This is confusing, so it has been forbidden.',ch10,&
-       'Action: remove one of the two occurences.'
+       'Action: remove one of the two occurrences.'
        ABI_ERROR(msg)
      end if
 
@@ -1324,7 +1316,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      itoken_2plus=index(string,cs2plus(1:cs1len))
      itoken_2times=index(string,cs2times(1:cs1len))
 
-     ! Look for another occurence of the same tokens in string
+     ! Look for another occurrence of the same tokens in string
      itoken2_colon=index(string,cscolon(1:cslen), BACK=.true. )
      itoken2_plus=index(string,csplus(1:cslen), BACK=.true. )
      itoken2_times=index(string,cstimes(1:cslen), BACK=.true. )
@@ -1379,7 +1371,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
          'to series definition in the multi-dataset mode  ',sum_token,' times.',ch10,&
          'This is not allowed, since it should be used once with ":",',ch10,&
          'and once with "+" or "*".',ch10,&
-         'Action: change the number of occurences of this keyword.'
+         'Action: change the number of occurrences of this keyword.'
          ABI_ERROR(msg)
        end if
 
@@ -1414,9 +1406,9 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
        end if
        if(ier==1)then
          write(msg, '(a,a,a,a,a,a,a)' )&
-         'There are two occurences of the keyword "',cs(1:cslen),'" in the input file.',ch10,&
+         'There are two occurrences of the keyword "',cs(1:cslen),'" in the input file.',ch10,&
          'This is confusing, so it has been forbidden.',ch10,&
-         'Action: remove one of the two occurences.'
+         'Action: remove one of the two occurrences.'
          ABI_ERROR(msg)
        end if
 
@@ -1444,14 +1436,14 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
        if(itoken_colon > 0 .and. (itoken_plus==0 .and. itoken_times==0) )then
          write(msg, '(13a)' )&
          'The keyword "',cscolon(1:cslen),'" initiate a series,',ch10,&
-         'but there is no occurence of "',csplus(1:cslen),'" or "',cstimes(1:cslen),'".',ch10,&
+         'but there is no occurrence of "',csplus(1:cslen),'" or "',cstimes(1:cslen),'".',ch10,&
          'Action: either suppress the series, or make the increment',ch10,&
          'or the factor available.'
          ABI_ERROR(msg)
        end if
        if(itoken_plus/=0 .and. itoken_times/=0)then
          write(msg, '(a,a, a,a,a,a,a)' )&
-         'The combined occurence of keywords "',csplus(1:cslen),'" and "',cstimes(1:cslen),'" is not allowed.',ch10,&
+         'The combined occurrence of keywords "',csplus(1:cslen),'" and "',cstimes(1:cslen),'" is not allowed.',ch10,&
          'Action: suppress one of them in your input file.'
          ABI_ERROR(msg)
        end if
@@ -1487,13 +1479,13 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      ! Absolute index of blank//token//blank in string:
      itoken=index(string,cs(1:cslen))
 
-     ! Look for another occurence of the same token in string, if so, leaves:
+     ! Look for another occurrence of the same token in string, if so, leaves:
      itoken2=index(string,cs(1:cslen), BACK=.true. )
      if (itoken/=itoken2) then
        write(msg, '(a,a,a,a,a,a,a)' )&
-       'There are two occurences of the keyword "',cs(1:cslen),'" in the input file.',ch10,&
+       'There are two occurrences of the keyword "',cs(1:cslen),'" in the input file.',ch10,&
        'This is confusing, so it has been forbidden.',ch10,&
-       'Action: remove one of the two occurences.'
+       'Action: remove one of the two occurrences.'
        ABI_ERROR(msg)
      end if
 
@@ -1507,31 +1499,31 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
    ! --------------------------------------------------------------------------
    ! If jdtset==0, means that the multi-dataset mode is not used, so
    ! checks whether the input file contains a multi-dataset keyword,
-   ! and if this occurs, stop. Check also the forbidden occurence of
+   ! and if this occurs, stop. Check also the forbidden occurrence of
    ! use of 0 as a multi-dataset index.
-   ! Note that the occurence of series initiators has already been checked.
+   ! Note that the occurrence of series initiators has already been checked.
 
    do trial_jdtset=0,9
      if(jdtset==0 .or. trial_jdtset==0)then
-       write(appen,'(i1)')trial_jdtset
-       trial_cs=blank//token(1:toklen)//trim(appen)
+       write(append,'(i1)')trial_jdtset
+       trial_cs=blank//token(1:toklen)//trim(append)
        trial_cslen=toklen+2
        ! Map token to all upper case (make case-insensitive):
        call inupper(trial_cs)
-       ! Look for an occurence of this token in string, if so, leaves:
+       ! Look for an occurrence of this token in string, if so, leaves:
        itoken2=index(string,trial_cs(1:trial_cslen))
        if(itoken2/=0)then
          if(trial_jdtset==0)then
            write(msg, '(7a)' )&
-           'There is an occurence of the keyword "',trim(token),'" appended with 0 in the input file.',ch10,&
+           'There is an occurrence of the keyword "',trim(token),'" appended with 0 in the input file.',ch10,&
            'This is forbidden.',ch10,&
-           'Action: remove this occurence.'
+           'Action: remove this occurrence.'
          else
            write(msg, '(5a,i0,5a)' )&
-           'In the input file, there is an occurence of the ',ch10,&
+           'In the input file, there is an occurrence of the ',ch10,&
            'keyword "',trim(token),'", appended with the digit "',trial_jdtset,'".',ch10,&
            'This is forbidden when ndtset = =0 .',ch10,&
-           'Action: remove this occurence, or change ndtset.'
+           'Action: remove this occurrence, or change ndtset.'
          end if
          ABI_ERROR(msg)
        end if
@@ -1720,7 +1712,6 @@ subroutine intagm_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,
  character(len=*),intent(in) :: typevarphys
  character(len=*),intent(in) :: token
  character(len=*),intent(in) :: string
-!arrays
 
 !Local variables-------------------------------
 !scalars
@@ -1731,7 +1722,6 @@ subroutine intagm_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,
 !arrays
  integer, allocatable :: intarr(:)
  real(dp),allocatable :: dprarr(:),dp_data_after(:),dp_data_before(:)
-
 ! *************************************************************************
 
 !Nothing to do in case of a single image
@@ -1745,8 +1735,7 @@ subroutine intagm_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,
  tread_current=0
  write(stringimage,'(i10)') iimage
  token_img=trim(token)//'_'//trim(adjustl(stringimage))//'img'
- call intagm(dprarr,intarr,jdtset,marr,size1,string(1:lenstr),&
-&            token_img,tread_current,typevarphys)
+ call intagm(dprarr,intarr,jdtset,marr,size1,string(1:lenstr), token_img,tread_current,typevarphys)
  if (tread_current==1)then
    dp_data(1:size1)=dprarr(1:size1)
    tread_ok=1
@@ -1754,8 +1743,7 @@ subroutine intagm_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,
  if (tread_current==0.and.iimage==nimage) then
 !  If the image is the last one, try to read data for last image (_lastimg)
    token_img=trim(token)//'_lastimg'
-   call intagm(dprarr,intarr,jdtset,marr,size1,string(1:lenstr),&
-&              token_img,tread_current,typevarphys)
+   call intagm(dprarr,intarr,jdtset,marr,size1,string(1:lenstr), token_img,tread_current,typevarphys)
    if (tread_current==1)then
      dp_data(1:size1)=dprarr(1:size1)
      tread_ok=1
@@ -1774,8 +1762,7 @@ subroutine intagm_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,
      iimage_before=iimage_before-1
      write(stringimage,'(i10)') iimage_before
      token_img=trim(token)//'_'//trim(adjustl(stringimage))//'img'
-     call intagm(dprarr,intarr,jdtset,marr,size1,string(1:lenstr),&
-&                token_img,tread_before,typevarphys)
+     call intagm(dprarr,intarr,jdtset,marr,size1,string(1:lenstr), token_img,tread_before,typevarphys)
      if (tread_before==1) dp_data_before(1:size1)=dprarr(1:size1)
    end do
    if (tread_before==0) then
@@ -1789,13 +1776,11 @@ subroutine intagm_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,
      iimage_after=iimage_after+1
      write(stringimage,'(i10)') iimage_after
      token_img=trim(token)//'_'//trim(adjustl(stringimage))//'img'
-     call intagm(dprarr,intarr,jdtset,marr,size1,string(1:lenstr),&
-&                token_img,tread_after,typevarphys)
+     call intagm(dprarr,intarr,jdtset,marr,size1,string(1:lenstr), token_img,tread_after,typevarphys)
      if (tread_after==1) dp_data_after(1:size1)=dprarr(1:size1)
      if (tread_after==0.and.iimage_after==nimage) then
        token_img=trim(token)//'_lastimg'
-       call intagm(dprarr,intarr,jdtset,marr,size1,string(1:lenstr),&
-&                  token_img,tread_after,typevarphys)
+       call intagm(dprarr,intarr,jdtset,marr,size1,string(1:lenstr), token_img,tread_after,typevarphys)
        if (tread_after==1) dp_data_after(1:size1)=dprarr(1:size1)
      end if
    end do
@@ -1807,14 +1792,12 @@ subroutine intagm_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,
 !  Interpolate image data
    if (tread_before==1.or.tread_after==1) then
      alpha=real(iimage-iimage_before,dp)/real(iimage_after-iimage_before,dp)
-     dp_data(1:size1)=dp_data_before(1:size1) &
-&                    +alpha*(dp_data_after(1:size1)-dp_data_before(1:size1))
+     dp_data(1:size1)=dp_data_before(1:size1) + alpha*(dp_data_after(1:size1)-dp_data_before(1:size1))
      tread_ok=1
    end if
 
    ABI_FREE(dp_data_before)
    ABI_FREE(dp_data_after)
-
  end if
 
  ABI_FREE(intarr)
@@ -1846,7 +1829,6 @@ subroutine intagm_img_2D(dp_data,iimage,jdtset,lenstr,nimage,size1,size2,string,
  character(len=*),intent(in) :: typevarphys
  character(len=*),intent(in) :: token
  character(len=*),intent(in) :: string
-!arrays
 
 !Local variables-------------------------------
 !scalars
@@ -1857,7 +1839,6 @@ subroutine intagm_img_2D(dp_data,iimage,jdtset,lenstr,nimage,size1,size2,string,
 !arrays
  integer, allocatable :: intarr(:)
  real(dp),allocatable :: dprarr(:),dp_data_after(:,:),dp_data_before(:,:)
-
 ! *************************************************************************
 
 !Nothing to do in case of a single image
@@ -1871,8 +1852,7 @@ subroutine intagm_img_2D(dp_data,iimage,jdtset,lenstr,nimage,size1,size2,string,
  tread_current=0
  write(stringimage,'(i10)') iimage
  token_img=trim(token)//'_'//trim(adjustl(stringimage))//'img'
- call intagm(dprarr,intarr,jdtset,marr,size1*size2,string(1:lenstr),&
-&            token_img,tread_current,typevarphys)
+ call intagm(dprarr,intarr,jdtset,marr,size1*size2,string(1:lenstr), token_img,tread_current,typevarphys)
  if (tread_current==1)then
    dp_data(1:size1,1:size2)=reshape( dprarr(1:size1*size2),(/size1,size2/) )
    tread_ok=1
@@ -1880,8 +1860,7 @@ subroutine intagm_img_2D(dp_data,iimage,jdtset,lenstr,nimage,size1,size2,string,
  if (tread_current==0.and.iimage==nimage) then
 !  In the image is the last one, try to read data for last image (_lastimg)
    token_img=trim(token)//'_lastimg'
-   call intagm(dprarr,intarr,jdtset,marr,size1*size2,string(1:lenstr),&
-&              token_img,tread_current,typevarphys)
+   call intagm(dprarr,intarr,jdtset,marr,size1*size2,string(1:lenstr), token_img,tread_current,typevarphys)
    if (tread_current==1)then
      dp_data(1:size1,1:size2)=reshape( dprarr(1:size1*size2),(/size1,size2/) )
      tread_ok=1
@@ -1900,10 +1879,8 @@ subroutine intagm_img_2D(dp_data,iimage,jdtset,lenstr,nimage,size1,size2,string,
      iimage_before=iimage_before-1
      write(stringimage,'(i10)') iimage_before
      token_img=trim(token)//'_'//trim(adjustl(stringimage))//'img'
-     call intagm(dprarr,intarr,jdtset,marr,size1*size2,string(1:lenstr),&
-&                token_img,tread_before,typevarphys)
-     if (tread_before==1) &
-&      dp_data_before(1:size1,1:size2)=reshape( dprarr(1:size1*size2),(/size1,size2/) )
+     call intagm(dprarr,intarr,jdtset,marr,size1*size2,string(1:lenstr), token_img,tread_before,typevarphys)
+     if (tread_before==1) dp_data_before(1:size1,1:size2)=reshape( dprarr(1:size1*size2),(/size1,size2/) )
    end do
    if (tread_before==0) then
      iimage_before=1
@@ -1916,16 +1893,12 @@ subroutine intagm_img_2D(dp_data,iimage,jdtset,lenstr,nimage,size1,size2,string,
      iimage_after=iimage_after+1
      write(stringimage,'(i10)') iimage_after
      token_img=trim(token)//'_'//trim(adjustl(stringimage))//'img'
-     call intagm(dprarr,intarr,jdtset,marr,size1*size2,string(1:lenstr),&
-&                token_img,tread_after,typevarphys)
-     if (tread_after==1) &
-&      dp_data_after(1:size1,1:size2)=reshape( dprarr(1:size1*size2),(/size1,size2/) )
+     call intagm(dprarr,intarr,jdtset,marr,size1*size2,string(1:lenstr), token_img,tread_after,typevarphys)
+     if (tread_after==1) dp_data_after(1:size1,1:size2)=reshape( dprarr(1:size1*size2),(/size1,size2/) )
      if (tread_after==0.and.iimage_after==nimage) then
        token_img=trim(token)//'_lastimg'
-       call intagm(dprarr,intarr,jdtset,marr,size1*size2,string(1:lenstr),&
-&                  token_img,tread_after,typevarphys)
-       if (tread_after==1) &
-&        dp_data_after(1:size1,1:size2)=reshape( dprarr(1:size1*size2),(/size1,size2/) )
+       call intagm(dprarr,intarr,jdtset,marr,size1*size2,string(1:lenstr), token_img,tread_after,typevarphys)
+       if (tread_after==1) dp_data_after(1:size1,1:size2)=reshape( dprarr(1:size1*size2),(/size1,size2/) )
      end if
    end do
    if (tread_after==0) then
@@ -1937,13 +1910,12 @@ subroutine intagm_img_2D(dp_data,iimage,jdtset,lenstr,nimage,size1,size2,string,
    if (tread_before==1.or.tread_after==1) then
      alpha=real(iimage-iimage_before,dp)/real(iimage_after-iimage_before,dp)
      dp_data(1:size1,1:size2)=dp_data_before(1:size1,1:size2) &
-&       +alpha*(dp_data_after(1:size1,1:size2)-dp_data_before(1:size1,1:size2))
+        +alpha*(dp_data_after(1:size1,1:size2)-dp_data_before(1:size1,1:size2))
      tread_ok=1
    end if
 
    ABI_FREE(dp_data_before)
    ABI_FREE(dp_data_after)
-
  end if
 
  ABI_FREE(intarr)
@@ -2007,17 +1979,14 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
  real(dp) :: factor,real8
  character(len=3) :: typevar
  character(len=500*4) :: msg
-
 ! *************************************************************************
 
-!DEBUG
 ! write(std_out,'(5a)' )' inarray: token: ',trim(cs),' "',cs(1:6),'"'
 ! if(trim(cs)==' UPAWU1')then
 !   write(std_out,'(2a)' )'          string: ',trim(string(b1:))
 !   write(std_out,'(a,i0)' )'        narr: ',narr
 !   write(std_out,'(2a)' )'          typevarphys: ',typevarphys
 ! endif
-!ENDDEBUG
 
  ii = 0
  typevar='INT'
@@ -2075,13 +2044,13 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
  end do ! while (ii<narr). Note "exit" instructions within loop.
 
  if (errcod /= 0) then
-   write(msg, '(5a,i0,12a)' ) &
+   write(msg, '(5a,i0,14a)' ) &
    'An error occurred reading data for keyword `',trim(cs),'`,',ch10,&
    'looking for ',narr,' elements.', ch10, &
-   'There is a problem with the input string:',ch10,trim(string(b1:)), ch10, &
+   'There is a problem with the input string:',ch10,ch10, trim(string(b1:)), ch10, ch10, &
    'Maybe a disagreement between the declared dimension of the array,',ch10,&
    'and the number of items provided. ',ch10,&
-   'Action: correct your input file and especially the keyword: ', trim(cs)
+   'Action: check the documentation, correct your input file and especially the keyword: ', trim(cs)
    ABI_ERROR(msg)
  end if
 
@@ -2094,14 +2063,14 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
      ! If no second blank is found put the second blank just beyond strln
      if(b2==0) b2=strln-b1+1
 
-!DEBUG
-! if(trim(cs)==' UPAWU1')then
-!     write(std_out,*)' inarray : strln=',strln
-!     write(std_out,*)' inarray : b1=',b1,' b2=',b2
-!     write(std_out,*)' inarray : string(b1+1:)=',string(b1+1:)
-!     write(std_out,*)' typevarphys==',typevarphys
-! endif
-!ENDDEBUG
+     !DEBUG
+     !if(trim(cs)==' UPAWU1')then
+     !    write(std_out,*)' inarray : strln=',strln
+     !    write(std_out,*)' inarray : b1=',b1,' b2=',b2
+     !    write(std_out,*)' inarray : string(b1+1:)=',string(b1+1:)
+     !    write(std_out,*)' typevarphys==',typevarphys
+     !endif
+     !ENDDEBUG
 
      ! Identify the presence of a non-digit character
      asciichar=iachar(string(b1+1:b1+1))
@@ -2152,8 +2121,7 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
 
 !DEBUG
 ! if(trim(cs)==' UPAWU1')then
-!   write(std_out,*)' dprarr(1:narr)==',dprarr(1:narr)
-!   stop
+!   write(std_out,*)' dprarr(1:narr)==',dprarr(1:narr) stop
 ! endif
 !write(std_out,*)' inarray : exit '
 !ENDDEBUG
@@ -2203,7 +2171,6 @@ subroutine importxyz(lenstr,string_raw,string_upper,strln)
  character(len=2) :: dtset_char
  character(len=500) :: msg
  character(len=fnlen) :: xyz_fname
-
 !************************************************************************
 
  index_already_done=1
@@ -2259,7 +2226,6 @@ subroutine importxyz(lenstr,string_raw,string_upper,strln)
    ! erase the file name from string_upper
    string_upper(index_xyz_fname:index_xyz_fname_end-1) = blank
  end do
-
 
 
  if (index_already_done > 1) then
@@ -2332,7 +2298,6 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
  integer, save :: atomspecies(200) = 0
  character(len=500), save :: znuclstring = ""
  character(len=2),allocatable :: elementtype(:)
-
 !************************************************************************
 
  lenstr_new=lenstr
@@ -2755,17 +2720,13 @@ end subroutine chkint_eq
 !! minmax_value=see the description of minmax_flag
 !! unit=unit number for clean output file
 !!
-!! OUTPUT
-!!  (only side effect)
-!!
 !! SIDE EFFECT
 !! ierr= switch it to 1 if an error was detected. No action otherwise.
 !!
 !! NOTES
 !! cond_values(cond_number) or list_values(list_number)
 !! must be between -99 and 999 to be printed correctly.
-!!
-!! for the time being, at most 3 conditions are allowed.
+!! For the time being, at most 3 conditions are allowed.
 !!
 !! SOURCE
 
@@ -2835,16 +2796,12 @@ end subroutine chkint_ge
 !! minmax_value=see the description of minmax_flag
 !! unit=unit number for clean output file
 !!
-!! OUTPUT
-!!  (only side effect)
-!!
 !! SIDE EFFECT
 !! ierr= switch it to 1 if an error was detected. No action otherwise.
 !!
 !! NOTES
 !! cond_values(cond_number) or list_values(list_number)
 !! must be between -99 and 999 to be printed correctly.
-!!
 !! for the time being, at most 3 conditions are allowed.
 !!
 !! SOURCE
@@ -2916,9 +2873,6 @@ end subroutine chkint_le
 !! list_number=number of NOT allowed values (maximum 40).
 !! list_values=list of allowed values
 !! unit=unit number for clean output file
-!!
-!! OUTPUT
-!!  (only side effect)
 !!
 !! SIDE EFFECT
 !! ierr= switch it to 1 if an error was detected. No action otherwise.
@@ -3002,9 +2956,6 @@ end subroutine chkint_ne
 !! minmax_value=see the description of minmax_flag
 !! unit=unit number for clean output file
 !!
-!! OUTPUT
-!!  (only side effect)
-!!
 !! SIDE EFFECT
 !! ierr= switch it to 1 if an error was detected. No action otherwise.
 !!
@@ -3048,7 +2999,6 @@ subroutine chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
 !scalars
  integer :: icond
  character(len=500) :: msg
-
 !******************************************************************
 
  if(cond_number<0 .or. cond_number>4)then
@@ -3228,12 +3178,11 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
  real(dp) :: diff,scale_factor,sumtol
  character(len=4) :: digit
  character(len=1) :: first_column
- character(len=4) :: appen
+ character(len=4) :: append
  character(len=8) :: out_unit
  character(len=50) :: format_dp,format_int,full_format
  character(len=48) :: format_str
  character(len=500) :: msg
-
 ! *************************************************************************
 
 !###########################################################
@@ -3275,7 +3224,7 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
 
    if(typevarphys=='INT')then
 
-!    Determine whether the different non-default occurences are all equal
+!    Determine whether the different non-default occurrences are all equal
 
      if (use_narrm==0) then ! use of scalar 'narr' instead of array 'narrm'
        if(ndtset_alloc>1)then
@@ -3323,10 +3272,10 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
          if(abs(length)==6)format_int=trim(f_kptrlatt)
 !        Initialize the dataset number string, and print
          if((multi==0).or.(ncid<0))then
-           appen=' '
+           append=' '
          else
            jdtset=jdtset_(idtset)
-           call appdig(jdtset,'',appen)
+           call appdig(jdtset,'',append)
          end if
 !        full_format=trim(long_beg)//trim(format_int)
          full_format='("'//first_column//trim(format_1)//'("'// first_column//trim(format_2)//trim(format_int)//")"
@@ -3341,10 +3290,10 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
 
          if (narr_eff/=0) then
 
-           if (print_out) write(iout,full_format) token,trim(appen),intarr(1:narr_eff,idtset)
+           if (print_out) write(iout,full_format) token,trim(append),intarr(1:narr_eff,idtset)
            if (print_netcdf) then
              call write_var_netcdf(intarr(1:narr_eff,idtset),&
-               dprarr(1:narr_eff,idtset),marr,narr_eff,abs(ncid),typevarphys,token//appen)
+               dprarr(1:narr_eff,idtset),marr,narr_eff,abs(ncid),typevarphys,token//append)
            end if
          end if
 
@@ -3455,7 +3404,7 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
 !          Initialize the character in the first column
            first_column=' ';if (present(firstchar)) first_column=firstchar
 !          Define scale_factor
-           scale_factor=one !EB to what this is still usefull ???
+           scale_factor=one !EB to what this is still useful ???
 !          EB remove           if(typevarphys=='BFI')scale_factor=one/BField_Tesla
 !          Define out_unit
            if(typevarphys=='ENE')out_unit=' Hartree'
@@ -3464,10 +3413,10 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
            if(typevarphys=='TIM')out_unit=' Second'
 !          Format, according to the length of the dataset string
            if((multi==0).or.(ncid<0))then
-             appen=' '
+             append=' '
            else
              jdtset=jdtset_(idtset)
-             call appdig(jdtset,'',appen)
+             call appdig(jdtset,'',append)
            end if
            ! full_format=trim(long_beg)//trim(format_dp)
            full_format='("'//first_column//trim(format_1)//'("'// first_column//trim(format_2)//trim(format_dp)//")"
@@ -3475,13 +3424,13 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
            ! write(ab_out,*)' trim(format_dp)=',trim(format_dp)
            ! write(ab_out,*)' trim(full_format)=',trim(full_format)
            if(typevarphys=='DPR')then
-             if (print_out) write(iout,full_format) token,trim(appen),dprarr(1:narr_eff,idtset)*scale_factor
+             if (print_out) write(iout,full_format) token,trim(append),dprarr(1:narr_eff,idtset)*scale_factor
            else
-             if (print_out) write(iout,full_format) token,trim(appen),dprarr(1:narr_eff,idtset)*scale_factor,trim(out_unit)
+             if (print_out) write(iout,full_format) token,trim(append),dprarr(1:narr_eff,idtset)*scale_factor,trim(out_unit)
            end if
            if (print_netcdf) then
              call write_var_netcdf(intarr(1:narr_eff,idtset),dprarr(1:narr_eff,idtset),&
-               marr,narr_eff,abs(ncid),'DPR',token//trim(appen))
+               marr,narr_eff,abs(ncid),'DPR',token//trim(append))
            end if
 
          end if
@@ -3498,7 +3447,7 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
             ABI_ERROR(msg)
       end if
 
-!    Determine whether the different non-default occurences are all equal
+!    Determine whether the different non-default occurrences are all equal
 
      if (use_narrm==0) then ! use of scalar 'narr' instead of array 'narrm'
        if(ndtset_alloc>1)then
@@ -3542,10 +3491,10 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
          format_str=f_str
 !        Initialize the dataset number string, and print
          if((multi==0).or.(ncid<0))then
-           appen=' '
+           append=' '
          else
            jdtset=jdtset_(idtset)
-           call appdig(jdtset,'',appen)
+           call appdig(jdtset,'',append)
          end if
          full_format='("'//first_column//trim(format_1)//trim(format_str)//")"
 
@@ -3559,13 +3508,11 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
 
          if (narr_eff/=0) then
 
-           if (print_out) write(iout,full_format) token,trim(appen),(trim(strarr(iarr,idtset)),iarr=1,narr_eff)
-!#ifdef HAVE_NETCDF
+           if (print_out) write(iout,full_format) token,trim(append),(trim(strarr(iarr,idtset)),iarr=1,narr_eff)
 !           if (print_netcdf) then
 !             call write_var_netcdf(intarr(1:narr_eff,idtset),&
-!&             dprarr(1:narr_eff,idtset),marr,narr_eff,abs(ncid),typevarphys,token//appen)
+!&             dprarr(1:narr_eff,idtset),marr,narr_eff,abs(ncid),typevarphys,token//append)
 !           end if
-!#endif
          end if
 
        end do
@@ -3629,14 +3576,13 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
  real(dp), allocatable :: dprarr(:,:)
  logical :: print_out,print_netcdf,test_multiimages
  character(len=1) :: first_column
- character(len=4) :: appen
+ character(len=4) :: append
  character(len=16) :: keywd
  character(len=50) :: full_format
  character(len=*), parameter :: format_1  ='",a16,t22,'
  character(len=*), parameter :: format_1a ='",a16,a,t22,'
  character(len=*), parameter :: format_2  ='",t22,'
  character(len=*), parameter :: long_dpr  ='3es18.10)'
-
 ! *************************************************************************
 
 !Test whether for this variable, the content of different images differ.
@@ -3718,25 +3664,25 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
 
            if(ndtset>0)then
              jdtset=jdtset_(idtset)
-             call appdig(jdtset,'',appen)
+             call appdig(jdtset,'',append)
              if (print_out) then
                full_format='("'//first_column//trim(format_1a)//'("'// &
-&               first_column//trim(format_2)//trim(long_dpr)//")"
+               first_column//trim(format_2)//trim(long_dpr)//")"
                write(iout,full_format) &
-&               trim(keywd),appen,dprarr_images(1:narrm(idtset),iimage,idtset)
+                 trim(keywd),append,dprarr_images(1:narrm(idtset),iimage,idtset)
              end if
              if (print_netcdf) then
                call write_var_netcdf(intarr_images(1:narrm(idtset),iimage,idtset),&
-&               dprarr_images(1:narrm(idtset),iimage,idtset),&
-&               marr,narrm(idtset),ncid,'DPR',trim(keywd)//appen)
+                dprarr_images(1:narrm(idtset),iimage,idtset),&
+                marr,narrm(idtset),ncid,'DPR',trim(keywd)//append)
              end if
            else
 
              if (print_out) then
                full_format='("'//first_column//trim(format_1)//'("'// &
-&               first_column//trim(format_2)//trim(long_dpr)//")"
+                 first_column//trim(format_2)//trim(long_dpr)//")"
                write(iout,full_format) &
-&               trim(keywd),dprarr_images(1:narrm(idtset),iimage,idtset)
+                 trim(keywd),dprarr_images(1:narrm(idtset),iimage,idtset)
              end if
              if (print_netcdf) then
                call write_var_netcdf(intarr_images(1:narrm(idtset),iimage,idtset),&
@@ -3759,7 +3705,7 @@ end subroutine prttagm_images
 !!  chkvars_in_string
 !!
 !! FUNCTION
-!!  Analyze variable names in string. Ignore tokens withing double quotation marks.
+!!  Analyze variable names in string. Ignore tokens within double quotation marks.
 !!  Abort if name is not recognized.
 !!
 !! INPUTS
@@ -3792,7 +3738,6 @@ subroutine chkvars_in_string(protocol, list_vars, list_vars_img, list_logicals, 
 !scalars
  integer :: index_blank,index_current,index_endfullword, index_endword,index_endwordnow,index_list_vars
  character(len=500) :: msg
-
 !************************************************************************
 
  !write(std_out,"(3a)")"Checking vars in string:", ch10, trim(string)
@@ -3912,7 +3857,6 @@ end subroutine chkvars_in_string
 !! SOURCE
 
 type(geo_t) function geo_from_abivar_string(string, comm) result(new)
-!type(geo_t) function geo_from_structure_string(string, comm) result(new)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: string
@@ -3921,7 +3865,6 @@ type(geo_t) function geo_from_abivar_string(string, comm) result(new)
 !Local variables-------------------------------
  integer :: ii
  character(len=len(string)) :: prefix
-
 !************************************************************************
 
  !print *, "in geo_from_abivar_string: `", trim(string), "`"
@@ -3950,7 +3893,7 @@ type(geo_t) function geo_from_abivar_string(string, comm) result(new)
      !new = geo_from_fortran_file_with_hdr(string(ii+1:), comm)
      !cryst = crystal_from_file(string(ii+1:), comm)
      !if (cryst%isalchemical()) then
-     !  ABI_ERROR("Alchemical mixing is not compatibile with `structure` input variable!")
+     !  ABI_ERROR("Alchemical mixing is not compatible with `structure` input variable!")
      !end if
      !new%natom = cryst%natom
      !new%ntypat = cryst%ntypat
@@ -3993,7 +3936,6 @@ type(geo_t) function geo_from_abivars_path(path, comm) result(new)
  real(dp) :: acell(3), rprim(3,3)
  real(dp),allocatable :: dprarr(:)
  character(len=5),allocatable :: symbols(:)
-
 !************************************************************************
 
  ! Master node reads string and broadcasts
@@ -4082,7 +4024,6 @@ subroutine typat_from_symbols(symbols, ntypat, typat)
 
 !Local variables-------------------------------
  integer :: ii, jj, nstr, found
-
 !************************************************************************
 
  nstr = size(symbols)
@@ -4128,7 +4069,6 @@ type(geo_t) function geo_from_poscar_path(path, comm) result(new)
  integer,parameter :: master = 0
  integer :: unt, my_rank
  character(len=500) :: msg
-
 !************************************************************************
 
  my_rank = xmpi_comm_rank(comm)
@@ -4151,7 +4091,7 @@ end function geo_from_poscar_path
 !!  geo_from_poscar_unit
 !!
 !! FUNCTION
-!!  Build object from string with seperator `sep`. Usually sep = newline = ch10
+!!  Build object from string with separator `sep`. Usually sep = newline = ch10
 !!
 !! SOURCE
 
@@ -4171,7 +4111,6 @@ type(geo_t) function geo_from_poscar_unit(unit) result(new)
  logical,allocatable :: duplicated(:)
  character(len=5),allocatable :: symbols(:), dupe_symbols(:)
  real(dp),allocatable :: xcart(:,:)
-
 !************************************************************************
 
  ! Example of POSCAR (with 6 figures --> space group won't be recognized by Abinit
@@ -4338,7 +4277,6 @@ subroutine geo_print_abivars(self, unit)
 
 !Local variables-------------------------------
  integer :: ii, iatom, itypat
-
 !************************************************************************
 
  if (unit == dev_null) return
@@ -4381,7 +4319,6 @@ type(geo_t) function geo_from_netcdf_path(path, comm) result(new)
  integer, parameter :: master = 0
  integer :: ncid, npsp, dimid, itime
  logical :: has_nimage
-
 !************************************************************************
 
  new%fileformat = "netcdf"
@@ -4447,7 +4384,7 @@ end function geo_from_netcdf_path
 !!  geo_bcast
 !!
 !! FUNCTION
-!!  Brodcast object
+!!  Broadcast object
 !!
 !! SOURCE
 
@@ -4459,7 +4396,6 @@ subroutine geo_bcast(self, master, comm)
 
 !Local variables-------------------------------
  integer :: ierr, my_rank, list_int(2)
-
 !************************************************************************
 
  if (xmpi_comm_size(comm) == 1) return
@@ -4496,7 +4432,6 @@ subroutine geo_malloc(self)
 
 !Arguments ------------------------------------
  class(geo_t),intent(inout) :: self
-
 !************************************************************************
 
  ABI_MALLOC(self%typat, (self%natom))
@@ -4519,7 +4454,6 @@ subroutine geo_free(self)
 
 !Arguments ------------------------------------
  class(geo_t),intent(inout) :: self
-
 !************************************************************************
 
  ABI_SFREE(self%typat)
@@ -4567,7 +4501,6 @@ subroutine get_acell_rprim(lenstr, string, jdtset, iimage, nimage, marr, acell, 
  integer,allocatable :: intarr(:)
  real(dp) :: angdeg(3)
  real(dp),allocatable :: dprarr(:)
-
 !************************************************************************
 
  ABI_MALLOC(intarr, (marr))

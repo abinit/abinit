@@ -161,7 +161,7 @@ The script:
 The expansion of special strings is documented in the [links section](markdown.md#links).
 It can be used in all the YAML files mentioned below.
 For equations/formulas, [Mathjax](http://docs.mathjax.org/en/latest/mathjax.html) is activated, and allows
-to process and visualize LaTeX formulas, see also [this section](markdown.md#MathJax) for further details.
+to process and visualize LaTeX formulas, see also [this section](markdown.md#mathjax) for further details.
 
 
 ## Writing docs

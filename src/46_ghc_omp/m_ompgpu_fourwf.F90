@@ -59,9 +59,6 @@ integer :: ndat_fourdp=-1
 integer :: fft_size_fourwf=-1
 integer :: ndat_fourwf=-1
 
-! GPU ffts buffers (fourwf)
-real(dp),allocatable,target :: work_gpu(:,:,:,:)
-
 #endif
 
  public :: ompgpu_fourdp
@@ -76,8 +73,6 @@ real(dp),allocatable,target :: work_gpu(:,:,:,:)
 contains
 
 function ompgpu_fourwf_work_mem(ngfft, ndat) result(req_mem)
-
- implicit none
 
  integer, intent(in) :: ngfft(:), ndat
  integer(kind=c_size_t) :: req_mem
@@ -150,12 +145,12 @@ subroutine ompgpu_fourdp(cplex,ngfft,ldx,ldy,ldz,ndat,isign,fofg,fofr)
    ! Complex to Complex.
    select case (isign)
    case (FFT_INVERSE) ! +1
-     !$OMP TARGET DATA USE_DEVICE_PTR(fofg,fofr)
+     !$OMP TARGET DATA USE_DEVICE_ADDR(fofg,fofr)
      call gpu_fft_exec_z2z(FOURDP_ID, c_loc(fofg), c_loc(fofr), FFT_INVERSE)
      !$OMP END TARGET DATA
      call gpu_fft_stream_synchronize(FOURDP_ID)
    case (FFT_FORWARD) ! -1
-     !$OMP TARGET DATA USE_DEVICE_PTR(fofg,fofr)
+     !$OMP TARGET DATA USE_DEVICE_ADDR(fofg,fofr)
      call gpu_fft_exec_z2z(FOURDP_ID, c_loc(fofr), c_loc(fofg), FFT_FORWARD)
      !$OMP END TARGET DATA
      call gpu_fft_stream_synchronize(FOURDP_ID)
@@ -210,7 +205,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
  real(dp), allocatable :: fofrb(:,:,:,:)
  logical :: l_use_ndo
 
- real(dp) :: xnorm,one
+ real(dp) :: xnorm,one,tmp
 
  integer :: n1,n2,n3,nfft_tot,npwmin
  integer :: cfft_size
@@ -219,6 +214,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
  integer :: i1inv,i2inv,i3inv
  logical :: transfer_fofgin, transfer_fofginb, transfer_fofgout, transfer_denpot, transfer_fofr
  integer(C_SIZE_T) :: byte_count
+ real(dp), ABI_CONTIGUOUS pointer :: work_gpu(:,:,:,:)
 
 #if defined HAVE_GPU_HIP && defined FC_LLVM
  real(dp), ABI_CONTIGUOUS pointer :: fofr_amdref(:,:,:,:)
@@ -271,10 +267,16 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    !$OMP TARGET ENTER DATA MAP(alloc:fofrb)
  end if
 
- !$OMP TARGET ENTER DATA MAP(alloc:work_gpu)
+ if(option==3) then
+   ! We don't want to erase fofr initial value so we alloc a separate array.
+   ABI_MALLOC(work_gpu, (2,n1,n2,n3*ndat))
+   !$OMP TARGET ENTER DATA MAP(alloc:work_gpu)
+ else
+   work_gpu => fofr
+ end if
 
  if(option==3) then
-   !$OMP TARGET UPDATE TO(fofr)
+   !$OMP TARGET UPDATE TO(fofr) IF(transfer_fofr)
  endif
 
  if(option==1 .or. option==2) then
@@ -385,21 +387,21 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    call gpu_fft_exec_z2z(FOURWF_ID, c_loc(work_gpu), c_loc(fofr_amdref), FFT_INVERSE)
    !$OMP END TARGET DATA
 #else
-   !$OMP TARGET DATA USE_DEVICE_PTR(work_gpu,fofr)
+   !$OMP TARGET DATA USE_DEVICE_ADDR(work_gpu,fofr)
    call gpu_fft_exec_z2z(FOURWF_ID, c_loc(work_gpu), c_loc(fofr), FFT_INVERSE)
    !$OMP END TARGET DATA
 #endif
    call gpu_fft_stream_synchronize(FOURWF_ID)
 
    ! In non-diagonal specific use-case, perform same operation with fofginb:
-   ! - box-to-sphere : fofginb => work_gpu
-   ! - backward FFT  : work_gpu => fofrb
+   ! - box-to-sphere : fofginb => fofrb
+   ! - backward FFT  : fofrb => fofrb
    if(l_use_ndo) then
 
-     call gpu_set_to_zero(work_gpu,int(2,c_size_t)*n1*n2*n3*ndat)
+     call gpu_set_to_zero(fofrb,int(2,c_size_t)*n1*n2*n3*ndat)
 
      !$OMP TARGET TEAMS DISTRIBUTE &
-     !$OMP& PRIVATE(idat) MAP(to:work_gpu,kg_kin,fofginb)
+     !$OMP& PRIVATE(idat) MAP(to:fofrb,kg_kin,fofginb)
      do idat = 1, ndat
        !$OMP PARALLEL DO PRIVATE(ipw,i1,i2,i3)
        do ipw = 1, npwin
@@ -408,13 +410,13 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
          i3=kg_kin(3,ipw); if(i3<0)i3=i3+n3; i3=i3+1
          ! We write cfft(i1,i2,i3)
          ! (double2): cfft[i1 + n1*(i2 + n2*(i3 + n3*idat))] = cg[ipw + npw*idat]
-         work_gpu(1, i1, i2, i3+n3*(idat-1)) = fofginb(1, (ipw + npwin*(idat-1)))
-         work_gpu(2, i1, i2, i3+n3*(idat-1)) = fofginb(2, (ipw + npwin*(idat-1)))
+         fofrb(1, i1, i2, i3+n3*(idat-1)) = fofginb(1, (ipw + npwin*(idat-1)))
+         fofrb(2, i1, i2, i3+n3*(idat-1)) = fofginb(2, (ipw + npwin*(idat-1)))
        end do
      end do
 
-     !$OMP TARGET DATA USE_DEVICE_PTR(work_gpu,fofrb)
-     call gpu_fft_exec_z2z(FOURWF_ID, c_loc(work_gpu), c_loc(fofrb), FFT_INVERSE)
+     !$OMP TARGET DATA USE_DEVICE_ADDR(fofrb)
+     call gpu_fft_exec_z2z(FOURWF_ID, c_loc(fofrb), c_loc(fofrb), FFT_INVERSE)
      !$OMP END TARGET DATA
      call gpu_fft_stream_synchronize(FOURWF_ID)
    end if
@@ -497,22 +499,22 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
        end do
      end do
    else ! cplex==2
-     call gpu_copy(work_gpu, fofr, int(2,c_size_t)*n1*n2*n3*ndat)
 
      !!$OMP TARGET TEAMS LOOP &
      !$OMP TARGET TEAMS DISTRIBUTE &
-     !$OMP& PRIVATE(idat) MAP(to:denpot,fofr,work_gpu)
+     !$OMP& PRIVATE(idat) MAP(to:denpot,fofr)
      do idat = 1, ndat
-       !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(i1,i2,i3)
+       !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(i1,i2,i3,tmp)
        do i3=1, n3
          do i2=1, n2
            do i1=1, n1
+             tmp = fofr(1, i1, i2, i3+(idat-1)*n3)
              fofr(1, i1, i2, i3+(idat-1)*n3) = &
-             &    work_gpu(1, i1, i2, i3+(idat-1)*n3) * denpot(2*i1-1,i2,i3)&
-             &    - work_gpu(2, i1, i2, i3+(idat-1)*n3) * denpot(2*i1,i2,i3)
+             &    fofr(1, i1, i2, i3+(idat-1)*n3) * denpot(2*i1-1,i2,i3)&
+             &    - fofr(2, i1, i2, i3+(idat-1)*n3) * denpot(2*i1,i2,i3)
              fofr(2, i1, i2, i3+(idat-1)*n3) = &
-             &    work_gpu(2, i1, i2, i3+(idat-1)*n3) * denpot(2*i1-1,i2,i3)&
-             &    + work_gpu(1, i1, i2, i3+(idat-1)*n3) * denpot(2*i1,i2,i3)
+             &    fofr(2, i1, i2, i3+(idat-1)*n3) * denpot(2*i1-1,i2,i3)&
+             &    + tmp * denpot(2*i1,i2,i3)
            end do
          end do
        end do
@@ -528,7 +530,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    call gpu_fft_exec_z2z(FOURWF_ID, c_loc(fofr_amdref), c_loc(work_gpu), FFT_FORWARD)
    !$OMP END TARGET DATA
 #else
-   !$OMP TARGET DATA USE_DEVICE_PTR(work_gpu,fofr)
+   !$OMP TARGET DATA USE_DEVICE_ADDR(work_gpu,fofr)
    call gpu_fft_exec_z2z(FOURWF_ID, c_loc(fofr), c_loc(work_gpu), FFT_FORWARD)
    !$OMP END TARGET DATA
 #endif
@@ -570,7 +572,10 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    endif
  endif
 
- !$OMP TARGET EXIT DATA MAP(delete:work_gpu)
+ if(option==3) then
+   !$OMP TARGET EXIT DATA MAP(delete:work_gpu)
+   ABI_FREE(work_gpu)
+ end if
 
  !$OMP TARGET EXIT DATA MAP(delete:fofgin)  IF(transfer_fofgin)
  !$OMP TARGET EXIT DATA MAP(delete:fofgout) IF(transfer_fofgout)
@@ -591,7 +596,6 @@ end subroutine ompgpu_fourwf
 
 ! Memory allocation routine
 subroutine alloc_ompgpu_fourdp(ngfft, ndat)
- implicit none
  integer, intent(in) :: ngfft(18), ndat
 
  integer :: n1,n2,n3, ldx, ldy, ldz
@@ -631,7 +635,6 @@ subroutine free_ompgpu_fourdp()
 end subroutine free_ompgpu_fourdp
 
 subroutine alloc_ompgpu_fourwf(ngfft, ndat)
- implicit none
  integer, intent(in) :: ngfft(18), ndat
 
  integer :: n1,n2,n3, ldx, ldy, ldz
@@ -661,8 +664,6 @@ subroutine alloc_ompgpu_fourwf(ngfft, ndat)
  ! Creation du plan
  call gpu_fft_plan_many(FOURWF_ID, 3, c_loc(t_fft), c_loc(embed), 1, ldx*ldy*ldz, c_loc(embed), 1, ldx*ldy*ldz, FFT_Z2Z, ndat);
 
- ABI_MALLOC(work_gpu, (2,n1,n2,n3*ndat))
-
 end subroutine alloc_ompgpu_fourwf
 
 subroutine free_ompgpu_fourwf()
@@ -671,8 +672,6 @@ subroutine free_ompgpu_fourwf()
 
  ! On detruit l'ancien plan
  call gpu_fft_plan_destroy(FOURWF_ID)
-
- ABI_FREE(work_gpu)
 
  fourwf_initialized = 0
 
@@ -699,7 +698,6 @@ end subroutine ompgpu_fourdp
 
 subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 &  kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -723,7 +721,6 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
 end subroutine ompgpu_fourwf
 
 subroutine alloc_ompgpu_fourwf(ngfft, ndat)
- implicit none
 !Arguments ------------------------------------
  integer, intent(in) :: ngfft(6), ndat
 

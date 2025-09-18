@@ -6,8 +6,8 @@
 !!****m* ABINIT/m_Ctqmc
 !! NAME
 !!  m_Ctqmc
-!! 
-!! FUNCTION 
+!!
+!! FUNCTION
 !!  Manage and drive all the CTQMC
 !!  Should not be used if you don't know what you do
 !!  Please use CtqmcInterface
@@ -36,9 +36,8 @@ USE m_OurRng
 USE m_Vector
 use m_io_tools, only : open_file
 use defs_basis
-#ifdef HAVE_MPI2
-USE mpi
-#endif
+
+USE_MPI
 
 IMPLICIT NONE
 
@@ -52,7 +51,7 @@ INTEGER, PARAMETER :: CTQMC_SLICE2 = 100
 ! Coupe modNoise1 en 100
 INTEGER, PARAMETER :: CTQMC_SEGME =  1
 INTEGER, PARAMETER :: CTQMC_ANTIS = -2
-INTEGER, PARAMETER :: CTQMC_ADDED =  3  
+INTEGER, PARAMETER :: CTQMC_ADDED =  3
 INTEGER, PARAMETER :: CTQMC_REMOV =  4
 INTEGER, PARAMETER :: CTQMC_DETSI =  5
 
@@ -92,13 +91,13 @@ TYPE, PUBLIC :: Ctqmc
 ! Flag:  do we have parameters in input
 
   LOGICAL _PRIVATE :: have_MPI = .FALSE.
-! Flag: 
+! Flag:
 
   INTEGER _PRIVATE :: opt_movie = 0
 !
 
   INTEGER _PRIVATE :: opt_analysis = 0
-! correlations 
+! correlations
 
   INTEGER _PRIVATE :: opt_check = 0
 ! various check 0
@@ -171,7 +170,7 @@ TYPE, PUBLIC :: Ctqmc
 ! nb of successfull GM
 
   INTEGER _PRIVATE :: MY_COMM
-! 
+!
 
   INTEGER _PRIVATE :: rank
 !
@@ -180,7 +179,7 @@ TYPE, PUBLIC :: Ctqmc
 ! size of MY_COMM
 
   DOUBLE PRECISION _PRIVATE :: runTime ! time for the run routine
-!  
+!
 
   DOUBLE PRECISION _PRIVATE :: beta
 !
@@ -190,10 +189,10 @@ TYPE, PUBLIC :: Ctqmc
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) _PRIVATE :: mu
 ! levels
 
-  TYPE(GreenHyb)  , ALLOCATABLE, DIMENSION(:    ) _PRIVATE :: Greens 
+  TYPE(GreenHyb)  , ALLOCATABLE, DIMENSION(:    ) _PRIVATE :: Greens
 
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:  ) _PRIVATE :: measN 
-! measure of occupations (3or4,flavor) 
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:  ) _PRIVATE :: measN
+! measure of occupations (3or4,flavor)
 
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:  ) _PRIVATE :: measDE
 !  (flavor,flavor) double occupancies
@@ -208,14 +207,14 @@ TYPE, PUBLIC :: Ctqmc
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:) _PRIVATE :: abNoiseG   !(ab,tau,flavor)
 ! Noise but for G
 
-  TYPE(Vector)             , DIMENSION(1:2) _PRIVATE :: measNoise 
-  TYPE(Vector), ALLOCATABLE, DIMENSION(:,:,:) _PRIVATE :: measNoiseG       !(tau,flavor,mod) 
+  TYPE(Vector)             , DIMENSION(1:2) _PRIVATE :: measNoise
+  TYPE(Vector), ALLOCATABLE, DIMENSION(:,:,:) _PRIVATE :: measNoiseG       !(tau,flavor,mod)
 ! accumulate each value relataed to measurenoise 1 2
 
   DOUBLE PRECISION _PRIVATE                            :: inv_dt
 ! 1/(beta/L)
 
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:  ) _PRIVATE :: measPerturbation 
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:  ) _PRIVATE :: measPerturbation
 ! opt_order,nflavor
 
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: occup_histo_time
@@ -236,11 +235,11 @@ TYPE, PUBLIC :: Ctqmc
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: ntot
 ! occupation total, t2g, eg
 
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:) _PRIVATE :: measCorrelation 
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:) _PRIVATE :: measCorrelation
 ! segment,antisegment,nflavor,nflavor
 
   DOUBLE PRECISION _PRIVATE :: errorImpurity
-! check 
+! check
 
   DOUBLE PRECISION _PRIVATE :: errorBath
 ! for check
@@ -350,7 +349,7 @@ include 'mpif.h'
 
   this%ostream = ostream
   this%istream = istream
-  
+
 ! --- RENICE ---
 !#ifdef __GFORTRAN__
 !  pid = GetPid()
@@ -681,7 +680,7 @@ END SUBROUTINE Ctqmc_allocateAll
 !!  Ctqmc_allocateOpt
 !!
 !! FUNCTION
-!!  allocate all option variables 
+!!  allocate all option variables
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
@@ -805,7 +804,7 @@ include 'mpif.h'
 #endif
 
   IF ( .NOT. this%para ) &
-    CALL ERROR("Ctqmc_setG0wFile : Ctqmc_setParameters never called   ") 
+    CALL ERROR("Ctqmc_setG0wFile : Ctqmc_setParameters never called   ")
 
   flavors = this%flavors
 
@@ -865,7 +864,7 @@ SUBROUTINE Ctqmc_setG0wTab(this,Gomega,opt_fk)
   DOUBLE PRECISION, DIMENSION(:,:), ALLOCATABLE :: F
 
   IF ( .NOT. this%para ) &
-    CALL ERROR("Ctqmc_setG0wTab : Ctqmc_setParameters never called    ") 
+    CALL ERROR("Ctqmc_setG0wTab : Ctqmc_setParameters never called    ")
 
   MALLOC(F,(1:this%samples+1,1:this%flavors))
   CALL Ctqmc_computeF(this,Gomega, F, opt_fk)  ! mu is changed
@@ -878,7 +877,7 @@ SUBROUTINE Ctqmc_setG0wTab(this,Gomega,opt_fk)
   END IF
 
   this%inF = .TRUE.
-  this%set = .TRUE. 
+  this%set = .TRUE.
 
 END SUBROUTINE Ctqmc_setG0wTab
 !!***
@@ -888,7 +887,7 @@ END SUBROUTINE Ctqmc_setG0wTab
 !  DOUBLE PRECISION, DIMENSION(:,:), ALLOCATABLE :: F
 !
 !  IF ( .NOT. this%para ) &
-!    CALL ERROR("Ctqmc_setG0wTab : Ctqmc_setParameters never called    ") 
+!    CALL ERROR("Ctqmc_setG0wTab : Ctqmc_setParameters never called    ")
 !
 !  MALLOC(F,(1:this%samples+1,1:this%flavors))
 !  CALL Ctqmc_computeFK(this,Gomega, this%Wmax, F)  ! mu is changed
@@ -897,7 +896,7 @@ END SUBROUTINE Ctqmc_setG0wTab
 !  FREE(F)
 !
 !  this%inF = .TRUE.
-!  this%set = .TRUE. 
+!  this%set = .TRUE.
 !
 !END SUBROUTINE Ctqmc_setFwK
 !!***
@@ -1001,7 +1000,7 @@ SUBROUTINE Ctqmc_clear(this)
   this%stats(:)     = 0.d0
   this%swap         = 0.d0
   this%runTime      = 0.d0
-  this%modGlobalMove(2) = 0 
+  this%modGlobalMove(2) = 0
   CALL Vector_clear(this%measNoise(1))
   CALL Vector_clear(this%measNoise(2))
 !#ifdef CTCtqmc_CHECK
@@ -1012,8 +1011,8 @@ SUBROUTINE Ctqmc_clear(this)
     CALL GreenHyb_clear(this%Greens(j))
   END DO
 !#ifdef CTCtqmc_ANALYSIS
-  IF ( this%opt_analysis .EQ. 1 .AND. ALLOCATED(this%measCorrelation) ) &    
-    this%measCorrelation = 0.d0 
+  IF ( this%opt_analysis .EQ. 1 .AND. ALLOCATED(this%measCorrelation) ) &
+    this%measCorrelation = 0.d0
   IF ( this%opt_order .GT. 0 .AND. ALLOCATED(this%measPerturbation) ) &
     this%measPerturbation = 0.d0
   IF ( this%opt_noise .EQ. 1 .AND. ALLOCATED(this%measNoiseG) ) THEN
@@ -1216,7 +1215,7 @@ SUBROUTINE Ctqmc_computeF(this, Gomega, F, opt_fk)
     ELSE
       K = -REAL(F_omega(this%Wmax, iflavor))
 !    this%mu = K
-      this%mu(iflavor) = K 
+      this%mu(iflavor) = K
     END IF
     !IF ( this%rank .EQ. 0 ) &
     !WRITE(9876,'(I4,2E22.14)') iflavor, K, REAL(-F_omega(this%Wmax, iflavor))
@@ -1231,7 +1230,7 @@ SUBROUTINE Ctqmc_computeF(this, Gomega, F, opt_fk)
         !if(iflavor==1.and.this%rank==0) then
           !write(224,*) (2.d0*DBLE(iomega)-1.d0) * pi_invBeta, real(F_omega(iomega,iflavor)),imag(F_omega(iomega,iflavor))
           !write(225,*) (2.d0*DBLE(iomega)-1.d0) * pi_invBeta, real(Gomega(iomega, iflavor)),imag(Gomega(iomega, iflavor))
-        !end if 
+        !end if
       END DO
     ELSE
       DO iomega = 1, this%Wmax
@@ -1240,7 +1239,7 @@ SUBROUTINE Ctqmc_computeF(this, Gomega, F, opt_fk)
         !if(iflavor==1.and.this%rank==0) then
           !write(224,*) (2.d0*DBLE(iomega)-1.d0) * pi_invBeta, real(F_omega(iomega,iflavor)),imag(F_omega(iomega,iflavor))
           !write(225,*) (2.d0*DBLE(iomega)-1.d0) * pi_invBeta, real(Gomega(iomega, iflavor)),imag(Gomega(iomega, iflavor))
-        !end if 
+        !end if
       END DO
     END IF
     K = REAL(CMPLX(0,(2.d0*DBLE(this%Wmax)-1.d0)*pi_invBeta,8)*F_omega(this%Wmax,iflavor))
@@ -1257,7 +1256,7 @@ SUBROUTINE Ctqmc_computeF(this, Gomega, F, opt_fk)
       do  itau=1,this%samples+1
         write(346,*) itau,F(itau,iflavor)
       enddo
-      write(346,*) 
+      write(346,*)
     END DO
     close(346)
   ENDIF
@@ -1298,14 +1297,14 @@ END SUBROUTINE Ctqmc_computeF
 !    K = REAL(Gomega(Wmax, iflavor))
 !    WRITE(this%ostream,*) "CTQMC K, this%mu = ",K,this%mu
 !    WRITE(this%ostream,*) "CTQMC beta     = ",this%beta
-!    this%mu(iflavor) = K 
+!    this%mu(iflavor) = K
 !    DO iomega = 1, Wmax
 !      F_omega(iomega,iflavor) = Gomega(iomega,iflavor) &
 !                  - CMPLX(K, 0.d0, 8)
 !      !if(iflavor==1.and.this%rank==0) then
 !        !write(224,*) (2.d0*DBLE(iomega)-1.d0) * pi_invBeta, real(F_omega(iomega,iflavor)),imag(F_omega(iomega,iflavor))
 !        !write(225,*) (2.d0*DBLE(iomega)-1.d0) * pi_invBeta, real(Gomega(iomega, iflavor)),imag(Gomega(iomega, iflavor))
-!      !end if 
+!      !end if
 !    END DO
 !    CALL GreenHyb_backFourier(F_tmp,F_omega(:,iflavor))
 !    F(1:samples+1,iflavor) = (/ (-F_tmp%oper(samples+1-itau),itau=0,samples) /)
@@ -1389,11 +1388,11 @@ include 'mpif.h'
   IF ( PRESENT( opt_analysis ) ) &
     this%opt_analysis = opt_analysis
   IF ( PRESENT ( opt_order ) ) &
-    this%opt_order = opt_order 
+    this%opt_order = opt_order
   IF ( PRESENT ( opt_histo ) ) &
-    this%opt_histo = opt_histo 
+    this%opt_histo = opt_histo
   IF ( PRESENT ( opt_noise ) ) THEN
-    this%opt_noise = opt_noise 
+    this%opt_noise = opt_noise
   END IF
   IF ( PRESENT ( opt_spectra ) ) &
     this%opt_spectra = opt_spectra
@@ -1404,18 +1403,18 @@ include 'mpif.h'
     IF ( opt_gMove .LE. 0 .OR. opt_gMove .GT. this%sweeps ) THEN
       this%modGlobalMove(1) = this%sweeps+1
       CALL WARNALL("Ctqmc_run : global moves option is <= 0 or > sweeps/cpu -> No global Moves")
-    ELSE 
-      this%modGlobalMove(1) = opt_gMove 
+    ELSE
+      this%modGlobalMove(1) = opt_gMove
     END IF
   END IF
 
   CALL Ctqmc_allocateOpt(this)
-  
-!#ifdef CTCtqmc_MOVIE  
+
+!#ifdef CTCtqmc_MOVIE
   ilatex = 0
   IF ( this%opt_movie .EQ. 1 ) THEN
     Cchar ="0000"
-    WRITE(Cchar,'(I4)') this%rank 
+    WRITE(Cchar,'(I4)') this%rank
     ilatex = 87+this%rank
     OPEN(UNIT=ilatex, FILE="Movie_"//TRIM(ADJUSTL(Cchar))//".tex")
     WRITE(ilatex,'(A)') "\documentclass{beamer}"
@@ -1424,22 +1423,22 @@ include 'mpif.h'
     WRITE(ilatex,'(A)') "\setbeamersize{sidebar width right=0pt}"
     WRITE(ilatex,'(A)') "\setbeamersize{text width left=0pt}"
     WRITE(ilatex,'(A)') "\setbeamersize{text width right=0pt}"
-    WRITE(ilatex,*) 
+    WRITE(ilatex,*)
     WRITE(ilatex,'(A)') "\begin{document}"
-    WRITE(ilatex,*) 
+    WRITE(ilatex,*)
   END IF
 !#endif
 
   IF ( this%rank .EQ. 0 ) THEN
     WRITE(this%ostream,'(A29)') "Starting QMC (Thermalization)"
   END IF
-  
+
   !=================================
-  ! STARTING THERMALIZATION 
+  ! STARTING THERMALIZATION
   !=================================
   CALL Ctqmc_loop(this,this%thermalization,ilatex)
   !=================================
-  ! ENDING   THERMALIZATION 
+  ! ENDING   THERMALIZATION
   !=================================
 
   estimatedTime = this%runTime
@@ -1456,16 +1455,16 @@ include 'mpif.h'
   END IF
 
   !=================================
-  ! CLEANING CTQMC          
+  ! CLEANING CTQMC
   !=================================
   CALL Ctqmc_clear(this)
 
   !=================================
-  ! STARTING CTQMC          
+  ! STARTING CTQMC
   !=================================
   CALL Ctqmc_loop(this,this%sweeps,ilatex)
   !=================================
-  ! ENDING   CTQMC          
+  ! ENDING   CTQMC
   !=================================
 
   IF ( this%opt_movie .EQ. 1 ) THEN
@@ -1512,7 +1511,7 @@ SUBROUTINE Ctqmc_loop(this,itotal,ilatex)
   INTEGER    , INTENT(IN   )         :: itotal
   INTEGER    , INTENT(IN   )         :: ilatex
 !Local variables ------------------------------
-  LOGICAL                            :: updated 
+  LOGICAL                            :: updated
   LOGICAL                            :: updated_seg
   LOGICAL, DIMENSION(:), ALLOCATABLE :: updated_swap
 
@@ -1522,7 +1521,7 @@ SUBROUTINE Ctqmc_loop(this,itotal,ilatex)
   INTEGER                            :: modNoise2
   INTEGER                            :: modGlobalMove
   INTEGER                            :: sp1
-  INTEGER                            :: itau   
+  INTEGER                            :: itau
   INTEGER                            :: ind
   INTEGER                            :: endDensity
   INTEGER                            :: indDensity
@@ -1623,7 +1622,7 @@ SUBROUTINE Ctqmc_loop(this,itotal,ilatex)
         updated_swap(swapUpdate2) = .TRUE.
       END IF
     END IF
-    
+
     IF ( MOD(isweep,measurements) .EQ. 0 ) THEN
       CALL ImpurityOperator_measDE(this%Impurity,this%measDE)
       IF ( this%opt_spectra .GE. 1) THEN
@@ -1656,7 +1655,7 @@ SUBROUTINE Ctqmc_loop(this,itotal,ilatex)
         DO iflavor = 1, flavors
           DO ind = 1, this%Greens(iflavor)%this%tail
             itau = this%Greens(iflavor)%this%listINT(ind)
-            gtmp_new(itau,iflavor) = this%Greens(iflavor)%oper(itau) & 
+            gtmp_new(itau,iflavor) = this%Greens(iflavor)%oper(itau) &
                         +this%Greens(iflavor)%this%listDBLE(ind)*DBLE(this%Greens(iflavor)%factor)
           END DO
           DO itau = 1, sp1
@@ -1675,19 +1674,19 @@ SUBROUTINE Ctqmc_loop(this,itotal,ilatex)
         DO iflavor = 1, flavors
           DO ind = 1, this%Greens(iflavor)%this%tail
             itau = this%Greens(iflavor)%this%listINT(ind)
-            gtmp_new(itau,iflavor) = this%Greens(iflavor)%oper(itau) & 
+            gtmp_new(itau,iflavor) = this%Greens(iflavor)%oper(itau) &
                         +this%Greens(iflavor)%this%listDBLE(ind)*this%Greens(iflavor)%factor
           END DO
           DO itau = 1, sp1
             CALL Vector_pushBack(this%measNoiseG(itau,iflavor,2), gtmp_new(itau,iflavor) - gtmp_old2(itau,iflavor))
             gtmp_old2(itau,iflavor) = gtmp_new(itau,iflavor)
           END DO
-        END DO 
+        END DO
       END IF
 
-      IF ( this%rank .EQ. 0 ) THEN 
+      IF ( this%rank .EQ. 0 ) THEN
         new_percent = CEILING(DBLE(isweep)*100.d0/DBLE(itotal))
-        DO ipercent = old_percent+1, new_percent 
+        DO ipercent = old_percent+1, new_percent
           WRITE(this%ostream,'(A)',ADVANCE="NO") "-"
         END DO
         old_percent = new_percent
@@ -1707,7 +1706,7 @@ SUBROUTINE Ctqmc_loop(this,itotal,ilatex)
     END DO
     WRITE(this%ostream,'(A)') "|"
   END IF
- 
+
   FREE(gtmp_new)
   FREE(gtmp_old1)
   FREE(gtmp_old2)
@@ -1754,8 +1753,8 @@ SUBROUTINE Ctqmc_tryAddRemove(this,updated)
 
 !Arguments ------------------------------------
   TYPE(Ctqmc)             , INTENT(INOUT) :: this
-!  TYPE(BathOperator)    , INTENT(INOUT) :: Bath 
-!  TYPE(ImpurityOperator), INTENT(INOUT) :: Impurity 
+!  TYPE(BathOperator)    , INTENT(INOUT) :: Bath
+!  TYPE(ImpurityOperator), INTENT(INOUT) :: Impurity
   LOGICAL               , INTENT(  OUT) :: updated
 !Local variables ------------------------------
   INTEGER                               :: position
@@ -1784,7 +1783,7 @@ SUBROUTINE Ctqmc_tryAddRemove(this,updated)
 
 
   DO i = 1, 2
-    signe = SIGN(1.d0,DBLE(nature(i))) 
+    signe = SIGN(1.d0,DBLE(nature(i)))
 
     !CALL RANDOM_NUMBER(action)
     CALL OurRng(this%seed,action)
@@ -1817,8 +1816,8 @@ SUBROUTINE Ctqmc_tryAddRemove(this,updated)
           this%stats(nature(i)+CTQMC_ADDED) = this%stats(nature(i)+CTQMC_ADDED)  + 1.d0
           updated = .TRUE. .OR. updated
           tail = tail + 1.d0
-        END IF 
-      END IF 
+        END IF
+      END IF
 
     ELSE ! Supprimer un segment
       IF ( tail .GT. 0.d0 ) THEN
@@ -1877,8 +1876,8 @@ SUBROUTINE Ctqmc_trySwap(this,flav_i,flav_j)
 
 !Arguments ------------------------------------
   TYPE(Ctqmc)           , INTENT(INOUT) :: this
-!  TYPE(BathOperator)    , INTENT(INOUT) :: Bath 
-!  TYPE(ImpurityOperator), INTENT(INOUT) :: Impurity 
+!  TYPE(BathOperator)    , INTENT(INOUT) :: Bath
+!  TYPE(ImpurityOperator), INTENT(INOUT) :: Impurity
   INTEGER               , INTENT(  OUT) :: flav_i
   INTEGER               , INTENT(  OUT) :: flav_j
 !Local variables ------------------------------
@@ -1904,7 +1903,7 @@ SUBROUTINE Ctqmc_trySwap(this,flav_i,flav_j)
   !CALL RANDOM_NUMBER(rnd)
   CALL OurRng(this%seed,rnd)
   flavor_j = NINT(rnd*DBLE(this%flavors-1.d0))+1
-  
+
   flav_i = 0
   flav_j = 0
 
@@ -1989,7 +1988,7 @@ SUBROUTINE Ctqmc_measN(this, iflavor, updated)
 !  IF ( .NOT. this%set ) &
 !    CALL ERROR("Ctqmc_measN : QMC not set                           ")
 
-  
+
   IF ( updated .EQV. .TRUE. ) THEN
     this%measN(1,iflavor) = this%measN(1,iflavor) + this%measN(3,iflavor)*this%measN(4,iflavor)
     this%measN(2,iflavor) = this%measN(2,iflavor) + this%measN(4,iflavor)
@@ -2052,7 +2051,7 @@ SUBROUTINE Ctqmc_measCorrelation(this, iflavor)
   beta = this%beta
 
   IF ( size .EQ. 0 ) RETURN
-  
+
   inv_dt = this%inv_dt
 
   DO iCdag = 1, size ! first segments
@@ -2077,7 +2076,7 @@ SUBROUTINE Ctqmc_measCorrelation(this, iflavor)
 !      index = INT( ( time * inv_dt ) + .5d0 ) + 1
 !      this%measCorrelation(index,3,iflavor) = this%measCorrelation(index,3,iflavor) + 1.d0
 !    END DO
-    DO iC = 1, size!  this%Greens(iflavor)%index_old%tail 
+    DO iC = 1, size!  this%Greens(iflavor)%index_old%tail
         this%measCorrelation(this%Greens(iflavor)%this%listINT(iC+(iCdag-1)*size),3,iflavor) = &
         this%measCorrelation(this%Greens(iflavor)%this%listINT(iC+(iCdag-1)*size),3,iflavor) + 1.d0
     END DO
@@ -2193,13 +2192,13 @@ include 'mpif.h'
 !  INTEGER                                      :: fin
   character(len=2)                              :: atomnb
 !  character(len=fnlen)                          :: tmpfile
-!  INTEGER                                       :: unt  
+!  INTEGER                                       :: unt
 #ifdef HAVE_MPI
   INTEGER                                       :: ierr
   DOUBLE PRECISION,              DIMENSION(1)   :: rtime
 #endif
   DOUBLE PRECISION                              :: inv_size,sumh,sumtot
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: buffer 
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: buffer
   TYPE(FFTHyb) :: FFTmrka
 
 #if defined HAVE_MPI && !defined HAVE_MPI2_INPLACE
@@ -2220,8 +2219,8 @@ include 'mpif.h'
 
 !#ifdef CTCtqmc_CHECK
   IF ( this%opt_check .GT. 0 ) THEN
-    this%errorImpurity = ImpurityOperator_getError(this%Impurity) * inv_flavors 
-    this%errorBath     = BathOperator_getError    (this%Bath    ) * inv_flavors 
+    this%errorImpurity = ImpurityOperator_getError(this%Impurity) * inv_flavors
+    this%errorBath     = BathOperator_getError    (this%Bath    ) * inv_flavors
   END IF
 !#endif
 
@@ -2235,15 +2234,15 @@ include 'mpif.h'
     MALLOC(beta,(1:this%samples+1,1:flavors))
   END IF
 
-  IF ( this%have_MPI .EQV. .TRUE.) THEN 
+  IF ( this%have_MPI .EQV. .TRUE.) THEN
     sp1   = this%samples+1
-    spALL = sp1 + flavors + 6 
+    spALL = sp1 + flavors + 6
 
 !#ifdef CTCtqmc_ANALYSIS
     IF ( this%opt_analysis .EQ. 1 ) &
-      spAll = spAll + 3*sp1 
+      spAll = spAll + 3*sp1
     IF ( this%opt_order .GT. 0 ) &
-      spAll = spAll + this%opt_order 
+      spAll = spAll + this%opt_order
     IF ( this%opt_noise .EQ. 1 ) &
       spAll = spAll + 2*(this%samples + 1)
 !#endif
@@ -2252,7 +2251,7 @@ include 'mpif.h'
     MALLOC(buffer,(1:spAll,1:MAX(2,flavors)))
   END IF
 
-!  this%seg_added    = this%seg_added    * inv_flavors 
+!  this%seg_added    = this%seg_added    * inv_flavors
 !  this%seg_removed  = this%seg_removed  * inv_flavors
 !  this%seg_sign     = this%seg_sign     * inv_flavors
 !  this%anti_added   = this%anti_added   * inv_flavors
@@ -2277,22 +2276,22 @@ include 'mpif.h'
     IF ( this%opt_analysis .EQ. 1 ) THEN
       this%measCorrelation (:,1,iflavor) = this%measCorrelation  (:,1,iflavor) &
                                     / SUM(this%measCorrelation (:,1,iflavor)) &
-                                    * this%inv_dt 
+                                    * this%inv_dt
       this%measCorrelation (:,2,iflavor) = this%measCorrelation  (:,2,iflavor) &
                                     / SUM(this%measCorrelation (:,2,iflavor)) &
-                                    * this%inv_dt 
+                                    * this%inv_dt
       this%measCorrelation (:,3,iflavor) = this%measCorrelation  (:,3,iflavor) &
                                     / SUM(this%measCorrelation (:,3,iflavor)) &
-                                    * this%inv_dt 
+                                    * this%inv_dt
     END IF
 !#endif
     IF ( this%opt_noise .EQ. 1 ) THEN
       TabX(1) = DBLE(this%modNoise2)
       TabX(2) = DBLE(this%modNoise1)
       DO itau = 1, this%samples+1
-        this%measNoiseG(itau,iflavor,2)%vec = -this%measNoiseG(itau,iflavor,2)%vec*this%inv_dt &  
+        this%measNoiseG(itau,iflavor,2)%vec = -this%measNoiseG(itau,iflavor,2)%vec*this%inv_dt &
                                            /(this%beta*DBLE(this%modNoise2))
-        this%measNoiseG(itau,iflavor,1)%vec = -this%measNoiseG(itau,iflavor,1)%vec*this%inv_dt &  
+        this%measNoiseG(itau,iflavor,1)%vec = -this%measNoiseG(itau,iflavor,1)%vec*this%inv_dt &
                                            /(this%beta*DBLE(this%modNoise1))
         n2 = this%measNoiseG(itau,iflavor,2)%tail
         TabY(1) = Stat_deviation(this%measNoiseG(itau,iflavor,2)%vec(1:n2))!*SQRT(n2/(n2-1))
@@ -2304,7 +2303,7 @@ include 'mpif.h'
       END DO
     END IF
 
-    IF ( this%have_MPI .EQV. .TRUE. ) THEN 
+    IF ( this%have_MPI .EQV. .TRUE. ) THEN
       buffer(1:sp1, iflavor) = this%Greens(iflavor)%oper(1:sp1)
     END IF
   END DO
@@ -2343,7 +2342,7 @@ include 'mpif.h'
     displs(:) = (/ ( iflavor*n1, iflavor=0, this%size-1 ) /)
 #ifdef HAVE_MPI
 #if defined HAVE_MPI2_INPLACE
-    freqs(n1*this%rank+1:n1*(this%rank+1)) = this%measNoise(1)%vec(1:n1) 
+    freqs(n1*this%rank+1:n1*(this%rank+1)) = this%measNoise(1)%vec(1:n1)
     CALL MPI_ALLGATHERV(MPI_IN_PLACE, 0, MPI_DOUBLE_PRECISION, &
                         freqs, counts, displs, &
                         MPI_DOUBLE_PRECISION, this%MY_COMM, ierr)
@@ -2367,7 +2366,7 @@ include 'mpif.h'
     displs(:) = (/ ( iflavor*n2, iflavor=0, this%size-1 ) /)
 #ifdef HAVE_MPI
 #if defined HAVE_MPI2_INPLACE
-    freqs(n2*this%rank+1:n2*(this%rank+1)) = this%measNoise(2)%vec(1:n2) 
+    freqs(n2*this%rank+1:n2*(this%rank+1)) = this%measNoise(2)%vec(1:n2)
     CALL MPI_ALLGATHERV(MPI_IN_PLACE, 0, MPI_DOUBLE_PRECISION, &
                         freqs, counts, displs, &
                         MPI_DOUBLE_PRECISION, this%MY_COMM, ierr)
@@ -2475,8 +2474,8 @@ include 'mpif.h'
   CALL ImpurityOperator_getErrorOverlap(this%Impurity,this%measDE)
   ! Add the difference between true calculation and quick calculation of the
   ! last sweep overlap to measDE(2,2)
-  !this%measDE = this%measDE * DBLE(this%measurements) 
-  IF ( this%have_MPI .EQV. .TRUE. ) THEN 
+  !this%measDE = this%measDE * DBLE(this%measurements)
+  IF ( this%have_MPI .EQV. .TRUE. ) THEN
     IF ( this%opt_analysis .EQ. 1 ) THEN
       buffer(last+1:last+sp1,:) = this%measCorrelation(:,1,:)
       last = last + sp1
@@ -2497,12 +2496,12 @@ include 'mpif.h'
     END IF
 !  this%measDE(2,2) = a*EXP(b*LOG(DBLE(this%sweeps*this%size)))
     buffer(spall-(flavors+5):spAll-6,:) = this%measDE(:,:)
-!    buffer(spAll  ,1) = this%seg_added   
-!    buffer(spAll-1,1) = this%seg_removed 
-!    buffer(spAll-2,1) = this%seg_sign    
-!    buffer(spAll  ,2) = this%anti_added  
+!    buffer(spAll  ,1) = this%seg_added
+!    buffer(spAll-1,1) = this%seg_removed
+!    buffer(spAll-2,1) = this%seg_sign
+!    buffer(spAll  ,2) = this%anti_added
 !    buffer(spAll-1,2) = this%anti_removed
-!    buffer(spAll-2,2) = this%anti_sign   
+!    buffer(spAll-2,2) = this%anti_sign
     buffer(spAll  ,1) = this%stats(1)
     buffer(spAll-1,1) = this%stats(2)
     buffer(spAll-2,1) = this%stats(3)
@@ -2515,7 +2514,7 @@ include 'mpif.h'
     buffer(spAll-4,2) = b
 !#ifdef CTCtqmc_CHECK
     buffer(spAll-5,1) = this%errorImpurity
-    buffer(spAll-5,2) = this%errorBath 
+    buffer(spAll-5,2) = this%errorBath
 !#endif
 
 #ifdef HAVE_MPI
@@ -2554,7 +2553,7 @@ include 'mpif.h'
 #endif
 #endif
 
-  
+
     buffer          = buffer * inv_size
     this%measDE(:,:)  = buffer(spall-(flavors+5):spAll-6,:)
 !    this%seg_added    = buffer(spAll  ,1)
@@ -2571,11 +2570,11 @@ include 'mpif.h'
     this%stats(6)    = buffer(spAll-2,2)
     this%swap         = buffer(spAll-3,1)
     this%modGlobalMove(2) = NINT(buffer(spAll-3,2))
-    a               = buffer(spAll-4,1) 
+    a               = buffer(spAll-4,1)
     b               = buffer(spAll-4,2)
 !!#ifdef CTCtqmc_CHECK
-    this%errorImpurity= buffer(spAll-5,1) 
-    this%errorBath    = buffer(spAll-5,2)   
+    this%errorImpurity= buffer(spAll-5,1)
+    this%errorBath    = buffer(spAll-5,2)
 !#endif
 
     DO iflavor = 1, flavors
@@ -2583,11 +2582,11 @@ include 'mpif.h'
     END DO
     last = sp1
     IF ( this%opt_analysis .EQ. 1 ) THEN
-      this%measCorrelation(:,1,:) = buffer(last+1:last+sp1,:) 
+      this%measCorrelation(:,1,:) = buffer(last+1:last+sp1,:)
       last = last + sp1
-      this%measCorrelation(:,2,:) = buffer(last+1:last+sp1,:) 
+      this%measCorrelation(:,2,:) = buffer(last+1:last+sp1,:)
       last = last + sp1
-      this%measCorrelation(:,3,:) = buffer(last+1:last+sp1,:) 
+      this%measCorrelation(:,3,:) = buffer(last+1:last+sp1,:)
       last = last + sp1
     END IF
     IF ( this%opt_order .GT. 0 ) THEN
@@ -2615,10 +2614,10 @@ include 'mpif.h'
     IF ( this%density(1,endDensity) .EQ. -1.d0 ) &
       endDensity = endDensity - 1
     CALL FFTHyb_init(FFTmrka,endDensity,DBLE(this%thermalization)/DBLE(this%measurements*this%opt_spectra))
-    ! Not very Beauty 
+    ! Not very Beauty
     MALLOC(freqs,(1:FFTmrka%size/2))
     DO iflavor = 1, flavors
-      ! mean value is removed to supress the continue composent 
+      ! mean value is removed to supress the continue composent
       CALL FFTHyb_setData(FFTmrka,this%density(iflavor,1:endDensity)/this%beta+this%Greens(iflavor)%oper(this%samples+1))
       CALL FFTHyb_run(FFTmrka,1)
       CALL FFTHyb_getData(FFTmrka,endDensity,this%density(iflavor,:),freqs)
@@ -2651,8 +2650,15 @@ include 'mpif.h'
 
 
     MALLOC(occ,(2**this%flavors,1:flavors))
+#ifdef FC_LLVM
+    !FIXME I don't understand why LLVM fails here...
+    !I put preproc so others know extra spaces are on purpose
+    MALLOC(occtot,(2**this%flavors) )
+    MALLOC(spintot,(2**this%flavors) )
+#else
     MALLOC(occtot,(2**this%flavors))
     MALLOC(spintot,(2**this%flavors))
+#endif
     do n1=1,2**this%flavors
       ! Compute occupations of individual Orbitals
       n3=n1-1
@@ -2686,7 +2692,7 @@ include 'mpif.h'
       enddo
     end if
     write(this%ostream,'(a,f10.4)') " all" , sumh
-    
+
     sumtot=0
     do nelec=0,10
       spinmin=modulo(nelec,2)
@@ -2736,7 +2742,7 @@ include 'mpif.h'
           write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (n1-1)*this%beta/this%samples,(this%suscep(n2,n1),n2=1,3)
         enddo
         !add tau=beta
-        write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (this%samples)*this%beta/this%samples,(this%suscep(n2,1),n2=1,3) 
+        write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (this%samples)*this%beta/this%samples,(this%suscep(n2,1),n2=1,3)
 
       else
         !SOC
@@ -2751,7 +2757,7 @@ include 'mpif.h'
       endif
     close(unit=735)
     endif
-   
+
     !Local Charge Susceptibility
     if(this%opt_histo .gt. 2) then
       this%ntot(:)=this%ntot(:)/float(this%size)/float(this%samples)
@@ -2768,7 +2774,7 @@ include 'mpif.h'
       write(735, '(1x,f14.8,2x,f14.8,2x,f14.8)') (this%samples)*this%beta/this%samples,(this%chicharge(1,1)),this%ntot(1)
       close(unit=735)
     endif
- 
+
 #if defined HAVE_FC_FLUSH
              call flush(735)
 #elif defined HAVE_FC_FLUSH_
@@ -2826,7 +2832,7 @@ SUBROUTINE Ctqmc_symmetrizeGreen(this, syms)
     CALL WARNALL("Ctqmc_symmetrizeGreen : wrong opt_sym -> not symmetrizing")
     RETURN
   END IF
- 
+
   MALLOC(green_tmp,(1:this%samples+1,flavors))
   green_tmp(:,:) = 0.d0
   MALLOC(n_tmp,(1:flavors))
@@ -2886,7 +2892,7 @@ SUBROUTINE Ctqmc_getGreen(this, Gtau, Gw)
   INTEGER                            :: iflavor2
   INTEGER                            :: iflavor3
   INTEGER                            :: flavors
-  DOUBLE PRECISION :: u1 
+  DOUBLE PRECISION :: u1
   DOUBLE PRECISION :: u2
   DOUBLE PRECISION :: Un
   DOUBLE PRECISION :: UUnn
@@ -2898,14 +2904,14 @@ SUBROUTINE Ctqmc_getGreen(this, Gtau, Gw)
     DO iflavor2 = 1, flavors
       IF ( iflavor2 .EQ. iflavor1 ) CYCLE
       Un = this%Impurity%mat_U(iflavor2,iflavor1) * this%measN(1,iflavor2)
-      u1 = u1 + Un 
-      u2 = u2 + Un*this%Impurity%mat_U(iflavor2,iflavor1) 
+      u1 = u1 + Un
+      u2 = u2 + Un*this%Impurity%mat_U(iflavor2,iflavor1)
       DO iflavor3 = 1, flavors
         IF ( iflavor3 .EQ. iflavor2 .OR. iflavor3 .EQ. iflavor1 ) CYCLE
-        UUnn = (this%Impurity%mat_U(iflavor2,iflavor1)*this%Impurity%mat_U(iflavor3,iflavor1)) * this%measDE(iflavor2,iflavor3) 
-        u2 = u2 + UUnn 
+        UUnn = (this%Impurity%mat_U(iflavor2,iflavor1)*this%Impurity%mat_U(iflavor3,iflavor1)) * this%measDE(iflavor2,iflavor3)
+        u2 = u2 + UUnn
       END DO
-    END DO  
+    END DO
 
     CALL GreenHyb_setMoments(this%Greens(iflavor1),u1,u2)
     IF ( PRESENT( Gtau ) ) THEN
@@ -2913,11 +2919,11 @@ SUBROUTINE Ctqmc_getGreen(this, Gtau, Gw)
     END IF
        !write(6,*) "present gw", present(gw)
     IF ( PRESENT( Gw ) ) THEN
-       !write(6,*) "size gw",SIZE(Gw,DIM=2) ,flavors+1 
+       !write(6,*) "size gw",SIZE(Gw,DIM=2) ,flavors+1
       IF ( SIZE(Gw,DIM=2) .EQ. flavors+1 ) THEN
         CALL GreenHyb_forFourier(this%Greens(iflavor1), Gomega=Gw(:,iflavor1), omega=Gw(:,this%flavors+1))
         !IF ( this%rank .EQ. 0 ) write(20,*) Gw(:,iflavor1)
-      ELSE IF ( SIZE(Gw,DIM=2) .EQ. flavors ) THEN  
+      ELSE IF ( SIZE(Gw,DIM=2) .EQ. flavors ) THEN
         CALL GreenHyb_forFourier(this%Greens(iflavor1),Gomega=Gw(:,iflavor1))
       ELSE
         CALL WARNALL("Ctqmc_getGreen : Gw is not valid                    ")
@@ -3013,7 +3019,7 @@ SUBROUTINE Ctqmc_getE(this,E,noise)
   DOUBLE PRECISION, OPTIONAL, INTENT(OUT) :: Noise
 
   IF ( PRESENT(E) ) &
-    E = this%measDE(1,1)  
+    E = this%measDE(1,1)
   IF ( PRESENT(Noise) ) &
     Noise = SUM(this%Impurity%mat_U)/(this%flavors*(this%flavors-1)) &
             * this%a_Noise*(DBLE(this%sweeps)*DBLE(this%size))**this%b_Noise
@@ -3141,10 +3147,10 @@ SUBROUTINE Ctqmc_printQMC(this)
   WRITE(ostream,'(A28,F8.4,A3,F7.4)') "Noise                [/U] : ", this%a_Noise, " x^", this%b_Noise
   WRITE(ostream,'(A28,E10.2)')  "Niquist puls.     [/beta] : ", ACOS(-1.d0)*this%inv_dt
   WRITE(ostream,'(A28,E22.14)') "Max Acc. Epot Error   [U] : ", this%measDE(2,2)/(this%beta*this%modNoise1*2.d0)*sweeps
-  
+
   !WRITE(ostream,'(A28,F7.4,A3,F7.4,A4,E20.14)') "Noise            [G(tau)] : ", this%a_Noise(2), "x^", this%b_Noise(2), " -> ", &
                                                               !this%a_Noise(2)*(sweeps*DBLE(this%size))**this%b_Noise(2)
-  IF ( this%opt_order .GT. 0 ) THEN 
+  IF ( this%opt_order .GT. 0 ) THEN
     WRITE(a,'(I2)') this%flavors
     string = '(A28,'//TRIM(ADJUSTL(a))//'(1x,I3))'
     WRITE(ostream,string) "Perturbation orders       : ", &
@@ -3155,7 +3161,7 @@ SUBROUTINE Ctqmc_printQMC(this)
             (this%stats(CTQMC_SEGME+CTQMC_REMOV) *invSweeps*100.d0) - 1.d0)) .GE. 0.02d0 &
    .OR. ABS(((this%stats(CTQMC_ANTIS+CTQMC_ADDED)*invSweeps*100.d0) / &
              (this%stats(CTQMC_ANTIS+CTQMC_REMOV)*invSweeps*100.d0) - 1.d0)) .GE. 0.02d0 ) &
-    THEN 
+    THEN
     CALL WARNALL("Ctqmc_printQMC : bad statistic according to moves. Increase sweeps")
   END IF
   ! Check sign problem for diagonal hybridization.
@@ -3312,7 +3318,7 @@ END SUBROUTINE Ctqmc_printD
 !!  Ctqmc_printE
 !!
 !! FUNCTION
-!!  print energy and noise 
+!!  print energy and noise
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
@@ -3412,7 +3418,7 @@ SUBROUTINE Ctqmc_printPerturbation(this, oFileIn)
   ELSE
     OPEN(UNIT=oFile, FILE="Perturbation.dat")
   END IF
-    
+
   order        =  this%opt_order
   flavors      =  this%flavors
 
@@ -3653,7 +3659,7 @@ SUBROUTINE Ctqmc_destroy(this)
 !#endif
   this%ostream        = 0
   this%istream        = 0
- 
+
   this%sweeps         = 0
   this%thermalization = 0
   this%flavors        = 0

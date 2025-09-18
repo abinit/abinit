@@ -245,7 +245,7 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
 !The dielectric stuff is performed in sequential mode.
 !Set mpi_enreg_diel accordingly
  call initmpi_seq(mpi_enreg_diel)
- call init_distribfft_seq(MPI_enreg_diel%distribfft,'c',ngfftdiel(2),ngfftdiel(3),'all')
+ call MPI_enreg_diel%distribfft%init_seq('c',ngfftdiel(2),ngfftdiel(3),'all')
 
 !testocc to be taken away
  testocc=1
@@ -941,8 +941,7 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
 ! *************************************************************************
 
 !DEBUG
-!write(std_out,*)' susk : enter '
-!if(.true.)stop
+!write(std_out,*)' susk : enter '; stop
 !ENDDEBUG
 
  call timab(750,1,tsec)
@@ -953,7 +952,7 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
 !The dielectric stuff is performed in sequential mode.
 !Set mpi_enreg_diel accordingly
  call initmpi_seq(mpi_enreg_diel)
- call init_distribfft_seq(mpi_enreg_diel%distribfft,'c',ngfftdiel(2),ngfftdiel(3),'all')
+ call mpi_enreg_diel%distribfft%init_seq('c',ngfftdiel(2),ngfftdiel(3),'all')
  me_bandfft=xmpi_comm_rank(mpi_enreg%comm_bandfft)
 
  testocc=1
@@ -1525,7 +1524,7 @@ subroutine suskmm(atindx,bdtot_index,cg,cprj_k,doccde,drhode,eigen,extrap,gbound
 !The dielectric stuff is performed in sequential mode.
 !Set mpi_enreg_diel accordingly
  call initmpi_seq(mpi_enreg_diel)
- call init_distribfft_seq(mpi_enreg_diel%distribfft,'c',ngfftdiel(2),ngfftdiel(3),'all')
+ call mpi_enreg_diel%distribfft%init_seq('c',ngfftdiel(2),ngfftdiel(3),'all')
 
  comm_fft=mpi_enreg%comm_fft
 

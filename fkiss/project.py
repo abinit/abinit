@@ -40,6 +40,9 @@ EXTERNAL_MODS_DEPS = {
     "f90_unix_dir": None,
     "ifcore": None,
     # MPI modules.
+    # MPI module should be imported via USE_MPI macro that will be replaced by mpi_abinit_macro
+    # This trick is used so that we can migrate easily to mpi_f08
+    "mpi_abinit_macro": ["mpi"],
     "mpi": ["mpi"],
     "mpi_f08": ["mpi"],
     # External libraries.
@@ -90,7 +93,7 @@ def load_mod(filepath):
         return SourceFileLoader(filepath, filepath).load_module()
 
 
-class FortranFile(object):
+class FortranFile:
     """
     Base class for files containing Fortran source code.
     A FortranFile can have modules, programs, subroutines and functions.
@@ -329,7 +332,14 @@ class FortranFile(object):
         return pd.DataFrame([d], index=[self.basename], columns=d.keys() if d else None)
 
     def check_abirules(self, verbose=0):
+        if verbose: print("Checking abirules for", self.name)
         retcode = 0
+
+        #for fort_file in self.fort_files.values():
+        if "mpi" in self.all_uses:
+            cprint("[%s]: Please replace `use mpi` with USE_MPI macro!" % self.name, color="red")
+            retcode += 1
+
         for a in ["modules", "programs", "subroutines", "functions"]:
             for p in getattr(self, a):
                 retcode += p.check_abirules(verbose=verbose)
@@ -478,10 +488,11 @@ class AbinitProject(NotebookWriter):
     # Must be consistent with CPP version. See incs/abi_common.h
     MACROS = {
         # Abinit MACROS.
+        "USE_MPI": "use mpi_abinit_macro ",
         "ABI_ASYNC": ",asynchronous",
         "ABI_PRIVATE": ",private",
         "ABI_PROTECTED": ",protected",
-        "ABI_CONTIGUOUS": "contigous,",
+        "ABI_CONTIGUOUS": "contiguous,",
         # Libpaw.
         "USE_DEFS": "use defs_basis",
         "USE_MPI_WRAPPERS": "use m_xmpi",
@@ -582,7 +593,7 @@ class AbinitProject(NotebookWriter):
                     raise RuntimeError((
                         "Cannot find Fortran module `%s`\n used by `%s`\nin Abinit project.\n" +
                         "It may be a syntax error or a stale import if you've removed the module.\n" +
-                        "If it's an external module (e.g. mpi), add it to the EXTERNAL_MODS list in ~abinit/fkiss/project.py."
+                        "If it's an external module (e.g. mpi), add it to the EXTERNAL_MODS list in ~abinit/fkiss/project.py.\n"
                         ) % (use_name, fort_file.path))
                 fort_file.all_used_mods.append(used_mod)
 
@@ -1197,7 +1208,7 @@ class AbinitProject(NotebookWriter):
 
     def update_corelibs(self, dryrun=False, verbose=0):
         """
-        Update corelibs.conf file taking into account the external dependecies.
+        Update corelibs.conf file taking into account the external dependencies.
 
         Args:
             dryrun: True to operate in dryrun mode.
@@ -1343,13 +1354,13 @@ class AbinitProject(NotebookWriter):
 
         #retcode += self.check_abirules(verbose=verbose)
 
-        cprint("retcode %d" % retcode, color="green" if retcode == 0 else "red")
+        if verbose: cprint("retcode %d" % retcode, color="green" if retcode == 0 else "red")
         return retcode
 
     def check_abirules(self, verbose=0):
         retcode = 0
         for name, fort_file in self.fort_files.items():
-            print("Checking abirules for %s..." % name)
+            if verbose: print("Checking abirules for %s..." % name)
             rv = fort_file.check_abirules(verbose=verbose)
             retcode += rv
             msg = "%s [OK]" if rv == 0 else "%s [FAILED]"

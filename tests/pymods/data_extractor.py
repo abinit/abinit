@@ -3,7 +3,6 @@ Implement the steps to extract data from an Abinit output file.
 Extract lines associated with their "meta character" (that makes sense in
 fldiff), and valid YAML documents associated with their iteration context.
 """
-from __future__ import print_function, division, unicode_literals
 import re
 
 from .yaml_tools import Document, is_available as has_yaml
@@ -16,11 +15,12 @@ doc_start_re = re.compile(r'---(?: !(\w+))?\n?$')
 doc_end_re = re.compile(r'\.\.\.\n?$')
 
 
-class DataExtractor(object):
+class DataExtractor:
     """Setup extraction of formatted documents and significant lines."""
 
     IGNORE_LINES_STARTING_WITH = [
         "MPI startup(): Warning: I_MPI_PMI_LIBRARY",
+        "MPI startup(): PMI server not found.",
     ]
 
     def __init__(self, use_yaml, ignore=True, ignoreP=True, xml_mode=False):

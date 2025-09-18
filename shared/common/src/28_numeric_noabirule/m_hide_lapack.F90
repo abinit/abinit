@@ -236,7 +236,6 @@ subroutine wrap_CHEEV(jobz, uplo, n, a, w)
 !arrays
  real(sp),allocatable :: rwork(:)
  complex(spc),allocatable :: work(:)
-
 !************************************************************************
 
  lwork = MAX(1,2*n-1)
@@ -261,7 +260,7 @@ subroutine wrap_CHEEV(jobz, uplo, n, a, w)
  ABI_FREE(rwork)
  ABI_FREE(work)
 
- !TODO scaLAPACK version (complex single precision buffer is needed in matrix_scalapack)
+ !TODO scaLAPACK version (complex single precision buffer is needed in slkmat_dp_t)
 
 end subroutine wrap_CHEEV
 !!***
@@ -334,8 +333,8 @@ subroutine wrap_ZHEEV(jobz, uplo, n, a, w, comm)
 #ifdef HAVE_LINALG_SCALAPACK
  integer :: ierr,istwf_k
  logical :: want_eigenvectors
- type(matrix_scalapack)    :: Slk_mat,Slk_vec
- type(processor_scalapack) :: Slk_processor
+ type(slkmat_dp_t)    :: Slk_mat,Slk_vec
+ type(slk_processor_t) :: Slk_processor
 #endif
 !************************************************************************
 
@@ -395,7 +394,7 @@ subroutine wrap_ZHEEV(jobz, uplo, n, a, w, comm)
     a = czero
     call slk_matrix_to_global_dpc_2D(Slk_vec,"All",a) ! Fill the entries calculated by this node.
     call Slk_vec%free()
-    call xmpi_sum(a,comm,ierr)                        ! Fill the remaing entries of the global matrix
+    call xmpi_sum(a,comm,ierr)                        ! Fill the remaining entries of the global matrix
    end if
 
    call Slk_processor%free()
@@ -483,8 +482,8 @@ subroutine xheev_cplex(jobz, uplo, cplex, n, a, w, msg, ierr, comm)
 #ifdef HAVE_LINALG_SCALAPACK
  !integer :: istwf_k
  !logical :: want_eigenvectors
- !type(matrix_scalapack)    :: Slk_mat,Slk_vec
- !type(processor_scalapack) :: Slk_processor
+ !type(slkmat_dp_t)    :: Slk_mat,Slk_vec
+ !type(slk_processor_t) :: Slk_processor
 #endif
 !************************************************************************
 
@@ -573,7 +572,7 @@ subroutine xheev_cplex(jobz, uplo, cplex, n, a, w, msg, ierr, comm)
    ! a = czero
    ! call slk_matrix_to_global_dpc_2D(Slk_vec,"All",a) ! Fill the entries calculated by this node.
    ! call Slk_vec%free()
-   ! call xmpi_sum(a,comm,ierr)                        ! Fill the remaing entries of the global matrix
+   ! call xmpi_sum(a,comm,ierr)                        ! Fill the remaining entries of the global matrix
    !end if
    !
    !call Slk_processor%free()
@@ -661,7 +660,6 @@ subroutine wrap_CHPEV(jobz, uplo, n, ap, w, z, ldz)
 !arrays
  real(sp),allocatable :: rwork(:)
  complex(spc),allocatable :: work(:)
-
 !************************************************************************
 
  ABI_MALLOC(work, (MAX(1,2*n-1)))
@@ -716,7 +714,7 @@ end subroutine wrap_CHPEV
 !! [comm]=MPI communicator for ScaLAPACK inversion. Only available if the code has been compiled with Scalapack support.
 !!        To avoid wasting CPU time the scalapack initialization is avoided if the number of processors in 1,
 !!        in this case the sequential LAPACK routine is called. Note that scalapack does not provide native
-!!        support for packed symmetric matrices. Threfore we have to distribute the full matrix among the nodes.
+!!        support for packed symmetric matrices. Therefore we have to distribute the full matrix among the nodes.
 !!        in order to perform the calculation in parallel.
 !!
 !! OUTPUT
@@ -772,10 +770,9 @@ subroutine wrap_ZHPEV(jobz, uplo, n, ap, w, z, ldz, comm)
 #ifdef HAVE_LINALG_SCALAPACK
  integer :: ierr,istwf_k
  logical :: want_eigenvectors
- type(matrix_scalapack)    :: Slk_mat,Slk_vec
- type(processor_scalapack) :: Slk_processor
+ type(slkmat_dp_t)    :: Slk_mat,Slk_vec
+ type(slk_processor_t) :: Slk_processor
 #endif
-
 !************************************************************************
 
  use_scalapack=.FALSE.
@@ -833,7 +830,7 @@ subroutine wrap_ZHPEV(jobz, uplo, n, ap, w, z, ldz, comm)
     z = zero
     call slk_matrix_to_global_dpc_2D(Slk_vec,"All",z) ! Fill the entries calculated by this node.
     call Slk_vec%free()
-    call xmpi_sum(z,comm,ierr)                        ! Fill the remaing entries of the global matrix
+    call xmpi_sum(z,comm,ierr)                        ! Fill the remaining entries of the global matrix
    end if
 
    call Slk_processor%free()
@@ -854,7 +851,7 @@ end subroutine wrap_ZHPEV
 !!  wrap_ZHEGV
 !!
 !! FUNCTION
-!!  wrap_ZHEGV computes all the  eigenvalues, and  optionally, the eigenvectors of a  complex generalized
+!!  wrap_ZHEGV computes all the eigenvalues, and optionally, the eigenvectors of a complex generalized
 !!  Hermitian-definite eigenproblem, of  the form
 !!        A*x=(lambda)*B*x  (1),
 !!       A*Bx=(lambda)*x,   (2), or
@@ -862,7 +859,6 @@ end subroutine wrap_ZHPEV
 !!  Here A and B are assumed to be Hermitian and B is also positive definite.
 !!
 !! INPUTS
-!!
 !!  ITYPE   (input) INTEGER Specifies the problem type to be solved:
 !!          = 1:  A*x = (lambda)*B*x
 !!          = 2:  A*B*x = (lambda)*x
@@ -901,7 +897,6 @@ end subroutine wrap_ZHPEV
 !!          If JOBZ = "N", then on exit the upper triangle (if UPLO="U") or the lower triangle
 !!          (if UPLO="L") of A, including the diagonal, is destroyed.
 !!
-!!
 !!  B       (input/output) COMPLEX*16 array, dimension (LDB, N)
 !!          On entry, the Hermitian positive definite matrix B.
 !!          If UPLO = "U", the leading N-by-N upper triangular part of B contains the upper triangular part of the matrix B.
@@ -933,8 +928,8 @@ subroutine wrap_ZHEGV(itype, jobz, uplo, n, a, b, w, comm)
  complex(dpc),allocatable :: work(:)
 #ifdef HAVE_LINALG_SCALAPACK
  integer :: ierr,istwf_k
- type(matrix_scalapack)    :: Slk_matA,Slk_matB
- type(processor_scalapack) :: Slk_processor
+ type(slkmat_dp_t)    :: Slk_matA,Slk_matB
+ type(slk_processor_t) :: Slk_processor
 #endif
 !************************************************************************
 
@@ -1002,7 +997,7 @@ subroutine wrap_ZHEGV(itype, jobz, uplo, n, a, b, w, comm)
    if (firstchar(jobz,(/"V","v"/))) then ! A is overwritten with the eigenvectors
      a = czero
      call slk_matrix_to_global_dpc_2D(Slk_matA,"All",a) ! Fill the entries calculated by this node.
-     call xmpi_sum(a,comm,ierr)                         ! Fill the remaing entries of the global matrix
+     call xmpi_sum(a,comm,ierr)                         ! Fill the remaining entries of the global matrix
    end if
 
    call Slk_matA%free()
@@ -1025,14 +1020,13 @@ end subroutine wrap_ZHEGV
 !! FUNCTION
 !!  xhegv_cplex computes all the  eigenvalues, and  optionally, the eigenvectors of a
 !!  (real generalized symmetric-definite| complex generalized  Hermitian-definite)
-!!  eigenproblem, of  the form
+!!  eigenproblem, of the form
 !!        A*x=(lambda)*B*x  (1),
 !!       A*Bx=(lambda)*x,   (2), or
 !!      B*A*x=(lambda)*x    (3).
 !!  Here A and B are assumed to be (symmetric|Hermitian) and B is also positive definite.
 !!
 !! INPUTS
-!!
 !!  ITYPE   (input) INTEGER Specifies the problem type to be solved:
 !!          = 1:  A*x = (lambda)*B*x
 !!          = 2:  A*B*x = (lambda)*x
@@ -1081,7 +1075,6 @@ end subroutine wrap_ZHEGV
 !!          If JOBZ = "N", then on exit the upper triangle (if UPLO="U") or the lower triangle
 !!          (if UPLO="L") of A, including the diagonal, is destroyed.
 !!
-!!
 !!  B       (input/output) REAL(DP) array, dimension (CPLEX,N, N)
 !!          On entry, the (real symmetric|Hermitian) positive definite matrix B.
 !!          If UPLO = "U", the leading N-by-N upper triangular part of B contains the upper triangular part of the matrix B.
@@ -1116,8 +1109,8 @@ subroutine xhegv_cplex(itype, jobz, uplo, cplex, n, a, b, w, msg, ierr, comm)
  complex(dpc),allocatable :: work_cplx(:)
 #ifdef HAVE_LINALG_SCALAPACK
  !integer :: istwf_k
- !type(matrix_scalapack)    :: Slk_matA,Slk_matB
- !type(processor_scalapack) :: Slk_processor
+ !type(slkmat_dp_t)    :: Slk_matA,Slk_matB
+ !type(slk_processor_t) :: Slk_processor
 #endif
 !************************************************************************
 
@@ -1222,7 +1215,7 @@ subroutine xhegv_cplex(itype, jobz, uplo, cplex, n, a, b, w, msg, ierr, comm)
   ! if (firstchar(jobz,(/"V","v"/))) then ! A is overwritten with the eigenvectors
   !  a = czero
   !  call slk_matrix_to_global_dpc_2D(Slk_matA,"All",a) ! Fill the entries calculated by this node.
-  !  call xmpi_sum(a,comm,ierr)                         ! Fill the remaing entries of the global matrix
+  !  call xmpi_sum(a,comm,ierr)                         ! Fill the remaining entries of the global matrix
   ! end if
 
   ! call Slk_matA%free()
@@ -1378,10 +1371,9 @@ subroutine wrap_ZHEEVX(jobz,range,uplo,n,a,vl,vu,il,iu,abstol,m,w,z,ldz,comm)
 #ifdef HAVE_LINALG_SCALAPACK
  integer :: ierr,istwf_k
  logical :: want_eigenvectors
- type(matrix_scalapack)    :: Slk_mat,Slk_vec
- type(processor_scalapack) :: Slk_processor
+ type(slkmat_dp_t)    :: Slk_mat,Slk_vec
+ type(slk_processor_t) :: Slk_processor
 #endif
-
 !************************************************************************
 
  use_scalapack=.FALSE.
@@ -1444,7 +1436,7 @@ subroutine wrap_ZHEEVX(jobz,range,uplo,n,a,vl,vu,il,iu,abstol,m,w,z,ldz,comm)
     z = czero
     call slk_matrix_to_global_dpc_2D(Slk_vec,"All",z) ! Fill the entries calculated by this node.
     call Slk_vec%free()
-    call xmpi_sum(z,comm,ierr)                        ! Fill the remaing entries of the global matrix
+    call xmpi_sum(z,comm,ierr)                        ! Fill the remaining entries of the global matrix
    end if
 
    call Slk_processor%free()
@@ -1605,10 +1597,9 @@ subroutine xheevx_cplex(jobz, range, uplo, cplex, n, a, vl, vu, il, iu, &
 #ifdef HAVE_LINALG_SCALAPACK
  !integer :: istwf_k
  !logical :: want_eigenvectors
- !type(matrix_scalapack)    :: Slk_mat,Slk_vec
- !type(processor_scalapack) :: Slk_processor
+ !type(slkmat_dp_t)    :: Slk_mat,Slk_vec
+ !type(slk_processor_t) :: Slk_processor
 #endif
-
 !************************************************************************
 
  use_scalapack=.FALSE.
@@ -1701,7 +1692,7 @@ subroutine xheevx_cplex(jobz, range, uplo, cplex, n, a, vl, vu, il, iu, &
   !  z = czero
   !  call slk_matrix_to_global_dpc_2D(Slk_vec,"All",z) ! Fill the entries calculated by this node.
   !  call Slk_vec%free()
-  !  call xmpi_sum(z,comm,ierr)                        ! Fill the remaing entries of the global matrix
+  !  call xmpi_sum(z,comm,ierr)                        ! Fill the remaining entries of the global matrix
   ! end if
 
   ! call Slk_processor%free()
@@ -1868,10 +1859,9 @@ subroutine wrap_ZHEGVX(itype,jobz,range,uplo,n,a,b,vl,vu,il,iu,abstol,m,w,z,ldz,
 #ifdef HAVE_LINALG_SCALAPACK
  integer :: ierr,istwf_k
  logical :: want_eigenvectors
- type(matrix_scalapack)    :: Slk_matA,Slk_matB,Slk_vec
- type(processor_scalapack) :: Slk_processor
+ type(slkmat_dp_t)    :: Slk_matA,Slk_matB,Slk_vec
+ type(slk_processor_t) :: Slk_processor
 #endif
-
 !************************************************************************
 
  use_scalapack=.FALSE.
@@ -1947,7 +1937,7 @@ subroutine wrap_ZHEGVX(itype,jobz,range,uplo,n,a,b,vl,vu,il,iu,abstol,m,w,z,ldz,
      z = czero
      call slk_matrix_to_global_dpc_2D(Slk_vec,"All",z) ! Fill the entries calculated by this node.
      call Slk_vec%free()
-     call xmpi_sum(z,comm,ierr)                        ! Fill the remaing entries of the global matrix
+     call xmpi_sum(z,comm,ierr)                        ! Fill the remaining entries of the global matrix
    end if
 
    call Slk_processor%free()
@@ -2125,10 +2115,9 @@ subroutine xhegvx_cplex(itype, jobz, range, uplo, cplex, n, a, b, &
 #ifdef HAVE_LINALG_SCALAPACK
  !integer :: istwf_k
  !logical :: want_eigenvectors
- !type(matrix_scalapack)    :: Slk_matA,Slk_matB,Slk_vec
- !type(processor_scalapack) :: Slk_processor
+ !type(slkmat_dp_t)    :: Slk_matA,Slk_matB,Slk_vec
+ !type(slk_processor_t) :: Slk_processor
 #endif
-
 !************************************************************************
 
  use_scalapack=.FALSE.
@@ -2245,7 +2234,7 @@ subroutine xhegvx_cplex(itype, jobz, range, uplo, cplex, n, a, b, &
   !  z = czero
   !  call slk_matrix_to_global_dpc_2D(Slk_vec,"All",z) ! Fill the entries calculated by this node.
   !  call Slk_vec%free()
-  !  call xmpi_sum(z,comm,ierr)                        ! Fill the remaing entries of the global matrix
+  !  call xmpi_sum(z,comm,ierr)                        ! Fill the remaining entries of the global matrix
   ! end if
 
   ! call Slk_processor%free()
@@ -2344,7 +2333,6 @@ subroutine wrap_CGEEV(jobvl, jobvr, n, a, lda, w, vl, ldvl, vr, ldvr)
 !arrays
  real(sp),allocatable :: rwork(:)
  complex(spc),allocatable :: work(:)
-
 !************************************************************************
 
  lwork = MAX(1,2*n)
@@ -2459,7 +2447,6 @@ subroutine wrap_ZGEEV(jobvl,jobvr,n,a,lda,w,vl,ldvl,vr,ldvr)
 !arrays
  real(dp),allocatable :: rwork(:)
  complex(dpc),allocatable :: work(:)
-
 !************************************************************************
 
  use_scalapack=.FALSE.
@@ -2518,7 +2505,7 @@ end subroutine wrap_ZGEEV
 !! a(n,n)= array of complex elements, input, inverted at output
 !!
 !! TODO
-!!  Add Scalapack version, matrix_scalapack has to be modified by adding a single precision complex buffer.
+!!  Add Scalapack version
 !!
 !! SOURCE
 
@@ -2542,8 +2529,8 @@ subroutine cginv(a, n, comm)
 #ifdef HAVE_LINALG_SCALAPACK
  !integer :: ierr,istwf_k,ipiv_size,liwork
  !integer,allocatable :: iwork(:)
- !type(matrix_scalapack)    :: Slk_mat
- !type(processor_scalapack) :: Slk_processor
+ !type(slkmat_dp_t)    :: Slk_mat
+ !type(slk_processor_t) :: Slk_processor
 #endif
 
 ! *************************************************************************
@@ -2602,7 +2589,7 @@ subroutine cginv(a, n, comm)
  CASE (.TRUE.)
 
 #if 0
-! FIXME matrix_scalapack does not have a single precision complex buffer
+! FIXME slkmat_dp_t does not have a single precision complex buffer
 
 #ifdef HAVE_LINALG_SCALAPACK
   call Slk_processor%init(comm)
@@ -2638,7 +2625,7 @@ subroutine cginv(a, n, comm)
   call PCGETRI(Slk_mat%sizeb_global(1),Slk_mat%buffer_cplx_sp,1,1,Slk_mat%descript%tab,ipiv,&
 &  work,lwork,iwork,liwork,info)
 
-  ABI_CHECK(info==0,"PZGETRI: Error during compuation of workspace size")
+  ABI_CHECK(info==0,"PZGETRI: Error during computation of workspace size")
 
   lwork = NINT(DBLE(work(1))); liwork=iwork(1)
   ABI_FREE(work)
@@ -2665,7 +2652,7 @@ subroutine cginv(a, n, comm)
   !! call slk_matrix_to_global_dpc_2D(Slk_mat,"All",a)  ! Fill the entries calculated by this node.
   call Slk_mat%free()
 
-  call xmpi_sum(a,comm,ierr)                         ! Fill the remaing entries of the global matrix
+  call xmpi_sum(a,comm,ierr)                         ! Fill the remaining entries of the global matrix
   call Slk_processor%free()
 
   RETURN
@@ -2722,8 +2709,8 @@ subroutine zginv(a, n, comm)
  complex(dpc),allocatable :: work(:)
 #ifdef HAVE_LINALG_SCALAPACK
  integer :: istwf_k,ierr
- type(matrix_scalapack)    :: Slk_mat
- type(processor_scalapack) :: Slk_processor
+ type(slkmat_dp_t)    :: Slk_mat
+ type(slk_processor_t) :: Slk_processor
 #endif
 
 ! *************************************************************************
@@ -2794,7 +2781,7 @@ subroutine zginv(a, n, comm)
    call slk_matrix_to_global_dpc_2D(Slk_mat,"All",a)  ! Fill the entries calculated by this node.
    call Slk_mat%free()
 
-   call xmpi_sum(a,comm,ierr)                         ! Fill the remaing entries of the global matrix
+   call xmpi_sum(a,comm,ierr)                         ! Fill the remaining entries of the global matrix
    call Slk_processor%free()
 
    return
@@ -2855,8 +2842,8 @@ subroutine zhpd_invert(uplo, a, n, comm)
 !arrays
 #ifdef HAVE_LINALG_SCALAPACK
  integer :: istwf_k,ierr
- type(matrix_scalapack)    :: Slk_mat
- type(processor_scalapack) :: Slk_processor
+ type(slkmat_dp_t)    :: Slk_mat
+ type(slk_processor_t) :: Slk_processor
 #endif
 
 ! *************************************************************************
@@ -2926,7 +2913,7 @@ subroutine zhpd_invert(uplo, a, n, comm)
    call slk_matrix_to_global_dpc_2D(Slk_mat,uplo,a)  ! Fill the entries calculated by this node.
    call Slk_mat%free()
 
-   call xmpi_sum(a,comm,ierr)                         ! Fill the remaing entries of the global matrix
+   call xmpi_sum(a,comm,ierr)                         ! Fill the remaining entries of the global matrix
    call Slk_processor%free()
 
    RETURN
@@ -3237,12 +3224,8 @@ end subroutine jacobi
 !!  respectively. This routine is used in combination with lubksb to solve
 !!  linear equations or invert a matrix.
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! NOTES
-!!   This routine is depreacted, use lapack API
+!!   This routine is deprecated, use lapack API
 !!
 !! SOURCE
 
@@ -3336,12 +3319,6 @@ END SUBROUTINE ludcmp
 !!  b will begin with many zero elements, so it is efficient for use in
 !!  matrix inversion.
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
 !! NOTES
 !!  This routine is deprecated, use lapack API
 !!
@@ -3393,13 +3370,8 @@ END SUBROUTINE LUBKSB
 !!  This routine is the clone of zgefa.F90 using real*8 a(2) instead of complex*16
 !!  for the purpose of ABINIT
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
 !! NOTES
+!!  This routine is deprecated, use lapack API
 !!
 !! SOURCE
 
@@ -3577,13 +3549,8 @@ end subroutine dzgedi
 !!   This routine is the clone of zgefa.F90 using real*8 a(2) instead of complex*16
 !!   for the purpose of ABINIT (2008,TD)
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
 !! NOTES
+!!  This routine is deprecated, use lapack API
 !!
 !! SOURCE
 
@@ -3775,7 +3742,6 @@ subroutine test_xginv(msize,skinds,do_check,Tres,comm)
  Tres%max_abserr = max_abserr
 
  ABI_FREE(cmat_dpc)
-
  ABI_SFREE(cmat_dpc_check)
 
 end subroutine test_xginv
@@ -3857,7 +3823,6 @@ subroutine xhesv_cplex(UPLO, cplex, N, NRHS, A, B, msg, info)
  integer :: lwork, lda, ldb
  integer,allocatable :: ipiv(:)
  real(dp),allocatable :: work(:,:)
-
 !************************************************************************
 
  if (all(cplex /= [1, 2])) then

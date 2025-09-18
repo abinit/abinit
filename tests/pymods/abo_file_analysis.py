@@ -2,15 +2,12 @@
 Implement a class used to analyze some data from ABINIT .abo file.
 Can be used to count datasets, extract number of iterations...
 """
-from __future__ import print_function, division, unicode_literals
 from math import ceil, floor
 
-# ---------------------------------------------------------------------
+class AboFileAnalysis:
+    """Main object containing data from abo file (for further analysis)."""
 
-class AboFileAnalysis(object):
-    """Main object containing data from abo file (for furher analysis)."""
-
-    def __init__(self,file_name,option):
+    def __init__(self, file_name, option):
         """
         Arguments:
         file_name: name of the file to analyze
@@ -23,9 +20,7 @@ class AboFileAnalysis(object):
         if option != "":
             self.dtsets = self.extract(option=option)
 
-#   -------------
-
-    def extract(self,option):
+    def extract(self, option):
         """
         Extract data from the abo file, dataset per dataset
         Argument:
@@ -98,8 +93,6 @@ class AboFileAnalysis(object):
 
         return dataset_list
 
-#   -------------
-
     def compare_with(self,other_abo_file,option,percent_allowed_small=0,percent_allowed_large=0):
         """
         Compare the current abo file with another one
@@ -125,6 +118,7 @@ class AboFileAnalysis(object):
         if status == "succeeded":
             if len(self.dtsets) != len(other_abo_file.dtsets):
                 status = "failed"
+                print ("2 lengths of dtsets = ", len(self.dtsets), len(other_abo_file.dtsets))
                 raise ValueError("ERROR: the two abo files have different dataset numbers!")
 
         if status == "succeeded":
@@ -159,12 +153,10 @@ class AboFileAnalysis(object):
 
         return status,err_msg,err_msg_short
 
-# ---------------------------------------------------------------------
-
-class AboDataset(object):
+class AboDataset:
     """Object storing data extracted from ABINIT abo file for ONE dataset."""
 
-    def __init__(self,number):
+    def __init__(self, number):
         self.number = number
         self.optddriver = 0
         self.MD_niter = None

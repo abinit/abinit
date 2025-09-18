@@ -22,9 +22,7 @@
 module m_gwr_driver
 
  use, intrinsic :: iso_c_binding
-#ifdef HAVE_MPI2
- use mpi
-#endif
+ USE_MPI
  use defs_basis
  use defs_wvltypes
  use m_errors
@@ -38,7 +36,6 @@ module m_gwr_driver
  use m_dtset
  use m_dtfil
  use m_wfk
- use m_distribfft
  use netcdf
  use m_nctk
 
@@ -48,11 +45,10 @@ module m_gwr_driver
  use m_io_tools,        only : file_exists, open_file, get_unit, iomode_from_fname
  use m_time,            only : cwtime, cwtime_report, sec2str
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa, string_in, ltoa
- use m_slk,             only : matrix_scalapack
  use m_fftcore,         only : print_ngfft, get_kg
  use m_fft,             only : fourdp
  use m_ioarr,           only : read_rhor
- use m_energies,        only : energies_type, energies_init
+ use m_energies,        only : energies_type
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
@@ -67,7 +63,7 @@ module m_gwr_driver
  use m_paw_pwaves_lmn,  only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
  use m_pawpwij,         only : pawpwff_t, pawpwff_init, pawpwff_free, paw_rho_tw_g
  use m_kg,              only : getph
- use m_wfd,             only : wfd_init, wfd_t, test_charge
+ use m_wfd,             only : wfd_t, test_charge
  use m_pspini,          only : pspini
  use m_paw_correlations,only : pawpuxinit
  use m_paw_dmft,        only : paw_dmft_type
@@ -87,6 +83,7 @@ module m_gwr_driver
  use m_gwr,             only : gwr_t
  use m_vcoul,           only : vcgen_t
  !use m_ephtk,          only : ephtk_update_ebands
+ use m_pstat,           only : pstat_proc
 
  implicit none
 
@@ -190,8 +187,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  integer :: rhoxsp_method, usexcnhat !, use_umklp
  real(dp) :: compch_fft, compch_sph !,r_s,rhoav,alpha
  !real(dp) :: drude_plsmf !,my_plsmf,ecut_eff,ecutdg_eff,ehartree
- real(dp) :: gsqcutc_eff, gsqcutf_eff, gsqcut_shp
- real(dp) :: vxcavg, gw_gsq
+ real(dp) :: gsqcutc_eff, gsqcutf_eff, gsqcut_shp, vxcavg, gw_gsq, gs_fermie
  type(energies_type) :: KS_energies
  type(melflags_t) :: KS_mflags
  type(paw_dmft_type) :: Paw_dmft
@@ -217,7 +213,6 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  type(pawrhoij_type),allocatable :: KS_Pawrhoij(:)
  type(pawpwff_t),allocatable :: Paw_pwff(:)
  !type(pawcprj_type),allocatable :: cprj_k(:,:)
-
 !************************************************************************
 
  ! This part performs the initialization of the basic objects used to perform e-ph calculations:
@@ -240,11 +235,10 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  units(:) = [std_out, ab_out]
 
  call cwtime(cpu, wall, gflops, "start")
+ call pstat_proc%print(_PSTAT_ARGS_)
 
-! write(msg,'(7a)')&
+! write(msg,'(a)')&
 ! ' GWR: Calculation of the GW corrections with GWR code ',ch10,ch10,&
-! ' Based on a program developed by R.W. Godby, V. Olevano, G. Onida, and L. Reining.',ch10,&
-! ' Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.'
 ! call wrtout(units, msg)
 !
 #if defined HAVE_GW_DPC
@@ -304,10 +298,10 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
 
  ! Some variables need to be initialized/nullify at start
  usexcnhat = 0
- call energies_init(KS_energies)
+ call KS_energies%init()
 
 !Get electronic temperature from dtset
- el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
+ el_temp = merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
 
  den_path = dtfil%fildensin; wfk_path = dtfil%fnamewffk; kden_path = dtfil%filkdensin
  !use_den = f (string_in(dtset%gwr_task, "CC4S_FROM_WFK")) then
@@ -342,8 +336,8 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
 
  ! Fake MPI_type for the sequential part.
  call initmpi_seq(mpi_enreg_seq)
- call init_distribfft_seq(mpi_enreg_seq%distribfft, 'c', ngfftc(2), ngfftc(3), 'all')
- call init_distribfft_seq(mpi_enreg_seq%distribfft, 'f', ngfftf(2), ngfftf(3), 'all')
+ call mpi_enreg_seq%distribfft%init_seq('c', ngfftc(2), ngfftc(3), 'all')
+ call mpi_enreg_seq%distribfft%init_seq('f', ngfftf(2), ngfftf(3), 'all')
 
  ! ===========================================
  ! === Open and read pseudopotential files ===
@@ -469,6 +463,10 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  if (cryst%compare(den_cryst, header=" Comparing input crystal with DEN crystal") /= 0) then
    ABI_ERROR("Crystal structure from input and from DEN file do not agree! Check messages above!")
  end if
+ ! Get fermie from the GS calculation.
+ ! NB: It might understimate the real fermi level, especially if the den was computed on a shifted k-mesh
+ ! at present it's only used to implement pseudobands
+ gs_fermie = den_hdr%fermie
  call den_cryst%free(); call den_hdr%free()
 
  ABI_MALLOC(ks_taur, (nfftf, dtset%nspden * dtset%usekden))
@@ -522,11 +520,11 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    !  Calculate onsite vxc with and without core charge.
    nzlmopt=-1; option=0; compch_sph=greatest_real
    call pawdenpot(compch_sph,el_temp,KS_energies%e_paw,KS_energies%e_pawdc,&
-     KS_energies%entropy_paw,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
+     KS_energies%entropy_paw,Cryst%gprimd,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
      Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,KS_Paw_an,KS_Paw_an,KS_paw_ij,&
      Pawang,Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,&
      Pawtab,Dtset%pawxcdev,Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,&
-     Cryst%ucvol,Psps%znuclpsp,epaw_xc=KS_energies%e_pawxc)
+     Cryst%xred,Cryst%ucvol,Psps%znuclpsp,epaw_xc=KS_energies%e_pawxc)
 
  else
    ABI_MALLOC(ks_nhatgr, (0, 0, 0))
@@ -644,6 +642,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    call timab(561,2,tsec)
  end if
 
+ call pstat_proc%print(_PSTAT_ARGS_)
  call cwtime_report(" prepare gwr_driver_init", cpu, wall, gflops)
 
  if (string_in(dtset%gwr_task, "HDIAGO, HDIAGO_FULL, CC4S, CC4S_FULL")) then
@@ -681,9 +680,10 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    !print *, "owfk_ebands%npwarr:",  owfk_ebands%npwarr; stop
    call owfk_hdr%init(owfk_ebands, codvsn, dtset, pawtab, 0, psps, wvl%descr)
 
-   ! Change the value of istwfk taken from dtset.
+   ! Change the value of istwfk taken from dtset and set the Fermie level from gs_fermie.
    ABI_REMALLOC(owfk_hdr%istwfk, (dtset%nkpt))
    owfk_hdr%istwfk(:) = istwfk_ik
+   owfk_hdr%fermie = gs_fermie
 
    ! Build MPI pools to distribute (kpt, spin).
    ! Try to get rectangular grids in each pool to improve efficiency in slk diago.
@@ -728,7 +728,7 @@ if (dtset%usefock == 1 .and. .not. cc4s_from_wfk) then
 
 else
        call cwtime(diago_cpu, diago_wall, diago_gflops, "start")
-       call ugb%from_diago(spin, istwfk_ik(ik_ibz), dtset%kptns(:,ik_ibz), dtset%ecut, nband_k, ngfftc, nfftf, &
+       call ugb%from_diago(spin, istwfk_ik(ik_ibz), dtset%kptns(:,ik_ibz), dtset%ecut, gs_fermie, nband_k, ngfftc, nfftf, &
                            dtset, pawtab, pawfgr, ks_paw_ij, cryst, psps, ks_vtrial, eig_k, hyb, diago_pool%comm%value)
        call cwtime(diago_cpu, diago_wall, diago_gflops, "stop")
 
@@ -821,6 +821,10 @@ end if
    ! Construct crystal and ks_ebands from the GS WFK file.
    tmp_ebands = wfk_read_ebands(wfk_path, comm, out_hdr=wfk_hdr)
    ks_ebands = tmp_ebands%chop(1, maxval(dtset%nband))
+
+   ! Make sure that ef is inside the gap if semiconductor.
+   !call ks_ebands%update_occ(dtset%spinmagntarget, prtvol=dtset%prtvol, fermie_to_zero=.True.)
+
    call tmp_ebands%free()
    call wfk_hdr%vs_dtset(dtset)
 
@@ -891,6 +895,7 @@ end if
      ! All the modifications to ebands should be done here.
      !call ephtk_update_ebands(dtset, ks_ebands, "Ground state energies")
    end if
+   call pstat_proc%print(_PSTAT_ARGS_)
 
    call gwr%init(dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg_seq, comm)
    if (gwr%idle_proc) goto 100
@@ -996,6 +1001,8 @@ end if
 
  call cryst%free(); call wfk_hdr%free(); call ks_ebands%free(); call destroy_mpi_enreg(mpi_enreg_seq); call gwr%free()
 
+ call pstat_proc%print(_PSTAT_ARGS_)
+
 end subroutine gwr_driver
 !!***
 
@@ -1015,10 +1022,26 @@ subroutine cc4s_write_eigens(ebands, dtfil)
  type(datafiles_type),intent(in) :: dtfil
 
 !Local variables-------------------------------
- integer :: unt, ik_ibz, spin, band
+ integer :: unt, ik_ibz, spin, band, gap_err
+ real(dp) :: my_fermie
  character(len=500) :: msg
  character(len=fnlen) :: filepath
+ type(gaps_t) :: ks_gaps
 ! *************************************************************************
+
+ ks_gaps = ebands%get_gaps(gap_err)
+ call ks_gaps%print([std_out], header="Kohn-Sham gaps and band edges from IBZ mesh")
+ if (any(ks_gaps%ierr /= 0)) then
+   ABI_ERROR("Cannot compute gaps!")
+ end if
+
+ ! Make sure fermi level is within the gap. I know, the case nsppol = 2 is treated in a dirty way!
+ my_fermie = zero
+ do spin=1,ebands%nsppol
+   my_fermie = ks_gaps%vb_max(spin) + (ks_gaps%cb_min(spin) - ks_gaps%vb_max(spin)) / two
+ end do
+ my_fermie = my_fermie / ebands%nsppol
+ call ks_gaps%free()
 
  ! See https://manuals.cc4s.org/user-manual/objects/EigenEnergies.html
  filepath = trim(dtfil%filnam_ds(4))//'_EigenEnergies.yaml'
@@ -1036,7 +1059,7 @@ subroutine cc4s_write_eigens(ebands, dtfil)
  write(unt,'(A)')    '  type: TextFile'
  write(unt,'(A)')    'unit: 1.0     # Hartree units'
  write(unt,'(A)')    'metaData:'
- write(unt,'(A,E22.15)')    '  fermiEnergy: ',ebands%fermie
+ write(unt,'(A,E22.15)')    '  fermiEnergy: ',my_fermie
  write(unt,'(A)')    '  energies:'
 
  do spin=1,ebands%nsppol
@@ -1085,7 +1108,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  use m_fft_mesh,      only : setmesh
  use m_fft,           only : uplan_t
  use m_vcoul,         only : vcgen_t
- use m_pstat,         only : pstat_t
+
  use m_sort,          only : sort_gvecs
  use m_pawpwij,       only : pawpwij_t, pawpwij_init, pawpwij_free
 
@@ -1114,7 +1137,6 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  logical,parameter :: trust_no_one = .False.
  type(uplan_t) :: uplan_1, uplan_2, uplan_m
  type(vcgen_t) :: vcgen
- !type(pstat_t) :: pstat
  integer :: u_ngfft(18), u_nfft, u_mgfft, enforce_sym, method, nlmn_atm(cryst%natom)
  integer,pointer :: gvec_max(:,:)
  integer,allocatable,target :: m_gvec(:,:), sorted_kg_k(:,:)
@@ -1122,7 +1144,6 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  complex(gwpc),allocatable :: sqrt_vc(:), paw_rhotwg(:)
  type(pawpwij_t),allocatable :: pwij(:)
  type(pawcprj_type),allocatable :: cprj1(:,:)
-
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
@@ -1165,7 +1186,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  nqibz_ = 1; nqbz_ = 1; qbz_ = zero; nkbz_ = 1
  ! TODO: MC technique does not seem to work as expected, even in the legacy code.
  call vcgen%init(cryst, ebands%kptrlatt, nkbz_, nqibz_, nqbz_, qbz_, &
-                 dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, comm)
+                 dtset%gw_rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, comm)
 
  ! NB: npweps = m_npw
  ABI_MALLOC(sqrt_vc, (m_npw))

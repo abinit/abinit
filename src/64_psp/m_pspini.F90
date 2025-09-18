@@ -61,6 +61,7 @@ module m_pspini
 !!***
 
  public :: pspini
+ public :: pspcor
 !!***
 
 contains
@@ -140,7 +141,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 !Local variables-------------------------------
 !scalars
  integer,parameter :: npspmax=50
- integer,save :: dimekb_old=0,ifirst=1,ixc_old=-1,lmnmax_old=0,lnmax_old=0
+ integer,save :: dimekb_old=0,ifirst=1,ixc_old=-1,lmnmax_old=0,lnmax_old=0,use_rcpaw_old=0
  integer,save :: mpssoang_old=0,mqgridff_old=0,mqgridvl_old=0,optnlxccc_old=-1
  integer,save :: paw_size_old=-1,pawxcdev_old=-1,positron_old=-2,usekden_old=-1,usepaw_old=-1
  integer,save :: usexcnhat_old=-1,usewvl_old=-1,useylm_old=-1
@@ -218,12 +219,12 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  paw_options=0;paw_size=0
  if (psps%usepaw==1) then
    paw_size=size(pawtab)
-   has_kij=(dtset%positron/=0.or.abs(dtset%effmass_free-one)>tol8.or.dtset%orbmag>0)
+   has_kij=(dtset%positron/=0.or.abs(dtset%effmass_free-one)>tol8.or.dtset%orbmag>0.or.dtset%use_rcpaw==1)
    has_tvale=.true. ! Will be modified later (depending on PAW dataset format)
    has_nabla=.false.
    has_shapefncg=(dtset%optdriver==RUNL_GSTATE.and.((dtset%iprcel>=20.and.dtset%iprcel<70).or.dtset%iprcel>=80))
    has_wvl=(dtset%usewvl==1.or.dtset%icoulomb/=0)
-   has_tproj=(dtset%usewvl==1) ! projectors will be free at the end of the psp reading
+   has_tproj=(dtset%usewvl==1.or.dtset%use_rcpaw==1) ! projectors will be free at the end of the psp reading
    has_vminushalf=(maxval(dtset%ldaminushalf)==1)
    has_coretau=(dtset%usekden>=1)
    if (has_kij)       paw_options(1)=1
@@ -285,6 +286,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 & .or. sum(new_pspso(:))/=0                &
 & .or. mtypalch>0                          &
 & .or. (dtset%usewvl==1.and.psps%usepaw==1)&
+& .or. (use_rcpaw_old==1)&
 & ) gencond=1
 
  if (present(comm_mpi).and.psps%usepaw==1) then
@@ -599,6 +601,9 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 !but epsatm is needed, so should be in the psp datastructure.
 !Compute pseudo correction energy. Will differ from an already
 !computed one if the number of atom differ ...
+ do ipsp=1,npsp
+   psps%epsatm(ipsp)=epsatm(ipsp)
+ enddo
  call pspcor(ecore,epsatm,dtset%natom,ntypat,dtset%typat,psps%ziontypat)
  if(abs(ecore_old-ecore)>tol8*abs(ecore_old+ecore))then
    write(msg, '(2x,es15.8,t50,a)' ) ecore,'ecore*ucvol(ha*bohr**3)'
@@ -636,6 +641,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  usekden_old = dtset%usekden
  usexcnhat_old=dtset%usexcnhat_orig
  paw_size_old=paw_size
+ use_rcpaw_old=dtset%use_rcpaw
  ecore_old=ecore
  paw_options_old(:)=paw_options(:)
 

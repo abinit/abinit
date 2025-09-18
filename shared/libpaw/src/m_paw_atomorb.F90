@@ -100,6 +100,30 @@ MODULE m_paw_atomorb
   logical :: dirac
   ! Dirac relativism or not
 
+  logical :: nc_conv
+  ! nc has converged ?
+
+  logical :: zcore_conv
+  ! zcore has converged ?
+
+  real(dp) :: edcc
+  ! DC core energy
+
+  real(dp) :: eeigc
+  ! Core eigenvalue energy contribution
+
+  real(dp) :: ehnzc
+  ! Core Hartree nc+Z energy
+
+  real(dp) :: ekinc
+  ! Core kinetic energy
+
+  real(dp) :: min_eigv
+  ! Minimal eigenvalue of the  valence orbitals
+
+  real(dp) :: nresid_c
+  ! Residual error on core density
+
   real(dp) :: rcore
   ! Radius of the sphere used to describe core electrons.
   ! It should be <= rpaw
@@ -110,6 +134,10 @@ MODULE m_paw_atomorb
 
   real(dp) :: zcore
    ! Number of core electrons
+
+  real(dp) :: zcore_orig
+   ! original zcore
+   ! This is used in RCPAW
 
   ! TODO alchemy?
   !real(dp) :: ziontypat
@@ -140,7 +168,7 @@ MODULE m_paw_atomorb
   ! indln(2,ln_size)
   ! Array giving l and n for i=ln
 
-  integer, allocatable :: indklmn(:,:) 
+  integer, allocatable :: indklmn(:,:)
    ! indklmn(8,lmn2_size)
    ! Array giving klm, kln, abs(il-jl), (il+jl), ilm and jlm, ilmn and jlmn for each klmn=(ilmn,jlmn)
    ! Note: ilmn=(il,im,in) and ilmn<=jlmn
@@ -181,9 +209,21 @@ MODULE m_paw_atomorb
   ! eig(ln_size,nsppol)
   ! Eigenvalues for each ln channel and spin.
 
+  real(dp), allocatable :: max_occ(:,:)
+  ! max_occ(ln_size,nsppol)
+  ! Maximal occupancy for each, used in RCPAW
+
   real(dp), allocatable :: occ(:,:)
   ! occ(ln_size,nsppol)
   ! Occupation for each ln channel and spin.
+
+  real(dp), allocatable :: occ_res(:,:)
+  ! occ_res(ln_size,nsppol)
+  ! Occupation residue for each ln channel and spin, used in RCPAW
+
+  real(dp), allocatable :: occ_respc(:,:)
+  ! occ_respc(ln_size,nsppol)
+  ! Occupation preconditionned residue for each ln channel and spin, used in RCPAW.
 
   real(dp), allocatable :: phi(:,:,:)
   ! phi(mesh_size,ln_size,nsppol)
@@ -194,6 +234,10 @@ MODULE m_paw_atomorb
    ! density(mesh_size,nspden)
    ! Gives the core density of the atom for each spin channel
    ! Total charge in first dimension,up component in second one (if present)
+
+  real(dp), allocatable :: vhtnzc_orig(:)
+   ! vhtnzc_orig(size(pawtab(itypat)%vhtnzc))
+   ! Original vhtnzc, used in RCPAW
 
  end type atomorb_type
 
@@ -206,8 +250,8 @@ MODULE m_paw_atomorb
 !----------------------------------------------------------------------
 
  integer,public,parameter :: ORB_FROZEN       =1
- integer,public,parameter :: ORB_RELAXED_CORE =2
- integer,public,parameter :: ORB_VALENCE      =4
+ integer,public,parameter :: ORB_RELAXED_CORE =0
+ integer,public,parameter :: ORB_VALENCE      =2
 
 
 CONTAINS  !=========================================================================================================================
@@ -228,8 +272,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine destroy_atomorb(Atm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -269,12 +311,25 @@ subroutine destroy_atomorb(Atm)
  if (allocated(Atm%eig)) then
    LIBPAW_DEALLOCATE(Atm%eig)
  end if
+ if (allocated(Atm%max_occ)) then
+   LIBPAW_DEALLOCATE(Atm%max_occ)
+ end if
  if (allocated(Atm%occ)) then
    LIBPAW_DEALLOCATE(Atm%occ)
+ end if
+ if (allocated(Atm%occ_res)) then
+   LIBPAW_DEALLOCATE(Atm%occ_res)
+ end if
+if (allocated(Atm%occ_respc)) then
+   LIBPAW_DEALLOCATE(Atm%occ_respc)
  end if
  if (allocated(Atm%phi)) then
    LIBPAW_DEALLOCATE(Atm%phi)
  end if
+ if(allocated(atm%vhtnzc_orig)) then
+   LIBPAW_DEALLOCATE(atm%vhtnzc_orig)
+ endif
+ call pawrad_free(atm%radmesh)
 
 end subroutine destroy_atomorb
 !!***
@@ -301,8 +356,6 @@ end subroutine destroy_atomorb
 !! SOURCE
 
 subroutine get_atomorb_charge(Atm,Radmesh,nele,radens)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -374,8 +427,6 @@ end subroutine get_atomorb_charge
 !! SOURCE
 
 subroutine get_overlap(Atm,Atmesh,Radmesh2,isppol,nphi,phi,phi_indln,overlap)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -477,8 +528,6 @@ end subroutine get_overlap
 
 subroutine print_atomorb(Atm,header,unit,prtvol,mode_paral)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(atomorb_type),intent(in) :: Atm
@@ -559,8 +608,6 @@ end subroutine print_atomorb
 !! SOURCE
 
 function my_mode2str(mode) result(str)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -120,7 +120,7 @@ program ioprof
    call get_command_argument(2, wfk_path)
    if (my_rank == master) then
      formeig = 0
-     call wfk_open_read(wfk, wfk_path, formeig, iomode_from_fname(wfk_path), get_unit(), xmpi_comm_self)
+     call wfk%open_read(wfk_path, formeig, iomode_from_fname(wfk_path), get_unit(), xmpi_comm_self)
      call wfk%print()
      call wfk%close()
    end if

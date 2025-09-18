@@ -1,4 +1,3 @@
-from __future__ import print_function, division, absolute_import #, unicode_literals
 
 import os
 import sys
@@ -60,7 +59,7 @@ def patch(fromfile, tofile):
 
 
 def unzip(gz_fname, dest=None):
-    """decompress a gz file."""
+    """Decompress a gz file."""
     import gzip
 
     if not gz_fname.endswith(".gz"):
@@ -159,7 +158,7 @@ class RShellError(Exception):
     """Exceptions raised by RestrictedShell"""
 
 
-class RestrictedShell(object):
+class RestrictedShell:
     """
     This object executes a restricted set of shell commands.
     It's main goal is to provide a restricted access to the
@@ -203,10 +202,10 @@ class RestrictedShell(object):
         tokens = string.split()
         try:
             key, args  = tokens[0], tokens[1:]
-            pres, key = key.split("_") # Assume command in the form pre_cmd
+            pre_s, key = key.split("_") # Assume command in the form pre_cmd
             cmd   = _key2command[key][0]
             expected_nargs = _key2command[key][1]
-            #print pres, key, cmd, expected_nargs
+            #print pre_s, key, cmd, expected_nargs
             nargs = len(args)
             if nargs != expected_nargs:
                 err_msg = " Too many arguments, cmd = %s, args = %s " % (cmd, args)
@@ -218,14 +217,14 @@ class RestrictedShell(object):
             return
 
         new_args = []
-        for pref, arg in zip(pres, args):
+        for pref, arg in zip(pre_s, args):
             new_args.append(os.path.join(self.prefix2dir[pref], arg))
         #print "new_args: ",new_args
 
         try:
             if nargs == 1:
                 # Touch
-                assert pres == "w"
+                assert pre_s == "w"
                 return cmd(new_args[0])
 
             elif nargs == 2:
@@ -281,7 +280,7 @@ def stream_has_colours(stream):
         return False
 
 
-class StringColorizer(object):
+class StringColorizer:
     colours = {
         "default": "",
         "blue":  "\x1b[01;34m",
@@ -326,7 +325,7 @@ def user_wants_to_exit():
     return answer.lower().strip() in ["n", "no"]
 
 
-class Editor(object):
+class Editor:
     """Python interface to text editors."""
     def __init__(self, editor=None):
         if editor is None:
@@ -365,7 +364,7 @@ class PatcherError(Exception):
     """Base class for errors raised by patcher"""
 
 
-class Patcher(object):
+class Patcher:
     """Python interface to differt/patcher tools."""
     Error = PatcherError
 
@@ -376,7 +375,7 @@ class Patcher(object):
         "tkdiff",
     ]
 
-    # The revered unix tool for automatic patches.
+    # The unix tool for automatic patches.
     auto_patchers = ["patch"]
 
     known_patchers = interactive_patchers + auto_patchers
@@ -437,11 +436,10 @@ class Patcher(object):
                 print("Exit requested by user. Nothing is changed.")
                 return 0
 
-        for idx, (fro, to) in enumerate(zip(fromfiles, tofiles)):
+        for idx, (source, to) in enumerate(zip(fromfiles, tofiles)):
 
             if self.is_interactive:
-                #print("from %s, to %s" % (fro, to))
-                exit_status = self.patch(fro, to)
+                exit_status = self.patch(source, to)
                 if idx != (nfiles-1) and user_wants_to_exit():
                     break
 
@@ -450,10 +448,10 @@ class Patcher(object):
                 # 1) Keep a backup copy of to.
                 shutil.copy(to, to + ".orig")
                 # 2) Apply the patch
-                exit_status = self.patch(fro, to)
+                exit_status = self.patch(source, to)
 
                 if exit_status != 0:
-                    msg = "Error while trying to patch %s with %s, interrupting" % (to, fro)
+                    msg = "Error while trying to patch %s with %s, interrupting" % (to, source)
                     break
 
         return exit_status
@@ -603,7 +601,7 @@ hds++++oyyydshhoooos++++++oo+ooo++++s+/ssdmyhhhhyo///yymyhsoy/:..`      `::.
 from functools import wraps
 
 
-class lazy_property(object):
+class lazy_property:
     """
     lazy_property descriptor
 

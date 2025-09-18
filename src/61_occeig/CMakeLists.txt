@@ -6,11 +6,12 @@ add_library(61_occeig STATIC
   m_ebands.F90
   m_fstab.F90
   m_extfpmd.F90
+  m_rcpaw.F90
   )
 
 set_target_properties(61_occeig
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(61_occeig
   PRIVATE
@@ -18,7 +19,7 @@ target_include_directories(61_occeig
   ${CMAKE_SOURCE_DIR}/shared/common/src/incs
   ${CMAKE_SOURCE_DIR}/src/incs
   PUBLIC
-  ${CMAKE_CURRENT_BINARY_DIR}/modules
+  ${CMAKE_BINARY_DIR}/modules
   )
 
 target_compile_definitions(61_occeig

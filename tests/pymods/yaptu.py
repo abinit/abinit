@@ -1,27 +1,21 @@
-"Yet Another Python Templating Utility, Version 1.2. Taken from http://code.activestate.com/recipes/52305/"
-from __future__ import print_function, division, absolute_import #, unicode_literals
+"""Yet Another Python Templating Utility, Version 1.2. Taken from http://code.activestate.com/recipes/52305/"""
 
 import sys
 
 from .six import exec_
-
-#def exec_(stat, globals, locals):
-#    """Comment the last line if you are using python3."""
-#    # Py2 version
-#    exec stat in globals, locals
-#    # Py3 version
-#    #exec(stat, globals, locals)
-
 
 # utility stuff to avoid tests in the mainline code
 class _nevermatch:
     "Polymorphic with a regex that never matches"
     def match(self, line):
         return None
+
 _never = _nevermatch()     # one reusable instance of it suffices
+
 def identity(string, why):
     "A do-nothing-special-to-the-input, just-return-it function"
     return string
+
 def nohandle(string):
     "A do-nothing handler that just re-raises the exception"
     raise
@@ -121,7 +115,7 @@ One last, plain line at the end.""".split('\n')]
 
 __doc__ = """
 We may often want to copy some "template" text (normally from an input file) to an output
-file-like object, while expanding Python expressions (and possibily executing Python
+file-like object, while expanding Python expressions (and possibly executing Python
 statements, e.g. for selection or repetition) that may be "embedded" in the template text.
 
 YAPTU is a small but complete Python module for this purpose, suitable for processing most

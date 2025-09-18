@@ -55,6 +55,12 @@ MODULE m_ifc
  implicit none
 
  private
+
+ public :: defwrite_nonana_terms
+ ! Write to ncfile the phonon frequencies and displacements for q --> 0
+ ! in the presence of non-analytical behaviour.
+
+
 !!***
 
 !!****t* m_ifc/ifc_type
@@ -268,7 +274,6 @@ subroutine ifc_free(ifc)
 
 !Arguments ------------------------------------
  class(ifc_type),intent(inout) :: ifc
-
 ! ************************************************************************
 
  ABI_SFREE(ifc%amu)
@@ -402,9 +407,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  mpert = ddb%mpert
  iout = ab_out
  prtout_ = .true.
- if (present(prtout)) then
-    prtout_ = prtout
- end if
+ if (present(prtout)) prtout_ = prtout
 
  rprim = ddb%rprim; gprim = ddb%gprim
 
@@ -570,6 +573,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
    call xmpi_sum(ifc%dynmat, comm, ierr)
    ABI_FREE(dyew)
+   !if (prtout_) call wrtout(std_out, " Done")
  end if
 
  ! OmegaSRLR: Store the short-range dynmat and compute long-range as difference
@@ -804,7 +808,7 @@ subroutine ifc_from_file(ifc, dielt,filename,natom,ngqpt,nqshift,qshift,ucell_dd
  end if
 
  ABI_MALLOC(qdrp_cart,(3,3,3,natom))
- iblok = ddb%get_quadrupoles(ddb_hdr%ddb_version,1,3,qdrp_cart)
+ iblok = ddb%get_quadrupoles(ddb_hdr%ddb_version,1,BLKTYP_d3E_xx,qdrp_cart)
 
  ! ifc to be calculated for interpolation
  write(msg, '(a,a,(80a),a,a,a,a)' ) ch10,('=',i=1,80),ch10,ch10,' Calculation of the interatomic forces ',ch10
@@ -959,7 +963,6 @@ subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
 !arrays
  real(dp) :: my_qpt(3),eigvec(2,3,Crystal%natom,3*Crystal%natom),eigval(3*Crystal%natom)
  real(dp) :: d2cart(2,3,Ifc%mpert,3,Ifc%mpert),tsec(2)
-
 ! ************************************************************************
 
  ! Keep track of total time spent.
@@ -1071,7 +1074,6 @@ subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq, comm)
  real(dp) :: dddq(2,3*cryst%natom,3*cryst%natom,3),dot(2),qfd(3)
  real(dp) :: omat(2,3*cryst%natom,3*cryst%natom)
  real(dp) :: dyew(2,3*cryst%natom,3*cryst%natom)
-
 ! ************************************************************************
 
  ABI_UNUSED((/comm/))
@@ -1091,7 +1093,7 @@ subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq, comm)
 
  if (ifc%dipdip == 1.or.ifc%dipquad == 1.or.ifc%quadquad == 1) then
    ! Add the gradient of the non-analytical part.
-   ! Note that dddq is in cartesian cordinates.
+   ! Note that dddq is in cartesian coordinates.
    ! For the time being, the gradient is computed with finite difference and step hh.
    ! TODO: should generalize ewald9 to compute dq.
    !enough = enough + 1
@@ -1395,7 +1397,7 @@ end subroutine ifc_speedofsound
 !! FUNCTION
 !! Find the value of nsphere that gives non-negative frequencies around Gamma
 !! in a small sphere of radius qrad.
-!! Use bisection to reduce the number of attemps although there's no guarantee
+!! Use bisection to reduce the number of attempts although there's no guarantee
 !! that the number of negative frequencies is monotonic.
 !!
 !! INPUTS
@@ -1453,7 +1455,7 @@ subroutine ifc_autocutoff(ifc, crystal, comm)
 
  if (my_rank == master) then
    write(ab_out, "(a)")" Apply cutoff on IFCs. Using bisection algorithm to find initial guess for nsphere."
-   write(ab_out, "(a,i0)")" Maximum nuber of atom-centered spheres: ",natom * nrpt
+   write(ab_out, "(a,i0)")" Maximum number of atom-centered spheres: ",natom * nrpt
    write(ab_out, "(a,i0,a,f5.3)")" Using Lebedev-Laikov grid with npts: ",lgrid%npts, ", qrad: ",qrad
    write(ab_out, "(/,a)")" <adiff>: Average difference between ab-initio frequencies and frequencies with cutoff."
    write(ab_out, "(a)")" num_negw: Number of negative freqs detected in small sphere around Gamma."
@@ -1482,7 +1484,7 @@ subroutine ifc_autocutoff(ifc, crystal, comm)
    end do
    call xmpi_sum(cut_phfrq, comm, ierr)
 
-   ! Test wether there are negative frequencies around gamma, including reciprocal lattice vectors.
+   ! Test whether there are negative frequencies around gamma, including reciprocal lattice vectors.
    num_negw = 0; min_negw = zero
    do ii=1,lgrid%npts+3
      if (mod(ii, nprocs) /= my_rank) cycle ! mpi-parallelism
@@ -1664,7 +1666,7 @@ end subroutine corsifc9
 !! INPUTS
 !! Ifc<type(ifc_type)>=Object containing the dynamical matrix and the IFCs.
 !! ifcana= 0 => no analysis of ifc ; 1 => full analysis
-!! atifc(natom) =  atifc(ia) equals 1 if the analysis of ifc has to be done for atom ia; otherwise 0.
+!! atifcflg(natom) =  atifcflg(ia) equals 1 if the analysis of ifc has to be done for atom ia; otherwise 0.
 !! ifcout= Number of interatomic force constants written in the output file
 !! prt_ifc = flag to print out ifc information for dynamical matrix (AI2PS)
 !! ncid=the id of the open NetCDF file. Set to nctk_noid if netcdf output is not wanted.
@@ -1686,7 +1688,7 @@ end subroutine corsifc9
 !!
 !! SOURCE
 
-subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid,prefix,&
+subroutine ifc_write(Ifc,ifcana,atifcflg,ifcout,prt_ifc,ncid,prefix,&
                      unit_out) ! optional arguments
 
 !Arguments -------------------------------
@@ -1696,7 +1698,7 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid,prefix,&
  integer,optional,intent(in) :: unit_out
  character(*),intent(in) :: prefix
 !arrays
- integer,intent(in) :: atifc(Ifc%natom)
+ integer,intent(in) :: atifcflg(Ifc%natom)
 
 !Local variables -------------------------
 !scalars
@@ -1813,7 +1815,7 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid,prefix,&
 
  if (ncid /= nctk_noid) then
    ! initialize netcdf variables
-   ncerr = nctk_def_dims(ncid, [nctkdim_t("natifc", SUM(atifc)), nctkdim_t("number_of_r_points_big_box", Ifc%nrpt), &
+   ncerr = nctk_def_dims(ncid, [nctkdim_t("natifc", SUM(atifcflg)), nctkdim_t("number_of_r_points_big_box", Ifc%nrpt), &
      nctkdim_t("number_of_atoms_big_box", Ifc%natom*Ifc%nrpt), nctkdim_t("ifcout", ifcout1)], defmode=.True.)
    NCF_CHECK(ncerr)
 
@@ -1853,7 +1855,7 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid,prefix,&
 
  ! BIG loop on all generic atoms
  do ia=1,Ifc%natom
-   if(atifc(ia)==1)then
+   if(atifcflg(ia)==1)then
 
      iatifc=iatifc+1
 
@@ -1950,7 +1952,7 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid,prefix,&
          end if
        end if
      end if
-   end if ! End the condition on atifc
+   end if ! End the condition on atifcflg
  end do ! End Big loop on atoms in the unit cell, and corresponding test
 
 
@@ -2782,7 +2784,7 @@ subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, &
 
  if (present(ncid)) then
    iphl2 = 0
-   call nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, crystal%natom, phfrq, displ_cart, mode="define")
+   call defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, crystal%natom, phfrq, displ_cart, mode="define")
    ! Add epsinf, Born effective charges and some useful metadata.
    ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t('emacro_cart', "dp", 'number_of_cartesian_directions, number_of_cartesian_directions'), &
@@ -2832,7 +2834,7 @@ subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, &
 
    if(present(ncid))then
      ! Loop is not MPI-parallelized --> no need for MPI-IO API.
-     call nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, crystal%natom, phfrq, displ_cart, mode="write")
+     call defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, crystal%natom, phfrq, displ_cart, mode="write")
    endif
  end do ! iphl2
 
@@ -2872,9 +2874,9 @@ subroutine ifc_calcnwrite_nana_terms_qpath(ifc, qpath, cryst, ncid, units)
 
    call wrtout(units, sjoin("Phonon frequencies in meV along reduced direction:", ktoa(qvers_red(:,iq)), "(reciprocal space)"))
    if (iq == 1) then
-     call nctk_defwrite_nonana_terms(ncid, iq, nq_vers, qvers_cart, cryst%natom, phfreqs, displ_cart, mode="define")
+     call defwrite_nonana_terms(ncid, iq, nq_vers, qvers_cart, cryst%natom, phfreqs, displ_cart, mode="define")
    end if
-   call nctk_defwrite_nonana_terms(ncid, iq, nq_vers, qvers_cart, cryst%natom, phfreqs, displ_cart, mode="write")
+   call defwrite_nonana_terms(ncid, iq, nq_vers, qvers_cart, cryst%natom, phfreqs, displ_cart, mode="write")
 
    do nu=1,natom3
      write(msg, "(1x,i0, es16.6)") nu, phfreqs(nu) * Ha_meV
@@ -2968,7 +2970,7 @@ subroutine ifc_to_ddb(ifc, ddb, crystal)
   ABI_MALLOC(ddb%qpt,(9,nqibz))      ; ddb%qpt = zero
   ABI_MALLOC(ddb%val,(2,msize,nqibz)); ddb%val = zero
   ABI_MALLOC(ddb%typ,(nqibz))
-  
+
   do iqpt=1,nqibz
     ddb%typ(iqpt) = BLKTYP_d2E_ns
     do jj = 1,3
@@ -3031,6 +3033,73 @@ subroutine ifc_to_ddb(ifc, ddb, crystal)
   ABI_FREE(flg)
 
 end subroutine ifc_to_ddb
+!!***
+
+!!****f* m_ifc/defwrite_nonana_terms
+!! NAME
+!! defwrite_nonana_terms
+!!
+!! FUNCTION
+!!  Write to ncfile the phonon frequencies and displacements for q --> 0 in the presence of non-analytical behaviour.
+!!
+!! INPUTS
+!!  ncid=netcdf file id.
+!!  iq_dir=Index of the q-point to be written to file
+!!  ndirs=Number of qpoints.
+!!  qdirs_cart(3,ndirs)=List of phonon wavevector directions along which the non-analytical correction
+!!    to the Gamma-point phonon frequencies will be calculated. The direction is in CARTESIAN COORDINATES
+!!  natom=Number of atoms
+!!  phfrq(3*natom)=Phonon frequencies in Ha
+!!  cart_displ(2,3*natom,3*natom)=displacements in CARTESIAN coordinates.
+!!
+!! OUTPUT
+!!  Only writing.
+!!
+!! SOURCE
+
+subroutine defwrite_nonana_terms(ncid, iq_dir, ndirs, qdirs_cart, natom, phfrq, cart_displ, mode)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ncid,iq_dir,ndirs,natom
+ character(len=*),intent(in) :: mode
+!arrays
+ real(dp),intent(in) :: qdirs_cart(3, ndirs), phfrq(3*natom), cart_displ(2,3*natom,3*natom)
+
+!Local variables-------------------------------
+ integer :: ncerr, na_phmodes_varid, na_phdispl_varid
+! *************************************************************************
+
+ select case (mode)
+ case ("define")
+   !NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
+   ncerr = nctk_def_dims(ncid, [nctkdim_t("number_of_non_analytical_directions", ndirs)], defmode=.True.)
+   NCF_CHECK(ncerr)
+
+   ncerr = nctk_def_arrays(ncid, [&
+     nctkarr_t('non_analytical_directions', "dp", "number_of_cartesian_directions, number_of_non_analytical_directions"),&
+     nctkarr_t('non_analytical_phonon_modes', "dp", "number_of_phonon_modes, number_of_non_analytical_directions"),&
+     nctkarr_t('non_analytical_phdispl_cart', "dp", &
+               "two, number_of_phonon_modes, number_of_phonon_modes, number_of_non_analytical_directions")])
+   NCF_CHECK(ncerr)
+
+   NCF_CHECK(nctk_set_datamode(ncid))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "non_analytical_directions"), qdirs_cart))
+
+ case ("write")
+
+   NCF_CHECK(nf90_inq_varid(ncid, "non_analytical_phonon_modes", na_phmodes_varid))
+   NCF_CHECK(nf90_put_var(ncid,na_phmodes_varid,phfrq*Ha_eV,start=[1, iq_dir], count=[3*natom, 1]))
+   NCF_CHECK(nf90_inq_varid(ncid, "non_analytical_phdispl_cart", na_phdispl_varid))
+   ncerr = nf90_put_var(ncid,na_phdispl_varid,cart_displ*Bohr_Ang,&
+   start=[1,1,1,iq_dir], count=[2,3*natom,3*natom, 1])
+   NCF_CHECK(ncerr)
+
+ case default
+   ABI_ERROR(sjoin("Wrong value for mode", mode))
+ end select
+
+end subroutine defwrite_nonana_terms
 !!***
 
 !----------------------------------------------------------------------

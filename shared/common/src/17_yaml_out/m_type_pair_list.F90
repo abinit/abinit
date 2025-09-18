@@ -22,6 +22,7 @@
 
 module m_type_pair_list
   use, intrinsic :: iso_c_binding
+  implicit none
 ! type c_pair_list
 ! Represent a list of key-value pairs value can be either
 ! integer, double precision real or string.

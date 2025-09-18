@@ -3,8 +3,7 @@
 !!  m_psps
 !!
 !! FUNCTION
-!!  This module provides method to allocate/free/initialize the
-!!  pseudopotential_type object.
+!!  This module provides method to allocate/free/initialize the pseudopotential_type object.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2014-2025 ABINIT group (XG,DC,MG)
@@ -47,6 +46,11 @@ module m_psps
 
  ! Helper functions
  public :: test_xml_xmlpaw_upf     ! Test if a pseudo potential file is in XML, XML-PAW or in UPF format.
+
+!type, extends(pseudopotentials_base_t), public :: pseudopotentials_type
+!contains
+!end type pseudopotentials_base_type
+!!***
 
  public :: psps_init_global        ! Allocate and init all part of psps structure that are independent of a given dataset.
  public :: psps_init_from_dtset    ! Allocate and init all part of psps structure that are dependent of a given dataset.
@@ -96,7 +100,6 @@ subroutine test_xml_xmlpaw_upf(path, usexml, xmlpaw, useupf)
  integer :: temp_unit, ii
  character(len=500) :: msg,errmsg
  character(len=70) :: testxml
-
 ! *************************************************************************
 
 !  Check if the file pseudopotential file is written in XML
@@ -164,8 +167,6 @@ end subroutine test_xml_xmlpaw_upf
 !! pspheads(npsp)=<type pspheader_type>all the important information from the
 !!   pseudopotential file header, as well as the psp file name
 !!
-!! OUTPUT
-!!
 !! SIDE EFFECTS
 !! psps=<type pseudopotential_type>the pseudopotentials description
 !!
@@ -181,9 +182,7 @@ subroutine psps_init_global(psps, mtypalch, npsp, pspheads)
  type(pspheader_type),intent(in) :: pspheads(npsp)
 
 !Local variables-------------------------------
-!scalars
  integer :: ii, mpsang, n1xccc
-
 ! *************************************************************************
 
 !Allocation of some arrays independent of the dataset
@@ -195,6 +194,7 @@ subroutine psps_init_global(psps, mtypalch, npsp, pspheads)
  ABI_MALLOC(psps%title,(npsp))
  ABI_MALLOC(psps%zionpsp,(npsp))
  ABI_MALLOC(psps%znuclpsp,(npsp))
+ ABI_MALLOC(psps%epsatm,(npsp))
  call psp2params_init(psps%gth_params, npsp)
 
  psps%filpsp(1:npsp)=pspheads(1:npsp)%filpsp
@@ -265,7 +265,6 @@ subroutine psps_init_from_dtset(psps, dtset, idtset, pspheads)
  integer :: ipsp,lmnmax,lmnmaxso,lnmax,lnmaxso,newmqgrid,newmqgriddg,nptsgvec
  integer :: changed,ii,itypat
  real(dp) :: gprimd_orig(3,3)
-
 ! *************************************************************************
 
  psps%optnlxccc   = dtset%optnlxccc
@@ -492,11 +491,10 @@ end subroutine psps_init_from_dtset
 subroutine psps_free(psps)
 
 !Arguments ------------------------------------
- type(pseudopotential_type),intent(inout) :: psps
+ class(pseudopotential_type),intent(inout) :: psps
 
 !Local variables-------------------------------
  integer :: ii
-
 ! *************************************************************************
 
 !Allocation of some arrays independent of the dataset
@@ -523,6 +521,7 @@ subroutine psps_free(psps)
  ABI_SFREE(psps%znucltypat)
  ABI_SFREE(psps%znuclpsp)
  ABI_SFREE(psps%md5_pseudos)
+ ABI_SFREE(psps%epsatm)
 
  ! Free types.
  call psp2params_free(psps%gth_params)
@@ -556,7 +555,6 @@ subroutine psps_copy(pspsin, pspsout)
 
 !Local variables-------------------------------
  integer :: ii
-
 ! *************************************************************************
 
  ! integer
@@ -612,6 +610,7 @@ subroutine psps_copy(pspsin, pspsout)
 
  if (allocated(pspsin%ziontypat)) call alloc_copy(pspsin%ziontypat, pspsout%ziontypat)
  if (allocated(pspsin%znucltypat)) call alloc_copy(pspsin%znucltypat, pspsout%znucltypat)
+ if (allocated(pspsin%epsatm)) call alloc_copy(pspsin%epsatm,pspsout%epsatm)
 
  ! GA: Could make a check on mtypalch here
  if (allocated(pspsin%znuclpsp)) call alloc_copy(pspsin%znuclpsp, pspsout%znuclpsp)
@@ -684,7 +683,6 @@ subroutine psps_print(psps, unit, prtvol, mode_paral)
 !arrays
  integer :: cond_values(4)
  character(len=9) :: cond_string(4)
-
 ! *************************************************************************
 
  ! Provide defaults
@@ -879,7 +877,6 @@ subroutine psps_ncwrite_path(psps, path)
 
 !Local variables-------------------------------
  integer :: ncid
-
 ! *************************************************************************
 
  NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
@@ -908,9 +905,8 @@ end subroutine psps_ncwrite_path
 subroutine psps_ncwrite(psps, ncid)
 
 !Arguments ------------------------------------
-!scalars
+ class(pseudopotential_type),intent(in) :: psps
  integer,intent(in) :: ncid
- type(pseudopotential_type),intent(in) :: psps
 
 !Local variables-------------------------------
 !scalars
@@ -920,7 +916,6 @@ subroutine psps_ncwrite(psps, ncid)
 !arrays
  real(dp), allocatable :: dummy3(:,:,:)
  !real(dp), allocatable :: dummy1(:)
-
 ! *************************************************************************
 
  with_alch = 0  ! Alchemical IO not supported at the moment.
@@ -1118,28 +1113,21 @@ end subroutine psps_ncwrite
 !!
 !! INPUTS
 !!
-!! OUTPUT
-!!
 !! SOURCE
 
 subroutine psps_ncread(psps, ncid)
 
 !Arguments ------------------------------------
- type(pseudopotential_type),intent(inout) :: psps
+ class(pseudopotential_type),intent(inout) :: psps
  integer,intent(in) :: ncid
 
 !Local variables-------------------------------
 !scalars
- integer :: ipsp,itypat
- integer :: ncerr
- integer :: with_xccc
- integer :: with_xcctau
-
+ integer :: ipsp,itypat, ncerr, with_xccc, with_xcctau
 ! *********************************************************************
 
  ! Note: Some dimensions and variables are written conditionally,
  !       so try to read those but ignore errors
-
  call psps_free(psps)
 
  psps%dimekb         = zero
@@ -1329,7 +1317,6 @@ subroutine psp2params_init(gth_params, npsp)
 !Arguments ------------------------------------
  class(pseudopotential_gth_type),intent(out) :: gth_params
  integer,intent(in) :: npsp
-
 ! *********************************************************************
 
 !Check array, no params are currently set.
@@ -1374,7 +1361,6 @@ subroutine psp2params_copy(gth_paramsin, gth_paramsout)
 !Arguments ------------------------------------
  class(pseudopotential_gth_type),intent(in) :: gth_paramsin
  class(pseudopotential_gth_type),intent(inout) :: gth_paramsout
-
 ! *********************************************************************
 
  if (allocated(gth_paramsin%psppar)) then
@@ -1415,9 +1401,7 @@ end subroutine psp2params_copy
 subroutine psp2params_free(gth_params)
 
 !Arguments ------------------------------------
-!scalars
- type(pseudopotential_gth_type),intent(inout) :: gth_params
-
+ class(pseudopotential_gth_type),intent(inout) :: gth_params
 ! *********************************************************************
 
  ABI_SFREE(gth_params%set)
@@ -1455,7 +1439,6 @@ subroutine nctab_init(nctab, mqgrid_vl, has_tcore, has_tvale)
  class(nctab_t),intent(inout) :: nctab
  integer,intent(in) :: mqgrid_vl
  logical,intent(in) :: has_tcore, has_tvale
-
 ! *************************************************************************
 
  nctab%mqgrid_vl = mqgrid_vl
@@ -1492,7 +1475,6 @@ subroutine nctab_free(nctab)
 
 !Arguments ------------------------------------
  class(nctab_t),intent(inout) :: nctab
-
 ! *************************************************************************
 
  ABI_SFREE(nctab%tvalespl)
@@ -1521,7 +1503,6 @@ subroutine nctab_copy(nctabin, nctabout)
 !Arguments ------------------------------------
  class(nctab_t),intent(in) :: nctabin
  class(nctab_t),intent(inout) :: nctabout
-
 ! *************************************************************************
 
  nctabout%mqgrid_vl  = nctabin%mqgrid_vl
@@ -1574,7 +1555,6 @@ subroutine nctab_eval_tvalespl(nctab, zion, mesh, valr, mqgrid_vl, qgrid_vl)
 
 !Local variables-------------------------------
  real(dp) :: fact,yp1,ypn,d2nvdq0
-
 ! *************************************************************************
 
  nctab%has_tvale = .True.
@@ -1647,7 +1627,6 @@ subroutine nctab_eval_tcorespl(nctab, n1xccc, xcccrc, xccc1d, xcctau1d, mqgrid_v
 !Local variables-------------------------------
  real(dp) :: amesh,yp1,ypn
  type(pawrad_type) :: core_mesh
-
 ! *************************************************************************
 
  ABI_CHECK(mqgrid_vl == nctab%mqgrid_vl, "wrong mqgrid_vl")
@@ -1729,7 +1708,6 @@ subroutine nctab_mixalch(nctabs, npspalch, ntypalch, algalch, mixalch, mixtabs)
  logical :: has_tcore, has_tvale
  real(dp) :: mc
  type(nctab_t),pointer :: mix
-
 ! *************************************************************************
 
  ABI_CHECK(all(nctabs(:)%mqgrid_vl == nctabs(1)%mqgrid_vl), "Wrong mqgrid_vl")

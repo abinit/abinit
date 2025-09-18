@@ -1,9 +1,9 @@
-from __future__ import print_function, division, absolute_import #, unicode_literals
-
 import os
 import time
 import errno
 import subprocess
+import shutil
+
 from functools import wraps
 
 
@@ -18,11 +18,11 @@ def number_of_cpus():
     import os, re, subprocess
 
     # Python 2.6+
-    try:
-        import multiprocessing
-        return multiprocessing.cpu_count()
-    except (ImportError, NotImplementedError):
-        pass
+    #try:
+    #    import multiprocessing
+    #    return multiprocessing.cpu_count()
+    #except (ImportError, NotImplementedError):
+    #    pass
 
     # POSIX
     try:
@@ -103,11 +103,14 @@ def number_of_gpus():
     """
 
     # Look for NVIDIA GPU first, then AMD GPU...
-    nvidia_cmd=['nvidia-smi', '--query-gpu=name', '--format=csv,noheader']
-    amdgpu_cmd=['roc-smi', '--listgpu']
+    nvidia_cmd = ['nvidia-smi', '--query-gpu=name', '--format=csv,noheader']
+    amdgpu_cmd = ['roc-smi', '--listgpu']
 
     num_gpus = 0
-    for gpu_cmd in [ nvidia_cmd, amdgpu_cmd ]:
+    for gpu_cmd in [nvidia_cmd, amdgpu_cmd]:
+        if shutil.which(gpu_cmd[0]) is None:
+            continue
+
         try:
             result = subprocess.run(gpu_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
             # The text argument was introduced in Python 3.7 as an alias for universal_newlines=True.
@@ -134,7 +137,7 @@ class FileLockException(Exception):
     """Exception raised by FileLock."""
 
 
-class FileLock(object):
+class FileLock:
     """ A file locking mechanism that has context-manager support so
         you can use it in a with statement. This should be relatively cross
         compatible as it doesn't rely on msvcrt or fcntl for the locking.
@@ -185,7 +188,7 @@ class FileLock(object):
                 if e.errno != errno.EEXIST:
                     raise
                 if (time.time() - start_time) >= self.timeout:
-                    raise FileLockException("Timeout occured.")
+                    raise FileLockException("Timeout occurred.")
                 time.sleep(self.delay)
 
         self.is_locked = True
@@ -223,7 +226,7 @@ class FileLock(object):
 class NoErrorFileLock(FileLock):
     '''
     A file locker that never raise a FileLockErrorin call of __enter__ but
-    return a boolean to tell wether the lock.
+    return a boolean to tell whether the lock.
     '''
 
     def __enter__(self):
@@ -237,7 +240,7 @@ class NoErrorFileLock(FileLock):
 
 def makeunique(gen):
     '''
-    gen have to be random enought not to produce too often the same thing
+    gen have to be random enough not to produce too often the same thing
     '''
     cache = set()
 

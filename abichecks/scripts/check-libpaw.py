@@ -8,7 +8,7 @@ import string
 import glob,os
 import re
 import sys
-#reload(sys
+
 try:
     sys.setdefaultencoding('utf8')
 except AttributeError:

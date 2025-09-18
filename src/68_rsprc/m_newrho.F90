@@ -25,10 +25,12 @@ module m_newrho
  use defs_wvltypes
  use m_errors
  use m_abicore
- use m_ab7_mixing
+ use m_abi_mixing
  use m_abi2big
  use m_dtset
 
+ use m_rcpaw, only : rcpaw_type
+ use m_extfpmd, only : extfpmd_type
  use defs_datatypes, only : pseudopotential_type
  use defs_abitypes,     only : MPI_type
  use m_time,     only : timab
@@ -134,12 +136,12 @@ contains
 !! SIDE EFFECTS
 !!  dtn_pc(3,natom)=preconditioned change of atomic position,
 !!                                          in reduced coordinates
-!!  mix<type(ab7_mixing_object)>=all data defining the mixing algorithm for the density
+!!  mix<type(abi_mixing_object)>=all data defining the mixing algorithm for the density
 !!  rhor(nfft,nspden)= at input, it is the "out" trial density that gave nresid=(rho_out-rho_in)
 !!                     at output, it is an updated "mixed" trial density
 !!  rhog(2,nfft)= Fourier transform of the new trial density
 !!  ===== if usekden==1 =====
-!!  [mix_mgga<type(ab7_mixing_object)>]=all data defining the mixing algorithm
+!!  [mix_mgga<type(abi_mixing_object)>]=all data defining the mixing algorithm
 !!     for the kinetic energy density
 !!  ===== if densfor_pred==3 .and. moved_atm_inside==1 =====
 !!    ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phases
@@ -167,7 +169,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 &  moved_atm_inside,mpi_enreg,my_natom,nattyp,nfft,&
 &  nfftmix,nfftmix_per_nfft,ngfft,ngfftmix,nkxc,npawmix,npwdiel,&
 &  nresid,ntypat,n1xccc,pawrhoij,pawtab,&
-&  ph1d,psps,rhog,rhor,rprimd,susmat,usepaw,vtrial,wvl,wvl_den,xred,&
+&  ph1d,psps,rhog,rhor,rprimd,susmat,usepaw,vtrial,wvl,wvl_den,xred,rcpaw,extfpmd,&
 &  mix_mgga,taug,taur,tauresid)
 
 !Arguments-------------------------------
@@ -179,12 +181,14 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  integer,intent(inout) :: dbl_nnsclo
  real(dp),intent(in) :: etotal,gsqcut
  type(MPI_type),intent(in) :: mpi_enreg
- type(ab7_mixing_object), intent(inout) :: mix
- type(ab7_mixing_object), intent(inout),optional :: mix_mgga
+ type(abi_mixing_object), intent(inout) :: mix
+ type(abi_mixing_object), intent(inout),optional :: mix_mgga
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
  type(wvl_internal_type), intent(in) :: wvl
  type(wvl_denspot_type), intent(inout) :: wvl_den
+ type(extfpmd_type), intent(inout), pointer :: extfpmd
+ type(rcpaw_type), pointer, intent(inout) :: rcpaw
 !arrays
  integer,intent(in) :: atindx(dtset%natom)
  integer,intent(in) :: ffttomix(nfft*(nfftmix_per_nfft))
@@ -215,13 +219,15 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 !scalars
  integer,parameter :: tim_fourdp9=9
  integer :: cplex,dplex,errid,i_vresid1,i_vrespc1,iatom,ifft,indx,iq,iq0,irhoij,ispden,jfft
- integer :: jrhoij,klmn,kklmn,kmix,mpicomm,nfftot,qphase
+ integer :: jrhoij,klmn,kklmn,kmix,mpicomm,nfftot,qphase,itypat,iln,isppol
  logical :: mpi_summarize,reset
  real(dp) :: fact,ucvol,ucvol_local
  character(len=500) :: message
 !arrays
  real(dp) :: gprimd(3,3),rmet(3,3),ro(2),tsec(2),vhartr_dum(1),vpsp_dum(1)
  real(dp) :: vxc_dum(1,1)
+ real(dp) :: nelect_extfpmd_=zero
+ real(dp),target :: dum0(0)
  real(dp),allocatable :: magng(:,:,:),magntaug(:,:,:)
  real(dp),allocatable :: nresid0(:,:),nrespc(:,:),nreswk(:,:,:)
  real(dp),allocatable :: rhoijrespc(:),rhoijtmp(:,:)
@@ -230,6 +236,8 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  real(dp), pointer :: rhomag(:,:), npaw(:)
  real(dp),allocatable :: tauresid0(:,:),taurespc(:,:)
  real(dp),allocatable :: taumag(:,:)
+ real(dp), pointer :: rcpaw_arr_(:)
+ real(dp),allocatable, target :: rcpaw_arr(:)
 
 ! *************************************************************************
 
@@ -266,8 +274,8 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
      message='Several arrays are missing!'
      ABI_BUG(message)
    end if
-   if (mix_mgga%iscf==AB7_MIXING_CG_ENERGY.or.mix_mgga%iscf==AB7_MIXING_CG_ENERGY_2.or.&
-&      mix_mgga%iscf==AB7_MIXING_EIG) then
+   if (mix_mgga%iscf==ABI_MIXING_CG_ENERGY.or.mix_mgga%iscf==ABI_MIXING_CG_ENERGY_2.or.&
+&      mix_mgga%iscf==ABI_MIXING_EIG) then
      message='kinetic energy density cannot be mixed with the selected mixing algorithm!'
      ABI_ERROR(message)
    end if
@@ -447,7 +455,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 &   mgfft,moved_atm_inside,mpi_enreg,my_natom,&
 &   nattyp,nfft,nfftmix,ngfft,ngfftmix,nkxc,npawmix,npwdiel,ntypat,n1xccc,&
 &   ispmix,1,pawrhoij,pawtab,ph1d,psps,rhog,rhoijrespc,rhor,rprimd,&
-&   susmat,vhartr_dum,vpsp_dum,nresid0,nrespc,vxc_dum,wvl,wvl_den,xred)
+&   susmat,vhartr_dum,vpsp_dum,nresid0,nrespc,vxc_dum,wvl,wvl_den,xred,rcpaw,extfpmd)
  else
    call wvl_prcref(dielar,dtset%iprcel,my_natom,nfftmix,npawmix,dtset%nspden,pawrhoij,&
 &   rhoijrespc,psps%usepaw,nresid0,nrespc)
@@ -468,17 +476,29 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
    i_vrespc1=mix%i_vrespc(1)
  end if
 
+ if(associated(extfpmd)) then
+   mix%useextfpmd=1
+ endif
+ if(associated(rcpaw)) then
+   mix%use_rcpaw=1
+   mix%n_rcpawmix=0
+   do itypat=1,size(rcpaw%atm)
+     mix%n_rcpawmix=mix%n_rcpawmix+rcpaw%atm(itypat)%ln_size*rcpaw%atm(itypat)%nsppol
+   enddo
+   ABI_MALLOC(rcpaw_arr,(mix%n_rcpawmix))
+ endif
+
 !Initialise working arrays for the mixing object.
  if (moved_atm_inside == 1) then
-   call ab7_mixing_use_moving_atoms(mix, dtset%natom, xred, dtn_pc)
+   call abi_mixing_use_moving_atoms(mix, dtset%natom, xred, dtn_pc)
  end if
- call ab7_mixing_eval_allocate(mix, istep)
+ call abi_mixing_eval_allocate(mix, istep)
 
 !Copy current step arrays.
  if (moved_atm_inside == 1) then
-   call ab7_mixing_copy_current_step(mix, nresid0, errid, message, arr_respc = nrespc, arr_atm = grhf)
+   call abi_mixing_copy_current_step(mix, nresid0, errid, message, arr_respc = nrespc, arr_atm = grhf)
  else
-   call ab7_mixing_copy_current_step(mix, nresid0, errid, message, arr_respc = nrespc)
+   call abi_mixing_copy_current_step(mix, nresid0, errid, message, arr_respc = nrespc)
  end if
  if (errid /= AB7_NO_ERROR) then
    ABI_ERROR(message)
@@ -486,8 +506,8 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 
 !Same treatment for the kinetic energy density
  if (dtset%usekden==1) then
-   call ab7_mixing_eval_allocate(mix_mgga, istep)
-   call ab7_mixing_copy_current_step(mix_mgga, tauresid0, errid, message, arr_respc = taurespc)
+   call abi_mixing_eval_allocate(mix_mgga, istep)
+   call abi_mixing_copy_current_step(mix_mgga, tauresid0, errid, message, arr_respc = taurespc)
    if (errid /= AB7_NO_ERROR) then
      ABI_ERROR(message)
    end if
@@ -524,6 +544,31 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
    end do
  end if
 
+ rcpaw_arr_=>dum0
+ if(associated(rcpaw)) then
+   indx=0
+   do itypat=1,size(rcpaw%atm)
+     do isppol=1,rcpaw%atm(itypat)%nsppol
+       do iln=1,rcpaw%atm(itypat)%ln_size
+         indx=indx+1
+         mix%f_rcpaw(indx,i_vresid1)=rcpaw%atm(itypat)%occ_res(iln,isppol)
+         mix%f_rcpaw(indx,i_vrespc1)=rcpaw%atm(itypat)%occ_respc(iln,isppol)
+         rcpaw_arr(indx)=rcpaw%atm(itypat)%occ(iln,isppol)-rcpaw%atm(itypat)%occ_res(iln,isppol)
+       enddo
+     enddo
+   enddo
+   rcpaw_arr_=>rcpaw_arr
+ endif
+
+ if(associated(extfpmd)) then
+   extfpmd%nelect=extfpmd%nelect-extfpmd%nelect_res
+   mix%f_extfpmd(i_vresid1)=extfpmd%nelect_res
+   mix%f_extfpmd(i_vrespc1)=extfpmd%nelect_respc
+   nelect_extfpmd_=extfpmd%nelect
+ endif
+
+
+
 !------Prediction of the components of the density
 
 !Init mpicomm
@@ -543,11 +588,13 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  if (initialized == 0) reset = .true.
 
 !Electronic density mixing
- call ab7_mixing_eval(mix, rhomag, istep, nfftot, ucvol_local, &
+ call abi_mixing_eval(mix, rhomag, istep, nfftot, ucvol_local, &
 & mpicomm, mpi_summarize, errid, message, &
 & reset = reset, isecur = dtset%isecur,&
 & pawopt = dtset%pawoptmix, pawarr = npaw, &
 & etotal = etotal, potden = vtrial, &
+& nelect_extfpmd = nelect_extfpmd_,&
+& rcpaw_arr = rcpaw_arr_ ,&
 & comm_atom=mpi_enreg%comm_atom)
  if (errid == AB7_ERROR_MIXING_INC_NNSLOOP) then
    dbl_nnsclo = 1
@@ -556,12 +603,26 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  end if
 !Kinetic energy density mixing (if any)
  if (dtset%usekden==1) then
-   call ab7_mixing_eval(mix_mgga, taumag, istep, nfftot, ucvol_local, &
+   call abi_mixing_eval(mix_mgga, taumag, istep, nfftot, ucvol_local, &
 &   mpicomm, mpi_summarize, errid, message, reset = reset)
    if (errid /= AB7_NO_ERROR) then
      ABI_ERROR(message)
    end if
  end if
+
+ if(associated(rcpaw)) then
+   indx=0
+   do itypat=1,size(rcpaw%atm)
+     do isppol=1,rcpaw%atm(itypat)%nsppol
+       do iln=1,rcpaw%atm(itypat)%ln_size
+         indx=indx+1
+         rcpaw%atm(itypat)%occ(iln,isppol)=rcpaw_arr_(indx)
+       enddo
+     enddo
+   enddo
+   ABI_FREE(rcpaw_arr)
+ endif
+ nullify(rcpaw_arr_)
 
 !PAW: apply a simple mixing to rhoij (this is temporary)
  if(dtset%iscf==15 .or. dtset%iscf==16)then
@@ -660,8 +721,8 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  ABI_FREE(npaw)
 
 !Eventually write the data on disk and deallocate f_fftgr_disk
- call ab7_mixing_eval_deallocate(mix)
- if (dtset%usekden==1) call ab7_mixing_eval_deallocate(mix_mgga)
+ call abi_mixing_eval_deallocate(mix)
+ if (dtset%usekden==1) call abi_mixing_eval_deallocate(mix_mgga)
 
 !Fourier transform the density
  if (ispmix==1.and.nfft==nfftmix) then

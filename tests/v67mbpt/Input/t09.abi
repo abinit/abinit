@@ -19,7 +19,7 @@ optdriver3   4
 gwcalctyp3  25
 getwfk3      1
 gw_icutcoul3   0            # Spherical cutoff
-rcut3       -1.0
+gw_rcut3    -1.0
 
 # The following GW variable are meaningful only during the sigma run.
 nkptgw 1

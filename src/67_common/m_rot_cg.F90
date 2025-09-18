@@ -80,23 +80,23 @@ subroutine diag_occ(occ_nd_cpx,nband,occ_diag)
 
 !! Use the opposite to have zheev orders the eigenvalues by descending order.
 !! Afterwards, we multiply by -1 once again.
-  occ_nd_cpx(:,:) = -occ_nd_cpx(:,:)
+  occ_nd_cpx(:,:) = - occ_nd_cpx(:,:)
 
 !! Get diagonal occupations and associated base
 
 ! Compute the optimal working array size
   ABI_MALLOC(work,(1))
-  call zheev('V','U',nband,occ_nd_cpx(:,:),nband,occ_diag(:),work(:),-1,rwork(:),info)
+  call zheev('v','u',nband,occ_nd_cpx(:,:),nband,occ_diag(:),work(:),-1,rwork(:),info)
   lwork = int(work(1))
   ABI_FREE(work)
 
 ! Compute the eigenvalues (occ_diag) and vectors
   ABI_MALLOC(work,(lwork))
 
-  call zheev('V','U',nband,occ_nd_cpx(:,:),nband,occ_diag(:),work(:),lwork,rwork(:),info)
+  call zheev('v','u',nband,occ_nd_cpx(:,:),nband,occ_diag(:),work(:),lwork,rwork(:),info)
 
 !! Obtain the true eigenvalues of occupation matrix in descending order
-  occ_diag(:) = -occ_diag(:)
+  occ_diag(:) = - occ_diag(:)
 
   ABI_FREE(work)
 
@@ -135,7 +135,6 @@ end subroutine diag_occ
 !!   nspinor = number of spinor components
 !!   first_bandc = index of the first correlated band
 !!   nbandc = number of correlated bands
-!!   dmft_test = for backwards compatibility of some tests
 !!
 !! OUTPUT
 !!   occ_diag(nband) = diagonal occupations in the new band space
@@ -149,11 +148,11 @@ end subroutine diag_occ
 !! TODO add the possibility of using ScaLAPACK to do computation in parallel
 !! TODO Make the computation of the new wf parallel
 
-subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,occ_diag,dmft_test)
+subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,occ_diag,dmft_optim)
 
 !Arguments ------------------------------------
 !scalars
-  integer, intent(in) :: blocksize,dmft_test,first_bandc,nband,nbandc,npw,nspinor
+  integer, intent(in) :: blocksize,dmft_optim,first_bandc,nband,nbandc,npw,nspinor
 !! type(MPI_type),intent(inout) :: mpi_enreg
 !! type(dataset_type),intent(in) :: dtset
 !! type(paw_dmft_type), intent(in)  :: band_in
@@ -203,7 +202,8 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
 !! Compute the corresponding wave functions if nothing wrong happened
   ! $c^{rot}_{n,k}(g) =  \sum_{n'} [\bar{f_{n',n}} * c_{n',k}(g)]$
 
-  if (dmft_test == 1) occ_nd_cpx(:,:) = conjg(occ_nd_cpx(:,:))
+  ! Correct a bug in the formula when using TRIQS
+  if (dmft_optim == 1) occ_nd_cpx(:,:) = conjg(occ_nd_cpx(:,:))
 
   do ispinor=1,nspinor
     mat_tmp(:,:) = cmplx(cwavef(1,1:npw,first_bandc:first_bandc+nbandc-1,ispinor), &

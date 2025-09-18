@@ -73,7 +73,7 @@ tolwfr3 1.0d-20
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi
+#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi, atlas_gnu_14.2_triqs
 #%% test_chain =  teph4mob_1.abi, teph4mob_2.abi, teph4mob_3.abi, teph4mob_4.abi, teph4mob_5.abi, teph4mob_6.abi, teph4mob_7.abi
 #%% [files]
 #%% files_to_test =

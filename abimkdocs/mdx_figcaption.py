@@ -8,8 +8,7 @@ A simple example:
 
     ![](http://lorempixel.com/350/150/)
     :   Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-        Praesent at consequat magna, faucibus ornare eros. Nam et
-        mattis urna. Cras sodales, massa id gravida
+        Praesent at consequat magna, faucibus ornare eros.
 
 Outputs:
 
@@ -17,8 +16,8 @@ Outputs:
         <img alt="" src="http://lorempixel.com/350/150/" />
         <figcaption>
             <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            Praesent at consequat magna, faucibus ornare eros. Nam et
-            mattis urna. Cras sodales, massa id gravida</p>
+            Praesent at consequat magna, faucibus ornare eros.
+            </p>
         </figcaption>
     </figure>
 

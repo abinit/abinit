@@ -54,6 +54,7 @@ module m_dft_energy
  use m_paw_dmft,         only : paw_dmft_type
  use m_paw_nhat,         only : pawmknhat
  use m_paw_occupancies,  only : pawaccrhoij
+ use m_rcpaw,            only : rcpaw_type
  use m_fft,              only : fftpac, fourdp
  use m_spacepar,         only : meanvalue_g, hartre
  use m_dens,             only : constrained_dft_t,mag_penalty
@@ -96,7 +97,7 @@ contains
 !!  energies%e_eigenvalues, ek and enl from arbitrary (orthonormal) provided wf,
 !!  ehart, enxc, and eei from provided density and potential,
 !!  energies%e_eigenvalues=Sum of the eigenvalues - Band energy (Hartree)
-!!  energies%e_zeeman=Zeeman spin energy from applied magnetic field -m.B
+!!  energies%e_hspinfield=Spin magnetic energy from applied magnetic field -m.B
 !!  ek=kinetic energy, ehart=Hartree electron-electron energy,
 !!  enxc,enxcdc=exchange-correlation energies, eei=local pseudopotential energy,
 !!  enl=nonlocal pseudopotential energy
@@ -222,7 +223,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 & nhatgr,nhatgrdim,npwarr,n3xccc,occ,optene,paw_dmft,paw_ij,pawang,pawfgr,&
 & pawfgrtab,pawrhoij,pawtab,phnons,ph1d,psps,resid,rhog,rhor,rprimd,strsxc,symrec,&
 & taug,taur,usexcnhat,vhartr,vtrial,vpsp,vxc,wfs,wvl,wvl_den,wvl_e,xccc3d,xred,ylm,&
-& add_tfw,vxctau,xcctau3d) ! optional argument
+& add_tfw,vxctau,xcctau3d,rcpaw) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
@@ -244,6 +245,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  type(wvl_wf_type),intent(inout) :: wfs
  type(wvl_denspot_type), intent(inout) :: wvl_den
  type(wvl_energy_terms),intent(inout) ::wvl_e
+ type(rcpaw_type),pointer,intent(in),optional :: rcpaw
 !arrays
 !nfft**(1-1/nsym) is 1 if nsym==1, and nfft otherwise
  integer, intent(in) :: indsym(4,dtset%nsym,dtset%natom)
@@ -286,7 +288,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 !arrays
  integer,allocatable :: kg_k(:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),kpg_dum(0,0),kpoint(3),nonlop_out(1,1)
- real(dp) :: qpt(3),rhodum(1),rmet(3,3),tsec(2),ylmgr_dum(1,1,1),vzeeman(4)
+ real(dp) :: qpt(3),rhodum(1),rmet(3,3),tsec(2),ylmgr_dum(1,1,1),vhspinfield(4)
  real(dp) :: magvec(dtset%nspden)
  real(dp),target :: vxctau_dum(0,0,0)
  real(dp),allocatable :: buffer(:)
@@ -419,38 +421,38 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
    end do
  end if
 
-!Add the vzeeman pot in the trial pot
-!Vzeeman might have to be allocated correctly --> to be checked
- if (any(abs(dtset%zeemanfield(:))>tol8)) then
-   vzeeman(:) = zero
+!Add the vhspinfield pot in the trial pot
+!Vhspinfield might have to be allocated correctly --> to be checked
+ if (any(abs(dtset%hspinfield(:))>tol8)) then
+   vhspinfield(:) = zero
    if(dtset%nspden==2)then
 !TODO: check this against rhotov and setvtr, where the potential is -1/2 and +1/2 for the 2 spin components.
 ! see comment by SPr in rhotov
 ! TODO: check this 1/2 factor is for the electron spin magnetic moment.
-     vzeeman(1) = -half*dtset%zeemanfield(3) ! For collinear ispden=1 potential is v_upup
-     vzeeman(2) = +half*dtset%zeemanfield(3) ! For collinear ispden=2 potential is v_dndn
+     vhspinfield(1) = -half*dtset%hspinfield(3) ! For collinear ispden=1 potential is v_upup
+     vhspinfield(2) = +half*dtset%hspinfield(3) ! For collinear ispden=2 potential is v_dndn
    end if
    if(dtset%nspden==4)then
-     vzeeman(1)=-half*dtset%zeemanfield(3)
-     vzeeman(2)= half*dtset%zeemanfield(3)
-     vzeeman(3)=-half*dtset%zeemanfield(1)
-     vzeeman(4)= half*dtset%zeemanfield(2)
+     vhspinfield(1)=-half*dtset%hspinfield(3)
+     vhspinfield(2)= half*dtset%hspinfield(3)
+     vhspinfield(3)=-half*dtset%hspinfield(1)
+     vhspinfield(4)= half*dtset%hspinfield(2)
    end if
    magvec = zero
    do ispden=1,dtset%nspden
      do ifft=1,nfftf
 !TODO: the full cell magnetization will need extra PAW terms, and is certainly calculated elsewhere.
-!The calculation of the zeeman energy can be moved there
+!The calculation of the spin magnetic energy can be moved there
        magvec(ispden) = magvec(ispden) + rhor(ifft,ispden)
-       vtrial(ifft,ispden)=vtrial(ifft,ispden)+vzeeman(ispden)
+       vtrial(ifft,ispden)=vtrial(ifft,ispden)+vhspinfield(ispden)
      end do
    end do
    if(dtset%nspden==2)then
-     energies%e_zeeman = -half*dtset%zeemanfield(3)*(two*magvec(2)-magvec(1)) !  diff rho = rhoup-rhodown = 2 rhoup - rho
+     energies%e_hspinfield = -half*dtset%hspinfield(3)*(two*magvec(2)-magvec(1)) !  diff rho = rhoup-rhodown = 2 rhoup - rho
    else if(dtset%nspden==4)then
-     energies%e_zeeman = -half * (dtset%zeemanfield(1)*magvec(2)& ! x
-&                                +dtset%zeemanfield(2)*magvec(3)& ! y
-&                                +dtset%zeemanfield(3)*magvec(4)) ! z
+     energies%e_hspinfield = -half * (dtset%hspinfield(1)*magvec(2)& ! x
+&                                +dtset%hspinfield(2)*magvec(3)& ! y
+&                                +dtset%hspinfield(3)*magvec(4)) ! z
    end if
  end if
 
@@ -461,7 +463,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  if (dtset%magconon==1.or.dtset%magconon==2) then
    ABI_MALLOC(v_constr_dft_r, (nfftf,dtset%nspden))
    v_constr_dft_r = zero
-   call mag_penalty(constrained_dft,mpi_enreg,rhor,v_constr_dft_r,xred)
+   call mag_penalty(constrained_dft,mpi_enreg,rhor,v_constr_dft_r,xred,dtset%qgbt,dtset%use_gbt)
 !   call mag_penalty(dtset%natom, dtset%spinat, dtset%nspden, dtset%magconon, dtset%magcon_lambda, rprimd, &
 !&   mpi_enreg, nfftf, dtset%ngfft, dtset%ntypat, dtset%ratsph, rhor, &
 !&   dtset%typat, v_constr_dft_r, xred)
@@ -606,7 +608,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
        my_bandfft_kpt => bandfft_kpt(my_ikpt)
      else
        my_ikpt=ikpt
-       nblockbd=nband_k/mpi_enreg%bandpp
+       nblockbd=nband_k
        !if (nband_k/=nblockbd*mpi_enreg%nproc_fft) nblockbd=nblockbd+1
      end if
      blocksize=nband_k/nblockbd
@@ -843,6 +845,16 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
    if(optene==0.or.optene==2) etotal=etotal+energies%e_extfpmd
    if(optene==1.or.optene==3) etotal=etotal+energies%edc_extfpmd
  end if
+
+ ! Add the contribution from cores
+ if(present(rcpaw)) then
+   if(associated(rcpaw)) then
+     energies%e_cpaw=rcpaw%ehnzc+rcpaw%ekinc
+     energies%e_cpawdc=rcpaw%eeigc-rcpaw%edcc+rcpaw%ehnzc
+     if(optene==0.or.optene==2) etotal=etotal+energies%e_cpaw
+     if(optene==1.or.optene==3) etotal=etotal+energies%e_cpawdc
+   endif
+ endif
 
  call entropy(dtset,energies)
  etotal=etotal+energies%e_entropy
@@ -1104,9 +1116,8 @@ end subroutine mkresi
 !!  common case, at finite temperature, the electronic entropy is mainly constitued
 !!  of the non-interacting entropy (entropy_ks). Finite-temperature exchange-correlation
 !!  functionals or other methods may introduce additional entropy terms.
-!! 
+!!
 !! NOTE
-!!  (A. Blanchet): Should DMFT entropy be also added here?
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables for this dataset
@@ -1116,8 +1127,9 @@ end subroutine mkresi
 !!  energies <type(energies_type)>=all part of total energy.
 !!   | entropy_ks(IN)=non-interacting entropy of the kohn-sham states
 !!   | entropy_paw(IN)=entropy due to paw corrections (for finite-temperature xc functionals)
-!!   | entropy_xc(IN)=exchange-correlation entropy (fro finite-temperature xc functionals)
+!!   | entropy_xc(IN)=exchange-correlation entropy (for finite-temperature xc functionals)
 !!   | entropy_extfpmd(IN)=entropy of extfpmd model
+!!   | entropy_imp(IN)=entropy of impurity electrons (for DFT+DMFT)
 !!
 !! OUTPUT
 !!  energies <type(energies_type)>=all part of total energy.
@@ -1140,6 +1152,7 @@ subroutine entropy(dtset,energies)
  if(abs(energies%entropy_paw)>tiny(zero))     energies%entropy=energies%entropy+energies%entropy_paw
  if(abs(energies%entropy_xc)>tiny(zero))      energies%entropy=energies%entropy+energies%entropy_xc
  if(abs(energies%entropy_extfpmd)>tiny(zero)) energies%entropy=energies%entropy+energies%entropy_extfpmd
+ if(abs(energies%entropy_imp)>tiny(zero))     energies%entropy=energies%entropy+energies%entropy_imp
 
 !When the finite-temperature VG broadening scheme is used,
 !the total entropy contribution "tsmear*entropy" has a meaning,

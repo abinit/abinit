@@ -48,6 +48,9 @@ subroutine xmpi_alltoallv_dp2d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,co
  logical :: l_use_omp_map
  integer :: sc,sds,sdr,sz1
  integer :: i
+#ifdef HAVE_OPENMP_OFFLOAD
+ integer :: j
+#endif
 
 ! *********************************************************************
 
@@ -63,7 +66,7 @@ subroutine xmpi_alltoallv_dp2d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,co
 #ifdef HAVE_OPENMP_OFFLOAD
 #ifdef HAVE_GPU_MPI
      ! Proper GPU-aware call
-     !$OMP TARGET DATA USE_DEVICE_PTR(xval,recvbuf)
+     !$OMP TARGET DATA USE_DEVICE_ADDR(xval,recvbuf)
      call MPI_ALLTOALLV(xval,sendcnts,sdispls,MPI_DOUBLE_PRECISION,recvbuf,&
 &     recvcnts,rdispls,MPI_DOUBLE_PRECISION,comm,ier)
      !$OMP END TARGET DATA
@@ -88,9 +91,11 @@ subroutine xmpi_alltoallv_dp2d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,co
      end do
    else
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET PARALLEL DO MAP(to:xval,recvbuf) PRIVATE(i)
+     !$OMP TARGET PARALLEL DO COLLAPSE(2) MAP(to:xval,recvbuf) PRIVATE(i,j)
      do i=1,sc
-       recvbuf(:,sdr+i)=xval(:,sds+i)
+       do j=1,sz1
+         recvbuf(j,sdr+i)=xval(j,sds+i)
+       end do
      end do
 #endif
    end if

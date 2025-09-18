@@ -248,7 +248,7 @@ subroutine xmpi_isend_dp3d(xval,dest,tag,comm,request,ierr,use_omp_map)
 #ifdef HAVE_OPENMP_OFFLOAD
 #ifdef HAVE_GPU_MPI
        ! Proper GPU-aware call
-       !$OMP TARGET DATA USE_DEVICE_PTR(xval)
+       !$OMP TARGET DATA USE_DEVICE_ADDR(xval)
        call MPI_ISEND(xval,n1*n2*n3,MPI_DOUBLE_PRECISION,dest,my_tag,comm,request,ier)
        !$OMP END TARGET DATA
 #else
@@ -265,7 +265,7 @@ subroutine xmpi_isend_dp3d(xval,dest,tag,comm,request,ierr,use_omp_map)
 #ifdef HAVE_OPENMP_OFFLOAD
 #ifdef HAVE_GPU_MPI
        ! Proper GPU-aware call
-       !$OMP TARGET DATA USE_DEVICE_PTR(xval)
+       !$OMP TARGET DATA USE_DEVICE_ADDR(xval)
        call MPI_ISEND(xval,1,my_dt,dest,my_tag,comm,request,ier)
        !$OMP END TARGET DATA
 #else

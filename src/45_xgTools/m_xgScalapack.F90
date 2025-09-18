@@ -22,16 +22,13 @@ module m_xgScalapack
 
   use defs_basis, only : std_err, std_out, dp, ABI_GPU_DISABLED, ABI_GPU_OPENMP
   use m_abicore
+  USE_MPI
   use m_xmpi
   use m_errors
   use m_slk
   use m_xg
   use m_xomp
   use m_time,     only: timab
-
-#ifdef HAVE_MPI2
- use mpi
-#endif
 
   implicit none
 
@@ -67,7 +64,7 @@ module m_xgScalapack
     integer :: coords(2)
     integer :: ngroup
     integer :: verbosity
-    type(grid_scalapack) :: grid
+    type(slk_grid_t) :: grid
   end type xgScalapack_t
 
   public :: xgScalapack_init
@@ -208,12 +205,12 @@ module m_xgScalapack
 
     if ( xgScalapack%comms(M__SLK) /= xmpi_comm_null ) then
       call xgScalapack%grid%init(xgScalapack%size(M__SLK), xgScalapack%comms(M__SLK), gpu_option)
-      call BLACS_GridInfo(xgScalapack%grid%ictxt, &
+      call BLACS_GridInfo(xgScalapack%grid%comm, &
         xgScalapack%grid%dims(M__ROW), xgScalapack%grid%dims(M__COL),&
         xgScalapack%coords(M__ROW), xgScalapack%coords(M__COL))
 
      !These values are the same as those computed by BLACS_GRIDINFO
-     !except in the case where the myproc argument is not the local proc
+     !except in the case where the my_rank argument is not the local proc
       test_row = INT((xgScalapack%rank(M__SLK)) / xgScalapack%grid%dims(2))
       test_col = MOD((xgScalapack%rank(M__SLK)), xgScalapack%grid%dims(2))
       if ( test_row /= xgScalapack%coords(M__ROW) ) then
@@ -258,9 +255,9 @@ module m_xgScalapack
   function toProcessorScalapack(xgScalapack) result(processor)
 
     type(xgScalapack_t), intent(in) :: xgScalapack
-    type(processor_scalapack) :: processor
+    type(slk_processor_t) :: processor
 
-    processor%myproc = xgScalapack%rank(M__SLK)
+    processor%my_rank = xgScalapack%rank(M__SLK)
     processor%comm = xgScalapack%comms(M__SLK)
     processor%coords = xgScalapack%coords
     processor%grid = xgScalapack%grid
@@ -531,7 +528,7 @@ module m_xgScalapack
     call timab(M__tim_free,1,tsec)
 #ifdef HAVE_LINALG_SCALAPACK
     if ( xgScalapack%comms(M__SLK) /= xmpi_comm_null ) then
-      call BLACS_GridExit(xgScalapack%grid%ictxt)
+      call BLACS_GridExit(xgScalapack%grid%comm)
       call MPI_Comm_free(xgScalapack%comms(M__SLK),ierr)
     end if
     if ( xgScalapack%comms(M__UNUSED) /= xmpi_comm_null ) then

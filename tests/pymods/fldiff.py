@@ -39,7 +39,6 @@ The tolerance option set the tolerance for comparison of floats, the default
 is 1.01e-10.  This modifications do not apply to the tolerance determined by
 the '%',and '.' first-column special signs.
 """
-from __future__ import print_function, division, unicode_literals
 
 import re
 from math import floor
@@ -55,7 +54,6 @@ if has_yaml:
 # Match floats. Minimal float is .0 for historical reasons.
 # As a consequence, integers will be compared as strings
 float_re = re.compile(r'([+-]?[0-9]*\.[0-9]+(?:[eEdDfF][+-]?[0-9]+)?)')
-
 
 def norm_spaces(s):
     r"""Normalize all blanks ( \\n\\r\\t)."""
@@ -91,7 +89,7 @@ def relative_truncate(f, n):
         return floor(f * fact) / fact
 
 
-class NotDriverConf(object):
+class NotDriverConf:
     def __init__(self, has_yaml):
         self.has_yaml = has_yaml
 
@@ -102,7 +100,7 @@ class NotDriverConf(object):
             return ('# YAML support is not available, YAML based tests will be ignored.',)
 
 
-class LineDifference(object):
+class LineDifference:
     """Base class representing a difference."""
 
     def __init__(self, p1, p2, l1, l2):
@@ -176,10 +174,10 @@ class TextDifference(LineDifference):
 
 
 class ForcedDifference(LineDifference):
-    """A difference that is arbitrarly declared."""
+    """A difference that is arbitrarily declared."""
 
 
-class Result(object):
+class Result:
     """Analyse and summarize the set of differences found by a diff."""
 
     def __init__(self, fl_diff, yaml_diff, extra_info=[], label=None, verbose=False):
@@ -364,7 +362,7 @@ class Result(object):
                    for diff in self.fl_diff)
 
 
-class Differ(object):
+class Differ:
 
     def __init__(self, yaml_test=None, **options):
         """

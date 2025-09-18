@@ -160,7 +160,7 @@ bdgw
 #%% max_nprocs = 16
 #%% [extra_info]
 #%% authors = M. Giantomassi
-#%% keywords = NC, GW
+#%% keywords = NC, GW, AC
 #%% description =
 #%%   GW calculation in Si: Hilbert transform method for the irreducible polarizability (gaussian approximant)
 #%%   and analytic continuation of sigma from imaginary- to real-axis. The spectral function is also

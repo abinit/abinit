@@ -5,6 +5,8 @@
 ndtset 3
 jdtset 2 3 4
 
+cprj_in_memory 0
+
 npband 4
 
 wfoptalg1   0
@@ -69,13 +71,13 @@ pseudos="P.psp8, Al.psp8"
 #%% need_cpp_vars = HAVE_FFTW3
 #%% [files]
 #%% files_to_test =
-#%%   t47.abo, tolnlines=  0, tolabs=  0, tolrel= 0, fld_options = -ridiculous
+#%%   t47.abo, tolnlines=  0, tolabs=  0, tolrel= 0
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
 #%% [NCPU_4]
 #%% files_to_test =
-#%%   t47_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -ridiculous
+#%%   t47_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [extra_info]
 #%% authors = L. Baguet
 #%% keywords = NC

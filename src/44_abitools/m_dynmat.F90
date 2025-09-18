@@ -5100,6 +5100,11 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
  ! Keep track of time spent in dfpt_phfrq
  !call timab(1751, 1, tsec)
 
+ ! GA: I find it strange that both msym and nsym are needed here.
+ !     Moreover, there is an inconsistency in the dimensions of indsym
+ !     when it is passed to symdyma.
+ !     TODO: eliminate msym.
+
  ! Prepare the diagonalisation: analytical part.
  ! Note: displ is used as work space here
  i1=0
@@ -5493,7 +5498,6 @@ subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
 !arrays
  real(dp) :: vecti(3),vectr(3)
  character(len=1) :: metacharacter(3*natom)
-
 ! *********************************************************************
 
 !Check the value of eivec

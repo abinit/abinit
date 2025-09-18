@@ -163,12 +163,14 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,&
-&                  nphi,nsym,ntheta,pawang,pawrad,pawspnorb,pawtab,pawxcdev,ixc,usepotzero)
+&                  nphi,nsym,ntheta,pawang,pawrad,pawspnorb,pawtab,pawxcdev,ixc,usepotzero,&
+&                  rcpaw_update)
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: gnt_option,ixc,lcutdens,lmix,mpsang,nphi,nsym,ntheta
  integer,intent(in) :: pawspnorb,pawxcdev,usepotzero
+ logical,intent(in),optional :: rcpaw_update
  real(dp),intent(in) :: effmass_free,gsqcut_eff,hyb_range_fock
  type(pawang_type),intent(inout) :: pawang
 !arrays
@@ -182,7 +184,8 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
  integer :: itypat,j0lm,j0lmn,j0ln,jl,jlm,jlmn,jln,klm,klm1
  integer :: klmn,klmn1,kln,kln1,l_size,ll,lm0,lmax,lmax1,lmin,lmin1,lmn2_size
  integer :: lmn_size,lmnmix,mesh_size,meshsz,mm,nabgnt_option,ngrad2_ylm,ntypat,pw_mesh_size
- integer :: usexcnhat,use_angular_grid,use_ls_ylm,use_ylm,usekden
+ integer :: usexcnhat,use_angular_grid,use_ls_ylm,use_ylm,usekden,k1min
+ logical :: rcpaw_update_
  real(dp) :: dq,gnrm,intg,ql,ql1,rg,rg1,vh1,yp1,ypn
  character(len=500) :: message
 !arrays
@@ -192,6 +195,7 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
  real(dp),allocatable :: der(:),ff(:),gg(:),hh(:),indklmn_(:,:),intvhatl(:)
  real(dp),allocatable :: rad(:),rgl(:,:),vhatijl(:,:),vhatl(:),work(:)
  real(dp),pointer :: eijkl(:,:)
+ real(dp), allocatable :: old_phiphj(:,:),old_tphitphj(:,:),old_qijl(:,:),old_vhatijl(:,:)
 
 !************************************************************************
 
@@ -204,28 +208,32 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
    ABI_BUG('pawrad and pawtab should have the same size!')
  end if
 
-!Immediately set the value of usepotzero
-!it will be used later on in this subroutine
- pawtab%usepotzero=usepotzero
+ rcpaw_update_=.false.
+ if(present(rcpaw_update)) rcpaw_update_=rcpaw_update
 
  usexcnhat=maxval(pawtab(1:ntypat)%usexcnhat)
+ if(.not.rcpaw_update_) then
+  !Immediately set the value of usepotzero
+  !it will be used later on in this subroutine
+   pawtab%usepotzero=usepotzero
 
-!==================================================
-!1- INITIALIZE DATA RELATED TO ANGULAR MESH
-!* ANGULAR GRID
-!* REAL SPHERICAL HARMONICS
-!* REAL GAUNT COEFFICIENTS
+  !==================================================
+  !1- INITIALIZE DATA RELATED TO ANGULAR MESH
+  !* ANGULAR GRID
+  !* REAL SPHERICAL HARMONICS
+  !* REAL GAUNT COEFFICIENTS
 
- usekden=pawxc_get_usekden(ixc)
- nabgnt_option=0;if (usekden>0) nabgnt_option=1 ! If kin. ene. density is used, need nabla Gaunt coeffs
- use_angular_grid=0;if (pawxcdev==0) use_angular_grid=1
- use_ylm=0;if (pawxcdev==0) use_ylm=1
- use_ls_ylm=0;if (pawspnorb>0) use_ls_ylm=1
- ngrad2_ylm=0;if (pawxc_get_xclevel(ixc)>=2) ngrad2_ylm=1
- if (pawxc_get_uselaplacian(ixc)>0) ngrad2_ylm=2
- call pawang_free(pawang)
- call pawang_init(pawang,gnt_option,nabgnt_option,mpsang-1,nphi,ntheta,nsym,ngrad2_ylm,&
-&                 use_angular_grid,use_ylm,use_ls_ylm)
+   usekden=pawxc_get_usekden(ixc)
+   nabgnt_option=0;if (usekden>0) nabgnt_option=1 ! If kin. ene. density is used, need nabla Gaunt coeffs
+   use_angular_grid=0;if (pawxcdev==0) use_angular_grid=1
+   use_ylm=0;if (pawxcdev==0) use_ylm=1
+   use_ls_ylm=0;if (pawspnorb>0) use_ls_ylm=1
+   ngrad2_ylm=0;if (pawxc_get_xclevel(ixc)>=2) ngrad2_ylm=1
+   if (pawxc_get_uselaplacian(ixc)>0) ngrad2_ylm=2
+   call pawang_free(pawang)
+   call pawang_init(pawang,gnt_option,nabgnt_option,mpsang-1,nphi,ntheta,nsym,ngrad2_ylm,&
+  &                 use_angular_grid,use_ylm,use_ls_ylm)
+ endif
 
 !*******************
 !Loop on atom types
@@ -254,6 +262,18 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
 &     '        or use usexcnhat keyword in input file.'
      ABI_ERROR(message)
    end if
+
+   if(rcpaw_update_) then
+     ABI_MALLOC(old_phiphj,(mesh_size,ij_size))
+     ABI_MALLOC(old_tphitphj,(mesh_size,ij_size))
+     ABI_MALLOC(old_qijl,(l_size**2,lmn2_size))
+     ABI_MALLOC(old_vhatijl,(lmn2_size,l_size))
+     old_phiphj=zero
+     old_tphitphj=zero
+     old_qijl=zero
+     old_vhatijl=zero
+     goto 3
+   endif
 
 !  ==================================================
 !  2- TABULATE SHAPE FUNCTION
@@ -351,7 +371,7 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
    end if
    ABI_MALLOC(pawtab(itypat)%indklmn,(8,lmn2_size))
 
-   klm_diag=0
+3  klm_diag=0
    do jlmn=1,lmn_size
      jl= indlmn(1,jlmn);jlm=indlmn(4,jlmn);jln=indlmn(5,jlmn)
      j0lmn=jlmn*(jlmn-1)/2
@@ -382,6 +402,8 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
        if (ilm==jlm) klm_diag(klmn)=1
      end do
    end do
+
+   if(rcpaw_update_) goto 5
 
 !  ==================================================
 !  4- COMPUTE various FACTORS/SIZES (depending on (l,m,n))
@@ -432,16 +454,22 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
    end if
    ABI_MALLOC(pawtab(itypat)%phiphj,(mesh_size,ij_size))
    ABI_MALLOC(pawtab(itypat)%tphitphj,(mesh_size,ij_size))
-   do jln=1,basis_size
+5  do jln=1,basis_size
      j0ln=jln*(jln-1)/2
      do iln=1,jln
        kln=j0ln+iln
+       if(rcpaw_update_) then
+         old_phiphj(1:mesh_size,kln)=pawtab(itypat)%phiphj(1:mesh_size,kln)
+         old_tphitphj(1:mesh_size,kln)=pawtab(itypat)%tphitphj(1:mesh_size,kln)
+       endif
        pawtab(itypat)%phiphj(1:mesh_size,kln)=pawtab(itypat)%phi(1:mesh_size,iln)&
 &                                            *pawtab(itypat)%phi(1:mesh_size,jln)
        pawtab(itypat)%tphitphj(1:mesh_size,kln)=pawtab(itypat)%tphi(1:mesh_size,iln)&
 &                                              *pawtab(itypat)%tphi(1:mesh_size,jln)
      end do
    end do
+
+   if(rcpaw_update_) goto 6
 
    if (usekden==1)  then
      pw_mesh_size=pawtab(itypat)%partialwave_mesh_size
@@ -471,26 +499,6 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
 !  ==================================================
 !  6- COMPUTE Qijl TERMS AND Sij MATRIX
 
-!  Store some usefull quantities
-   if (allocated(pawtab(itypat)%phiphj))  then
-     ABI_FREE(pawtab(itypat)%phiphj)
-   end if
-   if (allocated(pawtab(itypat)%tphitphj))  then
-     ABI_FREE(pawtab(itypat)%tphitphj)
-   end if
-   ABI_MALLOC(pawtab(itypat)%phiphj,(mesh_size,ij_size))
-   ABI_MALLOC(pawtab(itypat)%tphitphj,(mesh_size,ij_size))
-   do jln=1,basis_size
-     j0ln=jln*(jln-1)/2
-     do iln=1,jln
-       kln=j0ln+iln
-       pawtab(itypat)%phiphj  (1:mesh_size,kln)=pawtab(itypat)%phi (1:mesh_size,iln)&
-&       *pawtab(itypat)%phi (1:mesh_size,jln)
-       pawtab(itypat)%tphitphj(1:mesh_size,kln)=pawtab(itypat)%tphi(1:mesh_size,iln)&
-&       *pawtab(itypat)%tphi(1:mesh_size,jln)
-     end do
-   end do
-
 !  Compute q_ijL and S_ij=q_ij0
    if (allocated(pawtab(itypat)%qijl))  then
      ABI_FREE(pawtab(itypat)%qijl)
@@ -502,7 +510,7 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
    ABI_MALLOC(pawtab(itypat)%sij,(lmn2_size))
    pawtab(itypat)%qijl=zero
    pawtab(itypat)%sij=zero
-   do klmn=1,lmn2_size
+6  do klmn=1,lmn2_size
      klm=indklmn_(1,klmn);kln=indklmn_(2,klmn)
      lmin=indklmn_(3,klmn);lmax=indklmn_(4,klmn)
      do ll=lmin,lmax,2
@@ -513,6 +521,7 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
        call simp_gen(intg,ff,pawrad(itypat))
        do mm=-ll,ll
          isel=pawang%gntselect(lm0+mm,klm)
+         if (isel>0.and.rcpaw_update_) old_qijl(lm0+mm,klmn)=pawtab(itypat)%qijl(lm0+mm,klmn)
          if (isel>0) pawtab(itypat)%qijl(lm0+mm,klmn)=intg*pawang%realgnt(isel)
        end do
      end do
@@ -520,8 +529,10 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
 &     pawtab(itypat)%qijl(1,klmn)*sqrt(four_pi)
    end do
 
+   if(rcpaw_update_) goto 7
+
 !  ==================================================
-!  6- COMPUTE Eijkl TERMS (Hartree)
+!  7- COMPUTE Eijkl TERMS (Hartree)
 !     Compute eventually short-range screened version of Eijkl (Fock)
 
    if (allocated(pawtab(itypat)%eijkl))  then
@@ -537,7 +548,7 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
 
 !  First loop is for eijkl (Hartree)
 !  2nd loop is for eijkl_sr (short-range screened Fock exchange)
-   do iloop=1,2
+7  do iloop=1,2
      if (iloop==2.and.abs(hyb_range_fock)<=tol8) cycle
      if (iloop==1) eijkl => pawtab(itypat)%eijkl
      if (iloop==2) eijkl => pawtab(itypat)%eijkl_sr
@@ -563,6 +574,10 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
          kln=indklmn_(2,klmn)
          hh(1:mesh_size)=vhatl(1:mesh_size)*pawtab(itypat)%tphitphj(1:mesh_size,kln)
          call simp_gen(vhatijl(klmn,il),hh,pawrad(itypat))
+         if(rcpaw_update_) then
+           hh(1:mesh_size)=vhatl(1:mesh_size)*old_tphitphj(1:mesh_size,kln)
+           call simp_gen(old_vhatijl(klmn,il),hh,pawrad(itypat))
+         endif
        end do
      end do
      ABI_FREE(vhatl)
@@ -591,15 +606,23 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
          ff(1:meshsz)=pawtab(itypat)%tphitphj(1:meshsz,kln)
          if (iloop==1) call poisson(ff,ll,pawrad(itypat),hh)
          if (iloop==2) call poisson(ff,ll,pawrad(itypat),hh,screened_sr_separation=hyb_range_fock)
-         do klmn1=klmn,lmn2_size
+         k1min=klmn
+         if(rcpaw_update_) k1min=1
+         do klmn1=k1min,lmn2_size
            klm1=indklmn_(1,klmn1);kln1=indklmn_(2,klmn1)
            lmin1=indklmn_(3,klmn1);lmax1=indklmn_(4,klmn1)
            vh1=zero
            if ((ll.ge.lmin1).and.(ll.le.lmax1)) then
              ff(1)=zero
-             ff(2:meshsz)=(pawtab(itypat)%phiphj  (2:meshsz,kln1)*gg(2:meshsz)&
-&             -pawtab(itypat)%tphitphj(2:meshsz,kln1)*hh(2:meshsz))&
+             if(.not.rcpaw_update_) then
+               ff(2:meshsz)=(pawtab(itypat)%phiphj  (2:meshsz,kln1)*gg(2:meshsz)&
+&               -pawtab(itypat)%tphitphj(2:meshsz,kln1)*hh(2:meshsz))&
+&               *two/rad(2:meshsz)
+             else
+               ff(2:meshsz)=(old_phiphj(2:meshsz,kln1)*gg(2:meshsz)&
+&             -old_tphitphj(2:meshsz,kln1)*hh(2:meshsz))&
 &             *two/rad(2:meshsz)
+             endif
              call simp_gen(vh1,ff,pawrad(itypat))
            end if
            do mm=-ll,ll
@@ -609,13 +632,23 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
                rg =pawang%realgnt(isel)
                rg1=pawang%realgnt(isel1)
                ql =pawtab(itypat)%qijl(lm0+mm,klmn)
-               ql1=pawtab(itypat)%qijl(lm0+mm,klmn1)
-               eijkl(klmn,klmn1)=eijkl(klmn,klmn1)&
-&               +(   vh1                *rg *rg1&      ! vh1_ijkl
-&              -    vhatijl(klmn ,ll+1)*rg *ql1&     ! Vhat_ijkl
-&              -    vhatijl(klmn1,ll+1)*rg1*ql &     ! B_ijkl
-&              -    intvhatl(ll+1)     *ql *ql1&     ! C_ijkl
-&              )*two_pi
+               if(.not.rcpaw_update_) then
+                 ql1=pawtab(itypat)%qijl(lm0+mm,klmn1)
+                 eijkl(klmn,klmn1)=eijkl(klmn,klmn1)&
+&                 +(   vh1                *rg *rg1&      ! vh1_ijkl
+&                 -    vhatijl(klmn ,ll+1)*rg *ql1&     ! Vhat_ijkl
+&                 -    vhatijl(klmn1,ll+1)*rg1*ql &     ! B_ijkl
+&                 -    intvhatl(ll+1)     *ql *ql1&     ! C_ijkl
+&                 )*two_pi
+               else
+                 ql1=old_qijl(lm0+mm,klmn1)
+                 eijkl(klmn,klmn1)=eijkl(klmn,klmn1)&
+&                 +(   vh1                *rg *rg1&      ! vh1_ijkl
+&                 -    vhatijl(klmn ,ll+1)*rg *ql1&     ! Vhat_ijkl
+&                 -    old_vhatijl(klmn1,ll+1)*rg1*ql &     ! B_ijkl
+&                 -    intvhatl(ll+1)     *ql *ql1&     ! C_ijkl
+&                 )*two_pi
+               endif
              end if
            end do
          end do
@@ -625,8 +658,10 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
      ABI_FREE(intvhatl)
    end do ! iloop
 
+   if(rcpaw_update_) goto 10
+
 !  ==================================================
-!  7- COMPUTE gamma_ij TERMS
+!  8- COMPUTE gamma_ij TERMS
 !  Corrections to get the background right
 
    if (pawtab(itypat)%usepotzero==1) then
@@ -659,7 +694,7 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
    end if
 
 !  ==================================================
-!  8- TAKE into account a modified effective mass for the electrons
+!  9- TAKE into account a modified effective mass for the electrons
 
    if (abs(effmass_free-one)>tol8) then
      if (pawtab(itypat)%has_kij/=2) then
@@ -678,12 +713,18 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
 !  ***********************
 !  End Loop on atom types
 !  ***********************
-   ABI_FREE(ff)
+10 ABI_FREE(ff)
    ABI_FREE(gg)
    ABI_FREE(hh)
    ABI_FREE(indklmn_)
    ABI_FREE(klm_diag)
    ABI_FREE(rad)
+   if(rcpaw_update_) then
+     ABI_FREE(old_phiphj)
+     ABI_FREE(old_tphitphj)
+     ABI_FREE(old_qijl)
+     ABI_FREE(old_vhatijl)
+   endif
  end do
 
  call timab(553,2,tsec)

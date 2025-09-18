@@ -29,7 +29,7 @@ module m_rttddft_propagators
                                    & bandfft_kpt_set_ikpt,          &
                                    & prep_bandfft_tabs
  use m_dtset,                  only: dataset_type
- use m_energies,               only: energies_type, energies_init, energies_copy
+ use m_energies,               only: energies_type
  use m_errors,                 only: msg_hndl
  use m_gemm_nonlop_projectors, only: set_gemm_nonlop_ikpt
  use m_hamiltonian,            only: gs_hamiltonian_type, gspot_transgrid_and_pack
@@ -88,8 +88,6 @@ contains
 !!
 !! SOURCE
 subroutine rttddft_propagator_er(dtset, istep, mpi_enreg, psps, tdks, calc_properties)
-
- implicit none
 
  !Arguments ------------------------------------
  !scalars
@@ -165,7 +163,7 @@ subroutine rttddft_propagator_er(dtset, istep, mpi_enreg, psps, tdks, calc_prope
       !compute energy contributions
       lproperties(1) = .true.
       !Init to zero different energies
-      call energies_init(energies)
+      call energies%init()
       energies%entropy_ks=tdks%energies%entropy_ks
       energies%e_corepsp=tdks%energies%e_corepsp
       energies%e_ewald=tdks%energies%e_ewald
@@ -414,7 +412,7 @@ subroutine rttddft_propagator_er(dtset, istep, mpi_enreg, psps, tdks, calc_prope
  if (lcalc_properties) then
    call xmpi_sum(energies%e_kinetic,mpi_enreg%comm_kptband,ierr)
    call xmpi_sum(energies%e_nlpsp_vfock,mpi_enreg%comm_kptband,ierr)
-   call energies_copy(energies,tdks%energies)
+   call energies%copy(tdks%energies)
    if (lproperties(3)) call xmpi_sum(tdks%eigen,mpi_enreg%comm_kptband,ierr)
    if (lproperties(4)) call xmpi_sum(tdks%occ,mpi_enreg%comm_kpt,ierr)
  end if
@@ -447,8 +445,6 @@ end subroutine rttddft_propagator_er
 !!
 !! SOURCE
 subroutine rttddft_propagator_emr(dtset, istep, mpi_enreg, psps, tdks)
-
- implicit none
 
  !Arguments ------------------------------------
  !scalars

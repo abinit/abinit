@@ -25,12 +25,8 @@ MODULE m_errors
  use m_profiling_abi
  use m_xmpi
  use m_specialmsg, only : wrtout
-#ifdef HAVE_NETCDF
+ USE_MPI
  use netcdf
-#endif
-#ifdef HAVE_MPI2
- use mpi
-#endif
 #ifdef FC_NAG
  use f90_unix_proc
 #endif
@@ -138,7 +134,6 @@ function assert_eq2(l1,l2,message,file,line)
 !Local variables-------------------------------
  integer :: f90line=0
  character(len=500) :: f90name='Subroutine Unknown'
-
 ! *************************************************************************
 
  if (l1==l2) then
@@ -283,7 +278,7 @@ end function assert_eqn
 !!
 !! INPUTS
 !!  l1,l2,.. logical values to be checked (array version is also provided)
-!!  message(len=*)=tag with additiona information
+!!  message(len=*)=tag with additional information.
 !!
 !! SOURCE
 
@@ -490,10 +485,8 @@ subroutine netcdf_check(ncerr, msg, file, line)
  character(len=500) :: f90name
  character(len=1024) :: nc_msg
  character(len=2048) :: my_msg
-
 ! *************************************************************************
 
-#ifdef HAVE_NETCDF
  if (ncerr /= NF90_NOERR) then
 
    f90line = 0; if (present(line)) f90line = line
@@ -505,7 +498,6 @@ subroutine netcdf_check(ncerr, msg, file, line)
 
    call msg_hndl(my_msg, "ERROR", "PERS", f90name, f90line)
  end if
-#endif
 
 end subroutine netcdf_check
 !!***
@@ -552,7 +544,6 @@ subroutine sentinel(level,mode_paral,file,func,line)
  character(len=10) :: lnum
  character(len=500) :: my_func, my_file
  character(len=500) :: msg
-
 ! *********************************************************************
 
  ! initialize the variable
@@ -625,7 +616,6 @@ subroutine die(message,file,line)
  character(len=10) :: lnum,strank
  character(len=500) :: f90name='Subroutine Unknown'
  character(len=500) :: msg
-
 ! *********************************************************************
 
  if (PRESENT(line)) f90line=line
@@ -690,8 +680,8 @@ subroutine msg_hndl(message, level, mode_paral, file, line, NODUMP, NOSTOP, unit
  character(len=500) :: f90name
  character(len=LEN(message)) :: my_msg
  character(len=MAX(4*LEN(message),2000)) :: sbuf ! Increase size and keep fingers crossed!
-
 ! *********************************************************************
+
  unit_ = std_out; if (present(unit)) unit_ = unit
 
  if (PRESENT(line)) then
@@ -750,7 +740,7 @@ subroutine msg_hndl(message, level, mode_paral, file, line, NODUMP, NOSTOP, unit
      "mpi_rank: ",xmpi_comm_rank(xmpi_world),ch10,&
      "message: |",ch10,TRIM(indent(my_msg)),ch10,&
      "...",ch10
-   call wrtout(unit_, sbuf, mode_paral)
+   call wrtout(unit_, sbuf, mode_paral=mode_paral, do_flush=.True.)
 
    ! Write error message to ab_out as well, provided this proc is connected to ab_out
    if (is_open(ab_out)) then
@@ -1221,7 +1211,6 @@ subroutine bigdft_lib_error(file,line)
 
 !Local variables-------------------------------
  character(len=500) :: message
-
 ! *********************************************************************
 
   write(message,'(4a)') ch10,&
@@ -1311,7 +1300,6 @@ subroutine abinit_doctor(prefix, print_mem_report)
  character(len=fnlen) :: path
  character(len=5000) :: errmsg
 #endif
-
 ! *************************************************************************
 
  do_mem_report = 1; if (present(print_mem_report)) do_mem_report = print_mem_report
@@ -1415,6 +1403,15 @@ subroutine abinit_doctor(prefix, print_mem_report)
 #endif
  end if
 
+ ! Check for MPI windows.
+ if (xmpi_count_wins /= 0) then
+   write(msg, "(a,i0,a)")"Leaking ", xmpi_count_wins, " MPI windows at the end of the run"
+   ABI_WARNING(msg)
+#ifdef HAVE_MEM_PROFILING
+   ABI_ERROR(msg)
+#endif
+ end if
+
 end subroutine abinit_doctor
 !!***
 
@@ -1458,7 +1455,6 @@ subroutine abi_abort(mode_paral,exit_status,print_config)
 
 !Local variables-------------------------------
  logical :: print_config_
-
 ! **********************************************************************
 
  call wrtout(std_out, ch10//' abinit_abort: decision taken to exit. Check above messages for more info', 'PERS')

@@ -1,5 +1,3 @@
-from __future__ import print_function, division, absolute_import #, unicode_literals
-
 import time
 import os
 import errno
@@ -11,7 +9,7 @@ class TimeoutError(Exception):
     """Exceptions raised by SubProcessWithTimeout."""
 
 
-class SubProcessWithTimeout(object):
+class SubProcessWithTimeout:
     """
     Based on from http://stackoverflow.com/questions/3876886/timeout-a-subprocess?rq=1
     """

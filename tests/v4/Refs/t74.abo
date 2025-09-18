@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ANADDB, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h10 )
-  
+
 
 ================================================================================
 
@@ -51,13 +51,13 @@
  Polarization in cartesian coordinates (a.u.):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.125283105E-03   0.125283105E-03   0.125283105E-03
-     Ionic:                        -0.266168099E-01  -0.266168099E-01  -0.266168099E-01  
+     Ionic:                        -0.266168099E-01  -0.266168099E-01  -0.266168099E-01
      Total:                        -0.264915268E-01  -0.264915268E-01  -0.264915268E-01
 
  Polarization in cartesian coordinates (C/m^2):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.716804297E-02   0.716804296E-02   0.716804296E-02
-     Ionic:                        -0.152287443E+01  -0.152287443E+01  -0.152287443E+01  
+     Ionic:                        -0.152287443E+01  -0.152287443E+01  -0.152287443E+01
      Total:                        -0.151570639E+01  -0.151570639E+01  -0.151570639E+01
 -
 - Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
@@ -66,4 +66,4 @@
 
 +Total cpu time      0.023  and wall time      0.023 sec
 
- anaddb : the run completed succesfully.
+ anaddb : the run completed successfully.

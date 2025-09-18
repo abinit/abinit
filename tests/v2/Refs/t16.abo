@@ -1,5 +1,5 @@
 
-.Version 10.1.4.5 of ANADDB, released Sep 2024.
+.Version 10.1.4.3 of ANADDB, released Jul 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h08 )
+.Starting date : Tue 19 Aug 2025.
+- ( at 23h57 )
   
 
 ================================================================================
@@ -29,8 +29,8 @@
          asr         1
  Interatomic Force Constants Inputs :
       dipdip         0
-      dipqua         1
-      quadqu         1
+     dipquad         0
+    quadquad         0
       ifcana         1
       ifcout        20
       natifc         1
@@ -118,7 +118,6 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.033  and twall      0.051 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :      256
  greater than 80, so only write 20 of them
@@ -1055,11 +1054,11 @@ iatom,iwchan,igqpt2(i),gij error=   3  1     4     4     4   0.00000
  the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
-  3.0 -1.0 -1.0 -1.0 -0.0  0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0  1.0  1.0 -1.0 -1.0
+  3.0 -1.0 -1.0 -1.0 -0.0  0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0  1.0 -1.0 -1.0
  -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
  Symmetry characters of vibration mode #   4
        degenerate with vibration modes #   5 to    6
-  3.0 -1.0 -1.0 -1.0 -0.0  0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0  1.0  1.0 -1.0 -1.0
+  3.0 -1.0 -1.0 -1.0  0.0 -0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0  1.0 -1.0 -1.0
  -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
@@ -1086,10 +1085,10 @@ iatom,iwchan,igqpt2(i),gij error=   3  1     4     4     4   0.00000
 -  1.086272E+02  1.086272E+02  3.723269E+02  4.121226E+02  4.911576E+02
 -  4.911576E+02
 -
-- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.3
+- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.2
 
 ================================================================================
 
-+Total cpu time      0.161  and wall time      0.258 sec
++Total cpu time      0.160  and wall time      0.160 sec
 
- anaddb : the run completed succesfully.
+ anaddb : the run completed successfully.

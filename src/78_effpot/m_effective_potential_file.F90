@@ -179,7 +179,6 @@ module m_effective_potential_file
    subroutine effpot_xml_getValue(filename,name_value,value_result) &
  &                          bind(C,name="effpot_xml_getValue")
       use, intrinsic :: iso_c_binding, only : C_CHAR
-      implicit none
       character(kind=C_CHAR) :: filename(*),name_value(*)
       character(kind=C_CHAR) :: value_result
     end subroutine effpot_xml_getValue
@@ -2515,10 +2514,8 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
     call asria_calc(inp%asr,d2asr,ddb%val(:,:,iblok),ddb%mpert,ddb%natom)
   end if
 
-  ! Acoustic Sum Rule
-  ! In case the interatomic forces are not calculated, the
-  ! ASR-correction (asrq0%d2asr) has to be determined here from the Dynamical matrix at Gamma.
-  asrq0 = ddb%get_asrq0(inp%asr, inp%rfmeth, crystal%xcart)
+  ! Acoustic sum rule imposition (not yet applied)
+  call asrq0%init(ddb, inp%asr, inp%rfmeth, crystal%xcart)
 
 !**********************************************************************
 ! Interatomic Forces Calculation

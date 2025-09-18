@@ -1,8 +1,8 @@
 
 .Version 10.1.4.1 of ANADDB, released Nov 2024.
-.(sequential version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(sequential version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Sun 16 Feb 2025.
 - ( at 22h51 )
-  
+
 
 ================================================================================
 
@@ -36,8 +36,8 @@
        frmax         1.00000000E+01
  Interatomic Force Constants Inputs :
       dipdip         1
-      dipqua         1
-      quadqu         1
+     dipquad         0
+    quadquad         0
       ifcana         1
       ifcout        16
       natifc         2
@@ -107,11 +107,11 @@
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -127,7 +127,7 @@
        3               2        0.000000        0.000000
        3               3        0.035845        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -162,7 +162,7 @@
 
 ================================================================================
 
- Calculation of the interatomic forces 
+ Calculation of the interatomic forces
 
 -begin at tcpu      0.036  and twall      0.036 sec
        Homogeneous q point set in the B.Z.
@@ -178,26 +178,26 @@
 
  The interatomic forces have been obtained
 
- Analysis of interatomic force constants 
+ Analysis of interatomic force constants
 
  Are given : column(1-3), the total force constant
        then  column(4-6), the Ewald part
        then  column(7-9), the short-range part
  Column 1, 4 and 7 are related to the displacement
-       of the generic atom along x,               
+       of the generic atom along x,
  column 2, 5 and 8 are related to the displacement
-       of the generic atom along y,               
+       of the generic atom along y,
  column 3, 6 and 9 are related to the displacement
-       of the generic atom along z.               
+       of the generic atom along z.
 
-  NOTE: Open file _ifcinfo.dat, for the output of interatomic force constants. This is because prt_ifc==1. 
+  NOTE: Open file _ifcinfo.dat, for the output of interatomic force constants. This is because prt_ifc==1.
 
-  NOTE: Open file _forceconstants.dat, for the output of interatomic force constants in TDEP format. This is because prt_ifc==1. 
+  NOTE: Open file _forceconstants.dat, for the output of interatomic force constants in TDEP format. This is because prt_ifc==1.
 
  generic atom number   1
  with cartesian coordinates  4.19798664E+00 -1.81969603E-09  1.67621667E+00
 
- Third atom defining local coordinates : 
+ Third atom defining local coordinates :
      ib =    8   irpt =   18
 
    1 interaction with atom     1 cell      18
@@ -209,7 +209,7 @@
  Traces (and ratios) :
   1.46238                  -0.45869                   1.92107
   1.00000                  -0.31366                   1.31366
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.000000       -0.898020       -0.439954
  Second local vector :       -1.000000        0.000000       -0.000000
  Third  local vector :        0.000000        0.439954       -0.898020
@@ -230,7 +230,7 @@
  Traces (and ratios) :
  -0.33160                   0.13232                  -0.46393
   1.00000                  -0.39904                   1.39904
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.578163        0.732714        0.358968
  Second local vector :        0.312081        0.605089       -0.732443
  Third  local vector :       -0.753879       -0.311444       -0.578506
@@ -251,7 +251,7 @@
  Traces (and ratios) :
  -0.33160                   0.13232                  -0.46392
   1.00000                  -0.39904                   1.39904
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.578163       -0.732714       -0.358968
  Second local vector :        0.312713       -0.605350        0.731958
  Third  local vector :       -0.753617        0.310936        0.579120
@@ -272,7 +272,7 @@
  Traces (and ratios) :
  -0.32345                   0.11257                  -0.43601
   1.00000                  -0.34802                   1.34802
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.577670       -0.332509        0.745476
  Second local vector :       -0.060506        0.893316        0.445337
  Third  local vector :       -0.814025       -0.302363        0.495923
@@ -293,7 +293,7 @@
  Traces (and ratios) :
  -0.32357                   0.11257                  -0.43614
   1.00000                  -0.34788                   1.34788
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.577670        0.332509       -0.745476
  Second local vector :       -0.074707       -0.887902       -0.453927
  Third  local vector :       -0.812844        0.317912       -0.488074
@@ -314,7 +314,7 @@
  Traces (and ratios) :
  -0.05397                  -0.00389                  -0.05008
   1.00000                   0.07209                   0.92791
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.492908       -0.639643        0.589829
  Second local vector :       -0.345643       -0.766066       -0.541917
  Third  local vector :        0.798481        0.063245       -0.598688
@@ -335,7 +335,7 @@
  Traces (and ratios) :
  -0.05397                  -0.00389                  -0.05008
   1.00000                   0.07209                   0.92791
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.307493        0.746692        0.589829
  Second local vector :        0.800318       -0.132358        0.584785
  Third  local vector :        0.514723        0.651868       -0.556892
@@ -356,7 +356,7 @@
  Traces (and ratios) :
  -0.05397                  -0.00389                  -0.05008
   1.00000                   0.07209                   0.92791
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.492908        0.639643       -0.589829
  Second local vector :       -0.345643        0.766066        0.541917
  Third  local vector :        0.798481       -0.063245        0.598689
@@ -377,7 +377,7 @@
  Traces (and ratios) :
  -0.05397                  -0.00389                  -0.05008
   1.00000                   0.07209                   0.92791
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.307493       -0.746692       -0.589829
  Second local vector :        0.800321        0.132354       -0.584781
  Third  local vector :        0.514718       -0.651869        0.556896
@@ -398,7 +398,7 @@
  Traces (and ratios) :
   0.00094                   0.00449                  -0.00355
   1.00000                   4.78085                  -3.78085
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.436768       -0.883444        0.169589
  Second local vector :        0.375067        0.350193        0.858306
  Third  local vector :       -0.817654       -0.311273        0.484304
@@ -419,7 +419,7 @@
  Traces (and ratios) :
   0.00094                   0.00449                  -0.00354
   1.00000                   4.77002                  -3.77002
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.436768        0.883444       -0.169589
  Second local vector :        0.375086       -0.350201       -0.858295
  Third  local vector :       -0.817645        0.311265       -0.484324
@@ -440,7 +440,7 @@
  Traces (and ratios) :
  -0.00711                  -0.00607                  -0.00104
   1.00000                   0.85397                   0.14603
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.537703       -0.495941        0.681849
  Second local vector :        0.456057       -0.851269       -0.259524
  Third  local vector :        0.709146        0.171415        0.683907
@@ -461,7 +461,7 @@
  Traces (and ratios) :
  -0.00711                  -0.00607                  -0.00104
   1.00000                   0.85361                   0.14639
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.537703        0.495941       -0.681849
  Second local vector :        0.453583        0.851862        0.261906
  Third  local vector :        0.710731       -0.168448       -0.682998
@@ -482,7 +482,7 @@
  Traces (and ratios) :
  -0.00520                  -0.00305                  -0.00214
   1.00000                   0.58716                   0.41284
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.160962        0.713934        0.681461
  Second local vector :       -0.946497        0.307339       -0.098421
  Third  local vector :       -0.279706       -0.629159        0.725206
@@ -503,7 +503,7 @@
  Traces (and ratios) :
  -0.00520                  -0.00305                  -0.00215
   1.00000                   0.58687                   0.41313
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.160962       -0.713934       -0.681461
  Second local vector :       -0.946414       -0.307525        0.098634
  Third  local vector :       -0.279985        0.629068       -0.725177
@@ -524,7 +524,7 @@
  Traces (and ratios) :
   0.01027                   0.00401                   0.00626
   1.00000                   0.39035                   0.60965
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.475318        0.438401        0.762809
  Second local vector :       -0.154161        0.812098       -0.562789
  Third  local vector :       -0.866203       -0.385098       -0.318421
@@ -539,7 +539,7 @@
  generic atom number   4
  with cartesian coordinates  2.44762187E+00  2.21826306E+00  2.76297908E+00
 
- Third atom defining local coordinates : 
+ Third atom defining local coordinates :
      ib =    3   irpt =   29
 
    1 interaction with atom     4 cell      18
@@ -551,7 +551,7 @@
  Traces (and ratios) :
   0.77247                  -0.18669                   0.95917
   1.00000                  -0.24168                   1.24168
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.307493        0.746692        0.589829
  Second local vector :        0.828219       -0.095178        0.552263
  Third  local vector :        0.468509        0.658325       -0.589158
@@ -572,7 +572,7 @@
  Traces (and ratios) :
  -0.33160                   0.13232                  -0.46393
   1.00000                  -0.39904                   1.39904
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.578163       -0.732714       -0.358968
  Second local vector :       -0.804111       -0.586271       -0.098442
  Third  local vector :       -0.138323        0.345566       -0.928144
@@ -593,7 +593,7 @@
  Traces (and ratios) :
  -0.32357                   0.11257                  -0.43614
   1.00000                  -0.34788                   1.34788
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.000874        0.666532        0.745476
  Second local vector :       -0.997602        0.052169       -0.045475
  Third  local vector :       -0.069201       -0.743649        0.664979
@@ -614,7 +614,7 @@
  Traces (and ratios) :
  -0.02471                  -0.01372                  -0.01099
   1.00000                   0.55515                   0.44485
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.714069       -0.657612        0.240107
  Second local vector :        0.378150        0.650948        0.658233
  Third  local vector :       -0.589159       -0.379227        0.713497
@@ -635,7 +635,7 @@
  Traces (and ratios) :
  -0.02471                  -0.01372                  -0.01099
   1.00000                   0.55519                   0.44481
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.212474        0.947208        0.240107
  Second local vector :        0.974698        0.187983        0.120942
  Third  local vector :        0.069421        0.259728       -0.963183
@@ -656,7 +656,7 @@
  Traces (and ratios) :
  -0.03065                  -0.02975                  -0.00090
   1.00000                   0.97062                   0.02938
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.000000       -0.898020       -0.439954
  Second local vector :        0.401659       -0.402906        0.822397
  Third  local vector :       -0.915789       -0.176711        0.360698
@@ -677,7 +677,7 @@
  Traces (and ratios) :
  -0.02472                  -0.01646                  -0.00826
   1.00000                   0.66589                   0.33411
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.352777        0.203676        0.913271
  Second local vector :        0.711308       -0.575757        0.403168
  Third  local vector :        0.607938        0.791846        0.058238
@@ -698,7 +698,7 @@
  Traces (and ratios) :
  -0.01686                  -0.00541                  -0.01146
   1.00000                   0.32062                   0.67938
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.559898        0.486595        0.670626
  Second local vector :        0.782871       -0.575747       -0.235858
  Third  local vector :        0.271344        0.657070       -0.703301
@@ -719,7 +719,7 @@
  Traces (and ratios) :
  -0.01686                  -0.00541                  -0.01146
   1.00000                   0.32062                   0.67938
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.701353       -0.241589       -0.670626
  Second local vector :        0.690589        0.463394        0.555296
  Third  local vector :        0.176611       -0.852585        0.491841
@@ -740,7 +740,7 @@
  Traces (and ratios) :
   0.00030                   0.00499                  -0.00469
   1.00000                  16.37713                 -15.37713
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.297479        0.171750       -0.939153
  Second local vector :        0.767700        0.627823       -0.128356
  Third  local vector :        0.567577       -0.759171       -0.318616
@@ -761,7 +761,7 @@
  Traces (and ratios) :
   0.00429                   0.00750                  -0.00321
   1.00000                   1.74698                  -0.74698
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.745135        0.563944       -0.356007
  Second local vector :       -0.090877       -0.614693       -0.783514
  Third  local vector :       -0.660692       -0.551471        0.509279
@@ -782,7 +782,7 @@
  Traces (and ratios) :
   0.00429                   0.00750                  -0.00321
   1.00000                   1.74740                  -0.74740
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.745135        0.563944       -0.356007
  Second local vector :        0.030635        0.504306        0.862982
  Third  local vector :        0.666209       -0.653944        0.358500
@@ -803,7 +803,7 @@
  Traces (and ratios) :
   0.00094                   0.00449                  -0.00355
   1.00000                   4.78085                  -3.78085
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.436768        0.883444       -0.169589
  Second local vector :       -0.053451        0.162701        0.985226
  Third  local vector :        0.897985        0.439380       -0.023842
@@ -824,7 +824,7 @@
  Traces (and ratios) :
  -0.00711                  -0.00607                  -0.00104
   1.00000                   0.85397                   0.14603
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.698349        0.217694       -0.681849
  Second local vector :       -0.710263       -0.092954        0.697772
  Third  local vector :        0.088520        0.971581        0.219534
@@ -845,7 +845,7 @@
  Traces (and ratios) :
  -0.00520                  -0.00305                  -0.00214
   1.00000                   0.58716                   0.41284
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.698766        0.217570       -0.681461
  Second local vector :       -0.071929       -0.926428       -0.369536
  Third  local vector :       -0.711725        0.307236       -0.631707
@@ -866,7 +866,7 @@
  Traces (and ratios) :
   0.00269                   0.00638                  -0.00368
   1.00000                   2.36923                  -1.36923
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.851945       -0.491871        0.179591
  Second local vector :        0.431891       -0.466138        0.772130
  Third  local vector :       -0.296074        0.735376        0.609559
@@ -880,8 +880,8 @@
 
 ================================================================================
 
- Calculation of phonon density of states, 
-    thermodynamical properties, 
+ Calculation of phonon density of states,
+    thermodynamical properties,
     and Debye-Waller factors.
 
        Homogeneous q point set in the B.Z.
@@ -1033,7 +1033,7 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
 
 ================================================================================
 
- Treat the first list of vectors 
+ Treat the first list of vectors
 
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
@@ -1346,9 +1346,9 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
 
 ================================================================================
 
-  
- Mode effective charges 
- Mode number.    x            y            z            length 
+
+ Mode effective charges
+ Mode number.    x            y            z            length
 ;     1          0.000000    -0.000000     0.003021     0.003021
 -     2          0.001314    -0.000137     0.000000     0.001321
 -     3          0.000137     0.001314    -0.000000     0.001321
@@ -1376,7 +1376,7 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
 ;    25         -0.000000     0.000000    -0.081497     0.081497
 -    26          0.918227     0.038588    -0.000000     0.919038
 -    27          0.038588    -0.918227     0.000000     0.919038
-  
+
  Oscillator strengths (in a.u. ; 1 a.u.=253.2638413 m3/s2). Set to zero if abs()<tol14.
  Mode number.       xx          yy          zz          xy          xz          yz          trace
 ;   1     Real    0.0000E+00  0.0000E+00  2.5015E-10  0.0000E+00  0.0000E+00  0.0000E+00  2.5015E-10
@@ -1452,11 +1452,11 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
       4.76702665     -0.00000000      0.00000000
      -0.00000000      4.76702665     -0.00000000
      -0.00000000      0.00000000      4.98722521
- 
+
 
 ================================================================================
 
- Treat the second list of vectors 
+ Treat the second list of vectors
 
 
   Phonon at Gamma, with non-analyticity in the
@@ -1486,4 +1486,4 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
 
 +Total cpu time      5.889  and wall time      5.890 sec
 
- anaddb : the run completed succesfully.
+ anaddb : the run completed successfully.

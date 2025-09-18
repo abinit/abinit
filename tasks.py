@@ -14,7 +14,11 @@ import os
 import sys
 import webbrowser
 import subprocess
+import platform
 
+from glob import glob
+from pathlib import Path
+from shutil import which
 from contextlib import contextmanager
 try:
     from invoke import task
@@ -57,7 +61,7 @@ ALL_BINARIES = [
     "lruj",
 ]
 
-import platform
+
 SYSTEM = platform.system()
 
 
@@ -209,10 +213,11 @@ def runemall(ctx, make=True, jobs="auto", touch=False, clean=False, keywords=Non
 
 
 @task
-def makemake(ctx):
+def makemake(ctx, without_chmod=True):
     """Invoke makemake"""
     with cd(ABINIT_ROOTDIR):
-        ctx.run("./config/scripts/makemake", pty=True)
+        opt = "--without-chmod" if without_chmod else ""
+        ctx.run(f"./config/scripts/makemake {opt}", pty=True)
 
 
 @task
@@ -357,7 +362,7 @@ def vimt(ctx, tagname):
 
 @task
 def env(ctx):
-    """Print sh code to set $PATH and $ABI_PSPDIR in order to work with build directory."""
+    """Print bash commands to set $PATH and $ABI_PSPDIR in order to work with build directory."""
     cprint("\nExecute the following lines in the shell to set the env:\n", color="green")
     top = find_top_build_tree(".", with_abinit=True)
     binpath = os.path.join(top, "src", "98_main")
@@ -400,6 +405,9 @@ def diff3(ctx, filename="run.abo"):
 def add_trunk(ctx):
     """Register trunk as remote."""
     cmd = "git remote add trunk git@gitlab.abinit.org:trunk/abinit.git"
+    print("Executing:", cmd)
+    ctx.run(cmd, pty=True)
+    cmd = f"git fetch trunk"
     print("Executing:", cmd)
     ctx.run(cmd, pty=True)
 
@@ -515,6 +523,7 @@ def pyenv_clean(ctx):
     cmd = f"pip cache purge"
     cprint("About to execute {cmd=}")
     ctx.run(cmd)
+
 
 @task
 def abinit(ctx, input_name, run_make=False):
@@ -681,38 +690,6 @@ def watchdog(ctx, jobs="auto", sleep_time=5):
         observer.join()
 
 
-def which(cmd):
-    """
-    Returns full path to a executable.
-
-    Args:
-        cmd (str): Executable command to search for.
-
-    Returns:
-        (str) Full path to command. None if it is not found.
-
-    Example::
-
-        full_path_to_python = which("python")
-
-    Take from monty.path. See https://github.com/materialsvirtuallab/monty
-    """
-
-    def is_exe(fp):
-        return os.path.isfile(fp) and os.access(fp, os.X_OK)
-
-    fpath, fname = os.path.split(cmd)
-    if fpath:
-        if is_exe(cmd):
-            return cmd
-    else:
-        for path in os.environ["PATH"].split(os.pathsep):
-            exe_file = os.path.join(path, cmd)
-            if is_exe(exe_file):
-                return exe_file
-    return None
-
-
 def get_current_branch() -> str:
     """Run git command to get the current branch"""
     try:
@@ -805,3 +782,207 @@ def official_release(ctx: Context, new_version: str, dry_run: bool = True) -> No
             _run(f"git rm --cached {path}")
         _run("git commit -a -m 'Remove configure files from tracking in develop'")
         _run("git push origin develop")
+
+
+@task
+def git_info(ctx: Context, top_n=20) -> None:
+    """Scan git history for largest top_n files"""
+
+    def get_git_objects():
+        """Return list of all Git objects (hash, path)."""
+        result = subprocess.run(
+            ['git', 'rev-list', '--objects', '--all'],
+            stdout=subprocess.PIPE,
+            text=True,
+            check=True
+        )
+        objects = []
+        for line in result.stdout.splitlines():
+            parts = line.split(' ', 1)
+            if len(parts) == 2:
+                objects.append((parts[0], parts[1]))
+        return objects
+
+    def get_blob_sizes(hashes):
+        """Return a dict of {hash: (size_in_bytes, path)} for blobs."""
+        input_text = '\n'.join(hashes)
+        result = subprocess.run(
+            ['git', 'cat-file', '--batch-check=%(objectname) %(objecttype) %(objectsize)'],
+            input=input_text,
+            stdout=subprocess.PIPE,
+            text=True,
+            check=True
+        )
+
+        sizes = {}
+        for line in result.stdout.splitlines():
+            obj_hash, obj_type, obj_size = line.split()
+            if obj_type == "blob":
+                sizes[obj_hash] = int(obj_size)
+        return sizes
+
+    print("Scanning Git history for largest files...")
+
+    objects = get_git_objects()
+    hashes = [obj[0] for obj in objects]
+    paths = {obj[0]: obj[1] for obj in objects}
+
+    sizes = get_blob_sizes(hashes)
+
+    sorted_blobs = sorted(
+        ((size, paths[_hash], _hash) for _hash, size in sizes.items() if _hash in paths),
+        reverse=True
+    )
+
+    print(f"\nTop {top_n} largest files ever committed:")
+    for size, path, obj_hash in sorted_blobs[:top_n]:
+        print(f"{size / (1024*1024):7.2f} MB\t{path}")
+
+    ctx.run("git count-objects -vH", pty=True)
+
+
+@task
+def large_files(ctx, top_dir=None, size_threshold_mb=5):
+    """
+    Find and list files larger than `size_threshold_mb` megabytes under `top_dir`.
+
+    Args:
+        top_dir: Root directory to start searching from.
+        size_threshold_mb: Minimum file size in MB to report.
+    """
+    large_files = []
+    threshold_bytes = size_threshold_mb * 1024 * 1024
+
+    if top_dir is None:
+        top_dir = ABINIT_ROOTDIR
+
+    exclude_dirs = {".git", "__pycache__", ".ruff_cache", "modules_with_data", "site"}
+    print(f"Scanning files starting from {top_dir=}")
+
+    for root, dirs, files in os.walk(top_dir):
+        dirs[:] = [d for d in dirs if d not in exclude_dirs]
+        dirs[:] = [d for d in dirs if not d.startswith("_build")]
+
+        for name in files:
+            path = os.path.join(root, name)
+            try:
+                size = os.path.getsize(path)
+                if size > threshold_bytes:
+                    large_files.append((size / (1024 * 1024), Path(path)))
+            except OSError:
+                # skip unreadable files
+                continue
+
+    large_files.sort(reverse=True)
+
+    for size_mb, path in large_files:
+        print(f"{size_mb:.2f} MB\t{path}")
+
+
+@task
+def system(ctx):
+    """Show System Info as a Table"""
+    import platform
+    import psutil
+    from tabulate import tabulate
+    info = []
+    info.append(["OS", f"{platform.system()} {platform.release()}"])
+    info.append(["Kernel", platform.version()])
+    info.append(["Architecture", platform.machine()])
+    info.append(["Processor", platform.processor()])
+    info.append(["CPU Cores (Physical)", psutil.cpu_count(logical=False)])
+    info.append(["CPU Cores (Logical)", psutil.cpu_count()])
+    info.append(["Memory (Total)", f"{psutil.virtual_memory().total / (1024 ** 3):.2f} GB"])
+    for level, size in get_cache_info().items():
+        info.append([level, size])
+
+    print(tabulate(info, headers=["Item", "Value"], tablefmt="grid"))
+
+
+@task
+def pid(ctx, pid):
+    """Show Info for given process PID."""
+    import psutil
+    from tabulate import tabulate
+    pid = int(pid)
+    try:
+        p = psutil.Process(pid)
+        info = []
+        info.append(["PID", p.pid])
+        info.append(["Name", p.name()])
+        info.append(["Executable", p.exe()])
+        info.append(["Command Line", " ".join(p.cmdline())])
+        info.append(["Status", p.status()])
+        info.append(["User", p.username()])
+        info.append(["CPU %", f"{p.cpu_percent(interval=0.1):.1f} %"])
+        info.append(["Memory %", f"{p.memory_percent():.2f} %"])
+        info.append(["Memory RSS", f"{p.memory_info().rss / (1024 ** 2):.2f} MB"])
+        info.append(["Threads", p.num_threads()])
+        info.append(["CWD", p.cwd()])
+        info.append(["Parent PID", p.ppid()])
+        info.append(["Start Time (Epoch)", int(p.create_time())])
+        print(tabulate(info, headers=["Item", "Value"], tablefmt="grid"))
+
+    except psutil.NoSuchProcess:
+        print(f"❌ Process with PID {pid} does not exist.")
+        sys.exit(1)
+
+
+def get_cache_info() -> dict:
+    system = platform.system()
+    if system == "Linux":
+        return get_cache_info_linux()
+    elif system == "Darwin":
+        return get_cache_info_mac()
+    elif system == "Windows":
+        return get_cache_info_windows()
+    raise RuntimeError(f"Unsupported platform {system}")
+
+
+def get_cache_info_linux() -> dict:
+    caches = {}
+    base_path = "/sys/devices/system/cpu/cpu0/cache"
+    for index_dir in glob(f"{base_path}/index*"):
+        try:
+            with open(os.path.join(index_dir, "level")) as f:
+                level = f.read().strip()
+            with open(os.path.join(index_dir, "type")) as f:
+                cache_type = f.read().strip()
+            with open(os.path.join(index_dir, "size")) as f:
+                size = f.read().strip()
+            caches[f"L{level} {cache_type}"] = size
+        except Exception:
+            continue
+    return caches
+
+
+def get_cache_info_mac() -> dict:
+    caches = {}
+    keys = {
+        "hw.l1dcachesize": "L1d",
+        "hw.l1icachesize": "L1i",
+        "hw.l2cachesize": "L2",
+        "hw.l3cachesize": "L3"
+    }
+    for key, label in keys.items():
+        try:
+            out = subprocess.check_output(["sysctl", "-n", key]).decode().strip()
+            caches[label] = f"{int(out) // 1024} KB"
+        except Exception as exc:
+            continue
+    return caches
+
+
+def get_cache_info_windows() -> dict:
+    caches = {}
+    try:
+        out = subprocess.check_output(["wmic", "cpu", "get", "L2CacheSize,L3CacheSize"],
+                                       stderr=subprocess.DEVNULL).decode()
+        lines = out.strip().split("\n")
+        if len(lines) >= 2:
+            _, l2, l3 = lines[1].split()
+            if l2: caches["L2"] = f"{l2} KB"
+            if l3: caches["L3"] = f"{l3} KB"
+    except Exception:
+        pass
+    return caches

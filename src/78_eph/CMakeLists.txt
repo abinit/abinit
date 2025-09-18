@@ -17,11 +17,12 @@ add_library(78_eph STATIC
   m_rta.F90
   m_sigmaph.F90
   m_varpeq.F90
+  m_wkk.F90
   )
 
 set_target_properties(78_eph
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(78_eph
   PRIVATE
@@ -29,7 +30,7 @@ target_include_directories(78_eph
   ${CMAKE_SOURCE_DIR}/shared/common/src/incs
   ${CMAKE_SOURCE_DIR}/src/incs
   PUBLIC
-  ${CMAKE_CURRENT_BINARY_DIR}/modules
+  ${CMAKE_BINARY_DIR}/modules
   )
 
 target_compile_definitions(78_eph

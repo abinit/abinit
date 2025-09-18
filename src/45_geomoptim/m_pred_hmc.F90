@@ -75,7 +75,6 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,mttk_vars,zDEBUG,iex
  use m_numeric_tools,  only : uniformrandom
  use m_pred_velverlet,     only : pred_velverlet
  use m_pred_isothermal,     only : pred_isothermal
- implicit none
 
 !Arguments ------------------------------------
  type(abimover),intent(in)   :: ab_mover
@@ -176,6 +175,10 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,mttk_vars,zDEBUG,iex
 
    strain_updated=.FALSE.
    xred_updated=.FALSE.
+
+   etotal_hmc_prev = zero
+   epot_hmc_prev = zero
+
  end if
 
 

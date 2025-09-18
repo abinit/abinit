@@ -3,7 +3,6 @@
 This module provides functions and objects to validate netcdf files written in the ETSF-IO file format.
 For a quick reference to the etsf specs see: http://esl.cecam.org/mediawiki/index.php/ETSF_File_Format_Specifications
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
 
 import os
 import re
@@ -30,7 +29,7 @@ def all_subclasses(cls):
     return subclasses + [g for s in subclasses for g in all_subclasses(s)]
 
 
-class EtsfObject(object):
+class EtsfObject:
     """
     Base class for netcdf Dimensions, Variables, Attributes.
     Subclasses implement a `validate` method that receives a nc dataset
@@ -301,7 +300,7 @@ reduced_symmetry_translations = EtsfVariable("reduced_symmetry_translations", "d
     [number_of_symmetry_operations, number_of_reduced_dimensions])
 # The "symmorphic" attribute is needed.
 
-# In principle: allowed=range(1, 233)) but I usually use 0 when the space_group is not avaiable
+# In principle: allowed=range(1, 233)) but I usually use 0 when the space_group is not available
 space_group = EtsfVariable("space_group", "integer", [], allowed=range(0, 233))
 atom_species = EtsfVariable("atom_species", "integer", [number_of_atoms]) # Between 1 and number_of_atom_species.
 
@@ -851,9 +850,9 @@ def validate_ncfile(path):
 
     # DFPT files require regular expressions e.g.
     # _DS2_1WF6.nc, _DS2_DEN6, _DEN_POSITRON
-    re_1wf = re.compile("(\w+_)1WF(\d+)(\.nc)$")
-    re_1den = re.compile("(\w+_)DEN(\d+)(\.nc)$")
-    #re_1den = re.compile("(\w+_)POT(\d+)(\.nc)$")
+    re_1wf = re.compile(r"(\w+_)1WF(\d+)(\.nc)$")
+    re_1den = re.compile(r"(\w+_)DEN(\d+)(\.nc)$")
+    #re_1den = re.compile(r"(\w+_)POT(\d+)(\.nc)$")
     if re_1wf.match(fname): groups = [WavefunctionGroup]
     if re_1den.match(fname): groups = [DensityGroup]
     if groups is not None: return validate_groups(path, groups)

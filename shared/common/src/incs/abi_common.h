@@ -13,6 +13,18 @@
 #define _ABINIT_COMMON_H
 
 /*
+#define _GMATTEO_WHISH_LIST
+*/
+
+#if defined HAVE_MPI2
+#define USE_MPI use mpi
+#elif defined HAVE_MPI3
+#define USE_MPI use mpi_f08
+#else
+#define USE_MPI
+#endif
+
+/*
  * Language standards requires the existance of pre-defined macros
  * Microsoft Visual C++ does not define __STDC__,
  * Sun Workshop 4.2 supports C94 without setting __STDC_VERSION__ to the proper value
@@ -45,10 +57,23 @@
 #ifdef HAVE_FC_LONG_LINES
 #define _FILE_LINE_ARGS_    ,file=__FILE__, line=__LINE__
 #define _FILE_ABIFUNC_LINE_ARGS_    ,file=__FILE__, line=__LINE__
+#define _PSTAT_ARGS_    file=__FILE__, line=__LINE__
 #else
 #define _FILE_LINE_ARGS_
 #define _FILE_ABIFUNC_LINE_ARGS_
+#define _PSTAT_ARGS_
 #endif
+
+/**
+  Macro used for pstat memory logging.
+  Since eos_nvhpc_23.9_elpa crashes (likely due to optional arguments), we disable it if FC_NVHP
+
+#ifndef FC_NVHPC
+#define call pstat_proc%print(_PSTAT_ARGS_) call pstat_proc%print(_PSTAT_ARGS_)
+#else
+#define call pstat_proc%print(_PSTAT_ARGS_)
+#endif
+**/
 
 /** this does not work with gfort, pgi, **/
 #if defined (FC_GNU) || defined (FC_PGI)
@@ -70,13 +95,6 @@
 #endif
 
 #define BYTE_SIZE(array)  PRODUCT(SHAPE(array)) * DBLE(KIND(array))
-
-/* var = var + increment
- * Because Fortran does not provide inplace add.
- * but NAG does not like this CPP macro so we cannot use it!
- *
-#define IADD(var, increment) var = var + increment
-*/
 
 /*
  * ABI_  abinit macros.
@@ -294,8 +312,6 @@
 #define ABI_ERROR_NODUMP(msg) call msg_hndl(msg, "ERROR", "PERS", NODUMP=.TRUE. _FILE_LINE_ARGS_)
 #define ABI_ERROR_NOSTOP(msg, ierr) \
    ierr=ierr+1; call msg_hndl(msg, "ERROR", "PERS", NOSTOP=.TRUE. _FILE_LINE_ARGS_)
-#define MSG_ERROR_NOSTOP_IF(condition, msg, ierr) \
-   if (condition)  then NEWLINE ABI_ERROR_NOSTOP(msg, ierr) NEWLINE endif
 
 #define NCF_CHECK(ncerr) if (ncerr/=nf90_noerr) call netcdf_check(ncerr,"No msg from caller" _FILE_LINE_ARGS_)
 #define NCF_CHECK_MSG(ncerr,msg) if (ncerr/=nf90_noerr) call netcdf_check(ncerr,msg _FILE_LINE_ARGS_)
@@ -385,6 +401,18 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 #define COLLAPSE(x)
 #endif
 
+/* Legacy OpenMP 4.5 compliance from NVHPC
+ * Before 25.1, USE_DEVICE_PTR was the sole clause supported for
+ * hinting GPU addresses in OMP TARGET DATA directives, complying with OpenMP 4.5.
+ * Starting from NVHPC 25.1, the compiler :
+ *   - honors USE_DEVICE_ADDR following OpenMP 5 norm
+ *   - emit deprecation warnings at USE_DEVICE_PTR, while still supporting it
+ * This macro exists to keep support for older NVHPC versions.
+ */
+#if __NVCOMPILER_MAJOR__ < 25
+#define USE_DEVICE_ADDR USE_DEVICE_PTR
+#endif
+
 /* DFTI macros (should be declared in m_dfti but build-sys tests complain */
 #define DFTI_CHECK(status) if (status /= 0) call dfti_check_status(status _FILE_LINE_ARGS_)
 
@@ -393,7 +421,7 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 #ifdef HAVE_GW_DPC
 #  define GWPC_CONJG(cvar)  DCONJG(cvar)
 #  define GWPC_CMPLX(re,im) DCMPLX(re,im)
-#  define __slkmat_t matrix_scalapack
+#  define __slkmat_t slkmat_dp_t
 #else
 #  define GWPC_CONJG(cvar)  CONJG(cvar)
 #  define GWPC_CMPLX(re,im) CMPLX(re,im)

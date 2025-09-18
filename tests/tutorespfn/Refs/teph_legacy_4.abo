@@ -1,5 +1,5 @@
 
-.Version 10.1.4.5 of ANADDB, released Sep 2024.
+.Version 10.1.4.3 of ANADDB, released Jul 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h03 )
+.Starting date : Wed 20 Aug 2025.
+- ( at 05h30 )
   
 
 ================================================================================
@@ -31,8 +31,8 @@
       chneut         0
  Interatomic Force Constants Inputs :
       dipdip         0
-      dipqua         1
-      quadqu         1
+     dipquad         0
+    quadquad         0
       ifcana         1
       ifcout         0
  Description of grid 1 :
@@ -83,7 +83,6 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.030  and twall      0.030 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -96,6 +95,46 @@
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
+
+================================================================================
+
+ Treat the first list of vectors 
+
+
+  Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
+ Phonon energies in Hartree :
+   0.000000E+00  0.000000E+00  0.000000E+00
+ Phonon frequencies in cm-1    :
+-  0.000000E+00  0.000000E+00  0.000000E+00
+
+ Eigendisplacements 
+ (will be given, for each mode : in cartesian coordinates
+   for each atom the real part of the displacement vector,
+   then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
+  Mode number    1   Energy    0.000000E+00
+ Attention : low frequency mode.
+   (Could be unstable or acoustic mode)
+-  1  0.00000000E+00  4.34839795E-07 -4.50906596E-03
+-     0.00000000E+00  0.00000000E+00  0.00000000E+00
+  Mode number    2   Energy    0.000000E+00
+ Attention : low frequency mode.
+   (Could be unstable or acoustic mode)
+-  1  0.00000000E+00  4.50906596E-03  4.34840416E-07
+-     0.00000000E+00  0.00000000E+00  0.00000000E+00
+  Mode number    3   Energy    0.000000E+00
+ Attention : low frequency mode.
+   (Could be unstable or acoustic mode)
+-  1  4.50906598E-03  0.00000000E+00  0.00000000E+00
+-     0.00000000E+00  0.00000000E+00  0.00000000E+00
+
+ Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
+ For each vibration mode, or group of modes if degenerate,
+ the characters are given for each symmetry operation (see the list in the log file).
+ Symmetry characters of vibration mode #   1
+       degenerate with vibration modes #   2 to    3
+  3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
+ -0.0  0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+ -0.0  0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
 
 ================================================================================
 
@@ -166,51 +205,11 @@
  mka2f: omegalog  =     1.038371E-03 (Ha)     3.278912E+02 (Kelvin)
  mka2f: input mustar =     1.360000E-01
 -mka2f: MacMillan Tc =     2.645390E+05 (Ha)     8.353469E+10 (Kelvin)
-
-================================================================================
-
- Treat the first list of vectors 
-
-
-  Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
- Phonon energies in Hartree :
-   0.000000E+00  0.000000E+00  0.000000E+00
- Phonon frequencies in cm-1    :
--  0.000000E+00  0.000000E+00  0.000000E+00
-
- Eigendisplacements 
- (will be given, for each mode : in cartesian coordinates
-   for each atom the real part of the displacement vector,
-   then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
-  Mode number    1   Energy    0.000000E+00
- Attention : low frequency mode.
-   (Could be unstable or acoustic mode)
--  1  0.00000000E+00  4.34839795E-07 -4.50906596E-03
--     0.00000000E+00  0.00000000E+00  0.00000000E+00
-  Mode number    2   Energy    0.000000E+00
- Attention : low frequency mode.
-   (Could be unstable or acoustic mode)
--  1  0.00000000E+00  4.50906596E-03  4.34840416E-07
--     0.00000000E+00  0.00000000E+00  0.00000000E+00
-  Mode number    3   Energy    0.000000E+00
- Attention : low frequency mode.
-   (Could be unstable or acoustic mode)
--  1  4.50906598E-03  0.00000000E+00  0.00000000E+00
--     0.00000000E+00  0.00000000E+00  0.00000000E+00
-
- Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
- For each vibration mode, or group of modes if degenerate,
- the characters are given for each symmetry operation (see the list in the log file).
- Symmetry characters of vibration mode #   1
-       degenerate with vibration modes #   2 to    3
-  3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
- -0.0  0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
- -0.0  0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
 -
 - Proc.   0 individual time (sec): cpu=          1.4  wall=          1.4
 
 ================================================================================
 
-+Total cpu time      1.378  and wall time      1.407 sec
++Total cpu time      1.397  and wall time      1.433 sec
 
- anaddb : the run completed succesfully.
+ anaddb : the run completed successfully.

@@ -14,6 +14,7 @@ add_library(77_ddb STATIC
   m_ddb_internalstr.F90
   m_a2ftr.F90
   m_anaddb_dataset.F90
+  m_anaddb_driver.F90
   m_atprj.F90
   m_band2eps_dataset.F90
   m_gruneisen.F90
@@ -31,7 +32,7 @@ add_library(77_ddb STATIC
 
 set_target_properties(77_ddb
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(77_ddb
   PRIVATE
@@ -39,7 +40,7 @@ target_include_directories(77_ddb
   ${CMAKE_SOURCE_DIR}/shared/common/src/incs
   ${CMAKE_SOURCE_DIR}/src/incs
   PUBLIC
-  ${CMAKE_CURRENT_BINARY_DIR}/modules
+  ${CMAKE_BINARY_DIR}/modules
   )
 
 target_compile_definitions(77_ddb

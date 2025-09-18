@@ -37,7 +37,6 @@ subroutine xmpi_sum_int(xval,comm,ier)
  integer :: n1
  integer,allocatable :: xsum(:)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -123,7 +122,6 @@ subroutine xmpi_sum_intv(xval,comm,ier)
 #if defined HAVE_MPI
  integer :: arr_xsum(1),arr_xval(1)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -194,7 +192,6 @@ subroutine xmpi_sum_intv2(xval,xsum,comm,ier)
 #if defined HAVE_MPI
  integer :: arr_xsum(1),arr_xval(1)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -271,7 +268,6 @@ subroutine xmpi_sum_intn(xval,n1,comm,ier)
  integer :: nproc_space_comm
  integer , allocatable :: xsum(:)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -358,7 +354,6 @@ subroutine xmpi_sum_int2t(xval,xsum,n1,comm,ier)
  integer,intent(in) :: n1
  integer,intent(in) :: comm
  integer,intent(out) :: ier
-
 ! *************************************************************************
 
  ier=0
@@ -411,7 +406,6 @@ subroutine xmpi_sum_int2d(xval,comm,ier)
  integer(kind=int64) :: ntot
  integer,allocatable :: xsum(:,:)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -513,7 +507,6 @@ subroutine xmpi_sum_int3d(xval,comm,ier)
  integer(kind=int64) :: ntot
  integer,allocatable :: xsum(:,:,:)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -616,7 +609,6 @@ subroutine xmpi_sum_int4d(xval,comm,ier)
  integer(kind=int64) :: ntot
  integer,allocatable :: xsum(:,:,:,:)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -719,7 +711,6 @@ subroutine xmpi_sum_dp(xval,comm,ier)
  integer :: n1,nproc_space_comm
  real(dp),allocatable :: xsum(:)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -812,7 +803,6 @@ subroutine xmpi_sum_dpvt(xval,xsum,comm,ier)
  integer :: nproc_space_comm
  real(dp) :: arr_xsum(1),arr_xval(1)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -894,7 +884,6 @@ subroutine xmpi_sum_dpv(xval,comm,ier)
  integer :: nproc_space_comm
  real(dp) :: arr_xsum(1),arr_xval(1)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -970,7 +959,6 @@ subroutine xmpi_sum_dpn(xval,n1,comm,ier)
  integer :: nproc_space_comm
  real(dp) , allocatable :: xsum(:)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -1061,7 +1049,6 @@ subroutine xmpi_sum_sp2d(xval,comm,ier)
  integer(kind=int64) :: ntot
  real(sp),allocatable :: xsum(:,:)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -1163,7 +1150,6 @@ subroutine xmpi_sum_sp3d(xval,comm,ier)
  integer(kind=int64) :: ntot
  real(sp),allocatable :: xsum(:,:,:)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -1265,7 +1251,6 @@ subroutine xmpi_sum_sp4d(xval,comm,ier)
  integer(kind=int64) :: ntot
  real(sp),allocatable :: xsum(:,:,:,:)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -1368,7 +1353,6 @@ subroutine xmpi_sum_sp5d(xval,comm,ier)
  integer(kind=int64) :: ntot
  real(sp),allocatable :: xsum(:,:,:,:,:)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -1472,7 +1456,6 @@ subroutine xmpi_sum_sp6d(xval,comm,ier)
  integer(kind=int64) :: ntot
  real(sp), allocatable :: xsum(:,:,:,:,:,:)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -1577,7 +1560,6 @@ subroutine xmpi_sum_sp7d(xval,comm,ier)
  integer(kind=int64) :: ntot
  real(sp),allocatable :: xsum(:,:,:,:,:,:,:)
 #endif
-
 ! *************************************************************************
  ier=0
 #if defined HAVE_MPI
@@ -1690,7 +1672,6 @@ subroutine xmpi_sum_dp2d(xval,comm,ier,use_omp_map)
  integer(kind=int64) :: ntot
  real(dp),allocatable :: xsum(:,:)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -1723,7 +1704,7 @@ subroutine xmpi_sum_dp2d(xval,comm,ier,use_omp_map)
 #ifdef HAVE_OPENMP_OFFLOAD
 #ifdef HAVE_GPU_MPI
          ! Proper GPU-aware call
-         !$OMP TARGET DATA USE_DEVICE_PTR(xval)
+         !$OMP TARGET DATA USE_DEVICE_ADDR(xval)
          call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
          !$OMP END TARGET DATA
 #else
@@ -1745,7 +1726,7 @@ subroutine xmpi_sum_dp2d(xval,comm,ier,use_omp_map)
          !$OMP TARGET ENTER DATA MAP(alloc:xsum)
 #ifdef HAVE_GPU_MPI
          ! Proper GPU-aware call
-         !$OMP TARGET DATA USE_DEVICE_PTR(xval,xsum)
+         !$OMP TARGET DATA USE_DEVICE_ADDR(xval,xsum)
          call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
          !$OMP END TARGET DATA
          !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) PRIVATE(i2,i1) MAP(to:xval,xsum)
@@ -1838,7 +1819,6 @@ subroutine xmpi_sum_dp3d(xval,comm,ier,use_omp_map)
  integer(kind=int64) :: ntot
  real(dp),allocatable :: xsum(:,:,:)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -1872,7 +1852,7 @@ subroutine xmpi_sum_dp3d(xval,comm,ier,use_omp_map)
 #ifdef HAVE_OPENMP_OFFLOAD
 #ifdef HAVE_GPU_MPI
          ! Proper GPU-aware call
-         !$OMP TARGET DATA USE_DEVICE_PTR(xval)
+         !$OMP TARGET DATA USE_DEVICE_ADDR(xval)
          call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
          !$OMP END TARGET DATA
 #else
@@ -1894,7 +1874,7 @@ subroutine xmpi_sum_dp3d(xval,comm,ier,use_omp_map)
          !$OMP TARGET ENTER DATA MAP(alloc:xsum)
 #ifdef HAVE_GPU_MPI
          ! Proper GPU-aware call
-         !$OMP TARGET DATA USE_DEVICE_PTR(xval,xsum)
+         !$OMP TARGET DATA USE_DEVICE_ADDR(xval,xsum)
          call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
          !$OMP END TARGET DATA
          !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(i3) MAP(to:xval,xsum)
@@ -1985,7 +1965,6 @@ subroutine xmpi_sum_dp4d(xval,comm,ier)
  integer(kind=int64) :: ntot
  real(dp),allocatable :: xsum(:,:,:,:)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -2089,7 +2068,6 @@ subroutine xmpi_sum_dp5d(xval,comm,ier)
  integer(kind=int64) :: ntot
  real(dp),allocatable :: xsum(:,:,:,:,:)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -2193,7 +2171,6 @@ subroutine xmpi_sum_dp6d(xval,comm,ier)
  integer(kind=int64) :: ntot
  real(dp), allocatable :: xsum(:,:,:,:,:,:)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -2299,7 +2276,6 @@ subroutine xmpi_sum_dp7d(xval,comm,ier)
  integer(kind=int64) :: ntot
  real(dp),allocatable :: xsum(:,:,:,:,:,:,:)
 #endif
-
 ! *************************************************************************
  ier=0
 #if defined HAVE_MPI
@@ -2401,7 +2377,6 @@ subroutine xmpi_sum_dp2t(xval,xsum,n1,comm,ier)
  integer ,intent(in) :: n1
  integer ,intent(in) :: comm
  integer ,intent(out) :: ier
-
 ! *************************************************************************
 
  ier=0
@@ -2449,9 +2424,6 @@ subroutine xmpi_sum_dp2d2t(xval,xsum,n,comm,ier)
  integer ,intent(in) :: n
  integer ,intent(in) :: comm
  integer ,intent(out) :: ier
-
-!Local variables-------------------
-
 ! *************************************************************************
 
  ier=0
@@ -2500,8 +2472,8 @@ subroutine xmpi_sum_dp3d2t(xval,xsum,n1,comm,ier)
  integer ,intent(in) :: n1
  integer ,intent(in) :: comm
  integer ,intent(out) :: ier
-
 ! *************************************************************************
+
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
@@ -2548,7 +2520,6 @@ subroutine xmpi_sum_dp4d2t(xval,xsum,n1,comm,ier)
  integer ,intent(in) :: n1
  integer ,intent(in) :: comm
  integer ,intent(out) :: ier
-
 ! *************************************************************************
 
  ier=0
@@ -2599,7 +2570,6 @@ subroutine xmpi_sum_c0dc(xval,comm,ier)
  integer :: nproc_space_comm
  complex(dpc) :: arr_xsum(1),arr_xval(1)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -2651,7 +2621,6 @@ subroutine xmpi_sum_c0sc(xval,comm,ier)
  integer :: nproc_space_comm
  complex(sp) :: arr_xsum(1),arr_xval(1)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -2704,7 +2673,6 @@ subroutine xmpi_sum_c1dc(xval,comm,ier)
  integer :: n1,nproc_space_comm
  complex(dpc) , allocatable :: xsum(:)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -2776,7 +2744,6 @@ subroutine xmpi_sum_c2dc(xval,comm,ier,use_omp_map)
  integer(kind=int64) :: ntot
  complex(dpc),allocatable :: xsum(:,:)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -2809,7 +2776,7 @@ subroutine xmpi_sum_c2dc(xval,comm,ier,use_omp_map)
 #ifdef HAVE_OPENMP_OFFLOAD
 #ifdef HAVE_GPU_MPI
          ! Proper GPU-aware call
-         !$OMP TARGET DATA USE_DEVICE_PTR(xval)
+         !$OMP TARGET DATA USE_DEVICE_ADDR(xval)
          call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
          !$OMP END TARGET DATA
 #else
@@ -2831,7 +2798,7 @@ subroutine xmpi_sum_c2dc(xval,comm,ier,use_omp_map)
          !$OMP TARGET ENTER DATA MAP(alloc:xsum)
 #ifdef HAVE_GPU_MPI
          ! Proper GPU-aware call
-         !$OMP TARGET DATA USE_DEVICE_PTR(xval,xsum)
+         !$OMP TARGET DATA USE_DEVICE_ADDR(xval,xsum)
          call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
          !$OMP END TARGET DATA
          !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) PRIVATE(i2,i1) MAP(to:xval,xsum)
@@ -2897,7 +2864,6 @@ subroutine xmpi_sum_c3dc(xval,comm,ier)
  integer(kind=int64) :: ntot
  complex(dpc),allocatable :: xsum(:,:,:)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -2978,7 +2944,6 @@ subroutine xmpi_sum_c4dc(xval,comm,ier)
  integer(kind=int64) :: ntot
  complex(dpc),allocatable :: xsum(:,:,:,:)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -3059,7 +3024,6 @@ subroutine xmpi_sum_c5dc(xval,comm,ier)
  integer(kind=int64) :: ntot
  complex(dpc),allocatable :: xsum(:,:,:,:,:)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -3141,7 +3105,6 @@ subroutine xmpi_sum_c6dc(xval,comm,ier)
  integer(kind=int64) :: ntot
  complex(dpc),allocatable :: xsum(:,:,:,:,:,:)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -3224,7 +3187,6 @@ subroutine xmpi_sum_c7dc(xval,comm,ier)
  integer(kind=int64) :: ntot
  complex(dpc),allocatable :: xsum(:,:,:,:,:,:,:)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -3310,7 +3272,6 @@ subroutine xmpi_sum_c1cplx(xval,comm,ier)
  integer :: n1,nproc_space_comm
  complex(spc),allocatable :: xsum(:)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -3377,7 +3338,6 @@ subroutine xmpi_sum_c2cplx(xval,comm,ier)
  integer(kind=int64) :: ntot
  complex(spc), allocatable :: xsum(:,:)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -3462,7 +3422,6 @@ subroutine xmpi_sum_c3cplx(xval,comm,ier)
  integer(kind=int64) :: ntot
  complex(spc), allocatable :: xsum(:,:,:)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -3548,7 +3507,6 @@ subroutine xmpi_sum_c4cplx(xval,comm,ier)
  integer(kind=int64) :: ntot
  complex(spc),allocatable :: xsum(:,:,:,:)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -3630,7 +3588,6 @@ subroutine xmpi_sum_c5cplx(xval,comm,ier)
  integer(kind=int64) :: ntot
  complex(spc),allocatable :: xsum(:,:,:,:,:)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -3712,7 +3669,6 @@ subroutine xmpi_sum_c6cplx(xval,comm,ier)
  integer(kind=int64) :: ntot
  complex(spc),allocatable :: xsum(:,:,:,:,:,:)
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -3795,7 +3751,6 @@ subroutine xmpi_sum_coeff5d1(xval,comm,ier)
  integer, allocatable :: dims(:,:)
  real(dp),allocatable :: buf(:),xsum(:)
 #endif
-
 ! *************************************************************************
 
  ier=0
