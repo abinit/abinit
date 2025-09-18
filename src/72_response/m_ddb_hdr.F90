@@ -40,7 +40,6 @@ MODULE m_ddb_hdr
  use m_fstrings,  only : sjoin, endswith
  use m_geometry,  only : mkrdim
 
-
  implicit none
 
  private
@@ -311,8 +310,6 @@ CONTAINS  !===========================================================
 !!   ddb_hdr=the new ddb_hdr object
 !!   crystal=crystal object
 !!
-!! OUTPUT
-!!
 !! SOURCE
 
 subroutine ddb_hdr_init_from_crystal(ddb_hdr, crystal)
@@ -320,9 +317,6 @@ subroutine ddb_hdr_init_from_crystal(ddb_hdr, crystal)
 !Arguments ------------------------------------
  class(ddb_hdr_type),intent(inout) :: ddb_hdr
  type(crystal_t),intent(inout) :: crystal
-
-!Local variables -------------------------
-
 ! ************************************************************************
 
  ddb_hdr%nblok = 1
@@ -422,8 +416,6 @@ end subroutine ddb_hdr_init_from_crystal
 !!   mband=maximum number of bands
 !!   mkpt=maximum number of kpoints
 !!
-!! OUTPUT
-!!
 !! SOURCE
 
 subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, dscrpt, &
@@ -446,7 +438,6 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, dscrpt, &
 
 !Local variables -------------------------
  integer :: ii, nn, ikpt
-
 ! ************************************************************************
 
  ddb_hdr%nblok = nblok
@@ -536,7 +527,6 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, dscrpt, &
  ddb_hdr%zion(:) = dtset%ziontypat(1:ddb_hdr%mtypat)
  ddb_hdr%znucl(:) = dtset%znucl(1:ddb_hdr%mtypat)
 
-
  if (present(kpt)) then
    do ikpt=1,ddb_hdr%nkpt
      do ii = 1,3
@@ -612,7 +602,6 @@ subroutine ddb_hdr_malloc(ddb_hdr)
 
 !Arguments ------------------------------------
  class(ddb_hdr_type),intent(inout) :: ddb_hdr
-
 ! ************************************************************************
 
  ! integer
@@ -677,7 +666,6 @@ subroutine ddb_hdr_set_typ(ddb_hdr, nblok, typ)
  class(ddb_hdr_type),intent(inout) :: ddb_hdr
  integer,intent(in) :: nblok
  integer,intent(in) :: typ(nblok)
-
 ! ************************************************************************
 
  ddb_hdr%nblok = nblok
@@ -704,7 +692,6 @@ subroutine ddb_hdr_get_block_dims(ddb_hdr)
 
 !Arguments ------------------------------------
  class(ddb_hdr_type),intent(inout) :: ddb_hdr
-
 ! ************************************************************************
 
  ! Compute mpert
@@ -736,7 +723,6 @@ subroutine ddb_hdr_free(ddb_hdr)
 
 !Arguments ------------------------------------
  class(ddb_hdr_type),intent(inout) :: ddb_hdr
-
 ! ************************************************************************
 
  ! integer
@@ -800,12 +786,11 @@ subroutine ddb_hdr_open_write_txt(ddb_hdr, filename, with_psps)
  character(len=500) :: message
  integer :: unddb
  integer :: ierr
-
 ! ************************************************************************
 
  if (present(with_psps)) then
-    ddb_hdr%with_psps = with_psps
-    ddb_hdr%with_dfpt_vars = with_psps
+   ddb_hdr%with_psps = with_psps
+   ddb_hdr%with_dfpt_vars = with_psps
  end if
 
  unddb = get_unit()
@@ -878,13 +863,13 @@ subroutine ddb_hdr_open_write_nc(ddb_hdr, filename, with_psps, with_dfpt_vars)
 ! ************************************************************************
 
  if (present(with_psps)) then
-    ddb_hdr%with_psps = with_psps
+   ddb_hdr%with_psps = with_psps
  end if
 
  if (present(with_dfpt_vars)) then
-    ddb_hdr%with_dfpt_vars = with_dfpt_vars
+   ddb_hdr%with_dfpt_vars = with_dfpt_vars
  else
-    ddb_hdr%with_dfpt_vars = ddb_hdr%with_psps
+   ddb_hdr%with_dfpt_vars = ddb_hdr%with_psps
  end if
 
  ! Initialize NetCDF file.
@@ -1568,30 +1553,24 @@ subroutine ddb_hdr_open_write(ddb_hdr, filename, with_psps, comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: comm_
- integer :: iomode
+ integer :: comm_, iomode
  character(len=fnlen) :: filename_
-
 ! ************************************************************************
 
-  if (present(comm)) then
-    comm_ = comm
-  else
-    comm_ = xmpi_comm_self
-  end if
+ if (present(comm)) then
+   comm_ = comm
+ else
+   comm_ = xmpi_comm_self
+ end if
 
  if (xmpi_comm_rank(comm_) /= master) return
 
  call ddb_hdr%get_iomode(filename, 2, iomode, filename_)
 
  if (iomode==IO_MODE_ETSF) then
-
     call ddb_hdr%open_write_nc(nctk_ncify(filename), with_psps=with_psps)
-
  else if (iomode==IO_MODE_FORTRAN) then
-
-    call ddb_hdr%open_write_txt(filename, with_psps)
-
+   call ddb_hdr%open_write_txt(filename, with_psps)
  end if
 
 end subroutine ddb_hdr_open_write
@@ -1617,7 +1596,7 @@ end subroutine ddb_hdr_open_write
 !! SOURCE
 
 subroutine ddb_hdr_open_read(ddb_hdr, filename, comm, &
-&        matom,mtypat,mband,mkpt,msym,dimekb,lmnmax,usepaw,dimonly)
+                             matom,mtypat,mband,mkpt,msym,dimekb,lmnmax,usepaw,dimonly)
 
 !Arguments ------------------------------------
  class(ddb_hdr_type),intent(inout) :: ddb_hdr
@@ -1633,11 +1612,9 @@ subroutine ddb_hdr_open_read(ddb_hdr, filename, comm, &
  integer :: iomode
  character(len=fnlen) :: filename_
 
-
  call ddb_hdr%get_iomode(filename, 1, iomode, filename_)
 
  if (xmpi_comm_rank(comm) == master) then
-
    ! GA: FIXME
    ! Here we keep the old output behavior just to make test pass.
    ! However, test should allow differences in filenames.
@@ -1648,12 +1625,12 @@ subroutine ddb_hdr_open_read(ddb_hdr, filename, comm, &
  if (iomode==IO_MODE_ETSF) then
 
    call ddb_hdr%open_read_nc(filename_, comm, &
-&        matom,mtypat,mband,mkpt,msym,dimekb,lmnmax,usepaw,dimonly)
+        matom,mtypat,mband,mkpt,msym,dimekb,lmnmax,usepaw,dimonly)
 
  else if (iomode==IO_MODE_FORTRAN) then
 
    call ddb_hdr%open_read_txt(filename, comm, &
-&        matom,mtypat,mband,mkpt,msym,dimekb,lmnmax,usepaw,dimonly)
+        matom,mtypat,mband,mkpt,msym,dimekb,lmnmax,usepaw,dimonly)
 
  end if
 
@@ -1706,7 +1683,6 @@ subroutine ddb_hdr_open_read_txt(ddb_hdr, filename, comm, &
  logical :: has_d0E_xx,has_d1E_xx,has_d2E_xx,has_d3E_xx,has_d3E_lw,has_d2eig
 !arrays
  real(dp):: rprimd(3,3)
-
 ! ************************************************************************
 
  if (present(comm)) then
@@ -1972,7 +1948,6 @@ subroutine ddb_hdr_open_read_nc(ddb_hdr, filename, comm, &
  real(dp),allocatable :: pawtab_rpaw(:)
  real(dp),allocatable :: pawtab_rshp(:)
  real(dp),allocatable :: occ(:,:,:)
-
 ! ************************************************************************
 
  if (present(comm)) then
@@ -2293,7 +2268,6 @@ subroutine ddb_hdr_close(ddb_hdr, comm)
 !scalars
  integer,parameter :: master=0
  integer :: ncerr, ierr
-
 ! ************************************************************************
 
   if (present(comm)) then
@@ -2342,7 +2316,6 @@ subroutine ddb_hdr_compare(ddb_hdr1, ddb_hdr2)
  !real(dp) :: ekbcm8,ekbcmp
  real(dp),parameter :: tol=1.0d-6  ! Limited by the precision of text DDB
  character(len=500) :: msg
-
 ! ************************************************************************
 
  fullinit = ddb_hdr1%with_psps * ddb_hdr1%with_dfpt_vars
@@ -2560,7 +2533,6 @@ subroutine ddb_hdr_copy_missing_variables(ddb_hdr1, ddb_hdr2)
 !Local variables -------------------------
  integer :: fullinit, fullinit2
  integer :: bantot,ii,ij,itypat
-
 ! ************************************************************************
 
  fullinit = ddb_hdr1%with_psps * ddb_hdr1%with_dfpt_vars
@@ -2724,7 +2696,6 @@ subroutine ddb_hdr_copy_psps_from(ddb_hdr1, ddb_hdr2)
    end do
  end if
 
-
 end subroutine ddb_hdr_copy_psps_from
 !!***
 
@@ -2751,7 +2722,6 @@ subroutine ddb_hdr_bcast_dim(ddb_hdr, comm)
 !Local variables -------------------------
  integer, parameter :: master=0
  integer :: ierr
-
 ! ************************************************************************
 
  if (xmpi_comm_size(comm) == 1) return
@@ -2824,9 +2794,7 @@ subroutine ddb_hdr_bcast(ddb_hdr, comm)
 
 !Local variables -------------------------
  integer, parameter :: master=0
- integer :: ierr
- integer :: ii,nn
-
+ integer :: ierr, ii,nn
 ! ************************************************************************
 
  if (xmpi_comm_size(comm) == 1) return
@@ -2934,7 +2902,6 @@ subroutine ddb_hdr_get_iomode(ddb_hdr, filenamein, io, iomode, filenameout)
 
 !Local variables ------------------------------
  character(len=fnlen) :: filenamenc
-
 ! ************************************************************************
 
  ! Simple case: file name was given with netcdf extension
@@ -3081,7 +3048,6 @@ subroutine psddb8 (choice,dimekb,ekb,with_psps,indlmn,lmnmax,&
 !arrays
  integer,allocatable :: i1(:),i2(:),nprj(:),orbitals(:)
  real(dp),allocatable :: dij0(:),ekb0(:,:)
-
 ! *********************************************************************
 
 !Check the value of choice
@@ -3526,7 +3492,6 @@ subroutine ioddb8_in(filename,matom,mband,mkpt,msym,mtypat,unddb,&
  character(len=3) :: prefix
 !arrays
  character(len=12) :: name(9)
-
 ! *********************************************************************
 
 !Open the input derivative database.
@@ -4108,7 +4073,6 @@ subroutine ddb_getdims(filename,comm,dimekb,lmnmax,mband,msym,natom,nblok,nkpt,n
 !scalars
  integer,parameter :: master=0
  integer :: ierr,unddb
-
 ! *********************************************************************
 
  ! Master node reads dims from file and then broadcast.
@@ -4205,7 +4169,6 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,msym,natom,nblok,nkpt,&
 !arrays
  integer,allocatable :: nband(:)
  character(len=12) :: name(9)
-
 ! *********************************************************************
 
 !Open the input derivative database.
@@ -4715,9 +4678,7 @@ subroutine ddb_chkname(nmfond,nmxpct,nmxpct2)
 !Local variables-------------------------------
 !scalars
  logical :: found
- character(len=500) :: nmfond_,nmxpct_,nmxpct2_
- character(len=500) :: message
-
+ character(len=500) :: nmfond_,nmxpct_,nmxpct2_, message
 ! *********************************************************************
 
  nmxpct_ = trim(adjustl(nmxpct))
@@ -4754,8 +4715,6 @@ end subroutine ddb_chkname
 !! INPUTS
 !!  unddb=unit to print out the content.
 !!
-!! OUTPUT
-!!
 !! SOURCE
 
 subroutine ddb_hdr_print(ddb_hdr, unddb)
@@ -4766,7 +4725,6 @@ subroutine ddb_hdr_print(ddb_hdr, unddb)
 
 !Local variables -------------------------
  integer,parameter :: choice=2
-
 ! ************************************************************************
 
  call ddb_io_out(unddb,ddb_hdr%dscrpt,ddb_hdr%matom,ddb_hdr%mband,&
@@ -4821,7 +4779,6 @@ subroutine chkr8(reali,realt,name,tol)
 !Local variables-------------------------------
 !scalars
  character(len=500) :: message
-
 ! *********************************************************************
 
  if(abs(reali-realt)>tol) then
@@ -4869,7 +4826,6 @@ subroutine chki8(inti,intt,name)
 !Local variables-------------------------------
 !scalars
  character(len=500) :: message
-
 ! *********************************************************************
 
  if(inti/=intt) then
@@ -4978,13 +4934,11 @@ subroutine ddb_io_out (unddb,dscrpt,matom,mband,&
  integer :: bantot,ii,ij,ikpt,iline,im
 !arrays
  character(len=9) :: name(9)
-
 ! *********************************************************************
 
  DBG_ENTER("COLL")
 
-
-!Write the heading
+!Write the header
  write(unddb, '(/,a,/,a,i10,/,/,a,a,/)' ) &
  ' **** DERIVATIVE DATABASE ****    ',&
  '+DDB, Version number',DDB_VERSION,' ',trim(dscrpt)
@@ -5288,7 +5242,6 @@ logical function is_type_d2eig(blktyp) result(answer)
 
 end function is_type_d2eig
 !!***
-
 
 END MODULE m_ddb_hdr
 !!***

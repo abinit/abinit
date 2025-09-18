@@ -70,8 +70,8 @@ module m_cgwf
 !! nscf_t
 !!
 !! FUNCTION
-!!  Simplified interface to the cgwf routine to perform NSCF calculations
-!!  starting from the KS potential read from file.
+!!  Simplified interface to the cgwf routine (congjugate gradient) to perform
+!!  NSCF calculations starting from the KS potential read from file.
 !!
 !! SOURCE
 
@@ -105,6 +105,7 @@ module m_cgwf
 
    procedure :: free => nscf_free
     ! Free dynamic memory.
+
  end type nscf_t
 !!***
 
@@ -1247,9 +1248,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
  end do ! iblock End loop over block of bands
 
- if (allocated(dimlmn_srt)) then
-   ABI_FREE(dimlmn_srt)
- end if
+ ABI_SFREE(dimlmn_srt)
 
  if (finite_field .and. gs_hamk%usepaw == 1) then ! store updated cprjs for this kpt
    ! switch from ikptf to ikpt
@@ -1302,27 +1301,15 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  ABI_FREE(gvnlx_direc)
  ABI_FREE(vresid)
  ABI_FREE(gs_direc)
-
- if (gen_eigenpb) then
-   ABI_FREE(scwavef)
-   ABI_FREE(direc_tmp)
- end if
-
- if (gen_eigenpb.and.(inonsc==1)) then
-   ABI_FREE(ghc_all)
- end if
-
- if(wfopta10==2.or.wfopta10==3) then
-   ABI_FREE(ghcws)
-   ABI_FREE(gh_direcws)
- end if
  ABI_FREE(gvnlx_dummy)
-
- if(wfopta10==2.or.wfopta10==3) then
-   ABI_FREE(work)
- end if
-
  ABI_FREE(swork)
+
+ ABI_SFREE(scwavef)
+ ABI_SFREE(direc_tmp)
+ ABI_SFREE(ghc_all)
+ ABI_SFREE(ghcws)
+ ABI_SFREE(gh_direcws)
+ ABI_SFREE(work)
 
  if (finite_field) then
    ABI_FREE(cg1_k)
@@ -2380,8 +2367,8 @@ subroutine nscf_init(nscf, dtset, dtfil, cryst, comm)
  end if
 
  call initmpi_seq(nscf%mpi_enreg)
- call init_distribfft_seq(nscf%mpi_enreg%distribfft, 'c', nscf%ngfft(2), nscf%ngfft(3), 'all')
- call init_distribfft_seq(nscf%mpi_enreg%distribfft, 'f', nscf%ngfftf(2), nscf%ngfftf(3), 'all')
+ call nscf%mpi_enreg%distribfft%init_seq('c', nscf%ngfft(2), nscf%ngfft(3), 'all')
+ call nscf%mpi_enreg%distribfft%init_seq('f', nscf%ngfftf(2), nscf%ngfftf(3), 'all')
 
  ! Read KS potential from file.
  nfftf = product(nscf%ngfftf(1:3))
@@ -2471,23 +2458,25 @@ end subroutine nscf_setup_spin
 !!
 !! FUNCTION
 !!  Prepare call to nscf_solve_kpt.
-!!  Compute k-dependent terms, gs_ham_k and allocate wavefunction block for this k-point
+!!  Compute k-dependent terms, gs_ham_k and allocate wavefunction block for this k-point.
 !!
 !! INPUT
 !! isppol=Spin index
 !! kpt(3)=K-point
+!! istwf_k=wavefunction storage.
+!! nband_k=Number of bands.
+!! cryst=Crystalline structure.
 !! dtset<dataset_type>=All input variables for this dataset.
-!! cryst=Crystalline structure
 !! psps<pseudopotential_type>=Variables related to pseudopotentials.
 !! pawtab(ntypat*usepaw)<pawtab_type>=Paw tabulated starting data.
-!! pawfgr <type(pawfgr_type)>=fine grid parameters and related data
+!! pawfgr <type(pawfgr_type)>=fine grid parameters and related data.
 !!
 !! OUTPUT
 !!  kg_k=
 !!  cg_k
 !!  gsc_k
 !!  eig_k
-!!  gs_ham_k <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
+!!  gs_ham_k=all data for the Hamiltonian at k-point kpt.
 !!
 !! SOURCE
 
@@ -2513,17 +2502,17 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psp
 !Local variables ------------------------------
 !scalars
  integer,parameter :: nkpt1 = 1, use_subovl0 = 0, ider0 = 0, idir0 = 0, mkmem1 = 1, useylmgr0 = 0, optder0=0
- integer :: nvloc, nkpg, n1, n2, n3, n4, n5, n6, nfft, nfftf, mgfft, mgfftf, nspinor
+ integer :: nvloc, nkpg, n1, n2, n3, n4, n5, n6, nfft, nfftf, mgfft, mgfftf, nspinor, ncomp
  !character(len=500) :: msg
 !arrays
  real(dp) :: ylmgr_dum(1,1,1)
  real(dp),allocatable :: ph1d(:,:), ylm_k(:,:)
 ! *************************************************************************
 
- ABI_CHECK(gs_ham_k%use_gbt == 0, "use_gbt /= 0 not coded")
+ ABI_CHECK_IEQ(gs_ham_k%use_gbt, 0, "use_gbt /= 0 not coded")
 
  ! See vtorho.F90 for the sequence of calls needed to initialize the GS Hamiltonian.
- ! The Hamiltonian has references to the _k arrays allocated here and returned
+ ! The Hamiltonian has references to the _k arrays that allocated here and returned to the caller.
  associate (mpi_enreg => nscf%mpi_enreg)
 
  !==== Initialize most of the Hamiltonian ====
@@ -2551,6 +2540,7 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psp
  ABI_MALLOC(ph1d, (2,3*(2*mgfft+1)*cryst%natom))
  call getph(cryst%atindx, cryst%natom, n1, n2, n3, ph1d, cryst%xred)
 
+ ! Initi GS Hamiltonian.
  call gs_ham_k%init(psps, pawtab, nspinor, dtset%nsppol, dtset%nspden, cryst%natom, &
                     dtset%typat, cryst%xred, nfft, mgfft, nscf%ngfft, cryst%rprimd, dtset%nloalg, &
                     comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab, mpi_spintab=mpi_enreg%my_isppoltab, &
@@ -2562,8 +2552,10 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psp
  nvloc = gs_ham_k%nvloc
  ABI_CALLOC(vlocal, (n4, n5, n6, nvloc))
 
+ ! ncomp=Number of extra components in vtrial and vlocal (e.g. 1 if LDA/GGA pot, 4 for Meta-GGA, etc).
+ ncomp = 1
  call gspot_transgrid_and_pack(isppol, psps%usepaw, nscf%paral_kgb0, nfft, nscf%ngfft, nfftf, &
-                               dtset%nspden, gs_ham_k%nvloc, 1, pawfgr, mpi_enreg, nscf%vtrial, vlocal)
+                               dtset%nspden, gs_ham_k%nvloc, ncomp, pawfgr, mpi_enreg, nscf%vtrial, vlocal)
 
  call gs_ham_k%load_spin(isppol, vlocal=vlocal, with_nonlocal=.true.)
 
@@ -2595,9 +2587,9 @@ subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psp
                       kinpw_k=kinpw_k, kg_k=kg_k, kpg_k=kpg_k, ffnl_k=ffnl_k, ph3d_k=ph3d_k, &
                       compute_ph3d=(nscf%paral_kgb0/=1), compute_gbound=(nscf%paral_kgb0/=1))
 
+ ! Allocate output buffers.
  ABI_MALLOC(cg_k, (2, npw_k*nspinor, nband_k))
  ABI_MALLOC(gsc_k, (2, npw_k*nspinor, nband_k*dtset%usepaw))
-
  end associate
 
 end subroutine nscf_setup_kpt
@@ -2621,12 +2613,12 @@ end subroutine nscf_setup_kpt
 !! npw_k=Number of planewaves
 !!
 !! OUTPUT
-!!  kg_k=g-vectors for this k-point
-!!  cg_k=Wavefunction block.
-!!  gsc_k=<g|S|c> for PAW
-!!  eig_k=Eigenvalues
-!!  msg=Error message
-!!  ierr=Exit statue
+!! kg_k=g-vectors for this k-point
+!! cg_k=Wavefunction block.
+!! gsc_k=<g|S|c> for PAW
+!! eig_k=Eigenvalues.
+!! msg=Error message.
+!! ierr=Exit status.
 !!
 !! SOURCE
 
@@ -2682,13 +2674,12 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
  if (.not. use_cg_k) then
    ! Initialize the wavefunctions with random numbers.
    call cg_randomize(istwf_k, npw_k, nspinor, nband_k, me_g0, cg_k)
-   ! Multiply with envelope function to reduce kinetic energy
+   ! Multiply with envelope function to reduce kinetic energy.
    call cg_envlop(cg_k, dtset%ecut, cryst%gmet, icg0, kg_k, kpt, mcg, nband_k, npw_k, nspinor)
  end if
 
  ! Ortoghonalize input trial states (this is important, even when cg_k is already initialized from a previous k-point.
  call pw_orthon(icg0, igsc0, istwf_k, mcg, mgsc, npwsp, nband_k, ortalgo_3, gsc_k, dtset%usepaw, cg_k, me_g0, xmpi_comm_self)
-
  !call cg_kfilter(npw_k, nspinor, nband_k, gs_ham_k%kinpw_k, cg_k)
 
  ! linalg initialisation (required by subdiago)
@@ -2724,7 +2715,8 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
    ! Exit loop over inonsc if converged
    if (max_resid < dtset%tolwfr) then
      ierr = 0
-     msg = sjoin(" NSCF for kpt:", ktoa(kpt), " completed in", itoa(inonsc), "steps. max_resid:", ftoa(max_resid))
+     msg = sjoin(" NSCF for kpt:", ktoa(kpt), "spin:", itoa(isppol))
+     msg = sjoin(msg, ", completed in: ", itoa(inonsc), "steps. max_resid:", ftoa(max_resid))
      call wrtout(std_out, msg)
 
      ! Print energies and residuals
@@ -2740,7 +2732,8 @@ subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtf
  end do ! inonsc (NON SELF-CONSISTENT LOOP)
 
  if (ierr /= 0) then
-   msg = sjoin(" NSCF run for kpt:", ktoa(kpt), "didn't converge after", itoa(dtset%nstep), " steps", ch10)
+   msg = sjoin(" NSCF run for kpt:", ktoa(kpt), "spin", itoa(isppol))
+   msg = sjoin(msg, " didn't converge after", itoa(dtset%nstep), " steps", ch10)
    msg = sjoin(msg, "max_resid:", ftoa(max_resid), " >= tolwfr:", ftoa(dtset%tolwfr))
  end if
 

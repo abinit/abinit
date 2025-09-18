@@ -234,11 +234,11 @@ subroutine fft_test_init(Ftest, fft_setup, kpoint, ecut, boxcutmin, rprimd, nsym
  ABI_CALLOC(tnons,(3,nsym))
 
  call getng(boxcutmin,0,ecut,gmet,k0,Ftest%MPI_enreg%me_fft,Ftest%mgfft,Ftest%nfft,Ftest%ngfft,Ftest%MPI_enreg%nproc_fft,nsym,&
-&  Ftest%MPI_enreg%paral_kgb,symrel,tnons, unit=dev_null, gpu_option=ftest%gpu_option)
+   Ftest%MPI_enreg%paral_kgb,symrel,tnons, unit=dev_null, gpu_option=ftest%gpu_option)
 
  ABI_FREE(tnons)
 
- call init_distribfft(Ftest%MPI_enreg%distribfft,'c',Ftest%MPI_enreg%nproc_fft,Ftest%ngfft(2),Ftest%ngfft(3))
+ call Ftest%MPI_enreg%distribfft%init('c',Ftest%MPI_enreg%nproc_fft,Ftest%ngfft(2),Ftest%ngfft(3))
 
  ! Compute the index of each plane wave in the FFT grid.
  ABI_MALLOC(Ftest%indpw_k,(Ftest%npw_k))
@@ -1202,7 +1202,7 @@ subroutine time_rhotwg(Ftest, map2sphere, use_padfft, osc_npw, osc_gvec, header,
  if (Ftest%ngfft(7)/100 == FFT_FFTW3) call fftw3_set_nthreads(Ftest%nthreads)
 
  call initmpi_seq(MPI_enreg_seq)
- call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',n2,n3,'all')
+ call MPI_enreg_seq%distribfft%init_seq('c',n2,n3,'all')
 
  itim1=1; itim2=1
  ABI_MALLOC(ktabr1,(nfft))

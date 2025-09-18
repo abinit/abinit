@@ -30,7 +30,6 @@ module m_bethe_salpeter
  use m_xmpi
  use m_errors
  use m_nctk
- use m_distribfft
  use netcdf
  use m_hdr
  use m_dtset
@@ -59,7 +58,7 @@ module m_bethe_salpeter
  use m_qparticles,      only : rdqps, rdgw  !, show_QP , rdgw
  use m_wfd,             only : wfdgw_t, test_charge
  use m_wfk,             only : wfk_read_eigenvalues
- use m_energies,        only : energies_type, energies_init
+ use m_energies,        only : energies_type
  use m_io_screening,    only : hscr_t, get_hscr_qmesh_gsph
  use m_haydock,         only : exc_haydock_driver
  use m_exc_diago,       only : exc_diago_driver
@@ -271,7 +270,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  call wrtout([std_out, ab_out], msg)
 
  !=== Some variables need to be initialized/nullify at start ===
- call energies_init(KS_energies)
+ call KS_energies%init()
  usexcnhat=0
  call mkrdim(acell,rprim,rprimd)
  call metric(gmet,gprimd,ab_out,rmet,rprimd,ucvol)
@@ -291,8 +290,8 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
  ! Fake MPI_type for the sequential part.
  call initmpi_seq(MPI_enreg_seq)
- call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfftc(2),ngfftc(3),'all')
- call init_distribfft_seq(MPI_enreg_seq%distribfft,'f',ngfftf(2),ngfftf(3),'all')
+ call MPI_enreg_seq%distribfft%init_seq('c',ngfftc(2),ngfftc(3),'all')
+ call MPI_enreg_seq%distribfft%init_seq('f',ngfftf(2),ngfftf(3),'all')
 
  ! ===========================================
  ! === Open and read pseudopotential files ===

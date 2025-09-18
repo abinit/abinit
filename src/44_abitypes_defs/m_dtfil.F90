@@ -425,12 +425,13 @@ module m_dtfil
   character(len=fnlen) :: fnametmp_app_den
   character(len=fnlen) :: fnametmp_app_kden
 
+  contains
+    procedure  :: init => dtfil_init
+    procedure  :: init_img => dtfil_init_img
+    procedure  :: init_time => dtfil_init_time
  end type datafiles_type
 !!***
 
- public :: dtfil_init
- public :: dtfil_init_img
- public :: dtfil_init_time
  public :: mkfilename
  public :: isfile
  public :: iofn1
@@ -446,8 +447,7 @@ contains
 !!
 !! FUNCTION
 !! Initialize most of the dtfil structured variable
-!! (what is left should be initialized inside the itimimage,
-!! iimage and itime loops).
+!! (what is left should be initialized inside the itimimage, iimage and itime loops).
 !!
 !! INPUTS
 !! dtset=<type datasets_type>contain all input variables for the current dataset
@@ -476,19 +476,19 @@ contains
 !! SOURCE
 
 subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset,&
-&                      image_index) ! optional argument
+                      image_index) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
+ class(datafiles_type),intent(inout) :: dtfil
+ type(dataset_type),intent(in) :: dtset
  integer, intent(in) :: idtset,ndtset
  integer, optional, intent(in) :: image_index
  character(len=fnlen),intent(in) :: filstat
  type(MPI_type),intent(in) :: mpi_enreg
- type(datafiles_type),intent(inout) :: dtfil !vz_i
 !arrays
  integer :: jdtset_(0:ndtset)
  character(len=fnlen),intent(in) :: filnam(5)
- type(dataset_type),intent(in) :: dtset
 
 !Local variables-------------------------------
 !scalars
@@ -516,7 +516,6 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  character(len=fnlen) :: filnam_ds(5)
  character(len=fnlen) :: tmpfil(14)
  integer :: idtmpfil(14)
-
 !******************************************************************
 
  DBG_ENTER("COLL")
@@ -1033,7 +1032,6 @@ end subroutine dtfil_init
 !!***
 
 !!****f* m_dtfil/dtfil_init_time
-!!
 !! NAME
 !! dtfil_init_time
 !!
@@ -1048,25 +1046,20 @@ end subroutine dtfil_init
 !!         if -1 : append "_TIM0" (called from brdmin)
 !!         if -2, -3, -4, -5: append "_TIMA", ... ,"_TIMD", (called from move)
 !!
-!! OUTPUT
-!!
 !! SIDE EFFECTS
 !! dtfil=<type datafiles_type>infos about file names, file unit numbers
 !!  (part of which were initialized previously)
 !!
 !! SOURCE
 
-subroutine dtfil_init_time(dtfil,iapp)
+subroutine dtfil_init_time(dtfil, iapp)
 
 !Arguments ------------------------------------
-!scalars
+ class(datafiles_type),intent(inout) :: dtfil
  integer, intent(in) :: iapp
- type(datafiles_type),intent(inout) :: dtfil
 
 !Local variables-------------------------------
-!scalars
  character(len=fnlen) :: filapp,filprot
-
 !******************************************************************
 
  DBG_ENTER("COLL")
@@ -1238,17 +1231,15 @@ subroutine dtfil_init_img(dtfil,dtset,dtsets,idtset,jdtset,ndtset,ndtset_alloc)
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: idtset,ndtset,ndtset_alloc
- type(datafiles_type),intent(out) :: dtfil
+ class(datafiles_type),intent(inout) :: dtfil
  type(dataset_type),intent(in) :: dtset
+ integer, intent(in) :: idtset,ndtset,ndtset_alloc
 !arrays
  integer,intent(in) :: jdtset(0:ndtset)
  type(dataset_type),intent(in) :: dtsets(0:ndtset_alloc)
 
 !Local variables -------------------------
-!scalars
  integer :: iget
-
 ! *********************************************************************
 
  DBG_ENTER("COLL")

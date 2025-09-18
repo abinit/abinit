@@ -48,7 +48,7 @@ MODULE m_fft
  use m_fftcore,       only : get_cache_kb, kpgsph, get_kg, sphere_fft, sphere_fft1, sphere, change_istwfk, &
                              fftalg_info, fftalg_has_mpi, print_ngfft, getng, sphereboundary
  use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp, ptabs_fourwf, initmpi_seq
- use m_distribfft,    only : distribfft_type, init_distribfft, destroy_distribfft
+ use m_distribfft,    only : distribfft_type
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
@@ -1756,7 +1756,7 @@ integer function fftbox_mpi_utests(fftalg, cplex, ndat, nthreads, comm_fft, unit
    call RANDOM_NUMBER(fofr)
    fofr_copy = fofr
 
-   call init_distribfft(fftabs,"c",nproc_fft,n2,n3)
+   call fftabs%init("c",nproc_fft,n2,n3)
    fftn2_distrib => fftabs%tab_fftdp2_distrib
    ffti2_local => fftabs%tab_fftdp2_local
    fftn3_distrib => fftabs%tab_fftdp3_distrib
@@ -1805,7 +1805,7 @@ integer function fftbox_mpi_utests(fftalg, cplex, ndat, nthreads, comm_fft, unit
    end if
    call wrtout(ount,sjoin(info, msg))
 
-   call destroy_distribfft(fftabs)
+   call fftabs%free()
 
    ABI_FREE(fofg)
    ABI_FREE(fofr_copy)
@@ -1923,7 +1923,7 @@ integer function fftu_mpi_utests(fftalg, ecut, rprimd, ndat, nthreads, comm_fft,
    call print_ngfft([std_out], ngfft, header="ngfft for MPI-fourwf", prtvol=0)
 
    ! Compute FFT distribution tables.
-   call init_distribfft(fftabs,"c",nproc_fft,n2,n3)
+   call fftabs%init("c",nproc_fft,n2,n3)
 
    ! Set to 1 if this node owns G = 0.
    me_g0 = 0; if (fftabs%tab_fftwf2_distrib(1) == me_fft) me_g0 = 1
@@ -2179,7 +2179,7 @@ integer function fftu_mpi_utests(fftalg, ecut, rprimd, ndat, nthreads, comm_fft,
    ABI_FREE(full_kg_k)
    ABI_FREE(full_fofg)
 
-   call destroy_distribfft(fftabs)
+   call fftabs%free()
  end do
 
  if (nthreads > 0) call xomp_set_num_threads(old_nthreads)

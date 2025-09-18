@@ -161,7 +161,6 @@ module m_gwr
  use m_fftcore,       only : get_kg, sphereboundary, getng, print_ngfft, fftcore_set_mixprec, ngfft_seq
  use m_cgtk,          only : cgtk_rotate
  use m_mpinfo,        only : initmpi_seq, destroy_mpi_enreg
- use m_distribfft,    only : init_distribfft_seq
  use m_kg,            only : getcut
  use m_fft,           only : fftbox_plan3_t, uplan_t, fft_ug, fft_ur, fourdp
  use m_fft_mesh,      only : calc_ceikr, calc_ceigr, ctimes_eikr
@@ -174,7 +173,7 @@ module m_gwr
                              slk_array_locmem_mb, block_dist_1d, slk_pgemm
  use m_wfk,           only : wfk_read_ebands, wfk_t
  use m_wfd,           only : wfd_t, wfdgw_t
- use m_ddk,           only : ddkop_t, ddkop_new
+ use m_ddk,           only : ddkop_t
  use m_pawtab,        only : pawtab_type
  use m_pawcprj,       only : pawcprj_type
  use m_vcoul,         only : vcgen_t
@@ -7582,7 +7581,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  ABI_MALLOC(rhotwg, (npwe * dim_rtwg))
 
  ! TODO: use ddkop instead of commutator so that we can handle SOC terms.
- ddkop = ddkop_new(dtset, gwr%cryst, gwr%pawtab, gwr%psps, gwr%mpi_enreg, u_mpw, u_ngfft)
+ call ddkop%init(dtset, gwr%cryst, gwr%pawtab, gwr%psps, gwr%mpi_enreg, u_mpw, u_ngfft)
 
  ABI_CHECK_IEQ(dtset%symchi, 1, "symchi 0 not implemented")
  if (dtset%nspinor == 2) then

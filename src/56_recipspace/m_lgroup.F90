@@ -36,15 +36,15 @@ module m_lgroup
  use defs_basis
  use m_errors
  use m_abicore
- use m_crystal
  use m_copy
  use m_symkpt
  use m_sort
  use m_xmpi
 
- use m_fstrings,      only : ftoa, ktoa, sjoin, ltoa
+ use m_fstrings,      only : ftoa, ktoa, sjoin, ltoa, itoa
  use m_numeric_tools, only : wrap2_pmhalf
  use m_geometry,      only : normv
+ use m_crystal,      only : crystal_t
  use m_kpts,          only : listkk
  use m_symtk,         only : sg_multable, littlegroup_q
 
@@ -124,6 +124,9 @@ module m_lgroup
 
  contains
 
+   procedure :: init => lgroup_init
+    ! Creation method.
+
    procedure :: findq_ibzk => lgroup_findq_ibzk
    ! Find the index of the point in the IBZ(k).
 
@@ -139,21 +142,19 @@ module m_lgroup
  end type lgroup_t
 !!***
 
- public :: lgroup_new                 ! Creation method.
-
 contains  !=====================================================
 !!***
 
-!!****f* m_sigmaph/lgroup_new
+!!****f* m_sigmaph/lgroup_init
 !! NAME
-!!  lgroup_new
+!!  lgroup_init
 !!
 !! FUNCTION
 !!  Build the little group of the k-point. Return IBZ(k) points packed in shells.
 !!  to facilitate optimization of loops.
 !!
 !! INPUTS
-!!  cryst(crystal_t)=Crystalline structure
+!!  cryst=Crystalline structure
 !!  kpoint(3)=External k-point defining the little-group
 !!  timrev=1 if time-reversal symmetry can be used, 0 otherwise.
 !!  nkbz=Number of k-points in the BZ.
@@ -165,10 +166,12 @@ contains  !=====================================================
 !!
 !! SOURCE
 
-type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz, comm, sord) result(new)
+subroutine lgroup_init(new, cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz, comm, &
+                       sord) ! optional
 
 !Arguments ------------------------------------
 !scalars
+ class(lgroup_t),intent(out) :: new
  integer,intent(in) :: timrev,nkibz,nkbz,comm
  type(crystal_t),intent(in) :: cryst
  character(len=1),optional,intent(in) :: sord
@@ -184,7 +187,6 @@ type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz
  integer,allocatable :: ibz2bz(:), iperm(:), inv_iperm(:)
  real(dp) :: kred(3), shift(3)
  real(dp),allocatable :: wtk_folded(:), kord(:,:)
-
 ! *************************************************************************
 
  ! TODO: Add option to exclude umklapp/time-reversal symmetry and kptopt
@@ -216,7 +218,7 @@ type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz
  ! Check group closure.
  if (debug /= 0) then
    call sg_multable(new%nsym_lg, symafm_lg, symrec_lg, ierr)
-   ABI_CHECK(ierr == 0, "Error in group closure")
+   ABI_CHECK_IEQ(ierr, 0, "Error in group closure")
  end if
 
  ! Find the irreducible zone with the little group operations.
@@ -315,7 +317,7 @@ type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz
    end do
  end if
 
-end function lgroup_new
+end subroutine lgroup_init
 !!***
 
 !!****f* m_lgroup/lgroup_findq_ibzk
@@ -337,15 +339,14 @@ integer pure function lgroup_findq_ibzk(self, qpt, qtol) result(iqpt)
 
 !Arguments ------------------------------------
 !scalars
- real(dp),optional,intent(in) :: qtol
  class(lgroup_t),intent(in) :: self
+ real(dp),optional,intent(in) :: qtol
 !arrays
  real(dp),intent(in) :: qpt(3)
 
 !Local variables-------------------------------
  integer :: iq
  real(dp) :: my_qtol
-
 ! *************************************************************************
 
  my_qtol = tol6; if (present(qtol)) my_qtol = qtol
@@ -353,7 +354,7 @@ integer pure function lgroup_findq_ibzk(self, qpt, qtol) result(iqpt)
  iqpt = -1
  do iq=1,self%nibz
    if (all(abs(self%ibz(:, iq) - qpt) < my_qtol)) then
-      iqpt = iq; exit
+     iqpt = iq; exit
    end if
  end do
 
@@ -422,9 +423,9 @@ end function lgroup_find_ibzimage
 subroutine lgroup_print(self, title, unit, prtvol)
 
 !Arguments ------------------------------------
+ class(lgroup_t),intent(in) :: self
  integer,optional,intent(in) :: unit, prtvol
  character(len=*),optional,intent(in) :: title
- class(lgroup_t),intent(in) :: self
 
 !Local variables-------------------------------
 !scalars
@@ -470,7 +471,6 @@ subroutine lgroup_free(self)
 
 !Arguments ------------------------------------
  class(lgroup_t),intent(inout) :: self
-
 ! *************************************************************************
 
  ! integer

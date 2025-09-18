@@ -520,8 +520,7 @@ function cg_zdotc(n, x, y) result(res)
 !scalars
  integer,intent(in) :: n
 !arrays
- real(dp),intent(in) :: x(2,n)
- real(dp),intent(in) :: y(2,n)
+ real(dp),intent(in) :: x(2,n), y(2,n)
  real(dp) :: res(2)
 
 !Local variables-------------------------------

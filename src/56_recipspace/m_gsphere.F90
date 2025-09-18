@@ -29,7 +29,6 @@ module m_gsphere
  use defs_basis
  use m_abicore
  use m_errors
- use m_distribfft
  use m_sort
 
  use defs_abitypes,   only : MPI_type
@@ -517,7 +516,7 @@ subroutine gsph_fft_tabs(Gsph, g0, mgfft, ngfft, use_padfft, gmg0_gbound, gmg0_i
  if (use_padfft == 1) call sphereboundary(gmg0_gbound,1,gmg0,mgfft,ng)
 
  call initmpi_seq(MPI_enreg_seq) ! No FFT parallelism.
- call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfft(2),ngfft(3),'all')
+ call MPI_enreg_seq%distribfft%init_seq('c',ngfft(2),ngfft(3),'all')
 
  ABI_MALLOC(kg_mask, (ng))
  call kgindex(gmg0_ifft, gmg0, kg_mask, MPI_enreg_seq, ngfft, ng)

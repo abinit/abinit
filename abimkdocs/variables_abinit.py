@@ -4314,8 +4314,7 @@ Variable(
     characteristics=['[[ENERGY]]'],
     added_in_version="before_v9",
     text=r"""
-This variable can be used to change artificially the value of the Fermi level when
-performing e-ph calculations.
+This variable can be used to change artificially the value of the Fermi level when performing e-ph calculations.
 The variable has effect only if set to a non-zero value.
 This option is mutually exclusive with [[eph_extrael]] and [[eph_doping]].
 When [[eph_fermie]] is used the number of temperatures specified by [[tmesh]] cannot be greater than one.
@@ -24629,11 +24628,10 @@ This input variable specifies whether the EPH code should store $|g|^2$ or $g$
 when computing the e-ph matrix elements ([[eph_task]] == 11)
 Possible values are:
 
-    1 --> compute and store $|g|^2$ in GSTORE.nc.
-          Use this option to reduce the size of the file but keep in mind
-          that the GSTORE can only be used to compute expressions in which
-          only $|g|^2$ is needed.
-    2 --> compute and store complex $g$ in GSTORE.nc (default)
+1 --> compute and store $|g|^2$ in GSTORE.nc.
+      Use this option to reduce the size of the file but keep in mind
+      that the GSTORE can only be used to compute expressions in which only $|g|^2$ is needed.
+2 --> compute and store complex $g$ in GSTORE.nc (default)
 """,
 ),
 
@@ -24717,8 +24715,11 @@ This input variable can be used to introduce a filter in the electronic wavevect
 when computing the e-ph matrix elements with [[eph_task]] == 11.
 Possible values are:
 
-    "none" --> No filter is applied.
-    "fs_tetra" --> Use tetrahedron method to filter k/k+q states on the Fermi surface.
+- "none" --> No filter is applied (default)
+- "fs_tetra" --> Use tetrahedron method to filter k/k+q states on the Fermi surface.
+- "qprange" --> Use [[gw_qprange]] to select k-points. If [[gw_qprange]] is not given in input
+   the code automatically selects the k-points associated to the direct and the fundamental KS gap
+   as computed from the WFK file.
 
 Note that it is possible to use another filter based on the position of the energy states wrt to either
 the CBM/VBM or the position wrt to the Fermi level via [[gstore_erange]].
@@ -24740,8 +24741,8 @@ This input variable specifies the representation used to store the e-ph matrix e
 
 Possible values are:
 
-    "phonon" --> Store e-ph matrix elements in the phonon representation (collective displacement)
-    "atom" -->  Store e-ph matrix elements in the atom representation (displacement of a single atom along one of the reduced directions)
+- "phonon" --> Store e-ph matrix elements in the phonon representation (collective displacement)
+- "atom" -->  Store e-ph matrix elements in the atom representation (displacement of a single atom along one of the reduced directions)
 """,
 ),
 
@@ -24759,7 +24760,6 @@ Variable(
 This input variable can be used to specify the band range
 when computing the GSTORE.nc file with [[eph_task]] == 11.
 The first entry gives the first band to be included while the second index specifies the last band.
-
 Note that the array depends on the value of [[nsppol]] thus one has to provide four integers for the
 two different spin channels when [[nsppol]] == 2.
 
@@ -24868,7 +24868,6 @@ on the basis of their KS energy $\ee_\nk$.
 
 If both entries in [[gstore_erange]] are negative, the code assumes a metal and only states within the energy
 window [efermi - abs(gstore_erange(1)), efermi + abs(gstore_erange(2)] are included in the calculation.
-
 Positive (or zero) values are used in semiconductors to define an energy range with respect to the band edges.
 In this case, the first entry given the position of the holes with respect to the CBM while the second entry
 gives the position of electrons with respect to the VBM (energy differences are **always positive**, even for holes).
@@ -24964,11 +24963,11 @@ The choice is among:
 
     At the time of writing, the following features are **not yet supported** in GWR:
 
+    * PAW method.
     * Calculations with [[nspinor]] == 2.
     * Metallic systems as the our minimax meshes assume systems with an energy gap.
     * Temperature effects at the electronic level are not taken into account as we work with the T = 0 formalism.
     * Only $\Gamma$-centered $\kk$-meshes are supported in GWR.
-    * PAW method.
 """,
 ),
 
@@ -25066,8 +25065,7 @@ If encountering out-of-memory issues with the supercell method, it is advisable 
 To optimize performance, utilize all available cores, prioritizing g-parallelism followed by k-parallelism.
 
 The two algorithms are equivalent in the case of $\Gamma$-only sampling.
-
-See also [[gwr_chi_algo]]
+See also [[gwr_chi_algo]].
 """,
 ),
 
@@ -25114,25 +25112,6 @@ The default value (-1.0) instructs the code to use all available [nband]] states
 See also [[inclvkb]] for the inclusion of the contribution given by the non-local part of pseudopotential.
 """,
 ),
-
-
-#Variable(
-#    abivarname="gwr_regterm",
-#    varset="gwr",
-#    vartype="real",
-#    topics=['GWR_expert'],
-#    dimensions=[1],
-#    defaultval=-1.0,
-#    mnemonics="GWR REGularization TERM",
-#    requires="[[optdriver]] == 6",
-#    added_in_version="9.8.0",
-#    text=r"""
-#TODO: To be described.
-#Negative value means automatic regularization.
-#Zero to deactivate it.
-#Positive to use specific value.
-#""",
-#),
 
 
 Variable(
@@ -25708,48 +25687,48 @@ The other piece of information is given by [[eph_fix_korq]] that specifies wheth
 To compute e-ph matrix as a function of the $\qq$-point, start from this template:
 
 ```
-   optdriver 7
-   eph_task 18
+optdriver 7    # EPH driver
+eph_task 18    # Compute g(k,q) along a path.
 
-   nstep 100      # NSCF cycle for electronic wavefunctions.
-   tolwfr 1e-18
-   nbdbuf 4
-   getpot_filepath  "gs_POT"   # Need to read the GS potential from file produced in a previous run.
+nstep 100      # NSCF cycle for electronic wavefunctions.
+tolwfr 1e-20   # Stopping criterion for NSCF
+nband 10       # Adjust nband and nbdbuf according to your system.
+nbdbuf 4       # Ignore last nbdbuf states when computing residuals for tolwfr
+
+getpot_filepath  "gs_POT"   # Read the GS potential produced with prtpot 1
+
+# OTHER VARIABLES required by the EPH code such as getdvdb_filepath ...
+
+eph_fix_korq "k"          # k is fixed in g(k,q)
+eph_fix_wavevec 0.0 0 0   # k-point
+
+eph_path_brange 1 4       # Compute g(k,q) with m and n ranging from 4 up to 10
 
 
-   # OTHER VARIABLES required by the EPH code such as getdvdb_filepath ...
-
-   eph_fix_korq "k"          # k is fixed in g(k,q)
-   eph_fix_wavevec 0.0 0 0   # k-point
-
-   eph_path_brange 1 4              # Compute g(k,q) with m and n ranging from 4 up to 10
-   nband 40
-
-   ph_ndivsm 10              # the q-path in g(k,q)
-   ph_nqpath 3
-   ph_qpath
-      0.0    0.0    0.0
-      0.5    0.0    0.5
-      0.5    0.25   0.75
+ph_ndivsm 10              # the q-path in g(k,q)
+ph_nqpath 3
+ph_qpath
+   0.0    0.0    0.0
+   0.5    0.0    0.5
+   0.5    0.25   0.75
 ```
 
 To compute e-ph matrix as a function of the $\kk$-point, start from this template:
 
 ```
-   optdriver 7
-   eph_task 18
+optdriver 7
+eph_task 18
 
-   eph_fix_korq "q"
-   eph_fix_wavevec 0.5 0 0
-   nband 10
-   eph_path_brange 4
+eph_fix_korq "q"
+eph_fix_wavevec 0.5 0 0
+eph_path_brange 1 4
 
-   ndivsm 10
-   nkpath 3
-   kptbounds
-      0.0    0.0    0.0
-      0.5    0.0    0.5
-      0.5    0.25   0.75
+ndivsm 10
+nkpath 3
+kptbounds
+   0.0    0.0    0.0
+   0.5    0.0    0.5
+   0.5    0.25   0.75
 ```
 """,
 ),
@@ -25858,7 +25837,6 @@ In order to reduce the number of SCF iterations and the computational cost,
 we recommend using [[toldfe]] as stopping criterion.
 Also, the convergence of the SCF cycle may be significantly improved by increasing [[nline]] to e.g. 12.
 
-
 !!! important
 
     The atomic magnetic moment rotates in the x-y plane (Cartesian coords.) while the z-component
@@ -25868,6 +25846,18 @@ Also, the convergence of the SCF cycle may be significantly improved by increasi
 Note that [[spinat]] gives the **initial** electronic spin-magnetization for each atom and the final
 atomic magnetization may differ from [[spinat]], unless one uses GBT in conjunction with constrained DFT
 to specify a **target value** of the magnetization (see [[constraint_kind]] and [[magconon]]).
+
+!!! important
+
+    The NC pseudopotentials provided by PseudoDojo are designed as a compromise between accuracy and efficiency,
+    and may not always be sufficient to capture the finer details of magnon dispersion or atomic magnetization
+    (even the stringent version).
+    In such cases, NC pseudopotentials with smaller core radii close to the maximum of the all-electron wavefunctions
+    are usually required for the d or f channels, though this comes at the cost of a higher [[ecut]] value.
+
+    For this reason, we recommend comparing NC results with other ab initio codes that implement the GBT using
+    either all-electron or PAW methods, and, when necessary, generating customized pseudopotentials for the magnetic species,
+    starting from the input files available on the PseudoDojo website.
 """,
 ),
 

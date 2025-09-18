@@ -45,6 +45,7 @@ MODULE m_geometry
  public :: acrossb            ! Cross product of two 3-vectors.
  public :: wigner_seitz       ! Find the grid of points falling inside the Wigner-Seitz cell.
  public :: phdispl_cart2red   ! Calculate the displacement vectors for all branches in reduced coordinates.
+ public :: phdispl_cart2red_nmodes  ! Calculate the displacement vectors for nmodes in reduced coordinates.
  public :: getspinrot         ! Compute the components of the spinor rotation matrix
  public :: spinrot_cmat       ! Construct 2x2 complex matrix representing rotation operator in spin-space.
  public :: rotmat             ! Finds the rotation matrix.
@@ -211,7 +212,6 @@ function normv_int_vector_array(xv,met,space) result(res)
  integer,intent(in) :: xv(:,:)
  !this awful trick is needed to avoid problems with abilint
  real(dp) :: res(SIZE(xv(1,:)))
- !real(dp) :: res(SIZE(xv,DIM=2))
 ! *************************************************************************
 
  res(:) = ( xv(1,:)*met(1,1)*xv(1,:) + xv(2,:)*met(2,2)*xv(2,:) + xv(3,:)*met(3,3)*xv(3,:)  &
@@ -396,7 +396,6 @@ subroutine acrossb(a,b,c)
 !arrays
  real(dp),intent(in) :: a(3),b(3)
  real(dp),intent(out) :: c(3)
-
 ! *********************************************************************
 
  c(1) =  a(2)*b(3) - a(3)*b(2)
@@ -438,7 +437,6 @@ subroutine wedge_basis(gprimd,rprimd,wedge,normalize)
  integer :: igprimd, irprimd
  real(dp) :: nfac
  logical :: nvec
-
 ! *********************************************************************
 
  if(present(normalize)) then
@@ -495,9 +493,7 @@ subroutine wedge_product(produv,u,v,wedgebasis)
  real(dp),intent(out) :: produv(3)
 
 ! local
-!scalars
  integer :: igprimd, irprimd
-
 ! *********************************************************************
 
  produv(:) = zero
@@ -707,7 +703,7 @@ end subroutine wigner_seitz
 !!
 !! SOURCE
 
-subroutine phdispl_cart2red(natom, gprimd, displ_cart, displ_red)
+pure subroutine phdispl_cart2red(natom, gprimd, displ_cart, displ_red)
 
 !Arguments ------------------------------------
 !scalars
@@ -716,17 +712,39 @@ subroutine phdispl_cart2red(natom, gprimd, displ_cart, displ_red)
  real(dp),intent(in) :: gprimd(3,3)
  real(dp),intent(in) :: displ_cart(2,3*natom,3*natom)
  real(dp),intent(out) :: displ_red(2,3*natom,3*natom)
+! *************************************************************************
+
+ call phdispl_cart2red_nmodes(natom, 3*natom, gprimd, displ_cart, displ_red)
+
+end subroutine phdispl_cart2red
+!!***
+
+!!****f* m_geometry/phdispl_cart2red_nmodes
+!! NAME
+!!  phdispl_cart2red_nmodes
+!!
+!! FUNCTION
+!!  Similar to phdispl_cart2red but operates on nmodes instead of 3*natom
+!!
+!! SOURCE
+
+pure subroutine phdispl_cart2red_nmodes(natom, nmodes, gprimd, displ_cart, displ_red)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: natom, nmodes
+!arrays
+ real(dp),intent(in) :: gprimd(3,3)
+ real(dp),intent(in) :: displ_cart(2,3*natom, nmodes)
+ real(dp),intent(out) :: displ_red(2,3*natom, nmodes)
 
 !Local variables-------------------------
-!scalars
- integer :: nbranch,jbranch,iatom,idir,ibranch,kdir,k1
+ integer :: jbranch,iatom,idir,ibranch,kdir,k1
 ! *************************************************************************
 
  displ_red = zero
 
- nbranch=3*natom
-
- do jbranch=1,nbranch
+ do jbranch=1,nmodes
    !
    do iatom=1,natom
      do idir=1,3
@@ -734,19 +752,17 @@ subroutine phdispl_cart2red(natom, gprimd, displ_cart, displ_red)
        do kdir=1,3
          k1 = kdir+3*(iatom-1)
          ! WARNING: could be non-transpose of rprimd matrix : to be checked.
-         ! 23 june 2004: rprimd becomes gprimd
-         ! could be gprim and then multiply by acell...
+         ! 23 june 2004: rprimd becomes gprimd. could be gprim and then multiply by acell...
          ! Nope, checked and ok with gprimd 24 jun 2004
          displ_red(1,ibranch,jbranch) = displ_red(1,ibranch,jbranch) + gprimd(kdir,idir) * displ_cart(1,k1,jbranch)
-
          displ_red(2,ibranch,jbranch) = displ_red(2,ibranch,jbranch) + gprimd(kdir,idir) * displ_cart(2,k1,jbranch)
 
-       end do !kdir
-     end do !idir
-   end do !iatom
- end do !jbranch
+       end do ! kdir
+     end do ! idir
+   end do ! iatom
+ end do ! jbranch
 
-end subroutine phdispl_cart2red
+end subroutine phdispl_cart2red_nmodes
 !!***
 
 !----------------------------------------------------------------------
@@ -1499,7 +1515,6 @@ subroutine mkrdim(acell,rprim,rprimd)
  real(dp),intent(out) :: rprimd(3,3)
 
 !Local variables-------------------------------
-!scalars
  integer :: ii,jj
 ! *************************************************************************
 
@@ -1593,7 +1608,6 @@ subroutine xred2xcart(natom, rprimd, xcart, xred)
  real(dp),intent(out) :: xcart(3,natom)
 
 !Local variables-------------------------------
-!scalars
  integer :: iatom,mu
 ! *************************************************************************
 
@@ -1643,7 +1657,6 @@ subroutine gred2fcart(favg,Favgz_null,fcart,gred,gprimd,natom)
  real(dp),intent(out) :: favg(3)
 
 !Local variables-------------------------------
-!scalars
  integer :: iatom,mu
 ! *************************************************************************
 
@@ -1704,7 +1717,6 @@ subroutine fcart2gred(fcart,gred,rprimd,natom)
  real(dp),intent(in) :: rprimd(3,3)
 
 !Local variables-------------------------------
-!scalars
  integer :: iatom,mu
 ! *************************************************************************
 
@@ -1782,7 +1794,7 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
 ! *************************************************************************
 
 !Initialize the file
- write(msg, '(a,a,a)' )' bonds_lgth_angles : about to open file ',trim(fnameabo_app_geo),ch10
+ write(msg, '(3a)' )' bonds_lgth_angles : about to open file ',trim(fnameabo_app_geo),ch10
  call wrtout(std_out,msg); call wrtout(ab_out,msg)
 
  if (open_file(fnameabo_app_geo,msg,newunit=temp_unit,status='unknown',form='formatted') /= 0) then
@@ -2681,7 +2693,6 @@ subroutine remove_inversion(nsym,symrel,tnons,nsym_out,symrel_out,tnons_out,pinv
 !arrays
  integer :: determinant(nsym),inversion(3,3),symrel2(3,3,nsym)
  real(dp) :: dtnons(3),tnons2(3,nsym)
-
 ! *********************************************************************
 
  ABI_WARNING('Removing inversion related symmetrie from initial set')
@@ -3265,7 +3276,6 @@ subroutine littlegroup_pert(gprimd,idir,indsym,iout,ipert,natom,nsym,nsym1, &
 !arrays
  integer :: sym_test(3,3,2)
  real(dp) :: str_test(6)
-
 ! *********************************************************************
 
  ount = std_out; if (present(unit)) ount = unit
@@ -3435,7 +3445,6 @@ subroutine irreducible_set_pert(indsym,mpert,natom,nsym,pertsy,rfdir,rfpert,symq
  integer :: found,idir1,idisy1,ii,ipert1,ipesy1,isign,isym,itirev,jj
 !arrays
  integer :: sym1(3,3)
-
 ! *********************************************************************
 
 !Zero pertsy
@@ -3583,7 +3592,6 @@ subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
  integer :: sym1(3,3),sym2(3,3),sym3(3,3)
 ! integer :: strflg(3,mpert,3,3,3,mpert),strflg_car(3,mpert,3,3,3,mpert)
 ! real(dp) :: d3str(2,3,mpert,3,3,3,mpert)
-
 ! *********************************************************************
 
 !First, take into account the permutations symmetry of
@@ -3866,7 +3874,6 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 ! integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
  integer :: sym1(3,3),sym2(3,3),sym3(3,3)
  integer,allocatable :: pertsy(:,:,:,:,:,:)
-
 !***********************************************************************
 
  ABI_MALLOC(pertsy,(3,mpert,3,mpert,3,mpert))
