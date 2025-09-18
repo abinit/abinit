@@ -7,7 +7,7 @@ from math import ceil, floor
 class AboFileAnalysis:
     """Main object containing data from abo file (for further analysis)."""
 
-    def __init__(self,file_name,option):
+    def __init__(self, file_name, option):
         """
         Arguments:
         file_name: name of the file to analyze
@@ -20,7 +20,7 @@ class AboFileAnalysis:
         if option != "":
             self.dtsets = self.extract(option=option)
 
-    def extract(self,option):
+    def extract(self, option):
         """
         Extract data from the abo file, dataset per dataset
         Argument:
@@ -118,6 +118,7 @@ class AboFileAnalysis:
         if status == "succeeded":
             if len(self.dtsets) != len(other_abo_file.dtsets):
                 status = "failed"
+                print ("2 lengths of dtsets = ", len(self.dtsets), len(other_abo_file.dtsets))
                 raise ValueError("ERROR: the two abo files have different dataset numbers!")
 
         if status == "succeeded":
@@ -155,7 +156,7 @@ class AboFileAnalysis:
 class AboDataset:
     """Object storing data extracted from ABINIT abo file for ONE dataset."""
 
-    def __init__(self,number):
+    def __init__(self, number):
         self.number = number
         self.optddriver = 0
         self.MD_niter = None

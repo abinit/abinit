@@ -35,7 +35,7 @@ module m_getgh1c
  use defs_abitypes, only : MPI_type
  use defs_datatypes, only : pseudopotential_type
  use m_time,        only : timab
- use m_fstrings,    only : sjoin, ltoa
+ use m_fstrings,    only : sjoin, ltoa, itoa
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, &
                            pawcprj_copy, pawcprj_lincom, pawcprj_axpby, pawcprj_mpi_sum
  use m_kg,          only : kpgstr, mkkin, mkkpg, mkkin_metdqdq
@@ -110,7 +110,7 @@ contains
 !!            1: used as an input:   (only for ipert=natom+2)
 !!                 NCPP: contains the ddk 1-st order WF
 !!                 PAW: contains frozen part of 1st-order hamiltonian
-!!            2: used as input/ouput:    - used only for PAW and ipert=natom+2
+!!            2: used as input/output:    - used only for PAW and ipert=natom+2
 !!                 At input: contains the ddk 1-st order WF (times i)
 !!                 At output: contains frozen part of 1st-order hamiltonian
 !!  rf_hamkq <type(rf_hamiltonian_type)>=all data for the 1st-order Hamiltonian at k,k+q
@@ -133,7 +133,8 @@ contains
 
 subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
                    gvnlx1,idir,ipert,lambda,mpi_enreg,ndat,optlocal,optnl,opt_gvnlx1,&
-                   rf_hamkq,sij_opt,tim_getgh1c,usevnl,conj)
+                   rf_hamkq,sij_opt,tim_getgh1c,usevnl, &
+                   conj) ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -174,7 +175,6 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 #ifdef HAVE_OPENMP_OFFLOAD
  logical :: map_gh1c,map_gs1c,map_cwave,map_gvnlx1_
 #endif
-
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -216,26 +216,16 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 
  ! Check sizes
  my_nspinor=max(1,gs_hamkq%nspinor/mpi_enreg%nproc_spinor)
- if (size(cwave)<2*npw*my_nspinor*ndat) then
-   ABI_BUG('wrong size for cwave!')
- end if
- if (size(gh1c)<2*npw1*my_nspinor*ndat) then
-   ABI_BUG('wrong size for gh1c!')
- end if
+ ABI_CHECK_IGEQ(size(cwave), 2*npw*my_nspinor*ndat, 'wrong size for cwave!')
+ ABI_CHECK_IGEQ(size(gh1c), 2*npw1*my_nspinor*ndat, 'wrong size for gh1c!')
  if (usevnl/=0) then
-   if (size(gvnlx1)<2*npw1*my_nspinor*ndat) then
-     ABI_BUG('wrong size for gvnlx1!')
-   end if
+   ABI_CHECK_IGEQ(size(gvnlx1), 2*npw1*my_nspinor*ndat, 'wrong size for gvnlx1!')
  end if
  if (sij_opt==1) then
-   if (size(gs1c)<2*npw1*my_nspinor*ndat) then
-     ABI_BUG('wrong size for gs1c!')
-   end if
+   ABI_CHECK_IGEQ(size(gs1c), 2*npw1*my_nspinor*ndat, 'wrong size for gs1c!')
  end if
  if (berryopt>=4) then
-   if (size(grad_berry)<2*npw1*my_nspinor*ndat) then
-     ABI_BUG('wrong size for grad_berry!')
-   end if
+   ABI_CHECK_IGEQ(size(grad_berry), 2*npw1*my_nspinor*ndat, 'wrong size for grad_berry!')
  end if
 
  ! PAW: specific treatment for usecprj input arg
@@ -245,9 +235,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    if (size(cwaveprj)==0) usecprj=0
    if (usecprj/=0) then
      ncpgr=cwaveprj(1,1)%ncpgr
-     if (size(cwaveprj)<gs_hamkq%natom*my_nspinor*ndat) then
-       ABI_BUG('wrong size for cwaveprj!')
-     end if
+     ABI_CHECK_IGEQ(size(cwaveprj), gs_hamkq%natom*my_nspinor*ndat, 'wrong size for cwaveprj!')
      if(gs_hamkq%usepaw==1.and.(ipert>=0.and.(ipert<=natom.or.ipert==natom+3.or.ipert==natom+4))) then
        if (ncpgr/=1)then
          ABI_BUG('Projected WFs (cprj) derivatives are not correctly stored !')
@@ -282,13 +270,13 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 #endif
  end if
  has_mGGA1=( (ipert .EQ. natom+1) .AND. ASSOCIATED(rf_hamkq%vxctaulocal) )
+
 !======================================================================
 !== Apply the 1st-order local potential to the wavefunction
 !======================================================================
-
-!Phonon perturbation
-!or Electric field perturbation
-!or Strain perturbation
+! Phonon perturbation or
+! Electric field perturbation or
+! Strain perturbation
 !-------------------------------------------
  if (ipert<=natom+5.and.ipert/=natom+1.and.optlocal>0) then !SPr deb
 
@@ -304,6 +292,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,ndat,gs_hamkq%ngfft,&
        npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
        gpu_option=gs_hamkq%gpu_option)
+
      if(gs_hamkq%nspinor==2)then
        ABI_MALLOC(cwave_sp,(2,npw))
        ABI_MALLOC(gh1c_sp,(2,npw1))
@@ -323,7 +312,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        end do
        ABI_FREE(cwave_sp)
        ABI_FREE(gh1c_sp)
-     end if
+     end if ! nspinor == 2
+
    else
      ! Non-Collinear magnetism for nvloc=4
      if (gs_hamkq%nspinor==2) then
@@ -539,12 +529,13 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      end if
      nullify(cwaveprj_ptr)
 
-!  Norm-conserving psps:
+
    else
-!    Compute only derivatives due to projectors |p_i>^(1)
+     ! Norm-conserving psps:
+     ! Compute only derivatives due to projectors |p_i>^(1)
      cpopt=-1 ; choice=2 ; signs=2 ; paw_opt=0
      call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamkq,idir,lambda,mpi_enreg,ndat,nnlout,&
-&     paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnlx1_,iatom_only=ipert)
+       paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnlx1_,iatom_only=ipert)
      if (sij_opt==1) then
        if(gs_hamkq%gpu_option/=ABI_GPU_OPENMP) then
          !$OMP PARALLEL DO
@@ -885,10 +876,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    ABI_BUG('need dkinpw allocated!')
  end if
 
- if (has_kin) then    ! This is the correct line
-!DEBUG
-!if (.false.)then
-!ENDDEBUG
+ if (has_kin) then
 !  Remember that npw=npw1 for ddk perturbation
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(ipws) MAP(to:cwave,gvnlx1_,dkinpw,kinpw1) &
@@ -925,7 +913,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    call getgh1ndc(cwave,gh1ndc,gs_hamkq%gbound_k,gs_hamkq%istwf_k,gs_hamkq%kg_k,&
      & gs_hamkq%mgfft,mpi_enreg,ndat,gs_hamkq%ngfft,npw,gs_hamkq%nvloc,&
      & gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,my_nspinor,rf_hamkq%vectornd,&
-     & gs_hamkq%gpu_option)
+     & gs_hamkq%vlocal,rf_hamkq%zora,gs_hamkq%gpu_option)
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET TEAMS DISTRIBUTE &
    !$OMP& MAP(to:gvnlx1_,gh1ndc) PRIVATE(ispinor) &
@@ -1054,7 +1042,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !     Generating target enter data map(to: cwave$sd(:),dkinpw$sd46(:),gvnlx1_$sd(:))
 !
 !     Tested with NVHPC 24.3
-!     Issues occured with arrays: work, gvnlx1, gvnl2, nonlop_out
+!     Issues occurred with arrays: work, gvnlx1, gvnl2, nonlop_out
 !     The name 'getgh1c_array' is for debugging purposes.
 #ifdef HAVE_OPENMP_OFFLOAD
  contains
@@ -1131,7 +1119,6 @@ subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvl
  real(dp) :: rhodum(1) !, tsec(2)
  real(dp), ABI_CONTIGUOUS pointer :: vtrial_ptr(:,:),vtrial1_ptr(:,:)
  real(dp),allocatable :: cgrvtrial(:,:),cgrvtrial1(:,:),vlocal_tmp(:,:,:),vlocal1_tmp(:,:,:)
-
 ! *************************************************************************
 
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
@@ -1182,7 +1169,7 @@ subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvl
    end if
    ABI_FREE(vlocal_tmp)
    ABI_FREE(vlocal1_tmp)
- end if !nspden
+ end if ! nspden
 
 end subroutine rf_transgrid_and_pack
 !!***
@@ -1237,7 +1224,6 @@ subroutine getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kpoint, kpq, idir, ipe
  !real(dp) :: cpu, wall, gflops
 !arrays
  real(dp) :: ylmgr_dum(1,1,1), tsec(2)
-
 ! *************************************************************************
 
  ! MG: This routine is called **many times** in the EPH code for phonon and DDK perturbations
@@ -1390,33 +1376,33 @@ subroutine getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kpoint, kpq, idir, ipe
    else
      select case(idir)
      ! Diagonal terms:
-     case(1)
+     case (1)
        idir1 = 1
        idir2 = 1
-     case(2)
+     case (2)
        idir1 = 2
        idir2 = 2
-     case(3)
+     case (3)
        idir1 = 3
        idir2 = 3
      ! Upper triangular terms:
-     case(4)
+     case (4)
        idir1 = 2
        idir2 = 3
-     case(5)
+     case (5)
        idir1 = 1
        idir2 = 3
-     case(6)
+     case (6)
        idir1 = 1
        idir2 = 2
      ! Lower triangular terms:
-     case(7)
+     case (7)
        idir1 = 3
        idir2 = 2
-     case(8)
+     case (8)
        idir1 = 3
        idir2 = 1
-     case(9)
+     case (9)
        idir1 = 2
        idir2 = 1
      end select
@@ -1448,8 +1434,8 @@ subroutine getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kpoint, kpq, idir, ipe
    call gs_hamkq%load_k(ffnl_k=ffnl1)
  end if
 
-  ! Load k+q-dependent part in the Hamiltonian datastructure
-  ! Note: istwf_k is imposed to 1 for RF calculations (should use istwf_kq instead)
+ ! Load k+q-dependent part in the Hamiltonian datastructure
+ ! Note: istwf_k is imposed to 1 for RF calculations (should use istwf_kq instead)
  call gs_hamkq%load_kprime(kpt_kp=kpq,npw_kp=npw1_k,istwf_kp=istwf_k,&
    kinpw_kp=kinpw1,kg_kp=kg1_k,kpg_kp=kpg1_k,ffnl_kp=ffnl1,compute_gbound=.true.)
 
@@ -1616,7 +1602,7 @@ subroutine getdc1(band,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,
 
 ! save to my proc if it is my turn, and subtract Ntuple counted dcwavef
    if (band_ == band) then
-!=== 2- COMPUTE: <G|delta_C^(1)> = -1/2.Sum_j [<C_k+q,j|S^(1)|C_k>.<G|C_k+q,j>] by substraction
+!=== 2- COMPUTE: <G|delta_C^(1)> = -1/2.Sum_j [<C_k+q,j|S^(1)|C_k>.<G|C_k+q,j>] by subtraction
 ! tested this is equivalent to previous coding to within 1.e-18 accumulated error (probably in favor of this coding)
      if(l_gpu_option==ABI_GPU_DISABLED) then
        !$OMP PARALLEL DO PRIVATE(ipw) SHARED(dcwavef,s1cwave0,dcwavef_tmp,npw1,nspinor)
@@ -1688,7 +1674,7 @@ end subroutine getdc1
 !! INPUTS
 !!  cwave(2,npw*nspinor)=input wavefunction, in reciprocal space
 !!  cwaveprj(natom,nspinor*usecprj)=<p_lmn|C> coefficients for wavefunction |C> (and 1st derivatives)
-!!     if not allocated or size=0, they are locally computed (and not sotred)
+!!     if not allocated or size=0, they are locally computed (and not sorted)
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+q
 !!  idir=first index of the perturbation
 !!  ipert=type of the perturbation
@@ -1709,10 +1695,7 @@ end subroutine getdc1
 !!  gvloc1dqc(2,npw1*nspinor)= local potential part of gh1dqc
 !!  gvnl1dqc(2,npw1*nspinor)= non local potential part of gh1dqc
 !!
-!! SIDE EFFECTS
-!!
 !! NOTES
-!!
 !!  Currently two Hamiltonian gradients at (q=0) are implemented:
 !!     ipert<=natom -> 		    first q-derivative along reduced coordinates directions
 !!                     		    of the atomic displacement perturbation hamiltonian
@@ -1757,7 +1740,6 @@ subroutine getgh1dqc(cwave,cwaveprj,gh1dqc,gvloc1dqc,gvnl1dqc,gs_hamkq,&
  real(dp) :: enlout(1),svectout_dum(1,1)
  real(dp),ABI_CONTIGUOUS pointer :: gvnl1dqc_(:,:)
  real(dp), allocatable :: work(:,:,:,:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1772,19 +1754,16 @@ subroutine getgh1dqc(cwave,cwaveprj,gh1dqc,gvloc1dqc,gvnl1dqc,gs_hamkq,&
 
 !Compatibility tests
  if (mpi_enreg%paral_spinor==1) then
-   msg='Not compatible with parallelization over spinorial components !'
-   ABI_BUG(msg)
+   ABI_BUG('Not compatible with parallelization over spinor components !')
  end if
 
 !Check sizes
  my_nspinor=max(1,gs_hamkq%nspinor/mpi_enreg%nproc_spinor)
  if (size(cwave)<2*npw*my_nspinor) then
-   msg='wrong size for cwave!'
-   ABI_BUG(msg)
+   ABI_BUG('wrong size for cwave!')
  end if
  if (size(gh1dqc)<2*npw1*my_nspinor) then
-   msg='wrong size for gh1dqc!'
-   ABI_BUG(msg)
+   ABI_BUG('wrong size for gh1dqc!')
  end if
 
 !=============================================================================
@@ -1986,8 +1965,6 @@ subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qd
  integer,parameter :: gamma(3,3)=reshape((/1,6,5,6,2,4,5,4,3/),(/3,3/))
  real(dp) :: ylmgr_dum(1,1,1)
  real(dp),allocatable :: ffnl1_tmp(:,:,:,:)
-
-
 ! *************************************************************************
 
  reuse_ffnlk_ = 0; if (present(reuse_ffnlk)) reuse_ffnlk_ = reuse_ffnlk
@@ -2020,9 +1997,9 @@ subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qd
    if (ipert<=natom) then
      ider=0;idir0=0
      call mkffnl(psps%dimekb,dimffnlk,psps%ekb,ffnlk,psps%ffspl,&
-   & gmet,gprimd,ider,idir0,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,&
-   & psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,npw_k,ntypat,&
-   & psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_dum)
+      gmet,gprimd,ider,idir0,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,&
+      psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,npw_k,ntypat,&
+      psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_dum)
    end if
  else
    ABI_CHECK(all(shape(ffnlk) == [npw_k, dimffnlk, psps%lmnmax, ntypat]), "Wrong shape in input ffnlk")
@@ -2050,8 +2027,8 @@ subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qd
  if (reuse_ffnl1_ == 0) then
    ABI_MALLOC(ffnl1,(npw1_k,dimffnl1,psps%lmnmax,ntypat))
    call mkffnl(psps%dimekb,dimffnl1,psps%ekb,ffnl1,psps%ffspl,gmet,gprimd,ider,idir0,&
-  & psps%indlmn,kg1_k,kpg1_k,kpq,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg1,&
-  & npw1_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm1_k,ylmgr1_k)
+    psps%indlmn,kg1_k,kpg1_k,kpq,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg1,&
+    npw1_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm1_k,ylmgr1_k)
  else
    ABI_CHECK(all(shape(ffnl1) == [npw1_k, dimffnl1, psps%lmnmax, ntypat]), "Wrong shape in input ffnl1")
  end if
@@ -2159,33 +2136,36 @@ end subroutine getgh1dqc_setup
 !! (to first order in the nuclear dipole strength) is A.p where in atomic units
 !! A.p=\alpha^2 m x (r-R)/(r-R)^3 . p. Here the components of A have been precomputed in real space
 !! by make_vectornd. The first-order DDK contribution is i[A.p,r] = A_idir where idir is the
-!! direction of the DDK perturbation, or 2\pi A_idir when A, p, and r are in reduced coords 
+!! direction of the DDK perturbation, or 2\pi A_idir when A, p, and r are in reduced coords
 !!
 !! SOURCE
 
 subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
-&                      ndat,ngfft,npw_k,nvloc,n4,n5,n6,my_nspinor,vectornd,gpu_option)
+&                      ndat,ngfft,npw_k,nvloc,n4,n5,n6,my_nspinor,&
+&                      vectornd,vlocal,zora,gpu_option)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: istwf_k,mgfft,my_nspinor,ndat,npw_k,nvloc,n4,n5,n6,gpu_option
+ integer,intent(in) :: istwf_k,mgfft,my_nspinor,ndat,npw_k,nvloc,n4,n5,n6,zora
+ integer,intent(in) :: gpu_option
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: gbound_k(2*mgfft+4),kg_k(3,npw_k),ngfft(18)
  real(dp),intent(inout) :: cwavein(2,npw_k*my_nspinor*ndat)
  real(dp),intent(inout) :: gh1ndc(2,npw_k*my_nspinor*ndat)
- real(dp),intent(inout) :: vectornd(n4,n5,n6,nvloc)
+ real(dp),intent(inout) :: vectornd(n4,n5,n6,nvloc),vlocal(n4,n5,n6,nvloc)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tim_fourwf=1
  integer :: idat,ipw,iv1,iv2,nspinortot,shift
- logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
+ logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc,usezora
  real(dp) :: weight=one
+ real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
  !arrays
  real(dp),allocatable :: cwavein1(:,:),cwavein2(:,:)
  real(dp),allocatable :: ghc1(:,:),ghc2(:,:)
- real(dp),allocatable :: work(:,:,:,:)
+ real(dp),allocatable :: vectornd_dir(:,:,:,:),work(:,:,:,:),zk(:,:,:)
 
 ! *********************************************************************
 
@@ -2203,6 +2183,12 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
    nspinor2TreatedByThisProc=(mpi_enreg%me_spinor==1)
  end if
 
+ usezora=((zora.EQ.1).OR.(zora.EQ.3))
+ if(usezora) then
+   ABI_MALLOC(zk,(n4,n5,n6))
+   zk(1:n4,1:1:n5,1:n6)=1.0/(1.0-HalfFineStruct2*vlocal(1:n4,1:n5,1:n6,nvloc))
+ end if
+
  ABI_MALLOC(work,(2,n4,n5,n6*ndat))
 
  if (nspinortot==1) then
@@ -2212,10 +2198,17 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
    !$OMP TARGET ENTER DATA MAP(alloc:ghc1) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
 
+   ABI_MALLOC(vectornd_dir,(n4,n5,n6,nvloc))
+   if (usezora) then
+     vectornd_dir(1:n4,1:n5,1:n6,nvloc)=zk(1:n4,1:n5,1:n6)*vectornd(1:n4,1:n5,1:n6,nvloc)
+   else
+     vectornd_dir(1:n4,1:n5,1:n6,nvloc)=vectornd(1:n4,1:n5,1:n6,nvloc)
+   end if
    ! apply vector potential in direction ipert to input wavefunction
-   call fourwf(1,vectornd,cwavein,ghc1,work,gbound_k,gbound_k,&
+   call fourwf(1,vectornd_dir,cwavein,ghc1,work,gbound_k,gbound_k,&
      & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
      & tim_fourwf,weight,weight,gpu_option=gpu_option)
+   ABI_FREE(vectornd_dir)
 
    ! scale by 2\pi
    if(gpu_option==ABI_GPU_DISABLED) then
@@ -2263,9 +2256,16 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
 #endif
      end if
 
-     call fourwf(1,vectornd,cwavein1,ghc1,work,gbound_k,gbound_k,&
+     ABI_MALLOC(vectornd_dir,(n4,n5,n6,nvloc))
+     if (usezora) then
+       vectornd_dir(1:n4,1:n5,1:n6,nvloc)=zk(1:n4,1:n5,1:n6)*vectornd(1:n4,1:n5,1:n6,nvloc)
+     else
+       vectornd_dir(1:n4,1:n5,1:n6,nvloc)=vectornd(1:n4,1:n5,1:n6,nvloc)
+     end if
+     call fourwf(1,vectornd_dir,cwavein1,ghc1,work,gbound_k,gbound_k,&
        & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
        & tim_fourwf,weight,weight,gpu_option=gpu_option)
+     ABI_FREE(vectornd_dir)
 
      if(gpu_option==ABI_GPU_DISABLED) then
        do idat=1,ndat
@@ -2319,9 +2319,16 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
 #endif
      end if
 
-     call fourwf(1,vectornd,cwavein2,ghc2,work,gbound_k,gbound_k,&
+     ABI_MALLOC(vectornd_dir,(n4,n5,n6,nvloc))
+     if (usezora) then
+       vectornd_dir(1:n4,1:n5,1:n6,nvloc)=zk(1:n4,1:n5,1:n6)*vectornd(1:n4,1:n5,1:n6,nvloc)
+     else
+       vectornd_dir(1:n4,1:n5,1:n6,nvloc)=vectornd(1:n4,1:n5,1:n6,nvloc)
+     end if
+     call fourwf(1,vectornd_dir,cwavein2,ghc2,work,gbound_k,gbound_k,&
        & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
        & tim_fourwf,weight,weight,gpu_option=gpu_option)
+     ABI_FREE(vectornd_dir)
 
      if(gpu_option==ABI_GPU_DISABLED) then
        do idat=1,ndat
@@ -2352,6 +2359,9 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
  end if ! nspinortot
 
  ABI_FREE(work)
+ if (usezora) then
+   ABI_FREE(zk)
+ end if
 
 end subroutine getgh1ndc
 !!***
@@ -2406,7 +2416,7 @@ subroutine getgh1c_mGGA(cwavein,gbound_k,gh1c_mGGA,gmet,gprimd,idir,istwf_k,kg_k
  end if
 
  gh1c_mGGA(:,:)=zero
- 
+
  if (nvloc/=1) return
 
  nspinortot=min(2,(1+mpi_enreg%paral_spinor)*my_nspinor)
@@ -2515,7 +2525,7 @@ subroutine getgh1c_mGGA(cwavein,gbound_k,gh1c_mGGA,gmet,gprimd,idir,istwf_k,kg_k
      end do ! ii
      ABI_FREE(dgcwavef)
      ABI_FREE(dlcwavef)
- 
+
      ABI_FREE(ghc1)
    end if ! end spinor 1
 
@@ -2559,7 +2569,7 @@ subroutine getgh1c_mGGA(cwavein,gbound_k,gh1c_mGGA,gmet,gprimd,idir,istwf_k,kg_k
      end do ! ii
      ABI_FREE(dgcwavef)
      ABI_FREE(dlcwavef)
- 
+
      ABI_FREE(ghc2)
    end if ! end spinor 2
 

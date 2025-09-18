@@ -25,15 +25,14 @@ module m_energies
  use defs_basis
  use m_abicore
  use m_errors
+ use netcdf
  use m_nctk
  use m_dtset
- use netcdf
 
  implicit none
 
  private
 
-!public parameter
  integer, public, parameter :: n_energies=48
 
 !!***
@@ -205,7 +204,7 @@ module m_energies
    ! h0=e_kinetic+e_localpsp+e_nlpsp_vfock
 
   real(dp) :: e_hspinfield=zero
-   ! Spin  magnetic field contribution to the XC energy
+   ! Spin magnetic field contribution to the XC energy
 
   real(dp) :: e_cpaw=zero
    ! PAW core energy
@@ -213,14 +212,13 @@ module m_energies
   real(dp) :: e_cpawdc=zero
    ! PAW core double-counting energy
 
+  contains
+     procedure :: init => energies_init
+     procedure :: copy => energies_copy
+     procedure :: to_array => energies_to_array
+     procedure :: eval_eint => energies_eval_eint
+     procedure :: ncwrite => energies_ncwrite
  end type energies_type
-
-!public procedures.
- public :: energies_init
- public :: energies_copy
- public :: energies_to_array
- public :: energies_eval_eint
- public :: energies_ncwrite
 !!***
 
 
@@ -228,31 +226,24 @@ CONTAINS !===========================================================
 !!***
 
 !!****f* m_energies/energies_init
-!!
 !! NAME
 !! energies_init
 !!
 !! FUNCTION
 !! Set zero in all values of a type(energies_type) object
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!   energies <type(energies_type)>=values to initialise
-!!
 !! SOURCE
 
 subroutine energies_init(energies)
 
 !Arguments ------------------------------------
-!scalars
  class(energies_type),intent(out) :: energies
 ! *************************************************************************
 
 !@energies_type
 
  energies%e_chempot     = zero
- energies%e_constrained_dft    = zero
+ energies%e_constrained_dft = zero
  energies%e_corepsp     = zero
  energies%e_corepspdc   = zero
  energies%e_dc          = zero
@@ -388,7 +379,6 @@ end subroutine energies_copy
 !----------------------------------------------------------------------
 
 !!****f* m_energies/energies_to_array
-!!
 !! NAME
 !! energies_to_array
 !!
@@ -399,8 +389,6 @@ end subroutine energies_copy
 !! INPUTS
 !!   option= 1: copy energies datastructure into an array
 !!   option=-1: copy an array into a energies datastructure
-!!
-!! OUTPUT
 !!
 !! SIDE EFFECTS
 !!   energies <type(energies_type)>=energies stored in a datastructure
@@ -545,7 +533,6 @@ end subroutine energies_to_array
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
 !!  usewvl= 0 for PW calculation; =1 for WVL calculation
 !!
-!!
 !! OUTPUT
 !!  optdc=option for double counting scheme
 !!  eint=internal energy with direct scheme
@@ -553,7 +540,7 @@ end subroutine energies_to_array
 !!
 !! SOURCE
 
- subroutine energies_eval_eint(energies,dtset,usepaw,optdc,eint,eintdc)
+ subroutine energies_eval_eint(energies, dtset, usepaw, optdc, eint, eintdc)
 
 !Arguments ------------------------------------
 !scalars
@@ -561,13 +548,11 @@ end subroutine energies_to_array
  type(dataset_type),intent(in) :: dtset
  integer,intent(in) :: usepaw
  integer , intent(out) :: optdc
- real(dp), intent(out) :: eint
- real(dp), intent(out) :: eintdc
+ real(dp), intent(out) :: eint, eintdc
 
 !Local variables-------------------------------
 !scalars
- logical :: positron
- logical :: wvlbigdft=.false.
+ logical :: positron, wvlbigdft
 ! *************************************************************************
 
 !If usewvl: wvlbigdft indicates that the BigDFT workflow will be followed

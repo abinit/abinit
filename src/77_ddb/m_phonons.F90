@@ -50,7 +50,7 @@ module m_phonons
  use m_dynmat,          only : gtdyn9, dfpt_phfrq, dfpt_prtph, &
                                pheigvec_normalize, massmult_and_breaksym, phdispl_from_eigvec, phangmom_from_eigvec
  use m_atprj,           only : atprj_type
- use m_bz_mesh,         only : isamek, make_path, kpath_t, kpath_new
+ use m_bz_mesh,         only : isamek, make_path, kpath_t
  use m_ifc,             only : ifc_type
  use m_anaddb_dataset,  only : anaddb_dataset_type
  use m_kpts,            only : kpts_ibz_from_kptrlatt, get_full_kgrid, kpts_map, kpts_timrev_from_kptopt
@@ -192,7 +192,7 @@ module m_phonons
 !!
 !! FUNCTION
 !!  This object stores ph eigenvalues and eigenvectors in the IBZ and provides methods
-!!  to compute the corresponding quantites in the full BZ using symmetries.
+!!  to compute the corresponding quantities in the full BZ using symmetries.
 !!  Useful for very intensive loops of q-points in the BZ in which the call to ifc_fourq
 !!  may become a significant bottleneck.
 !!  Note that IBZ quantities are memory-distributed inside the MPI communicator comm.
@@ -218,7 +218,7 @@ module m_phonons
    integer :: natom, natom3
 
    logical :: use_ifc_fourq = .False.
-   ! Debuggin flag. If True, replace symmetrization with call to ifc_fourq.
+   ! Debugging flag. If True, replace symmetrization with call to ifc_fourq.
 
    integer :: requests(2)
    ! MPI requests
@@ -882,7 +882,7 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
    ABI_MALLOC(bz2ibz, (nqbz))
    bz2ibz = bz2ibz_smap(1,:)
 
-   call htetra_init(htetraq, bz2ibz, crystal%gprimd, qlatt, qbz, nqbz, qibz, phdos%nqibz, ierr, errstr, comm)
+   call htetraq%init(bz2ibz, crystal%gprimd, qlatt, qbz, nqbz, qibz, phdos%nqibz, ierr, errstr, comm)
    !call cwtime_report(" init_tetra", cpu, wall, gflops)
    ABI_CHECK(ierr == 0, errstr)
    ABI_FREE(bz2ibz)
@@ -1442,7 +1442,7 @@ end subroutine zacharias_supercell_make
 !!      option == 2 =>  populate them according to a default amplitude
 !!      option == 3 =>  populate according to their modulus squared
 !!      option == 4 =>  USER defined value(s), require namplitude and amplitude
-!!   nconfig = numer of requested configurations
+!!   nconfig = number of requested configurations
 !!   rlatt = matrix of conversion for supercell (3 0 0   0 3 0   0 0 3 for example)
 !!   temperature_K =  temperature in Kelvin
 !!   nqpt = number of q-point
@@ -2495,7 +2495,7 @@ end subroutine phonons_ncwrite
 !scalars
  integer :: nphmodes, iq, iunit, imod, icomp
  real(dp) :: dummy
- character(len=300) :: formt
+ character(len=300) :: fmt
  character(len=500) :: msg
 ! *************************************************************************
 
@@ -2514,9 +2514,9 @@ end subroutine phonons_ncwrite
  write (iunit, '(a,i0)')  '# number_of_phonon_modes ', nphmodes
  write (iunit, '(a)')  '# '
 
- write (formt,'(a,i0,a)') "(I5, ", nphmodes, "E20.10)"
+ write (fmt,'(a,i0,a)') "(I5, ", nphmodes, "E20.10)"
  do iq= 1, nqpts
-   write (iunit, formt)  iq, phfreq(:,iq)
+   write (iunit, fmt)  iq, phfreq(:,iq)
  end do
 
  close(iunit)
@@ -2534,15 +2534,15 @@ end subroutine phonons_ncwrite
    write (iunit, '(a,i0)')  '# number_of_phonon_modes ', nphmodes
    write (iunit, '(a)')     '# '
 
-   !write (formt,'(a,I3,a)') "( ", nphmodes, "(2E20.10,2x))"
-   formt = "(2E20.10,2x)"
+   !write (fmt,'(a,I3,a)') "( ", nphmodes, "(2E20.10,2x))"
+   fmt = "(2E20.10,2x)"
 
    do iq = 1, nqpts
      write (iunit, '(a, i0)') '# iq ', iq
      do imod = 1, nphmodes
        write (iunit, '(a, i0)') '# imode ', imod
        do icomp = 1, nphmodes
-         write (iunit, formt, ADVANCE='NO') phdispl_cart(:,icomp,imod,iq)
+         write (iunit, fmt, ADVANCE='NO') phdispl_cart(:,icomp,imod,iq)
        end do
        write (iunit, '(a)') ' '
      end do
@@ -2563,10 +2563,10 @@ end subroutine phonons_ncwrite
  write (iunit, '(a,i0)')  '# number_of_phonon_modes ', nphmodes
  write (iunit, '(a)')     '# '
 
- write (formt,'(a,i0,a)') "(I5, ", nphmodes, "E20.10)"
+ write (fmt,'(a,i0,a)') "(I5, ", nphmodes, "E20.10)"
  do icomp = 1, 3
    do iq= 1, nqpts
-     write (iunit, formt)  iq, phangmom(icomp,:,iq)
+     write (iunit, fmt)  iq, phangmom(icomp,:,iq)
    end do
    if (icomp /= 3) then
      write (iunit, '(a,a)') ''
@@ -2870,7 +2870,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  natom = cryst%natom
- qpath = kpath_new(dtset%ph_qpath(:,1:dtset%ph_nqpath), cryst%gprimd, dtset%ph_ndivsm)
+ call qpath%init(dtset%ph_qpath(:,1:dtset%ph_nqpath), cryst%gprimd, dtset%ph_ndivsm)
  nqpts = qpath%npts
 
  ABI_CALLOC(phfrqs, (3*natom,nqpts))
@@ -3187,7 +3187,7 @@ end subroutine dfpt_symph
 !! FUNCTION
 !!  From a given set of phonon modes, generate and output supercells and
 !!  displaced configurations of atoms.
-!!  Typically useful to follow soft modes and see distorsions of crystal structures
+!!  Typically useful to follow soft modes and see distortions of crystal structures
 !!
 !! INPUTS
 !! amu(ntypat) = mass of the atoms (atomic mass unit)

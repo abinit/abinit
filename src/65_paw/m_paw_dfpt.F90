@@ -43,7 +43,7 @@ MODULE m_paw_dfpt
  use m_paw_denpot,   only : pawdensities,pawaccenergy,pawaccenergy_nospin
  use m_paral_atom,   only : get_my_atmtab,free_my_atmtab
  use m_atm2fft,      only : dfpt_atm2fft
- use m_distribfft,   only : distribfft_type,init_distribfft_seq,destroy_distribfft
+ use m_distribfft,   only : distribfft_type
  use m_geometry,     only : metric, stresssym
  use m_efield,       only : efield_type
 
@@ -186,26 +186,21 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
    end if
    if (my_natom>0) then
      if(paw_ij1(1)%has_dijhartree==0) then
-       msg='dijhartree must be allocated!'
-       ABI_BUG(msg)
+       ABI_BUG('dijhartree must be allocated!')
      end if
      if (any(pawtab(1:ntypat)%usepawu/=0)) then
        if(paw_ij1(1)%has_dijU==0) then
-         msg='dijU must be allocated!'
-         ABI_BUG(msg)
+         ABI_BUG('dijU must be allocated!')
        end if
      end if
      if(paw_an1(1)%has_vxc==0) then
-       msg='vxc1 and vxct1 must be allocated!'
-       ABI_BUG(msg)
+       ABI_BUG('vxc1 and vxct1 must be allocated!')
      end if
      if(paw_an0(1)%has_kxc==0) then
-       msg='kxc1 must be allocated!'
-       ABI_BUG(msg)
+       ABI_BUG('kxc1 must be allocated!')
      end if
      if ((ipert1<=natom.or.ipert1==natom+1.or.ipert1==natom+10.or.ipert1==natom+11).and.paw_an0(1)%has_kxc/=2) then
-       msg='XC kernels for ground state must be in memory!'
-       ABI_BUG(msg)
+       ABI_BUG('XC kernels for ground state must be in memory!')
      end if
      if (paw_ij1(1)%qphase/=paw_an1(1)%cplex) then
        msg='paw_ij1()%qphase and paw_an1()%cplex must be equal!'
@@ -562,13 +557,11 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
    end if
    if (pawfgrtab(1)%rfgd_allocated==0) then
      if ((optgr2==1.and.qne0==1).or.optstr2==1) then
-       msg='pawgrnl: pawfgrtab()%rfgd array must be allocated!'
-       ABI_BUG(msg)
+       ABI_BUG('pawgrnl: pawfgrtab()%rfgd array must be allocated!')
      end if
    end if
    if (pawrhoij(1)%qphase/=1) then
-     msg='pawgrnl: not supposed to be called with pawrhoij(:)%qphase=2!'
-     ABI_BUG(msg)
+     ABI_BUG('pawgrnl: not supposed to be called with pawrhoij(:)%qphase=2!')
    end if
  end if
 
@@ -611,7 +604,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
      my_distribfft => distribfft
    else
      ABI_MALLOC(my_distribfft,)
-     call init_distribfft_seq(my_distribfft,'f',n2,n3,'fourdp')
+     call my_distribfft%init_seq('f',n2,n3,'fourdp')
    end if
    if (n2 == my_distribfft%n2_coarse) then
      fftn3_distrib => my_distribfft%tab_fftdp3_distrib
@@ -1944,7 +1937,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 
 !Destroy FFT tables used for parallelism
  if ((optgr2==1.or.optstr2==1).and.(.not.present(comm_fft))) then
-   call destroy_distribfft(my_distribfft)
+   call my_distribfft%free()
    ABI_FREE(my_distribfft)
  end if
 

@@ -147,17 +147,15 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  type(paw_dmft_type), intent(in)  :: paw_dmft
  type(wvl_wf_type),intent(inout) :: wvl_wfs
  type(wvl_denspot_type), intent(inout) :: wvl_den
-!no_abirules
 !nfft**(1-1/nsym) is 1 if nsym==1, and nfft otherwise
- integer, intent(in) :: irrzon(dtset%nfft**(1-1/dtset%nsym),2,  &
-   &               (dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
+ integer, intent(in) :: irrzon(dtset%nfft**(1-1/dtset%nsym),2, (dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
  integer, intent(in) :: kg(3,dtset%mpw*dtset%mkmem),npwarr(dtset%nkpt)
  real(dp), intent(in) :: gprimd(3,3)
  real(dp), intent(in), target :: cg(2,mcg)
  real(dp), intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
 !nfft**(1-1/nsym) is 1 if nsym==1, and nfft otherwise
  real(dp), intent(in) :: phnons(2,(dtset%ngfft(1)*dtset%ngfft(2)*dtset%ngfft(3))**(1-1/dtset%nsym),  &
-&                                 (dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
+                                  (dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
  real(dp), intent(in) :: rprimd(3,3)
  real(dp), intent(out) :: rhor(dtset%nfft,dtset%nspden),rhog(2,dtset%nfft)
 
@@ -195,7 +193,6 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  real(dp), ABI_CONTIGUOUS pointer :: rhoaug_my(:,:,:)   => null()
  real(dp), ABI_CONTIGUOUS pointer :: wfraug(:,:,:,:)    => null()
  real(dp), ABI_CONTIGUOUS pointer :: cg_k(:,:) => null()
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -778,8 +775,8 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                    !$OMP PARALLEL DO PRIVATE(ipw,cwftmp)
                    do ipw=1,npw_k
                      cwftmp=-cwavef(2,ipw+(ib-1)*npw_k,1)*kg_k_cart_block(ipw)
-                     cwavef(2,ipw,1)=cwavef(1,ipw+(ib-1)*npw_k,1)*kg_k_cart_block(ipw)
-                     cwavef(1,ipw,1)=cwftmp
+                     cwavef(2,ipw+(ib-1)*npw_k,1)=cwavef(1,ipw+(ib-1)*npw_k,1)*kg_k_cart_block(ipw)
+                     cwavef(1,ipw+(ib-1)*npw_k,1)=cwftmp
                    end do
                  end do
                  if (my_nspinor==2) then
@@ -788,8 +785,8 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                      !$OMP PARALLEL DO PRIVATE(ipw,cwftmp)
                      do ipw=1,npw_k
                        cwftmp=-cwavef(2,ipw+(ib-1)*npw_k,2)*kg_k_cart_block(ipw)
-                       cwavef(2,ipw,2)=cwavef(1,ipw+(ib-1)*npw_k,2)*kg_k_cart_block(ipw)
-                       cwavef(1,ipw,2)=cwftmp
+                       cwavef(2,ipw+(ib-1)*npw_k,2)=cwavef(1,ipw+(ib-1)*npw_k,2)*kg_k_cart_block(ipw)
+                       cwavef(1,ipw+(ib-1)*npw_k,2)=cwftmp
                      end do
                    end do
                  end if
@@ -798,12 +795,12 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                  do ib=1,blocksize
                    do ipw=1,npw_k
                      cwftmp=-cwavef(2,ipw+(ib-1)*npw_k,1)*kg_k_cart_block(ipw)
-                     cwavef(2,ipw,1)=cwavef(1,ipw+(ib-1)*npw_k,1)*kg_k_cart_block(ipw)
-                     cwavef(1,ipw,1)=cwftmp
+                     cwavef(2,ipw+(ib-1)*npw_k,1)=cwavef(1,ipw+(ib-1)*npw_k,1)*kg_k_cart_block(ipw)
+                     cwavef(1,ipw+(ib-1)*npw_k,1)=cwftmp
                      if (my_nspinor==2) then
                        cwftmp=-cwavef(2,ipw+(ib-1)*npw_k,2)*kg_k_cart_block(ipw)
-                       cwavef(2,ipw,2)=cwavef(1,ipw+(ib-1)*npw_k,2)*kg_k_cart_block(ipw)
-                       cwavef(1,ipw,2)=cwftmp
+                       cwavef(2,ipw+(ib-1)*npw_k,2)=cwavef(1,ipw+(ib-1)*npw_k,2)*kg_k_cart_block(ipw)
+                       cwavef(1,ipw+(ib-1)*npw_k,2)=cwftmp
                      end if
                    end do
                  end do
@@ -1105,7 +1102,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  end if
 
  select case (ioption)
- case(0, 1)
+ case (0, 1)
    call symrhg(1,gprimd,irrzon,mpi_enreg,dtset%nfft,nfftot,dtset%ngfft,dtset%nspden,dtset%nsppol,dtset%nsym,&
                phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel,dtset%tnons)
    if(ioption==1)then
@@ -1117,7 +1114,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
        rhog(:,ifft)=1.0d0/2.0d0*rhog(:,ifft)
      end do
    end if
- case(2)
+ case (2)
    ABI_BUG('kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.')
    !call symtaug(1,gprimd,irrzon,mpi_enreg,dtset%nfft,nfftot,dtset%ngfft,dtset%nspden,dtset%nsppol,dtset%nsym,&
    !dtset%paral_kgb,phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel)
@@ -2408,10 +2405,8 @@ end subroutine read_atomden
 !! atomrgrid(natomgrmax,ntypat)
 !! density(natomgrmax,ntypat)
 !!
-!! OUTPUT
-!! rho(ngrid) : input/output density array
-!!
 !! SIDE EFFECTS
+!! rho(ngrid): input/output density array
 !!
 !! NOTES
 !! There are two ways to compile the proto density in real space
@@ -2430,11 +2425,10 @@ end subroutine read_atomden
 !! average, since there is no preferred direction without any
 !! external field (and it's simpler)
 !!
-!!
 !! SOURCE
 
 subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_pos, &
-&                  natomgr,natomgrmax,atomrgrid,density,prtvol,calctype)
+                   natomgr,natomgrmax,atomrgrid,density,prtvol,calctype)
 
 !Arguments ------------------------------------
 !scalars
@@ -2467,8 +2461,6 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
  real(dp),allocatable :: equiv_atom_dist(:,:),equiv_atom_pos(:,:,:),rho_temp(:,:)
  real(dp),allocatable :: dp_1d_dummy(:),dp_2d_dummy(:,:),ypp(:)
  real(dp),allocatable :: x_fit(:),y_fit(:)
-
-
 ! ************************************************************************
 
 !initialise and check parallel execution
@@ -2767,7 +2759,7 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
  ABI_SFREE(equiv_atom_pos)
  ABI_SFREE(equiv_atom_dist)
 
- end subroutine atomden
+end subroutine atomden
 !!***
 
 end module m_mkrho

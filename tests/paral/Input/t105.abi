@@ -19,6 +19,7 @@ tolvrs 1.0d-12
 nband     22
 nbdbuf 4
 occopt 3 tsmear 2000 K
+nblock_lobpcg 1
 
 ##### PHYSICAL PARAMETERS
 nspinor 2
@@ -85,7 +86,6 @@ paral_kgb 1
 np_spkpt 4
 npband 2
 npfft 1
-bandpp 11
 
 prtwf 0
 

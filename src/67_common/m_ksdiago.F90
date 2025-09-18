@@ -241,7 +241,7 @@ module m_ksdiago
   ! TODO Not implemented
 
   real(dp) :: abstol
-   ! used fro RANGE= "V", "I", and "A" when do_full_diago=.FALSE.
+   ! used for RANGE= "V", "I", and "A" when do_full_diago=.FALSE.
    ! The absolute error tolerance for the eigenvalues. An approximate eigenvalue is accepted
    ! as converged when it is determined to lie in an interval [a,b] of width less than or equal to
    !
@@ -490,9 +490,9 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
  end if
 
  call initmpi_seq(mpi_enreg_seq) ! Fake MPI_type for sequential part.
- call init_distribfft_seq(mpi_enreg_seq%distribfft, 'c', ngfftc(2), ngfftc(3), 'all')
+ call mpi_enreg_seq%distribfft%init_seq('c', ngfftc(2), ngfftc(3), 'all')
  if (pawfgr%usefinegrid /= 0) then
-   call init_distribfft_seq(mpi_enreg_seq%distribfft, 'f', pawfgr%ngfft(2), pawfgr%ngfft(3), 'all')
+   call mpi_enreg_seq%distribfft%init_seq('f', pawfgr%ngfft(2), pawfgr%ngfft(3), 'all')
  end if
 
  spin  = Diago_ctl%spin
@@ -1082,9 +1082,9 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
 
  ! MPI_type for sequential part.
  call initmpi_seq(mpi_enreg_seq)
- call init_distribfft_seq(mpi_enreg_seq%distribfft, 'c', ngfftc(2), ngfftc(3), 'all')
+ call mpi_enreg_seq%distribfft%init_seq('c', ngfftc(2), ngfftc(3), 'all')
  if (pawfgr%usefinegrid /= 0) then
-   call init_distribfft_seq(mpi_enreg_seq%distribfft, 'f', pawfgr%ngfft(2), pawfgr%ngfft(3), 'all')
+   call mpi_enreg_seq%distribfft%init_seq('f', pawfgr%ngfft(2), pawfgr%ngfft(3), 'all')
  end if
 
  nspinor = dtset%nspinor; nsppol = dtset%nsppol; nspden = dtset%nspden
@@ -1984,7 +1984,7 @@ end subroutine ugb_collect_cprj
 !!  hyb_from_wfk_file
 !!
 !! FUNCTION
-!!  Read the WFK file compute with HYBRID functionql
+!!  Read the WFK file compute with HYBRID functional
 !!
 !! SOURCE
 

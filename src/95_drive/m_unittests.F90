@@ -61,7 +61,7 @@ contains
 !!
 !! FUNCTION
 !!  Generate rprimd compatible with the point group
-!!  This is only for testing porposes
+!!  This is only for testing purposes
 !!
 
 function rprimd_from_ptgroup(ptgroup) result(rprim)
@@ -259,7 +259,7 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, prtvol, comm)
  end if
 
  ! Initialize new tetrahedra
- call htetra_init(htetraq, bz2ibz(1,:), cryst%gprimd, qlatt, qbz, nqbz, qibz, nqibz, ierr, errstr, comm)
+ call htetraq%init(bz2ibz(1,:), cryst%gprimd, qlatt, qbz, nqbz, qibz, nqibz, ierr, errstr, comm)
  if (prtvol > 0) then
    call htetraq%print(std_out)
    call cwtime_report(" init_htetra", cpu, wall, gflops)
@@ -673,7 +673,7 @@ subroutine tetra_zinv_convergence(ptgroup, use_symmetries, comm)
    rlatt = new_qptrlatt; call matr3inv(rlatt, qlatt)
 
    ! Initialize new tetrahedra
-   call htetra_init(htetraq, bz2ibz(1,:), cryst%gprimd, qlatt, qbz, nqbz, qibz, nqibz, ierr, errstr, comm)
+   call htetraq%init(bz2ibz(1,:), cryst%gprimd, qlatt, qbz, nqbz, qibz, nqibz, ierr, errstr, comm)
    call htetraq%print(std_out)
    call cwtime_report(" init_htetra", cpu, wall, gflops)
 

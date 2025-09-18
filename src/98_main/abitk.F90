@@ -45,7 +45,7 @@ program abitk
  use m_specialmsg,     only : herald
  use m_matrix,         only : matr3inv
  use m_numeric_tools,  only : arth
- use m_bz_mesh,        only : kpath_new, kpath_t
+ use m_bz_mesh,        only : kpath_t
  use m_unittests,      only : tetra_unittests, kptrank_unittests, tetra_zinv_convergence
  use m_argparse,       only : get_arg, get_arg_list, parse_kargs
  use m_common,         only : ebands_from_file, crystal_from_file
@@ -283,7 +283,7 @@ program abitk
 
    if (command == "ebands_edos") then
      edos = ebands%get_edos(cryst, intmeth, step, broad, comm)
-     call edos%print(std_out, header="Electron DOS")
+     call edos%print([std_out], header="Electron DOS")
      out_path = strcat(basename(path), "_EDOS")
      call wrtout(std_out, sjoin("Writing electron DOS to file:", out_path))
      call edos%write(out_path)
@@ -317,7 +317,7 @@ program abitk
    ABI_MALLOC(bounds, (3, 5))
    bounds = reshape([zero, zero, zero, half, zero, zero, zero, half, zero, zero, zero, zero, zero, zero, half], [3,5])
    !ABI_CHECK(get_args_from_string("bounds", bounds, msg, default="[0,0,0,1/2,0,0,0,1/2]") == 0, msg)
-   kpath = kpath_new(bounds, cryst%gprimd, ndivsm)
+   call kpath%init(bounds, cryst%gprimd, ndivsm)
    ABI_FREE(bounds)
 
    call kpath%print([std_out], header="Interpolating energies on k-path")
@@ -344,7 +344,7 @@ program abitk
    call get_path_ebands_cryst(other_path, other_ebands, other_cryst, comm, argpos=3)
 
    ! Interpolate band energies on the path with star-functions
-   kpath = kpath_new(other_ebands%kptns, other_cryst%gprimd, -1)
+   call kpath%init(other_ebands%kptns, other_cryst%gprimd, -1)
 
    call parse_skw_params(skw_params)
    ebands_kpath = ebands%interp_kpath(cryst, kpath, skw_params, [1, ebands%mband], comm)
@@ -418,7 +418,7 @@ program abitk
    ABI_CHECK(get_arg("broad", broad, msg, default=0.06 * eV_Ha) == 0, msg)
 
    edos = ebands%get_edos(cryst, intmeth, step, broad, comm)
-   call edos%print(std_out, header="Electron DOS")
+   call edos%print([std_out], header="Electron DOS")
    call edos%get_carriers(ntemp, kTmesh, mu_e, n_ehst)
 
    !write(msg, "(a16,a32,a32)") 'Temperature [K]', 'e/h density [cm^-3]', 'e/h mobility [cm^2/Vs]'

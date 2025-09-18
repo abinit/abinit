@@ -32,7 +32,7 @@ mixesimgf -59.00 +80.0 -20.0    # Must be coherent with the occupation numbers
  npimage 3
  np_spkpt 4
  npband 2
- bandpp 1 # maybe not the most efficient choice
+ nblock_lobpcg 16 # maybe not the most efficient choice
 
 ###########################################################################
 #Common to all images
