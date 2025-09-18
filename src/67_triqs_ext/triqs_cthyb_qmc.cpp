@@ -25,7 +25,6 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
                      complex<double> *moments_self_1, complex<double> *moments_self_2, complex<double> *occ, complex<double> *eu,
                      char *fname_data, char *fname_dataw, char *fname_histo) {
 
-  int ndim = num_orbitals / 2;
   string qmc_data_fname  = string(fname_data);
   string qmc_data_fnamew = string(fname_dataw);
   string hist_fname = string(fname_histo);
@@ -101,20 +100,19 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
   paramCTQMC.pauli_prob = pauli_prob;
 #endif
 
-  int restart = (exists(qmc_data_fname) && read_data == 1 ? 1 : 0);
+  int restart = (exists(qmc_data_fname) && read_data > 0 ? read_data : 0);
 
   file qmc_data_hfile;
 
 #if defined HAVE_TRIQS_v4_0
-  if (restart == 1 && rank == 0) {
+  if (restart > 0 && rank == 0) {
 
     // Check if the configuration file can be read
     qmc_data_hfile = {qmc_data_fname,'r'};
     group grp = qmc_data_hfile;
-    int err = -1;
     double beta_;
     gf_struct_t gf_struct_;
-    int nbins_,nproc_;
+    int nproc_;
 
     h5_read(grp,"beta",beta_);
     h5_read(grp,"gf_struct",gf_struct_);
@@ -137,14 +135,14 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
 
     if (restart == 0) qmc_data_hfile.close();
 
-    if (restart == 1) cout << endl << "   == Reading CTQMC data from file " << qmc_data_fname << endl;
+    if (restart > 0) cout << endl << "   == Reading CTQMC data from file " << qmc_data_fname << endl;
   }
 
   MPI_Bcast(&restart,1,MPI_INTEGER,0,comm);
 
-  if (restart == 1) {
+  if (restart > 0) {
 
-    therm = ntherm_restart;
+    if (restart == 1) therm = ntherm_restart;
     std::vector<int> sendcounts(nproc);
 
     if (rank == 0) {

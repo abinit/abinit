@@ -94,7 +94,7 @@ dmft_triqs_epsilon 1d-2
 
 dmft_triqs_entropy 1
 dmft_triqs_compute_integral 1
-dmft_triqs_gaussorder 2
+dmft_triqs_gaussorder 3
 
 #Definition of DFT+U
 usepawu1    4           #
