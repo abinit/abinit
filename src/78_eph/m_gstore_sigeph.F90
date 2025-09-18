@@ -132,8 +132,8 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
 
  ! The Fan-Migdal SE requires |g(k,q)| in the phonon representation but
  ! to compute the DW term in the RIA, we need complex g in the atom representation.
- !gvals_vname = "gvals"
- gvals_vname = "gvals_ks" ! TODO: Input variable?
+ gvals_vname = "gvals"
+ !gvals_vname = "gvals_ks" ! TODO: Input variable?
  call gstore%from_ncpath(dtfil%filgstorein, with_cplex1, dtset, cryst, ebands, ifc, comm, &
                          with_gmode="phonon", gvals_vname=gvals_vname, read_dw=.True.)
 
@@ -369,16 +369,14 @@ subroutine write_results__(ntemp, gqk)
  integer,intent(in) :: ntemp
  type(gqk_t),intent(in) :: gqk
  integer,parameter :: max_ntemp = 50
-#if 1
- integer :: band_k,ik_ibz,ib_val,ib_cond,jj, ideg,ib,it,ii,iw,nstates
+ integer :: band_k,ik_ibz,ib_val,ib_cond,jj !,ideg,ib,it,ii,iw,nstates
  !integer :: nq_ibzk_eff, nelem, imyq, iq_ibz_k, sr_ncid
  !logical :: iwrite
  real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond,qpe_oms,qpe_oms_val,qpe_oms_cond
  !real(dp) :: invsig2fmts, tau, ravg2
- complex(dpc) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2,cavg3,cavg4
+ complex(dpc) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond !,cavg1,cavg2,cavg3,cavg4
  !character(len=5000) :: msg
- integer :: grp_ncid, ncerr
-#endif
+ !integer :: grp_ncid, ncerr
 !arrays
  real(dp) :: kcalc(3)
  !integer, allocatable :: recvcounts(:), displs(:), nq_rank(:), kq_symtab(:,:), my_kq_symtab(:,:)
@@ -441,6 +439,7 @@ subroutine write_results__(ntemp, gqk)
        end if
      end if
 
+     ! Loop over bands for this k-point and spin
      do in_k=1,gqk%nb ! gqk%nb_k
        !print *, "Re SE (eV), Z:", real(vals_e0ks(it, in_k, ikcalc)) * Ha_eV, real(dvals_de0ks(it, in_k, ikcalc))
        band_k = in_k - gqk%bstart + 1

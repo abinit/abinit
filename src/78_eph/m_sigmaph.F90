@@ -4756,6 +4756,7 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
      end if
    end if
 
+   ! Loop over bands for this k-point and spin
    do ibc=1,self%nbcalc_ks(ikcalc, spin)
      band_ks = self%bstart_ks(ikcalc, spin) + ibc - 1
      kse = ebands%eig(band_ks, ik_ibz, spin)
