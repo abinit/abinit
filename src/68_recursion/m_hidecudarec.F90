@@ -70,7 +70,6 @@ CONTAINS !===========================================================
 #if defined HAVE_GPU_CUDA
 subroutine prt_mem_usage(nptrec,nfft)
 
-  implicit none
 !Arguments ------------------------------------
   integer,intent(in) :: nptrec,nfft
 !Local ---------------------------
@@ -128,8 +127,6 @@ end subroutine prt_mem_usage
 
 subroutine InitRecGPU_0(recgpu,mpi_ab)
 
- implicit none
-
 !Arguments ------------------------------------
  type(MPI_type),intent(in) :: mpi_ab
  type(recGPU_type),intent(inout) :: recgpu
@@ -167,8 +164,6 @@ end subroutine InitRecGPU_0
 
 subroutine InitRecGPU(rset,nfft,gratio,gpudevice,calc_type)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: nfft,gpudevice
  integer,intent(in) :: gratio
@@ -186,8 +181,6 @@ subroutine InitRecGPU(rset,nfft,gratio,gpudevice,calc_type)
 
 
  call InitGPU(gpuinfo,gpudevice)
- !-- look if it is possible to set devices CUDA compatible
- call set_dev(gpudevice)
  if(gpudevice>-1)then
    !--Take the approximate use of memory to compute the number of points on any GPU
    if(rset%tronc)then
@@ -259,8 +252,6 @@ end subroutine InitRecGPU
 #if defined HAVE_GPU_CUDA
 
 subroutine cudarec(rset,exppot,an,bn2,beta,trotter,tolrec,gratio,ngfft,max_rec)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in)     :: trotter,gratio
@@ -352,8 +343,6 @@ end subroutine cudarec
 
 subroutine CleanRecGPU(recgpu,load)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in)  :: load
  type(recGPU_type),intent(inout) :: recgpu
@@ -372,7 +361,6 @@ subroutine CleanRecGPU(recgpu,load)
      ABI_FREE(recgpu%par%vcount)
    end if
  endif
- call unset_dev()
 
 end subroutine CleanRecGPU
 !!***

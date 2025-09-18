@@ -32,7 +32,7 @@ MODULE m_numeric_tools
 
  private
 
- public :: arth                  ! Return an arithmetic progression
+ public :: arth                  ! Return an arithmetic progression.
  public :: linspace              ! Similar to the above but with start, stop and num of division
  public :: geop                  ! Return a geometric progression
  public :: reverse               ! Reverse a 1D array *IN PLACE*
@@ -50,7 +50,7 @@ MODULE m_numeric_tools
  public :: imax_loc              ! Index of maxloc on an array returned as scalar instead of array-valued quantity
  public :: imin_loc              ! Index of minloc on an array returned as scalar instead of array-valued quantity
  public :: lfind                 ! Find the index of the first occurrence of .True. in a logical array.
- public :: list2blocks           ! Given a list of integers, find the number of contiguos groups of values.
+ public :: list2blocks           ! Given a list of integers, find the number of contiguous groups of values.
  public :: mask2blocks           ! Find groups of .TRUE. elements in a logical mask.
  public :: linfit                ! Perform a linear fit, y = ax + b, of data
  public :: llsfit_svd            ! Linear least squares fit with SVD of an user-defined set of functions
@@ -80,6 +80,8 @@ MODULE m_numeric_tools
  public :: isordered             ! Check the ordering of a sequence.
  public :: wrap2_zero_one        ! Transforms a real number in a reduced number in the interval [0,1[ ! where 1 is not included (tol12)
  public :: wrap2_pmhalf          ! Transforms a real number in areduced number in the interval ]-1/2,1/2] ! where -1/2 is not included (tol12)
+ public :: interpol1d            ! Linear interpolation in 1D
+ public :: interpol1d_c          ! Linear interpolation in 1D for complex data
  public :: interpol3d_0d         ! Linear interpolation in 3D
  public :: interpol3d_1d         ! Linear interpolation in 3D for an array
  public :: interpol3d_indices    ! Computes the indices in a cube which are neighbors to the point to be interpolated in interpol3d
@@ -878,7 +880,7 @@ end function isdiagmat_int
 !!  isdiagmat_rdp
 !!
 !! FUNCTION
-!!  True if matrix mat is diagonal withing the given absolute tolerance (default: tol12)
+!!  True if matrix mat is diagonal within the given absolute tolerance (default: tol12)
 !!
 !! SOURCE
 
@@ -1404,7 +1406,6 @@ pure function is_integer_0d(rr,tol) result(ans)
  logical :: ans
 !arrays
  real(dp),intent(in) :: rr
-
 ! *************************************************************************
 
  ans=(ABS(rr-NINT(rr))<tol)
@@ -1434,7 +1435,6 @@ pure function is_integer_1d(rr,tol) result(ans)
  logical :: ans
 !arrays
  real(dp),intent(in) :: rr(:)
-
 ! *************************************************************************
 
  ans=ALL((ABS(rr-NINT(rr))<tol))
@@ -1824,7 +1824,6 @@ integer pure function lfind(mask, back)
 !scalars
  integer :: ii,nitems
  logical :: do_back
-
 !************************************************************************
 
  do_back = .False.; if (present(back)) do_back = back
@@ -1856,7 +1855,7 @@ end function lfind
 !!  list2blocks
 !!
 !! FUNCTION
-!!  Given a list of integers, find the number of contiguos groups of values.
+!!  Given a list of integers, find the number of contiguous groups of values.
 !!  and returns the set of indices that can be used to loop over these groups
 !!  Example list = [1,2,3,5,6] --> blocks = [[1,3], [4,5]]
 !!
@@ -1887,7 +1886,6 @@ subroutine list2blocks(list,nblocks,blocks)
  integer :: ii,nitems
 !arrays
  integer :: work(2,size(list))
-
 !************************************************************************
 
  nitems = size(list)
@@ -1924,7 +1922,7 @@ end subroutine list2blocks
 !!  mask2blocks
 !!
 !! FUNCTION
-!!  Give a logical mask, find the number of contiguos groups of .TRUE. values.
+!!  Give a logical mask, find the number of contiguous groups of .TRUE. values.
 !!  and return the set of indices that can be used to loop over these groups
 !!
 !! INPUTS
@@ -1955,7 +1953,6 @@ subroutine mask2blocks(mask,nblocks,blocks)
  logical :: inblock
 !arrays
  integer :: work(2,SIZE(mask))
-
 !************************************************************************
 
  ! Find first element.
@@ -2204,7 +2201,6 @@ subroutine llsfit_svd(xx,yy,sigma,nfuncs,funcs,chisq,par,var,cov,info)
  interface
   function funcs(xx,nf)
   use defs_basis
-  implicit none
   real(dp),intent(in) :: xx
   integer,intent(in) :: nf
   real(dp) :: funcs(nf)
@@ -2296,7 +2292,7 @@ end subroutine llsfit_svd
 !!  dy=error estimate
 !!
 !! NOTES
-!!  Based on the polint routine reported in Numerical Recipies
+!!  Based on the polint routine reported in Numerical Recipes
 !!
 !! SOURCE
 
@@ -2507,7 +2503,6 @@ end subroutine trapezoidal_
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: xx(:)
-
 !************************************************************************
 
  select case (nn)
@@ -2604,8 +2599,7 @@ recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,np
  real(dp) :: TOL
  character(len=500) :: msg
 !arrays
- real(dp),allocatable :: h(:),s(:)
- real(dp),allocatable :: wx(:),xx(:)
+ real(dp),allocatable :: h(:),s(:), wx(:),xx(:)
 ! *************************************************************************
 
  ierr = 0
@@ -2787,7 +2781,6 @@ subroutine ctrap(imax,ff,hh,ans)
 !scalars
  integer :: ir,ir2
  real(dp) :: endpt,sum
-
 ! *************************************************************************
 
  if (imax>=10)then
@@ -2947,7 +2940,6 @@ subroutine cspint ( ftab, xtab, ntab, a, b, y, e, work, result )
   real(dp) :: s
   real(dp) :: term
   real(dp) :: u
-
 !************************************************************************
 
   if ( ntab < 3 ) then
@@ -3093,7 +3085,6 @@ subroutine coeffs_gausslegint(xmin,xmax,x,weights,n)
  real(dp),parameter :: tol=1.d-13
  real(dp),parameter :: pi=4.d0*atan(1.d0)
  real(dp) :: z,z1,xmean,p1,p2,p3,pp,xl
-
 !************************************************************************
 
  xl=(xmax-xmin)*0.5d0
@@ -3165,7 +3156,6 @@ function simpson_cplx(npts,step,ff)
 !scalars
  integer :: ii,my_n
  complex(dpc) :: sum_even, sum_odd
-
 !************************************************************************
 
  my_n=npts; if ((npts/2)*2 == npts) my_n=npts-3
@@ -3449,17 +3439,16 @@ subroutine hermit(chmin, chmout, ierr, ndim)
 !Local variables-------------------------------
 !scalars
  integer,save :: mmesgs=20,nmesgs=0
- integer :: idim,merrors,nerrors
+ integer :: idim,max_errors,nerrors
  real(dp),parameter :: eps=epsilon(0.0d0)
- real(dp) :: ch_im,ch_re,moduls,tol
+ real(dp) :: ch_im,ch_re,modules,tol
  character(len=500) :: msg
-
 ! *************************************************************************
 
  tol=4096.0d0*eps
 
  ierr=0
- merrors=0
+ max_errors=0
 
 !Copy matrix into possibly new location
  chmout(:)=chmin(:)
@@ -3479,7 +3468,7 @@ subroutine hermit(chmin, chmout, ierr, ndim)
    if( (abs(ch_im) > tol .and. nmesgs<mmesgs) .or. nerrors==2)then
      write(msg, '(3a,i0,a,es20.12,a,es20.12,a)' )&
      ' Input Hermitian matrix has nonzero relative Im part on diagonal:',ch10,&
-     ' for component:',idim,' Im part is: ',ch_im,', Re part is: ',ch_re,'.'
+     ' for component: ',idim,' Im part is: ',ch_im,', Re part is: ',ch_re,'.'
      call wrtout(std_out,msg)
      nmesgs=nmesgs+1
    end if
@@ -3487,25 +3476,24 @@ subroutine hermit(chmin, chmout, ierr, ndim)
    if( ( abs(ch_im) > tol8*abs(ch_re) .and. nmesgs<mmesgs) .or. nerrors==2)then
      write(msg, '(3a,i0,a,es20.12,a,es20.12,a)' )&
      ' Input Hermitian matrix has nonzero relative Im part on diagonal:',ch10,&
-     ' for component',idim,' Im part is',ch_im,', Re part is',ch_re,'.'
+     ' for component: ',idim,' Im part is',ch_im,', Re part is',ch_re,'.'
      call wrtout(std_out,msg)
      nmesgs=nmesgs+1
    end if
 
 !  compute modulus $= (\Re^2+\Im^2)^{1/2}$
-   moduls=sqrt(ch_re**2+ch_im**2)
+   modules=sqrt(ch_re**2+ch_im**2)
 
 !  set Re part to modulus with sign of original Re part
-   chmout(idim*idim+idim-1)=sign(moduls,ch_re)
+   chmout(idim*idim+idim-1)=sign(modules,ch_re)
 
 !  set Im part to 0
    chmout(idim*idim+idim)=zero
 
-   merrors=max(merrors,nerrors)
-
+   max_errors=max(max_errors,nerrors)
  end do
 
- if(merrors==2)then
+ if (max_errors==2)then
    ierr=1
    write(msg, '(3a)' )&
     'Imaginary part(s) of diagonal Hermitian matrix element(s) is too large.',ch10,&
@@ -3692,7 +3680,6 @@ subroutine pack_matrix(mat_in, mat_out, N, cplx)
 
 !Local variables-------------------------------
  integer :: isubh, i, j
-
 ! *************************************************************************
 
  isubh = 1
@@ -3733,7 +3720,6 @@ integer function check_vec_conjg(nn, vec1, vec2, abs_diff, abs_tol) result(ierr)
 !Local variables-------------------------------
  integer :: ii
  real(dp) :: my_abs_tol
-
  ! *************************************************************************
 
  my_abs_tol = tol6; if (present(abs_tol)) my_abs_tol = abs_tol
@@ -4091,7 +4077,7 @@ subroutine calculate_pade_a(a, n, z, f)
 
  do i=2,n
    do j=i,n
-     if (REAL(g(i-1,j))==zero.and.AIMAG(g(i-1,j))==zero) write(std_out,*) 'g_i(z_j)',i,j,g(i,j)
+    !  if (REAL(g(i-1,j))==zero.and.AIMAG(g(i-1,j))==zero) write(std_out,*) 'g_i(z_j)',i,j,g(i,j)
      g(i,j)=(g(i-1,i-1)-g(i-1,j)) / ((z(j)-z(i-1))*g(i-1,j))
      !write(std_out,*) 'g_i(z_j)',i,j,g(i,j)
    end do
@@ -4258,7 +4244,6 @@ subroutine remove_copies(n_in, set_in, n_out, is_equal)
   real(dp),pointer :: rpt(:)
  end type rdp1d_pt
  type(rdp1d_pt),allocatable :: Ap(:)
-
 ! *************************************************************************
 
  ABI_MALLOC(Ap,(n_in))
@@ -4328,7 +4313,6 @@ integer function denominator(dd,ierr,tolerance)
  integer,parameter :: largest_integer = HUGE(1)
  integer :: ii
  real(dp) :: my_tol
-
 !************************************************************************
 
  ii=1
@@ -4367,7 +4351,6 @@ integer function mincm(ii,jj)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ii,jj
-
 !************************************************************************
 
  if (ii==0.or.jj==0) then
@@ -4430,12 +4413,11 @@ subroutine continued_fract(nlev,term_type,aa,bb,nz,zpts,spectrum)
 !Local variables ------------------------------
 !scalars
  integer :: it
- real(dp) ::  bb_inf,bg,bu,swap
+ real(dp) ::  bb_inf,bg,bup,swap
  complex(dpc) :: aa_inf
  character(len=500) :: msg
 !arrays
  complex(dpc),allocatable :: div(:),den(:)
-
 !************************************************************************
 
  ABI_MALLOC(div,(nz))
@@ -4458,24 +4440,24 @@ subroutine continued_fract(nlev,term_type,aa,bb,nz,zpts,spectrum)
    ABI_ERROR("To be tested")
    div = zero
    if (nlev>4) then
-     bg=zero; bu=zero
+     bg=zero; bup=zero
      do it=1,nlev,2
        if (it+2<nlev) bg = bg + bb(it+2)
-       bu = bu + bb(it)
+       bup = bup + bb(it)
      end do
      bg = bg/(nlev/2+MOD(nlev,2))
-     bu = bg/((nlev+1)/2)
+     bup = bg/((nlev+1)/2)
      !if (iseven(nlev)) then
      if (.not.iseven(nlev)) then
        swap = bg
-       bg = bu
-       bu = bg
+       bg = bup
+       bup = bg
      end if
-     !write(std_out,*)nlev,bg,bu
+     !write(std_out,*)nlev,bg,bup
      !Here be careful with the sign of SQRT
      do it=1,nz
-       div(it) = half/zpts(it) * (bb(nlev)/bu)**2 * &
-&        ( (zpts(it)**2 +bu**2 -bg**2) - SQRT( (zpts(it)**2+bu**2-bg**2)**2 -four*(zpts(it)*bu)**2) )
+       div(it) = half/zpts(it) * (bb(nlev)/bup)**2 * &
+         ( (zpts(it)**2 +bup**2 -bg**2) - SQRT( (zpts(it)**2+bup**2-bg**2)**2 -four*(zpts(it)*bup)**2) )
      end do
    end if
 
@@ -4534,7 +4516,6 @@ subroutine cmplx_sphcart(carr, from, units)
  integer :: jj,ii
  real(dp) :: rho,theta,fact
  character(len=500) :: msg
-
 ! *************************************************************************
 
  select case (from(1:1))
@@ -4613,7 +4594,6 @@ subroutine pfactorize(nn,nfactors,pfactors,powers)
 !Local variables ------------------------------
 !scalars
  integer :: tnn,ifc,fact,ipow,maxpwr
-
 ! *************************************************************************
 
  powers=0; tnn=nn
@@ -4673,7 +4653,6 @@ function isordered_rdp(nn,arr,direction,tol) result(isord)
  integer :: ii
  real(dp) :: prev
  character(len=500) :: msg
-
 ! *************************************************************************
 
  prev = arr(1); isord =.TRUE.
@@ -4732,7 +4711,6 @@ pure function stats_eval(arr) result(stats)
 !scalars
  integer :: ii,nn
  real(dp) :: xx,x2_sum
-
 ! *************************************************************************
 
  stats%min   = +HUGE(one)
@@ -4792,7 +4770,6 @@ elemental subroutine wrap2_zero_one(num, red, shift)
 !scalars
  real(dp),intent(in) :: num
  real(dp),intent(out) :: red,shift
-
 ! *************************************************************************
 
  if (num>zero) then
@@ -4848,6 +4825,93 @@ end subroutine wrap2_pmhalf
 
 !----------------------------------------------------------------------
 
+!!***
+!!****f* m_numeric_tools/linear_interpolation
+!! NAME
+!! interpol1d
+!!
+!! FUNCTION
+!!  Perform linear interpolation of a set of points pts_o with values val_o
+!!  The points pts_o and pts_i are assumed to be ascending ordered arrays.
+!!
+!! INPUTS
+!!  npts_o=Number of points in the original array.
+!!  npts_i=Number of points in the interpolated array.
+!!  pts_o(npts_o)=Points in the original array.
+!!  pts_i(npts_i)=Points in the interpolated array.
+!!  val_o(npts_o)=Values at the points pts_o.
+!!
+!! OUTPUT
+!!  res(npts_i)=Interpolated values at the points pts_i.
+!!
+!! SOURCE
+pure function interpol1d(npts_o,npts_i,pts_o,pts_i,val_o) result(res)
+!Arguments ------------------------------------
+!arrays
+  integer,intent(in) :: npts_o, npts_i
+  real(dp),intent(in) :: pts_o(npts_o), pts_i(npts_i)
+  real(dp),intent(in) :: val_o(npts_o)
+  real(dp) :: res(npts_i)
+!Local variables-------------------------------
+!scalars
+  integer :: ii, jj
+  real(dp) :: x1, x2, y1, y2, slope
+! *************************************************************************
+
+  res = zero
+
+  do ii = 1, npts_i
+    do jj = 1, npts_o + 1
+      if (jj == npts_o + 1 .or. pts_i(ii) < pts_o(jj)) exit
+    end do
+    if (jj == 1) then
+      res(ii) = val_o(1)
+    else if (jj == npts_o + 1) then
+      res(ii) = val_o(npts_o)
+    else
+      x1 = pts_o(jj - 1)
+      x2 = pts_o(jj)
+      y1 = val_o(jj - 1)
+      y2 = val_o(jj)
+
+      if (x2 == x1) then
+        res(ii) = (y1 + y2)/2.0_dp
+      else
+        slope = (y2 - y1) / (x2 - x1)
+        res(ii) = y1 + slope * (pts_i(ii) - x1)
+      end if
+    end if
+  end do
+
+end function interpol1d
+! *********************************************************************
+
+pure function interpol1d_c(npts_o,npts_i,pts_o,pts_i,val_o) result(res)
+!Arguments ------------------------------------
+!arrays
+ integer,intent(in) :: npts_o, npts_i
+ real(dp),intent(in) :: pts_o(npts_o), pts_i(npts_i)
+ complex(dpc),intent(in) :: val_o(npts_o)
+ complex(dpc) :: res(npts_i)
+!Local variables-------------------------------
+ real(dp) :: val_o_r(npts_o), val_o_i(npts_o), res_r(npts_i), res_i(npts_i)
+! *************************************************************************
+
+  ! Split the complex values into real and imaginary parts.
+  val_o_r = REAL(val_o, kind=dp)
+  val_o_i = AIMAG(val_o)
+
+  ! Interpolate the real part.
+  res_r = interpol1d(npts_o, npts_i, pts_o, pts_i, val_o_r)
+
+  ! Interpolate the imaginary part.
+  res_i = interpol1d(npts_o, npts_i, pts_o, pts_i, val_o_i)
+
+  ! Combine the results back into complex form.
+  res = CMPLX(res_r, res_i, kind=dpc)
+end function interpol1d_c
+
+!!----------------------------------------------------------------------
 !!****f* m_numeric_tools/interpol3d_0d
 !! NAME
 !! interpol3d_0d
@@ -5752,7 +5816,7 @@ end subroutine nderiv
 !!  npts=Number of points used in finite difference, origin at npts/2 + 1
 !!
 !! OUTPUT
-!!  coeffient for central finite difference
+!!  coefficients for central finite difference
 !!
 !! SOURCE
 
@@ -5967,7 +6031,6 @@ subroutine findmin(dedv_1,dedv_2,dedv_predict,&
  real(dp) :: discr,ee,eep,lambda_shift,sum1,sum2,sum3,uu
  real(dp) :: uu3,vv,vv3
  character(len=500) :: msg
-
 ! *************************************************************************
 
 !DEBUG
@@ -6022,7 +6085,7 @@ subroutine findmin(dedv_1,dedv_2,dedv_predict,&
      ABI_COMMENT(msg)
      lambda_predict=0.25_dp
    end if
-!  Mimick a zero-gradient lambda, in order to avoid spurious
+!  Mimic a zero-gradient lambda, in order to avoid spurious
 !  action of the inverse hessian (the next line would be a realistic estimation)
    dedv_predict=0.0_dp
 !  dedv_predict=dedv_2+lambda_predict*(dedv_1-dedv_2)
@@ -6144,7 +6207,6 @@ subroutine kramerskronig(nomega,omega,eps,method,only_check)
  character(len=500) :: msg
 !arrays
  real(dp) :: e1kk(nomega),intkk(nomega),kk(nomega)
-
 ! *************************************************************************
 
 !Check whether the frequency grid is linear or not
@@ -6272,7 +6334,7 @@ end subroutine kramerskronig
 !! big vectors. The point is that less check is performed.
 !!
 !! MG: FIXME: Well, optized blas1 is for sure better than what you wrote!
-!! Now I dont' have time to update ref files
+!! Now I don't have time to update ref files
 !!
 !! SOURCE
 
@@ -6288,8 +6350,8 @@ function dotproduct(nv1,nv2,v1,v2)
 !Local variables-------------------------------
 !scalars
  integer :: i,j
-
 ! *************************************************************************
+
  dotproduct=zero
  do j=1,nv2
   do i=1,nv1
@@ -6334,7 +6396,6 @@ subroutine invcb(rhoarr,rspts,npts)
  real(dp) :: del,prod,rho,rhom1,rhomtrd
  logical :: test
 !character(len=500) :: message
-
 ! *************************************************************************
 
 !Loop over points : here, brute force algorithm

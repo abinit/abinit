@@ -1,5 +1,5 @@
 
-.Version 10.1.4.5 of ANADDB, released Sep 2024.
+.Version 10.1.4.3 of ANADDB, released Jul 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h14 )
+.Starting date : Wed 20 Aug 2025.
+- ( at 00h01 )
   
 
 ================================================================================
@@ -28,8 +28,8 @@
          asr         2
  Interatomic Force Constants Inputs :
       dipdip         1
-      dipqua         1
-      quadqu         1
+     dipquad         0
+    quadquad         0
      nsphere        -1
       ifcana         0
       ifcout         0
@@ -113,7 +113,6 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.240  and twall      0.240 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :      539
  greater than 80, so only write 20 of them
@@ -140,7 +139,7 @@
 
  The interatomic forces have been obtained
  Apply cutoff on IFCs. Using bisection algorithm to find initial guess for nsphere.
- Maximum nuber of atom-centered spheres: 6150
+ Maximum number of atom-centered spheres: 6150
  Using Lebedev-Laikov grid with npts: 434, qrad: 0.010
 
  <adiff>: Average difference between ab-initio frequencies and frequencies with cutoff.
@@ -164,10 +163,10 @@
 -   1586    6.0651E-02           0    0.0000E+00     4.4187E+01
 -   1587    6.0031E-02           0    0.0000E+00     4.4187E+01
 -
-- Proc.   0 individual time (sec): cpu=         58.7  wall=         58.7
+- Proc.   0 individual time (sec): cpu=         59.0  wall=         59.0
 
 ================================================================================
 
-+Total cpu time     58.716  and wall time     58.725 sec
++Total cpu time     59.042  and wall time     59.048 sec
 
- anaddb : the run completed succesfully.
+ anaddb : the run completed successfully.

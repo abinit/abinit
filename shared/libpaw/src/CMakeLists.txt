@@ -28,11 +28,12 @@ add_library(39_libpaw STATIC
   m_paw_gaussfit.F90
   m_pawxmlps.F90
   m_pawpsp.F90
+  m_paw_atom_solve.F90
   )
 
 set_target_properties(39_libpaw
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(39_libpaw
   PRIVATE
@@ -41,7 +42,7 @@ target_include_directories(39_libpaw
 
 target_include_directories(39_libpaw
   PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/modules>
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/modules>
   $<INSTALL_INTERFACE:include/libpaw>
   )
 

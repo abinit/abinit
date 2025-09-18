@@ -46,7 +46,7 @@ module m_outscfcv
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
  use m_oper,             only : oper_type,init_oper,destroy_oper
  use m_crystal,          only : crystal_t, prt_cif
- use m_results_gs,       only : results_gs_type, results_gs_ncwrite
+ use m_results_gs,       only : results_gs_type
  use m_ioarr,            only : ioarr, fftdatar_write
  use m_matlu,            only : copy_matlu,destroy_matlu,init_matlu,matlu_type
  use m_nucprop,          only : calc_efg,calc_fc
@@ -65,8 +65,7 @@ module m_outscfcv
  use m_paw_optics,       only : optics_paw,optics_paw_core
  use m_paw_tools,        only : pawprt
  use m_numeric_tools,    only : simpson_int
- use m_epjdos,           only : dos_calcnwrite, partial_dos_fractions, partial_dos_fractions_paw, &
-                                epjdos_t, epjdos_new, prtfatbands, fatbands_ncwrite
+ use m_epjdos,           only : epjdos_t
  use m_paral_atom,       only : get_my_atmtab, free_my_atmtab
  use m_io_kss,           only : outkss
  use m_multipoles,       only : multipoles_out, out1dm
@@ -272,7 +271,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  type(pawrhoij_type),pointer :: pawrhoij_all(:)
  logical :: remove_inv
  logical :: paral_atom, paral_fft, my_atmtab_allocated
- real(dp) :: e_zeeman
+ real(dp) :: e_hspinfield
  real(dp) :: dmatdum(0,0,0,0)
  real(dp) :: e_fermie, e_fermih
  type(oper_type) :: dft_occup
@@ -884,18 +883,18 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !Generate DOS using the tetrahedron method or using Gaussians
 !FIXME: Should centralize all calculations of DOS here in outscfcv
  if (dtset%prtdos>=2.or.dtset%pawfatbnd>0) then
-   dos = epjdos_new(dtset, psps, pawtab)
+   call dos%init(dtset, psps, pawtab)
 
    if (dos%partial_dos_flag>=1 .or. dos%fatbands_flag==1)then
      ! Generate fractions for partial DOSs if needed partial_dos 1,2,3,4  give different decompositions
      collect = 1 !; if (psps%usepaw==1 .and. dos%partial_dos_flag /= 2) collect = 0
      if ((psps%usepaw==0.or.dtset%pawprtdos/=2) .and. dos%partial_dos_flag>=1) then
-       call partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,collect,mpi_enreg)
+       call dos%partial_dos_fractions(crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,collect,mpi_enreg)
      end if
 
      if (psps%usepaw==1 .and. dos%partial_dos_flag /= 2) then
        ! TODO: update partial_dos_fractions_paw for extra atoms - no PAW contribution normally, but check bounds and so on.
-       call partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enreg,pawrad,pawtab)
+       call dos%partial_dos_fractions_paw(cprj,dimcprj,dtset,mcprj,mkmem,mpi_enreg,pawrad,pawtab)
      end if
 
    else
@@ -904,19 +903,19 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
 !  Here, print out fatbands for the k-points given in file appended _FATBANDS
    if (me == master .and. dtset%pawfatbnd>0 .and. dos%fatbands_flag==1) then
-     call prtfatbands(dos,dtset,ebands,dtfil%fnameabo_app_fatbands,dtset%pawfatbnd,pawtab)
+     call dos%prtfatbands(dtset,ebands,dtfil%fnameabo_app_fatbands,dtset%pawfatbnd,pawtab)
    end if
 
 !  Here, computation and output of DOS and partial DOS  _DOS
    if (dos%fatbands_flag == 0 .and. dos%prtdos /= 4) then
-     call dos_calcnwrite(dos,dtset,crystal,ebands,dtfil%fnameabo_app_dos,comm)
+     call dos%calcnwrite(dtset,crystal,ebands,dtfil%fnameabo_app_dos,comm)
    end if
 
    ! Write netcdf file with dos% results.
    if (me == master) then
      fname = trim(dtfil%filnam_ds(4))//'_FATBANDS.nc'
      NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
-     call fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid)
+     call dos%ncwrite(crystal, ebands, hdr, dtset, psps, pawtab, ncid)
      NCF_CHECK(nf90_close(ncid))
    end if
 
@@ -928,10 +927,12 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  call timab(1166,1,tsec)
 
 !Output of integrated density inside atomic spheres
- if ((dtset%prtdensph==1.and.dtset%usewvl==0) .or. sum(abs(dtset%zeemanfield)) > tol10) then
-   ABI_MALLOC(intgden,(nspden,natom))
+ if ((dtset%prtdensph==1.and.dtset%usewvl==0) .or. sum(abs(dtset%hspinfield)) > tol10) then
+   ABI_MALLOC(intgden, (nspden, natom))
+
    call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,&
-                      ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
+                      ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,dtset%qgbt,dtset%use_gbt,intgden=intgden,rhomag=rhomag)
+
    !  for rhomag:
    !    in collinear case component 1 is total density and 2 is _magnetization_ up-down
    !    in non collinear case component 1 is total density, and 2:4 are the magnetization vector
@@ -974,23 +975,23 @@ if (dtset%prt_lorbmag==1) then
      endif
    end if
 
-   if (sum(abs(dtset%zeemanfield)) > tol10) then
+   if (sum(abs(dtset%hspinfield)) > tol10) then
      if(nspden==2)then
-       e_zeeman = -half*rhomag(1,2)*dtset%zeemanfield(3)
+       e_hspinfield = -half*rhomag(1,2)*dtset%hspinfield(3)
        write (msg, "(a,E20.10,a)") " Collinear magnetization ", rhomag(1,2), &
            " (in # of spins, without 1/2 for magnetic moment) "
        call wrtout(units, msg)
      else if(nspden==4)then
-       e_zeeman = -half * (dtset%zeemanfield(1)*rhomag(1,2)& ! x
-&                         +dtset%zeemanfield(2)*rhomag(1,3)& ! y
-&                         +dtset%zeemanfield(3)*rhomag(1,4)) ! z
+       e_hspinfield = -half * (dtset%hspinfield(1)*rhomag(1,2)& ! x
+&                         +dtset%hspinfield(2)*rhomag(1,3)& ! y
+&                         +dtset%hspinfield(3)*rhomag(1,4)) ! z
        write (msg, "(a,3E20.10,a)") " Magnetization vector ", rhomag(1,2:4), &
 &            " (in # of spins, without 1/2 for magnetic moment) "
        call wrtout(units, msg)
      end if
 !TODO: this quantity should also be calculated in rhotov, and stored in
-!    results_gs%energies%e_zeeman, but for the moment it comes out 0
-     write (msg, "(a,E20.10,a)") " Zeeman energy -m.B = ", e_zeeman, " Ha"
+!    results_gs%energies%e_hspinfield, but for the moment it comes out 0
+     write (msg, "(a,E20.10,a)") " Spin magnetic energy -m.B = ", e_hspinfield, " Ha"
      call wrtout(units, msg)
    end if
  end if ! end if prtdensph or magnetic field
@@ -1001,7 +1002,7 @@ if (dtset%prt_lorbmag==1) then
  if (dtset%magconon /= 0) then
 !  calculate final value of terms for magnetic constraint: "energy" term, lagrange multiplier term, and atomic contributions
    call mag_penalty_e(dtset%magconon,dtset%magcon_lambda,mpi_enreg,&
-&   natom,nfft,ngfft,nspden,ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%spinat,dtset%typat,xred)
+&   natom,nfft,ngfft,nspden,ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%spinat,dtset%typat,xred,dtset%qgbt,dtset%use_gbt)
  end if
 
  call timab(1167,2,tsec)
@@ -1141,9 +1142,10 @@ if (dtset%prt_lorbmag==1) then
    ! Use DMFT to compute wannier function for cRPA calculation.
    if(dtset%usedmft==1) then
      write(msg,'(2a,i3)') ch10,&
-&     '  Warning: Chipsi are renormalized in datafordmft because nbandkss is used',dtset%nbandkss
+&     '  Warning: Chipsi are orthonormalized in the DMFT code because nbandkss is used, with the value ',dtset%nbandkss
      call wrtout(std_out, msg)
-     call init_dmft(crystal,dmatpawu(:,:,:,:),dtset,e_fermie,dtfil%filnam_ds(3),dtfil%fnameabo_app,paw_dmft)
+     call init_dmft(crystal,dmatpawu(:,:,:,:),dtset,e_fermie,dtfil%filctqmcdatain,dtfil%filselfin, &
+                  & dtfil%filnam_ds(3),dtfil%fnameabo_app,dtfil%ireadctqmcdata,dtfil%ireadself,paw_dmft,pawtab(:))
      call print_dmft(paw_dmft,dtset%pawprtvol)
 
 !    ==  compute chipsi
@@ -1170,8 +1172,7 @@ if (dtset%prt_lorbmag==1) then
       ! Initialize green on real axis
        call init_green(greenr,paw_dmft,opt_oper_ksloc=3,wtype='real')
 
-      ! Read self energy in imag. Matsubara freq (for double counting
-      ! and limit at high frequency)
+      ! Read self energy in imag. Matsubara freq (for double counting and asymptotic value)
        call rw_self(self,paw_dmft,prtopt=5,opt_rw=1,opt_stop=1)
 
        ABI_MALLOC(opt_selflimit,(paw_dmft%natom))
@@ -1343,7 +1344,6 @@ if (dtset%prt_lorbmag==1) then
  call timab(1154,1,tsec)
 
  ! Output of the GSR file (except when we are inside mover)
- ! Temporarily disable for CRAY
  if (me == master .and. dtset%prtgsr == 1 .and. dtset%usewvl == 0) then
    !.and. (dtset%ionmov /= 0 .or. dtset%optcell /= 0)) then
    fname = strcat(dtfil%filnam_ds(4), "_GSR.nc")
@@ -1353,18 +1353,38 @@ if (dtset%prt_lorbmag==1) then
    NCF_CHECK(crystal%ncwrite(ncid))
    NCF_CHECK(ebands%ncwrite(ncid))
    ! Add energy, forces, stresses
-   NCF_CHECK(results_gs_ncwrite(results_gs, ncid, dtset%ecut, dtset%pawecutdg))
+   NCF_CHECK(results_gs%ncwrite(ncid, dtset%ecut, dtset%pawecutdg))
+
+   ! Add info on GBT.
+   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
+     "use_gbt" &
+   ], defmode=.True.)
+   NCF_CHECK(ncerr)
+
+   ncerr = nctk_def_arrays(ncid, [ &
+     nctkarr_t("qgbt", "dp", "three") &
+   ])
+   NCF_CHECK(ncerr)
+
+   NCF_CHECK(nctk_set_datamode(ncid))
+   ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
+     "use_gbt"], &
+     [dtset%use_gbt])
+   NCF_CHECK(ncerr)
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qgbt"), dtset%qgbt))
 
    if (allocated(intgden)) then
      ! Write integrated density inside atomic spheres and ratsph(ntypat)=radius of spheres around atoms
      ncerr = nctk_def_arrays(ncid, [ &
        nctkarr_t("intgden", "dp", "number_of_components, number_of_atoms"), &
-       nctkarr_t("ratsph", "dp", "number_of_atom_species") &
+       nctkarr_t("ratsph", "dp", "number_of_atom_species"), &
+       nctkarr_t("rhomag", "dp", "two, number_of_components") &
      ], defmode=.True.)
      NCF_CHECK(ncerr)
      NCF_CHECK(nctk_set_datamode(ncid))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "intgden"), intgden))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ratsph"), dtset%ratsph))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rhomag"), rhomag))
    end if
 
    if(allocated(efg)) then
@@ -1373,7 +1393,7 @@ if (dtset%prt_lorbmag==1) then
        nctkdim_t("ndir",3),&
        nctkdim_t("natom",dtset%natom),&
        nctkdim_t("ntypat",dtset%ntypat)],defmode=.True.)
-     NCF_CHECK(ncerr) 
+     NCF_CHECK(ncerr)
      ncerr = nctk_def_arrays(ncid, [&
        nctkarr_t("quadmom", "dp", "ntypat"),&
        nctkarr_t("efg", "dp", "ndir, ndir, natom")])
@@ -1388,21 +1408,18 @@ if (dtset%prt_lorbmag==1) then
 
  call timab(1154,2,tsec)
 
- if(allocated(efg)) then
-   ABI_FREE(efg)
- end if
-
  ABI_SFREE_PTR(elfr)
  ABI_SFREE_PTR(grhor)
  ABI_SFREE_PTR(lrhor)
 
+ ABI_SFREE(efg)
  ABI_SFREE(intgden)
 
  call crystal%free()
  call ebands%free()
 
  ! Destroy atom table used for parallelism
- call free_my_atmtab(my_atmtab,my_atmtab_allocated)
+ call free_my_atmtab(my_atmtab, my_atmtab_allocated)
 
  call timab(1150,2,tsec) ! outscfcv
 

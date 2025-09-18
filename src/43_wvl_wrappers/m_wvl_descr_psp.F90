@@ -75,7 +75,6 @@ subroutine wvl_descr_psp_set(filoccup, nsppol, psps, spinat, wvl)
  use BigDFT_API, only: psp_data_merge_to_dict, psp_dict_fill_all, atomic_info, &
 &                psp_dict_analyse, atomic_data_set_from_dict, merge_input_file_to_dict
 #endif
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -163,7 +162,6 @@ subroutine wvl_descr_psp_fill(gth_params, ipsp, ixc, nelpsp, nzatom, pspunit)
 #if defined HAVE_BIGDFT
   use BigDFT_API, only: atomic_info, UNINITIALIZED, psp_from_data
 #endif
-  implicit none
 
 !Arguments ------------------------------------
   integer, intent(in) :: ipsp, pspunit, nzatom, nelpsp, ixc
@@ -306,7 +304,6 @@ subroutine wvl_descr_free(wvl)
  use BigDFT_API, only : deallocate_atoms_data
  use dynamic_memory
 #endif
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -366,7 +363,6 @@ subroutine wvl_descr_atoms_set(acell, icoulomb, natom, ntypat, typat, wvl)
 &                      astruct_set_n_atoms,astruct_set_n_types,&
 &                      allocate_atoms_nat,allocate_atoms_ntypes
 #endif
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -460,7 +456,6 @@ subroutine wvl_descr_atoms_set_sym(wvl, efield, irrzon, nsppol, nsym, phnons, &
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: astruct_set_symmetries
 #endif
-  implicit none
 
 !Arguments ------------------------------------
 !scalars

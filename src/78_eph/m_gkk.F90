@@ -53,7 +53,7 @@ module m_gkk
  use m_pawtab,         only : pawtab_type
  use m_pawfgr,         only : pawfgr_type
  use m_eig2d,          only : gkk_t, gkk_init, gkk_ncwrite, gkk_free
- use m_wfd,            only : wfd_init, wfd_t
+ use m_wfd,            only : wfd_t
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
  use m_ephtk,          only : ephtk_v1atm_to_vqnu
 
@@ -211,7 +211,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  wfd_istwfk = 1
 
  ! Initialize the wavefunction descriptors
- call wfd_init(wfd_k,cryst,pawtab,psps,keep_ur,mband,nband,nkpt,nsppol,bks_mask,&
+ call wfd_k%init(cryst,pawtab,psps,keep_ur,mband,nband,nkpt,nsppol,bks_mask,&
    nspden,nspinor,ecut,dtset%ecutsm,dtset%dilatmx,wfd_istwfk,ebands_k%kptns,ngfft,&
    dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm)
  ABI_FREE(wfd_istwfk)
@@ -221,7 +221,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  ABI_MALLOC(wfd_istwfk, (nkpt_kq))
  wfd_istwfk = 1
 
- call wfd_init(wfd_kq,cryst,pawtab,psps,keep_ur_kq,mband_kq,nband_kq,nkpt_kq,nsppol,bks_mask_kq,&
+ call wfd_kq%init(cryst,pawtab,psps,keep_ur_kq,mband_kq,nband_kq,nkpt_kq,nsppol,bks_mask_kq,&
    nspden,nspinor,ecut,dtset%ecutsm,dtset%dilatmx,wfd_istwfk,ebands_kq%kptns,ngfft,&
    dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm)
  ABI_FREE(wfd_istwfk)
@@ -460,7 +460,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
          eshift = eig0nk - dtset%dfpt_sciss
 
          call getgh1c(berryopt0,kets(:,:,ib2),cwaveprj0,h1_kets(:,:,ib2),&
-                      grad_berry,gs1c,gs_hamkq,gvnlx1,idir,ipert,(/eshift/),mpi_enreg,1,optlocal,&
+                      grad_berry,gs1c,gs_hamkq,gvnlx1,idir,ipert, [eshift], mpi_enreg,1,optlocal,&
                       optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
        end do
 
@@ -560,12 +560,10 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  ABI_FREE(kg_kq)
  ABI_FREE(ylm_k)
  ABI_FREE(ylm_kq)
-
- call gs_hamkq%free()
- call wfd_k%free()
- call wfd_kq%free()
  call pawcprj_free(cwaveprj0)
  ABI_FREE(cwaveprj0)
+
+ call gs_hamkq%free(); call wfd_k%free(); call wfd_kq%free()
 
 end subroutine eph_gkk
 !!***
@@ -593,7 +591,7 @@ end subroutine eph_gkk
 
 subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
 
- use m_bz_mesh, only : kpath_t, kpath_new
+ use m_bz_mesh, only : kpath_t
 
 !Arguments ------------------------------------
  class(dvdb_t),intent(inout) :: dvdb
@@ -639,7 +637,7 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
  bounds(:, 5) = tol3 * [+0.00000,  +0.00000, +0.00000] !  # $\Gamma$
  bounds(:, 6) = tol3 * [+0.50000,  +0.25000, +0.75000] !  # W
 
- qpath = kpath_new(bounds, dvdb%cryst%gprimd, dtset%ndivsm)
+ call qpath%init(bounds, dvdb%cryst%gprimd, dtset%ndivsm)
 
  units = [std_out, ab_out]
 
@@ -681,7 +679,7 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
  call wrtout(units, sjoin(ch10, "- Results stored in: ", out_ncpath))
  call wrtout(std_out, sjoin(" Using qpt:", ktoa(qpt)))
  !call wrtout(units, " Use `abiopen.py out_V1QAVG.nc -e` to visualize results")
- call dvdb%print(unit=std_out)
+ call dvdb%print([std_out], "", 0)
 
  ! Define FFT mesh
  ngfft = dvdb%ngfft
@@ -757,7 +755,7 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
    call dvdb%ftinterp_qpt(qpt, nfft, ngfft, v1scf, dvdb%comm_rpt)
  end if
 
- ! Compute scattering potential the in phonon representations instead ot atomic one.
+ ! Compute scattering potential the in phonon representations instead of atomic one.
  ! v1_qnu = \sum_{ka} phdispl{ka}(q,nu) D_{ka,q} V_scf(r)
  ! NOTE: prefactor 1/sqrt(2 w(q,nu)) is not included in the potentials saved to file.
  ! v1_qnu(2, nfft, nspden, natom3), v1scf(cplex, nfft, nspden, natom3)

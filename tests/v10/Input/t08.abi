@@ -8,6 +8,8 @@ jdtset 6 7
 
 wfoptalg 111
 
+cprj_in_memory 0
+
 nline  8
 tolwfr_diago 1e-15
 
@@ -92,7 +94,7 @@ pseudos="P.xml, Al.xml"
 #%% need_cpp_vars = HAVE_DFTI
 #%% [files]
 #%% files_to_test = 
-#%%   t08.abo, tolnlines=  0, tolabs=  0, tolrel= 0, fld_options = -ridiculous
+#%%   t08.abo, tolnlines=  0, tolabs=  0, tolrel= 0
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

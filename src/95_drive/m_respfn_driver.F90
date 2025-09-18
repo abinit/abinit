@@ -100,6 +100,7 @@ module m_respfn_driver
  use m_mkcore,     only : mkcore, dfpt_mkcore
  use m_dfpt_elt,   only : dfpt_eltfrxc, dfpt_eltfrloc, dfpt_eltfrkin, dfpt_eltfrhar, elt_ewald, dfpt_ewald
  use m_d2frnl,     only : d2frnl
+ use m_pstat,      only : pstat_proc
 
 #if defined HAVE_GPU
  use m_alloc_hamilt_gpu
@@ -231,7 +232,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: optcut,option,optgr0,optgr1,optgr2,optorth,optrad
  integer :: optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv
  integer :: outd2,pawbec,pawpiezo,prtbbb,psp_gencond,qzero,rdwrpaw
- integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
+ integer :: rfddk,rfelfd,rfphon,rfstrs,rf2_dkdk,rf2_dkde,rfmagn
  integer :: spaceworld,sumg0,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw,usevxctau,usevxctau_paw
  integer :: usexcnhat,use_sym,vloc_method,zero_by_symm
  logical :: has_full_piezo,has_allddk,is_dfpt=.true.,non_magnetic_xc
@@ -324,7 +325,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  asr=dtset%asr   ; chneut=dtset%chneut ; rfdir(1:3)=dtset%rfdir(1:3)
  rfddk=dtset%rfddk   ; rfelfd=dtset%rfelfd ; rfmagn=dtset%rfmagn
  rfphon=dtset%rfphon ; rfstrs=dtset%rfstrs
- rfuser=dtset%rfuser ; rf2_dkdk=dtset%rf2_dkdk ; rf2_dkde=dtset%rf2_dkde
+ rf2_dkdk=dtset%rf2_dkdk ; rf2_dkde=dtset%rf2_dkde
 
  pawbec=0  ; if(psps%usepaw==1.and.(rfphon==1.or.(rfelfd==1.or.rfelfd==3))) pawbec=1
  pawpiezo=0; if(psps%usepaw==1.and.(rfstrs/=0.or.(rfelfd==1.or.rfelfd==3))) pawpiezo=1
@@ -370,7 +371,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  if(rfphon==1)rfpert(dtset%rfatpol(1):dtset%rfatpol(2))=1
 
  if(rfddk==1)rfpert(natom+1)=1
- if(rfddk==2)rfpert(natom+6)=1
 
  if(rf2_dkdk/=0)rfpert(natom+10)=1
  if(rf2_dkde/=0)rfpert(natom+11)=1
@@ -381,10 +381,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  if(rfstrs==1.or.rfstrs==3)rfpert(natom+3)=1
  if(rfstrs==2.or.rfstrs==3)rfpert(natom+4)=1
 
- if(rfuser==1.or.rfuser==3)rfpert(natom+6)=1
- if(rfuser==2.or.rfuser==3)rfpert(natom+7)=1
-
- if(rfmagn==1) rfpert(natom+5)=1
+ if(rfmagn==1)rfpert(natom+5)=1
 
  qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
 
@@ -706,7 +703,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call paw_ij_init(paw_ij,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%pawspnorb,&
 &   natom,dtset%ntypat,dtset%typat,pawtab,has_dij=1,has_dijhartree=1,has_dijnd=has_dijnd,&
 &   has_dijso=1,has_dijU=has_diju,has_pawu_occ=1,has_exexch_pot=1,&
-&   nucdipmom=dtset%nucdipmom,&
+&   nucdipmom=dtset%nucdipmom,zora=dtset%zora,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
 
  else ! PAW vs NCPP
@@ -989,10 +986,11 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    cplex=1;ipert=0;option=1
    nzlmopt=0;if (dtset%pawnzlm>0) nzlmopt=-1
 
-   call pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,dtset%ixc,my_natom,natom,dtset%nspden,&
+   call pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,gprimd,ipert,&
+     & dtset%ixc,my_natom,natom,dtset%nspden,&
 &   ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_ij,pawang,dtset%pawprtvol,&
 &   pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,&
-&   dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp, &
+&   dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,xred,ucvol,psps%znuclpsp, &
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
 
    call timab(561,1,tsec)
@@ -1181,6 +1179,7 @@ ABI_NVTX_END_RANGE()
  if(dtset%prtvol==-level) call wrtout(std_out,' respfn: frozen wavef. and Ewald(q=0) part of 2DTE done.')
 
  call timab(136,2,tsec)
+ call pstat_proc%print(_PSTAT_ARGS_)
 
 !-----3. Initialisation of 1st response, taking into account the q vector.
 
@@ -1444,6 +1443,7 @@ ABI_NVTX_END_RANGE()
  ABI_MALLOC(eigbrd,(2,dtset%mband*dtset%nsppol,dtset%nkpt,3,natom,3,natom*dim_eigbrd))
 
  call timab(137,2,tsec)
+ call pstat_proc%print(_PSTAT_ARGS_)
 
 
 !Check whether exiting was required by the user.
@@ -1526,7 +1526,7 @@ ABI_NVTX_END_RANGE()
 !rfpert(natom+1)=0
 
 !Were 2DTE computed ?
- if(rfphon==0 .and. (rf2_dkdk/=0 .or. rf2_dkde/=0 .or. rfddk/=0 .or. rfelfd==2) .and. rfstrs==0 .and. rfuser==0 .and. rfmagn==0)then
+ if(rfphon==0 .and. (rf2_dkdk/=0 .or. rf2_dkde/=0 .or. rfddk/=0 .or. rfelfd==2) .and. rfstrs==0 .and. rfmagn==0)then
 
    write(msg,'(a,a)' )ch10,' respfn : d/dk was computed, but no 2DTE, so no DDB output.'
    call wrtout([std_out, ab_out], msg)
@@ -1659,7 +1659,7 @@ ABI_NVTX_END_RANGE()
  end if !end me == 0
 
 !Compute the other terms for AHC dynamic and AHC full
- if (.not.(rfphon==0 .and. (rf2_dkdk/=0 .or. rf2_dkde/=0.or. rfddk/=0 .or. rfelfd==2) .and. rfstrs==0 .and. rfuser==0 &
+ if (.not.(rfphon==0 .and. (rf2_dkdk/=0 .or. rf2_dkde/=0.or. rfddk/=0 .or. rfelfd==2) .and. rfstrs==0 &
 & .and. rfmagn==0)) then
    if(rfphon==1) then ! AHC can only be computed in case of phonons
 
@@ -1734,7 +1734,7 @@ ABI_NVTX_END_RANGE()
  ABI_FREE(doccde)
 
  if(me==0)then
-   if (.not.(rfphon==0 .and. (rf2_dkdk/=0 .or. rf2_dkde/=0 .or. rfddk/=0 .or. rfelfd==2) .and. rfstrs==0 .and.rfuser==0 &
+   if (.not.(rfphon==0 .and. (rf2_dkdk/=0 .or. rf2_dkde/=0 .or. rfddk/=0 .or. rfelfd==2) .and. rfstrs==0 &
 &   .and. rfmagn==0) )then
      if(rfphon==1)then
 !      Compute and print the T=0 Fan, and possibly DDW contributions to the eigenenergies.

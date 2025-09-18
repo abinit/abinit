@@ -232,7 +232,7 @@ Variable(
     topics=['Bader_expert'],
     dimensions="scalar",
     defaultval=100,
-    mnemonics="numer of INtegration PoinTs",
+    mnemonics="number of INtegration PoinTs",
     added_in_version="before_v9",
     text=r"""
 Number of radial points used for integration of the Bader charge (not too

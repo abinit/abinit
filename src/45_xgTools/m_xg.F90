@@ -39,13 +39,10 @@ module m_xg
   use m_abicore
   use defs_basis
   use m_time, only : timab
+  USE_MPI
   use m_xmpi
   use m_xomp
   use m_abi_linalg
-
-#if defined HAVE_MPI2
- use mpi
-#endif
 
 #if defined(HAVE_GPU)
   use m_gpu_toolbox
@@ -1443,13 +1440,13 @@ contains
       case (SPACE_R,SPACE_CR)
         xgBlockA__vecR => xgBlockA%vecR
         xgBlockB__vecR => xgBlockB%vecR
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockB__vecR)
+        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecR,xgBlockB__vecR)
         call abi_gpu_xcopy(1, size, c_loc(xgBlockA__vecR), incx, c_loc(xgBlockB__vecR), incy)
         !$OMP END TARGET DATA
       case(SPACE_C)
         xgBlockA__vecC => xgBlockA%vecC
         xgBlockB__vecC => xgBlockB%vecC
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecC,xgBlockB__vecC)
+        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecC,xgBlockB__vecC)
         call abi_gpu_xcopy(2, size, c_loc(xgBlockA__vecC), incx, c_loc(xgBlockB__vecC), incy)
         !$OMP END TARGET DATA
       end select
@@ -1674,7 +1671,7 @@ contains
   !! NAME
   !! xgBlock_gemmR
 
-  subroutine xgBlock_gemmR(transa, transb, alpha, xgBlockA, xgBlockB, beta, xgBlockW, comm)
+  subroutine xgBlock_gemmR(transa, transb, alpha, xgBlockA, xgBlockB, beta, xgBlockW, comm, timing)
 
     character,        intent(in   )           :: transa
     character,        intent(in   )           :: transb
@@ -1684,6 +1681,7 @@ contains
     double precision, intent(in   )           :: beta
     type(xgBlock_t),  intent(inout)           :: xgBlockW
     integer,optional, intent(in)              :: comm
+    logical,optional, intent(in)              :: timing
 
     real(dp)       :: alpha_
     complex(dpc)   :: calpha
@@ -1691,6 +1689,7 @@ contains
     character(kind=1) :: transa_,transb_
     integer           :: K
     double precision  :: tsec(2)
+    logical :: timing_
 
 #if defined HAVE_OPENMP_OFFLOAD
 #if !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
@@ -1704,7 +1703,11 @@ contains
 #endif
 #endif
 
-    call timab(tim_gemm_blas,1,tsec)
+    timing_ = .true.
+    if (present(timing)) then
+      timing_ = timing
+    end if
+    if (timing_) call timab(tim_gemm_blas,1,tsec)
 
     call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
     call xgBlock_check_gpu_option(xgBlockA,xgBlockW)
@@ -1778,7 +1781,7 @@ contains
         xgBlockA__vecR => xgBlockA%vecR
         xgBlockB__vecR => xgBlockB%vecR
         xgBlockW__vecR => xgBlockW%vecR
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR)
+        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR)
         call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
           calpha, &
           c_loc(xgBlockA__vecR), xgBlockA%LDim, &
@@ -1828,7 +1831,7 @@ contains
           xgBlockA__vecR => xgBlockA%vecR
           xgBlockB__vecR => xgBlockB%vecR
           xgBlockW__vecR => xgBlockW%vecR
-          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR)
+          !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR)
           call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, 2*K, &
             calpha, &
             c_loc(xgBlockA__vecR), 2*xgBlockA%LDim, &
@@ -1898,7 +1901,7 @@ contains
           xgBlockA__vecC => xgBlockA%vecC
           xgBlockB__vecC => xgBlockB%vecC
           xgBlockW__vecC => xgBlockW%vecC
-          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecC,xgBlockB__vecC,xgBlockW__vecC)
+          !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecC,xgBlockB__vecC,xgBlockW__vecC)
           call abi_gpu_xgemm(2, transa_, transb_, xgBlockW%rows, xgBlockW%cols, K, &
             calpha, &
             c_loc(xgBlockA__vecC), xgBlockA%LDim, &
@@ -1940,7 +1943,7 @@ contains
           xgBlockA__vecR => xgBlockA%vecR
           xgBlockB__vecR => xgBlockB%vecR
           xgBlockW__vecR => xgBlockW%vecR
-          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR)
+          !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR)
           call abi_gpu_xgemm(1, transa, transb, 2*xgBlockW%rows, xgBlockW%cols, K, &
             calpha, &
             c_loc(xgBlockA__vecR), 2*xgBlockA%LDim, &
@@ -1960,14 +1963,14 @@ contains
 
     end if
 
-    call timab(tim_gemm_blas,2,tsec)
+    if (timing_) call timab(tim_gemm_blas,2,tsec)
     ! END CALL GEMM
 
     ! MPI SUM
     if ( present(comm) ) then
-      call timab(tim_gemm_mpi,1,tsec)
+      if (timing_) call timab(tim_gemm_mpi,1,tsec)
       call xgBlock_mpi_sum(xgBlockW,comm=comm)
-      call timab(tim_gemm_mpi,2,tsec)
+      if (timing_) call timab(tim_gemm_mpi,2,tsec)
     end if
 
   end subroutine xgBlock_gemmR
@@ -1978,7 +1981,7 @@ contains
   !! NAME
   !! xgBlock_gemmC
 
-  subroutine xgBlock_gemmC(transa, transb, alpha, xgBlockA, xgBlockB, beta, xgBlockW, comm)
+  subroutine xgBlock_gemmC(transa, transb, alpha, xgBlockA, xgBlockB, beta, xgBlockW, comm, timing)
 
     character,       intent(in   ) :: transa
     character,       intent(in   ) :: transb
@@ -1988,12 +1991,18 @@ contains
     complex(kind=8), intent(in   ) :: beta
     type(xgBlock_t), intent(inout) :: xgBlockW
     integer,optional,intent(in)    :: comm
+    logical,optional,intent(in)    :: timing
 
     integer          :: K
     double precision :: tsec(2)
     character(kind=1) :: transa_,transb_
+    logical :: timing_
 
-    call timab(tim_gemm_blas,1,tsec)
+    timing_ = .true.
+    if (present(timing)) then
+      timing_ = timing
+    end if
+    if (timing_) call timab(tim_gemm_blas,1,tsec)
 
     call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
     call xgBlock_check_gpu_option(xgBlockA,xgBlockW)
@@ -2040,13 +2049,13 @@ contains
         xgBlockW%vecC, xgBlockW%LDim)
     end if
     ! END CALL GEMM
-    call timab(tim_gemm_blas,2,tsec)
+    if (timing_) call timab(tim_gemm_blas,2,tsec)
 
     ! MPI SUM
     if ( present(comm) ) then
-      call timab(tim_gemm_mpi,1,tsec)
+      if (timing_) call timab(tim_gemm_mpi,1,tsec)
       call xgBlock_mpi_sum(xgBlockW,comm=comm)
-      call timab(tim_gemm_mpi,2,tsec)
+      if (timing_) call timab(tim_gemm_mpi,2,tsec)
     end if
 
   end subroutine xgBlock_gemmC
@@ -2133,12 +2142,12 @@ contains
       select case(xgBlock%space)
       case (SPACE_R)
         xgBlock__vecR => xgBlock%vecR
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock__vecR)
+        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock__vecR)
         call abi_gpu_xpotrf(1,uplo,xgBlock%rows,c_loc(xgBlock__vecR),xgBlock%LDim,info)
         !$OMP END TARGET DATA
       case (SPACE_C)
         xgBlock__vecC => xgBlock%vecC
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock__vecC)
+        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock__vecC)
         call abi_gpu_xpotrf(2,uplo,xgBlock%rows,c_loc(xgBlock__vecC),xgBlock%LDim,info)
         !$OMP END TARGET DATA
       case (SPACE_CR)
@@ -2274,7 +2283,7 @@ contains
       case (SPACE_R)
         xgBlockA__vecR => xgBlockA%vecR
         xgBlockW__vecR => xgBlockW%vecR
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockW__vecR)
+        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecR,xgBlockW__vecR)
         call abi_gpu_xheevd(1,jobz,uplo,xgBlockA%cols, &
             c_loc(xgBlockA__vecR),xgBlockA%LDim, &
             c_loc(xgBlockW__vecR),info)
@@ -2300,7 +2309,7 @@ contains
       case (SPACE_C)
         xgBlockA__vecC => xgBlockA%vecC
         xgBlockW__vecR => xgBlockW%vecR
-        !!$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecC,xgBlockW__vecR)
+        !!$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecC,xgBlockW__vecR)
         !call abi_gpu_xheevd(2,jobz,uplo,xgBlockA%cols, &
         !    c_loc(xgBlockA__vecC),xgBlockA%LDim, &
         !    c_loc(xgBlockW__vecR),info)
@@ -2733,7 +2742,7 @@ contains
         !  !write(std_out,*) "Allocate work from", liwork, "to", int(iwork(1))
         !  call checkResize(iwork,liwork,int(iwork(1)))
         !end if
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR)
+        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR)
         call abi_gpu_xhegvd(1, itype, jobz, uplo, &
           &             xgBlockA%rows, &
           &             c_loc(xgBlockA__vecR), xgBlockA%ldim, &
@@ -2785,7 +2794,7 @@ contains
         !  !write(std_out,*) "Allocate work from", liwork, "to", int(iwork(1))
         !  call checkResize(iwork,liwork,int(iwork(1)))
         !end if
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecC,xgBlockB__vecC,xgBlockW__vecR)
+        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecC,xgBlockB__vecC,xgBlockW__vecR)
         call abi_gpu_xhegvd(2, itype, jobz, uplo, &
           &             xgBlockA%rows, &
           &             c_loc(xgBlockA__vecC), xgBlockA%ldim, &
@@ -3123,14 +3132,14 @@ contains
       case (SPACE_R,SPACE_CR)
         xgBlockA__vecR => xgBlockA%vecR
         xgBlockB__vecR => xgBlockB%vecR
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockB__vecR)
+        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecR,xgBlockB__vecR)
         call abi_gpu_xtrsm(1,side,uplo,transa,diag,fact*xgBlockB%rows,xgBlockB%cols, &
           calpha,c_loc(xgBlockA__vecR),xgBlockA%LDim,c_loc(xgBlockB__vecR),fact*xgBlockB%LDim)
         !$OMP END TARGET DATA
       case (SPACE_C)
         xgBlockA__vecC => xgBlockA%vecC
         xgBlockB__vecC => xgBlockB%vecC
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecC,xgBlockB__vecC)
+        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecC,xgBlockB__vecC)
         call abi_gpu_xtrsm(2,side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
           calpha,c_loc(xgBlockA__vecC),xgBlockA%LDim,c_loc(xgBlockB__vecC),xgBlockB%LDim)
         !$OMP END TARGET DATA
@@ -3189,7 +3198,7 @@ contains
         alpha,xgBlockA%vecC,xgBlockA%LDim,xgBlockB%vecC,xgBlockB%LDim)
 #elif defined HAVE_OPENMP_OFFLOAD
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
-      !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecC,xgBlockB__vecC)
+      !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecC,xgBlockB__vecC)
       xgBlockA__vecC => xgBlockA%vecC
       xgBlockB__vecC => xgBlockB%vecC
       call abi_gpu_xtrsm(2,side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
@@ -3756,11 +3765,11 @@ contains
 
     type(xgBlock_t) , intent(in)    :: xgBlockA,xgBlockB
     type(xgBlock_t) , intent(inout) :: xgBlockW
-    integer,intent(in) :: blocksize,me_comm
-    integer,intent(in),optional :: comm
+    integer,intent(in) :: me_comm
+    integer,intent(in),optional :: blocksize,comm
 
     logical :: multiblock
-    integer :: ierr,comm_,source,dest,tag,request
+    integer :: ierr,blocksize_,comm_,source,dest,tag,request
     integer :: iblock_left,iblock_right,iblock_mpi,nblocks_mpi,nblocks_left,nblocks_right
     integer :: shift_col,shift_row,shift_col_mpi,shift_row_mpi
     double precision :: tsec(2)
@@ -3793,16 +3802,28 @@ contains
       ABI_ERROR('cols(xgBlockB)/=nblocks_mpi*cols(xgBlockW)')
     end if
 
+    blocksize_ = xgBlockA%cols
+    if (present(blocksize)) then
+      if (mod(xgBlockA%cols,blocksize)/=0) then
+        ABI_ERROR('invalid blocksize')
+      end if
+      if (mod(xgBlockB%cols/nblocks_mpi,blocksize)/=0) then
+        ABI_ERROR('invalid blocksize')
+      end if
+      blocksize_ = blocksize
+    end if
+
     if (nblocks_mpi==1) then
 
+      ! If only one mpi process, use timing from gemm routine
       call timab(tim_gemmcyclic,2,tsec)
       call xgBlock_gemm('n','n',1.0d0,xgBlockA,xgBlockB,1.d0,xgBlockW)
       call timab(tim_gemmcyclic,1,tsec)
 
     else
 
-      nblocks_left  = xgBlockA%cols / blocksize
-      nblocks_right = xgBlockB%cols / (blocksize*nblocks_mpi)
+      nblocks_left  = xgBlockA%cols / blocksize_
+      nblocks_right = xgBlockB%cols / (blocksize_*nblocks_mpi)
       multiblock = .false.
       if (nblocks_left>1.or.nblocks_right>1) then
         multiblock = .true.
@@ -3811,32 +3832,30 @@ contains
       call xg_init(xg_mpi_work,xgBlockA%space,xgBlockA%rows,xgBlockA%cols,xmpi_comm_null)
       call xg_init(subB_mpi,xgBlockB%space,xgBlockB%rows/nblocks_mpi,xgBlockB%cols/nblocks_mpi,xmpi_comm_null)
       if (multiblock) then
-        call xg_init(subB,xgBlockB%space,blocksize,blocksize,xmpi_comm_null)
+        call xg_init(subB,xgBlockB%space,blocksize_,blocksize_,xmpi_comm_null)
       end if
 
       do iblock_mpi=1,nblocks_mpi
 
-        shift_row_mpi = mod((iblock_mpi-1)+me_comm,nblocks_mpi) * blocksize
-        shift_col_mpi = me_comm * blocksize
+        shift_row_mpi = mod((iblock_mpi-1)+me_comm,nblocks_mpi) * blocksize_
+        shift_col_mpi = me_comm * blocksize_
         if (.not.multiblock) then
           call xgBlock_partialcopy(xgBlockB,subB_mpi%self,shift_row_mpi,shift_col_mpi,BIG2SMALL)
         else
           do iblock_right=1,nblocks_right
             do iblock_left=1,nblocks_left
-              shift_row = shift_row_mpi + (iblock_left-1) * blocksize*nblocks_mpi
-              shift_col = shift_col_mpi + (iblock_right-1) * blocksize*nblocks_mpi
+              shift_row = shift_row_mpi + (iblock_left-1) * blocksize_*nblocks_mpi
+              shift_col = shift_col_mpi + (iblock_right-1) * blocksize_*nblocks_mpi
               call xgBlock_partialcopy(xgBlockB,subB%self,shift_row,shift_col,BIG2SMALL)
-              shift_row = (iblock_left-1) * blocksize
-              shift_col = (iblock_right-1) * blocksize
+              shift_row = (iblock_left-1) * blocksize_
+              shift_col = (iblock_right-1) * blocksize_
               call xgBlock_partialcopy(subB%self,subB_mpi%self,shift_row,shift_col,SMALL2BIG)
             end do
           end do
         end if
 
         if (iblock_mpi==1) then
-          call timab(tim_gemmcyclic,2,tsec)
-          call xgBlock_gemm('n','n',1.0d0,xgBlockA,subB_mpi%self,1.d0,xgBlockW)
-          call timab(tim_gemmcyclic,1,tsec)
+          call xgBlock_gemm('n','n',1.0d0,xgBlockA,subB_mpi%self,1.d0,xgBlockW,timing=.false.)
         else
           tag = iblock_mpi
           dest = mod(me_comm-(iblock_mpi-1),nblocks_mpi)
@@ -3844,9 +3863,7 @@ contains
           call xgBlock_mpi_isend(xgBlockA,dest,tag,request,comm=comm_)
           source = mod(me_comm+(iblock_mpi-1),nblocks_mpi)
           call xgBlock_mpi_recv(xg_mpi_work%self,source,tag,comm=comm_)
-          call timab(tim_gemmcyclic,2,tsec)
-          call xgBlock_gemm('n','n',1.0d0,xg_mpi_work%self,subB_mpi%self,1.d0,xgBlockW)
-          call timab(tim_gemmcyclic,1,tsec)
+          call xgBlock_gemm('n','n',1.0d0,xg_mpi_work%self,subB_mpi%self,1.d0,xgBlockW,timing=.false.)
         end if
 
         if (iblock_mpi>1) call xmpi_wait(request,ierr)
@@ -4120,13 +4137,13 @@ contains
       case (SPACE_R,SPACE_CR)
         xgBlock1__vecR => xgBlock1%vecR
         xgBlock2__vecR => xgBlock2%vecR
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock1__vecR,xgBlock2__vecR)
+        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock1__vecR,xgBlock2__vecR)
         call abi_gpu_xaxpy(1, xgBlock1%cols*fact*xgBlock1%LDim, da_cplx, c_loc(xgBlock2__vecR),1,c_loc(xgBlock1__vecR),1)
         !$OMP END TARGET DATA
       case (SPACE_C)
         xgBlock1__vecC => xgBlock1%vecC
         xgBlock2__vecC => xgBlock2%vecC
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock1__vecC,xgBlock2__vecC)
+        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock1__vecC,xgBlock2__vecC)
         call abi_gpu_xaxpy(2, xgBlock1%cols*xgBlock1%LDim, da_cplx, c_loc(xgBlock2__vecC),1,c_loc(xgBlock1__vecC),1)
         !$OMP END TARGET DATA
       end select
@@ -4187,7 +4204,7 @@ contains
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
       xgBlock1__vecC => xgBlock1%vecC
       xgBlock2__vecC => xgBlock2%vecC
-      !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock1__vecC,xgBlock2__vecC)
+      !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock1__vecC,xgBlock2__vecC)
       call abi_gpu_xaxpy(2, xgBlock1%cols*xgBlock1%LDim, da, c_loc(xgBlock2__vecC),1,c_loc(xgBlock1__vecC),1)
       !$OMP END TARGET DATA
 #endif
@@ -5090,12 +5107,12 @@ contains
         select case(xgBlock%space)
         case (SPACE_R,SPACE_CR)
           xgBlock__vecR => xgBlock%vecR
-          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock__vecR)
+          !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock__vecR)
           call abi_gpu_xscal(1, fact*xgBlock%ldim*xgBlock%cols/inc, valc, c_loc(xgBlock__vecR), inc)
           !$OMP END TARGET DATA
         case (SPACE_C)
           xgBlock__vecC => xgBlock%vecC
-          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock__vecC)
+          !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock__vecC)
           call abi_gpu_xscal(2, xgBlock%ldim*xgBlock%cols/inc, valc, c_loc(xgBlock__vecC), inc)
           !$OMP END TARGET DATA
         end select
@@ -5120,14 +5137,14 @@ contains
         case (SPACE_R,SPACE_CR)
           xgBlock__vecR => xgBlock%vecR
           do i=1,xgBlock%cols
-            !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock__vecR)
+            !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock__vecR)
             call abi_gpu_xscal(1, fact*xgBlock%rows/inc, valc, c_loc(xgBlock__vecR(1,i)), inc)
             !$OMP END TARGET DATA
           end do
         case (SPACE_C)
           xgBlock__vecC => xgBlock%vecC
           do i=1,xgBlock%cols
-            !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock__vecC)
+            !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock__vecC)
             call abi_gpu_xscal(2, xgBlock%rows/inc, valc, c_loc(xgBlock__vecC(1,i)), inc)
             !$OMP END TARGET DATA
           end do
@@ -5695,12 +5712,12 @@ contains
       select case(xgBlock%space)
       case (SPACE_R,SPACE_CR)
         byte_count = int(fact, c_size_t) * xgBlock%ldim * xgBlock%cols * dp
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecR)
+        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock%vecR)
         call gpu_memset(c_loc(xgBlock%vecR), 0, byte_count)
         !$OMP END TARGET DATA
       case (SPACE_C)
         byte_count = int(xgBlock%ldim, c_size_t) * xgBlock%cols * 2 * dpc ! Note the factor 2, needed here!
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecC)
+        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock%vecC)
         call gpu_memset(c_loc(xgBlock%vecC), 0, byte_count)
         !$OMP END TARGET DATA
       end select

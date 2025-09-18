@@ -63,7 +63,6 @@ contains
 subroutine tdep_make_inbox(tab,natom,tol,&
 &                          temp) !Optional
 
-  implicit none
   integer :: natom,ii,jj,iatom
   double precision :: tol
   double precision :: tab(3,natom) !Input (and ouput if temp is not present)
@@ -88,8 +87,6 @@ end subroutine tdep_make_inbox
 
 !=====================================================================================================
  subroutine tdep_make_latt(Invar,Lattice)
-
-  implicit none
 
   integer :: brav,ii,jj,line
   double precision :: acell_unitcell(3),multiplicity(3,3),multiplicitym1(3,3)
@@ -281,10 +278,10 @@ end subroutine tdep_make_inbox
   rotation_cart = MATMUL(rotation, Invar%rprimd_md)
   rotation_cart = MATMUL(rprimdm1_tmp, rotation_cart)
   rotation_cart = TRANSPOSE(rotation_cart)
-  
+
   ! Perform some checks
   if ((mat33det(rotation) - 1) .gt. tol8) then
-     rprimd_tmp = MATMUL(multiplicitym1, Invar%rprimd_md) 
+     rprimd_tmp = MATMUL(multiplicitym1, Invar%rprimd_md)
      write(msg, '(6a,3(3f16.10,1x,a),2a,3(3f16.10,1x,a))')&
       'The input primitive vectors cannot be aligned',ch10,&
       'with the expected primitive vectors through rotation.',ch10,&
@@ -345,19 +342,19 @@ end subroutine tdep_make_inbox
     do ii=1,3
       write(Invar%stdlog,'(a,1x,3(f16.10,1x))') 'The rprimd (from the input file or NetCDF file) is=',&
 &                                             (Invar%rprimd_md(ii,jj),jj=1,3)
-    end do  
+    end do
     do ii=1,3
       write(Invar%stdlog,'(a,1x,3(f16.10,1x))') 'However, using multiplicity (from the input file)=',&
 &                                             (multiplicity(ii,jj),jj=1,3)
-    end do  
+    end do
     do ii=1,3
       write(Invar%stdlog,'(a,1x,3(f16.10,1x))') 'rprim (from the aTDEP code)=',(rprim(ii,jj),jj=1,3)
-    end do  
+    end do
     write(Invar%stdlog,'(a,1x,3(f16.10,1x))') 'and acell (from the calculation)=',(acell_unitcell(ii),ii=1,3)
     ABI_ERROR(' RPRIMD IS NOT RELATED TO RPRIM AND MULTIPLICITY. MODIFY YOUR RPRIMD.')
   end if
 
-! Check the diagonal elements 
+! Check the diagonal elements
   if ((Invar%bravais(1).eq.2).and.(Invar%bravais(2).eq.0)) then !monoclinic
     if ((acell_unitcell(1).gt.acell_unitcell(3)).or.&
 &       (acell_unitcell(2).gt.acell_unitcell(3))) then
@@ -416,7 +413,7 @@ end subroutine tdep_make_inbox
 ! Define transpose and inverse of rprimd
   rprimdt = TRANSPOSE(rprimd)
 
-  ! Compute gmet, rmet, gprimd  
+  ! Compute gmet, rmet, gprimd
   call metric(Lattice%gmet,Lattice%gprimd,Invar%stdlog,Lattice%rmet,rprimdt,Lattice%ucvol)
 
   call matr3inv(rprimd, rprimdtm1)
@@ -446,11 +443,10 @@ end subroutine tdep_make_inbox
 ! Shift xred to keep atoms in the same unit cell at each step.
 subroutine tdep_shift_xred(Invar,MPIdata)
 
-  implicit none
   type(Input_type), intent(inout) :: Invar
   type(MPI_enreg_type), intent(in) :: MPIdata
   integer :: natom,ii,iatom,istep,ierr
-  integer :: shift, best_shift
+  integer :: shift,shift_max,shift_best
   double precision :: xi, dist, best_dist
   double precision, allocatable :: x0(:,:)
 
@@ -465,20 +461,21 @@ subroutine tdep_shift_xred(Invar,MPIdata)
   call xmpi_sum(x0,MPIdata%comm_step,ierr)
 
   ! Shift xred from all steps in the same unitcell as the first step
+  shift_max = 1
   do istep=1, Invar%my_nstep
     do iatom=1,natom
       do ii=1,3
         best_dist = abs(Invar%xred(ii,iatom,istep) - x0(ii,iatom))
-        best_shift = 0
-        do shift=-1,1
+        shift_best = 0
+        do shift=-shift_max,shift_max
           xi = Invar%xred(ii,iatom,istep) + shift
           dist = abs(xi - x0(ii,iatom))
           if (dist < best_dist) then
             best_dist = dist
-            best_shift = shift
+            shift_best = shift
           end if
         end do
-        Invar%xred(ii,iatom,istep) = Invar%xred(ii,iatom,istep) + best_shift
+        Invar%xred(ii,iatom,istep) = Invar%xred(ii,iatom,istep) + shift_best
       end do
     end do
   end do

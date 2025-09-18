@@ -7,6 +7,8 @@ ndtset 4
 
 #npband 4
 
+cprj_in_memory 0
+
 wfoptalg1   0
 wfoptalg2  14
 wfoptalg3 114
@@ -71,7 +73,7 @@ pseudos="P.xml, Al.xml"
 #%% need_cpp_vars = HAVE_FFTW3 or HAVE_DFTI
 #%% [files]
 #%% files_to_test =
-#%%   t207.abo, tolnlines=  0, tolabs=  0, tolrel= 0, fld_options = -ridiculous
+#%%   t207.abo, tolnlines=  0, tolabs=  0, tolrel= 0, fld_options= -medium
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

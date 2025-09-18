@@ -65,12 +65,14 @@ Core build parameters
   * architecture      : ${abi_cpu_vendor} ${abi_cpu_model} (${abi_cpu_bits} bits)
   * debugging         : ${abi_debug_flavor}
   * optimizations     : ${abi_optim_flavor}
+  * Python            : ${PYTHON}
 
   * MPI    enabled    : ${abi_mpi_enable} (flavor: ${abi_mpi_flavor})
   * MPI    in-place   : ${abi_mpi_inplace_enable}
   * MPI-IO enabled    : ${abi_mpi_io_enable}
   * OpenMP enabled    : ${abi_openmp_enable} (collapse: ${tmp_omp_collapse}; GPU offload: ${tmp_omp_gpu_offload})
   * GPU    enabled    : ${abi_gpu_enable} (flavor: ${abi_gpu_flavor})
+  * GPU-aware MPI     : ${abi_mpi_gpu_aware_enable}
 
   * LibXML2 enabled   : ${abi_libxml2_enable}
   * LibPSML enabled   : ${sd_libpsml_enable}

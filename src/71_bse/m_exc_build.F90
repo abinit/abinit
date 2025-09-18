@@ -26,12 +26,10 @@ module m_exc_build
  use m_abicore
  use m_bs_defs
  use m_bse_io
+ USE_MPI
  use m_xmpi
  use m_errors
  use m_screen
-#if defined HAVE_MPI2
- use mpi
-#endif
  use m_hdr
 
  use m_wfd,          only : wfdgw_t, wave_t, WFD_STORED
@@ -243,7 +241,6 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
 #ifdef DEV_MG_DEBUG_MODE
  integer,allocatable :: ttp_check(:,:)
 #endif
-
 !************************************************************************
 
  call timab(680,1,tsec)
@@ -257,32 +254,28 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
  if (Wfd%nsppol==2) then
    ABI_WARNING("nsppol==2 is still under testing")
  end if
- !
  ! MPI variables.
  comm    = Wfd%comm
  nproc   = Wfd%nproc
  my_rank = Wfd%my_rank
 
- !
  ! Basic constants.
  nspinor = Wfd%nspinor
  nsppol  = Wfd%nsppol
  dim_rtwg=1; faq = one/(Cryst%ucvol*Kmesh%nbz)
  npweps = Bsp%npweps
- !
+
  ! Prepare the FFT tables to have u(r) on the ngfft_osc mesh.
  mgfft_osc = MAXVAL(ngfft_osc(1:3))
  fftalga_osc = ngfft_osc(7)/100
- if ( ANY(ngfft_osc(1:3) /= Wfd%ngfft(1:3)) ) then
-   call wfd%change_ngfft(Cryst,Psps,ngfft_osc)
- end if
+ if ( ANY(ngfft_osc(1:3) /= Wfd%ngfft(1:3)) ) call wfd%change_ngfft(Cryst,Psps,ngfft_osc)
 
  ABI_MALLOC(igfftg0,(npweps))
  ABI_MALLOC(ktabr_k,(nfftot_osc))
  ABI_MALLOC(ktabr_kp,(nfftot_osc))
  ABI_MALLOC(id_tab,(nfftot_osc))
  id_tab = (/(ic, ic=1,nfftot_osc)/)
- !
+
  ! Workspace arrays for wavefunctions and oscillator matrix elements.
  ABI_MALLOC(rhxtwg_vpv,(npweps))
  ABI_MALLOC(rhxtwg_cpc,(npweps))
@@ -367,25 +360,24 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
  if (is_resonant) then
    if (use_mpiio) then
      write(msg,'(2a,f6.2,a)')&
-&      ". Writing resonant excitonic Hamiltonian on file "//TRIM(fname)," via MPI-IO; file size= ",two*tot_nels*dpc*b2Gb," [Gb]."
+      ". Writing resonant excitonic Hamiltonian on file "//TRIM(fname)," via MPI-IO; file size= ",two*tot_nels*dpc*b2Gb," [Gb]."
    else
      write(msg,'(2a,f6.2,a)')&
-&      ". Writing resonant excitonic Hamiltonian on file "//TRIM(fname),"; file size= ",two*dpc*tot_nels*b2Gb," [Gb]."
+      ". Writing resonant excitonic Hamiltonian on file "//TRIM(fname),"; file size= ",two*dpc*tot_nels*b2Gb," [Gb]."
    end if
  else
    if (use_mpiio) then
      write(msg,'(2a,f6.2,a)')&
-&      ". Writing coupling excitonic Hamiltonian on file "//TRIM(fname)," via MPI-IO; file size= ",tot_nels*2*dpc*b2Gb," [Gb]."
+      ". Writing coupling excitonic Hamiltonian on file "//TRIM(fname)," via MPI-IO; file size= ",tot_nels*2*dpc*b2Gb," [Gb]."
    else
      write(msg,'(2a,f6.2,a)')&
-&      ". Writing coupling excitonic Hamiltonian on file "//TRIM(fname),"; file size= ",two*dpc*tot_nels*b2Gb," [Gb]."
+      ". Writing coupling excitonic Hamiltonian on file "//TRIM(fname),"; file size= ",two*dpc*tot_nels*b2Gb," [Gb]."
    end if
  end if
  call wrtout([std_out, ab_out], msg, do_flush=.True.)
- !
+
  ! Master writes the BSE header with Fortran IO.
  if (my_rank==master) then
-
    if (open_file(fname,msg,newunit=bsh_unt,form="unformatted",action="write") /= 0) then
       ABI_ERROR(msg)
    end if
@@ -564,7 +556,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
    ABI_MALLOC_OR_DIE(my_bsham,(t_start(my_rank):t_stop(my_rank)), ierr)
 
    if (BSp%prep_interp) then
-     ! Allocate big (scalable) buffers to store a,b,c coeffients
+     ! Allocate big (scalable) buffers to store a,b,c coefficients
      ABI_MALLOC_OR_DIE(acoeffs,(t_start (my_rank):t_stop(my_rank)), ierr)
      ABI_MALLOC_OR_DIE(bcoeffs,(t_start(my_rank):t_stop(my_rank)), ierr)
      ABI_MALLOC_OR_DIE(ccoeffs,(t_start(my_rank):t_stop(my_rank)), ierr)
@@ -653,7 +645,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
            ABI_MALLOC(gbound,(2*mgfft_osc+8,2*use_padfft))
          end if
          !
-         ! * Get iq_ibz, and symmetries from iq_bz
+         ! Get iq_ibz, and symmetries from iq_bz
          call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q)
          is_qeq0 = (normv(qbz,Cryst%gmet,'G')<GW_TOLQ0)
 
@@ -754,14 +746,14 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
                bb_cpc2(2:) = czero
 
                if(ik_bz == ikp_bz) then
-                  ! Enforce orthogonality of the wavefunctions.
-                  if(icp == ic) then
-                    aa_cpc(1) = cone
-                    bb_cpc2(1) = cone
-                  else
-                    aa_cpc(1) = czero
-                    bb_cpc2(1) = czero
-                  end if
+                 ! Enforce orthogonality of the wavefunctions.
+                 if(icp == ic) then
+                   aa_cpc(1) = cone
+                   bb_cpc2(1) = cone
+                 else
+                   aa_cpc(1) = czero
+                   bb_cpc2(1) = czero
+                 end if
                end if
 
                ! MG TODO: a does not require a call to w0gemv
@@ -1178,8 +1170,8 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
 
      if (offset_err/=0) then
        write(msg,"(3a)")&
-&        "Global position index cannot be stored in a standard Fortran integer. ",ch10,&
-&        "BSE matrix cannot be written with a single MPI-IO call. "
+        "Global position index cannot be stored in a standard Fortran integer. ",ch10,&
+        "BSE matrix cannot be written with a single MPI-IO call. "
        ABI_ERROR(msg)
      end if
      !
@@ -1239,7 +1231,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
          ist=iend+1
        end do
        write(msg,'(2(a,i0))')" Wraparound error: iend=",iend," my_hsize=",hsize_of(my_rank)
-       ABI_CHECK(iend==hsize_of(my_rank),msg)
+       ABI_CHECK(iend == hsize_of(my_rank),msg)
        ABI_FREE(my_bsham)
        if (BSp%prep_interp) then
          ABI_FREE(acoeffs)
@@ -2119,7 +2111,6 @@ subroutine exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,
 !arrays
  real(dp) :: tsec(2)
  complex(gwpc),allocatable :: all_mgq0(:,:,:,:,:)
-
 !************************************************************************
 
  call timab(670,1,tsec)
@@ -2167,7 +2158,7 @@ subroutine exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,
  ! ========================
  ! ==== Coupling Block ====
  ! ========================
- if (do_coupling.and.BSp%use_coupling>0) then
+ if (do_coupling .and. BSp%use_coupling > 0) then
    call timab(673,1,tsec)
    call exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,&
                         Wfd,screen,Hdr_bse,nfftot_osc,ngfft_osc,Psps,Pawtab,Pawang,Paw_pwff,all_mgq0,.FALSE.,BS_files%out_hcoup)

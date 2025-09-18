@@ -47,7 +47,7 @@ module m_ebands
  use m_time,           only : cwtime, cwtime_report
  use m_fstrings,       only : tolower, itoa, sjoin, ftoa, ltoa, ktoa, strcat, basename, replace
  use m_numeric_tools,  only : arth, imin_loc, imax_loc, bisect, stats_t, stats_eval, simpson, simpson_int, wrap2_zero_one, &
-                              isdiagmat, get_diag, interpol3d_0d, interpol3d_indices
+                              isdiagmat, get_diag, interpol3d_0d, interpol3d_indices, linspace
  use m_special_funcs,  only : gaussian
  use m_geometry,       only : normv
  use m_cgtools,        only : set_istwfk
@@ -55,7 +55,7 @@ module m_ebands
  use m_occ,            only : getnel, newocc, occ_fd
  use m_nesting,        only : mknesting
  use m_crystal,        only : crystal_t
- use m_bz_mesh,        only : isamek, kpath_t, kpath_new
+ use m_bz_mesh,        only : isamek, kpath_t, littlegroup_t, kmesh_t
  use m_fftcore,        only : get_kg
 
  implicit none
@@ -92,49 +92,50 @@ contains
 
  procedure :: from_hdr => ebands_from_hdr
  ! Init object from the abinit header.
+
  procedure :: from_dtset => ebands_from_dtset
  ! Init object from the abinit dataset.
 
  procedure :: copy                  => ebands_copy                       ! Copy of the ebands_t.
- procedure :: move_alloc            =>   ebands_move_alloc               ! Transfer allocation.
- procedure :: print                 =>   ebands_print                    ! Printout basic info on the data type.
- procedure :: get_bandenergy        =>   ebands_get_bandenergy           ! Returns the band energy of the system.
- procedure :: get_valence_idx       =>   ebands_get_valence_idx          ! Gives the index of the (valence|bands at E_f).
- procedure :: get_bands_from_erange =>   ebands_get_bands_from_erange    ! Return the indices of the mix and max band within an energy window.
- procedure :: vcbm_range_from_gaps  =>   ebands_vcbm_range_from_gaps     ! Find band and energy range for states close to the CBM/VBM given input energies.
- procedure :: apply_scissors        =>   ebands_apply_scissors           ! Apply scissors operator (no k-dependency)
- procedure :: get_occupied          =>   ebands_get_occupied             ! Returns band indices after wich occupations are less than an input value.
- procedure :: enclose_degbands      =>   ebands_enclose_degbands         ! Adjust band indices such that all degenerate states are treated.
- procedure :: get_bands_e0          =>   ebands_get_bands_e0             ! Find min/max band indices crossing energy e0
- procedure :: get_erange            =>   ebands_get_erange               ! Compute the minimum and maximum energy enclosing a list of states.
- procedure :: nelect_per_spin       =>   ebands_nelect_per_spin          ! Returns number of electrons per spin channel
- procedure :: get_minmax            =>   ebands_get_minmax               ! Returns min and Max value of (eig|occ|doccde).
- procedure :: has_metal_scheme      =>   ebands_has_metal_scheme         ! .True. if metallic occupation scheme is used.
- procedure :: write_bxsf            =>   ebands_write_bxsf               ! Write 3D energies for Fermi surface visualization (XSF format)
- procedure :: update_occ            =>   ebands_update_occ               ! Update the occupation numbers.
- procedure :: set_scheme            =>   ebands_set_scheme               ! Set the occupation scheme.
- procedure :: set_fermie            =>   ebands_set_fermie               ! Change the fermi level (assume metallic scheme).
- procedure :: set_extrael           =>   ebands_set_extrael              ! Add extrael to initial number of electrons to simulate e/h doping. (assume metallic scheme).
- procedure :: get_muT_with_fd       =>   ebands_get_muT_with_fd          ! Change the number of electrons (assume metallic scheme).
- procedure :: calc_nelect           =>   ebands_calc_nelect              ! Compute nelect from Fermi level and Temperature.
- procedure :: report_gap            =>   ebands_report_gap               ! Print info on the fundamental and direct gap.
- procedure :: ncwrite               =>   ebands_ncwrite                  ! Write object to NETCDF file (use ncid)
- procedure :: ncwrite_path          =>   ebands_ncwrite_path             ! Dump the object into NETCDF file (use filepath)
- procedure :: write_nesting         =>   ebands_write_nesting            ! Calculate the nesting function and output data to file.
- procedure :: expandk               =>   ebands_expandk                  ! Build a new ebands_t in the full BZ.
- procedure :: downsample            =>   ebands_downsample               ! Build a new ebands_t with a downsampled IBZ.
- procedure :: chop                  =>   ebands_chop                     ! Build a new ebands_t with selected nbands.
- procedure :: get_edos              =>   ebands_get_edos                 ! Compute e-DOS from band structure.
- procedure :: get_jdos              =>   ebands_get_jdos                 ! Compute electron joint-DOS from band structure.
+ procedure :: move_alloc            => ebands_move_alloc               ! Transfer allocation.
+ procedure :: print                 => ebands_print                    ! Printout basic info on the data type.
+ procedure :: get_bandenergy        => ebands_get_bandenergy           ! Returns the band energy of the system.
+ procedure :: get_valence_idx       => ebands_get_valence_idx          ! Gives the index of the (valence|bands at E_f).
+ procedure :: get_bands_from_erange => ebands_get_bands_from_erange    ! Return the indices of the mix and max band within an energy window.
+ procedure :: vcbm_range_from_gaps  => ebands_vcbm_range_from_gaps     ! Find band and energy range for states close to the CBM/VBM given input energies.
+ procedure :: apply_scissors        => ebands_apply_scissors           ! Apply scissors operator (no k-dependency)
+ procedure :: get_occupied          => ebands_get_occupied             ! Returns band indices after which occupations are less than an input value.
+ procedure :: enclose_degbands      => ebands_enclose_degbands         ! Adjust band indices such that all degenerate states are treated.
+ procedure :: get_bands_e0          => ebands_get_bands_e0             ! Find min/max band indices crossing energy e0
+ procedure :: get_erange            => ebands_get_erange               ! Compute the minimum and maximum energy enclosing a list of states.
+ procedure :: nelect_per_spin       => ebands_nelect_per_spin          ! Returns number of electrons per spin channel
+ procedure :: get_minmax            => ebands_get_minmax               ! Returns min and Max value of (eig|occ|doccde).
+ procedure :: has_metal_scheme      => ebands_has_metal_scheme         ! .True. if metallic occupation scheme is used.
+ procedure :: write_bxsf            => ebands_write_bxsf               ! Write 3D energies for Fermi surface visualization (XSF format)
+ procedure :: update_occ            => ebands_update_occ               ! Update the occupation numbers.
+ procedure :: set_scheme            => ebands_set_scheme               ! Set the occupation scheme.
+ procedure :: set_fermie            => ebands_set_fermie               ! Change the fermi level (assume metallic scheme).
+ procedure :: set_extrael           => ebands_set_extrael              ! Add extrael to initial number of electrons to simulate e/h doping. (assume metallic scheme).
+ procedure :: get_muT_with_fd       => ebands_get_muT_with_fd          ! Change the number of electrons (assume metallic scheme).
+ procedure :: calc_nelect           => ebands_calc_nelect              ! Compute nelect from Fermi level and Temperature.
+ procedure :: report_gap            => ebands_report_gap               ! Print info on the fundamental and direct gap.
+ procedure :: ncwrite               => ebands_ncwrite                  ! Write object to NETCDF file (use ncid)
+ procedure :: ncwrite_path          => ebands_ncwrite_path             ! Dump the object into NETCDF file (use filepath)
+ procedure :: write_nesting         => ebands_write_nesting            ! Calculate the nesting function and output data to file.
+ procedure :: expandk               => ebands_expandk                  ! Build a new ebands_t in the full BZ.
+ procedure :: downsample            => ebands_downsample               ! Build a new ebands_t with a downsampled IBZ.
+ procedure :: chop                  => ebands_chop                     ! Build a new ebands_t with selected nbands.
+ procedure :: get_edos              => ebands_get_edos                 ! Compute e-DOS from band structure.
+ procedure :: get_jdos              => ebands_get_jdos                 ! Compute electron joint-DOS from band structure.
  procedure :: get_edos_matrix_elements => ebands_get_edos_matrix_elements ! Compute e-DOS and other DOS-like quantities involving ! vectorial or tensorial matrix elements.
- procedure :: interp_kmesh          =>   ebands_interp_kmesh             ! Use SWK to interpolate energies on a k-mesh.
- procedure :: interp_kpath          =>   ebands_interp_kpath             ! Interpolate energies on a k-path.
- procedure :: interpolate_kpath     =>   ebands_interpolate_kpath
- procedure :: prtbltztrp            =>   ebands_prtbltztrp               ! Output files for BoltzTraP code.
- procedure :: write                 =>   ebands_write                    ! Driver routine to write bands in different txt formats.
- procedure :: get_carriers          =>   ebands_get_carriers             ! Compute carrier concentration from input Fermi level and list of Temperatures.
- procedure :: get_gaps              =>   ebands_get_gaps                 ! Build the gaps object from a bandstructure.
- procedure :: print_gaps            =>   ebands_print_gaps               ! Helper function to print gaps directrly from ebands.
+ procedure :: interp_kmesh          => ebands_interp_kmesh             ! Use SWK to interpolate energies on a k-mesh.
+ procedure :: interp_kpath          => ebands_interp_kpath             ! Interpolate energies on a k-path.
+ procedure :: interpolate_kpath     => ebands_interpolate_kpath
+ procedure :: prtbltztrp            => ebands_prtbltztrp               ! Output files for BoltzTraP code.
+ procedure :: write                 => ebands_write                    ! Driver routine to write bands in different txt formats.
+ procedure :: get_carriers          => ebands_get_carriers             ! Compute carrier concentration from input Fermi level and list of Temperatures.
+ procedure :: get_gaps              => ebands_get_gaps                 ! Build the gaps object from a bandstructure.
+ procedure :: print_gaps            => ebands_print_gaps               ! Helper function to print gaps directly from ebands.
 
 end type ebands_t
 !!***
@@ -1447,7 +1448,7 @@ subroutine put_eneocc_vect(ebands, arr_name, vect)
  case ('eig')
    ! DFPT routines call ebands_init with the wrong bantot. Using maxval(vect) causes SEGFAULT
    ! so I have to recompute the correct bantot here
-   !ABI_CHECK(sum(ebands%nband) == ebands%bantot, "bantot and nband are incosistent")
+   !ABI_CHECK(sum(ebands%nband) == ebands%bantot, "bantot and nband are inconsistent")
    val = maxval(vect(1:sum(ebands%nband)))
    call unpack_eneocc(nkpt,nsppol,mband,ebands%nband,vect,ebands%eig, val=val)
  case ('doccde')
@@ -1613,7 +1614,7 @@ end subroutine ebands_get_bands_from_erange
 !! INPUTS
 !!  gaps<gaps_t>=Object with info on the gaps.
 !!  erange(2)=Energy range for holes and electrons. Only those states whose relative position
-!!    wrt to the VBM/CBM is <= than erange are icluded. Note that relative positions are always
+!!    wrt to the VBM/CBM is <= than erange are included. Note that relative positions are always
 !!    positive (even for holes). Use a negative value to exclude either holes or electrons.
 !!
 !! OUTPUT
@@ -1782,7 +1783,7 @@ end subroutine ebands_apply_scissors
 !!
 !! INPUTS
 !!  ebands<ebands_t>=The object describing the band structure.
-!!  tol_occ[Optional]=Tollerance on the occupation factors.
+!!  tol_occ[Optional]=Tolerance on the occupation factors.
 !!
 !! OUTPUT
 !!
@@ -2254,7 +2255,7 @@ end function ebands_write_bxsf
 !!  see also SIDE EFFECTS.
 !!
 !! SIDE EFFECTS
-!!  === For metallic occupation the following quantites are recalculated ===
+!!  === For metallic occupation the following quantities are recalculated ===
 !!   %fermie=the new Fermi energy
 !!   %entropy=the new entropy associated with the smearing.
 !!   %occ(mband,nkpt,nsppol)=occupation numbers
@@ -3260,7 +3261,7 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
 
  ! Use bisection to find the Fermi level at T = 0
  ! Warning: this code assumes idos[i+1] >= idos[i]. This condition may not be
- ! fullfilled if we use tetra and this is the reason why we have filtered the DOS.
+ ! fulfilled if we use tetra and this is the reason why we have filtered the DOS.
  if (ebands%occopt == 9) then
     ihf = bisect(edos%idos(:,0), ebands%nelect-ebands%nh_qFD)
     ief = bisect(edos%idos(:,0), ebands%nelect+ebands%ne_qFD)
@@ -3337,11 +3338,7 @@ end subroutine edos_free
 !! Write results to file.
 !!
 !! INPUTS
-!!  edos<edos_t>=DOS container
 !!  path=File name.
-!!
-!! OUTPUT
-!!  Only writing.
 !!
 !! SOURCE
 
@@ -3357,6 +3354,8 @@ subroutine edos_write(edos, path)
  character(len=500) :: msg
  type(yamldoc_t) :: ydoc
 ! *************************************************************************
+
+ call wrtout([std_out, ab_out], sjoin("- Writing electron DOS to file:", path, ch10))
 
  if (open_file(path, msg, newunit=unt, form="formatted", action="write") /= 0) then
    ABI_ERROR(msg)
@@ -3431,7 +3430,6 @@ end subroutine edos_write
 !!  Write results to netcdf file.
 !!
 !! INPUTS
-!!  edos<edos_t>=DOS container
 !!  ncid=NC file handle.
 !!  [prefix]=String prepended to netcdf dimensions/variables (HDF5 poor-man groups)
 !!    Empty string if not specified.
@@ -3501,83 +3499,100 @@ end function edos_ncwrite
 !! edos_print
 !!
 !! FUNCTION
-!! Print DOS info to Fortran unit.
+!! Print DOS info.
 !!
 !! INPUTS
-!!  edos<edos_t>=DOS container
-!!  [unit]=Unit number for output. Defaults to std_out
-!!
-!! OUTPUT
-!!  Only writing.
+!!  units=Unit numbers for output
+!!  [header]=Header string.
 !!
 !! SOURCE
 
-subroutine edos_print(edos, unit, header)
+subroutine edos_print(edos, units, header)
 
 !Arguments ------------------------------------
  class(edos_t),intent(in) :: edos
- integer,optional,intent(in) :: unit
+ integer,intent(in) :: units(:)
  character(len=*),optional,intent(in) :: header
 
 !Local variables-------------------------------
- integer :: unt
+ character(len=500) :: msg
 ! *************************************************************************
 
- unt = std_out; if (present(unit)) unt = unit
- if (unt == dev_null) return
-
  if (present(header)) then
-   write(unt, "(a)") ch10//' === '//trim(adjustl(header))//' === '
+   write(msg, "(a)") ch10//' === '//trim(adjustl(header))//' === '
  else
-   write(unt, "(a)") ch10
+   write(msg, "(a)") ch10
  end if
+ call wrtout(units, msg)
 
  select case (edos%intmeth)
  case (1)
-   write(unt, "(a,f5.1,a)") " Gaussian method with broadening: ", edos%broad * Ha_meV, " (meV)"
+   write(msg, "(a,f5.1,a)") " Gaussian method with broadening: ", edos%broad * Ha_meV, " (meV)"
  case (2)
-   write(unt, "(a)")" Linear tetrahedron method."
+   write(msg, "(a)")" Linear tetrahedron method."
  case (-2)
-   write(unt, "(a)")" Linear tetrahedron method with Blochl corrections."
+   write(msg, "(a)")" Linear tetrahedron method with Blochl corrections."
  case default
    ABI_ERROR(sjoin("Wrong intmeth:", itoa(edos%intmeth)))
  end select
+ call wrtout(units, msg)
 
- write(unt, "(a,f5.1,a, i0)")" Mesh step: ", edos%step * Ha_meV, " (meV) with npts: ", edos%nw
- write(unt, "(2(a,f5.1),a)")" From emin: ", edos%mesh(1) * Ha_eV, " to emax: ", edos%mesh(edos%nw) * Ha_eV, " (eV)"
- write(unt, "(a, i0)")" Number of k-points in the IBZ: ", edos%nkibz
+ write(msg, "(a,f5.1,a, i0)")" Mesh step: ", edos%step * Ha_meV, " (meV) with npts: ", edos%nw
+ call wrtout(units, msg)
+ write(msg, "(2(a,f5.1),a)")" From emin: ", edos%mesh(1) * Ha_eV, " to emax: ", edos%mesh(edos%nw) * Ha_eV, " (eV)"
+ call wrtout(units, msg)
+ write(msg, "(a, i0)")" Number of k-points in the IBZ: ", edos%nkibz
+ call wrtout(units, msg)
 
  if (edos%ief == 0) then
-   write(unt, "(a, /)")" edos%ief == 0 --> Cannot print quantities at the Fermi level."
+   call wrtout(units, " edos%ief == 0 --> Cannot print quantities at the Fermi level.", newlines=1)
    return
  end if
 
- write(unt,'(a,es16.8,a)')' Fermi level: ',edos%mesh(edos%ief) * Ha_eV, " (eV)"
- write(unt,"(a,es16.8)")" Total electron DOS at Fermi level in states/eV: ", edos%gef(0) / Ha_eV
+ write(msg,'(a,es16.8,a)')' Fermi level: ',edos%mesh(edos%ief) * Ha_eV, " (eV)"
+ call wrtout(units, msg)
+ write(msg,"(a,es16.8)")" Total electron DOS at Fermi level in states/eV: ", edos%gef(0) / Ha_eV
+ call wrtout(units, msg)
+
  if (edos%nsppol == 2) then
-   write(unt,"(a,es16.8)")"   g(eF) for spin up:  ", edos%gef(1) / Ha_eV
-   write(unt,"(a,es16.8)")"   g(eF) for spin down:", edos%gef(2) / Ha_eV
+   write(msg,"(a,es16.8)")"   g(eF) for spin up:  ", edos%gef(1) / Ha_eV
+   call wrtout(units, msg)
+   write(msg,"(a,es16.8)")"   g(eF) for spin down:", edos%gef(2) / Ha_eV
+   call wrtout(units, msg)
  end if
- write(unt,"(a,f6.1)")" Total number of electrons at eF: ", edos%idos(edos%ief, 0)
+ write(msg,"(a,f6.1)")" Total number of electrons at eF: ", edos%idos(edos%ief, 0)
+ call wrtout(units, msg)
+
  if (edos%nsppol == 2) then
-   write(unt,"(a,es16.8)")"   IDOS(eF) for spin up:  ", edos%idos(edos%ief, 1)
-   write(unt,"(a,es16.8)")"   IDOS(eF) for spin down:", edos%idos(edos%ief, 2)
+   write(msg,"(a,es16.8)")"   IDOS(eF) for spin up:  ", edos%idos(edos%ief, 1)
+   call wrtout(units, msg)
+   write(msg,"(a,es16.8)")"   IDOS(eF) for spin down:", edos%idos(edos%ief, 2)
+   call wrtout(units, msg)
  end if
+
  if (edos%ihf /= edos%ief) then
-    write(unt,'(a,es16.8,a)')' Fermi level for excited holes: ',edos%mesh(edos%ihf) * Ha_eV, " (eV)"
-    write(unt,"(a,es16.8)")" Total hole DOS at Fermi level in states/eV: ", edos%ghf(0) / Ha_eV
+    write(msg,'(a,es16.8,a)')' Fermi level for excited holes: ',edos%mesh(edos%ihf) * Ha_eV, " (eV)"
+    call wrtout(units, msg)
+    write(msg,"(a,es16.8)")" Total hole DOS at Fermi level in states/eV: ", edos%ghf(0) / Ha_eV
+    call wrtout(units, msg)
     if (edos%nsppol == 2) then
-       write(unt,"(a,es16.8)")"   g(hF) for spin up:  ", edos%ghf(1) / Ha_eV
-       write(unt,"(a,es16.8)")"   g(hF) for spin down:", edos%ghf(2) / Ha_eV
+      write(msg,"(a,es16.8)")"   g(hF) for spin up:  ", edos%ghf(1) / Ha_eV
+      call wrtout(units, msg)
+      write(msg,"(a,es16.8)")"   g(hF) for spin down:", edos%ghf(2) / Ha_eV
+      call wrtout(units, msg)
     end if
-    write(unt,"(a,f6.1)")" Total number of electrons at hF: ", edos%idos(edos%ihf, 0)
+    write(msg,"(a,f6.1)")" Total number of electrons at hF: ", edos%idos(edos%ihf, 0)
+    call wrtout(units, msg)
+
     if (edos%nsppol == 2) then
-       write(unt,"(a,es16.8)")"   N(hF) for spin up:  ", edos%idos(edos%ihf, 1)
-       write(unt,"(a,es16.8)")"   N(hF) for spin down:", edos%idos(edos%ihf, 2)
+       write(msg,"(a,es16.8)")"   N(hF) for spin up:  ", edos%idos(edos%ihf, 1)
+       call wrtout(units, msg)
+       write(msg,"(a,es16.8)")"   N(hF) for spin down:", edos%idos(edos%ihf, 2)
+       call wrtout(units, msg)
     end if
  end if
 
- write(unt, "(a)")""
+ call wrtout(units, " ")
 
 end subroutine edos_print
 !!***
@@ -3815,7 +3830,7 @@ subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, 
  ABI_FREE(my_kibz)
  ABI_FREE(wtk)
 
- ! Costruct full BZ and create mapping BZ --> IBZ
+ ! Construct full BZ and create mapping BZ --> IBZ
  ! Note:
  !   - we don't change the value of nsppol hence sppoldbl is set to 1
  !   - we use symrel so that bz2ibz can be used to reconstruct the wavefunctions.
@@ -3920,7 +3935,7 @@ end subroutine ebands_expandk
 !! ebands_downsample
 !!
 !! FUNCTION
-!!  Return a new ebands_t object of type ebands_t with a coarser IBZ contained in the inititial one.
+!!  Return a new ebands_t object of type ebands_t with a coarser IBZ contained in the initial one.
 !!
 !! INPUTS
 !!  cryst<crystal_t>=Info on unit cell and symmetries.
@@ -3961,7 +3976,7 @@ type(ebands_t) function ebands_downsample(self, cryst, in_kptrlatt, in_nshiftk, 
  call kpts_ibz_from_kptrlatt(cryst, in_kptrlatt, self%kptopt, in_nshiftk, in_shiftk, &
    new_nkibz, new_kibz, new_wtk, new_nkbz, new_kbz, new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk)
 
- ! Costruct mapping IBZ_coarse --> IBZ_fine
+ ! Construct mapping IBZ_coarse --> IBZ_fine
  ! We don't change the value of nsppol hence sppoldbl1 is set to 1
  ABI_MALLOC(ibz_c2f, (new_nkibz*sppoldbl1, 6))
 
@@ -4469,7 +4484,7 @@ end function ebands_interp_kpath
 !!  bks_vals=Scalar matrix elements
 !!  nvecs=Number of 3d-vectorial entries. Maybe zero
 !!  bks_vecs=Vectorial matrix elements in Cartesian Coordinates
-!!  ntens=Numer of 3x3 tensorial entries in Cartesian coordinates. Maybe zero
+!!  ntens=Number of 3x3 tensorial entries in Cartesian coordinates. Maybe zero
 !!  bks_tens= Tensorial matrix elements (3x3) in Cartesian Coordinates
 !!  intmeth=
 !!    1 for Gaussian,
@@ -4751,7 +4766,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
 
  ! Use bisection to find the Fermi level.
  ! Warning: this code assumes idos[i+1] >= idos[i]. This condition may not be
- ! fullfilled if we use tetra and this is the reason why we have filtered the DOS.
+ ! fulfilled if we use tetra and this is the reason why we have filtered the DOS.
  if (ebands%occopt == 9) then
    ihf = bisect(edos%idos(:,0), ebands%nelect-ebands%nh_qFD)
    ief = bisect(edos%idos(:,0), ebands%nelect+ebands%ne_qFD)
@@ -5829,7 +5844,7 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_range, prefix, co
    call alloc_copy(dtset%kptbounds, bounds)
  end if
 
- kpath = kpath_new(bounds, cryst%gprimd, ndivsm)
+ call kpath%init(bounds, cryst%gprimd, ndivsm)
  call kpath%print([std_out], header="Interpolating energies on k-path")
  ABI_FREE(bounds)
 
@@ -5897,7 +5912,7 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
    ABI_ERROR_NOSTOP('Multiple shifts not allowed', ierr)
  end if
  if (any(abs(shiftk(:, 1)) > tol8)) then
-   ABI_ERROR_NOSTOP("shifted k-mesh not implented", ierr)
+   ABI_ERROR_NOSTOP("shifted k-mesh not implemented", ierr)
  end if
 
  if (ierr /= 0) then

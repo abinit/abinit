@@ -641,8 +641,8 @@ real(dp) :: k0(3)
 !        MAIN CALL TO SELF-CONSISTENT FIELD ROUTINE
          if (need_scfcv_cycle) then
 
-           call dtfil_init_time(dtfil,iapp)
-           itimes(1)=itime ; itimes(2)=1
+           call dtfil%init_time(iapp)
+           itimes(1)=itime; itimes(2)=1
            if(present(itimimage_gstate))then
              itimes(2)=itimimage_gstate
            endif
@@ -686,8 +686,8 @@ real(dp) :: k0(3)
 &               effective_potential,scfcv_args%results_gs%etotal,scfcv_args%results_gs%fcart,scfcv_args%results_gs%gred,&
 &               scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose,&
 &               filename=name_file,elec_eval=need_elec_eval,efield_type=multibinit_dtset%efield_type,efield=multibinit_dtset%efield,&
-&               efield2=multibinit_dtset%efield2,efield_lambda=multibinit_dtset%efield_lambda,efield_lambda2=multibinit_dtset%efield_lambda2,&
-&               efield_period=multibinit_dtset%efield_period,efield_phase=multibinit_dtset%efield_phase,efield_phase2=multibinit_dtset%efield_phase2,&
+&               efield_lambda=multibinit_dtset%efield_lambda,nefield=multibinit_dtset%nefield,&
+&               efield_period=multibinit_dtset%efield_period,efield_phase=multibinit_dtset%efield_phase,&
 &               efield_gmean=multibinit_dtset%efield_gmean,efield_gvel=multibinit_dtset%efield_gvel,efield_sigma=multibinit_dtset%efield_sigma,&
 &               efield_background=multibinit_dtset%efield_background,time=itime*ab_mover%dtion)
             else
@@ -1031,8 +1031,7 @@ real(dp) :: k0(3)
 
  call abihist_free(hist)
 
-
-   call abihist_free(hist_prev)
+ call abihist_free(hist_prev)
  call abimover_destroy(ab_mover)
  call abiforstr_fin(preconforstr)
 

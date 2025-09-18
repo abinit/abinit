@@ -23,16 +23,13 @@ module m_opernlb_gemm
  use defs_basis
  use m_abicore
  use m_errors
+ USE_MPI
  use m_xmpi
  use m_abi_linalg
  use m_gemm_nonlop_projectors
 
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab
-
-#if defined HAVE_MPI2 && defined HAVE_GPU_MPI
- use mpi
-#endif
 
 #ifdef HAVE_FC_ISO_C_BINDING
  use, intrinsic :: iso_c_binding, only : c_ptr,c_loc,c_size_t
@@ -98,7 +95,7 @@ subroutine opernlb_gemm_distributed(rank,nprocs,npw,ndat,&
    end if
 
    if(modulo(iblock,2)==1) then
-!    XG20241028 : This coding confused the gnu_8.5 compiler of buda2_gnu_8.5_cuda, wrt the contiguous character of the target. 
+!    XG20241028 : This coding confused the gnu_8.5 compiler of buda2_gnu_8.5_cuda, wrt the contiguous character of the target.
 !    It declared an error. Make it simple !
 !    work_buf => projs_local(1:cplex,1:npw,1:nprojs_last_blk)
 !    recv_buf => projs_recv(1:cplex,1:npw,1:nprojs_last_blk)
@@ -153,7 +150,7 @@ subroutine opernlb_gemm_distributed(rank,nprocs,npw,ndat,&
      end if
    else if(gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET DATA USE_DEVICE_PTR(work_buf,vectout,projections)
+     !$OMP TARGET DATA USE_DEVICE_ADDR(work_buf,vectout,projections)
      call abi_gpu_xgemm(cplex, 'N','N', &
      &                  npw, ndat, nprojs_cur_blk, cone, &
      &                  c_loc(work_buf), npw, &
@@ -184,7 +181,7 @@ subroutine opernlb_gemm_distributed(rank,nprocs,npw,ndat,&
      call DCOPY(cplex*npw*nprojs_cur_blk, recv_buf, 1, work_buf, 1)
    else if(gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET DATA USE_DEVICE_PTR(work_buf,recv_buf)
+     !$OMP TARGET DATA USE_DEVICE_ADDR(work_buf,recv_buf)
      call copy_gpu_to_gpu(c_loc(work_buf), c_loc(recv_buf), INT(cplex, c_size_t)*npw*nprojs_last_blk*dp)
      !$OMP END TARGET DATA
 #endif
@@ -241,7 +238,7 @@ subroutine opernlb_xgemm(cplex,transa,transb,npw,ndat,nprojs,alpha,a,lda,b,ldb,b
      end if
    else if (gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
+     !$OMP TARGET DATA USE_DEVICE_ADDR(a,b,c)
      call abi_gpu_xgemm(cplex,transa,transb,npw,ndat,nprojs,alpha,&
      &    c_loc(a),lda,c_loc(b(1,ibeg,1)),ldb,beta,c_loc(c),ldc)
      !$OMP END TARGET DATA
@@ -295,7 +292,7 @@ subroutine opernlb_xgemm(cplex,transa,transb,npw,ndat,nprojs,alpha,a,lda,b,ldb,b
 !!  idir=direction of the - atom to be moved in the case (choice=2,signs=2) or (choice=22,signs=2)
 !!                        - k point direction in the case (choice=5,signs=2)
 !!                        - strain component (1:6) in the case (choice=3,signs=2) or (choice=6,signs=1)
-!!                        - strain component (1:9) in the case (choice=33,signs=2) 
+!!                        - strain component (1:9) in the case (choice=33,signs=2)
 !!                        - (1:9) components to specify the atom to be moved and the second q-gradient
 !!                          direction in the case (choice=25,signs=2)
 !!  indlmn(6,nlmn)= array giving l,m,n,lm,ln,s for i=lmn
@@ -660,7 +657,7 @@ subroutine opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
        svectout = svectout + vectin ! TODO understand this
      else if(gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET DATA USE_DEVICE_PTR(vectin,svectout)
+       !$OMP TARGET DATA USE_DEVICE_ADDR(vectin,svectout)
        call abi_gpu_xaxpy(1, 2*npw*nspinor*ndat, cone, &
        &    c_loc(vectin), 1, c_loc(svectout), 1)
        !$OMP END TARGET DATA

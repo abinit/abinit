@@ -48,6 +48,7 @@ module m_driver
  use defs_abitypes,  only : MPI_type
  use m_fstrings,     only : sjoin, itoa
  use m_time,         only : timab, cwtime, cwtime_report
+ use m_pstat,        only : pstat_proc
  use m_xg,           only : xg_finalize
  use m_libpaw_tools, only : libpaw_write_comm_set
  use m_geometry,     only : mkrdim, xcart2xred, xred2xcart, chkdilatmx
@@ -226,7 +227,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  end if
 
  do idtset=1,ndtset_alloc
-   call init_results_respfn(dtsets,ndtset_alloc,results_respfn)
+   call results_respfn%init(dtsets,ndtset_alloc)
  end do
 
  call timab(641,2,tsec)
@@ -338,24 +339,20 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
          [dtset%optdriver, dtset%gwcalctyp] , dict_key="meta")
 
      case (RUNL_GWR)
-       call ydoc%add_ints("optdriver", [dtset%optdriver], &
-         dict_key="meta")
+       call ydoc%add_ints("optdriver", [dtset%optdriver], dict_key="meta")
 
      case (RUNL_BSE)
        call ydoc%add_ints("optdriver, bs_calctype, bs_algorithm", &
          [dtset%optdriver, dtset%bs_calctype, dtset%bs_algorithm] , dict_key="meta")
 
      case (RUNL_EPH)
-       call ydoc%add_ints("optdriver, eph_task", &
-         [dtset%optdriver, dtset%eph_task] , dict_key="meta")
+       call ydoc%add_ints("optdriver, eph_task", [dtset%optdriver, dtset%eph_task] , dict_key="meta")
 
      case(RUNL_LONGWAVE)
-       call ydoc%add_ints("optdriver", [dtset%optdriver], &
-         dict_key="meta")
+       call ydoc%add_ints("optdriver", [dtset%optdriver], dict_key="meta")
 
      case(RUNL_RTTDDFT)
-       call ydoc%add_ints("optdriver", [dtset%optdriver], &
-         dict_key="meta")
+       call ydoc%add_ints("optdriver", [dtset%optdriver], dict_key="meta")
 
      case default
        ABI_ERROR(sjoin('Add a meta section for optdriver: ', itoa(dtset%optdriver)))
@@ -411,9 +408,9 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 !  Treat the file names (get variables)
 
 !  In the case of multiple images, the file names will be overwritten later (for each image)
-   call dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enregs(idtset),ndtset)
+   call dtfil%init(dtset,filnam,filstat,idtset,jdtset_,mpi_enregs(idtset),ndtset)
    if (dtset%optdriver==RUNL_GSTATE.and.dtset%nimage>1) then
-     call dtfil_init_img(dtfil,dtset,dtsets,idtset,jdtset_,ndtset,ndtset_alloc)
+     call dtfil%init_img(dtset,dtsets,idtset,jdtset_,ndtset,ndtset_alloc)
    end if
 
 !  ****************************************************************************
@@ -755,13 +752,14 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
         dtset%gpu_option,dtset%use_slk,dtset%np_slk,mpi_enregs(idtset)%comm_bandspinorfft)
 
    call timab(642,2,tsec)
+   call pstat_proc%print(_PSTAT_ARGS_)
 
 !  ****************************************************************************
 !  Main case selection in driver
 
    select case(dtset%optdriver)
 
-   case(RUNL_GSTATE)
+   case (RUNL_GSTATE)
 
      ABI_MALLOC(fcart_img,(3,dtset%natom,nimage))
      ABI_MALLOC(gred_img,(3,dtset%natom,nimage))
@@ -774,17 +772,17 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
        pawang,pawrad,pawtab,psps,rprim_img,strten_img,vel_cell_img,vel_img,wvl,xred_img,&
        filnam,filstat,idtset,jdtset_,ndtset)
 
-   case(RUNL_RESPFN)
+   case (RUNL_RESPFN)
      call respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,mkmems,mpi_enregs(idtset),&
        npwtot,occ,pawang,pawrad,pawtab,psps,results_respfn,xred)
 
-   case(RUNL_SCREENING)
+   case (RUNL_SCREENING)
      call screening(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim)
 
-   case(RUNL_SIGMA)
+   case (RUNL_SIGMA)
      call sigma(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim)
 
-   case(RUNL_NONLINEAR)
+   case (RUNL_NONLINEAR)
      call nonlinear(codvsn,dtfil,dtset,etotal,mpi_enregs(idtset),npwtot,occ,pawang,pawrad,pawtab,psps,xred)
 
    case (RUNL_GWR)
@@ -793,7 +791,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    case (RUNL_BSE)
      call bethe_salpeter(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
-   case(RUNL_GWLS)
+   case (RUNL_GWLS)
      ! For running G0W0 calculations with Lanczos basis for dielectric operator
      ! and Sternheimer equation for avoiding the use of conduction states (MC+JJL)
      ABI_MALLOC(etotal_img,(nimage))
@@ -821,16 +819,15 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      call dtsets(idtset)%free_nkpt_arrays()
      call eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
-   case(RUNL_LONGWAVE)
+   case (RUNL_LONGWAVE)
 
      call longwave(codvsn,dtfil,dtset,etotal,mpi_enregs(idtset),npwtot,occ,&
 &     pawrad,pawtab,psps,xred)
 
-   case(RUNL_RTTDDFT)
+   case (RUNL_RTTDDFT)
      call rttddft(codvsn,dtfil,dtset,mpi_enregs(idtset),pawang,pawrad,pawtab,psps)
 
    case default
-     ! Bad value for optdriver
      write(msg,'(a,i0,4a)')&
       'Unknown value for the variable optdriver: ',dtset%optdriver,ch10,&
       'This is not allowed.',ch10, 'Action: modify optdriver in the input file.'
@@ -947,7 +944,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  call elpa_func_uninit()
 #endif
 
- !PSP deallocation
  call psps_free(psps)
 
  !XG 121126 : One should not use dtset or idtset in this section, as these might not be defined for all processors.
@@ -965,8 +961,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
  ABI_FREE(jdtset_)
 
-!Results_respfn deallocation
- call destroy_results_respfn(results_respfn)
+ call results_respfn%free()
 
  call timab(644,2,tsec)
  call timab(640,2,tsec)

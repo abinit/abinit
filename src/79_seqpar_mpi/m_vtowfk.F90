@@ -66,11 +66,9 @@ module m_vtowfk
  use m_cgtk,        only : cgtk_fixphase
  use m_common,      only : get_gemm_nonlop_ompgpu_blocksize
  use m_gemm_nonlop_projectors, only : gemm_nonlop_block_size, gemm_nonlop_is_distributed
-
 #if defined HAVE_YAKL
  use gator_mod
 #endif
-
 #if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
@@ -146,7 +144,7 @@ contains
 !!  eig_k(nband_k)=array for holding eigenvalues (hartree)
 !!  ek_k(nband_k)=contribution from each band to kinetic energy, at this k-point
 !!  ek_k_nd(2,nband_k,nband_k*use_dmft)=contribution to kinetic energy,
-!!     including non-diagonal terms, at this k-point (usefull if use_dmft)
+!!     including non-diagonal terms, at this k-point (useful if use_dmft)
 !!  end_k(nband_k)=contribution from each band to nuclear dipole energy, at this k-point
 !!  resid_k(nband_k)=residuals for each band over all k points, BEFORE the band rotation.
 !!   In input: previous residuals.
@@ -195,11 +193,12 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  integer, intent(in) :: kg_k(3,npw_k)
  integer, intent(in) :: npwarr(nkpt),pwind(pwind_alloc,2,3)
  integer, intent(inout) :: rmm_diis_status(2)
- real(dp), intent(in) :: cgq(2,mcgq),kinpw(npw_k),occ_k(nband_k)
+ real(dp), intent(in) :: cgq(2,mcgq),occ_k(nband_k)
+ real(dp),target,intent(in) :: kinpw(npw_k)
  real(dp), intent(in) :: pwnsfac(2,pwind_alloc),pwnsfacq(2,mkgq)
  real(dp), intent(in) :: zshift(nband_k)
  real(dp), target, intent(out) :: eig_k(nband_k)
- real(dP), intent(out) ::ek_k(nband_k),dphase_k(3),ek_k_nd(2,nband_k,nband_k*paw_dmft%use_dmft)
+ real(dp), intent(out) :: ek_k(nband_k),dphase_k(3),ek_k_nd(2,nband_k,nband_k*paw_dmft%use_dmft)
  real(dp), intent(out) :: end_k(nband_k),enlx_k(nband_k)
  real(dp), intent(out),target :: grnl_k(3*natom,nband_k*optforces)
  real(dp), intent(inout) :: resid_k(nband_k)
@@ -213,52 +212,38 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  logical :: do_subdiago,do_ortho,rotate_subvnlx,use_rmm_diis,is_distrib_tmp
  integer,parameter :: level=112,tim_fourwf=2,tim_nonlop_prep=11,enough=3,tim_getcprj=5
  integer,save :: nskip=0
-!     Flag use_subovl: 1 if "subovl" array is computed (see below)
-!     subovl should be Identity (in that case we should use use_subovl=0)
-!     But this is true only if conjugate gradient algo. converges
- integer :: use_subovl=0
- integer :: use_subvnlx=0
- integer :: use_totvnlx=0
- integer :: bandpp_cprj,blocksize,choice,cpopt,iband,iband1
+! Flag use_subovl: 1 if "subovl" array is computed (see below)
+! subovl should be Identity (in that case we should use use_subovl=0)
+! But this is true only if conjugate gradient algo. converges
+ integer :: use_subovl=0, use_subvnlx=0, use_totvnlx=0
+ integer :: bandpp_cprj,blocksize,choice,cpopt,fftalg,iband,iband1,filter
  integer :: iblock,iblocksize,ibs,idir,ierr,igs,igsc,ii,inonsc
- integer :: iorder_cprj,ipw,ispinor,ispinor_index,istwf_k,iwavef,me_g0,mgsc,my_nspinor,n1,n2,n3 !kk
+ integer :: iorder_cprj,ipw,ispinor,iispinor,ispinor_index,istwf_k,iwavef,me_g0,mgsc,my_nspinor,n1,n2,n3 !kk
  integer :: nband_k_cprj,ncols_cprj,nblockbd,ncpgr,ndat,niter,nkpt_max,nnlout,ortalgo,ndat_fft
  integer :: paw_opt,quit,signs,space,spaceComm,tim_nonlop,wfoptalg,wfopta10
  integer :: gpu_option_tmp,nblk_gemm_nonlop,blksize_gemm_nonlop_tmp
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
- real(dp) :: ar,ar_im,eshift,occblock,norm
+ real(dp) :: ar,ar2,ar_im,eshift,occblock,norm
  real(dp) :: max_resid,weight,cpu,wall,gflops
  character(len=50) :: iter_name
  character(len=500) :: msg
- real(dp) :: dummy(2,1),nonlop_dum(1,1),tsec(2)
+ real(dp) :: dummy(2,1),nonlop_dum(1,1),nonlop_dum2(1,1),tsec(2)
  real(dp),allocatable :: cwavef1(:,:),cwavef_x(:,:),cwavef_y(:,:),cwavefb(:,:,:)
-
 #if defined HAVE_GPU && defined HAVE_YAKL
  real(real64), ABI_CONTIGUOUS pointer :: cwavef(:,:)  => null()
-#else
- real(dp),allocatable,target :: cwavef(:,:)
-#endif
-
- real(dp),allocatable :: eig_save(:),enlout(:),evec(:,:),gsc(:,:),ghc_vectornd(:,:)
- real(dp),allocatable :: subham(:),subovl(:),subvnlx(:),totvnlx(:,:)
-
-
-#if defined HAVE_GPU && defined HAVE_YAKL
  real(real64), ABI_CONTIGUOUS pointer :: wfraug(:,:,:,:)
 #else
+ real(dp),allocatable,target :: cwavef(:,:)
  real(dp),allocatable :: wfraug(:,:,:,:)
 #endif
-
+ real(dp),allocatable :: eig_save(:),enlout(:),evec(:,:),gsc(:,:),ghc_vectornd(:,:)
+ real(dp),allocatable :: subham(:),subovl(:),subvnlx(:),totvnlx(:,:)
  real(dp),pointer :: cg_k(:,:),cg_k_block(:,:),grnl_k_block(:,:),eig_k_block(:)
- real(dp),pointer :: cwavef_iband(:,:)
- type(pawcprj_type),pointer :: cwaveprj(:,:)
- type(pawcprj_type),pointer :: cprj_cwavef_bands(:,:),cprj_cwavef(:,:)
-
+ real(dp),contiguous, pointer :: cwavef_iband(:,:), kinpw_ptr(:)
  real(dp), allocatable :: weight_t(:) ! only allocated and used with GPU fourwf
+ type(pawcprj_type),pointer :: cwaveprj(:,:), cprj_cwavef_bands(:,:),cprj_cwavef(:,:)
  type(xgBlock_t) :: xgx0,xgeigen,xgforces
  type(xg_t) :: cprj_xgx0,cprj_work
-
-
 ! **********************************************************************
 
  DBG_ENTER("COLL")
@@ -416,20 +401,23 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      if (use_subovl==1)subovl(:)=zero
    end if
 
-   !resid_k(:)=zero
-
-   !call cg_kfilter(npw_k, my_nspinor, nband_k, kinpw, cg(:, icg+1))
-
-!  Filter the WFs when modified kinetic energy is too large (see routine mkkin.f)
-!  !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(igs,iwavef)
+   ! Filter the WFs when modified kinetic energy is too large (see routine mkkin.f)
+   ! !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(igs,iwavef)
    do iband=1,nband_k
      iwavef=(iband-1)*npw_k*my_nspinor+icg
      cwavef_iband => cg(:,1+iwavef:npw_k*my_nspinor+iwavef)
      update_cprj=.False.
      do ispinor=1,my_nspinor
+       iispinor=ispinor; if (mpi_enreg%paral_spinor==1) iispinor=mpi_enreg%me_spinor+1
        igs=(ispinor-1)*npw_k
+       kinpw_ptr => kinpw
+       if (gs_hamk%use_gbt /= 0) then
+         ! Use different kinetic energies for up and down component (this won't work if paral_kgb /= 0)
+         if (iispinor == 1) kinpw_ptr => gs_hamk%kinpw_k
+         if (iispinor == 2) kinpw_ptr => gs_hamk%kinpw_kp
+       end if
        do ipw=1+igs,npw_k+igs
-         if(kinpw(ipw-igs)>huge(zero)*1.d-11)then
+         if(kinpw_ptr(ipw-igs)>huge(zero)*1.d-11)then
            norm=cwavef_iband(1,ipw)**2+cwavef_iband(2,ipw)**2
            if (norm>tol15*tol15) update_cprj=.True.
            cwavef_iband(:,ipw)=zero
@@ -442,7 +430,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      end if
    end do
    ABI_NVTX_END_RANGE()
-
 
    ! JLJ 17/10/2014: If it is a GWLS calculation, construct the hamiltonian
    ! as in a usual GS calc., but skip any minimisation procedure.
@@ -466,11 +453,11 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
                          mpi_enreg, nband_k, npw_k, my_nspinor, resid_k, rmm_diis_status)
          else
 
-            if ( .not. xg_diago ) then
+           if ( .not. xg_diago ) then
 
              ABI_NVTX_START_RANGE(NVTX_LOBPCG1)
              call lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
-&             nband_k,nblockbd,npw_k,prtvol,resid_k,subham,totvnlx,use_totvnlx)
+             nband_k,nblockbd,npw_k,prtvol,resid_k,subham,totvnlx,use_totvnlx)
              ! In case of FFT parallelism, exchange subspace arrays
              spaceComm=mpi_enreg%comm_bandspinorfft
              call xmpi_sum(subham,spaceComm,ierr)
@@ -484,7 +471,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
              if (use_subovl==1) call xmpi_sum(subovl,spaceComm,ierr)
              ABI_NVTX_END_RANGE()
 
-          else
+           else
 
              ABI_NVTX_START_RANGE(NVTX_LOBPCG2)
              if (dtset%cprj_in_memory==1) then
@@ -492,11 +479,11 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
                  kinpw,mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k,nbdbuf,xg_nonlop)
              else
                call lobpcgwf2(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,isppol,ikpt,inonsc,istep,kinpw,mpi_enreg,&
-&               nband_k,npw_k,my_nspinor,prtvol,resid_k,nbdbuf)
+                 nband_k,npw_k,my_nspinor,prtvol,resid_k,nbdbuf)
              end if
              ABI_NVTX_END_RANGE()
 
-          end if
+           end if
 
          end if
 
@@ -538,14 +525,14 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
          if (dtset%cprj_in_memory==2) then
            call cgwf_cprj(cg,cprj_cwavef_bands,dtset%cprj_update_lvl,eig_k,&
-&             gs_hamk,icg,mcg,mpi_enreg,nband_k,dtset%nline,&
-&             dtset%ortalg,prtvol,quit,resid_k,subham,dtset%tolrde,dtset%tolwfr_diago,wfoptalg)
+             gs_hamk,icg,mcg,mpi_enreg,nband_k,dtset%nline,&
+             dtset%ortalg,prtvol,quit,resid_k,subham,dtset%tolrde,dtset%tolwfr_diago,wfoptalg)
          else
            call cgwf(dtset%berryopt,cg,cgq,dtset%chkexit,cpus,dphase_k,dtefield,dtfil%filnam_ds(1),&
-&           gsc,gs_hamk,icg,igsc,ikpt,inonsc,isppol,dtset%mband,mcg,mcgq,mgsc,mkgq,&
-&           mpi_enreg,mpw,nband_k,dtset%nbdblock,nkpt,dtset%nline,npw_k,npwarr,my_nspinor,&
-&           dtset%nsppol,dtset%ortalg,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,quit,resid_k,&
-&           subham,subovl,subvnlx,dtset%tolrde,dtset%tolwfr_diago,use_subovl,use_subvnlx,wfoptalg,zshift)
+             gsc,gs_hamk,icg,igsc,ikpt,inonsc,isppol,dtset%mband,mcg,mcgq,mgsc,mkgq,&
+             mpi_enreg,mpw,nband_k,dtset%nbdblock,nkpt,dtset%nline,npw_k,npwarr,my_nspinor,&
+             dtset%nsppol,dtset%ortalg,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,quit,resid_k,&
+             subham,subovl,subvnlx,dtset%tolrde,dtset%tolwfr_diago,use_subovl,use_subvnlx,wfoptalg,zshift)
          end if
        else
          call rmm_diis(istep, ikpt, isppol, cg(:,icg+1:), dtset, eig_k, occ_k, enlx_k, gs_hamk, kinpw, gsc, &
@@ -556,18 +543,16 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          ! Kokkos GPU branch is not OpenMp thread-safe, restoring OpenMP threads num
          call xomp_set_num_threads(dtset%gpu_kokkos_nthrd)
        end if
-
      end if
-
    end if
 
-!  =========================================================================
-!  ===================== FIND LARGEST RESIDUAL =============================
-!  =========================================================================
+   !  =========================================================================
+   !  ===================== FIND LARGEST RESIDUAL =============================
+   !  =========================================================================
 
-!  Find largest resid over bands at this k point
-!  Note that this operation is done BEFORE rotation of bands:
-!  it would be time-consuming to recompute the residuals after.
+   ! Find largest resid over bands at this k point
+   ! Note that this operation is done BEFORE rotation of bands:
+   ! it would be time-consuming to recompute the residuals after.
    if (nbdbuf >= 0) then
      max_resid = maxval(resid_k(1:max(1,nband_k-nbdbuf)))
    else if (nbdbuf==-101) then
@@ -576,7 +561,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      ABI_ERROR(sjoin('Bad value of nbdbuf:', itoa(nbdbuf)))
    end if
 
-!  Print residuals
+   ! Print residuals
    if(prtvol/=5.and.(prtvol>2 .or. ikpt<=nkpt_max))then
      do ii=0,(nband_k-1)/8
        write(msg,'(a,8es10.2)')' res:',(resid_k(iband),iband=1+ii*8,min(nband_k,8+ii*8))
@@ -584,9 +569,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      end do
    end if
 
-!  =========================================================================
-!  ========== DIAGONALIZATION OF HAMILTONIAN IN WFs SUBSPACE ===============
-!  =========================================================================
+   !  =========================================================================
+   !  ========== DIAGONALIZATION OF HAMILTONIAN IN WFs SUBSPACE ===============
+   !  =========================================================================
    do_subdiago = .not. wfopta10 == 1 .and. .not. xg_diago
    if (use_rmm_diis) do_subdiago = .False.  ! subdiago is already performed before RMM-DIIS.
 
@@ -596,7 +581,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      call timab(585,1,tsec) !"vtowfk(subdiago)"
      if (dtset%cprj_in_memory==2) then
        call subdiago_low_memory(cg,eig_k,evec,icg,istwf_k,&
-&       mcg,nband_k,npw_k,my_nspinor,dtset%paral_kgb,subham)
+         mcg,nband_k,npw_k,my_nspinor,dtset%paral_kgb,subham)
        call timab(585,2,tsec)
        call timab(578,1,tsec)
        call cprj_rotate(cprj_cwavef_bands,evec,gs_hamk%dimcprj,natom,nband_k,gs_hamk%nspinor)
@@ -618,32 +603,28 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      end do
    end if
 
-!  THIS CHANGE OF SHIFT DOES NOT WORK WELL
-!  Update zshift in the case of wfoptalg==3
-!  if(wfoptalg==3 .and. inonsc/=1)then
-!  do iband=1,nband_k
-!  if(eig_k(iband)<eshift .and. eig_save(iband)<eshift)then
-!  zshift(iband)=max(eig_k(iband),eig_save(iband))
-!  end if
-!  if(eig_k(iband)>eshift .and. eig_save(iband)>eshift)then
-!  zshift(iband)=min(eig_k(iband),eig_save(iband))
-!  end if
-!  end do
-!  eig_save(:)=eig_k(:)
-!  end if
+   !  THIS CHANGE OF SHIFT DOES NOT WORK WELL
+   !  Update zshift in the case of wfoptalg==3
+   !  if(wfoptalg==3 .and. inonsc/=1)then
+   !  do iband=1,nband_k
+   !  if(eig_k(iband)<eshift .and. eig_save(iband)<eshift) zshift(iband)=max(eig_k(iband),eig_save(iband))
+   !  if(eig_k(iband)>eshift .and. eig_save(iband)>eshift) zshift(iband)=min(eig_k(iband),eig_save(iband))
+   !  end do
+   !  eig_save(:)=eig_k(:)
+   !  end if
 
-!  =========================================================================
-!  =============== ORTHOGONALIZATION OF WFs (if needed) ====================
-!  =========================================================================
+   !  =========================================================================
+   !  =============== ORTHOGONALIZATION OF WFs (if needed) ====================
+   !  =========================================================================
 
-!  Re-orthonormalize the wavefunctions at this k point.
-!  this step is redundant but is performed to combat rounding error in wavefunction orthogonality.
-!  This step is performed inside rmm_diis if RMM-DIIS is activated.
+   !  Re-orthonormalize the wavefunctions at this k point.
+   !  this step is redundant but is performed to combat rounding error in wavefunction orthogonality.
+   !  This step is performed inside rmm_diis if RMM-DIIS is activated.
 
    call timab(583,1,tsec) ! "vtowfk(pw_orthon)"
    ortalgo = mpi_enreg%paral_kgb
    ! The orthogonalization is completely disabled with ortalg<=-10.
-   ! This option is usefull for testing only and is not documented.
+   ! This option is useful for testing only and is not documented.
    do_ortho = (wfoptalg/=14 .and. wfoptalg /= 1 .and. wfoptalg /= 11 .and. dtset%ortalg>-10) .or. dtset%ortalg > 0
    if (xg_diago) do_ortho = .false.
    if (use_rmm_diis) do_ortho = .False.
@@ -660,7 +641,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        call pw_orthon_cprj(icg,mcg,npw_k*my_nspinor,my_nspinor,nband_k,ortalgo,subovl,cg,cprj=cprj_cwavef_bands)
      else
        call pw_orthon(icg,igsc,istwf_k,mcg,mgsc,npw_k*my_nspinor,nband_k,ortalgo,gsc,gs_hamk%usepaw,cg,&
-&        mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
+         mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
      end if
 
      ABI_NVTX_END_RANGE()
@@ -725,10 +706,10 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  !if (dtset%prtvol > 0)
  !call wrtout(std_out, sjoin(" Number of Vnl|Psi> applications:", itoa(nonlop_counter)))
 
-!###################################################################
+ !###################################################################
 
-!Compute kinetic energy and non-local energy for each band, and in the SCF
-!case, contribution to forces, and eventually accumulate rhoaug
+ !Compute kinetic energy and non-local energy for each band, and in the SCF
+ !case, contribution to forces, and eventually accumulate rhoaug
 
  ndat=1;if (mpi_enreg%paral_kgb==1) ndat=mpi_enreg%bandpp
  if(iscf>0 .and. fixed_occ)  then
@@ -738,7 +719,12 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      ABI_MALLOC_MANAGED(wfraug,(/2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat_fft/))
 #endif
    else
-     ABI_MALLOC(wfraug,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat_fft))
+     fftalg = gs_hamk%ngfft(7)
+     if (gs_hamk%gpu_option==ABI_GPU_DISABLED.and.fftalg/=401) then
+       ABI_MALLOC(wfraug,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6))
+     else
+       ABI_MALLOC(wfraug,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat_fft))
+     end if
    end if
  end if
 
@@ -753,7 +739,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    paw_opt=2;cpopt=0;tim_nonlop=10-8*optforces
    if (dtset%cprj_in_memory==2) cpopt=2 ! cprj are in memory (but not the derivatives)
    if (dtset%usefock==1) then
-!     if (dtset%optforces/= 0) then
+     !if (dtset%optforces/= 0) then
      if (optforces/= 0) then
        choice=2;cpopt=1; nnlout=3*natom
      end if
@@ -805,7 +791,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    blksize_gemm_nonlop_tmp = gemm_nonlop_block_size; is_distrib_tmp = gemm_nonlop_is_distributed
    gemm_nonlop_block_size = dtset%gpu_nl_splitsize
    call get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,mpi_enreg%bandpp,nband_k,&
-   &                        dtset%nspinor,mpi_enreg%paral_kgb,mpi_enreg%nproc_band,&
+   &                        dtset%nspinor,dtset%nspden,mpi_enreg%paral_kgb,mpi_enreg%nproc_band,&
    &                        optforces,0,-1,gs_hamk%gpu_option,(dtset%gpu_nl_distrib/=0),&
    &                        gemm_nonlop_block_size,nblk_gemm_nonlop,warn_on_fail=.true.)
    gemm_nonlop_is_distributed = (dtset%gpu_nl_distrib/=0 .and. nblk_gemm_nonlop > 0)
@@ -815,39 +801,71 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
  end if
 
-!Loop over bands or blocks of bands. Note that in sequential mode iblock=iband, nblockbd=nband_k and blocksize=1
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET ENTER DATA MAP(alloc:cwavef) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
+
+ ! Loop over bands or blocks of bands.
+ ! Note that in sequential mode iblock=iband, nblockbd=nband_k and blocksize=1
  do iblock=1,nblockbd
    occblock=maxval(occ_k(1+(iblock-1)*blocksize:iblock*blocksize))
-   cwavef(:,:)=cg(:,1+(iblock-1)*npw_k*my_nspinor*blocksize+icg:iblock*npw_k*my_nspinor*blocksize+icg)
+   !cwavef(:,:)=cg(:,1+(iblock-1)*npw_k*my_nspinor*blocksize+icg:iblock*npw_k*my_nspinor*blocksize+icg)
+   if(gs_hamk%gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET TEAMS DISTRIBUTE MAP(to:cg_k,cwavef) PRIVATE(iblocksize)
+     do iblocksize=1,blocksize*my_nspinor
+       !$OMP PARALLEL DO PRIVATE(ipw)
+       do ipw=1,npw_k
+         cwavef(1,ipw+(iblocksize-1)*npw_k)=cg_k(1,ipw+(iblocksize-1)*npw_k+(iblock-1)*npw_k*blocksize*my_nspinor)
+         cwavef(2,ipw+(iblocksize-1)*npw_k)=cg_k(2,ipw+(iblocksize-1)*npw_k+(iblock-1)*npw_k*blocksize*my_nspinor)
+       end do
+     end do
+#endif
+   else
+     call DCOPY(2*npw_k*my_nspinor*blocksize, &
+       cg_k(:,1+(iblock-1)*npw_k*my_nspinor*blocksize:iblock*npw_k*my_nspinor*blocksize), 1, cwavef, 1)
+   end if
 
-!  Compute kinetic energy of each band
    do iblocksize=1,blocksize
      iband=(iblock-1)*blocksize+iblocksize
 
-     call meanvalue_g(ar,kinpw,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
-&     cg(:,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),&
-&     cg(:,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),0,&
-&     gpu_thread_limit=dtset%gpu_thread_limit)
+     cwavef_iband => cg(:,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg)
 
-     ek_k(iband)=ar
+     ! Compute kinetic energy for band iband.
+     if (gs_hamk%use_gbt == 0) then
+       call meanvalue_g(ek_k(iband),kinpw,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
+         cwavef_iband, cwavef_iband, 0, gpu_thread_limit=dtset%gpu_thread_limit)
+     else
+       ! Treat up and down components separately.
+       ! Note filter 1. Also: this won't work if paral_kgb 1 and/or spinor parallelism
+       filter = 1
+       call meanvalue_g(ar,gs_hamk%kinpw_k,filter,istwf_k,mpi_enreg,npw_k,1,&
+         cwavef_iband, cwavef_iband, 0, gpu_thread_limit=dtset%gpu_thread_limit)
+       call meanvalue_g(ar2,gs_hamk%kinpw_kp,filter,istwf_k,mpi_enreg,npw_k,1,&
+         cwavef_iband(:,npw_k+1:), cwavef_iband(:,npw_k+1:),0,gpu_thread_limit=dtset%gpu_thread_limit)
+       ek_k(iband) = ar + ar2
+     end if
+
      if(ANY(ABS(dtset%nucdipmom)>tol8)) then
        ABI_MALLOC(ghc_vectornd,(2,npw_k*my_nspinor))
        call getghc_nucdip(cg(:,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),&
-         & ghc_vectornd,gs_hamk%gbound_k,gs_hamk%istwf_k,kg_k,gs_hamk%kpt_k,&
-         & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npw_k,gs_hamk%nvloc,&
-         & gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,my_nspinor,gs_hamk%vectornd,gs_hamk%gpu_option)
+          ghc_vectornd,gs_hamk%gbound_k,gs_hamk%istwf_k,kg_k,gs_hamk%kpt_k,&
+          gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npw_k,gs_hamk%nvloc,&
+          gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,my_nspinor,gs_hamk%vectornd,gs_hamk%vlocal,&
+          gs_hamk%zora,gs_hamk%gpu_option)
        end_k(iband)=DOT_PRODUCT(cg(1,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),&
-         &                      ghc_vectornd(1,1:npw_k*my_nspinor))+&
-         &          DOT_PRODUCT(cg(2,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),&
-         &                      ghc_vectornd(2,1:npw_k*my_nspinor))
+                               ghc_vectornd(1,1:npw_k*my_nspinor))+&
+                    DOT_PRODUCT(cg(2,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),&
+                               ghc_vectornd(2,1:npw_k*my_nspinor))
        ABI_FREE(ghc_vectornd)
      end if
+
      if(paw_dmft%use_dmft==1) then
        do iband1=1,nband_k
          call meanvalue_g(ar,kinpw,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
-&         cg(:,1+(iband -1)*npw_k*my_nspinor+icg:iband *npw_k*my_nspinor+icg),&
-&         cg(:,1+(iband1-1)*npw_k*my_nspinor+icg:iband1*npw_k*my_nspinor+icg),&
-&         paw_dmft%use_dmft,ar_im=ar_im,gpu_thread_limit=dtset%gpu_thread_limit)
+           cg(:,1+(iband -1)*npw_k*my_nspinor+icg:iband *npw_k*my_nspinor+icg),&
+           cg(:,1+(iband1-1)*npw_k*my_nspinor+icg:iband1*npw_k*my_nspinor+icg),&
+           paw_dmft%use_dmft,ar_im=ar_im,gpu_thread_limit=dtset%gpu_thread_limit)
          ek_k_nd(1,iband,iband1)=ar
          ek_k_nd(2,iband,iband1)=ar_im
        end do
@@ -864,7 +882,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        if (dtset%gpu_option /= ABI_GPU_DISABLED) then
 
          ABI_MALLOC(weight_t,(blocksize))
-
          ! compute weights
          do iblocksize=1,blocksize
            iband=(iblock-1)*blocksize+iblocksize
@@ -874,32 +891,52 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
          if(dtset%nspinor==1) then
            call fourwf(1,rhoaug(:,:,:,1),cwavef(:,:),dummy,wfraug,&
-           &    gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,kg_k,kg_k,&
-           &    gs_hamk%mgfft,mpi_enreg,blocksize,gs_hamk%ngfft,&
-           &    npw_k,1,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,tim_fourwf,weight,weight,&
-           &    weight_array_r=weight_t,weight_array_i=weight_t,&
-           &    gpu_option=dtset%gpu_option)
+               gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,kg_k,kg_k,&
+               gs_hamk%mgfft,mpi_enreg,blocksize,gs_hamk%ngfft,&
+               npw_k,1,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,tim_fourwf,weight,weight,&
+               weight_array_r=weight_t,weight_array_i=weight_t,&
+               gpu_option=dtset%gpu_option)
+
          else if(dtset%nspinor==2) then
            ABI_MALLOC(cwavefb,(2,npw_k*blocksize,2))
-           ibs=(iblock-1)*npw_k*my_nspinor*blocksize+icg
-           do iband=1,blocksize
-             cwavefb(:,(iband-1)*npw_k+1:iband*npw_k,1)=cg(:,1+(2*iband-2)*npw_k+ibs:(iband*2-1)*npw_k+ibs)
-             cwavefb(:,(iband-1)*npw_k+1:iband*npw_k,2)=cg(:,1+(2*iband-1)*npw_k+ibs:iband*2*npw_k+ibs)
-           end do
+           ibs=(iblock-1)*npw_k*my_nspinor*blocksize
+           if(gs_hamk%gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+             !$OMP TARGET ENTER DATA MAP(alloc:cwavefb)
+             !$OMP TARGET TEAMS DISTRIBUTE MAP(to:cwavefb,cwavef) PRIVATE(iband)
+             do iband=1,blocksize
+               !$OMP PARALLEL DO PRIVATE(ipw)
+               do ipw=1,npw_k
+                 cwavefb(1,(iband-1)*npw_k+ipw,1)=cwavef(1,ipw+(2*iband-2)*npw_k)
+                 cwavefb(2,(iband-1)*npw_k+ipw,1)=cwavef(2,ipw+(2*iband-2)*npw_k)
+
+                 cwavefb(1,(iband-1)*npw_k+ipw,2)=cwavef(1,ipw+(2*iband-1)*npw_k)
+                 cwavefb(2,(iband-1)*npw_k+ipw,2)=cwavef(2,ipw+(2*iband-1)*npw_k)
+               end do
+             end do
+#endif
+           else
+             do iband=1,blocksize
+               cwavefb(:,(iband-1)*npw_k+1:iband*npw_k,1)=cwavef(:,1+(2*iband-2)*npw_k:(iband*2-1)*npw_k)
+               cwavefb(:,(iband-1)*npw_k+1:iband*npw_k,2)=cwavef(:,1+(2*iband-1)*npw_k:iband*2*npw_k)
+             end do
+           end if
 
            call fourwf(1,rhoaug(:,:,:,1),cwavefb(:,:,1),dummy,wfraug,&
-           &    gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,kg_k,kg_k,&
-           &    gs_hamk%mgfft,mpi_enreg,blocksize,gs_hamk%ngfft,&
-           &    npw_k,1,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,tim_fourwf,weight,weight,&
-           &    weight_array_r=weight_t,weight_array_i=weight_t,&
-           &    gpu_option=dtset%gpu_option)
+                       gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,kg_k,kg_k,&
+                       gs_hamk%mgfft,mpi_enreg,blocksize,gs_hamk%ngfft,&
+                       npw_k,1,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,tim_fourwf,weight,weight,&
+                       weight_array_r=weight_t,weight_array_i=weight_t,&
+                       gpu_option=dtset%gpu_option)
+
            if(dtset%nspden==1) then
              call fourwf(1,rhoaug(:,:,:,1),cwavefb(:,:,2),dummy,wfraug,&
-             &    gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,kg_k,kg_k,&
-             &    gs_hamk%mgfft,mpi_enreg,blocksize,gs_hamk%ngfft,&
-             &    npw_k,1,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,tim_fourwf,weight,weight,&
-             &    weight_array_r=weight_t,weight_array_i=weight_t,&
-             &    gpu_option=dtset%gpu_option)
+                         gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,kg_k,kg_k,&
+                         gs_hamk%mgfft,mpi_enreg,blocksize,gs_hamk%ngfft,&
+                         npw_k,1,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,tim_fourwf,weight,weight,&
+                         weight_array_r=weight_t,weight_array_i=weight_t,&
+                         gpu_option=dtset%gpu_option)
+
            else if (dtset%nspden==4) then
              ! Build the four components of rho. We use only norm quantities and, so fourwf.
              ! $\sum_{n} f_n \Psi^{* \alpha}_n \Psi^{\alpha}_n =\rho^{\alpha \alpha}$
@@ -908,44 +945,67 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
              ABI_MALLOC(cwavef_x,(2,npw_k*blocksize))
              ABI_MALLOC(cwavef_y,(2,npw_k*blocksize))
 
-             !$(\Psi^{1}+\Psi^{2})$
-             cwavef_x(:,:)=cwavefb(:,1:npw_k*blocksize,1)+cwavefb(:,1:npw_k*blocksize,2)
-             !$(\Psi^{1}-i \Psi^{2})$
-             cwavef_y(1,:)=cwavefb(1,1:npw_k*blocksize,1)+cwavefb(2,1:npw_k*blocksize,2)
-             cwavef_y(2,:)=cwavefb(2,1:npw_k*blocksize,1)-cwavefb(1,1:npw_k*blocksize,2)
+             if(gs_hamk%gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+               !$OMP TARGET ENTER DATA MAP(alloc:cwavef_x,cwavef_y)
+               !$OMP TARGET TEAMS DISTRIBUTE MAP(to:cwavef_x,cwavef_y,cwavefb) PRIVATE(iband)
+               do iband=1,blocksize
+                 !$OMP PARALLEL DO PRIVATE(ipw)
+                 do ipw=1,npw_k
+                   !$(\Psi^{1}+\Psi^{2})$
+                   cwavef_x(1,(iband-1)*npw_k+ipw)=cwavefb(1,(iband-1)*npw_k+ipw,1)+cwavefb(1,(iband-1)*npw_k+ipw,2)
+                   cwavef_x(2,(iband-1)*npw_k+ipw)=cwavefb(2,(iband-1)*npw_k+ipw,1)+cwavefb(2,(iband-1)*npw_k+ipw,2)
+                   !$(\Psi^{1}-i \Psi^{2})$
+                   cwavef_y(1,(iband-1)*npw_k+ipw)=cwavefb(1,(iband-1)*npw_k+ipw,1)+cwavefb(2,(iband-1)*npw_k+ipw,2)
+                   cwavef_y(2,(iband-1)*npw_k+ipw)=cwavefb(2,(iband-1)*npw_k+ipw,1)-cwavefb(1,(iband-1)*npw_k+ipw,2)
+                 end do
+               end do
+#endif
+             else
+               !$(\Psi^{1}+\Psi^{2})$
+               cwavef_x(:,:)=cwavefb(:,1:npw_k*blocksize,1)+cwavefb(:,1:npw_k*blocksize,2)
+               !$(\Psi^{1}-i \Psi^{2})$
+               cwavef_y(1,:)=cwavefb(1,1:npw_k*blocksize,1)+cwavefb(2,1:npw_k*blocksize,2)
+               cwavef_y(2,:)=cwavefb(2,1:npw_k*blocksize,1)-cwavefb(1,1:npw_k*blocksize,2)
+             end if
 
              ! z component
              call fourwf(1,rhoaug(:,:,:,4),cwavefb(:,:,2),dummy,wfraug,&
-             &    gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,kg_k,kg_k,&
-             &    gs_hamk%mgfft,mpi_enreg,blocksize,gs_hamk%ngfft,&
-             &    npw_k,1,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,tim_fourwf,weight,weight,&
-             &    weight_array_r=weight_t,weight_array_i=weight_t,&
-             &    gpu_option=dtset%gpu_option)
+                         gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,kg_k,kg_k,&
+                         gs_hamk%mgfft,mpi_enreg,blocksize,gs_hamk%ngfft,&
+                         npw_k,1,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,tim_fourwf,weight,weight,&
+                         weight_array_r=weight_t,weight_array_i=weight_t,&
+                         gpu_option=dtset%gpu_option)
              ! x component
              call fourwf(1,rhoaug(:,:,:,2),cwavef_x(:,:),dummy,wfraug,&
-             &    gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,kg_k,kg_k,&
-             &    gs_hamk%mgfft,mpi_enreg,blocksize,gs_hamk%ngfft,&
-             &    npw_k,1,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,tim_fourwf,weight,weight,&
-             &    weight_array_r=weight_t,weight_array_i=weight_t,&
-             &    gpu_option=dtset%gpu_option)
+                         gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,kg_k,kg_k,&
+                         gs_hamk%mgfft,mpi_enreg,blocksize,gs_hamk%ngfft,&
+                         npw_k,1,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,tim_fourwf,weight,weight,&
+                         weight_array_r=weight_t,weight_array_i=weight_t,&
+                         gpu_option=dtset%gpu_option)
              ! y component
              call fourwf(1,rhoaug(:,:,:,3),cwavef_y(:,:),dummy,wfraug,&
-             &    gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,kg_k,kg_k,&
-             &    gs_hamk%mgfft,mpi_enreg,blocksize,gs_hamk%ngfft,&
-             &    npw_k,1,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,tim_fourwf,weight,weight,&
-             &    weight_array_r=weight_t,weight_array_i=weight_t,&
-             &    gpu_option=dtset%gpu_option)
+                         gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,kg_k,kg_k,&
+                         gs_hamk%mgfft,mpi_enreg,blocksize,gs_hamk%ngfft,&
+                         npw_k,1,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,tim_fourwf,weight,weight,&
+                         weight_array_r=weight_t,weight_array_i=weight_t,&
+                         gpu_option=dtset%gpu_option)
+#ifdef HAVE_OPENMP_OFFLOAD
+             !$OMP TARGET EXIT DATA MAP(delete:cwavef_x,cwavef_y) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
              ABI_FREE(cwavef_x)
              ABI_FREE(cwavef_y)
            end if
 
+#ifdef HAVE_OPENMP_OFFLOAD
+           !$OMP TARGET EXIT DATA MAP(delete:cwavefb) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
            ABI_FREE(cwavefb)
          end if
 
          ABI_FREE(weight_t)
 
        else
-
          do iblocksize=1,blocksize
            iband=(iblock-1)*blocksize+iblocksize
            cwavef_iband => cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor)
@@ -954,12 +1014,11 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
              weight = occ_k(iband) * wtk / gs_hamk%ucvol
 
              ! Accumulate charge density in real space in array rhoaug
-
              ! The same section of code is also found in mkrho.F90 : should be rationalized !
              call fourwf(1,rhoaug(:,:,:,1),cwavef_iband,dummy,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
-               &           istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
-               &           gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
-               &           tim_fourwf,weight,weight,gpu_option=dtset%gpu_option)
+                         istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
+                         gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
+                         tim_fourwf,weight,weight,gpu_option=dtset%gpu_option)
 
              if(dtset%nspinor==2)then
                ABI_MALLOC(cwavef1,(2,npw_k))
@@ -968,10 +1027,10 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
                if(dtset%nspden==1) then
 
                  call fourwf(1,rhoaug(:,:,:,1),cwavef1,dummy,wfraug,&
-                   &               gs_hamk%gbound_k,gs_hamk%gbound_k,&
-                   &               istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
-                   &               gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
-                   &               tim_fourwf,weight,weight,gpu_option=dtset%gpu_option)
+                             gs_hamk%gbound_k,gs_hamk%gbound_k,&
+                             istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
+                             gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
+                             tim_fourwf,weight,weight,gpu_option=dtset%gpu_option)
 
                else if(dtset%nspden==4) then
                  ! Build the four components of rho. We use only norm quantities and, so fourwf.
@@ -987,19 +1046,19 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
                  cwavef_y(2,:)=cwavef_iband(2,1:npw_k)-cwavef1(1,1:npw_k)
                  ! z component
                  call fourwf(1,rhoaug(:,:,:,4),cwavef1,dummy,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
-                   &             istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
-                   &               gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
-                   &               tim_fourwf,weight,weight,gpu_option=dtset%gpu_option)
+                             istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
+                             gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
+                             tim_fourwf,weight,weight,gpu_option=dtset%gpu_option)
                  ! x component
                  call fourwf(1,rhoaug(:,:,:,2),cwavef_x,dummy,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
-                   &               istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
-                   &               gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
-                   &               tim_fourwf,weight,weight,gpu_option=dtset%gpu_option)
+                             istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
+                             gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
+                             tim_fourwf,weight,weight,gpu_option=dtset%gpu_option)
                  ! y component
                  call fourwf(1,rhoaug(:,:,:,3),cwavef_y,dummy,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
-                   &               istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
-                   &               gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
-                   &               tim_fourwf,weight,weight,gpu_option=dtset%gpu_option)
+                             istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
+                             gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
+                             tim_fourwf,weight,weight,gpu_option=dtset%gpu_option)
 
                  ABI_FREE(cwavef_x)
                  ABI_FREE(cwavef_y)
@@ -1014,96 +1073,141 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
        end if ! dtset%gpu_option
 
-!      In case of fixed occupation numbers,in bandFFT mode accumulates the partial density
+
      else if (fixed_occ .and. mpi_enreg%paral_kgb==1) then
+       ! In case of fixed occupation numbers,in bandFFT mode accumulates the partial density
 
        if (dtset%nspinor==1) then
          call timab(537,1,tsec) ! "prep_fourwf%vtow"
          call prep_fourwf(rhoaug(:,:,:,1),blocksize,cwavef,wfraug,iblock,istwf_k,&
-&         gs_hamk%mgfft,mpi_enreg,nband_k,ndat,gs_hamk%ngfft,npw_k,&
-&         gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,&
-&         1,gs_hamk%ucvol,wtk,gpu_option=dtset%gpu_option)
+           gs_hamk%mgfft,mpi_enreg,nband_k,ndat,gs_hamk%ngfft,npw_k,&
+           gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,&
+           1,gs_hamk%ucvol,wtk,gpu_option=dtset%gpu_option)
          call timab(537,2,tsec)
        else if (dtset%nspinor==2) then
          ABI_MALLOC(cwavefb,(2,npw_k*blocksize,2))
-         ibs=(iblock-1)*npw_k*my_nspinor*blocksize+icg
-!        --- No parallelization over spinors ---
-         if (mpi_enreg%paral_spinor==0) then
-           do iband=1,blocksize
-             cwavefb(:,(iband-1)*npw_k+1:iband*npw_k,1)=cg(:,1+(2*iband-2)*npw_k+ibs:(iband*2-1)*npw_k+ibs)
-             cwavefb(:,(iband-1)*npw_k+1:iband*npw_k,2)=cg(:,1+(2*iband-1)*npw_k+ibs:iband*2*npw_k+ibs)
-           end do
+         if(gs_hamk%gpu_option==ABI_GPU_OPENMP) then
+           ! --- No parallelization over spinors ---
+           if (mpi_enreg%paral_spinor==0) then
+#ifdef HAVE_OPENMP_OFFLOAD
+             !$OMP TARGET ENTER DATA MAP(alloc:cwavefb)
+             !$OMP TARGET TEAMS DISTRIBUTE MAP(to:cwavefb,cwavef) PRIVATE(iband)
+             do iband=1,blocksize
+               !$OMP PARALLEL DO PRIVATE(ipw)
+               do ipw=1,npw_k
+                 cwavefb(1,(iband-1)*npw_k+ipw,1)=cwavef(1,ipw+(2*iband-2)*npw_k)
+                 cwavefb(2,(iband-1)*npw_k+ipw,1)=cwavef(2,ipw+(2*iband-2)*npw_k)
+
+                 cwavefb(1,(iband-1)*npw_k+ipw,2)=cwavef(1,ipw+(2*iband-1)*npw_k)
+                 cwavefb(2,(iband-1)*npw_k+ipw,2)=cwavef(2,ipw+(2*iband-1)*npw_k)
+               end do
+             end do
+#endif
+           else
+             ABI_BUG("Parallelisation on spinor isn't supported with OpenMP GPU")
+           end if
          else
-!          --- Parallelization over spinors ---
-!          (split the work between 2 procs)
-           cwavefb(:,:,3-ispinor_index)=zero
-           do iband=1,blocksize
-             cwavefb(:,(iband-1)*npw_k+1:iband*npw_k,ispinor_index) = cg(:,1+(iband-1)*npw_k+ibs:iband*npw_k+ibs)
-           end do
-           call xmpi_sum(cwavefb,mpi_enreg%comm_spinor,ierr)
-         end if
+           ! --- No parallelization over spinors ---
+           if (mpi_enreg%paral_spinor==0) then
+             do iband=1,blocksize
+               cwavefb(:,(iband-1)*npw_k+1:iband*npw_k,1)=cwavef(:,1+(2*iband-2)*npw_k:(iband*2-1)*npw_k)
+               cwavefb(:,(iband-1)*npw_k+1:iband*npw_k,2)=cwavef(:,1+(2*iband-1)*npw_k:iband*2*npw_k)
+             end do
+           else
+             ! --- Parallelization over spinors ---
+             ! (split the work between 2 procs)
+             cwavefb(:,:,3-ispinor_index)=zero
+             do iband=1,blocksize
+               cwavefb(:,(iband-1)*npw_k+1:iband*npw_k,ispinor_index) = cwavef(:,1+(iband-1)*npw_k:iband*npw_k)
+             end do
+             call xmpi_sum(cwavefb,mpi_enreg%comm_spinor,ierr)
+           end if
+         end if !gpu_option
 
          call timab(537,1,tsec) !"prep_fourwf%vtow"
          if (nspinor1TreatedByThisProc) then
            call prep_fourwf(rhoaug(:,:,:,1),blocksize,cwavefb(:,:,1),wfraug,iblock,&
-&           istwf_k,gs_hamk%mgfft,mpi_enreg,nband_k,ndat,gs_hamk%ngfft,npw_k,&
-&           gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,1,gs_hamk%ucvol,wtk,&
-&           gpu_option=dtset%gpu_option)
+             istwf_k,gs_hamk%mgfft,mpi_enreg,nband_k,ndat,gs_hamk%ngfft,npw_k,&
+             gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,1,gs_hamk%ucvol,wtk,&
+             gpu_option=dtset%gpu_option)
          end if
          if(dtset%nspden==1) then
            if (nspinor2TreatedByThisProc) then
              call prep_fourwf(rhoaug(:,:,:,1),blocksize,cwavefb(:,:,2),wfraug,&
-&             iblock,istwf_k,gs_hamk%mgfft,mpi_enreg,nband_k,ndat,&
-&             gs_hamk%ngfft,npw_k,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,1,&
-&             gs_hamk%ucvol,wtk,gpu_option=dtset%gpu_option)
+               iblock,istwf_k,gs_hamk%mgfft,mpi_enreg,nband_k,ndat,&
+               gs_hamk%ngfft,npw_k,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,1,&
+               gs_hamk%ucvol,wtk,gpu_option=dtset%gpu_option)
            end if
          else if(dtset%nspden==4) then
            ABI_MALLOC(cwavef_x,(2,npw_k*blocksize))
            ABI_MALLOC(cwavef_y,(2,npw_k*blocksize))
-           cwavef_x(:,:)=cwavefb(:,1:npw_k*blocksize,1)+cwavefb(:,:,2)
-           cwavef_y(1,:)=cwavefb(1,1:npw_k*blocksize,1)+cwavefb(2,:,2)
-           cwavef_y(2,:)=cwavefb(2,:,1)-cwavefb(1,:,2)
+           if(gs_hamk%gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+             !$OMP TARGET ENTER DATA MAP(alloc:cwavef_x,cwavef_y)
+             !$OMP TARGET TEAMS DISTRIBUTE MAP(to:cwavef_x,cwavef_y,cwavefb) PRIVATE(iband)
+             do iband=1,blocksize
+               !$OMP PARALLEL DO PRIVATE(ipw)
+               do ipw=1,npw_k
+                 !$(\Psi^{1}+\Psi^{2})$
+                 cwavef_x(1,(iband-1)*npw_k+ipw)=cwavefb(1,(iband-1)*npw_k+ipw,1)+cwavefb(1,(iband-1)*npw_k+ipw,2)
+                 cwavef_x(2,(iband-1)*npw_k+ipw)=cwavefb(2,(iband-1)*npw_k+ipw,1)+cwavefb(2,(iband-1)*npw_k+ipw,2)
+                 !$(\Psi^{1}-i \Psi^{2})$
+                 cwavef_y(1,(iband-1)*npw_k+ipw)=cwavefb(1,(iband-1)*npw_k+ipw,1)+cwavefb(2,(iband-1)*npw_k+ipw,2)
+                 cwavef_y(2,(iband-1)*npw_k+ipw)=cwavefb(2,(iband-1)*npw_k+ipw,1)-cwavefb(1,(iband-1)*npw_k+ipw,2)
+               end do
+             end do
+#endif
+           else
+             cwavef_x(:,:)=cwavefb(:,1:npw_k*blocksize,1)+cwavefb(:,:,2)
+             cwavef_y(1,:)=cwavefb(1,1:npw_k*blocksize,1)+cwavefb(2,:,2)
+             cwavef_y(2,:)=cwavefb(2,:,1)-cwavefb(1,:,2)
+           end if
            if (nspinor1TreatedByThisProc) then
              call prep_fourwf(rhoaug(:,:,:,4),blocksize,cwavefb(:,:,2),wfraug,&
-&             iblock,istwf_k,gs_hamk%mgfft,mpi_enreg,nband_k,ndat,gs_hamk%ngfft,&
-&             npw_k,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,1,gs_hamk%ucvol,wtk,&
-&             gpu_option=dtset%gpu_option)
+               iblock,istwf_k,gs_hamk%mgfft,mpi_enreg,nband_k,ndat,gs_hamk%ngfft,&
+               npw_k,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,1,gs_hamk%ucvol,wtk,&
+               gpu_option=dtset%gpu_option)
            end if
            if (nspinor2TreatedByThisProc) then
              call prep_fourwf(rhoaug(:,:,:,2),blocksize,cwavef_x,wfraug,&
-&             iblock,istwf_k,gs_hamk%mgfft,mpi_enreg,nband_k,ndat,gs_hamk%ngfft,&
-&             npw_k,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,1,gs_hamk%ucvol,wtk,&
-&             gpu_option=dtset%gpu_option)
+               iblock,istwf_k,gs_hamk%mgfft,mpi_enreg,nband_k,ndat,gs_hamk%ngfft,&
+               npw_k,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,1,gs_hamk%ucvol,wtk,&
+               gpu_option=dtset%gpu_option)
              call prep_fourwf(rhoaug(:,:,:,3),blocksize,cwavef_y,wfraug,&
-&             iblock,istwf_k,gs_hamk%mgfft,mpi_enreg,nband_k,ndat,gs_hamk%ngfft,&
-&             npw_k,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,1,gs_hamk%ucvol,wtk,&
-&             gpu_option=dtset%gpu_option)
+               iblock,istwf_k,gs_hamk%mgfft,mpi_enreg,nband_k,ndat,gs_hamk%ngfft,&
+               npw_k,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,1,gs_hamk%ucvol,wtk,&
+               gpu_option=dtset%gpu_option)
            end if
+#ifdef HAVE_OPENMP_OFFLOAD
+           !$OMP TARGET EXIT DATA MAP(delete:cwavef_x,cwavef_y) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
            ABI_FREE(cwavef_x)
            ABI_FREE(cwavef_y)
          end if
          call timab(537,2,tsec)
+#ifdef HAVE_OPENMP_OFFLOAD
+         !$OMP TARGET EXIT DATA MAP(delete:cwavefb) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
          ABI_FREE(cwavefb)
        end if
      end if
      ABI_NVTX_END_RANGE()
    end if ! End of SCF calculation
 
-!    Call to nonlocal operator:
-!    - Compute nonlocal forces from most recent wfs
-!    - PAW: compute projections of WF onto NL projectors (cprj)
+   ! Call to nonlocal operator:
+   ! - Compute nonlocal forces from most recent wfs
+   ! - PAW: compute projections of WF onto NL projectors (cprj)
    ABI_NVTX_START_RANGE(NVTX_VTOWFK_NONLOP)
    eig_k_block => eig_k(1+(iblock-1)*blocksize:iblock*blocksize)
    cg_k_block => cg_k(:,1+(iblock-1)*blocksize*my_nspinor*npw_k:iblock*blocksize*my_nspinor*npw_k)
    if (dtset%cprj_in_memory==2) then
      if (optforces>0) then
        call timab(554,1,tsec)  ! "vtowfk:rhoij"
-!      Treat all wavefunctions in case of PAW
+       ! Treat all wavefunctions in case of PAW
        cwaveprj => cprj(:,1+(iblock-1)*my_nspinor*blocksize+ibg:iblock*my_nspinor*blocksize+ibg)
        call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,eig_k_block,&
-&       mpi_enreg,blocksize,nnlout,&
-&       paw_opt,signs,nonlop_dum,tim_nonlop,cwavef,cwavef)
-!      Acccumulate forces
+         mpi_enreg,blocksize,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop,cwavef,nonlop_dum2)
+       ! Accumulate forces
        iband=(iblock-1)*blocksize
        do iblocksize=1,blocksize
          ii=0
@@ -1116,8 +1220,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    else
      if(iscf>0.or.gs_hamk%usecprj==1)then
        if (gs_hamk%usepaw==1.or.optforces/=0) then
-!        Treat all wavefunctions in case of varying occupation numbers or PAW
-!        Only treat occupied bands in case of fixed occupation numbers and NCPP
+         ! Treat all wavefunctions in case of varying occupation numbers or PAW
+         ! Only treat occupied bands in case of fixed occupation numbers and NCPP
          if(fixed_occ.and.abs(occblock)<=tol8.and.gs_hamk%usepaw==0) then
            if (optforces>0) grnl_k(:,(iblock-1)*blocksize+1:iblock*blocksize)=zero
          else
@@ -1132,18 +1236,18 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
              if (mpi_enreg%paral_kgb==1) then
                call timab(572,1,tsec) ! 'prep_nonlop%vtowfk'
                call prep_nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir, &
-  &             eig_k_block,blocksize,&
-  &             mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef,already_transposed=.false.)
+                 eig_k_block,blocksize,&
+                 mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,nonlop_dum2,already_transposed=.false.)
                call timab(572,2,tsec)
              else
                call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,eig_k_block,&
-  &             mpi_enreg,blocksize,nnlout,&
-  &             paw_opt,signs,nonlop_dum,tim_nonlop,cwavef,cwavef)
+                 mpi_enreg,blocksize,nnlout,&
+                 paw_opt,signs,nonlop_dum,tim_nonlop,cwavef,cwavef)
              end if
              if(gs_hamk%usepaw==1) then
                call timab(554,2,tsec)
              end if
-  !          Acccumulate forces
+             ! Acccumulate forces
              if (optforces>0) then
                iband=(iblock-1)*blocksize
                do iblocksize=1,blocksize
@@ -1153,12 +1257,12 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
                  grnl_k(1:nnlout,iband)=enlout(ibs+1:ibs+nnlout)
                end do
              end if
-  !          Store cprj (<Pnl|Psi>)
+             ! Store cprj (<Pnl|Psi>)
              if (gs_hamk%usepaw==1.and.gs_hamk%usecprj==1) then
                iband=1+(iblock-1)*bandpp_cprj
                call pawcprj_put(gs_hamk%atindx,cwaveprj,cprj,natom,iband,ibg,ikpt,iorder_cprj,isppol,&
-  &             mband_cprj,dtset%mkmem,natom,bandpp_cprj,nband_k_cprj,gs_hamk%dimcprj,my_nspinor,&
-  &             dtset%nsppol,dtfil%unpaw,mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
+                 mband_cprj,dtset%mkmem,natom,bandpp_cprj,nband_k_cprj,gs_hamk%dimcprj,my_nspinor,&
+                 dtset%nsppol,dtfil%unpaw,mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
              end if
 
            else ! cprj_in_memory==1
@@ -1178,7 +1282,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
                end if
              end if
              call xgBlock_map(xgx0,cg_k_block,space,npw_k*my_nspinor,blocksize,comm=mpi_enreg%comm_band,me_g0=me_g0,&
-         &   gpu_option=dtset%gpu_option)
+              gpu_option=dtset%gpu_option)
              call xgBlock_map_1d(xgeigen,eig_k_block,SPACE_R,blocksize)
 
              if (optforces/=0.or.gs_hamk%usepaw==1) then
@@ -1206,6 +1310,10 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ABI_NVTX_END_RANGE()
  end do !  End of loop on blocks
 
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET EXIT DATA MAP(delete:cwavef) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
+
  ! restore safe value related to GEMM nonlop slicing and GPU in case of forces compute
  if(optforces==1 .and. gpu_option_tmp==ABI_GPU_OPENMP) then
    gs_hamk%gpu_option = gpu_option_tmp
@@ -1214,10 +1322,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  end if
 
  if (dtset%cprj_in_memory==1) then
-
    call xg_free(cprj_xgx0)
    call xg_free(cprj_work)
-
  end if
 
  !call cwtime_report(" Block loop", cpu, wall, gflops)
@@ -1283,7 +1389,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ABI_WARNING(msg)
  end if
 
-!Print out eigenvalues (hartree)
+ ! Print out eigenvalues (hartree)
  if (mod(dtset%wfoptalg,10)==1) then
    niter=dtset%mdeg_filter
    iter_name='as the degree of the polynomial filter'
@@ -1304,11 +1410,11 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    call wrtout(std_out,' vtowfk : prtvol=0 or 1, do not print more k-points.','PERS')
  end if
 
-!Print out decomposition of eigenvalues in the non-selfconsistent case or if prtvol>=10
+ ! Print out decomposition of eigenvalues in the non-selfconsistent case or if prtvol>=10
  if( (iscf<0 .and. (prtvol>2 .or. ikpt<=nkpt_max)) .or. prtvol>=10)then
    write(msg, '(5x,a,i5,2x,a,a,a,i4,a,i4,2a)' ) &
-&   ' mean kinetic energy (hartree) for ',nband_k,' bands',ch10,&
-&   '              after ',inonsc,' non-SCF iterations with ',niter,' ',trim(iter_name)
+   ' mean kinetic energy (hartree) for ',nband_k,' bands',ch10,&
+   '              after ',inonsc,' non-SCF iterations with ',niter,' ',trim(iter_name)
    call wrtout(std_out,msg,'PERS')
 
    do ii=0,(nband_k-1)/6
@@ -1318,8 +1424,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
    if (gs_hamk%usepaw==0) then
      write(msg, '(5x,a,i5,2x,a,a,a,i4,a,i4,2a)' ) &
-&     ' mean NL+Fock-type energy (hartree) for ',nband_k,' bands',ch10,&
-&     '              after ',inonsc,' non-SCF iterations with ',niter,' ',trim(iter_name)
+     ' mean NL+Fock-type energy (hartree) for ',nband_k,' bands',ch10,&
+     '              after ',inonsc,' non-SCF iterations with ',niter,' ',trim(iter_name)
      call wrtout(std_out,msg,'PERS')
 
      do ii=0,(nband_k-1)/6
@@ -1350,7 +1456,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  if (prtvol==-level) then
    ! Structured debugging: if prtvol=-level, stop here.
-   write(msg,'(a,a,a,i0,a)')' vtowfk : exit ',ch10,'  prtvol=-',level,', debugging mode => stop '
+   write(msg,'(3a,i0,a)')' vtowfk: exit ',ch10,'  prtvol=-',level,', debugging mode => stop '
    ABI_ERROR(msg)
  end if
 

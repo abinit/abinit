@@ -1,5 +1,5 @@
 
-.Version 10.1.4.5 of ANADDB, released Sep 2024.
+.Version 10.1.4.3 of ANADDB, released Jul 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h16 )
+.Starting date : Wed 20 Aug 2025.
+- ( at 00h03 )
   
 
 ================================================================================
@@ -28,8 +28,8 @@
          asr         1
  Interatomic Force Constants Inputs :
       dipdip         0
-      dipqua         1
-      quadqu         1
+     dipquad         1
+    quadquad         1
       ifcana         0
       ifcout         0
  Description of grid 1 :
@@ -112,7 +112,6 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.031  and twall      0.033 sec
 
  Warning : due to the use of quadrupolar fields, the width of the reciprocal space gaussians
  in ewald9 has been set to eta=    1.2618 1/bohr and the real-space sums have been neglected.
@@ -164,6 +163,6 @@
 
 ================================================================================
 
-+Total cpu time      0.050  and wall time      0.053 sec
++Total cpu time      0.053  and wall time      0.053 sec
 
- anaddb : the run completed succesfully.
+ anaddb : the run completed successfully.

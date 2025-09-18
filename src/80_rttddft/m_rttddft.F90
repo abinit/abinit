@@ -73,8 +73,6 @@ contains
 !! SOURCE
 subroutine rttddft_setup_ele_step(dtset, mpi_enreg, psps, tdks)
 
- implicit none
-
  !Arguments ------------------------------------
  !scalars
  type(dataset_type),         intent(inout) :: dtset
@@ -167,8 +165,6 @@ end subroutine rttddft_setup_ele_step
 !!
 !! SOURCE
 subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, psps, tdks)
-
- implicit none
 
  !Arguments ------------------------------------
  !scalars
@@ -279,12 +275,14 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
    call paw_ij_reset_flags(tdks%paw_ij,self_consistent=.false.)
    option=0; compch_sph=-1.d5; nzlmopt=0
    call pawdenpot(compch_sph,el_temp,energies%e_paw,energies%e_pawdc,       &
-                & energies%entropy_paw,ipert,dtset%ixc,my_natom,dtset%natom,&
+                & energies%entropy_paw,tdks%gprimd,ipert,dtset%ixc,my_natom,&
+                & dtset%natom,&
                 & dtset%nspden,psps%ntypat,dtset%nucdipmom,nzlmopt,option,  &
                 & tdks%paw_an,tdks%paw_an,tdks%paw_ij,tdks%pawang,          &
                 & dtset%pawprtvol,tdks%pawrad,tdks%pawrhoij,dtset%pawspnorb,&
                 & tdks%pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel, &
-                & dtset%xc_denpos,dtset%xc_taupos,tdks%ucvol,psps%znuclpsp, &
+                & dtset%xc_denpos,dtset%xc_taupos,tdks%xred,tdks%ucvol,     &
+                & psps%znuclpsp, &
                 & comm_atom=mpi_enreg%comm_atom,                            &
                 & mpi_atmtab=mpi_enreg%my_atmtab,vpotzero=vpotzero,         &
                 & epaw_xc=energies%e_pawxc)

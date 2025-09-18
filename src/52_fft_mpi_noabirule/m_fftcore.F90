@@ -101,7 +101,7 @@ module m_fftcore
  public :: multpot
 
  ! 0 for double precision version (default), 1 for mixed precision FFTs
- integer, public, protected :: fftcore_mixprec = 0
+ integer, public, save, protected :: fftcore_mixprec = 0
  public :: fftcore_set_mixprec
 ! *************************************************************************
 
@@ -496,7 +496,7 @@ end subroutine print_ngfft
 !! OUTPUT
 !!  dsqmax=maximum distance**2 from k to boundary in Bohr**-2.
 !!  dsqmin=minimum distance**2 from k to boundary in Bohr**-2.
-!!  gbound(3)=coords of G on boundary (correspnding to gsqmin)
+!!  gbound(3)=coords of G on boundary (corresponding to gsqmin)
 !!  plane=which plane min occurs in (1,2, or 3 for G1,etc).
 !!
 !! NOTES
@@ -721,12 +721,14 @@ subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, n
  integer,parameter :: maxpow3 =6       ! int(log(largest_ngfft+half)/log(three))
  integer,parameter :: maxpow5 =6       ! int(log(largest_ngfft+half)/log(five))
 !#if defined HAVE_FFTW3 || defined HAVE_DFTI
-! integer,parameter :: maxpow7 =5       ! FFTW3 and DFTI support powers of 7 and 11
-! integer,parameter :: maxpow11=4
-!#else
+!#ifdef _GMATTEO_WHISH_LIST
+#if 0
+ integer,parameter :: maxpow7 =5       ! FFTW3 and DFTI support powers of 7 and 11
+ integer,parameter :: maxpow11=4
+#else
  integer,parameter :: maxpow7 =0
  integer,parameter :: maxpow11=0
-!#endif
+#endif
  integer,parameter :: mmsrch=(maxpow2+1)*(maxpow3+1)*(maxpow5+1)*(maxpow7+1)*(maxpow11+1)
  integer,parameter :: nfactor=10, mpower=5
 !Arrays
@@ -1034,10 +1036,10 @@ subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, n
        endif
      end do
    end do
-!  This gives a tentative symetric triplet
+!  This gives a tentative symmetric triplet
    ngcurrent(1:3)=ngmax(1:3)
    prodcurrent=ngmax(1)*ngmax(2)*ngmax(3)+1.0d-3
-!  However, it is perhaps possible to do better, by assymetric triplets, still giving lower prodcurrent !
+!  However, it is perhaps possible to do better, by asymmetric triplets, still giving lower prodcurrent !
    ngmax(1)=min(int(prodcurrent/(ngfft(2)*ngfft(3))),srch(msrch(1),1))
    ngmax(2)=min(int(prodcurrent/(ngfft(1)*ngfft(3))),srch(msrch(2),2))
    ngmax(3)=min(int(prodcurrent/(ngfft(1)*ngfft(2))),srch(msrch(3),3))
@@ -1341,7 +1343,7 @@ subroutine sphereboundary(gbound, istwf_k, kg_k, mgfft, npw)
 
          else if(istwf_k>=2 .and. fftalgc==1)then
 
-           ! Here, must take into account time-reversal symmetry explicitely
+           ! Here, must take into account time-reversal symmetry explicitly
 
            ! Determine the boundaries for the plane g_a
            testp=0
@@ -1523,7 +1525,7 @@ end subroutine sphereboundary
 !! 1) Order arguments
 !! 2) Split the two cases to avoid breaking intent: from and to sphere (merge with cg_box2gpsh and cg_gsph2box?)
 !! 3) If symmetries are used with or without shiftg, it might happen that the FFT mesh
-!!    is not large enough to accomodate the rotated G, in this case one should return ierr /= 0
+!!    is not large enough to accommodate the rotated G, in this case one should return ierr /= 0
 !!
 !! SOURCE
 
@@ -2165,7 +2167,7 @@ end subroutine switch
 !!     input: I2,i1,j3,(jp3)
 !!     output: i1,I2,j3,(jp3)
 !!
-!!   and padd the signal with zeros.
+!!   and pad the signal with zeros.
 !!
 !! INPUTS
 !!  n1dfft=Number of 1D FFTs to perform
@@ -2234,7 +2236,7 @@ end subroutine switch_cent
 !!     input: I2,i1,j3,(jp3)
 !!     output: i1,I2,j3,(jp3)
 !!
-!!   and padd the signal with zeros.
+!!   and pad the signal with zeros.
 !!   Used for real wavefunctions.
 !!
 !! INPUTS
@@ -2319,7 +2321,7 @@ end subroutine switchreal
 !!     input: I2,i1,j3,(jp3)
 !!     output: i1,I2,j3,(jp3)
 !!
-!!   and padd the signal with zeros.
+!!   and pad the signal with zeros.
 !!   Used for the Fourier transform of real wavefunctions.
 !!
 !! INPUTS
@@ -3140,7 +3142,7 @@ pure subroutine mpiswitch(j3,n1dfft,Jp2st,J2st,lot,n1,nd2proc,nd3proc,nproc,iopt
        jjp2=modulo(ind-1,nproc)+1
 
        !in other words: mfft=(jj2-1)*nproc+jjp2 (modulo case)
-       !istead of mfft=(Jjp2-1) * nd2proc + Jj2 (slice case)
+       !instead of mfft=(Jjp2-1) * nd2proc + Jj2 (slice case)
        !with 1<=jjp2<=nproc, jj2=1,nd2proc
        do I1=1,n1
          ! zw(1,mfft,I1)=zmpi1(1,I1,J2,j3,Jp2)
@@ -3938,7 +3940,7 @@ subroutine kpgsph(ecut, exchn2n3d, gmet, ikg, ikpt, istwf_k, kg, kpt, mkmem, mpi
  integer,allocatable :: array_ipw(:),ig1arr(:),ig2arr(:)
  integer,allocatable :: ig3arr(:),kg_ind(:),kg_small(:,:)
  integer, allocatable :: npw_gather(:),npw_disp(:) ,kg_ind_gather(:),kg_small_gather(:,:)
- real(dp) :: kmax(3),minor(3),numer(3),tsec(2)
+ real(dp) :: kmax(3),minor(3),numer_(3),tsec(2)
  real(dp),allocatable :: kg1arr(:),kg2arr(:),kg3arr(:)
 ! *************************************************************************
 
@@ -3979,17 +3981,17 @@ subroutine kpgsph(ecut, exchn2n3d, gmet, ikg, ikpt, istwf_k, kg, kpt, mkmem, mpi
 !In reduced coordinates, determine maximal value of k+G and G for each direction
 
  minor(1)=gmet(2,2)*gmet(3,3)-gmet(2,3)**2
- numer(1)=gmet(1,2)**2*gmet(3,3)-2.0_dp*gmet(1,2)*gmet(1,3)*gmet(2,3) +gmet(1,3)**2*gmet(2,2)
+ numer_(1)=gmet(1,2)**2*gmet(3,3)-2.0_dp*gmet(1,2)*gmet(1,3)*gmet(2,3) +gmet(1,3)**2*gmet(2,2)
  minor(2)=gmet(1,1)*gmet(3,3)-gmet(1,3)**2
- numer(2)=gmet(2,3)**2*gmet(1,1)-2.0_dp*gmet(1,2)*gmet(1,3)*gmet(2,3) +gmet(2,1)**2*gmet(3,3)
+ numer_(2)=gmet(2,3)**2*gmet(1,1)-2.0_dp*gmet(1,2)*gmet(1,3)*gmet(2,3) +gmet(2,1)**2*gmet(3,3)
  minor(3)=gmet(2,2)*gmet(1,1)-gmet(1,2)**2
- numer(3)=gmet(3,2)**2*gmet(1,1)-2.0_dp*gmet(1,2)*gmet(1,3)*gmet(2,3) +gmet(1,3)**2*gmet(2,2)
+ numer_(3)=gmet(3,2)**2*gmet(1,1)-2.0_dp*gmet(1,2)*gmet(1,3)*gmet(2,3) +gmet(1,3)**2*gmet(2,2)
 
 !Take the trace of the gmet tensor as dimensional reference
  gmet_trace=gmet(1,1)+gmet(2,2)+gmet(3,3)
 
  do ii=1,3
-   xx=gmet(ii,ii)*minor(ii)-numer(ii)
+   xx=gmet(ii,ii)*minor(ii)-numer_(ii)
    if(xx<tol10*gmet_trace**3 .or. minor(ii)<tol10*gmet_trace**2)then
      ABI_BUG('The metric tensor seem incorrect')
    end if
@@ -4312,7 +4314,7 @@ subroutine kpgcount(ecut,exchn2n3d,gmet,istwfk,kpt,ngmax,ngmin,nkpt)
  real(dp) :: gmet_trace,gscut,xx
 !arrays
  integer :: ngrid(3),nmax(3)
- real(dp) :: minor(3),numer(3)
+ real(dp) :: minor(3),numer_(3)
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -4322,16 +4324,16 @@ subroutine kpgcount(ecut,exchn2n3d,gmet,istwfk,kpt,ngmax,ngmin,nkpt)
  minor(1)=gmet(2,2)*gmet(3,3)-gmet(2,3)**2
  minor(2)=gmet(1,1)*gmet(3,3)-gmet(1,3)**2
  minor(3)=gmet(2,2)*gmet(1,1)-gmet(1,2)**2
- numer(1)=gmet(1,2)**2*gmet(3,3)-2.0_dp*gmet(1,2)*gmet(1,3)*gmet(2,3)+gmet(1,3)**2*gmet(2,2)
- numer(2)=gmet(2,3)**2*gmet(1,1)-2.0_dp*gmet(1,2)*gmet(1,3)*gmet(2,3)+gmet(2,1)**2*gmet(3,3)
- numer(3)=gmet(3,2)**2*gmet(1,1)-2.0_dp*gmet(1,2)*gmet(1,3)*gmet(2,3)+gmet(1,3)**2*gmet(2,2)
+ numer_(1)=gmet(1,2)**2*gmet(3,3)-2.0_dp*gmet(1,2)*gmet(1,3)*gmet(2,3)+gmet(1,3)**2*gmet(2,2)
+ numer_(2)=gmet(2,3)**2*gmet(1,1)-2.0_dp*gmet(1,2)*gmet(1,3)*gmet(2,3)+gmet(2,1)**2*gmet(3,3)
+ numer_(3)=gmet(3,2)**2*gmet(1,1)-2.0_dp*gmet(1,2)*gmet(1,3)*gmet(2,3)+gmet(1,3)**2*gmet(2,2)
 
  ngmin(:)=1000000;ngmax(:)=0
  do ikpt=1,nkpt
    istwf_k=istwfk(ikpt)
 
    do ii=1,3
-     xx=gmet(ii,ii)*minor(ii)-numer(ii)
+     xx=gmet(ii,ii)*minor(ii)-numer_(ii)
      if(xx<tol10*gmet_trace**3.or.minor(ii)<tol10*gmet_trace**2)then
        ABI_BUG('The metric tensor seem incorrect')
      end if
@@ -4416,7 +4418,6 @@ subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k, &
 !arrays
  integer :: kg_dum(3, 0)
  integer,allocatable :: iwork(:,:)
-
 ! *********************************************************************
 
  call initmpi_seq(MPI_enreg_seq)
@@ -4432,7 +4433,7 @@ subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k, &
 
  if (present(kin_sorted)) then
    if (kin_sorted) then
-     call sort_gvecs(npw_k, kpoint, gmet, kg_k, iwork)
+     call sort_gvecs(npw_k, kpoint, gmet, kg_k, out_gvec=iwork)
      kg_k = iwork
      ABI_FREE(iwork)
    end if
@@ -4465,9 +4466,9 @@ end subroutine get_kg
 !!  npw_k=number of planewaves
 !!
 !! OUTPUT
-!!  indpw_k(npw_k)=linear list number (in fft box) of given G vector for the current processor (local adress)
-!!                =0 if kg_k(ipw) is not treated by this procesor
-!!  mask(npw_k)=True if  kg_k(ipw) belongs to this procesor, false otherwise.
+!!  indpw_k(npw_k)=linear list number (in fft box) of given G vector for the current processor (local address)
+!!                =0 if kg_k(ipw) is not treated by this processor
+!!  mask(npw_k)=True if  kg_k(ipw) belongs to this processor, false otherwise.
 !!
 !! NOTES
 !!   mpi_enreg is not necessary in this case (the info is also in ngfft), but much more easy to read...
@@ -4552,7 +4553,7 @@ end subroutine kgindex
 !!  lot=2nd Leading dimension of zw (cache blocking factor).
 !!  n1dfft=Number of 1D FFTs along y performed.
 !!  zw(2,lot,n2)=Array with the x-y planes (wavefunction in real space).
-!!  weigth=Weight factor for the density.
+!!  weight=Weight factor for the density.
 !!
 !! SIDE EFFECTS
 !!   rhopart(nd1,nd2)=density in the x-y plane, accumulated in output.

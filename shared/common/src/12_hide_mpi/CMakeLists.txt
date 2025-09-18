@@ -35,7 +35,7 @@ add_library(12_hide_mpi STATIC
 
 set_target_properties(12_hide_mpi
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(12_hide_mpi
   PRIVATE
@@ -45,7 +45,7 @@ target_include_directories(12_hide_mpi
 
 target_include_directories(12_hide_mpi
   PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/modules>
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/modules>
   $<INSTALL_INTERFACE:include/libpaw>
 )
 
@@ -65,6 +65,12 @@ if(OpenMP_FOUND)
   target_link_libraries(12_hide_mpi
     PUBLIC
     OpenMP::OpenMP_Fortran)
+endif()
+
+if(HAVE_OPENMP_OFFLOAD)
+  target_compile_options(12_hide_mpi
+    PRIVATE
+    $<$<COMPILE_LANGUAGE:Fortran>:${OPENMP_OFFLOAD_FLAGS}>)
 endif()
 
 add_library(abinit::12_hide_mpi ALIAS 12_hide_mpi)

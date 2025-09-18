@@ -1,4 +1,3 @@
-from __future__ import print_function, division, absolute_import
 
 import sys
 import os
@@ -10,6 +9,7 @@ import tarfile
 import re
 import warnings
 import json
+import pickle
 
 from pprint import pprint
 from base64 import b64encode
@@ -17,19 +17,9 @@ from socket import gethostname
 from subprocess import Popen, PIPE
 from multiprocessing import Process, Queue, Lock, Manager, current_process
 from threading import Thread
-
-# Handle py2, py3k differences.
-py2 = sys.version_info[0] <= 2
-if py2:
-    import cPickle as pickle
-    from StringIO import StringIO
-    from ConfigParser import SafeConfigParser, NoOptionError, ParsingError as CPError
-    from Queue import Empty as EmptyQueueError
-else:
-    import pickle
-    from io import StringIO
-    from configparser import ConfigParser, ParsingError as CPError
-    from queue import Empty as EmptyQueueError
+from io import StringIO
+from configparser import ConfigParser, ParsingError as CPError
+from queue import Empty as EmptyQueueError
 
 from .jobrunner import TimeBomb
 from .tools import RestrictedShell, unzip, tail_file, pprint_table, Patcher, Editor
@@ -159,22 +149,13 @@ def lazy__str__(func):
 # Helper functions for performing IO
 
 def lazy_read(fname):
-    if not py2:
-        with open(fname, "rt", encoding="utf-8") as fh:
-            return fh.read()
-
-    else:
-        with open(fname, "rt") as fh:
-            return fh.read()
+    with open(fname, "rt", encoding="utf-8") as fh:
+        return fh.read()
 
 
 def lazy_readlines(fname):
-    if not py2:
-        with open(fname, "rt", encoding="utf-8") as fh:
-            return fh.readlines()
-    else:
-        with open(fname, "rt") as fh:
-            return fh.readlines()
+    with open(fname, "rt", encoding="utf-8") as fh:
+        return fh.readlines()
 
 
 def rm_rf(top, exclude_paths=None):
@@ -278,7 +259,7 @@ def extract_errinfo_from_files(workdir):
     return "\n".join(errinfo)
 
 
-class FileToTest(object):
+class FileToTest:
     """
     This object contains information on the output file that will be analyzed by fldiff
     """
@@ -474,7 +455,7 @@ def _str2filestotest(string):
         for tok in tokens[1:]:
             k, v = [s.strip() for s in tok.split("=")]
             if k in d:
-                err_msg = "Found multiple occurences of keyword %s" % k
+                err_msg = "Found multiple occurrences of keyword %s" % k
                 raise AbinitTestInfoParserError(err_msg)
             d[k] = v
         files_to_test.append(FileToTest(d))
@@ -590,13 +571,13 @@ def line_starts_with_section_or_option(string):
 
 def doc_testcnf_format(fh=sys.stdout):
     """Automatic documentation of the TEST_INFO sections and related options."""
-    def writen(string):
+    def written(string):
         fh.write(string + "\n")
 
-    writen("Automatic documentation of the TEST_INFO sections and options.")
+    written("Automatic documentation of the TEST_INFO sections and options.")
 
     for section in TESTCNF_SECTIONS:
-        writen("\n[" + section + "]")
+        written("\n[" + section + "]")
         for key in TESTCNF_KEYWORDS:
             tup = TESTCNF_KEYWORDS[key]
             if section == tup[2]:
@@ -609,10 +590,10 @@ def doc_testcnf_format(fh=sys.stdout):
                     msg = "%s =  %s (DEFAULT: %s)" % (key, desc, default)
                 else:
                     msg = "%s =  %s" % (key, desc)
-                writen(msg)
+                written(msg)
 
 
-class AbinitTestInfo(object):
+class AbinitTestInfo:
     """Container storing the options specified in the TEST_INFO section."""
 
     def __init__(self, dct):
@@ -659,7 +640,7 @@ class AbinitTestInfoParserError(Exception):
     """Error class raised by the parse"""
 
 
-class AbinitTestInfoParser(object):
+class AbinitTestInfoParser:
     """This object parses the TEST_INFO section that describes the test."""
     Error = AbinitTestInfoParserError
 
@@ -687,7 +668,7 @@ class AbinitTestInfoParser(object):
             raise self.Error(
                 "{} does not contain any valid testcnf section!".format(inp_fname))
 
-        # Keep only test section lines and remove one space at the begining
+        # Keep only test section lines and remove one space at the beginning
         lines = [line[1:] if line.startswith(' ') else line
                  for i, line in enumerate(lines) if start < i < stop]
 
@@ -695,25 +676,7 @@ class AbinitTestInfoParser(object):
             raise self.Error("%s does not contain any valid testcnf section!" % inp_fname)
 
         # Interface in python 3 is richer so we rebuilt part of it
-        if py2:
-            class MySafeConfigParser(SafeConfigParser):
-                """Wrap the get method of SafeConfigParser to disable the interpolation of raw_options."""
-                raw_options = {"description"}
-
-                def get(self, section, option, raw=False, vars=None):
-                    if option in self.raw_options and section == TESTCNF_KEYWORDS[option][2]:
-                        logger.debug("Disabling interpolation for section = %s, option = %s" % (section, option))
-                        return SafeConfigParser.get(self, section, option, raw=True, vars=vars)
-                    else:
-                        return SafeConfigParser.get(self, section, option, raw, vars)
-
-                def read_string(self, string, source='<string>'):
-                    s = StringIO(string)
-                    SafeConfigParser.readfp(self, s, filename=source)
-
-            self.parser = MySafeConfigParser(defaults)
-        else:
-            self.parser = ConfigParser(defaults, interpolation=None)
+        self.parser = ConfigParser(defaults, interpolation=None)
 
         try:
             self.parser.read_string("".join(lines), source=inp_fname)
@@ -754,7 +717,7 @@ class AbinitTestInfoParser(object):
             section = tup[2]
 
             if section == 'yaml_test':
-                # special case: handle this separatly
+                # special case: handle this separately
                 continue
             elif section in self.parser.sections() and self.parser.has_option(
                 section, key
@@ -911,7 +874,7 @@ def find_top_build_tree(start_path, with_abinit=True, ntrials=10):
     raise RuntimeError("Cannot find the ABINIT build tree after %s trials" % ntrials)
 
 
-class Compiler(object):
+class Compiler:
     """
     Base class for C, Fortran, C++ compilers.
     Usually instantiated through the class method from_defined_cpp_vars.
@@ -968,7 +931,7 @@ class CPreProcessorError(Exception):
     """Errors raised by `CPreProcessors`"""
 
 
-class CPreProcessor(object):
+class CPreProcessor:
     """Pre-process source code with ANSI CPP."""
     Error = CPreProcessorError
 
@@ -1018,7 +981,7 @@ class CPreProcessor(object):
             return "\n".join(str(l) for l in stdout.splitlines() if not l.startswith("#"))
 
 
-class FortranBacktrace(object):
+class FortranBacktrace:
     def __init__(self, text):
         self.text = text
         self.trace = []
@@ -1081,7 +1044,7 @@ class NagBacktrace(FortranBacktrace):
             self.trace.append((src_file, int(lineno)))
 
 
-class BuildEnvironment(object):
+class BuildEnvironment:
     """
     Store information on the ABINIT build environment.
     """
@@ -1222,7 +1185,7 @@ def input_file_has_vars(fname, ivars, comment="#", mode="any"):
     return:
         (bool, d)
         bool is True is the input file contains the specified variables
-        d is a dictionary with the matching lines (empty dict if no occurence).
+        d is a dictionary with the matching lines (empty dict if no occurrence).
     """
     # This algorithm is not very robust as it assumes that the variable and the line
     # are placed on the same line.
@@ -1384,7 +1347,7 @@ class BaseTestError(Exception):
     """Base Error class raised by Test objects"""
 
 
-class BaseTest(object):
+class BaseTest:
     """
     Base class describing a single test. Tests associated to other executables should
     subclass BaseTest and redefine the method make_stdin.
@@ -1880,7 +1843,7 @@ pp_dirpath $ABI_PSPDIR
             slaves.append(host)
 
         # Find the slave
-        # Use short hostname i.e. the toke before '.' so alps.pcml.ucl.ac.be becomes alps
+        # Use short hostname i.e. the token before '.' so alps.pcml.ucl.ac.be becomes alps
         try:
             #idx = slaves.index(self.build_env.hostname)
             short_hostname = self.build_env.hostname.split('.', 1)[0]
@@ -2380,7 +2343,7 @@ pp_dirpath $ABI_PSPDIR
         if other_test_files is not None:
             save_files += other_test_files
 
-        # Add harcoded list of files
+        # Add hardcoded list of files
         hard_files = ["perf.data", "__ABI_MPIABORTFILE__"]
         save_files += [os.path.join(self.workdir, f) for f in hard_files]
 
@@ -3372,7 +3335,7 @@ def run_and_check_test(test, rank, print_lock=None, **kwargs):
     return d
 
 
-class ChainOfTests(object):
+class ChainOfTests:
     """
     A list of tests that should be executed together due to inter-dependencies.
     It provides the same interface as the one given by BaseTest.
@@ -3709,7 +3672,7 @@ class ChainOfTests(object):
         return [test._get_one_backtrace() for test in self]
 
 
-class AbinitTestSuite(object):
+class AbinitTestSuite:
     """
     List of BaseTest instances. Provide methods to:
 
@@ -4073,10 +4036,10 @@ class AbinitTestSuite(object):
         self.file_lock = NoErrorFileLock(os.path.join(workdir, "__run_tests_lock__"), timeout=3)
 
         with self.file_lock as locked:
-            # aquire the global file lock
+            # acquire the global file lock
             if not locked:
                 msg = (
-                    "Timeout occured while trying to acquire lock in:\n\t{}\n"
+                    "Timeout occurred while trying to acquire lock in:\n\t{}\n"
                     "Perhaps a previous run did not exit cleanly or another "
                     "process is running in the same directory.\n If you are "
                     "sure no other process is in execution, remove the directory with `rm -rf` and rerun.\n"
@@ -4436,7 +4399,7 @@ class AbinitTestSuite(object):
             return header + body + footer
 
 
-class Results(object):
+class Results:
     """Stores the final results."""
 
     def __init__(self, test_suite):

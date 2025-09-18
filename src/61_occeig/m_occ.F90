@@ -30,6 +30,7 @@ module m_occ
 
  use m_time,         only : timab, cwtime, cwtime_report
  use m_fstrings,     only : sjoin, itoa
+ use m_rcpaw,        only : rcpaw_type
 
  implicit none
 
@@ -123,7 +124,7 @@ contains
 
 subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mband, nband, &
                   nelect, nkpt, nsppol, occ, occopt, option, tphysel, tsmear, unitdos, wtk, &
-                  iB1, iB2, extfpmd_nbdbuf) ! optional parameters
+                  iB1, iB2, extfpmd_nbdbuf,rcpaw) ! optional parameters
 
 !Arguments ------------------------------------
 !scalars
@@ -138,6 +139,8 @@ subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mba
  integer, intent(in), optional:: iB1, iB2 !! CP: added optional arguments to get number of electrons between bands iB1 and iB2
  integer, intent(in), optional :: extfpmd_nbdbuf
  !! Used only when occopt = 9
+ type(rcpaw_type),pointer,intent(inout),optional :: rcpaw
+
 
 !Local variables-------------------------------
 ! nptsdiv2 is the number of integration points, divided by 2.
@@ -152,7 +155,7 @@ subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mba
 !scalars
  integer,parameter :: prtdos1=1
  integer :: iband,iene,ikpt,index,index_tot,index_start,isppol,nene,nptsdiv2
- integer :: low_band_index, high_band_index, number_of_bands
+ integer :: low_band_index, high_band_index, number_of_bands,itypat,iln
  real(dp) :: buffer,deltaene,dosdbletot,doshalftot,dostot, wk
  real(dp) :: enemax,enemin,enex,intdostot,limit,tsmearinv
  !real(dp) :: cpu, wall, gflops
@@ -163,6 +166,9 @@ subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mba
  real(dp),allocatable :: arg(:),derfun(:),dos(:),dosdble(:),doshalf(:),ent(:)
  real(dp),allocatable :: intdos(:)
  real(dp),allocatable :: occ_tmp(:),ent_tmp(:),doccde_tmp(:)
+ real(dp),allocatable :: occ_tmp_core(:),doccde_tmp_core(:),arg_core(:)
+ real(dp),allocatable :: ent_core(:), derfun_core(:)
+
 
 ! *************************************************************************
 
@@ -276,6 +282,51 @@ subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mba
          index_tot = index_tot + nband(ikpt+nkpt*(isppol-1))
       end do
    end do
+
+   if(present(rcpaw)) then
+     if(associated(rcpaw)) then
+       if(.not.rcpaw%frocc.or.(rcpaw%frocc.and.rcpaw%istep<=rcpaw%nfrocc)) then
+         rcpaw%entropy=zero
+         rcpaw%nelect_core=zero
+         do itypat=1,rcpaw%ntypat
+           if(rcpaw%atm(itypat)%zcore_orig>zero) then
+             rcpaw%atm(itypat)%zcore=zero
+             ABI_MALLOC(occ_tmp_core,(rcpaw%atm(itypat)%ln_size))
+             ABI_MALLOC(doccde_tmp_core,(rcpaw%atm(itypat)%ln_size))
+             ABI_MALLOC(arg_core,(rcpaw%atm(itypat)%ln_size))
+             ABI_MALLOC(derfun_core,(rcpaw%atm(itypat)%ln_size))
+             ABI_MALLOC(ent_core,(rcpaw%atm(itypat)%ln_size))
+             do isppol=1,nsppol
+               do iln=1,rcpaw%atm(itypat)%ln_size
+                 if (tsmear==0) then
+                   arg_core(iln)=sign(huge_tsmearinv,fermie-rcpaw%atm(itypat)%eig(iln,isppol))
+                 else
+                   arg_core(iln)=(fermie-rcpaw%atm(itypat)%eig(iln,isppol))*tsmearinv
+                 end if
+               enddo
+               call splfit(xgrid, doccde_tmp_core, occfun, 1,arg_core,occ_tmp_core,(2*nptsdiv2+1),rcpaw%atm(itypat)%ln_size)
+               call splfit(xgrid, derfun_core, entfun, 0, arg_core, ent_core,(2*nptsdiv2+1),rcpaw%atm(itypat)%ln_size)
+               do iln=1,rcpaw%atm(itypat)%ln_size
+                 rcpaw%atm(itypat)%occ(iln,isppol)=rcpaw%atm(itypat)%max_occ(iln,isppol)*occ_tmp_core(iln)
+                 rcpaw%atm(itypat)%zcore=rcpaw%atm(itypat)%zcore+rcpaw%atm(itypat)%occ(iln,isppol)
+                 rcpaw%entropy=rcpaw%entropy+ ent_core(iln)*rcpaw%atm(itypat)%max_occ(iln,isppol)*rcpaw%atm(itypat)%mult
+               enddo
+             enddo
+             ABI_FREE(occ_tmp_core)
+             ABI_FREE(doccde_tmp_core)
+             ABI_FREE(arg_core)
+             ABI_FREE(derfun_core)
+             ABI_FREE(ent_core)
+             rcpaw%nelect_core=rcpaw%nelect_core+rcpaw%atm(itypat)%zcore*rcpaw%atm(itypat)%mult
+           endif
+         end do
+         nelect=nelect+rcpaw%nelect_core
+       endif
+       entropy=entropy+rcpaw%entropy
+     endif
+   endif
+
+
 
    !write(std_out,*) ' getnel : debug   wtk, occ, eigen = ', wtk, occ, eigen
    !write(std_out,*)xgrid(-nptsdiv2),xgrid(nptsdiv2)
@@ -452,7 +503,7 @@ end subroutine getnel
 
 subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarget, mband, nband, &
   nelect, ne_qFD, nh_qFD, nkpt, nspinor, nsppol, occ, occopt, prtvol, tphysel, tsmear, wtk, &
-  prtstm, stmbias, extfpmd) ! Optional argument
+  prtstm, stmbias, extfpmd,rcpaw) ! Optional argument
 
 !Arguments ------------------------------------
 !scalars
@@ -462,6 +513,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
  real(dp),intent(in),optional :: stmbias
  real(dp),intent(out) :: entropy,fermie,fermih
  type(extfpmd_type),pointer,intent(inout),optional :: extfpmd
+ type(rcpaw_type),pointer,intent(inout),optional :: rcpaw
 !arrays
  integer,intent(in) :: nband(nkpt*nsppol)
  real(dp),intent(in) :: eigen(mband*nkpt*nsppol),wtk(nkpt)
@@ -471,9 +523,10 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
 !Local variables-------------------------------
  integer,parameter :: niter_max=120,nkpt_max=2,fake_unit=-666,option1=1
  integer :: cnt,cnt2,cnt3,ib,iban,ibantot,ii,ik,ikpt,is,isppol,nban,nkpt_eff,sign
- integer :: extfpmd_nbdbuf=0
+ integer :: extfpmd_nbdbuf=0,itypat
  integer,allocatable :: nbandt(:)
  real(dp),parameter :: tol = tol14
+ type(rcpaw_type),pointer :: rcpaw_getnel => null()
  !real(dp),parameter :: tol = tol10
  real(dp) :: dosdeltae,entropy_tmp,fermie_hi,fermie_lo,fermie_mid,fermie_mid_tmp
  real(dp) :: fermih_lo,fermih_mid,fermih_hi
@@ -492,6 +545,23 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
  DBG_ENTER("COLL")
 
  call timab(74,1,tsec)
+
+ if(present(rcpaw)) then
+   if(associated(rcpaw))  then
+     rcpaw_getnel=>rcpaw
+     do itypat=1,rcpaw%ntypat
+       if(rcpaw%atm(itypat)%zcore_orig>zero) then
+         rcpaw%atm(itypat)%occ_res=-rcpaw%atm(itypat)%occ
+       endif
+     enddo
+   endif
+ endif
+
+ if(present(extfpmd)) then
+   if(associated(extfpmd)) then
+     extfpmd%nelect_res=-extfpmd%nelect
+   endif
+ endif
 
  ! Here treat the case where occopt does not correspond to a metallic occupation scheme
  if (occopt < 3 .or. occopt > 9) then
@@ -579,7 +649,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
  if(occopt >= 3 .and. occopt <= 8) then
     call getnel(doccde,dosdeltae,eigen,entropye,fermie_lo,fermie_lo,maxocc,mband,nband,&
 & nelectlo,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk,1,nband(1),&
-& extfpmd_nbdbuf=extfpmd_nbdbuf)
+& extfpmd_nbdbuf=extfpmd_nbdbuf,rcpaw=rcpaw_getnel)
  else if (occopt == 9) then
     call getnel(doccde,dosdeltae,eigen,entropye,fermie_lo,fermie_lo,maxocc,mband,nband,&
 & nelectlo,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk, ivalence+1, nband(1)) ! Excited electrons
@@ -596,7 +666,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
  if (occopt >= 3 .and. occopt <= 8) then
     call getnel(doccde,dosdeltae,eigen,entropye,fermie_hi,fermie_hi,maxocc,mband,nband,&
 & nelecthi,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk,1,nband(1),&
-& extfpmd_nbdbuf=extfpmd_nbdbuf)
+& extfpmd_nbdbuf=extfpmd_nbdbuf,rcpaw=rcpaw_getnel)
  else if (occopt == 9) then
     call getnel(doccde,dosdeltae,eigen,entropye,fermie_hi,fermie_hi,maxocc,mband,nband,&
 & nelecthi,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk, ivalence+1, nband(1)) ! Excited electrons
@@ -684,7 +754,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
 
        call getnel(doccde,dosdeltae,eigen,entropye,fermie_mid,fermie_mid,maxocc,mband,nband,&
 &     nelectmid,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk, 1, nband(1),&
-&     extfpmd_nbdbuf=extfpmd_nbdbuf)
+&     extfpmd_nbdbuf=extfpmd_nbdbuf,rcpaw=rcpaw_getnel)
 
        ! Compute the number of free electrons of the extfpmd model
        ! with corresponding chemical potential and add to nelect bounds.
@@ -918,6 +988,23 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
    ABI_FREE(occt)
 
  end if ! End of logical on fixed moment calculations
+
+ if(present(rcpaw)) then
+   if(associated(rcpaw))  then
+     do itypat=1,rcpaw%ntypat
+       if(rcpaw%atm(itypat)%zcore_orig>zero) then
+         rcpaw%atm(itypat)%occ_res=rcpaw%atm(itypat)%occ_res+rcpaw%atm(itypat)%occ
+       endif
+     enddo
+   endif
+ endif
+
+ if(present(extfpmd)) then
+   if(associated(extfpmd)) then
+     extfpmd%nelect_res=extfpmd%nelect_res+extfpmd%nelect
+   endif
+ endif
+
 
  !write(std_out,*) "kT*Entropy:", entropy*tsmear
 

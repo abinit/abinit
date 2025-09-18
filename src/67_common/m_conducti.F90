@@ -157,9 +157,9 @@ contains
  real(dp),allocatable :: kin11(:,:),kin12(:),kin21(:),kin22(:)
  real(dp),allocatable :: kin11_k(:),kin12_k(:),kin21_k(:),kin22_k(:),Kth(:),Stp(:)
  real(dp),allocatable :: psinablapsi(:,:,:),sig_abs(:)
- 
+
 ! *********************************************************************************
- 
+
 ! ---------------------------------------------------------------------------------
 ! Read input data
 
@@ -227,7 +227,7 @@ contains
        ABI_ERROR(msg)
      end if
      call hdr%fort_read(opt_unt,fform1,rewind=.true.)
-   end if 
+   end if
    ABI_CHECK(fform1/=0,sjoin("Error while reading ",filnam1))
    ABI_CHECK(fform1==610.or.fform1==620,"Conducti requires an OPT file with fform=610 or 620!")
  end if
@@ -479,20 +479,20 @@ contains
      nband_k=nband(ikpt+(isppol-1)*nkpt)
      mykpt=.not.(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me))
      master_band=minval(mpi_enreg%proc_distrb(ikpt,1:nband_k,isppol))
-     
+
 !    In case of non MPI-IO, has to read all (n,m) dipoles for this k-point
 !      Master node reads and send to relevant processor
      if (.not.iomode_estf_mpiio.and.me==master) then
        if (iomode==IO_MODE_ETSF) then
          psinablapsi=zero
          if (nc_unlimited) then
-           nc_start_6=[1,1,1,ikpt,isppol,1] ; nc_count_6=[2,3,mband,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1] 
+           nc_start_6=[1,1,1,ikpt,isppol,1] ; nc_count_6=[2,3,mband,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1]
            NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
          else if (.not.read_half_dipoles) then
-           nc_start_6=[1,1,1,1,ikpt,isppol] ; nc_count_6=[2,3,mband,mband,1,1] ; nc_stride_6=[1,1,1,1,1,1] 
+           nc_start_6=[1,1,1,1,ikpt,isppol] ; nc_count_6=[2,3,mband,mband,1,1] ; nc_stride_6=[1,1,1,1,1,1]
            NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
          else
-           nc_start_5=[1,1,1,ikpt,isppol] ; nc_count_5=[2,3,(mband*(mband+1))/2,1,1] ; nc_stride_5=[1,1,1,1,1] 
+           nc_start_5=[1,1,1,ikpt,isppol] ; nc_count_5=[2,3,(mband*(mband+1))/2,1,1] ; nc_stride_5=[1,1,1,1,1]
            NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi,start=nc_start_5,stride=nc_stride_5,count=nc_count_5))
          end if
        else
@@ -500,7 +500,7 @@ contains
          bsize=nband_k**2;if (read_half_dipoles) bsize=(nband_k*(nband_k+1))/2
          read(opt_unt)(psinablapsi(1:2,1,ijband),ijband=1,bsize)
          read(opt_unt)(psinablapsi(1:2,2,ijband),ijband=1,bsize)
-         read(opt_unt)(psinablapsi(1:2,3,ijband),ijband=1,bsize)           
+         read(opt_unt)(psinablapsi(1:2,3,ijband),ijband=1,bsize)
        end if
        if (.not.mykpt) then
          call xmpi_exch(psinablapsi,pnp_size,master,psinablapsi,master_band,comm,etiq,ierr)
@@ -534,7 +534,7 @@ contains
            call xmpi_exch(psinablapsi,pnp_size,master,psinablapsi,me,comm,etiq,ierr)
          end if
          call xmpi_bcast(psinablapsi,master,mpi_enreg%comm_band,mpierr)
-       end if  
+       end if
 
 !      LOOP OVER BANDS n
        do iband=1,nband_k
@@ -546,17 +546,17 @@ contains
 !        Select bands for current proc
          myband=(mpi_enreg%proc_distrb(ikpt,iband,isppol)==me)
          if (myband) then
-       
+
 !          In case of MPI-IO, read valence-valence dipoles for band n
            if (iomode_estf_mpiio) then
              if (nc_unlimited) then
-               nc_start_6=[1,1,iband,ikpt,isppol,1] ; nc_count_6=[2,3,1,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1] 
+               nc_start_6=[1,1,iband,ikpt,isppol,1] ; nc_count_6=[2,3,1,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1]
                NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
              else if (.not.read_half_dipoles) then
-               nc_start_6=[1,1,1,iband,ikpt,isppol] ; nc_count_6=[2,3,mband,1,1,1] ; nc_stride_6=[1,1,1,1,1,1] 
+               nc_start_6=[1,1,1,iband,ikpt,isppol] ; nc_count_6=[2,3,mband,1,1,1] ; nc_stride_6=[1,1,1,1,1,1]
                NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
              else
-               nc_start_5=[1,1,(iband*(iband-1))/2+1,ikpt,isppol] ; nc_count_5=[2,3,iband,1,1] ; nc_stride_5=[1,1,1,1,1] 
+               nc_start_5=[1,1,(iband*(iband-1))/2+1,ikpt,isppol] ; nc_count_5=[2,3,iband,1,1] ; nc_stride_5=[1,1,1,1,1]
                NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi,start=nc_start_5,stride=nc_stride_5,count=nc_count_5))
              end if
            end if
@@ -576,7 +576,7 @@ contains
                bd_stride=merge(mband,nband_k,iomode==IO_MODE_ETSF)
                ijband=(my_iband-1)*bd_stride+jband
              end if
-               
+
              do l2=1,3
                do l1=1,3
                  dhdk2_r(l1,l2)=dhdk2_r(l1,l2)+(&
@@ -696,7 +696,7 @@ contains
  call xmpi_min(deltae_min,comm,mpierr)
  call xmpi_sum(cond_nd,comm,mpierr)
  deltae=deltae/mpi_enreg%nproc_band
- 
+
  ABI_FREE(psinablapsi)
 
 !---------------------------------------------------------------------------------
@@ -780,7 +780,7 @@ contains
      write(ocond_unt,'(a)')'# omega(ua)       cond(ua)             thermal cond(ua)       thermopower(ua)'
    else
      write(ocond_unt,'(a)')'# hbar*omega(eV) cond(ohm.cm)-1 thermal cond(W/m/K)   thermopower(microvolt/K) '
-   endif   
+   endif
 
  end if ! me==master?
 
@@ -822,7 +822,7 @@ contains
       write(lij_unt,'(f12.5,3es22.12)') oml,sig_abs(iom),kin12(iom),kin22(iom)
    enddo
  endif
- 
+
  np_sum_2=zero
  do iom=1,mom-1
    np_sum_2=np_sum_2+(sig_abs(iom)+sig_abs(iom+1))*(oml1(iom+1)-oml1(iom))/2.0_dp
@@ -993,7 +993,7 @@ end subroutine conducti_paw
  real(dp),allocatable :: eig0_k(:),eigen0(:),eig0nc(:,:,:)
  real(dp),allocatable :: energy_cor(:,:),edge(:),nphicor_arr(:)
  real(dp),allocatable :: occ(:),occ_k(:),wtk(:)
- real(dp),allocatable :: oml_edge(:,:),oml_emis(:,:) 
+ real(dp),allocatable :: oml_edge(:,:),oml_emis(:,:)
  real(dp),allocatable :: psinablapsi2(:,:,:,:,:)
  real(dp),allocatable :: sigx1(:,:,:,:),sigx1_av(:,:,:),sigx1_k(:,:,:)
  real(dp),allocatable :: sum_spin_sigx1(:,:,:),sum_spin_sigx1_av(:,:)
@@ -1077,7 +1077,7 @@ end subroutine conducti_paw
        ABI_ERROR(msg)
      end if
      call hdr%fort_read(opt2_unt,fform2,rewind=.true.)
-   end if 
+   end if
    ABI_CHECK(fform2/=0,sjoin("Error while reading ",filnam2))
    ABI_CHECK(fform2==611.or.fform2==612.or.fform2==613,"OPT2 file format should be fform=611/612/613!")
  end if
@@ -1261,7 +1261,7 @@ end subroutine conducti_paw
    del_sig=(omax_sig-omin_sig)/(mom-1)
    do iom=1,mom
      do icor=1,nphicor
-       oml_edge(icor,iom)=-energy_cor(icor,itypat_atnbr)+ dble(iom-1)*del_sig + omin_sig -one 
+       oml_edge(icor,iom)=-energy_cor(icor,itypat_atnbr)+ dble(iom-1)*del_sig + omin_sig -one
        if ((oml_edge(icor,iom)<=edge(icor)).or.(abs(dom_max)<=tol10)) then
          dom_var1(icor,iom)= dom
        else
@@ -1274,7 +1274,7 @@ end subroutine conducti_paw
    ABI_MALLOC(sigx1,(nphicor,mom,natom_atnbr,nsppol))
    sigx1=zero
  end if
- 
+
  if (need_emissivity) then
    ABI_MALLOC(oml_emis,(nphicor,mom))
    omin_emis=minval(eigen0)
@@ -1288,7 +1288,7 @@ end subroutine conducti_paw
    ABI_MALLOC(emisx,(nphicor,mom,natom_atnbr,nsppol))
    emisx=zero
  end if
- 
+
 !---------------------------------------------------------------------------------
 ! Prepare core-valence dipoles reading
 
@@ -1315,7 +1315,7 @@ end subroutine conducti_paw
      !end if
    end if
  end if
- 
+
  if (iomode_estf_mpiio) then
    !If MPI-IO, store only elements for one band
    ABI_MALLOC(psinablapsi2,(2,3,nphicor_max,natom,1))
@@ -1350,7 +1350,7 @@ end subroutine conducti_paw
 !      Master node reads and send to relevant processor
      if (.not.iomode_estf_mpiio.and.me==master) then
        if (iomode==IO_MODE_ETSF) then
-         nc_start=[1,1,1,1,1,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1] 
+         nc_start=[1,1,1,1,1,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1]
          nc_count=[2,3,nphicor_max,natom,mband,1,1]
          NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi2,start=nc_start,stride=nc_stride,count=nc_count))
        else
@@ -1380,17 +1380,17 @@ end subroutine conducti_paw
      end if
 !!    Select k-points for current proc
      if (mykpt) then
-       
+
        ABI_MALLOC(eig0_k,(nband_k))
        ABI_MALLOC(occ_k,(nband_k))
-       
+
        if (need_absorption) sigx1_k=zero
        if (need_emissivity) emisx_k=zero
 
 !      k-dependent data
        eig0_k(:)=eigen0(1+bdtot_index:nband_k+bdtot_index)
        occ_k(:)=occ(1+bdtot_index:nband_k+bdtot_index)
-      
+
 !      In case of non MPI-IO, receive all (n,m) dipoles from master proc
 !        Then broadcast them to all band processors
        if (.not.iomode_estf_mpiio) then
@@ -1398,10 +1398,10 @@ end subroutine conducti_paw
            call xmpi_exch(psinablapsi2,pnp_size,master,psinablapsi2,me,comm,etiq,ierr)
          end if
          call xmpi_bcast(psinablapsi2,master,mpi_enreg%comm_band,mpierr)
-       end if  
-        
+       end if
+
 !      LOOP OVER BANDS
-       
+
        do iband=1,nband_k
 
          !If MPI-IO, store only ib elements for each iband
@@ -1417,9 +1417,9 @@ end subroutine conducti_paw
 !          In case of MPI-IO, read core-valence dipoles for band n
            if (iomode_estf_mpiio) then
             itask=itask+1
-             nc_start=[1,1,1,1,iband,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1] 
+             nc_start=[1,1,1,1,iband,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1]
              nc_count=[2,3,nphicor_max,natom,1,1,1]
-             NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi2,start=nc_start,stride=nc_stride,count=nc_count)) 
+             NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi2,start=nc_start,stride=nc_stride,count=nc_count))
            end if
 
 !          LOOP OVER ATOMS
@@ -1432,7 +1432,7 @@ end subroutine conducti_paw
                  do l1=1,3
                    dhdk2_g(icor)=dhdk2_g(icor) &
 &                   +(psinablapsi2(1,l1,icor,iatom,my_iband)*psinablapsi2(1,l1,icor,iatom,my_iband) &
-&                    +psinablapsi2(2,l1,icor,iatom,my_iband)*psinablapsi2(2,l1,icor,iatom,my_iband))*third 
+&                    +psinablapsi2(2,l1,icor,iatom,my_iband)*psinablapsi2(2,l1,icor,iatom,my_iband))*third
                  end do
                end do
                do iom=1,mom
@@ -1442,13 +1442,13 @@ end subroutine conducti_paw
                    if(need_absorption) then
                      docc_deig=abs(diff_occ/oml)
                      if(broad_mode==1) then
-                       dirac=dom_var1(icor,iom)/((diff_eig-oml)**2+(dom_var1(icor,iom))**2)/pi 
+                       dirac=dom_var1(icor,iom)/((diff_eig-oml)**2+(dom_var1(icor,iom))**2)/pi
                      else
                        dirac=dexp(-((diff_eig-oml)/(sqrt(two)*dom))**2)/(dom*dsqrt(two*pi))
                      endif
                      if(dirac<1d-20) dirac=zero
                      sigx1_k(icor,iom,iatom_atnbr)=sigx1_k(icor,iom,iatom_atnbr)+dhdk2_g(icor)*docc_deig*dirac*pi/ucvol
-                   endif      
+                   endif
                    if (need_emissivity) then
                      docc_deig=abs(occ_k(iband)/oml)
                      if(broad_mode==1) then
@@ -1465,15 +1465,15 @@ end subroutine conducti_paw
            end do ! iatom
          end if ! my band?
        end do ! iband
-       
+
 !      Accumulate k-point contribution
        if (need_absorption) then
          sigx1(1:nphicor,1:mom,1:natom_atnbr,isppol)=sigx1(1:nphicor,1:mom,1:natom_atnbr,isppol) &
-&                                              +wtk(ikpt)*sigx1_k(1:nphicor,1:mom,1:natom_atnbr)   
+&                                              +wtk(ikpt)*sigx1_k(1:nphicor,1:mom,1:natom_atnbr)
        end if
        if (need_emissivity) then
          emisx(1:nphicor,1:mom,1:natom_atnbr,isppol)=emisx(1:nphicor,1:mom,1:natom_atnbr,isppol) &
-&                                              +wtk(ikpt)*emisx_k(1:nphicor,1:mom,1:natom_atnbr)   
+&                                              +wtk(ikpt)*emisx_k(1:nphicor,1:mom,1:natom_atnbr)
        end if
 
 !      Validity limit
@@ -1495,9 +1495,9 @@ end subroutine conducti_paw
        NCF_CHECK(nf90_get_var(ncid,varid,dummy,start=nc_start,stride=nc_stride,count=nc_count))
      enddo
      ABI_FREE(num_tasks)
-   endif 
+   endif
  endif
- 
+
 !Accumulate kpt/band contributions over processors
  if (need_absorption) then
    call xmpi_sum(sigx1,comm,mpierr)
@@ -1597,7 +1597,7 @@ end subroutine conducti_paw
      end do
    end do
  endif
-  
+
  ! Units
  if(au_units==0) then
    oml_edge=oml_edge*Ha_eV
@@ -1606,7 +1606,7 @@ end subroutine conducti_paw
      sigx1=sigx1*Ohmcm
      if(nsppol==2) then
        sum_spin_sigx1_av=sum_spin_sigx1_av*Ohmcm
-       sum_spin_sigx1=sum_spin_sigx1*Ohmcm 
+       sum_spin_sigx1=sum_spin_sigx1*Ohmcm
      endif
    endif
    if(need_emissivity) then
@@ -1614,17 +1614,17 @@ end subroutine conducti_paw
      emisx=emisx*Ohmcm
      if(nsppol==2) then
        sum_spin_emisx_av=sum_spin_emisx_av*Ohmcm
-       sum_spin_emisx=sum_spin_emisx*Ohmcm 
+       sum_spin_emisx=sum_spin_emisx*Ohmcm
      endif
    endif
  endif
- 
+
 !---------------------------------------------------------------------------------
 ! Output results
  write(str_atm,*) input_atm
  str_atm=adjustl(str_atm)
- str_atm=trim(str_atm) 
- 
+ str_atm=trim(str_atm)
+
 !Only master node outputs results in files (only master node)
  if (me==master) then
 
@@ -1738,9 +1738,9 @@ end subroutine conducti_paw
      end if
      do iom=1,mom
        write(sigx1_up_unt,'(100(1x,e15.8))') &
-&      (oml_edge(icor,iom),sigx1_av(icor,iom,1),sigx1(icor,iom,atnbr,1),icor=1,nphicor) 
+&      (oml_edge(icor,iom),sigx1_av(icor,iom,1),sigx1(icor,iom,atnbr,1),icor=1,nphicor)
        write(sigx1_dn_unt,'(100(1x,e15.8))') &
-&      (oml_edge(icor,iom),sigx1_av(icor,iom,2),sigx1(icor,iom,atnbr,2),icor=1,nphicor)      
+&      (oml_edge(icor,iom),sigx1_av(icor,iom,2),sigx1(icor,iom,atnbr,2),icor=1,nphicor)
      end do
      close(sigx1_up_unt)
      close(sigx1_dn_unt)
@@ -1767,7 +1767,7 @@ end subroutine conducti_paw
      end do
     close(ems_unt)
   end if
-    
+
 !    _s_emisX
    if (need_emissivity.and.nsppol==2) then
      if (open_file(trim(filnam_out)//'_emisX_up_at'//str_atm,msg,newunit=ems_up_unt,form='formatted',action="write")/=0) then
@@ -1785,7 +1785,7 @@ end subroutine conducti_paw
      close(ems_up_unt)
      close(ems_dn_unt)
    end if
-   
+
  endif ! master node
 
 !---------------------------------------------------------------------------------
@@ -1811,6 +1811,7 @@ end subroutine conducti_paw
    end if
    ABI_FREE(oml_emis)
  end if
+ ABI_FREE(typat)
  ABI_FREE(ncor)
  ABI_FREE(lcor)
  ABI_FREE(kappacor)
@@ -1948,19 +1949,19 @@ subroutine conducti_nc(filnam,filnam_out)
  comm = xmpi_comm_self
  call nctk_fort_or_ncfile(filnam0, iomode, msg)
  if (len_trim(msg) /= 0) ABI_ERROR(msg)
- call wfk_open_read(gswfk,filnam0, formeig0, iomode, get_unit(), comm)
+ call gswfk%open_read(filnam0, formeig0, iomode, get_unit(), comm)
 
  call nctk_fort_or_ncfile(filnam1, iomode, msg)
  if (len_trim(msg) /= 0) ABI_ERROR(msg)
- call wfk_open_read(ddk1,filnam1, formeig1, iomode, get_unit(), comm, hdr_out=hdr)
+ call ddk1%open_read(filnam1, formeig1, iomode, get_unit(), comm, hdr_out=hdr)
 
  call nctk_fort_or_ncfile(filnam2, iomode, msg)
  if (len_trim(msg) /= 0) ABI_ERROR(msg)
- call wfk_open_read(ddk2,filnam2, formeig1, iomode, get_unit(), comm)
+ call ddk2%open_read(filnam2, formeig1, iomode, get_unit(), comm)
 
  call nctk_fort_or_ncfile(filnam3, iomode, msg)
  if (len_trim(msg) /= 0) ABI_ERROR(msg)
- call wfk_open_read(ddk3,filnam3, formeig1, iomode, get_unit(), comm)
+ call ddk3%open_read(filnam3, formeig1, iomode, get_unit(), comm)
 
  if (ddk1%compare(ddk2) /= 0) then
    ABI_ERROR("ddk1 and ddk2 are not consistent. see above messages")
@@ -2536,7 +2537,7 @@ subroutine msig(fcti,npti,xi,filnam_out_sig,phi,au_units)
 !loop on the initial energy grid
  do ip=1,npti
    !!! Taylor expansion up to second order of fcti at xx=xi(ii) for each ii
-   !!! Then, in each discretization interval, the integral can be performed analytically   
+   !!! Then, in each discretization interval, the integral can be performed analytically
    pole=xi(ip)
    dx=(xi(npti)-xi(1))/dble(npti-1)
    xsum=zero
@@ -2549,7 +2550,7 @@ subroutine msig(fcti,npti,xi,filnam_out_sig,phi,au_units)
      ff=fct(ii)
      ffp=zero
      ffpp=zero
-     if(ii<=npti-3) then 
+     if(ii<=npti-3) then
        ffp=(four*fct(ii+1)-three*fct(ii)-fct(ii+2))/dx/two
        ffpp=(-fct(ii+3)+four*fct(ii+2)-five*fct(ii+1)+&
 &          two*fct(ii))/dx/dx
@@ -2584,7 +2585,7 @@ subroutine msig(fcti,npti,xi,filnam_out_sig,phi,au_units)
 
    epsc=cmplx(eps1,eps2,kind=dp)
    cos_phi=cmplx(cos(phi),kind=dp)
-   sin_phi=cmplx(sin(phi),kind=dp) 
+   sin_phi=cmplx(sin(phi),kind=dp)
    sqroot=sqrt(epsc-sin_phi*sin_phi)
    crefl_s=(cos_phi-sqroot)/(cos_phi+sqroot)
    crefl_p=(epsc*cos_phi-sqroot)/(epsc*cos_phi+sqroot)

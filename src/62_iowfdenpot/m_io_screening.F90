@@ -25,9 +25,7 @@ MODULE m_io_screening
  use, intrinsic :: iso_c_binding
  use defs_basis
  use m_abicore
-#if defined HAVE_MPI2
- use mpi
-#endif
+ USE_MPI
  use m_xmpi
  use m_mpiotk
  use m_nctk
@@ -37,8 +35,9 @@ MODULE m_io_screening
  use m_hdr
  use m_sort
  use m_crystal
+ use m_gwdefs
 
- use m_gwdefs,          only : em1params_t, GW_TOLQ
+ use m_time,            only : cwtime, cwtime_report !, sec2str, timab
  use m_fstrings,        only : sjoin, itoa, endswith, replace_ch0
  use m_copy,            only : alloc_copy
  use m_io_tools,        only : open_file, file_exists, iomode2str
@@ -217,7 +216,13 @@ MODULE m_io_screening
     ! omega(nomega)
     ! All frequencies calculated both along the real and the imaginary axis.
     ! Real frequencies are packed in the first section.
-    ! TODO: Add frequency mesh type?
+
+  real(dp),allocatable :: omega_wgs(:)
+  ! (nomega)
+  ! Weights for numerical integration. Used for instance for minimax meshes.
+
+  character(len=etsfio_charlen) :: iw_mesh_type="None", rw_mesh_type="None", cw_mesh_type="None"
+  ! String defining the kind of sampling for imaginary (iw), real (rw) and complex (cw) frequencies
 
   type(hdr_type) :: hdr
     ! The abinit header.
@@ -228,18 +233,17 @@ MODULE m_io_screening
     procedure :: bcast => hscr_bcast            ! Broadcast the header.
     procedure :: free => hscr_free              ! Free the header.
     procedure :: copy => hscr_copy              ! Copy the SCR|SUSC header.
-
+    procedure :: io => hscr_io                  ! I/O of the header (read/write/echo).
  end type hscr_t
 !!***
 
- integer,private,parameter :: HSCR_KNOWN_HEADFORMS(1) = [80]
+ !integer,private,parameter :: HSCR_KNOWN_HEADFORMS(1) = [80]
+ integer,private,parameter :: HSCR_KNOWN_HEADFORMS(2) = [80, 81]
  ! The list of headforms used for SCR/SUSC so far.
 
  integer,private,parameter :: size_hscr_known_headforms = size(HSCR_KNOWN_HEADFORMS) ! Need this for Flang
  integer,public,parameter :: HSCR_LATEST_HEADFORM = HSCR_KNOWN_HEADFORMS(size_hscr_known_headforms)
  ! The latest headform used when writing.
-
- public :: hscr_io              ! I/O of the header (read/write/echo).
 
  public :: hscr_new             ! Create header.
  public :: hscr_merge           ! Merge two or more headers.
@@ -303,8 +307,8 @@ subroutine hscr_from_file(hscr, path, fform, comm)
 !scalars
  class(hscr_t),intent(out) :: hscr
  character(len=*),intent(in) :: path
- integer,intent(in) :: comm
  integer,intent(out) :: fform
+ integer,intent(in) :: comm
 
 !Local variables-------------------------------
 !scalars
@@ -322,12 +326,12 @@ subroutine hscr_from_file(hscr, path, fform, comm)
      if (open_file(path,msg,newunit=unt,form="unformatted", status="old",action="read") /= 0) then
        ABI_ERROR(msg)
      end if
-     call hscr_io(hscr,fform,rdwr5,unt,xmpi_comm_self,master,IO_MODE_FORTRAN)
+     call hscr%io(fform, rdwr5, unt, xmpi_comm_self, master, IO_MODE_FORTRAN)
      close(unt)
    else
      ! Netcdf format
      NCF_CHECK(nctk_open_read(unt, path, xmpi_comm_self))
-     call hscr_io(hscr,fform,rdwr5,unt,xmpi_comm_self,master,IO_MODE_ETSF)
+     call hscr%io(fform, rdwr5, unt, xmpi_comm_self, master, IO_MODE_ETSF)
      NCF_CHECK(nf90_close(unt))
    end if
 
@@ -417,8 +421,8 @@ subroutine hscr_io(hscr, fform, rdwr, unt, comm, master, iomode)
  if (rdwr==1 .or. rdwr==5) then
 
    if (.True.) then
-   ! TODO: only master should read but then I have to skip the header.
-   !if (my_rank == master) then
+     ! TODO: only master should read but then I have to skip the header.
+     !if (my_rank == master) then
      ! Read the abinit header, rewinding of the file (if any) is done here.
      if (iomode==IO_MODE_FORTRAN) then
        call hscr%hdr%fort_read(unt, fform, rewind=(rdwr==1))
@@ -442,7 +446,7 @@ subroutine hscr_io(hscr, fform, rdwr, unt, comm, master, iomode)
 
          ! Read real scalars
          read(unt, err=10, iomsg=errmsg)&
-           hscr%mbpt_sciss, hscr%spsmear, hscr%zcut, hscr%gwencomp,hscr%kind_cdata
+           hscr%mbpt_sciss, hscr%spsmear, hscr%zcut, hscr%gwencomp, hscr%kind_cdata
 
          ! Allocate arrays and read them
          call hscr_malloc(hscr, hscr%npwe, hscr%nqibz, hscr%nomega, hscr%nqlwl)
@@ -454,6 +458,14 @@ subroutine hscr_io(hscr, fform, rdwr, unt, comm, master, iomode)
          ! Read data for q-->0 limit.
          if (hscr%nqlwl>0) then
            read(unt, err=10, iomsg=errmsg)hscr%qlwl(:,:)
+         end if
+
+         call set_defaults_from_gwcalctyp()
+         if (hscr%headform > 80) then
+           read(unt, err=10, iomsg=errmsg)hscr%rw_mesh_type
+           read(unt, err=10, iomsg=errmsg)hscr%iw_mesh_type
+           read(unt, err=10, iomsg=errmsg)hscr%cw_mesh_type
+           read(unt, err=10, iomsg=errmsg)hscr%omega_wgs
          end if
 
        case default
@@ -515,6 +527,17 @@ subroutine hscr_io(hscr, fform, rdwr, unt, comm, master, iomode)
            NCF_CHECK(nf90_get_var(ncid, vid("qpoints_gamma_limit"), hscr%qlwl))
          end if
 
+         call set_defaults_from_gwcalctyp()
+         if (hscr%headform > 80) then
+           NCF_CHECK(nf90_get_var(ncid, vid("rw_mesh_type"), hscr%rw_mesh_type))
+           call replace_ch0(hscr%rw_mesh_type)
+           NCF_CHECK(nf90_get_var(ncid, vid("iw_mesh_type"), hscr%iw_mesh_type))
+           call replace_ch0(hscr%iw_mesh_type)
+           NCF_CHECK(nf90_get_var(ncid, vid("cw_mesh_type"), hscr%cw_mesh_type))
+           call replace_ch0(hscr%cw_mesh_type)
+           NCF_CHECK(nf90_get_var(ncid, vid("omega_wgs"), hscr%omega_wgs))
+         end if
+
        case default
          ABI_BUG(sjoin('Unsupported fform read:',itoa(fform)))
        end select
@@ -534,7 +557,7 @@ subroutine hscr_io(hscr, fform, rdwr, unt, comm, master, iomode)
    if (iomode==IO_MODE_FORTRAN .or. iomode==IO_MODE_MPI) then
      ! Write the abinit header.
      call hscr%hdr%fort_write(unt, fform, ierr)
-     ABI_CHECK(ierr == 0, "hdr_fort_write retured ierr != 0")
+     ABI_CHECK(ierr == 0, "hdr_fort_write returned ierr != 0")
 
      write(unt, err=10, iomsg=errmsg)hscr%titles
 
@@ -559,6 +582,13 @@ subroutine hscr_io(hscr, fform, rdwr, unt, comm, master, iomode)
        write(unt, err=10, iomsg=errmsg)hscr%qlwl(:,:)
      end if
 
+     if (hscr%headform > 80) then
+       write(unt, err=10, iomsg=errmsg)hscr%rw_mesh_type
+       write(unt, err=10, iomsg=errmsg)hscr%iw_mesh_type
+       write(unt, err=10, iomsg=errmsg)hscr%cw_mesh_type
+       write(unt, err=10, iomsg=errmsg)hscr%omega_wgs
+     end if
+
    else if (iomode == IO_MODE_ETSF) then
      ncid = unt
      ! Write the abinit header, rewinding of the file (if any) is done here.
@@ -566,7 +596,7 @@ subroutine hscr_io(hscr, fform, rdwr, unt, comm, master, iomode)
 
      ! Define dimensions
      ! Part 2) of etsf-io specifications
-     ! FIXME: Spin is only used in particular cases, We usuall get the trace of W in spin space
+     ! FIXME: Spin is only used in particular cases, We usually get the trace of W in spin space
      ! and I'm not gonna allocate extra memory just to have up up, down down
      ! Besides number_of_spins should be replaced by `number_of_spins_dielectric_function`
      ! Should add spin_dependent attribute.
@@ -594,7 +624,11 @@ subroutine hscr_io(hscr, fform, rdwr, unt, comm, master, iomode)
        ! Abinit
        nctkarr_t('vcutgeo', "dp", 'number_of_reduced_dimensions'), &
        nctkarr_t('kind_cdata', "char", 'character_string_length'), &
-       nctkarr_t('titles', "char", 'character_string_length, two') &
+       nctkarr_t('titles', "char", 'character_string_length, two'), &
+       nctkarr_t('rw_mesh_type', "char", 'character_string_length'), &
+       nctkarr_t('iw_mesh_type', "char", 'character_string_length'), &
+       nctkarr_t('cw_mesh_type', "char", 'character_string_length'), &
+       nctkarr_t('omega_wgs', "dp", 'number_of_frequencies_dielectric_function') &
      ])
      NCF_CHECK(ncerr)
 
@@ -653,6 +687,14 @@ subroutine hscr_io(hscr, fform, rdwr, unt, comm, master, iomode)
 
        NCF_CHECK(nctk_set_datamode(ncid))
        NCF_CHECK(nf90_put_var(ncid, vid('qpoints_gamma_limit'), hscr%qlwl))
+
+       !if (hscr%headform > 80) then
+       NCF_CHECK(nf90_put_var(ncid, vid("rw_mesh_type"), hscr%rw_mesh_type))
+       NCF_CHECK(nf90_put_var(ncid, vid("iw_mesh_type"), hscr%iw_mesh_type))
+       NCF_CHECK(nf90_put_var(ncid, vid("cw_mesh_type"), hscr%cw_mesh_type))
+       NCF_CHECK(nf90_put_var(ncid, vid("omega_wgs"), hscr%omega_wgs))
+       !end if
+
      end if
    else
      ABI_ERROR(sjoin('Unsupported iomode:',iomode2str(iomode)))
@@ -676,6 +718,20 @@ contains
    vid = nctk_idname(ncid, vname)
  end function vid
 
+ subroutine set_defaults_from_gwcalctyp()
+   integer :: mod10
+   ! Ppovide default values of mesh type on the basis of gw_calctyp if old format is read.
+   mod10 = mod(hscr%gwcalctyp, 10)
+   hscr%iw_mesh_type = "None"; hscr%rw_mesh_type = "None"; hscr%cw_mesh_type = "None"
+
+   if (mod10 == SIG_GW_AC) then
+     hscr%iw_mesh_type = "gauss_legendre"
+   else if (any(mod10 == [SIG_QPGW_CD, SIG_QPGW_CD])) then
+     hscr%rw_mesh_type = "linear"
+     hscr%iw_mesh_type = "logarithmic"
+   end if
+ end subroutine set_defaults_from_gwcalctyp
+
 end subroutine hscr_io
 !!***
 
@@ -688,96 +744,92 @@ end subroutine hscr_io
 !! FUNCTION
 !!  Prints info on the header of the SCR|SUSC file.
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! SOURCE
 
-subroutine hscr_print(Hscr, header, unit, prtvol, mode_paral)
+subroutine hscr_print(Hscr, units, prtvol, header)
 
 !Arguments ------------------------------------
 !scalars
  class(hscr_t),intent(in) :: hscr
- integer,intent(in),optional :: prtvol,unit
- character(len=4),intent(in),optional :: mode_paral
+ integer,intent(in) :: units(:)
+ integer,intent(in) :: prtvol
  character(len=*),intent(in),optional :: header
 
 !Local variables-------------------------------
 !scalars
- integer :: iomega,iqibz,unt,verbose
- character(len=4) :: mode
+ integer :: iomega,iq_ibz
  character(len=500) :: msg
-
 ! *************************************************************************
 
- unt=std_out; if (PRESENT(unit      )) unt    =unit
- verbose=0  ; if (PRESENT(prtvol    )) verbose=prtvol
- mode='COLL'; if (PRESENT(mode_paral)) mode   =mode_paral
-
  if (PRESENT(header)) then
-   msg=' ==== '//TRIM(ADJUSTL(header))//' ==== '
-   call wrtout(unt,msg,mode)
+   msg = ' ==== '//TRIM(ADJUSTL(header))//' ==== '
+   call wrtout(units, msg)
  end if
 
  write(msg,'(1x,a)')TRIM(hscr%titles(1))
- call wrtout(unt,msg,mode)
+ call wrtout(units,msg)
  write(msg,'(1x,a)')TRIM(hscr%titles(2))
- call wrtout(unt,msg,mode)
+ call wrtout(units,msg)
  write(msg,'(a,i8)') ' Identifier                ',hscr%ID
- call wrtout(unt,msg,mode)
+ call wrtout(units,msg)
  write(msg,'(a,i8)') ' Kxc kernel                ',hscr%ikxc
- call wrtout(unt,msg,mode)
+ call wrtout(units,msg)
  write(msg,'(a,i8)') ' Treatment of q-->0 limit  ',hscr%inclvkb
- call wrtout(unt,msg,mode)
- write(msg,'(a,i8)') ' headform                  ',hscr%headform
- call wrtout(unt,msg,mode)
+ call wrtout(units,msg)
+ write(msg,'(a,i8)') '- headform                  ',hscr%headform
+ call wrtout(units,msg)
  write(msg,'(a,i8)') ' fform                     ',hscr%fform
- call wrtout(unt,msg,mode)
+ call wrtout(units,msg)
  write(msg,'(a,i8)') ' gwcalctyp                 ',hscr%gwcalctyp
- call wrtout(unt,msg,mode)
+ call wrtout(units,msg)
  write(msg,'(a,2i8)')' Number of components      ',hscr%nI,hscr%nJ
- call wrtout(unt,msg,mode)
+ call wrtout(units,msg)
  write(msg,'(a,i8)') ' Number of q-points        ',hscr%nqibz
- call wrtout(unt,msg,mode)
+ call wrtout(units,msg)
  write(msg,'(a,i8)') ' Number of q-directions    ',hscr%nqlwl
- call wrtout(unt,msg,mode)
+ call wrtout(units,msg)
  write(msg,'(a,i8)') ' Number of frequencies     ',hscr%nomega
- call wrtout(unt,msg,mode)
+ call wrtout(units,msg)
  write(msg,'(a,i8)') ' Number of bands used      ',hscr%nbnds_used
- call wrtout(unt,msg,mode)
+ call wrtout(units,msg)
  write(msg,'(a,i8)') ' Dimension of matrix       ',hscr%npwe
- call wrtout(unt,msg,mode)
+ call wrtout(units,msg)
  write(msg,'(a,i8)') ' Number of planewaves used ',hscr%npwwfn_used
- call wrtout(unt,msg,mode)
+ call wrtout(units,msg)
  write(msg,'(a,i8)') ' Spectral method           ',hscr%spmeth
- call wrtout(unt,msg,mode)
+ call wrtout(units,msg)
  write(msg,'(a,i8)') ' Test_type                 ',hscr%test_type
- call wrtout(unt,msg,mode)
+ call wrtout(units,msg)
  write(msg,'(a,i8)') ' Time-ordering             ',hscr%tordering
- call wrtout(unt,msg,mode)
+ call wrtout(units,msg)
  write(msg,'(a,es16.6)')' Scissor Energy             ',hscr%mbpt_sciss
- call wrtout(unt,msg,mode)
+ call wrtout(units,msg)
  write(msg,'(a,es16.6)')' Spectral smearing          ',hscr%spsmear
- call wrtout(unt,msg,mode)
+ call wrtout(units,msg)
  write(msg,'(a,es16.6)')' Complex Imaginary Shift    ',hscr%zcut
- call wrtout(unt,msg,mode)
+ call wrtout(units,msg)
+ write(msg,'(2a)')      ' rw_mesh_type    ',trim(hscr%rw_mesh_type)
+ call wrtout(units,msg)
+ write(msg,'(2a)')      ' iw_mesh_type    ',trim(hscr%iw_mesh_type)
+ call wrtout(units,msg)
+ write(msg,'(2a)')      ' cw_mesh_type    ',trim(hscr%cw_mesh_type)
+ call wrtout(units,msg)
 
- if (verbose==0) then
-   call wrtout(unt,' The header contains additional records.',mode)
+ if (prtvol == 0) then
+   call wrtout(units,' The header contains additional records.')
  else
    write(msg,'(2a)')ch10,' q-points [r.l.u.]:'
-   call wrtout(unt,msg,mode)
-   do iqibz=1,hscr%nqibz
-     write(msg,'(i5,3f12.6)')iqibz,hscr%qibz(:,iqibz)
-     call wrtout(unt,msg,mode)
+   call wrtout(units,msg)
+   do iq_ibz=1,hscr%nqibz
+     write(msg,'(i5,3f12.6)')iq_ibz,hscr%qibz(:,iq_ibz)
+     call wrtout(units,msg)
    end do
 
    write(msg,'(2a)')ch10,' Frequencies used [eV]:'
-   call wrtout(unt,msg,mode)
+   call wrtout(units,msg)
    do iomega=1,hscr%nomega
      write(msg,'(i3,2f7.2)')iomega,REAL(hscr%omega(iomega))*Ha_eV,AIMAG(hscr%omega(iomega))*Ha_eV
-     call wrtout(unt,msg,mode)
+     call wrtout(units,msg)
    end do
  end if
 
@@ -798,7 +850,7 @@ end subroutine hscr_print
 !!
 !! INPUTS
 !!  varname=Name of the netcdf variable (used to get fform and ID).
-!!  ikxc=Integer flag definining the type of XC kernel (0 if None i.e RPA)
+!!  ikxc=Integer flag defining the type of XC kernel (0 if None i.e RPA)
 !!  test_type=Integer flag defining the type of probing charge (0 for None)
 !!  tordering=The time-ordering of the Response function.
 !!  gvec(3,Ep%npwe)=The G-vectors used.
@@ -810,7 +862,7 @@ end subroutine hscr_print
 !!
 !! SOURCE
 
-type(hscr_t) function hscr_new(varname, dtset,ep,hdr_abinit,ikxc,test_type,tordering,titles,ngvec,gvec) result(hscr)
+type(hscr_t) function hscr_new(varname, dtset, ep, hdr_abinit, ikxc, test_type, tordering, titles, ngvec, gvec) result(hscr)
 
 !Arguments ------------------------------------
 !scalars
@@ -831,7 +883,7 @@ type(hscr_t) function hscr_new(varname, dtset,ep,hdr_abinit,ikxc,test_type,torde
  !@hscr_t
  ABI_CHECK(ngvec == Ep%npwe, 'ngvec/=Ep%npwe')
 
- ! Identifier used to define the type of Response function (e^-1, chi0)
+ ! Identifier used to define the type of response function (e^-1, chi0)
  id = 0
  if (varname == "polarizability") id = 1
  if (varname == "inverse_dielectric_function") id = 4
@@ -871,10 +923,15 @@ type(hscr_t) function hscr_new(varname, dtset,ep,hdr_abinit,ikxc,test_type,torde
  hscr%titles(:)=titles(:)
 
  call hscr_malloc(hscr, hscr%npwe, hscr%nqibz, hscr%nomega, hscr%nqlwl)
- hscr%gvec(:,:) = gvec(1:3,1:Ep%npwe)
+ hscr%gvec(:,:) = gvec(:,1:Ep%npwe)
  hscr%qibz(:,:) = Ep%qcalc
  hscr%qlwl(:,:) = Ep%qlwl
  hscr%omega(:) = Ep%omega
+
+ hscr%omega_wgs(:) = Ep%omega_wgs
+ hscr%iw_mesh_type = Ep%iw_mesh_type
+ hscr%rw_mesh_type = Ep%rw_mesh_type
+ hscr%cw_mesh_type = Ep%cw_mesh_type
 
 ! HSCR_NEW
  hscr%awtr = dtset%awtr
@@ -913,9 +970,6 @@ end function hscr_new
 !!   initialized entirely, while for the other procs, everything has
 !!   to be transmitted.
 !!
-!! NOTES
-!! This routine is called only in the case of MPI version of the code.
-!!
 !! SOURCE
 
 subroutine hscr_bcast(hscr, master, my_rank, comm)
@@ -926,7 +980,6 @@ subroutine hscr_bcast(hscr, master, my_rank, comm)
 
 !Local variables-------------------------------
  integer :: ierr
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -979,6 +1032,11 @@ subroutine hscr_bcast(hscr, master, my_rank, comm)
  call xmpi_bcast(hscr%kind_cdata, master, comm, ierr)
  ! HSCR_NEW
 
+ call xmpi_bcast(hscr%omega_wgs, master, comm, ierr)
+ call xmpi_bcast(hscr%iw_mesh_type, master, comm, ierr)
+ call xmpi_bcast(hscr%rw_mesh_type, master, comm, ierr)
+ call xmpi_bcast(hscr%cw_mesh_type, master, comm, ierr)
+
  DBG_EXIT("COLL")
 
 end subroutine hscr_bcast
@@ -1001,7 +1059,6 @@ subroutine hscr_malloc(hscr, npwe, nqibz, nomega, nqlwl)
 !scalars
  class(hscr_t),intent(inout) :: Hscr
  integer,intent(in) :: npwe, nqibz, nomega, nqlwl
-
 ! *************************************************************************
 
  !@hscr_t
@@ -1009,6 +1066,7 @@ subroutine hscr_malloc(hscr, npwe, nqibz, nomega, nqlwl)
  ABI_MALLOC(hscr%qibz, (3, nqibz))
  ABI_MALLOC(hscr%qlwl, (3, nqlwl))
  ABI_MALLOC(hscr%omega, (nomega))
+ ABI_CALLOC(hscr%omega_wgs, (nomega))
 
 end subroutine hscr_malloc
 !!***
@@ -1022,25 +1080,19 @@ end subroutine hscr_malloc
 !! FUNCTION
 !! Deallocate the components of the header structured datatype
 !!
-!! INPUTS
-!! hdr <type(hdr_type)>=the header
-!!
-!! OUTPUT
-!!  (only deallocate)
-!!
 !! SOURCE
 
 subroutine hscr_free(hscr)
 
 !Arguments ------------------------------------
  class(hscr_t),intent(inout) :: hscr
-
 ! *************************************************************************
 
  ABI_SFREE(hscr%gvec)
  ABI_SFREE(hscr%qibz)
  ABI_SFREE(hscr%qlwl)
  ABI_SFREE(hscr%omega)
+ ABI_SFREE(hscr%omega_wgs)
 
  call hscr%Hdr%free()
 
@@ -1103,6 +1155,7 @@ subroutine hscr_copy(Hscr_in, Hscr_cp)
  call alloc_copy(Hscr_in%qibz , Hscr_cp%qibz)
  call alloc_copy(Hscr_in%qlwl , Hscr_cp%qlwl)
  call alloc_copy(Hscr_in%omega, Hscr_cp%omega)
+ call alloc_copy(Hscr_in%omega_wgs, Hscr_cp%omega_wgs)
 
 ! HSCR_NEW
  hscr_cp%awtr      =  hscr_in%awtr
@@ -1111,7 +1164,11 @@ subroutine hscr_copy(Hscr_in, Hscr_cp)
  hscr_cp%gwcomp    =  hscr_in%gwcomp
  hscr_cp%gwgamma   =  hscr_in%gwgamma
  hscr_cp%gwencomp  =  hscr_in%gwencomp
- hscr_cp%kind_cdata  =  hscr_in%kind_cdata
+ hscr_cp%kind_cdata  = hscr_in%kind_cdata
+
+ hscr_cp%iw_mesh_type = hscr_in%iw_mesh_type
+ hscr_cp%rw_mesh_type = hscr_in%rw_mesh_type
+ hscr_cp%cw_mesh_type = hscr_in%cw_mesh_type
 ! HSCR_NEW
 
 end subroutine hscr_copy
@@ -1124,7 +1181,7 @@ end subroutine hscr_copy
 !! hscr_merge
 !!
 !! FUNCTION
-!! This subroutine merges diffrent header structured variable (hscr_t)
+!! This subroutine merges different header structured variable (hscr_t)
 !!
 !! INPUTS
 !!  Hscr_in(:) <hscr_t)>=List of headers to be merged.
@@ -1149,6 +1206,8 @@ subroutine hscr_merge(Hscr_in, Hscr_out)
 !arrays
  real(dp),allocatable :: qset(:,:)
 ! *************************************************************************
+
+ ! TODO: This should be called hscr_merge_qpoints
 
  !@hscr_t
  nhds=SIZE(Hscr_in)
@@ -1274,7 +1333,7 @@ end subroutine hscr_merge
 !!    IO_MODE_ETSF--> ETSF format
 !!  npwe=Number of plane waves in epsm1.
 !!  nomega=Number of frequencies
-!!  iqibz=Index of the q-points in the IBZ.
+!!  iq_ibz=Index of the q-points in the IBZ.
 !!  epsm1(npwe,npwe,nomega)=The matrix to be written, for different frequencies, and a single q-point.
 !!
 !! NOTES
@@ -1286,12 +1345,12 @@ end subroutine hscr_merge
 !!
 !! SOURCE
 
-subroutine write_screening(varname, unt, iomode, npwe, nomega, iqibz, epsm1)
+subroutine write_screening(varname, unt, iomode, npwe, nomega, iq_ibz, epsm1)
 
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: varname
- integer,intent(in) :: nomega,npwe,iqibz,unt,iomode
+ integer,intent(in) :: nomega,npwe,iq_ibz,unt,iomode
 !arrays
  complex(gwpc),target,intent(in) :: epsm1(npwe,npwe,nomega)
 
@@ -1307,7 +1366,6 @@ subroutine write_screening(varname, unt, iomode, npwe, nomega, iqibz, epsm1)
 #else
  real(sp), ABI_CONTIGUOUS pointer :: real_epsm1(:,:,:,:,:,:,:)
 #endif
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1334,7 +1392,7 @@ subroutine write_screening(varname, unt, iomode, npwe, nomega, iqibz, epsm1)
    call c_f_pointer(c_loc(epsm1(1,1,1)), real_epsm1, [2, npwe, npwe, 1, 1, nomega, 1])
    ! [cplex, npwe, npwe, nspin, nspin, nomega, nqpt]
    spins = 1; s1 = spins(1); s2 = spins(2)
-   ncerr = nf90_put_var(unt, varid, real_epsm1, start=[1,1,1,s1,s2,1,iqibz], count=[2,npwe,npwe,1,1,nomega,1])
+   ncerr = nf90_put_var(unt, varid, real_epsm1, start=[1,1,1,s1,s2,1,iq_ibz], count=[2,npwe,npwe,1,1,nomega,1])
    NCF_CHECK_MSG(ncerr, sjoin("putting var:", varname))
 
  case default
@@ -1386,7 +1444,7 @@ end subroutine write_screening
 !!
 !! SOURCE
 
-subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, &
+subroutine read_screening(varname, fname, npweA, nqibzA, nomegaA, epsm1, iomode, comm, &
                           iqiA) ! Optional
 
 !Arguments ------------------------------------
@@ -1400,15 +1458,14 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: ipwe,fform,iomega,iqibz,unt,rdwr,my_rank,nprocs,my_iomode
- integer :: varid,ncerr
+ integer :: ipwe,fform,iomega,iq_ibz,unt,rdwr,my_rank,nprocs,my_iomode, varid, ncerr
 #ifdef HAVE_MPI_IO
- integer :: test_fform,mpi_err,ierr,sc_mode
- integer :: bsize_frm,mpi_type_frm
+ integer :: test_fform,mpi_err,ierr,sc_mode, bsize_frm,mpi_type_frm
  integer :: mpi_fh,buf_dim !,mat_ggw,mat_ggwq
  integer(XMPI_OFFSET_KIND) :: offset,displ_wq !,my_offpad
  !complex(dpc) :: ctmp
 #endif
+ real(dp) :: cpu, wall, gflops
  character(len=500) :: msg,errmsg
  logical :: read_qslice
  type(hscr_t) :: Hscr
@@ -1424,10 +1481,10 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, 
  real(sp), ABI_CONTIGUOUS pointer :: real_epsm1(:,:,:,:,:,:,:)
 #endif
  integer :: spins(2),s1,s2
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
+ call cwtime(cpu, wall, gflops, "start")
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  my_iomode = iomode
@@ -1451,16 +1508,16 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, 
    ABI_CHECK_MPI(mpi_err, sjoin("MPI_FILE_OPEN:", fname))
 
    ! Retrieve the offset of the section immediately below the header.
-   call hscr_mpio_skip(mpi_fh,test_fform,offset)
+   call hscr_mpio_skip(mpi_fh, test_fform, offset)
    ABI_CHECK(test_fform == fform, "mismatch in fform!")
 
    ! Offsets of the Fortran markers corresponding to the (w,q) slices.
    ABI_MALLOC(offset_wq,(HScr%nomega,HScr%nqibz))
    displ_wq = offset
-   do iqibz=1,Hscr%nqibz
+   do iq_ibz=1,Hscr%nqibz
      do iomega=1,Hscr%nomega
        ABI_CHECK(displ_wq > 0, "displ_wq < 0, your SCR|SUSC file is too big for MPI-IO!")
-       offset_wq(iomega,iqibz) = displ_wq
+       offset_wq(iomega,iq_ibz) = displ_wq
        displ_wq = displ_wq + Hscr%npwe**2 * xmpi_bsize_dpc + Hscr%npwe * 2 * bsize_frm
      end do
    end do
@@ -1473,11 +1530,11 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, 
    if (open_file(fname,msg,newunit=unt,form="unformatted",status="old",action="read") /= 0) then
      ABI_ERROR(msg)
    end if
-   call hscr_io(hscr,fform,rdwr,unt,comm,master,my_iomode)
+   call hscr%io(fform, rdwr, unt, comm, master, my_iomode)
 
  case (IO_MODE_ETSF)
    NCF_CHECK(nctk_open_read(unt, fname, xmpi_comm_self))
-   call hscr_io(hscr,fform,rdwr,unt,comm,master,my_iomode)
+   call hscr%io(fform, rdwr, unt, comm, master, my_iomode)
 
  case default
    ABI_ERROR(sjoin("Wrong iomode:", iomode2str(my_iomode)))
@@ -1513,7 +1570,7 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, 
  case (IO_MODE_MPI)
 #ifdef HAVE_MPI_IO
    if (read_qslice) then
-      call wrtout(std_out, "calling mpiotk to read_qslice")
+      !call wrtout(std_out, "calling mpiotk to read_qslice")
       buf_dim = (npweA)**2 * nomegaA
       offset = offset_wq(1,iqiA)
       sc_mode = xmpio_collective
@@ -1539,7 +1596,7 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, 
 
    else
      ! Full matrix (G,G',w,q) is needed.
-     call wrtout(std_out, "calling mpiotk: Full matrix (G,G',w,q) is needed.")
+     !call wrtout(std_out, "calling mpiotk: Full matrix (G,G',w,q) is needed.")
 
 #ifdef HAVE_GW_DPC
      ! Can read all data at once.
@@ -1556,8 +1613,8 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, 
      ABI_MALLOC_OR_DIE(bufdc3d,(npweA,npweA,nomegaA), ierr)
      sc_mode = xmpio_collective
 
-     do iqibz=1,Hscr%nqibz
-       offset = offset_wq(1,iqibz)
+     do iq_ibz=1,Hscr%nqibz
+       offset = offset_wq(1,iq_ibz)
        buf_dim = (2*npweA)**2 * nomegaA
 
        call mpiotk_read_fsuba_dpc3D(mpi_fh,offset, &
@@ -1565,7 +1622,7 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, 
          buf_dim,bufdc3d,xmpio_chunk_bsize,sc_mode,comm,ierr)
        ABI_CHECK(ierr==0,"Fortran matrix too big")
 
-       epsm1(:,:,:,iqibz) = bufdc3d
+       epsm1(:,:,:,iq_ibz) = bufdc3d
      end do
 
      ABI_FREE(bufdc3d)
@@ -1589,8 +1646,8 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, 
      !if (dim_wings==1) STOP 'not implemented'
      !TODO this has to be done in a cleaner way.
      qread_loop: &
-&    do iqibz=1,Hscr%nqibz
-       if (iqibz==iqiA) then
+&    do iq_ibz=1,Hscr%nqibz
+       if (iq_ibz==iqiA) then
          do iomega=1,nomegaA
            do ipwe=1,Hscr%npwe
              read(unt, err=10, iomsg=errmsg) bufdc2d(1:Hscr%npwe,1)
@@ -1605,16 +1662,16 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, 
             read(unt, err=10, iomsg=errmsg)
            end do
          end do
-       end if ! iqibz==iqiA
-     end do qread_loop ! iqibz
+       end if ! iq_ibz==iqiA
+     end do qread_loop ! iq_ibz
 
    case (.False.)
      ! Read the entire array.
-     do iqibz=1,Hscr%nqibz
+     do iq_ibz=1,Hscr%nqibz
        do iomega=1,nomegaA
          do ipwe=1,Hscr%npwe
           read(unt, err=10, iomsg=errmsg) bufdc2d(1:Hscr%npwe,1)
-          if (ipwe<=npweA) epsm1(1:npweA,ipwe,iomega,iqibz)=bufdc2d(1:npweA,1)
+          if (ipwe<=npweA) epsm1(1:npweA,ipwe,iomega,iq_ibz)=bufdc2d(1:npweA,1)
          end do
        end do
        ! Skip other frequencies
@@ -1623,7 +1680,7 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, 
            read(unt, err=10, iomsg=errmsg)
          end do
        end do
-     end do !iqibz
+     end do !iq_ibz
    end select
 
    close(unt)
@@ -1645,8 +1702,8 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, 
      ncerr = nf90_get_var(unt, varid, real_epsm1, start=[1,1,1,s1,s2,1,iqia], count=[2,npweA,npweA,1,1,nomegaA,1])
    else
      ncerr = nf90_get_var(unt, varid, real_epsm1, start=[1,1,1,s1,s2,1,1], count=[2,npweA,npweA,1,1,nomegaA,nqibzA])
-     !do iqibz=1,nqibzA
-     !  !write(*,*)"epsm1: in read ",iqibz,epsm1(1:3,1,1,iqibz)
+     !do iq_ibz=1,nqibzA
+     !  !write(*,*)"epsm1: in read ",iq_ibz,epsm1(1:3,1,1,iq_ibz)
      !end do
    end if
    NCF_CHECK_MSG(ncerr, sjoin("getting var:", varname))
@@ -1663,6 +1720,7 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, 
 
  call Hscr%free()
 
+ !call cwtime_report("- read_screening:", cpu, wall, gflops)
  DBG_EXIT("COLL")
 
  return
@@ -1705,7 +1763,7 @@ subroutine hscr_mpio_skip(mpio_fh, fform, offset)
 
 !Local variables-------------------------------
 !scalars
- integer :: bsize_frm,mpi_type_frm
+ integer :: bsize_frm,mpi_type_frm, headform
 #ifdef HAVE_MPI_IO
  integer :: ierr,isk
  !character(len=500) :: msg
@@ -1713,7 +1771,6 @@ subroutine hscr_mpio_skip(mpio_fh, fform, offset)
  integer(kind=MPI_OFFSET_KIND) :: fmarker,positloc
  integer :: nqlwl(1),statux(MPI_STATUS_SIZE)
 #endif
-
 ! *************************************************************************
 
  offset = 0
@@ -1722,18 +1779,23 @@ subroutine hscr_mpio_skip(mpio_fh, fform, offset)
 
  call hdr_mpio_skip(mpio_fh,fform,offset)
 
- call wrtout(std_out, sjoin("in hdr_mpio_skip with fform = ",itoa(fform)))
+ !call wrtout(std_out, sjoin("in hdr_mpio_skip with fform = ",itoa(fform)))
 
 #ifdef HAVE_MPI_IO
  select case (fform)
  case (1003, 1004)
-   ! Ship the titles
+   ! Skip the titles
    call xmpio_read_frm(mpio_fh,offset,xmpio_single,fmarker,ierr)
+
+   ! read headform from the 2d record.
+   positloc  = offset + bsize_frm + 3*xmpi_bsize_int
+   call MPI_FILE_READ_AT(mpio_fh,positloc,headform,1,MPI_INTEGER,statux,ierr)
+   !call wrtout(std_out, sjoin("headform = ",itoa(headform)))
 
    ! read nqlwl from the 2d record.
    positloc  = offset + bsize_frm + 9*xmpi_bsize_int
    call MPI_FILE_READ_AT(mpio_fh,positloc,nqlwl,1,MPI_INTEGER,statux,ierr)
-   call wrtout(std_out, sjoin("nqlwl = ",itoa(nqlwl(1))))
+   !call wrtout(std_out, sjoin("nqlwl = ",itoa(nqlwl(1))))
 
    do isk=1,5
      call xmpio_read_frm(mpio_fh,offset,xmpio_single,fmarker,ierr)
@@ -1741,6 +1803,12 @@ subroutine hscr_mpio_skip(mpio_fh, fform, offset)
 
    if (nqlwl(1)>0) then  ! skip qlwl
      call xmpio_read_frm(mpio_fh,offset,xmpio_single,fmarker,ierr)
+   end if
+
+   if (headform > 80) then ! skip new records
+     do isk=1,4
+       call xmpio_read_frm(mpio_fh,offset,xmpio_single,fmarker,ierr)
+     end do
    end if
 
  case default
@@ -1767,7 +1835,7 @@ end subroutine hscr_mpio_skip
 !! INPUTS
 !!  nfiles=Number of files to be merged.
 !!  filenames(nfiles)=Paths of files to be merged.
-!!  hscr_files(nfiles)<hscr_t>=Heades of the files to be merged.
+!!  hscr_files(nfiles)<hscr_t>=Headers of the files to be merged.
 !!  fname_out=Name of the file to be produced.
 !!
 !! OUTPUT
@@ -1789,7 +1857,7 @@ subroutine ioscr_qmerge(nfiles, filenames, hscr_files, fname_out, ohscr)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: rdwr2=2,master=0
- integer :: iqibz,ifound,ifile,iqf,ount,iomode,fform_merge,comm,nomega4m,npwe4m,iqiA,ierr
+ integer :: iq_ibz,ifound,ifile,iqf,ount,iomode,fform_merge,comm,nomega4m,npwe4m,iqiA,ierr
  character(len=500) :: msg
  character(len=nctk_slen) :: varname
  type(abifile_t) :: abifile
@@ -1797,7 +1865,6 @@ subroutine ioscr_qmerge(nfiles, filenames, hscr_files, fname_out, ohscr)
  integer,allocatable :: merge_table(:,:)
  real(dp) :: qdiff(3)
  complex(gwpc),allocatable :: epsm1(:,:,:,:)
-
 ! *************************************************************************
 
  comm = xmpi_comm_self
@@ -1808,21 +1875,21 @@ subroutine ioscr_qmerge(nfiles, filenames, hscr_files, fname_out, ohscr)
 
  ! Merge the headers creating the full list of q-points.
  call hscr_merge(Hscr_files(1:nfiles), ohscr)
- call ohscr%print(header='Header of the final file', unit=std_out, prtvol=1)
+ call ohscr%print([std_out], 1, header='Header of the final file')
 
  ! For each q to be merged, save the index of the file where q is stored as well as its sequential index.
  ! Useful to do the merge point-by-point thus avoiding the allocation of the entire epsm1 array.
  ABI_MALLOC(merge_table,(ohscr%nqibz,2))
- do iqibz=1,ohscr%nqibz
+ do iq_ibz=1,ohscr%nqibz
    ifound=0
    fl: do ifile=1,nfiles
      do iqf=1,Hscr_files(ifile)%nqibz
-       qdiff(:)=ohscr%qibz(:,iqibz)-Hscr_files(ifile)%qibz(:,iqf)
+       qdiff(:)=ohscr%qibz(:,iq_ibz)-Hscr_files(ifile)%qibz(:,iqf)
        if (all(abs(qdiff) < GW_TOLQ)) then
-         merge_table(iqibz,1)=ifile
-         merge_table(iqibz,2)=iqf
+         merge_table(iq_ibz,1)=ifile
+         merge_table(iq_ibz,2)=iqf
          ifound=ifound+1
-         write(msg,'(a,3f12.6,2a)')'. q-point:',ohscr%qibz(:,iqibz),' will be taken from ',TRIM(filenames(ifile))
+         write(msg,'(a,3f12.6,2a)')'. q-point:',ohscr%qibz(:,iq_ibz),' will be taken from ',TRIM(filenames(ifile))
          call wrtout(std_out, msg)
          EXIT fl
        end if
@@ -1854,18 +1921,18 @@ subroutine ioscr_qmerge(nfiles, filenames, hscr_files, fname_out, ohscr)
    ABI_ERROR("Files to be merged have different fform. Cannot merge data")
  end if
 
- call hscr_io(ohscr,fform_merge,rdwr2,ount,comm,master,iomode)
+ call ohscr%io(fform_merge, rdwr2, ount, comm, master, iomode)
 
  npwe4m   = ohscr%npwe
  nomega4m = ohscr%nomega
 
  ABI_MALLOC_OR_DIE(epsm1,(npwe4m,npwe4m,nomega4m,1), ierr)
 
- do iqibz=1,ohscr%nqibz
-   ifile = merge_table(iqibz,1)
-   iqiA  = merge_table(iqibz,2)
-   call read_screening(varname,filenames(ifile),npwe4m,1,nomega4m,epsm1,iomode,comm,iqiA=iqiA)
-   call write_screening(varname,ount,iomode,npwe4m,nomega4m,iqibz,epsm1)
+ do iq_ibz=1,ohscr%nqibz
+   ifile = merge_table(iq_ibz,1)
+   iqiA  = merge_table(iq_ibz,2)
+   call read_screening(varname, filenames(ifile), npwe4m, 1, nomega4m,epsm1, iomode, comm, iqiA=iqiA)
+   call write_screening(varname, ount, iomode, npwe4m, nomega4m, iq_ibz, epsm1)
  end do
 
  ABI_FREE(epsm1)
@@ -1920,7 +1987,6 @@ subroutine ioscr_qrecover(ipath, nqrec, fname_out)
  type(abifile_t) :: abifile
 !arrays
  complex(gwpc),allocatable :: epsm1(:,:,:,:)
-
 ! *************************************************************************
 
  comm = xmpi_comm_self
@@ -1960,7 +2026,7 @@ subroutine ioscr_qrecover(ipath, nqrec, fname_out)
  ABI_MALLOC(hscr_recov%qibz, (3,nqrec))
  hscr_recov%qibz = hscr%qibz(:,1:nqrec)
 
- call hscr_recov%print(header="Header of the new SCR file",unit=std_out,prtvol=1)
+ call hscr_recov%print([std_out], 1, header="Header of the new SCR file")
 
  ! Write the header of the recovered file.
  fform1 = hscr%fform
@@ -1971,7 +2037,7 @@ subroutine ioscr_qrecover(ipath, nqrec, fname_out)
  end if
  varname = abifile%varname
 
- call hscr_io(hscr_recov,fform1,rdwr2,unt,comm,master,iomode)
+ call hscr_recov%io(fform1,rdwr2,unt,comm,master,iomode)
 
  nqibzA=1; nomega_asked=hscr%nomega; npwe_asked=hscr%npwe
 
@@ -2009,7 +2075,7 @@ end subroutine ioscr_qrecover
 !! INPUTS
 !!  nfiles=Number of files to be merged.
 !!  filenames(nfiles)=Paths of files to be merged.
-!!  hscr_files(nfiles)<hscr_t>=Heades of the files to be merged.
+!!  hscr_files(nfiles)<hscr_t>=Headers of the files to be merged.
 !!  fname_out=Name of the file to be produced.
 !!
 !! OUTPUT
@@ -2032,49 +2098,92 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
 !Local variables-------------------------------
 !scalars
  integer,parameter :: rdwr2=2,master=0
- integer :: ii,iqibz,ifile,ount,iomode,fform_merge,comm,nomega4m
- integer :: nfreq_tot,nfreqre,nfreqim,ifrq,npwe4mI,npwe4mJ,ierr
+ integer :: ii,iq_ibz,ifile,ount,iomode,fform_merge,comm,nomega4m
+ integer :: nfreq_tot,nfreqre,nfreqim,ifrq,npwe4mI,npwe4mJ,ierr, mod10, order
  character(len=500) :: msg
  logical :: skip
  character(len=nctk_slen) :: varname
+ character(len=etsfio_charlen) :: rw_mesh_type, iw_mesh_type, cw_mesh_type
  type(abifile_t) :: abifile
 !arrays
  integer,allocatable :: freq_indx(:,:),ifile_indx(:),pos_indx(:),i_temp(:),i2_temp(:,:)
- real(dp),allocatable :: real_omega(:),imag_omega(:)
+ real(dp),allocatable :: real_omega(:), real_omega_wgs(:), imag_omega(:), imag_omega_wgs(:) ,omega_wgs_storage(:)
  complex(gwpc),allocatable :: epsm1(:,:,:,:),epsm1_temp(:,:,:,:)
  complex(dpc),allocatable :: omega_storage(:)
-
 ! *************************************************************************
 
  comm = xmpi_comm_self
 
- ! Check that q-point sets are the same
- do ifile=1,nfiles
-   do ii=1,nfiles
-     if (ii == ifile) CYCLE
-     if (Hscr_file(ifile)%nqibz /= Hscr_file(ii)%nqibz) then
-       ABI_ERROR(' One or more files do not have the same number of q-points!')
-     end if
-     do iqibz=1,Hscr_file(1)%nqibz
-       if (ABS(SUM(Hscr_file(ifile)%qibz(:,iqibz)-Hscr_file(ii)%qibz(:,iqibz))) > tol6) then
-         ABI_ERROR('Q-point set differs between one or more files!')
-       end if
-     end do
-   end do
- end do
+ if (file_exists(fname_out)) then
+   ABI_ERROR(sjoin("Cannot overwrite existing file:", fname_out))
+ end if
 
- ! nfreq_tot here is the total *possible* number of freq.
- nfreq_tot=0
+ mod10 = mod(hscr_file(1)%gwcalctyp, 10)
+
+ ! These are the meshes that will be reported in the final SCR file.
+ ! None means that we have a single point or no point at all along that axis
+ ! Clearly we cannot merge files with different meshes.
+ rw_mesh_type = "None"; iw_mesh_type = "None"; cw_mesh_type = "None"
+ do ifile=1,nfiles
+   if (hscr_file(ifile)%rw_mesh_type /= "None") then
+     if (rw_mesh_type /= "None" .and. rw_mesh_type /= hscr_file(ifile)%rw_mesh_type) then
+       ABI_ERROR(sjoin("Cannot merge rw_mesh_type:", rw_mesh_type, " with: ", hscr_file(ifile)%rw_mesh_type))
+     end if
+     rw_mesh_type = hscr_file(ifile)%rw_mesh_type
+   end if
+
+   if (hscr_file(ifile)%iw_mesh_type /= "None") then
+     if (iw_mesh_type /= "None" .and. iw_mesh_type /= hscr_file(ifile)%iw_mesh_type) then
+       ABI_ERROR(sjoin("Cannot merge iw_mesh_type:", iw_mesh_type, " with: ", hscr_file(ifile)%iw_mesh_type))
+     end if
+     iw_mesh_type = hscr_file(ifile)%iw_mesh_type
+   end if
+
+   if (hscr_file(ifile)%cw_mesh_type /= "None") then
+     if (cw_mesh_type /= "None" .and. cw_mesh_type /= hscr_file(ifile)%cw_mesh_type) then
+       ABI_ERROR(sjoin("Cannot merge cw_mesh_type:", cw_mesh_type, " with: ", hscr_file(ifile)%cw_mesh_type))
+     end if
+     cw_mesh_type = hscr_file(ifile)%cw_mesh_type
+   end if
+ end do ! ifile
+
+ do ifile=2,nfiles
+
+   ! Check that q-points are the same
+   ABI_CHECK_IEQ(Hscr_file(ifile)%nqibz, Hscr_file(1)%nqibz, 'files do not have the same number of q-points!')
+   do iq_ibz=1,Hscr_file(1)%nqibz
+     if (ABS(SUM(Hscr_file(ifile)%qibz(:,iq_ibz) - Hscr_file(1)%qibz(:,iq_ibz))) > tol6) then
+       ABI_ERROR('Q-point set differs between one or more files!')
+     end if
+   end do
+
+   ! Check gwcalctyp and other basic parameters.
+   ABI_CHECK_IEQ(hscr_file(ifile)%gwcalctyp, hscr_file(1)%gwcalctyp, "Different gwcalctyp")
+   ABI_CHECK_IEQ(hscr_file(ifile)%npwe, hscr_file(1)%npwe, "Different npwe")
+   ABI_CHECK_IEQ(hscr_file(ifile)%id, hscr_file(1)%id, "Different IDs")
+   ABI_CHECK_IEQ(hscr_file(ifile)%ikxc, hscr_file(1)%ikxc, "Different IXCx")
+   ABI_CHECK_IEQ(hscr_file(ifile)%test_type, hscr_file(1)%test_type, "Different test_type")
+   ABI_CHECK_IEQ(hscr_file(ifile)%tordering, hscr_file(1)%tordering, "Different tordering")
+   ABI_CHECK_IEQ(hscr_file(ifile)%gwgamma, hscr_file(1)%gwgamma, "Different gwgamma")
+ end do ! ifile
+
+ ! nfreq_tot here is the total *possible* number of freqs.
+ nfreq_tot = 0
  do ifile=1,nfiles
    nfreq_tot = nfreq_tot + Hscr_file(ifile)%nomega
  end do
 
+ ! freq_indx: mapping (global frequency index, file index) to local file index.
+ ! ifile_indx: mapping global frequency index to file index.
+ !
  ABI_MALLOC(omega_storage, (nfreq_tot))
- ABI_MALLOC(freq_indx, (nfreq_tot,nfiles))
+ ABI_MALLOC(omega_wgs_storage, (nfreq_tot))
+ ABI_MALLOC(freq_indx, (nfreq_tot, nfiles))
  ABI_MALLOC(ifile_indx, (nfreq_tot))
  omega_storage = CMPLX(-one,-one); freq_indx = 0; ifile_indx = 0
 
- ! Calculate the total number of real freq and store
+ ! TODO: One should handle the case of complex frequencies as well.
+ ! Calculate the total number of real freqs and store
  nfreqre = 0
  do ifile=1,nfiles
    do ifrq=1,Hscr_file(ifile)%nomega
@@ -2083,17 +2192,21 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
      if (AIMAG(Hscr_file(ifile)%omega(ifrq)) > tol16) skip = .TRUE.
      if (REAL(Hscr_file(ifile)%omega(ifrq)) > freqremax) skip = .TRUE.
      ! Check for repetition or non-monotonic points
-     if (nfreqre>1) then
+     if (nfreqre > 1) then
        do ii=1,nfreqre
          if (ABS(REAL(Hscr_file(ifile)%omega(ifrq)) - REAL(omega_storage(ii))) < tol6) skip = .TRUE.
        end do
      end if
      if (skip) CYCLE
+
      nfreqre = nfreqre + 1
+
      ! Store (complex) frequency and index
      omega_storage(nfreqre) = Hscr_file(ifile)%omega(ifrq)
+     omega_wgs_storage(nfreqre) = Hscr_file(ifile)%omega_wgs(ifrq)
+
      ifile_indx(nfreqre) = ifile
-     freq_indx(nfreqre,ifile) = ifrq
+     freq_indx(nfreqre, ifile) = ifrq
      write(std_out,'(a,es16.6,a,i0,2(a,i0))')&
        ' Found real frequency: ',REAL(omega_storage(nfreqre))*Ha_eV,' [eV], number: ',nfreqre,&
        ', in file: ',ifile,' local index: ',ifrq
@@ -2101,29 +2214,35 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
  end do
 
  if (nfreqre > 0) then
-   ! Sort real frequencies
-   ABI_MALLOC(real_omega,(nfreqre))
-   ABI_MALLOC(pos_indx,(nfreqre))
-   ABI_MALLOC(i_temp,(nfreqre))
-   ABI_MALLOC(i2_temp,(nfreqre,nfiles))
-   real_omega(1:nfreqre) = REAL(omega_storage(1:nfreqre)) ! Copy real frequencies to temp. sorting array
-   do ii=1,nfreqre ! Set up indexing array
-     pos_indx(ii) = ii
-   end do
+   ! Sort real frequencies and rearrange weights as well.
+   ABI_MALLOC(real_omega, (nfreqre))
+   ABI_MALLOC(real_omega_wgs, (nfreqre))
+   ABI_MALLOC(pos_indx, (nfreqre))
+   ABI_MALLOC(i_temp, (nfreqre))
+   ABI_MALLOC(i2_temp, (nfreqre,nfiles))
+
+   ! Copy real frequencies to temp. sorting array.
+   real_omega(1:nfreqre) = REAL(omega_storage(1:nfreqre))
 
    ! Sort frequencies while keeping track of index
-   call sort_dp(nfreqre,real_omega,pos_indx,tol16)
+   ! Set up indexing array
+   pos_indx = [(ii, ii=1,nfreqre)]
+   call sort_dp(nfreqre, real_omega, pos_indx, tol16)
+
    i_temp(1:nfreqre) = ifile_indx(1:nfreqre)
    i2_temp(1:nfreqre,1:nfiles) = freq_indx(1:nfreqre,1:nfiles)
 
    ! Copy sorted frequencies plus file and frequency index
    do ii=1,nfreqre
      omega_storage(ii) = CMPLX(real_omega(ii),zero)
+     real_omega_wgs(ii) = omega_wgs_storage(pos_indx(ii))
      ifile_indx(ii) = i_temp(pos_indx(ii))
      freq_indx(ii,1:nfiles) = i2_temp(pos_indx(ii),1:nfiles)
    end do
+   omega_wgs_storage(1:nfreqre) = real_omega_wgs(1:nfreqre)
 
    ABI_FREE(real_omega)
+   ABI_FREE(real_omega_wgs)
    ABI_FREE(pos_indx)
    ABI_FREE(i_temp)
    ABI_FREE(i2_temp)
@@ -2137,44 +2256,57 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
      if (AIMAG(Hscr_file(ifile)%omega(ifrq)) < tol8) CYCLE
      nfreqim = nfreqim + 1
      omega_storage(nfreqre+nfreqim) = Hscr_file(ifile)%omega(ifrq)
+     omega_wgs_storage(nfreqre+nfreqim) = Hscr_file(ifile)%omega_wgs(ifrq)
      ifile_indx(nfreqre+nfreqim) = ifile
      freq_indx(nfreqre+nfreqim,ifile) = ifrq
      write(std_out,'(a,es16.6,a,i0,2(a,i0))')&
-      ' Found imaginary frequency: ',AIMAG(omega_storage(nfreqre+nfreqim))*Ha_eV,' [eV], number: ',nfreqim,&
+      ' Found imag frequency: ',AIMAG(omega_storage(nfreqre+nfreqim))*Ha_eV,' [eV], number: ',nfreqim,&
       ', in file: ',ifile,' local index: ',ifrq
    end do
  end do
 
  ! Sort imaginary frequencies
- ABI_MALLOC(imag_omega,(nfreqim))
- ABI_MALLOC(pos_indx,(nfreqim))
- ABI_MALLOC(i_temp,(nfreqim))
- ABI_MALLOC(i2_temp,(nfreqim,nfiles))
+ ABI_MALLOC(imag_omega, (nfreqim))
+ ABI_MALLOC(imag_omega_wgs, (nfreqim))
+ ABI_MALLOC(pos_indx, (nfreqim))
+ ABI_MALLOC(i_temp, (nfreqim))
+ ABI_MALLOC(i2_temp, (nfreqim, nfiles))
 
  ! Copy imaginary frequencies to temp. sorting array
  imag_omega(1:nfreqim) = AIMAG(omega_storage(nfreqre+1:nfreqre+nfreqim))
- do ii=1,nfreqim ! Set up indexing array
-   pos_indx(ii) = ii
- end do
 
- ! Sort frequencies while keeping track of index
- call sort_dp(nfreqim,imag_omega,pos_indx,tol16)
+ ! Sort frequencies while keeping track of index (+1 for ascending order, -1 for descending order)
+ order = +1
+ if (mod10 == SIG_GW_AC .and. Hscr_file(1)%iw_mesh_type == "gauss_legendre") order = -1
+
+ ! Set up indexing array
+ pos_indx = [(ii, ii=1,nfreqim)]
+ call sort_dp(nfreqim, imag_omega, pos_indx, tol16, order=order)
+
  i_temp(1:nfreqim) = ifile_indx(nfreqre+1:nfreqre+nfreqim)
  i2_temp(1:nfreqim,1:nfiles) = freq_indx(nfreqre+1:nfreqre+nfreqim,1:nfiles)
 
  ! Copy sorted frequencies plus file and frequency index
  do ii=1,nfreqim
    omega_storage(nfreqre+ii) = CMPLX(zero,imag_omega(ii))
-   ifile_indx(nfreqre+ii) = i_temp(pos_indx(ii))
+   ifile = i_temp(pos_indx(ii))
+
+   ifile_indx(nfreqre+ii) = ifile
    freq_indx(nfreqre+ii,1:nfiles) = i2_temp(pos_indx(ii),1:nfiles)
+   ifrq = i2_temp(pos_indx(ii), ifile)
+   imag_omega_wgs(ii) = Hscr_file(ifile)%omega_wgs(ifrq) ! TODO
  end do
 
+ omega_wgs_storage(nfreqre+1:nfreqre+nfreqim) = imag_omega_wgs
+
  ABI_FREE(imag_omega)
+ ABI_FREE(imag_omega_wgs)
  ABI_FREE(pos_indx)
  ABI_FREE(i_temp)
  ABI_FREE(i2_temp)
 
- nfreq_tot = nfreqre + nfreqim ! Here nfreq_tot becomes the *true* number of freq
+ ! Here nfreq_tot becomes the *true* number of freq
+ nfreq_tot = nfreqre + nfreqim
  write(std_out,'(2a,i0,a)') ch10,' Merging ',nfreq_tot,' frequencies.'
  write(std_out,'(2(a,i0),2a)') ' ',nfreqre,' real, and ',nfreqim,' imaginary.',ch10
 
@@ -2182,21 +2314,23 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
  call Hscr_file(1)%copy(ohscr)
 
  ! TODO: hscr_wmerge
- ! Then modify entries for new frequency grid
+ ! Then modify entries for new frequency grid.
  ohscr%nomega = nfreq_tot
- ABI_FREE(ohscr%omega)
- ABI_MALLOC(ohscr%omega,(nfreq_tot))
- ohscr%omega(1:nfreq_tot) = omega_storage(1:nfreq_tot)
+
+ ABI_REMALLOC(ohscr%omega, (nfreq_tot))
+ ABI_REMALLOC(ohscr%omega_wgs, (nfreq_tot))
+ ohscr%omega = omega_storage(1:nfreq_tot)
+ ohscr%omega_wgs = omega_wgs_storage
+
+ ohscr%rw_mesh_type = rw_mesh_type
+ ohscr%iw_mesh_type = iw_mesh_type
+ ohscr%cw_mesh_type = cw_mesh_type
 
  npwe4mI = ohscr%npwe*ohscr%nI
  npwe4mJ = ohscr%npwe*ohscr%nJ
 
  ! Print new header for info
- call ohscr%print(header='Header of the final file',unit=std_out,prtvol=1)
-
- if (file_exists(fname_out)) then
-   ABI_ERROR(sjoin("Cannot overwrite existing file:", fname_out))
- end if
+ call ohscr%print([std_out], 1, header='Header of the final file')
 
  if (endswith(fname_out, ".nc")) then
    iomode = IO_MODE_ETSF
@@ -2208,33 +2342,34 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
    end if
  end if
 
- ! * Write the header.
+ ! Write the header.
  fform_merge = ohscr%fform
-
  abifile = abifile_from_fform(fform_merge)
  if (abifile%fform == 0) then
     ABI_ERROR(sjoin("Cannot find any abifile object associated to fform:", itoa(fform_merge)))
  end if
  varname = abifile%varname
 
- call hscr_io(ohscr,fform_merge,rdwr2,ount,comm,master,iomode)
+ call ohscr%io(fform_merge, rdwr2, ount, comm, master, iomode)
 
  npwe4mI = ohscr%npwe*ohscr%nI
  npwe4mJ = ohscr%npwe*ohscr%nJ
  nomega4m = ohscr%nomega
- ABI_MALLOC_OR_DIE(epsm1,(npwe4mI,npwe4mJ,nomega4m,1), ierr)
 
- do iqibz=1,ohscr%nqibz
+ ! FIXME: Lot of memory allocated here. One can read and write inside the ifile loop
+ ! provided that partial frequencies are always contiguous and files are in the proper order
+ ABI_MALLOC_OR_DIE(epsm1, (npwe4mI, npwe4mJ, nomega4m, 1), ierr)
 
+ do iq_ibz=1,ohscr%nqibz
    do ifile=1,nfiles
      ! allocate temporary array
      npwe4mI = Hscr_file(ifile)%npwe*Hscr_file(ifile)%nI
      npwe4mJ = Hscr_file(ifile)%npwe*Hscr_file(ifile)%nJ
      nomega4m = Hscr_file(ifile)%nomega
-     ABI_MALLOC_OR_DIE(epsm1_temp,(npwe4mI,npwe4mJ,nomega4m,1), ierr)
+     ABI_MALLOC_OR_DIE(epsm1_temp, (npwe4mI, npwe4mJ, nomega4m, 1), ierr)
 
      ! read screening
-     call read_screening(varname,filenames(ifile),npwe4mI,1,nomega4m,epsm1_temp,iomode,comm,iqiA=iqibz)
+     call read_screening(varname,filenames(ifile),npwe4mI,1,nomega4m,epsm1_temp,iomode,comm,iqiA=iq_ibz)
 
      ! Copy matrices for relevant frequencies
      do ifrq=1,nfreq_tot
@@ -2243,23 +2378,17 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
        end if
      end do
 
-     !Add imaginary part if needed
-     !if (indx_imfreq_file==ifile) then
-     !do ifrq=nfreqre+1,ohscr%nomega
-     !epsm1(:,:,ifrq,1)=epsm1_temp(:,:,freq_indx(ifrq,ifile),1)
-     !end do
-     !end if
-
      ABI_FREE(epsm1_temp)
    end do !ifile
 
    ! Write data.
    npwe4mI = ohscr%npwe*ohscr%nI
    nomega4m = ohscr%nomega
-   call write_screening(varname,ount,iomode,npwe4mI,nomega4m,iqibz,epsm1)
- end do ! iqibz
+   call write_screening(varname,ount,iomode,npwe4mI,nomega4m,iq_ibz,epsm1)
+ end do ! iq_ibz
 
  ABI_FREE(epsm1)
+ ABI_FREE(omega_wgs_storage)
  ABI_FREE(omega_storage)
  ABI_FREE(freq_indx)
  ABI_FREE(ifile_indx)
@@ -2312,14 +2441,13 @@ subroutine ioscr_wremove(inpath, ihscr, fname_out, nfreq_tot, freq_indx, ohscr)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: rdwr2=2,master=0
- integer :: iqibz,fform_merge,comm,nomega4m,ierr
+ integer :: iq_ibz,fform_merge,comm,nomega4m,ierr
  integer :: ifrq,npwe4mI,npwe4mJ,iomode,ount
  character(len=500) :: msg
  character(len=nctk_slen) :: varname
  type(abifile_t) :: abifile
 !arrays
  complex(gwpc),allocatable :: epsm1(:,:,:),epsm1_temp(:,:,:)
-
 ! *************************************************************************
 
  comm = xmpi_comm_self
@@ -2333,17 +2461,18 @@ subroutine ioscr_wremove(inpath, ihscr, fname_out, nfreq_tot, freq_indx, ohscr)
 
  ! Then modify entries for new frequency grid.
  ohscr%nomega = nfreq_tot
- ABI_FREE(ohscr%omega)
- ABI_MALLOC(ohscr%omega,(nfreq_tot))
+ ABI_REMALLOC(ohscr%omega, (nfreq_tot))
+ ABI_REMALLOC(ohscr%omega_wgs, (nfreq_tot))
  do ifrq=1,nfreq_tot
    ohscr%omega(ifrq) = ihscr%omega(freq_indx(ifrq))
+   ohscr%omega_wgs(ifrq) = ihscr%omega_wgs(freq_indx(ifrq))
  end do
 
  npwe4mI = ohscr%npwe*ohscr%nI
  npwe4mJ = ohscr%npwe*ohscr%nJ
 
  ! Print new header for info
- call ohscr%print(header='Header of the final file',unit=std_out,prtvol=1)
+ call ohscr%print([std_out], 1, header='Header of the final file')
 
  ! Open output file.
  if (endswith(fname_out, ".nc")) then
@@ -2364,14 +2493,14 @@ subroutine ioscr_wremove(inpath, ihscr, fname_out, nfreq_tot, freq_indx, ohscr)
  end if
  varname = abifile%varname
 
- call hscr_io(ohscr,fform_merge,rdwr2,ount,comm,master,iomode)
+ call ohscr%io(fform_merge,rdwr2,ount,comm,master,iomode)
 
  npwe4mI = ohscr%npwe*ohscr%nI; npwe4mJ = ohscr%npwe*ohscr%nJ
  nomega4m = ohscr%nomega
 
  ABI_MALLOC_OR_DIE(epsm1, (npwe4mI,npwe4mJ,nomega4m), ierr)
 
- do iqibz=1,ohscr%nqibz
+ do iq_ibz=1,ohscr%nqibz
    ! allocate temporary array
    npwe4mI = ihscr%npwe * ihscr%nI
    npwe4mJ = ihscr%npwe * ihscr%nJ
@@ -2379,7 +2508,7 @@ subroutine ioscr_wremove(inpath, ihscr, fname_out, nfreq_tot, freq_indx, ohscr)
    ABI_MALLOC_OR_DIE(epsm1_temp,(npwe4mI,npwe4mJ,nomega4m), ierr)
 
    ! read full screening matrix for this q-point
-   call read_screening(varname,inpath,npwe4mI,1,nomega4m,epsm1_temp,iomode,comm,iqiA=iqibz)
+   call read_screening(varname,inpath,npwe4mI,1,nomega4m,epsm1_temp,iomode,comm,iqiA=iq_ibz)
 
    ! Copy relevant frequencies
    do ifrq=1,nfreq_tot
@@ -2389,8 +2518,8 @@ subroutine ioscr_wremove(inpath, ihscr, fname_out, nfreq_tot, freq_indx, ohscr)
    ABI_FREE(epsm1_temp)
 
    npwe4mI = ohscr%npwe*ohscr%nI; nomega4m = ohscr%nomega
-   call write_screening(varname,ount,iomode,npwe4mI,nomega4m,iqibz,epsm1)
- end do ! iqibz
+   call write_screening(varname,ount,iomode,npwe4mI,nomega4m,iq_ibz,epsm1)
+ end do ! iq_ibz
 
  ABI_FREE(epsm1)
 
@@ -2436,10 +2565,9 @@ subroutine get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl,
  integer,parameter :: master = 0
  integer :: my_rank, fform, npwe_file, nqlwl, ierr
  character(len=500) :: msg
-
 ! *************************************************************************
 
- my_rank = xmpi_comm_rank(comm) !; nprocs = xmpi_comm_size(comm)
+ my_rank = xmpi_comm_rank(comm)
 
  if (my_rank == master) then
    ! Read dimensions from the external file.
@@ -2449,7 +2577,7 @@ subroutine get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl,
    end if
    ! Master reads npw and nqlwl from the SCR file.
    call wrtout(std_out, sjoin('Testing file: ', w_fname))
-   call hscr%from_file(w_fname, fform, xmpi_comm_self); if (dtset%prtvol > 0) call Hscr%print()
+   call hscr%from_file(w_fname, fform, xmpi_comm_self)
 
    ! Have to change %npweps if it was larger than dim on disk.
    npwe_file = Hscr%npwe
@@ -2461,11 +2589,29 @@ subroutine get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl,
       "Calculation will proceed with the maximum available set, npwe_file: ",npwe_file
      ABI_WARNING(msg)
      dtset%npweps = npwe_file
-   else if (Dtset%npweps < npwe_file) then
+   else if (dtset%npweps < npwe_file .and. dtset%npweps /= 0) then
      write(msg,'(2(a,i0),2a,i0)')&
       "The number of G-vectors stored on file (",npwe_file,") is larger than dtset%npweps: ",dtset%npweps,ch10,&
       "Calculation will proceed with dtset%npweps: ",dtset%npweps
      ABI_COMMENT(msg)
+   else
+     call Gsph_c%init(cryst, 0, ecut=dtset%ecuteps)
+     if (Gsph_c%ng > npwe_file) then
+        dtset%npweps = npwe_file
+        write(msg,'(2a,f4.1,a,i0,a,a,i0)')&
+        "npweps was not set in input",&
+        ch10//"The number of G-vectors generated according to ecuteps (",dtset%ecuteps,") is larger than that stored on file (",npwe_file,")",&
+        ch10//"Calculation will proceed with the maximum available set: ",npwe_file
+        ABI_COMMENT(msg)
+     else
+        dtset%npweps = Gsph_c%ng
+        write(msg,'(2a,f4.1,a,i0,a,a,f3.1)')&
+        "npweps was not set in input",&
+        ch10//"The number of G-vectors generated according to ecuteps (",dtset%ecuteps,") is smaller than that stored on file (",npwe_file,")",&
+        ch10//"Calculation will proceed with ecuteps: ",dtset%ecuteps
+        ABI_COMMENT(msg)
+     end if
+     call Gsph_c%free()
    end if
  end if
 
@@ -2480,9 +2626,8 @@ subroutine get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl,
  end if
 
  ! Init qmesh from the SCR file.
- call Qmesh%init(cryst, Hscr%nqibz, Hscr%qibz, Dtset%kptopt)
+ call Qmesh%init(cryst, Hscr%nqibz, Hscr%qibz, dtset%kptopt)
 
- ! The G-sphere for W and Sigma_c is initialized from the g-vectors found in the SCR file.
  call Gsph_c%init(cryst, dtset%npweps, gvec=Hscr%gvec)
 
 end subroutine get_hscr_qmesh_gsph

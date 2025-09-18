@@ -41,13 +41,13 @@ module m_ksdiago
  use m_gwdefs,            only : GW_TOLQ0, GW_Q0_DEFAULT !, cone_gw, czero_gw, j_gw
  use m_dtset,             only : dataset_type
  use m_fstrings,          only : toupper, ktoa, itoa, sjoin, ftoa, ltoa
- use m_io_tools,          only : iomode_from_fname, get_unit ! file_exists, open_file,
+ use m_io_tools,          only : iomode_from_fname, get_unit
  use m_yaml,              only : yamldoc_t, yamldoc_open
  use m_numeric_tools,     only : blocked_loop
  use m_time,              only : cwtime, cwtime_report, timab
  use m_geometry,          only : metric, normv
  use m_hide_lapack,       only : xhegv_cplex, xheev_cplex, xheevx_cplex, xhegvx_cplex
- use m_slk,               only : matrix_scalapack, processor_scalapack, block_dist_1d, &
+ use m_slk,               only : slkmat_dp_t, slk_processor_t, block_dist_1d, &
                                  compute_eigen_problem, compute_generalized_eigen_problem
  use m_bz_mesh,           only : findnq, findq, findqg0, identk
  use m_kg,                only : mkkin, mkkpg
@@ -67,10 +67,10 @@ module m_ksdiago
  use m_initylmg,          only : initylmg
  use m_mkffnl,            only : mkffnl
  use m_getghc,            only : getghc, multithreaded_getghc
- use m_wfd,               only : wfd_t, wfd_init
+ use m_wfd,               only : wfd_t
  use m_vcoul,             only : vcgen_t
  use m_occ,               only : get_fact_spin_tol_empty
- use m_pstat,             only : pstat_t
+ use m_pstat,             only : pstat_proc
 
  implicit none
 
@@ -90,16 +90,16 @@ module m_ksdiago
  type, public :: ugb_t
 
    integer :: istwf_k = -1
-   ! Storage mode of cg_k
+   ! Storage mode of cg_k.
 
    integer :: nspinor = -1
-   ! Number of spinors
+   ! Number of spinors.
 
    integer :: npw_k = -1
    ! Number of planewaves.
 
    integer :: npwsp = -1
-   ! nnpw_k * nspinor
+   ! nnpw_k * nspinor.
 
    integer :: nband_k = - 1
    ! Total number of bands (global)
@@ -107,7 +107,7 @@ module m_ksdiago
    integer :: my_bstart = -1, my_bstop = - 1, my_nband = - 1
    ! 1) Initial band
    ! 2) Last band
-   ! 3) Number of bands treated by this proc. 0 if idle proc
+   ! 3) Number of bands treated by this proc. 0 if idle proc.
 
    logical :: has_idle_procs
    ! True if there are procs in comm who don't own any column.
@@ -115,10 +115,10 @@ module m_ksdiago
    integer,pointer :: comm
    ! pointer to MPI communicator in mat
 
-   type(processor_scalapack) :: processor
+   type(slk_processor_t) :: processor
 
-   type(matrix_scalapack) :: mat
-   ! PBLAS matrix with MPI-distributed Fourier components
+   type(slkmat_dp_t) :: mat
+   ! PBLAS matrix with MPI-distributed Fourier components (double precision)
    ! Local buffer: (2, npwsp * my_nband)
    ! Global matrix: (npwsp, nband_k)
 
@@ -128,7 +128,7 @@ module m_ksdiago
 
    real(dp), contiguous, pointer :: cg_k(:,:,:)
    ! (2, npwsp * my_nband)
-   ! NB: This is pointer to mat%buffer_cplx
+   ! NB: This is a pointer to mat%buffer_cplx
 
    type(pawcprj_type),allocatable :: cprj_k(:,:)
    ! (natom, nspinor * my_nband))
@@ -138,7 +138,7 @@ module m_ksdiago
  contains
 
    procedure :: from_diago  => ugb_from_diago
-    ! Build object by direct diagonalization of the KS Hamiltonian
+    ! Build object by direct diagonalization of the KS Hamiltonian.
 
    procedure :: from_wfk_file  => ugb_from_wfk_file
     ! Build object from WFK file.
@@ -241,7 +241,7 @@ module m_ksdiago
   ! TODO Not implemented
 
   real(dp) :: abstol
-   ! used fro RANGE= "V", "I", and "A" when do_full_diago=.FALSE.
+   ! used for RANGE= "V", "I", and "A" when do_full_diago=.FALSE.
    ! The absolute error tolerance for the eigenvalues. An approximate eigenvalue is accepted
    ! as converged when it is determined to lie in an interval [a,b] of width less than or equal to
    !
@@ -298,6 +298,54 @@ module m_ksdiago
   ! The name of the file storing the eigenvectors and eigenvalues (only if jobz="V")
 
  end type ddiago_ctl_type
+!!***
+
+
+!!****t* m_ksdiago/psbands_t
+!! NAME
+!!  psbands_t
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+ type, public :: psbands_t
+
+   integer :: nb_tot = -1
+   ! Total number of states (protected + pseudo bands)
+
+   integer :: nb_protected = -1
+   ! Number of protected bands.
+
+   integer :: nslices = -1
+   ! Number of slices.
+
+   integer :: maxsto_per_slice = -1
+   ! Max number of pseudo bands per slice.
+
+   real(dp) :: efrac
+
+   integer,allocatable :: subspace(:,:)
+   ! (3, nslices)
+   ! For each slice, the first and last band index and the number of pseudo bands in the slice.
+
+   real(dp),allocatable :: ps_eig(:)
+   ! (nb_tot)
+   ! eigenvalues (KS + pseudo energies)
+
+ contains
+
+   procedure :: init => psbands_init
+    ! Initialize the object
+
+   procedure :: band2slice => psbands_band2slice
+   ! Return the slice index from the band index.
+
+   procedure :: free => psbands_free
+    ! Free memory.
+
+ end type psbands_t
+!!***
 
  public :: ksdiago
  public :: init_ddiago_ctl
@@ -433,7 +481,6 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
  real(dp),allocatable :: ghc(:,:),gvnlxc(:,:),gsc(:,:),ghg_mat(:,:,:),gsg_mat(:,:,:)
  real(dp),pointer :: cwavef(:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
-
 ! *********************************************************************
 
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -443,9 +490,9 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
  end if
 
  call initmpi_seq(mpi_enreg_seq) ! Fake MPI_type for sequential part.
- call init_distribfft_seq(mpi_enreg_seq%distribfft, 'c', ngfftc(2), ngfftc(3), 'all')
+ call mpi_enreg_seq%distribfft%init_seq('c', ngfftc(2), ngfftc(3), 'all')
  if (pawfgr%usefinegrid /= 0) then
-   call init_distribfft_seq(mpi_enreg_seq%distribfft, 'f', pawfgr%ngfft(2), pawfgr%ngfft(3), 'all')
+   call mpi_enreg_seq%distribfft%init_seq('f', pawfgr%ngfft(2), pawfgr%ngfft(3), 'all')
  end if
 
  spin  = Diago_ctl%spin
@@ -919,10 +966,13 @@ end subroutine init_ddiago_ctl
 !!  for a given k-point and spin using Scalapack/ELPA.
 !!
 !! INPUTS
-!!  spin: spin index.
-!!  kpoint(3)
+!!  spin= spin index.
+!!  istwf_k= Storage mode for wavefunctions.
+!!  kpoint(3)= k-point in reduced coordinates
+!!  ecut= Cutoff energy
+!!  gs_fermie=Fermi level as computed from the previous GS run.
+!!  nband_k=Number of bands
 !!  prtvol=Verbosity level
-!!  mgfftc=maximum size of 1D FFTs (coarse mesh).
 !!  nfftf=(effective) number of FFT grid points in the dense FFT mesh (for this processor)
 !!         (nfftf=nfft for norm-conserving potential runs)
 !!  pawtab(psps%ntypat*psps%usepaw) <type(pawtab_type)>=paw tabulated starting data
@@ -940,7 +990,7 @@ end subroutine init_ddiago_ctl
 !!
 !! SOURCE
 
-subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nfftf, &
+subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, ngfftc, nfftf, &
                           dtset, pawtab, pawfgr, paw_ij, cryst, psps, vtrial, eig_k, hyb, comm, &
                           electronpositron) ! Optional arguments
 
@@ -948,7 +998,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 !scalars
  class(ugb_t),target,intent(out) :: ugb
  integer,intent(in) :: spin, istwf_k
- real(dp),intent(in) :: kpoint(3), ecut
+ real(dp),intent(in) :: kpoint(3), ecut, gs_fermie
  type(dataset_type),intent(in) :: dtset
  integer,intent(in) :: comm,nfftf
  integer,intent(inout) :: nband_k
@@ -969,12 +1019,12 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 !scalars
  integer,parameter :: mkmem1 = 1, tim_getghc = 4, paral_kgb0 = 0, master = 0, ncomp1 = 1
  integer :: cprj_choice,cpopt,dimffnl,ib,ider,idir,npw_k,nfftc,mgfftc, igs, ige, omp_nt
- integer :: jj,n1,n2,n3,n4,n5,n6,nkpg,nproc,my_rank,optder
- integer :: type_calc,sij_opt,igsp2_start,ig, my_ib,ibs1
+ integer :: jj,n1,n2,n3,n4,n5,n6,nkpg,nproc,my_rank,optder, ib_glob, nb_glob, ib_loc
+ integer :: type_calc,sij_opt,igsp2_start,ig, my_ib, ibs1, ipwsp, islice, igsp_loc, my_npwsp
  integer :: npwsp, col_bsize, nsppol, nspinor, nspden, loc2_size, il_g1, il_g2, ig1, ig2, ierr, min_my_nband, band_sum
  integer :: idat, ndat, batch_size, h_size !, mene_found
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3), g0(3)
- integer :: iq_bz !, isym_q, trev_q !, g0_q(3) iq_ibz,
+ integer :: iq_bz !, isym_q, trev_q !, g0_q(3) iq_ibz
  real(dp),parameter :: lambda0 = zero
  real(dp) :: cpu, wall, gflops, mem_mb, f_bsum, fact_spin, tol_empty_in, tol_empty, gsq_max, inv_sqrt_ucvol, rcut
  logical :: do_full_diago, haveit, isirr_k, q_is_gamma ! isirr_q,
@@ -983,17 +1033,18 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  character(len=500) :: msg
  type(MPI_type) :: mpi_enreg_seq
  type(gs_hamiltonian_type) :: gs_hamk
- type(matrix_scalapack) :: ghg_mat, gsg_mat, ghg_4diag, gsg_4diag, eigvec
- type(processor_scalapack) :: proc_1d, proc_4diag
+ type(slkmat_dp_t) :: ghg_mat, gsg_mat, ghg_4diag, gsg_4diag, eigvec
+ type(slk_processor_t) :: proc_1d, proc_4diag
  type(uplan_t) :: uplan_k
  type(fftbox_plan3_t) :: box_plan
- type(pstat_t) :: pstat
+ type(psbands_t) :: psb
 !arrays
  integer,allocatable :: gfft(:,:)
  real(dp) :: kptns_(3,1), ylmgr_dum(1,1,1), tsec(2), ksum(3), kk_ibz(3), kgw_m_ksum(3), qq_bz(3), my_gw_qlwl(3) ! q0(3),
- real(dp),allocatable :: ph3d(:,:,:), ffnl(:,:,:,:), kinpw(:), kpg_k(:,:)
+ real(dp),allocatable :: ph3d(:,:,:), ffnl(:,:,:,:), kinpw(:), kpg_k(:,:), thetas(:,:)
  real(dp),allocatable :: vlocal(:,:,:,:), ylm_k(:,:), dum_ylm_gr_k(:,:,:), eig_ene(:), ghc(:,:), gvnlxc(:,:), gsc(:,:), vcg_qbz(:,:)
  real(dp),target,allocatable :: bras(:,:)
+ complex(dp),allocatable :: ps_ug(:,:,:)
  complex(gwpc),allocatable :: cbras_box(:,:), cbras_g(:,:), vc_sqrt(:), ur(:), rfg_box(:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 ! *********************************************************************
@@ -1029,14 +1080,11 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    end if
  end if
 
- ! Init pstat object.
- call pstat%from_pid()
-
  ! MPI_type for sequential part.
  call initmpi_seq(mpi_enreg_seq)
- call init_distribfft_seq(mpi_enreg_seq%distribfft, 'c', ngfftc(2), ngfftc(3), 'all')
+ call mpi_enreg_seq%distribfft%init_seq('c', ngfftc(2), ngfftc(3), 'all')
  if (pawfgr%usefinegrid /= 0) then
-   call init_distribfft_seq(mpi_enreg_seq%distribfft, 'f', pawfgr%ngfft(2), pawfgr%ngfft(3), 'all')
+   call mpi_enreg_seq%distribfft%init_seq('f', pawfgr%ngfft(2), pawfgr%ngfft(3), 'all')
  end if
 
  nspinor = dtset%nspinor; nsppol = dtset%nsppol; nspden = dtset%nspden
@@ -1169,9 +1217,9 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 
  ! Loop over the |beta,G''> component.
  call cwtime(cpu, wall, gflops, "start")
- loc2_size = ghg_mat%sizeb_local(2)
+ loc2_size = ghg_mat%size_local(2)
 
- if (my_rank == master) call pstat%print([std_out], header="Before build_ham")
+ if (my_rank == master) call pstat_proc%print(_PSTAT_ARGS_)
 
  do il_g2=1, loc2_size, batch_size
    ! Operate on ndat g-vectors starting at the igsp2_start global index.
@@ -1429,6 +1477,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ! NB: global H shape is (h_size, h_size) even for partial diago.
  ! then one extracts the (hsize, nband_k) sub-matrix before returning.
  call ghg_4diag%copy(eigvec)
+ if (my_rank == master) call pstat_proc%print(_PSTAT_ARGS_)
 
 #ifndef HAVE_LINALG_ELPA
  call wrtout([std_out, ab_out], &
@@ -1468,8 +1517,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  end if
 
  if (my_rank == master) then
-   call pstat%print([std_out], header="After diago")
-
+   call pstat_proc%print(_PSTAT_ARGS_)
    ! Write eigenvalues.
    frmt1 = '(8x,*(1x,f7.3))'
    write(msg, '(2a,3x,a)')' Eigenvalues in eV for kpt: ', trim(ktoa(kpoint)), stag(spin); call wrtout(std_out, msg)
@@ -1484,9 +1532,80 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    end if
  end if
 
+ ! Free memory
  call ghg_4diag%free(); call gsg_4diag%free(); call proc_1d%free()
 
- ! Now transfer eigvec to the ugb datastructure using 1d grid (block column distribution)
+ ! ================
+ ! Stochastic bands
+ ! ================
+ if (dtset%nb_protected /= 0) then
+   call wrtout(std_out, " Generating stochastic bands...")
+   ! Initial setup.
+   call psb%init(dtset, h_size, eig_ene, gs_fermie) !, nband_k)
+   my_npwsp = eigvec%size_local(1)
+   nb_glob = eigvec%size_global(2)
+   ABI_CALLOC(ps_ug, (my_npwsp, psb%maxsto_per_slice, psb%nslices))
+   ABI_MALLOC(thetas, (nb_glob, psb%maxsto_per_slice))
+
+   ! Loop over global bands.
+   do ib_glob=1, nb_glob
+    ! Need the same random phases on all MPI procs.
+    if (eigvec%processor%my_rank == master) call random_number(thetas)
+    call xmpi_bcast(thetas, master, eigvec%processor%comm, ierr)
+
+     ! Get slice index from ib_glob.
+     islice = psb%band2slice(ib_glob); if (islice == -1) cycle
+     !band_block = psb%subspace(1:2, islice)
+     !nb_in_slice  = psb%subspace(3,islice)
+
+     ! Loop over global PW index.
+     do ipwsp=1,npwsp
+       call eigvec%glob2loc(ipwsp, ib_glob, igsp_loc, ib_loc, haveit); if (.not. haveit) cycle
+       do ib=1,psb%subspace(3,islice)
+         ps_ug(igsp_loc, ib, islice) = ps_ug(igsp_loc, ib, islice) + &
+           eigvec%buffer_cplx(igsp_loc, ib_loc) * exp(j_dpc*two_pi*thetas(ib_glob,ib))
+       end do
+     end do
+   end do ! ib_glob
+   ABI_FREE(thetas)
+
+   ! Normalize
+   ! TODO: Need MPI communicator over columns here.
+   !call xmpi_sum(ps_ug, eigvec%column_comm, ierr)
+   do islice=1,psb%nslices
+     do ib=1,psb%subspace(3,islice)
+       if (psb%subspace(3,islice) == 1) cycle
+       ps_ug(:,ib,islice) = ps_ug(:,ib,islice) / sqrt(one * psb%subspace(3,islice))
+     end do
+   end do
+
+   ! Now insert ps_ug in the right position in eigevec
+   do ib_glob=1, nb_glob
+     islice = psb%band2slice(ib_glob); if (islice == -1) cycle
+     !band_start = 1 + (islice - 1) * psb%nb_per_slice
+     ! Loop over global PW index.
+     do ipwsp=1,npwsp
+       call eigvec%glob2loc(ipwsp, ib_glob, igsp_loc, ib_loc, haveit); if (.not. haveit) cycle
+       !do ib=1,psb%nb_per_slice
+       !  eigvec%buffer_cplx(igsp_loc, ib_loc) = ps_ug(igsp_loc, ib, islice)
+       !end do
+     end do
+   end do
+
+   ABI_FREE(ps_ug)
+
+   ! here we change the value of nband_k and eig_k.
+   nband_k = psb%nb_tot
+   ABI_MALLOC(eig_k, (nband_k))
+   eig_k = psb%ps_eig
+
+ else
+   ! No pseudo bands.
+   ABI_MALLOC(eig_k, (nband_k))
+   eig_k(:) = eig_ene(1:nband_k)
+ end if
+
+ ! Now transfer eigvec to the ugb datastructure using 1d grid (block column distribution).
  call wrtout(std_out, " Moving to PBLAS block column distribution...")
  call cwtime(cpu, wall, gflops, "start")
 
@@ -1494,9 +1613,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ABI_CHECK(block_dist_1d(nband_k, nproc, col_bsize, msg), msg)
  call eigvec%cut(h_size, nband_k, ugb%mat, size_blocs=[h_size, col_bsize], processor=ugb%processor, free=.True.)
  call proc_4diag%free()
-
- ABI_MALLOC(eig_k, (nband_k))
- eig_k(:) = eig_ene(1:nband_k)
 
  ! =================
  ! Build ugb object
@@ -1509,14 +1625,13 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ugb%comm => ugb%mat%processor%comm
 
  ugb%my_bstart = ugb%mat%loc2gcol(1)
- ugb%my_bstop = ugb%mat%loc2gcol(ugb%mat%sizeb_local(2))
+ ugb%my_bstop = ugb%mat%loc2gcol(ugb%mat%size_local(2))
  ugb%my_nband = ugb%my_bstop - ugb%my_bstart + 1
 
  if (ugb%my_nband > 0) then
    call c_f_pointer(c_loc(ugb%mat%buffer_cplx), ugb%cg_k, shape=[2, npwsp, ugb%my_nband])
  else
-   ugb%my_nband = 0
-   ugb%cg_k => null()
+   ugb%my_nband = 0; ugb%cg_k => null()
  end if
 
  call xmpi_min(ugb%my_nband, min_my_nband, comm, ierr)
@@ -1544,13 +1659,14 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  call cwtime_report(" block column distribution completed", cpu, wall, gflops)
 
  ! Free memory.
+
  ABI_FREE(eig_ene)
  ABI_FREE(kpg_k)
  ABI_FREE(ph3d)
  ABI_FREE(ffnl)
- call destroy_mpi_enreg(mpi_enreg_seq); call gs_hamk%free()
+ call destroy_mpi_enreg(mpi_enreg_seq); call gs_hamk%free(); call psb%free()
 
- if (my_rank == master) call pstat%print([std_out], header="end of ugb_from_diago")
+ if (my_rank == master) call pstat_proc%print(_PSTAT_ARGS_)
 
  call timab(1919, 2, tsec)
 
@@ -1607,7 +1723,6 @@ subroutine ugb_from_wfk_file(ugb, ik_ibz, spin, istwf_k, kpoint, nband_k, &
  integer :: units(2)
  real(dp),target,allocatable :: cg_work(:,:,:)
  real(dp),ABI_CONTIGUOUS pointer :: cg_k(:,:)
-
 ! *********************************************************************
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -1647,7 +1762,7 @@ subroutine ugb_from_wfk_file(ugb, ik_ibz, spin, istwf_k, kpoint, nband_k, &
 
  ! Master reads and broadcasts. Much faster on lumi
  if (my_rank == master) then
-   call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), xmpi_comm_self)
+   call wfk%open_read(wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), xmpi_comm_self)
  end if
 
  ! TODO: Optimize this part
@@ -1707,7 +1822,7 @@ subroutine ugb_from_wfk_file(ugb, ik_ibz, spin, istwf_k, kpoint, nband_k, &
  ugb%comm => ugb%mat%processor%comm
 
  ugb%my_bstart = ugb%mat%loc2gcol(1)
- ugb%my_bstop = ugb%mat%loc2gcol(ugb%mat%sizeb_local(2))
+ ugb%my_bstop = ugb%mat%loc2gcol(ugb%mat%size_local(2))
  ugb%my_nband = ugb%my_bstop - ugb%my_bstart + 1
 
  if (ugb%my_nband > 0) then
@@ -1743,8 +1858,7 @@ subroutine ugb_from_wfk_file(ugb, ik_ibz, spin, istwf_k, kpoint, nband_k, &
 
  call ugb%print(units, dtset%prtvol)
 
- call wfk_hdr%free()
- call wfk_ebands%free()
+ call wfk_hdr%free(); call wfk_ebands%free()
 
 end subroutine ugb_from_wfk_file
 !!***
@@ -1822,7 +1936,7 @@ end subroutine ugb_print
 !!***
 !----------------------------------------------------------------------
 
-!!****f* m_slk/ugb_collect_cprj
+!!****f* m_ksdiago/ugb_collect_cprj
 !! NAME
 !!  ugb_collect_cprj
 !!
@@ -1870,7 +1984,7 @@ end subroutine ugb_collect_cprj
 !!  hyb_from_wfk_file
 !!
 !! FUNCTION
-!!  Read the WFK file compute with HYBRID functionql
+!!  Read the WFK file compute with HYBRID functional
 !!
 !! SOURCE
 
@@ -1903,7 +2017,6 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, dia
  integer,allocatable :: nband(:,:), wfd_istwfk(:), qtab(:), qtabi(:), qtabo(:)
  real(dp),allocatable :: qbz(:,:), wtk(:), wtq(:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
-
 !************************************************************************
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -1965,7 +2078,7 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, dia
  ABI_MALLOC(wfd_istwfk, (nkibz))
  wfd_istwfk = 1 !; wfd_istwfk = wfk_hdr%istwf_k
 
- call wfd_init(hyb%wfd, cryst, pawtab, psps, keep_ur, mband, nband, nkibz, dtset%nsppol, bks_mask, &
+ call hyb%wfd%init(cryst, pawtab, psps, keep_ur, mband, nband, nkibz, dtset%nsppol, bks_mask, &
                dtset%nspden, dtset%nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, hyb%ebands%kptns, ngfftc, &
                dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 
@@ -2103,6 +2216,170 @@ subroutine hyb_free(hyb)
  call hyb%wfd%free(); call hyb%vcgen%free(); call hyb%ebands%free()
 
 end subroutine hyb_free
+!!***
+
+!!****f* m_ksdiago/psbands_init
+!! NAME
+!! psbands_init
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine psbands_init(psb, dtset, eig_size, eig_k, gs_fermie)
+
+!Arguments ------------------------------------
+ class(psbands_t),intent(out) :: psb
+ class(dataset_type),target,intent(in) :: dtset
+ integer,intent(in) :: eig_size
+ real(dp),intent(in) :: gs_fermie
+!arrays
+ real(dp),intent(in) :: eig_k(eig_size)
+
+!Local variables-------------------------------
+!scalars
+ integer :: islice, ib, cnt, units(2), first_band, last_band, nb
+ real(dp) :: first_eig, last_eig
+ real(dp),allocatable :: tmp_eig_k(:)
+! *********************************************************************
+
+ ! Shift energies wrt the input Fermi level.
+ ABI_MALLOC(tmp_eig_k, (eig_size))
+ tmp_eig_k = eig_k - gs_fermie
+
+ psb%nb_protected = dtset%nb_protected
+ psb%maxsto_per_slice = dtset%nb_per_slice
+ ! TODO
+ psb%efrac = 0.02_dp   ! dtset%efrac
+
+ ! Compute nslices and subspace
+ ! TODO: Add possibility of treating occupied states as well?
+ ABI_MALLOC(psb%subspace, (3, eig_size))
+ first_band = psb%nb_protected + 1
+ psb%nslices = 0
+
+ do while (first_band > 0)
+   first_eig = tmp_eig_k(first_band)
+   last_eig = first_eig + (first_eig * psb%efrac)
+   last_band = get_band_with_energy_small_than(first_band+1, eig_size, last_eig)
+   psb%nslices = psb%nslices + 1
+   psb%subspace(1, psb%nslices) = first_band
+   if (last_band == -1) then
+     psb%subspace(2, psb%nslices) = eig_size
+   else
+     psb%subspace(2, psb%nslices) = last_band
+   end if
+   nb = psb%subspace(2, psb%nslices) - psb%subspace(1, psb%nslices)  + 1
+   if (last_band == first_band) then
+     ! Won't use pseudo bands in this case.
+     psb%subspace(3, psb%nslices) = 1
+   else
+     psb%subspace(3, psb%nslices) = min(dtset%nb_per_slice, nb)
+   end if
+   first_band = last_band + 1
+   !write(std_out,'(a,i0,a,*(1x,i0))')" islice: ", psb%nslices, " subspace:", psb%subspace(:, psb%nslices)
+ end do
+
+ ! Copy eigenvalues of the protected states.
+ psb%nb_tot = psb%nb_protected + sum(psb%subspace(3,1:psb%nslices))
+ ABI_MALLOC(psb%ps_eig, (psb%nb_tot))
+ psb%ps_eig(1:psb%nb_protected) = tmp_eig_k(1:psb%nb_protected)
+
+ cnt = 0
+ do islice=1,psb%nslices
+   first_band = psb%subspace(1, islice)
+   last_band = psb%subspace(2, islice)
+   ! Take average of eigenvalues inside the slice.
+   do ib=1,psb%subspace(3, islice)
+     cnt = cnt + 1
+     psb%ps_eig(psb%nb_protected + cnt) = sum(tmp_eig_k(first_band:last_band)) / dble(last_band - first_band + 1)
+   end do
+ end do
+ ABI_FREE(tmp_eig_k)
+
+ psb%ps_eig = psb%ps_eig + gs_fermie
+
+ units = [std_out, ab_out]
+ call wrtout(units, ' Stochastic pseudobands setup:', pre_newlines=1)
+ call wrtout(units, sjoin('     Number of stochastic subspaces: ', itoa(psb%nslices)))
+ call wrtout(units, sjoin('     Number of stochastic pseudobands per subspace: ', itoa(dtset%nb_per_slice)))
+ call wrtout(units, sjoin('     Original number of bands: ', itoa(eig_size)))
+ call wrtout(units, sjoin('     Number of bands in the protection window: ', itoa(psb%nb_protected)))
+ call wrtout(units, sjoin('     Final number of bands: ', itoa(psb%nb_tot)), newlines=1)
+
+ !if (dtset%prtvol > 5) then
+ !  do islice=1,psb%nslices
+ !    write(msg,'(a,i0,a,*(1x,i0))')" islice: ", psb%nslices, " subspace:", psb%subspace(:, psb%nslices)
+ !    call wrtout(units, msg)
+ !  end do
+ !end if
+
+contains
+
+integer function get_band_with_energy_small_than(idx_start, idx_end, energy) result(band)
+  integer, intent(in) :: idx_start, idx_end
+  integer :: ib
+  real(dp), intent(in) :: energy
+
+  band = -1
+  do ib=idx_start,idx_end
+    if (tmp_eig_k(ib) > energy) then
+      band = ib - 1; return
+    end if
+  end do
+end function get_band_with_energy_small_than
+
+end subroutine psbands_init
+!!***
+
+!!****f* m_ksdiago/psbands_band2slice
+!! NAME
+!! psbands_band2slice
+!!
+!! FUNCTION
+!!  Return the slice index from the band index. -1 if band is protected.
+!!
+!! SOURCE
+
+integer function psbands_band2slice(psb, band) result(islice)
+
+!Arguments ------------------------------------
+ class(psbands_t),intent(in) :: psb
+ integer,intent(in) :: band
+! *********************************************************************
+
+ do islice=1,psb%nslices
+   if (band >= psb%subspace(1,islice) .and. &
+       band <= psb%subspace(2,islice)) return
+ end do
+ islice = -1
+
+end function psbands_band2slice
+!!***
+
+!!****f* m_ksdiago/psbands_free
+!! NAME
+!! psbands_free
+!!
+!! FUNCTION
+!! Free memory
+!!
+!! SOURCE
+
+subroutine psbands_free(psb)
+
+!Arguments ------------------------------------
+ class(psbands_t),intent(inout) :: psb
+! *********************************************************************
+
+ ABI_SFREE(psb%ps_eig)
+ ABI_SFREE(psb%subspace)
+
+end subroutine psbands_free
 !!***
 
 end module m_ksdiago

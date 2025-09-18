@@ -27,9 +27,7 @@ MODULE m_mpinfo
  use defs_basis
  use m_errors
  use m_abicore
-#if defined HAVE_MPI2
- use mpi
-#endif
+ USE_MPI
  use m_xmpi
  use m_sort
  use m_distribfft
@@ -49,6 +47,11 @@ MODULE m_mpinfo
  include 'mpif.h'
 #endif
 
+!type, extends(mpi_type_base_t), public :: mpi_type
+!contains
+!end type mpi_type
+!!***
+
  public :: init_mpi_enreg        ! Initialise a mpi_enreg structure with dataset independent values.
  public :: nullify_mpi_enreg     ! nullify a mpi_enreg datastructure
  public :: destroy_mpi_enreg     ! Free memory
@@ -65,7 +68,7 @@ MODULE m_mpinfo
  public :: proc_distrb_band      ! Return array of me indices for bands at this k and spin
 
  public :: initmpi_seq           ! Initializes the MPI information for sequential use.
- public :: initmpi_world         ! %comm_world is redifined for the number of processors on which ABINIT is launched
+ public :: initmpi_world         ! %comm_world is redefined for the number of processors on which ABINIT is launched
 
  public :: initmpi_atom          ! Initializes the mpi information for parallelism over atoms (PAW).
  public :: clnmpi_atom           ! Cleans-up the mpi information for the parallelism over atoms (PAW).
@@ -100,10 +103,10 @@ CONTAINS  !=====================================================================
 !! FUNCTION
 !!  Initialise a mpi_enreg structure with dataset independent values.
 !!  Other values of mpi_enreg are dataset dependent, and should NOT be initialized
-!!  inside abinit.F90 .
-!!  XG 071118 : At present several other values are
+!!  inside abinit.F90.
+!!  XG 071118: At present several other values are
 !!  initialized temporarily inside invars1.F90, FROM THE DTSET
-!!  VALUES. In order to releave the present constraint of having mpi_enreg
+!!  VALUES. In order to relieve the present constraint of having mpi_enreg
 !!  equal for all datasets, they should be reinitialized from the dtset values
 !!  inside invars2m.F90 (where there is a loop over datasets, and finally,
 !!  reinitialized from the dataset values inside each big routine called by driver,
@@ -111,8 +114,6 @@ CONTAINS  !=====================================================================
 !!  One should have one init_mpi_dtset routine (or another name) per big routine (well, there is also
 !!  the problem of TDDFT ...). Also, one should have a clean_mpi_dtset called at the end
 !!  of each big routine, as well as invars1.F90 or invars2m.F90 .
-!!
-!! INPUTS
 !!
 !! SIDE EFFECTS
 !!  MPI_enreg<MPI_type>=All pointer set to null().
@@ -122,13 +123,12 @@ CONTAINS  !=====================================================================
 subroutine init_mpi_enreg(mpi_enreg)
 
 !Arguments ------------------------------------
-!scalars
- type(MPI_type),intent(inout) :: MPI_enreg
-
+ class(MPI_type),intent(inout) :: MPI_enreg
 ! *********************************************************************
 
 !Default for sequential use
  call initmpi_seq(mpi_enreg)
+
 !Initialize MPI
 #if defined HAVE_MPI
  mpi_enreg%comm_world=xmpi_world
@@ -148,17 +148,12 @@ end subroutine init_mpi_enreg
 !! FUNCTION
 !!  nullify a mpi_enreg datastructure
 !!
-!! SIDE EFFECTS
-!!  MPI_enreg<MPI_type>=All pointer set to null().
-!!
 !! SOURCE
 
 subroutine nullify_mpi_enreg(MPI_enreg)
 
 !Arguments ------------------------------------
-!scalars
- type(MPI_type),intent(inout) :: MPI_enreg
-
+ class(MPI_type),intent(inout) :: MPI_enreg
 ! *********************************************************************
 
  nullify(mpi_enreg%nscatterarr)
@@ -178,21 +173,16 @@ subroutine nullify_mpi_enreg(MPI_enreg)
 !! FUNCTION
 !!  Destroy a mpi_enreg datastructure
 !!
-!! SIDE EFFECTS
-!!  MPI_enreg<MPI_type>=Datatype gathering information on the parallelism.
-!!
 !! SOURCE
 
 subroutine destroy_mpi_enreg(MPI_enreg)
 
 !Arguments ------------------------------------
-!scalars
- type(MPI_type),intent(inout) :: MPI_enreg
-
+ class(MPI_type),intent(inout) :: MPI_enreg
 ! *********************************************************************
 
  if (associated(mpi_enreg%distribfft)) then
-   call destroy_distribfft(mpi_enreg%distribfft)
+   call mpi_enreg%distribfft%free()
    ABI_FREE(mpi_enreg%distribfft)
    nullify(mpi_enreg%distribfft)
  end if
@@ -227,25 +217,16 @@ end subroutine destroy_mpi_enreg
 !! FUNCTION
 !!  Copy a mpi_enreg datastructure into another
 !!
-!! INPUTS
-!!  MPI_enreg1<MPI_type>=input mpi_enreg datastructure
-!!
-!! OUTPUT
-!!  MPI_enreg2<MPI_type>=output mpi_enreg datastructure
-!!
 !! SOURCE
 
 subroutine copy_mpi_enreg(MPI_enreg1, MPI_enreg2)
 
 !Arguments ------------------------------------
-!scalars
- type(MPI_type),intent(in) :: mpi_enreg1
- type(MPI_type),intent(out) :: MPI_enreg2
+ class(MPI_type),intent(in) :: mpi_enreg1
+ class(MPI_type),intent(out) :: MPI_enreg2
 
 !Local variables-------------------------------
-!scalars
  integer :: sz1,sz2,sz3
-
 ! *********************************************************************
 
 !scalars
@@ -303,7 +284,7 @@ subroutine copy_mpi_enreg(MPI_enreg1, MPI_enreg2)
    if (.not.associated(mpi_enreg2%distribfft)) then
      ABI_MALLOC(mpi_enreg2%distribfft,)
    end if
-   call copy_distribfft(mpi_enreg1%distribfft,mpi_enreg2%distribfft)
+   call mpi_enreg1%distribfft%copy(mpi_enreg2%distribfft)
  end if
 
  if (allocated(mpi_enreg1%proc_distrb)) then
@@ -399,18 +380,16 @@ end subroutine copy_mpi_enreg
 !!  paral_kgb= flag used to activate "band-FFT" parallelism
 !!
 !! SIDE EFFECTS
-!!  MPI_enreg<MPI_type>=FFT pointer/flags intialized
+!!  MPI_enreg<MPI_type>=FFT pointer/flags initialized
 !!
 !! SOURCE
 
 subroutine set_mpi_enreg_fft(MPI_enreg,comm_fft,distribfft,me_g0,paral_kgb)
 
 !Arguments ------------------------------------
-!scalars
+ class(MPI_type),intent(inout) :: MPI_enreg
  integer,intent(in) :: me_g0,comm_fft,paral_kgb
  type(distribfft_type),intent(in),target :: distribfft
- type(MPI_type),intent(inout) :: MPI_enreg
-
 ! *********************************************************************
 
  mpi_enreg%comm_fft=comm_fft
@@ -423,7 +402,7 @@ subroutine set_mpi_enreg_fft(MPI_enreg,comm_fft,distribfft,me_g0,paral_kgb)
    mpi_enreg%me_g0_fft=1
  end if
  if (associated(mpi_enreg%distribfft)) then
-   call destroy_distribfft(mpi_enreg%distribfft)
+   call mpi_enreg%distribfft%free()
    ABI_FREE(mpi_enreg%distribfft)
  end if
  mpi_enreg%distribfft => distribfft
@@ -441,19 +420,15 @@ end subroutine set_mpi_enreg_fft
 !!  Unset the content of a MPI datastructure used to call fourwf/fourdp
 !!  (in view of a wrapper for these routines)
 !!
-!! INPUTS
-!!
 !! SIDE EFFECTS
-!!  MPI_enreg<MPI_type>=FFT pointer/flags intialized
+!!  MPI_enreg<MPI_type>=FFT pointer/flags initialized
 !!
 !! SOURCE
 
 subroutine unset_mpi_enreg_fft(MPI_enreg)
 
 !Arguments ------------------------------------
-!scalars
- type(MPI_type),intent(inout) :: MPI_enreg
-
+ class(MPI_type),intent(inout) :: MPI_enreg
 ! *********************************************************************
 
  mpi_enreg%me_g0=1
@@ -498,16 +473,14 @@ end subroutine unset_mpi_enreg_fft
 subroutine ptabs_fourdp(MPI_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
 !Arguments ------------------------------------
-!scalars
+ class(MPI_type),intent(in) :: MPI_enreg
  integer,intent(in) :: n2,n3
- type(MPI_type),intent(in) :: MPI_enreg
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
 
 !Local variables-------------------------------
 !scalars
  logical :: grid_found
-
 ! *********************************************************************
 
  grid_found=.false.
@@ -534,7 +507,7 @@ subroutine ptabs_fourdp(MPI_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,
    end if
  end if
 
- if (.not.grid_found) then
+ if (.not. grid_found) then
    ABI_BUG(sjoin("Unable to find an allocated distrib for this fft grid with n2, n3 = ", ltoa([n2, n3])))
  end if
 
@@ -573,15 +546,14 @@ subroutine ptabs_fourwf(MPI_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,
 
 !Arguments ------------------------------------
 !scalars
+ class(MPI_type),intent(in) :: MPI_enreg
  integer,intent(in) :: n2,n3
- type(MPI_type),intent(in) :: MPI_enreg
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
 
 !Local variables-------------------------------
 !scalars
  logical :: grid_found
-
 ! *********************************************************************
 
  grid_found=.false.
@@ -642,10 +614,9 @@ logical function mpi_distrib_is_ok(MPI_enreg,nband,nkpt,nkpt_current_proc,nsppol
 
 !Arguments ------------------------------------
 !scalars
+ class(MPI_type),intent(in) :: MPI_enreg
  integer,intent(in) :: nband,nkpt,nkpt_current_proc,nsppol
- type(MPI_type),intent(in) :: MPI_enreg
  character(len=*),optional,intent(out) :: msg
-
 ! *********************************************************************
 
  mpi_distrib_is_ok=.true.
@@ -690,20 +661,18 @@ end function mpi_distrib_is_ok
 !!
 !! SOURCE
 
-function proc_distrb_cycle(distrb,ikpt,iband1,iband2,isppol,me)
+logical function proc_distrb_cycle(distrb,ikpt,iband1,iband2,isppol,me)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ikpt,iband1,iband2,isppol,me
  integer,allocatable,intent(in) :: distrb(:,:,:)
- logical :: proc_distrb_cycle
-
 ! *************************************************************************
 
  proc_distrb_cycle=.false.
  if (allocated(distrb)) then
    if (isppol==-1) then
-! in this condition, if one of the distrb is for me, then the minval will be == 0, so it returns false
+     ! in this condition, if one of the distrb is for me, then the minval will be == 0, so it returns false
      proc_distrb_cycle=(minval(abs(distrb(ikpt,iband1:iband2,:)-me))/=0)
    else
      proc_distrb_cycle=(minval(abs(distrb(ikpt,iband1:iband2,isppol)-me))/=0)
@@ -726,20 +695,18 @@ end function proc_distrb_cycle
 !!
 !! SOURCE
 
-function proc_distrb_nband(distrb,ikpt,nband_k,isppol,me)
+integer function proc_distrb_nband(distrb,ikpt,nband_k,isppol,me)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ikpt,isppol,me,nband_k
  integer,allocatable,intent(in) :: distrb(:,:,:)
- integer :: proc_distrb_nband
-
 ! *************************************************************************
 
  proc_distrb_nband=0
  if (allocated(distrb)) then
    if (isppol==-1) then
-!TODO: check this is used correctly : in nsppol 2 case you could end up with 2*nband
+     !TODO: check this is used correctly : in nsppol 2 case you could end up with 2*nband
      proc_distrb_nband=(count(distrb(ikpt,1:nband_k,:)==me))
    else
      proc_distrb_nband=(count(distrb(ikpt,1:nband_k,isppol)==me))
@@ -768,15 +735,14 @@ subroutine proc_distrb_cycle_bands(cycle_bands,distrb,ikpt,isppol,me)
  integer,allocatable,intent(in) :: distrb(:,:,:)
  logical,allocatable,intent(out) :: cycle_bands(:)
  character(len=500) :: msg
-
 ! *************************************************************************
 
  ABI_REMALLOC (cycle_bands, (size(distrb, 2)))
  cycle_bands=.false.
  if (allocated(distrb)) then
    if (isppol==-1) then
-! TODO : should raise error here - the output rank will be all wrong
-!   could return an OR of the two spin channels, if appropriate
+     ! TODO : should raise error here - the output rank will be all wrong
+     ! could return an OR of the two spin channels, if appropriate
      cycle_bands=(distrb(ikpt,:,1)/=me)
      write (msg, "(a)") " for the moment proc_distrb_cycle_bands does not handle the 'any spin' option nsppol -1"
      ABI_ERROR(msg)
@@ -807,7 +773,6 @@ subroutine proc_distrb_kptband(kpt_band_procs,distrb,ikpt,isppol)
  integer,allocatable,intent(in) :: distrb(:,:,:)
  integer,allocatable,intent(out) :: kpt_band_procs(:)
  character(len=500) :: msg
-
 ! *************************************************************************
 
  ABI_REMALLOC(kpt_band_procs, (size(distrb, 2)))
@@ -847,7 +812,6 @@ subroutine proc_distrb_band(rank_band,distrib,ikpt,isppol,nband,me_band,me_kpt,c
  integer,intent(out) :: rank_band(nband)
 
  integer :: ierr, iband
-
 ! *************************************************************************
 
  rank_band = 0
@@ -872,26 +836,21 @@ end subroutine proc_distrb_band
 !!  initmpi_world
 !!
 !! FUNCTION
-!!  %comm_world is redifined for the number of processors on which ABINIT is launched
-!!
-!! INPUTS
-!!
-!! OUTPUT
+!!  %comm_world is redefined for the number of processors on which ABINIT is launched
 !!
 !! SOURCE
 
 subroutine initmpi_world(mpi_enreg,nproc)
 
 !Arguments ------------------------------------
+ class(MPI_type),intent(inout) :: mpi_enreg
  integer, intent(in)::nproc
- type(MPI_type),intent(inout) :: mpi_enreg
 
 !Local variables-------------------------------
 !scalars
  integer :: ii
 !arrays
  integer,allocatable :: ranks(:)
-
 ! ***********************************************************************
 
  DBG_ENTER("COLL")
@@ -934,8 +893,7 @@ end subroutine initmpi_world
 subroutine initmpi_seq(mpi_enreg)
 
 !Arguments ------------------------------------
- type(MPI_type),intent(out) :: mpi_enreg
-
+ class(MPI_type),intent(out) :: mpi_enreg
 ! ***********************************************************************
 
  DBG_ENTER("COLL")
@@ -1034,14 +992,13 @@ subroutine initmpi_atom(dtset,mpi_enreg)
 !Arguments ------------------------------------
 !scalars
  type(dataset_type),intent(in) :: dtset
- type(MPI_type),intent(inout) :: mpi_enreg
+ class(MPI_type),intent(inout) :: mpi_enreg
 
 !Local variables-------------------------------
 !scalars
  logical :: my_atmtab_allocated,paral_atom
  character(len=500) :: msg
  integer :: iatom
-
 ! ***********************************************************************
 
  DBG_ENTER("COLL")
@@ -1135,8 +1092,7 @@ end subroutine initmpi_atom
 subroutine clnmpi_atom(mpi_enreg)
 
 !Arguments ------------------------------------
- type(MPI_type), intent(inout) :: mpi_enreg
-
+ class(MPI_type), intent(inout) :: mpi_enreg
 ! ***********************************************************************
 
  DBG_ENTER("COLL")
@@ -1166,8 +1122,8 @@ end subroutine clnmpi_atom
 !!
 !! FUNCTION
 !!  Initializes the MPI information for the grid:
-!!    * 2D if parallization KPT/FFT (paral_kgb == 0 & MPI)
-!!    * 3D if parallization KPT/FFT/BAND (paral_kgb == 1 & MPI)
+!!    * 2D if parallelization KPT/FFT (paral_kgb == 0 & MPI)
+!!    * 3D if parallelization KPT/FFT/BAND (paral_kgb == 1 & MPI)
 !!    * 2D in case of an Hartree-Fock calculation
 !!
 !! INPUTS
@@ -1179,7 +1135,7 @@ end subroutine clnmpi_atom
 subroutine initmpi_grid(mpi_enreg)
 
 !Arguments ------------------------------------
- type(MPI_type),intent(inout) :: mpi_enreg
+ class(MPI_type),intent(inout) :: mpi_enreg
 
 !Local variables-------------------------------
 !scalars
@@ -1191,9 +1147,8 @@ subroutine initmpi_grid(mpi_enreg)
  logical :: reorder
 !arrays
  integer,allocatable :: coords(:),sizecart(:)
- logical,allocatable :: periode(:), keepdim(:)
+ logical,allocatable :: period(:), keepdim(:)
 #endif
-
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -1269,21 +1224,21 @@ subroutine initmpi_grid(mpi_enreg)
      !  CREATE THE 4D GRID
      !  ==================================================
 
-     !  Create the global cartesian 4D- communicator
-     !  valgrind claims this is not deallocated in test v5/72
-     !  Can someone knowledgable check?
+     ! Create the global cartesian 4D- communicator
+     ! valgrind claims this is not deallocated in test v5/72
+     ! Can someone knowledgeble check?
      dimcart=4
      ABI_MALLOC(sizecart,(dimcart))
-     ABI_MALLOC(periode,(dimcart))
+     ABI_MALLOC(period,(dimcart))
 !    MT 2012-june: change the order of the indexes; not sure this is efficient
 !    (not efficient on TGCC-Curie).
      sizecart(1)=mpi_enreg%nproc_spkpt  ! mpi_enreg%nproc_spkpt
      sizecart(2)=mpi_enreg%nproc_band ! mpi_enreg%nproc_band
      sizecart(3)=mpi_enreg%nproc_spinor ! mpi_enreg%nproc_spinor
      sizecart(4)=mpi_enreg%nproc_fft  ! mpi_enreg%nproc_fft
-     periode(:)=.false.;reorder=.false.
-     call MPI_CART_CREATE(spacecomm,dimcart,sizecart,periode,reorder,commcart_4d,ierr)
-     ABI_FREE(periode)
+     period(:)=.false.;reorder=.false.
+     call MPI_CART_CREATE(spacecomm,dimcart,sizecart,period,reorder,commcart_4d,ierr)
+     ABI_FREE(period)
      ABI_FREE(sizecart)
 
 !    Find the index and coordinates of the current processor
@@ -1395,12 +1350,12 @@ subroutine initmpi_grid(mpi_enreg)
 !* Create the global cartesian 2D- communicator
    dimcart=2
    ABI_MALLOC(sizecart,(dimcart))
-   ABI_MALLOC(periode,(dimcart))
+   ABI_MALLOC(period,(dimcart))
    sizecart(1)=mpi_enreg%nproc_spkpt  ! mpi_enreg%nproc_spkpt
    sizecart(2)=mpi_enreg%nproc_hf   ! mpi_enreg%nproc_hf
-   periode(:)=.false.;reorder=.false.
-   call MPI_CART_CREATE(spacecomm,dimcart,sizecart,periode,reorder,commcart_2d,ierr)
-   ABI_FREE(periode)
+   period(:)=.false.;reorder=.false.
+   call MPI_CART_CREATE(spacecomm,dimcart,sizecart,period,reorder,commcart_2d,ierr)
+   ABI_FREE(period)
    ABI_FREE(sizecart)
 
 !* Find the index and coordinates of the current processor
@@ -1456,8 +1411,7 @@ end subroutine initmpi_grid
 subroutine clnmpi_grid(mpi_enreg)
 
 !Arguments ------------------------------------
- type(MPI_type), intent(inout) :: mpi_enreg
-
+ class(MPI_type), intent(inout) :: mpi_enreg
 ! ***********************************************************************
 
  DBG_ENTER("COLL")
@@ -1547,7 +1501,7 @@ subroutine initmpi_img(dtset,mpi_enreg,option)
 !Arguments ------------------------------------
  integer,intent(in) :: option
  type(dataset_type),intent(in) :: dtset
- type(MPI_type),intent(inout) :: mpi_enreg
+ class(MPI_type),intent(inout) :: mpi_enreg
 
 !Local variables-------------------------------
  integer :: imod,irank,iprocmax,iprocmin,jrank
@@ -1557,7 +1511,6 @@ subroutine initmpi_img(dtset,mpi_enreg,option)
  character(len=500) :: msg
 
 !integer :: group_cell,ierr
-
 ! ***********************************************************************
 
  DBG_ENTER("COLL")
@@ -1589,7 +1542,7 @@ subroutine initmpi_img(dtset,mpi_enreg,option)
         'The number of processors used for the parallelization',ch10,&
         ' over images (nproc=',mpi_enreg%nproc,&
         ') is smaller than npimage in input file (',dtset%npimage,&
-        ')!',ch10,' This is unconsistent.',ch10
+        ')!',ch10,' This is inconsistent.',ch10
        ABI_ERROR(msg)
      end if
      if (mod(nimage_eff,dtset%npimage)/=0) then
@@ -1716,7 +1669,7 @@ subroutine initmpi_img(dtset,mpi_enreg,option)
 
 !  if (debug) then
 !  write(200+mpi_enreg%me,*) "=================================="
-!  write(200+mpi_enreg%me,*) "DEBUGGING STATMENTS IN INITMPI_IMG"
+!  write(200+mpi_enreg%me,*) "DEBUGGING STATEMENTS IN INITMPI_IMG"
 !  write(200+mpi_enreg%me,*) "=================================="
 !  write(200+mpi_enreg%me,*) "option         =",option
 !  write(200+mpi_enreg%me,*) "MPI_UNDEFINED  =",MPI_UNDEFINED
@@ -1844,8 +1797,7 @@ end subroutine initmpi_img
 subroutine clnmpi_img(mpi_enreg)
 
 !Arguments ------------------------------------
- type(MPI_type), intent(inout) :: mpi_enreg
-
+ class(MPI_type), intent(inout) :: mpi_enreg
 ! ***********************************************************************
 
  DBG_ENTER("COLL")
@@ -1898,7 +1850,7 @@ subroutine initmpi_pert(dtset,mpi_enreg)
 
 !Arguments ------------------------------------
 !scalars
- type(MPI_type),intent(inout) :: mpi_enreg
+ class(MPI_type),intent(inout) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
 
 !Local variables-------------------------------
@@ -1909,7 +1861,6 @@ subroutine initmpi_pert(dtset,mpi_enreg)
 !arrays
  integer,pointer :: nkpt_rbz(:)
  real(dp),pointer :: nband_rbz(:,:)
-
 ! ***********************************************************************
 
  if (mpi_enreg%me_pert<0) then
@@ -1992,15 +1943,12 @@ end subroutine initmpi_pert
 !! FUNCTION
 !!  Cleans-up the mpi information for parallelization over perturbations.
 !!
-!! INPUTS
-!!
 !! SOURCE
 
 subroutine clnmpi_pert(mpi_enreg)
 
 !Arguments ------------------------------------
- type(MPI_type),intent(inout) :: mpi_enreg
-
+ class(MPI_type),intent(inout) :: mpi_enreg
 ! ***********************************************************************
 
  DBG_ENTER("COLL")
@@ -2054,7 +2002,7 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
  integer,intent(in) :: mkmem
  integer,intent(in) :: nkpt,nsppol
  integer,intent(in) :: nband(nkpt*nsppol)
- type(MPI_type),intent(inout) :: mpi_enreg
+ class(MPI_type),intent(inout) :: mpi_enreg
 
 !Local variables-------------------------------
 !scalars
@@ -2064,7 +2012,6 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
  character(len=500) :: msg
 !arrays
  integer,allocatable :: ranks(:)
-
 ! ***********************************************************************
 
 ! reinstate default just to be sure - can be switched inside a previous part of the same dtset!
@@ -2177,18 +2124,16 @@ end subroutine initmpi_band
 !!
 !! SOURCE
 
-
 subroutine pre_gather(array,array_allgather,n1,n2,n3,n4,mpi_enreg)
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1,n2,n3,n4
  real(dp),intent(in) :: array(n1,n2,n4,1)
  real(dp),intent(inout) :: array_allgather(n1,n2,n3,1)
- type(mpi_type),intent(in) :: mpi_enreg
+ class(mpi_type),intent(in) :: mpi_enreg
 
 !Local variables-------------------------------
  integer :: ier
-
 ! *********************************************************************
 
 !Gather the array on all procs
@@ -2223,8 +2168,7 @@ subroutine pre_scatter(array,array_allgather,n1,n2,n3,n4,mpi_enreg)
  integer,intent(in) :: n1,n2,n3,n4
  real(dp),intent(out) :: array(n1,n2,n4,1)
  real(dp),intent(in) :: array_allgather(n1,n2,n3,1)
- type(mpi_type),intent(in) :: mpi_enreg
-
+ class(mpi_type),intent(in) :: mpi_enreg
 ! *********************************************************************
 
 !Perform the reverse operation
@@ -2251,8 +2195,7 @@ logical function iwrite_fftdatar(mpi_enreg) result(ans)
 
 !Arguments ------------------------------------
 !scalars
- type(MPI_type),intent(in) :: mpi_enreg
-
+ class(MPI_type),intent(in) :: mpi_enreg
 ! *********************************************************************
 
  ans = (xmpi_paral==0 .or. &                                  ! No MPI
@@ -2302,7 +2245,7 @@ subroutine distrb2(mband,mband_mem_out,nband,nkpt,nproc,nsppol,mpi_enreg)
  integer,intent(in) :: mband,nkpt,nproc,nsppol
  integer,intent(in) :: nband(nkpt*nsppol)
  integer,intent(out) :: mband_mem_out
- type(MPI_type),intent(inout) :: mpi_enreg
+ class(MPI_type),intent(inout) :: mpi_enreg
 
 !Local variables-------------------------------
  integer :: maxproc_bandpool
@@ -2313,7 +2256,6 @@ subroutine distrb2(mband,mband_mem_out,nband,nkpt,nproc,nsppol,mpi_enreg)
  integer :: kpt_distrb(nkpt)
  logical,save :: first=.true.,has_file
  character(len=500) :: msg
-
 !******************************************************************
 
  nproc_spkpt=mpi_enreg%nproc_spkpt
@@ -2607,12 +2549,11 @@ subroutine distrb2_hf(nbandhf,nkpthf, nproc, nsppol, mpi_enreg)
 
 !Arguments ------------------------------------
  integer,intent(in) :: nbandhf,nkpthf,nproc,nsppol
- type(MPI_type),intent(inout) :: mpi_enreg
+ class(MPI_type),intent(inout) :: mpi_enreg
 
 !Local variables-------------------------------
  integer :: ind,iiband,iikpt,iistep,nproc_hf
  character(len=500) :: msg
-
 !******************************************************************
 
  nproc_hf=mpi_enreg%nproc_hf

@@ -51,6 +51,7 @@ MODULE m_paw_optics
  use m_paw_onsite,   only : pawnabla_init,pawnabla_core_init
  use m_paw_sphharm,  only : setnabla_ylm
  use m_pawxc,        only : pawxc,pawxcm,pawxc_get_xclevel,pawxc_get_usekden
+ use m_rcpaw,        only : rcpaw_type
  use m_mpinfo,       only : destroy_mpi_enreg,nullify_mpi_enreg,initmpi_seq,proc_distrb_cycle
  use m_numeric_tools,only : kramerskronig
  use m_geometry,     only : metric
@@ -254,6 +255,7 @@ CONTAINS  !=====================================================================
 !1- Opening of OPT file and header writing
 !----------------------------------------------------------------------------------
 
+ iomode=dtset%iomode
  if (iomode /= NO_FILE_OUT) then
 !  I/O mode is netCDF or Fortran
    iomode=merge(IO_MODE_ETSF,IO_MODE_FORTRAN_MASTER,dtset%iomode==IO_MODE_ETSF)
@@ -885,7 +887,7 @@ end if
 
  subroutine optics_paw_core(atindx1,cprj,dimcprj,dtfil,dtset,eigen0,filpsp,hdr,&
 &               mband,mcprj,mkmem,mpi_enreg,mpsang,natom,nkpt,nsppol,&
-&               pawang,pawrad,pawrhoij,pawtab,znucl)
+&               pawang,pawrad,pawrhoij,pawtab,znucl,rcpaw)
 
 !Arguments ------------------------------------
 !scalars
@@ -895,6 +897,7 @@ end if
  type(dataset_type),intent(in) :: dtset
  type(hdr_type),intent(inout) :: hdr
  type(pawang_type),intent(in) :: pawang
+ type(rcpaw_type), intent(in), pointer,optional :: rcpaw
 !arrays
  integer,intent(in) :: atindx1(natom),dimcprj(natom)
  character(len=fnlen),intent(in) :: filpsp(dtset%ntypat)
@@ -981,12 +984,22 @@ end if
 !------------------------------------------------------------------------------------------------
  !TODO At present, impose 2-spinor simulataneously for core and valence WF
  ABI_MALLOC(atm,(dtset%ntypat))
- use_rcpaw_data=.false.
- if(.not.(use_rcpaw_data)) then
-   do itypat=1,dtset%ntypat
+ do itypat=1,dtset%ntypat
+   use_rcpaw_data=.false.
+   if(present(rcpaw)) then
+     if(associated(rcpaw)) then
+       if(allocated(rcpaw%atm)) then
+         if(dtset%ntypat==size(rcpaw%atm)) then
+           atm(itypat)=rcpaw%atm(itypat)
+           use_rcpaw_data=.true.
+         endif
+       endif
+     endif
+   endif
+   if(.not.use_rcpaw_data) then
      call pawpsp_init_core(atm(itypat),filpsp(itypat),radmesh=pawrad(itypat))
-   enddo
- endif
+   endif
+ enddo
 
  nphicor=0
  ncorespinor=0

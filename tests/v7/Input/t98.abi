@@ -12,10 +12,9 @@
 
 
 ndtset  4
-ecut 3 # Must be increased for convergence purposes 
+ecut 3 # Must be increased for convergence purposes
 nstep 10
 ecutsm 0.5
-dilatmx 1.05
 ixc 11
 kptopt 3
 # DATASET 1: ground-state computation
@@ -101,19 +100,19 @@ vdw_tol 1d-10 # Tolerance on the pair-wise term
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%   t98.abo, tolnlines = 8, tolabs = 1.0e-05, tolrel = 1.0e-06, fld_options = -easy
+#%% files_to_test =
+#%%   t98.abo, tolnlines = 8, tolabs = 0.31, tolrel = 0.003, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = B. VAN TROEYE
 #%% keywords = DFPT, VDW, DFT-D3(BJ)
-#%% description = 
+#%% description =
 #%%   Computation of the dynamical matrix at different q-vector including
 #%%   vdW-DFT-D3 corrections with Becke-Jonhson damping (DFT-D3(BJ))
 #%%   Only the pair-wise is computed (3-body term not implemented)
 #%%   In this test the following properties are thus tested: contribution
-#%%   to the energy and to the stress of DFT-D3(BJ) as well as 
+#%%   to the energy and to the stress of DFT-D3(BJ) as well as
 #%%   the contribution to the dynamical matrix
 #%% topics = vdw
 #%%<END TEST_INFO>

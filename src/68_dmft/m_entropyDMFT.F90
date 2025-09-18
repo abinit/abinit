@@ -29,7 +29,7 @@ module m_entropyDMFT
   use m_xmpi
   use m_dtset
 
-  use m_energies, only : energies_type, energies_eval_eint
+  use m_energies, only : energies_type
   use m_splines, only : spline_integrate, spline, splint
   use m_pawang, only : pawang_type
   use m_pawrad, only : pawrad_type, simp_gen, poisson
@@ -86,8 +86,8 @@ module m_entropyDMFT
     integer               :: nctypat        ! number of type of correlated atoms
     integer               :: nlambda        ! number of integration points
     integer               :: ofile          ! unit for file output data
-    character(len=fnlen)  :: filename       ! name fo the file user readable
-    character(len=fnlen)  :: filedata       ! name fo the file for restart purposes
+    character(len=fnlen)  :: filename       ! name for the file user readable
+    character(len=fnlen)  :: filedata       ! name for the file for restart purposes
     character(len=fnlen)  :: ofilename      ! ofstream prefix
     character(len=fnlen)  :: ifilename      ! ifstream prefix
     real(dp)              :: temp           ! temperature
@@ -420,7 +420,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
         read(e_t%ofile,end=42) lambda
         if ( ABS(lambda - e_t%lambda(ilambda)) >= tol9 ) then
           write(msg,'(5a,f6.4,a,f6.4)') "File ", trim(e_t%filedata), " is wrong:", ch10, &
-          "Lambda values are differente: in file ", lambda, " instead of ", e_t%lambda(ilambda)
+          "Lambda values are different: in file ", lambda, " instead of ", e_t%lambda(ilambda)
           ABI_WARNING(msg)
           goto 42
         end if
@@ -687,8 +687,9 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
       call wrtout(ab_out,message,"COLL")
       call pawpuxinit(dt%dmatpuopt,dt%exchmix,dt%f4of2_sla,dt%f6of2_sla,&
 &        is_dfpt,jpawu,dt%lexexch,dt%lpawu,dt%nspinor,dt%ntypat,dt%optdcmagpawu,pawang,dt%pawprtvol,&
-&        pawrad,pawtab,upawu,dt%usedmft,dt%useexexch,dt%usepawu,&
-&        dmft_orbital=dt%dmft_orbital,dmft_dc=dt%dmft_dc)
+&        pawrad,pawtab,upawu,dt%usedmft,dt%useexexch,dt%usepawu,dmft_orbital=dt%dmft_orbital, &
+&        dmft_dc=dt%dmft_dc,dmft_orbital_filepath=dt%dmft_orbital_filepath,dmft_yukawa_param=dt%dmft_yukawa_param, &
+&        dmft_lambda_yukawa=dt%dmft_lambda_yukawa,dmft_epsilon_yukawa=dt%dmft_epsilon_yukawa)
       ABI_FREE(upawu)
       ABI_FREE(jpawu)
     end if
@@ -749,7 +750,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
       e_t%entropy0 = energies%entropy_ks
       ! 1 is for usepaw that is 1 in DMFT, optdc is to know if the DC scheme is
       ! calculated.
-      call energies_eval_eint(energies,dt,1,optdc,e_t%energies(E_DIRECT,E_U0),e_t%energies(E_DC,E_U0))
+      call energies%eval_eint(dt,1,optdc,e_t%energies(E_DIRECT,E_U0),e_t%energies(E_DC,E_U0))
       if ( e_t%rank == 0 ) then
         open(unit=e_t%ofile,file=e_t%filename,position="append")
         write(e_t%ofile,'(a)') "# Temperature [Ha]:"
@@ -767,7 +768,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
       end if
     else if ( e_t%mylambda == e_t%nlambda ) then
       ! Save internal energy for U=Umax
-      call energies_eval_eint(energies,dt,1,optdc,e_t%energies(E_DIRECT,E_UU),e_t%energies(E_DC,E_UU))
+      call energies%eval_eint(dt,1,optdc,e_t%energies(E_DIRECT,E_UU),e_t%energies(E_DC,E_UU))
       if ( e_t%rank == 0 ) then
         open(unit=e_t%ofile,file=e_t%filename,position="append")
         write(e_t%ofile,'(a)') "# Internal energy for lambda=1 [Ha]:"

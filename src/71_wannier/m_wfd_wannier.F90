@@ -38,6 +38,7 @@ module m_wfd_wannier
   use m_xmpi
 
   use defs_abitypes,     only : mpi_type
+  use defs_datatypes,    only : pseudopotential_type
   use m_dtset,           only : dataset_type
   use m_hdr,             only : hdr_type
   use m_wfd,             only : wfd_t
@@ -46,7 +47,6 @@ module m_wfd_wannier
   use m_pawrad,          only : pawrad_type
   use m_pawtab,          only : pawtab_type
   use m_pawcprj,         only : pawcprj_type
-  use defs_datatypes,    only : pseudopotential_type
   use m_dtfil,           only : datafiles_type
   use m_abstract_wf,     only : abstract_wf, compute_iwav, write_cg_and_cprj, wann_ksetting_t, init_mywfc
   use m_mlwfovlp,        only : mlwfovlp
@@ -190,7 +190,7 @@ contains
                & eigen=mywfc%ebands%eig,gprimd=cryst%gprimd,kg=ptr_kg,&
                & mband=mywfc%hdr%mband,mcg=mcg,mcprj=mcprj,mgfftc=mgfftc, &
                & mkmem=mkmem,mpi_enreg=mpi_enreg,mpw=mpw,natom=cryst%natom,&
-               & nattyp=cryst%nattyp,nfft=nfft,ngfft=ngfftf,nkpt=mywfc%hdr%nkpt,npwarr= mywfc%hdr%npwarr , &
+               & nattyp=cryst%nattyp,nfft=nfft,ngfft=ngfftc,nkpt=mywfc%hdr%nkpt,npwarr= mywfc%hdr%npwarr , &
                &nsppol=dtset%nsppol,ntypat=cryst%ntypat,occ=mywfc%ebands%occ,&
                &pawang=pawang,pawrad=pawrad,pawtab=pawtab,prtvol=dtset%prtvol,psps=psps, &
                &rprimd=cryst%rprimd,ucvol=cryst%ucvol, xred=cryst%xred, exclude_bands=exclude_bands)

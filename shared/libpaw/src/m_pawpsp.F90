@@ -1378,7 +1378,7 @@ subroutine pawpsp_init_core(Atm,psp_filename,rcut_in,radmesh)
    filename_=trim(psp_filename)
    fnln=len(trim(psp_filename))
    fmt_abinit=.false.
-   if (fnln>6) fmt_abinit=(filename_(fnln-6:fnln)=='.abinit')  
+   if (fnln>6) fmt_abinit=(filename_(fnln-6:fnln)=='.abinit')
    fmt_xml=.false.
    if (fnln>3) fmt_xml=(filename_(fnln-3:fnln)=='.xml')
    if(fmt_abinit) then
@@ -1397,7 +1397,7 @@ subroutine pawpsp_init_core(Atm,psp_filename,rcut_in,radmesh)
      write(msg,'(3a)') 'This file does not exist: ',trim(filename_),'!'
      LIBPAW_WARNING(msg)
      string=trim(psp_filename)
-     filename_="CORE_"//trim(libpaw_basename(string)) 
+     filename_="CORE_"//trim(libpaw_basename(string))
      ic = index (trim(string), "/" , back=.true.)
      if (ic>0 .and. ic<len_trim(string)) filename_=psp_filename(1:ic)//trim(filename_)
      inquire(file=trim(filename_),iostat=ios,exist=ex)
@@ -1407,8 +1407,8 @@ subroutine pawpsp_init_core(Atm,psp_filename,rcut_in,radmesh)
      end if
      if (.not.ex) def_name=.true.
    end if
- endif 
- 
+ endif
+
  if(.not.present(psp_filename).or.(def_name)) then
 !   Core WF file: new format
    filename_='corewf.abinit';ex=.false.
@@ -1428,7 +1428,7 @@ subroutine pawpsp_init_core(Atm,psp_filename,rcut_in,radmesh)
      fmt_xml=ex
      if (.not.ex) then
        write(msg, '(3a)' )'Please provide an up-to-date corewf file'
-       LIBPAW_ERROR(msg) 
+       LIBPAW_ERROR(msg)
 !!      Core WF file: old format
 !       filename_='corewf.dat';ex=.false.
 !       inquire(file=trim(filename_),iostat=ios,exist=ex)
@@ -1452,7 +1452,7 @@ subroutine pawpsp_init_core(Atm,psp_filename,rcut_in,radmesh)
    LIBPAW_WARNING(msg)
  endif
 
- 
+
 
  unt = libpaw_get_free_unit()
  open(unit=unt,file=trim(filename_),form='formatted',status='old',action="read")
@@ -1495,7 +1495,7 @@ end subroutine pawpsp_init_core
 !!  oldformat= old format for the file or not
 !!  rcut= radius cut-off for radial mesh quantities
 !!  ramesh_in= (optional) radial mesh
-!! 
+!!
 !! OUTPUT
 !!  Atm<paw_atomorb_type>= Structure defining the set of core orbitals.
 !!
@@ -1533,7 +1533,7 @@ subroutine pawpsp_read_corewf(Atm,filename_,rcut,radmesh_in)
 
 ! Some default parameters
  Atm%nspden=1
- Atm%dirac=.false. 
+ Atm%dirac=.false.
  Atm%fname = filename_
  Atm%l_max=0
  Atm%l_size=0
@@ -1555,7 +1555,7 @@ subroutine pawpsp_read_corewf(Atm,filename_,rcut,radmesh_in)
    read(unt,err=23,end=23,fmt=*) dirac, Atm%method, Atm%nspinor, Atm%nsppol
    write(msg,'(4(i2,2x),22x,a)' )dirac, Atm%method,Atm%nspinor,Atm%nsppol,' dirac, method, nspinor, nsppol.'
    if(dirac==1) Atm%dirac=.true.
-23 backspace(unt) 
+23 backspace(unt)
    read(unt,*) Atm%method, Atm%nspinor, Atm%nsppol
    write(msg,'(3(i2,2x),22x,a)' )Atm%method,Atm%nspinor,Atm%nsppol,'method,nspinor, nsppol.'
    go to 24
@@ -1564,6 +1564,7 @@ subroutine pawpsp_read_corewf(Atm,filename_,rcut,radmesh_in)
    !3)
    read(unt,*) Atm%znucl, Atm%zcore, pspdat
    Atm%zion=Atm%znucl-Atm%zcore
+   Atm%zcore_orig=Atm%zcore
    write(msg,'(2f10.5,2x,i8,2x,a)' )Atm%znucl, Atm%zcore, pspdat,'znucl,zcore,pspdat'
    call wrtout(std_out,msg,'COLL')
    if(Atm%zcore>zero) then
@@ -1571,7 +1572,7 @@ subroutine pawpsp_read_corewf(Atm,filename_,rcut,radmesh_in)
      read(unt,*)pspcod,Atm%ixc,lmax
      write(msg,'(2i5,2x,2x,a)')Atm%ixc,lmax,'ixc,lmax'
      Atm%l_max  =  lmax+1
-     !5) 
+     !5)
      read(unt,*) ! skip pspfmt,creatorID
      !6)
      read(unt,*)Atm%ln_size, Atm%lmn_size
@@ -1598,14 +1599,16 @@ subroutine pawpsp_read_corewf(Atm,filename_,rcut,radmesh_in)
          radstp(ii)=rs;logstp(ii)=ls
        end if
      end do
-     !9) 
+     !9)
      read(unt,*) Atm%rcore
      !10)
      LIBPAW_ALLOCATE(Atm%indln,(2,Atm%ln_size))
      LIBPAW_ALLOCATE(Atm%eig,(Atm%ln_size,Atm%nsppol))
      LIBPAW_ALLOCATE(Atm%occ,(Atm%ln_size,Atm%nsppol))
+     LIBPAW_ALLOCATE(Atm%occ_res,(Atm%ln_size,Atm%nsppol))
+     LIBPAW_ALLOCATE(Atm%occ_respc,(Atm%ln_size,Atm%nsppol))
      if (Atm%dirac) then
-       LIBPAW_ALLOCATE(Atm%kappa,(Atm%ln_size)) 
+       LIBPAW_ALLOCATE(Atm%kappa,(Atm%ln_size))
      endif
      do isppol=1,Atm%nsppol
        do iln=1,Atm%ln_size
@@ -1616,7 +1619,7 @@ subroutine pawpsp_read_corewf(Atm,filename_,rcut,radmesh_in)
            if(present(radmesh_in)) then
              Atm%mesh_size = radmesh_in%mesh_size
              Atm%rcore=radmesh_in%rad(radmesh_in%mesh_size)
-             Atm%radmesh=radmesh_in
+             call pawrad_copy(radmesh_in,atm%radmesh)
            elseif(rcut>tol16) then
              call pawrad_init(tmpmesh,meshsz(ii),meshtp(ii),radstp(ii),logstp(ii),-one)
              msz_cut =min(pawrad_ifromr(tmpmesh,rcut)+6,tmpmesh%mesh_size) ! addsix more points
@@ -1674,12 +1677,11 @@ subroutine pawpsp_read_corewf(Atm,filename_,rcut,radmesh_in)
      LIBPAW_DEALLOCATE(meshtp)
      LIBPAW_DEALLOCATE(radstp)
      LIBPAW_DEALLOCATE(logstp)
-     close(unt) 
-  
+
      Atm%l_size =2*Atm%l_max-1
      Atm%ln2_size  = Atm%ln_size *(Atm%ln_size +1)/2
      Atm%lmn2_size = Atm%lmn_size*(Atm%lmn_size+1)/2
-  
+
      if(Atm%dirac) then
        call make_indlmn(Atm%ln_size, Atm%lmn_size,orbitals,Atm%indlmn,kappa=Atm%kappa)
      else
@@ -1690,7 +1692,7 @@ subroutine pawpsp_read_corewf(Atm,filename_,rcut,radmesh_in)
      LIBPAW_ALLOCATE(Atm%indklmn,(8,Atm%lmn2_size))
      LIBPAW_ALLOCATE(Atm%klm_diag,(Atm%lmn2_size))
      call make_indklmn(HUGE(1), Atm%lmn_size, Atm%lmn2_size, Atm%indlmn,Atm%indklmn, Atm%klm_diag)
-   
+
      ! * Setup of klmntomn.
      LIBPAW_ALLOCATE(Atm%klmntomn,(4,Atm%lmn2_size))
      do jlmn=1,Atm%lmn_size
@@ -1705,16 +1707,21 @@ subroutine pawpsp_read_corewf(Atm,filename_,rcut,radmesh_in)
          Atm%klmntomn(4,klmn) = Atm%indlmn(3,jlmn)      ! jn
        end do
      end do
-   
+
      LIBPAW_DEALLOCATE(orbitals)
      LIBPAW_ALLOCATE(Atm%mode,(Atm%ln_size,Atm%nsppol))
      Atm%mode = ORB_FROZEN
- 
+     LIBPAW_ALLOCATE(Atm%max_occ,(Atm%ln_size,Atm%nsppol))
+     Atm%max_occ=Atm%occ
+     atm%zcore_conv=.false.
+     atm%nc_conv=.false.
+     atm%nresid_c=one
+
      ! * Setup of kln2ln.
      !TODO this has to be tested
    !  LIBPAW_ALLOCATE(Atm%kln2ln,(6,Atm%ln2_size))
    !  call make_kln2ln(Atm%lmn_size,Atm%lmn2_size,Atm%ln2_size,Atm%indlmn,Atm%indklmn,Atm%kln2ln)
- 
+
    endif
    close(unt)
 ! end if
@@ -1730,7 +1737,7 @@ subroutine pawpsp_read_corewf(Atm,filename_,rcut,radmesh_in)
 !   Atm%ln2_size  = Atm%ln_size *(Atm%ln_size +1)/2
 !   LIBPAW_ALLOCATE(Atm%indln,(2,Atm%ln_size))
 !   LIBPAW_ALLOCATE(Atm%eig,(Atm%ln_size,1))
-!   LIBPAW_ALLOCATE(Atm%phi,(Atm%mesh_size,Atm%ln_size,1)) 
+!   LIBPAW_ALLOCATE(Atm%phi,(Atm%mesh_size,Atm%ln_size,1))
 !   LIBPAW_ALLOCATE(Atm%occ,(Atm%ln_size,1))
 !   LIBPAW_ALLOCATE(rad,(Atm%mesh_size))
 !   do iln=1,Atm%ln_size
@@ -2512,14 +2519,15 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
 
 !Keep VH(tnZc) eventually in memory
  if (pawtab%has_vhtnzc==1) then
-   LIBPAW_ALLOCATE(pawtab%vhtnzc,(pawtab%mesh_size))
    if ((reduced_vloc).and.(rvloc_mesh%mesh_type==pawrad%mesh_type)&
 &   .and.(rvloc_mesh%rstep==pawrad%rstep).and.(rvloc_mesh%lstep==pawrad%lstep)) then
-     pawtab%vhtnzc(1:pawtab%mesh_size)=rvlocr(1:pawtab%mesh_size)
+     LIBPAW_ALLOCATE(pawtab%vhtnzc,(rvloc_mesh%mesh_size))
+     pawtab%vhtnzc(:)=rvlocr(:)
      pawtab%has_vhtnzc=2
    else if ((vloc_mesh%mesh_type==pawrad%mesh_type)&
 &     .and.(vloc_mesh%rstep==pawrad%rstep).and.(vloc_mesh%lstep==pawrad%lstep)) then
-     pawtab%vhtnzc(1:pawtab%mesh_size)=vlocr(1:pawtab%mesh_size)
+     LIBPAW_ALLOCATE(pawtab%vhtnzc,(size(vlocr)))
+     pawtab%vhtnzc(:)=vlocr(:)
      pawtab%has_vhtnzc=2
    else
      msg = 'Vloc mesh is not right !'
@@ -4998,7 +5006,7 @@ subroutine pawpsp_main( &
 !arrays
 
 ! *************************************************************************
- 
+
 !Check consistency of parameters
  if (icoulomb/= 0.or.usewvl==1) then
    if (.not.present(wvl_ngauss)) then

@@ -45,8 +45,8 @@ module m_ephtk
  public :: ephtk_gam_atm2qnu          ! Compute phonon linewidths from gamma matrix in reduced coordinates.
  public :: ephtk_gkknu_from_atm       ! Transform the gkk matrix elements from (atom, red_direction) basis to phonon-mode basis.
  public :: ephtk_update_ebands        ! Update ebands according to dtset%occopt, tsmear, mbpt_sciss, eph_fermie, eph_extrael
- public :: ephtk_get_mpw_gmax
- public :: ephtk_v1atm_to_vqnu        !  Receive potentials in atomic representation and return potential in phonon representation
+ public :: ephtk_get_mpw_gmax         ! Compute maximum number of plane-waves over k and k+q where k and k+q are in the BZ.
+ public :: ephtk_v1atm_to_vqnu        ! Receive potentials in atomic representation and return potential in phonon representation
 !!***
 
  real(dp),public,parameter :: EPHTK_WTOL = tol6
@@ -343,7 +343,7 @@ subroutine ephtk_gkknu_from_atm(nb1, nb2, nk, natom, gkq_atm, phfrq, displ_red, 
 !scalars
  integer,intent(in) :: nb1, nb2, nk, natom
 !arrays
- real(dp),intent(in) :: phfrq(3*natom),displ_red(2,3*natom,3*natom)
+ real(dp),intent(in) :: phfrq(3*natom), displ_red(2,3*natom,3*natom)
  real(dp),intent(in) :: gkq_atm(2,nb1,nb2,nk,3*natom)
  real(dp),intent(out) :: gkq_nu(2,nb1,nb2,nk,3*natom)
 
@@ -358,7 +358,7 @@ subroutine ephtk_gkknu_from_atm(nb1, nb2, nk, natom, gkq_atm, phfrq, displ_red, 
    ! Ignore negative or too small frequencies
    if (phfrq(nu) < EPHTK_WTOL) cycle
 
-   ! Transform the gkk from (atom, reduced direction) basis to phonon mode representation
+   ! Transform the gkk from (atom, reduced direction) basis to phonon mode representation.
    do ipc=1,3*natom
      gkq_nu(1,:,:,:,nu) = gkq_nu(1,:,:,:,nu) &
        + gkq_atm(1,:,:,:,ipc) * displ_red(1,ipc,nu) &
@@ -369,13 +369,6 @@ subroutine ephtk_gkknu_from_atm(nb1, nb2, nk, natom, gkq_atm, phfrq, displ_red, 
    end do
 
    gkq_nu(:,:,:,:,nu) = gkq_nu(:,:,:,:,nu) / sqrt(two * phfrq(nu))
-
-   ! Perform the transformation using array operations
-   !gkq_nu(1,:,:,:,nu) = sum(gkq_atm(1,:,:,:,:) * displ_red(1,:,nu) - gkq_atm(2,:,:,:,:) * displ_red(2,:,nu), dim=5)
-   !gkq_nu(2,:,:,:,nu) = sum(gkq_atm(1,:,:,:,:) * displ_red(2,:,nu) + gkq_atm(2,:,:,:,:) * displ_red(1,:,nu), dim=5)
-   !! Apply the normalization factor
-   !factor = one / sqrt(two * phfrq(nu))
-   !gkq_nu(:,:,:,:,nu) = gkq_nu(:,:,:,:,nu) * factor
  end do
 
 end subroutine ephtk_gkknu_from_atm
@@ -460,7 +453,7 @@ end subroutine ephtk_update_ebands
 !!  ephtk_get_mpw_gmax
 !!
 !! FUNCTION
-!! mpw is the maximum number of plane-waves over k and k+q where k and k+q are in the BZ.
+!! Compute maximum number of plane-waves over k and k+q where k and k+q are in the BZ.
 !! we also need the max components of the G-spheres (k, k+q) in order to allocate the workspace array work
 !! used to symmetrize the wavefunctions in G-space.
 !! Note that we loop over the full BZ instead of the IBZ(k)

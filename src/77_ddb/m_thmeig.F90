@@ -70,14 +70,13 @@ contains
 !!
 !! SOURCE
 
-subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, iout, natom, mpert, msize, d2asr, comm)
+subroutine thmeig(inp, ddb, crystal, iout, natom, mpert, msize, d2asr, comm)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(inout) :: natom
  integer,intent(in) :: mpert,msize
  integer,intent(in) :: comm
- character(len=*),intent(in) :: elph_base_name, eig2_filnam
  integer,intent(in) :: iout
  type(crystal_t), intent(inout) :: crystal
  type(anaddb_dataset_type),intent(inout) :: inp
@@ -109,14 +108,14 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, iout, natom, m
  real(dp) :: rcvol,tmp,tol,vec1i,vec1r,vec2i,vec2r,veci,vecr,xx
  real(dp) :: tolsym,tolsym8  !new
  character(len=500) :: message
- character(len=fnlen) :: outfile
+ character(len=fnlen) :: outfile, elph_base_name, eig2_filnam
  type(ddb_type) :: ddb_eig2
  type(ddb_hdr_type) :: ddb_hdr
 !arrays
  ! FIXME now these must be allocated
  integer :: ngqpt(9),qptrlatt(3,3),rfelfd(4),rfphon(4),rfstrs(4),vacuum(3)
  integer :: bravais(11)
- integer,allocatable :: typat(:),atifc(:)
+ integer,allocatable :: typat(:)
  integer,allocatable :: symrel(:,:,:),symrec(:,:,:)
  integer,allocatable :: indsym(:,:,:)
  integer,allocatable :: indqpt(:)
@@ -168,6 +167,10 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, iout, natom, m
 !0) Initializations
 !=========================================================================
 
+ !GA: TODO Perhaps those should be created at initialization of inp
+ elph_base_name = trim(inp%prefix_outdata)//"_ep" 
+ eig2_filnam = inp%filename_eigr2d
+
 
  g2fsmear = inp%a2fsmear
 
@@ -197,7 +200,6 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, iout, natom, m
  usepaw = ddb_hdr%usepaw
 
  ABI_MALLOC(typat, (natom))
- ABI_MALLOC(atifc, (natom))
  ABI_MALLOC(zion, (ntypat))
  ABI_MALLOC(amu, (ntypat))
 
@@ -233,8 +235,6 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, iout, natom, m
 
  ABI_MALLOC(eigvec,(2,3,natom,3*natom))
  ABI_MALLOC(phfreq,(3*natom,ddb%nblok))
-
- atifc = inp%atifc
 
  !amu = ddb%amu
  amu(:) = ddb_hdr%amu(1:ntypat)
@@ -278,10 +278,6 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, iout, natom, m
 !back this atom to the referenced unit cell
  tolsym8=tol8
  call symatm(indsym,natom,nsym,symrec(:,:,1:nsym),tnons(:,1:nsym),tolsym8,typat,xred)
-
-!Check the correctness of some input parameters,
-!and perform small treatment if needed.
- call chkin9(atifc,natifc,natom)
 
  eig2dGamma(:,:,:,:)=zero
 
@@ -932,7 +928,6 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, iout, natom, m
  end do
 
  ABI_FREE(typat)
- ABI_FREE(atifc)
  ABI_FREE(zion)
  ABI_FREE(amu)
  ABI_FREE(xcart)

@@ -185,7 +185,7 @@ subroutine calc_vhxc_me(Wfd, Mflags, Mels, Cryst, Dtset, nfftf, ngfftf, &
  ! Fake MPI_type for sequential part
  rank = Wfd%my_rank
  call initmpi_seq(MPI_enreg_seq)
- call init_distribfft_seq(MPI_enreg_seq%distribfft,'f',ngfftf(2),ngfftf(3),'all')
+ call MPI_enreg_seq%distribfft%init_seq('f',ngfftf(2),ngfftf(3),'all')
 
  nspinor=Wfd%nspinor; nsppol =Wfd%nsppol; nspden =Wfd%nspden
  if (nspinor == 2) ABI_WARNING("Remember to ADD SO")

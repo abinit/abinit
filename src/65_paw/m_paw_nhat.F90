@@ -39,7 +39,7 @@ MODULE m_paw_nhat
  use m_pawcprj,      only : pawcprj_type
  use m_paw_finegrid, only : pawgylm,pawrfgd_fft,pawrfgd_wvl,pawexpiqr
  use m_paral_atom,   only : get_my_atmtab, free_my_atmtab
- use m_distribfft,   only : distribfft_type,init_distribfft_seq,destroy_distribfft
+ use m_distribfft,   only : distribfft_type
  use m_geometry,     only : xred2xcart
  use m_cgtools,      only : mean_fftr
  use m_mpinfo,       only : set_mpi_enreg_fft,unset_mpi_enreg_fft,initmpi_seq
@@ -119,8 +119,6 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 &          my_natom,natom,nfft,ngfft,nhatgrdim,nspden,ntypat,pawang,pawfgrtab,&
 &          pawgrnhat,pawnhat,pawrhoij,pawrhoij0,pawtab,qphon,rprimd,ucvol,usewvl,xred,&
 &          mpi_atmtab,comm_atom,comm_fft,mpi_comm_wvl,me_g0,paral_kgb,distribfft,gpu_thread_limit) ! optional arguments
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -581,7 +579,7 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
      my_distribfft => distribfft
    else
      ABI_MALLOC(my_distribfft,)
-     call init_distribfft_seq(my_distribfft,'f',ngfft(2),ngfft(3),'fourdp')
+     call my_distribfft%init_seq('f',ngfft(2),ngfft(3),'fourdp')
    end if
    call initmpi_seq(mpi_enreg_fft)
    ABI_FREE(mpi_enreg_fft%distribfft)
@@ -603,7 +601,7 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 !  Destroy fake mpi_enreg
    call unset_mpi_enreg_fft(mpi_enreg_fft)
    if (.not.present(distribfft)) then
-     call destroy_distribfft(my_distribfft)
+     call my_distribfft%free()
      ABI_FREE(my_distribfft)
    end if
  end if
@@ -675,8 +673,6 @@ end subroutine pawmknhat
 subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nhat12_grdim,&
 &          nspinor,ntypat,ndat1,ndat2,pawang,pawfgrtab,grnhat12,nhat12,nattyp,pawtab, &
 &          gprimd,grnhat_12,qphon,xred,atindx,mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,distribfft,gpu_option) ! optional arguments
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1271,8 +1267,8 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
          end do
        case (ABI_GPU_OPENMP)
 #ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET DATA USE_DEVICE_PTR(nhat12_atm,nhat12)
-         call abi_gpu_xaxpy(2, nfft*ndat2*ndat1*(nspinor**2),&
+         !$OMP TARGET DATA USE_DEVICE_ADDR(nhat12_atm,nhat12)
+         call abi_gpu_xaxpy(1, 2*nfft*ndat2*ndat1*nspinor*nspinor,&
          &    cone,c_loc(nhat12_atm(:,:,:,:,:,ia)),1,c_loc(nhat12),1)
          !$OMP END TARGET DATA
 #endif
@@ -1337,7 +1333,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
      grnhat_12=-grnhat_12
    case (ABI_GPU_OPENMP)
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET DATA USE_DEVICE_PTR(grnhat_12)
+     !$OMP TARGET DATA USE_DEVICE_ADDR(grnhat_12)
      call abi_gpu_xscal(1, size(grnhat_12),cminusone,c_loc(grnhat_12),1)
      !$OMP END TARGET DATA
 #endif
@@ -1369,7 +1365,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
      my_distribfft => distribfft
    else
      ABI_MALLOC(my_distribfft,)
-     call init_distribfft_seq(my_distribfft,'f',ngfft(2),ngfft(3),'fourdp')
+     call my_distribfft%init_seq('f',ngfft(2),ngfft(3),'fourdp')
    end if
    call initmpi_seq(mpi_enreg_fft)
    ABI_FREE(mpi_enreg_fft%distribfft)
@@ -1396,7 +1392,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
 !  Destroy fake mpi_enreg
    call unset_mpi_enreg_fft(mpi_enreg_fft)
    if (.not.present(distribfft)) then
-     call destroy_distribfft(my_distribfft)
+     call my_distribfft%free()
      ABI_FREE(my_distribfft)
    end if
  end if
@@ -1412,8 +1408,6 @@ end subroutine pawmknhat_psipsi_ndat
 subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nhat12_grdim,&
 &          nspinor,ntypat,ndat1,ndat2,pawang,pawfgrtab,grnhat12,nhat12,pawtab, &
 &          gprimd,grnhat_12,qphon,xred,atindx,mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,distribfft,gpu_option,nattyp) ! optional arguments
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1759,7 +1753,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
      my_distribfft => distribfft
    else
      ABI_MALLOC(my_distribfft,)
-     call init_distribfft_seq(my_distribfft,'f',ngfft(2),ngfft(3),'fourdp')
+     call my_distribfft%init_seq('f',ngfft(2),ngfft(3),'fourdp')
    end if
    call initmpi_seq(mpi_enreg_fft)
    ABI_FREE(mpi_enreg_fft%distribfft)
@@ -1786,7 +1780,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
 !  Destroy fake mpi_enreg
    call unset_mpi_enreg_fft(mpi_enreg_fft)
    if (.not.present(distribfft)) then
-     call destroy_distribfft(my_distribfft)
+     call my_distribfft%free()
      ABI_FREE(my_distribfft)
    end if
  end if
@@ -1842,8 +1836,6 @@ end subroutine pawmknhat_psipsi
 subroutine pawnhatfr(ider,idir,ipert,my_natom,natom,nspden,ntypat,&
 &                    pawang,pawfgrtab,pawrhoij,pawtab,rprimd, &
 &                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2444,7 +2436,7 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
          prod=prod*ucvol/dble(ngridtot)
        else if(gpu_option_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET DATA USE_DEVICE_PTR(prod)
+         !$OMP TARGET DATA USE_DEVICE_ADDR(prod)
          call abi_gpu_xscal(1,qphase*lm_size*ndat*nattyp,scal,c_loc(prod),1)
          !$OMP END TARGET DATA
 #endif
@@ -2738,8 +2730,6 @@ subroutine pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,iband1,iband2,ispinor1
 &                    pawang,pawtab,ph3d_diel,typat,wfprod,wfraug, &
 &                    mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,distribfft) ! optional arguments (parallelism)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: iband1,iband2,ispinor1,ispinor2,istwf_k,lmax_diel,mgfftdiel
@@ -2907,7 +2897,7 @@ subroutine pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,iband1,iband2,ispinor1
      my_distribfft => distribfft
    else
      ABI_MALLOC(my_distribfft,)
-     call init_distribfft_seq(my_distribfft,'c',ngfftdiel(2),ngfftdiel(3),'fourwf')
+     call my_distribfft%init_seq('c',ngfftdiel(2),ngfftdiel(3),'fourwf')
    end if
    call initmpi_seq(mpi_enreg_fft)
    ABI_FREE(mpi_enreg_fft%distribfft)
@@ -2929,7 +2919,7 @@ subroutine pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,iband1,iband2,ispinor1
    ABI_FREE(wfraug_paw)
    call unset_mpi_enreg_fft(mpi_enreg_fft)
    if (.not.present(distribfft)) then
-     call destroy_distribfft(my_distribfft)
+     call my_distribfft%free()
      ABI_FREE(my_distribfft)
    end if
  end if
@@ -3001,8 +2991,6 @@ end subroutine pawsushat
 subroutine nhatgrid(atindx1,gmet,my_natom,natom,nattyp,ngfft,ntypat,&
 & optcut,optgr0,optgr1,optgr2,optrad,pawfgrtab,pawtab,rprimd,typat,ucvol,xred, &
 & mpi_atmtab,comm_atom,comm_fft,distribfft,typord) ! optional arguments (parallelism)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -3236,8 +3224,6 @@ subroutine wvl_nhatgrid(atindx1,geocode,h,i3s,natom,natom_tot,&
 & nattyp,ntypat,n1,n1i,n2,n2i,n3,n3pi,optcut,optgr0,optgr1,optgr2,optrad,&
 & pawfgrtab,pawtab,psppar,rprimd,shift,xred)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: i3s,natom,natom_tot,ntypat,optcut,optgr0,optgr1,optgr2,optrad
@@ -3378,4 +3364,3 @@ end subroutine wvl_nhatgrid
 
 END MODULE m_paw_nhat
 !!***
-
