@@ -187,21 +187,25 @@ AC_DEFUN([SD_LIBXC_INIT], [
           TMP_LIBXC_CPPFLAGS=`$PKG_CONFIG --cflags --keep-system-cflags libxc`
           TMP_LIBXC_FFFLAGS="${TMP_HDF5_CPPFLAGS}"
           TMP_LIBXC_LIBS=`$PKG_CONFIG --libs  --keep-system-libs libxc`
-	  if "$PKG_CONFIG" --exists libxcf03; then
-               TMP_LIBXC04OR90_LIBS=`$PKG_CONFIG --libs  --keep-system-libs libxcf03`
-          elif "$PKG_CONFIG" --exists libxcf90; then
-               TMP_LIBXC04OR90_LIBS=`$PKG_CONFIG --libs  --keep-system-libs libxcf90`
-	  else
- 		AC_MSG_ERROR([invalid PKG-CONFIG  for LibXC: neither fortran90 nor fortran03 interface available])
-	  fi
+	  #if test "${sd_libxc_enable_fc}" = "yes"; then
+	  #    if "$PKG_CONFIG" --exists libxcf03; then
+          #        TMP_LIBXC04OR90_LIBS=`$PKG_CONFIG --libs  --keep-system-libs libxcf03`
+          #    elif "$PKG_CONFIG" --exists libxcf90; then
+          #        TMP_LIBXC04OR90_LIBS=`$PKG_CONFIG --libs  --keep-system-libs libxcf90`
+	  #    else
+          #        AC_MSG_ERROR([invalid PKG-CONFIG  for LibXC: neither fortran90 nor fortran03 interface available])
+	  #    fi
+	  #else	  
+          #     TMP_LIBXC04OR90_LIBS=''
+	  #fi
 
           sd_libxc_cppflags="${TMP_LIBXC_CPPFLAGS} "
           sd_libxc_cflags="${TMP_LIBXC_CPPFLAGS}"
           sd_libxc_cxxflags="${TMP_LIBXC_CPPFLAGS}"
           test "${sd_libxc_enable_fc}" = "yes" && \
                sd_libxc_fcflags="${TMP_LIBXC_FFLAGS}"
-          sd_libxc_ldflags="${TMP_LIBXC_LIBS} ${TMP_LIBXC04OR90_LIBS}"
-          sd_libxc_libs="${TMP_LIBXC_LIBS} ${TMP_LIBXC04OR90_LIBS}"
+          sd_libxc_ldflags="${TMP_LIBXC_LIBS}" 
+          sd_libxc_libs="${TMP_LIBXC_LIBS}" 
           ;;
 
 
