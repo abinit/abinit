@@ -4,7 +4,7 @@
 !!
 !! FUNCTION
 !!  This module contains the declaration of data types and methods
-!!  used to handle interatomic force constant sets
+!!  used to handle interatomic force constants.
 !!
 !! COPYRIGHT
 !! Copyright (C) 2011-2025 ABINIT group (XG,MJV,EB,MG,GA)
@@ -34,21 +34,21 @@ MODULE m_ifc
  use netcdf
  use m_nctk
 
- use m_io_tools,    only : open_file
+ use m_io_tools,      only : open_file
  use m_numeric_tools, only : arth
- use m_fstrings,    only : ktoa, int2char4, sjoin, itoa, ltoa, ftoa
- use m_matrix,      only : matr3inv
- use m_special_funcs,  only : abi_derfc
- use m_time,        only : cwtime, cwtime_report, timab
- use m_copy,        only : alloc_copy
- use m_pptools,     only : printbxsf
- use m_lebedev,     only : lebedev_t, lebedev_ngrids
- use m_ewald,       only : ewald9
- use m_crystal,     only : crystal_t
- use m_geometry,    only : phdispl_cart2red, normv, mkrdim
- use m_kpts,        only : kpts_ibz_from_kptrlatt, smpbz
- use m_bz_mesh,     only : kpath_t
- use m_dynmat,      only : canct9, dist9 , ifclo9, axial9, q0dy3_apply, q0dy3_calc, asrif9, dynmat_dq, &
+ use m_fstrings,      only : ktoa, int2char4, sjoin, itoa, ltoa, ftoa
+ use m_matrix,        only : matr3inv
+ use m_special_funcs, only : abi_derfc
+ use m_time,          only : cwtime, cwtime_report, timab
+ use m_copy,          only : alloc_copy
+ use m_pptools,       only : printbxsf
+ use m_lebedev,       only : lebedev_t, lebedev_ngrids
+ use m_ewald,         only : ewald9
+ use m_crystal,       only : crystal_t
+ use m_geometry,      only : phdispl_cart2red, normv, mkrdim
+ use m_kpts,          only : kpts_ibz_from_kptrlatt, smpbz
+ use m_bz_mesh,       only : kpath_t
+ use m_dynmat,        only : canct9, dist9 , ifclo9, axial9, q0dy3_apply, q0dy3_calc, asrif9, dynmat_dq, &
                            make_bigbox, canat9, chkrp9, ftifc_q2r, wght9, nanal9, gtdyn9, dymfz9, &
                            massmult_and_breaksym, dfpt_phfrq, dfpt_prtph, d2cart_to_red
 
@@ -74,46 +74,46 @@ MODULE m_ifc
 
  type,public :: ifc_type
 
-   integer :: natom
+   integer :: natom = -1
      ! Number of atoms in the unit cell.
 
-   integer :: mpert
+   integer :: mpert = -1
      ! Maximum number of ipert.
 
-   integer :: asr
+   integer :: asr = -1
      ! Option for the treatment of the Acoustic Sum Rule.
 
-   integer :: brav
+   integer :: brav = -1
      ! Option for the sampling of the BZ (anaddb input variable)
 
-   integer :: dipdip
+   integer :: dipdip = -1
      ! dipole dipole interaction flag.
 
-   integer :: dipquad
+   integer :: dipquad = -1
      ! dipole quadrupole interaction flag.
 
-   integer :: quadquad
+   integer :: quadquad = -1
      ! dipole quadrupole interaction flag.
 
-   integer :: symdynmat
+   integer :: symdynmat = -1
      ! If equal to 1, the dynamical matrix is symmetrized in dfpt_phfrq before the diagonalization.
 
-   integer :: nqshft
+   integer :: nqshft = -1
      ! Number of shifts in the q-mesh (usually 1 since the mesh is gamma-centered!)
 
-   integer :: nqibz
+   integer :: nqibz = -1
      ! Number of points in the IBZ
 
-   integer :: nqbz
+   integer :: nqbz = -1
      ! Number of points in the full BZ
 
-   integer :: nrpt
+   integer :: nrpt = -1
      ! Number of real space points used to integrate IFC (for interpolation of dynamical matrices)
 
-   integer :: ngqpt(3)
+   integer :: ngqpt(3) = -1
     ! Number of division in the Q mesh.
 
-   integer :: ewald_option
+   integer :: ewald_option = -1
     ! Option for the ewald sum
 
    real(dp) :: rprim(3,3),gprim(3,3),acell(3)
@@ -201,10 +201,6 @@ MODULE m_ifc
      ! Note that the long-range dip-dip part has been removed if dipdip = 1
      ! Moreover the array is multiplied by a phase shift in mkifc9.
 
-   !real(dp),allocatable :: dynmat_lr(:,:,:,:,:,:)
-    ! dynmat_lr(2,3,natom,3,natom,nqbz))
-    ! Long-range part of dynmat in q-space
-
  contains
 
     procedure :: free => ifc_free
@@ -254,7 +250,7 @@ MODULE m_ifc
 
 !----------------------------------------------------------------------
 
-CONTAINS  !===========================================================
+contains  !===========================================================
 !!***
 
 !----------------------------------------------------------------------
@@ -304,8 +300,7 @@ end subroutine ifc_free
 !!
 !! FUNCTION
 !!  Initialize the dynamical matrix as well as the IFCs.
-!!  taking into account the dipole-dipole, dipole-quadrupole and quadrupole-quadrupole
-!!  interaction.
+!!  taking into account the dipole-dipole, dipole-quadrupole and quadrupole-quadrupole interaction.
 !!
 !! INPUTS
 !! crystal<type(crystal_t)> = Information on the crystalline structure.
@@ -370,7 +365,6 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  real(dp),intent(in) :: qdrp_cart(3,3,3,Crystal%natom)
 !anaddb variables (TO BE REMOVED)
  integer,intent(in) :: prtsrlr,enunit
-!end anaddb variables
 
 !Local variables -------------------------
 !scalars
@@ -514,7 +508,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    ! This means that the final D(q) may break some symmetry in q-space if the FT does not preserve it.
    ! The most elegant approach would be to get D(q_ibz) via FT if q_ibz is not in the coarse mesh and then
    ! call symdm9 to get D(q) for each q point in the star of q_ibz.
-   call wrtout(std_out,"Will fill missing qpoints in the full BZ using the coarse q-mesh","COLL")
+   call wrtout(std_out,"Will fill missing qpoints in the full BZ using the coarse q-mesh")
 
    call symdm9(ddb, &
      Ifc%dynmat,gprim_tmp,Crystal%indsym,mpert,natom,nqbz,nsym,rfmeth,rprim_tmp,qbz,&
@@ -626,7 +620,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
  ! The interatomic forces have been calculated
  write(msg, '(2a)')ch10,' The interatomic forces have been obtained '
- if (prtout_) call wrtout([std_out, ab_out], msg,'COLL')
+ if (prtout_) call wrtout([std_out, ab_out], msg)
  call cwtime_report(" ifc_init1", cpu, wall, gflops)
 
  ! Apply cutoff on ifc if needed
@@ -742,7 +736,7 @@ end subroutine ifc_init
 !!  ifc_from_file
 !!
 !! FUNCTION
-!!  Need to be updated
+!!  Initialize instance from file.
 !!
 !! INPUTS
 !!
@@ -750,7 +744,7 @@ end subroutine ifc_init
 !!
 !! SOURCE
 
-subroutine ifc_from_file(ifc, dielt,filename,natom,ngqpt,nqshift,qshift,ucell_ddb,zeff,qdrp_cart,comm)
+subroutine ifc_from_file(ifc, dielt, filename,natom,ngqpt,nqshift,qshift,ucell_ddb,zeff,qdrp_cart,comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -802,8 +796,7 @@ subroutine ifc_from_file(ifc, dielt,filename,natom,ngqpt,nqshift,qshift,ucell_dd
 
  ! ifc to be calculated for interpolation
  write(msg, '(a,a,(80a),a,a,a,a)' ) ch10,('=',i=1,80),ch10,ch10,' Calculation of the interatomic forces ',ch10
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+ call wrtout([std_out, ab_out], msg)
  if ((maxval(abs(zeff)) .lt. tol10) .OR. (maxval(dielt) .gt. 100000.0)) then
    dipdip=0
  else
@@ -828,11 +821,8 @@ end subroutine ifc_from_file
 !!
 !! INPUTS
 !!  units=Unit numbers for output
-!!  [prtvol]=Verbosity level.
 !!  [header]=String to be printed as header for additional info.
-!!
-!! OUTPUT
-!!  Only printing
+!!  [prtvol]=Verbosity level.
 !!
 !! SOURCE
 
@@ -1067,7 +1057,6 @@ subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq, comm)
 ! ************************************************************************
 
  ABI_UNUSED((/comm/))
-
  natom3 = cryst%natom * 3
 
  ! Generate the analytical part from the interatomic forces
@@ -2540,7 +2529,6 @@ subroutine ifc_outphbtrap(ifc, cryst, ngqpt, nqshft, qshft, basename)
 ! *********************************************************************
 
  DBG_ENTER("COLL")
-
  natom = cryst%natom
 
  ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons even in systems wo inversion
@@ -2555,16 +2543,16 @@ subroutine ifc_outphbtrap(ifc, cryst, ngqpt, nqshft, qshft, basename)
    ABI_ERROR(msg)
  end if
 
- write (unit_btrap,'(a)') '#'
- write (unit_btrap,'(a)') '# ABINIT package : Boltztrap phonon file. With old BT versions remove this header before feeding to BT'
- write (unit_btrap,'(a)') '#    for compatibility with PHON output the freq are in Ry (before the square)'
- write (unit_btrap,'(a)') '#'
- write (unit_btrap,'(a)') '#    nq, nband  '
- write (unit_btrap,'(a)') '#  qx, qy, qz   '
- write (unit_btrap,'(a)') '#  qpt weight   '
- write (unit_btrap,'(a)') '#  freq_1^2, dynmat column for mode 1 '
- write (unit_btrap,'(a)') '#  etc for mode 2,3,4... qpt 2,3,4... '
- write (unit_btrap,'(2I6)') nqibz, 3*natom
+ write(unit_btrap,'(a)') '#'
+ write(unit_btrap,'(a)') '# ABINIT package : Boltztrap phonon file. With old BT versions remove this header before feeding to BT'
+ write(unit_btrap,'(a)') '#    for compatibility with PHON output the freq are in Ry (before the square)'
+ write(unit_btrap,'(a)') '#'
+ write(unit_btrap,'(a)') '#    nq, nband  '
+ write(unit_btrap,'(a)') '#  qx, qy, qz   '
+ write(unit_btrap,'(a)') '#  qpt weight   '
+ write(unit_btrap,'(a)') '#  freq_1^2, dynmat column for mode 1 '
+ write(unit_btrap,'(a)') '#  etc for mode 2,3,4... qpt 2,3,4... '
+ write(unit_btrap,'(2I6)') nqibz, 3*natom
 
 ! Loop over irreducible q-points
  do iq_ibz=1,nqibz
@@ -2668,7 +2656,7 @@ subroutine ifc_printbxsf(ifc, cryst, ngqpt, nqshft, qshft, path, comm)
    if (ierr /=0) then
      msg = "Cannot produce BXSF file with phonon isosurface, see log file for more info"
      ABI_WARNING(msg)
-     call wrtout(ab_out, msg, 'COLL')
+     call wrtout(ab_out, msg)
    end if
  end if
 
@@ -2863,7 +2851,6 @@ end subroutine ifc_calcnwrite_nana_terms_qpath
 !! Construct a DDB object from the IFC object.
 !!
 !! INPUTS
-!!  ifc = IFC object
 !!  crystal = Crystal object
 !!
 !! OUTPUT
@@ -2916,8 +2903,7 @@ subroutine ifc_to_ddb(ifc, ddb, crystal)
   qptrlatt(2,2)=ifc%ngqpt(2)
   qptrlatt(3,3)=ifc%ngqpt(3)
 
-  call kpts_ibz_from_kptrlatt(crystal,qptrlatt,qptopt,nqshft,qshft, &
-                              nqibz,qibz,wtq,nqbz,qbz)
+  call kpts_ibz_from_kptrlatt(crystal,qptrlatt,qptopt,nqshft,qshft, nqibz,qibz,wtq,nqbz,qbz)
 
   ddb%nblok = nqibz
   ABI_MALLOC(ddb%flg,(msize,nqibz))  ; ddb%flg = one
@@ -2947,8 +2933,7 @@ subroutine ifc_to_ddb(ifc, ddb, crystal)
   ABI_MALLOC(d2red,(2,3,mpert,3,mpert))
 
   ! Set up the flags
-  ABI_MALLOC(flg,(3,mpert,3,mpert))
-  flg = zero
+  ABI_CALLOC(flg,(3,mpert,3,mpert))
   do ipert1=1,ddb%natom
     do ipert2=1,ddb%natom
       do idir1=1,3
@@ -2980,7 +2965,6 @@ subroutine ifc_to_ddb(ifc, ddb, crystal)
      crystal%natom,crystal%ntypat,crystal%typat,crystal%ucvol,crystal%zion)
 
     call ddb%set_d2matr(iqpt, d2red, flg)
-
   end do
 
   ABI_FREE(d2cart)
