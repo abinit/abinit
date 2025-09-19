@@ -125,18 +125,17 @@ module m_gstore
  use m_ddb
  use m_ddk
  use m_dvdb
- use m_crystal
  use m_fft
  use m_hamiltonian
  use m_pawcprj
- use m_dtset
- use m_dtfil
  use m_wfd
  use m_ephtk
  use m_mkffnl
  use m_sigtk
 
  use defs_abitypes,    only : mpi_type
+ use m_dtset,          only : dataset_type
+ use m_dtfil,          only : datafiles_type
  use m_time,           only : cwtime, cwtime_report, sec2str
  use m_fstrings,       only : tolower, itoa, ftoa, sjoin, ktoa, ltoa, strcat, replace_ch0, yesno, string_in
  use m_numeric_tools,  only : arth, get_diag, isdiagmat
@@ -148,6 +147,7 @@ module m_gstore
  use m_cgtools,        only : cg_zdotc
  use m_kg,             only : getph
  use defs_datatypes,   only : pseudopotential_type
+ use m_crystal,        only : crystal_t
  use m_hdr,            only : hdr_type, fform_from_ext
  use m_matrix,         only : matr3inv
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_sort, kpts_pack_in_stars, &
@@ -388,8 +388,8 @@ type, public :: gqk_t
 !!    - metadata such as kzone, qzone and kfilter that are needed to interpret
 !!      the storage mode used for the g(k,q).
 !!
-!! NB: the e-ph matrix element are stored in gstore%gqk(my_is) where my_is counts the number of collinear spins
-!!     treated by this MPI processor.
+!! NB: the e-ph matrix element are stored in gstore%gqk(my_is) where my_is counts
+!!     the number of collinear spins treated by this MPI processor.
 !!
 !! SOURCE
 
@@ -583,10 +583,10 @@ contains
   ! Compute Eliashberg function a^2F(w).
 
   procedure :: from_ncpath => gstore_from_ncpath
-  ! Reconstruct object from netcdf file
+  ! Reconstruct object from netcdf file.
 
   procedure :: init => gstore_init
-  ! Build object
+  ! Build object from scratch
 
   procedure :: get_missing_qbz_spin => gstore_get_missing_qbz_spin
   ! Return the number of (q-points, spin) entries that have been computed
@@ -602,8 +602,6 @@ contains
 
   procedure :: wannierize_and_write_gwan => gstore_wannierize_and_write_gwan
   ! Compute g(R_e,R_ph) from g(k,q) and save results to GWAN.nc file
-
-
 
 end type gstore_t
 !!***
@@ -1476,7 +1474,8 @@ subroutine gstore_print(gstore, units, header, prtvol)
  integer,optional,intent(in) :: prtvol
 
 !Local variables ------------------------------
- integer :: my_is, my_prtvol
+ integer,parameter :: max_nk=10
+ integer :: my_is, my_prtvol, ik_calc, ik_bz, ik_ibz !, iq_calc, iq_bz, iq_ibz
  character(len=500) :: msg
 !----------------------------------------------------------------------
 
@@ -1517,12 +1516,37 @@ subroutine gstore_print(gstore, units, header, prtvol)
    call wrtout(units, sjoin("P Number of perturbations treated by this CPU: ",  itoa(gqk%my_npert)))
    call wrtout(units, sjoin("P Number of CPUs for parallelism over q-points: ", itoa(gqk%qpt_comm%nproc)))
    call wrtout(units, sjoin("P Number of CPUs for parallelism over k-points: ", itoa(gqk%kpt_comm%nproc)))
+   ! This only if GWPT.
    if (gqk%bsum_comm%nproc /= 1) then
      call wrtout(units, sjoin("P Number of CPUs for parallelism over band summation: ", itoa(gqk%bsum_comm%nproc)))
    end if
    if (gqk%pp_sum_comm%nproc /= 1) then
      call wrtout(units, sjoin("P Number of CPUs for parallelism over wavevector summation: ", itoa(gqk%pp_sum_comm%nproc)))
    end if
+
+   ! Print q-points
+   call wrtout(units, " k-points included in gstore:")
+   do ik_calc=1,gqk%glob_nk
+     ik_bz = gstore%kglob2bz(ik_calc, spin)
+     ik_ibz = gstore%kbz2ibz(1, ik_bz)
+     call wrtout(units, sjoin(itoa(ik_calc), ":", ktoa(gstore%kbz(:, ik_bz))))
+     if (ik_calc > max_nk .and. my_prtvol == 0) then
+       call wrtout(units, sjoin(" Max", itoa(max_nk), " k-points will be written. Use prtvol > 0 to print all of them."))
+       exit
+     end if
+   end do
+
+   ! Print q-points
+   !call wrtout(units, " q-points included in gstore:")
+   !do iq_calc=1,gqk%glob_nq
+   !  iq_bz = gstore%qglob2bz(iq_calc, spin)
+   !  iq_ibz = gstore%qbz2ibz(1, iq_bz)
+   !  call wrtout(units, sjoin(itoa(iq_calc), ":", ktoa(gstore%qbz(:, iq_bz))))
+   !  if (iq_calc > max_nk .and. my_prtvol == 0) then
+   !    call wrtout(units, sjoin(" Max", itoa(max_nk), " q-points will be written. Use prtvol > 0 to print all of them."))
+   !    exit
+   !  end if
+   !end do
 
    ! Print memory
    if (allocated(gqk%my_g2)) then
@@ -2560,10 +2584,9 @@ subroutine gstore_get_lambda_iso_iw(gstore, nw, imag_w, lambda)
 !----------------------------------------------------------------------
 
  ABI_CHECK(gstore%qzone == "bz", "gstore_get_lambda_iso_iw assumes qzone == `bz`")
- lambda = zero
-
  !if (gstore%check_cplex_qkzone_gmode(cplex1, "bz", kzone, gmode, kfilter) result(ierr)
 
+ lambda = zero
  do my_is=1,gstore%my_nspins
    associate (gqk => gstore%gqk(my_is))
    ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
@@ -2623,31 +2646,38 @@ end subroutine gstore_get_lambda_iso_iw
 !!
 !! SOURCE
 
-subroutine gstore_get_a2fw(gstore, nw, wmesh, a2fw)
+subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
 
 !Arguments ------------------------------------
  class(gstore_t),intent(inout) :: gstore
+ type(dataset_type),intent(in) :: dtset
  integer,intent(in) :: nw
  real(dp),intent(in) :: wmesh(nw)
  real(dp),intent(out) :: a2fw(nw)
 
 !Local variables-------------------------------
- integer :: my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr
+ integer :: my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, timrev_q, ii, ik_ibz
  real(dp) :: g2, wqnu, weight_k, weight_q, cpu, wall, gflops
+ type(lgroup_t) :: lg_myq
+ character(len=500) :: msg, kk_string !, qq_bz_string,
 !arrays
- real(dp) :: qpt(3)
+ real(dp) :: qpt(3), kk(3)
  real(dp),allocatable :: dbldelta_q(:,:,:), g2_mnkp(:,:,:,:), deltaw_nuq(:)
 !----------------------------------------------------------------------
 
  call wrtout(std_out, sjoin(" Computing a^2F(w) with ph_smear:", ftoa(gstore%dtset%ph_smear * Ha_meV), "(meV)"), pre_newlines=1)
  ABI_CHECK(gstore%qzone == "bz", "gstore_get_lambda_iso_iw assumes qzone == `bz`")
+
+ ! Check consistency of little group options
+ ABI_CHECK(gstore%check_little_group(dtset, msg) == 0, msg)
+
  call cwtime(cpu, wall, gflops, "start")
 
  ABI_MALLOC(deltaw_nuq, (nw))
 
  a2fw = zero
  do my_is=1,gstore%my_nspins
-   associate (gqk => gstore%gqk(my_is))
+   associate (gqk => gstore%gqk(my_is), cryst => gstore%cryst)
    ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
    ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
 
@@ -2664,11 +2694,30 @@ subroutine gstore_get_a2fw(gstore, nw, wmesh, a2fw)
        g2_mnkp(:,:,:,my_ip) = gqk%my_g2(my_ip,:,my_iq,:,:)
      end do
 
+     ! Compute the little group of the q-point so that we only need to sum g(k,q) for k in the IBZ_q
+     if (dtset%gstore_use_lgq /= 0) then
+       timrev_q = kpts_timrev_from_kptopt(gstore%qptopt)
+       call lg_myq%init(cryst, qpt, timrev_q, gstore%nkbz, gstore%kbz, gstore%nkibz, gstore%kibz, xmpi_comm_self)
+     end if
+
      do my_ip=1,gqk%my_npert
        wqnu = gqk%my_wnuq(my_ip, my_iq)
        deltaw_nuq = gaussian(wmesh - wqnu, gstore%dtset%ph_smear)
+
        do my_ik=1,gqk%my_nk
-         weight_k = gqk%my_wtk(my_ik)
+         kk = gqk%my_kpts(:, my_ik); ik_ibz = gqk%my_k2ibz(1, my_ik); weight_k = gqk%my_wtk(my_ik)
+
+         if (dtset%gstore_use_lgq /= 0) then
+           ii = lg_myq%findq_ibzk(kk)
+           if (ii == -1) then
+             kk_string = ktoa(kk)
+             call wrtout(std_out, sjoin(" my_ik:", itoa(my_ik), kk_string, " not in IBZ_q --> skipping iteration"))
+             cycle
+             weight_k = lg_myq%weights(ii)
+             ! TODO: Check fillvalue (should be zero)
+           end if
+         end if
+
          do in_k=1,gqk%nb
            do im_kq=1,gqk%nb
              g2 = g2_mnkp(im_kq, in_k, my_ik, my_ip)
@@ -2677,6 +2726,8 @@ subroutine gstore_get_a2fw(gstore, nw, wmesh, a2fw)
          end do
        end do
      end do
+
+     call lg_myq%free()
    end do ! my_iq
 
    ABI_FREE(dbldelta_q)

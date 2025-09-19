@@ -333,6 +333,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  if (use_wfk) then
    ! Construct crystal and ebands from the GS WFK file.
+   ! TODO: If we want to update the eigenvalues to perform some kind of self-consistency,
+   ! this operation should be done here! Either scissors operator or external file with QP energies.
    ebands = wfk_read_ebands(wfk0_path, comm, out_hdr=wfk0_hdr)
    call wfk0_hdr%vs_dtset(dtset)
 
@@ -472,10 +474,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    dipquad=dtset%dipquad, quadquad=dtset%quadquad)
 
  ABI_FREE(ddb_qshifts)
- if (my_rank == master) then
-   call ifc%print(unit=std_out)
-   !call ifc%print(unit=ab_out)
- end if
+ if (my_rank == master) call ifc%print([std_out])
 
  ! Output phonon band structure (requires qpath)
  if (dtset%prtphbands /= 0) call ifc_mkphbs(ifc, cryst, dtset, dtfil%filnam_ds(4), comm)
