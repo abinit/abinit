@@ -193,7 +193,7 @@ subroutine anaddb_driver_init(driver, dtset)
 
  ! Set control flags
  if (dtset%ifcflag == 1) then
-   driver%do_ifc = .true. 
+   driver%do_ifc = .true.
  end if
 
  if (dtset%ifcflag /= 0 .or. dtset%dieflag /= 0 &
@@ -211,7 +211,7 @@ subroutine anaddb_driver_init(driver, dtset)
  end if
 
  if (dtset%nph2l /= 0) then
-   driver%do_dielectric_nonana = .true. 
+   driver%do_dielectric_nonana = .true.
  end if
 
  if (dtset%ifcflag == 1 .and. any(dtset%prtdos==[1, 2])) then
@@ -219,15 +219,15 @@ subroutine anaddb_driver_init(driver, dtset)
  end if
 
  if (dtset%nph1l /= 0 .or. dtset%nqpath /= 0) then
-   driver%do_phonon_bs = .true. 
+   driver%do_phonon_bs = .true.
  end if
 
  if (dtset%gruns_nddbs /= 0) then
-   driver%do_ifc = .false. 
+   driver%do_ifc = .false.
    driver%do_electric_tensors = .false.
    driver%do_dielectric_q0 = .false.
-   driver%do_dielectric_nonana = .false. 
-   driver%do_phonon_bs = .false. 
+   driver%do_dielectric_nonana = .false.
+   driver%do_phonon_bs = .false.
    driver%do_phonon_dos = .false.
  end if
 
@@ -684,7 +684,7 @@ subroutine anaddb_driver_interatomic_force_constants(driver, ifc, dtset, crystal
      dipquad=dtset%dipquad, quadquad=dtset%quadquad)
  end if
 
- call ifc%print(unit=std_out)
+ call ifc%print([std_out])
 
  ! Compute speed of sound.
  if (dtset%vs_qrad_tolkms(1) > zero) then

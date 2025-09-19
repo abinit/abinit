@@ -295,7 +295,7 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
 
  ! Compute Eliashberg function a2F(w)
  ABI_MALLOC(a2fw, (phmesh_size))
- call gstore%get_a2fw(phmesh_size, phmesh, a2fw)
+ call gstore%get_a2fw(dtset, phmesh_size, phmesh, a2fw)
 
  ncid = nctk_noid
  if (my_rank == master) then

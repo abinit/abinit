@@ -223,7 +223,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  real(dp),allocatable :: rwork_wing(:,:,:,:), tmp_omega_wgs(:)
  complex(dp),allocatable :: chi0intra_lwing(:,:,:),chi0intra_uwing(:,:,:),chi0intra_head(:,:,:), tmp_omega(:)
  complex(gwpc),allocatable,target :: chi0(:,:,:),chi0intra(:,:,:)
- complex(gwpc),ABI_CONTIGUOUS pointer :: epsm1(:,:,:)
+ complex(gwpc),contiguous, pointer :: epsm1(:,:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  character(len=80) :: title(2)
  character(len=fnlen) :: gw_fname,wfk_fname,lwl_fname

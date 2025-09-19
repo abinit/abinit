@@ -827,7 +827,7 @@ end subroutine ifc_from_file
 !!  Print info on the object
 !!
 !! INPUTS
-!!  [unit]=Unit number for output. Defaults to std_out
+!!  units=Unit numbers for output
 !!  [prtvol]=Verbosity level.
 !!  [header]=String to be printed as header for additional info.
 !!
@@ -836,61 +836,61 @@ end subroutine ifc_from_file
 !!
 !! SOURCE
 
-subroutine ifc_print(ifc, header, unit, prtvol)
+subroutine ifc_print(ifc, units, header, prtvol)
 
 !Arguments ------------------------------------
 !scalars
  class(ifc_type),intent(in) :: ifc
- integer,optional,intent(in) :: unit,prtvol
+ integer,intent(in) :: units(:)
+ integer,optional,intent(in) :: prtvol
  character(len=*),optional,intent(in) :: header
 
 !Local variables-------------------------------
- integer :: unt,my_prtvol,iatom,ii,idir
+ integer :: my_prtvol,iatom,ii,idir
  character(len=500) :: msg
 ! *********************************************************************
 
- unt = std_out; if (present(unit)) unt = unit
  my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
 
  msg = ' ==== Info on the interatomic force constants ==== '
  if (present(header)) msg = ' ==== '//trim(adjustl(header))//' ==== '
- call wrtout(unt, msg)
+ call wrtout(units, msg)
 
- call wrtout(unt,' Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):')
+ call wrtout(units,' Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):')
  do ii=1,3
    write(msg,'(1x,a,i1,a,3f11.7,2x,a,i1,a,3f11.7)')&
     'R(',ii,')=',ifc%rprim(:,ii),'G(',ii,')=',ifc%gprim(:,ii)
-   call wrtout(unt,msg)
+   call wrtout(units,msg)
  end do
- call wrtout(unt, sjoin(" acell:", ltoa(ifc%acell)))
- call wrtout(unt, sjoin(" Acoustic Sum Rule option (asr):", itoa(ifc%asr)))
- call wrtout(unt, sjoin(" Option for the sampling of the BZ (brav):", itoa(ifc%brav)))
- call wrtout(unt, sjoin(" Symmetrization flag (symdynmat):", itoa(ifc%symdynmat)))
- call wrtout(unt, sjoin(" Dipole-dipole interaction flag (dipdip):", itoa(ifc%dipdip)))
- call wrtout(unt, sjoin(" Dipole-quadrupole interaction flag (dipquad):", itoa(ifc%dipquad)))
- call wrtout(unt, sjoin(" quadrupole-quadrupole interaction flag (quadquad):", itoa(ifc%quadquad)))
- call wrtout(unt, sjoin(" Ewald option:", itoa(ifc%ewald_option)))
- call wrtout(unt, sjoin(" Dielectric tensor: ", ch10, ltoa(reshape(ifc%dielt, [9]), fmt="f10.2")))
- call wrtout(unt, " Effective charges:")
+ call wrtout(units, sjoin(" acell:", ltoa(ifc%acell)))
+ call wrtout(units, sjoin(" Acoustic Sum Rule option (asr):", itoa(ifc%asr)))
+ call wrtout(units, sjoin(" Option for the sampling of the BZ (brav):", itoa(ifc%brav)))
+ call wrtout(units, sjoin(" Symmetrization flag (symdynmat):", itoa(ifc%symdynmat)))
+ call wrtout(units, sjoin(" Dipole-dipole interaction flag (dipdip):", itoa(ifc%dipdip)))
+ call wrtout(units, sjoin(" Dipole-quadrupole interaction flag (dipquad):", itoa(ifc%dipquad)))
+ call wrtout(units, sjoin(" quadrupole-quadrupole interaction flag (quadquad):", itoa(ifc%quadquad)))
+ call wrtout(units, sjoin(" Ewald option:", itoa(ifc%ewald_option)))
+ call wrtout(units, sjoin(" Dielectric tensor: ", ch10, ltoa(reshape(ifc%dielt, [9]), fmt="f10.2")))
+ call wrtout(units, " Effective charges:")
  do iatom=1,ifc%natom
-   call wrtout(unt, ltoa(reshape(ifc%zeff(:,:,iatom), [3*3]), fmt="f10.2"))
+   call wrtout(units, ltoa(reshape(ifc%zeff(:,:,iatom), [3*3]), fmt="f10.2"))
  end do
- call wrtout(unt, " Quadrupolar terms:")
+ call wrtout(units, " Quadrupolar terms:")
  do iatom=1,ifc%natom
    do idir=1,3
-     call wrtout(unt, ltoa(reshape(ifc%qdrp_cart(:,:,idir,iatom), [3*3]), fmt="f10.2"))
+     call wrtout(units, ltoa(reshape(ifc%qdrp_cart(:,:,idir,iatom), [3*3]), fmt="f10.2"))
    end do
  end do
 
- call wrtout(unt, sjoin(" Mass of the atoms (atomic mass unit): ", ltoa(ifc%amu)))
- call wrtout(unt, sjoin(" Number of real-space points for IFC(R): ", itoa(ifc%nrpt)))
- call wrtout(std_out, sjoin(" Radius of biggest sphere inscribed in the WS supercell: ", ftoa(ifc%r_inscribed_sphere)))
- call wrtout(unt, " ")
+ call wrtout(units, sjoin(" Mass of the atoms (atomic mass unit): ", ltoa(ifc%amu)))
+ call wrtout(units, sjoin(" Number of real-space points for IFC(R): ", itoa(ifc%nrpt)))
+ call wrtout(units, sjoin(" Radius of biggest sphere inscribed in the WS supercell: ", ftoa(ifc%r_inscribed_sphere)))
+ call wrtout(units, " ")
 
- call wrtout(unt, " Q-mesh:")
- call wrtout(unt, sjoin(" ngqpt:", ltoa(ifc%ngqpt),", nqshft:", itoa(ifc%nqshft)))
+ call wrtout(units, " Q-mesh:")
+ call wrtout(units, sjoin(" ngqpt:", ltoa(ifc%ngqpt),", nqshft:", itoa(ifc%nqshft)))
  do ii=1,ifc%nqshft
-   call wrtout(unt, sjoin("  ", ktoa(ifc%qshft(:,ii))))
+   call wrtout(units, sjoin("  ", ktoa(ifc%qshft(:,ii))))
  end do
 
 end subroutine ifc_print
@@ -1201,8 +1201,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
  integer,parameter :: master=0
  integer :: ii,nu,igrid,my_rank,nprocs,ierr,converged,npts,num_negw,vs_ierr,ncerr
  integer :: iatom,iatref,num_acoustic,isacoustic
- real(dp) :: min_negw,cpu,wall,gflops
- real(dp) :: qrad,tolkms,diff
+ real(dp) :: min_negw,cpu,wall,gflops, qrad,tolkms,diff
  character(len=500) :: msg
  type(lebedev_t) :: lgrid
 !arrays
@@ -1411,7 +1410,7 @@ subroutine ifc_autocutoff(ifc, crystal, comm)
 !scalars
  integer,parameter :: master=0
  integer :: iq_ibz,ierr,my_rank,nprocs,ii,nsphere,num_negw,jl,ju,jm,natom,nrpt
- real(dp),parameter :: rifcsph0=zero
+ real(dp),parameter :: rifcsph0 = zero
  real(dp) :: adiff,qrad,min_negw,xval,rcut_min
  type(lebedev_t) :: lgrid
 !arrays
@@ -1552,9 +1551,7 @@ subroutine corsifc9(acell,gprim,natom,nrpt,nsphere,rifcsph,rcan,rprim,rpt,rcut_m
  real(dp),intent(in) :: rifcsph
  real(dp),intent(out) :: rcut_min
 !arrays
- real(dp),intent(in) :: acell(3)
- real(dp),intent(in) :: gprim(3,3),rcan(3,natom)
- real(dp),intent(in) :: rprim(3,3),rpt(3,nrpt)
+ real(dp),intent(in) :: acell(3), gprim(3,3),rcan(3,natom), rprim(3,3),rpt(3,nrpt)
  real(dp),intent(inout) :: wghatm(natom,natom,nrpt)
 
 !Local variables -------------------------
@@ -1637,7 +1634,6 @@ end subroutine corsifc9
 !----------------------------------------------------------------------
 
 !!****f* m_ifc/ifc_write
-!!
 !! NAME
 !! ifc_write
 !!
@@ -1687,20 +1683,15 @@ subroutine ifc_write(Ifc,ifcana,atifcflg,ifcout,prt_ifc,ncid,prefix,&
 
 !Local variables -------------------------
 !scalars
- integer :: ia,ib,ii,ncerr,iatifc,ifcout1,mu,nu,iout, irpt
-! unit number to print out ifc information for dynamical matrix (AI2PS)
- integer :: unit_ifc, unit_tdep
- real(dp) :: detdlt
- real(dp) :: maxdist_tdep
+ integer :: ia,ib,ii,ncerr,iatifc,ifcout1,mu,nu,iout, irpt, unit_ifc, unit_tdep
+ real(dp) :: detdlt, maxdist_tdep
  character(len=fnlen) :: filename
  character(len=500) :: msg
  character(len=4) :: str1, str2
 !arrays
  integer,allocatable :: list(:),indngb(:)
- real(dp) :: invdlt(3,3),ra(3),xred(3),dielt(3,3)
- real(dp),allocatable :: dist(:,:,:),wkdist(:),rsiaf(:,:,:),sriaf(:,:,:),vect(:,:,:)
- real(dp),allocatable :: posngb(:,:),wghia(:)
- real(dp) :: gprimd(3,3),rprimd(3,3)
+ real(dp) :: invdlt(3,3),ra(3),xred(3),dielt(3,3), gprimd(3,3),rprimd(3,3)
+ real(dp),allocatable :: dist(:,:,:),wkdist(:),rsiaf(:,:,:),sriaf(:,:,:),vect(:,:,:), posngb(:,:),wghia(:)
 ! *********************************************************************
 
  iout = ab_out; if (present(unit_out)) iout = unit_out
@@ -2890,15 +2881,13 @@ subroutine ifc_to_ddb(ifc, ddb, crystal)
 
 !Local variables-------------------------------
 !scalars
- integer :: jj,iqpt,idir1,idir2,ipert1,ipert2
- integer :: mpert,msize
- integer :: nqibz,nqbz
  integer,parameter :: qptopt=1, nqshft=1
+ integer :: jj,iqpt,idir1,idir2,ipert1,ipert2, mpert,msize, nqibz,nqbz
  real(dp) :: qj,qptnrm
 !arrays
  integer :: qptrlatt(3,3)
- real(dp) :: qpt(3), qshft(1,3)
  integer,allocatable :: flg(:,:,:,:)
+ real(dp) :: qpt(3), qshft(1,3)
  real(dp),allocatable :: qibz(:,:),qbz(:,:), wtq(:), d2cart(:,:,:,:,:),d2red(:,:,:,:,:)
 ! *********************************************************************
 

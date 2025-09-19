@@ -2224,7 +2224,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
  !logical,allocatable :: bmask(:)
  real(dp) :: kk_ibz(3), tsec(2)
  real(dp),target,allocatable :: cg_work(:,:,:)
- real(dp),ABI_CONTIGUOUS pointer :: cg_k(:,:)
+ real(dp),contiguous, pointer :: cg_k(:,:)
 ! *************************************************************************
 
  units = [std_out, ab_out]
@@ -7090,7 +7090,7 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, wt_space, keep_file, filepath)
  integer :: my_is, my_iqi, my_it, spin, iq_ibz, itau, npwtot_q, my_ncols, my_gcol_start, ncid, ncerr, var_id !, ierr
  real(dp) :: cpu, wall, gflops
 !arrays
- real(dp), ABI_CONTIGUOUS pointer :: fptr(:,:,:)
+ real(dp), contiguous, pointer :: fptr(:,:,:)
  type(__slkmat_t), pointer :: mats(:)
 ! *************************************************************************
 

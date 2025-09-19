@@ -4550,7 +4550,7 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
  integer :: grp_ncid, ncerr
 !arrays
  integer, allocatable :: recvcounts(:), displs(:), nq_rank(:), kq_symtab(:,:), my_kq_symtab(:,:)
- integer, ABI_CONTIGUOUS pointer :: bids(:)
+ integer, contiguous, pointer :: bids(:)
  real(dp) :: qp_gaps(self%ntemp),qpoms_gaps(self%ntemp)
  real(dp),allocatable :: aw(:,:,:), a2few_avg(:,:), gather_srate(:,:,:,:), grp_srate(:,:,:,:)
  real(dp) :: ks_enes(self%max_nbcalc), ze0_vals(self%ntemp, self%max_nbcalc)

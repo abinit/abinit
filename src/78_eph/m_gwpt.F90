@@ -197,7 +197,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_qq, wall_qq, gflops_qq, cpu_kk, wall_kk, gflops_kk, cpu_pp, wall_pp, gflops_pp
  real(dp) :: drude_plsmf, my_plsmf
  real(dp) :: fact_spin, theta_mu_minus_e0i, tol_empty, tol_empty_in !, e_mkq, e_nk ! e0i,
- real(dp),ABI_CONTIGUOUS pointer :: qp_ene(:,:,:), qp_occ(:,:,:)
+ real(dp),contiguous, pointer :: qp_ene(:,:,:), qp_occ(:,:,:)
  real(dp) :: ecut,weight_q,bigexc,bigsxc,vxcavg ! ediff, eshift, q0rad, bz_vol,
  logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, qq_is_gamma, pp_is_gamma, isirr_q
  logical :: stern_use_cache, stern_has_band_para, use_ftinterp
@@ -231,7 +231,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,allocatable :: nband(:,:), wfd_istwfk(:), count_bk(:,:), qibz2dvdb(:)
  integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:), my_iqibz_inds(:)
  integer(i1b),allocatable :: itreat_qibz(:)
- integer, ABI_CONTIGUOUS pointer :: kg_c(:,:), kg_x(:,:)
+ integer, contiguous, pointer :: kg_c(:,:), kg_x(:,:)
  real(dp) :: eig0nk, cpu, wall, gflops !, cpu_q, wall_q, gflops_q, cpu_all, wall_all, gflops_all
  complex(gwpc) :: ctmp_gwpc, xdot_tmp
 !arrays
