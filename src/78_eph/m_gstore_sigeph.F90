@@ -374,7 +374,7 @@ subroutine write_results__(ntemp, gqk)
  !logical :: iwrite
  real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond,qpe_oms,qpe_oms_val,qpe_oms_cond
  !real(dp) :: invsig2fmts, tau, ravg2
- complex(dpc) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond !,cavg1,cavg2,cavg3,cavg4
+ complex(dp) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond !,cavg1,cavg2,cavg3,cavg4
  !character(len=5000) :: msg
  !integer :: grp_ncid, ncerr
 !arrays
@@ -385,7 +385,7 @@ subroutine write_results__(ntemp, gqk)
  !real(dp),allocatable :: aw(:,:,:), a2few_avg(:,:), gather_srate(:,:,:,:), grp_srate(:,:,:,:)
  real(dp) :: ks_enes(gqk%nb), ze0_vals(ntemp, gqk%nb)
  !real(dp) :: gfw_avg(self%phmesh_size, 3)
- complex(dpc) :: qpoms_enes(ntemp, gqk%nb),qp_enes(ntemp, gqk%nb) ! nb_k
+ complex(dp) :: qpoms_enes(ntemp, gqk%nb),qp_enes(ntemp, gqk%nb) ! nb_k
 ! *************************************************************************
 
  ! Write legend.

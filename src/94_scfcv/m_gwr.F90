@@ -107,7 +107,6 @@
 !!  - Sig_c breaks QP degeneracies due to fixed q0.
 !!
 !! NOTES:
-!!
 !!  1) _slk_mat_t is a CPP macro defined in abi_common.h that allows us to use PBLAS in single/double precision
 !!     Be careful when using c_f_pointer because there's no type checking.
 !!

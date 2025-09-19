@@ -463,12 +463,8 @@ subroutine destroy_green(green)
    ABI_FREE(green%moments)
  end if  ! green%moments
 
- !if (allocated(green%procb))   then
- !   ABI_FREE(green%procb)
- !end if
- !if ( allocated(green%proct))   then
- !   ABI_FREE(green%proct)
- !end if
+ !ABI_SFREE(green%procb)
+ !ABI_SFREE(green%proct)
  green%distrib => null()
  green%omega => null()
 

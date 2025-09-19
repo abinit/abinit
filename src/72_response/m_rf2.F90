@@ -137,11 +137,9 @@ CONTAINS  !=====================================================================
 !! INPUTS
 !!  idir1 : index of the 1st direction (1<=idir1<=3)
 !!  idir2 : index of the 2nd direction (1<=idir2<=3)
-
+!!
 !! OUTPUT
 !!  idir : integer between 1 and 9
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -152,7 +150,6 @@ subroutine rf2_getidir(idir1,idir2,idir)
  integer,intent(in) :: idir1,idir2
  integer,intent(out) :: idir
  integer :: dir_from_dirs(9) = (/1,6,5,9,2,4,8,7,3/)
-
 ! *************************************************************************
 
  idir = dir_from_dirs(3*(idir1-1)+idir2)
@@ -170,13 +167,11 @@ end subroutine rf2_getidir
 !!  Get directions of the 1st and 2nd perturbations according to the input idir
 !!
 !! INPUTS
-!!  idir : integer between 1 and 9
+!!  idir: integer between 1 and 9
 !!
 !! OUTPUT
-!!  idir1 : index of the 1st direction (1<=idir1<=3)
-!!  idir2 : index of the 2nd direction (1<=idir2<=3)
-!!
-!! NOTES
+!!  idir1: index of the 1st direction (1<=idir1<=3)
+!!  idir2: index of the 2nd direction (1<=idir2<=3)
 !!
 !! SOURCE
 
@@ -186,38 +181,37 @@ subroutine rf2_getidirs(idir,idir1,idir2)
 !scalars
  integer,intent(in) :: idir
  integer,intent(out) :: idir1,idir2
-
 ! *************************************************************************
 
  select case(idir)
 !  Diagonal terms :
-   case(1)
+   case (1)
      idir1 = 1
      idir2 = 1
-   case(2)
+   case (2)
      idir1 = 2
      idir2 = 2
-   case(3)
+   case (3)
      idir1 = 3
      idir2 = 3
 !  Upper triangular terms :
-   case(4)
+   case (4)
      idir1 = 2
      idir2 = 3
-   case(5)
+   case (5)
      idir1 = 1
      idir2 = 3
-   case(6)
+   case (6)
      idir1 = 1
      idir2 = 2
 !  Lower triangular terms :
-   case(7)
+   case (7)
      idir1 = 3
      idir2 = 2
-   case(8)
+   case (8)
      idir1 = 3
      idir2 = 1
-   case(9)
+   case (9)
      idir1 = 2
      idir2 = 1
  end select
@@ -251,8 +245,6 @@ end subroutine rf2_getidirs
 !!
 !! OUTPUT
 !!
-!! NOTES
-!!
 !! SOURCE
 
 subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,ipert1,ipert2,&
@@ -260,12 +252,11 @@ subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,
 
 !Arguments ---------------------------------------------
 !scalars
+ class(rf2_t),intent(inout) :: rf2
  integer,intent(in) :: choice,iband,idir1,idir2,ipert1,ipert2,jband,debug_mode
- type(rf2_t),intent(inout) :: rf2
  type(gs_hamiltonian_type),intent(in) :: gs_hamkq
  type(MPI_type),intent(in) :: mpi_enreg
  real(dp), intent(in) :: factor_in
-
 !arrays
  real(dp),intent(in) :: vi(2,rf2%size_wf),v1j(2,rf2%size_wf),v2j(2,rf2%size_wf)
 
@@ -276,7 +267,6 @@ subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,
  character(len=500) :: msg
  character(len=15) :: bra_i,ket_j,op1,op2
  character(len=2) :: pert1,pert2
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -298,22 +288,22 @@ subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,
      pert2 = "dE"
    end if
    select case (choice)
-    case(1) ! < u^(pert2) | H^(0) | u^(pert1) >
+    case (1) ! < u^(pert2) | H^(0) | u^(pert1) >
       write(bra_i,'(2a,2(i1,a))') ' < du/',pert2,idir2,'(',iband,') | '
       write(ket_j,'(2a,2(i1,a))') ' | du/',pert1,idir1,'(',jband,') > '
       write(op1,'(a)')            '     H^(0)     '
       write(op2,'(a)')            '     S^(0)     '
-    case(2) ! < u^(pert2) | H^(pert1) | u^(0) >
+    case (2) ! < u^(pert2) | H^(pert1) | u^(0) >
       write(bra_i,'(2a,2(i1,a))') ' < du/',pert2,idir2,'(',iband,') | '
       write(ket_j,'(a,i1,a)')     ' | u^(0) (',jband,') > '
       write(op1,'(2a,i1,a)')      '     dH/',pert1,idir1,'    '
       write(op2,'(2a,i1,a)')      '     dS/',pert1,idir1,'    '
-    case(3) ! < u^(0) | H^(pert1pert2) | u^(0) >
+    case (3) ! < u^(0) | H^(pert1pert2) | u^(0) >
       write(bra_i,'(a,i1,a)')     ' < u^(0) (',iband,') | '
       write(ket_j,'(a,i1,a)')     ' | u^(0) (',jband,') > '
       write(op1,'(2(2a,i1),a)')   'd^2H/(',pert1,idir1,' ',pert2,idir2,')'
       write(op2,'(2(2a,i1),a)')   'd^2S/(',pert1,idir1,' ',pert2,idir2,')'
-    case(4) ! < u^(0) | H^(pert2) | u^(pert1) >
+    case (4) ! < u^(0) | H^(pert2) | u^(pert1) >
       write(bra_i,'(a,i1,a)')     ' < u^(0) (',iband,') | '
       write(ket_j,'(2a,2(i1,a))') ' | du/',pert1,idir1,'(',jband,') > '
       write(op1,'(2a,i1,a)')      '     dH/',pert2,idir2,'    '
@@ -730,9 +720,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
      if (associated(enl_ptr)) then
        nullify(enl_ptr)
      end if
-     if (allocated(enl_temp)) then
-       ABI_FREE(enl_temp)
-     end if
+     ABI_SFREE(enl_temp)
 
    end if ! end tests
 ! *******************************************************************************************
@@ -763,13 +751,6 @@ end subroutine rf2_apply_hamiltonian
 !! FUNCTION
 !!  Free all allocated arrays in a rf2_t object
 !!
-!! INPUTS
-!! rf2 : the rf2_t object to destroy
-!!
-!! OUTPUT
-!!
-!! NOTES
-!!
 !! SOURCE
 
 subroutine rf2_destroy(rf2)
@@ -777,25 +758,14 @@ subroutine rf2_destroy(rf2)
 !Arguments ---------------------------------------------
 !scalars
  type(rf2_t),intent(inout) :: rf2
-!arrays
-
-!Local variables ---------------------------------------
-!scalars
-
 ! *************************************************************************
 
  if (associated(rf2%RHS_Stern)) then
    ABI_FREE(rf2%RHS_Stern)
  end if
- if (allocated(rf2%dcwavef)) then
-   ABI_FREE(rf2%dcwavef)
- end if
- if (allocated(rf2%amn)) then
-   ABI_FREE(rf2%amn)
- end if
- if (allocated(rf2%lambda_mn)) then
-   ABI_FREE(rf2%lambda_mn)
- end if
+ ABI_SFREE(rf2%dcwavef)
+ ABI_SFREE(rf2%amn)
+ ABI_SFREE(rf2%lambda_mn)
 
 end subroutine rf2_destroy
 !!***

@@ -6,7 +6,7 @@
 !! This module define the m_unitcell type, which defines an atomic structure, with spin, lwf, electron
 !!
 !! Datatypes:
-!!  
+!!
 !!
 !! Subroutines:
 !!
@@ -93,7 +93,7 @@ module m_multibinit_cell
      integer, allocatable ::  ilwf_prim(:) ! index of primitive cell
      integer, allocatable ::  rvec(:,:) ! R cell vectors for each spin (for supercell)
      real(dp), allocatable :: lwf_masses(:)
-     type(lwf_latt_coeff_t) :: lwf_latt_coeffs  
+     type(lwf_latt_coeff_t) :: lwf_latt_coeffs
    contains
      Procedure :: initialize => lwf_initialize
      procedure :: finalize => lwf_finalize
@@ -238,7 +238,7 @@ contains
   !> @brief fill the cell supercell
   !>
   !> @param[in]  sc_maker: the helper to build supercells
-  !> @param[out]supercell; the supercell to be built 
+  !> @param[out]supercell; the supercell to be built
   !----------------------------------------------------------------------
   subroutine fill_supercell(self, sc_maker, supercell)
     class(mbcell_t), target, intent(inout) :: self
@@ -302,7 +302,7 @@ contains
   !>
   !> @param[in]  natom: number of atoms
   !> @param[in]  cell:  cell matrix
-  !> @param[in]  xcart:  cartesion 
+  !> @param[in]  xcart:  cartesion
   !> @param[in]  masses: masses of atoms
   !> @param[in]  zion: zion of atoms
   !----------------------------------------------------------------------
@@ -323,20 +323,14 @@ contains
 
 
 !----------------------------------------------------------------------
-  !> @brief finalize lattice 
+  !> @brief finalize lattice
   !----------------------------------------------------------------------
   subroutine latt_finalize(self)
     class(mbcell_lattice_t) :: self
     self%natom=0
-    if (allocated(self%xcart)) then
-       ABI_FREE(self%xcart)
-    endif
-    if (allocated(self%masses)) then
-       ABI_FREE(self%masses)
-    endif
-    if (allocated(self%zion)) then
-       ABI_FREE(self%zion)
-    endif
+    ABI_SFREE(self%xcart)
+    ABI_SFREE(self%masses)
+    ABI_SFREE(self%zion)
   end subroutine latt_finalize
 
 
@@ -394,7 +388,7 @@ contains
     integer, intent(in) :: nspin
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
     self%nspin=nspin
     call xmpi_bcast(self%nspin, master, comm, ierr)
     ABI_MALLOC(self%spin_positions, (3, self%nspin))
@@ -432,7 +426,7 @@ contains
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
 
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
     if (iam_master) then
        self%ms(:) = ms(:)
        self%rprimd(:,:) = rprimd(:,:)
@@ -508,7 +502,7 @@ contains
     integer :: i, nspin
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
     nspin=sc_maker%ncells*self%nspin
     call supercell%initialize(nspin=nspin)
