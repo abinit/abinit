@@ -3210,8 +3210,7 @@ type(krank_t) function polstate_get_krank_glob(self, mode, kptrlatt) result(kran
   enddo
   call xmpi_sum(kpts, comm, ierr)
 
-  krank_tmp = krank_from_kptrlatt(glob_nk, kpts, kptrlatt, &
-    compute_invrank=.True.)
+  call krank_tmp%from_kptrlatt(glob_nk, kpts, kptrlatt, compute_invrank=.True.)
   krank_kpts = krank_tmp%copy()
   call krank_tmp%free()
 
@@ -3340,7 +3339,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
 
    nqbz = product(ngqpt)
    call kptrlatt_from_ngkpt(ngqpt, qptrlatt_)
-   qrank_ibz = krank_from_kptrlatt(nqibz, qibz, qptrlatt_, compute_invrank=.False.)
+   call qrank_ibz%from_kptrlatt(nqibz, qibz, qptrlatt_, compute_invrank=.False.)
 
    call scell_q%init(cryst%natom, qptrlatt_, cryst%rprimd, cryst%typat, cryst%xcart, cryst%znucl, xyz_order="xyz")
 
@@ -3445,7 +3444,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
 
  call wrtout(std_out, " varpeq_plot: computing polaron wavefunction in real space.", pre_newlines=1)
 
- krank_ibz = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
+ call krank_ibz%from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
 
  ! Initialize the wave function descriptor.
  ABI_MALLOC(nband, (nkibz, nsppol))

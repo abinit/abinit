@@ -372,7 +372,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
    ! Get mapping IBZ_k --> initial IBZ (self%lgk%ibz --> self%ibz)
    ABI_MALLOC(indkk, (6, self%nq_k))
 
-   krank = krank_from_kptrlatt(self%nibz, self%ibz, self%kptrlatt, compute_invrank=.False.)
+   call krank%from_kptrlatt(self%nibz, self%ibz, self%kptrlatt, compute_invrank=.False.)
 
    if (kpts_map("symrel", self%kptopt, cryst, krank, self%nq_k, self%lgk%ibz, indkk) /= 0) then
      ABI_ERROR("At least one of the points in IBZ(k) could not be generated from a symmetrical one.")
@@ -391,7 +391,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
    end do
    ABI_MALLOC(indkk, (6, self%nq_k))
 
-   krank = krank_from_kptrlatt(self%nibz, self%ibz, self%kptrlatt, compute_invrank=.False.)
+   call krank%from_kptrlatt(self%nibz, self%ibz, self%kptrlatt, compute_invrank=.False.)
 
    if (kpts_map("symrel", self%kptopt, cryst, krank, self%nq_k, self%lgk%ibz, indkk) /= 0) then
      ABI_ERROR("At least one of the points in IBZ(k) + q could not be generated from a symmetrical one.")

@@ -2768,7 +2768,7 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
  !  - we use symrec instead of symrel
 
  ABI_MALLOC(indqq, (6, nqbz))
- qrank = krank_from_kptrlatt(nqibz, qibz, qptrlatt, compute_invrank=.False.)
+ call qrank%from_kptrlatt(nqibz, qibz, qptrlatt, compute_invrank=.False.)
 
  if (kpts_map("symrec", qptopt, cryst, qrank, nqbz, qbz, indqq) /= 0) then
    ABI_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map qBZ --> qIBZ")
@@ -2825,7 +2825,7 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
  ABI_FREE(bz2ibz_sort)
 
  ! Redo the mapping with the new IBZ
- qrank = krank_from_kptrlatt(nqibz, qibz, qptrlatt, compute_invrank=.False.)
+ call qrank%from_kptrlatt(nqibz, qibz, qptrlatt, compute_invrank=.False.)
 
  if (kpts_map("symrec", qptopt, cryst, qrank, nqbz, qbz, indqq) /= 0) then
    ABI_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map qBZ --> qIBZ")
@@ -3295,7 +3295,7 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
  call listkk(dksqmax,cryst%gmet,indqq,qibz,qbz,nqibz,nqbz,cryst%nsym,&
              sppoldbl1,cryst%symafm,cryst%symrec,timrev1,comm,use_symrec=.True.)
 
- !qrank = krank_from_kptrlatt(new%nqibz, new%qibz, qptrlatt, compute_invrank=.False.)
+ !call qrank%from_kptrlatt(new%nqibz, new%qibz, qptrlatt, compute_invrank=.False.)
  !call qrank%get_mapping(new%nqbz, new%qbz, dksqmax, cryst%gmet, temp, &
  !                       cryst%nsym, cryst%symafm, cryst%symrec, 1, use_symrec=.True.)
  !call qrank%free()
@@ -3357,7 +3357,7 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
  call listkk(dksqmax,cryst%gmet,indqq,qibz,qbz,nqibz,nqbz,cryst%nsym,&
              sppoldbl1,cryst%symafm,cryst%symrec,timrev1,comm,use_symrec=.True.)
 
- !qrank = krank_from_kptrlatt(new%nqibz, new%qibz, qptrlatt, compute_invrank=.False.)
+ !call qrank%from_kptrlatt(new%nqibz, new%qibz, qptrlatt, compute_invrank=.False.)
  !call qrank%get_mapping(new%nqbz, new%qbz, dksqmax, cryst%gmet, temp, &
  !                       cryst%nsym, cryst%symafm, cryst%symrec, 1, use_symrec=.True.)
  !call qrank%free()
@@ -3832,7 +3832,7 @@ subroutine dvdb_need_ftinterp(db, nqpt, qpts, qptopt,  qmap_symrec, need_ftinter
 ! *************************************************************************
 
  need_ftinterp = .False.
- qrank = krank_new(db%nqpt, db%qpts, compute_invrank=.False.)
+ call qrank%init(db%nqpt, db%qpts, compute_invrank=.False.)
 
  qtimrev = kpts_timrev_from_kptopt(qptopt)
  ABI_MALLOC(qmap_symrec, (6, nqpt))

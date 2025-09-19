@@ -38,12 +38,13 @@ module m_phonons
  use m_ddb
  use netcdf
  use m_supercell
- use m_dtset
- use m_krank
+
 
  use m_fstrings,        only : itoa, ftoa, sjoin, ltoa, ktoa, strcat, basename, replace
  use m_matrix,          only : matr3inv
  use m_symtk,           only : sg_multable
+ use m_krank,           only : krank_t
+ use m_dtset,           only : dataset_type
  use m_time,            only : cwtime, cwtime_report
  use m_io_tools,        only : open_file
  use m_geometry,        only : mkrdim, symredcart, normv, phdispl_cart2red
@@ -3597,7 +3598,7 @@ subroutine test_phrotation(ifc, cryst, qptopt, ngqpt, comm)
  ! Compute BZ --> IBZ mapping.
  ABI_MALLOC(bz2ibz_listkk, (6, nqbz))
 
- qrank = krank_from_kptrlatt(nqibz, qibz, in_qptrlatt, compute_invrank=.False.)
+ call qrank%from_kptrlatt(nqibz, qibz, in_qptrlatt, compute_invrank=.False.)
 
  if (kpts_map("symrec", qptopt, cryst, qrank, nqbz, qbz, bz2ibz_listkk) /= 0) then
    write(msg, '(3a)' ) "Error mapping BZ to IBZ",ch10,"The q-point could not be generated from a symmetrical one"

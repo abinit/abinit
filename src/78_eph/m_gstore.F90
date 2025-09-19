@@ -53,7 +53,7 @@
 !!  a specialized routine that implements the "post-processing" steps needed
 !!  to compute the physical properties of interest.
 !!
-!!  Now, let's discuss the MPI-distribution.
+!!  Now, let us discuss the MPI-distribution.
 !!
 !!  The (q, k) matrix is distributed inside a 2D cartesian grid using block distribution.
 !!  This is schematic representation for MPI 4 procs with 2 procs for k and 2 procs for q:
@@ -118,45 +118,44 @@ module m_gstore
  use m_errors
  use m_htetra
  use libtetrabz
- use m_ebands
  use netcdf
  use m_nctk
- use m_wfk
  use m_ddb
  use m_ddk
  use m_dvdb
  use m_fft
  use m_hamiltonian
  use m_pawcprj
- use m_wfd
  use m_ephtk
  use m_mkffnl
  use m_sigtk
 
  use defs_abitypes,    only : mpi_type
+ use defs_datatypes,   only : pseudopotential_type
  use m_dtset,          only : dataset_type
  use m_dtfil,          only : datafiles_type
  use m_time,           only : cwtime, cwtime_report, sec2str
  use m_fstrings,       only : tolower, itoa, ftoa, sjoin, ktoa, ltoa, strcat, replace_ch0, yesno, string_in
  use m_numeric_tools,  only : arth, get_diag, isdiagmat
- use m_krank,          only : krank_t, krank_new, krank_from_kptrlatt, get_ibz2bz, star_from_ibz_idx
+ use m_krank,          only : krank_t, get_ibz2bz, star_from_ibz_idx
  use m_io_tools,       only : iomode_from_fname, file_exists
  use m_special_funcs,  only : gaussian
  use m_copy,           only : alloc_copy
  use m_fftcore,        only : ngfft_seq, get_kg
  use m_cgtools,        only : cg_zdotc
  use m_kg,             only : getph
- use defs_datatypes,   only : pseudopotential_type
  use m_crystal,        only : crystal_t
  use m_hdr,            only : hdr_type, fform_from_ext
  use m_matrix,         only : matr3inv
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_sort, kpts_pack_in_stars, &
                               kptrlatt_from_ngkpt
+ use m_ebands,         only : ebands_t, gaps_t
  use m_lgroup,         only : lgroup_t
  use m_bz_mesh,        only : kmesh_t
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack
  use m_ifc,            only : ifc_type
  use m_phonons,        only : pheigvec_rotate
+ use m_wfd,            only : wfd_t
  use m_pawang,         only : pawang_type
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type
@@ -755,7 +754,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
 
  ! HM: the bz2ibz produced above is incomplete, I do it here using listkk
  ABI_MALLOC(qbz2ibz, (6, gstore%nqbz))
- gstore%qrank_ibz = krank_from_kptrlatt(gstore%nqibz, gstore%qibz, qptrlatt, compute_invrank=.False.)
+ call gstore%qrank_ibz%from_kptrlatt(gstore%nqibz, gstore%qibz, qptrlatt, compute_invrank=.False.)
 
  if (kpts_map("symrec", gstore%qptopt, cryst, gstore%qrank_ibz, gstore%nqbz, gstore%qbz, qbz2ibz) /= 0) then
    ABI_ERROR("Cannot map qBZ to IBZ!")
@@ -789,7 +788,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  ! TODO This ambiguity should be removed. Change cgtk_rotate so that we can use the symrec convention.
 
  ABI_MALLOC(gstore%kbz2ibz, (6, gstore%nkbz))
- gstore%krank_ibz = krank_from_kptrlatt(gstore%nkibz, gstore%kibz, ebands%kptrlatt, compute_invrank=.False.)
+ call gstore%krank_ibz%from_kptrlatt(gstore%nkibz, gstore%kibz, ebands%kptrlatt, compute_invrank=.False.)
  if (kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, gstore%nkbz, gstore%kbz, gstore%kbz2ibz) /= 0) then
    ABI_ERROR("Cannot map kBZ to IBZ!")
  end if
@@ -3039,7 +3038,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
    call libtetrabz_dbldelta(ltetra, gstore%cryst%gprimd, nb, nge, eig_k, eig_kq, ngw, wght_bz) !, comm=comm)
    !call cwtime_report(" libtetrabz_dbldelta", cpu, wall, gflops)
 
-   my_krank = krank_new(gqk%my_nk, gqk%my_kpts)
+   call my_krank%init(gqk%my_nk, gqk%my_kpts)
 
    ! Reindex from full BZ to my set of kpoints and rescale weights.
    cnt = 0
@@ -4324,7 +4323,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  call gstore%distribute_spins__(ebands%mband, brange_spin, nproc_spin, comm_spin, comm)
 
  ! Compute krank
- gstore%krank_ibz = krank_from_kptrlatt(gstore%nkibz, gstore%kibz, ebands%kptrlatt, compute_invrank=.False.)
+ call gstore%krank_ibz%from_kptrlatt(gstore%nkibz, gstore%kibz, ebands%kptrlatt, compute_invrank=.False.)
 
  call gstore%set_mpi_grid__(with_cplex, nproc_spin, comm_spin)
 
@@ -5284,7 +5283,7 @@ subroutine gqk_filter_erange(gqk, gstore, erange)
  enddo
  call xmpi_sum(kpts, gqk%kpt_comm%value, ierr)
 
- krank_kpts = krank_from_kptrlatt(gqk%glob_nk, kpts, ebands%kptrlatt, compute_invrank=.True.)
+ call krank_kpts%from_kptrlatt(gqk%glob_nk, kpts, ebands%kptrlatt, compute_invrank=.True.)
 
  ! Get all q-points for this proc
  do my_iq=1,gqk%my_nq

@@ -2623,7 +2623,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  ! HM: the bz2ibz produced above is incomplete, I do it here using listkk
  ABI_MALLOC(temp, (6, new%nqbz))
 
- qrank = krank_from_kptrlatt(new%nqibz, new%qibz, qptrlatt, compute_invrank=.False.)
+ call qrank%from_kptrlatt(new%nqibz, new%qibz, qptrlatt, compute_invrank=.False.)
  if (kpts_map("symrec", qptopt, cryst, qrank, new%nqbz, new%qbz, temp) /= 0) then
    ABI_ERROR("Cannot map qBZ to qIBZ!")
  end if
@@ -2712,7 +2712,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  ABI_ICALLOC(degblock_all, (2, mband, new%nkcalc, new%nsppol))
  ABI_ICALLOC(ndeg_all, (new%nkcalc, new%nsppol))
 
- krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
+ call krank%from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
  ierr = 0
 
  do ikcalc=1,new%nkcalc
@@ -3795,7 +3795,7 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, kcalc2eb
  ! Map input ebands kpoints to kcalc k-points stored in sigmaph file.
  ABI_MALLOC(kcalc2ebands, (6, self%nkcalc))
 
- krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
+ call krank%from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
 
  if (kpts_map("symrec", ebands%kptopt, cryst, krank, self%nkcalc, self%kcalc, kcalc2ebands) /= 0) then
     write(msg, '(3a)' ) &
@@ -4163,7 +4163,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
    ! Assume qptopt == kptopt unless value is specified in input
    qptopt = ebands%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
    qptrlatt = 0; qptrlatt(1,1) = self%ngqpt(1); qptrlatt(2,2) = self%ngqpt(2); qptrlatt(3,3) = self%ngqpt(3)
-   qrank = krank_from_kptrlatt(self%nqibz, self%qibz, qptrlatt, compute_invrank=.False.)
+   call qrank%from_kptrlatt(self%nqibz, self%qibz, qptrlatt, compute_invrank=.False.)
 
    if (kpts_map("symrec", qptopt, cryst, qrank, self%nqibz_k, self%qibz_k, iqk2dvdb) /= 0) then
      write(msg, '(3a)' )&
@@ -4244,7 +4244,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
  ! Use iqk2dvdb as workspace array.
  ABI_MALLOC(iqk2dvdb, (6, self%nqibz_k))
 
- krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
+ call krank%from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
 
  if (self%timrev == 1) then
    kptopt=1
@@ -5333,7 +5333,7 @@ subroutine qpoints_oracle(sigma, dtset, cryst, ebands, qpts, nqpt, nqbz, qbz, qs
  ABI_CHECK(nkibz == ebands%nkpt, "nkibz != ebands%nkpt")
 
  ! Make full k-point rank arrays
- krank = krank_new(nkbz, kbz)
+ call krank%init(nkbz, kbz)
  call cwtime_report(" krank_new", cpu, wall, gflops)
 
  ! This loop is Expensive with a 288^3
@@ -5382,7 +5382,7 @@ subroutine qpoints_oracle(sigma, dtset, cryst, ebands, qpts, nqpt, nqbz, qbz, qs
  ABI_MALLOC(qbz2qpt, (6, nqbz))
 
  qptrlatt = 0; qptrlatt(1,1) = sigma%ngqpt(1); qptrlatt(2,2) = sigma%ngqpt(2); qptrlatt(3,3) = sigma%ngqpt(3)
- qrank = krank_from_kptrlatt(nqpt, qpts, qptrlatt, compute_invrank=.False.)
+ call qrank%from_kptrlatt(nqpt, qpts, qptrlatt, compute_invrank=.False.)
  qptopt = ebands%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
 
  if (kpts_map("symrec", qptopt, cryst, qrank, nqbz, qbz, qbz2qpt) /= 0) then

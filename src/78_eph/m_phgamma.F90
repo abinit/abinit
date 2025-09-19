@@ -3632,7 +3632,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  end if
 
  ! Build krank object to find k-points
- krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
+ call krank%from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
 
  ! Loop over my q-points in the IBZ.
  do my_iq=1,gams%my_nqibz
@@ -4284,8 +4284,8 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
  nkbz = product(nge(1:3))
 
  ! TODO: Handle symmetries in a cleaner way. Change API of krank_new to pass symafm and kptopt
- ibz_krank = krank_new(ebands%nkpt, ebands%kptns, nsym=cryst%nsym, symrec=cryst%symrec, &
-                       time_reversal=kpts_timrev_from_kptopt(ebands%kptopt) == 1)
+ call ibz_krank%init(ebands%nkpt, ebands%kptns, nsym=cryst%nsym, symrec=cryst%symrec, &
+                     time_reversal=kpts_timrev_from_kptopt(ebands%kptopt) == 1)
 
  ! Compute eig_k and eig_kq in full BZ for the relevant bands around Ef.
  nb = fs%maxnb
@@ -4620,8 +4620,8 @@ subroutine calc_dbldelta(cryst, ebands, ltetra, bstart, bstop, nqibz, qibz, wtqs
  nkbz = product(nge(1:3))
 
  ! TODO: Handle symmetries in a cleaner way. Change API of krank_new to pass symafm and kptopt
- ibz_krank = krank_new(ebands%nkpt, ebands%kptns, nsym=cryst%nsym, symrec=cryst%symrec, &
-                       time_reversal=kpts_timrev_from_kptopt(ebands%kptopt) == 1)
+ call ibz_krank%init(ebands%nkpt, ebands%kptns, nsym=cryst%nsym, symrec=cryst%symrec, &
+                    time_reversal=kpts_timrev_from_kptopt(ebands%kptopt) == 1)
 
  nb = bstop - bstart + 1
  ABI_MALLOC(kbz, (3, nkbz))

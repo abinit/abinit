@@ -671,8 +671,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  ! HM TODO: Avoid krank and map the k-point grid to indexes
  ! Make full k-point rank arrays
  !oct = octree_init(kpt_fullbz,2**4,[-one,-one,-one],[two,two,two])
- krank = krank_new(nkpt_fullbz, kpt_fullbz)
-
+ call krank%init(nkpt_fullbz, kpt_fullbz)
  !
  ! HM (13/04/2019): I implement two different versions:
  ! 1. I only use 24 tetrahedra around the IBZ k-point

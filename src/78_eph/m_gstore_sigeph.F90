@@ -43,16 +43,17 @@ module m_gstore_sigeph
  !use m_mkffnl
  use m_sigtk
 
- !use defs_abitypes,    only : mpi_type
  !use m_time,           only : cwtime, cwtime_report, sec2str
  use m_fstrings,       only : tolower, itoa, ftoa, sjoin, ktoa, ltoa, strcat, replace_ch0, yesno, string_in
  !use m_cgtools,        only : cg_zdotc
  !use m_kg,             only : getph
  !use defs_datatypes,   only : pseudopotential_type
+ use defs_abitypes,    only : mpi_type
  use m_hdr,            only : hdr_type, fform_from_ext
  use m_geometry,       only : phdispl_cart2red_nmodes
  use m_ebands,         only : ebands_t, gaps_t
  use m_kpts,           only : kpts_timrev_from_kptopt, kpts_map !, kpts_sort, kpts_pack_in_stars, kptrlatt_from_ngkpt
+ use m_ioarr,          only : read_rhor
  !use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack
  use m_ifc,            only : ifc_type
  use m_dfpt_cgwf,      only : stern_t
@@ -61,6 +62,7 @@ module m_gstore_sigeph
  !use m_pawrad,         only : pawrad_type
  !use m_pawtab,         only : pawtab_type
  !use m_pawfgr,         only : pawfgr_type
+ use m_pawrhoij,       only : pawrhoij_type
  !use m_pstat,          only : pstat_proc
  use m_occ,            only : occ_be, occ_fd
  use m_lgroup,         only : lgroup_t
@@ -102,10 +104,6 @@ module m_gstore_sigeph
    ! chemical potential of electrons for the different temperatures.
 
    complex(dp),allocatable :: vals_e0ks(:,:,:)
-   ! vals_e0ks(ntemp, max_nbcalc, nk_glob, nsppol)
-   ! Sigma_eph(omega=eKS, kT, band) for given (ikcalc, spin).
-   ! Fan-Migdal + Debye-Waller
-
    !complex(dp),allocatable :: fan_vals(:,:)
    ! fan_vals(ntemp, max_nbcalc)
    ! Fan-Migdal
@@ -160,7 +158,7 @@ contains
 !!
 !! SOURCE
 
-subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
+subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_enreg, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -169,12 +167,17 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
  type(ifc_type),target,intent(in) :: ifc
+ type(mpi_type),intent(inout) :: mpi_enreg
  integer,intent(in) :: comm
+!arrays
+ integer,intent(in) :: ngfft(18),ngfftf(18)
 
 !Local variables-------------------------------
  integer,parameter :: master = 0, with_cplex1 = 1, max_ntemp = 50, cplex1 = 1, pawread0 = 0
+ integer :: n1, n2, n3, n4, n5, n6
  integer :: spin, my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, ntemp, gap_err, my_rank, ip1, ip2
  integer :: it, ik_bz, ik_ibz, ikq_ibz, band_k, band_kq, timrev_k, ii, ikcalc, natom, natom3, nsppol
+ integer :: nfft, nfftf, mgfft, mgfftf !,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart, enough_stern
  real(dp) :: wqnu, gkq2, weight_q, eig0nk, eig0mk, eig0mkq, ediff, gmod2, hmod2, gdw2, gdw2_stern, rtmp !,nqnu,gkq2,gkq2_pf,
  !real(dp) :: cpu, wall, gflops
  logical :: q_is_gamma, intra_band, same_band
@@ -191,10 +194,12 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
  integer :: units(2), my_kqmap(6)
  integer,allocatable :: phmodes_skip(:)
  real(dp) :: kk(3), qpt(3), kq(3)
+ real(dp),allocatable :: vtrial(:,:) !,gvnlx1(:,:),work(:,:,:,:), vcar_ibz(:,:,:,:)
  real(dp),allocatable :: gkq_atm(:,:,:),gkq_nu(:,:,:) !,gkq0_atm(:,:,:,:), gaussw_qnu(:)
  real(dp),allocatable :: rfact_t(:), nqnu(:), f_mkq(:) !, f_nk(:),  g2_pmnk(:,:,:,:)
  real(dp),allocatable :: displ_nu_cart(:,:,:), displ_nu_red(:,:,:)
  complex(dp),allocatable :: cfact_t(:), tpp_red(:,:) !, fmw_frohl_sphcorr(:,:,:,:), cfact_wr(:),
+ type(pawrhoij_type),allocatable :: pot_pawrhoij(:)
 !----------------------------------------------------------------------
 
  units = [std_out, ab_out]
@@ -226,6 +231,12 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
      'In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
    ABI_ERROR(msg)
  end if
+
+ ! FFT meshes from input file, not necessarily equal to the ones found in the external files.
+ nfftf = product(ngfftf(1:3)); mgfftf = maxval(ngfftf(1:3))
+ nfft = product(ngfft(1:3)) ; mgfft = maxval(ngfft(1:3))
+ n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
+ n4 = ngfft(4); n5 = ngfft(5); n6 = ngfft(6)
 
  ! Build (linear) mesh of K * temperatures. tsmesh(1:3) = [start, step, num]
  call dtset%get_ktmesh(ntemp, sep%kTmesh)
@@ -260,18 +271,19 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
  ! Check consistency of little group options
  ABI_CHECK(gstore%check_little_group(dtset, msg) == 0, msg)
 
- !if (dtset%eph_stern /= 0) then
- !  ! Read the GS potential (vtrial) from input POT file
- !  ! In principle one may store vtrial in the DVDB but getpot_filepath is simpler to implement.
- !  call wrtout(units, sjoin(" Reading GS KS potential for Sternheimer from: ", dtfil%filpotin))
- !  call read_rhor(dtfil%filpotin, cplex1, nspden, nfftf, ngfftf, pawread0, mpi_enreg, vtrial, pot_hdr, pot_pawrhoij, comm, &
- !                 allow_interp=.True., want_varname="vtrial")
- !  pot_cryst = pot_hdr%get_crystal()
- !  if (gstore%cryst%compare(pot_cryst, header=" Comparing input crystal with POT crystal") /= 0) then
- !    ABI_ERROR("Crystal structure from WFK and POT do not agree! Check messages above!")
- !  end if
- !  call pot_cryst%free(); call pot_hdr%free()
- !end if
+ if (dtset%eph_stern /= 0) then
+   ! Read the GS potential (vtrial) from input POT file
+   ! In principle one may store vtrial in the DVDB but getpot_filepath is simpler to implement.
+   call wrtout(units, sjoin(" Reading GS KS potential for Sternheimer from: ", dtfil%filpotin))
+   call read_rhor(dtfil%filpotin, cplex1, dtset%nspden, nfftf, ngfftf, pawread0, mpi_enreg, vtrial, pot_hdr, pot_pawrhoij, comm, &
+                  allow_interp=.True., want_varname="vtrial")
+   pot_cryst = pot_hdr%get_crystal()
+   if (gstore%cryst%compare(pot_cryst, header=" Comparing input crystal with POT crystal") /= 0) then
+     ABI_ERROR("Crystal structure from WFK and POT do not agree! Check messages above!")
+   end if
+   call pot_cryst%free(); call pot_hdr%free()
+   NOT_IMPLEMENTED_ERROR()
+ end if
 
  ! Compute electronic occ for all Temps (note sep%mu_e(it) Fermi level)
  !do it=1,ntemp
@@ -448,6 +460,7 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
  ABI_FREE(displ_nu_cart)
  ABI_FREE(displ_nu_red)
  ABI_FREE(tpp_red)
+ ABI_SFREE(vtrial)
 
  call gstore%free()
 

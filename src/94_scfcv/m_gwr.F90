@@ -154,7 +154,7 @@ module m_gwr
  use m_geometry,      only : normv, vdotw
  use m_fstrings,      only : sjoin, itoa, strcat, ktoa, ltoa, ftoa, string_in, yesno
  use m_sort,          only : sort_rvals, sort_gvecs
- use m_krank,         only : krank_t, krank_new, krank_from_kptrlatt, get_ibz2bz, star_from_ibz_idx
+ use m_krank,         only : krank_t, get_ibz2bz, star_from_ibz_idx
  use m_crystal,       only : crystal_t
  use m_dtset,         only : dataset_type
  use m_fftcore,       only : get_kg, sphereboundary, getng, print_ngfft, fftcore_set_mixprec, ngfft_seq
@@ -968,7 +968,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  ! Note symrec convention here.
  kptopt = ks_ebands%kptopt
- krank_ibz = krank_from_kptrlatt(gwr%nkibz, kibz, ks_ebands%kptrlatt, compute_invrank=.False.)
+ call krank_ibz%from_kptrlatt(gwr%nkibz, kibz, ks_ebands%kptrlatt, compute_invrank=.False.)
 
  ABI_MALLOC(gwr%kbz2ibz, (6, gwr%nkbz))
  if (kpts_map("symrec", kptopt, cryst, krank_ibz, gwr%nkbz, gwr%kbz, gwr%kbz2ibz) /= 0) then
@@ -1007,7 +1007,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    ! Table with symrec conventions for the symmetrization of chi.
    ABI_MALLOC(gwr%qbz2ibz, (6, gwr%nqbz))
 
-   qrank = krank_from_kptrlatt(gwr%nqibz, gwr%qibz, qptrlatt, compute_invrank=.False.)
+   call qrank%from_kptrlatt(gwr%nqibz, gwr%qibz, qptrlatt, compute_invrank=.False.)
    if (kpts_map("symrec", qptopt1, cryst, qrank, gwr%nqbz, gwr%qbz, gwr%qbz2ibz) /= 0) then
      ABI_ERROR("Cannot map qBZ to IBZ!")
    end if

@@ -374,7 +374,6 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
  integer,allocatable :: indkk(:,:)
  real(dp) :: extrael_fermie(2), sigma_erange(2)
  real(dp),allocatable :: values_bksd(:,:,:,:), vals_bsd(:,:,:), tmp_array4(:,:,:,:), tmp_array5(:,:,:,:,:)
-
 !************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
@@ -589,7 +588,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
    ! Map the points of the downsampled bands to dense ebands
    ABI_MALLOC(indkk, (6, tmp_ebands%nkpt))
 
-   krank = krank_from_kptrlatt(new%ebands%nkpt, new%ebands%kptns, new%ebands%kptrlatt, compute_invrank=.False.)
+   call krank%from_kptrlatt(new%ebands%nkpt, new%ebands%kptns, new%ebands%kptrlatt, compute_invrank=.False.)
 
    if (kpts_map("symrec", ebands%kptopt, cryst, krank, tmp_ebands%nkpt, tmp_ebands%kptns, indkk) /= 0) then
      write(msg, '(3a)' ) &
@@ -700,7 +699,6 @@ subroutine compute_rta(self, cryst, dtset, dtfil, comm)
  real(dp) :: vr(3), dummy_vecs(1,1,1,1,1), work_33(3,3), S_33(3,3), mat33(3,3)
  real(dp),allocatable :: vv_tens(:,:,:,:,:,:,:), out_valsdos(:,:,:,:), dummy_dosvecs(:,:,:,:,:)
  real(dp),allocatable :: out_tensdos(:,:,:,:,:,:), tau_vals(:,:,:,:,:), l0inv_33nw(:,:,:)
-
 !************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
@@ -1135,7 +1133,6 @@ subroutine compute_rta_mobility(self, cryst, comm)
  integer :: nsppol, nkibz, ib, ik_ibz, spin, ii, jj, itemp, ieh, cnt, nprocs, irta, time_opt
  real(dp) :: eig_nk, mu_e, linewidth, fact, fact0, max_occ, kT, wtk, cpu, wall, gflops
  real(dp) :: vr(3), vv_tens(3,3), vv_tenslw(3,3), work_33(3,3), mat33(3,3) !, tmp_tens(3,3)
-
 !************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
@@ -1296,7 +1293,6 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
  integer :: ncerr, ii
  real(dp) :: cpu, wall, gflops
  real(dp) :: work(dtset%nsppol)
-
 !************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
@@ -1434,7 +1430,6 @@ subroutine print_rta_txt_files(self, cryst, dtset, dtfil)
  integer :: units(2)
  character(len=2) :: components(3)
  real(dp) :: mat33(3,3),  work33(3,3)
-
 !************************************************************************
 
  units = [std_out, ab_out]
@@ -1621,7 +1616,6 @@ subroutine write_tensor(self, dtset, irta, header, values, path)
  integer :: itemp, iw, ount
  character(len=500) :: msg, rta_type
  real(dp),allocatable :: tmp_values(:,:,:,:,:)
-
 !************************************************************************
 
  if (open_file(trim(path), msg, newunit=ount, form="formatted", action="write", status='unknown') /= 0) then
@@ -2579,7 +2573,6 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
  !real(dp) :: fact_sigma, fact_mob
  !arrays
  real(dp) :: vr(3), vv_tens(3,3)
-
 !************************************************************************
 
  ABI_UNUSED(kt)

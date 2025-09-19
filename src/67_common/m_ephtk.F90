@@ -216,7 +216,7 @@ subroutine ephtk_mkqtabs(cryst, nqibz, qibz, nqbz, qbz, qirredtofull, qpttoqpt)
  real(dp) :: qirr(3), tmp_qpt(3)
 ! *************************************************************************
 
- qrank = krank_new(nqbz, qbz)
+ call qrank%init(nqbz, qbz)
 
  ! Compute index of IBZ q-point in the BZ array
  ABI_CALLOC(qirredtofull, (nqibz))
