@@ -281,7 +281,7 @@ type, public :: dataset_type
  integer :: gstore_cplex = 2
  integer :: gstore_with_vk = 1
  integer :: gstore_use_lgk = 0
- integer :: gstore_use_lgq = 1
+ integer :: gstore_use_lgq = 0
  character(len=abi_slen) :: gstore_kzone = "ibz"
  character(len=abi_slen) :: gstore_qzone = "bz"
  character(len=abi_slen) :: gstore_kfilter = "none"

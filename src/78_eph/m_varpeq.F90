@@ -625,7 +625,6 @@ subroutine varpeq_compare(self, other, bz_mismatch)
 !Local variables-------------------------------
  integer :: ierr
  real(dp) :: cpu, wall, gflops
-
 !----------------------------------------------------------------------
 
  ! TODO: provide more flexibility for nstates
@@ -1616,8 +1615,22 @@ subroutine varpeq_init(self, gstore, dtset)
  call cwtime(cpu, wall, gflops, "start")
 
  ! Consistency check
+ ierr = 0
  if (gstore%check_cplex_qkzone_gmode(2, "bz", "bz", "phonon") /= 0) then
-   ABI_ERROR("The gstore object is inconsistent with varpeq. See messages above.")
+   ABI_ERROR_NOSTOP("The gstore object is inconsistent with varpeq. See messages above.", ierr)
+ end if
+ if (gstore%has_used_lgk /= 0) then
+   ABI_ERROR_NOSTOP("The varpeq formalism does not support use_lgk /=0 .", ierr)
+ end if
+ if (gstore%has_used_lgq /= 0) then
+   ABI_ERROR_NOSTOP("The varpeq formalism does not support use_lgq /=0 .", ierr)
+ end if
+ if (ierr > 1) then
+   write(msg,'(a,i0,5a)')&
+     'Checking consistency of input data against itself gave ',ierr,' inconsistencies.',ch10,&
+     'The details of the problems can be FOUND ABOVE (or in output or log file), in an earlier WARNING.',ch10,&
+     'In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
+   ABI_ERROR(msg)
  end if
 
  ! Scalars

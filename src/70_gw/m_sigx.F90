@@ -29,6 +29,7 @@ module m_sigx
  use m_errors
 
  use defs_datatypes,  only : pseudopotential_type
+ use m_dtset,         only : dataset_type
  use m_time,          only : timab, cwtime, cwtime_report
  use m_fstrings,      only : itoa, sjoin, ktoa, ltoa
  use m_hide_blas,     only : xdotc, xgemv
@@ -121,7 +122,7 @@ contains
 !!     based on group theory, and it might lead to spurious results in case of accidental degeneracies.
 !!
 
-subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, Sr, Gsph_x, Vcp, Kmesh, Qmesh, &
+subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, dtset, Sigp, Sr, Gsph_x, Vcp, Kmesh, Qmesh, &
                         ltg_k, Pawtab, Pawang, Paw_pwff, Pawfgrtab, Paw_onsite, psps, wfd, Wfdf, &
                         allQP_sym, x_ngfft, ngfftf, prtvol, pawcross, tol_empty_in)
 
@@ -135,6 +136,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
  type(gsphere_t),intent(in) :: Gsph_x
  type(littlegroup_t),intent(in) :: ltg_k
  type(Pseudopotential_type),intent(in) :: psps
+ type(dataset_type),intent(in) :: dtset
  type(sigparams_t),target,intent(in) :: Sigp
  type(sigma_t),intent(inout) :: Sr
  type(pawang_type),intent(in) :: Pawang
@@ -349,7 +351,13 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
    ! Load wavefunctions for Sigma_x matrix elements
    ! ===============================================
    ABI_MALLOC_OR_DIE(ur_bdgw, (x_nfft * nspinor, bmin:bmax), ierr)
-   call wfd%get_many_ur([(jb, jb=bmin, bmax)], jk_ibz, spin, ur_bdgw)
+
+   if (dtset%userie == 456) then
+     call wrtout(std_out, "Taking states from Sigma^x_nk from supercell WFK file")
+     call wfdf%get_many_ur([(jb, jb=bmin, bmax)], jk_ibz, spin, ur_bdgw)
+   else
+     call wfd%get_many_ur([(jb, jb=bmin, bmax)], jk_ibz, spin, ur_bdgw)
+   end if
 
    if (wfd%usepaw == 1) then
      ! Load cprj for GW states, note the indexing.

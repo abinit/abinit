@@ -420,6 +420,11 @@ meta: {optdriver: 7, eph_task: -12, }
 
  Initializing gstore object from: teph4isotc_6o_GSTORE.nc
 
+P qpt_comm can use shmem: yes
+P kpt_comm can use shmem: yes
+P bsum_comm can use shmem: yes
+P pp_sum_comm can use shmem: yes
+
  === Gstore parameters ===
  kzone: ibz
  kfilter: fs_tetra
@@ -432,6 +437,8 @@ meta: {optdriver: 7, eph_task: -12, }
  glob_nq_spin: [216]
  kptopt: 1
  qptopt: 1
+ has_use_lgk: 0
+ has_use_lgq: 0
  with_vk: 1
 
  gqk_cplex: 1

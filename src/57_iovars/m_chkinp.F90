@@ -4748,7 +4748,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      'In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
    ABI_ERROR(msg)
  end if
- if (ierr>1) then
+ if (ierr > 1) then
    write(msg,'(a,i0,5a)')&
      'Checking consistency of input data against itself gave ',ierr,' inconsistencies.',ch10,&
      'The details of the problems can be FOUND ABOVE (or in output or log file), in an earlier WARNING.',ch10,&

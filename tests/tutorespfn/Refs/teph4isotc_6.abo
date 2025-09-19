@@ -419,6 +419,11 @@ meta: {optdriver: 7, eph_task: 11, }
   -1.94839037E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
+P qpt_comm can use shmem: yes
+P kpt_comm can use shmem: yes
+P bsum_comm can use shmem: yes
+P pp_sum_comm can use shmem: yes
+
  === Gstore parameters ===
  kzone: ibz
  kfilter: fs_tetra
@@ -431,6 +436,8 @@ meta: {optdriver: 7, eph_task: 11, }
  glob_nq_spin: [216]
  kptopt: 1
  qptopt: 1
+ has_use_lgk: -1
+ has_use_lgq: -1
  with_vk: 1
 
  gqk_cplex: 2
@@ -447,6 +454,7 @@ P Number of perturbations treated by this CPU: 9
 P Number of CPUs for parallelism over q-points: 1
 P Number of CPUs for parallelism over k-points: 1
  Cannot find all IBZ q-points in the DVDB --> Activating Fourier interpolation.
+ Only k-points in the IBZ_q will be computed.
 
  gstore_completed: 1
  gstore_done_qbz_spin: 216
