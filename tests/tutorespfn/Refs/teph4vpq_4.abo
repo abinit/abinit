@@ -371,8 +371,8 @@ P pp_sum_comm can use shmem: yes
  glob_nq_spin: [27]
  kptopt: 1
  qptopt: 1
- has_uses_lgk: 0
- has_uses_lgq: 0
+ has_used_lgk: 0
+ has_used_lgq: 0
  with_vk: 1
 
  gqk_cplex: 2
@@ -388,6 +388,19 @@ P Number of CPUs for parallelism over perturbations: 1
 P Number of perturbations treated by this CPU: 6
 P Number of CPUs for parallelism over q-points: 1
 P Number of CPUs for parallelism over k-points: 1
+ k-points included in gstore:
+1 : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+2 : [ 3.3333E-01,  0.0000E+00,  0.0000E+00]
+3 : [-3.3333E-01,  0.0000E+00,  0.0000E+00]
+4 : [ 0.0000E+00,  3.3333E-01,  0.0000E+00]
+5 : [ 3.3333E-01,  3.3333E-01,  0.0000E+00]
+6 : [-3.3333E-01,  3.3333E-01,  0.0000E+00]
+7 : [ 0.0000E+00, -3.3333E-01,  0.0000E+00]
+8 : [ 3.3333E-01, -3.3333E-01,  0.0000E+00]
+9 : [-3.3333E-01, -3.3333E-01,  0.0000E+00]
+10 : [ 0.0000E+00,  0.0000E+00,  3.3333E-01]
+11 : [ 3.3333E-01,  0.0000E+00,  3.3333E-01]
+ Max 10  k-points will be written. Use prtvol > 0 to print all of them.
 
   === Variational Polaron Equations ===
 
@@ -613,8 +626,8 @@ P pp_sum_comm can use shmem: yes
  glob_nq_spin: [64]
  kptopt: 1
  qptopt: 1
- has_uses_lgk: 0
- has_uses_lgq: 0
+ has_used_lgk: 0
+ has_used_lgq: 0
  with_vk: 1
 
  gqk_cplex: 2
@@ -630,6 +643,19 @@ P Number of CPUs for parallelism over perturbations: 1
 P Number of perturbations treated by this CPU: 6
 P Number of CPUs for parallelism over q-points: 1
 P Number of CPUs for parallelism over k-points: 1
+ k-points included in gstore:
+1 : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+2 : [ 2.5000E-01,  0.0000E+00,  0.0000E+00]
+3 : [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
+4 : [-2.5000E-01,  0.0000E+00,  0.0000E+00]
+5 : [ 0.0000E+00,  2.5000E-01,  0.0000E+00]
+6 : [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
+7 : [ 5.0000E-01,  2.5000E-01,  0.0000E+00]
+8 : [-2.5000E-01,  2.5000E-01,  0.0000E+00]
+9 : [ 0.0000E+00,  5.0000E-01,  0.0000E+00]
+10 : [ 2.5000E-01,  5.0000E-01,  0.0000E+00]
+11 : [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Max 10  k-points will be written. Use prtvol > 0 to print all of them.
 
   === Variational Polaron Equations ===
 
@@ -840,8 +866,8 @@ P pp_sum_comm can use shmem: yes
  glob_nq_spin: [125]
  kptopt: 1
  qptopt: 1
- has_uses_lgk: 0
- has_uses_lgq: 0
+ has_used_lgk: 0
+ has_used_lgq: 0
  with_vk: 1
 
  gqk_cplex: 2
@@ -857,6 +883,19 @@ P Number of CPUs for parallelism over perturbations: 1
 P Number of perturbations treated by this CPU: 6
 P Number of CPUs for parallelism over q-points: 1
 P Number of CPUs for parallelism over k-points: 1
+ k-points included in gstore:
+1 : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+2 : [ 2.0000E-01,  0.0000E+00,  0.0000E+00]
+3 : [ 4.0000E-01,  0.0000E+00,  0.0000E+00]
+4 : [-4.0000E-01,  0.0000E+00,  0.0000E+00]
+5 : [-2.0000E-01,  0.0000E+00,  0.0000E+00]
+6 : [ 0.0000E+00,  2.0000E-01,  0.0000E+00]
+7 : [ 2.0000E-01,  2.0000E-01,  0.0000E+00]
+8 : [ 4.0000E-01,  2.0000E-01,  0.0000E+00]
+9 : [-4.0000E-01,  2.0000E-01,  0.0000E+00]
+10 : [-2.0000E-01,  2.0000E-01,  0.0000E+00]
+11 : [ 0.0000E+00,  4.0000E-01,  0.0000E+00]
+ Max 10  k-points will be written. Use prtvol > 0 to print all of them.
 
   === Variational Polaron Equations ===
 

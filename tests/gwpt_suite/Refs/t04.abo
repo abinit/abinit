@@ -249,8 +249,8 @@ P pp_sum_comm can use shmem: yes
  glob_nq_spin: [8]
  kptopt: 1
  qptopt: 1
- has_use_lgk: -1
- has_use_lgq: -1
+ has_used_lgk: 0
+ has_used_lgq: 0
  with_vk: 1
 
  gqk_cplex: 2
@@ -266,7 +266,9 @@ P Number of CPUs for parallelism over perturbations: 1
 P Number of perturbations treated by this CPU: 6
 P Number of CPUs for parallelism over q-points: 1
 P Number of CPUs for parallelism over k-points: 1
-P Number of CPUs for parallelism over wavevector summation: 4
+ k-points included in gstore:
+1 : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+2 : [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
  ==== Header of the SCR file ====
  SCR file: epsilon^-1 , calculated using inclvkb = 2
  TESTPARTICLE RPA
@@ -376,7 +378,7 @@ drude_plsmf:   1.14321459E+00
 force_plsmf:   0.00000000E+00
 ...
 
- Only k-points in the IBZ_q will be computed.
+ Little group operations won't be used
 
  gstore_completed: 1
  gstore_done_qbz_spin: 8
