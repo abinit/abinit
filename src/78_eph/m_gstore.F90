@@ -152,6 +152,7 @@ module m_gstore
  use m_matrix,         only : matr3inv
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_sort, kpts_pack_in_stars, &
                               kptrlatt_from_ngkpt
+ use m_lgroup,         only : lgroup_t
  use m_bz_mesh,        only : kmesh_t
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack
  use m_ifc,            only : ifc_type
@@ -418,6 +419,12 @@ type, public :: gstore_t
   integer :: qptopt = -1
   ! option for the generation of q points (defines whether spatial symmetries and/or time-reversal can be used)
 
+  integer :: has_used_lgk = -1
+  ! value of use_lgk used to generate GSTORE.nc (read from file).
+
+  integer :: has_used_lgq = -1
+  ! value of use_lgq used to generate GSTORE.nc (read from file).
+
   character(len=fnlen) :: path = " "
   ! Path to the nc file associated to the gstore
 
@@ -545,6 +552,9 @@ contains
   procedure :: print => gstore_print
   ! Print info on the object
 
+  procedure :: check_little_group => gstore_check_little_group
+   !  Check consistency between little group options from file and from input.
+
   procedure, private :: distribute_spins__ => gstore_distribute_spins
   ! Distribute spins, create indirect mapping to spin index and init %brange_spin
 
@@ -593,6 +603,8 @@ contains
   procedure :: wannierize_and_write_gwan => gstore_wannierize_and_write_gwan
   ! Compute g(R_e,R_ph) from g(k,q) and save results to GWAN.nc file
 
+
+
 end type gstore_t
 !!***
 
@@ -635,7 +647,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: all_nproc, my_rank, ierr, my_nshiftq, nsppol, spin, natom3, cnt, qtimrev, with_cplex
+ integer :: all_nproc, my_rank, ierr, my_nshiftq, nsppol, spin, natom3, cnt, timrev_q, with_cplex
  integer :: ik_ibz, ik_bz, iq_bz, iq_ibz, max_nq, max_nk, ncid, spin_ncid, ncerr, gstore_fform
  integer :: my_is, my_ik, my_iq, nq
  logical :: keep_umats, has_abiwan, has_gwan, write_gstore
@@ -735,7 +747,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  ! Assume qptopt == kptopt unless value is specified in input
  qptrlatt = 0; qptrlatt(1, 1) = ngqpt(1); qptrlatt(2, 2) = ngqpt(2); qptrlatt(3, 3) = ngqpt(3)
  gstore%qptopt = ebands%kptopt; if (dtset%qptopt /= 0) gstore%qptopt = dtset%qptopt
- qtimrev = kpts_timrev_from_kptopt(gstore%qptopt)
+ timrev_q = kpts_timrev_from_kptopt(gstore%qptopt)
 
  call wrtout(std_out, sjoin(" Generating q-mesh with ngqpt:", ltoa(ngqpt), " and qptopt:", itoa(gstore%qptopt)))
  call kpts_ibz_from_kptrlatt(cryst, qptrlatt, gstore%qptopt, my_nshiftq, my_shiftq, &
@@ -929,7 +941,10 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    ], defmode=.True.)
    NCF_CHECK(ncerr)
 
-   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "gstore_with_vk", "gstore_qptopt", "gstore_completed"])
+   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
+     "gstore_with_vk", "gstore_qptopt", "gstore_completed", &
+     "gstore_use_lgk", "gstore_use_lgq" &
+   ])
    NCF_CHECK(ncerr)
    !ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "fermi_energy", "smearing_width"])
    !NCF_CHECK(ncerr)
@@ -976,6 +991,8 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    NCF_CHECK(nctk_set_datamode(ncid))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_with_vk"), gstore%with_vk))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_qptopt"), gstore%qptopt))
+   NCF_CHECK(nf90_put_var(ncid, vid("gstore_use_lgk"), dtset%gstore_use_lgk))
+   NCF_CHECK(nf90_put_var(ncid, vid("gstore_use_lgq"), dtset%gstore_use_lgq))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_completed"), 0))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_kzone"), trim(gstore%kzone)))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_qzone"), trim(gstore%qzone)))
@@ -1482,6 +1499,8 @@ subroutine gstore_print(gstore, units, header, prtvol)
  call wrtout(units, sjoin(" glob_nq_spin:", ltoa(gstore%glob_nq_spin)))
  call wrtout(units, sjoin(" kptopt:", itoa(gstore%ebands%kptopt)))
  call wrtout(units, sjoin(" qptopt:", itoa(gstore%qptopt)))
+ call wrtout(units, sjoin(" has_use_lgk:", itoa(gstore%has_used_lgk)))
+ call wrtout(units, sjoin(" has_use_lgq:", itoa(gstore%has_used_lgq)))
  call wrtout(units, sjoin(" with_vk:", itoa(gstore%with_vk)))
 
  do my_is=1,gstore%my_nspins
@@ -1534,6 +1553,56 @@ subroutine gstore_print(gstore, units, header, prtvol)
  end if
 
 end subroutine gstore_print
+!!***
+
+!!****f* m_gstore/gstore_check_little_group
+!! NAME
+!! gstore_check_little_group
+!!
+!! FUNCTION
+!!  Check consistency between little group options from file and from input.
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+integer function gstore_check_little_group(gstore, dtset, msg) result(ierr)
+
+!Arguments ------------------------------------
+ class(gstore_t),intent(in) :: gstore
+ type(dataset_type),intent(in) :: dtset
+ character(len=*),intent(out) :: msg
+!----------------------------------------------------------------------
+
+ ierr = 0; msg = ""
+
+ if (dtset%gstore_use_lgk /= 0) then
+   ! Connot use IBZ_k if we have used IBZ_q.
+   if (gstore%has_used_lgq /= 0) then
+     msg = sjoin("input gstore_use_lgq: ", itoa(dtset%gstore_use_lgq), ", but GSTORE file has:", itoa(gstore%has_used_lgq))
+     ABI_ERROR_NOSTOP(msg, ierr)
+   end if
+   ! Using IBZ_k when GSTORE has full BZ if OK but inefficient.
+   if (gstore%has_used_lgk == 0) then
+     msg = sjoin("input gstore_use_lgk: ", itoa(dtset%gstore_use_lgk), ", but GSTORE file has:", itoa(gstore%has_used_lgk))
+     ABI_COMMENT(msg)
+   end if
+ end if
+
+ if (dtset%gstore_use_lgq /= 0) then
+   ! Connot use IBZ_q if we have used IBZ_k.
+   if (gstore%has_used_lgk /= 0) then
+     msg = sjoin("input gstore_use_lgk: ", itoa(dtset%gstore_use_lgk), ", but GSTORE file has:", itoa(gstore%has_used_lgk))
+     ABI_ERROR_NOSTOP(msg, ierr)
+   end if
+   ! Using IBZ_q when GSTORE has full BZ if OK but inefficient.
+   if (gstore%has_used_lgq == 0) then
+     msg = sjoin("input gstore_use_lgq: ", itoa(dtset%gstore_use_lgq), ", but GSTORE file has:", itoa(gstore%has_used_lgq))
+     ABI_COMMENT(msg)
+   end if
+ end if
+
+end function gstore_check_little_group
 !!***
 
 !----------------------------------------------------------------------
@@ -3133,7 +3202,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 !scalars
  integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, ider0 = 0, idir0 = 0, LOG_MODQ = 5, master = 0, ndat1 = 1
  integer :: my_rank,nproc,nproc_lim,mband,nsppol,nkibz,idir,ipert, iq_bz
- integer :: cplex,natom,natom3,ipc,nspinor, nskip_tetra_kq
+ integer :: cplex,natom,natom3,ipc,nspinor, nskip_tetra_kq, timrev_k, timrev_q
  integer :: bstart_k,bstart_kq,nband_k,nband_kq,band_k, in_k, im_kq !ib1,ib2, band_kq,
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq
  integer :: my_ik, my_is, comm_rpt, my_npert, my_ip, my_iq, spin,istwf_k,istwf_kq,npw_k,npw_kq
@@ -3149,7 +3218,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  type(rf_hamiltonian_type) :: rf_ham_kq
  type(ddkop_t) :: ddkop
  type(gqk_t),pointer :: gqk
- character(len=500) :: msg
+ type(lgroup_t) :: lg_myq
+ character(len=5000) :: msg, qq_bz_string, kk_string !, qkp_string, pp_string
 !arrays
  integer :: g0_k(3), g0_kq(3), g0_q(3), work_ngfft(18),gmax(3),indkk_kq(6,1), units(2), qbz2dvdb(6)
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), nband(:,:), wfd_istwfk(:), qmap_symrec(:,:)
@@ -3168,6 +3238,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  real(dp),allocatable :: my_gbuf(:,:,:,:,:,:), buf_wqnu(:,:), buf_eigvec_cart(:,:,:,:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
+ type(lgroup_t),allocatable :: lg_myk(:)
+ !type(lgroup_t) :: lg_myk(:)
 !************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
@@ -3476,6 +3548,15 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ! The price to pay is an increase in the number of calls to get_ftqbz but for small systems this part does not dominate
  ! Alternatively, one cah have two versions that will be invoked depending on my_nk, my_nq
 
+ ! Here we decide if the q-points can be reduced to the IBZ(k)
+ if (dtset%gstore_use_lgk /= 0) then
+   call wrtout(units, " Only q-points in the IBZ_k will be computed.")
+ else if (dtset%gstore_use_lgq /= 0) then
+   call wrtout(units, " Only k-points in the IBZ_q will be computed.")
+ else
+   call wrtout(units, " Little group operations won't be used")
+ end if
+
  ! if PAW, one has to solve a generalized eigenproblem
  gen_eigenpb = psps%usepaw == 1; sij_opt = 0; if (gen_eigenpb) sij_opt = 1
 
@@ -3500,6 +3581,16 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    ABI_MALLOC_OR_DIE(my_gbuf, (gqk%cplex, nb, nb, natom3, gqk%my_nk, qbuf_size), ierr)
    call pstat_proc%print(_PSTAT_ARGS_)
 
+   ! Compute the little group of the k-point so that we can compute g(k,q) only for q in the IBZ_k
+   if (dtset%gstore_use_lgk /= 0) then
+     timrev_k = kpts_timrev_from_kptopt(ebands%kptopt)
+     ABI_MALLOC(lg_myk, (gqk%my_nk))
+     do my_ik=1,gqk%my_nk
+       kk_bz = gqk%my_kpts(:, my_ik)
+       call lg_myk(my_ik)%init(cryst, kk_bz, timrev_k, gstore%nqbz, gstore%qbz, gstore%nqibz, gstore%qibz, xmpi_comm_self)
+     end do
+   end if
+
    ! Loop over my set of q-points
    prev_iqbz = -1
    do my_iq=1,gqk%my_nq
@@ -3507,14 +3598,21 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      if (print_time) call cwtime(cpu_q, wall_q, gflops_q, "start")
      iq_bz = gqk%my_q2bz(my_iq)
 
+     call gqk%myqpt(my_iq, gstore, weight_q, qq_bz)
+     qq_is_gamma = sum(qq_bz**2) < tol14
+     qq_bz_string = ktoa(qq_bz)
+
      ! Handle possible restart.
      if (done_qbz_spin(iq_bz, spin) == 1) then
        call wrtout(std_out, sjoin(" iq_bz:", itoa(iq_bz), ", spin: ", itoa(spin), " already computed --> skipping iteration"))
        cycle
      end if
 
-     call gqk%myqpt(my_iq, gstore, weight_q, qq_bz)
-     qq_is_gamma = sum(qq_bz**2) < tol14
+     ! Compute the little group of the q-point so that we can compute g(k,q) only for k in the IBZ_q
+     if (dtset%gstore_use_lgq /= 0) then
+       timrev_q = kpts_timrev_from_kptopt(gstore%qptopt)
+       call lg_myq%init(cryst, qq_bz, timrev_q, gstore%nkbz, gstore%kbz, gstore%nkibz, gstore%kibz, xmpi_comm_self)
+     end if
 
      iq_ibz = gqk%my_q2ibz(1, my_iq); isym_q = gqk%my_q2ibz(2, my_iq)
      trev_q = gqk%my_q2ibz(6, my_iq); g0_q = gqk%my_q2ibz(3:5,my_iq)
@@ -3572,18 +3670,37 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
      ! Loop over my k-points
      do my_ik=1,gqk%my_nk
-       ! Set entry to zero. Important as there are cycle instructions inside these loops
-       ! and we don't want random numbers written to disk.
-       my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = zero
-
        ! The k-point and the symmetries relating the BZ k-point to the IBZ.
        kk_bz = gqk%my_kpts(:, my_ik)
        weight_k = gqk%my_wtk(my_ik)
+       kk_string = ktoa(kk_bz)
 
        ik_ibz = gqk%my_k2ibz(1, my_ik); isym_k = gqk%my_k2ibz(2, my_ik)
        trev_k = gqk%my_k2ibz(6, my_ik); g0_k = gqk%my_k2ibz(3:5,my_ik)
        isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
        kk_ibz = ebands%kptns(:,ik_ibz)
+
+       ! Set entry to zero. Important as there are cycle instructions inside these loops
+       ! and we don't want random numbers written to disk.
+       my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = zero
+
+       if (dtset%gstore_use_lgk /= 0) then
+         ii = lg_myk(my_ik)%findq_ibzk(qq_bz)
+         if (ii == -1) then
+           call wrtout(std_out, sjoin(" iq_bz:", itoa(iq_bz), qq_bz_string, " not in IBZ_k --> skipping iteration"))
+           cycle
+           ! TODO: Check fillvalue (should be zero)
+         end if
+       end if
+
+       if (dtset%gstore_use_lgq /= 0) then
+         ii = lg_myq%findq_ibzk(kk_bz)
+         if (ii == -1) then
+           call wrtout(std_out, sjoin(" my_ik:", itoa(my_ik), kk_string, " not in IBZ_q --> skipping iteration"))
+           cycle
+           ! TODO: Check fillvalue (should be zero)
+         end if
+       end if
 
        ! Number of bands at k
        bstart_k = gqk%bstart; nband_k = gqk%nb
@@ -3723,6 +3840,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        write(msg,'(2(a,i0),a)')" My q-point [", my_iq, "/", gqk%my_nq, "]"
        call cwtime_report(msg, cpu_q, wall_q, gflops_q); if (my_iq == LOG_MODQ) call wrtout(std_out, "...", do_flush=.True.)
      end if
+     call lg_myq%free()
    end do ! my_iq
 
    ! Dump the remainder.
@@ -3737,6 +3855,13 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    ABI_FREE(h1_kets_kq)
    ABI_FREE(gkq_atm)
    ABI_FREE(gkq_nu)
+
+   if (dtset%gstore_use_lgk /= 0) then
+     do my_ik=1,gqk%my_nk
+       call lg_myk(my_ik)%free()
+     end do
+     ABI_FREE(lg_myk)
+   end if
  end do ! my_is
 
  call cwtime_report(" GSTORE computation done", cpu_all, wall_all, gflops_all, pre_str=ch10, end_str=ch10) !, comm=gstore%comm)
@@ -3992,6 +4117,8 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    ! Read gstore variables
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_with_vk"), gstore%with_vk))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_qptopt"), gstore%qptopt))
+   NCF_CHECK(nf90_get_var(ncid, vid("gstore_has_used_lgk"), gstore%has_used_lgk))
+   NCF_CHECK(nf90_get_var(ncid, vid("gstore_has_used_lgq"), gstore%has_used_lgk))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_kzone"), gstore%kzone))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_qzone"), gstore%qzone))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_kfilter"), gstore%kfilter))
@@ -4099,6 +4226,8 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    end if
 
    call xmpi_bcast(gstore%qptopt, master, comm, ierr)
+   call xmpi_bcast(gstore%has_used_lgk, master, comm, ierr)
+   call xmpi_bcast(gstore%has_used_lgq, master, comm, ierr)
    call xmpi_bcast(gstore%kzone, master, comm, ierr)
    call xmpi_bcast(gstore%qzone, master, comm, ierr)
    call xmpi_bcast(gstore%kfilter, master, comm, ierr)
