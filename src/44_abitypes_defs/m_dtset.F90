@@ -284,6 +284,7 @@ type, public :: dataset_type
  character(len=abi_slen) :: gstore_qzone = "bz"
  character(len=abi_slen) :: gstore_kfilter = "none"
  character(len=abi_slen) :: gstore_gmode = "phonon"
+ character(len=abi_slen) :: gstore_gname = "gvals"
  integer :: gstore_brange(2, 2) = 0
  real(dp) :: gstore_erange(2, 2) = zero
 
@@ -1799,6 +1800,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gstore_qzone       = dtin%gstore_qzone
  dtout%gstore_kfilter     = dtin%gstore_kfilter
  dtout%gstore_gmode       = dtin%gstore_gmode
+ dtout%gstore_gname       = dtin%gstore_gname
  dtout%gstore_brange      = dtin%gstore_brange
  dtout%gstore_erange      = dtin%gstore_erange
 
@@ -3658,7 +3660,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' gpu_devices gpu_kokkos_nthrd gpu_linalg_limit gpu_nl_distrib gpu_thread_limit'
  list_vars=trim(list_vars)//' gpu_nl_splitsize gpu_option'
  list_vars=trim(list_vars)//' gwaclowrank gwcalctyp gwcomp gwencomp gwgamma gwmem'
- list_vars=trim(list_vars)//' gstore_brange gstore_cplex gstore_erange gstore_kfilter gstore_gmode'
+ list_vars=trim(list_vars)//' gstore_brange gstore_cplex gstore_erange gstore_kfilter gstore_gmode gstore_gname'
  list_vars=trim(list_vars)//' gstore_kzone gstore_qzone gstore_with_vk'
  list_vars=trim(list_vars)//' gwpara gwrpacorr gwgmcorr gw_customnfreqsp gw1rdm'
  list_vars=trim(list_vars)//' gw_frqim_inzgrid gw_frqre_inzgrid gw_frqre_tangrid gw_freqsp'
@@ -3679,7 +3681,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
  list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb indata_prefix intxc invovl_blksliced iomode ionmov iqpt'
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'
- list_vars=trim(list_vars)//' irdbseig irdbsreso irdchkprdm irdddb irdddk irdden irdkden irddkdk irddkde irddelfd' 
+ list_vars=trim(list_vars)//' irdbseig irdbsreso irdchkprdm irdddb irdddk irdden irdkden irddkdk irddkde irddelfd'
  list_vars=trim(list_vars)//' irddvdb irddrhodb irdefmas'
  list_vars=trim(list_vars)//' irdhaydock irdpawden irdqps irdscr irdsuscep irdwfk irdwfq ird1den irdwfkfine'
  list_vars=trim(list_vars)//' ird1wf iscf isecur istatimg istatr'

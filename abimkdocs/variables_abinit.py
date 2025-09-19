@@ -24747,6 +24747,45 @@ Possible values are:
 ),
 
 Variable(
+    abivarname="gstore_vname",
+    varset="eph",
+    vartype="string",
+    topics=['ElPhonInt_expert'],
+    dimensions="scalar",
+    defaultval="gvals",
+    mnemonics=r"GSTORE Variable NAME",
+    requires="[[optdriver]] == 7",
+    added_in_version="10.5.6",
+    text=r"""
+This input variable specifies the name of the netcdf variable from which the e-ph matrix elements
+will be **read** from the GSTORE.nc file.
+Possible values are: "gvals" (default) or "gvals_ks"
+This variable has an effect only where reading a GSTORE file produced by
+the GWPT subdriver ([[eph_task]] 17) for post-processing purposes.
+In this case, indeed, the "gvals" netcdf variables stores the GWPT electron-matrix elements
+while "gvals_ks" contains the KS e-ph matrix elements.
+Use "gvals_ks" if you want to compute physical properties using KS matrix elements instead of the GWPT ones
+for comparison purposes.
+
+This input variable specifies the name of the NetCDF variable from which
+the electron–phonon matrix elements will be read in the GSTORE.nc file.
+
+Valid options are:
+
+- "gvals" (default)
+- "gvals_ks"
+
+This variable is only relevant when reading a GSTORE.nc file produced by
+the GWPT subdriver ([[eph_task]] = 17) for post-processing.
+In such cases: gvals" stores the GWPT-renormalized electron–phonon matrix elements while
+"gvals_ks" contains the Kohn–Sham (KS) electron–phonon matrix elements.
+
+Select "gvals_ks" if you wish to compute physical properties using the KS matrix elements
+instead of the GWPT ones, for comparison purposes.
+""",
+),
+
+Variable(
     abivarname="gstore_brange",
     varset="eph",
     vartype="int",

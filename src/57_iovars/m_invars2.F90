@@ -2101,13 +2101,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irdddk',tread,'INT')
  if(tread==1) dtset%irdddk=intarr(1)
- 
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irddelfd',tread,'INT')
  if(tread==1) dtset%irddelfd=intarr(1)
- 
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irddkdk',tread,'INT')
  if(tread==1) dtset%irddkdk=intarr(1)
- 
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irddkde',tread,'INT')
  if(tread==1) dtset%irddkde=intarr(1)
 
@@ -2311,6 +2311,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_gmode', tread, 'KEY', key_value=key_value)
  if (tread == 1) dtset%gstore_gmode = tolower(key_value)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_gname', tread, 'KEY', key_value=key_value)
+ if (tread == 1) dtset%gstore_gname = tolower(key_value)
 
  narr = 2 * nsppol
  call intagm(dprarr, intarr, jdtset, marr, narr, string(1:lenstr), 'gstore_brange', tread_brange, 'INT')

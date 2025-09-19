@@ -109,7 +109,6 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
  !real(dp) :: cpu, wall, gflops
  logical :: use_lgk, q_is_gamma, intra_band, same_band, imag_only
  complex(dp) :: ieta, cfact !, sig_cplx
- character(len=500) :: gvals_vname
  type(gaps_t) :: gaps
  type(lgroup_t) :: lg_myk
  type(gstore_t) :: gstore
@@ -132,10 +131,8 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
 
  ! The Fan-Migdal SE requires |g(k,q)| in the phonon representation but
  ! to compute the DW term in the RIA, we need complex g in the atom representation.
- gvals_vname = "gvals"
- !gvals_vname = "gvals_ks" ! TODO: Input variable?
  call gstore%from_ncpath(dtfil%filgstorein, with_cplex1, dtset, cryst, ebands, ifc, comm, &
-                         with_gmode="phonon", gvals_vname=gvals_vname, read_dw=.True.)
+                         with_gmode="phonon", gvals_name=dtset%gstore_gname, read_dw=.True.)
 
  ABI_CHECK(gstore%qzone == "bz", "gstore_sigeph assumes qzone == `bz`")
 
