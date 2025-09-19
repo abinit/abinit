@@ -102,6 +102,9 @@ module m_gstore_sigeph
    ! chemical potential of electrons for the different temperatures.
 
    complex(dp),allocatable :: vals_e0ks(:,:,:)
+   ! vals_e0ks(ntemp, max_nbcalc, nk_glob, nsppol)
+   ! Sigma_eph(omega=eKS, kT, band) for given (ikcalc, spin).
+   ! Fan-Migdal + Debye-Waller
 
    !complex(dp),allocatable :: fan_vals(:,:)
    ! fan_vals(ntemp, max_nbcalc)
@@ -126,7 +129,6 @@ module m_gstore_sigeph
    ! Sigma_eph(omega, kT, band) for given (ikcalc, spin).
    ! enk_KS corresponds to nwr/2 + 1.
    ! This array depends on (ikcalc, spin)
-
 
  contains
 
@@ -292,9 +294,6 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
    ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
    ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
 
-   ! vals_e0ks(ntemp, max_nbcalc, nk_glob, nsppol)
-   ! Sigma_eph(omega=eKS, kT, band) for given (ikcalc, spin).
-   ! Fan-Migdal + Debye-Waller
    ABI_CALLOC(sep%vals_e0ks, (ntemp, gqk%nb, gqk%glob_nk))  ! nb_k
    ABI_CALLOC(sep%dvals_de0ks, (ntemp, gqk%nb, gqk%glob_nk))  ! nb_k
    ABI_CALLOC(sep%dw_vals, (ntemp, gqk%nb, gqk%glob_nk))  ! nb_k
@@ -500,7 +499,7 @@ subroutine sep_gather_and_write_results(sep, ntemp, gstore, gqk, ebands)
  complex(dp) :: qpoms_enes(ntemp, gqk%nb),qp_enes(ntemp, gqk%nb) ! nb_k
 !! *************************************************************************
 
- print *, "in print results"
+ !print *, "in print results"
  spin = gqk%spin
 
  ! Sum partial terms inside qgk%comm.
