@@ -419,10 +419,10 @@ type, public :: gstore_t
   integer :: qptopt = -1
   ! option for the generation of q points (defines whether spatial symmetries and/or time-reversal can be used)
 
-  integer :: has_used_lgk = -1
+  integer :: has_used_lgk = 0
   ! value of use_lgk used to generate GSTORE.nc (read from file).
 
-  integer :: has_used_lgq = -1
+  integer :: has_used_lgq = 0
   ! value of use_lgq used to generate GSTORE.nc (read from file).
 
   character(len=fnlen) :: path = " "
@@ -1499,8 +1499,8 @@ subroutine gstore_print(gstore, units, header, prtvol)
  call wrtout(units, sjoin(" glob_nq_spin:", ltoa(gstore%glob_nq_spin)))
  call wrtout(units, sjoin(" kptopt:", itoa(gstore%ebands%kptopt)))
  call wrtout(units, sjoin(" qptopt:", itoa(gstore%qptopt)))
- call wrtout(units, sjoin(" has_use_lgk:", itoa(gstore%has_used_lgk)))
- call wrtout(units, sjoin(" has_use_lgq:", itoa(gstore%has_used_lgq)))
+ call wrtout(units, sjoin(" has_used_lgk:", itoa(gstore%has_used_lgk)))
+ call wrtout(units, sjoin(" has_used_lgq:", itoa(gstore%has_used_lgq)))
  call wrtout(units, sjoin(" with_vk:", itoa(gstore%with_vk)))
 
  do my_is=1,gstore%my_nspins
@@ -4117,8 +4117,18 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    ! Read gstore variables
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_with_vk"), gstore%with_vk))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_qptopt"), gstore%qptopt))
-   NCF_CHECK(nf90_get_var(ncid, vid("gstore_has_used_lgk"), gstore%has_used_lgk))
-   NCF_CHECK(nf90_get_var(ncid, vid("gstore_has_used_lgq"), gstore%has_used_lgk))
+
+   ! little group variables were added in Abinit v10.5.6.
+   gstore%has_used_lgk = 0
+   gstore%has_used_lgq = 0
+   ncerr = nf90_inq_varid(ncid, "gstore_has_used_lgk", varid)
+   if (ncerr == nf90_noerr) then
+     NCF_CHECK(nf90_get_var(ncid, vid("gstore_has_used_lgk"), gstore%has_used_lgk))
+   end if
+   ncerr = nf90_inq_varid(ncid, "gstore_has_used_lgq", varid)
+   if (ncerr == nf90_noerr) then
+     NCF_CHECK(nf90_get_var(ncid, vid("gstore_has_used_lgq"), gstore%has_used_lgq))
+   end if
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_kzone"), gstore%kzone))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_qzone"), gstore%qzone))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_kfilter"), gstore%kfilter))

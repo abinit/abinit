@@ -701,11 +701,16 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ! This test has been disabled (too expensive!)
  if (.False.) call wfd%test_ortho(Cryst,Pawtab,unit=ab_out,mode_paral="COLL")
 
- if (Dtset%pawcross==1) then
+ if (Dtset%pawcross==1 .or. dtset%userie == 456) then
    call Wfdf%init(Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh%nibz,Sigp%nsppol,bks_mask,&
      Dtset%nspden,Dtset%nspinor,dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
      Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)
-   call wfdgw_copy(Wfd, Wfdf)
+   if (dtset%userie == 456) then
+      call wrtout(std_out, "Reading states from supercell WFK file")
+     call wfdf%read_wfk("SC_WFK", iomode_from_fname("SC_WFK"))
+   else
+     call wfdgw_copy(Wfd, Wfdf)
+   end if
    call wfdf%change_ngfft(Cryst, Psps, ngfftf)
  end if
 
@@ -973,9 +978,17 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    end do
  end do
 
+ if (dtset%userie == 456) then
+ call wrtout(std_out, "Computing KS vxc matrix elements using supercell WFK file")
+ call calc_vhxc_me(Wfdf, KS_mflags, KS_me, Cryst, Dtset, nfftf, ngfftf, &
+                   ks_vtrial, ks_vhartr, ks_vxc, Psps, Pawtab, KS_paw_an, Pawang, Pawfgrtab, KS_paw_ij, dijexc_core, &
+                   ks_rhor, usexcnhat, ks_nhat, ks_nhatgr, nhatgrdim, tmp_kstab, taur=ks_taur)
+ else
+
  call calc_vhxc_me(Wfd, KS_mflags, KS_me, Cryst, Dtset, nfftf, ngfftf, &
                    ks_vtrial, ks_vhartr, ks_vxc, Psps, Pawtab, KS_paw_an, Pawang, Pawfgrtab, KS_paw_ij, dijexc_core, &
                    ks_rhor, usexcnhat, ks_nhat, ks_nhatgr, nhatgrdim, tmp_kstab, taur=ks_taur)
+ end if
  ABI_FREE(tmp_kstab)
 
 !Set KS matrix elements connecting different irreps to zero. Do not touch unknown bands!.
@@ -2336,7 +2349,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        ! min and max band indices for GW corrections (for this k-point)
        ib1 = MINVAL(Sigp%minbnd(ikcalc,:))
        ib2 = MAXVAL(Sigp%maxbnd(ikcalc,:))
-       call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,qp_ebands,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,Ltg_k(ikcalc),&
+       call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,qp_ebands,dtset, Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,Ltg_k(ikcalc),&
                          Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
                          gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross,tol_empty)
 
@@ -2553,7 +2566,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
            ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
            ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
            ! Notice we need KS occs and band energy diffs
-           call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,ks_ebands,Sigp,Sr,Gsph_x,Vcp_ks,Kmesh,Qmesh,Ltg_k(ikcalc),&
+           call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,ks_ebands,dtset, Sigp,Sr,Gsph_x,Vcp_ks,Kmesh,Qmesh,Ltg_k(ikcalc),&
                              Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
                              gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross,tol_empty)
 
@@ -2600,7 +2613,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
          ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
 
          ! Build <NO_i|Sigma_x[NO]|NO_j> matrix
-         call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,qp_ebands,Sigp,Sr,Gsph_x,Vcp_full,Kmesh,Qmesh,Ltg_k(ikcalc),&
+         call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,qp_ebands,dtset, Sigp,Sr,Gsph_x,Vcp_full,Kmesh,Qmesh,Ltg_k(ikcalc),&
                             Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd_nato_all,Wfdf,QP_sym,&
                             gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross,tol_empty)
        end do

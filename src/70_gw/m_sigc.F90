@@ -590,7 +590,13 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    ! Load wavefunctions for GW corrections
    ! TODO: Rotate the functions here instead of calling rho_tw_g
    ABI_MALLOC(wfr_bdgw, (gwc_nfftot*nspinor, ib1:ib2))
+
+   if (dtset%userie == 456) then
+     call wrtout(std_out, "Taking states from Sigma^c_nk from supercell WFK file")
+     call wfdf%get_many_ur([(jb, jb=ib1,ib2)], jk_ibz, spin, wfr_bdgw)
+   else
    call wfd%get_many_ur([(jb, jb=ib1,ib2)], jk_ibz, spin, wfr_bdgw)
+   end if
 
    if (wfd%usepaw == 1) then
      ! Load cprj for GW states, note the indexing.

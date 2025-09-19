@@ -135,7 +135,23 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
  call gstore%from_ncpath(dtfil%filgstorein, with_cplex1, dtset, cryst, ebands, ifc, comm, &
                          with_gmode="phonon", gvals_name=dtset%gstore_gname, read_dw=.True.)
 
- ABI_CHECK(gstore%qzone == "bz", "gstore_sigeph assumes qzone == `bz`")
+ ierr = 0
+ if (gstore%qzone /= "bz") then
+   ABI_ERROR_NOSTOP("gstore_sigeph assumes qzone == `bz`", ierr)
+ end if
+ if (gstore%has_used_lgk /= 0) then
+   ABI_ERROR_NOSTOP("The varpeq formalism does not support use_lgk /=0 .", ierr)
+ end if
+ if (gstore%has_used_lgq /= 0) then
+   ABI_ERROR_NOSTOP("gstore_sigeph does not support use_lgq /=0 .", ierr)
+ end if
+ if (ierr > 1) then
+   write(msg,'(a,i0,5a)')&
+     'Checking consistency of input data against itself gave ',ierr,' inconsistencies.',ch10,&
+     'The details of the problems can be FOUND ABOVE (or in output or log file), in an earlier WARNING.',ch10,&
+     'In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
+   ABI_ERROR(msg)
+ end if
 
  ! Build (linear) mesh of K * temperatures. tsmesh(1:3) = [start, step, num]
  call dtset%get_ktmesh(ntemp, kTmesh)
