@@ -51,8 +51,8 @@ module m_gwpt
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
  use m_numeric_tools,  only : arth, c2r, get_diag, linfit, iseven, simpson_cplx, print_arr, inrange
  use m_io_tools,       only : iomode_from_fname
- use m_fftcore,        only : ngfft_seq, sphereboundary, get_kg, kgindex, print_ngfft
- use m_cgtk,           only : cgtk_rotate, cgtk_change_gsphere
+ use m_fftcore,        only : ngfft_seq, sphereboundary, print_ngfft
+ use m_cgtk,           only : cgtk_rotate
  use m_cgtools,        only : cg_zdotc, cg_real_zdotc, cg_zgemm
  use m_crystal,        only : crystal_t
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map
@@ -232,8 +232,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:), my_iqibz_inds(:)
  integer(i1b),allocatable :: itreat_qibz(:)
  integer, ABI_CONTIGUOUS pointer :: kg_c(:,:), kg_x(:,:)
- real(dp) :: cpu, wall, gflops !, cpu_q, wall_q, gflops_q, cpu_all, wall_all, gflops_all
- real(dp) :: eig0nk
+ real(dp) :: eig0nk, cpu, wall, gflops !, cpu_q, wall_q, gflops_q, cpu_all, wall_all, gflops_all
  complex(gwpc) :: ctmp_gwpc, xdot_tmp
 !arrays
  real(dp) :: fermie1_idir_ipert(3,cryst%natom), ylmgr_dum(1,1,1), dum_nhat(0), dum_xccc3d(0)
@@ -559,7 +558,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is); nb = gqk%nb
 
      ! Be careful as wavefunctions might be replicated.
-     ! Use count_bk to count how many states has been computed
+     ! Use count_bk to count how many states have been computed
      ! in parallel in order to rescale the results.
      if (gstore%with_vk == 1) then
        ABI_CALLOC(vk_cart_ibz, (3, gqk%nb, gstore%nkibz))

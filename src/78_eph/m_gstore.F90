@@ -385,9 +385,10 @@ type, public :: gqk_t
 !!    - pointers to the crystal structure, the KS bands, the IFCs.
 !!    - arrays that do not depend on the spin such as the IBZ and weights for k/q-points.
 !!    - metadata such as kzone, qzone and kfilter that are needed to interpret
-!!      the storage mode used for the g(k, q)
+!!      the storage mode used for the g(k,q).
 !!
-!! NB: the e-ph matrix element are stored in gstore%gqk(my_is) where my_is counts the number of spins treated by this MPI processor.
+!! NB: the e-ph matrix element are stored in gstore%gqk(my_is) where my_is counts the number of collinear spins
+!!     treated by this MPI processor.
 !!
 !! SOURCE
 
@@ -3007,7 +3008,6 @@ subroutine gstore_get_missing_qbz_spin(gstore, done_qbz_spin, ndone, nmiss)
  integer,intent(out) :: ndone, nmiss
 
 !Local variables ------------------------------
-!scalars
  integer :: my_is, my_iq, iq_bz, spin, ierr, nscale
 !----------------------------------------------------------------------
 
@@ -3038,7 +3038,7 @@ end subroutine gstore_get_missing_qbz_spin
 !! gstore_set_perts_distrib
 !!
 !! FUNCTION
-!!   Activate parallelism over perturbations at the level of the DVDB file.
+!! Activate parallelism over perturbations at the level of the DVDB file.
 !!
 !! SOURCE
 
@@ -3103,6 +3103,7 @@ end subroutine gstore_set_perts_distrib
 !! comm=MPI communicator.
 !!
 !! OUTPUT
+!!  GSTORE.nc file
 !!
 !! SOURCE
 
@@ -3130,8 +3131,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, ider0 = 0, idir0 = 0, LOG_MODQ = 5
- integer,parameter :: master = 0, ndat1 = 1
+ integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, ider0 = 0, idir0 = 0, LOG_MODQ = 5, master = 0, ndat1 = 1
  integer :: my_rank,nproc,nproc_lim,mband,nsppol,nkibz,idir,ipert, iq_bz
  integer :: cplex,natom,natom3,ipc,nspinor, nskip_tetra_kq
  integer :: bstart_k,bstart_kq,nband_k,nband_kq,band_k, in_k, im_kq !ib1,ib2, band_kq,

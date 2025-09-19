@@ -220,7 +220,7 @@ module m_sigmaph
    ! Dimension of angular mesh for spherical integration of the Frohlich self-energy
    ! angl_size = ntheta * nphi
 
-  complex(dpc) :: ieta
+  complex(dp) :: ieta
    ! Used to shift the poles in the complex plane (Ha units)
    ! Corresponds to `i eta` term in equations.
 
@@ -418,7 +418,7 @@ module m_sigmaph
    ! Linewidths computed within the momentum relaxation time approximation
    ! for given (ikcalc, spin). Only if imag_only
 
-  complex(dpc),allocatable :: cweights(:,:,:,:,:,:,:)
+  complex(dp),allocatable :: cweights(:,:,:,:,:,:,:)
    ! (nz, 2, nbcalc_ks, my_npert, my_bsum_start:my_bsum_stop, my_nqibz_k, ndiv))
    ! Weights for the q-integration of 1 / (e1 - e2 \pm w_{q, nu} + i.eta)
    ! This array is initialized inside the (ikcalc, spin) loop
@@ -456,24 +456,24 @@ module m_sigmaph
    ! qp_done(kcalc, spin)
    ! Keep track of the QP states already computed for restart of the calculation
 
-  complex(dpc),allocatable :: vals_e0ks(:,:)
+  complex(dp),allocatable :: vals_e0ks(:,:)
    ! vals_e0ks(ntemp, max_nbcalc)
    ! Sigma_eph(omega=eKS, kT, band) for given (ikcalc, spin).
    ! Fan-Migdal + Debye-Waller
 
-  complex(dpc),allocatable :: fan_vals(:,:)
+  complex(dp),allocatable :: fan_vals(:,:)
    ! fan_vals(ntemp, max_nbcalc)
    ! Fan-Migdal
 
-  complex(dpc),allocatable :: fan_stern_vals(:,:)
+  complex(dp),allocatable :: fan_stern_vals(:,:)
    ! fan_stern_vals(ntemp, max_nbcalc)
    ! Fan-Migdal adiabatic Sternheimer part
 
-  complex(dpc),allocatable :: dvals_de0ks(:,:)
+  complex(dp),allocatable :: dvals_de0ks(:,:)
    ! dvals_de0ks(ntemp, max_nbcalc) for given (ikcalc, spin)
    ! d Re Sigma_eph(omega, kT, band, kcalc, spin) / d omega (omega=eKS)
 
-  complex(dpc),allocatable :: frohl_dvals_de0ks(:,:)
+  complex(dp),allocatable :: frohl_dvals_de0ks(:,:)
    ! frohl_dvals_de0ks(ntemp, max_nbcalc) for given (ikcalc, spin)
    ! d Re Sigma_frohl(omega, kT, band, kcalc, spin) / d omega (omega=eKS)
 
@@ -485,7 +485,7 @@ module m_sigmaph
    !  dw_stern_vals(ntemp, max_nbcalc) for given (ikcalc, spin)
    !  Debye-Waller Sternheimer term (static) .
 
-  complex(dpc),allocatable :: vals_wr(:,:,:)
+  complex(dp),allocatable :: vals_wr(:,:,:)
    ! vals_wr(nwr, ntemp, max_nbcalc)
    ! Sigma_eph(omega, kT, band) for given (ikcalc, spin).
    ! enk_KS corresponds to nwr/2 + 1.
@@ -650,7 +650,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop, gf_val
  real(dp) :: ecut,eshift,weight_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, simag, q0rad
  real(dp) :: vkk_norm, vkq_norm, osc_ecut, bz_vol
- complex(dpc) :: cfact,dka,dkap,dkpa,dkpap, cnum, sig_cplx, cfact2
+ complex(dp) :: cfact,dka,dkap,dkpa,dkpap, cnum, sig_cplx, cfact2
  logical :: isirr_k, isirr_kq, gen_eigenpb, q_is_gamma, isirr_q, use_ifc_fourq, stern_use_cache, intra_band, same_band
  logical :: zpr_frohl_sphcorr_done, stern_has_band_para
  type(wfd_t) :: wfd
@@ -692,8 +692,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  !real(dp),allocatable :: phfreqs_qibz(:,:), pheigvec_qibz(:,:,:,:), eigvec_qpt(:,:,:)
  logical,allocatable :: osc_mask(:)
  real(dp),allocatable :: gkq2_lr(:,:,:)
- complex(dpc) :: cp3(3)
- complex(dpc),allocatable :: osc_ks(:,:), fmw_frohl_sphcorr(:,:,:,:), cfact_wr(:), tpp_red(:,:)
+ complex(dp) :: cp3(3)
+ complex(dp),allocatable :: osc_ks(:,:), fmw_frohl_sphcorr(:,:,:,:), cfact_wr(:), tpp_red(:,:)
  complex(gwpc),allocatable :: ur_k(:,:), ur_kq(:), work_ur(:), workq_ug(:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
  type(pawrhoij_type),allocatable :: pot_pawrhoij(:)
@@ -1024,7 +1024,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 !       ! cnum = q.\sum_k Z_k.d(q,nu)
 !       cp3 = czero
 !       do iatom=1, natom
-!         cp3 = cp3 + matmul(ifc%zeff(:, :, iatom), cmplx(displ_cart(1,:,iatom, nu), displ_cart(2,:,iatom, nu), kind=dpc))
+!         cp3 = cp3 + matmul(ifc%zeff(:, :, iatom), cmplx(displ_cart(1,:,iatom, nu), displ_cart(2,:,iatom, nu), kind=dp))
 !       end do
 !       cnum = dot_product(qpt_cart, cp3)
 !       ! Compute spherical average.
@@ -1320,7 +1320,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            ! cnum = q.\sum_k Z_k.d_k(q,nu)
            cp3 = czero
            do iatom=1, natom
-             cp3 = cp3 + matmul(ifc%zeff(:, :, iatom), cmplx(displ_cart(1,:,iatom, nu), displ_cart(2,:,iatom, nu), kind=dpc))
+             cp3 = cp3 + matmul(ifc%zeff(:, :, iatom), cmplx(displ_cart(1,:,iatom, nu), displ_cart(2,:,iatom, nu), kind=dp))
            end do
            cnum = dot_product(qpt_cart, cp3); if (abs(cnum) < tol12) cycle
 
@@ -2336,7 +2336,7 @@ end if
                  cfact = zero
                  do ip2=1,natom3
                    do ip1=1,natom3
-                     cfact = cfact + tpp_red(ip1, ip2) * cmplx(stern_dw(1,ip1,ip2,ib_k), stern_dw(2,ip1,ip2,ib_k), kind=dpc)
+                     cfact = cfact + tpp_red(ip1, ip2) * cmplx(stern_dw(1,ip1,ip2,ib_k), stern_dw(2,ip1,ip2,ib_k), kind=dp)
                    end do
                  end do
                  ! There's no 1/two here because I don't symmetrize the expression.
@@ -4545,7 +4545,7 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
  logical :: iwrite
  real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond,qpe_oms,qpe_oms_val,qpe_oms_cond
  real(dp) :: cpu, wall, gflops, invsig2fmts, tau, ravg2
- complex(dpc) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2,cavg3,cavg4
+ complex(dp) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2,cavg3,cavg4
  !character(len=5000) :: msg
  integer :: grp_ncid, ncerr
 !arrays
@@ -4555,7 +4555,7 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
  real(dp),allocatable :: aw(:,:,:), a2few_avg(:,:), gather_srate(:,:,:,:), grp_srate(:,:,:,:)
  real(dp) :: ks_enes(self%max_nbcalc), ze0_vals(self%ntemp, self%max_nbcalc)
  real(dp) :: gfw_avg(self%phmesh_size, 3)
- complex(dpc) :: qpoms_enes(self%ntemp, self%max_nbcalc),qp_enes(self%ntemp, self%max_nbcalc)
+ complex(dp) :: qpoms_enes(self%ntemp, self%max_nbcalc),qp_enes(self%ntemp, self%max_nbcalc)
 ! *************************************************************************
 
  ! Could use non-blocking communications and double buffer technique to reduce synchronisation cost...
@@ -5137,7 +5137,7 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
 !arrays
  real(dp) :: kk(3), kq(3), qpt(3), dpm(2)
  real(dp),allocatable :: tmp_deltaw_pm(:,:,:)
- complex(dpc),allocatable :: zvals(:,:), tmp_cweights(:,:,:,:)
+ complex(dp),allocatable :: zvals(:,:), tmp_cweights(:,:,:,:)
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")

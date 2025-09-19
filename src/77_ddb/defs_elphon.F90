@@ -540,9 +540,7 @@ subroutine elph_k_procs(nproc, elph_k)
  integer :: ikpt, me, ik_this_proc
 ! *************************************************************************
 
- if (allocated(elph_k%my_kpt)) then
-   ABI_FREE (elph_k%my_kpt)
- end if
+ ABI_SFREE (elph_k%my_kpt)
  ABI_MALLOC (elph_k%my_kpt, (elph_k%nkpt))
 
  elph_k%my_kpt = 0
@@ -554,9 +552,7 @@ subroutine elph_k_procs(nproc, elph_k)
  end do
 
 ! create inverse mapping from ik_this_proc to ikpt
- if (allocated(elph_k%my_ikpt)) then
-   ABI_FREE (elph_k%my_ikpt)
- end if
+ ABI_SFREE (elph_k%my_ikpt)
  ABI_MALLOC (elph_k%my_ikpt, (elph_k%my_nkpt))
  elph_k%my_ikpt = 0
 
@@ -971,7 +967,7 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
 
 !        for each tensor component, rotate the cartesian directions of phonon modes
          do itensor = 1, 9
-           do reim=1,2  ! Real/Imaginary parts 
+           do reim=1,2  ! Real/Imaginary parts
 !            Multiply by the ss matrices
              tmp_mat2(:,:) = zero
              tmp_mat(:,:) = reshape(gkk_qpt_tmp(reim,itensor,:,isppol),(/nbranch,nbranch/))
@@ -983,7 +979,7 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
 
 !        for each cartesian direction/phonon mode, rotate the tensor components
          do imode = 1, nbranch*nbranch
-           do reim=1,2  ! Real/Imaginary parts 
+           do reim=1,2  ! Real/Imaginary parts
              tmp_tensor2(:,:) = zero
              tmp_tensor(:,:) = reshape(gkk_qpt_tmp(reim,:,imode,isppol),(/3,3/))
              call DGEMM ('N','N',3,3,3,one,sscart,3,tmp_tensor,3,zero,tmp_tensor2,3)

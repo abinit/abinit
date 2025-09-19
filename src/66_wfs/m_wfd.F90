@@ -2097,7 +2097,7 @@ subroutine wave_free(Wave, what)
  end if
 
  if (firstchar(my_what, ["A", "G"])) then
-    ABI_SFREE(Wave%ug)
+   ABI_SFREE(Wave%ug)
    Wave%has_ug = WFD_NOWAVE
  end if
 
@@ -4644,6 +4644,18 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  mband_disk = MAXVAL(Hdr%nband)
  ABI_CHECK_ILEQ(Wfd%mband, mband_disk, "Not enough bands stored on WFK file")
 
+ ! Make sure wfd%kibz agrees the k-points reported in the hdr.
+ ABI_CHECK_IEQ(wfd%nkibz, hdr%nkpt, "wfd%nkibz != hdr%nkpt")
+ ierr = 0
+ do ik_ibz=1,wfd%nkibz
+   if (any(abs(wfd%kibz(:, ik_ibz) - hdr%kptns(:, ik_ibz)) > tol12)) then
+     ierr = ierr + 1
+     call wrtout(std_out, &
+       sjoin("For ik_ibz: ", itoa(ik_ibz), "wfd kpt:", ktoa(wfd%kibz(:, ik_ibz)), " /= ", ktoa(hdr%kptns(:,ik_ibz))))
+   end if
+ end do
+ ABI_CHECK_IEQ(ierr, 0, "kpoints in wfd% and WFK file do not agree. See messages above")
+
  ! Each node will read the waves whose status if (WFD_ALLOCATED|WFD_STORED).
  ! all_countks is a global array used to skip (ik_ibz, spin) if all MPI procs do not need bands for this (k, s)
  ABI_MALLOC(my_readmask, (mband_disk, Wfd%nkibz, Wfd%nsppol))
@@ -4744,9 +4756,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
             do ig=1,npw_disk
               icg = ig+cg_spad+cg_bpad
               igw = gf2wfd(ig)+gw_spad
-              if (gf2wfd(ig) /= 0) then
-                wave%ug(igw) = CMPLX(cg_k(1,icg), cg_k(2,icg), kind=gwpc)
-              end if
+              if (gf2wfd(ig) /= 0) wave%ug(igw) = CMPLX(cg_k(1,icg), cg_k(2,icg), kind=gwpc)
             end do
           end do
           wave%has_ug = WFD_STORED
@@ -4915,15 +4925,14 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
         write(msg,'(4x,4(a,i0),a)') "Reading kpt [", ik_ibz, "/", wfd%nkibz, "] spin [", spin, "/", wfd%nsppol, "]"
         call cwtime_report(msg, cpu_ks, wall_ks, gflops_ks)
       end if
-    end do !ik_ibz
-  end do !spin
+    end do ! ik_ibz
+  end do ! spin
 
  else
    ABI_ERROR(sjoin("Wrong method: ", itoa(method)))
  end if
 
- call wfk%close()
- call Hdr%free()
+ call wfk%close(); call Hdr%free()
 
  ABI_FREE(my_readmask)
  ABI_FREE(all_countks)
@@ -5739,7 +5748,7 @@ subroutine wfdgw_mkrho(wfd, cryst, psps, ebands, ngfftf, nfftf, rhor, &
            ABI_FREE(gradug)
          end if
 
-!$OMP PARALLEL DO
+         !$OMP PARALLEL DO
          do ir=1,nfftf
            rhor(ir,is) = rhor(ir,is) + CONJG(cwavef1(ir)) * cwavef1(ir) * bks_weight
          end do
@@ -5756,7 +5765,7 @@ subroutine wfdgw_mkrho(wfd, cryst, psps, ebands, ngfftf, nfftf, rhor, &
            cwavef2 => wfr(1+nfftf:2*nfftf)
            wfr_x(:) = cwavef1(:) + cwavef2(:)       ! $(\Psi^{1}+\Psi^{2})$
            wfr_y(:) = cwavef1(:) -j_dpc*cwavef2(:)  ! $(\Psi^{1}-i\Psi^{2})$
-!$OMP PARALLEL DO
+           !$OMP PARALLEL DO
            do ir=1,nfftf
              rhor_down(ir) = rhor_down(ir) + CONJG(cwavef2(ir)) * cwavef2(ir) * bks_weight
              rhor_mx(ir) = rhor_mx(ir) + CONJG(wfr_x(ir)) * wfr_x(ir) * bks_weight
@@ -5879,7 +5888,7 @@ subroutine test_charge(nfftf,nelectron_exp,nspden,rhor,ucvol,&
 
  ! === For PAW output of compensation charges ===
  if (usepaw==1) then
-!if (usepaw==1.and.usexcnhat>0) then ! TODO I still dont understand this if!
+ !if (usepaw==1.and.usexcnhat>0) then ! TODO I still dont understand this if!
    write(msg,'(4a)')ch10,' PAW TEST:',ch10,' ==== Compensation charge inside spheres ============'
    if (compch_sph<greatest_real.and.compch_fft<greatest_real) &
      write(msg,'(3a)')TRIM(msg),ch10,' The following values must be close...'

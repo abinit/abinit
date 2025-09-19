@@ -2633,42 +2633,17 @@ end subroutine fullbz_plowannier
    end do
  end do
 
- if (allocated(wan%kpt)) then
-   ABI_FREE(wan%kpt)
- end if
- if (allocated(wan%iatom_wan)) then
-   ABI_FREE(wan%iatom_wan)
- end if
- if (allocated(wan%nbl_atom_wan)) then
-   ABI_FREE(wan%nbl_atom_wan)
- end if
- if (allocated(wan%latom_wan)) then
-   ABI_FREE(wan%latom_wan)
- end if
- if (allocated(wan%nbproj_atom_wan)) then
-   ABI_FREE(wan%nbproj_atom_wan)
- end if
- if (allocated(wan%projector_wan)) then
-   ABI_FREE(wan%projector_wan)
- end if
- if (allocated(wan%position)) then
-   ABI_FREE(wan%position)
- end if
- if (allocated(wan%wtk)) then
-   ABI_FREE(wan%wtk)
- end if
- if (allocated(wan%acell)) then
-   ABI_FREE(wan%acell)
- end if
-
-
- if (allocated(wan%nposition)) then
-   ABI_FREE(wan%nposition)
- end if
- if (allocated(wan%psichi)) then
-   ABI_FREE(wan%psichi)
- end if
-
+ ABI_SFREE(wan%kpt)
+ ABI_SFREE(wan%iatom_wan)
+ ABI_SFREE(wan%nbl_atom_wan)
+ ABI_SFREE(wan%latom_wan)
+ ABI_SFREE(wan%nbproj_atom_wan)
+ ABI_SFREE(wan%projector_wan)
+ ABI_SFREE(wan%position)
+ ABI_SFREE(wan%wtk)
+ ABI_SFREE(wan%acell)
+ ABI_SFREE(wan%nposition)
+ ABI_SFREE(wan%psichi)
 
  end subroutine destroy_plowannier
 !!***
