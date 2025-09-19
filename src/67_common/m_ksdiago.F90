@@ -2012,8 +2012,8 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, dia
  type(crystal_t) :: wfk_cryst
  type(krank_t) :: krank_ibz ! qrank,
  character(len=fnlen) :: wfk_path
- integer :: units(2)
  integer :: nqbzX
+ integer :: units(2)
  integer,allocatable :: nband(:,:), wfd_istwfk(:), qtab(:), qtabi(:), qtabo(:)
  real(dp),allocatable :: qbz(:,:), wtk(:), wtq(:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
@@ -2112,7 +2112,7 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, dia
 
  ! Note symrec convention.
  ebands_kptopt = hyb%ebands%kptopt
- krank_ibz = krank_from_kptrlatt(hyb%nkibz, hyb%kibz, hyb%ebands%kptrlatt, compute_invrank=.False.)
+ call krank_ibz%from_kptrlatt(hyb%nkibz, hyb%kibz, hyb%ebands%kptrlatt, compute_invrank=.False.)
 
  ABI_MALLOC(hyb%kbz2ibz, (6, hyb%nkbz))
  if (kpts_map("symrec", ebands_kptopt, cryst, krank_ibz, hyb%nkbz, hyb%kbz, hyb%kbz2ibz) /= 0) then

@@ -14,7 +14,6 @@
 !!
 !! SOURCE
 
-
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -45,13 +44,13 @@ module m_krank
 
  type,public :: krank_t
 
-   integer :: max_linear_density
+   integer :: max_linear_density = -1
 
-   integer :: min_rank
+   integer :: min_rank = -1
 
-   integer :: max_rank
+   integer :: max_rank = -1
 
-   integer :: npoints
+   integer :: npoints = -1
 
    logical :: time_reversal
 
@@ -66,6 +65,12 @@ module m_krank
    integer,allocatable :: rank2ikpt_(:), rank2symtime_(:)
 
  contains
+
+   procedure :: init => krank_init
+     ! Sets up the kpt ranks for comparing kpts
+
+   procedure :: from_kptrlatt => krank_from_kptrlatt
+     ! Initialize object from kptrlatt
 
    procedure :: get_rank
     ! Calculates the rank for one kpt
@@ -89,9 +94,6 @@ module m_krank
 
  end type krank_t
 
- public :: krank_from_kptrlatt  ! Initialize object from kptrlatt
- public :: krank_new            ! Sets up the kpt ranks for comparing kpts
-
  public :: get_ibz2bz           ! Return array with the index of the IBZ wave vectors in the BZ.
  public :: star_from_ibz_idx    ! Return array with the indices of the star of the ik_ibz wavevector in the IBZ.
 !!***
@@ -110,19 +112,17 @@ contains
 !!  npt = number of kpoints (eventually irreducible)
 !!  kpt = coordinates of kpoints
 !!
-!! OUTPUT
-!!  krank = object containing ranking and inverse ranking
-!!
 !! NOTES
 !!  By default, the object holds a reference to kpts so do not change/deallocate this array
 !!  while using krank.
 !!
 !! SOURCE
 
-type(krank_t) function krank_from_kptrlatt(nkpt, kpts, kptrlatt, compute_invrank) result(new)
+subroutine krank_from_kptrlatt(new, nkpt, kpts, kptrlatt, compute_invrank)
 
 !Arguments ------------------------------------
 !scalars
+ class(krank_t), intent(out) :: new
  integer,intent(in) :: nkpt
  logical,optional,intent(in) :: compute_invrank
 !arrays
@@ -165,14 +165,14 @@ type(krank_t) function krank_from_kptrlatt(nkpt, kpts, kptrlatt, compute_invrank
    max_linear_density = maxval([kptrlatt(1,1), kptrlatt(2,2), kptrlatt(3,3)])
  end if
 
- new = krank_new(nkpt, kpts, max_linear_density=max_linear_density, compute_invrank=compute_invrank_)
+ call new%init(nkpt, kpts, max_linear_density=max_linear_density, compute_invrank=compute_invrank_)
 
-end function krank_from_kptrlatt
+end subroutine krank_from_kptrlatt
 !!***
 
-!!****f* m_krank/krank_new
+!!****f* m_krank/krank_init
 !! NAME
-!! krank_new
+!! krank_init
 !!
 !! FUNCTION
 !! This routine sets up the kpt ranks for comparing kpts
@@ -185,11 +185,11 @@ end function krank_from_kptrlatt
 !!
 !! SOURCE
 
-type(krank_t) function krank_new(nkpt, kpts, &
-                                 nsym, symrec, time_reversal, max_linear_density, compute_invrank) result(new)
+subroutine krank_init(new, nkpt, kpts, nsym, symrec, time_reversal, max_linear_density, compute_invrank)
 
 !Arguments ------------------------------------
 !scalars
+ class(krank_t),intent(out) :: new
  integer,intent(in) :: nkpt
  integer,intent(in), optional :: nsym
  logical,intent(in), optional :: time_reversal
@@ -280,7 +280,7 @@ type(krank_t) function krank_new(nkpt, kpts, &
    end do
  end if
 
-end function krank_new
+end subroutine krank_init
 !!***
 
 !----------------------------------------------------------------------
@@ -290,11 +290,10 @@ end function krank_new
 !! get_rank
 !!
 !! FUNCTION
-!! This routine calculates the rank for one kpt
+!! Calculate the rank for one kpt.
 !!
 !! INPUTS
 !!  kpt = coordinates of kpoints
-!!  krank = rank object for the k-grid we are using
 !!
 !! OUTPUT
 !!  rank = rank of the kpoint

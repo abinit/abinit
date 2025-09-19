@@ -38,6 +38,7 @@ module m_mlwfovlp
  use m_dtset
  use m_dtfil
  use m_krank
+ use m_yaml
 
  use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
@@ -356,7 +357,6 @@ class(abstract_wf), pointer :: mywfc
 #ifdef HAVE_WANNIER90
  real(dp) :: spreadw(3,nsppol)
 #endif
-
 !************************************************************************
 
  ABI_UNUSED((/crystal%natom, ebands%nkpt, hdr%nkpt/))
@@ -1464,7 +1464,6 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
  character(len=500) :: msg
  logical:: lfile
  real(dp),allocatable :: cg_read(:,:) !to be used in case of MPI
-
 !************************************************************************
 
  write(msg, '(a,a)' ) ch10, '** mlwfovlp_pw : compute pw part of overlap'
@@ -1841,7 +1840,6 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
  integer,parameter :: orb_l_defs(-5:3)=(/2,2,1,1,1,0,1,2,3/)
 ! integer,parameter :: mtransfo(0:3,7)=&
 !&  reshape((/1,0,0,0,0,0,0,1,1,1,0,0,0,0,0,-2,-1,2,1,0,0,0,-1,1,2,-2,-3,3/),(/4,7/))
-
 !************************************************************************
 
 !mpi initialization
@@ -3337,7 +3335,7 @@ subroutine wan_from_abiwan(wan, abiwan_filepath, spin, nsppol, keep_umats, out_p
    end do
  end do
 
- wan%krank = krank_from_kptrlatt(nkbz, wan%kbz, kptrlatt, compute_invrank=.True.)
+ call wan%krank%from_kptrlatt(nkbz, wan%kbz, kptrlatt, compute_invrank=.True.)
 
  ABI_MALLOC(wan%rmod_h, (wan%nr_h))
  do ir=1,wan%nr_h
@@ -3352,6 +3350,7 @@ subroutine wan_from_abiwan(wan, abiwan_filepath, spin, nsppol, keep_umats, out_p
  end do
 
  wan%keep_umats = keep_umats
+
  if (.not. keep_umats) then
    ABI_FREE(wan%u_mat)
    ABI_FREE(wan%u_mat_opt)
@@ -3459,8 +3458,6 @@ end subroutine wan_from_abiwan
 !! SOURCE
 
 subroutine wan_print(wan, units)
-
- use m_yaml
 
 !Arguments ------------------------------------
  class(wan_t),intent(in) :: wan
@@ -3647,7 +3644,6 @@ subroutine wan_interp_eph_manyq(wan, nq, qpts, kpt, g_atm)
 !arrays
  real(dp) :: kq(3), eigens_k(wan%nwan), eigens_kq(wan%nwan)
  complex(dp),allocatable :: eikr(:), eiqr(:), u_k(:,:), u_kq(:,:), cbuf_e(:,:,:,:), cbuf_w(:,:,:), cmat_w(:,:)
-
 !************************************************************************
 
  ! TODO: Handle long-range part.

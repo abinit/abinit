@@ -2014,7 +2014,7 @@ subroutine ebands_get_erange(ebands, nkpts, kpoints, band_range, emin, emax)
  type(krank_t) :: krank
 ! *************************************************************************
 
- krank = krank_new(ebands%nkpt, ebands%kptns)
+ call krank%init(ebands%nkpt, ebands%kptns)
  emin = huge(one); emax = -huge(one); cnt = 0
 
  do spin=1,ebands%nsppol

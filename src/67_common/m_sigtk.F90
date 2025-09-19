@@ -409,7 +409,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
 
     ABI_MALLOC(indkk, (6, tmp_nkpt))
 
-    krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
+    call krank%from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
 
     if (kpts_map("symrec", ebands%kptopt, cryst, krank, tmp_nkpt, tmp_kcalc, indkk) /= 0) then
       write(msg, '(3a)' )&

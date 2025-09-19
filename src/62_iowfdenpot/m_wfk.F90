@@ -3372,20 +3372,13 @@ subroutine wfk_write_my_kptbands(outpath_, distrb_flags, comm, formeig, hdr,&
 
 !Local variables-------------------------------
 !scalars
- integer :: spin,ik_rbz,nband_k
- integer :: npw_k
- integer :: iomode
- integer :: wfk_unt, iband, nband_me
- integer :: ii,jj,kk,ll
- integer, allocatable :: icg(:,:)
- integer, allocatable :: ikg(:)
- integer, allocatable :: ibdeig(:,:)
- integer, allocatable :: ibdocc(:,:)
+ integer :: spin,ik_rbz,nband_k, npw_k, iomode, wfk_unt, iband, nband_me, ii,jj,kk,ll
+ integer, allocatable :: icg(:,:), ikg(:), ibdeig(:,:), ibdocc(:,:)
+ integer, contiguous, pointer :: kg(:,:)
  character(len=fnlen) :: outpath
- real(dp) :: cpu,wall,gflops
+ real(dp) :: cpu, wall, gflops
+ real(dp), contiguous, pointer :: cg(:,:)
  type(wfk_t),target :: wfk_disk
- real(dp), pointer :: cg(:,:)
- integer, pointer :: kg(:,:)
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
@@ -4140,7 +4133,7 @@ subroutine mpio_read_eigocc_k(fh,offset,nband_disk,formeig,sc_mode,buffer,mpierr
  integer(XMPI_OFFSET_KIND),intent(in) :: offset
  integer,intent(out) :: mpierr
 !arrays
- real(dp),pointer :: buffer(:)
+ real(dp),contiguous, pointer :: buffer(:)
 
 !Local variables-------------------------------
 !scalars
@@ -4403,7 +4396,7 @@ subroutine wfk_to_bz(in_path, dtset, psps, pawtab, out_path, hdr_bz, ebands_bz)
  integer,allocatable :: bz2ibz(:,:),kg_ki(:,:),kg_kf(:,:),iperm(:),bz2ibz_sort(:)
  real(dp) :: kf(3),kibz(3)
  real(dp),allocatable :: cg_ki(:,:),cg_kf(:,:),eig_ki(:),occ_ki(:),work(:,:,:,:)
- real(dp), ABI_CONTIGUOUS pointer :: kfull(:,:)
+ real(dp), contiguous, pointer :: kfull(:,:)
 ! *************************************************************************
 
  if (all(dtset%kptrlatt == 0)) then
@@ -4933,7 +4926,7 @@ subroutine wfk_create_wfkfile(wfk_fname, Hdr, iomode, formeig, Kvars, cwtimes, c
  type(wfk_t) :: Wfk
 !arrays
  integer :: nband(Hdr%nkpt,Hdr%nsppol)
- integer,pointer :: kg_k(:,:)
+ integer,contiguous, pointer :: kg_k(:,:)
  real(dp) :: kpoint(3),gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable :: cg_k(:,:),eig_k(:),occ_k(:)
 !************************************************************************
@@ -5723,7 +5716,7 @@ end subroutine wfk_klist2mesh
 
 subroutine wfk_check_symtab(in_wfkpath, comm)
 
- use m_krank,         only : krank_t, krank_new, krank_from_kptrlatt, get_ibz2bz, star_from_ibz_idx
+ use m_krank,         only : krank_t, get_ibz2bz, star_from_ibz_idx
  use m_kpts,          only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_map_print, kpts_pack_in_stars
  use m_cgtools,       only : fxphas_and_cmp
 
@@ -5736,8 +5729,7 @@ subroutine wfk_check_symtab(in_wfkpath, comm)
 !scalars
  integer,parameter :: formeig0 = 0, master = 0, kptopt1 = 1
  integer :: spin, nband_k, mpw, mband, nspinor, ik_ibz, ik_bz !, ierr, ikf
- integer :: nsppol, iomode, npw_kf, npw_ki, istwf_kf, istwf_ki, ii, my_rank, nkibz, nkbz
- integer :: isym_k, trev_k, g0_k(3)
+ integer :: nsppol, iomode, npw_kf, npw_ki, istwf_kf, istwf_ki, ii, my_rank, nkibz, nkbz, isym_k, trev_k, g0_k(3)
  logical :: isirr_k
  character(len=500) :: msg
  character(len=fnlen) :: my_inpath
@@ -5747,11 +5739,9 @@ subroutine wfk_check_symtab(in_wfkpath, comm)
  type(ebands_t) :: ks_ebands
 !arrays
  integer :: work_ngfft(18), gmax(3), gmax_kf(3), gmax_ki(3)
- integer,allocatable :: symrec_kbz2ibz(:,:), symrel_kbz2ibz(:,:), symrec_ibz2bz(:), symrel_ibz2bz(:)
- integer,allocatable :: kg_kf(:,:), kg_ki(:,:)
+ integer,allocatable :: symrec_kbz2ibz(:,:), symrel_kbz2ibz(:,:), symrec_ibz2bz(:), symrel_ibz2bz(:), kg_kf(:,:), kg_ki(:,:)
  real(dp) :: ki(3), kf(3)
- real(dp),allocatable :: kibz(:,:), kbz(:,:), wtk(:), cg_kf(:,:), cg_ki(:,:), cg_symrel(:,:), cg_symrec(:,:)  !, eig_k(:), occ_k(:)
- real(dp),allocatable :: work(:,:,:,:)
+ real(dp),allocatable :: kibz(:,:), kbz(:,:), wtk(:), cg_kf(:,:), cg_ki(:,:), cg_symrel(:,:), cg_symrec(:,:), work(:,:,:,:)
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm); if (my_rank /= master) return
@@ -5778,7 +5768,7 @@ subroutine wfk_check_symtab(in_wfkpath, comm)
 
  ABI_CHECK(all(abs(ks_ebands%kptns - kbz) < tol12), "Wrong kbz!")
 
- krank_ibz = krank_from_kptrlatt(nkibz, kibz, ks_ebands%kptrlatt, compute_invrank=.False.)
+ call krank_ibz%from_kptrlatt(nkibz, kibz, ks_ebands%kptrlatt, compute_invrank=.False.)
 
  ! Build symmetry tables using the two conventions.
 

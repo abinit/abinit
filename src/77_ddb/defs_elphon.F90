@@ -306,16 +306,12 @@ CONTAINS
 !! INPUTS
 !!  elph_ds = elphon datastructure
 !!
-!! NOTES
-!!
 !! SOURCE
 
 subroutine elph_ds_clean(elph_ds)
 
 !Arguments ------------------------------------
-!scalars
- type(elph_type), intent(inout) :: elph_ds
-
+ class(elph_type), intent(inout) :: elph_ds
 ! *************************************************************************
 
  !@elph_type
@@ -354,16 +350,12 @@ end subroutine elph_ds_clean
 !! INPUTS
 !!  elph_tr_ds = elphon transport datastructure
 !!
-!! NOTES
-!!
 !! SOURCE
 
 subroutine elph_tr_ds_clean(elph_tr_ds)
 
 !Arguments ------------------------------------
-!scalars
- type(elph_tr_type), intent(inout) :: elph_tr_ds
-
+ class(elph_tr_type), intent(inout) :: elph_tr_ds
 ! *************************************************************************
 
  !@elph_tr_type
@@ -417,10 +409,8 @@ end subroutine elph_tr_ds_clean
 subroutine elph_k_copy(elph_k_in, elph_k_out)
 
 !Arguments ------------------------------------
-!scalars
- type(elph_kgrid_type), intent(in) :: elph_k_in
- type(elph_kgrid_type), intent(out) :: elph_k_out
-
+ class(elph_kgrid_type), intent(in) :: elph_k_in
+ class(elph_kgrid_type), intent(out) :: elph_k_out
 ! *************************************************************************
 
  !@elph_kgrid_type
@@ -477,16 +467,12 @@ end subroutine elph_k_copy
 !! INPUTS
 !!  elph_k = elphon k-points datastructure
 !!
-!! NOTES
-!!
 !! SOURCE
 
 subroutine elph_k_destroy(elph_k)
 
 !Arguments ------------------------------------
-!scalars
- type(elph_kgrid_type), intent(inout) :: elph_k
-
+ class(elph_kgrid_type), intent(inout) :: elph_k
 ! *************************************************************************
 
  !@elph_kgrid_type
@@ -535,7 +521,7 @@ subroutine elph_k_procs(nproc, elph_k)
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: nproc
- type(elph_kgrid_type), intent(inout) :: elph_k
+ class(elph_kgrid_type), intent(inout) :: elph_k
 
  integer :: ikpt, me, ik_this_proc
 ! *************************************************************************
@@ -603,13 +589,11 @@ subroutine gam_mult_displ(nbranch, displ_red, gam_bare, gam_now)
 
 !Local variables -------------------------
  real(dp) :: zgemm_tmp_mat(2,nbranch,nbranch)
-
 ! *********************************************************************
 
  gam_now = zero
 
  call zgemm('c','n',nbranch,nbranch,nbranch,cone,displ_red,nbranch,gam_bare,nbranch,czero,zgemm_tmp_mat,nbranch)
-
  call zgemm('n','n',nbranch,nbranch,nbranch,cone,zgemm_tmp_mat,nbranch,displ_red,nbranch,czero,gam_now,nbranch)
 
 end subroutine gam_mult_displ
@@ -1130,12 +1114,11 @@ subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_
  type(krank_t) :: krank
 !arrays
  real(dp) :: tmpkpt(3),gamma_kpt(3)
-
 ! *************************************************************************
 
  call wrtout(std_out,' mkqptequiv : making rankkpt_phon and invrankkpt_phon',"COLL")
 
- krank = krank_new(nkpt_phon, kpt_phon)
+ call krank%init(nkpt_phon, kpt_phon)
 
  FSfullpqtofull = -999
  gamma_kpt(:) = zero
@@ -1175,7 +1158,7 @@ subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_
  ! start over with q grid
  call wrtout(std_out,' mkqptequiv : FSfullpqtofull made. Do qpttoqpt',"COLL")
 
- krank = krank_new(nqpt, qpt_full)
+ call krank%init(nqpt, qpt_full)
 
  qpttoqpt(:,:,:) = -1
  do iFSqpt=1,nqpt
