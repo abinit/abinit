@@ -193,14 +193,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: n1,n2,n3,n4,n5,n6,nspden, mqmem, m_kq, n_k, restart, root_ncid, spin_ncid, usecprj !,sij_opt
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg_k,nkpg_kq,nkpg_kqmp,nkpg_kmp,imyp, cnt, nvloc, iw_nk, iw_mkq, ndone, nmiss
  integer :: my_ipp, ipp_bz, ipp_ibz, isym_pp, itim_pp, comm_rpt, nqlwl, scr_iomode
- integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt, nb, timrev, iq_start, my_nqibz
+ integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt, nb, timrev_k, timrev_q, iq_start, my_nqibz
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_qq, wall_qq, gflops_qq, cpu_kk, wall_kk, gflops_kk, cpu_pp, wall_pp, gflops_pp
  real(dp) :: drude_plsmf, my_plsmf
  real(dp) :: fact_spin, theta_mu_minus_e0i, tol_empty, tol_empty_in !, e_mkq, e_nk ! e0i,
  real(dp),ABI_CONTIGUOUS pointer :: qp_ene(:,:,:), qp_occ(:,:,:)
  real(dp) :: ecut,weight_q,bigexc,bigsxc,vxcavg ! ediff, eshift, q0rad, bz_vol,
  logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, qq_is_gamma, pp_is_gamma, isirr_q
- logical :: stern_use_cache, stern_has_band_para, use_ftinterp, use_lgk
+ logical :: stern_use_cache, stern_has_band_para, use_ftinterp
  logical :: print_time_qq, print_time_kk, print_time_pp, non_magnetic_xc, need_x_kmp, need_x_kqmp
  complex(dpc) :: ieta
  type(wfd_t) :: wfd
@@ -216,11 +216,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  type(vcoul_t) :: vcp
  type(gstore_t),target :: gstore
  type(gqk_t),pointer :: gqk
- type(lgroup_t),allocatable :: lg_myk(:)
+ type(lgroup_t) :: lg_myq
  type(xcdata_type) :: xcdata
  type(ppmodel_t) :: ppm
  character(len=fnlen) :: screen_filepath, gstore_filepath
- character(len=5000) :: msg, qkp_string, qq_bz_string, kk_string, pp_string
+ character(len=5000) :: msg, qq_bz_string, kk_string, qkp_string, pp_string
 !arrays
  integer :: nbsum, my_bsum_start(dtset%nsppol), my_bsum_stop(dtset%nsppol), my_nbsum(dtset%nsppol)
  integer :: g0_k(3), g0_q(3), g0_kq(3), g0_kmp(3), g0_kqmp(3), units(2), work_ngfft(18), gmax(3)
@@ -264,6 +264,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
  type(pawrhoij_type),allocatable :: pot_pawrhoij(:), den_pawrhoij(:)
+ type(lgroup_t),allocatable :: lg_myk(:)
 !************************************************************************
 
  ! Problems to be addressed:
@@ -861,14 +862,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call pstat_proc%print(_PSTAT_ARGS_)
 
  ! Here we decide if the q-points can be reduced to the IBZ(k)
- use_lgk = .False.
- if (gstore%qzone == "bz") then
-   use_lgk = .True.
- end if
- use_lgk = .False.
-
- if (use_lgk) then
+ if (dtset%gstore_use_lgk /= 0) then
    call wrtout(units, " Only q-points in the IBZ_k will be computed.")
+ else if (dtset%gstore_use_lgq /= 0) then
+   call wrtout(units, " Only k-points in the IBZ_q will be computed.")
+ else
+   call wrtout(units, " Little group operations won't be used")
  end if
 
  ! ===================================================
@@ -919,12 +918,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_MALLOC_OR_DIE(vec_gx_mkq, (npw_x*nspinor, gqk%bstart:gqk%bstop), ierr)
 
    ! Compute the little group of the k-point so that we can compute g(k,q) only for q in the IBZ_k
-   if (use_lgk) then
-     timrev = kpts_timrev_from_kptopt(ebands%kptopt)
+   if (dtset%gstore_use_lgk /= 0) then
+     timrev_k = kpts_timrev_from_kptopt(ebands%kptopt)
      ABI_MALLOC(lg_myk, (gqk%my_nk))
      do my_ik=1,gqk%my_nk
        kk = gqk%my_kpts(:, my_ik)
-       call lg_myk(my_ik)%init(cryst, kk, timrev, gstore%nqbz, gstore%qbz, gstore%nqibz, gstore%qibz, xmpi_comm_self)
+       call lg_myk(my_ik)%init(cryst, kk, timrev_k, gstore%nqbz, gstore%qbz, gstore%nqibz, gstore%qibz, xmpi_comm_self)
      end do
    end if
 
@@ -944,6 +943,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      if (done_qbz_spin(iq_bz, spin) == 1) then
        call wrtout(std_out, sjoin(" iq_bz:", itoa(iq_bz), ", spin: ", itoa(spin), " already computed --> skipping iteration"))
        cycle
+     end if
+
+     ! Compute the little group of the q-point so that we can compute g(k,q) only for k in the IBZ_q
+     if (dtset%gstore_use_lgq /= 0) then
+       timrev_q = kpts_timrev_from_kptopt(gstore%qptopt)
+       call lg_myq%init(cryst, qq_bz, timrev_q, gstore%nkbz, gstore%kbz, gstore%nkibz, gstore%kibz, xmpi_comm_self)
      end if
 
      ! Note symrec conventions here as needed to symmetrize DFPT potentials.
@@ -1021,16 +1026,27 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      ! Loop over k-points in the e-ph matrix elements (gqk%kpt_comm)
      ! =============================================================
      do my_ik=1,gqk%my_nk
+       kk = gqk%my_kpts(:, my_ik)
+       kk_string = ktoa(kk)
 
        if (dtset%userib /= 0) then
          if (any(abs(gqk%my_kpts(:, my_ik) - [0.25, 0.0, 0.0]) > tol14) .and. &
              any(abs(gqk%my_kpts(:, my_ik) - [-0.25, 0.0, 0.0]) > tol14)) cycle
        end if
 
-       if (use_lgk) then
+       if (dtset%gstore_use_lgk /= 0) then
          ii = lg_myk(my_ik)%findq_ibzk(qq_bz)
          if (ii == -1) then
            call wrtout(std_out, sjoin(" iq_bz:", itoa(iq_bz), qq_bz_string, " not in IBZ_k --> skipping iteration"))
+           cycle
+           ! TODO: Check fillvalue (should be zero)
+         end if
+       end if
+
+       if (dtset%gstore_use_lgq /= 0) then
+         ii = lg_myq%findq_ibzk(kk)
+         if (ii == -1) then
+           call wrtout(std_out, sjoin(" my_ik:", itoa(my_ik), kk_string, " not in IBZ_q --> skipping iteration"))
            cycle
            ! TODO: Check fillvalue (should be zero)
          end if
@@ -1046,10 +1062,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        my_gbuf_ks(:,:,:,:, my_ik, iqbuf_cnt) = zero
        gks_atm = zero
        gks_atm2 = zero
-
-       ! Symmetry indices for kk.
-       kk = gqk%my_kpts(:, my_ik)
-       kk_string = ktoa(kk)
 
        call inds2str(0, sjoin(" Computing g^Sigma(k, q) for kpt:", kk_string), my_ik, gqk%my_nk, gqk%glob_nk, msg)
        call wrtout(std_out, sjoin(msg, ", for spin:", itoa(spin)), pre_newlines=1)
@@ -1822,6 +1834,7 @@ end if ! .not qq_is_gamma.
        call inds2str(2, "My q-point", my_iq, gqk%my_nq, gqk%glob_nq, msg)
        call cwtime_report(msg, cpu_qq, wall_qq, gflops_qq); if (my_iq == LOG_MODQ) call wrtout(std_out, "...", do_flush=.True.)
      end if
+     call lg_myq%free()
    end do ! my_iq
 
    ! Dump the remainder.
@@ -1850,7 +1863,7 @@ end if ! .not qq_is_gamma.
    ABI_FREE(sigcme_nk)
    ABI_FREE(sigcme_mkq)
 
-   if (use_lgk) then
+   if (dtset%gstore_use_lgk /= 0) then
      do my_ik=1,gqk%my_nk
        call lg_myk(my_ik)%free()
      end do

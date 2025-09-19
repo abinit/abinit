@@ -104,11 +104,12 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
 !Local variables-------------------------------
  integer,parameter :: master = 0, with_cplex1 = 1, max_ntemp = 50
  integer :: spin, my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, ntemp, gap_err, my_rank, ip1, ip2
- integer :: it, ik_bz, ik_ibz, ikq_ibz, band_k, band_kq, timrev, ii, ikcalc, natom, natom3, nsppol
+ integer :: it, ik_bz, ik_ibz, ikq_ibz, band_k, band_kq, timrev_k, ii, ikcalc, natom, natom3, nsppol
  real(dp) :: wqnu, gkq2, weight_q, eig0nk, eig0mk, eig0mkq, ediff, gmod2, hmod2, gdw2, gdw2_stern, rtmp !,nqnu,gkq2,gkq2_pf,
  !real(dp) :: cpu, wall, gflops
- logical :: use_lgk, q_is_gamma, intra_band, same_band, imag_only
+ logical :: q_is_gamma, intra_band, same_band, imag_only
  complex(dp) :: ieta, cfact !, sig_cplx
+ character(len=5000) :: msg
  type(gaps_t) :: gaps
  type(lgroup_t) :: lg_myk
  type(gstore_t) :: gstore
@@ -164,9 +165,9 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
  ABI_MALLOC(rfact_t, (ntemp))
 
  ieta = + j_dpc * dtset%zcut
- !use_lgk = dtset%symsigma /= 0
- use_lgk = .True.
- use_lgk = .False.
+
+ ! Check consistency of little group options
+ ABI_CHECK(gstore%check_little_group(dtset, msg) == 0, msg)
 
  ! Compute electronic occ for all Temps (note mu_e(it) Fermi level)
  !do it=1,ntemp
@@ -202,9 +203,9 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
      ikcalc = gqk%my_k2glob(my_ik)
 
      ! Compute the little group of the k-point so that we can compute g(k,q) only for q in the IBZ_k.
-     if (use_lgk) then
-       timrev = kpts_timrev_from_kptopt(ebands%kptopt)
-       call lg_myk%init(cryst, kk, timrev, gstore%nqbz, gstore%qbz, gstore%nqibz, gstore%qibz, xmpi_comm_self)
+     if (dtset%gstore_use_lgk /= 0) then
+       timrev_k = kpts_timrev_from_kptopt(ebands%kptopt)
+       call lg_myk%init(cryst, kk, timrev_k, gstore%nqbz, gstore%qbz, gstore%nqibz, gstore%qibz, xmpi_comm_self)
      end if
 
      ! Sum over q-points.
@@ -214,7 +215,7 @@ subroutine gstore_sigeph(dtset, dtfil, cryst, ebands, ifc, comm)
 
        ! weight_q is computed here. It depends whether we are assuming over the full BZ or IBZ_k.
        weight_q = one / gstore%nqbz
-       if (use_lgk) then
+       if (dtset%gstore_use_lgk /= 0) then
          ii = lg_myk%findq_ibzk(qpt); if (ii == -1) cycle; weight_q = lg_myk%weights(ii)
        end if
 
@@ -383,7 +384,7 @@ subroutine write_results__(ntemp, gqk)
  real(dp) :: ks_enes(gqk%nb), ze0_vals(ntemp, gqk%nb)
  !real(dp) :: gfw_avg(self%phmesh_size, 3)
  complex(dp) :: qpoms_enes(ntemp, gqk%nb),qp_enes(ntemp, gqk%nb) ! nb_k
-! *************************************************************************
+!! *************************************************************************
 
  ! Write legend.
  if (spin == 1) then
