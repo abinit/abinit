@@ -3906,13 +3906,13 @@ end function gstore_check_cplex_qkzone_gmode
 !!  ifc: interatomic force constants
 !!  comm: MPI communicator
 !!  [with_gmode]
-!!  [gvals_vname]: "gvals" (default) or "gvals_ks" to read the KS g produced by the GWPT code.
+!!  [gvals_name]: "gvals" (default) or "gvals_ks" to read the KS g produced by the GWPT code.
 !!  [read_dw]:
 !!
 !! SOURCE
 
 subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, ifc, comm, &
-                              with_gmode, gvals_vname, read_dw)  ! optional
+                              with_gmode, gvals_name, read_dw)  ! optional
 
 !Arguments ------------------------------------
  class(gstore_t),target,intent(out) :: gstore
@@ -3923,7 +3923,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  class(ebands_t),target,intent(in) :: ebands
  class(ifc_type),target,intent(in) :: ifc
  integer,intent(in) :: comm
- character(len=*),optional,intent(in) :: with_gmode, gvals_vname
+ character(len=*),optional,intent(in) :: with_gmode, gvals_name
  logical,optional,intent(in) :: read_dw
 
 !Local variables-------------------------------
@@ -3933,7 +3933,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  integer :: max_nq, max_nk, gstore_cplex, ncerr, my_is, my_iq, iq_glob, my_ik, ik_glob
  integer :: my_ip, ipert, iq_ibz, iq_bz, isym_q, trev_q, tsign_q, ii
  real(dp) :: cpu, wall, gflops
- character(len=500) :: gvals_vname__
+ character(len=500) :: gvals_name__
  logical :: isirr_q, read_dw__, from_atm_to_nu
  type(hdr_type) :: wfk0_hdr
  type(crystal_t) :: gstore_cryst
@@ -3948,7 +3948,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
- gvals_vname__ = "gvals"; if (present(gvals_vname)) gvals_vname__ = gvals_vname
+ gvals_name__ = "gvals"; if (present(gvals_name)) gvals_name__ = gvals_name
  read_dw__ = .False.; if (present(read_dw)) read_dw__ = read_dw
 
  ! Set basic parameters.
@@ -4231,7 +4231,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
         call wrtout(std_out, sjoin(" Reading g_atm(k,q=0) for Debye-Waller with iq_glob:", itoa(iq_glob)))
 
        ! Read q-slice (individual IO)
-       ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_vname__), gwork_q, start=[1, 1, 1, 1, 1, iq_glob])
+       ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_name__), gwork_q, start=[1, 1, 1, 1, 1, iq_glob])
        NCF_CHECK(ncerr)
 
        ! Allocate my_gq0nm_atm and transfer data. Note TRANSPOSITION in (m, n) indices.
@@ -4269,7 +4269,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
         gqk%my_displ_cart(:,:,:,:,my_iq) = displ_cart_qbz(:,:,:,gqk%my_pertcases(:))
 
         ! Read q-slice (individual IO)
-        ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_vname__), gwork_q, start=[1, 1, 1, 1, 1, iq_glob])
+        ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_name__), gwork_q, start=[1, 1, 1, 1, 1, iq_glob])
         NCF_CHECK(ncerr)
 
         do my_ik=1,gqk%my_nk
