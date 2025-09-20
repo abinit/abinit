@@ -321,7 +321,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  if (restart == 0) then
    ! Build new gstore object from dtset input variables.
-   call gstore%init(gstore_filepath, dtset, dtfil, wfk_hdr, cryst, ebands, ifc, comm)
+   call gstore%init(gstore_filepath, dtset, dtfil, wfk_hdr, cryst, ebands, ifc, comm, gtype="gwpt")
    ABI_REMALLOC(done_qbz_spin, (gstore%nqbz, nsppol))
    done_qbz_spin = 0
  else

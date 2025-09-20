@@ -214,6 +214,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
  call gstore%from_ncpath(dtfil%filgstorein, with_cplex1, dtset, cryst, ebands, ifc, comm, &
                          with_gmode="phonon", gvals_name=dtset%gstore_gname, read_dw=.True.)
 
+ ! Consistency check.
  ierr = 0
  if (gstore%qzone /= "bz") then
    ABI_ERROR_NOSTOP("gstore_sigeph assumes qzone == `bz`", ierr)
@@ -536,6 +537,9 @@ subroutine sep_gather_and_write_results(sep, ntemp, gstore, gqk, ebands)
    write(ab_out,"(a)")"     OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)"
    write(ab_out,"(a)")"     TAU(eKS): Lifetime in femtoseconds computed at the KS energy."
    write(ab_out,"(a)")"     mu_e: Fermi level for given (T, nelect)"
+   write(ab_out,"(a)")" "
+   write(ab_out,"(a)")" "
+   write(ab_out,"(2a)")" Using g(k,q) of type: ", trim(gstore%gtype)
    write(ab_out,"(a)")" "
    write(ab_out,"(a)")" "
  end if

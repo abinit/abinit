@@ -439,6 +439,7 @@ type, public :: gstore_t
   ! Possible values: "none", "fs_tetra", "erange", "qprange"
 
   character(len=abi_slen) :: gmode = "none"
+  character(len=abi_slen) :: gtype = "KS"
 
   real(dp),allocatable :: erange_spin(:, :)
   ! (2, nsppol)
@@ -627,7 +628,8 @@ contains
 !!
 !! SOURCE
 
-subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc, comm)
+subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc, comm, &
+                       gtype) ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -640,6 +642,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  class(ebands_t),target,intent(in) :: ebands
  class(ifc_type),target,intent(in) :: ifc
  integer,intent(in) :: comm
+ character(len=*),optional,intent(in) :: gtype
 
 !Local variables-------------------------------
 !scalars
@@ -670,6 +673,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
 
  ! Set basic parameters.
  gstore%comm = comm; gstore%nsppol = nsppol; gstore%path = path
+ if (present(gtype)) gstore%gtype = gtype
 
  ! Get references to other data structures.
  gstore%dtset => dtset
@@ -955,6 +959,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      nctkarr_t("gstore_qzone", "c", "character_string_length"), &
      nctkarr_t("gstore_kfilter", "c", "character_string_length"), &
      nctkarr_t("gstore_gmode", "c", "character_string_length"), &
+     nctkarr_t("gstore_gtype", "c", "character_string_length"), &
      nctkarr_t("gstore_wfk0_path", "c", "fnlen"), &
      nctkarr_t("gstore_brange_spin", "i", "two, number_of_spins"), &
      nctkarr_t("gstore_erange_spin", "dp", "two, number_of_spins"), &
@@ -995,6 +1000,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_qzone"), trim(gstore%qzone)))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_kfilter"), trim(gstore%kfilter)))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_gmode"), trim(gstore%gmode)))
+   NCF_CHECK(nf90_put_var(ncid, vid("gstore_gtype"), trim(gstore%gtype)))
 
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_qibz"), gstore%qibz))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_qbz"), gstore%qbz))
@@ -2579,7 +2585,7 @@ subroutine gstore_get_lambda_iso_iw(gstore, nw, imag_w, lambda)
  real(dp) :: g2, wqnu, weight_k, weight_q
 !arrays
  real(dp) :: qpt(3)
- real(dp),allocatable :: dbldelta_q(:,:,:), g2_pmnk(:,:,:,:)
+ real(dp),allocatable :: dbl_delta_q(:,:,:), g2_pmnk(:,:,:,:)
 !----------------------------------------------------------------------
 
  ABI_CHECK(gstore%qzone == "bz", "gstore_get_lambda_iso_iw assumes qzone == `bz`")
@@ -2592,12 +2598,12 @@ subroutine gstore_get_lambda_iso_iw(gstore, nw, imag_w, lambda)
    ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
 
    ! Weights for delta(e_{m k+q}) delta(e_{n k}) for my list of k-points.
-   ABI_MALLOC(dbldelta_q, (gqk%nb, gqk%nb, gqk%my_nk))
+   ABI_MALLOC(dbl_delta_q, (gqk%nb, gqk%nb, gqk%my_nk))
    ABI_MALLOC(g2_pmnk, (gqk%my_npert, gqk%nb, gqk%nb, gqk%my_nk))
 
    do my_iq=1,gqk%my_nq
      ! Compute integration weights for the double delta.
-     call gqk%dbldelta_qpt(my_iq, gstore, gstore%dtset%eph_intmeth, gstore%dtset%eph_fsmear, qpt, weight_q, dbldelta_q)
+     call gqk%dbldelta_qpt(my_iq, gstore, gstore%dtset%eph_intmeth, gstore%dtset%eph_fsmear, qpt, weight_q, dbl_delta_q)
 
      ! Copy data to improve memory access in the loops below.
      g2_pmnk = gqk%my_g2(:,:,my_iq,:,:)
@@ -2611,14 +2617,14 @@ subroutine gstore_get_lambda_iso_iw(gstore, nw, imag_w, lambda)
              ! TODO: handle wqnu ~ 0
              wqnu = gqk%my_wnuq(my_ip, my_iq)
              lambda(:) = lambda(:) + &
-               two * wqnu / (imag_w(:) ** 2 + wqnu ** 2) * g2 * weight_k * weight_q * dbldelta_q(im_kq, in_k, my_ik)
+               two * wqnu / (imag_w(:) ** 2 + wqnu ** 2) * g2 * weight_k * weight_q * dbl_delta_q(im_kq, in_k, my_ik)
            end do
          end do
        end do
      end do
    end do ! my_iq
 
-   ABI_FREE(dbldelta_q)
+   ABI_FREE(dbl_delta_q)
    ABI_FREE(g2_pmnk)
    end associate
  end do ! my_is
@@ -2661,7 +2667,7 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
  character(len=500) :: msg, kk_string !, qq_bz_string,
 !arrays
  real(dp) :: qpt(3), kk(3)
- real(dp),allocatable :: dbldelta_q(:,:,:), g2_mnkp(:,:,:,:), deltaw_nuq(:)
+ real(dp),allocatable :: dbl_delta_q(:,:,:), g2_mnkp(:,:,:,:), deltaw_nuq(:)
 !----------------------------------------------------------------------
 
  call wrtout(std_out, sjoin(" Computing a^2F(w) with ph_smear:", ftoa(gstore%dtset%ph_smear * Ha_meV), "(meV)"), pre_newlines=1)
@@ -2681,12 +2687,12 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
    ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
 
    ! Weights for delta(e_{m k+q}) delta(e_{n k}) for my list of k-points.
-   ABI_MALLOC(dbldelta_q, (gqk%nb, gqk%nb, gqk%my_nk))
+   ABI_MALLOC(dbl_delta_q, (gqk%nb, gqk%nb, gqk%my_nk))
    ABI_MALLOC(g2_mnkp, (gqk%nb, gqk%nb, gqk%my_nk, gqk%my_npert))
 
    do my_iq=1,gqk%my_nq
      ! Compute integration weights for the double delta.
-     call gqk%dbldelta_qpt(my_iq, gstore, gstore%dtset%eph_intmeth, gstore%dtset%eph_fsmear, qpt, weight_q, dbldelta_q)
+     call gqk%dbldelta_qpt(my_iq, gstore, gstore%dtset%eph_intmeth, gstore%dtset%eph_fsmear, qpt, weight_q, dbl_delta_q)
 
      ! Copy data to improve memory access in the loops below.
      do my_ip=1,gqk%my_npert
@@ -2706,6 +2712,7 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
        do my_ik=1,gqk%my_nk
          kk = gqk%my_kpts(:, my_ik); ik_ibz = gqk%my_k2ibz(1, my_ik); weight_k = gqk%my_wtk(my_ik)
 
+         ! Handle little group and weight
          if (dtset%gstore_use_lgq /= 0) then
            ii = lg_myq%findq_ibzk(kk)
            if (ii == -1) then
@@ -2720,7 +2727,7 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
          do in_k=1,gqk%nb
            do im_kq=1,gqk%nb
              g2 = g2_mnkp(im_kq, in_k, my_ik, my_ip)
-             a2fw(:) = a2fw(:) + deltaw_nuq(:) * g2 * weight_k * weight_q * dbldelta_q(im_kq, in_k, my_ik)
+             a2fw(:) = a2fw(:) + deltaw_nuq(:) * g2 * weight_k * weight_q * dbl_delta_q(im_kq, in_k, my_ik)
            end do
          end do
        end do
@@ -2729,7 +2736,7 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
      call lg_myq%free()
    end do ! my_iq
 
-   ABI_FREE(dbldelta_q)
+   ABI_FREE(dbl_delta_q)
    ABI_FREE(g2_mnkp)
    end associate
  end do ! my_is
@@ -2844,7 +2851,7 @@ end subroutine gqk_myqpt
 !! gqk_dbldelta_qpt
 !!
 !! FUNCTION
-!!  Note that k/q weights are not included in dbldelta_q
+!!  Note that k/q weights are not included in dbl_delta_q
 !!
 !! INPUTS
 !!
@@ -2852,14 +2859,14 @@ end subroutine gqk_myqpt
 !!
 !! SOURCE
 
-subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, weight_q, dbldelta_q)
+subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, weight_q, dbl_delta_q)
 
 !Arguments ------------------------------------
  class(gqk_t),intent(in) :: gqk
  class(gstore_t),target,intent(inout) :: gstore
  integer,intent(in) :: my_iq, eph_intmeth
  real(dp),intent(in) :: eph_fsmear
- real(dp),intent(out) :: qpt(3), weight_q, dbldelta_q(gqk%nb, gqk%nb, gqk%my_nk)
+ real(dp),intent(out) :: qpt(3), weight_q, dbl_delta_q(gqk%nb, gqk%nb, gqk%my_nk)
 
 !Local variables ------------------------------
 !scalars
@@ -2955,7 +2962,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
            sigma = max(maxval([(abs(dot_product(vb_kq(:, ib1), kmesh_cartvec(:,ii))), ii=1,3)]), min_smear)
          end if
          g1 = gaussian(ebands%eig(band1, ikq_ibz, spin) - ebands%fermie, sigma)
-         dbldelta_q(ib1, ib2, my_ik) = g1 * g2 ! / fs%nktot
+         dbl_delta_q(ib1, ib2, my_ik) = g1 * g2 ! / fs%nktot
        end do
 
      end do
@@ -3045,7 +3052,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
    do ik_bz=1,nkbz
      my_ik = my_krank%get_index(kmesh(:, ik_bz))
      if (my_ik /= -1) then
-       dbldelta_q(:,:,my_ik) = wght_bz(:,:,ik_bz) * gstore%nkbz
+       dbl_delta_q(:,:,my_ik) = wght_bz(:,:,ik_bz) * gstore%nkbz
        cnt = cnt + 1
      end if
    end do
@@ -4114,7 +4121,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  type(crystal_t) :: gstore_cryst
  type(gqk_t),pointer :: gqk
 !arrays
- integer :: ibuffer(9), nproc_spin(ebands%nsppol), comm_spin(ebands%nsppol), brange_spin(2, ebands%nsppol), g0_q(3)
+ integer :: units(2), ibuffer(9), nproc_spin(ebands%nsppol), comm_spin(ebands%nsppol), brange_spin(2, ebands%nsppol), g0_q(3)
  integer,allocatable :: qglob2bz(:,:), qbz2ibz(:,:), kbz2ibz(:,:)
  real(dp) :: qq_ibz(3)
  real(dp),allocatable :: gwork_q(:,:,:,:,:), slice_bb(:,:,:)
@@ -4125,6 +4132,8 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
  gvals_name__ = "gvals"; if (present(gvals_name)) gvals_name__ = gvals_name
  read_dw__ = .False.; if (present(read_dw)) read_dw__ = read_dw
+
+ call wrtout(units, sjoin("- Reading e-ph matrix elements from: ", path))
 
  ! Set basic parameters.
  gstore%comm = comm; gstore%nsppol = dtset%nsppol; gstore%path = path
@@ -4183,6 +4192,24 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_qzone"), gstore%qzone))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_kfilter"), gstore%kfilter))
    call replace_ch0(gstore%kzone); call replace_ch0(gstore%qzone); call replace_ch0(gstore%kfilter)
+
+   ! gstore_gtype was added in Abinit v10.5.6
+   gstore%gtype = "KS"
+   ncerr = nf90_inq_varid(ncid, "gstore_gtype", varid)
+   if (ncerr == nf90_noerr) then
+     NCF_CHECK(nf90_get_var(ncid, vid("gstore_gtype"), gstore%gtype))
+   end if
+   call replace_ch0(gstore%gmode)
+
+   if (gvals_name == "gvals_ks") then
+     call wrtout(units, " Using KS matrix elements")
+   else if (gvals_name == "gvals") then
+     if (gstore%gtype == "GWPT") then
+       call wrtout(units, " Using GWPT matrix elements")
+     else
+       call wrtout(units, " Using KS matrix elements")
+     end if
+   end if
 
    ! gstore_gmode was added in Abinit v10.1.2
    gstore%gmode = GSTORE_GMODE_PHONON
