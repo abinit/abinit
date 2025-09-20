@@ -65,6 +65,8 @@ module m_sigtk
 
  type, public :: degtab_t
    type(bids_t), allocatable :: bids(:)
+   contains
+   procedure :: free => degtab_free
  end type degtab_t
 
  public :: degtab_array_free   ! Free array of degtab_t objects.
@@ -784,8 +786,17 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
 end subroutine sigtk_kpts_in_erange
 !!***
 
+subroutine degtab_free(degtab)
+ class(degtab_t),intent(inout) :: degtab
+ integer :: ii
+ do ii=1,size(degtab%bids)
+   ABI_SFREE(degtab%bids(ii)%vals)
+ end do
+ ABI_FREE(degtab%bids)
+end subroutine degtab_free
+
 subroutine degtab_array_free(degtab)
- type(degtab_t),intent(inout) :: degtab(:,:)
+ class(degtab_t),intent(inout) :: degtab(:,:)
 
  integer :: jj, ii, ideg
 
