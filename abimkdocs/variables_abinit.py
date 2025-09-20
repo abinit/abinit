@@ -24831,7 +24831,7 @@ Valid options are:
 
 This variable is only relevant when reading a GSTORE.nc file produced by
 the GWPT subdriver ([[eph_task]] = 17) for post-processing.
-In such cases: gvals" stores the GWPT-renormalized electron–phonon matrix elements while
+In such cases: "gvals" stores the GWPT-renormalized electron–phonon matrix elements while
 "gvals_ks" contains the Kohn–Sham (KS) electron–phonon matrix elements.
 
 Select "gvals_ks" if you wish to compute physical properties using the KS matrix elements
@@ -24951,7 +24951,7 @@ Variable(
     dimensions=[2, "[[nsppol]]"],
     characteristics=['[[ENERGY]]'],
     requires="[[optdriver]] == 7",
-    mnemonics="GSTORE Energy  RANGE",
+    mnemonics="GSTORE Energy RANGE",
     added_in_version="9.6.2",
     text=r"""
 This variable is used when [[eph_task]] = 11 to define the k/q points that should be considered when

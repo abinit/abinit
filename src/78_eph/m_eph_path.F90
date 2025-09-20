@@ -194,7 +194,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  ABI_CHECK_IRANGE(bstart, 1, nband, "Wrong eph_path_brange(1)")
  ABI_CHECK_IRANGE(bstop, 1, nband, "Wrong eph_path_brange(2)")
  ABI_CHECK_IGEQ(bstop, bstart, "eph_path_brange(2) < eph_path_brange(1)")
- call wrtout(units, sjoin("Computing g with eph_path_brange:", ltoa([bstart, bstop])))
+ call wrtout(units, sjoin(" Computing g(k,q) with eph_path_brange:", ltoa([bstart, bstop])))
 
  ! Distribute spins inside input comm.
  call xmpi_split_nsppol(comm, nsppol, my_nspins, my_spins, comm_my_is)
