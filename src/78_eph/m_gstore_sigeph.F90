@@ -72,6 +72,8 @@ module m_gstore_sigeph
 
  private
  public :: gstore_sigeph
+
+ real(dp),private,parameter :: TOL_EDIFF = 0.001_dp * eV_Ha
 !!***
 
 !----------------------------------------------------------------------
@@ -446,7 +448,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
    end do ! my_ik
 
    ! TODO: Sternheimer with KS states.
-   call sep%gather_and_write_results(ntemp, gstore, gqk, ebands)
+   call sep%gather_and_write_results(ntemp, gstore, gqk, dtset, ebands)
 
    end associate
  end do ! my_is
@@ -484,7 +486,7 @@ end subroutine gstore_sigeph
 !!
 !! SOURCE
 
-subroutine sep_gather_and_write_results(sep, ntemp, gstore, gqk, ebands)
+subroutine sep_gather_and_write_results(sep, ntemp, gstore, gqk, dtset, ebands)
 
 !Local variables-------------------------------
  class(sep_t),intent(inout) :: sep
@@ -492,19 +494,22 @@ subroutine sep_gather_and_write_results(sep, ntemp, gstore, gqk, ebands)
  type(gstore_t),intent(in) :: gstore
  type(gqk_t),intent(in) :: gqk
  type(ebands_t),intent(in) :: ebands
+ type(dataset_type),intent(in) :: dtset
  integer,parameter :: max_ntemp = 50
- integer :: it, in_k, ikcalc, ik_bz, spin, ierr
- integer :: band_k,ik_ibz,ib_val,ib_cond,jj !,ideg,ib,it,ii,iw,nstates
+ integer :: it, in_k, ikcalc, ik_bz, spin, ierr, bstart_nk, bstop_nk, cnt, ndeg
+ integer :: band_k,ik_ibz,ib_val,ib_cond,jj,ideg,ii,iw,nstates
  !integer :: nq_ibzk_eff, nelem, imyq, iq_ibz_k, sr_ncid
- !logical :: iwrite
+ logical :: changed !, iwrite
  real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond,qpe_oms,qpe_oms_val,qpe_oms_cond
- !real(dp) :: invsig2fmts, tau, ravg2
- complex(dp) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond !,cavg1,cavg2,cavg3,cavg4
- !character(len=5000) :: msg
+ real(dp) :: ravg2 ! invsig2fmts, tau,
+ complex(dp) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2,cavg3,cavg4
+ character(len=500) :: this_gtype ! msg
  !integer :: grp_ncid, ncerr
+  type(degtab_t) :: degtab
 !arrays
  real(dp) :: kcalc(3)
  !integer, allocatable :: recvcounts(:), displs(:), nq_rank(:), kq_symtab(:,:), my_kq_symtab(:,:)
+ integer,allocatable :: degblock(:,:)
  !integer, contiguous, pointer :: bids(:)
  real(dp) :: qp_gaps(ntemp),qpoms_gaps(ntemp)
  !real(dp),allocatable :: aw(:,:,:), a2few_avg(:,:), gather_srate(:,:,:,:), grp_srate(:,:,:,:)
@@ -521,7 +526,9 @@ subroutine sep_gather_and_write_results(sep, ntemp, gstore, gqk, ebands)
  call xmpi_sum(sep%dvals_de0ks, gqk%comm%value, ierr)
  call xmpi_sum(sep%dw_vals, gqk%comm%value, ierr)
 
- ! TODO: Average self-energy matrix elements in the degenerate subspace.
+ this_gtype = "KS"
+ if (gstore%gtype == "gwpt" .and. dtset%gstore_gname == "gvals") this_gtype = "GWPT"
+ if (gstore%gtype == "gwpt" .and. dtset%gstore_gname == "gvals_ks") this_gtype = "KS"
 
  ! Write legend.
  if (spin == 1) then
@@ -539,7 +546,7 @@ subroutine sep_gather_and_write_results(sep, ntemp, gstore, gqk, ebands)
    write(ab_out,"(a)")"     mu_e: Fermi level for given (T, nelect)"
    write(ab_out,"(a)")" "
    write(ab_out,"(a)")" "
-   write(ab_out,"(2a)")" Using g(k,q) of type: ", trim(gstore%gtype)
+   write(ab_out,"(2a)")" Using g(k,q) of type: ", trim(this_gtype)
    write(ab_out,"(a)")" "
    write(ab_out,"(a)")" "
  end if
@@ -551,6 +558,62 @@ subroutine sep_gather_and_write_results(sep, ntemp, gstore, gqk, ebands)
    ik_bz = gstore%kglob2bz(ikcalc, spin)
    ik_ibz = gstore%kbz2ibz(1, ik_bz)
    kcalc = gstore%kbz(:, ik_bz)
+
+   if (abs(dtset%symsigma) == 1) then
+     ! Average self-energy matrix elements in the degenerate subspace.
+     ! We will have to average the QP corrections over degenerate states if symsigma=1 is used.
+     ! Here we make sure that all the degenerate states are included.
+     ! Store also band indices of the degenerate sets, used to average final results.
+     bstart_nk = gqk%bstart
+     bstop_nk = gqk%bstop
+     call ebands%enclose_degbands(ik_ibz, spin, bstart_nk, bstop_nk, changed, TOL_EDIFF, degblock=degblock)
+     !if (changed) then
+     !  ABI_WARNING("Changed")
+     !end if
+
+     ! Store band indices used for averaging (shifted by bstart_ks)
+     ndeg = size(degblock, dim=2)
+     ABI_MALLOC(degtab%bids, (ndeg))
+
+     do ii=1,ndeg
+       ! Make sure boundaries are within the input nk states.
+       ! In principle the nk states should be initialized so that all degenerate states are included.
+       degblock(1, ii) = max(degblock(1, ii), gqk%bstart)
+       degblock(2, ii) = min(degblock(2, ii), gqk%bstop)
+       cnt = degblock(2, ii) - degblock(1, ii) + 1
+       ABI_MALLOC(degtab%bids(ii)%vals, (cnt))
+       degtab%bids(ii)%vals = [(jj, jj= &
+         degblock(1, ii) - gqk%bstart  + 1, &
+         degblock(2, ii) - gqk%bstart  + 1)]
+     end do
+
+     ! Average self-energy matrix elements in the degenerate subspace.
+     do ideg=1,size(degtab%bids)
+       associate (bids => degtab%bids(ideg)%vals)
+       nstates = size(bids)
+       do it=1,ntemp
+         ! Average QP(T) and Z(T).
+         cavg1 = sum(sep%vals_e0ks(it, bids(:), ikcalc)) / nstates
+         cavg2 = sum(sep%dvals_de0ks(it, bids(:), ikcalc)) / nstates
+         !cavg3 = sum(sep%fan_vals(it, bids(:), ikcalc)) / nstates
+         !cavg4 = sum(sep%fan_stern_vals(it, bids(:), ikcalc)) / nstates
+         ravg = sum(sep%dw_vals(it, bids(:), ikcalc)) / nstates
+         !ravg2 = sum(sep%dw_stern_vals(it, bids(:), ikcalc)) / nstates
+         do ii=1,nstates
+           sep%vals_e0ks(it, bids(ii), ikcalc) = cavg1
+           sep%dvals_de0ks(it, bids(ii), ikcalc) = cavg2
+           !sep%fan_vals(it, bids(ii), ikcalc) = cavg3
+           !sep%fan_stern_vals(it, bids(ii), ikcalc) = cavg4
+           sep%dw_vals(it, bids(ii), ikcalc) = ravg
+           !sep%dw_stern_vals(it, bids(ii), ikcalc) = ravg2
+         end do
+       end do ! it
+       end associate
+     end do ! ideg
+
+     call degtab%free()
+     ABI_FREE(degblock)
+   end if ! symsigma == +1
 
    kse_val = huge(one) * tol6; kse_cond = huge(one) * tol6
    qp_enes = huge(one) * tol6; qpoms_enes = huge(one) * tol6

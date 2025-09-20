@@ -1861,7 +1861,8 @@ end function ebands_get_occupied
 !!
 !! SOURCE
 
-subroutine ebands_enclose_degbands(ebands, ikibz, spin, ibmin, ibmax, changed, tol_enedif, degblock)
+subroutine ebands_enclose_degbands(ebands, ikibz, spin, ibmin, ibmax, changed, tol_enedif, &
+                                   degblock) ! Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -1893,7 +1894,7 @@ subroutine ebands_enclose_degbands(ebands, ikibz, spin, ibmin, ibmax, changed, t
 
  emax = ebands%eig(ibmax,ikibz,spin)
  do ib=ibmax+1,ebands%nband(ikibz+(spin-1)*ebands%nkpt)
-   if ( ABS(ebands%eig(ib,ikibz,spin) - emax) > tol_enedif) then
+   if (abs(ebands%eig(ib,ikibz,spin) - emax) > tol_enedif) then
      ibmax = ib - 1
      EXIT
    else

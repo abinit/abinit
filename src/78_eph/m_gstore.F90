@@ -4199,15 +4199,15 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    if (ncerr == nf90_noerr) then
      NCF_CHECK(nf90_get_var(ncid, vid("gstore_gtype"), gstore%gtype))
    end if
-   call replace_ch0(gstore%gmode)
+   call replace_ch0(gstore%gtype)
 
-   if (gvals_name == "gvals_ks") then
-     call wrtout(units, " Using KS matrix elements")
-   else if (gvals_name == "gvals") then
+   if (gvals_name__ == "gvals_ks") then
+     call wrtout(units, " Reading KS e-ph matrix elements")
+   else if (gvals_name__ == "gvals") then
      if (gstore%gtype == "GWPT") then
-       call wrtout(units, " Using GWPT matrix elements")
+       call wrtout(units, " Reading GWPT e-ph matrix elements")
      else
-       call wrtout(units, " Using KS matrix elements")
+       call wrtout(units, " Reading KS e-ph matrix elements")
      end if
    end if
 
@@ -4312,6 +4312,8 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
      ABI_MALLOC(gstore%kglob2bz, (max_nk, gstore%nsppol))
    end if
 
+   call xmpi_bcast(gstore%has_used_lgk, master, comm, ierr)
+   call xmpi_bcast(gstore%has_used_lgq, master, comm, ierr)
    call xmpi_bcast(gstore%qptopt, master, comm, ierr)
    call xmpi_bcast(gstore%has_used_lgk, master, comm, ierr)
    call xmpi_bcast(gstore%has_used_lgq, master, comm, ierr)
@@ -4319,6 +4321,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    call xmpi_bcast(gstore%qzone, master, comm, ierr)
    call xmpi_bcast(gstore%kfilter, master, comm, ierr)
    call xmpi_bcast(gstore%gmode, master, comm, ierr)
+   call xmpi_bcast(gstore%gtype, master, comm, ierr)
    call xmpi_bcast(gstore%ngqpt, master, comm, ierr)
    call xmpi_bcast(gstore%wfk0_path, master, comm, ierr)
    call xmpi_bcast(brange_spin, master, comm, ierr)

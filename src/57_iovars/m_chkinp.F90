@@ -4669,11 +4669,11 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    if (dt%gstore_kzone == "ibz" .and. dt%gstore_qzone == "ibz") then
      ABI_CHECK_NOSTOP(.False., "gstore_kzone and gstore_qzone cannot be both in the 'ibz' ", ierr)
    end if
-   if (dt%gstore_use_lgk /= 0 .and. dt%gstore_kzone /= "bz") then
-     ABI_CHECK_NOSTOP(.False., "when gstore_use_lgk /= 0, gstore_kzone must be 'bz' ", ierr)
+   if (dt%gstore_use_lgk /= 0 .and. dt%gstore_qzone /= "bz") then
+     ABI_CHECK_NOSTOP(.False., "when gstore_use_lgk /= 0, gstore_qzone must be 'bz' ", ierr)
    end if
-   if (dt%gstore_use_lgq /= 0 .and. dt%gstore_qzone /= "bz") then
-     ABI_CHECK_NOSTOP(.False., "when gstore_use_lgq /= 0, gstore_qzone must be 'bz' ", ierr)
+   if (dt%gstore_use_lgq /= 0 .and. dt%gstore_kzone /= "bz") then
+     ABI_CHECK_NOSTOP(.False., "when gstore_use_lgq /= 0, gstore_kzone must be 'bz' ", ierr)
    end if
 
 !  If molecular dynamics or structural optimization is being done
