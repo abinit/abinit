@@ -42,11 +42,6 @@
 !! NOTES
 !!  status of MPI_IRECV is explicitly ignored
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_irecv
-!!
 !! SOURCE
 
 subroutine xmpi_irecv_intv(xval,source,tag,comm,request,ierr)
@@ -97,11 +92,6 @@ subroutine xmpi_irecv_intv(xval,source,tag,comm,request,ierr)
 !!
 !! SIDE EFFECTS
 !!  xval= buffer array
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_irecv
 !!
 !! SOURCE
 
@@ -155,11 +145,6 @@ subroutine xmpi_irecv_int1d(xval,source,tag,comm,request,ierr)
 !! NOTES
 !!  status of MPI_IRECV is explicitly ignored
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_irecv
-!!
 !! SOURCE
 
 subroutine xmpi_irecv_dp1d(xval,source,tag,comm,request,ierr)
@@ -211,11 +196,6 @@ end subroutine xmpi_irecv_dp1d
 !!
 !! NOTES
 !!  status of MPI_IRECV is explicitly ignored
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_irecv
 !!
 !! SOURCE
 
@@ -283,11 +263,6 @@ end subroutine xmpi_irecv_dp2d
 !!
 !! NOTES
 !!  status of MPI_IRECV is explicitly ignored
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_irecv
 !!
 !! SOURCE
 

@@ -201,9 +201,6 @@ end subroutine copy_on_gpu
 !!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
 !!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
-!! PARENTS
-!!      lobpcgwf,m_abi_gpu_linalg
-!!
 !! SOURCE
 
 subroutine copy_gpu_to_gpu(cpu_ptr,gpu_ptr,size_in_bytes)
@@ -267,9 +264,6 @@ end subroutine dealloc_on_gpu
 !!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
-!! PARENTS
-!!      lobpcgwf
-!!
 !! SOURCE
 
 subroutine gpu_memset(gpu_ptr, val, array_size)
@@ -303,9 +297,6 @@ end subroutine gpu_memset
 !!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
-!! PARENTS
-!!      lobpcgwf
-!!
 !! SOURCE
 
 subroutine gpu_allocated_impl(gpu_ptr, is_allocated)
@@ -336,8 +327,6 @@ end subroutine gpu_allocated_impl
 !! SIDE EFFECTS
 !!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/dev_spec.cu
-!!
-!! PARENTS
 !!
 !! SOURCE
 

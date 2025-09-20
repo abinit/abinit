@@ -3113,14 +3113,6 @@ end subroutine setrhoijpbe0
 !! OUTPUT
 !! printing the values of orbital magnetic moments for atoms in the output file
 !!
-!! NOTES
-!!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      m_paw_correlations
-!!
 !! SOURCE
 
 subroutine loc_orbmom_cal(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym,my_natom,natom,&

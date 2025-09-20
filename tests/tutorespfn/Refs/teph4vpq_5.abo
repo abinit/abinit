@@ -853,8 +853,8 @@ P pp_sum_comm can use shmem: yes
  glob_nq_spin: [125]
  kptopt: 1
  qptopt: 1
- has_uses_lgk: 0
- has_uses_lgq: 0
+ has_used_lgk: 0
+ has_used_lgq: 0
  with_vk: 1
 
  gqk_cplex: 2

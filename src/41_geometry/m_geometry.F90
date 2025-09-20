@@ -3560,11 +3560,6 @@ end subroutine irreducible_set_pert
 !!   element of d3 is available (1 if available, 0 otherwise)
 !!  d3(2,3,mpert,3,mpert,3,mpert)= matrix of the 3DTE
 !!
-!! PARENTS
-!!      m_ddb,m_nonlinear
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 !subroutine d3lwsym(blkflg,d3,has_strain,indsym,mpert,natom,nsym,symrec,symrel,symrel_cart)
@@ -3843,14 +3838,8 @@ end subroutine d3lwsym
 !!      -1   ->   use symmetry operations to obtain the corresponding element
 !!      -2   ->   element is zero by symmetry
 !!
-!! PARENTS
-!!      m_ddb,m_nonlinear,m_respfn_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-!subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel,symrel_cart)
 subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 
 !Arguments -------------------------------

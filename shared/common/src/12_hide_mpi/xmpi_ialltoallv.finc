@@ -27,11 +27,6 @@
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_ialltoallv
-!!
 !! SOURCE
 
 subroutine xmpi_ialltoallv_dp2d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,request)
@@ -45,7 +40,7 @@ subroutine xmpi_ialltoallv_dp2d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,c
 
 !Local variables-------------------
  integer :: ierr
- 
+
 ! *********************************************************************
 
 #ifdef HAVE_MPI_IALLTOALLV
@@ -71,11 +66,6 @@ end subroutine xmpi_ialltoallv_dp2d
 !! FUNCTION
 !!  Sends data from all to all processes.
 !!  Target: two-dimensional integer arrays.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_ialltoallv
 !!
 !! SOURCE
 
@@ -116,11 +106,6 @@ end subroutine xmpi_ialltoallv_int2d
 !! FUNCTION
 !!  Sends data from all to all processes.
 !!  Target: double precision one-dimensional arrays.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_ialltoallv
 !!
 !! SOURCE
 
