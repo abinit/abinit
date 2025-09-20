@@ -18,11 +18,6 @@
 !!  MPI2 defines an option MPI_IN_PLACE to do the SUM in-place in the case of intra-communicators.
 !!  The additional array xsum is therefore not needed if MPI_INPLACE is defined.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,xmpi_abort
-!!
 !! SOURCE
 
 subroutine xmpi_sum_int(xval,comm,ier)
@@ -3402,11 +3397,6 @@ end subroutine xmpi_sum_c2cplx
 !! SIDE EFFECTS
 !!  xval= buffer array
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,xmpi_abort
-!!
 !! SOURCE
 
 subroutine xmpi_sum_c3cplx(xval,comm,ier)
@@ -3486,11 +3476,6 @@ end subroutine xmpi_sum_c3cplx
 !!
 !! SIDE EFFECTS
 !!  xval= buffer array
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,xmpi_abort
 !!
 !! SOURCE
 

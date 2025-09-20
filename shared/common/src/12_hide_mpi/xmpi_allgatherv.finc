@@ -14,11 +14,6 @@
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
-!!
 !! SOURCE
 
 subroutine xmpi_allgatherv_int2d(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
@@ -73,11 +68,6 @@ end subroutine xmpi_allgatherv_int2d
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
-!!
 !! SOURCE
 
 subroutine xmpi_allgatherv_int(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
@@ -131,11 +121,6 @@ end subroutine xmpi_allgatherv_int
 !!  buf_dp_all=buffer dp array gathered
 !!  buf_dp_size_all=size of buffer dp array gathered
 !!  ier=exit status, a non-zero value meaning there is an error
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -333,11 +318,6 @@ end subroutine xmpi_allgatherv_int1_dp1
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
-!!
 !! SOURCE
 
 subroutine xmpi_allgatherv_dp(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
@@ -391,11 +371,6 @@ end subroutine xmpi_allgatherv_dp
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
-!!
 !! SOURCE
 
 subroutine xmpi_allgatherv_dp2d(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
@@ -443,11 +418,8 @@ end subroutine xmpi_allgatherv_dp2d
 !! OUTPUT
 !!  r= GCD
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
+
 function get_gcd_of_array(array) result(r)
 
 !Arguments-------------------------
@@ -495,11 +467,6 @@ end function get_gcd_of_array
 !!
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -584,11 +551,6 @@ end subroutine xmpi_allgatherv_dp3d
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
-!!
 !! SOURCE
 
 subroutine xmpi_allgatherv_dp4d(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
@@ -642,11 +604,6 @@ end subroutine xmpi_allgatherv_dp4d
 !!
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -703,11 +660,6 @@ end subroutine xmpi_allgatherv_dp5d
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
-!!
 !! SOURCE
 
 subroutine xmpi_allgatherv_dp6d(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
@@ -758,11 +710,6 @@ end subroutine xmpi_allgatherv_dp6d
 !!  ier= exit status, a non-zero value meaning there is an error
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -908,13 +855,6 @@ end subroutine xmpi_allgatherv_coeff2d
 !!  xval_out = coeff2d_type array structure
 !!  ierr= exit status, a non-zero value meaning there is an error
 !!
-!! SIDE EFFECTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
-!!
 !! SOURCE
 
 subroutine xmpi_allgatherv_coeff2d_indx(xval_in,xval_out,comm,indx,ierr)
@@ -1049,11 +989,6 @@ end subroutine xmpi_allgatherv_coeff2d_indx
 !!
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
 !!
 !! SOURCE
 

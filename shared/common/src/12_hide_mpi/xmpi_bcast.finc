@@ -60,11 +60,6 @@ end subroutine xmpi_bcast_intv
 !! SIDE EFFECTS
 !!  xval= buffer array
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_bcast
-!!
 !! SOURCE
 
 subroutine xmpi_bcast_int1d(xval,master,comm,ier)
@@ -106,11 +101,6 @@ end subroutine xmpi_bcast_int1d
 !!
 !! SIDE EFFECTS
 !!  xval= buffer array
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_bcast
 !!
 !! SOURCE
 
@@ -172,11 +162,6 @@ end subroutine xmpi_bcast_int2d
 !! SIDE EFFECTS
 !!  xval= buffer array
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_bcast
-!!
 !! SOURCE
 
 subroutine xmpi_bcast_int3d(xval,master,comm,ier)
@@ -237,11 +222,6 @@ end subroutine xmpi_bcast_int3d
 !!
 !! SIDE EFFECTS
 !!  xval= buffer array
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_bcast
 !!
 !! SOURCE
 
@@ -307,11 +287,6 @@ end subroutine xmpi_bcast_int4d
 !! SIDE EFFECTS
 !!  xval= buffer array
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_bcast
-!!
 !! SOURCE
 
 subroutine xmpi_bcast_dpv(xval,master,comm,ier)
@@ -357,11 +332,6 @@ end subroutine xmpi_bcast_dpv
 !!
 !! SIDE EFFECTS
 !!  xval= buffer array
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_bcast
 !!
 !! SOURCE
 
@@ -999,11 +969,6 @@ end subroutine xmpi_bcast_sp4d
 !! SIDE EFFECTS
 !!  xval= buffer array
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_bcast
-!!
 !! SOURCE
 
 subroutine xmpi_bcast_cplxv(xval,master,comm,ier)
@@ -1050,11 +1015,6 @@ end subroutine xmpi_bcast_cplxv
 !!
 !! SIDE EFFECTS
 !!  xval= buffer array
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_bcast
 !!
 !! SOURCE
 

@@ -3700,14 +3700,6 @@ END SUBROUTINE Ctqmc_destroy
 !!
 !! SIDE EFFECTS
 !!
-!! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE Ctqmc_setMagmom(this,Magmom_orb,Magmom_spin,Magmom_tot)

@@ -1566,10 +1566,6 @@ end function endswith
 !! INPUTS
 !!   istr=Input string
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure function indent(istr) result(ostr)
