@@ -26,7 +26,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain =  t01.abi, t02.abi, t03.abi, t04.abi
+#%% test_chain =  t01.abi, t02.abi, t03.abi, t04.abi, t05.abi
 #%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi
 #%% [files]
 #%% use_git_submodule = diamond_eph_gwpt

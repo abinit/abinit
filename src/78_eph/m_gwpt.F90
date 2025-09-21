@@ -981,13 +981,13 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      call ifc%fourq(cryst, qq_bz, phfr_qq, displ_cart_qbz, out_displ_red=displ_red_qbz)
 
 #else
+     ! Compute stuff in the IBZ and then rotate in order to fix the gauge in g
      if (iq_ibz /= prev_iqbz) then
        ! Get phonon frequencies and eigenvectors for the corresponding q-point in the IBZ.
        call ifc%fourq(cryst, qq_ibz, phfr_qq, displ_cart_qibz, out_displ_red=displ_red_qibz, out_eigvec=pheigvec_qibz)
        prev_iqbz = iq_ibz
      end if
 
-     ! FIXME: Here I should compute stuff in the IBZ and then rotate in order to fix the gauge in g
      ! Get phonon frequencies and eigenvectors for the corresponding q-point in the IBZ.
      if (isirr_q) then
        displ_cart_qbz = displ_cart_qibz; displ_red_qbz = displ_red_qibz; pheigvec_qbz = pheigvec_qibz

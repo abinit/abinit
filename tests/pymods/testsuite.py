@@ -1323,8 +1323,7 @@ def make_abitests_from_inputs(input_fnames, abenv, keywords=None, need_cpp_vars=
                 try:
                     idx = inp_fnames.index(s)
                 except ValueError:
-                    raise RuntimeError(
-                        "%s not found in inp_fnames" % inp_fnames)
+                    raise RuntimeError("%s not found in inp_fnames. Forgot to register the input in __init__.py ?" % inp_fnames)
 
                 inp_fnames.pop(idx)
 
