@@ -548,20 +548,18 @@ subroutine sep_gather_and_write_results(sigma, gstore, gqk, dtset, ebands)
  complex(dp) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2,cavg3,cavg4
  character(len=500) :: this_gtype ! msg
  !integer :: grp_ncid, ncerr
-  type(degtab_t) :: degtab
+ type(degtab_t) :: degtab
 !arrays
  real(dp) :: kcalc(3)
  !integer, allocatable :: recvcounts(:), displs(:), nq_rank(:), kq_symtab(:,:), my_kq_symtab(:,:)
  integer,allocatable :: degblock(:,:)
- !integer, contiguous, pointer :: bids(:)
  real(dp) :: qp_gaps(sigma%ntemp),qpoms_gaps(sigma%ntemp)
  !real(dp),allocatable :: aw(:,:,:), a2few_avg(:,:), gather_srate(:,:,:,:), grp_srate(:,:,:,:)
  real(dp) :: ks_enes(gqk%nb), ze0_vals(sigma%ntemp, gqk%nb)
- !real(dp) :: gfw_avg(self%phmesh_size, 3)
+ !real(dp) :: gfw_avg(sigma%phmesh_size, 3)
  complex(dp) :: qpoms_enes(sigma%ntemp, gqk%nb),qp_enes(sigma%ntemp, gqk%nb) ! nb_k
 !! *************************************************************************
 
- !print *, "in print results"
  spin = gqk%spin; nb_k = gqk%nb
 
  ! Sum partial terms inside qgk%comm.
@@ -686,7 +684,6 @@ subroutine sep_gather_and_write_results(sigma, gstore, gqk, dtset, ebands)
 
      ! Loop over band n_k for this k-point and spin.
      do in_k=1,nb_k
-       !print *, "Re SE (eV), Z:", real(vals_e0ks(it, in_k, ikcalc)) * Ha_eV, real(dvals_de0ks(it, in_k, ikcalc))
        band_k = in_k - bstart_k + 1
        kse = ebands%eig(band_k, ik_ibz, spin)
        ks_enes(in_k) = kse

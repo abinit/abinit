@@ -62,7 +62,6 @@ MODULE m_dfti
 
  use m_fstrings,  only : basename, strcat, int2char10, itoa, sjoin
  use m_hide_blas, only : xcopy
- use m_fft_mesh,  only : zpad_t, zpad_init, zpad_free
 
  implicit none
 
