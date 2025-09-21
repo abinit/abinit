@@ -1,6 +1,7 @@
 # GWPT calculation with SCR file
-#gwpt_np_wpqbks 1 1 8 1 1 1
+# Preparatory run for computing the ZPR
 
+ #gwpt_np_wpqbks 1 1 8 1 1 1
  optdriver 7              # Enter EPH driver.
  eph_task 17              # GWPT computation.
 
@@ -8,12 +9,14 @@
  # we want k in the IBZ and q in the full BZ.
  gstore_kzone "ibz"
  gstore_qzone "bz"
+ #gstore_use_lgk 1
 
  # Additional filter in k-space: only k-points corresponding to the band edges are considered
  gstore_kfilter "qprange"
 
- # g matrix elements are in the atomic representation.
+ # store complex g matrix elements in the atomic representation in the GSTORE file.
  gstore_gmode "atom"
+ gstore_cplex 2
 
  ecut 45.0          # Cutoff energy for wavefunctions.
  ecuteps  8         # Cutoff energy for screening (cannot be larger than the one found in the SCR file)
@@ -35,8 +38,8 @@
  #ppmodel 2
 
  # Read wavefunctions from this file
-
  getwfk_filepath "t03o_WFK"
+
  # K-mesh (must be equal to the one of the WFK file).
  ngkpt 2 2 2
  nshiftk 1

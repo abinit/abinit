@@ -771,7 +771,7 @@ subroutine sep_gather_and_write_results(sigma, gstore, gqk, dtset, ebands)
  end if
 
  call wrtout(std_out, "gstore_sigeph ended OK")
- stop
+ !stop
 
 end subroutine sep_gather_and_write_results
 !!***

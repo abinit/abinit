@@ -4704,10 +4704,11 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: root_ncid, spin_ncid, gstore_completed, spin, nb, ik_glob, iq_glob, ipc, cplex, ncerr, natom3
+ integer :: root_ncid, spin_ncid, gstore_completed, spin, nb, ik_glob, iq_glob, ipc, cplex, ncerr, natom3, varid
  integer :: glob_nq, glob_nk, im_kq, in_k ! ib, ik_ibz,
  logical :: with_ks__
  real(dp) :: g2, g2_ks
+ character(len=abi_slen) :: gstore_gmode
 !arrays
  integer,allocatable :: done_qbz_spin(:,:)
  real(dp),allocatable :: gslice_mn(:,:,:), gslice_ks_mn(:,:,:)  !,vk_cart_ibz(:,:,:), vkmat_cart_ibz(:,:,:,:)
@@ -4730,11 +4731,20 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
  write(ab_out, "(a,*(i0,1x))")" gstore_done_qbz_spin: ", count(done_qbz_spin == 1)
  ABI_FREE(done_qbz_spin)
 
+ ! gstore_gmode was added in Abinit v10.1.2
+ gstore_gmode = GSTORE_GMODE_PHONON
+ ncerr = nf90_inq_varid(root_ncid, "gstore_gmode", varid)
+ if (ncerr == nf90_noerr) then
+   NCF_CHECK(nf90_get_var(root_ncid, root_vid("gstore_gmode"), gstore_gmode))
+   call replace_ch0(gstore_gmode)
+ end if
+
  do spin=1,gstore%nsppol
    NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
    NCF_CHECK(nctk_get_dim(spin_ncid, "nb", nb))
    NCF_CHECK(nctk_get_dim(spin_ncid, "glob_nq", glob_nq))
    NCF_CHECK(nctk_get_dim(spin_ncid, "glob_nk", glob_nk))
+   NCF_CHECK(nctk_get_dim(spin_ncid, "gstore_cplex", cplex))
 
    write(ab_out, "(a,i0)")" gqk%nb: ", nb
    write(ab_out, "(a,i0)")" gqk%glob_nq: ", glob_nq
@@ -4774,7 +4784,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
    !
    !    nctkarr_t("gvals", "dp", "gstore_cplex, nb, nb, natom3, glob_nk, glob_nq")
 
-   cplex = dtset%gstore_cplex
+   !cplex = dtset%gstore_cplex
    ABI_MALLOC(gslice_mn, (cplex, nb, nb))
    ABI_MALLOC(gslice_ks_mn, (cplex, nb, nb))
 
@@ -4795,6 +4805,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
                               start=[1,1,1,ipc,ik_glob,iq_glob], count=[cplex,nb,nb,1,1,1])
          NCF_CHECK(ncerr)
 
+         ! TODO: Get rid of cplex, write everything using complex and atom representation
          write(ab_out, "(3(a,1x,i0,1x))")" |g(k,q)|^2 in Ha^2 for iq:", iq_glob, "ik:", ik_glob, "mode:", ipc
 
          if (.not. with_ks__) then
