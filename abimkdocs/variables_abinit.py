@@ -4409,7 +4409,7 @@ Variable(
     text=r"""
 This variable defines the technique for the integration over the Brillouin zone in the EPH code.
 
-* 1 --> Gaussian technique with broadening factor
+* 1 --> Gaussian technique with broadening factor.
 * 2 --> Tetrahedron method.
 
 Note that the default value depends on the value of [[eph_task]] i.e. on the physical properties
