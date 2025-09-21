@@ -237,6 +237,7 @@ P qpt_comm can use shmem: yes
 P kpt_comm can use shmem: yes
 P bsum_comm can use shmem: yes
 P pp_sum_comm can use shmem: yes
+
  === Gstore parameters ===
  kzone: ibz
  kfilter: qprange
