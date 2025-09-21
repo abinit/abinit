@@ -72,7 +72,7 @@ module m_gwpt
  use m_pawfgr,         only : pawfgr_type
  use m_dfpt_cgwf,      only : stern_t
  use m_ddk,            only : ddkop_t
- !use m_phonons,       only : phstore_t
+ use m_phonons,        only : pheigvec_rotate
  use m_io_screening,   only : hscr_t, get_hscr_qmesh_gsph, read_screening
  use m_vcoul,          only : vcoul_t
  use m_gstore,         only : gstore_t, gqk_t, gstore_check_restart, GSTORE_GMODE_ATOM, GSTORE_GMODE_PHONON
@@ -180,7 +180,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,parameter :: tim_getgh1c1 = 1, berryopt0 = 0, istw1 = 1, ider0 = 0, idir0 = 0, istwfk1 = 1
  integer,parameter :: useylmgr = 0, useylmgr1 = 0, master = 0, ndat1 = 1, with_cplex0 = 0, n3xccc0 = 0
  integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
- integer :: band, band_me, nband_me, stern_comm, nkpt, my_rank, nsppol, iq_ibz, iq_bz, my_npert
+ integer :: band, band_me, nband_me, stern_comm, nkpt, my_rank, nsppol, iq_ibz, iq_bz, prev_iqbz, my_npert
  integer :: nb_k, nb_kq, bstart_k, bstop_k, bstart_kq, bstop_kq
  integer :: cplex,drho_cplex,nkxc,nk3xc,option,usexcnhat,db_iqpt,natom,natom3,ipc,nspinor,nproc !, gsum_master
  integer :: ib_sum, ii, ib, u1_band !,u1c_ib_k,  jj, iw !ib_kq, band_ks, ib_k, ibsum_kq, u1_master, ip
@@ -239,14 +239,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp) :: fermie1_idir_ipert(3,cryst%natom), ylmgr_dum(1,1,1), dum_nhat(0), dum_xccc3d(0)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3), kqmp(3), kmp(3), pp(3), kmp_ibz(3), kqmp_ibz(3)
  real(dp) :: phfr_qq(3*cryst%natom), qq_ibz(3), qq_bz(3)
- real(dp),allocatable :: qlwl(:,:), vk_cart_ibz(:,:,:), displ_cart_qq(:,:,:,:),displ_red_qq(:,:,:,:)
+ real(dp),allocatable :: qlwl(:,:), vk_cart_ibz(:,:,:)
  real(dp),allocatable :: kinpw_kqmp(:),kinpw_kmp(:), kpg_k(:,:),kpg_kq(:,:),kpg_kmp(:,:),kpg_kqmp(:,:), dkinpw(:)
  real(dp),allocatable :: ffnl_kmp(:,:,:,:),ffnl_kqmp(:,:,:,:)
  real(dp),allocatable :: ph3d_kmp(:,:,:), ph3d1_kqmp(:,:,:), ph3d_kqmp(:,:,:), ph3d1_kmp(:,:,:)
  real(dp),allocatable, target :: vxc1_qq(:,:,:,:)
  real(dp),target,allocatable :: gsig_atm(:,:,:,:)
  real(dp),allocatable :: displ_cart_qibz(:,:,:,:), displ_red_qibz(:,:,:,:), pheigvec_qibz(:,:,:,:)
- !real(dp),allocatable :: displ_cart_qbz(:,:,:,:), displ_red_qbz(:,:,:,:), pheigvec_qbz(:,:,:,:)
+ real(dp),allocatable :: displ_cart_qbz(:,:,:,:), displ_red_qbz(:,:,:,:), pheigvec_qbz(:,:,:,:)
  real(dp),allocatable :: gsig_nu(:,:,:,:), gxc_atm(:,:,:,:), gxc_nu(:,:,:,:), gks_atm(:,:,:,:), gks_atm2(:,:,:,:), gks_nu(:,:,:,:)
  real(dp),allocatable :: cg_work(:,:), ug_k(:,:), ug_kq(:,:)
  real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1_qq(:,:,:,:,:), v1scf_qq(:,:,:,:), vlocal1_mqq(:,:,:,:,:), v1scf_mq(:,:,:,:)
@@ -527,8 +527,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  usecprj = dtset%usepaw
  ABI_MALLOC(cwaveprj0, (natom, nspinor*usecprj))
  ABI_MALLOC(cwaveprj, (natom, nspinor*usecprj))
- ABI_MALLOC(displ_cart_qq, (2, 3, natom, natom3))
- ABI_MALLOC(displ_red_qq, (2, 3, natom, natom3))
  ABI_MALLOC(gbound_k, (2*mgfft+8, 2))
  ABI_MALLOC(gbound_kq, (2*mgfft+8, 2))
  ABI_MALLOC(gbound_kmp, (2*mgfft+8, 2))
@@ -683,6 +681,13 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! Allocate workspace arrays.
  ! vtrial and vlocal are required for Sternheimer (H0). DFPT routines do not need it.
  ! Note nvloc in vlocal (we will select one/four spin components afterwards)
+ ABI_MALLOC(displ_cart_qbz, (2, 3, cryst%natom, natom3))
+ ABI_MALLOC(displ_red_qbz, (2, 3, cryst%natom, natom3))
+ ABI_MALLOC(pheigvec_qbz, (2, 3, cryst%natom, 3*cryst%natom))
+ ABI_MALLOC(displ_cart_qibz, (2, 3, cryst%natom, natom3))
+ ABI_MALLOC(displ_red_qibz, (2, 3, cryst%natom, natom3))
+ ABI_MALLOC(pheigvec_qibz, (2, 3, cryst%natom, 3*cryst%natom))
+
  nvloc = gs_ham_kqmp%nvloc
  ABI_CALLOC(vtrial, (nfftf, nspden))
  ABI_CALLOC(vlocal, (n4, n5, n6, nvloc))
@@ -934,6 +939,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ! ============================================================
    ! Loop over MPI distributed q-points in Sigma_q (gqk%qpt_comm)
    ! ============================================================
+   prev_iqbz = -1
    do my_iq=1,gqk%my_nq
      call gqk%myqpt(my_iq, gstore, weight_q, qq_bz)
 
@@ -971,18 +977,27 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      end if
      !print *, "iq_ibz:", iq_ibz, "qq_bz:", qq_bz, "qq_ibz:", qq_ibz
 
+#if 0
+     call ifc%fourq(cryst, qq_bz, phfr_qq, displ_cart_qbz, out_displ_red=displ_red_qbz)
+
+#else
+     if (iq_ibz /= prev_iqbz) then
+       ! Get phonon frequencies and eigenvectors for the corresponding q-point in the IBZ.
+       call ifc%fourq(cryst, qq_ibz, phfr_qq, displ_cart_qibz, out_displ_red=displ_red_qibz, out_eigvec=pheigvec_qibz)
+       prev_iqbz = iq_ibz
+     end if
+
      ! FIXME: Here I should compute stuff in the IBZ and then rotate in order to fix the gauge in g
      ! Get phonon frequencies and eigenvectors for the corresponding q-point in the IBZ.
-     call ifc%fourq(cryst, qq_bz, phfr_qq, displ_cart_qq, out_displ_red=displ_red_qq)
-
      if (isirr_q) then
-       !displ_cart_qbz = displ_cart_qibz; displ_red_qbz = displ_red_qibz; pheigvec_qbz = pheigvec_qibz
+       displ_cart_qbz = displ_cart_qibz; displ_red_qbz = displ_red_qibz; pheigvec_qbz = pheigvec_qibz
      else
-       !! Rotate phonon eigenvectors from q_ibz to q_bz.
-       !! This part is needed to enforce the gauge in the ph eigenvectors, including e(-q) = e(q)^*
-       !call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_qibz, pheigvec_qbz, displ_cart_qbz, &
-       !                     displ_red_qbz=displ_red_qbz)
+       ! Rotate phonon eigenvectors from q_ibz to q_bz.
+       ! This part is needed to enforce the gauge in the ph eigenvectors, including e(-q) = e(q)^*
+       call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_qibz, pheigvec_qbz, displ_cart_qbz, &
+                            displ_red_qbz=displ_red_qbz)
      end if
+#endif
 
      ! ==================================================
      ! Get DFPT potentials and densities for this q-point
@@ -1130,7 +1145,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! Parallelized in gqk%pert_ppsum_comm
        gxc_atm = czero; cnt = 0
        do m_kq=bstart_kq, bstop_kq
-         do n_k=bstart_k, bstop_k ! do n_k=gqk%n_start, gqk%n_stop
+         do n_k=bstart_k, bstop_k
             cnt = cnt + 1
             if (gqk%pp_sum_comm%skip(cnt)) cycle ! MPI parallelism inside pp_sum_comm
             do imyp=1,gqk%my_npert
@@ -1150,7 +1165,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        !call xmpi_sum(gxc_atm, gqk%pert_comm%value, ierr)
 
        ! Get KS g_xc in the phonon representation.
-       call ephtk_gkknu_from_atm(nb_kq, nb_k, 1, natom, gxc_atm, phfr_qq, displ_red_qq, gxc_nu)
+       call ephtk_gkknu_from_atm(nb_kq, nb_k, 1, natom, gxc_atm, phfr_qq, displ_red_qbz, gxc_nu)
 
        ! ===========================================================
        ! MPI sum over the pp momenta in the full BZ gqk%pp_sum_comm
@@ -1792,8 +1807,8 @@ end if ! .not qq_is_gamma.
        case (GSTORE_GMODE_PHONON)
          ! FIXME Perhaps it's gonna be easier if we only support GMODE_ATOM
          ! Get g^{Sigma} and g^{KS} in the phonon representation.
-         call ephtk_gkknu_from_atm(nb_kq, nb_k, 1, natom, gsig_atm, phfr_qq, displ_red_qq, gsig_nu)
-         call ephtk_gkknu_from_atm(nb_kq, nb_k, 1, natom, gks_atm, phfr_qq, displ_red_qq, gks_nu)
+         call ephtk_gkknu_from_atm(nb_kq, nb_k, 1, natom, gsig_atm, phfr_qq, displ_red_qbz, gsig_nu)
+         call ephtk_gkknu_from_atm(nb_kq, nb_k, 1, natom, gks_atm, phfr_qq, displ_red_qbz, gks_nu)
 
          ! Save e-ph matrix elements in the buffer.
          select case (gqk%cplex)
@@ -1913,8 +1928,9 @@ end if ! .not qq_is_gamma.
  ABI_FREE(work)
  ABI_FREE(ph1d)
  ABI_FREE(vlocal)
- ABI_FREE(displ_cart_qq)
- ABI_FREE(displ_red_qq)
+ ABI_FREE(displ_cart_qbz)
+ ABI_FREE(displ_red_qbz)
+ ABI_FREE(pheigvec_qbz)
  ABI_FREE(gbound_k)
  ABI_FREE(gbound_kq)
  ABI_FREE(gbound_kmp)
@@ -1925,6 +1941,9 @@ end if ! .not qq_is_gamma.
  ABI_FREE(rhor)
  ABI_FREE(kxc)
  ABI_FREE(vxc)
+ ABI_FREE(displ_cart_qibz)
+ ABI_FREE(displ_red_qibz)
+ ABI_FREE(pheigvec_qibz)
 
  call gs_ham_kqmp%free(); call gs_ham_kmp%free(); call wfd%free(); call vcp%free(); call ppm%free()
  call pp_mesh%free(); call gsph_c%free(); call gsph_x%free(); call gstore%free()
