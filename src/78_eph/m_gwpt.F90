@@ -181,6 +181,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,parameter :: useylmgr = 0, useylmgr1 = 0, master = 0, ndat1 = 1, with_cplex0 = 0, n3xccc0 = 0
  integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
  integer :: band, band_me, nband_me, stern_comm, nkpt, my_rank, nsppol, iq_ibz, iq_bz, my_npert
+ integer :: nb_k, nb_kq, bstart_k, bstop_k, bstart_kq, bstop_kq
  integer :: cplex,drho_cplex,nkxc,nk3xc,option,usexcnhat,db_iqpt,natom,natom3,ipc,nspinor,nproc !, gsum_master
  integer :: ib_sum, ii, ib, u1_band !,u1c_ib_k,  jj, iw !ib_kq, band_ks, ib_k, ibsum_kq, u1_master, ip
  integer :: my_is, spin, idir,ipert, ig, max_npw_xc, min_npw_xc, npw_x, npw_c, nw_nk, nw_mkq
@@ -556,7 +557,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    call ddkop%init(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
 
    do my_is=1,gstore%my_nspins
-     spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is); nb = gqk%nb
+     spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is)
+     nb = gqk%nb; nb_k = gqk%nb; nb_kq = gqk%nb
 
      ! Be careful as wavefunctions might be replicated.
      ! Use count_bk to count how many states have been computed
@@ -881,28 +883,30 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
    NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
 
-   ! TODO: Should introduce the possibility of specifying different nb states
-   ! for the incoming and the intermediate states.
-   nb = gqk%nb
+   ! Note the possibility of specifying different number of states for the incoming and the intermediate states.
+   nb = gqk%nb; nb_k = gqk%nb; nb_kq = gqk%nb
+   bstart_k = gqk%bstart; bstop_k = gqk%bstart
+   bstart_kq = gqk%bstart; bstop_kq = gqk%bstart
+
    ABI_MALLOC(iq_buf, (2, qbuf_size))
-   ABI_MALLOC(gsig_atm, (2, nb, nb, natom3))
-   ABI_MALLOC(gsig_nu, (2, nb, nb, natom3))
-   ABI_MALLOC(gks_atm, (2, nb, nb, natom3))
-   ABI_MALLOC(gks_atm2, (2, nb, nb, natom3))
-   ABI_MALLOC(gks_nu, (2, nb, nb, natom3))
-   ABI_MALLOC(gxc_atm, (2, nb, nb, natom3))
-   ABI_MALLOC(gxc_nu, (2, nb, nb, natom3))
+   ABI_MALLOC(gsig_atm, (2, nb_kq, nb_k, natom3))
+   ABI_MALLOC(gsig_nu, (2, nb_kq, nb_k, natom3))
+   ABI_MALLOC(gks_atm, (2, nb_kq, nb_k, natom3))
+   ABI_MALLOC(gks_atm2, (2, nb_kq, nb_k, natom3))
+   ABI_MALLOC(gks_nu, (2, nb_kq, nb_k, natom3))
+   ABI_MALLOC(gxc_atm, (2, nb_kq, nb_k, natom3))
+   ABI_MALLOC(gxc_nu, (2, nb_kq, nb_k, natom3))
 
-   ABI_MALLOC_OR_DIE(ur_nk,  (nfft*nspinor, gqk%bstart:gqk%bstop), ierr)
-   ABI_MALLOC_OR_DIE(ur_mkq, (nfft*nspinor, gqk%bstart:gqk%bstop), ierr)
+   ABI_MALLOC_OR_DIE(ur_nk,  (nfft*nspinor, bstart_k:bstop_k), ierr)
+   ABI_MALLOC_OR_DIE(ur_mkq, (nfft*nspinor, bstart_kq:bstop_kq), ierr)
 
-   ! Inside the loops we compute gsig_nu(2, nb, nb, natom3)
-   ABI_MALLOC_OR_DIE(my_gbuf, (gqk%cplex, nb, nb, natom3, gqk%my_nk, qbuf_size), ierr)
-   ABI_MALLOC_OR_DIE(my_gbuf_ks, (gqk%cplex, nb, nb, natom3, gqk%my_nk, qbuf_size), ierr)
+   ! Inside the loops we compute gsig_nu(2, nb_kq, nb_k, natom3)
+   ABI_MALLOC_OR_DIE(my_gbuf, (gqk%cplex, nb_kq, nb_k, natom3, gqk%my_nk, qbuf_size), ierr)
+   ABI_MALLOC_OR_DIE(my_gbuf_ks, (gqk%cplex, nb_kq, nb_k, natom3, gqk%my_nk, qbuf_size), ierr)
 
    ! Allocate memory to deal with frequencies in Sigma(w).
-   nw_nk = 1 + (gqk%bstop - gqk%bstart + 1)
-   nw_mkq = 1 + (gqk%bstop - gqk%bstart + 1)
+   nw_nk = 1 + (bstop_k - bstart_k + 1)
+   nw_mkq = 1 + (bstop_kq - bstart_kq + 1)
    ABI_MALLOC(omegame0i_nk, (nw_nk))
    ABI_MALLOC(omegame0i_mkq, (nw_mkq))
    ABI_MALLOC(omegas_nk, (nw_nk))
@@ -911,11 +915,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_MALLOC(sigcme_mkq, (nw_mkq))
 
    ! Correlated part
-   ABI_MALLOC_OR_DIE(vec_gwc_nk, (npw_c*nspinor, nw_nk, gqk%bstart:gqk%bstop), ierr)
-   ABI_MALLOC_OR_DIE(vec_gwc_mkq, (npw_c*nspinor, nw_mkq, gqk%bstart:gqk%bstop), ierr)
+   ABI_MALLOC_OR_DIE(vec_gwc_nk, (npw_c*nspinor, nw_nk, bstart_k:bstop_k), ierr)
+   ABI_MALLOC_OR_DIE(vec_gwc_mkq, (npw_c*nspinor, nw_mkq, bstart_kq:bstop_kq), ierr)
    ! Exchange part
-   ABI_MALLOC_OR_DIE(vec_gx_nk, (npw_x*nspinor,  gqk%bstart:gqk%bstop), ierr)
-   ABI_MALLOC_OR_DIE(vec_gx_mkq, (npw_x*nspinor, gqk%bstart:gqk%bstop), ierr)
+   ABI_MALLOC_OR_DIE(vec_gx_nk, (npw_x*nspinor,  bstart_k:bstop_k), ierr)
+   ABI_MALLOC_OR_DIE(vec_gx_mkq, (npw_x*nspinor, bstart_kq:bstop_kq), ierr)
 
    ! Compute the little group of the k-point so that we can compute g(k,q) only for q in the IBZ_k
    if (dtset%gstore_use_lgk /= 0) then
@@ -1110,12 +1114,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
        ! Precompute ur_nk and ur_mkq for all m and n indices treated by me.
        ! TODO: Can distribute operations inside gqk%pert_comm
-       do n_k=gqk%bstart, gqk%bstop ! do n_k=gqk%n_start, gqk%n_stop
+       do n_k=bstart_k, bstop_k
          call wfd%rotate_cg(n_k, ndat1, spin, kk_ibz, npw_k, kg_k, istwf_k, &
                             cryst, mapl_k, gbound_k, work_ngfft, work, ug_k, urs_kbz=ur_nk(:,n_k))
        end do
 
-       do m_kq=gqk%bstart, gqk%bstop ! do m_kq=gqk%m_start, gqk%m_stop
+       do m_kq=bstart_kq, bstop_kq
          call wfd%rotate_cg(m_kq, ndat1, spin, kq_ibz, npw_kq, kg_kq, istwf_kq, &
                             cryst, mapl_kq, gbound_kq, work_ngfft, work, ug_kq, urs_kbz=ur_mkq(:,m_kq))
        end do
@@ -1125,8 +1129,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! ===========================
        ! Parallelized in gqk%pert_ppsum_comm
        gxc_atm = czero; cnt = 0
-       do m_kq=gqk%bstart, gqk%bstop ! do m_kq=gqk%m_start, gqk%m_stop
-         do n_k=gqk%bstart, gqk%bstop ! do n_k=gqk%n_start, gqk%n_stop
+       do m_kq=bstart_kq, bstop_kq
+         do n_k=bstart_k, bstop_k ! do n_k=gqk%n_start, gqk%n_stop
             cnt = cnt + 1
             if (gqk%pp_sum_comm%skip(cnt)) cycle ! MPI parallelism inside pp_sum_comm
             do imyp=1,gqk%my_npert
@@ -1146,7 +1150,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        !call xmpi_sum(gxc_atm, gqk%pert_comm%value, ierr)
 
        ! Get KS g_xc in the phonon representation.
-       call ephtk_gkknu_from_atm(nb, nb, 1, natom, gxc_atm, phfr_qq, displ_red_qq, gxc_nu)
+       call ephtk_gkknu_from_atm(nb_kq, nb_k, 1, natom, gxc_atm, phfr_qq, displ_red_qq, gxc_nu)
 
        ! ===========================================================
        ! MPI sum over the pp momenta in the full BZ gqk%pp_sum_comm
@@ -1347,7 +1351,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            !    sum_g' \int de' Wc_{gg'}(pp, e') / (omega - e_{bsum, kmp) - e') <bsum,k-p|e^{-i(p+g')}r|n,k>
            if (gqk%pert_comm%nproc > 1) vec_gwc_nk = zero
 
-           do n_k=gqk%bstart, gqk%bstop ! do n_k=gqk%n_start, gqk%n_stop
+           do n_k=bstart_k, bstop_k
              !if gqk%pert_comm%skip(n_k) cycle ! MPI parallelism inside pert_comm
 
              ! Compute <bsum,k-p|e^{-i(p+G')}r|n,k> * vc_sqrt(p,G')
@@ -1371,7 +1375,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              ! FIXME: npw_x should be npw_c here
              ! Prepare list of omegas: first e_nk then e_mkq for all m indices.
              omegas_nk(1) = qp_ene(n_k, ik_ibz, spin); cnt = 1
-             do m_kq=gqk%bstart, gqk%bstop ! do m_kq=gqk%m_start, gqk%m_stop
+             do m_kq=bstart_kq, bstop_kq
                cnt = cnt + 1; omegas_nk(cnt) = qp_ene(m_kq, ikq_ibz, spin)
              end do
              omegame0i_nk = omegas_nk - qp_ene(ib_sum, ikmp_ibz, spin)
@@ -1408,7 +1412,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            ! Store results in vec_gwc_mkq(:,:,m_kq),
            if (gqk%pert_comm%nproc > 1) vec_gwc_mkq = zero
 
-           do m_kq=gqk%bstart, gqk%bstop ! do m_kq=gqk%m_start, gqk%m_stop
+           do m_kq=bstart_kq, bstop_kq
              !if (gqk%pert_sumcomm%skip(m_kq)) cycle ! MPI parallelism inside pert_comm
 
              ! <m,k+q|e^{i(p+G)}r|bsum,k+q-p> * vc_sqrt(p,G)
@@ -1431,7 +1435,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
              ! Prepare list of omegas: first e_mkq then e_nk for all n indices.
              omegas_mkq(1) = qp_ene(m_kq, ikq_ibz, spin); cnt = 1
-             do n_k=gqk%bstart, gqk%bstop ! do n_k=gqk%n_start, gqk%n_stop
+             do n_k=bstart_k, bstop_k
                cnt = cnt + 1; omegas_mkq(cnt) = qp_ene(n_k, ik_ibz, spin)
              end do
              omegame0i_mkq = omegas_mkq - qp_ene(ib_sum, ikqmp_ibz, spin)
@@ -1520,15 +1524,15 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
              ! Store KS e-ph matrix elements for this perturbation.
              if (pp_is_gamma) then
-               ib = ib_sum - gqk%bstart + 1
-               gks_atm(:,:,ib,ipc) = stern_kmp%eig1_k(:, gqk%bstart:gqk%bstop, ib_sum)
+               ib = ib_sum - bstart_kq + 1
+               gks_atm(:,:,ib,ipc) = stern_kmp%eig1_k(:, bstart_kq:bstop_kq, ib_sum)
              end if
 
              ! <m,k+q|e^{i(p+G)r}|Delta_q psi_{bsum,k-p}>
              ! Exchange bra and ket and take the CC of the FFT.
              full_ur1_kqmp = GWPC_CONJG(full_ur1_kqmp)
 
-             do m_kq=gqk%bstart, gqk%bstop ! do m_kq=gqk%m_start, gqk%m_stop
+             do m_kq=bstart_kq, bstop_kq
                cwork_ur = full_ur1_kqmp * ur_mkq(:,m_kq)
 
                if (need_x_kqmp) then
@@ -1545,14 +1549,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                if (m_kq == 1 .AND. ipc == 1) &
                   print *, "|rhotwg_x|^2,+q,ib=", ib_sum, sum(abs(rhotwg_x)*abs(rhotwg_x))
 
-               do n_k=gqk%bstart, gqk%bstop ! do n_k=gqk%n_start, gqk%n_stop
+               do n_k=bstart_k, bstop_k ! do n_k=gqk%n_start, gqk%n_stop
                  if (m_kq == 1 .AND. n_k == 1 .AND. ipc == 1) &
                    print *, "|vec_gwc_nk|^2,+q,ib=", ib_sum, sum(abs(vec_gwc_nk(:, 1, n_k))*abs(vec_gwc_nk(:, 1, n_k)))
                  if (m_kq == 1 .AND. n_k == 1 .AND. ipc == 1) &
                    print *, "|rhotwg_c|^2,+q,ib=", ib_sum, sum(abs(rhotwg_c)*abs(rhotwg_c))
 
                   ! Take the average
-                  iw_mkq = m_kq - gqk%bstart + 1
+                  iw_mkq = m_kq - bstart_kq + 1
                   ctmp_gwpc = half * sum(rhotwg_c(:) * (vec_gwc_nk(:,1,n_k) + vec_gwc_nk(:,iw_mkq,n_k)))
 
                  if (need_x_kqmp) then
@@ -1643,13 +1647,13 @@ if (.not. qq_is_gamma) then
 
              ! For debug, gks_atm2 and gks_atm should be consistent
              if (pp_is_gamma) then
-               ib = ib_sum - gqk%bstart + 1
-               gks_atm2(:,:,ib,ipc) = stern_kqmp%eig1_k(:, gqk%bstart:gqk%bstop, ib_sum)
+               ib = ib_sum - bstart_kq + 1
+               gks_atm2(:,:,ib,ipc) = stern_kqmp%eig1_k(:, bstart_kq:bstop_kq, ib_sum)
              end if
 
              full_ur1_kmp = GWPC_CONJG(full_ur1_kmp)
 
-             do n_k=gqk%bstart, gqk%bstop ! do n_k=gqk%n_start, gqk%n_stop
+             do n_k=bstart_k, bstop_k
 
                ! <Delta_{-q} psi_{bsum,k+q-p}|e^{-i(p+G')r}|n,k>
                cwork_ur = full_ur1_kmp * ur_nk(:,n_k)
@@ -1668,14 +1672,14 @@ if (.not. qq_is_gamma) then
                if (n_k == 1 .AND. ipc == 1) &
                   print *, "|rhotwg_x|^2,-q,ib=", ib_sum, sum(abs(rhotwg_x)*abs(rhotwg_x))
 
-               do m_kq=gqk%bstart, gqk%bstop ! do m_kq=gqk%m_start, gqk%m_stop
+               do m_kq=bstart_kq, bstop_kq
                  if (n_k == 1 .AND. m_kq == 1 .AND. ipc == 1) &
                    print *, "|vec_gwc_mkq|^2,-q,ib=", ib_sum, sum(abs(vec_gwc_mkq(:, 1, m_kq))*abs(vec_gwc_mkq(:, 1, m_kq)))
                  if (n_k == 1 .AND. m_kq == 1 .AND. ipc == 1) &
                    print *, "|rhotwg_c|^2,-q,ib=", ib_sum, sum(abs(rhotwg_c)*abs(rhotwg_c))
 
                   ! Take the average
-                  iw_nk = n_k - gqk%bstart + 1
+                  iw_nk = n_k - bstart_k + 1
                   ctmp_gwpc = half * sum(rhotwg_c(:) * (vec_gwc_mkq(:,1,m_kq) + vec_gwc_mkq(:,iw_nk,m_kq)))
 
                  if (need_x_kmp) then
@@ -1788,8 +1792,8 @@ end if ! .not qq_is_gamma.
        case (GSTORE_GMODE_PHONON)
          ! FIXME Perhaps it's gonna be easier if we only support GMODE_ATOM
          ! Get g^{Sigma} and g^{KS} in the phonon representation.
-         call ephtk_gkknu_from_atm(nb, nb, 1, natom, gsig_atm, phfr_qq, displ_red_qq, gsig_nu)
-         call ephtk_gkknu_from_atm(nb, nb, 1, natom, gks_atm, phfr_qq, displ_red_qq, gks_nu)
+         call ephtk_gkknu_from_atm(nb_kq, nb_k, 1, natom, gsig_atm, phfr_qq, displ_red_qq, gsig_nu)
+         call ephtk_gkknu_from_atm(nb_kq, nb_k, 1, natom, gks_atm, phfr_qq, displ_red_qq, gks_nu)
 
          ! Save e-ph matrix elements in the buffer.
          select case (gqk%cplex)
@@ -1951,11 +1955,11 @@ subroutine dump_my_gbuf()
 
  ! On disk we have the global arrays:
  !
- !      nctkarr_t("gvals", "dp", "gstore_cplex, nb, nb, natom3, glob_nk, glob_nq")
+ !      nctkarr_t("gvals", "dp", "gstore_cplex, nb_kq, nb_k, natom3, glob_nk, glob_nq")
  !
  ! while the local MPI buffers are dimensioned as follows:
  !
- !      my_gbuf(2, nb, nb, natom3, gqk%my_nk, qbuf_size)
+ !      my_gbuf(2, nb_kq, nb_k, natom3, gqk%my_nk, qbuf_size)
 
  ! If parallelism over perturbation is activated, only the procs treating the first perturbation
  ! i.e. the procs treating different k-points for this q are involved in IO
