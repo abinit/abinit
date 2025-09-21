@@ -204,7 +204,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
 !Local variables-------------------------------
  integer,parameter :: master = 0, with_cplex1 = 1, max_ntemp = 50, cplex1 = 1, pawread0 = 0
  integer :: n1, n2, n3, n4, n5, n6, nb_k, nb_kq, bstart_k, bstart_kq
- integer :: spin, my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, gap_err, my_rank, ip1, ip2
+ integer :: spin, my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, gap_err, my_rank, ip1, ip2, nu
  integer :: it, ik_bz, ik_ibz, ikq_ibz, band_k, band_kq, timrev_k, ii, ikcalc, natom, natom3, nsppol
  integer :: nfft, nfftf, mgfft, mgfftf !,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart, enough_stern
  real(dp) :: wqnu, gkq2, weight_q, eig0nk, eig0mk, eig0mkq, ediff, gmod2, hmod2, gdw2, gdw2_stern, rtmp !,nqnu,gkq2,gkq2_pf,
@@ -236,7 +236,9 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
 
  call wrtout(std_out, " Computing Fan-Migdal + DW self-energy from GSTORE.nc", pre_newlines=1)
  natom = cryst%natom; natom3 = 3 * cryst%natom; nsppol = gstore%nsppol
+
  sigma%imag_only = .False.
+ sigma%ieta = + j_dpc * dtset%zcut
 
  ! The Fan-Migdal SE requires |g(k,q)| in the phonon representation but
  ! to compute the DW term in the RIA, we need complex g in the atom representation.
@@ -261,6 +263,8 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
      'In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
    ABI_ERROR(msg)
  end if
+ ! Check consistency of little group options
+ ABI_CHECK(gstore%check_little_group(dtset, msg) == 0, msg)
 
  ! FFT meshes from input file, not necessarily equal to the ones found in the external files.
  nfftf = product(ngfftf(1:3)); mgfftf = maxval(ngfftf(1:3))
@@ -305,11 +309,6 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
  ABI_MALLOC(cfact_t, (sigma%ntemp))
  ABI_MALLOC(rfact_t, (sigma%ntemp))
 
- sigma%ieta = + j_dpc * dtset%zcut
-
- ! Check consistency of little group options
- ABI_CHECK(gstore%check_little_group(dtset, msg) == 0, msg)
-
  if (dtset%eph_stern /= 0) then
    ! Read the GS potential (vtrial) from input POT file
    ! In principle one may store vtrial in the DVDB but getpot_filepath is simpler to implement.
@@ -333,10 +332,8 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
  ABI_MALLOC(displ_nu_red, (2, 3, natom))
  ABI_MALLOC(tpp_red, (natom3, natom3))
 
- ! TODO
  ! Setup a mask to skip accumulating the contribution of certain phonon modes.
- !call ephtk_set_phmodes_skip(dtset%natom, dtset%eph_phrange, phmodes_skip)
- !ABI_FREE(phmodes_skip)
+ call ephtk_set_phmodes_skip(dtset%natom, dtset%eph_phrange, phmodes_skip)
 
  ! Loop over collinear spins.
  do my_is=1,gstore%my_nspins
@@ -386,8 +383,10 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
        ! Sum over phonon modes.
        do my_ip=1,gqk%my_npert
          wqnu = gqk%my_wnuq(my_ip, my_iq)
+         nu = my_ip + gqk%my_pert_start - 1
+
          ! Ignore unstable modes or modes that should be skipped.
-         if (wqnu < EPHTK_WTOL) cycle
+         if (ephtk_skip_phmode(nu, wqnu, phmodes_skip, dtset%eph_phrange_w)) cycle
 
          nqnu(:) = occ_be(wqnu, sigma%kTmesh, zero)
          !print *, "wqnu", wqnu
@@ -508,6 +507,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
  ABI_FREE(displ_nu_red)
  ABI_FREE(tpp_red)
  ABI_SFREE(vtrial)
+ ABI_FREE(phmodes_skip)
 
  call gstore%free()
 

@@ -47,6 +47,7 @@ module m_ephtk
  public :: ephtk_update_ebands        ! Update ebands according to dtset%occopt, tsmear, mbpt_sciss, eph_fermie, eph_extrael
  public :: ephtk_get_mpw_gmax         ! Compute maximum number of plane-waves over k and k+q where k and k+q are in the BZ.
  public :: ephtk_v1atm_to_vqnu        ! Receive potentials in atomic representation and return potential in phonon representation
+ public :: ephtk_skip_phmode          ! Ignore contribution of phonon mode depending on phonon frequency value or mode index.
 !!***
 
  real(dp),public,parameter :: EPHTK_WTOL = tol6
@@ -564,6 +565,43 @@ pure subroutine ephtk_v1atm_to_vqnu(cplex, nfft, nspden, natom3, v1_atm, displ_r
  end do
 
 end subroutine ephtk_v1atm_to_vqnu
+!!***
+
+!!****f* m_ephtk/ephtk_skip_phmode
+!! NAME
+!!  ephtk_skip_mode
+!!
+!! FUNCTION
+!!  Ignore contribution of phonon mode depending on phonon frequency value or mode index.
+!!
+!! INPUTS
+!!  nu: mode index
+!!  wqnu: phonon frequency
+!!  eph_phrange_w: range for phonon frequency.
+!!
+!! SOURCE
+
+pure logical function ephtk_skip_phmode(nu, wqnu, phmodes_skip, eph_phrange_w) result(skip)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: nu, phmodes_skip(:)
+ real(dp),intent(in) :: wqnu, eph_phrange_w(2)
+! *************************************************************************
+
+ skip = wqnu < EPHTK_WTOL .or. phmodes_skip(nu) == 1
+
+ ! Check frequency range
+ if (abs(eph_phrange_w(2)) > tol12) then
+    if (eph_phrange_w(2) > zero) then
+      ! wqnu must be inside range
+      skip = skip .or. .not. (wqnu >= eph_phrange_w(1) .and. wqnu <= eph_phrange_w(2))
+    else
+      ! wqnu must be outside range
+      skip = skip .or. (wqnu >= eph_phrange_w(1) .and. wqnu <= eph_phrange_w(2))
+    end if
+ end if
+
+end function ephtk_skip_phmode
 !!***
 
 end module m_ephtk

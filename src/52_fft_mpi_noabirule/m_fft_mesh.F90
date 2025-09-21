@@ -70,7 +70,6 @@ MODULE m_fft_mesh
    module procedure calc_ceikr_dpc
  end interface calc_ceikr
 
-
  !interface times_eikr
  !  module procedure times_eikr_dp
  !  module procedure ctimes_eikr_dpc
@@ -84,7 +83,7 @@ MODULE m_fft_mesh
 !!  zpad_t
 !!
 !! FUNCTION
-!!   Store tables used for zero-padded FFTs.
+!!  Tables used for zero-padded FFTs.
 !!
 !! SOURCE
 
@@ -120,15 +119,12 @@ CONTAINS  !=====================================================================
 !!  zpad_init
 !!
 !! FUNCTION
-!!  Creation method
+!!  Creation method for zpad_t instance
 !!
 !! INPUTS
 !!   mgfft=MAX(nx,ny,nz), only used to dimension gbound
 !!   gbound(2*mgfft+8,2)= The boundaries of the basis sphere of G vectors at a given k-point.
 !!     See sphereboundary for more info.
-!!
-!! OUTPUT
-!!  zpad<type(zpad_t)>
 !!
 !! SOURCE
 
@@ -534,9 +530,9 @@ subroutine setmesh(gmet, gvec, ngfft, npwvec, npwsigx, npwwfn, nfftot, method, m
    idx=0
    do ! If a FFT division gets too large the code stops in size_goed_fft.
      if ( check_rot_fft(nsym,symrel,fftsym(1),fftsym(2),fftsym(3)) .and. &
-         (MOD(fftsym(1),fftnons(1))==0) .and.                           &
-         (MOD(fftsym(2),fftnons(2))==0) .and.                           &
-         (MOD(fftsym(3),fftnons(3))==0)                                 &
+         (MOD(fftsym(1),fftnons(1))==0) .and.                            &
+         (MOD(fftsym(2),fftnons(2))==0) .and.                            &
+         (MOD(fftsym(3),fftnons(3))==0)                                  &
      ) EXIT
      ii=MOD(idx,3)+1
      mdum(ii)=mdum(ii)+1
@@ -577,7 +573,7 @@ subroutine setmesh(gmet, gvec, ngfft, npwvec, npwsigx, npwwfn, nfftot, method, m
  ! * Presently only Goedecker"s library or FFTW3 are allowed, see size_goed_fft.F90
  fftalg=ngfft(7); fftalga=fftalg/100; fftalgc=MOD(fftalg,10)
 
- if ( ALL(fftalga /= [FFT_SG, FFT_FFTW3, FFT_DFTI]) ) then
+ if (all(fftalga /= [FFT_SG, FFT_FFTW3, FFT_DFTI]) ) then
    write(msg,'(6a)')ch10,&
     "Only Goedecker's routines with fftalg=1xx or FFTW3/DFTI routines are allowed in GW calculations. ",ch10,&
     "Action : check the value of fftalg in your input file, ",ch10,&
@@ -698,13 +694,13 @@ function fft_check_rotrans(nsym,symrel,tnons,ngfft,err) result(isok)
  real(dp) :: Rm1_FFT(3,3,nsym),fft2red(3,3),r2_FFT(3),tnons_FFT(3,nsym)
 ! *************************************************************************
 
- ! === Precalculate R^-1 and fractional translations in FFT coordinates ===
+ ! Precalculate R^-1 and fractional translations in FFT coordinates
  ngfft1=ngfft(1)
  ngfft2=ngfft(2)
  ngfft3=ngfft(3)
 
- red2fft=RESHAPE((/ngfft1,0,0,0,ngfft2,0,0,0,ngfft3/),(/3,3/))
- fft2red=RESHAPE((/(one/ngfft1),zero,zero,zero,(one/ngfft2),zero,zero,zero,(one/ngfft3)/),(/3,3/))
+ red2fft=RESHAPE([ngfft1,0,0,0,ngfft2,0,0,0,ngfft3], [3,3])
+ fft2red=RESHAPE((/(one/ngfft1),zero,zero,zero,(one/ngfft2),zero,zero,zero, (one/ngfft3)/),(/3,3/))
  !
  ! === For a fully compatible mesh, each Rm1_FFT should be integer ===
  do isym=1,nsym
@@ -721,7 +717,7 @@ function fft_check_rotrans(nsym,symrel,tnons,ngfft,err) result(isok)
      R1_FFT(2)=DBLE(iy)
      do ix=0,ngfft1-1
        R1_FFT(1)=DBLE(ix)
-       do isym=1,nsym  ! Form R^-1 (r-\tau) in the FFT basis ===
+       do isym=1,nsym  ! Form R^-1 (r-\tau) in the FFT basis.
          R2_FFT(:)=MATMUL(Rm1_FFT(:,:,isym),R1_FFT(:)-tnons_FFT(:,isym))
          jx=NINT(R2_FFT(1)); err(1,isym)=MAX(err(1,isym),ABS(R2_FFT(1)-jx)/ngfft1)
          jy=NINT(R2_FFT(2)); err(2,isym)=MAX(err(2,isym),ABS(R2_FFT(2)-jy)/ngfft2)
@@ -794,7 +790,7 @@ subroutine rotate_fft_mesh(nsym, symrel, tnons, ngfft, irottb, preserve)
  real(dp) :: Rm1_FFT(3,3,nsym),err(3,nsym),fft2red(3,3),r2_FFT(3), tnons_FFT(3,nsym)
 ! *************************************************************************
 
- ! === Precalculate R^-1 and fractional translations in FFT coordinates ===
+ ! Precalculate R^-1 and fractional translations in FFT coordinates.
  ngfft1 = ngfft(1); ngfft2 = ngfft(2); ngfft3 = ngfft(3)
 
  red2fft = reshape([ngfft1, 0, 0, 0, ngfft2, 0, 0, 0, ngfft3], [3, 3])
@@ -967,8 +963,7 @@ subroutine cigfft(mG0,npwvec,ngfft,gvec,igfft,ierr)
        gmg0(2) = gvec(2,ig)-ig02
        do ig03=-mg0(3),mg0(3)
          gmg0(3) = gvec(3,ig)-ig03
-         ! Calculate FFT index of G-G0
-         ! Consider possible wrap around errors.
+         ! Calculate FFT index of G-G0. Consider possible wrap around errors.
          gmg01=MODULO(gmg0(1),n1)
          gmg02=MODULO(gmg0(2),n2)
          gmg03=MODULO(gmg0(3),n3)
