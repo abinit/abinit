@@ -885,8 +885,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
    ! Note the possibility of specifying different number of states for the incoming and the intermediate states.
    nb = gqk%nb; nb_k = gqk%nb; nb_kq = gqk%nb
-   bstart_k = gqk%bstart; bstop_k = gqk%bstart
-   bstart_kq = gqk%bstart; bstop_kq = gqk%bstart
+   bstart_k = gqk%bstart; bstop_k = gqk%bstop
+   bstart_kq = gqk%bstart; bstop_kq = gqk%bstop
 
    ABI_MALLOC(iq_buf, (2, qbuf_size))
    ABI_MALLOC(gsig_atm, (2, nb_kq, nb_k, natom3))
