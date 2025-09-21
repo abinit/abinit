@@ -455,6 +455,8 @@ type, public :: gstore_t
 
   logical :: ebands_owns_memory = .False.
   ! True if ebands pointer owns memory and should therefore be deallocated in gstore_free
+  ! TODO: To my future Matteo, here we have to be very careful if we try to update the energies with GW
+  ! or dope/changhe the Fermi level.
 
   type(ifc_type), pointer :: ifc => null()
   ! interatomic force constants.
@@ -1120,7 +1122,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      ABI_MALLOC(intp_gatm, (wan%nwan, wan%nwan, wan%my_npert, nq))
      do my_iq=1,gqk%my_nq
        call gqk%myqpt(my_iq, gstore, weight_qq, qpt)
-       !call ifc%fourq(cryst, qq_ibz, phfrq, displ_cart_qibz, out_displ_red=displ_red_qibz, out_eigvec=pheigvec_qibz)
+       !call ifc%fourq(cryst, qq_ibz, phfr_qq, displ_cart_qibz, out_displ_red=displ_red_qibz, out_eigvec=pheigvec_qibz)
        do my_ik=1,gqk%my_nk
          kpt = gqk%my_kpts(:,my_ik); kq = kpt + qpt
          call wan%interp_eph_manyq(1, qpt, kpt, intp_gatm)
@@ -1611,7 +1613,7 @@ integer function gstore_check_little_group(gstore, dtset, msg) result(ierr)
  ierr = 0; msg = ""
 
  if (dtset%gstore_use_lgk /= 0) then
-   ! Connot use IBZ_k if we have used IBZ_q.
+   ! Cannot use IBZ_k if we have used IBZ_q.
    if (gstore%has_used_lgq /= 0) then
      msg = sjoin("input gstore_use_lgq: ", itoa(dtset%gstore_use_lgq), ", but GSTORE file has:", itoa(gstore%has_used_lgq))
      ABI_ERROR_NOSTOP(msg, ierr)
@@ -1624,7 +1626,7 @@ integer function gstore_check_little_group(gstore, dtset, msg) result(ierr)
  end if
 
  if (dtset%gstore_use_lgq /= 0) then
-   ! Connot use IBZ_q if we have used IBZ_k.
+   ! Cannot use IBZ_q if we have used IBZ_k.
    if (gstore%has_used_lgk /= 0) then
      msg = sjoin("input gstore_use_lgk: ", itoa(dtset%gstore_use_lgk), ", but GSTORE file has:", itoa(gstore%has_used_lgk))
      ABI_ERROR_NOSTOP(msg, ierr)
@@ -3297,7 +3299,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), nband(:,:), wfd_istwfk(:), qmap_symrec(:,:)
  integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:), my_iqibz_inds(:)
  !integer,allocatable :: qibz2dvdb(:) !, displs(:), recvcounts(:)
- real(dp) :: kk_bz(3),kq_bz(3),kk_ibz(3),kq_ibz(3), qq_bz(3), qq_ibz(3), vk(3), phfrq(3*cryst%natom)
+ real(dp) :: kk_bz(3),kq_bz(3),kk_ibz(3),kq_ibz(3), qq_bz(3), qq_ibz(3), vk(3), phfr_qq(3*cryst%natom)
  real(dp),allocatable :: displ_cart_qibz(:,:,:,:), displ_red_qibz(:,:,:,:), pheigvec_qibz(:,:,:,:)
  real(dp),allocatable :: displ_cart_qbz(:,:,:,:), displ_red_qbz(:,:,:,:), pheigvec_qbz(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:), kinpw_k(:), kinpw_kq(:), kpg_kq(:,:), kpg_k(:,:)
@@ -3703,7 +3705,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
      if (iq_ibz /= prev_iqbz) then
        ! Get phonon frequencies and eigenvectors for the corresponding q-point in the IBZ.
-       call ifc%fourq(cryst, qq_ibz, phfrq, displ_cart_qibz, out_displ_red=displ_red_qibz, out_eigvec=pheigvec_qibz)
+       call ifc%fourq(cryst, qq_ibz, phfr_qq, displ_cart_qibz, out_displ_red=displ_red_qibz, out_eigvec=pheigvec_qibz)
        prev_iqbz = iq_ibz
      end if
 
@@ -3875,7 +3877,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        ! Get g in the phonon representation.
        select case (gstore%gmode)
        case (GSTORE_GMODE_PHONON)
-         call ephtk_gkknu_from_atm(nb_kq, nb_k, 1, natom, gkq_atm, phfrq, displ_red_qbz, gkq_nu)
+         call ephtk_gkknu_from_atm(nb_kq, nb_k, 1, natom, gkq_atm, phfr_qq, displ_red_qbz, gkq_nu)
 
          ! Save e-ph matrix elements in the buffer.
          select case (gqk%cplex)
@@ -4499,7 +4501,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
         call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_cart_ibz(:,:,:,:,iq_ibz), pheigvec_cart_qbz, displ_cart_qbz, &
                              displ_red_qbz=displ_red_qbz)
 
-        ! Save my frequencies and my phonono displacements
+        ! Save my frequencies and my phonon displacements
         gqk%my_wnuq(:, my_iq) = phfreqs_ibz(gqk%my_pertcases(:), iq_ibz)
         gqk%my_displ_cart(:,:,:,:,my_iq) = displ_cart_qbz(:,:,:,gqk%my_pertcases(:))
 
