@@ -2292,7 +2292,7 @@ end function gstore_spin2my_is
 !! gstore_fill_bks_mask
 !!
 !! FUNCTION
-!!  Fills the bks_mask array defining the set of states that should be read from file
+!!  Fills the bks_mask array defining the set of wavefunctoins that should be read from file
 !!  by this MPI rank when computing the KS e-ph matrix elements.
 !!
 !! INPUTS
@@ -2310,28 +2310,29 @@ subroutine gstore_fill_bks_mask(gstore, mband, nkibz, nsppol, bks_mask)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_is, my_ik, my_iq, spin, ik_ibz, iqk_ibz, ebands_kptopt
+ integer :: my_is, my_ik, my_iq, spin, ik_ibz, ikq_ibz, ebands_kptopt
+ integer :: bstart_k, bstop_k, bstart_kq, bstop_kq
  real(dp) :: weight_q, cpu, wall, gflops
 !arrays
  integer,allocatable :: map_kq(:,:)
  real(dp) :: qpt(3)
 !----------------------------------------------------------------------
 
+ call cwtime(cpu, wall, gflops, "start")
  associate (cryst => gstore%cryst, ebands => gstore%ebands)
 
- call cwtime(cpu, wall, gflops, "start")
-
- bks_mask = .False.
- ebands_kptopt = gstore%ebands%kptopt
+ bks_mask = .False.; ebands_kptopt = gstore%ebands%kptopt
 
  do my_is=1,gstore%my_nspins
    associate (gqk => gstore%gqk(my_is))
    spin = gstore%my_spins(my_is)
+   bstart_k = gqk%bstart; bstop_k = gqk%bstop
+   bstart_kq = gqk%bstart; bstop_kq = gqk%bstop
 
    ! We need the image of this k-point in the IBZ.
    do my_ik=1,gqk%my_nk
      ik_ibz = gqk%my_k2ibz(1, my_ik)
-     bks_mask(gqk%bstart:gqk%bstop, ik_ibz, spin) = .True.
+     bks_mask(bstart_k:bstop_k, ik_ibz, spin) = .True.
    end do
 
    ! As well as the image of k+q in the IBZ.
@@ -2345,8 +2346,8 @@ subroutine gstore_fill_bks_mask(gstore, mband, nkibz, nsppol, bks_mask)
      end if
 
      do my_ik=1,gqk%my_nk
-       iqk_ibz = map_kq(1, my_ik)
-       bks_mask(gqk%bstart:gqk%bstop, iqk_ibz, spin) = .True.
+       ikq_ibz = map_kq(1, my_ik)
+       bks_mask(bstart_kq:bstop_kq, ikq_ibz, spin) = .True.
      end do
    end do
 
@@ -2368,7 +2369,8 @@ end subroutine gstore_fill_bks_mask
 !!
 !! FUNCTION
 !!  Fill the bks_mask array defining the set of states that should be read from the WFK file
-!!  by this MPI rank when computing the GWPT e-ph matrix elements.
+!!  by this MPI rank when computing the GWPT e-ph matrix elements in which we have
+!!  to consider k+q, k-q and k+q-p as well as the sum over states (bsum)
 !!
 !! INPUTS
 !!
@@ -3273,7 +3275,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, ider0 = 0, idir0 = 0, LOG_MODQ = 5, master = 0, ndat1 = 1
  integer :: my_rank,nproc,nproc_lim,mband,nsppol,nkibz,idir,ipert, iq_bz
  integer :: cplex,natom,natom3,ipc,nspinor, nskip_tetra_kq, timrev_k, timrev_q
- integer :: bstart_k, bstart_kq, band_k, in_k, im_kq !ib1,ib2, band_kq,
+ integer :: bstart_k, bstart_kq, band_k, in_k, im_kq
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq, nb_k, nb_kq
  integer :: my_ik, my_is, comm_rpt, my_npert, my_ip, my_iq, spin,istwf_k,istwf_kq,npw_k,npw_kq
  integer :: mpw, nb,ierr,cnt, n1,n2,n3,n4,n5,n6,nspden,ndone, db_iqpt
@@ -3289,7 +3291,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  type(ddkop_t) :: ddkop
  type(gqk_t),pointer :: gqk
  type(lgroup_t) :: lg_myq
- character(len=5000) :: msg, qq_bz_string, kk_string !, qkp_string, pp_string
+ character(len=5000) :: msg, qq_bz_string, kk_string
 !arrays
  integer :: g0_k(3), g0_kq(3), g0_q(3), work_ngfft(18),gmax(3),indkk_kq(6,1), units(2), qbz2dvdb(6)
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), nband(:,:), wfd_istwfk(:), qmap_symrec(:,:)

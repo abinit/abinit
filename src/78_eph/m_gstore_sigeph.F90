@@ -106,7 +106,10 @@ module m_gstore_sigeph
    ! chemical potential of electrons for the different temperatures.
 
    complex(dp),allocatable :: vals_e0ks(:,:,:)
-   !complex(dp),allocatable :: fan_vals(:,:)
+   ! Sigma_eph(omega=eKS, kT, band) for given (ikcalc, spin).
+   ! Fan-Migdal + Debye-Waller
+
+   complex(dp),allocatable :: fan_vals(:,:,:)
    ! (ntemp, nb_k, nkcalc)
    ! Fan-Migdal
 
@@ -185,7 +188,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
 
 !Local variables-------------------------------
  integer,parameter :: master = 0, with_cplex1 = 1, max_ntemp = 50, cplex1 = 1, pawread0 = 0
- integer :: n1, n2, n3, n4, n5, n6, nb_k, nb_kq
+ integer :: n1, n2, n3, n4, n5, n6, nb_k, nb_kq, bstart_k, bstart_kq
  integer :: spin, my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, ntemp, gap_err, my_rank, ip1, ip2
  integer :: it, ik_bz, ik_ibz, ikq_ibz, band_k, band_kq, timrev_k, ii, ikcalc, natom, natom3, nsppol
  integer :: nfft, nfftf, mgfft, mgfftf !,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart, enough_stern
@@ -316,12 +319,14 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
    associate (gqk => gstore%gqk(my_is), cryst => gstore%cryst)
    spin = gstore%my_spins(my_is)
    nb_k = gqk%nb; nb_kq = gqk%nb
+   bstart_k = gqk%bstart; bstart_kq = gqk%bstart
 
    ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
    ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
 
    ABI_CALLOC(sep%vals_e0ks, (ntemp, nb_k, gqk%glob_nk))
    ABI_CALLOC(sep%dvals_de0ks, (ntemp, nb_k, gqk%glob_nk))
+   ABI_CALLOC(sep%fan_vals, (ntemp, nb_k, gqk%glob_nk))
    ABI_CALLOC(sep%dw_vals, (ntemp, nb_k, gqk%glob_nk))
 
    ! Loop over k-points in |n,k>
@@ -377,7 +382,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
 
          ! Sum over bands.
          do im_kq=1,nb_kq
-           band_kq = im_kq - gqk%bstart + 1
+           band_kq = im_kq - bstart_kq + 1
            eig0mkq = ebands%eig(band_kq, ikq_ibz, spin)
 
            ! Compute electronic occ for all Temps (note mu_e(it) Fermi level)
@@ -387,7 +392,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
 
            ! Loop over the n index in |n,k>.
            do in_k=1,nb_k
-             band_k = in_k - gqk%bstart + 1
+             band_k = in_k - bstart_k + 1
              eig0nk = ebands%eig(band_k, ik_ibz, spin)
              ediff = eig0nk - eig0mk
              !intra_band = q_is_gamma .and. ediff <= TOL_EDIFF
@@ -403,7 +408,10 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
              ! Re + Im of Fan-Migdal self-energy
              ! (my_npert, nb_kq, my_nq, nb_k, my_nk)
              gkq2 = weight_q * gqk%my_g2(my_ip, im_kq, my_iq, in_k, my_ik)
-             sep%vals_e0ks(:, in_k, ikcalc) = sep%vals_e0ks(:, in_k, ikcalc) + cfact_t * gkq2
+             cfact_t = cfact_t * gkq2
+             sep%vals_e0ks(:, in_k, ikcalc) = sep%vals_e0ks(:, in_k, ikcalc) + cfact_t
+             sep%fan_vals(:, in_k, ikcalc) = sep%fan_vals(:, in_k, ikcalc) + cfact_t
+
              !print *, "gkq2", gkq2
 
              ! Derivative of sigma
@@ -450,6 +458,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
                cfact_t(:) = zero
              endif
              sep%dw_vals(:, in_k, ikcalc) = sep%dw_vals(:, in_k, ikcalc) + real(cfact_t)
+             sep%vals_e0ks(:, in_k, ikcalc) = sep%vals_e0ks(:, in_k, ikcalc) + real(cfact_t)
            end do ! in_k
 
          end do ! im_kq
@@ -507,7 +516,7 @@ subroutine sep_gather_and_write_results(sep, ntemp, gstore, gqk, dtset, ebands)
  type(ebands_t),intent(in) :: ebands
  type(dataset_type),intent(in) :: dtset
  integer,parameter :: max_ntemp = 50
- integer :: it, in_k, ikcalc, ik_bz, spin, ierr, bstart_nk, bstop_nk, cnt, ndeg
+ integer :: it, in_k, ikcalc, ik_bz, spin, ierr, bstart_k, bstop_k, cnt, ndeg
  integer :: band_k,ik_ibz,ib_val,ib_cond,jj,ideg,ii,iw,nstates, nb_k
  !integer :: nq_ibzk_eff, nelem, imyq, iq_ibz_k, sr_ncid
  logical :: changed !, iwrite
@@ -535,6 +544,7 @@ subroutine sep_gather_and_write_results(sep, ntemp, gstore, gqk, dtset, ebands)
  ! Sum partial terms inside qgk%comm.
  call xmpi_sum(sep%vals_e0ks, gqk%comm%value, ierr)
  call xmpi_sum(sep%dvals_de0ks, gqk%comm%value, ierr)
+ call xmpi_sum(sep%fan_vals, gqk%comm%value, ierr)
  call xmpi_sum(sep%dw_vals, gqk%comm%value, ierr)
 
  this_gtype = "KS"
@@ -575,27 +585,27 @@ subroutine sep_gather_and_write_results(sep, ntemp, gstore, gqk, dtset, ebands)
      ! We will have to average the QP corrections over degenerate states if symsigma=1 is used.
      ! Here we make sure that all the degenerate states are included.
      ! Store also band indices of the degenerate sets, used to average final results.
-     bstart_nk = gqk%bstart
-     bstop_nk = gqk%bstop
-     call ebands%enclose_degbands(ik_ibz, spin, bstart_nk, bstop_nk, changed, TOL_EDIFF, degblock=degblock)
+     bstart_k = gqk%bstart; bstop_k = gqk%bstop
+     call ebands%enclose_degbands(ik_ibz, spin, bstart_k, bstop_k, changed, TOL_EDIFF, degblock=degblock)
      !if (changed) then
      !  ABI_WARNING("Changed")
      !end if
+     bstart_k = gqk%bstart; bstop_k = gqk%bstop
 
-     ! Store band indices used for averaging (shifted by bstart_ks)
+     ! Store band indices used for averaging (shifted by bstart_k)
      ndeg = size(degblock, dim=2)
      ABI_MALLOC(degtab%bids, (ndeg))
 
      do ii=1,ndeg
        ! Make sure boundaries are within the input nk states.
        ! In principle the nk states should be initialized so that all degenerate states are included.
-       degblock(1, ii) = max(degblock(1, ii), gqk%bstart)
-       degblock(2, ii) = min(degblock(2, ii), gqk%bstop)
+       degblock(1, ii) = max(degblock(1, ii), bstart_k)
+       degblock(2, ii) = min(degblock(2, ii), bstop_k)
        cnt = degblock(2, ii) - degblock(1, ii) + 1
        ABI_MALLOC(degtab%bids(ii)%vals, (cnt))
        degtab%bids(ii)%vals = [(jj, jj= &
-         degblock(1, ii) - gqk%bstart  + 1, &
-         degblock(2, ii) - gqk%bstart  + 1)]
+         degblock(1, ii) - bstart_k + 1, &
+         degblock(2, ii) - bstart_k + 1)]
      end do
 
      ! Average self-energy matrix elements in the degenerate subspace.
@@ -606,14 +616,14 @@ subroutine sep_gather_and_write_results(sep, ntemp, gstore, gqk, dtset, ebands)
          ! Average QP(T) and Z(T).
          cavg1 = sum(sep%vals_e0ks(it, bids(:), ikcalc)) / nstates
          cavg2 = sum(sep%dvals_de0ks(it, bids(:), ikcalc)) / nstates
-         !cavg3 = sum(sep%fan_vals(it, bids(:), ikcalc)) / nstates
+         cavg3 = sum(sep%fan_vals(it, bids(:), ikcalc)) / nstates
          !cavg4 = sum(sep%fan_stern_vals(it, bids(:), ikcalc)) / nstates
          ravg = sum(sep%dw_vals(it, bids(:), ikcalc)) / nstates
          !ravg2 = sum(sep%dw_stern_vals(it, bids(:), ikcalc)) / nstates
          do ii=1,nstates
            sep%vals_e0ks(it, bids(ii), ikcalc) = cavg1
            sep%dvals_de0ks(it, bids(ii), ikcalc) = cavg2
-           !sep%fan_vals(it, bids(ii), ikcalc) = cavg3
+           sep%fan_vals(it, bids(ii), ikcalc) = cavg3
            !sep%fan_stern_vals(it, bids(ii), ikcalc) = cavg4
            sep%dw_vals(it, bids(ii), ikcalc) = ravg
            !sep%dw_stern_vals(it, bids(ii), ikcalc) = ravg2
@@ -654,7 +664,7 @@ subroutine sep_gather_and_write_results(sep, ntemp, gstore, gqk, dtset, ebands)
      ! Loop over band n_k for this k-point and spin.
      do in_k=1,nb_k
        !print *, "Re SE (eV), Z:", real(vals_e0ks(it, in_k, ikcalc)) * Ha_eV, real(dvals_de0ks(it, in_k, ikcalc))
-       band_k = in_k - gqk%bstart + 1
+       band_k = in_k - bstart_k + 1
        kse = ebands%eig(band_k, ik_ibz, spin)
        ks_enes(in_k) = kse
        sig0c = sep%vals_e0ks(it, in_k, ikcalc)
@@ -764,6 +774,7 @@ subroutine sep_free(sep)
  ABI_SFREE(sep%mu_e)
  ABI_SFREE(sep%vals_e0ks)
  ABI_SFREE(sep%dvals_de0ks)
+ ABI_SFREE(sep%fan_vals)
  ABI_SFREE(sep%dw_vals)
 
 end subroutine sep_free
