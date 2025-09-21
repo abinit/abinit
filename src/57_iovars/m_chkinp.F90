@@ -4749,10 +4749,11 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    ABI_ERROR(msg)
  end if
  if (ierr > 1) then
-   write(msg,'(a,i0,5a)')&
+   write(msg,'(a,i0,7a)')&
      'Checking consistency of input data against itself gave ',ierr,' inconsistencies.',ch10,&
      'The details of the problems can be FOUND ABOVE (or in output or log file), in an earlier WARNING.',ch10,&
-     'In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
+     'In parallel, the details might not even be printed there. Then, try running in sequential to see the details.',ch10,&
+     "Also, try to run abinit in sequential in dry-run mode with e.g., `abinit INPUT -d` to detect problems in the INPUT."
    ABI_ERROR(msg)
  end if
 

@@ -107,28 +107,37 @@ module m_gstore_sigeph
 
    complex(dp),allocatable :: vals_e0ks(:,:,:)
    !complex(dp),allocatable :: fan_vals(:,:)
-   ! fan_vals(ntemp, max_nbcalc)
+   ! (ntemp, nb_k, nkcalc)
    ! Fan-Migdal
 
-   !complex(dp),allocatable :: fan_stern_vals(:,:)
-   ! fan_stern_vals(ntemp, max_nbcalc)
+   !complex(dp),allocatable :: fan_stern_vals(:,:,:)
+   ! (ntemp, nb_k, nkcalc)
    ! Fan-Migdal adiabatic Sternheimer part
 
    complex(dp),allocatable :: dvals_de0ks(:,:,:)
+   ! (ntemp, nb_k, nkcalc)
+   ! d Re Sigma_eph(omega, kT, band, kcalc) / d omega (omega=eKS)
 
    real(dp),allocatable :: dw_vals(:,:,:)
-   !  dw_vals(ntemp, max_nbcalc) for given (ikcalc, spin)
+   !  dw_vals(ntemp, nb_k, nkcalc) for given (ikcalc, spin)
    !  Debye-Waller term (static).
 
-  !real(dp),allocatable :: dw_stern_vals(:,:)
-   !  dw_stern_vals(ntemp, max_nbcalc) for given (ikcalc, spin)
+  !real(dp),allocatable :: dw_stern_vals(:,:,:)
+   !  dw_stern_vals(ntemp, nb_k, nkcalc)
    !  Debye-Waller Sternheimer term (static) .
 
-  !complex(dp),allocatable :: vals_wr(:,:,:)
-   ! vals_wr(nwr, ntemp, max_nbcalc)
-   ! Sigma_eph(omega, kT, band) for given (ikcalc, spin).
+  !complex(dp),allocatable :: vals_wr(:,:,:,:)
+   ! vals_wr(nwr, ntemp, nb_k, nkcalc)
+   ! Sigma_eph(omega, kT, band)
    ! enk_KS corresponds to nwr/2 + 1.
-   ! This array depends on (ikcalc, spin)
+
+  !integer :: phmesh_size
+   ! Number of phonon frequencies in phonon mesh used for Eliashberg functions and
+   ! and other omega-resolved quantities.
+
+  !real(dp),allocatable :: phmesh(:)
+   ! phmesh(phmesh_size)
+   ! phonon mesh in Ha.
 
  contains
 
@@ -176,7 +185,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
 
 !Local variables-------------------------------
  integer,parameter :: master = 0, with_cplex1 = 1, max_ntemp = 50, cplex1 = 1, pawread0 = 0
- integer :: n1, n2, n3, n4, n5, n6
+ integer :: n1, n2, n3, n4, n5, n6, nb_k, nb_kq
  integer :: spin, my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, ntemp, gap_err, my_rank, ip1, ip2
  integer :: it, ik_bz, ik_ibz, ikq_ibz, band_k, band_kq, timrev_k, ii, ikcalc, natom, natom3, nsppol
  integer :: nfft, nfftf, mgfft, mgfftf !,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart, enough_stern
@@ -306,12 +315,14 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
  do my_is=1,gstore%my_nspins
    associate (gqk => gstore%gqk(my_is), cryst => gstore%cryst)
    spin = gstore%my_spins(my_is)
+   nb_k = gqk%nb; nb_kq = gqk%nb
+
    ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
    ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
 
-   ABI_CALLOC(sep%vals_e0ks, (ntemp, gqk%nb, gqk%glob_nk))  ! nb_k
-   ABI_CALLOC(sep%dvals_de0ks, (ntemp, gqk%nb, gqk%glob_nk))  ! nb_k
-   ABI_CALLOC(sep%dw_vals, (ntemp, gqk%nb, gqk%glob_nk))  ! nb_k
+   ABI_CALLOC(sep%vals_e0ks, (ntemp, nb_k, gqk%glob_nk))
+   ABI_CALLOC(sep%dvals_de0ks, (ntemp, nb_k, gqk%glob_nk))
+   ABI_CALLOC(sep%dw_vals, (ntemp, nb_k, gqk%glob_nk))
 
    ! Loop over k-points in |n,k>
    do my_ik=1,gqk%my_nk
@@ -365,7 +376,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
          call sigtk_dw_tpp_red(natom, displ_nu_red, tpp_red)
 
          ! Sum over bands.
-         do im_kq=1,gqk%nb ! gqk%nb_kq
+         do im_kq=1,nb_kq
            band_kq = im_kq - gqk%bstart + 1
            eig0mkq = ebands%eig(band_kq, ikq_ibz, spin)
 
@@ -375,7 +386,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
            end do
 
            ! Loop over the n index in |n,k>.
-           do in_k=1,gqk%nb ! gqk%nb_k
+           do in_k=1,nb_k
              band_k = in_k - gqk%bstart + 1
              eig0nk = ebands%eig(band_k, ik_ibz, spin)
              ediff = eig0nk - eig0mk
@@ -448,8 +459,8 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
    end do ! my_ik
 
    ! TODO: Sternheimer with KS states.
-   call sep%gather_and_write_results(ntemp, gstore, gqk, dtset, ebands)
 
+   call sep%gather_and_write_results(ntemp, gstore, gqk, dtset, ebands)
    end associate
  end do ! my_is
 
@@ -497,7 +508,7 @@ subroutine sep_gather_and_write_results(sep, ntemp, gstore, gqk, dtset, ebands)
  type(dataset_type),intent(in) :: dtset
  integer,parameter :: max_ntemp = 50
  integer :: it, in_k, ikcalc, ik_bz, spin, ierr, bstart_nk, bstop_nk, cnt, ndeg
- integer :: band_k,ik_ibz,ib_val,ib_cond,jj,ideg,ii,iw,nstates
+ integer :: band_k,ik_ibz,ib_val,ib_cond,jj,ideg,ii,iw,nstates, nb_k
  !integer :: nq_ibzk_eff, nelem, imyq, iq_ibz_k, sr_ncid
  logical :: changed !, iwrite
  real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond,qpe_oms,qpe_oms_val,qpe_oms_cond
@@ -519,7 +530,7 @@ subroutine sep_gather_and_write_results(sep, ntemp, gstore, gqk, dtset, ebands)
 !! *************************************************************************
 
  !print *, "in print results"
- spin = gqk%spin
+ spin = gqk%spin; nb_k = gqk%nb
 
  ! Sum partial terms inside qgk%comm.
  call xmpi_sum(sep%vals_e0ks, gqk%comm%value, ierr)
@@ -622,7 +633,6 @@ subroutine sep_gather_and_write_results(sep, ntemp, gstore, gqk, dtset, ebands)
 
    ! Loop over temperatures.
    do it=1,ntemp
-
      ! Write header.
      if (it <= max_ntemp) then
        if (ebands%nsppol == 1) then
@@ -642,7 +652,7 @@ subroutine sep_gather_and_write_results(sep, ntemp, gstore, gqk, dtset, ebands)
      end if
 
      ! Loop over band n_k for this k-point and spin.
-     do in_k=1,gqk%nb ! gqk%nb_k
+     do in_k=1,nb_k
        !print *, "Re SE (eV), Z:", real(vals_e0ks(it, in_k, ikcalc)) * Ha_eV, real(dvals_de0ks(it, in_k, ikcalc))
        band_k = in_k - gqk%bstart + 1
        kse = ebands%eig(band_k, ik_ibz, spin)

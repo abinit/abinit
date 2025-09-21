@@ -269,11 +269,13 @@ type, public :: gqk_t
   ! Diagonal v_{m, m,k} for k in the IBZ.
   ! Values in the BZ can be reconstructed by symmetry.
   ! Allocated if gstore%with_vk == 1
+  ! TODO: Here I should decide how to treat nb_k, nk_kq
 
   real(dp),allocatable :: vkmat_cart_ibz(:,:,:,:,:)
   ! (3, nb, nb, nkibz)
   ! v_{m, n,k} for the k in the IBZ
   ! Allocated if gstore%with_vk in (1, 2)
+  ! TODO: Here I should decide how to treat nb_k, nk_kq
 
   integer,allocatable :: my_pertcases(:)
   ! (my_npert)
@@ -474,6 +476,7 @@ type, public :: gstore_t
   integer,allocatable :: brange_spin(:, :)
   ! (2, nsppol)
   ! Range of bands for each spin
+  ! TODO: Should be replaced by brange_k_spin and brange_kq_spin
 
   !integer :: max_nb = -1
   ! Max number of bands over spin
@@ -1513,6 +1516,8 @@ subroutine gstore_print(gstore, units, header, prtvol)
    call wrtout(units, sjoin(" gqk_bstart:", itoa(gqk%bstart)))
    call wrtout(units, sjoin(" gqk_bstop:", itoa(gqk%bstop)))
    call wrtout(units, sjoin(" gqk_nb:", itoa(gqk%nb)))
+   !call wrtout(units, sjoin(" gqk_nb_kq:", itoa(gqk%nb_kq)))
+   !call wrtout(units, sjoin(" gqk_nb_k:", itoa(gqk%nb_k)))
    call wrtout(units, sjoin(" gqk_my_npert:", itoa(gqk%my_npert)))
    call wrtout(units, sjoin(" gqk_my_nk:", itoa(gqk%my_nk)))
    call wrtout(units, sjoin(" gqk_my_nq:", itoa(gqk%my_nq)))
@@ -1661,7 +1666,7 @@ subroutine gstore_malloc__(gstore, with_cplex, max_nq, qglob2bz, max_nk, kglob2b
 !Local variables-------------------------------
 !scalars
  integer :: my_is, ierr, my_iq, my_ik, iq_glob, iq_bz, ik_glob, ik_bz
- integer :: ik_ibz, isym_k, trev_k, tsign_k, g0_k(3)
+ integer :: ik_ibz, isym_k, trev_k, tsign_k, g0_k(3), nb_k, nb_kq
  logical :: isirr_k
  real(dp) :: mem_mb
 !----------------------------------------------------------------------
@@ -1670,6 +1675,7 @@ subroutine gstore_malloc__(gstore, with_cplex, max_nq, qglob2bz, max_nk, kglob2b
 
  do my_is=1,gstore%my_nspins
    associate (gqk => gstore%gqk(my_is), spin => gstore%my_spins(my_is))
+   nb_k = gqk%nb; nb_kq = gqk%nb
 
    ! Split q-points and transfer symmetry tables.
    ! Note that glob_nq and glob_nk does not necessarily correspond to the size of the BZ
@@ -1723,7 +1729,7 @@ subroutine gstore_malloc__(gstore, with_cplex, max_nq, qglob2bz, max_nk, kglob2b
 
    ! Allocate storage for MPI-distributed e-ph matrix elements.
    if (with_cplex > 0) then
-     mem_mb = with_cplex * gqk%my_npert * gqk%nb ** 2 * gqk%my_nq * gqk%my_nk * eight * b2Mb
+     mem_mb = with_cplex * gqk%my_npert * nb_kq * nb_k * gqk%my_nq * gqk%my_nk * eight * b2Mb
      call wrtout(std_out, sjoin(" Local memory for e-ph matrix elements:", ftoa(mem_mb, fmt="f8.1"), " [Mb] <<< MEM"))
 
      ! The initialization with zero is important as not all the g are computed when we filter in k-space.
@@ -1731,10 +1737,10 @@ subroutine gstore_malloc__(gstore, with_cplex, max_nq, qglob2bz, max_nk, kglob2b
      ! and we don't want to trigger floating point exceptions.
      select case (with_cplex)
      case (1)
-       ABI_MALLOC_OR_DIE(gqk%my_g2, (gqk%my_npert, gqk%nb, gqk%my_nq, gqk%nb, gqk%my_nk), ierr)
+       ABI_MALLOC_OR_DIE(gqk%my_g2, (gqk%my_npert, nb_kq, gqk%my_nq, nb_k, gqk%my_nk), ierr)
        gqk%my_g2 = zero
      case (2)
-        ABI_MALLOC_OR_DIE(gqk%my_g, (gqk%my_npert, gqk%nb, gqk%my_nq, gqk%nb, gqk%my_nk), ierr)
+        ABI_MALLOC_OR_DIE(gqk%my_g, (gqk%my_npert, nb_kq, gqk%my_nq, nb_k, gqk%my_nk), ierr)
         gqk%my_g = zero
      case default
        ABI_ERROR(sjoin("Wrong with_cplex:", itoa(with_cplex)))
@@ -1872,7 +1878,6 @@ subroutine gstore_filter_fs_tetra__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kb
  end do
 
  !call ktetra%print(std_out)
-
  call xmpi_sum(select_kbz_spin, comm, ierr)
  call xmpi_sum(gstore%delta_ef_kibz_spin, comm, ierr)
 
@@ -2299,7 +2304,7 @@ end function gstore_spin2my_is
 subroutine gstore_fill_bks_mask(gstore, mband, nkibz, nsppol, bks_mask)
 
 !Arguments ------------------------------------
- class(gstore_t),target,intent(inout) :: gstore
+ class(gstore_t),intent(inout) :: gstore
  integer,intent(in) :: mband, nkibz, nsppol
  logical,intent(out) :: bks_mask(mband, nkibz, nsppol)
 
@@ -2307,7 +2312,6 @@ subroutine gstore_fill_bks_mask(gstore, mband, nkibz, nsppol, bks_mask)
 !scalars
  integer :: my_is, my_ik, my_iq, spin, ik_ibz, iqk_ibz, ebands_kptopt
  real(dp) :: weight_q, cpu, wall, gflops
- type(gqk_t),pointer :: gqk
 !arrays
  integer,allocatable :: map_kq(:,:)
  real(dp) :: qpt(3)
@@ -2321,7 +2325,8 @@ subroutine gstore_fill_bks_mask(gstore, mband, nkibz, nsppol, bks_mask)
  ebands_kptopt = gstore%ebands%kptopt
 
  do my_is=1,gstore%my_nspins
-   gqk => gstore%gqk(my_is); spin = gstore%my_spins(my_is)
+   associate (gqk => gstore%gqk(my_is))
+   spin = gstore%my_spins(my_is)
 
    ! We need the image of this k-point in the IBZ.
    do my_ik=1,gqk%my_nk
@@ -2346,7 +2351,8 @@ subroutine gstore_fill_bks_mask(gstore, mband, nkibz, nsppol, bks_mask)
    end do
 
    ABI_FREE(map_kq)
- end do
+   end associate
+ end do ! my_is
 
  call cwtime_report(" gstore_fill_bks_mask", cpu, wall, gflops)
  end associate
@@ -2581,7 +2587,7 @@ subroutine gstore_get_lambda_iso_iw(gstore, nw, imag_w, lambda)
  real(dp),intent(out) :: lambda(nw)
 
 !Local variables-------------------------------
- integer :: my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr
+ integer :: my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, nb_k, nb_kq
  real(dp) :: g2, wqnu, weight_k, weight_q
 !arrays
  real(dp) :: qpt(3)
@@ -2597,9 +2603,12 @@ subroutine gstore_get_lambda_iso_iw(gstore, nw, imag_w, lambda)
    ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
    ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
 
+   nb_k = gqk%nb; nb_kq = gqk%nb
+   ABI_CHECK_IEQ(nb_k, nb_kq, "gqk_dbldelta_qpt does not support nb_k != nb_kq")
+
    ! Weights for delta(e_{m k+q}) delta(e_{n k}) for my list of k-points.
-   ABI_MALLOC(dbl_delta_q, (gqk%nb, gqk%nb, gqk%my_nk))
-   ABI_MALLOC(g2_pmnk, (gqk%my_npert, gqk%nb, gqk%nb, gqk%my_nk))
+   ABI_MALLOC(dbl_delta_q, (nb_kq, nb_k, gqk%my_nk))
+   ABI_MALLOC(g2_pmnk, (gqk%my_npert, nb_kq, nb_k, gqk%my_nk))
 
    do my_iq=1,gqk%my_nq
      ! Compute integration weights for the double delta.
@@ -2610,8 +2619,8 @@ subroutine gstore_get_lambda_iso_iw(gstore, nw, imag_w, lambda)
 
      do my_ik=1,gqk%my_nk
        weight_k = gqk%my_wtk(my_ik)
-       do in_k=1,gqk%nb
-         do im_kq=1,gqk%nb
+       do in_k=1,nb_k
+         do im_kq=1,nb_kq
            do my_ip=1,gqk%my_npert
              g2 = g2_pmnk(my_ip, im_kq, in_k, my_ik)
              ! TODO: handle wqnu ~ 0
@@ -2646,6 +2655,8 @@ end subroutine gstore_get_lambda_iso_iw
 !!  Compute Eliashberg function a^2F(omega).
 !!
 !! INPUTS
+!!  nw: Number of frequencies.
+!!  wmesh: Frequency mesh.
 !!
 !! OUTPUT
 !!
@@ -2661,7 +2672,7 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
  real(dp),intent(out) :: a2fw(nw)
 
 !Local variables-------------------------------
- integer :: my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, timrev_q, ii, ik_ibz
+ integer :: my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, timrev_q, ii, ik_ibz, nb_k, nb_kq
  real(dp) :: g2, wqnu, weight_k, weight_q, cpu, wall, gflops
  type(lgroup_t) :: lg_myq
  character(len=500) :: msg, kk_string !, qq_bz_string,
@@ -2670,14 +2681,12 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
  real(dp),allocatable :: dbl_delta_q(:,:,:), g2_mnkp(:,:,:,:), deltaw_nuq(:)
 !----------------------------------------------------------------------
 
+ call cwtime(cpu, wall, gflops, "start")
  call wrtout(std_out, sjoin(" Computing a^2F(w) with ph_smear:", ftoa(gstore%dtset%ph_smear * Ha_meV), "(meV)"), pre_newlines=1)
  ABI_CHECK(gstore%qzone == "bz", "gstore_get_lambda_iso_iw assumes qzone == `bz`")
 
- ! Check consistency of little group options
+ ! Check consistency of little group options.
  ABI_CHECK(gstore%check_little_group(dtset, msg) == 0, msg)
-
- call cwtime(cpu, wall, gflops, "start")
-
  ABI_MALLOC(deltaw_nuq, (nw))
 
  a2fw = zero
@@ -2686,9 +2695,12 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
    ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
    ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
 
+   nb_k = gqk%nb; nb_kq = gqk%nb
+   ABI_CHECK_IEQ(nb_k, nb_kq, "gqk_dbldelta_qpt does not support nb_k != nb_kq")
+
    ! Weights for delta(e_{m k+q}) delta(e_{n k}) for my list of k-points.
-   ABI_MALLOC(dbl_delta_q, (gqk%nb, gqk%nb, gqk%my_nk))
-   ABI_MALLOC(g2_mnkp, (gqk%nb, gqk%nb, gqk%my_nk, gqk%my_npert))
+   ABI_MALLOC(dbl_delta_q, (nb_kq, nb_k, gqk%my_nk))
+   ABI_MALLOC(g2_mnkp, (nb_kq, nb_k, gqk%my_nk, gqk%my_npert))
 
    do my_iq=1,gqk%my_nq
      ! Compute integration weights for the double delta.
@@ -2708,7 +2720,6 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
      do my_ip=1,gqk%my_npert
        wqnu = gqk%my_wnuq(my_ip, my_iq)
        deltaw_nuq = gaussian(wmesh - wqnu, gstore%dtset%ph_smear)
-
        do my_ik=1,gqk%my_nk
          kk = gqk%my_kpts(:, my_ik); ik_ibz = gqk%my_k2ibz(1, my_ik); weight_k = gqk%my_wtk(my_ik)
 
@@ -2724,8 +2735,8 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
            end if
          end if
 
-         do in_k=1,gqk%nb
-           do im_kq=1,gqk%nb
+         do in_k=1,nb_k
+           do im_kq=1,nb_kq
              g2 = g2_mnkp(im_kq, in_k, my_ik, my_ip)
              a2fw(:) = a2fw(:) + deltaw_nuq(:) * g2 * weight_k * weight_q * dbl_delta_q(im_kq, in_k, my_ik)
            end do
@@ -2759,7 +2770,7 @@ end subroutine gstore_get_a2fw
 !! gstore_free
 !!
 !! FUNCTION
-!!  Free dynamic memory.
+!!  Free dynamic memory in gstore_t.
 !!
 !! SOURCE
 
@@ -2871,7 +2882,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
 !Local variables ------------------------------
 !scalars
  real(dp), parameter :: min_smear = tol9
- integer :: nb, nkbz, spin, my_ik, ib, ib1, ib2, band1, band2, nesting
+ integer :: nb_k, nb_kq, nkbz, spin, my_ik, ib, ib1, ib2, band1, band2, nesting
  integer :: ik_ibz, isym_k, trev_k, tsign_k, g0_k(3)
  integer :: ikq_ibz, isym_kq, trev_kq, tsign_kq, g0_kq(3), ii, i1, i2, i3, cnt, ik_bz, ltetra
  real(dp) :: g1, g2, sigma !, weight_k !, cpu, wall, gflops
@@ -2886,8 +2897,10 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
  real(dp),allocatable :: eig_k(:,:), eig_kq(:,:), kmesh(:,:), wght_bz(:,:,:)
 !----------------------------------------------------------------------
 
- nb = gqk%nb; nkbz = gstore%nkbz; spin = gqk%spin
+ nb_k = gqk%nb; nb_kq = gqk%nb; nkbz = gstore%nkbz; spin = gqk%spin
  ebands => gstore%ebands; cryst => gstore%cryst
+
+ ABI_CHECK_IEQ(nb_k, nb_kq, "gqk_dbldelta_qpt does not support nb_k != nb_kq")
 
  call gqk%myqpt(my_iq, gstore, weight_q, qpt)
 
@@ -2937,18 +2950,18 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
        vb_kq = gqk%vk_cart_ibz(:,:,ikq_ibz)
 
        if (.not. isirr_k) then
-         do ib=1,nb
+         do ib=1,nb_k
            vb_k(:,ib) = tsign_k * matmul(transpose(cryst%symrel_cart(:,:,isym_k)), vb_k(:,ib))
          end do
        end if
        if (.not. isirr_kq) then
-         do ib=1,nb
+         do ib=1,nb_kq
            vb_kq(:,ib) = tsign_kq * matmul(transpose(cryst%symrel_cart(:,:,isym_kq)), vb_kq(:,ib))
          end do
        end if
      end if
 
-     do ib2=1,nb
+     do ib2=1,nb_k
        band2 = ib2 + gqk%bstart - 1
        if (use_adaptive) then
          sigma = max(maxval([(abs(dot_product(vb_k(:, ib2), kmesh_cartvec(:,ii))), ii=1,3)]), min_smear)
@@ -2956,7 +2969,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
        end if
        g2 = gaussian(ebands%eig(band2, ik_ibz, spin) - ebands%fermie, sigma)
 
-       do ib1=1,nb
+       do ib1=1,nb_kq
          band1 = ib1 + gqk%bstart - 1
          if (use_adaptive) then
            sigma = max(maxval([(abs(dot_product(vb_kq(:, ib1), kmesh_cartvec(:,ii))), ii=1,3)]), min_smear)
@@ -2979,8 +2992,8 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
 
    ! Compute eig_k and eig_kq in full BZ for the relevant bands around Ef.
    ABI_MALLOC(kmesh, (3, nkbz))
-   ABI_MALLOC(eig_k, (nb, nkbz))
-   ABI_MALLOC(eig_kq, (nb, nkbz))
+   ABI_MALLOC(eig_k, (nb_k, nkbz))
+   ABI_MALLOC(eig_kq, (nb_kq, nkbz))
 
    ! Technical problems:
    !
@@ -3041,8 +3054,8 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
    if (eph_intmeth ==  2) ltetra = 2
    if (eph_intmeth == -2) ltetra = 1
 
-   ABI_MALLOC(wght_bz, (nb, nb, nkbz))
-   call libtetrabz_dbldelta(ltetra, gstore%cryst%gprimd, nb, nge, eig_k, eig_kq, ngw, wght_bz) !, comm=comm)
+   ABI_MALLOC(wght_bz, (nb_k, nb_kq, nkbz))
+   call libtetrabz_dbldelta(ltetra, gstore%cryst%gprimd, nb_k, nge, eig_k, eig_kq, ngw, wght_bz) !, comm=comm)
    !call cwtime_report(" libtetrabz_dbldelta", cpu, wall, gflops)
 
    call my_krank%init(gqk%my_nk, gqk%my_kpts)

@@ -2,8 +2,9 @@
 !! NAME
 !!
 !! FUNCTION
-!!  Computation of phonon linewidths, isotropic superconducting properties
-!!  and transport properties in metals within the LOVA approximation to the linearized Boltzmann equation.
+!!  Computation of phonon linewidths, isotropic superconducting properties,
+!!  and transport properties in metals within the LOVA approximation
+!!  to the linearized Boltzmann equation.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2025 ABINIT group (MG)
@@ -12,15 +13,15 @@
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! TODO
-!!  1) Implement restart capabilities (eph_restart)
-!!  2) Sum over the IBZ(q) on the FS instead of full BZ
-!!  3) Gaussian adaptive smearing for double delta (tetra version from libtetrabz really slow!)
+!!  1) Implement restart capabilities (eph_restart).
+!!  2) Sum over the IBZ(q) on the FS instead of full BZ.
+!!  3) Gaussian adaptive smearing for double delta (tetra version from libtetrabz really slow!).
 !!  4) Automatic detections of energy window, improve filtering techniques.
 !!  5) Interface with KERANGE trick
-!!  6) More examples and tutorials (using precomputed Netcdf files)
+!!  6) More examples and tutorials (using precomputed Netcdf files).
 !!  7) SKW interpolation for ph linewidths and/or linear interpolation (I don't trust plain Fourier interpolation).
-!!  8) Perform more benchmarks with dense meshes to detect hotspots and memory bottlenecks
-!!  9) Test spin and SOC
+!!  8) Perform more benchmarks with dense meshes to detect hotspots and memory bottlenecks.
+!!  9) Test spin and SOC.
 !!
 !! SOURCE
 
@@ -82,6 +83,7 @@ module m_phgamma
  use m_pawtab,         only : pawtab_type
  use m_pawfgr,         only : pawfgr_type
  use m_wfd,            only : wfd_t
+ use m_pstat,          only : pstat_proc
 
  implicit none
 
@@ -361,6 +363,9 @@ module m_phgamma
 
   contains
 
+   procedure :: init => a2fw_init            !
+    ! Calculates the FS averaged alpha^2F(w) function.
+
    procedure :: free => a2fw_free
     ! Free the memory allocated in the structure.
 
@@ -369,10 +374,7 @@ module m_phgamma
 
    procedure :: get_moment => a2fw_get_moment
     ! Compute moments of alpha^2F(w)/w .
-
  end type a2fw_t
-
- public :: a2fw_init            ! Calculates the FS averaged alpha^2F(w) function.
 !!***
 
 !!****t* m_phgamma/a2fw_tr_t
@@ -456,6 +458,9 @@ module m_phgamma
 
   contains
 
+  procedure :: init =>  a2fw_tr_init
+   ! Calculates the FS averaged alpha^2F_tr,in,out(w, x, x') functions.
+
   procedure :: free => a2fw_tr_free
    ! Free the memory allocated in the structure.
 
@@ -463,8 +468,6 @@ module m_phgamma
    ! Write alpha^2F(w) to an external file in text/netcdf format
 
  end type a2fw_tr_t
-
- public :: a2fw_tr_init            ! Calculates the FS averaged alpha^2F_tr,in,out(w, x, x') functions.
 !!***
 
  real(dp),private,parameter :: EPH_Q0TOL = 0.01_dp
@@ -535,11 +538,10 @@ subroutine phgamma_init(gams, cryst, ifc, ebands, fstab, dtset, eph_scalprod, ng
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: eph_scalprod
- integer,intent(in) :: comm
+ class(phgamma_t),intent(out) :: gams
+ integer,intent(in) :: eph_scalprod, comm
  type(crystal_t),intent(in) :: cryst
  type(ifc_type),intent(in) :: ifc
- type(phgamma_t),intent(out) :: gams
  type(ebands_t),intent(in) :: ebands
  type(fstab_t), intent(in) :: fstab
  type(dataset_type),intent(in) :: dtset
@@ -634,7 +636,7 @@ subroutine phgamma_ncwrite(gams, cryst, ifc, ncid)
 
 !Arguments ------------------------------------
 !scalars
- type(phgamma_t),intent(inout) :: gams
+ class(phgamma_t),intent(inout) :: gams
  type(crystal_t),intent(in) :: cryst
  type(ifc_type),intent(in) :: ifc
  integer,intent(in) :: ncid
@@ -800,8 +802,8 @@ subroutine phgamma_eval_qibz(gams, cryst, ifc, iq_ibz, spin, phfrq, gamma_ph, la
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: iq_ibz,spin
  class(phgamma_t),intent(inout) :: gams
+ integer,intent(in) :: iq_ibz,spin
  type(crystal_t),intent(in) :: cryst
  type(ifc_type),intent(in) :: ifc
 !arrays
@@ -895,8 +897,8 @@ subroutine phgamma_interp(gams, cryst, ifc, spin, qpt, phfrq, gamma_ph, lambda_p
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: spin
  class(phgamma_t),intent(inout) :: gams
+ integer,intent(in) :: spin
  type(crystal_t),intent(in) :: cryst
  type(ifc_type),intent(in) :: ifc
 !arrays
@@ -1067,7 +1069,7 @@ subroutine phgamma_interp_setup(gams, cryst)
       gams%nrpt, qtor1, coskr, sinkr)
 
    ! Enforce "acoustic" rule on vals_rpt
-   ! This call is not executed in elphon!
+   ! NB: This call is not executed in elphon!
    if (gams%asr /= 0) then
      ABI_MALLOC(atmfrc, (3*gams%natom*3*gams%natom, gams%nrpt))
      do ii=1,2
@@ -1116,8 +1118,8 @@ subroutine phgamma_vv_eval_qibz(gams, cryst, ifc, iq_ibz, spin, phfrq, gamma_in_
 
 !Arguments ------------------------------------
 !scalars
+ class(phgamma_t),intent(inout) :: gams
  integer,intent(in) :: iq_ibz,spin
- type(phgamma_t),intent(inout) :: gams
  type(crystal_t),intent(in) :: cryst
  type(ifc_type),intent(in) :: ifc
 !arrays
@@ -1323,8 +1325,7 @@ end subroutine phgamma_vv_interp
 subroutine phgamma_vv_interp_setup(gams, cryst)
 
 !Arguments ------------------------------------
-!scalars
- type(phgamma_t),intent(inout) :: gams
+ class(phgamma_t),intent(inout) :: gams
  type(crystal_t),intent(in) :: cryst
 
 !Local variables-------------------------------
@@ -1444,10 +1445,10 @@ subroutine phgamma_linwid(gams, cryst, ifc, ndivsm, nvert, qverts, basename, nci
 
 !Arguments ------------------------------------
 !scalars
+ class(phgamma_t),intent(inout) :: gams
  integer,intent(in) :: nvert,ndivsm,comm,ncid
  type(crystal_t),intent(in) :: cryst
  type(ifc_type),intent(in) :: ifc
- class(phgamma_t),intent(inout) :: gams
  character(len=*),intent(in) :: basename
 !arrays
  real(dp),intent(in) :: qverts(3,nvert)
@@ -1457,8 +1458,7 @@ subroutine phgamma_linwid(gams, cryst, ifc, ndivsm, nvert, qverts, basename, nci
 !scalars
  integer,parameter :: master = 0
  integer :: natom,ii,mu,iqpt,natom3,nsppol,ierr
- integer :: spin,unt,nqpt,nrpt,cnt,nproc,my_rank
- integer :: ncerr
+ integer :: spin,unt,nqpt,nrpt,cnt,nproc,my_rank, ncerr
  real(dp) :: omega_min,omega_max,wtmp,omega
  character(len=500) :: msg
  type(kpath_t) :: qpath
@@ -1663,6 +1663,7 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, ph_intmeth, wstep, wminmax, smear, n
 
 !Arguments ------------------------------------
 !scalars
+ class(a2fw_t),target,intent(out) :: a2f
  integer,intent(in) :: ph_intmeth,nqshift,comm
  integer,intent(in),optional :: qptopt
  real(dp),intent(in) :: wstep,smear
@@ -1670,7 +1671,6 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, ph_intmeth, wstep, wminmax, smear, n
  type(phgamma_t),intent(inout) :: gams
  type(ifc_type),intent(in) :: ifc
  type(crystal_t),intent(in) :: cryst
- type(a2fw_t),target,intent(out) :: a2f
 !arrays
  integer,intent(in) :: ngqpt(3)
  real(dp),intent(in) :: wminmax(2),qshift(3,nqshift)
@@ -1680,8 +1680,7 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, ph_intmeth, wstep, wminmax, smear, n
  integer,parameter :: master = 0
  integer :: my_qptopt,iq_ibz,nqibz,ount,my_rank,nproc,cnt
  integer :: mu,iw,natom3,nsppol,spin,ierr,nomega,nqbz
- integer :: iene, jene, itemp, ntemp, jene_jump
- integer :: spinfactor
+ integer :: iene, jene, itemp, ntemp, jene_jump, spinfactor
  real(dp) :: cpu,wall,gflops
  real(dp) :: lambda_iso,omega,omega_log,xx,omega_min,omega_max,ww,mustar,tc_macmill
  real(dp) :: temp_el, min_temp, delta_temp, chempot, ene1, ene2, G0
@@ -1694,11 +1693,11 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, ph_intmeth, wstep, wminmax, smear, n
  real(dp) :: phfrq(gams%natom3),gamma_ph(gams%natom3),lambda_ph(gams%natom3)
  real(dp) :: invphfrq(gams%natom3)
  real(dp),allocatable :: my_qshift(:,:), gamma_ph_ee(:,:,:,:), tmp_a2f(:)
- real(dp), ABI_CONTIGUOUS pointer :: a2f_1d(:)
+ real(dp), contiguous, pointer :: a2f_1d(:)
  real(dp),allocatable :: qibz(:,:),wtq(:),qbz(:,:)
  real(dp),allocatable :: a2f_1mom(:),a2flogmom(:),a2flogmom_int(:),wdt(:,:)
  real(dp),allocatable :: lambda_tetra(:,:,:),phfreq_tetra(:,:), tmp_gaussian(:,:)
- real(dp), allocatable :: a2feew_partial(:), a2feew_partial_int(:), a2feew_w(:), a2feew_w_int(:)
+ real(dp),allocatable :: a2feew_partial(:), a2feew_partial_int(:), a2feew_w(:), a2feew_w_int(:)
 ! *********************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
@@ -2087,9 +2086,8 @@ end subroutine a2fw_init
 real(dp) function a2fw_get_moment(a2f, nn, spin, out_int)
 
 !Arguments ------------------------------------
-!scalars
- integer,intent(in) :: spin,nn
  class(a2fw_t),intent(in) :: a2f
+ integer,intent(in) :: spin,nn
 !arrays
  real(dp),intent(out),optional :: out_int(a2f%nomega)
 
@@ -2165,8 +2163,8 @@ function a2fw_tr_moment(a2f_tr, nn, spin, out_int)
 
 !Arguments ------------------------------------
 !scalars
+ class(a2fw_tr_t),intent(in) :: a2f_tr
  integer,intent(in) :: spin,nn
- type(a2fw_tr_t),intent(in) :: a2f_tr
 !arrays
  real(dp),intent(out),optional :: out_int(a2f_tr%nomega,3,3)
  real(dp) :: a2fw_tr_moment(3,3)
@@ -2233,16 +2231,14 @@ subroutine a2fw_write(a2f, basename, post, ncid)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ncid
- character(len=*),intent(in) :: basename, post
  class(a2fw_t),intent(in) :: a2f
+ character(len=*),intent(in) :: basename, post
+ integer,intent(in) :: ncid
 
 !Local variables -------------------------
 !scalars
- integer :: iw,spin,unt,ii,mu
- integer :: ncerr
- character(len=500) :: dim1_name
- character(len=500) :: msg
+ integer :: iw,spin,unt,ii,mu, ncerr
+ character(len=500) :: dim1_name, msg
  character(len=fnlen) :: path
 ! *********************************************************************
 
@@ -2370,9 +2366,8 @@ end subroutine a2fw_write
 subroutine a2fw_ee_write(a2f, basename)
 
 !Arguments ------------------------------------
-!scalars
+ class(a2fw_t),intent(in) :: a2f
  character(len=*),intent(in) :: basename
- type(a2fw_t),intent(in) :: a2f
 
 !Local variables -------------------------
 !scalars
@@ -2521,6 +2516,7 @@ subroutine a2fw_tr_init(a2f_tr, gams, cryst, ifc, ph_intmeth, wstep, wminmax, sm
 
 !Arguments ------------------------------------
 !scalars
+ class(a2fw_tr_t),target,intent(out) :: a2f_tr
  integer,intent(in) :: ph_intmeth,nqshift,comm
  integer,intent(in),optional :: qptopt
  real(dp),intent(in) :: wstep,smear
@@ -2528,7 +2524,6 @@ subroutine a2fw_tr_init(a2f_tr, gams, cryst, ifc, ph_intmeth, wstep, wminmax, sm
  type(phgamma_t),intent(inout) :: gams
  type(ifc_type),intent(in) :: ifc
  type(crystal_t),intent(in) :: cryst
- type(a2fw_tr_t),target,intent(out) :: a2f_tr
 !arrays
  integer,intent(in) :: ngqpt(3)
  real(dp),intent(in) :: wminmax(2),qshift(3,nqshift)
@@ -2548,7 +2543,7 @@ subroutine a2fw_tr_init(a2f_tr, gams, cryst, ifc, ph_intmeth, wstep, wminmax, sm
  real(dp) :: gamma_in_ph(3,3,gams%natom3), gamma_out_ph(3,3,gams%natom3)
  real(dp) :: lambda_in_ph(3,3,gams%natom3), lambda_out_ph(3,3,gams%natom3)
  real(dp),allocatable :: tmp_a2f_in(:,:,:), tmp_a2f_out(:,:,:), my_qshift(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: a2f_tr_1d(:)
+ real(dp), contiguous, pointer :: a2f_tr_1d(:)
  real(dp),allocatable :: qibz(:,:),wtq(:),qbz(:,:)
  real(dp),allocatable :: a2f_tr_1mom(:),a2f_tr_logmom(:),a2f_tr_logmom_int(:),wdt(:,:)
  real(dp),allocatable :: lambda_in_tetra(:,:,:,:,:),phfreq_tetra(:,:,:), lambda_out_tetra(:,:,:,:,:)
@@ -2849,9 +2844,9 @@ subroutine a2fw_tr_write(a2f_tr, basename, post, ncid)
 
 !Arguments ------------------------------------
 !scalars
+ class(a2fw_tr_t),intent(in) :: a2f_tr
  integer,intent(in) :: ncid
  character(len=*),intent(in) :: basename, post
- class(a2fw_tr_t),intent(in) :: a2f_tr
 
 !Local variables -------------------------
 !scalars
@@ -3056,7 +3051,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  integer :: jene, iene, comm_rpt, nesting, my_npert, my_ip, my_iq, ncerr, edos_intmeth
  real(dp) :: cpu, wall, gflops, cpu_q, wall_q, gflops_q, cpu_k, wall_k, gflops_k, cpu_all, wall_all, gflops_all
  real(dp) :: edos_step, edos_broad, sigma, ecut, eshift, eig0nk
- logical :: gen_eigenpb, need_velocities, isirr_k, isirr_kq
+ logical :: gen_eigenpb, need_velocities, isirr_k, isirr_kq, print_time_k
  type(wfd_t) :: wfd
  type(fstab_t),pointer :: fs
  type(gs_hamiltonian_type) :: gs_hamkq
@@ -3107,6 +3102,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
  units = [std_out, ab_out]
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor; nspden = dtset%nspden
@@ -3144,8 +3140,9 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
  call phgamma_init(gams, cryst, ifc, ebands, fstab(1), dtset, eph_scalprod0, gamma_ngqpt, n0, comm)
 
- call wrtout(std_out, sjoin("q-mesh for the phonon linewidths:", ltoa(gamma_ngqpt)))
- call wrtout(std_out, sjoin("Will compute", itoa(gams%nqibz), "q-points in the IBZ"))
+ call wrtout(std_out, sjoin(" q-mesh for phonon linewidths:", ltoa(gamma_ngqpt)))
+ call wrtout(std_out, sjoin(" Will compute:", itoa(gams%nqibz), "q-points in the IBZ"))
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  ! Select option for double delta with tetra.
  !  2 for the optimized tetrahedron method.
@@ -3633,6 +3630,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
  ! Build krank object to find k-points
  call krank%from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  ! Loop over my q-points in the IBZ.
  do my_iq=1,gams%my_nqibz
@@ -3741,7 +3739,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
      call phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nesting, kpt_comm%value)
 
      do my_ik=1,gams%my_nfsk_q
-       call cwtime(cpu_k, wall_k, gflops_k, "start")
+       print_time_k = (my_ik <= 5 .or. (fs%nkfs > 100 .and. mod(my_ik, 200) == 0))
+       if (print_time_k) call cwtime(cpu_k, wall_k, gflops_k, "start")
 
        ! The k-point and the symmetries relating the BZ k-point to the IBZ.
        ik_fs = gams%my_ifsk_q(my_ik)
@@ -4010,11 +4009,10 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
          end do
        end if
 
-       if (my_ik < 20 .or. (fs%nkfs > 100 .and. mod(my_ik, 200) == 0)) then
-         write(msg,'(4(a,i0),a,f8.2)')" q-point [", iq_ibz, "/", gams%nqibz, "] k-point [", my_ik, "/", gams%my_nfsk_q, "]"
+       if (print_time_k) then
+         write(msg,'(5x,2(a,i0),a)')"k-point [", my_ik, "/", gams%my_nfsk_q, "]"
          call cwtime_report(msg, cpu_k, wall_k, gflops_k)
        end if
-
      end do ! ik_fs: sum over k-points on the BZ FS for this spin.
 
      ABI_FREE(dbldelta_wts)
@@ -4023,7 +4021,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
      ABI_FREE(h1kets_kq)
      ABI_FREE(gkk_atm)
      !ABI_FREE(gkq_nu)
-
      ABI_SFREE(wt_ek)
      ABI_SFREE(wt_ekq)
 
@@ -4052,7 +4049,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        ABI_FREE(tmp_vals_ee)
        ABI_FREE(emesh)
      end if
-
    end do ! spin
 
    ABI_FREE(v1scf)
@@ -4082,9 +4078,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
  ABI_SFREE(tgamvv_in)
  ABI_SFREE(tgamvv_out)
- call ddkop%free()
- call gs_hamkq%free()
- call wfd%free()
+ call ddkop%free(); call gs_hamkq%free(); call wfd%free()
  do spin=1,ebands%nsppol
    call fstab(spin)%free()
  end do
@@ -4099,18 +4093,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    call xmpi_sum(gams%vals_out_qibz, qs_comm%value, ierr)
  end if
  if (dtset%prteliash == 3) call xmpi_sum(gams%vals_ee, qs_comm%value, ierr)
-
- ! Close the netcdf file then master reopens it
- !if (ncwrite_comm%value /= xmpi_comm_null) then
- !  NCF_CHECK(nf90_close(ncid))
- !end if
- !call xmpi_barrier(comm)
-
- !ncid = nctk_noid
- !if (my_rank == master) then
- !  NCF_CHECK(nctk_open_modify(ncid, path, xmpi_comm_self))
- !  NCF_CHECK(nctk_set_datamode(ncid))
- !end if
 
  ! Deallocate MPI communicators.
  call pert_comm%free(); call qpt_comm%free(); call bsum_comm%free(); call qs_comm%free()
@@ -4131,7 +4113,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  end if
 
  ! Compute a2Fw using the ab-initio q-points (no interpolation here)
- call a2fw_init(a2fw, gams, cryst, ifc, dtset%ph_intmeth, dtset%ph_wstep, wminmax, dtset%ph_smear, &
+ call a2fw%init(gams, cryst, ifc, dtset%ph_intmeth, dtset%ph_wstep, wminmax, dtset%ph_smear, &
    dtset%ph_ngqpt, dtset%ph_nqshift, dtset%ph_qshift, comm, qintp=.False., qptopt=1)
 
  if (my_rank == master) then
@@ -4141,7 +4123,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  call a2fw%free()
 
  ! Compute a2Fw using Fourier interpolation (R -> q) and ph_ngqpt grid.
- call a2fw_init(a2fw, gams, cryst, ifc, dtset%ph_intmeth, dtset%ph_wstep, wminmax, dtset%ph_smear, &
+ call a2fw%init(gams, cryst, ifc, dtset%ph_intmeth, dtset%ph_wstep, wminmax, dtset%ph_smear, &
    dtset%ph_ngqpt, dtset%ph_nqshift, dtset%ph_qshift, comm, qptopt=1)
 
  if (my_rank == master) then
@@ -4152,7 +4134,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  call a2fw%free()
 
  ! Compute A2fw using Fourier interpolation and full BZ for debugging purposes.
- !call a2fw_init(a2fw, gams, cryst, ifc, dtset%ph_intmeth, dtset%ph_wstep, wminmax, dtset%ph_smear,&
+ !call a2fw%init(gams, cryst, ifc, dtset%ph_intmeth, dtset%ph_wstep, wminmax, dtset%ph_smear,&
  !  dtset%ph_ngqpt, dtset%ph_nqshift, dtset%ph_qshift, comm, qptopt=3)
  !if (my_rank == master) call a2fw%write(strcat(dtfil%filnam_ds(4), "_A2FW_QPTOPT3"), "fake", nctk_noid)
  !call a2fw%free()
@@ -4161,21 +4143,21 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    ! Calculate and output transport quantities
 
    ! Compute a2Fw_tr using ab-initio q-points (no interpolation)
-   call a2fw_tr_init(a2fw_tr, gams, cryst, ifc, dtset%ph_intmeth, dtset%ph_wstep, wminmax, dtset%ph_smear,&
+   call a2fw_tr%init(gams, cryst, ifc, dtset%ph_intmeth, dtset%ph_wstep, wminmax, dtset%ph_smear,&
      dtset%ph_ngqpt, dtset%ph_nqshift, dtset%ph_qshift, comm, qintp=.False., qptopt=1)
 
    if (my_rank == master) call a2fw_tr%write(strcat(dtfil%filnam_ds(4), "_NOINTP"), "_qcoarse", ncid)
    call a2fw_tr%free()
 
    ! Compute a2Fw_tr using Fourier interpolation (R --> q) and ph_ngqpt grid
-   call a2fw_tr_init(a2fw_tr, gams, cryst, ifc, dtset%ph_intmeth, dtset%ph_wstep, wminmax, dtset%ph_smear,&
+   call a2fw_tr%init(gams, cryst, ifc, dtset%ph_intmeth, dtset%ph_wstep, wminmax, dtset%ph_smear,&
      dtset%ph_ngqpt, dtset%ph_nqshift, dtset%ph_qshift, comm, qptopt=1)
 
    if (my_rank == master) call a2fw_tr%write(dtfil%filnam_ds(4), "_qintp", ncid)
    call a2fw_tr%free()
 
    ! Compute A2fw_tr using Fourier interpolation and full BZ for debugging purposes.
-   !call a2fw_tr_init(a2fw_tr, gams, cryst, ifc, dtset%ph_intmeth, dtset%ph_wstep, wminmax, dtset%ph_smear,&
+   !call a2fw_tr%init(gams, cryst, ifc, dtset%ph_intmeth, dtset%ph_wstep, wminmax, dtset%ph_smear,&
    !  dtset%ph_ngqpt, dtset%ph_nqshift, dtset%ph_qshift, comm, qptopt=3)
    !if (my_rank == master) call a2fw_tr%write(strcat(dtfil%filnam_ds(4), "_A2FWTR_QPTOPT3"), "fake", nctk_noid)
    !call a2fw_tr%free()
@@ -4215,8 +4197,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
 !Local variables-------------------------------
 !scalars
  integer,parameter :: enough = 5
- integer :: nkbz, ierr, nb, ik_bz, ik_ibz, ikq_ibz, ikq_fs, ik_fs, i1, i2, i3, nkfs_q, nene
- integer :: ib1, ib2 ! band_k, band_kq
+ integer :: nkbz, ierr, nb, ik_bz, ik_ibz, ikq_ibz, ikq_fs, ik_fs, i1, i2, i3, nkfs_q, nene, ib1, ib2 ! band_k, band_kq
  real(dp),parameter :: max_occ1 = one
  real(dp) :: cpu, wall, gflops, enemin, enemax
  character(len=500) :: msg
@@ -4234,8 +4215,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
 
  call cwtime(cpu, wall, gflops, "start")
 
- ! The double delta with tetra is ill-defined for q == 0.
- ! Set nesting to 1 and return
+ ! The double delta with tetra is ill-defined for q == 0. Set nesting to 1 and return
  nesting = 0
  if (abs(fs%eph_intmeth) == 2 .and. all(abs(qpt) < tol12)) then
    ABI_COMMENT("Tetrahedron for double grid with q = 0 is ill-defined. Using adaptive gaussian.")
@@ -4254,7 +4234,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
    ! Gaussian method:
    ! Distribute k-points within the FS window inside comm.
    ! 1) Select k-points such that k+q is still inside the FS window
-   ! 2) Distribute effective k-points assuming all procs in comm have all FS k-points (no filtering)
+   ! 2) Distribute effective k-points assuming all procs in comm have all FS k-points (no filtering).
    ABI_MALLOC(select_ikfs, (fs%nkfs))
    nkfs_q = 0
    do ik_fs=1,fs%nkfs
@@ -4271,7 +4251,6 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
  end if
 
  ! Tetrahedron method:
- !
  !     1) Compute weights for double delta integration.
  !     2) Filter k-points according to the weights (k must be in FS window with non-zero weight)
  !     3) Distribute effective k-points assuming all procs have all FS k-points.

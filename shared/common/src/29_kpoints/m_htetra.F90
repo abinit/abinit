@@ -897,9 +897,9 @@ end subroutine htetra_init
 subroutine htetra_init_mapping_ibz(tetra)
 
  class(htetra_t),intent(inout) :: tetra
+
  integer :: ikibz, itetra, isummit, ihash, ntetra
  integer :: tetra_count(tetra%nkibz),tetra_mibz(0:4)
-
  real(dp) :: mem_mb
 
  ! Only execute the following if not yet allocated
