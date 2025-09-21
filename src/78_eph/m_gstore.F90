@@ -3273,7 +3273,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, ider0 = 0, idir0 = 0, LOG_MODQ = 5, master = 0, ndat1 = 1
  integer :: my_rank,nproc,nproc_lim,mband,nsppol,nkibz,idir,ipert, iq_bz
  integer :: cplex,natom,natom3,ipc,nspinor, nskip_tetra_kq, timrev_k, timrev_q
- integer :: bstart_k,bstart_kq, band_k, in_k, im_kq !ib1,ib2, band_kq,
+ integer :: bstart_k, bstart_kq, band_k, in_k, im_kq !ib1,ib2, band_kq,
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq, nb_k, nb_kq
  integer :: my_ik, my_is, comm_rpt, my_npert, my_ip, my_iq, spin,istwf_k,istwf_kq,npw_k,npw_kq
  integer :: mpw, nb,ierr,cnt, n1,n2,n3,n4,n5,n6,nspden,ndone, db_iqpt
