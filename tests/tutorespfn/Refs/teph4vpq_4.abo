@@ -379,6 +379,8 @@ P pp_sum_comm can use shmem: yes
  gqk_bstart: 3
  gqk_bstop: 5
  gqk_nb: 3
+ gqk_nb_kq: 3
+ gqk_nb_k: 3
  gqk_my_npert: 6
  gqk_my_nk: -1
  gqk_my_nq: -1
@@ -634,6 +636,8 @@ P pp_sum_comm can use shmem: yes
  gqk_bstart: 3
  gqk_bstop: 5
  gqk_nb: 3
+ gqk_nb_kq: 3
+ gqk_nb_k: 3
  gqk_my_npert: 6
  gqk_my_nk: -1
  gqk_my_nq: -1
@@ -874,6 +878,8 @@ P pp_sum_comm can use shmem: yes
  gqk_bstart: 3
  gqk_bstop: 5
  gqk_nb: 3
+ gqk_nb_kq: 3
+ gqk_nb_k: 3
  gqk_my_npert: 6
  gqk_my_nk: -1
  gqk_my_nq: -1

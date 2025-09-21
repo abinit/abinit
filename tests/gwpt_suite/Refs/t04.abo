@@ -258,6 +258,8 @@ P pp_sum_comm can use shmem: yes
  gqk_bstart: 1
  gqk_bstop: 9
  gqk_nb: 9
+ gqk_nb_kq: 9
+ gqk_nb_k: 9
  gqk_my_npert: 6
  gqk_my_nk: -1
  gqk_my_nq: -1
