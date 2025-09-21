@@ -60,7 +60,6 @@ module m_varpeq
  implicit none
 
  private
-
 !!***
 
 !----------------------------------------------------------------------
@@ -696,8 +695,7 @@ subroutine varpeq_ncread(self, path, comm, keep_open)
 !Local variables-------------------------------
  integer :: ncid, nsppol, natom3, nstates
  real(dp) :: cpu, wall, gflops
- real(dp), ABI_CONTIGUOUS pointer :: rpt_d5(:,:,:,:,:)
-
+ real(dp), contiguous, pointer :: rpt_d5(:,:,:,:,:)
 !----------------------------------------------------------------------
 
  call cwtime(cpu, wall, gflops, "start")
@@ -806,9 +804,8 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
  integer, parameter :: master = 0
  integer :: my_rank, ncid, ncerr
  real(dp) :: cpu, wall, gflops
- real(dp), ABI_CONTIGUOUS pointer :: rpt_d5(:,:,:,:,:)
+ real(dp), contiguous, pointer :: rpt_d5(:,:,:,:,:)
  integer :: units(2)
-
 !----------------------------------------------------------------------
 
  units = [std_out, ab_out]
@@ -1086,7 +1083,6 @@ subroutine varpeq_print_results(self)
  integer :: my_rank, spin, ip, ii
 !arrays
  integer :: units(2)
-
 !----------------------------------------------------------------------
 
  my_rank = xmpi_comm_rank(self%gstore%comm)
@@ -1213,7 +1209,6 @@ subroutine varpeq_collect(self)
  integer :: my_is, spin, my_ik, ik_glob, ik_ibz, ip
  integer :: my_iq, iq_glob, iq_ibz, my_pert, pert_glob
  integer :: oc_scf, oc_a, oc_b, oc_k, oc_q
-
 !----------------------------------------------------------------------
 
  ! Gather the SCF process evolution data
@@ -1342,9 +1337,8 @@ subroutine varpeq_load(self, dtfil, pselect)
  integer :: units(2)
  real(dp) :: kpt(3)
  real(dp), allocatable :: ak(:), kpts_ld(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: rpt_d2(:,:)
+ real(dp), contiguous, pointer :: rpt_d2(:,:)
  complex(dp), allocatable, target :: a_ld(:,:)
-
 !----------------------------------------------------------------------
 
  call cwtime(cpu, wall, gflops, "start")
@@ -1456,7 +1450,6 @@ subroutine varpeq_solve(self)
  real(dp) :: grad_sqnorm
  real(dp) :: cpu, wall, gflops
  integer :: units(2)
-
 !----------------------------------------------------------------------
 
  units = [std_out, ab_out]
@@ -1554,7 +1547,6 @@ subroutine varpeq_record(self, iter, ip, my_is)
  class(polstate_t), pointer :: polstate
  integer :: spin, psign
  real(dp) :: enel, enph, enelph, eps
-
 !----------------------------------------------------------------------
 
  spin = self%gstore%my_spins(my_is)
@@ -1607,8 +1599,7 @@ subroutine varpeq_init(self, gstore, dtset)
  class(gqk_t), pointer :: gqk
  class(polstate_t), pointer :: polstate
  integer :: ierr, my_is, spin, bstart, bend, my_iq
- real(dp) :: wtq
- real(dp) :: cpu, wall, gflops
+ real(dp) :: wtq, cpu, wall, gflops
  !integer, allocatable :: my_states(:,:), glob_states(:,:)
 !----------------------------------------------------------------------
 
@@ -1835,7 +1826,6 @@ subroutine varpeq_calc_fravg(self, avg_g0)
  real(dp), allocatable :: angweight(:)
  real(dp), allocatable :: e_frohl_mode(:)
  complex(dpc) :: cp3(3)
-
 !----------------------------------------------------------------------
 
  call cwtime(cpu, wall, gflops, "start")
@@ -1935,7 +1925,6 @@ subroutine polstate_free(self)
 
 !Arguments ------------------------------------
  class(polstate_t), intent(inout) :: self
-
 !----------------------------------------------------------------------
 
  ! Free allocatable arrays
@@ -2054,7 +2043,6 @@ subroutine polstate_update_a(self, ip)
 
 !Local variables-------------------------------
  real(dp) :: theta
-
 !----------------------------------------------------------------------
 
  theta = self%get_lm_theta(ip)
@@ -2091,7 +2079,6 @@ subroutine polstate_update_pc(self, ip)
  class(gqk_t), pointer :: gqk
  integer :: my_ik, ik_ibz, ib
  real(dp) :: eps
-
 !----------------------------------------------------------------------
 
  gqk => self%gqk
@@ -2144,7 +2131,6 @@ subroutine polstate_ort_to_states(self, my_v, istart, iend, tr_flag)
  integer :: tr_vec(3), ngkpt_tr(3)
  real(dp) :: kpt(3)
  complex(dp) :: a_tr(self%gqk%nb, self%gqk%my_nk)
-
 !----------------------------------------------------------------------
 
  gqk => self%gqk
@@ -2242,7 +2228,6 @@ real(dp) function polstate_get_lm_theta(self, ip) result(theta)
  complex(dp) :: ak(self%gqk%nb), akq(self%gqk%nb)
  complex(dp) :: dk(self%gqk%nb), dkq(self%gqk%nb)
  complex(dp) :: bq(self%gqk%my_npert)
-
 !----------------------------------------------------------------------
 
  gqk => self%gqk
@@ -2449,7 +2434,6 @@ subroutine polstate_calc_grad(self, ip)
  complex(dp) :: akq(self%gqk%nb), akmq(self%gqk%nb)
  complex(dp) :: bq(self%gqk%my_npert)
  complex(dp), allocatable :: gq_gathered(:,:,:,:)
-
 !----------------------------------------------------------------------
 
  gqk => self%gqk
@@ -2580,7 +2564,6 @@ subroutine polstate_localize(self, ip, alpha)
  class(polstate_t), intent(inout) :: self
  integer, intent(in) :: ip
  real(dp), intent(in) :: alpha
-
 !----------------------------------------------------------------------
 
  ! Calculation of B_qnu requires globally available A_nk
@@ -2638,7 +2621,6 @@ real(dp) function polstate_get_enelph(self, ip) result(enelph)
 !arrays
  real(dp) :: kpt(3), qpt(3), kpq(3)
  complex(dp) :: ak(self%gqk%nb), akq(self%gqk%nb), bq(self%gqk%my_npert)
-
 !----------------------------------------------------------------------
 
  gqk => self%gqk
@@ -2814,7 +2796,6 @@ subroutine polstate_calc_b_from_a(self, ip)
 !arrays
  real(dp) :: qpt(3), kpq(3)
  complex(dp) :: ak(self%gqk%nb), akq(self%gqk%nb)
-
 !----------------------------------------------------------------------
 
  gqk => self%gqk
@@ -2900,7 +2881,6 @@ subroutine polstate_load_a(self, a_src, ip)
  class(gqk_t), pointer :: gqk
  integer :: my_ik, ik_glob, ib
  !complex(dp) :: ank
-
 !----------------------------------------------------------------------
 
  gqk => self%gqk
@@ -2946,7 +2926,6 @@ subroutine polstate_seed_a(self, mode, ip)
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
  integer :: ierr
-
 !----------------------------------------------------------------------
 
  gqk => self%gqk
@@ -3040,7 +3019,6 @@ real(dp) function polstate_get_sqnorm(self, mode, ip) result(sqnorm)
 
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
-
 !----------------------------------------------------------------------
 
  gqk => self%gqk
@@ -3124,7 +3102,6 @@ subroutine polstate_gather(self, mode, ip)
   complex(dp), intent(out) :: glob_arr(:, :)
 
   integer :: ierr, my_ik, ik_glob
-
  !----------------------------------------------------------------------
 
   glob_arr(:, :) = zero
@@ -3172,7 +3149,6 @@ type(krank_t) function polstate_get_krank_glob(self, mode, kptrlatt) result(kran
 !Local variables-------------------------------
 !scalars
  class(gqk_t), pointer :: gqk
-
 !----------------------------------------------------------------------
 
  gqk => self%gqk
@@ -3279,7 +3255,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  real(dp),allocatable :: displ_cart_qbz(:,:,:,:), pheigvec_qbz(:,:,:,:)  !displ_red_qbz(:,:,:,:), displ_cart_qibz(:,:,:,:),
  real(dp),allocatable :: phfreqs_ibz(:,:), pheigvec_cart_ibz(:,:,:,:,:) !, pheigvec_cart_qbz(:,:,:,:)
  real(dp),allocatable :: sc_displ_cart_re(:,:,:,:), sc_displ_cart_im(:,:,:,:)
- real(dp), ABI_CONTIGUOUS pointer :: xcart_ptr(:,:)
+ real(dp), contiguous, pointer :: xcart_ptr(:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  complex(gwpc),allocatable :: ur_k(:,:), ds_ur_k(:,:), pol_wfr(:,:,:), sc_ceikr_1d(:,:)
 !----------------------------------------------------------------------

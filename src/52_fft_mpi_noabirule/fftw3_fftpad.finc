@@ -7,7 +7,7 @@ block
 
 ! *************************************************************************
 
- call zpad_init(zpad,nx,ny,nz,ldx,ldy,ldz,mgfft,gbound)
+ call zpad%init(nx,ny,nz,ldx,ldy,ldz,mgfft,gbound)
 
  nthreads = xomp_get_num_threads(open_parallel=.TRUE.)
 
@@ -26,7 +26,7 @@ block
        ff, (/ldx, ldy, ldz/), 1, ldx, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nt1)
    !$omp end critical
 
-!$OMP PARALLEL DO PRIVATE(dat,line,jj,kk,sidx)
+   !$OMP PARALLEL DO PRIVATE(dat,line,jj,kk,sidx)
    do cnt=0,(zpad%nlinex*ndat)-1
      dat  = 1 + cnt / zpad%nlinex
      line = 1 + MOD(cnt, zpad%nlinex)
@@ -48,7 +48,7 @@ block
        ff, (/ldx, ldy, ldz/), ldx, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nt1)
    !$omp end critical
 
-!$OMP PARALLEL DO PRIVATE(dat,zplane,kk,sidx)
+   !$OMP PARALLEL DO PRIVATE(dat,zplane,kk,sidx)
    do cnt=0,(zpad%n_zplanes*ndat)-1
      dat    = 1 + cnt / zpad%n_zplanes
      zplane = 1 + MOD(cnt, zpad%n_zplanes)
@@ -64,10 +64,10 @@ block
    !
    ! 3) Transform along z.
    if (ndat==1 .or. nthreads==1 .or. MOD(ndat,nthreads)/=0) then
-      !$omp critical
+     !$omp critical
      bw_plan3 = fftw3_plan_many_dft(1, (/nz/), ldx*ldy, & ! We have to visit the entire augmented x-y plane!
          ff, (/ldx, ldy, ldz/), ldx*ldy, 1,            &
-         ff, (/ldx, ldy, ldz/), ldx*ldy, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads) 
+         ff, (/ldx, ldy, ldz/), ldx*ldy, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
      !$omp end critical
 
      do dat=1,ndat
@@ -87,7 +87,7 @@ block
            ff, (/ldx, ldy, ldz/), ldx*ldy, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nt1)
      !$omp end critical
 
-!$OMP PARALLEL DO PRIVATE(sidx)
+     !$OMP PARALLEL DO PRIVATE(sidx)
      do dat=1,ndat
        sidx = 1 + dst*(dat-1)*ldx*ldy*ldz
        call fftw3_execute_dft(bw_plan3, ff(sidx:), ff(sidx:))
@@ -102,7 +102,7 @@ block
      fact = one/(nx*ny*nz)
      call xscal(dst*ldx*ldy*ldz*ndat, fact, ff, 1)
    end if
- 
+
  case (ABI_FFTW_FORWARD) ! R --> G
    !
    ! The prototype for sfftw_plan_many_dft is:
@@ -135,7 +135,7 @@ block
          ff, (/ldx, ldy, ldz/), ldx*ldy, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nt1)
      !$omp end critical
 
-!$OMP PARALLEL DO PRIVATE(sidx)
+     !$OMP PARALLEL DO PRIVATE(sidx)
      do dat=1,ndat
        sidx = 1 + dst*(dat-1) *ldx*ldy*ldz
        call fftw3_execute_dft(fw_plan3, ff(sidx:), ff(sidx:))
@@ -153,7 +153,7 @@ block
        ff, (/ldx, ldy, ldz/), ldx, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nt1)
    !$omp end critical
 
-!$OMP PARALLEL DO PRIVATE(dat,zplane,kk,sidx)
+   !$OMP PARALLEL DO PRIVATE(dat,zplane,kk,sidx)
    do cnt=0,(zpad%n_zplanes*ndat)-1
      dat    = 1 + cnt / zpad%n_zplanes
      zplane = 1 + MOD(cnt, zpad%n_zplanes)
@@ -174,7 +174,7 @@ block
        ff, (/ldx, ldy, ldz/), 1, ldx, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nt1)
    !$omp end critical
 
-!$OMP PARALLEL DO PRIVATE(dat,line,jj,kk,sidx)
+   !$OMP PARALLEL DO PRIVATE(dat,line,jj,kk,sidx)
    do cnt=0,(zpad%nlinex*ndat)-1
      dat  = 1 + cnt / zpad%nlinex
      line = 1 + MOD(cnt, zpad%nlinex)
@@ -193,10 +193,10 @@ block
      fact = one/(nx*ny*nz)
      call xscal(dst*ldx*ldy*ldz*ndat, fact, ff, 1)
    end if
- 
+
  case default
    ABI_BUG("Wrong isign")
  end select
 
- call zpad_free(zpad)
+ call zpad%free()
 end block

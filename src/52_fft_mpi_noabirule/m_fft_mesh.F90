@@ -104,11 +104,10 @@ MODULE m_fft_mesh
    integer,allocatable :: linex2ifft_yz(:,:)
    ! linex2ifft_yz(2,nlinex)
    ! mapping 1D-FFT -> (FFT_index_y, FFT index_z)
-
+ contains
+    procedure :: init => zpad_init
+    procedure :: free => zpad_free
  end type zpad_t
-
- public :: zpad_init
- public :: zpad_free
 !!***
 
 CONTAINS  !========================================================================================
@@ -133,19 +132,17 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine zpad_init(zpad,nx,ny,nz,ldx,ldy,ldz,mgfft,gbound)
+subroutine zpad_init(zpad, nx, ny, nz, ldx, ldy, ldz, mgfft, gbound)
 
 !Arguments ------------------------------------
 !scalars
+ class(zpad_t),intent(out) :: zpad
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,mgfft
- type(zpad_t),intent(out) :: zpad
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2)
 
 !Local variables-------------------------------
-!scalars
  integer :: jj,g3_max,g3_min,gg3,ifft_g3,igb,g2min,g2max,nlinex
-
 ! *************************************************************************
 
  g3_min = gbound(3, 2)
@@ -205,19 +202,14 @@ end subroutine zpad_init
 !!  zpad_free
 !!
 !! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
+!!  Free dynamic memory
 !!
 !! SOURCE
 
 subroutine zpad_free(zpad)
 
 !Arguments ------------------------------------
-!scalars
- type(zpad_t),intent(inout) :: zpad
-
+ class(zpad_t),intent(inout) :: zpad
 ! *************************************************************************
 
  ABI_SFREE(zpad%zplane)
@@ -649,13 +641,13 @@ pure function check_rot_fft(nsym,symrel,nr1,nr2,nr3)
  ! for each symmetry, each n_i and n_j ==> $n_i*R_{ij}/n_j$ is an integer
  check_rot_fft=.TRUE.
  do is=1,nsym
-   if ( MOD(symrel(2,1,is)*nr2, nr1) /=0 .or. &
-&       MOD(symrel(3,1,is)*nr3, nr1) /=0 .or. &
-&       MOD(symrel(1,2,is)*nr1, nr2) /=0 .or. &
-&       MOD(symrel(3,2,is)*nr3, nr2) /=0 .or. &
-&       MOD(symrel(1,3,is)*nr1, nr3) /=0 .or. &
-&       MOD(symrel(2,3,is)*nr2, nr3) /=0      &
-&     ) then
+   if (MOD(symrel(2,1,is)*nr2, nr1) /=0 .or. &
+       MOD(symrel(3,1,is)*nr3, nr1) /=0 .or. &
+       MOD(symrel(1,2,is)*nr1, nr2) /=0 .or. &
+       MOD(symrel(3,2,is)*nr3, nr2) /=0 .or. &
+       MOD(symrel(1,3,is)*nr1, nr3) /=0 .or. &
+       MOD(symrel(2,3,is)*nr2, nr3) /=0      &
+     ) then
      check_rot_fft=.FALSE.; EXIT
    end if
  end do
@@ -704,7 +696,6 @@ function fft_check_rotrans(nsym,symrel,tnons,ngfft,err) result(isok)
 !arrays
  integer :: Rm1(3,3,nsym),r1_FFT(3),red2fft(3,3)
  real(dp) :: Rm1_FFT(3,3,nsym),fft2red(3,3),r2_FFT(3),tnons_FFT(3,nsym)
-
 ! *************************************************************************
 
  ! === Precalculate R^-1 and fractional translations in FFT coordinates ===
@@ -800,9 +791,7 @@ subroutine rotate_fft_mesh(nsym, symrel, tnons, ngfft, irottb, preserve)
  !character(len=500) :: msg
 !arrays
  integer :: Rm1(3,3,nsym),r1_FFT(3),red2fft(3,3)
- real(dp) :: Rm1_FFT(3,3,nsym),err(3,nsym),fft2red(3,3),r2_FFT(3)
- real(dp) :: tnons_FFT(3,nsym)
-
+ real(dp) :: Rm1_FFT(3,3,nsym),err(3,nsym),fft2red(3,3),r2_FFT(3), tnons_FFT(3,nsym)
 ! *************************************************************************
 
  ! === Precalculate R^-1 and fractional translations in FFT coordinates ===
@@ -821,7 +810,7 @@ subroutine rotate_fft_mesh(nsym, symrel, tnons, ngfft, irottb, preserve)
 
  err(:,:) = zero
 
-!$OMP PARALLEL DO PRIVATE(R1_FFT,ir1,R2_FFT,jx,jy,jz) reduction(MAX:err)
+ !$OMP PARALLEL DO PRIVATE(R1_FFT,ir1,R2_FFT,jx,jy,jz) reduction(MAX:err)
  do iz=0,ngfft3-1
    R1_FFT(3) = dble(iz)
    do iy=0,ngfft2-1
@@ -896,7 +885,6 @@ subroutine denpot_project(cplex,  ngfft, nspden, in_rhor, one_symrel, one_tnons,
  logical :: preserve
 !arrays
  integer,allocatable :: irottb(:)
-
 ! *************************************************************************
 
  nfft = product(ngfft(1:3))
@@ -979,8 +967,8 @@ subroutine cigfft(mG0,npwvec,ngfft,gvec,igfft,ierr)
        gmg0(2) = gvec(2,ig)-ig02
        do ig03=-mg0(3),mg0(3)
          gmg0(3) = gvec(3,ig)-ig03
-         ! === Calculate FFT index of G-G0 ===
-         ! * Consider possible wrap around errors.
+         ! Calculate FFT index of G-G0
+         ! Consider possible wrap around errors.
          gmg01=MODULO(gmg0(1),n1)
          gmg02=MODULO(gmg0(2),n2)
          gmg03=MODULO(gmg0(3),n3)
@@ -1185,7 +1173,6 @@ subroutine calc_ceigr_spc(gg, nfft, nspinor, ngfft, ceigr)
  complex(spc),intent(out) :: ceigr(nfft*nspinor)
 
 !Local variables-------------------------------
-!scalars
  integer :: ix,iy,iz,fft_idx,base,isp
  real(dp) :: gdotr
 ! *************************************************************************
@@ -1249,7 +1236,6 @@ subroutine calc_ceigr_dpc(gg, nfft, nspinor, ngfft, ceigr)
  complex(dpc),intent(out) :: ceigr(nfft*nspinor)
 
 !Local variables-------------------------------
-!scalars
  integer :: ix,iy,iz,fft_idx,base,isp
  real(dp) :: gdotr
 ! *************************************************************************
@@ -1548,7 +1534,6 @@ subroutine times_eikr(kk, ngfft, nfft, ndat, ur)
 !Local variables-------------------------------
  integer :: ix,iy,iz,ifft,idat
  real(dp) :: kr, ph(2),val(2)
-
 ! *************************************************************************
 
  if (all(abs(kk) < tol12)) return
@@ -1612,7 +1597,7 @@ end subroutine ctimes_eikr
 !!  ph(2*ngfft)=phase array (complex)
 !!
 !! NOTES
-!! XG 990504 : changed the formulation, in order to preserve
+!! XG 990504: changed the formulation, in order to preserve
 !! the invariance between n and -n, that was broken for n=ngfft/2 if ngfft even.
 !! Simply suppresses the corresponding sine.
 !!
@@ -1627,7 +1612,6 @@ subroutine phase(ngfft, ph)
  real(dp),intent(out) :: ph(2*ngfft)
 
 !Local variables-------------------------------
-!scalars
  integer :: id,ig,nn
  real(dp) :: arg,fac
 ! *************************************************************************
@@ -1641,7 +1625,7 @@ subroutine phase(ngfft, ph)
    ph(2*ig)  =sin(arg)
  end do
 
-!XG 990504 Here zero the corresponding sine
+ ! XG 990504 Here zero the corresponding sine
  if((ngfft/2)*2==ngfft) ph(2*(id-1))=zero
 
 end subroutine phase
@@ -1674,7 +1658,6 @@ subroutine mkgrid_fft(ffti3_local,fftn3_distrib,gridcart,nfft,ngfft,rprimd)
  integer :: n1,n2,n3
  real(dp), dimension(3) :: coord
  real(dp), dimension(3,nfft) :: gridred
-
 ! *************************************************************************
 
  n1    = ngfft(1)
