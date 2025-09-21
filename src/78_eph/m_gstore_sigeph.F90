@@ -95,35 +95,50 @@ module m_gstore_sigeph
 
  type,public :: sep_t
 
-   logical :: imag_only
+  integer :: nwr = 0
+   ! Number of frequency points along the real axis for Sigma(w) and spectral function A(w)
+   ! Odd number so that the mesh is centered on the KS energy.
+   ! The spectral function is computed only if nwr > 0 (taken from dtset%nfreqsp)
 
-   real(dp),allocatable :: kTmesh(:)
-   ! kTmesh(ntemp)
-   ! List of temperatures (kT units).
+  integer :: ntemp = 0
+  ! Number of temperatures.
 
-   real(dp),allocatable :: mu_e(:)
-   ! mu_e(ntemp)
-   ! chemical potential of electrons for the different temperatures.
+  logical :: imag_only
 
-   complex(dp),allocatable :: vals_e0ks(:,:,:)
-   ! Sigma_eph(omega=eKS, kT, band) for given (ikcalc, spin).
-   ! Fan-Migdal + Debye-Waller
+  real(dp) :: wr_step
+   ! Step of the linear mesh along the real axis (Ha units).
 
-   complex(dp),allocatable :: fan_vals(:,:,:)
-   ! (ntemp, nb_k, nkcalc)
-   ! Fan-Migdal
+  complex(dp) :: ieta = zero
+   ! Used to shift the poles in the complex plane (Ha units)
+   ! Corresponds to `i eta` term in equations.
 
-   !complex(dp),allocatable :: fan_stern_vals(:,:,:)
-   ! (ntemp, nb_k, nkcalc)
-   ! Fan-Migdal adiabatic Sternheimer part
+  real(dp),allocatable :: kTmesh(:)
+  ! kTmesh(ntemp)
+  ! List of temperatures (kT units).
 
-   complex(dp),allocatable :: dvals_de0ks(:,:,:)
-   ! (ntemp, nb_k, nkcalc)
-   ! d Re Sigma_eph(omega, kT, band, kcalc) / d omega (omega=eKS)
+  real(dp),allocatable :: mu_e(:)
+  ! mu_e(ntemp)
+  ! chemical potential of electrons for the different temperatures.
 
-   real(dp),allocatable :: dw_vals(:,:,:)
-   !  dw_vals(ntemp, nb_k, nkcalc) for given (ikcalc, spin)
-   !  Debye-Waller term (static).
+  complex(dp),allocatable :: vals_e0ks(:,:,:)
+  ! Sigma_eph(omega=eKS, kT, band) for given (ikcalc, spin).
+  ! Fan-Migdal + Debye-Waller
+
+  complex(dp),allocatable :: fan_vals(:,:,:)
+  ! (ntemp, nb_k, nkcalc)
+  ! Fan-Migdal
+
+  !complex(dp),allocatable :: fan_stern_vals(:,:,:)
+  ! (ntemp, nb_k, nkcalc)
+  ! Fan-Migdal adiabatic Sternheimer part
+
+  complex(dp),allocatable :: dvals_de0ks(:,:,:)
+  ! (ntemp, nb_k, nkcalc)
+  ! d Re Sigma_eph(omega, kT, band, kcalc) / d omega (omega=eKS)
+
+  real(dp),allocatable :: dw_vals(:,:,:)
+  !  dw_vals(ntemp, nb_k, nkcalc) for given (ikcalc, spin)
+  !  Debye-Waller term (static).
 
   !real(dp),allocatable :: dw_stern_vals(:,:,:)
    !  dw_stern_vals(ntemp, nb_k, nkcalc)
@@ -189,18 +204,18 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
 !Local variables-------------------------------
  integer,parameter :: master = 0, with_cplex1 = 1, max_ntemp = 50, cplex1 = 1, pawread0 = 0
  integer :: n1, n2, n3, n4, n5, n6, nb_k, nb_kq, bstart_k, bstart_kq
- integer :: spin, my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, ntemp, gap_err, my_rank, ip1, ip2
+ integer :: spin, my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, gap_err, my_rank, ip1, ip2
  integer :: it, ik_bz, ik_ibz, ikq_ibz, band_k, band_kq, timrev_k, ii, ikcalc, natom, natom3, nsppol
  integer :: nfft, nfftf, mgfft, mgfftf !,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart, enough_stern
  real(dp) :: wqnu, gkq2, weight_q, eig0nk, eig0mk, eig0mkq, ediff, gmod2, hmod2, gdw2, gdw2_stern, rtmp !,nqnu,gkq2,gkq2_pf,
  !real(dp) :: cpu, wall, gflops
  logical :: q_is_gamma, intra_band, same_band
- complex(dp) :: ieta, cfact !, sig_cplx
+ complex(dp) :: cfact !, sig_cplx
  character(len=5000) :: msg
  type(gaps_t) :: gaps
  type(lgroup_t) :: lg_myk
  type(gstore_t) :: gstore
- type(sep_t) :: sep
+ type(sep_t) :: sigma
  type(stern_t) :: stern
  type(hdr_type) :: pot_hdr
  type(crystal_t) :: pot_cryst
@@ -221,7 +236,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
 
  call wrtout(std_out, " Computing Fan-Migdal + DW self-energy from GSTORE.nc", pre_newlines=1)
  natom = cryst%natom; natom3 = 3 * cryst%natom; nsppol = gstore%nsppol
- sep%imag_only = .False.
+ sigma%imag_only = .False.
 
  ! The Fan-Migdal SE requires |g(k,q)| in the phonon representation but
  ! to compute the DW term in the RIA, we need complex g in the atom representation.
@@ -254,14 +269,14 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
  n4 = ngfft(4); n5 = ngfft(5); n6 = ngfft(6)
 
  ! Build (linear) mesh of K * temperatures. tsmesh(1:3) = [start, step, num]
- call dtset%get_ktmesh(ntemp, sep%kTmesh)
+ call dtset%get_ktmesh(sigma%ntemp, sigma%kTmesh)
 
  ! Compute the chemical potential at the different physical temperatures with Fermi-Dirac.
  ! TODO: One should check that nband is > nbocc to avoid inaccuracies in mu_e.
- ABI_MALLOC(sep%mu_e, (ntemp))
- sep%mu_e(:) = ebands%fermie
+ ABI_MALLOC(sigma%mu_e, (sigma%ntemp))
+ sigma%mu_e(:) = ebands%fermie
  if (dtset%eph_fermie == zero) then
-   call ebands%get_muT_with_fd(ntemp, sep%ktmesh, dtset%spinmagntarget, dtset%prtvol, sep%mu_e, gstore%comm)
+   call ebands%get_muT_with_fd(sigma%ntemp, sigma%ktmesh, dtset%spinmagntarget, dtset%prtvol, sigma%mu_e, gstore%comm)
  end if
 
  gaps = ebands%get_gaps(gap_err)
@@ -270,18 +285,27 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
  end if
 
  if (my_rank == master) then
-   call gaps%print(units, kTmesh=sep%ktmesh, mu_e=sep%mu_e, &
+   call gaps%print(units, kTmesh=sigma%ktmesh, mu_e=sigma%mu_e, &
                    header="Gaps, band edges and relative position wrt Fermi level")
  end if
  call gaps%free()
 
- ABI_MALLOC(nqnu, (ntemp))
- !ABI_MALLOC(f_nk, (ntemp))
- ABI_MALLOC(f_mkq, (ntemp))
- ABI_MALLOC(cfact_t, (ntemp))
- ABI_MALLOC(rfact_t, (ntemp))
+ ! Frequency mesh for sigma(w) and spectral functions.
+ ! Use GW variables but change default values
+ sigma%nwr = dtset%nfreqsp; sigma%wr_step = zero
+ if (sigma%nwr > 0) then
+   if (mod(sigma%nwr, 2) == 0) sigma%nwr = sigma%nwr + 1
+   sigma%wr_step = two * eV_Ha / (sigma%nwr - 1)
+   if (dtset%freqspmax /= zero) sigma%wr_step = dtset%freqspmax / (sigma%nwr - 1)
+ end if
 
- ieta = + j_dpc * dtset%zcut
+ ABI_MALLOC(nqnu, (sigma%ntemp))
+ !ABI_MALLOC(f_nk, (sigma%ntemp))
+ ABI_MALLOC(f_mkq, (sigma%ntemp))
+ ABI_MALLOC(cfact_t, (sigma%ntemp))
+ ABI_MALLOC(rfact_t, (sigma%ntemp))
+
+ sigma%ieta = + j_dpc * dtset%zcut
 
  ! Check consistency of little group options
  ABI_CHECK(gstore%check_little_group(dtset, msg) == 0, msg)
@@ -300,9 +324,9 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
    NOT_IMPLEMENTED_ERROR()
  end if
 
- ! Compute electronic occ for all Temps (note sep%mu_e(it) Fermi level)
- !do it=1,ntemp
- !  f_nk(it) = occ_fd(eig0nk, sep%kTmesh(it), sep%mu_e(it))
+ ! Compute electronic occ for all Temps (note sigma%mu_e(it) Fermi level)
+ !do it=1,sigma%ntemp
+ !  f_nk(it) = occ_fd(eig0nk, sigma%kTmesh(it), sigma%mu_e(it))
  !end do ! it
 
  ABI_MALLOC(displ_nu_cart, (2, 3, natom))
@@ -324,10 +348,10 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
    ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
    ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
 
-   ABI_CALLOC(sep%vals_e0ks, (ntemp, nb_k, gqk%glob_nk))
-   ABI_CALLOC(sep%dvals_de0ks, (ntemp, nb_k, gqk%glob_nk))
-   ABI_CALLOC(sep%fan_vals, (ntemp, nb_k, gqk%glob_nk))
-   ABI_CALLOC(sep%dw_vals, (ntemp, nb_k, gqk%glob_nk))
+   ABI_CALLOC(sigma%vals_e0ks, (sigma%ntemp, nb_k, gqk%glob_nk))
+   ABI_CALLOC(sigma%dvals_de0ks, (sigma%ntemp, nb_k, gqk%glob_nk))
+   ABI_CALLOC(sigma%fan_vals, (sigma%ntemp, nb_k, gqk%glob_nk))
+   ABI_CALLOC(sigma%dw_vals, (sigma%ntemp, nb_k, gqk%glob_nk))
 
    ! Loop over k-points in |n,k>
    do my_ik=1,gqk%my_nk
@@ -365,7 +389,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
          ! Ignore unstable modes or modes that should be skipped.
          if (wqnu < EPHTK_WTOL) cycle
 
-         nqnu(:) = occ_be(wqnu, sep%kTmesh, zero)
+         nqnu(:) = occ_be(wqnu, sigma%kTmesh, zero)
          !print *, "wqnu", wqnu
 
          ! FIXME: Not sure this is correct!
@@ -386,8 +410,8 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
            eig0mkq = ebands%eig(band_kq, ikq_ibz, spin)
 
            ! Compute electronic occ for all Temps (note mu_e(it) Fermi level)
-           do it=1,ntemp
-             f_mkq(it) = occ_fd(eig0mkq, sep%kTmesh(it), sep%mu_e(it))
+           do it=1,sigma%ntemp
+             f_mkq(it) = occ_fd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
            end do
 
            ! Loop over the n index in |n,k>.
@@ -399,18 +423,18 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
              !same_band = ibsum_kq == band_k
 
              if (dtset%eph_ahc_type == 1) then
-               cfact_t(:) =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + ieta) + &
-                             (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + ieta)
+               cfact_t(:) =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) + &
+                             (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta)
              else
-               cfact_t(:) =  (two * nqnu + one) / (eig0nk - eig0mkq + ieta)
+               cfact_t(:) =  (two * nqnu + one) / (eig0nk - eig0mkq + sigma%ieta)
              end if
 
              ! Re + Im of Fan-Migdal self-energy
              ! (my_npert, nb_kq, my_nq, nb_k, my_nk)
              gkq2 = weight_q * gqk%my_g2(my_ip, im_kq, my_iq, in_k, my_ik)
              cfact_t = cfact_t * gkq2
-             sep%vals_e0ks(:, in_k, ikcalc) = sep%vals_e0ks(:, in_k, ikcalc) + cfact_t
-             sep%fan_vals(:, in_k, ikcalc) = sep%fan_vals(:, in_k, ikcalc) + cfact_t
+             sigma%vals_e0ks(:, in_k, ikcalc) = sigma%vals_e0ks(:, in_k, ikcalc) + cfact_t
+             sigma%fan_vals(:, in_k, ikcalc) = sigma%fan_vals(:, in_k, ikcalc) + cfact_t
 
              !print *, "gkq2", gkq2
 
@@ -420,10 +444,10 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
              !            (nqnu - f_mkq + one) / (x - eig0mkq - wqnu + sigma%ieta)
              gmod2 = (eig0nk - eig0mkq + wqnu) ** 2
              hmod2 = (eig0nk - eig0mkq - wqnu) ** 2
-             rfact_t(:) = (nqnu + f_mkq      ) * (-gmod2 + aimag(ieta)**2) / (gmod2 + aimag(ieta)**2) ** 2 + &
-                        (nqnu - f_mkq + one) * (-hmod2 + aimag(ieta)**2) / (hmod2 + aimag(ieta)**2) ** 2
+             rfact_t(:) = (nqnu + f_mkq      ) * (-gmod2 + aimag(sigma%ieta)**2) / (gmod2 + aimag(sigma%ieta)**2) ** 2 + &
+                        (nqnu - f_mkq + one) * (-hmod2 + aimag(sigma%ieta)**2) / (hmod2 + aimag(sigma%ieta)**2) ** 2
 
-             sep%dvals_de0ks(:, in_k, ikcalc) = sep%dvals_de0ks(:, in_k, ikcalc) + gkq2 * rfact_t
+             sigma%dvals_de0ks(:, in_k, ikcalc) = sigma%dvals_de0ks(:, in_k, ikcalc) + gkq2 * rfact_t
 
              ! Compute DW term following XG paper. Check prefactor.
              ! gkq0_atm(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
@@ -453,12 +477,12 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
              ! Accumulate DW for each T, add it to Sigma(e0) and Sigma(w) as well
              ! - (2 n_{q\nu} + 1) * gdw2 / (e_nk - e_mk)
              if (abs(ediff) > EPHTK_WTOL) then
-               cfact_t(:) = - weight_q * gdw2 * (two * nqnu + one)  / (ediff + ieta)
+               cfact_t(:) = - weight_q * gdw2 * (two * nqnu + one)  / (ediff + sigma%ieta)
              else
                cfact_t(:) = zero
              endif
-             sep%dw_vals(:, in_k, ikcalc) = sep%dw_vals(:, in_k, ikcalc) + real(cfact_t)
-             sep%vals_e0ks(:, in_k, ikcalc) = sep%vals_e0ks(:, in_k, ikcalc) + real(cfact_t)
+             sigma%dw_vals(:, in_k, ikcalc) = sigma%dw_vals(:, in_k, ikcalc) + real(cfact_t)
+             sigma%vals_e0ks(:, in_k, ikcalc) = sigma%vals_e0ks(:, in_k, ikcalc) + real(cfact_t)
            end do ! in_k
 
          end do ! im_kq
@@ -469,11 +493,11 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
 
    ! TODO: Sternheimer with KS states.
 
-   call sep%gather_and_write_results(ntemp, gstore, gqk, dtset, ebands)
+   call sigma%gather_and_write_results(gstore, gqk, dtset, ebands)
    end associate
  end do ! my_is
 
- call sep%free()
+ call sigma%free()
 
  ABI_FREE(nqnu)
  !ABI_FREE(f_nk)
@@ -506,11 +530,10 @@ end subroutine gstore_sigeph
 !!
 !! SOURCE
 
-subroutine sep_gather_and_write_results(sep, ntemp, gstore, gqk, dtset, ebands)
+subroutine sep_gather_and_write_results(sigma, gstore, gqk, dtset, ebands)
 
 !Local variables-------------------------------
- class(sep_t),intent(inout) :: sep
- integer,intent(in) :: ntemp
+ class(sep_t),intent(inout) :: sigma
  type(gstore_t),intent(in) :: gstore
  type(gqk_t),intent(in) :: gqk
  type(ebands_t),intent(in) :: ebands
@@ -531,21 +554,21 @@ subroutine sep_gather_and_write_results(sep, ntemp, gstore, gqk, dtset, ebands)
  !integer, allocatable :: recvcounts(:), displs(:), nq_rank(:), kq_symtab(:,:), my_kq_symtab(:,:)
  integer,allocatable :: degblock(:,:)
  !integer, contiguous, pointer :: bids(:)
- real(dp) :: qp_gaps(ntemp),qpoms_gaps(ntemp)
+ real(dp) :: qp_gaps(sigma%ntemp),qpoms_gaps(sigma%ntemp)
  !real(dp),allocatable :: aw(:,:,:), a2few_avg(:,:), gather_srate(:,:,:,:), grp_srate(:,:,:,:)
- real(dp) :: ks_enes(gqk%nb), ze0_vals(ntemp, gqk%nb)
+ real(dp) :: ks_enes(gqk%nb), ze0_vals(sigma%ntemp, gqk%nb)
  !real(dp) :: gfw_avg(self%phmesh_size, 3)
- complex(dp) :: qpoms_enes(ntemp, gqk%nb),qp_enes(ntemp, gqk%nb) ! nb_k
+ complex(dp) :: qpoms_enes(sigma%ntemp, gqk%nb),qp_enes(sigma%ntemp, gqk%nb) ! nb_k
 !! *************************************************************************
 
  !print *, "in print results"
  spin = gqk%spin; nb_k = gqk%nb
 
  ! Sum partial terms inside qgk%comm.
- call xmpi_sum(sep%vals_e0ks, gqk%comm%value, ierr)
- call xmpi_sum(sep%dvals_de0ks, gqk%comm%value, ierr)
- call xmpi_sum(sep%fan_vals, gqk%comm%value, ierr)
- call xmpi_sum(sep%dw_vals, gqk%comm%value, ierr)
+ call xmpi_sum(sigma%vals_e0ks, gqk%comm%value, ierr)
+ call xmpi_sum(sigma%dvals_de0ks, gqk%comm%value, ierr)
+ call xmpi_sum(sigma%fan_vals, gqk%comm%value, ierr)
+ call xmpi_sum(sigma%dw_vals, gqk%comm%value, ierr)
 
  this_gtype = "KS"
  if (gstore%gtype == "gwpt" .and. dtset%gstore_gname == "gvals") this_gtype = "GWPT"
@@ -612,21 +635,21 @@ subroutine sep_gather_and_write_results(sep, ntemp, gstore, gqk, dtset, ebands)
      do ideg=1,size(degtab%bids)
        associate (bids => degtab%bids(ideg)%vals)
        nstates = size(bids)
-       do it=1,ntemp
+       do it=1,sigma%ntemp
          ! Average QP(T) and Z(T).
-         cavg1 = sum(sep%vals_e0ks(it, bids(:), ikcalc)) / nstates
-         cavg2 = sum(sep%dvals_de0ks(it, bids(:), ikcalc)) / nstates
-         cavg3 = sum(sep%fan_vals(it, bids(:), ikcalc)) / nstates
-         !cavg4 = sum(sep%fan_stern_vals(it, bids(:), ikcalc)) / nstates
-         ravg = sum(sep%dw_vals(it, bids(:), ikcalc)) / nstates
-         !ravg2 = sum(sep%dw_stern_vals(it, bids(:), ikcalc)) / nstates
+         cavg1 = sum(sigma%vals_e0ks(it, bids(:), ikcalc)) / nstates
+         cavg2 = sum(sigma%dvals_de0ks(it, bids(:), ikcalc)) / nstates
+         cavg3 = sum(sigma%fan_vals(it, bids(:), ikcalc)) / nstates
+         !cavg4 = sum(sigma%fan_stern_vals(it, bids(:), ikcalc)) / nstates
+         ravg = sum(sigma%dw_vals(it, bids(:), ikcalc)) / nstates
+         !ravg2 = sum(sigma%dw_stern_vals(it, bids(:), ikcalc)) / nstates
          do ii=1,nstates
-           sep%vals_e0ks(it, bids(ii), ikcalc) = cavg1
-           sep%dvals_de0ks(it, bids(ii), ikcalc) = cavg2
-           sep%fan_vals(it, bids(ii), ikcalc) = cavg3
-           !sep%fan_stern_vals(it, bids(ii), ikcalc) = cavg4
-           sep%dw_vals(it, bids(ii), ikcalc) = ravg
-           !sep%dw_stern_vals(it, bids(ii), ikcalc) = ravg2
+           sigma%vals_e0ks(it, bids(ii), ikcalc) = cavg1
+           sigma%dvals_de0ks(it, bids(ii), ikcalc) = cavg2
+           sigma%fan_vals(it, bids(ii), ikcalc) = cavg3
+           !sigma%fan_stern_vals(it, bids(ii), ikcalc) = cavg4
+           sigma%dw_vals(it, bids(ii), ikcalc) = ravg
+           !sigma%dw_stern_vals(it, bids(ii), ikcalc) = ravg2
          end do
        end do ! it
        end associate
@@ -642,19 +665,19 @@ subroutine sep_gather_and_write_results(sep, ntemp, gstore, gqk, dtset, ebands)
    ks_gap = -one; qpoms_gaps = -one; qp_gaps = -one
 
    ! Loop over temperatures.
-   do it=1,ntemp
+   do it=1,sigma%ntemp
      ! Write header.
      if (it <= max_ntemp) then
        if (ebands%nsppol == 1) then
          write(ab_out,"(3a,f6.1,a,f8.3)") &
-           "K-point: ", trim(ktoa(kcalc)), ", T: ", sep%kTmesh(it) / kb_HaK, &
-           " [K], mu_e: ", sep%mu_e(it) * Ha_eV
+           "K-point: ", trim(ktoa(kcalc)), ", T: ", sigma%kTmesh(it) / kb_HaK, &
+           " [K], mu_e: ", sigma%mu_e(it) * Ha_eV
        else
          write(ab_out,"(3a,i1,a,f6.1,a,f8.3)") &
-           "K-point: ", trim(ktoa(kcalc)), ", spin: ", spin, ", T: ",sep%kTmesh(it) / kb_HaK, &
-           " [K], mu_e: ", sep%mu_e(it) * Ha_eV
+           "K-point: ", trim(ktoa(kcalc)), ", spin: ", spin, ", T: ",sigma%kTmesh(it) / kb_HaK, &
+           " [K], mu_e: ", sigma%mu_e(it) * Ha_eV
        end if
-       if (sep%imag_only) then
+       if (sigma%imag_only) then
          write(ab_out,"(a)")"   B    eKS    SE2(eKS)  TAU(eKS)  DeKS"
        else
          write(ab_out,"(a)")"   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP"
@@ -667,13 +690,13 @@ subroutine sep_gather_and_write_results(sep, ntemp, gstore, gqk, dtset, ebands)
        band_k = in_k - bstart_k + 1
        kse = ebands%eig(band_k, ik_ibz, spin)
        ks_enes(in_k) = kse
-       sig0c = sep%vals_e0ks(it, in_k, ikcalc)
-       dw = sep%dw_vals(it, in_k, ikcalc)
+       sig0c = sigma%vals_e0ks(it, in_k, ikcalc)
+       dw = sigma%dw_vals(it, in_k, ikcalc)
        fan0 = real(sig0c) - dw
        ! Compute QP energies with On-the-Mass-Shell approximation and first renormalization i.e. Z(eKS)
        ! TODO: Note that here I use the full Sigma including the imaginary part
-       !zc = one / (one - sep%dvals_de0ks(it, in_k))
-       zc = one / (one - real(sep%dvals_de0ks(it, in_k, ikcalc)))
+       !zc = one / (one - sigma%dvals_de0ks(it, in_k))
+       zc = one / (one - real(sigma%dvals_de0ks(it, in_k, ikcalc)))
        ze0_vals(it, in_k) = real(zc)
        qpe = kse + real(zc) * real(sig0c)
        qpe_oms = kse + real(sig0c)
@@ -688,7 +711,7 @@ subroutine sep_gather_and_write_results(sep, ntemp, gstore, gqk, dtset, ebands)
        end if
 
        if (it <= max_ntemp) then
-         if (sep%imag_only) then
+         if (sigma%imag_only) then
            ! 1/tau  = 2 Imag(Sigma)
            !invsig2fmts = Time_Sec * 1e+15 / two
            !tau = 999999.0_dp
@@ -719,7 +742,7 @@ subroutine sep_gather_and_write_results(sep, ntemp, gstore, gqk, dtset, ebands)
 
      ! Print KS and QP gaps.
      if (it <= max_ntemp) then
-       if (.not. sep%imag_only) then
+       if (.not. sigma%imag_only) then
          if (kse_val /= huge(one) * tol6 .and. kse_cond /= huge(one) * tol6) then
            write(ab_out, "(a)")" "
            write(ab_out, "(a,f8.3,1x,2(a,i0),a)")" KS gap: ",ks_gap * Ha_eV, &
@@ -742,7 +765,7 @@ subroutine sep_gather_and_write_results(sep, ntemp, gstore, gqk, dtset, ebands)
    end do ! it
  end do ! ikcalc
 
- if (ntemp > max_ntemp) then
+ if (sigma%ntemp > max_ntemp) then
    write(ab_out, "(a,i0,a)")" No more than ", max_ntemp, " temperatures are written to the main output file."
    write(ab_out, "(2a)")" Please use SIGEPH.nc file and AbiPy to analyze the results.",ch10
  end if
@@ -755,7 +778,7 @@ end subroutine sep_gather_and_write_results
 
 !----------------------------------------------------------------------
 
-!!****f* m_gstore_sigeph/gstore_sigeph
+!!****f* m_gstore_sigeph/sep_free
 !! NAME
 !!  sep_free
 !!
@@ -764,18 +787,18 @@ end subroutine sep_gather_and_write_results
 !!
 !! SOURCE
 
-subroutine sep_free(sep)
+subroutine sep_free(sigma)
 
 !Arguments ------------------------------------
- class(sep_t),intent(inout) :: sep
+ class(sep_t),intent(inout) :: sigma
 ! *********************************************************************
 
- ABI_SFREE(sep%kTmesh)
- ABI_SFREE(sep%mu_e)
- ABI_SFREE(sep%vals_e0ks)
- ABI_SFREE(sep%dvals_de0ks)
- ABI_SFREE(sep%fan_vals)
- ABI_SFREE(sep%dw_vals)
+ ABI_SFREE(sigma%kTmesh)
+ ABI_SFREE(sigma%mu_e)
+ ABI_SFREE(sigma%vals_e0ks)
+ ABI_SFREE(sigma%dvals_de0ks)
+ ABI_SFREE(sigma%fan_vals)
+ ABI_SFREE(sigma%dw_vals)
 
 end subroutine sep_free
 !!***

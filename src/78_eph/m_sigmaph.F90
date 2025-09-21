@@ -2645,8 +2645,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  gaps = ebands%get_gaps(gap_err)
 
  ! Frequency mesh for sigma(w) and spectral functions.
- ! TODO: Use GW variables but change default
- !dtset%freqspmin
+ ! Use GW variables but change default values
  new%nwr = dtset%nfreqsp; new%wr_step = zero
  if (new%nwr > 0) then
    if (mod(new%nwr, 2) == 0) new%nwr = new%nwr + 1
