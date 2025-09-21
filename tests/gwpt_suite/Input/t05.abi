@@ -25,7 +25,7 @@
  gstore_use_lgk  0
  #gstore_use_lgk  1
  #gstore_gname "gvals"
- #gstore_gname "gvals_ks"
+ gstore_gname "gvals_ks"
  tmesh 300 100 1
 
  ddb_ngqpt 2 2 2          # The code expects to find in the DDB
