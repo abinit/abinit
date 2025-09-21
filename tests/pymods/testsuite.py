@@ -2145,7 +2145,7 @@ pp_dirpath $ABI_PSPDIR
                 if status == "failed" and (self.exclude_hosts or self.exclude_builders):
                     cprint("\tTest `%s` with keywords: `%s` failed." %
                            (self.full_id, str(self.keywords)), color="yellow")
-                    cprint("\tNote however that this feature is not portable", color="yellow")
+                    cprint("\tNote, however, that this feature is not portable", color="yellow")
                     cprint("\tand this test is partly disabled on the Abinit testfarm.", color="yellow")
                     if self.exclude_hosts:
                         cprint("\t\texclude_hosts: %s" % str(self.exclude_hosts), color="yellow")

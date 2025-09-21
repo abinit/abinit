@@ -28,11 +28,8 @@ module m_gstore_sigeph
  use m_abicore
  use m_xmpi
  use m_errors
- !use m_htetra
- !use libtetrabz
  use netcdf
  use m_nctk
- !use m_ddb
  !use m_dvdb
  use m_crystal,        only : crystal_t
  !use m_hamiltonian
@@ -57,7 +54,6 @@ module m_gstore_sigeph
  !use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack
  use m_ifc,            only : ifc_type
  use m_dfpt_cgwf,      only : stern_t
- !use m_phonons,        only : pheigvec_rotate
  !use m_pawang,         only : pawang_type
  !use m_pawrad,         only : pawrad_type
  !use m_pawtab,         only : pawtab_type
@@ -251,7 +247,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
    ABI_ERROR_NOSTOP("gstore_sigeph assumes qzone == `bz`", ierr)
  end if
  if (gstore%has_used_lgk /= 0) then
-   ABI_ERROR_NOSTOP("The varpeq formalism does not support use_lgk /=0 .", ierr)
+   ABI_ERROR_NOSTOP("gstore_sigeph formalism does not support use_lgk /=0 .", ierr)
  end if
  if (gstore%has_used_lgq /= 0) then
    ABI_ERROR_NOSTOP("gstore_sigeph does not support use_lgq /=0 .", ierr)
@@ -263,6 +259,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
      'In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
    ABI_ERROR(msg)
  end if
+
  ! Check consistency of little group options
  ABI_CHECK(gstore%check_little_group(dtset, msg) == 0, msg)
 
@@ -339,8 +336,8 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
  do my_is=1,gstore%my_nspins
    associate (gqk => gstore%gqk(my_is), cryst => gstore%cryst)
    spin = gstore%my_spins(my_is)
-   nb_k = gqk%nb; nb_kq = gqk%nb
-   bstart_k = gqk%bstart; bstart_kq = gqk%bstart
+   nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
+   bstart_k = gqk%bstart_k; bstart_kq = gqk%bstart_kq
 
    ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
    ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
@@ -431,11 +428,10 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
              ! Re + Im of Fan-Migdal self-energy
              ! (my_npert, nb_kq, my_nq, nb_k, my_nk)
              gkq2 = weight_q * gqk%my_g2(my_ip, im_kq, my_iq, in_k, my_ik)
+             !print *, "gkq2", gkq2
              cfact_t = cfact_t * gkq2
              sigma%vals_e0ks(:, in_k, ikcalc) = sigma%vals_e0ks(:, in_k, ikcalc) + cfact_t
              sigma%fan_vals(:, in_k, ikcalc) = sigma%fan_vals(:, in_k, ikcalc) + cfact_t
-
-             !print *, "gkq2", gkq2
 
              ! Derivative of sigma
              ! Accumulate d(Re Sigma) / dw(w=eKS) for state in_k
@@ -544,7 +540,7 @@ subroutine sep_gather_and_write_results(sigma, gstore, gqk, dtset, ebands)
  !integer :: nq_ibzk_eff, nelem, imyq, iq_ibz_k, sr_ncid
  logical :: changed !, iwrite
  real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond,qpe_oms,qpe_oms_val,qpe_oms_cond
- real(dp) :: ravg2 ! invsig2fmts, tau,
+ real(dp) :: ravg2 ! invsig2fmts, tau
  complex(dp) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2,cavg3,cavg4
  character(len=500) :: this_gtype ! msg
  !integer :: grp_ncid, ncerr
@@ -555,12 +551,12 @@ subroutine sep_gather_and_write_results(sigma, gstore, gqk, dtset, ebands)
  integer,allocatable :: degblock(:,:)
  real(dp) :: qp_gaps(sigma%ntemp),qpoms_gaps(sigma%ntemp)
  !real(dp),allocatable :: aw(:,:,:), a2few_avg(:,:), gather_srate(:,:,:,:), grp_srate(:,:,:,:)
- real(dp) :: ks_enes(gqk%nb), ze0_vals(sigma%ntemp, gqk%nb)
+ real(dp) :: ks_enes(gqk%nb_k), ze0_vals(sigma%ntemp, gqk%nb_k)
  !real(dp) :: gfw_avg(sigma%phmesh_size, 3)
- complex(dp) :: qpoms_enes(sigma%ntemp, gqk%nb),qp_enes(sigma%ntemp, gqk%nb) ! nb_k
+ complex(dp) :: qpoms_enes(sigma%ntemp, gqk%nb_k),qp_enes(sigma%ntemp, gqk%nb_k) ! nb_k
 !! *************************************************************************
 
- spin = gqk%spin; nb_k = gqk%nb
+ spin = gqk%spin; nb_k = gqk%nb_k
 
  ! Sum partial terms inside qgk%comm.
  call xmpi_sum(sigma%vals_e0ks, gqk%comm%value, ierr)
@@ -606,12 +602,12 @@ subroutine sep_gather_and_write_results(sigma, gstore, gqk, dtset, ebands)
      ! We will have to average the QP corrections over degenerate states if symsigma=1 is used.
      ! Here we make sure that all the degenerate states are included.
      ! Store also band indices of the degenerate sets, used to average final results.
-     bstart_k = gqk%bstart; bstop_k = gqk%bstop
+     bstart_k = gqk%bstart_k; bstop_k = gqk%bstop_k
      call ebands%enclose_degbands(ik_ibz, spin, bstart_k, bstop_k, changed, TOL_EDIFF, degblock=degblock)
      !if (changed) then
      !  ABI_WARNING("Changed")
      !end if
-     bstart_k = gqk%bstart; bstop_k = gqk%bstop
+     bstart_k = gqk%bstart_k; bstop_k = gqk%bstop_k
 
      ! Store band indices used for averaging (shifted by bstart_k)
      ndeg = size(degblock, dim=2)
@@ -767,8 +763,7 @@ subroutine sep_gather_and_write_results(sigma, gstore, gqk, dtset, ebands)
    write(ab_out, "(2a)")" Please use SIGEPH.nc file and AbiPy to analyze the results.",ch10
  end if
 
- call wrtout(std_out, "gstore_sigeph ended OK")
- !stop
+ !stop; call wrtout(std_out, "gstore_sigeph ended OK")
 
 end subroutine sep_gather_and_write_results
 !!***

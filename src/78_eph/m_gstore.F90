@@ -200,12 +200,6 @@ type, public :: gqk_t
   ! 3 * natom
   ! Mainly used to dimension arrays
 
-  ! TODO
-  ! These new entries will be used to implement band distribution
-  !integer :: m_start = -1, m_stop = -1, m_nb = -1
-  !integer :: n_start = -1, n_stop = -1, n_nb = -1
-  !integer :: nb_kq, nb_k
-
   integer :: nb = -1
   ! Number of bands included in the calculation for this spin
   ! Global as this dimension is not MPI-distributed due to (m, n) pairs.
@@ -214,6 +208,12 @@ type, public :: gqk_t
   integer :: bstart = -1, bstop = -1
   ! The first band starts at bstart.
   ! The last band is bstop (NB: These are global indices)
+
+  ! TODO
+  ! These new entries will be used to implement band distribution
+  integer :: nb_kq = -1, nb_k = -1
+  integer :: bstart_k = -1, bstop_k = -1
+  integer :: bstart_kq = -1, bstop_kq = -1
 
   integer :: my_npert = -1
   ! Number of perturbations treated by this MPI rank.
@@ -441,7 +441,10 @@ type, public :: gstore_t
   ! Possible values: "none", "fs_tetra", "erange", "qprange"
 
   character(len=abi_slen) :: gmode = "none"
+  ! "phonon" or "atom"
+
   character(len=abi_slen) :: gtype = "KS"
+  ! Formalism used to compute g(k,q). Either KS or GWPT
 
   real(dp),allocatable :: erange_spin(:, :)
   ! (2, nsppol)
@@ -628,8 +631,6 @@ contains
 !!
 !! INPUTS
 !! path=Filename of the output GSTORE.nc file
-!!
-!! OUTPUT
 !!
 !! SOURCE
 
@@ -1042,7 +1043,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      ncerr = nctk_def_iscalars(spin_ncid, [character(len=nctk_slen) :: "bstart"])
      NCF_CHECK(ncerr)
 
-     ! arrays in gqk_spin group with the precious stuff. Note glob dimensions
+     ! arrays in gqk_spin group with the precious stuff. Note global dimensions.
      ncerr = nctk_def_arrays(spin_ncid, [ &
        nctkarr_t("gvals", "dp", "gstore_cplex, nb, nb, natom3, glob_nk, glob_nq") &
      ])
@@ -1262,6 +1263,11 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, nproc_spin, comm_spin)
    gqk%bstart = gstore%brange_spin(1, spin)
    gqk%bstop = gstore%brange_spin(2, spin)
    gqk%nb = gstore%brange_spin(2, spin) - gstore%brange_spin(1, spin) + 1
+
+   ! FIXME: for the time being, a direct copy of %nb
+   gqk%nb_k = gqk%nb; gqk%nb_kq = gqk%nb
+   gqk%bstart_k = gqk%bstart; gqk%bstop_k = gqk%bstop
+   gqk%bstart_kq = gqk%bstart; gqk%bstop_kq = gqk%bstop
 
    ! Store global shape of the q/k matrix for this spin.
    gqk%glob_nq = gstore%glob_nq_spin(spin)
@@ -1516,13 +1522,16 @@ subroutine gstore_print(gstore, units, header, prtvol)
    associate (spin => gstore%my_spins(my_is), gqk => gstore%gqk(my_is))
    call wrtout(units, sjoin(" gqk_cplex:", itoa(gqk%cplex)), pre_newlines=1)
    call wrtout(units, sjoin(" gqk_bstart:", itoa(gqk%bstart)))
+   !call wrtout(units, sjoin(" gqk_bstart_k:", itoa(gqk%bstart_k)))
+   !call wrtout(units, sjoin(" gqk_bstart_kq:", itoa(gqk%bstart_kq)))
    call wrtout(units, sjoin(" gqk_bstop:", itoa(gqk%bstop)))
    call wrtout(units, sjoin(" gqk_nb:", itoa(gqk%nb)))
-   !call wrtout(units, sjoin(" gqk_nb_kq:", itoa(gqk%nb_kq)))
-   !call wrtout(units, sjoin(" gqk_nb_k:", itoa(gqk%nb_k)))
+   call wrtout(units, sjoin(" gqk_nb_kq:", itoa(gqk%nb_kq)))
+   call wrtout(units, sjoin(" gqk_nb_k:", itoa(gqk%nb_k)))
    call wrtout(units, sjoin(" gqk_my_npert:", itoa(gqk%my_npert)))
    call wrtout(units, sjoin(" gqk_my_nk:", itoa(gqk%my_nk)))
    call wrtout(units, sjoin(" gqk_my_nq:", itoa(gqk%my_nq)))
+   !tot_num_g = one * qqk%nb_kq * gqk%nb_k * gqk%glob_nk * gqk%glob_nq * gqk%natom3
    call wrtout(units, sjoin(ch10, " === MPI distribution ==="))
    call wrtout(units, sjoin("P Number of CPUs for parallelism over perturbations: ", itoa(gqk%pert_comm%nproc)))
    call wrtout(units, sjoin("P Number of perturbations treated by this CPU: ",  itoa(gqk%my_npert)))
@@ -1570,7 +1579,7 @@ subroutine gstore_print(gstore, units, header, prtvol)
      call wrtout(units, msg)
    end if
    if  (allocated(gqk%my_gq0nm_atm)) then
-     write(msg,'(a,f8.1,a)')'- Local memory allocated for g array: ',ABI_MEM_MB(gqk%my_gq0nm_atm),' [Mb] <<< MEM'
+     write(msg,'(a,f8.1,a)')'- Local memory allocated for g0nm_atm array: ',ABI_MEM_MB(gqk%my_gq0nm_atm),' [Mb] <<< MEM'
      call wrtout(units, msg)
    end if
    if (allocated(gqk%vk_cart_ibz)) then
@@ -1615,12 +1624,12 @@ integer function gstore_check_little_group(gstore, dtset, msg) result(ierr)
  if (dtset%gstore_use_lgk /= 0) then
    ! Cannot use IBZ_k if we have used IBZ_q.
    if (gstore%has_used_lgq /= 0) then
-     msg = sjoin("input gstore_use_lgq: ", itoa(dtset%gstore_use_lgq), ", but GSTORE file has:", itoa(gstore%has_used_lgq))
+     msg = sjoin("Input var gstore_use_lgq: ", itoa(dtset%gstore_use_lgq), ", but GSTORE file has:", itoa(gstore%has_used_lgq))
      ABI_ERROR_NOSTOP(msg, ierr)
    end if
    ! Using IBZ_k when GSTORE has full BZ if OK but inefficient.
    if (gstore%has_used_lgk == 0) then
-     msg = sjoin("input gstore_use_lgk: ", itoa(dtset%gstore_use_lgk), ", but GSTORE file has:", itoa(gstore%has_used_lgk))
+     msg = sjoin("Input var gstore_use_lgk: ", itoa(dtset%gstore_use_lgk), ", but GSTORE file has:", itoa(gstore%has_used_lgk))
      ABI_COMMENT(msg)
    end if
  end if
@@ -1628,12 +1637,12 @@ integer function gstore_check_little_group(gstore, dtset, msg) result(ierr)
  if (dtset%gstore_use_lgq /= 0) then
    ! Cannot use IBZ_q if we have used IBZ_k.
    if (gstore%has_used_lgk /= 0) then
-     msg = sjoin("input gstore_use_lgk: ", itoa(dtset%gstore_use_lgk), ", but GSTORE file has:", itoa(gstore%has_used_lgk))
+     msg = sjoin("Input var gstore_use_lgk: ", itoa(dtset%gstore_use_lgk), ", but GSTORE file has:", itoa(gstore%has_used_lgk))
      ABI_ERROR_NOSTOP(msg, ierr)
    end if
    ! Using IBZ_q when GSTORE has full BZ if OK but inefficient.
    if (gstore%has_used_lgq == 0) then
-     msg = sjoin("input gstore_use_lgq: ", itoa(dtset%gstore_use_lgq), ", but GSTORE file has:", itoa(gstore%has_used_lgq))
+     msg = sjoin("Input var gstore_use_lgq: ", itoa(dtset%gstore_use_lgq), ", but GSTORE file has:", itoa(gstore%has_used_lgq))
      ABI_COMMENT(msg)
    end if
  end if
@@ -2328,8 +2337,8 @@ subroutine gstore_fill_bks_mask(gstore, mband, nkibz, nsppol, bks_mask)
  do my_is=1,gstore%my_nspins
    associate (gqk => gstore%gqk(my_is))
    spin = gstore%my_spins(my_is)
-   bstart_k = gqk%bstart; bstop_k = gqk%bstop
-   bstart_kq = gqk%bstart; bstop_kq = gqk%bstop
+   bstart_k = gqk%bstart_k; bstop_k = gqk%bstop_k
+   bstart_kq = gqk%bstart_kq; bstop_kq = gqk%bstop_kq
 
    ! We need the image of this k-point in the IBZ.
    do my_ik=1,gqk%my_nk
@@ -4003,12 +4012,12 @@ subroutine dump_my_gbuf()
  iq_glob = my_iq + gqk%my_qstart - 1
 
  !print *, "in dump_my_gbuf with start: ", [1, 1, 1, 1, gqk%my_kstart, iq_glob]
- !print *, "                  count; ", [gqk%cplex, gqk%nb, gqk%nb, gqk%natom3, gqk%my_nk, iqbuf_cnt]
+ !print *, "                  count; ", [gqk%cplex, gqk%nb_kq, gqk%nb_k, gqk%natom3, gqk%my_nk, iqbuf_cnt]
 
  ! NB: this is an individual IO operation
  ncerr = nf90_put_var(spin_ncid, spin_vid("gvals"), my_gbuf, &
                       start=[1, 1, 1, 1, gqk%my_kstart, iq_glob], &
-                      count=[gqk%cplex, gqk%nb, gqk%nb, gqk%natom3, gqk%my_nk, iqbuf_cnt])
+                      count=[gqk%cplex, gqk%nb_kq, gqk%nb_k, gqk%natom3, gqk%my_nk, iqbuf_cnt])
  NCF_CHECK(ncerr)
 
  ! Only one proc sets the entry in done_qbz_spin to 1 for all the q-points in the buffer.
@@ -4173,10 +4182,6 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    ABI_CHECK(path /= ABI_NOFILE, "Use getgstore_filepath to specify the path to GSTORE.nc")
    NCF_CHECK(nctk_open_read(ncid, path, xmpi_comm_self))
 
-   ! TODO Should compare ebands_file with input ebands
-   !NCF_CHECK(cryst%ncwrite(ncid))
-   !NCF_CHECK(ebands%ncwrite(ncid))
-
    call wfk0_hdr%ncread(ncid, fform)
    ABI_CHECK(fform /= 0, sjoin("Error while reading:", path))
 
@@ -4195,8 +4200,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_qptopt"), gstore%qptopt))
 
    ! little group variables were added in Abinit v10.5.6.
-   gstore%has_used_lgk = 0
-   gstore%has_used_lgq = 0
+   gstore%has_used_lgk = 0; gstore%has_used_lgq = 0
    ncerr = nf90_inq_varid(ncid, "gstore_has_used_lgk", varid)
    if (ncerr == nf90_noerr) then
      NCF_CHECK(nf90_get_var(ncid, vid("gstore_has_used_lgk"), gstore%has_used_lgk))
@@ -4362,8 +4366,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    end if
  end if
 
- ! Construct crystal and ebands from the GS WFK file.
- !ebands_file = wfk_read_ebands(wfk0_path, comm, out_hdr=wfk0_hdr)
+ ! Consistency checl
  call wfk0_hdr%vs_dtset(dtset); call wfk0_hdr%free()
 
  ! Distribute spins, create indirect mapping to spin index and init gstore%brange_spin
@@ -4442,7 +4445,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
 
    if (my_is /= 0) then
      gqk => gstore%gqk(my_is)
-     nb_k = gqk%nb; nb_kq = gqk%nb
+     nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
 
      ABI_MALLOC(gqk%my_wnuq, (gqk%my_npert, gqk%my_nq))
      ABI_MALLOC(gqk%my_displ_cart, (2, 3, cryst%natom, gqk%my_npert, gqk%my_nq))
@@ -4501,11 +4504,11 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
         call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_cart_ibz(:,:,:,:,iq_ibz), pheigvec_cart_qbz, displ_cart_qbz, &
                              displ_red_qbz=displ_red_qbz)
 
-        ! Save my frequencies and my phonon displacements
+        ! Save my frequencies and my phonon displacements.
         gqk%my_wnuq(:, my_iq) = phfreqs_ibz(gqk%my_pertcases(:), iq_ibz)
         gqk%my_displ_cart(:,:,:,:,my_iq) = displ_cart_qbz(:,:,:,gqk%my_pertcases(:))
 
-        ! Read q-slice (individual IO)
+        ! Read q-slice (individual IO).
         ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_name__), gwork_q, start=[1, 1, 1, 1, 1, iq_glob])
         NCF_CHECK(ncerr)
 
@@ -4747,6 +4750,8 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
    NCF_CHECK(nctk_get_dim(spin_ncid, "gstore_cplex", cplex))
 
    write(ab_out, "(a,i0)")" gqk%nb: ", nb
+   !write(ab_out, "(a,i0)")" gqk%nb_kq: ", nb_kq
+   !write(ab_out, "(a,i0)")" gqk%nb_k: ", nb_k
    write(ab_out, "(a,i0)")" gqk%glob_nq: ", glob_nq
    write(ab_out, "(a,i0)")" gqk%glob_nk: ", glob_nk
 
