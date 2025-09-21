@@ -555,7 +555,7 @@ module m_sigmaph
     procedure :: get_ebands => sigmaph_get_ebands
       ! Fill in values in ebands from the sigmaph structure and netcdf file
 
-    procedure :: skip_phmode => sigmaph_skip_phmode
+    !procedure :: skip_phmode => sigmaph_skip_phmode
       ! Ignore contribution of phonon mode depending on phonon frequency value or mode index.
 
  end type sigmaph_t
@@ -1020,7 +1020,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 !
 !     ! Acoustic modes are ignored here
 !     do nu=4,natom3
-!       wqnu = phfrq(nu); if (sigma%skip_phmode(nu, wqnu, dtset%eph_phrange_w)) cycle
+!       wqnu = phfrq(nu); if (ephtk_skip_phmode(nu, wqnu, sigma%phmodes_skip, dtset%eph_phrange_w)) cycle
 !       ! cnum = q.\sum_k Z_k.d(q,nu)
 !       cp3 = czero
 !       do iatom=1, natom
@@ -1313,7 +1313,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
          ! Acoustic modes are ignored here.
          do nu=4,natom3
-           wqnu = phfrq(nu); if (sigma%skip_phmode(nu, wqnu, dtset%eph_phrange_w)) cycle
+           wqnu = phfrq(nu); if (ephtk_skip_phmode(nu, wqnu, sigma%phmodes_skip, dtset%eph_phrange_w)) cycle
            ! Get phonon occupation for all temperatures.
            nqnu_tlist = occ_be(wqnu, sigma%kTmesh(:), zero)
 
@@ -1756,7 +1756,7 @@ end if
          ! Compute contribution to Fan-Migdal for M > sigma%nbsum
          do imyp=1,my_npert
            nu = sigma%my_pinfo(3, imyp)
-           wqnu = phfrq(nu); if (sigma%skip_phmode(nu, wqnu, dtset%eph_phrange_w)) cycle
+           wqnu = phfrq(nu); if (ephtk_skip_phmode(nu, wqnu, sigma%phmodes_skip, dtset%eph_phrange_w)) cycle
 
            ! Get phonon occupation for all temperatures.
            nqnu_tlist = occ_be(wqnu, sigma%kTmesh(:), zero)
@@ -1916,7 +1916,7 @@ end if
          do imyp=1,my_npert
            nu = sigma%my_pinfo(3, imyp)
            ! Ignore unstable modes or modes that should be skipped.
-           wqnu = phfrq(nu); if (sigma%skip_phmode(nu, wqnu, dtset%eph_phrange_w)) cycle
+           wqnu = phfrq(nu); if (ephtk_skip_phmode(nu, wqnu, sigma%phmodes_skip, dtset%eph_phrange_w)) cycle
 
            if (dtset%eph_prtscratew == 1) then
              ! Precompute delta(w-w_qnu)
@@ -2297,7 +2297,7 @@ end if
          do imyp=1,my_npert
            nu = sigma%my_pinfo(3, imyp)
            ! Ignore acoustic or unstable modes.
-           wqnu = phfrq(nu); if (sigma%skip_phmode(nu, wqnu, dtset%eph_phrange_w)) cycle
+           wqnu = phfrq(nu); if (ephtk_skip_phmode(nu, wqnu, sigma%phmodes_skip, dtset%eph_phrange_w)) cycle
 
            ! Get phonon occupation for all temperatures.
            nqnu_tlist = occ_be(wqnu, sigma%kTmesh(:), zero)
@@ -4280,41 +4280,6 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
  end if
 
 end subroutine sigmaph_setup_kcalc
-!!***
-
-!!****f* m_sigmaph/sigmaph_skip_phmode
-!! NAME
-!!  sigmaph_phskip_mode
-!!
-!! FUNCTION
-!!  Ignore contribution of phonon mode depending on phonon frequency value or mode index.
-!!
-!! INPUTS
-!!
-!! SOURCE
-
-pure logical function sigmaph_skip_phmode(self, nu, wqnu, eph_phrange_w) result(skip)
-
-!Arguments ------------------------------------
- class(sigmaph_t),intent(in) :: self
- integer,intent(in) :: nu
- real(dp),intent(in) :: wqnu, eph_phrange_w(2)
-! *************************************************************************
-
- skip = wqnu < EPHTK_WTOL .or. self%phmodes_skip(nu) == 1
-
- ! Check frequency range
- if (abs(eph_phrange_w(2)) > tol12) then
-    if (eph_phrange_w(2) > zero) then
-      ! wqnu must be inside range
-      skip = skip .or. .not. (wqnu >= eph_phrange_w(1) .and. wqnu <= eph_phrange_w(2))
-    else
-      ! wqnu must be outside range
-      skip = skip .or. (wqnu >= eph_phrange_w(1) .and. wqnu <= eph_phrange_w(2))
-    end if
- end if
-
-end function sigmaph_skip_phmode
 !!***
 
 !!****f* m_sigmaph/sigmaph_setup_qloop

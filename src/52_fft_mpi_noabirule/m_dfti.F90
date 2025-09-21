@@ -48,6 +48,7 @@
 
 MODULE m_dfti
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  use m_abicore
  use m_errors
@@ -55,7 +56,7 @@ MODULE m_dfti
  use m_cgtools
  use m_cplxtools
  use m_fftcore
- use, intrinsic :: iso_c_binding
+ use m_fft_mesh
 #ifdef HAVE_DFTI
  use MKL_DFTI
 #endif

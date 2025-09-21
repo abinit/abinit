@@ -57,7 +57,6 @@ module m_sigtk
  public :: sigtk_dw_tpp_red
 !!***
 
-
  ! Tables for degenerated KS states.
  type, public :: bids_t
    integer, allocatable :: vals(:)

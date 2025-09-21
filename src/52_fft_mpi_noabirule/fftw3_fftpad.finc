@@ -4,7 +4,6 @@ block
  integer(KIND_FFTW_PLAN) :: bw_plan1,bw_plan2,bw_plan3
  integer(KIND_FFTW_PLAN) :: fw_plan1,fw_plan2,fw_plan3
  type(zpad_t) :: zpad
-
 ! *************************************************************************
 
  call zpad%init(nx,ny,nz,ldx,ldy,ldz,mgfft,gbound)
