@@ -229,7 +229,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
  real(dp),allocatable :: gkq_atm(:,:,:),gkq_nu(:,:,:) !,gkq0_atm(:,:,:,:), gaussw_qnu(:)
  real(dp),allocatable :: rfact_t(:), nqnu(:), f_mkq(:) !, f_nk(:),  g2_pmnk(:,:,:,:)
  real(dp),allocatable :: displ_nu_cart(:,:,:), displ_nu_red(:,:,:)
- complex(dp),allocatable :: cfact_t(:), tpp_red(:,:) !, fmw_frohl_sphcorr(:,:,:,:), cfact_wr(:),
+ complex(dp),allocatable :: cfact_t(:), tpp_red(:,:), cfact_wr(:) !,fmw_frohl_sphcorr(:,:,:,:),
  type(pawrhoij_type),allocatable :: pot_pawrhoij(:)
 !----------------------------------------------------------------------
 
@@ -304,6 +304,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
    if (mod(sigma%nwr, 2) == 0) sigma%nwr = sigma%nwr + 1
    sigma%wr_step = two * eV_Ha / (sigma%nwr - 1)
    if (dtset%freqspmax /= zero) sigma%wr_step = dtset%freqspmax / (sigma%nwr - 1)
+   ABI_MALLOC(cfact_wr, (sigma%nwr))
  end if
 
  ABI_MALLOC(nqnu, (sigma%ntemp))
@@ -354,17 +355,10 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
    ABI_CALLOC(sigma%dw_vals, (sigma%ntemp, nb_k, glob_nk))
 
    ! Prepare computation of Sigma_{nk}(w) and spectral function.
-   !if (sigma%nwr > 0) then
-   !  ABI_CALLOC(sigma%vals_wr, (sigma%nwr, sigma%ntemp, nb_k, glob_nk))
-   !  ABI_CALLOC(sigma%wrmesh_b, (sigma%nwr, nb_k, glob_nk))
-   !  kk = gqk%my_kpts(:, my_ik); ik_ibz = gqk%my_k2ibz(1, my_ik)
-   !  do in_k=1,gqk%nb_k
-   !    band_k = in_k + gqk%bstart_k - 1
-   !    ! Build linear mesh **centered** around the KS energy.
-   !    eig0nk = ebands%eig(band_k, ik_ibz, spin) - sigma%wr_step * (sigma%nwr / 2)
-   !    sigma%wrmesh_b(:,in_k, ikcalc) = arth(eig0nk, sigma%wr_step, sigma%nwr)
-   !  end do
-   !end if
+   if (sigma%nwr > 0) then
+     ABI_CALLOC(sigma%vals_wr, (sigma%nwr, sigma%ntemp, nb_k, glob_nk))
+     ABI_CALLOC(sigma%wrmesh_b, (sigma%nwr, nb_k, glob_nk))
+   end if ! nwr
 
    ! Loop over k-points in |n,k>
    do my_ik=1,gqk%my_nk
@@ -377,6 +371,15 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
        timrev_k = kpts_timrev_from_kptopt(ebands%kptopt)
        call lg_myk%init(cryst, kk, timrev_k, gstore%nqbz, gstore%qbz, gstore%nqibz, gstore%qibz, xmpi_comm_self)
      end if
+
+     if (sigma%nwr > 0) then
+      do in_k=1,gqk%nb_k
+        band_k = in_k + gqk%bstart_k - 1
+        ! Build linear mesh **centered** around the KS energy.
+        eig0nk = ebands%eig(band_k, ik_ibz, spin) - sigma%wr_step * (sigma%nwr / 2)
+        sigma%wrmesh_b(:,in_k, ikcalc) = arth(eig0nk, sigma%wr_step, sigma%nwr)
+      end do
+     end if ! nwr
 
      ! Sum over q-points.
      do my_iq=1,gqk%my_nq
@@ -463,28 +466,31 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
 
              sigma%dvals_de0ks(:, in_k, ikcalc) = sigma%dvals_de0ks(:, in_k, ikcalc) + gkq2 * rfact_t
 
-#if 0
-             ! Accumulate Sigma(w) for state ib_k if spectral function is wanted.
+
+             ! Accumulate Sigma(w) for state in_k if spectral function is wanted.
              if (sigma%nwr > 0) then
                !if (sigma%qint_method == 1) then
                !  ! Tetra
-               !  cfact_wr(:) = (nqnu + f_mkq      ) * sigma%cweights(2:, 1, ib_k, imyp, ibsum_kq, imyq, 1) + &
-               !                (nqnu - f_mkq + one) * sigma%cweights(2:, 2, ib_k, imyp, ibsum_kq, imyq, 1)
+               !  cfact_wr(:) = (nqnu + f_mkq      ) * sigma%cweights(2:, 1, in_k, imyp, ibsum_kq, imyq, 1) + &
+               !                (nqnu - f_mkq + one) * sigma%cweights(2:, 2, in_k, imyp, ibsum_kq, imyq, 1)
                !else
-                 ! Zcut
-                 cfact_wr(:) = (nqnu + f_mkq      ) / (sigma%wrmesh_b(:,ib_k) - eig0mkq + wqnu + sigma%ieta) + &
-                               (nqnu - f_mkq + one) / (sigma%wrmesh_b(:,ib_k) - eig0mkq - wqnu + sigma%ieta)
-               !end if
-               cfact_wr(:) = gkq2 * cfact_wr(:)
+               ! Zcut version
+#if 1
+               do it=1,sigma%ntemp
+                 cfact_wr(:) = (nqnu(it) + f_mkq(it)      ) / (sigma%wrmesh_b(:,in_k, ikcalc) - eig0mkq + wqnu + sigma%ieta) + &
+                               (nqnu(it) - f_mkq(it) + one) / (sigma%wrmesh_b(:,in_k, ikcalc) - eig0mkq - wqnu + sigma%ieta)
+                 cfact_wr(:) = gkq2 * cfact_wr(:)
 
-               !if (intra_band .and. sigma%frohl_model == 1)  then
-               !  ! Add Frohlich correction to Sigma_nk(w)
-               !  cfact_wr(:) = zero; if (same_band) cfact_wr(:) = fmw_frohl_sphcorr(:,nu,it,ib_k)
-               !end if
+                 !if (intra_band .and. sigma%frohl_model == 1)  then
+                 !  ! Add Frohlich correction to Sigma_nk(w)
+                 !  cfact_wr(:) = zero; if (same_band) cfact_wr(:) = fmw_frohl_sphcorr(:,nu,it,in_k)
+                 !end if
 
-               sigma%vals_wr(:,it,ib_k) = sigma%vals_wr(:,it,ib_k) + cfact_wr(:)
-             end if ! nwr > 0
+                 sigma%vals_wr(:,it,in_k,ikcalc) = sigma%vals_wr(:,it,in_k,ikcalc) + cfact_wr(:)
+               end do
 #endif
+             end if ! nwr > 0
+
 
              ! Compute DW term following XG paper. Check prefactor.
              ! gkq0_atm(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
@@ -520,7 +526,12 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
              endif
              sigma%dw_vals(:, in_k, ikcalc) = sigma%dw_vals(:, in_k, ikcalc) + real(cfact_t)
              sigma%vals_e0ks(:, in_k, ikcalc) = sigma%vals_e0ks(:, in_k, ikcalc) + real(cfact_t)
-             !if (sigma%nwr > 0) sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + rfact
+             if (sigma%nwr > 0) then
+               ! Add static term from Sternheimer to Sigma(w) as well.
+               do it=1,sigma%ntemp
+                 sigma%vals_wr(:, it, in_k, ikcalc) = sigma%vals_wr(:, it, in_k, ikcalc) + real(cfact_t(it))
+               end do
+             end if
            end do ! in_k
 
          end do ! im_kq
@@ -547,6 +558,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
  ABI_FREE(tpp_red)
  ABI_SFREE(vtrial)
  ABI_FREE(phmodes_skip)
+ ABI_SFREE(cfact_wr)
 
  call gstore%free()
 
@@ -673,6 +685,7 @@ subroutine sep_gather_and_write_results(sigma, gstore, gqk, dtset, ebands)
      do ideg=1,size(degtab%bids)
        associate (bids => degtab%bids(ideg)%vals)
        nstates = size(bids)
+
        do it=1,sigma%ntemp
          ! Average QP(T) and Z(T).
          cavg1 = sum(sigma%vals_e0ks(it, bids(:), ikcalc)) / nstates
@@ -681,6 +694,7 @@ subroutine sep_gather_and_write_results(sigma, gstore, gqk, dtset, ebands)
          !cavg4 = sum(sigma%fan_stern_vals(it, bids(:), ikcalc)) / nstates
          ravg = sum(sigma%dw_vals(it, bids(:), ikcalc)) / nstates
          !ravg2 = sum(sigma%dw_stern_vals(it, bids(:), ikcalc)) / nstates
+
          do ii=1,nstates
            sigma%vals_e0ks(it, bids(ii), ikcalc) = cavg1
            sigma%dvals_de0ks(it, bids(ii), ikcalc) = cavg2
@@ -688,7 +702,18 @@ subroutine sep_gather_and_write_results(sigma, gstore, gqk, dtset, ebands)
            !sigma%fan_stern_vals(it, bids(ii), ikcalc) = cavg4
            sigma%dw_vals(it, bids(ii), ikcalc) = ravg
            !sigma%dw_stern_vals(it, bids(ii), ikcalc) = ravg2
-         end do
+         end do ! ii
+
+         if (sigma%nwr > 0) then
+           ! Average Sigma(omega, T)
+           do iw=1,sigma%nwr
+             cavg1 = sum(sigma%vals_wr(iw, it, bids(:), ikcalc)) / nstates
+             do ii=1,nstates
+               sigma%vals_wr(iw, it, bids(ii), ikcalc) = cavg1
+             end do
+           end do
+         end if
+
        end do ! it
        end associate
      end do ! ideg
@@ -806,8 +831,6 @@ subroutine sep_gather_and_write_results(sigma, gstore, gqk, dtset, ebands)
    write(ab_out, "(a,i0,a)")" No more than ", max_ntemp, " temperatures are written to the main output file."
    write(ab_out, "(2a)")" Please use SIGEPH.nc file and AbiPy to analyze the results.",ch10
  end if
-
- !stop; call wrtout(std_out, "gstore_sigeph ended OK")
 
 end subroutine sep_gather_and_write_results
 !!***
