@@ -140,10 +140,15 @@ module m_gstore_sigeph
    !  dw_stern_vals(ntemp, nb_k, nkcalc)
    !  Debye-Waller Sternheimer term (static) .
 
-  !complex(dp),allocatable :: vals_wr(:,:,:,:)
+  complex(dp),allocatable :: vals_wr(:,:,:,:)
    ! vals_wr(nwr, ntemp, nb_k, nkcalc)
    ! Sigma_eph(omega, kT, band)
    ! enk_KS corresponds to nwr/2 + 1.
+
+  real(dp),allocatable :: wrmesh_b(:,:,:)
+   ! wrmesh_b(nwr, nb_k, nkcalc)
+   ! Frequency mesh along the real axis (Ha units) used for the different bands
+   ! Each mesh is **centered** on the corresponding KS energy.
 
   !integer :: phmesh_size
    ! Number of phonon frequencies in phonon mesh used for Eliashberg functions and
@@ -199,7 +204,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
 
 !Local variables-------------------------------
  integer,parameter :: master = 0, with_cplex1 = 1, max_ntemp = 50, cplex1 = 1, pawread0 = 0
- integer :: n1, n2, n3, n4, n5, n6, nb_k, nb_kq
+ integer :: n1, n2, n3, n4, n5, n6, nb_k, nb_kq, glob_nk
  integer :: spin, my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, gap_err, my_rank, ip1, ip2, nu
  integer :: it, ik_bz, ik_ibz, ikq_ibz, band_k, band_kq, timrev_k, ii, ikcalc, natom, natom3, nsppol
  integer :: nfft, nfftf, mgfft, mgfftf !,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart, enough_stern
@@ -337,14 +342,28 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
    associate (gqk => gstore%gqk(my_is), cryst => gstore%cryst)
    spin = gstore%my_spins(my_is)
    nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
+   glob_nk = gqk%glob_nk
 
    ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
    ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
 
-   ABI_CALLOC(sigma%vals_e0ks, (sigma%ntemp, nb_k, gqk%glob_nk))
-   ABI_CALLOC(sigma%dvals_de0ks, (sigma%ntemp, nb_k, gqk%glob_nk))
-   ABI_CALLOC(sigma%fan_vals, (sigma%ntemp, nb_k, gqk%glob_nk))
-   ABI_CALLOC(sigma%dw_vals, (sigma%ntemp, nb_k, gqk%glob_nk))
+   ABI_CALLOC(sigma%vals_e0ks, (sigma%ntemp, nb_k, glob_nk))
+   ABI_CALLOC(sigma%dvals_de0ks, (sigma%ntemp, nb_k, glob_nk))
+   ABI_CALLOC(sigma%fan_vals, (sigma%ntemp, nb_k, glob_nk))
+   ABI_CALLOC(sigma%dw_vals, (sigma%ntemp, nb_k, glob_nk))
+
+   ! Prepare computation of Sigma_{nk}(w) and spectral function.
+   !if (sigma%nwr > 0) then
+   !  ABI_CALLOC(sigma%vals_wr, (sigma%nwr, sigma%ntemp, nb_k, glob_nk))
+   !  ABI_CALLOC(sigma%wrmesh_b, (sigma%nwr, nb_k, glob_nk))
+   !  do in_k=1,gqk%nb_k
+   !    do ib_k=1,nbcalc_ks
+   !     band_k = in_k + gqk%bstart_k - 1
+   !     ! Build linear mesh **centered** around the KS energy.
+   !     eig0nk = ebands%eig(band_k, ik_ibz, spin) - sigma%wr_step * (sigma%nwr / 2)
+   !     sigma%wrmesh_b(:,ib_k) = arth(eig0nk, sigma%wr_step, sigma%nwr)
+   !  end do
+   !end if
 
    ! Loop over k-points in |n,k>
    do my_ik=1,gqk%my_nk
@@ -411,11 +430,11 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
 
            ! Loop over the n index in |n,k>.
            do in_k=1,gqk%nb_k
-             band_k = in_k - gqk%bstart_k + 1
+             band_k = in_k + gqk%bstart_k - 1
              eig0nk = ebands%eig(band_k, ik_ibz, spin)
              ediff = eig0nk - eig0mk
-             !intra_band = q_is_gamma .and. ediff <= TOL_EDIFF
-             !same_band = ibsum_kq == band_k
+             intra_band = q_is_gamma .and. ediff <= TOL_EDIFF
+             same_band = band_k == band_kq
 
              if (dtset%eph_ahc_type == 1) then
                cfact_t(:) =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) + &
@@ -442,6 +461,29 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
                           (nqnu - f_mkq + one) * (-hmod2 + aimag(sigma%ieta)**2) / (hmod2 + aimag(sigma%ieta)**2) ** 2
 
              sigma%dvals_de0ks(:, in_k, ikcalc) = sigma%dvals_de0ks(:, in_k, ikcalc) + gkq2 * rfact_t
+
+#if 0
+             ! Accumulate Sigma(w) for state ib_k if spectral function is wanted.
+             if (sigma%nwr > 0) then
+               !if (sigma%qint_method == 1) then
+               !  ! Tetra
+               !  cfact_wr(:) = (nqnu + f_mkq      ) * sigma%cweights(2:, 1, ib_k, imyp, ibsum_kq, imyq, 1) + &
+               !                (nqnu - f_mkq + one) * sigma%cweights(2:, 2, ib_k, imyp, ibsum_kq, imyq, 1)
+               !else
+                 ! Zcut
+                 cfact_wr(:) = (nqnu + f_mkq      ) / (sigma%wrmesh_b(:,ib_k) - eig0mkq + wqnu + sigma%ieta) + &
+                               (nqnu - f_mkq + one) / (sigma%wrmesh_b(:,ib_k) - eig0mkq - wqnu + sigma%ieta)
+               !end if
+               cfact_wr(:) = gkq2 * cfact_wr(:)
+
+               if (intra_band .and. sigma%frohl_model == 1)  then
+                 ! Add Frohlich correction to Sigma_nk(w)
+                 cfact_wr(:) = zero; if (same_band) cfact_wr(:) = fmw_frohl_sphcorr(:,nu,it,ib_k)
+               end if
+
+               sigma%vals_wr(:,it,ib_k) = sigma%vals_wr(:,it,ib_k) + cfact_wr(:)
+             end if ! nwr > 0
+#endif
 
              ! Compute DW term following XG paper. Check prefactor.
              ! gkq0_atm(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
@@ -477,6 +519,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
              endif
              sigma%dw_vals(:, in_k, ikcalc) = sigma%dw_vals(:, in_k, ikcalc) + real(cfact_t)
              sigma%vals_e0ks(:, in_k, ikcalc) = sigma%vals_e0ks(:, in_k, ikcalc) + real(cfact_t)
+             !if (sigma%nwr > 0) sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + rfact
            end do ! in_k
 
          end do ! im_kq
@@ -562,6 +605,7 @@ subroutine sep_gather_and_write_results(sigma, gstore, gqk, dtset, ebands)
  call xmpi_sum(sigma%dvals_de0ks, gqk%comm%value, ierr)
  call xmpi_sum(sigma%fan_vals, gqk%comm%value, ierr)
  call xmpi_sum(sigma%dw_vals, gqk%comm%value, ierr)
+ if (sigma%nwr > 0) call xmpi_sum(sigma%vals_wr, gqk%comm%value, ierr)
 
  this_gtype = "KS"
  if (gstore%gtype == "gwpt" .and. dtset%gstore_gname == "gvals") this_gtype = "GWPT"
@@ -679,7 +723,7 @@ subroutine sep_gather_and_write_results(sigma, gstore, gqk, dtset, ebands)
 
      ! Loop over band n_k for this k-point and spin.
      do in_k=1,gqk%nb_k
-       band_k = in_k - bstart_k + 1
+       band_k = in_k + bstart_k - 1
        kse = ebands%eig(band_k, ik_ibz, spin)
        ks_enes(in_k) = kse
        sig0c = sigma%vals_e0ks(it, in_k, ikcalc)
@@ -790,6 +834,8 @@ subroutine sep_free(sigma)
  ABI_SFREE(sigma%dvals_de0ks)
  ABI_SFREE(sigma%fan_vals)
  ABI_SFREE(sigma%dw_vals)
+ ABI_SFREE(sigma%vals_wr)
+ ABI_SFREE(sigma%wrmesh_b)
 
 end subroutine sep_free
 !!***
