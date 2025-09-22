@@ -9,7 +9,10 @@
  # we want k in the IBZ and q in the full BZ.
  gstore_kzone "ibz"
  gstore_qzone "bz"
- #gstore_use_lgk 1
+ #gstore_use_lgk  0
+ gstore_use_lgk 1     # IMPORTANT FOR PERFORMANCE
+                      # Since we want to compute ZPR_k, we can restrict the q-points
+                      # to the IBZ_k
 
  # Additional filter in k-space: only k-points corresponding to the band edges are considered
  gstore_kfilter "qprange"
@@ -23,8 +26,9 @@
                     # SC TODO: on alps_gnu_14.2_cov, ecuteps here = ecuteps in the SCR file still results in an error
  ecutsigx 8         # Cutoff energy for exchange part.
  boxcutmin 1.1
- tolwfr 1e-4       # Tolerance for Sternheimer solver.
-                   # THIS VALUE IS TOO LOW.
+ #tolwfr 1e-12      # Tolerance for Sternheimer solver.
+ tolwfr 1e-20       # Tolerance for Sternheimer solver.
+ #tolwfr 1e-4       # Tolerance for Sternheimer solver. # THIS VALUE IS TOO LOW.
 
  nband 9           # Number of bands to build G with Lehmnann's representation.
                    # This value cannot be larger that the number of bands in the WFK file.
@@ -89,7 +93,6 @@
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH
-#%% description =
-#%% Calculation of GWPT e-ph matrix elements with precomputed SCR file.
-#%% Preparatory run for computing the ZPR
+#%% description = Calculation of GWPT e-ph matrix elements with precomputed SCR file.
+#%%     Preparatory run for computing the ZPR
 #%%<END TEST_INFO>

@@ -40,5 +40,5 @@
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH, GWPT
-#%% NSCF computation of WFK file with empty states to prepare ZPR calculation in diamond.
+#%% description = NSCF computation of WFK file with empty states to prepare ZPR calculation in diamond.
 #%%<END TEST_INFO>
