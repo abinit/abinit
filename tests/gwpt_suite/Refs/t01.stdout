@@ -33,7 +33,7 @@
 - Merging file [4]: diamond_eph_gwpt/dfpto_DS3_POT1.nc
  Merged successfully 4 files
 - Analyzing DVDB file: t01_DVDB ...
-- dvdb_init , wall:  0.01 [s] , cpu:  0.00 [s] <<< TIME
+- dvdb_init , wall:  0.00 [s] , cpu:  0.00 [s] <<< TIME
  ==== Info on the dvdb% object ====
  DVDB version: 2
  File path: t01_DVDB

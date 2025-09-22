@@ -394,7 +394,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
 
          ! For the DW, we need gkq_atm at q = 0, for all atomic perturbations
          ! Copy data to improve memory access in the loops below.
-         ! (my_npert, nb, my_nq, nb, my_nk)
+         ! (my_npert, nb_kq, my_nq, nb_k, my_nk)
          !g2_pmnk = gqk%my_g2(my_ip,:,my_iq,:,my_ik)
 
          ! Compute T_pp'(q,nu) matrix in reduced coordinates.

@@ -332,8 +332,8 @@ meta: {optdriver: 7, eph_task: 13, }
              1   -2.250662   -0.474685
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
+- pspini: atom type   2  psp file is /Users/giantomassi/git_repos/abinit/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
+- pspatm: opening atomic psp file    /Users/giantomassi/git_repos/abinit/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
 - F     ONCVPSP-3.2.3.1  r_core=   1.30942   1.45782   1.60379
 -  9.00000   7.00000    170504                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -375,14 +375,15 @@ P pp_sum_comm can use shmem: yes
  with_vk: 1
 
  gqk_cplex: 2
- gqk_bstart: 3
- gqk_bstop: 5
- gqk_nb: 3
- gqk_nb_kq: 3
+ gqk_bstart_k: 3
+ gqk_bstart_kq: 3
+ gqk_bstop_k: 5
+ gqk_bstop_kq: 5
  gqk_nb_k: 3
+ gqk_nb_kq: 3
  gqk_my_npert: 6
- gqk_my_nk: -1
- gqk_my_nq: -1
+P gqk_my_nk: -1
+P gqk_my_nq: -1
 
   === MPI distribution ===
 P Number of CPUs for parallelism over perturbations: 1
@@ -611,14 +612,15 @@ P pp_sum_comm can use shmem: yes
  with_vk: 1
 
  gqk_cplex: 2
- gqk_bstart: 3
- gqk_bstop: 5
- gqk_nb: 3
- gqk_nb_kq: 3
+ gqk_bstart_k: 3
+ gqk_bstart_kq: 3
+ gqk_bstop_k: 5
+ gqk_bstop_kq: 5
  gqk_nb_k: 3
+ gqk_nb_kq: 3
  gqk_my_npert: 6
- gqk_my_nk: -1
- gqk_my_nq: -1
+P gqk_my_nk: -1
+P gqk_my_nq: -1
 
   === MPI distribution ===
 P Number of CPUs for parallelism over perturbations: 1
@@ -862,14 +864,15 @@ P pp_sum_comm can use shmem: yes
  with_vk: 1
 
  gqk_cplex: 2
- gqk_bstart: 3
- gqk_bstop: 5
- gqk_nb: 3
- gqk_nb_kq: 3
+ gqk_bstart_k: 3
+ gqk_bstart_kq: 3
+ gqk_bstop_k: 5
+ gqk_bstop_kq: 5
  gqk_nb_k: 3
+ gqk_nb_kq: 3
  gqk_my_npert: 6
- gqk_my_nk: -1
- gqk_my_nq: -1
+P gqk_my_nk: -1
+P gqk_my_nq: -1
 
   === MPI distribution ===
 P Number of CPUs for parallelism over perturbations: 1

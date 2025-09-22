@@ -210,7 +210,7 @@ type, public :: gqk_t
   ! The last band is bstop (NB: These are global indices)
 
   ! TODO
-  ! These new entries will be used to implement band distribution
+  ! These new entries will be used to implement band distribution.
   integer :: nb_kq = -1, nb_k = -1
   integer :: bstart_k = -1, bstop_k = -1
   integer :: bstart_kq = -1, bstop_kq = -1
@@ -1521,16 +1521,18 @@ subroutine gstore_print(gstore, units, header, prtvol)
  do my_is=1,gstore%my_nspins
    associate (spin => gstore%my_spins(my_is), gqk => gstore%gqk(my_is))
    call wrtout(units, sjoin(" gqk_cplex:", itoa(gqk%cplex)), pre_newlines=1)
-   call wrtout(units, sjoin(" gqk_bstart:", itoa(gqk%bstart)))
-   !call wrtout(units, sjoin(" gqk_bstart_k:", itoa(gqk%bstart_k)))
-   !call wrtout(units, sjoin(" gqk_bstart_kq:", itoa(gqk%bstart_kq)))
-   call wrtout(units, sjoin(" gqk_bstop:", itoa(gqk%bstop)))
-   call wrtout(units, sjoin(" gqk_nb:", itoa(gqk%nb)))
-   call wrtout(units, sjoin(" gqk_nb_kq:", itoa(gqk%nb_kq)))
+   !call wrtout(units, sjoin(" gqk_bstart:", itoa(gqk%bstart)))
+   call wrtout(units, sjoin(" gqk_bstart_k:", itoa(gqk%bstart_k)))
+   call wrtout(units, sjoin(" gqk_bstart_kq:", itoa(gqk%bstart_kq)))
+   !call wrtout(units, sjoin(" gqk_bstop:", itoa(gqk%bstop)))
+   call wrtout(units, sjoin(" gqk_bstop_k:", itoa(gqk%bstop_k)))
+   call wrtout(units, sjoin(" gqk_bstop_kq:", itoa(gqk%bstop_kq)))
+   !call wrtout(units, sjoin(" gqk_nb:", itoa(gqk%nb)))
    call wrtout(units, sjoin(" gqk_nb_k:", itoa(gqk%nb_k)))
+   call wrtout(units, sjoin(" gqk_nb_kq:", itoa(gqk%nb_kq)))
    call wrtout(units, sjoin(" gqk_my_npert:", itoa(gqk%my_npert)))
-   call wrtout(units, sjoin(" gqk_my_nk:", itoa(gqk%my_nk)))
-   call wrtout(units, sjoin(" gqk_my_nq:", itoa(gqk%my_nq)))
+   call wrtout(units, sjoin("P gqk_my_nk:", itoa(gqk%my_nk)))
+   call wrtout(units, sjoin("P gqk_my_nq:", itoa(gqk%my_nq)))
    !tot_num_g = one * qqk%nb_kq * gqk%nb_k * gqk%glob_nk * gqk%glob_nq * gqk%natom3
    call wrtout(units, sjoin(ch10, " === MPI distribution ==="))
    call wrtout(units, sjoin("P Number of CPUs for parallelism over perturbations: ", itoa(gqk%pert_comm%nproc)))
@@ -1686,7 +1688,7 @@ subroutine gstore_malloc__(gstore, with_cplex, max_nq, qglob2bz, max_nk, kglob2b
 
  do my_is=1,gstore%my_nspins
    associate (gqk => gstore%gqk(my_is), spin => gstore%my_spins(my_is))
-   nb_k = gqk%nb; nb_kq = gqk%nb
+   nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
 
    ! Split q-points and transfer symmetry tables.
    ! Note that glob_nq and glob_nk does not necessarily correspond to the size of the BZ
@@ -1751,8 +1753,8 @@ subroutine gstore_malloc__(gstore, with_cplex, max_nq, qglob2bz, max_nk, kglob2b
        ABI_MALLOC_OR_DIE(gqk%my_g2, (gqk%my_npert, nb_kq, gqk%my_nq, nb_k, gqk%my_nk), ierr)
        gqk%my_g2 = zero
      case (2)
-        ABI_MALLOC_OR_DIE(gqk%my_g, (gqk%my_npert, nb_kq, gqk%my_nq, nb_k, gqk%my_nk), ierr)
-        gqk%my_g = zero
+       ABI_MALLOC_OR_DIE(gqk%my_g, (gqk%my_npert, nb_kq, gqk%my_nq, nb_k, gqk%my_nk), ierr)
+       gqk%my_g = zero
      case default
        ABI_ERROR(sjoin("Wrong with_cplex:", itoa(with_cplex)))
      end select
@@ -2432,7 +2434,7 @@ subroutine gstore_fill_bks_mask_pp_mesh(gstore, ecut, mband, nkibz, nsppol, my_p
      kk = gqk%my_kpts(:, my_ik); ik_ibz = gqk%my_k2ibz(1, my_ik)
 
      ! We need the image of this k-point in the IBZ for the incoming state |psi_nk>.
-     bks_mask(gqk%bstart:gqk%bstop, ik_ibz, spin) = .True.  ! gqk%n_start, gqk%n_stop
+     bks_mask(gqk%bstart_k:gqk%bstop_k, ik_ibz, spin) = .True.  ! gqk%n_start, gqk%n_stop
 
      ! We also need the image of k+q in the IBZ for the outgoing state <psi_mkq|.
      do my_iq=1,gqk%my_nq
@@ -2441,7 +2443,7 @@ subroutine gstore_fill_bks_mask_pp_mesh(gstore, ecut, mband, nkibz, nsppol, my_p
          ABI_ERROR(sjoin("Cannot map k+q to IBZ with qpt:", ktoa(qpt)))
        end if
        ikq_ibz = map_kq(1, 1)
-       bks_mask(gqk%bstart:gqk%bstop, ikq_ibz, spin) = .True. ! gqk%m_start, gqk%m_stop
+       bks_mask(gqk%bstart_kq:gqk%bstop_kq, ikq_ibz, spin) = .True. ! gqk%m_start, gqk%m_stop
      end do ! my_iq
 
    end do ! my_ok
@@ -2616,7 +2618,7 @@ subroutine gstore_get_lambda_iso_iw(gstore, nw, imag_w, lambda)
    ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
    ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
 
-   nb_k = gqk%nb; nb_kq = gqk%nb
+   nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
    ABI_CHECK_IEQ(nb_k, nb_kq, "gqk_dbldelta_qpt does not support nb_k != nb_kq")
 
    ! Weights for delta(e_{m k+q}) delta(e_{n k}) for my list of k-points.
@@ -2708,7 +2710,7 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
    ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
    ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
 
-   nb_k = gqk%nb; nb_kq = gqk%nb
+   nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
    ABI_CHECK_IEQ(nb_k, nb_kq, "gqk_dbldelta_qpt does not support nb_k != nb_kq")
 
    ! Weights for delta(e_{m k+q}) delta(e_{n k}) for my list of k-points.
@@ -2910,7 +2912,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
  real(dp),allocatable :: eig_k(:,:), eig_kq(:,:), kmesh(:,:), wght_bz(:,:,:)
 !----------------------------------------------------------------------
 
- nb_k = gqk%nb; nb_kq = gqk%nb; nkbz = gstore%nkbz; spin = gqk%spin
+ nb_k = gqk%nb_k; nb_kq = gqk%nb_kq; nkbz = gstore%nkbz; spin = gqk%spin
  ebands => gstore%ebands; cryst => gstore%cryst
 
  ABI_CHECK_IEQ(nb_k, nb_kq, "gqk_dbldelta_qpt does not support nb_k != nb_kq")
@@ -3651,7 +3653,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
    ! Allocate workspace for wavefunctions using mpw and nb
    ! FIXME: Should be allocated with npw_k and npw_kw but one has to change wfd_sym_ug_kg to get rid of mpw
-   nb_k = gqk%nb; nb_kq = gqk%nb
+   nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
 
    ABI_MALLOC(kets_k, (2, mpw*nspinor, nb_k))
    ABI_MALLOC(bras_kq, (2, mpw*nspinor, nb_kq))
@@ -4708,7 +4710,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
 !scalars
  integer,parameter :: master = 0
  integer :: root_ncid, spin_ncid, gstore_completed, spin, nb, ik_glob, iq_glob, ipc, cplex, ncerr, natom3, varid
- integer :: glob_nq, glob_nk, im_kq, in_k ! ib, ik_ibz,
+ integer :: glob_nq, glob_nk, im_kq, in_k, nb_k, nb_kq ! ib, ik_ibz,
  logical :: with_ks__
  real(dp) :: g2, g2_ks
  character(len=abi_slen) :: gstore_gmode
@@ -4744,12 +4746,16 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
 
  do spin=1,gstore%nsppol
    NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
-   NCF_CHECK(nctk_get_dim(spin_ncid, "nb", nb))
    NCF_CHECK(nctk_get_dim(spin_ncid, "glob_nq", glob_nq))
    NCF_CHECK(nctk_get_dim(spin_ncid, "glob_nk", glob_nk))
    NCF_CHECK(nctk_get_dim(spin_ncid, "gstore_cplex", cplex))
 
+   NCF_CHECK(nctk_get_dim(spin_ncid, "nb", nb))
    write(ab_out, "(a,i0)")" gqk%nb: ", nb
+   nb_k = nb; nb_kq = nb
+
+   !NCF_CHECK(nctk_get_dim(spin_ncid, "nb_k", nb_k))
+   !NCF_CHECK(nctk_get_dim(spin_ncid, "nb_kq", nb_kq))
    !write(ab_out, "(a,i0)")" gqk%nb_kq: ", nb_kq
    !write(ab_out, "(a,i0)")" gqk%nb_k: ", nb_k
    write(ab_out, "(a,i0)")" gqk%glob_nq: ", glob_nq
@@ -4790,8 +4796,8 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
    !    nctkarr_t("gvals", "dp", "gstore_cplex, nb, nb, natom3, glob_nk, glob_nq")
 
    !cplex = dtset%gstore_cplex
-   ABI_MALLOC(gslice_mn, (cplex, nb, nb))
-   ABI_MALLOC(gslice_ks_mn, (cplex, nb, nb))
+   ABI_MALLOC(gslice_mn, (cplex, nb_kq, nb_k))
+   ABI_MALLOC(gslice_ks_mn, (cplex, nb_kq, nb_k))
 
    write(ab_out,"(a)") " E-PH matrix elements:"
    if (with_ks__) then
@@ -4807,7 +4813,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
        do ipc=1,natom3
          if (ipc /= 4 .and. ipc /= natom3) cycle ! Write the 4th and the last perturbation.
          ncerr = nf90_get_var(spin_ncid, spin_vid("gvals"), gslice_mn, &
-                              start=[1,1,1,ipc,ik_glob,iq_glob], count=[cplex,nb,nb,1,1,1])
+                              start=[1,1,1,ipc,ik_glob,iq_glob], count=[cplex,nb_kq,nb_k,1,1,1])
          NCF_CHECK(ncerr)
 
          ! TODO: Get rid of cplex, write everything using complex and atom representation
@@ -4816,8 +4822,8 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
          if (.not. with_ks__) then
           ! gvals only.
            write(ab_out, "(1x,5(a5,1x),a16)")"iq","ik", "mode", "im_kq", "in_k", "|g|^2 in Ha^2"
-           do im_kq=1,nb
-             do in_k=1,nb
+           do im_kq=1,nb_kq
+             do in_k=1,nb_k
                if (cplex == 1) g2 = gslice_mn(1, im_kq, in_k)
                if (cplex == 2) g2 = gslice_mn(1, im_kq, in_k)**2 + gslice_mn(2, im_kq, in_k)**2
                write(ab_out, "(1x,5(i5,1x),es16.6)") iq_glob, ik_glob, ipc, im_kq, in_k, g2
@@ -4829,8 +4835,8 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
                                start=[1,1,1,ipc,ik_glob,iq_glob], count=[cplex,nb,nb,1,1,1])
           NCF_CHECK(ncerr)
           write(ab_out, "(1x,5(a5,1x),2a16)")"iq","ik", "mode", "im_kq", "in_k", "|g^SE|^2 in Ha^2", "|g^KS|^2 in Ha^2"
-          do im_kq=1,nb
-            do in_k=1,nb
+          do im_kq=1,nb_kq
+            do in_k=1,nb_k
               if (cplex == 1) then
                 g2 = gslice_mn(1, im_kq, in_k)
                 g2_ks = gslice_ks_mn(1, im_kq, in_k)
@@ -5000,7 +5006,7 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
 
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is); my_nq = gqk%my_nq; my_nk = gqk%my_nk; my_npert = gqk%my_npert
-   nb_k = gqk%nb; nb_kq = gqk%nb
+   nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
 
    ! Initialize gkq%wan from ABIWAN.nc for this spin.
    keep_umats = .False.
