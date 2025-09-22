@@ -1,4 +1,4 @@
-# GWPT calculation with SCR file
+# Calculation of GWPT e-ph matrix elements with precomputed SCR file.
 # Preparatory run for computing the ZPR
 
  #gwpt_np_wpqbks 1 1 8 1 1 1
@@ -21,17 +21,18 @@
  ecut 45.0          # Cutoff energy for wavefunctions.
  ecuteps  8         # Cutoff energy for screening (cannot be larger than the one found in the SCR file)
                     # SC TODO: on alps_gnu_14.2_cov, ecuteps here = ecuteps in the SCR file still results in an error
-
  ecutsigx 8         # Cutoff energy for exchange part.
  boxcutmin 1.1
- tolwfr 1e-4
+ tolwfr 1e-4       # Tolerance for Sternheimer solver.
+                   # THIS VALUE IS TOO LOW.
 
  nband 9           # Number of bands to build G with Lehmnann's representation.
                    # This value cannot be larger that the number of bands in the WFK file.
  #prtvol 10
 
- # TODO: Should have a default value
+ # TODO: elph2_imagden Should have a default value
  elph2_imagden 0.1 eV
+ zcut 0.01 eV
 
  # Specify ppmodel used to evalue convolution between G and W.
  # MG: TODO: ppmodel 2 leads to a SIGFPE on eos_gnu_13.2_mpich
@@ -51,8 +52,8 @@
 
  # Read DDB file with dynamica matrix.
  getddb_filepath "diamond_eph_gwpt/out_DDB"
- ddb_ngqpt 2 2 2          # The code expects to find in the DDB
-                          # all the IBZ q-points corresponding to a 2x2x2 q-mesh
+ ddb_ngqpt 2 2 2   # The code expects to find in the DDB
+                   # all the IBZ q-points corresponding to a 2x2x2 q-mesh
 
  # Read first-order potentials and densities from these two files.
  getdvdb_filepath "t01_DVDB"
@@ -65,12 +66,7 @@
  prtphdos 0
  prtphbands 0
 
-##############################################
-####                 SECTION: Sigma_nk
-##############################################
- zcut 0.01 eV
-
-# Read crystal structure from DEN.nc file
+ # Read crystal structure from DEN.nc file
  structure "abifile:diamond_eph_gwpt/gso_DEN.nc"
 
  pp_dirpath "$ABI_PSPDIR/Psdj_nc_fr_04_pbe_std_psp8"
@@ -93,5 +89,7 @@
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH
-#%% description = GWPT calculation
+#%% description =
+#%% Calculation of GWPT e-ph matrix elements with precomputed SCR file.
+#%% Preparatory run for computing the ZPR
 #%%<END TEST_INFO>

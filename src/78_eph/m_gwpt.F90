@@ -194,7 +194,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: n1,n2,n3,n4,n5,n6,nspden, mqmem, m_kq, n_k, restart, root_ncid, spin_ncid, usecprj !,sij_opt
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg_k,nkpg_kq,nkpg_kqmp,nkpg_kmp,imyp, cnt, nvloc, iw_nk, iw_mkq, ndone, nmiss
  integer :: my_ipp, ipp_bz, ipp_ibz, isym_pp, itim_pp, comm_rpt, nqlwl, scr_iomode
- integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt, nb, timrev_k, timrev_q, iq_start, my_nqibz
+ integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt, timrev_k, timrev_q, iq_start, my_nqibz
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_qq, wall_qq, gflops_qq, cpu_kk, wall_kk, gflops_kk, cpu_pp, wall_pp, gflops_pp
  real(dp) :: drude_plsmf, my_plsmf
  real(dp) :: fact_spin, theta_mu_minus_e0i, tol_empty, tol_empty_in !, e_mkq, e_nk ! e0i,
@@ -556,14 +556,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
    do my_is=1,gstore%my_nspins
      spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is)
-     nb = gqk%nb; nb_k = gqk%nb; nb_kq = gqk%nb
+     nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
 
      ! Be careful as wavefunctions might be replicated.
      ! Use count_bk to count how many states have been computed
      ! in parallel in order to rescale the results.
      if (gstore%with_vk == 1) then
-       ABI_CALLOC(vk_cart_ibz, (3, gqk%nb, gstore%nkibz))
-       ABI_ICALLOC(count_bk, (nb, gstore%nkibz))
+       ABI_CALLOC(vk_cart_ibz, (3, nb_k, gstore%nkibz))
+       ABI_ICALLOC(count_bk, (nb_k, gstore%nkibz))
      else
        ABI_ERROR("gstore%with_vk 2 not implemented")
      end if
@@ -579,10 +579,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        npw_k = wfd%npwarr(ik_ibz); istwf_k = wfd%istwfk(ik_ibz)
        call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kk, istwf_k, npw_k, wfd%kdata(ik_ibz)%kg_k)
 
-       do band=gqk%bstart, gqk%bstop
+       do band=gqk%bstart_k, gqk%bstop_k
          call wfd%copy_cg(band, ik_ibz, spin, cg_work)
          eig0nk = ebands%eig(band, ik_ibz, spin)
-         ib = band - gqk%bstart + 1
+         ib = band - gqk%bstart_k + 1
          vk_cart_ibz(:, ib, ik_ibz) = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, wfd%nspinor, cg_work, cwaveprj0)
          count_bk(ib, ik_ibz) = count_bk(ib, ik_ibz) + 1
        end do
@@ -592,8 +592,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      call xmpi_sum(vk_cart_ibz, gqk%comm%value, ierr)
 
      do ik_ibz=1, gstore%nkibz
-       do band=gqk%bstart, gqk%bstop
-         ib = band - gqk%bstart + 1
+       do band=gqk%bstart_k, gqk%bstop_k
+         ib = band - gqk%bstart_k + 1
          if (count_bk(ib, ik_ibz) == 0) cycle
          do ii=1,3
            vk_cart_ibz(ii,ib,ik_ibz) = vk_cart_ibz(ii,ib,ik_ibz) / count_bk(ib, ik_ibz)
@@ -884,14 +884,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is); my_npert = gqk%my_npert
    ABI_CHECK_IEQ(my_npert, gqk%my_npert, "my_npert")
-   ABI_CHECK_IGEQ(nbsum, gqk%bstop, "nband must be greater than the max band in the e-ph matrix elements")
+   ABI_CHECK_IGEQ(nbsum, gqk%bstop_kq, "nband must be greater than the max band in the e-ph matrix elements")
 
    NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
 
    ! Note the possibility of specifying different number of states for the incoming and the intermediate states.
-   nb = gqk%nb; nb_k = gqk%nb; nb_kq = gqk%nb
-   bstart_k = gqk%bstart; bstop_k = gqk%bstop
-   bstart_kq = gqk%bstart; bstop_kq = gqk%bstop
+   nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
+   bstart_k = gqk%bstart_k; bstop_k = gqk%bstop_k
+   bstart_kq = gqk%bstart_kq; bstop_kq = gqk%bstop_k
 
    ABI_MALLOC(iq_buf, (2, qbuf_size))
    ABI_MALLOC(gsig_atm, (2, nb_kq, nb_k, natom3))
@@ -1993,20 +1993,20 @@ subroutine dump_my_gbuf()
  iq_glob = my_iq + gqk%my_qstart - 1
 
  !print *, "in dump_my_gbuf with start: ", [1, 1, 1, 1, gqk%my_kstart, iq_glob]
- !print *, "                  count; ", [gqk%cplex, gqk%nb, gqk%nb, gqk%natom3, gqk%my_nk, iqbuf_cnt]
+ !print *, "                  count; ", [gqk%cplex, gqk%nb_kq, gqk%nb_k, gqk%natom3, gqk%my_nk, iqbuf_cnt]
  !print *, "my_gbuf", my_gbuf(:,:,:,natom3,1,1)
 
  ! Output g^Sigma
  ! NB: this is an individual IO operation
  ncerr = nf90_put_var(spin_ncid, spin_vid("gvals"), my_gbuf, &
                       start=[1, 1, 1, 1, gqk%my_kstart, iq_glob], &
-                      count=[gqk%cplex, gqk%nb, gqk%nb, gqk%natom3, gqk%my_nk, iqbuf_cnt])
+                      count=[gqk%cplex, gqk%nb_kq, gqk%nb_k, gqk%natom3, gqk%my_nk, iqbuf_cnt])
  NCF_CHECK(ncerr)
 
  ! Output g^KS
  ncerr = nf90_put_var(spin_ncid, spin_vid("gvals_ks"), my_gbuf_ks, &
                       start=[1, 1, 1, 1, gqk%my_kstart, iq_glob], &
-                      count=[gqk%cplex, gqk%nb, gqk%nb, gqk%natom3, gqk%my_nk, iqbuf_cnt])
+                      count=[gqk%cplex, gqk%nb_kq, gqk%nb_k, gqk%natom3, gqk%my_nk, iqbuf_cnt])
  NCF_CHECK(ncerr)
 
  ! Only one proc sets the entry in done_qbz_spin to 1 for all the q-points in the buffer.

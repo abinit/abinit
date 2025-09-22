@@ -199,7 +199,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
 
 !Local variables-------------------------------
  integer,parameter :: master = 0, with_cplex1 = 1, max_ntemp = 50, cplex1 = 1, pawread0 = 0
- integer :: n1, n2, n3, n4, n5, n6, nb_k, nb_kq, bstart_k, bstart_kq
+ integer :: n1, n2, n3, n4, n5, n6, nb_k, nb_kq
  integer :: spin, my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, gap_err, my_rank, ip1, ip2, nu
  integer :: it, ik_bz, ik_ibz, ikq_ibz, band_k, band_kq, timrev_k, ii, ikcalc, natom, natom3, nsppol
  integer :: nfft, nfftf, mgfft, mgfftf !,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart, enough_stern
@@ -337,7 +337,6 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
    associate (gqk => gstore%gqk(my_is), cryst => gstore%cryst)
    spin = gstore%my_spins(my_is)
    nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
-   bstart_k = gqk%bstart_k; bstart_kq = gqk%bstart_kq
 
    ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
    ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
@@ -401,8 +400,8 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
          call sigtk_dw_tpp_red(natom, displ_nu_red, tpp_red)
 
          ! Sum over bands.
-         do im_kq=1,nb_kq
-           band_kq = im_kq - bstart_kq + 1
+         do im_kq=1,gqk%nb_kq
+           band_kq = im_kq - gqk%bstart_kq + 1
            eig0mkq = ebands%eig(band_kq, ikq_ibz, spin)
 
            ! Compute electronic occ for all Temps (note mu_e(it) Fermi level)
@@ -411,8 +410,8 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
            end do
 
            ! Loop over the n index in |n,k>.
-           do in_k=1,nb_k
-             band_k = in_k - bstart_k + 1
+           do in_k=1,gqk%nb_k
+             band_k = in_k - gqk%bstart_k + 1
              eig0nk = ebands%eig(band_k, ik_ibz, spin)
              ediff = eig0nk - eig0mk
              !intra_band = q_is_gamma .and. ediff <= TOL_EDIFF
@@ -553,10 +552,10 @@ subroutine sep_gather_and_write_results(sigma, gstore, gqk, dtset, ebands)
  !real(dp),allocatable :: aw(:,:,:), a2few_avg(:,:), gather_srate(:,:,:,:), grp_srate(:,:,:,:)
  real(dp) :: ks_enes(gqk%nb_k), ze0_vals(sigma%ntemp, gqk%nb_k)
  !real(dp) :: gfw_avg(sigma%phmesh_size, 3)
- complex(dp) :: qpoms_enes(sigma%ntemp, gqk%nb_k),qp_enes(sigma%ntemp, gqk%nb_k) ! nb_k
+ complex(dp) :: qpoms_enes(sigma%ntemp, gqk%nb_k),qp_enes(sigma%ntemp, gqk%nb_k)
 !! *************************************************************************
 
- spin = gqk%spin; nb_k = gqk%nb_k
+ spin = gqk%spin
 
  ! Sum partial terms inside qgk%comm.
  call xmpi_sum(sigma%vals_e0ks, gqk%comm%value, ierr)
@@ -679,7 +678,7 @@ subroutine sep_gather_and_write_results(sigma, gstore, gqk, dtset, ebands)
      end if
 
      ! Loop over band n_k for this k-point and spin.
-     do in_k=1,nb_k
+     do in_k=1,gqk%nb_k
        band_k = in_k - bstart_k + 1
        kse = ebands%eig(band_k, ik_ibz, spin)
        ks_enes(in_k) = kse

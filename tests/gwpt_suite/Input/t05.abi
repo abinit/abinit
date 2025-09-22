@@ -1,7 +1,7 @@
-# ZPR computation at the Gamma point for Diamond with GWPT e-ph matrix elements.
+# ZPR computation for Diamond with GWPT e-ph matrix elements.
 
- optdriver 7              # Enter EPH driver.
- eph_task 24              # ZPR computation from GSTORE file
+ optdriver 7    # Enter EPH driver.
+ eph_task 24    # ZPR computation from GSTORE file
 
  nband 9
  ecut 45.0
@@ -22,11 +22,13 @@
  getddb_filepath "diamond_eph_gwpt/out_DDB"
  getgstore_filepath "t04o_GSTORE.nc"
  gstore_gmode "atom"
+
  gstore_use_lgk  0
  #gstore_use_lgk  1
- #gstore_gname "gvals"
- gstore_gname "gvals_ks"
- tmesh 300 100 1
+ #gstore_gname "gvals"   # Use GWPT e-ph matrix elements from GSTORE
+ gstore_gname "gvals_ks" # Use KS e-ph matrix elements from GSTORE
+
+ tmesh 300 100 1         # Temperature mesh.
 
  ddb_ngqpt 2 2 2          # The code expects to find in the DDB
                           # all the IBZ q-points corresponding to a 2x2x2 q-mesh
@@ -66,5 +68,5 @@
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH
-#%% description = ZPR computation at the Gamma point for Diamond with GWPT e-ph matrix elements.
+#%% description = ZPR computation for Diamond with GWPT e-ph matrix elements.
 #%%<END TEST_INFO>

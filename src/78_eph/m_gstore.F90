@@ -266,7 +266,7 @@ type, public :: gqk_t
 
   real(dp),allocatable :: vk_cart_ibz(:,:,:)
   ! (3, nb, nkibz)
-  ! Diagonal v_{m, m,k} for k in the IBZ.
+  ! Diagonal v_{n,k} for k in the IBZ.
   ! Values in the BZ can be reconstructed by symmetry.
   ! Allocated if gstore%with_vk == 1
   ! TODO: Here I should decide how to treat nb_k, nk_kq
@@ -3570,7 +3570,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      spin = gstore%my_spins(my_is)
 
      if (gstore%with_vk == 1) then
-       ABI_CALLOC(vk_cart_ibz, (3, gqk%nb, gstore%nkibz))
+       ABI_CALLOC(vk_cart_ibz, (3, gqk%nb_k, gstore%nkibz))
      else
        ABI_ERROR("gstore%with_vk 2 not implemented")
      end if
@@ -3597,8 +3597,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
        select case (gstore%with_vk)
        case (1)
-         do in_k=1,gqk%nb
-           band_k = in_k + gqk%bstart - 1
+         do in_k=1,gqk%nb_k
+           band_k = in_k + gqk%bstart_k - 1
            call wfd%copy_cg(band_k, ik_ibz, spin, cgwork)
            vk = ddkop%get_vdiag(ebands%eig(band_k, ik_ibz, spin), istwf_k, npw_k, wfd%nspinor, cgwork, cwaveprj0)
            vk_cart_ibz(:, in_k, ik_ibz) = vk
@@ -4557,7 +4557,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
        NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("vkmat_cart_ibz"), gqk%vkmat_cart_ibz))
 
        ! Transfer diagonal terms to vk_cart_ibz.
-       do ib=1,gqk%nb
+       do ib=1,gqk%nb_k
          gqk%vk_cart_ibz(:, ib, :) = gqk%vkmat_cart_ibz(1, :, ib, ib, :)
        end do
      end if
