@@ -1013,7 +1013,7 @@ type, public :: dataset_type
 !Real arrays
  real(dp) :: boxcenter(3)
  real(dp) :: bfield(3)
-!  Take big absolute value numbers, but not the biggest ones, otherwise overflow can happen
+! Take big absolute value numbers, but not the biggest ones, otherwise overflow can happen.
  real(dp) :: bs_eh_cutoff(2) = [smallest_real*tol6, greatest_real*tol6]
  real(dp) :: bs_freq_mesh(3) = [zero,zero, 0.01_dp/Ha_eV]
  real(dp) :: bs_haydock_tol(2) = [0.02_dp, zero]
