@@ -712,6 +712,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      call wfdgw_copy(Wfd, Wfdf)
    end if
    call wfdf%change_ngfft(Cryst, Psps, ngfftf)
+   if (dtset%userie == 456) call wfdf%print(units, "UNPERTURBED WFDF for GWTPT")
  end if
 
  call pstat_proc%print(_PSTAT_ARGS_)
