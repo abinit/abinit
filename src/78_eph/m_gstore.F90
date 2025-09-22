@@ -290,8 +290,8 @@ type, public :: gqk_t
   ! FIXME: I don't remember why I decided to have my_npert as first dimension
   ! now it seems much more more natural to me to have:
 
-  ! (nb, nb, my_npert, my_nk, my_nq) or
-  ! (nb, nb, my_npert, my_nq, my_nk)
+  ! (nb_kq, nb_k, my_npert, my_nk, my_nq) or
+  ! (nb_kq, nb_k, my_npert, my_nq, my_nk)
 
   complex(dp), allocatable :: my_gq0nm_atm(:,:,:,:)
   ! (nb_k, nb_kq, natom3, my_nk)
@@ -1034,6 +1034,8 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      ! Dimensions in gqk_spin group
      ncerr = nctk_def_dims(spin_ncid, [ &
         nctkdim_t("nb", gstore%brange_spin(2, spin) - gstore%brange_spin(1, spin) + 1), &
+        !nctkdim_t("nb_k", gstore%brange_spin(2, spin) - gstore%brange_spin(1, spin) + 1), &
+        !nctkdim_t("nb_kq", gstore%brange_spin(2, spin) - gstore%brange_spin(1, spin) + 1), &
         nctkdim_t("glob_nk", gstore%glob_nk_spin(spin)), &
         nctkdim_t("glob_nq", gstore%glob_nq_spin(spin))  &
      ], defmode=.True.)
@@ -1521,13 +1523,10 @@ subroutine gstore_print(gstore, units, header, prtvol)
  do my_is=1,gstore%my_nspins
    associate (spin => gstore%my_spins(my_is), gqk => gstore%gqk(my_is))
    call wrtout(units, sjoin(" gqk_cplex:", itoa(gqk%cplex)), pre_newlines=1)
-   !call wrtout(units, sjoin(" gqk_bstart:", itoa(gqk%bstart)))
    call wrtout(units, sjoin(" gqk_bstart_k:", itoa(gqk%bstart_k)))
    call wrtout(units, sjoin(" gqk_bstart_kq:", itoa(gqk%bstart_kq)))
-   !call wrtout(units, sjoin(" gqk_bstop:", itoa(gqk%bstop)))
    call wrtout(units, sjoin(" gqk_bstop_k:", itoa(gqk%bstop_k)))
    call wrtout(units, sjoin(" gqk_bstop_kq:", itoa(gqk%bstop_kq)))
-   !call wrtout(units, sjoin(" gqk_nb:", itoa(gqk%nb)))
    call wrtout(units, sjoin(" gqk_nb_k:", itoa(gqk%nb_k)))
    call wrtout(units, sjoin(" gqk_nb_kq:", itoa(gqk%nb_kq)))
    call wrtout(units, sjoin(" gqk_my_npert:", itoa(gqk%my_npert)))
@@ -3041,7 +3040,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
 
    do ik_bz=1,nkbz
      ik_ibz = kmesh_map(1, ik_bz)
-     eig_k(:, ik_bz) = ebands%eig(gqk%bstart:gqk%bstop, ik_ibz, spin) - ebands%fermie
+     eig_k(:, ik_bz) = ebands%eig(gqk%bstart_k:gqk%bstop_k, ik_ibz, spin) - ebands%fermie
    end do
 
    ! Map libtetra BZ mesh + q to IBZ and fill eig_kq
@@ -3051,7 +3050,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
 
    do ik_bz=1,nkbz
      ikq_ibz = kmesh_map(1, ik_bz)
-     eig_kq(:, ik_bz) = ebands%eig(gqk%bstart:gqk%bstop, ikq_ibz, spin) - ebands%fermie
+     eig_kq(:, ik_bz) = ebands%eig(gqk%bstart_kq:gqk%bstop_kq, ikq_ibz, spin) - ebands%fermie
    end do
 
    ABI_FREE(kmesh_map)
@@ -3288,8 +3287,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, ider0 = 0, idir0 = 0, LOG_MODQ = 5, master = 0, ndat1 = 1
  integer :: my_rank,nproc,nproc_lim,mband,nsppol,nkibz,idir,ipert, iq_bz
  integer :: cplex,natom,natom3,ipc,nspinor, nskip_tetra_kq, timrev_k, timrev_q
- integer :: bstart_k, bstart_kq, band_k, in_k, im_kq
- integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq, nb_k, nb_kq
+ integer :: band_k, in_k, im_kq, ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq, nb_k, nb_kq
  integer :: my_ik, my_is, comm_rpt, my_npert, my_ip, my_iq, spin,istwf_k,istwf_kq,npw_k,npw_kq
  integer :: mpw, nb,ierr,cnt, n1,n2,n3,n4,n5,n6,nspden,ndone, db_iqpt
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
@@ -3788,9 +3786,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
          end if
        end if
 
-       ! Number of bands at k
-       bstart_k = gqk%bstart
-
        ! =========================================
        ! Find symmetrical image of k+q in the kIBZ
        ! =========================================
@@ -3817,17 +3812,14 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
          end if
        end if
 
-       ! Number of bands at k+q
-       bstart_kq = gqk%bstart
-
        ! Get npw_k, kg_k and symmetrize wavefunctions from IBZ (if needed).
        ! TODO: these routines now should allocate wavefunctions as
        !real(dp),intent(out) :: cgs_kbz(2, npw_k*self%nspinor, nband)
-       call wfd%sym_ug_kg(ecut, kk_bz, kk_ibz, bstart_k, nb_k, spin, mpw, gqk%my_k2ibz(:, my_ik), cryst, &
+       call wfd%sym_ug_kg(ecut, kk_bz, kk_ibz, gqk%bstart_k, nb_k, spin, mpw, gqk%my_k2ibz(:, my_ik), cryst, &
                           work_ngfft, work, istwf_k, npw_k, kg_k, kets_k)
 
        ! Get npw_kq, kg_kq and symmetrize wavefunctions from IBZ (if needed).
-       call wfd%sym_ug_kg(ecut, kq_bz, kq_ibz, bstart_kq, nb_kq, spin, mpw, indkk_kq(:,1), cryst, &
+       call wfd%sym_ug_kg(ecut, kq_bz, kq_ibz, gqk%bstart_kq, nb_kq, spin, mpw, indkk_kq(:,1), cryst, &
                           work_ngfft, work, istwf_kq, npw_kq, kg_kq, bras_kq)
 
        call gs_ham_kq%eph_setup_k("k" , kk_bz, istwf_k, npw_k, kg_k, dtset, cryst, psps, &
@@ -3850,7 +3842,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
          ! Calculate dvscf * psi_k, results stored in h1_kets_kq on the k+q sphere.
          ! Compute H(1) applied to GS wavefunction Psi(0)
          do in_k=1,nb_k
-           band_k = in_k + bstart_k - 1
+           band_k = in_k + gqk%bstart_k - 1
            eig0nk = ebands%eig(band_k, ik_ibz, spin)
            ! Use scissor shift on 0-order eigenvalue
            eshift = eig0nk - dtset%dfpt_sciss

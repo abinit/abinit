@@ -1559,16 +1559,16 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                  call sigtk_multiply_by_vc_sqrt("C", npw_c, nspinor, ndat1, vc_sqrt_gx, rhotwg_c)
                end if
 
-               if (m_kq == 1 .AND. ipc == 1) &
-                  print *, "|vec_gx_nk|^2,+q,ib=", ib_sum, sum(abs(vec_gx_nk(:, 1))*abs(vec_gx_nk(:, 1)))
-               if (m_kq == 1 .AND. ipc == 1) &
-                  print *, "|rhotwg_x|^2,+q,ib=", ib_sum, sum(abs(rhotwg_x)*abs(rhotwg_x))
+               !if (m_kq == 1 .AND. ipc == 1) &
+               !   print *, "|vec_gx_nk|^2,+q,ib=", ib_sum, sum(abs(vec_gx_nk(:, 1))*abs(vec_gx_nk(:, 1)))
+               !if (m_kq == 1 .AND. ipc == 1) &
+               !   print *, "|rhotwg_x|^2,+q,ib=", ib_sum, sum(abs(rhotwg_x)*abs(rhotwg_x))
 
                do n_k=bstart_k, bstop_k ! do n_k=gqk%n_start, gqk%n_stop
-                 if (m_kq == 1 .AND. n_k == 1 .AND. ipc == 1) &
-                   print *, "|vec_gwc_nk|^2,+q,ib=", ib_sum, sum(abs(vec_gwc_nk(:, 1, n_k))*abs(vec_gwc_nk(:, 1, n_k)))
-                 if (m_kq == 1 .AND. n_k == 1 .AND. ipc == 1) &
-                   print *, "|rhotwg_c|^2,+q,ib=", ib_sum, sum(abs(rhotwg_c)*abs(rhotwg_c))
+                 !if (m_kq == 1 .AND. n_k == 1 .AND. ipc == 1) &
+                 !  print *, "|vec_gwc_nk|^2,+q,ib=", ib_sum, sum(abs(vec_gwc_nk(:, 1, n_k))*abs(vec_gwc_nk(:, 1, n_k)))
+                 !if (m_kq == 1 .AND. n_k == 1 .AND. ipc == 1) &
+                 !  print *, "|rhotwg_c|^2,+q,ib=", ib_sum, sum(abs(rhotwg_c)*abs(rhotwg_c))
 
                   ! Take the average
                   iw_mkq = m_kq - bstart_kq + 1
@@ -1586,11 +1586,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                   !print *, rhotwg_x
                   !print *, 'vec_gx_nk(:,n_k)'
                   !print *, vec_gx_nk(:,n_k)
-                  print *, '+qq', qq_bz
-                  print *, 'ib_sum', ib_sum
-                  print *, 'correlation contribution,+q:', ctmp_gwpc
-                  print *, 'exchange contribution,+q:', xdot_tmp
-                  !call sleep(10)
+                  !print *, '+qq', qq_bz
+                  !print *, 'ib_sum', ib_sum
+                  !print *, 'correlation contribution,+q:', ctmp_gwpc
+                  !print *, 'exchange contribution,+q:', xdot_tmp
                  end if
 
                  gsig_atm(1, m_kq, n_k, ipc) = gsig_atm(1, m_kq, n_k, ipc) + real(ctmp_gwpc)
@@ -1598,13 +1597,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
                  ! DEBUG
                  if (n_k == 1 .and. m_kq == 1 .and. ipc == 1) then
-                   print '(A7, A7, A7, A7, A7, A7)', 'my_is', 'my_iq', 'my_ik', 'ipp_bz', 'ib_sum', 'imyp'
-                   print '(I7, I7, I7, I7, I7, I7)', my_is,  my_iq,  my_ik,  ipp_bz,  ib_sum,  imyp
-                   print *, "gsig_atm(:, 1, 1, 1):", gsig_atm(:, 1, 1, 1)
-                   print *, "gks_atm(:, 1, 1, 1):", gks_atm(:, 1, 1, 1)
-                   print *, "gks_atm2(:, 1, 1, 1):", gks_atm2(:, 1, 1, 1)
-                   print *, ' '
-                   !call sleep(0)
+                   !print '(A7, A7, A7, A7, A7, A7)', 'my_is', 'my_iq', 'my_ik', 'ipp_bz', 'ib_sum', 'imyp'
+                   !print '(I7, I7, I7, I7, I7, I7)', my_is,  my_iq,  my_ik,  ipp_bz,  ib_sum,  imyp
+                   !print *, "gsig_atm(:, 1, 1, 1):", gsig_atm(:, 1, 1, 1)
+                   !print *, "gks_atm(:, 1, 1, 1):", gks_atm(:, 1, 1, 1)
+                   !print *, "gks_atm2(:, 1, 1, 1):", gks_atm2(:, 1, 1, 1)
+                   !print *, ' '
                  end if
 
                end do ! n_k
@@ -1682,16 +1680,16 @@ if (.not. qq_is_gamma) then
                  call sigtk_multiply_by_vc_sqrt("N", npw_c, nspinor, ndat1, vc_sqrt_gx, rhotwg_c)
                end if
 
-               if (n_k == 1 .AND. ipc == 1) &
-                  print *, "|vec_gx_mkq|^2,-q,ib=", ib_sum, sum(abs(vec_gx_mkq(:, 1))*abs(vec_gx_mkq(:, 1)))
-               if (n_k == 1 .AND. ipc == 1) &
-                  print *, "|rhotwg_x|^2,-q,ib=", ib_sum, sum(abs(rhotwg_x)*abs(rhotwg_x))
+               !if (n_k == 1 .AND. ipc == 1) &
+               !   print *, "|vec_gx_mkq|^2,-q,ib=", ib_sum, sum(abs(vec_gx_mkq(:, 1))*abs(vec_gx_mkq(:, 1)))
+               !if (n_k == 1 .AND. ipc == 1) &
+               !   print *, "|rhotwg_x|^2,-q,ib=", ib_sum, sum(abs(rhotwg_x)*abs(rhotwg_x))
 
                do m_kq=bstart_kq, bstop_kq
-                 if (n_k == 1 .AND. m_kq == 1 .AND. ipc == 1) &
-                   print *, "|vec_gwc_mkq|^2,-q,ib=", ib_sum, sum(abs(vec_gwc_mkq(:, 1, m_kq))*abs(vec_gwc_mkq(:, 1, m_kq)))
-                 if (n_k == 1 .AND. m_kq == 1 .AND. ipc == 1) &
-                   print *, "|rhotwg_c|^2,-q,ib=", ib_sum, sum(abs(rhotwg_c)*abs(rhotwg_c))
+                 !if (n_k == 1 .AND. m_kq == 1 .AND. ipc == 1) &
+                 !  print *, "|vec_gwc_mkq|^2,-q,ib=", ib_sum, sum(abs(vec_gwc_mkq(:, 1, m_kq))*abs(vec_gwc_mkq(:, 1, m_kq)))
+                 !if (n_k == 1 .AND. m_kq == 1 .AND. ipc == 1) &
+                 !  print *, "|rhotwg_c|^2,-q,ib=", ib_sum, sum(abs(rhotwg_c)*abs(rhotwg_c))
 
                   ! Take the average
                   iw_nk = n_k - bstart_k + 1
@@ -1709,11 +1707,10 @@ if (.not. qq_is_gamma) then
                   !print *, rhotwg_x
                   !print *, 'vec_gx_mkq(:,m_kq)'
                   !print *, vec_gx_mkq(:,m_kq)
-                  print *, '-qq', -qq_bz
-                  print *, 'ib_sum', ib_sum
-                  print *, 'correlation contribution,-q:', ctmp_gwpc
-                  print *, 'exchange contribution,-q:', xdot_tmp
-                  !call sleep(10)
+                  !print *, '-qq', -qq_bz
+                  !print *, 'ib_sum', ib_sum
+                  !print *, 'correlation contribution,-q:', ctmp_gwpc
+                  !print *, 'exchange contribution,-q:', xdot_tmp
                  end if
 
                  gsig_atm(1, m_kq, n_k, ipc) = gsig_atm(1, m_kq, n_k, ipc) + real(ctmp_gwpc)
@@ -1721,13 +1718,12 @@ if (.not. qq_is_gamma) then
 
                  ! DEBUG
                  if (n_k == 1 .and. m_kq == 1 .and. ipc == 1) then
-                   print '(A7, A7, A7, A7, A7, A7)', 'my_is', 'my_iq', 'my_ik', 'ipp_bz', 'ib_sum', 'imyp'
-                   print '(I7, I7, I7, I7, I7, I7)', my_is,  my_iq,  my_ik,  ipp_bz,  ib_sum,  imyp
-                   print *, "gsig_atm(:, 1, 1, 1):", gsig_atm(:, 1, 1, 1)
-                   print *, "gks_atm(:, 1, 1, 1):", gks_atm(:, 1, 1, 1)
-                   print *, "gks_atm2(:, 1, 1, 1):", gks_atm2(:, 1, 1, 1)
-                   print *, ' '
-                   !call sleep(0)
+                   !print '(A7, A7, A7, A7, A7, A7)', 'my_is', 'my_iq', 'my_ik', 'ipp_bz', 'ib_sum', 'imyp'
+                   !print '(I7, I7, I7, I7, I7, I7)', my_is,  my_iq,  my_ik,  ipp_bz,  ib_sum,  imyp
+                   !print *, "gsig_atm(:, 1, 1, 1):", gsig_atm(:, 1, 1, 1)
+                   !print *, "gks_atm(:, 1, 1, 1):", gks_atm(:, 1, 1, 1)
+                   !print *, "gks_atm2(:, 1, 1, 1):", gks_atm2(:, 1, 1, 1)
+                   !print *, ' '
                  end if
 
                end do ! n_k
@@ -1786,10 +1782,9 @@ end if ! .not qq_is_gamma.
        !gsig_atm = gsig_atm / pp_mesh%nbz
 
        ! DEBUG
-       print *, ' '
-       print *, 'Finally, normaliz gsig_atm by a factor of ', pp_mesh%nbz
-       print *, "gsig_atm(:, 1, 1, 1):", gsig_atm(:, 1, 1, 1)
-       !call sleep(0)
+       !print *, ' '
+       !print *, 'Finally, normaliz gsig_atm by a factor of ', pp_mesh%nbz
+       !print *, "gsig_atm(:, 1, 1, 1):", gsig_atm(:, 1, 1, 1)
 
        if (dtset%useria == 0) then
         gsig_atm = gsig_atm + gks_atm - gxc_atm
@@ -1797,8 +1792,8 @@ end if ! .not qq_is_gamma.
         gsig_atm = gks_atm
        end if
 
-       print *, "gks_atm(:, 1, 1, 1) - gxc_atm(:, 1, 1, 1):",  gks_atm(:, 1, 1, 1) - gxc_atm(:, 1, 1, 1)
-       print *, "gsig_atm(:, 1, 1, 1)+ gks_atm(:, 1, 1, 1) - gxc_atm(:, 1, 1, 1):", gsig_atm(:, 1, 1, 1)
+       !print *, "gks_atm(:, 1, 1, 1) - gxc_atm(:, 1, 1, 1):",  gks_atm(:, 1, 1, 1) - gxc_atm(:, 1, 1, 1)
+       !print *, "gsig_atm(:, 1, 1, 1)+ gks_atm(:, 1, 1, 1) - gxc_atm(:, 1, 1, 1):", gsig_atm(:, 1, 1, 1)
 
        !print *, "gsig_average", sum(abs(gsig_atm)) / size(gsig_atm) / two
        !print *, "gks_average", sum(abs(gks_atm)) / size(gks_atm) / two
