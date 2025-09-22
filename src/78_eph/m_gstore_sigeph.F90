@@ -41,6 +41,7 @@ module m_gstore_sigeph
  use m_sigtk
 
  !use m_time,           only : cwtime, cwtime_report, sec2str
+ use m_numeric_tools,  only : arth !, c2r, get_diag, linfit, iseven, simpson_cplx, simpson, print_arr, inrange
  use m_fstrings,       only : tolower, itoa, ftoa, sjoin, ktoa, ltoa, strcat, replace_ch0, yesno, string_in
  !use m_cgtools,        only : cg_zdotc
  !use m_kg,             only : getph
@@ -356,12 +357,12 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
    !if (sigma%nwr > 0) then
    !  ABI_CALLOC(sigma%vals_wr, (sigma%nwr, sigma%ntemp, nb_k, glob_nk))
    !  ABI_CALLOC(sigma%wrmesh_b, (sigma%nwr, nb_k, glob_nk))
+   !  kk = gqk%my_kpts(:, my_ik); ik_ibz = gqk%my_k2ibz(1, my_ik)
    !  do in_k=1,gqk%nb_k
-   !    do ib_k=1,nbcalc_ks
-   !     band_k = in_k + gqk%bstart_k - 1
-   !     ! Build linear mesh **centered** around the KS energy.
-   !     eig0nk = ebands%eig(band_k, ik_ibz, spin) - sigma%wr_step * (sigma%nwr / 2)
-   !     sigma%wrmesh_b(:,ib_k) = arth(eig0nk, sigma%wr_step, sigma%nwr)
+   !    band_k = in_k + gqk%bstart_k - 1
+   !    ! Build linear mesh **centered** around the KS energy.
+   !    eig0nk = ebands%eig(band_k, ik_ibz, spin) - sigma%wr_step * (sigma%nwr / 2)
+   !    sigma%wrmesh_b(:,in_k, ikcalc) = arth(eig0nk, sigma%wr_step, sigma%nwr)
    !  end do
    !end if
 
@@ -420,7 +421,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
 
          ! Sum over bands.
          do im_kq=1,gqk%nb_kq
-           band_kq = im_kq - gqk%bstart_kq + 1
+           band_kq = im_kq + gqk%bstart_kq - 1
            eig0mkq = ebands%eig(band_kq, ikq_ibz, spin)
 
            ! Compute electronic occ for all Temps (note mu_e(it) Fermi level)
@@ -476,10 +477,10 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
                !end if
                cfact_wr(:) = gkq2 * cfact_wr(:)
 
-               if (intra_band .and. sigma%frohl_model == 1)  then
-                 ! Add Frohlich correction to Sigma_nk(w)
-                 cfact_wr(:) = zero; if (same_band) cfact_wr(:) = fmw_frohl_sphcorr(:,nu,it,ib_k)
-               end if
+               !if (intra_band .and. sigma%frohl_model == 1)  then
+               !  ! Add Frohlich correction to Sigma_nk(w)
+               !  cfact_wr(:) = zero; if (same_band) cfact_wr(:) = fmw_frohl_sphcorr(:,nu,it,ib_k)
+               !end if
 
                sigma%vals_wr(:,it,ib_k) = sigma%vals_wr(:,it,ib_k) + cfact_wr(:)
              end if ! nwr > 0
