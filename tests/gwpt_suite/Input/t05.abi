@@ -25,8 +25,8 @@
 
  #gstore_use_lgk  0
  gstore_use_lgk  1
- gstore_gname "gvals"   # Use GWPT e-ph matrix elements from GSTORE
- #gstore_gname "gvals_ks" # Use KS e-ph matrix elements from GSTORE
+ #gstore_gname "gvals"   # Use GWPT e-ph matrix elements from GSTORE
+ gstore_gname "gvals_ks" # Use KS e-ph matrix elements from GSTORE
 
  tmesh 300 100 1         # Temperature mesh.
 
