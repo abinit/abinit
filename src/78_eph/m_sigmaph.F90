@@ -4667,8 +4667,9 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
            do ii=1,nstates
              self%vals_wr(iw, it, bids(ii)) = cavg1
            end do
-         end do
+         end do ! iw
        end if
+
      end do ! it
    end do ! ideg
  end if ! symsigma == +1
