@@ -213,7 +213,10 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, dtset,
   ' Calculating <nk|Sigma_x|nk> at k: ',trim(ktoa(kgw)), ", for bands: ", trim(ltoa([bmin, bmax])),ch10
  call wrtout(std_out, msg)
 
- if (any(x_ngfft(1:3) /= wfd%ngfft(1:3)) ) call wfd%change_ngfft(cryst, psps, x_ngfft)
+ if (any(x_ngfft(1:3) /= wfd%ngfft(1:3)) ) then
+   call wfd%change_ngfft(cryst, psps, x_ngfft)
+   if (dtset%userie == 456) call wfdf%change_ngfft(Cryst, Psps, x_ngfft)
+ end if
  x_nfft = product(x_ngfft(1:3)); x_mgfft = maxval(x_ngfft(1:3)); x_fftalga = x_ngfft(7) / 100
 
  if (pawcross==1) mgfftf = MAXVAL(ngfftf(1:3))

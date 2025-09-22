@@ -264,7 +264,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
  ABI_CALLOC(w_maxval,(minbnd:maxbnd))
 
- if (ANY(gwc_ngfft(1:3) /= Wfd%ngfft(1:3))) call Wfd%change_ngfft(Cryst,Psps,gwc_ngfft)
+ if (ANY(gwc_ngfft(1:3) /= Wfd%ngfft(1:3))) then
+   call Wfd%change_ngfft(Cryst,Psps,gwc_ngfft)
+   if (dtset%userie == 456) call wfdf%change_ngfft(Cryst, Psps, gwc_ngfft)
+ end if
  gwc_mgfft   = MAXVAL(gwc_ngfft(1:3))
  gwc_fftalga = gwc_ngfft(7)/100 !; gwc_fftalgc=MOD(gwc_ngfft(7),10)
 
