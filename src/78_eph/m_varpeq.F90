@@ -132,7 +132,7 @@ module m_varpeq
    ! 4 -> polaron energy level
 
   real(dp), allocatable :: eig(:,:)
-   ! (gqk%nb, gstore%ebands%nkpt)
+   ! (gqk%nb_k, gstore%ebands%nkpt)
    ! Electronic eigenstates participating in the polaron formation
    ! Correspond either to valence or conduction manifold, not both
    ! Band edge is set to 0; valence states are also inverted
@@ -150,11 +150,11 @@ module m_varpeq
    ! k-points treated by this MPI proc, points to gqk%my_kpts(:,:)
 
   complex(dp), allocatable :: my_a(:,:,:)
-   ! (gqk%nb, gqk%my_nk, np)
+   ! (gqk%nb_k, gqk%my_nk, np)
    ! Electronic coefficients A_nk for each state treated by this MPI proc
 
   complex(dp), allocatable :: a_glob(:,:)
-   ! (gqk%nb, gqk%glob_nk)
+   ! (gqk%nb_k, gqk%glob_nk)
    ! Global array of electronic coefficients A_nk at current state
 
   complex(dp), allocatable :: my_b(:,:,:)
@@ -166,37 +166,37 @@ module m_varpeq
    ! Previous vibrational coefficients B_q\nu for each state treated by this MPI proc
 
   complex(dp), allocatable :: my_pc(:,:)
-   ! (gqk%nb, gqk%my_nk)
+   ! (gqk%nb_k, gqk%my_nk)
    ! Preconditioner at current state treated by this MPI proc
 
   complex(dp), allocatable :: my_grad(:,:)
-   ! (gqk%nb, gqk%my_nk)
+   ! (gqk%nb_k, gqk%my_nk)
    ! Electronic gradient D_nk at current state treated by this MPI proc
    ! orthogonal to states
 
   complex(dp), allocatable :: my_prev_grad(:,:)
-   ! (gqk%nb, gqk%my_nk)
+   ! (gqk%nb_k, gqk%my_nk)
    ! Previous electronic gradient D_nk at current state, orthogonal to states
 
   complex(dp), allocatable :: my_pcgrad(:,:)
-   ! (gqk%nb, gqk%my_nk)
+   ! (gqk%nb_k, gqk%my_nk)
    ! Preconditioned gradient at current state, orthogonal to states
 
   complex(dp), allocatable :: my_prev_pcgrad(:,:)
-   ! (gqk%nb, gqk%my_nk)
+   ! (gqk%nb_k, gqk%my_nk)
    ! Previous preconditioned gradient at current state, orthogonal to states
 
   complex(dp), allocatable :: my_pcjgrad(:,:)
-   ! (gqk%nb, gqk%my_nk)
+   ! (gqk%nb_k, gqk%my_nk)
    ! Preconditioned conjugate gradient at current state treated by this MPI proc
    ! orthogonal to current state & normalized
 
   complex(dp), allocatable :: my_prev_pcjgrad(:,:)
-   ! (gqk%nb, gqk%my_nk)
+   ! (gqk%nb_k, gqk%my_nk)
    ! Previous preconditioned conjugate gradient at current state
 
   complex(dp), allocatable :: pcjgrad_glob(:,:)
-   ! (gqk%nb, gqk%glob_nk)
+   ! (gqk%nb_k, gqk%glob_nk)
    ! Global preconditioned conjugate gradient at current state
    ! orthogonal to current state & normalized
 
@@ -1696,6 +1696,7 @@ subroutine varpeq_init(self, gstore, dtset)
    spin = gstore%my_spins(my_is)
    gqk => gstore%gqk(my_is)
    polstate => self%polstate(my_is)
+   ABI_CHECK_IEQ(gqk%nb_k, gqk%nb_kq, "VarPEq requires nb_k == nb_kq")
 
    ! Scalars
    ! character
@@ -1724,13 +1725,13 @@ subroutine varpeq_init(self, gstore, dtset)
    ABI_MALLOC(polstate%gradres, (dtset%vpq_nstates))
    ABI_MALLOC(polstate%enterms, (4, dtset%vpq_nstates))
 
-   ABI_MALLOC(polstate%eig, (gqk%nb, gstore%ebands%nkpt))
+   ABI_MALLOC(polstate%eig, (gqk%nb_k, gstore%ebands%nkpt))
    msg = sjoin(self%gaps%errmsg_spin(spin), &
      "VarPEq is incompatible with metals and requires band gap.")
    ABI_CHECK(self%gaps%ierr(spin) == 0, msg)
 
    bstart = gstore%brange_spin(1, spin)
-   bend = bstart + gqk%nb - 1
+   bend = bstart + gqk%nb_k - 1
    select case(dtset%vpq_pkind)
    case ("electron")
      polstate%eig = &
@@ -1749,18 +1750,18 @@ subroutine varpeq_init(self, gstore, dtset)
    enddo
 
    ! complex
-   ABI_MALLOC(polstate%my_a, (gqk%nb, gqk%my_nk, dtset%vpq_nstates))
-   ABI_MALLOC(polstate%a_glob, (gqk%nb, gqk%glob_nk))
+   ABI_MALLOC(polstate%my_a, (gqk%nb_k, gqk%my_nk, dtset%vpq_nstates))
+   ABI_MALLOC(polstate%a_glob, (gqk%nb_k, gqk%glob_nk))
    ABI_MALLOC(polstate%my_b, (gqk%my_npert, gqk%my_nq, dtset%vpq_nstates))
    ABI_MALLOC(polstate%my_prev_b, (gqk%my_npert, gqk%my_nq))
-   ABI_MALLOC(polstate%my_pc, (gqk%nb, gqk%my_nk))
-   ABI_MALLOC(polstate%my_grad, (gqk%nb, gqk%my_nk))
-   ABI_MALLOC(polstate%my_prev_grad, (gqk%nb, gqk%my_nk))
-   ABI_MALLOC(polstate%my_pcgrad, (gqk%nb, gqk%my_nk))
-   ABI_MALLOC(polstate%my_prev_pcgrad, (gqk%nb, gqk%my_nk))
-   ABI_MALLOC(polstate%my_pcjgrad, (gqk%nb, gqk%my_nk))
-   ABI_MALLOC(polstate%my_prev_pcjgrad, (gqk%nb, gqk%my_nk))
-   ABI_MALLOC(polstate%pcjgrad_glob, (gqk%nb, gqk%glob_nk))
+   ABI_MALLOC(polstate%my_pc, (gqk%nb_k, gqk%my_nk))
+   ABI_MALLOC(polstate%my_grad, (gqk%nb_k, gqk%my_nk))
+   ABI_MALLOC(polstate%my_prev_grad, (gqk%nb_k, gqk%my_nk))
+   ABI_MALLOC(polstate%my_pcgrad, (gqk%nb_k, gqk%my_nk))
+   ABI_MALLOC(polstate%my_prev_pcgrad, (gqk%nb_k, gqk%my_nk))
+   ABI_MALLOC(polstate%my_pcjgrad, (gqk%nb_k, gqk%my_nk))
+   ABI_MALLOC(polstate%my_prev_pcjgrad, (gqk%nb_k, gqk%my_nk))
+   ABI_MALLOC(polstate%pcjgrad_glob, (gqk%nb_k, gqk%glob_nk))
 
    ! Datatypes ans pointers
    polstate%gqk => gqk
@@ -1975,7 +1976,7 @@ end subroutine polstate_free
 !!
 !! INPUTS
 !!  ip=Index of the polaronic state.
-!!  a_src(self%gqk%nb, self%gqk%glob_nk) [optional]=Global A_nk coefficients at
+!!  a_src(self%gqk%nb_k, self%gqk%glob_nk) [optional]=Global A_nk coefficients at
 !!    this state, which have to be provided if load_src=.True.
 !!  load_src [optional]=.True. if A_nk is initialized from an external source,
 !!    e.g. loaded from file. Default: .False.
@@ -1990,7 +1991,7 @@ subroutine polstate_setup(self, ip, a_src, load)
  class(polstate_t), target, intent(inout) :: self
  integer, intent(in) :: ip
  logical, optional, intent(in) :: load
- complex(dp), optional, intent(in) :: a_src(self%gqk%nb, self%gqk%glob_nk)
+ complex(dp), optional, intent(in) :: a_src(self%gqk%nb_k, self%gqk%glob_nk)
 
 !Local variables-------------------------------
  real(dp) :: a_sqnorm
@@ -2086,7 +2087,7 @@ subroutine polstate_update_pc(self, ip)
  eps = self%enterms(4, ip)
  do my_ik=1,gqk%my_nk
    ik_ibz = gqk%my_k2ibz(1, my_ik)
-   do ib=1,gqk%nb
+   do ib=1,gqk%nb_k
      self%my_pc(ib, my_ik) = &
        one/abs(self%eig(ib, ik_ibz) - two*abs(self%e_frohl) + abs(eps))
    enddo
@@ -2122,7 +2123,7 @@ subroutine polstate_ort_to_states(self, my_v, istart, iend, tr_flag)
  class(polstate_t), intent(inout) :: self
  logical, intent(in) :: tr_flag
  integer, intent(in) :: istart, iend
- complex(dp), intent(inout) :: my_v(self%gqk%nb, self%gqk%my_nk)
+ complex(dp), intent(inout) :: my_v(self%gqk%nb_k, self%gqk%my_nk)
 
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
@@ -2130,7 +2131,7 @@ subroutine polstate_ort_to_states(self, my_v, istart, iend, tr_flag)
  complex(dp) :: phase, proj
  integer :: tr_vec(3), ngkpt_tr(3)
  real(dp) :: kpt(3)
- complex(dp) :: a_tr(self%gqk%nb, self%gqk%my_nk)
+ complex(dp) :: a_tr(self%gqk%nb_k, self%gqk%my_nk)
 !----------------------------------------------------------------------
 
  gqk => self%gqk
@@ -2168,7 +2169,7 @@ subroutine polstate_ort_to_states(self, my_v, istart, iend, tr_flag)
 
  complex(dp) function get_proj_(my_u) result(proj)
 
-  complex(dp), intent(in) :: my_u(gqk%nb, gqk%my_nk)
+  complex(dp), intent(in) :: my_u(gqk%nb_k, gqk%my_nk)
   integer :: ierr
   real(dp) :: u_sqnorm
  !----------------------------------------------------------------------
@@ -2225,8 +2226,8 @@ real(dp) function polstate_get_lm_theta(self, ip) result(theta)
  complex(dp) :: g_forw, g0, b
 !arrays
  real(dp) :: kpt(3), qpt(3), kpq(3)
- complex(dp) :: ak(self%gqk%nb), akq(self%gqk%nb)
- complex(dp) :: dk(self%gqk%nb), dkq(self%gqk%nb)
+ complex(dp) :: ak(self%gqk%nb_k), akq(self%gqk%nb_k)
+ complex(dp) :: dk(self%gqk%nb_k), dkq(self%gqk%nb_k)
  complex(dp) :: bq(self%gqk%my_npert)
 !----------------------------------------------------------------------
 
@@ -2266,11 +2267,11 @@ real(dp) function polstate_get_lm_theta(self, ip) result(theta)
      akq(:) = self%a_glob(:, ik_forw)
      dkq(:) = self%pcjgrad_glob(:, ik_forw)
 
-     do ib=1,gqk%nb
+     do ib=1,gqk%nb_k
        a_from = ak(ib)
        d_from = dk(ib)
 
-       do jb=1,gqk%nb
+       do jb=1,gqk%nb_k
          a_forw = akq(jb)
          d_forw = dkq(jb)
 
@@ -2301,7 +2302,7 @@ real(dp) function polstate_get_lm_theta(self, ip) result(theta)
  do my_ik=1,gqk%my_nk
    ik_ibz = gqk%my_k2ibz(1, my_ik)
 
-   do ib=1,gqk%nb
+   do ib=1,gqk%nb_k
      a_from = self%my_a(ib, my_ik, ip)
      d_from = self%my_pcjgrad(ib, my_ik)
 
@@ -2431,14 +2432,14 @@ subroutine polstate_calc_grad(self, ip)
  complex(dp) :: b, g0
 !arrays
  real(dp) :: kpt(3), qpt(3), kpq(3), kmq(3)
- complex(dp) :: akq(self%gqk%nb), akmq(self%gqk%nb)
+ complex(dp) :: akq(self%gqk%nb_k), akmq(self%gqk%nb)
  complex(dp) :: bq(self%gqk%my_npert)
  complex(dp), allocatable :: gq_gathered(:,:,:,:)
 !----------------------------------------------------------------------
 
  gqk => self%gqk
 
- !ABI_MALLOC(gq_gathered, (gqk%my_npert, gqk%nb, gqk%nb, gqk%glob_nk))
+ !ABI_MALLOC(gq_gathered, (gqk%my_npert, gqk%nb_k, gqk%nb_k, gqk%glob_nk))
 
  ! Scattering-dependent part
  self%my_grad(:, :) = zero
@@ -2465,9 +2466,9 @@ subroutine polstate_calc_grad(self, ip)
      if (ik_forw /= -1) then
        akq(:) = self%a_glob(:, ik_forw)
 
-       do ib=1,gqk%nb
+       do ib=1,gqk%nb_k
 
-         do jb=1,gqk%nb
+         do jb=1,gqk%nb_k
            a_forw = akq(jb)
 
            do my_pert=1,gqk%my_npert
@@ -2496,9 +2497,9 @@ subroutine polstate_calc_grad(self, ip)
      if (ik_back /= -1) then
        akmq(:) = self%a_glob(:, ik_back)
 
-       do ib=1,gqk%nb
+       do ib=1,gqk%nb_k
 
-         do jb=1,gqk%nb
+         do jb=1,gqk%nb_k
            a_back = akmq(jb)
 
            do my_pert=1,gqk%my_npert
@@ -2529,7 +2530,7 @@ subroutine polstate_calc_grad(self, ip)
  eps = self%enterms(4, ip)
  do my_ik=1,gqk%my_nk
    ik_ibz = gqk%my_k2ibz(1, my_ik)
-   do ib=1,gqk%nb
+   do ib=1,gqk%nb_k
      self%my_grad(ib, my_ik) = self%my_grad(ib, my_ik) + &
        two/self%nkbz * (self%eig(ib, ik_ibz) - eps) * self%my_a(ib, my_ik, ip)
    enddo
@@ -2620,7 +2621,7 @@ real(dp) function polstate_get_enelph(self, ip) result(enelph)
  complex(dp) :: a_from, a_forw, g_forw, g0, b
 !arrays
  real(dp) :: kpt(3), qpt(3), kpq(3)
- complex(dp) :: ak(self%gqk%nb), akq(self%gqk%nb), bq(self%gqk%my_npert)
+ complex(dp) :: ak(self%gqk%nb_k), akq(self%gqk%nb_k), bq(self%gqk%my_npert)
 !----------------------------------------------------------------------
 
  gqk => self%gqk
@@ -2646,10 +2647,10 @@ real(dp) function polstate_get_enelph(self, ip) result(enelph)
      akq(:) = self%a_glob(:, ik_forw)
      bq(:) = self%my_b(:, my_iq, ip)
 
-     do ib=1,gqk%nb
+     do ib=1,gqk%nb_k
        a_from = ak(ib)
 
-       do jb=1,gqk%nb
+       do jb=1,gqk%nb_k
          a_forw = akq(jb)
 
          do my_pert=1,gqk%my_npert
@@ -2753,7 +2754,7 @@ real(dp) function polstate_get_enel(self, ip) result(enel)
  enel = zero
  do my_ik=1,gqk%my_nk
    ik_ibz = gqk%my_k2ibz(1, my_ik)
-   do ib=1,gqk%nb
+   do ib=1,gqk%nb_k
      enel = enel + self%eig(ib, ik_ibz)*abs(self%my_a(ib, my_ik, ip))**2
    enddo
  enddo
@@ -2795,7 +2796,7 @@ subroutine polstate_calc_b_from_a(self, ip)
  complex(dp) :: a_from, a_forw, g_forw, g0, b_tmp
 !arrays
  real(dp) :: qpt(3), kpq(3)
- complex(dp) :: ak(self%gqk%nb), akq(self%gqk%nb)
+ complex(dp) :: ak(self%gqk%nb_k), akq(self%gqk%nb_k)
 !----------------------------------------------------------------------
 
  gqk => self%gqk
@@ -2827,10 +2828,10 @@ subroutine polstate_calc_b_from_a(self, ip)
        ak(:) = self%my_a(:, my_ik, ip)
        akq(:) = self%a_glob(:, ik_forw)
 
-       do ib=1,gqk%nb
+       do ib=1,gqk%nb_k
          a_from = ak(ib)
 
-         do jb=1,gqk%nb
+         do jb=1,gqk%nb_k
            a_forw = akq(jb)
 
            g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik)
@@ -2862,7 +2863,7 @@ end subroutine polstate_calc_b_from_a
 !!  Load the initial vector of electronic coefficients A_nk from source.
 !!
 !! INPUTS
-!!  a_src(self%gqk%nb, self%gqk%glob_nk)=Global A_nk array to be loaded.
+!!  a_src(self%gqk%nb_k, self%gqk%glob_nk)=Global A_nk array to be loaded.
 !!
 !! OUTPUT
 !!
@@ -2875,7 +2876,7 @@ subroutine polstate_load_a(self, a_src, ip)
  class(polstate_t), intent(inout) :: self
  integer, intent(in) :: ip
 !arrays
- complex(dp), intent(in) :: a_src(self%gqk%nb, self%gqk%glob_nk)
+ complex(dp), intent(in) :: a_src(self%gqk%nb_k, self%gqk%glob_nk)
 
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
@@ -2887,7 +2888,7 @@ subroutine polstate_load_a(self, a_src, ip)
 
  do my_ik=1,gqk%my_nk
    ik_glob = gqk%my_kstart + my_ik - 1
-   do ib=1,gqk%nb
+   do ib=1,gqk%nb_k
      self%my_a(ib, my_ik, ip) = a_src(ib, ik_glob)
    enddo
  enddo
@@ -2954,7 +2955,7 @@ subroutine polstate_seed_a(self, mode, ip)
   ABI_CHECK(sigma /= 0, "gpr_energy: standard deviation must be non-zero")
   do my_ik=1,gqk%my_nk
     ik_ibz = gqk%my_k2ibz(1, my_ik)
-    do ib=1,gqk%nb
+    do ib=1,gqk%nb_k
       eig = self%eig(ib, ik_ibz)
       self%my_a(ib, my_ik, ip) = exp(-half*(eig - mu)**2/sigma**2)
     enddo
@@ -2966,7 +2967,7 @@ subroutine polstate_seed_a(self, mode, ip)
   real(dp) :: kpt(3)
   do my_ik=1,gqk%my_nk
     kpt(:) = self%my_kpts(:, my_ik)
-    do ib=1,gqk%nb
+    do ib=1,gqk%nb_k
       self%my_a(ib, my_ik, ip) = exp(-sum((kpt(:)*self%gpr_length(:))**2))
     enddo
   enddo
@@ -2974,8 +2975,8 @@ subroutine polstate_seed_a(self, mode, ip)
 
  subroutine random_()
    real(dp), allocatable :: re_rand(:,:), im_rand(:,:)
-   ABI_MALLOC(re_rand, (gqk%nb, gqk%my_nk))
-   ABI_MALLOC(im_rand, (gqk%nb, gqk%my_nk))
+   ABI_MALLOC(re_rand, (gqk%nb_k, gqk%my_nk))
+   ABI_MALLOC(im_rand, (gqk%nb_k, gqk%my_nk))
    call random_number(re_rand)
    call random_number(im_rand)
    self%my_a(:,:,ip) = re_rand(:,:) + j_dpc*im_rand(:,:)
