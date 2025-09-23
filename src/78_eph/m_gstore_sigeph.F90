@@ -237,15 +237,14 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
  my_rank = xmpi_comm_rank(comm)
 
  call wrtout(std_out, " Computing Fan-Migdal + DW self-energy from GSTORE.nc", pre_newlines=1)
- natom = cryst%natom; natom3 = 3 * cryst%natom; nsppol = gstore%nsppol
 
- sigma%imag_only = .False.
- sigma%ieta = + j_dpc * dtset%zcut
-
- ! The Fan-Migdal SE requires |g(k,q)| in the phonon representation but
- ! to compute the DW term in the RIA, we need complex g in the atom representation.
+ ! Init gstore and MPI grid from file and dtset.
+ ! The Fan-Migdal SE requires |g(k,q)|^2 in the phonon representation but
+ ! we also need complex g(k,q=Gamma) in the atom representation for the DW term in the RIA,
  call gstore%from_ncpath(dtfil%filgstorein, with_cplex1, dtset, cryst, ebands, ifc, comm, &
                          with_gmode="phonon", gvals_name=dtset%gstore_gname, read_dw=.True.)
+
+ natom = cryst%natom; natom3 = 3 * cryst%natom; nsppol = dtset%nsppol
 
  ! Consistency check.
  ierr = 0
@@ -253,12 +252,12 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
    ABI_ERROR_NOSTOP("gstore_sigeph assumes qzone == `bz`", ierr)
  end if
  if (gstore%has_used_lgk /= 0) then
-   ABI_ERROR_NOSTOP("gstore_sigeph formalism does not support use_lgk /=0 .", ierr)
+   ABI_ERROR_NOSTOP("gstore_sigeph does not support use_lgk /=0.", ierr)
  end if
  if (gstore%has_used_lgq /= 0) then
-   ABI_ERROR_NOSTOP("gstore_sigeph does not support use_lgq /=0 .", ierr)
+   ABI_ERROR_NOSTOP("gstore_sigeph does not support use_lgq /=0.", ierr)
  end if
- if (ierr > 1) then
+ if (ierr /= 0) then
    write(msg,'(a,i0,5a)')&
      'Checking consistency of input data against itself gave ',ierr,' inconsistencies.',ch10,&
      'The details of the problems can be FOUND ABOVE (or in output or log file), in an earlier WARNING.',ch10,&
@@ -275,6 +274,10 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
  n4 = ngfft(4); n5 = ngfft(5); n6 = ngfft(6)
 
+ ! Initialize parameters in sigma object.
+ sigma%imag_only = .False.
+ sigma%ieta = + j_dpc * dtset%zcut
+
  ! Build (linear) mesh of K * temperatures. tsmesh(1:3) = [start, step, num]
  call dtset%get_ktmesh(sigma%ntemp, sigma%kTmesh)
 
@@ -286,6 +289,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
    call ebands%get_muT_with_fd(sigma%ntemp, sigma%ktmesh, dtset%spinmagntarget, dtset%prtvol, sigma%mu_e, gstore%comm)
  end if
 
+ ! Compute gaps.
  gaps = ebands%get_gaps(gap_err)
  if (gap_err /= 0) then
    ABI_ERROR("Cannot compute fundamental and direct gap (likely metal)")
@@ -305,13 +309,12 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
    sigma%wr_step = two * eV_Ha / (sigma%nwr - 1)
    if (dtset%freqspmax /= zero) sigma%wr_step = dtset%freqspmax / (sigma%nwr - 1)
    ABI_MALLOC(cfact_wr, (sigma%nwr))
+   call wrtout(units, &
+     sjoin(" Will compute Sigma(omega) using", itoa(sigma%nwr), "points and step:", ftoa(sigma%wr_step * Ha_eV), "(eV)"))
  end if
 
- ABI_MALLOC(nqnu, (sigma%ntemp))
- !ABI_MALLOC(f_nk, (sigma%ntemp))
- ABI_MALLOC(f_mkq, (sigma%ntemp))
- ABI_MALLOC(cfact_t, (sigma%ntemp))
- ABI_MALLOC(rfact_t, (sigma%ntemp))
+ ! Setup a mask to skip accumulating the contribution of certain phonon modes.
+ call ephtk_set_phmodes_skip(dtset%natom, dtset%eph_phrange, phmodes_skip)
 
  if (dtset%eph_stern /= 0) then
    ! Read the GS potential (vtrial) from input POT file
@@ -332,12 +335,15 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
  !  f_nk(it) = occ_fd(eig0nk, sigma%kTmesh(it), sigma%mu_e(it))
  !end do ! it
 
+ ! Allocate work space arrays used inside the loops. Then we are ready to go!
  ABI_MALLOC(displ_nu_cart, (2, 3, natom))
  ABI_MALLOC(displ_nu_red, (2, 3, natom))
  ABI_MALLOC(tpp_red, (natom3, natom3))
-
- ! Setup a mask to skip accumulating the contribution of certain phonon modes.
- call ephtk_set_phmodes_skip(dtset%natom, dtset%eph_phrange, phmodes_skip)
+ ABI_MALLOC(nqnu, (sigma%ntemp))
+ !ABI_MALLOC(f_nk, (sigma%ntemp))
+ ABI_MALLOC(f_mkq, (sigma%ntemp))
+ ABI_MALLOC(cfact_t, (sigma%ntemp))
+ ABI_MALLOC(rfact_t, (sigma%ntemp))
 
  ! Loop over collinear spins.
  do my_is=1,gstore%my_nspins
@@ -366,20 +372,20 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
      ! Will store results using glob_ik index.
      ikcalc = gqk%my_k2glob(my_ik)
 
-     ! Compute the little group of the k-point so that we can compute g(k,q) only for q in the IBZ_k.
+     ! Compute the little group of the k-point so that we can sum g(k,q) only for q in the IBZ_k.
      if (dtset%gstore_use_lgk /= 0) then
        timrev_k = kpts_timrev_from_kptopt(ebands%kptopt)
        call lg_myk%init(cryst, kk, timrev_k, gstore%nqbz, gstore%qbz, gstore%nqibz, gstore%qibz, xmpi_comm_self)
      end if
 
      if (sigma%nwr > 0) then
-      do in_k=1,gqk%nb_k
-        band_k = in_k + gqk%bstart_k - 1
-        ! Build linear mesh **centered** around the KS energy.
-        eig0nk = ebands%eig(band_k, ik_ibz, spin) - sigma%wr_step * (sigma%nwr / 2)
-        sigma%wrmesh_b(:,in_k, ikcalc) = arth(eig0nk, sigma%wr_step, sigma%nwr)
+       ! Build linear mesh **centered** around the KS energy.
+       do in_k=1,gqk%nb_k
+         band_k = in_k + gqk%bstart_k - 1
+         eig0nk = ebands%eig(band_k, ik_ibz, spin) - sigma%wr_step * (sigma%nwr / 2)
+         sigma%wrmesh_b(:,in_k, ikcalc) = arth(eig0nk, sigma%wr_step, sigma%nwr)
       end do
-     end if ! nwr
+     end if
 
      ! Sum over q-points.
      do my_iq=1,gqk%my_nq
@@ -419,7 +425,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
          ! (my_npert, nb_kq, my_nq, nb_k, my_nk)
          !g2_pmnk = gqk%my_g2(my_ip,:,my_iq,:,my_ik)
 
-         ! Compute T_pp'(q,nu) matrix in reduced coordinates.
+         ! Compute T_pp'(q,nu) matrix in reduced coordinates for DW.
          call sigtk_dw_tpp_red(natom, displ_nu_red, tpp_red)
 
          ! Sum over bands.
@@ -440,6 +446,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
              intra_band = q_is_gamma .and. ediff <= TOL_EDIFF
              same_band = band_k == band_kq
 
+             ! The frequency dependent part evaluated at eig0nk for all T.
              if (dtset%eph_ahc_type == 1) then
                cfact_t(:) =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) + &
                              (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta)
@@ -455,7 +462,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
              sigma%vals_e0ks(:, in_k, ikcalc) = sigma%vals_e0ks(:, in_k, ikcalc) + cfact_t
              sigma%fan_vals(:, in_k, ikcalc) = sigma%fan_vals(:, in_k, ikcalc) + cfact_t
 
-             ! Derivative of sigma
+             ! Derivative of FM sigma at eig0nk for all T.
              ! Accumulate d(Re Sigma) / dw(w=eKS) for state in_k
              !cfact(x) =  (nqnu + f_mkq      ) / (x - eig0mkq + wqnu + sigma%ieta) + &
              !            (nqnu - f_mkq + one) / (x - eig0mkq - wqnu + sigma%ieta)
@@ -466,16 +473,9 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
 
              sigma%dvals_de0ks(:, in_k, ikcalc) = sigma%dvals_de0ks(:, in_k, ikcalc) + gkq2 * rfact_t
 
-
              ! Accumulate Sigma(w) for state in_k if spectral function is wanted.
              if (sigma%nwr > 0) then
-               !if (sigma%qint_method == 1) then
-               !  ! Tetra
-               !  cfact_wr(:) = (nqnu + f_mkq      ) * sigma%cweights(2:, 1, in_k, imyp, ibsum_kq, imyq, 1) + &
-               !                (nqnu - f_mkq + one) * sigma%cweights(2:, 2, in_k, imyp, ibsum_kq, imyq, 1)
-               !else
                ! Zcut version
-#if 1
                do it=1,sigma%ntemp
                  cfact_wr(:) = (nqnu(it) + f_mkq(it)      ) / (sigma%wrmesh_b(:,in_k, ikcalc) - eig0mkq + wqnu + sigma%ieta) + &
                                (nqnu(it) - f_mkq(it) + one) / (sigma%wrmesh_b(:,in_k, ikcalc) - eig0mkq - wqnu + sigma%ieta)
@@ -488,9 +488,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
 
                  sigma%vals_wr(:,it,in_k,ikcalc) = sigma%vals_wr(:,it,in_k,ikcalc) + cfact_wr(:)
                end do
-#endif
              end if ! nwr > 0
-
 
              ! Compute DW term following XG paper. Check prefactor.
              ! gkq0_atm(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
@@ -527,7 +525,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
              sigma%dw_vals(:, in_k, ikcalc) = sigma%dw_vals(:, in_k, ikcalc) + real(cfact_t)
              sigma%vals_e0ks(:, in_k, ikcalc) = sigma%vals_e0ks(:, in_k, ikcalc) + real(cfact_t)
              if (sigma%nwr > 0) then
-               ! Add static term from Sternheimer to Sigma(w) as well.
+               ! Add static DW term to Sigma(w).
                do it=1,sigma%ntemp
                  sigma%vals_wr(:, it, in_k, ikcalc) = sigma%vals_wr(:, it, in_k, ikcalc) + real(cfact_t(it))
                end do
@@ -619,6 +617,10 @@ subroutine sep_gather_and_write_results(sigma, gstore, gqk, dtset, ebands)
  call xmpi_sum(sigma%fan_vals, gqk%comm%value, ierr)
  call xmpi_sum(sigma%dw_vals, gqk%comm%value, ierr)
  if (sigma%nwr > 0) call xmpi_sum(sigma%vals_wr, gqk%comm%value, ierr)
+
+ ! Only procs inside ncwrite_comm perform IO (ab_out and ncid)
+ !iwrite = self%ncwrite_comm%value /= xmpi_comm_null
+ !if (.not. iwrite) return
 
  this_gtype = "KS"
  if (gstore%gtype == "gwpt" .and. dtset%gstore_gname == "gvals") this_gtype = "GWPT"

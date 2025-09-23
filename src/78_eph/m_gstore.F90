@@ -3656,7 +3656,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    ABI_MALLOC(kets_k, (2, mpw*nspinor, nb_k))
    ABI_MALLOC(bras_kq, (2, mpw*nspinor, nb_kq))
    ABI_MALLOC(h1_kets_kq, (2, mpw*nspinor, nb_kq))
-
    ABI_MALLOC(iq_buf, (2, qbuf_size))
    ABI_MALLOC(gkq_atm, (2, nb_kq, nb_k, natom3))
    ABI_MALLOC(gkq_nu, (2, nb_kq, nb_k, natom3))
@@ -3987,11 +3986,11 @@ subroutine dump_my_gbuf()
 
  ! On disk we have the global arrays:
  !
- !      nctkarr_t("gvals", "dp", "gstore_cplex, nb, nb, natom3, glob_nk, glob_nq")
+ !      nctkarr_t("gvals", "dp", "gstore_cplex, nb_kq, nb_k, natom3, glob_nk, glob_nq")
  !
  ! while the local MPI buffers are dimensioned as follows:
  !
- !      my_gbuf(2, nb, nb, natom3, gqk%my_nk, qbuf_size)
+ !      my_gbuf(2, nb_kq, nb_k, natom3, gqk%my_nk, qbuf_size)
 
  ! If parallelism over perturbation is activated, only the procs treating the first perturbation
  ! i.e. the procs treating different k-points for this q are involved in IO
@@ -4109,7 +4108,8 @@ end function gstore_check_cplex_qkzone_gmode
 !!  comm: MPI communicator
 !!  [with_gmode]
 !!  [gvals_name]: "gvals" (default) or "gvals_ks" to read the KS g produced by the GWPT code.
-!!  [read_dw]:
+!!  [read_dw]: True if g_atm(k,q=0) should be read from file and stored in my_gq0nm_atm.
+!!    Default is False. Also, a GSTORE with g in the atom representation is required.
 !!
 !! SOURCE
 
