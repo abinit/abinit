@@ -36,7 +36,7 @@ module m_invars2
  use m_fstrings,  only : sjoin, itoa, ltoa, tolower, toupper
  use m_matrix,    only : matr3inv
  use m_parser,    only : intagm, intagm_img
- use m_geometry,  only : mkrdim, metric, kcart2kred
+ use m_geometry,  only : mkrdim, metric
  use m_gsphere,   only : setshells
  use m_xcdata,    only : get_auxc_ixc, get_xclevel
  use m_inkpts,    only : inkpts
@@ -250,7 +250,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 !arrays
  integer :: vacuum(3)
  integer,allocatable :: iatcon(:),natcon(:), intarr(:)
- real(dp) :: qgbt(3), rprimd(3,3),tmp_in(3,1),tmp_out(3,1),tsec(2)
+ real(dp) :: qgbt(3),rprimd(3,3),tsec(2)
  real(dp),allocatable :: dmatpawu_tmp(:), dprarr(:)
  type(libxc_functional_type) :: xcfunc(2)
 ! *************************************************************************
@@ -4356,10 +4356,8 @@ if (dtset%usekden==1) then
   else
     call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'qgbt_cart', tread, 'DPR')
     if (tread==1) then 
-      tmp_in(:,1) = dprarr(1:3)
       call mkrdim(dtset%acell_orig(1:3,1),dtset%rprim_orig(1:3,1:3,1),rprimd)
-      call kcart2kred(1, rprimd, tmp_in, tmp_out)
-      dtset%qgbt(1:3) = tmp_out(:,1)
+      dtset%qgbt(1:3) = MATMUL(TRANSPOSE(rprimd)/two_pi, dprarr(1:3))
     endif
   endif
  endif
