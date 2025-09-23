@@ -682,6 +682,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 !arrays
  integer,allocatable :: kg_k(:,:)
  real(dp) :: kpoint(3),kphq(3),nonlop_dum(1,1),rmet(3,3),tsec(2)
+ real(dp) :: kgr(3),kgr_kphq(3),kgc(3),kgc_kphq(3)
 #if defined HAVE_GPU && defined HAVE_YAKL
  real(c_double), ABI_CONTIGUOUS pointer :: cwavef(:,:) => null()
 #else
@@ -929,79 +930,86 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
      if (stress_needed==1) then
        ABI_MALLOC(gprimd,(3,3))
        gprimd=gs_hamk%gprimd
-!$OMP PARALLEL DO PRIVATE(fact_kin,ipw,kgc1,kgc2,kgc3,kin,xx,fsm,dfsm) &
-!$OMP&SHARED(ecut,ecutsm,ecutsm_inv,gs_hamk,htpisq,kg_k,kpoint,kstr1,kstr2,kstr3,kstr4,kstr5,kstr6,npw_k)
-         do ipw=1,npw_k
-!           kred(:,1) = kpoint + kg_k(:,ipw) 
-!           call kred2kcart(1,rprimd,kred,kcart)
-!           kin = 0.5_dp * (kcart(1,1)**2 + kcart(2,1)**2 + kcart(3,1)**2)     
+!$OMP PARALLEL DO PRIVATE(fact_kin,ipw,kgr,kgr_kphq,kgc,kgc_kphq,kin,xx,fsm,dfsm) &
+!$OMP&SHARED(ecut,ecutsm,ecutsm_inv,gs_hamk,htpisq,kg_k,kpoint,kphq,kstr1,kstr2,kstr3,kstr4,kstr5,kstr6,kstr1_kphq,kstr2_kphq,kstr3_kphq,kstr4_kphq,kstr5_kphq,kstr6_kphq,npw_k)
+       do ipw=1,npw_k
 !        Compute Cartesian coordinates of (k+G)
-
-         kgc1=gprimd(1,1)*(kpoint(1)+kg_k(1,ipw))+&
-&         gprimd(1,2)*(kpoint(2)+kg_k(2,ipw))+&
-&         gprimd(1,3)*(kpoint(3)+kg_k(3,ipw))
-         kgc2=gprimd(2,1)*(kpoint(1)+kg_k(1,ipw))+&
-&         gprimd(2,2)*(kpoint(2)+kg_k(2,ipw))+&
-&         gprimd(2,3)*(kpoint(3)+kg_k(3,ipw))
-         kgc3=gprimd(3,1)*(kpoint(1)+kg_k(1,ipw))+&
-&         gprimd(3,2)*(kpoint(2)+kg_k(2,ipw))+&
-&         gprimd(3,3)*(kpoint(3)+kg_k(3,ipw))
-         kin=htpisq* ( kgc1**2 + kgc2**2 + kgc3**2 )
-          fact_kin=1.0_dp
-          if(kin>ecut-ecutsm)then
-            if(kin>ecut)then
-              fact_kin=0.0_dp
-            else
+         kgr = kpoint + kg_k(:,ipw)
+         kgc = MATMUL(gprimd, kgr)
+         kin = htpisq * DOT_PRODUCT(kgc, kgc)
+!          kgc1=gprimd(1,1)*(kpoint(1)+kg_k(1,ipw))+&
+! &         gprimd(1,2)*(kpoint(2)+kg_k(2,ipw))+&
+! &         gprimd(1,3)*(kpoint(3)+kg_k(3,ipw))
+!          kgc2=gprimd(2,1)*(kpoint(1)+kg_k(1,ipw))+&
+!  &         gprimd(2,2)*(kpoint(2)+kg_k(2,ipw))+&
+!  &         gprimd(2,3)*(kpoint(3)+kg_k(3,ipw))
+!           kgc3=gprimd(3,1)*(kpoint(1)+kg_k(1,ipw))+&
+!  &         gprimd(3,2)*(kpoint(2)+kg_k(2,ipw))+&
+!  &         gprimd(3,3)*(kpoint(3)+kg_k(3,ipw))
+!           kin=htpisq* ( kgc1**2 + kgc2**2 + kgc3**2 )
+         fact_kin=1.0_dp
+         if (kin>ecut-ecutsm) then
+           if (kin>ecut) then
+               fact_kin=0.0_dp
+           else
 !            See the routine mkkin.f, for the smearing procedure
-              xx=(ecut-kin)*ecutsm_inv
+               xx=(ecut-kin)*ecutsm_inv
 !            This kinetic cutoff smoothing function and its xx derivatives
 !            were produced with Mathematica and the fortran code has been
 !            numerically checked against Mathematica.
-              fsm=1.0_dp/(xx**2*(3+xx*(1+xx*(-6+3*xx))))
-              dfsm=-3.0_dp*(-1+xx)**2*xx*(2+5*xx)*fsm**2
+               fsm=1.0_dp/(xx**2*(3+xx*(1+xx*(-6+3*xx))))
+               dfsm=-3.0_dp*(-1+xx)**2*xx*(2+5*xx)*fsm**2
 !            d2fsm=6.0_dp*xx**2*(9+xx*(8+xx*(-52+xx*(-3+xx*(137+xx*&
 !            &                         (-144+45*xx))))))*fsm**3
-              fact_kin=fsm+kin*(-ecutsm_inv)*dfsm
-            end if
-          end if
-          kstr1(ipw)=fact_kin*kgc1*kgc1
-          kstr2(ipw)=fact_kin*kgc2*kgc2
-          kstr3(ipw)=fact_kin*kgc3*kgc3
-          kstr4(ipw)=fact_kin*kgc3*kgc2
-          kstr5(ipw)=fact_kin*kgc3*kgc1
-          kstr6(ipw)=fact_kin*kgc2*kgc1 
+               fact_kin=fsm+kin*(-ecutsm_inv)*dfsm
+           end if
+         end if
+         kstr1(ipw) = fact_kin * kgc(1) * kgc(1)
+         kstr2(ipw) = fact_kin * kgc(2) * kgc(2)
+         kstr3(ipw) = fact_kin * kgc(3) * kgc(3)
+         kstr4(ipw) = fact_kin * kgc(3) * kgc(2)
+         kstr5(ipw) = fact_kin * kgc(3) * kgc(1)
+         kstr6(ipw) = fact_kin * kgc(2) * kgc(1)
+!           kstr1(ipw)=fact_kin*kgc1*kgc1
+!           kstr2(ipw)=fact_kin*kgc2*kgc2
+!           kstr3(ipw)=fact_kin*kgc3*kgc3
+!           kstr4(ipw)=fact_kin*kgc3*kgc2
+!           kstr5(ipw)=fact_kin*kgc3*kgc1
+!           kstr6(ipw)=fact_kin*kgc2*kgc1 
        end do ! ipw
-!       ABI_FREE(gprimd)
        if (use_gbt/=0) then
-         do ipw=1,npw_k 
-          kgc1_kphq=gprimd(1,1)*(kphq(1)+kg_k(1,ipw))+&
-&         gprimd(1,2)*(kphq(2)+kg_k(2,ipw))+&
-&         gprimd(1,3)*(kphq(3)+kg_k(3,ipw))
-         kgc2_kphq=gprimd(2,1)*(kphq(1)+kg_k(1,ipw))+&
-&         gprimd(2,2)*(kphq(2)+kg_k(2,ipw))+&
-&         gprimd(2,3)*(kphq(3)+kg_k(3,ipw))
-         kgc3_kphq=gprimd(3,1)*(kphq(1)+kg_k(1,ipw))+&
-&         gprimd(3,2)*(kphq(2)+kg_k(2,ipw))+&
-&         gprimd(3,3)*(kphq(3)+kg_k(3,ipw))
-         kin_kphq=htpisq* ( kgc1_kphq**2 + kgc2_kphq**2 + kgc3_kphq**2 )
-          fact_kin=1.0_dp
-          if(kin_kphq>ecut-ecutsm)then
-            if(kin_kphq>ecut)then
-              fact_kin=0.0_dp
-            else
-             xx=(ecut-kin_kphq)*ecutsm_inv
-              fsm=1.0_dp/(xx**2*(3+xx*(1+xx*(-6+3*xx))))
-              dfsm=-3.0_dp*(-1+xx)**2*xx*(2+5*xx)*fsm**2
-              fact_kin=fsm+kin_kphq*(-ecutsm_inv)*dfsm
-            end if
-          end if
-          kstr1_kphq(ipw)=fact_kin*kgc1_kphq*kgc1_kphq
-          kstr2_kphq(ipw)=fact_kin*kgc2_kphq*kgc2_kphq
-          kstr3_kphq(ipw)=fact_kin*kgc3_kphq*kgc3_kphq
-          kstr4_kphq(ipw)=fact_kin*kgc3_kphq*kgc2_kphq
-          kstr5_kphq(ipw)=fact_kin*kgc3_kphq*kgc1_kphq
-          kstr6_kphq(ipw)=fact_kin*kgc2_kphq*kgc1_kphq
-       end do ! ipw
+         do ipw=1,npw_k
+           kgr_kphq = kphq+kg_k(:,ipw)
+           kgc_kphq = MATMUL(gprimd, kgr_kphq)
+           kin_kphq = htpisq * DOT_PRODUCT(kgc_kphq, kgc_kphq) 
+!              kgc1_kphq=gprimd(1,1)*(kphq(1)+kg_k(1,ipw))+&
+! &         gprimd(1,2)*(kphq(2)+kg_k(2,ipw))+&
+! &         gprimd(1,3)*(kphq(3)+kg_k(3,ipw))
+!          kgc2_kphq=gprimd(2,1)*(kphq(1)+kg_k(1,ipw))+&
+! &         gprimd(2,2)*(kphq(2)+kg_k(2,ipw))+&
+! &         gprimd(2,3)*(kphq(3)+kg_k(3,ipw))
+!          kgc3_kphq=gprimd(3,1)*(kphq(1)+kg_k(1,ipw))+&
+! &         gprimd(3,2)*(kphq(2)+kg_k(2,ipw))+&
+! &         gprimd(3,3)*(kphq(3)+kg_k(3,ipw))
+!          kin_kphq=htpisq* ( kgc1_kphq**2 + kgc2_kphq**2 + kgc3_kphq**2 )
+           fact_kin=1.0_dp
+           if (kin_kphq>ecut-ecutsm) then
+             if (kin_kphq>ecut) then
+                 fact_kin=0.0_dp
+             else
+                 xx=(ecut-kin_kphq)*ecutsm_inv
+                 fsm=1.0_dp/(xx**2*(3+xx*(1+xx*(-6+3*xx))))
+                 dfsm=-3.0_dp*(-1+xx)**2*xx*(2+5*xx)*fsm**2
+                 fact_kin=fsm+kin_kphq*(-ecutsm_inv)*dfsm
+             end if
+           end if
+           kstr1_kphq(ipw)=fact_kin*kgc_kphq(1)*kgc_kphq(1)
+           kstr2_kphq(ipw)=fact_kin*kgc_kphq(2)*kgc_kphq(2)
+           kstr3_kphq(ipw)=fact_kin*kgc_kphq(3)*kgc_kphq(3)
+           kstr4_kphq(ipw)=fact_kin*kgc_kphq(3)*kgc_kphq(2)
+           kstr5_kphq(ipw)=fact_kin*kgc_kphq(3)*kgc_kphq(1)
+           kstr6_kphq(ipw)=fact_kin*kgc_kphq(2)*kgc_kphq(1)
+         end do ! ipw
        end if ! GBT 
        ABI_FREE(gprimd)
      end if
