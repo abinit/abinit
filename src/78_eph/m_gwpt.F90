@@ -977,11 +977,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      end if
      !print *, "iq_ibz:", iq_ibz, "qq_bz:", qq_bz, "qq_ibz:", qq_ibz
 
-#if 0
-     call ifc%fourq(cryst, qq_bz, phfr_qq, displ_cart_qbz, out_displ_red=displ_red_qbz)
-
-#else
-     ! Compute stuff in the IBZ and then rotate in order to fix the gauge in g
+     ! Compute stuff in the IBZ and then rotate in order to fix the gauge in g.
      if (iq_ibz /= prev_iqbz) then
        ! Get phonon frequencies and eigenvectors for the corresponding q-point in the IBZ.
        call ifc%fourq(cryst, qq_ibz, phfr_qq, displ_cart_qibz, out_displ_red=displ_red_qibz, out_eigvec=pheigvec_qibz)
@@ -997,7 +993,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_qibz, pheigvec_qbz, displ_cart_qbz, &
                             displ_red_qbz=displ_red_qbz)
      end if
-#endif
 
      ! ==================================================
      ! Get DFPT potentials and densities for this q-point
@@ -1608,8 +1603,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                end do ! n_k
              end do ! m_kq
 
-             ! FIXME
-!if (.False.) then
 if (.not. qq_is_gamma) then
              ! ===========================
              ! Same operations but for -qq
