@@ -204,8 +204,8 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
  integer,intent(in) :: ngfft(18),ngfftf(18)
 
 !Local variables-------------------------------
- integer,parameter :: master = 0, with_cplex1 = 1, max_ntemp = 50, cplex1 = 1, pawread0 = 0
- integer :: n1, n2, n3, n4, n5, n6, nb_k, nb_kq, glob_nk
+ integer,parameter :: master = 0, with_cplex1 = 1, cplex1 = 1, pawread0 = 0
+ integer :: n1, n2, n3, n4, n5, n6, nb_k, nb_kq, glob_nk, ntemp
  integer :: spin, my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, gap_err, my_rank, ip1, ip2, nu
  integer :: it, ik_bz, ik_ibz, ikq_ibz, band_k, band_kq, timrev_k, ii, ikcalc, natom, natom3, nsppol
  integer :: nfft, nfftf, mgfft, mgfftf !,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart, enough_stern
@@ -337,12 +337,13 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
  !end do ! it
 
  ! Allocate work space arrays used inside the loops. Then we are ready to go!
+ ntemp = sigma%ntemp
  ABI_MALLOC(tpp_red, (natom3, natom3))
- ABI_MALLOC(nqnu, (sigma%ntemp))
- !ABI_MALLOC(f_nk, (sigma%ntemp))
- ABI_MALLOC(f_mkq, (sigma%ntemp))
- ABI_MALLOC(cfact_t, (sigma%ntemp))
- ABI_MALLOC(rfact_t, (sigma%ntemp))
+ ABI_MALLOC(nqnu, (ntemp))
+ !ABI_MALLOC(f_nk, (ntemp))
+ ABI_MALLOC(f_mkq, (ntemp))
+ ABI_MALLOC(cfact_t, (ntemp))
+ ABI_MALLOC(rfact_t, (ntemp))
 
  call pstat_proc%print(_PSTAT_ARGS_)
 
@@ -356,14 +357,14 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
    ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
    ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
 
-   ABI_CALLOC(sigma%vals_e0ks, (sigma%ntemp, nb_k, glob_nk))
-   ABI_CALLOC(sigma%dvals_de0ks, (sigma%ntemp, nb_k, glob_nk))
-   ABI_CALLOC(sigma%fan_vals, (sigma%ntemp, nb_k, glob_nk))
-   ABI_CALLOC(sigma%dw_vals, (sigma%ntemp, nb_k, glob_nk))
+   ABI_CALLOC(sigma%vals_e0ks, (ntemp, nb_k, glob_nk))
+   ABI_CALLOC(sigma%dvals_de0ks, (ntemp, nb_k, glob_nk))
+   ABI_CALLOC(sigma%fan_vals, (ntemp, nb_k, glob_nk))
+   ABI_CALLOC(sigma%dw_vals, (ntemp, nb_k, glob_nk))
 
    ! Prepare computation of Sigma_{nk}(w) and spectral function.
    if (sigma%nwr > 0) then
-     ABI_CALLOC(sigma%vals_wr, (sigma%nwr, sigma%ntemp, nb_k, glob_nk))
+     ABI_CALLOC(sigma%vals_wr, (sigma%nwr, ntemp, nb_k, glob_nk))
      ABI_CALLOC(sigma%wrmesh_b, (sigma%nwr, nb_k, glob_nk))
    end if ! nwr
 
@@ -435,7 +436,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
            eig0mkq = ebands%eig(band_kq, ikq_ibz, spin)
 
            ! Compute electronic occ for all Temps (note mu_e(it) Fermi level)
-           do it=1,sigma%ntemp
+           do it=1,ntemp
              f_mkq(it) = occ_fd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
            end do
 
@@ -477,7 +478,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
              ! Accumulate Sigma(w) for state in_k if spectral function is wanted.
              if (sigma%nwr > 0) then
                ! Zcut version
-               do it=1,sigma%ntemp
+               do it=1,ntemp
                  cfact_wr(:) = (nqnu(it) + f_mkq(it)      ) / (sigma%wrmesh_b(:,in_k, ikcalc) - eig0mkq + wqnu + sigma%ieta) + &
                                (nqnu(it) - f_mkq(it) + one) / (sigma%wrmesh_b(:,in_k, ikcalc) - eig0mkq - wqnu + sigma%ieta)
                  cfact_wr(:) = gkq2 * cfact_wr(:)
@@ -527,7 +528,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
              sigma%vals_e0ks(:, in_k, ikcalc) = sigma%vals_e0ks(:, in_k, ikcalc) + real(cfact_t)
              if (sigma%nwr > 0) then
                ! Add static DW term to Sigma(w).
-               do it=1,sigma%ntemp
+               do it=1,ntemp
                  sigma%vals_wr(:, it, in_k, ikcalc) = sigma%vals_wr(:, it, in_k, ikcalc) + real(cfact_t(it))
                end do
              end if
@@ -867,4 +868,3 @@ end subroutine sep_free
 
 end module m_gstore_sigeph
 !!***
- !!***
