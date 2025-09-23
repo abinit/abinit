@@ -37,6 +37,8 @@ inp_files = [
     "t25.abi" ,  # same as v10[10], with dilatxm>1, istwfk>1 (without DFTI).
     "t26.abi" ,  # test cprj_in_memory when atoms are not ordered by type.
     "t27.abi" ,  # test GBT for the spin spiral
+    "t28.abi" ,  # test stress for GBT unsing Finite difference
+    "t29.abi" ,  # test force for GBT unsing Finite difference
     "t30.abi" ,  # test axial vector symmetry with hspinfield along x,y and z directions.
     "t40.abi" ,  # test orbmag calculation when using spatial symmetries for GS nuclear dipole
     "t41.abi" ,  # test orbmag calculation using R2SCAN mGGA
