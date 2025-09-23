@@ -4421,6 +4421,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  ! =========================
  ! Load e-ph matrix elements
  ! =========================
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  from_atm_to_nu = .False.
  if (present(with_gmode)) then
@@ -4575,6 +4576,8 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  ABI_FREE(pheigvec_cart_qbz)
 
  call xmpi_barrier(gstore%comm)
+
+ call pstat_proc%print(_PSTAT_ARGS_)
  call cwtime_report(" gstore_from_ncpath", cpu, wall, gflops)
 
 contains

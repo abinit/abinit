@@ -60,7 +60,7 @@ module m_gstore_sigeph
  !use m_pawtab,         only : pawtab_type
  !use m_pawfgr,         only : pawfgr_type
  use m_pawrhoij,       only : pawrhoij_type
- !use m_pstat,          only : pstat_proc
+ use m_pstat,          only : pstat_proc
  use m_occ,            only : occ_be, occ_fd
  use m_lgroup,         only : lgroup_t
  use m_gstore,         only : gstore_t, gqk_t
@@ -225,10 +225,10 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
  integer :: units(2), my_kqmap(6)
  integer,allocatable :: phmodes_skip(:)
  real(dp) :: kk(3), qpt(3), kq(3)
+ real(dp) :: displ_nu_cart(2, 3, cryst%natom), displ_nu_red(2, 3, cryst%natom)
  real(dp),allocatable :: vtrial(:,:) !,gvnlx1(:,:),work(:,:,:,:), vcar_ibz(:,:,:,:)
  real(dp),allocatable :: gkq_atm(:,:,:),gkq_nu(:,:,:) !,gkq0_atm(:,:,:,:), gaussw_qnu(:)
  real(dp),allocatable :: rfact_t(:), nqnu(:), f_mkq(:) !, f_nk(:),  g2_pmnk(:,:,:,:)
- real(dp),allocatable :: displ_nu_cart(:,:,:), displ_nu_red(:,:,:)
  complex(dp),allocatable :: cfact_t(:), tpp_red(:,:), cfact_wr(:) !,fmw_frohl_sphcorr(:,:,:,:),
  type(pawrhoij_type),allocatable :: pot_pawrhoij(:)
 !----------------------------------------------------------------------
@@ -305,6 +305,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
  ! Use GW variables but change default values
  sigma%nwr = dtset%nfreqsp; sigma%wr_step = zero
  if (sigma%nwr > 0) then
+   !call dtset%get_nwr_for_sigeph(sigma%nwr, sigma%wr_step)
    if (mod(sigma%nwr, 2) == 0) sigma%nwr = sigma%nwr + 1
    sigma%wr_step = two * eV_Ha / (sigma%nwr - 1)
    if (dtset%freqspmax /= zero) sigma%wr_step = dtset%freqspmax / (sigma%nwr - 1)
@@ -336,14 +337,14 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
  !end do ! it
 
  ! Allocate work space arrays used inside the loops. Then we are ready to go!
- ABI_MALLOC(displ_nu_cart, (2, 3, natom))
- ABI_MALLOC(displ_nu_red, (2, 3, natom))
  ABI_MALLOC(tpp_red, (natom3, natom3))
  ABI_MALLOC(nqnu, (sigma%ntemp))
  !ABI_MALLOC(f_nk, (sigma%ntemp))
  ABI_MALLOC(f_mkq, (sigma%ntemp))
  ABI_MALLOC(cfact_t, (sigma%ntemp))
  ABI_MALLOC(rfact_t, (sigma%ntemp))
+
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  ! Loop over collinear spins.
  do my_is=1,gstore%my_nspins
@@ -551,8 +552,6 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
  ABI_FREE(f_mkq)
  ABI_FREE(cfact_t)
  ABI_FREE(rfact_t)
- ABI_FREE(displ_nu_cart)
- ABI_FREE(displ_nu_red)
  ABI_FREE(tpp_red)
  ABI_SFREE(vtrial)
  ABI_FREE(phmodes_skip)
