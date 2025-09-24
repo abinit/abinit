@@ -158,15 +158,14 @@ subroutine abi_chegv(itype,jobz,uplo,n,a,lda,b,ldb,w)
  character(len=1), intent(in) :: jobz
  character(len=1), intent(in) :: uplo
  integer, intent(in) :: n,lda,ldb
- complex(spc), intent(inout) :: a(lda,*)
- complex(spc), intent(inout) :: b(ldb,*)
+ complex(sp), intent(inout) :: a(lda,*)
+ complex(sp), intent(inout) :: b(ldb,*)
  real(sp), intent(out) :: w(n)
 
 !Local variables-------------------------------
  integer :: info,lwork
  real(sp),pointer :: rwork(:)
- complex(spc),pointer :: work(:)
-
+ complex(sp),pointer :: work(:)
 ! *********************************************************************
 
  ABI_CHECK(lapack_full_storage,"BUG(1) in abi_chegv (storage)!")

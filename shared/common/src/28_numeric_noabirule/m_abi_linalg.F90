@@ -94,7 +94,7 @@ module m_abi_linalg
  real(dp),save,target,allocatable :: eigen_z_rwork(:)
  real(sp),save,target,allocatable :: eigen_s_work(:)
  real(dp),save,target,allocatable :: eigen_d_work(:)
- complex(spc),save,target,allocatable :: eigen_c_work(:)
+ complex(sp),save,target,allocatable :: eigen_c_work(:)
  complex(dp),save,target,allocatable :: eigen_z_work(:)
 
  integer,save,private :: slk_minsize=1

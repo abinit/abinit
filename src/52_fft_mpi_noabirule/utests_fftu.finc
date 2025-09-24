@@ -10,7 +10,7 @@
  real(dp) :: kpoint(3),crand(2),kpoints(3,9)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable :: cg(:,:),cg_ref(:,:),cr(:,:)
- complex(spc),allocatable :: ugsp(:),ug_refsp(:),ursp(:)
+ complex(sp),allocatable :: ugsp(:),ug_refsp(:),ursp(:)
  complex(dp),allocatable :: ug(:),ug_ref(:),ur(:)
 ! *************************************************************************
 

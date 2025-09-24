@@ -205,7 +205,7 @@ CONTAINS  !=====================================================================
 !! See also SIDE EFFECTS
 !!
 !! SIDE EFFECTS
-!!  A       (input/output) COMPLEX(SPC) array, dimension (N, N)
+!!  A       (input/output) COMPLEX(sp) array, dimension (N, N)
 !!          On entry, the Hermitian matrix A.  If UPLO = 'U', the
 !!          leading N-by-N upper triangular part of A contains the
 !!          upper triangular part of the matrix A.  If UPLO = 'L',
@@ -227,7 +227,7 @@ subroutine wrap_CHEEV(jobz, uplo, n, a, w)
  character(len=*),intent(in) :: jobz,uplo
 !scalars
  real(sp),intent(out) :: w(n)
- complex(spc),intent(inout) :: a(n,n)
+ complex(sp),intent(inout) :: a(n,n)
 
 !Local variables ------------------------------
 !scalars
@@ -235,7 +235,7 @@ subroutine wrap_CHEEV(jobz, uplo, n, a, w)
  character(len=500) :: msg
 !arrays
  real(sp),allocatable :: rwork(:)
- complex(spc),allocatable :: work(:)
+ complex(sp),allocatable :: work(:)
 !************************************************************************
 
  lwork = MAX(1,2*n-1)
@@ -616,7 +616,7 @@ end subroutine xheev_cplex
 !!  W       (output) REAL(SP) array, dimension (N)
 !!          If INFO = 0, the eigenvalues in ascending order.
 !!
-!!  Z       (output) COMPLEX(SPC) array, dimension (LDZ, N)
+!!  Z       (output) COMPLEX(sp) array, dimension (LDZ, N)
 !!          If JOBZ = 'V', then if INFO = 0, Z contains the orthonormal
 !!          eigenvectors of the matrix A, with the i-th column of Z
 !!          holding the eigenvector associated with W(i).
@@ -626,7 +626,7 @@ end subroutine xheev_cplex
 !!
 !! SIDE EFFECTS
 !!
-!!  AP      (input/output) COMPLEX(SPC) array, dimension (N*(N+1)/2)
+!!  AP      (input/output) COMPLEX(sp) array, dimension (N*(N+1)/2)
 !!          On entry, the upper or lower triangle of the Hermitian matrix
 !!          A, packed columnwise in a linear array.  The j-th column of A
 !!          is stored in the array AP as follows:
@@ -650,8 +650,8 @@ subroutine wrap_CHPEV(jobz, uplo, n, ap, w, z, ldz)
  character(len=*),intent(in) :: jobz,uplo
 !arrays
  real(sp),intent(out) :: w(n)
- complex(spc),intent(inout) :: ap(n*(n+1)/2)
- complex(spc),intent(out) :: z(ldz,n)
+ complex(sp),intent(inout) :: ap(n*(n+1)/2)
+ complex(sp),intent(out) :: z(ldz,n)
 
 !Local variables ------------------------------
 !scalars
@@ -659,7 +659,7 @@ subroutine wrap_CHPEV(jobz, uplo, n, ap, w, z, ldz)
  character(len=500) :: msg
 !arrays
  real(sp),allocatable :: rwork(:)
- complex(spc),allocatable :: work(:)
+ complex(sp),allocatable :: work(:)
 !************************************************************************
 
  ABI_MALLOC(work, (MAX(1,2*n-1)))
@@ -2290,7 +2290,7 @@ end subroutine xhegvx_cplex
 !!           JOBVR = 'V', LDVR >= N.
 !!
 !! OUTPUT
-!!   W       (output) COMPLEX(SPC) array, dimension (N)
+!!   W       (output) COMPLEX(sp) array, dimension (N)
 !!           W contains the computed eigenvalues.
 !!   VL      (output) COMPLEX(SCP) array, dimension (LDVL,N)
 !!           If JOBVL = 'V', the left eigenvectors u(j) are stored one
@@ -2298,7 +2298,7 @@ end subroutine xhegvx_cplex
 !!           as their eigenvalues.
 !!           If JOBVL = 'N', VL is not referenced.
 !!           u(j) = VL(:,j), the j-th column of VL.
-!!   VR      (output) COMPLEX(SPC) array, dimension (LDVR,N)
+!!   VR      (output) COMPLEX(sp) array, dimension (LDVR,N)
 !!           If JOBVR = 'V', the right eigenvectors v(j) are stored one
 !!           after another in the columns of VR, in the same order
 !!           as their eigenvalues.
@@ -2308,7 +2308,7 @@ end subroutine xhegvx_cplex
 !!  See also SIDE EFFECTS
 !!
 !! SIDE EFFECTS
-!!   A       (input/output) COMPLEX(SPC) array, dimension (LDA,N)
+!!   A       (input/output) COMPLEX(sp) array, dimension (LDA,N)
 !!           On entry, the N-by-N matrix A.
 !!           On exit, A has been overwritten.
 !!
@@ -2321,10 +2321,10 @@ subroutine wrap_CGEEV(jobvl, jobvr, n, a, lda, w, vl, ldvl, vr, ldvr)
  integer,intent(in) :: n,lda,ldvl,ldvr
  character(len=*),intent(in) ::  jobvl,jobvr
 !arrays
- complex(spc),intent(inout) :: a(lda,n)
- complex(spc),intent(out) :: w(n)
- complex(spc),intent(out) :: vl(ldvl,n)
- complex(spc),intent(out) :: vr(ldvr,n)
+ complex(sp),intent(inout) :: a(lda,n)
+ complex(sp),intent(out) :: w(n)
+ complex(sp),intent(out) :: vl(ldvl,n)
+ complex(sp),intent(out) :: vr(ldvr,n)
 
 !Local variables ------------------------------
 !scalars
@@ -2332,7 +2332,7 @@ subroutine wrap_CGEEV(jobvl, jobvr, n, a, lda, w, vl, ldvl, vr, ldvr)
  character(len=500) :: msg
 !arrays
  real(sp),allocatable :: rwork(:)
- complex(spc),allocatable :: work(:)
+ complex(sp),allocatable :: work(:)
 !************************************************************************
 
  lwork = MAX(1,2*n)
@@ -2516,7 +2516,7 @@ subroutine cginv(a, n, comm)
  integer,intent(in) :: n
  integer,optional,intent(in) :: comm
 !arrays
- complex(spc),intent(inout) :: a(n,n)
+ complex(sp),intent(inout) :: a(n,n)
 
 !Local variables-------------------------------
 !scalars
@@ -2525,7 +2525,7 @@ subroutine cginv(a, n, comm)
  character(len=500) :: msg
 !arrays
  integer,allocatable :: ipiv(:)
- complex(spc),allocatable :: work(:)
+ complex(sp),allocatable :: work(:)
 #ifdef HAVE_LINALG_SCALAPACK
  !integer :: ierr,istwf_k,ipiv_size,liwork
  !integer,allocatable :: iwork(:)
@@ -3698,13 +3698,12 @@ subroutine test_xginv(msize,skinds,do_check,Tres,comm)
  character(len=*),intent(in) :: skinds
  type(latime_t),intent(out) :: Tres
 !arrays
- !complex(spc),allocatable :: cmat_spc(:,:)
- !complex(spc),allocatable :: cmat_spc_check(:,:)
+ !complex(sp),allocatable :: cmat_spc(:,:)
+ !complex(sp),allocatable :: cmat_spc_check(:,:)
  complex(dp),allocatable :: cmat_dpc(:,:)
  complex(dp),allocatable :: cmat_dpc_check(:,:)
 
 !Local variables-------------------------------
-!scalars
  integer :: ii
  real(dp) :: max_abserr
 ! *************************************************************************

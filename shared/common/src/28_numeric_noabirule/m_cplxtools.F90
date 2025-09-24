@@ -80,9 +80,9 @@ MODULE m_cplxtools
 
  !integer,parameter,private :: MIN_SIZE = 5000
 
- complex(spc),private,parameter :: czero_spc =  (0._sp,0._sp)
- complex(spc),private,parameter :: cone_spc  =  (1._sp,0._sp)
- !complex(spc) ,parameter :: j_spc=(0._sp,1.0_sp)
+ complex(sp),private,parameter :: czero_spc =  (0._sp,0._sp)
+ complex(sp),private,parameter :: cone_spc  =  (1._sp,0._sp)
+ !complex(sp) ,parameter :: j_spc=(0._sp,1.0_sp)
 
  complex(dp),private,parameter :: czero_dpc =  (0._dp,0._dp)
  complex(dp),private,parameter :: cone_dpc  =  (1._dp,0._dp)
@@ -410,13 +410,11 @@ subroutine cplx_box2gsph_spc(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsp
  real(sp),optional,intent(in) :: rscal
 !arrays
  integer,intent(in) :: kg_k(3,npw_k)
- complex(spc),intent(in) :: iarrbox(ldx*ldy*ldz*ndat)
- complex(spc),intent(out) :: oarrsph(npw_k*ndat)
+ complex(sp),intent(in) :: iarrbox(ldx*ldy*ldz*ndat)
+ complex(sp),intent(out) :: oarrsph(npw_k*ndat)
 
 !Local variables-------------------------------
-!scalars
  integer :: ig,ix,iy,iz,dat,pad_sph,pad_box,ifft,ldxyz
-
 ! *************************************************************************
 
  ldxyz = ldx*ldy*ldz
@@ -611,8 +609,8 @@ subroutine cplx_gsph2box_spc(nx,ny,nz,ldx,ldy,ldz,ndat,npw,istwf_k,kg_k,iarrsph,
  integer,intent(in) :: istwf_k,nx,ny,nz,ldx,ldy,ldz,ndat,npw
 !arrays
  integer,intent(in) :: kg_k(3,npw)
- complex(spc),intent(in) :: iarrsph(npw*ndat)
- complex(spc),intent(out) :: oarrbox(ldx*ldy*ldz*ndat)
+ complex(sp),intent(in) :: iarrsph(npw*ndat)
+ complex(sp),intent(out) :: oarrbox(ldx*ldy*ldz*ndat)
 
 !Local variables-------------------------------
 !scalars
@@ -621,7 +619,6 @@ subroutine cplx_gsph2box_spc(nx,ny,nz,ldx,ldy,ldz,ndat,npw,istwf_k,kg_k,iarrsph,
  !character(len=500) :: msg
 !arrays
  integer,allocatable :: ixinver(:),iyinver(:),izinver(:)
-
 ! *************************************************************************
 
 !In the case of special k-points, invariant under time-reversal,
@@ -925,11 +922,10 @@ subroutine cplx_setaug_zero_spc(nx,ny,nz,ldx,ldy,ldz,ndat,arr)
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat
 !arrays
- complex(spc),intent(inout) :: arr(ldx,ldy,ldz*ndat)
+ complex(sp),intent(inout) :: arr(ldx,ldy,ldz*ndat)
 
 !Local variables-------------------------------
  integer :: iy,iz,dat,padat
-
 ! *************************************************************************
 
  if (nx /= ldx) then

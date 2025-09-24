@@ -46,12 +46,10 @@ module defs_basis
 !nb of bytes related to default simple-precision real/complex subtypes
 !(= 4 for many machine architectures, = 8 for e.g. Cray)
  integer, parameter :: sp=kind(1.0)          ! Single precision should not be used
- integer, parameter :: spc=kind((1.0,1.0))
 
 !nb of bytes related to default double-precision real/complex subtypes
 !(= 8 for many machine architectures)
  integer, parameter :: dp=kind(1.0d0)
- !integer, parameter :: dpc=kind((1.0_dp,1.0_dp))  ! Complex should not be used presently
  !                                                 ! except for use of libraries
 
 !nb of bytes related to GW arrays, that can be tuned from sp to dp independently
@@ -71,7 +69,7 @@ module defs_basis
 ! d=5.04876_urp   ! for a real d with 12 significative digits
 ! and such as 10^-50 < |d| < 10^50
 
-!To modify sp/spc and / or dp/dpc, insert instructions such as 'dp='
+! To modify sp and/or dp/, insert instructions such as 'dp='
 ! but do not modify the other declarations in this module
 
 !The default lengths
@@ -270,16 +268,16 @@ module defs_basis
  complex(dp), parameter :: j_dpc = (0._dp,1.0_dp)
 
  ! single-precision
- complex(spc), parameter :: czero_sp = (0._sp,0._sp)
- complex(spc), parameter :: cone_sp  = (1._sp,0._sp)
- complex(spc), parameter :: ctwo_sp  = (2._sp,0._sp)
- complex(spc), parameter :: j_sp     = (0._sp,1.0_sp)
+ complex(sp), parameter :: czero_sp = (0._sp,0._sp)
+ complex(sp), parameter :: cone_sp  = (1._sp,0._sp)
+ complex(sp), parameter :: ctwo_sp  = (2._sp,0._sp)
+ complex(sp), parameter :: j_sp     = (0._sp,1.0_sp)
 
 !Pauli matrix
  complex(dp), parameter :: pauli_mat(2,2,0:3) = reshape([cone,czero,czero,cone, &
-                                                          czero,cone,cone,czero,&
-                                                          czero,j_dpc,-j_dpc,czero,&
-                                                          cone,czero,czero,-cone], [2,2,4])
+                                                         czero,cone,cone,czero,&
+                                                         czero,j_dpc,-j_dpc,czero,&
+                                                         cone,czero,czero,-cone], [2,2,4])
 
 !Character constants
  character(len=1), parameter :: ch10 = char(10)
