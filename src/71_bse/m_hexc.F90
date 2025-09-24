@@ -26,10 +26,10 @@ MODULE m_hexc
  use m_bs_defs
  use m_xmpi
  use m_errors
- use m_nctk
  use m_haydock_io
  use m_linalg_interfaces
  use netcdf
+ use m_nctk
 
  use m_time,              only : timab
  use m_fstrings,          only : indent, strcat, sjoin, itoa
@@ -43,8 +43,7 @@ MODULE m_hexc
  use m_bse_io,            only : exc_read_rcblock, exc_write_optme, exc_ham_ncwrite
  use m_pawtab,            only : pawtab_type
  use m_vcoul,             only : vcoul_t
- use m_bseinterp,         only : interpolator_t, interpolator_init, interpolator_normalize, &
-                                 interpolator_free, int_alloc_work, int_free_work
+ use m_bseinterp,         only : interpolator_t
  use m_ebands,            only : ebands_t
 
  implicit none
@@ -63,79 +62,79 @@ MODULE m_hexc
 
  type, public :: hexc_t
 
- !scalars
-    integer :: comm
-    ! MPI communicator
+   !scalars
+   integer :: comm
+   ! MPI communicator
 
-    integer :: hsize_coarse
-    ! Size of the coarse hamiltonian
+   integer :: hsize_coarse
+   ! Size of the coarse hamiltonian
 
-    integer :: hsize
-    ! Size of the hamiltonian and the kets
-    ! (= hsize_coarse without interpolation, = hsize_dense with interpolation)
+   integer :: hsize
+   ! Size of the hamiltonian and the kets
+   ! (= hsize_coarse without interpolation, = hsize_dense with interpolation)
 
-    integer :: nbz
-    ! Number of kpoints for the full problem
-    ! (= nbz_coarse without interpolation, = nbz_dense with interpolation)
+   integer :: nbz
+   ! Number of kpoints for the full problem
+   ! (= nbz_coarse without interpolation, = nbz_dense with interpolation)
 
-    integer :: my_t1
-    ! Lower limit of MPI paral
+   integer :: my_t1
+   ! Lower limit of MPI paral
 
-    integer :: my_t2
-    ! Upper limit of MPI paral
+   integer :: my_t2
+   ! Upper limit of MPI paral
 
-    integer :: my_nt
-    ! Number of transitions treat by node
-    ! = my_t2 - my_t1 + 1
+   integer :: my_nt
+   ! Number of transitions treat by node
+   ! = my_t2 - my_t1 + 1
 
-    integer :: nbnd_coarse
-    ! Product of number of bands conduction X valence
+   integer :: nbnd_coarse
+   ! Product of number of bands conduction X valence
 
-    ! Pointers to data that are already in memory
-    type(excparam),pointer :: bsp => null()
-    ! parameters for BS
+   ! Pointers to data that are already in memory
+   type(excparam),pointer :: bsp => null()
+   ! parameters for BS
 
-    type(excfiles),pointer :: bs_files => null()
-    ! files for BSE
+   type(excfiles),pointer :: bs_files => null()
+   ! files for BSE
 
-    type(crystal_t),pointer :: crystal => null()
-    ! crystal info
+   type(crystal_t),pointer :: crystal => null()
+   ! crystal info
 
-    type(kmesh_t),pointer :: kmesh_coarse => null()
-    ! kmesh of the coarse mesh
+   type(kmesh_t),pointer :: kmesh_coarse => null()
+   ! kmesh of the coarse mesh
 
-    type(kmesh_t),pointer :: kmesh => null()
-    ! kmesh of the full problem
+   type(kmesh_t),pointer :: kmesh => null()
+   ! kmesh of the full problem
 
-    type(ebands_t),pointer :: ks_bst => null()
-    type(ebands_t),pointer :: qp_bst => null()
-    ! band structures of the full problem
+   type(ebands_t),pointer :: ks_bst => null()
+   type(ebands_t),pointer :: qp_bst => null()
+   ! band structures of the full problem
 
-    type(wfdgw_t),pointer :: wfd_coarse => null()
-    ! Wfd of the coarse problem
+   type(wfdgw_t),pointer :: wfd_coarse => null()
+   ! Wfd of the coarse problem
 
-    type(wfdgw_t),pointer :: wfd => null()
-    ! wfd of the full problem
+   type(wfdgw_t),pointer :: wfd => null()
+   ! wfd of the full problem
 
- !arrays
-    complex(dp),allocatable :: hreso(:,:)
-    ! Resonant part of the hamiltonian
+   !arrays
+   complex(dp),allocatable :: hreso(:,:)
+   ! Resonant part of the hamiltonian
 
-    complex(dp),allocatable :: hcoup(:,:)
-    ! Coupling part of the hamiltonian
+   complex(dp),allocatable :: hcoup(:,:)
+   ! Coupling part of the hamiltonian
 
-    complex(dp),allocatable :: diag_coarse(:)
-    ! Diagonal part of the hamiltonian with transition energies
+   complex(dp),allocatable :: diag_coarse(:)
+   ! Diagonal part of the hamiltonian with transition energies
 
+ contains
+   procedure :: init => hexc_init           ! Construct the object
+   procedure :: free => hexc_free           ! Free memory
+   procedure :: build_hinterp => hexc_build_hinterp  ! Interpolate the Hamiltonian and store it in memory
+   procedure :: matmul_tda => hexc_matmul_tda     ! Matrix-vector multiplication (TDA)
+   procedure :: matmul_full => hexc_matmul_full    ! Matrix-vector multiplication (TDA + Coupling)
+   procedure :: matmul_elphon => hexc_matmul_elphon  ! Matrix-vector multiplication (TDA + elphon)
  end type hexc_t
 !!***
-
- public :: hexc_init           ! Construct the object
- public :: hexc_free           ! Free memory
- public :: hexc_build_hinterp  ! Interpolate the Hamiltonian and store it in memory
- public :: hexc_matmul_tda     ! Matrix-vector multiplication (TDA)
- public :: hexc_matmul_full    ! Matrix-vector multiplication (TDA + Coupling)
- public :: hexc_matmul_elphon  ! Matrix-vector multiplication (TDA + elphon)
 
 !----------------------------------------------------------------------
 
@@ -150,61 +149,61 @@ MODULE m_hexc
 
  type,public :: hexc_interp_t
 
- !scalars
-    integer :: hsize_dense
-    ! Size of the dense hamiltonian
+   !scalars
+   integer :: hsize_dense
+   ! Size of the dense hamiltonian
 
-    real(dp) :: m3_width
-    ! Width of the region where M3 is applied instead of M1
+   real(dp) :: m3_width
+   ! Width of the region where M3 is applied instead of M1
 
-    type(interpolator_t) :: interpolator
-    ! Interpolator containing overlaps and interpolation info
+   type(interpolator_t) :: interpolator
+   ! Interpolator containing overlaps and interpolation info
 
-    ! Pointers to datatypes that are already in memory
-    type(kmesh_t),pointer :: kmesh_dense => null()
-    ! kmesh of the dense mesh
+   ! Pointers to datatypes that are already in memory
+   type(kmesh_t),pointer :: kmesh_dense => null()
+   ! kmesh of the dense mesh
 
-    type(vcoul_t),pointer :: vcp_dense => null()
-    ! coulomb interaction on the dense mesh
+   type(vcoul_t),pointer :: vcp_dense => null()
+   ! coulomb interaction on the dense mesh
 
- !arrays
-    integer,allocatable :: kdense2div(:)
-    ! kdense2div(nbz_dense)
-    ! Index of kpoint -> Index of division
+   !arrays
+   integer,allocatable :: kdense2div(:)
+   ! kdense2div(nbz_dense)
+   ! Index of kpoint -> Index of division
 
-    integer,allocatable :: div2kdense(:,:)
-    ! div2kdense(nbz_coarse,ndiv)
-    ! Index of kpoint coarse + Index of division -> Index of kdense
+   integer,allocatable :: div2kdense(:,:)
+   ! div2kdense(nbz_coarse,ndiv)
+   ! Index of kpoint coarse + Index of division -> Index of kdense
 
-    complex(dp),allocatable :: diag_dense(:)
-    ! diag_dense(hsize_dense)
-    ! Diagonal part of the dense hamiltonian
+   complex(dp),allocatable :: diag_dense(:)
+   ! diag_dense(hsize_dense)
+   ! Diagonal part of the dense hamiltonian
 
-    complex(dp),allocatable :: hinterp(:,:)
-    ! hinterp(hsize_dense,hsize_dense)
-    ! Interpolated hamiltonian
+   complex(dp),allocatable :: hinterp(:,:)
+   ! hinterp(hsize_dense,hsize_dense)
+   ! Interpolated hamiltonian
 
-    complex(dp),allocatable :: all_hmat(:,:)
-    ! all_hmat,(hsize,hsize))
-    ! Coarse excitonic matrix in a format suitable for interpolation in k-space
+   complex(dp),allocatable :: all_hmat(:,:)
+   ! all_hmat,(hsize,hsize))
+   ! Coarse excitonic matrix in a format suitable for interpolation in k-space
 
-    complex(dp),allocatable :: all_acoeffs(:,:)
-    ! all_acoeffs(hsize,hsize))
-    ! a coefficients in a format suitable for interpolation in k-space
+   complex(dp),allocatable :: all_acoeffs(:,:)
+   ! all_acoeffs(hsize,hsize))
+   ! a coefficients in a format suitable for interpolation in k-space
 
-    complex(dp),allocatable :: all_bcoeffs(:,:)
-    ! all_bcoeffs(hsize,hsize))
-    ! b coefficients in a format suitable for interpolation in k-space
+   complex(dp),allocatable :: all_bcoeffs(:,:)
+   ! all_bcoeffs(hsize,hsize))
+   ! b coefficients in a format suitable for interpolation in k-space
 
-    complex(dp),allocatable :: all_ccoeffs(:,:)
-    ! all_ccoeffs(hsize,hsize))
-    ! c coefficients in a format suitable for interpolation in k-space
+   complex(dp),allocatable :: all_ccoeffs(:,:)
+   ! all_ccoeffs(hsize,hsize))
+   ! c coefficients in a format suitable for interpolation in k-space
 
+ contains
+   procedure :: init => hexc_interp_init    ! Construct the object for interpolated ham
+   procedure :: free => hexc_interp_free    ! Free memory for interpolated ham
  end type hexc_interp_t
 !!***
-
- public :: hexc_interp_init    ! Construct the object for interpolated ham
- public :: hexc_interp_free    ! Free memory for interpolated ham
 
 !----------------------------------------------------------------------
 
@@ -468,12 +467,10 @@ subroutine hexc_interp_init(hexc_i, hexc, m3_width, method, Kmesh_dense, Vcp_den
  hexc%my_t2 = hexc_i%hsize_dense
 
  ! Initialize the interpolator
- call interpolator_init(hexc_i%interpolator, double_grid, Wfd_dense, hexc%Wfd_coarse, Kmesh_dense, &
-&    hexc%Kmesh_coarse, hexc%BSp, hexc%crystal, Psps, Pawtab, method)
+ call hexc_i%interpolator%init(double_grid, Wfd_dense, hexc%Wfd_coarse, Kmesh_dense, &
+    hexc%Kmesh_coarse, hexc%BSp, hexc%crystal, Psps, Pawtab, method)
 
- if(BSp%sum_overlaps) then
-   call interpolator_normalize(hexc_i%interpolator)
- end if
+ if (BSp%sum_overlaps) call hexc_i%interpolator%normalize()
 
  ABI_MALLOC(hexc_i%kdense2div,(double_grid%nbz_dense))
  ABI_MALLOC(hexc_i%div2kdense,(double_grid%nbz_coarse,double_grid%ndiv))
@@ -544,7 +541,6 @@ end subroutine hexc_interp_init
 !! SIDE EFFECTS
 !! hexc, hexc_i
 !!   Pre-compute info to save CPU time when computing matmul
-!!
 !!
 !! SOURCE
 
@@ -788,7 +784,7 @@ subroutine hexc_compute_hinterp(BSp,hsize_coarse,hsize_dense,hmat,grid,nbnd_coar
  Cmat = czero
 
  ABI_MALLOC(band2it,(nbnd_coarse))
- call int_alloc_work(interpolator,nbnd_coarse*interpolator%nvert)
+ call interpolator%alloc_work(nbnd_coarse*interpolator%nvert)
 
  btemp => interpolator%btemp
  ctemp => interpolator%ctemp
@@ -1083,14 +1079,12 @@ subroutine hexc_compute_hinterp(BSp,hsize_coarse,hsize_dense,hmat,grid,nbnd_coar
  ABI_FREE(Cmat)
  ABI_FREE(band2it)
 
- if(newway) then
-   ABI_FREE(tmp_Cmat)
-   ABI_FREE(work_coeffs)
- end if
+ ABI_SFREE(tmp_Cmat)
+ ABI_SFREE(work_coeffs)
 
  nullify(ctemp)
  nullify(btemp)
- call int_free_work(interpolator)
+ call interpolator%free()
 
  hinterp = hinterp*factor
 
@@ -1113,7 +1107,7 @@ end subroutine hexc_compute_hinterp
 subroutine hexc_free(hexc)
 
 !Arguments ---------------------------
- type(hexc_t),intent(inout) :: hexc
+ class(hexc_t),intent(inout) :: hexc
 !*****************************************************************************
 
  if (associated(hexc%bsp)) then
@@ -1169,7 +1163,7 @@ subroutine hexc_interp_free(hexc_i)
    nullify(hexc_i%vcp_dense)
  end if
 
- call interpolator_free(hexc_i%interpolator)
+ call hexc_i%interpolator%free()
 
 end subroutine hexc_interp_free
 !!***
@@ -1201,7 +1195,7 @@ end subroutine hexc_interp_free
 !! SOURCE
 
 subroutine hexc_interp_matmul(BSp,hsize_coarse,hsize_dense,hmat,phi,hphi,grid,&
-&   nbnd_coarse,interpolator,div2kdense,kdense2div)
+                              nbnd_coarse,interpolator,div2kdense,kdense2div)
 
 !Arguments ------------------------------------
 !scalars
@@ -1231,7 +1225,6 @@ subroutine hexc_interp_matmul(BSp,hsize_coarse,hsize_dense,hmat,phi,hphi,grid,&
 !************************************************************************
 
  factor = one/grid%ndiv
-
  !hphi = czero
 
  ! Outer index : k point in the dense zone
@@ -1328,7 +1321,7 @@ subroutine hexc_interp_matmul(BSp,hsize_coarse,hsize_dense,hmat,phi,hphi,grid,&
 
      do it_coarse = 1, BSp%nreh(is)
        ibnd_coarse = (Bsp%trans(it_coarse,is)%v-BSp%lomo_spin(is))*BSp%maxnbndc+&
-&            (BSp%Trans(it_coarse,is)%c-BSp%lumo_spin(is)+1)
+                     (BSp%Trans(it_coarse,is)%c-BSp%lumo_spin(is)+1)
        ik_coarse = BSp%trans(it_coarse,is)%k
        !b(:) = interp_factors(it_coarse,ineighbour,:)
        b(:) = interpolator%interp_factors(ineighbour,:)
@@ -1407,7 +1400,7 @@ subroutine hexc_interp_matmul(BSp,hsize_coarse,hsize_dense,hmat,phi,hphi,grid,&
              do ic1 = BSp%lumo_spin(is),Bsp%humo_spin(is)
                ibnd_coarse1 = (iv1-BSp%lomo_spin(is))*BSp%maxnbndc+(ic1-BSp%lumo_spin(is)+1)
                A(ibnd_coarse,ibnd_coarse1) = (interpolator%overlaps(iv1,iv,ineighbour,ik_dense,is)) &
-&                                          *GWPC_CONJG(interpolator%overlaps(ic1,ic,ineighbour,ik_dense,is))
+                                            *GWPC_CONJG(interpolator%overlaps(ic1,ic,ineighbour,ik_dense,is))
              end do !ic1
            end do !iv1
          end do ! ic
@@ -1491,10 +1484,9 @@ end subroutine hexc_interp_matmul
 !! hexc_matmul_tda
 !!
 !! FUNCTION
-!! Compute H |\psi>
+!! Compute H_exc |\psi>
 !!
 !! INPUTS
-!! hexc<hexc_t> = Excitonic hamiltonian
 !! hexc_i<hexc_interp_t> = Interpolated excitonic hamiltonian
 !! phi = Input ket
 !!
@@ -1518,7 +1510,7 @@ subroutine hexc_matmul_tda(hexc, hexc_i, phi, hphi)
 
  call timab(697,1,tsec)
 
- if(hexc%BSp%use_interp) then
+ if (hexc%BSp%use_interp) then
    hphi = hexc_i%diag_dense * phi
 
    if (any(hexc%BSp%interp_mode == [2,3,4])) then
