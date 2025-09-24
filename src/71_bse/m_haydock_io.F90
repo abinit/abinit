@@ -66,7 +66,7 @@ MODULE m_haydock_io
    real(dp) :: broad
    ! Broadening factor
 
-   complex(dpc) :: factor
+   complex(dp) :: factor
 
    real(dp),allocatable :: qpoints(:,:)
    ! qpoints(3,nq)
@@ -276,12 +276,12 @@ subroutine read_haydock(haydock_file, q, aa, bb, phi_n, phi_nm1, niter, factor)
 !Arguments ------------------------------------
 !scalars
  integer,intent(out) :: niter
- complex(dpc),intent(out) :: factor
+ complex(dp),intent(out) :: factor
  type(haydock_type),intent(in) :: haydock_file
 !arrays
  real(dp),intent(in) :: q(3)
  real(dp),allocatable,intent(out) :: bb(:)
- complex(dpc),allocatable,intent(out) :: aa(:),phi_n(:),phi_nm1(:)
+ complex(dp),allocatable,intent(out) :: aa(:),phi_n(:),phi_nm1(:)
 
 !Local variables ------------------------------
 !scalars
@@ -363,17 +363,16 @@ subroutine write_haydock(haydock_file, hsize, q, aa, bb, phi_n, phi_nm1, niter, 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: niter,hsize
- complex(dpc),intent(in) :: factor
+ complex(dp),intent(in) :: factor
  type(haydock_type),intent(in) :: haydock_file
 !arrays
  real(dp),intent(in) :: q(3)
  real(dp),intent(in) :: bb(niter)
- complex(dpc),intent(in) :: aa(niter),phi_n(hsize),phi_nm1(hsize)
+ complex(dp),intent(in) :: aa(niter),phi_n(hsize),phi_nm1(hsize)
 
 !Local variables -----------------------------
 !scalars
  integer :: it
-
 ! *************************************************************************
 
  write(haydock_file%unt) q

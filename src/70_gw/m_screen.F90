@@ -192,14 +192,14 @@ end type screen_info_t
   ! (npw, npw, nomega)
   ! The component of the two-point function $F_{G,G',w}$ for a given q.
 
-  !complex(dpc),allocatable :: head(:,:,:)
+  !complex(dp),allocatable :: head(:,:,:)
   ! head(3,3,nomega)
 
-  !complex(dpc),allocatable :: lwing(:,:,:)
+  !complex(dp),allocatable :: lwing(:,:,:)
   ! lwing(3,npwe,nomega)
   ! Lower wings
 
-  !complex(dpc),allocatable :: uwing(:,:,:)
+  !complex(dp),allocatable :: uwing(:,:,:)
   ! uwing(3,npwe,nomega)
   ! Upper wings.
 
@@ -265,7 +265,7 @@ end type screen_info_t
   ! (3,nqlwl)
   ! q-points used for the long wave-length limit treatment.
 
-  complex(dpc),allocatable :: omega(:)
+  complex(dp),allocatable :: omega(:)
   ! (nomega)
   ! List of frequencies. Real frequencies are packed first.
 

@@ -1339,7 +1339,7 @@ function wfd_norm2(Wfd,Cryst,Pawtab,band,ik_ibz,spin) result(norm2)
 !Local variables ------------------------------
 !scalars
  integer :: npw_k,istwf_k
- complex(dpc) :: cdum
+ complex(dp) :: cdum
  type(wave_t),pointer :: wave
  character(len=500) :: msg
 !arrays
@@ -1368,14 +1368,14 @@ function wfd_norm2(Wfd,Cryst,Pawtab,band,ik_ibz,spin) result(norm2)
    ! Avoid the computation if Cprj are already in memory with the correct order.
    if (wave%has_cprj == WFD_STORED .and. wave%cprj_order == CPR_RANDOM) then
        pawovlp = paw_overlap(wave%Cprj, wave%Cprj, Cryst%typat, Pawtab)
-       cdum = cdum + CMPLX(pawovlp(1),pawovlp(2), kind=dpc)
+       cdum = cdum + CMPLX(pawovlp(1),pawovlp(2), kind=dp)
    else
      ! Compute Cproj
      ABI_MALLOC(Cp1,(Wfd%natom,Wfd%nspinor))
      call pawcprj_alloc(Cp1,0,Wfd%nlmn_atm)
      call wfd%get_cprj(band,ik_ibz,spin,Cryst,Cp1,sorted=.FALSE.)
      pawovlp = paw_overlap(Cp1,Cp1,Cryst%typat,Pawtab)
-     cdum = cdum + CMPLX(pawovlp(1),pawovlp(2), kind=dpc)
+     cdum = cdum + CMPLX(pawovlp(1),pawovlp(2), kind=dp)
      call pawcprj_free(Cp1)
      ABI_FREE(Cp1)
    end if
@@ -3059,7 +3059,7 @@ subroutine wfdgw_rotate(Wfd, Cryst, m_ks_to_qp, bmask)
  class(wfdgw_t),intent(inout) :: Wfd
  type(crystal_t),intent(in) :: Cryst
 !arrays
- complex(dpc),target,intent(in) :: m_ks_to_qp(Wfd%mband,Wfd%mband,Wfd%nkibz,Wfd%nsppol)
+ complex(dp),target,intent(in) :: m_ks_to_qp(Wfd%mband,Wfd%mband,Wfd%nkibz,Wfd%nsppol)
  logical,optional,intent(in) :: bmask(Wfd%mband,Wfd%nkibz,Wfd%nsppol)
 
 !Local variables-------------------------------
@@ -3069,7 +3069,7 @@ subroutine wfdgw_rotate(Wfd, Cryst, m_ks_to_qp, bmask)
  type(wave_t),pointer :: wave
 !arrays
  integer :: new_list(Wfd%mband),my_band_list(Wfd%mband)
- complex(dpc),ABI_CONTIGUOUS pointer :: umat_sk(:,:)
+ complex(dp),ABI_CONTIGUOUS pointer :: umat_sk(:,:)
  complex(gwpc) :: mcol(Wfd%mband)
  complex(gwpc),allocatable :: new_ug(:,:) !, new_ur(:)
 !************************************************************************
@@ -3840,7 +3840,7 @@ subroutine wfd_test_ortho(Wfd,Cryst,Pawtab,unit,mode_paral)
 !scalars
  integer :: ik_ibz,spin,band,band1,band2,ib,ib1,ib2,ierr,how_manyb,my_unt,npw_k,istwf_k
  real(dp) :: glob_cinf,my_cinf,glob_csup,my_csup,glob_einf,min_norm2,glob_esup,max_norm2
- complex(dpc) :: cdum
+ complex(dp) :: cdum
  logical :: bands_are_spread
  character(len=4) :: my_mode
  character(len=500) :: msg
@@ -3891,7 +3891,7 @@ subroutine wfd_test_ortho(Wfd,Cryst,Pawtab,unit,mode_paral)
        if (Wfd%usepaw==1) then
          call wfd%get_cprj(band,ik_ibz,spin,Cryst,Cp1,sorted=.FALSE.)
          pawovlp = paw_overlap(Cp1,Cp1,Cryst%typat,Pawtab,spinor_comm=Wfd%MPI_enreg%comm_spinor)
-         cdum = cdum + CMPLX(pawovlp(1),pawovlp(2), kind=dpc)
+         cdum = cdum + CMPLX(pawovlp(1),pawovlp(2), kind=dp)
        end if
        !write(std_out,*)"ik_ibz, band, spin, cdum: ",ik_ibz,band,spin,cdum
        if (REAL(cdum)<min_norm2) min_norm2=REAL(cdum)
@@ -3922,7 +3922,7 @@ subroutine wfd_test_ortho(Wfd,Cryst,Pawtab,unit,mode_paral)
          end if
          if (Wfd%usepaw==1) then
            pawovlp = paw_overlap(Cp1,Cp2,Cryst%typat,Pawtab,spinor_comm=Wfd%MPI_enreg%comm_spinor)
-           cdum = cdum + CMPLX(pawovlp(1),pawovlp(2), kind=dpc)
+           cdum = cdum + CMPLX(pawovlp(1),pawovlp(2), kind=dp)
          end if
 
          if (ABS(cdum)<my_cinf) my_cinf=ABS(cdum)
@@ -4021,7 +4021,7 @@ subroutine wfd_sym_ur(Wfd,Cryst,Kmesh,band,ik_bz,spin,ur_kbz,trans,with_umklp,ur
  integer :: ik_ibz,isym_k,itim_k,nr,ispinor,spad,ir,ir2
  integer :: fft_idx,ix,iy,iz,nx,ny,nz,irot
  real(dp) :: gdotr
- complex(dpc) :: ph_mkt,u2b,u2a
+ complex(dp) :: ph_mkt,u2b,u2a
  complex(gwpc) :: gwpc_ph_mkt
  logical :: isirred,my_with_umklp
  character(len=1) :: my_trans
@@ -4029,7 +4029,7 @@ subroutine wfd_sym_ur(Wfd,Cryst,Kmesh,band,ik_bz,spin,ur_kbz,trans,with_umklp,ur
 !arrays
  integer :: umklp(3)
  real(dp) :: kbz(3),spinrot_k(4)
- complex(dpc) :: spinrot_mat(2,2)
+ complex(dp) :: spinrot_mat(2,2)
  complex(gwpc),allocatable :: ur(:)
 !************************************************************************
 
@@ -5010,10 +5010,10 @@ subroutine wfd_paw_get_aeur(Wfd,band,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pa
  integer :: itypat,ln_size,lmn_size,iatom,spinor
  integer :: nfgd,ifgd,jlmn,jl,jm,ifftsph
  real(dp) :: phj,tphj,arg,re_cp,im_cp
- complex(dpc) :: cp,cnorm
+ complex(dp) :: cp,cnorm
 !arrays
  real(dp) :: kpoint(3)
- complex(dpc),allocatable :: ceikr(:),phk_atm(:)
+ complex(dp),allocatable :: ceikr(:),phk_atm(:)
  type(pawcprj_type),allocatable :: Cp1(:,:)
 ! *************************************************************************
 
@@ -5668,7 +5668,7 @@ subroutine wfdgw_mkrho(wfd, cryst, psps, ebands, ngfftf, nfftf, rhor, &
 !arrays
  integer,allocatable :: irrzon(:,:,:)
  real(dp),allocatable :: phnons(:,:,:),rhog(:,:),rhor_down(:),rhor_mx(:),rhor_my(:),cwavef(:,:)
- complex(dpc),allocatable :: wfr_x(:),wfr_y(:)
+ complex(dp),allocatable :: wfr_x(:),wfr_y(:)
  complex(gwpc),allocatable :: gradug(:),work(:)
  complex(gwpc),allocatable,target :: wfr(:)
  complex(gwpc), ABI_CONTIGUOUS pointer :: cwavef1(:),cwavef2(:)

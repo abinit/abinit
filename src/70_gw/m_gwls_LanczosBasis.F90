@@ -44,10 +44,10 @@ private
 ! Global arrays
 
 ! basis which diagonalizes the static dielectric matrix
-complex(dpc), public, allocatable :: Lbasis_lanczos(:,:)  ! complex array which contains the Lanczos basis
+complex(dp), public, allocatable :: Lbasis_lanczos(:,:)  ! complex array which contains the Lanczos basis
 
 ! basis which diagonalizes the model static dielectric matrix
-complex(dpc), public, allocatable :: Lbasis_model_lanczos(:,:)  ! complex array which contains the Lanczos basis
+complex(dp), public, allocatable :: Lbasis_model_lanczos(:,:)  ! complex array which contains the Lanczos basis
 
 
 !------------------------------------------------------------
@@ -64,7 +64,7 @@ real(dp), public, allocatable :: basis_0(:,:,:,:)
 
 
 ! modified basis, of the form (V^{1/2}. l^*) psie
-complex(dpc), public, allocatable :: Lbasis_modified(:,:)
+complex(dp), public, allocatable :: Lbasis_modified(:,:)
 
 
 integer, public  :: lanczos_basis_size

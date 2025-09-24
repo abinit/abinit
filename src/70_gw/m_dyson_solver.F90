@@ -150,7 +150,7 @@ subroutine solve_dyson(ikcalc, minbnd, maxbnd, nomega_sigc, dtset, Sigp, Kmesh, 
  type(melements_t),intent(in) :: ks_me
 !arrays
  real(dp),intent(in) :: qp_ene(Sr%nbnds,Sr%nkibz,Sr%nsppol)
- complex(dpc),intent(in) :: sigcme(nomega_sigc,minbnd:maxbnd,minbnd:maxbnd,Sigp%nsppol*Sigp%nsig_ab)
+ complex(dp),intent(in) :: sigcme(nomega_sigc,minbnd:maxbnd,minbnd:maxbnd,Sigp%nsppol*Sigp%nsig_ab)
 
 !Local variables-------------------------------
 !scalars
@@ -158,7 +158,7 @@ subroutine solve_dyson(ikcalc, minbnd, maxbnd, nomega_sigc, dtset, Sigp, Kmesh, 
  integer :: iab,ib1,ib2,ikbz_gw,io,spin,is_idx,isym,itim,jb, ie0, ierr
  integer :: ik_ibz,kb,ld_matrix,mod10,nsploop,my_rank, units(2)
  real(dp) :: alpha, beta, smrt, vxc_val, vu, v_meanf, sigx
- complex(dpc) :: dsigc, sigc, sigc_zsc, zz, zsc, phase
+ complex(dp) :: dsigc, sigc, sigc_zsc, zz, zsc, phase
  logical :: ltest
  character(len=500) :: msg
  type(sigma_pade_t) :: spade
@@ -166,7 +166,7 @@ subroutine solve_dyson(ikcalc, minbnd, maxbnd, nomega_sigc, dtset, Sigp, Kmesh, 
  real(dp) :: kbz_gw(3),tsec(2), betar_pm(2), zcut_pm(2)
  real(dp),allocatable :: e0pde(:),eig(:),scme(:)
  complex(dp) :: alphac_pm(2)
- complex(dpc),allocatable :: hdp(:,:),tmpcdp(:),hhartree(:,:,:),htotal(:,:,:),h_tmp1(:,:),h_tmp2(:,:)
+ complex(dp),allocatable :: hdp(:,:),tmpcdp(:),hhartree(:,:,:),htotal(:,:,:),h_tmp1(:,:),h_tmp2(:,:)
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -571,8 +571,8 @@ subroutine print_sigma_melems(ikcalc, ib1, ib2, nsp, htotal, hhartree, sigxme, s
  integer,intent(in) :: ikcalc,ib1,ib2,nsp
  character(len=*),intent(in) :: prefix
  !arrays
- complex(dpc),intent(in) :: htotal(ib1:ib2,ib1:ib2,nsp),hhartree(ib1:ib2,ib1:ib2,nsp)
- complex(dpc),intent(in) :: sigxme(ib1:ib2,ib1:ib2,nsp),sigcme(ib1:ib2,ib1:ib2,nsp)
+ complex(dp),intent(in) :: htotal(ib1:ib2,ib1:ib2,nsp),hhartree(ib1:ib2,ib1:ib2,nsp)
+ complex(dp),intent(in) :: sigxme(ib1:ib2,ib1:ib2,nsp),sigcme(ib1:ib2,ib1:ib2,nsp)
 
 ! Local variables ------------------------------
  integer,parameter :: MAX_NCOLS = 14
@@ -876,7 +876,7 @@ subroutine sigma_pade_qp_solve(self, e0, v_meanf, sigx, z_guess, zsc, sigc_zsc, 
 !scalars
  integer :: iter
  logical :: converged
- complex(dpc) :: ctdpc, dct, dsigc
+ complex(dp) :: ctdpc, dct, dsigc
  character(len=500) :: msg
 ! *************************************************************************
 

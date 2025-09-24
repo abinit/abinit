@@ -192,7 +192,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
  integer(i8b) :: tot_nels,prev_nels,prev_ncols,nels,ir,it,itp,ist,iend,my_hsize
  real(dp) :: faq,kx_fact,cputime,walltime,gflops
  complex(spc) :: http,ctemp
- complex(dpc) :: ph_mkpt,ph_mkt,ene_t,ene_tp
+ complex(dp) :: ph_mkpt,ph_mkt,ene_t,ene_tp
  logical,parameter :: with_umklp=.FALSE.
  logical :: use_mpiio,do_coulomb_term,do_exchange_term,w_is_diagonal,isirred
  logical :: is_qeq0
@@ -209,18 +209,18 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
  integer,allocatable :: col_start(:),col_stop(:)
  integer,allocatable :: gbound(:,:)
  real(dp) :: kbz(3),kpbz(3),qbz(3),spinrot_k(4),spinrot_kp(4),kmkp(3),tsec(2)
- complex(dpc),allocatable :: my_bsham(:),buffer(:),buffer_2d(:,:),my_kxssp(:,:),prev_col(:)
+ complex(dp),allocatable :: my_bsham(:),buffer(:),buffer_2d(:,:),my_kxssp(:,:),prev_col(:)
 !DBYG
- complex(dpc),allocatable :: acoeffs(:),bcoeffs(:),ccoeffs(:) ! Coeff of W = a/q^2 + b/q + c
+ complex(dp),allocatable :: acoeffs(:),bcoeffs(:),ccoeffs(:) ! Coeff of W = a/q^2 + b/q + c
  integer :: a_unt, b_unt, c_unt
- complex(dpc) :: aatmp, bbtmp, cctmp
+ complex(dp) :: aatmp, bbtmp, cctmp
  complex(gwpc),allocatable :: aa_vpv(:),aa_cpc(:),aa_ctccp(:)
  complex(gwpc),allocatable :: bb_vpv1(:),bb_cpc1(:),bb_ctccp1(:)
  complex(gwpc),allocatable :: bb_vpv2(:),bb_cpc2(:),bb_ctccp2(:)
  complex(gwpc),allocatable :: cc_vpv(:),cc_cpc(:),cc_ctccp(:)
- complex(dpc),allocatable :: abuffer(:),aprev_col(:)
- complex(dpc),allocatable :: bbuffer(:),bprev_col(:)
- complex(dpc),allocatable :: cbuffer(:),cprev_col(:)
+ complex(dp),allocatable :: abuffer(:),aprev_col(:)
+ complex(dp),allocatable :: bbuffer(:),bprev_col(:)
+ complex(dp),allocatable :: cbuffer(:),cprev_col(:)
  character(len=fnlen) :: tmpfname
  integer :: ii
 !END DBYG
@@ -360,18 +360,18 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
  if (is_resonant) then
    if (use_mpiio) then
      write(msg,'(2a,f6.2,a)')&
-      ". Writing resonant excitonic Hamiltonian on file "//TRIM(fname)," via MPI-IO; file size= ",two*tot_nels*dpc*b2Gb," [Gb]."
+      ". Writing resonant excitonic Hamiltonian on file "//TRIM(fname)," via MPI-IO; file size= ",two*tot_nels*dp*b2Gb," [Gb]."
    else
      write(msg,'(2a,f6.2,a)')&
-      ". Writing resonant excitonic Hamiltonian on file "//TRIM(fname),"; file size= ",two*dpc*tot_nels*b2Gb," [Gb]."
+      ". Writing resonant excitonic Hamiltonian on file "//TRIM(fname),"; file size= ",two*dp*tot_nels*b2Gb," [Gb]."
    end if
  else
    if (use_mpiio) then
      write(msg,'(2a,f6.2,a)')&
-      ". Writing coupling excitonic Hamiltonian on file "//TRIM(fname)," via MPI-IO; file size= ",tot_nels*2*dpc*b2Gb," [Gb]."
+      ". Writing coupling excitonic Hamiltonian on file "//TRIM(fname)," via MPI-IO; file size= ",tot_nels*2*dp*b2Gb," [Gb]."
    else
      write(msg,'(2a,f6.2,a)')&
-      ". Writing coupling excitonic Hamiltonian on file "//TRIM(fname),"; file size= ",two*dpc*tot_nels*b2Gb," [Gb]."
+      ". Writing coupling excitonic Hamiltonian on file "//TRIM(fname),"; file size= ",two*dp*tot_nels*b2Gb," [Gb]."
    end if
  end if
  call wrtout([std_out, ab_out], msg, do_flush=.True.)
@@ -541,7 +541,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
    my_ends   = [my_rows(2),my_cols(2)]
    !
    ! Announce the treatment of submatrix treated by each node.
-   bsize_my_block = 2*dpc*my_hsize
+   bsize_my_block = 2*dp*my_hsize
    write(msg,'(4(a,i0))')' Treating ',my_hsize,'/',nels,' matrix elements, from column ',my_cols(1),' up to column ',my_cols(2)
    call wrtout(std_out, msg)
 
@@ -1316,19 +1316,19 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
            iend = ist + nrows -1
            !write(std_out,*)"Using nrows, ist, iend=",nrows,ist,iend
            if (jj==1 .and. prev_nrows>0) then ! join prev_col and this subcolumn.
-             write(bsh_unt) CMPLX(prev_col,kind=dpc),CMPLX(buffer(ist:iend),kind=dpc)
+             write(bsh_unt) CMPLX(prev_col,kind=dp),CMPLX(buffer(ist:iend),kind=dp)
              if (BSp%prep_interp) then
-               write(a_unt) CMPLX(aprev_col,kind=dpc),CMPLX(abuffer(ist:iend),kind=dpc)
-               write(b_unt) CMPLX(bprev_col,kind=dpc),CMPLX(bbuffer(ist:iend),kind=dpc)
-               write(c_unt) CMPLX(cprev_col,kind=dpc),CMPLX(cbuffer(ist:iend),kind=dpc)
+               write(a_unt) CMPLX(aprev_col,kind=dp),CMPLX(abuffer(ist:iend),kind=dp)
+               write(b_unt) CMPLX(bprev_col,kind=dp),CMPLX(bbuffer(ist:iend),kind=dp)
+               write(c_unt) CMPLX(cprev_col,kind=dp),CMPLX(cbuffer(ist:iend),kind=dp)
              end if
              prev_nrows = prev_nrows + iend-ist+1
            else
-             write(bsh_unt) CMPLX(buffer(ist:iend),kind=dpc)
+             write(bsh_unt) CMPLX(buffer(ist:iend),kind=dp)
              if (BSp%prep_interp) then
-               write(a_unt) CMPLX(abuffer(ist:iend),kind=dpc)
-               write(b_unt) CMPLX(bbuffer(ist:iend),kind=dpc)
-               write(c_unt) CMPLX(cbuffer(ist:iend),kind=dpc)
+               write(a_unt) CMPLX(abuffer(ist:iend),kind=dp)
+               write(b_unt) CMPLX(bbuffer(ist:iend),kind=dp)
+               write(c_unt) CMPLX(cbuffer(ist:iend),kind=dp)
              end if
              prev_nrows=0
            end if
@@ -1726,7 +1726,7 @@ subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gs
 !arrays
  integer(i8b),intent(in) :: t_start(0:nproc-1),t_stop(0:nproc-1)
  complex(gwpc),intent(in) :: rhxtwg_q0(npweps,BSp%lomo_min:BSp%humo_max,BSp%lomo_min:BSp%humo_max,Kmesh%nibz,nsppol)
- complex(dpc),intent(inout) :: my_bsham(t_start(my_rank):t_stop(my_rank))
+ complex(dp),intent(inout) :: my_bsham(t_start(my_rank):t_stop(my_rank))
 
 !Local variables ------------------------------
 !scalars
@@ -1747,7 +1747,7 @@ subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gs
  integer,allocatable :: ncols_of(:)
  integer,allocatable :: col_start(:),col_stop(:)
  real(dp) :: qbz(3),tsec(2) !kbz(3),kpbz(3),
- complex(dpc),allocatable :: my_kxssp(:,:)
+ complex(dp),allocatable :: my_kxssp(:,:)
  complex(gwpc),allocatable :: vc_sqrt_qbz(:),rhotwg1(:),rhotwg2(:)
 
 !************************************************************************
@@ -2227,7 +2227,7 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
  integer :: ik_ibz,itim_k,isym_k,iq_bz,iq_ibz,isym_q,itim_q,iqbz0
  integer :: ierr,iv,ic,spin,lomo_min,humo_max !,inv_ipw,ipw
  real(dp) :: cpu,wall,gflops !q0vol,fcc_const
- complex(dpc) :: ph_mkt
+ complex(dp) :: ph_mkt
  character(len=500) :: msg
  type(wave_t),pointer :: wave_v, wave_c
 !arrays
@@ -2239,7 +2239,6 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
  complex(gwpc),ABI_CONTIGUOUS pointer :: ptr_ur1(:),ptr_ur2(:)
  type(pawcprj_type),allocatable :: Cp1(:,:),Cp2(:,:)
  type(pawpwij_t),allocatable :: Pwij_q0(:)
-
 !************************************************************************
 
  call timab(671,1,tsec)

@@ -170,7 +170,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  type(wfdgw_t),target,intent(inout) :: Wfd
 !arrays
  integer,intent(in) :: gwc_ngfft(18)
- complex(dpc),intent(out) :: sigcme_tmp(nomega_sigc,minbnd:maxbnd,minbnd:maxbnd,Wfd%nsppol*Sigp%nsig_ab)
+ complex(dp),intent(out) :: sigcme_tmp(nomega_sigc,minbnd:maxbnd,minbnd:maxbnd,Wfd%nsppol*Sigp%nsig_ab)
  type(Pawtab_type),intent(in) :: Pawtab(Psps%ntypat)
  type(pawpwff_t),intent(in) :: Paw_pwff(Psps%ntypat*Psps%usepaw)
  type(esymm_t),target,intent(in) :: allQP_sym(Wfd%nkibz,Wfd%nsppol)
@@ -188,7 +188,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  integer :: isym_kgw,isym_ki,gwc_mgfft,use_padfft,gwc_fftalga,gwc_nfftot,ifft,npw_k
  real(dp) :: fact_spin,theta_mu_minus_e0i,tol_empty,gw_gsq
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_k, wall_k, gflops_k
- complex(dpc) :: ctmp,ph_mkgwt,ph_mkt
+ complex(dp) :: ctmp,ph_mkgwt,ph_mkt
  logical :: iscompatibleFFT, q_is_gamma, print_time
  character(len=500) :: msg
  type(wave_t),pointer :: wave_sum, wave_jb
@@ -205,7 +205,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  complex(gwpc),allocatable :: rhotwg_ki(:,:), sigctmp(:,:)
  complex(gwpc),allocatable :: wfr_bdgw(:,:),ur_sum(:),wf1swf2_g(:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: cg_jb(:),cg_sum(:)
- complex(dpc),allocatable :: sym_cme(:,:,:,:),sigc(:,:,:,:,:)
+ complex(dp),allocatable :: sym_cme(:,:,:,:),sigc(:,:,:,:,:)
  logical :: rank_mask(Wfd%nproc),can_symmetrize(Wfd%nsppol)
  logical,allocatable :: bks_mask(:,:,:)
  type(sigijtab_t),pointer :: Sigcij_tab(:)

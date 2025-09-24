@@ -1148,7 +1148,7 @@ end subroutine fftw3_fftug_spc
 !! FUNCTION
 !! Compute ndat zero-padded FFTs.
 !! Mainly used for the transform of wavefunctions.
-!! TARGET: DPC arrays
+!! TARGET: DP arrays
 !! See fftw3_fftug_dp for API docs.
 !!
 !! SOURCE
@@ -1163,8 +1163,8 @@ subroutine fftw3_fftug_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
  integer,intent(in) :: npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2),kg_k(3,npw_k)
- complex(dpc),target,intent(in) :: ug(npw_k*ndat)
- complex(dpc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
+ complex(dp),target,intent(in) :: ug(npw_k*ndat)
+ complex(dp),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
  integer,optional,intent(in) :: isign, iscale
 
 #ifdef HAVE_FFTW3
@@ -1362,7 +1362,7 @@ end subroutine fftw3_fftur_spc
 !! FUNCTION
 !! Compute ndat zero-padded FFTs from R ro G.
 !! Mainly used for the transform of wavefunctions.
-!! TARGET: DPC arrays
+!! TARGET: DP arrays
 !! See fftw3_fftur_dp for API doc.
 !!
 !! SOURCE
@@ -1378,8 +1378,8 @@ subroutine fftw3_fftur_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
  integer,optional,intent(in) :: isign, iscale
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2),kg_k(3,npw_k)
- complex(dpc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
- complex(dpc),target,intent(inout) :: ug(npw_k*ndat)
+ complex(dp),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
+ complex(dp),target,intent(inout) :: ug(npw_k*ndat)
 
 #ifdef HAVE_FFTW3
 !Local variables-------------------------------
@@ -1585,7 +1585,7 @@ subroutine fftw3_c2c_ip_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff, 
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,iscale,isign
  integer,optional,intent(in) :: fftw_flags
 !arrays
- complex(dpc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
+ complex(dp),intent(inout) :: ff(ldx*ldy*ldz*ndat)
 
 #ifdef HAVE_FFTW3
 !Local variables-------------------------------
@@ -1736,8 +1736,8 @@ subroutine fftw3_c2c_op_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff, 
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,isign,ndat,iscale
  integer,optional,intent(in) :: fftw_flags
 !arrays
- complex(dpc),intent(in) :: ff(ldx*ldy*ldz*ndat)
- complex(dpc),intent(out) :: gg(ldx*ldy*ldz*ndat)
+ complex(dp),intent(in) :: ff(ldx*ldy*ldz*ndat)
+ complex(dp),intent(out) :: gg(ldx*ldy*ldz*ndat)
 
 #ifdef HAVE_FFTW3
 !Local variables-------------------------------
@@ -2479,7 +2479,7 @@ subroutine fftw3_fftpad_dpc(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, g
  integer,optional,intent(in) :: iscale
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2)
- complex(dpc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
+ complex(dp),intent(inout) :: ff(ldx*ldy*ldz*ndat)
 
 #ifdef HAVE_FFTW3
 !Local variables-------------------------------
@@ -2669,7 +2669,7 @@ function zplan_many_dft(rank,n,howmany,fin,inembed,istride,idist,fout,onembed,os
  integer,intent(in) :: n(rank),inembed(rank),onembed(rank)
  integer(KIND_FFTW_PLAN) :: plan
 !arrays
- complex(dpc) :: fin(*),fout(*)
+ complex(dp) :: fin(*),fout(*)
 
 !Local variables-------------------------------
  character(len=500) :: msg,frmt
@@ -2995,7 +2995,7 @@ subroutine fftw3_alloc_complex1d_dpc(size,cptr,fptr)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: size
- complex(dpc),ABI_CONTIGUOUS pointer :: fptr(:)
+ complex(dp),ABI_CONTIGUOUS pointer :: fptr(:)
  type(C_PTR),intent(out) :: cptr
 ! *************************************************************************
 

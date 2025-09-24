@@ -1228,7 +1228,7 @@ subroutine calc_ceigr_dpc(gg, nfft, nspinor, ngfft, ceigr)
 !arrays
  integer,intent(in) :: gg(3)
  integer,intent(in) :: ngfft(18)
- complex(dpc),intent(out) :: ceigr(nfft*nspinor)
+ complex(dp),intent(out) :: ceigr(nfft*nspinor)
 
 !Local variables-------------------------------
  integer :: ix,iy,iz,fft_idx,base,isp
@@ -1347,7 +1347,7 @@ pure subroutine calc_ceikr_dpc(kk, ngfft, nfft, nspinor, ceikr)
 !arrays
  real(dp),intent(in) :: kk(3)
  integer,intent(in) :: ngfft(18)
- complex(dpc),intent(out) :: ceikr(nfft*nspinor)
+ complex(dp),intent(out) :: ceikr(nfft*nspinor)
 
 !local variables-------------------------------
  integer :: ix, iy, iz, fft_idx

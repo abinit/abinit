@@ -189,9 +189,9 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  integer,intent(in) :: ngfft_gw(18),ngfftf(18)
  real(dp),intent(out) :: chi0_sumrule(Ep%npwe)
  complex(gwpc),intent(out) :: chi0(Ep%npwe,Ep%npwe,Ep%nomega)
- complex(dpc),intent(out) :: chi0_lwing(Ep%npwe*Ep%nI,Ep%nomega,3)
- complex(dpc),intent(out) :: chi0_uwing(Ep%npwe*Ep%nJ,Ep%nomega,3)
- complex(dpc),intent(out) :: chi0_head(3,3,Ep%nomega)
+ complex(dp),intent(out) :: chi0_lwing(Ep%npwe*Ep%nI,Ep%nomega,3)
+ complex(dp),intent(out) :: chi0_uwing(Ep%npwe*Ep%nJ,Ep%nomega,3)
+ complex(dp),intent(out) :: chi0_head(3,3,Ep%nomega)
  type(Pawrad_type),intent(in) :: Pawrad(Psps%ntypat*Psps%usepaw)
  type(Pawtab_type),intent(in) :: Pawtab(Psps%ntypat*Psps%usepaw)
  type(Paw_ij_type),intent(in) :: Paw_ij(Cryst%natom*Psps%usepaw)
@@ -212,7 +212,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  real(dp) :: fac,fac1,fac2,fac3,fac4,spin_fact,deltaf_b1b2,weight,factor
  real(dp) :: max_rest,min_rest,my_max_rest,my_min_rest, qlen
  real(dp) :: en_high,deltaeGW_enhigh_b2,wl,wr,numerator,deltaeGW_b1b2,gw_gsq,memreq
- complex(dpc) :: deltaeKS_b1b2
+ complex(dp) :: deltaeKS_b1b2
  logical :: qzero, luwindow, is_metallic, print_time
  character(len=500) :: msg_tmp,msg,allup
  type(gsphere_t) :: Gsph_FFT
@@ -228,16 +228,16 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  real(dp),allocatable :: omegasf(:), qdirs(:,:)
  complex(gwpc) :: rhotwx(3,Wfd%nspinor**2)
  complex(gwpc),allocatable :: rhotwg(:)
- complex(dpc),allocatable :: green_w(:),green_enhigh_w(:)
- complex(dpc),allocatable :: sf_lwing(:,:,:),sf_uwing(:,:,:),sf_head(:,:,:)
- complex(dpc) :: chq(3), wng(3)
- complex(dpc) :: ph_mkt
- complex(dpc),allocatable :: kkweight(:,:)
+ complex(dp),allocatable :: green_w(:),green_enhigh_w(:)
+ complex(dp),allocatable :: sf_lwing(:,:,:),sf_uwing(:,:,:),sf_head(:,:,:)
+ complex(dp) :: chq(3), wng(3)
+ complex(dp) :: ph_mkt
+ complex(dp),allocatable :: kkweight(:,:)
  complex(gwpc),allocatable :: ur1_kibz(:),ur2_kibz(:), usr1_k(:),ur2_k(:), wfwfg(:), sf_chi0(:,:,:)
  complex(gwpc),allocatable :: ur_ae1(:),ur_ae_onsite1(:),ur_ps_onsite1(:)
  complex(gwpc),allocatable :: ur_ae2(:),ur_ae_onsite2(:),ur_ps_onsite2(:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: ug1(:),ug2(:)
- complex(dpc), allocatable :: coeffW_BZ(:,:,:,:,:,:), head_qvals(:)
+ complex(dp), allocatable :: coeffW_BZ(:,:,:,:,:,:), head_qvals(:)
  logical :: gradk_not_done(Kmesh%nibz)
  logical,allocatable :: bbp_mask(:,:)
  type(pawcprj_type),allocatable :: Cprj1_bz(:,:),Cprj2_bz(:,:), Cprj1_ibz(:,:),Cprj2_ibz(:,:)
@@ -1181,7 +1181,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
  real(dp) :: e_b1_kmq,en_high,fac,fac2,fac3,f_b1_kmq,factor,max_rest,min_rest,my_max_rest
  real(dp) :: my_min_rest,numerator,spin_fact,weight,wl,wr
  real(dp) :: gw_gsq,memreq
- complex(dpc) :: ph_mkmqt,ph_mkt
+ complex(dp) :: ph_mkmqt,ph_mkt
  complex(gwpc) :: local_czero_gw
  logical :: qzero,isirred_k,isirred_kmq,luwindow,is_metallic, print_time
  character(len=500) :: msg,allup
@@ -1196,13 +1196,13 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
  real(dp) :: kbz(3),kmq_bz(3),spinrot_k(4),spinrot_kmq(4),q0(3),tsec(2)
  real(dp),ABI_CONTIGUOUS pointer :: qp_eig(:,:,:),qp_occ(:,:,:)
  real(dp),allocatable :: omegasf(:)
- complex(dpc),allocatable :: green_enhigh_w(:),green_w(:),kkweight(:,:)
+ complex(dp),allocatable :: green_enhigh_w(:),green_w(:),kkweight(:,:)
  complex(gwpc),allocatable :: sf_chi0(:,:,:),rhotwg(:)
  complex(gwpc),allocatable :: ur1_kmq_ibz(:),ur2_k_ibz(:),wfwfg(:)
  complex(gwpc),allocatable :: usr1_kmq(:),ur2_k(:)
  complex(gwpc),allocatable :: ur_ae1(:),ur_ae_onsite1(:),ur_ps_onsite1(:)
  complex(gwpc),allocatable :: ur_ae2(:),ur_ae_onsite2(:),ur_ps_onsite2(:)
- complex(dpc), allocatable :: coeffW_BZ(:,:,:,:,:,:)
+ complex(dp), allocatable :: coeffW_BZ(:,:,:,:,:,:)
  logical,allocatable :: bbp_mask(:,:)
  type(pawcprj_type),allocatable :: Cprj1_kmq(:,:),Cprj2_k(:,:)
  type(pawpwij_t),allocatable :: Pwij(:),Pwij_fft(:)
@@ -2003,9 +2003,9 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
 !arrays
  integer,intent(in) :: ngfft_gw(18)
  complex(gwpc),intent(out) :: chi0(Ep%npwe*Ep%nI,Ep%npwe*Ep%nJ,Ep%nomega)
- complex(dpc),intent(out) :: chi0_lwing(Ep%npwe*Ep%nI,Ep%nomega,3)
- complex(dpc),intent(out) :: chi0_uwing(Ep%npwe*Ep%nJ,Ep%nomega,3)
- complex(dpc),intent(out) :: chi0_head(3,3,Ep%nomega)
+ complex(dp),intent(out) :: chi0_lwing(Ep%npwe*Ep%nI,Ep%nomega,3)
+ complex(dp),intent(out) :: chi0_uwing(Ep%npwe*Ep%nJ,Ep%nomega,3)
+ complex(dp),intent(out) :: chi0_head(3,3,Ep%nomega)
  type(Pawrad_type),intent(in) :: Pawrad(Psps%ntypat*Psps%usepaw)
  type(Pawtab_type),intent(in) :: Pawtab(Psps%ntypat*Psps%usepaw)
  type(Paw_ij_type),intent(in) :: Paw_ij(Cryst%natom*Psps%usepaw)
@@ -2024,7 +2024,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  real(dp) :: deltaeGW_b1b2,zcut
  real(dp),parameter :: dummy_dosdeltae=HUGE(zero)
  real(dp) :: o_entropy,o_nelect,maxocc
- complex(dpc) :: ph_mkt
+ complex(dp) :: ph_mkt
  logical :: iscompatibleFFT, is_metallic !, print_time
  character(len=500) :: msg,msg_tmp !,allup
  type(kmesh_t) :: Kmesh
@@ -2050,9 +2050,9 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  real(dp) :: test_docc(BSt%mband,BSt%nkpt,BSt%nsppol)
  real(dp),allocatable :: qlwl(:,:)
  complex(gwpc) :: comm_kbbs(3,Wfd%nspinor**2)
- complex(dpc),allocatable :: ihr_comm(:,:,:,:,:)
+ complex(dp),allocatable :: ihr_comm(:,:,:,:,:)
  complex(gwpc),allocatable :: rhotwg(:)
- complex(dpc) :: green_w(Ep%nomega)
+ complex(dp) :: green_w(Ep%nomega)
  complex(gwpc),allocatable :: ur1(:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: ug(:)
  logical :: bmask(Wfd%mband)

@@ -103,7 +103,7 @@ subroutine exc_diago_driver(Wfd,Bsp,BS_files,KS_BSt,QP_BSt,Cryst,Kmesh,Psps,&
 !Local variables ------------------------------
 !scalars
  integer :: my_rank,master,comm,prtvol
- complex(dpc) :: exc_gap,gw_gap
+ complex(dp) :: exc_gap,gw_gap
  logical :: eval_eigenstates
  character(len=500) :: msg
 !arrays
@@ -223,7 +223,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
  character(len=fnlen) :: hreso_fname,bseig_fname
 !arrays
  real(dp),allocatable :: exc_ene(:)
- complex(dpc),allocatable :: exc_mat(:,:),exc_vec(:,:)
+ complex(dp),allocatable :: exc_mat(:,:),exc_vec(:,:)
 #if defined HAVE_LINALG_SCALAPACK && defined HAVE_MPI_IO
  integer :: amode,mpi_fh,istwf_k,tbloc
  integer(XMPI_OFFSET_KIND) :: ehdr_offset,fmarker
@@ -235,7 +235,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
 #endif
 
  integer :: ik, ic, iv, isppol, ireh, ep_ik, itemp
- complex(dpc) :: en
+ complex(dp) :: en
 
  real(dp) :: dksqmax
  integer,allocatable :: bs2eph(:,:)
@@ -243,9 +243,9 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
  logical :: do_ep_renorm, do_ep_lifetime
  integer :: ntemp
  character(len=4) :: ts
- complex(dpc),allocatable :: exc_vl(:,:),exc_ene_c(:)
- complex(dpc) :: ctemp
-!! complex(dpc),allocatable :: ovlp(:,:)
+ complex(dp),allocatable :: exc_vl(:,:),exc_ene_c(:)
+ complex(dp) :: ctemp
+!! complex(dp),allocatable :: ovlp(:,:)
 !************************************************************************
 
  DBG_ENTER("PERS")
@@ -325,7 +325,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
    write(msg,'(a,f8.1,a)')' Allocating excitonic eigenvalues. Memory required: ', exc_size*dp*b2Mb,' Mb. '
    call wrtout(std_out, msg)
 
-   write(msg,'(a,f8.1,a)')' Allocating excitonic hamiltonian.  Memory required: ',exc_size**2*dpc*b2Mb,' Mb.'
+   write(msg,'(a,f8.1,a)')' Allocating excitonic hamiltonian.  Memory required: ',exc_size**2*dp*b2Mb,' Mb.'
    call wrtout(std_out, msg, do_flush=.True.)
 
    ABI_MALLOC_OR_DIE(exc_mat,(exc_size,exc_size), ierr)
@@ -660,21 +660,21 @@ subroutine exc_print_eig(BSp,bseig_fname,gw_gap,exc_gap)
 
 !Arguments ------------------------------------
 !scalars
- complex(dpc),intent(in) :: gw_gap
- complex(dpc),intent(out) :: exc_gap
+ complex(dp),intent(in) :: gw_gap
+ complex(dp),intent(out) :: exc_gap
  character(len=*),intent(in) :: bseig_fname
  type(excparam),intent(in) :: BSp
 
 !Local variables ------------------------------
 !scalars
  integer :: nstates_read,ii,j,k,eig_unt,ieig,hsize_exp, hsize_read !,nstates
- complex(dpc) :: bind_energy,ctemp
+ complex(dp) :: bind_energy,ctemp
  character(len=500) :: msg
  !type(Hdr_type) :: tmp_Hdr
 !arrays
  integer,allocatable :: iperm(:)
  real(dp),allocatable :: exc_rene(:)
- complex(dpc),allocatable :: exc_cene(:)
+ complex(dp),allocatable :: exc_cene(:)
 !************************************************************************
 
  exc_gap = czero
@@ -816,8 +816,8 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
  character(len=500) :: msg
  character(len=fnlen) :: hreso_fname,hcoup_fname,bseig_fname
 !arrays
- complex(dpc),allocatable :: exc_ham(:,:),exc_rvect(:,:),exc_ene(:),ovlp(:,:), cbuff(:,:)
- complex(dpc) :: vl_dpc(ldvl,1)
+ complex(dp),allocatable :: exc_ham(:,:),exc_rvect(:,:),exc_ene(:),ovlp(:,:), cbuff(:,:)
+ complex(dp) :: vl_dpc(ldvl,1)
 !************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs  = xmpi_comm_size(comm)
@@ -847,7 +847,7 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
  write(msg,'(a,i0)')' Direct diagonalization of the full excitonic Hamiltonian, Matrix size= ',exc_size
  call wrtout([std_out, ab_out], msg)
 
- bsize_ham = 2*dpc*exc_size**2
+ bsize_ham = 2*dp*exc_size**2
  write(msg,'(a,f9.2,a)')' Allocating full excitonic Hamiltonian. Memory requested: ',bsize_ham*b2Gb,' Gb. '
  call wrtout(std_out, msg)
 
@@ -1014,7 +1014,7 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
  call wrtout(std_out,' Writing overlap matrix S^-1 on file: '//TRIM(bseig_fname))
 
  do it=1,nstates
-   write(eig_unt) CMPLX(ovlp(:,it),kind=dpc)
+   write(eig_unt) CMPLX(ovlp(:,it),kind=dp)
  end do
 
  ABI_FREE(ovlp)
@@ -1071,7 +1071,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
  logical :: use_scalapack,do_full_diago,diago_is_real, do_ep_lifetime
 !arrays
  real(dp),allocatable :: exc_ene(:) !,test_ene(:)
- complex(dpc),allocatable :: exc_ham(:,:),exc_rvect(:,:),fmat(:,:),ovlp(:,:)
+ complex(dp),allocatable :: exc_ham(:,:),exc_rvect(:,:),fmat(:,:),ovlp(:,:)
 #if defined HAVE_LINALG_SCALAPACK && defined HAVE_MPI_IO
  integer,parameter :: istwfk1=1
  integer :: amode,mpi_fh,tbloc,mene_found,mpi_err,my_nel,nsblocks
@@ -1080,10 +1080,10 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
  integer(XMPI_OFFSET_KIND) :: ehdr_offset,fmarker,my_offset
  integer :: gsub(2,2)
  logical,parameter :: is_fortran_file=.TRUE.
- complex(dpc) :: ctmp
+ complex(dp) :: ctmp
  integer,allocatable :: sub_block(:,:,:)
  integer,pointer :: myel2loc(:,:)
- complex(dpc),allocatable :: tmp_cbuffer(:)
+ complex(dp),allocatable :: tmp_cbuffer(:)
  character(50) :: uplo
  real(dp),external :: PDLAMCH
  type(slkmat_dp_t) :: Slk_F,Slk_Hbar,Slk_vec,Slk_ovlp !,Slk_tmp
@@ -1157,7 +1157,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
    write(msg,'(a)')". Using LAPACK sequential version to solve FHv = ev with H positive definite. "
    call wrtout([std_out, ab_out], msg)
 
-   bsize_ham = 2*dpc*exc_size**2
+   bsize_ham = 2*dp*exc_size**2
    write(msg,'(a,f9.2,a)')' Allocating full excitonic Hamiltonian. Memory requested: ',2*bsize_ham*b2Gb,' Gb. '
    call wrtout(std_out, msg)
 
@@ -1166,7 +1166,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
 
    write(msg,'(3a,f8.1,3a,f8.1,a)')&
     ' Allocating excitonic eigenvalues and eigenvectors. ',ch10,&
-    ' Memory-space requested: ',2*dpc*exc_size*b2Gb,' Gb. ',ch10,&
+    ' Memory-space requested: ',2*dp*exc_size*b2Gb,' Gb. ',ch10,&
     ' Memory-space requested: ',bsize_ham*b2Gb,' Gb. '
    call wrtout(std_out, msg)
 
@@ -1250,9 +1250,9 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
    do_ep_lifetime = .FALSE.
    write(eig_unt) do_ep_lifetime
    write(eig_unt) exc_size, nstates
-   write(eig_unt) CMPLX(exc_ene(1:nstates),kind=dpc)
+   write(eig_unt) CMPLX(exc_ene(1:nstates),kind=dp)
    do mi=1,nstates
-     write(eig_unt) CMPLX(exc_rvect(:,mi),kind=dpc)
+     write(eig_unt) CMPLX(exc_rvect(:,mi),kind=dp)
    end do
 
 !#ifdef DEV_MG_DEBUG_THIS
@@ -1518,9 +1518,9 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
      end if
 
      write(eig_unt) exc_size,nstates
-     write(eig_unt) CMPLX(exc_ene(1:nstates),kind=dpc)
+     write(eig_unt) CMPLX(exc_ene(1:nstates),kind=dp)
      !do mi=1,exc_size
-     !  write(eig_unt) CMPLX(exc_rvect(:,mi),kind=dpc)
+     !  write(eig_unt) CMPLX(exc_rvect(:,mi),kind=dp)
      !end do
      close(eig_unt)
    end if

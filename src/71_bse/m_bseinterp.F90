@@ -85,7 +85,7 @@ MODULE m_bseinterp
     ! Overlaps between dense and coarse mesh
     ! overlaps(mband_coarse,mband_dense,ivertex_coarse,double_grid%nkpt_dense,spin)
 
-    complex(dpc),allocatable :: btemp(:), ctemp(:)
+    complex(dp),allocatable :: btemp(:), ctemp(:)
     ! Temporary arrays for work
 
     ! Pointers to datatypes that are already in memory

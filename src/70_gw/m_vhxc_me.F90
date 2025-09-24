@@ -146,7 +146,7 @@ subroutine calc_vhxc_me(Wfd, Mflags, Mels, Cryst, Dtset, nfftf, ngfftf, &
  integer :: isppol,cplex_dij,npw_k,nspinor,nsppol,nspden,nk_calc,rank
  integer :: iab,isp1,isp2,ixc_sigma,nsploop,nkxc,option,n3xccc_,nk3xc,my_nbbp,my_nmels
  real(dp) :: nfftfm1,fact,DijH,bigexc_val,bigsxc_val,bigexc_hybrid_val,vxcval_avg,vxcval_hybrid_avg,h0dij,vxc1,vxc1_val,re_p,im_p,dijsigcx,dum
- complex(dpc) :: cdot
+ complex(dp) :: cdot
  logical :: ltest,nmxc
  character(len=500) :: msg
  type(MPI_type) :: MPI_enreg_seq
@@ -163,10 +163,10 @@ subroutine calc_vhxc_me(Wfd, Mflags, Mels, Cryst, Dtset, nfftf, ngfftf, &
  real(dp) :: dijU(2),kpt(3),vxc1ab(2),vxc1ab_val(2)
  real(dp),allocatable :: kxc_(:,:),xccc3d_(:),vxc_val(:,:),vxc_val_hybrid(:,:)
  real(dp),allocatable :: kinpw(:),veffh0(:,:)
- complex(dpc) :: tmp(3)
+ complex(dp) :: tmp(3)
  complex(gwpc),ABI_CONTIGUOUS pointer :: ur1_up(:),ur1_dwn(:),ur2_up(:),ur2_dwn(:),cg1(:),cg2(:)
  complex(gwpc),target,allocatable :: ur1(:),ur2(:)
- complex(dpc),allocatable :: vxcab(:),vxcab_val(:),vxcab_val_hybrid(:),u1cjg_u2dpc(:),kinwf2(:),veffh0_ab(:)
+ complex(dp),allocatable :: vxcab(:),vxcab_val(:),vxcab_val_hybrid(:),u1cjg_u2dpc(:),kinwf2(:),veffh0_ab(:)
  logical,allocatable :: bbp_mask(:,:)
  type(pawcprj_type),allocatable ::  Cprj_b1ks(:,:),Cprj_b2ks(:,:)
  type(libxc_functional_type) :: xc_funcs_hybrid(2)

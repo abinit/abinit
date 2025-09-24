@@ -146,11 +146,10 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  real(dp),allocatable :: kibz(:,:),wtk_ibz(:)
  real(dp),allocatable :: doccde_ibz(:),occfact_ibz(:),eigen_ibz(:)
  real(dp),allocatable ::  igwene(:,:,:)
- complex(dpc),allocatable :: m_ks_to_qp(:,:,:,:),m_ks_to_qp_BZ(:,:,:,:) !,ortho(:)
- complex(dpc),allocatable :: m_tmp(:,:),cg_k(:,:),cg_qpk(:,:)
+ complex(dp),allocatable :: m_ks_to_qp(:,:,:,:),m_ks_to_qp_BZ(:,:,:,:) !,ortho(:)
+ complex(dp),allocatable :: m_tmp(:,:),cg_k(:,:),cg_qpk(:,:)
  type(Pawrhoij_type),allocatable :: prev_Pawrhoij(:)
  !type(pawcprj_type),pointer :: Cp1(:,:),Cp2(:,:)
-
 !************************************************************************
 
  ABI_UNUSED(mkmem)
@@ -543,7 +542,7 @@ subroutine update_cprj(natom,nkibz,nbnds,nsppol,nspinor,m_ks_to_qp,dimlmn,Cprj_i
  integer,intent(in) :: natom,nbnds,nkibz,nsppol,nspinor
 !arrays
  integer,intent(in) :: dimlmn(natom)
- complex(dpc),intent(in) :: m_ks_to_qp(nbnds,nbnds,nkibz,nsppol)
+ complex(dp),intent(in) :: m_ks_to_qp(nbnds,nbnds,nkibz,nsppol)
  type(pawcprj_type),intent(inout) :: Cprj_ibz(natom,nspinor*nbnds*nkibz*nsppol)
 
 !Local variables-------------------------------
@@ -552,7 +551,6 @@ subroutine update_cprj(natom,nkibz,nbnds,nsppol,nspinor,m_ks_to_qp,dimlmn,Cprj_i
 !arrays
  real(dp),allocatable :: re_p(:),im_p(:),vect(:,:),umat(:,:,:)
  type(pawcprj_type),allocatable :: Cprj_ks(:,:)
-
 !************************************************************************
 
  DBG_ENTER("COLL")

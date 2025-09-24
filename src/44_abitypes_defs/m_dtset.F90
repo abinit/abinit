@@ -27,7 +27,7 @@ module m_dtset
  use m_errors
  use m_xmpi
 
- use m_fstrings,      only : inupper
+ use m_fstrings,      only : inupper, sjoin, itoa, ftoa
  use m_numeric_tools, only : arth
  use m_matrix,        only : mati3inv
  use m_symtk,         only : littlegroup_q, symatm
@@ -1154,6 +1154,9 @@ type, public :: dataset_type
 
  procedure :: get_ktmesh => dtset_get_ktmesh
    ! Build (linear) mesh of K * temperatures. tsmesh(1:3) = [start, step, num]
+
+ procedure :: get_wrmesh_for_sigeph => dtset_get_wrmesh_for_sigeph
+  ! Frequency mesh for sigma(w) and spectral functions (EPH self-energy)
 
  end type dataset_type
 !!***
@@ -3214,6 +3217,37 @@ subroutine dtset_get_ktmesh(dtset, ntemp, ktmesh)
 end subroutine dtset_get_ktmesh
 !!***
 
+!!****f* m_dtset/dtset_get_wrmesh_for_sigeph
+!! NAME
+!! dtset_get_wrmesh_for_sigeph
+!!
+!! FUNCTION
+!!  Frequency mesh for sigma(w) and spectral functions (EPH self-energy)
+!!
+!! SOURCE
+
+subroutine dtset_get_wrmesh_for_sigeph(dtset, nwr, wr_step)
+
+!Arguments-------------------------------
+!scalars
+ class(dataset_type),intent(in) :: dtset
+ integer,intent(out) :: nwr
+ real(dp),intent(out) :: wr_step
+! *********************************************************************
+
+ ! Use GW variables but change default values
+ nwr = dtset%nfreqsp; wr_step = zero
+ if (nwr > 0) then
+   if (mod(nwr, 2) == 0) nwr = nwr + 1
+   wr_step = two * eV_Ha / (nwr - 1)
+   if (dtset%freqspmax /= zero) wr_step = dtset%freqspmax / (nwr - 1)
+   call wrtout([std_out, ab_out], &
+     sjoin(" Will compute Sigma(omega) using", itoa(nwr), "points and step:", ftoa(wr_step * Ha_eV), "(eV)"))
+ end if
+
+end subroutine dtset_get_wrmesh_for_sigeph
+!!***
+
 !!****f* m_dtset/macroin
 !! NAME
 !! macroin
@@ -3250,7 +3284,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
  character(len=*),intent(inout) :: string
 !arrays
  real(dp),intent(in) :: ecut_tmp(3,2,10)
- type(dataset_type),intent(inout) :: dtsets(0:ndtset_alloc) !vz_i ziontypat
+ type(dataset_type),intent(inout) :: dtsets(0:ndtset_alloc)
 
 !Local variables -------------------------------
 !scalars

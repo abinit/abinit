@@ -120,7 +120,7 @@ subroutine wrqps(fname,Sigp,Cryst,Kmesh,Psps,Pawtab,Pawrhoij,nspden,nscf,nfftot,
 !arrays
  integer,intent(in) :: ngfftf(18)
  real(dp),intent(in) :: rho_qp(nfftot,nspden)
- complex(dpc),intent(in) :: m_ks_to_qp(Sigp%nbnds,Sigp%nbnds,Kmesh%nibz,Sigp%nsppol)
+ complex(dp),intent(in) :: m_ks_to_qp(Sigp%nbnds,Sigp%nbnds,Kmesh%nibz,Sigp%nsppol)
  type(Pawrhoij_type),intent(inout) :: Pawrhoij(Cryst%natom*Psps%usepaw)
  type(Pawtab_type),intent(in) :: Pawtab(Psps%ntypat*Psps%usepaw)
 
@@ -130,7 +130,7 @@ subroutine wrqps(fname,Sigp,Cryst,Kmesh,Psps,Pawtab,Pawrhoij,nspden,nscf,nfftot,
  character(len=500) :: msg
 !arrays
  integer,allocatable :: nlmn_type(:)
- complex(dpc),allocatable :: mtmp(:,:)
+ complex(dp),allocatable :: mtmp(:,:)
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -268,7 +268,7 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
 !arrays
  integer,intent(in) :: ngfftf(18)
  real(dp),intent(out) :: rhor_out(nfftot,nspden*dimrho)
- complex(dpc),intent(out) :: m_ks_to_qp(BSt%mband,BSt%mband,BSt%nkpt,BSt%nsppol)
+ complex(dp),intent(out) :: m_ks_to_qp(BSt%mband,BSt%mband,BSt%nkpt,BSt%nsppol)
  type(Pawtab_type),intent(in) :: Pawtab(Cryst%ntypat*usepaw)
  type(Pawrhoij_type),intent(inout) :: Pawrhoij(Cryst%natom*usepaw)
 
@@ -288,7 +288,7 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
  integer,allocatable :: nlmn_type(:),typatR(:)
  real(dp) :: kibz(3),rr(3),rhogdum(1,1)
  real(dp),allocatable :: en_tmp(:), rhor_tmp(:,:)
- complex(dpc),allocatable :: mtmp(:,:),utest(:,:)
+ complex(dp),allocatable :: mtmp(:,:),utest(:,:)
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -550,7 +550,7 @@ subroutine show_QP(Bst,m_ks_to_qp,fromb,tob,unit,prtvol,tolmat,kmask)
  type(ebands_t),intent(in) :: Bst
 !arrays
  logical,optional,intent(in) :: kmask(Bst%nkpt)
- complex(dpc),intent(in) :: m_ks_to_qp(Bst%mband,Bst%mband,Bst%nkpt,Bst%nsppol)
+ complex(dp),intent(in) :: m_ks_to_qp(Bst%mband,Bst%mband,Bst%nkpt,Bst%nsppol)
 
 !Local variables-------------------------------
 !scalars
@@ -886,13 +886,13 @@ subroutine updt_m_ks_to_qp(Sigp,Kmesh,nscf,Sr,m_ks_to_qp)
  type(sigparams_t),intent(in) :: Sigp
  type(sigma_t),intent(in) :: Sr
 !arrays
- complex(dpc),intent(inout) :: m_ks_to_qp(Sigp%nbnds,Sigp%nbnds,Kmesh%nibz,Sigp%nsppol)
+ complex(dp),intent(inout) :: m_ks_to_qp(Sigp%nbnds,Sigp%nbnds,Kmesh%nibz,Sigp%nsppol)
 
 !Local variables-------------------------------
 !scalars
  integer :: ik,is
 !arrays
- complex(dpc),allocatable :: mtmp(:,:)
+ complex(dp),allocatable :: mtmp(:,:)
 ! *************************************************************************
 
  if (nscf >= 0) then

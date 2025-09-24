@@ -217,7 +217,7 @@ module m_slk
     ! local part of the (real) matrix.
     ! The istwf_k option passed to the constructor defines whether we have a real or complex matrix
 
-   complex(dpc),allocatable :: buffer_cplx(:,:)
+   complex(dp),allocatable :: buffer_cplx(:,:)
     ! local part of the (complex) matrix
 
  contains
@@ -1405,7 +1405,7 @@ end function slk_has_elpa
 !!
 !! SOURCE
 
-pure complex(dpc) function matrix_get_local_cplx(matrix, i, j)
+pure complex(dp) function matrix_get_local_cplx(matrix, i, j)
 
 !Arguments ------------------------------------
  class(slkmat_dp_t),intent(in) :: matrix
@@ -1921,7 +1921,7 @@ subroutine slkmat_dp_from_complex_glob(matrix, glob_mat, istwf_k)
 
 !Local variables-------------------------------
  integer :: i,j,iglob,jglob
- complex(dpc) :: val
+ complex(dp) :: val
 ! *********************************************************************
 
  ABI_UNUSED(istwf_k)
@@ -2053,7 +2053,7 @@ subroutine slkmat_dp_to_complex_glob(matrix, glob_cmat, istwf_k)
  integer,intent(in) :: istwf_k
  class(slkmat_dp_t),intent(in) :: matrix
 !arrays
- complex(dpc),intent(inout) :: glob_cmat(:,:)
+ complex(dp),intent(inout) :: glob_cmat(:,:)
 
 !Local variables-------------------------------
  integer  :: i,j,iglob,jglob
@@ -2151,7 +2151,7 @@ subroutine slk_matrix_from_global_dpc_2D(mat, uplo, glob_cmat)
  class(slkmat_dp_t),intent(inout)  :: mat
  character(len=*),intent(in) :: uplo
 !array
- complex(dpc),intent(in) :: glob_cmat(:,:)
+ complex(dp),intent(in) :: glob_cmat(:,:)
 
 !Local variables-------------------------------
  integer :: ii, jj, iglob, jglob
@@ -2236,7 +2236,7 @@ subroutine slk_matrix_from_global_dpc_1Dp(mat,uplo, glob_cmat_pack)
  class(slkmat_dp_t),intent(inout)  :: mat
  character(len=*),intent(in) :: uplo
 !array
- complex(dpc),intent(in) :: glob_cmat_pack(:)
+ complex(dp),intent(in) :: glob_cmat_pack(:)
 
 !Local variables-------------------------------
  integer :: ii,jj,iglob,jglob,ind,n
@@ -2323,7 +2323,7 @@ subroutine slk_matrix_to_global_dpc_2D(mat, uplo, glob_cmat)
  class(slkmat_dp_t),intent(in) :: mat
  character(len=*),intent(in) :: uplo
 !arrays
- complex(dpc),intent(inout) :: glob_cmat(:,:)
+ complex(dp),intent(inout) :: glob_cmat(:,:)
 
 !Local variables-------------------------------
  integer :: ii,jj,iglob,jglob
@@ -2497,7 +2497,7 @@ subroutine slk_pgemm_dp(transa, transb, matrix1, alpha, matrix2, beta, results, 
  character(len=1),intent(in) :: transa, transb
  class(slkmat_dp_t),intent(in) :: matrix1, matrix2
  class(slkmat_dp_t),intent(inout) :: results
- complex(dpc),intent(in) :: alpha, beta
+ complex(dp),intent(in) :: alpha, beta
  integer,optional,intent(in) :: ija(2), ijb(2), ijc(2)
 
 !Local variables-------------------------------
@@ -2687,10 +2687,10 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
  !character(len=500) :: msg
  integer         , dimension(1) :: IWORK_tmp
  DOUBLE PRECISION, dimension(1) :: RWORK_tmp
- complex(dpc)     , dimension(1) :: CWORK_tmp
+ complex(dp)     , dimension(1) :: CWORK_tmp
  integer         , allocatable  :: IWORK(:)
  DOUBLE PRECISION, allocatable  :: RWORK(:)
- complex(dpc)     , allocatable  :: CWORK(:)
+ complex(dp)     , allocatable  :: CWORK(:)
  integer,          allocatable :: ICLUSTR(:)
  integer,          allocatable :: IFAIL(:)
  DOUBLE PRECISION, allocatable :: GAP(:)
@@ -3049,11 +3049,11 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
   !character(len=500) :: msg
   integer         , dimension(1) :: IWORK_tmp
   DOUBLE PRECISION, dimension(1) :: RWORK_tmp
-  complex(dpc)     , dimension(1) :: CWORK_tmp
+  complex(dp)     , dimension(1) :: CWORK_tmp
 
   integer         , allocatable  :: IWORK(:)
   DOUBLE PRECISION, allocatable  :: RWORK(:)
-  complex(dpc)     , allocatable  :: CWORK(:)
+  complex(dp)     , allocatable  :: CWORK(:)
   integer,          allocatable :: ICLUSTR(:)
   integer,          allocatable :: IFAIL(:)
   DOUBLE PRECISION, allocatable :: GAP(:)
@@ -3232,7 +3232,7 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
  type(slkmat_dp_t) :: sca_matrix1
  type(slkmat_dp_t) :: sca_matrix2
  real(dp),allocatable :: r_tmp_evec(:,:)
- complex(dpc),allocatable :: z_tmp_evec(:,:)
+ complex(dp),allocatable :: z_tmp_evec(:,:)
 ! *************************************************************************
 
  use_gpu_elpa_=0
@@ -3362,7 +3362,7 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
  integer :: ierr,use_gpu_elpa_
  type(slkmat_dp_t) :: sca_matrix1, sca_matrix2, sca_matrix3
  real(dp),allocatable :: r_tmp_evec(:,:)
- complex(dpc),allocatable :: z_tmp_evec(:,:)
+ complex(dp),allocatable :: z_tmp_evec(:,:)
 ! *************************************************************************
 
  use_gpu_elpa_=0
@@ -3738,7 +3738,7 @@ subroutine slkmat_dp_pzheevx(mat, jobz, range, uplo, vl, vu, il, iu, abstol, vec
  !integer :: ibuff(3),max_ibuff(3)
  integer,allocatable  :: iwork(:),iclustr(:),ifail(:)
  real(dp),allocatable  :: rwork(:),gap(:)
- complex(dpc),allocatable :: work(:)
+ complex(dp),allocatable :: work(:)
 !************************************************************************
 
  ABI_CHECK(allocated(mat%buffer_cplx), "buffer_cplx is not allocated!")
@@ -3960,7 +3960,7 @@ end subroutine slkmat_dp_pzheevx
 !!
 !!  Slk_matA<slkmat_dp_t>:
 !!    %buffer_cplx
-!!      (local input/local output) complex(DPC) pointer into the
+!!      (local input/local output) complex(DP) pointer into the
 !!      local memory to an array of dimension (LLD_A, LOCc(JA+N-1)).
 !!      On entry, this array contains the local pieces of the
 !!      N-by-N Hermitian distributed matrix sub( A ). If UPLO = 'U',
@@ -3980,7 +3980,7 @@ end subroutine slkmat_dp_pzheevx
 !!
 !!  Slk_matB=
 !!    %buffer_cplx
-!!      (local input/local output) complex*(DPC) pointer into the
+!!      (local input/local output) complex*(DP) pointer into the
 !!      local memory to an array of dimension (LLD_B, LOCc(JB+N-1)).
 !!      On entry, this array contains the local pieces of the
 !!      N-by-N Hermitian distributed matrix sub( B ). If UPLO = 'U',
@@ -4021,7 +4021,7 @@ subroutine slkmat_dp_pzhegvx(Slk_matA, ibtype, jobz, range, uplo, Slk_matB, vl, 
  integer :: desca(DLEN_),descb(DLEN_),descz(DLEN_)
  integer,allocatable  :: iwork(:),iclustr(:),ifail(:)
  real(dp),allocatable  :: rwork(:),gap(:)
- complex(dpc),allocatable :: work(:)
+ complex(dp),allocatable :: work(:)
 !************************************************************************
 
  ABI_CHECK(allocated(Slk_matA%buffer_cplx), "buffer_cplx is not allocated!")
@@ -5437,7 +5437,7 @@ subroutine slk_write(Slk_mat, uplo, is_fortran_file, fname,mpi_fh, offset, flags
 !arrays
  integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecord(:)
  integer,pointer :: elw2slk(:,:)
- complex(dpc),allocatable :: buffer1_cplx(:)
+ complex(dp),allocatable :: buffer1_cplx(:)
  character(len=500) :: msg
 !************************************************************************
 
@@ -5650,7 +5650,7 @@ subroutine slk_read(Slk_mat,uplo,symtype,is_fortran_file,fname,mpi_fh,offset,fla
  logical :: do_open
  integer :: comm,my_flags,my_fh,buffer_size,ierr,col_glob
  integer :: nfrec,bsize_elm,mpi_type_elm
- !complex(dpc) :: ctest
+ !complex(dp) :: ctest
  logical,parameter :: check_frm=.TRUE.
  integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecord(:)
 !arrays

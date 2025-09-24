@@ -5331,13 +5331,13 @@ subroutine gwr_build_wc(gwr)
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_q, wall_q, gflops_q !, cpu_tmp, wall_tmp, gflops_tmp
  logical :: q_is_gamma, free_tchi, print_time, keep_wcimw
  character(len=5000) :: msg
- complex(dpc) :: vcs_g1, vcs_g2
+ complex(dp) :: vcs_g1, vcs_g2
  type(__slkmat_t) :: em1
  type(yamldoc_t) :: ydoc
 !arrays
  integer :: units(2)
  real(dp) :: qq_ibz(3), tsec(2)
- complex(dpc) :: em1_wq(gwr%ntau, gwr%nqibz), eps_wq(gwr%ntau, gwr%nqibz)
+ complex(dp) :: em1_wq(gwr%ntau, gwr%nqibz), eps_wq(gwr%ntau, gwr%nqibz)
 ! *************************************************************************
 
  units = [std_out, ab_out]
@@ -6608,7 +6608,7 @@ subroutine gwr_rpa_energy(gwr)
  logical :: q_is_gamma, print_time
  real(dp) :: weight, qq_ibz(3), estep, aa, bb, rmsq, ecut_soft, damp, tsec(2)
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_q, wall_q, gflops_q, cpu_cut, wall_cut, gflops_cut
- complex(dpc) :: vcs_g1, vcs_g2
+ complex(dp) :: vcs_g1, vcs_g2
  type(desc_t),pointer :: desc_q
  character(len=500) :: msg
 !arrays
@@ -7416,7 +7416,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  logical :: isirr_k, use_tr, is_metallic, print_time
  real(dp) :: spin_fact, weight, deltaf_b1b2, deltaeGW_b1b2, gwr_boxcutmin_c, zcut, qlen, eig_nk, e0
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_k, wall_k, gflops_k
- complex(dpc) :: deltaeKS_b1b2
+ complex(dp) :: deltaeKS_b1b2
  type(__slkmat_t),pointer :: ugb_kibz
  character(len=5000) :: msg
  type(crystal_t),pointer :: cryst
@@ -7433,12 +7433,12 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  real(dp),allocatable :: work(:,:,:,:), qdirs(:,:)
  logical :: gradk_not_done(gwr%nkibz)
  logical,allocatable :: bbp_mask(:,:)
- complex(dpc) :: chq(3) !, wng(3)
+ complex(dp) :: chq(3) !, wng(3)
  !complex(dp),allocatable :: ug1_block(:,:)
  complex(gwpc) :: rhotwx(3, gwr%nspinor**2) !, new_rhotwx(3, gwr%nspinor**2)
  complex(gwpc),allocatable :: ug2(:), ur1_kibz(:), ur2_kibz(:), ur_prod(:), rhotwg(:), ug1_block(:,:), ug1(:)
- complex(dpc) :: green_w(gwr%ntau), omega(gwr%ntau)
- complex(dpc),allocatable :: chi0_lwing(:,:,:), chi0_uwing(:,:,:), chi0_head(:,:,:), head_qvals(:)
+ complex(dp) :: green_w(gwr%ntau), omega(gwr%ntau)
+ complex(dp),allocatable :: chi0_lwing(:,:,:), chi0_uwing(:,:,:), chi0_head(:,:,:), head_qvals(:)
  real(dp), allocatable :: gh1c_block(:,:,:,:)
  type(vkbr_t),allocatable :: vkbr(:)
  type(gsphere_t) :: gsph
@@ -8643,9 +8643,9 @@ subroutine gwr_gamma_gw(gwr, nfftf, ngfftf, vpsp)
  real(dp),parameter ::  k0(3) = zero
  !real(dp) :: kgw(3) ! kk_ibz(3),
  real(dp),allocatable :: nat_occs(:,:), gw_rhor(:,:), gw_rhog(:,:), gw_vhartr(:)
- complex(dpc),allocatable :: xrdm_k_full(:,:,:), rdm_k(:,:), pot_k(:,:), nateigv(:,:,:,:), old_ks_purex(:,:), new_hartr(:,:)
+ complex(dp),allocatable :: xrdm_k_full(:,:,:), rdm_k(:,:), pot_k(:,:), nateigv(:,:,:,:), old_ks_purex(:,:), new_hartr(:,:)
  complex(dp) :: omega_i(gwr%ntau)
- complex(dpc),allocatable :: sigcme_k(:,:,:,:)
+ complex(dp),allocatable :: sigcme_k(:,:,:,:)
 ! *************************************************************************
 
  call gwr%run_g0w0(free_ugb=.False.)

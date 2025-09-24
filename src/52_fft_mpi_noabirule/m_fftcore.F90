@@ -3341,7 +3341,7 @@ pure subroutine mpifft_fg2dbox_dpc(nfft,ndat,fofg,n1,n2,n3,n4,nd2proc,n6,fftn2_d
 !arrays
  integer,intent(in) :: fftn2_distrib(n2),ffti2_local(n2)
  real(dp),intent(in) :: fofg(2,nfft*ndat)
- complex(dpc),intent(inout) :: workf(n4,n6,nd2proc*ndat)
+ complex(dp),intent(inout) :: workf(n4,n6,nd2proc*ndat)
 
 !Local variables-------------------------------
  integer :: idat,i1,i2,i3,i2_local,i2_ldat,fgbase
@@ -3355,7 +3355,7 @@ pure subroutine mpifft_fg2dbox_dpc(nfft,ndat,fofg,n1,n2,n3,n4,nd2proc,n6,fftn2_d
          i2_ldat = i2_local + (idat-1) * nd2proc
          fgbase= n1*(i2_local-1 + nd2proc*(i3-1)) + (idat-1) * nfft
          do i1=1,n1
-           workf(i1,i3,i2_ldat)=CMPLX(fofg(1,i1+fgbase), fofg(2,i1+fgbase), kind=dpc)
+           workf(i1,i3,i2_ldat)=CMPLX(fofg(1,i1+fgbase), fofg(2,i1+fgbase), kind=dp)
          end do
        end if
      end do
@@ -3437,7 +3437,7 @@ pure subroutine mpifft_dbox2fg_dpc(n1,n2,n3,n4,nd2proc,n6,ndat,fftn2_distrib,fft
  integer,intent(in) :: n1,n2,n3,n4,nd2proc,n6,ndat,me_fft,nfft
 !arrays
  integer,intent(in) :: fftn2_distrib(n2),ffti2_local(n2)
- complex(dpc),intent(in) :: workf(n4,n6,nd2proc*ndat)
+ complex(dp),intent(in) :: workf(n4,n6,nd2proc*ndat)
  real(dp),intent(out) :: fofg(2,nfft*ndat)
 
 !Local variables-------------------------------
@@ -3564,7 +3564,7 @@ pure subroutine mpifft_dbox2fr_dpc(n1,n2,n3,n4,n5,nd3proc,ndat,fftn3_distrib,fft
  integer,intent(in) :: n1,n2,n3,n4,n5,nd3proc,ndat,me_fft,nfft,cplex
 !!arrays
  integer,intent(in) :: fftn3_distrib(n3),ffti3_local(n3)
- complex(dpc),intent(in) :: workr(n4,n5,nd3proc*ndat)
+ complex(dp),intent(in) :: workr(n4,n5,nd3proc*ndat)
  real(dp),intent(out) :: fofr(cplex*nfft*ndat)
 
 !Local variables-------------------------------
@@ -3710,7 +3710,7 @@ pure subroutine mpifft_fr2dbox_dpc(cplex,nfft,ndat,fofr,n1,n2,n3,n4,n5,nd3proc,f
 !!arrays
  integer,intent(in) :: fftn3_distrib(n3),ffti3_local(n3)
  real(dp),intent(in) :: fofr(cplex*nfft*ndat)
- complex(dpc),intent(inout) :: workr(n4,n5,nd3proc*ndat)
+ complex(dp),intent(inout) :: workr(n4,n5,nd3proc*ndat)
 
 !Local variables-------------------------------
  integer :: idat,i1,i2,i3,i3_local,i3_ldat,frbase
@@ -3727,7 +3727,7 @@ pure subroutine mpifft_fr2dbox_dpc(cplex,nfft,ndat,fofr,n1,n2,n3,n4,n5,nd3proc,f
          do i2=1,n2
            frbase=n1*(i2-1+n2*(i3_local-1)) + (idat-1) * nfft
            do i1=1,n1
-             workr(i1,i2,i3_ldat)=CMPLX(fofr(i1+frbase), zero, kind=dpc)
+             workr(i1,i2,i3_ldat)=CMPLX(fofr(i1+frbase), zero, kind=dp)
            end do
          end do
        end if
@@ -3744,7 +3744,7 @@ pure subroutine mpifft_fr2dbox_dpc(cplex,nfft,ndat,fofr,n1,n2,n3,n4,n5,nd3proc,f
          do i2=1,n2
            frbase=2*n1*(i2-1+n2*(i3_local-1)) + (idat-1) * cplex * nfft
            do i1=1,n1
-             workr(i1,i2,i3_ldat)=CMPLX(fofr(2*i1-1+frbase), fofr(2*i1  +frbase), kind=dpc)
+             workr(i1,i2,i3_ldat)=CMPLX(fofr(2*i1-1+frbase), fofr(2*i1  +frbase), kind=dp)
            end do
          end do
        end if

@@ -160,7 +160,7 @@ interface xnrm2
     use defs_basis
     real(dp) :: dznrm2
     integer,intent(in) :: incx, n
-    complex(dpc),intent(in) :: x( * )
+    complex(dp),intent(in) :: x( * )
   end function dznrm2
   !
 end interface xnrm2
@@ -197,8 +197,8 @@ interface xscal
     use defs_basis
     integer :: incx
     integer :: n
-    complex(dpc) :: za
-    complex(dpc) :: zx(*)
+    complex(dp) :: za
+    complex(dp) :: zx(*)
   end subroutine zscal
   !
   subroutine  csscal(n,sa,cx,incx)
@@ -214,7 +214,7 @@ interface xscal
     integer :: incx
     integer :: n
     real(dp) :: da
-    complex(dpc) :: zx(*)
+    complex(dp) :: zx(*)
   end subroutine zdscal
   !
 end interface xscal
@@ -236,8 +236,8 @@ interface xdotu
   !
   function zdotu(n,zx,incx,zy,incy)
     use defs_basis
-    complex(dpc) :: zdotu
-    complex(dpc),intent(in) :: zx(*),zy(*)
+    complex(dp) :: zdotu
+    complex(dp),intent(in) :: zx(*),zy(*)
     integer,intent(in) :: incx,incy,n
   end function zdotu
 #endif
@@ -266,8 +266,8 @@ interface xdotc
   !
   function zdotc(n,zx,incx,zy,incy)
     use defs_basis
-    complex(dpc) :: zdotc
-    complex(dpc),intent(in) :: zx(*),zy(*)
+    complex(dp) :: zdotc
+    complex(dp),intent(in) :: zx(*),zy(*)
     integer,intent(in) :: incx,incy,n
   end function zdotc
 #endif
@@ -311,8 +311,8 @@ interface xcopy
    integer,intent(in) :: incx
    integer,intent(in) :: incy
    integer,intent(in) :: n
-   complex(dpc),intent(in) :: cx(*)
-   complex(dpc),intent(inout) :: cy(*)
+   complex(dp),intent(in) :: cx(*)
+   complex(dp),intent(inout) :: cy(*)
  end subroutine zcopy
  !
 end interface xcopy
@@ -350,11 +350,11 @@ interface xgemv
   !
   subroutine zgemv ( trans, m, n, alpha, a, lda, x, incx, beta, y, incy )
     use defs_basis
-    complex(dpc),intent(in) :: alpha, beta
+    complex(dp),intent(in) :: alpha, beta
     integer,intent(in) :: incx, incy, lda, m, n
     character(len=1),intent(in) :: trans
-    complex(dpc),intent(in) :: a( lda, * ), x( * )
-    complex(dpc),intent(inout) :: y( * )
+    complex(dp),intent(in) :: a( lda, * ), x( * )
+    complex(dp),intent(inout) :: y( * )
   end subroutine zgemv
   !
 end interface xgemv
@@ -373,10 +373,10 @@ interface xgerc
   !
   subroutine zgerc ( m, n, alpha, x, incx, y, incy, a, lda )
     use defs_basis
-    complex(dpc),intent(in) :: alpha
+    complex(dp),intent(in) :: alpha
     integer,intent(in) :: incx, incy, lda, m, n
-    complex(dpc),intent(inout) :: a( lda, * )
-    complex(dpc),intent(in) :: x( * ), y( * )
+    complex(dp),intent(inout) :: a( lda, * )
+    complex(dp),intent(in) :: x( * ), y( * )
   end subroutine zgerc
   !
 end interface xgerc
@@ -397,10 +397,10 @@ interface xher
   subroutine zher ( uplo, n, alpha, x, incx, a, lda )
     use defs_basis
     character(len=1),intent(in) :: uplo
-    real(dpc),intent(in) :: alpha
+    real(dp),intent(in) :: alpha
     integer,intent(in) :: incx, lda, n
-    complex(dpc),intent(inout) :: a( lda, * )
-    complex(dpc),intent(in) :: x( * )
+    complex(dp),intent(inout) :: a( lda, * )
+    complex(dp),intent(in) :: x( * )
   end subroutine zher
   !
 end interface xher
@@ -440,9 +440,9 @@ interface xgemm
     use defs_basis
     character(len=1),intent(in) :: transa, transb
     integer,intent(in) :: m, n, k, lda, ldb, ldc
-    complex(dpc),intent(in) :: alpha, beta
-    complex(dpc),intent(in) :: a( lda, * ), b( ldb, * )
-    complex(dpc),intent(inout) :: c( ldc, * )
+    complex(dp),intent(in) :: alpha, beta
+    complex(dp),intent(in) :: a( lda, * ), b( ldb, * )
+    complex(dp),intent(inout) :: c( ldc, * )
   end subroutine zgemm
   !
 end interface xgemm
@@ -466,9 +466,9 @@ interface xherk
     character(len=1),intent(in) :: trans
     integer,intent(in) :: n,k,lda,ldc
     real(dp),intent(in) :: alpha
-    complex(dpc),intent(in) :: a( lda, * )
+    complex(dp),intent(in) :: a( lda, * )
     real(dp),intent(in) :: beta
-    complex(dpc),intent(inout) :: c( ldc, * )
+    complex(dp),intent(inout) :: c( ldc, * )
   end subroutine zherk
   !
 end interface xherk
@@ -507,8 +507,8 @@ end interface sqmat_oconjgtrans
  real(dp),private,parameter ::  zero_dp = 0._dp
  real(dp),private,parameter ::  one_dp  = 1._dp
 
- complex(dpc),private,parameter :: czero_dpc = (0._dp,0._dp)
- complex(dpc),private,parameter :: cone_dpc  = (1._dp,0._dp)
+ complex(dp),private,parameter :: czero_dpc = (0._dp,0._dp)
+ complex(dp),private,parameter :: cone_dpc  = (1._dp,0._dp)
 
 CONTAINS  !========================================================================================
 
@@ -620,15 +620,14 @@ subroutine blas_cholesky_ortho_dpc(vec_size,nvec,iomat,cf_ovlp,use_gemm)
 !Arguments ------------------------------------
  integer,intent(in) :: vec_size,nvec
  logical,optional,intent(in) :: use_gemm
- complex(dpc),intent(inout) :: iomat(vec_size,nvec)
- complex(dpc),intent(out) :: cf_ovlp(nvec,nvec)
+ complex(dp),intent(inout) :: iomat(vec_size,nvec)
+ complex(dp),intent(out) :: cf_ovlp(nvec,nvec)
 
 !Local variables ------------------------------
 !scalars
  integer :: ierr
  logical :: my_usegemm
  character(len=500) :: msg
-
 ! *************************************************************************
 
  ! 1) Calculate overlap_ij =  <phi_i|phi_j>
@@ -817,10 +816,9 @@ subroutine sqmat_itranspose_dpc(n,mat,alpha)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
- complex(dpc),optional,intent(in) :: alpha
+ complex(dp),optional,intent(in) :: alpha
 !arrays
- complex(dpc),intent(inout) :: mat(n,n)
-
+ complex(dp),intent(inout) :: mat(n,n)
 ! *************************************************************************
 
 #ifdef HAVE_LINALG_MKL_IMATCOPY
@@ -1012,11 +1010,10 @@ subroutine sqmat_otranspose_dpc(n,imat,omat,alpha)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
- complex(dpc),optional,intent(in) :: alpha
+ complex(dp),optional,intent(in) :: alpha
 !arrays
- complex(dpc),intent(in) :: imat(n,n)
- complex(dpc),intent(out) :: omat(n,n)
-
+ complex(dp),intent(in) :: imat(n,n)
+ complex(dp),intent(out) :: omat(n,n)
 ! *************************************************************************
 
 #ifdef HAVE_LINALG_MKL_OMATCOPY
@@ -1107,10 +1104,9 @@ subroutine sqmat_iconjgtrans_dpc(n, mat, alpha)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
- complex(dpc),optional,intent(in) :: alpha
+ complex(dp),optional,intent(in) :: alpha
 !arrays
- complex(dpc),intent(inout) :: mat(n,n)
-
+ complex(dp),intent(inout) :: mat(n,n)
 ! *************************************************************************
 
 #ifdef HAVE_LINALG_MKL_IMATCOPY
@@ -1204,11 +1200,10 @@ subroutine sqmat_oconjgtrans_dpc(n,imat,omat,alpha)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
- complex(dpc),optional,intent(in) :: alpha
+ complex(dp),optional,intent(in) :: alpha
 !arrays
- complex(dpc),intent(in) :: imat(n,n)
- complex(dpc),intent(out) :: omat(n,n)
-
+ complex(dp),intent(in) :: imat(n,n)
+ complex(dp),intent(out) :: omat(n,n)
 ! *************************************************************************
 
 #ifdef HAVE_LINALG_MKL_OMATCOPY

@@ -203,7 +203,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, qq_is_gamma, pp_is_gamma, isirr_q
  logical :: stern_use_cache, stern_has_band_para, use_ftinterp
  logical :: print_time_qq, print_time_kk, print_time_pp, non_magnetic_xc, need_x_kmp, need_x_kqmp
- complex(dpc) :: ieta
+ complex(dp) :: ieta
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_ham_kqmp, gs_ham_kmp
  type(rf_hamiltonian_type) :: rf_ham_kqmp, rf_ham_kmp

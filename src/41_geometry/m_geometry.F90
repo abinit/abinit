@@ -350,7 +350,7 @@ complex(dp) function vdotw_rc_vector(xv, xw, met, space) result(res)
  character(len=1),intent(in) :: space
 !arrays
  real(dp),intent(in) :: met(3,3),xv(3)
- complex(dpc),intent(in) :: xw(3)
+ complex(dp),intent(in) :: xw(3)
 ! *************************************************************************
 
  res = (  met(1,1)* xv(1)*xw(1)                &
@@ -954,7 +954,7 @@ pure function spinrot_cmat(spinrot)
 
 !Arguments ------------------------------------
  real(dp),intent(in) :: spinrot(4)
- complex(dpc) :: spinrot_cmat(2,2)
+ complex(dp) :: spinrot_cmat(2,2)
 ! *************************************************************************
 
  ! Build rotation matrix from spinrot:

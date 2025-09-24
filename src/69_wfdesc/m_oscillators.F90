@@ -95,7 +95,7 @@ subroutine rho_tw_g(nspinor, npwvec, nr, ndat, ngfft, map2sphere, use_padfft, ig
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: i1,i2,npwvec,nr,nspinor,dim_rtwg,map2sphere,use_padfft,ndat
- complex(dpc),intent(in) :: ktabp1, ktabp2
+ complex(dp),intent(in) :: ktabp1, ktabp2
 !arrays
  integer,intent(in) :: gbound(:,:) !gbound(2*mgfft+8,2)
  integer,intent(in) :: igfftg0(npwvec*map2sphere),ngfft(18)
@@ -241,7 +241,7 @@ subroutine ts_usug_kkp_bz(npw, nr, ndat, ngfft, map2sphere, use_padfft, igfftg0,
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: time1,time2,npw,nr,map2sphere,use_padfft,ndat
- complex(dpc),intent(in) :: ktabp1,ktabp2
+ complex(dp),intent(in) :: ktabp1,ktabp2
 !arrays
  integer,intent(in) :: gbound(:,:) !gbound(2*mgfft+8,2)
  integer,intent(in) :: igfftg0(npw*map2sphere),ngfft(18)
@@ -331,7 +331,7 @@ subroutine usur_kkp_bz(nr, ndat, time1, ktabr1, ktabp1, u1, time2, ktabr2, ktabp
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nr,ndat,time1,time2
- complex(dpc),intent(in) :: ktabp1,ktabp2
+ complex(dp),intent(in) :: ktabp1,ktabp2
 !arrays
  integer,intent(in) :: ktabr1(nr),ktabr2(nr)
  complex(gwpc),intent(in) :: u1(nr*ndat),u2(nr*ndat)
@@ -716,7 +716,7 @@ subroutine rotate_spinor(itim_kbz, ktabr_kbz, ktabp_kbz, spinrot, nr, nspinor, n
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: itim_kbz, nr, nspinor, ndat
- complex(dpc),intent(in) :: ktabp_kbz
+ complex(dp),intent(in) :: ktabp_kbz
 !arrays
  integer,intent(in) :: ktabr_kbz(nr)
  real(dp),intent(in) :: spinrot(4)
@@ -728,8 +728,7 @@ subroutine rotate_spinor(itim_kbz, ktabr_kbz, ktabp_kbz, spinrot, nr, nspinor, n
  integer :: ir,ir1,spad0,ispinor
  complex(gwpc) :: u1a,u1b
 !arrays
- complex(dpc) :: spinrot_cmat1(2,2)
-
+ complex(dp) :: spinrot_cmat1(2,2)
 !************************************************************************
 
  ABI_CHECK(ndat == 1, "ndat > 1 not coded")
