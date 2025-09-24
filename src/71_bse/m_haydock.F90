@@ -343,7 +343,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
    ABI_MALLOC(eps_gwnlf ,(BSp%nomega,BSp%nq))
    ABI_MALLOC(dos_gw,(BSp%nomega))
 
-   call wrtout(std_out," Calculating RPA NLF and QP NLF epsilon","COLL")
+   call wrtout(std_out," Calculating RPA NLF and QP NLF epsilon")
 
    call exc_eps_rpa(BSp%nbnds,BSp%lomo_spin,BSp%lomo_min,BSp%homo_spin,hexc%Kmesh,EPBSt,BSp%nq,nsppol,&
     opt_cvk,Cryst%ucvol,BSp%broad,BSp%nomega,BSp%omega,eps_rpanlf,dos_ks)
@@ -363,7 +363,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
      ABI_MALLOC(tensor_cart_rpanlf,(BSp%nomega,6))
      ABI_MALLOC(tensor_red_rpanlf,(BSp%nomega,6))
 
-     call wrtout(std_out," Calculating RPA NLF dielectric tensor","COLL")
+     call wrtout(std_out," Calculating RPA NLF dielectric tensor")
      call haydock_mdf_to_tensor(BSp,Cryst,eps_rpanlf,tensor_cart_rpanlf, tensor_red_rpanlf, ierr)
 
      if (ierr == 0) then
@@ -384,7 +384,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
      ABI_MALLOC(tensor_cart_gwnlf,(BSp%nomega,6))
      ABI_MALLOC(tensor_red_gwnlf,(BSp%nomega,6))
 
-     call wrtout(std_out," Calculating GW NLF dielectric tensor","COLL")
+     call wrtout(std_out," Calculating GW NLF dielectric tensor")
 
      call haydock_mdf_to_tensor(BSp,Cryst,eps_gwnlf,tensor_cart_gwnlf, tensor_red_gwnlf, ierr)
 
@@ -402,26 +402,26 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
      ABI_FREE(tensor_cart_gwnlf)
      ABI_FREE(tensor_red_gwnlf)
 
-     !call wrtout(std_out," Checking Kramers Kronig on Excitonic Macroscopic Epsilon","COLL")
+     !call wrtout(std_out," Checking Kramers Kronig on Excitonic Macroscopic Epsilon")
      !call check_kramerskronig(BSp%nomega,REAL(BSp%omega),eps_exc(:,1))
 
-     !call wrtout(std_out," Checking Kramers Kronig on RPA NLF Macroscopic Epsilon","COLL")
+     !call wrtout(std_out," Checking Kramers Kronig on RPA NLF Macroscopic Epsilon")
      !call check_kramerskronig(BSp%nomega,REAL(BSp%omega),eps_rpanlf(:,1))
 
-     !call wrtout(std_out," Checking Kramers Kronig on GW NLF Macroscopic Epsilon","COLL")
+     !call wrtout(std_out," Checking Kramers Kronig on GW NLF Macroscopic Epsilon")
      !call check_kramerskronig(BSp%nomega,REAL(BSp%omega),eps_gwnlf(:,1))
 
-     !call wrtout(std_out," Checking f-sum rule on Excitonic Macroscopic Epsilon","COLL")
+     !call wrtout(std_out," Checking f-sum rule on Excitonic Macroscopic Epsilon")
 
      !if (BSp%exchange_term>0) then
      !  ABI_COMMENT(' f-sum rule should be checked without LF')
      !end if
      !call check_fsumrule(BSp%nomega,REAL(BSp%omega),AIMAG(eps_exc(:,1)),drude_plsmf)
 
-     !call wrtout(std_out," Checking f-sum rule on RPA NLF Macroscopic Epsilon","COLL")
+     !call wrtout(std_out," Checking f-sum rule on RPA NLF Macroscopic Epsilon")
      !call check_fsumrule(BSp%nomega,REAL(BSp%omega),AIMAG(eps_rpanlf(:,1)),drude_plsmf)
 
-     !call wrtout(std_out," Checking f-sum rule on GW NLF Macroscopic Epsilon","COLL")
+     !call wrtout(std_out," Checking f-sum rule on GW NLF Macroscopic Epsilon")
      !call check_fsumrule(BSp%nomega,REAL(BSp%omega),AIMAG(eps_gwnlf(:,1)),drude_plsmf)
    end if ! my_rank==master
 
@@ -484,7 +484,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
      ABI_MALLOC(tensor_cart,(BSp%nomega,6))
      ABI_MALLOC(tensor_red,(BSp%nomega,6))
 
-     call wrtout(std_out," Calculating EXC dielectric tensor","COLL")
+     call wrtout(std_out," Calculating EXC dielectric tensor")
      call haydock_mdf_to_tensor(BSp,Cryst,green,tensor_cart,tensor_red,ierr)
 
      if (ierr == 0) then
@@ -631,11 +631,11 @@ subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,nkets,kets,green,
  ABI_CHECK(my_nt>0,"One of the processors has zero columns")
 
  write(msg,'(a,i0)')' Haydock algorithm with MAX number of iterations: ',BSp%niter
- call wrtout(std_out,msg,"COLL")
+ call wrtout(std_out,msg)
  !
  ! Select the terminator for the continued fraction.
  term_type=0; if (Bsp%hayd_term>0) term_type=1
- call wrtout(std_out,sjoin("Using terminator type: ",itoa(term_type)),"COLL")
+ call wrtout(std_out,sjoin("Using terminator type: ",itoa(term_type)))
  !
  ! Check for presence of the restart file.
  can_restart=.FALSE.
@@ -644,11 +644,11 @@ subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,nkets,kets,green,
    if (file_exists(restart_file) ) then
      can_restart=.TRUE.
      msg = " Restarting Haydock calculation from file: "//TRIM(restart_file)
-     call wrtout(std_out,msg,"COLL")
-     call wrtout(ab_out,msg,"COLL")
+     call wrtout(std_out,msg)
+     call wrtout(ab_out,msg)
    else
      can_restart=.FALSE.
-     call wrtout(ab_out," WARNING: cannot find restart file: "//TRIM(restart_file),"COLL")
+     call wrtout(ab_out," WARNING: cannot find restart file: "//TRIM(restart_file))
    end if
  end if
  ABI_CHECK(.not.can_restart,"restart not yet implemented")
@@ -761,9 +761,9 @@ subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,nkets,kets,green,
    ABI_MALLOC(green_temp,(n_all_omegas,nkets))
 
    call haydock_herm_algo(niter_done,niter_max,n_all_omegas,all_omegas,BSp%haydock_tol(1),check,&
-&    my_t1,my_t2,factor,term_type,aa,bb,phi_nm1,phi_n,&
-&    green_temp(:,iq),inn,is_converged,&
-&    hexc, hexc_i, comm)
+     my_t1,my_t2,factor,term_type,aa,bb,phi_nm1,phi_n,&
+     green_temp(:,iq),inn,is_converged,&
+     hexc, hexc_i, comm)
 
    ! Computing result from two ranges of frequencies
    ! The real part is added, the imaginary part is substracted
@@ -852,9 +852,8 @@ end subroutine haydock_herm
 !! SOURCE
 
 subroutine haydock_herm_algo(niter_done,niter_max,nomega,omega,tol_iter,check,&
-& my_t1,my_t2,factor,term_type,aa,bb,phi_nm1,phi_n,&
-& green,inn,is_converged,&
-& hexc, hexc_i, comm)
+                              my_t1,my_t2,factor,term_type,aa,bb,phi_nm1,phi_n,&
+                              green,inn,is_converged, hexc, hexc_i, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -882,9 +881,9 @@ subroutine haydock_herm_algo(niter_done,niter_max,nomega,omega,tol_iter,check,&
  character(len=500) :: msg
  logical,parameter :: force_real=.TRUE.
 !arrays
+ integer :: units(2)
  real(dp) :: abs_err(nomega,2) !,rel_err(nomega,2)
- complex(dp),allocatable :: oldg(:),newg(:)
- complex(dp),allocatable :: phi_np1(:),hphi_n(:),cfact(:)
+ complex(dp),allocatable :: oldg(:),newg(:), phi_np1(:),hphi_n(:),cfact(:)
  logical :: test(2)
 !************************************************************************
 
@@ -899,17 +898,13 @@ subroutine haydock_herm_algo(niter_done,niter_max,nomega,omega,tol_iter,check,&
  !  3) |n+1> = [H|n> -a_n|n> -b_{n-1}|n-1>]/b_n
  !
  my_nt = my_t2-my_t1+1
+ units = [std_out, ab_out]
 
  ABI_MALLOC_OR_DIE(hphi_n,(hexc%hsize), ierr)
-
  ABI_MALLOC(phi_np1,(my_nt))
-
- ABI_MALLOC(oldg,(nomega))
- oldg=czero
- ABI_MALLOC(newg,(nomega))
- newg=czero
- ABI_MALLOC(cfact,(nomega))
- cfact=czero
+ ABI_CALLOC(oldg,(nomega))
+ ABI_CALLOC(newg,(nomega))
+ ABI_CALLOC(cfact,(nomega))
 
  nconv=0
  do inn=niter_done+1,niter_max
@@ -929,17 +924,15 @@ subroutine haydock_herm_algo(niter_done,niter_max,nomega,omega,tol_iter,check,&
    bb(inn) = SQRT(bb(inn))
 
    phi_np1 = phi_np1/bb(inn)
-
    phi_nm1 = phi_n
    phi_n   = phi_np1
 
    write(msg,'(a,i0,a,3es12.4)')' Iteration number ',inn,', b_i RE(a_i) IM(a_i) ',bb(inn),REAL(aa(inn)),AIMAG(aa(inn))
-   call wrtout(std_out,msg,"COLL")
+   call wrtout(std_out, msg)
 
    call continued_fract(inn,term_type,aa,bb,nomega,omega,cfact)
-
    newg= factor*cfact
-   !
+
    ! Avoid spurious convergence.
    niter_min=4; if (niter_done>1) niter_min=niter_done+1
    if (inn>niter_min) then
@@ -970,8 +963,7 @@ subroutine haydock_herm_algo(niter_done,niter_max,nomega,omega,tol_iter,check,&
          write(msg,'(a,es10.2,a,i0,a)')&
            " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after ",inn," iterations."
        endif
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
+       call wrtout(units, msg)
        EXIT
      end if
    end if
@@ -983,8 +975,7 @@ subroutine haydock_herm_algo(niter_done,niter_max,nomega,omega,tol_iter,check,&
  if (nconv/=2) then
    write(msg,'(a,es10.2,a,i0,a)')&
     " WARNING: Haydock algorithm did not converge within ",tol_iter," after ",niter_max," iterations."
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+   call wrtout(units, msg)
  end if
 
  is_converged = (nconv==2)
@@ -1040,7 +1031,7 @@ subroutine haydock_restart(BSp,restart_file,ftype,iq_search,hsize,niter_file,aa_
 !Local variables ------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: nproc,my_rank,ierr,op_file
+ integer :: nproc,my_rank,ierr,op_file, units(2)
  integer :: hsize_file,use_coupling_file
  complex(dp) :: factor_file
  character(len=500) :: msg
@@ -1048,6 +1039,7 @@ subroutine haydock_restart(BSp,restart_file,ftype,iq_search,hsize,niter_file,aa_
 !************************************************************************
 
  nproc = xmpi_comm_size(comm); my_rank= xmpi_comm_rank(comm)
+ units = [std_out, ab_out]
 
  if (my_rank==master) then
    call haydock_file%open(restart_file)
@@ -1080,8 +1072,7 @@ subroutine haydock_restart(BSp,restart_file,ftype,iq_search,hsize,niter_file,aa_
      ABI_COMMENT(msg)
    else
      write(msg,'(a,i0)')" Number of iterations already performed: ",niter_file
-     call wrtout(std_out,msg,"COLL")
-     call wrtout(ab_out,msg,"COLL")
+     call wrtout(units, msg)
 
      if ( ABS(haydock_file%broad - BSp%broad) > tol6) then
        write(msg,'(2a,2(a,f8.4),a)')&
@@ -1263,6 +1254,8 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
  type(excparam),intent(in) :: BSp
  type(excfiles),intent(in) :: BS_files
  type(Hdr_type),intent(in) :: Hdr_bse
+ type(hexc_t),intent(in) :: hexc
+ type(hexc_interp_t),intent(in) :: hexc_i
 !arrays
  complex(dp),intent(out) :: green(BSp%nomega,BSp%nq)
  complex(dp),intent(in) :: kets(hsize,nkets)
@@ -1278,18 +1271,16 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
  character(len=fnlen),parameter :: tag_file="_HAYDC_SAVE"
  character(len=500) :: msg
  character(len=fnlen) :: restart_file,out_file
- type(hexc_t),intent(in) :: hexc
- type(hexc_interp_t),intent(in) :: hexc_i
 !arrays
- real(dp),allocatable :: bb_file(:)
- real(dp),allocatable :: bb(:)
+ integer :: units(2)
+ real(dp),allocatable :: bb_file(:), bb(:)
  complex(dp),allocatable :: aa(:),cc(:),phi_np1(:),phi_n(:),phi_nm1(:),cbuff(:)
- complex(dp),allocatable :: aa_file(:),phi_n_file(:),phi_np1_file(:),cc_file(:)
- complex(dp),allocatable :: ket0(:)
+ complex(dp),allocatable :: aa_file(:),phi_n_file(:),phi_np1_file(:),cc_file(:), ket0(:)
  logical :: check(2)
 !************************************************************************
 
  ABI_WARNING("Haydock + coupling is still under development")
+ units = [std_out, ab_out]
 
  if(BSp%use_interp) then
    ABI_ERROR("Coupling is not yet implemented with interpolation")
@@ -1310,7 +1301,7 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
  if (nsppol==1) nfact=two*nfact
 
  write(msg,'(a,i0)')' Haydock algorithm with MAX number of iterations: ',BSp%niter
- call wrtout(std_out,msg,"COLL")
+ call wrtout(std_out,msg)
  !
  ! Check for presence of the restart file.
  can_restart=.FALSE.
@@ -1320,8 +1311,7 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
    if (file_exists(restart_file) ) then
      can_restart=.TRUE.
      msg = strcat(" Restarting Haydock calculation from file: ",restart_file)
-     call wrtout(std_out,msg,"COLL")
-     call wrtout(ab_out,msg,"COLL")
+     call wrtout(units, msg)
      ABI_ERROR("Restart is not tested")
    else
      can_restart=.FALSE.
@@ -1341,7 +1331,7 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
  !
  ! Select the terminator for the continued fraction.
  term_type=0 !; if (Bsp%hayd_term>0) term_type=2
- call wrtout(std_out,sjoin("Using terminator type: ",itoa(term_type)),"COLL")
+ call wrtout(std_out,sjoin("Using terminator type: ",itoa(term_type)))
  !
  ! Calculate green(w) for the different starting kets.
  green=czero
@@ -1353,9 +1343,9 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
 
    if (can_restart) then
      call haydock_restart(BSp,restart_file,BSE_HAYD_IMEPS,iq,hsize,&
-&      niter_file,aa_file,bb_file,phi_np1_file,phi_n_file,comm)
+                          niter_file,aa_file,bb_file,phi_np1_file,phi_n_file,comm)
    end if
-   !
+
    ABI_MALLOC(phi_nm1,(my_nt))
    ABI_MALLOC(phi_n,(my_nt))
    ABI_MALLOC(phi_np1,(my_nt))
@@ -1378,7 +1368,7 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
      !ket0    = ket0/ket0_hbar_norm
      cc(1)=zero ! <P|F|P>
      !cc(1) =  DOT_PRODUCT(ket0,phi_np1)
-     write(std_out,*)" cc(1), ket0_hbar_norm =",cc(1),ket0_hbar_norm
+     !write(std_out,*)" cc(1), ket0_hbar_norm =",cc(1),ket0_hbar_norm
 
      phi_nm1 = czero
      niter_done=0  ! TODO Be careful here
@@ -1409,9 +1399,9 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
    if (ABS(Bsp%haydock_tol(2)-two)<tol6) check = (/.FALSE.,.TRUE./)
 
    call haydock_psherm_optalgo(niter_done,niter_max,BSp%nomega,BSp%omega,BSp%haydock_tol(1),check,hexc,hexc_i,&
-&    hsize,my_t1,my_t2,factor,term_type,aa,bb,cc,ket0,ket0_hbar_norm,phi_nm1,phi_n,phi_np1,&
-&    green(:,iq),inn,is_converged,comm)
-   !
+      hsize,my_t1,my_t2,factor,term_type,aa,bb,cc,ket0,ket0_hbar_norm,phi_nm1,phi_n,phi_np1,&
+      green(:,iq),inn,is_converged,comm)
+
    ! Save the a"s and the b"s for possible restarting.
    ! 1) Info on the Q.
    ! 2) Number of iterations performed.
@@ -1533,6 +1523,7 @@ subroutine haydock_psherm_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,che
  real(dp) :: max_err,mean_err,mean_err2,std_dev,err
  logical :: keep_vectors=.TRUE.
 !arrays
+ integer :: units(2)
  real(dp) :: abs_err(nomega,2) !,ww_err(nomega,2)
  complex(dp) :: gn0(nomega,niter_tot)
  complex(dp),allocatable :: oldg(:),newg(:)
@@ -1543,6 +1534,7 @@ subroutine haydock_psherm_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,che
 !************************************************************************
 
  ABI_UNUSED(ket0_hbar_norm)
+ units = [std_out, ab_out]
 
  my_nt = my_t2-my_t1+1
 
@@ -1572,7 +1564,7 @@ subroutine haydock_psherm_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,che
    ! |n>   = |n+1>
    phi_nm1 = phi_n
    phi_n   = phi_np1
-   !
+
    !|n+1> = H |n> using all eh components.
    parity = (-1)**(inn+1)
    call hexc%matmul_full(hexc_i, phi_n, phi_np1, parity)
@@ -1603,7 +1595,7 @@ subroutine haydock_psherm_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,che
    !call xmpi_sum(cc(inn+1),comm,ierr)
 
    write(msg,'(a,i0,a,3es12.4)')' Iteration number ',inn,', b_i RE(c_i+1) IM(c_i+1) ',bb(inn),REAL(cc(inn+1)),AIMAG(cc(inn+1))
-   call wrtout(std_out,msg,"COLL")
+   call wrtout(std_out,msg)
 
    call continued_fract(inn,term_type,aa,bb(2:),nomega,omega,g00)
    gn0(:,1) = g00
@@ -1657,8 +1649,7 @@ subroutine haydock_psherm_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,che
          write(msg,'(a,es10.2,a,i0,a)')&
           " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after ",inn," iterations."
        endif
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
+       call wrtout(units, msg)
        EXIT
      end if
    end if
@@ -1670,8 +1661,7 @@ subroutine haydock_psherm_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,che
  if (nconv/=2) then
    write(msg,'(a,es10.2,a,i0,a)')&
     " WARNING: Haydock algorithm did not converge within ",tol_iter," after ",niter_tot," iterations."
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+   call wrtout(units, msg)
  end if
 
  is_converged = (nconv==2)
@@ -1705,8 +1695,8 @@ subroutine haydock_psherm_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,che
    end do
    mean_err = mean_err/tdim
    std_dev = mean_err2/tdim -mean_err**2
-   write(std_out,'(a,i0,1x,3es14.6)')&
-&   " Error in normalization (ii, max_err,mean,std_dev): ",row_max,max_err,mean_err,std_dev
+   write(std_out,'(a,i0,1x,3es14.6)') &
+    " Error in normalization (ii, max_err,mean,std_dev): ",row_max,max_err,mean_err,std_dev
 
    ABI_FREE(phi_test)
    ABI_FREE(phi_test2)
@@ -1828,8 +1818,7 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
  complex(dp),allocatable :: phi_np1(:),phi_n(:),phi_nm1(:)
  complex(dp),allocatable :: phit_np1(:),phit_n(:),phit_nm1(:)
  complex(dp),allocatable :: cbuff(:), phi_n_file(:),phi_np1_file(:)
- complex(dp),allocatable :: ket0(:)
- complex(dp),allocatable :: hphi_n(:), hphit_n(:)
+ complex(dp),allocatable :: ket0(:), hphi_n(:), hphit_n(:)
  complex(dp),allocatable :: all_omegas(:),green_temp(:,:)
  logical :: check(2)
 !************************************************************************
@@ -1855,18 +1844,18 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
  if (nsppol==1) nfact=two*nfact
 
  write(msg,'(a,i0)')' Bi-Lanczos algorithm with MAX number of iterations: ',BSp%niter
- call wrtout(std_out,msg,"COLL")
+ call wrtout(std_out,msg)
  !
  ! Check for presence of the restart file.
  can_restart=.FALSE.
 
- if ( BS_files%in_haydock_basename /= BSE_NOFILE) then
+ if (BS_files%in_haydock_basename /= BSE_NOFILE) then
    restart_file = strcat(BS_files%in_haydock_basename,tag_file)
    if (file_exists(restart_file) ) then
      can_restart=.TRUE.
      msg = strcat(" Restarting Haydock calculation from file: ",restart_file)
-     call wrtout(std_out,msg,"COLL")
-     call wrtout(ab_out,msg,"COLL")
+     call wrtout(std_out,msg)
+     call wrtout(ab_out,msg)
      ABI_ERROR("Restart is not implemented")
    else
      can_restart=.FALSE.
@@ -1886,7 +1875,7 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
  !
  ! Select the terminator for the continued fraction.
  term_type=0 !; if (Bsp%hayd_term>0) term_type=2
- call wrtout(std_out,sjoin("Using terminator type: ",itoa(term_type)),"COLL")
+ call wrtout(std_out,sjoin("Using terminator type: ",itoa(term_type)))
  !
  ! Calculate green(w) for the different starting kets.
  green=czero
@@ -1913,10 +1902,9 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
    ! TODO: Note the different convention used for the coefficients
    ! Should use the same convention in the Hermitian case.
    niter_max = niter_file + Bsp%niter
-   ABI_MALLOC(aa,(niter_max))
-   ABI_MALLOC(bb,(niter_max))
-   ABI_MALLOC(cc,(niter_max))
-   aa=czero; bb=czero; cc=czero
+   ABI_CALLOC(aa,(niter_max))
+   ABI_CALLOC(bb,(niter_max))
+   ABI_CALLOC(cc,(niter_max))
 
    if (niter_file==0) then ! Calculation from scratch.
      phi_nm1 = ket0(my_t1:my_t2)
@@ -1984,12 +1972,9 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
 
    ABI_MALLOC(green_temp,(n_all_omegas,nkets))
 
-
-
    call haydock_bilanczos_optalgo(niter_done,niter_max,n_all_omegas,all_omegas,BSp%haydock_tol(1),check,hexc,hexc_i,&
-&    hsize,my_t1,my_t2,factor,term_type,ep_renorms,aa,bb,cc,ket0,ket0_hbar_norm,phi_nm1,phi_n,phi_np1,&
-&    phit_nm1,phit_n,phit_np1,green_temp(:,iq),inn,is_converged,comm)
-
+    hsize,my_t1,my_t2,factor,term_type,ep_renorms,aa,bb,cc,ket0,ket0_hbar_norm,phi_nm1,phi_n,phi_np1,&
+    phit_nm1,phit_n,phit_np1,green_temp(:,iq),inn,is_converged,comm)
 
    ! Computing result from two ranges of frequencies
    ! The real part is added, the imaginary part is substracted
@@ -1998,8 +1983,6 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
    ABI_FREE(all_omegas)
    ABI_FREE(green_temp)
 
-
-   !
    ! Save the a"s and the b"s for possible restarting.
    ! 1) Info on the Q.
    ! 2) Number of iterations performed.
@@ -2128,6 +2111,7 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
  character(len=500) :: msg
  logical :: keep_vectors=.TRUE.
 !arrays
+ integer :: units(2)
  real(dp) :: abs_err(nomega,2) !,ww_err(nomega,2)
  complex(dp),allocatable :: oldg(:),newg(:)
  complex(dp),allocatable :: hphi_np1(:),hphit_np1(:),save_phi(:,:),save_phit(:,:)
@@ -2139,6 +2123,7 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
  ABI_UNUSED(ket0_hbar_norm)
  ABI_UNUSED(ket0(1))
  ABI_UNUSED(hexc_i%hsize_dense)
+ units = [std_out, ab_out]
 
  my_nt = my_t2-my_t1+1
 
@@ -2184,7 +2169,6 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
    phi_np1 = phi_np1 / bb(inn)
    phit_np1 = phit_np1 / CONJG(cc(inn))
 
-   !
    ! |n-1> = |n>
    ! |n>   = |n+1>
    phi_nm1 = phi_n
@@ -2197,7 +2181,7 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
      save_phit(:,inn) = phit_n
    end if
    write(msg,'(a,i0,a,3es12.4)')' Iteration number ',inn,', b_i RE(c_i) IM(c_i) ',REAL(bb(inn)),REAL(cc(inn)),AIMAG(cc(inn))
-   call wrtout(std_out,msg,"COLL")
+   call wrtout(std_out,msg)
 
    call continued_fract_general(inn,term_type,aa,bb,cc,nomega,omega,g00)
    newg = factor*g00
@@ -2208,7 +2192,7 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
      test=.TRUE.
      abs_err(:,1) = ABS(DBLE (newg-oldg))
      abs_err(:,2) = ABS(AIMAG(newg-oldg))
-     !
+
      if (tol_iter>zero) then
        ! Test on the L1 norm.
        if (check(1)) test(1) = SUM(abs_err(:,1)) < tol_iter*SUM(ABS(DBLE (newg)))
@@ -2232,8 +2216,7 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
          write(msg,'(a,es10.2,a,i0,a)')&
           " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after ",inn," iterations."
        endif
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
+       call wrtout(units, msg)
        EXIT
      end if
    end if
@@ -2245,8 +2228,7 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
  if (nconv/=2) then
    write(msg,'(a,es10.2,a,i0,a)')&
      " WARNING: Haydock algorithm did not converge within ",tol_iter," after ",niter_tot," iterations."
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+   call wrtout(units, msg)
  end if
 
  is_converged = (nconv==2)
@@ -2257,10 +2239,8 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
  ABI_FREE(hphi_np1)
  ABI_FREE(hphit_np1)
 
- if (keep_vectors) then
-   ABI_FREE(save_phi)
-   ABI_FREE(save_phit)
- end if
+ ABI_SFREE(save_phi)
+ ABI_SFREE(save_phit)
 
  !! if (keep_vectors) then
  !!   tdim = MIN(inn,niter_tot)
@@ -2448,7 +2428,7 @@ subroutine continued_fract_general(nlev,term_type,aa,bb,cc,nz,zpts,spectrum)
    end if
 
  case default
-   write(msg,'(a,i0)')" Wrong value for term_type : ",term_type
+   write(msg,'(a,i0)')" Wrong value for term_type: ",term_type
    ABI_ERROR(msg)
  end select
 
