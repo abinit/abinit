@@ -240,15 +240,14 @@ subroutine abi_zhegv(itype,jobz,uplo,n,a,lda,b,ldb,w)
  character(len=1), intent(in) :: jobz
  character(len=1), intent(in) :: uplo
  integer, intent(in) :: n,lda,ldb
- complex(dpc), intent(inout) :: a(lda,*)
- complex(dpc), intent(inout) :: b(ldb,*)
+ complex(dp), intent(inout) :: a(lda,*)
+ complex(dp), intent(inout) :: b(ldb,*)
  real(dp), intent(out) :: w(n)
 
 !Local variables-------------------------------
  integer :: info,lwork
  real(dp),pointer :: rwork(:)
- complex(dpc),pointer :: work(:)
-
+ complex(dp),pointer :: work(:)
 ! *********************************************************************
 
  ABI_CHECK(lapack_full_storage,"BUG(1) in abi_zhegv (storage)!")

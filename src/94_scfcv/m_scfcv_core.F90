@@ -2992,15 +2992,14 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
  integer :: nband_k,nbdmix,npw_k,nset1,nset2,ntypat
  integer :: shift_set1,shift_set2,spaceComm_band,spare_mem,usepaw,wfmixalg
  real(dp) :: alpha,beta
- complex(dpc) :: sum_coeffs
+ complex(dp) :: sum_coeffs
 !arrays
  integer,allocatable :: ipiv(:),dimcprj(:)
  real(dp) :: tsec(2)
  real(dp),allocatable :: al(:,:),mmn(:,:,:)
  real(dp),allocatable :: dotprod_res(:,:,:),dotprod_res_k(:,:,:),res_mn(:,:,:),smn(:,:,:)
- complex(dpc),allocatable :: coeffs(:)
+ complex(dp),allocatable :: coeffs(:)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kh(:,:)
-
 ! *************************************************************************
 
 !DEBUG

@@ -1249,13 +1249,13 @@ end subroutine xmpi_bcast_cplx4d
 subroutine xmpi_bcast_dcv(xval,master,comm,ier)
 
 !Arguments-------------------------
- complex(dpc),intent(inout) :: xval
+ complex(dp),intent(inout) :: xval
  integer ,intent(in) :: comm,master
  integer ,intent(out) :: ier
 
 !Local variables-------------------
 #if defined HAVE_MPI
- complex(dpc) :: arr_xval(1)
+ complex(dp) :: arr_xval(1)
 #endif
 
 ! *************************************************************************
@@ -1295,7 +1295,7 @@ end subroutine xmpi_bcast_dcv
 subroutine xmpi_bcast_dc1d(xval,master,comm,ier)
 
 !Arguments-------------------------
- complex(dpc), DEV_CONTARRD intent(inout):: xval(:)
+ complex(dp), DEV_CONTARRD intent(inout):: xval(:)
  integer ,intent(in) :: comm,master
  integer ,intent(out) :: ier
 
@@ -1341,7 +1341,7 @@ end subroutine xmpi_bcast_dc1d
 subroutine xmpi_bcast_dc2d(xval,master,comm,ier)
 
 !Arguments-------------------------
- complex(dpc), DEV_CONTARRD intent(inout):: xval(:,:)
+ complex(dp), DEV_CONTARRD intent(inout):: xval(:,:)
  integer ,intent(in) :: comm,master
  integer ,intent(out) :: ier
 
@@ -1350,7 +1350,6 @@ subroutine xmpi_bcast_dc2d(xval,master,comm,ier)
  integer :: my_dt,my_op,n1,n2
  integer(kind=int64) :: ntot
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -1400,7 +1399,7 @@ end subroutine xmpi_bcast_dc2d
 subroutine xmpi_bcast_dc3d(xval,master,comm,ier)
 
 !Arguments-------------------------
- complex(dpc), DEV_CONTARRD intent(inout):: xval(:,:,:)
+ complex(dp), DEV_CONTARRD intent(inout):: xval(:,:,:)
  integer ,intent(in) :: comm,master
  integer ,intent(out) :: ier
 
@@ -1409,7 +1408,6 @@ subroutine xmpi_bcast_dc3d(xval,master,comm,ier)
  integer :: my_dt,my_op,n1,n2,n3
  integer(kind=int64) :: nn,ntot
 #endif
-
 ! *************************************************************************
 
  ier=0
@@ -1461,7 +1459,7 @@ end subroutine xmpi_bcast_dc3d
 subroutine xmpi_bcast_dc4d(xval,master,comm,ier)
 
 !Arguments-------------------------
- complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
+ complex(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
  integer,intent(in) :: comm,master
  integer,intent(out) :: ier
 
@@ -1470,7 +1468,6 @@ subroutine xmpi_bcast_dc4d(xval,master,comm,ier)
  integer :: my_dt,my_op,n1,n2,n3,n4
  integer(kind=int64) :: nn,ntot
 #endif
-
 ! *************************************************************************
 
  ier=0

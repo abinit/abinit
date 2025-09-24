@@ -2556,14 +2556,14 @@ end subroutine xmpi_sum_dp4d2t
 subroutine xmpi_sum_c0dc(xval,comm,ier)
 
 !Arguments-------------------------
- complex(dpc),intent(inout) :: xval
+ complex(dp),intent(inout) :: xval
  integer,intent(in) :: comm
  integer,intent(out) :: ier
 
 !Local variables-------------------
 #if defined HAVE_MPI
  integer :: nproc_space_comm
- complex(dpc) :: arr_xsum(1),arr_xval(1)
+ complex(dp) :: arr_xsum(1),arr_xval(1)
 #endif
 ! *************************************************************************
 
@@ -2659,14 +2659,14 @@ end subroutine xmpi_sum_c0sc
 subroutine xmpi_sum_c1dc(xval,comm,ier)
 
 !Arguments-------------------------
- complex(dpc), DEV_CONTARRD intent(inout) :: xval(:)
+ complex(dp), DEV_CONTARRD intent(inout) :: xval(:)
  integer,intent(in) :: comm
  integer,intent(out) :: ier
 
 !Local variables-------------------
 #if defined HAVE_MPI
  integer :: n1,nproc_space_comm
- complex(dpc) , allocatable :: xsum(:)
+ complex(dp) , allocatable :: xsum(:)
 #endif
 ! *************************************************************************
 
@@ -2724,7 +2724,7 @@ end subroutine xmpi_sum_c1dc
 subroutine xmpi_sum_c2dc(xval,comm,ier,use_omp_map)
 
 !Arguments-------------------------
- complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:)
+ complex(dp), DEV_CONTARRD intent(inout) :: xval(:,:)
  integer,intent(in) :: comm
  logical,intent(in), optional :: use_omp_map
  integer,intent(out) :: ier
@@ -2737,7 +2737,7 @@ subroutine xmpi_sum_c2dc(xval,comm,ier,use_omp_map)
 #endif
  logical :: l_use_omp_map
  integer(kind=int64) :: ntot
- complex(dpc),allocatable :: xsum(:,:)
+ complex(dp),allocatable :: xsum(:,:)
 #endif
 ! *************************************************************************
 
@@ -2849,7 +2849,7 @@ end subroutine xmpi_sum_c2dc
 subroutine xmpi_sum_c3dc(xval,comm,ier)
 
 !Arguments-------------------------
- complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:)
+ complex(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:)
  integer,intent(in) :: comm
  integer,intent(out) :: ier
 
@@ -2857,7 +2857,7 @@ subroutine xmpi_sum_c3dc(xval,comm,ier)
 #if defined HAVE_MPI
  integer :: my_dt,my_op,n1,n2,n3,nn,nproc_space_comm
  integer(kind=int64) :: ntot
- complex(dpc),allocatable :: xsum(:,:,:)
+ complex(dp),allocatable :: xsum(:,:,:)
 #endif
 ! *************************************************************************
 
@@ -2929,7 +2929,7 @@ end subroutine xmpi_sum_c3dc
 subroutine xmpi_sum_c4dc(xval,comm,ier)
 
 !Arguments-------------------------
- complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
+ complex(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
  integer,intent(in) :: comm
  integer,intent(out) :: ier
 
@@ -2937,7 +2937,7 @@ subroutine xmpi_sum_c4dc(xval,comm,ier)
 #if defined HAVE_MPI
  integer :: my_dt,my_op,n1,n2,n3,n4,nn,nproc_space_comm
  integer(kind=int64) :: ntot
- complex(dpc),allocatable :: xsum(:,:,:,:)
+ complex(dp),allocatable :: xsum(:,:,:,:)
 #endif
 ! *************************************************************************
 
@@ -3009,7 +3009,7 @@ end subroutine xmpi_sum_c4dc
 subroutine xmpi_sum_c5dc(xval,comm,ier)
 
 !Arguments-------------------------
- complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:)
+ complex(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:)
  integer,intent(in) :: comm
  integer,intent(out) :: ier
 
@@ -3017,7 +3017,7 @@ subroutine xmpi_sum_c5dc(xval,comm,ier)
 #if defined HAVE_MPI
  integer :: my_dt,my_op,n1,n2,n3,n4,n5,nn,nproc_space_comm
  integer(kind=int64) :: ntot
- complex(dpc),allocatable :: xsum(:,:,:,:,:)
+ complex(dp),allocatable :: xsum(:,:,:,:,:)
 #endif
 ! *************************************************************************
 
@@ -3090,7 +3090,7 @@ end subroutine xmpi_sum_c5dc
 subroutine xmpi_sum_c6dc(xval,comm,ier)
 
 !Arguments-------------------------
- complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:)
+ complex(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:)
  integer,intent(in) :: comm
  integer,intent(out) :: ier
 
@@ -3098,7 +3098,7 @@ subroutine xmpi_sum_c6dc(xval,comm,ier)
 #if defined HAVE_MPI
  integer :: my_dt,my_op,n1,n2,n3,n4,n5,n6,nn,nproc_space_comm
  integer(kind=int64) :: ntot
- complex(dpc),allocatable :: xsum(:,:,:,:,:,:)
+ complex(dp),allocatable :: xsum(:,:,:,:,:,:)
 #endif
 ! *************************************************************************
 
@@ -3172,7 +3172,7 @@ end subroutine xmpi_sum_c6dc
 subroutine xmpi_sum_c7dc(xval,comm,ier)
 
 !Arguments-------------------------
- complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:,:)
+ complex(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:,:)
  integer,intent(in) :: comm
  integer,intent(out) :: ier
 
@@ -3180,7 +3180,7 @@ subroutine xmpi_sum_c7dc(xval,comm,ier)
 #if defined HAVE_MPI
  integer :: my_dt,my_op,n1,n2,n3,n4,n5,n6,n7,nn,nproc_space_comm
  integer(kind=int64) :: ntot
- complex(dpc),allocatable :: xsum(:,:,:,:,:,:,:)
+ complex(dp),allocatable :: xsum(:,:,:,:,:,:,:)
 #endif
 ! *************************************************************************
 

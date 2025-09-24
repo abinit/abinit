@@ -124,7 +124,7 @@ MODULE m_oper
   type(matlu_type), allocatable :: matlu(:)
   ! Local projection on correlated orbitals
 
-  complex(dpc), allocatable :: ks(:,:,:,:)
+  complex(dp), allocatable :: ks(:,:,:,:)
   ! In the KS basis  (mbandc,mbandc,nkpt,nsppol)
 
   real(dp), ABI_CONTIGUOUS pointer :: wtk(:) => null()
@@ -451,7 +451,7 @@ subroutine copy_oper_from_ndat(oper1,oper2,ndat,nw,proct,me_freq,copy_ks)
 
 !oper variables-------------------------------
  integer ::  ikpt, isppol, idat, iw, iatom, mbandc
- complex(dpc), ABI_CONTIGUOUS pointer :: mat(:,:,:)
+ complex(dp), ABI_CONTIGUOUS pointer :: mat(:,:,:)
 ! *********************************************************************
  DBG_ENTER("COLL")
  ABI_CHECK(oper1%ndat==ndat, "Bad value for ndat!")
@@ -521,7 +521,7 @@ subroutine copy_oper_to_ndat(oper1,oper2,ndat,nw,proct,me_freq,copy_ks)
 
 !oper variables-------------------------------
  integer :: ikpt, isppol, idat, iw, iatom, mbandc
- complex(dpc), ABI_CONTIGUOUS pointer :: mat(:,:,:)
+ complex(dp), ABI_CONTIGUOUS pointer :: mat(:,:,:)
 ! *********************************************************************
  DBG_ENTER("COLL")
  ABI_CHECK(oper2%ndat==ndat, "Bad value for ndat!")
@@ -734,12 +734,12 @@ subroutine inverse_oper(oper,option,procb,iproc,gpu_option)
  integer :: ikpt,isppol,idat,paral,mbandc
  integer :: l_gpu_option
  !integer :: blk,iatom,ib
- complex(dpc), ABI_CONTIGUOUS pointer :: ks(:,:,:,:)
+ complex(dp), ABI_CONTIGUOUS pointer :: ks(:,:,:,:)
 #ifdef HAVE_OPENMP_OFFLOAD
- complex(dpc), allocatable :: work(:,:)
- complex(dpc), ABI_CONTIGUOUS pointer :: mat(:,:,:)
+ complex(dp), allocatable :: work(:,:)
+ complex(dp), ABI_CONTIGUOUS pointer :: mat(:,:,:)
 #endif
-!todo_ba: prb with gwpc here: necessary for matcginv but should be dpc
+!todo_ba: prb with gwpc here: necessary for matcginv but should be dp
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -845,11 +845,11 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag,gpu_option)
  integer :: iatom,ib,ik,ikpt,isppol,im,idat,lpawu,mbandc,ndim
  integer :: ndim_max,nspinor,ndat,opt,paral,shift
  integer :: l_gpu_option
- complex(dpc) :: alpha
- complex(dpc), ABI_CONTIGUOUS pointer :: ks(:,:,:,:),mat(:,:,:),chipsi(:,:,:,:,:)
+ complex(dp) :: alpha
+ complex(dp), ABI_CONTIGUOUS pointer :: ks(:,:,:,:),mat(:,:,:),chipsi(:,:,:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: wtk(:)
  character(len=500) :: message
- complex(dpc), allocatable :: mat_temp(:,:,:),mat_temp2(:,:,:),mat_temp3(:,:)
+ complex(dp), allocatable :: mat_temp(:,:,:),mat_temp2(:,:,:),mat_temp3(:,:)
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -1111,8 +1111,8 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc,gpu_option)
 !Local variables-------------------------------
  integer :: iatom,ik,ikpt,isppol,idat,lpawu,mbandc,l_gpu_option
  integer :: ndim,ndim_max,ndat,nspinor,paral,shift
- complex(dpc), ABI_CONTIGUOUS pointer :: ks(:,:,:,:),mat(:,:,:),chipsi(:,:,:,:,:)
- complex(dpc), allocatable :: mat_temp(:,:),mat_temp2(:,:)
+ complex(dp), ABI_CONTIGUOUS pointer :: ks(:,:,:,:),mat(:,:,:),chipsi(:,:,:,:,:)
+ complex(dp), allocatable :: mat_temp(:,:),mat_temp2(:,:)
 ! *********************************************************************
 
  l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option=gpu_option
@@ -1368,10 +1368,10 @@ subroutine trace_oper(oper,trace_ks,trace_loc,opt_ksloc,trace_ks_cmplx)
  real(dp), intent(out) :: trace_ks  !vz_i
  real(dp), intent(inout) :: trace_loc(oper%nsppol+1,oper%natom) !vz_i
  integer, intent(in) :: opt_ksloc
- complex(dpc), optional, intent(out) :: trace_ks_cmplx
+ complex(dp), optional, intent(out) :: trace_ks_cmplx
 !Local variables-------------------------------
  integer :: ib,ikpt,isppol
- complex(dpc) :: trace
+ complex(dp) :: trace
  character(len=500) :: message
 ! *********************************************************************
 
@@ -1491,7 +1491,7 @@ subroutine trace_prod_oper(oper1,oper2,trace)
 
 !Arguments ------------------------------------
  type(oper_type), intent(in) :: oper1,oper2
- complex(dpc), intent(out) :: trace
+ complex(dp), intent(out) :: trace
 !Local variables-------------------------------
  integer :: ikpt,isppol
  character(len=500) :: message
@@ -1560,7 +1560,7 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
  integer :: nproc2,nspinor,nsppol,nw,optcommkpt,siz_buf
  logical :: diag
  integer, allocatable :: displs(:),recvcounts(:)
- complex(dpc), allocatable :: buffer(:),buffer_tot(:)
+ complex(dp), allocatable :: buffer(:),buffer_tot(:)
 ! *********************************************************************
 
  comm    = paw_dmft%spacecomm
@@ -1776,7 +1776,7 @@ subroutine gather_oper_ks(oper,distrib,paw_dmft,opt_diag)
  integer :: me_kpt,nkpt,nproc,nproc_freq,nsppol,siz_buf
  logical :: diag
  integer, allocatable :: displs(:),recvcounts(:)
- complex(dpc), allocatable :: buffer(:),buffer_tot(:)
+ complex(dp), allocatable :: buffer(:),buffer_tot(:)
 ! *********************************************************************
 
  mbandc = paw_dmft%mbandc

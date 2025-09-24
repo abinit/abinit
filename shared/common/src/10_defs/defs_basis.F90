@@ -264,10 +264,10 @@ module defs_basis
 
 !Complex constants
  !double precision
- complex(dpc), parameter :: czero = (0._dp,0._dp)
- complex(dpc), parameter :: cone  = (1._dp,0._dp)
- complex(dpc), parameter :: ctwo  = (2._dp,0._dp)
- complex(dpc), parameter :: j_dpc = (0._dp,1.0_dp)
+ complex(dp), parameter :: czero = (0._dp,0._dp)
+ complex(dp), parameter :: cone  = (1._dp,0._dp)
+ complex(dp), parameter :: ctwo  = (2._dp,0._dp)
+ complex(dp), parameter :: j_dpc = (0._dp,1.0_dp)
 
  ! single-precision
  complex(spc), parameter :: czero_sp = (0._sp,0._sp)
@@ -276,7 +276,7 @@ module defs_basis
  complex(spc), parameter :: j_sp     = (0._sp,1.0_sp)
 
 !Pauli matrix
- complex(dpc), parameter :: pauli_mat(2,2,0:3) = reshape([cone,czero,czero,cone, &
+ complex(dp), parameter :: pauli_mat(2,2,0:3) = reshape([cone,czero,czero,cone, &
                                                           czero,cone,cone,czero,&
                                                           czero,j_dpc,-j_dpc,czero,&
                                                           cone,czero,czero,-cone], [2,2,4])
@@ -412,7 +412,7 @@ module defs_basis
  end type coeff2_type
 !A small datatype for ragged complex 2D-arrays
  type coeff2c_type
-  complex(dpc), allocatable :: value(:,:)
+  complex(dp), allocatable :: value(:,:)
  end type coeff2c_type
 !A small datatype for ragged real 3D-arrays
  type coeff3_type

@@ -198,15 +198,15 @@ subroutine abi_zhpgv(itype,jobz,uplo,n,a,b,w,z,ldz)
  integer, intent(in) :: n,ldz
  character(len=1), intent(in) :: jobz
  character(len=1), intent(in) :: uplo
- complex(dpc), intent(inout) :: a(:,:)
- complex(dpc), intent(inout) :: b(:,:)
- complex(dpc), intent(out) :: z(:,:)
+ complex(dp), intent(inout) :: a(:,:)
+ complex(dp), intent(inout) :: b(:,:)
+ complex(dp), intent(out) :: z(:,:)
  real(dp), intent(out) :: w(:)
 
 !Local variables-------------------------------
  integer :: info
  real(dp),pointer :: rwork(:)
- complex(dpc),pointer :: work(:)
+ complex(dp),pointer :: work(:)
 ! *********************************************************************
 
  ABI_CHECK(lapack_packed_storage,"BUG(1) in abi_zhpgv (storage)!")

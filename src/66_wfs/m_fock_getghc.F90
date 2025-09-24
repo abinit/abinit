@@ -243,7 +243,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
  logical :: need_ghc,qeq0
  real(dp),parameter :: weight1=one
  real(dp) :: doti,eigen,imcwf,imcwocc,imvloc,invucvol,recwf,recwocc,revloc,wtk
- complex(dpc) :: cinvucvol,cucvol
+ complex(dp) :: cinvucvol,cucvol
  type(fock_common_type),pointer :: fockcommon
  type(fock_BZ_type),pointer :: fockbz
 ! Arrays
@@ -1872,7 +1872,7 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg,ndat,gpu_option)
 
 !Local variables-------------------------------
 ! Scalars
- complex(dpc), parameter :: cminusone  = (-1._dp,0._dp)
+ complex(dp), parameter :: cminusone  = (-1._dp,0._dp)
  integer :: iband,ikpt,ipw,my_nspinor,nband_k,npw,idat,gpu_option_
  real(dp) :: eigen
  type(fock_common_type),pointer :: fockcommon

@@ -95,7 +95,7 @@ module m_abi_linalg
  real(sp),save,target,allocatable :: eigen_s_work(:)
  real(dp),save,target,allocatable :: eigen_d_work(:)
  complex(spc),save,target,allocatable :: eigen_c_work(:)
- complex(dpc),save,target,allocatable :: eigen_z_work(:)
+ complex(dp),save,target,allocatable :: eigen_z_work(:)
 
  integer,save,private :: slk_minsize=1
  integer,save,public :: slk_communicator=xmpi_comm_null

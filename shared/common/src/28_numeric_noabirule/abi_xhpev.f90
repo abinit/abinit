@@ -178,15 +178,14 @@ end subroutine abi_chpev
  character(len=1), intent(in) :: jobz
  character(len=1), intent(in) :: uplo
  integer, intent(in) :: n,ldz
- complex(dpc), intent(inout) :: a(:,:)
- complex(dpc), intent(out) :: z(:,:)
+ complex(dp), intent(inout) :: a(:,:)
+ complex(dp), intent(out) :: z(:,:)
  real(dp), intent(out) :: w(:)
 
 !Local variables-------------------------------
  integer :: info
  real(dp),pointer :: rwork(:)
- complex(dpc),pointer :: work(:)
-
+ complex(dp),pointer :: work(:)
 ! *********************************************************************
 
  ABI_CHECK(lapack_packed_storage,"BUG(1) in abi_zhpev (storage)!")

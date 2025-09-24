@@ -2154,8 +2154,7 @@ subroutine compute_kgb_indicator(acc_kgb,bandpp,glb_comm,mband,mpw,npband,npfft,
 !arrays
  integer,allocatable :: ranks(:),val_npslk(:)
  real(dp),allocatable :: eigen(:),grama(:,:),gramb(:,:)
- complex(dpc),allocatable :: blockvectorbx(:,:),blockvectorx(:,:),sqgram(:,:)
-
+ complex(dp),allocatable :: blockvectorbx(:,:),blockvectorx(:,:),sqgram(:,:)
 !******************************************************************
 
  DBG_ENTER("COLL")

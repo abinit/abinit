@@ -97,10 +97,9 @@ subroutine ompgpu_fourdp(cplex,ngfft,ldx,ldy,ldz,ndat,isign,fofg,fofr)
 !Local variables-------------------------------
 !scalars
  integer      :: n1,n2,n3,nfft_tot
- complex(dpc) :: norm
+ complex(dp) :: norm
  logical      :: transfer_fofr, transfer_fofg
  character(len=500) :: msg
-
 ! *************************************************************************
 
  n1=ngfft(1);

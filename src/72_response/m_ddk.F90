@@ -238,7 +238,7 @@ subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfft
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
  real(dp) :: kpt(3), vv(2, 3)
  real(dp),allocatable :: cg_c(:,:), cg_v(:,:)
- complex(dpc) :: vg(3), vr(3)
+ complex(dp) :: vg(3), vr(3)
  complex(gwpc),allocatable :: ihrc(:,:), ug_c(:), ug_v(:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 !************************************************************************

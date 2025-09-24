@@ -1713,8 +1713,8 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
  real(dp) :: ro(2),sumocc(2)
  real(dp),allocatable :: eig(:),hdp(:,:,:),hdp2(:,:),noccmmptemp(:,:,:,:),noccmmp_tmp(:,:,:,:)
  real(dp),allocatable :: rwork(:),noccmmp2(:,:,:,:),nocctot2(:)
- complex(dpc),allocatable :: noccmmp_ylm(:,:,:),noccmmp_jmj(:,:),noccmmp_slm(:,:,:)
- complex(dpc),allocatable :: zhdp(:,:),zhdp2(:,:),znoccmmp_tmp(:,:),zwork(:)
+ complex(dp),allocatable :: noccmmp_ylm(:,:,:),noccmmp_jmj(:,:),noccmmp_slm(:,:,:)
+ complex(dp),allocatable :: zhdp(:,:),zhdp2(:,:),znoccmmp_tmp(:,:),zwork(:)
  character(len=9),parameter :: dspin(6)=  (/"up       ","down     ","up-up    ","down-down","Re[up-dn]","Im[up-dn]"/)
  character(len=9),parameter :: dspinc(6)= (/"up       ","down     ","up-up    ","down-down","up-dn    ","dn-up    "/)
 ! character(len=9),parameter :: dspinc2(6)=(/"up       ","down     ","dn-dn    ","up-up    ","dn-up    ","up-dn    "/)
@@ -1722,10 +1722,9 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
  type(coeff4_type),allocatable :: tmp_noccmmp(:)
 
  real(dp),allocatable :: l_noccmmp_tmp(:,:,:,:)
- real(dpc),optional,allocatable :: my_l_occmat(:,:,:,:)
+ real(dp),optional,allocatable :: my_l_occmat(:,:,:,:)
  logical :: cal_lmom
  integer :: atom_min,atom_max
-
 !*********************************************************************
 
  DBG_ENTER("COLL")
@@ -3143,10 +3142,10 @@ character(len=5) :: orb_char
  integer :: cplex_dij,im1,im2,ndij,itypat,my_comm_atom
  integer :: my_lcur,my_iatom,coor,isp,lmin,lmax,me_atom
  real(dp),allocatable :: my_l_occmat(:,:,:,:)
- complex(dpc),allocatable :: op_l(:,:,:),cmfoccmat(:,:,:)
+ complex(dp),allocatable :: op_l(:,:,:),cmfoccmat(:,:,:)
  real(dp) :: orb_mom(3)
  real(dp) :: sum_orb_mom(3)
- complex(dpc) :: my_sls_val
+ complex(dp) :: my_sls_val
  character(len=500) :: message
  type(paw_ij_type), ABI_CONTIGUOUS pointer :: paw_ij_all(:)
  type(pawrhoij_type),ABI_CONTIGUOUS pointer :: pawrhoij_all(:)
