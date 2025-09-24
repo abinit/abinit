@@ -56,8 +56,8 @@ nshiftk   1
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%   t79.abo, tolnlines = 10, tolabs = 1.100e+00, tolrel = 7.0e-01, fld_options = -easy
+#%% files_to_test =
+#%%   t79.abo, tolnlines = 8, tolabs = 1.100e+00, tolrel = 7.0e-01, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
