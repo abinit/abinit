@@ -92,14 +92,14 @@ MODULE m_bseinterp
     type(double_grid_t),pointer :: double_grid => null()
     ! Mapping between coarse and dense mesh
 
+ contains
+  procedure :: init => interpolator_init    ! Construct the object
+  procedure :: free => interpolator_free    ! Free memory
+  procedure :: normalize => interpolator_normalize ! Normalize the overlaps
+  procedure :: alloc_work => int_alloc_work       ! Alloc temp memory
+  procedure :: int_free => int_free        ! Free temp memory
+
  end type interpolator_t
-
- public :: interpolator_init    ! Construct the object
- public :: interpolator_free    ! Free memory
- public :: interpolator_normalize ! Normalize the overlaps
- public :: int_alloc_work       ! Alloc temp memory
- public :: int_free_work        ! Free temp memory
-
 !!***
 
 !----------------------------------------------------------------------
@@ -227,16 +227,16 @@ end subroutine int_alloc_work
 
 !-------------------------------------------------------------------
 
-!!****f* m_bseinterp/int_free_work
+!!****f* m_bseinterp/int_free
 !! NAME
-!! int_free_work
+!! int_free
 !!
 !! FUNCTION
 !! Deallocate temporary arrays
 !!
 !! SOURCE
 
-subroutine int_free_work(interpolator)
+subroutine int_free(interpolator)
 
 !Arguments ---------------------------
  class(interpolator_t),intent(inout) :: interpolator
@@ -245,7 +245,7 @@ subroutine int_free_work(interpolator)
  ABI_SFREE(interpolator%btemp)
  ABI_SFREE(interpolator%ctemp)
 
-end subroutine int_free_work
+end subroutine int_free
 !!***
 
 !-------------------------------------------------------------------
