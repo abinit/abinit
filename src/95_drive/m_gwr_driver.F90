@@ -242,9 +242,9 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
 ! call wrtout(units, msg)
 !
 #if defined HAVE_GW_DPC
- write(msg,'(a,i2,a)')'.Using double precision arithmetic; gwpc = ',gwpc,ch10
+ write(msg,'(a,i2,a)')'.Using double precision arithmetic; gwpc = ',gwp,ch10
 #else
- write(msg,'(a,i2,a)')'.Using single precision arithmetic; gwpc = ',gwpc,ch10
+ write(msg,'(a,i2,a)')'.Using single precision arithmetic; gwpc = ',gwp,ch10
 #endif
  call wrtout(units, msg)
 
@@ -1141,7 +1141,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  integer,pointer :: gvec_max(:,:)
  integer,allocatable,target :: m_gvec(:,:), sorted_kg_k(:,:)
  complex(dp),allocatable :: ug1_batch(:,:), ur1_batch(:,:), ur2_batch(:,:), ur12_batch(:,:), ug12_batch(:,:), cwork(:)
- complex(gwpc),allocatable :: sqrt_vc(:), paw_rhotwg(:)
+ complex(gwp),allocatable :: sqrt_vc(:), paw_rhotwg(:)
  type(pawpwij_t),allocatable :: pwij(:)
  type(pawcprj_type),allocatable :: cprj1(:,:)
 ! *************************************************************************

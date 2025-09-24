@@ -3243,7 +3243,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  type(supercell_type), target :: scell_q, scell_k
  type(krank_t) :: krank_ibz, qrank_ibz
  complex(dp) :: a_nk, bstar_qnu, cphase, cphase_tr, c3tmp(3)
- complex(gwpc) :: c123, c23, c3
+ complex(gwp) :: c123, c23, c3
 !arrays
  integer :: sc_ngfft(18), ds_ngfft(18), mapl_k(6), kptrlatt_(3,3), qptrlatt_(3,3)
  integer :: units(2), work_ngfft(18), gmax(3), g0_k(3), mapl_qq(6), g0_q(3), ngqpt(3)
@@ -3257,7 +3257,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  real(dp),allocatable :: sc_displ_cart_re(:,:,:,:), sc_displ_cart_im(:,:,:,:)
  real(dp), contiguous, pointer :: xcart_ptr(:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
- complex(gwpc),allocatable :: ur_k(:,:), ds_ur_k(:,:), pol_wfr(:,:,:), sc_ceikr_1d(:,:)
+ complex(gwp),allocatable :: ur_k(:,:), ds_ur_k(:,:), pol_wfr(:,:,:), sc_ceikr_1d(:,:)
 !----------------------------------------------------------------------
 
  units = [std_out, ab_out]

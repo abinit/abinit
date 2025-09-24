@@ -162,11 +162,11 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  !integer(i1b),allocatable :: itreat_qibz(:)
  !integer, ABI_CONTIGUOUS pointer :: kg_c(:,:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3), kqmp(3), kmp(3), pp(3), kmp_ibz(3), kqmp_ibz(3), qq_ibz(3), qpt(3)
- !complex(gwpc) :: ctmp_gwpc, xdot_tmp
+ !complex(gwp) :: ctmp_gwpc, xdot_tmp
 !arrays
  real(dp),allocatable :: qlwl(:,:), kpg_k(:,:), kpg_kq(:,:), cg_work(:,:), ug_k(:,:), ug_kq(:,:)
  real(dp),allocatable :: work(:,:,:,:), my_gbuf(:,:,:,:,:,:)
- complex(gwpc),allocatable :: cwork_ur(:), rhotwg_c(:), vc_sqrt_gc(:), ur_nk(:,:), ur_mkq(:,:), epsm1_ggw(:,:,:)
+ complex(gwp),allocatable :: cwork_ur(:), rhotwg_c(:), vc_sqrt_gc(:), ur_nk(:,:), ur_mkq(:,:), epsm1_ggw(:,:,:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
 !************************************************************************
 

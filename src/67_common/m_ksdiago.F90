@@ -1045,7 +1045,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
  real(dp),allocatable :: vlocal(:,:,:,:), ylm_k(:,:), dum_ylm_gr_k(:,:,:), eig_ene(:), ghc(:,:), gvnlxc(:,:), gsc(:,:), vcg_qbz(:,:)
  real(dp),target,allocatable :: bras(:,:)
  complex(dp),allocatable :: ps_ug(:,:,:)
- complex(gwpc),allocatable :: cbras_box(:,:), cbras_g(:,:), vc_sqrt(:), ur(:), rfg_box(:,:)
+ complex(gwp),allocatable :: cbras_box(:,:), cbras_g(:,:), vc_sqrt(:), ur(:), rfg_box(:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 ! *********************************************************************
 
@@ -1354,7 +1354,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
 
    ! Build plans for (dense, g-sphere) FFTs.
    call box_plan%from_ngfft(ngfftc, nspinor*batch_size, dtset%gpu_option)
-   call uplan_k%init(npw_k, nspinor, batch_size, ngfftc, istwf_k, ugb%kg_k, gwpc, dtset%gpu_option)
+   call uplan_k%init(npw_k, nspinor, batch_size, ngfftc, istwf_k, ugb%kg_k, gwp, dtset%gpu_option)
 
    ! Blocked loop over the columns of F^k_{g1,g2}.
    do ig2=1, npwsp, batch_size
@@ -1803,7 +1803,7 @@ subroutine ugb_from_wfk_file(ugb, ik_ibz, spin, istwf_k, kpoint, nband_k, &
      do band=bstart, bstop
        ib = band - bstart + 1
        call ugb%mat%glob2loc(1, band, iloc, il_b, have_band); if (.not. have_band) cycle
-       ugb%mat%buffer_cplx(:, il_b) = cmplx(cg_work(1,:,ib), cg_work(2,:,ib), kind=gwpc)
+       ugb%mat%buffer_cplx(:, il_b) = cmplx(cg_work(1,:,ib), cg_work(2,:,ib), kind=gwp)
      end do
    end if
    ABI_FREE(cg_work)

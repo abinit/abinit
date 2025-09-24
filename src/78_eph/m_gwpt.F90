@@ -139,8 +139,8 @@ contains  !=====================================================
 !!     We encode this in the name of the variable using e.g. mapc_qq for the symrec convention (C) and mapl_k convention (L)
 !!
 !!  3) The DFPT routines operate on double-precision wavefunctions stored in arrays with real/imag part e.g. cg(1:2,npw_k)
-!!     while the GW routines operate on complex arrays of kind=gwpc where gwpc is defined at configure-time.
-!!     The default value of gwpc is single-precision.
+!!     while the GW routines operate on complex arrays of kind=gwp where gwp is defined at configure-time.
+!!     The default value of gwp is single-precision.
 !!     We use the following conventions for the buffers used to store the wavefunctions:
 !!
 !!       cg_kq, cr_kq
@@ -234,7 +234,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer(i1b),allocatable :: itreat_qibz(:)
  integer, contiguous, pointer :: kg_c(:,:), kg_x(:,:)
  real(dp) :: eig0nk, cpu, wall, gflops !, cpu_q, wall_q, gflops_q, cpu_all, wall_all, gflops_all
- complex(gwpc) :: ctmp_gwpc, xdot_tmp
+ complex(gwp) :: ctmp_gwpc, xdot_tmp
 !arrays
  real(dp) :: fermie1_idir_ipert(3,cryst%natom), ylmgr_dum(1,1,1), dum_nhat(0), dum_xccc3d(0)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3), kqmp(3), kmp(3), pp(3), kmp_ibz(3), kqmp_ibz(3)
@@ -257,11 +257,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),allocatable :: my_gbuf(:,:,:,:,:,:), my_gbuf_ks(:,:,:,:,:,:), buf_wqnu(:,:), buf_eigvec_cart(:,:,:,:,:)
  real(dp),allocatable :: cg_kmp(:,:), cg_kqmp(:,:), cg1_kqmp(:,:), cg1_kmp(:,:), full_cg1_kqmp(:,:), full_cg1_kmp(:,:)
  complex(dp), contiguous, pointer :: cvxc1_qq_ptr(:,:,:)
- complex(gwpc),allocatable :: ur_kmp(:), ur_kqmp(:), cwork_ur(:), rhotwg_c(:), rhotwg_x(:), vc_sqrt_gx(:)
- complex(gwpc),allocatable :: full_ur1_kqmp(:), full_ur1_kmp(:), sigcme_nk(:), sigcme_mkq(:), ur_nk(:,:), ur_mkq(:,:)
- complex(gwpc),allocatable :: vec_gwc_nk(:,:,:), vec_gwc_mkq(:,:,:), vec_gx_nk(:,:), vec_gx_mkq(:,:)
- complex(gwpc),allocatable :: botsq_pbz(:,:), otq_pbz(:,:), dmeig_pbz(:,:), epsm1_ggw(:,:,:)
- complex(gwpc),allocatable :: trans_botsq_pbz(:,:), trans_otq_pbz(:,:), trans_dmeig_pbz(:,:)
+ complex(gwp),allocatable :: ur_kmp(:), ur_kqmp(:), cwork_ur(:), rhotwg_c(:), rhotwg_x(:), vc_sqrt_gx(:)
+ complex(gwp),allocatable :: full_ur1_kqmp(:), full_ur1_kmp(:), sigcme_nk(:), sigcme_mkq(:), ur_nk(:,:), ur_mkq(:,:)
+ complex(gwp),allocatable :: vec_gwc_nk(:,:,:), vec_gwc_mkq(:,:,:), vec_gx_nk(:,:), vec_gx_mkq(:,:)
+ complex(gwp),allocatable :: botsq_pbz(:,:), otq_pbz(:,:), dmeig_pbz(:,:), epsm1_ggw(:,:,:)
+ complex(gwp),allocatable :: trans_botsq_pbz(:,:), trans_otq_pbz(:,:), trans_dmeig_pbz(:,:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
  type(pawrhoij_type),allocatable :: pot_pawrhoij(:), den_pawrhoij(:)

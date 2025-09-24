@@ -1174,8 +1174,7 @@ subroutine time_rhotwg(Ftest, map2sphere, use_padfft, osc_npw, osc_gvec, header,
  real(dp),parameter :: spinrot1(4)=(/one,zero,zero,one/),spinrot2(4)=(/one,zero,zero,one/)
  logical,allocatable :: mask(:)
  complex(dp),allocatable :: results(:)
- complex(gwpc),allocatable :: rhotwg(:), wfn1(:), wfn2(:)
-
+ complex(gwp),allocatable :: rhotwg(:), wfn1(:), wfn2(:)
 ! *********************************************************************
 
  test_name = Ftest%get_name()

@@ -116,21 +116,20 @@ subroutine assemblychi0_sym(is_metallic,ik_bz,nspinor,Ep,Ltg_q,green_w,npwepG0,r
  type(littlegroup_t),intent(in) :: Ltg_q
  type(em1params_t),intent(in) :: Ep
 !arrays
- complex(gwpc),intent(in) :: rhotwg(npwepG0)
+ complex(gwp),intent(in) :: rhotwg(npwepG0)
  complex(dp),intent(in) :: green_w(Ep%nomega)
- complex(gwpc),intent(inout) :: chi0(Ep%npwe*Ep%nI,Ep%npwe*Ep%nJ,Ep%nomega)
+ complex(gwp),intent(inout) :: chi0(Ep%npwe*Ep%nI,Ep%npwe*Ep%nJ,Ep%nomega)
 
 !Local variables-------------------------------
 !scalars
  integer :: itim,io,isym,nthreads
  integer :: isymop,nsymop
  real(gwp) :: dr
- complex(gwpc) :: dd
+ complex(gwp) :: dd
  !character(len=500) :: msg
 !arrays
  integer :: Sm1_gmG0(Ep%npwe)
- complex(gwpc),allocatable :: rhotwg_sym(:,:)
-
+ complex(gwp),allocatable :: rhotwg_sym(:,:)
 ! *************************************************************************
 
  ABI_UNUSED(nspinor)
@@ -256,9 +255,8 @@ subroutine mkrhotwg_sigma(ii,nspinor,npw,rhotwg,rhotwg_I)
 !scalars
  integer,intent(in) :: ii,npw,nspinor
 !arrays
- complex(gwpc),intent(in) :: rhotwg(npw*nspinor**2)
- complex(gwpc),intent(out) :: rhotwg_I(npw)
-
+ complex(gwp),intent(in) :: rhotwg(npw*nspinor**2)
+ complex(gwp),intent(out) :: rhotwg_I(npw)
 ! *************************************************************************
 
  SELECT CASE (ii)
@@ -350,7 +348,7 @@ subroutine symmetrize_afm_chi0(Cryst,Gsph,Ltg_q,npwe,nomega,chi0,chi0_head,chi0_
  type(crystal_t),intent(in) :: Cryst
  type(littlegroup_t),intent(in) :: Ltg_q
 !arrays
- complex(gwpc),optional,intent(inout) :: chi0(npwe,npwe,nomega)
+ complex(gwp),optional,intent(inout) :: chi0(npwe,npwe,nomega)
  complex(dp),optional,intent(inout) :: chi0_lwing(npwe,nomega,3)
  complex(dp),optional,intent(inout) :: chi0_uwing(npwe,nomega,3)
  complex(dp),optional,intent(inout) :: chi0_head(3,3,nomega)
@@ -359,13 +357,13 @@ subroutine symmetrize_afm_chi0(Cryst,Gsph,Ltg_q,npwe,nomega,chi0,chi0_head,chi0_
 !scalars
  integer :: io,ig1,ig2,isymf,isyma,isym,ipair,k0g,kg,npairs,nonzero
  integer :: iSmg1,iSmg2,itim,shubnikov,ntest
- complex(gwpc) :: phase,phase_old,sumchi,ctmp
+ complex(gwp) :: phase,phase_old,sumchi,ctmp
  logical :: found
  !character(len=500) :: msg
 !arrays
  integer :: rotfm(3,3),rotafm(3,3),pairs2sym(2,Cryst%nsym/2)
  real(dp) :: tfm(3),tafm(3)
- complex(gwpc),allocatable :: afm_mat(:),chi0_afm(:,:)
+ complex(gwp),allocatable :: afm_mat(:),chi0_afm(:,:)
 !************************************************************************
 
  ABI_CHECK(ANY(Cryst%symafm==-1),'Not magnetic space group')
@@ -626,9 +624,9 @@ subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor
  type(crystal_t),intent(in) :: Cryst
  type(em1params_t),intent(in) :: Ep
 !arrays
- complex(gwpc),intent(in) :: rhotwg(npwepG0)
- complex(gwpc),intent(in) :: rhotwx(3, nspinor**2)
- complex(gwpc),intent(inout) :: chi0(Ep%npwe*Ep%nI, Ep%npwe*Ep%nJ, Ep%nomega)
+ complex(gwp),intent(in) :: rhotwg(npwepG0)
+ complex(gwp),intent(in) :: rhotwx(3, nspinor**2)
+ complex(gwp),intent(inout) :: chi0(Ep%npwe*Ep%nI, Ep%npwe*Ep%nJ, Ep%nomega)
  complex(dp),intent(in) :: green_w(Ep%nomega), green_enhigh_w(Ep%nomega)
  complex(dp),intent(inout) :: chi0_head(3, 3, Ep%nomega)
  complex(dp),intent(inout) :: chi0_lwing(Ep%npwe*Ep%nI, Ep%nomega, 3)
@@ -638,13 +636,13 @@ subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor
 !scalars
  integer :: itim,io,isym,idir,jdir,isymop,nsymop,npwe,nomega
  real(gwp) :: dr
- complex(gwpc) :: dd
+ complex(gwp) :: dd
  !character(len=500) :: msg
 !arrays
  integer,ABI_CONTIGUOUS pointer :: Sm1G(:)
  complex(dp) :: mir_kbz(3)
- complex(gwpc),allocatable :: rhotwg_sym(:,:)
- complex(gwpc), ABI_CONTIGUOUS pointer :: phmGt(:)
+ complex(gwp),allocatable :: rhotwg_sym(:,:)
+ complex(gwp), ABI_CONTIGUOUS pointer :: phmGt(:)
 !************************************************************************
 
  ABI_UNUSED(deltaf_b1b2)
@@ -826,8 +824,8 @@ subroutine accumulate_head_wings_imagw( &
  type(gsphere_t),target,intent(in) :: Gsph_epsG0
  type(crystal_t),intent(in) :: Cryst
 !arrays
- complex(gwpc),intent(in) :: rhotwg(npwe)
- complex(gwpc),intent(in) :: rhotwx(3, nspinor**2)
+ complex(gwp),intent(in) :: rhotwg(npwe)
+ complex(gwp),intent(in) :: rhotwx(3, nspinor**2)
  complex(dp),intent(in) :: green_w(nomega)
  complex(dp),intent(inout) :: chi0_head(3, 3, nomega)
  complex(dp),intent(inout) :: chi0_lwing(npwe*nI, nomega, 3)
@@ -840,8 +838,8 @@ subroutine accumulate_head_wings_imagw( &
 !arrays
  integer,ABI_CONTIGUOUS pointer :: Sm1G(:)
  complex(dp) :: mir_kbz(3)
- complex(gwpc),allocatable :: rhotwg_sym(:,:)
- complex(gwpc), ABI_CONTIGUOUS pointer :: phmGt(:)
+ complex(gwp),allocatable :: rhotwg_sym(:,:)
+ complex(gwp), ABI_CONTIGUOUS pointer :: phmGt(:)
 !************************************************************************
 
  ABI_UNUSED([is_metallic])
@@ -1019,9 +1017,9 @@ subroutine accumulate_sfchi0_q0(ikbz,isym_kbz,itim_kbz,nspinor,symchi,npwepG0,np
  type(gsphere_t),target,intent(in) :: Gsph_epsG0
  type(crystal_t),intent(in) :: Cryst
 !arrays
- complex(gwpc),intent(in) :: rhotwg(npwepG0)
- complex(gwpc),intent(in) :: rhotwx(3,nspinor**2)
- complex(gwpc),intent(inout) :: sf_chi0(npwe,npwe,my_wl:my_wr)
+ complex(gwp),intent(in) :: rhotwg(npwepG0)
+ complex(gwp),intent(in) :: rhotwx(3,nspinor**2)
+ complex(gwp),intent(inout) :: sf_chi0(npwe,npwe,my_wl:my_wr)
  complex(dp),intent(inout) :: sf_head(3,3,my_wl:my_wr)
  complex(dp),intent(inout) :: sf_lwing(npwe,my_wl:my_wr,3)
  complex(dp),intent(inout) :: sf_uwing(npwe,my_wl:my_wr,3)
@@ -1029,13 +1027,13 @@ subroutine accumulate_sfchi0_q0(ikbz,isym_kbz,itim_kbz,nspinor,symchi,npwepG0,np
 !Local variables-------------------------------
 !scalars
  integer :: itim,isym,idir,jdir
- complex(gwpc) :: num
+ complex(gwp) :: num
  character(len=500) :: msg
 !arrays
  integer, ABI_CONTIGUOUS pointer :: Sm1G(:)
  complex(dp) :: mir_kbz(3)
- complex(gwpc), ABI_CONTIGUOUS pointer :: phmGt(:)
- complex(gwpc),allocatable :: rhotwg_sym(:)
+ complex(gwp), ABI_CONTIGUOUS pointer :: phmGt(:)
+ complex(gwp),allocatable :: rhotwg_sym(:)
 !************************************************************************
 
  if (iomegal<my_wl .or. iomegar>my_wr) then
@@ -1250,18 +1248,17 @@ subroutine assemblychi0sf(ik_bz,symchi,Ltg_q,npwepG0,npwe,rhotwg,Gsph_epsG0,&
  type(gsphere_t),intent(in) :: Gsph_epsG0
  type(littlegroup_t),intent(in) :: Ltg_q
 !arrays
- complex(gwpc),intent(in) :: rhotwg(npwepG0)
- complex(gwpc),intent(inout) :: chi0sf(npwe,npwe,my_wl:my_wr)
+ complex(gwp),intent(in) :: rhotwg(npwepG0)
+ complex(gwp),intent(inout) :: chi0sf(npwe,npwe,my_wl:my_wr)
 
 !Local variables-------------------------------
 !scalars
  integer :: isym,itim,ig1,ig2
- complex(gwpc) :: num
+ complex(gwp) :: num
  character(len=500) :: msg
 !arrays
  integer :: Sm1_gmG0(npwe)
- complex(gwpc) :: rhotwg_sym(npwe)
-
+ complex(gwp) :: rhotwg_sym(npwe)
 ! *************************************************************************
 
  if (iomegal < my_wl .or. iomegar > my_wr) then
@@ -1746,15 +1743,15 @@ subroutine hilbert_transform(npwe,nomega,nomegasf,my_wl,my_wr,kkweight,sf_chi0,c
  integer,intent(in) :: spmeth,nomega,nomegasf,my_wl,my_wr,npwe
 !arrays
  complex(dp),intent(in) :: kkweight(nomegasf,nomega)
- complex(gwpc),intent(inout) :: sf_chi0(npwe,npwe,my_wl:my_wr)
- complex(gwpc),intent(inout) :: chi0(npwe,npwe,nomega)
+ complex(gwp),intent(inout) :: sf_chi0(npwe,npwe,my_wl:my_wr)
+ complex(gwp),intent(inout) :: chi0(npwe,npwe,nomega)
 
 !Local variables-------------------------------
 !scalars
  integer :: ig2,my_nwp
  character(len=500) :: msg
 !arrays
- complex(gwpc),allocatable :: A_g1wp(:,:),H_int(:,:),my_kkweight(:,:)
+ complex(gwp),allocatable :: A_g1wp(:,:),H_int(:,:),my_kkweight(:,:)
 !************************************************************************
 
 #ifdef HAVE_OPENMP
@@ -1915,17 +1912,16 @@ subroutine completechi0_deltapart(ik_bz,qzero,symchi,npwe,npwvec,nomega,nspinor,
 !arrays
  integer,intent(in) :: igfft0(npwvec),ngfft(18)
  complex(dp),intent(in) :: green_enhigh_w(nomega)
- complex(gwpc),intent(in) :: wfwfg(nfftot*nspinor**2)
- complex(gwpc),intent(inout) :: chi0(npwe,npwe,nomega)
+ complex(gwp),intent(in) :: wfwfg(nfftot*nspinor**2)
+ complex(gwp),intent(inout) :: chi0(npwe,npwe,nomega)
 
 !Local variables ------------------------------
 !scalars
  integer,save :: enough=0
  integer :: iSm1_g1mg2,iSm1_g1mg2_fft,ig,gmg_sph,gmg_fft
  integer :: igp,igstart,isym,itim,outofbox_wfn
- complex(gwpc) :: phmGt
+ complex(gwp) :: phmGt
  !character(len=500) :: msg
-
 !************************************************************************
 
  igstart=1; if (qzero) igstart=2
@@ -2025,14 +2021,13 @@ subroutine output_chi0sumrule(qeq0,iq,npwe,omegaplasma,chi0sumrule,epsm1_w0,vc_s
  logical,intent(in) :: qeq0
 !arrays
  real(dp),intent(inout) :: chi0sumrule(npwe)
- complex(gwpc),intent(in) :: epsm1_w0(npwe,npwe),vc_sqrt(npwe)
+ complex(gwp),intent(in) :: epsm1_w0(npwe,npwe),vc_sqrt(npwe)
 
 !Local variables ------------------------------
 !scalars
  integer :: ig,igstart
  real(dp) :: average,norm
  character(len=500) :: msg
-
 !************************************************************************
 
  igstart=1; if (qeq0) igstart=2
@@ -2106,7 +2101,7 @@ subroutine accumulate_chi0sumrule(ik_bz,symchi,npwe,factor,delta_ene,&
  type(littlegroup_t),target,intent(in) :: Ltg_q
 !arrays
  real(dp),intent(inout) :: chi0sumrule(npwe)
- complex(gwpc),intent(in) :: rhotwg(npwepG0)
+ complex(gwp),intent(in) :: rhotwg(npwepG0)
 
 !Local variables-------------------------------
 !scalars
@@ -2115,8 +2110,7 @@ subroutine accumulate_chi0sumrule(ik_bz,symchi,npwe,factor,delta_ene,&
 !arrays
  integer,allocatable :: Sm1_gmG0(:)
  integer, ABI_CONTIGUOUS pointer :: gmG0(:)
- complex(gwpc),allocatable :: rhotwg_sym(:)
-
+ complex(gwp),allocatable :: rhotwg_sym(:)
 !************************************************************************
 
  ! Accumulating the sum rule on chi0.

@@ -188,7 +188,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  integer,intent(in) :: ktabr(nfftot_gw,Kmesh%nbz),ktabrf(nfftf_tot*Dtset%pawcross,Kmesh%nbz)
  integer,intent(in) :: ngfft_gw(18),ngfftf(18)
  real(dp),intent(out) :: chi0_sumrule(Ep%npwe)
- complex(gwpc),intent(out) :: chi0(Ep%npwe,Ep%npwe,Ep%nomega)
+ complex(gwp),intent(out) :: chi0(Ep%npwe,Ep%npwe,Ep%nomega)
  complex(dp),intent(out) :: chi0_lwing(Ep%npwe*Ep%nI,Ep%nomega,3)
  complex(dp),intent(out) :: chi0_uwing(Ep%npwe*Ep%nJ,Ep%nomega,3)
  complex(dp),intent(out) :: chi0_head(3,3,Ep%nomega)
@@ -226,17 +226,17 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  real(dp) :: kbz(3),spinrot_kbz(4),q0(3)
  real(dp),ABI_CONTIGUOUS pointer :: ks_eig(:,:,:),qp_eig(:,:,:),qp_occ(:,:,:)
  real(dp),allocatable :: omegasf(:), qdirs(:,:)
- complex(gwpc) :: rhotwx(3,Wfd%nspinor**2)
- complex(gwpc),allocatable :: rhotwg(:)
+ complex(gwp) :: rhotwx(3,Wfd%nspinor**2)
+ complex(gwp),allocatable :: rhotwg(:)
  complex(dp),allocatable :: green_w(:),green_enhigh_w(:)
  complex(dp),allocatable :: sf_lwing(:,:,:),sf_uwing(:,:,:),sf_head(:,:,:)
  complex(dp) :: chq(3), wng(3)
  complex(dp) :: ph_mkt
  complex(dp),allocatable :: kkweight(:,:)
- complex(gwpc),allocatable :: ur1_kibz(:),ur2_kibz(:), usr1_k(:),ur2_k(:), wfwfg(:), sf_chi0(:,:,:)
- complex(gwpc),allocatable :: ur_ae1(:),ur_ae_onsite1(:),ur_ps_onsite1(:)
- complex(gwpc),allocatable :: ur_ae2(:),ur_ae_onsite2(:),ur_ps_onsite2(:)
- complex(gwpc),ABI_CONTIGUOUS pointer :: ug1(:),ug2(:)
+ complex(gwp),allocatable :: ur1_kibz(:),ur2_kibz(:), usr1_k(:),ur2_k(:), wfwfg(:), sf_chi0(:,:,:)
+ complex(gwp),allocatable :: ur_ae1(:),ur_ae_onsite1(:),ur_ps_onsite1(:)
+ complex(gwp),allocatable :: ur_ae2(:),ur_ae_onsite2(:),ur_ps_onsite2(:)
+ complex(gwp),ABI_CONTIGUOUS pointer :: ug1(:),ug2(:)
  complex(dp), allocatable :: coeffW_BZ(:,:,:,:,:,:), head_qvals(:)
  logical :: gradk_not_done(Kmesh%nibz)
  logical,allocatable :: bbp_mask(:,:)
@@ -483,8 +483,8 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
    ABI_MALLOC(sf_uwing,(Ep%npwe,my_wl:my_wr,3))
    sf_head=czero; sf_lwing=czero; sf_uwing=czero
 
-   memreq = two*gwpc*Ep%npwe**2*(my_wr-my_wl+1)*b2Gb
-   write(msg,'(a,f10.4,a)')' memory required per spectral point: ',two*gwpc*Ep%npwe**2*b2Mb,' [Mb]'
+   memreq = two*gwp*Ep%npwe**2*(my_wr-my_wl+1)*b2Gb
+   write(msg,'(a,f10.4,a)')' memory required per spectral point: ',two*gwp*Ep%npwe**2*b2Mb,' [Mb]'
    call wrtout(std_out, msg)
    write(msg,'(a,f10.4,a)')' memory required by sf_chi0q0:       ',memreq,' [Gb]'
    call wrtout(std_out, msg)
@@ -1159,7 +1159,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
  integer,intent(in) :: ngfft_gw(18),ngfftf(18)
  real(dp),intent(in) :: qpoint(3)
  real(dp),intent(out) :: chi0_sumrule(Ep%npwe)
- complex(gwpc),intent(out) :: chi0(Ep%npwe*Ep%nI,Ep%npwe*Ep%nJ,Ep%nomega)
+ complex(gwp),intent(out) :: chi0(Ep%npwe*Ep%nI,Ep%npwe*Ep%nJ,Ep%nomega)
  type(Pawtab_type),intent(in) :: Pawtab(Psps%ntypat*Psps%usepaw)
  type(pawpwff_t),intent(in) :: Paw_pwff(Psps%ntypat*Psps%usepaw)
  type(pawfgrtab_type),intent(inout) :: Pawfgrtab(Cryst%natom*Psps%usepaw)
@@ -1182,7 +1182,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
  real(dp) :: my_min_rest,numerator,spin_fact,weight,wl,wr
  real(dp) :: gw_gsq,memreq
  complex(dp) :: ph_mkmqt,ph_mkt
- complex(gwpc) :: local_czero_gw
+ complex(gwp) :: local_czero_gw
  logical :: qzero,isirred_k,isirred_kmq,luwindow,is_metallic, print_time
  character(len=500) :: msg,allup
  type(gsphere_t) :: Gsph_FFT
@@ -1197,11 +1197,11 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
  real(dp),ABI_CONTIGUOUS pointer :: qp_eig(:,:,:),qp_occ(:,:,:)
  real(dp),allocatable :: omegasf(:)
  complex(dp),allocatable :: green_enhigh_w(:),green_w(:),kkweight(:,:)
- complex(gwpc),allocatable :: sf_chi0(:,:,:),rhotwg(:)
- complex(gwpc),allocatable :: ur1_kmq_ibz(:),ur2_k_ibz(:),wfwfg(:)
- complex(gwpc),allocatable :: usr1_kmq(:),ur2_k(:)
- complex(gwpc),allocatable :: ur_ae1(:),ur_ae_onsite1(:),ur_ps_onsite1(:)
- complex(gwpc),allocatable :: ur_ae2(:),ur_ae_onsite2(:),ur_ps_onsite2(:)
+ complex(gwp),allocatable :: sf_chi0(:,:,:),rhotwg(:)
+ complex(gwp),allocatable :: ur1_kmq_ibz(:),ur2_k_ibz(:),wfwfg(:)
+ complex(gwp),allocatable :: usr1_kmq(:),ur2_k(:)
+ complex(gwp),allocatable :: ur_ae1(:),ur_ae_onsite1(:),ur_ps_onsite1(:)
+ complex(gwp),allocatable :: ur_ae2(:),ur_ae_onsite2(:),ur_ps_onsite2(:)
  complex(dp), allocatable :: coeffW_BZ(:,:,:,:,:,:)
  logical,allocatable :: bbp_mask(:,:)
  type(pawcprj_type),allocatable :: Cprj1_kmq(:,:),Cprj2_k(:,:)
@@ -1382,8 +1382,8 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
      ABI_BUG('spectral method requires time-reversal')
    end if
 
-   memreq = two*gwpc*Ep%npwe**2*(my_wr-my_wl+1)*b2Gb
-   write(msg,'(a,f10.4,a)')' memory required per spectral point: ',two*gwpc*Ep%npwe**2*b2Mb,' [Mb]'
+   memreq = two*gwp*Ep%npwe**2*(my_wr-my_wl+1)*b2Gb
+   write(msg,'(a,f10.4,a)')' memory required per spectral point: ',two*gwp*Ep%npwe**2*b2Mb,' [Mb]'
    call wrtout(std_out,msg)
    write(msg,'(a,f10.4,a)')' memory required by sf_chi0: ',memreq,' [Gb]'
    call wrtout(std_out,msg)
@@ -2002,7 +2002,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  type(wfdgw_t),target,intent(inout) :: Wfd
 !arrays
  integer,intent(in) :: ngfft_gw(18)
- complex(gwpc),intent(out) :: chi0(Ep%npwe*Ep%nI,Ep%npwe*Ep%nJ,Ep%nomega)
+ complex(gwp),intent(out) :: chi0(Ep%npwe*Ep%nI,Ep%npwe*Ep%nJ,Ep%nomega)
  complex(dp),intent(out) :: chi0_lwing(Ep%npwe*Ep%nI,Ep%nomega,3)
  complex(dp),intent(out) :: chi0_uwing(Ep%npwe*Ep%nJ,Ep%nomega,3)
  complex(dp),intent(out) :: chi0_head(3,3,Ep%nomega)
@@ -2049,12 +2049,12 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  real(dp) :: delta_ene(BSt%mband,BSt%nkpt,BSt%nsppol)
  real(dp) :: test_docc(BSt%mband,BSt%nkpt,BSt%nsppol)
  real(dp),allocatable :: qlwl(:,:)
- complex(gwpc) :: comm_kbbs(3,Wfd%nspinor**2)
+ complex(gwp) :: comm_kbbs(3,Wfd%nspinor**2)
  complex(dp),allocatable :: ihr_comm(:,:,:,:,:)
- complex(gwpc),allocatable :: rhotwg(:)
+ complex(gwp),allocatable :: rhotwg(:)
  complex(dp) :: green_w(Ep%nomega)
- complex(gwpc),allocatable :: ur1(:)
- complex(gwpc),ABI_CONTIGUOUS pointer :: ug(:)
+ complex(gwp),allocatable :: ur1(:)
+ complex(gwp),ABI_CONTIGUOUS pointer :: ug(:)
  logical :: bmask(Wfd%mband)
  type(pawcprj_type),allocatable :: Cprj1_bz(:,:),Cprj1_ibz(:,:),Cp_bks(:,:)
  type(pawpwij_t),allocatable :: Pwij(:)
