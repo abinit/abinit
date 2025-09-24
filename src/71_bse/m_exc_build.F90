@@ -191,7 +191,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
  integer :: ierr,nproc,my_rank,mgfft_osc,fftalga_osc,comm
  integer(i8b) :: tot_nels,prev_nels,prev_ncols,nels,ir,it,itp,ist,iend,my_hsize
  real(dp) :: faq,kx_fact,cputime,walltime,gflops
- complex(spc) :: http,ctemp
+ complex(sp) :: http,ctemp
  complex(dp) :: ph_mkpt,ph_mkt,ene_t,ene_tp
  logical,parameter :: with_umklp=.FALSE.
  logical :: use_mpiio,do_coulomb_term,do_exchange_term,w_is_diagonal,isirred
@@ -1738,7 +1738,7 @@ subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gs
  integer :: block
  integer(i8b) :: tot_nels,ir,it,itp
  real(dp) :: faq,kx_fact
- complex(spc) :: ctemp
+ complex(sp) :: ctemp
  character(len=500) :: msg
 !arrays
  integer :: bidx(2,4),spin_ids(2,3)

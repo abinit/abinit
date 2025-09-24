@@ -2079,9 +2079,8 @@ function linfit_spc(nn,xx,zz,aa,bb) result(res)
  integer,intent(in) :: nn
  real(dp) :: res
  real(dp),intent(in) :: xx(nn)
- complex(spc),intent(in) :: zz(nn)
- complex(spc),intent(out) :: aa,bb
-!arrays
+ complex(sp),intent(in) :: zz(nn)
+ complex(sp),intent(out) :: aa,bb
 
 !Local variables-------------------------------
 !scalars
@@ -2099,8 +2098,8 @@ function linfit_spc(nn,xx,zz,aa,bb) result(res)
   sx2=sx2+xx(ii)*xx(ii)
  end do
 
- aa=CMPLX((nn*sxz-sx*sz)/(nn*sx2-sx*sx), kind=spc)
- bb=CMPLX(sz/nn-sx*aa/nn, kind=spc)
+ aa=CMPLX((nn*sxz-sx*sz)/(nn*sx2-sx*sx), kind=sp)
+ bb=CMPLX(sz/nn-sx*aa/nn, kind=sp)
 
  do ii=1,nn
   msrt=msrt+ABS(zz(ii)-aa*xx(ii)-bb)**2
@@ -3210,13 +3209,13 @@ subroutine hermitianize_spc(mat,uplo)
 !scalars
  character(len=*),intent(in) :: uplo
 !arrays
- complex(spc),intent(inout) :: mat(:,:)
+ complex(sp),intent(inout) :: mat(:,:)
 
 !Local variables-------------------------------
 !scalars
  integer :: nn,ii,jj
 !arrays
- complex(spc),allocatable :: tmp(:)
+ complex(sp),allocatable :: tmp(:)
 ! *************************************************************************
 
  nn = assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',__FILE__,__LINE__)
@@ -3530,13 +3529,13 @@ subroutine symmetrize_spc(mat,uplo)
 !scalars
  character(len=*),intent(in) :: uplo
 !arrays
- complex(spc),intent(inout) :: mat(:,:)
+ complex(sp),intent(inout) :: mat(:,:)
 
 !Local variables-------------------------------
 !scalars
  integer :: nn,ii,jj
 !arrays
- complex(spc),allocatable :: tmp(:)
+ complex(sp),allocatable :: tmp(:)
 ! *************************************************************************
 
  nn = assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',__FILE__,__LINE__)
@@ -3760,7 +3759,7 @@ subroutine print_arr1d_spc(units, arr, max_r)
  integer,intent(in) :: units(:)
  integer,optional,intent(in) :: max_r
 !arrays
- complex(spc),intent(in) :: arr(:)
+ complex(sp),intent(in) :: arr(:)
 
 !Local variables-------------------------------
 !scalars
@@ -3854,7 +3853,7 @@ subroutine print_arr2d_spc(units, arr, max_r, max_c)
  integer,intent(in) :: units(:)
  integer,optional,intent(in) :: max_r, max_c
 !arrays
- complex(spc),intent(in) :: arr(:,:)
+ complex(sp),intent(in) :: arr(:,:)
 
 !Local variables-------------------------------
 !scalars
@@ -5174,8 +5173,8 @@ subroutine interpolate_ur_spc(in_ngfft, ndat, in_ur, out_ngfft, out_ur)
  integer,intent(in) :: ndat
 !arrays
  integer,intent(in) :: in_ngfft(:), out_ngfft(:)
- complex(spc),intent(in) :: in_ur(product(in_ngfft(1:3)), ndat)
- complex(spc),intent(out) :: out_ur(product(out_ngfft(1:3)), ndat)
+ complex(sp),intent(in) :: in_ur(product(in_ngfft(1:3)), ndat)
+ complex(sp),intent(out) :: out_ur(product(out_ngfft(1:3)), ndat)
 
 !Local variables--------------------------------------------------------
 !scalars
@@ -5224,19 +5223,19 @@ end subroutine interpolate_ur_spc
 !!
 !! SOURCE
 
-pure complex(spc) function interpol3d_1d_spc(rr, nr1, nr2, nr3, grid) result(res)
+pure complex(sp) function interpol3d_1d_spc(rr, nr1, nr2, nr3, grid) result(res)
 
 !Arguments-------------------------------------------------------------
 !scalars
  integer,intent(in) :: nr1, nr2, nr3
 !arrays
  real(dp),intent(in) :: rr(3)
- complex(spc),intent(in) :: grid(nr1, nr2, nr3)
+ complex(sp),intent(in) :: grid(nr1, nr2, nr3)
 
 !Local variables--------------------------------------------------------
 !scalars
  integer :: ir1,ir2,ir3,pr1,pr2,pr3
- complex(spc) :: res1,res2,res3,res4,res5,res6,res7,res8,x1,x2,x3
+ complex(sp) :: res1,res2,res3,res4,res5,res6,res7,res8,x1,x2,x3
 ! *************************************************************************
 
  call interpol3d_indices(rr, nr1, nr2, nr3, ir1, ir2, ir3, pr1, pr2, pr3)

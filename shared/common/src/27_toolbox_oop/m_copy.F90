@@ -36,8 +36,8 @@
 
 MODULE m_copy
 
- use defs_basis,  only : dp, spc
  use, intrinsic :: iso_c_binding
+ use defs_basis,  only : dp, sp
  use m_abicore
 
  implicit none
@@ -443,8 +443,8 @@ end subroutine deep_copy_rdp4d
 subroutine deep_copy_csp0d(xval,copy)
 
 !Arguments ------------------------------------
- complex(spc),intent(in) :: xval
- complex(spc),intent(out) :: copy
+ complex(sp),intent(in) :: xval
+ complex(sp),intent(out) :: copy
 ! *********************************************************************
   copy=xval
 
@@ -465,8 +465,8 @@ end subroutine deep_copy_csp0d
 subroutine deep_copy_csp1d(xval,copy)
 
 !Arguments ------------------------------------
- complex(spc),pointer :: xval(:)
- complex(spc),pointer :: copy(:)
+ complex(sp),pointer :: xval(:)
+ complex(sp),pointer :: copy(:)
 
 !Local variables-------------------------------
  integer :: il,iu
@@ -497,8 +497,8 @@ end subroutine deep_copy_csp1d
 subroutine deep_copy_csp2d(xval,copy)
 
 !Arguments ------------------------------------
- complex(spc),pointer :: xval(:,:)
- complex(spc),pointer :: copy(:,:)
+ complex(sp),pointer :: xval(:,:)
+ complex(sp),pointer :: copy(:,:)
 
 !Local variables-------------------------------
  integer :: il1,iu1,il2,iu2
@@ -530,8 +530,8 @@ end subroutine deep_copy_csp2d
 subroutine deep_copy_csp3d(xval,copy)
 
 !Arguments ------------------------------------
- complex(spc),pointer :: xval(:,:,:)
- complex(spc),pointer :: copy(:,:,:)
+ complex(sp),pointer :: xval(:,:,:)
+ complex(sp),pointer :: copy(:,:,:)
 
 !Local variables-------------------------------
  integer :: il1,iu1,il2,iu2,il3,iu3
@@ -564,8 +564,8 @@ end subroutine deep_copy_csp3d
 subroutine deep_copy_csp4d(xval,copy)
 
 !Arguments ------------------------------------
- complex(spc),pointer :: xval(:,:,:,:)
- complex(spc),pointer :: copy(:,:,:,:)
+ complex(sp),pointer :: xval(:,:,:,:)
+ complex(sp),pointer :: copy(:,:,:,:)
 
 !Local variables-------------------------------
  integer :: il1,iu1,il2,iu2,il3,iu3,il4,iu4
@@ -1279,8 +1279,8 @@ end subroutine alloc_copy_rdp6d
 subroutine alloc_copy_csp1d(xval,copy)
 
 !Arguments ------------------------------------
- complex(spc),intent(in) :: xval(:)
- complex(spc),allocatable,intent(out) :: copy(:)
+ complex(sp),intent(in) :: xval(:)
+ complex(sp),allocatable,intent(out) :: copy(:)
 
 !Local variables-------------------------------
  integer :: il,iu
@@ -1307,8 +1307,8 @@ end subroutine alloc_copy_csp1d
 subroutine alloc_copy_csp2d(xval,copy)
 
 !Arguments ------------------------------------
- complex(spc),intent(in) :: xval(:,:)
- complex(spc),allocatable,intent(out) :: copy(:,:)
+ complex(sp),intent(in) :: xval(:,:)
+ complex(sp),allocatable,intent(out) :: copy(:,:)
 
 !Local variables-------------------------------
  integer :: il1,iu1,il2,iu2
@@ -1336,8 +1336,8 @@ end subroutine alloc_copy_csp2d
 subroutine alloc_copy_csp3d(xval,copy)
 
 !Arguments ------------------------------------
- complex(spc),intent(in) :: xval(:,:,:)
- complex(spc),allocatable,intent(out) :: copy(:,:,:)
+ complex(sp),intent(in) :: xval(:,:,:)
+ complex(sp),allocatable,intent(out) :: copy(:,:,:)
 
 !Local variables-------------------------------
  integer :: il1,iu1,il2,iu2,il3,iu3
@@ -1366,8 +1366,8 @@ end subroutine alloc_copy_csp3d
 subroutine alloc_copy_csp4d(xval,copy)
 
 !Arguments ------------------------------------
- complex(spc),intent(in) :: xval(:,:,:,:)
- complex(spc),allocatable,intent(out) :: copy(:,:,:,:)
+ complex(sp),intent(in) :: xval(:,:,:,:)
+ complex(sp),allocatable,intent(out) :: copy(:,:,:,:)
 
 !Local variables-------------------------------
  integer :: il1,iu1,il2,iu2,il3,iu3,il4,iu4

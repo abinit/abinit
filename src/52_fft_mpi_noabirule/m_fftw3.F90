@@ -315,7 +315,7 @@ subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_
 !scalars
  integer,parameter :: iscale1 = 1
  integer :: my_flags,ii,jj
- complex(spc), allocatable :: work_sp(:)
+ complex(sp), allocatable :: work_sp(:)
 ! *************************************************************************
 
  my_flags = ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags= fftw_flags
@@ -327,9 +327,9 @@ subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_
      ! Mixed precision: copy in + in-place + copyout
      ABI_MALLOC(work_sp, (ldx*ldy*ldz*ndat))
      if (isign == ABI_FFTW_BACKWARD) then ! +1
-       work_sp(:) = cmplx(fofg(1::2), fofg(2::2), kind=spc)
+       work_sp(:) = cmplx(fofg(1::2), fofg(2::2), kind=sp)
      else if (isign == ABI_FFTW_FORWARD) then ! -1
-       work_sp(:) = cmplx(fofr(1::2), fofr(2::2), kind=spc)
+       work_sp(:) = cmplx(fofr(1::2), fofr(2::2), kind=sp)
      else
        ABI_BUG("Wrong isign")
      end if
@@ -805,7 +805,7 @@ subroutine fftw3_fftrisc_sp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,
 #undef  MYCONJG
 
 #define FFT_PRECISION FFT_SINGLE
-#define MYKIND SPC
+#define MYKIND SP
 #define MYCZERO (0._sp,0._sp)
 #define MYCMPLX  CMPLX
 #define MYCONJG  CONJG
@@ -978,7 +978,7 @@ subroutine fftw3_fftrisc_mixprec(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboun
 #undef  MYCONJG
 
 #define FFT_PRECISION FFT_MIXPREC
-#define MYKIND SPC
+#define MYKIND SP
 #define MYCZERO (0._sp,0._sp)
 #define MYCMPLX  CMPLX
 #define MYCONJG  CONJG
@@ -1099,8 +1099,8 @@ subroutine fftw3_fftug_spc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
  integer,optional,intent(in) :: isign, iscale
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2),kg_k(3,npw_k)
- complex(spc),target,intent(in) :: ug(npw_k*ndat)
- complex(spc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
+ complex(sp),target,intent(in) :: ug(npw_k*ndat)
+ complex(sp),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
 
 #ifdef HAVE_FFTW3
 !Local variables-------------------------------
@@ -1312,8 +1312,8 @@ subroutine fftw3_fftur_spc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
  integer,optional,intent(in) :: isign, iscale
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2),kg_k(3,npw_k)
- complex(spc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
- complex(spc),target,intent(inout) :: ug(npw_k*ndat)
+ complex(sp),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
+ complex(sp),target,intent(inout) :: ug(npw_k*ndat)
 
 #ifdef HAVE_FFTW3
 !Local variables-------------------------------
@@ -1452,7 +1452,7 @@ subroutine fftw3_c2c_ip_spc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff, 
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,iscale,isign
  integer,optional,intent(in) :: fftw_flags
 !arrays
- complex(spc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
+ complex(sp),intent(inout) :: ff(ldx*ldy*ldz*ndat)
 
 #ifdef HAVE_FFTW3
 !Local variables-------------------------------
@@ -1529,7 +1529,7 @@ subroutine fftw3_fftpad_spc(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, g
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2)
- complex(spc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
+ complex(sp),intent(inout) :: ff(ldx*ldy*ldz*ndat)
  integer,optional,intent(in) :: iscale
 
 #ifdef HAVE_FFTW3
@@ -1660,8 +1660,8 @@ subroutine fftw3_c2c_op_spc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff, 
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,iscale,isign,ndat
  integer,optional,intent(in) :: fftw_flags
 !arrays
- complex(spc),intent(in) :: ff(ldx*ldy*ldz*ndat)
- complex(spc),intent(out) :: gg(ldx*ldy*ldz*ndat)
+ complex(sp),intent(in) :: ff(ldx*ldy*ldz*ndat)
+ complex(sp),intent(out) :: gg(ldx*ldy*ldz*ndat)
 
 #ifdef HAVE_FFTW3
 !Local variables-------------------------------
@@ -2620,7 +2620,7 @@ function cplan_many_dft(rank,n,howmany,fin,inembed,istride,idist,fout,onembed,os
  integer,intent(in) :: n(rank),inembed(rank),onembed(rank)
  integer(KIND_FFTW_PLAN) :: plan
 !arrays
- complex(spc) :: fin(*),fout(*)
+ complex(sp) :: fin(*),fout(*)
 
 !Local variables-------------------------------
  character(len=500) :: msg,frmt
@@ -2964,7 +2964,7 @@ subroutine fftw3_alloc_complex1d_spc(size,cptr,fptr)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: size
- complex(spc),ABI_CONTIGUOUS pointer :: fptr(:)
+ complex(sp),ABI_CONTIGUOUS pointer :: fptr(:)
  type(C_PTR),intent(out) :: cptr
 ! *************************************************************************
 

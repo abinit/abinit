@@ -62,7 +62,7 @@ program lapackprof
  real(dp),allocatable :: cg(:,:), gsc(:,:), ortho_check(:,:,:)
  real(dp),allocatable :: cg1(:,:), cg2(:,:), cg3(:,:), ene(:), direc(:,:), scprod(:,:)
  complex(dp),allocatable :: zvec(:), zmat(:,:), wmat(:,:), zpmat(:), evec(:,:)
-! complex(spc),allocatable :: vec(:), mat(:,:)
+! complex(sp),allocatable :: vec(:), mat(:,:)
  !type(latime_t) :: Tres
  integer :: ncalls, nband, nsizes, nthreads
  integer :: npw_start_step_num(3)

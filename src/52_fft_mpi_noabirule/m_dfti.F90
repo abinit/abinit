@@ -220,7 +220,7 @@ subroutine dfti_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr)
 !scalars
  integer,parameter :: iscale1 = 1
  integer :: ii,jj
- complex(spc), allocatable :: work_sp(:)
+ complex(sp), allocatable :: work_sp(:)
 ! *************************************************************************
 
  select case (cplex)
@@ -230,9 +230,9 @@ subroutine dfti_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr)
      ! Mixed precision: copy in + in-place + copyout
      ABI_MALLOC(work_sp, (ldx*ldy*ldz*ndat))
      if (isign == +1) then
-       work_sp(:) = cmplx(fofg(1::2), fofg(2::2), kind=spc)
+       work_sp(:) = cmplx(fofg(1::2), fofg(2::2), kind=sp)
      else if (isign == -1) then
-       work_sp(:) = cmplx(fofr(1::2), fofr(2::2), kind=spc)
+       work_sp(:) = cmplx(fofr(1::2), fofr(2::2), kind=sp)
      else
        ABI_BUG("Wrong isign")
      end if
@@ -623,7 +623,7 @@ subroutine dfti_fftrisc_sp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
 #undef MYCONJG
 
 #define FFT_PRECISION DFTI_SINGLE
-#define MYKIND SPC
+#define MYKIND SP
 #define MYCZERO (0._sp,0._sp)
 #define MYCMPLX  CMPLX
 #define MYCONJG  CONJG
@@ -803,7 +803,7 @@ subroutine dfti_fftrisc_mixprec(cplex,denpot,fofgin,fofgout,fofr,gboundin,gbound
 #undef  MYCONJG
 
 #define FFT_PRECISION DFTI_SINGLE
-#define MYKIND SPC
+#define MYKIND SP
 #define MYCZERO (0._sp,0._sp)
 #define MYCMPLX  CMPLX
 #define MYCONJG  CONJG
@@ -943,8 +943,8 @@ subroutine dfti_fftug_spc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
  integer,optional,intent(in) :: isign, iscale
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2),kg_k(3,npw_k)
- complex(spc),target,intent(in) :: ug(npw_k*ndat)
- complex(spc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)    !vz_i
+ complex(sp),target,intent(in) :: ug(npw_k*ndat)
+ complex(sp),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
 
 #ifdef HAVE_DFTI
 !Local variables-------------------------------
@@ -1187,8 +1187,8 @@ subroutine dfti_fftur_spc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
  integer,intent(in) :: npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2),kg_k(3,npw_k)
- complex(spc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
- complex(spc),target,intent(inout) :: ug(npw_k*ndat)    !vz_i
+ complex(sp),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
+ complex(sp),target,intent(inout) :: ug(npw_k*ndat)    !vz_i
  integer,optional,intent(in) :: isign, iscale
 
 #ifdef HAVE_DFTI
@@ -1340,7 +1340,7 @@ subroutine dfti_c2c_ip_spc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff)
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,iscale,isign
 !arrays
- complex(spc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
+ complex(sp),intent(inout) :: ff(ldx*ldy*ldz*ndat)
 ! *************************************************************************
 
 ! Include Fortran template
@@ -1422,8 +1422,8 @@ subroutine dfti_c2c_op_spc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff, g
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,isign,ndat, iscale
 !arrays
- complex(spc),intent(in) :: ff(ldx*ldy*ldz*ndat)
- complex(spc),intent(out) :: gg(ldx*ldy*ldz*ndat)
+ complex(sp),intent(in) :: ff(ldx*ldy*ldz*ndat)
+ complex(sp),intent(out) :: gg(ldx*ldy*ldz*ndat)
 ! *************************************************************************
 
 ! Include Fortran template
@@ -1753,7 +1753,7 @@ subroutine dfti_fftpad_spc(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gb
  integer,optional,intent(in) :: iscale
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2)
- complex(spc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
+ complex(sp),intent(inout) :: ff(ldx*ldy*ldz*ndat)
 
 #ifdef HAVE_DFTI
 
@@ -2292,7 +2292,7 @@ subroutine dfti_alloc_complex_spc(size, cptr, fptr)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: size
- complex(spc),ABI_CONTIGUOUS pointer :: fptr(:)
+ complex(sp),ABI_CONTIGUOUS pointer :: fptr(:)
  type(C_PTR),intent(out) :: cptr
 ! *************************************************************************
 

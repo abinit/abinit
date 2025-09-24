@@ -1165,7 +1165,7 @@ subroutine calc_ceigr_spc(gg, nfft, nspinor, ngfft, ceigr)
 !arrays
  integer,intent(in) :: gg(3)
  integer,intent(in) :: ngfft(18)
- complex(spc),intent(out) :: ceigr(nfft*nspinor)
+ complex(sp),intent(out) :: ceigr(nfft*nspinor)
 
 !Local variables-------------------------------
  integer :: ix,iy,iz,fft_idx,base,isp
@@ -1185,7 +1185,7 @@ subroutine calc_ceigr_spc(gg, nfft, nspinor, ngfft, ceigr)
                       +gg(2)*(iy/DBLE(ngfft(2))) &
                       +gg(3)*(iz/DBLE(ngfft(3))) )
        fft_idx = fft_idx+1
-       ceigr(fft_idx)=CMPLX(DCOS(gdotr),DSIN(gdotr), KIND=spc)
+       ceigr(fft_idx)=CMPLX(DCOS(gdotr),DSIN(gdotr), KIND=sp)
      end do
    end do
  end do
@@ -1404,7 +1404,7 @@ pure subroutine calc_ceikr_spc(kk, ngfft, nfft, nspinor, ceikr)
 !arrays
  real(dp),intent(in) :: kk(3)
  integer,intent(in) :: ngfft(18)
- complex(spc),intent(out) :: ceikr(nfft*nspinor)
+ complex(sp),intent(out) :: ceikr(nfft*nspinor)
 
 !local variables-------------------------------
  integer :: ix, iy, iz, fft_idx
@@ -1423,7 +1423,7 @@ pure subroutine calc_ceikr_spc(kk, ngfft, nfft, nspinor, ceikr)
                        +kk(2) * (iy / dble(ngfft(2))) &
                        +kk(3) * (iz / dble(ngfft(3))) )
        fft_idx = fft_idx + 1
-       ceikr(fft_idx) = cmplx(cos(kdotr), sin(kdotr), kind=spc)
+       ceikr(fft_idx) = cmplx(cos(kdotr), sin(kdotr), kind=sp)
      end do
    end do
  end do

@@ -408,7 +408,7 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, iscale)
  integer,intent(in) :: isign
  integer,optional,intent(in) :: ndat, iscale
 !arrays
- complex(spc),target,intent(inout) :: ff(*)
+ complex(sp),target,intent(inout) :: ff(*)
 ! *************************************************************************
 
  integer :: ndat__, iscale__
@@ -511,8 +511,8 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign, ndat, iscale)
  integer,intent(in) :: isign
  integer,optional,intent(in) :: ndat, iscale
 !arrays
- complex(spc),target,intent(in) :: ff(*)
- complex(spc),target,intent(inout) :: gg(*)
+ complex(sp),target,intent(in) :: ff(*)
+ complex(sp),target,intent(inout) :: gg(*)
 ! *************************************************************************
 
  integer :: ndat__, iscale__
@@ -691,8 +691,8 @@ subroutine fft_ug_spc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, g
  integer,intent(in) :: npw_k,nfft,nspinor,istwf_k,mgfft,ndat
 !arrays
  integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2),kg_k(3,npw_k)
- complex(spc),intent(in) :: ug(*)  !npw_k*nspinor*ndat)
- complex(spc),intent(out) :: ur(*) !nfft*nspinor*ndat)
+ complex(sp),intent(in) :: ug(*)  !npw_k*nspinor*ndat)
+ complex(sp),intent(out) :: ur(*) !nfft*nspinor*ndat)
 ! *************************************************************************
 
 #include "fftug_driver.finc"
@@ -816,8 +816,8 @@ subroutine fft_ur_spc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, g
  integer,intent(in) :: npw_k,nfft,nspinor,ndat,istwf_k,mgfft
 !arrays
  integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2),kg_k(3,npw_k)
- complex(spc),intent(inout) :: ur(*) !nfft*nspinor*ndat)
- complex(spc),intent(out) :: ug(*)   !npw_k*nspinor*ndat)
+ complex(sp),intent(inout) :: ur(*) !nfft*nspinor*ndat)
+ complex(sp),intent(out) :: ug(*)   !npw_k*nspinor*ndat)
 ! *************************************************************************
 
 #include "fftur_driver.finc"
@@ -906,7 +906,7 @@ subroutine fftpad_spc(ff, ngfft, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, 
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign
 !arrays
  integer,intent(in) :: ngfft(18),gbound(2*mgfft+8,2)
- complex(spc),target,intent(inout) :: ff(ldx*ldy*ldz*ndat)
+ complex(sp),target,intent(inout) :: ff(ldx*ldy*ldz*ndat)
 
 !Local variables-------------------------------
 !scalars
@@ -1197,7 +1197,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
  real(dp) :: crand(2)
  real(dp),allocatable :: fofg(:),fofr_ref(:),fofr(:)
  complex(dp),allocatable :: ff(:),ff_ref(:),gg(:)
- complex(spc),allocatable :: ffsp(:),ff_refsp(:),ggsp(:)
+ complex(sp),allocatable :: ffsp(:),ff_refsp(:),ggsp(:)
 ! *************************************************************************
 
  nfailed = 0
@@ -1468,7 +1468,7 @@ function fftu_utests(ecut, ngfft, rprimd, ndat, nthreads, unit) result(nfailed)
  real(dp) :: kpoint(3),crand(2),kpoints(3,9)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable :: cg(:,:),cg_ref(:,:),cr(:,:)
- complex(spc),allocatable :: ugsp(:),ug_refsp(:),ursp(:)
+ complex(sp),allocatable :: ugsp(:),ug_refsp(:),ursp(:)
  complex(dp),allocatable :: ug(:),ug_ref(:),ur(:)
  type(MPI_type) :: MPI_enreg_seq
 ! *************************************************************************
