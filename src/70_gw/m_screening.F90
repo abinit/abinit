@@ -144,12 +144,12 @@ module m_screening
 
   type(xcomm_t) :: shared_comm
 
-  complex(gwpc), contiguous, pointer :: epsm1(:,:,:,:) => null()
+  complex(gwp), contiguous, pointer :: epsm1(:,:,:,:) => null()
   ! epsm1(npwe,npwe,nomega,nqibz)
   ! Contains the two-point function $\epsilon_{G,Gp}(q,omega)$ in frequency and reciprocal space.
   ! We use a pointer so that we can associated it to MPI shared memory window.
 
-  complex(gwpc), contiguous, pointer :: epsm1_qbz(:,:,:) => null()
+  complex(gwp), contiguous, pointer :: epsm1_qbz(:,:,:) => null()
   integer :: epsm1_qbz_win = xmpi_undefined
 
   complex(dp),allocatable :: omega(:)
@@ -221,7 +221,7 @@ module m_screening
    integer :: nomega
    ! Number of frequencies
 
-   complex(gwpc),allocatable :: mat(:,:,:)
+   complex(gwp),allocatable :: mat(:,:,:)
    ! mat(npwe, npwe, nomega)
 
    complex(dp),allocatable :: head(:,:,:)
@@ -543,7 +543,7 @@ subroutine Epsm1_rotate_iqbz(epsm1, iq_bz, nomega, npwc, Gsph, Qmesh, remove_exc
 !Local variables-------------------------------
 !scalars
  integer :: iw,ii,jj,iq_ibz,itim_q,isym_q,iq_loc,sg1,sg2, ierr, g0(3)
- complex(gwpc) :: phmsg1t,phmsg2t_star
+ complex(gwp) :: phmsg1t,phmsg2t_star
 !arrays
  real(dp) :: qbz(3)
 ! *********************************************************************
@@ -656,8 +656,8 @@ subroutine Epsm1_rotate_iqbz_inplace(epsm1, iq_bz, nomega, npwc, Gsph, Qmesh, re
  integer :: iw,ii,jj,iq_ibz,itim_q,isym_q,iq_loc,sg1,sg2, g0(3)
 !arrays
  real(dp) :: qbz(3)
- complex(gwpc) :: phmsg1t,phmsg2t_star
- complex(gwpc),allocatable :: work(:,:)
+ complex(gwp) :: phmsg1t,phmsg2t_star
+ complex(gwp),allocatable :: work(:,:)
 ! *********************************************************************
 
  ABI_CHECK(epsm1%nomega>=nomega,'Too many frequencies required')
@@ -866,8 +866,8 @@ subroutine epsm1_mkdump(epsm1, Vcp, npwe, gvec, nkxc, kxcg, id_required, approx_
  character(len=*),intent(in) :: fname_dump
 !arrays
  integer,intent(in) :: ngfft(18), gvec(3,npwe)
- complex(gwpc),intent(in) :: kxcg(nfftot,nkxc)
- complex(gwpc),intent(in), optional :: fxc_ADA(npwe*epsm1%nI,npwe*epsm1%nJ,epsm1%nqibz)
+ complex(gwp),intent(in) :: kxcg(nfftot,nkxc)
+ complex(gwp),intent(in), optional :: fxc_ADA(npwe*epsm1%nI,npwe*epsm1%nJ,epsm1%nqibz)
 
 !Local variables-------------------------------
 !scalars
@@ -886,7 +886,7 @@ subroutine epsm1_mkdump(epsm1, Vcp, npwe, gvec, nkxc, kxcg, id_required, approx_
 !arrays
  integer :: units(2)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
- complex(gwpc),allocatable :: tmp_epsm1(:,:,:)
+ complex(gwp),allocatable :: tmp_epsm1(:,:,:)
  complex(dp),allocatable :: dummy_lwing(:,:,:),dummy_uwing(:,:,:),dummy_head(:,:,:)
 ! *********************************************************************
 
@@ -926,7 +926,7 @@ subroutine epsm1_mkdump(epsm1, Vcp, npwe, gvec, nkxc, kxcg, id_required, approx_
        iomode__ = IO_MODE_FORTRAN
      end if
 
-     write(msg,'(a,f12.1,a)')' Memory for epsm1%epsm1: ',two*gwpc*npwe**2*epsm1%nomega*epsm1%nqibz*b2Mb,' [Mb] <<< MEM'
+     write(msg,'(a,f12.1,a)')' Memory for epsm1%epsm1: ',two*gwp*npwe**2*epsm1%nomega*epsm1%nqibz*b2Mb,' [Mb] <<< MEM'
      call wrtout(std_out, msg)
 
      if (.not. epsm1%use_mpi_shared_win) then
@@ -949,7 +949,7 @@ subroutine epsm1_mkdump(epsm1, Vcp, npwe, gvec, nkxc, kxcg, id_required, approx_
        epsm1%shared_comm = xcomm%split_type()
 
        count = _MOK(2 * npwe) * _MOK(npwe) * _MOK(epsm1%nomega * epsm1%nqibz)
-       call epsm1%shared_comm%allocate_shared_master(count, gwpc, xmpi_info_null, void_ptr, epsm1%epsm1_win)
+       call epsm1%shared_comm%allocate_shared_master(count, gwp, xmpi_info_null, void_ptr, epsm1%epsm1_win)
        call c_f_pointer(void_ptr, epsm1%epsm1, shape=[npwe, npwe, epsm1%nomega, epsm1%nqibz])
 
        ! Only one proc in shared_comm reads from file.
@@ -1101,7 +1101,7 @@ subroutine epsm1_mkdump(epsm1, Vcp, npwe, gvec, nkxc, kxcg, id_required, approx_
        epsm1%shared_comm = xcomm%split_type()
 
        count = _MOK(2 * npwe) * _MOK(npwe) * _MOK(epsm1%nomega * epsm1%nqibz)
-       call epsm1%shared_comm%allocate_shared_master(count, gwpc, xmpi_info_null, void_ptr, epsm1%epsm1_win)
+       call epsm1%shared_comm%allocate_shared_master(count, gwp, xmpi_info_null, void_ptr, epsm1%epsm1_win)
        call c_f_pointer(void_ptr, epsm1%epsm1, shape=[npwe, npwe, epsm1%nomega, epsm1%nqibz])
 
        ! Only one proc in shared_comm reads from file.
@@ -1177,7 +1177,7 @@ subroutine epsm1_malloc_epsm1_qbz(epsm1, npwc, nomega)
    ABI_MALLOC_OR_DIE(epsm1%epsm1_qbz, (npwc, npwc, nomega), ierr)
  else
    count = _MOK(2 * npwc) * _MOK(npwc) * _MOK(nomega)
-   call epsm1%shared_comm%allocate_shared_master(count, gwpc, xmpi_info_null, void_ptr, epsm1%epsm1_qbz_win)
+   call epsm1%shared_comm%allocate_shared_master(count, gwp, xmpi_info_null, void_ptr, epsm1%epsm1_qbz_win)
    call c_f_pointer(void_ptr, epsm1%epsm1_qbz, shape=[npwc, npwc, nomega])
  end if
 
@@ -1476,13 +1476,13 @@ subroutine make_epsm1_driver(iq_ibz, dim_wing, npwe, nI, nJ, nomega, omega,&
  type(spectra_t),intent(out) :: Spectra
 !arrays
  integer,intent(in) :: ngfft(18),gvec(3,npwe)
- complex(gwpc),intent(in) :: kxcg(nfftot,nkxc)
+ complex(gwp),intent(in) :: kxcg(nfftot,nkxc)
  complex(dp),intent(in) :: omega(nomega)
  complex(dp),intent(inout) :: chi0_lwing(:,:,:)   !(npwe*nI,nomega,dim_wing)
  complex(dp),intent(inout) :: chi0_uwing(:,:,:)   !(npwe*nJ,nomega,dim_wing)
  complex(dp),intent(inout) :: chi0_head(:,:,:)   !(dim_wing,dim_wing,nomega)
- complex(gwpc),intent(inout) :: chi0(npwe*nI,npwe*nJ,nomega)
- complex(gwpc),intent(in),optional :: fxc_ADA(npwe*nI,npwe*nJ)
+ complex(gwp),intent(inout) :: chi0(npwe*nI,npwe*nJ,nomega)
+ complex(gwp),intent(in),optional :: fxc_ADA(npwe*nI,npwe*nJ)
 
 !Local variables-------------------------------
 !scalars
@@ -1499,14 +1499,14 @@ subroutine make_epsm1_driver(iq_ibz, dim_wing, npwe, nI, nJ, nomega, omega,&
  real(dp),allocatable :: eelf(:,:),tmp_eelf(:)
  complex(dp),allocatable :: epsm_lf(:,:),epsm_nlf(:,:),tmp_lf(:),tmp_nlf(:)
  complex(dp),allocatable :: buffer_lwing(:,:),buffer_uwing(:,:)
- complex(gwpc),allocatable :: kxcg_mat(:,:)
+ complex(gwp),allocatable :: kxcg_mat(:,:)
 
 !bootstrap and LR
  integer :: istep,nstep
  real(dp) :: conv_err, alpha, Zr, qpg2(3), qpg2_nrm, cpu, wall, gflops
- real(gwpc) :: chi00_head, fxc_head
- complex(gwpc),allocatable :: vfxc_boot(:,:), vfxc_boot0(:,:), vfxc_lr(:,:), vfxc_tmp(:,:), chi0_tmp(:,:), chi0_save(:,:,:)
- complex(gwpc), ABI_CONTIGUOUS pointer :: vc_sqrt(:)
+ real(gwp) :: chi00_head, fxc_head
+ complex(gwp),allocatable :: vfxc_boot(:,:), vfxc_boot0(:,:), vfxc_lr(:,:), vfxc_tmp(:,:), chi0_tmp(:,:), chi0_save(:,:,:)
+ complex(gwp), ABI_CONTIGUOUS pointer :: vc_sqrt(:)
 ! *************************************************************************
 
  if (nI/=1.or.nJ/=1) then
@@ -2071,7 +2071,7 @@ subroutine rpa_symepsm1(iq_ibz,Vcp,npwe,nI,nJ,chi0,my_nqlwl,dim_wing,chi0_head,c
  integer,intent(in) :: iq_ibz,nI,nJ,npwe,dim_wing,my_nqlwl,comm
  type(vcoul_t),target,intent(in) :: Vcp
 !arrays
- complex(gwpc),intent(inout) :: chi0(npwe*nI,npwe*nJ)
+ complex(gwp),intent(inout) :: chi0(npwe*nI,npwe*nJ)
  complex(dp),intent(inout) :: chi0_lwing(:,:) !(npwe*nI,dim_wing)
  complex(dp),intent(inout) :: chi0_uwing(:,:) !(npwe*nJ,dim_wing)
  complex(dp),intent(inout) :: chi0_head(:,:) !(dim_wing,dim_wing)
@@ -2087,8 +2087,8 @@ subroutine rpa_symepsm1(iq_ibz,Vcp,npwe,nI,nJ,chi0,my_nqlwl,dim_wing,chi0_head,c
  !character(len=500) :: msg
 !arrays
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
- complex(gwpc), ABI_CONTIGUOUS pointer :: vc_sqrt(:)
- complex(gwpc),allocatable :: chi0_save(:,:)
+ complex(gwp), ABI_CONTIGUOUS pointer :: vc_sqrt(:)
+ complex(gwp),allocatable :: chi0_save(:,:)
 ! *************************************************************************
 
  ABI_UNUSED(chi0_head(1,1))
@@ -2220,12 +2220,12 @@ subroutine atddft_symepsm1(iq_ibz,Vcp,npwe,nI,nJ,chi0,kxcg_mat,option_test,my_nq
  integer,intent(in) :: option_test,comm
  type(vcoul_t),target,intent(in) :: Vcp
 !arrays
- complex(gwpc),intent(in) :: kxcg_mat(npwe,npwe)
+ complex(gwp),intent(in) :: kxcg_mat(npwe,npwe)
  complex(dp),intent(in) :: omega
  complex(dp),intent(inout) :: chi0_lwing(npwe*nI,dim_wing)
  complex(dp),intent(inout) :: chi0_uwing(npwe*nJ,dim_wing)
  complex(dp),intent(inout) :: chi0_head(dim_wing,dim_wing)
- complex(gwpc),intent(inout) :: chi0(npwe*nI,npwe*nJ)
+ complex(gwp),intent(inout) :: chi0(npwe*nI,npwe*nJ)
  real(dp),intent(out) :: eelf(my_nqlwl)
  complex(dp),intent(out) :: epsm_lf(my_nqlwl),epsm_nlf(my_nqlwl)
 
@@ -2238,8 +2238,8 @@ subroutine atddft_symepsm1(iq_ibz,Vcp,npwe,nI,nJ,chi0,kxcg_mat,option_test,my_nq
  character(len=500) :: msg
 !arrays
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
- complex(gwpc),allocatable :: chitmp(:,:)
- complex(gwpc), ABI_CONTIGUOUS pointer :: vc_sqrt(:)
+ complex(gwp),allocatable :: chitmp(:,:)
+ complex(gwp), ABI_CONTIGUOUS pointer :: vc_sqrt(:)
 ! *************************************************************************
 
  ABI_UNUSED(chi0_head(1,1))
@@ -2266,7 +2266,7 @@ subroutine atddft_symepsm1(iq_ibz,Vcp,npwe,nI,nJ,chi0,kxcg_mat,option_test,my_nq
    vc_sqrt => Vcp%vc_sqrt(:,iq_ibz)
  end if
 
- write(msg,'(a,f8.2,a)')" chitmp requires: ",npwe**2*gwpc*b2Mb," Mb"
+ write(msg,'(a,f8.2,a)')" chitmp requires: ",npwe**2*gwp*b2Mb," Mb"
  ABI_MALLOC_OR_DIE(chitmp, (npwe,npwe), ierr)
  !
  ! Calculate chi0*fxc.
@@ -2394,12 +2394,12 @@ subroutine atddft_hyb_symepsm1(iq_ibz,Vcp,npwe,nI,nJ,chi0,kxcg_mat,kxcg_mat_sr,o
  integer,intent(in) :: option_test,comm
  type(vcoul_t),target,intent(in) :: Vcp
 !arrays
- complex(gwpc),intent(in) :: kxcg_mat(npwe,npwe), kxcg_mat_sr(npwe,npwe)
+ complex(gwp),intent(in) :: kxcg_mat(npwe,npwe), kxcg_mat_sr(npwe,npwe)
  complex(dp),intent(in) :: omega
  complex(dp),intent(inout) :: chi0_lwing(npwe*nI,dim_wing)
  complex(dp),intent(inout) :: chi0_uwing(npwe*nJ,dim_wing)
  complex(dp),intent(inout) :: chi0_head(dim_wing,dim_wing)
- complex(gwpc),intent(inout) :: chi0(npwe*nI,npwe*nJ)
+ complex(gwp),intent(inout) :: chi0(npwe*nI,npwe*nJ)
  real(dp),intent(out) :: eelf(my_nqlwl)
  complex(dp),intent(out) :: epsm_lf(my_nqlwl),epsm_nlf(my_nqlwl)
 
@@ -2412,8 +2412,8 @@ subroutine atddft_hyb_symepsm1(iq_ibz,Vcp,npwe,nI,nJ,chi0,kxcg_mat,kxcg_mat_sr,o
  character(len=500) :: msg
 !arrays
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
- complex(gwpc),allocatable :: chitmp(:,:)
- complex(gwpc), ABI_CONTIGUOUS pointer :: vc_sqrt(:)
+ complex(gwp),allocatable :: chitmp(:,:)
+ complex(gwp), ABI_CONTIGUOUS pointer :: vc_sqrt(:)
 ! *************************************************************************
 
  ABI_UNUSED(chi0_head(1,1))
@@ -2440,7 +2440,7 @@ subroutine atddft_hyb_symepsm1(iq_ibz,Vcp,npwe,nI,nJ,chi0,kxcg_mat,kxcg_mat_sr,o
    vc_sqrt => Vcp%vc_sqrt(:,iq_ibz)
  end if
 
- write(msg,'(a,f8.2,a)')" chitmp requires: ",npwe**2*gwpc*b2Mb," Mb"
+ write(msg,'(a,f8.2,a)')" chitmp requires: ",npwe**2*gwp*b2Mb," Mb"
  ABI_MALLOC_OR_DIE(chitmp,(npwe,npwe), ierr)
  !
  ! * Calculate chi0*fxc.
@@ -2607,7 +2607,7 @@ subroutine mkem1_q0(npwe,n1,n2,nomega,Cryst,Vcp,gvec,chi0_head,chi0_lwing,chi0_u
  type(vcoul_t),intent(in) :: Vcp
 !arrays
  integer,intent(in) :: gvec(3,npwe)
- complex(gwpc),intent(in) :: chi0(npwe*n1,npwe*n2,nomega)
+ complex(gwp),intent(in) :: chi0(npwe*n1,npwe*n2,nomega)
  complex(dp),intent(inout) :: chi0_lwing(npwe*n1,nomega,3)
  complex(dp),intent(inout) :: chi0_uwing(npwe*n2,nomega,3)
  complex(dp),intent(inout) :: chi0_head(3,3,nomega)
@@ -3003,7 +3003,7 @@ subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsp
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: rhor(nfft,nspden)
- complex(gwpc),intent(out) :: w_qbz(npw,npw,nomega)
+ complex(gwp),intent(out) :: w_qbz(npw,npw,nomega)
 
 !Local variables-------------------------------
 !scalars
@@ -3020,8 +3020,8 @@ subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsp
  integer,allocatable :: igfft(:),g1mg2(:,:)
  real(dp) :: qpg2(3),qpt_bz(3)
  real(dp),allocatable :: em1_qpg2r(:),fofg(:,:)
- complex(gwpc),ABI_CONTIGUOUS pointer :: vc_sqrt_ibz(:)
- complex(gwpc),allocatable :: vc_qbz(:),ctmp(:,:)
+ complex(gwp),ABI_CONTIGUOUS pointer :: vc_sqrt_ibz(:)
+ complex(gwp),allocatable :: vc_qbz(:),ctmp(:,:)
  logical,allocatable :: mask(:)
 ! *************************************************************************
 
@@ -3225,7 +3225,7 @@ subroutine lwl_write(path, cryst, vcp, npwe, nomega, gvec, chi0, chi0_head, chi0
  type(vcoul_t),intent(in) :: Vcp
 !arrays
  integer,intent(in) :: gvec(3,npwe)
- complex(gwpc),intent(in) :: chi0(npwe,npwe,nomega)
+ complex(gwp),intent(in) :: chi0(npwe,npwe,nomega)
  complex(dp),intent(inout)  :: chi0_head(3,3,nomega),chi0_lwing(npwe,nomega,3),chi0_uwing(npwe,nomega,3)
 
 !Local variables-------------------------------

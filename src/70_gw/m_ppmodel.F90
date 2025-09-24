@@ -121,13 +121,13 @@ module m_ppmodel
    integer,allocatable :: has_qibz(:)
    ! Flag defining the status of the tables for the different q. See the PPM_TAB flags.
 
-   complex(gwpc),allocatable :: bigomegatwsq_qbz_vals(:,:)
+   complex(gwp),allocatable :: bigomegatwsq_qbz_vals(:,:)
    ! (Points|Stores) the symmetrized plasmon pole parameters $\tilde\Omega^2_{G Gp}(q_bz)$.
 
-   complex(gwpc),allocatable :: omegatw_qbz_vals(:,:)
+   complex(gwp),allocatable :: omegatw_qbz_vals(:,:)
    ! (Points|Stores) the symmetrized plasmon pole parameters $\tilde\omega_{G Gp}(q_bz)$.
 
-   complex(gwpc),allocatable :: eigpot_qbz_vals(:,:)
+   complex(gwp),allocatable :: eigpot_qbz_vals(:,:)
    ! (Points|Stores) the eigvectors of the symmetrized inverse dielectric matrix.
 
    type(array2_gwpc_t),allocatable :: bigomegatwsq(:)
@@ -231,14 +231,14 @@ subroutine ppm_get_qbz(ppm, Gsph, Qmesh, iq_bz, botsq, otq, eig)
  integer,intent(in) :: iq_bz
  type(gsphere_t),target,intent(in) :: Gsph
  type(kmesh_t),intent(in) :: Qmesh
- complex(gwpc),allocatable,intent(out) :: botsq(:,:),otq(:,:),eig(:,:)
+ complex(gwp),allocatable,intent(out) :: botsq(:,:),otq(:,:),eig(:,:)
 
 !Local variables-------------------------------
 !scalars
  integer :: ii,jj,iq_ibz,itim_q,isym_q,iq_curr,isg1,isg2
 !arrays
  integer, ABI_CONTIGUOUS pointer :: grottb(:)
- complex(gwpc),ABI_CONTIGUOUS pointer :: phsgt(:),bigomegatwsq(:,:),omegatw(:,:)
+ complex(gwp),ABI_CONTIGUOUS pointer :: phsgt(:),bigomegatwsq(:,:),omegatw(:,:)
 ! *********************************************************************
 
  ! Save the index of the q-point for checking purpose.
@@ -584,7 +584,7 @@ subroutine ppm_setup(ppm, Cryst, Qmesh, npwe, nomega, omega, epsm1, nfftf, gvec,
  integer,intent(in) :: gvec(3,npwe),ngfftf(18)
  real(dp),intent(in) :: rhor_tot(nfftf)
  complex(dp),intent(in) :: omega(nomega)
- complex(gwpc),intent(in) :: epsm1(:,:,:,:)
+ complex(gwp),intent(in) :: epsm1(:,:,:,:)
 
 !Local variables-------------------------------
 !scalars
@@ -1054,15 +1054,15 @@ subroutine cppm1par(npwc, nomega, omega, omegaplasma, epsm1, omegatw, bigomegatw
  real(dp),intent(in) :: omegaplasma
 !arrays
  complex(dp),intent(in) :: omega(nomega)
- complex(gwpc),intent(in) :: epsm1(npwc,npwc,nomega)
- complex(gwpc),intent(out) :: omegatw(npwc,npwc), bigomegatwsq(npwc,npwc)
+ complex(gwp),intent(in) :: epsm1(npwc,npwc,nomega)
+ complex(gwp),intent(out) :: omegatw(npwc,npwc), bigomegatwsq(npwc,npwc)
 
 !Local variables-------------------------------
 !scalars
  integer :: ig,igp,io,io0,ioe0
  real(dp) :: e0,minomega
  character(len=500) :: msg
- complex(gwpc) :: AA,omegatwsq,diff,ratio,epsm1_io0,epsm1_ioe0
+ complex(gwp) :: AA,omegatwsq,diff,ratio,epsm1_io0,epsm1_ioe0
 ! *************************************************************************
 
  ! Find omega=0 and omega=imag (closest to omegaplasma) to fit the ppm parameters
@@ -1172,8 +1172,8 @@ subroutine cppm2par(qpt, npwc, epsm1, ngfftf, gvec, gprimd, rhor, nfftf, gmet, b
 !arrays
  integer,intent(in) :: gvec(3,npwc), ngfftf(18)
  real(dp),intent(in) :: qpt(3),gmet(3,3),gprimd(3,3), rhor(nfftf)
- complex(gwpc),intent(in) :: epsm1(npwc,npwc)
- complex(gwpc),intent(out) :: bigomegatwsq(npwc,npwc), omegatw(npwc,npwc)
+ complex(gwp),intent(in) :: epsm1(npwc,npwc)
+ complex(gwp),intent(out) :: bigomegatwsq(npwc,npwc), omegatw(npwc,npwc)
 
 !Local variables-------------------------------
 !scalars
@@ -1185,8 +1185,8 @@ subroutine cppm2par(qpt, npwc, epsm1, ngfftf, gvec, gprimd, rhor, nfftf, gmet, b
 !arrays
  real(dp) :: qlist(3,1)
  real(dp),allocatable :: tmp_rhor(:),qratio(:,:),qplusg(:),rhog_dp(:,:)
- complex(gwpc),allocatable :: omegatwsq(:,:)
- complex(gwpc),allocatable :: rhog(:),rhogg(:,:),temp(:,:)  !MG these should be double precision TODO
+ complex(gwp),allocatable :: omegatwsq(:,:)
+ complex(gwp),allocatable :: rhog(:),rhogg(:,:),temp(:,:)  !MG these should be double precision TODO
 !*************************************************************************
 
  call initmpi_seq(MPI_enreg_seq)
@@ -1369,8 +1369,8 @@ subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
 !arrays
  integer,intent(in) :: gvec(3,npwc),ngfftf(18)
  real(dp),intent(in) :: qpt(3),gprimd(3,3),rhor(nfftf)
- complex(gwpc),intent(in) :: epsm1(npwc,npwc)
- complex(gwpc),intent(out) :: bigomegatwsq(npwc,1),omegatw(npwc) ,eigtot(npwc,npwc)
+ complex(gwp),intent(in) :: epsm1(npwc,npwc)
+ complex(gwp),intent(out) :: bigomegatwsq(npwc,1),omegatw(npwc) ,eigtot(npwc,npwc)
 
 !Local variables-------------------------------
 !TODO these should be dp
@@ -1615,8 +1615,8 @@ subroutine cppm4par(qpt, npwc, epsm1, ngfftf, gvec, gprimd, rhor, nfftf, bigomeg
 !arrays
  integer,intent(in) :: gvec(3,npwc),ngfftf(18)
  real(dp),intent(in) :: gprimd(3,3),qpt(3), rhor(nfftf)
- complex(gwpc),intent(in) :: epsm1(npwc,npwc)
- complex(gwpc),intent(out) :: bigomegatwsq(npwc,npwc),omegatw(npwc)
+ complex(gwp),intent(in) :: epsm1(npwc,npwc)
+ complex(gwp),intent(out) :: bigomegatwsq(npwc,npwc),omegatw(npwc)
 
 !Local variables-------------------------------
 !scalars
@@ -1934,20 +1934,20 @@ subroutine ppm_calc_sigc(ppm, nspinor, npwc, nomega, rhotwgp, botsq, otq, &
  real(dp),intent(in) :: theta_mu_minus_e0i, zcut
 !arrays
  real(dp),intent(in) :: omegame0i(nomega)
- complex(gwpc),intent(in) :: botsq(npwc,ppm%dm2_botsq), eig(ppm%dm_eig,ppm%dm_eig), otq(npwc,ppm%dm2_otq)
- complex(gwpc),intent(in) :: rhotwgp(npwx*nspinor)
- complex(gwpc),intent(inout) :: ket(npwc*nspinor, nomega)
- complex(gwpc),intent(out) :: sigcme(nomega)
+ complex(gwp),intent(in) :: botsq(npwc,ppm%dm2_botsq), eig(ppm%dm_eig,ppm%dm_eig), otq(npwc,ppm%dm2_otq)
+ complex(gwp),intent(in) :: rhotwgp(npwx*nspinor)
+ complex(gwp),intent(inout) :: ket(npwc*nspinor, nomega)
+ complex(gwp),intent(out) :: sigcme(nomega)
 
 !Local variables-------------------------------
 !scalars
  integer :: ig,igp,ii,ios,ispinor,spadc,spadx
  real(dp) :: den,ff,inv_den,omegame0i_io,otw,twofm1,twofm1_zcut
- complex(gwpc) :: ct, num, numf, rhotwgdp_igp
+ complex(gwp) :: ct, num, numf, rhotwgdp_igp
  logical :: fully_occupied,totally_empty
  !character(len=500) :: msg
 !arrays
- complex(gwpc),allocatable :: rhotwgdpcc(:)
+ complex(gwp),allocatable :: rhotwgdpcc(:)
 !*************************************************************************
 
  select case (ppm%model)
@@ -2121,7 +2121,7 @@ subroutine ppm_rotate_iqbz(ppm, iq_bz, Cryst, Qmesh, Gsph, npwe, nomega, omega, 
  integer,intent(in) :: ngfftf(18)
  real(dp),intent(in) :: rhor_tot(nfftf)
  complex(dp),intent(in) :: omega(nomega)
- complex(gwpc),intent(in) :: epsm1_ggw(npwe,npwe,nomega)
+ complex(gwp),intent(in) :: epsm1_ggw(npwe,npwe,nomega)
 
 !Local variables-------------------------------
 !scalars
@@ -2230,7 +2230,7 @@ subroutine ppm_new_setup(ppm, iq_ibz, Cryst, Qmesh, npwe, nomega, omega, epsm1_g
  integer,intent(in) :: gvec(3,npwe),ngfftf(18)
  real(dp),intent(in) :: rhor_tot(nfftf)
  complex(dp),intent(in) :: omega(nomega)
- complex(gwpc),intent(in) :: epsm1_ggw(npwe,npwe,nomega)
+ complex(gwp),intent(in) :: epsm1_ggw(npwe,npwe,nomega)
 
 !Local variables-------------------------------
 !scalars

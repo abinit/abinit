@@ -1022,8 +1022,8 @@ subroutine sigtk_multiply_by_vc_sqrt(trans, npw, nspinor, ndat, vc_sqrt, rhotwg)
 
  character(len=1),intent(in) :: trans
  integer,intent(in) :: npw, nspinor, ndat
- complex(gwpc),intent(in) :: vc_sqrt(npw)
- complex(gwpc),intent(inout) :: rhotwg(npw*nspinor, ndat)
+ complex(gwp),intent(in) :: vc_sqrt(npw)
+ complex(gwp),intent(inout) :: rhotwg(npw*nspinor, ndat)
 
 !Local variables ------------------------------
  integer :: ii, spad, idat

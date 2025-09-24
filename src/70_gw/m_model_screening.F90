@@ -286,7 +286,7 @@ subroutine re_and_im_screening_with_phase(omega,fval,nomega,coeff,ncoeff)
 !arrays
   complex(dp) ,intent(in)  :: omega(nomega)
   real(gwp)   ,intent(in)  :: coeff(ncoeff)
-  complex(gwpc),intent(out) :: fval(nomega)
+  complex(gwp),intent(out) :: fval(nomega)
 
 !Local variables-------------------------------
 !scalars
@@ -441,7 +441,7 @@ subroutine init_peaks_from_grid(omega,fval,nomega,nfreqre,nfreqim,coeff,ncoeff,p
 !arrays
   complex(dp) ,intent(in)  :: omega(nomega)
   real(gwp)   ,intent(out) :: coeff(ncoeff)
-  complex(gwpc),intent(in)  :: fval(nomega)
+  complex(gwp),intent(in)  :: fval(nomega)
 
 !Local variables-------------------------------
 !scalars
@@ -451,7 +451,6 @@ subroutine init_peaks_from_grid(omega,fval,nomega,nfreqre,nfreqim,coeff,ncoeff,p
 
 !arrays
   integer :: ploc(ncoeff/3)
-
 ! *********************************************************************
 
   npoles = ncoeff/3
@@ -625,13 +624,12 @@ subroutine init_peaks_even_dist(omega,fval,nomega,nfreqre,coeff,ncoeff,prtvol)
 !arrays
   complex(dp) ,intent(in)  :: omega(nomega)
   real(gwp)   ,intent(out) :: coeff(ncoeff)
-  complex(gwpc),intent(in)  :: fval(nomega)
+  complex(gwp),intent(in)  :: fval(nomega)
 
 !Local variables-------------------------------
 !scalars
   integer :: npoles,ip,idx,iw
   real(gwp) :: delta,norm,div,val1,val2,osc,pol,gam
-
 ! *********************************************************************
 
   npoles = ncoeff/3
@@ -702,7 +700,7 @@ subroutine print_peaks(omega,fval,nomega,nfreqre,nfreqim)
   integer,intent(in)   :: nomega,nfreqre,nfreqim
 !arrays
   complex(dp) ,intent(in)  :: omega(nomega)
-  complex(gwpc),intent(in)  :: fval(nomega)
+  complex(gwp),intent(in)  :: fval(nomega)
 
 !Local variables-------------------------------
 !scalars
@@ -710,7 +708,6 @@ subroutine print_peaks(omega,fval,nomega,nfreqre,nfreqim)
   integer :: idx1,idx2,idx3
   real(gwp) :: rez,imz,val1,val2,val3
   character(len=500) :: msg
-
 ! *********************************************************************
 
   if (open_file("grid_peak_tree.dat", msg, newunit=unt_tmp) /= 0) then
@@ -833,18 +830,16 @@ subroutine find_peaks(fval,nomega,nfreqre,nfreqim,ploc,npoles,iline)
   integer, intent(inout) :: iline
 !arrays
   integer    ,intent(inout) :: ploc(npoles)
-  complex(gwpc), intent(in) :: fval(nomega)
+  complex(gwp), intent(in) :: fval(nomega)
 
 !Local variables-------------------------------
 !scalars
   integer    :: ire,iim,ipoles
   integer    :: idx1,idx2,idx3,ipol
   real(gwp) :: val1,val2,val3
-
 !arrays
   integer :: ploc_prev(npoles)
   real    :: pval(npoles),pval_prev(npoles)
-
 ! *********************************************************************
 
   ploc=-1; ploc_prev=-1
@@ -1004,13 +999,12 @@ subroutine remove_phase(fval,nomega,phase)
   integer,    intent(in)  :: nomega
   real(gwp), intent(out) :: phase
 !arrays
-  complex(gwpc), intent(inout) :: fval(nomega)
+  complex(gwp), intent(inout) :: fval(nomega)
 
 !Local variables-------------------------------
 !scalars
   integer       :: io
   real(gwp)    :: a,b,retemp,imtemp
-
 ! *********************************************************************
 
 ! The phase can be found by checking when the function is

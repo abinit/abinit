@@ -181,7 +181,7 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
  real(dp),pointer :: ene_k(:)
  real(dp),pointer :: zarot(:,:,:,:)
  complex(dp),allocatable :: eig0r(:,:),tr_emig0r(:,:)
- complex(gwpc),allocatable :: ur1(:),ur2(:),ur2_rot(:)
+ complex(gwp),allocatable :: ur1(:),ur2(:),ur2_rot(:)
  type(pawcprj_type),allocatable :: Cprj_b1(:,:),Cprj_b2(:,:),Cprj_b2rot(:,:)
  type(Pawfgrtab_type),allocatable :: Pawfgrtab(:)
  type(paw_pwaves_lmn_t),allocatable :: Paw_onsite(:)

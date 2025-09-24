@@ -61,9 +61,9 @@ module m_gwdefs
  real(gwp),public,parameter :: one_gw  = 1._gwp
  real(gwp),public,parameter :: zero_gw = 0._gwp
 
- complex(gwpc),public,parameter :: czero_gw = (0._gwp,0._gwp)
- complex(gwpc),public,parameter :: cone_gw  = (1._gwp,0._gwp)
- complex(gwpc),public,parameter :: j_gw     = (0._gwp,1._gwp)
+ complex(gwp),public,parameter :: czero_gw = (0._gwp,0._gwp)
+ complex(gwp),public,parameter :: cone_gw  = (1._gwp,0._gwp)
+ complex(gwp),public,parameter :: j_gw     = (0._gwp,1._gwp)
 
 !arrays
  real(dp),public,parameter :: GW_Q0_DEFAULT(3) = [0.00001_dp, 0.00002_dp, 0.00003_dp]

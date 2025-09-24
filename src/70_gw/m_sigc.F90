@@ -179,7 +179,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  logical :: iscompatibleFFT, q_is_gamma, print_time
  character(len=500) :: msg
  type(wave_t),pointer :: wave_sum, wave_jb
- complex(gwpc),allocatable :: botsq(:,:),otq(:,:),eig(:,:)
+ complex(gwp),allocatable :: botsq(:,:),otq(:,:),eig(:,:)
 !arrays
  integer :: g0(3),spinor_padc(2,4),got(Wfd%nproc), units(2)
  integer,allocatable :: proc_distrb(:,:,:),extrapolar_distrb(:,:,:,:),degtab(:,:,:)
@@ -191,18 +191,18 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  real(dp) :: conv_gl_knots(epsm1%nomega_i_conv),conv_gl_wts(epsm1%nomega_i_conv),conv_omegap(epsm1%nomega_i_conv),conv_omegap2(epsm1%nomega_i_conv), tmp_conv_omegap(epsm1%nomega_i_conv)
  real(dp),ABI_CONTIGUOUS pointer :: qp_ene(:,:,:),qp_occ(:,:,:)
  real(dp),allocatable :: omegame0i(:), w_maxval(:)
- complex(gwpc) :: sigcohme(Sigp%nsig_ab), omegap_cplx(epsm1%nomega_i)
- complex(gwpc),allocatable :: vc_sqrt_qbz(:),rhotwg(:),rhotwgp(:)
- complex(gwpc),allocatable :: botsq_conjg_transp(:,:)
- complex(gwpc),pointer, contiguous :: ac_epsm1cqwz2(:,:,:) => null()
- complex(gwpc),allocatable :: epsm1_trcc_qbz(:,:,:), epsm1_tmp(:,:)
- complex(gwpc),allocatable :: sigc_ket(:,:),ket1(:,:),ket2(:,:)
- complex(gwpc),allocatable :: herm_sigc_ket(:,:),aherm_sigc_ket(:,:), rhotwg_ki(:,:)
- complex(gwpc),allocatable :: sigcme2(:,:),sigcme_3(:),sigcme_new(:),sigctmp(:,:)
- complex(gwpc),allocatable :: wfr_bdgw(:,:),ur_ibz(:),wf1swf2_g(:),usr_bz(:)
- complex(gwpc),allocatable :: ur_ae_sum(:),ur_ae_onsite_sum(:),ur_ps_onsite_sum(:)
- complex(gwpc),allocatable :: ur_ae_bdgw(:,:),ur_ae_onsite_bdgw(:,:),ur_ps_onsite_bdgw(:,:), otq_transp(:,:)
- complex(gwpc),ABI_CONTIGUOUS pointer :: cg_jb(:),cg_sum(:)
+ complex(gwp) :: sigcohme(Sigp%nsig_ab), omegap_cplx(epsm1%nomega_i)
+ complex(gwp),allocatable :: vc_sqrt_qbz(:),rhotwg(:),rhotwgp(:)
+ complex(gwp),allocatable :: botsq_conjg_transp(:,:)
+ complex(gwp),pointer, contiguous :: ac_epsm1cqwz2(:,:,:) => null()
+ complex(gwp),allocatable :: epsm1_trcc_qbz(:,:,:), epsm1_tmp(:,:)
+ complex(gwp),allocatable :: sigc_ket(:,:),ket1(:,:),ket2(:,:)
+ complex(gwp),allocatable :: herm_sigc_ket(:,:),aherm_sigc_ket(:,:), rhotwg_ki(:,:)
+ complex(gwp),allocatable :: sigcme2(:,:),sigcme_3(:),sigcme_new(:),sigctmp(:,:)
+ complex(gwp),allocatable :: wfr_bdgw(:,:),ur_ibz(:),wf1swf2_g(:),usr_bz(:)
+ complex(gwp),allocatable :: ur_ae_sum(:),ur_ae_onsite_sum(:),ur_ps_onsite_sum(:)
+ complex(gwp),allocatable :: ur_ae_bdgw(:,:),ur_ae_onsite_bdgw(:,:),ur_ps_onsite_bdgw(:,:), otq_transp(:,:)
+ complex(gwp),ABI_CONTIGUOUS pointer :: cg_jb(:),cg_sum(:)
  complex(dp),allocatable :: sym_cme(:,:,:,:),sigc(:,:,:,:,:)
  logical :: rank_mask(Wfd%nproc),can_symmetrize(Wfd%nsppol)
  !logical :: me_calc_poles(Sr%nomega_r+Sr%nomega4sd)
@@ -212,7 +212,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  type(esymm_t),pointer :: QP_sym(:)
  integer :: neig(epsm1%nomega_i)
  real(gwp),allocatable :: epsm1_eig(:)
- complex(gwpc),allocatable :: epsm1_sqrt_rhotw(:,:), rhotw_epsm1_rhotw(:,:,:), conv_rhotw_epsm1_rhotw(:,:,:)
+ complex(gwp),allocatable :: epsm1_sqrt_rhotw(:,:), rhotw_epsm1_rhotw(:,:,:), conv_rhotw_epsm1_rhotw(:,:,:)
  complex(dp) :: tmp_rhotw_epsm1_rhotw(epsm1%nomega_i), tmp_conv_rhotw_epsm1_rhotw(epsm1%nomega_i_conv)
 !************************************************************************
 
@@ -490,7 +490,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    if (epsm1%use_mpi_shared_win) then
 #define _MOK(integer) int(integer, kind=XMPI_OFFSET_KIND)
      ad_count = _MOK(2*npwc) * _MOK(npwc) * _MOK(epsm1%nomega_i)
-     call epsm1%shared_comm%allocate_shared_master(ad_count, gwpc, xmpi_info_null, void_ptr, ac_epsm1cqwz2_win)
+     call epsm1%shared_comm%allocate_shared_master(ad_count, gwp, xmpi_info_null, void_ptr, ac_epsm1cqwz2_win)
      call c_f_pointer(void_ptr, ac_epsm1cqwz2, shape=[npwc, npwc, epsm1%nomega_i])
    else
      ABI_CALLOC(ac_epsm1cqwz2, (npwc, npwc, epsm1%nomega_i))
@@ -1492,10 +1492,10 @@ subroutine calc_coh_comp(iqibz,i_sz,same_band,nspinor,nsig_ab,ediff,npwc,gvec,&
  logical,intent(in) :: same_band
 !arrays
  integer,intent(in) :: gvec(3,npwc),ngfft(18)
- complex(gwpc),intent(in) :: botsq(npwc,npwc),otq(npwc,npwc)
- complex(gwpc),intent(in) :: vc_sqrt(npwc)
- complex(gwpc),intent(in) :: wfg2_jk(nfftot*nsig_ab)
- complex(gwpc),intent(out) :: sigcohme(nsig_ab)
+ complex(gwp),intent(in) :: botsq(npwc,npwc),otq(npwc,npwc)
+ complex(gwp),intent(in) :: vc_sqrt(npwc)
+ complex(gwp),intent(in) :: wfg2_jk(nfftot*nsig_ab)
+ complex(gwp),intent(out) :: sigcohme(nsig_ab)
 
 !Local variables-------------------------------
 !scalars
@@ -1604,9 +1604,9 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
 !arrays
  real(dp),intent(in) :: omegame0i(nomega)
  complex(dp),intent(in) :: omega(nomegae)
- complex(gwpc),intent(in) :: epsm1q(npwc,npwc,nomegae)
- complex(gwpc),intent(in) :: rhotwgp(npwx*nspinor)
- complex(gwpc),intent(inout) :: ket(nspinor*npwc,nomega)
+ complex(gwp),intent(in) :: epsm1q(npwc,npwc,nomegae)
+ complex(gwp),intent(in) :: rhotwgp(npwx*nspinor)
+ complex(gwp),intent(inout) :: ket(nspinor*npwc,nomega)
  logical, intent(in), optional :: calc_poles(nomega)
  integer, intent(in), optional :: method
 
@@ -1621,7 +1621,7 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
  real(dp) :: re_intG,re_intK,im_intG,im_intK,GKttab,tau,ttil
  real(dp) :: ref,imf,r,s,r2,s2
  complex(dp) :: ct,domegaleft,domegaright
- complex(gwpc) :: fact
+ complex(gwp) :: fact
 !arrays
  real(dp) :: omegame0i_tmp(nomega),tmp_x(2),tmp_y(2)
  real(dp) :: left(nomega),right(nomega)
@@ -1631,10 +1631,10 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
  real(dp) :: ftab(nomegaei+2),ftab2(nomegaei+2),xtab(nomegaei+2),y(3,nomegaei+2)
  real(dp) :: work(nomegaei+2),work2(nomegaei+2),y2(3,nomegaei+2)
  complex(dp) :: omega_imag(nomegaei+1)
- complex(gwpc) :: epsrho(npwc,nomegae),epsrho_imag(npwc,nomegaei+1)
- complex(gwpc) :: tfone(npwc,nomegaei+1),tftwo(npwc,nomegaei+1)
- complex(gwpc) :: weight(nomegaei+1,nomega)
- complex(gwpc) :: weight2(nomegaei,nomega)
+ complex(gwp) :: epsrho(npwc,nomegae),epsrho_imag(npwc,nomegaei+1)
+ complex(gwp) :: tfone(npwc,nomegaei+1),tftwo(npwc,nomegaei+1)
+ complex(gwp) :: weight(nomegaei+1,nomega)
+ complex(gwp) :: weight2(nomegaei,nomega)
  logical :: my_calc_poles(nomega)
  real(dp), allocatable :: KronN(:),KronW(:),GaussW(:),fint(:),fint2(:)
 !*************************************************************************
@@ -2023,18 +2023,18 @@ subroutine calc_sig_ppm_comp(npwc,nomega,rhotwgp,botsq,otq,omegame0i_io,zcut,the
  integer,intent(in) :: nomega,npwc,npwc1,npwc2,npwx,ppmodel
  real(dp),intent(in) :: omegame0i_io,theta_mu_minus_e0i,zcut
 !arrays
- complex(gwpc),intent(in) :: botsq(npwc,npwc1),rhotwgp(npwx),otq(npwc,npwc2)
- complex(gwpc),intent(inout) :: ket(npwc,nomega)
+ complex(gwp),intent(in) :: botsq(npwc,npwc1),rhotwgp(npwx),otq(npwc,npwc2)
+ complex(gwp),intent(inout) :: ket(npwc,nomega)
 
 !Local variables-------------------------------
 !scalars
  integer :: ig,igp,io
  real(dp) :: den,otw,twofm1_zcut
- complex(gwpc) :: num,rhotwgdp_igp
+ complex(gwp) :: num,rhotwgdp_igp
  logical :: fully_occupied,totally_empty
  character(len=500) :: msg
 !arrays
- complex(gwpc),allocatable :: ket_comp(:)
+ complex(gwp),allocatable :: ket_comp(:)
 !*************************************************************************
 
  if (ppmodel/=1.and.ppmodel/=2) then

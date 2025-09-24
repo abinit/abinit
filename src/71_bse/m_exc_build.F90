@@ -167,7 +167,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
 !arrays
  integer,intent(in) :: ngfft_osc(18)
  integer,intent(in) :: ktabr(nfftot_osc,Kmesh%nbz)
- complex(gwpc),intent(in) :: rhxtwg_q0(BSp%npweps,BSp%lomo_min:BSp%humo_max,BSp%lomo_min:BSp%humo_max,Wfd%nkibz,Wfd%nsppol)
+ complex(gwp),intent(in) :: rhxtwg_q0(BSp%npweps,BSp%lomo_min:BSp%humo_max,BSp%lomo_min:BSp%humo_max,Wfd%nkibz,Wfd%nsppol)
  type(Pawtab_type),intent(in) :: Pawtab(Psps%ntypat*Wfd%usepaw)
  type(pawpwff_t),intent(in) :: Paw_pwff(Psps%ntypat*Wfd%usepaw)
 
@@ -214,20 +214,20 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
  complex(dp),allocatable :: acoeffs(:),bcoeffs(:),ccoeffs(:) ! Coeff of W = a/q^2 + b/q + c
  integer :: a_unt, b_unt, c_unt
  complex(dp) :: aatmp, bbtmp, cctmp
- complex(gwpc),allocatable :: aa_vpv(:),aa_cpc(:),aa_ctccp(:)
- complex(gwpc),allocatable :: bb_vpv1(:),bb_cpc1(:),bb_ctccp1(:)
- complex(gwpc),allocatable :: bb_vpv2(:),bb_cpc2(:),bb_ctccp2(:)
- complex(gwpc),allocatable :: cc_vpv(:),cc_cpc(:),cc_ctccp(:)
+ complex(gwp),allocatable :: aa_vpv(:),aa_cpc(:),aa_ctccp(:)
+ complex(gwp),allocatable :: bb_vpv1(:),bb_cpc1(:),bb_ctccp1(:)
+ complex(gwp),allocatable :: bb_vpv2(:),bb_cpc2(:),bb_ctccp2(:)
+ complex(gwp),allocatable :: cc_vpv(:),cc_cpc(:),cc_ctccp(:)
  complex(dp),allocatable :: abuffer(:),aprev_col(:)
  complex(dp),allocatable :: bbuffer(:),bprev_col(:)
  complex(dp),allocatable :: cbuffer(:),cprev_col(:)
  character(len=fnlen) :: tmpfname
  integer :: ii
 !END DBYG
- complex(gwpc),allocatable :: vc_sqrt_qbz(:)
- complex(gwpc),allocatable :: rhotwg1(:),rhotwg2(:),rhxtwg_vpv(:),rhxtwg_cpc(:),ctccp(:)
- complex(gwpc),target,allocatable :: ur_ckp(:),ur_vkp(:),ur_vk(:),ur_ck(:)
- complex(gwpc),ABI_CONTIGUOUS pointer :: ptur_ckp(:),ptur_vkp(:),ptur_vk(:),ptur_ck(:)
+ complex(gwp),allocatable :: vc_sqrt_qbz(:)
+ complex(gwp),allocatable :: rhotwg1(:),rhotwg2(:),rhxtwg_vpv(:),rhxtwg_cpc(:),ctccp(:)
+ complex(gwp),target,allocatable :: ur_ckp(:),ur_vkp(:),ur_vk(:),ur_ck(:)
+ complex(gwp),ABI_CONTIGUOUS pointer :: ptur_ckp(:),ptur_vkp(:),ptur_vk(:),ptur_ck(:)
  type(pawcprj_type),target,allocatable :: Cp_tmp1(:,:),Cp_tmp2(:,:)
  type(pawcprj_type),target,allocatable :: Cp_tmp3(:,:),Cp_tmp4(:,:)
  type(pawcprj_type),allocatable :: Cp_ckp(:,:),Cp_vkp(:,:)
@@ -1725,7 +1725,7 @@ subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gs
  type(gsphere_t),intent(in) :: Gsph_x,Gsph_c
 !arrays
  integer(i8b),intent(in) :: t_start(0:nproc-1),t_stop(0:nproc-1)
- complex(gwpc),intent(in) :: rhxtwg_q0(npweps,BSp%lomo_min:BSp%humo_max,BSp%lomo_min:BSp%humo_max,Kmesh%nibz,nsppol)
+ complex(gwp),intent(in) :: rhxtwg_q0(npweps,BSp%lomo_min:BSp%humo_max,BSp%lomo_min:BSp%humo_max,Kmesh%nibz,nsppol)
  complex(dp),intent(inout) :: my_bsham(t_start(my_rank):t_stop(my_rank))
 
 !Local variables ------------------------------
@@ -1748,7 +1748,7 @@ subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gs
  integer,allocatable :: col_start(:),col_stop(:)
  real(dp) :: qbz(3),tsec(2) !kbz(3),kpbz(3),
  complex(dp),allocatable :: my_kxssp(:,:)
- complex(gwpc),allocatable :: vc_sqrt_qbz(:),rhotwg1(:),rhotwg2(:)
+ complex(gwp),allocatable :: vc_sqrt_qbz(:),rhotwg1(:),rhotwg2(:)
 
 !************************************************************************
 
@@ -2110,7 +2110,7 @@ subroutine exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,
  !character(len=500) :: msg
 !arrays
  real(dp) :: tsec(2)
- complex(gwpc),allocatable :: all_mgq0(:,:,:,:,:)
+ complex(gwp),allocatable :: all_mgq0(:,:,:,:,:)
 !************************************************************************
 
  call timab(670,1,tsec)
@@ -2216,7 +2216,7 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
 !arrays
  integer,intent(in) :: lomo_spin(Wfd%nsppol),homo_spin(Wfd%nsppol),humo_spin(Wfd%nsppol)
  integer,intent(in) :: ngfft_osc(18)
- complex(gwpc),allocatable,intent(out) :: mgq0(:,:,:,:,:)
+ complex(gwp),allocatable,intent(out) :: mgq0(:,:,:,:,:)
  type(Pawtab_type),intent(in) :: Pawtab(Psps%ntypat)
  type(pawpwff_t),intent(in) :: Paw_pwff(Psps%ntypat*Wfd%usepaw)
 
@@ -2234,9 +2234,9 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
  integer,allocatable :: igfftg0(:),task_distrib(:,:,:,:)
  integer,allocatable :: gbound(:,:),id_tab(:)
  real(dp) :: qbz(3),spinrot_k(4),tsec(2)
- complex(gwpc),allocatable :: rhotwg1(:)
- complex(gwpc),target,allocatable :: ur1(:),ur2(:)
- complex(gwpc),ABI_CONTIGUOUS pointer :: ptr_ur1(:),ptr_ur2(:)
+ complex(gwp),allocatable :: rhotwg1(:)
+ complex(gwp),target,allocatable :: ur1(:),ur2(:)
+ complex(gwp),ABI_CONTIGUOUS pointer :: ptr_ur1(:),ptr_ur2(:)
  type(pawcprj_type),allocatable :: Cp1(:,:),Cp2(:,:)
  type(pawpwij_t),allocatable :: Pwij_q0(:)
 !************************************************************************

@@ -1352,7 +1352,7 @@ subroutine write_screening(varname, unt, iomode, npwe, nomega, iq_ibz, epsm1)
  character(len=*),intent(in) :: varname
  integer,intent(in) :: nomega,npwe,iq_ibz,unt,iomode
 !arrays
- complex(gwpc),target,intent(in) :: epsm1(npwe,npwe,nomega)
+ complex(gwp),target,intent(in) :: epsm1(npwe,npwe,nomega)
 
 !Local variables-------------------------------
 !scalars
@@ -1453,7 +1453,7 @@ subroutine read_screening(varname, fname, npweA, nqibzA, nomegaA, epsm1, iomode,
  integer,optional,intent(in) :: iqiA
  character(len=*),intent(in) :: varname,fname
 !arrays
- complex(gwpc),target,intent(inout) :: epsm1(npweA,npweA,nomegaA,nqibzA)
+ complex(gwp),target,intent(inout) :: epsm1(npweA,npweA,nomegaA,nqibzA)
 
 !Local variables-------------------------------
 !scalars
@@ -1864,7 +1864,7 @@ subroutine ioscr_qmerge(nfiles, filenames, hscr_files, fname_out, ohscr)
 !arrays
  integer,allocatable :: merge_table(:,:)
  real(dp) :: qdiff(3)
- complex(gwpc),allocatable :: epsm1(:,:,:,:)
+ complex(gwp),allocatable :: epsm1(:,:,:,:)
 ! *************************************************************************
 
  comm = xmpi_comm_self
@@ -1986,7 +1986,7 @@ subroutine ioscr_qrecover(ipath, nqrec, fname_out)
  type(hscr_t) :: hscr_recov,hscr
  type(abifile_t) :: abifile
 !arrays
- complex(gwpc),allocatable :: epsm1(:,:,:,:)
+ complex(gwp),allocatable :: epsm1(:,:,:,:)
 ! *************************************************************************
 
  comm = xmpi_comm_self
@@ -2108,7 +2108,7 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
 !arrays
  integer,allocatable :: freq_indx(:,:),ifile_indx(:),pos_indx(:),i_temp(:),i2_temp(:,:)
  real(dp),allocatable :: real_omega(:), real_omega_wgs(:), imag_omega(:), imag_omega_wgs(:) ,omega_wgs_storage(:)
- complex(gwpc),allocatable :: epsm1(:,:,:,:),epsm1_temp(:,:,:,:)
+ complex(gwp),allocatable :: epsm1(:,:,:,:),epsm1_temp(:,:,:,:)
  complex(dp),allocatable :: omega_storage(:)
 ! *************************************************************************
 
@@ -2447,7 +2447,7 @@ subroutine ioscr_wremove(inpath, ihscr, fname_out, nfreq_tot, freq_indx, ohscr)
  character(len=nctk_slen) :: varname
  type(abifile_t) :: abifile
 !arrays
- complex(gwpc),allocatable :: epsm1(:,:,:),epsm1_temp(:,:,:)
+ complex(gwp),allocatable :: epsm1(:,:,:),epsm1_temp(:,:,:)
 ! *************************************************************************
 
  comm = xmpi_comm_self

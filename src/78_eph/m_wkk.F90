@@ -151,14 +151,14 @@ subroutine wkk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  integer,allocatable :: nband(:,:), wfd_istwfk(:)
  integer, contiguous, pointer :: kg_c(:,:), kg_x(:,:)
  real(dp) :: kk_ibz(3), kk_bz(3), kp_ibz(3), kp_bz(3), qq_bz(3), kk_diff(3) ! qq_ibz(3)
- complex(gwpc) :: ctmp_gwpc
+ complex(gwp) :: ctmp_gwpc
  character(len=fnlen) :: path
 !arrays
  real(dp) :: n0(ebands%nsppol)
  real(dp),allocatable :: qlwl(:,:), kpg_kp(:,:), kpg_k(:,:), ug_kp(:,:,:), ug_k(:,:), cg_work(:,:)
  real(dp),allocatable :: work(:,:,:,:), e_mesh(:), e_args(:), vcart_ibz(:,:,:,:), wgt_mk(:), wgt_nkp(:,:)
- complex(gwpc),allocatable :: cwork_ur(:), rhotwg_mn_x(:,:,:), rhotwg_mn_c(:,:,:), w_rhotwg_mn_c(:,:,:)
- complex(gwpc),allocatable :: vc_sqrt_gx(:), ur_nkp(:,:), ur_mk(:,:), kxcg(:,:), mu_mn(:,:)
+ complex(gwp),allocatable :: cwork_ur(:), rhotwg_mn_x(:,:,:), rhotwg_mn_c(:,:,:), w_rhotwg_mn_c(:,:,:)
+ complex(gwp),allocatable :: vc_sqrt_gx(:), ur_nkp(:,:), ur_mk(:,:), kxcg(:,:), mu_mn(:,:)
  complex(dp),allocatable :: w_ee(:,:) ! w_kkp(:,:,:,:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
  type(fstab_t),target,allocatable :: fstab(:)

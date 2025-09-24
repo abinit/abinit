@@ -694,7 +694,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp),allocatable :: gkq2_lr(:,:,:)
  complex(dp) :: cp3(3)
  complex(dp),allocatable :: osc_ks(:,:), fmw_frohl_sphcorr(:,:,:,:), cfact_wr(:), tpp_red(:,:)
- complex(gwpc),allocatable :: ur_k(:,:), ur_kq(:), work_ur(:), workq_ug(:)
+ complex(gwp),allocatable :: ur_k(:,:), ur_kq(:), work_ur(:), workq_ug(:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
  type(pawrhoij_type),allocatable :: pot_pawrhoij(:)
 #if defined HAVE_MPI && !defined HAVE_MPI2_INPLACE
@@ -1853,7 +1853,7 @@ end if
          if (q_is_gamma .and. .not. sigma%imag_only) gkq0_atm(:, :, ibsum_kq, :) = gkq_atm
 
          if (osc_ecut > zero) then
-           workq_ug = cmplx(bra_kq(1, :), bra_kq(2, :), kind=gwpc)
+           workq_ug = cmplx(bra_kq(1, :), bra_kq(2, :), kind=gwp)
            call fft_ug(npw_kq, wfd%nfft, nspinor, ndat1, wfd%mgfft, wfd%ngfft, &
                        istwf_kq, kg_kq, gbound_kq, workq_ug, ur_kq)
 

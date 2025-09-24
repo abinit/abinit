@@ -174,7 +174,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  real(dp),pointer :: gs_eigen(:,:,:)
  real(dp),allocatable :: eig_k(:), occ_k(:), thetas(:) !, out_cg(:,:), work(:,:,:,:), allcg_k(:,:)
  real(dp),allocatable,target :: cg_k(:,:)
- complex(gwpc),allocatable :: ur_ae(:)
+ complex(gwp),allocatable :: ur_ae(:)
  complex(dp),pointer :: cg_k_cplx(:,:)
  complex(dp),allocatable :: ps_ug(:,:)
  logical,allocatable :: keep_ur(:,:,:),bks_mask(:,:,:)

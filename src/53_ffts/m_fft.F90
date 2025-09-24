@@ -4306,7 +4306,7 @@ subroutine fourdp_6d(cplex,matrix,isign,MPI_enreg,nfft,ngfft,tim_fourdp)
  type(MPI_type),intent(in) :: MPI_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
- complex(gwpc),intent(inout) :: matrix(nfft,nfft)
+ complex(gwp),intent(inout) :: matrix(nfft,nfft)
 
 !Local variables-------------------------------
 !scalars

@@ -56,11 +56,9 @@ module defs_basis
 !of other variables in ABINIT. Presently single-precision is the default (see config/specs/options.conf)..
 #if defined HAVE_GW_DPC
  integer, parameter :: gwp=kind(1.0d0)
- integer, parameter :: gwpc=kind((1.0_dp,1.0_dp))
 
 #else
  integer, parameter :: gwp=kind(1.0)
- integer, parameter :: gwpc=kind((1.0,1.0))
 #endif
 
 !Example:
@@ -349,8 +347,7 @@ module defs_basis
   integer,parameter,public :: NLO_MINCAT = 10
 
 ! This is used to compute the maximum index of the perturbation as natom + MPERT_MAX
-! GA: But this is not actually the maximum perturbation,
-!     see m_dfpt_loopert
+! GA: But this is not actually the maximum perturbation, see m_dfpt_loopert
   integer,parameter,public :: MPERT_MAX = 8
 
 ! Parameters for the GPU implementation(s)

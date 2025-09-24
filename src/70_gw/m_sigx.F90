@@ -163,7 +163,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, dtset,
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_k, wall_k, gflops_k
  real(dp) :: fact_spin, theta_mu_minus_esum, theta_mu_minus_esum2, tol_empty
  complex(dp) :: ctmp,ph_mkgwt,ph_mkt
- complex(gwpc) :: gwpc_sigxme,gwpc_sigxme2,xdot_tmp
+ complex(gwp) :: gwpc_sigxme,gwpc_sigxme2,xdot_tmp
  logical :: iscompatibleFFT, q_is_gamma, print_time
  character(len=5000) :: msg
  type(wave_t),pointer :: wave_sum, wave_jb
@@ -174,11 +174,11 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, dtset,
  real(dp) :: ksum(3), kgw(3), kgw_m_ksum(3), qbz(3), q0(3), spinrot_kbz(4), spinrot_kgw(4), tsec(2)
  real(dp),contiguous, pointer :: qp_ene(:,:,:), qp_occ(:,:,:)
  real(dp),allocatable :: nhat12(:,:,:),grnhat12(:,:,:,:)
- complex(gwpc),allocatable :: vc_sqrt_qbz(:), rhotwg(:), rhotwgp(:), rhotwg_ki(:,:), ur_bdgw(:,:), ur_ibz(:)
+ complex(gwp),allocatable :: vc_sqrt_qbz(:), rhotwg(:), rhotwgp(:), rhotwg_ki(:,:), ur_bdgw(:,:), ur_ibz(:)
  complex(dp),allocatable  :: sigxcme_tmp(:,:), sigxme_tmp(:,:,:), sigx(:,:,:,:)
- complex(gwpc),allocatable :: ur_ae_sum(:),ur_ae_onsite_sum(:),ur_ps_onsite_sum(:)
- complex(gwpc),allocatable :: ur_ae_bdgw(:,:),ur_ae_onsite_bdgw(:,:),ur_ps_onsite_bdgw(:,:)
- complex(gwpc),contiguous, pointer :: cg_jb(:),cg_sum(:)
+ complex(gwp),allocatable :: ur_ae_sum(:),ur_ae_onsite_sum(:),ur_ps_onsite_sum(:)
+ complex(gwp),allocatable :: ur_ae_bdgw(:,:),ur_ae_onsite_bdgw(:,:),ur_ps_onsite_bdgw(:,:)
+ complex(gwp),contiguous, pointer :: cg_jb(:),cg_sum(:)
  logical :: can_symmetrize(wfd%nsppol)
  logical,allocatable :: bks_mask(:,:,:)
  type(esymm_t),pointer :: QP_sym(:)

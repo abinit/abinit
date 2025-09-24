@@ -151,7 +151,7 @@ contains
  complex(dp), allocatable :: rhot_q_m1m3(:,:,:,:,:,:),rhot_q_m2m4(:,:,:,:,:,:)
  complex(dp), allocatable :: rhot_q_m1m3_npwe(:,:,:,:,:,:),rhot_q_m2m4_npwe(:,:,:,:,:,:)
  complex(dp),allocatable :: trrho(:,:),sumrhorhoeps(:)
- complex(gwpc), allocatable :: scr(:,:,:,:)
+ complex(gwp), allocatable :: scr(:,:,:,:)
 
  real(dp),allocatable :: k_coord(:,:)!,k_coordIBZ(:,:)
  real(dp),allocatable :: q_coord(:,:)

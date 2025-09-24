@@ -130,6 +130,13 @@ MODULE m_hexc
  end type hexc_t
 !!***
 
+ public :: hexc_init           ! Construct the object
+ public :: hexc_free           ! Free memory
+ public :: hexc_build_hinterp  ! Interpolate the Hamiltonian and store it in memory
+ public :: hexc_matmul_tda     ! Matrix-vector multiplication (TDA)
+ public :: hexc_matmul_full    ! Matrix-vector multiplication (TDA + Coupling)
+ public :: hexc_matmul_elphon  ! Matrix-vector multiplication (TDA + elphon)
+
 !----------------------------------------------------------------------
 
 !!****t* m_hexc/hexc_interp_t
@@ -194,17 +201,10 @@ MODULE m_hexc
     ! c coefficients in a format suitable for interpolation in k-space
 
  end type hexc_interp_t
-
 !!***
 
- public :: hexc_init           ! Construct the object
  public :: hexc_interp_init    ! Construct the object for interpolated ham
- public :: hexc_free           ! Free memory
  public :: hexc_interp_free    ! Free memory for interpolated ham
- public :: hexc_build_hinterp  ! Interpolate the Hamiltonian and store it in memory
- public :: hexc_matmul_tda     ! Matrix-vector multiplication (TDA)
- public :: hexc_matmul_full    ! Matrix-vector multiplication (TDA + Coupling)
- public :: hexc_matmul_elphon  ! Matrix-vector multiplication (TDA + elphon)
 
 !----------------------------------------------------------------------
 
@@ -622,7 +622,7 @@ subroutine hexc_compute_subhinterp(BSp,grid,nbnd_coarse,&
  type(interpolator_t),target,intent(inout) :: interpolator
 !arrays
  integer,intent(in) :: kdense2div(grid%nbz_dense)
- complex(gwpc),intent(in) :: overlaps(interpolator%mband_coarse,interpolator%mband_dense,interpolator%nvert)
+ complex(gwp),intent(in) :: overlaps(interpolator%mband_coarse,interpolator%mband_dense,interpolator%nvert)
  complex(dp),intent(in) :: work_coeffs(nbnd_coarse,interpolator%nvert)
  complex(dp),intent(out) :: Cmat(nbnd_coarse)
 

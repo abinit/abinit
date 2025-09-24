@@ -81,7 +81,7 @@ MODULE m_bseinterp
     ! interp_factors(nvert,ndiv)
     ! index_in_fine_box -> k-point in Trans_interp
 
-    complex(gwpc),allocatable :: overlaps(:,:,:,:,:)
+    complex(gwp),allocatable :: overlaps(:,:,:,:,:)
     ! Overlaps between dense and coarse mesh
     ! overlaps(mband_coarse,mband_dense,ivertex_coarse,double_grid%nkpt_dense,spin)
 
@@ -285,13 +285,13 @@ subroutine int_compute_overlaps(interpolator, double_grid, Wfd_dense, Wfd_coarse
  integer :: ib_coarse, ib_dense, ik_coarse, ik_dense
  integer :: spin, iorder, ivertex, ix, iy, iz, bstart, bstop
  real(dp),parameter :: threshold = 0.1_dp
- complex(gwpc) :: ovlp
+ complex(gwp) :: ovlp
 !arrays
  integer :: curindices_dense(6), curindices_coarse(3)
  integer :: neighbour(3)
  integer :: g0(3),g01(3),diffg0(3)
- complex(gwpc),allocatable :: ur_coarse(:),ur_dense(:)
- complex(gwpc),allocatable :: ceigr(:)
+ complex(gwp),allocatable :: ur_coarse(:),ur_dense(:)
+ complex(gwp),allocatable :: ceigr(:)
 !*****************************************************************************
 
  nprocs = xmpi_comm_size(Wfd_coarse%comm)
@@ -606,10 +606,9 @@ subroutine interpolator_normalize(interpolator)
 !Local variables ---------------------
 !scalars
  integer :: spin, ivertex, ib_dense, ik_dense
- complex(gwpc) :: sum_ovlp
+ complex(gwp) :: sum_ovlp
 !arrays
- complex(gwpc),allocatable :: overlaps(:)
-
+ complex(gwp),allocatable :: overlaps(:)
 !*****************************************************************************
 
  ABI_MALLOC(overlaps,(interpolator%mband_coarse))
