@@ -1,5 +1,5 @@
 
-.Version 10.4.5.5 of ABINIT, released Jul 2025.
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
 .(sequential version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  7 Jul 2025.
-- ( at 11h29 )
+.Starting date : Wed 24 Sep 2025.
+- ( at 17h29 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_serial/srostami_test/tests/TestBot_MPI1/seq_tsv3_03/tsv3_03.abi
 - output file    -> tsv3_03.abo
@@ -1247,15 +1247,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.488610     0.488610      0.977219     0.000000
-    2   2.00000     0.827979     0.827979      1.655958     0.000000
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ga   2.00000     0.488610     0.488610      0.977219     0.000000
+    2 As   2.00000     0.827979     0.827979      1.655958     0.000000
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.316589     1.316589      2.633177     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                       0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                          0.000000
 
 ================================================================================
 
@@ -1420,15 +1420,15 @@ force_length_stats: {min: null, max: null, mean: null, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.488610     0.488610      0.977219     0.000000
-    2   2.00000     0.827979     0.827979      1.655958     0.000000
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ga   2.00000     0.488610     0.488610      0.977219     0.000000
+    2 As   2.00000     0.827979     0.827979      1.655958     0.000000
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.316589     1.316589      2.633177     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                       0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                          0.000000
 
 ================================================================================
 
@@ -1553,15 +1553,15 @@ force_length_stats: {min: null, max: null, mean: null, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.488610     0.488610      0.977219     0.000000
-    2   2.00000     0.827979     0.827979      1.655958     0.000000
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ga   2.00000     0.488610     0.488610      0.977219     0.000000
+    2 As   2.00000     0.827979     0.827979      1.655958     0.000000
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.316589     1.316589      2.633177     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                       0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                          0.000000
 
 ================================================================================
 
@@ -1900,60 +1900,60 @@ P           mkmem8         16
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          1.9        0.03      0.001
-- Total wall clock time (s,m,h):          2.0        0.03      0.001
+- Total cpu        time (s,m,h):          1.7        0.03      0.000
+- Total wall clock time (s,m,h):          1.8        0.03      0.001
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0
 -
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            1.9, wall_time =            2.0
+- cpu_time =            1.7, wall_time =            1.8
 -
 - routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
 -                                                                                (-1=no count)
-- get_dtsets_pspheads                       0.530  28.1         0.530  26.7              1      -1.00        1.00       1.00
-- fourwf%(pot)                              0.229  12.1         0.332  16.7           9250      -1.00        0.69       0.69
-- timing timab                              0.145   7.7         0.145   7.3             10      -1.00        1.00       1.00
-- nonlop(apply)                             0.113   6.0         0.107   5.4           9250      -1.00        1.05       1.05
-- abinit(outvars)                           0.103   5.5         0.104   5.2              1      -1.00        0.99       0.99
-- ewald                                     0.090   4.8         0.088   4.4              8      -1.00        1.03       1.03
-- abinit(after driver)                      0.079   4.2         0.079   4.0              1      -1.00        1.00       1.00
-- getghc(/=fourXX,nonlop,fock_XX)           0.069   3.7         0.064   3.2             -1      -1.00        1.08       1.08
-- vtowfk(ssdiag)                            0.049   2.6         0.051   2.6             -1      -1.00        0.96       0.96
-- projbd                                    0.038   2.0         0.049   2.5          13670      -1.00        0.78       0.78
-- abinit(chkinp,chkvars)                    0.037   1.9         0.036   1.8              1      -1.00        1.02       1.02
-- stress                                    0.019   1.0         0.019   1.0              2      -1.00        0.98       0.98
-- ewald2 (+vdw_dftd)                        0.018   1.0         0.019   1.0              2      -1.00        0.97       0.97
-- others (146)                              0.049   2.6         0.053   2.7             -1      -1.00        0.92       0.92
+- get_dtsets_pspheads                       0.530  31.2         0.530  29.4              1      -1.00        1.00       1.00
+- fourwf%(pot)                              0.178  10.5         0.295  16.4           9250      -1.00        0.60       0.60
+- timing timab                              0.118   7.0         0.118   6.5             10      -1.00        1.00       1.00
+- abinit(outvars)                           0.103   6.1         0.104   5.8              1      -1.00        0.99       0.99
+- nonlop(apply)                             0.090   5.3         0.080   4.4           9250      -1.00        1.12       1.12
+- abinit(after driver)                      0.080   4.7         0.081   4.5              1      -1.00        0.99       0.99
+- ewald                                     0.080   4.7         0.079   4.4              8      -1.00        1.01       1.01
+- getghc(/=fourXX,nonlop,fock_XX)           0.059   3.5         0.054   3.0             -1      -1.00        1.09       1.09
+- vtowfk(ssdiag)                            0.041   2.4         0.028   1.6             -1      -1.00        1.45       1.45
+- abinit(chkinp,chkvars)                    0.037   2.2         0.037   2.1              1      -1.00        1.00       1.00
+- projbd                                    0.031   1.8         0.031   1.7          13670      -1.00        0.99       0.99
+- stress                                    0.019   1.1         0.018   1.0              2      -1.00        1.06       1.06
+- ewald2 (+vdw_dftd)                        0.019   1.1         0.018   1.0              2      -1.00        1.05       1.05
+- others (197)                              0.043   2.6         0.046   2.6             -1      -1.00        0.94       0.94
 -<END_TIMER>
 -
-- subtotal                                  1.569  83.1         1.676  84.3                                  0.94       0.94
+- subtotal                                  1.428  84.1         1.519  84.2                                  0.94       0.94
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           1.9, wall_time =           2.0
+- cpu_time =           1.7, wall_time =           1.8
 -
 - routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
 -                                                                                (-1=no count)
-- get_dtsets_pspheads                       0.530  28.1         0.530  26.7              1      -1.00        1.00       1.00
-- fourwf%(pot)                              0.229  12.1         0.332  16.7           9250      -1.00        0.69       0.69
-- timing timab                              0.145   7.7         0.145   7.3             10      -1.00        1.00       1.00
-- nonlop(apply)                             0.113   6.0         0.107   5.4           9250      -1.00        1.05       1.05
-- abinit(outvars)                           0.103   5.5         0.104   5.2              1      -1.00        0.99       0.99
-- ewald                                     0.090   4.8         0.088   4.4              8      -1.00        1.03       1.03
-- abinit(after driver)                      0.079   4.2         0.079   4.0              1      -1.00        1.00       1.00
-- getghc(/=fourXX,nonlop,fock_XX)           0.069   3.7         0.064   3.2             -1      -1.00        1.08       1.08
-- vtowfk(ssdiag)                            0.049   2.6         0.051   2.6             -1      -1.00        0.96       0.96
-- projbd                                    0.038   2.0         0.049   2.5          13670      -1.00        0.78       0.78
-- abinit(chkinp,chkvars)                    0.037   1.9         0.036   1.8              1      -1.00        1.02       1.02
-- stress                                    0.019   1.0         0.019   1.0              2      -1.00        0.98       0.98
-- ewald2 (+vdw_dftd)                        0.018   1.0         0.019   1.0              2      -1.00        0.97       0.97
-- others (146)                              0.049   2.6         0.053   2.7             -1      -1.00        0.92       0.92
+- get_dtsets_pspheads                       0.530  31.2         0.530  29.4              1      -1.00        1.00       1.00
+- fourwf%(pot)                              0.178  10.5         0.295  16.4           9250      -1.00        0.60       0.60
+- timing timab                              0.118   7.0         0.118   6.5             10      -1.00        1.00       1.00
+- abinit(outvars)                           0.103   6.1         0.104   5.8              1      -1.00        0.99       0.99
+- nonlop(apply)                             0.090   5.3         0.080   4.4           9250      -1.00        1.12       1.12
+- abinit(after driver)                      0.080   4.7         0.081   4.5              1      -1.00        0.99       0.99
+- ewald                                     0.080   4.7         0.079   4.4              8      -1.00        1.01       1.01
+- getghc(/=fourXX,nonlop,fock_XX)           0.059   3.5         0.054   3.0             -1      -1.00        1.09       1.09
+- vtowfk(ssdiag)                            0.041   2.4         0.028   1.6             -1      -1.00        1.45       1.45
+- abinit(chkinp,chkvars)                    0.037   2.2         0.037   2.1              1      -1.00        1.00       1.00
+- projbd                                    0.031   1.8         0.031   1.7          13670      -1.00        0.99       0.99
+- stress                                    0.019   1.1         0.018   1.0              2      -1.00        1.06       1.06
+- ewald2 (+vdw_dftd)                        0.019   1.1         0.018   1.0              2      -1.00        1.05       1.05
+- others (197)                              0.043   2.6         0.046   2.6             -1      -1.00        0.94       0.94
 -<END_TIMER>
 
-- subtotal                                  1.569  83.1         1.676  84.3                                  0.94       0.94
+- subtotal                                  1.428  84.1         1.519  84.2                                  0.94       0.94
 
 ================================================================================
 
@@ -2037,10 +2037,10 @@ P           mkmem8         16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.9  wall=          2.0
+- Proc.   0 individual time (sec): cpu=          1.7  wall=          1.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   7 WARNINGs and  39 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.9  wall=          2.0
++Overall time at end (sec) : cpu=          1.7  wall=          1.8
