@@ -175,7 +175,7 @@
   type(oper_type) :: occup_tau
   ! Occupation in different basis
 
-  complex(dpc) :: trace_fermie(12)
+  complex(dp) :: trace_fermie(12)
   ! Container to store useful quantities for a quick computation
   ! of the moments during the Fermi level search
 
@@ -196,10 +196,10 @@
   real(dp), allocatable :: tau(:)
   ! Value of time in imaginary space
 
-  complex(dpc), allocatable :: trace_moments_log_ks(:)
+  complex(dp), allocatable :: trace_moments_log_ks(:)
   ! Trace of the moments of log(G)+log(iw*Id) in KS space
 
-  complex(dpc), allocatable :: trace_moments_log_loc(:)
+  complex(dp), allocatable :: trace_moments_log_loc(:)
   ! Trace of the moments of log(G)+log(iw*Id) in local space
 
   type(oper_type), allocatable :: moments(:)
@@ -708,7 +708,7 @@ subroutine print_green(char1,green,option,paw_dmft,opt_wt,opt_decim)
  character(len=10) :: tag_at
  character(len=3) :: tag_ik
  integer, allocatable :: unitgreenfunc_arr(:),unitgreenloc_arr(:)
- complex(dpc), allocatable :: sf(:,:),sf_corr(:),sf2(:)
+ complex(dp), allocatable :: sf(:,:),sf_corr(:),sf2(:)
 ! *********************************************************************
 
  optwt = 1
@@ -1003,12 +1003,12 @@ subroutine compute_green_batched_core(green,paw_dmft,self,optself,optlog)
  integer :: me_kpt,mkmem,myproc,natom,nkpt,nmoments,nspinor,nsppol,gpu_option,ndat
  integer :: option,shift,shift_green,spacecomm,optoper_ksloc
  real(dp) :: fermilevel,wtk,temp
- complex(dpc) :: green_tmp,trace_tmp
+ complex(dp) :: green_tmp,trace_tmp
  real(dp), allocatable :: eig(:),rwork(:),fac(:)
- complex(dpc), allocatable :: mat_tmp(:,:),work(:),omega_current(:)
+ complex(dp), allocatable :: mat_tmp(:,:),work(:),omega_current(:)
  type(oper_type), target :: green_oper_ndat
  real(dp), ABI_CONTIGUOUS pointer :: eigen_dft(:,:,:)
- complex(dpc), ABI_CONTIGUOUS pointer :: ks(:,:,:,:),occup_ks(:,:,:,:)
+ complex(dp), ABI_CONTIGUOUS pointer :: ks(:,:,:,:),occup_ks(:,:,:,:)
 ! *********************************************************************
 
  ABI_NVTX_START_RANGE(NVTX_DMFT_COMPUTE_GREEN_BATCHED)
@@ -1347,11 +1347,11 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
  integer :: opt_quick_restart,option,optlog,optnonxsum,optnonxsum2,optself
  integer :: shift,shift_green,spacecomm,gpu_option
  real(dp) :: beta,correction,eigen,fac,fermilevel,temp,wtk
- complex(dpc) :: green_tmp,omega_current,trace_tmp
+ complex(dp) :: green_tmp,omega_current,trace_tmp
  character(len=500) :: message
  real(dp) :: tsec(2)
  real(dp), allocatable :: eig(:),rwork(:)
- complex(dpc), allocatable :: mat_tmp(:,:),omega_fac(:),work(:)
+ complex(dp), allocatable :: mat_tmp(:,:),omega_fac(:),work(:)
 #ifdef HAVE_OPENMP_OFFLOAD
  integer :: ndat
  type(oper_type), target :: green_oper_ndat
@@ -1921,7 +1921,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
  character(len=12) :: tag
  character(len=500) :: message
  real(dp) :: tsec(2)
- complex(dpc), allocatable :: omega_fac(:),shift(:)
+ complex(dp), allocatable :: omega_fac(:),shift(:)
  type(matlu_type), allocatable :: matlu_temp(:)
 ! real(dp), allocatable :: charge_loc_old(:,:)
 ! type(oper_type)  :: oper_c
@@ -2500,10 +2500,10 @@ subroutine fourier_green(cryst_struc,green,paw_dmft,opt_ksloc,opt_tw)
  integer :: iatom,ib,ib1,ierr,ifreq,ikpt,im,im1,iparal,is,ispinor,ispinor1,itau
  integer :: mband,mbandc,myproc,natom,ndim,nkpt,nproc,nspinor,nsppol,spacecomm!,opt_four
  character(len=500) :: message
-! complex(dpc):: ybcbeg,ybcend
+! complex(dp):: ybcbeg,ybcend
 ! arrays
- complex(dpc), allocatable :: fw(:)
- complex(dpc), allocatable :: ft(:)
+ complex(dp), allocatable :: fw(:)
+ complex(dp), allocatable :: ft(:)
  type(green_type) :: green_temp
 ! *********************************************************************
 ! ybcbeg=czero
@@ -2920,9 +2920,9 @@ subroutine add_int_fct(ifreq,ff,ldiag,omega_current,option,integral,temp,wgt_wlo
  integer,intent(in) :: ifreq
  logical,intent(in) :: ldiag
  integer,intent(in) :: option,dmft_nwlo
- complex(dpc),intent(inout) :: integral
- complex(dpc), intent(in) :: ff
- complex(dpc), intent(in) :: omega_current
+ complex(dp),intent(inout) :: integral
+ complex(dp), intent(in) :: ff
+ complex(dp), intent(in) :: omega_current
  real(dp), intent(in) :: temp, wgt_wlo
 
 !local variables-------------------------------
@@ -3002,9 +3002,9 @@ subroutine int_fct(ff,ldiag,option,paw_dmft,integral,procb,myproc)
 !type
  logical,intent(in) :: ldiag
  integer,intent(in) :: option
- complex(dpc),intent(out) :: integral
+ complex(dp),intent(out) :: integral
  type(paw_dmft_type), intent(in) :: paw_dmft
- complex(dpc), intent(in) :: ff(paw_dmft%dmft_nwlo)
+ complex(dp), intent(in) :: ff(paw_dmft%dmft_nwlo)
  integer, optional, intent(in) :: procb(paw_dmft%dmft_nwlo)
  integer, optional, intent(in) :: myproc
 
@@ -3123,16 +3123,16 @@ subroutine fourier_fct(fw,ft,ldiag,ltau,opt_four,paw_dmft)
  logical,intent(in) :: ldiag
  integer,intent(in) :: ltau,opt_four
  type(paw_dmft_type), intent(in) :: paw_dmft
- complex(dpc), intent(inout) :: fw(paw_dmft%dmft_nwlo)
- complex(dpc), intent(inout) :: ft(ltau)
+ complex(dp), intent(inout) :: fw(paw_dmft%dmft_nwlo)
+ complex(dp), intent(inout) :: ft(ltau)
 
 !local variables-------------------------------
- complex(dpc), allocatable ::  splined_li(:)
- complex(dpc), allocatable ::  tospline_li(:)
-! complex(dpc), allocatable :: fw1(:)
+ complex(dp), allocatable ::  splined_li(:)
+ complex(dp), allocatable ::  tospline_li(:)
+! complex(dp), allocatable :: fw1(:)
  real(dp), allocatable :: ftr(:)
  real(dp) :: beta
- complex(dpc) :: xsto
+ complex(dp) :: xsto
  integer :: iflag,ifreq,itau,iwarn,log_direct
  character(len=500) :: message
  real(dp), allocatable :: omega_li(:)
@@ -3257,12 +3257,11 @@ subroutine spline_fct(fw1,fw2,opt_spline,paw_dmft)
 !type
  integer,intent(in) :: opt_spline
  type(paw_dmft_type), intent(in) :: paw_dmft
- complex(dpc), intent(inout) :: fw1(:)
- complex(dpc), intent(inout) :: fw2(:)
+ complex(dp), intent(inout) :: fw1(:)
+ complex(dp), intent(inout) :: fw2(:)
  integer :: size_fw1
  integer :: size_fw2
  real(dp), allocatable :: omega_li(:)
-
 ! *********************************************************************
 
  size_fw1 = size(fw1)
@@ -3321,7 +3320,7 @@ subroutine occup_green_tau(green)
  type(green_type), intent(inout) :: green
 !Local variables-------------------------------
  integer :: natom
- complex(dpc), allocatable :: shift(:)
+ complex(dp), allocatable :: shift(:)
 ! *********************************************************************
 
  natom = green%oper_tau(1)%natom
@@ -4074,9 +4073,9 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
  integer :: mkmem,nband_k,nkpt,nmoments,nspinor,nsppol,shift
  real(dp) :: correction,correction_prime,eig
  real(dp) :: fac,occ_prime,temp,wtk
- complex(dpc) :: omega
+ complex(dp) :: omega
  type(oper_type) :: oper_tmp
- complex(dpc), allocatable :: omega_fac(:),trace_moments(:),trace_moments_prime(:)
+ complex(dp), allocatable :: omega_fac(:),trace_moments(:),trace_moments_prime(:)
 ! *********************************************************************
 
    ABI_NVTX_START_RANGE(NVTX_DMFT_COMPUTE_NB_ELEC)
@@ -4210,8 +4209,8 @@ subroutine compute_trace_moments(fermie,trace_fermie,trace_moments,trace_moments
 
 !Arguments ------------------------------------
  real(dp), intent(in) :: fermie
- complex(dpc), intent(in) :: trace_fermie(:)
- complex(dpc), intent(inout) :: trace_moments(:),trace_moments_prime(:)
+ complex(dp), intent(in) :: trace_fermie(:)
+ complex(dp), intent(inout) :: trace_moments(:),trace_moments_prime(:)
 ! *********************************************
 
   trace_moments(2) = trace_fermie(2) - fermie*trace_fermie(1)
@@ -4284,9 +4283,8 @@ subroutine local_ks_green(green,paw_dmft,prtopt)
  integer,allocatable :: unitgreenlocks_arr(:)
  real(dp) :: beta
  real(dp), allocatable :: tau(:)
- complex(dpc), allocatable :: loc_ks(:,:,:)
- complex(dpc), allocatable :: loc_ks_tau(:,:,:),fw(:),ft(:)
-!scalars
+ complex(dp), allocatable :: loc_ks(:,:,:)
+ complex(dp), allocatable :: loc_ks_tau(:,:,:),fw(:),ft(:)
 !************************************************************************
  mbandc=paw_dmft%mbandc
  nkpt=paw_dmft%nkpt
@@ -4449,7 +4447,7 @@ subroutine compute_moments_ks(green,self,paw_dmft,opt_self,opt_log,opt_quick_res
  integer :: diag,i,ib,ierr,mkmem,natom,nsppol
  integer :: optlog,optquickrestart,optself,shift
  real(dp) :: dum,mu
- complex(dpc) :: trace_tmp
+ complex(dp) :: trace_tmp
  type(oper_type) :: oper(2)
  real(dp), allocatable :: trace_loc(:,:)
  character(len=500) :: message
@@ -4716,9 +4714,9 @@ subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log)
  integer, optional, intent(in) :: opt_log
 !Local variables ------------------------------
  integer :: i,natom,nspinor,nsppol,optlog
- complex(dpc) :: trace
+ complex(dp) :: trace
  integer, allocatable :: lpawu(:)
- complex(dpc), allocatable :: trace_loc(:)
+ complex(dp), allocatable :: trace_loc(:)
  type(matlu_type), allocatable :: matlu(:,:)
 !************************************************************************
 

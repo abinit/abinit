@@ -27,7 +27,6 @@ subroutine xmpi_allgatherv_int2d(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
 
 !Local variables--------------
  integer :: cc,dd,sz1
-
 ! *************************************************************************
 
  ier=0
@@ -81,7 +80,6 @@ subroutine xmpi_allgatherv_int(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
 
 !Local variables-------------------
  integer :: cc,dd
-
 ! *************************************************************************
 
  ier=0
@@ -151,7 +149,6 @@ subroutine xmpi_allgatherv_int1_dp1(buf_int,buf_int_size,buf_dp,buf_dp_size,&
  integer,pointer :: outbuf_int(:)
  real(dp),pointer:: outbuf_dp(:)
  character,allocatable :: buf_pack(:),buf_pack_tot(:)
-
 ! *************************************************************************
 
  ier=0
@@ -995,15 +992,14 @@ end subroutine xmpi_allgatherv_coeff2d_indx
 subroutine xmpi_allgatherv_dc(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
 
 !Arguments-------------------------
- complex(dpc), DEV_CONTARRD intent(in) :: xval(:)
- complex(dpc), DEV_CONTARRD intent(inout) :: recvbuf(:)
+ complex(dp), DEV_CONTARRD intent(in) :: xval(:)
+ complex(dp), DEV_CONTARRD intent(inout) :: recvbuf(:)
  integer,intent(in) :: recvcounts(:),displs(:)
  integer,intent(in) :: nelem,comm
  integer,intent(out) :: ier
 
 !Local variables--------------
  integer :: cc,dd
-
 ! *************************************************************************
 
  ier=0

@@ -97,11 +97,11 @@ module m_defs_ptgroups
    character(len=IRREPNAME_LEN) :: name="???"
    ! The name of the irreducible representation.
 
-   complex(dpc),allocatable :: mat(:,:,:)
+   complex(dp),allocatable :: mat(:,:,:)
    ! mat(dim,dim,nsym)
    ! The irreducible representations of the group.
 
-   complex(dpc),allocatable :: trace(:)
+   complex(dp),allocatable :: trace(:)
    ! trace(nsym)
    ! The trace of each matrix.
 

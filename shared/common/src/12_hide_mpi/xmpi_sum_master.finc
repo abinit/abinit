@@ -1156,7 +1156,7 @@ end subroutine xmpi_sum_master_c5cplx
 subroutine xmpi_sum_master_c1dpc(xval,master,comm,ier)
 
 !Arguments-------------------------
- complex(dpc), DEV_CONTARRD intent(inout) :: xval(:)
+ complex(dp), DEV_CONTARRD intent(inout) :: xval(:)
  integer,intent(in) :: master
  integer,intent(in) :: comm
  integer,intent(out) :: ier
@@ -1165,7 +1165,7 @@ subroutine xmpi_sum_master_c1dpc(xval,master,comm,ier)
 #if defined HAVE_MPI
  integer :: n1
  integer :: nproc_space_comm
- complex(dpc),allocatable :: xsum(:)
+ complex(dp),allocatable :: xsum(:)
 #endif
 
 ! *************************************************************************
@@ -1213,7 +1213,7 @@ end subroutine xmpi_sum_master_c1dpc
 subroutine xmpi_sum_master_c2dpc(xval,master,comm,ier)
 
 !Arguments-------------------------
- complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:)
+ complex(dp), DEV_CONTARRD intent(inout) :: xval(:,:)
  integer ,intent(in) :: master
  integer ,intent(in) :: comm
  integer ,intent(out) :: ier
@@ -1222,7 +1222,7 @@ subroutine xmpi_sum_master_c2dpc(xval,master,comm,ier)
 #if defined HAVE_MPI
  integer :: my_dt,my_op,n1,n2
  integer(kind=int64) :: ntot
- complex(dpc) , allocatable :: xsum(:,:)
+ complex(dp) , allocatable :: xsum(:,:)
  integer :: nproc_space_comm
 #endif
 
@@ -1286,7 +1286,7 @@ end subroutine xmpi_sum_master_c2dpc
 subroutine xmpi_sum_master_c3dpc(xval,master,comm,ier)
 
 !Arguments-------------------------
- complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:)
+ complex(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:)
  integer,intent(in) :: master
  integer,intent(in) :: comm
  integer,intent(out) :: ier
@@ -1295,7 +1295,7 @@ subroutine xmpi_sum_master_c3dpc(xval,master,comm,ier)
 #if defined HAVE_MPI
  integer :: my_dt,my_op,n1,n2,n3
  integer(kind=int64) :: ntot
- complex(dpc) , allocatable :: xsum(:,:,:)
+ complex(dp) , allocatable :: xsum(:,:,:)
  integer :: nproc_space_comm
 #endif
 
@@ -1359,7 +1359,7 @@ end subroutine xmpi_sum_master_c3dpc
 subroutine xmpi_sum_master_c4dpc(xval,master,comm,ier)
 
 !Arguments-------------------------
- complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
+ complex(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
  integer,intent(in) :: master
  integer,intent(in) :: comm
  integer,intent(out) :: ier
@@ -1368,7 +1368,7 @@ subroutine xmpi_sum_master_c4dpc(xval,master,comm,ier)
 #if defined HAVE_MPI
  integer :: my_dt,my_op,n1,n2,n3,n4
  integer(kind=int64) :: ntot
- complex(dpc) , allocatable :: xsum(:,:,:,:)
+ complex(dp) , allocatable :: xsum(:,:,:,:)
  integer :: nproc_space_comm
 #endif
 
@@ -1433,7 +1433,7 @@ end subroutine xmpi_sum_master_c4dpc
 subroutine xmpi_sum_master_c5dpc(xval,master,comm,ier)
 
 !Arguments-------------------------
- complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:)
+ complex(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:)
  integer,intent(in) :: master
  integer,intent(in) :: comm
  integer,intent(out) :: ier
@@ -1442,7 +1442,7 @@ subroutine xmpi_sum_master_c5dpc(xval,master,comm,ier)
 #if defined HAVE_MPI
  integer :: my_dt,my_op,n1,n2,n3,n4,n5
  integer(kind=int64) :: ntot
- complex(dpc),allocatable :: xsum(:,:,:,:,:)
+ complex(dp),allocatable :: xsum(:,:,:,:,:)
  integer :: nproc_space_comm
 #endif
 

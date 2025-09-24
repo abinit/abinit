@@ -319,7 +319,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  logical :: need_wfk,need_wf1,nmxc,paral_atom,qne0,t_exist,use_ompgpu,with_vxctau
  character(len=500) :: msg
  character(len=fnlen) :: fiwfddk(3)
- complex(dpc), parameter :: cminusone  = (-1._dp,0._dp)
+ complex(dp), parameter :: cminusone  = (-1._dp,0._dp)
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq
  type(MPI_type) :: mpi_enreg_seq

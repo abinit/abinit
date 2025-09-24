@@ -172,14 +172,13 @@ function paw_ihr(isppol,nspinor,npw,istwfk,kpoint,Cryst,Pawtab,ug1,ug2,gvec,Cprj
  integer :: iatom,itypat,lmn_size,ilmn,jlmn,isel
  integer :: ig,iab,spad1,spad2
  real(dp) :: re_p,im_p
- complex(dpc) :: ctemp
+ complex(dp) :: ctemp
 !arrays
  integer :: spinorwf_pad(2,4)
  real(dp) :: hurc_ij(3),ons_cart(2,3) !,ons_comm_red(2,3)
  real(dp) :: gspace_cart2red(3,3) !rs_cart2red(3,3),
  real(dp), ABI_CONTIGUOUS pointer :: nabla_ij(:,:,:)
  complex(gwpc) :: ihr_comm_cart(3,nspinor**2)
-
 ! *************************************************************************
 
  ! [H, r] = -\nabla + [V_{nl}, r]
@@ -327,13 +326,12 @@ subroutine paw_cross_ihr_comm(ihr_comm,nspinor,nr,Cryst,Pawfgrtab,Paw_onsite,&
 
 !Local variables-------------------------------
  integer :: iatom,lmn_size,ilmn,ifgd,ifftsph,nfgd
- complex(dpc) :: cp1, cp2
- complex(dpc) :: cross1,cross2
+ complex(dp) :: cp1, cp2
+ complex(dp) :: cross1,cross2
 !arrays
  real(dp) :: gspace_cart2red(3,3)
  complex(gwpc) :: ihr_comm_cart(3,nspinor**2)
- complex(dpc) :: dphigr(3), dphigr1(3),dphigr2(3)
-
+ complex(dp) :: dphigr(3), dphigr1(3),dphigr2(3)
 ! *************************************************************************
 
  ABI_CHECK(nspinor==1,"nspinor + pawcross not implemented")

@@ -214,9 +214,9 @@ subroutine zorthonormalize(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram
 !scalars
  integer,intent(in) :: blocksize,spaceComm,vectsize
 !arrays
- complex(dpc),intent(in) :: blockvectorbx(vectsize,blocksize)
- complex(dpc),intent(inout) :: blockvectorx(vectsize,blocksize)
- complex(dpc),intent(out) :: sqgram(blocksize,blocksize)
+ complex(dp),intent(in) :: blockvectorbx(vectsize,blocksize)
+ complex(dp),intent(inout) :: blockvectorx(vectsize,blocksize)
+ complex(dp),intent(out) :: sqgram(blocksize,blocksize)
 
 !Local variables-------------------------------
 !scalars

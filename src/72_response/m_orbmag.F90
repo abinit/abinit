@@ -93,8 +93,8 @@ module m_orbmag
 
   ! accounts for exp(i k.r) in abinit derivatives rather than exp( 2pi i k.r)
   real(dp),parameter :: c2=one/(two_pi*two_pi)
-  complex(dpc),parameter :: com=-half*j_dpc  ! Orbital magnetism pre-factor
-  complex(dpc),parameter :: cbc=-com ! Berry curvature pre-factor
+  complex(dp),parameter :: com=-half*j_dpc  ! Orbital magnetism pre-factor
+  complex(dp),parameter :: cbc=-com ! Berry curvature pre-factor
 
   ! local datatype for orbmag data on kpt mesh, for eventual output to netcdf
   type,private :: orbmag_mesh_type
@@ -145,21 +145,21 @@ module m_orbmag
     ! sum of \Delta A_ij
     ! typically will be just paw_ij
     ! aij(natom,lmn2max,ndij)
-    complex(dpc),allocatable :: aij(:,:,:)
+    complex(dp),allocatable :: aij(:,:,:)
 
     ! <phi|phi> - <tphi|tphi>
     ! qij(natom,lmn2max,ndij)
-    complex(dpc),allocatable :: qij(:,:,:)
+    complex(dp),allocatable :: qij(:,:,:)
 
     ! onsite L_R/2
     ! <phi|L_R/2|phi> - <tphi|L_R/2|tphi>
     ! LR(natom,lmn2max,ndij,3)
-    complex(dpc),allocatable :: LR(:,:,:,:)
+    complex(dp),allocatable :: LR(:,:,:,:)
 
     ! onsite BM
     ! <phi|Bxr . mxr|phi> - <tphi|Bxr . mxr|tphi>
     ! BM(natom,lmn2max,ndij,3)
-    complex(dpc),allocatable :: BM(:,:,:,:)
+    complex(dp),allocatable :: BM(:,:,:,:)
 
   end type dterm_type
 
@@ -877,10 +877,9 @@ subroutine orbmag_nl1_k(atindx,cprj_k,dimlmn,dterm,dtset,ikpt,isppol,mcprjk,&
   !Local variables -------------------------
   !scalars
   integer :: adir,nn
-  complex(dpc) :: tt
+  complex(dp) :: tt
   !arrays
   type(pawcprj_type),allocatable :: cwaveprj(:,:)
-
 !--------------------------------------------------------------------
 
  ABI_MALLOC(cwaveprj,(dtset%natom,dtset%nspinor))
@@ -967,7 +966,7 @@ subroutine orbmag_nl_k(atindx,cprj_k,dimlmn,dterm,dtset,eig_k,ikpt,isppol,&
   !scalars
   integer :: adir,bdir,gdir,nn
   real(dp) :: epsabg
-  complex(dpc) :: m1,prefac_m,txt_d,txt_q
+  complex(dp) :: m1,prefac_m,txt_d,txt_q
   !arrays
   type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
@@ -1071,11 +1070,10 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gs_hamk,ikpt,isp
   !scalars
   integer :: adir,bdir,cpopt,gdir,ndat,nn,npwsp,sij_opt,tim_getghc,type_calc
   real(dp) :: doti,dotr,epsabg,lams
-  complex(dpc) :: b1,m1,m1_mu,prefac_b,prefac_m
+  complex(dp) :: b1,m1,m1_mu,prefac_b,prefac_m
   !arrays
   real(dp),allocatable :: bra(:,:),ghc(:,:),gsc(:,:),gvnlxc(:,:),ket(:,:)
   type(pawcprj_type),allocatable :: cwaveprj1(:,:)
-
 !--------------------------------------------------------------------
 
  npwsp = npw_k*dtset%nspinor
@@ -1212,12 +1210,11 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gs_hamk,&
   integer :: adir,bdir,choice,cpopt,gdir,ndat,nn,nnlout,np,npwsp
   integer :: paw_opt,signs,tim_getghc
   real(dp) :: doti,dotr,epsabg
-  complex(dpc) :: b1,bv2b,m1,m1_mu,mb,mg,mv2b,mv2b_mu,prefac_b,prefac_m
+  complex(dp) :: b1,bv2b,m1,m1_mu,mb,mg,mv2b,mv2b_mu,prefac_b,prefac_m
   !arrays
   real(dp) :: enlout(1),lamv(1)
   real(dp),allocatable :: bra(:,:),ket(:,:),svectoutb(:,:),svectoutg(:,:),vectout(:,:)
   type(pawcprj_type),allocatable :: cwaveprj(:,:)
-
 !--------------------------------------------------------------------
 
  npwsp = npw_k*dtset%nspinor
@@ -1545,12 +1542,12 @@ subroutine txt_me(aij,atindx,bcp,bdir,dtset,gdir,kcp,lmn2max,ndij,pawtab,txt)
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: bdir,gdir,lmn2max,ndij
-  complex(dpc),intent(out) :: txt
+  complex(dp),intent(out) :: txt
   type(dataset_type),intent(in) :: dtset
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
-  complex(dpc),intent(in) :: aij(dtset%natom,lmn2max,ndij)
+  complex(dp),intent(in) :: aij(dtset%natom,lmn2max,ndij)
   type(pawcprj_type),intent(in) :: bcp(dtset%natom,dtset%nspinor)
   type(pawcprj_type),intent(in) :: kcp(dtset%natom,dtset%nspinor)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
@@ -1558,10 +1555,7 @@ subroutine txt_me(aij,atindx,bcp,bdir,dtset,gdir,kcp,lmn2max,ndij,pawtab,txt)
   !Local variables -------------------------
   !scalars
   integer :: iat,iatom,itypat,ilmn,isp,jlmn,klmn
-  complex(dpc) :: dcpi,dcpj,dij
-
-  !arrays
-
+  complex(dp) :: dcpi,dcpj,dij
 !--------------------------------------------------------------------
 
   txt = czero
@@ -1634,22 +1628,19 @@ subroutine tt_me(aij,atindx,bcp,dtset,kcp,lmn2max,ndij,pawtab,tt)
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: lmn2max,ndij
-  complex(dpc),intent(out) :: tt
+  complex(dp),intent(out) :: tt
   type(dataset_type),intent(in) :: dtset
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
-  complex(dpc),intent(in) :: aij(dtset%natom,lmn2max,ndij)
+  complex(dp),intent(in) :: aij(dtset%natom,lmn2max,ndij)
   type(pawcprj_type),intent(in) :: bcp(dtset%natom,dtset%nspinor),kcp(dtset%natom,dtset%nspinor)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
   integer :: iat,iatom,isp,itypat,ilmn,jlmn,klmn
-  complex(dpc) :: cpi,cpj,dij
-
-  !arrays
-
+  complex(dp) :: cpi,cpj,dij
 !--------------------------------------------------------------------
 
   tt = czero
@@ -1802,9 +1793,8 @@ subroutine dterm_BM(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,re
   real(dp) :: a2,afact,intg
 
   !arrays
-  complex(dpc) :: dij_cart(3),dij_red(3)
+  complex(dp) :: dij_cart(3),dij_red(3)
   real(dp),allocatable :: dyadic(:,:,:),ff(:),radint(:)
-
 !--------------------------------------------------------------------
 
   dterm%BM = czero
@@ -1911,12 +1901,10 @@ subroutine dterm_LR(atindx,dterm,dtset,gprimd,pawrad,pawtab)
   integer :: adir,iat,iatom,ilmn,il,im,itypat,jlmn,jl,jm
   integer :: klmn,kln,mesh_size,pwave_size
   real(dp) :: intg
-  complex(dpc) :: orbl_me
-
+  complex(dp) :: orbl_me
   !arrays
-  complex(dpc) :: dij_cart(3),dij_red(3)
+  complex(dp) :: dij_cart(3),dij_red(3)
   real(dp),allocatable :: ff(:)
-
 !--------------------------------------------------------------------
 
   dterm%LR = czero

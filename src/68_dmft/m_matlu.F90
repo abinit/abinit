@@ -130,7 +130,7 @@ MODULE m_matlu
   integer :: nsppol
   ! Number of polarizations
 
-  complex(dpc), allocatable :: mat(:,:,:)
+  complex(dp), allocatable :: mat(:,:,:)
   ! Local quantity
 
  end type matlu_type
@@ -169,7 +169,7 @@ subroutine init_matlu(natom,nspinor,nsppol,lpawu_natom,matlu,gpu_option,ndat)
  type(matlu_type), target, intent(inout) :: matlu(natom)
 !Local variables ------------------------------------
  integer :: iatom,lpawu,ndim,l_gpu_option,l_ndat
- complex(dpc), ABI_CONTIGUOUS pointer :: mat(:,:,:)
+ complex(dp), ABI_CONTIGUOUS pointer :: mat(:,:,:)
 !************************************************************************
 
  l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option=gpu_option
@@ -295,7 +295,7 @@ subroutine destroy_matlu(matlu,natom)
  type(matlu_type),target, intent(inout) :: matlu(natom)
 !Local variables-------------------------------
  integer :: iatom
- complex(dpc), ABI_CONTIGUOUS pointer :: mat(:,:,:)
+ complex(dp), ABI_CONTIGUOUS pointer :: mat(:,:,:)
 ! *********************************************************************
 
  do iatom=1,natom
@@ -569,7 +569,7 @@ subroutine print_matlu(matlu,natom,prtopt,opt_diag,opt_ab_out,opt_exp,argout,com
  integer :: arg_out,iatom,im,im1,ispinor,ispinor1,isppol,lpawu
  integer :: ndim,nspinor,nsppol,optab_out,optdiag
  logical :: testcmplx,testcmplx_
- complex(dpc), allocatable :: mat_nmrep(:,:)
+ complex(dp), allocatable :: mat_nmrep(:,:)
  character(len=500) :: message
  character(len=4) :: mode_paral,tag_at
  character(len=9), parameter :: dspinm(2,2) = RESHAPE((/"n        ","mx       ","my       ","mz       "/),(/2,2/))
@@ -735,12 +735,12 @@ end subroutine print_matlu
 !Local variables-------------------------------
  integer :: at_indx,iatom,irot,isppol,lpawu,m1,m2,mu,natom
  integer :: ndim,ndim_max,nspinor,nsppol,nsym,nu,gpu_option
- complex(dpc), allocatable :: gloc_tmp(:,:,:),gloc_tmp2(:,:,:)
- complex(dpc), allocatable :: gloc_tmp3(:,:,:,:),gloc_tmp4(:,:,:,:)
+ complex(dp), allocatable :: gloc_tmp(:,:,:),gloc_tmp2(:,:,:)
+ complex(dp), allocatable :: gloc_tmp3(:,:,:,:),gloc_tmp4(:,:,:,:)
  type(matlu_type), allocatable, target :: gloc_nmrep(:),glocsym(:)
- complex(dpc), ABI_CONTIGUOUS pointer :: zarot(:,:,:,:),gloc_mat(:,:,:),glocsym_mat(:,:,:)
+ complex(dp), ABI_CONTIGUOUS pointer :: zarot(:,:,:,:),gloc_mat(:,:,:),glocsym_mat(:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: symrec_cart(:,:,:)
- complex(dpc) :: ratio
+ complex(dp) :: ratio
 
  natom    = paw_dmft%natom
  ndim_max = 2*paw_dmft%maxlpawu + 1
@@ -1492,7 +1492,7 @@ end subroutine add_matlu
  type(matlu_type), intent(inout), target :: glocnm(natom),glocspsp(natom)
 !Local variables-------------------------------
  integer :: iatom,lpawu,m1,m2,mu,ndim,nsppol,isppol,gpu_option
- complex(dpc), ABI_CONTIGUOUS pointer :: glocnm_mat(:,:,:),glocspsp_mat(:,:,:)
+ complex(dp), ABI_CONTIGUOUS pointer :: glocnm_mat(:,:,:),glocspsp_mat(:,:,:)
  character(len=500) :: message
 
 ! DBG_ENTER("COLL")
@@ -1627,10 +1627,10 @@ end subroutine add_matlu
  type(matlu_type), intent(in) :: matlu(natom)
  real(dp), target, optional, intent(inout) :: trace_loc(matlu(1)%nsppol+1,natom)
  integer, optional, intent(in) :: itau
- complex(dpc), optional, intent(out) :: trace
+ complex(dp), optional, intent(out) :: trace
 !Local variables-------------------------------
  integer :: iatom,im,isppol,lpawu,ndim,nspinor,nsppol
- complex(dpc) :: trace_tmp,trace_tmp2
+ complex(dp) :: trace_tmp,trace_tmp2
  real(dp), ABI_CONTIGUOUS pointer :: traceloc(:,:) => null()
  character(len=4) :: tag
  character(len=12) :: tag_nb_elec
@@ -1759,7 +1759,7 @@ end subroutine add_matlu
 
 ! type  matlus_type
 !  SEQUENCE
-!  complex(dpc), pointer :: mat(:,:)
+!  complex(dp), pointer :: mat(:,:)
 ! end type matlus_type
 
 !Arguments ------------------------------------
@@ -1889,8 +1889,8 @@ end subroutine add_matlu
  real(dp), allocatable :: eig(:),rwork(:),valuer(:,:),work(:)!,valuer2(:,:)
  !real(dp),allocatable :: valuer3(:,:),valuer4(:,:)
 ! real(dp),allocatable :: eigvec(:,:)
- complex(dpc), allocatable :: temp_mat(:,:),zwork(:)
-!debug complex(dpc),allocatable :: temp_mat3(:,:)
+ complex(dp), allocatable :: temp_mat(:,:),zwork(:)
+!debug complex(dp),allocatable :: temp_mat3(:,:)
 !************************************************************************
 
  blockdiag    = .false.
@@ -2308,7 +2308,7 @@ end subroutine add_matlu
  type(matlu_type), intent(in) :: rot_mat(natom)
 !Local variables-------------------------------
  integer :: iatom,isppol,lpawu,nspinor,nsppol,tndim
- complex(dpc), allocatable :: temp_mat(:,:)
+ complex(dp), allocatable :: temp_mat(:,:)
  character(len=1) :: c1,c2
 !************************************************************************
 
@@ -2537,7 +2537,7 @@ end subroutine add_matlu
 !Arguments ------------------------------------
  integer, intent(in) :: natom
  type(matlu_type), intent(inout) :: matlu(natom)
- complex(dpc), intent(in) :: shift(natom)
+ complex(dp), intent(in) :: shift(natom)
  integer, optional, intent(in) :: signe
 !Local variables-------------------------------
  integer :: iatom,im,lpawu,ndim,nspinor,nsppol,signe_used
@@ -2962,9 +2962,9 @@ end subroutine add_matlu
 !Local variables-------------------------------
  integer :: iatom,im1,im2,ispin,ispinor1,ispinor2,isppol
  integer :: lpawu,ndim,ndim_max,nspin,nspinor,nsppol
- complex(dpc), pointer :: mat_out(:,:) => null(), slm2ylm(:,:) => null()
- complex(dpc), allocatable :: mat_inp(:,:),mat_tmp(:,:)
- complex(dpc), target, allocatable :: mat_tmp2(:,:)
+ complex(dp), pointer :: mat_out(:,:) => null(), slm2ylm(:,:) => null()
+ complex(dp), allocatable :: mat_inp(:,:),mat_tmp(:,:)
+ complex(dp), target, allocatable :: mat_tmp2(:,:)
  character(len=1) :: c1,c2
  character(len=500) :: message
 !************************************************************************
@@ -3189,7 +3189,7 @@ end subroutine add_matlu
 !Arguments ------------------------------------
  integer, intent(in) :: natom
  type(matlu_type), intent(inout) :: matlu(natom)
- complex(dpc), intent(in) :: fac
+ complex(dp), intent(in) :: fac
 !Local variables-------------------------------
  integer :: iatom,lpawu
 ! character(len=500) :: message
@@ -3372,7 +3372,7 @@ end subroutine add_matlu
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: natom,option,optprt
- complex(dpc), allocatable, intent(out) :: mu
+ complex(dp), allocatable, intent(out) :: mu
 !arrays
  type(matlu_type), intent(inout) :: matlu(natom)
 !Local variables-------------------------------
@@ -3382,9 +3382,9 @@ end subroutine add_matlu
  character(len=500) :: message
  real(dp) :: xj
 !arrays
- complex(dpc),allocatable :: mat_out_c(:,:)
+ complex(dp),allocatable :: mat_out_c(:,:)
 ! integer, allocatable :: ind_msml(:,:)
- complex(dpc), allocatable :: temp_mat(:,:)
+ complex(dp), allocatable :: temp_mat(:,:)
  type(coeff2c_type), allocatable :: gathermatlu(:)
  type(coeff2c_type), allocatable :: muorb(:)
 !************************************************************************
@@ -3613,7 +3613,7 @@ end subroutine add_matlu
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: natom,option,optprt
- complex(dpc), allocatable, intent(out) :: mu
+ complex(dp), allocatable, intent(out) :: mu
 !arrays
  type(matlu_type), intent(inout) :: matlu(natom)
 !Local variables-------------------------------
@@ -3623,9 +3623,9 @@ end subroutine add_matlu
  character(len=500) :: message
  real(dp) :: xj
 !arrays
- complex(dpc),allocatable :: mat_out_c(:,:)
+ complex(dp),allocatable :: mat_out_c(:,:)
  integer, allocatable :: ind_msml(:,:)
- complex(dpc), allocatable :: temp_mat(:,:)
+ complex(dp), allocatable :: temp_mat(:,:)
  type(coeff2c_type), allocatable :: gathermatlu(:)
  type(coeff2c_type), allocatable :: muspin(:)
 !************************************************************************
@@ -3879,7 +3879,7 @@ end subroutine add_matlu
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: natom,option,optprt
- complex(dpc), allocatable, intent(out) :: mu
+ complex(dp), allocatable, intent(out) :: mu
 !arrays
  type(matlu_type), intent(inout) :: matlu(natom)
 !Local variables-------------------------------
@@ -3889,9 +3889,9 @@ end subroutine add_matlu
  character(len=500) :: message
  real(dp) :: xj
 !arrays
- complex(dpc),allocatable :: mat_out_c(:,:)
+ complex(dp),allocatable :: mat_out_c(:,:)
  integer, allocatable :: ind_msml(:,:)
- complex(dpc), allocatable :: temp_mat(:,:)
+ complex(dp), allocatable :: temp_mat(:,:)
  type(coeff2c_type), allocatable :: gathermatlu(:)
  type(coeff2c_type), allocatable :: muzeeman(:)
 !************************************************************************
@@ -4365,8 +4365,8 @@ end subroutine add_matlu
 !Arguments ------------------------------------
  integer, intent(in) :: natom
  type(matlu_type), intent(in) :: matlu1(natom),matlu2(natom)
- complex(dpc), intent(inout) :: trace(natom)
- complex(dpc), optional, intent(out) :: trace_tot
+ complex(dp), intent(inout) :: trace(natom)
+ complex(dp), optional, intent(out) :: trace_tot
  integer, optional, intent(in) :: iatom
 !Local variables-------------------------------
  integer :: ia1,ia2,iatom_,isppol,lpawu,nspinor,nsppol
@@ -4427,7 +4427,7 @@ end subroutine add_matlu
 !Local variables-------------------------------
  integer :: iatom,ibuf,im1,ierr,isppol,lpawu
  integer :: master_node,ndim,nspinor,nsppol,opt,siz_buf
- complex(dpc), allocatable :: buffer(:)
+ complex(dp), allocatable :: buffer(:)
 !************************************************************************
 
  nspinor = matlu(1)%nspinor
@@ -4510,7 +4510,7 @@ end subroutine add_matlu
 !Local variables-------------------------------
  integer :: iatom,isppol,lpawu,nspinor,nsppol,tndim
  real(dp) :: err_
- complex(dpc), allocatable :: mat_tmp(:,:)
+ complex(dp), allocatable :: mat_tmp(:,:)
 !************************************************************************
 
  nspinor = matlu(1)%nspinor
@@ -4571,7 +4571,7 @@ end subroutine add_matlu
  type(paw_dmft_type), intent(in) :: paw_dmft
 !Local variables-------------------------------
  integer :: iatom,lpawu,nspinor,tndim,tndim_max
- complex(dpc), allocatable :: mat_tmp(:,:)
+ complex(dp), allocatable :: mat_tmp(:,:)
  character(len=1) :: c1,c2
 !************************************************************************
 
@@ -4657,18 +4657,18 @@ end subroutine add_matlu
  type(coeff2c_type), allocatable :: magnmatb(:)
 !************************************************************************
 
- !================================                               
- ! Allocate matrices                                             
- !================================                               
-                                                                 
- ABI_MALLOC(magnmatb,(natom))                                  
- do iatom=1,natom                                              
-   if(matlu(iatom)%lpawu .ne. -1) then                         
-     tndim=2*(2*matlu(iatom)%lpawu+1)                          
-     ABI_MALLOC(magnmatb(iatom)%value,(tndim,tndim))           
-     magnmatb(iatom)%value=czero                               
-   endif                                                       
- enddo                                                         
+ !================================
+ ! Allocate matrices
+ !================================
+
+ ABI_MALLOC(magnmatb,(natom))
+ do iatom=1,natom
+   if(matlu(iatom)%lpawu .ne. -1) then
+     tndim=2*(2*matlu(iatom)%lpawu+1)
+     ABI_MALLOC(magnmatb(iatom)%value,(tndim,tndim))
+     magnmatb(iatom)%value=czero
+   endif
+ enddo
 
  if(option .eq. 1) then
 

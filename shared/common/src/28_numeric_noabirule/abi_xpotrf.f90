@@ -71,8 +71,7 @@ subroutine abi_zpotrf_2d(uplo,n,a,lda,info)
  character(len=1), intent(in) :: uplo
  integer, intent(in) :: lda,n
  integer, intent(out) :: info
- complex(dpc), intent(inout) :: a(lda,*)
-
+ complex(dp), intent(inout) :: a(lda,*)
 ! *********************************************************************
 
  call abi_zpotrf(uplo,n,a(1,1),lda,info)
@@ -142,8 +141,7 @@ subroutine abi_zpotrf(uplo,n,a,lda,info)
  character(len=1), intent(in) :: uplo
  integer, intent(in) :: lda,n
  integer, intent(out) :: info
- complex(dpc), intent(inout) :: a(*)
-
+ complex(dp), intent(inout) :: a(*)
 ! *********************************************************************
 
 #ifdef HAVE_LINALG_PLASMA

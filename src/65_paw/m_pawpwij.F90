@@ -1117,14 +1117,14 @@ end subroutine paw_rho_tw_g
 !! SOURCE
 
 subroutine paw_cross_rho_tw_g(nspinor,npwvec,nr,ngfft,map2sphere,use_padfft,igfftg0,gbound,&
-& ur_ae1,ur_ae_onsite1,ur_ps_onsite1,i1,ktabr1,ktabp1,spinrot1,&
-& ur_ae2,ur_ae_onsite2,ur_ps_onsite2,i2,ktabr2,ktabp2,spinrot2,&
-& dim_rtwg,rhotwg)
+  ur_ae1,ur_ae_onsite1,ur_ps_onsite1,i1,ktabr1,ktabp1,spinrot1,&
+  ur_ae2,ur_ae_onsite2,ur_ps_onsite2,i2,ktabr2,ktabp2,spinrot2,&
+  dim_rtwg,rhotwg)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: i1,i2,npwvec,nr,nspinor,dim_rtwg,map2sphere,use_padfft
- complex(dpc),intent(in) :: ktabp1,ktabp2
+ complex(dp),intent(in) :: ktabp1,ktabp2
 !arrays
  integer,intent(in) :: gbound(:,:)
  integer,intent(in) :: igfftg0(npwvec*map2sphere),ngfft(18)
@@ -1141,8 +1141,7 @@ subroutine paw_cross_rho_tw_g(nspinor,npwvec,nr,ngfft,map2sphere,use_padfft,igff
  integer :: ig,igfft,nx,ny,nz,ldx,ldy,ldz,mgfft,isprot1,isprot2
  type(fftbox_plan3_t) :: plan
 !arrays
- complex(dpc),allocatable :: usk(:),uu(:),rho(:)
-
+ complex(dp),allocatable :: usk(:),uu(:),rho(:)
 ! *************************************************************************
 
  SELECT CASE (nspinor)

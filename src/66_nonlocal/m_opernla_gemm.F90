@@ -61,7 +61,7 @@ subroutine opernla_gemm_distributed(rank,nprocs,npw,ndat,&
 &                                   projs_local,vectin,projections,gpu_option)
  integer,  intent(in)     :: rank,nprocs,npw,ndat,gpu_option
  integer,  intent(in)     :: nprojs,nprojs_blk,nprojs_last_blk,cplex
- complex(dpc), intent(in) :: beta
+ complex(dp), intent(in) :: beta
  real(dp), intent(in),  target    :: projs_local(cplex,npw,nprojs_last_blk)
  real(dp), intent(in),  target    :: vectin(2,npw*ndat)
  real(dp), intent(out), target    :: projections(cplex,nprojs,ndat)
@@ -215,7 +215,7 @@ subroutine opernla_xgemm(cplex,transa,transb,nprojs,ndat,npw,alpha,a,lda,b,ldb,b
  integer,intent(in) :: rank,nprocs,nprojs_blk,nprojs_last_blk
  integer,intent(in) :: iblock
  logical,intent(in) :: use_distrib,use_sliced_gemms
- complex(dpc),intent(in) :: alpha,beta
+ complex(dp),intent(in) :: alpha,beta
  character(len=1),intent(in) :: transa,transb
  real(dp),target,intent(in) :: a(cplex,lda,nprojs),b(cplex,ldb,ndat)
  real(dp),target,intent(inout) :: c(cplex,ldc,ndat)

@@ -125,11 +125,11 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  type(CtqmcInterface) :: hybrid
  type(CtqmcoffdiagInterface) :: hybridoffdiag
  real(dp) :: umod(2,2)
- complex(dpc) :: integral(2,2)
+ complex(dp) :: integral(2,2)
  real(dp), allocatable :: docc(:,:),gtmp(:,:),gtmp_nd(:,:,:),levels_ctqmc(:),vee(:,:,:,:)
- complex(dpc), allocatable :: muorb,muspin,muzeem
- complex(dpc), allocatable :: fw1(:,:),fw1_nd(:,:,:),gw_tmp(:,:),gw_tmp_nd(:,:,:)
- complex(dpc), allocatable :: gw1_nd(:,:,:),hybri_limit(:,:),levels_ctqmc_nd(:,:),shift(:)
+ complex(dp), allocatable :: muorb,muspin,muzeem
+ complex(dp), allocatable :: fw1(:,:),fw1_nd(:,:,:),gw_tmp(:,:),gw_tmp_nd(:,:,:)
+ complex(dp), allocatable :: gw1_nd(:,:,:),hybri_limit(:,:),levels_ctqmc_nd(:,:),shift(:)
  type(coeff2c_type), allocatable :: magmom_orb(:),magmom_spin(:),magmom_tot(:)
  type(hu_type), allocatable :: hu_for_s(:)
  type(matlu_type), allocatable :: dmat_diag(:),eigvectmatlu(:),hybri_coeff(:),matlu1(:),matlu2(:),matlu3(:)
@@ -1932,9 +1932,9 @@ subroutine testcode_ctqmc_b(energy_level,hybri_coeff,weiss_for_rot,dmftqmc_l,fw1
  real(dp), intent(in) :: temp
  real(dp), intent(out) :: umod(2,2)
  real(dp), intent(inout) :: levels_ctqmc(:)
- complex(dpc), intent(out) :: fw1_nd(:,:,:)
- complex(dpc),  intent(inout) :: levels_ctqmc_nd(:,:)
- complex(dpc),  intent(inout) :: hybri_limit(:,:)
+ complex(dp), intent(out) :: fw1_nd(:,:,:)
+ complex(dp),  intent(inout) :: levels_ctqmc_nd(:,:)
+ complex(dp),  intent(inout) :: hybri_limit(:,:)
  type(oper_type)  :: energy_level
  type(matlu_type), allocatable  :: hybri_coeff(:)
  type(green_type)  :: weiss_for_rot
@@ -2036,24 +2036,24 @@ subroutine testcode_ctqmc(dmftqmc_l,fw1_nd,fw1,gtmp_nd,gw_tmp_nd,levels_ctqmc,hy
  integer, intent(in) :: dmftqmc_l,nflavor,testrot,testcode,opt
  real(dp), intent(in) :: temp
  real(dp), intent(out) :: umod(2,2)
- complex(dpc), intent(inout) :: gw_tmp_nd(:,:,:)
+ complex(dp), intent(inout) :: gw_tmp_nd(:,:,:)
  real(dp),  intent(inout) :: gtmp_nd(:,:,:)
- complex(dpc), intent(out) :: fw1(:,:)
- complex(dpc), intent(out) :: fw1_nd(:,:,:)
+ complex(dp), intent(out) :: fw1(:,:)
+ complex(dp), intent(out) :: fw1_nd(:,:,:)
  real(dp),  intent(inout) :: levels_ctqmc(:)
- complex(dpc),  intent(inout) :: hybri_limit(:,:)
+ complex(dp),  intent(inout) :: hybri_limit(:,:)
 
 !Local variables ------------------------------
  character(len=500) :: message
  integer :: ifreq, itau,realrot,simplehyb
  real(dp) :: omega
  real(dp) :: tbi1,tbi2,e2,tbi3,tbi4,e3,e4,tbi21,tbi12,e3b,e4b,tbi21b,tbi12b
- complex(dpc) :: e1
+ complex(dp) :: e1
 ! arrays
- complex(dpc) :: RR(2,2)
- complex(dpc) :: RR1(2,2)
- complex(dpc) :: RRi(2,2)
- complex(dpc) :: RRt(2,2)
+ complex(dp) :: RR(2,2)
+ complex(dp) :: RR1(2,2)
+ complex(dp) :: RRi(2,2)
+ complex(dp) :: RRt(2,2)
 ! ************************************************************************
  if (testcode==0) return
  if (nflavor/=2) then
@@ -2308,8 +2308,8 @@ subroutine ctqmcoutput_to_green(green,paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iat
  type(paw_dmft_type), intent(in)  :: paw_dmft
  type(green_type), intent(inout) :: green
  real(dp), allocatable, intent(in) :: gtmp_nd(:,:,:)
- complex(dpc), allocatable, intent(in) :: gw_tmp(:,:)
- complex(dpc), allocatable, intent(in) :: gw_tmp_nd(:,:,:)
+ complex(dp), allocatable, intent(in) :: gw_tmp(:,:)
+ complex(dp), allocatable, intent(in) :: gw_tmp_nd(:,:,:)
  real(dp), allocatable, intent(in) :: gtmp(:,:)
  integer, intent(in) :: iatom,opt_nondiag
  logical(kind=1), intent(in) :: leg_measure
@@ -2438,8 +2438,8 @@ subroutine ctqmcoutput_printgreen(paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom)
 !scalars
  type(paw_dmft_type), intent(in)  :: paw_dmft
  real(dp), allocatable, intent(inout) :: gtmp_nd(:,:,:)
- complex(dpc), allocatable, intent(in) :: gw_tmp(:,:)
- complex(dpc), allocatable, intent(in) :: gw_tmp_nd(:,:,:)
+ complex(dp), allocatable, intent(in) :: gw_tmp(:,:)
+ complex(dp), allocatable, intent(in) :: gw_tmp_nd(:,:,:)
  real(dp), allocatable, intent(in) :: gtmp(:,:)
  integer, intent(in) :: iatom
 
@@ -2619,15 +2619,15 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
  type(crystal_t),intent(in) :: cryst_struc
  type(hu_type), intent(in) :: hu(cryst_struc%ntypat)
  real(dp), allocatable, target, intent(inout) :: gtmp_nd(:,:,:)
- complex(dpc), allocatable, target, intent(inout) :: gw_tmp_nd(:,:,:)
- complex(dpc), allocatable, target, intent(in) :: fw1_nd(:,:,:)
+ complex(dp), allocatable, target, intent(inout) :: gw_tmp_nd(:,:,:)
+ complex(dp), allocatable, target, intent(in) :: fw1_nd(:,:,:)
  real(dp), allocatable, target, intent(inout) ::  levels_ctqmc(:)
  logical(kind=1), intent(in) :: leg_measure
  integer, intent(in) :: iatom
 
 !Local variables ------------------------------
- complex(dpc), allocatable, target ::fw1_nd_tmp(:,:,:)
- complex(dpc), allocatable, target :: g_iw(:,:,:)
+ complex(dp), allocatable, target ::fw1_nd_tmp(:,:,:)
+ complex(dp), allocatable, target :: g_iw(:,:,:)
  real(dp), allocatable, target :: u_mat_ij(:,:)
  real(dp), allocatable, target :: u_mat_ijkl(:,:,:,:)
  real(dp), allocatable, target :: u_mat_ijkl_tmp(:,:,:,:)
@@ -2646,7 +2646,7 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
  logical(kind=1) :: tot_not = .true.
 #endif
  real(dp) :: beta,besp,bespp,xx
- complex(dpc) :: u_nl
+ complex(dp) :: u_nl
 
 #if defined HAVE_PYTHON_INVOCATION
 !----------
@@ -3187,8 +3187,8 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  integer, target :: ndlr
  logical :: density_matrix,entropy,leg_measure,nondiag,off_diag,rot_inv
  real(dp) :: besp,bespp,beta,dx,elam,emig_tot,err,err_,fact,fact2,tau,tol,xtau,xx
- complex(dpc) :: mself_1,mself_2,occ_tmp,u_nl
- complex(dpc), target :: eu
+ complex(dp) :: mself_1,mself_2,occ_tmp,u_nl
+ complex(dp), target :: eu
  type(oper_type), target :: energy_level
  type(self_type) :: hybmwdhyb
  type(c_ptr) :: block_ptr,eu_ptr,flavor_ptr,fname_data_ptr,fname_dataw_ptr,fname_histo_ptr,ftau_ptr,gl_ptr,gtau_ptr
@@ -3198,8 +3198,8 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  real(dp), allocatable :: adlr(:,:),bdlr(:),elam_list(:),emig(:),gl_dlr_re(:),gl_dlr_im(:),jbes(:),lam_list(:)
  real(dp), allocatable :: leg_array(:,:),moment_fit(:),t_lp(:,:),tpoints(:),tweights(:),wdlr(:),wdlr_beta(:,:)
  real(dp), target, allocatable :: wdlr_tmp(:)
- complex(dpc), allocatable :: adlr_iw(:,:),gl_dlr(:,:,:,:),gl_tmp(:,:,:,:),gtau_dlr(:,:,:),gtau_leg(:,:,:),shift(:)
- complex(dpc), target, allocatable :: gl(:,:,:),gtau(:,:,:),levels_ctqmc(:,:),moments_self_1(:),moments_self_2(:),occ(:)
+ complex(dp), allocatable :: adlr_iw(:,:),gl_dlr(:,:,:,:),gl_tmp(:,:,:,:),gtau_dlr(:,:,:),gtau_leg(:,:,:),shift(:)
+ complex(dp), target, allocatable :: gl(:,:,:),gtau(:,:,:),levels_ctqmc(:,:),moments_self_1(:),moments_self_2(:),occ(:)
  type(matlu_type), allocatable :: eigvectmatlu(:),matlu_tmp(:)
  type(matlu_type), target, allocatable :: dmat_ctqmc(:),ftau(:),udens_rot(:)
  type(matlu_type), pointer :: matlu_pt(:) => null()
@@ -4222,7 +4222,7 @@ subroutine cubic_spline()
 
 !Arguments ------------------------------------
 !Local variables ------------------------------
- complex(dpc), allocatable :: y(:),yp(:)
+ complex(dp), allocatable :: y(:),yp(:)
 ! ************************************************************************
 
  ABI_MALLOC(y,(nwlo))
@@ -4329,7 +4329,7 @@ subroutine diag_block(matlu)
  integer :: i,iatom,iblock,iflavor,iflavor1,im,im1
  integer :: info,is,j,lpawu,lwork,ndim,sizb,tndim
  real(dp), allocatable :: eig(:),rwork(:)
- complex(dpc), allocatable :: mat_tmp(:,:),work(:)
+ complex(dp), allocatable :: mat_tmp(:,:),work(:)
 ! ************************************************************************
 
  is = 1
@@ -4521,7 +4521,7 @@ function k_iw(iom,omega)
 
 !Arguments ------------------------------------
  real(dp), intent(in) :: iom,omega
- complex(dpc) :: k_iw
+ complex(dp) :: k_iw
 ! *********************************************************************
 
  k_iw = cone / (cmplx(zero,iom,kind=dp)-omega)
@@ -4688,9 +4688,9 @@ subroutine fourier_inv(paw_dmft,nmoments,ntau,matlu_tau,oper_freq,moments)
  integer :: itau,itaub,itauf,lpawu,myproc,natom,ndim,nproc
  integer :: nspinor,nsppol,ntau_proc,nwlo,ratio,residu,siz_buf,tndim
  real(dp) :: beta,omegatau,tau
- complex(dpc) :: fac
+ complex(dp) :: fac
  integer, allocatable :: displs(:),recvcounts(:)
- complex(dpc), allocatable :: buffer(:),buffer_tot(:),omega_fac(:)
+ complex(dp), allocatable :: buffer(:),buffer_tot(:),omega_fac(:)
 ! ************************************************************************
 
  beta    = one / paw_dmft%temp

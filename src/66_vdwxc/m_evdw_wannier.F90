@@ -82,7 +82,7 @@ contains
  real(dp), intent(in)  :: xcart(3,natom)
  real(dp), intent(out) :: corrvdw
  real(dp), intent(out) :: csix(origmwan,origmwan,nsppol,nsppol)
- real(dpc), intent(in) :: tdocc_wan(origmwan,nsppol)
+ real(dp), intent(in) :: tdocc_wan(origmwan,nsppol)
 
 !Local variables-------------------------------
  integer  :: ier,igr,icx,icy,icz,ii,inx,iny,inz,isppol,iwan
@@ -99,8 +99,8 @@ contains
  real(dp), allocatable:: tmp_cent(:,:,:),tmp_spr(:,:),tmp_occ(:,:)
  real(dp), allocatable:: rv(:,:),wanncent(:,:,:),wannspr(:,:),wc_rec(:,:,:),xi(:,:)
  real(dp), allocatable:: c_QHO(:,:),Tij_dip(:,:),polar(:),omega(:),eigv(:),zhpev2(:)
- real(dpc), allocatable :: newocc_wan(:,:)
- complex(dpc), allocatable :: eigvec(:,:),matrx(:),zhpev1(:)
+ real(dp), allocatable :: newocc_wan(:,:)
+ complex(dp), allocatable :: eigvec(:,:),matrx(:),zhpev1(:)
  character(len=500) :: message                   ! to be uncommented, if needed
 ! *************************************************************************
 

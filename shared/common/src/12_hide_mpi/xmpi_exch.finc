@@ -568,8 +568,8 @@ subroutine xmpi_exch_dpc1d(vsend,n1,sender,vrecv,recever,comm,mtag,ier)
 
 !Arguments----------------
  integer,intent(in) :: mtag,n1
- complex(dpc), DEV_CONTARRD intent(in) :: vsend(:)
- complex(dpc), DEV_CONTARRD intent(inout) :: vrecv(:)
+ complex(dp), DEV_CONTARRD intent(in) :: vsend(:)
+ complex(dp), DEV_CONTARRD intent(inout) :: vrecv(:)
  integer,intent(in) :: sender,recever,comm
  integer,intent(out) :: ier
 
@@ -614,8 +614,8 @@ subroutine xmpi_exch_dpc2d(vsend,nt,sender,vrecv,recever,comm,mtag,ier)
 
 !Arguments----------------
  integer,intent(in) :: mtag,nt
- complex(dpc), DEV_CONTARRD intent(in) :: vsend(:,:)
- complex(dpc), DEV_CONTARRD intent(inout) :: vrecv(:,:)
+ complex(dp), DEV_CONTARRD intent(in) :: vsend(:,:)
+ complex(dp), DEV_CONTARRD intent(inout) :: vrecv(:,:)
  integer,intent(in) :: sender,recever,comm
  integer,intent(out) :: ier
 

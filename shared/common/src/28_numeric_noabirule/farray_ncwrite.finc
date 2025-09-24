@@ -12,7 +12,7 @@ subroutine farr_real_dp1(farray, varname, ncid)
 !scalars
 #ifdef HAVE_NETCDF
  integer :: dimval,ii,varid
- character(len=nctk_slen) :: dimname,shape_str   
+ character(len=nctk_slen) :: dimname,shape_str
 
 ! *********************************************************************
 
@@ -20,7 +20,7 @@ subroutine farr_real_dp1(farray, varname, ncid)
 ! Use *private* names for dimensions to avoid possible name collisions.
 ! if varname is "foo", we use "__foo_dim1__", __foo_dim2__" for name of the dimensions
  NCF_CHECK(nctk_set_datamode(ncid))
- 
+
  shape_str = ""
  do ii=1,size(shape(farray))
    dimval = size(farray, dim=ii)
@@ -28,7 +28,7 @@ subroutine farr_real_dp1(farray, varname, ncid)
    write(dimname,"(3a,i0,a)")"__",trim(varname),"_dim",ii,"__"
 
    NCF_CHECK(nctk_def_dims(ncid, nctkdim_t(dimname, dimval)))
-   shape_str = trim(shape_str) // ", " // dimname 
+   shape_str = trim(shape_str) // ", " // dimname
  end do
 
  ! Define the variable.
@@ -39,7 +39,7 @@ subroutine farr_real_dp1(farray, varname, ncid)
  NCF_CHECK(nctk_set_datamode(ncid))
  NCF_CHECK(nf90_put_var(ncid, varid, farray))
 
-#else 
+#else
  ABI_ERROR("netcdf support is not activated.")
 #endif
 
@@ -53,13 +53,13 @@ subroutine farr_complex_dpc1(farray, varname, ncid)
 !Arguments ------------------------------------
  integer,intent(in) :: ncid
  character(len=*),intent(in) :: varname
- complex(dpc),intent(in) :: farray(:)
+ complex(dp),intent(in) :: farray(:)
 
 !Local variables-------------------------------
 !scalars
 #ifdef HAVE_NETCDF
  integer :: dimval,ii,varid
- character(len=nctk_slen) :: dimname,shape_str   
+ character(len=nctk_slen) :: dimname,shape_str
 
 ! *********************************************************************
 
@@ -67,7 +67,7 @@ subroutine farr_complex_dpc1(farray, varname, ncid)
 ! Use *private* names for dimensions to avoid possible name collisions.
 ! if varname is "foo", we use "__foo_dim1__", __foo_dim2__" for name of the dimensions
  NCF_CHECK(nctk_set_datamode(ncid))
- 
+
  shape_str = ""
  do ii=1,size(shape(farray))
    dimval = size(farray, dim=ii)
@@ -75,7 +75,7 @@ subroutine farr_complex_dpc1(farray, varname, ncid)
    write(dimname,"(3a,i0,a)")"__",trim(varname),"_dim",ii,"__"
 
    NCF_CHECK(nctk_def_dims(ncid, nctkdim_t(dimname, dimval)))
-   shape_str = trim(shape_str) // ", " // dimname 
+   shape_str = trim(shape_str) // ", " // dimname
  end do
 
  ! Define the variable.
@@ -86,7 +86,7 @@ subroutine farr_complex_dpc1(farray, varname, ncid)
  NCF_CHECK(nctk_set_datamode(ncid))
  NCF_CHECK(nf90_put_var(ncid, varid, c2r(farray)))
 
-#else 
+#else
  ABI_ERROR("netcdf support is not activated.")
 #endif
 

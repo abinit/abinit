@@ -3038,7 +3038,7 @@ subroutine mkph_linwid(Cryst,ifc,elph_ds,nqpath,qpath_vertices)
 !arrays
  integer :: ndiv(nqpath-1)
  integer, allocatable :: indxprtqpt(:)
- complex(dpc),parameter :: c0=dcmplx(0._dp,0._dp),c1=dcmplx(1._dp,0._dp)
+ complex(dp),parameter :: c0=dcmplx(0._dp,0._dp),c1=dcmplx(1._dp,0._dp)
  real(dp) :: displ_cart(2,3*Cryst%natom,3*Cryst%natom)
  real(dp) :: displ_red(2,3*Cryst%natom,3*Cryst%natom)
  real(dp) :: eigval(3*Cryst%natom)
@@ -4116,9 +4116,7 @@ subroutine complete_gkk(elph_ds,gkk_flag,gprimd,indsym,natom,nsym,qpttoqpt,rprim
  real(dp),allocatable :: gkk_qpt_new(:,:,:,:,:),gkk_qpt_tmp(:,:,:,:,:)
 
  real(dp) :: ss_allatoms(2,elph_ds%nbranch,elph_ds%nbranch)
- complex(dpc) :: c_one, c_zero
-
-
+ complex(dp) :: c_one, c_zero
 ! *********************************************************************
 
  c_one = dcmplx(one,zero)
