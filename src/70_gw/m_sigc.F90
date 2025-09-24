@@ -154,7 +154,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  integer,intent(in) :: gwc_ngfft(18),rho_ngfft(18)
  real(dp),intent(in) :: rhor(rho_nfftot,Wfd%nspden)
  real(dp),intent(in) :: aepaw_rhor(rho_nfftot,Wfd%nspden*use_aerhor)
- complex(dpc),intent(out) :: sigcme_tmp(nomega_sigc,minbnd:maxbnd,minbnd:maxbnd,Wfd%nsppol*Sigp%nsig_ab)
+ complex(dp),intent(out) :: sigcme_tmp(nomega_sigc,minbnd:maxbnd,minbnd:maxbnd,Wfd%nsppol*Sigp%nsig_ab)
  type(Pawtab_type),intent(in) :: Pawtab(Psps%ntypat)
  type(pawpwff_t),intent(in) :: Paw_pwff(Psps%ntypat*Psps%usepaw)
  type(esymm_t),target,intent(in) :: allQP_sym(Wfd%nkibz,Wfd%nsppol)
@@ -175,7 +175,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  type(c_ptr) :: void_ptr
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_k, wall_k, gflops_k
  real(dp) :: e0i,fact_spin,theta_mu_minus_e0i,tol_empty,tol_empty_in,en_high,gw_gsq,w_localmax,w_max
- complex(dpc) :: ctmp,omegame0i2_ac,omegame0i_ac,ph_mkgwt,ph_mkt
+ complex(dp) :: ctmp,omegame0i2_ac,omegame0i_ac,ph_mkgwt,ph_mkt
  logical :: iscompatibleFFT, q_is_gamma, print_time
  character(len=500) :: msg
  type(wave_t),pointer :: wave_sum, wave_jb
@@ -203,7 +203,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  complex(gwpc),allocatable :: ur_ae_sum(:),ur_ae_onsite_sum(:),ur_ps_onsite_sum(:)
  complex(gwpc),allocatable :: ur_ae_bdgw(:,:),ur_ae_onsite_bdgw(:,:),ur_ps_onsite_bdgw(:,:), otq_transp(:,:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: cg_jb(:),cg_sum(:)
- complex(dpc),allocatable :: sym_cme(:,:,:,:),sigc(:,:,:,:,:)
+ complex(dp),allocatable :: sym_cme(:,:,:,:),sigc(:,:,:,:,:)
  logical :: rank_mask(Wfd%nproc),can_symmetrize(Wfd%nsppol)
  !logical :: me_calc_poles(Sr%nomega_r+Sr%nomega4sd)
  type(sigijtab_t),pointer :: Sigcij_tab(:)
@@ -213,7 +213,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  integer :: neig(epsm1%nomega_i)
  real(gwp),allocatable :: epsm1_eig(:)
  complex(gwpc),allocatable :: epsm1_sqrt_rhotw(:,:), rhotw_epsm1_rhotw(:,:,:), conv_rhotw_epsm1_rhotw(:,:,:)
- complex(dpc) :: tmp_rhotw_epsm1_rhotw(epsm1%nomega_i), tmp_conv_rhotw_epsm1_rhotw(epsm1%nomega_i_conv)
+ complex(dp) :: tmp_rhotw_epsm1_rhotw(epsm1%nomega_i), tmp_conv_rhotw_epsm1_rhotw(epsm1%nomega_i_conv)
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -1603,7 +1603,7 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
  real(dp),intent(in) :: theta_mu_minus_e0i,plasmafreq
 !arrays
  real(dp),intent(in) :: omegame0i(nomega)
- complex(dpc),intent(in) :: omega(nomegae)
+ complex(dp),intent(in) :: omega(nomegae)
  complex(gwpc),intent(in) :: epsm1q(npwc,npwc,nomegae)
  complex(gwpc),intent(in) :: rhotwgp(npwx*nspinor)
  complex(gwpc),intent(inout) :: ket(nspinor*npwc,nomega)
@@ -1620,7 +1620,7 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
  real(dp) :: alpha,inv_alph,beta,alphsq,betasq,inv_beta
  real(dp) :: re_intG,re_intK,im_intG,im_intK,GKttab,tau,ttil
  real(dp) :: ref,imf,r,s,r2,s2
- complex(dpc) :: ct,domegaleft,domegaright
+ complex(dp) :: ct,domegaleft,domegaright
  complex(gwpc) :: fact
 !arrays
  real(dp) :: omegame0i_tmp(nomega),tmp_x(2),tmp_y(2)
@@ -1630,7 +1630,7 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
  real(dp) :: rtmp_r(nomegaer),rtmp_i(nomegaer)
  real(dp) :: ftab(nomegaei+2),ftab2(nomegaei+2),xtab(nomegaei+2),y(3,nomegaei+2)
  real(dp) :: work(nomegaei+2),work2(nomegaei+2),y2(3,nomegaei+2)
- complex(dpc) :: omega_imag(nomegaei+1)
+ complex(dp) :: omega_imag(nomegaei+1)
  complex(gwpc) :: epsrho(npwc,nomegae),epsrho_imag(npwc,nomegaei+1)
  complex(gwpc) :: tfone(npwc,nomegaei+1),tftwo(npwc,nomegaei+1)
  complex(gwpc) :: weight(nomegaei+1,nomega)

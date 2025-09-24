@@ -2645,13 +2645,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  gaps = ebands%get_gaps(gap_err)
 
  ! Frequency mesh for sigma(w) and spectral functions.
- ! Use GW variables but change default values
- new%nwr = dtset%nfreqsp; new%wr_step = zero
- if (new%nwr > 0) then
-   if (mod(new%nwr, 2) == 0) new%nwr = new%nwr + 1
-   new%wr_step = two * eV_Ha / (new%nwr - 1)
-   if (dtset%freqspmax /= zero) new%wr_step = dtset%freqspmax / (new%nwr - 1)
- end if
+ call dtset%get_wrmesh_for_sigeph(new%nwr, new%wr_step)
 
  ! ======================================================
  ! Select k-point and bands where corrections are wanted

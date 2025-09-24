@@ -118,13 +118,13 @@ MODULE m_hexc
     ! wfd of the full problem
 
  !arrays
-    complex(dpc),allocatable :: hreso(:,:)
+    complex(dp),allocatable :: hreso(:,:)
     ! Resonant part of the hamiltonian
 
-    complex(dpc),allocatable :: hcoup(:,:)
+    complex(dp),allocatable :: hcoup(:,:)
     ! Coupling part of the hamiltonian
 
-    complex(dpc),allocatable :: diag_coarse(:)
+    complex(dp),allocatable :: diag_coarse(:)
     ! Diagonal part of the hamiltonian with transition energies
 
  end type hexc_t
@@ -169,27 +169,27 @@ MODULE m_hexc
     ! div2kdense(nbz_coarse,ndiv)
     ! Index of kpoint coarse + Index of division -> Index of kdense
 
-    complex(dpc),allocatable :: diag_dense(:)
+    complex(dp),allocatable :: diag_dense(:)
     ! diag_dense(hsize_dense)
     ! Diagonal part of the dense hamiltonian
 
-    complex(dpc),allocatable :: hinterp(:,:)
+    complex(dp),allocatable :: hinterp(:,:)
     ! hinterp(hsize_dense,hsize_dense)
     ! Interpolated hamiltonian
 
-    complex(dpc),allocatable :: all_hmat(:,:)
+    complex(dp),allocatable :: all_hmat(:,:)
     ! all_hmat,(hsize,hsize))
     ! Coarse excitonic matrix in a format suitable for interpolation in k-space
 
-    complex(dpc),allocatable :: all_acoeffs(:,:)
+    complex(dp),allocatable :: all_acoeffs(:,:)
     ! all_acoeffs(hsize,hsize))
     ! a coefficients in a format suitable for interpolation in k-space
 
-    complex(dpc),allocatable :: all_bcoeffs(:,:)
+    complex(dp),allocatable :: all_bcoeffs(:,:)
     ! all_bcoeffs(hsize,hsize))
     ! b coefficients in a format suitable for interpolation in k-space
 
-    complex(dpc),allocatable :: all_ccoeffs(:,:)
+    complex(dp),allocatable :: all_ccoeffs(:,:)
     ! all_ccoeffs(hsize,hsize))
     ! c coefficients in a format suitable for interpolation in k-space
 
@@ -253,7 +253,7 @@ subroutine hexc_init(hexc, BSp, BS_files, Cryst, Kmesh_coarse, Wfd_coarse, KS_BS
  character(len=fnlen) :: hreso_fname, hcoup_fname
  !character(len=500) :: msg
 !arrays
- complex(dpc),allocatable :: test(:,:)
+ complex(dp),allocatable :: test(:,:)
 !*****************************************************************************
 
  hexc%bsp => BSp
@@ -559,7 +559,7 @@ subroutine hexc_build_hinterp(hexc, hexc_i)
  character(len=500) :: msg
 !*****************************************************************************
 
- write(msg,"(a,f8.1,a)")"Memory needed for hinterp = ",one*(hexc_i%hsize_dense**2)*2*dpc*b2Mb," Mb"
+ write(msg,"(a,f8.1,a)")"Memory needed for hinterp = ",one*(hexc_i%hsize_dense**2)*2*dp*b2Mb," Mb"
  call wrtout(std_out,msg,"COLL")
 
  ABI_MALLOC_OR_DIE(hexc_i%hinterp,(hexc_i%hsize_dense,hexc_i%hsize_dense), ierr)
@@ -623,8 +623,8 @@ subroutine hexc_compute_subhinterp(BSp,grid,nbnd_coarse,&
 !arrays
  integer,intent(in) :: kdense2div(grid%nbz_dense)
  complex(gwpc),intent(in) :: overlaps(interpolator%mband_coarse,interpolator%mband_dense,interpolator%nvert)
- complex(dpc),intent(in) :: work_coeffs(nbnd_coarse,interpolator%nvert)
- complex(dpc),intent(out) :: Cmat(nbnd_coarse)
+ complex(dp),intent(in) :: work_coeffs(nbnd_coarse,interpolator%nvert)
+ complex(dp),intent(out) :: Cmat(nbnd_coarse)
 
 !Local variables ------------------------------
 !scalars
@@ -633,9 +633,9 @@ subroutine hexc_compute_subhinterp(BSp,grid,nbnd_coarse,&
  integer :: icp,ivp,idivp,ibndp_coarse,ibndp_coarse1,ineighbourp
  integer :: indwithnb
  integer :: lumo2,lomo2,humo2,homo2
- complex(dpc) :: tmp_val, tmp2, tmp4
+ complex(dp) :: tmp_val, tmp2, tmp4
 !arrays
- complex(dpc),ABI_CONTIGUOUS pointer :: btemp(:),ctemp(:)
+ complex(dp),ABI_CONTIGUOUS pointer :: btemp(:),ctemp(:)
 !*********************************************************************
 
  btemp => interpolator%btemp
@@ -741,11 +741,11 @@ subroutine hexc_compute_hinterp(BSp,hsize_coarse,hsize_dense,hmat,grid,nbnd_coar
 !arrays
  integer,intent(in) :: kdense2div(grid%nbz_dense)
  real(dp),intent(in) :: gmet(3,3)
- complex(dpc),intent(in) :: hmat(hsize_coarse,hsize_coarse)
- complex(dpc),intent(in) :: acoeffs(hsize_coarse,hsize_coarse)
- complex(dpc),intent(in) :: bcoeffs(hsize_coarse,hsize_coarse)
- complex(dpc),intent(in) :: ccoeffs(hsize_coarse,hsize_coarse)
- complex(dpc),intent(out) :: hinterp(hsize_dense,hsize_dense)
+ complex(dp),intent(in) :: hmat(hsize_coarse,hsize_coarse)
+ complex(dp),intent(in) :: acoeffs(hsize_coarse,hsize_coarse)
+ complex(dp),intent(in) :: bcoeffs(hsize_coarse,hsize_coarse)
+ complex(dp),intent(in) :: ccoeffs(hsize_coarse,hsize_coarse)
+ complex(dp),intent(out) :: hinterp(hsize_dense,hsize_dense)
 
 !Local variables ------------------------------
 !scalars
@@ -754,16 +754,15 @@ subroutine hexc_compute_hinterp(BSp,hsize_coarse,hsize_dense,hmat,grid,nbnd_coar
  integer :: icp,ivp,ikp_dense,ikp_coarse,itp_coarse,itp_dense,idivp,ibndp_coarse,ibndp_coarse1,ineighbourp,itp_coarse1
  integer :: itc,it_dense1,indwithnb, corresp_ind, limitnbz, inb,ierr
  real(dp) :: factor,vc_sqrt_qbz,qnorm
- complex(dpc) :: term
+ complex(dp) :: term
  logical :: newway, use_herm
 !arrays
  real(dp) :: kmkp(3),q2(3),shift(3),qinred(3),tsec(2)
- complex(dpc),allocatable :: Cmat(:,:,:) !Temp matrices for optimized version
- complex(dpc),allocatable :: tmp_Cmat(:)
- complex(dpc),allocatable :: work_coeffs(:,:)
+ complex(dp),allocatable :: Cmat(:,:,:) !Temp matrices for optimized version
+ complex(dp),allocatable :: tmp_Cmat(:)
+ complex(dp),allocatable :: work_coeffs(:,:)
  integer,allocatable :: band2it(:)
- complex(dpc),ABI_CONTIGUOUS pointer :: btemp(:),ctemp(:)
-
+ complex(dp),ABI_CONTIGUOUS pointer :: btemp(:),ctemp(:)
 !************************************************************************
 
  call timab(696,1,tsec)
@@ -1212,9 +1211,9 @@ subroutine hexc_interp_matmul(BSp,hsize_coarse,hsize_dense,hmat,phi,hphi,grid,&
  type(interpolator_t),intent(in) :: interpolator
 !arrays
  integer,intent(in) :: div2kdense(grid%nbz_coarse,grid%ndiv), kdense2div(grid%nbz_dense)
- complex(dpc),intent(in) :: phi(hsize_dense)
- complex(dpc),intent(in) :: hmat(hsize_coarse,hsize_coarse)
- complex(dpc),intent(inout) :: hphi(hsize_dense)
+ complex(dp),intent(in) :: phi(hsize_dense)
+ complex(dp),intent(in) :: hmat(hsize_coarse,hsize_coarse)
+ complex(dp),intent(inout) :: hphi(hsize_dense)
 
 !Local variables ------------------------------
 !scalars
@@ -1222,13 +1221,13 @@ subroutine hexc_interp_matmul(BSp,hsize_coarse,hsize_dense,hmat,phi,hphi,grid,&
  integer :: ibnd_coarse1, ineighbour,idense,ikpt
  integer :: my_k1,my_k2,ind_with_nb,is, is1
  real(dp) :: factor
- complex(dpc) :: tmp
+ complex(dp) :: tmp
  logical,parameter :: use_blas=.True.
 !arrays
  integer :: allindices(nbnd_coarse)
- complex(dpc) :: allp(hsize_coarse,interpolator%nvert), test(hsize_coarse)
- complex(dpc) :: ophi(grid%nbz_dense,interpolator%nvert,nbnd_coarse)
- complex(dpc),allocatable :: b(:), c(:),A(:,:), tmp_array(:), tmp_array2(:,:)
+ complex(dp) :: allp(hsize_coarse,interpolator%nvert), test(hsize_coarse)
+ complex(dp) :: ophi(grid%nbz_dense,interpolator%nvert,nbnd_coarse)
+ complex(dp),allocatable :: b(:), c(:),A(:,:), tmp_array(:), tmp_array2(:,:)
 !************************************************************************
 
  factor = one/grid%ndiv
@@ -1509,8 +1508,8 @@ subroutine hexc_matmul_tda(hexc, hexc_i, phi, hphi)
 !Arguments ---------------------------
  class(hexc_t),intent(in) :: hexc
  type(hexc_interp_t),intent(in) :: hexc_i
- complex(dpc),intent(in) :: phi(hexc%hsize)
- complex(dpc),intent(out) :: hphi(hexc%hsize)
+ complex(dp),intent(in) :: phi(hexc%hsize)
+ complex(dp),intent(out) :: hphi(hexc%hsize)
 
 !Local variables ---------------------
  integer :: ierr
@@ -1569,9 +1568,9 @@ subroutine hexc_matmul_elphon(hexc, phi, hphi, op, ep_renorm)
 !Arguments ---------------------------
  class(hexc_t),intent(in) :: hexc
  character,intent(in) :: op
- complex(dpc),intent(in) :: phi(hexc%my_nt)
- complex(dpc),intent(out) :: hphi(hexc%hsize)
- complex(dpc),intent(in) :: ep_renorm(hexc%hsize)
+ complex(dp),intent(in) :: phi(hexc%my_nt)
+ complex(dp),intent(out) :: hphi(hexc%hsize)
+ complex(dp),intent(in) :: ep_renorm(hexc%hsize)
 
 !Local variables ---------------------
  integer :: ierr
@@ -1625,8 +1624,8 @@ subroutine hexc_matmul_full(hexc, hexc_i, phi, hphi, parity)
 !Arguments ---------------------------
  class(hexc_t),intent(in) :: hexc
  type(hexc_interp_t),intent(in) :: hexc_i
- complex(dpc),intent(in) :: phi(hexc%hsize)
- complex(dpc),intent(out) :: hphi(hexc%hsize)
+ complex(dp),intent(in) :: phi(hexc%hsize)
+ complex(dp),intent(out) :: hphi(hexc%hsize)
  integer,intent(in) :: parity
 
 !Local variables ---------------------

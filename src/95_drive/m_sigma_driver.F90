@@ -205,7 +205,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  real(dp) :: ucvol,vxcavg,vxcavg_qp,el_temp
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq, gsqcut,boxcut,ecutf
  real(dp) :: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
- complex(dpc) :: max_degw,cdummy
+ complex(dp) :: max_degw,cdummy
  logical :: rdm_update,readchkprdm,prtchkprdm
  logical :: use_paw_aeur,dbg_mode,pole_screening,call_pawinit,is_dfpt=.false.
  character(len=500) :: msg
@@ -251,14 +251,14 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  real(dp),allocatable :: vpsp(:),xccc3d(:),dijexc_core(:,:,:),dij_hf(:,:,:)
  real(dp),allocatable :: nl_bks(:,:,:)
  real(dp),allocatable :: ks_aepaw_rhor(:,:) !,ks_n_one_rhor(:,:),ks_nt_one_rhor(:,:), osoc_bks(:, :, :)
- complex(dpc) :: ovlp(2)
- complex(dpc),allocatable :: ctmp(:,:),hbare(:,:,:,:)
- complex(dpc),target,allocatable :: sigcme(:,:,:,:,:)
- complex(dpc),allocatable :: hdft(:,:,:,:),htmp(:,:,:,:),uks2qp(:,:)
- complex(dpc),allocatable :: xrdm_k_full(:,:,:), rdm_k(:,:), pot_k(:,:), nateigv(:,:,:,:), old_ks_purex(:,:), new_hartr(:,:)
+ complex(dp) :: ovlp(2)
+ complex(dp),allocatable :: ctmp(:,:),hbare(:,:,:,:)
+ complex(dp),target,allocatable :: sigcme(:,:,:,:,:)
+ complex(dp),allocatable :: hdft(:,:,:,:),htmp(:,:,:,:),uks2qp(:,:)
+ complex(dp),allocatable :: xrdm_k_full(:,:,:), rdm_k(:,:), pot_k(:,:), nateigv(:,:,:,:), old_ks_purex(:,:), new_hartr(:,:)
  complex(gwpc),allocatable :: kxcg(:,:),fxc_ADA(:,:,:)
  complex(gwpc),contiguous, pointer :: ug1(:)
- complex(dpc),allocatable :: sigcme_k(:,:,:,:), rhot1_q_m(:,:,:,:,:,:,:), M1_q_m(:,:,:,:,:,:,:)
+ complex(dp),allocatable :: sigcme_k(:,:,:,:), rhot1_q_m(:,:,:,:,:,:,:), M1_q_m(:,:,:,:,:,:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:),bmask(:), bdm_mask(:,:,:),bdm2_mask(:,:,:)
  type(esymm_t),target,allocatable :: KS_sym(:,:)
  type(esymm_t),pointer :: QP_sym(:,:)

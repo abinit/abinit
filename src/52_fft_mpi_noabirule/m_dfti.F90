@@ -991,7 +991,7 @@ end subroutine dfti_fftug_spc
 !! FUNCTION
 !! Compute ndat zero-padded FFTs from G ro R.
 !! Mainly used for the transform of wavefunctions.
-!! TARGET: DPC arrays
+!! TARGET: DP arrays
 !!
 !! INPUTS
 !! fftalg=FFT algorithm (see input variable)
@@ -1021,8 +1021,8 @@ subroutine dfti_fftug_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
  integer,intent(in) :: npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2),kg_k(3,npw_k)
- complex(dpc),target,intent(in) :: ug(npw_k*ndat)
- complex(dpc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)    !vz_i
+ complex(dp),target,intent(in) :: ug(npw_k*ndat)
+ complex(dp),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)    !vz_i
  integer,optional,intent(in) :: isign, iscale
 
 #ifdef HAVE_DFTI
@@ -1238,7 +1238,7 @@ end subroutine dfti_fftur_spc
 !! FUNCTION
 !! Compute ndat zero-padded FFTs from R ro G.
 !! Mainly used for the transform of wavefunctions.
-!! TARGET: DPC arrays
+!! TARGET: DP arrays
 !!
 !! INPUTS
 !! fftalg=FFT algorithm (see input variable)
@@ -1271,8 +1271,8 @@ subroutine dfti_fftur_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
  integer,optional,intent(in) :: isign, iscale
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2),kg_k(3,npw_k)
- complex(dpc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
- complex(dpc),target,intent(inout) :: ug(npw_k*ndat)    !vz_i
+ complex(dp),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
+ complex(dp),target,intent(inout) :: ug(npw_k*ndat)    !vz_i
 
 #ifdef HAVE_DFTI
 !Local variables-------------------------------
@@ -1359,7 +1359,7 @@ end subroutine dfti_c2c_ip_spc
 !!  dfti_c2c_ip_dpc
 !!
 !! FUNCTION
-!! Driver routine for in-place 3D complex-complex FFT. TARGET: DPC arrays
+!! Driver routine for in-place 3D complex-complex FFT. TARGET: DP arrays
 !!
 !! INPUTS
 !! nx,ny,nz=Number of points along the three directions.
@@ -1381,7 +1381,7 @@ subroutine dfti_c2c_ip_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff)
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,iscale,isign
 !arrays
- complex(dpc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
+ complex(dp),intent(inout) :: ff(ldx*ldy*ldz*ndat)
 ! *************************************************************************
 
 ! Include Fortran template
@@ -1443,7 +1443,7 @@ end subroutine dfti_c2c_op_spc
 !!
 !! FUNCTION
 !! Driver routine for out-of-place 3D complex-complex FFT of lengths nx, ny, nz.
-!! TARGET: DPC arrays
+!! TARGET: DP arrays
 !!
 !! INPUTS
 !! nx,ny,nz=Number of points along the three directions.
@@ -1464,8 +1464,8 @@ subroutine dfti_c2c_op_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff, g
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,isign,ndat,iscale
 !arrays
- complex(dpc),intent(in) :: ff(ldx*ldy*ldz*ndat)
- complex(dpc),intent(out) :: gg(ldx*ldy*ldz*ndat)
+ complex(dp),intent(in) :: ff(ldx*ldy*ldz*ndat)
+ complex(dp),intent(out) :: gg(ldx*ldy*ldz*ndat)
 ! *************************************************************************
 
 ! Include Fortran template
@@ -1516,7 +1516,7 @@ subroutine dfti_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout)
  type(C_ptr) :: fin_cptr, fout_cptr
 
 !arrays
- complex(dpc),ABI_CONTIGUOUS pointer :: fin_fptr(:),fout_fptr(:)
+ complex(dp),ABI_CONTIGUOUS pointer :: fin_fptr(:),fout_fptr(:)
 ! *************************************************************************
 
  ! Associate complex pointers with real inputs via the C pointers
@@ -1577,7 +1577,7 @@ subroutine dfti_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,finout)
  integer,parameter :: iscale1 = 1
  type(C_ptr) :: finout_cptr
 !arrays
- complex(dpc),ABI_CONTIGUOUS pointer :: finout_fptr(:)
+ complex(dp),ABI_CONTIGUOUS pointer :: finout_fptr(:)
 ! *************************************************************************
 
  ! Associate complex finout_fptr with real ffinout via the C pointer
@@ -1639,7 +1639,7 @@ subroutine dfti_fftpad_dp(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gbo
  type(C_ptr) :: cptr
  integer :: iscale__
 !arrays
- complex(dpc),ABI_CONTIGUOUS pointer :: fptr(:)
+ complex(dp),ABI_CONTIGUOUS pointer :: fptr(:)
 ! *************************************************************************
 
  iscale__ = merge(1, 0, isign == -1); if (present(iscale)) iscale__ = iscale
@@ -1696,7 +1696,7 @@ subroutine dfti_fftpad_dpc(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gb
  integer,optional,intent(in) :: iscale
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2)
- complex(dpc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
+ complex(dp),intent(inout) :: ff(ldx*ldy*ldz*ndat)
 
 !Local variables-------------------------------
 #ifdef HAVE_DFTI
@@ -1800,7 +1800,7 @@ subroutine dfti_r2c_op_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, ff, gg)
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat
 !arrays
  real(dp),intent(in) :: ff(ldx*ldy*ldz*ndat)
- complex(dpc),intent(out) :: gg(ldx*ldy*ldz*ndat)
+ complex(dp),intent(out) :: gg(ldx*ldy*ldz*ndat)
 
 #ifdef HAVE_DFTI
 !Local variables-------------------------------
@@ -1811,7 +1811,7 @@ subroutine dfti_r2c_op_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, ff, gg)
  type(C_PTR) :: cptr
 !arrays
  integer,allocatable :: i1inver(:),i2inver(:),i3inver(:)
- complex(dpc),ABI_CONTIGUOUS pointer :: gg_hp(:)
+ complex(dp),ABI_CONTIGUOUS pointer :: gg_hp(:)
 ! *************************************************************************
 
  padx = (nx/2+1)
@@ -1940,7 +1940,7 @@ subroutine dfti_r2c_op_dp(nx, ny, nz, ldx, ldy, ldz, ndat, ff, gg)
 !scalars
  type(C_ptr) :: gg_cptr
 !arrays
- complex(dpc),ABI_CONTIGUOUS pointer :: gg_fptr(:)
+ complex(dp),ABI_CONTIGUOUS pointer :: gg_fptr(:)
 ! *************************************************************************
 
  gg_cptr = C_loc(gg)
@@ -1984,7 +1984,7 @@ subroutine dfti_c2r_op_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, ff, gg)
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat
 !arrays
- complex(dpc),intent(in) :: ff(ldx*ldy*ldz*ndat)
+ complex(dp),intent(in) :: ff(ldx*ldy*ldz*ndat)
  real(dp),intent(out) :: gg(ldx*ldy*ldz*ndat)
 
 #ifdef HAVE_DFTI
@@ -1994,7 +1994,7 @@ subroutine dfti_c2r_op_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, ff, gg)
  type(DFTI_DESCRIPTOR),pointer :: Desc
  type(C_PTR) :: cptr
 !arrays
- complex(dpc),ABI_CONTIGUOUS pointer :: ff_hp(:)
+ complex(dp),ABI_CONTIGUOUS pointer :: ff_hp(:)
 ! *************************************************************************
 
  !stride  = 1
@@ -2099,7 +2099,7 @@ subroutine dfti_c2r_op_dp(nx, ny, nz, ldx, ldy, ldz, ndat, ff, gg)
 !scalars
  type(C_ptr) :: ff_cptr
 !arrays
- complex(dpc),ABI_CONTIGUOUS pointer :: ff_fptr(:)
+ complex(dp),ABI_CONTIGUOUS pointer :: ff_fptr(:)
 ! *************************************************************************
 
  ff_cptr = C_loc(ff)
@@ -2329,7 +2329,7 @@ subroutine dfti_alloc_complex_dpc(size, cptr, fptr)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: size
- complex(dpc),ABI_CONTIGUOUS pointer :: fptr(:)
+ complex(dp),ABI_CONTIGUOUS pointer :: fptr(:)
  type(C_PTR),intent(out) :: cptr
 ! *************************************************************************
 

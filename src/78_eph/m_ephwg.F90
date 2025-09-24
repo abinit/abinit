@@ -883,8 +883,8 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
  class(ephwg_t),intent(in) :: self
  logical, optional, intent(in) :: use_bzsum
 !arrays
- complex(dpc),intent(in) :: zvals(nz, nbcalc)
- complex(dpc),intent(out) :: cweights(nz, 2, nbcalc, self%nq_k)
+ complex(dp),intent(in) :: zvals(nz, nbcalc)
+ complex(dp),intent(out) :: cweights(nz, 2, nbcalc, self%nq_k)
  real(dp),optional,intent(in) :: erange(2)
 
 !Local variables-------------------------------

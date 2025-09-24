@@ -552,10 +552,9 @@ function nc_ihr_comm(vkbr, cryst, psps, npw, nspinor, istwfk, inclvkb, kpoint, u
 !Local variables ------------------------------
 !scalars
  integer :: ig,iab,spad1,spad2
- complex(dpc) :: c_tmp
+ complex(dp) :: c_tmp
 !arrays
  integer :: spinorwf_pad(2,4)
-
 !************************************************************************
 
  ! [H, r] = -\nabla + [V_{nl}, r]
@@ -652,12 +651,12 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
  integer :: ii,iat,ig,il,im,ilm,itypat,nlmn,iln0,iln,ilmn,in
  real(dp),parameter :: ppad=tol6
  real(dp) :: cosphi,costh,factor,mkg,mkg2,sinphi,sinth,sq,xdotg
- complex(dpc) :: dphi,dth,sfac
+ complex(dp) :: dphi,dth,sfac
  character(len=500) :: msg
 !arrays
  real(dp) :: gcart(3),kcart(3),kg(3)
  real(dp) :: b1(3),b2(3),b3(3),a1(3),a2(3),a3(3)
- complex(dpc) :: dylmcart(3),dylmcrys(3),gradphi(3),gradth(3)
+ complex(dp) :: dylmcart(3),dylmcrys(3),gradphi(3),gradth(3)
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -712,7 +711,7 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
      xdotg = gcart(1)*cryst%xcart(1,iat)+gcart(2)*Cryst%xcart(2,iat)+gcart(3)*Cryst%xcart(3,iat)
      ! Remember that in the GW code the reciprocal vectors
      ! are defined such as a_i*b_j = 2pi delta_ij, no need to introduce 2pi
-     sfac=CMPLX(COS(xdotg), SIN(xdotg), kind=dpc)
+     sfac=CMPLX(COS(xdotg), SIN(xdotg), kind=dp)
 
      iln0 = 0
      nlmn = count(psps%indlmn(3,:,itypat) > 0)

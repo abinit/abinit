@@ -121,7 +121,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
  integer :: hsize,comm,my_t1,my_t2,nsppol,nkets,nproc,ncid
  integer :: spin,spad,ik_bz,iv,ic,trans_idx,lomo_min,max_band
  real(dp) :: omegaev,rand_phi !,norm
- complex(dpc) :: ks_avg,gw_avg,exc_avg
+ complex(dp) :: ks_avg,gw_avg,exc_avg
  logical :: use_mpio,prtdos
  character(len=500) :: msg
  type(hexc_t) :: hexc
@@ -129,11 +129,11 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
 !arrays
  real(dp) :: tsec(2)
  real(dp),allocatable :: dos(:),dos_gw(:),dos_ks(:)
- complex(dpc),allocatable :: green(:,:)
- complex(dpc),allocatable :: opt_cvk(:,:,:,:,:),kets(:,:)
- complex(dpc),allocatable :: eps_rpanlf(:,:),eps_gwnlf(:,:)
- complex(dpc),allocatable :: tensor_cart(:,:),tensor_cart_rpanlf(:,:),tensor_cart_gwnlf(:,:)
- complex(dpc),allocatable :: tensor_red(:,:),tensor_red_rpanlf(:,:),tensor_red_gwnlf(:,:)
+ complex(dp),allocatable :: green(:,:)
+ complex(dp),allocatable :: opt_cvk(:,:,:,:,:),kets(:,:)
+ complex(dp),allocatable :: eps_rpanlf(:,:),eps_gwnlf(:,:)
+ complex(dp),allocatable :: tensor_cart(:,:),tensor_cart_rpanlf(:,:),tensor_cart_gwnlf(:,:)
+ complex(dp),allocatable :: tensor_red(:,:),tensor_red_rpanlf(:,:),tensor_red_gwnlf(:,:)
 
  !Temperature
  real(dp) :: dksqmax, en
@@ -144,11 +144,10 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
  character(len=4) :: ts
  character(len=fnlen) :: prefix
  character(len=fnlen) :: path
- complex(dpc),allocatable :: ep_renorms(:)
+ complex(dp),allocatable :: ep_renorms(:)
  integer :: ep_ik, ik, ireh, isppol
  integer :: itemp
  type(ebands_t) :: EPBSt, EP_QPBSt
-
 !************************************************************************
 
  call timab(690,1,tsec) ! exc_haydock_driver
@@ -612,7 +611,7 @@ subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,&
  type(hexc_interp_t),intent(inout) :: hexc_i
 !arrays
  complex(dp),intent(out) :: green(BSp%nomega,nkets)
- complex(dpc),intent(in) :: kets(hexc%hsize,nkets)
+ complex(dp),intent(in) :: kets(hexc%hsize,nkets)
 
 !Local variables ------------------------------
 !scalars
@@ -621,7 +620,7 @@ subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,&
  integer :: niter_file,niter_max,niter_done,nsppol,iq,my_nt,term_type,n_all_omegas
  real(dp) :: norm,nfact
  logical :: can_restart,is_converged
- complex(dpc) :: factor
+ complex(dp) :: factor
  character(len=500) :: msg
  character(len=fnlen),parameter :: tag_file="_HAYDR_SAVE"
  character(len=fnlen) :: restart_file,out_file
@@ -629,10 +628,10 @@ subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,&
 !arrays
  real(dp),allocatable :: bb_file(:)
  real(dp),allocatable :: bb(:)
- complex(dpc),allocatable :: aa(:),phi_nm1(:),phi_n(:),hphi_n(:),hphi_nm1(:)
- complex(dpc),allocatable :: aa_file(:),phi_n_file(:),phi_nm1_file(:)
- complex(dpc),allocatable :: ket0(:),all_omegas(:),green_temp(:,:)
-! complex(dpc),allocatable :: diag_dense(:)
+ complex(dp),allocatable :: aa(:),phi_nm1(:),phi_n(:),hphi_n(:),hphi_nm1(:)
+ complex(dp),allocatable :: aa_file(:),phi_n_file(:),phi_nm1_file(:)
+ complex(dp),allocatable :: ket0(:),all_omegas(:),green_temp(:,:)
+! complex(dp),allocatable :: diag_dense(:)
  logical :: check(2)
 
 !************************************************************************
@@ -886,16 +885,16 @@ subroutine haydock_herm_algo(niter_done,niter_max,nomega,omega,tol_iter,check,&
  integer,intent(out) :: inn
  logical,intent(out) :: is_converged
  real(dp),intent(in) :: tol_iter
- complex(dpc),intent(in) :: factor
+ complex(dp),intent(in) :: factor
  type(hexc_t),intent(in) :: hexc
  type(hexc_interp_t),intent(in) :: hexc_i
 !arrays
  real(dp),intent(inout) :: bb(niter_max)
- complex(dpc),intent(out) :: green(nomega)
- complex(dpc),intent(in) :: omega(nomega)
- complex(dpc),intent(inout) :: aa(niter_max)
- complex(dpc),intent(inout) :: phi_nm1(my_t2-my_t1+1)
- complex(dpc),intent(inout) :: phi_n  (my_t2-my_t1+1)
+ complex(dp),intent(out) :: green(nomega)
+ complex(dp),intent(in) :: omega(nomega)
+ complex(dp),intent(inout) :: aa(niter_max)
+ complex(dp),intent(inout) :: phi_nm1(my_t2-my_t1+1)
+ complex(dp),intent(inout) :: phi_n  (my_t2-my_t1+1)
  logical,intent(in) :: check(2)
 
 !Local variables ------------------------------
@@ -905,8 +904,8 @@ subroutine haydock_herm_algo(niter_done,niter_max,nomega,omega,tol_iter,check,&
  logical,parameter :: force_real=.TRUE.
 !arrays
  real(dp) :: abs_err(nomega,2) !,rel_err(nomega,2)
- complex(dpc),allocatable :: oldg(:),newg(:)
- complex(dpc),allocatable :: phi_np1(:),hphi_n(:),cfact(:)
+ complex(dp),allocatable :: oldg(:),newg(:)
+ complex(dp),allocatable :: phi_np1(:),hphi_n(:),cfact(:)
  logical :: test(2)
 
 !************************************************************************
@@ -1058,17 +1057,16 @@ subroutine haydock_restart(BSp,restart_file,ftype,iq_search,hsize,niter_file,aa_
  type(excparam),intent(in) :: BSp
 !arrays
  real(dp),allocatable,intent(out) :: bb_file(:)
- complex(dpc),allocatable,intent(out) :: aa_file(:),phi_n_file(:),phi_nm1_file(:)
+ complex(dp),allocatable,intent(out) :: aa_file(:),phi_n_file(:),phi_nm1_file(:)
 
 !Local variables ------------------------------
 !scalars
  integer,parameter :: master=0
  integer :: nproc,my_rank,ierr,op_file
  integer :: hsize_file,use_coupling_file
- complex(dpc) :: factor_file
+ complex(dp) :: factor_file
  character(len=500) :: msg
  type(haydock_type) :: haydock_file
-
 !************************************************************************
 
  nproc = xmpi_comm_size(comm); my_rank= xmpi_comm_rank(comm)
@@ -1168,8 +1166,8 @@ subroutine haydock_mdf_to_tensor(BSp,Cryst,eps,tensor_cart,tensor_red,ierr)
  type(excparam),intent(in) :: BSp
  type(crystal_t),intent(in) :: Cryst
 !arrays
- complex(dpc),intent(in) :: eps(BSp%nomega,BSp%nq)
- complex(dpc),intent(out) :: tensor_cart(BSp%nomega,6), tensor_red(BSp%nomega,6)
+ complex(dp),intent(in) :: eps(BSp%nomega,BSp%nq)
+ complex(dp),intent(out) :: tensor_cart(BSp%nomega,6), tensor_red(BSp%nomega,6)
 
 !Local variables ------------------------------
 !scalars
@@ -1179,9 +1177,8 @@ subroutine haydock_mdf_to_tensor(BSp,Cryst,eps,tensor_cart,tensor_red,ierr)
  integer,allocatable :: ipiv(:)
  real(dp) :: qcart(3), qtmet(3)
  real(dp) :: qred2cart(3,3),qcart2red(3,3)
- complex(dpc) :: qqcart(BSp%nq,6), qqred(BSp%nq,6)
- complex(dpc) :: b(6,BSP%nomega)
-
+ complex(dp) :: qqcart(BSp%nq,6), qqred(BSp%nq,6)
+ complex(dp) :: b(6,BSP%nomega)
 !************************************************************************
 
  ! Error flag
@@ -1291,7 +1288,7 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
  type(Hdr_type),intent(in) :: Hdr_bse
 !arrays
  complex(dp),intent(out) :: green(BSp%nomega,BSp%nq)
- complex(dpc),intent(in) :: kets(hsize,nkets)
+ complex(dp),intent(in) :: kets(hsize,nkets)
 
 !Local variables ------------------------------
 !scalars
@@ -1300,7 +1297,7 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
  integer :: niter_file,niter_max,niter_done,nsppol,iq,my_nt,term_type
  real(dp) :: ket0_hbar_norm,nfact
  logical :: can_restart,is_converged
- complex(dpc) :: factor
+ complex(dp) :: factor
  character(len=fnlen),parameter :: tag_file="_HAYDC_SAVE"
  character(len=500) :: msg
  character(len=fnlen) :: restart_file,out_file
@@ -1309,9 +1306,9 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
 !arrays
  real(dp),allocatable :: bb_file(:)
  real(dp),allocatable :: bb(:)
- complex(dpc),allocatable :: aa(:),cc(:),phi_np1(:),phi_n(:),phi_nm1(:),cbuff(:)
- complex(dpc),allocatable :: aa_file(:),phi_n_file(:),phi_np1_file(:),cc_file(:)
- complex(dpc),allocatable :: ket0(:)
+ complex(dp),allocatable :: aa(:),cc(:),phi_np1(:),phi_n(:),phi_nm1(:),cbuff(:)
+ complex(dp),allocatable :: aa_file(:),phi_n_file(:),phi_np1_file(:),cc_file(:)
+ complex(dp),allocatable :: ket0(:)
  logical :: check(2)
 
 !************************************************************************
@@ -1538,18 +1535,18 @@ subroutine haydock_psherm_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,che
  integer,intent(out) :: inn
  logical,intent(out) :: is_converged
  real(dp),intent(in) :: tol_iter,ket0_hbar_norm
- complex(dpc),intent(in) :: factor
+ complex(dp),intent(in) :: factor
  type(hexc_t),intent(in) :: hexc
  type(hexc_interp_t),intent(in) :: hexc_i
 !arrays
  real(dp),intent(inout) :: bb(niter_tot+1)
- complex(dpc),intent(out) :: green(nomega)
- complex(dpc),intent(in) :: omega(nomega)
- complex(dpc),intent(inout) :: aa(niter_tot),cc(niter_tot+1)
- complex(dpc),intent(in) :: ket0(my_t2-my_t1+1)
- complex(dpc),intent(inout) :: phi_nm1(my_t2-my_t1+1)
- complex(dpc),intent(inout) :: phi_n  (my_t2-my_t1+1)
- complex(dpc),intent(inout) :: phi_np1(my_t2-my_t1+1)
+ complex(dp),intent(out) :: green(nomega)
+ complex(dp),intent(in) :: omega(nomega)
+ complex(dp),intent(inout) :: aa(niter_tot),cc(niter_tot+1)
+ complex(dp),intent(in) :: ket0(my_t2-my_t1+1)
+ complex(dp),intent(inout) :: phi_nm1(my_t2-my_t1+1)
+ complex(dp),intent(inout) :: phi_n  (my_t2-my_t1+1)
+ complex(dp),intent(inout) :: phi_np1(my_t2-my_t1+1)
  logical,intent(in) :: check(2)
 
 !Local variables ------------------------------
@@ -1561,13 +1558,12 @@ subroutine haydock_psherm_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,che
  logical :: keep_vectors=.TRUE.
 !arrays
  real(dp) :: abs_err(nomega,2) !,ww_err(nomega,2)
- complex(dpc) :: gn0(nomega,niter_tot)
- complex(dpc),allocatable :: oldg(:),newg(:)
- complex(dpc),allocatable :: hphi_n(:),save_phi(:,:)
- complex(dpc),allocatable ::  alpha(:,:),beta(:,:),ovlp(:,:)
- complex(dpc),allocatable :: phi_test(:),phi_test2(:),g00(:)
+ complex(dp) :: gn0(nomega,niter_tot)
+ complex(dp),allocatable :: oldg(:),newg(:)
+ complex(dp),allocatable :: hphi_n(:),save_phi(:,:)
+ complex(dp),allocatable ::  alpha(:,:),beta(:,:),ovlp(:,:)
+ complex(dp),allocatable :: phi_test(:),phi_test2(:),g00(:)
  logical :: test(2)
-
 !************************************************************************
 
  ABI_UNUSED(ket0_hbar_norm)
@@ -1834,8 +1830,8 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
  type(Hdr_type),intent(in) :: Hdr_bse
 !arrays
  complex(dp),intent(out) :: green(BSp%nomega,BSp%nq)
- complex(dpc),intent(in) :: kets(hsize,nkets)
- complex(dpc),intent(in) :: ep_renorms(hsize)
+ complex(dp),intent(in) :: kets(hsize,nkets)
+ complex(dp),intent(in) :: ep_renorms(hsize)
 
 !Local variables ------------------------------
 !scalars
@@ -1844,23 +1840,22 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
  integer :: niter_file,niter_max,niter_done,nsppol,iq,my_nt,term_type,n_all_omegas
  real(dp) :: ket0_hbar_norm,nfact,norm
  logical :: can_restart,is_converged
- complex(dpc) :: factor
+ complex(dp) :: factor
  character(len=fnlen),parameter :: tag_file="_HAYDC_SAVE"
  character(len=500) :: msg
  character(len=fnlen) :: restart_file,out_file
  type(hexc_t),intent(in) :: hexc
  type(hexc_interp_t),intent(in) :: hexc_i
 !arrays
- complex(dpc),allocatable :: aa_file(:),bb_file(:),cc_file(:)
- complex(dpc),allocatable :: aa(:),bb(:),cc(:)
- complex(dpc),allocatable :: phi_np1(:),phi_n(:),phi_nm1(:)
- complex(dpc),allocatable :: phit_np1(:),phit_n(:),phit_nm1(:)
- complex(dpc),allocatable :: cbuff(:), phi_n_file(:),phi_np1_file(:)
- complex(dpc),allocatable :: ket0(:)
- complex(dpc),allocatable :: hphi_n(:), hphit_n(:)
- complex(dpc),allocatable :: all_omegas(:),green_temp(:,:)
+ complex(dp),allocatable :: aa_file(:),bb_file(:),cc_file(:)
+ complex(dp),allocatable :: aa(:),bb(:),cc(:)
+ complex(dp),allocatable :: phi_np1(:),phi_n(:),phi_nm1(:)
+ complex(dp),allocatable :: phit_np1(:),phit_n(:),phit_nm1(:)
+ complex(dp),allocatable :: cbuff(:), phi_n_file(:),phi_np1_file(:)
+ complex(dp),allocatable :: ket0(:)
+ complex(dp),allocatable :: hphi_n(:), hphit_n(:)
+ complex(dp),allocatable :: all_omegas(:),green_temp(:,:)
  logical :: check(2)
-
 !************************************************************************
 
  ABI_WARNING("Haydock with Bilanczos is still under development")
@@ -2134,22 +2129,22 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
  integer,intent(out) :: inn
  logical,intent(out) :: is_converged
  real(dp),intent(in) :: tol_iter,ket0_hbar_norm
- complex(dpc),intent(in) :: factor
+ complex(dp),intent(in) :: factor
  type(hexc_t),intent(in) :: hexc
  type(hexc_interp_t),intent(in) :: hexc_i
 !arrays
- complex(dpc),intent(inout) :: bb(niter_tot+1)
- complex(dpc),intent(out) :: green(nomega)
- complex(dpc),intent(in) :: omega(nomega)
- complex(dpc),intent(inout) :: aa(niter_tot),cc(niter_tot+1)
- complex(dpc),intent(in) :: ket0(my_t2-my_t1+1)
- complex(dpc),intent(in) :: ep_renorms(hsize)
- complex(dpc),intent(inout) :: phi_nm1(my_t2-my_t1+1)
- complex(dpc),intent(inout) :: phi_n  (my_t2-my_t1+1)
- complex(dpc),intent(inout) :: phi_np1(my_t2-my_t1+1)
- complex(dpc),intent(inout) :: phit_nm1(my_t2-my_t1+1)
- complex(dpc),intent(inout) :: phit_n  (my_t2-my_t1+1)
- complex(dpc),intent(inout) :: phit_np1(my_t2-my_t1+1)
+ complex(dp),intent(inout) :: bb(niter_tot+1)
+ complex(dp),intent(out) :: green(nomega)
+ complex(dp),intent(in) :: omega(nomega)
+ complex(dp),intent(inout) :: aa(niter_tot),cc(niter_tot+1)
+ complex(dp),intent(in) :: ket0(my_t2-my_t1+1)
+ complex(dp),intent(in) :: ep_renorms(hsize)
+ complex(dp),intent(inout) :: phi_nm1(my_t2-my_t1+1)
+ complex(dp),intent(inout) :: phi_n  (my_t2-my_t1+1)
+ complex(dp),intent(inout) :: phi_np1(my_t2-my_t1+1)
+ complex(dp),intent(inout) :: phit_nm1(my_t2-my_t1+1)
+ complex(dp),intent(inout) :: phit_n  (my_t2-my_t1+1)
+ complex(dp),intent(inout) :: phit_np1(my_t2-my_t1+1)
  logical,intent(in) :: check(2)
 
 !Local variables ------------------------------
@@ -2159,12 +2154,11 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
  logical :: keep_vectors=.TRUE.
 !arrays
  real(dp) :: abs_err(nomega,2) !,ww_err(nomega,2)
- complex(dpc),allocatable :: oldg(:),newg(:)
- complex(dpc),allocatable :: hphi_np1(:),hphit_np1(:),save_phi(:,:),save_phit(:,:)
- complex(dpc),allocatable :: g00(:)
+ complex(dp),allocatable :: oldg(:),newg(:)
+ complex(dp),allocatable :: hphi_np1(:),hphit_np1(:),save_phi(:,:),save_phit(:,:)
+ complex(dp),allocatable :: g00(:)
  logical :: test(2)
  integer :: ierr
-
 !************************************************************************
 
  ABI_UNUSED(ket0_hbar_norm)
@@ -2421,21 +2415,20 @@ subroutine continued_fract_general(nlev,term_type,aa,bb,cc,nz,zpts,spectrum)
 !scalars
  integer,intent(in) :: nlev,term_type,nz
 !arrays
- complex(dpc),intent(in) :: bb(nlev)
- complex(dpc),intent(in) :: cc(nlev)
- complex(dpc),intent(in) :: aa(nlev)
- complex(dpc),intent(in) :: zpts(nz)
- complex(dpc),intent(out) :: spectrum(nz)
+ complex(dp),intent(in) :: bb(nlev)
+ complex(dp),intent(in) :: cc(nlev)
+ complex(dp),intent(in) :: aa(nlev)
+ complex(dp),intent(in) :: zpts(nz)
+ complex(dp),intent(out) :: spectrum(nz)
 
 !Local variables ------------------------------
 !scalars
  integer :: it
- complex(dpc) ::  bb_inf,bg,bu,swap
- complex(dpc) :: aa_inf
+ complex(dp) ::  bb_inf,bg,bu,swap
+ complex(dp) :: aa_inf
  character(len=500) :: msg
 !arrays
- complex(dpc),allocatable :: div(:),den(:)
-
+ complex(dp),allocatable :: div(:),den(:)
 !************************************************************************
 
  ABI_MALLOC(div,(nz))

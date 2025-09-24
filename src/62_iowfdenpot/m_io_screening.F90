@@ -183,7 +183,7 @@ MODULE m_io_screening
    ! Input variable (GW compensation energy technique)
 
   character(len=3) :: kind_cdata
-  ! Flag to signal whether the data is in single or double precision ("spc" or "dpc")
+  ! Flag to signal whether the data is in single or double precision ("spc" or "dp")
   ! For the time being, we always write/read in double precision.
   ! This flag could be use to reduce the memory requirements if spc:
   ! we run calculations in single precision dump the results with the same precision without
@@ -212,7 +212,7 @@ MODULE m_io_screening
     ! qlwl(3,nqlwl)
     ! q-points for the long wave-length limit treatment (r.l.u)
 
-  complex(dpc),allocatable :: omega(:)
+  complex(dp),allocatable :: omega(:)
     ! omega(nomega)
     ! All frequencies calculated both along the real and the imaginary axis.
     ! Real frequencies are packed in the first section.
@@ -1359,7 +1359,7 @@ subroutine write_screening(varname, unt, iomode, npwe, nomega, iq_ibz, epsm1)
  integer :: ipwe,iomega,spins(2),s1,s2
  character(len=500) :: errmsg
 !arrays
- complex(dpc),allocatable :: epsm1d(:,:)
+ complex(dp),allocatable :: epsm1d(:,:)
  integer :: varid,ncerr
 #ifdef HAVE_GW_DPC
  real(dp), ABI_CONTIGUOUS pointer :: real_epsm1(:,:,:,:,:,:,:)
@@ -1463,7 +1463,7 @@ subroutine read_screening(varname, fname, npweA, nqibzA, nomegaA, epsm1, iomode,
  integer :: test_fform,mpi_err,ierr,sc_mode, bsize_frm,mpi_type_frm
  integer :: mpi_fh,buf_dim !,mat_ggw,mat_ggwq
  integer(XMPI_OFFSET_KIND) :: offset,displ_wq !,my_offpad
- !complex(dpc) :: ctmp
+ !complex(dp) :: ctmp
 #endif
  real(dp) :: cpu, wall, gflops
  character(len=500) :: msg,errmsg
@@ -1473,7 +1473,7 @@ subroutine read_screening(varname, fname, npweA, nqibzA, nomegaA, epsm1, iomode,
 #ifdef HAVE_MPI_IO
  integer(MPI_OFFSET_KIND),allocatable :: offset_wq(:,:)
 #endif
- complex(dpc),allocatable :: bufdc2d(:,:),bufdc3d(:,:,:)
+ complex(dp),allocatable :: bufdc2d(:,:),bufdc3d(:,:,:)
  ! pointers passed to netcdf4 routines (complex datatypes are not supported).
 #ifdef HAVE_GW_DPC
  real(dp), ABI_CONTIGUOUS pointer :: real_epsm1(:,:,:,:,:,:,:)
@@ -1581,7 +1581,7 @@ subroutine read_screening(varname, fname, npweA, nqibzA, nomegaA, epsm1, iomode,
         buf_dim,epsm1,xmpio_chunk_bsize,sc_mode,comm,ierr)
      ABI_CHECK(ierr==0,"Fortran matrix too big")
 #else
-     ! Have to allocate workspace for dpc data.
+     ! Have to allocate workspace for dp data.
      ! FIXME: Change the file format of the SCR and SUC file so that
      ! they are written in single precision if not HAVE_GW_DPC
      ABI_MALLOC_OR_DIE(bufdc3d,(npweA,npweA,nomegaA), ierr)
@@ -1609,7 +1609,7 @@ subroutine read_screening(varname, fname, npweA, nqibzA, nomegaA, epsm1, iomode,
        buf_dim,epsm1,xmpio_chunk_bsize,sc_mode,comm,ierr)
      ABI_CHECK(ierr==0,"Fortran record too big")
 #else
-     ! Have to allocate workspace for dpc data.
+     ! Have to allocate workspace for dp data.
      ABI_MALLOC_OR_DIE(bufdc3d,(npweA,npweA,nomegaA), ierr)
      sc_mode = xmpio_collective
 
@@ -2109,7 +2109,7 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
  integer,allocatable :: freq_indx(:,:),ifile_indx(:),pos_indx(:),i_temp(:),i2_temp(:,:)
  real(dp),allocatable :: real_omega(:), real_omega_wgs(:), imag_omega(:), imag_omega_wgs(:) ,omega_wgs_storage(:)
  complex(gwpc),allocatable :: epsm1(:,:,:,:),epsm1_temp(:,:,:,:)
- complex(dpc),allocatable :: omega_storage(:)
+ complex(dp),allocatable :: omega_storage(:)
 ! *************************************************************************
 
  comm = xmpi_comm_self

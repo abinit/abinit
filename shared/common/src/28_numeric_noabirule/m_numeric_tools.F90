@@ -611,7 +611,7 @@ end subroutine unit_matrix_rdp
 pure subroutine unit_matrix_cdp(matrix)
 
 !Arguments ------------------------------------
- complex(dpc),intent(inout) :: matrix(:,:)
+ complex(dp),intent(inout) :: matrix(:,:)
 
 !Local variables-------------------------------
 !scalars
@@ -706,7 +706,7 @@ end function get_trace_rdp
 !!  get_trace_cdp
 !!
 !! FUNCTION
-!!  Calculate the trace of a square matrix (complex(dpc) version)
+!!  Calculate the trace of a square matrix (complex(dp) version)
 !!
 !! INPUTS
 !!
@@ -717,8 +717,8 @@ end function get_trace_rdp
 pure function get_trace_cdp(matrix) result(trace)
 
 !Arguments ------------------------------------
- complex(dpc) :: trace
- complex(dpc),intent(in) :: matrix(:,:)
+ complex(dp) :: trace
+ complex(dp),intent(in) :: matrix(:,:)
 
 !Local variables-------------------------------
 !scalars
@@ -823,8 +823,8 @@ function get_diag_cdp(cmat) result(cdiag)
 
 !Arguments ------------------------------------
 !scalars
- complex(dpc),intent(in) :: cmat(:,:)
- complex(dpc) :: cdiag(SIZE(cmat,1))
+ complex(dp),intent(in) :: cmat(:,:)
+ complex(dp) :: cdiag(SIZE(cmat,1))
 
 !Local variables-------------------------------
  integer :: ii
@@ -1029,11 +1029,10 @@ pure function rdp2cdp_1D(rr) result(cc)
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: rr(:,:)
- complex(dpc) :: cc(SIZE(rr,2))
-
+ complex(dp) :: cc(SIZE(rr,2))
 ! *********************************************************************
 
- cc(:)=CMPLX(rr(1,:),rr(2,:),kind=dpc)
+ cc(:)=CMPLX(rr(1,:),rr(2,:),kind=dp)
 
 end function rdp2cdp_1D
 !!***
@@ -1057,11 +1056,11 @@ pure function rdp2cdp_2D(rr) result(cc)
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: rr(:,:,:)
- complex(dpc) :: cc(SIZE(rr,2),SIZE(rr,3))
+ complex(dp) :: cc(SIZE(rr,2),SIZE(rr,3))
 
 ! *********************************************************************
 
- cc(:,:)=CMPLX(rr(1,:,:),rr(2,:,:), kind=dpc)
+ cc(:,:)=CMPLX(rr(1,:,:),rr(2,:,:), kind=dp)
 
 end function rdp2cdp_2D
 !!***
@@ -1085,11 +1084,10 @@ pure function rdp2cdp_3D(rr) result(cc)
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: rr(:,:,:,:)
- complex(dpc) :: cc(SIZE(rr,2),SIZE(rr,3),SIZE(rr,4))
-
+ complex(dp) :: cc(SIZE(rr,2),SIZE(rr,3),SIZE(rr,4))
 ! *********************************************************************
 
- cc(:,:,:)=CMPLX(rr(1,:,:,:),rr(2,:,:,:), kind=dpc)
+ cc(:,:,:)=CMPLX(rr(1,:,:,:),rr(2,:,:,:), kind=dp)
 
 end function rdp2cdp_3D
 !!***
@@ -1113,11 +1111,11 @@ pure function rdp2cdp_4D(rr) result(cc)
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: rr(:,:,:,:,:)
- complex(dpc) :: cc(SIZE(rr,2),SIZE(rr,3),SIZE(rr,4),SIZE(rr,5))
+ complex(dp) :: cc(SIZE(rr,2),SIZE(rr,3),SIZE(rr,4),SIZE(rr,5))
 
 ! *********************************************************************
 
- cc(:,:,:,:)=CMPLX(rr(1,:,:,:,:),rr(2,:,:,:,:), kind=dpc)
+ cc(:,:,:,:)=CMPLX(rr(1,:,:,:,:),rr(2,:,:,:,:), kind=dp)
 
 end function rdp2cdp_4D
 !!***
@@ -1141,11 +1139,11 @@ pure function rdp2cdp_5D(rr) result(cc)
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: rr(:,:,:,:,:,:)
- complex(dpc) :: cc(SIZE(rr,2),SIZE(rr,3),SIZE(rr,4),SIZE(rr,5),SIZE(rr,6))
+ complex(dp) :: cc(SIZE(rr,2),SIZE(rr,3),SIZE(rr,4),SIZE(rr,5),SIZE(rr,6))
 
 ! *********************************************************************
 
- cc(:,:,:,:,:)=CMPLX(rr(1,:,:,:,:,:),rr(2,:,:,:,:,:), kind=dpc)
+ cc(:,:,:,:,:)=CMPLX(rr(1,:,:,:,:,:),rr(2,:,:,:,:,:), kind=dp)
 
 end function rdp2cdp_5D
 !!***
@@ -1169,11 +1167,10 @@ pure function rdp2cdp_6D(rr) result(cc)
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: rr(:,:,:,:,:,:,:)
- complex(dpc) :: cc(SIZE(rr,2),SIZE(rr,3),SIZE(rr,4),SIZE(rr,5),SIZE(rr,6),SIZE(rr,7))
-
+ complex(dp) :: cc(SIZE(rr,2),SIZE(rr,3),SIZE(rr,4),SIZE(rr,5),SIZE(rr,6),SIZE(rr,7))
 ! *********************************************************************
 
- cc(:,:,:,:,:,:)=CMPLX(rr(1,:,:,:,:,:,:),rr(2,:,:,:,:,:,:), kind=dpc)
+ cc(:,:,:,:,:,:)=CMPLX(rr(1,:,:,:,:,:,:),rr(2,:,:,:,:,:,:), kind=dp)
 
 end function rdp2cdp_6D
 !!***
@@ -1200,9 +1197,8 @@ pure function cdp2rdp_0D(cc) result(rr)
 
 !Arguments ------------------------------------
 !scalars
- complex(dpc),intent(in) :: cc
+ complex(dp),intent(in) :: cc
  real(dp) :: rr(2)
-
 ! *********************************************************************
 
  rr(1)=REAL (cc)
@@ -1231,7 +1227,7 @@ end function cdp2rdp_0D
 pure function cdp2rdp_1D(cc) result(rr)
 
 !Arguments ------------------------------------
- complex(dpc),intent(in) :: cc(:)
+ complex(dp),intent(in) :: cc(:)
  real(dp) :: rr(2,SIZE(cc))
 ! *********************************************************************
 
@@ -1255,7 +1251,7 @@ end function cdp2rdp_1D
 pure function cdp2rdp_2D(cc) result(rr)
 
 !Arguments ------------------------------------
- complex(dpc),intent(in) :: cc(:,:)
+ complex(dp),intent(in) :: cc(:,:)
  real(dp) :: rr(2,SIZE(cc,1),SIZE(cc,2))
 ! *********************************************************************
 
@@ -1279,7 +1275,7 @@ end function cdp2rdp_2D
 pure function cdp2rdp_3D(cc) result(rr)
 
 !Arguments ------------------------------------
- complex(dpc),intent(in) :: cc(:,:,:)
+ complex(dp),intent(in) :: cc(:,:,:)
  real(dp) :: rr(2,SIZE(cc,1),SIZE(cc,2),SIZE(cc,3))
 ! *********************************************************************
 
@@ -1303,7 +1299,7 @@ end function cdp2rdp_3D
 pure function cdp2rdp_4D(cc) result(rr)
 
 !Arguments ------------------------------------
- complex(dpc),intent(in) :: cc(:,:,:,:)
+ complex(dp),intent(in) :: cc(:,:,:,:)
  real(dp) :: rr(2,SIZE(cc,1),SIZE(cc,2),SIZE(cc,3),SIZE(cc,4))
 ! *********************************************************************
 
@@ -1327,7 +1323,7 @@ end function cdp2rdp_4D
 pure function cdp2rdp_5D(cc) result(rr)
 
 !Arguments ------------------------------------
- complex(dpc),intent(in) :: cc(:,:,:,:,:)
+ complex(dp),intent(in) :: cc(:,:,:,:,:)
  real(dp) :: rr(2,SIZE(cc,1),SIZE(cc,2),SIZE(cc,3),SIZE(cc,4),SIZE(cc,5))
 ! *********************************************************************
 
@@ -1349,7 +1345,7 @@ end function cdp2rdp_5D
 pure function cdp2rdp_6D(cc) result(rr)
 
 !Arguments ------------------------------------
- complex(dpc),intent(in) :: cc(:,:,:,:,:,:)
+ complex(dp),intent(in) :: cc(:,:,:,:,:,:)
  real(dp) :: rr(2,SIZE(cc,1),SIZE(cc,2),SIZE(cc,3),SIZE(cc,4),SIZE(cc,5),SIZE(cc,6))
 ! *********************************************************************
 
@@ -2091,7 +2087,7 @@ function linfit_spc(nn,xx,zz,aa,bb) result(res)
 !scalars
  integer :: ii
  real(dp) :: sx,sx2,msrt
- complex(dpc) :: sz,sxz
+ complex(dp) :: sz,sxz
 ! *************************************************************************
 
  sx=zero ; sx2=zero ; msrt=zero
@@ -2136,15 +2132,15 @@ function linfit_dpc(nn,xx,zz,aa,bb) result(res)
  integer,intent(in) :: nn
  real(dp) :: res
  real(dp),intent(in) :: xx(nn)
- complex(dpc),intent(in) :: zz(nn)
- complex(dpc),intent(out) :: aa,bb
+ complex(dp),intent(in) :: zz(nn)
+ complex(dp),intent(out) :: aa,bb
 !arrays
 
 !Local variables-------------------------------
 !scalars
  integer :: ii
  real(dp) :: sx,sx2,msrt
- complex(dpc) :: sz,sxz
+ complex(dp) :: sz,sxz
 ! *************************************************************************
 
  sx=zero  ; sx2=zero ; msrt=zero
@@ -3149,13 +3145,13 @@ function simpson_cplx(npts,step,ff)
 !scalars
  integer,intent(in) :: npts
  real(dp),intent(in)  :: step
- complex(dpc),intent(in) :: ff(npts)
- complex(dpc) :: simpson_cplx
+ complex(dp),intent(in) :: ff(npts)
+ complex(dp) :: simpson_cplx
 
 !Local variables ------------------------------
 !scalars
  integer :: ii,my_n
- complex(dpc) :: sum_even, sum_odd
+ complex(dp) :: sum_even, sum_odd
 !************************************************************************
 
  my_n=npts; if ((npts/2)*2 == npts) my_n=npts-3
@@ -3298,13 +3294,13 @@ subroutine hermitianize_dpc(mat,uplo)
 !scalars
  character(len=*),intent(in) :: uplo
 !arrays
- complex(dpc),intent(inout) :: mat(:,:)
+ complex(dp),intent(inout) :: mat(:,:)
 
 !Local variables-------------------------------
 !scalars
  integer :: nn,ii,jj
 !arrays
- complex(dpc),allocatable :: tmp(:)
+ complex(dp),allocatable :: tmp(:)
 ! *************************************************************************
 
  nn = assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',__FILE__,__LINE__)
@@ -3328,7 +3324,7 @@ subroutine hermitianize_dpc(mat,uplo)
        if (ii/=jj) then
          mat(jj,ii) = DCONJG(mat(ii,jj))
        else
-         mat(ii,ii) = CMPLX(DBLE(mat(ii,ii)),zero, kind=dpc)
+         mat(ii,ii) = CMPLX(DBLE(mat(ii,ii)),zero, kind=dp)
        end if
      end do
    end do
@@ -3339,7 +3335,7 @@ subroutine hermitianize_dpc(mat,uplo)
       if (ii/=jj) then
         mat(ii,jj) = DCONJG(mat(jj,ii))
       else
-        mat(ii,ii) = CMPLX(REAL(mat(ii,ii)),zero, kind=dpc)
+        mat(ii,ii) = CMPLX(REAL(mat(ii,ii)),zero, kind=dp)
       end if
     end do
   end do
@@ -3609,13 +3605,13 @@ subroutine symmetrize_dpc(mat, uplo)
 !scalars
  character(len=*),intent(in) :: uplo
 !arrays
- complex(dpc),intent(inout) :: mat(:,:)
+ complex(dp),intent(inout) :: mat(:,:)
 
 !Local variables-------------------------------
 !scalars
  integer :: nn,ii,jj
 !arrays
- complex(dpc),allocatable :: tmp(:)
+ complex(dp),allocatable :: tmp(:)
 ! *************************************************************************
 
  nn = assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',__FILE__,__LINE__)
@@ -3810,7 +3806,7 @@ subroutine print_arr1d_dpc(units, arr, max_r)
  integer,intent(in) :: units(:)
  integer,optional,intent(in) :: max_r
 !arrays
- complex(dpc),intent(in) :: arr(:)
+ complex(dp),intent(in) :: arr(:)
 
 !Local variables-------------------------------
 !scalars
@@ -3911,7 +3907,7 @@ subroutine print_arr2d_dpc(units, arr, max_r, max_c)
  integer,intent(in) :: units(:)
  integer,optional,intent(in) :: max_r,max_c
 !arrays
- complex(dpc),intent(in) :: arr(:,:)
+ complex(dp),intent(in) :: arr(:,:)
 
 !Local variables-------------------------------
 !scalars
@@ -3959,15 +3955,15 @@ function pade(n, z, f, zz)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
- complex(dpc),intent(in) :: zz
- complex(dpc) :: pade
+ complex(dp),intent(in) :: zz
+ complex(dp) :: pade
 !arrays
- complex(dpc),intent(in) :: z(n), f(n)
+ complex(dp),intent(in) :: z(n), f(n)
 
 !Local variables-------------------------------
 !scalars
  integer :: i
- complex(dpc) :: a(n), Az(0:n), Bz(0:n)
+ complex(dp) :: a(n), Az(0:n), Bz(0:n)
 ! *************************************************************************
 
  call calculate_pade_a(a, n, z, f)
@@ -4006,16 +4002,16 @@ function dpade(n, z, f, zz)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
- complex(dpc),intent(in) :: zz
- complex(dpc) :: dpade
+ complex(dp),intent(in) :: zz
+ complex(dp) :: dpade
 !arrays
- complex(dpc),intent(in) :: z(n),f(n)
+ complex(dp),intent(in) :: z(n),f(n)
 
 !Local variables-------------------------------
 !scalars
  integer :: i
 !arrays
- complex(dpc) :: a(n), Az(0:n), Bz(0:n), dAz(0:n), dBz(0:n)
+ complex(dp) :: a(n), Az(0:n), Bz(0:n), dAz(0:n), dBz(0:n)
 ! *************************************************************************
 
  call calculate_pade_a(a, n, z, f)
@@ -4063,14 +4059,14 @@ subroutine calculate_pade_a(a, n, z, f)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
- complex(dpc),intent(in) :: z(n),f(n)
- complex(dpc),intent(out) :: a(n)
+ complex(dp),intent(in) :: z(n),f(n)
+ complex(dp),intent(out) :: a(n)
 
 !Local variables-------------------------------
 !scalars
  integer :: i,j
 !arrays
- complex(dpc) :: g(n,n)
+ complex(dp) :: g(n,n)
 ! *************************************************************************
 
  g(1,1:n)=f(1:n)
@@ -4106,7 +4102,7 @@ complex(dp) function newrap_step(z, f, df)
 
 !Arguments ------------------------------------
 !scalars
- complex(dpc),intent(in) :: z,f,df
+ complex(dp),intent(in) :: z,f,df
 
 !Local variables-------------------------------
  real(dp) :: dfm2
@@ -4406,18 +4402,18 @@ subroutine continued_fract(nlev,term_type,aa,bb,nz,zpts,spectrum)
  integer,intent(in) :: nlev,term_type,nz
 !arrays
  real(dp),intent(in) ::  bb(nlev)
- complex(dpc),intent(in) :: aa(nlev)
- complex(dpc),intent(in) :: zpts(nz)
- complex(dpc),intent(out) :: spectrum(nz)
+ complex(dp),intent(in) :: aa(nlev)
+ complex(dp),intent(in) :: zpts(nz)
+ complex(dp),intent(out) :: spectrum(nz)
 
 !Local variables ------------------------------
 !scalars
  integer :: it
  real(dp) ::  bb_inf,bg,bup,swap
- complex(dpc) :: aa_inf
+ complex(dp) :: aa_inf
  character(len=500) :: msg
 !arrays
- complex(dpc),allocatable :: div(:),den(:)
+ complex(dp),allocatable :: div(:),den(:)
 !************************************************************************
 
  ABI_MALLOC(div,(nz))
@@ -4509,7 +4505,7 @@ subroutine cmplx_sphcart(carr, from, units)
  character(len=*),intent(in) :: from
  character(len=*),optional,intent(in) :: units
 !arrays
- complex(dpc),intent(inout) :: carr(:,:)
+ complex(dp),intent(inout) :: carr(:,:)
 
 !Local variables-------------------------------
 !scalars
@@ -4531,7 +4527,7 @@ subroutine cmplx_sphcart(carr, from, units)
      do ii=1,SIZE(carr,DIM=1)
         rho  = DBLE(carr(ii,jj))
         theta= AIMAG(carr(ii,jj)) * fact
-        carr(ii,jj) = CMPLX(rho*DCOS(theta), rho*DSIN(theta), kind=dpc)
+        carr(ii,jj) = CMPLX(rho*DCOS(theta), rho*DSIN(theta), kind=dp)
      end do
    end do
 
@@ -4550,7 +4546,7 @@ subroutine cmplx_sphcart(carr, from, units)
         else
           theta= zero
         end if
-        carr(ii,jj) = CMPLX(rho, theta*fact, kind=dpc)
+        carr(ii,jj) = CMPLX(rho, theta*fact, kind=dp)
      end do
    end do
 
@@ -4891,8 +4887,8 @@ pure function interpol1d_c(npts_o,npts_i,pts_o,pts_i,val_o) result(res)
 !arrays
  integer,intent(in) :: npts_o, npts_i
  real(dp),intent(in) :: pts_o(npts_o), pts_i(npts_i)
- complex(dpc),intent(in) :: val_o(npts_o)
- complex(dpc) :: res(npts_i)
+ complex(dp),intent(in) :: val_o(npts_o)
+ complex(dp) :: res(npts_i)
 !Local variables-------------------------------
  real(dp) :: val_o_r(npts_o), val_o_i(npts_o), res_r(npts_i), res_i(npts_i)
 ! *************************************************************************
@@ -4908,7 +4904,7 @@ pure function interpol1d_c(npts_o,npts_i,pts_o,pts_i,val_o) result(res)
   res_i = interpol1d(npts_o, npts_i, pts_o, pts_i, val_o_i)
 
   ! Combine the results back into complex form.
-  res = CMPLX(res_r, res_i, kind=dpc)
+  res = CMPLX(res_r, res_i, kind=dp)
 end function interpol1d_c
 
 !!----------------------------------------------------------------------
@@ -5291,8 +5287,8 @@ subroutine interpolate_ur_dpc(in_ngfft, ndat, in_ur, out_ngfft, out_ur)
  integer,intent(in) :: ndat
 !arrays
  integer,intent(in) :: in_ngfft(:), out_ngfft(:)
- complex(dpc),intent(in) :: in_ur(product(in_ngfft(1:3)), ndat)
- complex(dpc),intent(out) :: out_ur(product(out_ngfft(1:3)), ndat)
+ complex(dp),intent(in) :: in_ur(product(in_ngfft(1:3)), ndat)
+ complex(dp),intent(out) :: out_ur(product(out_ngfft(1:3)), ndat)
 
 !Local variables--------------------------------------------------------
 !scalars
@@ -5341,19 +5337,19 @@ end subroutine interpolate_ur_dpc
 !!
 !! SOURCE
 
-pure complex(dpc) function interpol3d_1d_dpc(rr, nr1, nr2, nr3, grid) result(res)
+pure complex(dp) function interpol3d_1d_dpc(rr, nr1, nr2, nr3, grid) result(res)
 
 !Arguments-------------------------------------------------------------
 !scalars
  integer,intent(in) :: nr1, nr2, nr3
 !arrays
  real(dp),intent(in) :: rr(3)
- complex(dpc),intent(in) :: grid(nr1, nr2, nr3)
+ complex(dp),intent(in) :: grid(nr1, nr2, nr3)
 
 !Local variables--------------------------------------------------------
 !scalars
  integer :: ir1,ir2,ir3,pr1,pr2,pr3
- complex(dpc) :: res1,res2,res3,res4,res5,res6,res7,res8,x1,x2,x3
+ complex(dp) :: res1,res2,res3,res4,res5,res6,res7,res8,x1,x2,x3
 ! *************************************************************************
 
  call interpol3d_indices(rr, nr1, nr2, nr3, ir1, ir2, ir3, pr1, pr2, pr3)
@@ -6197,7 +6193,7 @@ subroutine kramerskronig(nomega,omega,eps,method,only_check)
  integer,intent(in) :: method,nomega,only_check
 !arrays
  real(dp),intent(in) :: omega(nomega)
- complex(dpc),intent(inout) :: eps(nomega)
+ complex(dp),intent(inout) :: eps(nomega)
 
 !Local variables-------------------------------
 !scalars
@@ -6286,7 +6282,7 @@ subroutine kramerskronig(nomega,omega,eps,method,only_check)
 
 !at this point real part is in e1kk, need to put it into eps
  do ii=1,nomega
-   eps(ii)=CMPLX(e1kk(ii),AIMAG(eps(ii)), kind=dpc)
+   eps(ii)=CMPLX(e1kk(ii),AIMAG(eps(ii)), kind=dp)
  end do
 
 !Verify Kramers-Kronig

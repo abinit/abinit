@@ -223,7 +223,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  real(dp),allocatable :: qp_rhor_paw(:,:),qp_rhor_n_one(:,:),qp_rhor_nt_one(:,:),qp_nhat(:,:)
  real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grvdw(:,:),qmax(:)
  real(dp),allocatable :: vpsp(:),xccc3d(:), ks_vhartr(:),ks_vtrial(:,:),ks_vxc(:,:), kxc(:,:) !,qp_kxc(:,:)
- complex(dpc),allocatable :: m_ks_to_qp(:,:,:,:)
+ complex(dp),allocatable :: m_ks_to_qp(:,:,:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(Pawrhoij_type),allocatable :: KS_Pawrhoij(:)
  type(Pawrhoij_type),allocatable :: prev_Pawrhoij(:) !QP_pawrhoij(:),
@@ -1066,7 +1066,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
  real(dp) :: qpt_bz(3),minmax_tene(2), gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),sq(3)
  real(dp),allocatable :: doccde(:),eigen(:),occfact(:),qlwl(:,:), igwene(:,:,:)
  real(dp),pointer :: energies_p(:,:,:)
- complex(dpc),allocatable :: gw_energy(:,:,:)
+ complex(dp),allocatable :: gw_energy(:,:,:)
  type(Pawrhoij_type),allocatable :: Pawrhoij(:)
 !************************************************************************
 
@@ -1907,7 +1907,7 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh, &
  real(dp),allocatable :: shiftk(:,:), doccde(:),eigen(:),occfact(:)
  real(dp),pointer :: energies_p_dense(:,:,:)
  real(dp),allocatable :: qlwl(:,:)
- complex(dpc),allocatable :: gw_energy(:,:,:)
+ complex(dp),allocatable :: gw_energy(:,:,:)
 !************************************************************************
 
  DBG_ENTER("COLL")

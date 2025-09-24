@@ -162,7 +162,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, dtset,
  integer :: nfftf, mgfftf, nhat12_grdim, my_nbks, use_padfft, use_padfftf
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_k, wall_k, gflops_k
  real(dp) :: fact_spin, theta_mu_minus_esum, theta_mu_minus_esum2, tol_empty
- complex(dpc) :: ctmp,ph_mkgwt,ph_mkt
+ complex(dp) :: ctmp,ph_mkgwt,ph_mkt
  complex(gwpc) :: gwpc_sigxme,gwpc_sigxme2,xdot_tmp
  logical :: iscompatibleFFT, q_is_gamma, print_time
  character(len=5000) :: msg
@@ -175,7 +175,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, dtset,
  real(dp),contiguous, pointer :: qp_ene(:,:,:), qp_occ(:,:,:)
  real(dp),allocatable :: nhat12(:,:,:),grnhat12(:,:,:,:)
  complex(gwpc),allocatable :: vc_sqrt_qbz(:), rhotwg(:), rhotwgp(:), rhotwg_ki(:,:), ur_bdgw(:,:), ur_ibz(:)
- complex(dpc),allocatable  :: sigxcme_tmp(:,:), sigxme_tmp(:,:,:), sigx(:,:,:,:)
+ complex(dp),allocatable  :: sigxcme_tmp(:,:), sigxme_tmp(:,:,:), sigx(:,:,:,:)
  complex(gwpc),allocatable :: ur_ae_sum(:),ur_ae_onsite_sum(:),ur_ps_onsite_sum(:)
  complex(gwpc),allocatable :: ur_ae_bdgw(:,:),ur_ae_onsite_bdgw(:,:),ur_ps_onsite_bdgw(:,:)
  complex(gwpc),contiguous, pointer :: cg_jb(:),cg_sum(:)
@@ -185,7 +185,6 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, dtset,
  type(sigijtab_t),pointer :: Sigxij_tab(:)
  type(pawcprj_type),allocatable :: Cprj_kgw(:,:),Cprj_ksum(:,:)
  type(pawpwij_t),allocatable :: Pwij_qg(:),Pwij_fft(:)
-
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -758,8 +757,7 @@ subroutine sigx_symmetrize(jk_ibz, spin, bmin, bmax, nsppol, nspinor, nsig_ab, q
 !Local variables ------------------------------
  integer :: ib, jb, ndegs, ii
  integer,allocatable :: degtab(:,:)
- complex(dpc),allocatable :: sym_sigx(:,:,:)
-
+ complex(dp),allocatable :: sym_sigx(:,:,:)
 !************************************************************************
 
  ! Find number of degenerates subspaces and number of bands in each subspace.

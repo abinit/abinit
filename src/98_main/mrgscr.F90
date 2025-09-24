@@ -112,7 +112,7 @@ program mrgscr
  real(dp),allocatable :: work(:),ftab(:),ysp(:,:),eint(:),qratio(:,:)
  complex(gwpc),pointer :: vc_sqrt(:)
  complex(gwpc),allocatable :: tmp_epsm1(:,:,:,:),kxcg(:,:)
- complex(dpc),allocatable :: omega(:),em1_ppm(:),epsm1_eigen(:,:),ppm_eigen(:,:),rhoggp(:,:)
+ complex(dp),allocatable :: omega(:),em1_ppm(:),epsm1_eigen(:,:),ppm_eigen(:,:),rhoggp(:,:)
  character(len=fnlen),allocatable :: filenames(:)
  type(pawrhoij_type),allocatable :: pawrhoij(:)
  type(hscr_t),target,allocatable :: Hscr_file(:)

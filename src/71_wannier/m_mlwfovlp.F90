@@ -346,10 +346,10 @@ class(abstract_wf), pointer :: mywfc
  real(dp),allocatable :: proj_site(:,:,:),proj_x(:,:,:),proj_z(:,:,:),proj_zona(:,:)
  real(dp),allocatable :: wann_centres(:,:,:),wann_spreads(:,:),xcart(:,:)
  real(dp),allocatable :: proj_s_qaxis_loc(:,:)
- complex(dpc),allocatable :: A_paw(:,:,:,:)
- complex(dpc),allocatable :: M_matrix(:,:,:,:,:),U_matrix(:,:,:,:)
- complex(dpc),allocatable :: U_matrix_opt(:,:,:,:)
- complex(dpc),pointer :: A_matrix(:,:,:,:)
+ complex(dp),allocatable :: A_paw(:,:,:,:)
+ complex(dp),allocatable :: M_matrix(:,:,:,:,:),U_matrix(:,:,:,:)
+ complex(dp),allocatable :: U_matrix_opt(:,:,:,:)
+ complex(dp),pointer :: A_matrix(:,:,:,:)
  logical,allocatable :: band_in(:,:),lwindow(:,:,:)
  character(len=3),allocatable :: atom_symbols(:)
  logical,allocatable:: just_augmentation(:,:)
@@ -897,9 +897,9 @@ contains
 #ifdef HAVE_WANNIER90
     integer :: ii, jj, ikpt, iband, kk
     real(dp) :: corrvdw
-    complex(dpc) :: caux,caux2,caux3
+    complex(dp) :: caux,caux2,caux3
     real(dp),allocatable :: csix(:,:,:,:)
-    real(dpc),allocatable :: occ_arr(:,:,:),occ_wan(:,:,:)
+    real(dp),allocatable :: occ_arr(:,:,:),occ_wan(:,:,:)
     real(dp),allocatable :: tdocc_wan(:,:)
 
      write(std_out,*) 'nwan(nsppol)=',ch10
@@ -1793,7 +1793,7 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
 
 !Arguments ------------------------------------
 !scalars
- complex(dpc),parameter :: c1=(1._dp,0._dp)
+ complex(dp),parameter :: c1=(1._dp,0._dp)
  integer,intent(in) :: lproj,max_num_bands,mband,mkmem,mpw,mwan,natom,nkpt,nspinor,nsppol
  integer,intent(in) :: ntypat
  type(MPI_type),intent(in) :: mpi_enreg
@@ -1807,7 +1807,7 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
  !real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol)
  real(dp),intent(in) :: gprimd(3,3),proj_site(3,mband,nsppol)
  real(dp),intent(in) :: proj_x(3,mband,nsppol),proj_z(3,mband,nsppol),proj_zona(mband,nsppol)
- complex(dpc),intent(out) :: A_matrix(max_num_bands,mwan,nkpt,nsppol)
+ complex(dp),intent(out) :: A_matrix(max_num_bands,mwan,nkpt,nsppol)
 !character(len=fnlen),intent(in) :: filew90_win(nsppol)
  logical,intent(in) :: band_in(mband,nsppol)
  logical,intent(in)::just_augmentation(mwan,nsppol)
@@ -1826,8 +1826,8 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
  real(dp),parameter :: qtol=2.0d-8
  real(dp) :: arg,norm_error,norm_error_bar
  real(dp) :: ucvol,x1,x2,xnorm,xnormb,xx,yy,zz
- complex(dpc) :: amn_tmp(nspinor)
- complex(dpc) :: cstr_fact
+ complex(dp) :: amn_tmp(nspinor)
+ complex(dp) :: cstr_fact
  character(len=500) :: msg
 !arrays
  integer :: kg_k(3,mpw),lmax(nsppol),lmax2(nsppol),nproj(nsppol)
@@ -1835,7 +1835,7 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
  real(dp) :: kpg(3),kpt(3)
  real(dp),allocatable :: amn(:,:,:,:,:),amn2(:,:,:,:,:,:,:)
  real(dp),allocatable :: gsum2(:),kpg2(:),radial(:)
- complex(dpc),allocatable :: gf(:,:),gft_lm(:), ylmc_fac(:,:,:),ylmcp(:)
+ complex(dp),allocatable :: gf(:,:),gft_lm(:), ylmc_fac(:,:,:),ylmcp(:)
 !Tables 3.1 & 3.2, User guide
  integer,parameter :: orb_l_defs(-5:3)=(/2,2,1,1,1,0,1,2,3/)
 ! integer,parameter :: mtransfo(0:3,7)=&
@@ -2266,7 +2266,7 @@ subroutine mlwfovlp_projpaw(A_paw,band_in,mywfc,just_augmentation,max_num_bands,
  real(dp),intent(in):: proj_site(3,mband,nsppol)
  real(dp),intent(in) :: proj_x(3,mband,nsppol),proj_z(3,mband,nsppol),proj_zona(mband,nsppol)
  real(dp),intent(in) :: rprimd(3,3),xred(3,natom)
- complex(dpc),intent(out) :: A_paw(max_num_bands,mwan,nkpt,nsppol)
+ complex(dp),intent(out) :: A_paw(max_num_bands,mwan,nkpt,nsppol)
  logical,intent(in) :: band_in(mband,nsppol)
  logical,intent(in)::just_augmentation(mwan,nsppol)
  !type(pawcprj_type) :: cprj(natom,nspinor*mband*mkmem*nsppol)
@@ -2285,7 +2285,7 @@ subroutine mlwfovlp_projpaw(A_paw,band_in,mywfc,just_augmentation,max_num_bands,
  real(dp):: aa,int_rad2,prod_real,prod_imag
  real(dp),parameter :: dx=0.015d0,rmax=10.d0,xmin=0.d0
  real(dp):: sum,wan_lm_fac,x
- complex(dpc)::prod
+ complex(dp)::prod
  character(len=500) :: msg
  !arrays
  integer :: index(mband,nkpt,nsppol)

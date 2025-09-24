@@ -583,7 +583,7 @@ subroutine ppm_setup(ppm, Cryst, Qmesh, npwe, nomega, omega, epsm1, nfftf, gvec,
 !arrays
  integer,intent(in) :: gvec(3,npwe),ngfftf(18)
  real(dp),intent(in) :: rhor_tot(nfftf)
- complex(dpc),intent(in) :: omega(nomega)
+ complex(dp),intent(in) :: omega(nomega)
  complex(gwpc),intent(in) :: epsm1(:,:,:,:)
 
 !Local variables-------------------------------
@@ -690,15 +690,15 @@ subroutine ppm_getem1(ppm, mpwc, iqibz, zcut, nomega, omega, Vcp, em1q, &
  real(dp),intent(in) :: zcut
  integer,optional,intent(in) :: only_ig1,only_ig2
 !arrays
- complex(dpc),intent(in) :: omega(nomega)
- complex(dpc),intent(out) :: em1q(mpwc,mpwc,nomega)
+ complex(dp),intent(in) :: omega(nomega)
+ complex(dp),intent(out) :: em1q(mpwc,mpwc,nomega)
 
 !Local variables-------------------------------
 !scalars
  integer :: ig1,ig2,io,idm,ig1_min,ig2_min,ig1_max,ig2_max
  real(dp) :: den
- complex(dpc) :: qpg1,qpg2,ug1,ug2
- complex(dpc) :: delta,em1ggp,otw,zzpq,yg1,yg2,bot1,bot2,chig1g2
+ complex(dp) :: qpg1,qpg2,ug1,ug2
+ complex(dp) :: delta,em1ggp,otw,zzpq,yg1,yg2,bot1,bot2,chig1g2
  !character(len=500) :: msg
 ! *************************************************************************
 
@@ -821,15 +821,15 @@ subroutine ppm_getem1_one_ggp(ppm, iqibz, zcut, nomega, omega, Vcp, em1q, ig1, i
  real(dp),intent(in) :: zcut
  integer, intent(in) :: ig1,ig2
 !arrays
- complex(dpc),intent(in) :: omega(nomega)
- complex(dpc),intent(out) :: em1q(nomega)
+ complex(dp),intent(in) :: omega(nomega)
+ complex(dp),intent(out) :: em1q(nomega)
 
 !Local variables-------------------------------
 !scalars
  integer :: io,idm !,ig1_min,ig2_min,ig2_max
  real(dp) :: den
- complex(dpc) :: qpg1,qpg2,ug1,ug2
- complex(dpc) :: delta,em1ggp,otw,zzpq,yg1,yg2,bot1,bot2,chig1g2
+ complex(dp) :: qpg1,qpg2,ug1,ug2
+ complex(dp) :: delta,em1ggp,otw,zzpq,yg1,yg2,bot1,bot2,chig1g2
  !character(len=500) :: msg
 ! *************************************************************************
 
@@ -925,8 +925,8 @@ subroutine ppm_get_eigenvalues(ppm, iqibz, zcut, nomega, omega, Vcp, eigenvalues
  type(vcoul_t),intent(in) :: Vcp
  real(dp),intent(in) :: zcut
 !arrays
- complex(dpc),intent(in) :: omega(nomega)
- complex(dpc),intent(out) :: eigenvalues(ppm%npwc,nomega)
+ complex(dp),intent(in) :: omega(nomega)
+ complex(dp),intent(out) :: eigenvalues(ppm%npwc,nomega)
 
 !Local variables-------------------------------
 !scalars
@@ -934,8 +934,8 @@ subroutine ppm_get_eigenvalues(ppm, iqibz, zcut, nomega, omega, Vcp, eigenvalues
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: ww(:),rwork(:)
- complex(dpc),allocatable :: work(:),Adpp(:),eigvec(:,:),wwc(:),vs(:,:),Afull(:,:)
- complex(dpc),allocatable :: em1q(:,:,:)
+ complex(dp),allocatable :: work(:),Adpp(:),eigvec(:,:),wwc(:),vs(:,:),Afull(:,:)
+ complex(dp),allocatable :: em1q(:,:,:)
  logical,allocatable :: bwork(:)
  logical :: sortcplx !BUG in abilint
 ! *************************************************************************
@@ -1053,7 +1053,7 @@ subroutine cppm1par(npwc, nomega, omega, omegaplasma, epsm1, omegatw, bigomegatw
  integer,intent(in) :: nomega,npwc
  real(dp),intent(in) :: omegaplasma
 !arrays
- complex(dpc),intent(in) :: omega(nomega)
+ complex(dp),intent(in) :: omega(nomega)
  complex(gwpc),intent(in) :: epsm1(npwc,npwc,nomega)
  complex(gwpc),intent(out) :: omegatw(npwc,npwc), bigomegatwsq(npwc,npwc)
 
@@ -1377,14 +1377,14 @@ subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
 !scalars
  integer :: idx,ierr,ig,igp,ii,jj,ngfft1,ngfft2,ngfft3,gmgp_idx
  real(dp) :: num,qpg_dot_qpgp
- complex(dpc) :: conjg_eig
+ complex(dp) :: conjg_eig
  logical :: qiszero
  character(len=500) :: msg
  type(MPI_type) :: MPI_enreg_seq
 !arrays
  real(dp) :: b1(3),b2(3),b3(3),gppq(3),gpq(3),qlist(3,1)
  real(dp),allocatable :: eigval(:),qplusg(:),rhog_dp(:,:),zhpev2(:),tmp_rhor(:)
- complex(dpc),allocatable :: eigvec(:,:),matr(:),mm(:,:),rhog(:),rhogg(:,:), zhpev1(:),zz(:)
+ complex(dp),allocatable :: eigvec(:,:),matr(:),mm(:,:),rhog(:),rhogg(:,:), zhpev1(:),zz(:)
 !*************************************************************************
 
  ! Fake MPI_type for the sequential part.
@@ -1628,7 +1628,7 @@ subroutine cppm4par(qpt, npwc, epsm1, ngfftf, gvec, gprimd, rhor, nfftf, bigomeg
 !arrays
  real(dp) :: b1(3),b2(3),b3(3),gppq(3),gpq(3),qlist(3,1)
  real(dp),allocatable :: eigval(:),qplusg(:),rhog_dp(:,:),tmp_rhor(:)
- complex(dpc),allocatable :: chi(:,:),chitmps(:,:), mm(:,:),mtemp(:,:),rhog(:), tmp1(:),zz2(:,:)
+ complex(dp),allocatable :: chi(:,:),chitmps(:,:), mm(:,:),mtemp(:,:),rhog(:), tmp1(:),zz2(:,:)
 !*************************************************************************
 
  ! Calculate density in G space rhog(G)
@@ -2120,7 +2120,7 @@ subroutine ppm_rotate_iqbz(ppm, iq_bz, Cryst, Qmesh, Gsph, npwe, nomega, omega, 
 !arrays
  integer,intent(in) :: ngfftf(18)
  real(dp),intent(in) :: rhor_tot(nfftf)
- complex(dpc),intent(in) :: omega(nomega)
+ complex(dp),intent(in) :: omega(nomega)
  complex(gwpc),intent(in) :: epsm1_ggw(npwe,npwe,nomega)
 
 !Local variables-------------------------------
@@ -2229,7 +2229,7 @@ subroutine ppm_new_setup(ppm, iq_ibz, Cryst, Qmesh, npwe, nomega, omega, epsm1_g
 !arrays
  integer,intent(in) :: gvec(3,npwe),ngfftf(18)
  real(dp),intent(in) :: rhor_tot(nfftf)
- complex(dpc),intent(in) :: omega(nomega)
+ complex(dp),intent(in) :: omega(nomega)
  complex(gwpc),intent(in) :: epsm1_ggw(npwe,npwe,nomega)
 
 !Local variables-------------------------------

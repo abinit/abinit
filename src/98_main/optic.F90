@@ -104,7 +104,7 @@ program optic
  real(dp),target,allocatable :: eigen11(:),eigen12(:),eigen13(:)
  real(dp),allocatable :: eigtmp(:)
  real(dp), ABI_CONTIGUOUS pointer :: outeig(:)
- complex(dpc),target,allocatable :: pmat(:,:,:,:,:)
+ complex(dp),target,allocatable :: pmat(:,:,:,:,:)
  real(dp),contiguous, pointer :: pmat_ptr(:,:,:,:,:,:)
  logical :: use_ncevk(0:3)
  character(len=fnlen) :: filnam,wfkfile,ddkfile_1,ddkfile_2,ddkfile_3,filnam_out, epfile,fname, infiles(0:3)

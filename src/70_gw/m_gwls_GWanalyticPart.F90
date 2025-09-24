@@ -52,7 +52,7 @@ private
 !real(dp),allocatable :: lanczos_basis_complement(:,:,:)
 
 
-complex(dpc),public, allocatable :: A_array(:,:)
+complex(dp),public, allocatable :: A_array(:,:)
 
 integer, public  :: model_number
 real(dp),public  :: model_parameter

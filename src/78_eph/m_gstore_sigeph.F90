@@ -302,17 +302,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
  call gaps%free()
 
  ! Frequency mesh for sigma(w) and spectral functions.
- ! Use GW variables but change default values
- sigma%nwr = dtset%nfreqsp; sigma%wr_step = zero
- if (sigma%nwr > 0) then
-   !call dtset%get_nwr_for_sigeph(sigma%nwr, sigma%wr_step)
-   if (mod(sigma%nwr, 2) == 0) sigma%nwr = sigma%nwr + 1
-   sigma%wr_step = two * eV_Ha / (sigma%nwr - 1)
-   if (dtset%freqspmax /= zero) sigma%wr_step = dtset%freqspmax / (sigma%nwr - 1)
-   ABI_MALLOC(cfact_wr, (sigma%nwr))
-   call wrtout(units, &
-     sjoin(" Will compute Sigma(omega) using", itoa(sigma%nwr), "points and step:", ftoa(sigma%wr_step * Ha_eV), "(eV)"))
- end if
+ call dtset%get_wrmesh_for_sigeph(sigma%nwr, sigma%wr_step)
 
  ! Setup a mask to skip accumulating the contribution of certain phonon modes.
  call ephtk_set_phmodes_skip(dtset%natom, dtset%eph_phrange, phmodes_skip)

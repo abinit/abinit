@@ -1819,14 +1819,14 @@ subroutine varpeq_calc_fravg(self, avg_g0)
  integer :: nu, my_is, my_pert, pert_glob
  real(dp) :: inv_qepsq, wqnu, prefactor
  real(dp) :: cpu, wall, gflops
- complex(dpc) :: cnum
+ complex(dp) :: cnum
 !arrays
  real(dp) :: qpt_cart(3)
  real(dp), allocatable :: phfreq(:), displ_cart(:, :, :, :)
  real(dp), allocatable :: qvers_cart(:, :)
  real(dp), allocatable :: angweight(:)
  real(dp), allocatable :: e_frohl_mode(:)
- complex(dpc) :: cp3(3)
+ complex(dp) :: cp3(3)
 !----------------------------------------------------------------------
 
  call cwtime(cpu, wall, gflops, "start")
