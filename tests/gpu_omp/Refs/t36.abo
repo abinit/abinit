@@ -1,6 +1,6 @@
 
-.Version 10.4.5.4 of ABINIT, released Jul 2025.
-.(MPI version, prepared for a x86_64_linux_nvhpc23.9-0 computer) 
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.(MPI version, prepared for a x86_64_linux_nvhpc24.9-0 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 10 Jul 2025.
-- ( at 17h12 )
+.Starting date : Sat 13 Sep 2025.
+- ( at 11h54 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/srostami_test/tests/TestBot_MPI1/gpu_omp_t36/t36.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/srostami_test/tests/TestBot_MPI1/gpu_omp_t36/t36.abi
 - output file    -> t36.abo
 - root for input  files -> t36i
 - root for output files -> t36o
@@ -273,8 +273,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  
  
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/srostami_test/tests/Pspdir/14si.Hamann_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/srostami_test/tests/Pspdir/14si.Hamann_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/srostami_test/tests/Pspdir/14si.Hamann_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/srostami_test/tests/Pspdir/14si.Hamann_mod
 -   Si psp produced from Hamann's atompp on 14 Feb 1990 ( !! OLD, for tests only )
 - 14.00000   4.00000    900214                znucl, zion, pspdat
     5    3    2    0       770   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -312,17 +312,17 @@ tolerances: {tolwfr: 1.00E-28, }
  ETOT  4  -7.9333339286293    -1.124E-06 6.595E-09 1.705E-03
  ETOT  5  -7.9333340828128    -1.542E-07 9.642E-10 2.249E-06
  ETOT  6  -7.9333340831206    -3.077E-10 3.787E-12 6.069E-09
- ETOT  7  -7.9333340831217    -1.104E-12 1.663E-14 2.108E-11
- ETOT  8  -7.9333340831218    -9.948E-14 2.309E-16 1.636E-13
- ETOT  9  -7.9333340831216     1.323E-13 2.628E-18 3.812E-16
- ETOT 10  -7.9333340831215     1.181E-13 3.368E-20 1.885E-18
- ETOT 11  -7.9333340831217    -1.528E-13 4.637E-22 9.840E-21
- ETOT 12  -7.9333340831216     2.931E-14 6.161E-24 2.286E-22
- ETOT 13  -7.9333340831216     2.220E-14 8.849E-26 4.902E-24
- ETOT 14  -7.9333340831216     2.665E-15 1.142E-27 2.202E-25
- ETOT 15  -7.9333340831216    -1.776E-15 8.600E-29 3.319E-26
+ ETOT  7  -7.9333340831217    -1.101E-12 1.663E-14 2.108E-11
+ ETOT  8  -7.9333340831218    -1.110E-13 2.309E-16 1.636E-13
+ ETOT  9  -7.9333340831216     1.368E-13 2.628E-18 3.812E-16
+ ETOT 10  -7.9333340831215     1.164E-13 3.368E-20 1.886E-18
+ ETOT 11  -7.9333340831217    -1.501E-13 4.638E-22 9.840E-21
+ ETOT 12  -7.9333340831216     3.020E-14 6.161E-24 2.280E-22
+ ETOT 13  -7.9333340831216     1.865E-14 8.851E-26 4.876E-24
+ ETOT 14  -7.9333340831216     7.105E-15 1.141E-27 2.522E-25
+ ETOT 15  -7.9333340831216    -3.553E-15 8.666E-29 2.595E-26
  
- At SCF step   15   max residual=  8.60E-29 < tolwfr=  1.00E-28 =>converged.
+ At SCF step   15   max residual=  8.67E-29 < tolwfr=  1.00E-28 =>converged.
  
 Result for kinetic energy density :
  
@@ -349,7 +349,7 @@ lattice_vectors:
 lattice_lengths: [   7.25492,    7.25492,    7.25492, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7001139E+02
-convergence: {deltae: -1.776E-15, res2:  3.319E-26, residm:  8.600E-29, diffor: null, }
+convergence: {deltae: -3.553E-15, res2:  2.595E-26, residm:  8.666E-29, diffor: null, }
 etotal    :  -7.93333408E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.40402326E-02
@@ -376,7 +376,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  
  ----iterations are completed or convergence reached----
  
- Mean square residual over all n,k,spin=   65.909E-30; max=  86.000E-30
+ Mean square residual over all n,k,spin=   65.984E-30; max=  86.661E-30
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -415,10 +415,10 @@ hartree             :  5.57533363475116E-01
 xc                  : -2.39924307022174E+00
 Ewald energy        : -8.40046478618609E+00
 psp_core            :  1.66947472379066E+00
-local_psp           : -2.22210873553007E+00
-non_local_psp       : -2.09684851364062E-01
+local_psp           : -2.22210873553006E+00
+non_local_psp       : -2.09684851364063E-01
 total_energy        : -7.93333408312162E+00
-total_energy_eV     : -2.15876999025444E+02
+total_energy_eV     : -2.15876999025443E+02
 band_energy         : -1.37531124941733E+00
 ...
 
@@ -467,8 +467,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  
  
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/srostami_test/tests/Pspdir/14si.Hamann_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/srostami_test/tests/Pspdir/14si.Hamann_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/srostami_test/tests/Pspdir/14si.Hamann_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/srostami_test/tests/Pspdir/14si.Hamann_mod
 -   Si psp produced from Hamann's atompp on 14 Feb 1990 ( !! OLD, for tests only )
 - 14.00000   4.00000    900214                znucl, zion, pspdat
     5    3    2    0       770   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -505,17 +505,17 @@ tolerances: {tolwfr: 1.00E-28, }
  ETOT  4  -7.9333339286293    -1.124E-06 6.595E-09 1.705E-03
  ETOT  5  -7.9333340828129    -1.542E-07 9.642E-10 2.249E-06
  ETOT  6  -7.9333340831206    -3.077E-10 3.787E-12 6.069E-09
- ETOT  7  -7.9333340831215    -9.548E-13 1.656E-14 2.108E-11
- ETOT  8  -7.9333340831217    -1.661E-13 2.309E-16 1.636E-13
+ ETOT  7  -7.9333340831215    -9.459E-13 1.656E-14 2.108E-11
+ ETOT  8  -7.9333340831217    -1.812E-13 2.309E-16 1.636E-13
  ETOT  9  -7.9333340831217     1.776E-15 2.626E-18 3.815E-16
  ETOT 10  -7.9333340831215     1.368E-13 3.368E-20 1.884E-18
- ETOT 11  -7.9333340831216    -2.753E-14 4.635E-22 9.840E-21
- ETOT 12  -7.9333340831216     2.132E-14 6.159E-24 2.282E-22
- ETOT 13  -7.9333340831215     3.020E-14 8.843E-26 4.866E-24
- ETOT 14  -7.9333340831215    -5.329E-15 1.140E-27 2.243E-25
- ETOT 15  -7.9333340831215    -6.217E-15 8.642E-29 2.859E-26
+ ETOT 11  -7.9333340831216    -2.576E-14 4.635E-22 9.841E-21
+ ETOT 12  -7.9333340831216     2.043E-14 6.159E-24 2.289E-22
+ ETOT 13  -7.9333340831215     3.020E-14 8.842E-26 4.868E-24
+ ETOT 14  -7.9333340831215    -7.994E-15 1.141E-27 2.249E-25
+ ETOT 15  -7.9333340831215    -3.553E-15 8.628E-29 3.197E-26
  
- At SCF step   15   max residual=  8.64E-29 < tolwfr=  1.00E-28 =>converged.
+ At SCF step   15   max residual=  8.63E-29 < tolwfr=  1.00E-28 =>converged.
  
 Result for kinetic energy density :
  
@@ -542,7 +542,7 @@ lattice_vectors:
 lattice_lengths: [   7.25492,    7.25492,    7.25492, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7001139E+02
-convergence: {deltae: -6.217E-15, res2:  2.859E-26, residm:  8.642E-29, diffor: null, }
+convergence: {deltae: -3.553E-15, res2:  3.197E-26, residm:  8.628E-29, diffor: null, }
 etotal    :  -7.93333408E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.40402326E-02
@@ -569,7 +569,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  
  ----iterations are completed or convergence reached----
  
- Mean square residual over all n,k,spin=   66.306E-30; max=  86.424E-30
+ Mean square residual over all n,k,spin=   66.850E-30; max=  86.281E-30
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -605,12 +605,12 @@ iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.04075175536097E+00
 hartree             :  5.57533363475127E-01
-xc                  : -2.36883555266803E+00
+xc                  : -2.36883555266804E+00
 Ewald energy        : -8.40046478618609E+00
 psp_core            :  1.66947472379066E+00
 local_psp           : -2.22210873553010E+00
 non_local_psp       : -2.09684851364064E-01
-total_energy        : -7.93333408312153E+00
+total_energy        : -7.93333408312154E+00
 total_energy_eV     : -2.15876999025441E+02
 band_energy         : -1.37531124941731E+00
 ...
@@ -662,8 +662,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  
  
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/srostami_test/tests/Pspdir/14si.Hamann_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/srostami_test/tests/Pspdir/14si.Hamann_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/srostami_test/tests/Pspdir/14si.Hamann_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/srostami_test/tests/Pspdir/14si.Hamann_mod
 -   Si psp produced from Hamann's atompp on 14 Feb 1990 ( !! OLD, for tests only )
 - 14.00000   4.00000    900214                znucl, zion, pspdat
     5    3    2    0       770   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -700,17 +700,17 @@ tolerances: {tolwfr: 1.00E-28, }
  ETOT  4  -7.9333339286293    -1.124E-06 6.595E-09 3.411E-03 0.000E+00 0.000E+00
  ETOT  5  -7.9333340828128    -1.542E-07 9.642E-10 4.499E-06 0.000E+00 0.000E+00
  ETOT  6  -7.9333340831206    -3.077E-10 3.787E-12 1.214E-08 0.000E+00 0.000E+00
- ETOT  7  -7.9333340831217    -1.116E-12 1.663E-14 4.215E-11 0.000E+00 0.000E+00
- ETOT  8  -7.9333340831218    -8.171E-14 2.309E-16 3.273E-13 0.000E+00 0.000E+00
- ETOT  9  -7.9333340831216     1.270E-13 2.628E-18 7.624E-16 0.000E+00 0.000E+00
- ETOT 10  -7.9333340831215     1.137E-13 3.368E-20 3.771E-18 0.000E+00 0.000E+00
- ETOT 11  -7.9333340831217    -1.510E-13 4.638E-22 1.968E-20 0.000E+00 0.000E+00
- ETOT 12  -7.9333340831216     2.842E-14 6.161E-24 4.560E-22 0.000E+00 0.000E+00
- ETOT 13  -7.9333340831216     2.220E-14 8.849E-26 9.658E-24 0.000E+00 0.000E+00
- ETOT 14  -7.9333340831216     3.553E-15 1.142E-27 4.529E-25 0.000E+00 0.000E+00
- ETOT 15  -7.9333340831216    -2.665E-15 8.578E-29 6.670E-26 0.000E+00 0.000E+00
+ ETOT  7  -7.9333340831217    -1.112E-12 1.663E-14 4.215E-11 0.000E+00 0.000E+00
+ ETOT  8  -7.9333340831218    -8.615E-14 2.309E-16 3.273E-13 0.000E+00 0.000E+00
+ ETOT  9  -7.9333340831216     1.252E-13 2.628E-18 7.624E-16 0.000E+00 0.000E+00
+ ETOT 10  -7.9333340831215     1.172E-13 3.368E-20 3.771E-18 0.000E+00 0.000E+00
+ ETOT 11  -7.9333340831217    -1.528E-13 4.638E-22 1.968E-20 0.000E+00 0.000E+00
+ ETOT 12  -7.9333340831216     2.931E-14 6.161E-24 4.562E-22 0.000E+00 0.000E+00
+ ETOT 13  -7.9333340831216     2.398E-14 8.850E-26 9.747E-24 0.000E+00 0.000E+00
+ ETOT 14  -7.9333340831216     8.882E-16 1.141E-27 4.670E-25 0.000E+00 0.000E+00
+ ETOT 15  -7.9333340831216    -8.882E-16 8.568E-29 6.893E-26 0.000E+00 0.000E+00
  
- At SCF step   15   max residual=  8.58E-29 < tolwfr=  1.00E-28 =>converged.
+ At SCF step   15   max residual=  8.57E-29 < tolwfr=  1.00E-28 =>converged.
  
 Result for kinetic energy density :
  
@@ -752,7 +752,7 @@ lattice_vectors:
 lattice_lengths: [   7.25492,    7.25492,    7.25492, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7001139E+02
-convergence: {deltae: -2.665E-15, res2:  6.670E-26, residm:  8.578E-29, diffor: null, }
+convergence: {deltae: -8.882E-16, res2:  6.893E-26, residm:  8.568E-29, diffor: null, }
 etotal    :  -7.93333408E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.40402326E-02
@@ -771,21 +771,21 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.894873     0.894873      1.789746     0.000000
-    2   2.00000     0.894873     0.894873      1.789746     0.000000
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Si   2.00000     0.894873     0.894873      1.789746     0.000000
+    2 Si   2.00000     0.894873     0.894873      1.789746     0.000000
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.789746     1.789746      3.579491     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                       0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                          0.000000
  
 ================================================================================
  
  ----iterations are completed or convergence reached----
  
- Mean square residual over all n,k,spin=   65.387E-30; max=  85.781E-30
+ Mean square residual over all n,k,spin=   65.501E-30; max=  85.680E-30
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -829,7 +829,7 @@ hartree             :  5.57533363475116E-01
 xc                  : -2.39924307022174E+00
 Ewald energy        : -8.40046478618609E+00
 psp_core            :  1.66947472379066E+00
-local_psp           : -2.22210873553006E+00
+local_psp           : -2.22210873553007E+00
 non_local_psp       : -2.09684851364062E-01
 total_energy        : -7.93333408312162E+00
 total_energy_eV     : -2.15876999025443E+02
@@ -881,8 +881,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  
  
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/srostami_test/tests/Pspdir/14si.Hamann_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/srostami_test/tests/Pspdir/14si.Hamann_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/srostami_test/tests/Pspdir/14si.Hamann_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/srostami_test/tests/Pspdir/14si.Hamann_mod
 -   Si psp produced from Hamann's atompp on 14 Feb 1990 ( !! OLD, for tests only )
 - 14.00000   4.00000    900214                znucl, zion, pspdat
     5    3    2    0       770   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -919,17 +919,17 @@ tolerances: {tolwfr: 1.00E-28, }
  ETOT  4  -7.9333339286293    -1.124E-06 6.595E-09 3.411E-03 0.000E+00 0.000E+00
  ETOT  5  -7.9333340828129    -1.542E-07 9.642E-10 4.499E-06 0.000E+00 0.000E+00
  ETOT  6  -7.9333340831206    -3.077E-10 3.787E-12 1.214E-08 0.000E+00 0.000E+00
- ETOT  7  -7.9333340831215    -9.734E-13 1.657E-14 4.215E-11 0.000E+00 0.000E+00
- ETOT  8  -7.9333340831217    -1.377E-13 2.309E-16 3.272E-13 0.000E+00 0.000E+00
- ETOT  9  -7.9333340831217    -1.243E-14 2.626E-18 7.630E-16 0.000E+00 0.000E+00
- ETOT 10  -7.9333340831215     1.341E-13 3.368E-20 3.768E-18 0.000E+00 0.000E+00
- ETOT 11  -7.9333340831216    -2.398E-14 4.635E-22 1.968E-20 0.000E+00 0.000E+00
- ETOT 12  -7.9333340831216     1.954E-14 6.159E-24 4.566E-22 0.000E+00 0.000E+00
- ETOT 13  -7.9333340831215     3.197E-14 8.842E-26 9.839E-24 0.000E+00 0.000E+00
- ETOT 14  -7.9333340831215    -5.329E-15 1.141E-27 4.284E-25 0.000E+00 0.000E+00
- ETOT 15  -7.9333340831215    -7.994E-15 8.662E-29 6.445E-26 0.000E+00 0.000E+00
+ ETOT  7  -7.9333340831215    -9.432E-13 1.656E-14 4.215E-11 0.000E+00 0.000E+00
+ ETOT  8  -7.9333340831217    -1.918E-13 2.309E-16 3.272E-13 0.000E+00 0.000E+00
+ ETOT  9  -7.9333340831217     1.776E-14 2.626E-18 7.630E-16 0.000E+00 0.000E+00
+ ETOT 10  -7.9333340831215     1.341E-13 3.368E-20 3.767E-18 0.000E+00 0.000E+00
+ ETOT 11  -7.9333340831216    -2.487E-14 4.635E-22 1.968E-20 0.000E+00 0.000E+00
+ ETOT 12  -7.9333340831216     1.954E-14 6.159E-24 4.568E-22 0.000E+00 0.000E+00
+ ETOT 13  -7.9333340831215     3.020E-14 8.842E-26 9.841E-24 0.000E+00 0.000E+00
+ ETOT 14  -7.9333340831215    -5.329E-15 1.142E-27 4.376E-25 0.000E+00 0.000E+00
+ ETOT 15  -7.9333340831215    -6.217E-15 8.675E-29 6.413E-26 0.000E+00 0.000E+00
  
- At SCF step   15   max residual=  8.66E-29 < tolwfr=  1.00E-28 =>converged.
+ At SCF step   15   max residual=  8.68E-29 < tolwfr=  1.00E-28 =>converged.
  
 Result for kinetic energy density :
  
@@ -971,7 +971,7 @@ lattice_vectors:
 lattice_lengths: [   7.25492,    7.25492,    7.25492, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7001139E+02
-convergence: {deltae: -7.994E-15, res2:  6.445E-26, residm:  8.662E-29, diffor: null, }
+convergence: {deltae: -6.217E-15, res2:  6.413E-26, residm:  8.675E-29, diffor: null, }
 etotal    :  -7.93333408E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.40402326E-02
@@ -990,21 +990,21 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.894873     0.894873      1.789746     0.000000
-    2   2.00000     0.894873     0.894873      1.789746     0.000000
- ---------------------------------------------------------------------
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Si   2.00000     0.894873     0.894873      1.789746     0.000000
+    2 Si   2.00000     0.894873     0.894873      1.789746     0.000000
+ ------------------------------------------------------------------------------------------------------------
   Sum:              1.789746     1.789746      3.579491     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                       0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                          0.000000
  
 ================================================================================
  
  ----iterations are completed or convergence reached----
  
- Mean square residual over all n,k,spin=   66.236E-30; max=  86.621E-30
+ Mean square residual over all n,k,spin=   66.483E-30; max=  86.751E-30
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -1305,10 +1305,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         13.4  wall=         13.4
+- Proc.   0 individual time (sec): cpu=         11.8  wall=         11.8
  
 ================================================================================
  
  Calculation completed.
 .Delivered  68 WARNINGs and  14 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         13.4  wall=         13.4
++Overall time at end (sec) : cpu=         11.8  wall=         11.8
