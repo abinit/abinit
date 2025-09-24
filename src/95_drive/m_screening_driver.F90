@@ -936,7 +936,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ! MS Modified to account for non-zero starting frequency (19-11-2010)
  ! MS Modified for tangent grid (07-01-2011)
  ABI_MALLOC(Ep%omega, (Ep%nomega))
- Ep%omega(1) = CMPLX(Ep%omegaermin, zero, kind=dpc)
+ Ep%omega(1) = CMPLX(Ep%omegaermin, zero, kind=dp)
 
  ep%iw_mesh_type = "None"; ep%rw_mesh_type = "None"; ep%cw_mesh_type = "None"
  ABI_CALLOC(Ep%omega_wgs, (Ep%nomega))
@@ -948,7 +948,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ep%rw_mesh_type = "linear"
      domegareal = (Ep%omegaermax -Ep%omegaermin) / (Ep%nomegaer -1)
      do iomega=2,Ep%nomegaer
-       Ep%omega(iomega)=CMPLX(Ep%omegaermin+(iomega-1)*domegareal,zero,kind=dpc)
+       Ep%omega(iomega)=CMPLX(Ep%omegaermin+(iomega-1)*domegareal,zero,kind=dp)
      end do
 
    else if (Dtset%gw_frqre_tangrid == 1.and. Dtset%gw_frqre_inzgrid == 0) then
@@ -965,7 +965,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ! Important: here nfreqre is used because the step is set by the original grid
      domegareal=(ATAN(Ep%omegaermax/factor)*two*piinv)/(Dtset%nfreqre-1) ! Stepsize in transformed variable
      do iomega=1,Ep%nomegaer
-       Ep%omega(iomega)=CMPLX(factor*TAN((iomega+ifirst-2)*domegareal*pi*half),zero,kind=dpc)
+       Ep%omega(iomega)=CMPLX(factor*TAN((iomega+ifirst-2)*domegareal*pi*half),zero,kind=dp)
      end do
      Ep%omegaermin = REAL(Ep%omega(1))
      Ep%omegaermax = REAL(Ep%omega(Ep%nomegaer))
@@ -976,7 +976,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      domegareal=one/(Ep%nomegaer)
      do iomega=1,Ep%nomegaer
        factor = (iomega-1)*domegareal
-       Ep%omega(iomega)=CMPLX(e0*factor/(one-factor),zero,kind=dpc)
+       Ep%omega(iomega)=CMPLX(e0*factor/(one-factor),zero,kind=dp)
      end do
      Ep%omegaermin = REAL(Ep%omega(1))
      Ep%omegaermax = REAL(Ep%omega(Ep%nomegaer))
@@ -988,7 +988,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  if (Ep%plasmon_pole_model .and. Ep%nomega == 2) then
    e0= Dtset%ppmfrq; if (e0 < 0.1d-4) e0 = omegaplasma
-   Ep%omega(2)=CMPLX(zero,e0, kind=dpc)
+   Ep%omega(2)=CMPLX(zero,e0, kind=dp)
  end if
 
  if (Ep%analytic_continuation) then
@@ -1006,7 +1006,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ABI_MALLOC(zw, (Ep%nomegaei))
      call coeffs_gausslegint(zero, one, z, zw, Ep%nomegaei)
      do iomega=1,Ep%nomegaei
-       Ep%omega(Ep%nomegaer + iomega) = CMPLX(zero, one/z(iomega) - one, kind=dpc)
+       Ep%omega(Ep%nomegaer + iomega) = CMPLX(zero, one/z(iomega) - one, kind=dp)
        Ep%omega_wgs(Ep%nomegaer + iomega) = zw(iomega)
      end do
      ABI_FREE(z)
@@ -1035,7 +1035,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ABI_CHECK(ierr == 0, "Error in gx_minimax_grid")
 
      do iomega=1,Ep%nomegaei
-       Ep%omega(Ep%nomegaer + iomega) = CMPLX(zero, iw_mesh(iomega), kind=dpc)
+       Ep%omega(Ep%nomegaer + iomega) = CMPLX(zero, iw_mesh(iomega), kind=dp)
        Ep%omega_wgs(Ep%nomegaer + iomega) = iw_wgs(iomega)
      end do
 
@@ -1068,7 +1068,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    domegareal=one/(Ep%nomegaei+1)
    do iomega=1,Ep%nomegaei
      factor = iomega*domegareal
-     Ep%omega(Ep%nomegaer+iomega)=CMPLX(zero,e0*factor/(one-factor),kind=dpc)
+     Ep%omega(Ep%nomegaer+iomega)=CMPLX(zero,e0*factor/(one-factor),kind=dp)
    end do
 
  else if (Ep%contour_deformation.and. Ep%nomegaei /= 0) then
@@ -1077,7 +1077,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    e0=Dtset%ppmfrq; if (e0<0.1d-4) e0=omegaplasma
    do iomega=1,Ep%nomegaei
      Ep%omega(Ep%nomegaer+iomega)=CMPLX(zero,e0/(Dtset%freqim_alpha-two)&
-       * (EXP(two/(Ep%nomegaei+1)*LOG(Dtset%freqim_alpha-one)*iomega)-one),kind=dpc)
+       * (EXP(two/(Ep%nomegaei+1)*LOG(Dtset%freqim_alpha-one)*iomega)-one),kind=dp)
    end do
  end if
 

@@ -633,7 +633,6 @@ subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,&
  complex(dp),allocatable :: ket0(:),all_omegas(:),green_temp(:,:)
 ! complex(dp),allocatable :: diag_dense(:)
  logical :: check(2)
-
 !************************************************************************
 
  ABI_CHECK(Bsp%nsppol==1,"nsppol > 1 not implemented yet")
@@ -676,13 +675,13 @@ subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,&
  ! Open the file and write basic dimensions and info.
  if (my_rank==master) then
    out_file = TRIM(BS_files%out_basename)//TRIM(tag_file)
-   call open_haydock(out_file,haydock_file)
+   call haydock_file%open(out_file)
    haydock_file%hsize = hexc%hsize
    haydock_file%use_coupling = Bsp%use_coupling
    haydock_file%op = BSE_HAYD_IMEPS
    haydock_file%nq = nkets
    haydock_file%broad = Bsp%broad
-   call write_dim_haydock(haydock_file)
+   call haydock_file%write_dim()
  end if
 
  !
@@ -696,7 +695,7 @@ subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,&
    niter_file=0
    if (can_restart) then
      call haydock_restart(BSp,restart_file,BSE_HAYD_IMEPS,iq,hexc%hsize,&
-&      niter_file,aa_file,bb_file,phi_nm1_file,phi_n_file,comm)
+       niter_file,aa_file,bb_file,phi_nm1_file,phi_n_file,comm)
    end if
    !
    ! For n>1, we have:
@@ -812,7 +811,7 @@ subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,&
 
    if (my_rank==master) then
      ! Write data for restarting
-     call write_haydock(haydock_file, hexc%hsize, Bsp%q(:,iq), aa, bb, hphi_n, hphi_nm1, MIN(inn,niter_max), factor)
+     call haydock_file%write(hexc%hsize, Bsp%q(:,iq), aa, bb, hphi_n, hphi_nm1, MIN(inn,niter_max), factor)
    end if
 
    ABI_FREE(hphi_n)
@@ -824,7 +823,7 @@ subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,&
    ABI_FREE(ket0)
  end do ! iq
 
- if (my_rank==master) call close_haydock(haydock_file)
+ if (my_rank==master) call haydock_file%close()
 
  call xmpi_barrier(comm)
 
@@ -907,7 +906,6 @@ subroutine haydock_herm_algo(niter_done,niter_max,nomega,omega,tol_iter,check,&
  complex(dp),allocatable :: oldg(:),newg(:)
  complex(dp),allocatable :: phi_np1(:),hphi_n(:),cfact(:)
  logical :: test(2)
-
 !************************************************************************
 
  ! The sequences starts with |1> normalized to 1 and b_0 =0, therefore:
@@ -1072,9 +1070,8 @@ subroutine haydock_restart(BSp,restart_file,ftype,iq_search,hsize,niter_file,aa_
  nproc = xmpi_comm_size(comm); my_rank= xmpi_comm_rank(comm)
 
  if (my_rank==master) then
-   call open_haydock(restart_file, haydock_file)
-
-   call read_dim_haydock(haydock_file)
+   call haydock_file%open(restart_file)
+   call haydock_file%read_dim()
 
    if (haydock_file%op/=ftype) then
      write(msg,"(2(a,i0))")" Expecting restart file with filetype: ",ftype," but found ",op_file
@@ -1083,23 +1080,23 @@ subroutine haydock_restart(BSp,restart_file,ftype,iq_search,hsize,niter_file,aa_
 
    if (haydock_file%hsize/=hsize) then
      write(msg,"(2(a,i0))")&
-&      " Rank of H_exc read from file: ",hsize_file," differs from the one used in this run: ",hsize
+       " Rank of H_exc read from file: ",hsize_file," differs from the one used in this run: ",hsize
      ABI_ERROR(msg)
    end if
 
    if (haydock_file%use_coupling /= BSp%use_coupling) then
      write(msg,'(2(a,i0))')&
-&      " use_coupling_file: ",use_coupling_file," differs from input file value: ",BSp%use_coupling
+       " use_coupling_file: ",use_coupling_file," differs from input file value: ",BSp%use_coupling
      ABI_ERROR(msg)
    end if
 
-   call read_haydock(haydock_file, Bsp%q(:,iq_search), aa_file, bb_file, &
-&                   phi_n_file, phi_nm1_file, niter_file, factor_file)
+   call haydock_file%read(Bsp%q(:,iq_search), aa_file, bb_file, &
+                   phi_n_file, phi_nm1_file, niter_file, factor_file)
 
    if (niter_file == 0) then
      write(msg,"(a,3f8.4,3a)")&
-&      " Could not find q-point: ",BSp%q(:,iq_search)," in file ",TRIM(restart_file),&
-&      " Cannot restart Haydock iterations for this q-point"
+      " Could not find q-point: ",BSp%q(:,iq_search)," in file ",TRIM(restart_file),&
+      " Cannot restart Haydock iterations for this q-point"
      ABI_COMMENT(msg)
    else
      write(msg,'(a,i0)')" Number of iterations already performed: ",niter_file
@@ -1108,12 +1105,12 @@ subroutine haydock_restart(BSp,restart_file,ftype,iq_search,hsize,niter_file,aa_
 
      if ( ABS(haydock_file%broad - BSp%broad) > tol6) then
        write(msg,'(2a,2(a,f8.4),a)')&
-&        " Restart file has been produced with a different Lorentzian broadening: ",ch10,&
-&        " broad_file: ",haydock_file%broad," input broadening: ",BSp%broad," Continuing anyway. "
+        " Restart file has been produced with a different Lorentzian broadening: ",ch10,&
+        " broad_file: ",haydock_file%broad," input broadening: ",BSp%broad," Continuing anyway. "
        ABI_WARNING(msg)
      end if
 
-     call close_haydock(haydock_file)
+     call haydock_file%close()
    end if
  end if
  !
@@ -1310,7 +1307,6 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
  complex(dp),allocatable :: aa_file(:),phi_n_file(:),phi_np1_file(:),cc_file(:)
  complex(dp),allocatable :: ket0(:)
  logical :: check(2)
-
 !************************************************************************
 
  ABI_WARNING("Haydock + coupling is still under development")
@@ -2424,8 +2420,7 @@ subroutine continued_fract_general(nlev,term_type,aa,bb,cc,nz,zpts,spectrum)
 !Local variables ------------------------------
 !scalars
  integer :: it
- complex(dp) ::  bb_inf,bg,bu,swap
- complex(dp) :: aa_inf
+ complex(dp) :: bb_inf,bg,bu,swap, aa_inf
  character(len=500) :: msg
 !arrays
  complex(dp),allocatable :: div(:),den(:)

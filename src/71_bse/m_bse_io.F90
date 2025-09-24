@@ -21,6 +21,7 @@
 
 MODULE m_bse_io
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  USE_MPI
  use m_xmpi
@@ -28,7 +29,6 @@ MODULE m_bse_io
  use m_abicore
  use netcdf
  use m_nctk
- use, intrinsic :: iso_c_binding
  use m_hdr
 
  use m_time,           only : cwtime
@@ -413,9 +413,7 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
  integer :: irec,nrec !,ncount
  integer(XMPI_OFFSET_KIND) :: ehdr_offset,my_offset,my_offpad,fsize
  integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecord(:)
- integer :: glob_sizes(2),my_cols(2)
- integer :: block_sizes(2,3)
- integer :: status(MPI_STATUS_SIZE)
+ integer :: glob_sizes(2),my_cols(2), block_sizes(2,3), status(MPI_STATUS_SIZE)
 #endif
 !************************************************************************
 
@@ -433,10 +431,7 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
  end if
 
  my_nt = my_t2-my_t1+1
-
-!BEGINDEBUG
-! hmat = HUGE(zero)
-!ENDDEBUG
+ !hmat = HUGE(zero)
 
  if (.not.use_mpio) then
 

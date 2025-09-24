@@ -1862,7 +1862,7 @@ subroutine varpeq_calc_fravg(self, avg_g0)
      cp3(:) = zero
      do iatom=1,self%cryst%natom
        cp3(:) = cp3(:) + matmul(ifc%zeff(:, :, iatom), &
-         cmplx(displ_cart(1,:,iatom,nu), displ_cart(2,:,iatom,nu), kind=dpc))
+         cmplx(displ_cart(1,:,iatom,nu), displ_cart(2,:,iatom,nu), kind=dp))
      enddo
      cnum = dot_product(qpt_cart, cp3)
      if (abs(cnum) < tol12) cycle

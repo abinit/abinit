@@ -742,7 +742,7 @@ subroutine dfti_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
 #undef  MYCONJG
 
 #define FFT_PRECISION DFTI_DOUBLE
-#define MYKIND DPC
+#define MYKIND DP
 #define MYCZERO (0._dp,0._dp)
 #define MYCMPLX  DCMPLX
 #define MYCONJG  DCONJG

@@ -1820,7 +1820,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
      eff = (one * work_size) / (il * neh_per_proc)
 
      ! EXC matrix is distributed.
-     mempercpu_mb = nonscal_mem + two * dpc * neh_per_proc * b2Mb
+     mempercpu_mb = nonscal_mem + two * dp * neh_per_proc * b2Mb
 
      write(ount,"(a,i0)")"    - tot_ncpus: ",il
      write(ount,"(a,i0)")"      mpi_ncpus: ",il

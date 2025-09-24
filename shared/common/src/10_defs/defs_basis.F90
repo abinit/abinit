@@ -51,8 +51,8 @@ module defs_basis
 !nb of bytes related to default double-precision real/complex subtypes
 !(= 8 for many machine architectures)
  integer, parameter :: dp=kind(1.0d0)
- integer, parameter :: dpc=kind((1.0_dp,1.0_dp))  ! Complex should not be used presently
-                                                  ! except for use of libraries
+ !integer, parameter :: dpc=kind((1.0_dp,1.0_dp))  ! Complex should not be used presently
+ !                                                 ! except for use of libraries
 
 !nb of bytes related to GW arrays, that can be tuned from sp to dp independently
 !of other variables in ABINIT. Presently single-precision is the default (see config/specs/options.conf)..
