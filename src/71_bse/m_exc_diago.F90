@@ -855,7 +855,7 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
 
  write(msg,'(3a,f8.1,3a,f8.1,a)')&
   ' Allocating excitonic eigenvalues and eigenvectors. ',ch10,&
-  ' Memory-space requested: ',2*dpc*exc_size*b2Gb,' Gb. ',ch10,&
+  ' Memory-space requested: ',2*dp*exc_size*b2Gb,' Gb. ',ch10,&
   ' Memory-space requested: ',bsize_ham*b2Gb,' Gb. '
  call wrtout(std_out, msg)
 
@@ -983,7 +983,7 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
  write(eig_unt) do_ep_lifetime
 
  write(eig_unt)exc_size,nstates
- write(eig_unt)CMPLX(exc_ene(1:nstates),kind=dpc)
+ write(eig_unt)CMPLX(exc_ene(1:nstates),kind=dp)
  do mi=1,nstates
    write(eig_unt) exc_rvect(:,mi)
  end do

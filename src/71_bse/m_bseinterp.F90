@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2025 ABINIT group (M.Giantomassi, Y. Gillet)
+!!  Copyright (C) 2014-2025 ABINIT group (Y. Gillet, M.Giantomassi)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -121,12 +121,12 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine interpolator_init(interpolator, double_grid, Wfd_dense, Wfd_coarse, &
-&    Kmesh_dense, Kmesh_coarse, BSp, Cryst, Psps, Pawtab, method)
+  Kmesh_dense, Kmesh_coarse, BSp, Cryst, Psps, Pawtab, method)
 
 !Arguments ---------------------------
 !scalars
+ class(interpolator_t),intent(inout) :: interpolator
  integer,intent(in) :: method
- type(interpolator_t),intent(inout) :: interpolator
  type(double_grid_t),intent(in),target :: double_grid
  type(wfdgw_t),intent(inout) :: Wfd_dense, Wfd_coarse
  type(kmesh_t),intent(in) :: Kmesh_dense, Kmesh_coarse
@@ -209,17 +209,14 @@ end subroutine interpolator_init
 !!
 !! INPUTS
 !!
-!! OUTPUT
-!!
 !! SOURCE
 
 subroutine int_alloc_work(interpolator, work_size)
 
 !Arguments ---------------------------
 !scalars
+ class(interpolator_t),intent(inout) :: interpolator
  integer,intent(in) :: work_size
- type(interpolator_t),intent(inout) :: interpolator
-
 !*****************************************************************************
 
  ABI_MALLOC(interpolator%btemp,(work_size))
@@ -237,18 +234,12 @@ end subroutine int_alloc_work
 !! FUNCTION
 !! Deallocate temporary arrays
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! SOURCE
 
 subroutine int_free_work(interpolator)
 
 !Arguments ---------------------------
-!scalars
- type(interpolator_t),intent(inout) :: interpolator
-
+ class(interpolator_t),intent(inout) :: interpolator
 !*****************************************************************************
 
  ABI_SFREE(interpolator%btemp)
@@ -273,11 +264,11 @@ end subroutine int_free_work
 !! SOURCE
 
 subroutine int_compute_overlaps(interpolator, double_grid, Wfd_dense, Wfd_coarse, &
-&   Kmesh_dense, Kmesh_coarse, BSp, Cryst, Psps, Pawtab)
+    Kmesh_dense, Kmesh_coarse, BSp, Cryst, Psps, Pawtab)
 
 !Arguments ---------------------------
 !scalars
- type(interpolator_t),intent(inout) :: interpolator
+ class(interpolator_t),intent(inout) :: interpolator
  type(double_grid_t),intent(in),target :: double_grid
  type(wfdgw_t),intent(inout) :: Wfd_dense, Wfd_coarse
  type(kmesh_t),intent(in) :: Kmesh_dense, Kmesh_coarse
@@ -289,15 +280,10 @@ subroutine int_compute_overlaps(interpolator, double_grid, Wfd_dense, Wfd_coarse
 
 !Local variables ---------------------
 !scalars
- integer :: nprocs, my_rank
- integer :: ierr
+ integer :: nprocs, my_rank, ierr
  integer :: nfft, nspinor, nsppol, nvert
- integer :: ib_coarse, ib_dense
- integer :: ik_coarse, ik_dense
- integer :: spin
- integer :: iorder
- integer :: ivertex, ix, iy, iz
- integer :: bstart, bstop
+ integer :: ib_coarse, ib_dense, ik_coarse, ik_dense
+ integer :: spin, iorder, ivertex, ix, iy, iz, bstart, bstop
  real(dp),parameter :: threshold = 0.1_dp
  complex(gwpc) :: ovlp
 !arrays
@@ -306,8 +292,6 @@ subroutine int_compute_overlaps(interpolator, double_grid, Wfd_dense, Wfd_coarse
  integer :: g0(3),g01(3),diffg0(3)
  complex(gwpc),allocatable :: ur_coarse(:),ur_dense(:)
  complex(gwpc),allocatable :: ceigr(:)
-!arrays
-
 !*****************************************************************************
 
  nprocs = xmpi_comm_size(Wfd_coarse%comm)
@@ -452,9 +436,8 @@ subroutine int_preprocess_tables(interpolator,double_grid)
 
 !Argument ------------------------------------
 !scalars
- type(interpolator_t),intent(inout) :: interpolator
+ class(interpolator_t),intent(inout) :: interpolator
  type(double_grid_t),intent(in) :: double_grid
-!arrays
 
 !Local variables -----------------------------
 !scalars
@@ -464,8 +447,8 @@ subroutine int_preprocess_tables(interpolator,double_grid)
 !arrays
  integer :: allxyz(3),curindices_dense(6)
  integer,allocatable :: curindex(:)
-
 !*********************************************
+
  ABI_MALLOC(curindex,(double_grid%nbz_coarse))
  curindex = 1
 
@@ -537,10 +520,9 @@ end subroutine int_preprocess_tables
 subroutine int_compute_corresp(interpolator,BSp,double_grid)
 
 !Arguments ------------------------------------
-!scalars
+ class(interpolator_t),intent(inout) :: interpolator
  type(excparam),intent(in) :: BSp
  type(double_grid_t),intent(in) :: double_grid
- type(interpolator_t),intent(inout) :: interpolator
 
 !Local variables ------------------------------
 !scalars
@@ -549,7 +531,6 @@ subroutine int_compute_corresp(interpolator,BSp,double_grid)
  integer :: ic,iv,ik_coarse0,it_coarse0,iovlp,ix,iy,iz
 !arrays
  integer :: curindices_dense(6),curindices_coarse(3),g0(3),g01(3),neighbour(3)
-
 !************************************************************************
 
  do spin=1,interpolator%nsppol
@@ -620,8 +601,7 @@ end subroutine int_compute_corresp
 subroutine interpolator_normalize(interpolator)
 
 !Arguments ---------------------------
-!scalars
- type(interpolator_t),intent(inout) :: interpolator
+ class(interpolator_t),intent(inout) :: interpolator
 
 !Local variables ---------------------
 !scalars
@@ -663,19 +643,12 @@ end subroutine interpolator_normalize
 !! FUNCTION
 !! Destroy the interpolator object in memory
 !!
-!! INPUTS
-!!
-!!
-!! OUTPUT
-!!
-!!
 !! SOURCE
 
 subroutine interpolator_free(interpolator)
 
 !Arguments ---------------------------
- type(interpolator_t),intent(inout) :: interpolator
-
+ class(interpolator_t),intent(inout) :: interpolator
 !*****************************************************************************
 
  ABI_SFREE(interpolator%overlaps)

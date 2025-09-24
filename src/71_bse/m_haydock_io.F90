@@ -3,10 +3,11 @@
 !! m_haydock_io
 !!
 !! FUNCTION
-!!  This module provides routines to read the Haydock file
+!!  This module provides routines to read the Haydock file used by the
+!!  Bethe-Salpeter code.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (YG)
+!!  Copyright (C) 2013-2025 ABINIT group (YG, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -74,18 +75,19 @@ MODULE m_haydock_io
    integer,allocatable :: niter(:)
    ! niter(nq)
 
- end type haydock_type
+ contains
 
- public :: open_haydock             ! Init the Haydock file
- public :: read_haydock             ! Reads the data associated with 1 q-point
- public :: read_dim_haydock         ! Read dimensions
- public :: write_dim_haydock        ! Write dimensions.
- public :: skip_dim_haydock         ! Skip the section with dimensions.
- public :: write_haydock            ! Writes data related to a q-point inside the file
- public :: close_haydock            ! Close the Haydock file and release memory
+ procedure :: open => open_haydock             ! Init the Haydock file
+ procedure :: read => read_haydock             ! Reads the data associated with 1 q-point
+ procedure :: read_dim => read_dim_haydock         ! Read dimensions
+ procedure :: write_dim => write_dim_haydock        ! Write dimensions.
+ procedure :: skip_dim => skip_dim_haydock         ! Skip the section with dimensions.
+ procedure :: write => write_haydock            ! Writes data related to a q-point inside the file
+ procedure :: close => close_haydock            ! Close the Haydock file and release memory
+ end type haydock_type
 !!***
 
-CONTAINS  !====================================================================
+contains  !====================================================================
 !!***
 
 !!****f* m_haydock_io/open_haydock
@@ -104,18 +106,14 @@ CONTAINS  !====================================================================
 !!
 !! SOURCE
 
-subroutine open_haydock(filename, haydock_file)
+subroutine open_haydock(haydock_file, filename)
 
 !Arguments ------------------------------------
-!scalars
+ class(haydock_type),intent(out) :: haydock_file
  character(len=*),intent(in) :: filename
- type(haydock_type),intent(out) :: haydock_file
-!arrays
 
 !Local variables ------------------------------
-!scalars
  character(len=500) :: msg
-
 !************************************************************************
 
  if (open_file(filename,msg,newunit=haydock_file%unt,form="unformatted") /= 0) then
@@ -145,8 +143,7 @@ end subroutine open_haydock
 subroutine read_dim_haydock(haydock_file)
 
 !Arguments ------------------------------------
-!scalars
- type(haydock_type),intent(inout) :: haydock_file
+ class(haydock_type),intent(inout) :: haydock_file
 
 !Local variables ------------------------------
 !scalars
@@ -155,7 +152,6 @@ subroutine read_dim_haydock(haydock_file)
  character(len=500) :: msg
 !arrays
  real(dp) :: q_file(3)
-
 !************************************************************************
 
  read(haydock_file%unt) haydock_file%version
@@ -164,7 +160,7 @@ subroutine read_dim_haydock(haydock_file)
  ABI_CHECK(haydock_file%version == CUR_VERSION, msg)
 
  read(haydock_file%unt) haydock_file%hsize,haydock_file%use_coupling,&
-&   haydock_file%op,haydock_file%nq,haydock_file%broad
+    haydock_file%op,haydock_file%nq,haydock_file%broad
 
  ABI_MALLOC(haydock_file%qpoints,(3,haydock_file%nq))
  ABI_MALLOC(haydock_file%niter,(haydock_file%nq))
@@ -196,21 +192,17 @@ end subroutine read_dim_haydock
 !! FUNCTION
 !!  Writes the basic dimensions stored inside the haydock descriptor inside the file
 !!
-!! INPUTS
-!!  haydock_file = haydock file descriptor
-!!
 !! SOURCE
 
 subroutine write_dim_haydock(haydock_file)
 
 !Arguments ------------------------------------
- type(haydock_type),intent(in) :: haydock_file
-
+ class(haydock_type),intent(in) :: haydock_file
 ! *************************************************************************
 
  write(haydock_file%unt) haydock_file%version
  write(haydock_file%unt) haydock_file%hsize,haydock_file%use_coupling, &
-&  haydock_file%op,haydock_file%nq,haydock_file%broad
+   haydock_file%op,haydock_file%nq,haydock_file%broad
 
 end subroutine write_dim_haydock
 !!***
@@ -224,19 +216,12 @@ end subroutine write_dim_haydock
 !! FUNCTION
 !!  Skip the part of the file reading basic dimensions contained in the header
 !!
-!! INPUTS
-!!  haydock_file = haydock file descriptor
-!!
-!! OUTPUT
-!!
 !! SOURCE
 
 subroutine skip_dim_haydock(haydock_file)
 
 !Arguments ------------------------------------
-!scalars
- type(haydock_type),intent(in) :: haydock_file
-
+ class(haydock_type),intent(in) :: haydock_file
 ! *************************************************************************
 
  read(haydock_file%unt)
@@ -275,9 +260,9 @@ subroutine read_haydock(haydock_file, q, aa, bb, phi_n, phi_nm1, niter, factor)
 
 !Arguments ------------------------------------
 !scalars
+ class(haydock_type),intent(in) :: haydock_file
  integer,intent(out) :: niter
  complex(dp),intent(out) :: factor
- type(haydock_type),intent(in) :: haydock_file
 !arrays
  real(dp),intent(in) :: q(3)
  real(dp),allocatable,intent(out) :: bb(:)
@@ -285,13 +270,11 @@ subroutine read_haydock(haydock_file, q, aa, bb, phi_n, phi_nm1, niter, factor)
 
 !Local variables ------------------------------
 !scalars
- integer :: iq, it, inn
- integer :: niter_file
+ integer :: iq, it, inn, niter_file
  logical :: found_q
  character(len=500) :: msg
 !arrays
  real(dp) :: q_file(3)
-
 ! *************************************************************************
 
  rewind(haydock_file%unt)
@@ -362,16 +345,15 @@ subroutine write_haydock(haydock_file, hsize, q, aa, bb, phi_n, phi_nm1, niter, 
 
 !Arguments ------------------------------------
 !scalars
+ class(haydock_type),intent(in) :: haydock_file
  integer,intent(in) :: niter,hsize
  complex(dp),intent(in) :: factor
- type(haydock_type),intent(in) :: haydock_file
 !arrays
  real(dp),intent(in) :: q(3)
  real(dp),intent(in) :: bb(niter)
  complex(dp),intent(in) :: aa(niter),phi_n(hsize),phi_nm1(hsize)
 
 !Local variables -----------------------------
-!scalars
  integer :: it
 ! *************************************************************************
 
@@ -394,18 +376,14 @@ end subroutine write_haydock
 !! close_haydock
 !!
 !! FUNCTION
-!!  Closes the haydock file and free the memory related to the file descriptor
-!!
-!! INPUTS
-!!  haydock_file = haydock file descriptor
+!!  Closes the haydock file and free dynamica memory.
 !!
 !! SOURCE
 
 subroutine close_haydock(haydock_file)
 
 !Arguments ------------------------------------
- type(haydock_type),intent(inout) :: haydock_file
-
+ class(haydock_type),intent(inout) :: haydock_file
 ! *************************************************************************
 
  close(haydock_file%unt)

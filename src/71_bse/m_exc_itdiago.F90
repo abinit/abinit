@@ -864,7 +864,7 @@ subroutine exc_write_phi_block(oeig_fname,use_mpio)
        ABI_ERROR(msg)
      end if
      write(eig_unt, err=10, iomsg=errmsg) nstates
-     write(eig_unt, err=10, iomsg=errmsg) CMPLX(exc_energy(1:nstates),kind=dpc)
+     write(eig_unt, err=10, iomsg=errmsg) CMPLX(exc_energy(1:nstates),kind=dp)
      ! TODO: change setup_bse so that Hdr_bse reflects the parameters of the run.
      close(eig_unt, err=10, iomsg=errmsg)
    end if
