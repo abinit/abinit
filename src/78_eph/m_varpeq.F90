@@ -2432,8 +2432,7 @@ subroutine polstate_calc_grad(self, ip)
  complex(dp) :: b, g0
 !arrays
  real(dp) :: kpt(3), qpt(3), kpq(3), kmq(3)
- complex(dp) :: akq(self%gqk%nb_k), akmq(self%gqk%nb)
- complex(dp) :: bq(self%gqk%my_npert)
+ complex(dp) :: akq(self%gqk%nb_kq), akmq(self%gqk%nb_kq), bq(self%gqk%my_npert)
  complex(dp), allocatable :: gq_gathered(:,:,:,:)
 !----------------------------------------------------------------------
 

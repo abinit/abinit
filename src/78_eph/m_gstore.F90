@@ -200,20 +200,18 @@ type, public :: gqk_t
   ! 3 * natom
   ! Mainly used to dimension arrays
 
-  integer :: nb = -1
-  ! Number of bands included in the calculation for this spin
-  ! Global as this dimension is not MPI-distributed due to (m, n) pairs.
-  ! NB: nb is not necessarily equal to nband.
-
-  integer :: bstart = -1, bstop = -1
-  ! The first band starts at bstart.
-  ! The last band is bstop (NB: These are global indices)
-
   ! TODO
   ! These new entries will be used to implement band distribution.
   integer :: nb_kq = -1, nb_k = -1
+  ! Number of bands included in the calculation at k+q and k, for this spin
+  ! Global as these dimensions iare not MPI-distributed.
+  ! NB: nb_kq and nb_k are not necessarily equal to nband. Use bstar_kq and bstart_k.
+
   integer :: bstart_k = -1, bstop_k = -1
   integer :: bstart_kq = -1, bstop_kq = -1
+  ! The first band at k starts at bstart_k.
+  ! The last band at k is bstop_k (NB: These are global indices)
+  ! Same meaning for bstart_kq and bstop_kq.
 
   integer :: my_npert = -1
   ! Number of perturbations treated by this MPI rank.
@@ -265,14 +263,14 @@ type, public :: gqk_t
   ! Mapping my_iq index --> global index in the g(q, k) matrix.
 
   real(dp),allocatable :: vk_cart_ibz(:,:,:)
-  ! (3, nb, nkibz)
+  ! (3, nb_k, nkibz)
   ! Diagonal v_{n,k} for k in the IBZ.
   ! Values in the BZ can be reconstructed by symmetry.
   ! Allocated if gstore%with_vk == 1
   ! TODO: Here I should decide how to treat nb_k, nk_kq
 
   real(dp),allocatable :: vkmat_cart_ibz(:,:,:,:,:)
-  ! (3, nb, nb, nkibz)
+  ! (3, nb_k, nb_k, nkibz)
   ! v_{m, n,k} for the k in the IBZ
   ! Allocated if gstore%with_vk in (1, 2)
   ! TODO: Here I should decide how to treat nb_k, nk_kq
@@ -297,7 +295,7 @@ type, public :: gqk_t
   ! (nb_k, nb_kq, natom3, my_nk)
   ! e-ph matrix elements g(k,q=0) required for the RIA DW term.
   ! Note: Perturbations are not distributed. Only k-points
-  ! Also, m, n bands are exchanged (first n then m)
+  ! Also, m, n bands are EXCHANGED (first n then m).
 
   real(dp), allocatable :: my_g2(:,:,:,:,:)
   ! (my_npert, nb_kq, my_nq, nb_k, my_nk)
@@ -1242,7 +1240,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, nproc_spin, comm_spin)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: spin, my_is, np, my_rank, ierr, npp_bz, units(2)
+ integer :: spin, my_is, np, my_rank, ierr, npp_bz, units(2), bstart, bstop, nb
  type(gqk_t),pointer :: gqk
  character(len=5000) :: msg
  character(len=10) :: order
@@ -1262,14 +1260,14 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, nproc_spin, comm_spin)
    ABI_CHECK_IRANGE(gqk%cplex, 1, 2, "gstore_cplex")
 
    ! Compute bstart and band size for this spin.
-   gqk%bstart = gstore%brange_spin(1, spin)
-   gqk%bstop = gstore%brange_spin(2, spin)
-   gqk%nb = gstore%brange_spin(2, spin) - gstore%brange_spin(1, spin) + 1
+   bstart = gstore%brange_spin(1, spin)
+   bstop = gstore%brange_spin(2, spin)
+   nb = gstore%brange_spin(2, spin) - gstore%brange_spin(1, spin) + 1
 
-   ! FIXME: for the time being, a direct copy of %nb
-   gqk%nb_k = gqk%nb; gqk%nb_kq = gqk%nb
-   gqk%bstart_k = gqk%bstart; gqk%bstop_k = gqk%bstop
-   gqk%bstart_kq = gqk%bstart; gqk%bstop_kq = gqk%bstop
+   ! FIXME: for the time being, nb_kq == nb_k
+   gqk%nb_k = nb; gqk%nb_kq = nb
+   gqk%bstart_k = bstart; gqk%bstop_k = bstop
+   gqk%bstart_kq = bstart; gqk%bstop_kq = bstop
 
    ! Store global shape of the q/k matrix for this spin.
    gqk%glob_nq = gstore%glob_nq_spin(spin)
@@ -1760,16 +1758,16 @@ subroutine gstore_malloc__(gstore, with_cplex, max_nq, qglob2bz, max_nk, kglob2b
 
      ! Allocate storage for MPI-distributed dH/dk matrix elements.
      if (any(gstore%with_vk == [1, 2])) then
-       mem_mb = 3 * gqk%nb * gqk%my_nk * eight * b2Mb
+       mem_mb = 3 * gqk%nb_k * gqk%my_nk * eight * b2Mb
        call wrtout(std_out, sjoin(" Memory for diagonal vk_cart_ibz:", ftoa(mem_mb, fmt="f8.1"), " [Mb] <<< MEM"))
-       ABI_MALLOC_OR_DIE(gqk%vk_cart_ibz, (3, gqk%nb, gstore%nkibz), ierr)
+       ABI_MALLOC_OR_DIE(gqk%vk_cart_ibz, (3, gqk%nb_k, gstore%nkibz), ierr)
        gqk%vk_cart_ibz = zero
      end if
 
      if (gstore%with_vk == 2) then
-       mem_mb = two * 3 * gqk%nb ** 2 * gqk%my_nk * eight * b2Mb
+       mem_mb = two * 3 * gqk%nb_k**2 * gqk%my_nk * eight * b2Mb
        call wrtout(std_out, sjoin(" Memory for vkmat_cart_ibz:", ftoa(mem_mb, fmt="f8.1"), " [Mb] <<< MEM"))
-       ABI_MALLOC_OR_DIE(gqk%vkmat_cart_ibz, (2, 3, gqk%nb, gqk%nb, gstore%nkibz), ierr)
+       ABI_MALLOC_OR_DIE(gqk%vkmat_cart_ibz, (2, 3, gqk%nb_k, gqk%nb_k, gstore%nkibz), ierr)
        gqk%vkmat_cart_ibz = zero
      end if
    end if
@@ -2130,7 +2128,7 @@ subroutine gstore_filter_qprange__(gstore, dtset, qbz, qbz2ibz, qibz2bz, kbz, ki
      ik_ibz = mapl_kk(1)
      ik_bz = kibz2bz(ik_ibz); select_kbz_spin(ik_bz, spin) = 1
    end do
-   ! FIXME: This requires a more careful treatment of (gqk%nb, gqk%nb) matrix that should become (nb1, nb2)
+   ! FIXME: This requires a more careful treatment of (gqk%nb_k, gqk%nb) matrix that should become (nb1, nb2)
    ! Set brange_spin from bstart_ks and nbcalc_ks. Arrays have shape (nkcalc, nsppol)
    !gstore%brange_spin(:, spin) = [minval(bstart_ks(:,spin)), maxval(bstart_ks(:,spin) + nbcalc_ks(:,spin) - 1)]
  end do
@@ -2433,7 +2431,7 @@ subroutine gstore_fill_bks_mask_pp_mesh(gstore, ecut, mband, nkibz, nsppol, my_p
      kk = gqk%my_kpts(:, my_ik); ik_ibz = gqk%my_k2ibz(1, my_ik)
 
      ! We need the image of this k-point in the IBZ for the incoming state |psi_nk>.
-     bks_mask(gqk%bstart_k:gqk%bstop_k, ik_ibz, spin) = .True.  ! gqk%n_start, gqk%n_stop
+     bks_mask(gqk%bstart_k:gqk%bstop_k, ik_ibz, spin) = .True.
 
      ! We also need the image of k+q in the IBZ for the outgoing state <psi_mkq|.
      do my_iq=1,gqk%my_nq
@@ -2442,7 +2440,7 @@ subroutine gstore_fill_bks_mask_pp_mesh(gstore, ecut, mband, nkibz, nsppol, my_p
          ABI_ERROR(sjoin("Cannot map k+q to IBZ with qpt:", ktoa(qpt)))
        end if
        ikq_ibz = map_kq(1, 1)
-       bks_mask(gqk%bstart_kq:gqk%bstop_kq, ikq_ibz, spin) = .True. ! gqk%m_start, gqk%m_stop
+       bks_mask(gqk%bstart_kq:gqk%bstop_kq, ikq_ibz, spin) = .True.
      end do ! my_iq
 
    end do ! my_ok
@@ -2891,7 +2889,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
  class(gstore_t),target,intent(inout) :: gstore
  integer,intent(in) :: my_iq, eph_intmeth
  real(dp),intent(in) :: eph_fsmear
- real(dp),intent(out) :: qpt(3), weight_q, dbl_delta_q(gqk%nb, gqk%nb, gqk%my_nk)
+ real(dp),intent(out) :: qpt(3), weight_q, dbl_delta_q(gqk%nb_kq, gqk%nb_k, gqk%my_nk)
 
 !Local variables ------------------------------
 !scalars
@@ -2907,7 +2905,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
 !arrays
  integer :: nge(3), ngw(3)
  integer,allocatable :: my_kqmap(:,:), kmesh_map(:,:)
- real(dp) :: kk(3), kmesh_cartvec(3,3), rlatt(3,3), klatt(3,3), vb_k(3, gqk%nb), vb_kq(3, gqk%nb)
+ real(dp) :: kk(3), kmesh_cartvec(3,3), rlatt(3,3), klatt(3,3), vb_k(3, gqk%nb_k), vb_kq(3, gqk%nb_kq)
  real(dp),allocatable :: eig_k(:,:), eig_kq(:,:), kmesh(:,:), wght_bz(:,:,:)
 !----------------------------------------------------------------------
 
@@ -2976,7 +2974,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
      end if
 
      do ib2=1,nb_k
-       band2 = ib2 + gqk%bstart - 1
+       band2 = ib2 + gqk%bstart_k - 1
        if (use_adaptive) then
          sigma = max(maxval([(abs(dot_product(vb_k(:, ib2), kmesh_cartvec(:,ii))), ii=1,3)]), min_smear)
          !write(std_out, *)"sigma:", sigma * Ha_eV
@@ -2984,7 +2982,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
        g2 = gaussian(ebands%eig(band2, ik_ibz, spin) - ebands%fermie, sigma)
 
        do ib1=1,nb_kq
-         band1 = ib1 + gqk%bstart - 1
+         band1 = ib1 + gqk%bstart_kq - 1
          if (use_adaptive) then
            sigma = max(maxval([(abs(dot_product(vb_kq(:, ib1), kmesh_cartvec(:,ii))), ii=1,3)]), min_smear)
          end if
@@ -3043,7 +3041,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
      eig_k(:, ik_bz) = ebands%eig(gqk%bstart_k:gqk%bstop_k, ik_ibz, spin) - ebands%fermie
    end do
 
-   ! Map libtetra BZ mesh + q to IBZ and fill eig_kq
+   ! Map libtetra BZ mesh + q to IBZ and fill eig_kq.
    if (kpts_map("symrec", ebands%kptopt, cryst, gstore%krank_ibz, nkbz, kmesh, kmesh_map, qpt=qpt) /= 0) then
      ABI_ERROR(sjoin("Cannot map libtetra k+q to IBZ with qpt:", ktoa(qpt)))
    end if
@@ -4907,6 +4905,8 @@ subroutine gqk_gather(gqk, mode, fixed_pt, g_gathered)
  complex(dp), pointer :: my_g(:,:,:,:)
 !----------------------------------------------------------------------
 
+ ABI_CHECK_IEQ(gqk%nb_kq, gqk%nb_k, "nb_kq != nb_k not tested")
+
  select case (mode)
  case ("k")
    comm = gqk%qpt_comm%value
@@ -4914,7 +4914,7 @@ subroutine gqk_gather(gqk, mode, fixed_pt, g_gathered)
    my_ngather = gqk%my_nq
    my_ptstart = gqk%my_qstart
    my_g => gqk%my_g(:,:,:,:,fixed_pt)
-   ABI_MALLOC(g_gathered, (gqk%my_npert, gqk%nb, gqk%nb, ngather))
+   ABI_MALLOC(g_gathered, (gqk%my_npert, gqk%nb_kq, gqk%nb_k, ngather))
 
  case ("q")
    comm = gqk%kpt_comm%value
@@ -4922,7 +4922,7 @@ subroutine gqk_gather(gqk, mode, fixed_pt, g_gathered)
    my_ngather = gqk%my_nk
    my_ptstart = gqk%my_kstart
    my_g => gqk%my_g(:,:,fixed_pt,:,:)
-   ABI_MALLOC(g_gathered, (gqk%my_npert, gqk%nb, gqk%nb, ngather))
+   ABI_MALLOC(g_gathered, (gqk%my_npert, gqk%nb_k, gqk%nb_kq, ngather))
 
  case default
    ABI_ERROR(sjoin("Gathering MPI-distributed matrix elements, unsupported mode: ", mode))
@@ -4933,8 +4933,8 @@ subroutine gqk_gather(gqk, mode, fixed_pt, g_gathered)
    ipt_glob = my_ipt + my_ptstart - 1
 
    ! FIXME: can the rearrangement be done in the select case statement?
-   do ib=1,gqk%nb
-     do jb=1,gqk%nb
+   do ib=1,gqk%nb_k
+     do jb=1,gqk%nb_kq
        do my_pert=1,gqk%my_npert
          if (mode == "k") then
            g_gathered(my_pert, jb, ib, ipt_glob) = my_g(my_pert, jb, my_ipt, ib)
@@ -5210,7 +5210,7 @@ end subroutine gstore_wannierize_and_write_gwan
 !!  gqk_get_erange_mask
 !!
 !! FUNCTION
-!!  Compute MPI-distributed and global masks for electronic states allowed by erange.
+!!  Compute MPI-distributed and global masks for electronic states |n,k> allowed by erange.
 !!
 !! INPUTS
 !!  gstore<gstore_t>=Electron-phonon object containing dimensions and related quantities.
@@ -5220,8 +5220,8 @@ end subroutine gstore_wannierize_and_write_gwan
 !!    -- otherwise, erange(1) & erange(2) select window wrt VBM & CBM, respectively.
 !!
 !! OUTPUT
-!!  my_states(gqk%nb, gqk%my_nk)=Mask for selected states at this MPI proc.
-!!  glob_states(gqk%nb, gqk%my_nk)=Global mask for selected states.
+!!  my_states(gqk%nb_k, gqk%my_nk)=Mask for selected states at this MPI proc.
+!!  glob_states(gqk%nb_k, gqk%my_nk)=Global mask for selected states.
 !!
 !! SOURCE
 
@@ -5233,7 +5233,7 @@ subroutine gqk_get_erange_mask(gqk, gstore, erange, my_states, glob_states)
  class(gstore_t), target, intent(in) :: gstore
 !arrays
  real(dp), intent(in) :: erange(2)
- integer, intent(out) :: my_states(gqk%nb, gqk%my_nk), glob_states(gqk%nb, gqk%glob_nk)
+ integer, intent(out) :: my_states(gqk%nb_k, gqk%my_nk), glob_states(gqk%nb_k, gqk%glob_nk)
 
 !Local variables-------------------------------
 !scalars
@@ -5267,7 +5267,7 @@ subroutine gqk_get_erange_mask(gqk, gstore, erange, my_states, glob_states)
    ik_ibz = gqk%my_k2ibz(1, my_ik)
    ik_glob = my_ik + gqk%my_kstart - 1
 
-   do ib=1,gqk%nb
+   do ib=1,gqk%nb_k
      eig = ebands%eig(bstart + ib - 1, ik_ibz, gqk%spin)
 
      if (abs(erange(1)) > tol12) then
@@ -5332,9 +5332,11 @@ subroutine gqk_filter_erange(gqk, gstore, erange)
  type(krank_t) :: krank_kpts
  type(ebands_t), pointer :: ebands
 !arrays
- integer :: my_states(gqk%nb, gqk%my_nk), glob_states(gqk%nb, gqk%glob_nk)
+ integer :: my_states(gqk%nb_k, gqk%my_nk), glob_states(gqk%nb_k, gqk%glob_nk)
  real(dp) :: kpt(3), qpt(3), kpq(3), kpts(3, gqk%glob_nk), my_qpts(3, gqk%my_nq)
 !----------------------------------------------------------------------
+
+ ABI_CHECK_IEQ(gqk%nb_kq, gqk%nb_k, "nb_kq /= nk_k not tested")
 
  ebands => gstore%ebands
 
@@ -5360,7 +5362,7 @@ subroutine gqk_filter_erange(gqk, gstore, erange)
  do my_ik=1,gqk%my_nk
    kpt(:) = gqk%my_kpts(:, my_ik)
 
-   do ib=1,gqk%nb
+   do ib=1,gqk%nb_k
      ! |nk> is forbidden
      skip_nk = .false.
      if (my_states(ib, my_ik) == 0) skip_nk = .true.
@@ -5376,7 +5378,7 @@ subroutine gqk_filter_erange(gqk, gstore, erange)
        skip_q = .false.
        if (ikq == -1) skip_q = .true.
 
-       do jb=1,gqk%nb
+       do jb=1,gqk%nb_kq
          ! |mk+q> is forbidden
          skip_mkq = .false.
          if (glob_states(jb, ikq) == 0) skip_mkq = .true.
