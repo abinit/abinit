@@ -986,6 +986,9 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      nctkarr_t("gstore_qbz2ibz", "i", "six, gstore_nqbz"), &
      nctkarr_t("gstore_qglob2bz", "i", "gstore_max_nq, number_of_spins"), &
      nctkarr_t("gstore_kglob2bz", "i", "gstore_max_nk, number_of_spins") &
+     ! TODO: These quantities are needed to interface GSTORE.nc with external codes.
+     !nctkarr_t("zeff", "dp", "three, three, number_of_atoms") &
+     !nctkarr_t("qdrp_cart", "dp", "three, three, three, number_of_atoms") &
    ])
    NCF_CHECK(ncerr)
 
@@ -1029,6 +1032,8 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_qbz2ibz"), qbz2ibz))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_qglob2bz"), qglob2bz))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_kglob2bz"), gstore%kglob2bz))
+   !NCF_CHECK(nf90_put_var(ncid, vid("zeff"), gstore%ifc%zeff))
+   !NCF_CHECK(nf90_put_var(ncid, vid("qdrp_cart"), gstore%ifc%qdrp_cart))
    ! NB: kibz has been already written by ebands%ncwrite
 
    if (allocated(gstore%delta_ef_kibz_spin)) then

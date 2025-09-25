@@ -439,6 +439,12 @@ subroutine slk_grid_init(grid, nprocs, comm, use_gpu, grid_dims)
 
  grid%nprocs = nprocs
 
+#if defined FC_NVHPC
+ if (grid%nprocs == -1) then
+   write(std_out, *)"NVHPC raises an internal compiler error that is fixed by this print statement."
+ end if
+#endif
+
  if (.not. present(grid_dims)) then
    ! Search for a rectangular grid of processors
    i=INT(SQRT(float(nprocs)))
