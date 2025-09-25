@@ -3616,7 +3616,7 @@ subroutine cg_precon(cg, eval, istwf_k, kinpw, npw, nspinor, me_g0, optekin, pco
 !scalars
  integer :: ierr,ig,igs,ipw1,ispinor
  real(dp) :: ek0,ek0_inv,fac,poly,xx
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  real(dp) :: tsec(2)
 ! *************************************************************************

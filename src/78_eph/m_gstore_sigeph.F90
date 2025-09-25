@@ -207,9 +207,9 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
  integer,parameter :: master = 0, with_cplex1 = 1, cplex1 = 1, pawread0 = 0
  integer :: n1, n2, n3, n4, n5, n6, nb_k, nb_kq, glob_nk, ntemp
  integer :: spin, my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, gap_err, my_rank, ip1, ip2, nu
- integer :: it, ik_bz, ik_ibz, ikq_ibz, band_k, band_kq, timrev_k, ii, ikcalc, natom, natom3, nsppol
+ integer :: it, ik_ibz, ikq_ibz, band_k, band_kq, timrev_k, ii, ikcalc, natom, natom3, nsppol  !ik_bz,
  integer :: nfft, nfftf, mgfft, mgfftf !,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart, enough_stern
- real(dp) :: wqnu, gkq2, weight_q, eig0nk, eig0mk, eig0mkq, ediff, gmod2, hmod2, gdw2, gdw2_stern, rtmp !,nqnu,gkq2,gkq2_pf,
+ real(dp) :: wqnu, gkq2, weight_q, eig0nk, eig0mk, eig0mkq, ediff, gmod2, hmod2, gdw2 !, gdw2_stern, rtmp !,nqnu,gkq2,gkq2_pf,
  !real(dp) :: cpu, wall, gflops
  logical :: q_is_gamma, intra_band, same_band
  complex(dp) :: cfact !, sig_cplx
@@ -218,7 +218,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
  type(lgroup_t) :: lg_myk
  type(gstore_t) :: gstore
  type(sep_t) :: sigma
- type(stern_t) :: stern
+ !type(stern_t) :: stern
  type(hdr_type) :: pot_hdr
  type(crystal_t) :: pot_cryst
 !arrays
@@ -227,7 +227,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
  real(dp) :: kk(3), qpt(3), kq(3)
  real(dp) :: displ_nu_cart(2, 3, cryst%natom), displ_nu_red(2, 3, cryst%natom)
  real(dp),allocatable :: vtrial(:,:) !,gvnlx1(:,:),work(:,:,:,:), vcar_ibz(:,:,:,:)
- real(dp),allocatable :: gkq_atm(:,:,:),gkq_nu(:,:,:) !,gkq0_atm(:,:,:,:), gaussw_qnu(:)
+ !real(dp),allocatable :: gkq_atm(:,:,:),gkq_nu(:,:,:) !,gkq0_atm(:,:,:,:), gaussw_qnu(:)
  real(dp),allocatable :: rfact_t(:), nqnu(:), f_mkq(:) !, f_nk(:),  g2_pmnk(:,:,:,:)
  complex(dp),allocatable :: cfact_t(:), tpp_red(:,:), cfact_wr(:) !,fmw_frohl_sphcorr(:,:,:,:),
  type(pawrhoij_type),allocatable :: pot_pawrhoij(:)
@@ -582,12 +582,12 @@ subroutine sep_gather_and_write_results(sigma, gstore, gqk, dtset, ebands)
  type(dataset_type),intent(in) :: dtset
  integer,parameter :: max_ntemp = 50
  integer :: it, in_k, ikcalc, ik_bz, spin, ierr, bstart_k, bstop_k, cnt, ndeg
- integer :: band_k,ik_ibz,ib_val,ib_cond,jj,ideg,ii,iw,nstates, nb_k
+ integer :: band_k,ik_ibz,ib_val,ib_cond,jj,ideg,ii,iw,nstates !, nb_k
  !integer :: nq_ibzk_eff, nelem, imyq, iq_ibz_k, sr_ncid
  logical :: changed !, iwrite
  real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond,qpe_oms,qpe_oms_val,qpe_oms_cond
- real(dp) :: ravg2 ! invsig2fmts, tau
- complex(dp) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2,cavg3,cavg4
+ !real(dp) :: ravg2 ! invsig2fmts, tau
+ complex(dp) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2,cavg3 !,cavg4
  character(len=500) :: this_gtype ! msg
  !integer :: grp_ncid, ncerr
  type(degtab_t) :: degtab

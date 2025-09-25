@@ -94,6 +94,9 @@
 !!  3) Use similar trick in dfpt_cgw for H^0 |psi_nk>
 !!  4) Operate on multiple n states in getgh1c (new version of getgh1c allows it)
 !!
+!!  Add BECS and eps infinity.
+!!  Move to atom representation and add symmetry tables. ifc
+!!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2025 ABINIT group (MG)
 !!  This file is distributed under the terms of the
@@ -3361,7 +3364,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  integer :: cplex,natom,natom3,ipc,nspinor, nskip_tetra_kq, timrev_k, timrev_q
  integer :: band_k, in_k, im_kq, ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq, nb_k, nb_kq
  integer :: my_ik, my_is, comm_rpt, my_npert, my_ip, my_iq, spin,istwf_k,istwf_kq,npw_k,npw_kq
- integer :: mpw, nb,ierr,cnt, n1,n2,n3,n4,n5,n6,nspden,ndone, db_iqpt
+ integer :: mpw, ierr,cnt, n1,n2,n3,n4,n5,n6,nspden,ndone, db_iqpt ! nb,
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf, nkpg_k, nkpg_kq, qbuf_size, iqbuf_cnt, root_ncid, spin_ncid, ncerr
  integer :: ii, my_nqibz, iq_start, iq_ibz, isym_q, trev_q, prev_iqbz
@@ -4214,7 +4217,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  type(gqk_t),pointer :: gqk
 !arrays
  integer :: units(2), ibuffer(9), nproc_spin(ebands%nsppol), comm_spin(ebands%nsppol), brange_k_spin(2, ebands%nsppol), g0_q(3)
- integer,allocatable :: qglob2bz(:,:), qbz2ibz(:,:), kbz2ibz(:,:)
+ integer,allocatable :: qglob2bz(:,:), qbz2ibz(:,:) !, kbz2ibz(:,:)
  real(dp) :: qq_ibz(3)
  real(dp),allocatable :: gwork_q(:,:,:,:,:), slice_bb(:,:,:)
  real(dp),allocatable :: phfreqs_ibz(:,:), pheigvec_cart_ibz(:,:,:,:,:), pheigvec_cart_qbz(:,:,:,:)
@@ -4780,7 +4783,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: root_ncid, spin_ncid, gstore_completed, spin, nb, ik_glob, iq_glob, ipc, cplex, ncerr, natom3, varid
+ integer :: root_ncid, spin_ncid, gstore_completed, spin, ik_glob, iq_glob, ipc, cplex, ncerr, natom3, varid, nb
  integer :: glob_nq, glob_nk, im_kq, in_k, nb_k, nb_kq ! ib, ik_ibz,
  logical :: with_ks__
  real(dp) :: g2, g2_ks

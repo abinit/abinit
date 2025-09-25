@@ -635,7 +635,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: ibsum_kq, ib_k, u1c_ib_k, band_ks, u1_band, ibsum, ii, jj, iw !ib_kq,
  integer :: u1_master, ip
  integer :: ig, ispinor, ifft !nband_kq,
- integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
+ integer :: idir,ipert,ip1,ip2 !,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq, isym_q, trev_q
  integer :: iq_ibz_fine,ikq_ibz_fine,ikq_bz_fine
  integer :: my_spin, spin, istwf_k, istwf_kq, istwf_kqirr, npw_k, npw_kq, npw_kqirr
@@ -650,7 +650,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop, gf_val
  real(dp) :: ecut,eshift,weight_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, simag, q0rad
  real(dp) :: vkk_norm, vkq_norm, osc_ecut, bz_vol
- complex(dp) :: cfact,dka,dkap,dkpa,dkpap, cnum, sig_cplx, cfact2
+ complex(dp) :: cfact,cnum, sig_cplx, cfact2 ! dka,dkap,dkpa,dkpap,
  logical :: isirr_k, isirr_kq, gen_eigenpb, q_is_gamma, isirr_q, use_ifc_fourq, stern_use_cache, intra_band, same_band
  logical :: zpr_frohl_sphcorr_done, stern_has_band_para
  type(wfd_t) :: wfd
