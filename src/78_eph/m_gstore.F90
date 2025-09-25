@@ -1032,6 +1032,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      ! Dimensions in gqk_spin group
      ncerr = nctk_def_dims(spin_ncid, [ &
         nctkdim_t("nb", gstore%brange_spin(2, spin) - gstore%brange_spin(1, spin) + 1), &
+        ! TODO: NEW VERSION if nb replaced by nb_kq and nb_k.
         !nctkdim_t("nb_k", gstore%brange_spin(2, spin) - gstore%brange_spin(1, spin) + 1), &
         !nctkdim_t("nb_kq", gstore%brange_spin(2, spin) - gstore%brange_spin(1, spin) + 1), &
         nctkdim_t("glob_nk", gstore%glob_nk_spin(spin)), &
@@ -1046,6 +1047,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      ! arrays in gqk_spin group with the precious stuff. Note global dimensions.
      ncerr = nctk_def_arrays(spin_ncid, [ &
        nctkarr_t("gvals", "dp", "gstore_cplex, nb, nb, natom3, glob_nk, glob_nq") &
+       !nctkarr_t("gvals", "dp", "gstore_cplex, nb_kq, nb_k, natom3, glob_nk, glob_nq") &
      ])
      NCF_CHECK(ncerr)
 
@@ -1063,6 +1065,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      if (dtset%eph_task == 17) then
        ncerr = nctk_def_arrays(spin_ncid, [ &
          nctkarr_t("gvals_ks", "dp", "gstore_cplex, nb, nb, natom3, glob_nk, glob_nq") &
+         !nctkarr_t("gvals_ks", "dp", "gstore_cplex, nb_kq, nb_k, natom3, glob_nk, glob_nq") &
        ])
        NCF_CHECK(ncerr)
        NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("gvals_ks"), NF90_FILL, gstore_fill_dp))
@@ -1072,10 +1075,12 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      case (1)
        ! Diagonal terms only
        NCF_CHECK(nctk_def_arrays(spin_ncid, nctkarr_t("vk_cart_ibz", "dp", "three, nb, gstore_nkibz")))
+       !NCF_CHECK(nctk_def_arrays(spin_ncid, nctkarr_t("vk_cart_ibz", "dp", "three, nb_k, gstore_nkibz")))
        NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("vk_cart_ibz"), NF90_FILL, gstore_fill_dp))
      case (2)
        ! Full (nb x nb) matrix.
        NCF_CHECK(nctk_def_arrays(spin_ncid, nctkarr_t("vkmat_cart_ibz", "dp", "two, three, nb, nb, gstore_nkibz")))
+       !NCF_CHECK(nctk_def_arrays(spin_ncid, nctkarr_t("vkmat_cart_ibz", "dp", "two, three, nb_k, nb_k, gstore_nkibz")))
        NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("vkmat_cart_ibz"), NF90_FILL, gstore_fill_dp))
      end select
 
@@ -4165,9 +4170,9 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  ABI_MALLOC(gstore%glob_nk_spin, (gstore%nsppol))
  ABI_MALLOC(gstore%glob_nq_spin, (gstore%nsppol))
 
- ! =======================================================
+ ! =====================================================
  ! Master node reads basic objects and gstore dimensions
- ! =======================================================
+ ! =====================================================
 
  if (my_rank == master) then
    call wrtout([std_out, ab_out], sjoin(" Initializing gstore object from:", path, ch10))
@@ -4358,7 +4363,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    end if
  end if
 
- ! Consistency checl
+ ! Consistency check
  call wfk0_hdr%vs_dtset(dtset); call wfk0_hdr%free()
 
  ! Distribute spins, create indirect mapping to spin index and init gstore%brange_spin
@@ -4438,6 +4443,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
 
    if (my_is /= 0) then
      gqk => gstore%gqk(my_is)
+     ! Note that these dimensions should be compatible with what is stored on disk.
      nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
 
      ABI_MALLOC(gqk%my_wnuq, (gqk%my_npert, gqk%my_nq))
@@ -4463,7 +4469,8 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
         ABI_CHECK_INEQ(iq_glob, -1, "Cannot finq q=0 in g(k,q)!")
         call wrtout(std_out, sjoin(" Reading g_atm(k,q=0) for Debye-Waller with iq_glob:", itoa(iq_glob)))
 
-       ! Read q-slice (individual IO)
+       ! Read q-slice of the e-ph matrix elements (individual IO)
+       ! Note gvals_name__
        ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_name__), gwork_q, start=[1, 1, 1, 1, 1, iq_glob])
        NCF_CHECK(ncerr)
 
