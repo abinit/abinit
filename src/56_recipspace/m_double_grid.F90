@@ -170,7 +170,7 @@ subroutine double_grid_init(Kmesh_coarse, Kmesh_dense, kptrlatt_coarse, kmult, g
 
 !Argument ------------------------------------
 !scalars
- class(double_grid_t),intent(out) :: grid
+ type(double_grid_t),intent(out) :: grid
  type(kmesh_t),intent(in) :: Kmesh_coarse,Kmesh_dense
 !arrays
  integer,intent(in) :: kptrlatt_coarse(3,3),kmult(3)

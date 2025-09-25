@@ -1921,7 +1921,7 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh, &
  CASE (1,2,3,4)
    nbnds_kss_dense = -1
    wfk_fname_dense = Dtfil%fnameabi_wfkfine
-   call wrtout(std_out,"BSE Interpolation: will read energies from: "//trim(wfk_fname_dense),"COLL")
+   call wrtout(std_out," BSE Interpolation: will read energies from: "//trim(wfk_fname_dense),"COLL")
 
    if (nctk_try_fort_or_ncfile(wfk_fname_dense, msg) /= 0) then
      ABI_ERROR(msg)
