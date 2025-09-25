@@ -1628,7 +1628,7 @@ subroutine cppm4par(qpt, npwc, epsm1, ngfftf, gvec, gprimd, rhor, nfftf, bigomeg
 !arrays
  real(dp) :: b1(3),b2(3),b3(3),gppq(3),gpq(3),qlist(3,1)
  real(dp),allocatable :: eigval(:),qplusg(:),rhog_dp(:,:),tmp_rhor(:)
- complex(dp),allocatable :: chi(:,:),chitmps(:,:), mm(:,:),mtemp(:,:),rhog(:), tmp1(:),zz2(:,:)
+ complex(dp),allocatable :: chi(:,:), mm(:,:),mtemp(:,:),rhog(:), tmp1(:),zz2(:,:)
 !*************************************************************************
 
  ! Calculate density in G space rhog(G)

@@ -2431,7 +2431,7 @@ subroutine pawdijnd(dijnd,cplex_dij,gprimd,iatom,natom,ndij,nspden,nucdipmom,&
 !Local variables ---------------------------------------
 !scalars
  integer :: angl_size,idir,ii,ij_size,il,ilmn,im,imesh
- integer :: jatom,jl,jlmn,jm,klm,klmn,kln,lm_size,lmn2_size
+ integer :: jatom,jl,jlmn,jm,klmn,kln,lm_size,lmn2_size ! klm,
  integer :: mesh_size
  real(dp) :: rc,rr,rt
  real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2

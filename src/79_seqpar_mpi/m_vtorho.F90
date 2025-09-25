@@ -413,7 +413,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(gs_hamiltonian_type) :: gs_hamk
 !arrays
  integer(int32), ABI_CONTIGUOUS pointer :: kg_k(:,:) => null()
- real(dp) :: dielar(7),dphase_k(3),kpoint(3),qpt(3),rhodum(1),tsec(2),ylmgr_dum(0,0,0), kphq(3), kmhq(3)
+ real(dp) :: dielar(7),dphase_k(3),kpoint(3),qpt(3),rhodum(1),tsec(2),ylmgr_dum(0,0,0), kphq(3)
  real(dp),allocatable :: EigMin(:,:),buffer1(:),cgq(:,:)
  real(dp),allocatable :: cgrkxc(:,:),doccde(:)
  real(dp),allocatable :: dphasek(:,:),ek_k(:),ek_k_nd(:,:,:),eknk(:),eknk_nd(:,:,:,:,:),end_k(:)

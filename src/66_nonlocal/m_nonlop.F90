@@ -361,7 +361,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  integer :: nkpgin,nkpgout,npwin,npwout,ntypat_,only_SO_,select_k_,shift1,shift2,shift3
  logical :: atom_pert,force_recompute_ph3d,kpgin_allocated,kpgout_allocated
  logical :: use_gemm_nonlop
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  integer :: nlmn_atm(1),nloalg_(3)
  integer,pointer :: kgin(:,:),kgout(:,:)

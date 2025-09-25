@@ -123,7 +123,7 @@ subroutine wkk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  integer,parameter :: LOG_MODQ = 1, LOG_MODK = 4, istwfk1 = 1, master = 0, ndat1 = 1
  integer :: id_required, approx_type, ikxc, option_test, nkxc, ig
  integer :: nkibz, my_rank, nsppol, iq_ibz, iq_bz, isym_qq, itim_qq
- integer :: cplex,nspinor,nprocs, ii, ib, spin, npw_x, npw_c ! max_npw_xc, min_npw_xc, my_is,
+ integer :: nspinor,nprocs, ii, spin, npw_x, npw_c ! max_npw_xc, min_npw_xc, my_is, cplex, ib,
  integer :: bstart_k, bstop_k, nband_k, ncols, mpw, ierr !, ncerr
  integer :: bstart_kp, bstop_kp, nband_kp, ik_bz, bmin, bmax, max_nb
  integer :: ikp_ibz, isym_kp, trev_kp, npw_kp, istwf_kp, npw_kp_ibz, istwf_kp_ibz
