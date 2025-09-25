@@ -26,7 +26,7 @@
 
 #ifdef HAVE_DFTI
 
-! Include and generate MKL_DFTI module
+! Include MKL_DFTI fortran module
 #include "mkl_dfti.f90"
 
 ! Macros for template files.
@@ -273,7 +273,7 @@ subroutine dfti_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr)
 
    ! MG: June 24. 2025
    ! dfti_seqfourdp does not work as expected when cplex= 1 and ngfft(1:3) != ngfft(4:6)
-   ! very likely do the use of r->c, c->r transforms.
+   ! very likely due to the use of r->c, c->r transforms.
    ! I don't know if it's a bug as the error seems to depend on the mkl version.
    ! To bypass this problem, we change the params on the fly so that ngfft(1:3) == ngfft(4:6)
    ! when FFT_DFTI is used.
@@ -437,12 +437,12 @@ subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,is
              mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
          end do
        else
-!$OMP PARALLEL DO PRIVATE(ptg,ptr)
+         !$OMP PARALLEL DO PRIVATE(ptg,ptr)
          do dat=1,ndat
            ptg = 1 + (dat-1)*npwin
            ptr = 1 + (dat-1)*ldx*ldy*ldz
            call dfti_fftrisc_dp(cplex,denpot,fofgin(1,ptg),fofgout,fofr(1,ptr),gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
-&            mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+             mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
          end do
        end if
 
@@ -471,7 +471,7 @@ subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,is
            end if
          end do
        else
-!$OMP PARALLEL DO PRIVATE(ptgin,ptgout)
+         !$OMP PARALLEL DO PRIVATE(ptgin,ptgout)
          do dat=1,ndat
            ptgin  = 1 + (dat-1)*npwin
            ptgout = 1 + (dat-1)*npwout
@@ -481,7 +481,7 @@ subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,is
        end if
 
      CASE (3)
-       !fofr -> fofgout
+       ! fofr -> fofgout
        if (.not.dfti_spawn_threads_here(ndat,nthreads)) then
          do dat=1,ndat
            ptr    = 1 + (dat-1)*ldx*ldy*ldz
@@ -490,7 +490,7 @@ subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,is
              mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
          end do
        else
-!$OMP PARALLEL DO PRIVATE(ptr,ptgout)
+         !$OMP PARALLEL DO PRIVATE(ptr,ptgout)
          do dat=1,ndat
            ptr    = 1 + (dat-1)*ldx*ldy*ldz
            ptgout = 1 + (dat-1)*npwout
@@ -514,12 +514,12 @@ subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,is
      if (.not.dfti_spawn_threads_here(ndat,nthreads)) then
        call dfti_fftug_dp(fftalg,fftcache,npwin,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_kin,gboundin,fofgin,fofr)
      else
-!$OMP PARALLEL DO PRIVATE(ptg, ptr)
+       !$OMP PARALLEL DO PRIVATE(ptg, ptr)
        do dat=1,ndat
          ptg = 1 + (dat-1)*npwin
          ptr = 1 + (dat-1)*ldx*ldy*ldz
          call dfti_fftug_dp(fftalg,fftcache,npwin,nx,ny,nz,ldx,ldy,ldz,ndat1,&
-&          istwf_k,mgfft,kg_kin,gboundin,fofgin(1,ptg),fofr(1,ptr))
+          istwf_k,mgfft,kg_kin,gboundin,fofgin(1,ptg),fofr(1,ptr))
        end do
      end if
 
@@ -540,16 +540,16 @@ subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,is
        call cg_box2gsph(nx,ny,nz,ldx,ldy,ldz,ndat,npwout,kg_kout,fofr,fofgout)
      else
 
-!$OMP PARALLEL DO PRIVATE(ptg, ptr)
+       !$OMP PARALLEL DO PRIVATE(ptg, ptr)
        do dat=1,ndat
          ptg = 1 + (dat-1)*npwin
          ptr = 1 + (dat-1)*ldx*ldy*ldz
          call dfti_fftug_dp(fftalg,fftcache,npwin,nx,ny,nz,ldx,ldy,ldz,ndat1,&
-&          istwf_k,mgfft,kg_kin,gboundin,fofgin(1,ptg),fofr(1,ptr))
+           istwf_k,mgfft,kg_kin,gboundin,fofgin(1,ptg),fofr(1,ptr))
 
          call cg_vlocpsi(nx,ny,nz,ldx,ldy,ldz,ndat1,cplex,denpot,fofr(1,ptr))
 
-         !  The data for option==2 is now in fofr.
+         ! The data for option==2 is now in fofr.
          call dfti_fftpad_dp(fofr(1,ptr),nx,ny,nz,ldx,ldy,ldz,ndat1,mgfft,-1,gboundout)
 
          ptg = 1 + (dat-1)*npwout
@@ -558,12 +558,12 @@ subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,is
      end if
 
    CASE (3)
-     !  The data for option==3 is already in fofr.
+     ! The data for option==3 is already in fofr.
      if (.not.dfti_spawn_threads_here(ndat,nthreads)) then
        call dfti_fftpad_dp(fofr,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,-1,gboundout)
        call cg_box2gsph(nx,ny,nz,ldx,ldy,ldz,ndat,npwout,kg_kout,fofr,fofgout)
      else
-!$OMP PARALLEL DO PRIVATE(ptg, ptr)
+       !$OMP PARALLEL DO PRIVATE(ptg, ptr)
        do dat=1,ndat
          ptg = 1 + (dat-1)*npwout
          ptr = 1 + (dat-1)*ldx*ldy*ldz

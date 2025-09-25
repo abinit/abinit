@@ -1084,7 +1084,7 @@ subroutine hexc_compute_hinterp(BSp,hsize_coarse,hsize_dense,hmat,grid,nbnd_coar
 
  nullify(ctemp)
  nullify(btemp)
- call interpolator%free()
+ call interpolator%int_free()
 
  hinterp = hinterp*factor
 
