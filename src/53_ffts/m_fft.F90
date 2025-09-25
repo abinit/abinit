@@ -417,7 +417,7 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, iscale)
 
 #if defined HAVE_GPU_CUDA
  if (plan%gpu_option /= ABI_GPU_DISABLED) then
-   call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, ndat__, isign, spc, iscale__, c_loc(ff), &
+   call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, ndat__, isign, sp, iscale__, c_loc(ff), &
                            plan%gpu_plan_ip_spc, plan%gpu_data_ip_spc)
    return
  end if
@@ -521,7 +521,7 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign, ndat, iscale)
 
 #if defined HAVE_GPU_CUDA
  if (plan%gpu_option /= ABI_GPU_DISABLED) then
-   call xgpu_fftbox_c2c_op(plan%dims, plan%embed, ndat__, isign, spc, iscale__, c_loc(ff), c_loc(gg), &
+   call xgpu_fftbox_c2c_op(plan%dims, plan%embed, ndat__, isign, sp, iscale__, c_loc(ff), c_loc(gg), &
                            plan%gpu_plan_op_spc, plan%gpu_idata_op_spc, plan%gpu_odata_op_spc)
    return
  end if
