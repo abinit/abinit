@@ -10,7 +10,6 @@ subroutine farr_real_dp1(farray, varname, ncid)
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_NETCDF
  integer :: dimval,ii,varid
  character(len=nctk_slen) :: dimname,shape_str
 
@@ -39,10 +38,6 @@ subroutine farr_real_dp1(farray, varname, ncid)
  NCF_CHECK(nctk_set_datamode(ncid))
  NCF_CHECK(nf90_put_var(ncid, varid, farray))
 
-#else
- ABI_ERROR("netcdf support is not activated.")
-#endif
-
 end subroutine farr_real_dp1
 
 !--------------------------------------------------------------------------------
@@ -57,10 +52,8 @@ subroutine farr_complex_dpc1(farray, varname, ncid)
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_NETCDF
  integer :: dimval,ii,varid
  character(len=nctk_slen) :: dimname,shape_str
-
 ! *********************************************************************
 
 ! Define dimensions.
@@ -85,10 +78,6 @@ subroutine farr_complex_dpc1(farray, varname, ncid)
  ! Write data
  NCF_CHECK(nctk_set_datamode(ncid))
  NCF_CHECK(nf90_put_var(ncid, varid, c2r(farray)))
-
-#else
- ABI_ERROR("netcdf support is not activated.")
-#endif
 
 end subroutine farr_complex_dpc1
 

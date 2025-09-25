@@ -738,6 +738,7 @@ subroutine anaddb_driver_phdos(driver, dtset, crystal, ifc, comm)
 
 ! ************************************************************************
 
+ ABI_UNUSED(driver%natom)
  my_rank = xmpi_comm_rank(comm)
  units = [std_out, ab_out]
 
@@ -799,9 +800,9 @@ subroutine anaddb_driver_thermal_supercell(driver, dtset, crystal, ifc)
 
 !Local variables -------------------------------
  type(supercell_type), allocatable:: thm_scells(:)
-
 ! ************************************************************************
 
+ ABI_UNUSED(driver%natom)
  ABI_MALLOC(thm_scells, (dtset%ntemper))
  call zacharias_supercell_make(crystal, ifc, dtset%ntemper, dtset%thermal_supercell, dtset%tempermin, dtset%temperinc, thm_scells)
  call zacharias_supercell_print(dtset%prefix_outdata, dtset%ntemper, dtset%tempermin, dtset%temperinc, thm_scells)
@@ -841,6 +842,7 @@ subroutine anaddb_driver_harmonic_thermo(driver, dtset, crystal, ifc, ddb, comm)
 
 ! ************************************************************************
 
+ ABI_UNUSED(driver%natom)
  units = [std_out, ab_out]
 
  write(msg, '(a, (80a), a, a, a, a, a, a, a, a)' ) ch10, ('=',ii = 1, 80), ch10, ch10, &
@@ -1407,6 +1409,7 @@ subroutine anaddb_driver_lattice_wannier(driver, dtset, crystal, ifc, comm)
 ! ************************************************************************
 
  units = [std_out, ab_out]
+ ABI_UNUSED(driver%natom)
 
  write(msg, '(a, (80a), 4a)')ch10, ('=',ii = 1, 80), ch10, ch10, ' Calculation of lattice Wannier functions ',ch10
  call wrtout(units, msg)

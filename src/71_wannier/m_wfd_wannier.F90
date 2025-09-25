@@ -120,6 +120,8 @@ contains
 
     integer :: spaceComm, nprocs, rank, master
 
+     ABI_UNUSED(ngfftf(1))
+
     !print *, "============================================================"
     !print *, "Starting WFD Wannier"
     !print *, "============================================================"

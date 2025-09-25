@@ -38,10 +38,7 @@ module m_lwf_mover
   use m_abicore
   use m_xmpi
   use m_nctk
-#define HAVE_NETCDF 1
-#if defined HAVE_NETCDF
   use netcdf
-#endif
   use m_mpi_scheduler, only: mpi_scheduler_t, init_mpi_info
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_random_xoroshiro128plus, only: set_seed, rand_normal_array, rng_t
@@ -308,7 +305,6 @@ contains
     character(len = 118):: msg
     ! open file
 
-#if defined HAVE_NETCDF
     ierr = nf90_open(trim(fname), NF90_NOWRITE, ncid)
     NCF_CHECK_MSG(ierr, "The lwf_init_state is set to 4. But opening netcdf file "//trim(fname)//" Failed. ")
 
@@ -336,9 +332,6 @@ contains
     ! close file
     ierr = nf90_close(ncid)
     NCF_CHECK_MSG(ierr, "Close netcdf file")
-#else
-    ABI_ERROR("lwf_init_state set to 4 but abinit is not compiled with netcdf.")
-#endif
 
   end subroutine read_hist_lwf_state
 
@@ -358,7 +351,6 @@ contains
       ABI_MALLOC(self%fixed_lwf_values, (self%n_fixed_lwf))
     else
 
-#if defined HAVE_NETCDF
     ierr = nf90_open(trim(fname), NF90_NOWRITE, ncid)
     NCF_CHECK_MSG(ierr, "Trying to read constrain from netcdf file "//trim(fname)//" Failed. ")
 
@@ -371,17 +363,17 @@ contains
       ABI_MALLOC(self%fixed_lwf_values, (self%n_fixed_lwf))
 
 
-      ! read fixed lwf ids and values 
+      ! read fixed lwf ids and values
       ierr = nf90_inq_varid(ncid, "fixed_lwf_ids", id_id)
       NCF_CHECK_MSG(ierr, "when reading fixed_lwf_ids.")
-  
+
       ierr = nf90_get_var(ncid = ncid, varid = id_id, values = self%fixed_lwf_ids, &
            & start=[1], count=[self%n_fixed_lwf])
       NCF_CHECK_MSG(ierr, "when reading fixed_lwf_ids from file "//trim(fname)//". " )
-  
+
       ierr = nf90_inq_varid(ncid, "fixed_lwf_values", value_id)
       NCF_CHECK_MSG(ierr, "when reading fixed_lwf_values.")
-  
+
       ierr = nf90_get_var(ncid = ncid, varid = value_id, values = self%fixed_lwf_values, &
            & start=[1], count=[self%n_fixed_lwf])
       NCF_CHECK_MSG(ierr, "when reading fixed_lwf_values from file "//trim(fname)//". " )
@@ -391,10 +383,6 @@ contains
     ! close file
     ierr = nf90_close(ncid)
     NCF_CHECK_MSG(ierr, "Close netcdf file")
-#else
-    ABI_ERROR("reading lwf constrain file but abinit is not compiled with netcdf.")
-#endif
-
    endif
 
   end subroutine read_lwf_constraints
@@ -408,7 +396,7 @@ contains
       integer:: master, my_rank, comm, nproc
       logical:: iam_master
       ABI_UNUSED_A(params)
-      call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+      call init_mpi_info(master, iam_master, my_rank, comm, nproc)
       if(iam_master) then
          call self%ncfile%initialize(fname, 1)
          call self%ncfile%write_cell(self%supercell)
@@ -432,7 +420,7 @@ contains
       endif
     end subroutine set_ncfile_name
 
-    
+
 
   !!****f*m_lwf_mover/run_varT
   !!
@@ -472,7 +460,7 @@ contains
 
     integer:: master, my_rank, comm, nproc, ierr
     logical:: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
     if (iam_master) then
        T_start = self%params%lwf_temperature_start
@@ -486,7 +474,7 @@ contains
        else
           T_step=(T_end-T_start)/(T_nstep-1)
        endif
-       write(msg, "(A52, ES13.5, A11, ES13.5, A1)") & 
+       write(msg, "(A52, ES13.5, A11, ES13.5, A1)") &
             & "Starting temperature dependent calculations. T from ", &
             & T_start*Ha_K, "K to ", T_end*Ha_K, " K."
        call wrtout(std_out, msg, "COLL")
@@ -540,7 +528,7 @@ contains
     integer:: i
     do i = 1, self%n_fixed_lwf
         self%vcart(self%fixed_lwf_ids(i))=0.0_dp
-        lwf(self%fixed_lwf_ids(i))=self%fixed_lwf_values(i)    
+        lwf(self%fixed_lwf_ids(i))=self%fixed_lwf_values(i)
     end do
   end subroutine apply_fixed_lwf
 

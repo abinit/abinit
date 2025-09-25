@@ -2011,7 +2011,7 @@ subroutine dump_my_gbuf()
  !end if
 
  ! Zero the counter before returning
-10 iqbuf_cnt = 0
+!10 iqbuf_cnt = 0
 
  !NCF_CHECK(nf90_sync(spin_ncid))
  !NCF_CHECK(nf90_sync(root_ncid))
