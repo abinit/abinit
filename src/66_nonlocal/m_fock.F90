@@ -2067,7 +2067,7 @@ subroutine strfock(fockcommon,gprimd,fockstr,mpi_enreg,nfft,ngfft,&
 !scalars
  integer,parameter :: im=2,re=1
  integer :: i1,i2,i3,id1,id2,id3,ierr,ig1,ig2,ig3,ii,irho2,idat,me_fft,n1,n2,n3,nproc_fft
- real(dp) :: arg,cutoff,gsquar,rcut,rhogsq,tot,tot1 !tolfix=1.000000001_dp,
+ real(dp) :: arg,gsquar,rcut,rhogsq,tot,tot1 !tolfix=1.000000001_dp,
  logical :: rcut_spencer_alavi
 #ifdef HAVE_OPENMP_OFFLOAD
  ! Cray has trouble with reduction on array, so we use 6 scalars instead
