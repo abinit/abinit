@@ -949,6 +949,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
       nctkdim_t("gstore_max_nq", max_nq), &
       nctkdim_t("gstore_max_nk", max_nk), &
       nctkdim_t("gstore_max_nb", maxval(gstore%brange_k_spin(2, :) - gstore%brange_k_spin(1, :) + 1) ), &
+      !nctkdim_t("nrpt", ifc%nrpt), &
       nctkdim_t("natom", gstore%cryst%natom), &
       nctkdim_t("natom3", 3 * gstore%cryst%natom), &
       nctkdim_t("gstore_cplex", dtset%gstore_cplex) &
@@ -987,9 +988,10 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      nctkarr_t("gstore_qglob2bz", "i", "gstore_max_nq, number_of_spins"), &
      nctkarr_t("gstore_kglob2bz", "i", "gstore_max_nk, number_of_spins"), &
      ! These quantities are needed to interface GSTORE.nc with external codes.
-     ! TODO: ifcf%short_atmfrc
      nctkarr_t("zeff", "dp", "three, three, number_of_atoms"), &
      nctkarr_t("qdrp_cart", "dp", "three, three, three, number_of_atoms") &
+     ! TODO: ifcf%short_atmfrc
+     !nctkarr_t("short_atmfrc", "dp", "three, natom, three, natom, nrpt"), &
    ])
    NCF_CHECK(ncerr)
 
@@ -1035,9 +1037,10 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_qglob2bz"), qglob2bz))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_kglob2bz"), gstore%kglob2bz))
    ! These quantities are needed to interface GSTORE.nc with external codes.
-   ! TODO: ifcf%short_atmfrc(
    NCF_CHECK(nf90_put_var(ncid, vid("zeff"), ifc%zeff))
    NCF_CHECK(nf90_put_var(ncid, vid("qdrp_cart"), ifc%qdrp_cart))
+   ! TODO: ifcf%short_atmfrc(
+   !NCF_CHECK(nf90_put_var(ncid, vid("short_atmfrc"), ifc%short_atmfrc))
 
    if (allocated(gstore%delta_ef_kibz_spin)) then
      NCF_CHECK(nf90_put_var(ncid, vid("gstore_delta_ef_kibz_spin"), gstore%delta_ef_kibz_spin))

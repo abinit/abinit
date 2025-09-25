@@ -51,6 +51,8 @@ module m_slk
 
  private
 
+ integer, parameter, private :: dpc=kind((1.0_dp,1.0_dp))
+
  ! scaLAPACK array descriptor.
  integer,private,parameter :: DLEN_ = 9    ! length
  integer,private,parameter :: Dtype_ = 1   ! type
@@ -223,7 +225,7 @@ module m_slk
     ! local part of the (real) matrix.
     ! The istwf_k option passed to the constructor defines whether we have a real or complex matrix
 
-   complex(dp),allocatable :: buffer_cplx(:,:)
+   complex(dpc),allocatable :: buffer_cplx(:,:)
     ! local part of the (complex) matrix
 
  contains
@@ -446,8 +448,6 @@ subroutine slk_grid_init(grid, nprocs, comm, use_gpu, grid_dims)
  grid%nprocs = nprocs
 
  _FIX_NVHPC_ICE()
-
- if (xmpi_bsize_ch == -1) write(std_out, *)"NVHPC raises an internal compiler error that is fixed by this print statement."
 
  if (.not. present(grid_dims)) then
    ! Search for a rectangular grid of processors
@@ -1417,7 +1417,7 @@ end function slk_has_elpa
 !!
 !! SOURCE
 
-pure complex(dp) function matrix_get_local_cplx(matrix, i, j)
+pure complex(dpc) function matrix_get_local_cplx(matrix, i, j)
 
 !Arguments ------------------------------------
  class(slkmat_dp_t),intent(in) :: matrix
@@ -1933,7 +1933,7 @@ subroutine slkmat_dp_from_complex_glob(matrix, glob_mat, istwf_k)
 
 !Local variables-------------------------------
  integer :: i,j,iglob,jglob
- complex(dp) :: val
+ complex(dpc) :: val
 ! *********************************************************************
 
  ABI_UNUSED(istwf_k)
@@ -2065,7 +2065,7 @@ subroutine slkmat_dp_to_complex_glob(matrix, glob_cmat, istwf_k)
  integer,intent(in) :: istwf_k
  class(slkmat_dp_t),intent(in) :: matrix
 !arrays
- complex(dp),intent(inout) :: glob_cmat(:,:)
+ complex(dpc),intent(inout) :: glob_cmat(:,:)
 
 !Local variables-------------------------------
  integer  :: i,j,iglob,jglob
@@ -2163,7 +2163,7 @@ subroutine slk_matrix_from_global_dpc_2D(mat, uplo, glob_cmat)
  class(slkmat_dp_t),intent(inout)  :: mat
  character(len=*),intent(in) :: uplo
 !array
- complex(dp),intent(in) :: glob_cmat(:,:)
+ complex(dpc),intent(in) :: glob_cmat(:,:)
 
 !Local variables-------------------------------
  integer :: ii, jj, iglob, jglob
@@ -2248,7 +2248,7 @@ subroutine slk_matrix_from_global_dpc_1Dp(mat,uplo, glob_cmat_pack)
  class(slkmat_dp_t),intent(inout)  :: mat
  character(len=*),intent(in) :: uplo
 !array
- complex(dp),intent(in) :: glob_cmat_pack(:)
+ complex(dpc),intent(in) :: glob_cmat_pack(:)
 
 !Local variables-------------------------------
  integer :: ii,jj,iglob,jglob,ind,n
@@ -2335,7 +2335,7 @@ subroutine slk_matrix_to_global_dpc_2D(mat, uplo, glob_cmat)
  class(slkmat_dp_t),intent(in) :: mat
  character(len=*),intent(in) :: uplo
 !arrays
- complex(dp),intent(inout) :: glob_cmat(:,:)
+ complex(dpc),intent(inout) :: glob_cmat(:,:)
 
 !Local variables-------------------------------
  integer :: ii,jj,iglob,jglob
@@ -2509,7 +2509,7 @@ subroutine slk_pgemm_dp(transa, transb, matrix1, alpha, matrix2, beta, results, 
  character(len=1),intent(in) :: transa, transb
  class(slkmat_dp_t),intent(in) :: matrix1, matrix2
  class(slkmat_dp_t),intent(inout) :: results
- complex(dp),intent(in) :: alpha, beta
+ complex(dpc),intent(in) :: alpha, beta
  integer,optional,intent(in) :: ija(2), ijb(2), ijc(2)
 
 !Local variables-------------------------------
@@ -2699,10 +2699,10 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
  !character(len=500) :: msg
  integer         , dimension(1) :: IWORK_tmp
  DOUBLE PRECISION, dimension(1) :: RWORK_tmp
- complex(dp)     , dimension(1) :: CWORK_tmp
+ complex(dpc)     , dimension(1) :: CWORK_tmp
  integer         , allocatable  :: IWORK(:)
  DOUBLE PRECISION, allocatable  :: RWORK(:)
- complex(dp)     , allocatable  :: CWORK(:)
+ complex(dpc)     , allocatable  :: CWORK(:)
  integer,          allocatable :: ICLUSTR(:)
  integer,          allocatable :: IFAIL(:)
  DOUBLE PRECISION, allocatable :: GAP(:)
@@ -3061,11 +3061,11 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
   !character(len=500) :: msg
   integer         , dimension(1) :: IWORK_tmp
   DOUBLE PRECISION, dimension(1) :: RWORK_tmp
-  complex(dp)     , dimension(1) :: CWORK_tmp
+  complex(dpc)     , dimension(1) :: CWORK_tmp
 
   integer         , allocatable  :: IWORK(:)
   DOUBLE PRECISION, allocatable  :: RWORK(:)
-  complex(dp)     , allocatable  :: CWORK(:)
+  complex(dpc)     , allocatable  :: CWORK(:)
   integer,          allocatable :: ICLUSTR(:)
   integer,          allocatable :: IFAIL(:)
   DOUBLE PRECISION, allocatable :: GAP(:)
@@ -3244,7 +3244,7 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
  type(slkmat_dp_t) :: sca_matrix1
  type(slkmat_dp_t) :: sca_matrix2
  real(dp),allocatable :: r_tmp_evec(:,:)
- complex(dp),allocatable :: z_tmp_evec(:,:)
+ complex(dpc),allocatable :: z_tmp_evec(:,:)
 ! *************************************************************************
 
  use_gpu_elpa_=0
@@ -3374,7 +3374,7 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
  integer :: ierr,use_gpu_elpa_
  type(slkmat_dp_t) :: sca_matrix1, sca_matrix2, sca_matrix3
  real(dp),allocatable :: r_tmp_evec(:,:)
- complex(dp),allocatable :: z_tmp_evec(:,:)
+ complex(dpc),allocatable :: z_tmp_evec(:,:)
 ! *************************************************************************
 
  use_gpu_elpa_=0
@@ -3750,7 +3750,7 @@ subroutine slkmat_dp_pzheevx(mat, jobz, range, uplo, vl, vu, il, iu, abstol, vec
  !integer :: ibuff(3),max_ibuff(3)
  integer,allocatable  :: iwork(:),iclustr(:),ifail(:)
  real(dp),allocatable  :: rwork(:),gap(:)
- complex(dp),allocatable :: work(:)
+ complex(dpc),allocatable :: work(:)
 !************************************************************************
 
  ABI_CHECK(allocated(mat%buffer_cplx), "buffer_cplx is not allocated!")
@@ -4033,7 +4033,7 @@ subroutine slkmat_dp_pzhegvx(Slk_matA, ibtype, jobz, range, uplo, Slk_matB, vl, 
  integer :: desca(DLEN_),descb(DLEN_),descz(DLEN_)
  integer,allocatable  :: iwork(:),iclustr(:),ifail(:)
  real(dp),allocatable  :: rwork(:),gap(:)
- complex(dp),allocatable :: work(:)
+ complex(dpc),allocatable :: work(:)
 !************************************************************************
 
  ABI_CHECK(allocated(Slk_matA%buffer_cplx), "buffer_cplx is not allocated!")
@@ -5449,7 +5449,7 @@ subroutine slk_write(Slk_mat, uplo, is_fortran_file, fname,mpi_fh, offset, flags
 !arrays
  integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecord(:)
  integer,pointer :: elw2slk(:,:)
- complex(dp),allocatable :: buffer1_cplx(:)
+ complex(dpc),allocatable :: buffer1_cplx(:)
  character(len=500) :: msg
 !************************************************************************
 
@@ -5662,7 +5662,7 @@ subroutine slk_read(Slk_mat,uplo,symtype,is_fortran_file,fname,mpi_fh,offset,fla
  logical :: do_open
  integer :: comm,my_flags,my_fh,buffer_size,ierr,col_glob
  integer :: nfrec,bsize_elm,mpi_type_elm
- !complex(dp) :: ctest
+ !complex(dpc) :: ctest
  logical,parameter :: check_frm=.TRUE.
  integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecord(:)
 !arrays
