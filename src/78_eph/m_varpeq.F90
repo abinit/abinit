@@ -1641,7 +1641,7 @@ subroutine varpeq_init(self, gstore, dtset)
  self%natom3 = gstore%cryst%natom*3
  self%max_nk = maxval(gstore%glob_nk_spin)
  self%max_nq = maxval(gstore%glob_nq_spin)
- self%max_nb = maxval(gstore%brange_spin(2,:) - gstore%brange_spin(1,:)) + 1
+ self%max_nb = maxval(gstore%brange_k_spin(2,:) - gstore%brange_k_spin(1,:)) + 1
  self%frohl_ntheta = dtset%eph_frohl_ntheta
  ! real
  self%tolgrs = dtset%vpq_tolgrs
@@ -1659,8 +1659,8 @@ subroutine varpeq_init(self, gstore, dtset)
  ABI_MALLOC(self%brange_spin, (2, gstore%nsppol))
  self%nk_spin(:) = gstore%glob_nk_spin(:)
  self%nq_spin(:) = gstore%glob_nq_spin(:)
- self%nb_spin(:) = gstore%brange_spin(2,:) - gstore%brange_spin(1,:) + 1
- self%brange_spin(:,:) = gstore%brange_spin(:,:)
+ self%nb_spin(:) = gstore%brange_k_spin(2,:) - gstore%brange_k_spin(1,:) + 1
+ self%brange_spin(:,:) = gstore%brange_k_spin(:,:)
 
  ABI_MALLOC(self%cvflag_spin, (self%nstates, gstore%nsppol))
  ABI_MALLOC(self%nstep2cv_spin, (self%nstates, gstore%nsppol))
@@ -1690,13 +1690,14 @@ subroutine varpeq_init(self, gstore, dtset)
  call gstore%cryst%copy(self%cryst)
  self%gaps = gstore%ebands%get_gaps(ierr)
 
+ ABI_CHECK(gstore%same_nbands(msg), sjoin("VarPEq requires nb_k == nb_kq.", msg))
+
  ! Initialize polaronic states for each spin
  ABI_MALLOC(self%polstate, (gstore%my_nspins))
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is)
    gqk => gstore%gqk(my_is)
    polstate => self%polstate(my_is)
-   ABI_CHECK_IEQ(gqk%nb_k, gqk%nb_kq, "VarPEq requires nb_k == nb_kq")
 
    ! Scalars
    ! character
@@ -1730,7 +1731,7 @@ subroutine varpeq_init(self, gstore, dtset)
      "VarPEq is incompatible with metals and requires band gap.")
    ABI_CHECK(self%gaps%ierr(spin) == 0, msg)
 
-   bstart = gstore%brange_spin(1, spin)
+   bstart = gstore%brange_k_spin(1, spin)
    bend = bstart + gqk%nb_k - 1
    select case(dtset%vpq_pkind)
    case ("electron")
