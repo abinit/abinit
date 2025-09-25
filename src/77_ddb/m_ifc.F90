@@ -175,7 +175,7 @@ MODULE m_ifc
 
    real(dp),allocatable :: zeff(:,:,:)
      ! zeff(3,3,natom)
-     ! Effective charge on each atom, versus electric field and atomic displacement.
+     ! Born effective charge on each atom, versus electric field and atomic displacement.
      ! Cartesian coordinates
 
    real(dp),allocatable :: qdrp_cart(:,:,:,:)

@@ -73,9 +73,10 @@ program conducti
  nproc = xmpi_comm_size(comm)
  my_rank = xmpi_comm_rank(comm)
 
- ! NVHPC raises an internal compiler error that is fixed by this print statement.
 #if defined FC_NVHPC
- write(std_out, *)"NVHPC raises an internal compiler error that is fixed by this print statement."
+ if (nproc == -1) then
+   write(std_out, *)"NVHPC raises an internal compiler error that is fixed by this print statement."
+ end if
 #endif
 
 !Read some input data
