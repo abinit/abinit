@@ -593,6 +593,15 @@ if test "${abi_fc_vendor}" = "cray"; then
   FCLIBS=`echo ${FCLIBS} | tr '"' ' '`
 fi
 
+# Remove -lsr-complexity-limit=<some-number> from FCLIBS, as it is
+# not an actual linker flag, but a flag passed to 'llc'. This flag
+# was observed in the FCLIBS variable when using the NVHPC compiler
+# on aarch64 systems.
+# Fixed in autoconf > 2.72.
+if test "${abi_fc_vendor}" = "nvhpc" -a "${target_cpu}" = "aarch64"; then
+  FCLIBS=`echo ${FCLIBS} | sed -e 's/-lsr-complexity-limit=[[0-9]]* //g' -e 's/-lsr-complexity-limit=[[0-9]]*$//g'`
+fi
+
 # Determine Fortran-C name mangling scheme
 AC_FC_WRAPPERS
 
