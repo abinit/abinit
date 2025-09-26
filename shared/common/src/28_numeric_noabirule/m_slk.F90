@@ -51,8 +51,6 @@ module m_slk
 
  private
 
- integer, parameter, private :: dpc=kind((1.0_dp,1.0_dp))
-
  ! scaLAPACK array descriptor.
  integer,private,parameter :: DLEN_ = 9    ! length
  integer,private,parameter :: Dtype_ = 1   ! type
