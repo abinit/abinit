@@ -50,6 +50,10 @@ module defs_basis
 !nb of bytes related to default double-precision real/complex subtypes
 !(= 8 for many machine architectures)
  integer, parameter :: dp=kind(1.0d0)
+
+! Please DO NOT USE use complex(dpc) as complex(dp) is completely equivalent.
+! dpc is still need because nvfortran with ELPA (eos_nvhpc_23.9_elpa), for unknown reasons,
+! raises an internal compiler error when compiling m_slk if dpc is not declared here.
  integer, parameter :: dpc=kind((1.0_dp,1.0_dp))
 
 !nb of bytes related to GW arrays, that can be tuned from sp to dp independently
@@ -59,15 +63,6 @@ module defs_basis
 #else
  integer, parameter :: gwp=kind(1.0)
 #endif
-
-!Example:
-! integer, parameter :: urp=selected_real_kind((p=)12,(r=)50)
-! real((kind=)urp) :: d
-! d=5.04876_urp   ! for a real d with 12 significative digits
-! and such as 10^-50 < |d| < 10^50
-
-! To modify sp and/or dp/, insert instructions such as 'dp='
-! but do not modify the other declarations in this module
 
 !The default lengths
 ! TODO: We should increase fnlen to be able to handle multiple pseudos paths in the input file
