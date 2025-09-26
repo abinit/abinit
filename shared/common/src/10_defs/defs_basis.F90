@@ -52,7 +52,7 @@ module defs_basis
  integer, parameter :: dp=kind(1.0d0)
 
 ! Please DO NOT USE use complex(dpc) as complex(dp) is completely equivalent.
-! dpc is still need because nvfortran with ELPA (eos_nvhpc_23.9_elpa), for unknown reasons,
+! dpc is still needed because nvfortran with ELPA (eos_nvhpc_23.9_elpa), for unknown reasons,
 ! raises an internal compiler error when compiling m_slk if dpc is not declared here.
  integer, parameter :: dpc=kind((1.0_dp,1.0_dp))
 
