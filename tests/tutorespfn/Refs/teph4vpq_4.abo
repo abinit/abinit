@@ -352,8 +352,10 @@ meta: {optdriver: 7, eph_task: 13, }
 --------------------------------------------------------------------------------
 
  Computing variational polaron equations from pre-existent GSTORE file: teph4vpq_3o_DS1_GSTORE.nc
+- Reading e-ph matrix elements from: teph4vpq_3o_DS1_GSTORE.nc
  Initializing gstore object from: teph4vpq_3o_DS1_GSTORE.nc
 
+ Reading KS e-ph matrix elements
 P qpt_comm can use shmem: yes
 P kpt_comm can use shmem: yes
 P bsum_comm can use shmem: yes
@@ -610,8 +612,10 @@ meta: {optdriver: 7, eph_task: 13, }
 --------------------------------------------------------------------------------
 
  Computing variational polaron equations from pre-existent GSTORE file: teph4vpq_3o_DS2_GSTORE.nc
+- Reading e-ph matrix elements from: teph4vpq_3o_DS2_GSTORE.nc
  Initializing gstore object from: teph4vpq_3o_DS2_GSTORE.nc
 
+ Reading KS e-ph matrix elements
 P qpt_comm can use shmem: yes
 P kpt_comm can use shmem: yes
 P bsum_comm can use shmem: yes
@@ -853,8 +857,10 @@ meta: {optdriver: 7, eph_task: 13, }
 --------------------------------------------------------------------------------
 
  Computing variational polaron equations from pre-existent GSTORE file: teph4vpq_3o_DS3_GSTORE.nc
+- Reading e-ph matrix elements from: teph4vpq_3o_DS3_GSTORE.nc
  Initializing gstore object from: teph4vpq_3o_DS3_GSTORE.nc
 
+ Reading KS e-ph matrix elements
 P qpt_comm can use shmem: yes
 P kpt_comm can use shmem: yes
 P bsum_comm can use shmem: yes

@@ -41,10 +41,10 @@
 !!
 !!  At the level of the API, we have three different routines.
 !!
-!!      1) gstore_new builds the object, defines the BZ sampling type (e.g. k in the IBZ, q in the BZ)
+!!      1) gstore_init builds the object, defines the BZ sampling type (e.g. k in the IBZ, q in the BZ)
 !!         and implements filtering techniques. The MPI grid is automatically generated at this level.
 !!
-!!      2) gstore_compute evaluates the e-ph matrix elements in parallel and dumps the results to GSTORE.nc.
+!!      2) gstore_compute evaluates the KS e-ph matrix elements in parallel and dumps the results to GSTORE.nc.
 !!
 !!      3) gstore%from_ncpath reconstructs the object from a GSTORE.nc file.
 !!
@@ -52,6 +52,10 @@
 !!  Then one introduces a new value of eph_task in which we read the object from file and call
 !!  a specialized routine that implements the "post-processing" steps needed
 !!  to compute the physical properties of interest.
+!!
+!!  Last but not least, the GSTORE.nc file can also produced by gwpt_run (eph_task 17).
+!!  In this case, gvals are the matrix elements computed with the variation of the self-energy
+!!  instead of the KS Hamiltonian.
 !!
 !!  Now, let us discuss the MPI-distribution.
 !!
@@ -93,9 +97,9 @@
 !!     the interpolation of v^1_q does not start to dominate
 !!  3) Use similar trick in dfpt_cgw for H^0 |psi_nk>
 !!  4) Operate on multiple n states in getgh1c (new version of getgh1c allows it)
-!!
-!!  Add BECS and eps infinity.
-!!  Move to atom representation and add symmetry tables. ifc
+!!  5) Write BECS and eps infinity (Done)
+!!  6) Write IFC to faciliate interporability with external codes
+!!  7) Move to atom representation and add symmetry tables.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2025 ABINIT group (MG)
@@ -664,6 +668,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  logical :: keep_umats, has_abiwan, has_gwan, write_gstore
  real(dp) :: cpu, wall, gflops, weight_qq, gstore_fill_dp
  character(len=5000) :: msg
+ integer, parameter :: gstore_write_ifcs = 1
 !arrays
  integer :: ngqpt(3), qptrlatt(3,3), comm_spin(ebands%nsppol), nproc_spin(ebands%nsppol), units(2)
  integer,allocatable :: qbz2ibz(:,:), kibz2bz(:), qibz2bz(:), qglob2bz(:,:)
@@ -949,7 +954,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
       nctkdim_t("gstore_max_nq", max_nq), &
       nctkdim_t("gstore_max_nk", max_nk), &
       nctkdim_t("gstore_max_nb", maxval(gstore%brange_k_spin(2, :) - gstore%brange_k_spin(1, :) + 1) ), &
-      !nctkdim_t("nrpt", ifc%nrpt), &
+      nctkdim_t("nrpt", ifc%nrpt), &
       nctkdim_t("natom", gstore%cryst%natom), &
       nctkdim_t("natom3", 3 * gstore%cryst%natom), &
       nctkdim_t("gstore_cplex", dtset%gstore_cplex) &
@@ -958,7 +963,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
 
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
      "gstore_with_vk", "gstore_qptopt", "gstore_completed", &
-     "gstore_use_lgk", "gstore_use_lgq" &
+     "gstore_use_lgk", "gstore_use_lgq", "gstore_write_ifcs"  &
    ])
    NCF_CHECK(ncerr)
    !ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "fermi_energy", "smearing_width"])
@@ -990,10 +995,18 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      ! These quantities are needed to interface GSTORE.nc with external codes.
      nctkarr_t("zeff", "dp", "three, three, number_of_atoms"), &
      nctkarr_t("qdrp_cart", "dp", "three, three, three, number_of_atoms") &
-     ! TODO: ifcf%short_atmfrc
-     !nctkarr_t("short_atmfrc", "dp", "three, natom, three, natom, nrpt"), &
    ])
    NCF_CHECK(ncerr)
+
+   if (gstore_write_ifcs /= 0) then
+     ! Define arrays for IFCs.
+     ncerr = nctk_def_arrays(ncid, [ &
+        nctkarr_t("rpt", "dp", "three, nrpt"), &
+        nctkarr_t("wghatm", "dp", "natom, natom, nrpt"), &
+        nctkarr_t("short_atmfrc", "dp", "three, natom, three, natom, nrpt") &
+     ])
+     NCF_CHECK(ncerr)
+   end if
 
    ! Internal table used to restart computation. Initialized with zeros.
    !  0 --> (ib_bz, spin) has not been computed.
@@ -1014,6 +1027,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_qptopt"), gstore%qptopt))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_use_lgk"), dtset%gstore_use_lgk))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_use_lgq"), dtset%gstore_use_lgq))
+   NCF_CHECK(nf90_put_var(ncid, vid("gstore_write_ifcs"), gstore_write_ifcs))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_completed"), 0))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_kzone"), trim(gstore%kzone)))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_qzone"), trim(gstore%qzone)))
@@ -1039,8 +1053,12 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    ! These quantities are needed to interface GSTORE.nc with external codes.
    NCF_CHECK(nf90_put_var(ncid, vid("zeff"), ifc%zeff))
    NCF_CHECK(nf90_put_var(ncid, vid("qdrp_cart"), ifc%qdrp_cart))
-   ! TODO: ifcf%short_atmfrc(
-   !NCF_CHECK(nf90_put_var(ncid, vid("short_atmfrc"), ifc%short_atmfrc))
+
+   if (gstore_write_ifcs /= 0) then
+     NCF_CHECK(nf90_put_var(ncid, vid("rpt"), ifc%rpt))
+     NCF_CHECK(nf90_put_var(ncid, vid("wghatm"), ifc%wghatm))
+     NCF_CHECK(nf90_put_var(ncid, vid("short_atmfrc"), ifc%short_atmfrc))
+   end if
 
    if (allocated(gstore%delta_ef_kibz_spin)) then
      NCF_CHECK(nf90_put_var(ncid, vid("gstore_delta_ef_kibz_spin"), gstore%delta_ef_kibz_spin))
@@ -1054,6 +1072,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      ncerr = nctk_def_dims(spin_ncid, [ &
         nctkdim_t("nb", gstore%brange_k_spin(2, spin) - gstore%brange_k_spin(1, spin) + 1), &
         ! TODO: NEW VERSION with nb replaced by nb_kq and nb_k.
+        !nctkdim_t("nb_k", gstore%brange_k_spin(2, spin) - gstore%brange_k_spin(1, spin) + 1), &
         !nctkdim_t("nb_kq", gstore%brange_kq_spin(2, spin) - gstore%brange_kq_spin(1, spin) + 1), &
         nctkdim_t("glob_nk", gstore%glob_nk_spin(spin)), &
         nctkdim_t("glob_nq", gstore%glob_nq_spin(spin))  &
@@ -1081,7 +1100,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      if (gstore%kfilter == "none") gstore_fill_dp = -huge(one)
      NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("gvals"), NF90_FILL, gstore_fill_dp))
 
-     ! In GWPT gvals is used for g^Sigma so we declare another array to store g^KS
+     ! In GWPT gvals is used for g^Sigma so we declare another array to store g^KS.
      if (dtset%eph_task == 17) then
        ncerr = nctk_def_arrays(spin_ncid, [ &
          nctkarr_t("gvals_ks", "dp", "gstore_cplex, nb, nb, natom3, glob_nk, glob_nq") &
@@ -1107,7 +1126,8 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      ! Write (small) data
      NCF_CHECK(nctk_set_datamode(spin_ncid))
      NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("bstart"), gstore%brange_k_spin(1, spin)))
-     !NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("bstart"), gstore%brange_kq_spin(1, spin)))
+     !NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("bstart_k"), gstore%brange_k_spin(1, spin)))
+     !NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("bstart_kq"), gstore%brange_kq_spin(1, spin)))
    end do ! spin
 
    NCF_CHECK(nf90_close(ncid))
@@ -2132,7 +2152,7 @@ end subroutine gstore_filter_erange__
 !! gstore_filter_qprange__
 !!
 !! FUNCTION
-!! Filter k-points according to qprange
+!! Filter k-points according to the input variable gw_qprange.
 !!
 !! INPUTS
 !!
@@ -2156,7 +2176,7 @@ subroutine gstore_filter_qprange__(gstore, dtset, qbz, qbz2ibz, qibz2bz, kbz, ki
 
 !Local variables-------------------------------
 !scalars
- integer :: spin, ik_bz, ik_ibz, gap_err, qprange, ik_calc, nkcalc, mapl_kk(6), my_rank
+ integer :: spin, ik_bz, ik_ibz, gap_err, gw_qprange, ik_calc, nkcalc, mapl_kk(6), my_rank
  type(gaps_t) :: gaps
 !arrays
  integer,allocatable :: bstart_ks(:,:), nbcalc_ks(:,:)
@@ -2174,10 +2194,10 @@ subroutine gstore_filter_qprange__(gstore, dtset, qbz, qbz2ibz, qibz2bz, kbz, ki
 
  my_rank = xmpi_comm_rank(gstore%comm)
 
- qprange = dtset%gw_qprange
- call wrtout(std_out, sjoin(" Filtering k-points using qprange:", itoa(qprange)))
+ gw_qprange = dtset%gw_qprange
+ call wrtout(std_out, sjoin(" Filtering k-points using gw_qprange:", itoa(gw_qprange)))
  if (gstore%qzone /= "bz") then
-   ABI_ERROR(sjoin('qprange filtering requires gstore_qzone = "bz" while it is: ', gstore%qzone))
+   ABI_ERROR(sjoin('gw_qprange filtering requires gstore_qzone = "bz" while it is: ', gstore%qzone))
  end if
 
  gaps = ebands%get_gaps(gap_err)
@@ -2195,10 +2215,10 @@ subroutine gstore_filter_qprange__(gstore, dtset, qbz, qbz2ibz, qibz2bz, kbz, ki
  !          Include all occupied states and `num` empty states.
 
  ! Compute nkcalc, kcalc, bstart_ks, nbcalc_ks
- if (qprange /= 0) then
-   call sigtk_kcalc_from_qprange(dtset, gstore%cryst, ebands, qprange, nkcalc, kcalc, bstart_ks, nbcalc_ks)
+ if (gw_qprange /= 0) then
+   call sigtk_kcalc_from_qprange(dtset, gstore%cryst, ebands, gw_qprange, nkcalc, kcalc, bstart_ks, nbcalc_ks)
  else
-   ! qprange is not specified in the input.
+   ! gw_qprange is not specified in the input.
    ! Include direct and fundamental KS gap or include states depending on the position wrt band edges.
    call sigtk_kcalc_from_gaps(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks, nbcalc_ks)
  end if
@@ -2389,8 +2409,8 @@ end function gstore_spin2my_is
 !! gstore_fill_bks_mask
 !!
 !! FUNCTION
-!!  Fills the bks_mask array defining the set of wavefunctoins that should be read from file
-!!  by this MPI rank when computing the KS e-ph matrix elements.
+!!  Fills the bks_mask array defining the set of wavefunctoins that should be read
+!!  from the WFK file by this MPI rank when computing the KS e-ph matrix elements.
 !!
 !! INPUTS
 !!
@@ -2467,7 +2487,7 @@ end subroutine gstore_fill_bks_mask
 !! FUNCTION
 !!  Fill the bks_mask array defining the set of states that should be read from the WFK file
 !!  by this MPI rank when computing the GWPT e-ph matrix elements in which we have
-!!  to consider k+q, k-q and k+q-p as well as the sum over states (bsum)
+!!  to consider k+q, k-q and k+q-p as well as the sum over states (bsum).
 !!
 !! INPUTS
 !!
@@ -4151,7 +4171,6 @@ integer function gstore_check_cplex_qkzone_gmode(gstore, cplex, qzone, kzone, gm
 
 !Local variables-------------------------------
  integer :: my_is
- type(gqk_t),pointer :: gqk
 ! *************************************************************************
 
  ierr = 0
@@ -4163,13 +4182,14 @@ integer function gstore_check_cplex_qkzone_gmode(gstore, cplex, qzone, kzone, gm
  end if
 
  do my_is=1,gstore%my_nspins
-   gqk => gstore%gqk(my_is)
+   associate (gqk => gstore%gqk(my_is))
    ABI_CHECK_NOSTOP(gqk%cplex == cplex, sjoin("cplex:", itoa(cplex), "required but got: ", itoa(gqk%cplex)), ierr)
    if (cplex == 1) then
      ABI_CHECK_NOSTOP(allocated(gqk%my_g2), "my_g2 array is not allocated", ierr)
    else if (cplex == 2) then
      ABI_CHECK_NOSTOP(allocated(gqk%my_g), "my_g array is not allocated", ierr)
    end if
+   end associate
  end do
 
 end function gstore_check_cplex_qkzone_gmode
@@ -4239,6 +4259,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  gvals_name__ = "gvals"; if (present(gvals_name)) gvals_name__ = gvals_name
  read_dw__ = .False.; if (present(read_dw)) read_dw__ = read_dw
 
+ units = [std_out, ab_out]
  call wrtout(units, sjoin("- Reading e-ph matrix elements from: ", path))
 
  ! Set basic parameters.
@@ -4258,7 +4279,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  ! =====================================================
 
  if (my_rank == master) then
-   call wrtout([std_out, ab_out], sjoin(" Initializing gstore object from:", path, ch10))
+   call wrtout(units, sjoin(" Initializing gstore object from:", path, ch10))
    ABI_CHECK(path /= ABI_NOFILE, "Use getgstore_filepath to specify the path to GSTORE.nc")
    NCF_CHECK(nctk_open_read(ncid, path, xmpi_comm_self))
 
@@ -4795,13 +4816,13 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
 !scalars
  integer,parameter :: master = 0
  integer :: root_ncid, spin_ncid, gstore_completed, spin, ik_glob, iq_glob, ipc, cplex, ncerr, natom3, varid, nb
- integer :: glob_nq, glob_nk, im_kq, in_k, nb_k, nb_kq ! ib, ik_ibz,
+ integer :: glob_nq, glob_nk, im_kq, in_k, nb_k, nb_kq ! ib_k, ik_ibz,
  logical :: with_ks__
  real(dp) :: g2, g2_ks
  character(len=abi_slen) :: gstore_gmode
 !arrays
  integer,allocatable :: done_qbz_spin(:,:)
- real(dp),allocatable :: gslice_mn(:,:,:), gslice_ks_mn(:,:,:)  !,vk_cart_ibz(:,:,:), vkmat_cart_ibz(:,:,:,:)
+ real(dp),allocatable :: gslice_mn(:,:,:), gslice_ks_mn(:,:,:)  !,vk_cart_ibz(:,:), vkmat_cart_ibz(:,:,:,:)
 ! *************************************************************************
 
  ! Only master prints to ab_out
@@ -4858,22 +4879,22 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
    !  continue
 
    !case (1)
-   !  ABI_MALLOC(vk_cart_ibz, (2, 3, nb))
+   !  ABI_MALLOC(vk_cart_ibz, (3, nb_k))
    !  write(ab_out,"(a)") " Group velocities v_nk in Cartesian coordinates and atomic units:"
    !  do ik_ibz=1,gstore%nkibz
    !    ! Only the first and the last k-points are written.
    !    if (ik_ibz /= 1 .and. ik_ibz /= gstore%nkibz) cycle
-   !    NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("vk_cart_ibz"), vk_cart_ibz, start=[1,1,ik_ibz], count=[3,nb,1]))
+   !    NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("vk_cart_ibz"), vk_cart_ibz, start=[1,1,ik_ibz], count=[3,nb_k,1]))
    !    write(ab_out, "(a)")sjoin(" For k-point:", ktoa(gstore%kibz(:,ik_ibz)), ", spin", itoa(spin))
-   !    do ib=1,nb
-   !      write(ab_out, "(6es16.6)") vk_cart_ibz(:,:,ib)
+   !    do ib_k=1,nb_k
+   !      write(ab_out, "(6es16.6)") vk_cart_ibz(:,:,ib_k)
    !    end do
    !  end do
    !  write(ab_out, "(a)")" "
    !  ABI_FREE(vk_cart_ibz)
 
    !case (2)
-   !  write(ab_out, "(a)")" TEXT Output of vkmat is not coded yet!"
+   !  ABI_ERROR(" TEXT output of vkmat is not coded yet!")
    !end select
 
    ! Handle the output of the e-ph matrix elements. On disk we have the global array:

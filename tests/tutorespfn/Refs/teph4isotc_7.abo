@@ -418,8 +418,10 @@ meta: {optdriver: 7, eph_task: -12, }
   -1.94839037E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
+- Reading e-ph matrix elements from: teph4isotc_6o_GSTORE.nc
  Initializing gstore object from: teph4isotc_6o_GSTORE.nc
 
+ Reading KS e-ph matrix elements
 P qpt_comm can use shmem: yes
 P kpt_comm can use shmem: yes
 P bsum_comm can use shmem: yes
