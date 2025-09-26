@@ -22,12 +22,6 @@
 
 #include "abi_common.h"
 
-#if defined FC_NVHPC
-#define _FIX_NVHPC_ICE() if (xmpi_bsize_ch == -1) write(std_out, *)"This to fix NVHPC ICE"
-#else
-#define _FIX_NVHPC_ICE()
-#endif
-
 module m_slk
 
  use defs_basis
@@ -445,8 +439,6 @@ subroutine slk_grid_init(grid, nprocs, comm, use_gpu, grid_dims)
 
  grid%nprocs = nprocs
 
- _FIX_NVHPC_ICE()
-
  if (.not. present(grid_dims)) then
    ! Search for a rectangular grid of processors
    i=INT(SQRT(float(nprocs)))
@@ -699,7 +691,6 @@ subroutine basemat_init(matrix, nbli_global, nbco_global, processor, istwf_k, &
  matrix%istwf_k = istwf_k
  select type (matrix)
  class is (slkmat_dp_t)
-    _FIX_NVHPC_ICE()
    if (istwf_k /= 2) then
      ABI_MALLOC(matrix%buffer_cplx, (matrix%size_local(1), matrix%size_local(2)))
      matrix%buffer_cplx = czero
@@ -709,7 +700,6 @@ subroutine basemat_init(matrix, nbli_global, nbco_global, processor, istwf_k, &
    end if
 
  class is (slkmat_sp_t)
-    _FIX_NVHPC_ICE()
    if (istwf_k /= 2) then
      ABI_MALLOC(matrix%buffer_cplx, (matrix%size_local(1), matrix%size_local(2)))
      matrix%buffer_cplx = czero_sp
