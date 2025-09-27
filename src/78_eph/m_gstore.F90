@@ -211,8 +211,15 @@ type, public :: gqk_t
   ! These new entries will be used to implement band distribution.
   integer :: nb_kq = -1, nb_k = -1
   ! Number of bands included in the calculation at k+q and k, for this spin
-  ! Global as these dimensions iare not MPI-distributed.
-  ! NB: nb_kq and nb_k are not necessarily equal to nband. Use bstar_kq and bstart_k.
+  ! Global as these dimensions are NOT DISTRIBUTED with MPI
+  ! NB: nb_kq and nb_k are not necessarily equal to nband.
+  ! Use bstar_kq and bstart_k to get the band index, e.g.:
+  !
+  !       do in_k=1,gqk%nb_k
+  !         band_k = in_k + gqk%bstart_k - 1
+  !
+  !       do imq_k=1,gqk%nb_kq
+  !         band_kq = im_kq + gqk%bstart_kq - 1
 
   integer :: bstart_k = -1, bstop_k = -1
   integer :: bstart_kq = -1, bstop_kq = -1
@@ -3416,7 +3423,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), nband(:,:), wfd_istwfk(:), qmap_symrec(:,:)
  integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:), my_iqibz_inds(:)
  !integer,allocatable :: qibz2dvdb(:) !, displs(:), recvcounts(:)
- real(dp) :: kk_bz(3),kq_bz(3),kk_ibz(3),kq_ibz(3), qq_bz(3), qq_ibz(3), vk(3), phfr_qq(3*cryst%natom)
+ real(dp) :: kk_bz(3),kq_bz(3),kk_ibz(3),kq_ibz(3), qq_bz(3), qq_ibz(3), v_nk(3), phfr_qq(3*cryst%natom)
  real(dp),allocatable :: displ_cart_qibz(:,:,:,:), displ_red_qibz(:,:,:,:), pheigvec_qibz(:,:,:,:)
  real(dp),allocatable :: displ_cart_qbz(:,:,:,:), displ_red_qbz(:,:,:,:), pheigvec_qbz(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:), kinpw_k(:), kinpw_kq(:), kpg_kq(:,:), kpg_k(:,:)
@@ -3425,7 +3432,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  real(dp),allocatable :: bras_kq(:,:,:), kets_k(:,:,:), h1_kets_kq(:,:,:), cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1(:,:,:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:), gvnlx1(:,:), work(:,:,:,:)
- real(dp),allocatable :: gs1c_kq(:,:), vk_cart_ibz(:,:,:) !, vkmat_cart_ibz(:,:,:,:)
+ real(dp),allocatable :: gs1c_kq(:,:), vk_cart_ibz(:,:,:), vkq_cart_ibz(:,:,:)  !, vkmat_cart_ibz(:,:,:,:)
  real(dp),allocatable :: my_gbuf(:,:,:,:,:,:), buf_wqnu(:,:), buf_eigvec_cart(:,:,:,:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
@@ -3680,6 +3687,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
      if (gstore%with_vk == 1) then
        ABI_CALLOC(vk_cart_ibz, (3, gqk%nb_k, gstore%nkibz))
+       !ABI_CALLOC(vkq_cart_ibz, (3, gqk%nb_kq, gstore%nkibz))
      else
        ABI_ERROR("gstore%with_vk 2 not implemented")
      end if
@@ -3696,7 +3704,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        if (.not. isirr_k) cycle
 
        ! parallelize inside (q, pert) so that only one proc in the 3D grid
-       ! computes vk for this kpt in the BZ and we can use xmpi_sum_master.
+       ! computes v_nk for this kpt in the BZ and we can use xmpi_sum_master.
        cnt = cnt + 1
        if (gqk%qpt_pert_comm%skip(cnt)) cycle
 
@@ -3709,9 +3717,20 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
          do in_k=1,gqk%nb_k
            band_k = in_k + gqk%bstart_k - 1
            call wfd%copy_cg(band_k, ik_ibz, spin, cgwork)
-           vk = ddkop%get_vdiag(ebands%eig(band_k, ik_ibz, spin), istwf_k, npw_k, wfd%nspinor, cgwork, cwaveprj0)
-           vk_cart_ibz(:, in_k, ik_ibz) = vk
+           v_nk = ddkop%get_vdiag(ebands%eig(band_k, ik_ibz, spin), istwf_k, npw_k, wfd%nspinor, cgwork, cwaveprj0)
+           vk_cart_ibz(:, in_k, ik_ibz) = v_nk
          end do
+
+         !if (gqk%nb_k == gqk%nb_kq .and. gqk%bstart_k == gqk%bstart_kq)
+         !  vmk_cart_ibz(:, im_kq, ik_ibz) = v_nk
+         !else
+         !do im_kq=1,gqk%nb_kq
+         !  band_k = im_kq + gqk%bstart_kq - 1
+         !  call wfd%copy_cg(band_k, ik_ibz, spin, cgwork)
+         !  v_nk = ddkop%get_vdiag(ebands%eig(band_k, ik_ibz, spin), istwf_k, npw_k, wfd%nspinor, cgwork, cwaveprj0)
+         !  vmk_cart_ibz(:, im_kq, ik_ibz) = v_mk
+         !end do
+         !end if
 
        case (2)
          ABI_ERROR("with_vk 2")
@@ -3721,12 +3740,17 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        end select
      end do ! my_ik
 
-     call xmpi_sum_master(vk_cart_ibz, master, gqk%comm%value, ierr)
+     call xmpi_sum(vk_cart_ibz, gqk%comm%value, ierr)
+     !call xmpi_sum(vkq_cart_ibz, gqk%comm%value, ierr)
+
      !if (gqk%comm%me == master) then
        NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
        NCF_CHECK(nf90_put_var(spin_ncid, spin_vid("vk_cart_ibz"), vk_cart_ibz))
+       !NCF_CHECK(nf90_put_var(spin_ncid, spin_vid("vkq_cart_ibz"), vk_cart_ibz))
+
      !end if
      ABI_SFREE(vk_cart_ibz)
+     !ABI_SFREE(vkq_cart_ibz)
    end do ! my_is
 
    ABI_FREE(cgwork)
@@ -4820,13 +4844,13 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
 !scalars
  integer,parameter :: master = 0
  integer :: root_ncid, spin_ncid, gstore_completed, spin, ik_glob, iq_glob, ipc, cplex, ncerr, natom3, varid, nb
- integer :: glob_nq, glob_nk, im_kq, in_k, nb_k, nb_kq ! ib_k, ik_ibz,
+ integer :: glob_nq, glob_nk, im_kq, in_k, nb_k, nb_kq, ib_k, ik_ibz
  logical :: with_ks__
  real(dp) :: g2, g2_ks
  character(len=abi_slen) :: gstore_gmode
 !arrays
  integer,allocatable :: done_qbz_spin(:,:)
- real(dp),allocatable :: gslice_mn(:,:,:), gslice_ks_mn(:,:,:)  !,vk_cart_ibz(:,:), vkmat_cart_ibz(:,:,:,:)
+ real(dp),allocatable :: gslice_mn(:,:,:), gslice_ks_mn(:,:,:),vnk_cart_ibz(:,:) !, vkmat_cart_ibz(:,:,:,:)
 ! *************************************************************************
 
  ! Only master prints to ab_out
@@ -4871,35 +4895,36 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
    write(ab_out, "(a,i0)")" gqk%glob_nq: ", glob_nq
    write(ab_out, "(a,i0)")" gqk%glob_nk: ", glob_nk
 
-   ! FIXME
    ! Handle the output of group velocities. On disk, we have:
    !
    !    nctkarr_t("vk_cart_ibz", "dp", "three, nb, gstore_nkibz"))
    ! or
    !    nctkarr_t("vkmat_cart_ibz", "dp", "two, three, nb, nb, gstore_nkibz")))
 
-   !select case (gstore%with_vk)
-   !case (0)
-   !  continue
+   select case (gstore%with_vk)
+   case (0)
+     continue
 
-   !case (1)
-   !  ABI_MALLOC(vk_cart_ibz, (3, nb_k))
-   !  write(ab_out,"(a)") " Group velocities v_nk in Cartesian coordinates and atomic units:"
-   !  do ik_ibz=1,gstore%nkibz
-   !    ! Only the first and the last k-points are written.
-   !    if (ik_ibz /= 1 .and. ik_ibz /= gstore%nkibz) cycle
-   !    NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("vk_cart_ibz"), vk_cart_ibz, start=[1,1,ik_ibz], count=[3,nb_k,1]))
-   !    write(ab_out, "(a)")sjoin(" For k-point:", ktoa(gstore%kibz(:,ik_ibz)), ", spin", itoa(spin))
-   !    do ib_k=1,nb_k
-   !      write(ab_out, "(6es16.6)") vk_cart_ibz(:,:,ib_k)
-   !    end do
-   !  end do
-   !  write(ab_out, "(a)")" "
-   !  ABI_FREE(vk_cart_ibz)
+   case (1)
+     write(ab_out,"(2a)") ch10," Group velocities v_nk in Cartesian coordinates and atomic units:"
 
-   !case (2)
-   !  ABI_ERROR(" TEXT output of vkmat is not coded yet!")
-   !end select
+     ABI_MALLOC(vnk_cart_ibz, (3, nb_k))
+     do ik_ibz=1,gstore%nkibz
+       ! Only the first and the last k-points are written.
+       if (ik_ibz /= 1 .and. ik_ibz /= gstore%nkibz) cycle
+       NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("vk_cart_ibz"), vnk_cart_ibz, start=[1,1,ik_ibz], count=[3,nb_k,1]))
+
+       write(ab_out, "(a)")sjoin(" For k-point:", ktoa(gstore%kibz(:,ik_ibz)), ", spin", itoa(spin))
+       do ib_k=1,min(nb_k, 10)
+         write(ab_out, "(a,i0,1x,3es16.6)")" ib_k:", ib_k, vnk_cart_ibz(:,ib_k)
+       end do
+     end do
+     ABI_FREE(vnk_cart_ibz)
+     write(ab_out, "(a)")" "
+
+   case (2)
+     ABI_ERROR(" TEXT output of vkmat is not coded yet!")
+   end select
 
    ! Handle the output of the e-ph matrix elements. On disk we have the global array:
    !
