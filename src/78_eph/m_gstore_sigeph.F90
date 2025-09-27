@@ -86,7 +86,7 @@ module m_gstore_sigeph
 !! save the results to netcdf file.
 !!
 !! TODO
-!!  Fix problem with spin parallelism.
+!!  Fix problem with spin parallelism and output of results.
 !!
 !! SOURCE
 
@@ -265,8 +265,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
    ABI_ERROR(msg)
  end if
 
- ! TODO: Off-diagonal terms.
- ! See https://journals.aps.org/prb/abstract/10.1103/PhysRevB.101.121102
+ ! TODO: For off-diagonal terms, see https://journals.aps.org/prb/abstract/10.1103/PhysRevB.101.121102
 
  ! Check consistency of little group options
  ABI_CHECK(gstore%check_little_group(dtset, msg) == 0, msg)
