@@ -393,12 +393,18 @@ P Number of CPUs for parallelism over k-points: 1
 
  gstore_completed: 1
  gstore_done_qbz_spin: 597
- gqk%nb: 1
+ gqk%nb_kq: 1
+ gqk%nb_k: 1
  gqk%glob_nq: 597
  gqk%glob_nk: 89
+
  Group velocities v_nk in Cartesian coordinates and atomic units:
  For k-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] , spin 1
  ib_k:1    -1.307716E-17   -6.236853E-18   -5.024010E-17
+ For k-point: [ 7.6923E-02,  0.0000E+00,  0.0000E+00] , spin 1
+ ib_k:1    -6.650618E-02    6.650613E-02    6.650613E-02
+ For k-point: [-3.0769E-01,  4.6154E-01,  1.5385E-01] , spin 1
+ ib_k:1     0.000000E+00    0.000000E+00    0.000000E+00
  For k-point: [-3.0769E-01,  4.6154E-01,  2.3077E-01] , spin 1
  ib_k:1     0.000000E+00    0.000000E+00    0.000000E+00
 
