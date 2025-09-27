@@ -477,6 +477,16 @@ P Number of CPUs for parallelism over k-points: 1
  gqk%nb: 3
  gqk%glob_nq: 216
  gqk%glob_nk: 173
+ Group velocities v_nk in Cartesian coordinates and atomic units:
+ For k-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] , spin 1
+ ib_k:1     0.000000E+00    0.000000E+00    0.000000E+00
+ ib_k:2     0.000000E+00    0.000000E+00    0.000000E+00
+ ib_k:3     0.000000E+00    0.000000E+00    0.000000E+00
+ For k-point: [ 3.3333E-01,  3.3333E-01,  5.0000E-01] , spin 1
+ ib_k:1     0.000000E+00    0.000000E+00    0.000000E+00
+ ib_k:2     0.000000E+00    0.000000E+00    0.000000E+00
+ ib_k:3     0.000000E+00    0.000000E+00    0.000000E+00
+
  E-PH matrix elements:
     iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
  |g(k,q)|^2 in Ha^2 for iq: 1 ik: 1 mode: 4
