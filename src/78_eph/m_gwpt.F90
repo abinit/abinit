@@ -239,7 +239,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp) :: fermie1_idir_ipert(3,cryst%natom), ylmgr_dum(1,1,1), dum_nhat(0), dum_xccc3d(0)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3), kqmp(3), kmp(3), pp(3), kmp_ibz(3), kqmp_ibz(3)
  real(dp) :: phfr_qq(3*cryst%natom), qq_ibz(3), qq_bz(3)
- real(dp),allocatable :: qlwl(:,:), vk_cart_ibz(:,:,:)
+ real(dp),allocatable :: qlwl(:,:), vnk_cart_ibz(:,:,:)
  real(dp),allocatable :: kinpw_kqmp(:),kinpw_kmp(:), kpg_k(:,:),kpg_kq(:,:),kpg_kmp(:,:),kpg_kqmp(:,:), dkinpw(:)
  real(dp),allocatable :: ffnl_kmp(:,:,:,:),ffnl_kqmp(:,:,:,:)
  real(dp),allocatable :: ph3d_kmp(:,:,:), ph3d1_kqmp(:,:,:), ph3d_kqmp(:,:,:), ph3d1_kmp(:,:,:)
@@ -562,7 +562,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      ! Use count_bk to count how many states have been computed
      ! in parallel in order to rescale the results.
      if (gstore%with_vk == 1) then
-       ABI_CALLOC(vk_cart_ibz, (3, nb_k, gstore%nkibz))
+       ABI_CALLOC(vnk_cart_ibz, (3, nb_k, gstore%nkibz))
        ABI_ICALLOC(count_bk, (nb_k, gstore%nkibz))
      else
        ABI_ERROR("gstore%with_vk 2 not implemented")
@@ -583,20 +583,20 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          call wfd%copy_cg(band, ik_ibz, spin, cg_work)
          eig0nk = ebands%eig(band, ik_ibz, spin)
          ib = band - gqk%bstart_k + 1
-         vk_cart_ibz(:, ib, ik_ibz) = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, wfd%nspinor, cg_work, cwaveprj0)
+         vnk_cart_ibz(:, ib, ik_ibz) = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, wfd%nspinor, cg_work, cwaveprj0)
          count_bk(ib, ik_ibz) = count_bk(ib, ik_ibz) + 1
        end do
      end do ! my_ik
 
      call xmpi_sum(count_bk, gqk%comm%value, ierr)
-     call xmpi_sum(vk_cart_ibz, gqk%comm%value, ierr)
+     call xmpi_sum(vnk_cart_ibz, gqk%comm%value, ierr)
 
      do ik_ibz=1, gstore%nkibz
        do band=gqk%bstart_k, gqk%bstop_k
          ib = band - gqk%bstart_k + 1
          if (count_bk(ib, ik_ibz) == 0) cycle
          do ii=1,3
-           vk_cart_ibz(ii,ib,ik_ibz) = vk_cart_ibz(ii,ib,ik_ibz) / count_bk(ib, ik_ibz)
+           vnk_cart_ibz(ii,ib,ik_ibz) = vnk_cart_ibz(ii,ib,ik_ibz) / count_bk(ib, ik_ibz)
          end do
        end do
      end do
@@ -604,10 +604,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      ! Write v_nk to disk.
      !if (gqk%comm%me == master) then
        NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
-       NCF_CHECK(nf90_put_var(spin_ncid, spin_vid("vk_cart_ibz"), vk_cart_ibz))
+       NCF_CHECK(nf90_put_var(spin_ncid, spin_vid("vk_cart_ibz"), vnk_cart_ibz))
      !end if
 
-     ABI_FREE(vk_cart_ibz)
+     ABI_FREE(vnk_cart_ibz)
      ABI_FREE(count_bk)
    end do ! my_is
 

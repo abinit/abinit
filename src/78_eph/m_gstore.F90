@@ -276,7 +276,7 @@ type, public :: gqk_t
   ! (my_nq)
   ! Mapping my_iq index --> global index in the g(q, k) matrix.
 
-  real(dp),allocatable :: vk_cart_ibz(:,:,:)
+  real(dp),allocatable :: vnk_cart_ibz(:,:,:)
   ! (3, nb_k, nkibz)
   ! Diagonal v_{n,k} for k in the IBZ.
   ! Values in the BZ can be reconstructed by symmetry.
@@ -1101,7 +1101,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      !NCF_CHECK(nf90_def_var_deflate(spin_ncid, vid_spin("gvals"), shuffle=1, deflate=1, deflate_level=5))
      ! IMPORTANT: Init gvals with zeros.
 
-    ! Default value for entries in gvals, vk_cart_ibz and vkmat_cart_ibz arrays that have not been written.
+    ! Default value for entries in gvals, vnk_cart_ibz and vkmat_cart_ibz arrays that have not been written.
     ! This can happen only if we have filtered wavevectors.
      gstore_fill_dp = zero
      if (gstore%kfilter == "none") gstore_fill_dp = -huge(one)
@@ -1683,8 +1683,8 @@ subroutine gstore_print(gstore, units, header, prtvol)
      write(msg,'(a,f8.1,a)')'- Local memory allocated for g0nm_atm array: ',ABI_MEM_MB(gqk%my_gq0nm_atm),' [Mb] <<< MEM'
      call wrtout(units, msg)
    end if
-   if (allocated(gqk%vk_cart_ibz)) then
-     write(msg,'(a,f8.1,a)')'- Local memory allocated for vnk_cart_ibz: ',ABI_MEM_MB(gqk%vk_cart_ibz),' [Mb] <<< MEM'
+   if (allocated(gqk%vnk_cart_ibz)) then
+     write(msg,'(a,f8.1,a)')'- Local memory allocated for vnk_cart_ibz: ',ABI_MEM_MB(gqk%vnk_cart_ibz),' [Mb] <<< MEM'
      call wrtout(units, msg)
    end if
    if (allocated(gqk%vkmat_cart_ibz)) then
@@ -1860,9 +1860,9 @@ subroutine gstore_malloc__(gstore, with_cplex, max_nq, qglob2bz, max_nk, kglob2b
      ! Allocate storage for MPI-distributed dH/dk matrix elements.
      if (any(gstore%with_vk == [1, 2])) then
        mem_mb = 3 * gqk%nb_k * gqk%my_nk * eight * b2Mb
-       call wrtout(std_out, sjoin(" Memory for diagonal vk_cart_ibz:", ftoa(mem_mb, fmt="f8.1"), " [Mb] <<< MEM"))
-       ABI_MALLOC_OR_DIE(gqk%vk_cart_ibz, (3, gqk%nb_k, gstore%nkibz), ierr)
-       gqk%vk_cart_ibz = zero
+       call wrtout(std_out, sjoin(" Memory for diagonal vnk_cart_ibz:", ftoa(mem_mb, fmt="f8.1"), " [Mb] <<< MEM"))
+       ABI_MALLOC_OR_DIE(gqk%vnk_cart_ibz, (3, gqk%nb_k, gstore%nkibz), ierr)
+       gqk%vnk_cart_ibz = zero
      end if
 
      if (gstore%with_vk == 2) then
@@ -3045,7 +3045,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
  if (abs(eph_intmeth) == 1 .or. nesting /= 0) then
    use_adaptive = eph_fsmear < zero .or. abs(eph_intmeth) == 2
    if (use_adaptive) then
-     ABI_CHECK(allocated(gqk%vk_cart_ibz), "vk_cart_ibz should be allocated when use_adaptive is .True.")
+     ABI_CHECK(allocated(gqk%vnk_cart_ibz), "vnk_cart_ibz should be allocated when use_adaptive is .True.")
    end if
 
    ! Find k + q in the IBZ for all my k-points.
@@ -3075,8 +3075,8 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
        ! Use transpose(R) because we are using the tables for the wavefunctions
        ! In this case listkk has been called with symrec and use_symrec=False
        ! so q_bz = S^T q_ibz where S is the isym_kq symmetry
-       vb_k = gqk%vk_cart_ibz(:,:,ik_ibz)
-       vb_kq = gqk%vk_cart_ibz(:,:,ikq_ibz)
+       vb_k = gqk%vnk_cart_ibz(:,:,ik_ibz)
+       vb_kq = gqk%vnk_cart_ibz(:,:,ikq_ibz)
 
        if (.not. isirr_k) then
          do ib=1,nb_k
@@ -3245,7 +3245,7 @@ subroutine gqk_free(gqk)
  ABI_SFREE(gqk%my_gq0nm_atm)
  ABI_SFREE(gqk%my_g2)
  ABI_SFREE(gqk%my_pertcases)
- ABI_SFREE(gqk%vk_cart_ibz)
+ ABI_SFREE(gqk%vnk_cart_ibz)
  ABI_SFREE(gqk%vkmat_cart_ibz)
 
  call gqk%wan%free()
@@ -3432,7 +3432,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  real(dp),allocatable :: bras_kq(:,:,:), kets_k(:,:,:), h1_kets_kq(:,:,:), cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1(:,:,:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:), gvnlx1(:,:), work(:,:,:,:)
- real(dp),allocatable :: gs1c_kq(:,:), vk_cart_ibz(:,:,:), vkq_cart_ibz(:,:,:)  !, vkmat_cart_ibz(:,:,:,:)
+ real(dp),allocatable :: gs1c_kq(:,:), vnk_cart_ibz(:,:,:), vkq_cart_ibz(:,:,:)  !, vkmat_cart_ibz(:,:,:,:)
  real(dp),allocatable :: my_gbuf(:,:,:,:,:,:), buf_wqnu(:,:), buf_eigvec_cart(:,:,:,:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
@@ -3686,7 +3686,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      spin = gstore%my_spins(my_is)
 
      if (gstore%with_vk == 1) then
-       ABI_CALLOC(vk_cart_ibz, (3, gqk%nb_k, gstore%nkibz))
+       ABI_CALLOC(vnk_cart_ibz, (3, gqk%nb_k, gstore%nkibz))
        !ABI_CALLOC(vkq_cart_ibz, (3, gqk%nb_kq, gstore%nkibz))
      else
        ABI_ERROR("gstore%with_vk 2 not implemented")
@@ -3718,7 +3718,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
            band_k = in_k + gqk%bstart_k - 1
            call wfd%copy_cg(band_k, ik_ibz, spin, cgwork)
            v_nk = ddkop%get_vdiag(ebands%eig(band_k, ik_ibz, spin), istwf_k, npw_k, wfd%nspinor, cgwork, cwaveprj0)
-           vk_cart_ibz(:, in_k, ik_ibz) = v_nk
+           vnk_cart_ibz(:, in_k, ik_ibz) = v_nk
          end do
 
          !if (gqk%nb_k == gqk%nb_kq .and. gqk%bstart_k == gqk%bstart_kq)
@@ -3740,16 +3740,16 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        end select
      end do ! my_ik
 
-     call xmpi_sum(vk_cart_ibz, gqk%comm%value, ierr)
+     call xmpi_sum(vnk_cart_ibz, gqk%comm%value, ierr)
      !call xmpi_sum(vkq_cart_ibz, gqk%comm%value, ierr)
 
      !if (gqk%comm%me == master) then
        NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
-       NCF_CHECK(nf90_put_var(spin_ncid, spin_vid("vk_cart_ibz"), vk_cart_ibz))
+       NCF_CHECK(nf90_put_var(spin_ncid, spin_vid("vk_cart_ibz"), vnk_cart_ibz))
        !NCF_CHECK(nf90_put_var(spin_ncid, spin_vid("vkq_cart_ibz"), vk_cart_ibz))
 
      !end if
-     ABI_SFREE(vk_cart_ibz)
+     ABI_SFREE(vnk_cart_ibz)
      !ABI_SFREE(vkq_cart_ibz)
    end do ! my_is
 
@@ -4688,7 +4688,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
        if (gqk%comm%nproc > 1) then
          NCF_CHECK(nctk_set_collective(spin_ncid, spin_vid("vk_cart_ibz")))
        end if
-       NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("vk_cart_ibz"), gqk%vk_cart_ibz))
+       NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("vk_cart_ibz"), gqk%vnk_cart_ibz))
 
      else if (gstore%with_vk == 2) then
        if (gqk%comm%nproc > 1) then
@@ -4696,9 +4696,9 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
        end if
        NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("vkmat_cart_ibz"), gqk%vkmat_cart_ibz))
 
-       ! Transfer diagonal terms to vk_cart_ibz.
+       ! Transfer diagonal terms to vnk_cart_ibz.
        do ib=1,gqk%nb_k
-         gqk%vk_cart_ibz(:, ib, :) = gqk%vkmat_cart_ibz(1, :, ib, ib, :)
+         gqk%vnk_cart_ibz(:, ib, :) = gqk%vkmat_cart_ibz(1, :, ib, ib, :)
        end do
      end if
 
