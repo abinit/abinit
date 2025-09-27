@@ -12,7 +12,7 @@
 !!  would be very expensive.
 !!
 !!  Note that g depends on the two wave vectors (q, k), two electron band indices (m, n),
-!!  phonon mode nu with momentum q and spin index if nsppol == 2 (collinear case).
+!!  phonon mode nu with crystalline momentum q and spin index if nsppol == 2 (collinear case).
 !!
 !!  g(q, k) is therefore a sloppy notation for:
 !!
@@ -97,9 +97,8 @@
 !!     the interpolation of v^1_q does not start to dominate
 !!  3) Use similar trick in dfpt_cgw for H^0 |psi_nk>
 !!  4) Operate on multiple n states in getgh1c (new version of getgh1c allows it)
-!!  5) Write BECS and eps infinity (Done)
-!!  6) Write IFC to faciliate interporability with external codes
-!!  7) Move to atom representation and add symmetry tables.
+!!  5) Write IFC to faciliate interporability with external codes
+!!  6) Move to atom representation and add symmetry tables.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2025 ABINIT group (MG)
@@ -136,6 +135,7 @@ module m_gstore
  use m_ephtk
  use m_mkffnl
  use m_sigtk
+ use m_copy
 
  use defs_abitypes,    only : mpi_type
  use defs_datatypes,   only : pseudopotential_type
@@ -484,17 +484,17 @@ type, public :: gstore_t
    ! Used only in the collinear case with nsppol = 2 and nspinor == 1
 
   integer,allocatable :: brange_k_spin(:, :)
-  !integer,allocatable :: brange_kq_spin(:, :)
+  integer,allocatable :: brange_kq_spin(:, :)
   ! (2, nsppol)
-  ! Range of bands for each spin
-  ! TODO: ADd brange_kq_spin
+  ! Range of bands for each spin at k and k+q.
+  ! This is a global variable
 
   !integer :: max_nb = -1
   ! Max number of bands over spin
 
   integer,allocatable :: glob_nk_spin(:), glob_nq_spin(:)
-  ! Total number of k/q points for each spin after filtering (if any)
   ! (nsppol)
+  ! Total number of k/q points for each spin after filtering (if any).
 
   integer,allocatable :: kglob2bz(:,:)
   ! (max_nk, nsppol))
@@ -741,8 +741,8 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    do spin=1,gstore%nsppol
      gstore%brange_k_spin(1, spin) = wan_spin(spin)%bmin
      gstore%brange_k_spin(2, spin) = wan_spin(spin)%bmax
-     !gstore%brange_kq_spin(1, spin) = wan_spin(spin)%bmin
-     !gstore%brange_kq_spin(2, spin) = wan_spin(spin)%bmax
+     gstore%brange_kq_spin(1, spin) = wan_spin(spin)%bmin
+     gstore%brange_kq_spin(2, spin) = wan_spin(spin)%bmax
    end do
  end if
 
@@ -1072,15 +1072,15 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      ncerr = nctk_def_dims(spin_ncid, [ &
         nctkdim_t("nb", gstore%brange_k_spin(2, spin) - gstore%brange_k_spin(1, spin) + 1), &
         ! TODO: NEW VERSION with nb replaced by nb_kq and nb_k.
-        !nctkdim_t("nb_k", gstore%brange_k_spin(2, spin) - gstore%brange_k_spin(1, spin) + 1), &
-        !nctkdim_t("nb_kq", gstore%brange_kq_spin(2, spin) - gstore%brange_kq_spin(1, spin) + 1), &
+        nctkdim_t("nb_k", gstore%brange_k_spin(2, spin) - gstore%brange_k_spin(1, spin) + 1), &
+        nctkdim_t("nb_kq", gstore%brange_kq_spin(2, spin) - gstore%brange_kq_spin(1, spin) + 1), &
         nctkdim_t("glob_nk", gstore%glob_nk_spin(spin)), &
         nctkdim_t("glob_nq", gstore%glob_nq_spin(spin))  &
      ], defmode=.True.)
      NCF_CHECK(ncerr)
 
      ! Define scalars
-     ncerr = nctk_def_iscalars(spin_ncid, [character(len=nctk_slen) :: "bstart"])
+     ncerr = nctk_def_iscalars(spin_ncid, [character(len=nctk_slen) :: "bstart", "bstart_k", "bstart_kq"])
      NCF_CHECK(ncerr)
 
      ! arrays in gqk_spin group with the precious stuff. Note global dimensions.
@@ -1114,8 +1114,10 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      case (1)
        ! Diagonal terms only
        NCF_CHECK(nctk_def_arrays(spin_ncid, nctkarr_t("vk_cart_ibz", "dp", "three, nb, gstore_nkibz")))
-       !NCF_CHECK(nctk_def_arrays(spin_ncid, nctkarr_t("vk_cart_ibz", "dp", "three, nb_k, gstore_nkibz")))
        NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("vk_cart_ibz"), NF90_FILL, gstore_fill_dp))
+       !NCF_CHECK(nctk_def_arrays(spin_ncid, nctkarr_t("vk_cart_ibz", "dp", "three, nb_k, gstore_nkibz")))
+       !NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("vk_cart_ibz"), NF90_FILL, gstore_fill_dp))
+
      case (2)
        ! Full (nb x nb) matrix.
        NCF_CHECK(nctk_def_arrays(spin_ncid, nctkarr_t("vkmat_cart_ibz", "dp", "two, three, nb, nb, gstore_nkibz")))
@@ -1126,8 +1128,8 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      ! Write (small) data
      NCF_CHECK(nctk_set_datamode(spin_ncid))
      NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("bstart"), gstore%brange_k_spin(1, spin)))
-     !NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("bstart_k"), gstore%brange_k_spin(1, spin)))
-     !NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("bstart_kq"), gstore%brange_kq_spin(1, spin)))
+     NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("bstart_k"), gstore%brange_k_spin(1, spin)))
+     NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("bstart_kq"), gstore%brange_kq_spin(1, spin)))
    end do ! spin
 
    NCF_CHECK(nf90_close(ncid))
@@ -1261,7 +1263,7 @@ subroutine gstore_distribute_spins(gstore, mband, gstore_brange, nproc_spin, com
 
  gstore%my_nspins = 0
  ABI_MALLOC(gstore%brange_k_spin, (2, nsppol))
- !ABI_MALLOC(gstore%brange_kq_spin, (2, nsppol))
+ ABI_MALLOC(gstore%brange_kq_spin, (2, nsppol))
 
  do spin=1,nsppol
    ! NB: If MPI_UNDEFINED is passed as the colour value, the subgroup in which the calling MPI process will be placed is MPI_COMM_NULL
@@ -1281,19 +1283,20 @@ subroutine gstore_distribute_spins(gstore, mband, gstore_brange, nproc_spin, com
    nproc_spin(spin) = xmpi_comm_size(comm_spin(spin))
 
    gstore%brange_k_spin(:, spin) = [1, mband]
+   gstore%brange_kq_spin(:, spin) = [1, mband]
    if (all(gstore_brange /= 0)) then
      gstore%brange_k_spin(:, spin) = gstore_brange(:, spin)
-     ! FIXME: I need an extra dimension for kq
-     !gstore%brange_kq_spin(:, spin) = gstore_brange(:, spin)
+     gstore%brange_kq_spin(:, spin) = gstore_brange(:, spin)
    end if
 
+   ! Validate against mband.
    ABI_CHECK_IRANGE(gstore%brange_k_spin(1, spin), 1, mband, "gstore_brange(1, spin)")
    ABI_CHECK_IRANGE(gstore%brange_k_spin(2, spin), 1, mband, "gstore_brange(2, spin)")
    ABI_CHECK(gstore%brange_k_spin(1, spin) <= gstore%brange_k_spin(2, spin), "brange_k_spin(1, spin) <= brange_k_spin(2, spin)")
 
-   !ABI_CHECK_IRANGE(gstore%brange_kq_spin(1, spin), 1, mband, "gstore_brange(1, spin)")
-   !ABI_CHECK_IRANGE(gstore%brange_kq_spin(2, spin), 1, mband, "gstore_brange(2, spin)")
-   !ABI_CHECK(gstore%brange_kq_spin(1, spin) <= gstore%brange_kq_spin(2, spin), "brange_kq_spin(1, spin) <= brange_kq_spin(2, spin)")
+   ABI_CHECK_IRANGE(gstore%brange_kq_spin(1, spin), 1, mband, "gstore_brange(1, spin)")
+   ABI_CHECK_IRANGE(gstore%brange_kq_spin(2, spin), 1, mband, "gstore_brange(2, spin)")
+   ABI_CHECK(gstore%brange_kq_spin(1, spin) <= gstore%brange_kq_spin(2, spin), "brange_kq_spin(1, spin) <= brange_kq_spin(2, spin)")
  end do
 
  ABI_MALLOC(gstore%my_spins, (gstore%my_nspins))
@@ -1328,7 +1331,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, nproc_spin, comm_spin)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: spin, my_is, np, my_rank, ierr, npp_bz, units(2), bstart_k, bstop_k, nb_k
+ integer :: spin, my_is, np, my_rank, ierr, npp_bz, units(2), bstart_k, bstop_k, nb_k, bstart_kq, bstop_kq, nb_kq
  type(gqk_t),pointer :: gqk
  character(len=5000) :: msg
  character(len=10) :: order
@@ -1347,21 +1350,19 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, nproc_spin, comm_spin)
    gqk%spin = spin; gqk%natom3 = 3 * gstore%cryst%natom; gqk%cplex = gstore_cplex
    ABI_CHECK_IRANGE(gqk%cplex, 1, 2, "gstore_cplex")
 
-   ! Compute bstart and band size for this spin.
+   ! Compute bstart_k and nb_k for this spin.
    bstart_k = gstore%brange_k_spin(1, spin)
    bstop_k = gstore%brange_k_spin(2, spin)
    nb_k = gstore%brange_k_spin(2, spin) - gstore%brange_k_spin(1, spin) + 1
 
+   ! Compute bstart_kq and nb_kq for this spin.
+   bstart_kq = gstore%brange_kq_spin(1, spin)
+   bstop_kq = gstore%brange_kq_spin(2, spin)
+   nb_kq = gstore%brange_kq_spin(2, spin) - gstore%brange_kq_spin(1, spin) + 1
+
    ! FIXME: for the time being, nb_kq == nb_k
-   gqk%nb_k = nb_k
-   gqk%bstart_k = bstart_k; gqk%bstop_k = bstop_k
-
-   !bstart_kq = gstore%brange_kq_spin(1, spin)
-   !bstop_kq = gstore%brange_kq_spin(2, spin)
-   !nb_kq = gstore%brange_kq_spin(2, spin) - gstore%brange_kq_spin(1, spin) + 1
-
-   gqk%nb_kq = nb_k
-   gqk%bstart_kq = bstart_k; gqk%bstop_kq = bstop_k
+   gqk%nb_k = nb_k; gqk%bstart_k = bstart_k; gqk%bstop_k = bstop_k
+   gqk%nb_kq = nb_k; gqk%bstart_kq = bstart_kq; gqk%bstop_kq = bstop_kq
 
    ! Store global shape of the q/k matrix for this spin.
    gqk%glob_nq = gstore%glob_nq_spin(spin)
@@ -1775,8 +1776,6 @@ subroutine gstore_malloc__(gstore, with_cplex, max_nq, qglob2bz, max_nk, kglob2b
  real(dp) :: mem_mb
 !----------------------------------------------------------------------
 
- !gstore%max_nb = maxval(gstore%brange_k_spin(2, :) - gstore%brange_k_spin(1, :) + 1)
-
  do my_is=1,gstore%my_nspins
    associate (gqk => gstore%gqk(my_is), spin => gstore%my_spins(my_is))
    nb_k = gqk%nb_k
@@ -1932,7 +1931,8 @@ subroutine gstore_filter_fs_tetra__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kb
  ! NB: here we precompute brange_k_spin
  call ebands%get_bands_e0(ebands%fermie, gstore%brange_k_spin, ierr)
  ABI_CHECK(ierr == 0, "Error in ebands_get_bands_e0")
- !call xcopy(gstore%brange_k_spin, gstore%brange_kq_spin)
+ ! FIXME: This should be changed
+ gstore%brange_kq_spin = gstore%brange_k_spin
 
  ABI_MALLOC(indkk, (gstore%nkbz))
  indkk(:) = kbz2ibz(1, :)
@@ -2063,7 +2063,7 @@ subroutine gstore_filter_erange__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2
  do spin=1,nsppol
    ! Init brange
    gstore%brange_k_spin(:, spin) = [huge(1), -huge(1)]
-   !gstore%brange_kq_spin(:, spin) = [huge(1), -huge(1)]
+   gstore%brange_kq_spin(:, spin) = [huge(1), -huge(1)]
    abs_erange1 = abs(gstore%erange_spin(1, spin))
    abs_erange2 = abs(gstore%erange_spin(2, spin))
 
@@ -2101,8 +2101,8 @@ subroutine gstore_filter_erange__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2
          gstore%brange_k_spin(1, spin) = min(gstore%brange_k_spin(1, spin), band)
          gstore%brange_k_spin(2, spin) = max(gstore%brange_k_spin(2, spin), band)
 
-         !gstore%brange_kq_spin(1, spin) = min(gstore%brange_kq_spin(1, spin), band)
-         !gstore%brange_kq_spin(2, spin) = max(gstore%brange_kq_spin(2, spin), band)
+         gstore%brange_kq_spin(1, spin) = min(gstore%brange_kq_spin(1, spin), band)
+         gstore%brange_kq_spin(2, spin) = max(gstore%brange_kq_spin(2, spin), band)
 
          select case (gstore%kzone)
          case ("ibz")
@@ -2125,13 +2125,15 @@ subroutine gstore_filter_erange__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2
 
    !call wrtout(std_out, sjoin("brange_k_spin:", ltoa(gstore%brange_k_spin(:, spin))))
    !call wrtout(std_out, sjoin("count_select_kbz:", itoa(count(select_kbz_spin == 1))))
+   !call wrtout(std_out, sjoin("brange_kq_spin:", ltoa(gstore%brange_k_qspin(:, spin))))
+   !call wrtout(std_out, sjoin("count_select_kbz:", itoa(count(select_kbz_spin == 1))))
 
    if (any(gstore%brange_k_spin(:, spin) == [huge(1), -huge(1)])) then
      ABI_ERROR("Empty list of states inside gstore_erange")
    end if
-   !if (any(gstore%brange_kq_spin(:, spin) == [huge(1), -huge(1)])) then
-   !  ABI_ERROR("Empty list of states inside gstore_erange")
-   !end if
+   if (any(gstore%brange_kq_spin(:, spin) == [huge(1), -huge(1)])) then
+     ABI_ERROR("Empty list of states inside gstore_erange")
+   end if
 
  end do ! spin
 
@@ -2912,7 +2914,7 @@ subroutine gstore_free(gstore)
  ABI_SFREE(gstore%wtq)
  ABI_SFREE(gstore%my_spins)
  ABI_SFREE(gstore%brange_k_spin)
- !ABI_SFREE(gstore%brange_kq_spin)
+ ABI_SFREE(gstore%brange_kq_spin)
  ABI_SFREE(gstore%glob_nk_spin)
  ABI_SFREE(gstore%glob_nq_spin)
  ABI_SFREE(gstore%kglob2bz)
@@ -3428,7 +3430,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
  type(lgroup_t),allocatable :: lg_myk(:)
- !type(lgroup_t) :: lg_myk(:)
 !************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
@@ -3591,7 +3592,9 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ABI_CALLOC(dummy_vtrial, (nfftf, nspden))
 
  ! Open GSTORE file, and read table used for restarting.
+ ! TODO: Fix problem with IO (some q-points are not written)
  NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, gstore%comm))
+ !NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, xmpi_comm_self))
 
  ! integer scalars
  ncerr = nctk_def_iscalars(root_ncid, [character(len=nctk_slen) :: &
@@ -4014,9 +4017,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      ABI_FREE(vlocal1)
 
      ! Dump buffer
-     if (iqbuf_cnt == qbuf_size) then
-       call dump_my_gbuf()
-     end if
+     if (iqbuf_cnt == qbuf_size) call dump_my_gbuf()
 
      if (print_time) then
        write(msg,'(2(a,i0),a)')" My q-point [", my_iq, "/", gqk%my_nq, "]"
@@ -4026,9 +4027,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    end do ! my_iq
 
    ! Dump the remainder.
-   if (iqbuf_cnt /= 0) then
-     call dump_my_gbuf()
-   end if
+   if (iqbuf_cnt /= 0) call dump_my_gbuf()
 
    ABI_FREE(iq_buf)
    ABI_FREE(my_gbuf)
@@ -4110,8 +4109,10 @@ subroutine dump_my_gbuf()
  my_iq = iq_buf(1, 1)
  iq_glob = my_iq + gqk%my_qstart - 1
 
+ !if (dtset%prtvol > 5) then
  !print *, "in dump_my_gbuf with start: ", [1, 1, 1, 1, gqk%my_kstart, iq_glob]
  !print *, "                  count; ", [gqk%cplex, gqk%nb_kq, gqk%nb_k, gqk%natom3, gqk%my_nk, iqbuf_cnt]
+ !end if
 
  ! NB: this is an individual IO operation
  ncerr = nf90_put_var(spin_ncid, spin_vid("gvals"), my_gbuf, &
@@ -4247,7 +4248,8 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  type(crystal_t) :: gstore_cryst
  type(gqk_t),pointer :: gqk
 !arrays
- integer :: units(2), ibuffer(9), nproc_spin(ebands%nsppol), comm_spin(ebands%nsppol), brange_k_spin(2, ebands%nsppol), g0_q(3)
+ integer :: units(2), ibuffer(9), nproc_spin(ebands%nsppol), comm_spin(ebands%nsppol)
+ integer :: brange_k_spin(2, ebands%nsppol), brange_kq_spin(2, ebands%nsppol), g0_q(3)
  integer,allocatable :: qglob2bz(:,:), qbz2ibz(:,:) !, kbz2ibz(:,:)
  real(dp) :: qq_ibz(3)
  real(dp),allocatable :: gwork_q(:,:,:,:,:), slice_bb(:,:,:)
@@ -4356,6 +4358,8 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    ABI_MALLOC(gstore%qbz, (3, gstore%nqbz))
    ABI_MALLOC(gstore%kbz, (3, gstore%nkbz))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_brange_spin"), brange_k_spin))
+   ! FIXME
+   brange_kq_spin = brange_k_spin
    !NCF_CHECK(nf90_get_var(ncid, vid("gstore_brange_spin"), brange_kq_spin))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_erange_spin"), gstore%erange_spin))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_qibz"), gstore%qibz))
@@ -4448,7 +4452,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    call xmpi_bcast(gstore%ngqpt, master, comm, ierr)
    call xmpi_bcast(gstore%wfk0_path, master, comm, ierr)
    call xmpi_bcast(brange_k_spin, master, comm, ierr)
-   !call xmpi_bcast(brange_kq_spin, master, comm, ierr)
+   call xmpi_bcast(brange_kq_spin, master, comm, ierr)
    call xmpi_bcast(gstore%erange_spin, master, comm, ierr)
    call xmpi_bcast(gstore%qibz, master, comm, ierr)
    call xmpi_bcast(gstore%wtq, master, comm, ierr)
@@ -4473,6 +4477,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  call wfk0_hdr%vs_dtset(dtset); call wfk0_hdr%free()
 
  ! Distribute spins, create indirect mapping to spin index and init gstore%brange_k_spin
+ ! FIXME: pass brange_kq_spin
  call gstore%distribute_spins__(ebands%mband, brange_k_spin, nproc_spin, comm_spin, comm)
 
  ! Compute krank
@@ -4575,8 +4580,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
         ABI_CHECK_INEQ(iq_glob, -1, "Cannot finq q=0 in g(k,q)!")
         call wrtout(std_out, sjoin(" Reading g_atm(k,q=0) for Debye-Waller with iq_glob:", itoa(iq_glob)))
 
-       ! Read q-slice of the e-ph matrix elements (individual IO)
-       ! Note gvals_name__
+       ! Read q-slice of the e-ph matrix elements (individual IO). Note gvals_name__
        ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_name__), gwork_q, start=[1, 1, 1, 1, 1, iq_glob])
        NCF_CHECK(ncerr)
 
@@ -4653,9 +4657,9 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
      ABI_FREE(slice_bb)
      ABI_SFREE(gmn_nu)
 
-     ! ==============================================
-     ! Read matrix elements of the velocity operator
-     ! ==============================================
+     ! =========================================
+     ! Read matrix elements of velocity operator
+     ! =========================================
      if (gstore%with_vk == 1) then
        if (gqk%comm%nproc > 1) then
          NCF_CHECK(nctk_set_collective(spin_ncid, spin_vid("vk_cart_ibz")))
@@ -5352,7 +5356,7 @@ subroutine gqk_get_erange_mask(gqk, gstore, erange, my_states, glob_states)
 !scalars
  class(ebands_t), pointer :: ebands
  type(gaps_t) :: gaps
- integer :: my_ik, ik_ibz, ik_glob, ib, bstart, gap_err, ierr
+ integer :: my_ik, ik_ibz, ik_glob, ib_k, bstart_k, gap_err, ierr
  real(dp) :: vmax, cmin, eig
  logical :: assume_gap
 !----------------------------------------------------------------------
@@ -5374,28 +5378,28 @@ subroutine gqk_get_erange_mask(gqk, gstore, erange, my_states, glob_states)
  ! Fill the mask for allowed states
  my_states(:,:) = 0
  glob_states(:,:) = 0
- bstart = gstore%brange_k_spin(1, gqk%spin)
+ bstart_k = gstore%brange_k_spin(1, gqk%spin)
 
  do my_ik=1,gqk%my_nk
    ik_ibz = gqk%my_k2ibz(1, my_ik)
    ik_glob = my_ik + gqk%my_kstart - 1
 
-   do ib=1,gqk%nb_k
-     eig = ebands%eig(bstart + ib - 1, ik_ibz, gqk%spin)
+   do ib_k=1,gqk%nb_k
+     eig = ebands%eig(bstart_k + ib_k - 1, ik_ibz, gqk%spin)
 
      if (abs(erange(1)) > tol12) then
        ! Filter valence states.
        if (eig <= vmax .and. vmax - eig <= abs(erange(1))) then
-         my_states(ib, my_ik) = 1
-         glob_states(ib, ik_glob) = 1
+         my_states(ib_k, my_ik) = 1
+         glob_states(ib_k, ik_glob) = 1
        end if
      end if
 
      if (abs(erange(2)) > tol12) then
        ! Filter conduction states.
        if (eig >= cmin .and. eig - cmin <= abs(erange(2))) then
-         my_states(ib, my_ik) = 1
-         glob_states(ib, ik_glob) = 1
+         my_states(ib_k, my_ik) = 1
+         glob_states(ib_k, ik_glob) = 1
        end if
      end if
 
@@ -5439,7 +5443,7 @@ subroutine gqk_filter_erange(gqk, gstore, erange)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_ik, ik_glob, my_iq, ikq, ipert, ierr, ib, jb
+ integer :: my_ik, ik_glob, my_iq, ikq, ipert, ierr, ib_k, jb_kq
  real(dp) :: wtq
  logical :: skip_nk, skip_mkq, skip_q
  type(krank_t) :: krank_kpts
@@ -5475,10 +5479,10 @@ subroutine gqk_filter_erange(gqk, gstore, erange)
  do my_ik=1,gqk%my_nk
    kpt(:) = gqk%my_kpts(:, my_ik)
 
-   do ib=1,gqk%nb_k
+   do ib_k=1,gqk%nb_k
      ! |nk> is forbidden
      skip_nk = .false.
-     if (my_states(ib, my_ik) == 0) skip_nk = .true.
+     if (my_states(ib_k, my_ik) == 0) skip_nk = .true.
 
      do my_iq=1,gqk%my_nq
        qpt(:) = my_qpts(:, my_iq)
@@ -5491,19 +5495,19 @@ subroutine gqk_filter_erange(gqk, gstore, erange)
        skip_q = .false.
        if (ikq == -1) skip_q = .true.
 
-       do jb=1,gqk%nb_kq
+       do jb_kq=1,gqk%nb_kq
          ! |mk+q> is forbidden
          skip_mkq = .false.
-         if (glob_states(jb, ikq) == 0) skip_mkq = .true.
+         if (glob_states(jb_kq, ikq) == 0) skip_mkq = .true.
 
          do ipert=1,gqk%my_npert
 
            if (skip_nk .or. skip_q .or. skip_mkq) then
              select case (gqk%cplex)
              case (1)
-               gqk%my_g2(ipert, jb, my_iq, ib, my_ik) = zero
+               gqk%my_g2(ipert, jb_kq, my_iq, ib_k, my_ik) = zero
              case (2)
-               gqk%my_g(ipert, jb, my_iq, ib, my_ik) = czero
+               gqk%my_g(ipert, jb_kq, my_iq, ib_k, my_ik) = czero
              case default
                ABI_ERROR(sjoin("Invalid gqk%cplex:", itoa(gqk%cplex)))
              end select
