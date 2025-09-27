@@ -571,7 +571,7 @@ contains
   ! Free memory
 
   procedure :: print => gstore_print
-  ! Print info on the object
+  ! Print info on the object.
 
   procedure :: check_little_group => gstore_check_little_group
    !  Check consistency between little group options from file and from input.
@@ -1092,17 +1092,17 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
 
      ! arrays in gqk_spin group with the precious stuff. Note global dimensions.
      ncerr = nctk_def_arrays(spin_ncid, [ &
-       nctkarr_t("gvals", "dp", "gstore_cplex, nb, nb, natom3, glob_nk, glob_nq") &
-       !nctkarr_t("gvals", "dp", "gstore_cplex, nb_kq, nb_k, natom3, glob_nk, glob_nq") &
+       !nctkarr_t("gvals", "dp", "gstore_cplex, nb, nb, natom3, glob_nk, glob_nq") &
+       nctkarr_t("gvals", "dp", "gstore_cplex, nb_kq, nb_k, natom3, glob_nk, glob_nq") &
      ])
      NCF_CHECK(ncerr)
 
      ! Compress gvals to reduce size on disk.
      !NCF_CHECK(nf90_def_var_deflate(spin_ncid, vid_spin("gvals"), shuffle=1, deflate=1, deflate_level=5))
-     ! IMPORTANT: Init gvals with zeros.
 
-    ! Default value for entries in gvals, vnk_cart_ibz and vkmat_cart_ibz arrays that have not been written.
-    ! This can happen only if we have filtered wavevectors.
+     ! IMPORTANT: Init gvals with zeros.
+     ! Default value for entries in gvals, vnk_cart_ibz and vkmat_cart_ibz arrays that have not been written.
+     ! This can happen only if we have filtered wavevectors.
      gstore_fill_dp = zero
      if (gstore%kfilter == "none") gstore_fill_dp = -huge(one)
      NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("gvals"), NF90_FILL, gstore_fill_dp))
@@ -1110,8 +1110,8 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      ! In GWPT gvals is used for g^Sigma so we declare another array to store g^KS.
      if (dtset%eph_task == 17) then
        ncerr = nctk_def_arrays(spin_ncid, [ &
-         nctkarr_t("gvals_ks", "dp", "gstore_cplex, nb, nb, natom3, glob_nk, glob_nq") &
-         !nctkarr_t("gvals_ks", "dp", "gstore_cplex, nb_kq, nb_k, natom3, glob_nk, glob_nq") &
+         !nctkarr_t("gvals_ks", "dp", "gstore_cplex, nb, nb, natom3, glob_nk, glob_nq") &
+         nctkarr_t("gvals_ks", "dp", "gstore_cplex, nb_kq, nb_k, natom3, glob_nk, glob_nq") &
        ])
        NCF_CHECK(ncerr)
        NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("gvals_ks"), NF90_FILL, gstore_fill_dp))
@@ -1120,15 +1120,15 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      select case(gstore%with_vk)
      case (1)
        ! Diagonal terms only
-       NCF_CHECK(nctk_def_arrays(spin_ncid, nctkarr_t("vk_cart_ibz", "dp", "three, nb, gstore_nkibz")))
-       NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("vk_cart_ibz"), NF90_FILL, gstore_fill_dp))
-       !NCF_CHECK(nctk_def_arrays(spin_ncid, nctkarr_t("vk_cart_ibz", "dp", "three, nb_k, gstore_nkibz")))
+       !NCF_CHECK(nctk_def_arrays(spin_ncid, nctkarr_t("vk_cart_ibz", "dp", "three, nb, gstore_nkibz")))
        !NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("vk_cart_ibz"), NF90_FILL, gstore_fill_dp))
+       NCF_CHECK(nctk_def_arrays(spin_ncid, nctkarr_t("vk_cart_ibz", "dp", "three, nb_k, gstore_nkibz")))
+       NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("vk_cart_ibz"), NF90_FILL, gstore_fill_dp))
 
      case (2)
        ! Full (nb x nb) matrix.
-       NCF_CHECK(nctk_def_arrays(spin_ncid, nctkarr_t("vkmat_cart_ibz", "dp", "two, three, nb, nb, gstore_nkibz")))
-       !NCF_CHECK(nctk_def_arrays(spin_ncid, nctkarr_t("vkmat_cart_ibz", "dp", "two, three, nb_k, nb_k, gstore_nkibz")))
+       !NCF_CHECK(nctk_def_arrays(spin_ncid, nctkarr_t("vkmat_cart_ibz", "dp", "two, three, nb, nb, gstore_nkibz")))
+       NCF_CHECK(nctk_def_arrays(spin_ncid, nctkarr_t("vkmat_cart_ibz", "dp", "two, three, nb_k, nb_k, gstore_nkibz")))
        NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("vkmat_cart_ibz"), NF90_FILL, gstore_fill_dp))
      end select
 
@@ -1594,6 +1594,7 @@ subroutine gstore_print(gstore, units, header, prtvol)
 !Local variables ------------------------------
  integer,parameter :: max_nk=10
  integer :: my_is, my_prtvol, ik_calc, ik_bz, ik_ibz !, iq_calc, iq_bz, iq_ibz
+ real(dp) :: rtot_num_g
  character(len=500) :: msg
 !----------------------------------------------------------------------
 
@@ -1629,10 +1630,11 @@ subroutine gstore_print(gstore, units, header, prtvol)
    call wrtout(units, sjoin(" gqk_bstop_kq:", itoa(gqk%bstop_kq)))
    call wrtout(units, sjoin(" gqk_nb_k:", itoa(gqk%nb_k)))
    call wrtout(units, sjoin(" gqk_nb_kq:", itoa(gqk%nb_kq)))
+   rtot_num_g = (one * gqk%nb_kq * gqk%nb_k) * (gqk%glob_nk * gqk%glob_nq * one) * gqk%natom3
+   !call wrtout(units, sjoin(" total number of g elements:", ftoa(rtot_num_g)))
    call wrtout(units, sjoin(" gqk_my_npert:", itoa(gqk%my_npert)))
    call wrtout(units, sjoin("P gqk_my_nk:", itoa(gqk%my_nk)))
    call wrtout(units, sjoin("P gqk_my_nq:", itoa(gqk%my_nq)))
-   !tot_num_g = one * qqk%nb_kq * gqk%nb_k * gqk%glob_nk * gqk%glob_nq * gqk%natom3
    call wrtout(units, sjoin(ch10, " === MPI distribution ==="))
    call wrtout(units, sjoin("P Number of CPUs for parallelism over perturbations: ", itoa(gqk%pert_comm%nproc)))
    call wrtout(units, sjoin("P Number of perturbations treated by this CPU: ",  itoa(gqk%my_npert)))
@@ -4263,11 +4265,12 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
 !scalars
  integer,parameter :: master = 0
  integer :: my_rank, ncid, spin, spin_ncid, nproc, ierr, fform, max_nb, ib, natom, natom3, varid, ib_m, ib_n
- integer :: max_nq, max_nk, gstore_cplex, ncerr, my_is, my_iq, iq_glob, my_ik, ik_glob, nb_k, nb_kq
+ integer :: max_nq, max_nk, gstore_cplex, ncerr, my_is, my_iq, iq_glob, my_ik, ik_glob
+ integer :: nb_k, nb_kq, nb_k_file, nb_kq_file
  integer :: my_ip, ipert, iq_ibz, iq_bz, isym_q, trev_q, tsign_q, ii
  real(dp) :: cpu, wall, gflops
  character(len=500) :: gvals_name__
- logical :: isirr_q, read_dw__, from_atm_to_nu
+ logical :: isirr_q, read_dw__, from_atm_to_nu, old_format
  type(hdr_type) :: wfk0_hdr
  type(crystal_t) :: gstore_cryst
  type(gqk_t),pointer :: gqk
@@ -4578,14 +4581,29 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
 
    if (my_is /= 0) then
      gqk => gstore%gqk(my_is)
-     ! Note that these dimensions should be compatible with what is stored on disk.
-     nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
 
      ABI_MALLOC(gqk%my_wnuq, (gqk%my_npert, gqk%my_nq))
      ABI_MALLOC(gqk%my_displ_cart, (2, 3, cryst%natom, gqk%my_npert, gqk%my_nq))
 
      NCF_CHECK(nctk_open_read(ncid, gstore%path, gqk%comm%value))
      NCF_CHECK(nf90_inq_ncid(ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
+
+     ncerr = nctk_get_dim(spin_ncid, "nb_k", nb_k_file)
+
+     if (ncerr /= nf90_noerr) then
+       old_format = .False.
+       NCF_CHECK(nctk_get_dim(spin_ncid, "nb_k", nb_k_file))
+       NCF_CHECK(nctk_get_dim(spin_ncid, "nb_kq", nb_kq_file))
+     else
+       old_format = .True.
+       NCF_CHECK(nctk_get_dim(spin_ncid, "nb", nb_k_file))
+       nb_kq_file = nb_k_file
+     end if
+
+     ! Note that these dimensions should be compatible with what is stored on disk.
+     nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
+     ABI_CHECK_IEQ(nb_k, nb_k_file, "nb_k !/ nb_k_file")
+     ABI_CHECK_IEQ(nb_kq, nb_kq_file, "nb_kq !/ nb_kq_file")
 
      ! gstore_cplex defines the data on disk while cplex defines what we want to store in memory
      ABI_MALLOC_OR_DIE(gwork_q, (gstore_cplex, nb_kq, nb_k, gqk%natom3, gqk%glob_nk), ierr)
@@ -4668,12 +4686,12 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
               if (with_cplex == 1 .and. gstore_cplex == 2) then
                 gqk%my_g2(my_ip, :, my_iq, :, my_ik) = slice_bb(1,:,:) ** 2 + slice_bb(2,:,:) ** 2
               else
-                ABI_ERROR("Conversion from g2 on file to g_cplx in memory is not possible!")
+                ABI_ERROR("Conversion from g2 on file to g_complex in memory is not possible!")
               end if
             end if
 
-          end do
-        end do
+          end do ! my_ip
+        end do ! my_ik
 
      end do ! my_iq
 
@@ -4845,7 +4863,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
  integer,parameter :: master = 0
  integer :: root_ncid, spin_ncid, gstore_completed, spin, ik_glob, iq_glob, ipc, cplex, ncerr, natom3, varid, nb
  integer :: glob_nq, glob_nk, im_kq, in_k, nb_k, nb_kq, ib_k, ik_ibz
- logical :: with_ks__
+ logical :: with_ks__, old_format
  real(dp) :: g2, g2_ks
  character(len=abi_slen) :: gstore_gmode
 !arrays
@@ -4884,14 +4902,19 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
    NCF_CHECK(nctk_get_dim(spin_ncid, "glob_nk", glob_nk))
    NCF_CHECK(nctk_get_dim(spin_ncid, "gstore_cplex", cplex))
 
-   NCF_CHECK(nctk_get_dim(spin_ncid, "nb", nb))
-   write(ab_out, "(a,i0)")" gqk%nb: ", nb
-   nb_k = nb; nb_kq = nb
+   ncerr = nctk_get_dim(spin_ncid, "nb_k", nb_k)
+   if (ncerr /= nf90_noerr) then
+     old_format = .False.
+     NCF_CHECK(nctk_get_dim(spin_ncid, "nb_kq", nb_kq))
+   else
+     old_format = .True.
+     NCF_CHECK(nctk_get_dim(spin_ncid, "nb", nb))
+     nb_k = nb; nb_kq = nb
+   end if
 
-   !NCF_CHECK(nctk_get_dim(spin_ncid, "nb_k", nb_k))
-   !NCF_CHECK(nctk_get_dim(spin_ncid, "nb_kq", nb_kq))
-   !write(ab_out, "(a,i0)")" gqk%nb_kq: ", nb_kq
-   !write(ab_out, "(a,i0)")" gqk%nb_k: ", nb_k
+   write(ab_out, "(a,i0)")" gqk%nb_kq: ", nb_kq
+   write(ab_out, "(a,i0)")" gqk%nb_k: ", nb_k
+   !write(ab_out, "(a,i0)")" gqk%nb: ", nb
    write(ab_out, "(a,i0)")" gqk%glob_nq: ", glob_nq
    write(ab_out, "(a,i0)")" gqk%glob_nk: ", glob_nk
 
@@ -4910,8 +4933,8 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
 
      ABI_MALLOC(vnk_cart_ibz, (3, nb_k))
      do ik_ibz=1,gstore%nkibz
-       ! Only the first and the last k-points are written.
-       if (ik_ibz /= 1 .and. ik_ibz /= gstore%nkibz) cycle
+       ! Only  a subset of k-points are written.
+       if (all(ik_ibz /= [1, 2, gstore%nkibz - 1, gstore%nkibz])) cycle
        NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("vk_cart_ibz"), vnk_cart_ibz, start=[1,1,ik_ibz], count=[3,nb_k,1]))
 
        write(ab_out, "(a)")sjoin(" For k-point:", ktoa(gstore%kibz(:,ik_ibz)), ", spin", itoa(spin))
@@ -5056,7 +5079,7 @@ subroutine gqk_gather(gqk, mode, fixed_pt, g_gathered)
    my_ngather = gqk%my_nq
    my_ptstart = gqk%my_qstart
    my_g => gqk%my_g(:,:,:,:,fixed_pt)
-   ABI_MALLOC(g_gathered, (gqk%my_npert, gqk%nb_kq, gqk%nb_k, ngather))
+   ABI_CALLOC(g_gathered, (gqk%my_npert, gqk%nb_kq, gqk%nb_k, ngather))
 
  case ("q")
    comm = gqk%kpt_comm%value
@@ -5064,13 +5087,12 @@ subroutine gqk_gather(gqk, mode, fixed_pt, g_gathered)
    my_ngather = gqk%my_nk
    my_ptstart = gqk%my_kstart
    my_g => gqk%my_g(:,:,fixed_pt,:,:)
-   ABI_MALLOC(g_gathered, (gqk%my_npert, gqk%nb_k, gqk%nb_kq, ngather))
+   ABI_CALLOC(g_gathered, (gqk%my_npert, gqk%nb_k, gqk%nb_kq, ngather))
 
  case default
    ABI_ERROR(sjoin("Gathering MPI-distributed matrix elements, unsupported mode: ", mode))
  end select
 
- g_gathered(:,:,:,:) = zero
  do my_ipt=1,my_ngather
    ipt_glob = my_ipt + my_ptstart - 1
 
