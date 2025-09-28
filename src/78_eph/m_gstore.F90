@@ -691,7 +691,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  natom3 = 3 * cryst%natom; nsppol = ebands%nsppol
  units = [std_out, ab_out]
 
- call wrtout(std_out, " gstore_init: building gstore_t instance...")
+ call wrtout(std_out, " gstore_init: initialize gstore_t instance...")
  call pstat_proc%print(_PSTAT_ARGS_)
 
  ! Set basic parameters.
@@ -699,10 +699,10 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  if (present(gtype)) gstore%gtype = gtype
 
  ! Get references to other data structures.
- gstore%dtset => dtset
- gstore%cryst => cryst; gstore%ebands => ebands; gstore%ifc => ifc
+ gstore%dtset => dtset; gstore%cryst => cryst; gstore%ebands => ebands; gstore%ifc => ifc
  gstore%ebands_owns_memory = .False.
 
+ ! Handle possible wannierization.
  has_abiwan = .False.; has_gwan = .False.; keep_umats = .False.
  if (dtfil%filabiwanin /= ABI_NOFILE) then
    has_abiwan = .True.
@@ -719,7 +719,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    end if
  end if
 
- ! Set metadata.
+ ! Set metadata and set initial value of kfilter from dtset.
  gstore%kibz => gstore%ebands%kptns
  gstore%kzone = dtset%gstore_kzone; gstore%qzone = dtset%gstore_qzone; gstore%kfilter = dtset%gstore_kfilter
  gstore%with_vk = dtset%gstore_with_vk; gstore%gmode = dtset%gstore_gmode
@@ -739,9 +739,11 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  ! TODO
  !gstore%kptrlatt(3, 3); gstore%kshift(3, 1); gstore%qptrlatt(3, 3); gstore%qshift(3, 1)
 
- ! Distribute spins, create indirect mapping to spin index and init %brange_k_spin
+ ! Distribute spins, create indirect mapping to spin index and init %brange_k_spin from dtset
+ ! TODO Should I introduce dtset%gstore_brange_kq or compute it automatically
  ABI_CHECK_ILEQ(dtset%mband, ebands%mband, "dtset%mband > ebands%mband")
- call gstore%distribute_spins__(dtset%mband, dtset%gstore_brange, nproc_spin, comm_spin, comm)
+ call gstore%distribute_spins__(dtset%mband, dtset%gstore_brange, dtset%gstore_brange, nproc_spin, comm_spin, comm)
+ !call gstore%distribute_spins__(dtset%mband, dtset%gstore_brange_kq, dtset%gstore_brange_k, nproc_spin, comm_spin, comm)
 
  if (has_abiwan) then
    ! Here we set brange_k_spin to be consistent with the wannierization step.
@@ -1245,12 +1247,12 @@ end function gstore_same_nbands
 !!
 !! SOURCE
 
-subroutine gstore_distribute_spins(gstore, mband, gstore_brange, nproc_spin, comm_spin, comm)
+subroutine gstore_distribute_spins(gstore, mband, brange_kq, brange_k, nproc_spin, comm_spin, comm)
 
 !Arguments ------------------------------------
 !scalars
  class(gstore_t),target,intent(inout) :: gstore
- integer,intent(in) :: mband, comm, gstore_brange(2, gstore%nsppol)
+ integer,intent(in) :: mband, comm, brange_kq(2, gstore%nsppol), brange_k(2, gstore%nsppol)
  integer,intent(out) :: nproc_spin(gstore%nsppol), comm_spin(gstore%nsppol)
 
 !Local variables-------------------------------
@@ -1284,20 +1286,21 @@ subroutine gstore_distribute_spins(gstore, mband, gstore_brange, nproc_spin, com
 
    nproc_spin(spin) = xmpi_comm_size(comm_spin(spin))
 
+   ! Default values for brange at k, k+q
    gstore%brange_k_spin(:, spin) = [1, mband]
    gstore%brange_kq_spin(:, spin) = [1, mband]
-   if (all(gstore_brange /= 0)) then
-     gstore%brange_k_spin(:, spin) = gstore_brange(:, spin)
-     gstore%brange_kq_spin(:, spin) = gstore_brange(:, spin)
-   end if
 
-   ! Validate against mband.
-   ABI_CHECK_IRANGE(gstore%brange_k_spin(1, spin), 1, mband, "gstore_brange(1, spin)")
-   ABI_CHECK_IRANGE(gstore%brange_k_spin(2, spin), 1, mband, "gstore_brange(2, spin)")
+   ! Optionally take them from input brange_k, brange_kq
+   if (all(brange_kq /= 0)) gstore%brange_kq_spin(:, spin) = brange_kq(:, spin)
+   if (all(brange_k  /= 0)) gstore%brange_k_spin(:, spin) = brange_k(:, spin)
+
+   ! Validate against input mband.
+   ABI_CHECK_IRANGE(gstore%brange_k_spin(1, spin), 1, mband, "brange_k(1, spin)")
+   ABI_CHECK_IRANGE(gstore%brange_k_spin(2, spin), 1, mband, "brange_k(2, spin)")
    ABI_CHECK(gstore%brange_k_spin(1, spin) <= gstore%brange_k_spin(2, spin), "brange_k_spin(1, spin) <= brange_k_spin(2, spin)")
 
-   ABI_CHECK_IRANGE(gstore%brange_kq_spin(1, spin), 1, mband, "gstore_brange(1, spin)")
-   ABI_CHECK_IRANGE(gstore%brange_kq_spin(2, spin), 1, mband, "gstore_brange(2, spin)")
+   ABI_CHECK_IRANGE(gstore%brange_kq_spin(1, spin), 1, mband, "brange_k(1, spin)")
+   ABI_CHECK_IRANGE(gstore%brange_kq_spin(2, spin), 1, mband, "brange_k(2, spin)")
    ABI_CHECK(gstore%brange_kq_spin(1, spin) <= gstore%brange_kq_spin(2, spin), "brange_kq_spin(1, spin) <= brange_kq_spin(2, spin)")
  end do
 
@@ -2227,10 +2230,12 @@ subroutine gstore_filter_gw_qprange__(gstore, dtset, qbz2ibz, qibz2bz, kibz2bz, 
      ik_ibz = mapl_kk(1)
      ik_bz = kibz2bz(ik_ibz); select_kbz_spin(ik_bz, spin) = 1
    end do
-   ! FIXME: This requires a more careful treatment of (gqk%nb_k, gqk%nb) matrix that should become (nb1, nb2)
    ! Set brange_k_spin from bstart_ks and nbcalc_ks. Arrays have shape (nkcalc, nsppol)
+   ! FIXME: This requires a more careful treatment of (gqk%nb_k, gqk%nb) matrix that should become (nb1, nb2)
+   ! Note also that brange_k and brange_kq have been already initialized in gstore_distribute_spins
    !gstore%brange_k_spin(:, spin) = [minval(bstart_ks(:,spin)), maxval(bstart_ks(:,spin) + nbcalc_ks(:,spin) - 1)]
    !gstore%brange_kq_spin(:, spin) = [minval(bstart_ks(:,spin)), maxval(bstart_ks(:,spin) + nbcalc_ks(:,spin) - 1)]
+   !gstore%brange_kq_spin(:, spin) = [1, dtset%mband]
  end do ! spin
 
  !call recompute_select_qbz_spin(gstore, gstore%qbz, qbz2ibz, qibz2bz, gstore%kbz, gstore%kibz, gstore%kbz2ibz, gstore%kibz2bz, &
@@ -4492,8 +4497,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  call wfk0_hdr%vs_dtset(dtset); call wfk0_hdr%free()
 
  ! Distribute spins, create indirect mapping to spin index and init gstore%brange_k_spin
- ! FIXME: pass brange_kq_spin
- call gstore%distribute_spins__(ebands%mband, brange_k_spin, nproc_spin, comm_spin, comm)
+ call gstore%distribute_spins__(ebands%mband, brange_kq_spin, brange_k_spin, nproc_spin, comm_spin, comm)
 
  ! Compute krank
  call gstore%krank_ibz%from_kptrlatt(gstore%nkibz, gstore%kibz, ebands%kptrlatt, compute_invrank=.False.)
