@@ -1,5 +1,5 @@
 
-.Version 10.3.4.7 of ABINIT, released Dec 2025.
+.Version 10.5.6.1 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
@@ -400,7 +400,7 @@ P Number of CPUs for parallelism over k-points: 1
 
  Group velocities |v_nk| in atomic units:
  For k-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] , spin 1
- ib_k: 1     5.228746E-17
+ ib_k: 1     5.654169E-17
  For k-point: [ 7.6923E-02,  0.0000E+00,  0.0000E+00] , spin 1
  ib_k: 1     1.151920E-01
  For k-point: [-3.0769E-01,  4.6154E-01,  1.5385E-01] , spin 1
