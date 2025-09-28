@@ -341,7 +341,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! NB: Write phonon data here as we are not guaranteed to have all the IBZ q-points
  ! inside the loop over my_iq if filtering has been used.
  ! TODO: Similar piece of code in gstore_compute, should write method...
- ! FIXME: Something wrong here
+ ! FIXME: Something wrong here.
+ ! Make sure internal table with gstore_done_qbz_spin is properly filled.
  !if (ndone == 0) then
    call wrtout(std_out, " Computing phonon frequencies and displacements in the IBZ", pre_newlines=1)
    call cwtime(cpu, wall, gflops, "start")

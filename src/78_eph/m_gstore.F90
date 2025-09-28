@@ -591,7 +591,7 @@ contains
   procedure, private :: filter_erange__ => gstore_filter_erange__
   ! Select k-points inside an energy window.
 
-  procedure, private :: filter_qprange__ => gstore_filter_qprange__
+  procedure, private :: filter_gw_qprange__ => gstore_filter_gw_qprange__
   ! Select k-points according to gw_qprange
 
   procedure :: compute => gstore_compute
@@ -871,18 +871,18 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    continue
 
  case ("erange")
-   call gstore%filter_erange__(gstore%qbz, qbz2ibz, qibz2bz, gstore%kbz, gstore%kibz, gstore%kbz2ibz, kibz2bz, &
-                               select_qbz_spin, select_kbz_spin)
+   ! Use energy range: transport in semiconductors/metals or superconducting propertiea.
+   call gstore%filter_erange__(qbz2ibz, qibz2bz, kibz2bz, select_qbz_spin, select_kbz_spin)
 
  case ("qprange")
-   call gstore%filter_qprange__(dtset, gstore%qbz, qbz2ibz, qibz2bz, gstore%kbz, gstore%kibz, gstore%kbz2ibz, &
-                                kibz2bz, select_qbz_spin, select_kbz_spin)
+   ! Use gw_qprange input variable. Useful for ZPR
+   call gstore%filter_gw_qprange__(dtset, qbz2ibz, qibz2bz, kibz2bz, select_qbz_spin, select_kbz_spin)
 
  case ("fs_tetra")
    ! Use the tetrahedron method to filter k- and k+q points on the FS in metals
    ! and define gstore%brange_k_spin automatically.
-   call gstore%filter_fs_tetra__(gstore%qbz, qbz2ibz, qibz2bz, gstore%kbz, gstore%kibz, gstore%kbz2ibz, &
-                                 kibz2bz, select_qbz_spin, select_kbz_spin)
+   ! Useful for transport in metals or superconducting propertiea.
+   call gstore%filter_fs_tetra__(qbz2ibz, qibz2bz, kibz2bz, select_qbz_spin, select_kbz_spin)
 
  case default
    ABI_ERROR(sjoin("Invalid gstore%kfilter:", gstore%kfilter))
@@ -1893,16 +1893,13 @@ end subroutine gstore_malloc__
 !!
 !! SOURCE
 
-subroutine gstore_filter_fs_tetra__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2ibz, kibz2bz, &
-                                    select_qbz_spin, select_kbz_spin)
+subroutine gstore_filter_fs_tetra__(gstore, qbz2ibz, qibz2bz, kibz2bz, select_qbz_spin, select_kbz_spin)
 
 !Arguments ------------------------------------
 !scalars
  class(gstore_t),intent(inout) :: gstore
- real(dp),intent(in) :: qbz(3, gstore%nqbz)
- real(dp),target,intent(in) :: kbz(3, gstore%nqbz), kibz(3, gstore%nkibz)
  integer,intent(in) :: qbz2ibz(6,gstore%nqbz), qibz2bz(gstore%nqibz)
- integer,intent(in) :: kbz2ibz(6,gstore%nkbz), kibz2bz(gstore%nkibz)
+ integer,intent(in) :: kibz2bz(gstore%nkibz)
  integer,intent(out) :: select_qbz_spin(gstore%nqbz, gstore%nsppol)
  integer,intent(out) :: select_kbz_spin(gstore%nkbz, gstore%nsppol)
 
@@ -1938,10 +1935,10 @@ subroutine gstore_filter_fs_tetra__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kb
  gstore%brange_kq_spin = gstore%brange_k_spin
 
  ABI_MALLOC(indkk, (gstore%nkbz))
- indkk(:) = kbz2ibz(1, :)
+ indkk(:) = gstore%kbz2ibz(1, :)
 
  rlatt = ebands%kptrlatt; call matr3inv(rlatt, klatt)
- call ktetra%init(indkk, gstore%cryst%gprimd, klatt, kbz, gstore%nkbz, gstore%kibz, gstore%nkibz, &
+ call ktetra%init(indkk, gstore%cryst%gprimd, klatt, gstore%kbz, gstore%nkbz, gstore%kibz, gstore%nkibz, &
                   ierr, error_string, gstore%comm)
  ABI_CHECK(ierr == 0, error_string)
 
@@ -1975,7 +1972,7 @@ subroutine gstore_filter_fs_tetra__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kb
          select_kbz_spin(ik_bz, spin) = select_kbz_spin(ik_bz, spin) + iflag
 
        case ("bz")
-         call star_from_ibz_idx(ik_ibz, gstore%nkbz, kbz2ibz, nk_in_star, kstar_bz_inds)
+         call star_from_ibz_idx(ik_ibz, gstore%nkbz, gstore%kbz2ibz, nk_in_star, kstar_bz_inds)
          ABI_CHECK(nk_in_star > 0, "Something wrong in star_from_ibz_idx")
          do ii=1,nk_in_star
            ik_bz = kstar_bz_inds(ii)
@@ -1996,7 +1993,7 @@ subroutine gstore_filter_fs_tetra__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kb
  ! do not lead to any scattering process between two states on the FS
  ! Remember that k+q is always a sub-mesh of the input ebands k-mesh.
 
- call recompute_select_qbz_spin(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2ibz, kibz2bz, &
+ call recompute_select_qbz_spin(gstore, gstore%qbz, qbz2ibz, qibz2bz, gstore%kbz, gstore%kibz, gstore%kbz2ibz, kibz2bz, &
                                 select_kbz_spin, select_qbz_spin)
 
  ABI_FREE(eig_ibz)
@@ -2022,16 +2019,13 @@ end subroutine gstore_filter_fs_tetra__
 !!
 !! SOURCE
 
-subroutine gstore_filter_erange__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2ibz, kibz2bz, &
-                                  select_qbz_spin, select_kbz_spin)
+subroutine gstore_filter_erange__(gstore, qbz2ibz, qibz2bz, kibz2bz, select_qbz_spin, select_kbz_spin)
 
 !Arguments ------------------------------------
 !scalars
  class(gstore_t),intent(inout) :: gstore
- real(dp),intent(in) :: qbz(3, gstore%nqbz)
- real(dp),target,intent(in) :: kbz(3, gstore%nqbz), kibz(3, gstore%nkibz)
  integer,intent(in) :: qbz2ibz(6,gstore%nqbz), qibz2bz(gstore%nqibz)
- integer,intent(in) :: kbz2ibz(6,gstore%nkbz), kibz2bz(gstore%nkibz)
+ integer,intent(in) :: kibz2bz(gstore%nkibz)
  integer,intent(out) :: select_qbz_spin(gstore%nqbz, gstore%nsppol)
  integer,intent(out) :: select_kbz_spin(gstore%nkbz, gstore%nsppol)
 
@@ -2114,7 +2108,7 @@ subroutine gstore_filter_erange__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2
            select_kbz_spin(ik_bz, spin) = iflag
 
          case ("bz")
-           call star_from_ibz_idx(ik_ibz, gstore%nkbz, kbz2ibz, nk_in_star, kstar_bz_inds)
+           call star_from_ibz_idx(ik_ibz, gstore%nkbz, gstore%kbz2ibz, nk_in_star, kstar_bz_inds)
            ABI_CHECK(nk_in_star > 0, "Something wrong in star_from_ibz_idx")
            do ii=1,nk_in_star
              ik_bz = kstar_bz_inds(ii)
@@ -2142,7 +2136,7 @@ subroutine gstore_filter_erange__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2
  end do ! spin
 
  !call xmpi_sum(select_kbz_spin, comm, ierr)
- call recompute_select_qbz_spin(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2ibz, kibz2bz, &
+ call recompute_select_qbz_spin(gstore, gstore%qbz, qbz2ibz, qibz2bz, gstore%kbz, gstore%kibz, gstore%kbz2ibz, kibz2bz, &
                                 select_kbz_spin, select_qbz_spin)
 
  call gaps%free()
@@ -2153,12 +2147,12 @@ end subroutine gstore_filter_erange__
 
 !----------------------------------------------------------------------
 
-!!****f* m_gstore/gstore_filter_qprange__
+!!****f* m_gstore/gstore_filter_gw_qprange__
 !! NAME
-!! gstore_filter_qprange__
+!! gstore_gw_filter_qprange__
 !!
 !! FUNCTION
-!! Filter k-points according to the input variable gw_qprange.
+!! Filter k-points according to the input variable gw_qprange. Useful for ZPR.
 !!
 !! INPUTS
 !!
@@ -2166,17 +2160,14 @@ end subroutine gstore_filter_erange__
 !!
 !! SOURCE
 
-subroutine gstore_filter_qprange__(gstore, dtset, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2ibz, kibz2bz, &
-                                   select_qbz_spin, select_kbz_spin)
+subroutine gstore_filter_gw_qprange__(gstore, dtset, qbz2ibz, qibz2bz, kibz2bz, select_qbz_spin, select_kbz_spin)
 
 !Arguments ------------------------------------
 !scalars
  class(gstore_t),intent(inout) :: gstore
  type(dataset_type),intent(in) :: dtset
- real(dp),intent(in) :: qbz(3, gstore%nqbz)
- real(dp),target,intent(in) :: kbz(3, gstore%nqbz), kibz(3, gstore%nkibz)
  integer,intent(in) :: qbz2ibz(6,gstore%nqbz), qibz2bz(gstore%nqibz)
- integer,intent(in) :: kbz2ibz(6,gstore%nkbz), kibz2bz(gstore%nkibz)
+ integer,intent(in) :: kibz2bz(gstore%nkibz)
  integer,intent(out) :: select_qbz_spin(gstore%nqbz, gstore%nsppol)
  integer,intent(out) :: select_kbz_spin(gstore%nkbz, gstore%nsppol)
 
@@ -2189,11 +2180,7 @@ subroutine gstore_filter_qprange__(gstore, dtset, qbz, qbz2ibz, qibz2bz, kbz, ki
  real(dp),allocatable :: kcalc(:,:)
 !----------------------------------------------------------------------
 
- ABI_UNUSED(kbz2ibz)
- ABI_UNUSED(kbz)
- ABI_UNUSED(kibz)
  ABI_UNUSED(qbz2ibz)
- ABI_UNUSED(qbz)
  ABI_UNUSED(qibz2bz)
 
  associate (cryst => gstore%cryst, ebands => gstore%ebands)
@@ -2244,9 +2231,9 @@ subroutine gstore_filter_qprange__(gstore, dtset, qbz, qbz2ibz, qibz2bz, kbz, ki
    ! Set brange_k_spin from bstart_ks and nbcalc_ks. Arrays have shape (nkcalc, nsppol)
    !gstore%brange_k_spin(:, spin) = [minval(bstart_ks(:,spin)), maxval(bstart_ks(:,spin) + nbcalc_ks(:,spin) - 1)]
    !gstore%brange_kq_spin(:, spin) = [minval(bstart_ks(:,spin)), maxval(bstart_ks(:,spin) + nbcalc_ks(:,spin) - 1)]
- end do
+ end do ! spin
 
- !call recompute_select_qbz_spin(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2ibz, kibz2bz, &
+ !call recompute_select_qbz_spin(gstore, gstore%qbz, qbz2ibz, qibz2bz, gstore%kbz, gstore%kibz, gstore%kbz2ibz, gstore%kibz2bz, &
  !                               select_kbz_spin, select_qbz_spin)
 
  ABI_FREE(kcalc)
@@ -2256,7 +2243,7 @@ subroutine gstore_filter_qprange__(gstore, dtset, qbz, qbz2ibz, qibz2bz, kbz, ki
  call gaps%free()
  end associate
 
-end subroutine gstore_filter_qprange__
+end subroutine gstore_filter_gw_qprange__
 !!***
 
 !!****f* m_gstore/recompute_select_qbz_spin
