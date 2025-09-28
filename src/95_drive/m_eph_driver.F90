@@ -669,7 +669,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
                     pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (2, -2)
-   ! Compute e-ph matrix elements.
+   ! Compute e-ph matrix elements (legacy version)
    ABI_CHECK(dtset%useylm == 0, "useylm != 0 not implemented/tested")
    call eph_gkk(wfk0_path, wfq_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, ebands_kq, dvdb, ifc, &
                 pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
@@ -695,6 +695,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
 
  case (24)
+   ! Compute e-ph self-energy from GSTORE.nc file
    call gstore_sigeph(ngfftc, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_enreg, comm)
 
  case (5, -5)

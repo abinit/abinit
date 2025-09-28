@@ -91,14 +91,15 @@
 !!  depends on the collinear spin when filters are employed.
 !!
 !! TODO
-!!  1) Implement possibility of reading a subset of data from a larger gstore ?
+!!  1) Implement possibility of reading a subset of data (bands) from a larger gstore ?
 !!  2) Optimize v^1_loc|psi_nk> by precomputing <r|psi_nk> before the loop over my_npert
 !!     Big speedup is expected, especially if one loops first over k and then q, provided
 !!     the interpolation of v^1_q does not start to dominate
 !!  3) Use similar trick in dfpt_cgw for H^0 |psi_nk>
 !!  4) Operate on multiple n states in getgh1c (new version of getgh1c allows it)
-!!  5) Write IFC to faciliate interporability with external codes
-!!  6) Move to atom representation and add symmetry tables.
+!!  5) Write IFC to faciliate interporability with external codes (DONE)
+!!  6) Move to atom representation and add symmetry tables qbz --> qibz to fix the gauge in the ph displacements.
+!!  7) Write GSTORE tutorial to explain all the relevant combinations
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2025 ABINIT group (MG)
@@ -207,10 +208,8 @@ type, public :: gqk_t
   ! 3 * natom
   ! Mainly used to dimension arrays
 
-  ! TODO
-  ! These new entries will be used to implement band distribution.
   integer :: nb_kq = -1, nb_k = -1
-  ! Number of bands included in the calculation at k+q and k, for this spin
+  ! Number of bands included in the calculation at k+q and k, for this spin.
   ! Global as these dimensions are NOT DISTRIBUTED with MPI
   ! NB: nb_kq and nb_k are not necessarily equal to nband.
   ! Use bstar_kq and bstart_k to get the band index, e.g.:
@@ -531,13 +530,13 @@ type, public :: gstore_t
   ! (nqibz)
   ! q-points weights in the IBZ
 
-  ! TODO: Use MPI shared memory
   real(dp),allocatable :: qbz(:,:)
   ! q-points in the BZ.
+  ! TODO: Use MPI shared memory.
 
- ! TODO: Use MPI shared memory
   real(dp),allocatable :: kbz(:,:)
   ! k-points in the BZ.
+  ! TODO: Use MPI shared memory.
 
   !integer :: qptrlatt(3, 3) = -1  ! kptrlatt(3, 3) = -1,
    ! k-mesh and q-mesh
@@ -1079,8 +1078,8 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
 
      ! Dimensions in gqk_spin group
      ncerr = nctk_def_dims(spin_ncid, [ &
+        ! TODO: Remove nb
         nctkdim_t("nb", gstore%brange_k_spin(2, spin) - gstore%brange_k_spin(1, spin) + 1), &
-        ! TODO: NEW VERSION with nb replaced by nb_kq and nb_k.
         nctkdim_t("nb_k", gstore%brange_k_spin(2, spin) - gstore%brange_k_spin(1, spin) + 1), &
         nctkdim_t("nb_kq", gstore%brange_kq_spin(2, spin) - gstore%brange_kq_spin(1, spin) + 1), &
         nctkdim_t("glob_nk", gstore%glob_nk_spin(spin)), &
@@ -4519,11 +4518,11 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  !
  ! or
  !
- !    my_g2(my_npert, nb, my_nq, nb, my_nk) if with_cplex == 1
+ !    my_g2(my_npert, nb_kq, my_nq, nb_k, my_nk) if with_cplex == 1
  !
  ! On disk, we have:
  !
- !   nctkarr_t("gvals", "dp", "gstore_cplex, nb, nb, natom3, glob_nk, glob_nq")
+ !   nctkarr_t("gvals", "dp", "gstore_cplex, nb_kq_disk, nb_k_disk, natom3, glob_nk, glob_nq")
  !
  ! so gstore_cplex == 1 and with_cplex == 2 are not compatible.
  !
@@ -4558,6 +4557,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
 
  from_atm_to_nu = .False.
  if (present(with_gmode)) then
+   ! Compare with_gmode with the one on disk.
    ! The only conversion I can think of is: atom --> phonon.
    if (gstore%gmode /= with_gmode) then
      if (gstore%gmode == GSTORE_GMODE_ATOM .and. with_gmode == GSTORE_GMODE_PHONON) then
@@ -4581,7 +4581,6 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
      NCF_CHECK(nf90_inq_ncid(ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
 
      ncerr = nctk_get_dim(spin_ncid, "nb_k", nb_k_file)
-
      if (ncerr /= nf90_noerr) then
        old_format = .False.
        NCF_CHECK(nctk_get_dim(spin_ncid, "nb_k", nb_k_file))
@@ -4601,7 +4600,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
      ABI_MALLOC_OR_DIE(gwork_q, (gstore_cplex, nb_kq, nb_k, gqk%natom3, gqk%glob_nk), ierr)
      ABI_MALLOC(slice_bb, (gstore_cplex, nb_kq, nb_k))
 
-     ! Read my_gq0nm_atm matrix elements for DW.
+     ! Read my_gq0nm_atm matrix elements for DW in the RIA.
      if (read_dw__) then
         ! Find the index of q = 0.
         iq_glob = -1
@@ -4614,7 +4613,8 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
         ABI_CHECK_INEQ(iq_glob, -1, "Cannot finq q=0 in g(k,q)!")
         call wrtout(std_out, sjoin(" Reading g_atm(k,q=0) for Debye-Waller with iq_glob:", itoa(iq_glob)))
 
-       ! Read q-slice of the e-ph matrix elements (individual IO). Note gvals_name__
+       ! Read q-slice of the e-ph matrix elements (individual IO).
+       ! Note gvals_name__ so that we can read either g^KS or g^Sigma.
        ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_name__), gwork_q, start=[1, 1, 1, 1, 1, iq_glob])
        NCF_CHECK(ncerr)
 
@@ -4645,6 +4645,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
         isirr_q = (isym_q == 1 .and. trev_q == 0)
         tsign_q = 1; if (trev_q == 1) tsign_q = -1
         qq_ibz = gstore%qibz(:, iq_ibz)
+
         call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_cart_ibz(:,:,:,:,iq_ibz), pheigvec_cart_qbz, displ_cart_qbz, &
                              displ_red_qbz=displ_red_qbz)
 
@@ -4791,8 +4792,8 @@ subroutine gstore_check_restart(filepath, dtset, nqbz, done_qbz_spin, restart, c
       NCF_CHECK(nf90_close(root_ncid))
       !print *, "done_qbz_spin:", done_qbz_spin
 
-      ! NOTE: done_qbz_spin is dimensioned with the q-points in the BZ but we
-      ! FIXME: should set to 1 the q-points in the BZ else we never restart
+      ! FIXME: done_qbz_spin is dimensioned with the q-points in the BZ but we
+      ! should set to 1 the q-points in the BZ else we never restart
       ! Perhaps can can set to -1 if q = TS q_ibz if q_ibz is done.
       if (gstore_completed /= 0) then
         ! Previous computation completed, keep a backup of the file and start from scratch.
