@@ -1,5 +1,5 @@
 
-.Version 10.3.4.7 of ABINIT, released Dec 2025.
+.Version 10.5.6.1 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
@@ -415,9 +415,9 @@ P Number of CPUs for parallelism over k-points: 1
 
  Group velocities |v_nk| in atomic units:
  For k-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] , spin 1
- ib_k: 1     1.597244E-16
- ib_k: 2     1.326357E-16
- ib_k: 3     2.865041E-16
+ ib_k: 1     1.022399E-16
+ ib_k: 2     1.488731E-16
+ ib_k: 3     1.245706E-16
  For k-point: [ 3.3333E-01,  0.0000E+00,  0.0000E+00] , spin 1
  ib_k: 1     1.554477E-01
  ib_k: 2     2.891524E-02
@@ -713,20 +713,20 @@ P Number of CPUs for parallelism over k-points: 1
 
  Group velocities |v_nk| in atomic units:
  For k-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] , spin 1
- ib_k: 1     1.597244E-16
- ib_k: 2     1.326357E-16
- ib_k: 3     2.865041E-16
+ ib_k: 1     1.022399E-16
+ ib_k: 2     1.488731E-16
+ ib_k: 3     1.245706E-16
  For k-point: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] , spin 1
  ib_k: 1     1.938540E-01
  ib_k: 2     3.388617E-02
  ib_k: 3     3.388619E-02
  For k-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] , spin 1
- ib_k: 1     5.448422E-16
- ib_k: 2     2.751637E-17
- ib_k: 3     5.022125E-17
+ ib_k: 1     8.643814E-17
+ ib_k: 2     1.818523E-16
+ ib_k: 3     2.124280E-16
  For k-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01] , spin 1
- ib_k: 1     1.557473E-04
- ib_k: 2     1.557473E-04
+ ib_k: 1     1.557480E-04
+ ib_k: 2     1.557480E-04
  ib_k: 3     2.987294E-08
 
  E-PH matrix elements:
@@ -1011,9 +1011,9 @@ P Number of CPUs for parallelism over k-points: 1
 
  Group velocities |v_nk| in atomic units:
  For k-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] , spin 1
- ib_k: 1     1.597244E-16
- ib_k: 2     1.326357E-16
- ib_k: 3     2.865041E-16
+ ib_k: 1     1.022399E-16
+ ib_k: 2     1.488731E-16
+ ib_k: 3     1.245706E-16
  For k-point: [ 2.0000E-01,  0.0000E+00,  0.0000E+00] , spin 1
  ib_k: 1     1.949008E-01
  ib_k: 2     3.257109E-02
