@@ -413,23 +413,23 @@ P Number of CPUs for parallelism over k-points: 1
  gqk%glob_nq: 27
  gqk%glob_nk: 27
 
- Group velocities v_nk in Cartesian coordinates and atomic units:
+ Group velocities |v_nk| in atomic units:
  For k-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] , spin 1
- ib_k:1     5.418543E-17   -9.681293E-17   -1.149046E-16
- ib_k:2    -8.690669E-17   -1.001925E-16    9.663544E-19
- ib_k:3    -2.447293E-16   -1.370390E-16   -5.841643E-17
+ ib_k: 1     1.597244E-16
+ ib_k: 2     1.326357E-16
+ ib_k: 3     2.865041E-16
  For k-point: [ 3.3333E-01,  0.0000E+00,  0.0000E+00] , spin 1
- ib_k:1     8.974781E-02   -8.974779E-02   -8.974779E-02
- ib_k:2    -1.184402E-02   -1.862036E-02   -1.868400E-02
- ib_k:3     2.881760E-02    1.646799E-03    1.710440E-03
+ ib_k: 1     1.554477E-01
+ ib_k: 2     2.891524E-02
+ ib_k: 3     2.891525E-02
  For k-point: [ 3.3333E-01,  3.3333E-01,  0.0000E+00] , spin 1
- ib_k:1     2.693638E-08    2.696512E-08   -1.836701E-01
- ib_k:2    -2.788599E-09   -2.792472E-09   -5.713438E-02
- ib_k:3     7.205972E-09    7.177233E-09   -5.713438E-02
+ ib_k: 1     1.836701E-01
+ ib_k: 2     5.713438E-02
+ ib_k: 3     5.713438E-02
  For k-point: [-3.3333E-01,  3.3333E-01,  0.0000E+00] , spin 1
- ib_k:1    -9.897002E-02    9.897002E-02   -1.103521E-10
- ib_k:2     4.715912E-02   -4.715912E-02    1.273550E-10
- ib_k:3    -4.445781E-02    4.445781E-02   -1.296269E-12
+ ib_k: 1     1.399647E-01
+ ib_k: 2     6.669306E-02
+ ib_k: 3     6.287284E-02
 
  E-PH matrix elements:
     iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
@@ -711,23 +711,23 @@ P Number of CPUs for parallelism over k-points: 1
  gqk%glob_nq: 64
  gqk%glob_nk: 64
 
- Group velocities v_nk in Cartesian coordinates and atomic units:
+ Group velocities |v_nk| in atomic units:
  For k-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] , spin 1
- ib_k:1     5.418543E-17   -9.681293E-17   -1.149046E-16
- ib_k:2    -8.690669E-17   -1.001925E-16    9.663544E-19
- ib_k:3    -2.447293E-16   -1.370390E-16   -5.841643E-17
+ ib_k: 1     1.597244E-16
+ ib_k: 2     1.326357E-16
+ ib_k: 3     2.865041E-16
  For k-point: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] , spin 1
- ib_k:1     1.119217E-01   -1.119217E-01   -1.119217E-01
- ib_k:2    -1.351103E-02   -2.194083E-02   -2.200737E-02
- ib_k:3     3.380250E-02    1.649380E-03    1.715925E-03
+ ib_k: 1     1.938540E-01
+ ib_k: 2     3.388617E-02
+ ib_k: 3     3.388619E-02
  For k-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] , spin 1
- ib_k:1    -1.595396E-16   -3.401459E-16   -3.945896E-16
- ib_k:2     2.370407E-17   -1.056518E-17   -9.145738E-18
- ib_k:3    -3.089648E-17    1.701367E-17   -3.575075E-17
+ ib_k: 1     5.448422E-16
+ ib_k: 2     2.751637E-17
+ ib_k: 3     5.022125E-17
  For k-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01] , spin 1
- ib_k:1     5.053306E-09   -1.557473E-04   -5.112354E-09
- ib_k:2     1.709760E-08    1.557473E-04   -1.711815E-08
- ib_k:3     2.116419E-08    2.224527E-11   -2.108245E-08
+ ib_k: 1     1.557473E-04
+ ib_k: 2     1.557473E-04
+ ib_k: 3     2.987294E-08
 
  E-PH matrix elements:
     iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
@@ -1009,23 +1009,23 @@ P Number of CPUs for parallelism over k-points: 1
  gqk%glob_nq: 125
  gqk%glob_nk: 125
 
- Group velocities v_nk in Cartesian coordinates and atomic units:
+ Group velocities |v_nk| in atomic units:
  For k-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] , spin 1
- ib_k:1     5.418543E-17   -9.681293E-17   -1.149046E-16
- ib_k:2    -8.690669E-17   -1.001925E-16    9.663544E-19
- ib_k:3    -2.447293E-16   -1.370390E-16   -5.841643E-17
+ ib_k: 1     1.597244E-16
+ ib_k: 2     1.326357E-16
+ ib_k: 3     2.865041E-16
  For k-point: [ 2.0000E-01,  0.0000E+00,  0.0000E+00] , spin 1
- ib_k:1     1.125261E-01   -1.125260E-01   -1.125260E-01
- ib_k:2    -1.271027E-02   -2.117528E-02   -2.123516E-02
- ib_k:3     3.251041E-02    1.375172E-03    1.435051E-03
+ ib_k: 1     1.949008E-01
+ ib_k: 2     3.257109E-02
+ ib_k: 3     3.257111E-02
  For k-point: [-4.0000E-01,  4.0000E-01,  0.0000E+00] , spin 1
- ib_k:1    -6.885349E-02    6.885349E-02   -2.081038E-11
- ib_k:2     7.010366E-02   -7.010366E-02    2.299852E-11
- ib_k:3    -3.509757E-02    3.509758E-02   -3.654102E-12
+ ib_k: 1     9.737354E-02
+ ib_k: 2     9.914155E-02
+ ib_k: 3     4.963547E-02
  For k-point: [-4.0000E-01,  4.0000E-01,  2.0000E-01] , spin 1
- ib_k:1     6.192897E-08    8.796170E-02   -4.959509E-02
- ib_k:2    -3.448919E-08   -1.286443E-01   -5.261493E-02
- ib_k:3     3.705503E-08    2.027491E-02   -5.590991E-02
+ ib_k: 1     1.009799E-01
+ ib_k: 2     1.389881E-01
+ ib_k: 3     5.947260E-02
 
  E-PH matrix elements:
     iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
