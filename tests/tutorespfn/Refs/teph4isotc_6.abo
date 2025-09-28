@@ -479,23 +479,23 @@ P Number of CPUs for parallelism over k-points: 1
  gqk%glob_nq: 216
  gqk%glob_nk: 173
 
- Group velocities v_nk in Cartesian coordinates and atomic units:
+ Group velocities |v_nk| in atomic units:
  For k-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] , spin 1
- ib_k:1     0.000000E+00    0.000000E+00    0.000000E+00
- ib_k:2     0.000000E+00    0.000000E+00    0.000000E+00
- ib_k:3     0.000000E+00    0.000000E+00    0.000000E+00
+ ib_k: 1     0.000000E+00
+ ib_k: 2     0.000000E+00
+ ib_k: 3     0.000000E+00
  For k-point: [ 5.5556E-02,  0.0000E+00,  0.0000E+00] , spin 1
- ib_k:1    -1.421704E-01   -2.462464E-01   -1.164725E-12
- ib_k:2    -6.748157E-02   -1.168815E-01    1.617837E-14
- ib_k:3     2.525743E-02    4.374715E-02   -4.937971E-13
+ ib_k: 1     2.843409E-01
+ ib_k: 2     1.349631E-01
+ ib_k: 3     5.051486E-02
  For k-point: [ 3.3333E-01,  2.7778E-01,  5.0000E-01] , spin 1
- ib_k:1     0.000000E+00    0.000000E+00    0.000000E+00
- ib_k:2     0.000000E+00    0.000000E+00    0.000000E+00
- ib_k:3     0.000000E+00    0.000000E+00    0.000000E+00
+ ib_k: 1     0.000000E+00
+ ib_k: 2     0.000000E+00
+ ib_k: 3     0.000000E+00
  For k-point: [ 3.3333E-01,  3.3333E-01,  5.0000E-01] , spin 1
- ib_k:1     0.000000E+00    0.000000E+00    0.000000E+00
- ib_k:2     0.000000E+00    0.000000E+00    0.000000E+00
- ib_k:3     0.000000E+00    0.000000E+00    0.000000E+00
+ ib_k: 1     0.000000E+00
+ ib_k: 2     0.000000E+00
+ ib_k: 3     0.000000E+00
 
  E-PH matrix elements:
     iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
