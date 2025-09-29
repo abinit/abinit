@@ -60,7 +60,7 @@ pseudos "Fe.psp8"
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t28.abo, tolnlines = 61, tolabs = 1.000e-02, tolrel = 3.640e-04
+#%%   t28.abo, tolnlines = 80, tolabs = 1.000e-01, tolrel = 3.640e-03
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

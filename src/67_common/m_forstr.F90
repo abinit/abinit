@@ -673,7 +673,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  integer :: tim_nonlop,tim_nonlop_prep,usecprj_local,use_ACE_old
  integer :: blocksize,iblock,iblocksize,ibs,nblockbd,nblk_gemm_nonlop
  integer :: space,me_g0,ncols_cprj
- real(dp) :: ar,ar2,renorm_factor,dfsm,ecutsm_inv,fact_kin,fsm,htpisq,kgc1
+ real(dp) :: ar,ar2,renorm_factor,dfsm,ecutsm_inv,fact_kin,fsm,htpisq
  real(dp) :: kin,kin_kphq,xx
  type(gs_hamiltonian_type) :: gs_hamk
  logical :: compute_gbound,usefock_loc
