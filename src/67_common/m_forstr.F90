@@ -674,7 +674,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  integer :: blocksize,iblock,iblocksize,ibs,nblockbd,nblk_gemm_nonlop
  integer :: space,me_g0,ncols_cprj
  real(dp) :: ar,ar2,renorm_factor,dfsm,ecutsm_inv,fact_kin,fsm,htpisq,kgc1
- real(dp) :: kgc2,kgc3,kin,kgc1_kphq,kgc2_kphq,kgc3_kphq,kgc4_kphq,kgc5_kphq,kgc6_kphq,kin_kphq,xx
+ real(dp) :: kin,kin_kphq,xx
  type(gs_hamiltonian_type) :: gs_hamk
  logical :: compute_gbound,usefock_loc
  character(len=500) :: msg
@@ -982,16 +982,6 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
            kgr_kphq = kphq+kg_k(:,ipw)
            kgc_kphq = MATMUL(gprimd, kgr_kphq)
            kin_kphq = htpisq * DOT_PRODUCT(kgc_kphq, kgc_kphq) 
-!              kgc1_kphq=gprimd(1,1)*(kphq(1)+kg_k(1,ipw))+&
-! &         gprimd(1,2)*(kphq(2)+kg_k(2,ipw))+&
-! &         gprimd(1,3)*(kphq(3)+kg_k(3,ipw))
-!          kgc2_kphq=gprimd(2,1)*(kphq(1)+kg_k(1,ipw))+&
-! &         gprimd(2,2)*(kphq(2)+kg_k(2,ipw))+&
-! &         gprimd(2,3)*(kphq(3)+kg_k(3,ipw))
-!          kgc3_kphq=gprimd(3,1)*(kphq(1)+kg_k(1,ipw))+&
-! &         gprimd(3,2)*(kphq(2)+kg_k(2,ipw))+&
-! &         gprimd(3,3)*(kphq(3)+kg_k(3,ipw))
-!          kin_kphq=htpisq* ( kgc1_kphq**2 + kgc2_kphq**2 + kgc3_kphq**2 )
            fact_kin=1.0_dp
            if (kin_kphq>ecut-ecutsm) then
              if (kin_kphq>ecut) then
