@@ -520,6 +520,7 @@ type, public :: dataset_type
  integer :: paral_atom
  integer :: paral_kgb
  integer :: paral_rf
+ integer :: paw_add_Core
  integer :: pawcpxocc
  integer :: pawcross
  integer :: pawfatbnd
@@ -2023,6 +2024,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%paral_rf           = dtin%paral_rf
  dtout%prt_lorbmag        = dtin%prt_lorbmag
  dtout%pawcpxocc          = dtin%pawcpxocc
+ dtout%paw_add_core       = dtin%paw_add_core
  dtout%pawcross           = dtin%pawcross
  dtout%pawlcutd           = dtin%pawlcutd
  dtout%pawlmix            = dtin%pawlmix
@@ -3730,7 +3732,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' optnlxccc optstress oracle_factor oracle_min_occ orbmag ortalg'
  list_vars=trim(list_vars)//' opt_effpot opt_ncoeff opt_coeff output_file outdata_prefix'
 !P
- list_vars=trim(list_vars)//' papiopt paral_atom paral_kgb paral_rf pawcpxocc pawcross'
+ list_vars=trim(list_vars)//' papiopt paral_atom paral_kgb paral_rf paw_add_core pawcpxocc pawcross'
  list_vars=trim(list_vars)//' pawecutdg pawfatbnd pawlcutd pawlmix'
  list_vars=trim(list_vars)//' pawmixdg pawnhatxc pawnphi pawntheta pawnzlm pawoptmix pawoptosc pawovlp'
  list_vars=trim(list_vars)//' pawprtdos pawprtvol pawprtwf pawprt_b pawprt_k pawspnorb pawstgylm'

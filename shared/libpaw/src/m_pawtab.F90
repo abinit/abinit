@@ -133,6 +133,11 @@ MODULE m_pawtab
 
 !Integer scalars
 
+  integer :: add_core_energy
+   ! Flag controling addition of core energies in total energy
+   ! add_core_energy=0 ; do not add core energy to PAW energy
+   ! add_core_energy=1 ; add core energy to PAW energy
+
   integer :: basis_size
    ! Number of elements for the paw nl basis on the considered atom type
 
@@ -140,11 +145,6 @@ MODULE m_pawtab
    ! Flag controling use of core kinetic energy density (AE and pseudo)
    ! if 1, [t]coretau() is allocated.
    ! if 2, [t]coretau() is computed and stored.
-
-  integer :: has_core_energies
-   ! Flag controling use of core energies in total energy
-   ! has_core_energies=0 ; do not use core energies
-   ! has_core_energies=1 ; use core energies
 
   integer :: has_fock
    ! if 1, onsite matrix elements of the core-valence Fock operator are allocated
@@ -713,7 +713,7 @@ subroutine pawtab_nullify_0D(Pawtab)
  Pawtab%has_nablaphi=0
  Pawtab%has_shapefncg=0
  Pawtab%has_wvl=0
- Pawtab%has_core_energies=0
+ Pawtab%add_core_energy=0
 
  Pawtab%usetcore=0
  Pawtab%usexcnhat=0
@@ -1063,10 +1063,10 @@ end subroutine pawtab_free_1D
 
 subroutine pawtab_set_flags_0D(Pawtab,has_coretau,has_fock,has_kij,has_tproj,has_tvale,has_vhnzc,&
 &                              has_vhtnzc,has_nabla,has_nablaphi,has_shapefncg,has_vminushalf,has_wvl,&
-&                              has_core_energies)
+&                              add_core_energy)
 
 !Arguments ------------------------------------
- integer,intent(in),optional :: has_coretau,has_core_energies,has_fock,has_kij,has_tproj,has_tvale
+ integer,intent(in),optional :: has_coretau,add_core_energy,has_fock,has_kij,has_tproj,has_tvale
  integer,intent(in),optional :: has_vhnzc,has_vhtnzc,has_vminushalf
  integer,intent(in),optional :: has_nabla,has_nablaphi,has_shapefncg,has_wvl
  type(pawtab_type),intent(inout) :: Pawtab
@@ -1089,7 +1089,7 @@ subroutine pawtab_set_flags_0D(Pawtab,has_coretau,has_fock,has_kij,has_tproj,has
  Pawtab%has_shapefncg =0
  Pawtab%has_vminushalf=0
  Pawtab%has_wvl       =0
- Pawtab%has_core_energies=0
+ Pawtab%add_core_energy=0
  if (present(has_fock))      Pawtab%has_fock=has_fock
  if (present(has_kij))       Pawtab%has_kij=has_kij
  if (present(has_tproj))     Pawtab%has_tproj=has_tproj
@@ -1102,7 +1102,7 @@ subroutine pawtab_set_flags_0D(Pawtab,has_coretau,has_fock,has_kij,has_tproj,has
  if (present(has_shapefncg) )Pawtab%has_shapefncg=has_shapefncg
  if (present(has_vminushalf))Pawtab%has_vminushalf=has_vminushalf
  if (present(has_wvl))       Pawtab%has_wvl=has_wvl
- if (present(has_core_energies)) Pawtab%has_core_energies=has_core_energies
+ if (present(add_core_energy)) Pawtab%add_core_energy=add_core_energy
 
 end subroutine pawtab_set_flags_0D
 !!***
@@ -1121,10 +1121,10 @@ end subroutine pawtab_set_flags_0D
 
 subroutine pawtab_set_flags_1D(Pawtab,has_coretau,has_fock,has_kij,has_tproj,has_tvale,has_vhnzc,&
 &                              has_vhtnzc,has_nabla,has_nablaphi,has_shapefncg,has_vminushalf,has_wvl,&
-&                              has_core_energies)
+&                              add_core_energy)
 
 !Arguments ------------------------------------
- integer,intent(in),optional :: has_coretau,has_core_energies,has_fock,has_kij,has_tproj,has_tvale,has_vhnzc,has_vhtnzc
+ integer,intent(in),optional :: has_coretau,add_core_energy,has_fock,has_kij,has_tproj,has_tvale,has_vhnzc,has_vhtnzc
  integer,intent(in),optional :: has_nabla,has_nablaphi,has_shapefncg,has_vminushalf,has_wvl
  type(pawtab_type),intent(inout) :: Pawtab(:)
 
@@ -1151,7 +1151,7 @@ subroutine pawtab_set_flags_1D(Pawtab,has_coretau,has_fock,has_kij,has_tproj,has
    Pawtab(ii)%has_shapefncg =0
    Pawtab(ii)%has_vminushalf=0
    Pawtab(ii)%has_wvl       =0
-   Pawtab(ii)%has_core_energies=0
+   Pawtab(ii)%add_core_energy=0
    if (present(has_fock))      Pawtab(ii)%has_fock=has_fock
    if (present(has_kij))       Pawtab(ii)%has_kij=has_kij
    if (present(has_tproj))     Pawtab(ii)%has_tproj=has_tproj
@@ -1164,7 +1164,7 @@ subroutine pawtab_set_flags_1D(Pawtab,has_coretau,has_fock,has_kij,has_tproj,has
    if (present(has_shapefncg)) Pawtab(ii)%has_shapefncg=has_shapefncg
    if (present(has_vminushalf))Pawtab(ii)%has_vminushalf=has_vminushalf
    if (present(has_wvl))       Pawtab(ii)%has_wvl=has_wvl
-   if (present(has_core_energies)) Pawtab(ii)%has_core_energies=has_core_energies
+   if (present(add_core_energy)) Pawtab(ii)%add_core_energy=add_core_energy
  end do
 
 end subroutine pawtab_set_flags_1D
@@ -1315,7 +1315,7 @@ subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,i4)')'  Has wvl ........................................ ',Pawtab(ityp)%has_wvl
   call wrtout(my_unt,msg,my_mode)
-  write(msg,'(a,i4)')'  Has core energies .............................. ',Pawtab(ityp)%has_core_energies
+  write(msg,'(a,i4)')'  Add core energy ................................ ',Pawtab(ityp)%add_core_energy
   call wrtout(my_unt,msg,my_mode)
   !
   ! Real scalars
@@ -1536,7 +1536,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 !Integers (depending on the parameters of the calculation)
 !-------------------------------------------------------------------------
 !  ij_proj,lcut_size,lexexch,lmnmix_sz,lpawu,mqgrid_shp,nproju,useexexch,usepawu,usepotzero,
-!  option_interaction_pawu,usespnorb,has_core_energies
+!  option_interaction_pawu,usespnorb,add_core_energy
    if (full_broadcast) nn_int=nn_int+13
 
 !Reals (read from psp file)
@@ -2063,7 +2063,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      list_int(ii)=pawtab%usepawu  ;ii=ii+1
      list_int(ii)=pawtab%usepotzero ;ii=ii+1
      list_int(ii)=pawtab%usespnorb ;ii=ii+1
-     list_int(ii)=pawtab%has_core_energies  ;ii=ii+1
+     list_int(ii)=pawtab%add_core_energy  ;ii=ii+1
 !Integer arrays
      if (siz_indklmn>0) then
        list_int(ii:ii+siz_indklmn-1)=reshape(pawtab%indklmn,(/siz_indklmn/))
@@ -2244,7 +2244,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      pawtab%usepawu=list_int(ii)  ;ii=ii+1
      pawtab%usepotzero=list_int(ii) ;ii=ii+1
      pawtab%usespnorb=list_int(ii) ;ii=ii+1
-     pawtab%has_core_energies=list_int(ii) ;ii=ii+1
+     pawtab%add_core_energy=list_int(ii) ;ii=ii+1
 !Integer arrays
      if (allocated(pawtab%indklmn)) then
        LIBPAW_DEALLOCATE(pawtab%indklmn)

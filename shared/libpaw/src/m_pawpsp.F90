@@ -1310,7 +1310,7 @@ subroutine pawpsp_read(core_mesh,funit,imainmesh,lmax,&
  end if
 
 !---------------------------------
-!Initialize (to zero) kinetic energy and energy densities (for testing purpose)
+!Initialize (to zero) kinetic energy and energy densities
  pawtab%ekincore=zero
  if (pawtab%has_coretau>0) then
    write(msg,'(5a)' )&
@@ -1945,9 +1945,6 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
  real(dp),allocatable,target :: work1(:),work2(:),work3(:)
  real(dp),pointer :: tmp1(:),tmp2(:)
  logical :: tmp_lmselect(1)
-
-!TEST
-! real(dp),allocatable,target :: work4(:)
 
 ! *************************************************************************
 
@@ -2718,12 +2715,6 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
  work1(:)=zero;work2(:)=zero;work3(:)=zero
  tmp1 => work1 ; tmp2 => work1
 
-!TEST
-! itest=pawrad_ifromr(radmesh(imainmesh),pawtab%rpaw)
-! LIBPAW_ALLOCATE(work4,(core_mesh%mesh_size))
-! work4=ncore ; work4(itest+1:)=zero
-! write(100+xmpi_comm_rank(xmpi_world),*) "itest=",itest; flush(100+xmpi_comm_rank(xmpi_world))
- 
  if (pawxcdev/=0) then
    call pawxcm(ncore,pawtab%exccore,yp1,pawtab%sxccore,0,hyb_mixing,ixc,work2,1,tmp_lmselect,work3,0,non_magnetic_xc,core_mesh%mesh_size,&
 &   nspden,4,pawang_tmp,core_mesh,pawxcdev,work1,1,0,tmp1,xclevel,xc_denpos,my_el_temp)
@@ -2732,9 +2723,6 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
      call pawxc(ncore,pawtab%exccore,yp1,pawtab%sxccore,hyb_mixing,ixc,work2,work1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,core_mesh%mesh_size,&
 &     nspden,4,pawang_tmp,core_mesh,tmp1,1,0,tmp2,xclevel,xc_denpos,my_el_temp,coretau=tcoretau,xc_taupos=my_xc_taupos)
    else
-!TEST
-!     call pawxc(work4,pawtab%exccore,yp1,pawtab%sxccore,hyb_mixing,ixc,work2,work1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,core_mesh%mesh_size,&
-!&     nspden,4,pawang_tmp,core_mesh,tmp1,1,0,tmp2,xclevel,xc_denpos,my_el_temp)
      call pawxc(ncore,pawtab%exccore,yp1,pawtab%sxccore,hyb_mixing,ixc,work2,work1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,core_mesh%mesh_size,&
 &     nspden,4,pawang_tmp,core_mesh,tmp1,1,0,tmp2,xclevel,xc_denpos,my_el_temp)
    end if
@@ -2743,8 +2731,6 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
  LIBPAW_DEALLOCATE(work1)
  LIBPAW_DEALLOCATE(work2)
  LIBPAW_DEALLOCATE(work3)
-!TEST
-! LIBPAW_DEALLOCATE(work4)
 
 !==================================================
 !Compute Hartree kinetic energy for the core density and the nucleus
