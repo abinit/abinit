@@ -4160,6 +4160,7 @@ subroutine vcart2ylm(vector, length, theta, phi)
      theta = acos(vector(3) / length) * 180.d0 / pi
      if (abs(vector(1)) > tol8 .or. abs(vector(2)) > tol8) then
         phi = atan2(vector(2), vector(1)) * 180.d0 / pi
+        if (phi < 0.d0) phi = phi + 360.d0
      else
         phi = 0.d0
      end if
