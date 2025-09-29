@@ -1561,7 +1561,15 @@ subroutine prtene(dtset,energies,iout,usepaw)
          call edoc%add_real('non_local_psp+x', energies%e_nlpsp_vfock-energies%e_fock0)
        endif
      else
-       call edoc%add_real('spherical_terms', energies%e_paw)
+       if (dtset%use_rcpaw/=0) then
+         call edoc%add_real('spherical_terms', energies%e_paw)
+         call edoc%add_real('paw_core', energies%e_corepaw)
+       else if (dtset%paw_add_core==1) then
+         call edoc%add_real('spherical_terms', energies%e_paw-energies%e_corepaw)
+         call edoc%add_real('paw_core', energies%e_corepaw)
+       else
+         call edoc%add_real('spherical_terms', energies%e_paw)
+       end if
        !!!XG20181025 Does not work (yet)...
        !!!if(abs(energies%e_nlpsp_vfock)>tol8)then
        !!!  write(msg, '(a,es21.14)' )'    Fock-type term  = ',energies%e_nlpsp_vfock
@@ -1569,9 +1577,6 @@ subroutine prtene(dtset,energies,iout,usepaw)
        !!!  write(msg, '(a,es21.14)' ) '    -frozen Fock en.= ',-energies%e_fock0
        !!!  call wrtout(iout,msg)
        !!!endif
-       if(abs(energies%e_cpaw)>tiny(0.0_dp)) then
-         call edoc%add_real('cpaw', energies%e_cpaw)
-       endif
      end if
      if (ANY(ABS(dtset%nucdipmom)>tol8)) then
        call edoc%add_real('nucl. magn. dipoles',energies%e_nucdip)
@@ -1657,10 +1662,15 @@ subroutine prtene(dtset,energies,iout,usepaw)
      call dc_edoc%add_real('electric_field', energies%e_elecfield)
    end if
    if (usepaw==1) then
-     call dc_edoc%add_real('spherical_terms', energies%e_pawdc)
-     if(abs(energies%e_cpawdc)>tiny(0.0_dp)) then
-       call dc_edoc%add_real('cpaw_dc', energies%e_cpawdc)
-     endif
+     if (dtset%use_rcpaw/=0) then
+       call dc_edoc%add_real('spherical_terms', energies%e_pawdc)
+       call dc_edoc%add_real('paw_core_dc', energies%e_corepawdc)
+     else if (dtset%paw_add_core==1) then
+       call dc_edoc%add_real('spherical_terms', energies%e_pawdc-energies%e_corepaw)
+       call dc_edoc%add_real('paw_core', energies%e_corepaw)
+     else
+       call dc_edoc%add_real('spherical_terms', energies%e_pawdc)
+     end if
    end if
    if ((dtset%vdw_xc>=5.and.dtset%vdw_xc<=7).and.ipositron/=1) then
      call dc_edoc%add_real('VdWaals_dft_d', energies%e_vdw_dftd)
@@ -1712,7 +1722,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
    call dc_edoc%add_real('total_energy_dc', etotaldc)
  end if
 
-!======= Additional printing for compatibility  ==========
+!======= Additional printing ==========
 
  if (usepaw==0.and.optdc==0) then
    call edoc%add_real('total_energy_eV', etotal*Ha_eV)
@@ -1729,11 +1739,23 @@ subroutine prtene(dtset,energies,iout,usepaw)
    if ((optdc==0.or.optdc==2).and.(directE_avail)) then
      call edoc%add_real('total_energy_eV', etotal*Ha_eV)
    end if
+   if (dtset%paw_add_core==0.and.dtset%use_rcpaw==0) then
+     if (abs(energies%e_corepaw)>tiny(zero)) then
+       call edoc%add_real('tot_ene_incl_core', etotal+energies%e_corepaw)
+       call edoc%add_real('tot_ene_incl_core_eV', (etotal+energies%e_corepaw)*Ha_eV)
+     end if
+   end if
    if (optdc>=1) then
      !if (optdc==1) write(msg, '(a,a,es21.14)' ) ch10,'  >Total DC energy in eV        = ',etotaldc*Ha_eV
      !if (optdc==2) write(msg, '(a,es21.14)' ) '  >Total DC energy in eV        = ',etotaldc*Ha_eV
      !call wrtout(iout,msg)
      call dc_edoc%add_real('total_energy_dc_eV', etotaldc*Ha_eV)
+     if (dtset%paw_add_core==0.and.dtset%use_rcpaw==0) then
+       if (abs(energies%e_corepaw)>tiny(zero)) then
+         call dc_edoc%add_real('tot_edc_incl_core', etotaldc+energies%e_corepaw)
+         call dc_edoc%add_real('tot_edc_incl_core_eV', (etotaldc+energies%e_corepaw)*Ha_eV)
+       end if
+     end if
    end if
  end if
 

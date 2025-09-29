@@ -849,10 +849,10 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  ! Add the contribution from cores
  if(present(rcpaw)) then
    if(associated(rcpaw)) then
-     energies%e_cpaw=rcpaw%ehnzc+rcpaw%ekinc
-     energies%e_cpawdc=rcpaw%eeigc-rcpaw%edcc+rcpaw%ehnzc
-     if(optene==0.or.optene==2) etotal=etotal+energies%e_cpaw
-     if(optene==1.or.optene==3) etotal=etotal+energies%e_cpawdc
+     energies%e_corepaw=rcpaw%ehnzc+rcpaw%ekinc
+     energies%e_corepawdc=rcpaw%eeigc-rcpaw%edcc+rcpaw%ehnzc
+     if(optene==0.or.optene==2) etotal=etotal+energies%e_corepaw
+     if(optene==1.or.optene==3) etotal=etotal+energies%e_corepawdc
    endif
  endif
 

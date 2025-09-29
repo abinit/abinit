@@ -2743,6 +2743,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    end if
 !  P
    dtsets(idtset)%paral_atom=paral_atom_default
+   dtsets(idtset)%paw_add_core=0
    dtsets(idtset)%pawcpxocc=1
    dtsets(idtset)%pawcross=0
    dtsets(idtset)%pawecutdg=-one

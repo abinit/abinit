@@ -2381,6 +2381,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%quadmom(1:ntypat)=dprarr(1:ntypat)
  end if
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'paw_add_core',tread,'INT')
+ if(tread==1) dtset%paw_add_core=intarr(1)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'pawcpxocc',tread,'INT')
  if(tread==1) then
    dtset%pawcpxocc=intarr(1)
