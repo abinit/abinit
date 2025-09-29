@@ -272,7 +272,6 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  ! Consistency check
  ierr = 0
  ABI_CHECK_NOSTOP(gstore%qzone == "bz", "qzone == 'bz' is required", ierr)
- ABI_CHECK_NOSTOP(gstore%gqk(1)%cplex == 1, "cplex == 1 is required", ierr)
  ABI_CHECK(ierr == 0, "Wrong gstore object for migdal_eliashberg_iso. See messages above")
 
  ! Compute electron DOS.

@@ -7,7 +7,6 @@
  eph_task   11  # Activate the e-ph matrix elements computation via GSTORE
 
 # Electron-phonon matrix elements parameters
- gstore_cplex  2     # Complex e-ph matrix elements   (mandatory for VarPEq)
  gstore_kzone  "bz"  # Use full BZ for k and q meshed (mandatory for VarPEq)
  gstore_qzone  "bz"
  gstore_erange 0. 1.0 eV  # Activate the energy filtering

@@ -924,14 +924,13 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  ! =============================================
  ! Initialize gqk basic dimensions and MPI grid
  ! =============================================
- call gstore%set_mpi_grid__(dtset%gstore_cplex, nproc_spin, comm_spin)
+ call gstore%set_mpi_grid__(nproc_spin, comm_spin)
  call xmpi_comm_free(comm_spin)
 
  ! At this point, we have the Cartesian grid (one per spin if any)
  ! and we can finally allocate and distribute other arrays.
  ! Note with_cplex = 0 --> matrix elements are not allocated here
- with_cplex = 0
- if (has_gwan) with_cplex = 2
+ with_cplex = 0; if (has_gwan) with_cplex = 2
  call gstore%malloc__(with_cplex, max_nq, qglob2bz, max_nk, gstore%kglob2bz, qbz2ibz, gstore%kbz2ibz)
 
  ! Initialize GSTORE.nc file i.e. define dimensions and arrays
@@ -965,7 +964,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
       nctkdim_t("nrpt", ifc%nrpt), &
       nctkdim_t("natom", gstore%cryst%natom), &
       nctkdim_t("natom3", 3 * gstore%cryst%natom), &
-      nctkdim_t("gstore_cplex", dtset%gstore_cplex) &
+      nctkdim_t("gstore_cplex", 2) &
    ], defmode=.True.)
    NCF_CHECK(ncerr)
 
@@ -1324,12 +1323,11 @@ end subroutine gstore_distribute_spins
 !!
 !! SOURCE
 
-subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, nproc_spin, comm_spin)
+subroutine gstore_set_mpi_grid__(gstore, nproc_spin, comm_spin)
 
 !Arguments ------------------------------------
 !scalars
  class(gstore_t),target,intent(inout) :: gstore
- integer,intent(in) :: gstore_cplex
  integer,intent(in) :: nproc_spin(gstore%nsppol)
  integer,intent(inout) :: comm_spin(gstore%nsppol)
 !Local variables-------------------------------
@@ -1351,8 +1349,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, nproc_spin, comm_spin)
 
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is)
-   gqk%spin = spin; gqk%natom3 = 3 * gstore%cryst%natom; gqk%cplex = gstore_cplex
-   ABI_CHECK_IRANGE(gqk%cplex, 1, 2, "gstore_cplex")
+   gqk%spin = spin; gqk%natom3 = 3 * gstore%cryst%natom; gqk%cplex = 2
 
    ! Compute bstart_k and nb_k for this spin.
    bstart_k = gstore%brange_k_spin(1, spin)
@@ -4005,6 +4002,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
          ! Save e-ph matrix elements in the buffer.
          select case (gqk%cplex)
          case (1)
+           NOT_IMPLEMENTED_ERROR()
            my_gbuf(1,:,:,:, my_ik, iqbuf_cnt) = gkq_nu(1,:,:,:) ** 2 + gkq_nu(2,:,:,:) ** 2
          case (2)
            my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gkq_nu
@@ -4014,6 +4012,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
          ! Save e-ph matrix elements in the buffer.
          select case (gqk%cplex)
          case (1)
+           NOT_IMPLEMENTED_ERROR()
            my_gbuf(1,:,:,:, my_ik, iqbuf_cnt) = gkq_atm(1,:,:,:) ** 2 + gkq_atm(2,:,:,:) ** 2
          case (2)
            my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gkq_atm
@@ -4123,13 +4122,13 @@ subroutine dump_my_gbuf()
 
  !if (dtset%prtvol > 5) then
  !print *, "in dump_my_gbuf with start: ", [1, 1, 1, 1, gqk%my_kstart, iq_glob]
- !print *, "                  count; ", [gqk%cplex, gqk%nb_kq, gqk%nb_k, gqk%natom3, gqk%my_nk, iqbuf_cnt]
+ !print *, "                  count; ", [2, gqk%nb_kq, gqk%nb_k, gqk%natom3, gqk%my_nk, iqbuf_cnt]
  !end if
 
  ! NB: this is an individual IO operation
  ncerr = nf90_put_var(spin_ncid, spin_vid("gvals"), my_gbuf, &
                       start=[1, 1, 1, 1, gqk%my_kstart, iq_glob], &
-                      count=[gqk%cplex, gqk%nb_kq, gqk%nb_k, gqk%natom3, gqk%my_nk, iqbuf_cnt])
+                      count=[2, gqk%nb_kq, gqk%nb_k, gqk%natom3, gqk%my_nk, iqbuf_cnt])
  NCF_CHECK(ncerr)
 
  ! Only one proc sets the entry in done_qbz_spin to 1 for all the q-points in the buffer.
@@ -4251,8 +4250,8 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
 !scalars
  integer,parameter :: master = 0
  integer :: my_rank, ncid, spin, spin_ncid, nproc, ierr, fform, max_nb, ib, natom, natom3, varid, ib_m, ib_n
- integer :: max_nq, max_nk, gstore_cplex, ncerr, my_is, my_iq, iq_glob, my_ik, ik_glob
- integer :: nb_k, nb_kq, nb_k_file, nb_kq_file
+ integer :: max_nq, max_nk, ncerr, my_is, my_iq, iq_glob, my_ik, ik_glob
+ integer :: nb_k, nb_kq, nb_k_file, nb_kq_file, gstore_cplex
  integer :: my_ip, ipert, iq_ibz, iq_bz, isym_q, trev_q, tsign_q, ii
  real(dp) :: cpu, wall, gflops
  character(len=500) :: gvals_name__
@@ -4303,6 +4302,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
 
    ! Read gstore dimensions
    NCF_CHECK(nctk_get_dim(ncid, "gstore_cplex", gstore_cplex))
+   ABI_CHECK_IEQ(gstore_cplex, 2, "gstore_cplex 1 from file not supported")
    NCF_CHECK(nctk_get_dim(ncid, "gstore_nkibz", gstore%nkibz))
    NCF_CHECK(nctk_get_dim(ncid, "gstore_nkbz", gstore%nkbz))
    NCF_CHECK(nctk_get_dim(ncid, "gstore_nqibz", gstore%nqibz))
@@ -4415,12 +4415,6 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    end if
    call gstore_cryst%free()
 
-   if (gstore_cplex == 1 .and. with_cplex == 2) then
-     ABI_ERROR("GSTORE file contains |g|^2 while ABINIT needs complex g. Recompute GSTORE file with gstore_cplex 2")
-   end if
-    if (read_dw__ .and. gstore_cplex == 1) then
-       ABI_ERROR("read_dw requires complex g. Recompute GSTORE file with gstore_cplex 2")
-    end if
     if (read_dw__ .and. gstore%gmode == GSTORE_GMODE_PHONON) then
        ABI_ERROR('read_dw requires g in the atom representation. Recompute GSTORE file with gstore_mode "atom"')
     end if
@@ -4501,7 +4495,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  ! Compute krank
  call gstore%krank_ibz%from_kptrlatt(gstore%nkibz, gstore%kibz, ebands%kptrlatt, compute_invrank=.False.)
 
- call gstore%set_mpi_grid__(with_cplex, nproc_spin, comm_spin)
+ call gstore%set_mpi_grid__(nproc_spin, comm_spin)
 
  ! At this point, we have the Cartesian grid (one per spin if any) and we can finally allocate and distribute other arrays.
  call gstore%malloc__(with_cplex, max_nq, qglob2bz, max_nk, gstore%kglob2bz, qbz2ibz, gstore%kbz2ibz)
@@ -4522,9 +4516,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  !
  ! On disk, we have:
  !
- !   nctkarr_t("gvals", "dp", "gstore_cplex, nb_kq_disk, nb_k_disk, natom3, glob_nk, glob_nq")
- !
- ! so gstore_cplex == 1 and with_cplex == 2 are not compatible.
+ !   nctkarr_t("gvals", "dp", "two, nb_kq_disk, nb_k_disk, natom3, glob_nk, glob_nq")
  !
  call cwtime(cpu, wall, gflops, "start")
 
@@ -4945,7 +4937,6 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
    !
    !    nctkarr_t("gvals", "dp", "gstore_cplex, nb_kq, nb_k, natom3, glob_nk, glob_nq")
 
-   !cplex = dtset%gstore_cplex
    ABI_MALLOC(gslice_mn, (cplex, nb_kq, nb_k))
    ABI_MALLOC(gslice_ks_mn, (cplex, nb_kq, nb_k))
 

@@ -11,7 +11,6 @@
  eph_task   11  # Activate the e-ph matrix elements computation via GSTORE
 
 # Electron-phonon matrix elements parameters
- gstore_cplex  2     # Complex e-ph matrix elements   (mandatory for VarPEq)
  gstore_kzone  "bz"  # Use full BZ for k and q meshes (mandatory for VarPEq)
  gstore_qzone  "bz"
  gstore_brange 3 5  # Bands participating in the hole polaron formation:
