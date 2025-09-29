@@ -2294,9 +2294,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'goprecprm',tread,'DPR')
  if(tread==1) dtset%goprecprm(1:3)=dprarr(1:3)
 
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_cplex', tread, 'INT')
- if (tread == 1) dtset%gstore_cplex = intarr(1)
-
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_with_vk', tread, 'INT')
  if (tread == 1) dtset%gstore_with_vk = intarr(1)
 

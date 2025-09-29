@@ -1793,21 +1793,21 @@ end if ! .not qq_is_gamma.
        !print *, "gks_average", sum(abs(gks_atm)) / size(gks_atm) / two
 
        select case (gstore%gmode)
-       case (GSTORE_GMODE_PHONON)
-         ! FIXME Perhaps it's gonna be easier if we only support GMODE_ATOM
-         ! Get g^{Sigma} and g^{KS} in the phonon representation.
-         call ephtk_gkknu_from_atm(nb_kq, nb_k, 1, natom, gsig_atm, phfr_qq, displ_red_qbz, gsig_nu)
-         call ephtk_gkknu_from_atm(nb_kq, nb_k, 1, natom, gks_atm, phfr_qq, displ_red_qbz, gks_nu)
+       !case (GSTORE_GMODE_PHONON)
+       !  ! FIXME Perhaps it's gonna be easier if we only support GMODE_ATOM
+       !  ! Get g^{Sigma} and g^{KS} in the phonon representation.
+       !  call ephtk_gkknu_from_atm(nb_kq, nb_k, 1, natom, gsig_atm, phfr_qq, displ_red_qbz, gsig_nu)
+       !  call ephtk_gkknu_from_atm(nb_kq, nb_k, 1, natom, gks_atm, phfr_qq, displ_red_qbz, gks_nu)
 
-         ! Save e-ph matrix elements in the buffer.
-         select case (gqk%cplex)
-         case (1)
-           my_gbuf(1,:,:,:, my_ik, iqbuf_cnt) = gsig_nu(1,:,:,:)**2 + gsig_nu(2,:,:,:)**2
-           my_gbuf_ks(1,:,:,:, my_ik, iqbuf_cnt) = gks_nu(1,:,:,:)**2 + gks_nu(2,:,:,:)**2
-         case (2)
-           my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gsig_nu
-           my_gbuf_ks(:,:,:,:, my_ik, iqbuf_cnt) = gks_nu
-         end select
+       !  ! Save e-ph matrix elements in the buffer.
+       !  select case (gqk%cplex)
+       !  case (1)
+       !    my_gbuf(1,:,:,:, my_ik, iqbuf_cnt) = gsig_nu(1,:,:,:)**2 + gsig_nu(2,:,:,:)**2
+       !    my_gbuf_ks(1,:,:,:, my_ik, iqbuf_cnt) = gks_nu(1,:,:,:)**2 + gks_nu(2,:,:,:)**2
+       !  case (2)
+       !    my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gsig_nu
+       !    my_gbuf_ks(:,:,:,:, my_ik, iqbuf_cnt) = gks_nu
+       !  end select
 
        case (GSTORE_GMODE_ATOM)
          ! Save e-ph matrix elements in the buffer.
@@ -1963,7 +1963,7 @@ subroutine dump_my_gbuf()
 
  ! On disk we have the global arrays:
  !
- !      nctkarr_t("gvals", "dp", "gstore_cplex, nb_kq, nb_k, natom3, glob_nk, glob_nq")
+ !      nctkarr_t("gvals", "dp", "two, nb_kq, nb_k, natom3, glob_nk, glob_nq")
  !
  ! while the local MPI buffers are dimensioned as follows:
  !
@@ -1987,20 +1987,20 @@ subroutine dump_my_gbuf()
  iq_glob = my_iq + gqk%my_qstart - 1
 
  !print *, "in dump_my_gbuf with start: ", [1, 1, 1, 1, gqk%my_kstart, iq_glob]
- !print *, "                  count; ", [gqk%cplex, gqk%nb_kq, gqk%nb_k, gqk%natom3, gqk%my_nk, iqbuf_cnt]
+ !print *, "                  count; ", [2, gqk%nb_kq, gqk%nb_k, gqk%natom3, gqk%my_nk, iqbuf_cnt]
  !print *, "my_gbuf", my_gbuf(:,:,:,natom3,1,1)
 
  ! Output g^Sigma
  ! NB: this is an individual IO operation
  ncerr = nf90_put_var(spin_ncid, spin_vid("gvals"), my_gbuf, &
                       start=[1, 1, 1, 1, gqk%my_kstart, iq_glob], &
-                      count=[gqk%cplex, gqk%nb_kq, gqk%nb_k, gqk%natom3, gqk%my_nk, iqbuf_cnt])
+                      count=[2, gqk%nb_kq, gqk%nb_k, gqk%natom3, gqk%my_nk, iqbuf_cnt])
  NCF_CHECK(ncerr)
 
  ! Output g^KS
  ncerr = nf90_put_var(spin_ncid, spin_vid("gvals_ks"), my_gbuf_ks, &
                       start=[1, 1, 1, 1, gqk%my_kstart, iq_glob], &
-                      count=[gqk%cplex, gqk%nb_kq, gqk%nb_k, gqk%natom3, gqk%my_nk, iqbuf_cnt])
+                      count=[2, gqk%nb_kq, gqk%nb_k, gqk%natom3, gqk%my_nk, iqbuf_cnt])
  NCF_CHECK(ncerr)
 
  ! Only one proc sets the entry in done_qbz_spin to 1 for all the q-points in the buffer.

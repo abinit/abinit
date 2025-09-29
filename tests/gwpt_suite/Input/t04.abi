@@ -19,7 +19,6 @@
 
  # store complex g matrix elements in the atomic representation in the GSTORE file.
  gstore_gmode "atom"
- gstore_cplex 2
 
  ecut 45.0          # Cutoff energy for wavefunctions.
  ecuteps  8         # Cutoff energy for screening (cannot be larger than the one found in the SCR file)

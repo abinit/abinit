@@ -24614,28 +24614,6 @@ See line 743 in src/95_drive/screening.F90 .
 ),
 
 Variable(
-    abivarname="gstore_cplex",
-    varset="eph",
-    vartype="integer",
-    topics=['ElPhonInt_basic'],
-    dimensions="scalar",
-    defaultval=2,
-    mnemonics=r"GSTORE ComPLEX dimension",
-    requires="[[optdriver]] == 7",
-    added_in_version="9.6.2",
-    text=r"""
-This input variable specifies whether the EPH code should store $|g|^2$ or $g$
-when computing the e-ph matrix elements ([[eph_task]] == 11)
-Possible values are:
-
-1 --> compute and store $|g|^2$ in GSTORE.nc.
-      Use this option to reduce the size of the file but keep in mind
-      that the GSTORE can only be used to compute expressions in which only $|g|^2$ is needed.
-2 --> compute and store complex $g$ in GSTORE.nc (default)
-""",
-),
-
-Variable(
     abivarname="gstore_with_vk",
     varset="eph",
     vartype="integer",
