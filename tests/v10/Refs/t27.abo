@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 15 Aug 2025.
-- ( at 21h20 )
+.Starting date : Wed 24 Sep 2025.
+- ( at 11h10 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/leshu_gbt/tests/TestBot_MPI1/v10_t27/t27.abi
 - output file    -> t27.abo
@@ -254,19 +254,19 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Mean square residual over all n,k,spin=   14.955E-08; max=  28.689E-06
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
- rms dE/dt=  8.6959E-07; max dE/dt=  3.9241E-07; dE/dt below (all hartree)
-    1      -0.000000466377      0.000000392410     -0.000001377331
+ rms dE/dt=  8.6975E-07; max dE/dt=  3.9279E-07; dE/dt below (all hartree)
+    1      -0.000000466768      0.000000392790     -0.000001377409
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00  -5.255E-08 -2.525E-07  2.820E-07 h/b
+ frms,max,avg= 0.0000000E+00 0.0000000E+00  -5.246E-08 -2.526E-07  2.820E-07 h/b
 
  cartesian forces (eV/Angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00  -2.702E-06 -1.298E-05  1.450E-05 e/A
+ frms,max,avg= 0.0000000E+00 0.0000000E+00  -2.698E-06 -1.299E-05  1.450E-05 e/A
  length scales=  1.000000000000  1.000000000000  1.000000000000 bohr
               =  0.529177208590  0.529177208590  0.529177208590 angstroms
  prteigrs : about to open file t27o_EIG
@@ -492,10 +492,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         18.7  wall=         18.8
+- Proc.   0 individual time (sec): cpu=         18.8  wall=         18.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         18.7  wall=         18.8
++Overall time at end (sec) : cpu=         18.8  wall=         18.9
