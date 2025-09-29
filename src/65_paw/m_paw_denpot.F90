@@ -62,13 +62,14 @@ MODULE m_paw_denpot
  private
 
 !public procedures.
- public :: pawdenpot           ! Compute different (PAW) energies, densities and potentials inside PAW spheres
- public :: pawdensities        ! Compute PAW on-site densities (all-electron, pseudo and compensation)
- public :: pawkindensities     ! Compute PAW on-site kinetic energy densities (all-electron, pseudo)
- public :: pawaccenergy        ! Accumulate the atomic contribution of a PAW on-site energy
- public :: pawaccenergy_nospin ! As pawaccenergy, but with no spin polarization
- public :: paw_mknewh0         ! Compute bare PAW on-site Hamiltonian (-> GW calculations)
- public :: paw_relax_core      ! Relax PAW core
+ public :: pawdenpot            ! Compute different (PAW) energies, densities and potentials inside PAW spheres
+ public :: pawdensities         ! Compute PAW on-site densities (all-electron, pseudo and compensation)
+ public :: pawkindensities      ! Compute PAW on-site kinetic energy densities (all-electron, pseudo)
+ public :: pawaccenergy         ! Accumulate the atomic contribution of a PAW on-site energy
+ public :: pawaccenergy_nospin  ! As pawaccenergy, but with no spin polarization
+ public :: paw_mknewh0          ! Compute bare PAW on-site Hamiltonian (-> GW calculations)
+ public :: paw_relax_core       ! Relax PAW core
+!public :: paw_energies_setzero ! Set all energies in a paw_energies datastructure to zero
 
 CONTAINS  !========================================================================================
 !!***

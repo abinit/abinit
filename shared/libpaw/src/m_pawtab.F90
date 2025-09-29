@@ -647,7 +647,7 @@ MODULE m_pawtab
  public :: pawtab_nullify      ! Nullify content
  public :: pawtab_get_lsize    ! Get the max. l for a product of 2 partial waves
  public :: pawtab_set_flags    ! Set the value of the internal flags
- public :: pawtab_print        ! Printout of the object.
+ public :: pawtab_print        ! Printout of the object
  public :: pawtab_bcast        ! MPI broadcast the object
 !TODO: someone should implement a pawtab copy routine to get an independent identical copy of the object
 
@@ -1245,13 +1245,13 @@ subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,i4)')'  Size of radial mesh ............................ ',Pawtab(ityp)%mesh_size
   call wrtout(my_unt,msg,my_mode)
-  write(msg,'(a,i4)')'  Size of radial mesh for partial waves........... ',Pawtab(ityp)%partialwave_mesh_size
+  write(msg,'(a,i4)')'  Size of radial mesh for partial waves .......... ',Pawtab(ityp)%partialwave_mesh_size
   call wrtout(my_unt,msg,my_mode)
-  write(msg,'(a,i4)')'  Size of radial mesh for [pseudo] core density... ',Pawtab(ityp)%core_mesh_size
+  write(msg,'(a,i4)')'  Size of radial mesh for [pseudo] core density .. ',Pawtab(ityp)%core_mesh_size
   call wrtout(my_unt,msg,my_mode)
-  write(msg,'(a,i4)')'  Size of radial mesh for [pseudo] kin core density',Pawtab(ityp)%coretau_mesh_size
+  write(msg,'(a,i4)')'  Size of radial mesh for [pseudo] kincore density ',Pawtab(ityp)%coretau_mesh_size
   call wrtout(my_unt,msg,my_mode)
-  write(msg,'(a,i4)')'  Size of radial mesh for pseudo valence density.. ',Pawtab(ityp)%tnvale_mesh_size
+  write(msg,'(a,i4)')'  Size of radial mesh for pseudo valence density . ',Pawtab(ityp)%tnvale_mesh_size
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,i4)')'  No of Q-points for tcorespl/tvalespl/tcoretauspl ',Pawtab(ityp)%mqgrid
   call wrtout(my_unt,msg,my_mode)
@@ -1278,11 +1278,11 @@ subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
     call wrtout(my_unt,msg,my_mode)
   end if
   if (Pawtab(ityp)%usepawu/=0.or.Pawtab(ityp)%useexexch/=0) then
-    write(msg,'(a,i4)')'  Number of (i,j) elements for PAW+U or EXX ..... ',Pawtab(ityp)%ij_proj
+    write(msg,'(a,i4)')'  Number of (i,j) elements for PAW+U or EXX ...... ',Pawtab(ityp)%ij_proj
     call wrtout(my_unt,msg,my_mode)
     write(msg,'(a,i4)')'  Number of projectors on which U or EXX acts .... ',Pawtab(ityp)%nproju
     call wrtout(my_unt,msg,my_mode)
-    write(msg,'(a,i4)')'  Option interaction for PAW+U (double-counting).. ',Pawtab(ityp)%option_interaction_pawu
+    write(msg,'(a,i4)')'  Option interaction for PAW+U (double-counting) . ',Pawtab(ityp)%option_interaction_pawu
     call wrtout(my_unt,msg,my_mode)
   end if
   write(msg,'(a,i4)')'  Use potential zero ............................. ',Pawtab(ityp)%usepotzero
@@ -1319,56 +1319,56 @@ subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
   call wrtout(my_unt,msg,my_mode)
   !
   ! Real scalars
-  write(msg,'(a,es16.8)')'  beta ............................................',Pawtab(ityp)%beta
+  write(msg,'(a,es16.8)')'  beta ........................................',Pawtab(ityp)%beta
   call wrtout(my_unt,msg,my_mode)
-  write(msg,'(a,es16.8)')'  1/q d(tNcore(q))/dq for q=0 .....................',Pawtab(ityp)%dncdq0
+  write(msg,'(a,es16.8)')'  1/q d(tNcore(q))/dq for q=0 .................',Pawtab(ityp)%dncdq0
   call wrtout(my_unt,msg,my_mode)
-  write(msg,'(a,es16.8)')'  d^2(tNcore(q))/dq^2 for q=0 .....................',Pawtab(ityp)%d2ncdq0
+  write(msg,'(a,es16.8)')'  d^2(tNcore(q))/dq^2 for q=0 .................',Pawtab(ityp)%d2ncdq0
   call wrtout(my_unt,msg,my_mode)
-  write(msg,'(a,es16.8)')'  1/q d(tNvale(q))/dq for q=0 .....................',Pawtab(ityp)%dnvdq0
+  write(msg,'(a,es16.8)')'  1/q d(tNvale(q))/dq for q=0 .................',Pawtab(ityp)%dnvdq0
   call wrtout(my_unt,msg,my_mode)
   if (Pawtab(ityp)%has_coretau/=0) then
-    write(msg,'(a,es16.8)')'  1/q d(tTAUcore(q))/dq for q=0 ...................',Pawtab(ityp)%dtaucdq0
+    write(msg,'(a,es16.8)')'  1/q d(tTAUcore(q))/dq for q=0 ...............',Pawtab(ityp)%dtaucdq0
     call wrtout(my_unt,msg,my_mode)
   end if
   if (Pawtab(ityp)%has_fock/=0) then
-    write(msg,'(a,es16.8)')'  Core-core Fock energy  ..........................',Pawtab(ityp)%ex_cc
+    write(msg,'(a,es16.8)')'  Core-core Fock energy  ......................',Pawtab(ityp)%ex_cc
     call wrtout(my_unt,msg,my_mode)
   end if
-  write(msg,'(a,es16.8)')'  XC energy for the core density ..................',Pawtab(ityp)%exccore
+  write(msg,'(a,es16.8)')'  XC energy for the core density ..............',Pawtab(ityp)%exccore
   call wrtout(my_unt,msg,my_mode)
-  write(msg,'(a,es16.8)')'  Kinetic energy for the core density ..............',Pawtab(ityp)%ekincore
+  write(msg,'(a,es16.8)')'  Kinetic energy for the core density .........',Pawtab(ityp)%ekincore
   call wrtout(my_unt,msg,my_mode)
   if(abs(Pawtab(ityp)%sxccore)>tiny(zero)) then
-    write(msg,'(a,es16.8)')'  XC entropy for the core density .................',Pawtab(ityp)%sxccore
+    write(msg,'(a,es16.8)')'  XC entropy for the core density .............',Pawtab(ityp)%sxccore
     call wrtout(my_unt,msg,my_mode)
   end if
-  write(msg,'(a,es16.8)')'  EH(n_Zc) ..........................................',Pawtab(ityp)%ehnzc
+  write(msg,'(a,es16.8)')'  EH(n_Zc) ....................................',Pawtab(ityp)%ehnzc
   call wrtout(my_unt,msg,my_mode)
-  write(msg,'(a,es16.8)')'  Lamb shielding due to core density ..............',Pawtab(ityp)%lamb_shielding
+  write(msg,'(a,es16.8)')'  Lamb shielding due to core density ..........',Pawtab(ityp)%lamb_shielding
   call wrtout(my_unt,msg,my_mode)
-  write(msg,'(a,es16.8)')'  Radius of the PAW sphere ........................',Pawtab(ityp)%rpaw
+  write(msg,'(a,es16.8)')'  Radius of the PAW sphere ....................',Pawtab(ityp)%rpaw
   call wrtout(my_unt,msg,my_mode)
-  write(msg,'(a,es16.8)')'  Compensation charge radius (if >rshp, g(r)=0) ...',Pawtab(ityp)%rshp !(if r>rshp, g(r)=zero)
+  write(msg,'(a,es16.8)')'  Compensation charge radius (if >rshp,g(r)=0) ',Pawtab(ityp)%rshp !(if r>rshp, g(r)=zero)
   call wrtout(my_unt,msg,my_mode)
   if (Pawtab(ityp)%shape_type==2) then
-   write(msg,'(a,es16.8)')'  Sigma parameter in gaussian shape function ......',Pawtab(ityp)%shape_sigma !(shape_type=2)
-   call wrtout(my_unt,msg,my_mode)
-  end if
-  if (Pawtab(ityp)%usepawu/=0) then
-   write(msg,'(a,es16.8)')'  Value of the U parameter [eV] ...................',Pawtab(ityp)%upawu*Ha_eV
-   call wrtout(my_unt,msg,my_mode)
-   write(msg,'(a,es16.8)')'  Value of the J parameter [eV] ...................',Pawtab(ityp)%jpawu*Ha_eV
-   call wrtout(my_unt,msg,my_mode)
-  end if
-  if (Pawtab(ityp)%useexexch/=0) then
-    write(msg,'(a,es16.8)')'  Mixing of exact exchange (PBE0) .................',Pawtab(ityp)%exchmix
+    write(msg,'(a,es16.8)')'  Sigma parameter in gaussian shape function ..',Pawtab(ityp)%shape_sigma !(shape_type=2)
     call wrtout(my_unt,msg,my_mode)
   end if
- if (associated(Pawtab(ityp)%wvl)) then
-   write(msg,'(a,es16.8)')'  WARNING: This Pawtab structure contains WVL data.'
-   call wrtout(my_unt,msg,my_mode)
- end if
+  if (Pawtab(ityp)%usepawu/=0) then
+    write(msg,'(a,es16.8)')'  Value of the U parameter [eV] ...............',Pawtab(ityp)%upawu*Ha_eV
+    call wrtout(my_unt,msg,my_mode)
+    write(msg,'(a,es16.8)')'  Value of the J parameter [eV] ...............',Pawtab(ityp)%jpawu*Ha_eV
+    call wrtout(my_unt,msg,my_mode)
+  end if
+  if (Pawtab(ityp)%useexexch/=0) then
+    write(msg,'(a,es16.8)')'  Mixing of exact exchange (PBE0) .............',Pawtab(ityp)%exchmix
+    call wrtout(my_unt,msg,my_mode)
+  end if
+  if (associated(Pawtab(ityp)%wvl)) then
+    write(msg,'(a,es16.8)')'  WARNING: This Pawtab structure contains WVL data.'
+    call wrtout(my_unt,msg,my_mode)
+  end if
 
  end do ! ityp
 
