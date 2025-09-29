@@ -14,11 +14,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
 
 #if defined HAVE_CONFIG_H
 #include "config.h"
@@ -906,7 +901,7 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
     subroutine wfd_expandk()
       integer, allocatable :: istwfk(:)
       integer :: ik, spin, band
-      complex(gwpc), allocatable :: ug(:)
+      complex(gwp), allocatable :: ug(:)
       integer ::  work_ngfft(18),gmax(3),indkk(6,1)
       real(dp),allocatable ::  work(:,:,:,:), cg_kbz(:, :, :)
       integer ::mpw, mband, npw_kbz, size, ik_ibz
@@ -978,7 +973,7 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
           size =self%hdr_bz%nspinor*npw_kbz
           ABI_MALLOC(ug, (size))
           do band = 1, self%ebands_bz%nband(ik)
-            ug(:)= cmplx(cg_kbz(1, 1:size,band), cg_kbz(2, 1:size, band), kind=gwpc)
+            ug(:)= cmplx(cg_kbz(1, 1:size,band), cg_kbz(2, 1:size, band), kind=gwp)
             !ug(:) = ug(:) / sqrt(sum(cg_kbz(:, 1:size, band)**2))
             call self%wfd_bz%push_ug(band, ik, spin, Cryst,ug, &
               & update_ur=.True., update_cprj=.False.)

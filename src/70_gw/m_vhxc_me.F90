@@ -146,7 +146,7 @@ subroutine calc_vhxc_me(Wfd, Mflags, Mels, Cryst, Dtset, nfftf, ngfftf, &
  integer :: isppol,cplex_dij,npw_k,nspinor,nsppol,nspden,nk_calc,rank
  integer :: iab,isp1,isp2,ixc_sigma,nsploop,nkxc,option,n3xccc_,nk3xc,my_nbbp,my_nmels
  real(dp) :: nfftfm1,fact,DijH,bigexc_val,bigsxc_val,bigexc_hybrid_val,vxcval_avg,vxcval_hybrid_avg,h0dij,vxc1,vxc1_val,re_p,im_p,dijsigcx,dum
- complex(dpc) :: cdot
+ complex(dp) :: cdot
  logical :: ltest,nmxc
  character(len=500) :: msg
  type(MPI_type) :: MPI_enreg_seq
@@ -163,14 +163,13 @@ subroutine calc_vhxc_me(Wfd, Mflags, Mels, Cryst, Dtset, nfftf, ngfftf, &
  real(dp) :: dijU(2),kpt(3),vxc1ab(2),vxc1ab_val(2)
  real(dp),allocatable :: kxc_(:,:),xccc3d_(:),vxc_val(:,:),vxc_val_hybrid(:,:)
  real(dp),allocatable :: kinpw(:),veffh0(:,:)
- complex(dpc) :: tmp(3)
- complex(gwpc),ABI_CONTIGUOUS pointer :: ur1_up(:),ur1_dwn(:),ur2_up(:),ur2_dwn(:),cg1(:),cg2(:)
- complex(gwpc),target,allocatable :: ur1(:),ur2(:)
- complex(dpc),allocatable :: vxcab(:),vxcab_val(:),vxcab_val_hybrid(:),u1cjg_u2dpc(:),kinwf2(:),veffh0_ab(:)
+ complex(dp) :: tmp(3)
+ complex(gwp),ABI_CONTIGUOUS pointer :: ur1_up(:),ur1_dwn(:),ur2_up(:),ur2_dwn(:),cg1(:),cg2(:)
+ complex(gwp),target,allocatable :: ur1(:),ur2(:)
+ complex(dp),allocatable :: vxcab(:),vxcab_val(:),vxcab_val_hybrid(:),u1cjg_u2dpc(:),kinwf2(:),veffh0_ab(:)
  logical,allocatable :: bbp_mask(:,:)
  type(pawcprj_type),allocatable ::  Cprj_b1ks(:,:),Cprj_b2ks(:,:)
  type(libxc_functional_type) :: xc_funcs_hybrid(2)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -185,7 +184,7 @@ subroutine calc_vhxc_me(Wfd, Mflags, Mels, Cryst, Dtset, nfftf, ngfftf, &
  ! Fake MPI_type for sequential part
  rank = Wfd%my_rank
  call initmpi_seq(MPI_enreg_seq)
- call init_distribfft_seq(MPI_enreg_seq%distribfft,'f',ngfftf(2),ngfftf(3),'all')
+ call MPI_enreg_seq%distribfft%init_seq('f',ngfftf(2),ngfftf(3),'all')
 
  nspinor=Wfd%nspinor; nsppol =Wfd%nsppol; nspden =Wfd%nspden
  if (nspinor == 2) ABI_WARNING("Remember to ADD SO")

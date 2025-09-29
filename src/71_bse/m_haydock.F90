@@ -25,12 +25,10 @@ MODULE m_haydock
  use m_bs_defs
  use m_xmpi
  use m_errors
- use m_nctk
  use m_haydock_io
  use m_linalg_interfaces
- use m_ebands
- use m_hdr
  use netcdf
+ use m_nctk
 
  use m_time,              only : timab
  use m_fstrings,          only : strcat, sjoin, itoa, int2char4
@@ -42,6 +40,8 @@ MODULE m_haydock
  use m_numeric_tools,     only : print_arr, symmetrize, hermitianize, continued_fract, wrap2_pmhalf, iseven
  use m_kpts,              only : listkk
  use m_crystal,           only : crystal_t
+ use m_ebands,            only : ebands_t
+ use m_hdr,               only : hdr_type
  use m_bz_mesh,           only : kmesh_t, findqg0
  use m_double_grid,       only : double_grid_t, get_kpt_from_indices_coarse, compute_corresp
  use m_paw_hr,            only : pawhur_t
@@ -49,8 +49,7 @@ MODULE m_haydock
  use m_bse_io,            only : exc_write_optme
  use m_pawtab,            only : pawtab_type
  use m_vcoul,             only : vcoul_t
- use m_hexc,              only : hexc_init, hexc_interp_init, hexc_free, hexc_interp_free, &
-                                 hexc_build_hinterp, hexc_matmul_tda, hexc_matmul_full, hexc_t, hexc_matmul_elphon, hexc_interp_t
+ use m_hexc,              only : hexc_t, hexc_interp_t
  use m_exc_spectra,       only : exc_write_data, exc_eps_rpa, exc_write_tensor, mdfs_ncwrite
  use m_eprenorms,         only : eprenorms_t, renorm_bst
  use m_wfd_optic,         only : calc_optical_mels
@@ -121,7 +120,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
  integer :: hsize,comm,my_t1,my_t2,nsppol,nkets,nproc,ncid
  integer :: spin,spad,ik_bz,iv,ic,trans_idx,lomo_min,max_band
  real(dp) :: omegaev,rand_phi !,norm
- complex(dpc) :: ks_avg,gw_avg,exc_avg
+ complex(dp) :: ks_avg,gw_avg,exc_avg
  logical :: use_mpio,prtdos
  character(len=500) :: msg
  type(hexc_t) :: hexc
@@ -129,26 +128,22 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
 !arrays
  real(dp) :: tsec(2)
  real(dp),allocatable :: dos(:),dos_gw(:),dos_ks(:)
- complex(dpc),allocatable :: green(:,:)
- complex(dpc),allocatable :: opt_cvk(:,:,:,:,:),kets(:,:)
- complex(dpc),allocatable :: eps_rpanlf(:,:),eps_gwnlf(:,:)
- complex(dpc),allocatable :: tensor_cart(:,:),tensor_cart_rpanlf(:,:),tensor_cart_gwnlf(:,:)
- complex(dpc),allocatable :: tensor_red(:,:),tensor_red_rpanlf(:,:),tensor_red_gwnlf(:,:)
+ complex(dp),allocatable :: green(:,:)
+ complex(dp),allocatable :: opt_cvk(:,:,:,:,:),kets(:,:)
+ complex(dp),allocatable :: eps_rpanlf(:,:),eps_gwnlf(:,:)
+ complex(dp),allocatable :: tensor_cart(:,:),tensor_cart_rpanlf(:,:),tensor_cart_gwnlf(:,:)
+ complex(dp),allocatable :: tensor_red(:,:),tensor_red_rpanlf(:,:),tensor_red_gwnlf(:,:)
 
  !Temperature
+ integer :: ep_ik, ik, ireh, isppol, itemp, ntemp
  real(dp) :: dksqmax, en
  integer,allocatable :: bs2eph(:,:)
  integer :: sppoldbl, timrev
  logical :: do_ep_renorm, do_ep_lifetime
- integer :: ntemp
  character(len=4) :: ts
- character(len=fnlen) :: prefix
- character(len=fnlen) :: path
- complex(dpc),allocatable :: ep_renorms(:)
- integer :: ep_ik, ik, ireh, isppol
- integer :: itemp
+ character(len=fnlen) :: prefix, path
+ complex(dp),allocatable :: ep_renorms(:)
  type(ebands_t) :: EPBSt, EP_QPBSt
-
 !************************************************************************
 
  call timab(690,1,tsec) ! exc_haydock_driver
@@ -179,19 +174,18 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
  hsize=SUM(BSp%nreh)
 
  !YG2014
- call hexc_init(hexc, BSp, BS_files, Cryst, Kmesh, Wfd, KS_BSt, QP_BSt, comm)
+ call hexc%init(BSp, BS_files, Cryst, Kmesh, Wfd, KS_BSt, QP_BSt, comm)
 
  !YG2014
  if(BSp%use_interp) then
-   call hexc_interp_init(hexc_i, hexc, BSp%interp_m3_width, BSp%interp_method,&
-&     Kmesh_dense, Vcp_dense, grid, Wfd_dense, &
-&     KS_BSt_dense, QP_BSt_dense, Psps, Pawtab)
-
+   call hexc_i%init(hexc, BSp%interp_m3_width, BSp%interp_method,&
+     Kmesh_dense, Vcp_dense, grid, Wfd_dense, &
+     KS_BSt_dense, QP_BSt_dense, Psps, Pawtab)
  end if
 
  call timab(691,2,tsec) ! exc_haydock_driver(read)
  call timab(692,1,tsec) ! exc_haydock_driver(prep)
- !
+
  ! Prepare the starting vectors for the Lanczos chain.
  nkets=Bsp%nq
 
@@ -247,7 +241,6 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
 
  end do
 
- !
  ! ========================================================
  ! === Write the Optical Matrix Elements to NetCDF file ===
  ! ========================================================
@@ -264,9 +257,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
 
  ! Build interpolated hamiltonian
  if(BSp%use_interp) then
-   if (any(BSp%interp_mode == [2,3,4])) then
-     call hexc_build_hinterp(hexc, hexc_i)
-   end if
+   if (any(BSp%interp_mode == [2,3,4])) call hexc%build_hinterp(hexc_i)
  end if
 
  call timab(692,2,tsec) ! exc_haydock_driver(prep)
@@ -282,9 +273,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
    end if
    do_ep_renorm = .TRUE.
    ntemp = Epren%ntemp
-   if(BSp%do_lifetime) then
-     do_ep_lifetime = .TRUE.
-   end if
+   if(BSp%do_lifetime) do_ep_lifetime = .TRUE.
 
    ! Force elphon linewidth
    do_ep_lifetime = .TRUE.
@@ -317,9 +306,8 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
      call int2char4(itemp,ts)
      prefix = TRIM("_T") // ts
 
-     ! No scissor with KSBST
+     ! No scissor with KS Bands
      call renorm_bst(Epren, EPBSt, Cryst, itemp, do_lifetime=.TRUE.,do_check=.TRUE.)
-
      call renorm_bst(Epren, EP_QPBSt, Cryst, itemp, do_lifetime=.TRUE.,do_check=.FALSE.)
 
      do isppol = 1, BSp%nsppol
@@ -340,13 +328,12 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
          ! Add linewith
          if(do_ep_lifetime) then
            ep_renorms(ireh) = ep_renorms(ireh) - j_dpc*(Epren%linewidth(1,ic,ik,isppol,itemp) +&
-&                                                       Epren%linewidth(1,iv,ik,isppol,itemp))
+                                                        Epren%linewidth(1,iv,ik,isppol,itemp))
          end if
 
        end do
      end do
    end if
-
 
    ! =======================================================
    ! === Make EPS RPA and GW without local-field effects ===
@@ -356,19 +343,18 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
    ABI_MALLOC(eps_gwnlf ,(BSp%nomega,BSp%nq))
    ABI_MALLOC(dos_gw,(BSp%nomega))
 
-   call wrtout(std_out," Calculating RPA NLF and QP NLF epsilon","COLL")
+   call wrtout(std_out," Calculating RPA NLF and QP NLF epsilon")
 
    call exc_eps_rpa(BSp%nbnds,BSp%lomo_spin,BSp%lomo_min,BSp%homo_spin,hexc%Kmesh,EPBSt,BSp%nq,nsppol,&
-&    opt_cvk,Cryst%ucvol,BSp%broad,BSp%nomega,BSp%omega,eps_rpanlf,dos_ks)
+    opt_cvk,Cryst%ucvol,BSp%broad,BSp%nomega,BSp%omega,eps_rpanlf,dos_ks)
 
    call exc_eps_rpa(BSp%nbnds,BSp%lomo_spin,BSp%lomo_min,BSp%homo_spin,hexc%Kmesh,EP_QPBSt,BSp%nq,nsppol,&
-&    opt_cvk,Cryst%ucvol,Bsp%broad,BSp%nomega,BSp%omega,eps_gwnlf,dos_gw)
+    opt_cvk,Cryst%ucvol,Bsp%broad,BSp%nomega,BSp%omega,eps_gwnlf,dos_gw)
 
    if (my_rank==master) then ! Only master works.
      !
      ! Master node writes final results on file.
      call exc_write_data(BSp,BS_files,"RPA_NLF_MDF",eps_rpanlf,prefix=prefix,dos=dos_ks)
-
      call exc_write_data(BSp,BS_files,"GW_NLF_MDF",eps_gwnlf,prefix=prefix,dos=dos_gw)
 
      ! Computing and writing tensor in files
@@ -377,17 +363,17 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
      ABI_MALLOC(tensor_cart_rpanlf,(BSp%nomega,6))
      ABI_MALLOC(tensor_red_rpanlf,(BSp%nomega,6))
 
-     call wrtout(std_out," Calculating RPA NLF dielectric tensor","COLL")
+     call wrtout(std_out," Calculating RPA NLF dielectric tensor")
      call haydock_mdf_to_tensor(BSp,Cryst,eps_rpanlf,tensor_cart_rpanlf, tensor_red_rpanlf, ierr)
 
-     if(ierr == 0) then
-        ! Writing tensor
-        call exc_write_tensor(BSp,BS_files,"RPA_NLF_TSR_CART",tensor_cart_rpanlf)
-        call exc_write_tensor(BSp,BS_files,"RPA_NLF_TSR_RED",tensor_red_rpanlf)
+     if (ierr == 0) then
+       ! Writing tensor
+       call exc_write_tensor(BSp,BS_files,"RPA_NLF_TSR_CART",tensor_cart_rpanlf)
+       call exc_write_tensor(BSp,BS_files,"RPA_NLF_TSR_RED",tensor_red_rpanlf)
      else
         write(msg,'(3a)')&
-&         'The RPA_NLF dielectric complex tensor cannot be computed',ch10,&
-&         'There must be 6 different q-points in long wavelength limit (see gw_nqlwl)'
+         'The RPA_NLF dielectric complex tensor cannot be computed',ch10,&
+         'There must be 6 different q-points in long wavelength limit (see gw_nqlwl)'
         ABI_COMMENT(msg)
      end if
 
@@ -398,7 +384,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
      ABI_MALLOC(tensor_cart_gwnlf,(BSp%nomega,6))
      ABI_MALLOC(tensor_red_gwnlf,(BSp%nomega,6))
 
-     call wrtout(std_out," Calculating GW NLF dielectric tensor","COLL")
+     call wrtout(std_out," Calculating GW NLF dielectric tensor")
 
      call haydock_mdf_to_tensor(BSp,Cryst,eps_gwnlf,tensor_cart_gwnlf, tensor_red_gwnlf, ierr)
 
@@ -408,34 +394,34 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
         call exc_write_tensor(BSp,BS_files,"GW_NLF_TSR_RED",tensor_red_gwnlf)
      else
         write(msg,'(3a)')&
-&         'The GW_NLF dielectric complex tensor cannot be computed',ch10,&
-&         'There must be 6 different q-points in long wavelength limit (see gw_nqlwl)'
+         'The GW_NLF dielectric complex tensor cannot be computed',ch10,&
+         'There must be 6 different q-points in long wavelength limit (see gw_nqlwl)'
         ABI_COMMENT(msg)
      end if
 
      ABI_FREE(tensor_cart_gwnlf)
      ABI_FREE(tensor_red_gwnlf)
 
-     !call wrtout(std_out," Checking Kramers Kronig on Excitonic Macroscopic Epsilon","COLL")
+     !call wrtout(std_out," Checking Kramers Kronig on Excitonic Macroscopic Epsilon")
      !call check_kramerskronig(BSp%nomega,REAL(BSp%omega),eps_exc(:,1))
 
-     !call wrtout(std_out," Checking Kramers Kronig on RPA NLF Macroscopic Epsilon","COLL")
+     !call wrtout(std_out," Checking Kramers Kronig on RPA NLF Macroscopic Epsilon")
      !call check_kramerskronig(BSp%nomega,REAL(BSp%omega),eps_rpanlf(:,1))
 
-     !call wrtout(std_out," Checking Kramers Kronig on GW NLF Macroscopic Epsilon","COLL")
+     !call wrtout(std_out," Checking Kramers Kronig on GW NLF Macroscopic Epsilon")
      !call check_kramerskronig(BSp%nomega,REAL(BSp%omega),eps_gwnlf(:,1))
 
-     !call wrtout(std_out," Checking f-sum rule on Excitonic Macroscopic Epsilon","COLL")
+     !call wrtout(std_out," Checking f-sum rule on Excitonic Macroscopic Epsilon")
 
      !if (BSp%exchange_term>0) then
      !  ABI_COMMENT(' f-sum rule should be checked without LF')
      !end if
      !call check_fsumrule(BSp%nomega,REAL(BSp%omega),AIMAG(eps_exc(:,1)),drude_plsmf)
 
-     !call wrtout(std_out," Checking f-sum rule on RPA NLF Macroscopic Epsilon","COLL")
+     !call wrtout(std_out," Checking f-sum rule on RPA NLF Macroscopic Epsilon")
      !call check_fsumrule(BSp%nomega,REAL(BSp%omega),AIMAG(eps_rpanlf(:,1)),drude_plsmf)
 
-     !call wrtout(std_out," Checking f-sum rule on GW NLF Macroscopic Epsilon","COLL")
+     !call wrtout(std_out," Checking f-sum rule on GW NLF Macroscopic Epsilon")
      !call check_fsumrule(BSp%nomega,REAL(BSp%omega),AIMAG(eps_gwnlf(:,1)),drude_plsmf)
    end if ! my_rank==master
 
@@ -467,8 +453,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
        call haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,hexc%my_t1,hexc%my_t2,nkets,kets,ep_renorms,green,comm)
      else
        !YG2014
-       call haydock_herm(BSp,BS_files,Cryst,Hdr_bse,hexc%my_t1,hexc%my_t2,&
-&         nkets,kets,green,hexc,hexc_i,comm)
+       call haydock_herm(BSp,BS_files,Cryst,Hdr_bse,hexc%my_t1,hexc%my_t2,nkets,kets,green,hexc,hexc_i,comm)
      end if
    else
      if (BSp%use_interp) then
@@ -478,12 +463,11 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
      end if
    end if
 
-   !
    ! Add 1 to have the real part right.
    green = one + green
 
    if (my_rank==master) then ! Master writes the final results.
-     !
+
      if (prtdos) then
        ABI_MALLOC(dos,(BSp%nomega))
        dos = -AIMAG(green(:,BSp%nq+1))
@@ -492,7 +476,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
      else
        call exc_write_data(BSp,BS_files,"EXC_MDF",green,prefix=prefix)
      end if
-     !
+
      ! =========================
      ! === Write out Epsilon ===
      ! =========================
@@ -500,7 +484,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
      ABI_MALLOC(tensor_cart,(BSp%nomega,6))
      ABI_MALLOC(tensor_red,(BSp%nomega,6))
 
-     call wrtout(std_out," Calculating EXC dielectric tensor","COLL")
+     call wrtout(std_out," Calculating EXC dielectric tensor")
      call haydock_mdf_to_tensor(BSp,Cryst,green,tensor_cart,tensor_red,ierr)
 
      if (ierr == 0) then
@@ -509,8 +493,8 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
          call exc_write_tensor(BSp,BS_files,"EXC_TSR_RED",tensor_red)
      else
          write(msg,'(3a)')&
-&          'The EXC dielectric complex tensor cannot be computed',ch10,&
-&          'There must be 6 different q-points in long wavelength limit (see gw_nqlwl)'
+           'The EXC dielectric complex tensor cannot be computed',ch10,&
+           'There must be 6 different q-points in long wavelength limit (see gw_nqlwl)'
          ABI_COMMENT(msg)
      end if
 
@@ -548,7 +532,6 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
 
    call EPBSt%free()
    call EP_QPBst%free()
-
  end do ! itemp loop
 
  ABI_FREE(opt_cvk)
@@ -558,13 +541,11 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
  call timab(695,1,tsec) ! exc_haydock_driver(end)
 
  !YG2014
- call hexc_free(hexc)
- call hexc_interp_free(hexc_i)
+ call hexc%free()
+ call hexc_i%free()
 
- if (do_ep_renorm) then
-   ABI_FREE(ep_renorms)
-   ABI_FREE(bs2eph)
- end if
+ ABI_SFREE(ep_renorms)
+ ABI_SFREE(bs2eph)
 
  call timab(695,2,tsec) ! exc_haydock_driver(end)
  call timab(690,2,tsec) ! exc_haydock_driver
@@ -598,8 +579,7 @@ end subroutine exc_haydock_driver
 !!
 !! SOURCE
 
-subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,&
-& nkets,kets,green,hexc,hexc_i,comm)
+subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,nkets,kets,green,hexc,hexc_i,comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -612,7 +592,7 @@ subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,&
  type(hexc_interp_t),intent(inout) :: hexc_i
 !arrays
  complex(dp),intent(out) :: green(BSp%nomega,nkets)
- complex(dpc),intent(in) :: kets(hexc%hsize,nkets)
+ complex(dp),intent(in) :: kets(hexc%hsize,nkets)
 
 !Local variables ------------------------------
 !scalars
@@ -621,20 +601,19 @@ subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,&
  integer :: niter_file,niter_max,niter_done,nsppol,iq,my_nt,term_type,n_all_omegas
  real(dp) :: norm,nfact
  logical :: can_restart,is_converged
- complex(dpc) :: factor
+ complex(dp) :: factor
  character(len=500) :: msg
- character(len=fnlen),parameter :: tag_file="_HAYDR_SAVE"
+ character(len=fnlen), parameter :: tag_file="_HAYDR_SAVE"
  character(len=fnlen) :: restart_file,out_file
  type(haydock_type) :: haydock_file
 !arrays
  real(dp),allocatable :: bb_file(:)
  real(dp),allocatable :: bb(:)
- complex(dpc),allocatable :: aa(:),phi_nm1(:),phi_n(:),hphi_n(:),hphi_nm1(:)
- complex(dpc),allocatable :: aa_file(:),phi_n_file(:),phi_nm1_file(:)
- complex(dpc),allocatable :: ket0(:),all_omegas(:),green_temp(:,:)
-! complex(dpc),allocatable :: diag_dense(:)
+ complex(dp),allocatable :: aa(:),phi_nm1(:),phi_n(:),hphi_n(:),hphi_nm1(:)
+ complex(dp),allocatable :: aa_file(:),phi_n_file(:),phi_nm1_file(:)
+ complex(dp),allocatable :: ket0(:),all_omegas(:),green_temp(:,:)
+! complex(dp),allocatable :: diag_dense(:)
  logical :: check(2)
-
 !************************************************************************
 
  ABI_CHECK(Bsp%nsppol==1,"nsppol > 1 not implemented yet")
@@ -652,11 +631,11 @@ subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,&
  ABI_CHECK(my_nt>0,"One of the processors has zero columns")
 
  write(msg,'(a,i0)')' Haydock algorithm with MAX number of iterations: ',BSp%niter
- call wrtout(std_out,msg,"COLL")
+ call wrtout(std_out,msg)
  !
  ! Select the terminator for the continued fraction.
  term_type=0; if (Bsp%hayd_term>0) term_type=1
- call wrtout(std_out,sjoin("Using terminator type: ",itoa(term_type)),"COLL")
+ call wrtout(std_out,sjoin("Using terminator type: ",itoa(term_type)))
  !
  ! Check for presence of the restart file.
  can_restart=.FALSE.
@@ -665,11 +644,11 @@ subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,&
    if (file_exists(restart_file) ) then
      can_restart=.TRUE.
      msg = " Restarting Haydock calculation from file: "//TRIM(restart_file)
-     call wrtout(std_out,msg,"COLL")
-     call wrtout(ab_out,msg,"COLL")
+     call wrtout(std_out,msg)
+     call wrtout(ab_out,msg)
    else
      can_restart=.FALSE.
-     call wrtout(ab_out," WARNING: cannot find restart file: "//TRIM(restart_file),"COLL")
+     call wrtout(ab_out," WARNING: cannot find restart file: "//TRIM(restart_file))
    end if
  end if
  ABI_CHECK(.not.can_restart,"restart not yet implemented")
@@ -677,13 +656,13 @@ subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,&
  ! Open the file and write basic dimensions and info.
  if (my_rank==master) then
    out_file = TRIM(BS_files%out_basename)//TRIM(tag_file)
-   call open_haydock(out_file,haydock_file)
+   call haydock_file%open(out_file)
    haydock_file%hsize = hexc%hsize
    haydock_file%use_coupling = Bsp%use_coupling
    haydock_file%op = BSE_HAYD_IMEPS
    haydock_file%nq = nkets
    haydock_file%broad = Bsp%broad
-   call write_dim_haydock(haydock_file)
+   call haydock_file%write_dim()
  end if
 
  !
@@ -693,11 +672,10 @@ subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,&
    ABI_MALLOC(ket0,(hexc%hsize))
    ket0=kets(:,iq)
 
-   !
    niter_file=0
    if (can_restart) then
      call haydock_restart(BSp,restart_file,BSE_HAYD_IMEPS,iq,hexc%hsize,&
-&      niter_file,aa_file,bb_file,phi_nm1_file,phi_n_file,comm)
+       niter_file,aa_file,bb_file,phi_nm1_file,phi_n_file,comm)
    end if
    !
    ! For n>1, we have:
@@ -725,7 +703,7 @@ subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,&
      norm = DZNRM2(hexc%hsize,ket0,1) ! Normalization
      phi_nm1=phi_nm1/norm
 
-     call hexc_matmul_tda(hexc,hexc_i,phi_nm1,hphi_n)
+     call hexc%matmul_tda(hexc_i,phi_nm1,hphi_n)
 
      aa(1)=xdotc(my_nt,phi_nm1,1,hphi_n(my_t1:),1)
      call xmpi_sum(aa(1:1),comm,ierr)
@@ -783,9 +761,9 @@ subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,&
    ABI_MALLOC(green_temp,(n_all_omegas,nkets))
 
    call haydock_herm_algo(niter_done,niter_max,n_all_omegas,all_omegas,BSp%haydock_tol(1),check,&
-&    my_t1,my_t2,factor,term_type,aa,bb,phi_nm1,phi_n,&
-&    green_temp(:,iq),inn,is_converged,&
-&    hexc, hexc_i, comm)
+     my_t1,my_t2,factor,term_type,aa,bb,phi_nm1,phi_n,&
+     green_temp(:,iq),inn,is_converged,&
+     hexc, hexc_i, comm)
 
    ! Computing result from two ranges of frequencies
    ! The real part is added, the imaginary part is substracted
@@ -813,7 +791,7 @@ subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,&
 
    if (my_rank==master) then
      ! Write data for restarting
-     call write_haydock(haydock_file, hexc%hsize, Bsp%q(:,iq), aa, bb, hphi_n, hphi_nm1, MIN(inn,niter_max), factor)
+     call haydock_file%write(hexc%hsize, Bsp%q(:,iq), aa, bb, hphi_n, hphi_nm1, MIN(inn,niter_max), factor)
    end if
 
    ABI_FREE(hphi_n)
@@ -825,7 +803,7 @@ subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,&
    ABI_FREE(ket0)
  end do ! iq
 
- if (my_rank==master) call close_haydock(haydock_file)
+ if (my_rank==master) call haydock_file%close()
 
  call xmpi_barrier(comm)
 
@@ -874,9 +852,8 @@ end subroutine haydock_herm
 !! SOURCE
 
 subroutine haydock_herm_algo(niter_done,niter_max,nomega,omega,tol_iter,check,&
-& my_t1,my_t2,factor,term_type,aa,bb,phi_nm1,phi_n,&
-& green,inn,is_converged,&
-& hexc, hexc_i, comm)
+                              my_t1,my_t2,factor,term_type,aa,bb,phi_nm1,phi_n,&
+                              green,inn,is_converged, hexc, hexc_i, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -886,16 +863,16 @@ subroutine haydock_herm_algo(niter_done,niter_max,nomega,omega,tol_iter,check,&
  integer,intent(out) :: inn
  logical,intent(out) :: is_converged
  real(dp),intent(in) :: tol_iter
- complex(dpc),intent(in) :: factor
+ complex(dp),intent(in) :: factor
  type(hexc_t),intent(in) :: hexc
  type(hexc_interp_t),intent(in) :: hexc_i
 !arrays
  real(dp),intent(inout) :: bb(niter_max)
- complex(dpc),intent(out) :: green(nomega)
- complex(dpc),intent(in) :: omega(nomega)
- complex(dpc),intent(inout) :: aa(niter_max)
- complex(dpc),intent(inout) :: phi_nm1(my_t2-my_t1+1)
- complex(dpc),intent(inout) :: phi_n  (my_t2-my_t1+1)
+ complex(dp),intent(out) :: green(nomega)
+ complex(dp),intent(in) :: omega(nomega)
+ complex(dp),intent(inout) :: aa(niter_max)
+ complex(dp),intent(inout) :: phi_nm1(my_t2-my_t1+1)
+ complex(dp),intent(inout) :: phi_n  (my_t2-my_t1+1)
  logical,intent(in) :: check(2)
 
 !Local variables ------------------------------
@@ -904,11 +881,10 @@ subroutine haydock_herm_algo(niter_done,niter_max,nomega,omega,tol_iter,check,&
  character(len=500) :: msg
  logical,parameter :: force_real=.TRUE.
 !arrays
+ integer :: units(2)
  real(dp) :: abs_err(nomega,2) !,rel_err(nomega,2)
- complex(dpc),allocatable :: oldg(:),newg(:)
- complex(dpc),allocatable :: phi_np1(:),hphi_n(:),cfact(:)
+ complex(dp),allocatable :: oldg(:),newg(:), phi_np1(:),hphi_n(:),cfact(:)
  logical :: test(2)
-
 !************************************************************************
 
  ! The sequences starts with |1> normalized to 1 and b_0 =0, therefore:
@@ -922,23 +898,19 @@ subroutine haydock_herm_algo(niter_done,niter_max,nomega,omega,tol_iter,check,&
  !  3) |n+1> = [H|n> -a_n|n> -b_{n-1}|n-1>]/b_n
  !
  my_nt = my_t2-my_t1+1
+ units = [std_out, ab_out]
 
  ABI_MALLOC_OR_DIE(hphi_n,(hexc%hsize), ierr)
-
  ABI_MALLOC(phi_np1,(my_nt))
-
- ABI_MALLOC(oldg,(nomega))
- oldg=czero
- ABI_MALLOC(newg,(nomega))
- newg=czero
- ABI_MALLOC(cfact,(nomega))
- cfact=czero
+ ABI_CALLOC(oldg,(nomega))
+ ABI_CALLOC(newg,(nomega))
+ ABI_CALLOC(cfact,(nomega))
 
  nconv=0
  do inn=niter_done+1,niter_max
 
    !YG2014
-   call hexc_matmul_tda(hexc,hexc_i,phi_n,hphi_n)
+   call hexc%matmul_tda(hexc_i,phi_n,hphi_n)
 
    aa(inn) = xdotc(my_nt,phi_n,1,hphi_n(my_t1:),1)
    call xmpi_sum(aa(inn:inn),comm,ierr)
@@ -952,17 +924,15 @@ subroutine haydock_herm_algo(niter_done,niter_max,nomega,omega,tol_iter,check,&
    bb(inn) = SQRT(bb(inn))
 
    phi_np1 = phi_np1/bb(inn)
-
    phi_nm1 = phi_n
    phi_n   = phi_np1
 
    write(msg,'(a,i0,a,3es12.4)')' Iteration number ',inn,', b_i RE(a_i) IM(a_i) ',bb(inn),REAL(aa(inn)),AIMAG(aa(inn))
-   call wrtout(std_out,msg,"COLL")
+   call wrtout(std_out, msg)
 
    call continued_fract(inn,term_type,aa,bb,nomega,omega,cfact)
-
    newg= factor*cfact
-   !
+
    ! Avoid spurious convergence.
    niter_min=4; if (niter_done>1) niter_min=niter_done+1
    if (inn>niter_min) then
@@ -988,13 +958,12 @@ subroutine haydock_herm_algo(niter_done,niter_max,nomega,omega,tol_iter,check,&
      if (nconv==2) then
        if(inn<100)then
          write(msg,'(a,es10.2,a)')&
-&          " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after less than 100 iterations."
+           " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after less than 100 iterations."
        else
          write(msg,'(a,es10.2,a,i0,a)')&
-&          " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after ",inn," iterations."
+           " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after ",inn," iterations."
        endif
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
+       call wrtout(units, msg)
        EXIT
      end if
    end if
@@ -1005,9 +974,8 @@ subroutine haydock_herm_algo(niter_done,niter_max,nomega,omega,tol_iter,check,&
  green = newg
  if (nconv/=2) then
    write(msg,'(a,es10.2,a,i0,a)')&
-&    " WARNING: Haydock algorithm did not converge within ",tol_iter," after ",niter_max," iterations."
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+    " WARNING: Haydock algorithm did not converge within ",tol_iter," after ",niter_max," iterations."
+   call wrtout(units, msg)
  end if
 
  is_converged = (nconv==2)
@@ -1058,25 +1026,24 @@ subroutine haydock_restart(BSp,restart_file,ftype,iq_search,hsize,niter_file,aa_
  type(excparam),intent(in) :: BSp
 !arrays
  real(dp),allocatable,intent(out) :: bb_file(:)
- complex(dpc),allocatable,intent(out) :: aa_file(:),phi_n_file(:),phi_nm1_file(:)
+ complex(dp),allocatable,intent(out) :: aa_file(:),phi_n_file(:),phi_nm1_file(:)
 
 !Local variables ------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: nproc,my_rank,ierr,op_file
+ integer :: nproc,my_rank,ierr,op_file, units(2)
  integer :: hsize_file,use_coupling_file
- complex(dpc) :: factor_file
+ complex(dp) :: factor_file
  character(len=500) :: msg
  type(haydock_type) :: haydock_file
-
 !************************************************************************
 
  nproc = xmpi_comm_size(comm); my_rank= xmpi_comm_rank(comm)
+ units = [std_out, ab_out]
 
  if (my_rank==master) then
-   call open_haydock(restart_file, haydock_file)
-
-   call read_dim_haydock(haydock_file)
+   call haydock_file%open(restart_file)
+   call haydock_file%read_dim()
 
    if (haydock_file%op/=ftype) then
      write(msg,"(2(a,i0))")" Expecting restart file with filetype: ",ftype," but found ",op_file
@@ -1085,37 +1052,36 @@ subroutine haydock_restart(BSp,restart_file,ftype,iq_search,hsize,niter_file,aa_
 
    if (haydock_file%hsize/=hsize) then
      write(msg,"(2(a,i0))")&
-&      " Rank of H_exc read from file: ",hsize_file," differs from the one used in this run: ",hsize
+       " Rank of H_exc read from file: ",hsize_file," differs from the one used in this run: ",hsize
      ABI_ERROR(msg)
    end if
 
    if (haydock_file%use_coupling /= BSp%use_coupling) then
      write(msg,'(2(a,i0))')&
-&      " use_coupling_file: ",use_coupling_file," differs from input file value: ",BSp%use_coupling
+       " use_coupling_file: ",use_coupling_file," differs from input file value: ",BSp%use_coupling
      ABI_ERROR(msg)
    end if
 
-   call read_haydock(haydock_file, Bsp%q(:,iq_search), aa_file, bb_file, &
-&                   phi_n_file, phi_nm1_file, niter_file, factor_file)
+   call haydock_file%read(Bsp%q(:,iq_search), aa_file, bb_file, &
+                   phi_n_file, phi_nm1_file, niter_file, factor_file)
 
    if (niter_file == 0) then
      write(msg,"(a,3f8.4,3a)")&
-&      " Could not find q-point: ",BSp%q(:,iq_search)," in file ",TRIM(restart_file),&
-&      " Cannot restart Haydock iterations for this q-point"
+      " Could not find q-point: ",BSp%q(:,iq_search)," in file ",TRIM(restart_file),&
+      " Cannot restart Haydock iterations for this q-point"
      ABI_COMMENT(msg)
    else
      write(msg,'(a,i0)')" Number of iterations already performed: ",niter_file
-     call wrtout(std_out,msg,"COLL")
-     call wrtout(ab_out,msg,"COLL")
+     call wrtout(units, msg)
 
      if ( ABS(haydock_file%broad - BSp%broad) > tol6) then
        write(msg,'(2a,2(a,f8.4),a)')&
-&        " Restart file has been produced with a different Lorentzian broadening: ",ch10,&
-&        " broad_file: ",haydock_file%broad," input broadening: ",BSp%broad," Continuing anyway. "
+        " Restart file has been produced with a different Lorentzian broadening: ",ch10,&
+        " broad_file: ",haydock_file%broad," input broadening: ",BSp%broad," Continuing anyway. "
        ABI_WARNING(msg)
      end if
 
-     call close_haydock(haydock_file)
+     call haydock_file%close()
    end if
  end if
  !
@@ -1168,8 +1134,8 @@ subroutine haydock_mdf_to_tensor(BSp,Cryst,eps,tensor_cart,tensor_red,ierr)
  type(excparam),intent(in) :: BSp
  type(crystal_t),intent(in) :: Cryst
 !arrays
- complex(dpc),intent(in) :: eps(BSp%nomega,BSp%nq)
- complex(dpc),intent(out) :: tensor_cart(BSp%nomega,6), tensor_red(BSp%nomega,6)
+ complex(dp),intent(in) :: eps(BSp%nomega,BSp%nq)
+ complex(dp),intent(out) :: tensor_cart(BSp%nomega,6), tensor_red(BSp%nomega,6)
 
 !Local variables ------------------------------
 !scalars
@@ -1179,9 +1145,8 @@ subroutine haydock_mdf_to_tensor(BSp,Cryst,eps,tensor_cart,tensor_red,ierr)
  integer,allocatable :: ipiv(:)
  real(dp) :: qcart(3), qtmet(3)
  real(dp) :: qred2cart(3,3),qcart2red(3,3)
- complex(dpc) :: qqcart(BSp%nq,6), qqred(BSp%nq,6)
- complex(dpc) :: b(6,BSP%nomega)
-
+ complex(dp) :: qqcart(BSp%nq,6), qqred(BSp%nq,6)
+ complex(dp) :: b(6,BSP%nomega)
 !************************************************************************
 
  ! Error flag
@@ -1289,9 +1254,11 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
  type(excparam),intent(in) :: BSp
  type(excfiles),intent(in) :: BS_files
  type(Hdr_type),intent(in) :: Hdr_bse
+ type(hexc_t),intent(in) :: hexc
+ type(hexc_interp_t),intent(in) :: hexc_i
 !arrays
  complex(dp),intent(out) :: green(BSp%nomega,BSp%nq)
- complex(dpc),intent(in) :: kets(hsize,nkets)
+ complex(dp),intent(in) :: kets(hsize,nkets)
 
 !Local variables ------------------------------
 !scalars
@@ -1300,23 +1267,20 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
  integer :: niter_file,niter_max,niter_done,nsppol,iq,my_nt,term_type
  real(dp) :: ket0_hbar_norm,nfact
  logical :: can_restart,is_converged
- complex(dpc) :: factor
+ complex(dp) :: factor
  character(len=fnlen),parameter :: tag_file="_HAYDC_SAVE"
  character(len=500) :: msg
  character(len=fnlen) :: restart_file,out_file
- type(hexc_t),intent(in) :: hexc
- type(hexc_interp_t),intent(in) :: hexc_i
 !arrays
- real(dp),allocatable :: bb_file(:)
- real(dp),allocatable :: bb(:)
- complex(dpc),allocatable :: aa(:),cc(:),phi_np1(:),phi_n(:),phi_nm1(:),cbuff(:)
- complex(dpc),allocatable :: aa_file(:),phi_n_file(:),phi_np1_file(:),cc_file(:)
- complex(dpc),allocatable :: ket0(:)
+ integer :: units(2)
+ real(dp),allocatable :: bb_file(:), bb(:)
+ complex(dp),allocatable :: aa(:),cc(:),phi_np1(:),phi_n(:),phi_nm1(:),cbuff(:)
+ complex(dp),allocatable :: aa_file(:),phi_n_file(:),phi_np1_file(:),cc_file(:), ket0(:)
  logical :: check(2)
-
 !************************************************************************
 
  ABI_WARNING("Haydock + coupling is still under development")
+ units = [std_out, ab_out]
 
  if(BSp%use_interp) then
    ABI_ERROR("Coupling is not yet implemented with interpolation")
@@ -1337,7 +1301,7 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
  if (nsppol==1) nfact=two*nfact
 
  write(msg,'(a,i0)')' Haydock algorithm with MAX number of iterations: ',BSp%niter
- call wrtout(std_out,msg,"COLL")
+ call wrtout(std_out,msg)
  !
  ! Check for presence of the restart file.
  can_restart=.FALSE.
@@ -1347,8 +1311,7 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
    if (file_exists(restart_file) ) then
      can_restart=.TRUE.
      msg = strcat(" Restarting Haydock calculation from file: ",restart_file)
-     call wrtout(std_out,msg,"COLL")
-     call wrtout(ab_out,msg,"COLL")
+     call wrtout(units, msg)
      ABI_ERROR("Restart is not tested")
    else
      can_restart=.FALSE.
@@ -1368,7 +1331,7 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
  !
  ! Select the terminator for the continued fraction.
  term_type=0 !; if (Bsp%hayd_term>0) term_type=2
- call wrtout(std_out,sjoin("Using terminator type: ",itoa(term_type)),"COLL")
+ call wrtout(std_out,sjoin("Using terminator type: ",itoa(term_type)))
  !
  ! Calculate green(w) for the different starting kets.
  green=czero
@@ -1380,9 +1343,9 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
 
    if (can_restart) then
      call haydock_restart(BSp,restart_file,BSE_HAYD_IMEPS,iq,hsize,&
-&      niter_file,aa_file,bb_file,phi_np1_file,phi_n_file,comm)
+                          niter_file,aa_file,bb_file,phi_np1_file,phi_n_file,comm)
    end if
-   !
+
    ABI_MALLOC(phi_nm1,(my_nt))
    ABI_MALLOC(phi_n,(my_nt))
    ABI_MALLOC(phi_np1,(my_nt))
@@ -1397,7 +1360,7 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
 
    if (niter_file==0) then ! Calculation from scratch.
      phi_n   = ket0
-     call hexc_matmul_full(hexc, hexc_i, phi_n, phi_np1, -1)
+     call hexc%matmul_full(hexc_i, phi_n, phi_np1, -1)
      !phi_np1 = MATMUL(hreso,ket0) - MATMUL(hcoup,CONJG(ket0))
      ket0_hbar_norm = SQRT(two*DBLE(DOT_PRODUCT(phi_n,phi_np1)))
      phi_n   = phi_n  /ket0_hbar_norm
@@ -1405,7 +1368,7 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
      !ket0    = ket0/ket0_hbar_norm
      cc(1)=zero ! <P|F|P>
      !cc(1) =  DOT_PRODUCT(ket0,phi_np1)
-     write(std_out,*)" cc(1), ket0_hbar_norm =",cc(1),ket0_hbar_norm
+     !write(std_out,*)" cc(1), ket0_hbar_norm =",cc(1),ket0_hbar_norm
 
      phi_nm1 = czero
      niter_done=0  ! TODO Be careful here
@@ -1436,9 +1399,9 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
    if (ABS(Bsp%haydock_tol(2)-two)<tol6) check = (/.FALSE.,.TRUE./)
 
    call haydock_psherm_optalgo(niter_done,niter_max,BSp%nomega,BSp%omega,BSp%haydock_tol(1),check,hexc,hexc_i,&
-&    hsize,my_t1,my_t2,factor,term_type,aa,bb,cc,ket0,ket0_hbar_norm,phi_nm1,phi_n,phi_np1,&
-&    green(:,iq),inn,is_converged,comm)
-   !
+      hsize,my_t1,my_t2,factor,term_type,aa,bb,cc,ket0,ket0_hbar_norm,phi_nm1,phi_n,phi_np1,&
+      green(:,iq),inn,is_converged,comm)
+
    ! Save the a"s and the b"s for possible restarting.
    ! 1) Info on the Q.
    ! 2) Number of iterations performed.
@@ -1538,18 +1501,18 @@ subroutine haydock_psherm_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,che
  integer,intent(out) :: inn
  logical,intent(out) :: is_converged
  real(dp),intent(in) :: tol_iter,ket0_hbar_norm
- complex(dpc),intent(in) :: factor
+ complex(dp),intent(in) :: factor
  type(hexc_t),intent(in) :: hexc
  type(hexc_interp_t),intent(in) :: hexc_i
 !arrays
  real(dp),intent(inout) :: bb(niter_tot+1)
- complex(dpc),intent(out) :: green(nomega)
- complex(dpc),intent(in) :: omega(nomega)
- complex(dpc),intent(inout) :: aa(niter_tot),cc(niter_tot+1)
- complex(dpc),intent(in) :: ket0(my_t2-my_t1+1)
- complex(dpc),intent(inout) :: phi_nm1(my_t2-my_t1+1)
- complex(dpc),intent(inout) :: phi_n  (my_t2-my_t1+1)
- complex(dpc),intent(inout) :: phi_np1(my_t2-my_t1+1)
+ complex(dp),intent(out) :: green(nomega)
+ complex(dp),intent(in) :: omega(nomega)
+ complex(dp),intent(inout) :: aa(niter_tot),cc(niter_tot+1)
+ complex(dp),intent(in) :: ket0(my_t2-my_t1+1)
+ complex(dp),intent(inout) :: phi_nm1(my_t2-my_t1+1)
+ complex(dp),intent(inout) :: phi_n  (my_t2-my_t1+1)
+ complex(dp),intent(inout) :: phi_np1(my_t2-my_t1+1)
  logical,intent(in) :: check(2)
 
 !Local variables ------------------------------
@@ -1560,17 +1523,18 @@ subroutine haydock_psherm_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,che
  real(dp) :: max_err,mean_err,mean_err2,std_dev,err
  logical :: keep_vectors=.TRUE.
 !arrays
+ integer :: units(2)
  real(dp) :: abs_err(nomega,2) !,ww_err(nomega,2)
- complex(dpc) :: gn0(nomega,niter_tot)
- complex(dpc),allocatable :: oldg(:),newg(:)
- complex(dpc),allocatable :: hphi_n(:),save_phi(:,:)
- complex(dpc),allocatable ::  alpha(:,:),beta(:,:),ovlp(:,:)
- complex(dpc),allocatable :: phi_test(:),phi_test2(:),g00(:)
+ complex(dp) :: gn0(nomega,niter_tot)
+ complex(dp),allocatable :: oldg(:),newg(:)
+ complex(dp),allocatable :: hphi_n(:),save_phi(:,:)
+ complex(dp),allocatable ::  alpha(:,:),beta(:,:),ovlp(:,:)
+ complex(dp),allocatable :: phi_test(:),phi_test2(:),g00(:)
  logical :: test(2)
-
 !************************************************************************
 
  ABI_UNUSED(ket0_hbar_norm)
+ units = [std_out, ab_out]
 
  my_nt = my_t2-my_t1+1
 
@@ -1600,10 +1564,10 @@ subroutine haydock_psherm_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,che
    ! |n>   = |n+1>
    phi_nm1 = phi_n
    phi_n   = phi_np1
-   !
+
    !|n+1> = H |n> using all eh components.
    parity = (-1)**(inn+1)
-   call hexc_matmul_full(hexc, hexc_i, phi_n, phi_np1, parity)
+   call hexc%matmul_full(hexc_i, phi_n, phi_np1, parity)
 
    !phi_np1 = MATMUL(hreso,phi_n) + parity * MATMUL(hcoup,CONJG(phi_n))
    !call xmpi_sum(hphi_np1,comm,ierr)
@@ -1631,7 +1595,7 @@ subroutine haydock_psherm_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,che
    !call xmpi_sum(cc(inn+1),comm,ierr)
 
    write(msg,'(a,i0,a,3es12.4)')' Iteration number ',inn,', b_i RE(c_i+1) IM(c_i+1) ',bb(inn),REAL(cc(inn+1)),AIMAG(cc(inn+1))
-   call wrtout(std_out,msg,"COLL")
+   call wrtout(std_out,msg)
 
    call continued_fract(inn,term_type,aa,bb(2:),nomega,omega,g00)
    gn0(:,1) = g00
@@ -1680,13 +1644,12 @@ subroutine haydock_psherm_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,che
      if (nconv==2) then
        if(inn<100)then
          write(msg,'(a,es10.2,a)')&
-&          " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after less than 100 iterations."
+          " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after less than 100 iterations."
        else
          write(msg,'(a,es10.2,a,i0,a)')&
-&          " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after ",inn," iterations."
+          " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after ",inn," iterations."
        endif
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
+       call wrtout(units, msg)
        EXIT
      end if
    end if
@@ -1697,9 +1660,8 @@ subroutine haydock_psherm_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,che
  green = newg
  if (nconv/=2) then
    write(msg,'(a,es10.2,a,i0,a)')&
-&    " WARNING: Haydock algorithm did not converge within ",tol_iter," after ",niter_tot," iterations."
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+    " WARNING: Haydock algorithm did not converge within ",tol_iter," after ",niter_tot," iterations."
+   call wrtout(units, msg)
  end if
 
  is_converged = (nconv==2)
@@ -1720,7 +1682,7 @@ subroutine haydock_psherm_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,che
    do ii=1,tdim
      parity = (-1)**(ii+1)
      phi_test  = save_phi(:,ii)
-     call hexc_matmul_full(hexc, hexc_i, phi_test, phi_test2, parity)
+     call hexc%matmul_full(hexc_i, phi_test, phi_test2, parity)
      !phi_test2 = MATMUL(hreso,phi_test) + parity * MATMUL(hcoup,CONJG(phi_test))
      ovlp(ii,ii) = DOT_PRODUCT(phi_test,phi_test2) + DOT_PRODUCT(phi_test2,phi_test)
      err = ABS(ovlp(ii,ii)-cone)
@@ -1733,8 +1695,8 @@ subroutine haydock_psherm_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,che
    end do
    mean_err = mean_err/tdim
    std_dev = mean_err2/tdim -mean_err**2
-   write(std_out,'(a,i0,1x,3es14.6)')&
-&   " Error in normalization (ii, max_err,mean,std_dev): ",row_max,max_err,mean_err,std_dev
+   write(std_out,'(a,i0,1x,3es14.6)') &
+    " Error in normalization (ii, max_err,mean,std_dev): ",row_max,max_err,mean_err,std_dev
 
    ABI_FREE(phi_test)
    ABI_FREE(phi_test2)
@@ -1745,7 +1707,7 @@ subroutine haydock_psherm_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,che
    ! TODO possibility to call hreso * phi, and hcoup * phi separately
    do ii=1,tdim
      parity = (-1)**(ii+1)
-     call hexc_matmul_full(hexc, hexc_i, save_phi(:,ii), alpha(:,ii), parity)
+     call hexc%matmul_full(hexc_i, save_phi(:,ii), alpha(:,ii), parity)
    end do
 
    !alpha = MATMUL(hreso,save_phi(:,1:tdim))
@@ -1785,7 +1747,7 @@ subroutine haydock_psherm_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,che
    mean_err = mean_err/(tdim*(tdim+1)/2)
    std_dev = mean_err2/(tdim*(tdim+1)/2) - mean_err**2
    write(std_out,'(a,2(i0,1x),3es14.6)')&
-&     " Error in Hbar-ortho (i,j), max_err, mean, std_dev ",row_max,col_max,max_err,mean_err,std_dev
+     " Error in Hbar-ortho (i,j), max_err, mean, std_dev ",row_max,col_max,max_err,mean_err,std_dev
    !call print_arr(ovlp,max_r=185,max_c=10,unit=std_out)
 
    ABI_FREE(alpha)
@@ -1834,8 +1796,8 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
  type(Hdr_type),intent(in) :: Hdr_bse
 !arrays
  complex(dp),intent(out) :: green(BSp%nomega,BSp%nq)
- complex(dpc),intent(in) :: kets(hsize,nkets)
- complex(dpc),intent(in) :: ep_renorms(hsize)
+ complex(dp),intent(in) :: kets(hsize,nkets)
+ complex(dp),intent(in) :: ep_renorms(hsize)
 
 !Local variables ------------------------------
 !scalars
@@ -1844,23 +1806,21 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
  integer :: niter_file,niter_max,niter_done,nsppol,iq,my_nt,term_type,n_all_omegas
  real(dp) :: ket0_hbar_norm,nfact,norm
  logical :: can_restart,is_converged
- complex(dpc) :: factor
+ complex(dp) :: factor
  character(len=fnlen),parameter :: tag_file="_HAYDC_SAVE"
  character(len=500) :: msg
  character(len=fnlen) :: restart_file,out_file
  type(hexc_t),intent(in) :: hexc
  type(hexc_interp_t),intent(in) :: hexc_i
 !arrays
- complex(dpc),allocatable :: aa_file(:),bb_file(:),cc_file(:)
- complex(dpc),allocatable :: aa(:),bb(:),cc(:)
- complex(dpc),allocatable :: phi_np1(:),phi_n(:),phi_nm1(:)
- complex(dpc),allocatable :: phit_np1(:),phit_n(:),phit_nm1(:)
- complex(dpc),allocatable :: cbuff(:), phi_n_file(:),phi_np1_file(:)
- complex(dpc),allocatable :: ket0(:)
- complex(dpc),allocatable :: hphi_n(:), hphit_n(:)
- complex(dpc),allocatable :: all_omegas(:),green_temp(:,:)
+ complex(dp),allocatable :: aa_file(:),bb_file(:),cc_file(:)
+ complex(dp),allocatable :: aa(:),bb(:),cc(:)
+ complex(dp),allocatable :: phi_np1(:),phi_n(:),phi_nm1(:)
+ complex(dp),allocatable :: phit_np1(:),phit_n(:),phit_nm1(:)
+ complex(dp),allocatable :: cbuff(:), phi_n_file(:),phi_np1_file(:)
+ complex(dp),allocatable :: ket0(:), hphi_n(:), hphit_n(:)
+ complex(dp),allocatable :: all_omegas(:),green_temp(:,:)
  logical :: check(2)
-
 !************************************************************************
 
  ABI_WARNING("Haydock with Bilanczos is still under development")
@@ -1884,18 +1844,18 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
  if (nsppol==1) nfact=two*nfact
 
  write(msg,'(a,i0)')' Bi-Lanczos algorithm with MAX number of iterations: ',BSp%niter
- call wrtout(std_out,msg,"COLL")
+ call wrtout(std_out,msg)
  !
  ! Check for presence of the restart file.
  can_restart=.FALSE.
 
- if ( BS_files%in_haydock_basename /= BSE_NOFILE) then
+ if (BS_files%in_haydock_basename /= BSE_NOFILE) then
    restart_file = strcat(BS_files%in_haydock_basename,tag_file)
    if (file_exists(restart_file) ) then
      can_restart=.TRUE.
      msg = strcat(" Restarting Haydock calculation from file: ",restart_file)
-     call wrtout(std_out,msg,"COLL")
-     call wrtout(ab_out,msg,"COLL")
+     call wrtout(std_out,msg)
+     call wrtout(ab_out,msg)
      ABI_ERROR("Restart is not implemented")
    else
      can_restart=.FALSE.
@@ -1915,7 +1875,7 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
  !
  ! Select the terminator for the continued fraction.
  term_type=0 !; if (Bsp%hayd_term>0) term_type=2
- call wrtout(std_out,sjoin("Using terminator type: ",itoa(term_type)),"COLL")
+ call wrtout(std_out,sjoin("Using terminator type: ",itoa(term_type)))
  !
  ! Calculate green(w) for the different starting kets.
  green=czero
@@ -1942,10 +1902,9 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
    ! TODO: Note the different convention used for the coefficients
    ! Should use the same convention in the Hermitian case.
    niter_max = niter_file + Bsp%niter
-   ABI_MALLOC(aa,(niter_max))
-   ABI_MALLOC(bb,(niter_max))
-   ABI_MALLOC(cc,(niter_max))
-   aa=czero; bb=czero; cc=czero
+   ABI_CALLOC(aa,(niter_max))
+   ABI_CALLOC(bb,(niter_max))
+   ABI_CALLOC(cc,(niter_max))
 
    if (niter_file==0) then ! Calculation from scratch.
      phi_nm1 = ket0(my_t1:my_t2)
@@ -1954,8 +1913,8 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
      phi_nm1=phi_nm1/norm
      phit_nm1=phit_nm1/norm
 
-     call hexc_matmul_elphon(hexc,phi_nm1,hphi_n,'N',ep_renorms)
-     call hexc_matmul_elphon(hexc,phit_nm1,hphit_n,'C',ep_renorms)
+     call hexc%matmul_elphon(phi_nm1,hphi_n,'N',ep_renorms)
+     call hexc%matmul_elphon(phit_nm1,hphit_n,'C',ep_renorms)
 
      aa(1)=xdotc(my_nt,phit_nm1,1,hphi_n(my_t1:),1)
      call xmpi_sum(aa(1:1),comm,ierr)
@@ -2013,12 +1972,9 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
 
    ABI_MALLOC(green_temp,(n_all_omegas,nkets))
 
-
-
    call haydock_bilanczos_optalgo(niter_done,niter_max,n_all_omegas,all_omegas,BSp%haydock_tol(1),check,hexc,hexc_i,&
-&    hsize,my_t1,my_t2,factor,term_type,ep_renorms,aa,bb,cc,ket0,ket0_hbar_norm,phi_nm1,phi_n,phi_np1,&
-&    phit_nm1,phit_n,phit_np1,green_temp(:,iq),inn,is_converged,comm)
-
+    hsize,my_t1,my_t2,factor,term_type,ep_renorms,aa,bb,cc,ket0,ket0_hbar_norm,phi_nm1,phi_n,phi_np1,&
+    phit_nm1,phit_n,phit_np1,green_temp(:,iq),inn,is_converged,comm)
 
    ! Computing result from two ranges of frequencies
    ! The real part is added, the imaginary part is substracted
@@ -2027,8 +1983,6 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
    ABI_FREE(all_omegas)
    ABI_FREE(green_temp)
 
-
-   !
    ! Save the a"s and the b"s for possible restarting.
    ! 1) Info on the Q.
    ! 2) Number of iterations performed.
@@ -2077,7 +2031,6 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
  end do ! iq
 
  if (my_rank==master) close(out_unt)
-
  call xmpi_barrier(comm)
 
 end subroutine haydock_bilanczos
@@ -2134,22 +2087,22 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
  integer,intent(out) :: inn
  logical,intent(out) :: is_converged
  real(dp),intent(in) :: tol_iter,ket0_hbar_norm
- complex(dpc),intent(in) :: factor
+ complex(dp),intent(in) :: factor
  type(hexc_t),intent(in) :: hexc
  type(hexc_interp_t),intent(in) :: hexc_i
 !arrays
- complex(dpc),intent(inout) :: bb(niter_tot+1)
- complex(dpc),intent(out) :: green(nomega)
- complex(dpc),intent(in) :: omega(nomega)
- complex(dpc),intent(inout) :: aa(niter_tot),cc(niter_tot+1)
- complex(dpc),intent(in) :: ket0(my_t2-my_t1+1)
- complex(dpc),intent(in) :: ep_renorms(hsize)
- complex(dpc),intent(inout) :: phi_nm1(my_t2-my_t1+1)
- complex(dpc),intent(inout) :: phi_n  (my_t2-my_t1+1)
- complex(dpc),intent(inout) :: phi_np1(my_t2-my_t1+1)
- complex(dpc),intent(inout) :: phit_nm1(my_t2-my_t1+1)
- complex(dpc),intent(inout) :: phit_n  (my_t2-my_t1+1)
- complex(dpc),intent(inout) :: phit_np1(my_t2-my_t1+1)
+ complex(dp),intent(inout) :: bb(niter_tot+1)
+ complex(dp),intent(out) :: green(nomega)
+ complex(dp),intent(in) :: omega(nomega)
+ complex(dp),intent(inout) :: aa(niter_tot),cc(niter_tot+1)
+ complex(dp),intent(in) :: ket0(my_t2-my_t1+1)
+ complex(dp),intent(in) :: ep_renorms(hsize)
+ complex(dp),intent(inout) :: phi_nm1(my_t2-my_t1+1)
+ complex(dp),intent(inout) :: phi_n  (my_t2-my_t1+1)
+ complex(dp),intent(inout) :: phi_np1(my_t2-my_t1+1)
+ complex(dp),intent(inout) :: phit_nm1(my_t2-my_t1+1)
+ complex(dp),intent(inout) :: phit_n  (my_t2-my_t1+1)
+ complex(dp),intent(inout) :: phit_np1(my_t2-my_t1+1)
  logical,intent(in) :: check(2)
 
 !Local variables ------------------------------
@@ -2158,18 +2111,19 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
  character(len=500) :: msg
  logical :: keep_vectors=.TRUE.
 !arrays
+ integer :: units(2)
  real(dp) :: abs_err(nomega,2) !,ww_err(nomega,2)
- complex(dpc),allocatable :: oldg(:),newg(:)
- complex(dpc),allocatable :: hphi_np1(:),hphit_np1(:),save_phi(:,:),save_phit(:,:)
- complex(dpc),allocatable :: g00(:)
+ complex(dp),allocatable :: oldg(:),newg(:)
+ complex(dp),allocatable :: hphi_np1(:),hphit_np1(:),save_phi(:,:),save_phit(:,:)
+ complex(dp),allocatable :: g00(:)
  logical :: test(2)
  integer :: ierr
-
 !************************************************************************
 
  ABI_UNUSED(ket0_hbar_norm)
  ABI_UNUSED(ket0(1))
  ABI_UNUSED(hexc_i%hsize_dense)
+ units = [std_out, ab_out]
 
  my_nt = my_t2-my_t1+1
 
@@ -2193,8 +2147,8 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
  do inn=niter_done+1,niter_tot
 
    !|n+1> = H |n> using all eh components.
-   call hexc_matmul_elphon(hexc, phi_n, hphi_np1, 'N', ep_renorms)
-   call hexc_matmul_elphon(hexc, phit_n, hphit_np1, 'C', ep_renorms)
+   call hexc%matmul_elphon(phi_n, hphi_np1, 'N', ep_renorms)
+   call hexc%matmul_elphon(phit_n, hphit_np1, 'C', ep_renorms)
 
    ! a(n) = < phit_n | H  | phi_n >
    aa(inn)=xdotc(my_nt,phit_n,1,hphi_np1(my_t1:),1)
@@ -2215,7 +2169,6 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
    phi_np1 = phi_np1 / bb(inn)
    phit_np1 = phit_np1 / CONJG(cc(inn))
 
-   !
    ! |n-1> = |n>
    ! |n>   = |n+1>
    phi_nm1 = phi_n
@@ -2228,7 +2181,7 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
      save_phit(:,inn) = phit_n
    end if
    write(msg,'(a,i0,a,3es12.4)')' Iteration number ',inn,', b_i RE(c_i) IM(c_i) ',REAL(bb(inn)),REAL(cc(inn)),AIMAG(cc(inn))
-   call wrtout(std_out,msg,"COLL")
+   call wrtout(std_out,msg)
 
    call continued_fract_general(inn,term_type,aa,bb,cc,nomega,omega,g00)
    newg = factor*g00
@@ -2239,7 +2192,7 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
      test=.TRUE.
      abs_err(:,1) = ABS(DBLE (newg-oldg))
      abs_err(:,2) = ABS(AIMAG(newg-oldg))
-     !
+
      if (tol_iter>zero) then
        ! Test on the L1 norm.
        if (check(1)) test(1) = SUM(abs_err(:,1)) < tol_iter*SUM(ABS(DBLE (newg)))
@@ -2258,13 +2211,12 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
      if (nconv==2) then
        if(inn<100)then
          write(msg,'(a,es10.2,a)')&
-&          " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after less than 100 iterations."
+          " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after less than 100 iterations."
        else
          write(msg,'(a,es10.2,a,i0,a)')&
-&          " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after ",inn," iterations."
+          " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after ",inn," iterations."
        endif
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
+       call wrtout(units, msg)
        EXIT
      end if
    end if
@@ -2275,9 +2227,8 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
  green = newg
  if (nconv/=2) then
    write(msg,'(a,es10.2,a,i0,a)')&
-&    " WARNING: Haydock algorithm did not converge within ",tol_iter," after ",niter_tot," iterations."
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+     " WARNING: Haydock algorithm did not converge within ",tol_iter," after ",niter_tot," iterations."
+   call wrtout(units, msg)
  end if
 
  is_converged = (nconv==2)
@@ -2288,10 +2239,8 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
  ABI_FREE(hphi_np1)
  ABI_FREE(hphit_np1)
 
- if (keep_vectors) then
-   ABI_FREE(save_phi)
-   ABI_FREE(save_phit)
- end if
+ ABI_SFREE(save_phi)
+ ABI_SFREE(save_phit)
 
  !! if (keep_vectors) then
  !!   tdim = MIN(inn,niter_tot)
@@ -2304,7 +2253,7 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
  !!   do ii=1,tdim
  !!     parity = (-1)**(ii+1)
  !!     phi_test  = save_phi(:,ii)
- !!     call hexc_matmul_full(hexc, hexc_i, phi_test, phi_test2, parity)
+ !!     call hexc%matmul_full(hexc_i, phi_test, phi_test2, parity)
  !!     !phi_test2 = MATMUL(hreso,phi_test) + parity * MATMUL(hcoup,CONJG(phi_test))
  !!     ovlp(ii,ii) = DOT_PRODUCT(phi_test,phi_test2) + DOT_PRODUCT(phi_test2,phi_test)
  !!     err = ABS(ovlp(ii,ii)-cone)
@@ -2329,7 +2278,7 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
  !!   ! TODO possibility to call hreso * phi, and hcoup * phi separately
  !!   do ii=1,tdim
  !!     parity = (-1)**(ii+1)
- !!     call hexc_matmul_full(hexc, hexc_i, save_phi(:,ii), alpha(:,ii), parity)
+ !!     call hexc%matmul_full(hexc_i, save_phi(:,ii), alpha(:,ii), parity)
  !!   end do
 
  !!   !alpha = MATMUL(hreso,save_phi(:,1:tdim))
@@ -2421,21 +2370,19 @@ subroutine continued_fract_general(nlev,term_type,aa,bb,cc,nz,zpts,spectrum)
 !scalars
  integer,intent(in) :: nlev,term_type,nz
 !arrays
- complex(dpc),intent(in) :: bb(nlev)
- complex(dpc),intent(in) :: cc(nlev)
- complex(dpc),intent(in) :: aa(nlev)
- complex(dpc),intent(in) :: zpts(nz)
- complex(dpc),intent(out) :: spectrum(nz)
+ complex(dp),intent(in) :: bb(nlev)
+ complex(dp),intent(in) :: cc(nlev)
+ complex(dp),intent(in) :: aa(nlev)
+ complex(dp),intent(in) :: zpts(nz)
+ complex(dp),intent(out) :: spectrum(nz)
 
 !Local variables ------------------------------
 !scalars
  integer :: it
- complex(dpc) ::  bb_inf,bg,bu,swap
- complex(dpc) :: aa_inf
+ complex(dp) :: bb_inf,bg,bu,swap, aa_inf
  character(len=500) :: msg
 !arrays
- complex(dpc),allocatable :: div(:),den(:)
-
+ complex(dp),allocatable :: div(:),den(:)
 !************************************************************************
 
  ABI_MALLOC(div,(nz))
@@ -2476,12 +2423,12 @@ subroutine continued_fract_general(nlev,term_type,aa,bb,cc,nz,zpts,spectrum)
      !Here be careful with the sign of SQRT
      do it=1,nz
        div(it) = half/zpts(it) * (bb(nlev)/bu)**2 * &
-&        ( (zpts(it)**2 +bu**2 -bg**2) - SQRT( (zpts(it)**2+bu**2-bg**2)**2 -four*(zpts(it)*bu)**2) )
+         ( (zpts(it)**2 +bu**2 -bg**2) - SQRT( (zpts(it)**2+bu**2-bg**2)**2 -four*(zpts(it)*bu)**2) )
      end do
    end if
 
  case default
-   write(msg,'(a,i0)')" Wrong value for term_type : ",term_type
+   write(msg,'(a,i0)')" Wrong value for term_type: ",term_type
    ABI_ERROR(msg)
  end select
 

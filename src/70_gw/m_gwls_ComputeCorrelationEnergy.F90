@@ -119,16 +119,16 @@ real(dp),  allocatable :: epsilon_eigenvalues_0(:)
 real(dp),  allocatable :: epsilon_model_eigenvalues_0(:)
 
 
-complex(dpc), allocatable   :: AT_Lanczos(:,:)
-complex(dpc), allocatable   :: AT_model_Lanczos(:,:)
+complex(dp), allocatable   :: AT_Lanczos(:,:)
+complex(dp), allocatable   :: AT_model_Lanczos(:,:)
 
 
 ! To use lanczos instead of sqmr
-complex(dpc), allocatable   :: Lbasis_diagonalize_dielectric_terms(:,:)
-complex(dpc), allocatable   :: hermitian_static_eps_m1_minus_eps_model_m1(:,:)
+complex(dp), allocatable   :: Lbasis_diagonalize_dielectric_terms(:,:)
+complex(dp), allocatable   :: hermitian_static_eps_m1_minus_eps_model_m1(:,:)
 real(dp), allocatable       :: eigenvalues_static_eps_m1_minus_eps_model_m1(:)
 real(dp), allocatable       :: eigenvalues_static_eps_model_m1_minus_one(:)
-complex(dpc), allocatable   :: work(:)
+complex(dp), allocatable   :: work(:)
 real(dp), allocatable       :: rwork(:)
 integer                     :: lwork
 integer                     :: info
@@ -146,11 +146,9 @@ real(dp)       :: freq_time1, freq_time2, freq_time
 integer              :: nfrequencies
 real(dp),allocatable :: list_projection_frequencies(:)
 
-complex(dpc), allocatable   :: array_integrand_exact_sector(:,:)
-complex(dpc), allocatable   :: array_integrand_model_sector(:,:)
-
-
-complex(dpc), allocatable :: tmp_dielectric_array(:,:,:)
+complex(dp), allocatable   :: array_integrand_exact_sector(:,:)
+complex(dp), allocatable   :: array_integrand_model_sector(:,:)
+complex(dp), allocatable :: tmp_dielectric_array(:,:,:)
 
 real(dp)        :: external_omega
 
@@ -944,7 +942,7 @@ real(dp) , allocatable :: psie_k(:,:)
 real(dp),  allocatable :: epsilon_eigenvalues_0(:)
 
 
-complex(dpc), allocatable   :: AT_Lanczos(:,:)
+complex(dp), allocatable   :: AT_Lanczos(:,:)
 
 
 
@@ -958,9 +956,9 @@ real(dp),allocatable :: list_projection_frequencies(:)
 
 
 
-complex(dpc), allocatable   :: array_integrand_exact_sector(:,:)
-complex(dpc), allocatable   :: array_integrand_model_sector(:,:)
-complex(dpc), allocatable   :: tmp_dielectric_array(:,:,:)
+complex(dp), allocatable   :: array_integrand_exact_sector(:,:)
+complex(dp), allocatable   :: array_integrand_model_sector(:,:)
+complex(dp), allocatable   :: tmp_dielectric_array(:,:,:)
 
 real(dp)        :: external_omega
 
@@ -1423,8 +1421,8 @@ array_integrand_model_sector, sigma_B_Lanczos, sigma_B_model_Lanczos)
 
 integer,  intent(in)   :: iw_ext, npt_gauss, n_ext_freq
 
-complex(dpc),  intent(in)   :: array_integrand_exact_sector(npt_gauss+1,n_ext_freq)
-complex(dpc),  intent(in)   :: array_integrand_model_sector(npt_gauss+1,n_ext_freq)
+complex(dp),  intent(in)   :: array_integrand_exact_sector(npt_gauss+1,n_ext_freq)
+complex(dp),  intent(in)   :: array_integrand_model_sector(npt_gauss+1,n_ext_freq)
 
 real(dp), intent(out)  :: sigma_B_Lanczos, sigma_B_model_Lanczos
 
@@ -1737,7 +1735,7 @@ subroutine output_Sigma_A_by_eigenvalues(n_ext_freq,lmax,external_frequencies,AT
 !----------------------------------------------------------------------------------------------------
 
 integer,      intent(in) :: n_ext_freq, lmax, which_case
-complex(dpc), intent(in) :: AT_Lanczos(n_ext_freq,lmax)
+complex(dp), intent(in) :: AT_Lanczos(n_ext_freq,lmax)
 real(dp),     intent(in) :: eigenvalues_array(lmax)
 real(dp),     intent(in) :: external_frequencies(n_ext_freq)
 
@@ -1745,7 +1743,7 @@ integer   :: iw_ext, l
 real(dp)  :: external_omega
 
 
-complex(dpc)  :: matrix, eig
+complex(dp)  :: matrix, eig
 
 integer         :: io_unit
 character(128) :: filename

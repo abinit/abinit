@@ -40,7 +40,7 @@ MODULE m_gruneisen
  use m_fstrings,            only : sjoin, itoa, ltoa, ftoa, strcat
  use m_numeric_tools,       only : central_finite_diff, arth
  use m_kpts,                only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt
- use m_bz_mesh,             only : kpath_t, kpath_new
+ use m_bz_mesh,             only : kpath_t
  use m_anaddb_dataset,      only : anaddb_dataset_type
  use m_dynmat,              only : massmult_and_breaksym, dfpt_phfrq, gtdyn9
 
@@ -656,11 +656,9 @@ end subroutine gruns_qmesh
 subroutine gruns_free(gruns)
 
 !Arguments ------------------------------------
-!array
  class(gruns_t),intent(inout) :: gruns
 
 !Local variables-------------------------------
-!scalars
  integer :: ii
 ! ************************************************************************
 
@@ -707,12 +705,11 @@ end subroutine gruns_free
 !!
 !! SOURCE
 
-subroutine gruns_anaddb(inp, prefix, comm)
+subroutine gruns_anaddb(inp, comm)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
- character(len=*),intent(in) :: prefix
- type(anaddb_dataset_type) :: inp
+ type(anaddb_dataset_type),intent(inout) :: inp
 
 !Local variables-------------------------------
 !scalars
@@ -734,7 +731,7 @@ subroutine gruns_anaddb(inp, prefix, comm)
 
  ncid = nctk_noid
  if (my_rank == master) then
-   NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_GRUNS.nc"), xmpi_comm_self), "Creating _GRUNS.nc")
+   NCF_CHECK_MSG(nctk_open_create(ncid, strcat(inp%filename_output, "_GRUNS.nc"), xmpi_comm_self), "Creating _GRUNS.nc")
 
    ! Write structure corresponding to iv0
    NCF_CHECK(gruns%cryst_vol(iv0)%ncwrite(ncid))
@@ -769,15 +766,15 @@ subroutine gruns_anaddb(inp, prefix, comm)
 
  ! Compute gruneisen parameters on the q-mesh.
  if (all(inp%ng2qpt /= 0)) then
-   call gruns_qmesh(gruns, prefix, inp%dosdeltae, inp%ng2qpt, 1, inp%q2shft, ncid, comm)
+   call gruns_qmesh(gruns, inp%filename_output, inp%dosdeltae, inp%ng2qpt, 1, inp%q2shft, ncid, comm)
  else
    ABI_WARNING("Cannot compute Gruneisen parameters on q-mesh because ng2qpt == 0")
  end if
 
  ! Compute gruneisen on the q-path.
  if (inp%nqpath /= 0) then
-   qpath = kpath_new(inp%qpath, gruns%cryst_vol(iv0)%gprimd, inp%ndivsm)
-   call gruns_qpath(gruns, prefix, qpath, ncid, comm)
+   call qpath%init(inp%qpath, gruns%cryst_vol(iv0)%gprimd, inp%ndivsm)
+   call gruns_qpath(gruns, inp%filename_output, qpath, ncid, comm)
    call qpath%free()
  else
    ABI_WARNING("Cannot compute Gruneisen parameters on q-path because nqpath == 0")

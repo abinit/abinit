@@ -176,7 +176,6 @@ subroutine dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
  real(dp),allocatable :: coord1(:,:),local_den(:,:,:,:)
  real(dp),allocatable :: step(:,:),sum_den(:,:,:)
  real(dp),allocatable :: xcartcells(:,:,:),xred(:,:),yder2(:)
-
 ! *********************************************************************
 
 !1. Read the 1D all-electron atomic files
@@ -486,7 +485,6 @@ subroutine add_atomic_fcts(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,optio
  real(dp) :: tsec(2)
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
-
 ! ***********************************************************************************************
 
 !We need the metric because it is needed to compute the "box" around each atom
@@ -653,13 +651,12 @@ end subroutine add_atomic_fcts
 
 !Local variables-------------------------------
 !scalars
- integer :: cplex1=1
+ integer,parameter :: cplex1=1
  real(dp) :: ucvol
 !arrays
  real(dp), allocatable :: intgf2(:,:) ! natom,natom
  real(dp), allocatable :: rhor_dum(:,:) ! nfftf,nspden
  real(dp) :: gprimd(3,3),rmet(3,3),gmet(3,3)
-
 ! ***********************************************************************************************
 
  ABI_MALLOC(intgf2,(natom,natom))
@@ -717,21 +714,12 @@ end subroutine constrained_dft_ini
 !! FUNCTION
 !! Free the constrained_dft datastructure.
 !!
-!! INPUTS
-!!  constrained_dft=datastructure that contain the needed information to enforce the density and magnetization constraints
-!!
-!! OUTPUT
-!!
 !! SOURCE
 
  subroutine constrained_dft_free(constrained_dft)
 
 !Arguments ------------------------------------
-!scalars
  type(constrained_dft_t),intent(inout):: constrained_dft
-
-!Local variables-------------------------------
-
 ! ***********************************************************************************************
 
  ABI_SFREE(constrained_dft%chrgat)
@@ -799,9 +787,9 @@ end subroutine constrained_dft_free
 
 !Arguments ------------------------------------
 !scalars
+ class(constrained_dft_t),intent(in) :: c_dft
  integer, intent(in) :: use_gbt
  real(dp),intent(out) :: e_constrained_dft
- type(constrained_dft_t),intent(in) :: c_dft
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  real(dp),intent(out) :: grcondft(:,:) ! 3,natom
@@ -814,7 +802,7 @@ end subroutine constrained_dft_free
 !Local variables-------------------------------
 !scalars
  integer :: conkind,iatom,ii,jatom,info,natom,nfftf,nspden,ntypat,option
- integer :: cplex1=1
+ integer,parameter :: cplex1=1
  real(dp) :: intgd,intgden_norm,intgden_proj,intgres_proj,norm,scprod
 !arrays
  integer :: ipiv(c_dft%natom)
@@ -829,7 +817,6 @@ end subroutine constrained_dft_free
  real(dp) :: intgf2(c_dft%natom,c_dft%natom),rhomag(2,c_dft%nspden),work(2*c_dft%natom)
  real(dp) :: intgden_normed(3)
  real(dp) :: spinat_normed(3)
-
 ! ***********************************************************************************************
 
 !DEBUG
@@ -1166,7 +1153,7 @@ end subroutine constrained_dft_free
  ABI_FREE(intgden_delta)
  ABI_FREE(intgr)
 
- end subroutine constrained_residual
+end subroutine constrained_residual
 !!***
 
 !!****f* m_dens/mag_penalty
@@ -1207,8 +1194,8 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred,qgbt,use_gbt)
 
 !Arguments ------------------------------------
 !scalars
+ class(constrained_dft_t),intent(in) :: c_dft
  integer,intent(in) :: use_gbt
- type(constrained_dft_t),intent(in) :: c_dft
  real(dp),intent(out) :: nv_constr_dft_r(c_dft%nfftf,c_dft%nspden)
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -1218,14 +1205,12 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred,qgbt,use_gbt)
 !Local variables-------------------------------
 !scalars
  integer :: iatom,magconon,natom,nfftf,nspden,ntypat,option
- integer :: cplex1=1
- real(dp):: cmm_x,cmm_y,cmm_z
- real(dp) :: intgden_proj,norm
+ integer,parameter :: cplex1=1
+ real(dp):: cmm_x,cmm_y,cmm_z,intgden_proj,norm
 !arrays
  real(dp), allocatable :: coeffs_constr_dft(:,:) ! nspden,natom
  real(dp), allocatable :: intgden(:,:) ! nspden,natom
  real(dp) :: rhomag(2,c_dft%nspden),spinat_normed(3)
-
 ! ***********************************************************************************************
 
  magconon=c_dft%magconon
@@ -1353,7 +1338,6 @@ end subroutine mag_penalty
 !!
 !! SOURCE
 
-
 subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,rhor,rprimd,spinat,typat,xred,qgbt,use_gbt)
 
 !Arguments ------------------------------------
@@ -1369,7 +1353,7 @@ subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspde
 !Local variables-------------------------------
 !scalars
  integer :: iatom,ii
- integer :: cplex1=1    ! dummy argument for calcdenmagsph
+ integer,parameter :: cplex1=1    ! dummy argument for calcdenmagsph
  real(dp) :: intgden_proj, Epen,Econstr,lVp, norm
 !arrays
  real(dp) :: intmm(3), mag_1atom(3)
@@ -1377,7 +1361,6 @@ subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspde
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),ucvol
  real(dp) :: rhomag(2,nspden),spinat_normed(3)
  character(len=500) :: msg
-
 ! *********************************************************************
 
 !We need the metric because it is needed in calcdenmagsph.F90
@@ -1386,7 +1369,6 @@ subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspde
  ABI_MALLOC(intgden, (nspden,natom))
 
 !We need the integrated magnetic moments
- cplex1=1
  call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,rhor,rprimd,typat,xred,&
                     1,cplex1,qgbt,use_gbt,intgden=intgden,rhomag=rhomag)
 
@@ -1543,6 +1525,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  real(dp),intent(out),optional  :: intgf2(natom,natom)
  real(dp),intent(out),optional  :: rhomag(2,nspden)
  real(dp),intent(out),optional  :: strs_intgden(6,nspden,natom)
+
 !Local variables ------------------------------
 !scalars
  integer,parameter :: ndir=3,ishift=5
@@ -1984,7 +1967,6 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
  real(dp) :: rho_tot, rho_tot_im
  real(dp) :: sum_mag, sum_mag_x,sum_mag_y,sum_mag_z,sum_rho_up,sum_rho_dn,sum_rho_tot ! EB
  character(len=500) :: msg,msg1
-
 ! *************************************************************************
 
  !write(ab_out,*)' prtdenmagsph : enter, rhomag(1,2)=',rhomag(1,2)
@@ -2281,7 +2263,6 @@ subroutine radsmear(dfsm,fsm,xarg,xcut,xsmear)
 !Local variables ------------------------------
 !scalars
  real(dp) :: xsmearinv,xx
-
 !******************************************************************
 
  fsm = zero
@@ -2319,8 +2300,6 @@ end subroutine radsmear
 !!
 !! OUTPUT
 !!
-!! SIDE EFFECTS
-!!
 !! NOTES
 !!  At the moment this routine is mainly used for development and debugging
 !!  of gs and dfpt calculations with non-collinear spins. If needed, can be used
@@ -2352,14 +2331,9 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
  integer :: nproc_fft,ir
  character(len=500) :: msg
  character(len=10)  :: outformat
- character(len=50)   :: fname_vtk
- character(len=50)   :: fname_xyz
- character(len=50)   :: fname_xyz_re
- character(len=50)   :: fname_xyz_im
+ character(len=fnlen)   :: fname_vtk, fname_xyz, fname_xyz_re, fname_xyz_im
 !arrays
  real(dp),allocatable :: rhorfull(:,:)
-
-
 ! *************************************************************************
 
  fname_vtk=adjustl(adjustr(fname)//".vtk")

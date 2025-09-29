@@ -115,15 +115,14 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
  integer :: itemp,ntemp
  logical :: do_ep_renorm
  real(dp) :: omegaev
- complex(dpc) :: ks_avg,gw_avg,exc_avg
+ complex(dp) :: ks_avg,gw_avg,exc_avg
  character(len=4) :: ts
  character(len=fnlen) :: path,prefix,filbseig, ost_fname
  !character(len=500) :: msg
  type(ebands_t) :: EPBSt, EP_QPBSt
 !arrays
  real(dp),allocatable :: dos_exc(:),dos_gw(:),dos_ks(:)
- complex(dpc),allocatable :: eps_rpanlf(:,:),eps_gwnlf(:,:), eps_exc(:,:),opt_cvk(:,:,:,:,:)
-
+ complex(dp),allocatable :: eps_rpanlf(:,:),eps_gwnlf(:,:), eps_exc(:,:),opt_cvk(:,:,:,:,:)
 !************************************************************************
 
  my_rank = Wfd%my_rank
@@ -315,7 +314,7 @@ subroutine exc_write_data(BSp,BS_files,what,eps,prefix,dos)
  character(len=*),optional,intent(in) :: prefix
 !arrays
  real(dp),optional,intent(in) :: dos(BSp%nomega)
- complex(dpc),intent(in) :: eps(BSp%nomega,BSp%nq)
+ complex(dp),intent(in) :: eps(BSp%nomega,BSp%nq)
 
 !Local variables ------------------------------
 !scalars
@@ -327,7 +326,6 @@ subroutine exc_write_data(BSp,BS_files,what,eps,prefix,dos)
  real(dp) :: tmp_eps(2,BSp%nq)
  character(len=500) :: lf_type,block_type,wgg_type,frm,str_type,msg
  character(len=fnlen) :: fname
-
 !************************************************************************
 
  if (PRESENT(prefix)) then
@@ -481,18 +479,17 @@ subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,op
 !arrays
  integer,intent(in) :: lomo_spin(nsppol),homo_spin(nsppol)
  real(dp),intent(out) :: dos(nomega)
- complex(dpc),intent(in) :: omega(nomega)
- complex(dpc),intent(in) :: opt_cvk(lomo_min:nbnds,lomo_min:nbnds,Kmesh%nbz,nsppol,nq)
- complex(dpc),intent(out) :: eps_rpa(nomega,nq)
+ complex(dp),intent(in) :: omega(nomega)
+ complex(dp),intent(in) :: opt_cvk(lomo_min:nbnds,lomo_min:nbnds,Kmesh%nbz,nsppol,nq)
+ complex(dp),intent(out) :: eps_rpa(nomega,nq)
 
 !Local variables ------------------------------
 !scalars
  integer :: iw,ib_v,ib_c,ik_bz,ik_ibz,spin,iq
  real(dp) :: fact,arg,ediff
  real(dp) :: linewidth
- complex(dpc) :: ctemp
+ complex(dp) :: ctemp
  logical :: do_linewidth
-
 !************************************************************************
 
  ! TODO: four_pi comes from the bare Coulomb term hence the
@@ -603,8 +600,8 @@ subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol
  logical,optional,intent(in) :: elph_lifetime
 !arrays
  real(dp),intent(out) :: dos_exc(nomega)
- complex(dpc),intent(in) :: opt_cvk(lomo_min:max_band,lomo_min:max_band,nkbz,nsppol,BSp%nq),omega(nomega)
- complex(dpc),intent(out) :: eps_exc(nomega,BSp%nq)
+ complex(dp),intent(in) :: opt_cvk(lomo_min:max_band,lomo_min:max_band,nkbz,nsppol,BSp%nq),omega(nomega)
+ complex(dp),intent(out) :: eps_exc(nomega,BSp%nq)
 
 !Local variables ------------------------------
 !scalars
@@ -612,13 +609,12 @@ subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol
  integer :: spin,spad,hsize_read,nstates,ost_unt
  logical :: do_ep_lifetime, file_do_lifetime
  real(dp) :: fact,arg
- complex(dpc) :: dotprod
+ complex(dp) :: dotprod
  character(len=500) :: msg,frm,errmsg
 !arrays
  real(dp),allocatable :: exc_ene(:)
- complex(dpc) :: ctemp(BSp%nq),dtemp(BSp%nq)
- complex(dpc),allocatable :: ostrength(:,:),exc_ene_cplx(:),exc_state(:),exc_state2(:)
-
+ complex(dp) :: ctemp(BSp%nq),dtemp(BSp%nq)
+ complex(dp),allocatable :: ostrength(:,:),exc_ene_cplx(:),exc_state(:),exc_state2(:)
 !************************************************************************
 
  call wrtout(std_out," Calculating excitonic epsilon with antiresonant")
@@ -840,22 +836,21 @@ subroutine exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
  type(excparam),intent(in) :: BSp
 !arrays
  real(dp),intent(out) :: dos_exc(nomega)
- complex(dpc),intent(in) :: opt_cvk(lomo_min:max_band,lomo_min:max_band,nkbz,nsppol,BSp%nq),omega(nomega)
- complex(dpc),intent(out) :: eps_exc(nomega,BSp%nq)
+ complex(dp),intent(in) :: opt_cvk(lomo_min:max_band,lomo_min:max_band,nkbz,nsppol,BSp%nq),omega(nomega)
+ complex(dp),intent(out) :: eps_exc(nomega,BSp%nq)
 
 !Local variables ------------------------------
 !scalars
  integer :: mi,it,ii,ib_v,ib_c,ik_bz,exc_size_read,nstates_read,eig_unt !,fform
  integer :: exc_size,iq,spin,tr_idx,tar_idx,nstates,iw,ll,ierr
  real(dp) :: fact,arg
- complex(dpc) :: eps,fam,famp
+ complex(dp) :: eps,fam,famp
  character(len=500) :: msg,errmsg
  character(len=fnlen) :: filbseig
  logical :: do_lifetime
 !arrays
- complex(dpc),allocatable :: Ami(:),exc_ene(:),Sm1mi(:)
- complex(dpc),allocatable :: msfap(:,:),fa(:,:),fap(:,:)
-
+ complex(dp),allocatable :: Ami(:),exc_ene(:),Sm1mi(:)
+ complex(dp),allocatable :: msfap(:,:),fa(:,:),fap(:,:)
 !************************************************************************
 
  call wrtout(std_out," Calculating absorption strength with full coupling")
@@ -1018,7 +1013,7 @@ subroutine exc_write_tensor(BSp,BS_files,what,tensor)
  type(excparam),intent(in) :: BSp
  type(excfiles),intent(in) :: BS_files
 !arrays
- complex(dpc),intent(in) :: tensor(BSp%nomega,6)
+ complex(dp),intent(in) :: tensor(BSp%nomega,6)
 
 !Local variables ------------------------------
 !scalars
@@ -1027,7 +1022,6 @@ subroutine exc_write_tensor(BSp,BS_files,what,tensor)
 !arrays
  character(len=500) :: lf_type,block_type,wgg_type,frm,str_type, msg
  character(len=fnlen) :: fname
-
 !************************************************************************
 
  fname = strcat(BS_files%out_basename,'_',toupper(what))
@@ -1155,9 +1149,9 @@ subroutine mdfs_ncwrite(ncid,Bsp,eps_exc,eps_rpanlf,eps_gwnlf)
  integer,intent(in) :: ncid
  type(excparam),intent(in) :: BSp
 !arrays
- complex(dpc),target,intent(in) :: eps_exc(BSp%nomega,BSp%nq)
- complex(dpc),target,intent(in) :: eps_rpanlf(BSp%nomega,BSp%nq)
- complex(dpc),target,intent(in) :: eps_gwnlf(BSp%nomega,BSp%nq)
+ complex(dp),target,intent(in) :: eps_exc(BSp%nomega,BSp%nq)
+ complex(dp),target,intent(in) :: eps_rpanlf(BSp%nomega,BSp%nq)
+ complex(dp),target,intent(in) :: eps_gwnlf(BSp%nomega,BSp%nq)
 
 !Local variables-------------------------------
 !scalars
@@ -1251,19 +1245,18 @@ subroutine check_kramerskronig(n,o,eps)
 !scalars
  integer,intent(in) :: n
 !arrays
- complex(dpc),intent(in) :: eps(n)
+ complex(dp),intent(in) :: eps(n)
  real(dp),intent(in) :: o(n)
 
 !Local variables ------------------------------
 !scalars
  integer :: ii,ip
  real(dp) :: omega,omegap,domega,kk,kkrms,eav
- complex(dpc) c
+ complex(dp) :: c
  character(len=500) :: msg
 !arrays
  real(dp) :: e1kk(n)
- complex(dpc) :: intg(n)
-
+ complex(dp) :: intg(n)
 !************************************************************************
 ! init jmb
  e1kk=zero
@@ -1386,8 +1379,7 @@ subroutine check_fsumrule(n,o,e2,omegaplasma)
  real(dp) :: omegap,domega,integral,omegaplasmaeff,fsumrule
  character(len=500) :: msg
 !arrays
- complex(dpc) :: intg(n)
-
+ complex(dp) :: intg(n)
 !************************************************************************
 
  ! calculate domega step and verify

@@ -295,7 +295,7 @@ AC_DEFUN([_SD_LINALG_CHECK_BLACS], [
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
-      call blacs_gridinit
+       call blacs_gridinit
     ]])],
     [sd_linalg_has_blacs="yes"; sd_linalg_provided="${sd_linalg_provided} blacs"],
     [sd_linalg_has_blacs="no"])

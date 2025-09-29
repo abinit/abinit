@@ -40,7 +40,6 @@ module m_scfcv_core
  use m_xcdata
  use m_cgtools
  use m_dtfil
- use m_distribfft
  use m_extfpmd
  use m_invovl
  use m_xg_nonlop
@@ -62,7 +61,7 @@ module m_scfcv_core
  use m_ioarr,            only : fftdatar_write_from_hdr
  use m_results_gs ,      only : results_gs_type
  use m_scf_history,      only : scf_history_type, scf_history_init, scf_history_free
- use m_energies,         only : energies_type, energies_init, energies_copy
+ use m_energies,         only : energies_type
  use m_electronpositron, only : electronpositron_type, electronpositron_calctype
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type
@@ -342,7 +341,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  integer :: n3xccc,ncpgr,nfftdiel,nfftmix,nfftmix_per_nfft,nfftotf,ngrcondft,ngrvdw,nhatgrdim,nk3xc,nkxc
  integer :: npawmix,npwdiel,nremit,nstep,nzlmopt,optcut,optcut_hf,optene,optgr0,optgr0_hf
  integer :: optgr1,optgr2,optgr1_hf,optgr2_hf,option,optrad,optrad_hf,optres,optxc,prtfor,prtxml,quit
- integer :: quit_sum,rdwrpaw,shft,spaceComm,spaceComm_fft,spaceComm_wvl,spaceComm_grid
+ integer :: quit_sum,rdwrpaw,shift,spaceComm,spaceComm_fft,spaceComm_wvl,spaceComm_grid
  integer :: spare_mem,optn
  integer :: stress_needed,sz1,sz2,tim_mkrho,unit_out
  integer :: usecprj,usevxctau,usevxctau_paw,usexcnhat,use_hybcomp
@@ -527,7 +526,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  !
  results_gs%residm=zero;results_gs%res2=zero
  results_gs%deltae=zero;results_gs%diffor=zero
- call energies_init(energies)
+ call energies%init()
  if (dtset%positron/=0.and.initialized/=0) then
    energies%e0_electronpositron =results_gs%energies%e0_electronpositron
    energies%e_electronpositron  =results_gs%energies%e_electronpositron
@@ -594,7 +593,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 & .and.finite_efield_flag.and.(nstep>0.or.dtfil%ireadwf==1)) stress_needed=1
 
 !This is only needed for the tddft routine, and does not
-!correspond to the intented use of results_gs (should be only
+!correspond to the intended use of results_gs (should be only
 !for output of scfcv_core
  etotal = results_gs%etotal
 
@@ -908,7 +907,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &     mpi_enreg_diel%nproc_fft,dtset%nsym,mpi_enreg_diel%paral_kgb,dtset%symrel,dtset%tnons,&
 &     gpu_option=dtset%gpu_option)
 !    Update the fft distribution
-     call init_distribfft_seq(mpi_enreg_diel%distribfft,'c',ngfftdiel(2),ngfftdiel(3),'all')
+     call mpi_enreg_diel%distribfft%init_seq('c',ngfftdiel(2),ngfftdiel(3),'all')
 
 !    Compute the size of the dielectric matrix
      kpt_diel(1:3)=(/ 0.0_dp, 0.0_dp, 0.0_dp /)
@@ -1139,15 +1138,15 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &         comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
 &         comm_fft=spaceComm_fft,distribfft=mpi_enreg%distribfft)
        else
-         shft=0
+         shift=0
 #if defined HAVE_BIGDFT
-         shft=wvl%descr%Glr%d%n1i*wvl%descr%Glr%d%n2i*wvl%den%denspot%dpbox%nscatterarr(me_wvl,4)
+         shift=wvl%descr%Glr%d%n1i*wvl%descr%Glr%d%n2i*wvl%den%denspot%dpbox%nscatterarr(me_wvl,4)
          call wvl_nhatgrid(atindx1,wvl%descr%atoms%astruct%geocode,&
 &         wvl%descr%h,wvl%den%denspot%dpbox%i3s,dtset%natom,dtset%natom,&
 &         nattyp,psps%ntypat,wvl%descr%Glr%d%n1,wvl%descr%Glr%d%n1i,&
 &         wvl%descr%Glr%d%n2,wvl%descr%Glr%d%n2i,wvl%descr%Glr%d%n3,&
 &         wvl%den%denspot%dpbox%n3pi,optcut,optgr0,optgr1,optgr2,optrad,&
-&         pawfgrtab,pawtab,psps%gth_params%psppar,rprimd,shft,xred)
+&         pawfgrtab,pawtab,psps%gth_params%psppar,rprimd,shift,xred)
 #endif
        end if
      end if
@@ -1455,9 +1454,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
        rec_set%quitrec = 0
 !      --At any step calculate the metric
        call Init_MetricRec(rec_set%inf,rec_set%nl%nlpsp,rmet,ucvol,rprimd,xred,dtset%ngfft(1:3),dtset%natom,rec_set%debug)
-       call destroy_distribfft(rec_set%mpi%distribfft)
-       call init_distribfft(rec_set%mpi%distribfft,'c',rec_set%mpi%nproc_fft,rec_set%ngfftrec(2),rec_set%ngfftrec(3))
-       call init_distribfft(rec_set%mpi%distribfft,'f',rec_set%mpi%nproc_fft,dtset%ngfft(2),dtset%ngfft(3))
+       call rec_set%mpi%distribfft%free()
+       call rec_set%mpi%distribfft%init('c',rec_set%mpi%nproc_fft,rec_set%ngfftrec(2),rec_set%ngfftrec(3))
+       call rec_set%mpi%distribfft%init('f',rec_set%mpi%nproc_fft,dtset%ngfft(2),dtset%ngfft(3))
        if(initialized==0) call first_rec(dtset,psps,rec_set)
      end if
 
@@ -1527,7 +1526,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &         dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,paw_ij,pawang,dtset%pawprtvol,&
 &         pawrhoij,pawtab,dtset%spinat,dtset%symafm,dtset%typat,0,dtset%usepawu,&
 &         comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-!        Reinitalize mixing if PAW+U and occupation matrix now allowed to change
+!        Reinitialize mixing if PAW+U and occupation matrix now allowed to change
 !        For experimental purpose...
          if ((dtset%userib==1234).and.(istep==abs(dtset%usedmatpu)).and. &
 &         (dtset%usedmatpu<0.or.initialized0==0)) reset_mixing=.true.
@@ -1748,7 +1747,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &     optene,computed_forces,optres,pawang,pawfgrtab,pawrad,pawrhoij,pawtab,&
 &     ph1df,red_ptot,psps,rhog,rhor,rmet,rprimd,symrec,synlgr,ucvol,&
 &     psps%usepaw,usevxctau,vhartr,vpsp,vxc,vxctau,wvl%descr,wvl%den,xccc3d,xred,rcpaw)
-    !if (wvlbigdft) energies_copy(energies,energies_wvl) ! TO BE ACTIVATED LATER
+    !if (wvlbigdft) energies%copy(energies_wvl) ! TO BE ACTIVATED LATER
    end if
    call timab(1452,2,tsec)
 
@@ -2211,7 +2210,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
    call prtene(dtset,energies,std_out,psps%usepaw)
  end if
 
-!if (wvlbigdft) call energies_copy(energies_wvl,energies) ! TO BE ACTIVATED LATER
+!if (wvlbigdft) call energies_wvl%copy(energies) ! TO BE ACTIVATED LATER
 
 !PAW: if cprj=<p_lmn|Cnk> are in memory,
 !need to reorder them (from atom-sorted to unsorted)
@@ -2614,9 +2613,9 @@ end subroutine scfcv_core
 !!   | e_xcdc(IN)=exchange-correlation double-counting energy (hartree)
 !!   | e_paw(IN)=PAW spherical part energy
 !!   | e_pawdc(IN)=PAW spherical part double-counting energy
-!!   | e_elecfield(OUT)=the term of the energy functional that depends explicitely
+!!   | e_elecfield(OUT)=the term of the energy functional that depends explicitly
 !!   |                  on the electric field:  enefield = -ucvol*E*P
-!!   | e_magfield(OUT)=the term of the energy functional that depends explicitely
+!!   | e_magfield(OUT)=the term of the energy functional that depends explicitly
 !!   |                  on the magnetic field:  e_magfield = -ucvol*E*P
 !!   | e_entropy(OUT)=entropy energy due to the occupation number smearing (if metal)
 !!   |                this value is %entropy * dtset%tsmear (hartree).
@@ -2633,7 +2632,7 @@ end subroutine scfcv_core
 !!    All computations are done on the fine FFT grid.
 !!    All variables (nfft,ngfft,mgfft) refer to this fine FFT grid.
 !!    All arrays (densities/potentials...) are computed on this fine FFT grid.
-!!  ! Developpers have to be careful when introducing others arrays:
+!!  ! Developers have to be careful when introducing others arrays:
 !!      they have to be stored on the fine FFT grid.
 !!  In case of norm-conserving calculations the FFT grid is the usual FFT grid.
 !!
@@ -2766,7 +2765,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
          end do
          A(:,:)=A1(:,:) ; A_new(:,:)=A1(:,:)
        end if
-     end do  ! end fo kkr
+     end do  ! end for kkr
      do iir=1,3
        do jjr=1,3
          eenth= eenth+half*A_new(iir,jjr)*efield_new(iir)*efield_new(jjr)
@@ -2993,15 +2992,14 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
  integer :: nband_k,nbdmix,npw_k,nset1,nset2,ntypat
  integer :: shift_set1,shift_set2,spaceComm_band,spare_mem,usepaw,wfmixalg
  real(dp) :: alpha,beta
- complex(dpc) :: sum_coeffs
+ complex(dp) :: sum_coeffs
 !arrays
  integer,allocatable :: ipiv(:),dimcprj(:)
  real(dp) :: tsec(2)
  real(dp),allocatable :: al(:,:),mmn(:,:,:)
  real(dp),allocatable :: dotprod_res(:,:,:),dotprod_res_k(:,:,:),res_mn(:,:,:),smn(:,:,:)
- complex(dpc),allocatable :: coeffs(:)
+ complex(dp),allocatable :: coeffs(:)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kh(:,:)
-
 ! *************************************************************************
 
 !DEBUG

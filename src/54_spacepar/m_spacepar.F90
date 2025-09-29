@@ -103,7 +103,7 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nspden,nu
  integer :: ii,ii1,ing,me_fft,n1,n2,n3,nd_atom,nd_atom_tot,nproc_fft
  real(dp),parameter :: tolfix=1.000000001e0_dp
  real(dp) :: cutoff,gqgm12,gqg2p3,gqgm23,gqgm13,gs2,gs3,gs,phase,ucvol
- complex(dpc) :: prefac,cgr
+ complex(dp) :: prefac,cgr
  !arrays
  integer :: id(3)
  integer,allocatable :: nd_list(:)
@@ -112,8 +112,6 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nspden,nu
  real(dp) :: gmet(3,3),gprimd(3,3),gqred(3),mcgc(3),rmet(3,3)
  real(dp) :: rgbasis(3,3,3)
  real(dp),allocatable :: gq(:,:),nd_m(:,:),ndvecr(:),work1(:,:),work2(:,:),work3(:,:)
-
-
 ! *************************************************************************
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)

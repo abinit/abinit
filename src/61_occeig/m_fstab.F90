@@ -305,7 +305,7 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, tetra, comm)
  ! Note that we use symrel so these tables can be used to symmetrize wavefunctions.
  ABI_MALLOC(indkk, (6, nkbz))
 
- krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, kptrlatt, compute_invrank=.False.)
+ call krank%from_kptrlatt(ebands%nkpt, ebands%kptns, kptrlatt, compute_invrank=.False.)
 
  if (kpts_map("symrel", ebands%kptopt, cryst, krank, nkbz, kbz, indkk) /= 0) then
    write(msg, '(10a)' ) &
@@ -425,7 +425,7 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, tetra, comm)
    ABI_CALLOC(fs%vk, (3, fs%maxnb))
    ABI_CALLOC(fs%vkq, (3, fs%maxnb))
 
-   fs%krank = krank_new(nkfs, fs%kpts)
+   call fs%krank%init(nkfs, fs%kpts)
  end do ! spin
 
  call cwtime_report(" fstab_init%fs_build:", cpu, wall, gflops)

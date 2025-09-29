@@ -5,13 +5,11 @@
 !! FUNCTION
 !!  This module provides the definition of the gs_hamiltonian_type and of the rf_hamiltonian_type
 !!  datastructures used in the "getghc" and "getgh1c" routines to apply the Hamiltonian (or
-!!  its derivative) on a wavefunction.
-!!  Methods to initialize or destroy the objects are defined here.
+!!  its derivative) on a wavefunction. Methods to initialize or destroy the objects are defined here.
 !!
 !! TODO
-!!  All array pointers in H datatypes should be declared as contiguous for efficiency reasons
-!!  (well, here performance is critical)
-!!  Client code should make sure they always point contiguous targets.
+!!  All array pointers in H datatypes should be declared as contiguous for efficiency reasons.
+!!  (well, here performance is critical). Client code should make sure they always point contiguous targets.
 !!
 !! COPYRIGHT
 !! Copyright (C) 2009-2025 ABINIT group (MG, MT)
@@ -29,14 +27,14 @@
 
 module m_hamiltonian
 
- use iso_fortran_env, only : int32,int64,real32,real64
+ use iso_fortran_env, only : int32, int64, real32, real64
 
  use defs_basis
  use m_abicore
  use m_errors
  use m_xmpi
 
- use m_fstrings,          only : sjoin
+ use m_fstrings,          only : sjoin, itoa, ktoa, yesno
  use defs_datatypes,      only : pseudopotential_type
  use defs_abitypes,       only : MPI_type
  use m_dtset,             only : dataset_type
@@ -77,7 +75,7 @@ module m_hamiltonian
  public :: pawdij2e1kb
  public :: gspot_transgrid_and_pack  ! Set up local potential vlocal on the coarse FFT mesh from vtrial on the fine mesh.
 
- ! These constants select how H is applied in reciprocal space
+ ! These constants select how H_{k',k} is applied in reciprocal space
  integer,parameter,public :: KPRIME_H_K=1, K_H_KPRIME=2, K_H_K=3, KPRIME_H_KPRIME=4
 !!***
 
@@ -102,7 +100,7 @@ module m_hamiltonian
 
 ! ===== Integer scalars
 
-  integer :: dimekb1
+  integer :: dimekb1 = -1
    ! First dimension of Ekb
    ! Same as psps%dimekb
    ! ->Norm conserving : Max. number of Kleinman-Bylander energies
@@ -112,39 +110,39 @@ module m_hamiltonian
    !                     for each atom
    !                     dimekb1=cplex_dij*lmnmax*(lmnmax+1)/2
 
-  integer :: dimekb2
+  integer :: dimekb2 = -1
    ! Second dimension of Ekb
    ! ->Norm conserving psps: dimekb2=ntypat
    ! ->PAW                 : dimekb2=natom
 
-  integer :: dimekbq
+  integer :: dimekbq = -1
    ! Fourth dimension of Ekb
    ! 2 if Ekb factors contain a exp(-iqR) phase, 1 otherwise
 
-  integer :: istwf_k
+  integer :: istwf_k = -1
    ! option parameter that describes the storage of wfs at k
 
-  integer :: istwf_kp
+  integer :: istwf_kp = -1
    ! option parameter that describes the storage of wfs at k^prime
 
-  integer :: lmnmax
+  integer :: lmnmax = -1
    ! Maximum number of different l,m,n components over all types of psps.
    ! same as dtset%lmnmax
 
-  integer :: matblk
+  integer :: matblk = -1
    ! dimension of the array ph3d
 
-  integer :: mgfft
+  integer :: mgfft = -1
    ! maximum size for 1D FFTs (same as dtset%mgfft)
 
-  integer :: mpsang
+  integer :: mpsang = -1
    ! Highest angular momentum of non-local projectors over all type of psps.
    ! shifted by 1 : for all local psps, mpsang=0; for largest s, mpsang=1,
    ! for largest p, mpsang=2; for largest d, mpsang=3; for largest f, mpsang=4
    ! This gives also the number of non-local "channels"
    ! same as psps%mpsang
 
-  integer :: mpssoang
+  integer :: mpssoang = -1
    ! Maximum number of channels, including those for treating the spin-orbit coupling
    ! For NC pseudopotentials only:
    !   when mpspso=1, mpssoang=mpsang
@@ -152,60 +150,60 @@ module m_hamiltonian
    ! For PAW: same as mpsang
    ! same as psps%mpssoang
 
-  integer :: natom
+  integer :: natom = -1
    ! The number of atoms for this dataset; same as dtset%natom
 
-  integer :: nfft
+  integer :: nfft = -1
    ! number of FFT grid points same as dtset%nfft
 
-  integer :: npw_k
+  integer :: npw_k = -1
    ! number of plane waves at k
    ! In case of band-FFT parallelism, npw_k is the number of plane waves
    ! processed by current proc
 
-  integer :: npw_fft_k
+  integer :: npw_fft_k = -1
    ! number of plane waves at k used to apply Hamiltonian when band-FFT
    ! parallelism is activated (i.e. data are distributed in the "FFT" configuration)
 
-  integer :: npw_kp
+  integer :: npw_kp = -1
    ! number of plane waves at k^prime
    ! In case of band-FFT parallelism, npw_kp is the number of plane waves
    ! processed by current proc
 
-  integer :: npw_fft_kp
+  integer :: npw_fft_kp = -1
    ! number of plane waves at k^prime used to apply Hamiltonian when band-FFT
    ! parallelism is activated (i.e. data are distributed in the "FFT" configuration)
 
-  integer :: nspinor
+  integer :: nspinor = -1
    ! Number of spinorial components
 
-  integer :: nsppol
+  integer :: nsppol = -1
    ! Total number of spin components (1=non-polarized, 2=polarized)
 
-  integer :: ntypat
+  integer :: ntypat = -1
    ! Number of types of pseudopotentials same as dtset%ntypat
 
-  integer :: nvloc
+  integer :: nvloc = -1
    ! Number of components of vloc
    ! usually, nvloc=1, except in the non-collinear magnetism case, where nvloc=4
 
-  integer :: n4,n5,n6
+  integer :: n4 = -1, n5 = -1, n6 = -1
    ! same as ngfft(4:6)
 
-  integer :: gpu_option
+  integer :: gpu_option = -1
   ! Governs the choice of the GPU implementation:
   !        = 0 ==> do not use GPU
   !        > 0 ==> see defs_basis.F90 to have the list of possible GPU implementations
 
-  integer :: usecprj
+  integer :: usecprj = -1
    ! usecprj= 1 if cprj projected WF are stored in memory
    !        = 0 if they are to be computed on the fly
 
-  integer :: usepaw
+  integer :: usepaw = -1
    ! if usepaw=0 , use norm-conserving psps part of the code
    ! is usepaw=1 , use paw part of the code
 
-  integer :: useylm
+  integer :: useylm = -1
    ! governs the way the nonlocal operator is to be applied:
    !   1=using Ylm, 0=using Legendre polynomials
 
@@ -213,7 +211,7 @@ module m_hamiltonian
    ! 0, use normal non-collinear calculation
    ! 1, use spin spiral calculation
 
-  integer :: zora
+  integer :: zora = 0
    ! zora=0: no zora terms. zora=1: use available zora terms
    ! currently this is limited to nuclear dipole moment terms,
    ! although pawspnorb should eventually be included here as well
@@ -312,7 +310,7 @@ module m_hamiltonian
 
 ! ===== Real scalars
 
-  real(dp) :: ucvol
+  real(dp) :: ucvol = -one
    ! unit cell volume (Bohr**3)
 
 ! ===== Real arrays
@@ -463,6 +461,9 @@ module m_hamiltonian
    procedure :: copy => gsham_copy
     ! Copy the object
 
+   procedure :: print => gsham_print
+    ! Print the object
+
  end type gs_hamiltonian_type
 !!***
 
@@ -483,36 +484,36 @@ module m_hamiltonian
 
 ! ===== Integer scalars
 
-  integer :: cplex
+  integer :: cplex = -1
    ! if 1, real space 1-order functions on FFT grid are REAL; if 2, COMPLEX
 
-  integer :: dime1kb1
+  integer :: dime1kb1 = -1
    ! First dimension of E1kb, derivative of Ekb with respect to a perturbation
 
-  integer :: dime1kb2
+  integer :: dime1kb2 = -1
    ! Second dimension of E1kb, derivative of Ekb with respect to a perturbation
    ! NCPP: dime1kb2=ntypat, PAW: dime1kb2=natom
 
-  integer :: npw_k
+  integer :: npw_k = -1
    ! number of plane waves at k
 
-  integer :: npw_kp
+  integer :: npw_kp = -1
    ! number of plane waves at k^prime
 
-  integer:: nspinor
+  integer:: nspinor = -1
    ! Number of spinorial components
 
-  integer :: nsppol
+  integer :: nsppol = -1
    ! Total number of spin components (1=non-polarized, 2=polarized)
 
-  integer :: nvloc
+  integer :: nvloc = -1
    ! Number of components of vloc
    ! usually, nvloc=1, except in the non-collinear magnetism case, where nvloc=4
 
-  integer :: n4,n5,n6
+  integer :: n4 = -1, n5 = -1, n6 = -1
    ! same as ngfft(4:6)
 
-  integer :: zora
+  integer :: zora = 0
    ! determines zora term use. 0 means nonrelativistic, 1 means use zora terms
    ! where available (currently only nuclear dipole moment terms)
 
@@ -521,12 +522,12 @@ module m_hamiltonian
   real(dp), allocatable :: e1kbfr_spin(:,:,:,:,:)
    ! e1kbfr_spin(dimekb1,dimekb2,nspinor**2,cplex,my_nsppol)
    ! Contains the values of e1kbfr array for all spins treated by current process
-   ! See e1kbfr description ; e1kbfr is pointer to e1kbfr_spin(:,:,:,:,isppol)
+   ! See e1kbfr description; e1kbfr is pointer to e1kbfr_spin(:,:,:,:,isppol)
 
   real(dp), allocatable :: e1kbsc_spin(:,:,:,:,:)
    ! e1kbsc_spin(dimekb1,dimekb2,nspinor**2,cplex,my_nsppol)
    ! Contains the values of e1kbsc array for all spins treated by current process
-   ! See e1kbsc description ; e1kbsc is pointer to e1kbsc_spin(:,:,:,:,isppol)
+   ! See e1kbsc description; e1kbsc is pointer to e1kbsc_spin(:,:,:,:,isppol)
 
 ! ===== Real pointers
 
@@ -574,7 +575,8 @@ module m_hamiltonian
    ! in real space, on the augmented fft grid
 
  contains
-   procedure :: init => rfham_init      ! Initialize the RF Hamiltonian
+   procedure :: init => rfham_init
+     ! Initialize the RF Hamiltonian
 
    procedure :: free => rfham_free
     ! Free the memory in the RF Hamiltonian
@@ -588,7 +590,7 @@ module m_hamiltonian
  end type rf_hamiltonian_type
 !!***
 
-CONTAINS  !===========================================================
+contains  !===========================================================
 
 !----------------------------------------------------------------------
 
@@ -785,7 +787,7 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
- ABI_CHECK(mgfft==MAXVAL(ngfft(1:3)),"Wrong mgfft")
+ ABI_CHECK_IEQ(mgfft, MAXVAL(ngfft(1:3)), "Wrong mgfft")
 
 !Allocate the arrays of the Hamiltonian whose dimensions do not depend on k
  if(l_gpu_option == ABI_GPU_KOKKOS) then
@@ -1287,12 +1289,12 @@ end subroutine gsham_load_kprime
 !!
 !! SOURCE
 
-subroutine gsham_eph_setup_k(ham, which_k, kk, istwf_k, npw_k, kg_k, dtset, cryst, psps, &  ! in
+subroutine gsham_eph_setup_k(gs_ham, which_k, kk, istwf_k, npw_k, kg_k, dtset, cryst, psps, &  ! in
                              nkpg_k, kpg_k, ffnl_k, kinpw_k, ph3d_k, comm)                  ! out
 
 !Arguments ------------------------------------
 !scalars
- class(gs_hamiltonian_type),intent(inout) :: ham
+ class(gs_hamiltonian_type),intent(inout) :: gs_ham
  character(len=*),intent(in) :: which_k
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
@@ -1330,16 +1332,16 @@ subroutine gsham_eph_setup_k(ham, which_k, kk, istwf_k, npw_k, kg_k, dtset, crys
  ABI_CALLOC(kinpw_k, (npw_k))
  call mkkin(dtset%ecut, dtset%ecutsm, dtset%effmass_free, cryst%gmet, kg_k, kinpw_k, kk, npw_k, 0, 0)
 
- ABI_MALLOC(ph3d_k, (2, npw_k, ham%matblk))
+ ABI_MALLOC(ph3d_k, (2, npw_k, gs_ham%matblk))
 
  ! Load the k dependent parts of the Hamiltonian
  select case (which_k)
  case ("k")
-   call ham%load_k(kpt_k=kk, npw_k=npw_k, istwf_k=istwf_k, kg_k=kg_k, kpg_k=kpg_k, kinpw_k=kinpw_k, &
-                   ph3d_k=ph3d_k, ffnl_k=ffnl_k, compute_ph3d=.true., compute_gbound=.true.)
+   call gs_ham%load_k(kpt_k=kk, npw_k=npw_k, istwf_k=istwf_k, kg_k=kg_k, kpg_k=kpg_k, kinpw_k=kinpw_k, &
+                      ph3d_k=ph3d_k, ffnl_k=ffnl_k, compute_ph3d=.true., compute_gbound=.true.)
  case ("kq")
-   call ham%load_kprime(kpt_kp=kk, npw_kp=npw_k, istwf_kp=istwf_k, kg_kp=kg_k, kpg_kp=kpg_k, kinpw_kp=kinpw_k, &
-                        ph3d_kp=ph3d_k, ffnl_kp=ffnl_k, compute_ph3d=.true., compute_gbound=.true.)
+   call gs_ham%load_kprime(kpt_kp=kk, npw_kp=npw_k, istwf_kp=istwf_k, kg_kp=kg_k, kpg_kp=kpg_k, kinpw_kp=kinpw_k, &
+                           ph3d_kp=ph3d_k, ffnl_kp=ffnl_k, compute_ph3d=.true., compute_gbound=.true.)
  case default
    ABI_ERROR(sjoin("Invalid value for which_k:", which_k))
  end select
@@ -1564,15 +1566,15 @@ subroutine gsham_load_spin(Ham,isppol,vectornd,vlocal,vxctaulocal,with_nonlocal)
 
  !@gs_hamiltonian_type
  if (present(vlocal)) then
-   ABI_CHECK(size(vlocal)==Ham%n4*Ham%n5*Ham%n6*Ham%nvloc, "Wrong vlocal")
+   ABI_CHECK_IEQ(size(vlocal), Ham%n4*Ham%n5*Ham%n6*Ham%nvloc, "Wrong vlocal")
    Ham%vlocal => vlocal
  end if
  if (present(vxctaulocal)) then
-   ABI_CHECK(size(vxctaulocal)==Ham%n4*Ham%n5*Ham%n6*Ham%nvloc*4, "Wrong vxctaulocal")
+   ABI_CHECK_IEQ(size(vxctaulocal), Ham%n4*Ham%n5*Ham%n6*Ham%nvloc*4, "Wrong vxctaulocal")
    Ham%vxctaulocal => vxctaulocal
  end if
  if (present(vectornd)) then
-   ABI_CHECK(size(vectornd)==Ham%n4*Ham%n5*Ham%n6*Ham%nvloc*3, "Wrong vectornd")
+   ABI_CHECK_IEQ(size(vectornd), Ham%n4*Ham%n5*Ham%n6*Ham%nvloc*3, "Wrong vectornd")
    Ham%vectornd => vectornd
  end if
 
@@ -1597,6 +1599,50 @@ subroutine gsham_load_spin(Ham,isppol,vectornd,vlocal,vxctaulocal,with_nonlocal)
  DBG_EXIT("COLL")
 
 end subroutine gsham_load_spin
+!!***
+
+!!****f* m_hamiltonian/gsham_print
+!! NAME
+!!  gsham_print
+!!
+!! FUNCTION
+!!  Print info on the object.
+!!
+!! INPUTS
+!! units=Unit numbers for output.
+!! header=Header string
+!! prtvol=verbosity level
+!!
+!! SOURCE
+
+subroutine gsham_print(gs_ham, units, header, prtvol)
+
+!Arguments ------------------------------------
+ class(gs_hamiltonian_type),intent(in) :: gs_ham
+ integer,intent(in) :: units(:), prtvol
+ character(len=*),intent(in) :: header
+
+!Local variables-------------------------------
+ character(len=5000) :: msg
+! *************************************************************************
+
+ if (len_trim(header) == 0) then
+   msg = ' ==== Info on the gs_hamiltonian_type object ==== '
+ else
+   msg = ' ==== '//trim(adjustl(header))//' ==== '
+ end if
+ call wrtout(units, msg)
+
+ call wrtout(units, sjoin(" kpt_k:", ktoa(gs_ham%kpt_k)))
+ call wrtout(units, sjoin(" kpt_kp:", ktoa(gs_ham%kpt_kp)))
+ call wrtout(units, sjoin(" npw_k:", itoa(gs_ham%npw_k)))
+ call wrtout(units, sjoin(" npw_kp:", itoa(gs_ham%npw_kp)))
+ call wrtout(units, sjoin(" associated(vlocal):", yesno(associated(gs_ham%vlocal))))
+
+ if (prtvol > 0) then
+ end if
+
+end subroutine gsham_print
 !!***
 
 !----------------------------------------------------------------------
@@ -1672,8 +1718,8 @@ end subroutine rfham_free
 !!
 !! SOURCE
 
-subroutine rfham_init(rf_ham, cplex,gs_Ham,ipert,&
-&          comm_atom,mpi_atmtab,mpi_spintab,paw_ij1,has_e1kbsc) ! optional arguments
+subroutine rfham_init(rf_ham, cplex, gs_Ham, ipert,&
+                      comm_atom, mpi_atmtab, mpi_spintab, paw_ij1, has_e1kbsc) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -1688,7 +1734,7 @@ subroutine rfham_init(rf_ham, cplex,gs_Ham,ipert,&
 
 !Local variables-------------------------------
 !scalars
- integer :: cplex_dij1,isp,jsp,my_comm_atom,my_nsppol,my_zora
+ integer :: cplex_dij1,isp,jsp,my_comm_atom,my_nsppol !,my_zora
  logical :: has_e1kbsc_
 !arrays
  integer :: my_spintab(2)
@@ -1818,7 +1864,8 @@ end subroutine rfham_init
 !!
 !! SOURCE
 
-subroutine rfham_load_spin(rf_Ham,isppol,vectornd,vlocal1,vxctaulocal,with_nonlocal)
+subroutine rfham_load_spin(rf_Ham, isppol, &
+                           vectornd, vlocal1, vxctaulocal, with_nonlocal) ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -1839,18 +1886,18 @@ subroutine rfham_load_spin(rf_Ham,isppol,vectornd,vlocal1,vxctaulocal,with_nonlo
 !@rf_hamiltonian_type
 
  if (present(vlocal1)) then
-   ABI_CHECK(size(vlocal1)==rf_Ham%cplex*rf_Ham%n4*rf_Ham%n5*rf_Ham%n6*rf_Ham%nvloc,"Wrong vlocal1")
+   ABI_CHECK_IEQ(size(vlocal1), rf_Ham%cplex*rf_Ham%n4*rf_Ham%n5*rf_Ham%n6*rf_Ham%nvloc, "Wrong vlocal1")
    rf_Ham%vlocal1 => vlocal1
  end if
 
  if (present(vectornd)) then
-   ABI_CHECK(size(vectornd)==rf_Ham%cplex*rf_Ham%n4*rf_Ham%n5*rf_Ham%n6*rf_Ham%nvloc,"Wrong vectornd")
+   ABI_CHECK_IEQ(size(vectornd), rf_Ham%cplex*rf_Ham%n4*rf_Ham%n5*rf_Ham%n6*rf_Ham%nvloc, "Wrong vectornd")
    rf_Ham%vectornd => vectornd
  end if
 
  if (present(vxctaulocal)) then
-    ABI_CHECK(size(vxctaulocal)==rf_Ham%n4*rf_Ham%n5*rf_Ham%n6*rf_Ham%nvloc*4,"Wrong vxctaulocal")
-    rf_Ham%vxctaulocal => vxctaulocal
+   ABI_CHECK_IEQ(size(vxctaulocal), rf_Ham%n4*rf_Ham%n5*rf_Ham%n6*rf_Ham%nvloc*4, "Wrong vxctaulocal")
+   rf_Ham%vxctaulocal => vxctaulocal
  end if
 
  ! Retrieve non-local factors for this spin component
@@ -1892,7 +1939,8 @@ end subroutine rfham_load_spin
 !!
 !! SOURCE
 
-subroutine rfham_load_k(rf_Ham,dkinpw_k,ddkinpw_k,npw_k)
+subroutine rfham_load_k(rf_Ham, &
+                        dkinpw_k, ddkinpw_k, npw_k) ! optional.
 
 !Arguments ------------------------------------
 !scalars
@@ -1976,14 +2024,14 @@ subroutine pawdij2ekb(ekb,paw_ij,isppol,comm_atom,mpi_atmtab)
    if (allocated(paw_ij(1)%dij)) then
      dimekb1=size(ekb,1) ; dimekb3=size(ekb,3) ; dimekb4=size(ekb,4)
      qphase=paw_ij(1)%qphase
-     ABI_CHECK(qphase<=dimekb4,'paw_ij%qphase>dimekb4!')
+     ABI_CHECK(qphase <= dimekb4, 'paw_ij%qphase>dimekb4!')
      do ii=1,qphase
        do ispden=1,dimekb3
          isp=isppol; if (dimekb3==4) isp=ispden
          do iatom=1,my_natom
            iatom_tot=iatom;if (paral_atom) iatom_tot=my_atmtab(iatom)
            dimdij=paw_ij(iatom)%cplex_dij*paw_ij(iatom)%lmn2_size
-           ABI_CHECK(dimdij<=dimekb1,'Size of paw_ij%dij>dimekb1!')
+           ABI_CHECK(dimdij <= dimekb1, 'Size of paw_ij%dij>dimekb1!')
            ekb(1:dimdij,iatom_tot,ispden,ii)=paw_ij(iatom)%dij(1+(ii-1)*dimdij:ii*dimdij,isp)
          end do
        end do
@@ -1992,9 +2040,7 @@ subroutine pawdij2ekb(ekb,paw_ij,isppol,comm_atom,mpi_atmtab)
  end if
 
 !Communication in case of distribution over atomic sites
- if (paral_atom) then
-   call xmpi_sum(ekb,comm_atom,ierr)
- end if
+ if (paral_atom) call xmpi_sum(ekb,comm_atom,ierr)
 
 !Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
@@ -2058,7 +2104,7 @@ subroutine pawdij2e1kb(paw_ij1,isppol,comm_atom,mpi_atmtab,e1kbfr,e1kbsc)
  if (my_natom>0.and.present(e1kbfr)) then
    if (allocated(paw_ij1(1)%dijfr)) then
      dime1kb1=size(e1kbfr,1) ; dime1kb3=size(e1kbfr,3) ; dime1kb4=size(e1kbfr,4)
-     ABI_CHECK(paw_ij1(1)%qphase==dime1kb4,'BUG in pawdij2e1kb (1)!')
+     ABI_CHECK_IEQ(paw_ij1(1)%qphase, dime1kb4,'BUG in pawdij2e1kb (1)!')
      do ispden=1,dime1kb3
        isp=isppol;if (dime1kb3==4) isp=ispden
        do iatom=1,my_natom
@@ -2077,14 +2123,14 @@ subroutine pawdij2e1kb(paw_ij1,isppol,comm_atom,mpi_atmtab,e1kbfr,e1kbsc)
  if (my_natom>0.and.present(e1kbsc)) then
    if (allocated(paw_ij1(1)%dijfr).and.allocated(paw_ij1(1)%dij)) then
      dime1kb1=size(e1kbsc,1) ; dime1kb3=size(e1kbsc,3) ; dime1kb4=size(e1kbsc,4)
-     ABI_CHECK(paw_ij1(1)%qphase==dime1kb4,'BUG in pawdij2e1kb (1)!')
+     ABI_CHECK_IEQ(paw_ij1(1)%qphase, dime1kb4, 'BUG in pawdij2e1kb (1)!')
      do ispden=1,dime1kb3
        isp=isppol;if (dime1kb3==4) isp=ispden
        do iatom=1,my_natom
          iatom_tot=iatom;if (paral_atom) iatom_tot=my_atmtab(iatom)
          qphase=paw_ij1(iatom)%qphase
          dimdij1=paw_ij1(iatom)%cplex_dij*paw_ij1(iatom)%lmn2_size
-         ABI_CHECK(dimdij1<=dime1kb1,'BUG: size of paw_ij1%dij>dime1kb1!')
+         ABI_CHECK(dimdij1<=dime1kb1, 'BUG: size of paw_ij1%dij>dime1kb1!')
          e1kbsc(1:dimdij1,iatom_tot,ispden,1)=paw_ij1(iatom)%dij  (1:dimdij1,isp) &
 &                                            -paw_ij1(iatom)%dijfr(1:dimdij1,isp)
          if (qphase==2) e1kbsc(1:dimdij1,iatom_tot,ispden,2)=paw_ij1(iatom)%dij  (dimdij1+1:2*dimdij1,isp) &
@@ -2146,7 +2192,6 @@ subroutine gspot_transgrid_and_pack(isppol, usepaw, paral_kgb,  nfft, ngfft, nff
  integer,intent(in) :: ngfft(18)
  real(dp),intent(inout) :: vtrial(nfftf, nspden, ncomp)
  real(dp),intent(out) :: vlocal(ngfft(4), ngfft(5), ngfft(6), nvloc, ncomp)
-
 
 !Local variables-------------------------------
 !scalars

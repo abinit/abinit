@@ -28,7 +28,6 @@ MODULE m_qparticles
  use m_hdr
  use m_errors
  use m_nctk
- use m_distribfft
 
  use defs_datatypes,   only : pseudopotential_type
  use defs_abitypes,    only : MPI_type
@@ -121,7 +120,7 @@ subroutine wrqps(fname,Sigp,Cryst,Kmesh,Psps,Pawtab,Pawrhoij,nspden,nscf,nfftot,
 !arrays
  integer,intent(in) :: ngfftf(18)
  real(dp),intent(in) :: rho_qp(nfftot,nspden)
- complex(dpc),intent(in) :: m_ks_to_qp(Sigp%nbnds,Sigp%nbnds,Kmesh%nibz,Sigp%nsppol)
+ complex(dp),intent(in) :: m_ks_to_qp(Sigp%nbnds,Sigp%nbnds,Kmesh%nibz,Sigp%nsppol)
  type(Pawrhoij_type),intent(inout) :: Pawrhoij(Cryst%natom*Psps%usepaw)
  type(Pawtab_type),intent(in) :: Pawtab(Psps%ntypat*Psps%usepaw)
 
@@ -131,7 +130,7 @@ subroutine wrqps(fname,Sigp,Cryst,Kmesh,Psps,Pawtab,Pawrhoij,nspden,nscf,nfftot,
  character(len=500) :: msg
 !arrays
  integer,allocatable :: nlmn_type(:)
- complex(dpc),allocatable :: mtmp(:,:)
+ complex(dp),allocatable :: mtmp(:,:)
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -269,7 +268,7 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
 !arrays
  integer,intent(in) :: ngfftf(18)
  real(dp),intent(out) :: rhor_out(nfftot,nspden*dimrho)
- complex(dpc),intent(out) :: m_ks_to_qp(BSt%mband,BSt%mband,BSt%nkpt,BSt%nsppol)
+ complex(dp),intent(out) :: m_ks_to_qp(BSt%mband,BSt%mband,BSt%nkpt,BSt%nsppol)
  type(Pawtab_type),intent(in) :: Pawtab(Cryst%ntypat*usepaw)
  type(Pawrhoij_type),intent(inout) :: Pawrhoij(Cryst%natom*usepaw)
 
@@ -288,9 +287,8 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
  integer :: ngfft_found(18)
  integer,allocatable :: nlmn_type(:),typatR(:)
  real(dp) :: kibz(3),rr(3),rhogdum(1,1)
- real(dp),allocatable :: en_tmp(:)
- real(dp),allocatable :: rhor_tmp(:,:)
- complex(dpc),allocatable :: mtmp(:,:),utest(:,:)
+ real(dp),allocatable :: en_tmp(:), rhor_tmp(:,:)
+ complex(dp),allocatable :: mtmp(:,:),utest(:,:)
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -341,7 +339,7 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
    end if
 
    if (nbsc/=nbandR) then
-     write(msg,'(3a,i4,a)')&
+     write(msg,'(3a,i0,a)')&
       'The QPS file contains more bands than that used in the present calculation ',ch10,&
       'only the first ',nbandR,' bands will be read'
      ABI_COMMENT(msg)
@@ -351,7 +349,7 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
    ABI_MALLOC(en_tmp,(nbandR))
    read(unqps,*)nsppolR
 
-   ABI_CHECK(nsppolR==BSt%nsppol,"QPS generated with different nsppol")
+   ABI_CHECK_IEQ(nsppolR, BSt%nsppol, "QPS generated with different nsppol")
 
    ! Read energies and transformation for each k-point and spin.
    ! TODO: The format of the QPS file must be standardized !
@@ -372,7 +370,7 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
        m_ks_to_qp(1:nbsc,1:nbsc,ik,isppol)=mtmp(1:nbsc,1:nbsc)
        BSt%eig(1:nbsc,ik,isppol)=en_tmp(1:nbsc)
 
-       ! Chech if matrix is unitary.
+       ! Check if matrix is unitary.
        ABI_MALLOC(utest,(nbsc,nbsc))
        utest(:,:) = TRANSPOSE(mtmp(1:nbsc,1:nbsc)) !this is just for the buggy gfortran
        utest(:,:) = MATMUL(CONJG(utest),mtmp(1:nbsc,1:nbsc))
@@ -418,9 +416,9 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
          cplex_fft =1 ! Real quantities.
          optin     =0 ! Input is taken from rhor.
          optout    =0 ! Output is only in real space.
-         call destroy_distribfft(MPI_enreg%distribfft)
-         call init_distribfft(MPI_enreg%distribfft,'c',MPI_enreg%nproc_fft,ngfftf(2),ngfftf(3))
-         call init_distribfft(MPI_enreg%distribfft,'f',MPI_enreg%nproc_fft,ngfft_found(2),ngfft_found(3))
+         call MPI_enreg%distribfft%free()
+         call MPI_enreg%distribfft%init('c',MPI_enreg%nproc_fft,ngfftf(2),ngfftf(3))
+         call MPI_enreg%distribfft%init('f',MPI_enreg%nproc_fft,ngfft_found(2),ngfft_found(3))
 
          call fourier_interpol(cplex_fft,nspden,optin,optout,nfft_found,ngfft_found,nfftot,ngfftf,&
            MPI_enreg,rhor_tmp,rhor_out,rhogdum,rhogdum)
@@ -552,7 +550,7 @@ subroutine show_QP(Bst,m_ks_to_qp,fromb,tob,unit,prtvol,tolmat,kmask)
  type(ebands_t),intent(in) :: Bst
 !arrays
  logical,optional,intent(in) :: kmask(Bst%nkpt)
- complex(dpc),intent(in) :: m_ks_to_qp(Bst%mband,Bst%mband,Bst%nkpt,Bst%nsppol)
+ complex(dp),intent(in) :: m_ks_to_qp(Bst%mband,Bst%mband,Bst%nkpt,Bst%nsppol)
 
 !Local variables-------------------------------
 !scalars
@@ -564,7 +562,6 @@ subroutine show_QP(Bst,m_ks_to_qp,fromb,tob,unit,prtvol,tolmat,kmask)
  character(len=500) :: KS_row,KS_ket,tmpstr,QP_ket
 !arrays
  real(dp) :: cx(2)
-
 ! *********************************************************************
 
  my_unt   =std_out  ; if (PRESENT(unit  )) my_unt   =unit
@@ -697,7 +694,6 @@ subroutine rdgw(Bst,fname,igwene,extrapolate)
  integer,allocatable :: vbik(:,:),seen(:)
  real(dp) :: kread(3)
  real(dp),allocatable :: gwcorr(:,:,:)
-
 !************************************************************************
 
  call wrtout(std_out,'Reading GW corrections from file: '//TRIM(fname))
@@ -712,8 +708,8 @@ subroutine rdgw(Bst,fname,igwene,extrapolate)
  ABI_CHECK(nsppolR==Bst%nsppol,"mismatch in nsppol")
  if (nkibzR/=Bst%nkpt) then
    write(msg,'(a,i4,a,i4,2a)')&
-&   'Found less k-points than that required ',nkibzR,'/',Bst%nkpt,ch10,&
-&   'Some k-points will be skipped. Continuing anyway '
+    'Found less k-points than that required ',nkibzR,'/',Bst%nkpt,ch10,&
+    'Some k-points will be skipped. Continuing anyway '
    ABI_WARNING(msg)
  end if
 
@@ -767,8 +763,8 @@ subroutine rdgw(Bst,fname,igwene,extrapolate)
 
    if (ANY(ABS(igwene)>tol6)) then
      write(msg,'(4a)')ch10,&
-&      "The GW file contains QP energies with non-zero imaginary part",ch10,&
-&      "Extrapolation not coded, change the source! "
+      "The GW file contains QP energies with non-zero imaginary part",ch10,&
+      "Extrapolation not coded, change the source! "
      ABI_ERROR(msg)
    end if
 
@@ -890,13 +886,13 @@ subroutine updt_m_ks_to_qp(Sigp,Kmesh,nscf,Sr,m_ks_to_qp)
  type(sigparams_t),intent(in) :: Sigp
  type(sigma_t),intent(in) :: Sr
 !arrays
- complex(dpc),intent(inout) :: m_ks_to_qp(Sigp%nbnds,Sigp%nbnds,Kmesh%nibz,Sigp%nsppol)
+ complex(dp),intent(inout) :: m_ks_to_qp(Sigp%nbnds,Sigp%nbnds,Kmesh%nibz,Sigp%nsppol)
 
 !Local variables-------------------------------
 !scalars
  integer :: ik,is
 !arrays
- complex(dpc),allocatable :: mtmp(:,:)
+ complex(dp),allocatable :: mtmp(:,:)
 ! *************************************************************************
 
  if (nscf >= 0) then

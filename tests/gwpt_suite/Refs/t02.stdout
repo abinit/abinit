@@ -1,8 +1,8 @@
 
 .Version 10.1.2.3 of MRGDV, released May 2025.
-.(MPI version, prepared for a x86_64_linux_gnu11.4 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu11.4 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  MRGDV comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,13 +16,13 @@
 
 .Starting date : Sat 21 Jun 2025.
 - ( at 14h17 )
-  
-->> Enter name of output file: 
-->> Enter total number of DFPT POT files: 
-->> Enter name of POT file 1 : 
-->> Enter name of POT file 2 : 
-->> Enter name of POT file 3 : 
-->> Enter name of POT file 4 : 
+
+->> Enter name of output file:
+->> Enter total number of DFPT POT files:
+->> Enter name of POT file 1 :
+->> Enter name of POT file 2 :
+->> Enter name of POT file 3 :
+->> Enter name of POT file 4 :
 - Reading header of file [1]: diamond_eph_gwpt/dfpto_DS1_DEN1.nc
 - Merging file [1]: diamond_eph_gwpt/dfpto_DS1_DEN1.nc
 - Reading header of file [2]: diamond_eph_gwpt/dfpto_DS2_DEN1.nc
@@ -33,7 +33,7 @@
 - Merging file [4]: diamond_eph_gwpt/dfpto_DS3_DEN1.nc
  Merged successfully 4 files
 - Analyzing DVDB file: t02_DRHODB ...
-- dvdb_new , wall:  0.01 [s] , cpu:  0.00 [s] <<< TIME
+- dvdb_init , wall:  0.00 [s] , cpu:  0.00 [s] <<< TIME
  ==== Info on the dvdb% object ====
  DVDB version: 2
  File path: t02_DRHODB

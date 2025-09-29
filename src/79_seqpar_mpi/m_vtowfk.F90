@@ -198,7 +198,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp), intent(in) :: pwnsfac(2,pwind_alloc),pwnsfacq(2,mkgq)
  real(dp), intent(in) :: zshift(nband_k)
  real(dp), target, intent(out) :: eig_k(nband_k)
- real(dP), intent(out) ::ek_k(nband_k),dphase_k(3),ek_k_nd(2,nband_k,nband_k*paw_dmft%use_dmft)
+ real(dp), intent(out) :: ek_k(nband_k),dphase_k(3),ek_k_nd(2,nband_k,nband_k*paw_dmft%use_dmft)
  real(dp), intent(out) :: end_k(nband_k),enlx_k(nband_k)
  real(dp), intent(out),target :: grnl_k(3*natom,nband_k*optforces)
  real(dp), intent(inout) :: resid_k(nband_k)

@@ -9,7 +9,7 @@
 !!  spin_supercell_t
 !!
 !! Subroutines:
-!! 
+!!
 !!
 !! COPYRIGHT
 !! Copyright (C) 2001-2025 ABINIT group (hexu)
@@ -50,7 +50,7 @@ contains
     integer, intent(in) :: nspin
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
 
 
@@ -75,7 +75,7 @@ contains
     integer :: nspin
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
 
     nspin=self%nspin
@@ -106,31 +106,14 @@ contains
   subroutine finalize(self)
     class(spin_supercell_t), intent(inout) :: self
     self%nspin=0
-    if (allocated(self%ms))  then
-       ABI_FREE(self%ms)
-    endif
 
-    if (allocated(self%pos))  then
-       ABI_FREE(self%pos)
-    endif
-
-    if (allocated(self%iatoms)) then
-       ABI_FREE(self%iatoms)
-    endif
-    if (allocated(self%ispin_prim)) then
-       ABI_FREE(self%ispin_prim)
-    endif
-    if (allocated(self%rvec)) then
-       ABI_FREE(self%rvec)
-    endif
-
-    if (allocated(self%gyro_ratio)) then
-       ABI_FREE(self%gyro_ratio)
-    endif
-
-    if (allocated(self%gilbert_damping))  then
-       ABI_FREE(self%gilbert_damping)
-    endif
+    ABI_SFREE(self%ms)
+    ABI_SFREE(self%pos)
+    ABI_SFREE(self%iatoms)
+    ABI_SFREE(self%ispin_prim)
+    ABI_SFREE(self%rvec)
+    ABI_SFREE(self%gyro_ratio)
+    ABI_SFREE(self%gilbert_damping)
 
   end subroutine finalize
 

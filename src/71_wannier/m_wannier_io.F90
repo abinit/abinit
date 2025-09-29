@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -61,7 +57,7 @@ contains
   ! Write amn file
   subroutine write_Amn(A_matrix, fname, nsppol, mband, nkpt, num_bands, nwan, band_in)
     ! TODO use the A_matrix sizes instead of the nsppol, mband, nkpt, nwan
-    complex(dpc),pointer :: A_matrix(:,:,:,:)
+    complex(dp),pointer :: A_matrix(:,:,:,:)
     !type(dataset_type),intent(in) :: dtset
     logical, intent(in) :: band_in(:, :)
     integer, intent(in) :: nsppol, num_bands(nsppol), nwan(nsppol), mband, nkpt
@@ -286,7 +282,7 @@ contains
                       !cwavef(1,ig)=cg(1,ipw+iwav(ispinor, iband,ikpt,isppol))
                       !cwavef(2,ig)=cg(2,ipw+iwav(ispinor, iband,ikpt,isppol))
                       !ig = ipw + (ispinor-1)*npw_k
-                      ig = ipw 
+                      ig = ipw
                       cwavef(1,ig)=mywfc%cg_elem(1,ipw, ispinor, iband, ikpt, isppol)
                       cwavef(2,ig)=mywfc%cg_elem(2,ipw, ispinor, iband, ikpt, isppol)
                   end do
@@ -399,7 +395,7 @@ contains
     integer, intent(in) :: g1(:, :, :)
     real(dp), intent(in) :: cm1(:,:,:,:,:,:)
     logical, intent(in) :: iam_master
-    complex(dpc),intent(inout) :: M_matrix(:,:,:,:,:)
+    complex(dp),intent(inout) :: M_matrix(:,:,:,:,:)
 
 !Local variables-------------------------------
 !scalars
@@ -434,7 +430,7 @@ contains
                  jband1=jband1+1
                  if(iam_master) write(iun(isppol),*) cm1(1,iband1,iband2,intot,ikpt1,isppol),cm1(2,iband1,iband2,intot,ikpt1,isppol)
                  M_matrix(jband1,jband2,intot,ikpt1,isppol)=&
-&                 cmplx(cm1(1,iband1,iband2,intot,ikpt1,isppol),cm1(2,iband1,iband2,intot,ikpt1,isppol), kind=dpc )
+&                 cmplx(cm1(1,iband1,iband2,intot,ikpt1,isppol),cm1(2,iband1,iband2,intot,ikpt1,isppol), kind=dp )
 !                write(2211,*) ikpt1,intot,iband1,iband2
 !                write(2211,*) cm1(1,iband1,iband2,intot,ikpt1,isppol),cm1(2,iband1,iband2,intot,ikpt1,isppol)
                end if ! band_in(iband1)

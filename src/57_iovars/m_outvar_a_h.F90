@@ -1079,6 +1079,9 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%fock_icutcoul
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'fock_icutcoul','INT',0)
 
+ dprarr(1,:)=dtsets(:)%fock_rcut
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'fock_rcut','LEN',0)
+
  dprarr(1,:)=dtsets(:)%freqim_alpha
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'freqim_alpha','DPR',0)
 
@@ -1292,17 +1295,32 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
 
  end if
 
- !intarr(1,:)  =dtsets(:)%gstore_cplex
- !call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gstore_cplex','INT',0)
+ intarr(1,:)  =dtsets(:)%gstore_cplex
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'gstore_cplex','INT',0)
 
- !intarr(1,:)  =dtsets(:)%gstore_with_vk
- !call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gstore_with_vk','INT',0)
+ intarr(1,:)  =dtsets(:)%gstore_with_vk
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'gstore_with_vk','INT',0)
 
- !intarr(1,:)  =dtsets(:)%gstore_gstore_brange
- !call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gstore_brange','INT',0)
+ intarr(1,:)  =dtsets(:)%gstore_use_lgk
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'gstore_use_lgk','INT',0)
 
- !dprarr(1,:)  =dtsets(:)%gstore_gstore_erange
- !call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gstore_erange','ENE',0)
+ intarr(1,:)  =dtsets(:)%gstore_use_lgq
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'gstore_use_lgq','INT',0)
+
+ !intarr(1,:)  =dtsets(:)%gstore_brange(1,1)
+ !intarr(2,:)  =dtsets(:)%gstore_brange(2,1)
+ !intarr(3,:)  =dtsets(:)%gstore_brange(1,2)
+ !intarr(4,:)  =dtsets(:)%gstore_brange(2,2)
+ !call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'gstore_brange','INT',0)
+
+ !dprarr(1,:)  =dtsets(:)%gstore_erange(1,1)
+ !dprarr(2,:)  =dtsets(:)%gstore_erange(2,1)
+ !dprarr(3,:)  =dtsets(:)%gstore_erange(1,2)
+ !dprarr(4,:)  =dtsets(:)%gstore_erange(2,2)
+ !call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'gstore_erange','ENE',0)
+
+ dprarr(1,:)=dtsets(:)%gw_rcut
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'gw_rcut','LEN',0)
 
  dprarr(1,:) = dtsets(:)%gwr_boxcutmin
  call prttagm(dprarr, intarr, iout, jdtset_, 1, marr, narr, narrm, ncid, ndtset_alloc, 'gwr_boxcutmin', 'DPR', 0)
