@@ -133,20 +133,14 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,
 
 
  if(iexit/=0)then
-   if (allocated(vel_prev))  then
-     ABI_FREE(vel_prev)
-   end if
+   ABI_SFREE(vel_prev)
    return
  end if
 
  if((hmcflag_==0.and.itime==1).or.(hmcflag_==1.and.icycle_==1))then
-   if (allocated(vel_prev))  then
-     ABI_FREE(vel_prev)
-   end if
+   ABI_SFREE(vel_prev)
    ABI_MALLOC(vel_prev,(3,ab_mover%natom))
  end if
-
-
 
  ! Start preparation for velocity verlet, get information about current ionic positions, forces, velocities, etc.
 

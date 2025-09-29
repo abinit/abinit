@@ -54,8 +54,8 @@ module m_sigtk
  public :: sigtk_kpts_in_erange
  public :: sigtk_sigma_tables
  public :: sigtk_multiply_by_vc_sqrt
+ public :: sigtk_dw_tpp_red
 !!***
-
 
  ! Tables for degenerated KS states.
  type, public :: bids_t
@@ -64,6 +64,8 @@ module m_sigtk
 
  type, public :: degtab_t
    type(bids_t), allocatable :: bids(:)
+   contains
+   procedure :: free => degtab_free
  end type degtab_t
 
  public :: degtab_array_free   ! Free array of degtab_t objects.
@@ -408,7 +410,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
 
     ABI_MALLOC(indkk, (6, tmp_nkpt))
 
-    krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
+    call krank%from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
 
     if (kpts_map("symrec", ebands%kptopt, cryst, krank, tmp_nkpt, tmp_kcalc, indkk) /= 0) then
       write(msg, '(3a)' )&
@@ -783,8 +785,17 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
 end subroutine sigtk_kpts_in_erange
 !!***
 
+subroutine degtab_free(degtab)
+ class(degtab_t),intent(inout) :: degtab
+ integer :: ii
+ do ii=1,size(degtab%bids)
+   ABI_SFREE(degtab%bids(ii)%vals)
+ end do
+ ABI_FREE(degtab%bids)
+end subroutine degtab_free
+
 subroutine degtab_array_free(degtab)
- type(degtab_t),intent(inout) :: degtab(:,:)
+ class(degtab_t),intent(inout) :: degtab(:,:)
 
  integer :: jj, ii, ideg
 
@@ -1011,8 +1022,8 @@ subroutine sigtk_multiply_by_vc_sqrt(trans, npw, nspinor, ndat, vc_sqrt, rhotwg)
 
  character(len=1),intent(in) :: trans
  integer,intent(in) :: npw, nspinor, ndat
- complex(gwpc),intent(in) :: vc_sqrt(npw)
- complex(gwpc),intent(inout) :: rhotwg(npw*nspinor, ndat)
+ complex(gwp),intent(in) :: vc_sqrt(npw)
+ complex(gwp),intent(inout) :: rhotwg(npw*nspinor, ndat)
 
 !Local variables ------------------------------
  integer :: ii, spad, idat
@@ -1041,6 +1052,46 @@ subroutine sigtk_multiply_by_vc_sqrt(trans, npw, nspinor, ndat, vc_sqrt, rhotwg)
  end select
 
 end subroutine sigtk_multiply_by_vc_sqrt
+!!***
+
+!!****f* m_sigtk/sigtk_dw_tpp_red
+!! NAME
+!!  sigtk_dw_tpp_red
+!!
+!! FUNCTION
+!!  Compute T_pp'(q,nu) matrix in reduced coordinates.
+!!
+!! INPUTS
+!!
+!! OUTPUTS
+!!
+!! SOURCE
+
+pure subroutine sigtk_dw_tpp_red(natom, displ_red, tpp_red)
+
+ integer,intent(in) :: natom
+ real(dp),intent(in) :: displ_red(2, 3, natom)
+ complex(dp),intent(out) :: tpp_red(3*natom,3*natom)
+
+!Local variables ------------------------------
+ integer :: ip1, ip2, idir1, idir2, ipert1, ipert2
+ complex(dp) :: dka, dkap, dkpa, dkpap
+!************************************************************************
+
+ do ip2=1,natom*3
+   idir2 = mod(ip2-1, 3) + 1; ipert2 = (ip2 - idir2) / 3 + 1
+   do ip1=1,natom*3
+     idir1 = mod(ip1-1, 3) + 1; ipert1 = (ip1 - idir1) / 3 + 1
+     ! (k,a) (k,a')* + (k',a) (k',a')*
+     dka   = dcmplx(displ_red(1, idir1, ipert1), displ_red(2, idir1, ipert1))
+     dkap  = dcmplx(displ_red(1, idir2, ipert1), displ_red(2, idir2, ipert1))
+     dkpa  = dcmplx(displ_red(1, idir1, ipert2), displ_red(2, idir1, ipert2))
+     dkpap = dcmplx(displ_red(1, idir2, ipert2), displ_red(2, idir2, ipert2))
+     tpp_red(ip1, ip2) = dka * dconjg(dkap) + dkpa * dconjg(dkpap)
+   end do
+ end do
+
+end subroutine sigtk_dw_tpp_red
 !!***
 
 end module m_sigtk

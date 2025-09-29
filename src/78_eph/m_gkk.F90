@@ -460,7 +460,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
          eshift = eig0nk - dtset%dfpt_sciss
 
          call getgh1c(berryopt0,kets(:,:,ib2),cwaveprj0,h1_kets(:,:,ib2),&
-                      grad_berry,gs1c,gs_hamkq,gvnlx1,idir,ipert,(/eshift/),mpi_enreg,1,optlocal,&
+                      grad_berry,gs1c,gs_hamkq,gvnlx1,idir,ipert, [eshift], mpi_enreg,1,optlocal,&
                       optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
        end do
 
@@ -560,12 +560,10 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  ABI_FREE(kg_kq)
  ABI_FREE(ylm_k)
  ABI_FREE(ylm_kq)
-
- call gs_hamkq%free()
- call wfd_k%free()
- call wfd_kq%free()
  call pawcprj_free(cwaveprj0)
  ABI_FREE(cwaveprj0)
+
+ call gs_hamkq%free(); call wfd_k%free(); call wfd_kq%free()
 
 end subroutine eph_gkk
 !!***
@@ -593,7 +591,7 @@ end subroutine eph_gkk
 
 subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
 
- use m_bz_mesh, only : kpath_t, kpath_new
+ use m_bz_mesh, only : kpath_t
 
 !Arguments ------------------------------------
  class(dvdb_t),intent(inout) :: dvdb
@@ -639,7 +637,7 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
  bounds(:, 5) = tol3 * [+0.00000,  +0.00000, +0.00000] !  # $\Gamma$
  bounds(:, 6) = tol3 * [+0.50000,  +0.25000, +0.75000] !  # W
 
- qpath = kpath_new(bounds, dvdb%cryst%gprimd, dtset%ndivsm)
+ call qpath%init(bounds, dvdb%cryst%gprimd, dtset%ndivsm)
 
  units = [std_out, ab_out]
 

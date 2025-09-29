@@ -396,7 +396,7 @@ module m_slk
  public :: slk_array_locmem_mb                 ! Compute memory allocated for an array of slkmat_dp_t elements
 
  ! External functions.
-#ifdef HAVE_LINALG_SCALAPACK
+#if defined(HAVE_LINALG_SCALAPACK) || defined(HAVE_LINALG_ELPA)
  integer,external :: indxl2g, numroc
  real(dp),external :: PDLAMCH
  real(dp),external :: PDLATRA
@@ -3960,7 +3960,7 @@ end subroutine slkmat_dp_pzheevx
 !!
 !!  Slk_matA<slkmat_dp_t>:
 !!    %buffer_cplx
-!!      (local input/local output) complex(DPC) pointer into the
+!!      (local input/local output) complex(DP) pointer into the
 !!      local memory to an array of dimension (LLD_A, LOCc(JA+N-1)).
 !!      On entry, this array contains the local pieces of the
 !!      N-by-N Hermitian distributed matrix sub( A ). If UPLO = 'U',
@@ -3980,7 +3980,7 @@ end subroutine slkmat_dp_pzheevx
 !!
 !!  Slk_matB=
 !!    %buffer_cplx
-!!      (local input/local output) complex*(DPC) pointer into the
+!!      (local input/local output) complex*(DP) pointer into the
 !!      local memory to an array of dimension (LLD_B, LOCc(JB+N-1)).
 !!      On entry, this array contains the local pieces of the
 !!      N-by-N Hermitian distributed matrix sub( B ). If UPLO = 'U',

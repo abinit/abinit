@@ -977,10 +977,10 @@ end subroutine unused_real_sp
 elemental subroutine unused_cplx_spc(var)
 
 !Arguments ------------------------------------
- complex(spc),intent(in) :: var
+ complex(sp),intent(in) :: var
 
 !Local variables-------------------------------
- complex(spc) :: dummy
+ complex(sp) :: dummy
 ! *********************************************************************
 
  dummy = var
@@ -1009,10 +1009,10 @@ end subroutine unused_cplx_spc
 elemental subroutine unused_cplx_dpc(var)
 
 !Arguments ------------------------------------
- complex(dpc),intent(in) :: var
+ complex(dp),intent(in) :: var
 
 !Local variables-------------------------------
- complex(dpc) :: dummy
+ complex(dp) :: dummy
 ! *********************************************************************
 
  dummy = var

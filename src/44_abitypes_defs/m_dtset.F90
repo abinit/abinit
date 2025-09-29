@@ -27,7 +27,7 @@ module m_dtset
  use m_errors
  use m_xmpi
 
- use m_fstrings,      only : inupper
+ use m_fstrings,      only : inupper, sjoin, itoa, ftoa
  use m_numeric_tools, only : arth
  use m_matrix,        only : mati3inv
  use m_symtk,         only : littlegroup_q, symatm
@@ -280,10 +280,13 @@ type, public :: dataset_type
 
  integer :: gstore_cplex = 2
  integer :: gstore_with_vk = 1
+ integer :: gstore_use_lgk = 0
+ integer :: gstore_use_lgq = 0
  character(len=abi_slen) :: gstore_kzone = "ibz"
  character(len=abi_slen) :: gstore_qzone = "bz"
  character(len=abi_slen) :: gstore_kfilter = "none"
  character(len=abi_slen) :: gstore_gmode = "phonon"
+ character(len=abi_slen) :: gstore_gname = "gvals"
  integer :: gstore_brange(2, 2) = 0
  real(dp) :: gstore_erange(2, 2) = zero
 
@@ -362,6 +365,9 @@ type, public :: dataset_type
  integer :: irandom
  integer :: irdchkprdm = 0
  integer :: irdddb = 0
+ integer :: irddkdk = 0
+ integer :: irddkde = 0
+ integer :: irddelfd = 0
  integer :: irddvdb = 0
  integer :: irddrhodb = 0
  integer :: irdddk = 0
@@ -640,7 +646,6 @@ type, public :: dataset_type
  integer :: rfphon
  integer :: rfstrs
  integer :: rfstrs_ref
- integer :: rfuser
  integer :: rf2_dkdk
  integer :: rf2_dkde
  integer :: rmm_diis = 0
@@ -882,6 +887,7 @@ type, public :: dataset_type
  real(dp) :: exchmix
  real(dp) :: fband
  real(dp) :: fermie_nest = zero
+ real(dp) :: fock_rcut
  real(dp) :: focktoldfe
  real(dp) :: freqim_alpha
  real(dp) :: freqremin = zero
@@ -892,6 +898,7 @@ type, public :: dataset_type
  real(dp) :: frictionbar
  real(dp) :: fxcartfactor
  real(dp) :: ga_opt_percent
+ real(dp) :: gw_rcut
  real(dp) :: gwencomp = 2.0_dp
  real(dp) :: gwls_model_parameter         ! Parameter used in dielectric function model
  real(dp) :: gwr_tolqpe = 0.01 * eV_Ha
@@ -1006,7 +1013,7 @@ type, public :: dataset_type
 !Real arrays
  real(dp) :: boxcenter(3)
  real(dp) :: bfield(3)
-!  Take big absolute value numbers, but not the biggest ones, otherwise overflow can happen
+! Take big absolute value numbers, but not the biggest ones, otherwise overflow can happen.
  real(dp) :: bs_eh_cutoff(2) = [smallest_real*tol6, greatest_real*tol6]
  real(dp) :: bs_freq_mesh(3) = [zero,zero, 0.01_dp/Ha_eV]
  real(dp) :: bs_haydock_tol(2) = [0.02_dp, zero]
@@ -1148,6 +1155,9 @@ type, public :: dataset_type
 
  procedure :: get_ktmesh => dtset_get_ktmesh
    ! Build (linear) mesh of K * temperatures. tsmesh(1:3) = [start, step, num]
+
+ procedure :: get_wrmesh_for_sigeph => dtset_get_wrmesh_for_sigeph
+  ! Frequency mesh for sigma(w) and spectral functions (EPH self-energy)
 
  end type dataset_type
 !!***
@@ -1722,6 +1732,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gwr_ucsc_batch     = dtin%gwr_ucsc_batch
  dtout%fockoptmix         = dtin%fockoptmix
  dtout%fock_icutcoul      = dtin%fock_icutcoul
+ dtout%fock_rcut          = dtin%fock_rcut
  dtout%freqim_alpha       = dtin%freqim_alpha
  dtout%freqremin          = dtin%freqremin
  dtout%freqremax          = dtin%freqremax
@@ -1791,10 +1802,13 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
 
  dtout%gstore_cplex       = dtin%gstore_cplex
  dtout%gstore_with_vk     = dtin%gstore_with_vk
+ dtout%gstore_use_lgk     = dtin%gstore_use_lgk
+ dtout%gstore_use_lgq     = dtin%gstore_use_lgq
  dtout%gstore_kzone       = dtin%gstore_kzone
  dtout%gstore_qzone       = dtin%gstore_qzone
  dtout%gstore_kfilter     = dtin%gstore_kfilter
  dtout%gstore_gmode       = dtin%gstore_gmode
+ dtout%gstore_gname       = dtin%gstore_gname
  dtout%gstore_brange      = dtin%gstore_brange
  dtout%gstore_erange      = dtin%gstore_erange
 
@@ -1815,6 +1829,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gw_frqre_inzgrid   = dtin%gw_frqre_inzgrid
  dtout%gw_frqre_tangrid   = dtin%gw_frqre_tangrid
  dtout%gw_invalid_freq    = dtin%gw_invalid_freq
+ dtout%gw_rcut            = dtin%gw_rcut
  dtout%gw_qprange         = dtin%gw_qprange
  dtout%gw_sigxcore        = dtin%gw_sigxcore
 
@@ -1879,6 +1894,9 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%irddrhodb          = dtin%irddrhodb
  dtout%irdddk             = dtin%irdddk
  dtout%irdden             = dtin%irdden
+ dtout%irddkdk            = dtin%irddkdk
+ dtout%irddkde            = dtin%irddkde
+ dtout%irddelfd           = dtin%irddelfd
  dtout%irdefmas           = dtin%irdefmas
  dtout%irdhaydock         = dtin%irdhaydock
  dtout%irdkden            = dtin%irdkden
@@ -2141,7 +2159,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%rfphon             = dtin%rfphon
  dtout%rfstrs             = dtin%rfstrs
  dtout%rfstrs_ref         = dtin%rfstrs_ref
- dtout%rfuser             = dtin%rfuser
  dtout%rf2_dkdk           = dtin%rf2_dkdk
  dtout%rf2_dkde           = dtin%rf2_dkde
  dtout%rmm_diis           = dtin%rmm_diis
@@ -2822,7 +2839,6 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
  if(dtset%rfphon==1)rfpert(dtset%rfatpol(1):dtset%rfatpol(2))=1
 
  if(dtset%rfddk==1)rfpert(dtset%natom+1)=1
- if(dtset%rfddk==2)rfpert(dtset%natom+6)=1
 
  if(dtset%rf2_dkdk/=0) rfpert(dtset%natom+10)=1
  if(dtset%rf2_dkde/=0) rfpert(dtset%natom+11)=1
@@ -2832,9 +2848,6 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
 
  if(dtset%rfstrs==1.or.dtset%rfstrs==3)rfpert(dtset%natom+3)=1
  if(dtset%rfstrs==2.or.dtset%rfstrs==3)rfpert(dtset%natom+4)=1
-
- if(dtset%rfuser==1.or.dtset%rfuser==3)rfpert(dtset%natom+6)=1
- if(dtset%rfuser==2.or.dtset%rfuser==3)rfpert(dtset%natom+7)=1
 
  if(dtset%rfmagn==1) rfpert(dtset%natom+5)=1
 
@@ -3206,6 +3219,37 @@ subroutine dtset_get_ktmesh(dtset, ntemp, ktmesh)
 end subroutine dtset_get_ktmesh
 !!***
 
+!!****f* m_dtset/dtset_get_wrmesh_for_sigeph
+!! NAME
+!! dtset_get_wrmesh_for_sigeph
+!!
+!! FUNCTION
+!!  Frequency mesh for sigma(w) and spectral functions (EPH self-energy)
+!!
+!! SOURCE
+
+subroutine dtset_get_wrmesh_for_sigeph(dtset, nwr, wr_step)
+
+!Arguments-------------------------------
+!scalars
+ class(dataset_type),intent(in) :: dtset
+ integer,intent(out) :: nwr
+ real(dp),intent(out) :: wr_step
+! *********************************************************************
+
+ ! Use GW variables but change default values
+ nwr = dtset%nfreqsp; wr_step = zero
+ if (nwr > 0) then
+   if (mod(nwr, 2) == 0) nwr = nwr + 1
+   wr_step = two * eV_Ha / (nwr - 1)
+   if (dtset%freqspmax /= zero) wr_step = dtset%freqspmax / (nwr - 1)
+   call wrtout([std_out, ab_out], &
+     sjoin(" Will compute Sigma(omega) using", itoa(nwr), "points and step:", ftoa(wr_step * Ha_eV), "(eV)"))
+ end if
+
+end subroutine dtset_get_wrmesh_for_sigeph
+!!***
+
 !!****f* m_dtset/macroin
 !! NAME
 !! macroin
@@ -3242,7 +3286,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
  character(len=*),intent(inout) :: string
 !arrays
  real(dp),intent(in) :: ecut_tmp(3,2,10)
- type(dataset_type),intent(inout) :: dtsets(0:ndtset_alloc) !vz_i ziontypat
+ type(dataset_type),intent(inout) :: dtsets(0:ndtset_alloc)
 
 !Local variables -------------------------------
 !scalars
@@ -3636,7 +3680,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' fit_nfixcoeff fit_nimposecoeff fit_rangePower fit_SPCoupling fit_SPC_maxS'
  list_vars=trim(list_vars)//' fit_tolGF fit_tolMSDE fit_tolMSDF fit_tolMSDFS fit_tolMSDS fit_max_nbody'
  list_vars=trim(list_vars)//' fit_weight_T'
- list_vars=trim(list_vars)//' fockoptmix focktoldfe fockdownsampling fock_icutcoul'
+ list_vars=trim(list_vars)//' fockoptmix focktoldfe fockdownsampling fock_icutcoul fock_rcut'
  list_vars=trim(list_vars)//' freqim_alpha freqremax freqremin freqspmax'
  list_vars=trim(list_vars)//' freqspmin friction frictionbar frzfermi fxcartfactor'
  list_vars=trim(list_vars)//' f4of2_sla f6of2_sla'
@@ -3656,12 +3700,12 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' gpu_devices gpu_kokkos_nthrd gpu_linalg_limit gpu_nl_distrib gpu_thread_limit'
  list_vars=trim(list_vars)//' gpu_nl_splitsize gpu_option'
  list_vars=trim(list_vars)//' gwaclowrank gwcalctyp gwcomp gwencomp gwgamma gwmem'
- list_vars=trim(list_vars)//' gstore_brange gstore_cplex gstore_erange gstore_kfilter gstore_gmode'
- list_vars=trim(list_vars)//' gstore_kzone gstore_qzone gstore_with_vk'
+ list_vars=trim(list_vars)//' gstore_brange gstore_cplex gstore_erange gstore_kfilter gstore_gmode gstore_gname'
+ list_vars=trim(list_vars)//' gstore_kzone gstore_qzone gstore_with_vk gstore_use_lgk gstore_use_lgq'
  list_vars=trim(list_vars)//' gwpara gwrpacorr gwgmcorr gw_customnfreqsp gw1rdm'
  list_vars=trim(list_vars)//' gw_frqim_inzgrid gw_frqre_inzgrid gw_frqre_tangrid gw_freqsp'
  list_vars=trim(list_vars)//' gw_icutcoul gw_invalid_freq'
- list_vars=trim(list_vars)//' gw_nqlwl gw_qlwl gw_qprange gw_sigxcore'
+ list_vars=trim(list_vars)//' gw_nqlwl gw_qlwl gw_qprange gw_rcut gw_sigxcore'
  list_vars=trim(list_vars)//' gwls_stern_kmax gwls_kmax_complement gwls_kmax_poles'
  list_vars=trim(list_vars)//' gwls_kmax_analytic gwls_kmax_numeric'
  list_vars=trim(list_vars)//' gwls_list_proj_freq gwls_nseeds gwls_n_proj_freq gwls_recycle'
@@ -3677,10 +3721,9 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
  list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb indata_prefix intxc invovl_blksliced iomode ionmov iqpt'
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'
- list_vars=trim(list_vars)//' irdbseig irdbsreso irdchkprdm irdddb irdddk irdden irdkden irddvdb irddrhodb irdefmas'
- list_vars=trim(list_vars)//' irdhaydock irdpawden irdqps'
- list_vars=trim(list_vars)//' irdscr irdsuscep irdwfk irdwfq ird1den'
- list_vars=trim(list_vars)//' irdwfkfine'
+ list_vars=trim(list_vars)//' irdbseig irdbsreso irdchkprdm irdddb irdddk irdden irdkden irddkdk irddkde irddelfd'
+ list_vars=trim(list_vars)//' irddvdb irddrhodb irdefmas'
+ list_vars=trim(list_vars)//' irdhaydock irdpawden irdqps irdscr irdsuscep irdwfk irdwfq ird1den irdwfkfine'
  list_vars=trim(list_vars)//' ird1wf iscf isecur istatimg istatr'
  list_vars=trim(list_vars)//' istatshft istwfk ixc ixc_sigma ixcpositron ixcrot irdvdw ivalence'
 !J
@@ -3768,7 +3811,7 @@ subroutine chkvars(string)
 !list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar restartxf rfasr'
  list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar restartxf'
  list_vars=trim(list_vars)//' rfatpol rfddk rfdir rfelfd rfmagn rfmeth rfphon'
- list_vars=trim(list_vars)//' rfstrs rfstrs_ref rfuser rf2_dkdk rf2_dkde rf2_pert1_dir rf2_pert2_dir rhoqpmix rifcsph rprim'
+ list_vars=trim(list_vars)//' rfstrs rfstrs_ref rf2_dkdk rf2_dkde rf2_pert1_dir rf2_pert2_dir rhoqpmix rifcsph rprim'
  list_vars=trim(list_vars)//' rmm_diis rmm_diis_savemem'
  list_vars=trim(list_vars)//' rcpaw_scenergy rcpaw_nfrpaw rcpaw_frocc rcpaw_tolnc rcpaw_nfrtnc rcpaw_frtypat'
 !S

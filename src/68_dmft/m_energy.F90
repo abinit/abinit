@@ -673,8 +673,8 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
 !Local variables-------------------------------
  integer :: i,iatom_,ierr,ifreq,j,myproc,natom,nmoments,nspinor,nsppol,nwlo
  real(dp) :: beta,temp
- complex(dpc) :: omega
- complex(dpc), allocatable :: omega_fac(:),trace_moments(:,:),trace(:)
+ complex(dp) :: omega
+ complex(dp), allocatable :: omega_fac(:),trace_moments(:,:),trace(:)
  type(matlu_type), allocatable :: self_nwlo_re(:)
  type(matlu_type), pointer :: matlu_tmp(:) => null()
  character(len=500) :: message
@@ -1281,9 +1281,9 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
  integer :: i,iatom,ierr,ifreq,info,isppol,lpawu,lwork,natom,ndim
  integer :: nmoments,nspinor,nsppol,nwlo,optinv
  real(dp) :: correction,fac,temp
- complex(dpc) :: trace_tmp
+ complex(dp) :: trace_tmp
  real(dp), allocatable :: eig(:),rwork(:)
- complex(dpc), allocatable :: mat_temp(:,:),omega_fac(:),work(:)
+ complex(dp), allocatable :: mat_temp(:,:),omega_fac(:),work(:)
 ! *********************************************************************
 
  optinv = 0

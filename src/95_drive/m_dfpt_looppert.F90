@@ -1300,24 +1300,24 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !TODO: for many other q this should be avoidable, in principle all if qptrlatt is a subgrid of kprtlatt
 !  Or at very least make a pointer instead of a full copy!!!
    if (dtfil%fnamewffq == dtfil%fnamewffk .and. sum(dtset%qptn(1:3)**2) < 1.d-14) then
-     call wrtout(std_out, " qpt is Gamma, psi_k+q initialized from psi_k in memory")
+     call wrtout(std_out, " qpt is Gamma --> psi_k+q initialized from psi_k in memory")
      cgq = cg
      eigenq = eigen0
    else
      call timab(144,1,tsec)
      call wfk_read_my_kptbands(dtfil%fnamewffq, distrb_flags, spacecomm, dtset%ecut*(dtset%dilatmx)**2,&
-&          formeig, istwfk_rbz, kpq_rbz, mcgq, dtset%mband, mband_mem_rbz, mkqmem_rbz, mpw1,&
-&          dtset%natom, nkpt_rbz, npwar1, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
-&          cgq, eigen=eigenq, occ=occ_disk)
+           formeig, istwfk_rbz, kpq_rbz, mcgq, dtset%mband, mband_mem_rbz, mkqmem_rbz, mpw1,&
+           dtset%natom, nkpt_rbz, npwar1, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
+           cgq, eigen=eigenq, occ=occ_disk)
      call timab(144,2,tsec)
 
      if (.not.kramers_deg) then
        !SPr: later "make" a separate WFQ file for "-q"
        call timab(144,1,tsec)
        call wfk_read_my_kptbands(dtfil%fnamewffq, distrb_flags, spacecomm,dtset%ecut*(dtset%dilatmx)**2, &
-&          formeig, istwfk_rbz, kmq_rbz, mcgmq, dtset%mband, mband_mem_rbz, mkqmem_rbz, mpw1_mq,&
-&          dtset%natom, nkpt_rbz, npwar1_mq, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
-&          cg_mq, eigen=eigen_mq, occ=occ_disk)
+          formeig, istwfk_rbz, kmq_rbz, mcgmq, dtset%mband, mband_mem_rbz, mkqmem_rbz, mpw1_mq,&
+          dtset%natom, nkpt_rbz, npwar1_mq, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
+          cg_mq, eigen=eigen_mq, occ=occ_disk)
        call timab(144,2,tsec)
 
      end if

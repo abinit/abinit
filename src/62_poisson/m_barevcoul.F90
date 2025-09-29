@@ -23,15 +23,15 @@ module m_barevcoul
 
  use defs_basis
  use m_abicore
- use m_dtset
  use m_errors
  use m_xmpi
 
- !use m_fstrings,        only : sjoin, itoa
+ use m_fstrings,        only : sjoin
  use defs_abitypes,     only : MPI_type
  use m_numeric_tools,   only : arth, l2norm, OPERATOR(.x.)
  use m_geometry,        only : normv
  use m_crystal,         only : crystal_t
+ use m_fft,             only : zerosym
  !use m_gsphere,         only : gsphere_t
 
 ! Cut-off methods modules
@@ -117,13 +117,12 @@ contains
 !! barevcoul
 !!
 !! FUNCTION
-!! Compute bare coulomb term in G-space on the FFT mesh i.e. 4pi/(G+q)**2
+!! Compute bare coulomb term in G-space on the FFT mesh i.e. 4pi/(G+q)**2 for a specified q-point
 !!
 !! INPUTS
-!!  qphon(3)=reduced coordinates for the phonon wavelength (needed if cplex==2).
+!!  qpoint(3)=reduced coordinates for the phonon wavelength
 !!  gsqcut=cutoff value on G**2 for sphere inside fft box. (gsqcut=(boxcut**2)*ecut/(2.d0*(Pi**2))
 !!  icutcoul=Option for the Coulomb potential cutoff technique
-!!  divgq0= value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq. Used if q = Gamma
 !!  gmet(3,3)=metrix tensor in G space in Bohr**-2.
 !!  izero=if 1, unbalanced components of V(q,g) are set to zero # Used by the PAW library
 !!  nfft=Total number of FFT grid points.
@@ -131,7 +130,7 @@ contains
 !!  comm=MPI communicator.
 !!
 !! OUTPUT
-!!  barev(nfft)=4pi/(G+q)**2, G=0 component is set to divgq0/pi if q = Gamma.
+!!  barev(nfft)=4pi/(G+q)**2, q+G=0 component is set carefully
 !!
 !! NOTES
 !!  This routine operates on the full FFT mesh. DO NOT PASS MPI_TYPE
@@ -140,37 +139,37 @@ contains
 !!
 !! SOURCE
 
-subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,shortrange)
+subroutine barevcoul(rcut,icutcoul,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,izero,barev,shortrange)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in)         :: nfft,nkpt_bz
+ integer,intent(in)         :: icutcoul,nfft,nkpt_bz,izero
  real(dp),intent(in)        :: rcut,gsqcut,ucvol
  logical,intent(in),optional:: shortrange
 !arrays
  integer,intent(in)         :: ngfft(18)
  integer                    :: ng!!!!
- real(dp),intent(in)        :: qphon(3)
+ real(dp),intent(in)        :: qpoint(3)
  real(dp),intent(inout)     :: gmet(3,3)
  real(dp),intent(inout)     :: barev(nfft)
  !real(dp)                   :: a1(3),a2(3),a3(3)
  real(dp)                   :: b1(3),b2(3),b3(3),rmet(3,3) !,gprimd(3,3),
- type(dataset_type)         :: dtset
  type(MPI_type)             :: mpi_enreg   !!!!
  type(crystal_t)            :: Cryst       !!!!
  !type(gsphere_t)            :: Gsph
- type(vcut_t)               :: vcut        !!!!
 !Local variables-------------------------------
 !scalars
  integer,parameter    :: empty(3,3)=zero
+ integer,parameter    :: cplex1=1
  integer              :: comm
- integer              :: i1,i2,i23,i3,id1,id2,id3,icutcoul_local
- integer              :: ig,ig1min,ig1max,ig2min,ig2max,ig3min,ig3max
+ integer              :: ii1,i1,i2,i23,i3,id1,id2,id3,icutcoul_local
+ integer              :: ig,ig1,ig2,ig3,ig1min,ig1max,ig2min,ig2max,ig3min,ig3max
  integer              :: ii,ing,n1,n2,n3,npar,npt
  integer              :: opt_cylinder,opt_slab,test
+ integer              :: qeq0,qeq05
  real(dp),parameter   :: tolfix=1.000000001e0_dp ! Same value as the one used in hartre
  real(dp)             :: check,step
- real(dp)             :: cutoff,gqg2p3,gqgm12,gqgm13,gqgm23,gs2,gs3,divgq0,rcut0
+ real(dp)             :: cutoff,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,rcut0
  real(dp)             :: bz_plane,dx,integ,q0_vol,q0_volsph
  character(len=500)   :: msg
 !arrays
@@ -178,6 +177,7 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
  real(dp),allocatable :: gq(:,:),gpq(:),gpq2(:)
  real(dp),allocatable :: vcfit(:,:),xx(:),yy(:)
  real(dp),allocatable :: cov(:,:),par(:),qfit(:,:),sigma(:),var(:),qcart(:,:)
+ type(vcut_t)               :: vcut        !!!!
 !
  comm=mpi_enreg%comm_world
 !
@@ -190,36 +190,44 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
  vcut%hcyl      = zero                 ! Length of finite cylinder (Rozzi"s method, default is Beigi).
  vcut%ucvol     = ucvol                ! Unit cell volume.
 
- vcut%rprimd    = Cryst%rprimd(:,:)    ! Dimensional direct lattice.
- vcut%boxcenter = dtset%boxcenter      ! boxcenter at the moment is supposed to be at the origin.
- vcut%vcutgeo   = dtset%vcutgeo(:)     ! Info on the orientation and extension of the cutoff region.
+ !FBruneval: comment the definitions below since Cryst and dtset have never been initialized!
+ !vcut%rprimd    = Cryst%rprimd(:,:)    ! Dimensional direct lattice.
+ !vcut%boxcenter = dtset%boxcenter      ! boxcenter at the moment is supposed to be at the origin.
+ !vcut%vcutgeo   = dtset%vcutgeo(:)     ! Info on the orientation and extension of the cutoff region.
 !
 ! === Define geometry and cutoff radius (if used) ===
  vcut%mode='NONE'
- !icutcoul_local=dtset%icutcoul
+ icutcoul_local=icutcoul
 
-! BG: Temporary to circumvent the tests
- if(shortrange) then
-    icutcoul_local=5
- else
-    icutcoul_local=0
+ ! for short-range exchange (e.g. HSE06), enforce ERFC
+ if (PRESENT(shortrange)) then
+   if (shortrange) then
+      icutcoul_local=5
+   end if
  end if
 ! -------------------------------------
 
- if (icutcoul_local==0) vcut%mode='SPHERE'
- if (icutcoul_local==1) vcut%mode='CYLINDER'
- if (icutcoul_local==2) vcut%mode='SLAB'
- if (icutcoul_local==4) vcut%mode='ERF'
- if (icutcoul_local==5) vcut%mode='ERFC'
-!
-! Treatment of the divergence at q+g=zero
- rcut0= (three*nkpt_bz*ucvol/four_pi)**(one/three)
- divgq0= two_pi*rcut0**two
+ if (icutcoul_local == 0) vcut%mode = 'SPHERE'
+ if (icutcoul_local == 1) vcut%mode = 'CYLINDER'
+ if (icutcoul_local == 2) vcut%mode = 'SLAB'
+ if (icutcoul_local == 3) vcut%mode = 'CRYSTAL'
+ if (icutcoul_local == 4) vcut%mode = 'ERF'
+ if (icutcoul_local == 5) vcut%mode = 'ERFC'
+ if (icutcoul_local == 6) vcut%mode = 'AUXILIARY_FUNCTION'
+ if (icutcoul_local == 7) vcut%mode = 'AUX_GB'
 
 !Initialize a few quantities
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
- cutoff=gsqcut*tolfix
+ cutoff = gsqcut * tolfix
  barev=zero
+
+!Some peculiar values of q: q=0 or q on the BZ edge
+ qeq0=0; if (qpoint(1)**2+qpoint(2)**2+qpoint(3)**2<1.d-15) qeq0=1
+ qeq05=0
+ if (qeq0==0) then
+   if (abs(abs(qpoint(1))-half)<tol12.or.abs(abs(qpoint(2))-half)<tol12.or. &
+&   abs(abs(qpoint(3))-half)<tol12) qeq05=1
+ end if
 
 !In order to speed the routine, precompute the components of g+q
 !Also check if the booked space was large enough...
@@ -232,7 +240,7 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
    id(ii)=ngfft(ii)/2+2
    do ing=1,ngfft(ii)
      ig=ing-(ing/id(ii))*ngfft(ii)-1
-     gq(ii,ing)=ig+qphon(ii)
+     gq(ii,ing)=ig+qpoint(ii)
    end do
  end do
  ig1max=-1;ig2max=-1;ig3max=-1
@@ -240,38 +248,58 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
 
  id1=n1/2+2;id2=n2/2+2;id3=n3/2+2
 
+ ! Triple loop on each dimension
  do i3=1,n3
+   ig3=i3-(i3/id3)*n3-1
    ! Precompute some products that do not depend on i2 and i1
    gs3=gq(3,i3)*gq(3,i3)*gmet(3,3)
    gqgm23=gq(3,i3)*gmet(2,3)*2
    gqgm13=gq(3,i3)*gmet(1,3)*2
    do i2=1,n2
+     ig2=i2-(i2/id2)*n2-1
      i23=n1*(i2-1 +(n2)*(i3-1))
      gs2=gs3+ gq(2,i2)*(gq(2,i2)*gmet(2,2)+gqgm23)
      gqgm12=gq(2,i2)*gmet(1,2)*2
      gqg2p3=gqgm13+gqgm12
+
      do i1=1,n1
         ii=i1+i23
-        gpq(ii)=gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
-        if(gpq(ii)>=tol4) then
+        gpq(ii)= gs2 + gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
+        if (gpq(ii)>=tol4) then
+          ! gpq2 contains 4*pi / |q+G|**2
           gpq2(ii) = piinv/gpq(ii)
         end if
      end do
+
+     !
+     ! Next part looks for ig1min,ig1max that are needed by zerosym
+     ! Do the test that eliminates the Gamma point outside of the inner loop
+     ii1=1
+     if (i23==0 .and. qeq0==1  .and. ig2==0 .and. ig3==0) then
+       ii1=2
+     end if
+
+     ! Final inner loop on the first dimension (note the lower limit)
+     do i1=ii1,n1
+       gs = gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
+
+       !ii=i1+i23
+
+       if (gs<=cutoff) then
+         ! Identify min/max indexes (to cancel unbalanced contributions later)
+         ! Count (q+g)-vectors with similar norm
+         if ((qeq05==1).and.(izero==1)) then
+           ig1=i1-(i1/id1)*n1-1
+           ig1max=max(ig1max,ig1); ig1min=min(ig1min,ig1)
+           ig2max=max(ig2max,ig2); ig2min=min(ig2min,ig2)
+           ig3max=max(ig3max,ig3); ig3min=min(ig3min,ig3)
+         end if
+
+       end if ! Cut-off
+     end do ! End loop on i1
    end do
  end do
 
-! Old version of the code extracted from m_Fock
-! do ig=1,nfft
-!     if(abs(gpq(ig))<tol4) then
-!        barev(ig)=barev(ig)+divgq0
-!     else if(gpq(ig)<=cutoff) then
-!       if(shortrange) then
-!         barev(ig)=barev(ig)+gpq2(ig)*(one-exp(-pi/(gpq2(ig)*rcut**2)))
-!       else
-!         barev(ig)=barev(ig)+gpq2(ig)*(one-cos(rcut*sqrt(four_pi/gpq2(ig))))
-!       end if
-!    end if
-! end do
 
  barev(:)=zero
 
@@ -280,18 +308,62 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
  !a2=Cryst%rprimd(:,2); b2=two_pi*gprimd(:,2)
  !a3=Cryst%rprimd(:,3); b3=two_pi*gprimd(:,3)
 
- SELECT CASE (TRIM(vcut%mode))
- CASE('SPHERE') ! Spencer-Alavi method
+ select case(TRIM(vcut%mode))
+ case ('CRYSTAL', 'AUXILIARY_FUNCTION', "AUX_GB")
+   if (vcut%mode == "CRYSTAL") then
+     ! Analytic integration of 4pi/q^2 over the volume element:
+     ! $4pi/V \int_V d^3q 1/q^2 =4pi bz_geometric_factor V^(-2/3)$
+     ! i_sz=4*pi*bz_geometry_factor*q0_vol**(-two_thirds) where q0_vol= V_BZ/N_k
+     ! bz_geometry_factor: sphere=7.79, fcc=7.44, sc=6.188, bcc=6.946, wz=5.255 (see gwa.pdf, appendix A.4)
+     q0_vol = two_pi**3 / (nkpt_bz * ucvol)
+     vcut%i_sz = four_pi*7.44*q0_vol**(-two_thirds)
+
+   !TODO FBruneval: cryst is not available here, find a workaround!
+   !else if (vcut%mode == "AUXILIARY_FUNCTION") then
+   !  ! Numerical integration of the exact-exchange divergence through the
+   !  ! auxiliary function of Carrier et al. PRB 75, 205126 (2007) [[cite:Carrier2007]].
+   !  vcut%i_sz = carrier_isz(cryst, 1, qpoint, rcut, comm)
+
+   !else if (vcut%mode == "AUX_GB") then
+   !  ! We use the auxiliary function of a Gygi-Baldereschi variant [[cite:Gigy1986]]
+   !  vcut%i_sz = gygi_baldereschi_isz(cryst, 1, qpoint, vc_ecut, ng, gvec)
+
+   else
+     ABI_ERROR(sjoin("Need treatment of 1/q^2 singularity! for mode", vcut%mode))
+   end if
 
    do ig=1,nfft
-     if(abs(gpq(ig))<tol4) then
-        barev(ig)=barev(ig)+divgq0
-     else if(gpq(ig)<=cutoff) then
-         barev(ig)=barev(ig)+gpq2(ig)*(one-cos(rcut*sqrt(four_pi/gpq2(ig))))
-    end if
+     if (abs(gpq(ig))<tol4) then
+       barev(ig) = vcut%i_sz
+     else if (gpq(ig)<=cutoff) then
+       barev(ig) = gpq2(ig)
+     end if
+   end do
+   
+
+ case('SPHERE') ! Spherical cutoff
+
+   !
+   ! Treatment of the divergence at q+g=zero
+   !
+   ! rcut is not set (rcut<=0), use the default Spencer-Alavi definition: 
+   if ( rcut < tol8 ) then
+     rcut0= (three*nkpt_bz*ucvol/four_pi)**(one/three)
+   else
+     rcut0 = rcut
+   end if
+
+   do ig=1,nfft
+     if (abs(gpq(ig))<tol4) then
+       barev(ig) = two_pi*rcut0**two
+     else if (gpq(ig)<=cutoff) then
+       barev(ig) = gpq2(ig) * (one - cos( rcut0*sqrt(four_pi/gpq2(ig)) ) )
+     end if
    end do
 
- CASE('CYLINDER')
+ case('CYLINDER')
+   !FBruneval: not working. For instance, Cryst is never initialized
+   ABI_BUG("Cylinder cutoff coding is not finalized")
 
    test=COUNT(ABS(vcut%vcutgeo)>tol6)
    ABI_CHECK(test==1,'Wrong cutgeo for cylinder')
@@ -374,6 +446,8 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
    end if
 
  CASE('SLAB')
+   !FBruneval: not working. For instance, Cryst is never initialized
+   ABI_BUG("Slab cutoff coding is not finalized")
 
    test=COUNT(vcut%vcutgeo/=zero)
    ABI_CHECK(test==2,"Wrong vcutgeo")
@@ -471,11 +545,14 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
  CASE('ERF')
 
    do ig=1,nfft
-     if(abs(gpq(ig))<tol4) then
-        barev(ig)=barev(ig)+divgq0
-     else if(gpq(ig)<=cutoff) then
-       if(shortrange) then
-         barev(ig)=barev(ig)+gpq2(ig)*exp(-pi/(gpq2(ig)*rcut**2))
+     if (abs(gpq(ig))<tol4) then
+        !FIXME FBruneval check this value, ERFC value was wrong, so why not this one.
+        barev(ig) = zero ! Stupid definition to remember something should be done here.
+     else if (gpq(ig)<=cutoff) then
+       !FIXME FBruneval shortrange does not make sense here (it is an optional argument that may not be present)
+       ! and ERF is long range any way
+       if (shortrange) then
+         barev(ig) = + gpq2(ig) * exp( -pi * rcut**2 /gpq2(ig) )
        end if
     end if
    end do
@@ -483,20 +560,46 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
  CASE('ERFC')
 
    do ig=1,nfft
-     if(abs(gpq(ig))<tol4) then
-        barev(ig)=barev(ig)+divgq0
-     else if(gpq(ig)<=cutoff) then
-       if(shortrange) then
-         barev(ig)=barev(ig)+gpq2(ig)*(one-exp(-pi/(gpq2(ig)*rcut**2)))
-       end if
+     if (abs(gpq(ig))<tol4) then
+        !FBruneval there was a wrong value here
+        barev(ig) = pi * rcut**2
+     else if (gpq(ig)<=cutoff) then
+       ! gpq2 is 4 pi / (q+G)**2
+       ! 4 pi / (q+G)**2 * [ 1 - exp( -1/4 * Rc**2 * (q+G)**2 ) ]
+       barev(ig) = gpq2(ig) * ( one - exp( -pi * rcut**2 / gpq2(ig) ) )
     end if
    end do
 
- CASE DEFAULT
+ case default
    write(msg,'(3a)')'No cut-off applied to the Coulomb Potential.', ch10, &
                     'Either icutcoul value not allowed or not defined.'
    ABI_WARNING(msg)
- END SELECT
+ end select
+
+ if (izero==1) then
+   ! Set contribution of unbalanced components to zero
+   if (qeq0==1) then !q=0
+     call zerosym(barev,cplex1,n1,n2,n3)
+   else if (qeq05==1) then
+     !q=1/2; this doesn't work in parallel
+     ig1=-1;if (mod(n1,2)==0) ig1=1+n1/2
+     ig2=-1;if (mod(n2,2)==0) ig2=1+n2/2
+     ig3=-1;if (mod(n3,2)==0) ig3=1+n3/2
+     if (abs(abs(qpoint(1))-half)<tol12) then
+       if (abs(ig1min)<abs(ig1max)) ig1=abs(ig1max)
+       if (abs(ig1min)>abs(ig1max)) ig1=n1-abs(ig1min)
+     end if
+     if (abs(abs(qpoint(2))-half)<tol12) then
+       if (abs(ig2min)<abs(ig2max)) ig2=abs(ig2max)
+       if (abs(ig2min)>abs(ig2max)) ig2=n2-abs(ig2min)
+     end if
+     if (abs(abs(qpoint(3))-half)<tol12) then
+       if (abs(ig3min)<abs(ig3max)) ig3=abs(ig3max)
+       if (abs(ig3min)>abs(ig3max)) ig3=n3-abs(ig3min)
+     end if
+     call zerosym(barev,cplex1,n1,n2,n3,ig1=ig1,ig2=ig2,ig3=ig3)
+   end if
+ end if
 
  ABI_FREE(gq)
  ABI_FREE(gpq)

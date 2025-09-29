@@ -250,7 +250,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 !arrays
  integer :: vacuum(3)
  integer,allocatable :: iatcon(:),natcon(:), intarr(:)
- real(dp) :: qgbt(3),rprimd(3,3),tsec(2)
+ real(dp) :: tsec(2),rprimd(3,3) ! qgbt(3),
  real(dp),allocatable :: dmatpawu_tmp(:), dprarr(:)
  type(libxc_functional_type) :: xcfunc(2)
 ! *************************************************************************
@@ -618,7 +618,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if (tread == 1) dtset%gwr_task = toupper(trim(key_value))
 
  ! RESPFN integer input variables (needed here to get the value of response)
- ! Warning: rfddk,rfelfd,rfmagn,rfphon,rfstrs,rfsrs_ref,rfuser,rf2_dkdk and rf2_dkde are also read in invars1
+ ! Warning: rfddk,rfelfd,rfmagn,rfphon,rfstrs,rfsrs_ref,rf2_dkdk and rf2_dkde are also read in invars1
 
 !call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfasr',tread,'INT')
 !if(tread==1) dtset%rfasr=intarr(1)
@@ -663,9 +663,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfstrs_ref',tread,'INT')
  if(tread==1) dtset%rfstrs_ref=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfuser',tread,'INT')
- if(tread==1) dtset%rfuser=intarr(1)
-
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rf2_dkdk',tread,'INT')
  if(tread==1) dtset%rf2_dkdk=intarr(1)
 
@@ -683,7 +680,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  ! For rf2_dkdk and rf2_dkde, we do the same for rf2_pert1_dir and rf2_pert2_dir
  response=0
  if(dtset%rfddk/=0 .or. dtset%rf2_dkdk/=0 .or. dtset%rf2_dkde/=0 .or. dtset%rfelfd/=0 .or. &
-   dtset%rfphon/=0 .or. dtset%rfstrs/=0 .or. dtset%rfuser/=0 ) then
+   dtset%rfphon/=0 .or. dtset%rfstrs/=0 ) then
    response=1
    if( (dtset%rfdir(1) == 0) .and. (dtset%rfdir(2) == 0) .and. (dtset%rfdir(3) == 0) ) dtset%rfdir(1:3) = 1
    if (dtset%rf2_dkdk/=0 .or. dtset%rf2_dkde/=0) then
@@ -764,8 +761,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  response=0
  if(dtset%rfddk/=0 .or. dtset%rfphon/=0 .or. dtset%rfelfd/=0 .or. &
-    dtset%rfstrs/=0 .or. dtset%rfuser/=0 .or. &
-    dtset%rf2_dkdk/=0 .or. dtset%rf2_dkde/=0 .or. &
+    dtset%rfstrs/=0 .or. dtset%rf2_dkdk/=0 .or. dtset%rf2_dkde/=0 .or. &
     dtset%d3e_pert1_elfd/=0 .or. dtset%d3e_pert1_phon/=0 .or. &
     dtset%d3e_pert2_elfd/=0 .or. dtset%d3e_pert2_phon/=0 .or. &
     dtset%d3e_pert3_elfd/=0 .or. dtset%d3e_pert3_phon/=0 ) response=1
@@ -1089,6 +1085,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcut',tread,'LEN')
  if(tread==1) dtset%rcut=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fock_rcut',tread,'LEN')
+ if(tread==1) dtset%fock_rcut=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gw_rcut',tread,'LEN')
+ if(tread==1) dtset%gw_rcut=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'zcut',tread,'ENE')
  if(tread==1) dtset%zcut = dprarr(1)
@@ -1617,6 +1619,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'icutcoul',tread,'INT')
  if(tread==1) dtset%icutcoul=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fock_icutcoul',tread,'INT')
+ if(tread==1) dtset%fock_icutcoul=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'imgwfstor',tread,'INT')
  if(tread==1) dtset%imgwfstor=intarr(1)
 
@@ -2097,6 +2102,15 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irdddk',tread,'INT')
  if(tread==1) dtset%irdddk=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irddelfd',tread,'INT')
+ if(tread==1) dtset%irddelfd=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irddkdk',tread,'INT')
+ if(tread==1) dtset%irddkdk=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irddkde',tread,'INT')
+ if(tread==1) dtset%irddkde=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'kptopt',tread,'INT')
  if(tread==1) dtset%kptopt=intarr(1)
 
@@ -2160,6 +2174,18 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%optstress=intarr(1)
  else if (xc_is_pot_only) then
    dtset%optstress=0
+ end if
+ ! ABINIT cannot calculate stress when fock_icutcoul is not zero (not implemented)
+ if (dtset%optstress==1.and.dtset%fock_icutcoul/=0) then
+   write(msg, '(3a)' ) &
+        'Stress can only be calculated (as of today) when fock_icutcoul=0',ch10,&
+        'If you really want the stress, change fock_icutcoul.'
+   if(tread==1) then
+     ABI_ERROR(msg)
+   else
+     ABI_COMMENT(msg)
+     dtset%optstress=0
+   endif
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optnlxccc',tread,'INT')
@@ -2274,6 +2300,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_with_vk', tread, 'INT')
  if (tread == 1) dtset%gstore_with_vk = intarr(1)
 
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_use_lgk', tread, 'INT')
+ if (tread == 1) dtset%gstore_use_lgk = intarr(1)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_use_lgq', tread, 'INT')
+ if (tread == 1) dtset%gstore_use_lgq = intarr(1)
+
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_kzone', tread, 'KEY', key_value=key_value)
  if (tread == 1) dtset%gstore_kzone = tolower(key_value)
 
@@ -2285,6 +2317,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_gmode', tread, 'KEY', key_value=key_value)
  if (tread == 1) dtset%gstore_gmode = tolower(key_value)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_gname', tread, 'KEY', key_value=key_value)
+ if (tread == 1) dtset%gstore_gname = tolower(key_value)
 
  narr = 2 * nsppol
  call intagm(dprarr, intarr, jdtset, marr, narr, string(1:lenstr), 'gstore_brange', tread_brange, 'INT')

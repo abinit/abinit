@@ -170,7 +170,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  type(wfdgw_t),target,intent(inout) :: Wfd
 !arrays
  integer,intent(in) :: gwc_ngfft(18)
- complex(dpc),intent(out) :: sigcme_tmp(nomega_sigc,minbnd:maxbnd,minbnd:maxbnd,Wfd%nsppol*Sigp%nsig_ab)
+ complex(dp),intent(out) :: sigcme_tmp(nomega_sigc,minbnd:maxbnd,minbnd:maxbnd,Wfd%nsppol*Sigp%nsig_ab)
  type(Pawtab_type),intent(in) :: Pawtab(Psps%ntypat)
  type(pawpwff_t),intent(in) :: Paw_pwff(Psps%ntypat*Psps%usepaw)
  type(esymm_t),target,intent(in) :: allQP_sym(Wfd%nkibz,Wfd%nsppol)
@@ -188,7 +188,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  integer :: isym_kgw,isym_ki,gwc_mgfft,use_padfft,gwc_fftalga,gwc_nfftot,ifft,npw_k
  real(dp) :: fact_spin,theta_mu_minus_e0i,tol_empty,gw_gsq
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_k, wall_k, gflops_k
- complex(dpc) :: ctmp,ph_mkgwt,ph_mkt
+ complex(dp) :: ctmp,ph_mkgwt,ph_mkt
  logical :: iscompatibleFFT, q_is_gamma, print_time
  character(len=500) :: msg
  type(wave_t),pointer :: wave_sum, wave_jb
@@ -199,13 +199,13 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  integer :: got(Wfd%nproc)
  real(dp) :: ksum(3),kgw(3),kgw_m_ksum(3),q0(3),tsec(2),qbz(3),spinrot_kbz(4),spinrot_kgw(4)
  real(dp),ABI_CONTIGUOUS pointer :: qp_ene(:,:,:),qp_occ(:,:,:)
- complex(gwpc) :: sigcohme(Sigp%nsig_ab)
- complex(gwpc),allocatable :: vc_sqrt_qbz(:),rhotwg(:),rhotwgp(:),sigsex(:)
- complex(gwpc),allocatable :: sigc_ket(:,:)  ! epsm1_qbz(:,:,:),
- complex(gwpc),allocatable :: rhotwg_ki(:,:), sigctmp(:,:)
- complex(gwpc),allocatable :: wfr_bdgw(:,:),ur_sum(:),wf1swf2_g(:)
- complex(gwpc),ABI_CONTIGUOUS pointer :: cg_jb(:),cg_sum(:)
- complex(dpc),allocatable :: sym_cme(:,:,:,:),sigc(:,:,:,:,:)
+ complex(gwp) :: sigcohme(Sigp%nsig_ab)
+ complex(gwp),allocatable :: vc_sqrt_qbz(:),rhotwg(:),rhotwgp(:),sigsex(:)
+ complex(gwp),allocatable :: sigc_ket(:,:)  ! epsm1_qbz(:,:,:),
+ complex(gwp),allocatable :: rhotwg_ki(:,:), sigctmp(:,:)
+ complex(gwp),allocatable :: wfr_bdgw(:,:),ur_sum(:),wf1swf2_g(:)
+ complex(gwp),ABI_CONTIGUOUS pointer :: cg_jb(:),cg_sum(:)
+ complex(dp),allocatable :: sym_cme(:,:,:,:),sigc(:,:,:,:,:)
  logical :: rank_mask(Wfd%nproc),can_symmetrize(Wfd%nsppol)
  logical,allocatable :: bks_mask(:,:,:)
  type(sigijtab_t),pointer :: Sigcij_tab(:)
@@ -886,9 +886,9 @@ subroutine calc_coh(nspinor,nsig_ab,nfftot,ngfft,npwc,gvec,wfg2_jk,epsm1q_o,vc_s
  logical,intent(in) :: same_band
 !arrays
  integer,intent(in) :: gvec(3,npwc),ngfft(18)
- complex(gwpc),intent(in) :: epsm1q_o(npwc,npwc),vc_sqrt(npwc)
- complex(gwpc),intent(in) :: wfg2_jk(nfftot*nsig_ab)
- complex(gwpc),intent(out) :: sigcohme(nsig_ab)
+ complex(gwp),intent(in) :: epsm1q_o(npwc,npwc),vc_sqrt(npwc)
+ complex(gwp),intent(in) :: wfg2_jk(nfftot*nsig_ab)
+ complex(gwp),intent(out) :: sigcohme(nsig_ab)
 
 !Local variables-------------------------------
 !scalars

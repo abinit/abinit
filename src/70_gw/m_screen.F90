@@ -188,18 +188,18 @@ end type screen_info_t
   integer :: has_mat = MAT_NODATA
   ! Flag giving the status of mat.
 
-  complex(gwpc),allocatable :: mat(:,:,:)
+  complex(gwp),allocatable :: mat(:,:,:)
   ! (npw, npw, nomega)
   ! The component of the two-point function $F_{G,G',w}$ for a given q.
 
-  !complex(dpc),allocatable :: head(:,:,:)
+  !complex(dp),allocatable :: head(:,:,:)
   ! head(3,3,nomega)
 
-  !complex(dpc),allocatable :: lwing(:,:,:)
+  !complex(dp),allocatable :: lwing(:,:,:)
   ! lwing(3,npwe,nomega)
   ! Lower wings
 
-  !complex(dpc),allocatable :: uwing(:,:,:)
+  !complex(dp),allocatable :: uwing(:,:,:)
   ! uwing(3,npwe,nomega)
   ! Upper wings.
 
@@ -265,7 +265,7 @@ end type screen_info_t
   ! (3,nqlwl)
   ! q-points used for the long wave-length limit treatment.
 
-  complex(dpc),allocatable :: omega(:)
+  complex(dp),allocatable :: omega(:)
   ! (nomega)
   ! List of frequencies. Real frequencies are packed first.
 
@@ -804,7 +804,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
 !arrays
  integer :: units(2), g0(3), iperm(Qmesh%nibz)
  real(dp) :: wt_list(Qmesh%nibz)
- !complex(gwpc),ABI_CONTIGUOUS pointer :: em1_ggw(:,:,:)
+ !complex(gwp),ABI_CONTIGUOUS pointer :: em1_ggw(:,:,:)
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -1264,18 +1264,18 @@ subroutine screen_w0gemv(screen, trans, in_npw, nspinor, only_diago, alpha, beta
 !scalars
  class(screen_t),intent(in) :: screen
  integer,intent(in) :: in_npw,nspinor
- complex(gwpc),intent(in) :: alpha,beta
+ complex(gwp),intent(in) :: alpha,beta
  logical,intent(in) :: only_diago
  character(len=*),intent(in) ::  trans
 !arrays
- complex(gwpc),intent(in) :: in_ket(in_npw*nspinor)
- complex(gwpc),intent(out) :: out_ket(in_npw*nspinor)
+ complex(gwp),intent(in) :: in_ket(in_npw*nspinor)
+ complex(gwp),intent(out) :: out_ket(in_npw*nspinor)
 
 !Local variables-------------------------------
 !scalars
  integer :: ig,lda
 !arrays
- complex(gwpc),ABI_CONTIGUOUS pointer :: em1_qbz(:,:)
+ complex(gwp),ABI_CONTIGUOUS pointer :: em1_qbz(:,:)
 ! *************************************************************************
 
  lda = screen%npw; em1_qbz => screen%Fgg_qbz%mat(:,:,1)
@@ -1348,12 +1348,12 @@ subroutine screen_calc_sigc(screen, trans, nomega, omegame0i, theta_mu_minus_e0i
  real(dp),intent(in) :: theta_mu_minus_e0i, zcut
 !arrays
  real(dp),intent(in) :: omegame0i(nomega)
- complex(gwpc),intent(in) :: rhotwgp(npw_x*nspinor)
- complex(gwpc),intent(inout) :: out_ket(npw_c*nspinor, nomega)
- complex(gwpc),intent(out) :: sigcme(nomega)
+ complex(gwp),intent(in) :: rhotwgp(npw_x*nspinor)
+ complex(gwp),intent(inout) :: out_ket(npw_c*nspinor, nomega)
+ complex(gwp),intent(out) :: sigcme(nomega)
 
 !Local variables-------------------------------
- complex(gwpc),allocatable :: botsq_conjg_transp(:,:), otq_transp(:,:)
+ complex(gwp),allocatable :: botsq_conjg_transp(:,:), otq_transp(:,:)
 ! *************************************************************************
 
  out_ket = czero_gw
@@ -1452,17 +1452,17 @@ subroutine em1_symmetrize_ip(iq_bz, npw_c, nomega, Gsph, Qmesh, epsm1)
  type(gsphere_t),intent(in) :: Gsph
  type(kmesh_t),intent(in) :: Qmesh
 !arrays
- complex(gwpc),intent(inout) :: epsm1(npw_c,npw_c,nomega)
+ complex(gwp),intent(inout) :: epsm1(npw_c,npw_c,nomega)
 
 !Local variables-------------------------------
 !scalars
  integer :: iw,g1,g2,isg1,isg2,iq_ibz,itim_q,isym_q,ierr
  logical :: q_isirred
- complex(gwpc) :: phmsg1t,phmsg2t_star
+ complex(gwp) :: phmsg1t,phmsg2t_star
  !character(len=500) :: msg
 !arrays
  real(dp) :: qbz(3)
- complex(gwpc),allocatable :: work(:,:)
+ complex(gwp),allocatable :: work(:,:)
 ! *********************************************************************
 
  ! Get iq_ibz, and symmetries from iq_ibz.
@@ -1470,7 +1470,7 @@ subroutine em1_symmetrize_ip(iq_bz, npw_c, nomega, Gsph, Qmesh, epsm1)
 
  if (q_isirred) RETURN ! Nothing to do
 
- !write(msg,'(a,f8.2,a)')" out of memory in work , requiring ",npw_c**2*gwpc*b2Mb," Mb"
+ !write(msg,'(a,f8.2,a)')" out of memory in work , requiring ",npw_c**2*gwp*b2Mb," Mb"
  ABI_MALLOC_OR_DIE(work, (npw_c,npw_c), ierr)
 
 !$OMP PARALLEL DO PRIVATE(isg2,isg1,phmsg1t,phmsg2t_star,work) IF (nomega > 1)
@@ -1544,14 +1544,14 @@ subroutine em1_symmetrize_op(iq_bz, npw_c, nomega, Gsph, Qmesh, in_epsm1, out_ep
  type(gsphere_t),target,intent(in) :: Gsph
  type(kmesh_t),intent(in) :: Qmesh
 !arrays
- complex(gwpc),intent(in) :: in_epsm1(npw_c,npw_c,nomega)
- complex(gwpc),intent(out) :: out_epsm1(npw_c,npw_c,nomega)
+ complex(gwp),intent(in) :: in_epsm1(npw_c,npw_c,nomega)
+ complex(gwp),intent(out) :: out_epsm1(npw_c,npw_c,nomega)
 
 !Local variables-------------------------------
 !scalars
  integer :: iw,g1,g2,isg1,isg2,iq_ibz,itim_q,isym_q
  logical :: q_isirred
- complex(gwpc) :: phmsg1t,phmsg2t_star
+ complex(gwp) :: phmsg1t,phmsg2t_star
 !arrays
  real(dp) :: qbz(3)
 ! *********************************************************************
