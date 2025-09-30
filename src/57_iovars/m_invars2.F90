@@ -2312,9 +2312,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_kfilter', tread_kfilter, 'KEY', key_value=key_value)
  if (tread_kfilter == 1) dtset%gstore_kfilter = tolower(key_value)
 
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_gmode', tread, 'KEY', key_value=key_value)
- if (tread == 1) dtset%gstore_gmode = tolower(key_value)
-
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_gname', tread, 'KEY', key_value=key_value)
  if (tread == 1) dtset%gstore_gname = tolower(key_value)
 

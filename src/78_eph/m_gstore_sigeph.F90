@@ -241,8 +241,8 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
  ! Init gstore and MPI grid from file and dtset.
  ! The Fan-Migdal SE requires |g(k,q)|^2 in the phonon representation but
  ! we also need complex g(k,q=Gamma) in the atom representation for the DW term in the RIA,
- call gstore%from_ncpath(dtfil%filgstorein, with_cplex1, dtset, cryst, ebands, ifc, comm, &
-                         with_gmode="phonon", gvals_name=dtset%gstore_gname, read_dw=.True.)
+ call gstore%from_ncpath(dtfil%filgstorein, with_cplex1, dtset, cryst, ebands, ifc, &
+                         "phonon", dtset%gstore_gname, .True., comm)
 
  natom = cryst%natom; natom3 = 3 * cryst%natom; nsppol = dtset%nsppol
 

@@ -451,7 +451,7 @@ type, public :: gstore_t
   ! Specifies the technique used to filter k-points.
   ! Possible values: "none", "fs_tetra", "erange", "qprange"
 
-  character(len=abi_slen) :: gmode = "none"
+  character(len=abi_slen) :: gmode = "atom"
   ! "phonon" or "atom"
 
   character(len=abi_slen) :: gtype = "KS"
@@ -721,7 +721,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  ! Set metadata and set initial value of kfilter from dtset.
  gstore%kibz => gstore%ebands%kptns
  gstore%kzone = dtset%gstore_kzone; gstore%qzone = dtset%gstore_qzone; gstore%kfilter = dtset%gstore_kfilter
- gstore%with_vk = dtset%gstore_with_vk; gstore%gmode = dtset%gstore_gmode
+ gstore%with_vk = dtset%gstore_with_vk; gstore%gmode = GSTORE_GMODE_ATOM
 
  ABI_CALLOC(gstore%erange_spin, (2, nsppol))
  gstore%erange_spin = dtset%gstore_erange(:, 1:nsppol)
@@ -3996,11 +3996,11 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
        ! Get g in the phonon representation.
        select case (gstore%gmode)
-       case (GSTORE_GMODE_PHONON)
-         call ephtk_gkknu_from_atm(nb_kq, nb_k, 1, natom, gkq_atm, phfr_qq, displ_red_qbz, gkq_nu)
+       !case (GSTORE_GMODE_PHONON)
+       !  call ephtk_gkknu_from_atm(nb_kq, nb_k, 1, natom, gkq_atm, phfr_qq, displ_red_qbz, gkq_nu)
 
-         ! Save e-ph matrix elements in the buffer.
-         my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gkq_nu
+       !  ! Save e-ph matrix elements in the buffer.
+       !  my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gkq_nu
 
        case (GSTORE_GMODE_ATOM)
          ! Save e-ph matrix elements in the buffer.
@@ -4219,8 +4219,8 @@ end function gstore_check_cplex_qkzone_gmode
 !!
 !! SOURCE
 
-subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, ifc, comm, &
-                              with_gmode, gvals_name, read_dw)  ! optional
+subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, ifc, &
+                              with_gmode, gvals_name, read_dw, comm)
 
 !Arguments ------------------------------------
  class(gstore_t),target,intent(out) :: gstore
@@ -4230,9 +4230,9 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  class(crystal_t),target,intent(in) :: cryst
  class(ebands_t),target,intent(in) :: ebands
  class(ifc_type),target,intent(in) :: ifc
+ character(len=*),intent(in) :: with_gmode, gvals_name
+ logical,intent(in) :: read_dw
  integer,intent(in) :: comm
- character(len=*),optional,intent(in) :: with_gmode, gvals_name
- logical,optional,intent(in) :: read_dw
 
 !Local variables-------------------------------
 !scalars
@@ -4242,8 +4242,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  integer :: nb_k, nb_kq, nb_k_file, nb_kq_file, gstore_cplex
  integer :: my_ip, ipert, iq_ibz, iq_bz, isym_q, trev_q, tsign_q, ii
  real(dp) :: cpu, wall, gflops
- character(len=500) :: gvals_name__
- logical :: isirr_q, read_dw__, from_atm_to_nu, old_format
+ logical :: isirr_q, from_atm_to_nu, old_format
  type(hdr_type) :: wfk0_hdr
  type(crystal_t) :: gstore_cryst
  type(gqk_t),pointer :: gqk
@@ -4258,11 +4257,12 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
- gvals_name__ = "gvals"; if (present(gvals_name)) gvals_name__ = gvals_name
- read_dw__ = .False.; if (present(read_dw)) read_dw__ = read_dw
 
  units = [std_out, ab_out]
- call wrtout(units, sjoin("- Reading e-ph matrix elements from: ", path))
+ call wrtout(units, sjoin("- Reading e-ph matrix elements from: ", path), pre_newlines=1)
+ call wrtout(units, sjoin(" Asking for with_gmode: ", trim(with_gmode)))
+ call wrtout(units, sjoin(" Asking for gvals_name: ", trim(gvals_name)))
+ call wrtout(units, sjoin(" Asking for g(k,q=Gamma): ", yesno(read_dw)))
 
  ! Set basic parameters.
  gstore%comm = comm; gstore%nsppol = dtset%nsppol; gstore%path = path
@@ -4326,9 +4326,9 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    end if
    call replace_ch0(gstore%gtype)
 
-   if (gvals_name__ == "gvals_ks") then
+   if (gvals_name == "gvals_ks") then
      call wrtout(units, " Reading KS e-ph matrix elements")
-   else if (gvals_name__ == "gvals") then
+   else if (gvals_name == "gvals") then
      if (gstore%gtype == "GWPT") then
        call wrtout(units, " Reading GWPT e-ph matrix elements")
      else
@@ -4337,12 +4337,13 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    end if
 
    ! gstore_gmode was added in Abinit v10.1.2
-   gstore%gmode = GSTORE_GMODE_PHONON
-   ncerr = nf90_inq_varid(ncid, "gstore_gmode", varid)
-   if (ncerr == nf90_noerr) then
-     NCF_CHECK(nf90_get_var(ncid, vid("gstore_gmode"), gstore%gmode))
-     call replace_ch0(gstore%gmode)
-   end if
+   !gstore%gmode = GSTORE_GMODE_PHONON
+   gstore%gmode = GSTORE_GMODE_ATOM
+   !ncerr = nf90_inq_varid(ncid, "gstore_gmode", varid)
+   !if (ncerr == nf90_noerr) then
+   !  NCF_CHECK(nf90_get_var(ncid, vid("gstore_gmode"), gstore%gmode))
+   !  call replace_ch0(gstore%gmode)
+   !end if
 
    ! gstore_ngqpt was added during the 78_eph/m_varpeq.f90 module development
    gstore%ngqpt(:) = 0
@@ -4403,7 +4404,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    end if
    call gstore_cryst%free()
 
-    if (read_dw__ .and. gstore%gmode == GSTORE_GMODE_PHONON) then
+    if (read_dw .and. gstore%gmode == GSTORE_GMODE_PHONON) then
        ABI_ERROR('read_dw requires g in the atom representation. Recompute GSTORE file with gstore_mode "atom"')
     end if
  end if ! master
@@ -4536,17 +4537,16 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  call pstat_proc%print(_PSTAT_ARGS_)
 
  from_atm_to_nu = .False.
- if (present(with_gmode)) then
-   ! Compare with_gmode with the one on disk.
-   ! The only conversion I can think of is: atom --> phonon.
-   if (gstore%gmode /= with_gmode) then
-     if (gstore%gmode == GSTORE_GMODE_ATOM .and. with_gmode == GSTORE_GMODE_PHONON) then
-       from_atm_to_nu = .True.; gstore%gmode = GSTORE_GMODE_PHONON ! Change gstore%gmode here
-     else
-       ABI_ERROR(sjoin("Conversion from gstore%gmode: ", gstore%gmode, "to:", with_gmode, " is not yet supported"))
-     end if
+ ! Compare with_gmode with the one on disk.
+ ! The only conversion I can think of is: atom --> phonon.
+ if (gstore%gmode /= with_gmode) then
+   if (gstore%gmode == GSTORE_GMODE_ATOM .and. with_gmode == GSTORE_GMODE_PHONON) then
+     from_atm_to_nu = .True.; gstore%gmode = GSTORE_GMODE_PHONON ! Change gstore%gmode here
+   else
+     ABI_ERROR(sjoin("Conversion from gstore%gmode: ", gstore%gmode, "to:", with_gmode, " is not yet supported"))
    end if
  end if
+ gstore%gmode = with_gmode
 
  do spin=1,gstore%nsppol
    my_is = gstore%spin2my_is(spin)
@@ -4581,7 +4581,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
      ABI_MALLOC(slice_bb, (gstore_cplex, nb_kq, nb_k))
 
      ! Read my_gq0nm_atm matrix elements for DW in the RIA.
-     if (read_dw__) then
+     if (read_dw) then
         ! Find the index of q = 0.
         iq_glob = -1
         do ii=1, gstore%glob_nq_spin(spin)
@@ -4594,8 +4594,8 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
         call wrtout(std_out, sjoin(" Reading g_atm(k,q=0) for Debye-Waller with iq_glob:", itoa(iq_glob)))
 
        ! Read q-slice of the e-ph matrix elements (individual IO).
-       ! Note gvals_name__ so that we can read either g^KS or g^Sigma.
-       ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_name__), gwork_q, start=[1, 1, 1, 1, 1, iq_glob])
+       ! Note gvals_name so that we can read either g^KS or g^Sigma.
+       ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_name), gwork_q, start=[1, 1, 1, 1, 1, iq_glob])
        NCF_CHECK(ncerr)
 
        ! Allocate my_gq0nm_atm and transfer data. Note TRANSPOSITION in (m, n) indices.
@@ -4608,7 +4608,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
             end do
           end do
         end do
-     end if ! read_dw__
+     end if ! read_dw
 
      if (from_atm_to_nu) then
        ABI_MALLOC(gmn_nu, (2, nb_kq, nb_k, 3*natom))
@@ -4634,7 +4634,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
         gqk%my_displ_cart(:,:,:,:,my_iq) = displ_cart_qbz(:,:,:,gqk%my_pertcases(:))
 
         ! Read q-slice (individual IO).
-        ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_name__), gwork_q, start=[1, 1, 1, 1, 1, iq_glob])
+        ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_name), gwork_q, start=[1, 1, 1, 1, 1, iq_glob])
         NCF_CHECK(ncerr)
 
         do my_ik=1,gqk%my_nk
@@ -4861,13 +4861,16 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
  write(ab_out, "(a,*(i0,1x))")" gstore_done_qbz_spin: ", count(done_qbz_spin == 1)
  ABI_FREE(done_qbz_spin)
 
+ !gstore_gmode = GSTORE_GMODE_ATOM
  ! gstore_gmode was added in Abinit v10.1.2
- gstore_gmode = GSTORE_GMODE_PHONON
- ncerr = nf90_inq_varid(root_ncid, "gstore_gmode", varid)
- if (ncerr == nf90_noerr) then
-   NCF_CHECK(nf90_get_var(root_ncid, root_vid("gstore_gmode"), gstore_gmode))
-   call replace_ch0(gstore_gmode)
- end if
+ !gstore_gmode = GSTORE_GMODE_PHONON
+ gstore_gmode = GSTORE_GMODE_ATOM
+ !ncerr = nf90_inq_varid(root_ncid, "gstore_gmode", varid)
+ !if (ncerr == nf90_noerr) then
+ !  NCF_CHECK(nf90_get_var(root_ncid, root_vid("gstore_gmode"), gstore_gmode))
+ !  call replace_ch0(gstore_gmode)
+ !end if
+ !gstore_gmode = gstore%gmode
 
  do spin=1,gstore%nsppol
    NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
@@ -4925,10 +4928,13 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
    !
    !    nctkarr_t("gvals", "dp", "gstore_cplex, nb_kq, nb_k, natom3, glob_nk, glob_nq")
 
+   ! These are always in the atom representation
    ABI_MALLOC(gslice_mn, (cplex, nb_kq, nb_k))
    ABI_MALLOC(gslice_ks_mn, (cplex, nb_kq, nb_k))
 
    write(ab_out,"(a)") " E-PH matrix elements:"
+   write(ab_out,"(a)") " E-PH matrix elements in the atom representation: (idir, iatom)"
+
    if (with_ks__) then
      write(ab_out, "(1x,5(a5,1x),2(a16))") "iq","ik", "mode", "im_kq", "in_k", "|g^SE|^2 in Ha^2", "|g^KS|^2 in Ha^2"
    else
@@ -4937,6 +4943,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
 
    do iq_glob=1,glob_nq
      if (iq_glob /= 1 .and. iq_glob /= glob_nq) cycle  ! Write the first and the last q-point.
+
      do ik_glob=1,glob_nk
        if (ik_glob /= 1 .and. ik_glob /= glob_nk) cycle ! Write the first and the last k-point.
        do ipc=1,natom3

@@ -409,31 +409,32 @@ P Number of CPUs for parallelism over k-points: 1
  ib_k: 1     0.000000E+00
 
  E-PH matrix elements:
+ E-PH matrix elements in the atom representation: (idir, iatom)
     iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
  |g(k,q)|^2 in Ha^2 for iq: 1 ik: 1 mode: 4
     iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1     1     4     1     1     5.990915E-21
+     1     1     4     1     1     8.334480E-17
  |g(k,q)|^2 in Ha^2 for iq: 1 ik: 1 mode: 6
     iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1     1     6     1     1     4.823706E-22
+     1     1     6     1     1     1.647347E-15
  |g(k,q)|^2 in Ha^2 for iq: 1 ik: 89 mode: 4
     iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1    89     4     1     1     1.288018E-20
+     1    89     4     1     1     8.079448E-17
  |g(k,q)|^2 in Ha^2 for iq: 1 ik: 89 mode: 6
     iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1    89     6     1     1     8.743398E-22
+     1    89     6     1     1     1.739938E-15
  |g(k,q)|^2 in Ha^2 for iq: 597 ik: 1 mode: 4
     iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-   597     1     4     1     1     1.113755E-04
+   597     1     4     1     1     6.104844E-01
  |g(k,q)|^2 in Ha^2 for iq: 597 ik: 1 mode: 6
     iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-   597     1     6     1     1     1.097834E-04
+   597     1     6     1     1     2.482734E-01
  |g(k,q)|^2 in Ha^2 for iq: 597 ik: 89 mode: 4
     iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-   597    89     4     1     1     1.202732E-04
+   597    89     4     1     1     6.668229E-01
  |g(k,q)|^2 in Ha^2 for iq: 597 ik: 89 mode: 6
     iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-   597    89     6     1     1     1.168999E-04
+   597    89     6     1     1     3.006076E-01
 
 == END DATASET(S) ==============================================================
 ================================================================================
