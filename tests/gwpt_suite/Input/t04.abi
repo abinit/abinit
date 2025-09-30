@@ -91,7 +91,7 @@
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = M. Giantomassi
-#%% keywords = NC, DFPT, EPH, GWPT
+#%% keywords = NC, DFPT, EPH, GWPT, GSTORE
 #%% description = Calculation of GWPT e-ph matrix elements with precomputed SCR file.
 #%%     Preparatory run for computing the ZPR.
 #%%<END TEST_INFO>

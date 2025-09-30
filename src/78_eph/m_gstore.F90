@@ -4000,23 +4000,11 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
          call ephtk_gkknu_from_atm(nb_kq, nb_k, 1, natom, gkq_atm, phfr_qq, displ_red_qbz, gkq_nu)
 
          ! Save e-ph matrix elements in the buffer.
-         select case (gqk%cplex)
-         case (1)
-           NOT_IMPLEMENTED_ERROR()
-           my_gbuf(1,:,:,:, my_ik, iqbuf_cnt) = gkq_nu(1,:,:,:) ** 2 + gkq_nu(2,:,:,:) ** 2
-         case (2)
-           my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gkq_nu
-         end select
+         my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gkq_nu
 
        case (GSTORE_GMODE_ATOM)
          ! Save e-ph matrix elements in the buffer.
-         select case (gqk%cplex)
-         case (1)
-           NOT_IMPLEMENTED_ERROR()
-           my_gbuf(1,:,:,:, my_ik, iqbuf_cnt) = gkq_atm(1,:,:,:) ** 2 + gkq_atm(2,:,:,:) ** 2
-         case (2)
-           my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gkq_atm
-         end select
+         my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gkq_atm
 
        case default
          ABI_ERROR(sjoin("Invalid gstore%gmode:", gstore%gmode))
@@ -4965,8 +4953,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
            write(ab_out, "(1x,5(a5,1x),a16)")"iq","ik", "mode", "im_kq", "in_k", "|g|^2 in Ha^2"
            do im_kq=1,nb_kq
              do in_k=1,nb_k
-               if (cplex == 1) g2 = gslice_mn(1, im_kq, in_k)
-               if (cplex == 2) g2 = gslice_mn(1, im_kq, in_k)**2 + gslice_mn(2, im_kq, in_k)**2
+               g2 = gslice_mn(1, im_kq, in_k)**2 + gslice_mn(2, im_kq, in_k)**2
                write(ab_out, "(1x,5(i5,1x),es16.6)") iq_glob, ik_glob, ipc, im_kq, in_k, g2
              end do
            end do
@@ -4978,14 +4965,8 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
           write(ab_out, "(1x,5(a5,1x),2a16)")"iq","ik", "mode", "im_kq", "in_k", "|g^SE|^2 in Ha^2", "|g^KS|^2 in Ha^2"
           do im_kq=1,nb_kq
             do in_k=1,nb_k
-              if (cplex == 1) then
-                g2 = gslice_mn(1, im_kq, in_k)
-                g2_ks = gslice_ks_mn(1, im_kq, in_k)
-              end if
-              if (cplex == 2) then
-                g2 = gslice_mn(1, im_kq, in_k)**2 + gslice_mn(2, im_kq, in_k)**2
-                g2_ks = gslice_ks_mn(1, im_kq, in_k)**2 + gslice_ks_mn(2, im_kq, in_k)**2
-              end if
+              g2 = gslice_mn(1, im_kq, in_k)**2 + gslice_mn(2, im_kq, in_k)**2
+              g2_ks = gslice_ks_mn(1, im_kq, in_k)**2 + gslice_ks_mn(2, im_kq, in_k)**2
               write(ab_out, "(1x,5(i5,1x),2(es16.6))") iq_glob, ik_glob, ipc, im_kq, in_k, g2, g2_ks
             end do
           end do

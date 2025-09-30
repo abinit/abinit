@@ -67,6 +67,6 @@
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = M. Giantomassi
-#%% keywords = NC, DFPT, EPH, GWPT
+#%% keywords = NC, DFPT, EPH, GWPT, GSTORE
 #%% description = ZPR computation for Diamond with GWPT e-ph matrix elements.
 #%%<END TEST_INFO>
