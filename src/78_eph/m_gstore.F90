@@ -988,7 +988,8 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      nctkarr_t("gstore_gmode", "c", "character_string_length"), &
      nctkarr_t("gstore_gtype", "c", "character_string_length"), &
      nctkarr_t("gstore_wfk0_path", "c", "fnlen"), &
-     nctkarr_t("gstore_brange_spin", "i", "two, number_of_spins"), &
+     nctkarr_t("gstore_brange_k_spin", "i", "two, number_of_spins"), &
+     nctkarr_t("gstore_brange_kq_spin", "i", "two, number_of_spins"), &
      nctkarr_t("gstore_erange_spin", "dp", "two, number_of_spins"), &
      nctkarr_t("gstore_ngqpt", "i", "three"), &
      nctkarr_t("phfreqs_ibz", "dp", "natom3, gstore_nqibz"), &
@@ -1048,8 +1049,8 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_qbz"), gstore%qbz))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_wtq"), gstore%wtq))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_kbz"), gstore%kbz))
-   NCF_CHECK(nf90_put_var(ncid, vid("gstore_brange_spin"), gstore%brange_k_spin))
-   NCF_CHECK(nf90_put_var(ncid, vid("gstore_brange_spin"), gstore%brange_kq_spin))
+   NCF_CHECK(nf90_put_var(ncid, vid("gstore_brange_k_spin"), gstore%brange_k_spin))
+   NCF_CHECK(nf90_put_var(ncid, vid("gstore_brange_kq_spin"), gstore%brange_kq_spin))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_erange_spin"), gstore%erange_spin))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_ngqpt"), gstore%ngqpt))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_glob_nq_spin"), gstore%glob_nq_spin))
@@ -1079,7 +1080,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      ! Dimensions in gqk_spin group
      ncerr = nctk_def_dims(spin_ncid, [ &
         ! TODO: Remove nb
-        nctkdim_t("nb", gstore%brange_k_spin(2, spin) - gstore%brange_k_spin(1, spin) + 1), &
+        !nctkdim_t("nb", gstore%brange_k_spin(2, spin) - gstore%brange_k_spin(1, spin) + 1), &
         nctkdim_t("nb_k", gstore%brange_k_spin(2, spin) - gstore%brange_k_spin(1, spin) + 1), &
         nctkdim_t("nb_kq", gstore%brange_kq_spin(2, spin) - gstore%brange_kq_spin(1, spin) + 1), &
         nctkdim_t("glob_nk", gstore%glob_nk_spin(spin)), &
@@ -1088,7 +1089,8 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      NCF_CHECK(ncerr)
 
      ! Define scalars
-     ncerr = nctk_def_iscalars(spin_ncid, [character(len=nctk_slen) :: "bstart", "bstart_k", "bstart_kq"])
+     !ncerr = nctk_def_iscalars(spin_ncid, [character(len=nctk_slen) :: "bstart", "bstart_k", "bstart_kq"])
+     ncerr = nctk_def_iscalars(spin_ncid, [character(len=nctk_slen) :: "bstart_k", "bstart_kq"])
      NCF_CHECK(ncerr)
 
      ! arrays in gqk_spin group with the precious stuff. Note global dimensions.
@@ -1130,7 +1132,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
 
      ! Write (small) data
      NCF_CHECK(nctk_set_datamode(spin_ncid))
-     NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("bstart"), gstore%brange_k_spin(1, spin)))
+     !NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("bstart"), gstore%brange_k_spin(1, spin)))
      NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("bstart_k"), gstore%brange_k_spin(1, spin)))
      NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("bstart_kq"), gstore%brange_kq_spin(1, spin)))
    end do ! spin
@@ -4326,9 +4328,9 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    ABI_MALLOC(gstore%wtq, (gstore%nqibz))
    ABI_MALLOC(gstore%qbz, (3, gstore%nqbz))
    ABI_MALLOC(gstore%kbz, (3, gstore%nkbz))
-   NCF_CHECK(nf90_get_var(ncid, vid("gstore_brange_spin"), brange_k_spin))
-   brange_kq_spin = brange_k_spin
-   !NCF_CHECK(nf90_get_var(ncid, vid("gstore_brange_kq_spin"), brange_kq_spin))
+   NCF_CHECK(nf90_get_var(ncid, vid("gstore_brange_k_spin"), brange_k_spin))
+   NCF_CHECK(nf90_get_var(ncid, vid("gstore_brange_kq_spin"), brange_kq_spin))
+   !brange_kq_spin = brange_k_spin
 
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_erange_spin"), gstore%erange_spin))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_qibz"), gstore%qibz))
