@@ -91,15 +91,16 @@
 !!  depends on the collinear spin when filters are employed.
 !!
 !! TODO
-!!  1) Implement possibility of reading a subset of data (bands) from a larger gstore ?
-!!  2) Optimize v^1_loc|psi_nk> by precomputing <r|psi_nk> before the loop over my_npert
-!!     Big speedup is expected, especially if one loops first over k and then q, provided
-!!     the interpolation of v^1_q does not start to dominate
-!!  3) Use similar trick in dfpt_cgw for H^0 |psi_nk>
-!!  4) Operate on multiple n states in getgh1c (new version of getgh1c allows it)
-!!  5) Write IFC to faciliate interporability with external codes (DONE)
-!!  6) Move to atom representation and add symmetry tables qbz --> qibz to fix the gauge in the ph displacements.
-!!  7) Write GSTORE tutorial to explain all the relevant combinations
+!!  - Implement possibility of reading a subset of data (bands) from a larger gstore ?
+!!  - Optimize v^1_loc|psi_nk> by precomputing <r|psi_nk> before the loop over my_npert
+!!    Big speedup is expected, especially if one loops first over k and then q, provided
+!!    the interpolation of v^1_q does not start to dominate.
+!!  - Use similar trick in dfpt_cgw for H^0 |psi_nk>.
+!!  - Operate on multiple n states in getgh1c (new version of getgh1c allows it).
+!!  - Write IFC to faciliate interporability with external codes (DONE)
+!!  - Save alpha parameters so that external codes can handle the short range part of the IFCs
+!!  - Move to atom representation and add symmetry tables qbz --> qibz to fix the gauge in the ph displacements.
+!!  - Write GSTORE tutorial to explain all the relevant combinations
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2025 ABINIT group (MG)
