@@ -733,7 +733,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  end if
 
  if (gstore%kzone == "ibz" .and. gstore%qzone == "ibz") then
-   ABI_ERROR("The combination kzone = 'ibz' and qzone = 'ibz' is not allowed!")
+   ABI_ERROR("The combination kzone: 'ibz' and qzone: 'ibz' is not allowed!")
  end if
 
  ! TODO
@@ -3414,7 +3414,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  real(dp),allocatable :: displ_cart_qbz(:,:,:,:), displ_red_qbz(:,:,:,:), pheigvec_qbz(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:), kinpw_k(:), kinpw_kq(:), kpg_kq(:,:), kpg_k(:,:)
  real(dp),allocatable :: ffnl_k(:,:,:,:), ffnl_kq(:,:,:,:), ph3d_k(:,:,:), ph3d_kq(:,:,:)
- real(dp),allocatable :: v1scf(:,:,:,:), gkq_atm(:,:,:,:), gkq_nu(:,:,:,:)
+ real(dp),allocatable :: v1scf(:,:,:,:), gkq_atm(:,:,:,:)
  real(dp),allocatable :: bras_kq(:,:,:), kets_k(:,:,:), h1_kets_kq(:,:,:), cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1(:,:,:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:), gvnlx1(:,:), work(:,:,:,:)
@@ -3777,9 +3777,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    ABI_MALLOC(h1_kets_kq, (2, mpw*nspinor, nb_kq))
    ABI_MALLOC(iq_buf, (2, qbuf_size))
    ABI_MALLOC(gkq_atm, (2, nb_kq, nb_k, natom3))
-   ABI_MALLOC(gkq_nu, (2, nb_kq, nb_k, natom3))
 
-   ! Inside the loops we compute gkq_nu(2, nb_kq, nb_kq, natom3)
+   ! Inside the loops we compute gkq_atm(2, nb_kq, nb_kq, natom3)
    ABI_MALLOC_OR_DIE(my_gbuf, (gqk%cplex, nb_kq, nb_k, natom3, gqk%my_nk, qbuf_size), ierr)
    call pstat_proc%print(_PSTAT_ARGS_)
 
@@ -3995,21 +3994,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        ! Collect gkq_atm inside pert_comm so that all procs can operate on the data.
        if (gqk%pert_comm%nproc > 1) call xmpi_sum(gkq_atm, gqk%pert_comm%value, ierr)
 
-       ! Get g in the phonon representation.
-       select case (gstore%gmode)
-       !case (GSTORE_GMODE_PHONON)
-       !  call ephtk_gkknu_from_atm(nb_kq, nb_k, 1, natom, gkq_atm, phfr_qq, displ_red_qbz, gkq_nu)
-
-       !  ! Save e-ph matrix elements in the buffer.
-       !  my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gkq_nu
-
-       case (GSTORE_GMODE_ATOM)
-         ! Save e-ph matrix elements in the buffer.
-         my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gkq_atm
-
-       case default
-         ABI_ERROR(sjoin("Invalid gstore%gmode:", gstore%gmode))
-       end select
+       ! Save e-ph matrix elements in the buffer.
+       my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gkq_atm
 
      end do ! my_ik
 
@@ -4035,7 +4021,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    ABI_FREE(kets_k)
    ABI_FREE(h1_kets_kq)
    ABI_FREE(gkq_atm)
-   ABI_FREE(gkq_nu)
 
    if (dtset%gstore_use_lgk /= 0) then
      do my_ik=1,gqk%my_nk
@@ -4207,16 +4192,16 @@ end function gstore_check_cplex_qkzone_gmode
 !!
 !! INPUTS
 !!  path: Path to the GSTORE file.
-!!  with_cplex: 1 for |g|^2, 2 for complex g
+!!  with_cplex: 1 for |g|^2, 2 for complex g. with_gmode defines the representation.
 !!  dtset: Input variables
 !!  cryst: crystalline structure
 !!  ebands: KS energies
 !!  ifc: interatomic force constants
+!!  with_gmode: "phonon" to have g in the phonon representation or "atom" to have them in atom representation.
+!!  gvals_name: "gvals" or "gvals_ks" to read the KS gs produced by the GWPT code.
+!!    This option is valid only for gstore files produced by the GWPT code.
+!!  read_dw: True if g_atm(k,q=0) should be read from file and stored in my_gq0nm_atm.
 !!  comm: MPI communicator
-!!  [with_gmode]
-!!  [gvals_name]: "gvals" (default) or "gvals_ks" to read the KS g produced by the GWPT code.
-!!  [read_dw]: True if g_atm(k,q=0) should be read from file and stored in my_gq0nm_atm.
-!!    Default is False. Also, a GSTORE with g in the atom representation is required.
 !!
 !! SOURCE
 
@@ -4243,7 +4228,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  integer :: nb_k, nb_kq, nb_k_file, nb_kq_file, gstore_cplex
  integer :: my_ip, ipert, iq_ibz, iq_bz, isym_q, trev_q, tsign_q, ii
  real(dp) :: cpu, wall, gflops
- logical :: isirr_q, from_atm_to_nu, old_format
+ logical :: isirr_q, from_atm_to_nu
  type(hdr_type) :: wfk0_hdr
  type(crystal_t) :: gstore_cryst
  type(gqk_t),pointer :: gqk
@@ -4261,6 +4246,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
 
  units = [std_out, ab_out]
  call wrtout(units, sjoin("- Reading e-ph matrix elements from: ", path), pre_newlines=1)
+ !call wrtout(units, sjoin(" Asking for with_cplex: ", itoa(with_cplex)))
  call wrtout(units, sjoin(" Asking for with_gmode: ", trim(with_gmode)))
  call wrtout(units, sjoin(" Asking for gvals_name: ", trim(gvals_name)))
  call wrtout(units, sjoin(" Asking for g(k,q=Gamma): ", yesno(read_dw)))
@@ -4317,14 +4303,11 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_kzone"), gstore%kzone))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_qzone"), gstore%qzone))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_kfilter"), gstore%kfilter))
+   NCF_CHECK(nf90_get_var(ncid, vid("gstore_wfk0_path"), gstore%wfk0_path))
    call replace_ch0(gstore%kzone); call replace_ch0(gstore%qzone); call replace_ch0(gstore%kfilter)
+   call replace_ch0(gstore%wfk0_path)
 
-   ! gstore_gtype was added in Abinit v10.5.6
-   gstore%gtype = "KS"
-   ncerr = nf90_inq_varid(ncid, "gstore_gtype", varid)
-   if (ncerr == nf90_noerr) then
-     NCF_CHECK(nf90_get_var(ncid, vid("gstore_gtype"), gstore%gtype))
-   end if
+   NCF_CHECK(nf90_get_var(ncid, vid("gstore_gtype"), gstore%gtype))
    call replace_ch0(gstore%gtype)
 
    if (gvals_name == "gvals_ks") then
@@ -4337,38 +4320,15 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
      end if
    end if
 
-   ! gstore_gmode was added in Abinit v10.1.2
-   !gstore%gmode = GSTORE_GMODE_PHONON
-   gstore%gmode = GSTORE_GMODE_ATOM
-   !ncerr = nf90_inq_varid(ncid, "gstore_gmode", varid)
-   !if (ncerr == nf90_noerr) then
-   !  NCF_CHECK(nf90_get_var(ncid, vid("gstore_gmode"), gstore%gmode))
-   !  call replace_ch0(gstore%gmode)
-   !end if
-
-   ! gstore_ngqpt was added during the 78_eph/m_varpeq.f90 module development
-   gstore%ngqpt(:) = 0
-   ncerr = nf90_inq_varid(ncid, "gstore_ngqpt", varid)
-   if (ncerr == nf90_noerr) then
-     NCF_CHECK(nf90_get_var(ncid, vid("gstore_ngqpt"), gstore%ngqpt))
-   endif
-
-   NCF_CHECK(nf90_get_var(ncid, vid("gstore_wfk0_path"), gstore%wfk0_path))
-   call replace_ch0(gstore%wfk0_path)
+   NCF_CHECK(nf90_get_var(ncid, vid("gstore_ngqpt"), gstore%ngqpt))
 
    ABI_MALLOC(gstore%qibz, (3, gstore%nqibz))
    ABI_MALLOC(gstore%wtq, (gstore%nqibz))
    ABI_MALLOC(gstore%qbz, (3, gstore%nqbz))
    ABI_MALLOC(gstore%kbz, (3, gstore%nkbz))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_brange_spin"), brange_k_spin))
-
-   ! FIXME
-   old_format = .False.
-   ncerr = nf90_get_var(ncid, vid("gstore_brange_spin"), brange_kq_spin)
-   if (ncerr /= nf90_noerr) then
-     brange_kq_spin = brange_k_spin
-     old_format = .True.
-   end if
+   brange_kq_spin = brange_k_spin
+   !NCF_CHECK(nf90_get_var(ncid, vid("gstore_brange_kq_spin"), brange_kq_spin))
 
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_erange_spin"), gstore%erange_spin))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_qibz"), gstore%qibz))
@@ -4404,10 +4364,6 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
      ABI_ERROR("Crystal structure from input and GSTORE do not agree! Check messages above!")
    end if
    call gstore_cryst%free()
-
-    if (read_dw .and. gstore%gmode == GSTORE_GMODE_PHONON) then
-       ABI_ERROR('read_dw requires g in the atom representation. Recompute GSTORE file with gstore_mode "atom"')
-    end if
  end if ! master
 
  if (nproc > 1) then
@@ -4561,16 +4517,8 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
      NCF_CHECK(nctk_open_read(ncid, gstore%path, gqk%comm%value))
      NCF_CHECK(nf90_inq_ncid(ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
 
-     ncerr = nctk_get_dim(spin_ncid, "nb_k", nb_k_file)
-     if (ncerr /= nf90_noerr) then
-       old_format = .False.
-       NCF_CHECK(nctk_get_dim(spin_ncid, "nb_k", nb_k_file))
-       NCF_CHECK(nctk_get_dim(spin_ncid, "nb_kq", nb_kq_file))
-     else
-       old_format = .True.
-       NCF_CHECK(nctk_get_dim(spin_ncid, "nb", nb_k_file))
-       nb_kq_file = nb_k_file
-     end if
+     NCF_CHECK(nctk_get_dim(spin_ncid, "nb_k", nb_k_file))
+     NCF_CHECK(nctk_get_dim(spin_ncid, "nb_kq", nb_kq_file))
 
      ! Note that these dimensions should be compatible with what is stored on disk.
      nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
@@ -4837,7 +4785,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
  integer,parameter :: master = 0
  integer :: root_ncid, spin_ncid, gstore_completed, spin, ik_glob, iq_glob, ipc, cplex, ncerr, natom3, varid, nb
  integer :: glob_nq, glob_nk, im_kq, in_k, nb_k, nb_kq, ib_k, ik_ibz
- logical :: with_ks__, old_format
+ logical :: with_ks__
  real(dp) :: g2, g2_ks
  character(len=abi_slen) :: gstore_gmode
 !arrays
@@ -4862,16 +4810,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
  write(ab_out, "(a,*(i0,1x))")" gstore_done_qbz_spin: ", count(done_qbz_spin == 1)
  ABI_FREE(done_qbz_spin)
 
- !gstore_gmode = GSTORE_GMODE_ATOM
- ! gstore_gmode was added in Abinit v10.1.2
- !gstore_gmode = GSTORE_GMODE_PHONON
  gstore_gmode = GSTORE_GMODE_ATOM
- !ncerr = nf90_inq_varid(root_ncid, "gstore_gmode", varid)
- !if (ncerr == nf90_noerr) then
- !  NCF_CHECK(nf90_get_var(root_ncid, root_vid("gstore_gmode"), gstore_gmode))
- !  call replace_ch0(gstore_gmode)
- !end if
- !gstore_gmode = gstore%gmode
 
  do spin=1,gstore%nsppol
    NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
@@ -4879,15 +4818,8 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
    NCF_CHECK(nctk_get_dim(spin_ncid, "glob_nk", glob_nk))
    NCF_CHECK(nctk_get_dim(spin_ncid, "gstore_cplex", cplex))
 
-   ncerr = nctk_get_dim(spin_ncid, "nb_k", nb_k)
-   if (ncerr /= nf90_noerr) then
-     old_format = .False.
-     NCF_CHECK(nctk_get_dim(spin_ncid, "nb_kq", nb_kq))
-   else
-     old_format = .True.
-     NCF_CHECK(nctk_get_dim(spin_ncid, "nb", nb))
-     nb_k = nb; nb_kq = nb
-   end if
+   NCF_CHECK(nctk_get_dim(spin_ncid, "nb_k", nb_k))
+   NCF_CHECK(nctk_get_dim(spin_ncid, "nb_kq", nb_kq))
 
    write(ab_out, "(a,i0)")" gqk%nb_kq: ", nb_kq
    write(ab_out, "(a,i0)")" gqk%nb_k: ", nb_k

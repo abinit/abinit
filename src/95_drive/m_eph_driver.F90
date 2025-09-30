@@ -612,7 +612,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
    !call drhodb%load_ddb(dtset%prtvol, comm, ddb=ddb)
 
-   ! Set qdamp, quadrupoles and all long-range terms to 0
+   ! Set qdamp, quadrupoles and all long-range terms to 0.
    drhodb%qdamp = 0
    drhodb%qstar = 0
    drhodb%has_quadrupoles = .False.
@@ -787,7 +787,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    call wrtout(units, sjoin(" Computing variational polaron equations from pre-existent GSTORE file:", gstore_filepath))
    call gstore%from_ncpath(gstore_filepath, with_cplex2, dtset, cryst, ebands, ifc, &
                            "phonon", dtset%gstore_gname, .False., comm)
-                           !with_gmode="phonon", gvals_name=dtset%gstore_gname, read_dw=.False.)
    call varpeq_run(gstore, dtset, dtfil)
    call gstore%free()
 
@@ -802,7 +801,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    call wrtout(units, sjoin(" Computing Berry curvature from pre-existent GSTORE file:", dtfil%filgstorein))
    call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, cryst, ebands, ifc, &
                            "atom", dtset%gstore_gname, .False., comm)
-                           !with_gmode="atom", gvals_name=dtset%gstore_gname, read_dw=.False.)
 
    call berry_curvature(gstore, dtset, dtfil)
    call gstore%free()
@@ -839,11 +837,11 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
                  pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (18)
-   ! Compute e-ph matrix elements along path in the BZ
+   ! Compute e-ph matrix elements along path in the BZ.
    call eph_path_run(dtfil, dtset, cryst, ebands, dvdb, ifc, pawfgr, pawang, pawrad, pawtab, psps, comm)
 
  case (19)
-   ! Compute matrix elements of W_kk'
+   ! Compute matrix elements of W_kk'.
    call wkk_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, wfk0_hdr, pawtab, psps, mpi_enreg, comm)
 
  case default
