@@ -326,8 +326,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_REMALLOC(done_qbz_spin, (gstore%nqbz, nsppol))
    done_qbz_spin = 0
  else
-   ! Init gstore from pre-existent file.
-   call gstore%from_ncpath(gstore_filepath, with_cplex0, dtset, cryst, ebands, ifc, comm)
+   ! Init gstore from pre-existent file. gstore_gname and read_dw are not relevant here.
+   call gstore%from_ncpath(gstore_filepath, with_cplex0, dtset, cryst, ebands, ifc, &
+                           "atom", dtset%gstore_gname, .False., comm)
  end if
 
  ! Open GSTORE.nc file and go to data mode.
@@ -977,6 +978,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        call wrtout(std_out, sjoin(msg, ", for spin:", itoa(spin)), pre_newlines=1)
      end if
      !print *, "iq_ibz:", iq_ibz, "qq_bz:", qq_bz, "qq_ibz:", qq_ibz
+
+     ! TODO: This is not needed anymore as gstore%from_ncpath will handle this
 
      ! Compute stuff in the IBZ and then rotate in order to fix the gauge in g.
      if (iq_ibz /= prev_iqbz) then
@@ -1793,22 +1796,6 @@ end if ! .not qq_is_gamma.
        !print *, "gks_average", sum(abs(gks_atm)) / size(gks_atm) / two
 
        select case (gstore%gmode)
-       !case (GSTORE_GMODE_PHONON)
-       !  ! FIXME Perhaps it's gonna be easier if we only support GMODE_ATOM
-       !  ! Get g^{Sigma} and g^{KS} in the phonon representation.
-       !  call ephtk_gkknu_from_atm(nb_kq, nb_k, 1, natom, gsig_atm, phfr_qq, displ_red_qbz, gsig_nu)
-       !  call ephtk_gkknu_from_atm(nb_kq, nb_k, 1, natom, gks_atm, phfr_qq, displ_red_qbz, gks_nu)
-
-       !  ! Save e-ph matrix elements in the buffer.
-       !  select case (gqk%cplex)
-       !  case (1)
-       !    my_gbuf(1,:,:,:, my_ik, iqbuf_cnt) = gsig_nu(1,:,:,:)**2 + gsig_nu(2,:,:,:)**2
-       !    my_gbuf_ks(1,:,:,:, my_ik, iqbuf_cnt) = gks_nu(1,:,:,:)**2 + gks_nu(2,:,:,:)**2
-       !  case (2)
-       !    my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gsig_nu
-       !    my_gbuf_ks(:,:,:,:, my_ik, iqbuf_cnt) = gks_nu
-       !  end select
-
        case (GSTORE_GMODE_ATOM)
          ! Save e-ph matrix elements in the buffer.
          select case (gqk%cplex)

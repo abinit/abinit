@@ -634,7 +634,6 @@ This is an excerpt of the input file:
 
 ```sh
 # Electron-phonon matrix elements parameters
- gstore_cplex  2     # Complex e-ph matrix elements   (mandatory for VarPEq)
  gstore_kzone  "bz"  # Use full BZ for k and q meshes (mandatory for VarPEq)
  gstore_qzone  "bz"
  gstore_brange 3 5   # Bands participating in the hole polaron formation:
@@ -676,7 +675,7 @@ but the integration in $\qq$-space is performed with the [[eph_ngqpt_fine]] mesh
 As [[eph_ngqpt_fine]] differs from [[ddb_ngqpt]], the code will automatically activate
 the interpolation of the DFPT potentials as discussed in the [introduction to the EPH code](/tutorial/eph_intro).
 
-Polaron calculations require complex electron-phonon matrix elements, hence [[gstore_cplex]] 2 is used.
+Polaron calculations require complex electron-phonon matrix elements.
 As we will deal with small hole polaron, and the VBM in LiF is triply-degenerate, we select the last three occupied bands
 via [[gstore_brange]] variable.
 
@@ -1509,7 +1508,6 @@ This produces usual `*xsf` files that can be used for viauslization.
 If we open `teph4vpq_10o_pstate_1_POLARON.xsf` in VESTA, the following charge distribution can bee seen:
 
 ![](eph4vpq_assets/LiF_large.png)
-
 
 <!--
 -->

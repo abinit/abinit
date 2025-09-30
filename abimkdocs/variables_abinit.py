@@ -24759,26 +24759,6 @@ the CBM/VBM or the position wrt to the Fermi level via [[gstore_erange]].
 ),
 
 Variable(
-    abivarname="gstore_gmode",
-    varset="eph",
-    vartype="string",
-    topics=['ElPhonInt_basic'],
-    dimensions="scalar",
-    defaultval="phonon",
-    mnemonics=r"GSTORE GMODE",
-    requires="[[optdriver]] == 7",
-    added_in_version="10.1.2",
-    text=r"""
-This input variable specifies the representation used to store the e-ph matrix elements in the GSTORE.nc file
-
-Possible values are:
-
-- "phonon" --> Store e-ph matrix elements in the phonon representation (collective displacement)
-- "atom" -->  Store e-ph matrix elements in the atom representation (displacement of a single atom along one of the reduced directions)
-""",
-),
-
-Variable(
     abivarname="gstore_vname",
     varset="eph",
     vartype="string",

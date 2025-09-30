@@ -21,7 +21,6 @@
  # Read DDB file with dynamica matrix.
  getddb_filepath "diamond_eph_gwpt/out_DDB"
  getgstore_filepath "t04o_GSTORE.nc"
- gstore_gmode "atom"
 
  #gstore_use_lgk  0
  gstore_use_lgk  1

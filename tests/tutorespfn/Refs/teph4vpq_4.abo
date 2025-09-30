@@ -352,7 +352,11 @@ meta: {optdriver: 7, eph_task: 13, }
 --------------------------------------------------------------------------------
 
  Computing variational polaron equations from pre-existent GSTORE file: teph4vpq_3o_DS1_GSTORE.nc
+
 - Reading e-ph matrix elements from: teph4vpq_3o_DS1_GSTORE.nc
+ Asking for with_gmode: phonon
+ Asking for gvals_name: gvals
+ Asking for g(k,q=Gamma): no
  Initializing gstore object from: teph4vpq_3o_DS1_GSTORE.nc
 
  Reading KS e-ph matrix elements
@@ -613,6 +617,9 @@ meta: {optdriver: 7, eph_task: 13, }
 
  Computing variational polaron equations from pre-existent GSTORE file: teph4vpq_3o_DS2_GSTORE.nc
 - Reading e-ph matrix elements from: teph4vpq_3o_DS2_GSTORE.nc
+ Asking for with_gmode: phonon
+ Asking for gvals_name: gvals
+ Asking for g(k,q=Gamma): no
  Initializing gstore object from: teph4vpq_3o_DS2_GSTORE.nc
 
  Reading KS e-ph matrix elements
@@ -858,6 +865,9 @@ meta: {optdriver: 7, eph_task: 13, }
 
  Computing variational polaron equations from pre-existent GSTORE file: teph4vpq_3o_DS3_GSTORE.nc
 - Reading e-ph matrix elements from: teph4vpq_3o_DS3_GSTORE.nc
+ Asking for with_gmode: phonon
+ Asking for gvals_name: gvals
+ Asking for g(k,q=Gamma): no
  Initializing gstore object from: teph4vpq_3o_DS3_GSTORE.nc
 
  Reading KS e-ph matrix elements

@@ -419,6 +419,9 @@ meta: {optdriver: 7, eph_task: -12, }
 --------------------------------------------------------------------------------
 
 - Reading e-ph matrix elements from: teph4isotc_6o_GSTORE.nc
+ Asking for with_gmode: phonon
+ Asking for gvals_name: gvals
+ Asking for g(k,q=Gamma): no
  Initializing gstore object from: teph4isotc_6o_GSTORE.nc
 
  Reading KS e-ph matrix elements
@@ -443,7 +446,7 @@ P pp_sum_comm can use shmem: yes
  has_used_lgq: 0
  with_vk: 1
 
- gqk_cplex: 1
+ gqk_cplex: 2
  gqk_bstart_k: 3
  gqk_bstart_kq: 3
  gqk_bstop_k: 5
