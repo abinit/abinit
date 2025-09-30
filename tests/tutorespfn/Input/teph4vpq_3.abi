@@ -86,7 +86,7 @@
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = V. Vasilchenko
-#%% keywords = DFPT, EPH, POLARON
+#%% keywords = DFPT, EPH, POLARON, GSTORE
 #%% description =
 #%%   LiF, Fm-3m space group.
 #%%   Preparatory run for VarPEq calculations (hole polaron).

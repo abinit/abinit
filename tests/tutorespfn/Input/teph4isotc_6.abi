@@ -77,6 +77,6 @@ pseudos "Mg-low.psp8, B.psp8"
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = M. Giantomassi
-#%% keywords = NC, DFPT, EPH
+#%% keywords = NC, DFPT, EPH, GSTORE
 #%% description = Generation of GSTORE.nc file
 #%%<END TEST_INFO>
