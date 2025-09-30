@@ -769,7 +769,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  !  call gstore%from_ncpath(gstore_path, with_cplex2, dtset, cryst, ebands, ifc, comm)
  !  call gstore%wannierize(dvdb, dtfil)
  !  call gstore%free()
-
  !  call gstore%init(gstore_path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc, comm)
  !  call gstore%free()
 
