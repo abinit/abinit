@@ -130,7 +130,7 @@ include 'mpif.h'
   INTEGER                      :: ierr
   INTEGER                      :: rank
   CALL MPI_Comm_rank(MY_WORLD, rank, ierr)
-  WRITE(messend,'(A,I6,A)') "WARNING in QMC rank ", rank, " : ", TRIM(message)
+  WRITE(messend,'(A,I6,A,A)') "WARNING in QMC rank ", rank, " : ", TRIM(message)
 #else
   WRITE(messend,'(A,A)') "WARNING in QMC : ", TRIM(message)
 #endif
