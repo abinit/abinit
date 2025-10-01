@@ -408,33 +408,32 @@ P Number of CPUs for parallelism over k-points: 1
  For k-point: [-3.0769E-01,  4.6154E-01,  2.3077E-01] , spin 1
  ib_k: 1     0.000000E+00
 
- E-PH matrix elements:
- E-PH matrix elements in the atom representation: (idir, iatom)
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
- |g(k,q)|^2 in Ha^2 for iq: 1 ik: 1 mode: 4
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1     1     4     1     1     5.613291E-16
- |g(k,q)|^2 in Ha^2 for iq: 1 ik: 1 mode: 6
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1     1     6     1     1     5.325900E-16
- |g(k,q)|^2 in Ha^2 for iq: 1 ik: 89 mode: 4
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1    89     4     1     1     5.919595E-16
- |g(k,q)|^2 in Ha^2 for iq: 1 ik: 89 mode: 6
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1    89     6     1     1     6.394640E-16
- |g(k,q)|^2 in Ha^2 for iq: 597 ik: 1 mode: 4
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-   597     1     4     1     1     6.104845E-01
- |g(k,q)|^2 in Ha^2 for iq: 597 ik: 1 mode: 6
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-   597     1     6     1     1     2.482735E-01
- |g(k,q)|^2 in Ha^2 for iq: 597 ik: 89 mode: 4
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-   597    89     4     1     1     6.668229E-01
- |g(k,q)|^2 in Ha^2 for iq: 597 ik: 89 mode: 6
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-   597    89     6     1     1     3.006077E-01
+ E-PH matrix elements in the atom representation: pcase = (idir, iatom)
+    iq    ik pcase im_kq  in_k        |g| in Ha
+ |g(k,q)| in Ha for iq: 1 ik: 1 pcase: 4
+    iq    ik pcase im_kq  in_k              |g|
+     1     1     4     1     1     9.129338E-09
+ |g(k,q)| in Ha for iq: 1 ik: 1 pcase: 6
+    iq    ik pcase im_kq  in_k              |g|
+     1     1     6     1     1     4.058752E-08
+ |g(k,q)| in Ha for iq: 1 ik: 89 pcase: 4
+    iq    ik pcase im_kq  in_k              |g|
+     1    89     4     1     1     8.988575E-09
+ |g(k,q)| in Ha for iq: 1 ik: 89 pcase: 6
+    iq    ik pcase im_kq  in_k              |g|
+     1    89     6     1     1     4.171257E-08
+ |g(k,q)| in Ha for iq: 597 ik: 1 pcase: 4
+    iq    ik pcase im_kq  in_k              |g|
+   597     1     4     1     1     7.813350E-01
+ |g(k,q)| in Ha for iq: 597 ik: 1 pcase: 6
+    iq    ik pcase im_kq  in_k              |g|
+   597     1     6     1     1     4.982705E-01
+ |g(k,q)| in Ha for iq: 597 ik: 89 pcase: 4
+    iq    ik pcase im_kq  in_k              |g|
+   597    89     4     1     1     8.165923E-01
+ |g(k,q)| in Ha for iq: 597 ik: 89 pcase: 6
+    iq    ik pcase im_kq  in_k              |g|
+   597    89     6     1     1     5.482770E-01
 
 == END DATASET(S) ==============================================================
 ================================================================================
