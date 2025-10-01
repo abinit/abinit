@@ -3011,9 +3011,10 @@ Selects the double counting (DC) correction formula used in DFT+DMFT calculation
    * 8 - Exact formula (cf [[cite:Haule2015a]]): only compatible with [[ixc]] in [7,-1012,11,-101130].
          This is the formula you should always aim for. The implementation makes the assumption
          that the screened potential has the form of a Yukawa potential (cf [[dmft_yukawa_param]]),
-         which is rigorously valid only in the case [[dmft_solv]]=7. Besides, we assume that the
-         projection of the local orbital defined by [[dmft_orbital]] on the energy window
-         [ [[dmftbandi]],[[dmftbandf]] ] is equal to [[dmft_orbital]] itself.
+         which is rigorously valid only in the case [[dmft_solv]]=7, with the full Slater Hamiltonian.
+         Besides, we assume that the projection of the correlated orbital [[dmft_orbital]]
+         on the energy window [ [[dmftbandi]],[[dmftbandf]] ] is equal to [[dmft_orbital]] itself
+         (i.e. the closure relation is assumed).
 
 Magnetic formulas ([[dmft_dc]] < 5 ) are used with magnetic DFT ([[usepawu]]=10).
 Non-magnetic formulas ([[dmft_dc]] >= 5 ) are used with non-magnetic DFT ([[usepawu]]=14).
@@ -3068,7 +3069,7 @@ Variable(
     text=r"""
 Set the value of the maximal step increment in the Fermi level search. If it is too low, the
 root-finding algorithm will be significantly slowed down. If it is too high, the root-finding
-algorithm might encounter instabilities.
+algorithm might encounter instabilities and fail to converge.
 """,
 ),
 
@@ -3083,7 +3084,10 @@ Variable(
     requires="[[usedmft]] == 1",
     added_in_version="before_v9",
     text=r"""
-Number of iterations for the DMFT inner loop.
+Number of DMFT iterations in one DFT+DMFT cycle, with fixed density.
+The number of DFT+DMFT cycles is controlled by [[nstep]], for a total of
+ [[nstep]] $\times$ [[dmft_iter]] DMFT iterations, with a charge self-consistent
+update every [[dmft_iter]] iterations.
 """,
 ),
 
@@ -3100,7 +3104,7 @@ Variable(
     text=r"""
 
 When activated, in conjunction with [[iscf]] = -2 or -3, a calculation
-of k-resolved spectral function (or density of states) is performed.
+of $k$-resolved spectral function (or density of states) is performed.
 However, the calculation requires as input the self-energy computed in the real
 axis using an external analytical continuation code.
 The section 7 of the [[tutorial:dmft|tutorial on DFT+DMFT]] details how to obtain this data
@@ -3268,13 +3272,14 @@ Variable(
     requires="[[usedmft]] == 1",
     added_in_version="before_v10.5.6",
     text=r"""
-Set the radial part (multiplied by $r$) $u_l(r)$ of the local orbitals $\frac{u_l(r)}{r} Y_{lm}(\hat{r})$.
-The same function is used for all angular momentum channels of a given atom type.
+Set the radial part (multiplied by $r$) $u_l(r)$ of the local orbitals $\frac{u_l(r)}{r} Y_{lm}(\hat{r})$
+for each atom type. For uncorrelated atom types, simply put any arbitrary value.
+The same radial function is used for all angular momentum channels $m$ of a given atom type.
 
-  * If set to $i >$ 0, use the $i$-th atomic orbital of the corresponding PAW dataset.
-  * If set to $i \le$ 0, read the radial part from the file specified by [[dmft_orbital_filepath]].
-
-By default, the most bound atomic orbital from the PAW dataset is taken.
+  * If set to $i >$ 0, use the $i$-th radial orbital of the corresponding PAW dataset.
+    They all correspond to atomic orbitals at different energies, with $i$=1 having the lowest energy
+    and being bound (default choice).
+  * If set to $i \le$ 0, read an arbitrary radial part from the file specified by [[dmft_orbital_filepath]].
 """,
 ),
 
@@ -3288,11 +3293,27 @@ Variable(
     requires="[[usedmft]] == 1, [[dmft_orbital]] $\le$ 0",
     added_in_version="before_v10.5.6",
     text=r"""
-Set the root of the filepath for the correlated orbital in the case [[dmft_orbital]] $\le$ 0.
-The filepath for each atom type must then be "[[dmft_orbital_filepath]]_xxxx" with "xxxx"
-the atom type number number, written with 4 digits. You must provide the radial part
-of the orbital multiplied by $r$ for each radius of the PAW grid (that you can extend
-to the radius of your will). The first line must indicate the number of radial points.
+Set the root of the filepath for the correlated orbital in the case of a user-provided
+radial function $u_l(r)$ ([[dmft_orbital]] $\le$ 0).
+
+The filepath for each atom type must be "[[dmft_orbital_filepath]]_xxxx" with "xxxx"
+the atom type number, written with 4 digits.
+
+The first line must be the number of radial points. Afterwards, you must provide the value
+of $u_l(r)$ for each point, with one value per line. Simply provide the value, and nothing else.
+The file must be one column.
+
+The values of the radii are implicitly set in the code by assuming the radial mesh obeys the same
+formula as the one used for the radial mesh of the PAW dataset. The first value is the lowest radius
+(usually 0).
+
+Thus, inside the PAW sphere, the radial mesh of your orbital must be identical to that of the
+PAW dataset, but your orbital can stop at any arbitrary radius (earlier or even later as long as
+you extend the mesh in a consistent way). If you do not known how to extrapolate the PAW mesh, this
+can be done very simply by printing the Wannier functions ([[dmft_prtwan]]=1).
+
+If you only know the values of your orbital $u_l(r)$ on a specific set of radii, simply use a cubic
+spline interpolation to extrapolate the values on the extended PAW mesh.
 """,
 ),
 
@@ -3307,9 +3328,9 @@ Variable(
     requires="[[usedmft]] == 1",
     added_in_version="before_v10.5.6",
     text=r"""
-Set to 1 to write useful files for analytical continuation of the self-energy.
-Writes the self-energy in the basis that diagonalizes the electronic levels.
-This minimizes the off-diagonal elements that are not handled in most analytical
+Set to 1 to write useful files for the analytical continuation of the self-energy.
+This prints the self-energy in the basis that diagonalizes the local electronic levels.
+The off-diagonal elements are thus minimized, since they are not handled by most analytical
 continuation codes. The rotation matrix is also printed.
 """,
 ),
@@ -3326,7 +3347,8 @@ Variable(
     added_in_version="before_v10.5.6",
     text=r"""
 Set to 1 to write the self-energy at each iteration in order to see its evolution
-along the SCF cycle.
+along the SCF cycle. Otherwise, the self-energy file is overwritten at each iteration
+to keep the last value only.
 """,
 ),
 
@@ -3341,8 +3363,12 @@ Variable(
     requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
-Write the radial part (multiplied by $r$) of the Wannier functions, on the PAW spherical grid,
-extended up to [[dmft_wanrad]], for each correlated atom and angular momentum channel.
+Compute and write on file the radial part (multiplied by $r$) $u_l(r)$ of the Wannier functions
+(i.e. the orthonormalized projection of [[dmft_orbital]] on [ [[dmftbandi]],[[dmftbandf]] ]).
+This is computed on the same radial mesh as the PAW one, extended up to the radius [[dmft_wanrad]].
+It corresponds to the local orbital that is used in practice in the code, and is different from
+[[dmft_orbital]] in the general case (unless your energy window is large enough to have a closure
+relation).
 """,
 ),
 
@@ -3408,7 +3434,7 @@ regardless of the value of [[dmft_rslf]].
 Variable(
     abivarname="dmft_shiftself",
     varset="dmft",
-    vartype="integer",
+    vartype="real",
     topics=['DMFT_expert'],
     dimensions=['[[natom]]'],
     defaultval=0,
@@ -3416,9 +3442,11 @@ Variable(
     requires="[[usedmft]] == 1, [[nsppol]] == 2, [[usepawu]] == 14",
     added_in_version="before_v10.5.6",
     text=r"""
-Set the value of the initial static spin shift applied to the self-energy for
-each correlated atom. This is useful to start a calculation in a ferromagnetic
-configuration and speed up convergence for magnetic systems.
+When you are performing a magnetic calculation with a non-magnetic DFT, the magnetization
+can take quite some time to arise (especially if it's very low) since you start from a
+paramagnetic configuration. In this case, it is useful to start directly from a ferromagnetic
+self-energy to speed up convergence. Thus, at the first iteration, an initial static shift
+[[dmft_shiftself]] is applied between the two spin channels of the DMFT self-energy.
 """,
 ),
 
@@ -3439,8 +3467,8 @@ Choice of solver for the Impurity model.
   * 1 --> DFT+U self-energy is used (for testing purpose)
   * 2 --> Hubbard one solver in the density density approximation of the Coulomb interaction. The Hubbard one solver is an approximation which gives a rough description of correlated Mott insulators. It should not be used for metals.
   * 5 --> Use the Continuous Time Quantum Monte Carlo (CTQMC) solver CT-Hyb of ABINIT in the density density approximation of the Coulomb interaction. The calculation is fully parallelized over MPI processes.
-  * 6 --> Continuous Time Quantum Monte Carlo (CTQMC) solver CT-Hyb of TRIQS in the density density representation.
-  * 7 --> Continuous Time Quantum Monte Carlo (CTQMC) solver CT-Hyb of TRIQS with the rotationally invariant formulation.
+  * 6 --> TRIQS/CTHYB with the density-density Hamiltonian.
+  * 7 --> TRIQS/CTHYB with the full rotationally invariant Slater Hamiltonian.
   * 8 --> Same as 5, but off-diagonal elements of the hybridization function are taken into account (useful for low symmetry systems or with spin orbit coupling).
   * 9 --> Python invocation. Give a symbolic link to your python interpreter as an input like 'input-tag'_TRIQS_python_lib and the python script as an input like 'input-tag'_TRIQS_script.py. The inputs for the script will be written in dft_for_triqs.nc and the output as triqs_for_dft.nc.
 
@@ -3471,7 +3499,7 @@ Variable(
     text=r"""
 
 Can be set to 1 only if in cubic symmetry. It enables one to carry a DFT+DMFT
-calculations only on _t<sub>2g</sub>_ orbitals.
+calculations on _t<sub>2g</sub>_ orbitals only.
 """,
 ),
 
@@ -3486,10 +3514,10 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 
-The DFT occupation matrix for correlated electrons can be computed by direct integration of the Green's function.
-It can be compared to the calculation of the same quantity by projecting Fermi-Dirac
-occupations on the correlated orbitals. Because the Matsubara grid is finite, the two quantities
-differ. This check allows to see if you [[dmft_nwli]] is large enough. If this difference is
+The DFT occupation matrix for correlated electrons can be computed by direct integration of the DFT
+Green's function. It can be compared to the calculation of the same quantity by downfolding Fermi-Dirac
+occupations. Because the Matsubara grid is finite, the two quantities numerically
+differ. This check allows to see if you [[dmft_nwli]] is large enough. If the difference is
 larger than [[dmft_tolfreq]], then the code stops and an error message is thrown.
 """,
 ),
@@ -3512,7 +3540,7 @@ that this variable is not required.
 
 Variable(
     abivarname="dmft_triqs_compute_integral",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3530,7 +3558,7 @@ for instance.
 
 Variable(
     abivarname="dmft_triqs_det_init_size",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3548,7 +3576,7 @@ this can take some time if this happens too often.
 
 Variable(
     abivarname="dmft_triqs_det_n_operations_before_check",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3568,7 +3596,7 @@ and you repeatedly get some error messages during this check, you should decreas
 
 Variable(
     abivarname="dmft_triqs_det_precision_error",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="real",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3586,7 +3614,7 @@ often, simply lower the value of [[dmft_triqs_det_n_operations_before_check]].
 
 Variable(
     abivarname="dmft_triqs_det_precision_warning",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="real",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3604,7 +3632,7 @@ often, simply lower the value of [[dmft_triqs_det_n_operations_before_check]].
 
 Variable(
     abivarname="dmft_triqs_det_singular_threshold",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="real",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3622,7 +3650,7 @@ if the absolute value of the determinant is below [[dmft_triqs_det_singular_thre
 
 Variable(
     abivarname="dmft_triqs_entropy",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3637,7 +3665,7 @@ Computes the DFT+DMFT entropy using thermodynamic integration.
 
 Variable(
     abivarname="dmft_triqs_epsilon",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="real",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3653,7 +3681,7 @@ It should always be higher than the statistical noise on your Green's function.
 
 Variable(
     abivarname="dmft_triqs_gaussorder",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3668,7 +3696,7 @@ thermodynamic integration interval (cf [[dmft_triqs_compute_integral]]).
 
 Variable(
     abivarname="dmft_triqs_imag_threshold",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="real",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3684,7 +3712,7 @@ having a maximal imaginary part below [[dmft_triqs_imag_threshold]] are kept.
 
 Variable(
     abivarname="dmft_triqs_leg_measure",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3704,7 +3732,7 @@ This option is only here for historical purposes.
 
 Variable(
     abivarname="dmft_triqs_loc_n_min",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3722,7 +3750,7 @@ with non-negligible contributions.
 
 Variable(
     abivarname="dmft_triqs_loc_n_max",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3740,7 +3768,7 @@ with non-negligible contributions.
 
 Variable(
     abivarname="dmft_triqs_measure_density_matrix",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3757,7 +3785,7 @@ Currently, TRIQS/CTHYB does not support this feature with off-diagonal component
 
 Variable(
     abivarname="dmft_triqs_move_double",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3772,7 +3800,7 @@ Set to 1 to activate the double moves in TRIQS/CTHYB.
 
 Variable(
     abivarname="dmft_triqs_move_shift",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3787,7 +3815,7 @@ Set to 1 to activate the shift move in TRIQS/CTHYB.
 
 Variable(
     abivarname="dmft_triqs_nleg",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3802,7 +3830,7 @@ function in TRIQS/CTHYB (cf [[cite:Boehnke2011]]).
 
 Variable(
     abivarname="dmft_triqs_nsubdivisions",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3822,7 +3850,7 @@ unstable.
 
 Variable(
     abivarname="dmft_triqs_off_diag",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="integer",
     topics=['DMFT_basic'],
     dimensions="scalar",
@@ -3838,7 +3866,7 @@ basis specified by [[dmftctqmc_basis]]).
 
 Variable(
     abivarname="dmft_triqs_pauli_prob",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="real",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3856,7 +3884,7 @@ only guaranteed if [[dmft_triqs_pauli_prob]] < 1.
 
 Variable(
     abivarname="dmft_triqs_read_ctqmcdata",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3876,7 +3904,7 @@ if you're not converged yet. In this case, disable this.
 
 Variable(
     abivarname="dmft_triqs_seed_a",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3885,13 +3913,13 @@ Variable(
     requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
-Controls the seed of TRIQS/CTHYB, which is [[dmft_triqs_seed_a]] + rank * [[dmft_triqs_seed_b]].
+Controls the seed of TRIQS/CTHYB, which is [[dmft_triqs_seed_a]] + rank $\times$ [[dmft_triqs_seed_b]].
 """,
 ),
 
 Variable(
     abivarname="dmft_triqs_seed_b",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3900,13 +3928,13 @@ Variable(
     requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
-Controls the seed of TRIQS/CTHYB, which is [[dmft_triqs_seed_a]] + rank * [[dmft_triqs_seed_b]].
+Controls the seed of TRIQS/CTHYB, which is [[dmft_triqs_seed_a]] + rank $\times$ [[dmft_triqs_seed_b]].
 """,
 ),
 
 Variable(
     abivarname="dmft_triqs_therm_restart",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="integer",
     topics=['DMFT_compulsory'],
     dimensions="scalar",
@@ -3921,7 +3949,7 @@ composed of [[dmftctqmc_meas]] sweeps.
 
 Variable(
     abivarname="dmft_triqs_time_invariance",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3938,7 +3966,7 @@ if you measure too often.
 
 Variable(
     abivarname="dmft_triqs_tol_block",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="real",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3957,7 +3985,7 @@ Otherwise, try not to set this value above numerical noise.
 
 Variable(
     abivarname="dmft_triqs_use_norm_as_weight",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3974,7 +4002,7 @@ ergodicity.
 
 Variable(
     abivarname="dmft_triqs_wmax",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="real",
     topics=['DMFT_basic'],
     dimensions="scalar",
@@ -3991,24 +4019,31 @@ when computing the DLR frequencies (cf [[cite:Kaye2022]]).
 Variable(
     abivarname="dmft_wanorthnorm",
     varset="dmft",
-    vartype="real",
+    vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
     defaultval=3,
     mnemonics="Dynamical Mean Field Theory: WANnier OrthoNormalization",
     requires="[[usedmft]] == 1",
-    characteristics=['[[DEVELOP]]'],
     added_in_version="9.4.0",
     text=r"""
-Definition of Wannier orthormalization in DMFT.
+Definition of the orthonormalization scheme for the Wannier functions. As we project
+the orbitals on a finite energy window [ [[dmftbandi]],[[dmftbandf]] ], they might no
+longer be orthonormal, so it is necessary to orthogonalize them.
 
-Default value is 3 (Normalization of the overlap of Wannier functions summed
-over k-point) if [[natom]]=1, or 2 (Normalization of the overlap for each k-point) if
-[[natom]]>1 (only in the case [[dmft_solv]] < 6 or > 7).
+This is done by multiplication with the inverse square root of their overlaps.
 
-In the case [[dmft_solv]] in [6,7], the default value 3, as this is the only
-rigorous way to compare energies and to ensure you have the same Wannier functions
-between different systems.
+  * If set to 2, the overlap is computed at each individual $k$-point for all atoms at
+    the same time. This numerically guarantees the identity Downfold(Upfold) = Id, regardless
+    of the size of the energy window. However, this makes the Wannier functions system-dependent
+    as the orthonormalization scheme depends on the position of the atoms and the reciprocal lattice.
+    This is the default choice when [[natom]] > 1 and [[dmft_solv]] $\ne$ [6,7].
+  * If set to 3, the overlap is summed over all $k$-point and is computed separately for each
+    atom. With this choice, the fundamental identity Downfold(Upfold) = Id is only
+    guaranteed for localized Wannier functions (i.e. large enough energy window),
+    with no overlap to the neighboring atoms. This is the default choice when [[natom]]=1
+    or [[dmft_solv]] in [6,7] as this is the only rigorous choice to compare energies between
+    different systems.
 """,
 ),
 
@@ -4133,16 +4168,24 @@ determines the magnitude of the off-diagonal elements as well as the
 conserved quantities in the atomic Hamiltonian, and can therefore greatly
 impact the computation time.
 
-  * 0 --> Use the real spherical harmonics (cubic) basis.
-  Can be useful if the Hamiltonian has weak off diagonal terms and for this reason,
-  one want to keep the original basis for simplicity and for physical insight.
-  * 1 --> Diagonalize the electronic levels (but only if it is not diagonal).
-  The best choice in general for [[dmft_solv]] = 5.
+Note that if you choose a density-density solver ([[dmft_solv]] in [5,6]),
+the off-diagonal components of the electronic levels will be neglected by
+definition. As they carry most of the physics, it is important to choose a
+basis in which these off-diagonal components are weak.
+
+  * 0 --> Stay in the real spherical harmonics (cubic) basis. Useful for physical insight/
+  conserved quantities and for systems with cubic symmetry.
+  * 1 --> Diagonalize the electronic levels (if they are not already diagonal in the
+  cubic basis). The best choice in general for [[dmft_solv]] in [5,6]. Useful to reduce
+  the magnitude of the off-diagonal components of the Green's function.
   * 2 --> Diagonalize the local correlated occupation matrix. Can lead to non
-  diagonal Hamiltonian that cannot be handled by [[dmft_solv] = 5.
-  This option should be thus avoided when [[dmft_solv]] = 5.
-  * 3 (only when [[dmft_solv]] in [6,7]) --> Spherical harmonics basis.
-  * 4 (only when [[dmft_solv]] in [6,7]) --> JmJ basis
+  diagonal atomic Hamiltonian that cannot be handled by [[dmft_solv]] in [5,6].
+  This option should be thus avoided when [[dmft_solv]] in [5,6]. Useful to reduce
+  the magnitude of the off-diagonal components of the Green's function.
+  * 3 (only when [[dmft_solv]] in [6,7]) --> Spherical harmonics basis. Useful for physical
+  insight/conserved quantities.
+  * 4 (only when [[dmft_solv]] in [6,7] and [[nspinor]]=2) --> JmJ basis. Useful for physical
+  insight/conserved quantities when adding spin-orbit coupling.
 """,
 ),
 
@@ -4355,7 +4398,8 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Number of Monte Carlo sweeps. Should be at least $10^6$ for a physical solution.
-With TRIQS/CTHYB, this is the total number of measurement cycles over all CPUs.
+With TRIQS/CTHYB, this is the total number of cycles over all CPUs. A cycle is comprised
+of [[dmftctqmc_meas]] sweeps.
 """,
 ),
 
@@ -4390,7 +4434,8 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Number of Monte Carlo sweeps for the thermalization. With TRIQS/CTHYB, this is the
-number of warmup cycles on each CPU.
+number of warmup cycles on each CPU. A cycle is comprised
+of [[dmftctqmc_meas]] sweeps.
 """,
 ),
 
