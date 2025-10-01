@@ -3577,10 +3577,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
  ! Allocate work space arrays.
  ABI_MALLOC(displ_cart_qibz, (2, 3, cryst%natom, natom3))
- !ABI_MALLOC(displ_red_qbz, (2, 3, cryst%natom, natom3))
- !ABI_MALLOC(displ_red_qibz, (2, 3, cryst%natom, natom3))
- !ABI_MALLOC(pheigvec_qbz, (2, 3, cryst%natom, 3*cryst%natom))
- !ABI_MALLOC(pheigvec_qibz, (2, 3, cryst%natom, 3*cryst%natom))
  ABI_CALLOC(dummy_vtrial, (nfftf, nspden))
 
  ! Open GSTORE file, and read table used for restarting.
@@ -4224,8 +4220,8 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
 
  units = [std_out, ab_out]
  call wrtout(units, sjoin("- Reading e-ph matrix elements from: ", path), pre_newlines=1)
- !call wrtout(units, sjoin(" Asking for with_cplex: ", itoa(with_cplex)))
  call wrtout(units, sjoin(" Asking for with_gmode: ", trim(with_gmode)))
+ call wrtout(units, sjoin(" Asking for with_cplex: ", itoa(with_cplex)))
  call wrtout(units, sjoin(" Asking for gvals_name: ", trim(gvals_name)))
  call wrtout(units, sjoin(" Asking for g(k,q=Gamma): ", yesno(read_dw)))
 
@@ -4840,17 +4836,16 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
    !
    !    nctkarr_t("gvals", "dp", "gstore_cplex, nb_kq, nb_k, natom3, glob_nk, glob_nq")
 
-   ! These are always in the atom representation
+   ! These e-ph matrix elements are ALWAYS in the atom representation.
    ABI_MALLOC(gslice_mn, (cplex, nb_kq, nb_k))
    ABI_MALLOC(gslice_ks_mn, (cplex, nb_kq, nb_k))
 
-   write(ab_out,"(a)") " E-PH matrix elements:"
-   write(ab_out,"(a)") " E-PH matrix elements in the atom representation: (idir, iatom)"
+   write(ab_out,"(a)") " E-PH matrix elements in the atom representation: pcase = (idir, iatom)"
 
    if (with_ks__) then
-     write(ab_out, "(1x,5(a5,1x),2(a16))") "iq","ik", "mode", "im_kq", "in_k", "|g^SE|^2 in Ha^2", "|g^KS|^2 in Ha^2"
+     write(ab_out, "(1x,5(a5,1x),2(a16))") "iq","ik", "pcase", "im_kq", "in_k", "|g^SE| in Ha", "|g^KS| in Ha"
    else
-     write(ab_out, "(1x,5(a5,1x),a16)") "iq","ik", "mode", "im_kq", "in_k", "|g|^2 in Ha^2"
+     write(ab_out, "(1x,5(a5,1x),a16)") "iq","ik", "pcase", "im_kq", "in_k", "|g| in Ha"
    end if
 
    do iq_glob=1,glob_nq
@@ -4867,16 +4862,15 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
                               start=[1,1,1,ipc,ik_glob,iq_glob], count=[cplex,nb_kq,nb_k,1,1,1])
          NCF_CHECK(ncerr)
 
-         ! TODO: Get rid of cplex, write everything using complex and atom representation
-         write(ab_out, "(3(a,1x,i0,1x))")" |g(k,q)|^2 in Ha^2 for iq:", iq_glob, "ik:", ik_glob, "mode:", ipc
+         write(ab_out, "(3(a,1x,i0,1x))")" |g(k,q)| in Ha for iq:", iq_glob, "ik:", ik_glob, "pcase:", ipc
 
          if (.not. with_ks__) then
           ! gvals only.
-           write(ab_out, "(1x,5(a5,1x),a16)")"iq","ik", "mode", "im_kq", "in_k", "|g|^2 in Ha^2"
+           write(ab_out, "(1x,5(a5,1x),a16)")"iq","ik", "pcase", "im_kq", "in_k", "|g|"
            do im_kq=1,nb_kq
              do in_k=1,nb_k
                g2 = gslice_mn(1, im_kq, in_k)**2 + gslice_mn(2, im_kq, in_k)**2
-               write(ab_out, "(1x,5(i5,1x),es16.6)") iq_glob, ik_glob, ipc, im_kq, in_k, g2
+               write(ab_out, "(1x,5(i5,1x),es16.6)") iq_glob, ik_glob, ipc, im_kq, in_k, sqrt(g2)
              end do
            end do
         else
@@ -4884,12 +4878,12 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
           ncerr = nf90_get_var(spin_ncid, spin_vid("gvals_ks"), gslice_ks_mn, &
                                start=[1,1,1,ipc,ik_glob,iq_glob], count=[cplex,nb_kq,nb_k,1,1,1])
           NCF_CHECK(ncerr)
-          write(ab_out, "(1x,5(a5,1x),2a16)")"iq","ik", "mode", "im_kq", "in_k", "|g^SE|^2 in Ha^2", "|g^KS|^2 in Ha^2"
+          write(ab_out, "(1x,5(a5,1x),2a16)")"iq","ik", "pcase", "im_kq", "in_k", "|g^SE|", "|g^KS|"
           do im_kq=1,nb_kq
             do in_k=1,nb_k
               g2 = gslice_mn(1, im_kq, in_k)**2 + gslice_mn(2, im_kq, in_k)**2
               g2_ks = gslice_ks_mn(1, im_kq, in_k)**2 + gslice_ks_mn(2, im_kq, in_k)**2
-              write(ab_out, "(1x,5(i5,1x),2(es16.6))") iq_glob, ik_glob, ipc, im_kq, in_k, g2, g2_ks
+              write(ab_out, "(1x,5(i5,1x),2(es16.6))") iq_glob, ik_glob, ipc, im_kq, in_k, sqrt(g2), sqrt(g2_ks)
             end do
           end do
         end if

@@ -343,6 +343,7 @@ meta: {optdriver: 7, eph_task: 13, }
 
 - Reading e-ph matrix elements from: teph4vpq_8o_GSTORE.nc
  Asking for with_gmode: phonon
+ Asking for with_cplex: 2
  Asking for gvals_name: gvals
  Asking for g(k,q=Gamma): no
  Initializing gstore object from: teph4vpq_8o_GSTORE.nc

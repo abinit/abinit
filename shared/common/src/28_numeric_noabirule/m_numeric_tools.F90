@@ -581,7 +581,6 @@ pure subroutine unit_matrix_rdp(matrix)
  real(dp),intent(inout) :: matrix(:,:)
 
 !Local variables-------------------------------
-!scalars
  integer :: ii,nn
 ! *********************************************************************
 
@@ -614,7 +613,6 @@ pure subroutine unit_matrix_cdp(matrix)
  complex(dp),intent(inout) :: matrix(:,:)
 
 !Local variables-------------------------------
-!scalars
  integer :: ii,nn
 ! *********************************************************************
 
@@ -644,14 +642,12 @@ end subroutine unit_matrix_cdp
 !!
 !! SOURCE
 
-pure function get_trace_int(matrix) result(trace)
+integer pure function get_trace_int(matrix) result(trace)
 
 !Arguments ------------------------------------
- integer :: trace
  integer,intent(in) :: matrix(:,:)
 
 !Local variables-------------------------------
-!scalars
  integer :: ii
 ! *********************************************************************
 
@@ -680,14 +676,12 @@ end function get_trace_int
 !!
 !! SOURCE
 
-pure function get_trace_rdp(matrix) result(trace)
+real(dp) pure function get_trace_rdp(matrix) result(trace)
 
 !Arguments ------------------------------------
- real(dp) :: trace
  real(dp),intent(in) :: matrix(:,:)
 
 !Local variables-------------------------------
-!scalars
  integer :: ii
 ! *********************************************************************
 
@@ -714,14 +708,12 @@ end function get_trace_rdp
 !!
 !! SOURCE
 
-pure function get_trace_cdp(matrix) result(trace)
+complex(dp) pure function get_trace_cdp(matrix) result(trace)
 
 !Arguments ------------------------------------
- complex(dp) :: trace
  complex(dp),intent(in) :: matrix(:,:)
 
 !Local variables-------------------------------
-!scalars
  integer :: ii
 ! *********************************************************************
 
@@ -963,7 +955,6 @@ pure function l2int_2D(larr) result(int_arr)
 !scalars
  logical,intent(in) :: larr(:,:)
  integer :: int_arr(size(larr,1), size(larr,2))
-
 ! *********************************************************************
 
  where (larr)
@@ -995,7 +986,6 @@ pure function l2int_3D(larr) result(int_arr)
 !scalars
  logical,intent(in) :: larr(:,:,:)
  integer :: int_arr(size(larr,1), size(larr,2), size(larr,3))
-
 ! *********************************************************************
 
  where (larr)
@@ -1057,7 +1047,6 @@ pure function rdp2cdp_2D(rr) result(cc)
 !scalars
  real(dp),intent(in) :: rr(:,:,:)
  complex(dp) :: cc(SIZE(rr,2),SIZE(rr,3))
-
 ! *********************************************************************
 
  cc(:,:)=CMPLX(rr(1,:,:),rr(2,:,:), kind=dp)
@@ -1112,7 +1101,6 @@ pure function rdp2cdp_4D(rr) result(cc)
 !scalars
  real(dp),intent(in) :: rr(:,:,:,:,:)
  complex(dp) :: cc(SIZE(rr,2),SIZE(rr,3),SIZE(rr,4),SIZE(rr,5))
-
 ! *********************************************************************
 
  cc(:,:,:,:)=CMPLX(rr(1,:,:,:,:),rr(2,:,:,:,:), kind=dp)
@@ -1140,7 +1128,6 @@ pure function rdp2cdp_5D(rr) result(cc)
 !scalars
  real(dp),intent(in) :: rr(:,:,:,:,:,:)
  complex(dp) :: cc(SIZE(rr,2),SIZE(rr,3),SIZE(rr,4),SIZE(rr,5),SIZE(rr,6))
-
 ! *********************************************************************
 
  cc(:,:,:,:,:)=CMPLX(rr(1,:,:,:,:,:),rr(2,:,:,:,:,:), kind=dp)
@@ -3376,7 +3363,6 @@ pure subroutine mkherm(array,ndim)
 !Local variables -------------------------
 !scalars
  integer :: i1,i2
-
 ! *********************************************************************
 
  do i1=1,ndim
@@ -4879,7 +4865,7 @@ pure function interpol1d(npts_o,npts_i,pts_o,pts_i,val_o) result(res)
   end do
 
 end function interpol1d
-! *********************************************************************
+!!***
 
 pure function interpol1d_c(npts_o,npts_i,pts_o,pts_i,val_o) result(res)
 !Arguments ------------------------------------
@@ -5408,7 +5394,6 @@ subroutine simpson_int(npts, step, values, int_values)
  real(dp),parameter :: coef2 = 1.166666666666666666666666667_dp  !28.0_dp / 24.0_dp
  real(dp),parameter :: coef3 = 0.958333333333333333333333333_dp  !23.0_dp / 24.0_dp
  character(len=500) :: msg
-
 ! *********************************************************************
 
  if (npts < 6) then
@@ -5467,9 +5452,7 @@ function simpson(step, values) result(res)
  real(dp),intent(in) :: values(:)
 
 !Local variables -------------------------
-!scalars
  real(dp) :: int_values(size(values))
-
 ! *********************************************************************
 
  call simpson_int(size(values),step,values,int_values)
@@ -5504,7 +5487,6 @@ pure subroutine rhophi(cx, phi, rho)
  real(dp),intent(out) :: phi,rho
 !arrays
  real(dp),intent(in) :: cx(2)
-
 ! ***********************************************************************
 
  rho = sqrt(cx(1)*cx(1) + cx(2)*cx(2))
@@ -5635,7 +5617,6 @@ subroutine vdiff_print(vd, unit)
  type(vdiff_t),intent(in) :: vd
 
 !Local variables-------------------------------
-!scalars
  integer :: unt
 ! *********************************************************************
 
@@ -5741,7 +5722,6 @@ subroutine nderiv(hh,yy,zz,ndim,norder)
 !scalars
  integer :: ier,ii
  real(dp) :: aa,bb,cc,h1,y1
-
 ! *********************************************************************
 
 !Initialization (common to 1st and 2nd derivative)
@@ -5921,7 +5901,6 @@ function uniformrandom(seed)
  real(dp) :: im1inv,im2inv
  real(dp), save :: table(97)
  character(len=500) :: msg
-
 ! *********************************************************************
 
  im1inv=1.0d0/im1 ; im2inv=1.0d0/im2
@@ -6028,10 +6007,8 @@ subroutine findmin(dedv_1,dedv_2,dedv_predict,&
  character(len=500) :: msg
 ! *************************************************************************
 
-!DEBUG
 !write(std_out,*)' findmin : enter'
 !write(std_out,*)' choice,lambda_1,lambda_2=',choice,lambda_1,lambda_2
-!ENDDEBUG
 
  status=0
  d_lambda=lambda_1-lambda_2
@@ -6460,7 +6437,6 @@ elemental subroutine safe_div(n, d, altv, q)
 !scalars
  real(dp),intent(in) :: n, d, altv
  real(dp),intent(out) :: q
-
 ! *********************************************************************
 
  if ( exponent(n) - exponent(d) >= maxexponent(n) .or. d == zero) then
@@ -6634,7 +6610,6 @@ integer pure function blocked_loop(loop_index, loop_stop, batch_size) result(nda
 
 !Arguments ----------------------------------------------
  integer,intent(in) :: loop_index, loop_stop, batch_size
-
 ! *********************************************************************
 
  ndat = merge(batch_size, loop_stop - loop_index + 1, loop_index + batch_size - 1 <= loop_stop)

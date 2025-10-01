@@ -418,8 +418,10 @@ meta: {optdriver: 7, eph_task: -12, }
   -1.94839037E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
+
 - Reading e-ph matrix elements from: teph4isotc_6o_GSTORE.nc
  Asking for with_gmode: phonon
+ Asking for with_cplex: 1
  Asking for gvals_name: gvals
  Asking for g(k,q=Gamma): no
  Initializing gstore object from: teph4isotc_6o_GSTORE.nc
