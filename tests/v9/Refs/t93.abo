@@ -1,5 +1,5 @@
 
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.Version 10.4.5.9 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 10 Sep 2025.
-- ( at 12h20 )
+.Starting date : Wed  1 Oct 2025.
+- ( at 11h05 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v9_t93/t93.abi
 - output file    -> t93.abo
@@ -1223,8 +1223,12 @@ force_length_stats: {min:   1.16108984E-01, max:   1.16108984E-01, mean:   1.161
     1 Fe   2.11532       14.656846      2.082621    0.206544    0.206266    2.062063    8.057125   44.961372
     2 Fe   2.11532       14.656846      2.082621    0.206266    0.206544    2.062063    8.057125   45.038628
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)          4.165241    0.412810    0.412810    4.124125    8.057123   45.000000
- Total magnetization (exact)            4.000208    0.396467    0.396467    3.960719    8.057384   45.000000
+ Total magnetization (spheres)
+ (cart.coord.)                                      0.412810    0.412810    4.124125
+ (sph.coord.)                           4.165241                                        8.057123   45.000000
+ Total magnetization (exact)
+ (cart.coord.)                                      0.396467    0.396467    3.960719
+ (sph.coord.)                           4.000208                                        8.057384   45.000000
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -1800,8 +1804,12 @@ force_length_stats: {min:   1.16112524E-01, max:   1.16112524E-01, mean:   1.161
     1 Fe   2.11532       14.656847      2.082613    0.206530    0.206287    2.062054    8.057292   44.966346
     2 Fe   2.11532       14.656847      2.082613    0.206287    0.206530    2.062054    8.057292   45.033654
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)          4.165226    0.412817    0.412817    4.124109    8.057290   45.000000
- Total magnetization (exact)            4.000208    0.396448    0.396448    3.960723    8.057002   45.000000
+ Total magnetization (spheres)
+ (cart.coord.)                                      0.412817    0.412817    4.124109
+ (sph.coord.)                           4.165226                                        8.057290   45.000000
+ Total magnetization (exact)
+ (cart.coord.)                                      0.396448    0.396448    3.960723
+ (sph.coord.)                           4.000208                                        8.057002   45.000000
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -2374,8 +2382,12 @@ force_length_stats: {min:   1.16106347E-01, max:   1.16106347E-01, mean:   1.161
     1 Fe   2.11532       14.656848      2.082632    2.079061   -0.086111   -0.086299   92.374882   -2.371742
     2 Fe   2.11532       14.656848      2.082632    2.079061   -0.086299   -0.086111   92.369703   -2.376916
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)          4.165264    4.158121   -0.172411   -0.172411   92.372293   -2.374329
- Total magnetization (exact)            4.000208    3.993345   -0.165628   -0.165628   92.373003   -2.375041
+ Total magnetization (spheres)
+ (cart.coord.)                                      4.158121   -0.172411   -0.172411
+ (sph.coord.)                           4.165264                                       92.372293   -2.374329
+ Total magnetization (exact)
+ (cart.coord.)                                      3.993345   -0.165628   -0.165628
+ (sph.coord.)                           4.000208                                       92.373003   -2.375041
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -2948,8 +2960,12 @@ force_length_stats: {min:   1.16110526E-01, max:   1.16110526E-01, mean:   1.161
     1 Fe   2.11532       14.656847      2.082618    0.351101    2.022644    0.350625   80.307661   80.152428
     2 Fe   2.11532       14.656847      2.082618    0.350625    2.022644    0.351101   80.294362   80.165530
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)          4.165237    0.701726    4.045289    0.701726   80.301011   80.158979
- Total magnetization (exact)            4.000208    0.674016    3.884981    0.674016   80.299667   80.157575
+ Total magnetization (spheres)
+ (cart.coord.)                                      0.701726    4.045289    0.701726
+ (sph.coord.)                           4.165237                                       80.301011   80.158979
+ Total magnetization (exact)
+ (cart.coord.)                                      0.674016    3.884981    0.674016
+ (sph.coord.)                           4.000208                                       80.299667   80.157575
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -3522,8 +3538,12 @@ force_length_stats: {min:   1.16106358E-01, max:   1.16106358E-01, mean:   1.161
     1 Fe   2.11532       14.656845      2.082621    1.433573    1.432941    0.478393   76.720159   44.987371
     2 Fe   2.11532       14.656845      2.082621    1.432941    1.433573    0.478393   76.720159   45.012629
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)          4.165242    2.866514    2.866514    0.956787   76.720158   45.000000
- Total magnetization (exact)            4.000208    2.752945    2.752945    0.918831   76.720843   45.000000
+ Total magnetization (spheres)
+ (cart.coord.)                                      2.866514    2.866514    0.956787
+ (sph.coord.)                           4.165242                                       76.720158   45.000000
+ Total magnetization (exact)
+ (cart.coord.)                                      2.752945    2.752945    0.918831
+ (sph.coord.)                           4.000208                                       76.720843   45.000000
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -4308,10 +4328,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         29.1  wall=         29.1
+- Proc.   0 individual time (sec): cpu=         29.5  wall=         29.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered  14 WARNINGs and  58 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         29.1  wall=         29.1
++Overall time at end (sec) : cpu=         29.5  wall=         29.6

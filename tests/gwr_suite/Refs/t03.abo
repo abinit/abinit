@@ -1,5 +1,5 @@
 
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.Version 10.4.5.9 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 10 Sep 2025.
-- ( at 12h05 )
+.Starting date : Wed  1 Oct 2025.
+- ( at 10h50 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/gwr_suite_t03/t03.abi
 - output file    -> t03.abo
@@ -298,8 +298,12 @@ force_length_stats: {min:   1.34844656E-27, max:   1.34844656E-27, mean:   1.348
     1 Si   2.00000        1.783457      0.000000    0.000000   -0.000000    0.000000    0.000000    0.000000
     2 Si   2.00000        1.727468      0.000000    0.000000    0.000000   -0.000000    0.000000    0.000000
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)          0.000000    0.000000   -0.000000    0.000000    0.000000    0.000000
- Total magnetization (exact)            0.000000   -0.000000    0.000000    0.000000    0.000000    0.000000
+ Total magnetization (spheres)
+ (cart.coord.)                                      0.000000   -0.000000    0.000000
+ (sph.coord.)                           0.000000                                        0.000000    0.000000
+ Total magnetization (exact)
+ (cart.coord.)                                     -0.000000    0.000000    0.000000
+ (sph.coord.)                           0.000000                                        0.000000    0.000000
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -556,70 +560,70 @@ P           mkmem           3
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          1.3        0.02      0.000
-- Total wall clock time (s,m,h):          1.3        0.02      0.000
+- Total cpu        time (s,m,h):          1.4        0.02      0.000
+- Total wall clock time (s,m,h):          1.4        0.02      0.000
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0
 -
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            1.3, wall_time =            1.3
+- cpu_time =            1.4, wall_time =            1.4
 -
 - routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
 -                                                                                (-1=no count)
-- fourwf%(pot)                              0.364  28.0         0.397  29.7           6364      -1.00        0.92       0.92
-- pspini                                    0.216  16.7         0.216  16.2              2      -1.00        1.00       1.00
-- ugb_from_diago                            0.193  14.8         0.193  14.4              3      -1.00        1.00       1.00
-- nonlop(apply)                             0.137  10.6         0.138  10.3           1591      -1.00        1.00       1.00
-- timing timab                              0.114   8.8         0.114   8.5             12      -1.00        1.00       1.00
-- get_dtsets_pspheads                       0.100   7.7         0.102   7.6              1      -1.00        0.99       0.99
-- getghc(/=fourXX,nonlop,fock_XX)           0.094   7.3         0.093   7.0             -1      -1.00        1.01       1.01
-- abinit(chkinp,chkvars)                    0.026   2.0         0.026   2.0              1      -1.00        1.00       1.00
-- abinit(outvars)                           0.021   1.6         0.021   1.6              1      -1.00        1.00       1.00
-- abinit(after driver)                      0.020   1.6         0.020   1.5              1      -1.00        1.00       1.00
-- ewald                                     0.018   1.4         0.018   1.4              2      -1.00        1.00       1.00
-- fourwf%(den)                              0.016   1.2         0.016   1.2            672      -1.00        1.00       1.00
+- fourwf%(pot)                              0.377  27.9         0.413  29.8           6364      -1.00        0.91       0.91
+- pspini                                    0.218  16.1         0.218  15.7              2      -1.00        1.00       1.00
+- ugb_from_diago                            0.198  14.7         0.198  14.3              3      -1.00        1.00       1.00
+- nonlop(apply)                             0.143  10.6         0.143  10.3           1591      -1.00        1.00       1.00
+- timing timab                              0.116   8.6         0.116   8.3             12      -1.00        1.00       1.00
+- get_dtsets_pspheads                       0.115   8.5         0.115   8.3              1      -1.00        1.00       1.00
+- getghc(/=fourXX,nonlop,fock_XX)           0.103   7.6         0.102   7.4             -1      -1.00        1.00       1.00
+- abinit(chkinp,chkvars)                    0.025   1.9         0.025   1.8              1      -1.00        1.00       1.00
+- abinit(outvars)                           0.021   1.5         0.021   1.5              1      -1.00        1.00       1.00
+- abinit(after driver)                      0.020   1.5         0.020   1.4              1      -1.00        1.00       1.00
+- ewald                                     0.018   1.4         0.018   1.3              2      -1.00        1.00       1.00
+- fourwf%(den)                              0.016   1.2         0.016   1.1            672      -1.00        1.00       1.00
 - projbd                                    0.014   1.0         0.014   1.0           2368      -1.00        0.99       0.99
 - xc:pot/=fourdp                            0.012   0.9         0.012   0.9              9      -1.00        1.00       1.00
-- fourdp                                    0.010   0.7         0.010   0.7            336      -1.00        0.99       0.99
-- stress                                    0.008   0.6         0.008   0.6              1      -1.00        1.00       1.00
-- abinit(init,iofn1,herald)                 0.007   0.6         0.008   0.6              1      -1.00        0.96       0.96
+- abinit(init,iofn1,herald)                 0.010   0.7         0.010   0.7              1      -1.00        0.97       0.97
+- fourdp                                    0.009   0.7         0.009   0.7            336      -1.00        1.00       1.00
+- stress                                    0.008   0.6         0.008   0.5              1      -1.00        1.00       1.00
 - ewald2 (+vdw_dftd)                        0.007   0.5         0.007   0.5              1      -1.00        1.00       1.00
-- others (192)                              0.019   1.5         0.019   1.5             -1      -1.00        1.00       1.00
+- others (192)                              0.020   1.5         0.020   1.4             -1      -1.00        1.00       1.00
 -<END_TIMER>
 -
-- subtotal                                  1.397 107.6         1.431 107.2                                  0.98       0.98
+- subtotal                                  1.449 107.3         1.486 107.0                                  0.98       0.98
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           1.3, wall_time =           1.3
+- cpu_time =           1.4, wall_time =           1.4
 -
 - routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
 -                                                                                (-1=no count)
-- fourwf%(pot)                              0.364  28.0         0.397  29.7           6364      -1.00        0.92       0.92
-- pspini                                    0.216  16.7         0.216  16.2              2      -1.00        1.00       1.00
-- ugb_from_diago                            0.193  14.8         0.193  14.4              3      -1.00        1.00       1.00
-- nonlop(apply)                             0.137  10.6         0.138  10.3           1591      -1.00        1.00       1.00
-- timing timab                              0.114   8.8         0.114   8.5             12      -1.00        1.00       1.00
-- get_dtsets_pspheads                       0.100   7.7         0.102   7.6              1      -1.00        0.99       0.99
-- getghc(/=fourXX,nonlop,fock_XX)           0.094   7.3         0.093   7.0             -1      -1.00        1.01       1.01
-- abinit(chkinp,chkvars)                    0.026   2.0         0.026   2.0              1      -1.00        1.00       1.00
-- abinit(outvars)                           0.021   1.6         0.021   1.6              1      -1.00        1.00       1.00
-- abinit(after driver)                      0.020   1.6         0.020   1.5              1      -1.00        1.00       1.00
-- ewald                                     0.018   1.4         0.018   1.4              2      -1.00        1.00       1.00
-- fourwf%(den)                              0.016   1.2         0.016   1.2            672      -1.00        1.00       1.00
+- fourwf%(pot)                              0.377  27.9         0.413  29.8           6364      -1.00        0.91       0.91
+- pspini                                    0.218  16.1         0.218  15.7              2      -1.00        1.00       1.00
+- ugb_from_diago                            0.198  14.7         0.198  14.3              3      -1.00        1.00       1.00
+- nonlop(apply)                             0.143  10.6         0.143  10.3           1591      -1.00        1.00       1.00
+- timing timab                              0.116   8.6         0.116   8.3             12      -1.00        1.00       1.00
+- get_dtsets_pspheads                       0.115   8.5         0.115   8.3              1      -1.00        1.00       1.00
+- getghc(/=fourXX,nonlop,fock_XX)           0.103   7.6         0.102   7.4             -1      -1.00        1.00       1.00
+- abinit(chkinp,chkvars)                    0.025   1.9         0.025   1.8              1      -1.00        1.00       1.00
+- abinit(outvars)                           0.021   1.5         0.021   1.5              1      -1.00        1.00       1.00
+- abinit(after driver)                      0.020   1.5         0.020   1.4              1      -1.00        1.00       1.00
+- ewald                                     0.018   1.4         0.018   1.3              2      -1.00        1.00       1.00
+- fourwf%(den)                              0.016   1.2         0.016   1.1            672      -1.00        1.00       1.00
 - projbd                                    0.014   1.0         0.014   1.0           2368      -1.00        0.99       0.99
 - xc:pot/=fourdp                            0.012   0.9         0.012   0.9              9      -1.00        1.00       1.00
-- fourdp                                    0.010   0.7         0.010   0.7            336      -1.00        0.99       0.99
-- stress                                    0.008   0.6         0.008   0.6              1      -1.00        1.00       1.00
-- abinit(init,iofn1,herald)                 0.007   0.6         0.008   0.6              1      -1.00        0.96       0.96
+- abinit(init,iofn1,herald)                 0.010   0.7         0.010   0.7              1      -1.00        0.97       0.97
+- fourdp                                    0.009   0.7         0.009   0.7            336      -1.00        1.00       1.00
+- stress                                    0.008   0.6         0.008   0.5              1      -1.00        1.00       1.00
 - ewald2 (+vdw_dftd)                        0.007   0.5         0.007   0.5              1      -1.00        1.00       1.00
-- others (192)                              0.019   1.5         0.019   1.5             -1      -1.00        1.00       1.00
+- others (192)                              0.020   1.5         0.020   1.4             -1      -1.00        1.00       1.00
 -<END_TIMER>
 
-- subtotal                                  1.397 107.6         1.431 107.2                                  0.98       0.98
+- subtotal                                  1.449 107.3         1.486 107.0                                  0.98       0.98
 
 ================================================================================
 
@@ -708,10 +712,10 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.3  wall=          1.3
+- Proc.   0 individual time (sec): cpu=          1.4  wall=          1.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.3  wall=          1.3
++Overall time at end (sec) : cpu=          1.4  wall=          1.4

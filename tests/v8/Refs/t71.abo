@@ -1,5 +1,5 @@
 
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.Version 10.4.5.9 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 10 Sep 2025.
-- ( at 12h18 )
+.Starting date : Wed  1 Oct 2025.
+- ( at 11h03 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v8_t71-t72-t73-t74-t75-t76-t77-t78-t79-t80/t71.abi
 - output file    -> t71.abo
@@ -283,8 +283,12 @@ force_length_stats: {min:   1.56757475E-07, max:   4.72212106E-02, mean:   2.361
     3  O   2.00000        5.540789      0.003002   -0.002493    0.001379    0.000947   71.614802  151.050965
     4  O   2.00000        5.540789      0.003002   -0.002493    0.001379    0.000947   71.615170  151.050494
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)          0.335796   -0.280969    0.152142    0.103289   72.085763  151.564934
- Total magnetization (exact)            0.500001   -0.418369    0.226534    0.153790   72.086614  151.565814
+ Total magnetization (spheres)
+ (cart.coord.)                                     -0.280969    0.152142    0.103289
+ (sph.coord.)                           0.335796                                       72.085763  151.564934
+ Total magnetization (exact)
+ (cart.coord.)                                     -0.418369    0.226534    0.153790
+ (sph.coord.)                           0.500001                                       72.086614  151.565814
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -538,10 +542,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         37.1  wall=         37.1
+- Proc.   0 individual time (sec): cpu=         38.2  wall=         38.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         37.1  wall=         37.1
++Overall time at end (sec) : cpu=         38.2  wall=         38.3

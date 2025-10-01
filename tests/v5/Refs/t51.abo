@@ -1,5 +1,5 @@
 
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.Version 10.4.5.9 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 10 Sep 2025.
-- ( at 12h15 )
+.Starting date : Wed  1 Oct 2025.
+- ( at 11h00 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v5_t51-t52-t53/t51.abi
 - output file    -> t51.abo
@@ -864,8 +864,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
     1 Bi   2.00000        1.518753      0.602957    0.000178    0.002969    0.602950    0.282671   86.578491
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)          0.602957    0.000178    0.002969    0.602950    0.282671   86.578491
- Total magnetization (exact)            3.000000    0.000883    0.014775    2.999963    0.282681   86.580839
+ Total magnetization (spheres)
+ (cart.coord.)                                      0.000178    0.002969    0.602950
+ (sph.coord.)                           0.602957                                        0.282671   86.578491
+ Total magnetization (exact)
+ (cart.coord.)                                      0.000883    0.014775    2.999963
+ (sph.coord.)                           3.000000                                        0.282681   86.580839
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1036,8 +1040,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
     1 Bi   2.00000        1.518428      0.594772    0.000175    0.002929    0.594765    0.282676   86.582202
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)          0.594772    0.000175    0.002929    0.594765    0.282676   86.582202
- Total magnetization (exact)            2.957996    0.000870    0.014568    2.957960    0.282676   86.582174
+ Total magnetization (spheres)
+ (cart.coord.)                                      0.000175    0.002929    0.594765
+ (sph.coord.)                           0.594772                                        0.282676   86.582202
+ Total magnetization (exact)
+ (cart.coord.)                                      0.000870    0.014568    2.957960
+ (sph.coord.)                           2.957996                                        0.282676   86.582174
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1214,8 +1222,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
     1 Bi   2.00000        1.518753      0.602957    0.000178    0.002969    0.602950    0.282671   86.578491
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)          0.602957    0.000178    0.002969    0.602950    0.282671   86.578491
- Total magnetization (exact)            3.000000    0.000883    0.014775    2.999963    0.282681   86.580839
+ Total magnetization (spheres)
+ (cart.coord.)                                      0.000178    0.002969    0.602950
+ (sph.coord.)                           0.602957                                        0.282671   86.578491
+ Total magnetization (exact)
+ (cart.coord.)                                      0.000883    0.014775    2.999963
+ (sph.coord.)                           3.000000                                        0.282681   86.580839
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1386,8 +1398,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
     1 Bi   2.00000        1.518428      0.594772    0.000175    0.002929    0.594765    0.282676   86.582202
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)          0.594772    0.000175    0.002929    0.594765    0.282676   86.582202
- Total magnetization (exact)            2.957996    0.000870    0.014568    2.957960    0.282676   86.582174
+ Total magnetization (spheres)
+ (cart.coord.)                                      0.000175    0.002929    0.594765
+ (sph.coord.)                           0.594772                                        0.282676   86.582202
+ Total magnetization (exact)
+ (cart.coord.)                                      0.000870    0.014568    2.957960
+ (sph.coord.)                           2.957996                                        0.282676   86.582174
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1785,10 +1801,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.3  wall=          3.3
+- Proc.   0 individual time (sec): cpu=          3.4  wall=          3.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered  21 WARNINGs and  24 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.3  wall=          3.3
++Overall time at end (sec) : cpu=          3.4  wall=          3.5

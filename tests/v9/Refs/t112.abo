@@ -1,5 +1,5 @@
 
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.Version 10.4.5.9 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 10 Sep 2025.
-- ( at 12h20 )
+.Starting date : Wed  1 Oct 2025.
+- ( at 11h05 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v9_t112/t112.abi
 - output file    -> t112.abo
@@ -364,12 +364,16 @@ force_length_stats: {min:   1.66049229E-03, max:   1.46123681E-02, mean:   7.310
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
     Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
     1 Ni   2.30000       17.187529      1.054233    1.054222    0.003665   -0.003367   90.182978    0.199198
-    2 Ni   2.30000       17.187727      1.054005   -1.053983   -0.000833   -0.006775   90.368265 -179.954732
+    2 Ni   2.30000       17.187727      1.054005   -1.053983   -0.000833   -0.006775   90.368265  180.000000
     3  O   1.21105        3.402128      0.001576   -0.000099   -0.000208   -0.001559  171.600123 -115.538821
     4  O   1.21105        3.437990      0.001043    0.000210    0.000317   -0.000971  158.608544   56.570031
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)          0.013013    0.000349    0.002942   -0.012671  166.839621   83.227334
- Total magnetization (exact)            0.014344    0.000155    0.003482   -0.013914  165.935581   87.455472
+ Total magnetization (spheres)
+ (cart.coord.)                                      0.000349    0.002942   -0.012671
+ (sph.coord.)                           0.013013                                      166.839621   83.227334
+ Total magnetization (exact)
+ (cart.coord.)                                      0.000155    0.003482   -0.013914
+ (sph.coord.)                           0.014344                                      165.935581   87.455472
 
 
  Integrated orbital magnetic moments inside the PAW spheres:
@@ -1506,10 +1510,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         14.2  wall=         14.2
+- Proc.   0 individual time (sec): cpu=         14.7  wall=         14.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         14.2  wall=         14.2
++Overall time at end (sec) : cpu=         14.7  wall=         14.8

@@ -1,5 +1,5 @@
 
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.Version 10.4.5.9 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 10 Sep 2025.
-- ( at 12h12 )
+.Starting date : Wed  1 Oct 2025.
+- ( at 10h56 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v1_t39/t39.abi
 - output file    -> t39.abo
@@ -492,8 +492,12 @@ force_length_stats: {min:   2.60832804E-02, max:   2.60832804E-02, mean:   2.608
     1  H   2.00000        0.677338      0.500143   -0.000475    0.001389    0.500140    0.168196  108.890330
     2  H   2.00000        0.677325      0.500145    0.000388   -0.001159   -0.500143  179.859952  -71.472199
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)          0.000246   -0.000087    0.000230   -0.000003   90.633252  110.693316
- Total magnetization (exact)            0.000304   -0.000108    0.000284   -0.000001   90.154069  110.838164
+ Total magnetization (spheres)
+ (cart.coord.)                                     -0.000087    0.000230   -0.000003
+ (sph.coord.)                           0.000246                                       90.633252  110.693316
+ Total magnetization (exact)
+ (cart.coord.)                                     -0.000108    0.000284   -0.000001
+ (sph.coord.)                           0.000304                                       90.154069  110.838164
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -797,8 +801,12 @@ force_length_stats: {min:   2.61901050E-02, max:   2.61901050E-02, mean:   2.619
     1  H   2.00000        0.677327      0.498871    0.470603    0.165503    0.003653   89.580485   19.375930
     2  H   2.00000        0.676794      0.498812   -0.470605   -0.165362    0.000352   89.959554 -160.639484
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)          0.004007   -0.000001    0.000142    0.004005    2.027058   90.591143
- Total magnetization (exact)            0.005126   -0.000073    0.000157    0.005123    1.934236  114.989340
+ Total magnetization (spheres)
+ (cart.coord.)                                     -0.000001    0.000142    0.004005
+ (sph.coord.)                           0.004007                                        2.027058   90.591143
+ Total magnetization (exact)
+ (cart.coord.)                                     -0.000073    0.000157    0.005123
+ (sph.coord.)                           0.005126                                        1.934236  114.989340
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1081,10 +1089,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.3  wall=          2.4
+- Proc.   0 individual time (sec): cpu=          2.4  wall=          2.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered  31 WARNINGs and  23 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.3  wall=          2.4
++Overall time at end (sec) : cpu=          2.4  wall=          2.4

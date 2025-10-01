@@ -1,5 +1,5 @@
 
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.Version 10.4.5.9 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 13 Sep 2025.
-- ( at 10h30 )
+.Starting date : Wed  1 Oct 2025.
+- ( at 11h04 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v8_t67-t68-t69-t70/t68.abi
 - output file    -> t68.abo
@@ -242,15 +242,23 @@ tolerances: {toldfe: 1.00E-03, }
     Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
     1 Fe   2.00000       -0.061999     17.962226    4.069265   -7.915422   15.602203   29.702269  -62.792612
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)         17.962226    4.069265   -7.915422   15.602203   29.702269  -62.792612
- Total magnetization (exact)           21.921726    4.244530   -8.256343   19.858973   25.054721  -62.792612
+ Total magnetization (spheres)
+ (cart.coord.)                                      4.069265   -7.915422   15.602203
+ (sph.coord.)                          17.962226                                       29.702269  -62.792612
+ Total magnetization (exact)
+ (cart.coord.)                                      4.244530   -8.256343   19.858973
+ (sph.coord.)                          21.921726                                       25.054721  -62.792612
 ----------------------------
  Imaginary part of magnetization:
     Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
     1 Fe   2.00000       -0.000013      0.000003   -0.000002    0.000002    0.000002   58.017359  145.695106
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)          0.000003   -0.000002    0.000002    0.000002   58.017359  145.695106
- Total magnetization (exact)            0.000004   -0.000002    0.000002    0.000002   52.854259  142.918228
+ Total magnetization (spheres)
+ (cart.coord.)                                     -0.000002    0.000002    0.000002
+ (sph.coord.)                           0.000003                                       58.017359  145.695106
+ Total magnetization (exact)
+ (cart.coord.)                                     -0.000002    0.000002    0.000002
+ (sph.coord.)                           0.000004                                        52.854259  142.918228
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -458,10 +466,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         25.5  wall=         25.6
+- Proc.   0 individual time (sec): cpu=         25.6  wall=         25.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  12 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         25.5  wall=         25.6
++Overall time at end (sec) : cpu=         25.6  wall=         25.7
