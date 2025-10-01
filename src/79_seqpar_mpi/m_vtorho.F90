@@ -1886,7 +1886,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
              do iband1=1,nband_k
                if((paw_dmft%band_in(iband).and.paw_dmft%band_in(iband1)).or. &
                 & ((paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7).and.iband==iband1)) then
-!                write(std_out,*) "II+", isppol,ikpt,iband,iband1
+                 ! write(std_out,*) "II+", isppol,ikpt,iband,iband1
                  ekindmft2=ekindmft2  +  dtset%wtk(ikpt)*paw_dmft%occnd(1,iband,iband1,ikpt,isppol)*&
                    eknk_nd(1,iband,iband1,ikpt,isppol)
                  ekindmft2=ekindmft2  -  dtset%wtk(ikpt)*paw_dmft%occnd(2,iband,iband1,ikpt,isppol)*&
