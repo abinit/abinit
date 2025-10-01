@@ -1694,8 +1694,7 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, ph_intmeth, wstep, wminmax, smear, n
  real(dp) :: invphfrq(gams%natom3)
  real(dp),allocatable :: my_qshift(:,:), gamma_ph_ee(:,:,:,:), tmp_a2f(:)
  real(dp), contiguous, pointer :: a2f_1d(:)
- real(dp),allocatable :: qibz(:,:),wtq(:),qbz(:,:)
- real(dp),allocatable :: a2f_1mom(:),a2flogmom(:),a2flogmom_int(:),wdt(:,:)
+ real(dp),allocatable :: qibz(:,:),wtq(:),qbz(:,:), a2f_1mom(:),a2flogmom(:),a2flogmom_int(:),wdt(:,:)
  real(dp),allocatable :: lambda_tetra(:,:,:),phfreq_tetra(:,:), tmp_gaussian(:,:)
  real(dp),allocatable :: a2feew_partial(:), a2feew_partial_int(:), a2feew_w(:), a2feew_w_int(:)
 ! *********************************************************************
@@ -1979,7 +1978,7 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, ph_intmeth, wstep, wminmax, smear, n
    if (my_rank == master) then
      ount = std_out
      if (nsppol > 1) then
-       write(msg,'(3a)') ch10,'Warning: some of the following quantities should be integrated over spin', ch10
+       write(msg,'(3a)') ch10,' Warning: some of the following quantities should be integrated over spin', ch10
        call wrtout(ount, msg)
      end if
 
@@ -2073,7 +2072,6 @@ end subroutine a2fw_init
 !!  See also [[cite:Grimvall1981]], Eq 6.72 page 175)
 !!
 !! INPUTS
-!!  a2f<a2fw_t>=Structure storing the Eliashberg function.
 !!  nn=Value of n
 !!  spin=The spin component. 0 to sum over spins.
 !!
@@ -2149,7 +2147,6 @@ end function a2fw_get_moment
 !!  See also [[cite:Grimvall1981]] book.
 !!
 !! INPUTS
-!!  a2f_tr<a2fw_tr_t>=Structure storing the Eliashberg function.
 !!  nn=Value of n
 !!  spin=The spin component
 !!
@@ -2217,7 +2214,6 @@ end function a2fw_tr_moment
 !!  Write alpha^2F(w) to an external file in text form
 !!
 !! INPUTS
-!!  a2f<a2fw_t>=Container storing the Eliashberg functions.
 !!  basename=Filename for output.
 !!  post=String appended to netcdf variables e.g. _qcoarse, _qintp
 !!  ncid=Netcdf file handler. Set it to nctk_noid to disable output.
@@ -2355,7 +2351,6 @@ end subroutine a2fw_write
 !!  Write alpha^2F(e,e',w) to an external file in text form
 !!
 !! INPUTS
-!!  a2f<a2fw_t>=Container storing the Eliashberg functions.
 !!  basename=Filename for output.
 !!
 !! OUTPUT
@@ -2449,12 +2444,7 @@ end subroutine a2fw_ee_write
 !! a2fw_tr_free
 !!
 !! FUNCTION
-!!  Free the memory allocated in a2f
-!!
-!! SIDE EFFECTS
-!!  a2f<a2fw_tr_t>=Structure storing the Eliashberg function a2F.
-!!
-!! OUTPUT
+!!  Free the memory allocated in a2fw_tr_t
 !!
 !! SOURCE
 
@@ -2830,7 +2820,6 @@ end subroutine a2fw_tr_init
 !!  Write alpha^2F_tr(w) to an external file in text form
 !!
 !! INPUTS
-!!  a2f_tr<a2fw_tr_t>=Container storing the Eliashberg transport functions.
 !!  basename=Filename for output.
 !!  post=String appended to netcdf variables e.g. _qcoarse, _qintp
 !!  ncid=Netcdf file handler. Set it to nctk_noid to disable output.
@@ -3075,14 +3064,13 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  real(dp),allocatable :: kinpw_k(:), kinpw_kq(:), displ_cart(:,:,:,:), displ_red(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:), kpg_kq(:,:), kpg_k(:,:)
  real(dp),allocatable :: ffnl_k(:,:,:,:), ffnl_kq(:,:,:,:), ph3d_k(:,:,:), ph3d_kq(:,:,:)
- real(dp),allocatable :: v1scf(:,:,:,:), tgam(:,:,:), gkk_atm(:,:,:,:) !,gkq_nu(:,:,:,:)
+ real(dp),allocatable :: v1scf(:,:,:,:), tgam(:,:,:), gkk_atm(:,:,:,:)
  real(dp),allocatable :: bras_kq(:,:,:), kets_k(:,:,:), h1kets_kq(:,:,:), cg_work(:,:)
  real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1(:,:,:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:), gvnlx1(:,:), work(:,:,:,:)
  real(dp),allocatable :: gs1c_kq(:,:), v1_work(:,:,:,:), vcart_ibz(:,:,:,:)
  real(dp),allocatable :: wt_ek(:,:), wt_ekq(:,:), dbldelta_wts(:,:)
  real(dp),allocatable :: tgamvv_in(:,:,:,:),  vv_kk(:,:,:), tgamvv_out(:,:,:,:), vv_kkq(:,:,:), tmp_vals_ee(:,:,:,:,:), emesh(:)
- !real(dp) :: ylmgr_k_dum(1,1,1), ylmgr_kq_dum(1,1,1), ylmgr_dum(1,1,1)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(fstab_t),target,allocatable :: fstab(:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
@@ -3717,7 +3705,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
      ABI_MALLOC(kets_k, (2, mpw*nspinor, mnb))
      ABI_MALLOC(h1kets_kq, (2, mpw*nspinor, mnb))
      ABI_MALLOC(gkk_atm, (2, mnb, mnb, natom3))
-     !ABI_MALLOC(gkq_nu, (2, mnb, natom3))
 
      ! The weights for the integration of the double-delta.
      ABI_MALLOC(dbldelta_wts, (mnb, mnb))
@@ -3739,7 +3726,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
      call phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nesting, kpt_comm%value)
 
      do my_ik=1,gams%my_nfsk_q
-       print_time_k = (my_ik <= 5 .or. (fs%nkfs > 100 .and. mod(my_ik, 200) == 0))
+       print_time_k = (my_ik <= 2 .or. (fs%nkfs > 100 .and. mod(my_ik, 200) == 0))
        if (print_time_k) call cwtime(cpu_k, wall_k, gflops_k, "start")
 
        ! The k-point and the symmetries relating the BZ k-point to the IBZ.
@@ -3854,9 +3841,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
        ! Collect gkk_atm inside pert_comm so that all procs can operate on the data.
        if (pert_comm%nproc > 1) call xmpi_sum(gkk_atm, pert_comm%value, ierr)
-
-       ! Get gkq in the phonon representation.
-       !call ephtk_gkknu_from_atm(mnb, mnb, 1, natom, gkq_atm, phfrq, displ_red, gkq_nu)
 
        ! Compute group velocities if we are in transport mode or adaptive gaussian or
        ! tetrahedron with libtetrabz returning nesting condition.
@@ -4020,7 +4004,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
      ABI_FREE(kets_k)
      ABI_FREE(h1kets_kq)
      ABI_FREE(gkk_atm)
-     !ABI_FREE(gkq_nu)
      ABI_SFREE(wt_ek)
      ABI_SFREE(wt_ekq)
 
