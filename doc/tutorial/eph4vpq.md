@@ -84,7 +84,7 @@ For the underlying theory behind this formalism and derivations, the user may be
 
 We take on the approach presented by Sio and coworkers, albeit we reformulate it into a **variational** form.
 We refer to this formalism as **Variational Polaron Equations** or, simply, **VarPEq**.
-The derivations of our formalism and relevant discussions can be found in [[cite:Vasilchenko2022]].
+The derivations of our formalism and relevant discussions can be found in [[cite:Vasilchenko2025]] and [[cite:Vasilchenko2022]].
 In this approach, we utilize a variational expression for the polaron binding energy, enabling the application of efficient gradient-based optimization techniques.
 Moreover, as we demonstrate in the tutorial, explicit treatment of the gradient allows us to probe systems for multiple degenerate polaronic states.
 
