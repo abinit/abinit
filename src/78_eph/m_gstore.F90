@@ -100,7 +100,7 @@
 !!  - Write IFC to faciliate interporability with external codes (DONE)
 !!  - Save alpha parameters so that external codes can handle the short range part of the IFCs
 !!  - Move to atom representation and add symmetry tables qbz --> qibz to fix the gauge in the ph displacements.
-!!  - Write GSTORE tutorial to explain all the relevant combinations
+!!  - Write GSTORE tutorial to explain all the relevant combinations.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2025 ABINIT group (MG)
@@ -358,11 +358,13 @@ type, public :: gqk_t
 
   real(dp),allocatable :: my_wnuq(:,:)
   ! (my_npert, my_nq)
-  ! Phonon frequencies in Ha (MPI distributed)
+  ! Phonon frequencies in Ha (MPI distributed).
 
   real(dp),allocatable :: my_displ_cart(:,:,:,:,:)
   ! (2, 3, natom, my_npert, my_nq))
-  ! Phonon displacements (MPI distributed)
+  ! Phonon displacements (MPI distributed).
+  ! Reconstructed by symmetry from the IBZ (see pheigvec_rotate)
+  ! Don't use ifc%fourq as this would break the gauge.
 
  contains
 
@@ -1009,6 +1011,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
 
    if (gstore_has_ifcs /= 0) then
      ! Define arrays for IFCs.
+     ! For the meaning of the different variables and conventions see m_ifc module.
      ncerr = nctk_def_arrays(ncid, [ &
         nctkarr_t("rpt", "dp", "three, nrpt"), &
         nctkarr_t("wghatm", "dp", "natom, natom, nrpt"), &
@@ -1079,8 +1082,6 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
 
      ! Dimensions in gqk_spin group
      ncerr = nctk_def_dims(spin_ncid, [ &
-        ! TODO: Remove nb
-        !nctkdim_t("nb", gstore%brange_k_spin(2, spin) - gstore%brange_k_spin(1, spin) + 1), &
         nctkdim_t("nb_k", gstore%brange_k_spin(2, spin) - gstore%brange_k_spin(1, spin) + 1), &
         nctkdim_t("nb_kq", gstore%brange_kq_spin(2, spin) - gstore%brange_kq_spin(1, spin) + 1), &
         nctkdim_t("glob_nk", gstore%glob_nk_spin(spin)), &
@@ -1132,7 +1133,6 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
 
      ! Write (small) data
      NCF_CHECK(nctk_set_datamode(spin_ncid))
-     !NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("bstart"), gstore%brange_k_spin(1, spin)))
      NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("bstart_k"), gstore%brange_k_spin(1, spin)))
      NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("bstart_kq"), gstore%brange_kq_spin(1, spin)))
    end do ! spin
