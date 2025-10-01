@@ -1,0 +1,72 @@
+# ZPR computation for Diamond with GWPT e-ph matrix elements.
+
+ optdriver 7    # Enter EPH driver.
+ eph_task 24    # ZPR computation from GSTORE file
+
+ nband 9
+ ecut 45.0
+ #prtvol 10
+
+ # K-mesh (must be equal to the one of the WFK file).
+ ngkpt 2 2 2
+ nshiftk 1
+ shiftk 0 0 0
+
+ getwfk_filepath "t03o_WFK"
+
+ # We also need the KS GS density and potential.
+ getden_filepath "diamond_eph_gwpt/gso_DEN.nc"
+ getpot_filepath "diamond_eph_gwpt/gso_POT.nc"
+
+ # Read DDB file with dynamica matrix.
+ getddb_filepath "diamond_eph_gwpt/out_DDB"
+ getgstore_filepath "t04o_GSTORE.nc"
+ gstore_gmode "atom"
+
+ #gstore_use_lgk  0
+ gstore_use_lgk  1
+ #gstore_gname "gvals"   # Use GWPT e-ph matrix elements from GSTORE
+ gstore_gname "gvals_ks" # Use KS e-ph matrix elements from GSTORE
+
+ tmesh 300 100 1         # Temperature mesh.
+
+ ddb_ngqpt 2 2 2          # The code expects to find in the DDB
+                          # all the IBZ q-points corresponding to a 2x2x2 q-mesh
+
+ # Read first-order potentials and densities from these two files.
+ getdvdb_filepath "t01_DVDB"
+ tolwfr 1e-20
+
+ # Disable output of phonon DOS and phonon bands.
+ prtphdos 0
+ prtphbands 0
+
+##############################################
+####                 SECTION: Sigma_nk
+##############################################
+ zcut 0.01 eV
+
+# Read crystal structure from DEN.nc file
+ structure "abifile:diamond_eph_gwpt/gso_DEN.nc"
+
+ pp_dirpath "$ABI_PSPDIR/Psdj_nc_fr_04_pbe_std_psp8"
+ pseudos "C.psp8"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t01.abi, t02.abi, t03.abi, t04.abi, t05.abi
+#%% [files]
+#%% use_git_submodule = diamond_eph_gwpt
+#%% files_to_test =
+#%%   t05.abo, tolnlines= 25, tolabs= 5.000e-02, tolrel= 9.000e-03
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, DFPT, EPH
+#%% description = ZPR computation for Diamond with GWPT e-ph matrix elements.
+#%%<END TEST_INFO>

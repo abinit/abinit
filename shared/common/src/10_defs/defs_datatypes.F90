@@ -47,9 +47,9 @@ module defs_datatypes
 
 !----------------------------------------------------------------------
 
-!!****t* defs_datatypes/ebands_t
+!!****t* defs_datatypes/ebands_base_t
 !! NAME
-!! ebands_t
+!! ebands_base_t
 !!
 !! FUNCTION
 !! It contains different information about the band structure: eigenenergies, residuals, derivative of occupation

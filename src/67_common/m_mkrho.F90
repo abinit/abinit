@@ -64,7 +64,6 @@ module m_mkrho
  public :: initro
  public :: prtrhomxmn
  public :: read_atomden
- public :: gbt_times_qr
 !!***
 
 contains
@@ -2762,71 +2761,6 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
  ABI_SFREE(equiv_atom_dist)
 
 end subroutine atomden
-!!***
-
-!!****f* ABINIT/gbt_times_qr
-!! NAME
-!! gbt_times_qr
-!!
-!! FUNCTION
-!!  Multiply off-diagonal terms of the spin density matrix by e^{iqr}.
-!!
-!! INPUTS
-!! rhor(nfft,nspden)=electron density in r space
-!!   (if spin polarized, array contains total density in first half and spin-up density in second half)
-!!   (for non-collinear magnetism, first element: total density, 3 next ones: mx,my,mz in units of hbar/2)!!
-
-!! OUTPUT
-!!
-!! SOURCE
-
-subroutine gbt_times_qr(nfft, nspden, ngfft, mpi_enreg, qgbt, rhor)
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: nfft, nspden
- type(MPI_type),intent(in) :: mpi_enreg
-!arrays
- integer,intent(in) :: ngfft(18)
- real(dp),intent(in) :: qgbt(3)
- real(dp),intent(inout) :: rhor(nfft,nspden)
-
-!Local variables-------------------------------
-!scalars
- integer :: ix, iy, iz, ifft, n1, n2, n3, nproc_fft
- real(dp) :: qr
- complex(dp),allocatable :: rhor_ud(:)
-! *************************************************************************
-
- n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
- nproc_fft = ngfft(10)
- ABI_CHECK_IEQ(nproc_fft, 1, "MPI-FFT not implemented")
- ABI_CHECK_IEQ(nspden, 4, "nspden should be 4")
-
- ! Multiply (m_x - i m_y) by e^{iqr}.
- ABI_MALLOC(rhor_ud, (nfft))
- rhor_ud = rhor(:,2) - j_dpc * rhor(:,3)
-
- ifft = 0
- do iz=0,ngfft(3)-1
-   do iy=0,ngfft(2)-1
-     do ix=0,ngfft(1)-1
-       ifft = ifft + 1
-       qr = two_pi*(qgbt(1)*(ix/dble(ngfft(1))) &
-                   +qgbt(2)*(iy/dble(ngfft(2))) &
-                   +qgbt(3)*(iz/dble(ngfft(3))) )
-       rhor_ud(ifft) = rhor_ud(ifft) * exp(j_dpc * qr)
-     end do
-   end do
- end do
-
- ! Copy new data to m_x and m_y.
- rhor(:,2) = real(rhor_ud) !* two
- rhor(:,3) = - aimag(rhor_ud) !* two
-
- ABI_FREE(rhor_ud)
-
-end subroutine gbt_times_qr
 !!***
 
 end module m_mkrho

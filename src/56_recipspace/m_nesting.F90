@@ -92,7 +92,6 @@ subroutine bfactor(nkptfull,kptfull,nqpt,qpt,krank,nkpt,weight,nband,nestfactor)
  !character(len=500) :: msg
 !arrays
  real(dp) :: kptpq(3)
-
 ! *************************************************************************
 
  nestfactor(:)=zero
@@ -186,9 +185,7 @@ subroutine mknesting(nkpt,kpt,kptrlatt,nband,weight,nqpath,&
 !arrays
  integer,allocatable :: tmprank(:),ktable(:)
  character(len=fnlen) :: tmpname
- real(dp),allocatable :: nestfactor(:),nestordered(:)
- real(dp), allocatable :: kptfull(:,:)
-
+ real(dp),allocatable :: nestfactor(:), nestordered(:), kptfull(:,:)
 ! *************************************************************************
 
  if (kptrlatt(1,2) /= 0 .or. kptrlatt(1,3) /= 0 .or. kptrlatt(2,1) /= 0 .or. &
@@ -225,9 +222,9 @@ subroutine mknesting(nkpt,kpt,kptrlatt,nband,weight,nqpath,&
  ! new version now puts kptfull in correct order before bfactor, so no need to re-order...
  if (present(symrec)) then
    ABI_CHECK(present(nsym), "error - provide nsym and symrec arguments together")
-   krank = krank_new(nkpt, kpt, nsym=nsym, symrec=symrec)
+   call krank%init(nkpt, kpt, nsym=nsym, symrec=symrec)
  else
-   krank = krank_new(nkpt, kpt)
+   call krank%init(nkpt, kpt)
  end if
 
  call bfactor(nkptfull, kptfull, nkptfull, kptfull, krank, nkpt, weight, nband, nestordered)
@@ -249,7 +246,7 @@ subroutine mknesting(nkpt,kpt,kptrlatt,nband,weight,nqpath,&
  call krank%free()
  ABI_FREE(kptfull)
 
- krank = krank_new(nqptfull, qptfull)
+ call krank%init(nqptfull, qptfull)
 
  ABI_MALLOC(ktable,(nqptfull))
  do ikpt=1,nqptfull
@@ -334,7 +331,6 @@ subroutine outnesting(base_name,gmet,gprimd,kptrlatt,nestordered,nkpt,nqpath,prt
 ! dummy variables for call to printxsf
  integer :: natom, ntypat, typat(1)
  real(dp) :: xcart (3,1), znucl(1)
-
 ! *************************************************************************
 
  ! Definition of the q path along which ph linwid will be interpolated

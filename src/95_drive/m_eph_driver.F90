@@ -34,12 +34,10 @@ module m_eph_driver
  use m_dtfil
  use m_ddb
  use m_ddb_hdr
- use m_dvdb
+ use m_dvdb,            only : dvdb_t
  use m_ifc
  use m_phonons
  use m_nctk
- use m_wfk
- use m_distribfft
  use netcdf
 
  use defs_datatypes,    only : pseudopotential_type
@@ -48,6 +46,7 @@ module m_eph_driver
  use m_time,            only : cwtime, cwtime_report
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa
  use m_fftcore,         only : print_ngfft
+ use m_wfk,             only : wfk_read_ebands
  use m_rta,             only : rta_driver, ibte_driver
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_pawang,          only : pawang_type
@@ -67,7 +66,8 @@ module m_eph_driver
  use m_ephtk,           only : ephtk_update_ebands
  use m_gstore,          only : gstore_t
  use m_migdal_eliashberg, only : migdal_eliashberg_iso !, migdal_eliashberg_aniso
- use m_berry_curvature,  only : berry_curvature
+ use m_gstore_sigeph,   only : gstore_sigeph
+ use m_berry_curvature, only : berry_curvature
  use m_cumulant,        only : cumulant_driver
  use m_frohlich,        only : frohlich_t, frohlichmodel_zpr, frohlichmodel_polaronmass
  use m_gwpt,            only : gwpt_run
@@ -333,6 +333,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  if (use_wfk) then
    ! Construct crystal and ebands from the GS WFK file.
+   ! TODO: If we want to update the eigenvalues to perform some kind of self-consistency,
+   ! this operation should be done here! Either scissors operator or external file with QP energies.
    ebands = wfk_read_ebands(wfk0_path, comm, out_hdr=wfk0_hdr)
    call wfk0_hdr%vs_dtset(dtset)
 
@@ -472,10 +474,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    dipquad=dtset%dipquad, quadquad=dtset%quadquad)
 
  ABI_FREE(ddb_qshifts)
- if (my_rank == master) then
-   call ifc%print(unit=std_out)
-   !call ifc%print(unit=ab_out)
- end if
+ if (my_rank == master) call ifc%print([std_out])
 
  ! Output phonon band structure (requires qpath)
  if (dtset%prtphbands /= 0) call ifc_mkphbs(ifc, cryst, dtset, dtfil%filnam_ds(4), comm)
@@ -528,7 +527,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  ! Initialize the object used to read DeltaVscf
  if (use_dvdb) then
-   dvdb = dvdb_new(dvdb_filepath, comm)
+   call dvdb%init(dvdb_filepath, comm)
    ABI_CHECK(dvdb%has_fields("pot1", msg), sjoin(dvdb_filepath, msg))
 
    ! DVDB cryst comes from DPPT --> no time-reversal if q /= 0
@@ -591,8 +590,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  if (use_drhodb) then
    ! Store DRHODB as a DVDB object
-   drhodb = dvdb_new(drhodb_filepath, comm)
-   !ABI_CHECK(dvdb%has_fields("den1", msg), sjoin(drhodb_filepath, msg))
+   call drhodb%init(drhodb_filepath, comm)
+   ABI_CHECK(drhodb%has_fields("den1", msg), sjoin(drhodb_filepath, msg))
 
    ! DVDB cryst comes from DPPT --> no time-reversal if q /= 0
    ! Change the value so that we use the same as the GS part.
@@ -636,8 +635,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  ! Fake MPI_type for the sequential part.
  call initmpi_seq(mpi_enreg)
- call init_distribfft_seq(mpi_enreg%distribfft, 'c', ngfftc(2), ngfftc(3), 'all')
- call init_distribfft_seq(mpi_enreg%distribfft, 'f', ngfftf(2), ngfftf(3), 'all')
+ call mpi_enreg%distribfft%init_seq('c', ngfftc(2), ngfftc(3), 'all')
+ call mpi_enreg%distribfft%init_seq('f', ngfftf(2), ngfftf(3), 'all')
 
  ! I am not sure yet the EFMAS file will be needed as soon as eph_frohlichm/=0. To be decided later.
  if (dtset%eph_frohlichm /= 0) then
@@ -695,8 +694,11 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      end if
    end if
 
+ case (24)
+   call gstore_sigeph(ngfftc, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_enreg, comm)
+
  case (5, -5)
-   ! Interpolate the phonon potential.
+   ! Interpolate the DFPT potential.
    call dvdb%interpolate_and_write(dtset, dtfil%fnameabo_dvdb, ngfftc, ngfftf, cryst, &
                                    ifc%ngqpt, ifc%nqshft, ifc%qshft, comm)
 
@@ -776,15 +778,10 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (13)
    ! Variational polaron equations.
-   if (gstore_filepath /= ABI_NOFILE) then
-     call wrtout(units, sjoin(" Computing variational polaron equations from pre-existent GSTORE file:", gstore_filepath))
-     call gstore%from_ncpath(gstore_filepath, with_cplex2, dtset, cryst, ebands, ifc, comm)
-     call varpeq_run(gstore, dtset, dtfil)
-     call gstore%free()
-   else
-     gstore_path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
-     ABI_ERROR(sjoin("Cannot find GSTORE file:", gstore_path))
-   end if
+   call wrtout(units, sjoin(" Computing variational polaron equations from pre-existent GSTORE file:", gstore_filepath))
+   call gstore%from_ncpath(gstore_filepath, with_cplex2, dtset, cryst, ebands, ifc, comm)
+   call varpeq_run(gstore, dtset, dtfil)
+   call gstore%free()
 
  case (-13)
    ! Compute polaron wavefunctions and atomic displacements in the supercell and write results to files.
@@ -838,18 +835,16 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (17)
    ! Compute e-ph matrix elements with the GWPT formalism.
-   ABI_CHECK(dtset%useylm == 0, "useylm != 0 not implemented/tested")
    call gwpt_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, drhodb, ifc, wfk0_hdr, &
                  pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (18)
-   ! Compute e-ph matrix elements along q-path.
+   ! Compute e-ph matrix elements along path in the BZ
    call eph_path_run(dtfil, dtset, cryst, ebands, dvdb, ifc, pawfgr, pawang, pawrad, pawtab, psps, comm)
 
  case (19)
    ! Compute matrix elements of W_kk'
-   call wkk_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, wfk0_hdr, &
-                pawtab, psps, mpi_enreg, comm)
+   call wkk_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, wfk0_hdr, pawtab, psps, mpi_enreg, comm)
 
  case default
    ABI_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))

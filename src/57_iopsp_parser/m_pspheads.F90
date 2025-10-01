@@ -118,7 +118,6 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
  character(len=3) :: atmsymb
  character(len=30) :: creator
 #endif
-
 !*************************************************************************
 
  test_paw=0
@@ -266,7 +265,7 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
    ! Initialize nproj, nprojso, pspso, as well as xccc, for each type of psp
    pspheads(ipsp)%GTHradii = zero
 
-   if(pspcod==1 .or. pspcod==4)then
+   if (pspcod==1 .or. pspcod==4)then
 
      ! Teter format
      do ilmax=0,lmax
@@ -276,7 +275,7 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
      read(unt,*, err=10, iomsg=errmsg) rchrg,fchrg,qchrg
      if (fchrg>1.d-15) pspheads(ipsp)%xccc=n1xccc_default
 
-   else if(pspcod==2)then
+   else if (pspcod==2)then
 
      ! GTH pseudopotentials
      read(unt,*, err=10, iomsg=errmsg) pspheads(ipsp)%GTHradii(0) !rloc
@@ -286,7 +285,7 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
      read(unt,*, err=10, iomsg=errmsg) pspheads(ipsp)%GTHradii(2),hdum(3)
      if(abs(hdum(3))>1.d-9) nproj(1)=1
 
-   else if(pspcod==3)then
+   else if (pspcod==3)then
 
      ! HGH pseudopotentials
      read (unt,*, err=10, iomsg=errmsg) pspheads(ipsp)%GTHradii(0) !rloc
@@ -309,7 +308,7 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
        end if
      end do
 
-   else if(pspcod==5)then
+   else if (pspcod==5)then
 
      ! PHONEY pseudopotentials
      ! read parameter for Hamman grid
@@ -331,7 +330,7 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
      read (unt,*, err=10, iomsg=errmsg) rchrg,fchrg,qchrg
      if (fchrg>1.d-15) pspheads(ipsp)%xccc=n1xccc_default
 
-   else if(pspcod==6)then
+   else if (pspcod==6)then
 
      ! FHI pseudopotentials
      read (unt, '(a3)') testxc
@@ -349,7 +348,7 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
        nproj(ilmax)=1
      end do
 
-   else if(pspcod==7)then
+   else if (pspcod==7)then
 
      ! PAW pseudopotentials
      test_paw=1;pspheads(ipsp)%pawheader%pawver=1
@@ -429,7 +428,7 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
      end if
 #endif
 
-   else if(pspcod==8)then
+   else if (pspcod==8)then
 
      ! DRH pseudopotentials
      read(unt,*, err=10, iomsg=errmsg) rchrg,fchrg,qchrg
@@ -444,10 +443,10 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
      end if
      pspheads(ipsp)%pspso=pspso
 
-   else if(pspcod==9)then
+   else if (pspcod==9)then
       ! placeholder: nothing to do everything is read above
 
-   else if(pspcod==10)then
+   else if (pspcod==10)then
 
      ! HGH pseudopotentials, full h/k matrices
      read (unt,*,err=10,iomsg=errmsg) pspheads(ipsp)%GTHradii(0) !rloc
@@ -565,7 +564,6 @@ subroutine pspheads_comm(npsp,pspheads,test_paw)
  real(dp),allocatable :: list_dpr(:)
  character(len=fnlen),allocatable :: list_char(:)
 #endif
-
 !*************************************************************************
 
 #if defined HAVE_MPI
@@ -726,7 +724,6 @@ subroutine pawpsxml2ab(filnam, ecut_tmp, pspheads, option)
  integer :: ii,il,lloc,lmax,pspcod,pspxc
  real(dp) :: r2well,zionpsp,znuclpsp
 ! character(len=100) :: xclibxc, msg
-
 ! *********************************************************************
 
  if (option==1) then
@@ -886,7 +883,6 @@ subroutine upf2_to_psphead(filpsp, znucl, zion, pspxc, lmax, n1xccc, nproj_l, np
  type(atomdata_t) :: atom
 ! arrays
  real(dp),allocatable :: vsr(:,:,:), esr(:,:), vso(:,:,:), eso(:,:)
-
 ! *********************************************************************
 
  ! See also https://github.com/QEF/qeschemas/blob/master/UPF/qe_pp-0.99.xsd
@@ -968,9 +964,8 @@ subroutine upf2_jl2srso(upf, nproj_l, nprojso_l, vsr, esr, vso, eso)
  real(dp) :: jtot, eprmin !eps_srso,
  !character(len=500) :: msg
 ! arrays
-integer :: irc6(6),nproj6(6), done_ilk(6,2)
+ integer :: irc6(6),nproj6(6), done_ilk(6,2)
  real(dp),allocatable :: vkb(:,:,:,:), evkb(:,:,:)
-
 ! *********************************************************************
 
  lmax = upf%lmax; mmax = upf%mesh
@@ -1103,8 +1098,8 @@ subroutine upfxc2abi(dft, pspxc)
 !Local variables -------------------------
  integer :: iexch,icorr,igcx,igcc
  integer :: totalindex, offset
-
 ! *********************************************************************
+
 !extract from char*20 :: dft(:)
 !###  The following has been copied from pwscf src/Modules/upf_to_internal.f90:
 !workaround for rrkj format - it contains the indices, not the name
@@ -1191,7 +1186,6 @@ integer function upfdft_to_ixc(dft, ixc, msg) result(ierr)
 !Local variables-------------------------------
  integer :: start !, ii
  character(len=500) :: x_name, c_name, gcx_name, gcc_name
-
 !*************************************************************************
 
  ! This list taken from oncvpsp/src/upfout.f90
@@ -1566,7 +1560,6 @@ end function upfdft_to_ixc
 end subroutine sr_so_r
 !!***
 
-!
 ! Copyright (c) 1989-2019 by D. R. Hamann, Mat-Sim Research LLC and Rutgers
 ! University
 !

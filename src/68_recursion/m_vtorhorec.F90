@@ -22,7 +22,6 @@ module m_vtorhorec
 
  use defs_basis
  use defs_rectypes
- use m_distribfft
  use m_xmpi
  use m_pretty_rec
  use m_errors
@@ -522,9 +521,9 @@ subroutine vtorhorec(dtset,&
    ABI_MALLOC(ablocal_f,(1:rset%pawfgr%nfft,0:nrec,2))
    ABI_MALLOC(ablocal_1,(1:rset%par%npt,0:nrec,2))
 
-   call destroy_distribfft(rset%mpi%distribfft)
-   call init_distribfft(rset%mpi%distribfft,'c',rset%mpi%nproc_fft,rset%pawfgr%ngfftc(2) ,rset%pawfgr%ngfftc(3))
-   call init_distribfft(rset%mpi%distribfft,'f',rset%mpi%nproc_fft,rset%pawfgr%ngfft(2) ,rset%pawfgr%ngfft(3))
+   call rset%mpi%distribfft%free()
+   call rset%mpi%distribfft%init('c',rset%mpi%nproc_fft,rset%pawfgr%ngfftc(2) ,rset%pawfgr%ngfftc(3))
+   call rset%mpi%distribfft%init('f',rset%mpi%nproc_fft,rset%pawfgr%ngfft(2) ,rset%pawfgr%ngfft(3))
 
    rholocal_f = zero; ablocal_f = zero; ablocal_2 = zero
 
@@ -871,9 +870,9 @@ subroutine vtorhorec(dtset,&
  end if
 
 !--------------------------------------------------------
- call destroy_distribfft(rset%mpi%distribfft)
- call init_distribfft(rset%mpi%distribfft,'c',rset%mpi%nproc_fft,rset%ngfftrec(2),rset%ngfftrec(3))
- call init_distribfft(rset%mpi%distribfft,'f',rset%mpi%nproc_fft,dtset%ngfft(2),dtset%ngfft(3))
+ call rset%mpi%distribfft%free()
+ call rset%mpi%distribfft%init('c',rset%mpi%nproc_fft,rset%ngfftrec(2),rset%ngfftrec(3))
+ call rset%mpi%distribfft%init('f',rset%mpi%nproc_fft,dtset%ngfft(2),dtset%ngfft(3))
 
 !--Printing results
  write(msg,'(3a,f15.10)')&
@@ -963,18 +962,15 @@ subroutine entropyrec(an,bn2,nrec,trotter,ent_out,multce,debug_rec, &
  integer, save :: first_en = 1
  integer :: ii,kk,n_pt_integ_path2,n_pt_integ_path3
  real(dp) :: arg,epsilo,step,twotrotter,xmin,dr_step
- complex(dpc) :: D,Dnew,Dold,N,Nnew,Nold,dz_path,ent_acc,ent_acc1,ent_acc2
- complex(dpc) :: ent_acc3,ent_acc4
- complex(dpc) :: funczero,z_path,zj
- complex(dpc) ::delta_calc
+ complex(dp) :: D,Dnew,Dold,N,Nnew,Nold,dz_path,ent_acc,ent_acc1,ent_acc2
+ complex(dp) :: ent_acc3,ent_acc4
+ complex(dp) :: funczero,z_path,zj
+ complex(dp) ::delta_calc
  character(len=500) :: msg
 !arrays
  real(dp) :: tsec(2)
  real(dp) :: iif,factor
-
-
 ! *************************************************************************
-
 
  call timab(610,1,tsec)
 
@@ -1213,8 +1209,8 @@ subroutine entropyrec(an,bn2,nrec,trotter,ent_out,multce,debug_rec, &
 
    function func1_rec(z)
 
-   complex(dpc) :: func1_rec
-   complex(dpc),intent(in) :: z
+   complex(dp) :: func1_rec
+   complex(dp),intent(in) :: z
 
    func1_rec =   z/(cone+z)*log(cone+cone/z)+ cone/(cone+z)*log(cone+z)
 
@@ -1560,13 +1556,13 @@ subroutine density_rec(an,bn2,rho_out,nrec, &
  integer  :: irec
  real(dp) :: beta,mult,prod_b2,error,errold
  real(dp) :: pi_on_rtrotter,twortrotter,exp1,exp2
- complex(dpc) :: cinv2rtrotter,coeef_mu,facrec0
+ complex(dp) :: cinv2rtrotter,coeef_mu,facrec0
 ! character(len=500) :: msg
 !arrays
  real(dp) :: tsec(2)
- complex(dpc) :: acc_rho(0:nrec)
- complex(dpc) :: D(0:dim_trott),Dold(0:dim_trott)
- complex(dpc) :: N(0:dim_trott),Nold(0:dim_trott)
+ complex(dp) :: acc_rho(0:nrec)
+ complex(dp) :: D(0:dim_trott),Dold(0:dim_trott)
+ complex(dp) :: N(0:dim_trott),Nold(0:dim_trott)
 !**************************************************************************
 
  call timab(605,1,tsec)
@@ -1673,13 +1669,12 @@ subroutine gran_potrec(an,bn2,nrec,trotter,ene_out, mult, &
  integer, save :: first = 1
  integer :: ii,kk,n_pt_integ_path2
  real(dp) :: epsilon,step,twotrotter,xmin,dr_step
- complex(dpc) :: D,Dnew,Dold,N,Nnew,Nold,dz_path,ene_acc,ene_acc1,ene_acc2
- complex(dpc) :: ene_acc3,ene_acc4
- complex(dpc) :: z_path,delta_calc
+ complex(dp) :: D,Dnew,Dold,N,Nnew,Nold,dz_path,ene_acc,ene_acc1,ene_acc2
+ complex(dp) :: ene_acc3,ene_acc4
+ complex(dp) :: z_path,delta_calc
  character(len=500) :: message
 !arrays
  real(dp) :: tsec(2)
-
 ! *************************************************************************
 
 
@@ -1897,8 +1892,8 @@ subroutine gran_potrec(an,bn2,nrec,trotter,ene_out, mult, &
 
    function func_rec(z,x)
 
-   complex(dpc) :: func_rec
-   complex(dpc),intent(in) :: z
+   complex(dp) :: func_rec
+   complex(dp),intent(in) :: z
    real(dp),intent(in) :: x
 
    func_rec = log(cone+z**x)
@@ -2558,17 +2553,16 @@ subroutine recursion(exppot,coordx,coordy,coordz,an,bn2,rho_out, &
  real(dp) :: switchimu,switchu
  real(dp) :: bb,beta,mult,prod_b2,error,errold
  real(dp) :: inf_ucvol,pi_on_rtrotter,twortrotter,exp1,exp2
- complex(dpc) :: cinv2rtrotter,coeef_mu,facrec0
+ complex(dp) :: cinv2rtrotter,coeef_mu,facrec0
 ! character(len=500) :: msg
 !arrays
  real(dp) :: tsec(2)
  real(dp) :: inf_tr(3)
  real(dp) :: Zvtempo(1:2, 0:nfft-1)
  real(dp) :: unold(0:nfft-1),vn(0:nfft-1),un(0:nfft-1)
- complex(dpc) :: acc_rho(0:nrec)
- complex(dpc) :: D(0:dim_trott),Dold(0:dim_trott)
- complex(dpc) :: N(0:dim_trott),Nold(0:dim_trott)
-
+ complex(dp) :: acc_rho(0:nrec)
+ complex(dp) :: D(0:dim_trott),Dold(0:dim_trott)
+ complex(dp) :: N(0:dim_trott),Nold(0:dim_trott)
 ! *************************************************************************
 
 !--If count time or not
@@ -2768,7 +2762,7 @@ subroutine recursion_nl(exppot,un,rho_out,rset,ngfft, &
  real(dp) :: inf_ucvol,pi_on_rtrotter,twortrotter,exp1
  real(dp) :: exp2,error,errold
  real(dp) :: switchu,switchimu
- complex(dpc) :: facrec0,cinv2rtrotter,coeef_mu
+ complex(dp) :: facrec0,cinv2rtrotter,coeef_mu
  character(len=500) :: msg
  type(mpi_type),pointer:: mpi_loc
 !arrays
@@ -2778,9 +2772,9 @@ subroutine recursion_nl(exppot,un,rho_out,rset,ngfft, &
  real(dp):: vn(0:rset%nfftrec-1)
  real(dp):: unold(0:rset%nfftrec-1)
  real(dp):: Zvtempo(1:2,0:rset%nfftrec-1)
- complex(dpc) :: acc_rho(0:rset%min_nrec)
- complex(dpc) :: D(0:dim_trott),Dold(0:dim_trott)
- complex(dpc) :: N(0:dim_trott),Nold(0:dim_trott)
+ complex(dp) :: acc_rho(0:rset%min_nrec)
+ complex(dp) :: D(0:dim_trott),Dold(0:dim_trott)
+ complex(dp) :: N(0:dim_trott),Nold(0:dim_trott)
 
 ! *************************************************************************
 

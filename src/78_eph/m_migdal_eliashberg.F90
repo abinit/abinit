@@ -91,8 +91,6 @@ contains
   procedure :: solve => iso_solver_solve
 
 end type iso_solver_t
-
-!private :: iso_solver_new
 !!***
 
 contains
@@ -105,10 +103,7 @@ contains
 !! iso_solver_free
 !!
 !! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
+!!  Free dynamic memory
 !!
 !! SOURCE
 
@@ -247,7 +242,7 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: nproc, my_rank, ierr, itemp, ntemp, niw, ncid !, my_nshiftq, nsppol !, iq_glob, ik_glob, ii ! out_nkibz,
+ integer :: nproc, my_rank, ierr, itemp, ntemp, niw, ncid
  integer :: edos_intmeth
  !integer :: spin, natom3, cnt !, band, ib, nb, my_ik, my_iq, my_is
  !integer :: ik_ibz, ik_bz, ebands_timrev
@@ -259,8 +254,6 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  !character(len=5000) :: msg
  class(crystal_t),pointer :: cryst
  class(ebands_t),pointer :: ebands
- !class(ifc_type),target,intent(in) :: ifc
- !type(gqk_t),pointer :: gqk
  type(iso_solver_t) :: iso
  type(edos_t) :: edos
 !arrays
@@ -300,12 +293,9 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  ! Compute phonon frequency mesh.
  call gstore%ifc%get_phmesh(dtset%ph_wstep, phmesh_size, phmesh)
 
- ! Compute and store my phonon quantities
- call gstore%calc_my_phonons(store_phdispl=.False.)
-
  ! Compute Eliashberg function a2F(w)
  ABI_MALLOC(a2fw, (phmesh_size))
- call gstore%get_a2fw(phmesh_size, phmesh, a2fw)
+ call gstore%get_a2fw(dtset, phmesh_size, phmesh, a2fw)
 
  ncid = nctk_noid
  if (my_rank == master) then

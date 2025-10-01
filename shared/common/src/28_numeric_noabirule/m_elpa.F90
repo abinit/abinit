@@ -254,7 +254,7 @@ subroutine elpa_func_allocate(elpa_hdl,gpu,blacs_ctx)
    call elpa_func_error_handler(err_code=err,err_msg='Error when enabling GPU on ELPA')
 
    if (gpu_debug_mode) then
-     if (err==ELPA_OK) call elpa_hdl%elpa%set("debug",1,err) 
+     if (err==ELPA_OK) call elpa_hdl%elpa%set("debug",1,err)
      call elpa_func_error_handler(err_code=err,err_msg='Error when enabling debug on ELPA')
    end if
 
@@ -633,14 +633,13 @@ subroutine elpa_func_solve_gevp_2stage_complex(elpa_hdl,aa,bb,qq,ev,nev)
  integer,intent(in)  :: nev
  type(elpa_hdl_t),intent(inout) :: elpa_hdl
 !arrays
- complex(dpc),intent(inout) :: aa(:,:),bb(:,:)
+ complex(dp),intent(inout) :: aa(:,:),bb(:,:)
  real(dp),intent(out) :: ev(:)
- complex(dpc),intent(out) :: qq(:,:)
+ complex(dp),intent(out) :: qq(:,:)
 
 !Local variables-------------------------------
  integer :: err
  logical  :: success
-
 ! *********************************************************************
 
  success=.true. ; err=0
@@ -792,14 +791,13 @@ subroutine elpa_func_solve_evp_1stage_complex(elpa_hdl,aa,qq,ev,nev)
  integer,intent(in)  :: nev
  type(elpa_hdl_t),intent(inout) :: elpa_hdl
 !arrays
- complex(dpc),intent(inout) :: aa(:,:)
+ complex(dp),intent(inout) :: aa(:,:)
  real(dp),intent(out) :: ev(:)
- complex(dpc),intent(out) :: qq(:,:)
+ complex(dp),intent(out) :: qq(:,:)
 
 !Local variables-------------------------------
  integer :: err
  logical  :: success
-
 ! *********************************************************************
 
  success=.true. ; err=0
@@ -951,12 +949,11 @@ subroutine elpa_func_cholesky_complex(elpa_hdl,aa)
 !scalars
  type(elpa_hdl_t),intent(inout) :: elpa_hdl
 !arrays
- complex(dpc),intent(inout) :: aa(:,:)
+ complex(dp),intent(inout) :: aa(:,:)
 
 !Local variables-------------------------------
  integer :: err
  logical :: success
-
 ! *********************************************************************
 
  success=.true. ; err=0
@@ -1106,12 +1103,11 @@ subroutine elpa_func_invert_triangular_complex(elpa_hdl,aa)
 !scalars
  type(elpa_hdl_t),intent(inout) :: elpa_hdl
 !arrays
- complex(dpc),intent(inout) :: aa(:,:)
+ complex(dp),intent(inout) :: aa(:,:)
 
 !Local variables-------------------------------
  integer :: err
  logical :: success
-
 ! *********************************************************************
 
  success=.true. ; err=0
@@ -1305,13 +1301,12 @@ subroutine elpa_func_hermitian_multiply_complex(elpa_hdl,uplo_a,uplo_c,ncb,aa,bb
  character*1 :: uplo_a,uplo_c
  type(elpa_hdl_t),intent(inout) :: elpa_hdl
 !arrays
- complex(dpc),intent(in) :: aa(:,:),bb(:,:)
- complex(dpc),intent(out) :: cc(:,:)
+ complex(dp),intent(in) :: aa(:,:),bb(:,:)
+ complex(dp),intent(out) :: cc(:,:)
 
 !Local variables-------------------------------
  integer :: err
  logical :: success
-
 ! *********************************************************************
 
  success=.true. ; err=0

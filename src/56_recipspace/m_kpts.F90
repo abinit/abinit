@@ -663,7 +663,8 @@ end subroutine kpts_pack_in_stars
 !!
 !! SOURCE
 
-integer function kpts_map(mode, kptopt, cryst, krank, nkpt2, kpt2, map, qpt, dksqmax_tol) result(ierr)
+integer function kpts_map(mode, kptopt, cryst, krank, nkpt2, kpt2, map, &
+                          qpt, dksqmax_tol) result(ierr) ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -696,13 +697,13 @@ integer function kpts_map(mode, kptopt, cryst, krank, nkpt2, kpt2, map, qpt, dks
  end if
 
  select case (mode)
- case("symrel")
+ case ("symrel")
    ! Note symrel and use_symrec = .False.
    ! These are the conventions for the symmetrization of the wavefunctions used in cgtk_rotate.
    call krank%get_mapping(nkpt2, kpt2, dksqmax, cryst%gmet, map, &
                           nsym, cryst%symafm, cryst%symrel, timrev, use_symrec=.False., qpt=my_qpt)
 
- case("symrec")
+ case ("symrec")
    ! Note symrec and use_symrec = .True.
    ! These are the conventions for the symmetrization of the DVDB as well as the conventions
    ! used in several BZ routines.
@@ -1868,7 +1869,7 @@ subroutine get_full_kgrid(indkpt,kpt,kpt_fullbz,kptrlatt,nkpt,nkpt_fullbz,nshift
  call get_kpt_fullbz(kpt_fullbz,kptrlatt,nkpt_fullbz,nshiftk,shiftk)
 
  ! make full k-point rank arrays
- krank = krank_new(nkpt, kpt)
+ call krank%init(nkpt, kpt)
 
  !find equivalence to irred kpoints in kpt
  indkpt(:) = 0
@@ -1939,7 +1940,6 @@ subroutine get_kpt_fullbz(kpt_fullbz,kptrlatt,nkpt_fullbz,nshiftk,shiftk)
 &  113,127,131,137,139, 149,151,157,163,167,&
 &  173,179,181,191,193, 197,199/)
  real(dp) :: k1(3),k2(3),klatt(3,3),rlatt(3,3),shift(3),test_rlatt(3,3)
-
 ! *********************************************************************
 
 !Identify first factors that can be used to rescale the three kptrlatt vectors
@@ -2105,16 +2105,13 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
  integer :: ads(3),boundmax(3),boundmin(3),cds(3),coord(3),ngkpt(3)
  integer, allocatable :: found1(:,:),found2(:,:),found3(:,:)
  real(dp) :: k1(3),k2(3),kcar(3),klatt(3,3),ktest(3),rlatt(3,3)
-
 ! *********************************************************************
 
-!DEBUG
 !write(std_out,*)' smpbz : brav,iout,mkpt,nkpt,option=',brav,iout,mkpt,nkpt,option
 !write(std_out,*)' smpbz : kptrlatt(:,:)=',kptrlatt(:,:)
 !write(std_out,*)' smpbz : nshiftk=',nshiftk
 !write(std_out,*)' smpbz : shiftk(:,:)=',shiftk(:,:)
 !write(std_out,*)' smpbz : downsampling(:)=',downsampling(:)
-!ENDDEBUG
 
  prtout_ = .true.
  if (present(prtout)) then
@@ -2165,8 +2162,6 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
      end do
    end if
  end if
-
-!*********************************************************************
 
  if(abs(brav)==1)then
 

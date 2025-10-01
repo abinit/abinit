@@ -193,7 +193,7 @@ subroutine anaddb_driver_init(driver, dtset)
 
  ! Set control flags
  if (dtset%ifcflag == 1) then
-   driver%do_ifc = .true. 
+   driver%do_ifc = .true.
  end if
 
  if (dtset%ifcflag /= 0 .or. dtset%dieflag /= 0 &
@@ -211,7 +211,7 @@ subroutine anaddb_driver_init(driver, dtset)
  end if
 
  if (dtset%nph2l /= 0) then
-   driver%do_dielectric_nonana = .true. 
+   driver%do_dielectric_nonana = .true.
  end if
 
  if (dtset%ifcflag == 1 .and. any(dtset%prtdos==[1, 2])) then
@@ -219,15 +219,15 @@ subroutine anaddb_driver_init(driver, dtset)
  end if
 
  if (dtset%nph1l /= 0 .or. dtset%nqpath /= 0) then
-   driver%do_phonon_bs = .true. 
+   driver%do_phonon_bs = .true.
  end if
 
  if (dtset%gruns_nddbs /= 0) then
-   driver%do_ifc = .false. 
+   driver%do_ifc = .false.
    driver%do_electric_tensors = .false.
    driver%do_dielectric_q0 = .false.
-   driver%do_dielectric_nonana = .false. 
-   driver%do_phonon_bs = .false. 
+   driver%do_dielectric_nonana = .false.
+   driver%do_phonon_bs = .false.
    driver%do_phonon_dos = .false.
  end if
 
@@ -684,7 +684,7 @@ subroutine anaddb_driver_interatomic_force_constants(driver, ifc, dtset, crystal
      dipquad=dtset%dipquad, quadquad=dtset%quadquad)
  end if
 
- call ifc%print(unit=std_out)
+ call ifc%print([std_out])
 
  ! Compute speed of sound.
  if (dtset%vs_qrad_tolkms(1) > zero) then
@@ -738,6 +738,7 @@ subroutine anaddb_driver_phdos(driver, dtset, crystal, ifc, comm)
 
 ! ************************************************************************
 
+ ABI_UNUSED(driver%natom)
  my_rank = xmpi_comm_rank(comm)
  units = [std_out, ab_out]
 
@@ -799,9 +800,9 @@ subroutine anaddb_driver_thermal_supercell(driver, dtset, crystal, ifc)
 
 !Local variables -------------------------------
  type(supercell_type), allocatable:: thm_scells(:)
-
 ! ************************************************************************
 
+ ABI_UNUSED(driver%natom)
  ABI_MALLOC(thm_scells, (dtset%ntemper))
  call zacharias_supercell_make(crystal, ifc, dtset%ntemper, dtset%thermal_supercell, dtset%tempermin, dtset%temperinc, thm_scells)
  call zacharias_supercell_print(dtset%prefix_outdata, dtset%ntemper, dtset%tempermin, dtset%temperinc, thm_scells)
@@ -841,6 +842,7 @@ subroutine anaddb_driver_harmonic_thermo(driver, dtset, crystal, ifc, ddb, comm)
 
 ! ************************************************************************
 
+ ABI_UNUSED(driver%natom)
  units = [std_out, ab_out]
 
  write(msg, '(a, (80a), a, a, a, a, a, a, a, a)' ) ch10, ('=',ii = 1, 80), ch10, ch10, &
@@ -1407,6 +1409,7 @@ subroutine anaddb_driver_lattice_wannier(driver, dtset, crystal, ifc, comm)
 ! ************************************************************************
 
  units = [std_out, ab_out]
+ ABI_UNUSED(driver%natom)
 
  write(msg, '(a, (80a), 4a)')ch10, ('=',ii = 1, 80), ch10, ch10, ' Calculation of lattice Wannier functions ',ch10
  call wrtout(units, msg)

@@ -33,8 +33,8 @@ subroutine abi_zcopy(size,tsrc,incsrc,tdest,incdest)
  integer, intent(in) :: size
  integer, intent(in) :: incsrc
  integer, intent(in) :: incdest
- complex(dpc),intent(in) :: tsrc
- complex(dpc),intent(inout) :: tdest
+ complex(dp),intent(in) :: tsrc
+ complex(dp),intent(inout) :: tdest
 
  !Local variables-------------------------------
 #ifdef DEV_LINALG_TIMING
@@ -67,8 +67,8 @@ subroutine abi_zcopy_1d(size,tsrc,incsrc,tdest,incdest)
  integer, intent(in) :: size
  integer, intent(in) :: incsrc
  integer, intent(in) :: incdest
- complex(dpc), intent(in) :: tsrc(*)
- complex(dpc), intent(inout) :: tdest(*)
+ complex(dp), intent(in) :: tsrc(*)
+ complex(dp), intent(inout) :: tdest(*)
 
  call abi_zcopy(size,tsrc(1),incsrc,tdest(1),incdest)
 
@@ -237,7 +237,7 @@ subroutine abi_d2zcopy_2d(size,tsrc,incsrc,tdest,incdest,x_cplx)
  integer, intent(in) :: incsrc
  integer, intent(in) :: incdest
  real(dp),     DEV_CONTARRD intent(in) :: tsrc(:,:)
- complex(dpc), DEV_CONTARRD intent(inout) :: tdest(:,:)
+ complex(dp), DEV_CONTARRD intent(inout) :: tdest(:,:)
  !only in lobpcgwf
  integer, intent(in),optional :: x_cplx
 
@@ -279,7 +279,7 @@ subroutine abi_z2dcopy_2d(size,tsrc,incsrc,tdest,incdest,x_cplx)
  integer, intent(in) :: size
  integer, intent(in) :: incsrc
  integer, intent(in) :: incdest
- complex(dpc), DEV_CONTARRD intent(in) :: tsrc(:,:)
+ complex(dp), DEV_CONTARRD intent(in) :: tsrc(:,:)
  real(dp),     DEV_CONTARRD intent(inout) :: tdest(:,:)
  !only in lobpcgwf
  integer,intent(in), optional :: x_cplx

@@ -327,7 +327,7 @@ subroutine rotate_back_mag_dfpt(option,vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsiz
  ! fail problems
  !real(dp) :: d3,d4
  real(dp) :: dvdn_re,dvdn_im,dvdz_re,dvdz_im
- complex(dpc) :: rho_updn
+ complex(dp) :: rho_updn
  real(dp) :: mdirx,mdiry,mdirz,mxy,mx1,my1,mz1,wx,wy,wx1,wy1
  real(dp) :: theta0,theta1,theta1_re,theta1_im
  real(dp) :: wx1_re,wx1_im
@@ -337,10 +337,9 @@ subroutine rotate_back_mag_dfpt(option,vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsiz
  real(dp) :: bxc
 !arrays
  real(dp)     :: vxc_diag(2),v21tmp(2)
- complex(dpc) :: r1tmp(2,2),u0(2,2),u0_1(2,2),u0_1r1(2,2),u0v1(2,2)
- complex(dpc) :: rho1_updn(2,2),v1tmp(2,2),vxc1tmp(2,2)
- complex(dpc) :: rho1_offdiag(2)
-
+ complex(dp) :: r1tmp(2,2),u0(2,2),u0_1(2,2),u0_1r1(2,2),u0v1(2,2)
+ complex(dp) :: rho1_updn(2,2),v1tmp(2,2),vxc1tmp(2,2)
+ complex(dp) :: rho1_offdiag(2)
 ! *************************************************************************
 
 !DBG_ENTER("COLL")

@@ -709,9 +709,8 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  real(dp) :: gprimbyacell(3,3) !,tsec(2)
  real(dp),allocatable :: dyddt(:,:,:,:,:), dydqt(:,:,:,:,:,:), dyqqt(:,:,:,:,:,:,:)
  real(dp),allocatable :: work(:)
- complex(dpc) :: exp2piqx(natom)
- complex(dpc),allocatable :: expx1(:,:), expx2(:,:), expx3(:,:)
-
+ complex(dp) :: exp2piqx(natom)
+ complex(dp),allocatable :: expx1(:,:), expx2(:,:), expx3(:,:)
 ! *********************************************************************
 
  ! This routine is expensive so skip the calculation and return zeros if zeff == zero.

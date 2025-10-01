@@ -13,10 +13,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -39,11 +35,6 @@ MODULE m_scf_history
  implicit none
 
  private
-
-! public procedures.
- public :: scf_history_init
- public :: scf_history_free
- public :: scf_history_nullify
 !!***
 
 !!****t* m_scf_history/scf_history_type
@@ -185,6 +176,11 @@ MODULE m_scf_history
  end type scf_history_type
 !!***
 
+! public procedures.
+ public :: scf_history_init
+ public :: scf_history_free
+ public :: scf_history_nullify
+
 CONTAINS !===========================================================
 !!***
 
@@ -213,21 +209,18 @@ CONTAINS !===========================================================
 !!
 !! SOURCE
 
-subroutine scf_history_init(dtset,mpi_enreg,usecg,scf_history)
+subroutine scf_history_init(dtset, mpi_enreg, usecg, scf_history)
 
 !Arguments ------------------------------------
 !scalars
+ class(scf_history_type),intent(inout) :: scf_history
  integer, intent(in) :: usecg
  type(dataset_type),intent(in) :: dtset
  type(MPI_type),intent(in) :: mpi_enreg
-!arrays
- type(scf_history_type),intent(inout) :: scf_history
 
 !Local variables-------------------------------
 !scalars
  integer :: jj,mband_cprj,my_natom,my_nspinor,nfft
-!arrays
-
 !************************************************************************
 
  !@scf_history_type
@@ -328,21 +321,15 @@ end subroutine scf_history_init
 !! FUNCTION
 !!  Clean and destroy a scf_history datastructure
 !!
-!! SIDE EFFECTS
-!!  scf_history(:)=<type(scf_history_type)>=scf_history datastructure
-!!
 !! SOURCE
 
 subroutine scf_history_free(scf_history)
 
 !Arguments ------------------------------------
-!arrays
- type(scf_history_type),intent(inout) :: scf_history
+ class(scf_history_type),intent(inout) :: scf_history
 
 !Local variables-------------------------------
-!scalars
  integer :: jj
-
 !************************************************************************
 
  !@scf_history_type
@@ -364,36 +351,16 @@ subroutine scf_history_free(scf_history)
    ABI_FREE(scf_history%cprj)
  end if
 
- if (allocated(scf_history%hindex))       then
-   ABI_FREE(scf_history%hindex)
- end if
- if (allocated(scf_history%deltarhor))    then
-   ABI_FREE(scf_history%deltarhor)
- end if
- if (allocated(scf_history%xreddiff))     then
-   ABI_FREE(scf_history%xreddiff)
- end if
- if (allocated(scf_history%atmrho_last))  then
-   ABI_FREE(scf_history%atmrho_last)
- end if
- if (allocated(scf_history%xred_last))    then
-   ABI_FREE(scf_history%xred_last)
- end if
- if (allocated(scf_history%rhor_last))    then
-   ABI_FREE(scf_history%rhor_last)
- end if
- if (allocated(scf_history%taur_last))    then
-   ABI_FREE(scf_history%taur_last)
- end if
- if (allocated(scf_history%cg))           then
-   ABI_FREE(scf_history%cg)
- end if
- if (allocated(scf_history%eigen))           then
-   ABI_FREE(scf_history%eigen)
- end if
- if (allocated(scf_history%dotprod_sumdiag_cgcprj_ij))           then
-   ABI_FREE(scf_history%dotprod_sumdiag_cgcprj_ij)
- end if
+ ABI_SFREE(scf_history%hindex)
+ ABI_SFREE(scf_history%deltarhor)
+ ABI_SFREE(scf_history%xreddiff)
+ ABI_SFREE(scf_history%atmrho_last)
+ ABI_SFREE(scf_history%xred_last)
+ ABI_SFREE(scf_history%rhor_last)
+ ABI_SFREE(scf_history%taur_last)
+ ABI_SFREE(scf_history%cg)
+ ABI_SFREE(scf_history%eigen)
+ ABI_SFREE(scf_history%dotprod_sumdiag_cgcprj_ij)
 
  scf_history%history_size=-1
  scf_history%usecg=0
@@ -414,19 +381,12 @@ end subroutine scf_history_free
 !! FUNCTION
 !!  Nullify (set to null) an scf_history datastructure
 !!
-!! SIDE EFFECTS
-!!  scf_history(:)=<type(scf_history_type)>=scf_history datastructure
-!!
 !! SOURCE
 
 subroutine scf_history_nullify(scf_history)
 
 !Arguments ------------------------------------
-!arrays
- type(scf_history_type),intent(inout) :: scf_history
-!Local variables-------------------------------
-!scalars
-
+ class(scf_history_type),intent(inout) :: scf_history
 !************************************************************************
 
  !@scf_history_type

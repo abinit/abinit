@@ -3,20 +3,13 @@
 !!  m_efield
 !!
 !! FUNCTION
-!!  This module contains the declaration of data types and methods
-!!  used to handle electric fields
+!!  This module contains the declaration of data types and methods used to handle electric fields
 !!
 !! COPYRIGHT
 !! Copyright (C) 2011-2025 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -193,7 +186,7 @@ module m_efield
 ! 3)    -k_3
 
   real(dp), allocatable :: fkptns(:,:)       ! fkptns(3,1:dtefield%fnkpt)
-                                         ! k-points in FBZ
+                                             ! k-points in FBZ
 
   real(dp), allocatable :: qijb_kk(:,:,:,:)
 ! qijb_kk(2,lmn2max,natom,3)
@@ -219,128 +212,68 @@ module m_efield
    ! cprj's need to be computed in the full BZ, that is,
    ! in the PAW case with kptopt /= 3.
 
-! pointer to cprj
    type(pawcprj_type),allocatable :: cprj(:,:)
-! used with finite efield and PAW
+    ! used with finite efield and PAW
+
+  contains
+
+    procedure :: free => efield_free
 
  end type efield_type
-
- ! Bound methods:
- public :: destroy_efield
 !!***
 
 contains
 
-!!****f* m_efield/destroy_efield
+!!****f* m_efield/efield_free
 !! NAME
 !!
 !! FUNCTION
 !!   deallocate fields in efield structure
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! SOURCE
 
-subroutine destroy_efield(dtefield)
+subroutine efield_free(dtefield)
 
 !Arguments ------------------------------------
-!array
- type(efield_type),intent(inout) :: dtefield !vz_i
-
+ class(efield_type),intent(inout) :: dtefield
 ! ************************************************************************
 
 ! Integer pointers
-  if(allocated(dtefield%atom_indsym))  then
-    ABI_FREE(dtefield%atom_indsym)
-  end if
-  if(allocated(dtefield%cgindex))  then
-    ABI_FREE(dtefield%cgindex)
-  end if
-  if(allocated(dtefield%cgqindex))  then
-    ABI_FREE(dtefield%cgqindex)
-  end if
-  if(allocated(dtefield%cprjindex))  then
-    ABI_FREE(dtefield%cprjindex)
-  end if
-  if(allocated(dtefield%fkgindex))  then
-    ABI_FREE(dtefield%fkgindex)
-  end if
-  if(allocated(dtefield%idxkstr))  then
-    ABI_FREE(dtefield%idxkstr)
-  end if
-  if(allocated(dtefield%ikpt_dk))  then
-    ABI_FREE(dtefield%ikpt_dk)
-  end if
-  if(allocated(dtefield%indkk_f2ibz))  then
-    ABI_FREE(dtefield%indkk_f2ibz)
-  end if
-  if(allocated(dtefield%i2fbz))  then
-    ABI_FREE(dtefield%i2fbz)
-  end if
-  if(allocated(dtefield%kgindex))  then
-    ABI_FREE(dtefield%kgindex)
-  end if
-  if(allocated(dtefield%lmn_size))  then
-    ABI_FREE(dtefield%lmn_size)
-  end if
-  if(allocated(dtefield%lmn2_size))  then
-    ABI_FREE(dtefield%lmn2_size)
-  end if
-  if(allocated(dtefield%nband_occ))  then
-    ABI_FREE(dtefield%nband_occ)
-  end if
-  if(allocated(dtefield%nneigh))  then
-    ABI_FREE(dtefield%nneigh)
-  end if
-  if(allocated(dtefield%sflag))  then
-    ABI_FREE(dtefield%sflag)
-  end if
-  if(allocated(dtefield%str_neigh))  then
-    ABI_FREE(dtefield%str_neigh)
-  end if
-  if(allocated(dtefield%strg_neigh))  then
-    ABI_FREE(dtefield%strg_neigh)
-  end if
+  ABI_SFREE(dtefield%atom_indsym)
+  ABI_SFREE(dtefield%cgindex)
+  ABI_SFREE(dtefield%cgqindex)
+  ABI_SFREE(dtefield%cprjindex)
+  ABI_SFREE(dtefield%fkgindex)
+  ABI_SFREE(dtefield%idxkstr)
+  ABI_SFREE(dtefield%ikpt_dk)
+  ABI_SFREE(dtefield%indkk_f2ibz)
+  ABI_SFREE(dtefield%i2fbz)
+  ABI_SFREE(dtefield%kgindex)
+  ABI_SFREE(dtefield%lmn_size)
+  ABI_SFREE(dtefield%lmn2_size)
+  ABI_SFREE(dtefield%nband_occ)
+  ABI_SFREE(dtefield%nneigh)
+  ABI_SFREE(dtefield%sflag)
+  ABI_SFREE(dtefield%str_neigh)
+  ABI_SFREE(dtefield%strg_neigh)
 
-! Real(dp) pointers
+! Real(dp) arrays
+  ABI_SFREE(dtefield%coord_str)
+  ABI_SFREE(dtefield%epawf3)
+  ABI_SFREE(dtefield%epaws3)
+  ABI_SFREE(dtefield%expibi)
+  ABI_SFREE(dtefield%fkptns)
+  ABI_SFREE(dtefield%qijb_kk)
+  ABI_SFREE(dtefield%rij)
+  ABI_SFREE(dtefield%smat)
+  ABI_SFREE(dtefield%zarot)
 
-  if(allocated(dtefield%coord_str))  then
-    ABI_FREE(dtefield%coord_str)
-  end if
-  if(allocated(dtefield%epawf3))  then
-    ABI_FREE(dtefield%epawf3)
-  end if
-  if(allocated(dtefield%epaws3))  then
-    ABI_FREE(dtefield%epaws3)
-  end if
-  if(allocated(dtefield%expibi))  then
-    ABI_FREE(dtefield%expibi)
-  end if
-  if(allocated(dtefield%fkptns))  then
-    ABI_FREE(dtefield%fkptns)
-  end if
-  if(allocated(dtefield%qijb_kk))  then
-    ABI_FREE(dtefield%qijb_kk)
-  end if
-  if(allocated(dtefield%rij))  then
-    ABI_FREE(dtefield%rij)
-  end if
-  if(allocated(dtefield%smat))  then
-    ABI_FREE(dtefield%smat)
-  end if
-  if(allocated(dtefield%zarot))  then
-    ABI_FREE(dtefield%zarot)
-  end if
-
-! pointer to cprj
-  if(allocated(dtefield%cprj)) then
+  if (allocated(dtefield%cprj)) then
     call pawcprj_free(dtefield%cprj)
     ABI_FREE(dtefield%cprj)
   end if
 
-end subroutine destroy_efield
+end subroutine efield_free
 !!***
 
 end module m_efield

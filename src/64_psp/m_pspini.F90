@@ -77,13 +77,6 @@ contains
 !! Might combine the psps to generate pseudoatoms, thanks to alchemy.
 !! Also compute ecore=[Sum(i) zion(i)] * [Sum(i) epsatm(i)] by calling pspcor.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables in this dataset
 !!   | iscf=parameter controlling scf or non-scf calculations
@@ -171,7 +164,6 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  real(dp),allocatable :: xccc1d_alch(:,:,:),xcccrc_alch(:)
  real(dp),allocatable :: xcctau1d_alch(:,:,:)
  type(nctab_t),target,allocatable :: nctab_alch(:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -290,9 +282,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 & ) gencond=1
 
  if (present(comm_mpi).and.psps%usepaw==1) then
-   if(xmpi_comm_size(comm_mpi)>1)then
-     call xmpi_sum(gencond,comm_mpi,ierr)
-   end if
+   if(xmpi_comm_size(comm_mpi)>1) call xmpi_sum(gencond,comm_mpi,ierr)
    if (gencond/=0) gencond=1
  end if
  ABI_FREE(new_pspso)
@@ -591,7 +581,6 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
    ABI_FREE(xccc1d)
    ABI_FREE(xcctau1d)
    ABI_FREE(dvlspl)
-
  end if !  End condition of new computation needed
 
 !-------------------------------------------------------------
@@ -651,7 +640,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  end do
  psps%mproj = maxval(psps%indlmn(3,:,:))
 
- if (gencond == 1) call psps_print(psps,std_out,dtset%prtvol)
+ if (gencond == 1) call psps_print(psps,[std_out], prtvol=dtset%prtvol)
 
  ! Write the PSPS.nc file and exit here if requested by the user.
  if (abs(dtset%prtpsps) == 1) then
@@ -699,10 +688,8 @@ subroutine pspcor(ecore,epsatm,natom,ntypat,typat,zion)
  real(dp),intent(in) :: epsatm(ntypat),zion(ntypat)
 
 !Local variables-------------------------------
-!scalars
  integer :: ia
  real(dp) :: charge,esum
-
 ! *************************************************************************
 
  charge = 0.d0
@@ -865,7 +852,6 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
  character(len=30) :: creator
  type(pspheader_type) :: psphead
 #endif
-
 ! ******************************************************************************
 
 !paral_mode defines how we access to the psp file
@@ -1424,7 +1410,6 @@ subroutine psp_dump_outputs(pfx,pspcod,lmnmax,lnmax,mpssoang, &
  integer, parameter :: dump = 64
  integer :: ierr, i, j ,k
  character(len=500) :: msg
-
  ! *********************************************************************
 
  open(unit=dump, file=trim(pfx)//"_psp_info.yaml", status='REPLACE', err=10, iostat=ierr)
@@ -1565,8 +1550,8 @@ subroutine psp_dump_outputs(pfx,pspcod,lmnmax,lnmax,mpssoang, &
  return
  10 continue
 
- if ( ierr /= 0 ) then
-   write(msg,'(a,a,a,i8)') "Error writing pseudopotential information", ch10, "IOSTAT=", ierr
+ if (ierr /= 0) then
+   write(msg,'(3a,i0)') "Error writing pseudopotential information", ch10, "IOSTAT=", ierr
    ABI_WARNING(msg)
  end if
 

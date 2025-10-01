@@ -69,7 +69,6 @@ module m_fock
   type(fock_ACE_type), pointer :: fockACE(:,:)=> null()
  end type fock_type
 
-
  type, public :: fock_common_type
 
 ! Integer scalars
@@ -345,12 +344,8 @@ contains
 subroutine fockbz_create(fockbz,mgfft,mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_ACE)
 
 !Arguments ------------------------------------
-!scalars
+ type(fock_BZ_type), intent(inout) :: fockbz
  integer, intent(in) :: mgfft,mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_ACE
- type(fock_BZ_type) , intent(inout) :: fockbz
-
-!Local variables-------------------------------
-
 ! *************************************************************************
 
  !write (std_out,*) ' fockbz_create : enter'
@@ -484,7 +479,6 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
  real(dp),allocatable :: kptns_hf(:,:), phase1d(:,:)
  type(fock_common_type),pointer :: fockcommon
  type(fock_BZ_type),pointer :: fockbz
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -616,9 +610,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
    fockbz%mpi_enreg%me_kpt=mpi_enreg%me_hf
    fockbz%mpi_enreg%comm_kpt=mpi_enreg%comm_hf
    fockbz%mpi_enreg%nproc_spkpt=mpi_enreg%nproc_hf
-   if (allocated(fockbz%mpi_enreg%proc_distrb)) then
-     ABI_FREE(fockbz%mpi_enreg%proc_distrb)
-   end if
+   ABI_SFREE(fockbz%mpi_enreg%proc_distrb)
    ABI_MALLOC(fockbz%mpi_enreg%proc_distrb,(nkpt_bz,mband,1))
    do jkpt=1,nkpt_bz
      fockbz%mpi_enreg%proc_distrb(jkpt,:,1)=fockbz%mpi_enreg%me_kpt
@@ -1127,9 +1119,8 @@ end subroutine fock_init
 subroutine fock_updateikpt(fock,ikpt,isppol)
 
 !Arguments ------------------------------------
- integer, intent(in) :: ikpt,isppol
  type(fock_common_type),pointer :: fock
-
+ integer, intent(in) :: ikpt,isppol
 ! *************************************************************************
 
  !write (std_out,*) ' fock_updateikpt : enter'
@@ -1170,9 +1161,8 @@ end subroutine fock_updateikpt
 subroutine fock_set_ieigen(fock,iband)
 
 !Arguments ------------------------------------
- integer, intent(in) :: iband
  type(fock_common_type),pointer :: fock
-
+ integer, intent(in) :: iband
 ! *************************************************************************
 
 !Nothing to do if fock pointer is not associated...
@@ -1205,7 +1195,6 @@ subroutine fock_destroy(fock)
 
 !Arguments ------------------------------------
  type(fock_type),pointer :: fock
-
 ! *************************************************************************
 
  if (fock%fock_common%use_ACE/=0) then
@@ -1216,28 +1205,30 @@ subroutine fock_destroy(fock)
  ABI_FREE(fock)
 
 end subroutine fock_destroy
+!!***
 
 subroutine fock_common_destroy(fock)
 
 !Arguments ------------------------------------
  type(fock_common_type),pointer :: fock
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
 
  ABI_SFREE(fock%atindx)
  ABI_SFREE(fock%typat)
+
  ! real arrays
  ABI_SFREE(fock%forces)
  ABI_SFREE(fock%nband)
  ABI_SFREE(fock%forces_ikpt)
  ABI_SFREE(fock%stress_ikpt)
  ABI_SFREE(fock%eigen_ikpt)
+
  ! Deallocate datatypes
  if (allocated(fock%pawfgrtab)) then
-    call pawfgrtab_free(fock%pawfgrtab)
-    ABI_FREE(fock%pawfgrtab)
+   call pawfgrtab_free(fock%pawfgrtab)
+   ABI_FREE(fock%pawfgrtab)
  end if
 
  ! Put the integer to 0
@@ -1245,9 +1236,7 @@ subroutine fock_common_destroy(fock)
  fock%ikpt=0
  fock%isppol=0
 
- if (allocated(fock%symrec)) then
-    ABI_FREE(fock%symrec)
- end if
+ ABI_SFREE(fock%symrec)
 
 !* [description of divergence in |q+G|=0]
 !* Put the real (dp) to 0
@@ -1258,14 +1247,14 @@ subroutine fock_common_destroy(fock)
  fock%hyb_range_fock=zero
 
  DBG_EXIT("COLL")
-end subroutine fock_common_destroy
 
+end subroutine fock_common_destroy
+!!***
 
 subroutine fock_BZ_destroy(fock)
 
 !Arguments ------------------------------------
  type(fock_BZ_type),pointer :: fock
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1314,6 +1303,7 @@ subroutine fock_BZ_destroy(fock)
 
 end subroutine fock_BZ_destroy
 !!***
+
 !!****f* m_fock/fock_ACE_destroy
 !! NAME
 !!  fock_ACE_destroy
@@ -1330,9 +1320,11 @@ subroutine fock_ACE_destroy(fockACE)
 
 !Arguments ------------------------------------
  type(fock_ACE_type),pointer :: fockACE(:,:)
+
 !Local variables-------------------------------
  integer :: dim1,dim2,ii,jj
 ! *************************************************************************
+
  DBG_ENTER("COLL")
 
  dim1=size(fockACE,1)
@@ -1387,7 +1379,6 @@ subroutine fock_calc_ene(dtset,fock,fock_energy,ikpt,nband,occ)
 
 !Local variables-------------------------------
  integer :: iband
-
 ! *************************************************************************
 
  ABI_UNUSED(fock_energy)
@@ -1435,7 +1426,6 @@ subroutine fock_update_exc(fock_energy,xc_energy,xcdc_energy)
 !Arguments ------------------------------------
  real(dp),intent(in) :: fock_energy
  real(dp),intent(inout) :: xc_energy,xcdc_energy
-
 ! *************************************************************************
 
 !xc_energy = fock%hyb_mixing*fock_energy
@@ -1489,7 +1479,7 @@ end subroutine fock_update_exc
 !! SOURCE
 
 subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
-&                              mpi_enreg,nattyp,npwarr,occ,ucvol)
+                               mpi_enreg,nattyp,npwarr,occ,ucvol)
 
 !scalars
  integer, intent(in) :: mcg,mcprj
@@ -1856,9 +1846,8 @@ integer function fock_set_getghc_call(fock, new) result(old)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: new
  type(fock_common_type),intent(inout) :: fock
-
+ integer,intent(in) :: new
 ! *************************************************************************
 
  old = fock%getghc_call_
@@ -1881,9 +1870,7 @@ end function fock_set_getghc_call
 pure integer function fock_get_getghc_call(fock)
 
 !Arguments ------------------------------------
-!scalars
  type(fock_common_type),intent(in) :: fock
-
 ! *************************************************************************
 
  fock_get_getghc_call = fock%getghc_call_
@@ -1926,7 +1913,6 @@ subroutine fock_print(fockcommon,fockbz,header,unit,mode_paral,prtvol)
  integer :: my_unt,my_prtvol
  character(len=4) :: my_mode
  character(len=500) :: msg
-
 ! *********************************************************************
 
  my_unt=std_out; if (PRESENT(unit)) my_unt=unit
@@ -2004,9 +1990,8 @@ subroutine bare_vqg(qpoint,fockcommon,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
 !Local variables-------------------------------
 !scalars
  integer :: izero
- real(dp) :: rcut,gqgm12,gqgm13,gqgm23,gs2,gs3
+ real(dp) :: rcut !,gs2,gs3 ! gqgm12,gqgm13,gqgm23,
  real(dp) ::  vqg_sr(nfft)
-
 ! *************************************************************************
 
  if (abs(fockcommon%hyb_mixing_sr)>tol8.and.abs(fockcommon%hyb_range_fock)<tol8) then
@@ -2030,8 +2015,6 @@ subroutine bare_vqg(qpoint,fockcommon,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
     ! Rescale the interaction with the factor hyb_mixing_sr and add it to the full range one
     vqg = vqg + vqg_sr * fockcommon%hyb_mixing_sr
  end if
-
-
 
 end subroutine bare_vqg
 !!***
@@ -2069,6 +2052,7 @@ subroutine strfock(fockcommon,gprimd,fockstr,mpi_enreg,nfft,ngfft,&
 
 !Arguments ------------------------------------
 !scalars
+ type(fock_common_type),intent(in) :: fockcommon
  integer,intent(in) :: nfft,nkpt_bz,ndat
  integer,intent(in),optional :: gpu_option
  real(dp),intent(in) :: ucvol
@@ -2078,13 +2062,12 @@ subroutine strfock(fockcommon,gprimd,fockstr,mpi_enreg,nfft,ngfft,&
  real(dp),intent(in) :: gprimd(3,3),rhog(2,nfft,ndat),qphon(3)
  real(dp),intent(in),optional :: rhog2(2,nfft,ndat)
  real(dp),intent(out) :: fockstr(6,ndat)
- type(fock_common_type),intent(in) :: fockcommon
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: im=2,re=1
  integer :: i1,i2,i3,id1,id2,id3,ierr,ig1,ig2,ig3,ii,irho2,idat,me_fft,n1,n2,n3,nproc_fft
- real(dp) :: arg,cutoff,gsquar,rcut,rhogsq,tolfix=1.000000001_dp,tot,tot1
+ real(dp) :: arg,gsquar,rcut,rhogsq,tot,tot1 !tolfix=1.000000001_dp,
  logical :: rcut_spencer_alavi
 #ifdef HAVE_OPENMP_OFFLOAD
  ! Cray has trouble with reduction on array, so we use 6 scalars instead
@@ -2115,7 +2098,7 @@ subroutine strfock(fockcommon,gprimd,fockstr,mpi_enreg,nfft,ngfft,&
  !end if
 
  ! fockcommon%rcut is zero, rcut is a function of the cell volume (Spencer-Alavi scheme)
- ! Therefore gives a contribution to the stress 
+ ! Therefore gives a contribution to the stress
  rcut_spencer_alavi = fockcommon%rcut<tol8
  if(rcut_spencer_alavi) then
    rcut = (three*nkpt_bz*ucvol/four_pi)**(one/three)
