@@ -50,9 +50,8 @@ module m_spin_ncfile
   !use m_multibinit_supercell, only: mb_supercell_t
   use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   use m_spin_observables, only : spin_observable_t
-#if defined HAVE_NETCDF
   use netcdf
-#endif
+
   implicit none
 
   !!***
@@ -62,7 +61,7 @@ module m_spin_ncfile
      ! dimensions
      integer :: three, nspin, natoms, ntime, ntypat, nsublatt
      ! three: 3
-     ! nspin: number of spin 
+     ! nspin: number of spin
      ! natoms: number of atoms in a structure >=nspin
      ! ntime: number of time step
      ! ntypat: number of
@@ -93,7 +92,7 @@ module m_spin_ncfile
      ! thermo obs
      integer :: chi_id, binderU4_id, Cv_id
      !chi: susceptibility
-     ! binder U4: 
+     ! binder U4:
      ! Cv: Specific heat
 
      ! variable ids for spin/lattice coupling
@@ -110,7 +109,7 @@ module m_spin_ncfile
      ! netcdf filename
    contains
      ! initialize
-     procedure :: initialize    
+     procedure :: initialize
      ! define variables for trajectory
      procedure :: def_spindynamics_var
      ! define variables for observables
@@ -147,7 +146,6 @@ contains
     self%filename=trim(filename)
     self%isopen=.False.
 
-#if defined HAVE_NETCDF
     write(std_out,*) "Write iteration in spin history file "//trim(self%filename)//"."
     !  Create netCDF file
     ncerr = nf90_create(path=trim(filename), cmode=NF90_CLOBBER, ncid=self%ncid)
@@ -155,7 +153,6 @@ contains
     self%isopen=.True.
     ncerr =nf90_enddef(self%ncid)
     NCF_CHECK_MSG(ncerr, "Error when ending def mode in spin netcdf history file")
-#endif
   end subroutine initialize
 
 
@@ -168,7 +165,6 @@ contains
     type(spin_hist_t),intent(in) :: hist
     integer :: ncerr
 
-#if defined HAVE_NETCDF
     ncerr = nf90_redef(self%ncid)
     NCF_CHECK_MSG(ncerr, "Error when starting defining trajectory variables in spin history file.")
     ! define dimensions
@@ -206,13 +202,12 @@ contains
 
     ncerr=nf90_enddef(self%ncid)
     NCF_CHECK_MSG(ncerr, "Error when finishing defining variables in spin history file.")
-#endif
 
   end subroutine def_spindynamics_var
 
 
   !-----------------------------------------------------------------------
-  !> @brief define varibles of observables 
+  !> @brief define varibles of observables
   !> @param [in] ob: the spin observalble object
   !-----------------------------------------------------------------------
   subroutine def_observable_var(self, ob)
@@ -220,14 +215,13 @@ contains
     type(spin_observable_t), intent(in) :: ob
     integer ncerr
 
-#if defined HAVE_NETCDF
     ncerr = nf90_redef(self%ncid)
     NCF_CHECK_MSG(ncerr, "Error when defining observable variables in spin history file.")
     ncerr = nf90_def_dim(self%ncid, "nsublatt", ob%nsublatt, self%nsublatt)
     NCF_CHECK_MSG(ncerr, "Error when defining dimension nsublatt in spin history file.")
-    call ab_define_var(self%ncid, (/self%three, self%nsublatt, self%ntime/),& 
+    call ab_define_var(self%ncid, (/self%three, self%nsublatt, self%ntime/),&
            & self%Mst_sub_id, NF90_DOUBLE, "Mst_sub", "Sublattice staggered M", "Bohr magneton")
-    call ab_define_var(self%ncid, (/ self%nsublatt, self%ntime/), & 
+    call ab_define_var(self%ncid, (/ self%nsublatt, self%ntime/), &
           &  self%Mst_sub_norm_id, NF90_DOUBLE, "Mst_sub_norm", &
           &  "Norm of sublattice staggered M", "Bohr magneton")
     call ab_define_var(self%ncid, (/self%ntime/), self%Mst_norm_total_id, &
@@ -236,7 +230,7 @@ contains
            & NF90_DOUBLE, "Snorm_sub", "Snorm of sublattice", "Bohr magneton")
 
     if(ob%calc_thermo_obs)then
-       call ab_define_var(self%ncid, (/self%ntime/), self%binderU4_id, & 
+       call ab_define_var(self%ncid, (/self%ntime/), self%binderU4_id, &
                & NF90_DOUBLE, "BinderU4", "Binder U4", "1")
        call ab_define_var(self%ncid, (/self%ntime/), self%Cv_id, &
                & NF90_DOUBLE, "Cv", "Specific heat", "Joule/K")
@@ -253,7 +247,6 @@ contains
 
   ncerr=nf90_enddef(self%ncid)
   NCF_CHECK_MSG(ncerr, "Error when finishing defining observable variables in spin history file.")
-#endif
 end subroutine def_observable_var
 
 !-----------------------------------------------------------------------
@@ -268,7 +261,7 @@ end subroutine def_observable_var
     type(spin_observable_t), optional, intent(in) :: ob
     integer :: ncerr, itime
     itime=self%itime+1
-#if defined HAVE_NETCDF
+
     !write(std_out, *) "writing spin dynamics step into spin hist netcdf file: itime: ", itime
     if(self%write_traj ==1) then
        ncerr=nf90_put_var(self%ncid, self%S_id, hist%S(:,:,hist%ihist_prev), &
@@ -319,7 +312,6 @@ end subroutine def_observable_var
        endif
     end if
 
-#endif
   end subroutine write_one_step
 
   !-----------------------------------------------------------------------
@@ -340,7 +332,6 @@ end subroutine def_observable_var
     integer :: ncerr
 
 
-#if defined HAVE_NETCDF
      ncerr=nf90_redef(self%ncid)
      NCF_CHECK_MSG(ncerr, "Error when starting defining primitive cell variables in spin history file.")
 
@@ -389,14 +380,13 @@ end subroutine def_observable_var
      ncerr = nf90_put_var(self%ncid, gyro_ratio_id, prim%spin%gyro_ratio)
      NCF_CHECK_MSG(ncerr, "Error when writting gyro_ratio in spin history file.")
 
-#endif
   end subroutine write_primitive_cell
 
   !-----------------------------------------------------------------------
   !> @brief write information of supercell
   !>     - cartesian coordinates of each spin in supercell
   !>     - R vector in supercell (as R in S_j e^iqR_j)
-  !>     - the index of spin in primitive cell (as j in S_j e&iqR_j). 
+  !>     - the index of spin in primitive cell (as j in S_j e&iqR_j).
   !> @param [in] supercell: The supercell object
   !-----------------------------------------------------------------------
   subroutine write_supercell(self, supercell)
@@ -407,7 +397,6 @@ end subroutine def_observable_var
     !integer :: rprimd_id, iatomsid
     ! sc_matric
 
-#if defined HAVE_NETCDF
     ncerr=nf90_redef(self%ncid)
     NCF_CHECK_MSG(ncerr, "Error when starting to redefine supercell variables in spin history file.")
     !call ab_define_var(self%ncid, (/self%three, self%three /), rprimd_id,&
@@ -431,7 +420,6 @@ end subroutine def_observable_var
     ncerr=nf90_put_var(self%ncid, rvec_id, supercell%spin%rvec)
     NCF_CHECK_MSG(ncerr, "Error when writting Rvec in spin history file.")
     ! ncerr=nf90_put_var(self%ncid, iatoms_id, scell%iatoms)
-#endif
   end subroutine write_supercell
 
   !-----------------------------------------------------------------------
@@ -441,13 +429,13 @@ end subroutine def_observable_var
   subroutine write_parameters(self, params)
     class(spin_ncfile_t), intent(inout) :: self
     type(multibinit_dtset_type) :: params
-#if defined HAVE_NETCDF
+
     integer :: qpoint_id, temperature_id, dt_id, mfield_id, ncell_id
     integer :: dim0(0)
     integer :: ncerr
     ncerr=nf90_redef(self%ncid)
     NCF_CHECK_MSG(ncerr, "Error when starting to redefining parameters in spin history file.")
-    ! dims 
+    ! dims
     ! vars
     call ab_define_var(self%ncid, (/self%three/), qpoint_id, NF90_DOUBLE,&
          & "spin_projection_qpoint", "spin QPOINT", "dimensionless")
@@ -480,7 +468,6 @@ end subroutine def_observable_var
     NCF_CHECK_MSG(ncerr, "Error when writting spin_dt in spin history file.")
     ncerr=nf90_put_var(self%ncid, mfield_id, params%spin_mag_field/Bfield_Tesla)
     NCF_CHECK_MSG(ncerr, "Error when writting spin_mag_field in spin history file.")
-#endif
   end subroutine write_parameters
 
   !-----------------------------------------------------------------------
@@ -489,14 +476,12 @@ end subroutine def_observable_var
   subroutine close(self)
 
     class(spin_ncfile_t), intent(inout) :: self
-#if defined HAVE_NETCDF
     integer :: ncerr
     if (self%isopen) then
        write(std_out, *) "Closing spin history file "//trim(self%filename)//"."
        ncerr=nf90_close(self%ncid)
        NCF_CHECK_MSG(ncerr, "close netcdf spin history file"//trim(self%filename)//".")
     end if
-#endif
   end subroutine close
 
 end module m_spin_ncfile

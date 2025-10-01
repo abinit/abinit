@@ -40,7 +40,7 @@ MODULE m_gruneisen
  use m_fstrings,            only : sjoin, itoa, ltoa, ftoa, strcat
  use m_numeric_tools,       only : central_finite_diff, arth
  use m_kpts,                only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt
- use m_bz_mesh,             only : kpath_t, kpath_new
+ use m_bz_mesh,             only : kpath_t
  use m_anaddb_dataset,      only : anaddb_dataset_type
  use m_dynmat,              only : massmult_and_breaksym, dfpt_phfrq, gtdyn9
 
@@ -656,11 +656,9 @@ end subroutine gruns_qmesh
 subroutine gruns_free(gruns)
 
 !Arguments ------------------------------------
-!array
  class(gruns_t),intent(inout) :: gruns
 
 !Local variables-------------------------------
-!scalars
  integer :: ii
 ! ************************************************************************
 
@@ -775,7 +773,7 @@ subroutine gruns_anaddb(inp, comm)
 
  ! Compute gruneisen on the q-path.
  if (inp%nqpath /= 0) then
-   qpath = kpath_new(inp%qpath, gruns%cryst_vol(iv0)%gprimd, inp%ndivsm)
+   call qpath%init(inp%qpath, gruns%cryst_vol(iv0)%gprimd, inp%ndivsm)
    call gruns_qpath(gruns, inp%filename_output, qpath, ncid, comm)
    call qpath%free()
  else

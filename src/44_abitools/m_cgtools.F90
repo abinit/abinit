@@ -164,7 +164,7 @@ subroutine cg_tocplx(n, cg, ocplx)
  integer,intent(in) :: n
 !arrays
  real(dp),intent(in) :: cg(2*n)
- complex(dpc),intent(out) :: ocplx(n)
+ complex(dp),intent(out) :: ocplx(n)
 
 !Local variables ------------------------------
 !scalars
@@ -205,7 +205,7 @@ subroutine cg_fromcplx(n, icplx, ocg)
  integer,intent(in) :: n
 !arrays
  real(dp),intent(out) :: ocg(2*n)
- complex(dpc),intent(in) :: icplx(n)
+ complex(dp),intent(in) :: icplx(n)
 
 !Local variables ------------------------------
 !scalars
@@ -520,16 +520,15 @@ function cg_zdotc(n, x, y) result(res)
 !scalars
  integer,intent(in) :: n
 !arrays
- real(dp),intent(in) :: x(2,n)
- real(dp),intent(in) :: y(2,n)
+ real(dp),intent(in) :: x(2,n), y(2,n)
  real(dp) :: res(2)
 
 !Local variables-------------------------------
 #ifdef HAVE_LINALG_ZDOTC_BUG
  integer :: ii
 #else
- complex(dpc) :: cres
- complex(dpc),external :: zdotc
+ complex(dp) :: cres
+ complex(dp),external :: zdotc
 #endif
 ! *************************************************************************
 
@@ -621,8 +620,8 @@ function cg_zdotu(n, x, y) result(res)
 #ifdef HAVE_LINALG_ZDOTU_BUG
  integer :: ii
 #else
- complex(dpc) :: cres
- complex(dpc),external :: zdotu
+ complex(dp) :: cres
+ complex(dp),external :: zdotu
 #endif
 ! *************************************************************************
 
@@ -766,7 +765,7 @@ subroutine cg_zgemv(trans, nrows, ncols, cgmat, vec, matvec, alpha, beta, gpu_op
  integer :: mm, nn, kk, lda, ldb, ldc
  integer :: my_gpu_option
  real(dp) :: my_alpha(2), my_beta(2)
- complex(dpc) :: my_calpha, my_cbeta
+ complex(dp) :: my_calpha, my_cbeta
 ! *************************************************************************
 
  my_alpha = cg_cone;  if (present(alpha)) my_alpha = alpha
@@ -832,7 +831,7 @@ subroutine cg_zgemm(transa, transb, npwsp, ncola, ncolb, cg_a, cg_b, cg_c, alpha
 !scalars
  integer :: mm,nn,kk,lda,ldb,ldc
  !real(dp) :: my_alpha(2),my_beta(2)
- complex(dpc) :: my_calpha, my_cbeta
+ complex(dp) :: my_calpha, my_cbeta
 ! *************************************************************************
 
  lda = npwsp
@@ -2009,12 +2008,12 @@ subroutine cg_getspin(cgcband, npw_k, spin, cgcmat)
 !scalars
  integer, intent(in) :: npw_k
  real(dp), intent(in) :: cgcband(2,2*npw_k)
- complex(dpc), intent(out),optional :: cgcmat(2,2)
+ complex(dp), intent(out),optional :: cgcmat(2,2)
  real(dp), intent(out) :: spin(3)
 
 !Local variables-------------------------------
 !scalars
- complex(dpc) :: cspin(0:3), cgcmat_(2,2)
+ complex(dp) :: cspin(0:3), cgcmat_(2,2)
 ! ***********************************************************************
 
 ! cgcmat_ = cgcband * cgcband^T*  i.e. 2x2 matrix of spin components (dpcomplex)
@@ -3617,7 +3616,7 @@ subroutine cg_precon(cg, eval, istwf_k, kinpw, npw, nspinor, me_g0, optekin, pco
 !scalars
  integer :: ierr,ig,igs,ipw1,ispinor
  real(dp) :: ek0,ek0_inv,fac,poly,xx
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  real(dp) :: tsec(2)
 ! *************************************************************************
@@ -4025,9 +4024,9 @@ subroutine cg_zprecon_block(cg,eval,blocksize,iterationnumber,kinpw,&
 !arrays
  real(dp),intent(in) :: kinpw(npw)
  real(dp),intent(inout) :: pcon(npw,blocksize)
- complex(dpc),intent(in) :: cg(vectsize,blocksize),eval(blocksize,blocksize)
- complex(dpc),intent(in) :: ghc(vectsize,blocksize)
- complex(dpc),intent(inout) :: vect(vectsize,blocksize)
+ complex(dp),intent(in) :: cg(vectsize,blocksize),eval(blocksize,blocksize)
+ complex(dp),intent(in) :: ghc(vectsize,blocksize)
+ complex(dp),intent(inout) :: vect(vectsize,blocksize)
 
 !Local variables-------------------------------
 !scalars
@@ -5047,7 +5046,7 @@ subroutine pw_orthon(icg, igsc, istwf_k, mcg, mgsc, nelem, nvec, ortalgo, ovl_ve
  integer :: cgindex(nvec), gscindex(nvec)
  real(dp) :: buffer2(2),tsec(2)
  real(dp),allocatable :: rblockvectorbx(:,:),rblockvectorx(:,:),rgramxbx(:,:)
- complex(dpc),allocatable :: cblockvectorbx(:,:),cblockvectorx(:,:), cgramxbx(:,:)
+ complex(dp),allocatable :: cblockvectorbx(:,:),cblockvectorx(:,:), cgramxbx(:,:)
 ! *************************************************************************
 
 #ifdef DEBUG_MODE

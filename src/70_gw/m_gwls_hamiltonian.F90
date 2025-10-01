@@ -134,7 +134,7 @@ type(crystal_t)              :: Cryst
 type(gsphere_t)          :: Gsphere
 type(kmesh_t)           :: Kmesh, Qmesh
 character(len=132),pointer   :: title(:)   !SET2NULL
-complex(dpc), allocatable    :: vc_sqrt(:)
+complex(dp), allocatable    :: vc_sqrt(:)
 
 !MPI over bands requires :
 integer :: blocksize                                 !Public
@@ -565,7 +565,7 @@ real(dp) :: exchange
 integer, intent(in) :: e
 
 ! If these arguments are provided, the exchange energy is to be projected on this subspace
-complex(dpc), optional, intent(in) :: Lbasis_lanczos(:,:)  ! complex array which contains the Lanczos basis
+complex(dp), optional, intent(in) :: Lbasis_lanczos(:,:)  ! complex array which contains the Lanczos basis
 
 real(dp), allocatable :: psik_e(:,:)             !Working array to store the wavefunction
 
@@ -939,8 +939,8 @@ end subroutine precondition
 
 subroutine precondition_cplx(psi_out,psi_in)
 
-complex(dpc), intent(out) :: psi_out(npw_g)
-complex(dpc), intent(in)  :: psi_in(npw_g)
+complex(dp), intent(out) :: psi_out(npw_g)
+complex(dp), intent(in)  :: psi_in(npw_g)
 
 ! *************************************************************************
 
@@ -969,12 +969,12 @@ subroutine sqrt_vc_k(psi_inout)
 real(dp), intent(inout) :: psi_inout(2,npw_k)
 
 !Internal variable
-complex(dpc) :: c
+complex(dp) :: c
 
 ! *************************************************************************
 
 do i=1,npw_k
-c = vc_sqrt(i) * cmplx(psi_inout(1,i),psi_inout(2,i),dpc)
+c = vc_sqrt(i) * cmplx(psi_inout(1,i),psi_inout(2,i),dp)
 psi_inout(1,i) = dble (c)
 psi_inout(2,i) = dimag(c)
 end do
@@ -1068,9 +1068,9 @@ end subroutine Hpsik
 subroutine Hpsikc(psi_out,psi_in,cte)
 
 !External variables
-complex(dpc), intent(out) :: psi_out(npw_g)
-complex(dpc), intent(in)  :: psi_in(npw_g)
-complex(dpc), intent(in), optional :: cte
+complex(dp), intent(out) :: psi_out(npw_g)
+complex(dp), intent(in)  :: psi_in(npw_g)
+complex(dp), intent(in), optional :: cte
 
 ! *************************************************************************
 

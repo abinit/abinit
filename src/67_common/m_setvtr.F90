@@ -735,10 +735,10 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 !  Initialize the datastructure constrained_dft, for penalty function constrained magnetization
    call constrained_dft_ini(dtset%chrgat,constrained_dft,dtset%constraint_kind,dtset%magconon,dtset%magcon_lambda,&
 &    mpi_enreg,dtset%natom,dtset%nfft,dtset%ngfft,dtset%nspden,dtset%ntypat,dtset%ratsm,&
-&    dtset%ratsph,rprimd,dtset%spinat,dtset%typat,xred,dtset%ziontypat,dtset%znucl)
+&    dtset%ratsph,rprimd,dtset%spinat,dtset%typat,xred,dtset%ziontypat,dtset%znucl,dtset%qgbt,dtset%use_gbt)
    ABI_MALLOC(v_constr_dft_r, (nfft,dtset%nspden))
    v_constr_dft_r = zero
-   call mag_penalty(constrained_dft,mpi_enreg,rhor,v_constr_dft_r,xred)
+   call mag_penalty(constrained_dft,mpi_enreg,rhor,v_constr_dft_r,xred,dtset%qgbt,dtset%use_gbt)
    if(dtset%nspden==4)then
      do ispden=1,dtset%nspden ! (SPr: both components should be used? EB: Yes it should be the case, corrected now)
        do ifft=1,nfft

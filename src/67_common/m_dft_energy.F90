@@ -463,7 +463,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  if (dtset%magconon==1.or.dtset%magconon==2) then
    ABI_MALLOC(v_constr_dft_r, (nfftf,dtset%nspden))
    v_constr_dft_r = zero
-   call mag_penalty(constrained_dft,mpi_enreg,rhor,v_constr_dft_r,xred)
+   call mag_penalty(constrained_dft,mpi_enreg,rhor,v_constr_dft_r,xred,dtset%qgbt,dtset%use_gbt)
 !   call mag_penalty(dtset%natom, dtset%spinat, dtset%nspden, dtset%magconon, dtset%magcon_lambda, rprimd, &
 !&   mpi_enreg, nfftf, dtset%ngfft, dtset%ntypat, dtset%ratsph, rhor, &
 !&   dtset%typat, v_constr_dft_r, xred)

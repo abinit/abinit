@@ -58,7 +58,6 @@ program cut3d
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_fftcore,         only : ngfft_seq
  use m_fft_mesh,        only : denpot_project
- use m_distribfft,      only : init_distribfft_seq
  use m_ioarr,           only : fftdatar_write
  use m_io_tools,        only : flush_unit, file_exists, open_file, is_open, get_unit, read_string
 
@@ -372,26 +371,26 @@ program cut3d
            write(std_out,*) '  The name of your file is: ',trim(filnam)
          end if
 
-         select case(itask)
+         select case (itask)
 
-         case(1) ! point calculation
+         case (1) ! point calculation
            call cut3d_pointint(gridtt,gridmx,gridmy,gridmz,nr1,nr2,nr3,nspden,rprimd)
            exit
 
-         case(2) ! line calculation
+         case (2) ! line calculation
            call cut3d_lineint(gridtt,gridmx,gridmy,gridmz,nr1,nr2,nr3,nspden,rprimd)
            exit
 
-         case(3) ! plane calculation
+         case (3) ! plane calculation
            call cut3d_planeint(gridtt,gridmx,gridmy,gridmz,natom,nr1,nr2,nr3,nspden,rprimd,xcart)
            exit
 
-         case(4) ! volume calculation
+         case (4) ! volume calculation
            write(std_out,*) ' Enter volume calculation'
            call cut3d_volumeint(gridtt,gridmx,gridmy,gridmz,natom,nr1,nr2,nr3,nspden,rprimd,xcart)
            exit
 
-         case(5)
+         case (5)
            ! Rewrite the data on a formatted file, just in one (or four) column(s)
            if (open_file(filnam,message, newunit=unt, status='unknown', action="write") /= 0) then
              ABI_ERROR(message)
@@ -417,8 +416,8 @@ program cut3d
            close(unt)
            exit
 
-         case(6)
-!            Rewrite the data on a formatted file, 3D index + density
+         case (6)
+           ! Rewrite the data on a formatted file, 3D index + density
            if (open_file(filnam,message, newunit=unt, status='unknown', action="write") /= 0) then
              ABI_ERROR(message)
            end if
@@ -449,7 +448,7 @@ program cut3d
            close(unt)
            exit
 
-         case(7)
+         case (7)
            if (open_file(filnam,message, newunit=unt, form='unformatted', action="write") /= 0) then
              ABI_ERROR(message)
            end if
@@ -701,11 +700,11 @@ program cut3d
            close(unt)
            exit
 
-         case(11)
+         case (11)
            call cut3d_hirsh(grid,natom,nr1,nr2,nr3,ntypat,rprimd,xcart,hdr%typat,hdr%zionpsp,hdr%znucltypat)
            exit
 
-         case(14) ! CUBE file format from GAUSSIAN
+         case (14) ! CUBE file format from GAUSSIAN
            write(std_out,*)
            write(std_out,*) 'Output a cube file of 3D volumetric data'
            write(std_out,*)
@@ -737,10 +736,10 @@ program cut3d
 
            do iatom=1,natom
              write(unt,'(i9,4(3X,ES17.10))') nint(hdr%znucltypat(hdr%typat(iatom))),0.d0, &
-&             xcart(1,iatom),xcart(2,iatom),xcart(3,iatom)
+             xcart(1,iatom),xcart(2,iatom),xcart(3,iatom)
            end do
 
-!            C ordering of the indexes
+           ! C ordering of the indexes
            do i1=1,nr1
              do i2=1,nr2
                do i3=1,nr3
@@ -759,13 +758,13 @@ program cut3d
            ngfft(4:6) = ngfft(1:3)
            nfft = product(ngfft(1:3))
            cplex = 1
-           call init_distribfft_seq(mpi_enreg%distribfft, 'c', ngfft(2), ngfft(3), 'all')
-           call init_distribfft_seq(mpi_enreg%distribfft, 'f', ngfft(2), ngfft(3), 'all')
+           call mpi_enreg%distribfft%init_seq('c', ngfft(2), ngfft(3), 'all')
+           call mpi_enreg%distribfft%init_seq('f', ngfft(2), ngfft(3), 'all')
 
            call fftdatar_write(varname,filnam,IO_MODE_ETSF,hdr,cryst,ngfft,cplex,nfft,nspden,grid_full,mpi_enreg)
            call cryst%free()
 
-         case(0)
+         case (0)
            write(std_out,*)' Exit requested by user'
            exit
 
@@ -812,40 +811,18 @@ program cut3d
    if(isdenpot(ifiles)==1) grid_full_stored(:,:,:,:,ifiles)=grid_full(:,:,:,:)
    if(isdenpot(ifiles)==1) filrho_stored(ifiles)=filrho
 
-   if(allocated(xcart)) then
-     ABI_FREE(xcart)
-   end if
-   if(allocated(xred)) then
-     ABI_FREE(xred)
-   end if
-   if(allocated(grid)) then
-     ABI_FREE(grid)
-   end if
-   if(allocated(grid_full)) then
-     ABI_FREE(grid_full)
-   end if
-   if(allocated(gridtt)) then
-     ABI_FREE(gridtt)
-   end if
-   if(allocated(gridmx)) then
-     ABI_FREE(gridmx)
-   end if
-   if(allocated(gridmy)) then
-     ABI_FREE(gridmy)
-   end if
-   if(allocated(gridmz)) then
-     ABI_FREE(gridmz)
-   end if
-   if(allocated(rhomacu)) then
-     ABI_FREE(rhomacu)
-   end if
-   if(allocated(tau2)) then
-     ABI_FREE(tau2)
-   end if
+   ABI_SFREE(xcart)
+   ABI_SFREE(xred)
+   ABI_SFREE(grid)
+   ABI_SFREE(grid_full)
+   ABI_SFREE(gridtt)
+   ABI_SFREE(gridmx)
+   ABI_SFREE(gridmy)
+   ABI_SFREE(gridmz)
+   ABI_SFREE(rhomacu)
+   ABI_SFREE(tau2)
 
-   if(iprompt/=2) then
-     exit
-   end if
+   if(iprompt/=2) exit
 
  end do ! End big loop on files
 
@@ -908,13 +885,8 @@ program cut3d
 
  ABI_FREE(filrho_stored)
 
- if(allocated(grid_full_stored)) then
-   ABI_FREE(grid_full_stored)
- end if
-
- if(allocated(isdenpot)) then
-   ABI_FREE(isdenpot)
- end if
+ ABI_SFREE(grid_full_stored)
+ ABI_SFREE(isdenpot)
 
  call timein(tsec(1),tsec(2))
  tsec(1)=tsec(1)-tcpui

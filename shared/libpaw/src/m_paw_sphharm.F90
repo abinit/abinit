@@ -101,7 +101,7 @@ function ylmc(il,im,kcart)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: il,im
- complex(dpc) :: ylmc
+ complex(dp) :: ylmc
 !arrays
  real(dp),intent(in) :: kcart(3)
 
@@ -110,10 +110,9 @@ function ylmc(il,im,kcart)
  integer,parameter :: LMAX=3
  real(dp),parameter :: PPAD=tol8
  real(dp) :: cosphi,costh,costhreephi,costwophi,r,rxy,sinphi,sinth,sinthreephi,sintwophi
- !complex(dpc) :: new_ylmc
+ !complex(dp) :: new_ylmc
  character(len=500) :: msg
- complex(dpc) :: ctmp
-
+ complex(dp) :: ctmp
 ! *************************************************************************
 
  if (ABS(im)>ABS(il)) then
@@ -259,7 +258,7 @@ subroutine ylmcd(il,im,kcart,dth,dphi)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: il,im
- complex(dpc),intent(out) :: dphi,dth
+ complex(dp),intent(out) :: dphi,dth
 !arrays
  real(dp),intent(in) :: kcart(3)
 
@@ -269,8 +268,7 @@ subroutine ylmcd(il,im,kcart,dth,dphi)
  real(dp),parameter :: PPAD=tol8
  real(dp) :: cosphi,costh,costhreephi,costwophi,r,rxy,sinphi,sinth,sinthreephi,sintwophi,c
  character(len=500) :: msg
- complex(dpc) :: ctmp
-
+ complex(dp) :: ctmp
 ! *************************************************************************
 
  if (ABS(im)>ABS(il))then
@@ -401,7 +399,7 @@ subroutine ylm_cmplx(lx,ylm,xx,yy,zz)
  integer,intent(in) :: lx
  real(dp),intent(in) :: xx,yy,zz
 !arrays
- complex(dpc),intent(out) :: ylm((lx+1)*(lx+1))
+ complex(dp),intent(out) :: ylm((lx+1)*(lx+1))
 
 !Local variables-------------------------------
 !scalars
@@ -410,7 +408,6 @@ subroutine ylm_cmplx(lx,ylm,xx,yy,zz)
 !arrays
  real(dp) :: cosa(lx+1),fact(2*(lx+1)),plm(lx+2,lx+2),qlm(lx+2,lx+2),sgn(lx+1)
  real(dp) :: sina(lx+1)
-
 ! *************************************************************************
 
 !normalization coefficients
@@ -739,7 +736,7 @@ end subroutine initylmr
 !!  integer :: l2,m2,l1,m1
 !!
 !! OUTPUT
-!!  complex(dpc) :: ys_val
+!!  complex(dp) :: ys_val
 !!
 !! NOTES
 !! Ylm is the standard complex-valued spherical harmonic, Slm is the real spherical harmonic
@@ -752,7 +749,7 @@ subroutine ys(l2,m2,l1,m1,ys_val)
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: l1,l2,m1,m2
- complex(dpc),intent(out) :: ys_val
+ complex(dp),intent(out) :: ys_val
 
 !Local variables ---------------------------------------
  !scalars
@@ -801,7 +798,7 @@ end subroutine ys
 !!   integer :: lp,mp,idir,ll,mm
 !!
 !! OUTPUT
-!!   complex(dpc) :: lidir
+!!   complex(dp) :: lidir
 !!
 !! NOTES
 !!  Ylm is the standard complex-valued spherical harmonic,
@@ -814,12 +811,11 @@ subroutine lxyz(lp,mp,idir,ll,mm,lidir)
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: idir,ll,lp,mm,mp
- complex(dpc),intent(out) :: lidir
+ complex(dp),intent(out) :: lidir
 
 !Local variables ---------------------------------------
 !scalars
- complex(dpc) :: jme, jmme, jpme
-
+ complex(dp) :: jme, jmme, jpme
 ! *********************************************************************
 
  lidir = czero
@@ -859,7 +855,7 @@ end subroutine lxyz
 !!   integer :: lp,mp,idir,ll,mm
 !!
 !! OUTPUT
-!!   complex(dpc) :: sls_val
+!!   complex(dp) :: sls_val
 !!
 !! NOTES
 !! Slm is the real spherical harmonic used througout abinit,
@@ -873,13 +869,12 @@ subroutine slxyzs(lp,mp,idir,ll,mm,sls_val)
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: idir,ll,lp,mm,mp
- complex(dpc),intent(out) :: sls_val
+ complex(dp),intent(out) :: sls_val
 
 !Local variables ---------------------------------------
 !scalars
  integer :: mpp,mppp
- complex(dpc) :: lidir,sy_val,ys_val
-
+ complex(dp) :: lidir,sy_val,ys_val
 ! *********************************************************************
 
  sls_val = czero
@@ -942,14 +937,13 @@ subroutine lsylm(ls_ylm,lmax)
  logical,parameter :: tso=.false. ! use true to Test Spin Orbit and
 !                                   write the matrix of L.S in different basis
 !arrays
- complex(dpc) :: tmp(2)
- complex(dpc),allocatable :: ls_cplx(:,:,:),slm2ylm(:,:)
- complex(dpc),allocatable :: mat_inp_c(:,:,:),mat_out_c(:,:,:)
- complex(dpc),allocatable :: mat_ls_ylm(:,:,:),mat_jmj(:,:)
+ complex(dp) :: tmp(2)
+ complex(dp),allocatable :: ls_cplx(:,:,:),slm2ylm(:,:)
+ complex(dp),allocatable :: mat_inp_c(:,:,:),mat_out_c(:,:,:)
+ complex(dp),allocatable :: mat_ls_ylm(:,:,:),mat_jmj(:,:)
  character(len=9),parameter :: dspin2(2)=(/"up-up    ","up-dn    "/)
  character(len=9),parameter :: dspin6(6)=(/"dn       ","up       ","dn-dn    ","up-up    ","dn-up    ","up-dn    "/)
  character(len=9),parameter :: dspinm(6)=(/"dn       ","up       ","n        ","mx       ","my       ","mz       "/)
-
 ! *************************************************************************
 
  if (.not.allocated(ls_ylm)) then
@@ -1685,22 +1679,21 @@ subroutine mat_mlms2jmj(lcor,mat_mlms,mat_jmj,ndij,option,optspin,prtvol,unitfi,
  integer,intent(in) :: ndij,lcor,option,optspin,prtvol,unitfi
  character(len=4),intent(in) :: wrt_mode
 !arrays
- complex(dpc),intent(inout) :: mat_mlms(2*lcor+1,2*lcor+1,ndij)
- complex(dpc),intent(inout) :: mat_jmj(2*(2*lcor+1),2*(2*lcor+1))
+ complex(dp),intent(inout) :: mat_mlms(2*lcor+1,2*lcor+1,ndij)
+ complex(dp),intent(inout) :: mat_jmj(2*(2*lcor+1),2*(2*lcor+1))
 
 !Local variables ---------------------------------------
 !scalars
  integer :: ii,im,im1,im2,ispden,jc1,jc2,jj,jm,ll,ml1,ml2,ms1,ms2
  real(dp),parameter :: invsqrt2=one/sqrt2
  real(dp) :: invsqrt2lp1,xj,xmj
- complex(dpc) :: mat_tmp,tmp2
+ complex(dp) :: mat_tmp,tmp2
  character(len=9),parameter :: dspinold(6)=(/"up       ","down     ","up-up    ","down-down","up-dn    ","dn-up    "/)
  character(len=9),parameter :: dspin(6)=(/"dn       ","up       ","dn-dn    ","up-up    ","dn-up    ","up-dn    "/)
  character(len=500) :: msg
 !arrays
  integer, allocatable :: ind_msml(:,:)
- complex(dpc),allocatable :: mat_mlms2(:,:),mlms2jmj(:,:)
-
+ complex(dp),allocatable :: mat_mlms2(:,:),mlms2jmj(:,:)
 !*********************************************************************
 
  if(ndij/=4) then
@@ -1945,21 +1938,20 @@ subroutine mat_slm2ylm(lcor,mat_inp_c,mat_out_c,ndij,option,optspin,prtvol,unitf
  integer,intent(in) :: ndij,lcor,option,optspin,prtvol,unitfi
  character(len=4),intent(in) :: wrt_mode
 !arrays
- complex(dpc) :: mat_inp_c(2*lcor+1,2*lcor+1,ndij),mat_out(2*lcor+1,2*lcor+1,ndij)
- complex(dpc) :: mat_out_c(2*lcor+1,2*lcor+1,ndij)
+ complex(dp) :: mat_inp_c(2*lcor+1,2*lcor+1,ndij),mat_out(2*lcor+1,2*lcor+1,ndij)
+ complex(dp) :: mat_out_c(2*lcor+1,2*lcor+1,ndij)
 
 !Local variables ---------------------------------------
 !scalars
  integer :: jm,ii,jj,ll,mm,ispden,im,im1,im2
  real(dp),parameter :: invsqrt2=one/sqrt2
  real(dp) :: onem
- complex(dpc) :: tmp2
+ complex(dp) :: tmp2
  character(len=9),parameter :: dspinc(6)=(/"up       ","down     ","up-up    ","down-down","up-dn    ","dn-up    "/)! optspin 1
  character(len=9),parameter :: dspinc2(6)=(/"up       ","down     ","dn-dn    ","up-up    ","dn-up    ","up-dn    "/)! optspin 2
  character(len=500) :: msg
 !arrays
- complex(dpc),allocatable :: slm2ylm(:,:)
-
+ complex(dp),allocatable :: slm2ylm(:,:)
 ! *********************************************************************
 
  if(ndij/=4) then
@@ -3243,15 +3235,13 @@ subroutine create_slm2ylm(lcor,slmtwoylm)
 !scalars
  integer,intent(in) :: lcor
 !arrays
- complex(dpc),intent(out) :: slmtwoylm(2*lcor+1,2*lcor+1)
+ complex(dp),intent(out) :: slmtwoylm(2*lcor+1,2*lcor+1)
 
 !Local variables ---------------------------------------
 !scalars
  integer :: jm,ll,mm,im
  real(dp),parameter :: invsqrt2=one/sqrt2
  real(dp) :: onem
-!arrays
-
 ! *********************************************************************
 
  ll=lcor
@@ -3298,7 +3288,7 @@ subroutine create_mlms2jmj(lcor,mlmstwojmj)
 !scalars
  integer,intent(in) :: lcor
 !arrays
- complex(dpc),intent(out) :: mlmstwojmj(2*(2*lcor+1),2*(2*lcor+1))
+ complex(dp),intent(out) :: mlmstwojmj(2*(2*lcor+1),2*(2*lcor+1))
 
 !Local variables ---------------------------------------
 !scalars
@@ -3307,8 +3297,7 @@ subroutine create_mlms2jmj(lcor,mlmstwojmj)
  character(len=500) :: msg
 !arrays
  integer, allocatable :: ind_msml(:,:)
- complex(dpc),allocatable :: mat_mlms2(:,:)
-
+ complex(dp),allocatable :: mat_mlms2(:,:)
 !*********************************************************************
 
 !--------------- Built indices + allocations

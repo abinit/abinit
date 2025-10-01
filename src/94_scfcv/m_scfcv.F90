@@ -11,8 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! NOTES
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -70,12 +68,6 @@ module m_scfcv
 !!
 !! FUNCTION
 !!  This structured datatype contains the necessary data
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2014-2025 ABINIT group (JB)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! SOURCE
 
@@ -163,11 +155,6 @@ contains
 !!  argin(sizein)=description
 !!
 !! OUTPUT
-!!  argout(sizeout)=description
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -356,12 +343,6 @@ end subroutine scfcv_init
 !!
 !! INPUTS
 !!  scfcv=structure of scfcv
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -643,8 +624,6 @@ end subroutine scfcv_runWEntropyDMFT
 !! INPUTS
 !!  scfcv=structure of scfcv
 !!  itimes(2)=itime array, contain itime=itimes(1) and itimimage_gstate=itimes(2) from outer loops
-!!
-!! OUTPUT
 !!
 !! NOTES
 !!  Wrapper to scfcv to avoid circular dependencies ...

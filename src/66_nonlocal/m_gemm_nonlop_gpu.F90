@@ -15,7 +15,6 @@
 !!
 !! SOURCE
 
-
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -130,13 +129,8 @@ module m_gemm_nonlop_gpu
 !! INPUTS
 !! [gpu_option] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!
-!! PARENTS
-!!      m_nonlop
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,dgemm,opernlc_ylm,xmpi_sum
-!!
 !! SOURCE
+
  subroutine gemm_nonlop_gpu(atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,&
 &                 enl,ffnlin,ffnlout,indlmn,istwf_k,&
 &                 lambda,lmnmax,matblk,&

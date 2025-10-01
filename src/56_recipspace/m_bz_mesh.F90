@@ -162,7 +162,7 @@ module m_bz_mesh
   ! (nibz)
   ! Weights for each point in the IBZ.
 
-  complex(dpc),allocatable :: tabp(:)
+  complex(dp),allocatable :: tabp(:)
   ! (nkbz)
   ! For each point in the BZ, this table gives the phase factors associated
   ! to non-symmorphic operations, i.e., e^{-i2\pi k_IBZ.R{^-1}t}=e^{-i2\pi k_BZ cdot t}
@@ -247,6 +247,9 @@ module m_bz_mesh
 
  contains
 
+  procedure :: init => kpath_init
+   ! Construct a new path
+
   procedure :: free => kpath_free
    ! Free memory
 
@@ -258,7 +261,7 @@ module m_bz_mesh
 
  end type kpath_t
 
- public :: kpath_new        ! Construct a new path
+
  public :: make_path        ! Construct a normalized path. TODO: Remove it as it's deprecated
 !!***
 
@@ -359,6 +362,7 @@ module m_bz_mesh
    procedure :: init => littlegroup_init
    procedure :: print => littlegroup_print
    procedure :: free => littlegroup_free_0D
+   !procedure :: find => littlegroup_find
 
  end type littlegroup_t
 
@@ -836,7 +840,7 @@ subroutine get_bz_item(Kmesh, ik_bz, kbz, ik_ibz, isym, itim, ph_mkbzt, umklp, i
  class(kmesh_t),intent(in) :: Kmesh
  integer,intent(in) :: ik_bz
  integer,intent(out) :: ik_ibz,isym,itim
- complex(dpc),optional,intent(out) :: ph_mkbzt
+ complex(dp),optional,intent(out) :: ph_mkbzt
  logical,optional,intent(out) :: isirred
 !arrays
  integer,optional,intent(out) :: umklp(3)
@@ -1706,7 +1710,7 @@ end subroutine getkptnorm_bycomponent
 !!
 !! FUNCTION
 !!  Generate a normalized path given the extrema.
-!!  See also kpath_t and kpath_new (recommended API).
+!!  See also kpath_t and kpath_init (recommended API).
 !!
 !! INPUTS
 !!  nbounds=Number of extrema defining the path.
@@ -2695,9 +2699,9 @@ end function box_len
 
 !----------------------------------------------------------------------
 
-!!****f* m_bz_mesh/kpath_new
+!!****f* m_bz_mesh/kpath_init
 !! NAME
-!! kpath_new
+!! kpath_init
 !!
 !! FUNCTION
 !!  Create a normalized path given the extrema.
@@ -2710,10 +2714,11 @@ end function box_len
 !!
 !! SOURCE
 
-type(kpath_t) function kpath_new(bounds, gprimd, ndivsm) result(kpath)
+subroutine kpath_init(kpath, bounds, gprimd, ndivsm)
 
 !Arguments ------------------------------------
 !scalars
+ class(kpath_t),intent(out) :: kpath
  integer,intent(in) :: ndivsm
 !!arrays
  real(dp),intent(in) :: bounds(:,:),gprimd(3,3)
@@ -2761,7 +2766,7 @@ type(kpath_t) function kpath_new(bounds, gprimd, ndivsm) result(kpath)
    kpath%bounds2kpt(ii+1) = sum(kpath%ndivs(:ii)) + 1
  end do
 
-end function kpath_new
+end subroutine kpath_init
 !!***
 
 !----------------------------------------------------------------------

@@ -100,15 +100,10 @@ contains
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
 !!
-!! NOTES
-!!
-!! PARENTS
-!!      m_driver
-!!
 !! SOURCE
 
 subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
-&                   pawrad,pawtab,psps,xred)
+                   pawrad,pawtab,psps,xred)
 
 #ifdef FC_INTEL
 !DEC$ NOOPTIMIZE
@@ -837,12 +832,6 @@ end subroutine longwave
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!
-!! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
