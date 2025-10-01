@@ -153,6 +153,7 @@ nav:
         - Bethe-Salpeter: variables/bse.md
         - Developers: variables/dev.md
         - DMFT: variables/dmft.md
+        - DMFT_TRIQS: variables/dmft_triqs.md
         - Electron-Phonon: variables/eph.md
         - Varff: variables/ffield.md
         - File-handling: variables/files.md
