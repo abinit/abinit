@@ -1176,7 +1176,6 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      ABI_MALLOC(intp_gatm, (wan%nwan, wan%nwan, wan%my_npert, nq))
      do my_iq=1,gqk%my_nq
        call gqk%myqpt(my_iq, gstore, weight_qq, qpt)
-       !call ifc%fourq(cryst, qq_ibz, phfr_qq, displ_cart_qibz, out_displ_red=displ_red_qibz, out_eigvec=pheigvec_qibz)
        do my_ik=1,gqk%my_nk
          kpt = gqk%my_kpts(:,my_ik); kq = kpt + qpt
          call wan%interp_eph_manyq(1, qpt, kpt, intp_gatm)
@@ -3392,10 +3391,10 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  integer :: cplex,natom,natom3,ipc,nspinor, nskip_tetra_kq, timrev_k, timrev_q
  integer :: band_k, in_k, im_kq, ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq, nb_k, nb_kq
  integer :: my_ik, my_is, comm_rpt, my_npert, my_ip, my_iq, spin,istwf_k,istwf_kq,npw_k,npw_kq
- integer :: mpw, ierr,cnt, n1,n2,n3,n4,n5,n6,nspden,ndone, db_iqpt ! nb,
+ integer :: mpw, ierr,cnt, n1,n2,n3,n4,n5,n6,nspden,ndone, db_iqpt
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf, nkpg_k, nkpg_kq, qbuf_size, iqbuf_cnt, root_ncid, spin_ncid, ncerr
- integer :: ii, my_nqibz, iq_start, iq_ibz, isym_q, trev_q, prev_iqbz
+ integer :: ii, my_nqibz, iq_start, iq_ibz, isym_q, trev_q
  real(dp) :: cpu, wall, gflops, cpu_q, wall_q, gflops_q, cpu_all, wall_all, gflops_all
  real(dp) :: ecut, eshift, eig0nk, weight_q, weight_k
  logical :: gen_eigenpb, isirr_k, isirr_kq, isirr_q, print_time, need_ftinterp, qq_is_gamma
@@ -3411,9 +3410,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), nband(:,:), wfd_istwfk(:), qmap_symrec(:,:)
  integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:), my_iqibz_inds(:)
  !integer,allocatable :: qibz2dvdb(:) !, displs(:), recvcounts(:)
- real(dp) :: kk_bz(3),kq_bz(3),kk_ibz(3),kq_ibz(3), qq_bz(3), qq_ibz(3), v_nk(3), phfr_qq(3*cryst%natom)
- real(dp),allocatable :: displ_cart_qibz(:,:,:,:), displ_red_qibz(:,:,:,:), pheigvec_qibz(:,:,:,:)
- real(dp),allocatable :: displ_cart_qbz(:,:,:,:), displ_red_qbz(:,:,:,:), pheigvec_qbz(:,:,:,:)
+ real(dp) :: kk_bz(3),kq_bz(3),kk_ibz(3),kq_ibz(3), qq_bz(3), qq_ibz(3), v_nk(3)
+ real(dp),allocatable :: displ_cart_qibz(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:), kinpw_k(:), kinpw_kq(:), kpg_kq(:,:), kpg_k(:,:)
  real(dp),allocatable :: ffnl_k(:,:,:,:), ffnl_kq(:,:,:,:), ph3d_k(:,:,:), ph3d_kq(:,:,:)
  real(dp),allocatable :: v1scf(:,:,:,:), gkq_atm(:,:,:,:)
@@ -3578,12 +3576,11 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  vlocal = huge(one)
 
  ! Allocate work space arrays.
- ABI_MALLOC(displ_cart_qbz, (2, 3, cryst%natom, natom3))
  ABI_MALLOC(displ_cart_qibz, (2, 3, cryst%natom, natom3))
- ABI_MALLOC(displ_red_qbz, (2, 3, cryst%natom, natom3))
- ABI_MALLOC(displ_red_qibz, (2, 3, cryst%natom, natom3))
- ABI_MALLOC(pheigvec_qbz, (2, 3, cryst%natom, 3*cryst%natom))
- ABI_MALLOC(pheigvec_qibz, (2, 3, cryst%natom, 3*cryst%natom))
+ !ABI_MALLOC(displ_red_qbz, (2, 3, cryst%natom, natom3))
+ !ABI_MALLOC(displ_red_qibz, (2, 3, cryst%natom, natom3))
+ !ABI_MALLOC(pheigvec_qbz, (2, 3, cryst%natom, 3*cryst%natom))
+ !ABI_MALLOC(pheigvec_qibz, (2, 3, cryst%natom, 3*cryst%natom))
  ABI_CALLOC(dummy_vtrial, (nfftf, nspden))
 
  ! Open GSTORE file, and read table used for restarting.
@@ -3795,7 +3792,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    end if
 
    ! Loop over my set of q-points
-   prev_iqbz = -1
    do my_iq=1,gqk%my_nq
      print_time = my_rank == 0 .and. (my_iq <= LOG_MODQ .or. mod(my_iq, LOG_MODQ) == 0)
      if (print_time) call cwtime(cpu_q, wall_q, gflops_q, "start")
@@ -3830,21 +3826,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      nskip_tetra_kq = 0
      iqbuf_cnt = 1 + mod(my_iq - 1, qbuf_size)
      iq_buf(:, iqbuf_cnt) = [my_iq, iq_bz]
-
-     if (iq_ibz /= prev_iqbz) then
-       ! Get phonon frequencies and eigenvectors for the corresponding q-point in the IBZ.
-       call ifc%fourq(cryst, qq_ibz, phfr_qq, displ_cart_qibz, out_displ_red=displ_red_qibz, out_eigvec=pheigvec_qibz)
-       prev_iqbz = iq_ibz
-     end if
-
-     if (isirr_q) then
-       displ_cart_qbz = displ_cart_qibz; displ_red_qbz = displ_red_qibz; pheigvec_qbz = pheigvec_qibz
-     else
-       ! Rotate phonon eigenvectors from q_ibz to q_bz.
-       ! This part is needed to enforce the gauge in the ph eigenvectors, including e(-q) = e(q)^*
-       call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_qibz, pheigvec_qbz, displ_cart_qbz, &
-                            displ_red_qbz=displ_red_qbz)
-     end if
 
      if (need_ftinterp) then
        ! Fourier interpolation.
@@ -4055,12 +4036,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ABI_FREE(vlocal)
  ABI_FREE(kg_k)
  ABI_FREE(kg_kq)
- ABI_FREE(displ_cart_qbz)
  ABI_FREE(displ_cart_qibz)
- ABI_FREE(displ_red_qbz)
- ABI_FREE(displ_red_qibz)
- ABI_FREE(pheigvec_qbz)
- ABI_FREE(pheigvec_qibz)
  ABI_FREE(done_qbz_spin)
 
  call ddkop%free(); call gs_ham_kq%free(); call wfd%free()
@@ -4330,7 +4306,6 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    ABI_MALLOC(gstore%kbz, (3, gstore%nkbz))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_brange_k_spin"), brange_k_spin))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_brange_kq_spin"), brange_kq_spin))
-   !brange_kq_spin = brange_k_spin
 
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_erange_spin"), gstore%erange_spin))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_qibz"), gstore%qibz))
@@ -4577,6 +4552,8 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
         tsign_q = 1; if (trev_q == 1) tsign_q = -1
         qq_ibz = gstore%qibz(:, iq_ibz)
 
+        ! Here we get the ph displacement for this q-point in the BZ from the imange in the IBZ.
+        ! This s important for complex g as we have to enforce the gauge in the ph eigenvectors, including e(-q) = e(q)^*.
         call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_cart_ibz(:,:,:,:,iq_ibz), pheigvec_cart_qbz, displ_cart_qbz, &
                              displ_red_qbz=displ_red_qbz)
 
@@ -4785,7 +4762,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: root_ncid, spin_ncid, gstore_completed, spin, ik_glob, iq_glob, ipc, cplex, ncerr, natom3 !, varid, nb
+ integer :: root_ncid, spin_ncid, gstore_completed, spin, ik_glob, iq_glob, ipc, cplex, ncerr, natom3
  integer :: glob_nq, glob_nk, im_kq, in_k, nb_k, nb_kq, ib_k, ik_ibz
  logical :: with_ks__
  real(dp) :: g2, g2_ks
@@ -4843,7 +4820,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
 
      ABI_MALLOC(vnk_cart_ibz, (3, nb_k))
      do ik_ibz=1,gstore%nkibz
-       ! Only a subset of k-points are written.
+       ! Only a subset of k-points are written to ab_out.
        if (all(ik_ibz /= [1, 2, gstore%nkibz - 1, gstore%nkibz])) cycle
        NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("vk_cart_ibz"), vnk_cart_ibz, start=[1,1,ik_ibz], count=[3,nb_k,1]))
 
@@ -4877,12 +4854,15 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
    end if
 
    do iq_glob=1,glob_nq
-     if (iq_glob /= 1 .and. iq_glob /= glob_nq) cycle  ! Write the first and the last q-point.
+     ! Write the first and the last q-point.
+     if (iq_glob /= 1 .and. iq_glob /= glob_nq) cycle
 
      do ik_glob=1,glob_nk
-       if (ik_glob /= 1 .and. ik_glob /= glob_nk) cycle ! Write the first and the last k-point.
+       ! Write the first and the last k-point.
+       if (ik_glob /= 1 .and. ik_glob /= glob_nk) cycle
        do ipc=1,natom3
-         if (ipc /= 4 .and. ipc /= natom3) cycle ! Write the 4th and the last perturbation.
+         ! Write the 4th and the last perturbation.
+         if (ipc /= 4 .and. ipc /= natom3) cycle
          ncerr = nf90_get_var(spin_ncid, spin_vid("gvals"), gslice_mn, &
                               start=[1,1,1,ipc,ik_glob,iq_glob], count=[cplex,nb_kq,nb_k,1,1,1])
          NCF_CHECK(ncerr)
