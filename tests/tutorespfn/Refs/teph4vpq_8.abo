@@ -412,19 +412,19 @@ P Number of CPUs for parallelism over k-points: 1
     iq    ik pcase im_kq  in_k        |g| in Ha
  |g(k,q)| in Ha for iq: 1 ik: 1 pcase: 4
     iq    ik pcase im_kq  in_k              |g|
-     1     1     4     1     1     9.129338E-09
+     1     1     4     1     1     2.369238E-08
  |g(k,q)| in Ha for iq: 1 ik: 1 pcase: 6
     iq    ik pcase im_kq  in_k              |g|
-     1     1     6     1     1     4.058752E-08
+     1     1     6     1     1     2.307791E-08
  |g(k,q)| in Ha for iq: 1 ik: 89 pcase: 4
     iq    ik pcase im_kq  in_k              |g|
-     1    89     4     1     1     8.988575E-09
+     1    89     4     1     1     2.433022E-08
  |g(k,q)| in Ha for iq: 1 ik: 89 pcase: 6
     iq    ik pcase im_kq  in_k              |g|
-     1    89     6     1     1     4.171257E-08
+     1    89     6     1     1     2.528762E-08
  |g(k,q)| in Ha for iq: 597 ik: 1 pcase: 4
     iq    ik pcase im_kq  in_k              |g|
-   597     1     4     1     1     7.813350E-01
+   597     1     4     1     1     7.813351E-01
  |g(k,q)| in Ha for iq: 597 ik: 1 pcase: 6
     iq    ik pcase im_kq  in_k              |g|
    597     1     6     1     1     4.982705E-01
