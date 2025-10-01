@@ -3757,7 +3757,11 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
        inquire(file=trim(fname_data),exist=lexist)
        if ((.not. lexist) .and. ntot > 1) then ! try to restart from config of previous integration point instead
          if (read_data == 1) read_data = 2 ! to indicate not to use the value qmc_therm for warmup
-         fname_data = trim(adjustl(paw_dmft%filapp)) // "_CTQMC_DATA" // stringfile_prev
+         if (ilam == 1) then
+           fname_data = trim(adjustl(paw_dmft%filctqmcdatain)) // stringfile_prev
+         else
+           fname_data = trim(adjustl(paw_dmft%filapp)) // "_CTQMC_DATA" // stringfile_prev
+         end if
        end if
      else
        fname_data = trim(adjustl(paw_dmft%filapp)) // "_CTQMC_DATA" // stringfile

@@ -5,9 +5,9 @@ Version 10.4, released on May 15, 2025.
 
 These release notes
 are relative to modifications/improvements of ABINIT v10.4 with respect to v10.2.
-<!-- Initially, beta-release v10.4.1, merge requests from MR1063, 1068, 1077, 1079, 1081, then 1083 to 1175, 
+<!-- Initially, beta-release v10.4.1, merge requests from MR1063, 1068, 1077, 1079, 1081, then 1083 to 1175,
 EXCEPT MR1087, 1088, 1090, 1091, 1092, 1095, 1097, 1100, 1104, 1106, 1114, 1115, that had already been included in v10.2,
-and EXCEPT MR1160, 1165, 1168, 1170, 1172 and 1173  that will be included in v10.6 .  
+and EXCEPT MR1160, 1165, 1168, 1170, 1172 and 1173  that will be included in v10.6 .
 For release v10.4.3, also MR1176 to 1182 are included, as well as MR1184-1186, MR1188 and MR1190. However, MR1183 and MR1187 will be included in v10.6.
 For release v10.4.5, also MR1188 to 1190, MR1193, MR1195, MR1197-1199, MR1203 are included. However, MR1191-1192, MR1194, MR1196, MR1200-1202, MR1205-1210 will be included in v10.6.
 For release v10.4.7, also MR1219 and MR1225 are included.
@@ -453,7 +453,7 @@ There have been many improvements in the DMFT part of ABINIT, not yet though to 
 * Two extra components for the energy are printed.
 * New input variables (to be tested and documented) : dmft_fermi_step, dmft_nominal, dmft_orbital, dmft_prt_maxent, dmft_prtwan, dmft_shiftself, dmft_test, dmft_use_all_bands, dmft_use_full_chipsi, dmft_wanrad, dmft_x2my2d.
 
-Input variables [[dmftctqmc_mov]], [[dmftctqmc_order]] and [[dmftctqmc_triqs_nleg]] are documented, but not tested.
+Input variables [[dmftctqmc_mov]], [[dmftctqmc_order]] and [[dmft_triqs_nleg]] are documented, but not tested.
 There has also been miscellaneous DMFT fixes and improvements
 
 By F. Castiel, F. Gendron, O. Gingras, B. Amadon (MR1063, 1077, 1084, 1107, 1148 give more details)
@@ -2897,7 +2897,7 @@ fully in the Sec. 3.7 of [[cite:Gonze2020]], as follows.
 Also, the DMFT k-resolved spectral function is available (MR 529, 490).
 
 List of tests: [[test:paral_84]], [[test:paral_86]], [[test:paral_99]], [[test:v8_01]].
-New input variables: [[dmft_charge_prec]] and [[dmft_kspectral_func]] (test to be provided for the latter).
+New input variables: [[dmft_charge_prec]] and [[dmft_kspectralfunc]] (test to be provided for the latter).
 Also [[dmft_occnd_imag]], but only for keeping backward compatibility for tests.
 
 By T. Cavignac, B. Amadon and O. Gingras.
@@ -3643,7 +3643,7 @@ fully in the Sec. 3.7 of [[cite:Gonze2020]], as follows.
 Also, the DMFT k-resolved spectral function is available (MR 529, 490).
 
 List of tests: [[test:paral_84]], [[test:paral_86]], [[test:paral_99]], [[test:v8_01]].
-New input variables: [[dmft_charge_prec]] and [[dmft_kspectral_func]] (test to be provided for the latter).
+New input variables: [[dmft_charge_prec]] and [[dmft_kspectralfunc]] (test to be provided for the latter).
 Also [[dmft_occnd_imag]], but only for keeping backward compatibility for tests.
 
 By T. Cavignac, B. Amadon and O. Gingras.
