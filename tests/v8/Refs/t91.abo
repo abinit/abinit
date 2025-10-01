@@ -1,5 +1,5 @@
 
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.Version 10.4.5.9 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 10 Sep 2025.
-- ( at 12h19 )
+.Starting date : Wed  1 Oct 2025.
+- ( at 11h03 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v8_t91/t91.abi
 - output file    -> t91.abo
@@ -603,8 +603,12 @@ force_length_stats: {min:   6.32509400E-28, max:   6.32509400E-28, mean:   6.325
     1 Si   2.00000        1.739693      0.000000   -0.000000    0.000000    0.000000    0.000000    0.000000
     2 Si   2.00000        1.739693      0.000000   -0.000000    0.000000   -0.000000    0.000000    0.000000
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)          0.000000   -0.000000    0.000000    0.000000    0.000000    0.000000
- Total magnetization (exact)            0.000000    0.000000   -0.000000    0.000000    0.000000    0.000000
+ Total magnetization (spheres)
+ (cart.coord.)                                     -0.000000    0.000000    0.000000
+ (sph.coord.)                           0.000000                                        0.000000    0.000000
+ Total magnetization (exact)
+ (cart.coord.)                                      0.000000   -0.000000    0.000000
+ (sph.coord.)                           0.000000                                        0.000000    0.000000
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -2022,10 +2026,10 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          4.1  wall=          4.1
+- Proc.   0 individual time (sec): cpu=          4.3  wall=          4.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered  23 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.1  wall=          4.1
++Overall time at end (sec) : cpu=          4.3  wall=          4.4

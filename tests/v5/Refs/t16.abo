@@ -1,5 +1,5 @@
 
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.Version 10.4.5.9 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 10 Sep 2025.
-- ( at 12h15 )
+.Starting date : Wed  1 Oct 2025.
+- ( at 11h00 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v5_t16/t16.abi
 - output file    -> t16.abo
@@ -2614,8 +2614,12 @@ force_length_stats: {min:   1.96642882E-06, max:   1.96642882E-06, mean:   1.966
     3  O   1.21105        3.418823      0.000004    0.000003   -0.000003   -0.000000   90.000000  -45.000000
     4  O   1.21105        3.418826      0.000004   -0.000003    0.000003    0.000000   90.000000  135.000000
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)          0.000000    0.000000   -0.000000   -0.000000    0.000000    0.000000
- Total magnetization (exact)            0.000000   -0.000000    0.000000    0.000000    0.000000    0.000000
+ Total magnetization (spheres)
+ (cart.coord.)                                      0.000000   -0.000000   -0.000000
+ (sph.coord.)                           0.000000                                        0.000000    0.000000
+ Total magnetization (exact)
+ (cart.coord.)                                     -0.000000    0.000000    0.000000
+ (sph.coord.)                           0.000000                                        0.000000    0.000000
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -3567,8 +3571,12 @@ force_length_stats: {min:   2.05156189E-05, max:   2.05156189E-05, mean:   2.051
     3  O   1.21105        3.472713      0.000008    0.000006   -0.000006    0.000000   90.000000  -45.000000
     4  O   1.21105        3.472721      0.000008   -0.000006    0.000006   -0.000000   90.000000  135.000000
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)          0.000000   -0.000000   -0.000000    0.000000    0.000000    0.000000
- Total magnetization (exact)            0.000000   -0.000000    0.000000   -0.000000    0.000000    0.000000
+ Total magnetization (spheres)
+ (cart.coord.)                                     -0.000000   -0.000000    0.000000
+ (sph.coord.)                           0.000000                                        0.000000    0.000000
+ Total magnetization (exact)
+ (cart.coord.)                                     -0.000000    0.000000   -0.000000
+ (sph.coord.)                           0.000000                                        0.000000    0.000000
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -4526,8 +4534,12 @@ force_length_stats: {min:   5.31565101E-07, max:   5.31565101E-07, mean:   5.315
     3  O   1.21105        3.462356      0.000000    0.000000   -0.000000    0.000000    0.000000    0.000000
     4  O   1.21105        3.462355      0.000000   -0.000000    0.000000   -0.000000    0.000000    0.000000
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)          0.000000   -0.000000   -0.000000   -0.000000    0.000000    0.000000
- Total magnetization (exact)            0.000000    0.000000    0.000000   -0.000000    0.000000    0.000000
+ Total magnetization (spheres)
+ (cart.coord.)                                     -0.000000   -0.000000   -0.000000
+ (sph.coord.)                           0.000000                                        0.000000    0.000000
+ Total magnetization (exact)
+ (cart.coord.)                                      0.000000    0.000000   -0.000000
+ (sph.coord.)                           0.000000                                        0.000000    0.000000
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -7296,10 +7308,10 @@ P           mkmem8          4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         55.9  wall=         56.0
+- Proc.   0 individual time (sec): cpu=         57.1  wall=         57.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered  25 WARNINGs and  41 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         55.9  wall=         56.0
++Overall time at end (sec) : cpu=         57.1  wall=         57.2

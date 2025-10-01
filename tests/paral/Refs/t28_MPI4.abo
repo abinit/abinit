@@ -1,5 +1,5 @@
 
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.Version 10.4.5.9 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 10 Sep 2025.
-- ( at 12h26 )
+.Starting date : Wed  1 Oct 2025.
+- ( at 11h11 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI4/paral_t28_MPI4/t28.abi
 - output file    -> t28_MPI4.abo
@@ -965,8 +965,12 @@ force_length_stats: {min:   1.50712884E-03, max:   1.50712884E-03, mean:   1.507
     1 Bi   2.60648       12.858563      0.000055    0.000003   -0.000053   -0.000014  104.192502  -87.123716
     2 Bi   2.60648       12.858607      0.000047   -0.000003    0.000046    0.000008   80.462080   93.240508
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)          0.000009    0.000000   -0.000007   -0.000006  128.148858  -89.410723
- Total magnetization (exact)            0.000003   -0.000001    0.000000    0.000003   10.759206  157.635230
+ Total magnetization (spheres)
+ (cart.coord.)                                      0.000000   -0.000007   -0.000006
+ (sph.coord.)                           0.000009                                      128.148858  -89.410723
+ Total magnetization (exact)
+ (cart.coord.)                                     -0.000001    0.000000    0.000003
+ (sph.coord.)                           0.000003                                       10.759206  157.635230
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -1721,4 +1725,4 @@ P           mkmem2          8
 
  Calculation completed.
 .Delivered   0 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         28.1  wall=         28.2
++Overall time at end (sec) : cpu=         28.3  wall=         28.3

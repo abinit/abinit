@@ -1,5 +1,5 @@
 
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.Version 10.4.5.9 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 10 Sep 2025.
-- ( at 12h14 )
+.Starting date : Wed  1 Oct 2025.
+- ( at 10h59 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v3_t47/t47.abi
 - output file    -> t47.abo
@@ -317,8 +317,12 @@ force_length_stats: {min:   2.45517416E-01, max:   2.45517416E-01, mean:   2.455
     1 Fe   2.00000        5.657339      1.063023    0.729326    0.772868    0.027863   88.498036   46.660280
     2 Fe   2.00000        6.181103      1.002569    0.854425   -0.467197   -0.238386  103.755298  -28.669686
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)          1.626660    1.583751    0.305671   -0.210523   97.436113   10.924012
- Total magnetization (exact)            1.659885    1.610714    0.332301   -0.224492   97.772809   11.656948
+ Total magnetization (spheres)
+ (cart.coord.)                                      1.583751    0.305671   -0.210523
+ (sph.coord.)                           1.626660                                       97.436113   10.924012
+ Total magnetization (exact)
+ (cart.coord.)                                      1.610714    0.332301   -0.224492
+ (sph.coord.)                           1.659885                                       97.772809   11.656948
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -481,8 +485,12 @@ force_length_stats: {min:   1.94523316E-01, max:   1.94523316E-01, mean:   1.945
     1 Fe   2.00000        6.453714      0.927109    0.773118    0.491825   -0.141167   98.758275   32.462827
     2 Fe   2.00000        1.976482      0.596311    0.579035   -0.124136   -0.069965   96.737996  -12.100103
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)          1.417071    1.352153    0.367690   -0.211132   98.568509   15.212547
- Total magnetization (exact)            1.810542    1.751057    0.370400   -0.273249   98.680299   11.943676
+ Total magnetization (spheres)
+ (cart.coord.)                                      1.352153    0.367690   -0.211132
+ (sph.coord.)                           1.417071                                       98.568509   15.212547
+ Total magnetization (exact)
+ (cart.coord.)                                      1.751057    0.370400   -0.273249
+ (sph.coord.)                           1.810542                                       98.680299   11.943676
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -639,8 +647,12 @@ force_length_stats: {min:   2.70599713E-01, max:   2.70599713E-01, mean:   2.705
     1 Fe   2.00000        6.962862      0.528699   -0.144969    0.502304   -0.078719   98.562718  106.098545
     2 Fe   2.00000        1.601113      0.321448    0.308860    0.008385   -0.088680  106.014227    1.555173
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)          0.561860    0.163891    0.510690   -0.167399  107.333728   72.207475
- Total magnetization (exact)            0.656610    0.306805    0.553943   -0.173651  105.335231   61.019794
+ Total magnetization (spheres)
+ (cart.coord.)                                      0.163891    0.510690   -0.167399
+ (sph.coord.)                           0.561860                                      107.333728   72.207475
+ Total magnetization (exact)
+ (cart.coord.)                                      0.306805    0.553943   -0.173651
+ (sph.coord.)                           0.656610                                      105.335231   61.019794
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -803,8 +815,12 @@ force_length_stats: {min:   1.52564580E-01, max:   1.52564580E-01, mean:   1.525
     1 Fe   2.00000        6.402236      0.952599    0.489722    0.533411   -0.618942  130.522069   47.445071
     2 Fe   2.00000        2.014023      0.598033    0.513349   -0.168608   -0.256297  115.376612  -18.182621
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)          1.380317    1.003071    0.364803   -0.875239  129.352190   19.985599
- Total magnetization (exact)            1.760856    1.333378    0.347393   -1.096373  128.508921   14.602988
+ Total magnetization (spheres)
+ (cart.coord.)                                      1.003071    0.364803   -0.875239
+ (sph.coord.)                           1.380317                                      129.352190   19.985599
+ Total magnetization (exact)
+ (cart.coord.)                                      1.333378    0.347393   -1.096373
+ (sph.coord.)                           1.760856                                      128.508921   14.602988
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -967,8 +983,12 @@ force_length_stats: {min:   3.68623757E-01, max:   3.68623757E-01, mean:   3.686
     1 Fe   2.00000        7.613757      0.126638   -0.003127    0.099942    0.077711   52.146564   91.792227
     2 Fe   2.00000        1.236929      0.053057    0.048309    0.002504   -0.021794  114.252636    2.967385
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)          0.125154    0.045182    0.102446    0.055917   63.462256   66.201091
- Total magnetization (exact)            0.081371    0.029281    0.069480    0.030601   67.909670   67.148227
+ Total magnetization (spheres)
+ (cart.coord.)                                      0.045182    0.102446    0.055917
+ (sph.coord.)                           0.125154                                       63.462256   66.201091
+ Total magnetization (exact)
+ (cart.coord.)                                      0.029281    0.069480    0.030601
+ (sph.coord.)                           0.081371                                       67.909670   67.148227
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1244,10 +1264,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          5.6  wall=          5.6
+- Proc.   0 individual time (sec): cpu=          5.6  wall=          5.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and  24 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.6  wall=          5.6
++Overall time at end (sec) : cpu=          5.6  wall=          5.7

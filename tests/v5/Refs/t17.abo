@@ -1,5 +1,5 @@
 
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.Version 10.4.5.9 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 10 Sep 2025.
-- ( at 12h15 )
+.Starting date : Wed  1 Oct 2025.
+- ( at 11h00 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v5_t17/t17.abi
 - output file    -> t17.abo
@@ -1378,8 +1378,12 @@ force_length_stats: {min:   2.11921688E-03, max:   2.11921688E-03, mean:   2.119
     1 Bi   2.60648       12.858443      0.000077    0.000041    0.000065    0.000010   82.220580   57.540309
     2 Bi   2.60648       12.858539      0.000058   -0.000029   -0.000050   -0.000004   93.572409 -120.010032
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)          0.000020    0.000012    0.000015    0.000007   70.158954   50.066844
- Total magnetization (exact)            0.000006   -0.000003   -0.000005   -0.000001   98.347314 -117.464050
+ Total magnetization (spheres)
+ (cart.coord.)                                      0.000012    0.000015    0.000007
+ (sph.coord.)                           0.000020                                       70.158954   50.066844
+ Total magnetization (exact)
+ (cart.coord.)                                     -0.000003   -0.000005   -0.000001
+ (sph.coord.)                           0.000006                                       98.347314 -117.464050
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -3450,10 +3454,10 @@ P           mkmem5          2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         12.3  wall=         12.3
+- Proc.   0 individual time (sec): cpu=         12.4  wall=         12.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered  24 WARNINGs and  34 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         12.3  wall=         12.3
++Overall time at end (sec) : cpu=         12.4  wall=         12.5

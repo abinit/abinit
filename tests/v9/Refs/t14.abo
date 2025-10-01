@@ -1,5 +1,5 @@
 
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.Version 10.4.5.9 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 10 Sep 2025.
-- ( at 12h19 )
+.Starting date : Wed  1 Oct 2025.
+- ( at 11h04 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v9_t14/t14.abi
 - output file    -> t14.abo
@@ -3235,8 +3235,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
     1 Fe   2.11532       15.048749      0.505607    0.000000    0.000000    0.505607    0.000000    0.000000
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)          0.505607    0.000000    0.000000    0.505607    0.000000    0.000000
- Total magnetization (exact)            0.496020   -0.000000   -0.000000    0.496020    0.000000    0.000000
+ Total magnetization (spheres)
+ (cart.coord.)                                      0.000000    0.000000    0.505607
+ (sph.coord.)                           0.505607                                        0.000000    0.000000
+ Total magnetization (exact)
+ (cart.coord.)                                     -0.000000   -0.000000    0.496020
+ (sph.coord.)                           0.496020                                        0.000000    0.000000
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -4567,8 +4571,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
     1 Fe   2.11532       15.048751      0.505486    0.505486    0.000000   -0.000000   90.000000    0.000000
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)          0.505486    0.505486    0.000000   -0.000000   90.000000    0.000000
- Total magnetization (exact)            0.495925    0.495925    0.000000   -0.000000   90.000000    0.000000
+ Total magnetization (spheres)
+ (cart.coord.)                                      0.505486    0.000000   -0.000000
+ (sph.coord.)                           0.505486                                       90.000000    0.000000
+ Total magnetization (exact)
+ (cart.coord.)                                      0.495925    0.000000   -0.000000
+ (sph.coord.)                           0.495925                                       90.000000    0.000000
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -5899,8 +5907,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
     1 Fe   2.11532       15.048742      0.505608    0.000000    0.505608   -0.000000   90.000000   90.000000
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)          0.505608    0.000000    0.505608   -0.000000   90.000000   90.000000
- Total magnetization (exact)            0.496020    0.000000    0.496020   -0.000000   90.000000   90.000000
+ Total magnetization (spheres)
+ (cart.coord.)                                      0.000000    0.505608   -0.000000
+ (sph.coord.)                           0.505608                                       90.000000   90.000000
+ Total magnetization (exact)
+ (cart.coord.)                                      0.000000    0.496020   -0.000000
+ (sph.coord.)                           0.496020                                       90.000000   90.000000
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -7231,8 +7243,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
     1 Fe   2.11532       15.048741      0.505614    0.357523    0.357523   -0.000000   90.000000   45.000000
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)          0.505614    0.357523    0.357523   -0.000000   90.000000   45.000000
- Total magnetization (exact)            0.496026    0.350743    0.350743   -0.000000   90.000000   45.000000
+ Total magnetization (spheres)
+ (cart.coord.)                                      0.357523    0.357523   -0.000000
+ (sph.coord.)                           0.505614                                       90.000000   45.000000
+ Total magnetization (exact)
+ (cart.coord.)                                      0.350743    0.350743   -0.000000
+ (sph.coord.)                           0.496026                                       90.000000   45.000000
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -8068,10 +8084,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         13.9  wall=         14.0
+- Proc.   0 individual time (sec): cpu=         14.1  wall=         14.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered  10 WARNINGs and  30 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         13.9  wall=         14.0
++Overall time at end (sec) : cpu=         14.1  wall=         14.2
