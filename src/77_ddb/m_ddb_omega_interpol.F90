@@ -41,6 +41,7 @@ module m_ddb_omega_interpol
  use m_cgtools,         only : fxphas_seq
  use m_dynmat,          only : pheigvec_normalize,phdispl_from_eigvec
  use m_numeric_tools,   only : polcoe
+ use m_ddb_diel,        only : alignph
 
  implicit none
 
@@ -98,8 +99,8 @@ contains
 
 !Local variables -------------------------
 !scalars
- integer :: alpha_unit,diel_unit,fs2rs,i,iblok,ifound
- integer :: ii,imode,ipert1,ipert2,iw,j,jblok,jw,kblok,lblok
+ integer :: alpha_unit,diel_unit,fs2rs,i,iblok,idir1,idir2,ifound
+ integer :: ii,imode,index,ipert1,ipert2,iw,j,jblok,jw,kblok,lblok
  integer :: mmag_unit,mmom_unit,mmspec_unit,nblok,ndim 
  integer :: nmat,nmdir,nwcalc,optgb,phon_unit,prtopt
  integer :: locmagsus_unit,zeff_unit,zeffspec_unit,zfield_unit
@@ -261,6 +262,24 @@ contains
        call polcoe(omegacalc,ddb%val_fs(2,ii,:),nwcalc,coeffs(2,:,ii))
      end if
    end do
+
+   i=0
+   do ipert2= natom+11+mpatpol(1), natom+11+mpatpol(2)
+     do idir2= 1, 2
+       i= i + 1
+       j=0
+       do ipert1= natom+11+mpatpol(1), natom+11+mpatpol(2)
+         do idir1= 1, 2
+           j= j + 1
+           index= idir1 + 3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
+           write(150,*) j, i, coeffs(1,:,index) 
+           write(151,*) j, i, coeffs(2,:,index) 
+
+         end do
+       end do
+     end do
+   end do
+
  end if
 
 !Loop over the frequency
@@ -344,9 +363,9 @@ contains
    & lm_alpha(:,:,iw),lm_epsilon(:,:,iw),lm_localpha(:,:,iw),lm_magsus(:,:,iw),lm_mchi(:,:,iw),&
    & magsus(:,:,iw),mpert,mmom(:,:,iw),mmom_tr(:,:,iw),natom,ndim,phongreen,ucvol,zeff)
 
-     call lm_normal_modes(int_fsddb,displ,eta,lm_alpha_nm(:,:,:,iw),lm_epsilon_nm(:,:,:,iw),lm_mchi_nm(:,:,:,iw), &
+     call lm_normal_modes(amu,int_fsddb,displ,eta,lm_alpha_nm(:,:,:,iw),lm_epsilon_nm(:,:,:,iw),lm_mchi_nm(:,:,:,iw), &
    & mcell,mmom(:,:,iw),modemm(:,:,iw),modedisp(:,:,iw),modemeff(:,:,iw),modezeff(:,:,iw),modezf(:,:,iw),&
-   & mpert,natom,ndim,omega(iw),phfrq(:,iw),ucvol,zfield(:,:,iw))
+   & mpert,natom,ndim,ntypat,omega(iw),phfrq(:,iw),typat,ucvol,zfield(:,:,iw))
 
    else if (mpopt==2) then
      call phonon_green(amu,displ,eigvec,eta,int_rsddb,& 
@@ -357,9 +376,9 @@ contains
    & lm_alpha(:,:,iw),lm_epsilon(:,:,iw),lm_localpha(:,:,iw),lm_magsus(:,:,iw),lm_mchi(:,:,iw),& 
    & magsus(:,:,iw),mpert,mmom(:,:,iw),mmom_tr(:,:,iw),natom,ndim,phongreen,ucvol,zeff)
 
-     call lm_normal_modes(int_rsddb,displ,eta,lm_alpha_nm(:,:,:,iw),lm_epsilon_nm(:,:,:,iw),lm_mchi_nm(:,:,:,iw), &
+     call lm_normal_modes(amu,int_rsddb,displ,eta,lm_alpha_nm(:,:,:,iw),lm_epsilon_nm(:,:,:,iw),lm_mchi_nm(:,:,:,iw), &
    & mcell,mmom(:,:,iw),modemm(:,:,iw),modedisp(:,:,iw),modemeff(:,:,iw),modezeff(:,:,iw),modezf(:,:,iw),&
-   & mpert,natom,ndim,omega(iw),phfrq(:,iw),ucvol,zfield(:,:,iw))
+   & mpert,natom,ndim,ntypat,omega(iw),phfrq(:,iw),typat,ucvol,zfield(:,:,iw))
 
    end if
 
@@ -1368,8 +1387,8 @@ end subroutine phonon_green
 
 #include "abi_common.h"
 
-subroutine lm_normal_modes(blkval,displ,eta,lm_alpha_nm,lm_epsilon_nm,lm_mchi_nm, &
-& mcell,mmom,modemm,modedisp,modemeff,modezeff,modezf,mpert,natom,ndim,omega,phfrq,ucvol,zfield)
+subroutine lm_normal_modes(amu,blkval,displ,eta,lm_alpha_nm,lm_epsilon_nm,lm_mchi_nm, &
+& mcell,mmom,modemm,modedisp,modemeff,modezeff,modezf,mpert,natom,ndim,ntypat,omega,phfrq,typat,ucvol,zfield)
 
  use defs_basis
  use m_errors
@@ -1379,11 +1398,13 @@ subroutine lm_normal_modes(blkval,displ,eta,lm_alpha_nm,lm_epsilon_nm,lm_mchi_nm
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in)  :: mpert,natom,ndim 
+ integer, intent(in)  :: mpert,natom,ndim,ntypat 
  real(dp), intent(in) :: eta,mcell,omega,ucvol
 !arrays
+ integer, intent(in)  :: typat(natom)
+ real(dp), intent(in) :: amu(ntypat)
  real(dp), intent(in) :: blkval(2,3,mpert,3,mpert,1)
- real(dp), intent(in) :: displ(2*3*natom*3*natom)
+ real(dp), intent(inout) :: displ(2*3*natom*3*natom)
  real(dp), intent(in) :: phfrq(3*natom)
  complex(dpc), intent(in) :: mmom(ndim,(natom+5)*3)
  complex(dpc), intent(in) :: zfield(ndim,(natom+5)*3)
@@ -1409,9 +1430,18 @@ subroutine lm_normal_modes(blkval,displ,eta,lm_alpha_nm,lm_epsilon_nm,lm_mchi_nm
  complex(dpc),allocatable :: meff(:,:), meff_tr(:,:), modemeff_tr(:,:)
 !character(len=500) :: msg                   
 
+!TMP:
+ complex(dpc) :: basein(2,2),baseout(2,2),hmat(2,2),rmat(2,2)
+ complex(dpc) :: totbasein(3*natom,2), totbaseout(3*natom,2)
+ complex*16,parameter :: ure=(1.d0,0.d0),uim=(0.d0,1.d0)
+
+
 ! *************************************************************************
 
  DBG_ENTER("COLL")
+
+!Rotate doubly degenerated modes 
+! call alignph(amu,displ,blkval,mpert,natom,ntypat,phfrq,typat)
 
 !Define the complex eigendisplacementes array
 do imode=1,3*natom
@@ -1428,6 +1458,28 @@ do imode=1,3*natom
  do imode= 1, 3*natom
    norm(imode)= sqrt(dot_product(modedisp(:,imode),modedisp(:,imode)))
  end do 
+
+!!!!!!TMP rotation of doublet 23 and 24 for Cr2O3
+! baseout=cmplx(zero,zero,16)
+! baseout(1,1)=one
+! baseout(2,2)=one
+!
+!! baseout(:,1)=1.d0/sqrt(2.d0)*(/ure,uim/)
+!! baseout(:,2)=1.d0/sqrt(2.d0)*(/ure,-uim/)
+!
+! basein(:,1)=modedisp(1:2,24)
+! basein(:,2)=modedisp(1:2,23)
+! hmat=matmul(transpose(conjg(basein)),basein)
+! basein=basein/sqrt(hmat(1,1))
+!
+! rmat=matmul(transpose(conjg(baseout)),basein)
+!
+! totbasein(:,1)=modedisp(:,24)
+! totbasein(:,2)=modedisp(:,23)
+! totbaseout=matmul(totbasein,transpose(conjg(rmat)))
+! modedisp(:,23)=totbaseout(:,1)*(.99712401816457066536,-.07578715194108398329)
+! modedisp(:,24)=totbaseout(:,2)*(.99712401816457066536,.07578715194108398329)
+
 
 !Compute the mode-resolved macroscopic quantities
 !(Born and magnetic charges)
