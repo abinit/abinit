@@ -1031,6 +1031,7 @@ type, public :: dataset_type
  real(dp) :: polcen(3)
  real(dp) :: pvelmax(3)
  real(dp) :: qgbt(3)=[0.0_dp,0.0_dp,0.0_dp]
+ real(dp) :: qgbt_cart(3)=[0.0_dp,0.0_dp,0.0_dp]
  real(dp) :: qptn(3)
  real(dp) :: red_efield(3)
  real(dp) :: red_dfield(3)
@@ -2433,6 +2434,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%polcen(:)          = dtin%polcen(:)
  dtout%pvelmax(:)         = dtin%pvelmax(:)
  dtout%qgbt(:)            = dtin%qgbt(:)
+ dtout%qgbt_cart(:)       = dtin%qgbt_cart(:)
  dtout%qptn(:)            = dtin%qptn(:)
  dtout%red_efield(:)      = dtin%red_efield(:)
  dtout%red_dfield(:)      = dtin%red_dfield(:)
@@ -3797,7 +3799,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' pseudos ptcharge'
  list_vars=trim(list_vars)//' pvelmax pw_unbal_thresh'
 !Q
- list_vars=trim(list_vars)//' q1shft qgbt qmass qprtrb qpt qptdm qptnrm qph1l'
+ list_vars=trim(list_vars)//' q1shft qgbt qgbt_cart qmass qprtrb qpt qptdm qptnrm qph1l'
  list_vars=trim(list_vars)//' qptopt quadquad qptrlatt quadmom'
 !R
  list_vars=trim(list_vars)//' random_atpos randomseed ratsm ratsph ratsph_extra rcut'

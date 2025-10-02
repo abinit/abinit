@@ -1,0 +1,71 @@
+# Crystalline bcc Fe with Generalized Bloch Theorem
+# Finite difference stress under GBT
+#
+ndtset 3
+# GBT
+use_gbt 1
+qgbt 0.5 0 0
+
+# SPIN
+nspinor  2
+nspden   4
+so_psp   0
+spinat   5.0 0.0 0.0
+
+occopt   7
+tsmear   0.01
+
+# Definition of the planewave basis set
+ecut  8        # Maximal kinetic energy cut-off, in Hartree
+ecutsm 0.5
+
+# Definition of the k-point grids and symmetries
+nsym 1
+kptopt 4
+ngkpt 2 2 2
+nshiftk 1
+shiftk  0 0 0
+
+# Definition of the SCF procedure
+nstep 20         # Maximal number of SCF cycles
+toldfe 1.0d-6
+nband  32
+nline  11
+
+# Common input variables
+ natom 1
+ ntypat 1
+ typat 1
+ znucl 26
+ xred    0.0000000000    0.0000000000    0.0000000000
+
+ acell1    1.01     1.01     1.01
+ acell2    1.011    1.011    1.011
+ acell3    1.009    1.009    1.009
+
+ rprim
+    4.2463393340    0.0000000000   -1.5013076488
+   -2.1231696414    3.6774377363   -1.5013076851
+    0.0000000000    0.0000000000    4.5039230007
+
+pp_dirpath "$ABI_PSPDIR/Psdj_nc_fr_04_pbe_std_psp8"  # This is the path to the directory were
+                                                     # pseudopotentials for tests are stored
+pseudos "Fe.psp8"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t28.abo, tolnlines = 80, tolabs = 1.000e-01, tolrel = 3.640e-03
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = L. Shu
+#%% keywords = GBT
+#%% description =
+#%%   Crystalline bcc Fe: Finite difference calculation for stress under GBT
+#%%<END TEST_INFO>
