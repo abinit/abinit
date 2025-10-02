@@ -40,6 +40,7 @@ module m_ddb_diel
 !!***
 
  public :: ddb_diel
+ public :: alignph
 !!***
 
 contains
