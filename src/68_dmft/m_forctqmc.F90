@@ -117,7 +117,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  integer :: iatom,icomp,ierr,if1,if2,iflavor1,iflavor2,ifreq,im1,im2,ima,imb,ispa,ispb,ispinor
  integer :: ispinor1,ispinor2,isppol,itau,itypat,lpawu,myproc,natom,ndim,nflavor,nomega,nproc
  integer :: nspinor,nsppol,nsppol_imp,ntypat,nwlo,opt_diag,opt_fk,opt_nondiag,opt_complex
- integer :: opt_rot,rot_type_vee,testcode,testrot,tndim,unt,unt2,useylm
+ integer :: opt_rot,rot_type_vee,testcode,testrot,tndim,unt,unt2,useylm,opt_hybri
  integer, parameter :: optdb = 0
  logical :: nondiaglevels
  logical(kind=1) :: leg_measure = .true.
@@ -225,7 +225,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  if (nspinor == 2) useylm = 1 ! to avoid complex G(tau)
 
  opt_complex = 0
- if (paw_dmft%dmft_solv .eq. 10) opt_complex = 1 !Complex G(tau)
+ if (paw_dmft%dmft_solv .eq. 10) then 
+    opt_complex = 1 !Complex G(tau)
+    opt_hybri = paw_dmft%dmft_hybri_limit
+ endif
 
  !write(6,*) "nspinor,useylm",nspinor,useylm
  if (useylm == 0) then
@@ -294,9 +297,11 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  end if ! dmftctqmc_basis
  call wrtout(std_out,message,'COLL')
  if (opt_diag == 1) then
-   write(std_out,*) "  == Switching to CTQMC basis: using basis that diagonalizes the electronic levels"
+   write(message,'(5a)') "   == Switching to CTQMC basis: using basis that diagonalizes the electronic levels"
+   call wrtout(std_out,message,'COLL') 
  else if (opt_diag == 2) then
-   write(std_out,*) "  ==  The correlated occupation matrix is diagonalized"
+   write(message,'(5a)') "   == The correlated occupation matrix is diagonalized"
+   call wrtout(std_out,message,'COLL')
  end if ! opt_diag
 
  ! =================================================================
@@ -724,7 +729,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
    ! Print analytical C_ij (rotated)
    ! ---------------------------------------
-   if (paw_dmft%dmft_solv == 10) then
+   if (paw_dmft%dmft_solv /= 10) then
      write(message,'(a,2x,a)') ch10," == Coeff analytical C_ij such that F -> C_ij/iw_n after rotation"
      call wrtout(std_out,message,'COLL')
      call print_matlu(hybri_coeff(:),natom,1,compl=1,opt_exp=0)
@@ -1570,7 +1575,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
         call CtqmcoffdiagInterfaceComplex_run(hybridoffdiagComplex,fw1_nd(1:paw_dmft%dmftqmc_l,:,:),Gtau=gtmp_ndc(:,:,:),&                          
            & Gw=gw_tmp_nd(:,:,:),D=doccsum,E=green%ecorr_qmc(iatom),Noise=noise,matU=udens_atoms(iatom)%mat(:,:,1),&           
            & Docc=docc(:,:),opt_levels=levels_ctqmc_complex(:),hybri_limit=hybri_limit(:,:),Magmom_orb=REAL(magmom_orb(iatom)%value),&       
-           & Magmom_spin=REAL(magmom_spin(iatom)%value),Magmom_tot=REAL(magmom_tot(iatom)%value),Iatom=iatom,fname=paw_dmft%filapp)  
+           & Magmom_spin=REAL(magmom_spin(iatom)%value),Magmom_tot=REAL(magmom_tot(iatom)%value),&
+           & Iatom=iatom,fname=paw_dmft%filapp,opthybri=opt_hybri)  
  
         ABI_FREE(docc)        
        ! =================================================================
@@ -2666,8 +2672,8 @@ subroutine ctqmcoutput_printgreen(paw_dmft,gtmp_nd,gtmp_ndc,gw_tmp_nd,gtmp,gw_tm
         ABI_ERROR(message)                                                                                       
       end if                                                                                                     
       do itau=1, paw_dmft%dmftqmc_l                                                                              
-        write(unt,'(296f21.14)') float(itau-1)/float(paw_dmft%dmftqmc_l)/paw_dmft%temp,&                         
-&       ((gtmp_nd(itau,iflavor,iflavor1),iflavor=iflavor1,nflavor), iflavor1=1, nflavor)                        
+        write(unt,'(392f21.14)') float(itau-1)/float(paw_dmft%dmftqmc_l)/paw_dmft%temp,&                         
+&       ((gtmp_nd(itau,iflavor,iflavor1),iflavor=1,nflavor), iflavor1=1, nflavor)                        
       end do                                                                                                     
       close(unt)                                                                                                 
     endif                                                                                                        
@@ -2687,8 +2693,8 @@ subroutine ctqmcoutput_printgreen(paw_dmft,gtmp_nd,gtmp_ndc,gw_tmp_nd,gtmp,gw_tm
         ABI_ERROR(message)                                                                                           
       end if                                                                                                         
       do itau=1, paw_dmft%dmftqmc_l                                                                    
-        write(unt,'(296f21.14)') float(itau-1)/float(paw_dmft%dmftqmc_l)/paw_dmft%temp,&              
-&       ((gtmp_ndc(itau,iflavor,iflavor1),iflavor=iflavor1,nflavor), iflavor1=1, nflavor)                                           
+        write(unt,'(2x,393(e18.10e3,2x))') float(itau-1)/float(paw_dmft%dmftqmc_l)/paw_dmft%temp,&              
+&       ((dble(gtmp_ndc(itau,iflavor,iflavor1)),aimag(gtmp_ndc(itau,iflavor,iflavor1)),iflavor=1,nflavor), iflavor1=1, nflavor)                                           
       end do                                                                                          
       close(unt)                                                                                      
     endif

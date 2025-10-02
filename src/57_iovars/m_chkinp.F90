@@ -793,6 +793,11 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          ABI_ERROR(msg)
        endif
 
+       if (dt%dmft_solv .eq. 10) then
+          cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
+          call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_hybri_limit',dt%dmft_hybri_limit,2,(/0,1/),iout)
+       endif
+
        do itypat=1,dt%ntypat
          if (dt%lpawu(itypat)==-1) cycle
          if (dt%dmft_orbital(itypat)<=0.and.dt%dmft_orbital_filepath==ABI_NOFILE) then

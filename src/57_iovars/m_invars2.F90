@@ -2548,6 +2548,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread==1) dtset%dmft_epsilon_yukawa=dprarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_fermi_step',tread,'DPR')
    if(tread==1) dtset%dmft_fermi_step=dprarr(1)
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_hybri_limit',tread,'INT')
+   if(tread==1) dtset%dmft_hybri_limit=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_iter',tread,'INT')
    if(tread==1) dtset%dmft_iter=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_kspectralfunc',tread,'INT')

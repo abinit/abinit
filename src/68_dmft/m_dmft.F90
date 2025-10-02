@@ -213,7 +213,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  !  end if
  !end do
  opt_renorm = merge(2,paw_dmft%dmft_wanorthnorm,paw_dmft%nspinor==2.and. &
-   &(paw_dmft%dmft_solv == 8 .or. paw_dmft%dmft_solv == 9 .or. paw_dmft%dmft_solv == 10))
+   &(paw_dmft%dmft_solv == 8 .or. paw_dmft%dmft_solv == 9 )) !.or. paw_dmft%dmft_solv == 10))
 
  if (paw_dmft%dmft_solv /= -1) then
    call chipsi_renormalization(paw_dmft,opt=opt_renorm)
