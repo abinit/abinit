@@ -84,6 +84,7 @@ module m_phgamma
  use m_pawfgr,         only : pawfgr_type
  use m_wfd,            only : wfd_t
  use m_pstat,          only : pstat_proc
+ use m_lgroup,         only : lgroup_t
 
  implicit none
 
@@ -3051,6 +3052,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  type(xcomm_t) :: pert_comm, qs_comm, qpt_comm, bsum_comm, kpt_comm, spin_comm, pkb_comm !, ncwrite_comm
  type(krank_t) :: krank
  type(htetra_t) :: tetra
+ !type(lgroup_t) :: lg_q
  character(len=500) :: msg
  character(len=fnlen) :: path
 !arrays
@@ -3664,6 +3666,23 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
    ! Examine the symmetries of the q wavevector.
    call littlegroup_q(cryst%nsym, qpt, symq, cryst%symrec, cryst%symafm, timerev_q, prtvol=dtset%prtvol)
+
+   ! Compute the little group of the q-point so that we can compute g(k,q) only for k in the IBZ_q
+   !if (dtset%symsigma /= 0) then
+   !  timrev_q = kpts_timrev_from_kptopt(my_qptopt)
+   !  call lg_q%init(cryst, qq_bz, timrev_q, gstore%nkbz, gstore%kbz, gstore%nkibz, gstore%kibz, xmpi_comm_self)
+   !end if
+
+   !if (dtset%symsigma /= 0) then
+   !  ii = lg_q%findq_ibzk(kk)
+   !  if (ii == -1) then
+   !    call wrtout(std_out, sjoin(" my_ik:", itoa(my_ik), kk_string, " not in IBZ_q --> skipping iteration"))
+   !    cycle
+   !    ! TODO: Check fillvalue (should be zero)
+   !  end if
+   !  weight_k = lg_q%weights(ii)
+   !end if
+   !call lg_q%free()
 
    ! Get phonon frequencies and eigenvectors for this q-point.
    call ifc%fourq(cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
