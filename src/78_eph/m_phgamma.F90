@@ -3027,7 +3027,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 !Local variables ------------------------------
 !scalars
  integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, qptopt1 = 1, master = 0, ndat1 = 1, eph_scalprod0 = 0
- integer :: my_rank,nproc,mband,nsppol,nkibz,idir,ipert,iq_ibz
+ integer :: my_rank,nproc,mband,nsppol,nkibz,idir,ipert,iq_ibz !, timrev_q
  integer :: cplex,db_iqpt,natom,natom3,ipc,ipc1,ipc2,nspinor,onpw
  integer :: bstart_k,bstart_kq,nband_k,nband_kq,band_k, band_kq, ib_k, ib_kq !ib1,ib2,
  integer :: ik_ibz,ik_bz,ikq_bz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq,timerev_q
@@ -3670,7 +3670,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    ! Compute the little group of the q-point so that we can compute g(k,q) only for k in the IBZ_q
    !if (dtset%symsigma /= 0) then
    !  timrev_q = kpts_timrev_from_kptopt(my_qptopt)
-   !  call lg_q%init(cryst, qq_bz, timrev_q, gstore%nkbz, gstore%kbz, gstore%nkibz, gstore%kibz, xmpi_comm_self)
+   !  call lg_q%init(cryst, qpt, timrev_q, gstore%nkbz, gstore%kbz, gstore%nkibz, gstore%kibz, xmpi_comm_self)
    !end if
 
    !if (dtset%symsigma /= 0) then

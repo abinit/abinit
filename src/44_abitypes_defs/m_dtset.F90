@@ -1157,6 +1157,9 @@ type, public :: dataset_type
  procedure :: get_wrmesh_for_sigeph => dtset_get_wrmesh_for_sigeph
   ! Frequency mesh for sigma(w) and spectral functions (EPH self-energy)
 
+ procedure :: get_edos_params => dtset_get_edos_params
+  ! Return parameters for the computation of the electronic DOS.
+
  end type dataset_type
 !!***
 
@@ -3244,6 +3247,32 @@ subroutine dtset_get_wrmesh_for_sigeph(dtset, nwr, wr_step)
  end if
 
 end subroutine dtset_get_wrmesh_for_sigeph
+!!***
+
+!!****f* m_dtset/dtset_get_edos_params
+!! NAME
+!! dtset_get_edos_params
+!!
+!! FUNCTION
+!!   Return parameters for the computation of the electronic DOS.
+!!   to be passed to ebands%get_edos
+!!
+!! SOURCE
+
+subroutine dtset_get_edos_params(dtset, edos_intmeth, edos_step, edos_broad)
+
+!Arguments-------------------------------
+!scalars
+ class(dataset_type),intent(in) :: dtset
+ integer,intent(out) :: edos_intmeth
+ real(dp),intent(out) :: edos_step, edos_broad
+! *********************************************************************
+
+ edos_intmeth = 2; if (dtset%prtdos /= 0) edos_intmeth = dtset%prtdos
+ edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
+ edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
+
+end subroutine dtset_get_edos_params
 !!***
 
 !!****f* m_dtset/macroin

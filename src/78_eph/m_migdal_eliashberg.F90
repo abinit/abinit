@@ -245,12 +245,10 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  integer :: nproc, my_rank, ierr, itemp, ntemp, niw, ncid
  integer :: edos_intmeth
  !integer :: spin, natom3, cnt !, band, ib, nb, my_ik, my_iq, my_is
- !integer :: ik_ibz, ik_bz, ebands_timrev
- !integer :: iq_bz, iq_ibz !, ikq_ibz, ikq_bz
+ !integer :: ik_ibz, ik_bz, ebands_timrev, iq_bz, iq_ibz !, ikq_ibz, ikq_bz
  !integer :: ncid, spin_ncid, ncerr, gstore_fform
  integer :: phmesh_size, units(2) !, iw
- real(dp) :: kt, wmax, cpu, wall, gflops
- real(dp) :: edos_step, edos_broad !, sigma, ecut, eshift, eig0nk
+ real(dp) :: kt, wmax, cpu, wall, gflops, edos_step, edos_broad !, sigma, ecut, eshift, eig0nk
  !character(len=5000) :: msg
  class(crystal_t),pointer :: cryst
  class(ebands_t),pointer :: ebands
@@ -275,9 +273,7 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  ABI_CHECK(ierr == 0, "Wrong gstore object for migdal_eliashberg_iso. See messages above")
 
  ! Compute electron DOS.
- edos_intmeth = 2; if (dtset%prtdos /= 0) edos_intmeth = dtset%prtdos
- edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
- edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
+ call dtset%get_edos_params(edos_intmeth, edos_step, edos_broad)
  edos = ebands%get_edos(cryst, edos_intmeth, edos_step, edos_broad, gstore%comm)
 
  !! Store DOS per spin channel
