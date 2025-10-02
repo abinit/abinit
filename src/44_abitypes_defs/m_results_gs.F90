@@ -104,8 +104,8 @@ MODULE m_results_gs
   real(dp) :: entropy  ! entropy (Hartree)
 !!!  real(dp) :: enxc     ! exchange-correlation energy (Hartree)
 !!!  real(dp) :: enxcdc   ! exchange-correlation double-counting energy (Hartree)
-!!!  real(dp) :: epaw     ! PAW spherical energy (Hartree)
-!!!  real(dp) :: epawdc   ! PAW spherical double-counting energy (Hartree)
+!!!  real(dp) :: paw%epaw ! PAW spherical energy (Hartree)
+!!!  real(dp) :: paw%epaw_dc ! PAW spherical double-counting energy (Hartree)
   real(dp) :: etotal   ! total energy (Hartree)
                        ! for fixed occupation numbers (occopt==0,1,or 2):
                        !   etotal=ek+ehart+enxc+eei+eew+eii+enl+PAW_spherical_part

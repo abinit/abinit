@@ -258,8 +258,8 @@ contains
 !!   | e_nlpsp_vfock(IN)=nonlocal psp + potential Fock ACE part of total energy.
 !!   | e_xc(IN)=exchange-correlation energy (hartree)
 !!   | e_xcdc(IN)=exchange-correlation double-counting energy (hartree)
-!!   | e_paw(IN)=PAW spherical part energy
-!!   | e_pawdc(IN)=PAW spherical part double-counting energy
+!!   | paw%e_paw(IN)=PAW spherical part energy
+!!   | paw%e_pawdc(IN)=PAW spherical part double-counting energy
 !!   | e_elecfield(OUT)=the term of the energy functional that depends explicitely    !!HONG
 !!   |                  on the electric field:
 !!   |                 enefield =  -ebar_i p_i - Omega/(8*pi) (g^{-1})_ij ebar_i ebar_j for fixed E/ebar
