@@ -663,7 +663,6 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
  complex(dpc), pointer :: veeslm(:,:,:,:) => null(),veetemp(:,:,:,:) => null()
  complex(dpc), pointer :: veetemp2(:,:,:,:) => null(),veetemp3(:,:,:,:) => null()
  complex(dpc), pointer :: veeylm2(:,:,:,:) => null()
- real(dp) :: sum,m3,m4,mj,mk,ml
 ! *********************************************************************
 
  natom   = paw_dmft%natom
@@ -1716,7 +1715,7 @@ subroutine vee2udensatom_hu(ndim,udens_atoms,veetemp,basis,prtonly)
      call wrtout(std_out,message,'COLL')                                                   
    enddo !ms
  endif
- write(message,'(3x,a)') "--------------------------------------------------------"
+ write(message,'(3a)') "--------------------------------------------------------"
  call wrtout(std_out,message,'COLL')
 
 end subroutine vee2udensatom_hu

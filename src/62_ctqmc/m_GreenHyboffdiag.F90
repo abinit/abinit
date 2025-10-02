@@ -1163,7 +1163,7 @@ include 'mpif.h'
 
 
   ! --  correction on G(tau=0) is thus
-      correction = -C*0.5d0
+      correction = -dble(C)*0.5d0
 
   ! --  built frequency mesh
       Domega = (/ ((2.d0 * DBLE(iomega) - 1.d0)*pi_invbeta, iomega=1, omegaSamples) /)
@@ -1866,7 +1866,7 @@ END SUBROUTINE GreenHyboffdiag_destroy
 
        ABI_UNUSED((/aa, c3/))
        ABI_UNUSED((/lflag/))
-       czero=cmplx(0.d0,0.d0)
+       czero=cmplx(0.d0,0.d0,8)
        zero=0.d0
        one=1.d0
        two=2.d0

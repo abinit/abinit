@@ -1278,7 +1278,7 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk,Iatom,fname)
 !Local variables ------------------------------
   INTEGER                                         :: flavors
   INTEGER                                         :: samples
-  INTEGER                                         :: iflavor,ifl
+  INTEGER                                         :: iflavor
   INTEGER                                         :: iflavor2
   INTEGER                                         :: iomega
   INTEGER                                         :: itau
