@@ -5431,7 +5431,7 @@ end subroutine simpson_int
 !! simpson
 !!
 !! FUNCTION
-!!   Simpson integral of input function
+!!  Simpson integral of input function
 !!
 !! INPUTS
 !!  step = space between integral arguments
@@ -5492,7 +5492,6 @@ pure subroutine rhophi(cx, phi, rho)
  rho = sqrt(cx(1)*cx(1) + cx(2)*cx(2))
 
  if (abs(cx(1)) > tol8) then
-
    phi = atan(cx(2)/cx(1))
 
    ! phi is an element of [-pi,pi]
@@ -5647,7 +5646,7 @@ end subroutine vdiff_print
 !!
 !! SOURCE
 
-subroutine smooth(a, mesh, it)
+pure subroutine smooth(a, mesh, it)
 
 !Arguments ------------------------------------
 !scalars
@@ -5708,7 +5707,7 @@ end subroutine smooth
 !!
 !! SOURCE
 
-subroutine nderiv(hh,yy,zz,ndim,norder)
+pure subroutine nderiv(hh,yy,zz,ndim,norder)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -6217,7 +6216,6 @@ subroutine kramerskronig(nomega,omega,eps,method,only_check)
      call wrtout(std_out,msg,'COLL')
    end if
  end if
-
 
 !Perform Kramers-Kronig using naive integration
  select case (method)
