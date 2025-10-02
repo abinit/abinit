@@ -2017,7 +2017,7 @@ end subroutine add_matlu
 !debug       temp_mat2(:,:)=gathermatlu(iatom)%value(:,:)
 !           write(std_out,*)"diag"
 
-     if (optreal == 1 .and. maxval(abs(aimag(matlu(iatom)%mat(:,:,isppol)))) < tol6 .and. test .eq. 8 ) then
+     if (optreal == 1 .and. maxval(abs(aimag(matlu(iatom)%mat(:,:,isppol)))) < tol6 ) then
        write(message,'(a,2x,a,e9.3,a)') ch10,"Imaginary part of Local Hamiltonian is lower than ",&
          & tol6,": the real matrix is used"
        call wrtout(std_out,message,'COLL')
@@ -2107,7 +2107,7 @@ end subroutine add_matlu
 !             call wrtout(std_out,message,'COLL')
 !           end do
      else
-       if (optreal == 1 .and. maxval(abs(aimag(matlu(iatom)%mat(:,:,isppol)))) > tol8 .and. test .eq. 8 ) then
+       if (optreal == 1 .and. maxval(abs(aimag(matlu(iatom)%mat(:,:,isppol)))) > tol8 ) then
          write(message,'(a)') " Local hamiltonian in correlated basis is complex"
          ABI_COMMENT(message)
        end if
