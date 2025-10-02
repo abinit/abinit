@@ -714,7 +714,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
      call vee2udensatom_hu(ndim,hu(itypat)%udens(:,:),hu(itypat)%vee(:,:,:,:),"cubic",prtonly=1)
 
      if (.not. paw_dmft%dmft_solv .eq. 10) then
-       basis_vee = 'cubic'
+       basis_vee = "cubic"
 !    First print veeslm
        !call printvee_hu(ndim,real(veeslm),1,basis_vee)
        call printvee_hu(tndim,hu(itypat)%veeslm2(:,:,:,:),prtopt,basis_vee)
@@ -905,8 +905,8 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
        end do ! m1                                                         
                                                                          
        !write(*,*)"Sum of Imag part of Rotated Interaction Vee",xsum     
-       write(message,*) ch10,"=Sum of Imag part of Rotated Interaction Udens",xsum2                        
-       call wrtout(std_out,message,'COLL')
+       !write(message,'(5a)') "   == Sum of Imag part of Rotated Interaction Udens",xsum2                        
+       !call wrtout(std_out,message,'COLL')
 
      else 
        call vee2udensatom_hu(ndim,udens_atoms(iatom)%mat(:,:,1),vee_rotated(iatom)%mat(:,:,:,:),basis_vee,prtonly=1)

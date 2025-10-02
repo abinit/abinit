@@ -2325,6 +2325,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_entropy=0
    dtsets(idtset)%dmft_epsilon_yukawa=-1.0_dp
    dtsets(idtset)%dmft_fermi_step=0.02_dp
+   dtsets(idtset)%dmft_hybri_limit=0
    dtsets(idtset)%dmft_iter=10
    dtsets(idtset)%dmft_kspectralfunc=0
    dtsets(idtset)%dmft_lambda_yukawa=-1.0_dp

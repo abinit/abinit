@@ -258,7 +258,7 @@ END SUBROUTINE CtqmcoffdiagInterfaceComplex_setOpts
 !! SOURCE
 
 SUBROUTINE CtqmcoffdiagInterfaceComplex_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,opt_sym,opt_levels,hybri_limit,Magmom_orb,&
-&Magmom_spin,Magmom_tot,Iatom,fname) 
+&Magmom_spin,Magmom_tot,Iatom,fname,opthybri) 
 
 !Arguments ------------------------------------
   TYPE(CtqmcoffdiagInterfaceComplex), INTENT(INOUT) :: op
@@ -277,6 +277,7 @@ SUBROUTINE CtqmcoffdiagInterfaceComplex_run(op,G0omega, Gtau, Gw, D,E,Noise,matU
   DOUBLE PRECISION, DIMENSION(:,:),OPTIONAL, INTENT(IN ) :: Magmom_spin
   DOUBLE PRECISION, DIMENSION(:,:),OPTIONAL, INTENT(IN ) :: Magmom_tot
   INTEGER, INTENT(IN ) :: Iatom
+  INTEGER, INTENT(IN ) :: opthybri
   character(len=fnlen), INTENT(INOUT) :: fname
 !local variables--------------------------------
 !  INTEGER :: iflavor1,iflavor2
@@ -295,10 +296,10 @@ SUBROUTINE CtqmcoffdiagInterfaceComplex_run(op,G0omega, Gtau, Gw, D,E,Noise,matU
     CALL CtqmcoffdiagComplex_setMu(op%Hybrid, opt_levels)
 
   IF ( PRESENT(hybri_limit)) &
-    CALL CtqmcoffdiagComplex_sethybri_limit(op%Hybrid, hybri_limit)
+    CALL CtqmcoffdiagComplex_sethybri_limit(op%Hybrid, hybri_limit,opthybri)
 
      !call xmpi_barrier(op%Hybrid%MY_COMM)
-  CALL CtqmcoffdiagComplex_setG0wTab(op%Hybrid, G0omega,op%opt_fk)
+  CALL CtqmcoffdiagComplex_setG0wTab(op%Hybrid, G0omega,op%opt_fk,Iatom,fname)
      !call xmpi_barrier(op%Hybrid%MY_COMM)
 
   IF ( PRESENT(matU) ) &

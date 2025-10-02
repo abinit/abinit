@@ -143,6 +143,9 @@ MODULE m_paw_dmft
   ! = 0: do not compute entropy
   ! >= 1: compute entropy with an integration over self-consistent calculations
 
+  integer :: dmft_hybri_limit
+  ! = 1 : Use asymptotic limit to build hybridization function
+
   integer :: dmft_iter
   ! Nb of iterations for DMFT self-consistent cycle.
 
@@ -1056,6 +1059,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%natpawu              = dtset%natpawu
  paw_dmft%natom                = natom
  paw_dmft%temp                 = dtset%tsmear!*unit_e
+ paw_dmft%dmft_hybri_limit     = dtset%dmft_hybri_limit
  paw_dmft%dmft_iter            = dtset%dmft_iter
  paw_dmft%dmft_entropy         = dtset%dmft_entropy
  paw_dmft%dmft_kspectralfunc   = dtset%dmft_kspectralfunc

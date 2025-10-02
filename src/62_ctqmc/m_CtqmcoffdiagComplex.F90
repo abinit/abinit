@@ -42,6 +42,8 @@ MODULE m_CtqmcoffdiagComplex
  USE m_OurRng
  use defs_basis
  use m_abicore
+ use m_io_tools, only : open_file
+
 #ifdef HAVE_MPI2
  USE mpi
 #endif
@@ -916,12 +918,14 @@ END SUBROUTINE CtqmcoffdiagComplex_allocateOpt
 !!
 !! SOURCE
 
-SUBROUTINE CtqmcoffdiagComplex_setG0wTab(op,Gomega,opt_fk)
+SUBROUTINE CtqmcoffdiagComplex_setG0wTab(op,Gomega,opt_fk,Iatom,fname)
 
 !Arguments ------------------------------------
-  TYPE(CtqmcoffdiagComplex), INTENT(INOUT)                      :: op
+  TYPE(CtqmcoffdiagComplex), INTENT(INOUT)       :: op
   COMPLEX(KIND=8), DIMENSION(:,:,:), INTENT(IN ) :: Gomega
-  INTEGER                         , INTENT(IN ) :: opt_fk
+  INTEGER                         , INTENT(IN )  :: opt_fk
+  INTEGER, INTENT(IN)                            :: Iatom
+  CHARACTER(LEN=fnlen), INTENT(INOUT)            :: fname
 !Local variable -------------------------------
   COMPLEX(KIND=8), DIMENSION(:,:,:), ALLOCATABLE :: F
 
@@ -929,7 +933,7 @@ SUBROUTINE CtqmcoffdiagComplex_setG0wTab(op,Gomega,opt_fk)
     CALL ERROR("CtqmcoffdiagComplex_setG0wTab : CtqmcoffdiagComplex_setParameters never called    ") 
 
   MALLOC(F,(1:op%samples+1,1:op%flavors,1:op%flavors))
-  CALL CtqmcoffdiagComplex_computeF(op,Gomega, F, opt_fk)  ! mu is changed
+  CALL CtqmcoffdiagComplex_computeF(op,Gomega, F, opt_fk,Iatom,fname)  ! mu is changed
  !write(6,*) "eee111"
   CALL BathOperatoroffdiagComplex_setF(op%Bath, F)
  ! CALL BathOperatoroffdiag_printF(op%Bath,333)
@@ -1219,17 +1223,18 @@ END SUBROUTINE CtqmcoffdiagComplex_setMu
 !!
 !! SOURCE
 
-SUBROUTINE CtqmcoffdiagComplex_sethybri_limit(op, hybri_limit)
+SUBROUTINE CtqmcoffdiagComplex_sethybri_limit(op, hybri_limit,opthybri)
 
 !Arguments ------------------------------------
   TYPE(CtqmcoffdiagComplex)                     , INTENT(INOUT) :: op
   COMPLEX(KIND=8) , DIMENSION(:,:),  INTENT(IN ) :: hybri_limit
-
+  INTEGER, INTENT(IN)   :: opthybri
+!----------------------------------------------  
   IF ( op%flavors .NE. SIZE(hybri_limit,1) ) &
     CALL ERROR("Error in sethybri_limit")
 
   op%hybri_limit(:,:)=hybri_limit(:,:)  
-  op%opt_hybri_limit = 1
+  op%opt_hybri_limit = opthybri
 END SUBROUTINE CtqmcoffdiagComplex_sethybri_limit
 !!***
 !!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_computeF
@@ -1259,15 +1264,17 @@ END SUBROUTINE CtqmcoffdiagComplex_sethybri_limit
 !!
 !! SOURCE
 
-SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk)
+SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk,Iatom,fname)
 
  use m_hide_lapack,  only : xginv
 !Arguments ------------------------------------
-  TYPE(CtqmcoffdiagComplex)                       , INTENT(INOUT) :: op
+  TYPE(CtqmcoffdiagComplex)        , INTENT(INOUT) :: op
   COMPLEX(KIND=8), DIMENSION(:,:,:), INTENT(IN   ) :: Gomega
   !INTEGER                         , INTENT(IN   ) :: Wmax
   COMPLEX(KIND=8), DIMENSION(:,:,:), INTENT(INOUT) :: F
-  INTEGER                         , INTENT(IN   ) :: opt_fk
+  INTEGER                          , INTENT(IN   ) :: opt_fk
+  INTEGER, INTENT(IN)                              :: Iatom
+  CHARACTER(LEN=fnlen), INTENT(INOUT)              :: fname
 !Local variables ------------------------------
   INTEGER                                         :: flavors
   INTEGER                                         :: samples
@@ -1285,7 +1292,7 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk)
   COMPLEX(KIND=8), DIMENSION(:,:,:), ALLOCATABLE   :: Gomega_tmp
   TYPE(GreenHyboffdiagComplex)                     :: F_tmp
   CHARACTER(LEN=100) :: message
-  !character(len=4) :: tag_proc
+  character(len=2) :: atomnb
   !character(len=30) :: tmpfil
   !INTEGER :: unitnb
 
@@ -1454,15 +1461,15 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk)
   ! For all iflavor and iflavor2, do the Fourier transformation to have F(tau)
   ! ---------------------------------------------
   if (op%opt_hybri_limit .eq. 0) then
-    write(message,'(a,3a,a)') ch10,"== WARNING: Not using the asymptotic limit of hybridization to enforce F(iw_n) -> -C_ij/iw_n"
+    write(message,'(5a)') "   == WARNING: Not using the asymptotic limit of hybridization to enforce F(iw_n) -> -C_ij/iw_n"
   else
   ! Take into account asymptotic limit of hybridization function such that F(iw_n) -> -C_ij/iw_n
   ! with C_ij calculated in m_forctqmc.f90
   ! --------------------------------------
-    write(message,'(a,3a,a)') "== Use asymptotic limit of hybridization function such that F(iw_n) -> -C_ij/iw_n" 
+    write(message,'(5a)') "   == Use asymptotic limit of hybridization function such that F(iw_n) -> -C_ij/iw_n" 
   endif
   CALL wrtout(std_out,message,'COLL')
-  CALL GreenHyboffdiagComplex_backFourier(F_tmp,hybri_limit=op%hybri_limit,opt_hybri_limit=op%opt_hybri_limit)
+  CALL GreenHyboffdiagComplex_backFourierComplex(F_tmp,hybri_limit=op%hybri_limit,opt_hybri_limit=op%opt_hybri_limit)
 
   ! --- Put the result in F
   DO iflavor = 1, flavors
@@ -1484,22 +1491,22 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk)
     END DO
   END DO
 
-  open (unit=436,file='Hybridization.dat',status='unknown',form='formatted')
-  rewind(436)
+  !== Write Hybridization function in file ==
+  If (Iatom .lt. 10) then
+     write(atomnb,'("0",i1)') Iatom
+  else
+     write(atomnb,'(i2)') Iatom
+  endif
+
   IF ( op%rank .EQ. 0 ) THEN
-    ifl=0
-    DO iflavor = 1, flavors
-      DO iflavor2 = 1, flavors
-        ifl=ifl+1
-          write(436,*) "#",iflavor,iflavor2,op%hybri_limit(iflavor,iflavor2)
-        do  itau=1,op%samples+1
-          write(436,*) itau,real(F(itau,iflavor,iflavor2)),aimag(F(itau,iflavor,iflavor2))
-        enddo
-          write(436,*) 
-      END DO
-    END DO
+    open (unit=735,file=trim(fname)//'_Hybridization_iatom_'//atomnb//'.dat',status='unknown',form='formatted')      
+    write(735,'(6a)') "# Real and Imaginary part of the Hybridization function Delta(tau) in the CTQMC basis"
+    do itau=1,op%samples+1
+      write(735,'(2x,393(e25.17e3,2x))') DBLE(itau-1)*(op%beta/op%samples),&
+              &((-1*real(F(op%samples+2-itau,iflavor,iflavor2)),-1*AIMAG(F(op%samples+2-itau,iflavor,iflavor2)),iflavor=1,flavors),iflavor2=1,flavors)
+    enddo
+    close(735)
   ENDIF
-  close(436)
   !   call xmpi_barrier(op%MY_COMM)
   !write(6,*) "QQQQ3"
   FREE(Gomega_tmp)
@@ -2947,7 +2954,7 @@ include 'mpif.h'
 !sui!write(6,*) "getresults"
   CALL GreenHyboffdiagComplex_measHybrid(op%Greens, op%Bath%M, op%Impurity%Particles, .TRUE.,op%signvalue,op%phasevalue)
   CALL GreenHyboffdiagComplex_getHybrid(op%Greens)
-  write(6,*) "op%measN",op%measN(1,:)
+  !write(6,*) "op%measN",op%measN(1,:)
   MALLOC(measN_1,(flavors))
   do iflavor=1,flavors
     measN_1(iflavor)=op%measN(1,iflavor)

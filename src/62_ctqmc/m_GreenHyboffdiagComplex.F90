@@ -44,6 +44,7 @@ MODULE m_GreenHyboffdiagComplex
  public ::  GreenHyboffdiagComplex_setMuD1
  public ::  GreenHyboffdiagComplex_setMoments
  public ::  GreenHyboffdiagComplex_backFourier
+ public ::  GreenHyboffdiagComplex_backFourierComplex
  public ::  GreenHyboffdiagComplex_forFourier
  public ::  GreenHyboffdiagComplex_print
  public ::  GreenHyboffdiagComplex_destroy
@@ -1179,7 +1180,7 @@ include 'mpif.h'
       endif 
 
   ! --  correction on G(tau=0) is thus
-      correction = -C*0.5d0
+      correction = -C*cmplx(0.5d0,0.d0,kind=8)
     
   ! --  built frequency mesh
       Domega = (/ ((2.d0 * DBLE(iomega) - 1.d0)*pi_invbeta, iomega=1, omegaSamples) /)
@@ -1260,45 +1261,11 @@ include 'mpif.h'
                           !- CMPLX(0.d0, A_omega(iomega),8) ) &
                           * EXP( CMPLX(0.d0, minusOmegaTau, 8))
           opertau(itau)  = opertau(itau) + sumTerm
-!         Domega et minusomegatau identique MAIS oper_w different
-            !write(unitnb,*) iomega,Domega(iomega),real(C_omega(iomega)),imag(C_omega(iomega))
-          !if(itau==tauend) then
-          !  write(unitnb,*) iomega, sumTerm,opertau(itau),minusOmegaTau,op%oper_w(iomega,iflavor1,iflavor2),Domega(iomega)
-          !endif 
-          !if(itau==max(tauBegin-1,1)) then
-          !  write(unitnb1,*) iomega, sumTerm,opertau(itau),minusOmegaTau,op%oper_w(iomega,iflavor1,iflavor2),Domega(iomega)
-          !endif 
 
         END DO
-         ! if(itau==tauEnd) write(unitnb,*) 
-         ! if(itau==max(tauBegin-1,1)) write(unitnb1,*) 
-!        if(iflavor1==iflavor2) then
           opertau(itau) = correction + two_invBeta*opertau(itau)
-         ! if(itau==tauend) then
-         !   write(unitnb,*) "final", opertau(itau),correction
-         ! endif 
-         ! if(itau==max(tauBegin-1,1)) then
-         !   write(unitnb1,*) "final",opertau(itau),correction
-         ! endif 
-             !write(66666,*) itau, opertau(itau),correction
-!        else
-!          opertau(itau) =              &
-!             two_invBeta*opertau(itau)
-!        endif
+          !write(*,*) "itau opertau(itau)",opertau(itau)
       END DO
-      !unitnb=20000+op%rank
-      !call int2char4(op%rank,tag_proc)
-      !tmpfil = 'opertau'//tag_proc
-      !open (unit=unitnb,file=trim(tmpfil),status='unknown',form='formatted')
-      !write(unitnb,*) "#",iflavor1,iflavor2,tauBegin,tauEnd
-      !!do  itau=tauBegin, tauEnd
-      !do  itau=1,tauSamples
-      !  write(unitnb,*)    itau,opertau(itau)
-      !enddo
-      !write(unitnb,*) 
-      !opertau(tauBegin-1)=0.d0
-      !opertau(tauEnd+1)=0.d0
-             !write(66666,*)
   
   ! -- Gather
       IF ( op%have_MPI .EQV. .TRUE. ) THEN
@@ -1352,6 +1319,291 @@ include 'mpif.h'
   close(237)
 
 END SUBROUTINE GreenHyboffdiagComplex_backFourier
+!!***
+
+!****f* ABINIT/m_GreenHyboffdiagComplex/GreenHyboffdiagComplex_backFourierComplex
+!! NAME
+!!  GreenHyboffdiagComplex_backFourierComplex
+!!
+!! FUNCTION
+!!  perform back fourier transform for complex green's function
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  op=Green
+!!  dvgc=divergence parameter
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! SOURCE
+
+SUBROUTINE GreenHyboffdiagComplex_backFourierComplex(op,dvgc,func,hybri_limit,opt_hybri_limit)
+
+ use m_fstrings,       only : int2char4
+
+#ifdef HAVE_MPI1
+include 'mpif.h'
+#endif
+!Arguments ------------------------------------
+  TYPE(GreenHyboffdiagComplex)            , INTENT(INOUT) :: op
+  DOUBLE PRECISION, OPTIONAL, INTENT(IN   ) :: dvgc
+  CHARACTER(len=5)  ,OPTIONAL, INTENT(IN) :: func
+  COMPLEX(KIND=8), DIMENSION(op%nflavors,op%nflavors), OPTIONAL, INTENT(IN) :: hybri_limit
+  INTEGER, OPTIONAL, INTENT(IN) :: opt_hybri_limit
+!Local variables ------------------------------
+  INTEGER :: itau
+  INTEGER :: iomega
+  INTEGER :: omegaSamples
+  INTEGER :: tauSamples
+  INTEGER :: tauBegin
+  INTEGER :: tauEnd
+  INTEGER :: delta
+  INTEGER :: residu
+  INTEGER :: iflavor1
+  INTEGER :: iflavor2,unitnb !,unitnb1
+  INTEGER, ALLOCATABLE, DIMENSION(:) :: counts
+  INTEGER, ALLOCATABLE, DIMENSION(:) :: displs
+  DOUBLE PRECISION :: A,AA ! Correction factor
+  COMPLEX(KIND=8) :: B,BB ! Correction factor
+  COMPLEX(KIND=8) :: C !,CC ! Correction factor
+  DOUBLE PRECISION :: inv_beta
+  DOUBLE PRECISION :: pi_invBeta
+  DOUBLE PRECISION :: two_invBeta
+  DOUBLE PRECISION :: minusDt
+  DOUBLE PRECISION :: minusOmegaTau
+  DOUBLE PRECISION :: omegaa
+  DOUBLE PRECISION :: minusTau
+  COMPLEX(KIND=8) :: sumTerm,sumTerm_ab,sumTerm_ba
+  DOUBLE PRECISION :: pi
+  DOUBLE PRECISION :: twoPi
+  COMPLEX(KIND=8) :: correction
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: Domega
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: A_omega
+  COMPLEX(KIND=8) , ALLOCATABLE, DIMENSION(:) :: C_omega
+  COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:) :: opertau,opertau_ab,opertau_ba
+  CHARACTER(len=5) :: funct
+  character(len=4) :: tag_proc
+  character(len=30) :: tmpfil
+
+#if defined HAVE_MPI && !defined HAVE_MPI2_INPLACE
+  INTEGER :: my_count
+  COMPLEX(KIND=8), ALLOCATABLE , DIMENSION(:) :: opertau_buf,opertau_bufab,opertau_bufba
+#endif
+
+  IF ( op%set .EQV. .FALSE. ) &
+    CALL ERROR("GreenHyboffdiagComplex_backFourier : Uninitialized GreenHyboffdiagComplex structure")
+  IF ( op%setW .EQV. .FALSE. ) &
+    CALL ERROR("GreenHyboffdiagComplex_backFourier : no G(iw)")
+  
+  funct="hybri"
+  if(present(func)) funct=func
+  inv_beta     = op%inv_beta
+  two_invBeta  = 2.d0 * inv_beta
+  minusDt      = - op%delta_t
+  omegaSamples = op%Wmax
+  tauSamples   = op%samples-1
+  pi         = ACOS(-1.d0)
+  twoPi        = 2.d0 * pi
+  pi_invBeta = pi * inv_beta
+  MALLOC(Domega,(1:omegaSamples))
+  MALLOC(A_omega,(1:omegaSamples))
+  MALLOC(C_omega,(1:omegaSamples))
+  IF ( op%rank .EQ. 0 ) THEN
+    !DO iflavor1 = 1, op%nflavors
+    !  DO iflavor2 = 1, op%nflavors
+    !    write(22236,*) "#",iflavor1,iflavor2
+    !    do  iomega=1,op%Wmax
+    !      write(22236,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,real(op%oper_w(iomega,iflavor1,iflavor2))
+    !    enddo
+    !    write(22236,*) 
+    !  ENDDO
+    !ENDDO
+  ENDIF
+
+  op%oper = 0.d0
+
+  DO iflavor1 = 1, op%nflavors
+    DO iflavor2 = 1, op%nflavors
+  ! --  compute limit of function G*(i\omega_n)
+      if(funct=="hybri") then
+        IF ( PRESENT(dvgc) ) THEN
+          A = dvgc
+        ELSE
+          A = AIMAG(op%oper_w(omegaSamples,iflavor1,iflavor2))&! A = \lim_\infty Imag(G(iwn))*(wn)
+            *(2.d0*DBLE(omegaSamples)-1.d0) * pi_invBeta
+          AA = AIMAG(op%oper_w(omegaSamples-10,iflavor1,iflavor2))&! A = \lim_\infty Imag(G(iwn))*(wn)
+            *(2.d0*DBLE(omegaSamples-10)-1.d0) * pi_invBeta
+          B = op%oper_w(omegaSamples,iflavor1,iflavor2)&! A = \lim_\infty (G(iwn))*(iwn)
+            *(2.d0*DBLE(omegaSamples)-1.d0) *pi_invBeta*cmplx(0.d0,1.d0,kind=8)
+          BB = op%oper_w(omegaSamples-10,iflavor1,iflavor2)&! A = \lim_\infty (G(iwn))*(iwn)
+            *(2.d0*DBLE(omegaSamples-10)-1.d0) *pi_invBeta*cmplx(0.d0,1.d0,kind=8)
+        !sui!write(6,*) "B=",iflavor1,iflavor2,B,BB
+        END IF
+      else if(iflavor1==iflavor2.and.funct=="green") then
+        A = -1.d0
+      else if(iflavor1/=iflavor2.and.funct=="green") then
+        A = 0.d0
+      endif ! funct
+      
+      C=cmplx(-A,0.d0,kind=8)
+      if(present(hybri_limit)) then
+        if(present(opt_hybri_limit)) then
+          if(opt_hybri_limit==1) C= (hybri_limit(iflavor1,iflavor2))
+        !sui!write(6,*) "C=                         ",C
+        endif
+      endif 
+
+  ! --  correction on G(tau=0) is thus
+      correction = -C*cmplx(0.5d0,0.d0,kind=8)
+    
+  ! --  built frequency mesh
+      Domega = (/ ((2.d0 * DBLE(iomega) - 1.d0)*pi_invbeta, iomega=1, omegaSamples) /)
+
+  ! --  built asymptotic function (-C_ij / iw_n)
+      C_omega = C / (Domega*cmplx(0.d0,1.d0,kind=8))
+
+  ! --  built time mesh
+      IF (op%have_MPI .EQV. .TRUE.) THEN
+        delta = tauSamples / op%size
+        residu = tauSamples - op%size*delta
+        IF ( op%rank .LT. op%size - residu ) THEN
+          tauBegin = 1 + op%rank*delta
+          tauEnd   = (op%rank + 1)*delta
+        ELSE
+!          tauBegin = (op%size-residu)*delta + 1 + (op%rank-op%size+residu)*(delta+1)
+          tauBegin = 1 + op%rank*(delta + 1) -op%size + residu
+          tauEnd = tauBegin + delta
+        END IF
+        MALLOC(counts,(1:op%size))
+        MALLOC(displs,(1:op%size))
+        counts = (/ (delta, iTau=1, op%size-residu), &
+                    (delta+1, iTau=op%size-residu+1, op%size) /)
+        displs(1)=0
+        DO iTau = 2, op%size
+          displs(iTau) = displs(iTau-1) + counts (iTau-1)
+        END DO
+      ELSE
+        tauBegin = 1
+        tauEnd   = tauSamples
+      END IF
+      MALLOC(opertau,(1:tauSamples+1))
+   !   MALLOC(opertau_ab,(1:tauSamples+1))
+   !   MALLOC(opertau_ba,(1:tauSamples+1)) 
+      !do iomega=1,omegaSamples
+       ! write(6,*) iomega, imag(op%oper_w(iomega,iflavor1,iflavor2)), A_omega(iomega) ,"#diff"
+      !enddo
+      unitnb=70000+op%rank
+      call int2char4(op%rank,tag_proc)
+      tmpfil = 'counts'//tag_proc
+     ! open (unit=unitnb,file=trim(tmpfil),status='unknown',form='formatted')
+     ! write(unitnb,*) "#",iflavor1,iflavor2
+     ! do  itau=1,op%size
+     ! write(unitnb,*)  itau,counts(itau),displs(itau)
+     ! enddo
+     ! write(unitnb,*) 
+
+      unitnb=10000+op%rank
+      call int2char4(op%rank,tag_proc)
+      tmpfil = 'oper_w'//tag_proc
+
+
+  ! -- compute Fourier transformation
+      opertau=cmplx(0.d0,0.d0,kind=8)
+
+      DO itau = tauBegin, tauEnd
+        minusTau = DBLE(itau -1) * minusDt
+        DO iomega = 1, omegaSamples
+          omegaa         = Domega(iomega)
+          minusOmegaTau = MOD(omegaa*minusTau, TwoPi)
+          !== Original code from Jordan ==
+          !sumTerm       = REAL((op%oper_w(iomega,iflavor1,iflavor2) - C_omega(iomega) ) * EXP( CMPLX(0.d0, minusOmegaTau, 8))
+          !opertau(itau)     = opertau(itau) + sumTerm
+          !!
+          !== Complex version (related to shinaoka) ==
+          sumTerm_ab    = (op%oper_w(iomega,iflavor1,iflavor2) - C_omega(iomega) ) * EXP( CMPLX(0.d0, minusOmegaTau, 8))
+          sumTerm_ba    = (conjg( op%oper_w(iomega,iflavor2,iflavor1)) + C_omega(iomega) ) * EXP( -1*CMPLX(0.d0, minusOmegaTau, 8))
+          opertau(itau)     = opertau(itau) + sumTerm_ab + sumTerm_ba
+        END DO
+          !== Jordan ==
+          !opertau(itau) = correction + two_invbeta*(opertau(itau))
+          !== Complex version ==  
+          opertau(itau) = correction + inv_beta*(opertau(itau))
+      END DO
+  
+  ! -- Gather
+      IF ( op%have_MPI .EQV. .TRUE. ) THEN
+! rassembler les resultats
+#ifdef HAVE_MPI
+#if defined HAVE_MPI2_INPLACE
+        CALL MPI_ALLGATHERV(MPI_IN_PLACE, 0, MPI_DOUBLE_COMPLEX, &
+                          opertau, counts, displs, &
+                          MPI_DOUBLE_COMPLEX, op%MY_COMM, residu)
+       !  CALL MPI_ALLGATHERV(MPI_IN_PLACE, 0, MPI_DOUBLE_COMPLEX, &    
+       !                    opertau_ab, counts, displs, &                  
+       !                    MPI_DOUBLE_COMPLEX, op%MY_COMM, residu)     
+       !  CALL MPI_ALLGATHERV(MPI_IN_PLACE, 0, MPI_DOUBLE_COMPLEX, &    
+       !                    opertau_ab, counts, displs, &                  
+       !                    MPI_DOUBLE_COMPLEX, op%MY_COMM, residu)     
+#else
+    my_count=tauBegin-tauEnd+1
+    MALLOC(opertau_buf,(my_count))
+  !  MALLOC(opertau_bufab,(my_count))
+  !  MALLOC(opertau_bufba,(my_count))
+    opertau_buf(1:my_count)=opertau(tauBegin:tauEnd)
+  !  opertau_bufab(1:my_count)=opertau_ab(tauBegin:tauEnd)
+  !  opertau_bufba(1:my_count)=opertau_ba(tauBegin:tauEnd)
+    CALL MPI_ALLGATHERV(opertau_buf, my_count, MPI_DOUBLE_COMPLEX, &
+                      opertau, counts, displs, &
+                      MPI_DOUBLE_COMPLEX, op%MY_COMM, residu)
+  !  CALL MPI_ALLGATHERV(opertau_bufab, my_count, MPI_DOUBLE_COMPLEX, &   
+  !                    opertau_ab, counts, displs, &                       
+  !                    MPI_DOUBLE_COMPLEX, op%MY_COMM, residu)          
+  !  CALL MPI_ALLGATHERV(opertau_bufba, my_count, MPI_DOUBLE_COMPLEX, &   
+  !                    opertau_ba, counts, displs, &                       
+  !                    MPI_DOUBLE_COMPLEX, op%MY_COMM, residu)          
+
+    FREE(opertau_buf)
+  !  FREE(opertau_bufab)
+  !  FREE(opertau_bufba)
+#endif
+#endif
+        FREE(counts)
+        FREE(displs)
+      END IF
+  ! -- Add correction for discontinuity.
+!      if(iflavor1==iflavor2) then
+        !G(0+)-G(0-)=G(0+)+G(beta-)=A
+        opertau(tauSamples+1) = -C - opertau(1)
+   !     opertau_ab(tauSamples+1) = -C - opertau_ab(1)
+   !     opertau_ba(tauSamples+1) = -C - opertau_ba(1)
+      !sui!write(6,*) "BackFourier",opertau(tauSamples+1),opertau(1),real(C)
+
+        op%setT = .TRUE.
+!      endif
+      op%oper(:,iflavor1,iflavor2)=opertau(:)
+      FREE(opertau)
+  !    FREE(opertau_ab)
+  !    FREE(opertau_ba)
+    END DO ! iflavor2
+  END DO ! iflavor1
+  ! -- End loop over flavors.
+
+  FREE(Domega)
+  FREE(A_omega)
+  FREE(C_omega)
+  close(236)
+  close(237)
+
+END SUBROUTINE GreenHyboffdiagComplex_backFourierComplex
 !!***
 
 !!****f* ABINIT/m_GreenHyboffdiagComplex/GreenHyboffdiagComplex_forFourier
