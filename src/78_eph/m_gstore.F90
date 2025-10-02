@@ -932,7 +932,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
 
  ! At this point, we have the Cartesian grid (one per spin if any)
  ! and we can finally allocate and distribute other arrays.
- ! Note with_cplex = 0 --> matrix elements are not allocated here
+ ! Note with_cplex = 0 --> matrix elements are not allocated here.
  with_cplex = 0; if (has_gwan) with_cplex = 2
  call gstore%malloc__(with_cplex, max_nq, qglob2bz, max_nk, gstore%kglob2bz, qbz2ibz, gstore%kbz2ibz)
 
@@ -1062,10 +1062,10 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_qbz2ibz"), qbz2ibz))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_qglob2bz"), qglob2bz))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_kglob2bz"), gstore%kglob2bz))
+
    ! These quantities are needed to interface GSTORE.nc with external codes.
    NCF_CHECK(nf90_put_var(ncid, vid("zeff"), ifc%zeff))
    NCF_CHECK(nf90_put_var(ncid, vid("qdrp_cart"), ifc%qdrp_cart))
-
    if (gstore_has_ifcs /= 0) then
      NCF_CHECK(nf90_put_var(ncid, vid("rpt"), ifc%rpt))
      NCF_CHECK(nf90_put_var(ncid, vid("wghatm"), ifc%wghatm))
@@ -1116,6 +1116,8 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
          nctkarr_t("gvals_ks", "dp", "gstore_cplex, nb_kq, nb_k, natom3, glob_nk, glob_nq") &
        ])
        NCF_CHECK(ncerr)
+       ! Compress gvals to reduce size on disk.
+       !NCF_CHECK(nf90_def_var_deflate(spin_ncid, vid_spin("gvals_ks"), shuffle=1, deflate=1, deflate_level=5))
        NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("gvals_ks"), NF90_FILL, gstore_fill_dp))
      end if
 
@@ -1206,7 +1208,7 @@ end subroutine gstore_init
 !! gstore_same_nbands
 !!
 !! FUNCTION
-!    Returns True if nb_k == nb_kq.
+!!  Returns True if nb_k == nb_kq.
 !!
 !! SOURCE
 
@@ -1627,7 +1629,7 @@ subroutine gstore_print(gstore, units, header, prtvol)
    call wrtout(units, sjoin(" gqk_nb_k:", itoa(gqk%nb_k)))
    call wrtout(units, sjoin(" gqk_nb_kq:", itoa(gqk%nb_kq)))
    rtot_num_g = (one * gqk%nb_kq * gqk%nb_k) * (gqk%glob_nk * gqk%glob_nq * one) * gqk%natom3
-   !call wrtout(units, sjoin(" total number of g elements:", ftoa(rtot_num_g)))
+   !call wrtout(units, sjoin(" total number of g(k,q) elements:", ftoa(rtot_num_g)))
    call wrtout(units, sjoin(" gqk_my_npert:", itoa(gqk%my_npert)))
    call wrtout(units, sjoin("P gqk_my_nk:", itoa(gqk%my_nk)))
    call wrtout(units, sjoin("P gqk_my_nq:", itoa(gqk%my_nq)))
@@ -1636,7 +1638,7 @@ subroutine gstore_print(gstore, units, header, prtvol)
    call wrtout(units, sjoin("P Number of perturbations treated by this CPU: ",  itoa(gqk%my_npert)))
    call wrtout(units, sjoin("P Number of CPUs for parallelism over q-points: ", itoa(gqk%qpt_comm%nproc)))
    call wrtout(units, sjoin("P Number of CPUs for parallelism over k-points: ", itoa(gqk%kpt_comm%nproc)))
-   ! This only for GWPT.
+   ! This only for GWPT calculations.
    if (gqk%bsum_comm%nproc /= 1) then
      call wrtout(units, sjoin("P Number of CPUs for parallelism over band summation: ", itoa(gqk%bsum_comm%nproc)))
    end if
@@ -2059,8 +2061,7 @@ subroutine gstore_filter_erange__(gstore, qbz2ibz, qibz2bz, kibz2bz, select_qbz_
  select_kbz_spin = 0; cnt = 0
 
  do spin=1,nsppol
-   ! Init brange
-   ! NB: nb_kq == nb_k when erange filtering is used.
+   ! Init brange. NB: nb_kq == nb_k when erange filtering is used.
    gstore%brange_k_spin(:, spin) = [huge(1), -huge(1)]
    gstore%brange_kq_spin(:, spin) = [huge(1), -huge(1)]
    abs_erange1 = abs(gstore%erange_spin(1, spin))
@@ -2354,7 +2355,7 @@ subroutine recompute_select_qbz_spin(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, k
        end select
 
        do spin=1,gstore%nsppol
-         ! now, see if q-point connects k-points inside the filtered zone
+         ! Now, see if q-point connects k-points inside the filtered zone
          if (select_kbz_spin(ik_bz, spin) /= 0) then
            ikq_ibz = map_kq(1, ii)
            ikq_bz = kibz2bz(ikq_ibz)
@@ -2788,7 +2789,7 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
 
 !Local variables-------------------------------
  integer :: my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, timrev_q, ii, ik_ibz, nb_k, nb_kq
- real(dp) :: g2, wqnu, weight_k, weight_q, cpu, wall, gflops
+ real(dp) :: g2_qnu, wqnu, weight_k, weight_q, cpu, wall, gflops
  type(lgroup_t) :: lg_myq
  character(len=500) :: msg, kk_string !, qq_bz_string,
 !arrays
@@ -2838,7 +2839,7 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
        do my_ik=1,gqk%my_nk
          kk = gqk%my_kpts(:, my_ik); ik_ibz = gqk%my_k2ibz(1, my_ik); weight_k = gqk%my_wtk(my_ik)
 
-         ! Handle little group and weight
+         ! Handle little group and integration weight.
          if (dtset%gstore_use_lgq /= 0) then
            ii = lg_myq%findq_ibzk(kk)
            if (ii == -1) then
@@ -2852,8 +2853,8 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
 
          do in_k=1,nb_k
            do im_kq=1,nb_kq
-             g2 = g2_mnkp(im_kq, in_k, my_ik, my_ip)
-             a2fw(:) = a2fw(:) + deltaw_nuq(:) * g2 * weight_k * weight_q * dbl_delta_q(im_kq, in_k, my_ik)
+             g2_qnu = g2_mnkp(im_kq, in_k, my_ik, my_ip)
+             a2fw(:) = a2fw(:) + deltaw_nuq(:) * g2_qnu * weight_k * weight_q * dbl_delta_q(im_kq, in_k, my_ik)
            end do
          end do
        end do
@@ -2932,7 +2933,7 @@ end subroutine gstore_free
 !! gqk_myqpt
 !!
 !! FUNCTION
-!!  Return the weight and the reduced coordinates of the q-point from the local index my_iq.
+!!  Return the weight_q and the reduced coordinates of the q-point from the local index my_iq.
 !!
 !! INPUTS
 !!
@@ -2940,13 +2941,13 @@ end subroutine gstore_free
 !!
 !! SOURCE
 
-pure subroutine gqk_myqpt(gqk, my_iq, gstore, weight, qpt)
+pure subroutine gqk_myqpt(gqk, my_iq, gstore, weight_q, qpt)
 
 !Arguments ------------------------------------
  class(gqk_t),intent(in) :: gqk
  class(gstore_t),intent(in) :: gstore
  integer,intent(in) :: my_iq
- real(dp),intent(out) :: weight, qpt(3)
+ real(dp),intent(out) :: weight_q, qpt(3)
 
 !Local variables ------------------------------
  integer :: iq_ibz, isym_q, trev_q, tsign_q, g0_q(3)
@@ -2963,9 +2964,9 @@ pure subroutine gqk_myqpt(gqk, my_iq, gstore, weight, qpt)
 
  select case(gstore%qzone)
  case ("ibz")
-   weight = gstore%wtq(iq_ibz)
+   weight_q = gstore%wtq(iq_ibz)
  case ("bz")
-   weight = one / gstore%nqbz
+   weight_q = one / gstore%nqbz
  end select
 
 end subroutine gqk_myqpt
