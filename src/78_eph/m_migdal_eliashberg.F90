@@ -307,6 +307,7 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  call edos%free()
 
  call dtset%get_ktmesh(ntemp, ktmesh)
+
  !NVHPC and LLVM don't like using this constructor because allocatable arrays aren't set.
 #if defined FC_NVHPC || defined FC_LLVM
   iso%ntemp=ntemp
@@ -394,7 +395,7 @@ subroutine matsubara_mesh(bosons_or_fermions, kt, wmax, niw, imag_w)
    end do
 
  case default
-   ABI_ERROR(sjoin("Wrong bosons_or_fermions:", bosons_or_fermions))
+   ABI_ERROR(sjoin("Wrong values for bosons_or_fermions:", bosons_or_fermions))
  end select
 
 end subroutine matsubara_mesh

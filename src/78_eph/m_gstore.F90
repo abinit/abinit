@@ -1770,7 +1770,7 @@ subroutine gstore_malloc__(gstore, with_cplex, max_nq, qglob2bz, max_nk, kglob2b
 
 !Arguments ------------------------------------
 !scalars
- class(gstore_t),target,intent(inout) :: gstore
+ class(gstore_t),intent(inout) :: gstore
  integer,intent(in) :: with_cplex, max_nq, max_nk
  integer,intent(in) :: qglob2bz(max_nq, gstore%nsppol), kglob2bz(max_nk, gstore%nsppol)
  integer,intent(in) :: qbz2ibz(6, gstore%nqbz), kbz2ibz(6, gstore%nkbz)
@@ -1916,7 +1916,7 @@ subroutine gstore_filter_fs_tetra__(gstore, qbz2ibz, qibz2bz, kibz2bz, select_qb
  type(htetra_t) :: ktetra
 !arrays
  integer,allocatable :: indkk(:), kstar_bz_inds(:)
- real(dp):: rlatt(3,3), klatt(3,3), delta_theta_ef(2) ! qpt(3),
+ real(dp):: rlatt(3,3), klatt(3,3), delta_theta_ef(2) !, qpt(3)
  real(dp),allocatable :: eig_ibz(:)
 !----------------------------------------------------------------------
 
@@ -2100,7 +2100,6 @@ subroutine gstore_filter_erange__(gstore, qbz2ibz, qibz2bz, kibz2bz, select_qbz_
        if (iflag == 1) then
          gstore%brange_k_spin(1, spin) = min(gstore%brange_k_spin(1, spin), band)
          gstore%brange_k_spin(2, spin) = max(gstore%brange_k_spin(2, spin), band)
-
          gstore%brange_kq_spin(1, spin) = min(gstore%brange_kq_spin(1, spin), band)
          gstore%brange_kq_spin(2, spin) = max(gstore%brange_kq_spin(2, spin), band)
 
@@ -2268,7 +2267,7 @@ subroutine recompute_select_qbz_spin(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, k
 
 !Arguments ------------------------------------
 !scalars
- class(gstore_t),target,intent(inout) :: gstore
+ class(gstore_t),intent(inout) :: gstore
 !arrays
  real(dp),intent(in) :: qbz(3, gstore%nqbz)
  integer,intent(in) :: qbz2ibz(6,gstore%nqbz), qibz2bz(gstore%nqibz)
@@ -2791,18 +2790,22 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
  integer :: my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, timrev_q, ii, ik_ibz, nb_k, nb_kq
  real(dp) :: g2_qnu, wqnu, weight_k, weight_q, cpu, wall, gflops
  type(lgroup_t) :: lg_myq
- character(len=500) :: msg, kk_string !, qq_bz_string,
+ character(len=500) :: msg, kk_string !, qq_bz_string
 !arrays
+ integer :: units(2)
  real(dp) :: qpt(3), kk(3)
  real(dp),allocatable :: dbl_delta_q(:,:,:), g2_mnkp(:,:,:,:), deltaw_nuq(:)
 !----------------------------------------------------------------------
 
- call cwtime(cpu, wall, gflops, "start")
- call wrtout(std_out, sjoin(" Computing a^2F(w) with ph_smear:", ftoa(gstore%dtset%ph_smear * Ha_meV), "(meV)"), pre_newlines=1)
- ABI_CHECK(gstore%qzone == "bz", "gstore_get_lambda_iso_iw assumes qzone == `bz`")
+ units = [std_out, ab_out]
 
+ call cwtime(cpu, wall, gflops, "start")
+ call wrtout(units, sjoin(" Computing a^2F(w) with ph_smear:", ftoa(gstore%dtset%ph_smear * Ha_meV), "(meV)"), pre_newlines=1)
+
+ ABI_CHECK(gstore%qzone == "bz", "gstore_get_lambda_iso_iw assumes qzone == `bz`")
  ! Check consistency of little group options.
  ABI_CHECK(gstore%check_little_group(dtset, msg) == 0, msg)
+
  ABI_MALLOC(deltaw_nuq, (nw))
 
  a2fw = zero
@@ -2843,10 +2846,9 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
          if (dtset%gstore_use_lgq /= 0) then
            ii = lg_myq%findq_ibzk(kk)
            if (ii == -1) then
-             kk_string = ktoa(kk)
-             call wrtout(std_out, sjoin(" my_ik:", itoa(my_ik), kk_string, " not in IBZ_q --> skipping iteration"))
+             !kk_string = ktoa(kk)
+             !call wrtout(std_out, sjoin(" my_ik:", itoa(my_ik), kk_string, " not in IBZ_q --> skipping iteration"))
              cycle
-             weight_k = lg_myq%weights(ii)
              ! TODO: Check fillvalue (should be zero)
            end if
          end if
@@ -2873,7 +2875,6 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
  ! Take into account collinear spin and N(eF) TODO
  a2fw = a2fw * (two / (gstore%nsppol * gstore%dtset%nspinor))
  call xmpi_sum(a2fw, gstore%comm, ierr)
-
  call cwtime_report(" gstore_get_a2fw", cpu, wall, gflops)
 
 end subroutine gstore_get_a2fw
@@ -3162,7 +3163,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
    ! Call libtetra routine to compute weights for double delta integration.
    ! Note that libtetra assumes Ef set to zero.
    ! TODO: Average weights over degenerate states?
-   ! NB: This is a botleneck, can pass comm_kp
+   ! NB: This is a bottleneck, can pass comm_kp
 
    ! Select option for double delta with tetra.
    !  2 for the optimized tetrahedron method.
@@ -3187,7 +3188,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
      end if
    end do
 
-   ! FIXME: bug if k-point (and q-point) parallelism.
+   ! FIXME: BUG if k-point (and q-point) parallelism.
    ABI_CHECK_IEQ(cnt, gqk%my_nk, sjoin("cnt != my_nk, ", itoa(cnt), itoa(gqk%my_nk)))
    call my_krank%free()
    !call cwtime_report(" transfer", cpu, wall, gflops)
@@ -3458,7 +3459,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  qbuf_size = 16
  call wrtout(std_out, sjoin(" Begin computation of e-ph matrix elements with qbuf_size:", itoa(qbuf_size)), pre_newlines=1)
  call pstat_proc%print(_PSTAT_ARGS_)
-
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  ! Copy important dimensions
@@ -4404,7 +4404,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
      end if
      call xmpi_bcast(gstore%delta_ef_kibz_spin, master, comm, ierr)
    end if
- end if
+ end if ! nproc > 1.
 
  ! Consistency check
  call wfk0_hdr%vs_dtset(dtset); call wfk0_hdr%free()
@@ -4631,7 +4631,6 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  ABI_FREE(pheigvec_cart_qbz)
 
  call xmpi_barrier(gstore%comm)
-
  call pstat_proc%print(_PSTAT_ARGS_)
  call cwtime_report(" gstore_from_ncpath", cpu, wall, gflops)
 
