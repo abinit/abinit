@@ -1382,14 +1382,14 @@ include 'mpif.h'
   DOUBLE PRECISION :: minusOmegaTau
   DOUBLE PRECISION :: omegaa
   DOUBLE PRECISION :: minusTau
-  COMPLEX(KIND=8) :: sumTerm,sumTerm_ab,sumTerm_ba
+  COMPLEX(KIND=8) :: sumTerm_ab,sumTerm_ba
   DOUBLE PRECISION :: pi
   DOUBLE PRECISION :: twoPi
   COMPLEX(KIND=8) :: correction
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: Domega
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: A_omega
   COMPLEX(KIND=8) , ALLOCATABLE, DIMENSION(:) :: C_omega
-  COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:) :: opertau,opertau_ab,opertau_ba
+  COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:) :: opertau
   CHARACTER(len=5) :: funct
   character(len=4) :: tag_proc
   character(len=30) :: tmpfil
