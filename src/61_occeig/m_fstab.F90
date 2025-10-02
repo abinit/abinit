@@ -266,7 +266,7 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, tetra, comm)
  integer :: ik,mkpt,nkbz,ierr, nene,ifermi
  real(dp),parameter :: max_occ1 = one
  real(dp) :: elow,ehigh,ebis,enemin,enemax,deltaene,cpu,wall,gflops
- logical :: inwin
+ logical :: in_win
  character(len=80) :: errstr
  character(len=5000) :: msg
  type(fstab_t),pointer :: fs
@@ -363,16 +363,16 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, tetra, comm)
      !write(std_out,*)"eig_blow, eig_max, elow, ehigh:", &
      !                ebands%eig(blow, ik_ibz, spin), ebands%eig(nband_k, ik_ibz, spin), elow,ehigh
 
-     inwin = .False.; i1 = huge(1); i2 = -1
+     in_win = .False.; i1 = huge(1); i2 = -1
      do band=blow,nband_k
         !if (ebands%eig(band, ik_ibz, spin) > ehigh) exit
         !write(std_out,*)band, ebands%eig(band, ik_ibz, spin) >= elow, ebands%eig(band, ik_ibz, spin) <= ehigh
         if (ebands%eig(band, ik_ibz, spin) >= elow .and. ebands%eig(band, ik_ibz, spin) <= ehigh) then
-          inwin = .True.; i1 = min(i1, band); i2 = max(i2, band)
+          in_win = .True.; i1 = min(i1, band); i2 = max(i2, band)
         end if
      end do
 
-     if (inwin) then
+     if (in_win) then
        ! Add this k-point and the corresponding bands.
        !write(std_out,*)"in win"
        nkfs = nkfs + 1
