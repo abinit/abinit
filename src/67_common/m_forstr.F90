@@ -59,7 +59,7 @@ module m_forstr
  use m_initylmg,         only : initylmg
  use m_xchybrid,         only : xchybrid_ncpp_cc
  use m_kg,               only : mkkpg
- use m_hamiltonian,      only : gs_hamiltonian_type, gs_hamiltonian_type, gspot_transgrid_and_pack,K_H_K, KPRIME_H_KPRIME !,K_H_KPRIME
+ use m_hamiltonian,      only : gs_hamiltonian_type, gs_hamiltonian_type, gspot_transgrid_and_pack, K_H_K, KPRIME_H_KPRIME !,K_H_KPRIME
  use m_electronpositron, only : electronpositron_type, electronpositron_calctype
  use m_bandfft_kpt,      only : bandfft_kpt, bandfft_kpt_type, prep_bandfft_tabs, &
 &                               bandfft_kpt_savetabs, bandfft_kpt_restoretabs
@@ -666,7 +666,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tim_rwwf=7
- integer :: bandpp,bdtot_index,choice,cpopt,dimffnl,dimffnl_str,iband,iband_cprj,iband_last,ibg,icg,ider,ider_str,select_k
+ integer :: bandpp,bdtot_index,choice,cpopt,dimffnl,dimffnl_str,iband,iband_cprj,iband_last,ibg,icg,ider,ider_str
  integer :: idir,idir_str,ierr,ii,ikg,ikpt,ilm,ipositron,ipw,ishift,isppol,istwf_k
  integer :: mband_cprj,me_distrb,my_ikpt,my_nspinor,nband_k,nband_cprj_k,ndat,nkpg
  integer :: nnlout,npw_k,paw_opt,signs,spaceComm
@@ -1191,14 +1191,13 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
              enlout_spin(:) = zero
              call cg_copy_spin(1,npw_k,my_nspinor,blocksize,cwavef,cwavef_spin)
              call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,mpi_enreg,blocksize,nnlout,&
-                     &             paw_opt,signs,nonlop_dum,tim_nonlop,cwavef_spin,cwavef_spin,select_k=K_H_K)
+&             paw_opt,signs,nonlop_dum,tim_nonlop,cwavef_spin,cwavef_spin,select_k=K_H_K)
              
              call cg_copy_spin(2,npw_k,my_nspinor,blocksize,cwavef,cwavef_spin)
              call nonlop(choice,cpopt,cwaveprj,enlout_spin,gs_hamk,idir,lambda,mpi_enreg,blocksize,nnlout,&
-                     &             paw_opt,signs,nonlop_dum,tim_nonlop,cwavef_spin,cwavef_spin,select_k=KPRIME_H_KPRIME)
+&             paw_opt,signs,nonlop_dum,tim_nonlop,cwavef_spin,cwavef_spin,select_k=KPRIME_H_KPRIME)
 
              enlout(1:nnlout*blocksize) = enlout(1:nnlout*blocksize) + enlout_spin(1:nnlout*blocksize)
-!             enlout = enlout + enlout_spin
              gs_hamk%nspinor = 2
              ABI_FREE(cwavef_spin)
              ABI_FREE(enlout_spin) 
@@ -1474,7 +1473,6 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
      ABI_FREE(ylmgr_k)
      ABI_FREE(ph3d)
      ABI_SFREE(ph3d_kphq)
-
      if (stress_needed==1) then
        ABI_FREE(kstr1)
        ABI_FREE(kstr2)
