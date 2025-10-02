@@ -250,7 +250,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 !arrays
  integer :: vacuum(3)
  integer,allocatable :: iatcon(:),natcon(:), intarr(:)
- real(dp) :: tsec(2) ! qgbt(3),
+ real(dp) :: tsec(2),rprimd(3,3) ! qgbt(3),
  real(dp),allocatable :: dmatpawu_tmp(:), dprarr(:)
  type(libxc_functional_type) :: xcfunc(2)
 ! *************************************************************************
@@ -4380,7 +4380,15 @@ if (dtset%usekden==1) then
 
  if (dtset%use_gbt /= 0) then
   call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'qgbt', tread, 'DPR')
-  dtset%qgbt(1:3) = dprarr(1:3)
+  if (tread==1) then
+    dtset%qgbt(1:3) = dprarr(1:3)
+  else
+    call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'qgbt_cart', tread, 'DPR')
+    if (tread==1) then 
+      call mkrdim(dtset%acell_orig(1:3,1),dtset%rprim_orig(1:3,1:3,1),rprimd)
+      dtset%qgbt(1:3) = MATMUL(TRANSPOSE(rprimd)/two_pi, dprarr(1:3))
+    endif
+  endif
  endif
 
  ABI_FREE(intarr)
