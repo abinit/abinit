@@ -249,11 +249,11 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, tetra, comm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: comm
  type(ebands_t),intent(in) :: ebands
  type(crystal_t),intent(in) :: cryst
  type(dataset_type),intent(in) :: dtset
  type(htetra_t),intent(out) :: tetra
+ integer,intent(in) :: comm
 !arrays
  type(fstab_t),target,intent(out) :: fstab(ebands%nsppol)
 
@@ -657,6 +657,7 @@ end subroutine fstab_get_dbldelta_weights
 !!
 !! INPUTS
 !! units=unit numbers for output
+!! [header]=Header string.
 !! [prtvol]=verbosity level
 !!
 !! SOURCE
