@@ -157,6 +157,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  use m_ioarr,       only : read_rhor
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_pawdij,      only : pawdij, pawdijfr, symdij
+ use m_paw_energies,only : paw_energies_type
  use m_pawfgr,      only : pawfgr_type
  use m_pawfgrtab,   only : pawfgrtab_type
  use m_paw_an,      only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify, paw_an_reset_flags
@@ -232,10 +233,11 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  integer :: option,optene,optfr,optorth,pert1case,pert2case,pert3case
  integer :: qphase_rhoij,rdwrpaw,second_idir,timrev,usexcnhat
  logical :: non_magnetic_xc
- real(dp) :: dummy_real,dummy_real2,dummy_real3,dummy_real4,ecut_eff,el_temp
+ real(dp) :: dummy_real,ecut_eff,el_temp
  character(len=500) :: message
  character(len=fnlen) :: fiden1i,fiwf1i,fiwf2i,fiwf3i,fiwfddk,fnamewff(5)
  type(gs_hamiltonian_type) :: gs_hamkq
+ type(paw_energies_type) :: paw_energies_dum
  type(wffile_type) :: wff1,wff2,wff3,wfft1,wfft2,wfft3
  type(wfk_t) :: ddk_f(5)
  type(wvl_data) :: wvl
@@ -631,11 +633,11 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 
 !                    Computation of "on-site" first-order potentials, first-order densities
                      option=1
-                     call pawdenpot(dummy_real,el_temp,dummy_real2,dummy_real3,dummy_real4,&
-&                     i2pert,dtset%ixc,natom,dtset%natom,nspden,psps%ntypat,dtset%nucdipmom,&
-&                     0,option,paw_an1_i2pert,paw_an0,paw_ij1_i2pert,pawang,&
-&                     dtset%pawprtvol,pawrad,pawrhoij1_i2pert,dtset%pawspnorb,pawtab,dtset%pawxcdev,&
-&                     dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp, &
+                     call pawdenpot(dummy_real,el_temp,i2pert,dtset%ixc,natom,dtset%natom,&
+&                     nspden,psps%ntypat,dtset%nucdipmom,0,option,paw_an1_i2pert,paw_an0,&
+&                     paw_energies_dum,paw_ij1_i2pert,pawang,dtset%pawprtvol,pawrad,&
+&                     pawrhoij1_i2pert,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%spnorbscl,&
+&                     dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp, &
 &                     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
                 !    First-order Dij computation
 !                     call timab(561,1,tsec)

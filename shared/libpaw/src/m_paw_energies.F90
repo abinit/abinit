@@ -29,6 +29,10 @@ MODULE m_paw_energies
  implicit none
 
  private
+
+!public parameter
+ integer, public, parameter :: n_paw_energies=6
+
 !!***
 
 !----------------------------------------------------------------------
@@ -60,16 +64,18 @@ MODULE m_paw_energies
    ! core contribution to PAW energy (double counting scheme)
 
   real(dp) :: epaw_xc
-   ! Exchange-correlation on-site contribution to PAW energy
+   ! exchange-correlation on-site contribution to PAW energy
 
-  real(dp) :: spaw
+  real(dp) :: entropy_paw
    ! on-site PAW contribution to total entropy
 
  end type paw_energies_type
 
 !public procedures
- public :: paw_energies_setzero ! Set all energies in a paw_energies datastructure to zero
- public :: paw_energies_print   ! Printout of the object
+ public :: paw_energies_setzero  ! Set all energies in a paw_energies datastructure to zero
+ public :: paw_energies_copy     ! Copy a paw_energies_type object into another 
+ public :: paw_energies_to_array ! Transfer a paw_energies datastructure into/from a single array 
+ public :: paw_energies_print    ! Printout of the object
 !!***
 
 CONTAINS  !========================================================================================
@@ -108,9 +114,118 @@ subroutine paw_energies_setzero(Paw_energies)
  Paw_energies%epaw_core    = zero
  Paw_energies%epaw_core_dc = zero
  Paw_energies%epaw_xc      = zero
- Paw_energies%spaw         = zero
+ Paw_energies%entropy_paw  = zero
 
 end subroutine paw_energies_setzero
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_paw_energies/paw_energies_copy
+!!
+!! NAME
+!! paw_energies_copy
+!!
+!! FUNCTION
+!! Copy a paw_energies_type object into another
+!!
+!! INPUTS
+!!   paw_energies_in <type(paw_energies_type)>=input values (to copy)
+!!
+!! OUTPUT
+!!   paw_energies_out <type(paw_energies_type)>=output values
+!!
+!! SOURCE
+
+ subroutine paw_energies_copy(paw_energies_in, paw_energies_out)
+
+!Arguments ------------------------------------
+!scalars
+ type(paw_energies_type),intent(in)  :: paw_energies_in
+ type(paw_energies_type),intent(out) :: paw_energies_out
+
+!*************************************************************************
+
+!@paw_energies_type
+
+ paw_energies_out%epaw         = paw_energies_in%epaw
+ paw_energies_out%epaw_dc      = paw_energies_in%epaw_dc
+ paw_energies_out%epaw_core    = paw_energies_in%epaw_core
+ paw_energies_out%epaw_core_dc = paw_energies_in%epaw_core_dc
+ paw_energies_out%epaw_xc      = paw_energies_in%epaw_xc
+ paw_energies_out%entropy_paw  = paw_energies_in%entropy_paw
+
+end subroutine paw_energies_copy
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_paw_energies/paw_energies_to_array
+!!
+!! NAME
+!! paw_energies_to_array
+!!
+!! FUNCTION
+!! Transfer a paw_energies datastructure into a single array or
+!! transfer an array into a paw_energies datastructure
+!!
+!! INPUTS
+!!   option= 1: copy paw_energies datastructure into an array
+!!   option=-1: copy an array into a paw_energies datastructure
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!   paw_energies <type(paw_energies_type)>=energies stored in a datastructure
+!!   paw_energies_array=energies stored in a single array
+!!
+!! SOURCE
+
+ subroutine paw_energies_to_array(paw_energies,paw_energies_array,option)
+
+!Arguments ------------------------------------
+!scalars
+ type(paw_energies_type),intent(inout)  :: paw_energies
+ integer,intent(in) :: option
+!arrays
+ real(dp),intent(inout) :: paw_energies_array(:)
+
+!Local variables-------------------------------
+!scalars
+ character(len=100) :: msg
+
+!*************************************************************************
+
+!@paw_energies_type
+
+ if (n_paw_energies<6) then
+   msg='error on number of paw_energies!'
+   LIBPAW_BUG(msg)
+ end if
+ if (size(paw_energies_array)<n_paw_energies) then
+   msg='error on paw_energies_array size!'
+   LIBPAW_BUG(msg)
+ end if
+ 
+ if (option==1) then
+   paw_energies_array(1)=paw_energies%epaw
+   paw_energies_array(2)=paw_energies%epaw_dc
+   paw_energies_array(3)=paw_energies%epaw_core
+   paw_energies_array(4)=paw_energies%epaw_core_dc
+   paw_energies_array(5)=paw_energies%epaw_xc
+   paw_energies_array(6)=paw_energies%entropy_paw
+ end if
+
+ if (option==-1) then
+   paw_energies%epaw         = paw_energies_array(1)
+   paw_energies%epaw_dc      = paw_energies_array(2)
+   paw_energies%epaw_core    = paw_energies_array(3)
+   paw_energies%epaw_core_dc = paw_energies_array(4)
+   paw_energies%epaw_xc      = paw_energies_array(5)
+   paw_energies%entropy_paw  = paw_energies_array(6)
+ end if
+
+end subroutine paw_energies_to_array
 !!***
 
 !----------------------------------------------------------------------
@@ -170,7 +285,7 @@ subroutine paw_energies_print(Paw_energies,unit,mode_paral)
  call wrtout(my_unt,msg,my_mode)
  write(msg,'(a,i4)')'  XC contribution to PAW energy .................... ',Paw_energies%epaw_xc
  call wrtout(my_unt,msg,my_mode)
- write(msg,'(a,i4)')'  Contribution to PAW entropy ...................... ',Paw_energies%spaw
+ write(msg,'(a,i4)')'  Contribution to PAW entropy ...................... ',Paw_energies%entropy_paw
  call wrtout(my_unt,msg,my_mode)
 
 end subroutine paw_energies_print

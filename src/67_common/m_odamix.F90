@@ -148,8 +148,8 @@ contains
 !!   | e_nlpsp_vfock(IN)=nonlocal psp + potential Fock ACE part of total energy.
 !!   | e_xc(IN)=exchange-correlation energy (hartree)
 !!   | e_xcdc(IN)=exchange-correlation double-counting energy (hartree)
-!!   | e_paw(IN)=PAW spherical part energy
-!!   | e_pawdc(IN)=PAW spherical part double-counting energy
+!!   | paw%epaw(IN)=PAW spherical part energy
+!!   | paw%epaw_dc(IN)=PAW spherical part double-counting energy
 !!   | e_elecfield(OUT)=the term of the energy functional that depends explicitely
 !!   |                  on the electric field:  enefield = -ucvol*E*P
 !!   | e_magfield(OUT)=the term of the energy functional that depends explicitely
@@ -403,10 +403,11 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
      ABI_MALLOC(paw_ij(iatom)%dijhartree,(pawtab(itypat)%lmn2_size))
      paw_ij(iatom)%has_dijhartree=1
    end do
-   call pawdenpot(compch_sph,el_temp,energies%e_paw,energies%e_pawdc,energies%entropy_paw,0,dtset%ixc,my_natom,dtset%natom,dtset%nspden,ntypat,&
-&   dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_ij,pawang,dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,&
-&   pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp,&
-&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,epaw_xc=energies%e_pawxc)
+   call pawdenpot(compch_sph,el_temp,0,dtset%ixc,my_natom,dtset%natom,dtset%nspden,ntypat,&
+&   dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,energies%paw,paw_ij,pawang,dtset%pawprtvol,&
+&   pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,&
+&   dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp,comm_atom=mpi_enreg%comm_atom,&
+&   mpi_atmtab=mpi_enreg%my_atmtab)
    do iatom=1,my_natom
      ABI_FREE(paw_ij(iatom)%dijhartree)
      paw_ij(iatom)%has_dijhartree=0
@@ -509,7 +510,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !& e_entropy + energies%e_elecfield
  etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
  if (usepaw==1) then
-   etotal = etotal + energies%e_paw
+   etotal = etotal + energies%paw%epaw
  end if
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -641,11 +642,11 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
      ABI_MALLOC(paw_ij(iatom)%dijhartree,(pawtab(itypat)%lmn2_size))
      paw_ij(iatom)%has_dijhartree=1
    end do
-   call pawdenpot(compch_sph,el_temp,energies%e_paw,energies%e_pawdc,energies%entropy_paw,0,dtset%ixc,my_natom,dtset%natom, &
-&   dtset%nspden,ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_ij,pawang, &
+   call pawdenpot(compch_sph,el_temp,0,dtset%ixc,my_natom,dtset%natom,dtset%nspden,&
+&   ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,energies%paw,paw_ij,pawang,&
 &   dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%spnorbscl,&
 &   dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp,&
-&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,epaw_xc=energies%e_pawxc)
+&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    do iatom=1,my_natom
      ABI_FREE(paw_ij(iatom)%dijhartree)
      paw_ij(iatom)%has_dijhartree=0
@@ -658,7 +659,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  & energies%e_entropy + energies%e_elecfield + energies%e_magfield
  etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
  if (usepaw==1) then
-   etotal = etotal + energies%e_paw
+   etotal = etotal + energies%paw%epaw
  end if
 
 !Compute energy residual
@@ -674,10 +675,6 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  if(dtset%nspden==4) vtrial(:,3:4)=vxc(:,3:4)
 
  call timab(80,2,tsec)
-
-!DEBUG
-!write(std_out,*) 'eeig-ehart+enxc-enxcdc+eew+eii+eent+enefield+epawdc',eeig,ehart,enxc,enxcdc,eew,eii,eent,enefield,epawdc
-!ENDEBUG
 
 end subroutine odamix
 !!***

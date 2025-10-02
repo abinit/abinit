@@ -68,6 +68,7 @@ module m_respfn_driver
                            pawrhoij_bcast, pawrhoij_nullify, pawrhoij_inquire_dim, &
                            pawrhoij_print_rhoij, pawrhoij_io
  use m_pawdij,      only : pawdij, symdij, pawdij_print_dij
+ use m_paw_energies,only : paw_energies_type
  use m_pawfgr,      only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_paw_finegrid,only : pawexpiqr
  use m_pawxc,       only : pawxc_get_nkxc, pawxc_get_usekden
@@ -239,7 +240,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  logical :: paral_atom,qeq0,use_nhat_gga,call_pawinit
  real(dp) :: boxcut,compch_fft,compch_sph,cpus,ecore,ecut_eff,ecutdg_eff,ecutf
  real(dp) :: eei,eew,ehart,eii,ek,enl,entropy,bigexc,bigsxc
- real(dp) :: epaw,epawdc,spaw,etot,evdw,fermie,fermih,gsqcut,gsqcut_eff,gsqcutc_eff,qphnrm,residm
+ real(dp) :: etot,evdw,fermie,fermih,gsqcut,gsqcut_eff,gsqcutc_eff,qphnrm,residm
  real(dp) :: ucvol,vxcavg,el_temp
  character(len=500) :: msg
  type(ebands_t) :: bstruct
@@ -247,6 +248,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  type(ddb_type) :: ddb
  type(ddb_hdr_type) :: ddb_hdr
  type(paw_dmft_type) :: paw_dmft
+ type(paw_energies_type) :: paw_energies
  type(pawfgr_type) :: pawfgr
  type(wvl_data) :: wvl
  type(xcdata_type) :: xcdata
@@ -990,9 +992,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    cplex=1;ipert=0;option=1
    nzlmopt=0;if (dtset%pawnzlm>0) nzlmopt=-1
 
-   call pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,dtset%ixc,my_natom,natom,dtset%nspden,&
-&   ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_ij,pawang,dtset%pawprtvol,&
-&   pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,&
+   call pawdenpot(compch_sph,el_temp,ipert,dtset%ixc,my_natom,natom,dtset%nspden,&
+&   ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_energies,paw_ij,pawang,&
+&   dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,&
 &   dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp, &
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
 

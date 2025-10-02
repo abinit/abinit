@@ -817,10 +817,10 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
     cplex,Dtset%pawxcdev,Cryst%typat,Pawang,Pawtab,has_vxc=1,has_vxcval=0)
 
    nzlmopt=-1; option=0; compch_sph=greatest_real
-   call pawdenpot(compch_sph,el_temp,KS_energies%e_paw,KS_energies%e_pawdc,KS_energies%entropy_paw,&
-    ipert,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,&
-    Paw_an,Paw_an,Paw_ij,Pawang,Dtset%pawprtvol,Pawrad,Pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,&
-    Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,Cryst%ucvol,Psps%znuclpsp,epaw_xc=KS_energies%e_pawxc)
+   call pawdenpot(compch_sph,el_temp,ipert,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
+&   Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,Paw_an,Paw_an,KS_energies%paw,Paw_ij,Pawang,&
+&   Dtset%pawprtvol,Pawrad,Pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,Dtset%spnorbscl,&
+&   Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,Cryst%ucvol,Psps%znuclpsp)
    call timab(320,2,tsec) ! screening(paw
  else
    ABI_MALLOC(Paw_ij,(0))
