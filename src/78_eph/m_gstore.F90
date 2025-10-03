@@ -2791,7 +2791,7 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
  integer :: my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, timrev_q, ii, ik_ibz, nb_k, nb_kq
  real(dp) :: g2_qnu, wqnu, weight_k, weight_q, cpu, wall, gflops
  type(lgroup_t) :: lg_myq
- character(len=500) :: msg, kk_string !, qq_bz_string
+ character(len=500) :: msg !, kk_string !, qq_bz_string
 !arrays
  integer :: units(2)
  real(dp) :: qpt(3), kk(3)

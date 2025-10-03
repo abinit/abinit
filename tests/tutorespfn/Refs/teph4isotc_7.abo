@@ -488,6 +488,8 @@ P Number of CPUs for parallelism over k-points: 1
  Total number of electrons at eF:    8.0
 
 
+ Computing a^2F(w) with ph_smear: 5.442277E-01 (meV)
+
 == END DATASET(S) ==============================================================
 ================================================================================
 
