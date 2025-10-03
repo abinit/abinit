@@ -73,8 +73,8 @@ CONTAINS  !=====================================================================
  integer, intent(in) :: ixc,lpawu
  type(pawtab_type), intent(in) :: pawtab
  type(pawrad_type), intent(in) :: pawrad
- complex(dpc), intent(in) :: occ(2*lpawu+1,2*lpawu+1)
- complex(dpc), intent(inout) :: vdc(2*lpawu+1,2*lpawu+1)
+ complex(dp), intent(in) :: occ(2*lpawu+1,2*lpawu+1)
+ complex(dp), intent(inout) :: vdc(2*lpawu+1,2*lpawu+1)
  real(dp), intent(out) :: edc,edcdc
 !Local variables ------------------------------
  integer :: i,ir,j,k,l,m,m1,mm,minusm,meshsz,ndim
@@ -83,7 +83,7 @@ CONTAINS  !=====================================================================
  real(dp) :: onemsqrt2,phi,rad,rho,rhor,sexc,sphi,stheta,svxc
  real(dp) :: theta,vcc,vxcf,vxx
  real(dp) :: kcart(3)
- complex(dpc) :: dphi,dth,ylm_c
+ complex(dp) :: dphi,dth,ylm_c
  integer, parameter :: ln = 13
  real(dp), allocatable :: exc(:,:,:),exci(:),phis(:),proj_dr(:),rho_angle(:,:)
  real(dp), allocatable :: rho_angle_dphi(:,:),rho_angle_dtheta(:,:)

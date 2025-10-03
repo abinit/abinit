@@ -186,13 +186,13 @@ subroutine trottersum(dim_trott,error,&
  complex(dp), intent(in) :: coeef_mu
  complex(dp), intent(inout) :: facrec0
  !arrays
- complex(dpc),intent(inout) :: D(0:dim_trott),Dold(0:dim_trott)
- complex(dpc),intent(inout) :: N(0:dim_trott),Nold(0:dim_trott)
+ complex(dp),intent(inout) :: D(0:dim_trott),Dold(0:dim_trott)
+ complex(dp),intent(inout) :: N(0:dim_trott),Nold(0:dim_trott)
  !Local ----------------------------------------
  ! scalars
  integer :: itrot
  real(dp) :: arg
- complex(dpc) :: Dnew,Nnew,zj
+ complex(dp) :: Dnew,Nnew,zj
  !character(len=500) :: msg
  ! *********************************************************************
 

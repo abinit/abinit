@@ -2071,8 +2071,7 @@ end subroutine pawgrnl
 !scalars
  integer :: iatom,iband,ibs,icpgr,ilmn,ispinor,itypat
  integer :: jband,jbs,jlmn,klmn,nspinor
- complex(dpc) :: cpk,cpkb,dcpk,dcpkb,cterm,paw_onsite
-
+ complex(dp) :: cpk,cpkb,dcpk,dcpkb,cterm,paw_onsite
 ! *************************************************************************
 
 !initialize dsdr

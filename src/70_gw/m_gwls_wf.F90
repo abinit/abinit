@@ -130,7 +130,7 @@ end function norm_k
 
 real(dp) function norm_kc(v)
 
-complex(dpc), intent(in) :: v(nk)
+complex(dp), intent(in) :: v(nk)
 ! *************************************************************************
 norm_kc = zero
 
@@ -158,9 +158,9 @@ end function norm_kc
 !!
 !! SOURCE
 
-complex(dpc) function scprod_kc(v1,v2)
+complex(dp) function scprod_kc(v1,v2)
 
-complex(dpc), intent(in) :: v1(nk), v2(nk)
+complex(dp), intent(in) :: v1(nk), v2(nk)
 ! *************************************************************************
 scprod_kc = zero
 do i=1,nk
@@ -241,7 +241,7 @@ end function scprod_kc
 !
 !  integer :: i=0, j=0, k=0
 !  integer, allocatable :: ipiv(:)
-!  complex(dpc), allocatable :: a(:,:),b(:,:)  !For the (non-banded) solver of AX=B
+!  complex(dp), allocatable :: a(:,:),b(:,:)  !For the (non-banded) solver of AX=B
 !! *************************************************************************
 !  !write(std_out,*)  "Allocating..."
 !  ABI_MALLOC(a,(kmax*nseeds,kmax*nseeds))
@@ -262,7 +262,7 @@ end function scprod_kc
 !  do k=1,kmax
 !   do j=1,nseeds
 !    do i=1,nseeds
-!     a((k-1)*nseeds+i,(k-1)*nseeds+j) = cmplx(alpha(1,i,j,k),alpha(2,i,j,k),dpc)
+!     a((k-1)*nseeds+i,(k-1)*nseeds+j) = cmplx(alpha(1,i,j,k),alpha(2,i,j,k),dp)
 !    end do
 !   end do
 !  end do
@@ -270,8 +270,8 @@ end function scprod_kc
 !  do k=1,kmax-1
 !   do j=1,nseeds
 !    do i=1,j
-!      a(k*nseeds+i,(k-1)*nseeds+j) = cmplx(beta(1,i,j,k),beta(2,i,j,k),dpc)
-!      a((k-1)*nseeds+i,k*nseeds+j) = cmplx(beta(1,j,i,k),-beta(2,j,i,k),dpc)
+!      a(k*nseeds+i,(k-1)*nseeds+j) = cmplx(beta(1,i,j,k),beta(2,i,j,k),dp)
+!      a((k-1)*nseeds+i,k*nseeds+j) = cmplx(beta(1,j,i,k),-beta(2,j,i,k),dp)
 !    end do
 !   end do
 !  end do

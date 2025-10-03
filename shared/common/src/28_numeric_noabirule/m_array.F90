@@ -64,7 +64,7 @@ MODULE m_array
 !! SOURCE
 
  type,public :: array2_gwpc_t
-   complex(gwpc),allocatable :: vals(:,:)
+   complex(gwp),allocatable :: vals(:,:)
 
  contains
 

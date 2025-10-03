@@ -4895,16 +4895,6 @@ END SUBROUTINE Ctqmcoffdiag_destroy
 !!
 !! OUTPUT
 !!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE Ctqmcoffdiag_setMagmom(op,Magmom_orb, Magmom_spin, Magmom_tot)

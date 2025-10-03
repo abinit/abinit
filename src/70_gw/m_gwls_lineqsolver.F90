@@ -698,9 +698,9 @@ real(dp), intent(out) :: x(2,npw_k)
 !integer, intent(in)   :: project_on_what !Unused yet, no projections done.
 
 !Local variables
-complex(dpc), allocatable :: xc(:), r(:), v(:), w(:), z(:), p(:), q(:), y(:), t(:), d(:), s(:)
-complex(dpc), allocatable :: beta(:), eta(:), delta(:), epsilonn(:)
-complex(dpc) :: lambdac
+complex(dp), allocatable :: xc(:), r(:), v(:), w(:), z(:), p(:), q(:), y(:), t(:), d(:), s(:)
+complex(dp), allocatable :: beta(:), eta(:), delta(:), epsilonn(:)
+complex(dp) :: lambdac
 real(dp), allocatable :: rho(:), zeta(:), gama(:), theta(:), resid(:)
 integer :: i
 integer :: ierr

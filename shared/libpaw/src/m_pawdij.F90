@@ -2431,17 +2431,16 @@ subroutine pawdijnd(dijnd,cplex_dij,gprimd,iatom,natom,ndij,nspden,nucdipmom,&
 !Local variables ---------------------------------------
 !scalars
  integer :: angl_size,idir,ii,ij_size,il,ilmn,im,imesh
- integer :: jatom,jl,jlmn,jm,klm,klmn,kln,lm_size,lmn2_size
+ integer :: jatom,jl,jlmn,jm,klmn,kln,lm_size,lmn2_size ! klm,
  integer :: mesh_size
  real(dp) :: rc,rr,rt
  real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
- complex(dpc) :: cmatrixelement,lms
+ complex(dp) :: cmatrixelement,lms
  logical :: usezora
 !arrays
  integer,pointer :: indlmn(:,:),indklmn(:,:)
  real(dp),allocatable :: ff(:),intgr3(:),v1(:),zk1(:)
  character(len=500) :: msg
-
 ! *************************************************************************
 
 !Useful data
@@ -2571,7 +2570,7 @@ subroutine pawdijnd(dijnd,cplex_dij,gprimd,iatom,natom,ndij,nspden,nucdipmom,&
  ! in case of ndij > 1, note that there is no spin-flip in this term
  ! so therefore down-down = up-up, and up-down and down-up terms are still zero
  if(ndij > 1) dijnd(:,2)=dijnd(:,1)
- 
+
  if(allocated(zk1)) then
    LIBPAW_DEALLOCATE(zk1)
  end if
@@ -2654,7 +2653,7 @@ subroutine pawdijaa(dijnd,gprimd,iatom,jatom,mesh_size,natom,nucdipmom,&
  LIBPAW_ALLOCATE(my_gntselect,((2*my_lmax-1)**2,my_lmax**2*(my_lmax**2+1)/2))
  LIBPAW_ALLOCATE(my_realgnt,((2*my_lmax-1)**2*my_lmax**4))
  call realgaunt(my_lmax,my_ngnt,my_gntselect,my_realgnt)
- 
+
  ! obtain rprimd by inversion of gprimd
  ! have to use elaborate lapack calls because we are inside libpaw
  rprimd=gprimd
@@ -2665,8 +2664,8 @@ subroutine pawdijaa(dijnd,gprimd,iatom,jatom,mesh_size,natom,nucdipmom,&
  rvec(1:3,1)=MATMUL(rprimd,(xred(:,jatom)-xred(:,iatom)))
  rvec_len(1) = SQRT(DOT_PRODUCT(rvec(:,1),rvec(:,1)))
  dr = rvec_len(1)
-  
- ! generate Ylm's for rvec 
+
+ ! generate Ylm's for rvec
  LIBPAW_ALLOCATE(ylm_rvec,(my_lsizemax**2,1))
  call initylmr(my_lsizemax,1,1,rvec_len,1,rvec,ylm_rvec)
 
@@ -2700,7 +2699,7 @@ subroutine pawdijaa(dijnd,gprimd,iatom,jatom,mesh_size,natom,nucdipmom,&
  aa1b_fac = -half*FineStruct4*four_pi*m1m2/three
  ! term IIa factor: -1/2 \alpha^4
  aa2a_fac = -half*FineStruct4
- ! term IIb factor: 1/2 \alpha^4 (4\pi/3) 
+ ! term IIb factor: 1/2 \alpha^4 (4\pi/3)
  aa2b_fac = half*FineStruct4*four_pi/three
 
  do klmn=1,pawtab%lmn2_size
@@ -2717,7 +2716,7 @@ subroutine pawdijaa(dijnd,gprimd,iatom,jatom,mesh_size,natom,nucdipmom,&
        if (ignt > 0) then
          ! note that aaint second index is angmom + 1, so l2+1 here
          aa1a = aa1a + aa1a_fac*my_realgnt(ignt)*ylm_rvec(klm2,1)*aaint(kln,l2+1,1)
-         
+
          do l4=abs(l2-1),l2+1
            do m4=-l4,l4
              klm4=LMPACK(l4,m4)
@@ -5084,9 +5083,8 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
 !integer :: i1,i2,i3,i4,symrel_conv(3,3)
 !real(dp) :: spinrot(4)
 !real(dp),allocatable :: dijtemp(:,:),sumrhoso(:,:)
-!complex(dpc) :: dijt(2,2),dijt2(2,2),Rspinrot(2,2)
+!complex(dp) :: dijt(2,2),dijt2(2,2),Rspinrot(2,2)
 !DEBUG_ALTERNATE_ALGO
-
 ! *********************************************************************
 
 !Tests consistency of options

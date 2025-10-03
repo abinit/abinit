@@ -5070,8 +5070,7 @@ Variable(
     characteristics=['[[ENERGY]]'],
     added_in_version="before_v9",
     text=r"""
-This variable can be used to change artificially the value of the Fermi level when
-performing e-ph calculations.
+This variable can be used to change artificially the value of the Fermi level when performing e-ph calculations.
 The variable has effect only if set to a non-zero value.
 This option is mutually exclusive with [[eph_extrael]] and [[eph_doping]].
 When [[eph_fermie]] is used the number of temperatures specified by [[tmesh]] cannot be greater than one.
@@ -5166,7 +5165,7 @@ Variable(
     text=r"""
 This variable defines the technique for the integration over the Brillouin zone in the EPH code.
 
-* 1 --> Gaussian technique with broadening factor
+* 1 --> Gaussian technique with broadening factor.
 * 2 --> Tetrahedron method.
 
 Note that the default value depends on the value of [[eph_task]] i.e. on the physical properties
@@ -25445,11 +25444,10 @@ This input variable specifies whether the EPH code should store $|g|^2$ or $g$
 when computing the e-ph matrix elements ([[eph_task]] == 11)
 Possible values are:
 
-    1 --> compute and store $|g|^2$ in GSTORE.nc.
-          Use this option to reduce the size of the file but keep in mind
-          that the GSTORE can only be used to compute expressions in which
-          only $|g|^2$ is needed.
-    2 --> compute and store complex $g$ in GSTORE.nc (default)
+1 --> compute and store $|g|^2$ in GSTORE.nc.
+      Use this option to reduce the size of the file but keep in mind
+      that the GSTORE can only be used to compute expressions in which only $|g|^2$ is needed.
+2 --> compute and store complex $g$ in GSTORE.nc (default)
 """,
 ),
 
@@ -25468,10 +25466,64 @@ This input variable specifies whether the EPH code should compute and store
 the matrix elements of the velocity operator when computing the e-ph matrix elements ([[eph_task]] == 11)
 Possible values are:
 
-    0 --> Do not compute velocity matrix elements
-    1 --> compute and store the diagonal matrix elements (default)
-    2 --> compute and store diagonal + off-diagonal terms.
+0 --> Do not compute velocity matrix elements
+1 --> compute and store the diagonal matrix elements (default)
+2 --> compute and store diagonal + off-diagonal terms.
 """,
+),
+
+Variable(
+    abivarname="gstore_use_lgk",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics=r"GSTORE USE Little Group of K",
+    requires="[[optdriver]] == 7",
+    added_in_version="10.5.6",
+    text=r"""
+When generating a GSTORE file, setting [[gstore_use_lgk]] to 1,
+instructs Abinit to restrict the computation of the g(k,q) to the
+$\qq$-points in the IBZ_k where IBZ_k is the irreducibile zone
+defined by the little group of the $\kk$-point.
+This allows one to reduce the number of e-ph matrix elements, but keep in mind that
+the generated GSTORE can only be used to compute electronic properties such
+as the electron self-energy $\Sigma_\kk$.
+By default, little group symmetries are not used.
+
+!!! important
+
+    [[gstore_use_lgk]] = 1 is only compatible with [[gstore_qzone]] == "bz".
+""",
+),
+
+Variable(
+    abivarname="gstore_use_lgq",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics=r"GSTORE USE Little Group of Q",
+    requires="[[optdriver]] == 7",
+    added_in_version="10.5.6",
+    text=r"""
+When generating a GSTORE file, setting [[gstore_use_lgq]] to 1,
+instructs Abinit to restrict the computation of the g(k,q) to the
+$\kk$-points in the IBZ_q where IBZ_q is the irreducibile zone
+defined by the little group of the $\qq$-point.
+This allows one to reduce the number of e-ph matrix elements, but keep in mind that
+the generated GSTORE can only be used to compute phonon properties such
+as the phonon self-energy $\Pi_\kk$.
+By default, little group symmetries are not used.
+
+!!! important
+
+    [[gstore_use_lgq]] = 1 is only compatible with [[gstore_kzone]] == "bz".
+""",
+
+
 ),
 
 Variable(
@@ -25533,8 +25585,11 @@ This input variable can be used to introduce a filter in the electronic wavevect
 when computing the e-ph matrix elements with [[eph_task]] == 11.
 Possible values are:
 
-    "none" --> No filter is applied.
-    "fs_tetra" --> Use tetrahedron method to filter k/k+q states on the Fermi surface.
+- "none" --> No filter is applied (default)
+- "fs_tetra" --> Use tetrahedron method to filter k/k+q states on the Fermi surface.
+- "qprange" --> Use [[gw_qprange]] to select k-points. If [[gw_qprange]] is not given in input
+   the code automatically selects the k-points associated to the direct and the fundamental KS gap
+   as computed from the WFK file.
 
 Note that it is possible to use another filter based on the position of the energy states wrt to either
 the CBM/VBM or the position wrt to the Fermi level via [[gstore_erange]].
@@ -25556,8 +25611,47 @@ This input variable specifies the representation used to store the e-ph matrix e
 
 Possible values are:
 
-    "phonon" --> Store e-ph matrix elements in the phonon representation (collective displacement)
-    "atom" -->  Store e-ph matrix elements in the atom representation (displacement of a single atom along one of the reduced directions)
+- "phonon" --> Store e-ph matrix elements in the phonon representation (collective displacement)
+- "atom" -->  Store e-ph matrix elements in the atom representation (displacement of a single atom along one of the reduced directions)
+""",
+),
+
+Variable(
+    abivarname="gstore_vname",
+    varset="eph",
+    vartype="string",
+    topics=['ElPhonInt_expert'],
+    dimensions="scalar",
+    defaultval="gvals",
+    mnemonics=r"GSTORE Variable NAME",
+    requires="[[optdriver]] == 7",
+    added_in_version="10.5.6",
+    text=r"""
+This input variable specifies the name of the netcdf variable from which the e-ph matrix elements
+will be **read** from the GSTORE.nc file.
+Possible values are: "gvals" (default) or "gvals_ks"
+This variable has an effect only where reading a GSTORE file produced by
+the GWPT subdriver ([[eph_task]] 17) for post-processing purposes.
+In this case, indeed, the "gvals" netcdf variables stores the GWPT electron-matrix elements
+while "gvals_ks" contains the KS e-ph matrix elements.
+Use "gvals_ks" if you want to compute physical properties using KS matrix elements instead of the GWPT ones
+for comparison purposes.
+
+This input variable specifies the name of the NetCDF variable from which
+the electron–phonon matrix elements will be read in the GSTORE.nc file.
+
+Valid options are:
+
+- "gvals" (default)
+- "gvals_ks"
+
+This variable is only relevant when reading a GSTORE.nc file produced by
+the GWPT subdriver ([[eph_task]] = 17) for post-processing.
+In such cases: "gvals" stores the GWPT-renormalized electron–phonon matrix elements while
+"gvals_ks" contains the Kohn–Sham (KS) electron–phonon matrix elements.
+
+Select "gvals_ks" if you wish to compute physical properties using the KS matrix elements
+instead of the GWPT ones, for comparison purposes.
 """,
 ),
 
@@ -25575,7 +25669,6 @@ Variable(
 This input variable can be used to specify the band range
 when computing the GSTORE.nc file with [[eph_task]] == 11.
 The first entry gives the first band to be included while the second index specifies the last band.
-
 Note that the array depends on the value of [[nsppol]] thus one has to provide four integers for the
 two different spin channels when [[nsppol]] == 2.
 
@@ -25674,7 +25767,7 @@ Variable(
     dimensions=[2, "[[nsppol]]"],
     characteristics=['[[ENERGY]]'],
     requires="[[optdriver]] == 7",
-    mnemonics="GSTORE Energy  RANGE",
+    mnemonics="GSTORE Energy RANGE",
     added_in_version="9.6.2",
     text=r"""
 This variable is used when [[eph_task]] = 11 to define the k/q points that should be considered when
@@ -25684,7 +25777,6 @@ on the basis of their KS energy $\ee_\nk$.
 
 If both entries in [[gstore_erange]] are negative, the code assumes a metal and only states within the energy
 window [efermi - abs(gstore_erange(1)), efermi + abs(gstore_erange(2)] are included in the calculation.
-
 Positive (or zero) values are used in semiconductors to define an energy range with respect to the band edges.
 In this case, the first entry given the position of the holes with respect to the CBM while the second entry
 gives the position of electrons with respect to the VBM (energy differences are **always positive**, even for holes).
@@ -25780,11 +25872,11 @@ The choice is among:
 
     At the time of writing, the following features are **not yet supported** in GWR:
 
+    * PAW method.
     * Calculations with [[nspinor]] == 2.
     * Metallic systems as the our minimax meshes assume systems with an energy gap.
     * Temperature effects at the electronic level are not taken into account as we work with the T = 0 formalism.
     * Only $\Gamma$-centered $\kk$-meshes are supported in GWR.
-    * PAW method.
 """,
 ),
 
@@ -25882,8 +25974,7 @@ If encountering out-of-memory issues with the supercell method, it is advisable 
 To optimize performance, utilize all available cores, prioritizing g-parallelism followed by k-parallelism.
 
 The two algorithms are equivalent in the case of $\Gamma$-only sampling.
-
-See also [[gwr_chi_algo]]
+See also [[gwr_chi_algo]].
 """,
 ),
 
@@ -25930,25 +26021,6 @@ The default value (-1.0) instructs the code to use all available [nband]] states
 See also [[inclvkb]] for the inclusion of the contribution given by the non-local part of pseudopotential.
 """,
 ),
-
-
-#Variable(
-#    abivarname="gwr_regterm",
-#    varset="gwr",
-#    vartype="real",
-#    topics=['GWR_expert'],
-#    dimensions=[1],
-#    defaultval=-1.0,
-#    mnemonics="GWR REGularization TERM",
-#    requires="[[optdriver]] == 6",
-#    added_in_version="9.8.0",
-#    text=r"""
-#TODO: To be described.
-#Negative value means automatic regularization.
-#Zero to deactivate it.
-#Positive to use specific value.
-#""",
-#),
 
 
 Variable(

@@ -552,10 +552,9 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
  real(dp),allocatable :: eig(:),evec(:,:)
  real(dp),allocatable :: unm(:,:,:)
  real(dp),allocatable :: work(:,:),work1(:,:),wf1(:,:),ylmgr_k(:,:,:),zhpev1(:,:),zhpev2(:)
- complex(dpc),allocatable :: unm_tmp(:,:),anm_tmp(:,:)
+ complex(dp),allocatable :: unm_tmp(:,:),anm_tmp(:,:)
  type(pawcprj_type),allocatable :: cprj(:,:),cprj_k(:,:),cprj_k1(:,:),cprj_k2(:,:),cprj_k3(:,:),cprj_k4(:,:)
-!complex(dpc) :: aa
-
+!complex(dp) :: aa
 ! *************************************************************************
 
  if (istep==0) return

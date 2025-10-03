@@ -68,11 +68,11 @@ MODULE m_spectra
   ! eelf(nomega,nqpoints)
   ! contains the Electron Energy Loss Function i.e. -\Im{ e^{-1}_{G1=0,G2=0}(q-->0,nomega)}
 
-  complex(dpc),allocatable :: emacro_lf(:,:)
+  complex(dp),allocatable :: emacro_lf(:,:)
   ! emacro_lf(nomega,nqpoints)
   ! contains 1/e^{-1}_{G1=0,G2=0}(q-->0,nomega) (with Local field effects)
 
-  complex(dpc),allocatable :: emacro_nlf(:,:)
+  complex(dp),allocatable :: emacro_nlf(:,:)
   ! emacro_nlf(nomega,nqpoints)
   ! contains e_{G1=0,G2=0}(q-->0,nomega) (without Local field effects)
 

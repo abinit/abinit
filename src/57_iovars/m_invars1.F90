@@ -2740,6 +2740,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 !  Q
    dtsets(idtset)%qmass(:)=ten
    dtsets(idtset)%qgbt(3)=zero
+   dtsets(idtset)%qgbt_cart(3)=zero
    dtsets(idtset)%qprtrb(1:3)=0
    dtsets(idtset)%qptdm(:,:)=zero
    dtsets(idtset)%quadmom(:) = zero

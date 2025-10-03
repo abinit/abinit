@@ -139,77 +139,77 @@ module m_sigma
   ! (b1gw:b2gw, nkibz, nsppol*nsig_ab))
   ! $\<nks|v_{U}|nks\>$ for DFT+U.
 
-  complex(dpc),allocatable :: degw(:,:,:)
+  complex(dp),allocatable :: degw(:,:,:)
   ! (b1gw:b2gw, nkibz, nsppol))
   ! Difference between the QP and the KS energies.
 
-  complex(dpc),allocatable :: dsigmee0(:,:,:)
+  complex(dp),allocatable :: dsigmee0(:,:,:)
   ! (b1gw:b2gw, nkibz, nsppol*nsig_ab))
   ! Derivative of $\Sigma_c(E)$ calculated at the KS eigenvalue.
 
-  complex(dpc),allocatable :: egw(:,:,:)
+  complex(dp),allocatable :: egw(:,:,:)
   ! (nbnds, nkibz, nsppol))
   ! QP energies, $\epsilon_{nks}^{QP}$.
 
   logical :: needs_eigvec_qp = .True.
 
  ! FIXME: These arrays are huge and should be allocated only if self-consistent
-  complex(dpc),allocatable :: eigvec_qp(:,:,:,:)
+  complex(dp),allocatable :: eigvec_qp(:,:,:,:)
   ! (nbnds, nbnds, nkibz, nsppol))
   ! Expansion of the QP amplitudes in the QP basis set of the previous iteration.
 
-  complex(dpc),allocatable :: m_ks_to_qp(:,:,:,:)
+  complex(dp),allocatable :: m_ks_to_qp(:,:,:,:)
   ! (nbnds, nbnds, nkibz, nsppol))
   ! m_ks_to_qp(ib,jb,k,s) := <\psi_{ib,k,s}^{KS}|\psi_{jb,k,s}^{QP}>
 
-  complex(dpc),allocatable :: hhartree(:,:,:,:)
+  complex(dp),allocatable :: hhartree(:,:,:,:)
   ! (b1gw:b2gw, b1gw:b2gw, nkibz, nsppol*nsig_ab)
   ! $\<nks|T+v_H+v_{loc}+v_{nl}|mks\>$
   ! Note that v_{loc} does not include the contribution to vxc(r) given by the model core charge.
 
-  complex(dpc),allocatable :: sigcme(:,:,:,:)
+  complex(dp),allocatable :: sigcme(:,:,:,:)
   ! (b1gw:b2gw, nkibz, nomega_r, nsppol*nsig_ab))
   ! $\<nks|\Sigma_{c}(E)|nks\>$ at each nomega_r frequency
 
-  complex(dpc),allocatable :: sigmee(:,:,:)
+  complex(dp),allocatable :: sigmee(:,:,:)
   ! (b1gw:b2gw, nkibz, nsppol*nsig_ab))
   ! $\Sigma_{xc}E_{KS} + (E_{QP}- E_{KS})*dSigma/dE_KS
 
-  complex(dpc),allocatable :: sigcmee0(:,:,:)
+  complex(dp),allocatable :: sigcmee0(:,:,:)
   ! (b1gw:b2gw, nkibz, nsppol*nsig_ab))
   ! Diagonal matrix elements of $\Sigma_c(E)$ calculated at the KS energy $E_{KS}$
 
-  complex(dpc),allocatable :: sigcmesi(:,:,:,:)
+  complex(dp),allocatable :: sigcmesi(:,:,:,:)
   ! (b1gw:b2gw, nkibz, nomega_i, nsppol*nsig_ab))
   ! Matrix elements of $\Sigma_c$ along the imaginary axis.
   ! Only used in case of analytical continuation.
 
-  complex(dpc),allocatable :: sigcme4sd(:,:,:,:)
+  complex(dp),allocatable :: sigcme4sd(:,:,:,:)
   ! (b1gw:b2gw, nkibz, nomega4sd, nsppol*nsig_ab))
   ! Diagonal matrix elements of \Sigma_c around the zeroth order eigenvalue (usually KS).
 
-  complex(dpc),allocatable :: sigxcme(:,:,:,:)
+  complex(dp),allocatable :: sigxcme(:,:,:,:)
   ! (b1gw:b2gw, nkibz, nomega_r, nsppol*nsig_ab))
   ! $\<nks|\Sigma_{xc}(E)|nks\>$ at each real frequency frequency.
 
-  complex(dpc),allocatable :: sigxcmesi(:,:,:,:)
+  complex(dp),allocatable :: sigxcmesi(:,:,:,:)
   ! (b1gw:b2gw, nkibz, nomega_i, nsppol*nsig_ab))
   ! Matrix elements of $\Sigma_{xc}$ along the imaginary axis.
   ! Only used in case of analytical continuation.
 
-  complex(dpc),allocatable :: sigxcme4sd(:,:,:,:)
+  complex(dp),allocatable :: sigxcme4sd(:,:,:,:)
   ! (b1gw:b2gw, nkibz, nomega4sd, nsppol*nsig_ab))
   ! Diagonal matrix elements of \Sigma_xc for frequencies around the zeroth order eigenvalues.
 
-  complex(dpc),allocatable :: ze0(:,:,:)
+  complex(dp),allocatable :: ze0(:,:,:)
   ! (b1gw:b2gw, nkibz, nsppol))
   ! renormalization factor. $(1-\dfrac{\partial\Sigma_c} {\partial E_{KS}})^{-1}$
 
-  complex(dpc),allocatable :: omega_i(:)
+  complex(dp),allocatable :: omega_i(:)
   ! (nomega_i)
   ! Frequencies along the imaginary axis used for the analytical continuation.
 
-  complex(dpc),allocatable :: omega4sd(:,:,:,:)
+  complex(dp),allocatable :: omega4sd(:,:,:,:)
   ! (b1gw:b2gw, nkibz, nomega4sd, nsppol).
   ! Frequencies used to evaluate the Derivative of Sigma.
 

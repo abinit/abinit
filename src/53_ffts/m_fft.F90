@@ -408,7 +408,7 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, iscale)
  integer,intent(in) :: isign
  integer,optional,intent(in) :: ndat, iscale
 !arrays
- complex(spc),target,intent(inout) :: ff(*)
+ complex(sp),target,intent(inout) :: ff(*)
 ! *************************************************************************
 
  integer :: ndat__, iscale__
@@ -417,7 +417,7 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, iscale)
 
 #if defined HAVE_GPU_CUDA
  if (plan%gpu_option /= ABI_GPU_DISABLED) then
-   call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, ndat__, isign, spc, iscale__, c_loc(ff), &
+   call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, ndat__, isign, sp, iscale__, c_loc(ff), &
                            plan%gpu_plan_ip_spc, plan%gpu_data_ip_spc)
    return
  end if
@@ -438,7 +438,7 @@ end subroutine fftbox_execute_ip_spc
 !! FUNCTION
 !!  In-place FFT transform of complex arrays
 !!  Call (FFTW3|DFTI) routines if available, otherwise fallback to SG routines
-!!  TARGET: dpc arrays
+!!  TARGET: dp arrays
 !!
 !! INPUTS
 !!  plan<fftbox_plan3_t>=Structure with the parameters defining the transform.
@@ -460,7 +460,7 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, iscale)
  integer,intent(in) :: isign
  integer,optional,intent(in) :: ndat, iscale
 !arrays
- complex(dpc),target,intent(inout) :: ff(*)
+ complex(dp),target,intent(inout) :: ff(*)
 ! *************************************************************************
 
  integer :: ndat__, iscale__
@@ -469,7 +469,7 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, iscale)
 
 #if defined HAVE_GPU_CUDA
  if (plan%gpu_option /= ABI_GPU_DISABLED) then
-   call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, ndat__, isign, dpc, iscale__, c_loc(ff), &
+   call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, ndat__, isign, dp, iscale__, c_loc(ff), &
                            plan%gpu_plan_ip_dpc, plan%gpu_data_ip_dpc)
    return
  end if
@@ -511,8 +511,8 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign, ndat, iscale)
  integer,intent(in) :: isign
  integer,optional,intent(in) :: ndat, iscale
 !arrays
- complex(spc),target,intent(in) :: ff(*)
- complex(spc),target,intent(inout) :: gg(*)
+ complex(sp),target,intent(in) :: ff(*)
+ complex(sp),target,intent(inout) :: gg(*)
 ! *************************************************************************
 
  integer :: ndat__, iscale__
@@ -521,7 +521,7 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign, ndat, iscale)
 
 #if defined HAVE_GPU_CUDA
  if (plan%gpu_option /= ABI_GPU_DISABLED) then
-   call xgpu_fftbox_c2c_op(plan%dims, plan%embed, ndat__, isign, spc, iscale__, c_loc(ff), c_loc(gg), &
+   call xgpu_fftbox_c2c_op(plan%dims, plan%embed, ndat__, isign, sp, iscale__, c_loc(ff), c_loc(gg), &
                            plan%gpu_plan_op_spc, plan%gpu_idata_op_spc, plan%gpu_odata_op_spc)
    return
  end if
@@ -542,7 +542,7 @@ end subroutine fftbox_execute_op_spc
 !! FUNCTION
 !!  Out-of-place FFT transform of complex arrays.
 !!  Call (FFTW3|DFTI) routines if available, otherwise fallback to SG routines
-!!  TARGET: dpc arrays
+!!  TARGET: dp arrays
 !!
 !! INPUTS
 !! plan<fftbox_plan3_t>=Structure with the parameters defining the transform.
@@ -563,8 +563,8 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, iscale)
  integer,intent(in) :: isign
  integer,optional,intent(in) :: ndat, iscale
 !arrays
- complex(dpc),target,intent(in) :: ff(*)
- complex(dpc),target,intent(inout) :: gg(*)
+ complex(dp),target,intent(in) :: ff(*)
+ complex(dp),target,intent(inout) :: gg(*)
 ! *************************************************************************
 
  integer :: ndat__, iscale__
@@ -573,7 +573,7 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, iscale)
 
 #if defined HAVE_GPU_CUDA
  if (plan%gpu_option /= ABI_GPU_DISABLED) then
-   call xgpu_fftbox_c2c_op(plan%dims, plan%embed, ndat__, isign, dpc, iscale__, c_loc(ff), c_loc(gg), &
+   call xgpu_fftbox_c2c_op(plan%dims, plan%embed, ndat__, isign, dp, iscale__, c_loc(ff), c_loc(gg), &
                            plan%gpu_plan_op_dpc, plan%gpu_idata_op_dpc, plan%gpu_odata_op_dpc)
    return
  end if
@@ -691,8 +691,8 @@ subroutine fft_ug_spc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, g
  integer,intent(in) :: npw_k,nfft,nspinor,istwf_k,mgfft,ndat
 !arrays
  integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2),kg_k(3,npw_k)
- complex(spc),intent(in) :: ug(*)  !npw_k*nspinor*ndat)
- complex(spc),intent(out) :: ur(*) !nfft*nspinor*ndat)
+ complex(sp),intent(in) :: ug(*)  !npw_k*nspinor*ndat)
+ complex(sp),intent(out) :: ur(*) !nfft*nspinor*ndat)
 ! *************************************************************************
 
 #include "fftug_driver.finc"
@@ -734,8 +734,8 @@ subroutine fft_ug_dpc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, g
  integer,intent(in) :: npw_k,nfft,nspinor,istwf_k,mgfft,ndat
 !arrays
  integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2),kg_k(3,npw_k)
- complex(dpc),intent(in) :: ug(*)  !npw_k*nspinor*ndat)
- complex(dpc),intent(out) :: ur(*) !nfft*nspinor*ndat)
+ complex(dp),intent(in) :: ug(*)  !npw_k*nspinor*ndat)
+ complex(dp),intent(out) :: ur(*) !nfft*nspinor*ndat)
 ! *************************************************************************
 
 #include "fftug_driver.finc"
@@ -816,8 +816,8 @@ subroutine fft_ur_spc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, g
  integer,intent(in) :: npw_k,nfft,nspinor,ndat,istwf_k,mgfft
 !arrays
  integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2),kg_k(3,npw_k)
- complex(spc),intent(inout) :: ur(*) !nfft*nspinor*ndat)
- complex(spc),intent(out) :: ug(*)   !npw_k*nspinor*ndat)
+ complex(sp),intent(inout) :: ur(*) !nfft*nspinor*ndat)
+ complex(sp),intent(out) :: ug(*)   !npw_k*nspinor*ndat)
 ! *************************************************************************
 
 #include "fftur_driver.finc"
@@ -834,7 +834,7 @@ end subroutine fft_ur_spc
 !! FUNCTION
 !! Compute ndat zero-padded FFTs from R- to G-space .
 !! Mainly used for the transform of wavefunctions.
-!! TARGET: dpc complex arrays
+!! TARGET: dp complex arrays
 !!
 !! INPUTS
 !! npw_k=number of plane waves for this k-point.
@@ -863,8 +863,8 @@ subroutine fft_ur_dpc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, g
  integer,intent(in) :: npw_k,nfft,nspinor,ndat,istwf_k,mgfft
 !arrays
  integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2),kg_k(3,npw_k)
- complex(dpc),intent(inout) :: ur(*) ! nfft*nspinor*ndat)
- complex(dpc),intent(out) :: ug(*)   ! npw_k*nspinor*ndat)
+ complex(dp),intent(inout) :: ur(*) ! nfft*nspinor*ndat)
+ complex(dp),intent(out) :: ug(*)   ! npw_k*nspinor*ndat)
 ! *************************************************************************
 
 #include "fftur_driver.finc"
@@ -906,7 +906,7 @@ subroutine fftpad_spc(ff, ngfft, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, 
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign
 !arrays
  integer,intent(in) :: ngfft(18),gbound(2*mgfft+8,2)
- complex(spc),target,intent(inout) :: ff(ldx*ldy*ldz*ndat)
+ complex(sp),target,intent(inout) :: ff(ldx*ldy*ldz*ndat)
 
 !Local variables-------------------------------
 !scalars
@@ -971,7 +971,7 @@ end subroutine fftpad_spc
 !!
 !! FUNCTION
 !!  Driver routine used to transform COMPLEX arrays using 3D zero-padded FFTs.
-!!  TARGET: DPC arrays
+!!  TARGET: DP arrays
 !!
 !! INPUTS
 !!  ngfft(18)=Info on the 3D FFT.
@@ -996,7 +996,7 @@ subroutine fftpad_dpc(ff, ngfft, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, 
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign
 !arrays
  integer,intent(in) :: ngfft(18),gbound(2*mgfft+8,2)
- complex(dpc),target,intent(inout) :: ff(ldx*ldy*ldz*ndat)
+ complex(dp),target,intent(inout) :: ff(ldx*ldy*ldz*ndat)
 
 !Local variables-------------------------------
 !scalars
@@ -1196,8 +1196,8 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
  integer :: pars(6,NSETS)
  real(dp) :: crand(2)
  real(dp),allocatable :: fofg(:),fofr_ref(:),fofr(:)
- complex(dpc),allocatable :: ff(:),ff_ref(:),gg(:)
- complex(spc),allocatable :: ffsp(:),ff_refsp(:),ggsp(:)
+ complex(dp),allocatable :: ff(:),ff_ref(:),gg(:)
+ complex(sp),allocatable :: ffsp(:),ff_refsp(:),ggsp(:)
 ! *************************************************************************
 
  nfailed = 0
@@ -1468,8 +1468,8 @@ function fftu_utests(ecut, ngfft, rprimd, ndat, nthreads, unit) result(nfailed)
  real(dp) :: kpoint(3),crand(2),kpoints(3,9)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable :: cg(:,:),cg_ref(:,:),cr(:,:)
- complex(spc),allocatable :: ugsp(:),ug_refsp(:),ursp(:)
- complex(dpc),allocatable :: ug(:),ug_ref(:),ur(:)
+ complex(sp),allocatable :: ugsp(:),ug_refsp(:),ursp(:)
+ complex(dp),allocatable :: ug(:),ug_ref(:),ur(:)
  type(MPI_type) :: MPI_enreg_seq
 ! *************************************************************************
 
@@ -4306,7 +4306,7 @@ subroutine fourdp_6d(cplex,matrix,isign,MPI_enreg,nfft,ngfft,tim_fourdp)
  type(MPI_type),intent(in) :: MPI_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
- complex(gwpc),intent(inout) :: matrix(nfft,nfft)
+ complex(gwp),intent(inout) :: matrix(nfft,nfft)
 
 !Local variables-------------------------------
 !scalars

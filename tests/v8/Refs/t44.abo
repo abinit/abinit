@@ -562,6 +562,7 @@ meta: {optdriver: 7, eph_task: 4, }
    1.48144565E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
+ Will compute Sigma(omega) using 101 points and step: 1.000000E-02 (eV)
 
  === Gaps, band edges and relative position wrt Fermi level ===
  Indirect band gap semiconductor
@@ -927,6 +928,7 @@ meta: {optdriver: 7, eph_task: 4, }
 - Writing phonon DOS to netcdf file: t44o_DS2_PHDOS.nc
 --------------------------------------------------------------------------------
 
+ Will compute Sigma(omega) using 101 points and step: 1.000000E-02 (eV)
 
  === Gaps, band edges and relative position wrt Fermi level ===
  Indirect band gap semiconductor
@@ -1370,6 +1372,7 @@ meta: {optdriver: 7, eph_task: 4, }
 - Writing phonon DOS to netcdf file: t44o_DS4_PHDOS.nc
 --------------------------------------------------------------------------------
 
+ Will compute Sigma(omega) using 101 points and step: 1.000000E-02 (eV)
 
  === Gaps, band edges and relative position wrt Fermi level ===
  Indirect band gap semiconductor
@@ -2089,6 +2092,7 @@ meta: {optdriver: 7, eph_task: 4, }
 - Writing phonon DOS to netcdf file: t44o_DS6_PHDOS.nc
 --------------------------------------------------------------------------------
 
+ Will compute Sigma(omega) using 101 points and step: 1.000000E-02 (eV)
 
  === Gaps, band edges and relative position wrt Fermi level ===
  Indirect band gap semiconductor
@@ -2463,6 +2467,7 @@ meta: {optdriver: 7, eph_task: 4, }
 - Writing phonon DOS to netcdf file: t44o_DS7_PHDOS.nc
 --------------------------------------------------------------------------------
 
+ Will compute Sigma(omega) using 101 points and step: 1.000000E-02 (eV)
 
  === Gaps, band edges and relative position wrt Fermi level ===
  Indirect band gap semiconductor
@@ -2835,6 +2840,7 @@ meta: {optdriver: 7, eph_task: 4, }
 - Writing phonon DOS to netcdf file: t44o_DS8_PHDOS.nc
 --------------------------------------------------------------------------------
 
+ Will compute Sigma(omega) using 101 points and step: 1.000000E-02 (eV)
 
  === Gaps, band edges and relative position wrt Fermi level ===
  Indirect band gap semiconductor
@@ -3110,6 +3116,7 @@ meta: {optdriver: 7, eph_task: 4, }
 
 --------------------------------------------------------------------------------
 
+ Will compute Sigma(omega) using 101 points and step: 1.000000E-02 (eV)
 
  === Gaps, band edges and relative position wrt Fermi level ===
  Indirect band gap semiconductor

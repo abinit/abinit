@@ -1990,7 +1990,7 @@ subroutine bare_vqg(qpoint,fockcommon,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
 !Local variables-------------------------------
 !scalars
  integer :: izero
- real(dp) :: rcut,gqgm12,gqgm13,gqgm23,gs2,gs3
+ real(dp) :: rcut !,gs2,gs3 ! gqgm12,gqgm13,gqgm23,
  real(dp) ::  vqg_sr(nfft)
 ! *************************************************************************
 
@@ -2067,7 +2067,7 @@ subroutine strfock(fockcommon,gprimd,fockstr,mpi_enreg,nfft,ngfft,&
 !scalars
  integer,parameter :: im=2,re=1
  integer :: i1,i2,i3,id1,id2,id3,ierr,ig1,ig2,ig3,ii,irho2,idat,me_fft,n1,n2,n3,nproc_fft
- real(dp) :: arg,cutoff,gsquar,rcut,rhogsq,tolfix=1.000000001_dp,tot,tot1
+ real(dp) :: arg,gsquar,rcut,rhogsq,tot,tot1 !tolfix=1.000000001_dp,
  logical :: rcut_spencer_alavi
 #ifdef HAVE_OPENMP_OFFLOAD
  ! Cray has trouble with reduction on array, so we use 6 scalars instead

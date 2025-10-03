@@ -335,45 +335,19 @@ contains
 
     class(spin_hist_t) , intent(inout) :: self
 
-    if (allocated(self%xred)) then
-       ABI_FREE(self%xred)
-    end if
-    if (allocated(self%typat)) then
-       ABI_FREE(self%typat)
-    end if
-    if (allocated(self%znucl)) then
-       ABI_FREE(self%znucl)
-    end if
-    if (allocated(self%spin_index)) then
-       ABI_FREE(self%spin_index)
-    end if
-    if (allocated(self%heff)) then
-       ABI_FREE(self%heff)
-    end if
-    if (allocated(self%snorm)) then
-       ABI_FREE(self%snorm)
-    end if
-    if (allocated(self%S)) then
-       ABI_FREE(self%S)
-    end if
-    if (allocated(self%dSdt)) then
-       ABI_FREE(self%dSdt)
-    end if
-    if (allocated(self%etot)) then
-       ABI_FREE(self%etot)
-    end if
-    if (allocated(self%entropy)) then
-       ABI_FREE(self%entropy)
-    end if
-    if (allocated(self%time)) then
-       ABI_FREE(self%time)
-    end if
-    if (allocated(self%itime)) then
-       ABI_FREE(self%itime)
-    end if
-    if (allocated(self%ihist_latt)) then
-       ABI_FREE(self%ihist_latt)
-    end if
+    ABI_SFREE(self%xred)
+    ABI_SFREE(self%typat)
+    ABI_SFREE(self%znucl)
+    ABI_SFREE(self%spin_index)
+    ABI_SFREE(self%heff)
+    ABI_SFREE(self%snorm)
+    ABI_SFREE(self%S)
+    ABI_SFREE(self%dSdt)
+    ABI_SFREE(self%etot)
+    ABI_SFREE(self%entropy)
+    ABI_SFREE(self%time)
+    ABI_SFREE(self%itime)
+    ABI_SFREE(self%ihist_latt)
 
   end subroutine finalize
 !!***
