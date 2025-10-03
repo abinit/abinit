@@ -88,10 +88,6 @@ module m_energies
   real(dp) :: entropy_ks=zero
    ! Entropy contribution of the Kohn-Sham states (non-interacting entropy)
 
-  real(dp) :: entropy_paw=zero
-   ! PAW contribution to the entropy (for finite-temperature xc functionals).
-   ! This quantity is part of the total entropy (see %entropy).
-
   real(dp) :: entropy_xc=zero
    ! Exchange-correlation contribution to the entropy (for finite-temperature xc functionals).
    ! This quantity is part of the total entropy (see %entropy).
