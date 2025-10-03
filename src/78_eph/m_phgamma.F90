@@ -3056,7 +3056,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  character(len=500) :: msg
  character(len=fnlen) :: path
 !arrays
- integer :: g0_k(3),g0bz_kq(3),g0_kq(3),units(2) ! symq(4,2,cryst%nsym)
+ integer :: g0_k(3),g0bz_kq(3),g0_kq(3),units(2)
  integer :: indkk_kq(6,1), work_ngfft(18),gmax(3),my_gmax(3),gamma_ngqpt(3) !g0ibz_kq(3),
  integer,allocatable :: kg_k(:,:),kg_kq(:,:),gtmp(:,:),nband(:,:),wfd_istwfk(:), my_pinfo(:,:), pert_table(:,:) !, qibz_done(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3), lf(2),rg(2),res(2), vk(3), vkq(3), wminmax(2), n0(ebands%nsppol)
@@ -3670,9 +3670,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
      call dvdb%ftinterp_qpt(qpt, nfftf, ngfftf, v1scf, dvdb%comm_rpt)
    end if
 
-   ! Examine the symmetries of the q wavevector.
-   !call littlegroup_q(cryst%nsym, qpt, symq, cryst%symrec, cryst%symafm, timrev_q, prtvol=dtset%prtvol)
-
    ! Compute the little group of the q-point so that we can compute g(k,q) only for k in the IBZ_q
    !if (dtset%symsigma /= 0) then
    !  timrev_q = kpts_timrev_from_kptopt(my_qptopt)
@@ -3757,7 +3754,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
        kk_ibz = ebands%kptns(:,ik_ibz)
 
-       ! Number of bands crossing the Fermi level at k
+       ! Number of bands crossing the Fermi level at k.
        bstart_k = fs%bstart_cnt_ibz(1, ik_ibz); nband_k = fs%bstart_cnt_ibz(2, ik_ibz)
 
        ! Find k+q in the extended zone and extract symmetry info. cycle if k+q not in FS.
