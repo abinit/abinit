@@ -25961,11 +25961,32 @@ Variable(
     topics=['spinpolarisation_basic', 'MagMom_useful'],
     dimensions=[3],
     defaultval=[0, 0, 0],
-    mnemonics="Q-point for Generalized Bloch Theorem.",
+    mnemonics="Q-point for Generalized Bloch Theorem in REDuced coordinates.",
     added_in_version="10.5.1",
     text=r"""
 Reduced coordinates of the wave-vector $\qq$ of the spin spiral when [[use_gbt]] /= 0.
+If you prefer to work only with cartesian coordinates, you may work entirely
+with "[[qgbt_cart]]" and ignore [[qgbt]], in which case [[qgbt]]
+must be absent from the input file.
+One and only one of [[qgbt]] or [[qgbt_cart]] must be provided.
 """,
 ),
 
+Variable(
+    abivarname="qgbt_cart",
+    varset="gstate",
+    vartype="real",
+    topics=['spinpolarisation_basic', 'MagMom_useful'],
+    dimensions=[3],
+    defaultval=[0, 0, 0],
+    mnemonics="Q-point for Generalized Bloch Theorem in CARTesian coordinates.",
+    added_in_version="10.5.1",
+    text=r"""
+Cartesian coordinates of the wave-vector $\qq$ of the spin spiral when [[use_gbt]] /= 0.
+If [[qgbt]] is ABSENT from the input file and [[qgbt_cart]] is
+provided, then the values of [[qgbt]] will be computed from the provided
+[[qgbt_cart]]
+One and only one of [[qgbt]] or [[qgbt_cart]] must be provided.
+""",
+),
 ]

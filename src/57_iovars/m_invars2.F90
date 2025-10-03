@@ -235,7 +235,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  integer :: densfor_pred,ipsp,iscf,isiz,itypat,jj,kptopt,lpawu,marr,natom,natomcor,nband1,nberry
  integer :: niatcon,nimage,nkpt,nkpthf,npspalch,nqpt,nsp,nspinor,nsppol,nsym,ntypalch,ntypat,ntyppure
  integer :: occopt,occopt_tmp,response,sumnbl,tfband,tnband,tread,tread_alt,tread_dft,tread_fock,tread_key,tread_extrael
- integer :: tread_brange, tread_erange, tread_kfilter
+ integer :: tread_brange, tread_erange, tread_kfilter, tread_qgbt, tread_cart
  integer :: itol, itol_gen, ds_input, ifreq, ncerr, ierr, image, tread_dipdip, my_rank
  integer :: itol_wfr, itol_gen_wfr
  logical :: xc_is_mgga,xc_is_pot_only,xc_need_kden,xc_has_kxc
@@ -4385,17 +4385,17 @@ if (dtset%usekden==1) then
  end if
 
  if (dtset%use_gbt /= 0) then
-  call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'qgbt', tread, 'DPR')
-  if (tread==1) then
-    dtset%qgbt(1:3) = dprarr(1:3)
-  else
-    call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'qgbt_cart', tread, 'DPR')
-    if (tread==1) then 
-      call mkrdim(dtset%acell_orig(1:3,1),dtset%rprim_orig(1:3,1:3,1),rprimd)
-      dtset%qgbt(1:3) = MATMUL(TRANSPOSE(rprimd)/two_pi, dprarr(1:3))
-    endif
-  endif
- endif
+   call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'qgbt', tread_qgbt, 'DPR')
+   if (tread_qgbt == 1) dtset%qgbt(1:3) = dprarr(1:3)
+   call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'qgbt_cart', tread_cart, 'DPR')
+   if (tread_qgbt ==1 .and. tread_cart == 1) then
+     ABI_ERROR("Both 'qgbt' and 'qgbt_cart' are defined, choose to define only one of these.")
+   else if (tread_cart == 1) then
+     dtset%qgbt_cart = dprarr(1:3) 
+     call mkrdim(dtset%acell_orig(1:3,1),dtset%rprim_orig(1:3,1:3,1),rprimd)
+     dtset%qgbt(1:3) = MATMUL(TRANSPOSE(rprimd)/two_pi, dtset%qgbt_cart)
+   end if
+ end if
 
  ABI_FREE(intarr)
  ABI_FREE(dprarr)

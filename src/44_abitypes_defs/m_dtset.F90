@@ -1032,8 +1032,8 @@ type, public :: dataset_type
  real(dp) :: pol(3)
  real(dp) :: polcen(3)
  real(dp) :: pvelmax(3)
- real(dp) :: qgbt(3)=[0.0_dp,0.0_dp,0.0_dp]
- real(dp) :: qgbt_cart(3)=[0.0_dp,0.0_dp,0.0_dp]
+ real(dp) :: qgbt(3)=zero
+ real(dp) :: qgbt_cart(3)=zero
  real(dp) :: qptn(3)
  real(dp) :: red_efield(3)
  real(dp) :: red_dfield(3)
