@@ -13,7 +13,8 @@
 #include "abi_common.h"
 
 module m_iterative_solvers
-
+    
+    use m_errors
     use defs_basis
 #if defined HAVE_LINALG_MKL_OMATCOPY
     use mkl_rci, only : dfgmres, dfgmres_check, dfgmres_get, dfgmres_init
