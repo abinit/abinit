@@ -833,7 +833,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  call get_ibz2bz(gstore%nkibz, gstore%nkbz, gstore%kbz2ibz, kibz2bz, msg, ierr)
  ABI_CHECK(ierr == 0, sjoin("Something wrong in symmetry tables for k-points", ch10, msg))
 
- ! These tables are used to exclude q/k points
+ ! These tables are used to exclude q/k points.
  ! We use the full BZ because this mask can be also used when points are restricted to the IBZ
  ! provided we convert from ik_ibz to ik_bz. Note that both arrays are initialized with zeros.
  ABI_ICALLOC(select_qbz_spin, (gstore%nqbz, nsppol))
@@ -930,7 +930,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  call gstore%set_mpi_grid__(nproc_spin, comm_spin)
  call xmpi_comm_free(comm_spin)
 
- ! At this point, we have the Cartesian grid (one per spin if any)
+ ! At this point, we have the Cartesian grid (one per spin if any),
  ! and we can finally allocate and distribute other arrays.
  ! Note with_cplex = 0 --> matrix elements are not allocated here.
  with_cplex = 0; if (has_gwan) with_cplex = 2
@@ -1004,6 +1004,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      nctkarr_t("gstore_qglob2bz", "i", "gstore_max_nq, number_of_spins"), &
      nctkarr_t("gstore_kglob2bz", "i", "gstore_max_nk, number_of_spins"), &
      ! These quantities are needed to interface GSTORE.nc with external codes.
+     ! For the meaning of the different variables and conventions see m_ifc module.
      nctkarr_t("zeff", "dp", "three, three, number_of_atoms"), &
      nctkarr_t("qdrp_cart", "dp", "three, three, three, number_of_atoms") &
    ])
@@ -1077,7 +1078,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    end if
 
    do spin=1,gstore%nsppol
-     ! Create group for this spin.
+     ! Create hdf group for this spin.
      NCF_CHECK(nf90_def_grp(ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
 
      ! Dimensions in gqk_spin group
@@ -1706,7 +1707,7 @@ end subroutine gstore_print
 !! gstore_check_little_group
 !!
 !! FUNCTION
-!!  Check consistency between little group options from file and from input.
+!!  Check consistency between little group options read from file and from input.
 !!
 !! INPUTS
 !!
@@ -1728,7 +1729,7 @@ integer function gstore_check_little_group(gstore, dtset, msg) result(ierr)
      msg = sjoin("Input var gstore_use_lgq: ", itoa(dtset%gstore_use_lgq), ", but GSTORE file has:", itoa(gstore%has_used_lgq))
      ABI_ERROR_NOSTOP(msg, ierr)
    end if
-   ! Using IBZ_k when GSTORE has full BZ if OK but inefficient.
+   ! Using IBZ_k when GSTORE has full BZ is OK but inefficient.
    if (gstore%has_used_lgk == 0) then
      msg = sjoin("Input var gstore_use_lgk: ", itoa(dtset%gstore_use_lgk), ", but GSTORE file has:", itoa(gstore%has_used_lgk))
      ABI_COMMENT(msg)
@@ -1741,7 +1742,7 @@ integer function gstore_check_little_group(gstore, dtset, msg) result(ierr)
      msg = sjoin("Input var gstore_use_lgk: ", itoa(dtset%gstore_use_lgk), ", but GSTORE file has:", itoa(gstore%has_used_lgk))
      ABI_ERROR_NOSTOP(msg, ierr)
    end if
-   ! Using IBZ_q when GSTORE has full BZ if OK but inefficient.
+   ! Using IBZ_q when GSTORE has full BZ is OK but inefficient.
    if (gstore%has_used_lgq == 0) then
      msg = sjoin("Input var gstore_use_lgq: ", itoa(dtset%gstore_use_lgq), ", but GSTORE file has:", itoa(gstore%has_used_lgq))
      ABI_COMMENT(msg)
