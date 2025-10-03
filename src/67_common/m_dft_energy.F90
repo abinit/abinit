@@ -1149,7 +1149,7 @@ subroutine entropy(dtset,energies)
 !we sum all entropy terms. %entropy is now total entropy.
 !Examples of other sources of entropy: finite-temperature xc functionals, extfpmd, ...
  energies%entropy=energies%entropy_ks
- if(abs(energies%entropy_paw)>tiny(zero))     energies%entropy=energies%entropy+energies%entropy_paw
+ if(abs(energies%paw%entropy_paw)>tiny(zero))     energies%entropy=energies%entropy+energies%paw%entropy_paw
  if(abs(energies%entropy_xc)>tiny(zero))      energies%entropy=energies%entropy+energies%entropy_xc
  if(abs(energies%entropy_extfpmd)>tiny(zero)) energies%entropy=energies%entropy+energies%entropy_extfpmd
  if(abs(energies%entropy_imp)>tiny(zero))     energies%entropy=energies%entropy+energies%entropy_imp

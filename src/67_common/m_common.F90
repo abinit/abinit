@@ -1778,7 +1778,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
      & width=20, real_fmt="(es21.14)") ! in kB units
      call sdoc%add_real('noninteracting',energies%entropy_ks) ! Noninteracting entropy = Entropy of the Kohn-Sham states
      if(abs(energies%entropy_xc)>tiny(zero)) call sdoc%add_real('xc',energies%entropy_xc)
-     if(usepaw==1.and.abs(energies%paw%entropy_paw)>tiny(zero)) call sdoc%add_real('spherical_terms',energies%entropy_paw)
+     if(usepaw==1.and.abs(energies%paw%entropy_paw)>tiny(zero)) call sdoc%add_real('spherical_terms',energies%paw%entropy_paw)
      if(abs(energies%entropy_extfpmd)>tiny(zero)) call sdoc%add_real('extfpmd',energies%entropy_extfpmd)
      if(abs(energies%entropy_imp)>tiny(zero)) call sdoc%add_real('impurity',energies%entropy_imp)
      call sdoc%add_real('total_entropy',energies%entropy) ! Total entropy energy
