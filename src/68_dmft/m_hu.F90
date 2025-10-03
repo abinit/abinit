@@ -1704,7 +1704,7 @@ subroutine vee2udensatom_hu(ndim,udens_atoms,veetemp,basis,prtonly)
    write(message,'(1x,14(8x,i5))') (m,m=1,tndim) 
    call wrtout(std_out,message,'COLL')
    do ms=1,tndim
-     write(message,'(i3,1x(14f7.3","14f7.3))') ms,((udens_atoms(ms,ms1)),ms1=1,tndim)
+     write(message,'(i3,28(2x,14f7.3))') ms,((udens_atoms(ms,ms1)),ms1=1,tndim)
      call wrtout(std_out,message,'COLL')
    enddo
  else
