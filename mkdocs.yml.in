@@ -213,6 +213,7 @@ nav:
         - GWR1: tutorial/gwr1.md
         - Bethe-Salpeter: tutorial/bse.md
         - DMFT: tutorial/dmft.md
+        - DMFT with TRIQS/CT-HYB: tutorial/dmft_triqs.md
         - TDDFT (Casida): tutorial/tddft.md
         - RT-TDDFT: tutorial/rttddft.md
     - DFPT & electron-phonon:
