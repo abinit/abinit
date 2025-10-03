@@ -695,9 +695,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
 !---------------------------------------------------------------------------
 ! Free memory
 !---------------------------------------------------------------------------
- if (allocated(ind_cg_mpi_to_seq)) then
-   ABI_FREE(ind_cg_mpi_to_seq)
- end if
+ ABI_SFREE(ind_cg_mpi_to_seq)
 
 end subroutine readwf
 !!***
@@ -993,9 +991,7 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
 !Final statements
 !---------------------------------------------------------------------------
 
- if (allocated(ind_cg_mpi_to_seq)) then
-   ABI_FREE(ind_cg_mpi_to_seq)
- end if
+ ABI_SFREE(ind_cg_mpi_to_seq)
 
  RETURN
 

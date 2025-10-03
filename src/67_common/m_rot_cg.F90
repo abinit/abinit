@@ -67,13 +67,13 @@ subroutine diag_occ(occ_nd_cpx,nband,occ_diag)
 !! type(dataset_type),intent(in) :: dtset
 !! type(paw_dmft_type), intent(in)  :: paw_dmft
 !no_abirules
-  complex(dpc), intent(inout) :: occ_nd_cpx(nband,nband)
+  complex(dp), intent(inout) :: occ_nd_cpx(nband,nband)
   real(dp), intent(inout) :: occ_diag(nband)
 !Local variables-------------------------------
   integer :: info,lwork
   character(len=500) :: message
   real(dp) :: rwork(3*nband-1)
-  complex(dpc), allocatable :: work(:)
+  complex(dp), allocatable :: work(:)
 ! *************************************************************************
 
   DBG_ENTER("COLL")
@@ -167,8 +167,8 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
   character(len=500) :: message
 !arrays
   real(dp), allocatable :: occ_diag_red(:)
-  complex(dpc), allocatable :: mat_tmp(:,:),mat_tmp2(:,:),occ_nd_cpx(:,:)
-  !complex(kind=dpc) :: cwavef_rot_g(nbandc, nspinor)
+  complex(dp), allocatable :: mat_tmp(:,:),mat_tmp2(:,:),occ_nd_cpx(:,:)
+  !complex(kind=dp) :: cwavef_rot_g(nbandc, nspinor)
 ! *************************************************************************
 
   DBG_ENTER("COLL")
@@ -220,7 +220,7 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
   !  do n=1,nbandc
   !    do np=1,nbandc
   !      cwavef_rot_g(n,:) = cwavef_rot_g(n,:) + occ_nd_cpx(np, n) * &
-!&                           cmplx(cwavef(1,ig,np+first_bandc-1,:), cwavef(2,ig,np+first_bandc-1,:), kind=dpc)
+!&                           cmplx(cwavef(1,ig,np+first_bandc-1,:), cwavef(2,ig,np+first_bandc-1,:), kind=dp)
  !     end do
  !   end do
  !   cwavef(1,ig,first_bandc:first_bandc+nbandc-1,:) = dreal(cwavef_rot_g)

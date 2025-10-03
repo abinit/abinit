@@ -695,7 +695,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
 
 !Local variables ---------------------------------------
 !scalars
- complex(dpc), parameter :: cminusone  = (-1._dp,0._dp)
+ complex(dp), parameter :: cminusone  = (-1._dp,0._dp)
  integer :: iatm,iatom,iatom_tot,ic,ierr,ils,ilslm,isp1,isp2,isploop,itypat,jc,klm,klmn,idat1,idat2,ia,nfgd_max
  integer :: lmax,lmin,lm_size,mm,my_comm_atom,my_comm_fft,optgr0,optgr1,paral_kgb_fft
  integer :: cplex,ilmn,jlmn,lmn_size,lmn2_size,gpu_option_,nprojs,shift,nlmn,nfgd
@@ -2193,7 +2193,7 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
  integer :: lm0,lm_size,lmax,lmin,lmn2_size,mm,nfgd,nsploop,optgr0,gpu_option_
  logical :: has_qphase,qne0
  real(dp) :: vi,vr
- complex(dpc) :: scal
+ complex(dp) :: scal
  character(len=500) :: msg
 !arrays
  real(dp) :: rdum1(1),rdum2(2), sum_r, sum_i

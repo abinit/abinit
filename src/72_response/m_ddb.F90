@@ -2140,7 +2140,7 @@ subroutine chkin9(atifcflg,atifc,natifc,natom)
  integer :: iatifc
  character(len=500) :: msg
 !arrays
- integer,allocatable :: work(:)
+ !integer,allocatable :: work(:)
 ! *********************************************************************
 
  if(natifc>natom)then

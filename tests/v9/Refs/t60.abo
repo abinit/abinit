@@ -784,6 +784,7 @@ meta: {optdriver: 7, eph_task: 4, }
    2.47252491E-01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
+ Will compute Sigma(omega) using 135 points and step: 1.492537E-02 (eV)
 
  === Gaps, band edges and relative position wrt Fermi level ===
  Direct band gap semiconductor
@@ -1143,6 +1144,7 @@ meta: {optdriver: 7, eph_task: 4, }
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
 
+ Will compute Sigma(omega) using 135 points and step: 1.492537E-02 (eV)
 
  === Gaps, band edges and relative position wrt Fermi level ===
  Direct band gap semiconductor
@@ -1400,6 +1402,7 @@ meta: {optdriver: 7, eph_task: -4, }
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
 
+ Will compute Sigma(omega) using 135 points and step: 1.492537E-02 (eV)
 
  === Gaps, band edges and relative position wrt Fermi level ===
  Direct band gap semiconductor
@@ -1749,6 +1752,7 @@ meta: {optdriver: 7, eph_task: -4, }
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
 
+ Will compute Sigma(omega) using 135 points and step: 1.492537E-02 (eV)
 
  === Gaps, band edges and relative position wrt Fermi level ===
  Direct band gap semiconductor
@@ -2044,6 +2048,7 @@ meta: {optdriver: 7, eph_task: -4, }
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
 
+ Will compute Sigma(omega) using 135 points and step: 1.492537E-02 (eV)
 
  === Gaps, band edges and relative position wrt Fermi level ===
  Direct band gap semiconductor
@@ -2200,7 +2205,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
             1.00   -0.000000E+00   -0.000000E+00   -0.000000E+00
  Temperature (K)              xx              yy              zz
           300.00    0.336588E+01    0.336588E+01    0.336588E+01
- 
+
 
  Cartesian component of MRTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
@@ -2339,6 +2344,7 @@ meta: {optdriver: 7, eph_task: 4, }
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
 
+ Will compute Sigma(omega) using 135 points and step: 1.492537E-02 (eV)
 
  === Gaps, band edges and relative position wrt Fermi level ===
  Direct band gap semiconductor
@@ -2805,6 +2811,7 @@ meta: {optdriver: 7, eph_task: 4, }
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
 
+ Will compute Sigma(omega) using 135 points and step: 1.492537E-02 (eV)
 
  === Gaps, band edges and relative position wrt Fermi level ===
  Direct band gap semiconductor

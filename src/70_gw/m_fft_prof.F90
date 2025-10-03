@@ -134,7 +134,7 @@ MODULE m_FFT_prof
    real(dp) :: wall_time
    real(dp) :: gflops
    character(len=TNAME_LEN) :: test_name
-   complex(dpc),allocatable :: results(:)
+   complex(dp),allocatable :: results(:)
 
  contains
    procedure :: init => fftprof_init
@@ -421,8 +421,7 @@ subroutine fftprof_init(Ftprof, test_name, nthreads, ncalls, ndat, gpu_option, c
  real(dp),intent(in) :: cpu_time,wall_time,gflops
  character(len=*),intent(in) :: test_name
 !arrays
- complex(dpc),optional,intent(in) :: results(:)
-
+ complex(dp),optional,intent(in) :: results(:)
 ! *************************************************************************
 
  Ftprof%ncalls         = ncalls
@@ -632,8 +631,7 @@ subroutine time_fourdp(Ftest, isign, cplex, header, Ftprof)
  integer,parameter :: g0(3)=(/1,2,-1/)
  integer :: gg(3)
  real(dp),allocatable :: fofg(:,:),fofr(:)
- complex(dpc),allocatable :: results(:),ctmp(:)
-
+ complex(dp),allocatable :: results(:),ctmp(:)
 ! *********************************************************************
 
  test_name = Ftest%get_name()
@@ -752,7 +750,7 @@ subroutine time_fftbox(Ftest, isign, inplace, header, Ftprof)
 !arrays
  integer,parameter :: g0(3) = [1,-2,1]
  integer :: gg(3)
- complex(dpc),allocatable :: ffc(:),ggc(:),results(:)
+ complex(dp),allocatable :: ffc(:),ggc(:),results(:)
 ! *********************************************************************
 
  test_name = Ftest%get_name()
@@ -876,8 +874,7 @@ subroutine time_fourwf(Ftest, cplex, option_fourwf, header, Ftprof)
  integer :: gg(3)
  integer,allocatable :: gbound_in(:,:),gbound_out(:,:)
  real(dp),allocatable :: denpot(:,:,:),fofg_in(:,:), fofr_4(:,:,:,:),fofg_out(:,:)
- complex(dpc),allocatable :: results(:)
-
+ complex(dp),allocatable :: results(:)
 ! *********************************************************************
 
  test_name = Ftest%get_name()
@@ -1166,7 +1163,7 @@ subroutine time_rhotwg(Ftest, map2sphere, use_padfft, osc_npw, osc_gvec, header,
  integer,parameter :: nspinor1=1,dim_rtwg1=1,istwfk1=1
  integer :: icall,ifft,itim1,itim2,nfft,dat,sprc,ptr,ndat, n1,n2,n3,n4,n5,n6
  real(dp) :: cpu_time,wall_time,gflops
- complex(dpc) :: ktabp1 = cone, ktabp2 = cone
+ complex(dp) :: ktabp1 = cone, ktabp2 = cone
  character(len=TNAME_LEN) :: test_name
  logical :: not_implemented
  type(MPI_type) :: MPI_enreg_seq
@@ -1176,9 +1173,8 @@ subroutine time_rhotwg(Ftest, map2sphere, use_padfft, osc_npw, osc_gvec, header,
  integer,allocatable :: gbound(:,:), ktabr1(:), ktabr2(:), igfftg0(:)
  real(dp),parameter :: spinrot1(4)=(/one,zero,zero,one/),spinrot2(4)=(/one,zero,zero,one/)
  logical,allocatable :: mask(:)
- complex(dpc),allocatable :: results(:)
- complex(gwpc),allocatable :: rhotwg(:), wfn1(:), wfn2(:)
-
+ complex(dp),allocatable :: results(:)
+ complex(gwp),allocatable :: rhotwg(:), wfn1(:), wfn2(:)
 ! *********************************************************************
 
  test_name = Ftest%get_name()
@@ -1304,7 +1300,7 @@ subroutine time_fftu(Ftest, isign, header, Ftprof)
  integer,parameter :: g0(3) = [1,-2,1]
  integer :: gg(3)
  integer,allocatable :: kg_k(:,:),gbound(:,:)
- complex(dpc),allocatable :: ug(:),results(:),ur(:)
+ complex(dp),allocatable :: ug(:),results(:),ur(:)
 ! *********************************************************************
 
  test_name = Ftest%get_name()

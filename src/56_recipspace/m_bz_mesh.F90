@@ -162,7 +162,7 @@ module m_bz_mesh
   ! (nibz)
   ! Weights for each point in the IBZ.
 
-  complex(dpc),allocatable :: tabp(:)
+  complex(dp),allocatable :: tabp(:)
   ! (nkbz)
   ! For each point in the BZ, this table gives the phase factors associated
   ! to non-symmorphic operations, i.e., e^{-i2\pi k_IBZ.R{^-1}t}=e^{-i2\pi k_BZ cdot t}
@@ -362,6 +362,7 @@ module m_bz_mesh
    procedure :: init => littlegroup_init
    procedure :: print => littlegroup_print
    procedure :: free => littlegroup_free_0D
+   !procedure :: find => littlegroup_find
 
  end type littlegroup_t
 
@@ -839,7 +840,7 @@ subroutine get_bz_item(Kmesh, ik_bz, kbz, ik_ibz, isym, itim, ph_mkbzt, umklp, i
  class(kmesh_t),intent(in) :: Kmesh
  integer,intent(in) :: ik_bz
  integer,intent(out) :: ik_ibz,isym,itim
- complex(dpc),optional,intent(out) :: ph_mkbzt
+ complex(dp),optional,intent(out) :: ph_mkbzt
  logical,optional,intent(out) :: isirred
 !arrays
  integer,optional,intent(out) :: umklp(3)

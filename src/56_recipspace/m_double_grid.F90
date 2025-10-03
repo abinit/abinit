@@ -166,12 +166,12 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine double_grid_init(Kmesh_coarse,Kmesh_dense,kptrlatt_coarse,kmult,grid)
+subroutine double_grid_init(Kmesh_coarse, Kmesh_dense, kptrlatt_coarse, kmult, grid)
 
 !Argument ------------------------------------
 !scalars
- type(kmesh_t),intent(in) :: Kmesh_coarse,Kmesh_dense
  type(double_grid_t),intent(out) :: grid
+ type(kmesh_t),intent(in) :: Kmesh_coarse,Kmesh_dense
 !arrays
  integer,intent(in) :: kptrlatt_coarse(3,3),kmult(3)
 
@@ -181,7 +181,6 @@ subroutine double_grid_init(Kmesh_coarse,Kmesh_dense,kptrlatt_coarse,kmult,grid)
 !arrays
  integer :: ipiv(3)
  real(dp) :: rlatt_coarse(3,3),klatt_coarse(3,3),curmat(3,3)
-
 !*********************************************
 
  ABI_CHECK(Kmesh_coarse%nshift == 1, "Coarse mesh works only with nshiftk=1")
@@ -298,7 +297,6 @@ subroutine create_indices_coarse(bz, nbz, klatt, nshiftk, shiftk, maxcomp, nbz_c
 !arrays
  integer :: curg0(3)
  real(dp) :: curk1(3),ktoget(3)
-
 !*********************************************
 
  ABI_CHECK(nshiftk==1,"nshiftk != 1 not supported")
@@ -370,7 +368,6 @@ subroutine get_kpt_from_indices_coarse(indices,maxcomp,inttoik,allg0,nkpt,ikpt,g
 !Local variables -----------------------------
 !scalars
  integer :: curicoord
-
 !*********************************************
 
  curicoord = (indices(1)*(maxcomp(2)+1)+indices(2))*(maxcomp(3)+1)+indices(3)+1
@@ -428,7 +425,6 @@ subroutine create_indices_dense(klatt_coarse, maxcomp, &
 !arrays
  integer :: curg0(3)
  real(dp) :: curk1(3),ktoget(3)
-
 !*********************************************
 
  call wrtout(std_out, "Create Indices Dense", "COLL")
@@ -516,12 +512,11 @@ subroutine get_kpt_from_indices_dense(indices,maxcomp,kmult,inttoik,allg0,nkpt,i
 !Local variables -----------------------------
 !scalars
  integer :: curicoord
-
 !*********************************************
 
  curicoord = ((indices(1)*kmult(1)+indices(4))*(maxcomp(2)*kmult(2))+&
-&             (indices(2)*kmult(2)+indices(5)))*(maxcomp(3)*kmult(3))+&
-&             (indices(3)*kmult(3)+indices(6))+1
+              (indices(2)*kmult(2)+indices(5)))*(maxcomp(3)*kmult(3))+&
+              (indices(3)*kmult(3)+indices(6))+1
 
  ikpt = inttoik(curicoord)
  g0 = allg0(:,curicoord)
@@ -574,7 +569,6 @@ subroutine compute_neighbours(nbz_dense, iktoint_dense, indices_dense, maxcomp_c
  integer :: curindex(nbz_coarse)
  integer :: curindices_dense(6), curindices_coarse(3)
  integer :: g0(3)
-
 !*********************************************
 
  DBG_ENTER("COLL")
@@ -629,7 +623,7 @@ subroutine compute_corresp(double_grid, div2kdense, kdense2div)
 
 !Argument ------------------------------------
 !scalars
- type(double_grid_t),intent(in) :: double_grid
+ class(double_grid_t),intent(in) :: double_grid
 !arrays
  integer,intent(out) :: div2kdense(double_grid%nbz_coarse,double_grid%ndiv)
  integer,intent(out) :: kdense2div(double_grid%nbz_dense)
@@ -640,13 +634,12 @@ subroutine compute_corresp(double_grid, div2kdense, kdense2div)
 !arrays
  integer :: curindices_dense(6)
  integer,allocatable :: curindex(:)
-
 !*********************************************
+
  ABI_MALLOC(curindex,(double_grid%nbz_coarse))
  curindex = 1
 
  do ik_dense = 1,double_grid%nbz_dense
-
    ! From ik_ibz in the dense mesh -> indices_dense
    iorder = double_grid%iktoint_dense(ik_dense)
    !g01 = double_grid%g0_dense(:,iorder)
@@ -659,7 +652,6 @@ subroutine compute_corresp(double_grid, div2kdense, kdense2div)
    kdense2div(ik_dense) = curindex(ik_coarse)
 
    curindex(ik_coarse) = curindex(ik_coarse) + 1
-
  end do
 
  ABI_FREE(curindex)
@@ -676,19 +668,12 @@ end subroutine compute_corresp
 !! FUNCTION
 !! Deallocate all dynamics entities present in a double_grid structure.
 !!
-!! INPUTS
-!! grid<double_grid>=The datatype to be freed.
-!!
-!! SIDE EFFECTS
-!! All allocated memory is released.
-!!
 !! SOURCE
 
 subroutine double_grid_free(grid)
 
 !Arguments ------------------------------------
- type(double_grid_t),intent(inout) :: grid
-
+ class(double_grid_t),intent(inout) :: grid
 ! *********************************************************************
 
 !integer
@@ -761,7 +746,6 @@ subroutine kptfine_av(center,qptrlatt,kpt_fine,nkpt_fine,kpt_fine_sub,nkpt_sub,w
  integer,allocatable  :: kpt_fine_sub_tmp(:)
  real(dp),allocatable :: wgt_sub_tmp(:)
  logical :: found(3)
-
 ! *************************************************************************
 
  ABI_MALLOC(kpt_fine_sub_tmp,(nkpt_fine))
@@ -831,24 +815,21 @@ subroutine kptfine_av(center,qptrlatt,kpt_fine,nkpt_fine,kpt_fine_sub,nkpt_sub,w
          kpt_tmp2(3) = kpt_tmp(3)+cc
          kpt_fine_ref = MATMUL(qptrlatt,kpt_tmp2)
          if((ABS(kpt_fine_ref(1)-center_ref(1)-0.5)< tol8) .or.&
-&         (ABS(kpt_fine_ref(1)-center_ref(1)+0.5) < tol8)) then
+            (ABS(kpt_fine_ref(1)-center_ref(1)+0.5) < tol8)) then
            if(found(1)) then
-             wgt_sub(ikpt) = wgt_sub(ikpt)*0.5
-             found(1) = .False.
+             wgt_sub(ikpt) = wgt_sub(ikpt)*0.5; found(1) = .False.
            end if
          end if
          if((ABS(kpt_fine_ref(2)-center_ref(2)-0.5) < tol8) .or.&
-&         (ABS(kpt_fine_ref(2)-center_ref(2)+0.5) < tol8)) then
+            (ABS(kpt_fine_ref(2)-center_ref(2)+0.5) < tol8)) then
            if(found(2)) then
-             wgt_sub(ikpt) = wgt_sub(ikpt)*0.5
-             found(2) = .False.
+             wgt_sub(ikpt) = wgt_sub(ikpt)*0.5; found(2) = .False.
            end if
          end if
          if((ABS(kpt_fine_ref(3)-center_ref(3)-0.5)< tol8) .or.&
-&         (ABS(kpt_fine_ref(3)-center_ref(3)+0.5) < tol8)) then
+            (ABS(kpt_fine_ref(3)-center_ref(3)+0.5) < tol8)) then
            if(found(3)) then
-             wgt_sub(ikpt) = wgt_sub(ikpt)*0.5
-             found(3) = .False.
+             wgt_sub(ikpt) = wgt_sub(ikpt)*0.5; found(3) = .False.
            end if
          end if
        end do
@@ -885,7 +866,7 @@ end subroutine kptfine_av
 !!
 !! SOURCE
 
-subroutine k_neighbors (kpt, kptrlatt,krank, rel_kpt, kpt_phon_indices)
+subroutine k_neighbors(kpt, kptrlatt,krank, rel_kpt, kpt_phon_indices)
 
 ! inputs
  real(dp), intent(in) :: kpt(3)
@@ -895,12 +876,10 @@ subroutine k_neighbors (kpt, kptrlatt,krank, rel_kpt, kpt_phon_indices)
 ! outputs
  real(dp), intent(out) :: rel_kpt(3)
  integer, intent(out) :: kpt_phon_indices(8)
-
 ! local vars
  integer :: symrankkpt
  integer :: ir1,ir2,ir3, pr1,pr2,pr3
  real(dp) :: redkpt(3), cornerkpt(3), res
-
 ! *************************************************************************
 
 !wrap fine kpt to [0,1]
@@ -909,7 +888,7 @@ subroutine k_neighbors (kpt, kptrlatt,krank, rel_kpt, kpt_phon_indices)
  call wrap2_zero_one(kpt(3),redkpt(3),res)
 !find 8 indices of points neighboring ikpt_phon, for interpolation
  call interpol3d_indices (redkpt,kptrlatt(1,1),kptrlatt(2,2),kptrlatt(3,3), &
-& ir1,ir2,ir3, pr1,pr2,pr3)
+                          ir1,ir2,ir3, pr1,pr2,pr3)
 
 !transpose ir pr to ikpt_phon indices
 !order of kpt_phons:
@@ -956,4 +935,3 @@ end subroutine k_neighbors
 
 END MODULE m_double_grid
 !!***
-

@@ -240,7 +240,7 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
 ! real(dp) :: err_ovlp,mag_ovlp,max_err_ovlp, ovlp_r, ovlp_i, paw_r, paw_i
 ! real(dp) :: tot_r, tot_i
 ! real(dp),allocatable :: bra(:,:),ket(:,:)
-! complex(dpc) :: cpb,cpk,cterm
+! complex(dp) :: cpb,cpk,cterm
 ! ***********************************************************************
 
 !DEBUG

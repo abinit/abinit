@@ -3,7 +3,7 @@
 !scalars
  integer,parameter :: rank=3,nt_all=-1
  integer :: my_flags,dist,ii,stride
- integer(KIND_FFTW_PLAN) :: my_plan 
+ integer(KIND_FFTW_PLAN) :: my_plan
 !arrays
  integer :: embed(rank),n(rank)
 
@@ -14,7 +14,7 @@
  stride = 1
  dist   = ldx*ldy*ldz
  embed  = (/ldx,ldy,ldz/)
- n      = (/nx ,ny ,nz /) 
+ n      = (/nx ,ny ,nz /)
 
  my_plan = fftw3_plan_many_dft(rank, n, ndat, ff, embed, stride, dist, ff, embed, stride, dist, isign, my_flags, nt_all)
 
@@ -24,10 +24,10 @@
  call fftw3_destroy_plan(my_plan)
 
  if (isign==FFTW_FORWARD) then ! -1, FFTW returns not normalized FTs
-   call xscal(ldx*ldy*ldz*ndat, one/(nx*ny*nz), ff, 1) 
+   call xscal(ldx*ldy*ldz*ndat, one/(nx*ny*nz), ff, 1)
  end if
 
-#else 
+#else
  ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,isign/))
  ABI_UNUSED(ff)

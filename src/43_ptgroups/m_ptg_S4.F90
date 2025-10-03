@@ -50,7 +50,7 @@ contains
  character(len=5),allocatable,intent(out) :: class_names(:)
  type(irrep_t),allocatable,intent(out) :: Irr(:)
  !Local variables-------------------------------
- complex(dpc) :: j=(0.0_dp,1.0_dp)
+ complex(dp) :: j=(0.0_dp,1.0_dp)
  ! ********************************************************************************
 ! List of symmetries packed in classes
  nsym = 4

@@ -42,7 +42,7 @@
 subroutine xmpi_send_char(xval,dest,tag,comm,ier)
 
 !Arguments-------------------------
- character(len=*),intent(inout),target :: xval  
+ character(len=*),intent(inout),target :: xval
  integer ,intent(in) :: dest,tag,comm
  integer ,intent(out) :: ier
 
@@ -180,12 +180,8 @@ subroutine xmpi_send_int1d(xval,dest,tag,comm,ier)
 !! SIDE EFFECTS
 !!  xval= buffer array
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_send
-!!
 !! SOURCE
+
 subroutine xmpi_send_int2d(xval,dest,tag,comm,ier)
 
 !Arguments-------------------------
@@ -245,11 +241,6 @@ end subroutine xmpi_send_int2d
 !!
 !! SIDE EFFECTS
 !!  xval= buffer array
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_send
 !!
 !! SOURCE
 

@@ -704,15 +704,14 @@ end subroutine xmpi_gatherv_dp6d
 subroutine xmpi_gatherv_dc(xval,nelem,recvbuf,recvcounts,displs,root,comm,ier)
 
 !Arguments-------------------------
- complex(dpc), DEV_CONTARRD intent(in) :: xval(:)
- complex(dpc), DEV_CONTARRD intent(inout) :: recvbuf(:)
+ complex(dp), DEV_CONTARRD intent(in) :: xval(:)
+ complex(dp), DEV_CONTARRD intent(inout) :: recvbuf(:)
  integer, DEV_CONTARRD intent(in) :: recvcounts(:),displs(:)
  integer,intent(in) :: nelem,root,comm
  integer,intent(out) :: ier
 
 !Local variables--------------
  integer :: cc,dd
-
 ! *************************************************************************
 
  ier=0

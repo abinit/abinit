@@ -1,0 +1,77 @@
+# Conventional bcc Fe with Generalized Bloch Theorem
+# Finite diference calculation of the force
+
+ndtset 3
+
+# GBT
+use_gbt 1
+qgbt 0.5 0 0
+
+# SPIN
+nspinor  2
+nspden   4
+so_psp   0
+spinat
+        5.00000000  0.00000000  0.00000000
+        5.00000000  0.00000000  0.00000000
+
+occopt   7
+tsmear   0.01
+
+# Definition of the planewave basis set
+ecut  8        # Maximal kinetic energy cut-off, in Hartree
+ecutsm 0.5
+
+# Definition of the k-point grids and symmetries
+nsym 1
+kptopt 4
+ngkpt 2 2 2
+nshiftk 1
+shiftk  0 0 0
+
+# Definition of the SCF procedure
+nstep 20         # Maximal number of SCF cycles
+toldfe 1.0d-6
+nband  48
+nline  11
+
+# Common input variables
+ natom 2
+ ntypat 1
+ typat 1 1
+ znucl 26
+
+ xcart1    0.01              0.0000000000E+00  0.0000000000E+00
+           2.6003412121E+00  2.6003412121E+00  2.6003412121E+00
+ xcart2    0.011             0.0000000000E+00  0.0000000000E+00
+           2.6003412121E+00  2.6003412121E+00  2.6003412121E+00
+ xcart3    0.009             0.0000000000E+00  0.0000000000E+00
+           2.6003412121E+00  2.6003412121E+00  2.6003412121E+00
+
+ acell    1.0    1.0    1.0
+ rprim
+    5.2006824241    0.0000000000    0.0000000000
+    0.0000000000    5.2006824241    0.0000000000
+    0.0000000000    0.0000000000    5.2006824241
+
+pp_dirpath "$ABI_PSPDIR/Psdj_nc_fr_04_pbe_std_psp8"  # This is the path to the directory were
+                                                     # pseudopotentials for tests are stored
+pseudos "Fe.psp8" 
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t29.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = L. Shu
+#%% keywords = GBT
+#%% description =
+#%%   Crystalline bcc Fe: Finite difference calculation for force under GBT
+#%%<END TEST_INFO>

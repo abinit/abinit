@@ -21,6 +21,7 @@
 
 MODULE m_bse_io
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  USE_MPI
  use m_xmpi
@@ -28,7 +29,6 @@ MODULE m_bse_io
  use m_abicore
  use netcdf
  use m_nctk
- use, intrinsic :: iso_c_binding
  use m_hdr
 
  use m_time,           only : cwtime
@@ -292,7 +292,7 @@ subroutine exc_read_eigen(eig_fname,hsize,nvec,vec_idx,vec_list,ene_list,Bsp)
 ! arrays
  integer,intent(in) :: vec_idx(nvec)
  real(dp),optional,intent(out) :: ene_list(nvec)
- complex(dpc),intent(out) :: vec_list(hsize,nvec)
+ complex(dp),intent(out) :: vec_list(hsize,nvec)
 
 !Local variables ------------------------------
 !scalars
@@ -300,7 +300,7 @@ subroutine exc_read_eigen(eig_fname,hsize,nvec,vec_idx,vec_list,ene_list,Bsp)
  character(len=500) :: msg,errmsg
 !arrays
  !real(dp),allocatable :: exc_ene(:)
- complex(dpc),allocatable :: exc_ene_cplx(:)
+ complex(dp),allocatable :: exc_ene_cplx(:)
 ! *************************************************************************
 
  ABI_UNUSED(BSp%nline)
@@ -394,7 +394,7 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
  type(excparam),intent(in) :: Bsp
 !arrays
  integer,intent(in) :: nreh(nsppol)
- complex(dpc),intent(out) :: hmat(hsize,my_t1:my_t2)
+ complex(dp),intent(out) :: hmat(hsize,my_t1:my_t2)
 
 !Local variables ------------------------------
 !scalars
@@ -406,16 +406,14 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
  character(len=500) :: msg,errmsg
  !type(Hdr_type) :: bse_Hdr
 !arrays
- complex(dpc),allocatable :: buffer_dpc(:)
+ complex(dp),allocatable :: buffer_dpc(:)
  logical :: have_row,have_col
 #ifdef HAVE_MPI_IO
  integer :: mpierr,mpifh,ham_type,my_nel,old_type,etype,offset_err,amode
  integer :: irec,nrec !,ncount
  integer(XMPI_OFFSET_KIND) :: ehdr_offset,my_offset,my_offpad,fsize
  integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecord(:)
- integer :: glob_sizes(2),my_cols(2)
- integer :: block_sizes(2,3)
- integer :: status(MPI_STATUS_SIZE)
+ integer :: glob_sizes(2),my_cols(2), block_sizes(2,3), status(MPI_STATUS_SIZE)
 #endif
 !************************************************************************
 
@@ -433,10 +431,7 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
  end if
 
  my_nt = my_t2-my_t1+1
-
-!BEGINDEBUG
-! hmat = HUGE(zero)
-!ENDDEBUG
+ !hmat = HUGE(zero)
 
  if (.not.use_mpio) then
 
@@ -720,16 +715,16 @@ subroutine exc_fullh_from_blocks(funt,block_type,nsppol,row_sign,diago_is_real,n
  character(len=*),intent(in) :: block_type
 !arrays
  integer,intent(in) :: nreh(nsppol)
- complex(dpc),intent(inout) :: exc_ham(exc_size,exc_size)
+ complex(dp),intent(inout) :: exc_ham(exc_size,exc_size)
 
 !Local variables-------------------------------
 !scalars
  integer :: it,itp,szbuf,neh,pad_c1,pad_r1,spin_dim,spad_r,spad_c
  integer :: block,spad,row1,col1,row2,col2,spin_stride,ierr
- complex(dpc) :: cttp
+ complex(dp) :: cttp
  character(len=500) :: errmsg
 !arrays
- complex(dpc),allocatable :: cbuff_dpc(:)
+ complex(dp),allocatable :: cbuff_dpc(:)
 ! *********************************************************************
 
  szbuf=exc_size ! FIXME oversized!
@@ -966,7 +961,6 @@ pure function rrs_of_glob(row_glob,col_glob,size_glob)
  integer,intent(in) :: size_glob(2)
 
 !Local variables ------------------------------
-!scalars
  integer :: nreh1,nreh2
 ! *************************************************************************
 
@@ -1108,15 +1102,15 @@ subroutine exc_read_rblock_fio(funt,diago_is_real,nsppol,nreh,exc_size,exc_mat,i
  integer,intent(out) :: ierr
 !arrays
  integer,intent(in) :: nreh(nsppol)
- complex(dpc),intent(out) :: exc_mat(exc_size,exc_size)
+ complex(dp),intent(out) :: exc_mat(exc_size,exc_size)
 
 !Local variables ------------------------------
 !scalars
  integer :: itp,it,block,col,row,spad
- complex(dpc) :: ctemp
+ complex(dp) :: ctemp
  character(len=500) :: errmsg
 !arrays
- complex(dpc),allocatable :: cbuff_dpc(:)
+ complex(dp),allocatable :: cbuff_dpc(:)
 ! *************************************************************************
 
  ierr=0
@@ -1232,7 +1226,7 @@ subroutine exc_amplitude(Bsp,eig_fname,nvec,vec_idx,out_fname)
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: wmesh(:),amplitude(:),ene_list(:)
- complex(dpc),allocatable :: vec_list(:,:)
+ complex(dp),allocatable :: vec_list(:,:)
 ! *************************************************************************
 
  ! Setup of the frequency mesh for F(w).
@@ -1354,7 +1348,7 @@ subroutine exc_write_optme(filename,minb,maxb,nkbz,nsppol,nq,opt_cvk,ierr)
  !Arguments ------------------------------------
  integer,intent(in) :: minb,maxb,nkbz,nsppol,nq
  character(len=fnlen),intent(in) :: filename
- complex(dpc),intent(in) :: opt_cvk(minb:maxb,minb:maxb,nkbz,nsppol,nq)
+ complex(dp),intent(in) :: opt_cvk(minb:maxb,minb:maxb,nkbz,nsppol,nq)
  integer,intent(out) :: ierr
 
 !Local variables ------------------------------
@@ -1455,8 +1449,8 @@ subroutine exc_ham_ncwrite(ncid,Kmesh,BSp,hsize,nreh,vcks2t,hreso,diag)
  type(excparam),intent(in) :: BSp
  integer,intent(in) :: nreh(BSp%nsppol)
  integer,target,intent(in) :: vcks2t(BSp%maxnbndv,BSp%maxnbndc,Kmesh%nbz,BSp%nsppol)
- complex(dpc),target,intent(in) :: hreso(hsize,hsize)
- complex(dpc),target,intent(in) :: diag(hsize)
+ complex(dp),target,intent(in) :: hreso(hsize,hsize)
+ complex(dp),target,intent(in) :: diag(hsize)
 
 !Local variables-------------------------------
  integer :: ncerr

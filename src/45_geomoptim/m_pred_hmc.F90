@@ -134,12 +134,8 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,mttk_vars,zDEBUG,iex
  strain_sweep=.FALSE.
 
  if(iexit/=0)then  !icycle=ncycle and itime=ntime
-   if (allocated(xred_hmc_prev))  then
-     ABI_FREE(xred_hmc_prev)
-   end if
-   if (allocated(fcart_hmc_prev))  then
-     ABI_FREE(fcart_hmc_prev)
-   end if
+   ABI_SFREE(xred_hmc_prev)
+   ABI_SFREE(fcart_hmc_prev)
    !call pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,1,icycle,ncycle) ! this is needed to deallocate vel_prev array allocated in pred_velverlet
    call pred_isothermal(ab_mover,hist,icycle,mttk_vars,ncycle,zDEBUG,iexit)
    return
@@ -156,12 +152,8 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,mttk_vars,zDEBUG,iex
  kbtemp=(ab_mover%mdtemp(1)+((ab_mover%mdtemp(2)-ab_mover%mdtemp(1))/dble(ntime-1))*(itime-1))*kb_HaK ! correct temperature taking into account the possible heating/cooling
 
  if(itime==1.and.icycle==1) then
-   if (allocated(xred_hmc_prev))  then
-     ABI_FREE(xred_hmc_prev)
-   end if
-   if (allocated(fcart_hmc_prev))  then
-     ABI_FREE(fcart_hmc_prev)
-   end if
+   ABI_SFREE(xred_hmc_prev)
+   ABI_SFREE(fcart_hmc_prev)
 
    ABI_MALLOC(xred_hmc_prev,(3,ab_mover%natom))
    ABI_MALLOC(fcart_hmc_prev,(3,ab_mover%natom))

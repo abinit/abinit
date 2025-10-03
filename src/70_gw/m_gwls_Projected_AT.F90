@@ -95,8 +95,8 @@ real(dp),     intent(in) :: list_external_omega(nfreq)
 real(dp),     intent(in) :: model_parameter
 integer,      intent(in) :: lmax
 integer,      intent(in) :: kmax_analytic
-complex(dpc), intent(in) :: modified_Lbasis(npw_k,lmax)
-complex(dpc), intent(out):: list_AT_Lanczos(nfreq,lmax)
+complex(dp), intent(in) :: modified_Lbasis(npw_k,lmax)
+complex(dp), intent(out):: list_AT_Lanczos(nfreq,lmax)
 
 
 real(dp),     allocatable :: psik_wrk(:,:)
@@ -105,11 +105,10 @@ real(dp),     allocatable :: psikg_wrk(:,:)
 
 real(dp),     allocatable :: psikg(:,:)
 
-complex(dpc), allocatable :: seed_vector(:)
-complex(dpc), allocatable :: list_left_vectors(:,:)
-complex(dpc), allocatable :: matrix_elements_resolvent(:,:)
-
-complex(dpc), allocatable :: list_z_P(:), list_z_Q(:)
+complex(dp), allocatable :: seed_vector(:)
+complex(dp), allocatable :: list_left_vectors(:,:)
+complex(dp), allocatable :: matrix_elements_resolvent(:,:)
+complex(dp), allocatable :: list_z_P(:), list_z_Q(:)
 integer,      allocatable :: frequency_indices_array(:,:)
 
 

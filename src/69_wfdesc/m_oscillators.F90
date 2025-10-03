@@ -95,14 +95,14 @@ subroutine rho_tw_g(nspinor, npwvec, nr, ndat, ngfft, map2sphere, use_padfft, ig
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: i1,i2,npwvec,nr,nspinor,dim_rtwg,map2sphere,use_padfft,ndat
- complex(dpc),intent(in) :: ktabp1, ktabp2
+ complex(dp),intent(in) :: ktabp1, ktabp2
 !arrays
  integer,intent(in) :: gbound(:,:) !gbound(2*mgfft+8,2)
  integer,intent(in) :: igfftg0(npwvec*map2sphere),ngfft(18)
  integer,intent(in) :: ktabr1(nr),ktabr2(nr)
  real(dp),intent(in) :: spinrot1(4),spinrot2(4)
- complex(gwpc),intent(in) :: wfn1(nr*nspinor*ndat),wfn2(nr*nspinor*ndat)
- complex(gwpc),intent(out) :: rhotwg(npwvec*dim_rtwg*ndat)
+ complex(gwp),intent(in) :: wfn1(nr*nspinor*ndat),wfn2(nr*nspinor*ndat)
+ complex(gwp),intent(out) :: rhotwg(npwvec*dim_rtwg*ndat)
 ! real(dp),optional,intent(in) :: nhat12(2,nr,nspinor**2*ndat)
 
 !Local variables-------------------------------
@@ -112,8 +112,7 @@ subroutine rho_tw_g(nspinor, npwvec, nr, ndat, ngfft, map2sphere, use_padfft, ig
  type(fftbox_plan3_t) :: plan
 !arrays
  integer :: spinor_pad(2,4)
- complex(gwpc),allocatable :: u12prod(:),cwavef1(:),cwavef2(:),cwork(:)
-
+ complex(gwp),allocatable :: u12prod(:),cwavef1(:),cwavef2(:),cwork(:)
 ! *************************************************************************
 
  SELECT CASE (nspinor)
@@ -241,13 +240,13 @@ subroutine ts_usug_kkp_bz(npw, nr, ndat, ngfft, map2sphere, use_padfft, igfftg0,
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: time1,time2,npw,nr,map2sphere,use_padfft,ndat
- complex(dpc),intent(in) :: ktabp1,ktabp2
+ complex(dp),intent(in) :: ktabp1,ktabp2
 !arrays
  integer,intent(in) :: gbound(:,:) !gbound(2*mgfft+8,2)
  integer,intent(in) :: igfftg0(npw*map2sphere),ngfft(18)
  integer,intent(in) :: ktabr1(nr),ktabr2(nr)
- complex(gwpc),intent(in) :: u1(nr*ndat),u2(nr*ndat)
- complex(gwpc),intent(out) :: usug(npw*ndat)
+ complex(gwp),intent(in) :: u1(nr*ndat),u2(nr*ndat)
+ complex(gwp),intent(out) :: usug(npw*ndat)
 
 !Local variables-------------------------------
 !scalars
@@ -255,8 +254,7 @@ subroutine ts_usug_kkp_bz(npw, nr, ndat, ngfft, map2sphere, use_padfft, igfftg0,
  integer :: nx,ny,nz,ldx,ldy,ldz,mgfft
  type(fftbox_plan3_t) :: plan
 !arrays
- complex(gwpc),allocatable :: u12prod(:)
-
+ complex(gwp),allocatable :: u12prod(:)
 ! *************************************************************************
 
  ! Form rho-twiddle(r) = u_1^*(r,b1,kbz1) u_2(r,b2,kbz2), to account for symmetries:
@@ -331,19 +329,18 @@ subroutine usur_kkp_bz(nr, ndat, time1, ktabr1, ktabp1, u1, time2, ktabr2, ktabp
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nr,ndat,time1,time2
- complex(dpc),intent(in) :: ktabp1,ktabp2
+ complex(dp),intent(in) :: ktabp1,ktabp2
 !arrays
  integer,intent(in) :: ktabr1(nr),ktabr2(nr)
- complex(gwpc),intent(in) :: u1(nr*ndat),u2(nr*ndat)
- complex(gwpc),intent(out) :: u12prod(nr*ndat)
+ complex(gwp),intent(in) :: u1(nr*ndat),u2(nr*ndat)
+ complex(gwp),intent(out) :: u12prod(nr*ndat)
 
 !Local variables-------------------------------
 !scalars
  integer :: ir,dat,padat
- complex(gwpc) :: my_ktabp1,my_ktabp2
+ complex(gwp) :: my_ktabp1,my_ktabp2
 !arrays
- complex(gwpc),allocatable :: u1_bz(:),u2_bz(:)
-
+ complex(gwp),allocatable :: u1_bz(:),u2_bz(:)
 ! *************************************************************************
 
  ! Form rho-twiddle(r)=u_1^*(r,b1,kbz1) u_2(r,b2,kbz2), to account for symmetries:
@@ -493,13 +490,12 @@ subroutine gw_box2gsph(nr, ndat, npw, igfftg0, iarrbox, oarrsph)
  integer,intent(in) :: nr,ndat,npw
 !arrays
  integer,intent(in) :: igfftg0(npw)
- complex(gwpc),intent(in) :: iarrbox(nr*ndat)
- complex(gwpc),intent(out) :: oarrsph(npw*ndat)
+ complex(gwp),intent(in) :: iarrbox(nr*ndat)
+ complex(gwp),intent(out) :: oarrsph(npw*ndat)
 
 !Local variables-------------------------------
 !scalars
  integer :: ig,igfft,dat,pgsp,pfft
-
 ! *************************************************************************
 
  if (ndat==1) then
@@ -560,15 +556,14 @@ subroutine calc_wfwfg(ktabr_k, ktabi_k, spinrot, nr, nspinor, ngfft_gw, wfr_jb, 
 !arrays
  integer,intent(in) :: ktabr_k(nr),ngfft_gw(18)
  real(dp),intent(in) :: spinrot(4)
- complex(gwpc),intent(in) :: wfr_jb(nr*nspinor),wfr_kb(nr*nspinor)
- complex(gwpc),intent(out) :: wfg2_jk(nr*nspinor)
+ complex(gwp),intent(in) :: wfr_jb(nr*nspinor),wfr_kb(nr*nspinor)
+ complex(gwp),intent(out) :: wfg2_jk(nr*nspinor)
 
 !Local variables-------------------------------
  integer,parameter :: ndat1 = 1, fftcache0 = 0, gpu_option_0 = 0
  type(fftbox_plan3_t) :: plan
 !arrays
- complex(gwpc),allocatable :: wfr2_dpcplx(:),ujb_bz(:),ukb_bz(:)
-
+ complex(gwp),allocatable :: wfr2_dpcplx(:),ujb_bz(:),ukb_bz(:)
 ! *************************************************************************
 
  ! There is no need to take into account phases arising from non-symmorphic
@@ -648,13 +643,12 @@ function sym_rhotwgq0(itim_k, isym_k, dim_rtwg, npw, rhxtwg_in, Gsph) result(rhx
  integer,intent(in) :: npw,dim_rtwg,itim_k,isym_k
  type(gsphere_t),intent(in) :: Gsph
 !arrays
- complex(gwpc),intent(in) :: rhxtwg_in(dim_rtwg*npw)
- complex(gwpc) :: rhxtwg_sym(dim_rtwg*npw)
+ complex(gwp),intent(in) :: rhxtwg_in(dim_rtwg*npw)
+ complex(gwp) :: rhxtwg_sym(dim_rtwg*npw)
 
 !Local variables ------------------------------
 !scalars
  integer :: ig
-
 !************************************************************************
 
  ABI_CHECK(dim_rtwg == 1, "dim_rtwg/=1 not coded")
@@ -716,20 +710,19 @@ subroutine rotate_spinor(itim_kbz, ktabr_kbz, ktabp_kbz, spinrot, nr, nspinor, n
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: itim_kbz, nr, nspinor, ndat
- complex(dpc),intent(in) :: ktabp_kbz
+ complex(dp),intent(in) :: ktabp_kbz
 !arrays
  integer,intent(in) :: ktabr_kbz(nr)
  real(dp),intent(in) :: spinrot(4)
- complex(gwpc),intent(in) :: ug_ibz(nr*nspinor*ndat)
- complex(gwpc),intent(out) :: cwork(nr*nspinor*ndat), oug_bz(nr*nspinor*ndat)
+ complex(gwp),intent(in) :: ug_ibz(nr*nspinor*ndat)
+ complex(gwp),intent(out) :: cwork(nr*nspinor*ndat), oug_bz(nr*nspinor*ndat)
 
 !Local variables ------------------------------
 !scalars
  integer :: ir,ir1,spad0,ispinor
- complex(gwpc) :: u1a,u1b
+ complex(gwp) :: u1a,u1b
 !arrays
- complex(dpc) :: spinrot_cmat1(2,2)
-
+ complex(dp) :: spinrot_cmat1(2,2)
 !************************************************************************
 
  ABI_CHECK(ndat == 1, "ndat > 1 not coded")

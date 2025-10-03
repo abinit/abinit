@@ -97,11 +97,11 @@ module defs_wannier90
    character(len=*), dimension(num_atoms_loc), intent(in) :: atom_symbols_loc
    real(dp), dimension(3,num_atoms_loc), intent(in) :: atoms_cart_loc
    logical, intent(in)::gamma_only_loc
-   complex(dpc), dimension(num_bands_loc,num_bands_loc,nntot_loc,num_kpts_loc), intent(in) :: M_matrix_loc
-   complex(dpc), dimension(num_bands_loc,num_wann_loc,num_kpts_loc), intent(in) :: A_matrix_loc
+   complex(dp), dimension(num_bands_loc,num_bands_loc,nntot_loc,num_kpts_loc), intent(in) :: M_matrix_loc
+   complex(dp), dimension(num_bands_loc,num_wann_loc,num_kpts_loc), intent(in) :: A_matrix_loc
    real(dp), dimension(num_bands_loc,num_kpts_loc), intent(in) :: eigenvalues_loc
-   complex(dpc), dimension(num_wann_loc,num_wann_loc,num_kpts_loc), intent(out) :: U_matrix_loc
-   complex(dpc), dimension(num_bands_loc,num_wann_loc,num_kpts_loc), optional, intent(out) :: U_matrix_opt_loc
+   complex(dp), dimension(num_wann_loc,num_wann_loc,num_kpts_loc), intent(out) :: U_matrix_loc
+   complex(dp), dimension(num_bands_loc,num_wann_loc,num_kpts_loc), optional, intent(out) :: U_matrix_opt_loc
    logical, dimension(num_bands_loc,num_kpts_loc), optional, intent(out) :: lwindow_loc
    real(dp), dimension(3,num_wann_loc), optional, intent(out) :: wann_centres_loc
    real(dp), dimension(num_wann_loc), optional, intent(out) :: wann_spreads_loc

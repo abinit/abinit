@@ -136,7 +136,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
  character(len=500) :: message
  character(len=fnlen) :: fname
 !arrays
- complex(dpc),parameter :: c0=dcmplx(0.d0,0.d0),c1=dcmplx(1.d0,0.d0)
+ complex(dp),parameter :: c0=dcmplx(0.d0,0.d0),c1=dcmplx(1.d0,0.d0)
  real(dp) ::  gprimd(3,3)
  real(dp) :: eigval(elph_ds%nbranch)
  real(dp) :: displ_red(2,elph_ds%nbranch,elph_ds%nbranch)
@@ -1075,7 +1075,7 @@ subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr
  character(len=500) :: message
  character(len=fnlen) :: fname
 !arrays
- complex(dpc),parameter :: c0=dcmplx(0.d0,0.d0),c1=dcmplx(1.d0,0.d0)
+ complex(dp),parameter :: c0=dcmplx(0.d0,0.d0),c1=dcmplx(1.d0,0.d0)
  real(dp) :: gprimd(3,3)
  real(dp) :: eigval_in(elph_ds%nbranch)
  real(dp) :: eigval_out(elph_ds%nbranch)
@@ -1094,7 +1094,6 @@ subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr
  real(dp),allocatable :: coskr(:,:)
  real(dp),allocatable :: sinkr(:,:)
 !real(dp),allocatable :: gam_rpt(:,:,:)
-
 ! *********************************************************************
 
 !calculate a2f_tr for frequencies between 0 and omega_max

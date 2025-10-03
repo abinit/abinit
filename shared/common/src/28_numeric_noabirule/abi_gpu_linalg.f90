@@ -201,9 +201,6 @@ end subroutine copy_on_gpu
 !!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
 !!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
-!! PARENTS
-!!      lobpcgwf,m_abi_gpu_linalg
-!!
 !! SOURCE
 
 subroutine copy_gpu_to_gpu(cpu_ptr,gpu_ptr,size_in_bytes)
@@ -267,9 +264,6 @@ end subroutine dealloc_on_gpu
 !!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
-!! PARENTS
-!!      lobpcgwf
-!!
 !! SOURCE
 
 subroutine gpu_memset(gpu_ptr, val, array_size)
@@ -303,9 +297,6 @@ end subroutine gpu_memset
 !!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
-!! PARENTS
-!!      lobpcgwf
-!!
 !! SOURCE
 
 subroutine gpu_allocated_impl(gpu_ptr, is_allocated)
@@ -336,8 +327,6 @@ end subroutine gpu_allocated_impl
 !! SIDE EFFECTS
 !!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/dev_spec.cu
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -437,13 +426,12 @@ subroutine gpu_xgemm(cplx,transa,transb,m,n,k,alpha,a_gpu,lda,b_gpu,ldb,beta,c_g
 
 !Arguments ------------------------------------
  integer,intent(in) :: cplx,lda,ldb,ldc,m,n,k
- complex(dpc),intent(in) :: alpha,beta
+ complex(dp),intent(in) :: alpha,beta
  character(len=1),intent(in) :: transa,transb
  type(c_ptr),intent(in) :: a_gpu,b_gpu
  type(c_ptr),intent(inout) :: c_gpu
 !Local variables ------------------------------
  type(c_ptr) :: cptr
-
 ! *********************************************************************
 
  if (.false.) then
@@ -509,13 +497,12 @@ subroutine gpu_xtrsm(cplx,side,uplo,transa,diag,m,n,alpha,a_gpu,lda,b_gpu,ldb)
 
 ! !Arguments ------------------------------------
  integer, intent(in) :: cplx,lda,ldb,m,n
- complex(dpc), intent(in) :: alpha
+ complex(dp), intent(in) :: alpha
  character(len=1), intent(in) :: side,uplo,transa,diag
  type(c_ptr),intent(in) :: a_gpu
  type(c_ptr),intent(inout) :: b_gpu
 !Local variables ------------------------------
  type(c_ptr) :: cptr
-
 ! *********************************************************************
 
  if (.false.) then
@@ -549,7 +536,7 @@ subroutine gpu_xaxpy(cplx, size, alpha, x_gpu, incrx, y_gpu, incry)
   ! !Arguments ------------------------------------
   integer,      intent(in)    :: cplx
   integer,      intent(in)    :: size
-  complex(dpc), intent(in)    :: alpha
+  complex(dp), intent(in)    :: alpha
   type(c_ptr),  intent(in)    :: x_gpu
   integer,      intent(in)    :: incrx
   type(c_ptr),  intent(inout) :: y_gpu
@@ -616,7 +603,7 @@ subroutine gpu_xscal(cplx, size, alpha, x_gpu, incrx)
   ! !Arguments ------------------------------------
   integer,      intent(in)    :: cplx
   integer,      intent(in)    :: size
-  complex(dpc), intent(in)    :: alpha
+  complex(dp), intent(in)    :: alpha
   type(c_ptr),  intent(in)    :: x_gpu
   integer,      intent(in)    :: incrx
 
@@ -800,8 +787,7 @@ end subroutine gpu_set_to_zero
 subroutine gpu_set_to_zero_complex(array, sizea)
  use, intrinsic :: iso_c_binding
  integer(c_size_t),intent(in)  :: sizea
- complex(dpc),target,intent(out) :: array(sizea)
-
+ complex(dp),target,intent(out) :: array(sizea)
 ! *********************************************************************
 
 #if defined HAVE_OPENMP_OFFLOAD
@@ -809,7 +795,7 @@ subroutine gpu_set_to_zero_complex(array, sizea)
 
 #if defined HAVE_GPU_CUDA
  !$OMP TARGET DATA USE_DEVICE_ADDR(array)
- call gpu_memset(c_loc(array), 0, sizea*dpc*2)
+ call gpu_memset(c_loc(array), 0, sizea*dp*2)
  !$OMP END TARGET DATA
 #elif defined HAVE_GPU_HIP
  !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(i) MAP(to:array)
@@ -889,9 +875,8 @@ end subroutine gpu_copy
 subroutine gpu_copy_complex(dest, src, sizea)
  use, intrinsic :: iso_c_binding
  integer(c_size_t),intent(in)  :: sizea
- complex(dpc),target,intent(in)  :: src(sizea)
- complex(dpc),target,intent(out) :: dest(sizea)
-
+ complex(dp),target,intent(in)  :: src(sizea)
+ complex(dp),target,intent(out) :: dest(sizea)
 ! *********************************************************************
 
 #if defined HAVE_OPENMP_OFFLOAD
@@ -899,7 +884,7 @@ subroutine gpu_copy_complex(dest, src, sizea)
 
 #if defined HAVE_GPU_CUDA
  !$OMP TARGET DATA USE_DEVICE_ADDR(dest,src)
- call copy_gpu_to_gpu(c_loc(dest), c_loc(src), sizea*dpc*2)
+ call copy_gpu_to_gpu(c_loc(dest), c_loc(src), sizea*dp*2)
  !$OMP END TARGET DATA
 #elif defined HAVE_GPU_HIP
  !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(i) MAP(to:src,dest)
@@ -952,11 +937,10 @@ subroutine abi_gpu_xgemm_cptr(cplx,transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,
 
 !Arguments ------------------------------------
  integer,intent(in) :: cplx,lda,ldb,ldc,m,n,k
- complex(dpc),intent(in) :: alpha,beta
+ complex(dp),intent(in) :: alpha,beta
  character(len=1),intent(in) :: transa,transb
  type(c_ptr),intent(in) :: a,b
  type(c_ptr),intent(in) :: c
-
 ! *********************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -990,7 +974,7 @@ subroutine abi_gpu_xgemm_d(cplx,transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,ldc
 
 !Arguments ------------------------------------
  integer,intent(in) :: cplx,lda,ldb,ldc,m,n,k
- complex(dpc),intent(in) :: alpha,beta
+ complex(dp),intent(in) :: alpha,beta
  character(len=1),intent(in) :: transa,transb
  real(dp),   intent(in),target :: a(*),b(*)
  real(dp),   intent(inout),target :: c(*)
@@ -1028,11 +1012,10 @@ subroutine abi_gpu_xgemm_z(cplx,transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,ldc
 
 !Arguments ------------------------------------
  integer,intent(in) :: cplx,lda,ldb,ldc,m,n,k
- complex(dpc),intent(in) :: alpha,beta
+ complex(dp),intent(in) :: alpha,beta
  character(len=1),intent(in) :: transa,transb
- complex(dpc),intent(in),target :: a(*),b(*)
- complex(dpc),intent(inout),target :: c(*)
-
+ complex(dp),intent(in),target :: a(*),b(*)
+ complex(dp),intent(inout),target :: c(*)
 ! *********************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -1066,11 +1049,10 @@ subroutine abi_gpu_xgemm_2d(cplx,transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,ld
 
 !Arguments ------------------------------------
  integer,intent(in) :: cplx,lda,ldb,ldc,m,n,k
- complex(dpc),intent(in) :: alpha,beta
+ complex(dp),intent(in) :: alpha,beta
  character(len=1),intent(in) :: transa,transb
  real(dp),   intent(in),target :: a(lda,*),b(ldb,*)
  real(dp),   intent(inout),target :: c(ldc,*)
-
 ! *********************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -1104,11 +1086,10 @@ subroutine abi_gpu_xgemm_2z(cplx,transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,ld
 
 !Arguments ------------------------------------
  integer,intent(in) :: cplx,lda,ldb,ldc,m,n,k
- complex(dpc),intent(in) :: alpha,beta
+ complex(dp),intent(in) :: alpha,beta
  character(len=1),intent(in) :: transa,transb
- complex(dpc),intent(in),target :: a(lda,*),b(ldb,*)
- complex(dpc),intent(inout),target :: c(ldc,*)
-
+ complex(dp),intent(in),target :: a(lda,*),b(ldb,*)
+ complex(dp),intent(inout),target :: c(ldc,*)
 ! *********************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -1183,7 +1164,7 @@ subroutine abi_gpu_xgemm_strided_cptr(cplx,transa,transb,m,n,k,alpha,&
  integer,intent(in) :: strideA,strideB,strideC,batchCount
  logical,intent(in),optional :: async
  integer,intent(in),optional :: stream_id
- complex(dpc),intent(in) :: alpha,beta
+ complex(dp),intent(in) :: alpha,beta
  character(len=1),intent(in) :: transa,transb
  type(c_ptr),intent(in) :: a,b
  type(c_ptr),intent(in) :: c
@@ -1232,11 +1213,10 @@ subroutine abi_gpu_xgemm_strided_d(cplx,transa,transb,m,n,k,alpha,a,lda,strideA,
 !Arguments ------------------------------------
  integer,intent(in) :: cplx,lda,ldb,ldc,m,n,k
  integer,intent(in) :: strideA,strideB,strideC,batchCount
- complex(dpc),intent(in) :: alpha,beta
+ complex(dp),intent(in) :: alpha,beta
  character(len=1),intent(in) :: transa,transb
  real(dp),   intent(in),target :: a(*),b(*)
  real(dp),   intent(inout),target :: c(*)
-
 ! *********************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -1271,11 +1251,10 @@ subroutine abi_gpu_xgemm_strided_z(cplx,transa,transb,m,n,k,alpha,a,lda,strideA,
 !Arguments ------------------------------------
  integer,intent(in) :: cplx,lda,ldb,ldc,m,n,k
  integer,intent(in) :: strideA,strideB,strideC,batchCount
- complex(dpc),intent(in) :: alpha,beta
+ complex(dp),intent(in) :: alpha,beta
  character(len=1),intent(in) :: transa,transb
- complex(dpc),intent(in),target :: a(*),b(*)
- complex(dpc),intent(inout),target :: c(*)
-
+ complex(dp),intent(in),target :: a(*),b(*)
+ complex(dp),intent(inout),target :: c(*)
 ! *********************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -1310,11 +1289,10 @@ subroutine abi_gpu_xgemm_strided_2d(cplx,transa,transb,m,n,k,alpha,a,lda,strideA
 !Arguments ------------------------------------
  integer,intent(in) :: cplx,lda,ldb,ldc,m,n,k
  integer,intent(in) :: strideA,strideB,strideC,batchCount
- complex(dpc),intent(in) :: alpha,beta
+ complex(dp),intent(in) :: alpha,beta
  character(len=1),intent(in) :: transa,transb
  real(dp),   intent(in),target :: a(lda,*),b(ldb,*)
  real(dp),   intent(inout),target :: c(ldc,*)
-
 ! *********************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -1349,11 +1327,10 @@ subroutine abi_gpu_xgemm_strided_2z(cplx,transa,transb,m,n,k,alpha,a,lda,strideA
 !Arguments ------------------------------------
  integer,intent(in) :: cplx,lda,ldb,ldc,m,n,k
  integer,intent(in) :: strideA,strideB,strideC,batchCount
- complex(dpc),intent(in) :: alpha,beta
+ complex(dp),intent(in) :: alpha,beta
  character(len=1),intent(in) :: transa,transb
- complex(dpc),intent(in),target :: a(lda,*),b(ldb,*)
- complex(dpc),intent(inout),target :: c(ldc,*)
-
+ complex(dp),intent(in),target :: a(lda,*),b(ldb,*)
+ complex(dp),intent(inout),target :: c(ldc,*)
 ! *********************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -1425,11 +1402,10 @@ subroutine abi_gpu_xsymm_cptr(cplx,side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
 
 !Arguments ------------------------------------
  integer,intent(in) :: cplx,lda,ldb,ldc,m,n
- complex(dpc),intent(in) :: alpha,beta
+ complex(dp),intent(in) :: alpha,beta
  character(len=1),intent(in) :: side,uplo
  type(c_ptr),intent(in) :: a,b
  type(c_ptr),intent(in) :: c
-
 ! *********************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -1463,11 +1439,10 @@ subroutine abi_gpu_xsymm_d(cplx,side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
 
 !Arguments ------------------------------------
  integer,intent(in) :: cplx,lda,ldb,ldc,m,n
- complex(dpc),intent(in) :: alpha,beta
+ complex(dp),intent(in) :: alpha,beta
  character(len=1),intent(in) :: side,uplo
  real(dp),   intent(in),target :: a(*),b(*)
  real(dp),   intent(inout),target :: c(*)
-
 ! *********************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -1501,11 +1476,10 @@ subroutine abi_gpu_xsymm_z(cplx,side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
 
 !Arguments ------------------------------------
  integer,intent(in) :: cplx,lda,ldb,ldc,m,n
- complex(dpc),intent(in) :: alpha,beta
+ complex(dp),intent(in) :: alpha,beta
  character(len=1),intent(in) :: side,uplo
- complex(dpc),intent(in),target :: a(*),b(*)
- complex(dpc),intent(inout),target :: c(*)
-
+ complex(dp),intent(in),target :: a(*),b(*)
+ complex(dp),intent(inout),target :: c(*)
 ! *********************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -1539,11 +1513,10 @@ subroutine abi_gpu_xsymm_2d(cplx,side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
 
 !Arguments ------------------------------------
  integer,intent(in) :: cplx,lda,ldb,ldc,m,n
- complex(dpc),intent(in) :: alpha,beta
+ complex(dp),intent(in) :: alpha,beta
  character(len=1),intent(in) :: side,uplo
  real(dp),   intent(in),target :: a(lda,*),b(ldb,*)
  real(dp),   intent(inout),target :: c(ldc,*)
-
 ! *********************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -1577,11 +1550,10 @@ subroutine abi_gpu_xsymm_2z(cplx,side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
 
 !Arguments ------------------------------------
  integer,intent(in) :: cplx,lda,ldb,ldc,m,n
- complex(dpc),intent(in) :: alpha,beta
+ complex(dp),intent(in) :: alpha,beta
  character(len=1),intent(in) :: side,uplo
- complex(dpc),intent(in),target :: a(lda,*),b(ldb,*)
- complex(dpc),intent(inout),target :: c(ldc,*)
-
+ complex(dp),intent(in),target :: a(lda,*),b(ldb,*)
+ complex(dp),intent(inout),target :: c(ldc,*)
 ! *********************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -1652,11 +1624,10 @@ subroutine abi_gpu_zhemm_cptr(side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
 
 !Arguments ------------------------------------
  integer,intent(in) :: lda,ldb,ldc,m,n
- complex(dpc),intent(in) :: alpha,beta
+ complex(dp),intent(in) :: alpha,beta
  character(len=1),intent(in) :: side,uplo
  type(c_ptr),intent(in) :: a,b
  type(c_ptr),intent(in) :: c
-
 ! *********************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -1690,11 +1661,10 @@ subroutine abi_gpu_zhemm_d(side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
 
 !Arguments ------------------------------------
  integer,intent(in) :: lda,ldb,ldc,m,n
- complex(dpc),intent(in) :: alpha,beta
+ complex(dp),intent(in) :: alpha,beta
  character(len=1),intent(in) :: side,uplo
  real(dp),intent(in),target :: a(*),b(*)
  real(dp),intent(inout),target :: c(*)
-
 ! *********************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -1728,11 +1698,10 @@ subroutine abi_gpu_zhemm_z(side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
 
 !Arguments ------------------------------------
  integer,intent(in) :: lda,ldb,ldc,m,n
- complex(dpc),intent(in) :: alpha,beta
+ complex(dp),intent(in) :: alpha,beta
  character(len=1),intent(in) :: side,uplo
- complex(dpc),intent(in),target :: a(*),b(*)
- complex(dpc),intent(inout),target :: c(*)
-
+ complex(dp),intent(in),target :: a(*),b(*)
+ complex(dp),intent(inout),target :: c(*)
 ! *********************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -1766,11 +1735,10 @@ subroutine abi_gpu_zhemm_2d(side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
 
 !Arguments ------------------------------------
  integer,intent(in) :: lda,ldb,ldc,m,n
- complex(dpc),intent(in) :: alpha,beta
+ complex(dp),intent(in) :: alpha,beta
  character(len=1),intent(in) :: side,uplo
  real(dp),intent(in),target :: a(lda,*),b(ldb,*)
  real(dp),intent(inout),target :: c(ldc,*)
-
 ! *********************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -1804,11 +1772,10 @@ subroutine abi_gpu_zhemm_2z(side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
 
 !Arguments ------------------------------------
  integer,intent(in) :: lda,ldb,ldc,m,n
- complex(dpc),intent(in) :: alpha,beta
+ complex(dp),intent(in) :: alpha,beta
  character(len=1),intent(in) :: side,uplo
- complex(dpc),intent(in),target :: a(lda,*),b(ldb,*)
- complex(dpc),intent(inout),target :: c(ldc,*)
-
+ complex(dp),intent(in),target :: a(lda,*),b(ldb,*)
+ complex(dp),intent(inout),target :: c(ldc,*)
 ! *********************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -1862,10 +1829,9 @@ subroutine abi_gpu_xscal_cptr(cplx, size, alpha, x, incrx)
  ! !Arguments ------------------------------------
  integer,      intent(in)    :: cplx
  integer,      intent(in)    :: size
- complex(dpc), intent(in)    :: alpha
+ complex(dp), intent(in)    :: alpha
  type(c_ptr),  intent(in)    :: x
  integer,      intent(in)    :: incrx
-
 ! *************************************************************************
 
  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -1898,7 +1864,7 @@ subroutine abi_gpu_xscal_d(cplx, size, alpha, x, incrx)
  ! !Arguments ------------------------------------
  integer,      intent(in)    :: cplx
  integer,      intent(in)    :: size
- complex(dpc), intent(in)    :: alpha
+ complex(dp), intent(in)    :: alpha
  real(dp),     intent(inout), target :: x(*)
  integer,      intent(in)    :: incrx
 
@@ -1928,10 +1894,9 @@ subroutine abi_gpu_xscal_z(cplx, size, alpha, x, incrx)
  ! !Arguments ------------------------------------
  integer,      intent(in)    :: cplx
  integer,      intent(in)    :: size
- complex(dpc), intent(in)    :: alpha
- complex(dpc), intent(inout), target :: x(*)
+ complex(dp), intent(in)    :: alpha
+ complex(dp), intent(inout), target :: x(*)
  integer,      intent(in)    :: incrx
-
 ! *************************************************************************
 
  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -1958,10 +1923,9 @@ subroutine abi_gpu_xscal_2d(cplx, size, alpha, x, incrx)
  ! !Arguments ------------------------------------
  integer,      intent(in)    :: cplx
  integer,      intent(in)    :: size
- complex(dpc), intent(in)    :: alpha
+ complex(dp), intent(in)    :: alpha
  real(dp),     intent(inout), target :: x(size,*)
  integer,      intent(in)    :: incrx
-
 ! *************************************************************************
 
  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -1988,10 +1952,9 @@ subroutine abi_gpu_xscal_2z(cplx, size, alpha, x, incrx)
  ! !Arguments ------------------------------------
  integer,      intent(in)    :: cplx
  integer,      intent(in)    :: size
- complex(dpc), intent(in)    :: alpha
- complex(dpc), intent(inout), target :: x(size,*)
+ complex(dp), intent(in)    :: alpha
+ complex(dp), intent(inout), target :: x(size,*)
  integer,      intent(in)    :: incrx
-
 ! *************************************************************************
 
  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -2040,12 +2003,11 @@ subroutine abi_gpu_xaxpy_cptr(cplx, size, alpha, x, incrx, y, incry)
   ! !Arguments ------------------------------------
   integer,      intent(in)    :: cplx
   integer,      intent(in)    :: size
-  complex(dpc), intent(in)    :: alpha
+  complex(dp), intent(in)    :: alpha
   type(c_ptr),  intent(in)    :: x
   integer,      intent(in)    :: incrx
   type(c_ptr),  intent(in)    :: y
   integer,      intent(in)    :: incry
-
 ! *************************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -2078,12 +2040,11 @@ subroutine abi_gpu_xaxpy_d(cplx, size, alpha, x, incrx, y, incry)
   ! !Arguments ------------------------------------
   integer,      intent(in)    :: cplx
   integer,      intent(in)    :: size
-  complex(dpc), intent(in)    :: alpha
+  complex(dp), intent(in)    :: alpha
   real(dp),     intent(in), target    :: x(*)
   integer,      intent(in)    :: incrx
   real(dp),     intent(inout), target :: y(*)
   integer,      intent(in)    :: incry
-
 ! *************************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -2110,12 +2071,11 @@ subroutine abi_gpu_xaxpy_z(cplx, size, alpha, x, incrx, y, incry)
   ! !Arguments ------------------------------------
   integer,      intent(in)    :: cplx
   integer,      intent(in)    :: size
-  complex(dpc), intent(in)    :: alpha
-  complex(dpc), intent(in), target    :: x(*)
+  complex(dp), intent(in)    :: alpha
+  complex(dp), intent(in), target    :: x(*)
   integer,      intent(in)    :: incrx
-  complex(dpc), intent(inout), target :: y(*)
+  complex(dp), intent(inout), target :: y(*)
   integer,      intent(in)    :: incry
-
 ! *************************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -2142,12 +2102,11 @@ subroutine abi_gpu_xaxpy_2d(cplx, size, alpha, x, incrx, y, incry)
   ! !Arguments ------------------------------------
   integer,      intent(in)    :: cplx
   integer,      intent(in)    :: size
-  complex(dpc), intent(in)    :: alpha
+  complex(dp), intent(in)    :: alpha
   real(dp),     intent(in), target    :: x(size,*)
   integer,      intent(in)    :: incrx
   real(dp),     intent(inout), target :: y(size,*)
   integer,      intent(in)    :: incry
-
 ! *************************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -2174,12 +2133,11 @@ subroutine abi_gpu_xaxpy_2z(cplx, size, alpha, x, incrx, y, incry)
   ! !Arguments ------------------------------------
   integer,      intent(in)    :: cplx
   integer,      intent(in)    :: size
-  complex(dpc), intent(in)    :: alpha
-  complex(dpc), intent(in), target    :: x(size,*)
+  complex(dp), intent(in)    :: alpha
+  complex(dp), intent(in), target    :: x(size,*)
   integer,      intent(in)    :: incrx
-  complex(dpc), intent(inout), target :: y(size,*)
+  complex(dp), intent(inout), target :: y(size,*)
   integer,      intent(in)    :: incry
-
 ! *************************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -2294,11 +2252,10 @@ subroutine abi_gpu_xcopy_z(cplx, size, x, incrx, y, incry)
   ! !Arguments ------------------------------------
   integer,      intent(in)    :: cplx
   integer,      intent(in)    :: size
-  complex(dpc), intent(in),target    :: x(*)
+  complex(dp), intent(in),target    :: x(*)
   integer,      intent(in)    :: incrx
-  complex(dpc), intent(inout),target :: y(*)
+  complex(dp), intent(inout),target :: y(*)
   integer,      intent(in)    :: incry
-
 ! *************************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -2356,11 +2313,10 @@ subroutine abi_gpu_xcopy_2z(cplx, size, x, incrx, y, incry)
   ! !Arguments ------------------------------------
   integer,      intent(in)    :: cplx
   integer,      intent(in)    :: size
-  complex(dpc), intent(in),target    :: x(size,*)
+  complex(dp), intent(in),target    :: x(size,*)
   integer,      intent(in)    :: incrx
-  complex(dpc), intent(inout),target :: y(size,*)
+  complex(dp), intent(inout),target :: y(size,*)
   integer,      intent(in)    :: incry
-
 ! *************************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -2441,11 +2397,10 @@ subroutine abi_gpu_xtrsm_cptr(cplx,side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
 
 ! !Arguments ------------------------------------
  integer, intent(in) :: cplx,lda,ldb,m,n
- complex(dpc), intent(in) :: alpha
+ complex(dp), intent(in) :: alpha
  character(len=1), intent(in) :: side,uplo,transa,diag
  type(c_ptr),intent(in) :: a
  type(c_ptr),intent(in) :: b
-
 ! *********************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -2478,11 +2433,10 @@ subroutine abi_gpu_xtrsm_d(cplx,side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
 
 ! !Arguments ------------------------------------
  integer, intent(in) :: cplx,lda,ldb,m,n
- complex(dpc), intent(in) :: alpha
+ complex(dp), intent(in) :: alpha
  character(len=1), intent(in) :: side,uplo,transa,diag
  real(dp),   intent(in),target :: a(*)
  real(dp),   intent(inout),target :: b(*)
-
 ! *********************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -2510,11 +2464,10 @@ subroutine abi_gpu_xtrsm_z(cplx,side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
 
 ! !Arguments ------------------------------------
  integer, intent(in) :: cplx,lda,ldb,m,n
- complex(dpc), intent(in) :: alpha
+ complex(dp), intent(in) :: alpha
  character(len=1), intent(in) :: side,uplo,transa,diag
- complex(dpc),intent(in),target :: a(*)
- complex(dpc),intent(inout),target :: b(*)
-
+ complex(dp),intent(in),target :: a(*)
+ complex(dp),intent(inout),target :: b(*)
 ! *********************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -2542,11 +2495,10 @@ subroutine abi_gpu_xtrsm_2d(cplx,side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
 
 ! !Arguments ------------------------------------
  integer, intent(in) :: cplx,lda,ldb,m,n
- complex(dpc), intent(in) :: alpha
+ complex(dp), intent(in) :: alpha
  character(len=1), intent(in) :: side,uplo,transa,diag
  real(dp),   intent(in),target :: a(lda,*)
  real(dp),   intent(inout),target :: b(ldb,*)
-
 ! *********************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -2574,11 +2526,10 @@ subroutine abi_gpu_xtrsm_2z(cplx,side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
 
 ! !Arguments ------------------------------------
  integer, intent(in) :: cplx,lda,ldb,m,n
- complex(dpc), intent(in) :: alpha
+ complex(dp), intent(in) :: alpha
  character(len=1), intent(in) :: side,uplo,transa,diag
- complex(dpc),intent(in),target :: a(lda,*)
- complex(dpc),intent(inout),target :: b(ldb,*)
-
+ complex(dp),intent(in),target :: a(lda,*)
+ complex(dp),intent(inout),target :: b(ldb,*)
 ! *********************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -3030,13 +2981,12 @@ subroutine abi_gpu_xhegvd_z(cplx, itype, jobz, uplo, A_nrows, &
   character(len=1),intent(in   ) :: jobz
   character(len=1),intent(in   ) :: uplo
   integer,         intent(in   ) :: A_nrows
-  complex(dpc),    intent(in   ),target :: A(*)
+  complex(dp),    intent(in   ),target :: A(*)
   integer,         intent(in   ) :: lda
-  complex(dpc),    intent(in   ),target :: B(*)
+  complex(dp),    intent(in   ),target :: B(*)
   integer,         intent(in   ) :: ldb
   real(dp),        intent(inout),target :: W(*)
   integer,         intent(inout) :: devInfo
-
 ! *************************************************************************
 
   if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
@@ -3120,11 +3070,10 @@ subroutine abi_gpu_xhegvd_2z(cplx, itype, jobz, uplo, A_nrows, &
   character(len=1),intent(in   ) :: jobz
   character(len=1),intent(in   ) :: uplo
   integer,         intent(in   ) :: A_nrows,lda,ldb
-  complex(dpc),    intent(in   ),target :: A(lda,*)
-  complex(dpc),    intent(in   ),target :: B(ldb,*)
+  complex(dp),    intent(in   ),target :: A(lda,*)
+  complex(dp),    intent(in   ),target :: B(ldb,*)
   real(dp),        intent(inout),target :: W(A_nrows,*)
   integer,         intent(inout) :: devInfo
-
 ! *************************************************************************
 
   if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
@@ -3315,11 +3264,10 @@ subroutine abi_gpu_xheevd_z(cplx, jobz, uplo, A_nrows, &
   character(len=1),intent(in   ) :: jobz
   character(len=1),intent(in   ) :: uplo
   integer,         intent(in   ) :: A_nrows
-  complex(dpc),    intent(in   ),target :: A(*)
+  complex(dp),    intent(in   ),target :: A(*)
   integer,         intent(in   ) :: lda
   real(dp),        intent(inout),target :: W(*)
   integer,         intent(inout) :: devInfo
-
 ! *************************************************************************
 
   if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
@@ -3394,10 +3342,9 @@ subroutine abi_gpu_xheevd_2z(cplx, jobz, uplo, A_nrows, &
   character(len=1),intent(in   ) :: jobz
   character(len=1),intent(in   ) :: uplo
   integer,         intent(in   ) :: A_nrows,lda
-  complex(dpc),    intent(in   ),target :: A(lda,*)
+  complex(dp),    intent(in   ),target :: A(lda,*)
   real(dp),        intent(inout),target :: W(A_nrows,*)
   integer,         intent(inout) :: devInfo
-
 ! *************************************************************************
 
   if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
@@ -3572,10 +3519,9 @@ subroutine abi_gpu_xpotrf_z(cplx, uplo, A_nrows, &
   integer,         intent(in   ) :: cplx
   character(len=1),intent(in   ) :: uplo
   integer,         intent(in   ) :: A_nrows
-  complex(dpc),    intent(in   ),target :: A(*)
+  complex(dp),    intent(in   ),target :: A(*)
   integer,         intent(in   ) :: lda
   integer,         intent(inout) :: devInfo
-
 ! *************************************************************************
 
   if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
@@ -3641,9 +3587,8 @@ subroutine abi_gpu_xpotrf_2z(cplx, uplo, A_nrows, &
   integer,         intent(in   ) :: cplx
   character(len=1),intent(in   ) :: uplo
   integer,         intent(in   ) :: A_nrows,lda
-  complex(dpc),    intent(in   ),target :: A(lda,*)
+  complex(dp),    intent(in   ),target :: A(lda,*)
   integer,         intent(inout) :: devInfo
-
 ! *************************************************************************
 
   if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
@@ -3716,7 +3661,7 @@ subroutine gpu_xorthonormalize(blockvectorx_gpu,blockvectorbx_gpu,blocksize,spac
 #if defined HAVE_GPU
  integer :: ierr,info
  real(dp),    dimension(:,:),allocatable, target :: d_sqgram
- complex(dpc),dimension(:,:),allocatable, target :: z_sqgram
+ complex(dp),dimension(:,:),allocatable, target :: z_sqgram
  character :: tr
  real(dp) :: tsec(2)
  integer(c_size_t) :: size
@@ -3724,7 +3669,6 @@ subroutine gpu_xorthonormalize(blockvectorx_gpu,blockvectorbx_gpu,blocksize,spac
  type(c_ptr) :: cptr_a
 #endif
  character(len=500) :: message
-
 ! *********************************************************************
 
 #if defined HAVE_GPU

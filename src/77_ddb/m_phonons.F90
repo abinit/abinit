@@ -38,12 +38,13 @@ module m_phonons
  use m_ddb
  use netcdf
  use m_supercell
- use m_dtset
- use m_krank
+
 
  use m_fstrings,        only : itoa, ftoa, sjoin, ltoa, ktoa, strcat, basename, replace
  use m_matrix,          only : matr3inv
  use m_symtk,           only : sg_multable
+ use m_krank,           only : krank_t
+ use m_dtset,           only : dataset_type
  use m_time,            only : cwtime, cwtime_report
  use m_io_tools,        only : open_file
  use m_geometry,        only : mkrdim, symredcart, normv, phdispl_cart2red
@@ -183,7 +184,6 @@ module m_phonons
    procedure :: ncwrite => phdos_ncwrite
    procedure :: init => phdos_init  ! Constructor
  end type phdos_t
-
 !!***
 
 !!****t* m_phonons/phstore_t
@@ -248,23 +248,21 @@ module m_phonons
 
   contains
 
+    procedure :: init => phstore_init                    ! Creation method (allocates memory, initialize data from input vars).
     procedure :: async_rotate => phstore_async_rotate    ! Begin non-blocking collective MPI communication to symmetrize stuff
     procedure :: wait => phstore_wait                    ! Wait from non-blocking MPI BCAST started in phstore_async_rotate,
                                                          ! return ph frequencies and displacements.
     procedure :: free => phstore_free                    ! Free dynamic memory
-
  end type phstore_t
 !!***
 
  public :: pheigvec_rotate      ! Obtain phonon eigenvectors for q in the BZ from the symmetrical image in the IBZ.
- public :: phstore_new          ! Creation method (allocates memory, initialize data from input vars).
  public :: test_phrotation      ! Validate pheigvec_rotate routine.
 
 contains  !=====================================================
 !!***
 
 !!****f* m_phonons/phdos_print
-!!
 !! NAME
 !! phdos_print
 !!
@@ -292,7 +290,6 @@ subroutine phdos_print(PHdos, fname)
  character(len=500) :: msg, msg_method
  character(len=fnlen) :: fname_by_atom, fname_msqd
  character(len=3) :: unitname
-
 ! *************************************************************************
 
 ! Use Ha units everywhere
@@ -367,12 +364,8 @@ subroutine phdos_print(PHdos, fname)
         tens = zero
      end where
      write(unt_msqd,'(6es17.8,2x)',advance='NO') &
-        tens(1,1), &
-        tens(2,2), &
-        tens(3,3), &
-        tens(2,3), &
-        tens(1,3), &
-        tens(1,2)
+        tens(1,1), tens(2,2), tens(3,3), &
+        tens(2,3), tens(1,3), tens(1,2)
    end do
    write(unt_msqd,*)
  end do
@@ -413,7 +406,6 @@ subroutine phdos_print_debye(PHdos, ucvol)
 !arrays
  integer :: units(2)
  real(dp), allocatable :: om2dos(:), om1dos(:), intdos(:)
-
 ! *************************************************************************
 
  units = [std_out, ab_out]
@@ -600,10 +592,7 @@ end subroutine phdos_print_thermo
 !! phdos_free
 !!
 !! FUNCTION
-!! destructor function for phonon DOS object
-!!
-!! INPUTS
-!! PHdos= container object for phonon DOS
+!! Free memory
 !!
 !! SOURCE
 
@@ -636,6 +625,7 @@ end subroutine phdos_free
 !! phdos_malloc
 !!
 !! FUNCTION
+!! Allocate memory
 !!
 !! INPUTS
 !!
@@ -787,7 +777,6 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
  real(dp),allocatable :: full_eigvec(:,:,:,:,:),full_phfrq(:,:),full_phangmom(:,:,:),new_shiftq(:,:), full_veloc(:,:,:)
  real(dp),allocatable :: qbz(:,:),qibz(:,:),tmp_phfrq(:) !, work_msqd(:,:,:,:)
  real(dp),allocatable :: wtq_ibz(:),xvals(:), gvals_wtq(:), wdt(:,:), energies(:)
-
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -1316,7 +1305,6 @@ subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, rlatt, tempermin, tem
  real(dp), allocatable :: phfrq(:), phdispl(:,:,:,:),pheigvec(:,:,:,:)
  real(dp), allocatable :: phdispl1(:,:,:)
  character (len=500) :: msg
-
 ! *************************************************************************
 
  ! check inputs
@@ -1482,8 +1470,8 @@ subroutine thermal_supercell_make(amplitudes,Crystal, Ifc,namplitude, nconfig,op
  real(dp), allocatable :: phfrq(:), phdispl(:,:,:,:),pheigvec(:,:,:,:)
  real(dp), allocatable :: phdispl1(:,:,:)
  character (len=500) :: msg
-
 ! *************************************************************************
+
 ! check inputs
 ! TODO: add check that all rlatt are the same on input
  if (rlatt(1,2)/=0 .or.  rlatt(1,3)/=0 .or.  rlatt(2,3)/=0 .or. &
@@ -2416,7 +2404,6 @@ subroutine phonons_ncwrite(ncid, natom, nqpts, qpoints, weights, phfreq, phdispl
  real(dp),intent(in) :: phfreq(3*natom,nqpts),phdispl_cart(2,3*natom,3*natom,nqpts),phangmom(3,3*natom,nqpts)
 
 !Local variables-------------------------------
-!scalars
  integer :: nphmodes,ncerr
 ! *************************************************************************
 
@@ -3008,7 +2995,6 @@ subroutine dfpt_symph(iout, acell, eigvec, indsym, natom, nsym, phfrq, rprim, sy
  integer,allocatable :: degeneracy(:),integer_characters(:),symind(:,:)
  real(dp) :: gprimd(3,3),rprimd(3,3)
  real(dp),allocatable :: eigvtr(:),redvec(:),redvtr(:),symph(:,:)
-
 !******************************************************************
 
  units = [std_out, iout]
@@ -3292,7 +3278,6 @@ subroutine pheigvec_rotate(cryst, qq_ibz, isym, itimrev, eigvec_ibz, eigvec_qbz,
  integer :: r0(3)
  real(dp) :: gamma_matrix(2,3,cryst%natom,3,cryst%natom)
  real(dp) :: symat(3,3), phase(2) !, dum(0, 0), gamma2(2,3,cryst%natom,3,cryst%natom)
-
 !************************************************************************
 
  natom = cryst%natom; natom3 = cryst%natom * 3
@@ -3344,9 +3329,9 @@ end subroutine pheigvec_rotate
 
 !----------------------------------------------------------------------
 
-!!****f* m_phonons/phstore_new
+!!****f* m_phonons/phstore_init
 !! NAME
-!! phstore_new
+!! phstore_init
 !!
 !! FUNCTION
 !!  Create new object with phonon quantities in the IBZ.
@@ -3359,9 +3344,10 @@ end subroutine pheigvec_rotate
 !!  use_ifc_fourq:  True to replace symmetrization with call to ifc_fourq (debugging option)
 !!  comm: MPI communicator in which phonon arrays in the IBZ will be MPI distributed.
 
-type(phstore_t) function phstore_new(cryst, ifc, nqibz, qibz, use_ifc_fourq, comm) result(new)
+subroutine phstore_init(new, cryst, ifc, nqibz, qibz, use_ifc_fourq, comm)
 
 !Arguments ------------------------------------
+ class(phstore_t),intent(out) :: new
  type(crystal_t),intent(in) :: cryst
  type(ifc_type),intent(in) :: ifc
  integer,intent(in) :: nqibz, comm
@@ -3406,7 +3392,7 @@ type(phstore_t) function phstore_new(cryst, ifc, nqibz, qibz, use_ifc_fourq, com
                   out_eigvec=new%pheigvec_qibz(:,:,:,iq_ibz))
  end do
 
-end function phstore_new
+end subroutine phstore_init
 !!***
 
 !----------------------------------------------------------------------
@@ -3584,8 +3570,7 @@ subroutine test_phrotation(ifc, cryst, qptopt, ngqpt, comm)
  real(dp) :: eigvec_out(2,3*cryst%natom,3*cryst%natom) !eigvec_ibz(2,3*cryst%natom,3*cryst%natom),
  real(dp) :: eigvec_bz(2,3*cryst%natom,3*cryst%natom), displ_cart_qbz(2,3*cryst%natom,3*cryst%natom)
  real(dp) :: d2cart(2,3*cryst%natom,3*cryst%natom), d2tmp(2,3*cryst%natom,3*cryst%natom)
- real(dp),allocatable :: wtq_ibz(:), qbz(:,:), qibz(:,:)
- real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
+ real(dp),allocatable :: wtq_ibz(:), qbz(:,:), qibz(:,:), displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp),allocatable :: phfreqs_qibz(:,:), displ_cart_ibz(:,:,:,:),eigvec_ibz(:,:,:,:)
 !************************************************************************
 
@@ -3613,7 +3598,7 @@ subroutine test_phrotation(ifc, cryst, qptopt, ngqpt, comm)
  ! Compute BZ --> IBZ mapping.
  ABI_MALLOC(bz2ibz_listkk, (6, nqbz))
 
- qrank = krank_from_kptrlatt(nqibz, qibz, in_qptrlatt, compute_invrank=.False.)
+ call qrank%from_kptrlatt(nqibz, qibz, in_qptrlatt, compute_invrank=.False.)
 
  if (kpts_map("symrec", qptopt, cryst, qrank, nqbz, qbz, bz2ibz_listkk) /= 0) then
    write(msg, '(3a)' ) "Error mapping BZ to IBZ",ch10,"The q-point could not be generated from a symmetrical one"

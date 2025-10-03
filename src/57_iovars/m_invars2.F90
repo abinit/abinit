@@ -250,7 +250,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 !arrays
  integer :: vacuum(3)
  integer,allocatable :: iatcon(:),natcon(:), intarr(:)
- real(dp) :: qgbt(3), tsec(2)
+ real(dp) :: tsec(2),rprimd(3,3) ! qgbt(3),
  real(dp),allocatable :: dmatpawu_tmp(:), dprarr(:)
  type(libxc_functional_type) :: xcfunc(2)
 ! *************************************************************************
@@ -2101,13 +2101,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irdddk',tread,'INT')
  if(tread==1) dtset%irdddk=intarr(1)
- 
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irddelfd',tread,'INT')
  if(tread==1) dtset%irddelfd=intarr(1)
- 
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irddkdk',tread,'INT')
  if(tread==1) dtset%irddkdk=intarr(1)
- 
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irddkde',tread,'INT')
  if(tread==1) dtset%irddkde=intarr(1)
 
@@ -2300,6 +2300,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_with_vk', tread, 'INT')
  if (tread == 1) dtset%gstore_with_vk = intarr(1)
 
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_use_lgk', tread, 'INT')
+ if (tread == 1) dtset%gstore_use_lgk = intarr(1)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_use_lgq', tread, 'INT')
+ if (tread == 1) dtset%gstore_use_lgq = intarr(1)
+
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_kzone', tread, 'KEY', key_value=key_value)
  if (tread == 1) dtset%gstore_kzone = tolower(key_value)
 
@@ -2311,6 +2317,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_gmode', tread, 'KEY', key_value=key_value)
  if (tread == 1) dtset%gstore_gmode = tolower(key_value)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_gname', tread, 'KEY', key_value=key_value)
+ if (tread == 1) dtset%gstore_gname = tolower(key_value)
 
  narr = 2 * nsppol
  call intagm(dprarr, intarr, jdtset, marr, narr, string(1:lenstr), 'gstore_brange', tread_brange, 'INT')
@@ -4368,7 +4377,15 @@ if (dtset%usekden==1) then
 
  if (dtset%use_gbt /= 0) then
   call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'qgbt', tread, 'DPR')
-  dtset%qgbt(1:3) = dprarr(1:3)
+  if (tread==1) then
+    dtset%qgbt(1:3) = dprarr(1:3)
+  else
+    call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'qgbt_cart', tread, 'DPR')
+    if (tread==1) then 
+      call mkrdim(dtset%acell_orig(1:3,1),dtset%rprim_orig(1:3,1:3,1),rprimd)
+      dtset%qgbt(1:3) = MATMUL(TRANSPOSE(rprimd)/two_pi, dprarr(1:3))
+    endif
+  endif
  endif
 
  ABI_FREE(intarr)

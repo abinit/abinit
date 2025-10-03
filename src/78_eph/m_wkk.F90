@@ -59,7 +59,7 @@ module m_wkk
  use m_pstat,          only : pstat_proc
  use m_sigtk,          only : sigtk_multiply_by_vc_sqrt
  use m_screening,      only : epsm1_t
- use m_ddk,            only : ddkop_t, ddkop_new
+ use m_ddk,            only : ddkop_t
 
  implicit none
 
@@ -123,15 +123,15 @@ subroutine wkk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  integer,parameter :: LOG_MODQ = 1, LOG_MODK = 4, istwfk1 = 1, master = 0, ndat1 = 1
  integer :: id_required, approx_type, ikxc, option_test, nkxc, ig
  integer :: nkibz, my_rank, nsppol, iq_ibz, iq_bz, isym_qq, itim_qq
- integer :: cplex,nspinor,nprocs, ii, ib, my_is, spin, npw_x, npw_c ! max_npw_xc, min_npw_xc,
- integer :: bstart_k, bstop_k, nband_k, ncols, mpw, ierr, ncerr
+ integer :: nspinor,nprocs, ii, spin, npw_x, npw_c ! max_npw_xc, min_npw_xc, my_is, cplex, ib,
+ integer :: bstart_k, bstop_k, nband_k, ncols, mpw, ierr !, ncerr
  integer :: bstart_kp, bstop_kp, nband_kp, ik_bz, bmin, bmax, max_nb
  integer :: ikp_ibz, isym_kp, trev_kp, npw_kp, istwf_kp, npw_kp_ibz, istwf_kp_ibz
  integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_k_ibz, istwf_k_ibz
  integer :: m_k, im_k, n_kp, in_kp, root_ncid, wkk_mode, ne
- integer :: nfft,nfftf,mgfft,mgfftf,nkpg_kp,nkpg_k,cnt, edos_intmeth, nqlwl, scr_iomode
+ integer :: nfft,nfftf,mgfft,mgfftf,nkpg_kp,nkpg_k,edos_intmeth, nqlwl, scr_iomode ! cnt,
  integer :: ikp_bz, my_ikp, my_nkp !, my_iq,
- real(dp) :: cpu_all, wall_all, gflops_all, cpu, wall, gflops, cpu_kp, wall_kp, gflops_kp
+ real(dp) :: cpu_all, wall_all, gflops_all, cpu_kp, wall_kp, gflops_kp ! cpu, wall, gflops,
  real(dp) :: edos_step, edos_broad, e_mk, e_nkp, e_min, e_max, e_step, smear_mk, smear_nkp, faq
  logical :: isirr_k, isirr_kp, qq_is_gamma, remove_exchange, print_time_kp
  type(wfd_t) :: wfd
@@ -144,21 +144,21 @@ subroutine wkk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  type(ddkop_t) :: ddkop
  type(htetra_t) :: tetra
  character(len=fnlen) :: screen_filepath
- character(len=5000) :: msg, qkp_string
+ character(len=5000) :: msg !, qkp_string
 !arrays
  integer :: g0_k(3), g0_kp(3), g0_qq(3), units(2), work_ngfft(18), gmax(3), mapl_k(6), mapl_kp(6), mg0(3)
  integer,allocatable :: kg_kp(:,:), kg_k(:,:), gbound_kp(:,:), gbound_k(:,:), gbound_c(:,:), gbound_x(:,:)
  integer,allocatable :: nband(:,:), wfd_istwfk(:)
  integer, contiguous, pointer :: kg_c(:,:), kg_x(:,:)
  real(dp) :: kk_ibz(3), kk_bz(3), kp_ibz(3), kp_bz(3), qq_bz(3), kk_diff(3) ! qq_ibz(3)
- complex(gwpc) :: ctmp_gwpc
+ complex(gwp) :: ctmp_gwpc
  character(len=fnlen) :: path
 !arrays
  real(dp) :: n0(ebands%nsppol)
- real(dp),allocatable :: qlwl(:,:), kpg_kp(:,:), kpg_k(:,:), ug_kp(:,:,:), ug_k(:,:), cg_work(:,:)
- real(dp),allocatable :: work(:,:,:,:), e_mesh(:), e_args(:), vcart_ibz(:,:,:,:), wgt_mk(:), wgt_nkp(:,:)
- complex(gwpc),allocatable :: cwork_ur(:), rhotwg_mn_x(:,:,:), rhotwg_mn_c(:,:,:), w_rhotwg_mn_c(:,:,:)
- complex(gwpc),allocatable :: vc_sqrt_gx(:), ur_nkp(:,:), ur_mk(:,:), kxcg(:,:), mu_mn(:,:)
+ real(dp),allocatable :: qlwl(:,:), kpg_kp(:,:), kpg_k(:,:), ug_kp(:,:,:), ug_k(:,:) !, cg_work(:,:)
+ real(dp),allocatable :: work(:,:,:,:), e_mesh(:), e_args(:), wgt_mk(:), wgt_nkp(:,:) ! vcart_ibz(:,:,:,:),
+ complex(gwp),allocatable :: cwork_ur(:), rhotwg_mn_x(:,:,:), rhotwg_mn_c(:,:,:), w_rhotwg_mn_c(:,:,:)
+ complex(gwp),allocatable :: vc_sqrt_gx(:), ur_nkp(:,:), ur_mk(:,:), kxcg(:,:), mu_mn(:,:)
  complex(dp),allocatable :: w_ee(:,:) ! w_kkp(:,:,:,:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
  type(fstab_t),target,allocatable :: fstab(:)
@@ -167,6 +167,8 @@ subroutine wkk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ABI_CHECK(psps%usepaw == 0, "PAW not implemented")
  ABI_CHECK(dtset%nsppol == 1, "nsppol 2 implemented!")
  ABI_CHECK(dtset%nspinor == 1, "nspinor 2 implemented!")
+
+ ABI_UNUSED(mpi_enreg%nproc)
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm); units = [std_out, ab_out]
  call cwtime(cpu_all, wall_all, gflops_all, "start")
@@ -323,7 +325,7 @@ subroutine wkk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ! FIXME
  !gmax = 2 * gmax
 
- ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
+ call ddkop%init(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
 
 #if 0
  call cwtime(cpu, wall, gflops, "start", msg=" Computing v_nk matrix elements for all states on the FS...")

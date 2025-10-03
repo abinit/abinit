@@ -215,7 +215,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc,use_cwavef_r, filter_dilatmx_loc_
  real(dp) :: ghcim,ghcre,weight
 #ifdef HAVE_OPENMP_OFFLOAD
- complex(dpc), parameter :: cminusone  = (-1._dp,0._dp)
+ complex(dp), parameter :: cminusone  = (-1._dp,0._dp)
 #endif
  character(len=500) :: msg
 !arrays

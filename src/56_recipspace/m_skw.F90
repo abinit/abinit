@@ -96,20 +96,20 @@ module m_skw
     ! ptg_symrec(3,3,ptg_nsym)
     ! operations of the point group (reciprocal space).
 
-  complex(dpc),allocatable :: coefs(:,:,:)
+  complex(dp),allocatable :: coefs(:,:,:)
    ! coefs(nr, bcount, nsppol).
 
-  complex(dpc),allocatable :: cached_srk(:)
+  complex(dp),allocatable :: cached_srk(:)
    ! cached_srk(%nr)
    ! The star function for cached_kpt (used in skw_eval_bks).
   real(dp) :: cached_kpt(3)
 
-  complex(dpc),allocatable :: cached_srk_dk1(:,:)
+  complex(dp),allocatable :: cached_srk_dk1(:,:)
    ! cached_srk_dk1(%nr, 3)
    ! The 1d derivative wrt k of the star function for cached_kpt_dk1 (used in skw_eval_bks).
   real(dp) :: cached_kpt_dk1(3)
 
-  complex(dpc),allocatable :: cached_srk_dk2(:,:,:)
+  complex(dp),allocatable :: cached_srk_dk2(:,:,:)
    ! cached_srk_dk2(%nr,3,3)
    ! The 2d derivatives wrt k of the star function for cached_kpt_dk2 (used in skw_eval_bks).
   real(dp) :: cached_kpt_dk2(3)
@@ -187,8 +187,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  integer,allocatable :: ipiv(:)
  real(dp) :: list2(2)
  real(dp),allocatable :: r2vals(:),inv_rhor(:),oeig(:)
- complex(dpc),allocatable :: srk(:,:),hmat(:,:),lambda(:,:,:),work(:)
-
+ complex(dp),allocatable :: srk(:,:),hmat(:,:),lambda(:,:,:),work(:)
 ! *********************************************************************
 
  ABI_CHECK(nkpt > 1, sjoin("nkpt must be > 1 but got:", itoa(nkpt)))
@@ -633,14 +632,13 @@ subroutine mkstar(skw, kpt, srk)
  type(skw_t),intent(in) :: skw
 !arrays
  real(dp),intent(in) :: kpt(3)
- complex(dpc),intent(out) :: srk(skw%nr)
+ complex(dp),intent(out) :: srk(skw%nr)
 
 !Local variables-------------------------------
 !scalars
  integer :: ir,isym
 !arrays
  real(dp) :: sk(3)
-
 ! *********************************************************************
 
  srk = zero
@@ -679,15 +677,14 @@ subroutine mkstar_dk1(skw, kpt, srk_dk1)
  type(skw_t),intent(in) :: skw
 !arrays
  real(dp),intent(in) :: kpt(3)
- complex(dpc),intent(out) :: srk_dk1(skw%nr,3)
+ complex(dp),intent(out) :: srk_dk1(skw%nr,3)
 
 !Local variables-------------------------------
 !scalars
  integer :: ir,isym
 !arrays
  real(dp) :: sk(3)
- complex(dpc) :: work(3,skw%nr)
-
+ complex(dp) :: work(3,skw%nr)
 ! *********************************************************************
 
  work = zero
@@ -728,17 +725,16 @@ subroutine mkstar_dk2(skw, kpt, srk_dk2)
  type(skw_t),intent(in) :: skw
 !arrays
  real(dp),intent(in) :: kpt(3)
- complex(dpc),intent(out) :: srk_dk2(skw%nr,3,3)
+ complex(dp),intent(out) :: srk_dk2(skw%nr,3,3)
 
 !Local variables-------------------------------
 !scalars
  integer :: ir,isym,ii,jj
- complex(dpc) :: eiskr
+ complex(dp) :: eiskr
 !arrays
  integer :: sr(3)
  real(dp) :: sk(3)
- complex(dpc) :: work(3,3,skw%nr)
-
+ complex(dp) :: work(3,3,skw%nr)
 ! *********************************************************************
 
  work = zero

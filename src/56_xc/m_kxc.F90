@@ -922,7 +922,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 !arrays
  integer,intent(in) :: gvec(3,npw),ngfft(18)
  real(dp),intent(in) :: rhor(nfft_tot,nspden)
- complex(gwpc),intent(out) :: kxcg(nfft_tot,dim_kxcg)
+ complex(gwp),intent(out) :: kxcg(nfft_tot,dim_kxcg)
 
 !Local variables ------------------------------
 !scalars
@@ -1162,7 +1162,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  integer,intent(in) :: nqibz
  real(dp),intent(in) :: rhor(nfft,nspden)
  real(dp),intent(in) :: qibz(3,nqibz)
- complex(gwpc),intent(out) :: fxc_ADA(npw,npw,nqibz)
+ complex(gwp),intent(out) :: fxc_ADA(npw,npw,nqibz)
 
 !Local variables ------------------------------
 !scalars
@@ -1184,8 +1184,8 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  real(dp),allocatable :: xccc3d(:),my_rhor(:,:)
  real(dp),allocatable :: my_kxcg(:,:)
  real(dp),allocatable :: rhotilder(:,:)
- complex(gwpc),allocatable :: my_fxc_ADA_ggpq(:,:,:)
- complex(gwpc),allocatable :: FT_fxc_ADA_ggpq(:,:,:),dummy(:,:)
+ complex(gwp),allocatable :: my_fxc_ADA_ggpq(:,:,:)
+ complex(gwp),allocatable :: FT_fxc_ADA_ggpq(:,:,:),dummy(:,:)
  real(dp),allocatable :: rvec(:,:),my_fxc_ADA_rrp(:,:)
  real(dp) :: rmrp(3),abs_rmrp
  integer :: n1,n2,n3,ig_idx_fft(npw)
