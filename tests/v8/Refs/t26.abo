@@ -1,5 +1,5 @@
 
-.Version 10.4.5.9 of ABINIT, released Sep 2025.
+.Version 10.4.5.1 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Wed  1 Oct 2025.
-- ( at 11h03 )
+- ( at 15h44 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v8_t26/t26.abi
 - output file    -> t26.abo
@@ -716,7 +716,7 @@ force_length_stats: {min:   4.14928056E-02, max:   4.14928056E-02, mean:   4.149
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500. mag(i)=approximate local magnetic moment.
     Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)   Atomic charge
-    1  H   1.00000        0.306148      0.080000    0.000000   -0.000000    0.080000    0.000188   -0.000000      0.693852
+    1  H   1.00000        0.306148      0.080000    0.000000   -0.000000    0.080000    0.000188    0.000000      0.693852
     2  H   1.00000        0.315463      0.113137    0.080000    0.000000   -0.080000  134.999963    0.000000      0.684537
  ------------------------------------------------------------------------------------------------------------
  Total magnetization (spheres)
@@ -892,7 +892,7 @@ force_length_stats: {min:   4.37523312E-02, max:   4.37523312E-02, mean:   4.375
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500. mag(i)=approximate local magnetic moment.
     Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)   Atomic charge
-    1  H   1.00000        0.310000      0.080000   -0.000000    0.000000    0.080000    0.000069  180.000000      0.690000
+    1  H   1.00000        0.310000      0.080000   -0.000000    0.000000    0.080000    0.000069    0.000000      0.690000
     2  H   1.00000        0.310000      0.113137    0.080000   -0.000000   -0.080000  135.000047   -0.000000      0.690000
  ------------------------------------------------------------------------------------------------------------
  Total magnetization (spheres)
@@ -1066,7 +1066,7 @@ force_length_stats: {min:   4.14928330E-02, max:   4.14928330E-02, mean:   4.149
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500. mag(i)=approximate local magnetic moment.
     Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)   Atomic charge
-    1  H   1.00000        0.306148      0.080000   -0.000000    0.000000    0.080000    0.000165   90.000000      0.693852
+    1  H   1.00000        0.306148      0.080000   -0.000000    0.000000    0.080000    0.000165    0.000000      0.693852
     2  H   1.00000        0.315463      0.113137    0.000000    0.080000   -0.080000  134.999945   90.000000      0.684537
  ------------------------------------------------------------------------------------------------------------
  Total magnetization (spheres)
@@ -1242,7 +1242,7 @@ force_length_stats: {min:   4.37529620E-02, max:   4.37529620E-02, mean:   4.375
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500. mag(i)=approximate local magnetic moment.
     Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)   Atomic charge
-    1  H   1.00000        0.310000      0.080000   -0.000000   -0.000000    0.080000    0.000046  -90.000000      0.690000
+    1  H   1.00000        0.310000      0.080000   -0.000000   -0.000000    0.080000    0.000046    0.000000      0.690000
     2  H   1.00000        0.310000      0.113137   -0.000000    0.080000   -0.080000  135.000028   90.000000      0.690000
  ------------------------------------------------------------------------------------------------------------
  Total magnetization (spheres)

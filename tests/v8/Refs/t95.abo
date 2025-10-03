@@ -1,5 +1,5 @@
 
-.Version 10.4.5.9 of ABINIT, released Sep 2025.
+.Version 10.4.5.1 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Wed  1 Oct 2025.
-- ( at 11h04 )
+- ( at 15h45 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v8_t95/t95.abi
 - output file    -> t95.abo
@@ -2002,7 +2002,7 @@ force_length_stats: {min:   2.03068400E-01, max:   2.05081352E-01, mean:   2.040
  ------------------------------------------------------------------------------------------------------------
  Total magnetization (spheres)
  (cart.coord.)                                      0.000000    0.000001    0.080000
- (sph.coord.)                           0.080000                                        0.000723   61.459018
+ (sph.coord.)                           0.080000                                        0.000723    0.000000
  Total magnetization (exact)
  (cart.coord.)                                      0.000001    0.000001    0.195024
  (sph.coord.)                           0.195024                                        0.000443   65.953286
@@ -2752,10 +2752,10 @@ P           mkmem32        18
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          9.9  wall=          9.9
+- Proc.   0 individual time (sec): cpu=         10.2  wall=         10.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and  42 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.9  wall=          9.9
++Overall time at end (sec) : cpu=         10.2  wall=         10.3

@@ -1,5 +1,5 @@
 
-.Version 10.4.5.9 of ABINIT, released Sep 2025.
+.Version 10.4.5.1 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Wed  1 Oct 2025.
-- ( at 11h04 )
+- ( at 15h46 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v8_t67-t68-t69-t70/t69.abi
 - output file    -> t69.abo
@@ -249,14 +249,14 @@ tolerances: {toldfe: 1.00E-02, }
 ----------------------------
  Imaginary part of magnetization:
     Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
-    1 Fe   2.00000       -0.000016      0.000001   -0.000000    0.000000    0.000001   15.991953  142.846648
+    1 Fe   2.00000       -0.000016      0.000001   -0.000000    0.000000    0.000001   15.991953    0.000000
  ------------------------------------------------------------------------------------------------------------
  Total magnetization (spheres)
  (cart.coord.)                                     -0.000000    0.000000    0.000001
- (sph.coord.)                           0.000001                                       15.991953  142.846648
+ (sph.coord.)                           0.000001                                       15.991953    0.000000
  Total magnetization (exact)
  (cart.coord.)                                     -0.000000    0.000000    0.000001
- (sph.coord.)                           0.000001                                        16.293625  143.550921
+ (sph.coord.)                           0.000001                                        16.293625    0.000000
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -464,10 +464,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         24.5  wall=         24.5
+- Proc.   0 individual time (sec): cpu=         22.7  wall=         22.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         24.5  wall=         24.5
++Overall time at end (sec) : cpu=         22.7  wall=         22.8
