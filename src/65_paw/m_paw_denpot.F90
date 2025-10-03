@@ -1093,7 +1093,7 @@ subroutine pawdenpot(compch_sph,el_temp,ipert,ixc,my_natom,natom,nspden,ntypat,n
      paw_energies%epaw_xc=e1xc-etild1xc !+eexex
      paw_energies%entropy_paw=s1xc-sxccore-stild1xc ! PAW entropy coming from finite-temperature xc functionals
      paw_energies%epaw_core=zero ; paw_energies%epaw_core_dc=zero
-     if (abs(ekincore)>tiny(zero)) then
+     if (abs(ekincore)>tiny(zero).and.ipositron/=1) then
        paw_energies%epaw_core=exccore+ekincore+ehnzc
        paw_energies%epaw_core_dc=paw_energies%epaw_core
      end if
