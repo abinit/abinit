@@ -75,7 +75,7 @@ module m_phgamma
  use m_dynmat,         only : symdyma, ftgam_init, ftgam, asrif9
  use m_bz_mesh,        only : kpath_t
  use m_special_funcs,  only : fermi_dirac
- use m_kpts,           only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt, listkk, kpts_timrev_from_kptopt, kpts_map
+ use m_kpts,           only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map
  use defs_elphon,      only : complete_gamma !, complete_gamma_tr
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
  use m_pawang,         only : pawang_type
@@ -861,7 +861,8 @@ subroutine phgamma_eval_qibz(gams, cryst, ifc, iq_ibz, spin, phfrq, gamma_ph, la
  do nu1=1,gams%natom3
    gamma_ph(nu1) =  gamma_ph(nu1) * pi * spinfact
    lambda_ph(nu1) = zero
-   if (abs(phfrq(nu1)) > EPHTK_WTOL) lambda_ph(nu1) = gamma_ph(nu1) / (two * pi * gams%n0(spin) * phfrq(nu1)**2)
+   !if (abs(phfrq(nu1)) > EPHTK_WTOL) lambda_ph(nu1) = gamma_ph(nu1) / (two * pi * gams%n0(spin) * phfrq(nu1)**2)
+   if (abs(phfrq(nu1)) > EPHTK_WTOL) lambda_ph(nu1) = gamma_ph(nu1) / (two * pi * sum(gams%n0(:)) * phfrq(nu1)**2)
    if (present(gamma_ph_ee)) gamma_ph_ee(:,:,nu1) =  gamma_ph_ee(:,:,nu1) * pi * spinfact
  end do
 
@@ -3957,7 +3958,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
               end do
            end do
          end do
-
        end if ! add transport things
 
        if (dtset%prteliash == 3) then
@@ -4009,7 +4009,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
              end do
            end do
          end do
-       end if
+       end if ! prteliash == 3
 
        if (print_time_k) then
          write(msg,'(5x,2(a,i0),a)')"k-point [", my_ik, "/", gams%my_nfsk_q, "]"
@@ -4059,7 +4059,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    call cwtime_report(msg, cpu_q, wall_q, gflops_q, end_str=ch10)
  end do ! iq_ibz
 
- call cwtime_report(" phonon linewidths q-loop", cpu_all, wall_all, gflops_all, pre_str=ch10, end_str=ch10)
+ call cwtime_report(" phonon linewidths q-loop", cpu_all, wall_all, gflops_all, end_str=ch10)
 
  ! Free memory
  ABI_FREE(gvnlx1)
@@ -4088,12 +4088,14 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ABI_FREE(cwaveprj0)
 
  ! Collect results on each node
+ call cwtime(cpu_all, wall_all, gflops_all, "start")
  call xmpi_sum(gams%vals_qibz, qs_comm%value, ierr)
  if (dtset%eph_transport > 0) then
    call xmpi_sum(gams%vals_in_qibz, qs_comm%value, ierr)
    call xmpi_sum(gams%vals_out_qibz, qs_comm%value, ierr)
  end if
  if (dtset%prteliash == 3) call xmpi_sum(gams%vals_ee, qs_comm%value, ierr)
+ call cwtime_report(" xmpi_sum", cpu_all, wall_all, gflops_all)
 
  ! Deallocate MPI communicators.
  call pert_comm%free(); call qpt_comm%free(); call bsum_comm%free(); call qs_comm%free()
