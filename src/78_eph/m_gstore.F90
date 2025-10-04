@@ -2775,6 +2775,7 @@ end subroutine gstore_get_lambda_iso_iw
 !!  wmesh: Frequency mesh.
 !!
 !! OUTPUT
+!! a2fw(nw): Eliashberg function.
 !!
 !! SOURCE
 
@@ -2803,13 +2804,19 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
  call cwtime(cpu, wall, gflops, "start")
  call wrtout(units, sjoin(" Computing a^2F(w) with ph_smear:", ftoa(gstore%dtset%ph_smear * Ha_meV), "(meV)"), pre_newlines=1)
 
- ABI_CHECK(gstore%qzone == "bz", "gstore_get_lambda_iso_iw assumes qzone == `bz`")
+ !if (gstore%check_cplex_qkzone_gmode(2, "bz", "bz", "phonon") /= 0) then
+ !  ABI_ERROR("The gstore object is inconsistent with gstore_wannierize_and_write_gwan. See messages above.")
+ !end if
+
+ ABI_CHECK(gstore%qzone == "bz", "gstore_get_a2fw assumes qzone == `bz`")
  ! Check consistency of little group options.
  ABI_CHECK(gstore%check_little_group(dtset, msg) == 0, msg)
 
  ABI_MALLOC(deltaw_nuq, (nw))
 
  a2fw = zero
+
+ ! Loop over collinear spins.
  do my_is=1,gstore%my_nspins
    associate (gqk => gstore%gqk(my_is), cryst => gstore%cryst)
    ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
@@ -2822,8 +2829,9 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
    ABI_MALLOC(dbl_delta_q, (nb_kq, nb_k, gqk%my_nk))
    ABI_MALLOC(g2_mnkp, (nb_kq, nb_k, gqk%my_nk, gqk%my_npert))
 
+   ! Loop over my q-points.
    do my_iq=1,gqk%my_nq
-     ! Compute integration weights for the double delta.
+     ! Compute all integration weights for the double delta.
      call gqk%dbldelta_qpt(my_iq, gstore, gstore%dtset%eph_intmeth, gstore%dtset%eph_fsmear, qpt, weight_q, dbl_delta_q)
 
      ! Copy data to improve memory access in the loops below.
@@ -2837,23 +2845,22 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
        call lg_myq%init(cryst, qpt, timrev_q, gstore%nkbz, gstore%kbz, gstore%nkibz, gstore%kibz, xmpi_comm_self)
      end if
 
+     ! Loop over my phonon modes.
      do my_ip=1,gqk%my_npert
        wqnu = gqk%my_wnuq(my_ip, my_iq)
+       ! delta(w - omega_qnu)
        deltaw_nuq = gaussian(wmesh - wqnu, gstore%dtset%ph_smear)
+
+       ! Loop over my k-points.
        do my_ik=1,gqk%my_nk
          kk = gqk%my_kpts(:, my_ik); ik_ibz = gqk%my_k2ibz(1, my_ik); weight_k = gqk%my_wtk(my_ik)
 
          ! Handle little group and integration weight.
          if (dtset%gstore_use_lgq /= 0) then
-           ii = lg_myq%findq_ibzk(kk)
-           if (ii == -1) then
-             !kk_string = ktoa(kk)
-             !call wrtout(std_out, sjoin(" my_ik:", itoa(my_ik), kk_string, " not in IBZ_q --> skipping iteration"))
-             cycle
-             ! TODO: Check fillvalue (should be zero)
-           end if
+           ii = lg_myq%findq_ibzk(kk); if (ii == -1) cycle; weight_k = lg_myq%weights(ii)
          end if
 
+         ! Sum over m_kq and n_k and accumulate.
          do in_k=1,nb_k
            do im_kq=1,nb_kq
              g2_qnu = g2_mnkp(im_kq, in_k, my_ik, my_ip)
@@ -2876,6 +2883,7 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
  ! Take into account collinear spin and N(eF) TODO
  a2fw = a2fw * (two / (gstore%nsppol * gstore%dtset%nspinor))
  call xmpi_sum(a2fw, gstore%comm, ierr)
+
  call cwtime_report(" gstore_get_a2fw", cpu, wall, gflops)
 
 end subroutine gstore_get_a2fw
@@ -3775,7 +3783,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    ABI_MALLOC(iq_buf, (2, qbuf_size))
    ABI_MALLOC(gkq_atm, (2, nb_kq, nb_k, natom3))
 
-   ! Inside the loops we compute gkq_atm(2, nb_kq, nb_kq, natom3)
+   ! Inside the loops we compute gkq_atm(2, nb_kq, nb_k, natom3)
    ABI_MALLOC_OR_DIE(my_gbuf, (gqk%cplex, nb_kq, nb_k, natom3, gqk%my_nk, qbuf_size), ierr)
    call pstat_proc%print(_PSTAT_ARGS_)
 
