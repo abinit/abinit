@@ -1397,7 +1397,7 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk,Iatom,fname)
       END DO
     END DO
   ENDIF
-  call flush(4367)
+  !call flush(4367) nag compiler problrem
   close(4367)
 
   !Imag part
@@ -1414,7 +1414,7 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk,Iatom,fname)
       END DO                                                                                             
     END DO                                                                                               
   ENDIF   
-  call flush(4367)                                                                                               
+  !call flush(4367) !nag compiler problem                                                                                              
   close(4367)                                                                                            
      
   call xmpi_barrier(op%MY_COMM)
