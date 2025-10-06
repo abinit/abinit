@@ -3038,7 +3038,9 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  mband = MAXVAL(Hdr_wfk%nband)
 
  remove_inv = .FALSE.
+ if (dtset%userie /= 456) then
  call hdr_wfk%vs_dtset(dtset)
+ end if
 
  test_npwkss = 0
  call make_gvec_kss(Dtset%nkpt,Dtset%kptns,Hdr_wfk%ecut_eff,Dtset%symmorphi,Dtset%nsym,Dtset%symrel,Dtset%tnons,&
