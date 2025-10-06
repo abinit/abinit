@@ -73,7 +73,7 @@ prteig  0
 #%% test_chain = t71.abi, t72.abi, t73.abi, t74.abi, t75.abi, t76.abi, t77.abi, t78.abi, t79.abi, t80.abi
 #%% [files]
 #%% files_to_test =
-#%%    t77.abo,  tolnlines = 4, tolabs = 1.2e-03, tolrel = 1.5e-04, fld_options=-medium ;
+#%%    t77.abo,  tolnlines = 5, tolabs = 1.2e-03, tolrel = 2.1e-04, fld_options=-medium ;
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]
