@@ -117,13 +117,12 @@ contains
 !! SOURCE
 
 subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo, &
-&                     ng,optewald,qpt)
+&                     qpt) !optional arguments
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in)   :: icutcoul, nkpt
  real(dp),intent(in)  :: gsqcut,rcut
- integer,optional,intent(in) :: ng,optewald
 
 !arrays
  integer,intent(in)    :: ngfft(18)
@@ -136,8 +135,8 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo, &
  integer,save :: enough
  integer            :: i1,i2,i23,i3,ierr,id(3),ii,ig,ing
  integer            :: c1,c2,opt_cylinder
- integer            :: n1,n2,n3,nfft,ng_
- integer            :: test,opt_slab,optewald_ !opt_cylinder
+ integer            :: n1,n2,n3,nfft
+ integer            :: test,opt_slab !opt_cylinder
  real(dp)           :: alpha_fac, ap1sqrt, log_alpha
  real(dp)           :: cutoff,rcut_loc,rcut2,check,rmet(3,3)
  real(dp)           :: gvecg2p3,gvecgm12,gvecgm13,gvecgm23,gs2,gs3
@@ -189,10 +188,6 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo, &
    end do
  end do
 
- !Use a different order for the G-space indexes, i.e., as in Ewald subroutines.
- optewald_=0; if(present(optewald)) optewald_=optewald
- ng_=0; if(present(ng)) ng_=ng
-   
  ! Get the cut-off method info from the input file
  ! Assign method to one of the available cases
  mode='NONE'
@@ -531,47 +526,22 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo, &
        ! Calculate rcut for each method !
        rcut_loc = half*SQRT(DOT_PRODUCT(a3,a3))
 
-       if (optewald_==0) then
-
-        do i3=1,n3
-         do i2=1,n2
-          i23=n1*(i2-1 + n2*(i3-1))
-          do i1=1,n1
-            ii=i1+i23
-            gcart(:)=b1(:)*gvec(1,i1)+b2(:)*gvec(2,i2)+b3(:)*gvec(3,i3)
-            gcart_para=SQRT(gcart(1)**2+gcart(2)**2) ; gcart_perp = gcart(3)
-            if(gcart_para<tol4.and.ABS(gcart_perp)<tol4) then
-            !if(gcart_para<tol12.and.ABS(gcart_perp)<tol12) then
-              gcutoff(ii)=zero
-            else
-              gcutoff(ii)=one-EXP(-gcart_para*rcut_loc)*COS(gcart_perp*rcut_loc)
-            end if
-          end do !i1
-         end do !i2
-        end do !i3
-
-       else if (optewald_==1) then
-
-        ii=0
-        do i3=-ng_,ng_
-         do i2=-ng_,ng_
-          do i1=-ng_,ng_
-            ii=ii+1
-            gcart(:)=b1(:)*(dble(i1)+qpt_(1)) + &
-                   & b2(:)*(dble(i2)+qpt_(2)) + &
-                   & b3(:)*(dble(i3)+qpt_(3))
-            gcart_para=SQRT(gcart(1)**2+gcart(2)**2) ; gcart_perp = gcart(3)
-            if(gcart_para<tol4.and.ABS(gcart_perp)<tol4) then
-            !if(gcart_para<tol12.and.ABS(gcart_perp)<tol12) then
-              gcutoff(ii)=zero
-            else
-              gcutoff(ii)=one-EXP(-gcart_para*rcut_loc)*COS(gcart_perp*rcut_loc)
-            end if
-          end do !i1
-         end do !i2
-        end do !i3
-
-       end if
+       do i3=1,n3
+        do i2=1,n2
+         i23=n1*(i2-1 + n2*(i3-1))
+         do i1=1,n1
+           ii=i1+i23
+           gcart(:)=b1(:)*gvec(1,i1)+b2(:)*gvec(2,i2)+b3(:)*gvec(3,i3)
+           gcart_para=SQRT(gcart(1)**2+gcart(2)**2) ; gcart_perp = gcart(3)
+           if(gcart_para<tol4.and.ABS(gcart_perp)<tol4) then
+           !if(gcart_para<tol12.and.ABS(gcart_perp)<tol12) then
+             gcutoff(ii)=zero
+           else
+             gcutoff(ii)=one-EXP(-gcart_para*rcut_loc)*COS(gcart_perp*rcut_loc)
+           end if
+         end do !i1
+        end do !i2
+       end do !i3
 
        !CASE SLAB 2 - Rozzi
        CASE(2)
@@ -622,33 +592,16 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo, &
      test=COUNT(vcutgeo/=zero)
      ABI_CHECK(test==2,"Wrong vcutgeo")
 
-     if (optewald_==0) then
-
-      do i3=1,n3
-       odd2=1-(-1)**(i3-1)
-       do i2=1,n2
-        i23=n1*(i2-1 + n2*(i3-1))
-        do i1=1,n1
-         ii=i1+i23
-         gcutoff(ii)=odd2
-        end do
+     do i3=1,n3
+      odd2=1-(-1)**(i3-1)
+      do i2=1,n2
+       i23=n1*(i2-1 + n2*(i3-1))
+       do i1=1,n1
+        ii=i1+i23
+        gcutoff(ii)=odd2
        end do
       end do
-
-     else if (optewald_==1) then
-
-      ii=0
-      do i3=-ng_,ng_
-       odd2=1-(-1)**(i3)
-       do i2=-ng_,ng_
-        do i1=-ng_,ng_
-         ii=ii+1
-         gcutoff(ii)=odd2
-        end do
-       end do
-      end do
-    
-     end if
+     end do
 
    CASE('ERF')
 

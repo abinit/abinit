@@ -2356,7 +2356,8 @@ subroutine dfpt_ewald(dyew,gmet,gsqcut,icutcoul,my_natom,natom,ngfft,nkpt,qphon,
 !nr, ng affect convergence of sums (nr=3,ng=5 is not good enough):
 !scalars
  integer,parameter :: im=2,ng=10,nr=6,re=1
- integer :: ia,ia0,ib,ierr,ig1,ig2,ig3,ii,ir1,ir2,ir3,mu,my_comm_atom,nu
+ integer :: ia,ia0,ib,ierr,ig,ig1,ig2,ig23,ig3,ii,ing
+ integer :: ir1,ir2,ir3,mu,my_comm_atom,nh,nu
  logical :: my_atmtab_allocated,paral_atom,computeit
  real(dp) :: arg,arga,argb,c1i,c1r,da1,da2,da3,derfc_arg
  real(dp) :: direct,dot1,dot2,dot3,dotr1,dotr2,dotr3
@@ -2366,6 +2367,8 @@ subroutine dfpt_ewald(dyew,gmet,gsqcut,icutcoul,my_natom,natom,ngfft,nkpt,qphon,
  real(dp) :: term3,facg0
  character(len=500) :: message
 !arrays
+ integer :: id(3)
+ integer, allocatable :: inv_ig(:,:)
  real(dp) :: tsec(2)
  integer,pointer :: my_atmtab(:)
  real(dp) :: gpq(3),rq(3)
@@ -2391,7 +2394,19 @@ subroutine dfpt_ewald(dyew,gmet,gsqcut,icutcoul,my_natom,natom,ngfft,nkpt,qphon,
 
 !Initialize Gcut-off array from m_gtermcutoff
  call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo,&
-&                optewald=1,ng=ng,qpt=qphon)
+&                qpt=qphon)
+
+!Need a way to reverse mapping the indexes inside termcutoff and Ewald rotines
+ nh=MAX(ngfft(1),ngfft(2),ngfft(3))/2
+ ABI_MALLOC(inv_ig,(3,-nh:nh))
+ do ii=1,3
+   id(ii)=ngfft(ii)/2+2
+   do ing=1,ngfft(ii)
+     ig=ing-(ing/id(ii))*ngfft(ii)-1
+     ! Create reverse mapping
+     inv_ig(ii, ig) = ing
+   end do
+ end do
 
 !Sum terms over g space:
  fac=pi**2/eta
@@ -2438,7 +2453,21 @@ subroutine dfpt_ewald(dyew,gmet,gsqcut,icutcoul,my_natom,natom,ngfft,nkpt,qphon,
          arg=fac*gsq
 !        Larger arg gives 0 contribution:
          if (arg <= 80._dp) then
-           term=exp(-arg-facg0)/gsq * gcutoff(ii)
+
+           ! Apply cutoff 
+           if ((abs(ig1).le.ngfft(1)/2).and.&
+           &   (abs(ig2).le.ngfft(2)/2).and.&
+           &   (abs(ig3).le.ngfft(3)/2)) then
+             ! Use inv_ig to map back to ing indices
+             ig23=ngfft(1)*(inv_ig(2,ig2)-1 + ngfft(2)*(inv_ig(3,ig3)-1))
+             ii=inv_ig(1,ig1)+ig23
+             term=exp(-arg-facg0)/gsq * gcutoff(ii)
+           else if (icutcoul.ne.3) then
+             term=zero 
+           else
+             term=exp(-arg)/gsq
+           end if
+
            do ia0=1,my_natom
              ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
              arga=two_pi*(gpq(1)*xred(1,ia)+gpq(2)*xred(2,ia)+gpq(3)*xred(3,ia))
@@ -2466,6 +2495,7 @@ subroutine dfpt_ewald(dyew,gmet,gsqcut,icutcoul,my_natom,natom,ngfft,nkpt,qphon,
  end do
 
  ABI_FREE(gcutoff) 
+ ABI_FREE(inv_ig)
 
 !End G summation by accounting for some common factors.
 !(for the charges:see end of routine)
