@@ -31,7 +31,7 @@ nband 32 nband1 16
 
 # === SCF cycle options
 nstep 20  tolvrs 1.d-7 nstep3  7
-ecut 5. pawecutdg 10.
+ecut 6. pawecutdg 10.
 
 # === K-points and syms
 kptopt1 1  kptopt 4
