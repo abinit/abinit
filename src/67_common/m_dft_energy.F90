@@ -275,7 +275,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 !scalars
  integer :: bdtot_index,blocksize,choice,cplex,cplex_rhoij,cpopt,dimffnl
  integer :: iband,iband_last,iblock,iblocksize,icg,ider,idir,ierr,ifft,ikg,ikpt,ilm
- integer :: ipert,ipositron,iresid,ispden,isppol,istwf_k,izero
+ integer :: ipert,ipositron,iresid,ispden,isppol,istwf_k,itypat,izero
  integer :: me_distrb,mpi_comm_sphgrid,my_ikpt,my_nspinor,n1,n2,n3,n4,n5,n6
  integer :: nband_k,nblockbd,nfftotf,nkpg,nkxc,nk3xc,nnlout,npw_k,nspden_rhoij,option
  integer :: option_rhoij,paw_opt,signs,spaceComm,tim_mkrho,tim_nonlop
@@ -851,6 +851,12 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
    if(associated(rcpaw)) then
      energies%paw%epaw_core=rcpaw%ehnzc+rcpaw%ekinc
      energies%paw%epaw_core_dc=rcpaw%eeigc-rcpaw%edcc+rcpaw%ehnzc
+     if (ipositron/=1) then
+       do itypat=1,dtset%ntypat
+         energies%paw%epaw_core=energies%paw%epaw_core+pawtab(itypat)%exccore
+         energies%paw%epaw_core_dc=energies%paw%epaw_core_dc+pawtab(itypat)%exccore
+       enddo
+     endif
      if(optene==0.or.optene==2) etotal=etotal+energies%paw%epaw_core
      if(optene==1.or.optene==3) etotal=etotal+energies%paw%epaw_core_dc
    endif

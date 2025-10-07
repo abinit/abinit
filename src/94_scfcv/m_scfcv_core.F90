@@ -2687,7 +2687,8 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 
 !Local variables-------------------------------
 !scalars
- integer :: comm_grid,dimnhat,ifft,ipositron,ispden,optgr,optgr2,option,optnc,optstr,optstr2,iir,jjr,kkr
+ integer :: comm_grid,dimnhat,ifft,ipositron,ispden,itypat,optgr,optgr2,option
+ integer :: optnc,optstr,optstr2,iir,jjr,kkr
  logical :: apply_residual
  real(dp) :: eenth,ucvol_
 !arrays
@@ -2837,6 +2838,12 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
    if(associated(rcpaw)) then
      energies%paw%epaw_core=rcpaw%ehnzc+rcpaw%ekinc
      energies%paw%epaw_core_dc=rcpaw%eeigc-rcpaw%edcc+rcpaw%ehnzc
+     if (ipositron/=1) then
+       do itypat=1,dtset%ntypat
+         energies%paw%epaw_core=energies%paw%epaw_core+pawtab(itypat)%exccore
+         energies%paw%epaw_core_dc=energies%paw%epaw_core_dc+pawtab(itypat)%exccore
+       enddo
+     endif
      if(optene==0) etotal=etotal+energies%paw%epaw_core
      if(optene==1) etotal=etotal+energies%paw%epaw_core_dc
    end if
