@@ -2455,9 +2455,9 @@ subroutine dfpt_ewald(dyew,gmet,gsqcut,icutcoul,my_natom,natom,ngfft,nkpt,qphon,
          if (arg <= 80._dp) then
 
            ! Apply cutoff 
-           if ((abs(ig1).le.ngfft(1)/2).and.&
-           &   (abs(ig2).le.ngfft(2)/2).and.&
-           &   (abs(ig3).le.ngfft(3)/2)) then
+           if ((abs(ig1).lt.ngfft(1)/2).and.&
+           &   (abs(ig2).lt.ngfft(2)/2).and.&
+           &   (abs(ig3).lt.ngfft(3)/2)) then
              ! Use inv_ig to map back to ing indices
              ig23=ngfft(1)*(inv_ig(2,ig2)-1 + ngfft(2)*(inv_ig(3,ig3)-1))
              ii=inv_ig(1,ig1)+ig23
