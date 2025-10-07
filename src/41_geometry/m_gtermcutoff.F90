@@ -1,4 +1,4 @@
-!!****zeroi* ABINIT/m_gtermcutoff
+!!****m* ABINIT/m_gtermcutoff
 !! NAME
 !!  m_gtermcutoff
 !!
