@@ -116,8 +116,7 @@ contains
 !!
 !! SOURCE
 
-subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo, &
-&                     qpt) !optional arguments
+subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo,qpt) !optional arguments
 
 !Arguments ------------------------------------
 !scalars
