@@ -2840,8 +2840,8 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
      energies%paw%epaw_core_dc=rcpaw%eeigc-rcpaw%edcc+rcpaw%ehnzc
      if (ipositron/=1) then
        do itypat=1,dtset%ntypat
-         energies%paw%epaw_core=energies%paw%epaw_core+pawtab(itypat)%exccore
-         energies%paw%epaw_core_dc=energies%paw%epaw_core_dc+pawtab(itypat)%exccore
+         energies%paw%epaw_core=energies%paw%epaw_core+pawtab(itypat)%exccore*rcpaw%atm(itypat)%mult
+         energies%paw%epaw_core_dc=energies%paw%epaw_core_dc+pawtab(itypat)%exccore*rcpaw%atm(itypat)%mult
        enddo
      endif
      if(optene==0) etotal=etotal+energies%paw%epaw_core
