@@ -16,6 +16,7 @@ add_library(39_libpaw STATIC
   m_paw_atomorb.F90
   m_pawtab.F90
   m_paw_an.F90
+  m_paw_energies.F90
   m_paw_ij.F90
   m_pawfgrtab.F90
   m_paw_finegrid.F90
