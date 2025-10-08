@@ -65,7 +65,7 @@ occopt1? 7
  tolvrs11 1.0d-7
  tolvrs 1.0d-8
  nstep  60
- ecut 6
+ ecut 6.5
  kptopt 0
  nkpt 1
  kpt 0.0 0.0 0.0
