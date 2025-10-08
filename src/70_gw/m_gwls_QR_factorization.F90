@@ -94,9 +94,9 @@ subroutine extract_QR(mpi_communicator,Hsize,Xsize,Xmatrix,Rmatrix)
 !--------------------------------------------------------------------------
 
 integer,        intent(in) :: Hsize, Xsize, mpi_communicator
-complex(dpc),intent(inout) :: Xmatrix(Hsize,Xsize)
+complex(dp),intent(inout) :: Xmatrix(Hsize,Xsize)
 
-complex(dpc),  intent(out),optional :: Rmatrix(Xsize,Xsize)
+complex(dp),  intent(out),optional :: Rmatrix(Xsize,Xsize)
 
 ! local variables
 
@@ -151,12 +151,12 @@ subroutine extract_SVD(mpi_communicator, Hsize,lsolutions_max,svd_matrix,svd_val
 
 integer,      intent(in)    :: mpi_communicator
 integer,      intent(in)    :: Hsize, lsolutions_max
-complex(dpc), intent(inout) :: svd_matrix(Hsize,lsolutions_max)
+complex(dp), intent(inout) :: svd_matrix(Hsize,lsolutions_max)
 real(dp),     intent(out)   :: svd_values(lsolutions_max)
 
 
-complex(dpc), allocatable   :: Rmatrix(:,:)
-complex(dpc), allocatable   :: svd_tmp(:,:)
+complex(dp), allocatable   :: Rmatrix(:,:)
+complex(dp), allocatable   :: svd_tmp(:,:)
 
 real(dp) :: tsec(2)
 integer :: GWLS_TIMAB, OPTION_TIMAB
@@ -237,15 +237,15 @@ subroutine extract_SVD_lapack(Hsize,lsolutions_max,svd_matrix,svd_values)
 
 
 integer,      intent(in)    :: Hsize, lsolutions_max
-complex(dpc), intent(inout) :: svd_matrix(Hsize,lsolutions_max)
+complex(dp), intent(inout) :: svd_matrix(Hsize,lsolutions_max)
 real(dp),     intent(out)   :: svd_values(lsolutions_max)
 
 
 
 integer                   :: info_zgesvd
 integer                   :: lwork_svd
-complex(dpc), allocatable :: work_svd(:)
-complex(dpc), allocatable :: svd_U(:,:), svd_V(:,:)
+complex(dp), allocatable :: work_svd(:)
+complex(dp), allocatable :: svd_U(:,:), svd_V(:,:)
 real   (dp ), allocatable :: rwork_svd(:)
 
 integer        :: debug_unit
@@ -386,9 +386,9 @@ subroutine extract_QR_Householder(mpi_communicator,Hsize,Xsize,Xmatrix,Rmatrix)
 !--------------------------------------------------------------------------
 
 integer,        intent(in) :: Hsize, Xsize, mpi_communicator
-complex(dpc),intent(inout) :: Xmatrix(Hsize,Xsize)
+complex(dp),intent(inout) :: Xmatrix(Hsize,Xsize)
 
-complex(dpc),  intent(out),optional :: Rmatrix(Xsize,Xsize)
+complex(dp),  intent(out),optional :: Rmatrix(Xsize,Xsize)
 
 ! local variables
 integer        :: numbrer_of_plane_waves
@@ -405,23 +405,19 @@ integer :: l1, l2
 
 integer, allocatable      :: nproc_array(:)
 
-complex(dpc), allocatable :: Qinternal(:,:)
-complex(dpc), allocatable :: Rinternal(:,:)
-complex(dpc), allocatable :: vj(:)
-
-complex(dpc), allocatable :: A_matrix(:,:)
-complex(dpc), allocatable :: V_matrix(:,:)
-
-complex(dpc), allocatable :: list_beta(:)
-
-complex(dpc) :: cmplx_value
+complex(dp), allocatable :: Qinternal(:,:)
+complex(dp), allocatable :: Rinternal(:,:)
+complex(dp), allocatable :: vj(:)
+complex(dp), allocatable :: A_matrix(:,:)
+complex(dp), allocatable :: V_matrix(:,:)
+complex(dp), allocatable :: list_beta(:)
+complex(dp) :: cmplx_value
 real   (dp ) :: real_value
 
-complex(dpc) :: norm_x
-complex(dpc) :: phase
-
-complex(dpc), allocatable :: error(:,:)
-complex(dpc), allocatable :: coeff(:)
+complex(dp) :: norm_x
+complex(dp) :: phase
+complex(dp), allocatable :: error(:,:)
+complex(dp), allocatable :: coeff(:)
 
 
 integer :: mpi_rank

@@ -1828,7 +1828,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  integer,intent(out) :: ierr
  character(len=*),intent(out) :: err_msg
  real(dp),optional,target,intent(out) :: full_cg1(2, stern%npw_kq*stern%nspinor)
- complex(gwpc),optional,intent(out) :: full_ur1(gs_hamkq%nfft*stern%nspinor)
+ complex(gwp),optional,intent(out) :: full_ur1(gs_hamkq%nfft*stern%nspinor)
 
 !Local variables ------------------------------
 !scalars
@@ -1838,10 +1838,10 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  type(rf2_t) :: rf2
 !arrays
  real(dp),allocatable :: grad_berry(:,:)
- complex(gwpc),allocatable :: cwork_sp(:)
+ complex(gwp),allocatable :: cwork_sp(:)
  logical :: cycle_bands(stern%nband)
 #ifdef HAVE_GW_DPC
- complex(gwpc),pointer :: full_ug1_dp_ptr(:)
+ complex(gwp),pointer :: full_ug1_dp_ptr(:)
 #endif
 ! *************************************************************************
 

@@ -13,10 +13,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -210,11 +206,8 @@ contains
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
+
  subroutine xg_nonlop_init(xg_nonlop,indlmn,my_natom,nattyp,mkmem,ntypat,nspinor,ucvol,usepaw,&
      xg_nonlop_option,me_band,comm_band,comm_atom,mpi_atmtab)
 
@@ -320,10 +313,6 @@ contains
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
  subroutine xg_nonlop_update_weight(xg_nonlop,ucvol)
 
@@ -342,10 +331,6 @@ contains
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
  subroutine xg_nonlop_init_cplex_alldij(xg_nonlop,paw_ij)

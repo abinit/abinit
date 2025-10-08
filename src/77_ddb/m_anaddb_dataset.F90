@@ -2271,11 +2271,10 @@ subroutine anaddb_dtset_init(dtset, input_path)
  integer:: lenstr, marr, jdtset, tread, i1, ierr
  character(len=strlen):: string, raw_string, fname, dirpath
  character(len=fnlen):: unused
- character(len = 500):: msg
+ !character(len = 500):: msg
 !arrays
  integer, allocatable:: intarr(:)
  real(dp), allocatable:: dprarr(:)
-
 ! *********************************************************************
 
  dtset%filename_input = input_path

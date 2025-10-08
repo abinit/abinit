@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! SOURCE
-!!
 
 #if defined HAVE_CONFIG_H
 #include "config.h"
@@ -24,6 +20,7 @@
 #include "abi_common.h"
 
 module m_rcpaw
+
  use defs_basis
  use defs_abitypes
  use m_dtset
@@ -570,7 +567,6 @@ subroutine rcpaw_core_energies(rcpaw,ntypat)
 
 end subroutine rcpaw_core_energies
 !!***
-
 
 end module m_rcpaw
 !!***

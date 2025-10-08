@@ -656,73 +656,35 @@ subroutine multibinit_dtset_free(multibinit_dtset)
 
 ! *************************************************************************
 
- if (allocated(multibinit_dtset%atifc))  then
-   ABI_FREE(multibinit_dtset%atifc)
- end if
- if (allocated(multibinit_dtset%conf_cutoff_disp))  then
-   ABI_FREE(multibinit_dtset%conf_cutoff_disp)
- end if
- if (allocated(multibinit_dtset%fit_fixcoeff))  then
-   ABI_FREE(multibinit_dtset%fit_fixcoeff)
- end if
- if (allocated(multibinit_dtset%fit_imposecoeff))  then
-   ABI_FREE(multibinit_dtset%fit_imposecoeff)
- end if
- if (allocated(multibinit_dtset%fit_bancoeff))  then
-   ABI_FREE(multibinit_dtset%fit_bancoeff)
- end if
- if (allocated(multibinit_dtset%opt_coeff))  then
-   ABI_FREE(multibinit_dtset%opt_coeff)
- end if
+ ABI_SFREE(multibinit_dtset%atifc)
+ ABI_SFREE(multibinit_dtset%conf_cutoff_disp)
+ ABI_SFREE(multibinit_dtset%fit_fixcoeff)
+ ABI_SFREE(multibinit_dtset%fit_imposecoeff)
+ ABI_SFREE(multibinit_dtset%fit_bancoeff)
+ ABI_SFREE(multibinit_dtset%opt_coeff)
+
  ABI_SFREE(multibinit_dtset%fit_max_nbody)
  ABI_SFREE(multibinit_dtset%fit_max_nbody_inrange)
 
+ ABI_SFREE(multibinit_dtset%qmass)
+ ABI_SFREE(multibinit_dtset%coefficients)
+ ABI_SFREE(multibinit_dtset%qnrml1)
+ ABI_SFREE(multibinit_dtset%qnrml2)
+ ABI_SFREE(multibinit_dtset%qph1l)
+ ABI_SFREE(multibinit_dtset%qph2l)
 
-
- if (allocated(multibinit_dtset%qmass))  then
-   ABI_FREE(multibinit_dtset%qmass)
- end if
- if (allocated(multibinit_dtset%coefficients))  then
-   ABI_FREE(multibinit_dtset%coefficients)
- end if
- if (allocated(multibinit_dtset%qnrml1))  then
-   ABI_FREE(multibinit_dtset%qnrml1)
- end if
- if (allocated(multibinit_dtset%qnrml2))  then
-   ABI_FREE(multibinit_dtset%qnrml2)
- end if
- if (allocated(multibinit_dtset%qph1l))  then
-   ABI_FREE(multibinit_dtset%qph1l)
- end if
- if (allocated(multibinit_dtset%qph2l))  then
-   ABI_FREE(multibinit_dtset%qph2l)
- end if
- if(allocated(multibinit_dtset%q1shft))then
-   ABI_FREE(multibinit_dtset%q1shft)
- end if
- if(allocated(multibinit_dtset%iatfix))then
-   ABI_FREE(multibinit_dtset%iatfix)
- end if
+ ABI_SFREE(multibinit_dtset%q1shft)
+ ABI_SFREE(multibinit_dtset%iatfix)
 
  ABI_SFREE(multibinit_dtset%efield)
  ABI_SFREE(multibinit_dtset%efield_lambda)
  ABI_SFREE(multibinit_dtset%efield_phase)
 
 
- !if (allocated(multibinit_dtset%gilbert_damping))  then
- !  ABI_FREE(multibinit_dtset%gilbert_damping)
- !end if
-
- !if (allocated(multibinit_dtset%gyro_ratio))  then
- !  ABI_FREE(multibinit_dtset%gyro_ratio)
- !end if
-
- !if (allocated(multibinit_dtset%qph1l_spin))  then
- !  ABI_FREE(multibinit_dtset%qph1l_spin)
- !end if
- !if (allocated(multibinit_dtset%qph2l_spin))  then
- !  ABI_FREE(multibinit_dtset%qph2l_spin)
- !end if
+ !ABI_SFREE(multibinit_dtset%gilbert_damping)
+ !ABI_SFREE(multibinit_dtset%gyro_ratio)
+ !ABI_SFREE(multibinit_dtset%qph1l_spin)
+ !ABI_SFREE(multibinit_dtset%qph2l_spin)
 
 !=====================================================================
 !Free Scale-up dataset
@@ -920,7 +882,7 @@ real(dp), allocatable ::  dptmp(:)
 &   'Action: correct bmass in your input file.'
    ABI_ERROR(message)
  end if
- 
+
 ! Inhomogeneous electric Field variables --Fernando Start
 
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'efield_gmean',tread,'TIM')
@@ -3628,7 +3590,7 @@ contains
         ABI_MALLOC(dprarr,(marr))
       end if
       dpr_array_var(:)=default
-      call intagm(dprarr,intarr,jdtset,marr,size,& 
+      call intagm(dprarr,intarr,jdtset,marr,size,&
 &              string(1:lenstr),var_name,tread, type)
       if(tread==1)then
         do ii=1,size

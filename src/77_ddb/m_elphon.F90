@@ -175,7 +175,6 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,comm)
  real(dp),allocatable :: v_surf(:,:,:,:,:,:)
  real(dp),allocatable :: tmp_veloc_sq1(:,:), tmp_veloc_sq2(:,:)
  real(dp),allocatable :: coskr(:,:), sinkr(:,:)
-
 ! *************************************************************************
 
  write(message, '(a,a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,ch10,&
@@ -1420,7 +1419,6 @@ subroutine outelph(elph_ds,enunit,fname)
 !arrays
  integer :: qbranch_max(2)
  real(dp),allocatable :: lambda_q(:,:),nestfactor(:),qirred(:,:)
-
 ! *************************************************************************
 
  if ( ALL (enunit /= (/0,1,2/)) )  then
@@ -1595,7 +1593,7 @@ subroutine outelph(elph_ds,enunit,fname)
    qirred(:,iqirr)=elph_ds%qpt_full(:,elph_ds%qirredtofull(iqirr))
  end do
 
- krank = krank_new(elph_ds%k_phon%nkpt, elph_ds%k_phon%kpt)
+ call krank%init(elph_ds%k_phon%nkpt, elph_ds%k_phon%kpt)
 
  ABI_MALLOC(nestfactor,(nqptirred))
 
@@ -1764,7 +1762,6 @@ subroutine rchkGSheader (hdr,natom,nband,unitgkk)
 !scalars
  integer :: fform
  character(len=500) :: message
-
 ! *************************************************************************
 !
 !read in general header of _GKK file
@@ -1841,11 +1838,8 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
 
 !arrays
  real(dp) :: kpt(3),redkpt(3)
- integer, allocatable :: sortindexing(:), rankallk(:)
-
- integer, allocatable :: tmpkphon_full2irr(:,:)
+ integer, allocatable :: sortindexing(:), rankallk(:), tmpkphon_full2irr(:,:)
  real(dp), allocatable :: tmpkpt(:,:)
-
 ! *************************************************************************
 
  if(timrev /= 1 .and. timrev /= 0)then
@@ -1862,7 +1856,7 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
  elph_k%wtkirr(:) = zero
 
 !first allocation for irred kpoints - will be destroyed below
- elph_k%krank = krank_new(elph_k%nkptirr, elph_k%kptirr)
+ call elph_k%krank%init(elph_k%nkptirr, elph_k%kptirr)
  ABI_MALLOC(rankallk,(elph_k%krank%max_rank))
 
 !elph_k%krank%invrank is used as a placeholder in the following loop
@@ -1936,7 +1930,7 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
  call elph_k%krank%free()
 
 !make proper full rank arrays
- elph_k%krank = krank_new(elph_k%nkpt, elph_k%kpt)
+ call elph_k%krank%init(elph_k%nkpt, elph_k%kpt)
 
 !find correspondence table between irred FS kpoints and a full one
  ABI_MALLOC(elph_k%irr2full,(elph_k%nkptirr))
@@ -2762,11 +2756,10 @@ subroutine order_fs_kpts(kptns, nkpt, kptirr,nkptirr,FSirredtoGS)
  type(krank_t) :: krank
 !arrays
  integer :: kptirrank(nkptirr)
-
 ! *************************************************************************
 
-!rank is used to order kpoints
- krank = krank_new(nkpt, kptns)
+ ! rank is used to order kpoints
+ call krank%init(nkpt, kptns)
 
  ik=1
  do ikpt=1,nkpt
@@ -3045,7 +3038,7 @@ subroutine mkph_linwid(Cryst,ifc,elph_ds,nqpath,qpath_vertices)
 !arrays
  integer :: ndiv(nqpath-1)
  integer, allocatable :: indxprtqpt(:)
- complex(dpc),parameter :: c0=dcmplx(0._dp,0._dp),c1=dcmplx(1._dp,0._dp)
+ complex(dp),parameter :: c0=dcmplx(0._dp,0._dp),c1=dcmplx(1._dp,0._dp)
  real(dp) :: displ_cart(2,3*Cryst%natom,3*Cryst%natom)
  real(dp) :: displ_red(2,3*Cryst%natom,3*Cryst%natom)
  real(dp) :: eigval(3*Cryst%natom)
@@ -3377,7 +3370,6 @@ subroutine get_fs_bands(eigenGS,hdr,fermie,ep_b_min,ep_b_max,minFSband,maxFSband
  real(dp) :: epsFS,gausstol,gaussig
  character(len=500) :: message
  integer :: kpt_phonflag(hdr%nkpt)
-
 ! *************************************************************************
 
 !supposes nband is equal for all kpts
@@ -3509,7 +3501,6 @@ subroutine get_all_gkk2(crystal,ifc,elph_ds,kptirr_phon,kpt_phon)
  integer :: iost,onediaggkksize,sz1,sz2,sz3,sz4
  real(dp) :: realdp_ex
  !character(len=500) :: msg
-
 ! *************************************************************************
 
  if (elph_ds%nsppol /= 1) then
@@ -3614,13 +3605,9 @@ subroutine interpolate_gkk(crystal,ifc,elph_ds,kpt_phon)
  real(dp) :: eigvec(3*3*crystal%natom*3*crystal%natom)
  real(dp) :: pheigvec(2*elph_ds%nbranch*elph_ds%nbranch)
  real(dp) :: phfrq_tmp(elph_ds%nbranch),qphon(3),redkpt(3)
- real(dp),allocatable :: gkk2_diag_tmp(:,:,:,:),gkk2_tmp(:,:,:,:,:,:,:)
- real(dp),allocatable :: matrx(:,:),zhpev1(:,:)
- real(dp),allocatable :: zhpev2(:)
-
+ real(dp),allocatable :: gkk2_diag_tmp(:,:,:,:),gkk2_tmp(:,:,:,:,:,:,:), matrx(:,:),zhpev1(:,:), zhpev2(:)
 ! *************************************************************************
 
-!
 !NOTE: mjv 18/5/2008 reverted to old style of ftgkk with all kpt done together.
 !may want to modify this later to use the new cleaner format with 1 FT at a
 !time.
@@ -3851,7 +3838,6 @@ subroutine get_all_gkq (elph_ds,Cryst,ifc,Bst,FSfullpqtofull,nband,n1wf,onegkksi
  character(len=fnlen) :: fname
 !arrays
  integer,allocatable :: gkk_flag(:,:,:,:,:)
-
 ! *************************************************************************
 
 !attribute file unit number
@@ -3996,7 +3982,6 @@ subroutine get_all_gkr (elph_ds,gprim,natom,nrpt,onegkksize,rpt,qpt_full,wghatm)
 !Local variables-------------------------------
 !scalars
  integer :: ikpt_phon0,iost,qtor,sz2,sz3,sz4,sz5
-
 ! *************************************************************************
 
 !
@@ -4131,9 +4116,7 @@ subroutine complete_gkk(elph_ds,gkk_flag,gprimd,indsym,natom,nsym,qpttoqpt,rprim
  real(dp),allocatable :: gkk_qpt_new(:,:,:,:,:),gkk_qpt_tmp(:,:,:,:,:)
 
  real(dp) :: ss_allatoms(2,elph_ds%nbranch,elph_ds%nbranch)
- complex(dpc) :: c_one, c_zero
-
-
+ complex(dp) :: c_one, c_zero
 ! *********************************************************************
 
  c_one = dcmplx(one,zero)
@@ -4458,12 +4441,8 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
  real(dp) :: eff_mass1, eff_mass2, tmp_dos
  character(len=500) :: message
 !arrays
- real(dp) :: gprimd(3,3)
- real(dp) :: kpt_2nd(3), e_cb_2nd(2), en1(2)
- real(dp),allocatable :: dos_e1(:,:),tmp_wtk(:,:,:,:)
- real(dp),allocatable :: phfrq(:,:)
- real(dp),allocatable :: displ(:,:,:,:)
-
+ real(dp) :: gprimd(3,3), kpt_2nd(3), e_cb_2nd(2), en1(2)
+ real(dp),allocatable :: dos_e1(:,:),tmp_wtk(:,:,:,:), phfrq(:,:), displ(:,:,:,:)
 ! *************************************************************************
 
  gprimd = crystal%gprimd
@@ -4949,7 +4928,6 @@ subroutine get_nv_fs_temp(elph_ds,BSt,eigenGS,gprimd,max_occ,elph_tr_ds)
  real(dp) :: Temp, tmp_elphsmear, tmp_delta_e
 ! real(dp) :: xtr, e1
 ! real(dp),allocatable :: tmp_wtk(:,:)
-
 ! *************************************************************************
 
  ABI_MALLOC(elph_tr_ds%dos_n0,(elph_ds%ntemper,elph_ds%nsppol))
@@ -5127,7 +5105,6 @@ subroutine integrate_gamma(elph_ds,FSfullpqtofull)
  character(len=fnlen) :: fname
 !arrays
  real(dp),allocatable :: tmp_gkk(:,:,:,:)
-
 ! *************************************************************************
 
  comm = xmpi_world
@@ -5254,11 +5231,8 @@ subroutine integrate_gamma_tr(elph_ds,FSfullpqtofull,s1,s2, veloc_sq1,veloc_sq2,
  real(dp) :: wtk, wtkpq, interm
  real(dp) :: veloc1_i, veloc1_j, veloc2_i, veloc2_j
 !arrays
- real(dp) :: elvelock(3), elvelockpq(3)
- real(dp) :: velocwtk(3), velocwtkpq(3)
- real(dp) :: vvelocwtk(3,3), vvelocwtkpq(3,3)
+ real(dp) :: elvelock(3), elvelockpq(3), velocwtk(3), velocwtkpq(3), vvelocwtk(3,3), vvelocwtkpq(3,3)
  real(dp),allocatable :: tmp_gkk(:,:,:,:)
-
 ! *************************************************************************
 
  comm = xmpi_world
@@ -5410,7 +5384,6 @@ subroutine integrate_gamma_tr_lova(elph_ds,FSfullpqtofull,elph_tr_ds)
 !arrays
  real(dp) :: elvelock(3), elvelockpq(3)
  real(dp),allocatable :: tmp_gkk(:,:,:,:)
-
 ! *************************************************************************
 
  comm = xmpi_world

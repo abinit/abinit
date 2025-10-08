@@ -609,32 +609,32 @@ MODULE m_paw_dmft
 !  real(dp), allocatable :: phi0phiiint(:)
 !  ! non diagonal band-occupation for each k-point, polarisation.
 
-  complex(dpc), allocatable :: bessel(:,:,:,:)
+  complex(dp), allocatable :: bessel(:,:,:,:)
   ! 4*pi*(i**l)*jl(|k+G|r)*r/sqrt(ucvol) for each G,r,atom type and kpt
 
-  complex(dpc), allocatable :: bessel_int(:,:,:)
+  complex(dp), allocatable :: bessel_int(:,:,:)
   ! Integral over r of bessel(ig,:,iat,ikpt)
 
-  complex(dpc), allocatable :: buf_psi(:)
+  complex(dp), allocatable :: buf_psi(:)
   ! Temporary buffer for the computation of Wannier function
 
-  complex(dpc), allocatable :: chipsi(:,:,:,:,:)
+  complex(dp), allocatable :: chipsi(:,:,:,:,:)
   ! Hermitian product <Chi|Psi> for each flavor, correlated band,
   ! k-point, polarization and atom
 
-  complex(dpc), allocatable :: dpro(:,:,:)
+  complex(dp), allocatable :: dpro(:,:,:)
   ! Exp(i(k+G).xred(iatom)) for each G,correlated atom and k
 
-  complex(dpc), allocatable :: jmj2ylm(:,:,:)
+  complex(dp), allocatable :: jmj2ylm(:,:,:)
   ! Transformation matrix from JmJ to Ylm basis for each lpawu
 
-  complex(dpc), allocatable :: slm2ylm(:,:,:)
+  complex(dp), allocatable :: slm2ylm(:,:,:)
   ! Transformation matrix from real to complex harmonics for each lpawu
 
-  complex(dpc), allocatable :: wannier(:,:,:)
+  complex(dp), allocatable :: wannier(:,:,:)
   ! Wannier functions for each r,flavor and atom
 
-  complex(dpc), allocatable :: zarot(:,:,:,:)
+  complex(dp), allocatable :: zarot(:,:,:,:)
   !  Coeffs of the transformation of real spherical
   !  harmonics under the symmetry operations symrec.
 
@@ -1887,10 +1887,10 @@ subroutine construct_nwlo_dmft(paw_dmft)
  character(len=10) :: tag
  character(len=500) :: message
  real(dp) :: deltaomega,expfac,omegamaxmin,prefacexp,temp,wl
- complex(dpc):: ybcbeg,ybcend
+ complex(dp):: ybcbeg,ybcend
  integer, allocatable :: select_log(:)
  real(dp), allocatable :: omega_li(:),omega_lo_tmp(:),wgt_wlo(:)
- complex(dpc), allocatable :: splined_li(:),tospline_lo(:),ysplin2_lo(:)
+ complex(dp), allocatable :: splined_li(:),tospline_lo(:),ysplin2_lo(:)
 ! *********************************************************************
 
  nwlo = paw_dmft%dmft_nwlo

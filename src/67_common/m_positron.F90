@@ -1922,8 +1922,8 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
  real(dp),allocatable :: rhocorej(:),rhoe(:,:),rhop(:,:),ylmp(:)
  real(dp),pointer :: cg_pos_ptr(:,:),cg_ptr(:,:),occ_ptr(:),occ_pos_ptr(:)
  real(dp),pointer :: rhor_(:,:),rhor_ep_(:,:)
- complex(dpc) :: ifac ! (-i)^L mod 4
- complex(dpc),dimension(0:3) :: ilfac(0:3)=(/(1.0,0.0),(0.0,-1.0),(-1.0,0.0),(0.0,1.0)/)
+ complex(dp) :: ifac ! (-i)^L mod 4
+ complex(dp),dimension(0:3) :: ilfac(0:3)=(/(1.0,0.0),(0.0,-1.0),(-1.0,0.0),(0.0,1.0)/)
  type(coeff1_type),allocatable :: gammastate_c(:)
  type(coeffi2_type),allocatable :: indlmncor(:)
  type(coeff2_type),allocatable :: phicor(:)
@@ -1940,8 +1940,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 
 !Compatibility tests
  if (.not.associated(electronpositron)) then
-   msg='electronpositron variable must be associated!'
-   ABI_BUG(msg)
+   ABI_BUG('electronpositron variable must be associated!')
  end if
  if (allocated(mpi_enreg%proc_distrb)) then
    do isppol=1,dtset%nsppol

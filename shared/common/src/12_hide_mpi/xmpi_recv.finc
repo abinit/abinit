@@ -210,12 +210,9 @@ subroutine xmpi_recv_int1d(xval,source,tag,comm,ier)
 !! NOTES
 !!  status of MPI_RECV is explicitly ignored
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_recv
 !!
 !! SOURCE
+
 subroutine xmpi_recv_int2d(xval,source,tag,comm,ier)
 
 !Arguments-------------------------
@@ -280,12 +277,8 @@ end subroutine xmpi_recv_int2d
 !! NOTES
 !!  status of MPI_RECV is explicitly ignored
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_recv
-!!
 !! SOURCE
+
 subroutine xmpi_recv_int3d(xval,source,tag,comm,ier)
 
 !Arguments-------------------------

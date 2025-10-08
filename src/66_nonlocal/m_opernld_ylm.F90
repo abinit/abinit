@@ -149,8 +149,7 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
  integer,parameter :: twist_dir(6)=(/2,3,3,1,1,2/)
  real(dp) :: d2gx(cplex),enlj(6*cplex),gxfacj(cplex)
  real(dp),allocatable :: enljj(:)
- complex(dpc),allocatable :: cft(:,:), cfu(:,:)
-
+ complex(dp),allocatable :: cft(:,:), cfu(:,:)
 ! *************************************************************************
 
  ABI_CHECK(cplex_fac>=cplex,'BUG: invalid cplex_fac<cplex!')

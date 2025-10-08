@@ -3,7 +3,7 @@
 !! m_lwf_berendsen_mover
 !!
 !! FUNCTION
-!! This module contains the lwf berensen NVT mover 
+!! This module contains the lwf berensen NVT mover
 !!
 !!
 !! Datatypes:
@@ -28,17 +28,16 @@
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
+
 #include "abi_common.h"
+
 module m_lwf_berendsen_mover
   use defs_basis
   use m_errors
   use m_abicore
   use m_xmpi
   use m_nctk
-#define HAVE_NETCDF 1
-#if defined HAVE_NETCDF
   use netcdf
-#endif
   use m_mpi_scheduler, only: mpi_scheduler_t, init_mpi_info
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_random_xoroshiro128plus, only: set_seed, rand_normal_array, rng_t

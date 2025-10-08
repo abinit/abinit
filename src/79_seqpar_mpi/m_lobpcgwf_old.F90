@@ -122,7 +122,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  logical :: gen_eigenpb
  integer :: cplx
  real(dp) :: condestgramb,deltae,deold,dum
- complex(dpc) :: cminusone
+ complex(dp) :: cminusone
  real(dp) :: zvar(2)
  logical :: havetoprecon
  real(dp) :: tsec(2)

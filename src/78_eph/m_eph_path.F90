@@ -26,17 +26,12 @@ module m_eph_path
  use m_xmpi
  use m_mpinfo
  use m_errors
- use m_ifc
- use m_ddb
- use m_dvdb
  use m_copy
  use m_hamiltonian
  use m_pawcprj
  use m_ephtk
  use netcdf
  use m_nctk
- use m_dtset
- use m_dtfil
 
  use defs_abitypes,    only : mpi_type
  use defs_datatypes,   only : pseudopotential_type
@@ -44,6 +39,8 @@ module m_eph_path
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
  use m_cgtools,        only : cg_zdotc
  use m_crystal,        only : crystal_t
+ use m_dtset,          only : dataset_type
+ use m_dtfil,          only : datafiles_type
  use m_ebands,         only : ebands_t
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack
  use m_pawang,         only : pawang_type
@@ -53,6 +50,8 @@ module m_eph_path
  use m_cgwf,           only : nscf_t
  use m_bz_mesh,        only : kpath_t
  use m_wfd,            only : u0_cache_t
+ use m_ifc,            only : ifc_type
+ use m_dvdb,           only : dvdb_t
 
  implicit none
 
@@ -195,7 +194,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  ABI_CHECK_IRANGE(bstart, 1, nband, "Wrong eph_path_brange(1)")
  ABI_CHECK_IRANGE(bstop, 1, nband, "Wrong eph_path_brange(2)")
  ABI_CHECK_IGEQ(bstop, bstart, "eph_path_brange(2) < eph_path_brange(1)")
- call wrtout(units, sjoin("Computing g with eph_path_brange:", ltoa([bstart, bstop])))
+ call wrtout(units, sjoin(" Computing g(k,q) with eph_path_brange:", ltoa([bstart, bstop])))
 
  ! Distribute spins inside input comm.
  call xmpi_split_nsppol(comm, nsppol, my_nspins, my_spins, comm_my_is)

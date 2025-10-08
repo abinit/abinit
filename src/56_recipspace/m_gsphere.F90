@@ -148,11 +148,11 @@ module m_gsphere
   ! Radius of each shell.
 
   !TODO switch to dpc
-  complex(gwpc),allocatable :: phmGt(:,:)
+  complex(gwp),allocatable :: phmGt(:,:)
   ! phmGt(ng,nsym)
   ! Phase factor e^{-i2\pi(G.\tau)} where $\tau$ is the fractional translation associated to isym.
 
-  complex(gwpc),allocatable :: phmSGt(:,:)
+  complex(gwp),allocatable :: phmSGt(:,:)
   ! phmSGt(ng,nsym)
   ! Phase factor e^{-i2\pi(SG.\tau)} where S is one of the symmetry properties in reciprocal space.
 
