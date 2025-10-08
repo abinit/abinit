@@ -228,7 +228,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
  logical :: noquit,use_dpfft
  character(len=500) :: message, message2, message3
  character(len=2) :: format_istep
- character(len=5) :: format_magnet
+ !character(len=5) :: format_magnet
  character(len=8) :: colname
  character(len=1) :: firstchar
  type(yamldoc_t) :: ydoc

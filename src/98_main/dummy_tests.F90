@@ -53,7 +53,7 @@ program dummy_tests
 !Local variables-------------------------------
 !scalars
  integer :: comm,dummy_out,my_rank
- integer :: unused_arg,used_arg,used_variable,unused_variable
+ integer :: unused_arg,used_arg,used_variable !,unused_variable
 !arrays
  character(len=10) :: dummy_string
 
