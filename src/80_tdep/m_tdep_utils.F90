@@ -673,7 +673,7 @@ contains
   integer :: unt
   !integer :: natom,natom_unitcell
   integer :: iatom,jatom,ii,jj
-  logical :: with_xcart
+  !logical :: with_xcart
   integer,allocatable :: ideal2average(:)
   double precision :: rprimd(3,3)
   double precision :: xred_C(3),xred_I(3),xcart_C(3),xcart_I(3)

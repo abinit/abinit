@@ -42,9 +42,9 @@ implicit none
 
 private
 
-complex(dpc), public, parameter :: cmplx_i = (0.0_dp,1.0_dp)
-complex(dpc), public, parameter :: cmplx_1 = (1.0_dp,0.0_dp)
-complex(dpc), public, parameter :: cmplx_0 = (0.0_dp,0.0_dp)
+complex(dp), public, parameter :: cmplx_i = (0.0_dp,1.0_dp)
+complex(dp), public, parameter :: cmplx_1 = (1.0_dp,0.0_dp)
+complex(dp), public, parameter :: cmplx_0 = (0.0_dp,0.0_dp)
 
 logical, public  :: master_debug
 character(len=100), public :: files_status_new='new'
@@ -71,13 +71,12 @@ contains
 !!
 !! SOURCE
 
-complex(dpc) function complex_vector_product(v1,v2,l)
+complex(dp) function complex_vector_product(v1,v2,l)
 !--------------------------------------------------------------------------
 ! This function computes the vector product of two complex vectors.
 !--------------------------------------------------------------------------
 integer,     intent(in)  :: l
-complex(dpc),intent(in)  :: v1(l), v2(l)
-
+complex(dp),intent(in)  :: v1(l), v2(l)
 ! *************************************************************************
 
 complex_vector_product = sum(conjg(v1(:))*v2(:))
@@ -116,11 +115,9 @@ subroutine orthogonalize(mpi_communicator, Hsize,Qsize,Xsize,Q,X)
 !--------------------------------------------------------------------------
 integer,     intent(in)  :: mpi_communicator
 integer,     intent(in)  :: Hsize, Qsize, Xsize
-complex(dpc),intent(in)  :: Q(Hsize,Qsize)
-
-complex(dpc),intent(inout)  :: X(Hsize,Xsize)
-
-complex(dpc),allocatable :: C(:,:)
+complex(dp),intent(in)  :: Q(Hsize,Qsize)
+complex(dp),intent(inout)  :: X(Hsize,Xsize)
+complex(dp),allocatable :: C(:,:)
 
 integer :: ierr
 
@@ -189,7 +186,7 @@ subroutine driver_invert_positive_definite_hermitian_matrix(matrix,ldim)
 !        The subroutine overwrites the input.
 !----------------------------------------------------------------------------------------------------
 integer     , intent(in)    :: ldim
-complex(dpc), intent(inout) :: matrix(ldim,ldim)
+complex(dp), intent(inout) :: matrix(ldim,ldim)
 
 ! local variables
 integer      :: i, j
@@ -279,13 +276,13 @@ end interface
 
 
 integer,      intent(in)    :: Hsize, lmax , mpi_communicator
-complex(dpc), intent(in)    :: Lbasis(Hsize,lmax)
+complex(dp), intent(in)    :: Lbasis(Hsize,lmax)
 real(dp),     intent(in)    :: eigenvalues(lmax)
 
 
 ! local variables
-complex(dpc),allocatable :: check_matrix(:,:)
-complex(dpc),allocatable :: yl(:), rl(:), Ayl(:)
+complex(dp),allocatable :: check_matrix(:,:)
+complex(dp),allocatable :: yl(:), rl(:), Ayl(:)
 
 real(dp)     :: lambda_l
 real(dp)     :: check_norm

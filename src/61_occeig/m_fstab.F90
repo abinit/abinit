@@ -3,7 +3,7 @@
 !!  m_fstab
 !!
 !! FUNCTION
-!!  Tools for the management of a set of Fermi surface k-points
+!!  Tools for the management of a set of Fermi surface k-points.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2025 ABINIT group (MG, MVer)
@@ -48,9 +48,10 @@ module m_fstab
 !! fstab_t
 !!
 !! FUNCTION
-!!  Tables with the correspondence between k-points of the Fermi surface (FS) and k-points
+!!  Tables with the correspondence between k-points on the Fermi surface (FS) and k-points
 !!  in the IBZ (i.e. the k-points found in ebands_t).
-!!  We use `nsppol` fstab_t objects to account for spin polarization.
+!!  We use `nsppol` fstab_t objects to account for spin polarization and possibly different number of
+!!  bands crossing the Fermi level.
 !!
 !! SOURCE
 
@@ -63,6 +64,7 @@ module m_fstab
     ! Number of k-points on the Fermi-surface in the full BZ.
 
    integer :: nktot = -1
+   !integer :: nkbz = -1
     ! Total number of k-points in the initial mesh. Used to compute integrals in the BZ.
 
    integer :: nkibz = -1
@@ -71,10 +73,10 @@ module m_fstab
    integer :: bmin = -1, bmax = -1
     ! Min and max band index included in the calculation.
     ! Note that these values are obtained by taking the union over the k-points in the FS
-    ! For each k-point, we usually have a different number of states crossing eF given by bstart_cnt_ibz
+    ! For each k-point, we usually have a different number of states crossing eF given by bstart_cnt_ibz.
 
    integer :: maxnb = -1
-   ! Max number of bands on the FS (bmax - bmin + 1)
+   ! Max number of bands on the FS i.e.: bmax - bmin + 1.
 
    integer :: eph_intmeth = 1
    ! Integration method.
@@ -92,7 +94,7 @@ module m_fstab
 
    real(dp) :: min_smear = tol9
    ! Used for the adaptive gaussian broadening: use min_smear if the broadening computed from the group velocity
-   ! is smaller than this value to avoid divergences in the gaussian
+   ! is smaller than this value to avoid divergences in the gaussian.
 
    real(dp) :: enemin
    ! Minimal chemical potential value used for inelastic integration.
@@ -241,7 +243,7 @@ end subroutine fstab_free
 !!
 !! TODO
 !!  Use a different algorithm to select k-points if tetra. First compute tetra weights
-!!  then k-points contributing to FS integral are selected according to some threshold.
+!!  then k-points contributing to FS integrals are selected according to some threshold.
 !!
 !! SOURCE
 
@@ -249,11 +251,11 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, tetra, comm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: comm
  type(ebands_t),intent(in) :: ebands
  type(crystal_t),intent(in) :: cryst
  type(dataset_type),intent(in) :: dtset
  type(htetra_t),intent(out) :: tetra
+ integer,intent(in) :: comm
 !arrays
  type(fstab_t),target,intent(out) :: fstab(ebands%nsppol)
 
@@ -264,7 +266,7 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, tetra, comm)
  integer :: ik,mkpt,nkbz,ierr, nene,ifermi
  real(dp),parameter :: max_occ1 = one
  real(dp) :: elow,ehigh,ebis,enemin,enemax,deltaene,cpu,wall,gflops
- logical :: inwin
+ logical :: in_win
  character(len=80) :: errstr
  character(len=5000) :: msg
  type(fstab_t),pointer :: fs
@@ -305,7 +307,7 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, tetra, comm)
  ! Note that we use symrel so these tables can be used to symmetrize wavefunctions.
  ABI_MALLOC(indkk, (6, nkbz))
 
- krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, kptrlatt, compute_invrank=.False.)
+ call krank%from_kptrlatt(ebands%nkpt, ebands%kptns, kptrlatt, compute_invrank=.False.)
 
  if (kpts_map("symrel", ebands%kptopt, cryst, krank, nkbz, kbz, indkk) /= 0) then
    write(msg, '(10a)' ) &
@@ -318,7 +320,6 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, tetra, comm)
  end if
 
  call krank%free()
-
  call cwtime_report(" fstab_init%krank", cpu, wall, gflops)
 
  ABI_MALLOC(full2ebands, (6, nkbz))
@@ -362,16 +363,16 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, tetra, comm)
      !write(std_out,*)"eig_blow, eig_max, elow, ehigh:", &
      !                ebands%eig(blow, ik_ibz, spin), ebands%eig(nband_k, ik_ibz, spin), elow,ehigh
 
-     inwin = .False.; i1 = huge(1); i2 = -1
+     in_win = .False.; i1 = huge(1); i2 = -1
      do band=blow,nband_k
         !if (ebands%eig(band, ik_ibz, spin) > ehigh) exit
         !write(std_out,*)band, ebands%eig(band, ik_ibz, spin) >= elow, ebands%eig(band, ik_ibz, spin) <= ehigh
         if (ebands%eig(band, ik_ibz, spin) >= elow .and. ebands%eig(band, ik_ibz, spin) <= ehigh) then
-          inwin = .True.; i1 = min(i1, band); i2 = max(i2, band)
+          in_win = .True.; i1 = min(i1, band); i2 = max(i2, band)
         end if
      end do
 
-     if (inwin) then
+     if (in_win) then
        ! Add this k-point and the corresponding bands.
        !write(std_out,*)"in win"
        nkfs = nkfs + 1
@@ -425,7 +426,7 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, tetra, comm)
    ABI_CALLOC(fs%vk, (3, fs%maxnb))
    ABI_CALLOC(fs%vkq, (3, fs%maxnb))
 
-   fs%krank = krank_new(nkfs, fs%kpts)
+   call fs%krank%init(nkfs, fs%kpts)
  end do ! spin
 
  call cwtime_report(" fstab_init%fs_build:", cpu, wall, gflops)
@@ -512,7 +513,6 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, tetra, comm)
  ABI_FREE(full2ebands)
 
  call cwtime_report(" fstab_init%fs_weights:", cpu, wall, gflops)
-
  if (xmpi_comm_rank(comm) == 0) call fstab_print(fstab, [std_out, ab_out])
 
 end subroutine fstab_init
@@ -590,8 +590,7 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, 
 !scalars
  integer :: bstart_k, nband_k, bstart_kq, nband_kq, ib1, band1, ib2, band2, ii
  logical :: use_adaptive
- real(dp) :: g1, g2, sigma
- real(dp) :: abc(3)
+ real(dp) :: g1, g2, sigma, abc(3)
 ! *************************************************************************
 
  bstart_k = fs%bstart_cnt_ibz(1, ik_ibz); nband_k = fs%bstart_cnt_ibz(2, ik_ibz)
@@ -657,6 +656,7 @@ end subroutine fstab_get_dbldelta_weights
 !!
 !! INPUTS
 !! units=unit numbers for output
+!! [header]=Header string.
 !! [prtvol]=verbosity level
 !!
 !! SOURCE

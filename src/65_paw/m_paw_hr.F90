@@ -158,12 +158,12 @@ function paw_ihr(isppol,nspinor,npw,istwfk,kpoint,Cryst,Pawtab,ug1,ug2,gvec,Cprj
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: isppol,nspinor,npw,istwfk
- complex(gwpc) :: ihr_comm(3,nspinor**2)
+ complex(gwp) :: ihr_comm(3,nspinor**2)
  type(crystal_t),intent(in) :: Cryst
 !arrays
  integer,intent(in) :: gvec(3,npw)
  real(dp),intent(in) :: kpoint(3)
- complex(gwpc),intent(in) :: ug1(nspinor*npw),ug2(nspinor*npw)
+ complex(gwp),intent(in) :: ug1(nspinor*npw),ug2(nspinor*npw)
  type(Pawtab_type),target,intent(in) :: Pawtab(Cryst%ntypat)
  type(pawcprj_type),intent(in) :: Cprj_kb1(Cryst%natom,nspinor),Cprj_kb2(Cryst%natom,nspinor)
  type(pawhur_t),intent(in) :: Hur(Cryst%natom)
@@ -172,14 +172,13 @@ function paw_ihr(isppol,nspinor,npw,istwfk,kpoint,Cryst,Pawtab,ug1,ug2,gvec,Cprj
  integer :: iatom,itypat,lmn_size,ilmn,jlmn,isel
  integer :: ig,iab,spad1,spad2
  real(dp) :: re_p,im_p
- complex(dpc) :: ctemp
+ complex(dp) :: ctemp
 !arrays
  integer :: spinorwf_pad(2,4)
  real(dp) :: hurc_ij(3),ons_cart(2,3) !,ons_comm_red(2,3)
  real(dp) :: gspace_cart2red(3,3) !rs_cart2red(3,3),
  real(dp), ABI_CONTIGUOUS pointer :: nabla_ij(:,:,:)
- complex(gwpc) :: ihr_comm_cart(3,nspinor**2)
-
+ complex(gwp) :: ihr_comm_cart(3,nspinor**2)
 ! *************************************************************************
 
  ! [H, r] = -\nabla + [V_{nl}, r]
@@ -258,10 +257,10 @@ function paw_ihr(isppol,nspinor,npw,istwfk,kpoint,Cryst,Pawtab,ug1,ug2,gvec,Cprj
 
  !ons_comm_red(1,:)=MATMUL(rs_cart2red,ons_comm(1,:))
  !ons_comm_red(2,:)=MATMUL(rs_cart2red,ons_comm(2,:))
- !ihr_comm(:,1) = ihr_comm(:,1) + CMPLX(ons_comm_red(1,:),ons_comm_red(2,:),kind=gwpc)
+ !ihr_comm(:,1) = ihr_comm(:,1) + CMPLX(ons_comm_red(1,:),ons_comm_red(2,:),kind=gwp)
 
  ihr_comm_cart(:,1) = two_pi*MATMUL(Cryst%gprimd,ihr_comm(:,1))
- ihr_comm_cart(:,1) = ihr_comm_cart(:,1) + CMPLX(ons_cart(1,:),ons_cart(2,:),kind=gwpc)
+ ihr_comm_cart(:,1) = ihr_comm_cart(:,1) + CMPLX(ons_cart(1,:),ons_cart(2,:),kind=gwp)
 
  ! Final result is in reduced coordinates, in terms of gprimd.
  ihr_comm(:,1) = MATMUL(gspace_cart2red, ihr_comm_cart(:,1))/two_pi
@@ -318,22 +317,21 @@ subroutine paw_cross_ihr_comm(ihr_comm,nspinor,nr,Cryst,Pawfgrtab,Paw_onsite,&
  integer,intent(in) :: nspinor,nr
  type(crystal_t),intent(in) :: Cryst
 !arrays
- complex(gwpc),intent(inout) :: ihr_comm(3,nspinor**2)
- complex(gwpc),intent(in) :: ur_ae1(nr),ur_ae2(nr)
- complex(gwpc),intent(in) :: ur_ae_onsite1(nr),ur_ae_onsite2(nr)
+ complex(gwp),intent(inout) :: ihr_comm(3,nspinor**2)
+ complex(gwp),intent(in) :: ur_ae1(nr),ur_ae2(nr)
+ complex(gwp),intent(in) :: ur_ae_onsite1(nr),ur_ae_onsite2(nr)
  type(pawfgrtab_type),intent(in) :: Pawfgrtab(Cryst%natom)
  type(paw_pwaves_lmn_t),intent(in) :: Paw_onsite(Cryst%natom)
  type(pawcprj_type),intent(in) :: Cprj_kb1(Cryst%natom,nspinor),Cprj_kb2(Cryst%natom,nspinor)
 
 !Local variables-------------------------------
  integer :: iatom,lmn_size,ilmn,ifgd,ifftsph,nfgd
- complex(dpc) :: cp1, cp2
- complex(dpc) :: cross1,cross2
+ complex(dp) :: cp1, cp2
+ complex(dp) :: cross1,cross2
 !arrays
  real(dp) :: gspace_cart2red(3,3)
- complex(gwpc) :: ihr_comm_cart(3,nspinor**2)
- complex(dpc) :: dphigr(3), dphigr1(3),dphigr2(3)
-
+ complex(gwp) :: ihr_comm_cart(3,nspinor**2)
+ complex(dp) :: dphigr(3), dphigr1(3),dphigr2(3)
 ! *************************************************************************
 
  ABI_CHECK(nspinor==1,"nspinor + pawcross not implemented")

@@ -92,7 +92,6 @@ subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rm
  !character(len=500) :: msg
 !arrays
  real(dp),allocatable :: gcutoff(:)
-
 ! *************************************************************************
 
 !This is the minimum argument of an exponential, with some safety
@@ -107,15 +106,15 @@ subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rm
    chsq=chsq+zion(typat(ia))**2
  end do
 
-!Compute eta, the Ewald summation convergence parameter,
-!for approximately optimized summations:
+ !Compute eta, the Ewald summation convergence parameter,
+ ! for approximately optimized summations:
  direct=rmet(1,1)+rmet(1,2)+rmet(1,3)+rmet(2,1)+&
-& rmet(2,2)+rmet(2,3)+rmet(3,1)+rmet(3,2)+rmet(3,3)
+        rmet(2,2)+rmet(2,3)+rmet(3,1)+rmet(3,2)+rmet(3,3)
  recip=gmet(1,1)+gmet(1,2)+gmet(1,3)+gmet(2,1)+&
-& gmet(2,2)+gmet(2,3)+gmet(3,1)+gmet(3,2)+gmet(3,3)
+       gmet(2,2)+gmet(2,3)+gmet(3,1)+gmet(3,2)+gmet(3,3)
+
 !A bias is introduced, because G-space summation scales
-!better than r space summation ! Note : debugging is the most
-!easier at fixed eta.
+!better than r space summation ! Note: debugging is the most easier at fixed eta.
 zcut=SQRT(DOT_PRODUCT(rprimd(:,3),rprimd(:,3)))/2.0_dp
 if(icutcoul.eq.1) then
    eta=SQRT(16.0_dp/SQRT(DOT_PRODUCT(rprimd(:,1),rprimd(:,1))))
@@ -428,7 +427,6 @@ subroutine ewald2(gmet,natom,ntypat,rmet,rprimd,stress,typat,ucvol,xred,zion)
  real(dp) :: term2,term3,term4
 !arrays
  real(dp) :: gprimd(3,3),strg(6),strr(6)
-
 ! *************************************************************************
 
 !Define dimensional reciprocal space primitive translations gprimd
@@ -621,7 +619,7 @@ end subroutine ewald2
 !! ewald9
 !!
 !! FUNCTION
-!! Compute ewald contribution to the dynamical matrix, at a given
+!! Compute Ewald contribution to the dynamical matrix, at a given
 !! q wavevector, including anisotropic dielectric tensor and effective charges
 !! See Phys. Rev. B 55, 10355 (1997) [[cite:Gonze1997a]], equations (72) to (75).
 !! This has been generalized to quadrupoles.
@@ -665,7 +663,7 @@ end subroutine ewald2
 !! for improvement, by using bloking on G and R!
 !! 3. There can be small numerical variations due to the
 !! fact that the input dielectric tensor is usually
-!! not perfectly symmetric ....
+!! not perfectly symmetric.
 !!
 !! SOURCE
 
@@ -709,9 +707,8 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  real(dp) :: gprimbyacell(3,3) !,tsec(2)
  real(dp),allocatable :: dyddt(:,:,:,:,:), dydqt(:,:,:,:,:,:), dyqqt(:,:,:,:,:,:,:)
  real(dp),allocatable :: work(:)
- complex(dpc) :: exp2piqx(natom)
- complex(dpc),allocatable :: expx1(:,:), expx2(:,:), expx3(:,:)
-
+ complex(dp) :: exp2piqx(natom)
+ complex(dp),allocatable :: expx1(:,:), expx2(:,:), expx3(:,:)
 ! *********************************************************************
 
  ! This routine is expensive so skip the calculation and return zeros if zeff == zero.
@@ -761,11 +758,12 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  gprimbyacell(:,2) = gprimbyacell(:,2) / acell(2)
  gprimbyacell(:,3) = gprimbyacell(:,3) / acell(3)
 
-!compute eta for approximately optimized summations:
+ ! compute eta for approximately optimized summations:
  direct=rmet(1,1)+rmet(1,2)+rmet(1,3)+rmet(2,1)+&
-& rmet(2,2)+rmet(2,3)+rmet(3,1)+rmet(3,2)+rmet(3,3)
+        rmet(2,2)+rmet(2,3)+rmet(3,1)+rmet(3,2)+rmet(3,3)
  recip=gmet(1,1)+gmet(1,2)+gmet(1,3)+gmet(2,1)+&
-& gmet(2,2)+gmet(2,3)+gmet(3,1)+gmet(3,2)+gmet(3,3)
+       gmet(2,2)+gmet(2,3)+gmet(3,1)+gmet(3,2)+gmet(3,3)
+
  eta=pi*100.0_dp/33.0_dp*sqrt(1.69_dp*recip/direct)
 
  ! Compute a material-dependent width for the Gaussians that hopefully
@@ -788,8 +786,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
    !This is a tentative maximum value for the gaussian width in real space
    sigma_max=three
 
-   !Set eta taking into account that the eps_inf is used as a metric in
-   !reciprocal space
+   !Set eta taking into account that the eps_inf is used as a metric in reciprocal space
    eta=sqrt(maxval(eig_dielt))/sigma_max
 
    if (firstcall) then
@@ -823,7 +820,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  do
    ng=ng+1
 
-! if needed, update the complex phases for larger G vectors
+   ! if needed, update the complex phases for larger G vectors
    if (ng > ng_expxq) then
      !write(std_out,*)"have to realloc"
      ABI_FREE(expx1)
@@ -831,8 +828,8 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
      ABI_FREE(expx3)
 
      ng_expxq = ng_expxq*2
-! TODO: half of this space is not needed, as it contains the complex conjugate of the other half.
-! present duplication avoids if statements inside the loop, however
+     ! TODO: half of this space is not needed, as it contains the complex conjugate of the other half.
+     ! present duplication avoids if statements inside the loop, however
      ABI_MALLOC(expx1, (-ng_expxq:ng_expxq, natom))
      ABI_MALLOC(expx2, (-ng_expxq:ng_expxq, natom))
      ABI_MALLOC(expx3, (-ng_expxq:ng_expxq, natom))
@@ -852,11 +849,11 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
          if(abs(ig1)==ng .or. abs(ig2)==ng .or. abs(ig3)==ng .or. ng==1 )then
 
            gpq(1)=(ig1+qphon(1))*gprimbyacell(1,1)+(ig2+qphon(2))*&
-&           gprimbyacell(1,2)+(ig3+qphon(3))*gprimbyacell(1,3)
+                                 gprimbyacell(1,2)+(ig3+qphon(3))*gprimbyacell(1,3)
            gpq(2)=(ig1+qphon(1))*gprimbyacell(2,1)+(ig2+qphon(2))*&
-&           gprimbyacell(2,2)+(ig3+qphon(3))*gprimbyacell(2,3)
+                                 gprimbyacell(2,2)+(ig3+qphon(3))*gprimbyacell(2,3)
            gpq(3)=(ig1+qphon(1))*gprimbyacell(3,1)+(ig2+qphon(2))*&
-&           gprimbyacell(3,2)+(ig3+qphon(3))*gprimbyacell(3,3)
+                                 gprimbyacell(3,2)+(ig3+qphon(3))*gprimbyacell(3,3)
            gsq=zero
            do jj=1,3
              do ii=1,3
@@ -865,10 +862,10 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
              end do
            end do
 
-!          Skip q=0:
+           ! Skip q=0:
            if (gsq<1.0d-20) then
              if (sumg0==1) then
-               write(msg,'(a,a,a,a,a)' )&
+               write(msg,'(5a)' )&
                'The phonon wavelength should not be zero :',ch10,&
                'there are non-analytical terms that cannot be treated.',ch10,&
                'Action: subtract this wavelength from the input file.'
@@ -879,11 +876,11 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
              arg1=(two_pi**2)*gsq* inv4eta
 
-!            Larger arg gives 0 contribution:
+             ! Larger arg gives 0 contribution:
              if (arg1<= -minexparg ) then
                newg=1
 
-!              Here calculate the term
+               ! Here calculate the term
                term1=exp(-arg1)/gsq
                do jj=1,3
                  do ii=1,3
@@ -891,13 +888,14 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                  end do
                end do
 
-! MJV: replaced old calls to cos and sin. Checked for 10 tests in v2 that max error is about 6.e-15, usually < 2.e-15
+               ! MJV: replaced old calls to cos and sin.
+               ! Checked for 10 tests in v2 that max error is about 6.e-15, usually < 2.e-15
                do ia=1,natom
                  cosqxred(ia)= real(exp2piqx(ia)*expx1(ig1, ia)*expx2(ig2, ia)*expx3(ig3, ia))
                  sinqxred(ia)=aimag(exp2piqx(ia)*expx1(ig1, ia)*expx2(ig2, ia)*expx3(ig3, ia))
                end do
 
-!              First, the diagonal terms
+               ! First, the diagonal terms
                do nu=1,3
                  do ia=1,natom
                    do mu=nu,3
@@ -906,7 +904,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                  end do
                end do
 
-!              Then, the non-diagonal ones
+               ! Then, the non-diagonal ones
                do ib=2,natom
                  do ia=1,ib-1
                    ! phase factor dipole-dipole
@@ -969,11 +967,11 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
      end do
    end do
 
-!  Check if new shell must be calculated
+   !  Check if new shell must be calculated
    if(newg==0)exit
  end do
 
-!Multiplies by common factor
+ ! Multiplies by common factor
  fact1=4.0_dp*pi/ucvol
  do ib=1,natom
    do ia=1,ib
@@ -993,13 +991,14 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  reta=sqrt(eta)
  reta3=-eta*reta
 
-!Calculating the inverse (transpose) of the dielectric tensor
+ !Calculating the inverse (transpose) of the dielectric tensor
  call matr3inv(dielt,invdlt)
-!Calculating the determinant of the dielectric tensor
+
+ !Calculating the determinant of the dielectric tensor
  detdlt=dielt(1,1)*dielt(2,2)*dielt(3,3)+dielt(1,3)*dielt(2,1)*&
-& dielt(3,2)+dielt(1,2)*dielt(2,3)*dielt(3,1)-dielt(1,3)*&
-& dielt(2,2)*dielt(3,1)-dielt(1,1)*dielt(2,3)*dielt(3,2)-&
-& dielt(1,2)*dielt(2,1)*dielt(3,3)
+        dielt(3,2)+dielt(1,2)*dielt(2,3)*dielt(3,1)-dielt(1,3)*&
+        dielt(2,2)*dielt(3,1)-dielt(1,1)*dielt(2,3)*dielt(3,2)-&
+        dielt(1,2)*dielt(2,1)*dielt(3,3)
 
  if(detdlt<tol6)then
    write(msg, '(a,es16.6,11a)' )&
@@ -1146,7 +1145,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  end do
  end if ! check if should compute real part
 
-!Now, symmetrizes
+ ! Now, symmetrizes
  do ib=1,natom-1
    do nu=1,3
      do ia=ib+1,natom
@@ -1169,8 +1168,8 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
    end do
  end do
 
-!Tests
-!write(std_out,*)' ewald9 : take into account the effective charges '
+ !Tests
+ !write(std_out,*)' ewald9 : take into account the effective charges '
  dyew = zero
  do ib=1,natom
    do nu=1,3
@@ -1220,7 +1219,6 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  ABI_FREE(dyddt)
  ABI_FREE(dydqt)
  ABI_FREE(dyqqt)
-
  !call timab(1749, 2, tsec)
 
 end subroutine ewald9

@@ -14,12 +14,6 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
-!! INPUTS
-!!  (main routine)
-!!
-!! OUTPUT
-!!  (main routine)
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -79,6 +73,11 @@ program conducti
  nproc = xmpi_comm_size(comm)
  my_rank = xmpi_comm_rank(comm)
 
+#if defined FC_NVHPC
+ if (nproc == -1) then
+   write(std_out, *)"NVHPC raises an internal compiler error that is fixed by this print statement."
+ end if
+#endif
 
 !Read some input data
  if (my_rank==master) then

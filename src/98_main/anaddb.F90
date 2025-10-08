@@ -60,8 +60,7 @@ program anaddb
 
 !Local variables-------------------------------
  integer, parameter:: master = 0
- integer:: comm, iblok, ii
- integer:: ierr
+ integer:: comm, ii, ierr
  integer:: nproc, my_rank, ana_ncid
  logical:: iam_master
  integer:: units(2)

@@ -41,9 +41,7 @@ module m_effective_potential
  use m_xmpi
  use m_ewald
  use m_nctk
-#if defined HAVE_NETCDF
  use netcdf
-#endif
 #if defined DEV_MS_SCALEUP
  use scup_global, only : global_calculate_energy, global_calculate_forces
 #endif
@@ -2872,7 +2870,7 @@ select case (efield_type)
 case(1)
   ext_field = zero
   temp_pol = zero
-  energy_part = zero 
+  energy_part = zero
   fcart_part(:,:) = zero
   if (present(efield)) then
     ext_field = -1 * efield(:,1) ! Use first field by default
@@ -2880,7 +2878,7 @@ case(1)
   if (present(efield_background)) then
     ext_field = ext_field - efield_background
   endif
-  
+
   do icell = 1,eff_pot%mpi_coeff%my_ncell
     ii = eff_pot%mpi_coeff%my_index_cells(4,icell)
     do ia = 1,eff_pot%crystal%natom
@@ -2888,7 +2886,7 @@ case(1)
       !We compute the polarization from the atomic displacements
       temp_pol = temp_pol + matmul(disp_tmp(:,kk),&
               & eff_pot%harmonics_terms%zeff(:,:,eff_pot%supercell%atom_indexing(kk)))
-      !We compute the forces as the Born effective charges times the electric field  
+      !We compute the forces as the Born effective charges times the electric field
       fcart_part(:,kk) = matmul(ext_field, eff_pot%harmonics_terms%zeff(:,:,eff_pot%supercell%atom_indexing(kk)))
     end do
   end do
@@ -4019,10 +4017,7 @@ subroutine effective_potential_writeNETCDF(eff_pot,option,filename)
  character(len=fnlen) :: namefile
 !arrays
  real(dp) :: strain(9,6)
-
 ! *************************************************************************
-
-#if defined HAVE_NETCDF
 
  strain(:,1) = (/1,0,0,0,0,0,0,0,0/)
  strain(:,2) = (/0,0,0,0,1,0,0,0,0/)
@@ -4166,7 +4161,6 @@ subroutine effective_potential_writeNETCDF(eff_pot,option,filename)
    NCF_CHECK_MSG(ncerr," close netcdf history file")
  end if
 
-#endif
 end subroutine effective_potential_writeNETCDF
 !!***
 

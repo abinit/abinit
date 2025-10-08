@@ -166,7 +166,7 @@ module m_cumulant
    ! Allocate using only the relevant bands for transport
    ! including valence states to allow to compute different doping
 
-  complex(dpc) :: ieta
+  complex(dp) :: ieta
    ! Used to shift the poles in the complex plane (Ha units)
    ! Corresponds to `i eta` term in equations.
 
@@ -241,37 +241,37 @@ module m_cumulant
   ! Frequency mesh along the real axis (Ha units) used for the different bands
   ! Each mesh is **centered** on the corresponding KS energy.
 
-  complex(dpc),allocatable :: vals_e0ks(:,:,:,:)
+  complex(dp),allocatable :: vals_e0ks(:,:,:,:)
    ! vals_e0ks(ntemp, max_nbcalc, my_nkcalc, nsppol))
    ! Sigma_eph(omega=eKS, kT, band, ikcalc, spin).
    ! Fan-Migdal + Debye-Waller
 
-  complex(dpc),allocatable :: vals_wr(:,:,:,:,:)
+  complex(dp),allocatable :: vals_wr(:,:,:,:,:)
    ! vals_wr(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Sigma_eph(omega, kT, band, ikcalc, spin).
    ! enk_KS corresponds to nwr/2 + 1.
 
-     complex(dpc),allocatable :: ct_vals(:,:,:,:,:)
+     complex(dp),allocatable :: ct_vals(:,:,:,:,:)
    ! ct_vals(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Cumulant function (time, kT, band, ikcalc, spin).
 
-     complex(dpc),allocatable :: c1(:,:,:,:,:)
+     complex(dp),allocatable :: c1(:,:,:,:,:)
    ! FIXME ct_vals(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Cumulant function (time, kT, band, ikcalc, spin).
 
-     complex(dpc),allocatable :: c2(:,:,:,:,:)
+     complex(dp),allocatable :: c2(:,:,:,:,:)
    ! FIXME ct_vals(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Cumulant function (time, kT, band, ikcalc, spin).
 
-     complex(dpc),allocatable :: c3(:,:,:,:,:)
+     complex(dp),allocatable :: c3(:,:,:,:,:)
    ! FIXME ct_vals(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Cumulant function (time, kT, band, ikcalc, spin).
 
-     complex(dpc),allocatable :: gt_vals(:,:,:,:,:)
+     complex(dp),allocatable :: gt_vals(:,:,:,:,:)
    ! FIXME vals_wr(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Green's function in time domain (time, kT, band, ikcalc, spin).
 
-     complex(dpc),allocatable :: gw_vals(:,:,:,:,:)
+     complex(dp),allocatable :: gw_vals(:,:,:,:,:)
    ! gw_vals(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Green's function in frequency domain(omega, kT, band) for given (ikcalc, spin).
 
@@ -809,13 +809,13 @@ subroutine cumulant_compute(self)
 !arrays
  real(dp),allocatable :: temp_g(:,:,:), temp_r(:,:), temp_r_cplx(:,:), temp_g_ce(:,:,:)
  real(dp),allocatable :: betaoverw2(:) !, dfft(:)
- !complex(dpc),allocatable :: temp_reflex(:) ! betaoverw2c(:),
+ !complex(dp),allocatable :: temp_reflex(:) ! betaoverw2c(:),
  real(dp),allocatable :: wrmesh_shifted(:), wrmesh_shifted_ce(:), beta(:), c3(:)
  real(dp),allocatable :: time_mesh(:), time_mesh_temp(:)
  real(dp) :: output_c3!, output_test2r, output_test2i
  real(dp) :: m_fit_re, b_fit_re, m_fit_im, b_fit_im, res_re, res_im
- complex(dpc),allocatable :: c1(:), ct_temp(:), c_temp(:)
- complex(dpc),allocatable :: c2(:), ct(:), gt(:), gw(:), g1(:)
+ complex(dp),allocatable :: c1(:), ct_temp(:), c_temp(:)
+ complex(dp),allocatable :: c2(:), ct(:), gt(:), gw(:), g1(:)
  integer :: fftalg, fftalga
  logical :: use_fft
 
@@ -1146,7 +1146,7 @@ subroutine cumulant_compute(self)
  !
  !   integer,intent(in) :: f_size
  !   real(dp),intent(in) :: f_step
- !   complex(dpc),intent(in) :: f(f_size)
+ !   complex(dp),intent(in) :: f(f_size)
  !
  !   trapz = ( sum(f) - 0.5* f(1) - 0.5* f(f_size) )* f_step
  !

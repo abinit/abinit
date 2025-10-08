@@ -16,11 +16,6 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! for the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
-!! PARENTS
-!!      vtowfk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -219,12 +214,6 @@ end subroutine lobpcgwf2_cprj
 !! SIDE EFFECTS
 !!  X  <type(xgBlock_t)>= memory block containing |C>
 !!  AX <type(xgBlock_t)>= memory block containing H|C>
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xgBlock_getSize,xgBlock_reverseMap,xgBlock_scale,xgBlock_copy
-!!      multithreaded_getghc
 !!
 !! SOURCE
 !

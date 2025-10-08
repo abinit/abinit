@@ -92,14 +92,13 @@ subroutine pmat2cart(eigen11, eigen12, eigen13, mband, nkpt, nsppol, pmat, rprim
  real(dp),intent(in) :: eigen12(2,mband,mband,nkpt,nsppol)
  real(dp),intent(in) :: eigen13(2,mband,mband,nkpt,nsppol),rprimd(3,3)
 !no_abirules
- complex(dpc),intent(out) :: pmat(mband,mband,nkpt,3,nsppol)
+ complex(dp),intent(out) :: pmat(mband,mband,nkpt,3,nsppol)
 
 !Local variables -----------------------------------------
 !scalars
  integer :: iband1,iband2,ikpt,isppol
 !arrays
  real(dp) :: rprim(3,3)
-
 ! *************************************************************************
 
  !rescale the rprim
@@ -154,13 +153,12 @@ subroutine pmat_renorm(fermie, eig, mband, nkpt, nsppol, pmat, sc)
  real(dp), intent(in) :: sc
 !arrays
  real(dp), intent(in) :: eig(mband,nkpt,nsppol)
- complex(dpc), intent(inout) :: pmat(mband,mband,nkpt,3,nsppol)
+ complex(dp), intent(inout) :: pmat(mband,mband,nkpt,3,nsppol)
 
 !Local variables -----------------------------------------
 !scalars
  integer :: iband1,iband2,ikpt,isppol
  real(dp) :: corec, e1, e2
-
 ! *************************************************************************
 
  if (abs(sc) < tol8) then
@@ -232,7 +230,7 @@ subroutine linopt(icomp, itemp, nband_sum, cryst, ks_ebands, EPBSt, pmat, &
 integer, intent(in) :: icomp,itemp,nband_sum, ncid
 type(crystal_t), intent(in) :: cryst
 type(ebands_t),intent(in) :: ks_ebands,EPBSt
-complex(dpc), intent(in) :: pmat(ks_ebands%mband, ks_ebands%mband, ks_ebands%nkpt, 3, ks_ebands%nsppol)
+complex(dp), intent(in) :: pmat(ks_ebands%mband, ks_ebands%mband, ks_ebands%nkpt, 3, ks_ebands%nsppol)
 integer, intent(in) :: v1, v2, nmesh
 real(dp), intent(in) :: de, sc, brod
 character(len=*), intent(in) :: fnam
@@ -247,13 +245,13 @@ integer :: ncerr
 logical :: do_linewidth
 real(dp) :: deltav1v2, ha2ev, tmpabs, renorm_factor,emin,emax
 real(dp) :: ene,abs_eps,re_eps
-complex(dpc) :: e1,e2,e12, e1_ep,e2_ep,e12_ep, b11,b12, ieta, w
+complex(dp) :: e1,e2,e12, e1_ep,e2_ep,e12_ep, b11,b12, ieta, w
 character(len=fnlen) :: fnam1
 character(len=500) :: msg
 ! allocatable arrays
 real(dp) :: s(3,3),sym(3,3)
 real(dp), allocatable :: im_refract(:),re_refract(:)
-complex(dpc), allocatable :: chi(:,:), matrix_elements(:,:,:,:), renorm_eigs(:,:,:), eps(:)
+complex(dp), allocatable :: chi(:,:), matrix_elements(:,:,:,:), renorm_eigs(:,:,:), eps(:)
 
 ! *********************************************************************
 
@@ -608,7 +606,7 @@ subroutine nlinopt(icomp, itemp, nband_sum, cryst, ks_ebands, pmat, &
 integer, intent(in) :: icomp, itemp, nband_sum, ncid
 type(crystal_t),intent(in) :: cryst
 type(ebands_t),intent(in) :: ks_ebands
-complex(dpc), intent(in) :: pmat(ks_ebands%mband, ks_ebands%mband, ks_ebands%nkpt, 3, ks_ebands%nsppol)
+complex(dp), intent(in) :: pmat(ks_ebands%mband, ks_ebands%mband, ks_ebands%nkpt, 3, ks_ebands%nsppol)
 integer, intent(in) :: v1, v2, v3, nmesh, comm
 real(dp), intent(in) :: de, sc, brod, tol
 character(len=*), intent(in) :: fnam
@@ -627,36 +625,36 @@ real(dp) :: f1,f2,f3, ha2ev
 real(dp) :: ene,totre,totabs,totim
 real(dp) :: el,en,em,emin,emax,my_emin,my_emax
 real(dp) :: const_esu,const_au,au2esu,wmn,wnm,wln,wnl,wml,wlm, t1
-complex(dpc) :: idel,w,zi
-complex(dpc) :: mat2w,mat1w1,mat1w2,mat2w_tra,mat1w3_tra
-complex(dpc) :: b111,b121,b131,b112,b122,b132,b113,b123,b133
-complex(dpc) :: b241,b242,b243,b221,b222,b223,b211,b212,b213,b231
-complex(dpc) :: b311,b312,b313,b331
-complex(dpc) :: b24,b21_22,b11,b12_13,b31_32
+complex(dp) :: idel,w,zi
+complex(dp) :: mat2w,mat1w1,mat1w2,mat2w_tra,mat1w3_tra
+complex(dp) :: b111,b121,b131,b112,b122,b132,b113,b123,b133
+complex(dp) :: b241,b242,b243,b221,b222,b223,b211,b212,b213,b231
+complex(dp) :: b311,b312,b313,b331
+complex(dp) :: b24,b21_22,b11,b12_13,b31_32
 character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
 character(500) :: msg
 ! local allocatable arrays
 integer :: start4(4),count4(4)
 real(dp) :: s(3,3),sym(3,3,3)
-complex(dpc), allocatable :: px(:,:,:,:,:), py(:,:,:,:,:), pz(:,:,:,:,:)
-complex(dpc), allocatable :: delta(:,:,:), inter2w(:), inter1w(:)
-complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
+complex(dp), allocatable :: px(:,:,:,:,:), py(:,:,:,:,:), pz(:,:,:,:,:)
+complex(dp), allocatable :: delta(:,:,:), inter2w(:), inter1w(:)
+complex(dp), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
 ! Addition antiresonant (AR)
 ! Products of momentum matrix elem for the AR terms
 real(dp)     :: t2
-complex(dpc) :: mat2wa,mat1w1a,mat1w2a,mat2wa_tra,mat1w3a_tra
-complex(dpc) :: a111,a112,a113,a11                      ! AR inter2w term
-complex(dpc), allocatable :: inter2wa(:)
-complex(dpc) :: a121,a131,a122,a132,a123,a133,a12_13    ! AR inter1w term
-complex(dpc), allocatable :: inter1wa(:)
-complex(dpc) :: a241,a242,a243,a231,a24                 ! AR intra2w term
-complex(dpc), allocatable :: intra2wa(:)
-complex(dpc) :: a211,a221,a212,a222,a213,a223,a21_22    ! AR intra1w term
-complex(dpc), allocatable :: intra1wa(:)
-complex(dpc) :: a311,a312,a313,a331,a31_32              ! AR intra1wS term
-complex(dpc), allocatable :: intra1wSa(:)
-complex(dpc), allocatable :: chi2tota(:)                ! AR total sum
-complex(dpc), allocatable :: chi2full(:)               ! AR+R total sum
+complex(dp) :: mat2wa,mat1w1a,mat1w2a,mat2wa_tra,mat1w3a_tra
+complex(dp) :: a111,a112,a113,a11                      ! AR inter2w term
+complex(dp), allocatable :: inter2wa(:)
+complex(dp) :: a121,a131,a122,a132,a123,a133,a12_13    ! AR inter1w term
+complex(dp), allocatable :: inter1wa(:)
+complex(dp) :: a241,a242,a243,a231,a24                 ! AR intra2w term
+complex(dp), allocatable :: intra2wa(:)
+complex(dp) :: a211,a221,a212,a222,a213,a223,a21_22    ! AR intra1w term
+complex(dp), allocatable :: intra1wa(:)
+complex(dp) :: a311,a312,a313,a331,a31_32              ! AR intra1wS term
+complex(dp), allocatable :: intra1wSa(:)
+complex(dp), allocatable :: chi2tota(:)                ! AR total sum
+complex(dp), allocatable :: chi2full(:)               ! AR+R total sum
 ! Addition bands decomposition
 character(len=fnlen) :: fnam8
 character(len=fnlen) :: fnam9
@@ -671,19 +669,18 @@ integer :: fout12
 integer :: iw_tgt
 real(dp) :: iw_real
 real(dp) :: ev2ha
-complex(dpc), allocatable :: inter2w_bands(:,:,:), inter2w_bands_ik(:,:,:)
-complex(dpc), allocatable :: inter1w_bands(:,:,:), inter1w_bands_ik(:,:,:)
-complex(dpc), allocatable :: intra2w_bands(:,:,:), intra2w_bands_ik(:,:,:)
-complex(dpc), allocatable :: intra1w_bands(:,:,:), intra1w_bands_ik(:,:,:)
-complex(dpc), allocatable :: intra1wS_bands(:,:,:), intra1wS_bands_ik(:,:,:)
+complex(dp), allocatable :: inter2w_bands(:,:,:), inter2w_bands_ik(:,:,:)
+complex(dp), allocatable :: inter1w_bands(:,:,:), inter1w_bands_ik(:,:,:)
+complex(dp), allocatable :: intra2w_bands(:,:,:), intra2w_bands_ik(:,:,:)
+complex(dp), allocatable :: intra1w_bands(:,:,:), intra1w_bands_ik(:,:,:)
+complex(dp), allocatable :: intra1wS_bands(:,:,:), intra1wS_bands_ik(:,:,:)
 ! Addition 2bands interactions decomposition
 character(len=fnlen) :: fnam13
 character(len=fnlen) :: fnam14
 integer :: fout13
 integer :: fout14
-complex(dpc), allocatable :: intra2w_2bands(:,:), intra2w_2bands_ik(:,:)
-complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
-
+complex(dp), allocatable :: intra2w_2bands(:,:), intra2w_2bands_ik(:,:)
+complex(dp), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
 ! *********************************************************************
 
 !DEBUG
@@ -1671,7 +1668,6 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
        chi2tota  = inter2wa + inter1wa + intra2wa + intra1wa + intra1wSa
        chi2full = chi2tot + chi2tota
      end if ! .not.do_antiresonant
-#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_inter2w"),     c2r(inter2w),   start=start4, count=count4))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_inter1w"),     c2r(inter1w),   start=start4, count=count4))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_intra2w"),     c2r(intra2w),   start=start4, count=count4))
@@ -1688,7 +1684,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
        NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_chi2tot_AR"),  c2r(chi2tota),  start=start4, count=count4))
        NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_chi2full"),    c2r(chi2full),  start=start4, count=count4))
      end if ! .not.do_antiresonant
-#endif
+
      ABI_FREE(chi2tot)
      ! Addition AR
      if (.not.do_antiresonant) then
@@ -2191,7 +2187,7 @@ subroutine linelop(icomp, itemp, nband_sum, cryst, ks_ebands, &
  integer, intent(in) :: icomp, itemp, nband_sum, ncid
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ks_ebands
- complex(dpc), intent(in) :: pmat(ks_ebands%mband, ks_ebands%mband, ks_ebands%nkpt, 3, ks_ebands%nsppol)
+ complex(dp), intent(in) :: pmat(ks_ebands%mband, ks_ebands%mband, ks_ebands%nkpt, 3, ks_ebands%nsppol)
  integer, intent(in) :: v1, v2, v3
  integer, intent(in) :: nmesh
  integer, intent(in) :: comm
@@ -2214,7 +2210,7 @@ subroutine linelop(icomp, itemp, nband_sum, cryst, ks_ebands, &
  real(dp) :: emin,emax,my_emin,my_emax
  real(dp) :: const_esu,const_au,au2esu
  real(dp) :: wmn,wnm,wln,wnl,wml,wlm
- complex(dpc) :: idel,w,zi
+ complex(dp) :: idel,w,zi
  character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5
 ! local allocatable arrays
  real(dp), allocatable :: s(:,:), sym(:,:,:)
@@ -2223,24 +2219,23 @@ subroutine linelop(icomp, itemp, nband_sum, cryst, ks_ebands, &
  real(dp) :: ep, wmp, wpn
  real(dp), allocatable :: enk(:) ! (n) = \omega_n(k), with scissor included !
  real(dp) :: fn, fm, fl, fnm, fnl, fml, fln, fmn
- complex(dpc), allocatable :: delta(:,:,:) ! (m,n,a) = \Delta_{mn}^{a}
- complex(dpc), allocatable :: rmna(:,:,:) ! (m,n,a) = r_{mn}^{a}
- complex(dpc), allocatable :: rmnbc(:,:,:,:) ! (m,n,b,c) = r^b_{mn;c}(k)
- complex(dpc), allocatable :: roverw(:,:,:,:) ! (m,n,b,c) = [r^b_{mn}(k)/w_{mn(k)];c
- complex(dpc), allocatable :: chi(:) ! \chi_{II}^{abc}(-\omega,\omega,0)
- complex(dpc), allocatable :: eta(:) ! \eta_{II}^{abc}(-\omega,\omega,0)
- complex(dpc), allocatable :: sigma(:) ! \frac{i}{\omega} \sigma_{II}^{abc}(-\omega,\omega,0)
- complex(dpc), allocatable :: chi2tot(:)
- complex(dpc) :: num1, num2, den1, den2, term1, term2
- complex(dpc) :: chi1, chi1_1, chi1_2, chi2_1b, chi2_2b
- complex(dpc), allocatable :: chi2(:) ! Second term that depends on the frequency ! (omega)
- complex(dpc) :: eta1, eta2, eta2_1, eta2_2
- complex(dpc) :: sigma1, sigma1_1, sigma1_2, sigma2
+ complex(dp), allocatable :: delta(:,:,:) ! (m,n,a) = \Delta_{mn}^{a}
+ complex(dp), allocatable :: rmna(:,:,:) ! (m,n,a) = r_{mn}^{a}
+ complex(dp), allocatable :: rmnbc(:,:,:,:) ! (m,n,b,c) = r^b_{mn;c}(k)
+ complex(dp), allocatable :: roverw(:,:,:,:) ! (m,n,b,c) = [r^b_{mn}(k)/w_{mn(k)];c
+ complex(dp), allocatable :: chi(:) ! \chi_{II}^{abc}(-\omega,\omega,0)
+ complex(dp), allocatable :: eta(:) ! \eta_{II}^{abc}(-\omega,\omega,0)
+ complex(dp), allocatable :: sigma(:) ! \frac{i}{\omega} \sigma_{II}^{abc}(-\omega,\omega,0)
+ complex(dp), allocatable :: chi2tot(:)
+ complex(dp) :: num1, num2, den1, den2, term1, term2
+ complex(dp) :: chi1, chi1_1, chi1_2, chi2_1b, chi2_2b
+ complex(dp), allocatable :: chi2(:) ! Second term that depends on the frequency ! (omega)
+ complex(dp) :: eta1, eta2, eta2_1, eta2_2
+ complex(dp) :: sigma1, sigma1_1, sigma1_2, sigma2
  !Parallelism
  integer :: my_rank, nproc, ierr, my_k1, my_k2
  integer :: fout1,fout2,fout3,fout4,fout5
  character(500) :: msg
-
 ! *********************************************************************
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
@@ -2717,7 +2712,7 @@ subroutine nonlinopt(icomp, itemp, nband_sum, cryst, ks_ebands, &
 integer, intent(in) :: icomp, itemp, nband_sum, ncid
 type(crystal_t),intent(in) :: cryst
 type(ebands_t),intent(in) :: ks_ebands
-complex(dpc), intent(in) :: pmat(ks_ebands%mband, ks_ebands%mband, ks_ebands%nkpt, 3, ks_ebands%nsppol)
+complex(dp), intent(in) :: pmat(ks_ebands%mband, ks_ebands%mband, ks_ebands%nkpt, 3, ks_ebands%nsppol)
 integer, intent(in) :: v1, v2, v3
 integer, intent(in) :: nmesh
 integer, intent(in) :: comm
@@ -2734,7 +2729,7 @@ real(dp) :: el,en,em
 real(dp) :: emin,emax, my_emin,my_emax
 real(dp) :: const_esu,const_au,au2esu
 real(dp) :: wmn,wnm,wln,wnl,wml,wlm !, t1
-complex(dpc) :: idel,w,zi
+complex(dp) :: idel,w,zi
 character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
 ! local allocatable arrays
  integer :: start4(4),count4(4)
@@ -2743,22 +2738,22 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
  real(dp) :: ep, wmp, wpn, wtk
  real(dp), allocatable :: enk(:) ! (n) = \omega_n(k), with scissor included !
  real(dp) :: fn, fm, fl, fnm, fnl, fml, fln, flm
- complex(dpc), allocatable :: delta(:,:,:) ! (m,n,a) = \Delta_{mn}^{a}
- complex(dpc), allocatable :: rmna(:,:,:) ! (m,n,a) = r_{mn}^{a}
- complex(dpc), allocatable :: rmnbc(:,:,:,:) ! (m,n,b,c) = r^b_{mn;c}(k)
- complex(dpc), allocatable :: roverw(:,:,:,:) ! (m,n,b,c) = [r^b_{mn}(k)/w_{mn(k)];c
- complex(dpc), allocatable :: chiw(:), chi2w(:) ! \chi_{II}^{abc}(-\omega,\omega,0)
- complex(dpc), allocatable :: etaw(:), eta2w(:) ! \eta_{II}^{abc}(-\omega,\omega,0)
- complex(dpc), allocatable :: sigmaw(:) ! \frac{i}{\omega} \sigma_{II}^{abc}(-\omega,\omega,0)
- complex(dpc) :: num1, num2, den1, den2, term1, term2
- complex(dpc) :: chi1, chi2_1, chi2_2
- complex(dpc), allocatable :: chi2(:) ! Second term that depends on the frequency ! (omega)
- complex(dpc), allocatable :: eta1(:) ! Second term that depends on the frequency ! (omega)
- complex(dpc), allocatable :: chi2tot(:)
- complex(dpc) :: eta1_1, eta1_2, eta2_1, eta2_2
- complex(dpc) :: sigma2_1, sigma1
- complex(dpc), allocatable :: symrmn(:,:,:) ! (m,l,n) = 1/2*(rml^b rln^c+rml^c rln^b)
- complex(dpc) :: symrmnl(3,3), symrlmn(3,3), symrmln(3,3)
+ complex(dp), allocatable :: delta(:,:,:) ! (m,n,a) = \Delta_{mn}^{a}
+ complex(dp), allocatable :: rmna(:,:,:) ! (m,n,a) = r_{mn}^{a}
+ complex(dp), allocatable :: rmnbc(:,:,:,:) ! (m,n,b,c) = r^b_{mn;c}(k)
+ complex(dp), allocatable :: roverw(:,:,:,:) ! (m,n,b,c) = [r^b_{mn}(k)/w_{mn(k)];c
+ complex(dp), allocatable :: chiw(:), chi2w(:) ! \chi_{II}^{abc}(-\omega,\omega,0)
+ complex(dp), allocatable :: etaw(:), eta2w(:) ! \eta_{II}^{abc}(-\omega,\omega,0)
+ complex(dp), allocatable :: sigmaw(:) ! \frac{i}{\omega} \sigma_{II}^{abc}(-\omega,\omega,0)
+ complex(dp) :: num1, num2, den1, den2, term1, term2
+ complex(dp) :: chi1, chi2_1, chi2_2
+ complex(dp), allocatable :: chi2(:) ! Second term that depends on the frequency ! (omega)
+ complex(dp), allocatable :: eta1(:) ! Second term that depends on the frequency ! (omega)
+ complex(dp), allocatable :: chi2tot(:)
+ complex(dp) :: eta1_1, eta1_2, eta2_1, eta2_2
+ complex(dp) :: sigma2_1, sigma1
+ complex(dp), allocatable :: symrmn(:,:,:) ! (m,l,n) = 1/2*(rml^b rln^c+rml^c rln^b)
+ complex(dp) :: symrmnl(3,3), symrlmn(3,3), symrmln(3,3)
 !Parallelism
  integer :: my_rank, nproc
  integer,parameter :: master = 0

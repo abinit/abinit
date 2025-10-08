@@ -71,7 +71,7 @@ complex(dp), public, allocatable :: projected_dielectric_Lanczos_basis(:,:,:)
 complex(dp), public, allocatable :: eps_m1_minus_eps_model_m1(:,:,:)
 
 complex(dp), public, allocatable :: eps_model_m1_minus_one(:,:,:)
-complex(dpc),public, allocatable :: eps_model_m1_minus_one_DISTR(:,:,:)
+complex(dp),public, allocatable :: eps_model_m1_minus_one_DISTR(:,:,:)
 
 
 ! dimensions of blocks in the model dielectric matrix
@@ -189,11 +189,9 @@ real(dp)       :: time1, time2
 real(dp)       :: time
 
 integer        :: iw, l
-complex(dpc),allocatable  :: dummy_matrix(:,:)
-complex(dpc),allocatable  :: iden(:,:)
-
+complex(dp),allocatable  :: dummy_matrix(:,:)
+complex(dp),allocatable  :: iden(:,:)
 ! *************************************************************************
-
 
 timing_string = "#"
 call write_text_block_in_Timing_log(timing_string)
@@ -292,12 +290,9 @@ real(dp)       :: time1, time2
 real(dp)       :: time
 
 integer        :: iw, l
-complex(dpc),allocatable  :: dummy_matrix(:,:)
-complex(dpc),allocatable  :: iden(:,:)
-
+complex(dp),allocatable  :: dummy_matrix(:,:)
+complex(dp),allocatable  :: iden(:,:)
 ! *************************************************************************
-
-
 
 timing_string = "#"
 call write_text_block_in_Timing_log(timing_string)
@@ -420,30 +415,30 @@ real(dp),    allocatable :: psikb_wrk(:,:)
 real(dp),    allocatable :: psikg_wrk(:,:)
 real(dp),    allocatable :: psikg_tmp(:,:)
 
-complex(dpc),allocatable :: local_Lbasis_conjugated(:,:)
+complex(dp),allocatable :: local_Lbasis_conjugated(:,:)
 
 
-complex(dpc),allocatable :: VPV(:,:,:)
+complex(dp),allocatable :: VPV(:,:,:)
 real(dp),    allocatable :: re_buffer(:,:), im_buffer(:,:)
 
-complex(dpc),allocatable :: vpv_row(:)
+complex(dp),allocatable :: vpv_row(:)
 
 
-complex(dpc),allocatable :: epsilon_head(:,:)
+complex(dp),allocatable :: epsilon_head(:,:)
 
 real(dp), allocatable :: re_BUFFER_head(:,:)
 real(dp), allocatable :: im_BUFFER_head(:,:)
 
 
 
-complex(dpc),allocatable :: YL(:)
+complex(dp),allocatable :: YL(:)
 
 character(256) :: timing_string
 real(dp)       :: time1, time2, time
 real(dp)       :: fft_time1, fft_time2, fft_time
 real(dp)       :: prod_time1, prod_time2, prod_time
 
-complex(dpc)   :: z
+complex(dp)   :: z
 
 
 integer   :: iblk_lanczos, nbdblock_lanczos
@@ -1033,24 +1028,23 @@ integer :: recy_i
 integer :: lsolutions_max, lsolutions, ls
 integer :: projection
 
-complex(dpc), allocatable :: sternheimer_A0(:,:)
-complex(dpc), allocatable :: sternheimer_A(:,:)
-complex(dpc), allocatable :: sternheimer_B(:,:)
-complex(dpc), allocatable :: sternheimer_X(:,:)
-complex(dpc), allocatable :: sternheimer_G(:,:)
+complex(dp), allocatable :: sternheimer_A0(:,:)
+complex(dp), allocatable :: sternheimer_A(:,:)
+complex(dp), allocatable :: sternheimer_B(:,:)
+complex(dp), allocatable :: sternheimer_X(:,:)
+complex(dp), allocatable :: sternheimer_G(:,:)
 
 
-complex(dpc), allocatable :: dummy_tmp_1(:,:)
-complex(dpc), allocatable :: dummy_tmp_2(:,:)
+complex(dp), allocatable :: dummy_tmp_1(:,:)
+complex(dp), allocatable :: dummy_tmp_2(:,:)
 
 integer, allocatable      :: ipiv(:)
 
 
 
-complex(dpc),allocatable :: local_Lbasis(:,:)
-complex(dpc),allocatable :: local_Lbasis_conjugated(:,:)
-
-complex(dpc),allocatable :: YL(:)
+complex(dp),allocatable :: local_Lbasis(:,:)
+complex(dp),allocatable :: local_Lbasis_conjugated(:,:)
+complex(dp),allocatable :: YL(:)
 
 real(dp), allocatable :: psikg_in(:,:), psikg_out(:,:)
 
@@ -1065,11 +1059,11 @@ real(dp), allocatable :: psi_rhs(:,:,:)
 real(dp), allocatable :: psikg_VL(:,:)
 
 
-complex(dpc), allocatable :: check_matrix(:,:), check_matrix2(:,:)
-complex(dpc), allocatable :: c_sternheimer_solutions(:,:)
-complex(dpc), allocatable :: QR_orthonormal_basis(:,:)
+complex(dp), allocatable :: check_matrix(:,:), check_matrix2(:,:)
+complex(dp), allocatable :: c_sternheimer_solutions(:,:)
+complex(dp), allocatable :: QR_orthonormal_basis(:,:)
 
-complex(dpc), allocatable :: svd_matrix(:,:)
+complex(dp), allocatable :: svd_matrix(:,:)
 real   (dp ), allocatable :: svd_values(:)
 
 

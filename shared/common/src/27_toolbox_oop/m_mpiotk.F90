@@ -499,7 +499,7 @@ subroutine mpiotk_read_fsuba_dpc3D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
  integer(XMPI_OFFSET_KIND),intent(in) :: offset,chunk_bsize
 !arrays
  integer,intent(in) :: sizes(3),subsizes(3),starts(3)
- complex(dpc),intent(out),target :: cbuffer(bufsz)
+ complex(dp),intent(out),target :: cbuffer(bufsz)
 
 !Local variables-------------------------------
 !scalars
@@ -512,9 +512,8 @@ subroutine mpiotk_read_fsuba_dpc3D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
 !arrays
  integer :: call_subsizes(3),call_starts(3)
  integer,allocatable :: my_basead(:),my_subsizes(:,:),my_starts(:,:)
- complex(dpc),allocatable :: dummy_cbuf(:)
- complex(dpc),pointer :: buf_ptr(:)
-
+ complex(dp),allocatable :: dummy_cbuf(:)
+ complex(dp),pointer :: buf_ptr(:)
 !************************************************************************
 
  ! Workaround for XLF
@@ -692,7 +691,7 @@ subroutine mpiotk_read_fsuba_dpc4D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
  integer(XMPI_OFFSET_KIND),intent(in) :: offset,chunk_bsize
 !arrays
  integer,intent(in) :: sizes(4),subsizes(4),starts(4)
- complex(dpc),intent(out),target :: cbuffer(bufsz)
+ complex(dp),intent(out),target :: cbuffer(bufsz)
 
 !Local variables-------------------------------
 !scalars
@@ -705,9 +704,8 @@ subroutine mpiotk_read_fsuba_dpc4D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
 !arrays
  integer :: call_subsizes(4),call_starts(4)
  integer,allocatable :: my_basead(:),my_subsizes(:,:),my_starts(:,:)
- complex(dpc),allocatable :: dummy_cbuf(:)
- complex(dpc),pointer :: buf_ptr(:)
-
+ complex(dp),allocatable :: dummy_cbuf(:)
+ complex(dp),pointer :: buf_ptr(:)
 !************************************************************************
 
  ! Workaround for XLF

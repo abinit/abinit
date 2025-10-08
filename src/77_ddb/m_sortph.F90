@@ -29,7 +29,7 @@ module m_sortph
 
  private
 
- complex(dpc),save,allocatable :: eigvecLast(:,:)
+ complex(dp),save,allocatable :: eigvecLast(:,:)
 
  public :: end_sortph
  public :: sortph
@@ -123,11 +123,11 @@ character(len=500) :: msg
 !arrays
 logical     ::               mask(3*natom)
 real(dp)    ::           phfrqNew(3*natom)
-complex(dpc) ::           displIn(3*natom,3*natom)
-complex(dpc) ::           displNew(3*natom,3*natom)
-complex(dpc) ::           eigvecIn(3*natom,3*natom)
-complex(dpc) ::          eigvecNew(3*natom,3*natom)
-complex(dpc) ::   transpose_eigvec(3*natom,3*natom)
+complex(dp) ::           displIn(3*natom,3*natom)
+complex(dp) ::           displNew(3*natom,3*natom)
+complex(dp) ::           eigvecIn(3*natom,3*natom)
+complex(dp) ::          eigvecNew(3*natom,3*natom)
+complex(dp) ::   transpose_eigvec(3*natom,3*natom)
 real(dp)    ::     abs_similarity(3*natom,3*natom)  !|<displNew|displLast>|
 ! *********************************************************************
 

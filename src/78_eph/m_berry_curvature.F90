@@ -24,14 +24,14 @@ module m_berry_curvature
  use m_abicore
  use m_xmpi
  use m_errors
- use m_crystal
- use m_dtset
- use m_dtfil
  use netcdf
  use m_nctk
 
+ use m_crystal,         only : crystal_t
+ use m_dtset,           only : dataset_type
+ use m_dtfil,           only : datafiles_type
  use m_time,            only : cwtime, cwtime_report
- use m_fstrings,        only : strcat, sjoin, ktoa
+ use m_fstrings,        only : strcat, sjoin, ktoa, itoa
  use m_ebands,          only : ebands_t
  use m_kpts,            only : kpts_timrev_from_kptopt, kpts_map, smpbz
  use m_ddb_hdr,         only : ddb_hdr_type, BLKTYP_d2E_mbc
@@ -145,7 +145,8 @@ subroutine berry_curvature(gstore, dtset, dtfil)
  do spin=1,gstore%nsppol
    my_is = gstore%spin2my_is(spin); if (my_is == 0) cycle
    gqk => gstore%gqk(my_is)
-   nb = gqk%nb
+   ABI_CHECK_IEQ(gqk%nb_kq, gqk%nb_k, "nb_kq /= nb_k not tested")
+   nb = gqk%nb_k
    ABI_MALLOC(my_kqmap, (6, gqk%my_nk))
 
    ! For each q-point in the IBZ treated by me.
@@ -187,14 +188,14 @@ subroutine berry_curvature(gstore, dtset, dtfil)
        ! where b1 is the initial band and b2 the final band, p1, p2 are atomic perturbations in reduced coords
        ! and we're summing over k in the BZ at fixed q.
        do ib2=1,nb
-         band2 = ib2 + gqk%bstart - 1
+         band2 = ib2 + gqk%bstart_k - 1
          e_b2_k = ebands%eig(band2, ik_ibz, spin)
          f_b2_k = ebands%occ(band2, ik_ibz, spin) / spin_occ
          e_b2_kq = ebands%eig(band2, ikq_ibz, spin)
          f_b2_kq = ebands%occ(band2, ikq_ibz, spin) / spin_occ
 
          do ib1=1,nb
-           band1 = ib1 + gqk%bstart - 1
+           band1 = ib1 + gqk%bstart_k - 1
            e_b1_kq = ebands%eig(band1, ikq_ibz, spin)
            f_b1_kq = ebands%occ(band1, ikq_ibz, spin) / spin_occ
            e_b1_k = ebands%eig(band1, ik_ibz, spin)
@@ -208,7 +209,7 @@ subroutine berry_curvature(gstore, dtset, dtfil)
 
            dene = e_b1_k - e_b2_kq
            if (abs(dene) > tol12) then
-           ! the tolerance here might need some tweaking
+             ! the tolerance here might need some tweaking
              fact(1) = fact(1) / dene**2
            else
              ! TODO: add finite delta or do Taylor series expansion of numerator + denominator?
