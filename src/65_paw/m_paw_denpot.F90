@@ -1144,6 +1144,7 @@ subroutine pawdenpot(compch_sph,el_temp,ipert,ixc,my_natom,natom,nspden,ntypat,n
        vpotzero(1:2)=mpiarr(ii+1:ii+2)
        ii=ii+2
      end if
+     ABI_FREE(mpiarr)
      call timab(48,2,tsec)
    end if
  end if
