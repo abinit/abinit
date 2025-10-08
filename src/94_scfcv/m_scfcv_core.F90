@@ -374,7 +374,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 !arrays
  integer :: ngfft(18),ngfftdiel(18),ngfftf(18),ngfftmix(18),npwarr_diel(1)
  integer :: npwtot_diel(1)
- integer :: mu
  integer, save :: scfcv_jdtset = 0 ! To simulate iapp behavior
  integer, save :: scfcv_itime = 1 ! To simulate iapp behavior
  integer,allocatable :: dimcprj(:),dimcprj_srt(:)

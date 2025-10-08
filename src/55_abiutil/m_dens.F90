@@ -1553,7 +1553,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  real(dp) :: gmet(3,3),gprimd(3,3),gr_intg(3,4)
  real(dp) :: intg(cplex,4),rhomag_(2,nspden)
  real(dp) :: strs(3,3),strs_cartred(3,3),strs_intg(6,4),tsec(2)
- real(dp) :: dist_ij(natom,natom),intgden_(cplex,nspden,natom),intgden_im_(nspden,natom)
+ real(dp) :: dist_ij(natom,natom),intgden_(cplex,nspden,natom)!,intgden_im_(nspden,natom)
  real(dp) :: my_xred(3, natom), rmet(3,3),xshift(3, natom)
  real(dp), allocatable :: fsm_atom(:,:)
 !real(dp) :: rprimd_mod(3,3),strain
@@ -2762,7 +2762,7 @@ subroutine calmaxdifmag(cplex,intgden,intgden0,natom,nspden,maxmag,difmag)
  real(dp),intent(in) :: intgden(cplex,nspden,natom),intgden0(cplex,nspden,natom)
  real(dp),intent(out)::maxmag,difmag 
 !Local variables ------------------------------
- integer :: iatom,mu
+ integer :: iatom
  real(dp)::mag,mag0
    maxmag=zero;difmag=zero
    if (nspden==2 ) then

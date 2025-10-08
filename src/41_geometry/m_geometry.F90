@@ -4115,7 +4115,6 @@ subroutine vcart2ylm(vector, length, theta, phi)
 
 ! Local 
   real(8):: pi 
-  real(8):: x, y, z
 
   pi=4.0d0*datan(1.0d0)
   ! Compute spherical coordinates

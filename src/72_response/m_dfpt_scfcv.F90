@@ -417,7 +417,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  character(len=500),parameter :: MY_NAME="dfpt_scfcv"
  character(len=fnlen) :: fi1o
 !character(len=fnlen) :: fi1o_vtk
- integer  :: prtopt,mu
+ integer  :: prtopt
  type(abi_mixing_object) :: mix
  type(efield_type) :: dtefield
 !arrays
