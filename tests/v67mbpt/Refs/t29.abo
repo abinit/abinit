@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  2 Oct 2025.
-- ( at 23h34 )
+.Starting date : Thu  9 Oct 2025.
+- ( at 18h06 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/v67mbpt_t29/t29.abi
 - output file    -> t29.abo
@@ -518,7 +518,7 @@ xc                  : -7.05120173628226E+00
 Ewald energy        : -8.43581958561899E+00
 psp_core            :  2.08857285765676E-01
 local_psp           : -2.40410837928403E+00
-spherical_terms     :  6.13687669113656E+00
+PAW spherical_terms :  6.13687669113656E+00
 total_energy        : -7.96286906480150E+00
 total_energy_eV     : -2.16680686749233E+02
 ...
@@ -531,7 +531,7 @@ band_energy         :  1.83724955749726E-01
 Ewald energy        : -8.43581958561899E+00
 psp_core            :  2.08857285765676E-01
 xc_dc               : -4.31273743957088E+00
-spherical_terms     :  4.39311298537196E+00
+PAW spherical_terms :  4.39311298537196E+00
 total_energy_dc     : -7.96286179830251E+00
 total_energy_dc_eV  : -2.16680489017740E+02
 ...
@@ -1332,10 +1332,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         17.1  wall=         17.1
+- Proc.   0 individual time (sec): cpu=         17.3  wall=         17.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered  12 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.1  wall=         17.1
++Overall time at end (sec) : cpu=         17.3  wall=         17.4

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue  7 Oct 2025.
-- ( at 15h56 )
+.Starting date : Thu  9 Oct 2025.
+- ( at 18h03 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/v10_t108/t108.abi
 - output file    -> t108.abo
@@ -395,8 +395,8 @@ xc                  : -1.90167945763742E+00
 Ewald energy        : -3.56489332228662E+00
 psp_core            : -3.17095761467905E-02
 local_psp           : -2.45083765154123E+00
-spherical_terms     :  1.64734818974111E+00
-paw_core            : -4.80685696496226E+02
+PAW spherical_terms :  1.64734818974111E+00
+PAW core            : -4.80685696496226E+02
 internal            : -4.84358535250277E+02
 '-kT*entropy'       : -1.01890316224564E-02
 total_energy        : -4.84368724281899E+02
@@ -411,8 +411,8 @@ band_energy         :  3.85598315895678E-02
 Ewald energy        : -3.56489332228662E+00
 psp_core            : -3.17095761467905E-02
 xc_dc               : -4.04949450040727E-01
-spherical_terms     :  3.48781817908676E-01
-paw_core_dc         : -4.80685646429844E+02
+PAW spherical_terms :  3.48781817908676E-01
+PAW core dc         : -4.80685646429844E+02
 internal            : -4.84299857128819E+02
 '-kT*entropy'       : -1.01890316224564E-02
 total_energy_dc     : -4.84310046160442E+02
@@ -567,10 +567,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         32.1  wall=         32.1
+- Proc.   0 individual time (sec): cpu=         32.2  wall=         32.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered  18 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         32.1  wall=         32.1
++Overall time at end (sec) : cpu=         32.2  wall=         32.2

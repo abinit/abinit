@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri  3 Oct 2025.
-- ( at 19h37 )
+.Starting date : Thu  9 Oct 2025.
+- ( at 18h07 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/v7_t23-t24-t25/t25.abi
 - output file    -> t25.abo
