@@ -2313,8 +2313,8 @@ end subroutine rotate_fqg
 !!  dvdb_ftinterp_setup
 !!
 !! FUNCTION
-!!  Precompute the wsr array with with the DFPT potential in the supercell
-!!  required for the Fourier interpolation
+!!  Precompute the wsr array with the DFPT potential in the supercell
+!!  required for the Fourier interpolation.
 !!  This is a collective routine that should be called by all procs inside db%comm.
 !!
 !! \begin{equation}
@@ -2377,13 +2377,13 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qptopt, nqshift, qshift, nfft, ngfft, 
  call wrtout(std_out, sjoin(ch10, "Building W(R,r) using q-mesh ngqpt: ", ltoa(ngqpt), &
    ", with nprocs_rpt:", itoa(db%nprocs_rpt)), do_flush=.True.)
  call wrtout(std_out, sjoin(" Using Gaussian filter with qdamp: ", ftoa(db%qdamp, fmt="(f6.1)")))
+ call wrtout(std_out, "")
+ call wrtout(std_out, " Note: this part may take some time depending on the number of MPI procs, ngqpt and nfft points.")
+ call wrtout(std_out, " Use boxcutmin < 2.0 (> 1.1) to decrease nfft, reduce memory requirements and speedup the calculation.")
  !call wrtout(std_out, " Q-mesh shifts:")
  !do ii=1,nqshift
  !  call wrtout(std_out, ltoa(qshift(:, ii)))
  !end do
- call wrtout(std_out, "")
- call wrtout(std_out, " Note: this part may take some time depending on the number of MPI procs, ngqpt and nfft points.")
- call wrtout(std_out, " Use boxcutmin < 2.0 (> 1.1) to decrease nfft, reduce memory requirements and speedup the calculation.")
 
  call prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
                        qibz, qbz, indqq, iperm, nqsts, iqs_dvdb, all_rpt, all_wghatm, db%comm)
@@ -2444,7 +2444,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qptopt, nqshift, qshift, nfft, ngfft, 
    !
    ! Here all procs get all potentials for this IBZ q-point on the real-space FFT mesh.
    ! This call allocates v1r_qibz(cplex_qibz, nfft, nspden, 3*natom)
-   ! Note that here we need all 3*natom perturbations because of v1phq_rotate
+   ! Note that here we need all 3*natom perturbations because of v1phq_rotate.
    call db%readsym_allv1(iqs_dvdb(iq_ibz), cplex_qibz, nfft, ngfft, v1r_qibz, db%comm)
 
    ! Reconstruct by symmetry the potentials for the star of this q-point,
