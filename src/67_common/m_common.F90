@@ -1485,12 +1485,12 @@ subroutine prtene(dtset,energies,iout,usepaw)
 !Local variables-------------------------------
 !scalars
  integer :: ipositron,optdc
- logical :: directE_avail,testdmft,write_entropy=.false.,write_totalxc=.false.
+ logical :: directE_avail,testdmft,write_entropy=.false.,write_totalxc=.false.,write_epaw_core=.false.
  real(dp) :: eent,enevalue,etotal,etotaldc,exc_semilocal,el_temp
  ! Do not modify the length of these strings
  character(len=14) :: eneName
  character(len=500) :: info,msg
- type(yamldoc_t) :: edoc,dc_edoc,sdoc,ftxcdoc
+ type(yamldoc_t) :: edoc,dc_edoc,pawcore_edoc,sdoc,ftxcdoc
 !arrays
  !character(len=10) :: EPName(1:2)=(/"Positronic","Electronic"/)
 
@@ -1562,13 +1562,13 @@ subroutine prtene(dtset,energies,iout,usepaw)
        endif
      else
        if (dtset%use_rcpaw/=0) then
-         call edoc%add_real('spherical_terms', energies%paw%epaw)
-         call edoc%add_real('paw_core', energies%paw%epaw_core)
+         call edoc%add_real('PAW spherical_terms', energies%paw%epaw)
+         call edoc%add_real('PAW core', energies%paw%epaw_core)
        else if (dtset%paw_add_core==1) then
-         call edoc%add_real('spherical_terms', energies%paw%epaw-energies%paw%epaw_core)
-         call edoc%add_real('paw_core', energies%paw%epaw_core)
+         call edoc%add_real('PAW spherical_terms', energies%paw%epaw-energies%paw%epaw_core)
+         call edoc%add_real('PAW core', energies%paw%epaw_core)
        else
-         call edoc%add_real('spherical_terms', energies%paw%epaw)
+         call edoc%add_real('PAW spherical_terms', energies%paw%epaw)
        end if
        !!!XG20181025 Does not work (yet)...
        !!!if(abs(energies%e_nlpsp_vfock)>tol8)then
@@ -1663,13 +1663,13 @@ subroutine prtene(dtset,energies,iout,usepaw)
    end if
    if (usepaw==1) then
      if (dtset%use_rcpaw/=0) then
-       call dc_edoc%add_real('spherical_terms', energies%paw%epaw_dc)
-       call dc_edoc%add_real('paw_core_dc', energies%paw%epaw_core_dc)
+       call dc_edoc%add_real('PAW spherical_terms', energies%paw%epaw_dc)
+       call dc_edoc%add_real('PAW core dc', energies%paw%epaw_core_dc)
      else if (dtset%paw_add_core==1) then
-       call dc_edoc%add_real('spherical_terms', energies%paw%epaw_dc-energies%paw%epaw_core)
-       call dc_edoc%add_real('paw_core', energies%paw%epaw_core)
+       call dc_edoc%add_real('PAW spherical_terms', energies%paw%epaw_dc-energies%paw%epaw_core)
+       call dc_edoc%add_real('PAW core', energies%paw%epaw_core)
      else
-       call dc_edoc%add_real('spherical_terms', energies%paw%epaw_dc)
+       call dc_edoc%add_real('PAW spherical_terms', energies%paw%epaw_dc)
      end if
    end if
    if ((dtset%vdw_xc>=5.and.dtset%vdw_xc<=7).and.ipositron/=1) then
@@ -1739,23 +1739,11 @@ subroutine prtene(dtset,energies,iout,usepaw)
    if ((optdc==0.or.optdc==2).and.(directE_avail)) then
      call edoc%add_real('total_energy_eV', etotal*Ha_eV)
    end if
-   if (dtset%paw_add_core==0.and.dtset%use_rcpaw==0) then
-     if (abs(energies%paw%epaw_core)>tiny(zero)) then
-       !call edoc%add_real('tot_ene_incl_core', etotal+energies%paw%epaw_core)
-       !call edoc%add_real('tot_ene_incl_core_eV', (etotal+energies%paw%epaw_core)*Ha_eV)
-     end if
-   end if
    if (optdc>=1) then
      !if (optdc==1) write(msg, '(a,a,es21.14)' ) ch10,'  >Total DC energy in eV        = ',etotaldc*Ha_eV
      !if (optdc==2) write(msg, '(a,es21.14)' ) '  >Total DC energy in eV        = ',etotaldc*Ha_eV
      !call wrtout(iout,msg)
      call dc_edoc%add_real('total_energy_dc_eV', etotaldc*Ha_eV)
-     if (dtset%paw_add_core==0.and.dtset%use_rcpaw==0) then
-       if (abs(energies%paw%epaw_core)>tiny(zero)) then
-         !call dc_edoc%add_real('tot_edc_incl_core', etotaldc+energies%paw%epaw_core)
-         !call dc_edoc%add_real('tot_edc_incl_core_eV', (etotaldc+energies%paw%epaw_core)*Ha_eV)
-       end if
-     end if
    end if
  end if
 
@@ -1767,6 +1755,22 @@ subroutine prtene(dtset,energies,iout,usepaw)
    call wrtout(iout,msg)
    call edoc%add_real('monopole_correction', energies%e_monopole)
    call edoc%add_real('monopole_correction_eV', energies%e_monopole*Ha_eV)
+ end if
+
+!Print total energy including PAW core contribution
+ if (usepaw==1) then
+   if (dtset%paw_add_core==0.and.dtset%use_rcpaw==0) then
+     if (abs(energies%paw%epaw_core)>tiny(zero).or.abs(energies%paw%epaw_core_dc)>tiny(zero)) then
+       write_epaw_core=.true.
+       info = 'Components of total free energy, including PAW core contributions'
+       pawcore_edoc = yamldoc_open('EnergyTermsWithPAWCore', info=trim(adjustl(info)), &
+                                   width=20, real_fmt='(es21.14)')
+       call pawcore_edoc%add_real('Total energy', etotal+energies%paw%epaw_core)
+       if(optdc>=1) call pawcore_edoc%add_real('Total energy DC', etotaldc+energies%paw%epaw_core)
+       call pawcore_edoc%add_real('Total energy (eV)', (etotal+energies%paw%epaw_core)*Ha_eV)
+       if(optdc>=1) call pawcore_edoc%add_real('Total energy DC (eV)', (etotaldc+energies%paw%epaw_core)*Ha_eV)
+     end if
+   end if
  end if
 
 !======== In case other sources of entropies than the non-interacting entropy =========
@@ -1813,6 +1817,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
 !Write components of total energies in Yaml format.
  call edoc%write_and_free(iout)
  if(optdc >= 1) call dc_edoc%write_and_free(iout)
+ if (write_epaw_core) call pawcore_edoc%write_and_free(iout)
  if(write_entropy) call sdoc%write_and_free(iout)
  if(write_totalxc) call ftxcdoc%write_and_free(iout)
 
