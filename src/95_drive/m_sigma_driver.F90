@@ -3648,12 +3648,15 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
 
  end do
 
-#if 0
+#if 1
  ! Using the random q for the optical limit is one of the reasons
  ! why sigma breaks the initial energy degeneracies.
+ if (dtset%userra > 100) then
+ print *, "DEBUG, I am setting Vcp%i_sz=zero, Vcp%vc_sqrt(1,1)=czero, Vcp%vcqlwl_sqrt(1,1)=czero"
  Vcp%i_sz=zero
  Vcp%vc_sqrt(1,1)=czero
  Vcp%vcqlwl_sqrt(1,1)=czero
+ end if
 #endif
 
  ABI_FREE(qlwl)
