@@ -704,8 +704,13 @@ contains
  dprarr(2,:)=dtsets(:)%qgbt(2)
  dprarr(3,:)=dtsets(:)%qgbt(3)
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'qgbt','DPR',0)
+ 
+ dprarr(1,:)=dtsets(:)%qgbt_cart(1)
+ dprarr(2,:)=dtsets(:)%qgbt_cart(2)
+ dprarr(3,:)=dtsets(:)%qgbt_cart(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'qgbt_cart','DPR',0)
 
-!qptdm
+ !qptdm
  narr=3*dtsets(1)%nqptdm ! default size for all datasets
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    if(idtset/=0)then
