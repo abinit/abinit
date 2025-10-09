@@ -1,5 +1,5 @@
 
-.Version 10.3.4.4 of ABINIT, released Nov 2024.
+.Version 10.5.1.5 of ABINIT, released Jul 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 26 Jan 2025.
-- ( at 09h48 )
+.Starting date : Thu  9 Oct 2025.
+- ( at 18h04 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/TestBot_MPI1/v5_t07/t07.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/v5_t07/t07.abi
 - output file    -> t07.abo
 - root for input  files -> t07i
 - root for output files -> t07o
@@ -1542,8 +1542,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Al.gga.uspp.paw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Al.gga.uspp.paw
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Al.gga.uspp.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Al.gga.uspp.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): Aluminium
 - 13.00000   3.00000  20050712                znucl, zion, pspdat
     7   11    1    0       604   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1715,7 +1715,7 @@ xc                  : -8.51744386222745E+00
 Ewald energy        : -1.07831311739987E+01
 psp_core            :  4.35622962782581E-01
 local_psp           :  4.22517331545656E-01
-spherical_terms     :  6.54998649701413E+00
+PAW spherical_terms :  6.54998649701413E+00
 internal            : -8.38635656514164E+00
 '-kT*entropy'       : -4.98773715957233E-03
 total_energy        : -8.39134430230121E+00
@@ -1730,7 +1730,7 @@ band_energy         :  1.11989340522461E+00
 Ewald energy        : -1.07831311739987E+01
 psp_core            :  4.35622962782581E-01
 xc_dc               : -4.14398418310324E+00
-spherical_terms     :  4.98523531243247E+00
+PAW spherical_terms :  4.98523531243247E+00
 internal            : -8.38636367666228E+00
 '-kT*entropy'       : -4.98773715957233E-03
 total_energy_dc     : -8.39135141382185E+00
@@ -1783,8 +1783,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Al.gga.uspp.paw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Al.gga.uspp.paw
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Al.gga.uspp.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Al.gga.uspp.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): Aluminium
 - 13.00000   3.00000  20050712                znucl, zion, pspdat
     7   11    1    0       604   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1980,7 +1980,7 @@ iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.99273572282335E-01
 local_psp           : -1.99936987378019E-01
-spherical_terms     :  1.04737563768580E-02
+PAW spherical_terms :  1.04737563768580E-02
 '-kT*entropy'       : -0.00000000000000E+00
 positronic          :  9.81034128117325E-03
 electronic          : -8.39135141382185E+00
@@ -1994,7 +1994,7 @@ total_energy_eV     : -2.33105864171909E+02
 iteration_state     : {dtset: 2, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -1.45865352937084E-01
-spherical_terms     :  0.00000000000000E+00
+PAW spherical_terms :  0.00000000000000E+00
 '-kT*entropy'       : -0.00000000000000E+00
 electron_positron_dc:  1.55675758652471E-01
 positronic          :  9.81040571538588E-03
@@ -2050,8 +2050,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Al.gga.uspp.paw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Al.gga.uspp.paw
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Al.gga.uspp.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Al.gga.uspp.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): Aluminium
 - 13.00000   3.00000  20050712                znucl, zion, pspdat
     7   11    1    0       604   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2253,7 +2253,7 @@ xc                  : -8.51084138851527E+00
 Ewald energy        : -1.07831311739987E+01
 psp_core            :  4.35622962782581E-01
 local_psp           :  4.75497594103507E-01
-spherical_terms     :  6.50589122716735E+00
+PAW spherical_terms :  6.50589122716735E+00
 '-kT*entropy'       : -5.11747995391424E-03
 electronic          : -8.39038769389951E+00
 positronic          :  9.81040571538622E-03
@@ -2270,7 +2270,7 @@ band_energy         :  1.05623438827646E+00
 Ewald energy        : -1.07831311739987E+01
 psp_core            :  4.35622962782581E-01
 xc_dc               : -4.14314074097494E+00
-spherical_terms     :  4.98635205854312E+00
+PAW spherical_terms :  4.98635205854312E+00
 '-kT*entropy'       : -5.11747995391424E-03
 electron_positron_dc:  6.28435273065139E-02
 electronic          : -8.39033645801888E+00
@@ -2324,8 +2324,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Al.gga.uspp.paw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Al.gga.uspp.paw
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Al.gga.uspp.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Al.gga.uspp.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): Aluminium
 - 13.00000   3.00000  20050712                znucl, zion, pspdat
     7   11    1    0       604   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2570,7 +2570,7 @@ xc                  : -8.51081992235050E+00
 Ewald energy        : -1.07831311739987E+01
 psp_core            :  4.35622962782581E-01
 local_psp           :  4.74604509258747E-01
-spherical_terms     :  6.50735159804241E+00
+PAW spherical_terms :  6.50735159804241E+00
 '-kT*entropy'       : -5.14343180800822E-03
 electronic          : -8.39029259080167E+00
 positronic          :  9.29316596719134E-02
@@ -2587,7 +2587,7 @@ band_energy         :  1.07265636028621E+00
 Ewald energy        : -1.07831311739987E+01
 psp_core            :  4.35622962782581E-01
 xc_dc               : -4.14284344242123E+00
-spherical_terms     :  4.98631954220606E+00
+PAW spherical_terms :  4.98631954220606E+00
 '-kT*entropy'       : -5.14343180800822E-03
 electron_positron_dc:  4.62327589465418E-02
 electronic          : -8.39028642400654E+00
@@ -2641,8 +2641,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Al.gga.uspp.paw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Al.gga.uspp.paw
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Al.gga.uspp.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Al.gga.uspp.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): Aluminium
 - 13.00000   3.00000  20050712                znucl, zion, pspdat
     7   11    1    0       604   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2881,7 +2881,7 @@ xc                  : -8.51082000315330E+00
 Ewald energy        : -1.07831311739987E+01
 psp_core            :  4.35622962782581E-01
 local_psp           :  4.74603845479743E-01
-spherical_terms     :  6.50736789437750E+00
+PAW spherical_terms :  6.50736789437750E+00
 '-kT*entropy'       : -5.14343189467452E-03
 electronic          : -8.39027714699166E+00
 positronic          :  9.29314425853059E-02
@@ -2898,7 +2898,7 @@ band_energy         :  1.07265675627858E+00
 Ewald energy        : -1.07831311739987E+01
 psp_core            :  4.35622962782581E-01
 xc_dc               : -4.14284345163370E+00
-spherical_terms     :  4.98631911396912E+00
+PAW spherical_terms :  4.98631911396912E+00
 '-kT*entropy'       : -5.14343189467452E-03
 electron_positron_dc:  4.62328737338375E-02
 electronic          : -8.39028635076297E+00
@@ -3190,7 +3190,7 @@ xc                  : -8.51091088505672E+00
 Ewald energy        : -1.07823924283109E+01
 psp_core            :  4.35622962782581E-01
 local_psp           :  4.73551024100780E-01
-spherical_terms     :  6.50760860985700E+00
+PAW spherical_terms :  6.50760860985700E+00
 '-kT*entropy'       : -5.13588391329063E-03
 electronic          : -8.39007124269454E+00
 positronic          :  9.22404887243597E-02
@@ -3207,7 +3207,7 @@ band_energy         :  1.07250187248328E+00
 Ewald energy        : -1.07823924283109E+01
 psp_core            :  4.35622962782581E-01
 xc_dc               : -4.14299555903392E+00
-spherical_terms     :  4.98631173387205E+00
+PAW spherical_terms :  4.98631173387205E+00
 '-kT*entropy'       : -5.13588391329063E-03
 electron_positron_dc:  4.60114981482669E-02
 electronic          : -8.39007580397191E+00
@@ -4694,10 +4694,10 @@ P           mkmem6          6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         11.3  wall=         11.3
+- Proc.   0 individual time (sec): cpu=         11.2  wall=         11.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and  59 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.3  wall=         11.3
++Overall time at end (sec) : cpu=         11.2  wall=         11.3

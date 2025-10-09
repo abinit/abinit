@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  2 Oct 2025.
-- ( at 23h35 )
+.Starting date : Thu  9 Oct 2025.
+- ( at 18h06 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/v7_t23-t24-t25/t24.abi
 - output file    -> t24.abo
@@ -1003,10 +1003,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         13.3  wall=         13.4
+- Proc.   0 individual time (sec): cpu=         13.4  wall=         13.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         13.3  wall=         13.4
++Overall time at end (sec) : cpu=         13.4  wall=         13.4

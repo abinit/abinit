@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri  3 Oct 2025.
-- ( at 19h36 )
+.Starting date : Thu  9 Oct 2025.
+- ( at 18h06 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/v67mbpt_t06/t06.abi
 - output file    -> t06.abo
@@ -966,7 +966,7 @@ xc                  : -2.34952447413704E+01
 Ewald energy        : -6.95068319280860E+01
 psp_core            :  4.04809837710634E+00
 local_psp           : -8.89245929187855E+01
-spherical_terms     : -7.90385909610256E+00
+PAW spherical_terms : -7.90385909610256E+00
 total_energy        : -1.03097034713528E+02
 total_energy_eV     : -2.80541298641755E+03
 ...
@@ -979,7 +979,7 @@ band_energy         : -1.35488149508019E+01
 Ewald energy        : -6.95068319280860E+01
 psp_core            :  4.04809837710634E+00
 xc_dc               : -2.38018105217540E+01
-spherical_terms     : -2.89898159734570E-01
+PAW spherical_terms : -2.89898159734570E-01
 total_energy_dc     : -1.03099257183270E+02
 total_energy_dc_eV  : -2.80547346289483E+03
 ...
@@ -1852,7 +1852,7 @@ xc                  : -2.34952447414814E+01
 Ewald energy        : -6.95068319280860E+01
 psp_core            :  4.04809837710634E+00
 local_psp           : -8.89245929192744E+01
-spherical_terms     : -7.90385909653003E+00
+PAW spherical_terms : -7.90385909653003E+00
 total_energy        : -1.03097034714644E+02
 total_energy_eV     : -2.80541298644792E+03
 ...
@@ -1865,7 +1865,7 @@ band_energy         : -1.35488149504531E+01
 Ewald energy        : -6.95068319280860E+01
 psp_core            :  4.04809837710634E+00
 xc_dc               : -2.38018105220912E+01
-spherical_terms     : -2.89898159745924E-01
+PAW spherical_terms : -2.89898159745924E-01
 total_energy_dc     : -1.03099257183270E+02
 total_energy_dc_eV  : -2.80547346289482E+03
 ...
@@ -2718,7 +2718,7 @@ xc                  : -2.34951787248232E+01
 Ewald energy        : -6.95068319280860E+01
 psp_core            :  4.04809837710634E+00
 local_psp           : -8.89239859881000E+01
-spherical_terms     : -7.90375559085303E+00
+PAW spherical_terms : -7.90375559085303E+00
 total_energy        : -1.03096279501759E+02
 total_energy_eV     : -2.80539243606023E+03
 ...
@@ -2731,7 +2731,7 @@ band_energy         : -1.35491858156246E+01
 Ewald energy        : -6.95068319280860E+01
 psp_core            :  4.04809837710634E+00
 xc_dc               : -2.38014656678834E+01
-spherical_terms     : -2.89872127692831E-01
+PAW spherical_terms : -2.89872127692831E-01
 total_energy_dc     : -1.03099257162180E+02
 total_energy_dc_eV  : -2.80547346232095E+03
 ...
@@ -3992,10 +3992,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         32.6  wall=         32.6
+- Proc.   0 individual time (sec): cpu=         32.7  wall=         32.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  21 WARNINGs and  16 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         32.6  wall=         32.6
++Overall time at end (sec) : cpu=         32.7  wall=         32.7
