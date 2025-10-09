@@ -973,7 +973,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
 
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
      "gstore_with_vk", "gstore_qptopt", "gstore_completed", &
-     "gstore_use_lgk", "gstore_use_lgq", "gstore_has_ifcs"  &
+     "gstore_use_lgk", "gstore_use_lgq", "gstore_has_ifcs", "ifc_eta"  &
    ])
    NCF_CHECK(ncerr)
    !ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "fermi_energy", "smearing_width"])
@@ -1003,10 +1003,12 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      nctkarr_t("gstore_qbz2ibz", "i", "six, gstore_nqbz"), &
      nctkarr_t("gstore_qglob2bz", "i", "gstore_max_nq, number_of_spins"), &
      nctkarr_t("gstore_kglob2bz", "i", "gstore_max_nk, number_of_spins"), &
+     ! TODO
+     !nctkarr_t("gstore_kqs_symtab", "i", "gstore_max_nk, gstore_max_nq, number_of_spins"), &
      ! These quantities are needed to interface GSTORE.nc with external codes.
      ! For the meaning of the different variables and conventions see m_ifc module.
-     nctkarr_t("zeff", "dp", "three, three, number_of_atoms"), &
-     nctkarr_t("qdrp_cart", "dp", "three, three, three, number_of_atoms") &
+     nctkarr_t("ifc_zeff", "dp", "three, three, number_of_atoms"), &
+     nctkarr_t("ifc_qdrp_cart", "dp", "three, three, three, number_of_atoms") &
    ])
    NCF_CHECK(ncerr)
 
@@ -1014,9 +1016,10 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      ! Define arrays for IFCs.
      ! For the meaning of the different variables and conventions see m_ifc module.
      ncerr = nctk_def_arrays(ncid, [ &
-        nctkarr_t("rpt", "dp", "three, nrpt"), &
-        nctkarr_t("wghatm", "dp", "natom, natom, nrpt"), &
-        nctkarr_t("short_atmfrc", "dp", "three, natom, three, natom, nrpt") &
+        nctkarr_t("irc_rpt", "dp", "three, nrpt"), &
+        nctkarr_t("ifc_wghatm", "dp", "natom, natom, nrpt"), &
+        !nctkarr_t("ifc_dynmat", "dp", "two, three, natom, three, natom, gstore_nqbz") &
+        nctkarr_t("ifc_short_atmfrc", "dp", "three, natom, three, natom, nrpt") &
      ])
      NCF_CHECK(ncerr)
    end if
@@ -1026,6 +1029,11 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    !  1 --> (iq_bz, spin) has been computed.
    ! In order to check if the whole generation is completed, one should test if "gstore_completed" == 1
    !NCF_CHECK(nf90_def_var_fill(ncid, vid("gstore_done_qbz_spin"), NF90_FILL, 0))
+
+   !  0 --> (k, q, spin) has not been computed.
+   !  1 --> (k, q, spin) has been computed.
+   !  2 --> (k, q, spin) has been reconstructed by symmetry.
+   !NCF_CHECK(nf90_def_var_fill(ncid, vid("gstore_kqs_symtab"), NF90_FILL, 0))
 
    ! Optional arrays
    if (allocated(gstore%delta_ef_kibz_spin)) then
@@ -1065,12 +1073,14 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_kglob2bz"), gstore%kglob2bz))
 
    ! These quantities are needed to interface GSTORE.nc with external codes.
-   NCF_CHECK(nf90_put_var(ncid, vid("zeff"), ifc%zeff))
-   NCF_CHECK(nf90_put_var(ncid, vid("qdrp_cart"), ifc%qdrp_cart))
+   NCF_CHECK(nf90_put_var(ncid, vid("ifc_zeff"), ifc%zeff))
+   NCF_CHECK(nf90_put_var(ncid, vid("ifc_qdrp_cart"), ifc%qdrp_cart))
+   NCF_CHECK(nf90_put_var(ncid, vid("ifc_eta"), ifc%eta))
    if (gstore_has_ifcs /= 0) then
-     NCF_CHECK(nf90_put_var(ncid, vid("rpt"), ifc%rpt))
-     NCF_CHECK(nf90_put_var(ncid, vid("wghatm"), ifc%wghatm))
-     NCF_CHECK(nf90_put_var(ncid, vid("short_atmfrc"), ifc%short_atmfrc))
+     NCF_CHECK(nf90_put_var(ncid, vid("ifc_rpt"), ifc%rpt))
+     NCF_CHECK(nf90_put_var(ncid, vid("ifc_wghatm"), ifc%wghatm))
+     !NCF_CHECK(nf90_put_var(ncid, vid("ifc_dynmat"), ifc%dynmat))
+     NCF_CHECK(nf90_put_var(ncid, vid("ifc_short_atmfrc"), ifc%short_atmfrc))
    end if
 
    if (allocated(gstore%delta_ef_kibz_spin)) then

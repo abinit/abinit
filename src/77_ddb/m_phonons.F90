@@ -762,7 +762,7 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
  real(dp) :: dosdeltae, phdos_int, projfact
  character(len=500) :: msg
  character(len=80) :: errstr
- type(htetra_t) :: htetraq
+ type(htetra_t) :: htetra_q
 !arrays
  integer :: in_qptrlatt(3,3),new_qptrlatt(3,3), units(2)
  integer :: dos_maxmode_
@@ -871,7 +871,7 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
    ABI_MALLOC(bz2ibz, (nqbz))
    bz2ibz = bz2ibz_smap(1,:)
 
-   call htetraq%init(bz2ibz, crystal%gprimd, qlatt, qbz, nqbz, qibz, phdos%nqibz, ierr, errstr, comm)
+   call htetra_q%init(bz2ibz, crystal%gprimd, qlatt, qbz, nqbz, qibz, phdos%nqibz, ierr, errstr, comm)
    !call cwtime_report(" init_tetra", cpu, wall, gflops)
    ABI_CHECK(ierr == 0, errstr)
    ABI_FREE(bz2ibz)
@@ -1080,7 +1080,7 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
        do imode=1,dos_maxmode_
          ! Compute the weights for this q-point using tetrahedron
          tmp_phfrq(:) = full_phfrq(imode,:)
-         call htetraq%get_onewk_wvals(iq_ibz,bcorr0,phdos%nomega,energies,max_occ1,phdos%nqibz,tmp_phfrq,wdt)
+         call htetra_q%get_onewk_wvals(iq_ibz,bcorr0,phdos%nomega,energies,max_occ1,phdos%nqibz,tmp_phfrq,wdt)
          wdt = wdt * wtq_ibz(iq_ibz)
 
          ! Accumulate DOS/IDOS
@@ -1200,7 +1200,7 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
    ABI_FREE(full_veloc)
    ABI_FREE(full_phangmom)
    ABI_FREE(tmp_phfrq)
-   call htetraq%free()
+   call htetra_q%free()
  else
    ABI_WARNING('The netcdf PHIBZ file is only output for tetrahedron integration and DOS calculations')
  end if ! tetrahedra
@@ -1554,16 +1554,16 @@ subroutine thermal_supercell_make(amplitudes,Crystal, Ifc,namplitude, nconfig,op
        else
          !Treat negative frequencies
          select case (option)
-         case(1)
+         case (1)
            !Do not populate
            sigma = 0._dp
-         case(2)
+         case (2)
            !Default amplitude for all the frequencies
            sigma = 100._dp
-         case(3)
+         case (3)
            !Absolute value of the frequencies
            sigma=sqrt((bose_einstein(abs(phfrq_allq(imode,iq)),temperature)+half) / abs(phfrq_allq(imode,iq)))
-         case(4)
+         case (4)
            sigma = 0._dp
            !Search if the amplitude of this unstable phonon is in the input argument amplitudes
            do iampl=1,namplitude
@@ -1847,7 +1847,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
  integer,parameter :: master=0
  integer :: unt, iphl1,iblok,rftyp, ii,nfineqpath,nsym,natom,ncid,nprocs,my_rank
  integer :: natprj_bs,eivec,enunit,ifcflag,ptgroupma,spgroup
- real(dp) :: freeze_displ, cfact, omega, omega_min, gaussmaxarg, gaussfactor, gaussprefactor, xx
+ real(dp) :: freeze_displ, cfact, omega, omega_min, gaussmaxarg, gaussfactor, gaussprefactor, xx, eta
  character(500) :: msg
  character(len=8) :: unitname
 !arrays
@@ -1929,7 +1929,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
      ! long-range coulomb interaction through Ewald summation
      call gtdyn9(ddb%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,ddb%gprim,ddb%mpert,natom, &
       Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,ifc%zeff,&
-      ifc%qdrp_cart,ifc%ewald_option,xmpi_comm_self,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
+      ifc%qdrp_cart,ifc%ewald_option,eta,xmpi_comm_self,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
 
    else if (ifcflag == 0) then
 
