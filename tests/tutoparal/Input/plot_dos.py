@@ -1,20 +1,26 @@
-import matplotlib.pyplot as plt
 import numpy as np
+from plot_utils import *
 
-with open("tdmft_triqs_1o_DS1_DOS_AT0001","r") as f:
-    lines = f.readlines()
+# --- Load data and extract Fermi energy ---
+filename = "tdmft_triqs_1o_DS1_DOS_AT0001"
 
-for line in lines:
-    if "Fermi energy" in line:
-        fermi = float(line.split()[-1])
-        break
+with open(filename, "r") as f:
+    for line in f:
+        if "Fermi energy" in line:
+            fermi = float(line.split()[-1])
+            break
 
-data = np.loadtxt("tdmft_triqs_1o_DS1_DOS_AT0001")
+data = np.loadtxt(filename)
+data[:, 0] -= fermi  # Shift energy axis
+data[:, 0] *= HA_EV
+data[:, 1:] /= HA_EV
 
-data[:,0]-=fermi
+fig = Figure()
 
-plt.plot(data[:,0],data[:,3],lw=5,color="red")
+params = {}
+params["xlabel"] = r"E - E$_{\mathrm{F}}$ (eV)"
+params["ylabel"] = "Number of states / eV"
+params["xlim"]   = (-8,5)
 
-plt.xlim(-0.3,0.3)
-
-plt.show()
+fig.add_data(data[:, 0], data[:, 3], params)
+fig.plot()

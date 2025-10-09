@@ -69,7 +69,7 @@ prtvol 4     #
 
  nbandkss2 2
  kssform2  3
- pawfatbnd2 2  # Fatbands, resolved for each angular momentum
+ pawfatbnd2 1  # Fatbands, resolved for each angular momentum
  iscf2 -2
  kptopt2  -5  # Band structure: 5 segments
  ndivk2   18 12 21 25 18  # Length of each segment
