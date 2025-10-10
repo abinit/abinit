@@ -1016,7 +1016,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      ! Define arrays for IFCs.
      ! For the meaning of the different variables and conventions see m_ifc module.
      ncerr = nctk_def_arrays(ncid, [ &
-        nctkarr_t("irc_rpt", "dp", "three, nrpt"), &
+        nctkarr_t("ifc_rpt", "dp", "three, nrpt"), &
         nctkarr_t("ifc_wghatm", "dp", "natom, natom, nrpt"), &
         !nctkarr_t("ifc_dynmat", "dp", "two, three, natom, three, natom, gstore_nqbz") &
         nctkarr_t("ifc_short_atmfrc", "dp", "three, natom, three, natom, nrpt") &
