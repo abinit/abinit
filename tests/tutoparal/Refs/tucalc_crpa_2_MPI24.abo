@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  9 Oct 2025.
-- ( at 00h11 )
+.Starting date : Fri 10 Oct 2025.
+- ( at 09h36 )
   
 - input  file    -> /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/TestBot_MPI24/tutoparal_tucalc_crpa_2_MPI24/tucalc_crpa_2.abi
 - output file    -> tucalc_crpa_2_MPI24.abo
@@ -10123,7 +10123,7 @@ xc                  : -1.94923345610371E+01
 Ewald energy        : -1.14220316979058E+02
 psp_core            :  6.33972391350157E+00
 local_psp           : -1.09494290735323E+02
-spherical_terms     :  8.43864081977933E+00
+PAW spherical_terms :  8.43864081977933E+00
 internal            : -1.51925010102939E+02
 '-kT*entropy'       : -3.39894393249016E-03
 total_energy        : -1.51928409046872E+02
@@ -10138,11 +10138,21 @@ band_energy         : -1.47235864829429E+01
 Ewald energy        : -1.14220316979058E+02
 psp_core            :  6.33972391350157E+00
 xc_dc               : -3.05329761331906E+01
-spherical_terms     :  1.21214552788806E+00
+PAW spherical_terms :  1.21214552788806E+00
 internal            : -1.51925010153801E+02
 '-kT*entropy'       : -3.39894393249016E-03
 total_energy_dc     : -1.51928409097734E+02
 total_energy_dc_eV  : -4.13418225919756E+03
+...
+
+
+--- !EnergyTermsWithPAWCore
+iteration_state     : {dtset: 1, }
+comment             : 'Components of total free energy, including PAW core contributions'
+Total energy        : -4.34789070319128E+03
+Total energy DC     : -4.34789070324215E+03
+Total energy (eV)   : -1.18312122905863E+05
+Total energy DC (eV): -1.18312122907247E+05
 ...
 
 
@@ -14879,10 +14889,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=        165.6  wall=        165.8
+- Proc.   0 individual time (sec): cpu=        166.4  wall=        166.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=       3974.2  wall=       3976.2
++Overall time at end (sec) : cpu=       3991.9  wall=       3994.6
