@@ -80,7 +80,6 @@ subroutine prmat(mat, ni, nj, mi, unitm)
  character(len=1000)    :: msg
  integer,parameter      :: nline=10
  integer                :: ii,jj,jstart,jstop,unitn
-
 ! *************************************************************************
 
  unitn = std_out; if (present(unitm)) unitn = unitm
@@ -186,7 +185,6 @@ subroutine printxsf(n1, n2, n3, datagrid, basis, origin, natom, ntypat, typat, x
  real(dp) :: fact
 !arrays
  real(dp) :: tau(3,natom)
-
 ! *************************************************************************
 
  if (all(realrecip /= [0, 1])) then
@@ -292,7 +290,6 @@ subroutine print_fofr_ri(ri_mode,nx,ny,nz,ldx,ldy,ldz,fofr,unit)
 
 !Local variables-------------------------------
  integer :: ount,ix,iy,iz
-
 ! *************************************************************************
 
  ount = std_out; if (PRESENT(unit)) ount = unit
@@ -373,7 +370,6 @@ subroutine print_fofr_xyzri(ri_mode,nx,ny,nz,ldx,ldy,ldz,fofr,rprimd,conv_fact,u
 !scalars
  integer :: ount,ix,iy,iz
  real(dp) :: xnow,ynow,znow,my_cfact
-
 ! *************************************************************************
 
  ount = std_out; if (PRESENT(unit)) ount = unit
@@ -459,7 +455,6 @@ subroutine print_fofr_cube(nx,ny,nz,ldx,ldy,ldz,fofr,rprimd,natom,znucl_atom,xca
 !scalars
  integer,parameter :: cplx=2
  integer :: ount,ix,iy,iz,iatom
-
 ! *************************************************************************
 
  ount = std_out; if (PRESENT(unit)) ount = unit
@@ -568,7 +563,6 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
 !arrays
  integer,allocatable :: fulltoirred(:),symrecfm(:,:,:)
  real(dp) :: kptgrid(3),gmet(3,3)
-
 ! *************************************************************************
 
  ierr = 0
@@ -633,7 +627,7 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
  ABI_MALLOC(fulltoirred, (nkptfull))
  timrev = 0; if (use_tr) timrev=1
 
- krank = krank_new(nkptirred, kptirred, nsym=nsymfm, symrec=symrecfm, time_reversal=use_tr)
+ call krank%init(nkptirred, kptirred, nsym=nsymfm, symrec=symrecfm, time_reversal=use_tr)
 
  ! Xcrysden employs the C-ordering for the Fermi Surface (x-y-z)
  ikgrid=0
@@ -802,7 +796,6 @@ subroutine printvtk(eigen,v_surf,ewind,fermie,gprimd,kptrlatt,mband,&
 !arrays
  integer,allocatable :: fulltoirred(:)
  real(dp) :: kconv(3),kpt(3),kptgrid(3),kptsym(3)
-
 ! *************************************************************************
 
  ierr=0

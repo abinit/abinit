@@ -24,8 +24,11 @@ module m_raman
  use defs_basis
  use m_errors
  use m_abicore
+ use m_nctk
+ use netcdf
 
- use m_matrix,          only : matr3inv
+ use m_fstrings,  only : sjoin
+ use m_matrix,    only : matr3inv
 
  implicit none
 
@@ -34,6 +37,8 @@ module m_raman
 
  public :: ramansus        ! Raman susceptibilities of zone-center phonons.
  public :: electrooptic    ! Electrooptic tensor and the raman tensors of zone-center phonons.
+ public :: defwrite_nonana_raman_terms   ! Write raman susceptiblities for q-->0
+ public :: defwrite_raman_terms   ! Write raman susceptiblities and frequencies for q=0
 !!***
 
 contains
@@ -490,6 +495,110 @@ subroutine electrooptic(dchide,dieflag,epsinf,fact_oscstr,natom,phfrq,prtmbm,rsu
  ABI_FREE(rijk_tot)
 
 end subroutine electrooptic
+!!***
+
+!!****f* m_raman/defwrite_nonana_raman_terms
+!! NAME
+!! defwrite_nonana_raman_terms
+!!
+!! FUNCTION
+!! Write the Raman susceptiblities for q-->0 along different directions in the netcdf file.
+!!
+!! INPUTS
+!!  ncid=netcdf file id.
+!!  iq_dir=Index of the q-point to be written to file.
+!!  ndirs=Number of qpoints.
+!!  rsus(3*natom,3,3)=List of Raman susceptibilities along the direction corresponding to iq_dir.
+!!  natom=Number of atoms
+!!
+!! OUTPUT
+!!  Only writing.
+!!
+!! SOURCE
+
+subroutine defwrite_nonana_raman_terms(ncid, iq_dir, ndirs, natom, rsus, mode)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ncid,natom,iq_dir,ndirs
+ character(len=*),intent(in) :: mode
+!arrays
+ real(dp),intent(in) :: rsus(3*natom,3,3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ncerr, raman_sus_varid
+! *************************************************************************
+
+ ! Fake use of ndirs, to keep it as argument. This should be removed when ndirs will be used.
+ if(.false.) ncerr=ndirs
+
+ select case (mode)
+ case ("define")
+   NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
+   ncerr = nctk_def_arrays(ncid, [ nctkarr_t("non_analytical_raman_sus", "dp", &
+"number_of_non_analytical_directions,number_of_phonon_modes,number_of_cartesian_directions,number_of_cartesian_directions")])
+   NCF_CHECK(ncerr)
+
+   NCF_CHECK(nctk_set_datamode(ncid))
+
+ case ("write")
+   NCF_CHECK(nf90_inq_varid(ncid, "non_analytical_raman_sus", raman_sus_varid))
+   ncerr = nf90_put_var(ncid,raman_sus_varid,rsus, start=[iq_dir,1,1,1], count=[1,3*natom,3,3])
+   NCF_CHECK(ncerr)
+
+ case default
+   ABI_ERROR(sjoin("Wrong value for mode", mode))
+ end select
+
+end subroutine defwrite_nonana_raman_terms
+!!***
+
+!!****f* m_raman/defwrite_raman_terms
+!! NAME
+!! defwrite_raman_terms
+!!
+!! FUNCTION
+!! Write the Raman susceptiblities for q=0 and also the phonon frequncies at gamma.
+!!
+!! INPUTS
+!!  ncid=netcdf file id.
+!!  rsus(3*natom,3,3)=List of Raman susceptibilities.
+!!  natom=Number of atoms
+!!
+!! OUTPUT
+!!  Only writing.
+!!
+!! SOURCE
+
+subroutine defwrite_raman_terms(ncid, natom, rsus, phfrq)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ncid,natom
+!arrays
+ real(dp),intent(in) :: rsus(3*natom,3,3)
+ real(dp),intent(in) :: phfrq(3*natom)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ncerr, raman_sus_varid, phmodes_varid
+! *************************************************************************
+
+ NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
+ ncerr = nctk_def_arrays(ncid, [ nctkarr_t("raman_sus", "dp", &
+  "number_of_phonon_modes,number_of_cartesian_directions,number_of_cartesian_directions"), &
+  nctkarr_t("gamma_phonon_modes", "dp", "number_of_phonon_modes")])
+ NCF_CHECK(ncerr)
+
+ NCF_CHECK(nctk_set_datamode(ncid))
+
+ NCF_CHECK(nf90_inq_varid(ncid, "raman_sus", raman_sus_varid))
+ NCF_CHECK(nf90_put_var(ncid,raman_sus_varid,rsus))
+ NCF_CHECK(nf90_inq_varid(ncid, "gamma_phonon_modes", phmodes_varid))
+ NCF_CHECK(nf90_put_var(ncid,phmodes_varid,phfrq*Ha_eV))
+
+end subroutine defwrite_raman_terms
 !!***
 
 end module m_raman

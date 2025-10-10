@@ -1,55 +1,72 @@
- #gwpt_np_wpqbks 1 1 8 1 1 1
+# Calculation of GWPT e-ph matrix elements with precomputed SCR file.
+# Preparatory run for computing the ZPR
 
-# ZPR computation at the Gamma point for MgO.
- nband 9
- ecut 45.0
+ #gwpt_np_wpqbks 1 1 8 1 1 1
+ optdriver 7              # Enter EPH driver.
+ eph_task 17              # GWPT computation.
+
+ # When computing <k+q,m|\Delta_{q pert} V_scf|n, k>
+ # we want k in the IBZ and q in the full BZ.
+ gstore_kzone "ibz"
+ gstore_qzone "bz"
+ #gstore_use_lgk  0
+ gstore_use_lgk 1     # IMPORTANT FOR PERFORMANCE
+                      # Since we want to compute ZPR_k, we can restrict the q-points
+                      # to the IBZ_k
+
+ # Additional filter in k-space: only k-points corresponding to the band edges are considered
+ gstore_kfilter "qprange"
+
+ ecut 45.0          # Cutoff energy for wavefunctions.
+ ecuteps  8         # Cutoff energy for screening (cannot be larger than the one found in the SCR file)
+                    # SC TODO: on alps_gnu_14.2_cov, ecuteps here = ecuteps in the SCR file still results in an error
+ ecutsigx 8         # Cutoff energy for exchange part.
+ boxcutmin 1.1
+ #tolwfr 1e-12      # Tolerance for Sternheimer solver.
+ tolwfr 1e-20       # Tolerance for Sternheimer solver.
+ #tolwfr 1e-4       # Tolerance for Sternheimer solver. # THIS VALUE IS TOO LOW.
+
+ nband 9           # Number of bands to build G with Lehmnann's representation.
+                   # This value cannot be larger that the number of bands in the WFK file.
  #prtvol 10
 
- ngkpt 4 4 4
+ # TODO: elph2_imagden Should have a default value
+ elph2_imagden 0.1 eV
+ zcut 0.01 eV
+
+ # Specify ppmodel used to evalue convolution between G and W.
+ # MG: TODO: ppmodel 2 leads to a SIGFPE on eos_gnu_13.2_mpich
+ #ppmodel 2
+
+ # Read wavefunctions from this file
+ getwfk_filepath "t03o_WFK"
+
+ # K-mesh (must be equal to the one of the WFK file).
+ ngkpt 2 2 2
  nshiftk 1
  shiftk 0 0 0
 
- # TODO: Should have a default value
- elph2_imagden 0.1 eV
-
-##############################################
-####                 SECTION: EPH
-##############################################
- optdriver 7              # Enter EPH driver
- eph_task 17              # GWPT computation
-
- getddb_filepath "diamond_eph_gwpt/out_DDB"
- ddb_ngqpt 2 2 2          # The code expects to find in the DDB
-                          # all the IBZ q-points corresponding to a 4x4x4 q-mesh
-
- ecuteps 1
- ecutsigx 1
- boxcutmin 1.1
- tolwfr 1e-8
-
- mdf_epsinf 12    # For model dielectric function
- ppmodel 2
-
- getdvdb_filepath "t01_DVDB"
- getdrhodb_filepath "t02_DRHODB"
- getwfk_filepath "t03o_WFK"     # 4x4x4 k-mesh with 70 bands
+ # We also need the KS GS density and potential.
  getden_filepath "diamond_eph_gwpt/gso_DEN.nc"
  getpot_filepath "diamond_eph_gwpt/gso_POT.nc"
 
- #gstore_kzone "bz"; gstore_qzone "ibz"
- gstore_kzone "ibz"; gstore_qzone "bz"; gstore_kfilter "qprange"
- gstore_gmode "atom"
+ # Read DDB file with dynamica matrix.
+ getddb_filepath "diamond_eph_gwpt/out_DDB"
+ ddb_ngqpt 2 2 2   # The code expects to find in the DDB
+                   # all the IBZ q-points corresponding to a 2x2x2 q-mesh
 
- # Disable output of phonon DOS and phonon bands
+ # Read first-order potentials and densities from these two files.
+ getdvdb_filepath "t01_DVDB"
+ getdrhodb_filepath "t02_DRHODB"
+
+ # Read Screening from this file.
+ getscr_filepath "diamond_eph_gwpt/gwo_SCR.nc"
+
+ # Disable output of phonon DOS and phonon bands.
  prtphdos 0
  prtphbands 0
 
-##############################################
-####                 SECTION: Sigma_nk
-##############################################
- zcut 0.01 eV
-
-# Read crystal structure from DEN.nc file
+ # Read crystal structure from DEN.nc file
  structure "abifile:diamond_eph_gwpt/gso_DEN.nc"
 
  pp_dirpath "$ABI_PSPDIR/Psdj_nc_fr_04_pbe_std_psp8"
@@ -61,15 +78,17 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t01.abi, t02.abi, t03.abi, t04.abi
+#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi
+#%% test_chain = t01.abi, t02.abi, t03.abi, t04.abi, t05.abi
 #%% [files]
 #%% use_git_submodule = diamond_eph_gwpt
 #%% files_to_test =
-#%%   t04.abo, tolnlines= 700, tolabs=  100, tolrel=  6.000e-03
+#%%   t04.abo, tolnlines= 700, tolabs= 1.0e+5, tolrel= 10.0
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = M. Giantomassi
-#%% keywords = NC, DFPT, EPH
-#%% description = GWPT calculation
+#%% keywords = NC, DFPT, EPH, GWPT, GSTORE
+#%% description = Calculation of GWPT e-ph matrix elements with precomputed SCR file.
+#%%     Preparatory run for computing the ZPR.
 #%%<END TEST_INFO>

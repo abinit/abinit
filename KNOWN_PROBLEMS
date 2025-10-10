@@ -7,7 +7,7 @@ release are NOT described here...
 NOTE that problems are presently (for about three years) most often reported on the issue manager of the internal ABINIT Gitlab .
 Still, the list of platforms and corresponding failing tests is maintained in the present document.
 
-The present revision ABINITv10.5.3 is for developments
+The present revision ABINITv10.5.6 is for developments
 
 0. List of platforms
 1. Batteries of tests
@@ -16,7 +16,7 @@ The present revision ABINITv10.5.3 is for developments
 ================================================================
 0. Platforms
 
-For ABINITv10.5.3, list closed on 2025 07 16
+For ABINITv10.5.6, list closed on 2025 09 07
 after installation and successful tests for the standard set of platforms,
 as mentioned on
 https://bbportal.abinit.org/#/status
@@ -24,7 +24,7 @@ and
 https://abinit.github.io/abinit_web/builder.html
 Corresponding configuration files are to be found in doc/build/config-examples
 
-Supported compilers : gfortran, intel fortran, NAG, nvhpc. 
+Supported compilers : gfortran, intel fortran, NAG, nvhpc.
 The following compilers are either obsolete, or considered too unstable/buggy for ABINIT :
 IBM XLF, g95, pathscale, open64, PGI . This does not mean that ABINIT will not work with these,
 but there is no check on the ABINIT testfarm that ABINIT runs correctly with these.
@@ -41,8 +41,8 @@ GNU 13.2 with OpenMP : several atdep tests are disactivated (24,25,27,30,31,34,3
 
 Intel Ifort compiler (presently tested : 2023-OneAPI, 2025-OneAPI)
 Ifort 16.0 is mostly OK, except for tests v4#32,33,34, that are disactivated.
-2025-oneAPI is mostly OK, except : 
-   many atdep tests are disactivated (atdep#1,16,21,28,35,38, tutoatdep#atdep1_1);  
+2025-oneAPI is mostly OK, except :
+   many atdep tests are disactivated (atdep#1,16,21,28,35,38, tutoatdep#atdep1_1);
    one test for GWR is disactivated (paral#78).
    paral_19 and v10_24 are disactivated.
 2023-oneAPI (using CMAKE build system) is OK except v8#16.
@@ -306,7 +306,7 @@ kptopt1=1 WFK's from dataset 1 directly to the finite-difference ddk
 calculation (nrf.in) also fixes the problem, despite the fact that dataset 1
 has some istwfk>1.
 
-Clearly something bad is going on in WFK readin, but only in certain cases.
+Clearly something bad is going on in WFK reading, but only in certain cases.
 I've never looked at this part of the code, and I'm afraid I can't divert
 any more time now towards tracking this down.
 
@@ -445,7 +445,7 @@ very low.
 
 P56.23 (XG081203)
 The Etsf_io support of density files from PAW is not yet working.
-Thes test etsf_io #10 has been disabled.
+These test etsf_io #10 has been disabled.
 
 P57.06 (XG090110)
 the bin_seq and bin_seqpar tar.gz files contain Makefiles that do not allow to perform the
@@ -584,7 +584,7 @@ On chum/pathscale, the test mpiio/Q4  fails
 -P-0000
 -P-0000  leave_new : decision taken to exit ...
 
-So, mpiio testing has been desactivated on chum/pathscale .
+So, mpiio testing has been deactivated on chum/pathscale .
 
 P66.2 (XG110205)
 Several input variables are not documented or tested, see tests/abirules/Refs/t01.out
@@ -649,7 +649,7 @@ mGGAs from libxc raise several problems ...
 when the gradient is zero, while the kinetic energy density is not zero.
 
 P610.3 (JMB111201)
-Due to open64 compiler bug, the compilation of  "79_seqpar_mpi/lobpcgwf.F90" crashs
+Due to open64 compiler bug, the compilation of  "79_seqpar_mpi/lobpcgwf.F90" crashes
 The optimization is disabled for the folder 'src/79_seqpar_mpi' :
    fcflags_opt_79_seqpar_mpi = -O0 -m64 -align64
 
@@ -700,7 +700,7 @@ This should be monitored regularly, however.
 Also, the TB mGGA is badly portable, also on IBM6 XLF14. Tolerances have been set to very high values in Tlibxc#08.
 
 P71.3 (JMB130406)
-Problems with gcc4.8 (yquem_gcc48), Bigdft and Fox had to be unabled :
+Problems with gcc4.8 (yquem_gcc48), Bigdft and Fox had to be unable:
 
 - problème de link lorsqu'on active bigdft :
 
@@ -814,7 +814,7 @@ With abiref_nag_6.1_openmpi, erratically, one test fail with a timeout (900 secs
 Still, this was not the case with petrus_nag. So, for the time being, keep the latter.
 
 P871.1 (XG171106)
-Tutorial positron#4 on bob with Openmp 2 threads, the tolwfr is likely not openmp-shared correcty, because the difference
+Tutorial positron#4 on bob with Openmp 2 threads, the tolwfr is likely not openmp-shared correctly, because the difference
 with the reference for this quantity can be very large, while the difference for the total energy and other quantities
 is very small.
 

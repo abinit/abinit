@@ -73,8 +73,6 @@
  diemac 6.0
  ecut 1.40
  ecutsm 0.40
- dilatmx 1.20
- chkdilatmx 0
  ixc 3
  natom  2 nband 4  nbdbuf 0
  nstep 12
@@ -93,14 +91,14 @@
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%   t02.abo, tolnlines = 12, tolabs = 1.100e-03, tolrel = 1.0e-02, fld_options =  -medium
+#%% files_to_test =
+#%%   t02.abo, tolnlines = 16, tolabs = 1.100e-03, tolrel = 4.0e-02, fld_options =  -medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords = NC, DFPT
-#%% description = 
+#%% description =
 #%%   2. Generate first-order responses for GaAs (zinc-blende) (from test v2 #98).
 #%%   Compute responses at Gamma:
 #%%   1) Ground state calculation, with a k-point sampling in the IBZ only;

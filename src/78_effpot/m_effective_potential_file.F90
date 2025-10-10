@@ -35,9 +35,7 @@ module m_effective_potential_file
  use m_ifc
  use m_ddb
  use m_ddb_hdr
-#if defined HAVE_NETCDF
  use netcdf
-#endif
 
  use m_io_tools,   only : open_file, get_unit
  use m_geometry,   only : xcart2xred, xred2xcart, metric
@@ -437,12 +435,9 @@ subroutine effective_potential_file_getType(filename,filetype)
  integer :: ddbun = 666,ios=0
  character(len=500) :: message
  character (len=1000) :: line,readline
-#if defined HAVE_NETCDF
  integer :: natom_id,time_id,xyz_id,six_id,ddb_version
  integer :: ncid,ncerr
  logical :: md_file
-#endif
-
 !arrays
 ! *************************************************************************
 
@@ -494,7 +489,6 @@ subroutine effective_potential_file_getType(filename,filetype)
  if(filetype/=0) return
 
 !try to read netcdf HIST file
-#if defined HAVE_NETCDF
  ncerr=nf90_open(path=trim(filename),mode=NF90_NOWRITE,ncid=ncid)
  if(ncerr == NF90_NOERR) then
    md_file = .TRUE.
@@ -512,12 +506,10 @@ subroutine effective_potential_file_getType(filename,filetype)
    end if
  end if
  ncerr = nf90_close(ncid)
-#endif
 
  if(filetype/=0) return
 
 ! Try to read netcdf DDB file
-#if defined HAVE_NETCDF
  ncerr=nf90_open(path=trim(filename),mode=NF90_NOWRITE,ncid=ncid)
  if(ncerr==NF90_NOERR) then
    ncerr = nf90_get_var(ncid, nctk_idname(ncid, 'ddb_version'), ddb_version)
@@ -526,7 +518,6 @@ subroutine effective_potential_file_getType(filename,filetype)
      return
    end if
  end if
-#endif
 
 !Try to get the dim of MD ASCII file
  call effective_potential_file_getDimMD(filename,natom,nstep)
@@ -910,22 +901,18 @@ subroutine effective_potential_file_getDimMD(filename,natom,nstep)
  integer :: ios=0,ios2=0,ios3=0
  integer :: unit_md=24
  logical :: compatible,netcdf
-#if defined HAVE_NETCDF
  integer :: natom_id,time_id,xyz_id,six_id
  integer :: ncid,ncerr
  character(len=5) :: char_tmp
-#endif
 !arrays
  character (len=10000) :: readline,line
  character(len=500) :: msg
-
 ! *************************************************************************
 
  natom = 0
  nstep = 0
 !try to read netcdf
  netcdf = .false.
-#if defined HAVE_NETCDF
  ncerr=nf90_open(path=trim(filename),mode=NF90_NOWRITE,ncid=ncid)
  if(ncerr == NF90_NOERR) then
    netcdf = .TRUE.
@@ -944,7 +931,6 @@ subroutine effective_potential_file_getDimMD(filename,natom,nstep)
      NCF_CHECK_MSG(ncerr," inquire dimension ID for time")
    end if
  end if
-#endif
 
  if(.not.netcdf) then
 !  try to read ASCII file...
@@ -2514,10 +2500,8 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
     call asria_calc(inp%asr,d2asr,ddb%val(:,:,iblok),ddb%mpert,ddb%natom)
   end if
 
-  ! Acoustic Sum Rule
-  ! In case the interatomic forces are not calculated, the
-  ! ASR-correction (asrq0%d2asr) has to be determined here from the Dynamical matrix at Gamma.
-  asrq0 = ddb%get_asrq0(inp%asr, inp%rfmeth, crystal%xcart)
+  ! Acoustic sum rule imposition (not yet applied)
+  call asrq0%init(ddb, inp%asr, inp%rfmeth, crystal%xcart)
 
 !**********************************************************************
 ! Interatomic Forces Calculation

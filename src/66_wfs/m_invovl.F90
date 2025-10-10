@@ -478,7 +478,7 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 
  real(dp) :: atom_projs(2, ham%npw_k, ham%lmnmax)
  real(dp) :: temp(ham%npw_k)
- complex(dpc), allocatable :: work(:)
+ complex(dp), allocatable :: work(:)
  real(dp), allocatable,target :: projs(:,:,:)
  real(dp), allocatable :: gram_proj(:,:,:)
  integer, allocatable :: ipiv(:)

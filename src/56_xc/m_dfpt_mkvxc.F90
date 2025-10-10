@@ -1222,14 +1222,6 @@ end subroutine dfpt_mkvxcgga_n0met
 !! OUTPUT
 !!  vxccc1dq(2*nfft,nspden)= q-gradient of first-order XC potential due to pseudocore charge
 !!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine dfpt_mkvxcccdq(cplex,i3dir,ixc,gprimd,kxc,mpi_enreg,nfft, &

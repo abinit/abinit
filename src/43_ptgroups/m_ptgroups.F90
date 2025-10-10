@@ -438,7 +438,7 @@ subroutine point_group_print(Ptg, header, unit, mode_paral, prtvol)
 
 !Local variables-------------------------------
  integer :: my_unt,my_prtvol,irp,icls,sidx
- complex(dpc) :: trace
+ complex(dp) :: trace
  character(len=4) :: my_mode
  character(len=500) :: msg
  type(irrep_t),pointer :: Row
@@ -845,13 +845,13 @@ subroutine copy_irrep(In_irreps, Out_irreps, phase_fact)
 !Arguments ------------------------------------
  class(irrep_t),intent(in) :: In_irreps(:)
  class(irrep_t),intent(inout) :: Out_irreps(:)
- complex(dpc),optional,intent(in) :: phase_fact(:)
+ complex(dp),optional,intent(in) :: phase_fact(:)
 
 !Local variables-------------------------------
 !scalars
  integer :: irp,dim1,dim2,in_nsym,in_dim,isym
 !arrays
- complex(dpc) :: my_phase_fact(In_irreps(1)%nsym)
+ complex(dp) :: my_phase_fact(In_irreps(1)%nsym)
 ! *********************************************************************
 
  !@irrep_t
@@ -949,7 +949,7 @@ function sum_irreps(Irrep1,Irrep2,ii,jj,kk,ll) result(res)
  class(irrep_t),intent(in) :: Irrep1,Irrep2
  integer,intent(in) :: ii,jj,kk,ll
 !arrays
- complex(dpc) :: res
+ complex(dp) :: res
 
 !Local variables-------------------------------
  integer :: isym,nsym,ierr

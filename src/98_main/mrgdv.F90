@@ -34,7 +34,6 @@ program mrgdv
  use m_xmpi
  use m_errors
  use m_abicore
- use m_dvdb
 
  use m_build_info,      only : abinit_version
  use m_specialmsg,      only : specialmsg_getcount, herald
@@ -43,6 +42,7 @@ program mrgdv
  use m_io_tools,        only : file_exists, prompt
  use m_argparse,        only : get_arg, get_arg_list
  use m_fftcore,         only : ngfft_seq
+ use m_dvdb,            only : dvdb_t, dvdb_merge_files, dvdb_test_v1complete, dvdb_test_ftinterp, dvdb_test_v1rsym
 
  implicit none
 
@@ -57,7 +57,6 @@ program mrgdv
 !arrays
  integer :: ngqpt(3), coarse_ngqpt(3), ngfftf(18), qptopt
  character(len=fnlen),allocatable :: v1files(:)
-
 ! *************************************************************************
 
  ! Change communicator for I/O (mandatory!)
@@ -152,8 +151,8 @@ program mrgdv
      ABI_CHECK(nargs > 1, "Additional arguments are missing")
      call get_command_argument(2, dvdb_filepath)
 
-     dvdb = dvdb_new(dvdb_filepath, comm)
-     if (prtvol > 0) call dvdb%print(prtvol=prtvol)
+     call dvdb%init(dvdb_filepath, comm)
+     if (prtvol > 0) call dvdb%print([std_out], "", prtvol=prtvol)
      call dvdb%list_perts([-1, -1, -1], npert_miss)
      call dvdb%free()
 
@@ -191,10 +190,10 @@ program mrgdv
      write(std_out,"(a)")sjoin("                         qptopt:", itoa(qptopt))
      write(std_out,"(a)")trim(dvdb_filepath), " --> ", trim(dump_file)
 
-     dvdb = dvdb_new(dvdb_filepath, xmpi_comm_self)
+     call dvdb%init(dvdb_filepath, xmpi_comm_self)
      call ngfft_seq(ngfftf, dvdb%ngfft3_v1(:, 1))
      call dvdb%open_read(ngfftf, xmpi_comm_self)
-     if (prtvol > 0) call dvdb%print(prtvol=prtvol)
+     if (prtvol > 0) call dvdb%print([std_out], "", prtvol)
      call dvdb%list_perts([-1,-1,-1], npert_miss, unit=std_out)
      call dvdb%qdownsample(dump_file, qptopt, ngqpt, comm)
      call dvdb%free()

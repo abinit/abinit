@@ -101,7 +101,7 @@ module m_fftcore
  public :: multpot
 
  ! 0 for double precision version (default), 1 for mixed precision FFTs
- integer, public, protected :: fftcore_mixprec = 0
+ integer, public, save, protected :: fftcore_mixprec = 0
  public :: fftcore_set_mixprec
 ! *************************************************************************
 
@@ -496,7 +496,7 @@ end subroutine print_ngfft
 !! OUTPUT
 !!  dsqmax=maximum distance**2 from k to boundary in Bohr**-2.
 !!  dsqmin=minimum distance**2 from k to boundary in Bohr**-2.
-!!  gbound(3)=coords of G on boundary (correspnding to gsqmin)
+!!  gbound(3)=coords of G on boundary (corresponding to gsqmin)
 !!  plane=which plane min occurs in (1,2, or 3 for G1,etc).
 !!
 !! NOTES
@@ -1036,10 +1036,10 @@ subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, n
        endif
      end do
    end do
-!  This gives a tentative symetric triplet
+!  This gives a tentative symmetric triplet
    ngcurrent(1:3)=ngmax(1:3)
    prodcurrent=ngmax(1)*ngmax(2)*ngmax(3)+1.0d-3
-!  However, it is perhaps possible to do better, by assymetric triplets, still giving lower prodcurrent !
+!  However, it is perhaps possible to do better, by asymmetric triplets, still giving lower prodcurrent !
    ngmax(1)=min(int(prodcurrent/(ngfft(2)*ngfft(3))),srch(msrch(1),1))
    ngmax(2)=min(int(prodcurrent/(ngfft(1)*ngfft(3))),srch(msrch(2),2))
    ngmax(3)=min(int(prodcurrent/(ngfft(1)*ngfft(2))),srch(msrch(3),3))
@@ -1343,7 +1343,7 @@ subroutine sphereboundary(gbound, istwf_k, kg_k, mgfft, npw)
 
          else if(istwf_k>=2 .and. fftalgc==1)then
 
-           ! Here, must take into account time-reversal symmetry explicitely
+           ! Here, must take into account time-reversal symmetry explicitly
 
            ! Determine the boundaries for the plane g_a
            testp=0
@@ -1525,7 +1525,7 @@ end subroutine sphereboundary
 !! 1) Order arguments
 !! 2) Split the two cases to avoid breaking intent: from and to sphere (merge with cg_box2gpsh and cg_gsph2box?)
 !! 3) If symmetries are used with or without shiftg, it might happen that the FFT mesh
-!!    is not large enough to accomodate the rotated G, in this case one should return ierr /= 0
+!!    is not large enough to accommodate the rotated G, in this case one should return ierr /= 0
 !!
 !! SOURCE
 
@@ -1543,19 +1543,13 @@ subroutine sphere(cg, ndat, npw, cfft, n1, n2, n3, n4, n5, n6, kg_k, istwf_k, if
 !scalars
  integer :: i1,i1inv,i2,i2inv,i3,i3inv,id1,id2,id3,idat,ipw
  integer :: j1,j2,j3,l1,l2,l3,npwmin,use_symmetry,i3dat,i3invdat,i2invdat,ipwdat,i2dat
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  integer :: identity(3,3)
  integer :: i1inver(n1),i2inver(n2),i3inver(n3)
 ! *************************************************************************
 
  DBG_ENTER("COLL")
-
- if (n4 < 1) ABI_BUG('Wrong n4!')
- if (n5 < 1) ABI_BUG('Wrong n5!')
- if (n6 < 1) ABI_BUG('Wrong n6!')
- if (ndat < 1) ABI_BUG('Wrong ndat!')
- if (npw < 1) ABI_BUG('Wrong npw!')
 
  ! In the case of special k-points, invariant under time-reversal,
  ! but not Gamma, initialize the inverse coordinates.
@@ -1605,7 +1599,7 @@ subroutine sphere(cg, ndat, npw, cfft, n1, n2, n3, n4, n5, n6, kg_k, istwf_k, if
    if (istwf_k==1) then
 
      if (iflag==1) then
-!$OMP PARALLEL DO PRIVATE(i1,i2,i3) IF (ndat>1)
+       !$OMP PARALLEL DO PRIVATE(i1,i2,i3) IF (ndat>1)
        do idat=1,ndat
          do ipw=1,npw
            i1=kg_k(1,ipw); if(i1<0) i1=i1+n1; i1=i1+1
@@ -1619,7 +1613,7 @@ subroutine sphere(cg, ndat, npw, cfft, n1, n2, n3, n4, n5, n6, kg_k, istwf_k, if
      end if
 
      if (iflag==2) then
-!$OMP PARALLEL DO PRIVATE(i1,i2,i3) IF (ndat>1)
+       !$OMP PARALLEL DO PRIVATE(i1,i2,i3) IF (ndat>1)
        do idat=1,ndat
          do ipw=1,npw
            i1=kg_k(1,ipw); if(i1<0) i1=i1+n1; i1=i1+1
@@ -1645,7 +1639,7 @@ subroutine sphere(cg, ndat, npw, cfft, n1, n2, n3, n4, n5, n6, kg_k, istwf_k, if
      end if
 
      if (iflag==1) then
-!$OMP PARALLEL DO PRIVATE(i1,i1inv,i2,i2inv,i3,i3inv) IF (ndat>1)
+       !$OMP PARALLEL DO PRIVATE(i1,i1inv,i2,i2inv,i3,i3inv) IF (ndat>1)
        do idat=1,ndat
          do ipw=npwmin,npw
            i1=kg_k(1,ipw); if(i1<0) i1=i1+n1; i1=i1+1
@@ -1663,7 +1657,7 @@ subroutine sphere(cg, ndat, npw, cfft, n1, n2, n3, n4, n5, n6, kg_k, istwf_k, if
      end if
 
      if (iflag==2) then
-!$OMP PARALLEL DO PRIVATE(i1,i1inv,i2,i2inv,i3,i3inv) IF (ndat>1)
+       !$OMP PARALLEL DO PRIVATE(i1,i1inv,i2,i2inv,i3,i3inv) IF (ndat>1)
        do idat=1,ndat
          do ipw=npwmin,npw
            i1=kg_k(1,ipw); if(i1<0) i1=i1+n1; i1=i1+1
@@ -1696,7 +1690,7 @@ subroutine sphere(cg, ndat, npw, cfft, n1, n2, n3, n4, n5, n6, kg_k, istwf_k, if
 
      if (use_symmetry==0) then
        if (iflag==-1) then
-!$OMP PARALLEL DO PRIVATE(i1,i2,i3,ipwdat,i3dat) IF (ndat>1)
+         !$OMP PARALLEL DO PRIVATE(i1,i2,i3,ipwdat,i3dat) IF (ndat>1)
          do idat=1,ndat
            do ipw=1,npw
              i1=kg_k(1,ipw); if(i1<0) i1=i1+n1; i1=i1+1
@@ -1711,7 +1705,7 @@ subroutine sphere(cg, ndat, npw, cfft, n1, n2, n3, n4, n5, n6, kg_k, istwf_k, if
          end do
        else
          ! iflag==-2
-!$OMP PARALLEL DO PRIVATE(i1,i2,i3,ipwdat,i2dat) IF (ndat>1)
+         !$OMP PARALLEL DO PRIVATE(i1,i2,i3,ipwdat,i2dat) IF (ndat>1)
          do idat=1,ndat
            do ipw=1,npw
              i1=kg_k(1,ipw); if(i1<0) i1=i1+n1; i1=i1+1
@@ -1728,7 +1722,7 @@ subroutine sphere(cg, ndat, npw, cfft, n1, n2, n3, n4, n5, n6, kg_k, istwf_k, if
        end if
      else
        ! use_symmetry == 1
-!$OMP PARALLEL DO PRIVATE(i1,i2,i3,j1,j2,j3,l1,l2,l3,ipwdat,i3dat) IF (ndat>1)
+       !$OMP PARALLEL DO PRIVATE(i1,i2,i3,j1,j2,j3,l1,l2,l3,ipwdat,i3dat) IF (ndat>1)
        do idat=1,ndat
          do ipw=1,npw
            l1=kg_k(1,ipw)+shiftg(1)
@@ -1771,7 +1765,7 @@ subroutine sphere(cg, ndat, npw, cfft, n1, n2, n3, n4, n5, n6, kg_k, istwf_k, if
      if (use_symmetry==0) then
 
        if (iflag==-1) then
-!$OMP PARALLEL DO PRIVATE(i1,i1inv,i2,i2inv,i3,i3inv,ipwdat,i3dat,i3invdat) IF (ndat>1)
+         !$OMP PARALLEL DO PRIVATE(i1,i1inv,i2,i2inv,i3,i3inv,ipwdat,i3dat,i3invdat) IF (ndat>1)
          do idat=1,ndat
            do ipw=npwmin,npw
              i1=kg_k(1,ipw); if(i1<0) i1=i1+n1; i1=i1+1
@@ -1792,7 +1786,7 @@ subroutine sphere(cg, ndat, npw, cfft, n1, n2, n3, n4, n5, n6, kg_k, istwf_k, if
          end do
 
        else
-!$OMP PARALLEL DO PRIVATE(i1,i1inv,i2,i2inv,i3,i3inv,ipwdat,i2dat,i2invdat) IF (ndat>1)
+         !$OMP PARALLEL DO PRIVATE(i1,i1inv,i2,i2inv,i3,i3inv,ipwdat,i2dat,i2invdat) IF (ndat>1)
          do idat=1,ndat
            do ipw=npwmin,npw
              i1=kg_k(1,ipw); if(i1<0) i1=i1+n1; i1=i1+1
@@ -1819,7 +1813,7 @@ subroutine sphere(cg, ndat, npw, cfft, n1, n2, n3, n4, n5, n6, kg_k, istwf_k, if
        id2=n2/2+2
        id3=n3/2+2
 
-!$OMP PARALLEL DO PRIVATE(i1,i1inv,i2,i2inv,i3,i3inv,j1,j2,j3,l1,l2,l3,ipwdat,i3dat,i3invdat) IF (ndat>1)
+       !$OMP PARALLEL DO PRIVATE(i1,i1inv,i2,i2inv,i3,i3inv,j1,j2,j3,l1,l2,l3,ipwdat,i3dat,i3invdat) IF (ndat>1)
        do idat=1,ndat
          do ipw=npwmin,npw
 
@@ -1864,8 +1858,7 @@ subroutine sphere(cg, ndat, npw, cfft, n1, n2, n3, n4, n5, n6, kg_k, istwf_k, if
    end if
 
  else
-   write(msg,'(a,i0,a)')'  iflag=',iflag,' not acceptable.'
-   ABI_BUG(msg)
+   ABI_BUG(sjoin('iflag: ', itoa(iflag),' not acceptable.'))
  end if
 
  DBG_EXIT("COLL")
@@ -1949,7 +1942,7 @@ subroutine sphere_fft(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,kg_k,tab_fftwf2_local,nd2p
 !Insert cg into cfft with extra 0 s around outside:
  cfft = zero
 
-!$OMP PARALLEL DO PRIVATE(i1,i2,i2_local,i3)
+ !$OMP PARALLEL DO PRIVATE(i1,i2,i2_local,i3)
  do ipw=1,npw
    i1=kg_k(1,ipw); if(i1<0)i1=i1+n1; i1=i1+1
    i2=kg_k(2,ipw); if(i2<0)i2=i2+n2; i2=i2+1
@@ -2042,7 +2035,7 @@ subroutine sphere_fft1(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,tab_fftwf2_local)
 !Insert cg into cfft with extra 0 s around outside:
 
  cfft = zero
-!$OMP PARALLEL DO PRIVATE(i1,i2,i2_local,i3)
+ !$OMP PARALLEL DO PRIVATE(i1,i2,i2_local,i3)
  do idat=1,ndat
    do ipw=1,npw
      i1=kg_k(1,ipw); if(i1<0)i1=i1+n1; i1=i1+1
@@ -2167,7 +2160,7 @@ end subroutine switch
 !!     input: I2,i1,j3,(jp3)
 !!     output: i1,I2,j3,(jp3)
 !!
-!!   and padd the signal with zeros.
+!!   and pad the signal with zeros.
 !!
 !! INPUTS
 !!  n1dfft=Number of 1D FFTs to perform
@@ -2236,7 +2229,7 @@ end subroutine switch_cent
 !!     input: I2,i1,j3,(jp3)
 !!     output: i1,I2,j3,(jp3)
 !!
-!!   and padd the signal with zeros.
+!!   and pad the signal with zeros.
 !!   Used for real wavefunctions.
 !!
 !! INPUTS
@@ -2321,7 +2314,7 @@ end subroutine switchreal
 !!     input: I2,i1,j3,(jp3)
 !!     output: i1,I2,j3,(jp3)
 !!
-!!   and padd the signal with zeros.
+!!   and pad the signal with zeros.
 !!   Used for the Fourier transform of real wavefunctions.
 !!
 !! INPUTS
@@ -3142,7 +3135,7 @@ pure subroutine mpiswitch(j3,n1dfft,Jp2st,J2st,lot,n1,nd2proc,nd3proc,nproc,iopt
        jjp2=modulo(ind-1,nproc)+1
 
        !in other words: mfft=(jj2-1)*nproc+jjp2 (modulo case)
-       !istead of mfft=(Jjp2-1) * nd2proc + Jj2 (slice case)
+       !instead of mfft=(Jjp2-1) * nd2proc + Jj2 (slice case)
        !with 1<=jjp2<=nproc, jj2=1,nd2proc
        do I1=1,n1
          ! zw(1,mfft,I1)=zmpi1(1,I1,J2,j3,Jp2)
@@ -3348,7 +3341,7 @@ pure subroutine mpifft_fg2dbox_dpc(nfft,ndat,fofg,n1,n2,n3,n4,nd2proc,n6,fftn2_d
 !arrays
  integer,intent(in) :: fftn2_distrib(n2),ffti2_local(n2)
  real(dp),intent(in) :: fofg(2,nfft*ndat)
- complex(dpc),intent(inout) :: workf(n4,n6,nd2proc*ndat)
+ complex(dp),intent(inout) :: workf(n4,n6,nd2proc*ndat)
 
 !Local variables-------------------------------
  integer :: idat,i1,i2,i3,i2_local,i2_ldat,fgbase
@@ -3362,7 +3355,7 @@ pure subroutine mpifft_fg2dbox_dpc(nfft,ndat,fofg,n1,n2,n3,n4,nd2proc,n6,fftn2_d
          i2_ldat = i2_local + (idat-1) * nd2proc
          fgbase= n1*(i2_local-1 + nd2proc*(i3-1)) + (idat-1) * nfft
          do i1=1,n1
-           workf(i1,i3,i2_ldat)=CMPLX(fofg(1,i1+fgbase), fofg(2,i1+fgbase), kind=dpc)
+           workf(i1,i3,i2_ldat)=CMPLX(fofg(1,i1+fgbase), fofg(2,i1+fgbase), kind=dp)
          end do
        end if
      end do
@@ -3444,7 +3437,7 @@ pure subroutine mpifft_dbox2fg_dpc(n1,n2,n3,n4,nd2proc,n6,ndat,fftn2_distrib,fft
  integer,intent(in) :: n1,n2,n3,n4,nd2proc,n6,ndat,me_fft,nfft
 !arrays
  integer,intent(in) :: fftn2_distrib(n2),ffti2_local(n2)
- complex(dpc),intent(in) :: workf(n4,n6,nd2proc*ndat)
+ complex(dp),intent(in) :: workf(n4,n6,nd2proc*ndat)
  real(dp),intent(out) :: fofg(2,nfft*ndat)
 
 !Local variables-------------------------------
@@ -3571,7 +3564,7 @@ pure subroutine mpifft_dbox2fr_dpc(n1,n2,n3,n4,n5,nd3proc,ndat,fftn3_distrib,fft
  integer,intent(in) :: n1,n2,n3,n4,n5,nd3proc,ndat,me_fft,nfft,cplex
 !!arrays
  integer,intent(in) :: fftn3_distrib(n3),ffti3_local(n3)
- complex(dpc),intent(in) :: workr(n4,n5,nd3proc*ndat)
+ complex(dp),intent(in) :: workr(n4,n5,nd3proc*ndat)
  real(dp),intent(out) :: fofr(cplex*nfft*ndat)
 
 !Local variables-------------------------------
@@ -3717,7 +3710,7 @@ pure subroutine mpifft_fr2dbox_dpc(cplex,nfft,ndat,fofr,n1,n2,n3,n4,n5,nd3proc,f
 !!arrays
  integer,intent(in) :: fftn3_distrib(n3),ffti3_local(n3)
  real(dp),intent(in) :: fofr(cplex*nfft*ndat)
- complex(dpc),intent(inout) :: workr(n4,n5,nd3proc*ndat)
+ complex(dp),intent(inout) :: workr(n4,n5,nd3proc*ndat)
 
 !Local variables-------------------------------
  integer :: idat,i1,i2,i3,i3_local,i3_ldat,frbase
@@ -3734,7 +3727,7 @@ pure subroutine mpifft_fr2dbox_dpc(cplex,nfft,ndat,fofr,n1,n2,n3,n4,n5,nd3proc,f
          do i2=1,n2
            frbase=n1*(i2-1+n2*(i3_local-1)) + (idat-1) * nfft
            do i1=1,n1
-             workr(i1,i2,i3_ldat)=CMPLX(fofr(i1+frbase), zero, kind=dpc)
+             workr(i1,i2,i3_ldat)=CMPLX(fofr(i1+frbase), zero, kind=dp)
            end do
          end do
        end if
@@ -3751,7 +3744,7 @@ pure subroutine mpifft_fr2dbox_dpc(cplex,nfft,ndat,fofr,n1,n2,n3,n4,n5,nd3proc,f
          do i2=1,n2
            frbase=2*n1*(i2-1+n2*(i3_local-1)) + (idat-1) * cplex * nfft
            do i1=1,n1
-             workr(i1,i2,i3_ldat)=CMPLX(fofr(2*i1-1+frbase), fofr(2*i1  +frbase), kind=dpc)
+             workr(i1,i2,i3_ldat)=CMPLX(fofr(2*i1-1+frbase), fofr(2*i1  +frbase), kind=dp)
            end do
          end do
        end if
@@ -3854,7 +3847,7 @@ subroutine indfftrisc(gbound,indpw_k,kg_k,mgfft,ngb,ngfft,npw_k)
 !and for them, the second index does not fill 1:npw . It is only
 !the number of z-transform FFTs.
 
-!$OMP PARALLEL DO PRIVATE(i1,i2,i3)
+ !$OMP PARALLEL DO PRIVATE(i1,i2,i3)
  do ipw=1,npw_k
    i1=kg_k(1,ipw); if(i1<0)i1=i1+n1 ; i1=i1+1
    i2=kg_k(2,ipw); if(i2<0)i2=i2+n2 ; i2=i2+1
@@ -3940,7 +3933,7 @@ subroutine kpgsph(ecut, exchn2n3d, gmet, ikg, ikpt, istwf_k, kg, kpt, mkmem, mpi
  integer,allocatable :: array_ipw(:),ig1arr(:),ig2arr(:)
  integer,allocatable :: ig3arr(:),kg_ind(:),kg_small(:,:)
  integer, allocatable :: npw_gather(:),npw_disp(:) ,kg_ind_gather(:),kg_small_gather(:,:)
- real(dp) :: kmax(3),minor(3),numer(3),tsec(2)
+ real(dp) :: kmax(3),minor(3),numer_(3),tsec(2)
  real(dp),allocatable :: kg1arr(:),kg2arr(:),kg3arr(:)
 ! *************************************************************************
 
@@ -3981,17 +3974,17 @@ subroutine kpgsph(ecut, exchn2n3d, gmet, ikg, ikpt, istwf_k, kg, kpt, mkmem, mpi
 !In reduced coordinates, determine maximal value of k+G and G for each direction
 
  minor(1)=gmet(2,2)*gmet(3,3)-gmet(2,3)**2
- numer(1)=gmet(1,2)**2*gmet(3,3)-2.0_dp*gmet(1,2)*gmet(1,3)*gmet(2,3) +gmet(1,3)**2*gmet(2,2)
+ numer_(1)=gmet(1,2)**2*gmet(3,3)-2.0_dp*gmet(1,2)*gmet(1,3)*gmet(2,3) +gmet(1,3)**2*gmet(2,2)
  minor(2)=gmet(1,1)*gmet(3,3)-gmet(1,3)**2
- numer(2)=gmet(2,3)**2*gmet(1,1)-2.0_dp*gmet(1,2)*gmet(1,3)*gmet(2,3) +gmet(2,1)**2*gmet(3,3)
+ numer_(2)=gmet(2,3)**2*gmet(1,1)-2.0_dp*gmet(1,2)*gmet(1,3)*gmet(2,3) +gmet(2,1)**2*gmet(3,3)
  minor(3)=gmet(2,2)*gmet(1,1)-gmet(1,2)**2
- numer(3)=gmet(3,2)**2*gmet(1,1)-2.0_dp*gmet(1,2)*gmet(1,3)*gmet(2,3) +gmet(1,3)**2*gmet(2,2)
+ numer_(3)=gmet(3,2)**2*gmet(1,1)-2.0_dp*gmet(1,2)*gmet(1,3)*gmet(2,3) +gmet(1,3)**2*gmet(2,2)
 
 !Take the trace of the gmet tensor as dimensional reference
  gmet_trace=gmet(1,1)+gmet(2,2)+gmet(3,3)
 
  do ii=1,3
-   xx=gmet(ii,ii)*minor(ii)-numer(ii)
+   xx=gmet(ii,ii)*minor(ii)-numer_(ii)
    if(xx<tol10*gmet_trace**3 .or. minor(ii)<tol10*gmet_trace**2)then
      ABI_BUG('The metric tensor seem incorrect')
    end if
@@ -4314,7 +4307,7 @@ subroutine kpgcount(ecut,exchn2n3d,gmet,istwfk,kpt,ngmax,ngmin,nkpt)
  real(dp) :: gmet_trace,gscut,xx
 !arrays
  integer :: ngrid(3),nmax(3)
- real(dp) :: minor(3),numer(3)
+ real(dp) :: minor(3),numer_(3)
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -4324,16 +4317,16 @@ subroutine kpgcount(ecut,exchn2n3d,gmet,istwfk,kpt,ngmax,ngmin,nkpt)
  minor(1)=gmet(2,2)*gmet(3,3)-gmet(2,3)**2
  minor(2)=gmet(1,1)*gmet(3,3)-gmet(1,3)**2
  minor(3)=gmet(2,2)*gmet(1,1)-gmet(1,2)**2
- numer(1)=gmet(1,2)**2*gmet(3,3)-2.0_dp*gmet(1,2)*gmet(1,3)*gmet(2,3)+gmet(1,3)**2*gmet(2,2)
- numer(2)=gmet(2,3)**2*gmet(1,1)-2.0_dp*gmet(1,2)*gmet(1,3)*gmet(2,3)+gmet(2,1)**2*gmet(3,3)
- numer(3)=gmet(3,2)**2*gmet(1,1)-2.0_dp*gmet(1,2)*gmet(1,3)*gmet(2,3)+gmet(1,3)**2*gmet(2,2)
+ numer_(1)=gmet(1,2)**2*gmet(3,3)-2.0_dp*gmet(1,2)*gmet(1,3)*gmet(2,3)+gmet(1,3)**2*gmet(2,2)
+ numer_(2)=gmet(2,3)**2*gmet(1,1)-2.0_dp*gmet(1,2)*gmet(1,3)*gmet(2,3)+gmet(2,1)**2*gmet(3,3)
+ numer_(3)=gmet(3,2)**2*gmet(1,1)-2.0_dp*gmet(1,2)*gmet(1,3)*gmet(2,3)+gmet(1,3)**2*gmet(2,2)
 
  ngmin(:)=1000000;ngmax(:)=0
  do ikpt=1,nkpt
    istwf_k=istwfk(ikpt)
 
    do ii=1,3
-     xx=gmet(ii,ii)*minor(ii)-numer(ii)
+     xx=gmet(ii,ii)*minor(ii)-numer_(ii)
      if(xx<tol10*gmet_trace**3.or.minor(ii)<tol10*gmet_trace**2)then
        ABI_BUG('The metric tensor seem incorrect')
      end if
@@ -4466,9 +4459,9 @@ end subroutine get_kg
 !!  npw_k=number of planewaves
 !!
 !! OUTPUT
-!!  indpw_k(npw_k)=linear list number (in fft box) of given G vector for the current processor (local adress)
-!!                =0 if kg_k(ipw) is not treated by this procesor
-!!  mask(npw_k)=True if  kg_k(ipw) belongs to this procesor, false otherwise.
+!!  indpw_k(npw_k)=linear list number (in fft box) of given G vector for the current processor (local address)
+!!                =0 if kg_k(ipw) is not treated by this processor
+!!  mask(npw_k)=True if  kg_k(ipw) belongs to this processor, false otherwise.
 !!
 !! NOTES
 !!   mpi_enreg is not necessary in this case (the info is also in ngfft), but much more easy to read...
@@ -4553,7 +4546,7 @@ end subroutine kgindex
 !!  lot=2nd Leading dimension of zw (cache blocking factor).
 !!  n1dfft=Number of 1D FFTs along y performed.
 !!  zw(2,lot,n2)=Array with the x-y planes (wavefunction in real space).
-!!  weigth=Weight factor for the density.
+!!  weight=Weight factor for the density.
 !!
 !! SIDE EFFECTS
 !!   rhopart(nd1,nd2)=density in the x-y plane, accumulated in output.

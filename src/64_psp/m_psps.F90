@@ -3,8 +3,7 @@
 !!  m_psps
 !!
 !! FUNCTION
-!!  This module provides method to allocate/free/initialize the
-!!  pseudopotential_type object.
+!!  This module provides method to allocate/free/initialize the pseudopotential_type object.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2014-2025 ABINIT group (XG,DC,MG)
@@ -48,6 +47,11 @@ module m_psps
  ! Helper functions
  public :: test_xml_xmlpaw_upf     ! Test if a pseudo potential file is in XML, XML-PAW or in UPF format.
 
+!type, extends(pseudopotentials_base_t), public :: pseudopotentials_type
+!contains
+!end type pseudopotentials_base_type
+!!***
+
  public :: psps_init_global        ! Allocate and init all part of psps structure that are independent of a given dataset.
  public :: psps_init_from_dtset    ! Allocate and init all part of psps structure that are dependent of a given dataset.
  public :: psps_free               ! Deallocate all memory of psps structure.
@@ -56,6 +60,11 @@ module m_psps
  public :: psps_ncwrite_path       ! Create a netcdf file and write psps data.
  public :: psps_ncwrite            ! Write psps data in an open netcdf file.
  public :: psps_ncread             ! Read psps data from an open netcdf file.
+
+!type, extends(nctab_base_t), public :: nctab_t
+!contains
+!end type nctab_t
+!!***
 
  public :: nctab_init              ! Create the object.
  public :: nctab_free              ! Free memory.
@@ -96,7 +105,6 @@ subroutine test_xml_xmlpaw_upf(path, usexml, xmlpaw, useupf)
  integer :: temp_unit, ii
  character(len=500) :: msg,errmsg
  character(len=70) :: testxml
-
 ! *************************************************************************
 
 !  Check if the file pseudopotential file is written in XML
@@ -164,8 +172,6 @@ end subroutine test_xml_xmlpaw_upf
 !! pspheads(npsp)=<type pspheader_type>all the important information from the
 !!   pseudopotential file header, as well as the psp file name
 !!
-!! OUTPUT
-!!
 !! SIDE EFFECTS
 !! psps=<type pseudopotential_type>the pseudopotentials description
 !!
@@ -181,9 +187,7 @@ subroutine psps_init_global(psps, mtypalch, npsp, pspheads)
  type(pspheader_type),intent(in) :: pspheads(npsp)
 
 !Local variables-------------------------------
-!scalars
  integer :: ii, mpsang, n1xccc
-
 ! *************************************************************************
 
 !Allocation of some arrays independent of the dataset
@@ -266,7 +270,6 @@ subroutine psps_init_from_dtset(psps, dtset, idtset, pspheads)
  integer :: ipsp,lmnmax,lmnmaxso,lnmax,lnmaxso,newmqgrid,newmqgriddg,nptsgvec
  integer :: changed,ii,itypat
  real(dp) :: gprimd_orig(3,3)
-
 ! *************************************************************************
 
  psps%optnlxccc   = dtset%optnlxccc
@@ -280,7 +283,7 @@ subroutine psps_init_from_dtset(psps, dtset, idtset, pspheads)
  call matr3inv(dtset%rprimd_orig(:,:,1),gprimd_orig)
  if ( dtset%usewvl == 0) then
    call setmqgrid(newmqgrid,newmqgriddg,dtset%ecut*dtset%dilatmx**2,&
-&       dtset%pawecutdg*dtset%dilatmx**2,gprimd_orig,nptsgvec,psps%usepaw)
+                  dtset%pawecutdg*dtset%dilatmx**2,gprimd_orig,nptsgvec,psps%usepaw)
  else
    call setmqgrid(newmqgrid,newmqgriddg,one,one,gprimd_orig,nptsgvec,psps%usepaw)
  end if
@@ -293,7 +296,7 @@ subroutine psps_init_from_dtset(psps, dtset, idtset, pspheads)
 
 !Determine the maximum number of projectors, for the set of pseudo atom
  call getdim_nloc(lmnmax,lmnmaxso,lnmax,lnmaxso,dtset%mixalch_orig,dtset%nimage,psps%npsp,dtset%npspalch,&
-& dtset%ntypat,dtset%ntypalch,pspheads)
+                  dtset%ntypat,dtset%ntypalch,pspheads)
 
  psps%npspalch = dtset%npspalch
  psps%ntypat   = dtset%ntypat
@@ -327,11 +330,6 @@ subroutine psps_init_from_dtset(psps, dtset, idtset, pspheads)
  do ipsp=1,dtset%npsp
    if(dtset%nspinor==1)then
      psps%pspso(ipsp)=0
-     ! This is needed to treate SOC perturbatively in sigma.
-     !if (dtset%optdriver == RUNL_SIGMA .and. dtset%so_psp(ipsp) /= 0) then
-     !  ABI_WARNING("Setting pspso to 2 although nspinor == 1")
-     !  psps%pspso(ipsp) = 2
-     !end if
 
      ! Ideally the following line should not exist, but at present, the space has to be booked
      if(pspheads(ipsp)%pspso/=0)psps%mpspso=2
@@ -493,11 +491,10 @@ end subroutine psps_init_from_dtset
 subroutine psps_free(psps)
 
 !Arguments ------------------------------------
- type(pseudopotential_type),intent(inout) :: psps
+ class(pseudopotential_type),intent(inout) :: psps
 
 !Local variables-------------------------------
  integer :: ii
-
 ! *************************************************************************
 
 !Allocation of some arrays independent of the dataset
@@ -558,7 +555,6 @@ subroutine psps_copy(pspsin, pspsout)
 
 !Local variables-------------------------------
  integer :: ii
-
 ! *************************************************************************
 
  ! integer
@@ -662,7 +658,7 @@ end subroutine psps_copy
 !!
 !! INPUTS
 !!  psps=<type pseudopotential_type>=Info on the pseudopotentials.
-!!  unit(optional)=unit number for output
+!!  units=unit numbers for output
 !!  prtvol(optional)=verbosity level
 !!  mode_paral(optional): either "COLL" or "PERS"
 !!
@@ -671,112 +667,108 @@ end subroutine psps_copy
 !!
 !! SOURCE
 
-subroutine psps_print(psps, unit, prtvol, mode_paral)
+subroutine psps_print(psps, units, prtvol, mode_paral)
 
 !Arguments ------------------------------------
 !scalars
  class(pseudopotential_type),intent(in) :: psps
- integer,intent(in),optional :: prtvol,unit
+ integer,intent(in) :: units(:)
+ integer,intent(in),optional :: prtvol
  character(len=4),intent(in),optional :: mode_paral
 
 !Local variables-------------------------------
 !scalars
- integer :: ierr,ips,ipsp_alch,ityp_alch,itypat,unt,my_prtvol
+ integer :: ips,ipsp_alch,ityp_alch,itypat,my_prtvol
  character(len=4) :: mode
  character(len=500) :: msg
 !arrays
- integer :: cond_values(4)
- character(len=9) :: cond_string(4)
-
 ! *************************************************************************
 
  ! Provide defaults
  my_prtvol=0; if (present(prtvol)) my_prtvol=prtvol
- unt=std_out; if (present(unit)) unt=unit
  mode='COLL'; if (present(mode_paral)) mode=mode_paral
- ierr=0; cond_string(1:4)=' '; cond_values(:)=0
 
  ! General info including spin-orbit
- call wrtout(unt,' ==== Info on pseudopotentials ==== ', mode)
+ call wrtout(units,' ==== Info on pseudopotentials ==== ', mode)
 
- SELECT CASE (psps%usepaw)
- CASE (0)
-   call wrtout(unt,'  Norm-conserving pseudopotentials ', mode)
-   !call wrtout(unt, sjoin('  Max number of Kleinman-Bylander energies ', itoa(psps%dimekb)), mode)
+ select case (psps%usepaw)
+ case (0)
+   call wrtout(units,'  Norm-conserving pseudopotentials ', mode)
+   !call wrtout(units, sjoin('  Max number of Kleinman-Bylander energies ', itoa(psps%dimekb)), mode)
    !do itypat=1,psps%ntypat
    ! write(msg,'(a,i4,a,f9.4)')' Type ',itypat,' K-B energies ',(psps%ekb(ikbe,itypat),ikbe=1,psps%dimekb)
    !end do
- CASE (1)
+ case (1)
    write(msg,'(a)')
-   call wrtout(unt,'  PAW calculation', mode)
-   !call wrtout(unt,sjoin('  Max number of D_ij coefficients ', itoa(psps%dimekb)), mode)
- CASE DEFAULT
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'usepaw',psps%usepaw,2,[0,1],unt)
- END SELECT
+   call wrtout(units,'  PAW calculation', mode)
+   !call wrtout(units,sjoin('  Max number of D_ij coefficients ', itoa(psps%dimekb)), mode)
+ case default
+   ABI_ERROR(sjoin("Invalid usepaw: ", itoa(psps%usepaw)))
+ end select
 
- !SELECT CASE (psps%positron)
- !CASE (0)
- !  call wrtout(unt, '  Standard Electron Calculation ', mode)
- !CASE (1,2)
+ !select case (psps%positron)
+ !case (0)
+ !  call wrtout(units, '  Standard Electron Calculation ', mode)
+ !case (1,2)
  !  write(msg,'(a,i0)')'  Positron Calculation with positron .. ',psps%positron
- !  call wrtout(unt,msg,mode)
- !CASE DEFAULT
- !  call chkint_eq(0,0,cond_string,cond_values,ierr,'positron',psps%positron,3,[0,1,2],unt)
- !END SELECT
+ !  call wrtout(units,msg,mode)
+ !case default
+ !   ABI_ERROR(sjoin("Invalid positron: ", itoa(psps%positron)))
+ !end select
 
  write(msg,'(a,i4,2a,i4)')&
   '  Number of pseudopotentials .. ',psps%npsp,ch10,&
   '  Number of types of atoms   .. ',psps%ntypat
- call wrtout(unt,msg,mode)
+ call wrtout(units,msg,mode)
 
  if (psps%usepaw==0) then
-   SELECT CASE (psps%mpspso)
-   CASE (1)
-     call wrtout(unt,'  Scalar calculation (no spin-orbit term) ',mode)
-   CASE (2)
+   select case (psps%mpspso)
+   case (1)
+     call wrtout(units,'  Scalar calculation (no spin-orbit term) ',mode)
+   case (2)
      write(msg,'(3a,i3)')&
       '  Calculation with spin-orbit coupling ',ch10,&
       '  Max number of channels (spin-orbit included) ',psps%mpssoang
-     call wrtout(unt,msg,mode)
+     call wrtout(units,msg,mode)
      do itypat=1,psps%ntypat
        if (psps%pspso(itypat) /= 1) then
          write(msg,'(a,i4,a,i2,a)')&
           '  - Atom type ',itypat,' has spin-orbit characteristics (pspso= ',psps%pspso(itypat),")"
-         call wrtout(unt,msg,mode)
+         call wrtout(units,msg,mode)
        end if
      end do
-   CASE DEFAULT
-     call chkint_eq(0,0,cond_string,cond_values,ierr,'mpspso',psps%mpspso,2,[1,2],unt)
-   END SELECT
+   case default
+     ABI_ERROR(sjoin("Invalid mpspso: ", itoa(psps%mpspso)))
+   end select
  else
-   SELECT CASE (maxval(psps%pspso))
-   CASE (0,1)
+   select case (maxval(psps%pspso))
+   case (0,1)
      msg='  Scalar calculation (no spin-orbit term) '
-   CASE (2)
+   case (2)
      msg='  Calculation with spin-orbit coupling '
-   END SELECT
-   call wrtout(unt,msg,mode)
+   end select
+   call wrtout(units,msg,mode)
  end if
 
  ! Info on nonlocal part
- SELECT CASE (psps%useylm)
- CASE (0)
+ select case (psps%useylm)
+ case (0)
    msg = '  Nonlocal part applied using Legendre polynomials '
- CASE (1)
+ case (1)
    msg = '  Nonlocal part applied using real spherical harmonics '
- CASE DEFAULT
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'psps%useylm',psps%useylm,2,(/0,1/),unt)
- END SELECT
- call wrtout(unt,msg,mode)
+ case default
+   ABI_ERROR(sjoin("Invalid useylm: ", itoa(psps%useylm)))
+ end select
+ call wrtout(units,msg,mode)
 
  write(msg,'(a,i3)')'  Max number of non-local projectors over l and type ',psps%mproj
- call wrtout(unt,msg,mode)
+ call wrtout(units,msg,mode)
 
  write(msg,'(a,i3,2a,i3,2a,i3)')&
  '  Highest angular momentum +1 ....... ',psps%mpsang,ch10,&
  '  Max number of (l,n)   components .. ',psps%lnmax, ch10,&
  '  Max number of (l,m,n) components .. ',psps%lmnmax
- call wrtout(unt,msg,mode)
+ call wrtout(units,msg,mode)
 
  !FIXME for paw n1xccc==1
  ! Non-linear Core correction
@@ -786,10 +778,10 @@ subroutine psps_print(psps, unit, prtvol, mode_paral)
     '   Number of radial points for pseudo-core charge .. ',psps%n1xccc,ch10,&
     '   XC core-correction treatment (optnlxccc) ........ ',psps%optnlxccc,ch10,&
     '   Radius for pseudo-core charge for each type ..... ',ch10
-   call wrtout(unt,msg,mode)
+   call wrtout(units,msg,mode)
    do itypat=1,psps%ntypat
      write(msg,'(a,i4,a,f12.4)')'  - Atom type ',itypat,' has pseudo-core radius .. ',psps%xcccrc(itypat)
-     call wrtout(unt,msg,mode)
+     call wrtout(units,msg,mode)
    end do
  end if
 
@@ -800,7 +792,7 @@ subroutine psps_print(psps, unit, prtvol, mode_paral)
     '   Number of pure pseudoatoms .... ',psps%ntyppure,ch10,&
     '   Number of pseudos for mixing .. ',psps%npspalch,ch10,&
     '   Alchemical pseudoatoms ........ ',psps%ntypalch,ch10
-   call wrtout(unt,msg,mode)
+   call wrtout(units,msg,mode)
    do ipsp_alch=1,psps%npspalch
      do ityp_alch=1,psps%ntypalch
        write(std_out,*)' mixalch ',psps%mixalch(ipsp_alch,ityp_alch)
@@ -808,7 +800,7 @@ subroutine psps_print(psps, unit, prtvol, mode_paral)
    end do
    do ityp_alch=1,psps%ntypalch
      write(msg,'(a,i4,a,i4)')' For alchemical atom no. ',ityp_alch,' algalch is .. ',psps%algalch(ityp_alch)
-     call wrtout(unt,msg,mode)
+     call wrtout(units,msg,mode)
    end do
  end if
 
@@ -817,26 +809,26 @@ subroutine psps_print(psps, unit, prtvol, mode_paral)
   ' Info on the Q-grid used for form factors in spline form: ',ch10,&
   '   Number of q-points for radial functions ffspl .. ',psps%mqgrid_ff,ch10,&
   '   Number of q-points for vlspl ................... ',psps%mqgrid_vl
- call wrtout(unt,msg,mode)
+ call wrtout(units,msg,mode)
 
  if (psps%vlspl_recipSpace) then
-   call wrtout(unt,'   vloc is computed in Reciprocal Space ',mode)
+   call wrtout(units,'   vloc is computed in Reciprocal Space ',mode)
  else
-   call wrtout(unt,'   vloc is computed in Real Space ',mode)
+   call wrtout(units,'   vloc is computed in Real Space ',mode)
  end if
  if (psps%usepaw == 0) then
-   if (psps%nc_xccc_gspace == 0) call wrtout(unt,'   model core charge treated in real-space', mode)
-   if (psps%nc_xccc_gspace == 1) call wrtout(unt,'   model core charge treated in G-space', mode)
+   if (psps%nc_xccc_gspace == 0) call wrtout(units,'   model core charge treated in real-space', mode)
+   if (psps%nc_xccc_gspace == 1) call wrtout(units,'   model core charge treated in G-space', mode)
  end if
 
  !TODO additional stuff that might be printed
- call wrtout(unt, "", mode)
+ call wrtout(units, "", mode)
  do itypat=1,psps%ntypat
    write(msg,'(a,i0,a,i0)')'  XC functional for type ',itypat,' is ',psps%pspxc(itypat)
-   call wrtout(unt,msg,mode)
+   call wrtout(units,msg,mode)
    !write(std_out,*)psps%ziontypat(itypat),psps%znucltypat(itypat)
    if (psps%usepaw == 0) then
-     call wrtout(unt, sjoin("  Pseudo valence available: ", yesno(psps%nctab(itypat)%has_tvale)), mode)
+     call wrtout(units, sjoin("  Pseudo valence available: ", yesno(psps%nctab(itypat)%has_tvale)), mode)
    end if
  end do
 
@@ -852,7 +844,7 @@ subroutine psps_print(psps, unit, prtvol, mode_paral)
    end do
  end if
 
- call wrtout(unt, "", mode)
+ call wrtout(units, "", mode)
 
 end subroutine psps_print
 !!***
@@ -882,7 +874,6 @@ subroutine psps_ncwrite_path(psps, path)
 
 !Local variables-------------------------------
  integer :: ncid
-
 ! *************************************************************************
 
  NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
@@ -911,9 +902,8 @@ end subroutine psps_ncwrite_path
 subroutine psps_ncwrite(psps, ncid)
 
 !Arguments ------------------------------------
-!scalars
+ class(pseudopotential_type),intent(in) :: psps
  integer,intent(in) :: ncid
- type(pseudopotential_type),intent(in) :: psps
 
 !Local variables-------------------------------
 !scalars
@@ -923,7 +913,6 @@ subroutine psps_ncwrite(psps, ncid)
 !arrays
  real(dp), allocatable :: dummy3(:,:,:)
  !real(dp), allocatable :: dummy1(:)
-
 ! *************************************************************************
 
  with_alch = 0  ! Alchemical IO not supported at the moment.
@@ -1121,28 +1110,21 @@ end subroutine psps_ncwrite
 !!
 !! INPUTS
 !!
-!! OUTPUT
-!!
 !! SOURCE
 
 subroutine psps_ncread(psps, ncid)
 
 !Arguments ------------------------------------
- type(pseudopotential_type),intent(inout) :: psps
+ class(pseudopotential_type),intent(inout) :: psps
  integer,intent(in) :: ncid
 
 !Local variables-------------------------------
 !scalars
- integer :: ipsp,itypat
- integer :: ncerr
- integer :: with_xccc
- integer :: with_xcctau
-
+ integer :: ipsp,itypat, ncerr, with_xccc, with_xcctau
 ! *********************************************************************
 
  ! Note: Some dimensions and variables are written conditionally,
  !       so try to read those but ignore errors
-
  call psps_free(psps)
 
  psps%dimekb         = zero
@@ -1332,7 +1314,6 @@ subroutine psp2params_init(gth_params, npsp)
 !Arguments ------------------------------------
  class(pseudopotential_gth_type),intent(out) :: gth_params
  integer,intent(in) :: npsp
-
 ! *********************************************************************
 
 !Check array, no params are currently set.
@@ -1377,7 +1358,6 @@ subroutine psp2params_copy(gth_paramsin, gth_paramsout)
 !Arguments ------------------------------------
  class(pseudopotential_gth_type),intent(in) :: gth_paramsin
  class(pseudopotential_gth_type),intent(inout) :: gth_paramsout
-
 ! *********************************************************************
 
  if (allocated(gth_paramsin%psppar)) then
@@ -1418,9 +1398,7 @@ end subroutine psp2params_copy
 subroutine psp2params_free(gth_params)
 
 !Arguments ------------------------------------
-!scalars
- type(pseudopotential_gth_type),intent(inout) :: gth_params
-
+ class(pseudopotential_gth_type),intent(inout) :: gth_params
 ! *********************************************************************
 
  ABI_SFREE(gth_params%set)
@@ -1458,7 +1436,6 @@ subroutine nctab_init(nctab, mqgrid_vl, has_tcore, has_tvale)
  class(nctab_t),intent(inout) :: nctab
  integer,intent(in) :: mqgrid_vl
  logical,intent(in) :: has_tcore, has_tvale
-
 ! *************************************************************************
 
  nctab%mqgrid_vl = mqgrid_vl
@@ -1495,7 +1472,6 @@ subroutine nctab_free(nctab)
 
 !Arguments ------------------------------------
  class(nctab_t),intent(inout) :: nctab
-
 ! *************************************************************************
 
  ABI_SFREE(nctab%tvalespl)
@@ -1524,7 +1500,6 @@ subroutine nctab_copy(nctabin, nctabout)
 !Arguments ------------------------------------
  class(nctab_t),intent(in) :: nctabin
  class(nctab_t),intent(inout) :: nctabout
-
 ! *************************************************************************
 
  nctabout%mqgrid_vl  = nctabin%mqgrid_vl
@@ -1577,7 +1552,6 @@ subroutine nctab_eval_tvalespl(nctab, zion, mesh, valr, mqgrid_vl, qgrid_vl)
 
 !Local variables-------------------------------
  real(dp) :: fact,yp1,ypn,d2nvdq0
-
 ! *************************************************************************
 
  nctab%has_tvale = .True.
@@ -1644,13 +1618,11 @@ subroutine nctab_eval_tcorespl(nctab, n1xccc, xcccrc, xccc1d, xcctau1d, mqgrid_v
  integer,intent(in) :: n1xccc,mqgrid_vl
  real(dp),intent(in) :: xcccrc
 !arrays
- real(dp),intent(in) :: xccc1d(n1xccc,6),qgrid_vl(mqgrid_vl)
- real(dp),intent(in) :: xcctau1d(n1xccc,6)
+ real(dp),intent(in) :: xccc1d(n1xccc,6),qgrid_vl(mqgrid_vl), xcctau1d(n1xccc,6)
 
 !Local variables-------------------------------
  real(dp) :: amesh,yp1,ypn
  type(pawrad_type) :: core_mesh
-
 ! *************************************************************************
 
  ABI_CHECK(mqgrid_vl == nctab%mqgrid_vl, "wrong mqgrid_vl")
@@ -1732,7 +1704,6 @@ subroutine nctab_mixalch(nctabs, npspalch, ntypalch, algalch, mixalch, mixtabs)
  logical :: has_tcore, has_tvale
  real(dp) :: mc
  type(nctab_t),pointer :: mix
-
 ! *************************************************************************
 
  ABI_CHECK(all(nctabs(:)%mqgrid_vl == nctabs(1)%mqgrid_vl), "Wrong mqgrid_vl")

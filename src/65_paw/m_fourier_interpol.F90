@@ -29,7 +29,6 @@ MODULE m_fourier_interpol
  use defs_abitypes, only : MPI_type
  use m_fft,         only : zerosym, indirect_parallel_Fourier, fourdp
  use m_pawfgr,      only : pawfgr_type,pawfgr_destroy,indgrid
- use m_distribfft,  only : init_distribfft_seq
  use m_mpinfo,      only : destroy_mpi_enreg, initmpi_seq
 
  implicit none
@@ -550,11 +549,11 @@ subroutine fourier_interpol_seq(cplex, nspden, from_nfft, from_ngfft, to_nfft, t
 
  ! Which one is coarse? Note that this part is not very robust and can fail!
  if (ngfft_in(2) * ngfft_in(3) < ngfft_out(2) * ngfft_out(3)) then
-   call init_distribfft_seq(MPI_enreg_seq%distribfft, 'c', ngfft_in(2), ngfft_in(3), 'all')
-   call init_distribfft_seq(MPI_enreg_seq%distribfft, 'f', ngfft_out(2), ngfft_out(3), 'all')
+   call MPI_enreg_seq%distribfft%init_seq('c', ngfft_in(2), ngfft_in(3), 'all')
+   call MPI_enreg_seq%distribfft%init_seq('f', ngfft_out(2), ngfft_out(3), 'all')
  else
-   call init_distribfft_seq(MPI_enreg_seq%distribfft, 'f', ngfft_in(2), ngfft_in(3), 'all')
-   call init_distribfft_seq(MPI_enreg_seq%distribfft, 'c', ngfft_out(2), ngfft_out(3), 'all')
+   call MPI_enreg_seq%distribfft%init_seq('f', ngfft_in(2), ngfft_in(3), 'all')
+   call MPI_enreg_seq%distribfft%init_seq('c', ngfft_out(2), ngfft_out(3), 'all')
  end if
 
  ABI_MALLOC(from_rhog,  (2, from_nfft))

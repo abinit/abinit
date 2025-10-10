@@ -36,11 +36,6 @@
 !!  xval= buffer array
 !!  recvbuf= received elements
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allgather
-!!
 !! SOURCE
 
 subroutine xmpi_allgather_int(xval,recvbuf,comm,ier)
@@ -87,11 +82,6 @@ end subroutine xmpi_allgather_int
 !! SIDE EFFECTS
 !!  charval= buffer array
 !!  recvbuf= received elements
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allgather
 !!
 !! SOURCE
 
@@ -145,11 +135,6 @@ end subroutine xmpi_allgather_char
 !! SIDE EFFECTS
 !!  recvbuf= received elements
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allgather
-!!
 !! SOURCE
 
 subroutine xmpi_allgather_int1d_1b(xval, nelem, recvbuf, comm, ier)
@@ -194,11 +179,6 @@ end subroutine xmpi_allgather_int1d_1b
 !! SIDE EFFECTS
 !!  recvbuf= received elements
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allgather
-!!
 !! SOURCE
 
 subroutine xmpi_allgather_int1d(xval,nelem,recvbuf,comm,ier)
@@ -242,11 +222,6 @@ end subroutine xmpi_allgather_int1d
 !!
 !! SIDE EFFECTS
 !!  recvbuf= received elements
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allgather
 !!
 !! SOURCE
 
@@ -293,11 +268,6 @@ end subroutine xmpi_allgather_int2d
 !! SIDE EFFECTS
 !!  recvbuf= received elements
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allgather
-!!
 !! SOURCE
 
 subroutine xmpi_allgather_dp1d(xval,nelem,recvbuf,comm,ier)
@@ -341,11 +311,6 @@ end subroutine xmpi_allgather_dp1d
 !!
 !! SIDE EFFECTS
 !!  recvbuf= received elements
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allgather
 !!
 !! SOURCE
 
@@ -391,11 +356,6 @@ end subroutine xmpi_allgather_dp2d
 !! SIDE EFFECTS
 !!  recvbuf= received elements
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allgather
-!!
 !! SOURCE
 
 subroutine xmpi_allgather_dp3d(xval,nelem,recvbuf,comm,ier)
@@ -439,11 +399,6 @@ end subroutine xmpi_allgather_dp3d
 !!
 !! SIDE EFFECTS
 !!  recvbuf= received elements
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allgather
 !!
 !! SOURCE
 

@@ -713,8 +713,8 @@ subroutine matrix_function_epsilon_k(vector_out,vector_in,Hsize)
 ! algorithm.
 !----------------------------------------------------------------------------------------------------
 integer,      intent(in)  :: Hsize
-complex(dpc), intent(out) :: vector_out(Hsize)
-complex(dpc), intent(in)  :: vector_in(Hsize)
+complex(dp), intent(out) :: vector_out(Hsize)
+complex(dp), intent(in)  :: vector_in(Hsize)
 
 
 ! local variables

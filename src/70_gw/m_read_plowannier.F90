@@ -101,7 +101,7 @@ subroutine read_plowannier(cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,
 !types and arrays
  type(kmesh_t),intent(in) :: Kmesh
  type(crystal_t),intent(in) :: Cryst
- complex(dpc), allocatable, intent(inout) :: coeffW_BZ(:,:,:,:,:,:)
+ complex(dp), allocatable, intent(inout) :: coeffW_BZ(:,:,:,:,:,:)
  type(Pawang_type),intent(in) :: Pawang
 !scalars
  logical, intent(inout) :: luwindow
@@ -114,7 +114,7 @@ subroutine read_plowannier(cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,
  integer :: at_indx,ik_ibz,band1,m1,m2,spin,ik_bz,dummy,isym,itim,iat,indx,ispinor,unt
  real(dp) :: xx,yy
  real(dp) :: kbz(3)
- complex(dpc), allocatable :: coeffW_IBZ(:,:,:,:,:,:)
+ complex(dp), allocatable :: coeffW_IBZ(:,:,:,:,:,:)
 ! *********************************************************************
  write(message,*) "Read wannier in iBZ"
  call wrtout(std_out,message,'COLL')

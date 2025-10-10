@@ -39,7 +39,7 @@ MODULE m_paw_nhat
  use m_pawcprj,      only : pawcprj_type
  use m_paw_finegrid, only : pawgylm,pawrfgd_fft,pawrfgd_wvl,pawexpiqr
  use m_paral_atom,   only : get_my_atmtab, free_my_atmtab
- use m_distribfft,   only : distribfft_type,init_distribfft_seq,destroy_distribfft
+ use m_distribfft,   only : distribfft_type
  use m_geometry,     only : xred2xcart
  use m_cgtools,      only : mean_fftr
  use m_mpinfo,       only : set_mpi_enreg_fft,unset_mpi_enreg_fft,initmpi_seq
@@ -579,7 +579,7 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
      my_distribfft => distribfft
    else
      ABI_MALLOC(my_distribfft,)
-     call init_distribfft_seq(my_distribfft,'f',ngfft(2),ngfft(3),'fourdp')
+     call my_distribfft%init_seq('f',ngfft(2),ngfft(3),'fourdp')
    end if
    call initmpi_seq(mpi_enreg_fft)
    ABI_FREE(mpi_enreg_fft%distribfft)
@@ -601,7 +601,7 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 !  Destroy fake mpi_enreg
    call unset_mpi_enreg_fft(mpi_enreg_fft)
    if (.not.present(distribfft)) then
-     call destroy_distribfft(my_distribfft)
+     call my_distribfft%free()
      ABI_FREE(my_distribfft)
    end if
  end if
@@ -695,7 +695,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
 
 !Local variables ---------------------------------------
 !scalars
- complex(dpc), parameter :: cminusone  = (-1._dp,0._dp)
+ complex(dp), parameter :: cminusone  = (-1._dp,0._dp)
  integer :: iatm,iatom,iatom_tot,ic,ierr,ils,ilslm,isp1,isp2,isploop,itypat,jc,klm,klmn,idat1,idat2,ia,nfgd_max
  integer :: lmax,lmin,lm_size,mm,my_comm_atom,my_comm_fft,optgr0,optgr1,paral_kgb_fft
  integer :: cplex,ilmn,jlmn,lmn_size,lmn2_size,gpu_option_,nprojs,shift,nlmn,nfgd
@@ -1365,7 +1365,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
      my_distribfft => distribfft
    else
      ABI_MALLOC(my_distribfft,)
-     call init_distribfft_seq(my_distribfft,'f',ngfft(2),ngfft(3),'fourdp')
+     call my_distribfft%init_seq('f',ngfft(2),ngfft(3),'fourdp')
    end if
    call initmpi_seq(mpi_enreg_fft)
    ABI_FREE(mpi_enreg_fft%distribfft)
@@ -1392,7 +1392,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
 !  Destroy fake mpi_enreg
    call unset_mpi_enreg_fft(mpi_enreg_fft)
    if (.not.present(distribfft)) then
-     call destroy_distribfft(my_distribfft)
+     call my_distribfft%free()
      ABI_FREE(my_distribfft)
    end if
  end if
@@ -1753,7 +1753,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
      my_distribfft => distribfft
    else
      ABI_MALLOC(my_distribfft,)
-     call init_distribfft_seq(my_distribfft,'f',ngfft(2),ngfft(3),'fourdp')
+     call my_distribfft%init_seq('f',ngfft(2),ngfft(3),'fourdp')
    end if
    call initmpi_seq(mpi_enreg_fft)
    ABI_FREE(mpi_enreg_fft%distribfft)
@@ -1780,7 +1780,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
 !  Destroy fake mpi_enreg
    call unset_mpi_enreg_fft(mpi_enreg_fft)
    if (.not.present(distribfft)) then
-     call destroy_distribfft(my_distribfft)
+     call my_distribfft%free()
      ABI_FREE(my_distribfft)
    end if
  end if
@@ -2193,7 +2193,7 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
  integer :: lm0,lm_size,lmax,lmin,lmn2_size,mm,nfgd,nsploop,optgr0,gpu_option_
  logical :: has_qphase,qne0
  real(dp) :: vi,vr
- complex(dpc) :: scal
+ complex(dp) :: scal
  character(len=500) :: msg
 !arrays
  real(dp) :: rdum1(1),rdum2(2), sum_r, sum_i
@@ -2897,7 +2897,7 @@ subroutine pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,iband1,iband2,ispinor1
      my_distribfft => distribfft
    else
      ABI_MALLOC(my_distribfft,)
-     call init_distribfft_seq(my_distribfft,'c',ngfftdiel(2),ngfftdiel(3),'fourwf')
+     call my_distribfft%init_seq('c',ngfftdiel(2),ngfftdiel(3),'fourwf')
    end if
    call initmpi_seq(mpi_enreg_fft)
    ABI_FREE(mpi_enreg_fft%distribfft)
@@ -2919,7 +2919,7 @@ subroutine pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,iband1,iband2,ispinor1
    ABI_FREE(wfraug_paw)
    call unset_mpi_enreg_fft(mpi_enreg_fft)
    if (.not.present(distribfft)) then
-     call destroy_distribfft(my_distribfft)
+     call my_distribfft%free()
      ABI_FREE(my_distribfft)
    end if
  end if
@@ -3364,4 +3364,3 @@ end subroutine wvl_nhatgrid
 
 END MODULE m_paw_nhat
 !!***
-

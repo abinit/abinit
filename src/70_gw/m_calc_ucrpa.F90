@@ -118,14 +118,14 @@ contains
  type(crystal_t),intent(in) :: Cryst
  type(operwan_realspace_type),intent(in) :: rhot1(npw,Qmesh%nibz)
  type(plowannier_type),intent(in) :: wanbz
- complex(dpc), intent(in) :: M1_q_m(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,2*lpawu+1,2*lpawu+1,npw,Qmesh%nibz)
+ complex(dp), intent(in) :: M1_q_m(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,2*lpawu+1,2*lpawu+1,npw,Qmesh%nibz)
 
 !Local variables ------------------------------
 !scalars
  real(dp) :: x
  real(dp) :: t1,t2
  real(dp):: tol
- complex(dpc) :: uu,jj
+ complex(dp) :: uu,jj
 
  complex :: nC,ualter
 
@@ -134,7 +134,7 @@ contains
  integer :: ierr,ik_bz,ik_ibz,iq_ibz,i,iG1,iG2,iG,iiG,iomega,iomega1,ispinor1,ispinor2,ispinor3,ispinor4
  integer :: lpawu_read,nkibz,nbband,nkbz,nprocs,nqalloc,nqibz,ms1,ms2,ms3,ms4,mbband,nspinor
  integer :: isym_kgw,iik,unt, cp_paral
- complex(dpc) ::ph_mkt,cplx1,cplx2
+ complex(dp) ::ph_mkt,cplx1,cplx2
 
  logical :: wannier=.TRUE.
  logical :: verbose=.FALSE.
@@ -144,21 +144,21 @@ contains
  character(len=500) :: message
 
 !arrays
- complex(dpc), allocatable :: V_m(:,:,:,:)
- complex(dpc), allocatable :: U_m(:,:,:,:)
- complex(dpc),allocatable :: uspin(:,:),jspin(:,:)
-! complex(dpc), allocatable :: coeffW_BZ(:,:,:),coeffW_IBZ(:,:,:)
- complex(dpc), allocatable :: rhot_q_m1m3(:,:,:,:,:,:),rhot_q_m2m4(:,:,:,:,:,:)
- complex(dpc), allocatable :: rhot_q_m1m3_npwe(:,:,:,:,:,:),rhot_q_m2m4_npwe(:,:,:,:,:,:)
- complex(dpc),allocatable :: trrho(:,:),sumrhorhoeps(:)
- complex(gwpc), allocatable :: scr(:,:,:,:)
+ complex(dp), allocatable :: V_m(:,:,:,:)
+ complex(dp), allocatable :: U_m(:,:,:,:)
+ complex(dp),allocatable :: uspin(:,:),jspin(:,:)
+! complex(dp), allocatable :: coeffW_BZ(:,:,:),coeffW_IBZ(:,:,:)
+ complex(dp), allocatable :: rhot_q_m1m3(:,:,:,:,:,:),rhot_q_m2m4(:,:,:,:,:,:)
+ complex(dp), allocatable :: rhot_q_m1m3_npwe(:,:,:,:,:,:),rhot_q_m2m4_npwe(:,:,:,:,:,:)
+ complex(dp),allocatable :: trrho(:,:),sumrhorhoeps(:)
+ complex(gwp), allocatable :: scr(:,:,:,:)
 
  real(dp),allocatable :: k_coord(:,:)!,k_coordIBZ(:,:)
  real(dp),allocatable :: q_coord(:,:)
  real(dp),allocatable:: normG(:)
- complex(dpc),allocatable:: uomega(:),jomega(:)
+ complex(dp),allocatable:: uomega(:),jomega(:)
  real(dp),allocatable:: omega(:)
- complex(dpc),allocatable:: eiqr(:)
+ complex(dp),allocatable:: eiqr(:)
 
  integer,allocatable:: ikmq_bz_t(:,:)
 
@@ -1139,8 +1139,8 @@ endif
  SUBROUTINE checkk(Interaction,m_inf,m_sup,prtopt,ifreq,uu,jj,utype,mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital)
 
  integer, intent(in) :: m_inf,m_sup,ifreq,mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital
- complex(dpc), intent(in) :: Interaction(mbband1*nspinor,mbband2*nspinor,mbband3*nspinor,mbband4*nspinor)
- complex(dpc), intent(out)    :: uu,jj
+ complex(dp), intent(in) :: Interaction(mbband1*nspinor,mbband2*nspinor,mbband3*nspinor,mbband4*nspinor)
+ complex(dp), intent(out)    :: uu,jj
  character(len=*), intent(in) :: utype
  integer :: prtopt
 
@@ -1203,10 +1203,10 @@ endif
  SUBROUTINE Affichage(Interaction,m_inf,m_sup,option,ifreq,uu,jj,utype,mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital)
 
   integer, intent(in) :: m_inf,m_sup,option,ifreq,mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital
-  complex(dpc), intent(in) :: Interaction(mbband1*nspinor,mbband2*nspinor,mbband3*nspinor,mbband4*nspinor)
-  complex(dpc),intent(out) :: UU,JJ
+  complex(dp), intent(in) :: Interaction(mbband1*nspinor,mbband2*nspinor,mbband3*nspinor,mbband4*nspinor)
+  complex(dp),intent(out) :: UU,JJ
   character(len=*), intent(in) :: utype
-  complex(dpc) :: UU1,UUmJJ,JJ1,JJ2
+  complex(dp) :: UU1,UUmJJ,JJ1,JJ2
   integer :: m1,m2
   logical :: lprint
   character(len=500) :: message
@@ -1360,7 +1360,7 @@ endif
  SUBROUTINE Sauvegarde_M_q_m(M_q_m,normG,nqibz,npw,mbband)
 
  integer, intent(in) :: nqibz,npw,mbband
- complex(dpc), intent(in) :: M_q_m(mbband,mbband,npw,nqibz)
+ complex(dp), intent(in) :: M_q_m(mbband,mbband,npw,nqibz)
  real(dp), intent(in) :: normG(npw)
  integer :: i,j,iq_ibz,iG,unt
  character(len=500) :: msg
@@ -1495,11 +1495,11 @@ endif
 
  subroutine print_uj_spin(nomega,uspin,jspin,omega,one_orbital)
    integer,intent(in) :: nomega,one_orbital
-   complex(dpc),intent(in) :: uspin(4,nomega)
-   complex(dpc),intent(in) :: jspin(4,nomega)
+   complex(dp),intent(in) :: uspin(4,nomega)
+   complex(dp),intent(in) :: jspin(4,nomega)
    real(dp),intent(in) :: omega(nomega)
    integer :: iomega,ispin
-   complex(dpc) :: uomega(nomega),jomega(nomega)
+   complex(dp) :: uomega(nomega),jomega(nomega)
    character(len=500)::message
 
    call print_orbitals(spin1,spin2,iatom1,iatom2,iatom3,iatom4,pos1,pos2,pos3,pos4,il1,il2,il3,il4,wanbz,3)

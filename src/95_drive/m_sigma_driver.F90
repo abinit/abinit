@@ -24,20 +24,17 @@ module m_sigma_driver
  use defs_basis
  use m_gwdefs
  use defs_wvltypes
- use m_dtset
  use m_xmpi
  use m_xomp
  use m_errors
  use m_abicore
  use m_abi_mixing
- use m_nctk
  use m_kxc
  use m_distribfft
  use netcdf
- use m_hdr
+ use m_nctk
  use libxc_functionals
  use m_dtfil
- use m_crystal
  use m_cgtools
 
  use defs_datatypes,  only : pseudopotential_type
@@ -49,13 +46,16 @@ module m_sigma_driver
  use m_io_tools,      only : open_file, file_exists, iomode_from_fname
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
  use m_pstat,         only : pstat_proc
+ use m_dtset,         only : dataset_type
+ use m_hdr,           only : hdr_type
+ use m_crystal,       only : crystal_t
  use m_geometry,      only : normv, mkrdim, metric
  use m_fftcore,       only : print_ngfft
  use m_fft_mesh,      only : get_gfft, setmesh
  use m_fft,           only : fourdp
  use m_ioarr,         only : fftdatar_write, read_rhor
  use m_ebands,        only : ebands_t, gaps_t
- use m_energies,      only : energies_type, energies_init
+ use m_energies,      only : energies_type
  use m_bz_mesh,       only : kmesh_t, littlegroup_t, littlegroup_free, isamek, get_ng0sh
  use m_gsphere,       only : gsphere_t, merge_and_sort_kg, setshells
  use m_kg,            only : getph, getcut
@@ -109,7 +109,7 @@ module m_sigma_driver
  use m_plowannier,    only : operwan_realspace_type,plowannier_type,init_plowannier,get_plowannier,&
                              fullbz_plowannier,init_operwan_realspace,reduce_operwan_realspace,&
                              destroy_operwan_realspace,destroy_plowannier,zero_operwan_realspace
- use minimax_grids,   only : gx_minimax_grid !, gx_get_error_message
+ use minimax_grids,   only : gx_minimax_grid
 
  implicit none
 
@@ -195,11 +195,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  integer :: ngrvdw,nhatgrdim,nkxc,nkxc1,nprocs,nscf,nspden_rhoij,nzlmopt,optene
  integer :: optcut,optgr0,optgr1,optgr2,option,option_test,option_dij,optrad,psp_gencond
  integer :: my_rank,rhoxsp_method,comm,use_aerhor,use_umklp,usexcnhat
- integer :: ioe0j,spin,io,jb,nomega_sigc
+ integer :: ioe0j,spin,io,jb,nomega_sigc, gw1rdm,x1rdm
  integer :: temp_unt,ncid
- integer :: work_size,nstates_per_proc,my_nbks
- !integer :: jb_qp,ib_ks,ks_irr
- integer :: gw1rdm,x1rdm
+ integer :: work_size,nstates_per_proc,my_nbks !, jb_qp,ib_ks,ks_irr
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
  real(dp) :: etot_sd,etot_mbb,evextnl_energy,ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,old_fermie
@@ -207,7 +205,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  real(dp) :: ucvol,vxcavg,vxcavg_qp,el_temp
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq, gsqcut,boxcut,ecutf
  real(dp) :: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
- complex(dpc) :: max_degw,cdummy
+ complex(dp) :: max_degw,cdummy
  logical :: rdm_update,readchkprdm,prtchkprdm
  logical :: use_paw_aeur,dbg_mode,pole_screening,call_pawinit,is_dfpt=.false.
  character(len=500) :: msg
@@ -228,7 +226,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  type(ppmodel_t) :: PPm
  type(sigparams_t) :: Sigp
  type(sigma_t) :: Sr
- type(wfdgw_t),target :: Wfd,Wfdf,Wfd_nato_master
+ type(wfdgw_t),target :: Wfd, Wfdf, Wfd_nato_master
  type(wfdgw_t),pointer :: Wfd_nato_all
  type(wave_t),pointer :: wave
  type(wvl_data) :: Wvl
@@ -252,16 +250,15 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  real(dp),allocatable :: qp_taur(:,:),igwene(:,:,:)
  real(dp),allocatable :: vpsp(:),xccc3d(:),dijexc_core(:,:,:),dij_hf(:,:,:)
  real(dp),allocatable :: nl_bks(:,:,:)
- !real(dp),allocatable :: osoc_bks(:, :, :)
- real(dp),allocatable :: ks_aepaw_rhor(:,:) !,ks_n_one_rhor(:,:),ks_nt_one_rhor(:,:)
- complex(dpc) :: ovlp(2)
- complex(dpc),allocatable :: ctmp(:,:),hbare(:,:,:,:)
- complex(dpc),target,allocatable :: sigcme(:,:,:,:,:)
- complex(dpc),allocatable :: hdft(:,:,:,:),htmp(:,:,:,:),uks2qp(:,:)
- complex(dpc),allocatable :: xrdm_k_full(:,:,:), rdm_k(:,:), pot_k(:,:), nateigv(:,:,:,:), old_ks_purex(:,:), new_hartr(:,:)
- complex(gwpc),allocatable :: kxcg(:,:),fxc_ADA(:,:,:)
- complex(gwpc),ABI_CONTIGUOUS pointer :: ug1(:)
- complex(dpc),allocatable :: sigcme_k(:,:,:,:), rhot1_q_m(:,:,:,:,:,:,:), M1_q_m(:,:,:,:,:,:,:)
+ real(dp),allocatable :: ks_aepaw_rhor(:,:) !,ks_n_one_rhor(:,:),ks_nt_one_rhor(:,:), osoc_bks(:, :, :)
+ complex(dp) :: ovlp(2)
+ complex(dp),allocatable :: ctmp(:,:),hbare(:,:,:,:)
+ complex(dp),target,allocatable :: sigcme(:,:,:,:,:)
+ complex(dp),allocatable :: hdft(:,:,:,:),htmp(:,:,:,:),uks2qp(:,:)
+ complex(dp),allocatable :: xrdm_k_full(:,:,:), rdm_k(:,:), pot_k(:,:), nateigv(:,:,:,:), old_ks_purex(:,:), new_hartr(:,:)
+ complex(gwp),allocatable :: kxcg(:,:),fxc_ADA(:,:,:)
+ complex(gwp),contiguous, pointer :: ug1(:)
+ complex(dp),allocatable :: sigcme_k(:,:,:,:), rhot1_q_m(:,:,:,:,:,:,:), M1_q_m(:,:,:,:,:,:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:),bmask(:), bdm_mask(:,:,:),bdm2_mask(:,:,:)
  type(esymm_t),target,allocatable :: KS_sym(:,:)
  type(esymm_t),pointer :: QP_sym(:,:)
@@ -275,7 +272,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  type(paw_pwaves_lmn_t),allocatable :: Paw_onsite(:)
  type(plowannier_type) :: wanbz,wanibz,wanibz_in
  type(operwan_realspace_type), allocatable :: rhot1(:,:)
-
 !************************************************************************
 
  DBG_ENTER('COLL')
@@ -296,16 +292,16 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  end if
 
 #if defined HAVE_GW_DPC
- if (gwpc /= 8) then
+ if (gwp /= 8) then
    write(msg,'(6a)')ch10,&
     'Number of bytes for double precision complex /=8 ',ch10,&
     'Cannot continue due to kind mismatch in BLAS library ',ch10,&
     'Some BLAS interfaces are not generated by abilint '
    ABI_ERROR(msg)
  end if
- write(msg,'(a,i2,a)')'.Using double precision arithmetic ; gwpc = ',gwpc,ch10
+ write(msg,'(a,i2,a)')'.Using double precision arithmetic ; gwpc = ',gwp,ch10
 #else
- write(msg,'(a,i2,a)')'.Using single precision arithmetic ; gwpc = ',gwpc,ch10
+ write(msg,'(a,i2,a)')'.Using single precision arithmetic ; gwpc = ',gwp,ch10
 #endif
  call wrtout(units, msg)
 
@@ -350,7 +346,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  ! === Some variables need to be initialized/nullify at start ===
  usexcnhat = 0
- call energies_init(KS_energies)
+ call KS_energies%init()
  call mkrdim(acell, rprim, rprimd)
  call metric(gmet,gprimd,ab_out,rmet,rprimd,ucvol)
  !
@@ -365,8 +361,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  ! Fake MPI_type for the sequential part.
  call initmpi_seq(MPI_enreg_seq)
- call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfftc(2),ngfftc(3),'all')
- call init_distribfft_seq(MPI_enreg_seq%distribfft,'f',ngfftf(2),ngfftf(3),'all')
+ call MPI_enreg_seq%distribfft%init_seq('c',ngfftc(2),ngfftc(3),'all')
+ call MPI_enreg_seq%distribfft%init_seq('f',ngfftf(2),ngfftf(3),'all')
 
  call print_ngfft([std_out], ngfftf, header='Dense FFT mesh used for densities and potentials')
  nfftf_tot=PRODUCT(ngfftf(1:3))
@@ -381,7 +377,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ! ==================================================
  ! ==== Initialize Sigp, epsm1 and basic objects ====
  ! ==================================================
- ! Sigp is completetly initialized here.
+ ! Sigp is completely initialized here.
  ! epsm1 is only initialized with dimensions, (SCR|SUSC) file is read in epsm1%mkdump
  call timab(403,1,tsec) ! setup_sigma
 
@@ -621,7 +617,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    work_size = mband * Kmesh%nibz * Sigp%nsppol
 
    ! Non-scalable memory in Mb i.e. memory that is not distribute with MPI.
-   nonscal_mem = (two*gwpc*epsm1%npwe**2*epsm1%nomega*(epsm1%mqmem+1)*b2Mb) * 1.1_dp
+   nonscal_mem = (two*gwp*epsm1%npwe**2*epsm1%nomega*(epsm1%mqmem+1)*b2Mb) * 1.1_dp
 
    ! List of configurations.
    ! Assuming an OpenMP implementation with perfect speedup!
@@ -640,9 +636,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        eff = MIN(eff, (one * work_size) / (ii * nstates_per_proc))
 
        ! Memory needed for Fourier components ug.
-       ug_mem = two*gwpc*Dtset%nspinor*Sigp%npwwfn*my_nbks*b2Mb
+       ug_mem = two*gwp*Dtset%nspinor*Sigp%npwwfn*my_nbks*b2Mb
        ! Memory needed for real space ur (use gwc_nfft, instead of gwx_nfft)
-       ur_mem = two*gwpc*Dtset%nspinor*gwc_nfft*COUNT(keep_ur)*b2Mb
+       ur_mem = two*gwp*Dtset%nspinor*gwc_nfft*COUNT(keep_ur)*b2Mb
        ! Memory needed for PAW projections Cprj
        cprj_mem = zero
        if (Dtset%usepaw==1) cprj_mem = dp*Dtset%nspinor*SUM(nlmn_atm)*my_nbks*b2Mb
@@ -698,32 +694,34 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    call Wfd_nato_master%read_wfk(wfk_fname,iomode_from_fname(wfk_fname))
  end if
 
- if (Dtset%pawcross==1) then
-   call Wfdf%init(Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh%nibz,Sigp%nsppol,bks_mask,&
-     Dtset%nspden,Dtset%nspinor,dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
-     Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)
- end if
-
- ABI_FREE(bks_mask)
- ABI_FREE(nband)
- ABI_FREE(keep_ur)
-
  call timab(402,2,tsec) ! sigma(Init1)
  call timab(404,1,tsec) ! rdkss
 
  call wfd%read_wfk(wfk_fname, iomode_from_fname(wfk_fname))
-
- if (Dtset%pawcross==1) then
-   call wfdgw_copy(Wfd, Wfdf)
-   call wfdf%change_ngfft(Cryst,Psps,ngfftf)
- end if
-
  ! This test has been disabled (too expensive!)
  if (.False.) call wfd%test_ortho(Cryst,Pawtab,unit=ab_out,mode_paral="COLL")
+
+ if (Dtset%pawcross==1 .or. dtset%userie == 456) then
+   call Wfdf%init(Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh%nibz,Sigp%nsppol,bks_mask,&
+     Dtset%nspden,Dtset%nspinor,dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
+     Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)
+   if (dtset%userie == 456) then
+      call wrtout(std_out, "Reading states from supercell WFK file")
+     call wfdf%read_wfk("SC_WFK", iomode_from_fname("SC_WFK"))
+   else
+     call wfdgw_copy(Wfd, Wfdf)
+   end if
+   call wfdf%change_ngfft(Cryst, Psps, ngfftf)
+   if (dtset%userie == 456) call wfdf%print(units, "UNPERTURBED WFDF for GWTPT")
+ end if
 
  call pstat_proc%print(_PSTAT_ARGS_)
  call timab(404,2,tsec) ! rdkss
  call timab(405,1,tsec) ! Init2
+
+ ABI_FREE(bks_mask)
+ ABI_FREE(nband)
+ ABI_FREE(keep_ur)
 
  ! ==============================================================
  ! ==== Find little group of the k-points for GW corrections ====
@@ -768,9 +766,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        ik_ibz = Kmesh%tab(Sigp%kptgw2bz(ikcalc))
        first_band = Sigp%minbnd(ikcalc,spin)
        last_band  = Sigp%maxbnd(ikcalc,spin)
-!      call classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngfftf,Cryst,ks_ebands,Pawtab,Pawrad,Pawang,Psps,&
        call classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,Wfd%ngfft,Cryst,ks_ebands,Pawtab,Pawrad,Pawang,Psps,&
-&       Dtset%tolsym,KS_sym(ik_ibz,spin))
+         Dtset%tolsym,KS_sym(ik_ibz,spin))
      end do
    end do
    ! Recreate the Sig_ij tables taking advantage of the classification of the bands.
@@ -788,8 +785,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ABI_MALLOC(ks_taur, (nfftf, dtset%nspden * dtset%usekden))
 
  call wfd%mkrho(cryst, psps, ks_ebands, ngfftf, nfftf, ks_rhor)
+
  if ((rdm_update .and. Dtset%prtden /= 0) .and. Wfd%my_rank == master) then
-   ! Print initial (KS) density file as read (usefull to compare DEN files, cubes, etc.)
+   ! Print initial (KS) density file as read (useful to compare DEN files, cubes, etc.)
    gw1rdm_fname = trim(dtfil%fnameabo_ks_den)  ! and used on Sigma grids
    call fftdatar_write("density",gw1rdm_fname,dtset%iomode,hdr_sigma,&
                        Cryst,ngfftf,cplex1,nfftf,dtset%nspden,ks_rhor,mpi_enreg_seq,ebands=ks_ebands)
@@ -839,10 +837,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    !  Calculate onsite vxc with and without core charge.
    nzlmopt=-1; option=0; compch_sph=greatest_real
-   call pawdenpot(compch_sph,el_temp,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
+   call pawdenpot(compch_sph,el_temp,Cryst%gprimd,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
      Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,KS_Paw_an,KS_Paw_an,KS_energies%paw,KS_paw_ij,&
      Pawang,Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,&
-     Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,Cryst%ucvol,Psps%znuclpsp)
+     Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,Cryst%xred,Cryst%ucvol,Psps%znuclpsp)
 
  else
    ABI_MALLOC(ks_nhatgr, (0, 0, 0))
@@ -979,12 +977,19 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    end do
  end do
 
+ if (dtset%userie == 456) then
+ call wrtout(std_out, "Computing KS vxc matrix elements using supercell WFK file")
+ call calc_vhxc_me(Wfdf, KS_mflags, KS_me, Cryst, Dtset, nfftf, ngfftf, &
+                   ks_vtrial, ks_vhartr, ks_vxc, Psps, Pawtab, KS_paw_an, Pawang, Pawfgrtab, KS_paw_ij, dijexc_core, &
+                   ks_rhor, usexcnhat, ks_nhat, ks_nhatgr, nhatgrdim, tmp_kstab, taur=ks_taur)
+ else
+
  call calc_vhxc_me(Wfd, KS_mflags, KS_me, Cryst, Dtset, nfftf, ngfftf, &
                    ks_vtrial, ks_vhartr, ks_vxc, Psps, Pawtab, KS_paw_an, Pawang, Pawfgrtab, KS_paw_ij, dijexc_core, &
                    ks_rhor, usexcnhat, ks_nhat, ks_nhatgr, nhatgrdim, tmp_kstab, taur=ks_taur)
+ end if
  ABI_FREE(tmp_kstab)
 
-!#ifdef DEV_HAVE_SCGW_SYM
 !Set KS matrix elements connecting different irreps to zero. Do not touch unknown bands!.
  if (gwcalctyp>=20 .and. Sigp%symsigma > 0) then
    bmin=Sigp%minbdgw; bmax=Sigp%maxbdgw
@@ -1004,7 +1009,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    call KS_me%zero(ks_irreptab)
    ABI_FREE(ks_irreptab)
  end if
-!#endif
 
  call KS_me%print(header="Matrix elements in the KS basis set", prtvol=Dtset%prtvol)
 
@@ -1036,7 +1040,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ! Do not break this coding!
  ! When gwcalctyp>10, the order of the bands can be interexchanged after
  ! the diagonalization. Therefore, we have to correctly assign the matrix elements to the corresponding
- ! bands and we cannot skip the following even though it looks unuseful.
+ ! bands and we cannot skip the following even though it looks useless.
  if (gwcalctyp >= 10) call wrtout(std_out, ch10//' *************** KS Energies *******************')
 
  !=== qp_ebands stores energies and occ. used for the calculation ===
@@ -1056,7 +1060,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  else
    ! Self-consistent GW.
    ! Read the unitary matrix and the QP energies of the previous step from the QPS file.
-   call energies_init(QP_energies)
+   call QP_energies%init()
    QP_energies%e_corepsp=ecore/Cryst%ucvol
 
    ! m_ks_to_qp(ib,jb,k,s) := <\psi_{ib,k,s}^{KS}|\psi_{jb,k,s}^{QP}>
@@ -1104,7 +1108,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      call show_QP(qp_ebands,Sr%m_ks_to_qp,fromb=Sigp%minbdgw,tob=Sigp%maxbdgw,unit=std_out,tolmat=0.001_dp)
    end if
 
-   ! Compute QP wfg as linear combination of KS states ===
+   ! Compute QP wfg as linear combination of KS states.
    !  * Wfd%ug is modified inside calc_wf_qp
    !  * For PAW, update also the on-site projections.
    !  * WARNING the first dimension of MPI_enreg MUST be Kmesh%nibz
@@ -1124,7 +1128,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    call qp_ebands%update_occ(Dtset%spinmagntarget, prtvol=0)
    qp_vbik(:,:) = qp_ebands%get_valence_idx()
 
-!  #ifdef DEV_HAVE_SCGW_SYM
    ! Calculate the irreducible representations of the new QP amplitdues.
    if (Sigp%symsigma==1.and.gwcalctyp>=20) then
      ABI_MALLOC(QP_sym,(Wfd%nkibz,Wfd%nsppol))
@@ -1146,7 +1149,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ! Recreate the Sig_ij tables taking advantage of the classification of the bands.
      call sigma_tables(Sigp, Kmesh, esymm=QP_sym)
    end if
-!  #endif
 
    ! Compute QP density using the updated wfg.
    call wfd%mkrho(cryst, psps, qp_ebands, ngfftf, nfftf, qp_rhor)
@@ -1246,8 +1248,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    nkxc=0
    if (Dtset%nspden==1) nkxc=2
    if (Dtset%nspden>=2) nkxc=3 !check GGA and spinor that is messy !!!
-   !In case of MGGA, fxc and kxc are not available and we dont need them
-   !for the screening part (for now ...)
+   !In case of MGGA, fxc and kxc are not available and we dont need them for the screening part (for now ...)
    if (Dtset%ixc<0.and.libxc_functionals_ismgga()) nkxc=0
    if (nkxc/=0)  then
      ABI_MALLOC(qp_kxc,(nfftf,nkxc))
@@ -1255,9 +1256,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    ! **** NOTE THAT Vxc CONTAINS THE CORE-DENSITY CONTRIBUTION ****
    n3xccc=0; if (Psps%n1xccc/=0) n3xccc=nfftf
-   ABI_MALLOC(qp_vhartr,(nfftf))
-   ABI_MALLOC(qp_vtrial,(nfftf,Dtset%nspden))
-   ABI_MALLOC(qp_vxc,(nfftf,Dtset%nspden))
+   ABI_MALLOC(qp_vhartr, (nfftf))
+   ABI_MALLOC(qp_vtrial, (nfftf,Dtset%nspden))
+   ABI_MALLOC(qp_vxc, (nfftf,Dtset%nspden))
 
    optene=4; moved_atm_inside=0; moved_rhor=0; istep=1
 
@@ -1313,8 +1314,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  end if ! gwcalctyp>=10
 
  ! KS hamiltonian: hdft(b1,b1,k,s)= <b1,k,s|H_s|b1,k,s>
- ABI_MALLOC(hdft, (b1gw:b2gw, b1gw:b2gw, Kmesh%nibz, Sigp%nsppol*Sigp%nsig_ab))
- hdft = czero
+ ABI_CALLOC(hdft, (b1gw:b2gw, b1gw:b2gw, Kmesh%nibz, Sigp%nsppol*Sigp%nsig_ab))
 
  if (Dtset%nspinor == 1) then
    do spin=1,Sigp%nsppol
@@ -1382,7 +1382,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  ! Setup bare Hamiltonian := T + v_{loc} + v_{nl} + v_H.
  !
- ! * The representation depends wheter we are updating the wfs or not.
+ ! * The representation depends whether we are updating the wfs or not.
  ! * ks_vUme is zero unless we are using DFT+U as starting point, see calc_vHxc_braket
  ! * Note that vH matrix elements are calculated using the true uncutted interaction
  !   This should be changed if the cutoff is also used in the GS run.
@@ -1477,7 +1477,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
                      qp_rhor,usexcnhat,qp_nhat,qp_nhatgr,nhatgrdim,tmp_kstab,taur=qp_taur)
    ABI_FREE(tmp_kstab)
 
-!  #ifdef DEV_HAVE_SCGW_SYM
    if (gwcalctyp>=20 .and. Sigp%symsigma>0) then
      bmin=Sigp%minbdgw; bmax=Sigp%maxbdgw
      ABI_MALLOC(qp_irreptab,(bmin:bmax,Kmesh%nibz,Sigp%nsppol))
@@ -1496,7 +1495,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      call QP_me%zero(qp_irreptab)
      ABI_FREE(qp_irreptab)
    end if
-!  #endif
 
    call QP_me%print(header="Matrix elements in the QP basis set", prtvol=Dtset%prtvol)
 
@@ -1540,7 +1538,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      Sr%hhartree=QP_me%hbare
    end if
 
-!  #ifdef DEV_HAVE_SCGW_SYM
    if (gwcalctyp>=20 .and. Sigp%symsigma > 0) then
 !    bmin=Sigp%minbdgw; bmax=Sigp%maxbdgw
      do spin=1,Sigp%nsppol
@@ -1558,7 +1555,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        end do
      end do
    end if
-!  #endif
 
    ABI_FREE(qp_rhog)
    ABI_FREE(qp_vhartr)
@@ -1683,7 +1679,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    select case (dtset%gwgamma)
    case (0)
-     id_required=4; ikxc=0; approx_type=0; option_test=0; dim_kxcg=0
+     id_required = 4; ikxc = 0; approx_type = 0; option_test = 0; dim_kxcg = 0
      ABI_MALLOC(kxcg, (nfftf_tot,dim_kxcg))
 
    case (1, 2)
@@ -1713,7 +1709,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      id_required=4; ikxc=7; approx_type=1; dim_kxcg=1
      if (Dtset%gwgamma==1) option_test=1 ! TESTELECTRON, vertex in chi0 *and* sigma
      if (Dtset%gwgamma==2) option_test=0 ! TESTPARTICLE, vertex in chi0 only
-     ABI_MALLOC(kxcg, (nfftf_tot,dim_kxcg))
+     ABI_MALLOC(kxcg, (nfftf_tot, dim_kxcg))
 
      dbg_mode=.FALSE.
      if (Dtset%usepaw==1) then
@@ -1733,7 +1729,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
      if (Dtset%usepaw==1) then
        ! If we have PAW, we need the full density on the fine grid
-       ABI_MALLOC(ks_aepaw_rhor,(nfftf,Sigp%nsppol))
+       ABI_MALLOC(ks_aepaw_rhor,(nfftf, Sigp%nsppol))
        if (Dtset%getpawden==0.and.Dtset%irdpawden==0) then
          ABI_ERROR("Must use get/irdpawden to provide a _PAWDEN file!")
        end if
@@ -1787,7 +1783,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
      if (Dtset%usepaw==1) then
        ! If we have PAW, we need the full density on the fine grid
-       ABI_MALLOC(ks_aepaw_rhor,(nfftf,Wfd%nspden))
+       ABI_MALLOC(ks_aepaw_rhor, (nfftf,Wfd%nspden))
        if (Dtset%getpawden==0.and.Dtset%irdpawden==0) then
          ABI_ERROR("Must use get/irdpawden to provide a _PAWDEN file!")
        end if
@@ -1796,7 +1792,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
          ABI_ERROR(sjoin("Missing file:", dtfil%filpawdensin))
        end if
 
-       ABI_MALLOC(tmp_pawrhoij,(cryst%natom*wfd%usepaw))
+       ABI_MALLOC(tmp_pawrhoij, (cryst%natom*wfd%usepaw))
 
        call read_rhor(Dtfil%filpawdensin, cplex1, nfftf_tot, Wfd%nspden, ngfftf, 1, MPI_enreg_seq, &
                       ks_aepaw_rhor, Hdr_rhor, tmp_pawrhoij, wfd%comm)
@@ -1819,7 +1815,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      option_test=MOD(Dtset%gwgamma,2)
      ! 1 -> TESTELECTRON, vertex in chi0 *and* sigma
      ! 0 -> TESTPARTICLE, vertex in chi0 only
-     ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
+     ABI_MALLOC(kxcg, (nfftf_tot,dim_kxcg))
 
    case (-11)
      !LR+ALDA kernel
@@ -1879,7 +1875,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ! ================================================
  ! TODO Maybe its better if we use mqmem as input variable
  use_aerhor=0
- ABI_MALLOC(ks_aepaw_rhor,(nfftf,Wfd%nspden*use_aerhor))
+ ABI_MALLOC(ks_aepaw_rhor, (nfftf,Wfd%nspden*use_aerhor))
 
  if (sigp%needs_ppm()) then
    ! If epsm1 is MPI-shared, we have to start the RMA epoch. Note that epsm1%epsm1 is read-only.
@@ -1888,10 +1884,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ABI_CHECK_MPI(ierr, "")
    end if
 
-   my_plsmf=drude_plsmf; if (Dtset%ppmfrq>tol6) my_plsmf=Dtset%ppmfrq
-   call PPm%init(epsm1%mqmem,epsm1%nqibz,epsm1%npwe,Sigp%ppmodel,my_plsmf,Dtset%gw_invalid_freq)
-
-   ! PPm%force_plsmf= force_ppmfrq  ! this line to change the plasme frequency in HL expression.
+   my_plsmf = drude_plsmf; if (Dtset%ppmfrq > tol6) my_plsmf = Dtset%ppmfrq
+   call PPm%init(epsm1%mqmem, epsm1%nqibz, epsm1%npwe, Sigp%ppmodel, my_plsmf, Dtset%gw_invalid_freq)
+   ! PPm%force_plsmf= force_ppmfrq  ! this line to change the plasma frequency in the HL expression.
 
    if (Wfd%usepaw==1 .and. Ppm%userho==1) then
      ! For PAW and ppmodel 2-3-4 we need the AE rho(G) without compensation charge.
@@ -1899,14 +1894,14 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ! results will depend on the expression used for the matrix elements. This approach is safer.
      use_aerhor=1
      ABI_FREE(ks_aepaw_rhor)
-     ABI_MALLOC(ks_aepaw_rhor,(nfftf,Wfd%nspden))
+     ABI_MALLOC(ks_aepaw_rhor, (nfftf,Wfd%nspden))
 
      ! Check if input density file is available, otherwise compute
      pawden_fname = strcat(Dtfil%filnam_ds(3), '_PAWDEN')
      call wrtout(std_out,sjoin('Checking for existence of:',pawden_fname))
      if (file_exists(pawden_fname)) then
        ! Read density from file
-       ABI_MALLOC(tmp_pawrhoij,(cryst%natom*wfd%usepaw))
+       ABI_MALLOC(tmp_pawrhoij, (cryst%natom*wfd%usepaw))
 
        call read_rhor(pawden_fname, cplex1, nfftf_tot, Wfd%nspden, ngfftf, 1, MPI_enreg_seq, &
                       ks_aepaw_rhor, Hdr_rhor, tmp_pawrhoij, wfd%comm)
@@ -1916,8 +1911,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        ABI_FREE(tmp_pawrhoij)
      else
        ! Have to calculate PAW AW rhor from scratch
-       ABI_MALLOC(qp_rhor_n_one,(pawfgr%nfft,Dtset%nspden))
-       ABI_MALLOC(qp_rhor_nt_one,(pawfgr%nfft,Dtset%nspden))
+       ABI_MALLOC(qp_rhor_n_one, (pawfgr%nfft,Dtset%nspden))
+       ABI_MALLOC(qp_rhor_nt_one, (pawfgr%nfft,Dtset%nspden))
 
        ! FIXME
        ABI_WARNING(" denfgr in sigma seems to produce wrong results")
@@ -1943,7 +1938,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ! NC or PAW with PPmodel 1.
      if (epsm1%mqmem /= 0) then
        ! Calculate ppmodel parameters for all q-points
-       call PPm%setup(Cryst,Qmesh,epsm1%npwe,epsm1%nomega,epsm1%omega,epsm1%epsm1,nfftf,Gsph_c%gvec,ngfftf,ks_rhor(:,1))
+       call PPm%setup(Cryst, Qmesh, epsm1%npwe, epsm1%nomega, epsm1%omega, epsm1%epsm1, nfftf, Gsph_c%gvec, ngfftf, ks_rhor(:,1))
      end if
    end if ! PAW or NC PPm and/or needs density
 
@@ -2074,8 +2069,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  ! Do not store it for rdm_update because it might be too large!
  if (.not. rdm_update) then
-   ABI_MALLOC(sigcme, (nomega_sigc,ib1:ib2,ib1:ib2,Sigp%nkptgw,Sigp%nsppol*Sigp%nsig_ab))
-   sigcme=czero
+   ABI_CALLOC(sigcme, (nomega_sigc,ib1:ib2,ib1:ib2,Sigp%nkptgw,Sigp%nsppol*Sigp%nsig_ab))
  endif
 
  ! if (.False. .and. psps%usepaw == 0 .and. wfd%nspinor == 1 .and. any(dtset%so_psp /= 0)) then
@@ -2121,8 +2115,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    if(ic>1) then
      ABI_ERROR("number of correlated species is larger than one")
    end if
-   ABI_MALLOC(rhot1_q_m,(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,ndim,ndim,sigp%npwx,Qmesh%nibz))
-   ABI_MALLOC(M1_q_m,(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,ndim,ndim,sigp%npwx,Qmesh%nibz))
+   ABI_MALLOC(rhot1_q_m, (cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,ndim,ndim,sigp%npwx,Qmesh%nibz))
+   ABI_MALLOC(M1_q_m, (cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,ndim,ndim,sigp%npwx,Qmesh%nibz))
 
    M1_q_m=czero
    rhot1_q_m=czero
@@ -2154,7 +2148,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    nkcalc=Kmesh%nbz
    !if(1==1)then!DEBUG
    !open(67,file="test.rhot1",status="REPLACE")
-   do ikcalc=1,nkcalc ! for the oscillator strengh, spins are identical without SOC
+   do ikcalc=1,nkcalc ! for the oscillator strength, spins are identical without SOC
 !    if(Sigp%nkptgw/=Kmesh%nbz) then
 !      write(msg,'(6a)')ch10,&
 !&      ' nkptgw and nbz differs: this is not allowed to compute U in cRPA '
@@ -2354,7 +2348,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        ! min and max band indices for GW corrections (for this k-point)
        ib1 = MINVAL(Sigp%minbnd(ikcalc,:))
        ib2 = MAXVAL(Sigp%maxbnd(ikcalc,:))
-       call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,qp_ebands,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,Ltg_k(ikcalc),&
+       call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,qp_ebands,dtset, Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,Ltg_k(ikcalc),&
                          Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
                          gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross,tol_empty)
 
@@ -2571,7 +2565,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
            ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
            ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
            ! Notice we need KS occs and band energy diffs
-           call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,ks_ebands,Sigp,Sr,Gsph_x,Vcp_ks,Kmesh,Qmesh,Ltg_k(ikcalc),&
+           call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,ks_ebands,dtset, Sigp,Sr,Gsph_x,Vcp_ks,Kmesh,Qmesh,Ltg_k(ikcalc),&
                              Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
                              gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross,tol_empty)
 
@@ -2618,7 +2612,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
          ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
 
          ! Build <NO_i|Sigma_x[NO]|NO_j> matrix
-         call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,qp_ebands,Sigp,Sr,Gsph_x,Vcp_full,Kmesh,Qmesh,Ltg_k(ikcalc),&
+         call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,qp_ebands,dtset, Sigp,Sr,Gsph_x,Vcp_full,Kmesh,Qmesh,Ltg_k(ikcalc),&
                             Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd_nato_all,Wfdf,QP_sym,&
                             gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross,tol_empty)
        end do
@@ -3036,7 +3030,11 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  Sigp%npwx   = Dtset%npwsigx
 
  ! Read parameters of the WFK, verifify them and retrieve all G-vectors.
- call wfk_read_eigenvalues(wfk_fname,energies_p,Hdr_wfk,comm)
+ if (dtset%userie == 456) then
+   call wfk_read_eigenvalues("SC_WFK",energies_p,Hdr_wfk,comm)
+ else
+   call wfk_read_eigenvalues(wfk_fname,energies_p,Hdr_wfk,comm)
+ end if
  mband = MAXVAL(Hdr_wfk%nband)
 
  remove_inv = .FALSE.
@@ -3098,7 +3096,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  end if
 
  if (Sigp%npwx>ng_kss) then
-   ! Have to recalcuate the (large) sphere for Sigma_x.
+   ! Have to recalculate the (large) sphere for Sigma_x.
    pinv=1; if (remove_inv.and.Cryst%timrev==2) pinv=-1
    gamma_point(:,1) = (/zero,zero,zero/); nullify(gsphere_sigx_p)
 
@@ -3215,7 +3213,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  !
  if (dtset%nkptgw == 0) then
    !
-   ! Use qp_range to select the interesting k-points and the corresponing bands.
+   ! Use qp_range to select the interesting k-points and the corresponding bands.
    !
    !    0 --> Compute the QP corrections only for the fundamental and the direct gap.
    ! +num --> Compute the QP corrections for all the k-points in the irreducible zone and include `num`
@@ -3467,7 +3465,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
    end if
 
    if (Dtset%nfreqim_conv==0) then
-     ! If no extra frequencies is requested, keep the orginal grids.
+     ! If no extra frequencies is requested, keep the original grids.
      epsm1%nomega_i_conv = 0
    else if (Dtset%nfreqim_conv < 0) then
       ! If negative number of frequencies is requested, multiply the number of frequencies in the file by the absolute value.
@@ -3514,9 +3512,9 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  end do
  !stop
  !
- ! === Find optimal value for G-sphere enlargment due to oscillator matrix elements ===
+ ! === Find optimal value for G-sphere enlargement due to oscillator matrix elements ===
  ! * Here I have to be sure that Qmesh%bz is always inside the BZ, not always true size bz is buggy
- ! * -one is used because we loop over all the possibile differences, unlike screening
+ ! * -one is used because we loop over all the possible differences, unlike screening
 
  call get_ng0sh(Sigp%nkptgw,Sigp%kptgw,Kmesh%nbz,Kmesh%bz,Qmesh%nbz,Qmesh%bz,-one,ng0sh_opt)
  call wrtout(std_out, sjoin(' Optimal value for ng0sh ', ltoa(ng0sh_opt)))
@@ -3594,7 +3592,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
    endif
  endif
  do ivcoul_init=1,nvcoul_init
-   rcut = Dtset%rcut
+   rcut = Dtset%gw_rcut
    icutcoul_eff=Dtset%gw_icutcoul
    Sigp%sigma_mixing=one
    if( mod(Dtset%gwcalctyp,10)==5 .or. ivcoul_init==2)then
@@ -3605,7 +3603,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
        Sigp%sigma_mixing=abs(Dtset%hyb_mixing_sr)
        icutcoul_eff=5
      endif
-     if(abs(rcut)<tol6 .and. abs(Dtset%hyb_range_fock)>tol8)rcut=one/Dtset%hyb_range_fock
+     if(abs(rcut)<tol6 .and. abs(Dtset%hyb_range_fock)>tol8) rcut=one/Dtset%hyb_range_fock
    endif
 
    if (ivcoul_init == 1) then
@@ -3662,7 +3660,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  Sigp%ecutwfn = Dtset%ecutwfn
  Sigp%ecutsigx = Dtset%ecutsigx
 
- ! === Setup of the FFT mesh for the oscilator strengths ===
+ ! === Setup of the FFT mesh for the oscillator strengths ===
  ! * Init gwc_ngfft(7:18) and gwx_ngfft(7:18) with Dtset%ngfft(7:18)
  ! * Here we redefine gwc_ngfft(1:6) according to the following options:
  !
@@ -3672,7 +3670,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  ! method == 3 --> Doubled FFT grid, same as the the FFT for the density,
  !
  ! enforce_sym == 1 --> Enforce a FFT mesh compatible with all the symmetry operation and FFT library
- ! enforce_sym == 0 --> Find the smallest FFT grid compatbile with the library, do not care about symmetries
+ ! enforce_sym == 0 --> Find the smallest FFT grid compatible with the library, do not care about symmetries
  !
  gwc_ngfft(1:18) = Dtset%ngfft(1:18)
  gwx_ngfft(1:18) = Dtset%ngfft(1:18)
@@ -4040,7 +4038,7 @@ subroutine sigma_bksmask(Dtset,Sigp,Kmesh,my_rank,nprocs,my_spins,bks_mask,keep_
    my_nspins=1
    my_spins(1)=1
    if (my_rank+1>nprocs/2) then
-     ! I will treate spin=2, compute shifted rank.
+     ! I will treat spin=2, compute shifted rank.
      my_spins(1)=2
      rank_spin = my_rank - nprocs/2
    end if
@@ -4269,10 +4267,10 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,qp_ebands, &
  ! Get electronic temperature from dtset
  el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
 
- call pawdenpot(qp_compch_sph,el_temp,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
+ call pawdenpot(qp_compch_sph,el_temp,Cryst%gprimd,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
    Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,QP_paw_an,QP_paw_an,QP_energies%paw,&
    QP_paw_ij,Pawang,Dtset%pawprtvol,Pawrad,QP_pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,&
-   Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,Cryst%ucvol,Psps%znuclpsp)
+   Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,Cryst%xred,Cryst%ucvol,Psps%znuclpsp)
 
 end subroutine paw_qpscgw
 !!***
@@ -4328,7 +4326,7 @@ subroutine setup_vcp(Vcp_ks,Vcp_full,Dtset,Gsph_x,Gsph_c,Cryst,Qmesh,Kmesh,coef_
    ABI_MALLOC(qlwl,(3,nqlwl))
    qlwl(:,:)=Dtset%gw_qlwl(:,1:nqlwl)
  end if
- rcut=Dtset%rcut
+ rcut=Dtset%gw_rcut
  icsing_eff=Dtset%gw_icutcoul
  ! 1st part: Use a Vcp_full to compute the full Coulomb interaction for NOs
  if (Gsph_x%ng > Gsph_c%ng) then

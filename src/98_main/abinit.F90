@@ -164,8 +164,7 @@ program abinit
  character(len=24) :: start_datetime
  character(len=5000) :: msg
  character(len=strlen) :: string
- character(len=fnlen) :: filstat
- character(len=fnlen) :: filnam(5)
+ character(len=fnlen) :: filstat, filnam(5)
  type(args_t) :: args
  type(dataset_type),allocatable  :: dtsets(:)
  type(MPI_type),allocatable :: mpi_enregs(:)
@@ -180,7 +179,6 @@ program abinit
  character(len=10) :: strtime
  character(len=13) :: warn_fmt
  integer :: gpu_devices(12)
-
 !******************************************************************
 
 !0) Change communicator for I/O (mandatory!)

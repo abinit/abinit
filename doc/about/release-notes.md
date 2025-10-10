@@ -1,19 +1,19 @@
 ## v10.4
 
 Version 10.4, released on May 15, 2025.
-<!-- Release notes updated on July 6, 2025. -->
+<!-- Release notes updated on September 5, 2025. -->
 
 These release notes
 are relative to modifications/improvements of ABINIT v10.4 with respect to v10.2.
-<!-- Initially, beta-release v10.4.1, merge requests from MR1063, 1068, 1077, 1079, 1081, then 1083 to 1175, 
+<!-- Initially, beta-release v10.4.1, merge requests from MR1063, 1068, 1077, 1079, 1081, then 1083 to 1175,
 EXCEPT MR1087, 1088, 1090, 1091, 1092, 1095, 1097, 1100, 1104, 1106, 1114, 1115, that had already been included in v10.2,
-and EXCEPT MR1160, 1165, 1168, 1170, 1172 and 1173  that will be included in v10.6 .  
+and EXCEPT MR1160, 1165, 1168, 1170, 1172 and 1173  that will be included in v10.6 .
 For release v10.4.3, also MR1176 to 1182 are included, as well as MR1184-1186, MR1188 and MR1190. However, MR1183 and MR1187 will be included in v10.6.
-For release v10.4.5, also MR1188 to 1190, MR1193, MR1195, MR1197-1199, MR1203 are included. However, MR1191-1192, MR1194, MR1196, MR1200-1202, MR1205-12010 will be included in v10.6.
+For release v10.4.5, also MR1188 to 1190, MR1193, MR1195, MR1197-1199, MR1203 are included. However, MR1191-1192, MR1194, MR1196, MR1200-1202, MR1205-1210 will be included in v10.6.
+For release v10.4.7, also MR1219 and MR1225 are included.
 -->
-<!-- (with some late contributions until XXX 2024). -->
 
-Many thanks to the contributors to the ABINIT project between October 2024 and July 2025 !
+Many thanks to the contributors to the ABINIT project between October 2024 and August 2025 !
 The list of contributors includes:
 
 G. Allemand, B. Amadon, G. Antonius, M. Azizi, L. Baguet, S. Bandyopadhyay, L. Bastogne,
@@ -74,24 +74,17 @@ By M. Giantomassi and X. Gonze.
 
 The variational polaron equation implementation in ABINIT is ready for production.
 It allows one to compute polaron formation energies and associated quantities, in the
-strong-coupling approximation. See [[cite:Vasilchenko2022]], and a forthcoming Vasilchenko2025 paper (reference to be added when published).
+strong-coupling approximation. See [[cite:Vasilchenko2025]] and [[cite:Vasilchenko2022]].
 Activate it using [[optdriver]]=7 and [[eph_task]]=13 (see also [[eph_task]]=-13).
 The corresponding [[tutorial:eph4vpq]] is available.
 In this tutorial, there are 10 tests, [[test:eph4vpq_1]] to [[test:eph4vpq_10]].
 
 Related input variables: [[getvpq]], [[getvpq_filepath]],[[vpq_aseed]], [[vpq_avg_g]], [[vpq_gpr_energy]], [[vpq_gpr_length]],
-[[vpq_interp]],
-[[vpq_mix_fact]],
-[[vpq_mesh_fact]],
-[[vpq_nstates]],
-[[vpq_nstep]],
-[[vpq_nstep_ort]],
-[[vpq_select]],
-[[vpq_pkind]],
-[[vpq_tolgrs]],
-[[vpq_translate]],
-[[vpq_trvec]].
-The previously introduced input variables varpeq_<...> (or containing the string varpeq) have been renamed with the prefix vpq_ (or the string vpq) .
+[[vpq_interp]], [[vpq_mix_fact]], [[vpq_mesh_fact]], [[vpq_nstates]],
+[[vpq_nstep]], [[vpq_nstep_ort]], [[vpq_select]], [[vpq_pkind]], [[vpq_tolgrs]],
+[[vpq_translate]], [[vpq_trvec]].
+The previously introduced input variables varpeq_<...> (or containing the string varpeq) have been renamed
+with the prefix vpq_ (or the string vpq).
 
 By V. Vasilchenko, with help from M. Giantomassi, X. Gonze and S. Ponce (MR1126, 1161, 1164, 1166)
 
@@ -104,14 +97,14 @@ It includes the calculation of the current density response to an impulse electr
 Activate it using [[optdriver]]=9. Control the number of time steps using [[ntime]], and the time step value using [[dtele]].
 The corresponding [[tutorial:rttddft]] is available.
 
-Related input variables : [[prtcurrent]], [[td_propagator]], [[dtele]], [[td_ef_type]], [[td_ef_induced_vecpot]], [[td_ef_tzero]], [[td_ef_pol]]
+Related input variables: [[prtcurrent]], [[td_propagator]], [[dtele]], [[td_ef_type]], [[td_ef_induced_vecpot]], [[td_ef_tzero]], [[td_ef_pol]]
 The new input units "fs" and "as" have been introduced (for "femtoseconds" and "attoseconds").
-Related tests : [[test:rttddft_suite_01]] to  [[test:rttddft_suite_06]] as well as the tests of the tutorial, [[test:rttddft_1]] to [[test:rttddft_4]].
+Related tests: [[test:rttddft_suite_01]] to  [[test:rttddft_suite_06]] as well as the tests of the tutorial, [[test:rttddft_1]] to [[test:rttddft_4]].
 
 By F. Brieuc (MR1137)
 
 
-**B.3** Electron-phonon interaction : thermal transport, cumulant and miscellaneous improvements.
+**B.3** Electron-phonon interaction: thermal transport, cumulant and miscellaneous improvements.
 
 Thanks to the treatment of thermal gradients in addition to electric fields,
 the calculation of Seebeck, electronic thermal conductivity and Peltier coefficients is available both in the Relexation-Time Approximation
@@ -225,12 +218,12 @@ See [[test:v9_95]].
 By M. Torrent (MR1099)
 
 
-**B.8** Orbital magnetization, chemical shielding, and electric field gradient : mGGA, abipy integration, GPU.
+**B.8** Orbital magnetization, chemical shielding, and electric field gradient: mGGA, abipy integration, GPU.
 
 * The mGGA has been implemented for the DDK DFPT perturbation, enabling mGGA calculations of the orbital magnetization, that has been tested with R2SCAN, both with and without spinors.
 * ZORA terms coupling electron spin to nuclear magnetic dipole moments are now computed. This accomplishes accurate chemical shielding calculations in the presence of significant relativistic effects.
 * Added GSR netcdf output of orbital magnetism and electric field gradient. Together with previous ORBMAG.nc additions, this completes abinit work for integration with abipy developments.
-* GPU porting : DDK and orbital magnetism response with nuclear dipole moment and nspinor 2 are available.
+* GPU porting: DDK and orbital magnetism response with nuclear dipole moment and nspinor 2 are available.
 See [[test:v10_41]], [[test:v10_42]] and [[test:gpu_omp_31]].
 
 By J. Zwanziger with help from M. Giantomassi (MR1101, 1111, 1119, 1128)
@@ -258,12 +251,12 @@ By M. Sarraute, with help from L. Baguet and M. Torrent (MR 1120, 1123, 1125, 11
 
 
 
-**B.10** aTDEP : Command-Line Interface, file format, and compatibility with Abipy.
+**B.10** aTDEP: Command-Line Interface, file format, and compatibility with Abipy.
 
 The aTDEP utility has been upgraded to match the standard of most executables in the ABINIT package.
 
-* New syntax : one can specify the input file as a command line argument, e.g.  atdep run.abi
-* Three new input variables were introduced to replace the files file : [[output_file@atdep]], [[outdata_prefix@atdep]] and [[indata_prefix@atdep]].
+* New syntax: one can specify the input file as a command line argument, e.g.  atdep run.abi
+* Three new input variables were introduced to replace the files file: [[output_file@atdep]], [[outdata_prefix@atdep]] and [[indata_prefix@atdep]].
 * The IO name conventions are now in accordance with other executables inside the ABINIT package.
 * The standard output is used instead of forcing the name 'atdep.log'.
 * The input file admits free format. One can give input variables in any order, spread them over several lines, etc.
@@ -284,7 +277,7 @@ By G. Antonius with some contribution by F. Bottin (MR 1105, 1112, 1113, 1117, 1
 **B.11** Variable cell NEB
 
 Generalized solid-state NEB algorithm has been implemented.
-New input variable : [[neb_cell_algo]].
+New input variable: [[neb_cell_algo]].
 See [[test:v10_83]].
 
 By Q. Delacroix and M. Torrent (MR1149)
@@ -302,7 +295,7 @@ By M. Royo (MR1154).
 
 
 
-**B.13** GWR (real-space imaginary-time GW) algorithm : tutorial and miscellaneous improvements.
+**B.13** GWR (real-space imaginary-time GW) algorithm: tutorial and miscellaneous improvements.
 
 * The [[tutorial:gwr1]] has been finalized (see also the introductory [[tutorial:gwr_intro]]).
 * [[ecutwfn]] can now be used for GWR.
@@ -329,7 +322,7 @@ The timing in chebfi has been corrected.
 By L. Baguet (MR1103) and M. Torrent (MR1098)
 
 
-**B.15** Abipy : Automated computation of luminescence spectra
+**B.15** Abipy: Automated computation of luminescence spectra
 
 A set of Python modules integrated into the AbiPy framework now facilitates the automated computation of phonon-resolved luminescence spectra for defects in inorganic solids.
 The workflow automates key steps in a classical computational process, from the initial ∆SCF DFT calculations with constrained occupations to simulate the excited state,
@@ -342,7 +335,7 @@ and <https://abinit.github.io/abipy/flow_gallery/run_lumi_NV_center.html>.
 By J. Bouquiaux, with help from M. Giantomassi (see the forthcoming ABINIT2025 paper and a forthcoming JOSS paper).
 
 
-**B.16** Abipy : Automated computation of thermal expansion (volumetric as well as anisotropic)
+**B.16** Abipy: Automated computation of thermal expansion (volumetric as well as anisotropic)
 
 Abipy workflows for thermal expansion calculations are available, within the Quasi-Harmonic Approximation (QHA) for materials with diverse crystallographic symmetries,
 with efficient Zero Static Internal Stress Approximation (ZSISA) and its volume-constrained variant, v-ZSISA.
@@ -396,11 +389,11 @@ By I. Lygatsika (MR1158)
 
 **C.4** Change HDF5 detection when using "with_hdf5=path/to/hdf5". Same for netcdf and netcdf-fortran
 
-The situation was the following :
+The situation was the following:
 
 When giving a path in the ac9 file ("with_hdf5=path/to/hdf5"), the build system kind of ignores the command line if some environment variables are found (HDF5_CPPFLAGS,HDF5_CFLAGS,HDF5_FFLAGS,HDF5_FCFLAGS,HDF5_LDFLAGS,HDF5_LIBS). In that case the build system uses only the environment variables, whatever the path given in the ac9 file. This feature leads to confusing situations, especially when environment variables are set by the system, not the developer himself.
 
-The new policy is the following :
+The new policy is the following:
 
 The build system follows the command line "with_hdf5=path/to/hdf5", whatever the context. If some environment variables are found, a warning is printed and the developer is advised to set "with_hdf5=yes" if he or she wants to use environment variables.
 
@@ -419,14 +412,14 @@ By O. Mattelaer (MR1140)
 
 **C.6** Intel debug
 
-Corrections to improve the use of debug options from the intel compiler (still 2020 version) :
+Corrections to improve the use of debug options from the intel compiler (still 2020 version):
 
-At first there were crashes at compiling time : the compiler does not like operations on arrays inside a matmul call.
+At first there were crashes at compiling time: the compiler does not like operations on arrays inside a matmul call.
 Then many of warnings of temporary arrays have been removed, sometimes allocating explicitly an array (when the subarray is not contiguous, or very small), sometimes using a pointer (when it is contiguous).
 There are still many warnings, but for GS computations with lobpcg or chebfi and
 PAW pseudos the amount of warnings is limited, so one can run big computations without generating gigabytes of output every minute.
 
-The debug options used are : -traceback -check all -check uninit -ftrapuv -debug all -warn declarations
+The debug options used are: -traceback -check all -check uninit -ftrapuv -debug all -warn declarations
 All these changes do not affect the performances at all.
 
 By L. Baguet (MR1139)
@@ -448,10 +441,10 @@ There have been many improvements in the DMFT part of ABINIT, not yet though to 
 * There has been a massive optimization of the code, as well as a cleaning.
 * New functionalities have been added (new double counting, possibility to work with an arbitrary orbital read from file...). List to be provided ...
 * One can run dmft susceptibility with correlated and non correlated atoms.
-* A new option to run DFT+DMFT has been added : one can use Wannier90 to construct localized orbitals and call the impurity solver using the python invocation scheme (still to be done: going back to DFT from the impurity solver).
+* A new option to run DFT+DMFT has been added: one can use Wannier90 to construct localized orbitals and call the impurity solver using the python invocation scheme (still to be done: going back to DFT from the impurity solver).
 * Several routines have been added in preparation for a (working) interface with TRIQS. About thirty new input variables have been defined, with the prefix dmft_triqs_XXXX (to be tested and documented).
 * Two extra components for the energy are printed.
-* New input variables (to be tested and documented) : dmft_fermi_step, dmft_nominal, dmft_orbital, dmft_prt_maxent, dmft_prtwan, dmft_shiftself, dmft_test, dmft_use_all_bands, dmft_use_full_chipsi, dmft_wanrad, dmft_x2my2d.
+* New input variables (to be tested and documented): dmft_fermi_step, dmft_nominal, dmft_orbital, dmft_prt_maxent, dmft_prtwan, dmft_shiftself, dmft_test, dmft_use_all_bands, dmft_use_full_chipsi, dmft_wanrad, dmft_x2my2d.
 
 Input variables [[dmftctqmc_mov]], [[dmftctqmc_order]] and [[dmftctqmc_triqs_nleg]] are documented, but not tested.
 There has also been miscellaneous DMFT fixes and improvements
@@ -466,12 +459,12 @@ By F. Castiel, F. Gendron, O. Gingras, B. Amadon (MR1063, 1077, 1084, 1107, 1148
 
 As a consequence of the first point, xg_tools now uses OpenMP "collapse" directive when appropriate (as discussed with @torrent).
 
-Other minor corrections :
+Other minor corrections:
 
 * Prediction of memory footprint for chebfi with gemm_nonlop is now activated only if gemm_nonlop_use_gemm is activated
 * Timing of mkinvovl in vtorho was producing negative values of "other" timing in vtorho, so it is suppressed
 * Correction to reduce the numerical noise on stress and forces when comparing PAW calculations done with different compilers and/or different machines.
-* Change the design in xg_nonlop, which solves several issues :
+* Change the design in xg_nonlop, which solves several issues:
 no more warnings "temporary array was created" for some cases (seen on ubuntu and the testfarm), and
 no more crash for other (rare) cases.
 * Also set [[cprj_in_memory]] to 0 if optdriver is not GS.
@@ -527,7 +520,7 @@ per node when all cores on the node are used as MPI processes.
 
 By M. Giantomassi (MR1109)
 
-**D.10.** Optic utility : antiresonant terms and band decomposition
+**D.10.** Optic utility: antiresonant terms and band decomposition
 
 Anti-resonant contributions were missing in the Optic calculations of second-harmonic generation.
 Now they can be included. Use  do_antiresonant = .FALSE. parameter in the input file of optics (meaning that the antiresonant approximation is NOT done - this is confusing and should be changed).
@@ -589,17 +582,12 @@ By M. Azizi (MR1086)
 * Include [[nbdbuf]] in the check of the last occupancy in vtorho (and correct the exit condition for [[nsppol]]=2)
 * xmpi_distrib_2D: fix edge case where the code would try to distribute n points over N>n processes
 * m_krank: add support for non-diagonal [[kptrlatt]] in krank_from_kptrlatt()
+* mGGA: Fix calculation of kinetic energy density with paral_kgb 1; Fix GGA + usekden 1 in PAW; Fix meta-GGA when istwfk = 2 and bandpp > 1; Fix mistake in blocksize in case nstep 0 and wfoptalg 114; Adding one test in paral to test meta-GGA + PAW in different cases.
+* restores the previous behaviour implemented by get_fastest_devices when GPUs were equal in performance, that was broken by MR1197.
 
-By L. Baguet (MR1127), M. Mignolet (MR1118)
+By L. Baguet (MR1127), M. Mignolet (MR1118), F. Brieuc (MR1219), M. Sarraute (MR1225).
 
 * * *
-
-
-
-
-
-
-
 
 ## v10.2
 
@@ -2081,7 +2069,7 @@ From X. Gonze (MR874)
 A new type of file 'GSTORE' has been introduced,  for the electron-phonon matrix element storage, where it is taken advantage
 of filters (on energy or band or wavevectors) to reduce the size compared to the more usual EIG1 file type.
 It contains also the related metadata.
-Related input variables: [[getgstore_filepath]], [[gstore_cplex]], [[gstore_with_vk]], [[gstore_kzone]], [[gstore_qzone]],
+Related input variables: [[getgstore_filepath]], [[gstore_with_vk]], [[gstore_kzone]], [[gstore_qzone]],
 [[gstore_kfilter]], [[gstore_brange]], [[gstore_erange]].
 
 By M. Giantomassi (MR870)

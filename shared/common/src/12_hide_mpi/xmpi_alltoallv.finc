@@ -27,11 +27,6 @@
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_alltoallv
-!!
 !! SOURCE
 
 subroutine xmpi_alltoallv_dp2d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,ier,use_omp_map)

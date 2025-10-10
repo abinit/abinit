@@ -159,6 +159,7 @@ nav:
         - Geometry: variables/geo.md
         - Ground-State: variables/gstate.md
         - GW: variables/gw.md
+        - GWR: variables/gwr.md
         - Internal: variables/internal.md
         - Parallelism: variables/paral.md
         - PAW: variables/paw.md

@@ -1,8 +1,8 @@
 
 .Version 10.3.6 of MRGDV, released Feb 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  MRGDV comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,13 +16,13 @@
 
 .Starting date : Thu 10 Apr 2025.
 - ( at 14h38 )
-  
-->> Enter name of output file: 
-->> Enter total number of DFPT POT files: 
-->> Enter name of POT file 1 : 
-->> Enter name of POT file 2 : 
-->> Enter name of POT file 3 : 
-->> Enter name of POT file 4 : 
+
+->> Enter name of output file:
+->> Enter total number of DFPT POT files:
+->> Enter name of POT file 1 :
+->> Enter name of POT file 2 :
+->> Enter name of POT file 3 :
+->> Enter name of POT file 4 :
 - Reading header of file [1]: t104o_DS3_POT1
 - Merging file [1]: t104o_DS3_POT1
 - Reading header of file [2]: t104o_DS4_POT1
@@ -33,7 +33,7 @@
 - Merging file [4]: t104o_DS5_POT1
  Merged successfully 4 files
 - Analyzing DVDB file: t107o_DS20_DVDB ...
-- dvdb_new , wall:  0.00 [s] , cpu:  0.00 [s] <<< TIME
+- dvdb_init , wall:  0.00 [s] , cpu:  0.00 [s] <<< TIME
  ==== Info on the dvdb% object ====
  DVDB version: 2
  File path: t107o_DS20_DVDB

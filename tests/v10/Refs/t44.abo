@@ -1,8 +1,8 @@
 
 .Version 10.5.1.5 of ABINIT, released Jul 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,15 +16,15 @@
 
 .Starting date : Thu  9 Oct 2025.
 - ( at 18h02 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/v10_t44/t44.abi
 - output file    -> t44.abo
 - root for input  files -> t44i
 - root for output files -> t44o
 
-- inpspheads : Reading pseudopotential header in XML form from 
+- inpspheads : Reading pseudopotential header in XML form from
 -   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/P.xml
-- inpspheads : Reading pseudopotential header in XML form from 
+- inpspheads : Reading pseudopotential header in XML form from
 -   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
 
  invars1: COMMENT -
@@ -782,7 +782,7 @@ meta: {optdriver: 1, rfddk: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   3
@@ -973,7 +973,7 @@ tolerances: {tolwfr: 1.00E-20, }
 
 ====================================================
 
- Orbital magnetic moment computed with DFPT derivative wavefunctions 
+ Orbital magnetic moment computed with DFPT derivative wavefunctions
 
  Orbital magnetic moment, Cartesian directions :
  -3.19785625E-04  1.53291738E-09 -1.55540076E-09
@@ -1450,7 +1450,7 @@ meta: {optdriver: 1, rfddk: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   3
@@ -1641,7 +1641,7 @@ tolerances: {tolwfr: 1.00E-20, }
 
 ====================================================
 
- Orbital magnetic moment computed with DFPT derivative wavefunctions 
+ Orbital magnetic moment computed with DFPT derivative wavefunctions
 
  Orbital magnetic moment, Cartesian directions :
  -3.21297349E-04  2.49359531E-09  2.80156171E-09
@@ -2344,7 +2344,7 @@ meta: {optdriver: 1, rfddk: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   3
@@ -2535,7 +2535,7 @@ tolerances: {tolwfr: 1.00E-20, }
 
 ====================================================
 
- Orbital magnetic moment computed with DFPT derivative wavefunctions 
+ Orbital magnetic moment computed with DFPT derivative wavefunctions
 
  Orbital magnetic moment, Cartesian directions :
  -3.49253777E-04  2.18834146E-10  2.69381808E-11
@@ -3302,7 +3302,7 @@ meta: {optdriver: 1, rfddk: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   3
@@ -3493,7 +3493,7 @@ tolerances: {tolwfr: 1.00E-20, }
 
 ====================================================
 
- Orbital magnetic moment computed with DFPT derivative wavefunctions 
+ Orbital magnetic moment computed with DFPT derivative wavefunctions
 
  Orbital magnetic moment, Cartesian directions :
  -3.50747044E-04 -2.94756800E-09  2.03911329E-10
@@ -3658,7 +3658,7 @@ tolerances: {tolwfr: 1.00E-20, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0300896971E+01  1.0300896971E+01  1.0300896971E+01 Bohr
               amu      3.09737620E+01  2.69815390E+01
@@ -3945,7 +3945,7 @@ P          mk1mem          32
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -3957,12 +3957,12 @@ P          mk1mem          32
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -3980,7 +3980,7 @@ P          mk1mem          32
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

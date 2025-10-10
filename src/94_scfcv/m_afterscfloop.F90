@@ -385,7 +385,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  integer,allocatable :: dimcprj_srt(:)
  real(dp),allocatable :: hpsi_tmp(:),xcart(:,:)
 #endif
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1077,7 +1076,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  end if
 
 !results_gs%energies   = energies
- call energies_copy(energies,results_gs%energies)
+ call energies%copy(results_gs%energies)
  results_gs%etotal     =etotal
  results_gs%deltae     =deltae
  results_gs%diffor     =diffor
