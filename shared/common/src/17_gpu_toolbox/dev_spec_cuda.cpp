@@ -48,7 +48,7 @@ static void prt_dev_info()
       if(s__nprocs_per_gpu > 1) {
         printf("  Amount of global memory per MPI task:          %3.1f Mbytes\n", deviceProp.totalGlobalMem/1048576./s__nprocs_per_gpu);
       }
-      printf("  Clock rate:                                    %3.1f GHz\n", deviceProp.clockRate/1000000.);
+      printf("  Clock rate:                                    %3.1f GHz\n", clockRate/1000000.);
       printf("  Number of processors/cores:                    %d/%d\n", NProcs,NCores);
       if (NCores<0) {
         printf("  Max FP64 GFLOPS:                                    undefined (add new def. in version_2_cores function)\n");
