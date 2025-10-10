@@ -89,7 +89,7 @@ contains
 !!  cgq(2,mpw1*nspinor*mband_mem*mkqmem*nsppol)=pw coefficients of GS wavefunctions at k+q.
 !!  cg1(2,mpw1*nspinor*mband_mem*mk1mem*nsppol)=pw coefficients of RF wavefunctions at k,q.
 !!  cplex: if 1, real space 1-order functions on FFT grid are REAL; if 2, COMPLEX
-!TODO distribute cprj over bands mband_mem
+!!    TODO distribute cprj over bands mband_mem
 !!  cprj(natom,nspinor*mband*mkmem*nsppol*usecprj)= wave functions at k
 !!              projected with non-local projectors: cprj=<p_i|Cnk>
 !!  cprjq(natom,nspinor*mband*mkqmem*nsppol*usecprj)= wave functions at k+q
@@ -332,7 +332,6 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  real(dp),allocatable :: vxctaulocal(:,:,:,:,:)
  real(dp),allocatable :: ylm1_k(:,:),ylm_k(:,:),ylmgr1_k(:,:,:)
  type(pawrhoij_type),pointer :: pawrhoij1_unsym(:)
-
 ! *********************************************************************
 
  DBG_ENTER('COLL')
@@ -478,16 +477,16 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 !LOOP OVER SPINS
  do isppol=1,nsppol
 
-!  Rewind kpgsph data file if needed:
+   ! Rewind kpgsph data file if needed:
    ikg=0;ikg1=0
 
-!  Set up local potential vlocal1 with proper dimensioning, from vtrial1
-!  Same thing for vlocal from vtrial Also take into account the spin.
+   ! Set up local potential vlocal1 with proper dimensioning, from vtrial1
+   ! Same thing for vlocal from vtrial Also take into account the spin.
 
    call rf_transgrid_and_pack(isppol,nspden,psps%usepaw,cplex,nfftf,dtset%nfft,dtset%ngfft,&
-&   gs_hamkq%nvloc,pawfgr,mpi_enreg,vtrial,vtrial1,vlocal,vlocal1)
+   gs_hamkq%nvloc,pawfgr,mpi_enreg,vtrial,vtrial1,vlocal,vlocal1)
 
-!  Continue to initialize the Hamiltonian
+   !  Continue to initialize the Hamiltonian
    call gs_hamkq%load_spin(isppol,vlocal=vlocal,with_nonlocal=.true.)
    call rf_hamkq%load_spin(isppol,vlocal1=vlocal1,with_nonlocal=.true.)
    if ((ipert==natom+10.and.idir>3).or.ipert==natom+11) then
@@ -624,12 +623,12 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
      end if
 
 !    Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
-     call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                              ! In
-     kpoint,kpq,idir,ipert,natom,rmet,gprimd,gmet,istwf_k,&                         ! In
-     npw_k,npw1_k,useylmgr1,kg_k,ylm_k,kg1_k,ylm1_k,ylmgr1_k,&                      ! In
-     dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1,&                 ! Out
-     ddkinpw=ddkinpw,dkinpw2=dkinpw2,rf_hamk_dir2=rf_hamk_dir2,&                    ! Optional
-     ffnl1_test=ffnl1_test)                                                         ! Optional
+     call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                                ! In
+       kpoint,kpq,idir,ipert,natom,rmet,gprimd,gmet,istwf_k,&                         ! In
+       npw_k,npw1_k,useylmgr1,kg_k,ylm_k,kg1_k,ylm1_k,ylmgr1_k,&                      ! In
+       dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1,&                 ! Out
+       ddkinpw=ddkinpw,dkinpw2=dkinpw2,rf_hamk_dir2=rf_hamk_dir2,&                    ! Optional
+       ffnl1_test=ffnl1_test)                                                         ! Optional
 
 !    Compute the gradient of the Berry-phase term
      if (dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
@@ -784,13 +783,11 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 !More memory cleaning
  call gs_hamkq%free()
  call rf_hamkq%free()
- if ((ipert==natom+10.and.idir>3).or.ipert==natom+11) then
-   call rf_hamk_dir2%free()
- end if
+ if ((ipert==natom+10.and.idir>3).or.ipert==natom+11) call rf_hamk_dir2%free()
+
  ABI_FREE(rhoaug1)
  ABI_FREE(vlocal)
  ABI_FREE(vlocal1)
-
  ABI_SFREE(vxctaulocal)
  ABI_SFREE(vectornd_pac)
  ABI_SFREE(vectornd_pac_idir)
@@ -894,24 +891,24 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
  call timab(127,1,tsec)
 
-!If needed, compute rhog1, and symmetrizes the density
+!If needed, compute rhog1, and symmetrize the density
  if (iscf_mod > 0) then
 
 !  In order to have the symrhg working in parallel on FFT coefficients, the size
 !  of irzzon1 and phnons1 should be set to nfftot. Therefore, nsym\=1 does not work.
 
    if(nspden==4) then
-! FR symrhg will manage correctly this rearrangement
-     rhor1(:,2)=rhor1(:,2)+(rhor1(:,1)+rhor1(:,4))    !(n+mx)
-     rhor1(:,3)=rhor1(:,3)+(rhor1(:,1)+rhor1(:,4))    !(n+my)
+     ! FR symrhg will manage correctly this rearrangement
+     rhor1(:,2)=rhor1(:,2)+(rhor1(:,1)+rhor1(:,4))    ! (n+mx)
+     rhor1(:,3)=rhor1(:,3)+(rhor1(:,1)+rhor1(:,4))    ! (n+my)
    end if
 !
    if (psps%usepaw==0) then
      call symrhg(cplex,gprimd,irrzon1,mpi_enreg,dtset%nfft,dtset%nfft,dtset%ngfft,&
-&     nspden,nsppol,nsym1,phnons1,rhog1,rhor1,rprimd,symaf1,symrl1,tnons1)
+       nspden,nsppol,nsym1,phnons1,rhog1,rhor1,rprimd,symaf1,symrl1,tnons1)
    else
      call symrhg(cplex,gprimd,irrzon1,mpi_enreg,dtset%nfft,dtset%nfft,dtset%ngfft,&
-&     nspden,nsppol,nsym1,phnons1,rho1wfg,rho1wfr,rprimd,symaf1,symrl1,tnons1)
+       nspden,nsppol,nsym1,phnons1,rho1wfg,rho1wfr,rprimd,symaf1,symrl1,tnons1)
    end if
 !  We now have both rho(r) and rho(G), symmetrized, and if nsppol=2
 !  we also have the spin-up density, symmetrized, in rhor1(:,2).
@@ -940,10 +937,10 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 !  to get the total 1st-order density
    if (psps%usepaw==1) then
      call pawmkrho(1,arg,cplex,gprimd,idir,indsy1,ipert,mpi_enreg,&
-&     my_natom,natom,nspden,nsym1,ntypat,dtset%paral_kgb,pawang,pawfgr,pawfgrtab,&
-&     dtset%pawprtvol,pawrhoij1,pawrhoij1_unsym,pawtab,dtset%qptn,rho1wfg,rho1wfr,&
-&     rhor1,rprimd,symaf1,symrc1,dtset%typat,ucvol,dtset%usewvl,xred,&
-&     pawang_sym=pawang1,pawnhat=nhat1,pawrhoij0=pawrhoij,rhog=rhog1)
+       my_natom,natom,nspden,nsym1,ntypat,dtset%paral_kgb,pawang,pawfgr,pawfgrtab,&
+       dtset%pawprtvol,pawrhoij1,pawrhoij1_unsym,pawtab,dtset%qptn,rho1wfg,rho1wfr,&
+       rhor1,rprimd,symaf1,symrc1,dtset%typat,ucvol,dtset%usewvl,xred,&
+       pawang_sym=pawang1,pawnhat=nhat1,pawrhoij0=pawrhoij,rhog=rhog1)
      ABI_FREE(rho1wfr)
      ABI_FREE(rho1wfg)
      if (paral_atom) then

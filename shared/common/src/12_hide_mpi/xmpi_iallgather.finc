@@ -38,11 +38,6 @@
 !! SIDE EFFECTS
 !!  recvbuf= received elements
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allgather
-!!
 !! SOURCE
 
 subroutine xmpi_iallgather_dp4d(xval, nelem, recvbuf, comm, request)
@@ -68,7 +63,7 @@ subroutine xmpi_iallgather_dp4d(xval, nelem, recvbuf, comm, request)
    recvbuf = xval
    request = xmpi_request_null
  end if
- return 
+ return
 #endif
 
  ! Call the blocking version and return null request.

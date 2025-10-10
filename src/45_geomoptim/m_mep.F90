@@ -400,9 +400,7 @@ subroutine mep_qmin(fcart,itime,list_dynimage,mep_param,natom,ndynimage,nimage,r
 
 !Allocate history array (at first time step)
  if (itime==1) then
-   if (allocated(mep_param%qmin_vel)) then
-     ABI_FREE(mep_param%qmin_vel)
-   end if
+   ABI_SFREE(mep_param%qmin_vel)
    ABI_MALLOC(mep_param%qmin_vel,(3,natom,ndynimage))
    mep_param%qmin_vel=zero
  end if
@@ -525,15 +523,9 @@ subroutine mep_lbfgs(fcart,itime,list_dynimage,mep_param,natom,ndynimage,&
 
 !Allocate history array (at first time step)
  if (itime==1) then
-   if (allocated(mep_param%bfgs_xprev)) then
-     ABI_FREE(mep_param%bfgs_xprev)
-   end if
-   if (allocated(mep_param%bfgs_fprev)) then
-     ABI_FREE(mep_param%bfgs_fprev)
-   end if
-   if (allocated(mep_param%lbfgs_hess)) then
-     ABI_FREE(mep_param%lbfgs_hess)
-   end if
+   ABI_SFREE(mep_param%bfgs_xprev)
+   ABI_SFREE(mep_param%bfgs_fprev)
+   ABI_SFREE(mep_param%lbfgs_hess)
    ABI_MALLOC(mep_param%bfgs_xprev,(3,natom,ndynimage))
    ABI_MALLOC(mep_param%bfgs_fprev,(3,natom,ndynimage))
    ABI_MALLOC(mep_param%lbfgs_hess,(3*natom,3*natom,ndynimage))
@@ -741,15 +733,9 @@ subroutine mep_gbfgs(fcart,itime,list_dynimage,mep_param,mpi_enreg,natom,&
 
 !Allocate history array (at first time step)
  if (itime==1) then
-   if (allocated(mep_param%bfgs_xprev)) then
-     ABI_FREE(mep_param%bfgs_xprev)
-   end if
-   if (allocated(mep_param%bfgs_fprev)) then
-     ABI_FREE(mep_param%bfgs_fprev)
-   end if
-   if (allocated(mep_param%gbfgs_hess)) then
-     ABI_FREE(mep_param%gbfgs_hess)
-   end if
+   ABI_SFREE(mep_param%bfgs_xprev)
+   ABI_SFREE(mep_param%bfgs_fprev)
+   ABI_SFREE(mep_param%gbfgs_hess)
    ABI_MALLOC(mep_param%bfgs_xprev,(3,natom,ndynimage))
    ABI_MALLOC(mep_param%bfgs_fprev,(3,natom,ndynimage))
    ABI_MALLOC(mep_param%gbfgs_hess,(3*natom*ndynimage_tot,3*natom*ndynimage_tot))
@@ -1020,26 +1006,18 @@ subroutine mep_rk4(fcart,itime,list_dynimage,mep_param,natom,ndynimage,nimage,rp
 
 !Store data according to Runge-Kutta algo step
  if (istep_rk==1) then
-   if (allocated(mep_param%rk4_xcart1)) then
-     ABI_FREE(mep_param%rk4_xcart1)
-   end if
-   if (allocated(mep_param%rk4_fcart1)) then
-     ABI_FREE(mep_param%rk4_fcart1)
-   end if
+   ABI_SFREE(mep_param%rk4_xcart1)
+   ABI_SFREE(mep_param%rk4_fcart1)
    ABI_MALLOC(mep_param%rk4_xcart1,(3,natom,nimage))
    ABI_MALLOC(mep_param%rk4_fcart1,(3,natom,nimage))
    mep_param%rk4_xcart1 = xcart
    mep_param%rk4_fcart1 = fcart
  else if (istep_rk==2) then
-   if (allocated(mep_param%rk4_fcart2)) then
-     ABI_FREE(mep_param%rk4_fcart2)
-   end if
+   ABI_SFREE(mep_param%rk4_fcart2)
    ABI_MALLOC(mep_param%rk4_fcart2,(3,natom,nimage))
    mep_param%rk4_fcart2 = fcart
  else if (istep_rk==3) then
-   if (allocated(mep_param%rk4_fcart3)) then
-     ABI_FREE(mep_param%rk4_fcart3)
-   end if
+   ABI_SFREE(mep_param%rk4_fcart3)
    ABI_MALLOC(mep_param%rk4_fcart3,(3,natom,nimage))
    mep_param%rk4_fcart3 = fcart
  end if
@@ -1110,18 +1088,10 @@ subroutine mep_rk4(fcart,itime,list_dynimage,mep_param,natom,ndynimage,nimage,rp
 
 !Cancel storage when final RK step has been done
  if (istep_rk==0) then
-   if (allocated(mep_param%rk4_xcart1)) then
-     ABI_FREE(mep_param%rk4_xcart1)
-   end if
-   if (allocated(mep_param%rk4_fcart1)) then
-     ABI_FREE(mep_param%rk4_fcart1)
-   end if
-   if (allocated(mep_param%rk4_fcart2)) then
-     ABI_FREE(mep_param%rk4_fcart2)
-   end if
-   if (allocated(mep_param%rk4_fcart3)) then
-     ABI_FREE(mep_param%rk4_fcart3)
-   end if
+   ABI_SFREE(mep_param%rk4_xcart1)
+   ABI_SFREE(mep_param%rk4_fcart1)
+   ABI_SFREE(mep_param%rk4_fcart2)
+   ABI_SFREE(mep_param%rk4_fcart3)
  end if
 
 end subroutine mep_rk4
@@ -1143,7 +1113,6 @@ end subroutine mep_rk4
 !!
 !! OUTPUT
 !!  mep_img_dotp=dot product
-!!
 !!
 !! SOURCE
 
@@ -1186,7 +1155,6 @@ end function mep_img_dotp
 !!
 !! OUTPUT
 !!  mep_img_norm=norm
-!!
 !!
 !! SOURCE
 
@@ -1282,7 +1250,6 @@ function mep_img_norm_red(rmet,vect)
 !arrays
  real(dp),intent(in) :: rmet(3,3)
  real(dp),intent(in) :: vect(:,:)
-
 !************************************************************************
 
  mep_img_norm_red=sqrt(mep_img_dotp_red(rmet,vect,vect))

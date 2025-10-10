@@ -46,12 +46,6 @@ contains  !===========================================================
 !! OUTPUT
 !!  Only printing
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 subroutine dump_optim(my_unit)

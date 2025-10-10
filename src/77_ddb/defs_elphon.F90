@@ -306,16 +306,12 @@ CONTAINS
 !! INPUTS
 !!  elph_ds = elphon datastructure
 !!
-!! NOTES
-!!
 !! SOURCE
 
 subroutine elph_ds_clean(elph_ds)
 
 !Arguments ------------------------------------
-!scalars
- type(elph_type), intent(inout) :: elph_ds
-
+ class(elph_type), intent(inout) :: elph_ds
 ! *************************************************************************
 
  !@elph_type
@@ -354,16 +350,12 @@ end subroutine elph_ds_clean
 !! INPUTS
 !!  elph_tr_ds = elphon transport datastructure
 !!
-!! NOTES
-!!
 !! SOURCE
 
 subroutine elph_tr_ds_clean(elph_tr_ds)
 
 !Arguments ------------------------------------
-!scalars
- type(elph_tr_type), intent(inout) :: elph_tr_ds
-
+ class(elph_tr_type), intent(inout) :: elph_tr_ds
 ! *************************************************************************
 
  !@elph_tr_type
@@ -417,10 +409,8 @@ end subroutine elph_tr_ds_clean
 subroutine elph_k_copy(elph_k_in, elph_k_out)
 
 !Arguments ------------------------------------
-!scalars
- type(elph_kgrid_type), intent(in) :: elph_k_in
- type(elph_kgrid_type), intent(out) :: elph_k_out
-
+ class(elph_kgrid_type), intent(in) :: elph_k_in
+ class(elph_kgrid_type), intent(out) :: elph_k_out
 ! *************************************************************************
 
  !@elph_kgrid_type
@@ -477,16 +467,12 @@ end subroutine elph_k_copy
 !! INPUTS
 !!  elph_k = elphon k-points datastructure
 !!
-!! NOTES
-!!
 !! SOURCE
 
 subroutine elph_k_destroy(elph_k)
 
 !Arguments ------------------------------------
-!scalars
- type(elph_kgrid_type), intent(inout) :: elph_k
-
+ class(elph_kgrid_type), intent(inout) :: elph_k
 ! *************************************************************************
 
  !@elph_kgrid_type
@@ -535,14 +521,12 @@ subroutine elph_k_procs(nproc, elph_k)
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: nproc
- type(elph_kgrid_type), intent(inout) :: elph_k
+ class(elph_kgrid_type), intent(inout) :: elph_k
 
  integer :: ikpt, me, ik_this_proc
 ! *************************************************************************
 
- if (allocated(elph_k%my_kpt)) then
-   ABI_FREE (elph_k%my_kpt)
- end if
+ ABI_SFREE (elph_k%my_kpt)
  ABI_MALLOC (elph_k%my_kpt, (elph_k%nkpt))
 
  elph_k%my_kpt = 0
@@ -554,9 +538,7 @@ subroutine elph_k_procs(nproc, elph_k)
  end do
 
 ! create inverse mapping from ik_this_proc to ikpt
- if (allocated(elph_k%my_ikpt)) then
-   ABI_FREE (elph_k%my_ikpt)
- end if
+ ABI_SFREE (elph_k%my_ikpt)
  ABI_MALLOC (elph_k%my_ikpt, (elph_k%my_nkpt))
  elph_k%my_ikpt = 0
 
@@ -607,13 +589,11 @@ subroutine gam_mult_displ(nbranch, displ_red, gam_bare, gam_now)
 
 !Local variables -------------------------
  real(dp) :: zgemm_tmp_mat(2,nbranch,nbranch)
-
 ! *********************************************************************
 
  gam_now = zero
 
  call zgemm('c','n',nbranch,nbranch,nbranch,cone,displ_red,nbranch,gam_bare,nbranch,czero,zgemm_tmp_mat,nbranch)
-
  call zgemm('n','n',nbranch,nbranch,nbranch,cone,zgemm_tmp_mat,nbranch,displ_red,nbranch,czero,gam_now,nbranch)
 
 end subroutine gam_mult_displ
@@ -661,9 +641,8 @@ subroutine complete_gamma(Cryst,nbranch,nsppol,nqptirred,nqpt_full,ep_scalprod,q
  real(dp) :: tmp_mat(2,nbranch,nbranch)
  real(dp) :: tmp_mat2(2,nbranch,nbranch)
  real(dp) :: ss_allatoms(2,nbranch,nbranch)
- complex(dpc) :: c_one, c_zero
+ complex(dp) :: c_one, c_zero
  real(dp),allocatable :: gkk_qpt_new(:,:,:),gkk_qpt_tmp(:,:,:)
-
 ! *********************************************************************
 
  c_one = dcmplx(one,zero)
@@ -890,7 +869,6 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
  real(dp) :: tmp_tensor2(3,3)
  real(dp) :: ss_allatoms(nbranch,nbranch)
  real(dp),allocatable :: gkk_qpt_new(:,:,:,:),gkk_qpt_tmp(:,:,:,:)
-
 ! *********************************************************************
 
  gprimd = crystal%gprimd
@@ -971,7 +949,7 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
 
 !        for each tensor component, rotate the cartesian directions of phonon modes
          do itensor = 1, 9
-           do reim=1,2  ! Real/Imaginary parts 
+           do reim=1,2  ! Real/Imaginary parts
 !            Multiply by the ss matrices
              tmp_mat2(:,:) = zero
              tmp_mat(:,:) = reshape(gkk_qpt_tmp(reim,itensor,:,isppol),(/nbranch,nbranch/))
@@ -983,7 +961,7 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
 
 !        for each cartesian direction/phonon mode, rotate the tensor components
          do imode = 1, nbranch*nbranch
-           do reim=1,2  ! Real/Imaginary parts 
+           do reim=1,2  ! Real/Imaginary parts
              tmp_tensor2(:,:) = zero
              tmp_tensor(:,:) = reshape(gkk_qpt_tmp(reim,:,imode,isppol),(/3,3/))
              call DGEMM ('N','N',3,3,3,one,sscart,3,tmp_tensor,3,zero,tmp_tensor2,3)
@@ -1134,12 +1112,11 @@ subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_
  type(krank_t) :: krank
 !arrays
  real(dp) :: tmpkpt(3),gamma_kpt(3)
-
 ! *************************************************************************
 
  call wrtout(std_out,' mkqptequiv : making rankkpt_phon and invrankkpt_phon',"COLL")
 
- krank = krank_new(nkpt_phon, kpt_phon)
+ call krank%init(nkpt_phon, kpt_phon)
 
  FSfullpqtofull = -999
  gamma_kpt(:) = zero
@@ -1179,7 +1156,7 @@ subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_
  ! start over with q grid
  call wrtout(std_out,' mkqptequiv : FSfullpqtofull made. Do qpttoqpt',"COLL")
 
- krank = krank_new(nqpt, qpt_full)
+ call krank%init(nqpt, qpt_full)
 
  qpttoqpt(:,:,:) = -1
  do iFSqpt=1,nqpt

@@ -1,5 +1,5 @@
 
- **** DERIVATIVE DATABASE ****    
+ **** DERIVATIVE DATABASE ****
 +DDB, Version number  20230401
 
  linear + nonlinear response calculation of AlP
@@ -666,7 +666,7 @@
             0.00000000000000D+00  0.00000000000000D+00  0.00000000000000D+00
      znucl  0.15000000000000D+02  0.13000000000000D+02
       zion  0.50000000000000D+01  0.30000000000000D+01
- 
+
   Description of the potentials (KB energies)
   vrsio8 (for pseudopotentials)=100401
   usepaw =  0
@@ -699,10 +699,10 @@
                       -4.2295028E+00  0.0000000E+00
      6     2     2     0.0000000E+00  0.0000000E+00  0.0000000E+00  0.0000000E+00
                       -4.2295028E+00  0.0000000E+00
- 
+
  **** Database of total energy derivatives ****
  Number of data blocks=    2
-  
+
  2nd derivatives (non-stat.)  - # elements :         171
  qpt  0.00000000E+00  0.00000000E+00  0.00000000E+00   1.0
    1   1   1   1  0.59340127835732D+01  0.00000000000000D+00
@@ -876,7 +876,7 @@
    1   6   3   6  0.10519168733045D-08  0.00000000000000D+00
    2   6   3   6  0.31027421831620D-08  0.00000000000000D+00
    3   6   3   6  0.10569779406170D+01  0.00000000000000D+00
-  
+
  3rd derivatives              - # elements :         189
  qpt  0.00000000E+00  0.00000000E+00  0.00000000E+00   1.0
       0.00000000E+00  0.00000000E+00  0.00000000E+00   1.0

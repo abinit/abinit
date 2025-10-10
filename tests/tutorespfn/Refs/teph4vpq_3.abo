@@ -1,8 +1,8 @@
 
-.Version 10.3.4.7 of ABINIT, released Dec 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.Version 10.5.6.1 of ABINIT, released Sep 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Sun 23 Feb 2025.
 - ( at 16h06 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/TestBot_MPI1/tutorespfn_teph4vpq_1-teph4vpq_2-teph4vpq_3-teph4vpq_4-teph4vpq_5-teph4vpq_6-teph4vpq_7-teph4vpq_8-teph4vpq_9-teph4vpq_10/teph4vpq_3.abi
 - output file    -> teph4vpq_3.abo
 - root for input  files -> teph4vpq_3i
@@ -239,11 +239,11 @@ meta: {optdriver: 7, eph_task: 11, }
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -259,7 +259,7 @@ meta: {optdriver: 7, eph_task: 11, }
        3               2       -0.000000        0.000000
        3               3       -0.065315        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -353,6 +353,11 @@ meta: {optdriver: 7, eph_task: 11, }
    7.61971847E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
+P qpt_comm can use shmem: yes
+P kpt_comm can use shmem: yes
+P bsum_comm can use shmem: yes
+P pp_sum_comm can use shmem: yes
+
  === Gstore parameters ===
  kzone: bz
  kfilter: none
@@ -365,118 +370,157 @@ meta: {optdriver: 7, eph_task: 11, }
  glob_nq_spin: [27]
  kptopt: 1
  qptopt: 1
+ has_used_lgk: 0
+ has_used_lgq: 0
  with_vk: 1
 
  gqk_cplex: 2
- gqk_bstart: 3
- gqk_bstop: 5
- gqk_nb: 3
+ gqk_bstart_k: 3
+ gqk_bstart_kq: 3
+ gqk_bstop_k: 5
+ gqk_bstop_kq: 5
+ gqk_nb_k: 3
+ gqk_nb_kq: 3
  gqk_my_npert: 6
- gqk_my_nk: -1
- gqk_my_nq: -1
+P gqk_my_nk: -1
+P gqk_my_nq: -1
 
   === MPI distribution ===
 P Number of CPUs for parallelism over perturbations: 1
 P Number of perturbations treated by this CPU: 6
 P Number of CPUs for parallelism over q-points: 1
 P Number of CPUs for parallelism over k-points: 1
+ k-points included in gstore:
+1 : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+2 : [ 3.3333E-01,  0.0000E+00,  0.0000E+00]
+3 : [-3.3333E-01,  0.0000E+00,  0.0000E+00]
+4 : [ 0.0000E+00,  3.3333E-01,  0.0000E+00]
+5 : [ 3.3333E-01,  3.3333E-01,  0.0000E+00]
+6 : [-3.3333E-01,  3.3333E-01,  0.0000E+00]
+7 : [ 0.0000E+00, -3.3333E-01,  0.0000E+00]
+8 : [ 3.3333E-01, -3.3333E-01,  0.0000E+00]
+9 : [-3.3333E-01, -3.3333E-01,  0.0000E+00]
+10 : [ 0.0000E+00,  0.0000E+00,  3.3333E-01]
+11 : [ 3.3333E-01,  0.0000E+00,  3.3333E-01]
+ Max 10  k-points will be written. Use prtvol > 0 to print all of them.
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
- 
+ Little group operations won't be used
+
  gstore_completed: 1
  gstore_done_qbz_spin: 27
- gqk%nb: 3
+ gqk%nb_kq: 3
+ gqk%nb_k: 3
  gqk%glob_nq: 27
  gqk%glob_nk: 27
- E-PH matrix elements:
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
- |g(k,q)|^2 in Ha^2 for iq: 1 ik: 1 mode: 4
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1     1     4     1     1     1.458413E-24
-     1     1     4     1     2     1.209049E-26
-     1     1     4     1     3     1.720504E-27
-     1     1     4     2     1     1.208968E-26
-     1     1     4     2     2     4.975231E-25
-     1     1     4     2     3     6.307039E-27
-     1     1     4     3     1     1.720573E-27
-     1     1     4     3     2     6.307222E-27
-     1     1     4     3     3     2.061652E-25
- |g(k,q)|^2 in Ha^2 for iq: 1 ik: 1 mode: 6
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1     1     6     1     1     7.169195E-28
-     1     1     6     1     2     3.297664E-25
-     1     1     6     1     3     5.025685E-25
-     1     1     6     2     1     3.297641E-25
-     1     1     6     2     2     7.923151E-25
-     1     1     6     2     3     6.757426E-25
-     1     1     6     3     1     5.025618E-25
-     1     1     6     3     2     6.757428E-25
-     1     1     6     3     3     1.066013E-24
- |g(k,q)|^2 in Ha^2 for iq: 1 ik: 27 mode: 4
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1    27     4     1     1     3.093068E-27
-     1    27     4     1     2     3.427028E-07
-     1    27     4     1     3     1.031266E-06
-     1    27     4     2     1     3.427028E-07
-     1    27     4     2     2     1.842703E-25
-     1    27     4     2     3     1.825717E-16
-     1    27     4     3     1     1.031266E-06
-     1    27     4     3     2     1.825717E-16
-     1    27     4     3     3     6.768395E-26
- |g(k,q)|^2 in Ha^2 for iq: 1 ik: 27 mode: 6
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1    27     6     1     1     2.761310E-25
-     1    27     6     1     2     1.374298E-06
-     1    27     6     1     3     1.318098E-12
-     1    27     6     2     1     1.374298E-06
-     1    27     6     2     2     6.876552E-26
-     1    27     6     2     3     1.931274E-16
-     1    27     6     3     1     1.318098E-12
-     1    27     6     3     2     1.931274E-16
-     1    27     6     3     3     2.986686E-25
- |g(k,q)|^2 in Ha^2 for iq: 27 ik: 1 mode: 4
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-    27     1     4     1     1     2.419844E-06
-    27     1     4     1     2     4.614318E-06
-    27     1     4     1     3     3.500912E-07
-    27     1     4     2     1     3.225681E-10
-    27     1     4     2     2     1.248483E-06
-    27     1     4     2     3     1.712025E-05
-    27     1     4     3     1     3.377259E-08
-    27     1     4     3     2     1.088504E-08
-    27     1     4     3     3     1.532463E-09
- |g(k,q)|^2 in Ha^2 for iq: 27 ik: 1 mode: 6
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-    27     1     6     1     1     2.310794E-05
-    27     1     6     1     2     4.329633E-05
-    27     1     6     1     3     3.155267E-06
-    27     1     6     2     1     6.329838E-13
-    27     1     6     2     2     3.423089E-06
-    27     1     6     2     3     4.756787E-05
-    27     1     6     3     1     9.306980E-05
-    27     1     6     3     2     4.327594E-05
-    27     1     6     3     3     3.104917E-06
- |g(k,q)|^2 in Ha^2 for iq: 27 ik: 27 mode: 4
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-    27    27     4     1     1     1.080256E-06
-    27    27     4     1     2     6.731334E-06
-    27    27     4     1     3     5.904215E-06
-    27    27     4     2     1     6.604648E-07
-    27    27     4     2     2     3.512644E-06
-    27    27     4     2     3     4.372777E-09
-    27    27     4     3     1     2.807049E-06
-    27    27     4     3     2     2.249460E-07
-    27    27     4     3     3     2.020157E-06
- |g(k,q)|^2 in Ha^2 for iq: 27 ik: 27 mode: 6
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-    27    27     6     1     1     3.100464E-05
-    27    27     6     1     2     6.417471E-05
-    27    27     6     1     3     2.295926E-06
-    27    27     6     2     1     9.446407E-07
-    27    27     6     2     2     5.275272E-07
-    27    27     6     2     3     8.719953E-05
-    27    27     6     3     1     5.596086E-05
-    27    27     6     3     2     2.159868E-05
-    27    27     6     3     3     1.107545E-06
+
+ Group velocities |v_nk| in atomic units:
+ For k-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] , spin 1
+ ib_k: 1     1.022399E-16
+ ib_k: 2     1.488731E-16
+ ib_k: 3     1.245706E-16
+ For k-point: [ 3.3333E-01,  0.0000E+00,  0.0000E+00] , spin 1
+ ib_k: 1     1.554477E-01
+ ib_k: 2     2.891524E-02
+ ib_k: 3     2.891525E-02
+ For k-point: [ 3.3333E-01,  3.3333E-01,  0.0000E+00] , spin 1
+ ib_k: 1     1.836701E-01
+ ib_k: 2     5.713438E-02
+ ib_k: 3     5.713438E-02
+ For k-point: [-3.3333E-01,  3.3333E-01,  0.0000E+00] , spin 1
+ ib_k: 1     1.399647E-01
+ ib_k: 2     6.669306E-02
+ ib_k: 3     6.287284E-02
+
+ E-PH matrix elements in the atom representation: pcase = (idir, iatom)
+    iq    ik pcase im_kq  in_k        |g| in Ha
+ |g(k,q)| in Ha for iq: 1 ik: 1 pcase: 4
+    iq    ik pcase im_kq  in_k              |g|
+     1     1     4     1     1     6.627966E-11
+     1     1     4     1     2     6.143788E-12
+     1     1     4     1     3     3.895280E-11
+     1     1     4     2     1     6.143963E-12
+     1     1     4     2     2     4.664687E-11
+     1     1     4     2     3     6.985776E-12
+     1     1     4     3     1     3.895298E-11
+     1     1     4     3     2     6.985874E-12
+     1     1     4     3     3     1.007168E-10
+ |g(k,q)| in Ha for iq: 1 ik: 1 pcase: 6
+    iq    ik pcase im_kq  in_k              |g|
+     1     1     6     1     1     1.506685E-11
+     1     1     6     1     2     5.208609E-11
+     1     1     6     1     3     1.175880E-11
+     1     1     6     2     1     5.208589E-11
+     1     1     6     2     2     5.651836E-11
+     1     1     6     2     3     5.571592E-11
+     1     1     6     3     1     1.175836E-11
+     1     1     6     3     2     5.571595E-11
+     1     1     6     3     3     1.405957E-10
+ |g(k,q)| in Ha for iq: 1 ik: 27 pcase: 4
+    iq    ik pcase im_kq  in_k              |g|
+     1    27     4     1     1     2.340191E-11
+     1    27     4     1     2     3.192440E-02
+     1    27     4     1     3     2.884740E-05
+     1    27     4     2     1     3.192440E-02
+     1    27     4     2     2     2.203261E-11
+     1    27     4     2     3     5.585192E-11
+     1    27     4     3     1     2.884740E-05
+     1    27     4     3     2     5.585220E-11
+     1    27     4     3     3     2.057295E-11
+ |g(k,q)| in Ha for iq: 1 ik: 27 pcase: 6
+    iq    ik pcase im_kq  in_k              |g|
+     1    27     6     1     1     1.547465E-11
+     1    27     6     1     2     1.595382E-02
+     1    27     6     1     3     2.764903E-02
+     1    27     6     2     1     1.595382E-02
+     1    27     6     2     2     9.535837E-12
+     1    27     6     2     3     1.859963E-07
+     1    27     6     3     1     2.764903E-02
+     1    27     6     3     2     1.859963E-07
+     1    27     6     3     3     3.074341E-11
+ |g(k,q)| in Ha for iq: 27 ik: 1 pcase: 4
+    iq    ik pcase im_kq  in_k              |g|
+    27     1     4     1     1     7.690493E-02
+    27     1     4     1     2     7.057876E-02
+    27     1     4     1     3     1.578293E-01
+    27     1     4     2     1     8.309077E-02
+    27     1     4     2     2     4.865514E-02
+    27     1     4     2     3     4.706511E-02
+    27     1     4     3     1     6.761165E-02
+    27     1     4     3     2     5.830903E-02
+    27     1     4     3     3     3.293870E-02
+ |g(k,q)| in Ha for iq: 27 ik: 1 pcase: 6
+    iq    ik pcase im_kq  in_k              |g|
+    27     1     6     1     1     1.361580E-06
+    27     1     6     1     2     1.345845E-05
+    27     1     6     1     3     5.388397E-05
+    27     1     6     2     1     7.817642E-02
+    27     1     6     2     2     5.333813E-02
+    27     1     6     2     3     1.429262E-02
+    27     1     6     3     1     4.693105E-05
+    27     1     6     3     2     2.438195E-02
+    27     1     6     3     3     9.070367E-02
+ |g(k,q)| in Ha for iq: 27 ik: 27 pcase: 4
+    iq    ik pcase im_kq  in_k              |g|
+    27    27     4     1     1     6.317548E-02
+    27    27     4     1     2     4.258821E-02
+    27    27     4     1     3     1.290754E-02
+    27    27     4     2     1     6.017090E-02
+    27    27     4     2     2     6.486430E-02
+    27    27     4     2     3     3.255456E-02
+    27    27     4     3     1     8.227229E-02
+    27    27     4     3     2     6.338654E-02
+    27    27     4     3     3     9.041877E-02
+ |g(k,q)| in Ha for iq: 27 ik: 27 pcase: 6
+    iq    ik pcase im_kq  in_k              |g|
+    27    27     6     1     1     2.640500E-02
+    27    27     6     1     2     6.575965E-02
+    27    27     6     1     3     1.031900E-01
+    27    27     6     2     1     7.825274E-02
+    27    27     6     2     2     1.214014E-02
+    27    27     6     2     3     1.114068E-01
+    27    27     6     3     1     2.908856E-02
+    27    27     6     3     2     2.241730E-02
+    27    27     6     3     3     3.866986E-02
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -525,11 +569,11 @@ meta: {optdriver: 7, eph_task: 11, }
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -545,7 +589,7 @@ meta: {optdriver: 7, eph_task: 11, }
        3               2       -0.000000        0.000000
        3               3       -0.065315        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -607,6 +651,11 @@ meta: {optdriver: 7, eph_task: 11, }
 - Writing phonon DOS to netcdf file: teph4vpq_3o_DS2_PHDOS.nc
 --------------------------------------------------------------------------------
 
+P qpt_comm can use shmem: yes
+P kpt_comm can use shmem: yes
+P bsum_comm can use shmem: yes
+P pp_sum_comm can use shmem: yes
+
  === Gstore parameters ===
  kzone: bz
  kfilter: none
@@ -619,118 +668,157 @@ meta: {optdriver: 7, eph_task: 11, }
  glob_nq_spin: [64]
  kptopt: 1
  qptopt: 1
+ has_used_lgk: 0
+ has_used_lgq: 0
  with_vk: 1
 
  gqk_cplex: 2
- gqk_bstart: 3
- gqk_bstop: 5
- gqk_nb: 3
+ gqk_bstart_k: 3
+ gqk_bstart_kq: 3
+ gqk_bstop_k: 5
+ gqk_bstop_kq: 5
+ gqk_nb_k: 3
+ gqk_nb_kq: 3
  gqk_my_npert: 6
- gqk_my_nk: -1
- gqk_my_nq: -1
+P gqk_my_nk: -1
+P gqk_my_nq: -1
 
   === MPI distribution ===
 P Number of CPUs for parallelism over perturbations: 1
 P Number of perturbations treated by this CPU: 6
 P Number of CPUs for parallelism over q-points: 1
 P Number of CPUs for parallelism over k-points: 1
+ k-points included in gstore:
+1 : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+2 : [ 2.5000E-01,  0.0000E+00,  0.0000E+00]
+3 : [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
+4 : [-2.5000E-01,  0.0000E+00,  0.0000E+00]
+5 : [ 0.0000E+00,  2.5000E-01,  0.0000E+00]
+6 : [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
+7 : [ 5.0000E-01,  2.5000E-01,  0.0000E+00]
+8 : [-2.5000E-01,  2.5000E-01,  0.0000E+00]
+9 : [ 0.0000E+00,  5.0000E-01,  0.0000E+00]
+10 : [ 2.5000E-01,  5.0000E-01,  0.0000E+00]
+11 : [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Max 10  k-points will be written. Use prtvol > 0 to print all of them.
  Cannot find all IBZ q-points in the DVDB --> Activating Fourier interpolation.
- 
+ Little group operations won't be used
+
  gstore_completed: 1
  gstore_done_qbz_spin: 64
- gqk%nb: 3
+ gqk%nb_kq: 3
+ gqk%nb_k: 3
  gqk%glob_nq: 64
  gqk%glob_nk: 64
- E-PH matrix elements:
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
- |g(k,q)|^2 in Ha^2 for iq: 1 ik: 1 mode: 4
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1     1     4     1     1     1.887083E-18
-     1     1     4     1     2     1.061234E-19
-     1     1     4     1     3     4.213120E-20
-     1     1     4     2     1     1.061234E-19
-     1     1     4     2     2     9.068487E-19
-     1     1     4     2     3     1.186030E-18
-     1     1     4     3     1     4.213120E-20
-     1     1     4     3     2     1.186030E-18
-     1     1     4     3     3     3.692817E-18
- |g(k,q)|^2 in Ha^2 for iq: 1 ik: 1 mode: 6
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1     1     6     1     1     1.390373E-19
-     1     1     6     1     2     2.528168E-19
-     1     1     6     1     3     9.706093E-19
-     1     1     6     2     1     2.528168E-19
-     1     1     6     2     2     7.301823E-24
-     1     1     6     2     3     4.601545E-19
-     1     1     6     3     1     9.706093E-19
-     1     1     6     3     2     4.601545E-19
-     1     1     6     3     3     3.883247E-19
- |g(k,q)|^2 in Ha^2 for iq: 1 ik: 64 mode: 4
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1    64     4     1     1     1.269541E-18
-     1    64     4     1     2     4.401124E-07
-     1    64     4     1     3     1.323776E-06
-     1    64     4     2     1     4.401124E-07
-     1    64     4     2     2     1.386140E-18
-     1    64     4     2     3     1.656144E-16
-     1    64     4     3     1     1.323776E-06
-     1    64     4     3     2     1.656144E-16
-     1    64     4     3     3     4.681217E-20
- |g(k,q)|^2 in Ha^2 for iq: 1 ik: 64 mode: 6
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1    64     6     1     1     9.493234E-20
-     1    64     6     1     2     1.764353E-06
-     1    64     6     1     3     1.518634E-12
-     1    64     6     2     1     1.764353E-06
-     1    64     6     2     2     8.317445E-19
-     1    64     6     2     3     1.269487E-16
-     1    64     6     3     1     1.518634E-12
-     1    64     6     3     2     1.269487E-16
-     1    64     6     3     3     8.585589E-20
- |g(k,q)|^2 in Ha^2 for iq: 64 ik: 1 mode: 4
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-    64     1     4     1     1     2.982377E-05
-    64     1     4     1     2     1.431632E-05
-    64     1     4     1     3     1.035617E-06
-    64     1     4     2     1     1.036712E-09
-    64     1     4     2     2     3.052294E-06
-    64     1     4     2     3     4.210955E-05
-    64     1     4     3     1     3.364558E-05
-    64     1     4     3     2     6.437515E-05
-    64     1     4     3     3     4.669669E-06
- |g(k,q)|^2 in Ha^2 for iq: 64 ik: 1 mode: 6
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-    64     1     6     1     1     6.623853E-07
-    64     1     6     1     2     1.247714E-06
-    64     1     6     1     3     6.734387E-08
-    64     1     6     2     1     5.962298E-07
-    64     1     6     2     2     1.239352E-06
-    64     1     6     2     3     1.390384E-07
-    64     1     6     3     1     2.357498E-06
-    64     1     6     3     2     2.408679E-06
-    64     1     6     3     3     2.362200E-06
- |g(k,q)|^2 in Ha^2 for iq: 64 ik: 64 mode: 4
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-    64    64     4     1     1     1.386566E-05
-    64    64     4     1     2     3.299095E-05
-    64    64     4     1     3     4.674019E-06
-    64    64     4     2     1     2.365866E-06
-    64    64     4     2     2     2.202858E-05
-    64    64     4     2     3     5.250504E-05
-    64    64     4     3     1     3.789930E-05
-    64    64     4     3     2     5.476404E-07
-    64    64     4     3     3     3.292718E-05
- |g(k,q)|^2 in Ha^2 for iq: 64 ik: 64 mode: 6
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-    64    64     6     1     1     9.987052E-08
-    64    64     6     1     2     2.348186E-06
-    64    64     6     1     3     5.611412E-08
-    64    64     6     2     1     1.347810E-06
-    64    64     6     2     2     6.182848E-09
-    64    64     6     2     3     2.155357E-06
-    64    64     6     3     1     1.661450E-07
-    64    64     6     3     2     8.584110E-08
-    64    64     6     3     3     3.633013E-07
+
+ Group velocities |v_nk| in atomic units:
+ For k-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] , spin 1
+ ib_k: 1     1.022399E-16
+ ib_k: 2     1.488731E-16
+ ib_k: 3     1.245706E-16
+ For k-point: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] , spin 1
+ ib_k: 1     1.938540E-01
+ ib_k: 2     3.388617E-02
+ ib_k: 3     3.388619E-02
+ For k-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] , spin 1
+ ib_k: 1     8.643814E-17
+ ib_k: 2     1.818523E-16
+ ib_k: 3     2.124280E-16
+ For k-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01] , spin 1
+ ib_k: 1     1.557480E-04
+ ib_k: 2     1.557480E-04
+ ib_k: 3     2.987294E-08
+
+ E-PH matrix elements in the atom representation: pcase = (idir, iatom)
+    iq    ik pcase im_kq  in_k        |g| in Ha
+ |g(k,q)| in Ha for iq: 1 ik: 1 pcase: 4
+    iq    ik pcase im_kq  in_k              |g|
+     1     1     4     1     1     6.025918E-08
+     1     1     4     1     2     3.371796E-08
+     1     1     4     1     3     7.130277E-08
+     1     1     4     2     1     3.371796E-08
+     1     1     4     2     2     5.503387E-08
+     1     1     4     2     3     9.742443E-10
+     1     1     4     3     1     7.130277E-08
+     1     1     4     3     2     9.742442E-10
+     1     1     4     3     3     1.550818E-07
+ |g(k,q)| in Ha for iq: 1 ik: 1 pcase: 6
+    iq    ik pcase im_kq  in_k              |g|
+     1     1     6     1     1     1.227310E-07
+     1     1     6     1     2     1.880401E-08
+     1     1     6     1     3     6.531217E-09
+     1     1     6     2     1     1.880401E-08
+     1     1     6     2     2     1.148628E-07
+     1     1     6     2     3     2.891966E-08
+     1     1     6     3     1     6.531217E-09
+     1     1     6     3     2     2.891966E-08
+     1     1     6     3     3     1.278159E-08
+ |g(k,q)| in Ha for iq: 1 ik: 64 pcase: 4
+    iq    ik pcase im_kq  in_k              |g|
+     1    64     4     1     1     5.087520E-08
+     1    64     4     1     2     3.312884E-02
+     1    64     4     1     3     2.693342E-05
+     1    64     4     2     1     3.312884E-02
+     1    64     4     2     2     1.474495E-07
+     1    64     4     2     3     2.387538E-08
+     1    64     4     3     1     2.693342E-05
+     1    64     4     3     2     2.387538E-08
+     1    64     4     3     3     6.042888E-08
+ |g(k,q)| in Ha for iq: 1 ik: 64 pcase: 6
+    iq    ik pcase im_kq  in_k              |g|
+     1    64     6     1     1     1.017481E-07
+     1    64     6     1     2     1.656163E-02
+     1    64     6     1     3     2.869187E-02
+     1    64     6     2     1     1.656163E-02
+     1    64     6     2     2     9.920236E-09
+     1    64     6     2     3     4.123620E-07
+     1    64     6     3     1     2.869187E-02
+     1    64     6     3     2     4.123620E-07
+     1    64     6     3     3     9.104909E-08
+ |g(k,q)| in Ha for iq: 64 ik: 1 pcase: 4
+    iq    ik pcase im_kq  in_k              |g|
+    64     1     4     1     1     5.136277E-02
+    64     1     4     1     2     3.706215E-02
+    64     1     4     1     3     1.449084E-01
+    64     1     4     2     1     1.587161E-01
+    64     1     4     2     2     1.347253E-03
+    64     1     4     2     3     7.393788E-04
+    64     1     4     3     1     5.955074E-02
+    64     1     4     3     2     5.912301E-02
+    64     1     4     3     3     6.028144E-02
+ |g(k,q)| in Ha for iq: 64 ik: 1 pcase: 6
+    iq    ik pcase im_kq  in_k              |g|
+    64     1     6     1     1     7.760407E-05
+    64     1     6     1     2     1.290567E-04
+    64     1     6     1     3     8.872431E-04
+    64     1     6     2     1     1.027556E-01
+    64     1     6     2     2     1.419200E-01
+    64     1     6     2     3     3.826408E-02
+    64     1     6     3     1     2.073675E-04
+    64     1     6     3     2     3.751322E-02
+    64     1     6     3     3     1.402002E-01
+ |g(k,q)| in Ha for iq: 64 ik: 64 pcase: 4
+    iq    ik pcase im_kq  in_k              |g|
+    64    64     4     1     1     4.886582E-02
+    64    64     4     1     2     7.065878E-03
+    64    64     4     1     3     4.558524E-03
+    64    64     4     2     1     7.044357E-02
+    64    64     4     2     2     1.608553E-01
+    64    64     4     2     3     6.768266E-02
+    64    64     4     3     1     8.752411E-02
+    64    64     4     3     2     3.237566E-02
+    64    64     4     3     3     2.374434E-02
+ |g(k,q)| in Ha for iq: 64 ik: 64 pcase: 6
+    iq    ik pcase im_kq  in_k              |g|
+    64    64     6     1     1     2.549955E-02
+    64    64     6     1     2     6.248109E-02
+    64    64     6     1     3     9.443522E-02
+    64    64     6     2     1     9.344954E-02
+    64    64     6     2     2     2.514998E-02
+    64    64     6     2     3     1.059384E-01
+    64    64     6     3     1     1.411687E-01
+    64    64     6     3     2     4.551828E-02
+    64    64     6     3     3     1.498410E-02
 
 ================================================================================
 == DATASET  3 ==================================================================
@@ -779,11 +867,11 @@ meta: {optdriver: 7, eph_task: 11, }
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -799,7 +887,7 @@ meta: {optdriver: 7, eph_task: 11, }
        3               2       -0.000000        0.000000
        3               3       -0.065315        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -861,6 +949,11 @@ meta: {optdriver: 7, eph_task: 11, }
 - Writing phonon DOS to netcdf file: teph4vpq_3o_DS3_PHDOS.nc
 --------------------------------------------------------------------------------
 
+P qpt_comm can use shmem: yes
+P kpt_comm can use shmem: yes
+P bsum_comm can use shmem: yes
+P pp_sum_comm can use shmem: yes
+
  === Gstore parameters ===
  kzone: bz
  kfilter: none
@@ -873,122 +966,161 @@ meta: {optdriver: 7, eph_task: 11, }
  glob_nq_spin: [125]
  kptopt: 1
  qptopt: 1
+ has_used_lgk: 0
+ has_used_lgq: 0
  with_vk: 1
 
  gqk_cplex: 2
- gqk_bstart: 3
- gqk_bstop: 5
- gqk_nb: 3
+ gqk_bstart_k: 3
+ gqk_bstart_kq: 3
+ gqk_bstop_k: 5
+ gqk_bstop_kq: 5
+ gqk_nb_k: 3
+ gqk_nb_kq: 3
  gqk_my_npert: 6
- gqk_my_nk: -1
- gqk_my_nq: -1
+P gqk_my_nk: -1
+P gqk_my_nq: -1
 
   === MPI distribution ===
 P Number of CPUs for parallelism over perturbations: 1
 P Number of perturbations treated by this CPU: 6
 P Number of CPUs for parallelism over q-points: 1
 P Number of CPUs for parallelism over k-points: 1
+ k-points included in gstore:
+1 : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+2 : [ 2.0000E-01,  0.0000E+00,  0.0000E+00]
+3 : [ 4.0000E-01,  0.0000E+00,  0.0000E+00]
+4 : [-4.0000E-01,  0.0000E+00,  0.0000E+00]
+5 : [-2.0000E-01,  0.0000E+00,  0.0000E+00]
+6 : [ 0.0000E+00,  2.0000E-01,  0.0000E+00]
+7 : [ 2.0000E-01,  2.0000E-01,  0.0000E+00]
+8 : [ 4.0000E-01,  2.0000E-01,  0.0000E+00]
+9 : [-4.0000E-01,  2.0000E-01,  0.0000E+00]
+10 : [-2.0000E-01,  2.0000E-01,  0.0000E+00]
+11 : [ 0.0000E+00,  4.0000E-01,  0.0000E+00]
+ Max 10  k-points will be written. Use prtvol > 0 to print all of them.
  Cannot find all IBZ q-points in the DVDB --> Activating Fourier interpolation.
- 
+ Little group operations won't be used
+
  gstore_completed: 1
  gstore_done_qbz_spin: 125
- gqk%nb: 3
+ gqk%nb_kq: 3
+ gqk%nb_k: 3
  gqk%glob_nq: 125
  gqk%glob_nk: 125
- E-PH matrix elements:
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
- |g(k,q)|^2 in Ha^2 for iq: 1 ik: 1 mode: 4
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1     1     4     1     1     1.887083E-18
-     1     1     4     1     2     1.061234E-19
-     1     1     4     1     3     4.213120E-20
-     1     1     4     2     1     1.061234E-19
-     1     1     4     2     2     9.068487E-19
-     1     1     4     2     3     1.186030E-18
-     1     1     4     3     1     4.213120E-20
-     1     1     4     3     2     1.186030E-18
-     1     1     4     3     3     3.692817E-18
- |g(k,q)|^2 in Ha^2 for iq: 1 ik: 1 mode: 6
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1     1     6     1     1     1.390373E-19
-     1     1     6     1     2     2.528168E-19
-     1     1     6     1     3     9.706093E-19
-     1     1     6     2     1     2.528168E-19
-     1     1     6     2     2     7.301823E-24
-     1     1     6     2     3     4.601545E-19
-     1     1     6     3     1     9.706093E-19
-     1     1     6     3     2     4.601545E-19
-     1     1     6     3     3     3.883247E-19
- |g(k,q)|^2 in Ha^2 for iq: 1 ik: 125 mode: 4
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1   125     4     1     1     1.409119E-18
-     1   125     4     1     2     3.946299E-07
-     1   125     4     1     3     1.187000E-06
-     1   125     4     2     1     3.946299E-07
-     1   125     4     2     2     1.394985E-18
-     1   125     4     2     3     1.340972E-16
-     1   125     4     3     1     1.187000E-06
-     1   125     4     3     2     1.340972E-16
-     1   125     4     3     3     4.722798E-20
- |g(k,q)|^2 in Ha^2 for iq: 1 ik: 125 mode: 6
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1   125     6     1     1     1.050033E-19
-     1   125     6     1     2     1.582043E-06
-     1   125     6     1     3     1.378220E-12
-     1   125     6     2     1     1.582043E-06
-     1   125     6     2     2     8.372807E-19
-     1   125     6     2     3     8.509998E-17
-     1   125     6     3     1     1.378220E-12
-     1   125     6     3     2     8.509998E-17
-     1   125     6     3     3     8.646705E-20
- |g(k,q)|^2 in Ha^2 for iq: 125 ik: 1 mode: 4
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-   125     1     4     1     1     1.103929E-05
-   125     1     4     1     2     2.047513E-06
-   125     1     4     1     3     3.613695E-06
-   125     1     4     2     1     4.319360E-08
-   125     1     4     2     2     4.085236E-08
-   125     1     4     2     3     5.073040E-08
-   125     1     4     3     1     5.122438E-06
-   125     1     4     3     2     7.001263E-06
-   125     1     4     3     3     1.572293E-07
- |g(k,q)|^2 in Ha^2 for iq: 125 ik: 1 mode: 6
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-   125     1     6     1     1     1.942357E-05
-   125     1     6     1     2     1.143083E-06
-   125     1     6     1     3     3.074398E-05
-   125     1     6     2     1     2.181144E-05
-   125     1     6     2     2     2.203688E-05
-   125     1     6     2     3     2.233980E-05
-   125     1     6     3     1     7.042868E-06
-   125     1     6     3     2     6.802283E-05
-   125     1     6     3     3     3.137934E-05
- |g(k,q)|^2 in Ha^2 for iq: 125 ik: 125 mode: 4
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-   125   125     4     1     1     1.434705E-06
-   125   125     4     1     2     1.901380E-06
-   125   125     4     1     3     1.017364E-06
-   125   125     4     2     1     1.679023E-07
-   125   125     4     2     2     2.563437E-06
-   125   125     4     2     3     4.110854E-07
-   125   125     4     3     1     1.058963E-07
-   125   125     4     3     2     4.381606E-06
-   125   125     4     3     3     2.095600E-06
- |g(k,q)|^2 in Ha^2 for iq: 125 ik: 125 mode: 6
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-   125   125     6     1     1     9.057477E-06
-   125   125     6     1     2     2.903150E-05
-   125   125     6     1     3     1.204815E-05
-   125   125     6     2     1     9.384370E-06
-   125   125     6     2     2     2.679433E-05
-   125   125     6     2     3     6.694344E-05
-   125   125     6     3     1     3.921016E-05
-   125   125     6     3     2     3.282964E-05
-   125   125     6     3     3     6.657912E-07
+
+ Group velocities |v_nk| in atomic units:
+ For k-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] , spin 1
+ ib_k: 1     1.022399E-16
+ ib_k: 2     1.488731E-16
+ ib_k: 3     1.245706E-16
+ For k-point: [ 2.0000E-01,  0.0000E+00,  0.0000E+00] , spin 1
+ ib_k: 1     1.949008E-01
+ ib_k: 2     3.257109E-02
+ ib_k: 3     3.257111E-02
+ For k-point: [-4.0000E-01,  4.0000E-01,  0.0000E+00] , spin 1
+ ib_k: 1     9.737354E-02
+ ib_k: 2     9.914155E-02
+ ib_k: 3     4.963547E-02
+ For k-point: [-4.0000E-01,  4.0000E-01,  2.0000E-01] , spin 1
+ ib_k: 1     1.009799E-01
+ ib_k: 2     1.389881E-01
+ ib_k: 3     5.947260E-02
+
+ E-PH matrix elements in the atom representation: pcase = (idir, iatom)
+    iq    ik pcase im_kq  in_k        |g| in Ha
+ |g(k,q)| in Ha for iq: 1 ik: 1 pcase: 4
+    iq    ik pcase im_kq  in_k              |g|
+     1     1     4     1     1     6.025918E-08
+     1     1     4     1     2     3.371796E-08
+     1     1     4     1     3     7.130277E-08
+     1     1     4     2     1     3.371796E-08
+     1     1     4     2     2     5.503387E-08
+     1     1     4     2     3     9.742443E-10
+     1     1     4     3     1     7.130277E-08
+     1     1     4     3     2     9.742442E-10
+     1     1     4     3     3     1.550818E-07
+ |g(k,q)| in Ha for iq: 1 ik: 1 pcase: 6
+    iq    ik pcase im_kq  in_k              |g|
+     1     1     6     1     1     1.227310E-07
+     1     1     6     1     2     1.880401E-08
+     1     1     6     1     3     6.531217E-09
+     1     1     6     2     1     1.880401E-08
+     1     1     6     2     2     1.148628E-07
+     1     1     6     2     3     2.891966E-08
+     1     1     6     3     1     6.531217E-09
+     1     1     6     3     2     2.891966E-08
+     1     1     6     3     3     1.278159E-08
+ |g(k,q)| in Ha for iq: 1 ik: 125 pcase: 4
+    iq    ik pcase im_kq  in_k              |g|
+     1   125     4     1     1     5.337897E-08
+     1   125     4     1     2     2.912070E-02
+     1   125     4     1     3     2.229503E-05
+     1   125     4     2     1     2.912070E-02
+     1   125     4     2     2     1.478796E-07
+     1   125     4     2     3     2.391457E-08
+     1   125     4     3     1     2.229503E-05
+     1   125     4     3     2     2.391457E-08
+     1   125     4     3     3     6.060848E-08
+ |g(k,q)| in Ha for iq: 1 ik: 125 pcase: 6
+    iq    ik pcase im_kq  in_k              |g|
+     1   125     6     1     1     1.070302E-07
+     1   125     6     1     2     1.455812E-02
+     1   125     6     1     3     2.522876E-02
+     1   125     6     2     1     1.455812E-02
+     1   125     6     2     2     9.892603E-09
+     1   125     6     2     3     5.094774E-07
+     1   125     6     3     1     2.522876E-02
+     1   125     6     3     2     5.094774E-07
+     1   125     6     3     3     9.134066E-08
+ |g(k,q)| in Ha for iq: 125 ik: 1 pcase: 4
+    iq    ik pcase im_kq  in_k              |g|
+   125     1     4     1     1     4.155830E-02
+   125     1     4     1     2     1.492124E-02
+   125     1     4     1     3     8.101440E-02
+   125     1     4     2     1     1.831570E-01
+   125     1     4     2     2     8.470588E-04
+   125     1     4     2     3     6.846363E-02
+   125     1     4     3     1     7.931053E-02
+   125     1     4     3     2     3.628720E-02
+   125     1     4     3     3     3.050355E-02
+ |g(k,q)| in Ha for iq: 125 ik: 1 pcase: 6
+    iq    ik pcase im_kq  in_k              |g|
+   125     1     6     1     1     6.444572E-03
+   125     1     6     1     2     9.462477E-02
+   125     1     6     1     3     4.651921E-02
+   125     1     6     2     1     1.703192E-01
+   125     1     6     2     2     1.369098E-02
+   125     1     6     2     3     5.557238E-02
+   125     1     6     3     1     4.214029E-02
+   125     1     6     3     2     5.617508E-02
+   125     1     6     3     3     1.600885E-01
+ |g(k,q)| in Ha for iq: 125 ik: 125 pcase: 4
+    iq    ik pcase im_kq  in_k              |g|
+   125   125     4     1     1     4.399687E-03
+   125   125     4     1     2     4.986590E-02
+   125   125     4     1     3     5.252061E-03
+   125   125     4     2     1     9.262152E-02
+   125   125     4     2     2     2.558217E-02
+   125   125     4     2     3     1.761505E-02
+   125   125     4     3     1     1.347372E-01
+   125   125     4     3     2     2.941337E-03
+   125   125     4     3     3     5.072406E-02
+ |g(k,q)| in Ha for iq: 125 ik: 125 pcase: 6
+    iq    ik pcase im_kq  in_k              |g|
+   125   125     6     1     1     4.321110E-02
+   125   125     6     1     2     7.554732E-02
+   125   125     6     1     3     1.921382E-02
+   125   125     6     2     1     1.186300E-01
+   125   125     6     2     2     1.250305E-01
+   125   125     6     2     3     1.099477E-01
+   125   125     6     3     1     2.128968E-01
+   125   125     6     3     2     6.927676E-02
+   125   125     6     3     3     2.674202E-02
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      7.6750000000E+00  7.6750000000E+00  7.6750000000E+00 Bohr
               amu      6.94100000E+00  1.89984032E+01
@@ -1112,7 +1244,7 @@ P           mkmem3         10
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1129,12 +1261,12 @@ P           mkmem3         10
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1152,7 +1284,7 @@ P           mkmem3         10
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1167,7 +1299,7 @@ P           mkmem3         10
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

@@ -1029,7 +1029,7 @@ pure subroutine paw_rho_tw_g(cryst, pwij, npw, dim_rtwg, nspinor, gvec, Cprj_kmq
  integer,intent(in) :: gvec(3,npw)
  type(pawcprj_type),intent(in) :: Cprj_kmqb1(cryst%natom,nspinor), Cprj_kb2(cryst%natom,nspinor)
  type(pawpwij_t),intent(in) :: Pwij(cryst%ntypat)
- complex(gwpc),intent(inout) :: rhotwg(npw*dim_rtwg)
+ complex(gwp),intent(inout) :: rhotwg(npw*dim_rtwg)
 
 !Local variables-------------------------------
 !scalars
@@ -1038,7 +1038,6 @@ pure subroutine paw_rho_tw_g(cryst, pwij, npw, dim_rtwg, nspinor, gvec, Cprj_kmq
 !arrays
  integer,parameter :: spinor_idxs(2,4) = RESHAPE([1,1,2,2,1,2,2,1], [2, 4])
  real(dp) :: tmp(2),qpg(3),x0(3),ph3d(2)
-
 ! *************************************************************************
 
  ! Loop over the four spinorial combinations
@@ -1092,7 +1091,7 @@ pure subroutine paw_rho_tw_g(cryst, pwij, npw, dim_rtwg, nspinor, gvec, Cprj_kmq
      !if(ig==1) write(std_out,*) " TOTAL PW     osc str = ",rhotwg(ig+spad)
      !if(ig==1) write(std_out,*) " TOTAL PAW    osc str = ",tmp(1),tmp(2)
      ! Update input data using the appropriate index.
-     rhotwg(ig+spad) = rhotwg(ig+spad) + CMPLX(tmp(1),tmp(2),kind=gwpc)
+     rhotwg(ig+spad) = rhotwg(ig+spad) + CMPLX(tmp(1),tmp(2),kind=gwp)
      !if(ig==1) write(std_out,*) " TOTAL PW+PAW osc str = ",rhotwg(ig+spad)
    end do !ig
 
@@ -1117,23 +1116,23 @@ end subroutine paw_rho_tw_g
 !! SOURCE
 
 subroutine paw_cross_rho_tw_g(nspinor,npwvec,nr,ngfft,map2sphere,use_padfft,igfftg0,gbound,&
-& ur_ae1,ur_ae_onsite1,ur_ps_onsite1,i1,ktabr1,ktabp1,spinrot1,&
-& ur_ae2,ur_ae_onsite2,ur_ps_onsite2,i2,ktabr2,ktabp2,spinrot2,&
-& dim_rtwg,rhotwg)
+  ur_ae1,ur_ae_onsite1,ur_ps_onsite1,i1,ktabr1,ktabp1,spinrot1,&
+  ur_ae2,ur_ae_onsite2,ur_ps_onsite2,i2,ktabr2,ktabp2,spinrot2,&
+  dim_rtwg,rhotwg)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: i1,i2,npwvec,nr,nspinor,dim_rtwg,map2sphere,use_padfft
- complex(dpc),intent(in) :: ktabp1,ktabp2
+ complex(dp),intent(in) :: ktabp1,ktabp2
 !arrays
  integer,intent(in) :: gbound(:,:)
  integer,intent(in) :: igfftg0(npwvec*map2sphere),ngfft(18)
  integer,intent(in) :: ktabr1(nr),ktabr2(nr)
  real(dp),intent(in) :: spinrot1(4),spinrot2(4)
- complex(gwpc),intent(in) :: ur_ae1(nr),ur_ae2(nr)
- complex(gwpc),intent(in) :: ur_ae_onsite1(nr),ur_ae_onsite2(nr)
- complex(gwpc),intent(in) :: ur_ps_onsite1(nr),ur_ps_onsite2(nr)
- complex(gwpc),intent(inout) :: rhotwg(npwvec*dim_rtwg)
+ complex(gwp),intent(in) :: ur_ae1(nr),ur_ae2(nr)
+ complex(gwp),intent(in) :: ur_ae_onsite1(nr),ur_ae_onsite2(nr)
+ complex(gwp),intent(in) :: ur_ps_onsite1(nr),ur_ps_onsite2(nr)
+ complex(gwp),intent(inout) :: rhotwg(npwvec*dim_rtwg)
 
 !Local variables-------------------------------
 !scalars
@@ -1141,8 +1140,7 @@ subroutine paw_cross_rho_tw_g(nspinor,npwvec,nr,ngfft,map2sphere,use_padfft,igff
  integer :: ig,igfft,nx,ny,nz,ldx,ldy,ldz,mgfft,isprot1,isprot2
  type(fftbox_plan3_t) :: plan
 !arrays
- complex(dpc),allocatable :: usk(:),uu(:),rho(:)
-
+ complex(dp),allocatable :: usk(:),uu(:),rho(:)
 ! *************************************************************************
 
  SELECT CASE (nspinor)

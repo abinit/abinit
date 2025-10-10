@@ -60,7 +60,7 @@ module m_spin_observables
      real(dp) :: temperature
      integer, allocatable :: isublatt(:), nspin_sub(:)
      ! isublatt: index of sublattice for each spin
-     ! nspin_sub: 
+     ! nspin_sub:
 
      real(dp) :: energy
      real(dp), allocatable :: S(:,:), Snorm(:)
@@ -74,7 +74,7 @@ module m_spin_observables
 
      real(dp) ::  M_total(3), Mst_total(3), M_total_norm,  Mst_norm_total, Snorm_total
      ! M_total: M total    \sum M_i where M_i =|S_i|
-     ! Mst_total: staggerd M total  |sum M_I| 
+     ! Mst_total: staggerd M total  |sum M_I|
      ! Mst_norm : ||Mst_total||
      real(dp), allocatable :: Avg_Mst_sub_norm(:)
      real(dp) :: Avg_Mst_norm_total
@@ -178,35 +178,15 @@ contains
   !-----------------------------------------------------------------------
   subroutine finalize(self)
     class(spin_observable_t) :: self
-    if (allocated(self%isublatt)) then
-       ABI_FREE(self%isublatt)
-    endif
 
-    if (allocated(self%nspin_sub)) then
-       ABI_FREE(self%nspin_sub)
-    endif
-
-    if(allocated(self%S)) then
-       ABI_FREE(self%S)
-    endif
-
-    if(allocated(self%Snorm)) then
-       ABI_FREE(self%Snorm)
-    endif
-
-    if (allocated(self%Ms_coeff)) then
-       ABI_FREE(self%Ms_coeff)
-    endif
-
-    if (allocated(self%Mst_sub)) then
-       ABI_FREE(self%Mst_sub)
-    endif
-    if (allocated(self%Mst_sub_norm)) then
-       ABI_FREE(self%Mst_sub_norm)
-    endif
-    if (allocated(self%Avg_Mst_sub_norm)) then
-       ABI_FREE(self%Avg_Mst_sub_norm)
-    endif
+    ABI_SFREE(self%isublatt)
+    ABI_SFREE(self%nspin_sub)
+    ABI_SFREE(self%S)
+    ABI_SFREE(self%Snorm)
+    ABI_SFREE(self%Ms_coeff)
+    ABI_SFREE(self%Mst_sub)
+    ABI_SFREE(self%Mst_sub_norm)
+    ABI_SFREE(self%Avg_Mst_sub_norm)
 
   end subroutine finalize
 

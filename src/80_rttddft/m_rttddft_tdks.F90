@@ -33,7 +33,7 @@ module m_rttddft_tdks
  use m_dtfil,            only: datafiles_type
  use m_dtset,            only: dataset_type
  use m_ebands,           only: ebands_t, unpack_eneocc
- use m_energies,         only: energies_type, energies_init
+ use m_energies,         only: energies_type
  use m_errors,           only: msg_hndl, assert
  use m_extfpmd,          only: extfpmd_type
  use m_gemm_nonlop_projectors, only: init_gemm_nonlop, destroy_gemm_nonlop
@@ -47,10 +47,10 @@ module m_rttddft_tdks
  use m_mpinfo,           only: proc_distrb_cycle
  use m_occ,              only: newocc
  use m_paw_an,           only: paw_an_type, paw_an_init, paw_an_free, &
-                             & paw_an_nullify
+                               paw_an_nullify
  use m_pawang,           only: pawang_type
  use m_pawcprj,          only: pawcprj_type,pawcprj_free,pawcprj_alloc, &
-                             & pawcprj_getdim
+                               pawcprj_getdim
  use m_paw_dmft,         only: init_sc_dmft,destroy_sc_dmft,paw_dmft_type
  use m_pawfgr,           only: pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_pawfgrtab,        only: pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
@@ -581,7 +581,7 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
                 & ngfft,ngfftf)
 
  !** Init to zero different energies
- call energies_init(tdks%energies)
+ call tdks%energies%init()
  tdks%ecore = zero
  tdks%etot = zero
 

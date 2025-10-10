@@ -3,7 +3,7 @@
 !! m_matrix
 !!
 !! FUNCTION
-!! Module containing some function acting on a matrix 
+!! Module containing some function acting on a matrix
 !!  (sqrt root)
 !!
 !! COPYRIGHT
@@ -70,8 +70,8 @@ subroutine invsqrt_matrix(matrix,tndim,force_diag)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: tndim 
- complex(dpc),intent(inout) :: matrix(tndim,tndim)
+ integer,intent(in) :: tndim
+ complex(dp),intent(inout) :: matrix(tndim,tndim)
  integer, intent(out) :: force_diag
 !arrays
 
@@ -82,10 +82,9 @@ subroutine invsqrt_matrix(matrix,tndim,force_diag)
  real(dp) :: pawprtvol
 !arrays
  real(dp),allocatable :: eig(:),rwork(:)
- complex(dpc),allocatable :: zwork(:),diag(:,:)
- complex(dpc),allocatable :: sqrtmat(:,:),zhdp2(:,:),sqrtmatinv(:,:)
- complex(dpc),allocatable :: initialmatrix(:,:)
- 
+ complex(dp),allocatable :: zwork(:),diag(:,:)
+ complex(dp),allocatable :: sqrtmat(:,:),zhdp2(:,:),sqrtmatinv(:,:)
+ complex(dp),allocatable :: initialmatrix(:,:)
 ! *************************************************************************
 
 !Do not remove this silly print instruction. Seems needed to avoid floating
@@ -104,7 +103,7 @@ subroutine invsqrt_matrix(matrix,tndim,force_diag)
  ABI_MALLOC(rwork,(3*tndim-2))
  ABI_MALLOC(zwork,(lwork))
  ABI_MALLOC(eig,(tndim))
- 
+
  call zheev('v','u',tndim,matrix,tndim,eig,zwork,lwork,rwork,info)
  if(pawprtvol>3) then
    write(message,'(2a)') ch10,'  - rotation matrix - '
@@ -116,8 +115,8 @@ subroutine invsqrt_matrix(matrix,tndim,force_diag)
     call wrtout(std_out,message,'COLL')
    end do
  endif
- 
- 
+
+
  ABI_FREE(zwork)
  ABI_FREE(rwork)
  if(info/=0) then
@@ -259,7 +258,7 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
  integer,allocatable :: nonnul(:)
  integer,allocatable :: nonnuldege(:)
  logical :: testdege,swap
- 
+
 ! *************************************************************************
 
 !!!Do not remove this silly print instruction. Seems needed to avoid floating
@@ -275,7 +274,7 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
 
  ABI_MALLOC(matrix_save,(tndim,tndim))
  matrix_save=matrix
- 
+
  ABI_MALLOC(Permutcol,(tndim,tndim))
 
  Permutcol=zero
@@ -321,7 +320,7 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
  ABI_MALLOC(Apermutcol,(tndim,tndim))
  if(prtopt==1) then
    write(std_out,*) "Check product of original matrix by permutation matrix "
- endif 
+ endif
  Apermutcol=zero
  do im1=1,tndim
   do im2=1,tndim
@@ -338,7 +337,7 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
       write(std_out,'(2(1x,18(1x,f22.18,f22.18)))') (Apermutcol(im1,im2),im2=1,tndim)
    end do
  endif
- 
+
 
 
  ABI_MALLOC(Permutline,(tndim,tndim))
@@ -450,7 +449,7 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
   endif
   if(testdege) then
    current_dege=current_dege+1
-  else 
+  else
    !new set of degenerate state: reorder it: put it into block diagonal
    !form for column
      if(prtopt==1) write(std_out,*) "newstarting, current_dege",newstarting, current_dege
@@ -593,7 +592,7 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: tndim
- complex(dpc),intent(inout) :: matrix(tndim,tndim)
+ complex(dp),intent(inout) :: matrix(tndim,tndim)
  real(dp),intent(inout) :: eig(tndim)
 !arrays
 
@@ -601,19 +600,18 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
 !scalars
  integer :: im1,im2,im3,info,lwork
  character(len=500) :: message
- complex(dpc):: tmpx
+ complex(dp):: tmpx
  integer(dp):: tmpi
 !arrays
  real(dp),allocatable :: rwork(:)
- complex(dpc),allocatable :: work(:)
+ complex(dp),allocatable :: work(:)
  real(dp),allocatable :: Permutcol(:,:)
- complex(dpc),allocatable :: Apermutcol(:,:)
- complex(dpc),allocatable :: Apermutline(:,:)
- complex(dpc),allocatable :: Apermutlineback(:,:)
+ complex(dp),allocatable :: Apermutcol(:,:)
+ complex(dp),allocatable :: Apermutline(:,:)
+ complex(dp),allocatable :: Apermutlineback(:,:)
  real(dp),allocatable :: Permutline(:,:)
- complex(dpc),allocatable :: matrix_save(:,:) !,W(:)
+ complex(dp),allocatable :: matrix_save(:,:) !,W(:)
  integer,allocatable :: nonnul(:)
- 
 ! *************************************************************************
 
 !!!Do not remove this silly print instruction. Seems needed to avoid floating
@@ -629,7 +627,7 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
 
  ABI_MALLOC(matrix_save,(tndim,tndim))
  matrix_save=matrix
- 
+
  ABI_MALLOC(Permutcol,(tndim,tndim))
 
  Permutcol=zero
@@ -688,7 +686,7 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
  do im1=1,tndim
     write(std_out,'(2(1x,30(1x,f22.18,f22.18)))') (Apermutcol(im1,im2),im2=1,tndim)
  end do
- 
+
 
 
  ABI_MALLOC(Permutline,(tndim,tndim))

@@ -51,7 +51,7 @@ private
 
 real(dp), public, allocatable  :: epsilon_eigenvalues_0(:)     ! eigenvalues of the static dielectric matrix
 
-complex(dpc), public, allocatable  :: epsilon_inverse_0(:,:)   ! eps^{-1}-1 in diagonal basis
+complex(dp), public, allocatable  :: epsilon_inverse_0(:,:)   ! eps^{-1}-1 in diagonal basis
 
 integer, public ::  kmax, nseeds, lmax
 integer, public ::  first_seed
@@ -99,15 +99,14 @@ integer,       intent(in) :: nseeds, kmax
 logical,       intent(in) :: debug
 
 real   (dp),  intent(out) :: epsilon_eigenvalues(nseeds*kmax)
-complex(dpc), intent(out) :: Lbasis(npw_k,nseeds*kmax)  ! array containing the Lanczos basis
+complex(dp), intent(out) :: Lbasis(npw_k,nseeds*kmax)  ! array containing the Lanczos basis
 
 
 ! local variables
 
-complex(dpc), allocatable :: seeds(:,:)
-
-complex(dpc),allocatable :: alpha(:,:,:)
-complex(dpc),allocatable :: beta (:,:,:)
+complex(dp), allocatable :: seeds(:,:)
+complex(dp),allocatable :: alpha(:,:,:)
+complex(dp),allocatable :: beta (:,:,:)
 
 integer :: mpi_communicator
 
@@ -178,17 +177,16 @@ integer,       intent(in) :: nseeds, kmax
 character(*),  intent(in) :: output_filename
 
 
-complex(dpc), intent(out) :: Lbasis(:,:)
-complex(dpc), intent(out) :: alpha(:,:,:)
-complex(dpc), intent(out) :: beta (:,:,:)
+complex(dp), intent(out) :: Lbasis(:,:)
+complex(dp), intent(out) :: alpha(:,:,:)
+complex(dp), intent(out) :: beta (:,:,:)
 
 
 ! local variables
 
 
-complex(dpc),allocatable :: seeds(:,:)
-
-complex(dpc),allocatable :: Lbasis_diag(:,:)
+complex(dp),allocatable :: seeds(:,:)
+complex(dp),allocatable :: Lbasis_diag(:,:)
 
 
 real(dp),    allocatable :: psik(:,:)
@@ -388,43 +386,35 @@ character(128)  :: output_filename
 character(256)  :: timing_string
 
 
-complex(dpc), allocatable :: Lbasis_exact(:,:)
-complex(dpc), allocatable :: Lbasis_model(:,:)
-
-complex(dpc), allocatable :: sub_Lbasis_exact(:,:)
-complex(dpc), allocatable :: sub_Lbasis_model(:,:)
-
-complex(dpc), allocatable :: dummy(:,:)
-complex(dpc), allocatable :: dummy2(:,:)
-complex(dpc), allocatable :: dummy3(:,:)
-
-complex(dpc), allocatable :: alpha_exact(:,:,:)
-complex(dpc), allocatable :: beta_exact (:,:,:)
-
-complex(dpc), allocatable :: alpha_model(:,:,:)
-complex(dpc), allocatable :: beta_model (:,:,:)
+complex(dp), allocatable :: Lbasis_exact(:,:)
+complex(dp), allocatable :: Lbasis_model(:,:)
+complex(dp), allocatable :: sub_Lbasis_exact(:,:)
+complex(dp), allocatable :: sub_Lbasis_model(:,:)
+complex(dp), allocatable :: dummy(:,:)
+complex(dp), allocatable :: dummy2(:,:)
+complex(dp), allocatable :: dummy3(:,:)
+complex(dp), allocatable :: alpha_exact(:,:,:)
+complex(dp), allocatable :: beta_exact (:,:,:)
+complex(dp), allocatable :: alpha_model(:,:,:)
+complex(dp), allocatable :: beta_model (:,:,:)
 
 real(dp), allocatable :: eig_exact(:)
 real(dp), allocatable :: eig_model(:)
 
-complex(dpc), allocatable :: model_epsilon_matrix(:,:)
-complex(dpc), allocatable :: vector(:)
+complex(dp), allocatable :: model_epsilon_matrix(:,:)
+complex(dp), allocatable :: vector(:)
 
-real(dpc) :: tr_eps_1, tr_eps_2, tr_eps_3
+real(dp) :: tr_eps_1, tr_eps_2, tr_eps_3
 
 
 integer   ::  lwork, lrwork, liwork, info
-complex(dpc), allocatable :: work(:)
+complex(dp), allocatable :: work(:)
 real(dp)    , allocatable :: rwork(:)
 integer     , allocatable :: iwork(:)
 
 integer        :: debug_unit
 character(50)  :: debug_filename
-
 ! *************************************************************************
-
-
-
 
 kmax_exact   = dtset%gwls_stern_kmax
 kmax_model   = dtset%gwls_kmax_complement
