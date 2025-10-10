@@ -18122,7 +18122,7 @@
   0.0000000000000000E+00  5.1766611427224929E-01 -5.0001531349548134E-01
 </exact_exchange_X_matrix>
 <exact_exchange core-core=" -6.0788998081236819E+01"/>
-<!-- Program:  atompaw - input data follows: 
+<!-- Program:  atompaw - input data follows:
 Ge 32
 XC_GGA_X_PBE+XC_GGA_C_PBE loggrid 2000
 4 4 3 0 0 0

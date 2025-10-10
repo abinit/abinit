@@ -114,7 +114,7 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawprtvol,hdc,weiss)
  character(len=500) :: message
  integer :: iatom,ifreq,im,im1,isppol,ispinor,ispinor1
  integer :: lpawu,mbandc,natom,ndim,nkpt,nspinor,nsppol,nsppol_imp,testblock,useylm
-! complex(dpc) :: g,g0,w
+! complex(dp) :: g,g0,w
 ! arrays
  complex(dp), allocatable :: Id(:,:,:,:)
  type(matlu_type), allocatable :: eigvectmatlu(:)
@@ -122,7 +122,7 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawprtvol,hdc,weiss)
  type(oper_type)  :: energy_level
  type(green_type) :: green_hubbard
  type(matlu_type), allocatable :: level_diag(:)
- complex(dpc) :: omega_current
+ complex(dp) :: omega_current
  type(vee_type), allocatable :: vee_rotated(:)
 ! ************************************************************************
  mbandc=paw_dmft%mbandc
@@ -418,9 +418,9 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
  type(green_type) :: green_hubbard_realw
  type(level2_type), allocatable :: occ_level(:)
  type(level1_type), allocatable :: e_nelec(:)
- complex(dpc), allocatable :: green_temp(:,:)
- complex(dpc), allocatable :: green_temp_realw(:,:)
- complex(dpc) :: Z_part
+ complex(dp), allocatable :: green_temp(:,:)
+ complex(dp), allocatable :: green_temp_realw(:,:)
+ complex(dp) :: Z_part
  real(dp), allocatable :: maxener(:),minener(:)
  real(dp), allocatable :: elevels(:)
  real(dp) :: emax,emin,eshift,prtopt, Ej_np1, Ei_n,beta,maxarg_exp,tmp

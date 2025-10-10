@@ -8,15 +8,15 @@
  #fftalg 312
  #fftalg 401
  #fftalg 402
- 
+
 
  ngfft 18 18 18
  ngfftdg 36 36 36
  mem_test 0
 
- occopt 1 
+ occopt 1
  kptopt 0
- nkpt 1 toldfe 1.0d-10 
+ nkpt 1 toldfe 1.0d-10
 
  # Do not write WFK and DEN files
  prtwf 0
@@ -53,7 +53,7 @@
 #%% [extra_info]
 #%% keywords = PAW
 #%% authors = M. Giantomassi
-#%% description = 
+#%% description =
 #%%    C-diamond, Bulk, 2 atoms, paral_kgb, with PAW.
 #%%    Test MPI-FFT with 2 processors, istwfk=2
 #%% topics = parallelism

@@ -126,12 +126,8 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 !***************************************************************************
 
  if(iexit/=0)then
-   if (allocated(fcart_m))       then
-     ABI_FREE(fcart_m)
-   end if
-   if (allocated(vel_nexthalf))  then
-     ABI_FREE(vel_nexthalf)
-   end if
+   ABI_SFREE(fcart_m)
+   ABI_SFREE(vel_nexthalf)
    return
  end if
 
@@ -153,12 +149,8 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 !###     dataset that exit before itime==ntime
 
  if(itime==1)then
-   if (allocated(fcart_m))       then
-     ABI_FREE(fcart_m)
-   end if
-   if (allocated(vel_nexthalf))  then
-     ABI_FREE(vel_nexthalf)
-   end if
+   ABI_SFREE(fcart_m)
+   ABI_SFREE(vel_nexthalf)
  end if
 
  if (.not.allocated(fcart_m))       then

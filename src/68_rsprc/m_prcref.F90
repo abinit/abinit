@@ -47,7 +47,6 @@ module m_prcref
  use m_fft,      only : zerosym, indirect_parallel_fourier, fourdp
  use m_kg,       only : getph
  use m_spacepar, only : hartre, laplacian
- use m_distribfft, only : init_distribfft_seq
  use m_forces,     only : fresid
  use m_atm2fft,    only : atm2fft
  use m_rhotoxc,    only : rhotoxc
@@ -122,7 +121,7 @@ contains
 !!  etotal=total ennergy
 !!  fcart(3,natom)=cartesian forces (hartree/bohr)
 !!  ffttomix(nfft*(1-nfftprc/nfft))=Index of the points of the FFT (fine) grid on the grid used for mixing (coarse)
-!!  gmet(3,3)=metrix tensor in G space in Bohr**-2.
+!!  gmet(3,3)=metric tensor in G space in Bohr**-2.
 !!  gsqcut=cutoff on (k+G)^2 (bohr^-2)
 !!  istep= number of the step in the SCF cycle
 !!  kg_diel(3,npwdiel)=reduced planewave coordinates for the dielectric matrix.
@@ -776,7 +775,7 @@ end subroutine prcref
 !!   | typat(natom)=integer type for each atom in cell
 !!  fcart(3,natom)=cartesian forces (hartree/bohr)
 !!  ffttomix(nfft*(1-nfftprc/nfft))=Index of the points of the FFT (fine) grid on the grid used for mixing (coarse)
-!!  gmet(3,3)=metrix tensor in G space in Bohr**-2.
+!!  gmet(3,3)=metric tensor in G space in Bohr**-2.
 !!  gsqcut=cutoff on (k+G)^2 (bohr^-2)
 !!  istep= number of the step in the SCF cycle
 !!  kg_diel(3,npwdiel)=reduced planewave coordinates for the dielectric matrix.
@@ -2150,7 +2149,7 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,nfft,ngfft,nkxc,npwdiel,nspden,occo
 !  wkxc(:)=merge(kxc(:,1), kxc_min, kxc(:,1) > kxc_min)
 !  ENDDEBUG
    call initmpi_seq(mpi_enreg_seq)
-   call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfft(2),ngfft(3),'all')
+   call MPI_enreg_seq%distribfft%init_seq('c',ngfft(2),ngfft(3),'all')
    call fourdp(1,kxcg,wkxc,-1,mpi_enreg_seq,nfft,1,ngfft,0) ! trsfrm R to G
    call destroy_mpi_enreg(mpi_enreg_seq)
 
@@ -2387,7 +2386,7 @@ end subroutine dieltcel
 !!  gprimd(3,3)=dimensional primitive translations in fourier space (bohr**-1)
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  vresid(nfft,nspden)=residual potential
-!!  base(nfft) = real space function used as a basis to guess a fine dielectric funtion
+!!  base(nfft) = real space function used as a basis to guess a fine dielectric function
 !!  see the calling routine to know the content
 !!
 !! OUTPUT
@@ -2842,7 +2841,7 @@ subroutine prcrskerker2(dtset,nfft,nspden,ngfft,dielar,gprimd,rprimd,vresid,vres
 &rdielng,&          !the density
 &DE,&  !resulting dorproduct integrated over r  ! here DE is used has a buffer
 &doti,&          !imaginary part of the integral
-&size(rdielng,1),&          !number of localy(cpu) attributed grid point
+&size(rdielng,1),&          !number of locally(cpu) attributed grid point
 &nfftotf,&        !real total number of grid point
 &nspden,&        !nspden
 &option,&        !1=compute only the real part 2=compute also the imaginary part
@@ -2856,7 +2855,7 @@ subroutine prcrskerker2(dtset,nfft,nspden,ngfft,dielar,gprimd,rprimd,vresid,vres
 &rdielng,&          !the density
 &C1,&  !resulting dorproduct integrated over r  ! here DE is used has a buffer
 &doti,&          !imaginary part of the integral
-&size(rdielng,1),&          !number of localy(cpu) attributed grid point
+&size(rdielng,1),&          !number of locally(cpu) attributed grid point
 &nfftotf,&        !real total number of grid point
 &nspden,&        !nspden
 &option,&        !1=compute only the real part 2=compute also the imaginary part
@@ -2870,7 +2869,7 @@ subroutine prcrskerker2(dtset,nfft,nspden,ngfft,dielar,gprimd,rprimd,vresid,vres
 &rdielng,&          !the density
 &C2,&  !resulting dorproduct integrated over r  ! here DE is used has a buffer
 &doti,&          !imaginary part of the integral
-&size(rdielng,1),&          !number of localy(cpu) attributed grid point
+&size(rdielng,1),&          !number of locally(cpu) attributed grid point
 &nfftotf,&        !real total number of grid point
 &nspden,&        !nspden
 &option,&        !1=compute only the real part 2=compute also the imaginary part
@@ -2990,7 +2989,7 @@ end subroutine cgpr
 !! vdp_dum_vdp: derivative of f
 !!
 !! OUTPUT
-!! fmin: minimun value reached for dp_dum_vdp
+!! fmin: minimum value reached for dp_dum_vdp
 !!
 !! SIDE EFFECTS
 !! grad: the gradient line along which the minimization is performed (not changed)
@@ -3032,16 +3031,14 @@ end subroutine linmin
 !! bracketing
 !!
 !! FUNCTION
-!! bracket a minimun of a function f
+!! bracket a minimum of a function f
 !!
 !! INPUTS
 !! dp_dum_vdp: the function of which the mimimum should be bracketted
 !!
-!!
 !! OUTPUT
 !! b= last member of the bracketing triplet a < x < b
 !! fa,fx,fb= value of the function at dp_dum_vdp(v(:)+y*grad(:))
-!!
 !!
 !! SIDE EFFECTS
 !! v: the initial vector for the function (return unchanged)
@@ -3141,7 +3138,7 @@ end subroutine bracketing
 !! vdp_dum_vdp: derivative of the function (return a vector of dp from a vector of dp)
 !! itmax: number of iterations allowed
 !! tol: tolerance on error. It depend on the precision of the numbers
-!! (usualy chosen as sqrt(max precision available with your floating point reresentation))
+!! (usually chosen as sqrt(max precision available with your floating point reresentation))
 !! ax,xx,bx: a bracketing triplet around the minimum to be find
 !! OUTPUT
 !! xmin: value such that dp_dum_vdp(v(:)+xmin*grad(:)) is minimum

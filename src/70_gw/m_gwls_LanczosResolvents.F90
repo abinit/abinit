@@ -51,18 +51,18 @@ private
 
 integer :: LR_kmax, LR_nseeds
 
-complex(dpc), allocatable :: precondition_C(:)       ! this operator is diagonal!
-complex(dpc), allocatable :: precondition_one_on_C(:)  ! this operator is diagonal!
+complex(dp), allocatable :: precondition_C(:)       ! this operator is diagonal!
+complex(dp), allocatable :: precondition_one_on_C(:)  ! this operator is diagonal!
 
 
-complex(dpc), allocatable, public :: Hamiltonian_Qk(:,:) ! Lanczos basis of the Hamiltonian
+complex(dp), allocatable, public :: Hamiltonian_Qk(:,:) ! Lanczos basis of the Hamiltonian
 
-complex(dpc), allocatable :: LR_alpha(:,:,:)
-complex(dpc), allocatable :: LR_beta (:,:,:)
-complex(dpc), allocatable :: LR_seeds(:,:)
+complex(dp), allocatable :: LR_alpha(:,:,:)
+complex(dp), allocatable :: LR_beta (:,:,:)
+complex(dp), allocatable :: LR_seeds(:,:)
 real(dp),     allocatable :: LR_Hamiltonian_eigenvalues(:)
 
-complex(dpc), allocatable, public :: LR_M_matrix(:,:)
+complex(dp), allocatable, public :: LR_M_matrix(:,:)
 !!***
 
 public :: setup_LanczosResolvents
@@ -92,7 +92,7 @@ contains
 subroutine setup_LanczosResolvents(kmax, prec)
 !----------------------------------------------------------------------------------------------------
 !
-! This subroutine prepares global work arrays in order to use the Lanczos scheme to 
+! This subroutine prepares global work arrays in order to use the Lanczos scheme to
 ! compute matrix elements of inverse operators.
 !
 !
@@ -125,7 +125,7 @@ if ( prec ) then
   !precondition_one_on_C(:) = pcon(:) ! yields very bad results!
   precondition_C(:)        = cmplx_1/precondition_one_on_C(:)
 
-else 
+else
   precondition_C(:)        = cmplx_1
   precondition_one_on_C(:) = cmplx_1
 end if
@@ -200,13 +200,13 @@ subroutine matrix_function_preconditioned_Hamiltonian(vector_out,vector_in,Hsize
 !----------------------------------------------------------------------------------------------------
 implicit none
 integer,      intent(in)  :: Hsize
-complex(dpc), intent(out) :: vector_out(Hsize)
-complex(dpc), intent(in)  :: vector_in(Hsize)
+complex(dp), intent(out) :: vector_out(Hsize)
+complex(dp), intent(in)  :: vector_in(Hsize)
 
 ! local variables
 real(dp)  :: psikg(2,npw_g)
 
-complex(dpc)  :: tmp_vector(Hsize)
+complex(dp)  :: tmp_vector(Hsize)
 
 ! *************************************************************************
 
@@ -245,7 +245,7 @@ subroutine build_preconditioned_Hamiltonian_Lanczos_basis(seed_vector)
 ! This function Computes the Lanczos basis of the preconditioned Hamiltonian.
 !----------------------------------------------------------------------------------------------------
 implicit none
-complex(dpc), intent(in) :: seed_vector(npw_g)
+complex(dp), intent(in) :: seed_vector(npw_g)
 
 integer :: l
 integer :: ierr
@@ -265,7 +265,7 @@ call block_lanczos_algorithm(mpi_communicator, matrix_function_preconditioned_Ha
 &                            LR_alpha, LR_beta, Hamiltonian_Qk)
 
 
-call diagonalize_lanczos_banded(LR_kmax,LR_nseeds,npw_g, LR_alpha,LR_beta,  & 
+call diagonalize_lanczos_banded(LR_kmax,LR_nseeds,npw_g, LR_alpha,LR_beta,  &
 Hamiltonian_Qk, LR_Hamiltonian_eigenvalues,.false.)
 
 
@@ -308,34 +308,34 @@ subroutine compute_resolvent_column_shift_lanczos(nz, list_z, nvec, list_left_ve
 ! namely
 !
 !
-!               I_l(z) = < left_vector_l | xi(z) > 
+!               I_l(z) = < left_vector_l | xi(z) >
 !
-! where |xi(z) > is obtained from the shift lanczos scheme. 
+! where |xi(z) > is obtained from the shift lanczos scheme.
 !----------------------------------------------------------------------------------------------------
 implicit none
 
 integer     , intent(in) :: nz
-complex(dpc), intent(in) :: list_z(nz)
+complex(dp), intent(in) :: list_z(nz)
 
 integer     , intent(in) :: nvec
-complex(dpc), intent(in) :: list_left_vectors(npw_g,nvec)
+complex(dp), intent(in) :: list_left_vectors(npw_g,nvec)
 
-complex(dpc), intent(in) :: seed_vector(npw_g)
+complex(dp), intent(in) :: seed_vector(npw_g)
 
-complex(dpc), intent(out) :: matrix_elements_resolvent(nz,nvec)
+complex(dp), intent(out) :: matrix_elements_resolvent(nz,nvec)
 
 ! local variables
 integer        :: iz, l
-complex(dpc)   :: z
+complex(dp)   :: z
 integer        :: ierr
 integer        :: mpi_communicator
 
-complex(dpc)   :: right_vec(LR_kmax)
-complex(dpc)   :: left_vecs(LR_kmax,nvec)
-complex(dpc)   :: work_vec(LR_kmax)
-complex(dpc)   :: shift_lanczos_matrix(LR_kmax,LR_kmax)
+complex(dp)   :: right_vec(LR_kmax)
+complex(dp)   :: left_vecs(LR_kmax,nvec)
+complex(dp)   :: work_vec(LR_kmax)
+complex(dp)   :: shift_lanczos_matrix(LR_kmax,LR_kmax)
 
-complex(dpc)   :: work_array(npw_g)
+complex(dp)   :: work_array(npw_g)
 
 ! *************************************************************************
 
@@ -353,13 +353,13 @@ call build_preconditioned_Hamiltonian_Lanczos_basis(seed_vector)
 ! Next, generate arrays which do not depend on z, the external shift.
 !----------------------------------------------------------------------------------------------------
 
-! Q^dagger . C^{-2} | seed > 
-work_array(:) = precondition_one_on_C(:)**2*seed_vector 
+! Q^dagger . C^{-2} | seed >
+work_array(:) = precondition_one_on_C(:)**2*seed_vector
 
 call ZGEMV('C',npw_g,LR_kmax,cmplx_1,Hamiltonian_Qk,npw_g,work_array,1,cmplx_0,right_vec,1)
 call xmpi_sum(right_vec,mpi_communicator,ierr) ! sum on all processors working on FFT!
 
-!  Q^dagger | left_vectors > 
+!  Q^dagger | left_vectors >
 call ZGEMM('C','N',LR_kmax,nvec,npw_g,cmplx_1,Hamiltonian_Qk,npw_g,list_left_vectors,npw_g,cmplx_0,left_vecs,LR_kmax)
 call xmpi_sum(left_vecs,mpi_communicator,ierr) ! sum on all processors working on FFT!
 
@@ -376,7 +376,7 @@ shift_lanczos_matrix(:,:) = LR_M_matrix(:,:)
 
 do l = 1, LR_kmax
 shift_lanczos_matrix(l,l) = shift_lanczos_matrix(l,l)-z
-end do 
+end do
 
 ! since z could be complex, the matrix is not necessarily hermitian. Invert using general Lapack scheme
 call invert_general_matrix(LR_kmax,shift_lanczos_matrix)
@@ -387,7 +387,7 @@ call invert_general_matrix(LR_kmax,shift_lanczos_matrix)
 call ZGEMV('N',LR_kmax,LR_kmax,cmplx_1,shift_lanczos_matrix,LR_kmax,right_vec,1,cmplx_0,work_vec,1)
 
 
-! matrix_elements = < right_vecs | work_vec > 
+! matrix_elements = < right_vecs | work_vec >
 call ZGEMV('C',LR_kmax,nvec,cmplx_1,left_vecs,LR_kmax,work_vec,1,cmplx_0,matrix_elements_resolvent(iz,:),1)
 
 end do
@@ -412,12 +412,12 @@ end subroutine compute_resolvent_column_shift_lanczos
 
 subroutine compute_resolvent_column_shift_lanczos_right_vectors(seed_vector, right_vec)
 !----------------------------------------------------------------------------------------------------
-! The goal of this routine is to participate in the computation of a column of the resolvent 
+! The goal of this routine is to participate in the computation of a column of the resolvent
 ! using the shift lanczos algorithm. This routine should be called FIRST.
 !
 ! This routine:
 !
-!       1) builds the preconditioned Hamiltonian Lanczos basis, using the seed_vector, and 
+!       1) builds the preconditioned Hamiltonian Lanczos basis, using the seed_vector, and
 !          stores result in the Module variables.
 !
 !       2) prepares and returns the Lanczos basis-projected right vectors, ready for further processing.
@@ -426,14 +426,14 @@ subroutine compute_resolvent_column_shift_lanczos_right_vectors(seed_vector, rig
 !----------------------------------------------------------------------------------------------------
 implicit none
 
-complex(dpc), intent(in) :: seed_vector(npw_g)
-complex(dpc), intent(out):: right_vec(LR_kmax)
+complex(dp), intent(in) :: seed_vector(npw_g)
+complex(dp), intent(out):: right_vec(LR_kmax)
 
 ! local variables
 integer        :: mpi_communicator
 integer        :: ierr
 
-complex(dpc)   :: work_array(npw_g)
+complex(dp)   :: work_array(npw_g)
 
 ! *************************************************************************
 
@@ -450,7 +450,7 @@ call build_preconditioned_Hamiltonian_Lanczos_basis(seed_vector)
 ! Next, generate arrays which do not depend on z, the external shift.
 !----------------------------------------------------------------------------------------------------
 
-! Q^dagger . C^{-2} | seed > 
+! Q^dagger . C^{-2} | seed >
 work_array(:) = precondition_one_on_C(:)**2*seed_vector(:)
 
 call ZGEMV('C', npw_g, LR_kmax, cmplx_1, Hamiltonian_Qk, npw_g, work_array, 1, cmplx_0, right_vec, 1)
@@ -482,23 +482,19 @@ subroutine invert_general_matrix(n,matrix)
 implicit none
 
 integer,      intent(in)    :: n
-complex(dpc), intent(inout) :: matrix(n,n)
+complex(dp), intent(inout) :: matrix(n,n)
 
 integer :: info
 integer :: ipiv(n)
 
 integer        :: debug_unit
 character(50)  :: debug_filename
-
-
-
-
-complex(dpc) :: work(n)
+complex(dp) :: work(n)
 
 ! *************************************************************************
 
 call ZGETRF( n, n, matrix, n, ipiv, info )
-if ( info /= 0) then        
+if ( info /= 0) then
   debug_unit = get_unit()
   write(debug_filename,'(A,I4.4,A)') 'LAPACK_DEBUG_PROC=',mpi_enreg%me,'.log'
 
@@ -515,7 +511,7 @@ end if
 
 call ZGETRI( n, matrix, n, ipiv, work, n, info )
 
-if ( info /= 0) then        
+if ( info /= 0) then
   debug_unit = get_unit()
   write(debug_filename,'(A,I4.4,A)') 'LAPACK_DEBUG_PROC=',mpi_enreg%me,'.log'
 

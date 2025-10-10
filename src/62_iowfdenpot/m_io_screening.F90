@@ -183,7 +183,7 @@ MODULE m_io_screening
    ! Input variable (GW compensation energy technique)
 
   character(len=3) :: kind_cdata
-  ! Flag to signal whether the data is in single or double precision ("spc" or "dpc")
+  ! Flag to signal whether the data is in single or double precision ("spc" or "dp")
   ! For the time being, we always write/read in double precision.
   ! This flag could be use to reduce the memory requirements if spc:
   ! we run calculations in single precision dump the results with the same precision without
@@ -212,7 +212,7 @@ MODULE m_io_screening
     ! qlwl(3,nqlwl)
     ! q-points for the long wave-length limit treatment (r.l.u)
 
-  complex(dpc),allocatable :: omega(:)
+  complex(dp),allocatable :: omega(:)
     ! omega(nomega)
     ! All frequencies calculated both along the real and the imaginary axis.
     ! Real frequencies are packed in the first section.
@@ -557,7 +557,7 @@ subroutine hscr_io(hscr, fform, rdwr, unt, comm, master, iomode)
    if (iomode==IO_MODE_FORTRAN .or. iomode==IO_MODE_MPI) then
      ! Write the abinit header.
      call hscr%hdr%fort_write(unt, fform, ierr)
-     ABI_CHECK(ierr == 0, "hdr_fort_write retured ierr != 0")
+     ABI_CHECK(ierr == 0, "hdr_fort_write returned ierr != 0")
 
      write(unt, err=10, iomsg=errmsg)hscr%titles
 
@@ -596,7 +596,7 @@ subroutine hscr_io(hscr, fform, rdwr, unt, comm, master, iomode)
 
      ! Define dimensions
      ! Part 2) of etsf-io specifications
-     ! FIXME: Spin is only used in particular cases, We usuall get the trace of W in spin space
+     ! FIXME: Spin is only used in particular cases, We usually get the trace of W in spin space
      ! and I'm not gonna allocate extra memory just to have up up, down down
      ! Besides number_of_spins should be replaced by `number_of_spins_dielectric_function`
      ! Should add spin_dependent attribute.
@@ -850,7 +850,7 @@ end subroutine hscr_print
 !!
 !! INPUTS
 !!  varname=Name of the netcdf variable (used to get fform and ID).
-!!  ikxc=Integer flag definining the type of XC kernel (0 if None i.e RPA)
+!!  ikxc=Integer flag defining the type of XC kernel (0 if None i.e RPA)
 !!  test_type=Integer flag defining the type of probing charge (0 for None)
 !!  tordering=The time-ordering of the Response function.
 !!  gvec(3,Ep%npwe)=The G-vectors used.
@@ -1352,14 +1352,14 @@ subroutine write_screening(varname, unt, iomode, npwe, nomega, iq_ibz, epsm1)
  character(len=*),intent(in) :: varname
  integer,intent(in) :: nomega,npwe,iq_ibz,unt,iomode
 !arrays
- complex(gwpc),target,intent(in) :: epsm1(npwe,npwe,nomega)
+ complex(gwp),target,intent(in) :: epsm1(npwe,npwe,nomega)
 
 !Local variables-------------------------------
 !scalars
  integer :: ipwe,iomega,spins(2),s1,s2
  character(len=500) :: errmsg
 !arrays
- complex(dpc),allocatable :: epsm1d(:,:)
+ complex(dp),allocatable :: epsm1d(:,:)
  integer :: varid,ncerr
 #ifdef HAVE_GW_DPC
  real(dp), ABI_CONTIGUOUS pointer :: real_epsm1(:,:,:,:,:,:,:)
@@ -1444,7 +1444,7 @@ end subroutine write_screening
 !!
 !! SOURCE
 
-subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, &
+subroutine read_screening(varname, fname, npweA, nqibzA, nomegaA, epsm1, iomode, comm, &
                           iqiA) ! Optional
 
 !Arguments ------------------------------------
@@ -1453,7 +1453,7 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, 
  integer,optional,intent(in) :: iqiA
  character(len=*),intent(in) :: varname,fname
 !arrays
- complex(gwpc),target,intent(inout) :: epsm1(npweA,npweA,nomegaA,nqibzA)
+ complex(gwp),target,intent(inout) :: epsm1(npweA,npweA,nomegaA,nqibzA)
 
 !Local variables-------------------------------
 !scalars
@@ -1463,7 +1463,7 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, 
  integer :: test_fform,mpi_err,ierr,sc_mode, bsize_frm,mpi_type_frm
  integer :: mpi_fh,buf_dim !,mat_ggw,mat_ggwq
  integer(XMPI_OFFSET_KIND) :: offset,displ_wq !,my_offpad
- !complex(dpc) :: ctmp
+ !complex(dp) :: ctmp
 #endif
  real(dp) :: cpu, wall, gflops
  character(len=500) :: msg,errmsg
@@ -1473,7 +1473,7 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, 
 #ifdef HAVE_MPI_IO
  integer(MPI_OFFSET_KIND),allocatable :: offset_wq(:,:)
 #endif
- complex(dpc),allocatable :: bufdc2d(:,:),bufdc3d(:,:,:)
+ complex(dp),allocatable :: bufdc2d(:,:),bufdc3d(:,:,:)
  ! pointers passed to netcdf4 routines (complex datatypes are not supported).
 #ifdef HAVE_GW_DPC
  real(dp), ABI_CONTIGUOUS pointer :: real_epsm1(:,:,:,:,:,:,:)
@@ -1570,7 +1570,7 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, 
  case (IO_MODE_MPI)
 #ifdef HAVE_MPI_IO
    if (read_qslice) then
-      call wrtout(std_out, "calling mpiotk to read_qslice")
+      !call wrtout(std_out, "calling mpiotk to read_qslice")
       buf_dim = (npweA)**2 * nomegaA
       offset = offset_wq(1,iqiA)
       sc_mode = xmpio_collective
@@ -1581,7 +1581,7 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, 
         buf_dim,epsm1,xmpio_chunk_bsize,sc_mode,comm,ierr)
      ABI_CHECK(ierr==0,"Fortran matrix too big")
 #else
-     ! Have to allocate workspace for dpc data.
+     ! Have to allocate workspace for dp data.
      ! FIXME: Change the file format of the SCR and SUC file so that
      ! they are written in single precision if not HAVE_GW_DPC
      ABI_MALLOC_OR_DIE(bufdc3d,(npweA,npweA,nomegaA), ierr)
@@ -1596,7 +1596,7 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, 
 
    else
      ! Full matrix (G,G',w,q) is needed.
-     call wrtout(std_out, "calling mpiotk: Full matrix (G,G',w,q) is needed.")
+     !call wrtout(std_out, "calling mpiotk: Full matrix (G,G',w,q) is needed.")
 
 #ifdef HAVE_GW_DPC
      ! Can read all data at once.
@@ -1609,7 +1609,7 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, 
        buf_dim,epsm1,xmpio_chunk_bsize,sc_mode,comm,ierr)
      ABI_CHECK(ierr==0,"Fortran record too big")
 #else
-     ! Have to allocate workspace for dpc data.
+     ! Have to allocate workspace for dp data.
      ABI_MALLOC_OR_DIE(bufdc3d,(npweA,npweA,nomegaA), ierr)
      sc_mode = xmpio_collective
 
@@ -1779,7 +1779,7 @@ subroutine hscr_mpio_skip(mpio_fh, fform, offset)
 
  call hdr_mpio_skip(mpio_fh,fform,offset)
 
- call wrtout(std_out, sjoin("in hdr_mpio_skip with fform = ",itoa(fform)))
+ !call wrtout(std_out, sjoin("in hdr_mpio_skip with fform = ",itoa(fform)))
 
 #ifdef HAVE_MPI_IO
  select case (fform)
@@ -1790,12 +1790,12 @@ subroutine hscr_mpio_skip(mpio_fh, fform, offset)
    ! read headform from the 2d record.
    positloc  = offset + bsize_frm + 3*xmpi_bsize_int
    call MPI_FILE_READ_AT(mpio_fh,positloc,headform,1,MPI_INTEGER,statux,ierr)
-   call wrtout(std_out, sjoin("headform = ",itoa(headform)))
+   !call wrtout(std_out, sjoin("headform = ",itoa(headform)))
 
    ! read nqlwl from the 2d record.
    positloc  = offset + bsize_frm + 9*xmpi_bsize_int
    call MPI_FILE_READ_AT(mpio_fh,positloc,nqlwl,1,MPI_INTEGER,statux,ierr)
-   call wrtout(std_out, sjoin("nqlwl = ",itoa(nqlwl(1))))
+   !call wrtout(std_out, sjoin("nqlwl = ",itoa(nqlwl(1))))
 
    do isk=1,5
      call xmpio_read_frm(mpio_fh,offset,xmpio_single,fmarker,ierr)
@@ -1835,7 +1835,7 @@ end subroutine hscr_mpio_skip
 !! INPUTS
 !!  nfiles=Number of files to be merged.
 !!  filenames(nfiles)=Paths of files to be merged.
-!!  hscr_files(nfiles)<hscr_t>=Heades of the files to be merged.
+!!  hscr_files(nfiles)<hscr_t>=Headers of the files to be merged.
 !!  fname_out=Name of the file to be produced.
 !!
 !! OUTPUT
@@ -1864,7 +1864,7 @@ subroutine ioscr_qmerge(nfiles, filenames, hscr_files, fname_out, ohscr)
 !arrays
  integer,allocatable :: merge_table(:,:)
  real(dp) :: qdiff(3)
- complex(gwpc),allocatable :: epsm1(:,:,:,:)
+ complex(gwp),allocatable :: epsm1(:,:,:,:)
 ! *************************************************************************
 
  comm = xmpi_comm_self
@@ -1931,8 +1931,8 @@ subroutine ioscr_qmerge(nfiles, filenames, hscr_files, fname_out, ohscr)
  do iq_ibz=1,ohscr%nqibz
    ifile = merge_table(iq_ibz,1)
    iqiA  = merge_table(iq_ibz,2)
-   call read_screening(varname,filenames(ifile),npwe4m,1,nomega4m,epsm1,iomode,comm,iqiA=iqiA)
-   call write_screening(varname,ount,iomode,npwe4m,nomega4m,iq_ibz,epsm1)
+   call read_screening(varname, filenames(ifile), npwe4m, 1, nomega4m,epsm1, iomode, comm, iqiA=iqiA)
+   call write_screening(varname, ount, iomode, npwe4m, nomega4m, iq_ibz, epsm1)
  end do
 
  ABI_FREE(epsm1)
@@ -1986,7 +1986,7 @@ subroutine ioscr_qrecover(ipath, nqrec, fname_out)
  type(hscr_t) :: hscr_recov,hscr
  type(abifile_t) :: abifile
 !arrays
- complex(gwpc),allocatable :: epsm1(:,:,:,:)
+ complex(gwp),allocatable :: epsm1(:,:,:,:)
 ! *************************************************************************
 
  comm = xmpi_comm_self
@@ -2075,7 +2075,7 @@ end subroutine ioscr_qrecover
 !! INPUTS
 !!  nfiles=Number of files to be merged.
 !!  filenames(nfiles)=Paths of files to be merged.
-!!  hscr_files(nfiles)<hscr_t>=Heades of the files to be merged.
+!!  hscr_files(nfiles)<hscr_t>=Headers of the files to be merged.
 !!  fname_out=Name of the file to be produced.
 !!
 !! OUTPUT
@@ -2108,8 +2108,8 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
 !arrays
  integer,allocatable :: freq_indx(:,:),ifile_indx(:),pos_indx(:),i_temp(:),i2_temp(:,:)
  real(dp),allocatable :: real_omega(:), real_omega_wgs(:), imag_omega(:), imag_omega_wgs(:) ,omega_wgs_storage(:)
- complex(gwpc),allocatable :: epsm1(:,:,:,:),epsm1_temp(:,:,:,:)
- complex(dpc),allocatable :: omega_storage(:)
+ complex(gwp),allocatable :: epsm1(:,:,:,:),epsm1_temp(:,:,:,:)
+ complex(dp),allocatable :: omega_storage(:)
 ! *************************************************************************
 
  comm = xmpi_comm_self
@@ -2157,7 +2157,7 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
      end if
    end do
 
-   ! Check gwcalctyp and other bacic parameters.
+   ! Check gwcalctyp and other basic parameters.
    ABI_CHECK_IEQ(hscr_file(ifile)%gwcalctyp, hscr_file(1)%gwcalctyp, "Different gwcalctyp")
    ABI_CHECK_IEQ(hscr_file(ifile)%npwe, hscr_file(1)%npwe, "Different npwe")
    ABI_CHECK_IEQ(hscr_file(ifile)%id, hscr_file(1)%id, "Different IDs")
@@ -2447,7 +2447,7 @@ subroutine ioscr_wremove(inpath, ihscr, fname_out, nfreq_tot, freq_indx, ohscr)
  character(len=nctk_slen) :: varname
  type(abifile_t) :: abifile
 !arrays
- complex(gwpc),allocatable :: epsm1(:,:,:),epsm1_temp(:,:,:)
+ complex(gwp),allocatable :: epsm1(:,:,:),epsm1_temp(:,:,:)
 ! *************************************************************************
 
  comm = xmpi_comm_self
@@ -2567,7 +2567,7 @@ subroutine get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl,
  character(len=500) :: msg
 ! *************************************************************************
 
- my_rank = xmpi_comm_rank(comm) !; nprocs = xmpi_comm_size(comm)
+ my_rank = xmpi_comm_rank(comm)
 
  if (my_rank == master) then
    ! Read dimensions from the external file.
@@ -2578,7 +2578,6 @@ subroutine get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl,
    ! Master reads npw and nqlwl from the SCR file.
    call wrtout(std_out, sjoin('Testing file: ', w_fname))
    call hscr%from_file(w_fname, fform, xmpi_comm_self)
-   if (dtset%prtvol > 0) call Hscr%print([std_out], dtset%prtvol)
 
    ! Have to change %npweps if it was larger than dim on disk.
    npwe_file = Hscr%npwe
@@ -2590,11 +2589,29 @@ subroutine get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl,
       "Calculation will proceed with the maximum available set, npwe_file: ",npwe_file
      ABI_WARNING(msg)
      dtset%npweps = npwe_file
-   else if (Dtset%npweps < npwe_file) then
+   else if (dtset%npweps < npwe_file .and. dtset%npweps /= 0) then
      write(msg,'(2(a,i0),2a,i0)')&
       "The number of G-vectors stored on file (",npwe_file,") is larger than dtset%npweps: ",dtset%npweps,ch10,&
       "Calculation will proceed with dtset%npweps: ",dtset%npweps
      ABI_COMMENT(msg)
+   else
+     call Gsph_c%init(cryst, 0, ecut=dtset%ecuteps)
+     if (Gsph_c%ng > npwe_file) then
+        dtset%npweps = npwe_file
+        write(msg,'(2a,f4.1,a,i0,a,a,i0)')&
+        "npweps was not set in input",&
+        ch10//"The number of G-vectors generated according to ecuteps (",dtset%ecuteps,") is larger than that stored on file (",npwe_file,")",&
+        ch10//"Calculation will proceed with the maximum available set: ",npwe_file
+        ABI_COMMENT(msg)
+     else
+        dtset%npweps = Gsph_c%ng
+        write(msg,'(2a,f4.1,a,i0,a,a,f3.1)')&
+        "npweps was not set in input",&
+        ch10//"The number of G-vectors generated according to ecuteps (",dtset%ecuteps,") is smaller than that stored on file (",npwe_file,")",&
+        ch10//"Calculation will proceed with ecuteps: ",dtset%ecuteps
+        ABI_COMMENT(msg)
+     end if
+     call Gsph_c%free()
    end if
  end if
 
@@ -2609,9 +2626,8 @@ subroutine get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl,
  end if
 
  ! Init qmesh from the SCR file.
- call Qmesh%init(cryst, Hscr%nqibz, Hscr%qibz, Dtset%kptopt)
+ call Qmesh%init(cryst, Hscr%nqibz, Hscr%qibz, dtset%kptopt)
 
- ! The G-sphere for W and Sigma_c is initialized from the g-vectors found in the SCR file.
  call Gsph_c%init(cryst, dtset%npweps, gvec=Hscr%gvec)
 
 end subroutine get_hscr_qmesh_gsph

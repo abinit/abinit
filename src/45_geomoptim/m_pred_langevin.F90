@@ -4,7 +4,6 @@
 !!
 !! FUNCTION
 !!
-!!
 !! COPYRIGHT
 !!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, JCC, SE)
 !!  This file is distributed under the terms of the
@@ -112,27 +111,13 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
 !***************************************************************************
 
  if(iexit/=0)then
-   if (allocated(pot_perm))    then
-     ABI_FREE(pot_perm)
-   end if
-   if (allocated(max_perm))    then
-     ABI_FREE(max_perm)
-   end if
-   if (allocated(imax_perm))   then
-     ABI_FREE(imax_perm)
-   end if
-   if (allocated(ran_force))   then
-     ABI_FREE(ran_force)
-   end if
-   if (allocated(lang_force))  then
-     ABI_FREE(lang_force)
-   end if
-   if (allocated(fcart_mold))  then
-     ABI_FREE(fcart_mold)
-   end if
-   if (allocated(fcart_m))     then
-     ABI_FREE(fcart_m)
-   end if
+   ABI_SFREE(pot_perm)
+   ABI_SFREE(max_perm)
+   ABI_SFREE(imax_perm)
+   ABI_SFREE(ran_force)
+   ABI_SFREE(lang_force)
+   ABI_SFREE(fcart_mold)
+   ABI_SFREE(fcart_m)
    return
  end if
 
@@ -145,27 +130,13 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
 !###     dataset that exit before itime==ntime
 
  if(itime==1)then
-   if (allocated(pot_perm))    then
-     ABI_FREE(pot_perm)
-   end if
-   if (allocated(max_perm))    then
-     ABI_FREE(max_perm)
-   end if
-   if (allocated(imax_perm))   then
-     ABI_FREE(imax_perm)
-   end if
-   if (allocated(ran_force))   then
-     ABI_FREE(ran_force)
-   end if
-   if (allocated(lang_force))  then
-     ABI_FREE(lang_force)
-   end if
-   if (allocated(fcart_mold))  then
-     ABI_FREE(fcart_mold)
-   end if
-   if (allocated(fcart_m))     then
-     ABI_FREE(fcart_m)
-   end if
+   ABI_SFREE(pot_perm)
+   ABI_SFREE(max_perm)
+   ABI_SFREE(imax_perm)
+   ABI_SFREE(ran_force)
+   ABI_SFREE(lang_force)
+   ABI_SFREE(fcart_mold)
+   ABI_SFREE(fcart_m)
  end if
 
  if (.not.allocated(pot_perm))    then
@@ -437,9 +408,7 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
 
  end if ! if (icycle==1)
 
- if (allocated(imax_perm))   then
-   ABI_FREE(imax_perm)
- end if
+ ABI_SFREE(imax_perm)
 
 !write(std_out,*) 'langevin 05',jump_end_of_cycle
 !##########################################################

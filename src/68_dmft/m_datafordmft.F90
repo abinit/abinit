@@ -132,7 +132,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  character(len=500) :: message
  type(oper_type) :: loc_norm_check
  integer, allocatable :: displs(:),recvcounts(:)
- complex(dpc), allocatable :: buf_chipsi(:),buf_chipsi_tot(:),chipsi_tmp(:),cwprj(:,:)
+ complex(dp), allocatable :: buf_chipsi(:),buf_chipsi_tot(:),chipsi_tmp(:),cwprj(:,:)
  type(pawcprj_type), allocatable :: cwaveprj(:,:)
  type(matlu_type), allocatable :: matlu_temp(:)
  integer, parameter :: spinor_idxs(2,4) = RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))
@@ -1184,14 +1184,14 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
  logical :: lexist
  type(oper_type) :: norm1,norm2,norm3
  real(dp), allocatable :: si(:),sr(:)
- complex(dpc), allocatable :: chipsivect(:,:),largeoverlap(:,:),mat_tmp(:,:)
+ complex(dp), allocatable :: chipsivect(:,:),largeoverlap(:,:),mat_tmp(:,:)
  character(len=1) :: tag_is
  character(len=4) :: tag_at
  character(len=5) :: tag
  character(len=500) :: message
  character(len=fnlen) :: tmpfil
 ! real(dp),allocatable :: e0pde(:,:,:),omegame0i(:)
- !complex(dpc), allocatable :: wan(:,:,:),sqrtmatinv(:,:),wanall(:)
+ !complex(dp), allocatable :: wan(:,:,:),sqrtmatinv(:,:),wanall(:)
  !type(coeff2c_type), allocatable :: overlap(:)
 !************************************************************************
 
@@ -1584,7 +1584,7 @@ subroutine chipsi_gather(paw_dmft)
  integer :: iatom,ib,ibuf,ierr,ikpt,irank,isppol,lpawu,mbandc,me_kpt
  integer :: mkmem,natom,ndim,nproc,nspinor,nsppol,shift,siz_buf
  integer, allocatable :: displs(:),recvcounts(:)
- complex(dpc), allocatable :: buffer(:),buffer_tot(:)
+ complex(dp), allocatable :: buffer(:),buffer_tot(:)
 !************************************************************************
 
  me_kpt  = paw_dmft%distrib%me_kpt

@@ -5,7 +5,7 @@ authors: DCA, XG, RC
 # New user help file
 
 This page gives a beginner's introduction to the ABINIT resources,
-the package, and the main ABINIT applications.
+the package, and the main ABINIT applications. Hello world.
 
 ## Foreword
 
@@ -25,7 +25,7 @@ Chemistry package, you should complete such reading by going (at your own
 pace) through the Chaps. 1 to 13 , and appendices L and M of R.M. Martin's book [[cite:Martin2004]].
 
 After having gone through the present New User's Guide, you should follow the
-[[tutorial:index|ABINIT tutorial]].
+[[tutorial:index|ABINIT tutorials]].
 
 ## Introduction
 
@@ -303,7 +303,7 @@ There are also different temporary files, also constructed from a "root" name.
 Amongst these files, there is a "status" file, summarizing the current status of advancement of the
 code, in long jobs. The [[help:abinit|ABINIT help file]] contains more details.
 
-## What does the code do?
+## What the code does
 
 The simplest sort of job computes an electronic structure for a fixed set of
 atomic positions within a periodic unit cell. By electronic structure, we mean
@@ -352,7 +352,5 @@ capabilities, but the one with the largest last digit is more debugged than
 the other: version 9.10.5 is more debugged than 9.10.3, but no new features has
 been added (so likely, no additional bug!).
 
-In order to start using ABINIT, please follow [[tutorial:index|this tutorial.]]
-To learn how to compile the code from source, please consult the following guide:
-
-<embed src="https://wiki.abinit.org/lib/exe/fetch.php?media=build:installing_abinit.pdf" type="application/pdf" width="100%" height="480px">
+In order to start using ABINIT, and to learn how to compile ABINIT from source,
+please follow [[tutorial:index|these tutorials.]]

@@ -65,6 +65,7 @@ _ WF disk file :      3.868 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =          64
 -   mkqmem =          64        mk1mem =          64           mpw =        1158
       nfft =       19683          nkpt =          64
+- my_mband =          10
 ================================================================================
 P This job should need less than                      40.575 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -82,6 +83,7 @@ _ WF disk file :     11.311 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =          64
 -   mkqmem =          64        mk1mem =          64           mpw =        1158
       nfft =       19683          nkpt =          64
+- my_mband =          10
 ================================================================================
 P This job should need less than                      40.725 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -99,6 +101,7 @@ _ WF disk file :     11.311 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =          64
 -   mkqmem =          64        mk1mem =          64           mpw =        1158
       nfft =       19683          nkpt =          64
+- my_mband =          10
 ================================================================================
 P This job should need less than                      41.776 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -116,6 +119,7 @@ _ WF disk file :     11.311 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =          64
 -   mkqmem =          64        mk1mem =          64           mpw =        1158
       nfft =       19683          nkpt =          64
+- my_mband =          10
 ================================================================================
 P This job should need less than                      41.776 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :

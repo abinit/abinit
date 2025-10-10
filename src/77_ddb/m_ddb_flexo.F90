@@ -55,7 +55,7 @@ contains
 !!  asr= if /=0 acustic sume rule is imposed on the dynamical matrix
 !!  d2asr(2,3,natom,3,natom)=ASR-correction
 !!  ddb<type(ddb_type)>=2nd order derivative database.
-!!  ddb<type(ddb_type)>=Long wave 3rd order derivative database.
+!!  ddb_lw<type(ddb_type)>=Long wave 3rd order derivative database.
 !!  ddb_version = 8 digit integer giving date. To mantain compatibility with old DDB files.
 !!  Crystal<type(crystal_t)>=Crystal structure parameters
 !!  filnamddb = name of the ddb file

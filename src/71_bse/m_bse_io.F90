@@ -21,6 +21,7 @@
 
 MODULE m_bse_io
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  USE_MPI
  use m_xmpi
@@ -28,7 +29,6 @@ MODULE m_bse_io
  use m_abicore
  use netcdf
  use m_nctk
- use, intrinsic :: iso_c_binding
  use m_hdr
 
  use m_time,           only : cwtime
@@ -147,7 +147,6 @@ subroutine exc_read_bshdr(funt,Bsp,fform,ierr)
  type(hdr_type) :: Hdr
 !arrays
  integer :: nreh_read(SIZE(BSp%nreh))
-
  ! *************************************************************************
 
  ierr=0
@@ -160,7 +159,7 @@ subroutine exc_read_bshdr(funt,Bsp,fform,ierr)
  call Hdr%free()
 
  if (ANY(nreh_read /= BSp%nreh)) then
-   call wrtout(std_out,"Wrong number of e-h transitions","COLL")
+   call wrtout(std_out,"Wrong number of e-h transitions")
    ierr = ierr + 1
  end if
 
@@ -241,13 +240,11 @@ subroutine exc_skip_bshdr_mpio(mpifh,at_option,ehdr_offset)
  integer(XMPI_OFFSET_KIND),intent(inout) :: ehdr_offset
 
 !Local variables ------------------------------
-!scalars
  integer :: fform,ierr
 #ifdef HAVE_MPI_IO
  integer(XMPI_OFFSET_KIND) :: fmarker
 #endif
-
- ! *************************************************************************
+! *************************************************************************
 
  call hdr_mpio_skip(mpifh,fform,ehdr_offset)
 
@@ -295,7 +292,7 @@ subroutine exc_read_eigen(eig_fname,hsize,nvec,vec_idx,vec_list,ene_list,Bsp)
 ! arrays
  integer,intent(in) :: vec_idx(nvec)
  real(dp),optional,intent(out) :: ene_list(nvec)
- complex(dpc),intent(out) :: vec_list(hsize,nvec)
+ complex(dp),intent(out) :: vec_list(hsize,nvec)
 
 !Local variables ------------------------------
 !scalars
@@ -303,9 +300,8 @@ subroutine exc_read_eigen(eig_fname,hsize,nvec,vec_idx,vec_list,ene_list,Bsp)
  character(len=500) :: msg,errmsg
 !arrays
  !real(dp),allocatable :: exc_ene(:)
- complex(dpc),allocatable :: exc_ene_cplx(:)
-
- ! *************************************************************************
+ complex(dp),allocatable :: exc_ene_cplx(:)
+! *************************************************************************
 
  ABI_UNUSED(BSp%nline)
 
@@ -376,7 +372,7 @@ end subroutine exc_read_eigen
 !!  is_resonant=Set to .TRUE. if the block is resonant.
 !!  hsize=Dimension of the block.
 !!  nsppol=2 for spin polarized systems. 1 otherwise.
-!!  my_t1,my_t2=The first and the last colums of the matrix treated by this node.
+!!  my_t1,my_t2=The first and the last columns of the matrix treated by this node.
 !!  use_mpio=.TRUE. is MPI-IO routines are used.
 !!  comm=MPI communicator.
 !!
@@ -398,7 +394,7 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
  type(excparam),intent(in) :: Bsp
 !arrays
  integer,intent(in) :: nreh(nsppol)
- complex(dpc),intent(out) :: hmat(hsize,my_t1:my_t2)
+ complex(dp),intent(out) :: hmat(hsize,my_t1:my_t2)
 
 !Local variables ------------------------------
 !scalars
@@ -410,18 +406,15 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
  character(len=500) :: msg,errmsg
  !type(Hdr_type) :: bse_Hdr
 !arrays
- complex(dpc),allocatable :: buffer_dpc(:)
+ complex(dp),allocatable :: buffer_dpc(:)
  logical :: have_row,have_col
 #ifdef HAVE_MPI_IO
  integer :: mpierr,mpifh,ham_type,my_nel,old_type,etype,offset_err,amode
  integer :: irec,nrec !,ncount
  integer(XMPI_OFFSET_KIND) :: ehdr_offset,my_offset,my_offpad,fsize
  integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecord(:)
- integer :: glob_sizes(2),my_cols(2)
- integer :: block_sizes(2,3)
- integer :: status(MPI_STATUS_SIZE)
+ integer :: glob_sizes(2),my_cols(2), block_sizes(2,3), status(MPI_STATUS_SIZE)
 #endif
-
 !************************************************************************
 
  nproc = xmpi_comm_size(comm); my_rank= xmpi_comm_rank(comm)
@@ -434,22 +427,18 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
 
  ABI_CHECK(hsize==size_exp,"Wrong hsize")
  if (neh1/=neh2) then
-   msg = "BSE code does not support different number of transitions for the two spin channels"
-   ABI_ERROR(msg)
+   ABI_ERROR("BSE code does not support different number of transitions for the two spin channels")
  end if
 
  my_nt = my_t2-my_t1+1
-
-!BEGINDEBUG
-! hmat = HUGE(zero)
-!ENDDEBUG
+ !hmat = HUGE(zero)
 
  if (.not.use_mpio) then
 
    if (is_resonant) then
-     call wrtout(std_out,". Reading resonant block from file: "//TRIM(fname)//" using Fortran-IO","COLL")
+     call wrtout(std_out,". Reading resonant block from file: "//TRIM(fname)//" using Fortran-IO")
    else
-     call wrtout(std_out,". Reading coupling block from file: "//TRIM(fname)//" using Fortran-IO","COLL")
+     call wrtout(std_out,". Reading coupling block from file: "//TRIM(fname)//" using Fortran-IO")
    end if
 
    if (open_file(fname,msg,newunit=funit,form="unformatted",status="old",action="read") /= 0) then
@@ -493,7 +482,7 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
 
      call cwtime(cputime,walltime,gflops,"stop")
      write(msg,'(2(a,f9.1),a)')" Fortran-IO completed. cpu_time ",cputime,"[s], walltime ",walltime," [s]"
-     call wrtout(std_out,msg,"COLL", do_flush=.True.)
+     call wrtout(std_out, msg, do_flush=.True.)
    else
      ! Spin polarized case.
      !
@@ -503,7 +492,7 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
      ! B) The entire up-down exchange block (no symmetry here)
      !
      ! A) Construct resonant blocks from the upper triangles stored on file.
-     ! FIXME this part wont work if we have a different number of e-h pairs
+     ! FIXME this part won't work if we have a different number of e-h pairs
      if (.not.is_resonant) then
        ABI_ERROR("exc_read_rcblock does not support coupling.")
      end if
@@ -547,7 +536,7 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
      end do ! block
      !
      ! B) Kx_{down up} = Kx_{up down}^H.
-     ! FIXME this part wont work if we have a different number of e-h pairs
+     ! FIXME this part won't work if we have a different number of e-h pairs
      spad=neh1
      spin_dim=neh1
      ABI_MALLOC(buffer_dpc,(neh1))
@@ -576,9 +565,9 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
  else
 #ifdef HAVE_MPI_IO
    if (is_resonant) then
-     call wrtout(std_out,". Reading resonant block from file "//TRIM(fname)//" using MPI-IO","COLL")
+     call wrtout(std_out,". Reading resonant block from file "//TRIM(fname)//" using MPI-IO")
    else
-     call wrtout(std_out,". Reading coupling block from file "//TRIM(fname)//" using MPI-IO","COLL")
+     call wrtout(std_out,". Reading coupling block from file "//TRIM(fname)//" using MPI-IO")
    end if
 
    amode=MPI_MODE_RDONLY
@@ -587,7 +576,7 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
    ABI_CHECK_MPI(mpierr,msg)
 
    call MPI_FILE_GET_SIZE(mpifh,fsize,mpierr)
-   write(std_out,*)" file size is ",fsize
+   !write(std_out,*)" file size is ",fsize
    !
    ! Skip the header and find the offset for reading the matrix.
    call exc_skip_bshdr_mpio(mpifh,xmpio_collective,ehdr_offset)
@@ -602,7 +591,6 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
      ABI_WARNING("nsppol==2 => calling fp3blocks")
      write(std_out,*)"neh, hsize",neh1,neh2,hsize
 
-#if 1
      nrec=neh1+2*neh2
      ABI_MALLOC(bsize_frecord,(nrec))
      bsize_frecord(1:neh1)           = (/(irec*xmpi_bsize_dpc, irec=1,neh1)/)
@@ -613,7 +601,6 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
      ABI_FREE(bsize_frecord)
      ABI_COMMENT("Marker check ok")
      call xmpi_barrier(comm)
-#endif
 
      block_sizes(:,1) = (/neh1,neh1/)
      block_sizes(:,2) = (/neh2,neh2/)
@@ -624,8 +611,8 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
 
    if (offset_err/=0) then
      write(msg,"(3a)")&
-&      "Global position index cannot be stored in a standard Fortran integer ",ch10,&
-&      "Excitonic matrix cannot be read with a single MPI-IO call."
+      "Global position index cannot be stored in a standard Fortran integer ",ch10,&
+      "Excitonic matrix cannot be read with a single MPI-IO call."
      ABI_ERROR(msg)
    end if
    !
@@ -636,7 +623,7 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
    etype=MPI_BYTE
    call MPI_FILE_SET_VIEW(mpifh, my_offset, etype, ham_type, 'native', MPI_INFO_NULL, mpierr)
    ABI_CHECK_MPI(mpierr,"SET_VIEW")
-   !
+
    ! Release the MPI filetype.
    call MPI_TYPE_FREE(ham_type,mpierr)
    ABI_CHECK_MPI(mpierr,"TYPE_FREE")
@@ -669,10 +656,10 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
  end if
 
 !BEGINDEBUG
-!  if ( ANY(hmat==HUGE(zero)) ) then
-!    write(std_out,*)"COUNT",COUNT(hmat==HUGE(zero))," hsize= ",hsize
-!    ABI_ERROR("Something wrong in the reading")
-!  end if
+! if ( ANY(hmat==HUGE(zero)) ) then
+!   write(std_out,*)"COUNT",COUNT(hmat==HUGE(zero))," hsize= ",hsize
+!   ABI_ERROR("Something wrong in the reading")
+! end if
 !ENDDEBUG
 
  call xmpi_barrier(comm)
@@ -707,7 +694,7 @@ end subroutine exc_read_rcblock
 !!
 !!   +1 to read ( R   C )
 !!              ( C*  R*)
-!!  diago_is_real=Used when block_type=resonat to specify wheter the diagonal matrix elements are
+!!  diago_is_real=Used when block_type=resonat to specify whether the diagonal matrix elements are
 !!  real or complex (when QP linewidth are included)
 !!  nreh(nsppol)
 !!  exc_size=Size of the full excitonic Hamiltonian.
@@ -728,17 +715,16 @@ subroutine exc_fullh_from_blocks(funt,block_type,nsppol,row_sign,diago_is_real,n
  character(len=*),intent(in) :: block_type
 !arrays
  integer,intent(in) :: nreh(nsppol)
- complex(dpc),intent(inout) :: exc_ham(exc_size,exc_size)
+ complex(dp),intent(inout) :: exc_ham(exc_size,exc_size)
 
 !Local variables-------------------------------
 !scalars
  integer :: it,itp,szbuf,neh,pad_c1,pad_r1,spin_dim,spad_r,spad_c
  integer :: block,spad,row1,col1,row2,col2,spin_stride,ierr
- complex(dpc) :: cttp
+ complex(dp) :: cttp
  character(len=500) :: errmsg
 !arrays
- complex(dpc),allocatable :: cbuff_dpc(:)
-
+ complex(dp),allocatable :: cbuff_dpc(:)
 ! *********************************************************************
 
  szbuf=exc_size ! FIXME oversized!
@@ -783,7 +769,7 @@ subroutine exc_fullh_from_blocks(funt,block_type,nsppol,row_sign,diago_is_real,n
      !
      !
    else
-     ! FIXME this part wont work if we have a different number of e-h pairs
+     ! FIXME this part won't work if we have a different number of e-h pairs
      ABI_CHECK(ALL(nreh==nreh(1)),"Different number of transitions")
      ! The file contains
      ! A) The up-up and the down-down block in packed form
@@ -975,9 +961,7 @@ pure function rrs_of_glob(row_glob,col_glob,size_glob)
  integer,intent(in) :: size_glob(2)
 
 !Local variables ------------------------------
-!scalars
  integer :: nreh1,nreh2
-
 ! *************************************************************************
 
  nreh1=size_glob(1)/2 ! Matrix is square and nreh1==nreh2 but oh well.
@@ -1017,9 +1001,7 @@ pure function ccs_of_glob(row_glob,col_glob,size_glob)
  integer,intent(in) :: size_glob(2)
 
 !Local variables ------------------------------
-!scalars
  integer :: nreh1,nreh2
-
 ! *************************************************************************
 
  nreh1=size_glob(1)/2 ! Matrix is square and nreh1==nreh2 but oh well.
@@ -1065,8 +1047,7 @@ function offset_in_file(row_glob,col_glob,size_glob,nsblocks,sub_block,bsize_elm
 !scalars
  integer :: ii,jj,ijp_glob,swap
  integer(XMPI_OFFSET_KIND) :: my_offset
-
- ! *************************************************************************
+! *************************************************************************
 
  if (nsblocks==1) then
    ii = row_glob
@@ -1121,17 +1102,16 @@ subroutine exc_read_rblock_fio(funt,diago_is_real,nsppol,nreh,exc_size,exc_mat,i
  integer,intent(out) :: ierr
 !arrays
  integer,intent(in) :: nreh(nsppol)
- complex(dpc),intent(out) :: exc_mat(exc_size,exc_size)
+ complex(dp),intent(out) :: exc_mat(exc_size,exc_size)
 
 !Local variables ------------------------------
 !scalars
  integer :: itp,it,block,col,row,spad
- complex(dpc) :: ctemp
+ complex(dp) :: ctemp
  character(len=500) :: errmsg
 !arrays
- complex(dpc),allocatable :: cbuff_dpc(:)
-
- ! *************************************************************************
+ complex(dp),allocatable :: cbuff_dpc(:)
+! *************************************************************************
 
  ierr=0
 
@@ -1161,7 +1141,7 @@ subroutine exc_read_rblock_fio(funt,diago_is_real,nsppol,nreh,exc_size,exc_mat,i
    ! B) The entire up-down exchange block (no symmetry here)
    !
    ! A) Construct resonant blocks from the upper triangles stored on file.
-   ! FIXME this part wont work if we have a different number of e-h pairs
+   ! FIXME this part won't work if we have a different number of e-h pairs
    !ABI_CHECK(ALL(nreh==nreh(1)),"Different number of transitions")
 
    do block=1,2
@@ -1246,9 +1226,8 @@ subroutine exc_amplitude(Bsp,eig_fname,nvec,vec_idx,out_fname)
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: wmesh(:),amplitude(:),ene_list(:)
- complex(dpc),allocatable :: vec_list(:,:)
-
- ! *************************************************************************
+ complex(dp),allocatable :: vec_list(:,:)
+! *************************************************************************
 
  ! Setup of the frequency mesh for F(w).
  w_min=greatest_real; w_max=smallest_real
@@ -1349,7 +1328,7 @@ end subroutine exc_amplitude
 !!   Note that this is only available when NetCDF is available
 !!
 !! INPUTS
-!!  filname=filename used to write the optical matrix elements
+!!  filename=filename used to write the optical matrix elements
 !!  minb,maxb=minimum and max band index that have been calculated.
 !!  nkbz=Number of points in the full Brillouin zone.
 !!  nsppol=Number of independent spin polarizations.
@@ -1364,12 +1343,12 @@ end subroutine exc_amplitude
 !!
 !! SOURCE
 
-subroutine exc_write_optme(filname,minb,maxb,nkbz,nsppol,nq,opt_cvk,ierr)
+subroutine exc_write_optme(filename,minb,maxb,nkbz,nsppol,nq,opt_cvk,ierr)
 
  !Arguments ------------------------------------
  integer,intent(in) :: minb,maxb,nkbz,nsppol,nq
- character(len=fnlen),intent(in) :: filname
- complex(dpc),intent(in) :: opt_cvk(minb:maxb,minb:maxb,nkbz,nsppol,nq)
+ character(len=fnlen),intent(in) :: filename
+ complex(dp),intent(in) :: opt_cvk(minb:maxb,minb:maxb,nkbz,nsppol,nq)
  integer,intent(out) :: ierr
 
 !Local variables ------------------------------
@@ -1383,7 +1362,7 @@ subroutine exc_write_optme(filname,minb,maxb,nkbz,nsppol,nq,opt_cvk,ierr)
  ierr = 1
 
 !1. Create netCDF file
- NCF_CHECK_MSG(nctk_open_create(ncid, filname, xmpi_comm_self), " create netcdf OME file")
+ NCF_CHECK_MSG(nctk_open_create(ncid, filename, xmpi_comm_self), " create netcdf OME file")
 
 !2. Define dimensions
  NCF_CHECK(nf90_def_dim(ncid,"xyz",3,xyz_id))
@@ -1470,14 +1449,13 @@ subroutine exc_ham_ncwrite(ncid,Kmesh,BSp,hsize,nreh,vcks2t,hreso,diag)
  type(excparam),intent(in) :: BSp
  integer,intent(in) :: nreh(BSp%nsppol)
  integer,target,intent(in) :: vcks2t(BSp%maxnbndv,BSp%maxnbndc,Kmesh%nbz,BSp%nsppol)
- complex(dpc),target,intent(in) :: hreso(hsize,hsize)
- complex(dpc),target,intent(in) :: diag(hsize)
+ complex(dp),target,intent(in) :: hreso(hsize,hsize)
+ complex(dp),target,intent(in) :: diag(hsize)
 
 !Local variables-------------------------------
  integer :: ncerr
  integer :: max_nreh, sum_nreh
  real(dp), ABI_CONTIGUOUS pointer :: r2vals(:,:),r3vals(:,:,:)
-
 ! *************************************************************************
 
  ! ==============================================

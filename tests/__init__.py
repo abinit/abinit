@@ -1,25 +1,16 @@
-from __future__ import print_function, division, absolute_import  # , unicode_literals
-
 import logging
 import sys
 import os
 import platform
 import re
+import pickle
 
-from tests.pymods.devtools import FileLock
-from tests.pymods.testsuite import ChainOfTests, AbinitTestSuite
 from pprint import pprint
 from socket import gethostname
+from io import StringIO
+from tests.pymods.devtools import FileLock
+from tests.pymods.testsuite import ChainOfTests, AbinitTestSuite
 from tests.pymods.termcolor import cprint
-
-# Handle py2, py3k differences.
-py2 = sys.version_info[0] <= 2
-if py2:
-    import cPickle as pickle
-    from cStringIO import StringIO
-else:
-    import pickle
-    from io import StringIO
 
 logger = logging.getLogger(__name__)
 
@@ -492,7 +483,8 @@ class AbinitTestsDatabase(dict):
                 "keywords",
                 "description",
                 "authors",
-                "max_nprocs", ]
+                "max_nprocs",
+            ]
 
             d = {}
             for opt in recommended_opts:
@@ -601,6 +593,21 @@ class AbinitTests:
     def cpp_vars_of_suite(self, suite_name):
         return self._suites[suite_name].need_cpp_vars
 
+    #def get_all_need_cppvars(self):
+    #    all_need_cppvars = set()
+
+    #    for suite_name in self.suite_names:
+    #        cpp_vars = self.cpp_vars_of_suite(suite_name)
+    #        if cpp_vars: print(cpp_vars)
+    #        all_need_cppvars = all_need_cppvars.union(cpp_vars)
+
+
+    #    database = self.build_database(with_disabled=False)
+    #    for test in database:
+    #        print(test)
+
+    #    return all_need_cppvars
+
     def inputs_of_suite(self, suite_name, active=True):
         if active:
             return self._suites[suite_name].inp_paths
@@ -698,7 +705,6 @@ class AbinitTests:
                         d.pop((suite.name, arg))  # gw1- --> skip tutorial/gw1
 
         else:
-            import re
             re_slice = re.compile(r"^\[(\d*):(\d*)\]$")
             re_single = re.compile(r"^\[(\d*)\]$")
 
@@ -914,7 +920,7 @@ abitests = AbinitTests()
 
 # Dictionary mapping test keywords to string with human-readable description.
 KNOWN_KEYWORDS = {
-    # Main executables
+    # Main executables.
     "abinit": "Tests related to abinit code.",
     "anaddb": "Tests related to anaddb code",
     "atompaw": "Tests related to atompaw code",
@@ -1030,5 +1036,15 @@ KNOWN_KEYWORDS = {
     'DDB_TO_NC': "Conversion of DDB file from text to netcdf and vice-versa",
     'ddb_interpolation': "Interpolation of DDB files in q-space.",
     'pSIC': "Tests related to the polaron self-interaction correction method.",
-    'POLARON': "Tests related to the variational polaron equations."
+    'POLARON': "Tests related to the variational polaron equations.",
+    "AC": "Tests related to the analytic continuation in GW",
+    "CD": "Tests related to the contour deformation method in GW",
+    "GGA": "Tests using GGA",
+    "GWPT": "Tests related to GW Perturbation Theory",
+    "Hubbard-U": "Tests related to Hubbard-U",
+    "ftxc": "finite-temperature exchange-correlation functionals (corrKSDT and KDT16)",
+     #"WDM",
+     #"Hunds-J",
+     #"dmft_kspectralfunc",
+     #"dmft_magnfield",
 }

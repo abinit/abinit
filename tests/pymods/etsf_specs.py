@@ -3,7 +3,6 @@
 This module provides functions and objects to validate netcdf files written in the ETSF-IO file format.
 For a quick reference to the etsf specs see: http://esl.cecam.org/mediawiki/index.php/ETSF_File_Format_Specifications
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
 
 import os
 import re

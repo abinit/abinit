@@ -14,11 +14,6 @@
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
-!!
 !! SOURCE
 
 subroutine xmpi_allgatherv_int2d(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
@@ -32,7 +27,6 @@ subroutine xmpi_allgatherv_int2d(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
 
 !Local variables--------------
  integer :: cc,dd,sz1
-
 ! *************************************************************************
 
  ier=0
@@ -73,11 +67,6 @@ end subroutine xmpi_allgatherv_int2d
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
-!!
 !! SOURCE
 
 subroutine xmpi_allgatherv_int(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
@@ -91,7 +80,6 @@ subroutine xmpi_allgatherv_int(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
 
 !Local variables-------------------
  integer :: cc,dd
-
 ! *************************************************************************
 
  ier=0
@@ -132,11 +120,6 @@ end subroutine xmpi_allgatherv_int
 !!  buf_dp_size_all=size of buffer dp array gathered
 !!  ier=exit status, a non-zero value meaning there is an error
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
-!!
 !! SOURCE
 
 subroutine xmpi_allgatherv_int1_dp1(buf_int,buf_int_size,buf_dp,buf_dp_size,&
@@ -166,7 +149,6 @@ subroutine xmpi_allgatherv_int1_dp1(buf_int,buf_int_size,buf_dp,buf_dp_size,&
  integer,pointer :: outbuf_int(:)
  real(dp),pointer:: outbuf_dp(:)
  character,allocatable :: buf_pack(:),buf_pack_tot(:)
-
 ! *************************************************************************
 
  ier=0
@@ -333,11 +315,6 @@ end subroutine xmpi_allgatherv_int1_dp1
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
-!!
 !! SOURCE
 
 subroutine xmpi_allgatherv_dp(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
@@ -391,11 +368,6 @@ end subroutine xmpi_allgatherv_dp
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
-!!
 !! SOURCE
 
 subroutine xmpi_allgatherv_dp2d(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
@@ -443,11 +415,8 @@ end subroutine xmpi_allgatherv_dp2d
 !! OUTPUT
 !!  r= GCD
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
+
 function get_gcd_of_array(array) result(r)
 
 !Arguments-------------------------
@@ -495,11 +464,6 @@ end function get_gcd_of_array
 !!
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -584,11 +548,6 @@ end subroutine xmpi_allgatherv_dp3d
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
-!!
 !! SOURCE
 
 subroutine xmpi_allgatherv_dp4d(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
@@ -642,11 +601,6 @@ end subroutine xmpi_allgatherv_dp4d
 !!
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -703,11 +657,6 @@ end subroutine xmpi_allgatherv_dp5d
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
-!!
 !! SOURCE
 
 subroutine xmpi_allgatherv_dp6d(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
@@ -758,11 +707,6 @@ end subroutine xmpi_allgatherv_dp6d
 !!  ier= exit status, a non-zero value meaning there is an error
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -908,13 +852,6 @@ end subroutine xmpi_allgatherv_coeff2d
 !!  xval_out = coeff2d_type array structure
 !!  ierr= exit status, a non-zero value meaning there is an error
 !!
-!! SIDE EFFECTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
-!!
 !! SOURCE
 
 subroutine xmpi_allgatherv_coeff2d_indx(xval_in,xval_out,comm,indx,ierr)
@@ -1050,25 +987,19 @@ end subroutine xmpi_allgatherv_coeff2d_indx
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
-!!
 !! SOURCE
 
 subroutine xmpi_allgatherv_dc(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
 
 !Arguments-------------------------
- complex(dpc), DEV_CONTARRD intent(in) :: xval(:)
- complex(dpc), DEV_CONTARRD intent(inout) :: recvbuf(:)
+ complex(dp), DEV_CONTARRD intent(in) :: xval(:)
+ complex(dp), DEV_CONTARRD intent(inout) :: recvbuf(:)
  integer,intent(in) :: recvcounts(:),displs(:)
  integer,intent(in) :: nelem,comm
  integer,intent(out) :: ier
 
 !Local variables--------------
  integer :: cc,dd
-
 ! *************************************************************************
 
  ier=0

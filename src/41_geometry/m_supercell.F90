@@ -386,9 +386,9 @@ subroutine supercell_freeze_displ(scell, displ, freeze_displ)
 
 !Local variables-------------------------------
  integer :: iatom, ipratom
- complex(dpc) :: expqdotr, j=cmplx(zero,one)
- complex(dpc) :: phase
- complex(dpc) :: zdispl(3,scell%natom_primcell)
+ complex(dp) :: expqdotr, j=cmplx(zero,one)
+ complex(dp) :: phase
+ complex(dp) :: zdispl(3,scell%natom_primcell)
 ! *************************************************************************
 
  zdispl = (cmplx(reshape(displ(1,:), (/3,scell%natom_primcell/)),&
