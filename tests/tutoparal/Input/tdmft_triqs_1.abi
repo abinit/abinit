@@ -1,10 +1,10 @@
 # Multi_dataset parameters
-ndtset 2       # Two datasets
-jdtset 1 2     # one followed by two
-getden -1      # Second one takes the density of first
+ ndtset 2       # Two datasets
+ jdtset 1 2     # one followed by two
+ getden -1      # Second one takes the density of first
 
-pawprtvol 3  # Printing additional information
-prtvol 4     #
+ pawprtvol 3  # Printing additional information
+ prtvol 4     #
 
 ############################
 # Structural Parameters
@@ -36,6 +36,8 @@ prtvol 4     #
  nshiftk 2                # Convergence of the density with regular shifts.
  shiftk 0.25  0.25  0.25
        -0.25 -0.25 -0.25
+
+ istwfk *1
 
 ############################
 # Energy Parameters

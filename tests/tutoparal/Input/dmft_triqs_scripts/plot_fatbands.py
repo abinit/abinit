@@ -11,13 +11,12 @@ params["xticklabels"] = [r"$\Gamma$", "N", "P", r"$\Gamma$", "H", "N"]
 params["xlabel"] = r"$k$-point"
 params["ylabel"] = "Energy (eV)"
 
-bi = 6   # Initial band
-bf = 20  # Last band
-
-b_ind = 0 # Band index
-
+bi = 5    # Initial band
+bf = 20   # Last band
 
 with open(filename, "r") as f:
+
+    b_ind = -1
 
     eigen = []
     error = []
@@ -43,5 +42,4 @@ with open(filename, "r") as f:
         error.append(float(line_split[2]))
 
 fig.plot()
-
 
