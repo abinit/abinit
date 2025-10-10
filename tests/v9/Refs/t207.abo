@@ -719,7 +719,7 @@ xc                  : -3.21247524868960E+00
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 local_psp           : -3.21752380903916E+00
-spherical_terms     :  1.46296769005767E+00
+PAW spherical_terms :  1.46296769005767E+00
 total_energy        : -8.87836915000848E+00
 total_energy_eV     : -2.41592710991663E+02
 ...
@@ -732,7 +732,7 @@ band_energy         :  5.44840872517238E-01
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 xc_dc               : -3.84032622444618E-01
-spherical_terms     :  6.38934308000572E-02
+PAW spherical_terms :  6.38934308000572E-02
 total_energy_dc     : -8.87836904050252E+00
 total_energy_dc_eV  : -2.41592708011854E+02
 ...
@@ -1237,7 +1237,7 @@ xc                  : -3.21247524820829E+00
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 local_psp           : -3.21752369762647E+00
-spherical_terms     :  1.46296768945386E+00
+PAW spherical_terms :  1.46296768945386E+00
 total_energy        : -8.87836904182710E+00
 total_energy_eV     : -2.41592708047898E+02
 ...
@@ -1250,7 +1250,7 @@ band_energy         :  5.44840878939684E-01
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 xc_dc               : -3.84032624747225E-01
-spherical_terms     :  6.38934267117688E-02
+PAW spherical_terms :  6.38934267117688E-02
 total_energy_dc     : -8.87836904047097E+00
 total_energy_dc_eV  : -2.41592708010995E+02
 ...
@@ -1755,7 +1755,7 @@ xc                  : -3.21247524825643E+00
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 local_psp           : -3.21752369795973E+00
-spherical_terms     :  1.46296768922346E+00
+PAW spherical_terms :  1.46296768922346E+00
 total_energy        : -8.87836904227037E+00
 total_energy_eV     : -2.41592708059960E+02
 ...
@@ -1768,7 +1768,7 @@ band_energy         :  5.44840879093066E-01
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 xc_dc               : -3.84032624927243E-01
-spherical_terms     :  6.38934267384244E-02
+PAW spherical_terms :  6.38934267384244E-02
 total_energy_dc     : -8.87836904047095E+00
 total_energy_dc_eV  : -2.41592708010995E+02
 ...
@@ -2273,7 +2273,7 @@ xc                  : -3.21247524852078E+00
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 local_psp           : -3.21752369988425E+00
-spherical_terms     :  1.46296769003147E+00
+PAW spherical_terms :  1.46296769003147E+00
 total_energy        : -8.87836904317536E+00
 total_energy_eV     : -2.41592708084586E+02
 ...
@@ -2286,7 +2286,7 @@ band_energy         :  5.44840878963142E-01
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 xc_dc               : -3.84032624872040E-01
-spherical_terms     :  6.38934268120623E-02
+PAW spherical_terms :  6.38934268120623E-02
 total_energy_dc     : -8.87836904047203E+00
 total_energy_dc_eV  : -2.41592708011024E+02
 ...

@@ -699,7 +699,7 @@ xc                  : -3.21247524823286E+00
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 local_psp           : -3.21752369790430E+00
-spherical_terms     :  1.46296768921685E+00
+PAW spherical_terms :  1.46296768921685E+00
 total_energy        : -8.87836904223425E+00
 total_energy_eV     : -2.41592708058977E+02
 ...
@@ -712,7 +712,7 @@ band_energy         :  5.44840879052335E-01
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 xc_dc               : -3.84032624887327E-01
-spherical_terms     :  6.38934267392423E-02
+PAW spherical_terms :  6.38934267392423E-02
 total_energy_dc     : -8.87836904047095E+00
 total_energy_dc_eV  : -2.41592708010995E+02
 ...
@@ -1217,7 +1217,7 @@ xc                  : -3.21247524825655E+00
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 local_psp           : -3.21752369795975E+00
-spherical_terms     :  1.46296768922429E+00
+PAW spherical_terms :  1.46296768922429E+00
 total_energy        : -8.87836904226994E+00
 total_energy_eV     : -2.41592708059948E+02
 ...
@@ -1230,7 +1230,7 @@ band_energy         :  5.44840879092803E-01
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 xc_dc               : -3.84032624927251E-01
-spherical_terms     :  6.38934267386597E-02
+PAW spherical_terms :  6.38934267386597E-02
 total_energy_dc     : -8.87836904047099E+00
 total_energy_dc_eV  : -2.41592708010996E+02
 ...
@@ -1735,7 +1735,7 @@ xc                  : -3.21247524803062E+00
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 local_psp           : -3.21752369784691E+00
-spherical_terms     :  1.46296768919924E+00
+PAW spherical_terms :  1.46296768919924E+00
 total_energy        : -8.87836904205905E+00
 total_energy_eV     : -2.41592708054209E+02
 ...
@@ -1748,7 +1748,7 @@ band_energy         :  5.44840878542666E-01
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 xc_dc               : -3.84032624461763E-01
-spherical_terms     :  6.38934268227613E-02
+PAW spherical_terms :  6.38934268227613E-02
 total_energy_dc     : -8.87836904047153E+00
 total_energy_dc_eV  : -2.41592708011011E+02
 ...
