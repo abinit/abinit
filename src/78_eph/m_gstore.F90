@@ -86,7 +86,7 @@
 !!  wavefunctions. Using some procs for k-points is also beneficial in terms of performance
 !!  as we can reduce load imbalance is the number of procs in qpt_comm does not divide nqbz.
 !!
-!!  NB: If nsppol == 2, we create two gqk objects, one for each spin.
+!!  NB: If nsppol == 2, we create two gqk instances, one for each spin.
 !!  The reason is that dimensions such as the number of effective bands/q-points/k-points
 !!  depends on the collinear spin when filters are employed.
 !!
@@ -98,7 +98,7 @@
 !!  - Use similar trick in dfpt_cgw for H^0 |psi_nk>.
 !!  - Operate on multiple n states in getgh1c (new version of getgh1c allows it).
 !!  - Write IFC to faciliate interporability with external codes (DONE)
-!!  - Save alpha parameters so that external codes can handle the short range part of the IFCs
+!!  - Save alpha parameters so that external codes can handle the short range part of the IFCs (DONE)
 !!  - Move to atom representation and add symmetry tables qbz --> qibz to fix the gauge in the ph displacements.
 !!  - Write GSTORE tutorial to explain all the relevant combinations.
 !!
@@ -1101,7 +1101,6 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      NCF_CHECK(ncerr)
 
      ! Define scalars
-     !ncerr = nctk_def_iscalars(spin_ncid, [character(len=nctk_slen) :: "bstart", "bstart_k", "bstart_kq"])
      ncerr = nctk_def_iscalars(spin_ncid, [character(len=nctk_slen) :: "bstart_k", "bstart_kq"])
      NCF_CHECK(ncerr)
 
@@ -1219,7 +1218,7 @@ end subroutine gstore_init
 !! gstore_same_nbands
 !!
 !! FUNCTION
-!!  Returns True if nb_k == nb_kq.
+!!  True if nb_k == nb_kq.
 !!
 !! SOURCE
 
@@ -1521,7 +1520,7 @@ subroutine gstore_set_mpi_grid__(gstore, nproc_spin, comm_spin)
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is)
 
-   ! TODO: Should change order for GWPT
+   ! TODO: Should change order for GWPT.
    dims = [gqk%qpt_comm%nproc, gqk%kpt_comm%nproc, gqk%pert_comm%nproc, gqk%band_comm%nproc, &
            gqk%bsum_comm%nproc, gqk%pp_sum_comm%nproc]
 
