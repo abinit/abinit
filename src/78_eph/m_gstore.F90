@@ -1018,7 +1018,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      ncerr = nctk_def_arrays(ncid, [ &
         nctkarr_t("ifc_rpt", "dp", "three, nrpt"), &
         nctkarr_t("ifc_wghatm", "dp", "natom, natom, nrpt"), &
-        !nctkarr_t("ifc_dynmat", "dp", "two, three, natom, three, natom, gstore_nqbz") &
+        nctkarr_t("ifc_dynmat", "dp", "two, three, natom, three, natom, gstore_nqbz"), &
         nctkarr_t("ifc_short_atmfrc", "dp", "three, natom, three, natom, nrpt") &
      ])
      NCF_CHECK(ncerr)
@@ -1079,7 +1079,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    if (gstore_has_ifcs /= 0) then
      NCF_CHECK(nf90_put_var(ncid, vid("ifc_rpt"), ifc%rpt))
      NCF_CHECK(nf90_put_var(ncid, vid("ifc_wghatm"), ifc%wghatm))
-     !NCF_CHECK(nf90_put_var(ncid, vid("ifc_dynmat"), ifc%dynmat))
+     NCF_CHECK(nf90_put_var(ncid, vid("ifc_dynmat"), ifc%dynmat))
      NCF_CHECK(nf90_put_var(ncid, vid("ifc_short_atmfrc"), ifc%short_atmfrc))
    end if
 
