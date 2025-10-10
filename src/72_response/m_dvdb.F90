@@ -3157,6 +3157,7 @@ subroutine dvdb_get_vxc1_ftqbz(db, dtset, cryst, qbz, drho_cplex, nfft, ngfft, n
  call db%get_ftqbz(qbz, drho_cplex, nfft, ngfft, vxc1, comm)
 
  option = 2 ! if 2, treat only density change
+ !option = 1 ! if 1, treat both density change and XC core correction
  ABI_MALLOC(vxc1, (drho_cplex, nfft, dtset%nspden, db%my_npert))
 
  do imyp=1,db%my_npert
