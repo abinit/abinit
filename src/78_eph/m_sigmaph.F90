@@ -32,16 +32,16 @@ module m_sigmaph
  use m_copy
  use m_ifc
  use m_ebands
- use m_wfk
- use m_ddb
+ !use m_ddb
  use m_ddk
  use m_dvdb
  use m_fft
  use m_hamiltonian
  use m_pawcprj
- use m_wfd
+ use m_wfd,             only : wfd_t, u1_cache_t
+ use m_wfk
  use m_skw
- use m_krank
+ use m_krank,           only : krank_t
  use m_lgroup
  use m_ephwg
  use m_sort
@@ -1079,7 +1079,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_CALLOC(vlocal, (n4, n5, n6, gs_ham_kq%nvloc))
 
  if (dtset%eph_stern /= 0) then
-   ! Read the GS potential (vtrial) from input POT file
+   ! Read the GS potential (vtrial) from input POT file.
    ! In principle one may store vtrial in the DVDB but getpot_filepath is simpler to implement.
    call wrtout(units, sjoin(" Reading GS KS potential for Sternheimer from: ", dtfil%filpotin))
    call read_rhor(dtfil%filpotin, cplex1, nspden, nfftf, ngfftf, pawread0, mpi_enreg, vtrial, pot_hdr, pot_pawrhoij, comm, &
@@ -1536,8 +1536,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          call timab(1908, 1, tsec)
          ABI_CALLOC(cg1s_kq, (2, npw_kq*nspinor, natom3, nbcalc_ks))
 
-         ! NOTE that in the present version we need to gather all nbsum bands
-         ! on each core before calling dfpt_cgwf.
+         ! NOTE: in the present version, we need to gather all nbsum bands on each core before calling dfpt_cgwf.
          ! In principle one can call dfpt_cgwf in band-para mode but then
          ! we are obliged to call the sternheimer solver with one psi1 and all procs in bsum_comm
          ! just to to be able to apply the projector operator.
@@ -1605,7 +1604,7 @@ if (.not. stern%has_band_para) then
          end if
 end if
          call timab(1908, 2, tsec)
-       end if  ! eph_stern
+       end if ! eph_stern
 
        ! Loop over all 3*natom perturbations (Each core prepares its own potentials)
        ! In the inner loop, we calculate H1 * psi_k, stored in h1kets_kq on the k+q sphere.

@@ -30,12 +30,12 @@ module m_gstore_sigeph
  use m_errors
  use netcdf
  use m_nctk
- !use m_dvdb
+ !use m_dvdb,          only : dvdb_t
  use m_crystal,        only : crystal_t
  !use m_hamiltonian
  use m_dtset,          only : dataset_type
  use m_dtfil,          only : datafiles_type
- !use m_wfd
+ !use m_wfd,           only : wfd_t
  use m_ephtk
  !use m_mkffnl
  use m_sigtk
@@ -310,7 +310,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
  call ephtk_set_phmodes_skip(dtset%natom, dtset%eph_phrange, phmodes_skip)
 
  if (dtset%eph_stern /= 0) then
-   ! Read the GS potential (vtrial) from input POT file
+   ! Read the GS potential (vtrial) from input POT file.
    ! In principle one may store vtrial in the DVDB but getpot_filepath is simpler to implement.
    call wrtout(units, sjoin(" Reading GS KS potential for Sternheimer from: ", dtfil%filpotin))
    call read_rhor(dtfil%filpotin, cplex1, dtset%nspden, nfftf, ngfftf, pawread0, mpi_enreg, vtrial, pot_hdr, pot_pawrhoij, comm, &
@@ -360,7 +360,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
      ABI_CALLOC(sigma%wrmesh_b, (sigma%nwr, nb_k, glob_nk))
    end if ! nwr
 
-   ! Loop over k-points in |n,k>
+   ! Loop over my k-points in |n,k>
    do my_ik=1,gqk%my_nk
      kk = gqk%my_kpts(:, my_ik); ik_ibz = gqk%my_k2ibz(1, my_ik)
      ! Will store results using glob_ik index.
@@ -381,7 +381,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
       end do
      end if
 
-     ! Sum over q-points.
+     ! Sum over my q-points.
      do my_iq=1,gqk%my_nq
        call gqk%myqpt(my_iq, gstore, weight_q, qpt)
        q_is_gamma = sum(qpt**2) < tol14
@@ -399,7 +399,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
        end if
        ikq_ibz = my_kqmap(1)
 
-       ! Sum over phonon modes.
+       ! Sum over my phonon modes.
        do my_ip=1,gqk%my_npert
          wqnu = gqk%my_wnuq(my_ip, my_iq)
          nu = my_ip + gqk%my_pert_start - 1
@@ -422,7 +422,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
          ! Compute T_pp'(q,nu) matrix in reduced coordinates for DW.
          call sigtk_dw_tpp_red(natom, displ_nu_red, tpp_red)
 
-         ! Sum over bands.
+         ! Sum over bands in |m,k+q>
          do im_kq=1,gqk%nb_kq
            band_kq = im_kq + gqk%bstart_kq - 1
            eig0mkq = ebands%eig(band_kq, ikq_ibz, spin)
@@ -532,7 +532,7 @@ subroutine gstore_sigeph(ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_en
      call lg_myk%free()
    end do ! my_ik
 
-   ! TODO: Sternheimer with KS states.
+   ! TODO: Implement Sternheimer with KS states.
 
    call sigma%gather_and_write_results(gstore, gqk, dtset, ebands)
    end associate
