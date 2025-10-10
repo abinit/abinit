@@ -69,7 +69,6 @@ subroutine appdig(integ,string,strinn)
  character(len=2) :: ncha
  character(len=8) :: form
  !character(len=500) :: msg
-
 ! *************************************************************************
 
  ! Check that integer is nonnegative

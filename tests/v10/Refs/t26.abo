@@ -1,5 +1,5 @@
 
-.Version 10.5.1.5 of ABINIT, released Jul 2025.
+.Version 10.5.4.5 of ABINIT, released Jul 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,18 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  9 Oct 2025.
-- ( at 18h02 )
+.Starting date : Fri  1 Aug 2025.
+- ( at 15h55 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/v10_t26/t26.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_xg-tools-beautifications/tests/TestBot_MPI1/v10_t26/t26.abi
 - output file    -> t26.abo
 - root for input  files -> t26i
 - root for output files -> t26o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Ga.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_xg-tools-beautifications/tests/Pspdir/Psdj_paw_pbe_std/Ga.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/O.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_xg-tools-beautifications/tests/Pspdir/Psdj_paw_pbe_std/O.xml
  DATASET    1 : space group C2/m (# 12); Bravais mC (1-face-center monocl.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -190,9 +190,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.13813
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Ga.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Ga.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Ga.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_xg-tools-beautifications/tests/Pspdir/Psdj_paw_pbe_std/Ga.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_xg-tools-beautifications/tests/Pspdir/Psdj_paw_pbe_std/Ga.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_xg-tools-beautifications/tests/Pspdir/Psdj_paw_pbe_std/Ga.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.10359248
@@ -210,9 +210,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/O.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/O.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/O.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_xg-tools-beautifications/tests/Pspdir/Psdj_paw_pbe_std/O.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_xg-tools-beautifications/tests/Pspdir/Psdj_paw_pbe_std/O.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_xg-tools-beautifications/tests/Pspdir/Psdj_paw_pbe_std/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -474,7 +474,7 @@ xc                  : -4.40208073116916E+01
 Ewald energy        : -2.68369868855453E+02
 psp_core            :  1.45210172929893E+01
 local_psp           : -1.55198115839061E+02
-PAW spherical_terms : -3.31891000641272E+00
+spherical_terms     : -3.31891000641272E+00
 total_energy        : -3.07460460157600E+02
 total_energy_eV     : -8.36642460312068E+03
 ...
@@ -487,7 +487,7 @@ band_energy         : -1.96139198565192E+01
 Ewald energy        : -2.68369868855453E+02
 psp_core            :  1.45210172929893E+01
 xc_dc               : -2.63633504800957E+01
-PAW spherical_terms : -7.20976758752623E+00
+spherical_terms     : -7.20976758752623E+00
 total_energy_dc     : -3.07035889486605E+02
 total_energy_dc_eV  : -8.35487144761654E+03
 ...
@@ -785,7 +785,7 @@ xc                  : -4.40208073116833E+01
 Ewald energy        : -2.68369868855453E+02
 psp_core            :  1.45210172929893E+01
 local_psp           : -1.55198115838992E+02
-PAW spherical_terms : -3.31891000639078E+00
+spherical_terms     : -3.31891000639078E+00
 total_energy        : -3.07460460157498E+02
 total_energy_eV     : -8.36642460311792E+03
 ...
@@ -798,7 +798,7 @@ band_energy         : -1.96139198567706E+01
 Ewald energy        : -2.68369868855453E+02
 psp_core            :  1.45210172929893E+01
 xc_dc               : -2.63633504800169E+01
-PAW spherical_terms : -7.20976758735141E+00
+spherical_terms     : -7.20976758735141E+00
 total_energy_dc     : -3.07035889486603E+02
 total_energy_dc_eV  : -8.35487144761648E+03
 ...
@@ -1025,10 +1025,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          3.8  wall=          3.8
+- Proc.   0 individual time (sec): cpu=          4.2  wall=          4.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  18 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.8  wall=          3.8
++Overall time at end (sec) : cpu=          4.2  wall=          4.3

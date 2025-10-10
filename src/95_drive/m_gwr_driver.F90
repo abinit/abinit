@@ -36,7 +36,6 @@ module m_gwr_driver
  use m_dtset
  use m_dtfil
  use m_wfk
- use m_distribfft
  use netcdf
  use m_nctk
 
@@ -49,7 +48,7 @@ module m_gwr_driver
  use m_fftcore,         only : print_ngfft, get_kg
  use m_fft,             only : fourdp
  use m_ioarr,           only : read_rhor
- use m_energies,        only : energies_type, energies_init
+ use m_energies,        only : energies_type
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
@@ -243,9 +242,9 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
 ! call wrtout(units, msg)
 !
 #if defined HAVE_GW_DPC
- write(msg,'(a,i2,a)')'.Using double precision arithmetic; gwpc = ',gwpc,ch10
+ write(msg,'(a,i2,a)')'.Using double precision arithmetic; gwpc = ',gwp,ch10
 #else
- write(msg,'(a,i2,a)')'.Using single precision arithmetic; gwpc = ',gwpc,ch10
+ write(msg,'(a,i2,a)')'.Using single precision arithmetic; gwpc = ',gwp,ch10
 #endif
  call wrtout(units, msg)
 
@@ -299,7 +298,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
 
  ! Some variables need to be initialized/nullify at start
  usexcnhat = 0
- call energies_init(KS_energies)
+ call KS_energies%init()
 
 !Get electronic temperature from dtset
  el_temp = merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
@@ -337,8 +336,8 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
 
  ! Fake MPI_type for the sequential part.
  call initmpi_seq(mpi_enreg_seq)
- call init_distribfft_seq(mpi_enreg_seq%distribfft, 'c', ngfftc(2), ngfftc(3), 'all')
- call init_distribfft_seq(mpi_enreg_seq%distribfft, 'f', ngfftf(2), ngfftf(3), 'all')
+ call mpi_enreg_seq%distribfft%init_seq('c', ngfftc(2), ngfftc(3), 'all')
+ call mpi_enreg_seq%distribfft%init_seq('f', ngfftf(2), ngfftf(3), 'all')
 
  ! ===========================================
  ! === Open and read pseudopotential files ===
@@ -520,11 +519,11 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
 
    !  Calculate onsite vxc with and without core charge.
    nzlmopt=-1; option=0; compch_sph=greatest_real
-   call pawdenpot(compch_sph,el_temp,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
+   call pawdenpot(compch_sph,el_temp,Cryst%gprimd,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
      Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,KS_Paw_an,KS_Paw_an,KS_energies%paw,KS_paw_ij,&
      Pawang,Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,&
      Pawtab,Dtset%pawxcdev,Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,&
-     Cryst%ucvol,Psps%znuclpsp)
+     Cryst%xred,Cryst%ucvol,Psps%znuclpsp)
 
  else
    ABI_MALLOC(ks_nhatgr, (0, 0, 0))
@@ -1141,7 +1140,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  integer,pointer :: gvec_max(:,:)
  integer,allocatable,target :: m_gvec(:,:), sorted_kg_k(:,:)
  complex(dp),allocatable :: ug1_batch(:,:), ur1_batch(:,:), ur2_batch(:,:), ur12_batch(:,:), ug12_batch(:,:), cwork(:)
- complex(gwpc),allocatable :: sqrt_vc(:), paw_rhotwg(:)
+ complex(gwp),allocatable :: sqrt_vc(:), paw_rhotwg(:)
  type(pawpwij_t),allocatable :: pwij(:)
  type(pawcprj_type),allocatable :: cprj1(:,:)
 ! *************************************************************************
@@ -1186,7 +1185,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  nqibz_ = 1; nqbz_ = 1; qbz_ = zero; nkbz_ = 1
  ! TODO: MC technique does not seem to work as expected, even in the legacy code.
  call vcgen%init(cryst, ebands%kptrlatt, nkbz_, nqibz_, nqbz_, qbz_, &
-                 dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, comm)
+                 dtset%gw_rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, comm)
 
  ! NB: npweps = m_npw
  ABI_MALLOC(sqrt_vc, (m_npw))

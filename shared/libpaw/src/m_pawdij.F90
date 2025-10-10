@@ -15,12 +15,15 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! NOTES
-!!  FOR DEVELOPPERS: in order to preserve the portability of libPAW library,
+!!  FOR DEVELOPERS: in order to preserve the portability of libPAW library,
 !!  please consult ~abinit/src/??_libpaw/libpaw-coding-rules.txt
 !!
 !! SOURCE
 
 #include "libpaw.h"
+
+#define MATPACK(row,col) (MAX(row,col)*(MAX(row,col)-1)/2 + MIN(row,col))
+#define LMPACK(lqn,mqn) (lqn*lqn+lqn+mqn+1)
 
 MODULE m_pawdij
 
@@ -39,11 +42,11 @@ MODULE m_pawdij
  use m_pawfgrtab,    only : pawfgrtab_type
  use m_pawrhoij,     only : pawrhoij_type
  use m_paw_finegrid, only : pawgylm, pawexpiqr
- use m_paw_sphharm,  only : slxyzs,make_dyadic
+ use m_paw_sphharm,  only : initylmr,slxyzs,make_dyadic,realgaunt
 
  implicit none
 
- private
+ private :: pawdijaa
 
 
 !public procedures.
@@ -81,7 +84,7 @@ CONTAINS
 !!
 !! FUNCTION
 !! Compute the pseudopotential strengths Dij of the PAW non local operator as sum of
-!! several contributions. Can compute first-order strenghts Dij for RF calculations.
+!! several contributions. Can compute first-order strengths Dij for RF calculations.
 !! This routine is a driver calling, for each contribution to Dij, a specific
 !! routines.
 !! Within standard PAW formalism, Dij can be decomposd as follows:
@@ -805,9 +808,9 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 
 !    ===== Need to compute Dijnd
        LIBPAW_ALLOCATE(dijnd,(cplex_dij*lmn2_size,ndij))
-       call pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom(:,iatom),&
+       call pawdijnd(dijnd,cplex_dij,gprimd,iatom,natom,ndij,nspden,nucdipmom(1:3,1:natom),&
          & pawang,pawrad(itypat),pawtab(itypat),pawxcdev,qphase,&
-         & paw_an(iatom)%vh1,paw_an(iatom)%vxc1,znuc(itypat),paw_ij(iatom)%zora)
+         & paw_an(iatom)%vh1,paw_an(iatom)%vxc1,xred,znuc(itypat),paw_ij(iatom)%zora)
        if (dijnd_need) paw_ij(iatom)%dijnd(:,:)=dijnd(:,:)
        if (dij_need) then
          paw_ij(iatom)%dij(1:cplex_dij*lmn2_size,:)= &
@@ -1693,7 +1696,7 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
          end if
 
 !        ===== Integrate Vxc_ij_1 and Vxc_ij_2 over the angular mesh =====
-!        ===== and accummulate in total Vxc_ij                       =====
+!        ===== and accumulate in total Vxc_ij                       =====
          if (qphase==1) then
            do klmn=1,lmn2_size
              klm=pawtab%indklmn(1,klmn);kln=pawtab%indklmn(2,klmn)
@@ -2096,7 +2099,7 @@ end subroutine pawdijxcm
 !!  ndij= number of spin components
 !!  ngrid=number of points of the real space grid (FFT, WVL, ...) treated by current proc
 !!  ngridtot=total number of points of the real space grid (FFT, WVL, ...)
-!!           For the FFT grid, thi should be equal to ngfft1*ngfft2*ngfft3
+!!           For the FFT grid, this should be equal to ngfft1*ngfft2*ngfft3
 !!  nspden=number of spin density components
 !!  nsppol=number of independent spin WF components
 !!  pawang <type(pawang_type)>=paw angular mesh and related data
@@ -2410,34 +2413,34 @@ end subroutine pawdijhat
 !!
 !! SOURCE
 
-subroutine pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
-    & pawxcdev,qphase,vh1,vxc1,znuc,zora)
+subroutine pawdijnd(dijnd,cplex_dij,gprimd,iatom,natom,ndij,nspden,nucdipmom,&
+    & pawang,pawrad,pawtab,pawxcdev,qphase,vh1,vxc1,xred,znuc,zora)
 
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: cplex_dij,ndij,nspden,pawxcdev,qphase,zora
+ integer,intent(in) :: cplex_dij,iatom,natom,ndij,nspden,pawxcdev,qphase,zora
  real(dp),intent(in) :: znuc
  type(pawang_type),intent(in) :: pawang
  type(pawrad_type),intent(in) :: pawrad
  type(pawtab_type),target,intent(in) :: pawtab
 !arrays
  real(dp),intent(out) :: dijnd(:,:)
- real(dp),intent(in) :: nucdipmom(3)
- real(dp),intent(in) :: vh1(:,:,:),vxc1(:,:,:)
+ real(dp),intent(in) :: gprimd(3,3),nucdipmom(3,natom)
+ real(dp),intent(in) :: vh1(:,:,:),vxc1(:,:,:),xred(3,natom)
 
 !Local variables ---------------------------------------
 !scalars
  integer :: angl_size,idir,ii,ij_size,il,ilmn,im,imesh
- integer :: jl,jlmn,jm,klmn,kln,lm_size,lmn2_size,mesh_size
+ integer :: jatom,jl,jlmn,jm,klmn,kln,lm_size,lmn2_size ! klm,
+ integer :: mesh_size
  real(dp) :: rc,rr,rt
  real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
- complex(dpc) :: cmatrixelement,lms
+ complex(dp) :: cmatrixelement,lms
  logical :: usezora
 !arrays
  integer,pointer :: indlmn(:,:),indklmn(:,:)
  real(dp),allocatable :: ff(:),intgr3(:),v1(:),zk1(:)
  character(len=500) :: msg
-
 ! *************************************************************************
 
 !Useful data
@@ -2460,8 +2463,8 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
    LIBPAW_BUG(msg)
  end if
 
+ LIBPAW_ALLOCATE(zk1,(mesh_size))
  if(usezora) then
-   LIBPAW_ALLOCATE(zk1,(mesh_size))
    if (size(vh1,1)/=qphase*mesh_size.or.size(vh1,2)<1.or.size(vh1,3)<1) then
      msg='invalid sizes for vh1!'
      LIBPAW_BUG(msg)
@@ -2471,8 +2474,8 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
 &     (size(vxc1,2)/=lm_size.and.pawxcdev/=0)) then
      msg='invalid sizes for vxc1!'
      LIBPAW_BUG(msg)
-   end if 
-   
+   end if
+
    LIBPAW_ALLOCATE(v1,(mesh_size))
    call pawv1(mesh_size,nspden,pawang,pawxcdev,v1,vh1,vxc1)
    zk1 = one/(one - HalfFineStruct2*v1)
@@ -2482,7 +2485,7 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
    !! with better analytic properties at r=0.
    rc=two*HalfFineStruct2
    rt=znuc*rc
-  
+
    ! replace k at short range with Coulomb potential version
    do ii=1,mesh_size
      rr=pawrad%rad(ii)
@@ -2494,7 +2497,7 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
      end if
    end do
  end if
- 
+
  dijnd = zero
 
  !-------------------------------------------------------------------
@@ -2514,9 +2517,6 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
    call simp_gen(intgr3(kln),ff,pawrad)
  end do
  LIBPAW_DEALLOCATE(ff)
- if(allocated(zk1)) then
-   LIBPAW_DEALLOCATE(zk1)
- end if
 
  !---------------------------
  ! accumulate matrix elements
@@ -2541,11 +2541,11 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
    do idir = 1, 3
 
      ! this loop accumulates a dot product so if no dipole moment in direction idir, nothing to do
-     if( ABS(nucdipmom(idir)) .LT. tol8 ) cycle
+     if( ABS(nucdipmom(idir,iatom)) .LT. tol8 ) cycle
 
      call slxyzs(il,im,idir,jl,jm,lms)
 
-     cmatrixelement = FineStructureConstant2*lms*nucdipmom(idir)*intgr3(kln)
+     cmatrixelement = FineStructureConstant2*lms*nucdipmom(idir,iatom)*intgr3(kln)
      dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + real(cmatrixelement)
      dijnd(2*klmn  ,1) = dijnd(2*klmn  ,1) + aimag(cmatrixelement)
 
@@ -2555,14 +2555,268 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
 
  LIBPAW_DEALLOCATE(intgr3)
 
+ ! loop over other atoms to compute A.A term. Note this is "on-site only" with
+ ! phi*phij, no tphi*tphij, because this term is not present in the planewave
+ ! getghc
+ do jatom=1,natom
+   if (jatom .EQ. iatom) cycle ! no self term
+   if (.NOT. ANY(ABS(nucdipmom(:,jatom))>tol8)) cycle ! skip neighbors without dipoles
+
+   call pawdijaa(dijnd,gprimd,iatom,jatom,mesh_size,natom,nucdipmom,&
+     & pawang,pawrad,pawtab,usezora,xred,zk1)
+
+ end do
+
  ! in case of ndij > 1, note that there is no spin-flip in this term
  ! so therefore down-down = up-up, and up-down and down-up terms are still zero
  if(ndij > 1) dijnd(:,2)=dijnd(:,1)
+
+ if(allocated(zk1)) then
+   LIBPAW_DEALLOCATE(zk1)
+ end if
 
 end subroutine pawdijnd
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_pawdij/pawdijaa
+!! NAME
+!! pawdijaa
+!!
+!! FUNCTION
+!! Compute the Dipole-Dipole contribution to the PAW
+!! pseudopotential strength Dij
+!! (for one atom only)
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine pawdijaa(dijnd,gprimd,iatom,jatom,mesh_size,natom,nucdipmom,&
+    & pawang,pawrad,pawtab,usezora,xred,zk1)
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: iatom,jatom,mesh_size,natom
+ logical,intent(in) :: usezora
+ type(pawang_type),intent(in) :: pawang
+ type(pawrad_type),intent(in) :: pawrad
+ type(pawtab_type),target,intent(in) :: pawtab
+!arrays
+ real(dp),intent(in) :: gprimd(3,3),nucdipmom(3,natom),xred(3,natom),zk1(mesh_size)
+ real(dp),intent(inout) :: dijnd(:,:)
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: angmom,iaa,ignt,ignt23,ij_size,imesh,info
+ integer :: klmn,klm,klm2,klm23,klm3,klm3a,klm3b,klm4,kln,l2,l3,l4
+ integer :: m1dir,m2dir,m2,m3,m3a,m3b,m4,my_lmax,my_lsizemax,my_ngnt
+ real(dp) :: aa1a,aa1b,aa2a,aa2b,dr,rr,aa1a_fac,aa1b_fac,aa2a_fac,aa2b_fac
+ real(dp) :: m1m2,m12d
+ real(dp), parameter :: c1=sqrt(four_pi/15.0d0)
+ real(dp), parameter :: c2=sqrt(four_pi/5.0d0)
+ real(dp), parameter :: c3=sqrt(four_pi)
+ real(dp), parameter :: FineStruct4=one/InvFineStruct**4
+!arrays
+ integer :: ipiv(3)
+ integer,parameter :: s1map(3)=[1,-1,0]
+ integer,pointer :: indlmn(:,:),indklmn(:,:)
+ integer,allocatable :: my_gntselect(:,:)
+ real(dp) :: d2ij(3,3,9),rprimd(3,3),rvec(3,1),rvec_len(1),work(3)
+ real(dp),allocatable :: aaint(:,:,:),ff(:),my_realgnt(:),ylm_rvec(:,:)
+
+! *************************************************************************
+
+!Useful data
+ indklmn => pawtab%indklmn
+ indlmn => pawtab%indlmn
+ ij_size=pawtab%ij_size
+ m1m2 = DOT_PRODUCT(nucdipmom(1:3,iatom),nucdipmom(1:3,jatom))
+
+ ! spherical harmonic representation of \hat{r}\hat{r}
+ d2ij = zero
+ d2ij(1,2,5)=c1; d2ij(2,1,5)=c1 ! xy/r^2 = c1*S_{2,-2}
+ d2ij(2,3,6)=c1; d2ij(3,2,6)=c1 ! yz/r^2 = c1*S_{2,-1}
+ d2ij(1,3,8)=c1; d2ij(3,1,8)=c1 ! xz/r^2 = c1*S_{2,+1}
+ d2ij(3,3,1)=c3/three;  d2ij(3,3,7)=two*c2/three ! zz/r^2 = c3/3 S_{00} + 2c2/3 S_{20}
+ d2ij(1,1,1)=c3/three;  d2ij(1,1,7)=-c2/three; d2ij(1,1,9)=c1 ! xx/r^2 = c3/3 S_00-c2/3 S_20 + c1 S-{2,2}
+ d2ij(2,2,1)=c3/three;  d2ij(2,2,7)=-c2/three; d2ij(2,2,9)=-c1 ! xx/r^2 = c3/3 S_00-c2/3 S_20 - c1 S-{2,2}
+
+ ! need set of Gaunt integrals one larger than usual
+ my_lmax=pawang%l_max+1
+ my_lsizemax=2*my_lmax-1
+ LIBPAW_ALLOCATE(my_gntselect,((2*my_lmax-1)**2,my_lmax**2*(my_lmax**2+1)/2))
+ LIBPAW_ALLOCATE(my_realgnt,((2*my_lmax-1)**2*my_lmax**4))
+ call realgaunt(my_lmax,my_ngnt,my_gntselect,my_realgnt)
+
+ ! obtain rprimd by inversion of gprimd
+ ! have to use elaborate lapack calls because we are inside libpaw
+ rprimd=gprimd
+ call dgetrf(3,3,rprimd,3,ipiv,info)
+ call dgetri(3,rprimd,3,ipiv,work,3,info)
+
+ ! rvec is R2-R1 where R2,R1 are the two atoms with dipoles
+ rvec(1:3,1)=MATMUL(rprimd,(xred(:,jatom)-xred(:,iatom)))
+ rvec_len(1) = SQRT(DOT_PRODUCT(rvec(:,1),rvec(:,1)))
+ dr = rvec_len(1)
+
+ ! generate Ylm's for rvec
+ LIBPAW_ALLOCATE(ylm_rvec,(my_lsizemax**2,1))
+ call initylmr(my_lsizemax,1,1,rvec_len,1,rvec,ylm_rvec)
+
+ ! compute radial integrals
+ LIBPAW_ALLOCATE(aaint,(ij_size,my_lsizemax,2))
+ LIBPAW_ALLOCATE(ff,(mesh_size))
+
+ do iaa = 1, 2
+   ! note here l2 = angmom + 1
+   do l2 = 1, my_lsizemax
+     angmom = l2 - 1
+     do kln=1,ij_size
+       do imesh = 2, mesh_size
+         rr = pawrad%rad(imesh)
+         ! integrand for r^(angmom-iaa)/dr^(angmom+1) * 1/(dr^2 - r^2)
+         ff(imesh)=pawtab%phiphj(imesh,kln)*&
+           & rr**(angmom-iaa)/((dr*dr-rr*rr)*dr**(angmom+1))
+       end do !imesh
+       ff(2:mesh_size) = four_pi*ff(2:mesh_size)
+       if (usezora) ff(2:mesh_size)=ff(2:mesh_size)*zk1(2:mesh_size)
+       call pawrad_deducer0(ff,mesh_size,pawrad)
+       call simp_gen(aaint(kln,l2,iaa),ff,pawrad)
+     end do
+   end do
+ end do
+ LIBPAW_DEALLOCATE(ff)
+
+ ! term Ia factor: 1/2 \alpha^4 m1\cdot\m2
+ aa1a_fac = half*FineStruct4*m1m2
+ ! term Ib factor: -1/2 \alpha^4 (4\pi/3) m1\cdot\m2
+ aa1b_fac = -half*FineStruct4*four_pi*m1m2/three
+ ! term IIa factor: -1/2 \alpha^4
+ aa2a_fac = -half*FineStruct4
+ ! term IIb factor: 1/2 \alpha^4 (4\pi/3)
+ aa2b_fac = half*FineStruct4*four_pi/three
+
+ do klmn=1,pawtab%lmn2_size
+   klm=indklmn(2,klmn); kln=indklmn(2,klmn)
+
+   aa1a=zero
+   aa1b=zero
+   ! Term Ia, Ib
+   ! note l2 here really is the angular momentum
+   do l2 = indklmn(3,klmn),indklmn(4,klmn)
+     do m2=-l2,l2
+       klm2=LMPACK(l2,m2)
+       ignt=my_gntselect(klm2,klm)
+       if (ignt > 0) then
+         ! note that aaint second index is angmom + 1, so l2+1 here
+         aa1a = aa1a + aa1a_fac*my_realgnt(ignt)*ylm_rvec(klm2,1)*aaint(kln,l2+1,1)
+
+         do l4=abs(l2-1),l2+1
+           do m4=-l4,l4
+             klm4=LMPACK(l4,m4)
+             l3=1
+             do m3=-l3,l3
+               klm3=LMPACK(l3,m3)
+               klm23=MATPACK(klm2,klm3)
+               ignt23=my_gntselect(klm4,klm23)
+               if (ignt23 > 0) then
+                 aa1b = aa1b + aa1b_fac*aaint(kln,l4+1,2)*&
+                   & dr*ylm_rvec(klm4,1)*ylm_rvec(klm3,1)*&
+                   & my_realgnt(ignt)*my_realgnt(ignt23)
+               end if ! ignt23
+             end do ! m3
+           end do ! m4
+         end do ! l4
+       end if ! ignt
+     end do ! loop on mm
+   end do ! loop on ll
+
+   aa2a=0
+   do l2 = indklmn(3,klmn),indklmn(4,klmn)
+     do m2=-l2,l2
+       klm2=LMPACK(l2,m2)
+       ignt=my_gntselect(klm2,klm)
+       if (ignt > 0) then
+         do l4=abs(l2-2),l2+2
+           do m4=-l4,l4
+             klm4=LMPACK(l4,m4)
+             do l3=0,2
+               do m3=-l3,l3
+                 klm3=LMPACK(l3,m3)
+                 klm23=MATPACK(klm2,klm3)
+                 ignt23=my_gntselect(klm4,klm23)
+                 if (ignt23 > 0) then
+                   do m1dir=1,3
+                     do m2dir=1,3
+                       m12d=nucdipmom(m1dir,iatom)*nucdipmom(m2dir,jatom)
+                       if (abs(m12d)<tol8) cycle
+                       if (abs(d2ij(m1dir,m2dir,klm3))<tol8) cycle
+                       aa2a=aa2a+m12d*aa2a_fac*aaint(kln,l4+1,1)*&
+                         & d2ij(m1dir,m2dir,klm3)*ylm_rvec(klm4,1)*&
+                         & my_realgnt(ignt)*my_realgnt(ignt23)
+                     end do ! m2dir
+                   end do ! m1dir
+                 end if ! ignt23
+               end do ! m3
+             end do ! l3
+           end do ! m4
+         end do ! l4
+       end if ! ignt
+     end do ! loop on mm
+   end do ! loop on ll
+
+   aa2b=0
+   do l2 = indklmn(3,klmn),indklmn(4,klmn)
+     do m2=-l2,l2
+       klm2=LMPACK(l2,m2)
+       ignt=my_gntselect(klm2,klm)
+       if (ignt > 0) then
+         do l4=abs(l2-1),l2+1
+           do m4=-l4,l4
+             klm4=LMPACK(l4,m4)
+             do m1dir=1,3
+               l3=1; m3a=s1map(m1dir)
+               klm3a=LMPACK(l3,m3a)
+               klm23=MATPACK(klm2,klm3a)
+               ignt23=my_gntselect(klm4,klm23)
+               if (ignt23 > 0) then
+                 do m2dir=1,3
+                   m12d=nucdipmom(m1dir,iatom)*nucdipmom(m2dir,jatom)
+                   if (abs(m12d)<tol8) cycle
+                   m3b=s1map(m2dir)
+                   klm3b=LMPACK(l3,m3b)
+                   aa2b=aa2b+m12d*aa2b_fac*aaint(kln,l4+1,2)*&
+                     dr*my_realgnt(ignt)*my_realgnt(ignt23)*&
+                     ylm_rvec(klm4,1)*ylm_rvec(klm3b,1)
+                 end do ! m2dir
+               end if ! ignt23
+             end do ! m1dir
+           end do ! m4
+         end do ! l4
+       end if ! ignt
+     end do ! loop on mm
+   end do ! loop on ll
+
+   dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + aa1a + aa1b + aa2a + aa2b
+
+ end do ! loop on klmn
+
+ LIBPAW_DEALLOCATE(my_gntselect)
+ LIBPAW_DEALLOCATE(my_realgnt)
+ LIBPAW_DEALLOCATE(aaint)
+ LIBPAW_DEALLOCATE(ylm_rvec)
+
+end subroutine pawdijaa
+!!***
+
+!----------------------------------------------------------------------
+
 
 !!****f* m_pawdij/pawdijso
 !! NAME
@@ -2570,7 +2824,7 @@ end subroutine pawdijnd
 !!
 !! FUNCTION
 !! Compute the spin-orbit contribution to the PAW
-!! pseudopotential strength Dij and also the nuclear dipole 
+!! pseudopotential strength Dij and also the nuclear dipole
 !! spin interactions.
 !! (for one atom only)
 !!
@@ -2756,7 +3010,7 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,pawang,pawrad,pawtab,&
 
  LIBPAW_ALLOCATE(z_kernel,(mesh_size))
  LIBPAW_ALLOCATE(z_intgd,(mesh_size))
- 
+
  ! spin-orbit kernel
  if (use_soc) then
    LIBPAW_ALLOCATE(dijso_rad,(ij_size))
@@ -3754,7 +4008,7 @@ subroutine pawdijfr(gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nsppol,nt
    end if
  end if
 
-!Get correct index of strain pertubation
+!Get correct index of strain perturbation
  if (ipert==natom+3) istr = idir
  if (ipert==natom+4) istr = idir + 3
 
@@ -4763,7 +5017,7 @@ end subroutine pawdijfr
 !!  paw_ij(natom)%qphase=2 if exp^(-i.q.r) phase from RF at q<>0, 1 otherwise
 !!  paw_ij(natom)%lmn_size=number of (l,m,n) elements for the paw basis
 !!  paw_ij(natom)%nspden=number of spin-density components
-!!  paw_ij(natom)%nsppol=number of independant spin-density components
+!!  paw_ij(natom)%nsppol=number of independent spin-density components
 !!  paw_ij(natom)%dij(lmn2_size,nspden)=non-symmetrized paw dij quantities
 !!  pawang <type(pawang_type)>=angular mesh discretization and related data
 !!  pawprtvol=control print volume and debugging output for PAW
@@ -4829,9 +5083,8 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
 !integer :: i1,i2,i3,i4,symrel_conv(3,3)
 !real(dp) :: spinrot(4)
 !real(dp),allocatable :: dijtemp(:,:),sumrhoso(:,:)
-!complex(dpc) :: dijt(2,2),dijt2(2,2),Rspinrot(2,2)
+!complex(dp) :: dijt(2,2),dijt2(2,2),Rspinrot(2,2)
 !DEBUG_ALTERNATE_ALGO
-
 ! *********************************************************************
 
 !Tests consistency of options
@@ -5517,7 +5770,7 @@ end subroutine symdij
 !!  paw_ij(natom)%qphase=2 if exp^(-i.q.r) phase from RF at q<>0, 1 otherwise
 !!  paw_ij(natom)%lmn_size=number of (l,m,n) elements for the paw basis
 !!  paw_ij(natom)%nspden=number of spin-density components
-!!  paw_ij(natom)%nsppol=number of independant spin-density components
+!!  paw_ij(natom)%nsppol=number of independent spin-density components
 !!  paw_ij(natom)%dij(lmn2_size,nspden)=non-symmetrized paw dij quantities
 !!  pawang <type(pawang_type)>=angular mesh discretization and related data
 !!  pawprtvol=control print volume and debugging output for PAW

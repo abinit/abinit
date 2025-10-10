@@ -84,8 +84,6 @@ module m_chebfiwf
 ! For use in getghc_gsc1
  integer, save :: l_cpopt
  integer, save :: l_icplx
- integer, save :: l_npw
- integer, save :: l_nband_filter
  integer, save :: l_nspinor
  logical, save :: l_paw
  integer, save :: l_prtvol
@@ -160,7 +158,7 @@ subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  ! arrays
  real(dp) :: tsec(2)
  integer(kind=c_size_t) :: chebfiMem(2)
- real(dp), allocatable :: l_gvnlxc(:,:),occ_tmp(:)
+ real(dp), allocatable :: gvnlxc(:,:),occ_tmp(:)
 
  ! Parameters for nonlop call in NC
  integer,parameter :: choice=1, paw_opt=0, signs=1
@@ -177,12 +175,10 @@ subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 !Set module variables
  l_paw = (gs_hamk%usepaw==1)
  l_cpopt=-1;l_sij_opt=0;if (l_paw) l_sij_opt=1
- l_npw = npw
  l_nspinor = nspinor
  l_prtvol = prtvol
  l_mpi_enreg => mpi_enreg
  l_gs_hamk => gs_hamk
- l_nband_filter = nband
  l_paral_kgb = dtset%paral_kgb
  l_block_sliced = dtset%invovl_blksliced
 
@@ -219,14 +215,14 @@ subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 !Memory info
  if ( prtvol >= 3 ) then
    if (l_mpi_enreg%paral_kgb == 1) then
-     total_spacedim = l_icplx*l_npw*l_nspinor
+     total_spacedim = l_icplx*npw*nspinor
      call xmpi_sum(total_spacedim,l_mpi_enreg%comm_bandspinorfft,ierr)
    else
      total_spacedim = 0
    end if
-   chebfiMem = chebfi_memInfo(nband,l_icplx*l_npw*l_nspinor,space,l_mpi_enreg%paral_kgb, &
+   chebfiMem = chebfi_memInfo(nband,l_icplx*npw*nspinor,space,l_mpi_enreg%paral_kgb, &
 &                             total_spacedim,l_mpi_enreg%bandpp) !blockdim
-   localMem = (int(2,c_size_t)*l_npw*l_nspinor*nband+3*nband)*kind(1.d0) !blockdim
+   localMem = (int(2,c_size_t)*npw*nspinor*nband+3*nband)*kind(1.d0) !blockdim
    write(std_out,'(1x,A,F10.6,1x,A)') "Each MPI process calling chebfi should need around ", &
    (localMem+sum(chebfiMem))/1e9,"GB of peak memory as follows :"
    write(std_out,'(4x,A,F10.6,1x,A)') "Permanent memory in chebfiwf : ",real(localMem)/1e9,"GB"
@@ -238,7 +234,7 @@ subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  !$OMP TARGET ENTER DATA MAP(to:cg,eig,resid,occ) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
 
- call xgBlock_map(xgx0,cg,space,l_npw*l_nspinor,nband,comm=l_mpi_enreg%comm_bandspinorfft,me_g0=me_g0,&
+ call xgBlock_map(xgx0,cg,space,npw*nspinor,nband,comm=l_mpi_enreg%comm_bandspinorfft,me_g0=me_g0,&
    & gpu_option=dtset%gpu_option)
 
  call xgBlock_map_1d(xgeigen,eig,SPACE_R,nband,gpu_option=dtset%gpu_option)
@@ -257,7 +253,7 @@ subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  call timab(tim_chebfiwf2,2,tsec)
 
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_INIT)
- call chebfi_init(chebfi,nband,l_npw*l_nspinor,dtset%tolwfr_diago,dtset%ecut, &
+ call chebfi_init(chebfi,nband,npw*nspinor,dtset%tolwfr_diago,dtset%ecut, &
 &                 dtset%paral_kgb,l_mpi_enreg%bandpp, &
 &                 dtset%nline, dtset%nbdbuf, space,1, &
 &                 l_mpi_enreg%comm_bandspinorfft,me_g0,me_g0_fft,l_paw,&
@@ -279,9 +275,9 @@ subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  if ( .not. l_paw ) then
    call timab(tim_nonlop,1,tsec)
 #ifdef FC_CRAY
-   ABI_MALLOC(l_gvnlxc,(1,1))
+   ABI_MALLOC(gvnlxc,(1,1))
 #else
-   ABI_MALLOC(l_gvnlxc,(0,0))
+   ABI_MALLOC(gvnlxc,(0,0))
 #endif
    !end if
 
@@ -290,26 +286,23 @@ subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
    if (l_paral_kgb==0) then
 
      call nonlop(choice,l_cpopt,cprj_dum,enl_out,l_gs_hamk,0,eig,mpi_enreg,nband,1,paw_opt,&
-&                signs,gsc_dummy,l_tim_getghc,cg,l_gvnlxc)
+&                signs,gsc_dummy,l_tim_getghc,cg,gvnlxc)
 
    else
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET UPDATE FROM(cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
      do iband=1,nband/blockdim
-       shift = (iband-1)*blockdim*l_npw*l_nspinor
+       shift = (iband-1)*blockdim*npw*nspinor
        call prep_nonlop(choice,l_cpopt,cprj_dum, &
 &        enl_out((iband-1)*blockdim+1:iband*blockdim),l_gs_hamk,0,&
 &        eig((iband-1)*blockdim+1:iband*blockdim),blockdim,mpi_enreg,1,paw_opt,signs,&
-&        gsc_dummy,l_tim_getghc, &
-&        cg(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
-!&        l_gvnlxc(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
-&        l_gvnlxc(:,:),&
+&        gsc_dummy,l_tim_getghc,cg(:,shift+1:shift+blockdim*npw*nspinor),gvnlxc(:,:),&
 &        already_transposed=.false.)
      end do
    end if
    ABI_NVTX_END_RANGE()
-   ABI_FREE(l_gvnlxc)
+   ABI_FREE(gvnlxc)
    call timab(tim_nonlop,2,tsec)
  end if
 
@@ -364,7 +357,7 @@ subroutine getghc_gsc1(X,AX,BX)
  real(dp), pointer :: cg(:,:)
  real(dp), pointer :: ghc(:,:)
  real(dp), pointer :: gsc(:,:)
- real(dp)          :: l_gvnlxc(1,1)
+ real(dp)          :: gvnlxc(1,1)
 
 ! *********************************************************************
 
@@ -379,7 +372,7 @@ subroutine getghc_gsc1(X,AX,BX)
  call xgBlock_reverseMap(BX,gsc,rows=1,cols=spacedim*blockdim)
 
  call multithreaded_getghc(l_cpopt,cg,cprj_dum,ghc,gsc,&
-   l_gs_hamk,l_gvnlxc,eval,l_mpi_enreg,blockdim,l_prtvol,l_sij_opt,l_tim_getghc,0)
+   l_gs_hamk,gvnlxc,eval,l_mpi_enreg,blockdim,l_prtvol,l_sij_opt,l_tim_getghc,0)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
  call gpu_device_synchronize()

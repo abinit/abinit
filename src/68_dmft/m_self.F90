@@ -388,7 +388,7 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
  real(dp) :: dc,jpawu,ntot,upawu
  logical :: amf,fll,nmdc
  character(len=500) :: message
- complex(dpc), allocatable :: occ(:,:),vdc(:,:)
+ complex(dp), allocatable :: occ(:,:),vdc(:,:)
 ! *********************************************************************
 
  dmft_dc = paw_dmft%dmft_dc
@@ -534,7 +534,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  type(oper_type) :: energy_level
  integer, allocatable :: unitselffunc_arr(:),unitselffunc_arr2(:),unitselfrot(:,:,:,:)
  real(dp), allocatable :: s_i(:,:),s_r(:,:) !,fermie_read2(:)
- complex(dpc), allocatable :: buffer(:)
+ complex(dp), allocatable :: buffer(:)
  type(matlu_type), allocatable :: eigvectmatlu(:),level_diag(:),selfmomrot(:,:)
  type(oper_type), allocatable :: selfrotmatlu(:)
 ! *********************************************************************
@@ -1887,7 +1887,7 @@ subroutine selfreal2imag_self(selfr,self,filapp,paw_dmft)
 !Local variables-------------------------------
  integer :: iatom,ifreq,im,im1,ispinor,ispinor1,isppol,jfreq
  integer :: lpawu,myproc,natom,ndim,nspinor,nsppol,unt
- complex(dpc) :: omega
+ complex(dp) :: omega
  !real(dp) :: delta
  type(self_type) :: selftempmatsub
  character(len=2) :: tag_im,tag_im1

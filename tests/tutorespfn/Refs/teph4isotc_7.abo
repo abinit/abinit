@@ -418,7 +418,19 @@ meta: {optdriver: 7, eph_task: -12, }
   -1.94839037E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
+
+- Reading e-ph matrix elements from: teph4isotc_6o_GSTORE.nc
+ Asking for with_gmode: phonon
+ Asking for with_cplex: 1
+ Asking for gvals_name: gvals
+ Asking for g(k,q=Gamma): no
  Initializing gstore object from: teph4isotc_6o_GSTORE.nc
+
+ Reading KS e-ph matrix elements
+P qpt_comm can use shmem: yes
+P kpt_comm can use shmem: yes
+P bsum_comm can use shmem: yes
+P pp_sum_comm can use shmem: yes
 
  === Gstore parameters ===
  kzone: ibz
@@ -432,21 +444,51 @@ meta: {optdriver: 7, eph_task: -12, }
  glob_nq_spin: [216]
  kptopt: 1
  qptopt: 1
+ has_used_lgk: 0
+ has_used_lgq: 0
  with_vk: 1
 
- gqk_cplex: 1
- gqk_bstart: 3
- gqk_bstop: 5
- gqk_nb: 3
+ gqk_cplex: 2
+ gqk_bstart_k: 3
+ gqk_bstart_kq: 3
+ gqk_bstop_k: 5
+ gqk_bstop_kq: 5
+ gqk_nb_k: 3
+ gqk_nb_kq: 3
  gqk_my_npert: 9
- gqk_my_nk: -1
- gqk_my_nq: -1
+P gqk_my_nk: -1
+P gqk_my_nq: -1
 
   === MPI distribution ===
 P Number of CPUs for parallelism over perturbations: 1
 P Number of perturbations treated by this CPU: 9
 P Number of CPUs for parallelism over q-points: 1
 P Number of CPUs for parallelism over k-points: 1
+ k-points included in gstore:
+1 : [ 5.5556E-02,  0.0000E+00,  0.0000E+00]
+2 : [ 1.1111E-01,  0.0000E+00,  0.0000E+00]
+3 : [ 3.8889E-01,  0.0000E+00,  0.0000E+00]
+4 : [ 4.4444E-01,  0.0000E+00,  0.0000E+00]
+5 : [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
+6 : [ 5.5556E-02,  5.5556E-02,  0.0000E+00]
+7 : [ 3.8889E-01,  5.5556E-02,  0.0000E+00]
+8 : [ 4.4444E-01,  5.5556E-02,  0.0000E+00]
+9 : [ 3.3333E-01,  1.1111E-01,  0.0000E+00]
+10 : [ 3.8889E-01,  1.1111E-01,  0.0000E+00]
+11 : [ 4.4444E-01,  1.1111E-01,  0.0000E+00]
+ Max 10  k-points will be written. Use prtvol > 0 to print all of them.
+
+
+ Linear tetrahedron method.
+ Mesh step:  10.0 (meV) with npts: 2749
+ From emin:  -5.1 to emax:  22.4 (eV)
+ Number of k-points in the IBZ: 370
+ Fermi level:   7.66392108E+00 (eV)
+ Total electron DOS at Fermi level in states/eV:   7.17582741E-01
+ Total number of electrons at eF:    8.0
+
+
+ Computing a^2F(w) with ph_smear: 5.442277E-01 (meV)
 
 == END DATASET(S) ==============================================================
 ================================================================================

@@ -596,15 +596,15 @@ subroutine spline_c( nomega_lo, nomega_li, omega_lo, omega_li, splined_li, tospl
  integer, intent(in) :: nomega_lo, nomega_li
  real(dp), intent(in) :: omega_lo(nomega_lo)
  real(dp), intent(in) :: omega_li(nomega_li)
- complex(dpc), intent(in) :: tospline_lo(nomega_lo)
- complex(dpc), intent(out) :: splined_li(nomega_li)
+ complex(dp), intent(in) :: tospline_lo(nomega_lo)
+ complex(dp), intent(out) :: splined_li(nomega_li)
  logical, intent(in), optional :: extrapolate
 
 !Local variables---------------------------------------
 !scalars
  integer :: begin, end
- complex(dpc) :: ybcbeg, ybcend
- complex(dpc) :: ysplin2_lo(nomega_lo)
+ complex(dp) :: ybcbeg, ybcend
+ complex(dp) :: ysplin2_lo(nomega_lo)
 
  ybcbeg=czero
  ybcend=czero
@@ -667,10 +667,10 @@ subroutine spline_complex( t, y, n, ybcbeg, ybcend, ypp )
 
  integer, intent(in) :: n
  real(dp), intent(in) :: t(n)
- complex(dpc), intent(in) :: y(n)
- complex(dpc), intent(in) :: ybcbeg
- complex(dpc), intent(in) :: ybcend
- complex(dpc), intent(out) :: ypp(n)
+ complex(dp), intent(in) :: y(n)
+ complex(dp), intent(in) :: ybcbeg
+ complex(dp), intent(in) :: ybcend
+ complex(dp), intent(out) :: ypp(n)
 
  real(dp), allocatable :: y_r(:)
  real(dp) :: ybcbeg_r
@@ -810,10 +810,10 @@ subroutine splint_complex (nspline,xspline,yspline,ysplin2,nfit,xfit,yfit)
 
  integer, intent(in) :: nfit, nspline
  real(dp), intent(in) :: xspline(nspline)
- complex(dpc), intent(in) :: yspline(nspline)
- complex(dpc), intent(in) :: ysplin2(nspline)
+ complex(dp), intent(in) :: yspline(nspline)
+ complex(dp), intent(in) :: ysplin2(nspline)
  real(dp), intent(in) :: xfit(nfit)
- complex(dpc), intent(out) :: yfit(nfit)
+ complex(dp), intent(out) :: yfit(nfit)
 
  real(dp), allocatable :: ysplin2_r(:)
  real(dp), allocatable :: ysplin2_i(:)
@@ -1258,10 +1258,10 @@ end subroutine spline2
 subroutine spline2_complex(x,y,n,yp,ybcbeg,ybcend,ibcbeg,ibcend)
 
  integer,intent(in) :: n,ibcbeg,ibcend
- complex(dpc),intent(in) :: ybcbeg,ybcend
+ complex(dp),intent(in) :: ybcbeg,ybcend
  real(dp),intent(in) :: x(n)
- complex(dpc),intent(in) :: y(n)
- complex(dpc),intent(inout) :: yp(n)
+ complex(dp),intent(in) :: y(n)
+ complex(dp),intent(inout) :: yp(n)
 
  real(dp),allocatable :: y_tmp(:),yp_i(:),yp_r(:)
 

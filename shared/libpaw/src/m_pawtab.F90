@@ -801,8 +801,6 @@ subroutine pawtab_free_0D(Pawtab)
 !arrays
  type(Pawtab_type),intent(inout) :: Pawtab
 
-!Local variables-------------------------------
-
 ! *************************************************************************
 
  !@Pawtab_type

@@ -9,6 +9,7 @@ os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(os.path.dirname(__file__
 #print("ABI_PSPDIR:", os.environ["ABI_PSPDIR"])
 import platform
 import time
+import pickle
 
 from warnings import warn
 from optparse import OptionParser
@@ -16,13 +17,6 @@ from socket import gethostname
 
 import logging
 logger = logging.getLogger(__name__)
-
-py2 = sys.version_info[0] <= 2
-if py2:
-    import cPickle as pickle
-    #import pickle as pickle
-else:
-    import pickle
 
 # We don't install with setup.py hence we have to add the directory [...]/abinit/tests to $PYTHONPATH
 # TODO: Use Absolute imports and rename tests --> abitests to
@@ -380,6 +374,10 @@ def main():
     # Parse command line.
     options, suite_args = parser.parse_args()
 
+    #all_cpp_vars = abitests.get_all_need_cppvars()
+    #print(all_cpp_vars)
+    #return 0
+
     if options.show_info:
         abitests.show_info(verbose=options.verbose)
         return 0
@@ -406,9 +404,6 @@ def main():
 
     mpi_nprocs = options.mpi_nprocs
     omp_nthreads = options.omp_nthreads
-
-
-
 
     cprint("Running on %s -- system %s -- ncpus %s -- ngpus %s -- Python %s -- %s" % (
           gethostname(), system, ncpus_detected, ngpus_detected, platform.python_version(), _my_name),
@@ -444,15 +439,15 @@ def main():
         # read the [mpi] and the [openmp] sections from the external cfg file.
         assert omp_nthreads == 0
         cfg_fname = options.cfg_fname
-        logger.info("Initalizing JobRunner from cnf file: %s" % cfg_fname)
+        logger.info("Initializing JobRunner from cnf file: %s" % cfg_fname)
         runner = JobRunner.fromfile(cfg_fname, timebomb=timebomb)
 
     else:
         if mpi_nprocs == 1 and not (options.force_mpirun or options.use_srun):
-            logger.info("Initalizing JobRunner for sequential runs.")
+            logger.info("Initializing JobRunner for sequential runs.")
             runner = JobRunner.sequential(timebomb=timebomb)
         else:
-            logger.info("Initalizing JobRunner assuming generic_mpi. [-c option not provided]")
+            logger.info("Initializing JobRunner assuming generic_mpi. [-c option not provided]")
             # Decide whether we should use mpirun or mpiexec
             # If `use_mpiexec` is specified on the command line args, use it (user is always right)
             # else test for the presence of (mpirun, mpiexec) in $PATH, in this order
@@ -509,7 +504,7 @@ def main():
 
     # Select tests according to the input variables.
     # Note that the parser is very primitive and it does not
-    # have acces to the default values used by the codes.
+    # have access to the default values used by the codes.
     ivars = None
     if options.input_vars:
         ivars = {}
@@ -539,8 +534,8 @@ def main():
                                                keys=options.keys, authors=options.authors,
                                                ivars=ivars, with_pickle=options.with_pickle)
         except Exception as exc:
-            raise
             show_examples_and_exit(str(exc))
+            raise
 
     if not test_suite:
         cprint("No test fulfills the requirements specified by the user!", "red")
@@ -765,16 +760,32 @@ if __name__ == "__main__":
     #multiprocessing.set_start_method("fork")  # Ensure compatibility on macOS/Linux
 
     # Check whether we are in profiling mode
+    arg0 = None
     try:
-        do_prof = sys.argv[1] == "prof"
-        if do_prof: sys.argv.pop(1)
+        do_prof = sys.argv[1] in ("prof", "tuna", "snakeviz")
+        if do_prof:
+            arg0 = sys.argv.pop(1)
     except Exception:
         do_prof = False
 
     if not do_prof:
+        # No profiling. Run script as usual.
         sys.exit(main())
     else:
+        print("Entering profiling mode...")
         import pstats, cProfile
-        cProfile.runctx("main()", globals(), locals(), "Profile.prof")
-        s = pstats.Stats("Profile.prof")
+        import tempfile
+        #prof_file = kwargs.get("prof_file", None)
+        prof_file = None
+        if prof_file is None:
+            _, prof_file = tempfile.mkstemp()
+            print(f"Profiling data stored in: {prof_file}")
+
+        cProfile.runctx("main()", globals(), locals(), prof_file)
+        s = pstats.Stats(prof_file)
         s.strip_dirs().sort_stats("time").print_stats()
+
+        if arg0 in ("tuna", "snakeviz"):
+            cmd = f"{arg0} {prof_file}"
+            print(f"Executing {cmd=}")
+            os.system(cmd)

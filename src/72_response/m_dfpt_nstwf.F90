@@ -195,7 +195,7 @@ contains
 !!  usecprj= 1 if cprj, cprjq arrays are stored in memory
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
 !!  usevxctau=1 if if XC functional depends on kinetic energy density
-!!  usexcnhat= -PAW only- flag controling use of compensation density in Vxc
+!!  usexcnhat= -PAW only- flag controlling use of compensation density in Vxc
 !!  useylmgr1= 1 if ylmgr1 array is allocated
 !!  vectornd(with_vectornd*nfftf,3)=nuclear dipole moment vector potential
 !!  vhartr1(cplex*nfft)=1-order Hartree potential
@@ -319,7 +319,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  logical :: need_wfk,need_wf1,nmxc,paral_atom,qne0,t_exist,use_ompgpu,with_vxctau
  character(len=500) :: msg
  character(len=fnlen) :: fiwfddk(3)
- complex(dpc), parameter :: cminusone  = (-1._dp,0._dp)
+ complex(dp), parameter :: cminusone  = (-1._dp,0._dp)
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq
  type(MPI_type) :: mpi_enreg_seq
@@ -563,7 +563,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
     ! vlocal is needed when vectornd is present, for zora
     ABI_MALLOC(vlocal,(dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),gs_hamkq%nvloc))
     ABI_MALLOC(vtrial_,(nfftf,nspden))
-    ! need a mutable version of vtrial 
+    ! need a mutable version of vtrial
     vtrial_=vtrial
     ABI_MALLOC(vectornd_pac,(dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),gs_hamkq%nvloc,3))
     ABI_MALLOC(vectornd_pac_idir,(dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),gs_hamkq%nvloc))
@@ -678,7 +678,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
          else
            if(ipert1==dtset%natom+3.or.ipert1==dtset%natom+4) then
 
-             !To compute Absolute Deformation Potentials toghether with FxE tensor
+             !To compute Absolute Deformation Potentials together with FxE tensor
              !the reference has to be the same as in the FxE routines
              g0term=0; if (dtset%rfstrs_ref==1) g0term=1
 
@@ -1408,7 +1408,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !          -1/2.<u0_k_i|S^(j1)| Sum_{j}[<u0_k+q_j|H^(j2)-Eps_k_i.S^(j2)|u0_k_i>.|u0_k+q_j>
 !          The sum over j can be computed with a single call to projbd routine
 !          At first call (when j1=j2), ch1c=<u0_k+q_j|H^(j2)-Eps_k_i.S^(j2)|u0_k_i> is stored
-!          For the next calls, it is re-used.
+!          For the next calls, it is reused.
            if (has_dcwf.or.(ipert==ipert1.and.idir==idir1.and.usepaw==1)) then
 !            note: gvnlx1 used as temporary space
              if (ipert==ipert1.and.idir==idir1) then
@@ -1605,7 +1605,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !          Sum_j{1/2.(occ_kq_j-occ_k_i).Eps1_k,q_ij.<u0_k_i|S^(j1)|u0_k+q_j> }
 !          where Eps1_k,q_ij=<u0_k+q_j|H^(j2)-1/2(Eps_k+q_j-Eps_k_i)S^(j2)|u0_k_i>
 !          At first call (when j1=j2), cs1c=<u0_k_i|S^(j1)|u0_k+q_j> is stored
-!          For the next calls, it is re-used.
+!          For the next calls, it is reused.
              if (has_dcwf.and.is_metal_or_qne0) then
 ! dotX is local to my proc, and should accumulate sum over all jband, for my iband_me
                dotr=zero;doti=zero
@@ -2390,7 +2390,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
  call timab(112,1,tsec)
  tim_getgh1c=2
 
-!Miscelaneous inits
+!Miscellaneous inits
  ABI_MALLOC(dum_cwaveprj,(0,0))
  ddk=(ipert==dtset%natom+1.or.ipert==dtset%natom+10.or.ipert==dtset%natom+11)
 
@@ -2579,7 +2579,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
          end if
 
 !        Define the direction along which to move the atom :
-!        the polarisation (ipert1,idir1) is refered as j1.
+!        the polarisation (ipert1,idir1) is referred as j1.
          do idir1=1,3
            if (ipert1<=dtset%natom.or.(ipert1==dtset%natom+2.and.ddkfil(idir1)/=0)) then
 

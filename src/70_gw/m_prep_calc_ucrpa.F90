@@ -175,8 +175,8 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  type(pawang_type),intent(in) :: Pawang
  class(wfd_t),target,intent(inout) :: Wfd,Wfdf
 !arrays
- complex(dpc), intent(out) :: rhot1_q_m(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,2*lpawu+1,2*lpawu+1,sigp%npwx,Qmesh%nibz)
- complex(dpc), intent(out) :: M1_q_m(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,2*lpawu+1,2*lpawu+1,sigp%npwx,Qmesh%nibz)
+ complex(dp), intent(out) :: rhot1_q_m(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,2*lpawu+1,2*lpawu+1,sigp%npwx,Qmesh%nibz)
+ complex(dp), intent(out) :: M1_q_m(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,2*lpawu+1,2*lpawu+1,sigp%npwx,Qmesh%nibz)
  integer,intent(in) :: gwx_ngfft(18),ngfftf(18)
  type(Pawtab_type),intent(in) :: Pawtab(Psps%ntypat)
  type(pawpwff_t),intent(in) :: Paw_pwff(Psps%ntypat*Psps%usepaw)
@@ -201,7 +201,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  integer :: nhat12_grdim
  integer :: iatom1,iatom2,il1,il2,im1,im2,ispinor2,pos1,pos2,wan_jb,wan_ib_sum,pwx
  real(dp) :: fact_sp,theta_mu_minus_esum,tol_empty,norm,weight
- complex(dpc) :: ctmp,scprod,ph_mkgwt,ph_mkt,eikr
+ complex(dp) :: ctmp,scprod,ph_mkgwt,ph_mkt,eikr
  logical :: iscompatibleFFT,q_is_gamma
  character(len=500) :: msg
  type(wave_t),pointer :: wave_sum, wave_jb
@@ -214,15 +214,15 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  real(dp) :: spinrot_kbz(4),spinrot_kgw(4)
  real(dp),pointer :: qp_ene(:,:,:),qp_occ(:,:,:)
  real(dp),allocatable :: nhat12(:,:,:),grnhat12(:,:,:,:)
- complex(gwpc),allocatable :: vc_sqrt_qbz(:)
- complex(gwpc),allocatable :: rhotwg_ki(:,:)
- complex(gwpc),allocatable :: wfr_bdgw(:,:),wfr_sum(:)
- complex(gwpc),allocatable :: ur_ae_sum(:),ur_ae_onsite_sum(:),ur_ps_onsite_sum(:)
- complex(gwpc),allocatable :: ur_ae_bdgw(:,:),ur_ae_onsite_bdgw(:,:),ur_ps_onsite_bdgw(:,:)
- complex(gwpc),pointer :: cg_jb(:),cg_sum(:)
- complex(dpc) :: ovlp(2)
- complex(dpc),allocatable :: coeffW_BZ(:,:,:,:,:,:)
- complex(dpc),pointer :: ptr_rhot(:,:,:,:,:)
+ complex(gwp),allocatable :: vc_sqrt_qbz(:)
+ complex(gwp),allocatable :: rhotwg_ki(:,:)
+ complex(gwp),allocatable :: wfr_bdgw(:,:),wfr_sum(:)
+ complex(gwp),allocatable :: ur_ae_sum(:),ur_ae_onsite_sum(:),ur_ps_onsite_sum(:)
+ complex(gwp),allocatable :: ur_ae_bdgw(:,:),ur_ae_onsite_bdgw(:,:),ur_ps_onsite_bdgw(:,:)
+ complex(gwp),pointer :: cg_jb(:),cg_sum(:)
+ complex(dp) :: ovlp(2)
+ complex(dp),allocatable :: coeffW_BZ(:,:,:,:,:,:)
+ complex(dp),pointer :: ptr_rhot(:,:,:,:,:)
  logical :: can_symmetrize(Wfd%nsppol)
  logical,allocatable :: bks_mask(:,:,:)
  type(pawcprj_type),allocatable :: Cprj_kgw(:,:),Cprj_ksum(:,:)

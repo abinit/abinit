@@ -21,6 +21,8 @@
 
 module m_rttddft_output
 
+ use netcdf
+
  use defs_basis
  use defs_abitypes,   only: MPI_type
  use defs_datatypes,  only: pseudopotential_type
@@ -29,15 +31,12 @@ module m_rttddft_output
  use m_dtfil,         only: datafiles_type
  use m_dtset,         only: dataset_type
  use m_ebands,        only: ebands_t
- use m_epjdos,        only: dos_calcnwrite, partial_dos_fractions, &
-                          & partial_dos_fractions_paw,epjdos_t,    &
-                          & epjdos_new, prtfatbands, fatbands_ncwrite
+ use m_epjdos,        only: epjdos_t
  use m_errors,        only: msg_hndl, assert
  use m_ioarr,         only: fftdatar_write
  use m_io_tools,      only: open_file, close_unit
  use m_iowf,          only: outwf
  use m_mpinfo,        only: iwrite_fftdatar
- use netcdf
  use m_paral_atom,    only: get_my_atmtab, free_my_atmtab
  use m_profiling_abi, only: abimem_record
  use m_rttddft_tdks,  only: tdks_type
@@ -589,18 +588,18 @@ subroutine prt_dos(dtfil, dtset, istep, mpi_enreg, psps, tdks)
 
  !** Generate DOS using the tetrahedron method or using Gaussians
  if (dtset%prtdos>=2.or.dtset%pawfatbnd>0) then
-   dos = epjdos_new(dtset, psps, tdks%pawtab)
+   call dos%init(dtset, psps, tdks%pawtab)
 
    if (dos%partial_dos_flag>=1 .or. dos%fatbands_flag==1)then
       ! Generate fractions for partial DOSs if needed partial_dos 1,2,3,4  give different decompositions
       collect = 1 !; if (psps%usepaw==1 .and. dos%partial_dos_flag /= 2) collect = 0
       if ((psps%usepaw==0.or.dtset%pawprtdos/=2) .and. dos%partial_dos_flag>=1) then
-         call partial_dos_fractions(dos,crystal,dtset,tdks%eigen,tdks%occ0,tdks%npwarr,tdks%kg,tdks%cg,tdks%mcg,collect,mpi_enreg)
+         call dos%partial_dos_fractions(crystal,dtset,tdks%eigen,tdks%occ0,tdks%npwarr,tdks%kg,tdks%cg,tdks%mcg,collect,mpi_enreg)
       end if
 
       if (psps%usepaw==1 .and. dos%partial_dos_flag /= 2) then
          ! TODO: update partial_dos_fractions_paw for extra atoms - no PAW contribution normally, but check bounds and so on.
-         call partial_dos_fractions_paw(dos,tdks%cprj,tdks%dimcprj,dtset,tdks%mcprj,dtset%mkmem,mpi_enreg,tdks%pawrad,tdks%pawtab)
+         call dos%partial_dos_fractions_paw(tdks%cprj,tdks%dimcprj,dtset,tdks%mcprj,dtset%mkmem,mpi_enreg,tdks%pawrad,tdks%pawtab)
       end if
    else
       dos%fractions(:,:,:,1)=one
@@ -609,13 +608,13 @@ subroutine prt_dos(dtfil, dtset, istep, mpi_enreg, psps, tdks)
    !Here, print out fatbands for the k-points given in file appended _FATBANDS
    if (me == master .and. dtset%pawfatbnd>0 .and. dos%fatbands_flag==1) then
       fname = trim(dtfil%filnam_ds(4))//'_'//trim(adjustl(step_nb))//'_FATBANDS'
-      call prtfatbands(dos,dtset,ebands,fname,dtset%pawfatbnd,tdks%pawtab)
+      call dos%prtfatbands(dtset,ebands,fname,dtset%pawfatbnd,tdks%pawtab)
    end if
 
    !Here, computation and output of DOS and partial DOS  _DOS
    if (dos%fatbands_flag == 0 .and. dos%prtdos /= 4) then
       fname = trim(dtfil%filnam_ds(4))//'_'//trim(adjustl(step_nb))//'_DOS'
-      call dos_calcnwrite(dos,dtset,crystal,ebands,fname,spacecomm)
+      call dos%calcnwrite(dtset,crystal,ebands,fname,spacecomm)
    end if
  end if
 

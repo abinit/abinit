@@ -25,16 +25,15 @@ module m_energies
  use defs_basis
  use m_abicore
  use m_errors
+ use netcdf
  use m_nctk
  use m_dtset
- use netcdf
  use m_paw_energies
 
  implicit none
 
  private
 
-!public parameter
  integer, public, parameter :: n_energies=42+n_paw_energies
 
 !!***
@@ -198,14 +197,13 @@ module m_energies
   type(paw_energies_type) :: paw
    ! Several PAW on-site energy contributions
 
+  contains
+     procedure :: init => energies_init
+     procedure :: copy => energies_copy
+     procedure :: to_array => energies_to_array
+     procedure :: eval_eint => energies_eval_eint
+     procedure :: ncwrite => energies_ncwrite
  end type energies_type
-
-!public procedures
- public :: energies_init
- public :: energies_copy
- public :: energies_to_array
- public :: energies_eval_eint
- public :: energies_ncwrite
 !!***
 
 
@@ -213,24 +211,17 @@ CONTAINS !===========================================================
 !!***
 
 !!****f* m_energies/energies_init
-!!
 !! NAME
 !! energies_init
 !!
 !! FUNCTION
 !! Set zero in all values of a type(energies_type) object
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!   energies <type(energies_type)>=values to initialise
-!!
 !! SOURCE
 
 subroutine energies_init(energies)
 
 !Arguments ------------------------------------
-!scalars
  class(energies_type),intent(out) :: energies
 
 ! *************************************************************************
@@ -367,7 +358,6 @@ end subroutine energies_copy
 !----------------------------------------------------------------------
 
 !!****f* m_energies/energies_to_array
-!!
 !! NAME
 !! energies_to_array
 !!
@@ -378,8 +368,6 @@ end subroutine energies_copy
 !! INPUTS
 !!   option= 1: copy energies datastructure into an array
 !!   option=-1: copy an array into a energies datastructure
-!!
-!! OUTPUT
 !!
 !! SIDE EFFECTS
 !!   energies <type(energies_type)>=energies stored in a datastructure
@@ -515,7 +503,6 @@ end subroutine energies_to_array
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
 !!  usewvl= 0 for PW calculation; =1 for WVL calculation
 !!
-!!
 !! OUTPUT
 !!  optdc=option for double counting scheme
 !!  eint=internal energy with direct scheme
@@ -523,7 +510,7 @@ end subroutine energies_to_array
 !!
 !! SOURCE
 
- subroutine energies_eval_eint(energies,dtset,usepaw,optdc,eint,eintdc)
+ subroutine energies_eval_eint(energies, dtset, usepaw, optdc, eint, eintdc)
 
 !Arguments ------------------------------------
 !scalars
@@ -531,13 +518,11 @@ end subroutine energies_to_array
  type(dataset_type),intent(in) :: dtset
  integer,intent(in) :: usepaw
  integer , intent(out) :: optdc
- real(dp), intent(out) :: eint
- real(dp), intent(out) :: eintdc
+ real(dp), intent(out) :: eint, eintdc
 
 !Local variables-------------------------------
 !scalars
- logical :: positron
- logical :: wvlbigdft=.false.
+ logical :: positron, wvlbigdft
 
 ! *************************************************************************
 

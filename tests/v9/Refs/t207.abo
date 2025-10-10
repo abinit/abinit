@@ -1,6 +1,6 @@
 
-.Version 10.5.1.5 of ABINIT, released Jul 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.Version 10.5.4.8 of ABINIT, released Jul 2025.
+.(sequential version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,18 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  9 Oct 2025.
-- ( at 18h11 )
+.Starting date : Mon  4 Aug 2025.
+- ( at 14h57 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/v9_t207/t207.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_xg-tools-beautifications/tests/TestBot_MPI1/v9_t207/t207.abi
 - output file    -> t207.abo
 - root for input  files -> t207i
 - root for output files -> t207o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/P.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_xg-tools-beautifications/tests/Pspdir/Psdj_paw_pbe_std/P.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_xg-tools-beautifications/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
 
  invars1: COMMENT -
   With nspinor=2 and usepaw=1, pawspnorb=1 has been switched on by default.
@@ -242,9 +242,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/P.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/P.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/P.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_xg-tools-beautifications/tests/Pspdir/Psdj_paw_pbe_std/P.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_xg-tools-beautifications/tests/Pspdir/Psdj_paw_pbe_std/P.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_xg-tools-beautifications/tests/Pspdir/Psdj_paw_pbe_std/P.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90690075
@@ -262,9 +262,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_xg-tools-beautifications/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_xg-tools-beautifications/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_xg-tools-beautifications/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90363307
@@ -719,7 +719,7 @@ xc                  : -3.21247524868960E+00
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 local_psp           : -3.21752380903916E+00
-PAW spherical_terms :  1.46296769005767E+00
+spherical_terms     :  1.46296769005767E+00
 total_energy        : -8.87836915000848E+00
 total_energy_eV     : -2.41592710991663E+02
 ...
@@ -732,7 +732,7 @@ band_energy         :  5.44840872517238E-01
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 xc_dc               : -3.84032622444618E-01
-PAW spherical_terms :  6.38934308000572E-02
+spherical_terms     :  6.38934308000572E-02
 total_energy_dc     : -8.87836904050252E+00
 total_energy_dc_eV  : -2.41592708011854E+02
 ...
@@ -1237,7 +1237,7 @@ xc                  : -3.21247524820829E+00
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 local_psp           : -3.21752369762647E+00
-PAW spherical_terms :  1.46296768945386E+00
+spherical_terms     :  1.46296768945386E+00
 total_energy        : -8.87836904182710E+00
 total_energy_eV     : -2.41592708047898E+02
 ...
@@ -1250,7 +1250,7 @@ band_energy         :  5.44840878939684E-01
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 xc_dc               : -3.84032624747225E-01
-PAW spherical_terms :  6.38934267117688E-02
+spherical_terms     :  6.38934267117688E-02
 total_energy_dc     : -8.87836904047097E+00
 total_energy_dc_eV  : -2.41592708010995E+02
 ...
@@ -1755,7 +1755,7 @@ xc                  : -3.21247524825643E+00
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 local_psp           : -3.21752369795973E+00
-PAW spherical_terms :  1.46296768922346E+00
+spherical_terms     :  1.46296768922346E+00
 total_energy        : -8.87836904227037E+00
 total_energy_eV     : -2.41592708059960E+02
 ...
@@ -1768,7 +1768,7 @@ band_energy         :  5.44840879093066E-01
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 xc_dc               : -3.84032624927243E-01
-PAW spherical_terms :  6.38934267384244E-02
+spherical_terms     :  6.38934267384244E-02
 total_energy_dc     : -8.87836904047095E+00
 total_energy_dc_eV  : -2.41592708010995E+02
 ...
@@ -2273,7 +2273,7 @@ xc                  : -3.21247524852078E+00
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 local_psp           : -3.21752369988425E+00
-PAW spherical_terms :  1.46296769003147E+00
+spherical_terms     :  1.46296769003147E+00
 total_energy        : -8.87836904317536E+00
 total_energy_eV     : -2.41592708084586E+02
 ...
@@ -2286,7 +2286,7 @@ band_energy         :  5.44840878963142E-01
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 xc_dc               : -3.84032624872040E-01
-PAW spherical_terms :  6.38934268120623E-02
+spherical_terms     :  6.38934268120623E-02
 total_energy_dc     : -8.87836904047203E+00
 total_energy_dc_eV  : -2.41592708011024E+02
 ...
@@ -2404,10 +2404,64 @@ P           mkmem           8
 
 ================================================================================
 
+- Total cpu        time (s,m,h):         11.2        0.19      0.003
+- Total wall clock time (s,m,h):         11.3        0.19      0.003
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0
+-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =           11.2, wall_time =           11.3
+-
+- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
+-                                                                                (-1=no count)
+- fourwf%(pot)                              4.224  37.8         4.262  37.8          22622      -1.00        0.99       0.99
+- nonlop(apply)                             1.356  12.1         1.294  11.5          13487      -1.00        1.05       1.05
+- pspini                                    0.999   8.9         0.999   8.9              4      -1.00        1.00       1.00
+- pawdenpot                                 0.368   3.3         0.371   3.3             60      -1.00        0.99       0.99
+- xc:pot/=fourdp                            0.363   3.2         0.370   3.3             64      -1.00        0.98       0.98
+- xgBlock_trsm                              0.304   2.7         0.298   2.6           3237      -1.00        1.02       1.02
+- xgBlock_gemm(blas)                        0.265   2.4         0.273   2.4          13345      -1.00        0.97       0.97
+- getghc(/=fourXX,nonlop,fock_XX)           0.232   2.1         0.232   2.1             -1      -1.00        1.00       1.00
+- fourwf%(den)                              0.211   1.9         0.214   1.9           7680      -1.00        0.99       0.99
+- xgBlock_hegvd                             0.200   1.8         0.188   1.7           1079      -1.00        1.06       1.06
+- get_dtsets_pspheads                       0.162   1.4         0.163   1.4              1      -1.00        0.99       0.99
+- timing timab                              0.118   1.1         0.118   1.0             10      -1.00        1.00       1.00
+- fourdp                                    0.109   1.0         0.192   1.7            980      -1.00        0.57       0.57
+- vtowfk(ssdiag)                            0.091   0.8         0.085   0.8             -1      -1.00        1.07       1.07
+- vtowfk(contrib)                           0.090   0.8         0.082   0.7            480      -1.00        1.10       1.10
+- others (188)                              0.613   5.5         0.613   5.4             -1      -1.00        1.00       1.00
+-<END_TIMER>
+-
+- subtotal                                  9.706  86.8         9.754  86.4                                  1.00       1.00
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =          11.2, wall_time =          11.3
+-
+- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
+-                                                                                (-1=no count)
+- fourwf%(pot)                              4.224  37.8         4.262  37.8          22622      -1.00        0.99       0.99
+- nonlop(apply)                             1.356  12.1         1.294  11.5          13487      -1.00        1.05       1.05
+- pspini                                    0.999   8.9         0.999   8.9              4      -1.00        1.00       1.00
+- pawdenpot                                 0.368   3.3         0.371   3.3             60      -1.00        0.99       0.99
+- xc:pot/=fourdp                            0.363   3.2         0.370   3.3             64      -1.00        0.98       0.98
+- xgBlock_trsm                              0.304   2.7         0.298   2.6           3237      -1.00        1.02       1.02
+- xgBlock_gemm(blas)                        0.265   2.4         0.273   2.4          13345      -1.00        0.97       0.97
+- getghc(/=fourXX,nonlop,fock_XX)           0.232   2.1         0.232   2.1             -1      -1.00        1.00       1.00
+- fourwf%(den)                              0.211   1.9         0.214   1.9           7680      -1.00        0.99       0.99
+- xgBlock_hegvd                             0.200   1.8         0.188   1.7           1079      -1.00        1.06       1.06
+- get_dtsets_pspheads                       0.162   1.4         0.163   1.4              1      -1.00        0.99       0.99
+- timing timab                              0.118   1.1         0.118   1.0             10      -1.00        1.00       1.00
+- fourdp                                    0.109   1.0         0.192   1.7            980      -1.00        0.57       0.57
+- vtowfk(ssdiag)                            0.091   0.8         0.085   0.8             -1      -1.00        1.07       1.07
+- vtowfk(contrib)                           0.090   0.8         0.082   0.7            480      -1.00        1.10       1.10
+- others (188)                              0.613   5.5         0.613   5.4             -1      -1.00        1.00       1.00
+-<END_TIMER>
 
+- subtotal                                  9.706  86.8         9.754  86.4                                  1.00       1.00
 
 ================================================================================
 
@@ -2493,10 +2547,11 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         10.0  wall=         10.0
+- Proc.   0 individual time (sec): cpu=         11.2  wall=         11.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered  64 WARNINGs and  45 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.0  wall=         10.0
+.Delivered  65 WARNINGs and  45 COMMENTs to log file.
++Overall time at end (sec) : cpu=         11.2  wall=         11.3
+

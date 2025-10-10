@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (MT)
+!!  Copyright (C) 1998-2025 ABINIT group (MT, FDahm)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,6 +23,7 @@
 
 module m_nonlop
 
+ use, intrinsic :: iso_c_binding, only: c_loc, c_associated
  use defs_basis
  use m_errors
  use m_abicore
@@ -41,12 +42,9 @@ module m_nonlop
  use m_nonlop_pl,   only : nonlop_pl
  use m_nonlop_ylm,  only : nonlop_ylm
 
- use, intrinsic :: iso_c_binding, only: c_loc, c_associated
-
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
 #endif
-
 #if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
@@ -262,13 +260,13 @@ contains
 !!      not available
 !! ==== if (signs==2) ====
 !! --if (paw_opt=0)
-!!    vectout(2,npwout*my_nspinor*ndat)=result of the aplication of the concerned operator
+!!    vectout(2,npwout*my_nspinor*ndat)=result of the application of the concerned operator
 !!                or one of its derivatives to the input vect.
 !!      if (choice=22) <G|d2V_nonlocal/d(atm. pos)dq|vect_in> (at q=0)
 !!      if (choice=25) <G|d3V_nonlocal/d(atm. pos)dqdq|vect_in> (at q=0)
 !!      if (choice=33) <G|d2V_nonlocal/d(strain)dq|vect_in> (at q=0)
 !! --if (paw_opt=0, 1 or 4)
-!!    vectout(2,npwout*my_nspinor*ndat)=result of the aplication of the concerned operator
+!!    vectout(2,npwout*my_nspinor*ndat)=result of the application of the concerned operator
 !!                or one of its derivatives to the input vect.:
 !!      if (choice=1)  <G|V_nonlocal|vect_in>
 !!      if (choice=2)  <G|dV_nonlocal/d(atm. pos)|vect_in>
@@ -291,7 +289,7 @@ contains
 !!      if (choice=8)  <G|d2[V_nonlocal-lamdba.(I+S)]/d(k)d(k)|vect_in>
 !!      if (choice=81) <G|d[d(right[V_nonlocal-lamdba.(I+S)]/d(k)]/d(k)|vect_in>
 !! --if (paw_opt=3 or 4)
-!!    svectout(2,npwout*my_nspinor*ndat)=result of the aplication of Sij (overlap matrix)
+!!    svectout(2,npwout*my_nspinor*ndat)=result of the application of Sij (overlap matrix)
 !!                  or one of its derivatives to the input vect.:
 !!      if (choice=1)  <G|I+S|vect_in>
 !!      if (choice=2)  <G|dS/d(atm. pos)|vect_in>
@@ -336,8 +334,8 @@ contains
 !! SOURCE
 
 subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnlout,&
-&                 paw_opt,signs,svectout,tim_nonlop,vectin,vectout,&
-&                 cprjin_left,enl,enl_ndat,enlout_im,iatom_only,ndat_left,only_SO,qdir,select_k,vectproj) !optional arguments
+                  paw_opt,signs,svectout,tim_nonlop,vectin,vectout,&
+                  cprjin_left,enl,enl_ndat,enlout_im,iatom_only,ndat_left,only_SO,qdir,select_k,vectproj) !optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -356,7 +354,6 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  type(pawcprj_type),intent(inout),target,optional :: cprjin_left(:,:)
  real(dp),intent(inout), ABI_CONTIGUOUS optional :: vectproj(:,:,:)
 
-
 !Local variables-------------------------------
 !scalars
  integer :: dimenl1,dimenl2,dimenl2_,dimekbq,dimffnlin,dimffnlout,dimsij,iatm,iatom_only_,idat
@@ -364,7 +361,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  integer :: nkpgin,nkpgout,npwin,npwout,ntypat_,only_SO_,select_k_,shift1,shift2,shift3
  logical :: atom_pert,force_recompute_ph3d,kpgin_allocated,kpgout_allocated
  logical :: use_gemm_nonlop
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  integer :: nlmn_atm(1),nloalg_(3)
  integer,pointer :: kgin(:,:),kgout(:,:)
@@ -399,7 +396,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 
  force_recompute_ph3d=.false.
 
-!Error(s) on incorrect input
+ ! Error(s) on incorrect input
  if (hamk%useylm==0) then
    if (paw_opt>0) then
      ABI_BUG('When paw_opt>0 you must use ylm version of nonlop! Set useylm 1.')
@@ -423,9 +420,9 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  if ((.not.associated(hamk%ffnl_k)).or.(.not.associated(hamk%ffnl_kp))) then
    ABI_BUG('ffnl_k/ffnl_kp should be associated!')
  end if
-!if (hamk%istwf_k/=hamk%istwf_kp) then
-!  ABI_BUG('istwf has to be the same for both k-points.')
-!end if
+ !if (hamk%istwf_k/=hamk%istwf_kp) then
+ !  ABI_BUG('istwf has to be the same for both k-points.')
+ !end if
 
  if (present(enl) .and. present(enl_ndat)) then
    ABI_BUG("enl and enl_ndat cannot be specified concurrently !")
@@ -435,8 +432,8 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  select_k_=KPRIME_H_K;if (present(select_k)) select_k_=select_k
  ! If both K-Kprime variant of each attribute of hamiltonian share the same
  ! address, we can assume select_k==K_H_K.
- if (        c_associated(c_loc(hamk%ffnl_k), c_loc(hamk%ffnl_kp)) &
- &    .and. c_associated(c_loc(hamk%kg_k),   c_loc(hamk%kg_kp))) then
+ if (      c_associated(c_loc(hamk%ffnl_k), c_loc(hamk%ffnl_kp)) &
+     .and. c_associated(c_loc(hamk%kg_k),   c_loc(hamk%kg_kp))) then
    if (associated(hamk%ph3d_k).and.associated(hamk%ph3d_kp)) then
      if (c_associated(c_loc(hamk%ph3d_k),   c_loc(hamk%ph3d_kp))) then
        select_k_=K_H_K
@@ -447,6 +444,8 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  end if
  nkpgin=0;nkpgout=0;nullify(kpgin);nullify(kpgout)
  nullify(ph3din);nullify(ph3dout)
+ !print *, "in nonlop with select_k:", select_k_
+
  if (select_k_==KPRIME_H_K) then
 !  ===== <k^prime|Vnl|k> =====
    kptin = hamk%kpt_k ; kptout = hamk%kpt_kp
@@ -530,10 +529,9 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 
 !Check some sizes for safety
 !if (paw_opt==0.or.cpopt<2.or.((cpopt==2.or.cpopt==3).and.choice>1)) then
- if (size(ffnlin,1)/=npwin.or.size(ffnlin,3)/=hamk%lmnmax) then
-   msg = 'Incorrect size for ffnlin!'
-!   ABI_BUG(msg)
- end if
+ !if (size(ffnlin,1)/=npwin.or.size(ffnlin,3)/=hamk%lmnmax) then
+ ! ABI_BUG('Incorrect size for ffnlin!')
+ !end if
  if(signs==2) then
    if (size(ffnlout,1)/=npwout.or.size(ffnlout,3)/=hamk%lmnmax) then
      ABI_BUG('Incorrect size for ffnlout!')
@@ -562,21 +560,15 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  end if
  if(choice/=0.and.signs==2) then
    if(paw_opt/=3) then
-!    This test is OK only because explicit sizes are passed to nonlop_* routines
-     if (size(vectout)<2*npwout*my_nspinor*ndat) then
-       ABI_BUG('Incorrect size for vectout!')
-     end if
+     ! This test is OK only because explicit sizes are passed to nonlop_* routines
+     ABI_CHECK_IGEQ(size(vectout), 2*npwout*my_nspinor*ndat, 'Incorrect size for vectout!')
    end if
    if(paw_opt>=3) then
-     if (size(svectout)<2*npwout*my_nspinor*ndat) then
-       ABI_BUG('Incorrect size for svectout!')
-     end if
+     ABI_CHECK_IGEQ(size(svectout), 2*npwout*my_nspinor*ndat, 'Incorrect size for svectout!')
    end if
  end if
  if(cpopt>=0 .and. .not. present(vectproj)) then
-   if (size(cprjin)<hamk%natom*my_nspinor*ndat) then
-     ABI_BUG('Incorrect size for cprjin!')
-   end if
+   ABI_CHECK_IGEQ(size(cprjin), hamk%natom*my_nspinor*ndat, 'Incorrect size for cprjin!')
  end if
  ndat_left_ = 1
  if (present(ndat_left)) then
@@ -584,8 +576,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  end if
  if(present(cprjin_left)) then
    if (size(cprjin_left)/=hamk%natom*my_nspinor*ndat*ndat_left_) then
-     msg = 'Incorrect size for cprjin_left!'
-     ABI_BUG(msg)
+     ABI_BUG('Incorrect size for cprjin_left!')
    end if
  end if
 
@@ -993,13 +984,6 @@ end subroutine nonlop
 !!  Compute application of a nonlocal operator, using GPU (NVidia Cuda)
 !!  This routine is an interface to Cuda Kernel gpu_nonlop.cu
 !!
-!! COPYRIGHT
-!! Copyright (C) 2011-2025 ABINIT group (FDahm, MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
 !! INPUTS
 !!  atindx1(natom)=index table for atoms, inverse of atindx
 !!  choice: chooses possible output:
@@ -1093,7 +1077,7 @@ end subroutine nonlop
 !!    not available
 !! ==== if (signs==2) ====
 !! --if (paw_opt=0, 1 or 4)
-!!    vectout(2,npwout*nspinor)=result of the aplication of the concerned operator
+!!    vectout(2,npwout*nspinor)=result of the application of the concerned operator
 !!                or one of its derivatives to the input vect.:
 !!      if (choice=1) <G|V_nonlocal|vect_start>
 !!      if (choice=2) <G|dV_nonlocal/d(atm coord)|vect_start>
@@ -1104,7 +1088,7 @@ end subroutine nonlop
 !!      if (choice=2) <G|d[V_nonlocal-lamdba.(I+S)]/d(atm coord)|vect_start>
 !!      if (choice=3) <G|d[V_nonlocal-lamdba.(I+S)]/d(strain)|vect_start>
 !! --if (paw_opt=3 or 4)
-!!    svectout(2,npwout*nspinor)=result of the aplication of Sij (overlap matrix)
+!!    svectout(2,npwout*nspinor)=result of the application of Sij (overlap matrix)
 !!                  or one of its derivatives to the input vect.:
 !!      if (choice=1) <G|I+S|vect_start>
 !!      if (choice=2) <G|dS/d(atm coord)|vect_start>
@@ -1178,12 +1162,10 @@ end subroutine nonlop
    ABI_BUG(msg)
  end if
  if (cpopt<-1.or.cpopt>2) then
-   msg='  Bad value for cpopt !'
-   ABI_BUG(msg)
+   ABI_BUG('Bad value for cpopt !')
  end if
  if (nspinor==2) then
-   msg='  nspinor=2 (spinorial WF) not yet allowed !'
-   ABI_ERROR(msg)
+   ABI_ERROR('nspinor=2 (spinorial WF) not yet allowed !')
  end if
 
  if ((cpopt==0).or.(cpopt==1).or.(cpopt==2))  then

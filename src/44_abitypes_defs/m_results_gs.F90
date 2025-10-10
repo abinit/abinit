@@ -205,18 +205,17 @@ MODULE m_results_gs
 
  contains
 
-  procedure :: yaml_write => results_gs_yaml_write
+   procedure :: init => init_results_gs
+   procedure :: free => destroy_results_gs
+   procedure :: copy => copy_results_gs
+   procedure :: ncwrite => results_gs_ncwrite
+   procedure :: yaml_write => results_gs_yaml_write
     ! Write the most important results in Yaml format.
 
  end type results_gs_type
 
-!public procedures.
- public :: init_results_gs
  public :: init_results_gs_array
- public :: destroy_results_gs
  public :: destroy_results_gs_array
- public :: copy_results_gs
- public :: results_gs_ncwrite
 !!***
 
 CONTAINS
@@ -238,25 +237,17 @@ CONTAINS
 !!            if this flag is activated only the following parts of results_gs
 !!            are initalized: all scalars, fcart,gred,strten
 !!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!  results_gs=<type(results_gs_type)>=results_gs datastructure
-!!
 !! SOURCE
 
-subroutine init_results_gs(natom,nspden,nsppol,results_gs,only_part)
+subroutine init_results_gs(results_gs, natom, nspden, nsppol, only_part)
 
 !Arguments ------------------------------------
-!scalars
+ class(results_gs_type),intent(inout) :: results_gs
  integer,intent(in) :: natom,nspden,nsppol
  logical,optional,intent(in) :: only_part
-!arrays
- type(results_gs_type),intent(inout) :: results_gs
-!Local variables-------------------------------
-!scalars
- logical :: full_init
 
+!Local variables-------------------------------
+ logical :: full_init
 !************************************************************************
 
  !@results_gs_type
@@ -281,36 +272,25 @@ subroutine init_results_gs(natom,nspden,nsppol,results_gs,only_part)
  results_gs%extfpmd_eshift=zero
  results_gs%vxcavg =zero
 
- call energies_init(results_gs%energies)
+ call results_gs%energies%init()
 
  results_gs%strten=zero
- ABI_MALLOC(results_gs%fcart,(3,natom))
- results_gs%fcart=zero
- ABI_MALLOC(results_gs%gred,(3,natom))
- results_gs%gred =zero
- ABI_MALLOC(results_gs%gaps,(3,nsppol))
- results_gs%gaps =zero
- ABI_MALLOC(results_gs%intgres,(nspden,natom))
- results_gs%intgres=zero
+ ABI_CALLOC(results_gs%fcart,(3,natom))
+ ABI_CALLOC(results_gs%gred,(3,natom))
+ ABI_CALLOC(results_gs%gaps,(3,nsppol))
+ ABI_CALLOC(results_gs%intgres,(nspden,natom))
 
  if (full_init) then
    results_gs%pel=zero
    results_gs%pion=zero
 
-   ABI_MALLOC(results_gs%grchempottn,(3,natom))
-   results_gs%grchempottn=zero
-   ABI_MALLOC(results_gs%grcondft,(3,natom))
-   results_gs%grcondft=zero
-   ABI_MALLOC(results_gs%gresid,(3,natom))
-   results_gs%gresid=zero
-   ABI_MALLOC(results_gs%grewtn,(3,natom))
-   results_gs%grewtn=zero
-   ABI_MALLOC(results_gs%grvdw,(3,natom))
-   results_gs%grvdw=zero
-   ABI_MALLOC(results_gs%grxc,(3,natom))
-   results_gs%grxc  =zero
-   ABI_MALLOC(results_gs%synlgr,(3,natom))
-   results_gs%synlgr=zero
+   ABI_CALLOC(results_gs%grchempottn,(3,natom))
+   ABI_CALLOC(results_gs%grcondft,(3,natom))
+   ABI_CALLOC(results_gs%gresid,(3,natom))
+   ABI_CALLOC(results_gs%grewtn,(3,natom))
+   ABI_CALLOC(results_gs%grvdw,(3,natom))
+   ABI_CALLOC(results_gs%grxc,(3,natom))
+   ABI_CALLOC(results_gs%synlgr,(3,natom))
  end if
 
 end subroutine init_results_gs
@@ -339,7 +319,7 @@ end subroutine init_results_gs
 !!
 !! SOURCE
 
-subroutine init_results_gs_array(natom,nspden,nsppol,results_gs,only_part)
+subroutine init_results_gs_array(natom, nspden, nsppol, results_gs, only_part)
 
 !Arguments ------------------------------------
 !scalars
@@ -347,12 +327,11 @@ subroutine init_results_gs_array(natom,nspden,nsppol,results_gs,only_part)
  logical,optional,intent(in) :: only_part
 !arrays
  type(results_gs_type),intent(inout) :: results_gs(:,:)
+
 !Local variables-------------------------------
 !scalars
  integer :: ii,jj,results_gs_size1,results_gs_size2
  logical :: full_init
-!arrays
-
 !************************************************************************
 
  !@results_gs_type
@@ -384,7 +363,7 @@ subroutine init_results_gs_array(natom,nspden,nsppol,results_gs,only_part)
        results_gs(jj,ii)%extfpmd_eshift=zero
        results_gs(jj,ii)%vxcavg =zero
 
-       call energies_init(results_gs(jj,ii)%energies)
+       call results_gs(jj,ii)%energies%init()
 
        results_gs(jj,ii)%strten=zero
        ABI_MALLOC(results_gs(jj,ii)%fcart,(3,natom))
@@ -431,21 +410,12 @@ end subroutine init_results_gs_array
 !! FUNCTION
 !!  Clean and destroy a results_gs datastructure
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!  results_gs(:)=<type(results_gs_type)>=results_gs datastructure
-!!
 !! SOURCE
 
 subroutine destroy_results_gs(results_gs)
 
 !Arguments ------------------------------------
-!arrays
- type(results_gs_type),intent(inout) :: results_gs
-
+ class(results_gs_type),intent(inout) :: results_gs
 !************************************************************************
 
  !@results_gs_type
@@ -492,12 +462,10 @@ end subroutine destroy_results_gs
 subroutine destroy_results_gs_array(results_gs)
 
 !Arguments ------------------------------------
-!arrays
  type(results_gs_type),intent(inout) :: results_gs(:,:)
-!Local variables-------------------------------
-!scalars
- integer :: ii,jj,results_gs_size1,results_gs_size2
 
+!Local variables-------------------------------
+ integer :: ii,jj,results_gs_size1,results_gs_size2
 !************************************************************************
 
  !@results_gs_type
@@ -541,25 +509,17 @@ end subroutine destroy_results_gs_array
 !! FUNCTION
 !!  Copy a results_gs datastructure into another
 !!
-!! INPUTS
-!!  results_gs_in=<type(results_gs_type)>=input results_gs datastructure
-!!
-!! OUTPUT
-!!  results_gs_out=<type(results_gs_type)>=output results_gs datastructure
-!!
 !! SOURCE
 
-subroutine copy_results_gs(results_gs_in,results_gs_out)
+subroutine copy_results_gs(results_gs_in, results_gs_out)
 
 !Arguments ------------------------------------
 !arrays
  class(results_gs_type),intent(in) :: results_gs_in
- type(results_gs_type),intent(inout) :: results_gs_out !vz_i
+ class(results_gs_type),intent(inout) :: results_gs_out
 
 !Local variables-------------------------------
-!scalars
  integer :: natom_in,natom_out,ngrvdw_in,nspden_in,nspden_out,nsppol_in,nsppol_out
-
 !************************************************************************
 
  !@results_gs_type
@@ -627,7 +587,6 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
    end if
  endif
 
-
  results_gs_out%natom  =results_gs_in%natom
  results_gs_out%ngrvdw =results_gs_in%ngrvdw
  results_gs_out%nspden =results_gs_in%nspden
@@ -645,7 +604,7 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
  results_gs_out%extfpmd_eshift=results_gs_in%extfpmd_eshift
  results_gs_out%vxcavg =results_gs_in%vxcavg
 
- call energies_copy(results_gs_in%energies,results_gs_out%energies)
+ call results_gs_in%energies%copy(results_gs_out%energies)
 
  results_gs_out%pel(:)=results_gs_in%pel(:)
  results_gs_out%pion(:)=results_gs_in%pion(:)
@@ -654,15 +613,14 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
  if (allocated(results_gs_in%fcart))  results_gs_out%fcart(:,1:natom_in) =results_gs_in%fcart(:,1:natom_in)
  if (allocated(results_gs_in%gred))   results_gs_out%gred(:,1:natom_in)  =results_gs_in%gred(:,1:natom_in)
  if (allocated(results_gs_in%gaps))   results_gs_out%gaps(:,1:nsppol_in) =results_gs_in%gaps(:,1:nsppol_in)
- if (allocated(results_gs_in%grchempottn))&
-&  results_gs_out%grchempottn(:,1:natom_in)=results_gs_in%grchempottn(:,1:natom_in)
+ if (allocated(results_gs_in%grchempottn)) results_gs_out%grchempottn(:,1:natom_in)=results_gs_in%grchempottn(:,1:natom_in)
  if (allocated(results_gs_in%grcondft)) results_gs_out%grcondft(:,1:natom_in)=results_gs_in%grcondft(:,1:natom_in)
  if (allocated(results_gs_in%gresid)) results_gs_out%gresid(:,1:natom_in)=results_gs_in%gresid(:,1:natom_in)
  if (allocated(results_gs_in%grewtn)) results_gs_out%grewtn(:,1:natom_in)=results_gs_in%grewtn(:,1:natom_in)
  if (allocated(results_gs_in%grxc))   results_gs_out%grxc(:,1:natom_in)  =results_gs_in%grxc(:,1:natom_in)
  if (allocated(results_gs_in%intgres))results_gs_out%intgres(1:nspden_in,1:natom_in)  =results_gs_in%intgres(1:nspden_in,1:natom_in)
  if (allocated(results_gs_in%synlgr)) results_gs_out%synlgr(:,1:natom_in)=results_gs_in%synlgr(:,1:natom_in)
- if (allocated(results_gs_in%grvdw).and.ngrvdw_in>0) then
+ if (allocated(results_gs_in%grvdw) .and. ngrvdw_in>0) then
    results_gs_out%grvdw(:,1:ngrvdw_in)=results_gs_in%grvdw(:,1:ngrvdw_in)
  end if
 
@@ -676,6 +634,7 @@ end subroutine copy_results_gs
 !! results_gs_ncwrite
 !!
 !! FUNCTION
+!!  Write object to netcdf file.
 !!
 !! INPUTS
 !!  ncid=NC file handle
@@ -688,7 +647,6 @@ end subroutine copy_results_gs
 integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
 
 !Arguments ------------------------------------
-!scalars
  class(results_gs_type),intent(in) :: res
  integer,intent(in) :: ncid
  real(dp),intent(in) :: ecut,pawecutdg
@@ -706,7 +664,7 @@ integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
 ! scalars passed in input (not belonging to results_gs) as well as scalars defined in results_gs
  ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
    "ecut", "pawecutdg", "deltae", "diffor", "entropy", "etotal", "fermie", "fermih",&
-&  "nelect_extfpmd", "residm", "res2", "extfpmd_eshift"])
+   "nelect_extfpmd", "residm", "res2", "extfpmd_eshift"])
  NCF_CHECK(ncerr)
 
  ! arrays
@@ -730,11 +688,11 @@ integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
 ! Write data
 ! Write variables
  ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-&  'ecut', 'pawecutdg', 'deltae', 'diffor', 'entropy', 'etotal', 'fermie', 'fermih',&
-&  'nelect_extfpmd', 'residm', 'res2', 'extfpmd_eshift'],&
-&  [ecut, pawecutdg, res%deltae, res%diffor, res%entropy, res%etotal, res%fermie, res%fermih,&
-&  res%nelect_extfpmd, res%residm, res%res2, res%extfpmd_eshift],&
-&  datamode=.True.)
+  'ecut', 'pawecutdg', 'deltae', 'diffor', 'entropy', 'etotal', 'fermie', 'fermih',&
+  'nelect_extfpmd', 'residm', 'res2', 'extfpmd_eshift'],&
+  [ecut, pawecutdg, res%deltae, res%diffor, res%entropy, res%etotal, res%fermie, res%fermih,&
+  res%nelect_extfpmd, res%residm, res%res2, res%extfpmd_eshift],&
+  datamode=.True.)
  NCF_CHECK(ncerr)
 
  NCF_CHECK(nctk_set_datamode(ncid))
@@ -747,7 +705,7 @@ integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
  end if
 
 ! Add energies
- call energies_ncwrite(res%energies, ncid)
+ call res%energies%ncwrite(ncid)
 
 contains
  integer function vid(vname)
@@ -776,8 +734,10 @@ end function results_gs_ncwrite
 !!  [with_conv]: optional True if the convergence dictionary with residuals and diffs should be written.
 !!
 !! SOURCE
+
 subroutine results_gs_yaml_write(results, unit, cryst, info, occopt, with_conv)
 
+!Arguments ------------------------------------
  class(results_gs_type),intent(in) :: results
  integer,intent(in) :: unit
  type(crystal_t),intent(in),optional :: cryst
@@ -792,7 +752,6 @@ subroutine results_gs_yaml_write(results, unit, cryst, info, occopt, with_conv)
 !arrays
  real(dp) :: strten(3,3), abc(3), fnorms(results%natom)
  character(len=2) :: species(results%natom)
-
 !************************************************************************
 
  if (unit == dev_null) return

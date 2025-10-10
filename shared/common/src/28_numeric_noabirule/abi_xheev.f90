@@ -149,14 +149,13 @@ subroutine abi_cheev(jobz,uplo,n,a,lda,w)
  character(len=1), intent(in) :: jobz
  character(len=1), intent(in) :: uplo
  integer, intent(in) :: n,lda
- complex(spc), intent(inout) :: a(lda,*)
+ complex(sp), intent(inout) :: a(lda,*)
  real(sp), intent(out) :: w(n)
 
 !Local variables-------------------------------
  integer :: info,lwork
  real(sp),pointer :: rwork(:)
- complex(spc),pointer :: work(:)
-
+ complex(sp),pointer :: work(:)
 ! *********************************************************************
 
  ABI_CHECK(lapack_full_storage,"BUG(1) in abi_cheev (storage)!")
@@ -226,14 +225,13 @@ subroutine abi_zheev(jobz,uplo,n,a,lda,w)
  character(len=1), intent(in) :: jobz
  character(len=1), intent(in) :: uplo
  integer, intent(in) :: n,lda
- complex(dpc), intent(inout) :: a(lda,*)
+ complex(dp), intent(inout) :: a(lda,*)
  real(dp), intent(out) :: w(n)
 
 !Local variables-------------------------------
  integer :: info,lwork
  real(dp),pointer :: rwork(:)
- complex(dpc),pointer :: work(:)
-
+ complex(dp),pointer :: work(:)
 ! *********************************************************************
 
  ABI_CHECK(lapack_full_storage,"BUG(1) in abi_zheev (storage)!")

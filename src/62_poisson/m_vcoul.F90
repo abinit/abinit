@@ -128,16 +128,16 @@ type,public :: vcoul_t
    ! (3, nqlwl)
    ! q-points for the treatment of the Coulomb singularity.
 
-  complex(gwpc),allocatable :: vc_sqrt(:,:)
+  complex(gwp),allocatable :: vc_sqrt(:,:)
    ! (ng, nqibz)
    ! Square root of the Coulomb interaction in reciprocal space.
    ! complex-valued to allow for a possible cutoff (Rozzi's method)
 
-  complex(gwpc),allocatable :: vcqlwl_sqrt(:,:)
+  complex(gwp),allocatable :: vcqlwl_sqrt(:,:)
    ! (ng, nqlwl)
    ! Square root of the Coulomb term calculated for small q-points
 
-  complex(gwpc),allocatable :: vc_sqrt_resid(:,:)
+  complex(gwp),allocatable :: vc_sqrt_resid(:,:)
    ! (ng, nqibz)
    ! Square root of the residual difference between the Coulomb interaction in the sigma self-energy for exchange,
    ! and the Coulomb interaction already present in the generalized Kohn-Sham eigenenergies (when they come from an hybrid)
@@ -1813,7 +1813,7 @@ subroutine vcgen_get_vc_sqrt(vcgen, qpt, npw, gvec, q0, cryst, vc_sqrt, comm, &
  real(dp),intent(in) :: qpt(3), q0(3)
  integer,intent(in) :: npw, gvec(3,npw), comm
  type(crystal_t),intent(in) :: cryst
- complex(gwpc),intent(out) :: vc_sqrt(npw)
+ complex(gwp),intent(out) :: vc_sqrt(npw)
  real(dp),optional,intent(out) :: vc(npw)
 
 !Local variables-------------------------------

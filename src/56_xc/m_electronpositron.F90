@@ -247,7 +247,7 @@ subroutine init_electronpositron(ireadwf,dtset,electronpositron,mpi_enreg,nfft,p
   electronpositron%scf_converged=.false.
   electronpositron%has_pos_ham=0
 
-  call energies_init(electronpositron%energies_ep)
+  call electronpositron%energies_ep%init()
 
   electronpositron%e_hartree  =zero
   electronpositron%e_xc       =zero
@@ -364,47 +364,25 @@ subroutine destroy_electronpositron(electronpositron)
 
  if (associated(electronpositron)) then
 
-  if (allocated(electronpositron%cg_ep))        then
-    ABI_FREE(electronpositron%cg_ep)
-  end if
-  if (allocated(electronpositron%eigen_ep))     then
-    ABI_FREE(electronpositron%eigen_ep)
-  end if
-  if (allocated(electronpositron%occ_ep))       then
-    ABI_FREE(electronpositron%occ_ep)
-  end if
-  if (allocated(electronpositron%rhor_ep))      then
-    ABI_FREE(electronpositron%rhor_ep)
-  end if
-  if (allocated(electronpositron%nhat_ep))      then
-    ABI_FREE(electronpositron%nhat_ep)
-  end if
-  if (allocated(electronpositron%vha_ep))       then
-    ABI_FREE(electronpositron%vha_ep)
-  end if
-  if (allocated(electronpositron%lmselect_ep))  then
-    ABI_FREE(electronpositron%lmselect_ep)
-  end if
-  if (allocated(electronpositron%gred_ep))      then
-    ABI_FREE(electronpositron%gred_ep)
-  end if
-  if (allocated(electronpositron%stress_ep))    then
-    ABI_FREE(electronpositron%stress_ep)
-  end if
+  ABI_SFREE(electronpositron%cg_ep)
+  ABI_SFREE(electronpositron%eigen_ep)
+  ABI_SFREE(electronpositron%occ_ep)
+  ABI_SFREE(electronpositron%rhor_ep)
+  ABI_SFREE(electronpositron%nhat_ep)
+  ABI_SFREE(electronpositron%vha_ep)
+  ABI_SFREE(electronpositron%lmselect_ep)
+  ABI_SFREE(electronpositron%gred_ep)
+  ABI_SFREE(electronpositron%stress_ep)
 
   if (electronpositron%has_pawrhoij_ep/=0) then
    call pawrhoij_free(electronpositron%pawrhoij_ep)
   end if
-  if (allocated(electronpositron%pawrhoij_ep))  then
-    ABI_FREE(electronpositron%pawrhoij_ep)
-  end if
+  ABI_SFREE(electronpositron%pawrhoij_ep)
 
   if (electronpositron%dimcprj/=0) then
    call pawcprj_free(electronpositron%cprj_ep)
   end if
-  if (allocated(electronpositron%cprj_ep))  then
-    ABI_FREE(electronpositron%cprj_ep)
-  end if
+  ABI_SFREE(electronpositron%cprj_ep)
 
   electronpositron%calctype       =0
   electronpositron%particle       =-1
@@ -518,9 +496,9 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
 !  Energies
    ctmp(1)=energies%e_electronpositron
 !  ctmp(2)=energies%edc_electronpositron
-   call energies_copy(electronpositron%energies_ep,energies_tmp)
-   call energies_copy(energies,electronpositron%energies_ep)
-   call energies_copy(energies_tmp,energies)
+   call electronpositron%energies_ep%copy(energies_tmp)
+   call energies%copy(electronpositron%energies_ep)
+   call energies_tmp%copy(energies)
    energies%e_electronpositron=ctmp(1)
 !  energies%edc_electronpositron=ctmp(2)
    energies%e0_electronpositron=electronpositron%e0
@@ -766,7 +744,7 @@ end function electronpositron_calctype
 !!  paral_kgb=flag for (k,band,FFT) parallelism
 !!  rhor(nfft,nspden)=array for electron density in electrons/bohr**3.
 !!  ucvol = unit cell volume (Bohr**3)
-!!  usexcnhat= -PAW only- flag controling use of compensation density in Vxc
+!!  usexcnhat= -PAW only- flag controlling use of compensation density in Vxc
 !!  usepaw=flag for PAW
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction (bohr^-3)
 !!  xc_denpos= lowest allowed density (usually for the computation of the XC functionals)

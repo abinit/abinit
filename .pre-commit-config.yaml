@@ -18,7 +18,7 @@ repos:
       - id: trailing-whitespace
       - id: check-executables-have-shebangs
       - id: check-added-large-files
-        args: ['--maxkb=100']  # 1000 KB = 1 MB
+        args: ['--maxkb=1500']  # 1000 KB = 1 MB
 
   #- repo: https://github.com/astral-sh/ruff-pre-commit
   #  rev: v0.11.12
@@ -39,7 +39,7 @@ repos:
       - id: codespell
         stages: [pre-commit, commit-msg]
         exclude_types: [html]
-        args: [--ignore-words=.codespell.ignore]
+        args: [--ignore-words=.codespell.ignore, --skip=doc/abiref.bib]
 
   #- repo: https://github.com/adamchainz/blacken-docs
   #  rev: 1.19.1
@@ -124,7 +124,11 @@ repos:
       #  name: Run check-line-lengths
       #  entry: python abichecks/scripts/check-line-lengths.py
       #  language: python
-      - id: checl-inlined-macros
-        name: Run check-inlined-macros
+      - id: check-inlined-macros
+        name: run check-inlined-macros
         entry: python abichecks/scripts/check_inlined_macros.py
+        language: python
+      - id: check-unprotected-omp-target
+        name: run check-unprotected-omp-target.py
+        entry: python abichecks/scripts/check-unprotected-omp-target.py
         language: python

@@ -1,5 +1,5 @@
 
-.Version 10.1.6.2 of ABINIT, released Sep 2024.
+.Version 10.5.4.1 of ABINIT, released Jul 2025.
 .(MPI version, prepared for a x86_64_linux_nvhpc23.9-0 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue  1 Oct 2024.
-- ( at 19h38 )
+.Starting date : Mon 21 Jul 2025.
+- ( at 11h33 )
 
-- input  file    -> /home/sarrautem/abinit/tests/Test_suite/gpu_omp_t26/t26.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/baguetl_no-more-bandpp-develop/tests/TestBot_MPI1/gpu_omp_t26/t26.abi
 - output file    -> t26.abo
 - root for input  files -> t26i
 - root for output files -> t26o
@@ -78,17 +78,17 @@ _ WF disk file :      0.061 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -   iomode0 =  3 , fftalg0 =512 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file
--  max_nthreads =    8
+-  max_nthreads =    1
 -
  -outvars: echo values of preprocessed input variables --------
             acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
               amu      2.80855000E+01
-           bandpp           5
            diemac      1.20000000E+01
              ecut      6.00000000E+00 Hartree
 -          fftalg         512
            getwfk          -1
 -      gpu_option           2
+-gpu_thread_limit           1
            istwfk        1    0    0    0
               ixc1          1
               ixc2       -406
@@ -248,7 +248,7 @@ P           mkmem           4
 
 ================================================================================
 == DATASET  1 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -275,8 +275,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00850
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/sarrautem/abinit/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
-- pspatm: opening atomic psp file    /home/sarrautem/abinit/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/baguetl_no-more-bandpp-develop/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/baguetl_no-more-bandpp-develop/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
 - Goedecker-Teter-Hutter  Fri May 31 17:22:04 EDT 1996
 - 14.00000   4.00000    960531                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -311,18 +311,18 @@ tolerances: {tolwfr: 1.00E-18, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -7.8617849821127    -7.862E+00 2.445E-03 3.727E+00
+ ETOT  1  -7.8617849821128    -7.862E+00 2.445E-03 3.727E+00
  ETOT  2  -7.8672086220770    -5.424E-03 6.388E-07 1.282E-01
  ETOT  3  -7.8673316834843    -1.231E-04 2.742E-06 1.634E-03
  ETOT  4  -7.8673326446225    -9.611E-07 2.406E-08 1.585E-06
- ETOT  5  -7.8673326453027    -6.802E-10 1.247E-10 6.370E-09
- ETOT  6  -7.8673326453078    -5.056E-12 5.652E-12 3.143E-11
- ETOT  7  -7.8673326453078    -1.776E-14 2.065E-13 1.558E-13
- ETOT  8  -7.8673326453078    -1.865E-14 1.281E-14 7.441E-16
+ ETOT  5  -7.8673326453027    -6.803E-10 1.247E-10 6.370E-09
+ ETOT  6  -7.8673326453078    -5.066E-12 5.652E-12 3.143E-11
+ ETOT  7  -7.8673326453078    -6.217E-15 2.065E-13 1.558E-13
+ ETOT  8  -7.8673326453078    -1.688E-14 1.281E-14 7.441E-16
  ETOT  9  -7.8673326453078     2.220E-14 4.818E-16 2.351E-17
- ETOT 10  -7.8673326453078    -4.530E-14 2.997E-17 5.611E-19
- ETOT 11  -7.8673326453078     4.086E-14 1.127E-18 1.318E-22
- ETOT 12  -7.8673326453078     2.665E-15 9.762E-19 1.233E-24
+ ETOT 10  -7.8673326453078    -4.086E-14 2.997E-17 5.611E-19
+ ETOT 11  -7.8673326453078     4.707E-14 1.127E-18 1.316E-22
+ ETOT 12  -7.8673326453078    -2.665E-15 9.762E-19 1.228E-24
 
  At SCF step   12   max residual=  9.76E-19 < tolwfr=  1.00E-18 =>converged.
 
@@ -342,7 +342,7 @@ lattice_vectors:
 lattice_lengths: [   7.22451,    7.22451,    7.22451, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.6663072E+02
-convergence: {deltae:  2.665E-15, res2:  1.233E-24, residm:  9.762E-19, diffor: null, }
+convergence: {deltae: -2.665E-15, res2:  1.228E-24, residm:  9.762E-19, diffor: null, }
 etotal    :  -7.86733265E+00
 entropy   :   0.00000000E+00
 fermie    :   2.66842625E-01
@@ -404,15 +404,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.10948160241543E+00
-hartree             :  5.58262528383661E-01
-xc                  : -2.40661988693594E+00
+hartree             :  5.58262528383662E-01
+xc                  : -2.40661988693595E+00
 Ewald energy        : -8.43581958561899E+00
 psp_core            : -2.64619322653027E-01
 local_psp           : -2.25612450752957E+00
 non_local_psp       :  1.82810652663066E+00
-total_energy        : -7.86733264530779E+00
+total_energy        : -7.86733264530778E+00
 total_energy_eV     : -2.14081008565779E+02
-band_energy         :  6.59179413379122E-01
+band_energy         :  6.59179413379119E-01
 ...
 
 
@@ -428,7 +428,7 @@ band_energy         :  6.59179413379122E-01
 
 ================================================================================
 == DATASET  2 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -452,8 +452,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00850
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/sarrautem/abinit/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
-- pspatm: opening atomic psp file    /home/sarrautem/abinit/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/baguetl_no-more-bandpp-develop/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/baguetl_no-more-bandpp-develop/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
 - Goedecker-Teter-Hutter  Fri May 31 17:22:04 EDT 1996
 - 14.00000   4.00000    960531                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -575,7 +575,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.13525455445782E+00
+kinetic             :  3.13525455445781E+00
 hartree             :  5.77839330972153E-01
 xc                  : -1.89804218641907E+00
 Ewald energy        : -8.43581958561899E+00
@@ -589,11 +589,11 @@ total_energy        : -7.89056364383365E+00
 --- !EnergyTermsDC
 iteration_state     : {dtset: 2, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  2.80371622702999E-01
+band_energy         :  2.80371622703004E-01
 Ewald energy        : -8.43581958561899E+00
 psp_core            : -2.64619322653027E-01
-xc_dc               :  5.29483562616940E-01
-total_energy_dc     : -7.89058372295208E+00
+xc_dc               :  5.29483562616946E-01
+total_energy_dc     : -7.89058372295207E+00
 ...
 
 
@@ -609,7 +609,7 @@ total_energy_dc     : -7.89058372295208E+00
 
 ================================================================================
 == DATASET  3 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -636,8 +636,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00850
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/sarrautem/abinit/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
-- pspatm: opening atomic psp file    /home/sarrautem/abinit/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/baguetl_no-more-bandpp-develop/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/baguetl_no-more-bandpp-develop/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
 - Goedecker-Teter-Hutter  Fri May 31 17:22:04 EDT 1996
 - 14.00000   4.00000    960531                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -673,11 +673,11 @@ tolerances: {toldfe: 1.00E-07, }
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -7.8905640804244    -7.891E+00 3.376E-18 1.313E-09
- ETOT  2  -7.8905640804325    -8.179E-12 3.992E-20 1.376E-10
- ETOT  3  -7.8905640804330    -4.263E-13 6.279E-15 4.269E-12
+ ETOT  2  -7.8905640804325    -8.176E-12 3.992E-20 1.376E-10
+ ETOT  3  -7.8905640804330    -4.174E-13 6.279E-15 4.269E-12
 
  At SCF step    3, etot is converged :
-  for the second time, diff in etot=  4.263E-13 < toldfe=  1.000E-07
+  for the second time, diff in etot=  4.174E-13 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.50071110E-04  sigma(3 2)=  0.00000000E+00
@@ -695,7 +695,7 @@ lattice_vectors:
 lattice_lengths: [   7.22451,    7.22451,    7.22451, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.6663072E+02
-convergence: {deltae: -4.263E-13, res2:  4.269E-12, residm:  6.279E-15, diffor: null, }
+convergence: {deltae: -4.174E-13, res2:  4.269E-12, residm:  6.279E-15, diffor: null, }
 etotal    :  -7.89056408E+00
 entropy   :   0.00000000E+00
 fermie    :   2.35013790E-01
@@ -757,23 +757,23 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 3, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.13524947292774E+00
-hartree             :  5.77834888965352E-01
+hartree             :  5.77834888965350E-01
 xc                  : -1.89804135667234E+00
 Ewald energy        : -8.43581958561899E+00
 psp_core            : -2.64619322653027E-01
-local_psp           : -2.27782503690861E+00
+local_psp           : -2.27782503690859E+00
 non_local_psp+x     :  1.27265685952691E+00
-total_energy        : -7.89056408043297E+00
+total_energy        : -7.89056408043296E+00
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 3, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  2.80384783363202E-01
+band_energy         :  2.80384783363197E-01
 Ewald energy        : -8.43581958561899E+00
 psp_core            : -2.64619322653027E-01
-xc_dc               :  5.29489744841751E-01
+xc_dc               :  5.29489744841753E-01
 total_energy_dc     : -7.89056438006707E+00
 ...
 
@@ -794,7 +794,6 @@ total_energy_dc     : -7.89056438006707E+00
  -outvars: echo values of variables after computation  --------
             acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
               amu      2.80855000E+01
-           bandpp           5
            diemac      1.20000000E+01
              ecut      6.00000000E+00 Hartree
            etotal1    -7.8673326453E+00
@@ -809,6 +808,7 @@ total_energy_dc     : -7.89056438006707E+00
 -          fftalg         512
            getwfk          -1
 -      gpu_option           2
+-gpu_thread_limit           1
            istwfk        1    0    0    0
               ixc1          1
               ixc2       -406
@@ -1050,10 +1050,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          5.1  wall=          5.1
+- Proc.   0 individual time (sec): cpu=          6.6  wall=          6.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.1  wall=          5.1
++Overall time at end (sec) : cpu=          6.6  wall=          6.6
