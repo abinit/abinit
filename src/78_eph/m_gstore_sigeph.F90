@@ -32,7 +32,7 @@ module m_gstore_sigeph
  use m_nctk
  use m_dvdb,           only : dvdb_t
  use m_crystal,        only : crystal_t
- !use m_hamiltonian
+ use m_hamiltonian,    only : gs_hamiltonian_type, rf_hamiltonian_type
  use m_dtset,          only : dataset_type
  use m_dtfil,          only : datafiles_type
  use m_wfd,            only : wfd_t
@@ -45,7 +45,7 @@ module m_gstore_sigeph
  use m_numeric_tools,  only : arth !, c2r, get_diag, linfit, iseven, simpson_cplx, simpson, print_arr, inrange
  use m_fstrings,       only : tolower, itoa, ftoa, sjoin, ktoa, ltoa, strcat, replace_ch0, yesno, string_in
  !use m_cgtools,        only : cg_zdotc
- !use m_kg,             only : getph
+ use m_kg,             only : getph !, mkkpg, mkkin
  use defs_datatypes,   only : pseudopotential_type
  use defs_abitypes,    only : mpi_type
  use m_hdr,            only : hdr_type, fform_from_ext
@@ -225,11 +225,12 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
 
 !Local variables-------------------------------
- integer,parameter :: master = 0, with_cplex1 = 1, cplex1 = 1, pawread0 = 0, ndat1 = 1
+ integer,parameter :: master = 0, with_cplex1 = 1, cplex1 = 1, pawread0 = 0, ndat1 = 1, berryopt0 = 0
  integer :: n1, n2, n3, n4, n5, n6, nb_k, nb_kq, glob_nk, ntemp
  integer :: spin, my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, gap_err, my_rank, ip1, ip2, nu
- integer :: it, ik_ibz, ikq_ibz, band_k, band_kq, timrev_k, ii, ikcalc, natom, natom3, nsppol, nkpt  !ik_bz,
+ integer :: it, ik_ibz, ikq_ibz, band_k, band_kq, timrev_k, ii, ikcalc, natom, natom3, nsppol, nspden, nspinor, nkpt  !ik_bz,
  integer :: nfft, nfftf, mgfft, mgfftf !,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart, enough_stern
+ integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  real(dp) :: wqnu, gkq2, weight_q, eig0nk, eig0mk, eig0mkq, ediff, gmod2, hmod2, gdw2 !, gdw2_stern, rtmp !,nqnu,gkq2,gkq2_pf,
  !real(dp) :: cpu, wall, gflops
  logical :: q_is_gamma, intra_band, same_band
@@ -245,17 +246,21 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  type(wfd_t) :: wfd
  !type(u1_cache_t) :: u1c
  !type(stern_t) :: stern
+ type(gs_hamiltonian_type) :: gs_ham_kq
+ type(rf_hamiltonian_type) :: rf_ham_kq
 !arrays
  integer :: units(2), my_kqmap(6)
  integer,allocatable :: phmodes_skip(:)
  real(dp) :: kk(3), qpt(3), kq(3)
  real(dp) :: displ_nu_cart(2, 3, cryst%natom), displ_nu_red(2, 3, cryst%natom)
  real(dp),allocatable :: vtrial(:,:) !,gvnlx1(:,:),work(:,:,:,:), vcar_ibz(:,:,:,:)
+ real(dp),allocatable :: grad_berry(:,:),kinpw_k(:), kinpw_kq(:),kpg_kq(:,:),kpg_k(:,:)
  !real(dp),allocatable :: gkq_atm(:,:,:),gkq_nu(:,:,:) !,gkq0_atm(:,:,:,:), gaussw_qnu(:)
  integer,allocatable :: nband(:,:), wfd_istwfk(:) !, kg_k(:,:),kg_kq(:,:), , qselect(:),
  !integer,allocatable :: gbound_kq(:,:),
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:) !, ihave_ikibz_spin(:,:)
  !real(dp),allocatable :: bra_kq(:,:),kets_k(:,:,:),h1kets_kq(:,:,:,:),cgwork(:,:)
+ real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: rfact_t(:), nqnu(:), f_mkq(:) !, f_nk(:),  g2_pmnk(:,:,:,:)
  complex(dp),allocatable :: cfact_t(:), tpp_red(:,:), cfact_wr(:) !,fmw_frohl_sphcorr(:,:,:,:),
  type(pawrhoij_type),allocatable :: pot_pawrhoij(:)
@@ -273,6 +278,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
                          "phonon", dtset%gstore_gname, .True., comm)
 
  natom = cryst%natom; natom3 = 3 * cryst%natom; nsppol = dtset%nsppol; nkpt = ebands%nkpt
+ nspden = dtset%nspden; nspinor = dtset%nspinor
 
  ! Consistency check.
  ierr = 0
@@ -337,7 +343,39 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  ! Setup a mask to skip accumulating the contribution of certain phonon modes.
  call ephtk_set_phmodes_skip(dtset%natom, dtset%eph_phrange, phmodes_skip)
 
+ ! Prepare call to getgh1c
+ usevnl = 0
+ optlocal = 1   ! local part of H^(1) is computed in gh1c=<G|H^(1)|C>
+ optnl = 2      ! non-local part of H^(1) is totally computed in gh1c=<G|H^(1)|C>
+ opt_gvnlx1 = 0 ! gvnlx1 is output
+
+ ABI_MALLOC(grad_berry, (2, nspinor*(berryopt0/4)))
+
+ ! This part is taken from dfpt_vtorho
+ !==== Initialize most of the Hamiltonian (and derivative) ====
+ ! 1) Allocate all arrays and initialize quantities that do not depend on k and spin.
+ ! 2) Perform the setup needed for the non-local factors:
+ !
+ ! Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_hamk.
+ ! PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
+
+ ! Get one-dimensional structure factor information on the coarse grid.
+ ABI_MALLOC(ph1d, (2,3*(2*mgfft+1)*natom))
+ call getph(cryst%atindx, natom, n1, n2, n3, ph1d, cryst%xred)
+
+ call gs_ham_kq%init(psps, pawtab, nspinor, nsppol, nspden, natom,&
+  dtset%typat, cryst%xred, nfft, mgfft, ngfft, cryst%rprimd, dtset%nloalg,&
+  comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab, mpi_spintab=mpi_enreg%my_isppoltab,&
+  usecprj=usecprj, ph1d=ph1d, nucdipmom=dtset%nucdipmom, gpu_option=dtset%gpu_option)
+
+ ! Allocate work space arrays.
+ ! vtrial and vlocal are required for Sternheimer (H0). DFPT routines do not need it.
+ ! Note nvloc in vlocal (we will select one/four spin components afterwards)
+ ABI_CALLOC(vtrial, (nfftf, nspden))
+ ABI_CALLOC(vlocal, (n4, n5, n6, gs_ham_kq%nvloc))
+
  if (dtset%eph_stern /= 0) then
+
    ! Read the GS potential (vtrial) from input POT file.
    ! In principle one may store vtrial in the DVDB but getpot_filepath is simpler to implement.
    call wrtout(units, sjoin(" Reading GS KS potential for Sternheimer from: ", dtfil%filpotin))
@@ -350,29 +388,39 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
    call pot_cryst%free(); call pot_hdr%free()
 
    ! Initialize the wave function descriptor.
-   ! Each node has all k-points and spins and bands between my_bsum_start and my_bsum_stop.
+   ! Only wavefunctions for the symmetrical image of the k/k+q wavevectors treated by this MPI rank are stored.
    ABI_MALLOC(nband, (nkpt, nsppol))
    ABI_MALLOC(bks_mask, (dtset%mband, nkpt, nsppol))
    ABI_MALLOC(keep_ur, (dtset%mband, nkpt ,nsppol))
 
    nband = dtset%mband; bks_mask = .False.; keep_ur = .False.
 
+   ! initialize bks_mask
+   call gstore%fill_bks_mask(dtset%mband, nkpt, nsppol, bks_mask)
+
+   !if (dtset%userie == 124) then
+   !  ! Debugging section have all states on each MPI rank.
+   !  bks_mask = .True.; call wrtout(std_out, " Storing all bands for debugging purposes.")
+   !end if
+
+   ! Init work_ngfft
+   !gmax = gmax + 4 ! FIXME: this is to account for umklapp, should also consider Gamma-only and istwfk
+   !gmax = 2*gmax + 1
+
    ! Impose istwfk=1 for all k points. This is also done in respfn (see inkpts)
    ! wfd_read_wfk will handle a possible conversion if WFK contains istwfk /= 1.
    ABI_MALLOC(wfd_istwfk, (nkpt))
    wfd_istwfk = 1
 
-   NOT_IMPLEMENTED_ERROR()
-   ! TODO: initialize bks_mask
-
    ! The static correction to FM_nk is:
    !    \sum_{qnu} (2n_qnu + 1) <H^1_{qnu} psi_nk| psi^1_{nk; qnu}>
 
    call wfd%init(cryst, pawtab, psps, keep_ur, dtset%mband, nband, nkpt, nsppol, bks_mask,&
-                 dtset%nspden, dtset%nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ebands%kptns, ngfft,&
+                 dtset%nspden, nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ebands%kptns, ngfft,&
                  dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 
    call wfd%print([std_out], header="Wavefunctions for Sternheimer.")
+   call pstat_proc%print(_PSTAT_ARGS_)
 
    ABI_FREE(nband)
    ABI_FREE(bks_mask)
@@ -387,15 +435,11 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
    ABI_CHECK(dvdb%has_fields("pot1", msg), msg)
 
    !if (sigma%pert_comm%nproc > 1) then
-   !  !  Activate parallelism over perturbations
+   !  ! Activate parallelism over perturbations
    !  call dvdb%set_pert_distrib(sigma%my_npert, natom3, sigma%my_pinfo, sigma%pert_table, sigma%pert_comm%value)
    !end if
 
-   !call wrtout(units, " Cannot find all IBZ q-points in the DVDB --> Activating Fourier interpolation.")
-   !call dvdb%ftinterp_setup(dtset%ddb_ngqpt, gstore%qptopt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
-
-
-
+   call dvdb%ftinterp_setup(dtset%ddb_ngqpt, gstore%qptopt, 1, dtset%ddb_shiftq, nfftf, ngfftf, xmpi_comm_self)
  end if ! eph_stern /= 0
 
  ! Allocate work space arrays used inside the loops. Then we are ready to go!
@@ -656,8 +700,11 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  ABI_SFREE(vtrial)
  ABI_FREE(phmodes_skip)
  ABI_SFREE(cfact_wr)
+ ABI_SFREE(vtrial)
+ ABI_SFREE(vlocal)
+ ABI_FREE(ph1d)
 
- call wfd%free(); call gstore%free(); call sigma%free()
+ call wfd%free(); call gstore%free(); call sigma%free(); call gs_ham_kq%free()
 
 end subroutine gstore_sigeph
 !!***
