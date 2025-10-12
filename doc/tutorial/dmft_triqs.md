@@ -34,7 +34,9 @@ full interaction Hamiltonian.
 Our interface makes it easy to run charge self-consistent DFT+DMFT calculations on real materials
 with just a single input file. It is designed to give the accuracy and rigor
 needed for computing structural properties, including a stationary DFT+DMFT implementation,
-with the computation of the Baym-Kadanoff functional and the use of the exact double counting formula.
+with the computation of the Baym-Kadanoff functional, the use of the exact double counting formula,
+and an analytical computation of the high-frequency moments of the Green's function in a
+self-consistent fashion.
 That said, it is not meant for toy models - TRIQS's Python API and built-in tools
 already handle those efficiently.
 
@@ -115,11 +117,11 @@ To turn on DMFT, just set [[usedmft]]=1 in your input.
 
 ### Correlated electrons
 
-Next, choose which atom types will be treated with DMFT and which angular momentum channel is correlated.
+Next, choose which angular momentum channel and which atom types are correlated and will be treated within DMFT.
 Currently, only one correlated angular momentum channel per atom type is allowed. This works like in
 DFT+U using the variable [[lpawu]].
 
-For each atom type, set [[lpawu]] to the correlated channel (e.g., 2 for $d$ orbitals, 3 for $f$ orbitals). Set [[lpawu]] = -1 if you don't want DMFT on that atom type.
+For each atom type, set [[lpawu]] to the correlated channel (e.g., 2 for $d$ orbitals, 3 for $f$ orbitals). Set [[lpawu]]=-1 if you don't want DMFT on that atom type.
 
 Our interface lets you apply DMFT on multiple atoms, but each atom is treated separately, and interatomic
 interactions are not handled dynamically. Besides, only [[lpawu]] $\le$ 3 is supported currently.
@@ -129,7 +131,7 @@ If you want DMFT on a subset of orbitals, use [[dmft_t2g]] (for $t_{2g}$ orbital
 ### Correlated orbital
 
 After choosing the correlated channel (angular part), you need to define the radial part (multiplied
-by $r$), noted $u_l(r)$, of the local orbitals $\frac{u_l(r)}{r} \, Y_{lm}(\hat{r})$. This is controlled
+by $r$), noted $u_l(r)$, of the correlated orbitals $\frac{u_l(r)}{r} \, Y_{lm}(\hat{r})$. This is controlled
 by the variable [[dmft_orbital]].
 
 Pick an orbital that captures as many electrons as possible for DMFT, focusing on those near half-filling
@@ -146,7 +148,7 @@ large enough to avoid overlaps with orbitals of neighboring atoms.
 
 Because the orbitals are projected onto a finite energy window, they're no longer orthonormal.
 To fix this, Wannier functions are built by orthonormalizing the projected orbitals,
-following the schemes specified by [[dmft_wanorthnorm]].
+following the scheme specified by [[dmft_wanorthnorm]].
 
 ### Interaction tensor
 
@@ -177,19 +179,11 @@ Here's a schematic showing how the DFT+DMFT self-consistent cycle works:
 
 ![dmft_cycle_tuto](dmft_triqs_assets/dmft_cycle_tuto.png)
 
-By default, the initial DMFT self-energy is set to the DFT double counting value.
-
-If you are working with a magnetic system, you can speed up convergence by applying an initial
-static shift between the two spin channels using [[dmft_shiftself]].
-
-You can also restart from a previous DMFT run by loading an existing self-energy file with
-[[getself]].
-
 ### Magnetism
 
 Next, you will need to decide what kind of magnetism you want to include. If you set [[nsppol]]=1
-and [[nspden]]=1, we enforce a paramagnetic solution by symmetrizing the two spin channels of the
-Green's function. Even so, the impurity solver is still solved with all spin channels, so local
+and [[nspden]]=1, a paramagnetic solution is enforced by symmetrizing the two spin channels of the
+Green's function. Even so, the impurity solver is solved with all spin channels, so local
 magnetic moments can still form.
 
 If you set [[nsppol]]=2 and [[nspden]]=2, you enable collinear magnetism.
@@ -244,7 +238,7 @@ We will start by computing the density of states (DOS), the band structure, and 
 plot shows how much of a given angular character (like $s$, $p$, or $d$) each Kohn-Sham wavefunction
 has for every band and $k$-point - the thicker the line, the stronger that orbital's contribution.
 
-Go to the tutorial input directory and make a new working folder:
+Go to the tutorial input directory, make a new working folder, and copy the first input file:
 
 ```sh
 cd $ABI_TESTS/tutoparal/Input
