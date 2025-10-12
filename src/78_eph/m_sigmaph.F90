@@ -1533,6 +1533,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ! NB: bsum_range is not compatible with Sternheimer.
          ! There's a check at the level of the parser in chkinp.
 
+         ! The static correction to FM_nk is:
+         !    \sum_{qnu} (2n_qnu + 1) <H^1_{qnu} psi_nk| psi^1_{nk; qnu}>
+
          call timab(1908, 1, tsec)
          ABI_CALLOC(cg1s_kq, (2, npw_kq*nspinor, natom3, nbcalc_ks))
 
