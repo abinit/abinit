@@ -696,7 +696,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (24)
    ! Compute e-ph self-energy from GSTORE.nc file
-   call gstore_sigeph(ngfftc, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_enreg, comm)
+   call gstore_sigeph(wfk0_path, ngfftc, ngfftf, dtset, dtfil, cryst, ebands, dvdb, ifc, &
+                      pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (5, -5)
    ! Interpolate the DFPT potential.
