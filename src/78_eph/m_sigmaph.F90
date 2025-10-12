@@ -32,11 +32,10 @@ module m_sigmaph
  use m_copy
  use m_ifc
  use m_ebands
- !use m_ddb
  use m_ddk
- use m_dvdb
+ use m_dvdb,           only : dvdb_t
  use m_fft
- use m_hamiltonian
+ use m_hamiltonian,    only : gs_hamiltonian_type, rf_hamiltonian_type
  use m_pawcprj
  use m_wfd,             only : wfd_t, u1_cache_t
  use m_wfk

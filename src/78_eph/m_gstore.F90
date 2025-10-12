@@ -2415,7 +2415,7 @@ end function gstore_spin2my_is
 !! gstore_fill_bks_mask
 !!
 !! FUNCTION
-!!  Fills the bks_mask array defining the set of wavefunctoins that should be read
+!!  Fills the bks_mask array defining the set of wavefunctions that should be read
 !!  from the WFK file by this MPI rank when computing the KS e-ph matrix elements.
 !!
 !! INPUTS
