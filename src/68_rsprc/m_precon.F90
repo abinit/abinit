@@ -86,12 +86,13 @@ module m_precon
         logical :: use_kxc
         logical :: use_ridgereg
 
-        !Usefull
-        integer, allocatable :: cg_indices(:, :, :, :)
-
         !For LDOS preconditioner :
         real(dp) :: tdos
         real(dp), allocatable :: ldos(:, :)
+
+        !Usefull
+        integer, allocatable :: cg_indices(:, :, :, :)
+        integer, allocatable :: kg_indices(:, :)
 
         !Linear solver parameters
         integer :: linsolve_maxiter
@@ -157,7 +158,7 @@ contains
         &   pawtab, ph1d, phnons, psps, rhor, rmet, rprimd, symrec, ucvol, usecprj, vxc, xred, ylm)
 
         !Arguments ------------------------------------
-        class(precon_object), intent(inout) :: this
+        class(precon_object), intent(out) :: this
         !scalars
         type(dataset_type),intent(in) :: dtset
         real(dp), intent(in) :: ucvol
@@ -281,7 +282,8 @@ contains
 
             !Usefull
             ABI_MALLOC(this%cg_indices, (2*dtset%nspinor, dtset%mband, dtset%nkpt, dtset%nsppol))
-
+            ABI_MALLOC(this%kg_indices, (2, dtset%nkpt))
+            
         end if
         
     end subroutine precon_init
@@ -347,6 +349,7 @@ contains
 
         ! Indices in cg array
         call compute_cg_indices(dtset, mpi_enreg, this%npwarr, this%cg_indices)
+        call compute_kg_indices(dtset, mpi_enreg, this%npwarr, this%kg_indices)
         
         !LDOS
         if (this%use_ldos) then 
@@ -376,6 +379,7 @@ contains
         write(6,*)'chi0diel precon%free'; flush(6) !DEBUG
        
         ABI_FREE(this%cg_indices)
+        ABI_FREE(this%kg_indices)
 
         if (this%use_ldos) then
             !Deallocating the array containing ldos and tdos
@@ -1628,8 +1632,7 @@ contains
             &           dummy_int, n4, n5, n6, option, tim_fourwf, weight_r, weight_i)
             !write(6,*)'chi0diel compute_rhoii_coll i_cg = ', j_cg+1, j_cg+npw_k; flush(6) !DEBUG
             write(100+mpi_enreg%me,*)'chi0diel compute_rhoi_coll i_cg(1), i_cg(2)', j_cg+1, j_cg+npw_k; flush(100+mpi_enreg%me)
-            write(100+mpi_enreg%me,*)'chi0diel compute_rhoi_coll this%cg(:, i_cg(1):i_cg(2))', this%cg(:, j_cg+1:j_cg+npw_k); flush(100+mpi_enreg%me)
-            write(100+mpi_enreg%me,*)'chi0diel compute_rhoi_coll rhoaug_r_ii', rhoaug_r_ii(1, 1:20, 1, 1); flush(100+mpi_enreg%me)
+            !write(100+mpi_enreg%me,*)'chi0diel compute_rhoi_coll this%cg(:, i_cg(1):i_cg(2))', this%cg(:, j_cg+1:j_cg+npw_k); flush(100+mpi_enreg%me)
 
             ! In PAW : We need to add the correction (hat) term if pawsushat=1.
             if (this%psps%usepaw==1 .and. dtset%pawsushat==1) then
@@ -2219,6 +2222,32 @@ contains
 
     end function get_kg_indices
 
+    subroutine compute_kg_indices(dtset, mpi_enreg, npwarr, kg_indices)
+        !Arguments ------------------------------------
+        type(dataset_type),intent(in) :: dtset
+        type(MPI_type), intent(in) :: mpi_enreg
+        integer, intent(in) :: npwarr(:)
+        integer, intent(inout) :: kg_indices(2, dtset%nkpt)
+        !Returned variable ----------------------------
+        integer :: i_kg, ikpt, isppol
+
+        ! *************************************************************************
+
+        kg_indices = zero
+        i_kg = 1
+        do isppol =1, dtset%nsppol
+            do ikpt = 1, dtset%nkpt
+                    if (proc_distrb_cycle(mpi_enreg%proc_distrb, ikpt, 1, dtset%nband(ikpt+(isppol-1)*dtset%nkpt), isppol, mpi_enreg%me_kpt)) then
+                        cycle
+                    end if
+                    kg_indices(1, ikpt) = i_kg
+                    kg_indices(2, ikpt) = kg_indices(1, ikpt) + npwarr(ikpt) - 1
+                    i_kg = kg_indices(2, ikpt) + 1
+            end do
+        end do
+
+    end subroutine compute_kg_indices
+
     ! Compute rho_i in collinear case without PAW corrections
     subroutine compute_rhoi_coll(this, dtset,  mpi_enreg, gbound, iband, ikpt, isppol, istwf_k, kg_k, nband_k, npw_k, rhoi_r)
         !Arguments ------------------------------------
@@ -2275,15 +2304,14 @@ contains
             &           gbound, gbound, istwf_k, kg_k, kg_k, dtset%mgfft, mpi_enreg, ndat, dtset%ngfft, npw_k, &
             &           dummy_int, n4, n5, n6, option, tim_fourwf, one, one)
             write(100+mpi_enreg%me,*)'chi0diel compute_rhoi_coll i_cg(1), i_cg(2)', i_cg(1), i_cg(2); flush(100+mpi_enreg%me)
-            write(100+mpi_enreg%me,*)'chi0diel compute_rhoi_coll this%cg(:, i_cg(1):i_cg(2))', this%cg(:, i_cg(1):i_cg(2)); flush(100+mpi_enreg%me)
-            write(100+mpi_enreg%me,*)'chi0diel compute_rhoi_coll rhoi_aug_r', rhoi_aug_r(1:20, 1, 1); flush(100+mpi_enreg%me)
+            !write(100+mpi_enreg%me,*)'chi0diel compute_rhoi_coll this%cg(:, i_cg(1):i_cg(2))', this%cg(:, i_cg(1):i_cg(2)); flush(100+mpi_enreg%me)
 
             ! 2) Transfer rhoi_aug_r defined on the augmented (wavefunction) fft-grid to the preconditioning fft-grid.
             if (this%psps%usepaw==0) then
                 ! In NC, the preconditioning grid should be the density/potential grid.
                 if (this%nfftprc == n1*n2*n3) then
                     call fftpac(1, mpi_enreg, 1, n1, n2, n3, n4, n5, n6, dtset%ngfft, rhoi_r, rhoi_aug_r, 1)   ! DEBUG : weights for nspinor=1, nsppol=2 ok (factor from fft?)
-                    write(100+mpi_enreg%me,*)'chi0diel compute_rhoi_coll rhoi_r', rhoi_r(1:20, 1); flush(100+mpi_enreg%me)
+                    !write(100+mpi_enreg%me,*)'chi0diel compute_rhoi_coll rhoi_r', rhoi_r(1:20, 1); flush(100+mpi_enreg%me)
                 else
                     ABI_BUG("iprcel=20? : nfftprc /= nfft in norm-conserving not implemented.")
                 end if
@@ -2477,7 +2505,9 @@ contains
 
         ! *************************************************************************
         write(6,*)'chi0diel compute_delta_occ'; flush(6) !DEBUG
-        write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ delta_V(1:10, :)', delta_V(1:10, :); flush(100+mpi_enreg%me) !DEBUG
+        write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ start'; flush(100+mpi_enreg%me) !DEBUG
+        write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ this%npwarr', this%npwarr; flush(100+mpi_enreg%me) !DEBUG
+        !write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ delta_V(1:10, :)', delta_V(1:10, :); flush(100+mpi_enreg%me) !DEBUG
 
         !write(6,*)'chi0diel compute_delta_occ this%eigen', this%eigen; flush(6) !DEBUG
         !write(6,*)'chi0diel compute_delta_occ this%occ', this%occ; flush(6) !DEBUG
@@ -2509,10 +2539,12 @@ contains
         ABI_MALLOC(doccde, (size(this%occ)))
         ABI_MALLOC(occ, (size(this%occ)))
         option=1
+        write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ ok1'; flush(100+mpi_enreg%me) !DEBUG
         call getnel(doccde, dummy_real, this%eigen, entropy, this%fermie, this%fermie, maxocc, &
         &       dtset%mband, dtset%nband, nelect, dtset%nkpt, dtset%nsppol, occ, dtset%occopt, &
         &       option, dtset%tphysel, dtset%tsmear, dummy_int, dtset%wtk)
         !write(6,*)'chi0diel compute_delta_occ new occ', occ; flush(6) !DEBUG
+        write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ ok2'; flush(100+mpi_enreg%me) !DEBUG
 
         ABI_FREE(occ)
 
@@ -2523,38 +2555,51 @@ contains
             do ikpt = 1, dtset%nkpt
 
                 nband_k = dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+                write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ ok3'; flush(100+mpi_enreg%me) !DEBUG
 
                 !MPI parallelization over kpoints : cycle if kpt does not belong to current processor.
                 if (proc_distrb_cycle(mpi_enreg%proc_distrb, ikpt, 1, nband_k, isppol, mpi_enreg%me_kpt)) then
                     write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ cycle ', mpi_enreg%me; flush(100+mpi_enreg%me) !DEBUG
                     cycle
                 end if
+                write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ ok4'; flush(100+mpi_enreg%me) !DEBUG
 
                 npw_k = this%npwarr(ikpt)       ! Number of plane-wave at this kpt.
+                write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ ok4.1'; flush(100+mpi_enreg%me) !DEBUG
                 istwf_k = dtset%istwfk(ikpt)    ! Option parameter that describes the storage of wfs at this kpt.
+                write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ ok4.2'; flush(100+mpi_enreg%me) !DEBUG
                 ABI_MALLOC(kg_k, (3, npw_k))
-                i_kg = get_kg_indices(dtset, this%npwarr, ikpt)
-                !write(6,*)'chi0diel compute_delta_occ i_kg = ', i_kg; flush(6) !DEBUG
+                write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ ok4.3'; flush(100+mpi_enreg%me) !DEBUG
+                i_kg = this%kg_indices(:, ikpt)
+                !i_kg = get_kg_indices(dtset, this%npwarr, ikpt)
+                write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ ok4.4'; flush(100+mpi_enreg%me) !DEBUG
+                write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ i_kg = ', i_kg; flush(100+mpi_enreg%me) !DEBUG
                 kg_k = this%kg(:, i_kg(1):i_kg(2))     ! Reduced plane-wave coordinate (k+G) of this kpt.
+                write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ ok4.5'; flush(100+mpi_enreg%me) !DEBUG
                 call sphereboundary(gbound, istwf_k, kg_k, dtset%mgfft, npw_k)    ! Computes gbound.
                 !write(6,*)'chi0diel compute_delta_occ (1-2*(isppol-1)) = ', (1-2*(isppol-1)); flush(6) !DEBUG
                 !write(6,*)'chi0diel compute_delta_occ norm2(delta_V(:, 1) + (1-2*(isppol-1)) * delta_V(:, 2)) = ', norm2(delta_V(:, 1) + (1-2*(isppol-1)) * delta_V(:, 2)); flush(6) !DEBUG
                 !write(6,*)'chi0diel compute_delta_occ ok1'; flush(6) !DEBUG
+                write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ ok5'; flush(100+mpi_enreg%me) !DEBUG
                 
                 do iband = 1, nband_k
+                    write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ: iband, ikpt, isppol = ', iband, ikpt, isppol; flush(100+mpi_enreg%me) !DEBUG
 
                     !Indices
                     i_eigen = get_eigen_index(dtset, iband, ikpt, isppol)  ! Index of (iband, ikpt, isppol) in eigen array.
                     !write(6,*)'chi0diel compute_delta_occ i_eigen = ', i_eigen; flush(6) !DEBUG
+                write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ ok6'; flush(100+mpi_enreg%me) !DEBUG
                     
                     !2.1) Computing f'(eig_i - fermie).
                     eigenval = this%eigen(i_eigen)
                     fp = derivative_occ(dtset%occopt, eigenval, this%fermie, dtset%tsmear) * maxocc
+                write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ ok7'; flush(100+mpi_enreg%me) !DEBUG
                     !fp = doccde(i_eigen)
                     !kweights(i_eigen) = dtset%wtk(ikpt)  ! kpoint weights in array that has the same size as delta_occ
                     dos_fermie = dos_fermie + fp * dtset%wtk(ikpt)
                     write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ: i_eigen = ', i_eigen; flush(100+mpi_enreg%me) !DEBUG
-                    write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ: eigenval, fp = ', eigenval, fp; flush(100+mpi_enreg%me) !DEBUG
+                    !write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ: eigenval, fp = ', eigenval, fp; flush(100+mpi_enreg%me) !DEBUG
+                    write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ: proc_distrb_cycle = ', proc_distrb_cycle(mpi_enreg%proc_distrb, ikpt, iband, iband, isppol, mpi_enreg%me_kpt); flush(100+mpi_enreg%me) !DEBUG
                     !write(6,*)'chi0diel compute_delta_occ: old fp = ', derivative_occ(dtset%occopt, eigenval, this%fermie, dtset%tsmear) * maxocc; flush(6) !DEBUG
                     !write(6,*)'chi0diel compute_delta_occ ok2'; flush(6) !DEBUG
 
@@ -2566,7 +2611,7 @@ contains
 
                             !2.2) Computing rho_i = |psi_i|^2 using fourwf (if fp is not 0).
                             call compute_rhoi_coll(this, dtset, mpi_enreg, gbound, iband, ikpt, isppol, istwf_k, kg_k, nband_k, npw_k, rhoi_r)
-                            write(100+mpi_enreg%me,*)'chi0diel compute_rhoi_coll 1', rhoi_r(1:20, 1); flush(100+mpi_enreg%me) !DEBUG
+                            !write(100+mpi_enreg%me,*)'chi0diel compute_rhoi_coll 1', rhoi_r(1:20, 1); flush(100+mpi_enreg%me) !DEBUG
                             !write(6,*)'chi0diel compute_delta_occ ok3'; flush(6) !DEBUG
                             
                             !2.3) delta_occ(i) = fp_i * dot(rho_i, delta_V)
@@ -2601,7 +2646,7 @@ contains
                         end if
 
                         delta_occ_tot = delta_occ_tot + delta_occ(i_eigen) * dtset%wtk(ikpt)
-                        write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ mpi_enreg%me, delta_occ_tot', delta_occ_tot; flush(100+mpi_enreg%me) !DEBUG
+                        !write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ mpi_enreg%me, delta_occ_tot', delta_occ_tot; flush(100+mpi_enreg%me) !DEBUG
 
 
                     end if
@@ -2614,24 +2659,24 @@ contains
         end do  !isppol
         
         ABI_FREE(rhoi_r)
-        write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ ok5'; flush(100+mpi_enreg%me) !DEBUG
+        !write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ ok5'; flush(100+mpi_enreg%me) !DEBUG
 
         !MPI parallelization over kpoints : sum delta_occ on all processors.
         ier = 0
-        write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ before xmpi_sum delta_occ', delta_occ; flush(6) !DEBUG
-        write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ before xmpi_sum delta_occ_tot', delta_occ_tot; flush(6) !DEBUG
-        write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ before xmpi_sum dos_fermie', dos_fermie; flush(6) !DEBUG
+        !write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ before xmpi_sum delta_occ', delta_occ; flush(6) !DEBUG
+        !write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ before xmpi_sum delta_occ_tot', delta_occ_tot; flush(6) !DEBUG
+        !write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ before xmpi_sum dos_fermie', dos_fermie; flush(6) !DEBUG
 
         call xmpi_sum(delta_occ, mpi_enreg%comm_kpt, ier)
-        write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ ok5.1'; flush(100+mpi_enreg%me) !DEBUG
+        !write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ ok5.1'; flush(100+mpi_enreg%me) !DEBUG
         call xmpi_sum(delta_occ_tot, mpi_enreg%comm_kpt, ier)
-        write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ ok5.2'; flush(100+mpi_enreg%me) !DEBUG
+        !write(100+mpi_enreg%me,*)'chi0diel compute_delta_occ ok5.2'; flush(100+mpi_enreg%me) !DEBUG
         call xmpi_sum(dos_fermie, mpi_enreg%comm_kpt, ier)
 
-        write(6,*)'chi0diel compute_delta_occ ok6'; flush(6) !DEBUG
-        write(6,*)'chi0diel compute_delta_occ after  xmpi_sum delta_occ', delta_occ; flush(6) !DEBUG
-        write(6,*)'chi0diel compute_delta_occ after  xmpi_sum delta_occ_tot', delta_occ_tot; flush(6) !DEBUG
-        write(6,*)'chi0diel compute_delta_occ after  xmpi_sum dos_fermie', dos_fermie; flush(6) !DEBUG
+        !write(6,*)'chi0diel compute_delta_occ ok6'; flush(6) !DEBUG
+        !write(6,*)'chi0diel compute_delta_occ after  xmpi_sum delta_occ', delta_occ; flush(6) !DEBUG
+        !write(6,*)'chi0diel compute_delta_occ after  xmpi_sum delta_occ_tot', delta_occ_tot; flush(6) !DEBUG
+        !write(6,*)'chi0diel compute_delta_occ after  xmpi_sum dos_fermie', dos_fermie; flush(6) !DEBUG
         ! 2) Fermi-level variation
 
         !delta_occ_tot = sum(delta_occ * kweights)
@@ -2717,7 +2762,8 @@ contains
                 end if
                 npw_k = this%npwarr(ikpt)       ! Number of plane-wave at this kpt.
                 istwf_k = dtset%istwfk(ikpt)    ! Option parameter that describes the storage of wfs at this kpt.
-                i_kg = get_kg_indices(dtset, this%npwarr, ikpt)
+                i_kg = this%kg_indices(:, ikpt)
+                !i_kg = get_kg_indices(dtset, this%npwarr, ikpt)
                 call sphereboundary(gbound, istwf_k, this%kg(:, i_kg(1):i_kg(2)), dtset%mgfft, npw_k)    ! Computes gbound.
     
                 do iband = 1, nband_k
@@ -2828,6 +2874,7 @@ contains
         
         ! *************************************************************************
         write(6,*)'chi0diel compute_delta_rho'; flush(6) !DEBUG
+        write(100+mpi_enreg%me,*)'chi0diel compute_delta_rho start'; flush(6) !DEBUG
         n1 = dtset%ngfft(1)
         n2 = dtset%ngfft(2)
         n3 = dtset%ngfft(3)
@@ -2855,7 +2902,8 @@ contains
 
                 npw_k = this%npwarr(ikpt)           ! Number of plane-wave at this kpt.
                 istwf_k = dtset%istwfk(ikpt)        ! Option parameter that describes the storage of wfs at this kpt.
-                i_kg = get_kg_indices(dtset, this%npwarr, ikpt)
+                i_kg = this%kg_indices(:, ikpt)
+                !i_kg = get_kg_indices(dtset, this%npwarr, ikpt)
                 write(6,*)'chi0diel compute_delta_rho i_kg = ', i_kg; flush(6) !DEBUG
 
                 call sphereboundary(gbound, istwf_k, this%kg(:, i_kg(1):i_kg(2)), dtset%mgfft, npw_k)    ! Computes gbound.
@@ -2945,6 +2993,7 @@ contains
         write(6,*)'chi0diel compute_delta_occ, delta_rho2 = ', delta_rho(1:20, 2); flush(6) !DEBUG
 
         call to_pauli(this, 1, delta_rho)
+        write(100+mpi_enreg%me,*)'chi0diel compute_delta_rho done'; flush(6) !DEBUG
 
     end subroutine compute_delta_rho
 
