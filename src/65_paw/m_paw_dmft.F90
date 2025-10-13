@@ -228,6 +228,9 @@ MODULE m_paw_dmft
   ! TRIQS CTQMC: Only configurations with a number of electrons in
   ! [nlocmin,nlocmax] are taken into account.
 
+  integer :: dmft_triqs_n_cycles
+  ! TRIQS CTQMC: Number of measurement cycles.
+
   integer :: dmft_triqs_nleg
   ! TRIQS CTQMC: Nb of Legendre polynomials used for the
   ! Green's function (Phys. Rev. B 84, 075145) [[cite:Boehnke2011]].
@@ -493,7 +496,6 @@ MODULE m_paw_dmft
 
   real(dp) :: dmftqmc_n
   ! ABINIT CTQMC: Nb of sweeps
-  ! TRIQS CTQMC: Nb of measurements
 
   real(dp) :: e_dc
   ! Double counting energy
@@ -1160,6 +1162,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_triqs_tol_block                     = dtset%dmft_triqs_tol_block
  paw_dmft%dmft_triqs_read_ctqmcdata                = dtset%dmft_triqs_read_ctqmcdata
  paw_dmft%dmft_triqs_pauli_prob                    = dtset%dmft_triqs_pauli_prob
+ paw_dmft%dmft_triqs_n_cycles                      = dtset%dmft_triqs_n_cycles
 
 !==============================
 !==  Variables for DMFT itself

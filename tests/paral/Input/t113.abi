@@ -3,6 +3,7 @@ ndtset 3
 jdtset 1 2 3
 getden1 0
 getden  1
+getctqmcdata 0
 
 pawprtvol 3  # Printing additional information
 prtvol 4     #
@@ -92,6 +93,23 @@ dmft_triqs_off_diag 0
 dmft_triqs_wmax  1.0
 dmftctqmc_basis 0
 dmft_triqs_epsilon 1.d-2
+dmft_fermi_step 0.02
+dmft_prt_maxent 1
+dmft_prtself 1
+dmft_x2my2d 0
+dmft_triqs_det_init_size 100
+dmft_triqs_det_n_operations_before_check 10000
+dmft_triqs_det_precision_error 1.d-5
+dmft_triqs_det_precision_warning 1.d-8
+dmft_triqs_det_singular_threshold -1.0
+dmft_triqs_imag_threshold 1.d-13
+dmft_triqs_measure_density_matrix 1
+dmft_triqs_move_shift 0
+dmft_triqs_pauli_prob 1.0
+dmft_triqs_read_ctqmcdata 1
+dmft_triqs_therm_restart 1
+dmft_triqs_time_invariance 1
+dmft_triqs_use_norm_as_weight 1
 
 #Definition of DFT+U
 usepawu1    4           #

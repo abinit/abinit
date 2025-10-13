@@ -230,7 +230,7 @@ CONTAINS  !=====================================================================
 
  write(message,'(4a)') "An error occurred when trying to find a suitable lambda and ", &
                      & "epsilon for your input values of upawu and jpawu.", ch10, &
-                     & "Either try different values or use dmft_lambda_yukawa and dmft_epsilon_yukawa."
+                     & "Either try different values or use dmft_yukawa_lambda and dmft_yukawa_epsilon."
 
  if (fkk(1) > upawu) ABI_ERROR(message)
 

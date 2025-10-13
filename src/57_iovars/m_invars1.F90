@@ -2323,11 +2323,9 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_charge_prec=tol6
    dtsets(idtset)%dmft_dc=1
    dtsets(idtset)%dmft_entropy=0
-   dtsets(idtset)%dmft_epsilon_yukawa=-1.0_dp
    dtsets(idtset)%dmft_fermi_step=0.02_dp
    dtsets(idtset)%dmft_iter=10
    dtsets(idtset)%dmft_kspectralfunc=0
-   dtsets(idtset)%dmft_lambda_yukawa=-1.0_dp
    dtsets(idtset)%dmft_magnfield=0
    if (dtsets(idtset)%dmft_magnfield .gt. 0) dtsets(idtset)%dmft_magnfield_b=0.0_dp
    dtsets(idtset)%dmft_mxsf=0.6_dp
@@ -2355,7 +2353,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_triqs_det_precision_warning=1.0d-8
    dtsets(idtset)%dmft_triqs_det_singular_threshold=-1.0_dp
    dtsets(idtset)%dmft_triqs_entropy=0
-   dtsets(idtset)%dmft_triqs_epsilon=1.0d-6
+   dtsets(idtset)%dmft_triqs_epsilon=-1.0_dp
    dtsets(idtset)%dmft_triqs_gaussorder=0
    dtsets(idtset)%dmft_triqs_imag_threshold=1.0d-13
    dtsets(idtset)%dmft_triqs_leg_measure=0
@@ -2364,6 +2362,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_triqs_measure_density_matrix=1
    dtsets(idtset)%dmft_triqs_move_double=0
    dtsets(idtset)%dmft_triqs_move_shift=1
+   dtsets(idtset)%dmft_triqs_n_cycles=-1
    dtsets(idtset)%dmft_triqs_nleg=0
    dtsets(idtset)%dmft_triqs_nsubdivisions=1
    dtsets(idtset)%dmft_triqs_off_diag=-1
@@ -2379,6 +2378,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_wanorthnorm=3
    dtsets(idtset)%dmft_wanrad=-1.0_dp
    dtsets(idtset)%dmft_x2my2d=0
+   dtsets(idtset)%dmft_yukawa_epsilon=-1.0_dp
+   dtsets(idtset)%dmft_yukawa_lambda=-1.0_dp
    dtsets(idtset)%dmft_yukawa_param=1
    dtsets(idtset)%dmftbandi=0
    dtsets(idtset)%dmftbandf=0

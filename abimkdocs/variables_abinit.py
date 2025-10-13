@@ -3042,21 +3042,6 @@ Quantum Monte Carlo). See also the input variable [[dmft_nlambda]].
 ),
 
 Variable(
-    abivarname="dmft_epsilon_yukawa",
-    varset="dmft",
-    vartype="real",
-    topics=['DMFT_expert'],
-    dimensions="scalar",
-    mnemonics="Dynamical Mean Field Theory: dielectric constant (EPSILON) for YUKAWA potential",
-    requires="[[usedmft]] == 1, [[dmft_yukawa_param]] == 4",
-    added_in_version="before_v10.5.6",
-    text=r"""
-Set the value of the dielectric constant $\varepsilon$ for the Yukawa screened potential (cf
-[[dmft_yukawa_param]]).
-""",
-),
-
-Variable(
     abivarname="dmft_fermi_step",
     varset="dmft",
     vartype="real",
@@ -3109,21 +3094,6 @@ However, the calculation requires as input the self-energy computed in the real
 axis using an external analytical continuation code.
 The section 7 of the [[tutorial:dmft|tutorial on DFT+DMFT]] details how to obtain this data
 and related information.
-""",
-),
-
-Variable(
-    abivarname="dmft_lambda_yukawa",
-    varset="dmft",
-    vartype="real",
-    topics=['DMFT_expert'],
-    dimensions="scalar",
-    mnemonics="Dynamical Mean Field Theory: inverse screening length (LAMBDA) for YUKAWA potential",
-    requires="[[usedmft]] == 1, [[dmft_yukawa_param]] == 4",
-    added_in_version="before_v10.5.6",
-    text=r"""
-Set the value of the inverse screening length $\lambda$ for the Yukawa screened potential (cf
-[[dmft_yukawa_param]]).
 """,
 ),
 
@@ -3272,9 +3242,10 @@ Variable(
     requires="[[usedmft]] == 1",
     added_in_version="before_v10.5.6",
     text=r"""
-Set the radial part (multiplied by $r$) $u_l(r)$ of the local orbitals $\frac{u_l(r)}{r} Y_{lm}(\hat{r})$
-for each atom type. For uncorrelated atom types, simply put any arbitrary value.
-The same radial function is used for all angular momentum channels $m$ of a given atom type.
+Set the reduced radial wavefunction $u_l(r)$ of the local orbitals $\frac{u_l(r)}{r} Y_{lm}(\hat{r})$
+for each atom type, with $Y_{lm}(\hat{r})$ the real spherical harmonics.
+For uncorrelated atom types, simply put any arbitrary value.
+The same radial wavefunction is used for all angular momentum channels $m$ of a given atom type.
 
   * If set to $i >$ 0, use the $i$-th radial orbital of the corresponding PAW dataset.
     They all correspond to atomic orbitals at different energies, with $i$=1 having the lowest energy
@@ -3294,7 +3265,7 @@ Variable(
     added_in_version="before_v10.5.6",
     text=r"""
 Set the root of the filepath for the correlated orbital in the case of a user-provided
-radial function $u_l(r)$ ([[dmft_orbital]] $\le$ 0).
+reduced radial wavefunction $u_l(r)$ ([[dmft_orbital]] $\le$ 0).
 
 The filepath for each atom type must be "[[dmft_orbital_filepath]]_xxxx" with "xxxx"
 the atom type number, written with 4 digits.
@@ -3354,7 +3325,7 @@ to keep the last value only.
 
 Variable(
     abivarname="dmft_prtwan",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3363,7 +3334,7 @@ Variable(
     requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
-Compute and write on file the radial part (multiplied by $r$) $u_l(r)$ of the Wannier functions
+Compute and write on file the reduced radial part $u_l(r)$ of the Wannier functions
 (i.e. the orthonormalized projection of [[dmft_orbital]] on [ [[dmftbandi]],[[dmftbandf]] ]).
 This is computed on the same radial mesh as the PAW one, extended up to the radius [[dmft_wanrad]].
 It corresponds to the local orbital that is used in practice in the code, and is different from
@@ -4029,7 +4000,8 @@ Variable(
     text=r"""
 Definition of the orthonormalization scheme for the Wannier functions. As we project
 the orbitals on a finite energy window [ [[dmftbandi]],[[dmftbandf]] ], they might no
-longer be orthonormal, so it is necessary to orthogonalize them.
+longer be orthonormal, so it is necessary to orthonormalize them in order to build true
+Wannier functions.
 
 This is done by multiplication with the inverse square root of their overlaps.
 
@@ -4049,7 +4021,7 @@ This is done by multiplication with the inverse square root of their overlaps.
 
 Variable(
     abivarname="dmft_wanrad",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="real",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -4078,6 +4050,36 @@ Set to 1 to apply DMFT to the $d_{x^2-y^2}$ orbital only.
 ),
 
 Variable(
+    abivarname="dmft_yukawa_epsilon",
+    varset="dmft",
+    vartype="real",
+    topics=['DMFT_expert'],
+    dimensions="scalar",
+    mnemonics="Dynamical Mean Field Theory: dielectric constant (EPSILON) for YUKAWA potential",
+    requires="[[usedmft]] == 1, [[dmft_yukawa_param]] == 4",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Set the value of the dielectric constant $\varepsilon$ for the Yukawa screened potential (cf
+[[dmft_yukawa_param]]).
+""",
+),
+
+Variable(
+    abivarname="dmft_yukawa_lambda",
+    varset="dmft",
+    vartype="real",
+    topics=['DMFT_expert'],
+    dimensions="scalar",
+    mnemonics="Dynamical Mean Field Theory: inverse screening length (LAMBDA) for YUKAWA potential",
+    requires="[[usedmft]] == 1, [[dmft_yukawa_param]] == 4",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Set the value of the inverse screening length $\lambda$ for the Yukawa screened potential (cf
+[[dmft_yukawa_param]]).
+""",
+),
+
+Variable(
     abivarname="dmft_yukawa_param",
     varset="dmft",
     vartype="integer",
@@ -4098,7 +4100,7 @@ close as possible to the input [[upawu]] and [[jpawu]].
   * If set to 2: $\varepsilon$ = 1, and $\lambda$ is chosen to yield $U$ = [[upawu]].
   * If set to 3: $\lambda$ = 0, and $\varepsilon$ is chosen to yield $U$ = [[upawu]].
   * If set to 4: $\lambda$ and $\varepsilon$ are set to the values specified by
-[[dmft_lambda_yukawa]] and [[dmft_epsilon_yukawa]].
+[[dmft_yukawa_lambda]] and [[dmft_yukawa_epsilon]].
 
 """,
 ),
@@ -6384,7 +6386,7 @@ equivalent to using a zero get variable).
 
 Variable(
     abivarname="getctqmcdata",
-    varset="dmft",
+    varset="dmft_triqs",
     vartype="integer",
     topics=['DMFT_useful'],
     dimensions="scalar",
