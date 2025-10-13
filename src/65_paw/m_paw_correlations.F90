@@ -121,7 +121,7 @@ CONTAINS  !=====================================================================
 &           nspinor,ntypat,option_interaction,pawang,pawprtvol,pawrad,pawtab,upawu,use_dmft,&
 &           useexexch,usepawu,&
 &           ucrpa,lmagCalc,dmft_orbital,dmft_dc,dmft_orbital_filepath,& ! optional argument
-&           dmft_yukawa_param,dmft_lambda_yukawa,dmft_epsilon_yukawa) ! optional argument
+&           dmft_yukawa_param,dmft_yukawa_lambda,dmft_yukawa_epsilon) ! optional argument
 
 !Arguments ---------------------------------------------
 !scalars
@@ -145,7 +145,7 @@ CONTAINS  !=====================================================================
  logical,optional,intent(in) :: lmagCalc
  integer,optional,intent(in) :: dmft_yukawa_param
  integer,optional,intent(in) :: dmft_orbital(ntypat)
- real(dp),optional,intent(in) :: dmft_epsilon_yukawa,dmft_lambda_yukawa
+ real(dp),optional,intent(in) :: dmft_yukawa_epsilon,dmft_yukawa_lambda
  character(len=fnlen),optional,intent(in) :: dmft_orbital_filepath
 !Local variables ---------------------------------------
 !scalars
@@ -908,8 +908,8 @@ CONTAINS  !=====================================================================
            eps    = fk(1) / pawtab(itypat)%upawu
            fk(:)  = fk(:) / eps
          else if (dmft_yukawa_param == 4) then
-           lambda = dmft_lambda_yukawa
-           eps    = dmft_epsilon_yukawa
+           lambda = dmft_yukawa_lambda
+           eps    = dmft_yukawa_epsilon
          end if
 
          pawtab(itypat)%lambda = lambda

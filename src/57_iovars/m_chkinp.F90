@@ -749,13 +749,25 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_x2my2d',dt%dmft_x2my2d,2,(/0,1/),iout)
        if (dt%dmft_solv>=5.and.dt%ucrpa==0.and.dt%dmft_solv/=9) then
          cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
-         call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftqmc_l',dt%dmftqmc_l,1,iout)
+         if (dt%dmft_solv==6.or.dt%dmft_solv==7) then
+           call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_n_tau',dt%dmftqmc_l,1,iout)
+         else
+           call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftqmc_l',dt%dmftqmc_l,1,iout)
+         end if
          cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
-         call chkdpr(0,1,cond_string,cond_values,ierr,'dmftqmc_n',dt%dmftqmc_n,1,one,iout)
+         if (dt%dmft_solv==6.or.dt%dmft_solv==7) then
+           call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_n_cycles',dt%dmft_triqs_n_cycles,1,iout)
+         else
+           call chkdpr(0,1,cond_string,cond_values,ierr,'dmftqmc_n',dt%dmftqmc_n,1,one,iout)
+         end if
          cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftqmc_seed',dt%dmftqmc_seed,0,iout)
          cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
-         call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftqmc_therm',dt%dmftqmc_therm,1,iout)
+         if (dt%dmft_solv==6.or.dt%dmft_solv==7) then
+           call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_n_warmup_cycles_init',dt%dmftqmc_therm,0,iout)
+         else
+           call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftqmc_therm',dt%dmftqmc_therm,1,iout)
+         end if
        end if
        cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
        if (dt%usepawu==14) then
@@ -776,9 +788,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_yukawa_param',dt%dmft_yukawa_param,4,(/1,2,3,4/),iout)
          if (dt%dmft_yukawa_param==4) then
            cond_string(1)='dmft_yukawa_param' ; cond_values(1)=dt%dmft_yukawa_param
-           call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_lambda_yukawa',dt%dmft_lambda_yukawa,1,zero,iout)
+           call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_yukawa_lambda',dt%dmft_yukawa_lambda,1,zero,iout)
            cond_string(1)='dmft_yukawa_param' ; cond_values(1)=dt%dmft_yukawa_param
-           call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_epsilon_yukawa',dt%dmft_epsilon_yukawa,1,zero,iout)
+           call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_yukawa_epsilon',dt%dmft_yukawa_epsilon,1,zero,iout)
          end if
        end if
 
@@ -798,10 +810,10 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
        if (dt%dmft_solv>=5) then
          cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-         if (dt%dmft_solv == 6 .or. dt%dmft_solv == 7) then
-           call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_basis',dt%dmftctqmc_basis,5,(/0,1,2,3,4/),iout)
+         if (dt%dmft_solv==6.or.dt%dmft_solv==7) then
+           call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_basis',dt%dmftctqmc_basis,5,(/0,1,2,3,4/),iout)
            if (dt%dmftctqmc_basis == 4) then
-             cond_string(1)='dmftctqmc_basis' ; cond_values(1)=dt%dmftctqmc_basis
+             cond_string(1)='dmft_triqs_basis' ; cond_values(1)=dt%dmftctqmc_basis
              call chkint_eq(0,1,cond_string,cond_values,ierr,'nspinor',dt%nspinor,1,(/2/),iout)
            end if
          else
@@ -812,7 +824,11 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_gmove',dt%dmftctqmc_gmove,0,iout)
          cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-         call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_meas',dt%dmftctqmc_meas,1,iout)
+         if (dt%dmft_solv==6.or.dt%dmft_solv==7) then
+           call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_length_cycle',dt%dmftctqmc_meas,1,iout)
+         else
+           call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_meas',dt%dmftctqmc_meas,1,iout)
+         end if
 #if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
          if (dt%dmft_solv==9) then
            call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftqmc_l',dt%dmftqmc_l,2*dt%dmft_nwli+1,iout)
@@ -906,7 +922,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
    if(dt%dmft_solv==6.or.dt%dmft_solv==7) then
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nwli',dt%dmft_nwli,1,iout)
+     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_n_iw',dt%dmft_nwli,1,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_compute_integral',dt%dmft_triqs_compute_integral,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
@@ -916,7 +932,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_entropy',dt%dmft_triqs_entropy,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_leg_measure',dt%dmft_triqs_leg_measure,2,(/0,1/),iout)
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_measure_G_l',dt%dmft_triqs_leg_measure,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_loc_n_min',dt%dmft_triqs_loc_n_min,0,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
@@ -938,7 +954,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_read_ctqmcdata',dt%dmft_triqs_read_ctqmcdata,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_therm_restart',dt%dmft_triqs_therm_restart,0,iout)
+     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_n_warmup_cycles_restart',dt%dmft_triqs_therm_restart,0,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_time_invariance',dt%dmft_triqs_time_invariance,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
@@ -950,8 +966,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_triqs_det_precision_error',dt%dmft_triqs_det_precision_error,1,dt%dmft_triqs_det_precision_warning,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_triqs_epsilon',dt%dmft_triqs_epsilon,1,zero,iout)
-     cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_triqs_imag_threshold',dt%dmft_triqs_imag_threshold,1,zero,iout)
      if (dt%dmft_triqs_time_invariance == 1) then
        cond_string(1)='dmft_triqs_time_invariance' ; cond_values(1)=dt%dmft_triqs_time_invariance
@@ -962,11 +976,14 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_use_norm_as_weight',dt%dmft_triqs_use_norm_as_weight,1,(/1/),iout)
      end if
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     cond_string(2)='dmft_triqs_leg_measure' ; cond_values(2)=dt%dmft_triqs_leg_measure
+     cond_string(2)='dmft_triqs_measure_G_l' ; cond_values(2)=dt%dmft_triqs_leg_measure
      if (dt%dmft_triqs_leg_measure == 0) then
-       call chkdpr(0,2,cond_string,cond_values,ierr,'dmft_triqs_wmax',dt%dmft_triqs_wmax,1,zero,iout)
+       call chkdpr(0,2,cond_string,cond_values,ierr,'dmft_triqs_dlr_wmax',dt%dmft_triqs_wmax,1,zero,iout)
+       cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
+       cond_string(2)='dmft_triqs_measure_G_l' ; cond_values(2)=dt%dmft_triqs_leg_measure
+       call chkdpr(0,2,cond_string,cond_values,ierr,'dmft_triqs_dlr_epsilon',dt%dmft_triqs_wmax,1,zero,iout)
      else
-       call chkint_ge(0,2,cond_string,cond_values,ierr,'dmft_triqs_nleg',dt%dmft_triqs_nleg,1,iout)
+       call chkint_ge(0,2,cond_string,cond_values,ierr,'dmft_triqs_n_l',dt%dmft_triqs_nleg,1,iout)
      end if
      if (dt%dmft_triqs_off_diag == 1) then
        cond_string(1)='dmft_triqs_off_diag' ; cond_values(1)=dt%dmft_triqs_off_diag

@@ -158,6 +158,7 @@ type, public :: dataset_type
  integer :: dmft_triqs_measure_density_matrix
  integer :: dmft_triqs_move_double
  integer :: dmft_triqs_move_shift
+ integer :: dmft_triqs_n_cycles
  integer :: dmft_triqs_nleg
  integer :: dmft_triqs_nsubdivisions
  integer :: dmft_triqs_off_diag
@@ -843,9 +844,7 @@ type, public :: dataset_type
  real(dp) :: diemixmag
  real(dp) :: dilatmx
  real(dp) :: dmft_charge_prec
- real(dp) :: dmft_epsilon_yukawa
  real(dp) :: dmft_fermi_step
- real(dp) :: dmft_lambda_yukawa
  real(dp) :: dmft_mxsf
  real(dp) :: dmft_tolfreq
  real(dp) :: dmft_tollc
@@ -857,6 +856,8 @@ type, public :: dataset_type
  real(dp) :: dmft_triqs_pauli_prob
  real(dp) :: dmft_triqs_tol_block
  real(dp) :: dmft_triqs_wmax
+ real(dp) :: dmft_yukawa_epsilon
+ real(dp) :: dmft_yukawa_lambda
  real(dp) :: dmft_wanrad
  real(dp) :: dmftqmc_n
  real(dp) :: dosdeltae
@@ -1564,11 +1565,9 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmft_dc            = dtin%dmft_dc
  dtout%dmft_entropy       = dtin%dmft_entropy
  dtout%dmft_charge_prec   = dtin%dmft_charge_prec
- dtout%dmft_epsilon_yukawa = dtin%dmft_epsilon_yukawa
  dtout%dmft_fermi_step    = dtin%dmft_fermi_step
  dtout%dmft_iter          = dtin%dmft_iter
  dtout%dmft_kspectralfunc = dtin%dmft_kspectralfunc
- dtout%dmft_lambda_yukawa = dtin%dmft_lambda_yukawa
  dtout%dmft_magnfield     = dtin%dmft_magnfield
  dtout%dmft_magnfield_b   = dtin%dmft_magnfield_b
  dtout%dmft_nlambda       = dtin%dmft_nlambda
@@ -1586,6 +1585,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmft_t2g           = dtin%dmft_t2g
  dtout%dmft_wanrad        = dtin%dmft_wanrad
  dtout%dmft_x2my2d        = dtin%dmft_x2my2d
+ dtout%dmft_yukawa_epsilon = dtin%dmft_yukawa_epsilon
+ dtout%dmft_yukawa_lambda = dtin%dmft_yukawa_lambda
  dtout%dmft_yukawa_param  = dtin%dmft_yukawa_param
  dtout%dmft_tolfreq       = dtin%dmft_tolfreq
  dtout%dmft_tollc         = dtin%dmft_tollc
@@ -1605,6 +1606,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmft_triqs_measure_density_matrix = dtin%dmft_triqs_measure_density_matrix
  dtout%dmft_triqs_move_double = dtin%dmft_triqs_move_double
  dtout%dmft_triqs_move_shift = dtin%dmft_triqs_move_shift
+ dtout%dmft_triqs_n_cycles = dtin%dmft_triqs_n_cycles
  dtout%dmft_triqs_pauli_prob = dtin%dmft_triqs_pauli_prob
  dtout%dmft_triqs_nleg = dtin%dmft_triqs_nleg
  dtout%dmft_triqs_nsubdivisions = dtin%dmft_triqs_nsubdivisions
@@ -3619,24 +3621,26 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmftbandi dmftbandf dmftctqmc_basis'
  list_vars=trim(list_vars)//' dmftctqmc_check dmftctqmc_correl dmftctqmc_gmove'
  list_vars=trim(list_vars)//' dmftctqmc_grnns dmftctqmc_localprop dmftctqmc_meas dmftctqmc_mrka'
- list_vars=trim(list_vars)//' dmftctqmc_mov dmftctqmc_order dmft_triqs_compute_integral dmft_triqs_det_init_size'
+ list_vars=trim(list_vars)//' dmftctqmc_mov dmftctqmc_order dmft_triqs_basis dmft_triqs_compute_integral dmft_triqs_det_init_size'
  list_vars=trim(list_vars)//' dmft_triqs_det_n_operations_before_check dmft_triqs_det_precision_error'
- list_vars=trim(list_vars)//' dmft_triqs_det_precision_warning dmft_triqs_det_singular_threshold'
- list_vars=trim(list_vars)//' dmft_triqs_entropy dmft_triqs_epsilon dmft_triqs_gaussorder dmft_triqs_imag_threshold'
- list_vars=trim(list_vars)//' dmft_triqs_leg_measure dmft_triqs_loc_n_min dmft_triqs_loc_n_max'
- list_vars=trim(list_vars)//' dmft_triqs_measure_density_matrix dmft_triqs_move_double'
- list_vars=trim(list_vars)//' dmft_triqs_move_shift'
- list_vars=trim(list_vars)//' dmft_triqs_nleg dmft_triqs_nsubdivisions dmft_triqs_off_diag dmft_triqs_pauli_prob dmft_triqs_read_ctqmcdata'
- list_vars=trim(list_vars)//' dmft_triqs_seed_a dmft_triqs_seed_b dmft_triqs_therm_restart'
- list_vars=trim(list_vars)//' dmft_triqs_time_invariance dmft_triqs_tol_block dmft_triqs_use_norm_as_weight dmft_triqs_wmax dmftcheck'
+ list_vars=trim(list_vars)//' dmft_triqs_det_precision_warning dmft_triqs_det_singular_threshold dmft_triqs_dlr_epsilon dmft_triqs_dlr_wmax'
+ list_vars=trim(list_vars)//' dmft_triqs_entropy dmft_triqs_gaussorder dmft_triqs_imag_threshold'
+ list_vars=trim(list_vars)//' dmft_triqs_length_cycle dmft_triqs_loc_n_min dmft_triqs_loc_n_max'
+ list_vars=trim(list_vars)//' dmft_triqs_measure_density_matrix dmft_triqs_measure_G_l dmft_triqs_move_double'
+ list_vars=trim(list_vars)//' dmft_triqs_move_shift dmft_triqs_n_cycles dmft_triqs_n_iw dmft_triqs_n_l dmft_triqs_n_tau dmft_triqs_n_warmup_cycles_init'
+ list_vars=trim(list_vars)//' dmft_triqs_n_warmup_cycles_restart'
+ list_vars=trim(list_vars)//' dmft_triqs_nsubdivisions dmft_triqs_off_diag dmft_triqs_pauli_prob'
+ list_vars=trim(list_vars)//' dmft_triqs_random_seed_a dmft_triqs_random_seed_b dmft_triqs_read_ctqmcdata'
+ list_vars=trim(list_vars)//' dmft_triqs_time_invariance dmft_triqs_tol_block dmft_triqs_use_norm_as_weight dmftcheck'
  list_vars=trim(list_vars)//' dmftqmc_l dmftqmc_n dmftqmc_seed dmftqmc_therm dmft_charge_prec dmft_dc'
- list_vars=trim(list_vars)//' dmft_entropy dmft_epsilon_yukawa dmft_fermi_step'
- list_vars=trim(list_vars)//' dmft_iter dmft_kspectralfunc dmft_lambda_yukawa dmft_magnfield dmft_magnfield_b dmft_mxsf '
+ list_vars=trim(list_vars)//' dmft_entropy dmft_fermi_step'
+ list_vars=trim(list_vars)//' dmft_iter dmft_kspectralfunc dmft_magnfield dmft_magnfield_b dmft_mxsf '
  list_vars=trim(list_vars)//' dmft_nlambda dmft_nominal dmft_nwli dmft_nwlo'
  list_vars=trim(list_vars)//' dmft_occnd_imag dmft_orbital dmft_orbital_filepath dmft_prt_maxent dmft_prtself dmft_prtwan dmft_read_occnd'
  list_vars=trim(list_vars)//' dmft_rslf dmft_shiftself dmft_solv dmft_tolfreq dmft_tollc'
  list_vars=trim(list_vars)//' dmft_t2g dmft_wanorthnorm'
- list_vars=trim(list_vars)//' dmft_wanrad dmft_x2my2d dmft_yukawa_param dosdeltae dtion dtele dynamics dynimage' !FB: dynamics?
+ list_vars=trim(list_vars)//' dmft_wanrad dmft_x2my2d dmft_yukawa_epsilon dmft_yukawa_lambda dmft_yukawa_param'
+ list_vars=trim(list_vars)//' dosdeltae dtion dtele dynamics dynimage' !FB: dynamics?
  list_vars=trim(list_vars)//' dvdb_add_lr dvdb_ngqpt dvdb_qdamp dvdb_rspace_cell'
  list_vars=trim(list_vars)//' dyn_chksym dyn_tolsym'
  list_vars=trim(list_vars)//' d3e_pert1_atpol d3e_pert1_dir d3e_pert1_elfd d3e_pert1_phon'
