@@ -11232,7 +11232,7 @@ Variable(
     abivarname="lpawu",
     varset="paw",
     vartype="integer",
-    topics=['DFT+U_compulsory'],
+    topics=['DFT+U_compulsory', 'DMFT_compulsory'],
     dimensions=['[[ntypat]]'],
     defaultval=MultipleValue(number=None, value=-1),
     mnemonics="value of angular momentum L for PAW+U",
@@ -11240,10 +11240,10 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Give for each species the value of the angular momentum
- on which to apply the DFT+U correction.
+ on which to apply the DFT+U/DFT+DMFT correction.
 
-  * If equal to 1 (p-orbitals), 2 (d-orbitals)  or 3 (f-orbitals), values of [[upawu]] and  [[jpawu]] are used in the calculation.
-  * If equal to -1: do not apply DFT+U correction on the species.
+  * If equal to 0 (s-orbitals), 1 (p-orbitals), 2 (d-orbitals)  or 3 (f-orbitals), values of [[upawu]] and  [[jpawu]] are used in the calculation.
+  * If equal to -1: do not apply DFT+U/DFT+DMFT correction on the species.
 """,
 ),
 
