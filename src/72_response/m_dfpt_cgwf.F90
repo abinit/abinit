@@ -89,9 +89,9 @@ module m_dfpt_cgwf
    ! Max number of line minimization.
    integer :: nlines_done = -1
    ! Number of line minimization in stern_solve.
-   integer :: usedcwavef
+   integer :: usedcwavef = 0
    ! flag controlling the use of dcwavef array (PAW only):
-   integer :: usepaw
+   integer :: usepaw = -1
    ! 1 if PAW is used.
 
    integer :: work_ngfft(18)

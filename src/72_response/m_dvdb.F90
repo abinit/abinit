@@ -3071,9 +3071,9 @@ subroutine dvdb_get_ftqbz(db, qbz, cplex, nfft, ngfft, v1scf, comm)
 
 !Arguments ------------------------------------
 !scalars
+ class(dvdb_t),intent(inout) :: db
  integer,intent(in) :: nfft, comm
  integer,intent(out) :: cplex
- class(dvdb_t),intent(inout) :: db
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: qbz(3)
