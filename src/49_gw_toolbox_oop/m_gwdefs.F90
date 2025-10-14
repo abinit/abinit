@@ -61,9 +61,9 @@ module m_gwdefs
  real(gwp),public,parameter :: one_gw  = 1._gwp
  real(gwp),public,parameter :: zero_gw = 0._gwp
 
- complex(gwpc),public,parameter :: czero_gw = (0._gwp,0._gwp)
- complex(gwpc),public,parameter :: cone_gw  = (1._gwp,0._gwp)
- complex(gwpc),public,parameter :: j_gw     = (0._gwp,1._gwp)
+ complex(gwp),public,parameter :: czero_gw = (0._gwp,0._gwp)
+ complex(gwp),public,parameter :: cone_gw  = (1._gwp,0._gwp)
+ complex(gwp),public,parameter :: j_gw     = (0._gwp,1._gwp)
 
 !arrays
  real(dp),public,parameter :: GW_Q0_DEFAULT(3) = [0.00001_dp, 0.00002_dp, 0.00003_dp]
@@ -266,7 +266,7 @@ module m_gwdefs
   ! (nomegasf)
   ! real frequencies used to calculate the imaginary part of chi0.
 
-  complex(dpc),allocatable :: omega(:)
+  complex(dp),allocatable :: omega(:)
   ! (nomega)
   ! real and imaginary frequencies in chi0, epsilon and epsilonm1.
 
@@ -373,11 +373,11 @@ module m_gwdefs
 
   !TODO should be removed, everything should be in Sr%
 
-  complex(dpc),allocatable :: omegasi(:)
+  complex(dp),allocatable :: omegasi(:)
   ! (nomegasi)
   ! Frequencies along the imaginary axis used for the analytical continuation.
 
-  complex(dpc),allocatable :: omega_r(:)
+  complex(dp),allocatable :: omega_r(:)
   ! (nomegasr)
   ! Frequencies used to evaluate the spectral function.
 
@@ -653,13 +653,13 @@ end function sigma_needs_ppm
 !!
 !! SOURCE
 
-complex(dpc) function g0g0w(omega, numerator, delta_ene, zcut, TOL_W0, opt_poles)
+complex(dp) function g0g0w(omega, numerator, delta_ene, zcut, TOL_W0, opt_poles)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in):: opt_poles
  real(dp),intent(in) :: TOL_W0,delta_ene,numerator,zcut
- complex(dpc),intent(in) :: omega
+ complex(dp),intent(in) :: omega
 
 !Local variables ------------------------------
 !scalars

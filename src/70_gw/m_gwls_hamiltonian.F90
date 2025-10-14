@@ -22,12 +22,9 @@
 
 module m_gwls_hamiltonian
 
-! local modules
 use m_gwls_utility
 use m_gwls_wf
 use m_dtset
-
-! abinit modules
 use m_bandfft_kpt
 use m_cgtools
 use defs_basis
@@ -137,7 +134,7 @@ type(crystal_t)              :: Cryst
 type(gsphere_t)          :: Gsphere
 type(kmesh_t)           :: Kmesh, Qmesh
 character(len=132),pointer   :: title(:)   !SET2NULL
-complex(dpc), allocatable    :: vc_sqrt(:)
+complex(dp), allocatable    :: vc_sqrt(:)
 
 !MPI over bands requires :
 integer :: blocksize                                 !Public
@@ -568,7 +565,7 @@ real(dp) :: exchange
 integer, intent(in) :: e
 
 ! If these arguments are provided, the exchange energy is to be projected on this subspace
-complex(dpc), optional, intent(in) :: Lbasis_lanczos(:,:)  ! complex array which contains the Lanczos basis
+complex(dp), optional, intent(in) :: Lbasis_lanczos(:,:)  ! complex array which contains the Lanczos basis
 
 real(dp), allocatable :: psik_e(:,:)             !Working array to store the wavefunction
 
@@ -942,8 +939,8 @@ end subroutine precondition
 
 subroutine precondition_cplx(psi_out,psi_in)
 
-complex(dpc), intent(out) :: psi_out(npw_g)
-complex(dpc), intent(in)  :: psi_in(npw_g)
+complex(dp), intent(out) :: psi_out(npw_g)
+complex(dp), intent(in)  :: psi_in(npw_g)
 
 ! *************************************************************************
 
@@ -972,12 +969,12 @@ subroutine sqrt_vc_k(psi_inout)
 real(dp), intent(inout) :: psi_inout(2,npw_k)
 
 !Internal variable
-complex(dpc) :: c
+complex(dp) :: c
 
 ! *************************************************************************
 
 do i=1,npw_k
-c = vc_sqrt(i) * cmplx(psi_inout(1,i),psi_inout(2,i),dpc)
+c = vc_sqrt(i) * cmplx(psi_inout(1,i),psi_inout(2,i),dp)
 psi_inout(1,i) = dble (c)
 psi_inout(2,i) = dimag(c)
 end do
@@ -1025,7 +1022,7 @@ real(dp), intent(in), optional :: cte
 !mpi_enreg,        T
 !ndat,             Fixed to 1     (# of FFTs to do in //)
 !dtset%prtvol,     T
-!sij_opt,          Fixed to 0     (PAW dependant : 0-><G|H|C> ; 1-><G|H|C> & <G|S|C> ; -1-><G|H-cte.S|C>)
+!sij_opt,          Fixed to 0     (PAW dependent : 0-><G|H|C> ; 1-><G|H|C> & <G|S|C> ; -1-><G|H-cte.S|C>)
 !tim_getghc,       Fixed to 0     (identity of the timer of the calling subroutine. 1:cgwf 5:lobpcg)
 !type_calc)        Fixed to 0     (0:whole H N:some part only)
 
@@ -1071,9 +1068,9 @@ end subroutine Hpsik
 subroutine Hpsikc(psi_out,psi_in,cte)
 
 !External variables
-complex(dpc), intent(out) :: psi_out(npw_g)
-complex(dpc), intent(in)  :: psi_in(npw_g)
-complex(dpc), intent(in), optional :: cte
+complex(dp), intent(out) :: psi_out(npw_g)
+complex(dp), intent(in)  :: psi_in(npw_g)
+complex(dp), intent(in), optional :: cte
 
 ! *************************************************************************
 
@@ -1375,8 +1372,6 @@ call Vcp%free()
 call bandfft_kpt_destroy_array(bandfft_kpt,mpi_enreg)
 call destroy_mpi_enreg(mpi_enreg)
 
-!NOTE : the syntax if(allocated(a)) ABI_FREE(a) result in an error if "a" is not allocated; since the macro replace
-!ABI_MALLOC by more than one line of text, the second lines and up get outside the if... if() then syntax is equired.
 ABI_SFREE(cg)
 ABI_SFREE(gbound)
 ABI_SFREE(kg_k)
@@ -1425,7 +1420,7 @@ end subroutine destroy_H
 !!  build_H
 !!
 !! FUNCTION
-!!  .
+!! Arguments of gw_sternheimer, received as argument by build_H
 !!
 !! INPUTS
 !!
@@ -1435,11 +1430,8 @@ end subroutine destroy_H
 
 subroutine build_H(dtset2,mpi_enreg2,cpopt2,cg2,gs_hamk2,kg_k2,kinpw2)
 
-!use m_bandfft_kpt
-use m_cgtools
 use m_wfutils
 
-!Arguments of gw_sternheimer, reveived as argument by build_H-------------------------
 type(dataset_type),  intent(in) :: dtset2
 type(MPI_type),   intent(in) :: mpi_enreg2
 type(gs_hamiltonian_type), intent(inout) :: gs_hamk2
@@ -1522,7 +1514,7 @@ istwfk(:)=dtset%istwfk
 !Initializing variables from gs_hamk
 ucvol = gs_hamk%ucvol
 ABI_MALLOC(gbound,(2*mgfft+8,2))
-!gbound = gs_hamk%gbound_k !Must be done later for bandft paralelism
+!gbound = gs_hamk%gbound_k !Must be done later for bandft parallelism
 
 !Parameters which need to be set by hand for now...
 weight           = 1           ! The weight of the k-pts, which sum to 1.
@@ -1611,7 +1603,7 @@ ispden           = 1           !When required, the spin index to be used. We don
 !     The data is now distributed properly to do parallel FFTs! Each row in the diagram above corresponds to FFTs done
 !     in parallel over nproc_fft processors, on a given band. There are M rows running thus in parallel!
 !
-!     The underlying ABINIT routines are equiped to handle FFT parallelism, not band distributed parallelism.
+!     The underlying ABINIT routines are equipped to handle FFT parallelism, not band distributed parallelism.
 !     prep_getghc.F90 and lobpgcwf.F90 show how to rearange information to be able to apply basic ABINIT routines.
 !
 !     The code below is inspired / guessed from lobpcgwf and prep_getghc. WE ASSUME THERE IS NO SPINORS!  CODE SHOULD
@@ -1790,7 +1782,7 @@ close(io_unit_debug)
 
 ! Finishing the construction of vxc (transcribing it from the double real grid (for the density)
 ! to the single real grid (for the wfs).
-! Assummes we only need one spin component; one transcription per spin being needed.
+! Assumes we only need one spin component; one transcription per spin being needed.
 if(allocated(vxc_dg)) then
   ABI_MALLOC(vxc,(n4,n5,n6,dtset%nspden))
   vxc = zero
@@ -1836,9 +1828,9 @@ if(dtset%optdriver==66) then
                         dtset%prtvol,npw_serial,gvec,ierr)
 
   call Gsphere%init(Cryst,npw_serial,gvec=gvec)
-  call Gsphere%print()
+  call Gsphere%print([std_out], 0)
 
-  call Vcp%init(Gsphere,Cryst,Qmesh,Kmesh,dtset%rcut,dtset%gw_icutcoul,dtset%vcutgeo,dtset%ecutsigx,npw_serial,&
+  call Vcp%init(Gsphere,Cryst,Qmesh,Kmesh,dtset%gw_rcut,dtset%gw_icutcoul,dtset%vcutgeo,dtset%ecutsigx,npw_serial,&
                 dtset%nkpt,dtset%kptns,mpi_enreg%comm_world)
 
   ! Since Vcp%vc_sqrt is sorted according to the KSS convention for G vectors

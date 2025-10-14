@@ -219,8 +219,6 @@ end subroutine xcdata_init
 !!  [usefock = 1 if the XC functional needs the Fock operator]
 !!  xclevel= 0 if no XC functional except possibly Fock; 1 if LDA; 2 if GGA ; 3 for TDDFT kernel tests
 !!
-!! SIDE EFFECTS
-!!
 !! SOURCE
 
 subroutine get_xclevel(ixc, xclevel, usefock)

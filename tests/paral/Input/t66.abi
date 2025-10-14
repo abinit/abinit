@@ -15,8 +15,8 @@ nband     24       # number of (occ and empty) bands to be computed. 48 electron
 # Parallel settings for dataset 1. NB: These variables are not used in the GWR code.
 paral_kgb1  1
 #rmm_diis1   1
+nblock_lobpcg1 1
 npband1     4
-bandpp1     6
 npfft1      1
 np_spkpt1      1
 tolwfr1     1.0d-18
@@ -82,6 +82,7 @@ pseudos "Psdj_paw_pw_std/Si.xml, Psdj_paw_pw_std/O.xml"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = haicgu_*
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4

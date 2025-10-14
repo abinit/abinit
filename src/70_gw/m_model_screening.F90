@@ -83,7 +83,7 @@ subroutine im_screening(omega,fval,nomega,coeff,ncoeff)
 !scalars
   integer,intent(in)   :: nomega,ncoeff
 !arrays
-  complex(dpc),intent(in)  :: omega(nomega)
+  complex(dp),intent(in)  :: omega(nomega)
   real(gwp)  ,intent(in)  :: coeff(ncoeff)
   real(gwp)  ,intent(out) :: fval(nomega)
 
@@ -149,7 +149,7 @@ subroutine re_screening(omega,fval,nomega,coeff,ncoeff)
 !scalars
   integer,intent(in)   :: nomega,ncoeff
 !arrays
-  complex(dpc),intent(in)  :: omega(nomega)
+  complex(dp),intent(in)  :: omega(nomega)
   real(gwp)  ,intent(in)  :: coeff(ncoeff)
   real(gwp)  ,intent(out) :: fval(nomega)
 
@@ -215,7 +215,7 @@ subroutine re_and_im_screening(omega,fval,nomega,coeff,ncoeff)
 !scalars
   integer,intent(in)   :: nomega,ncoeff
 !arrays
-  complex(dpc) ,intent(in)  :: omega(nomega)
+  complex(dp) ,intent(in)  :: omega(nomega)
   real(gwp)   ,intent(in)  :: coeff(ncoeff)
   complex(gwp),intent(out) :: fval(nomega)
 
@@ -284,9 +284,9 @@ subroutine re_and_im_screening_with_phase(omega,fval,nomega,coeff,ncoeff)
 !scalars
   integer,intent(in)   :: nomega,ncoeff
 !arrays
-  complex(dpc) ,intent(in)  :: omega(nomega)
+  complex(dp) ,intent(in)  :: omega(nomega)
   real(gwp)   ,intent(in)  :: coeff(ncoeff)
-  complex(gwpc),intent(out) :: fval(nomega)
+  complex(gwp),intent(out) :: fval(nomega)
 
 !Local variables-------------------------------
 !scalars
@@ -360,7 +360,7 @@ subroutine sequential_fitting(omega,refval,imfval,nomega,nfreqre,coeff,&
 !scalars
   integer,intent(in)   :: nomega,nfreqre,ncoeff,prtvol
 !arrays
-  complex(dpc),intent(in)     :: omega(nomega)
+  complex(dp),intent(in)     :: omega(nomega)
   real(gwp)  ,intent(out)    :: coeff(ncoeff)
   real(gwp)  ,intent(inout)  :: refval(nomega),imfval(nomega)
   real(gwp),optional,intent(out) :: startcoeff(ncoeff)
@@ -369,8 +369,8 @@ subroutine sequential_fitting(omega,refval,imfval,nomega,nfreqre,coeff,&
 !scalars
   integer :: ip,npoles,idx
   real(gwp) :: thiscoeff(3),norm,invnorm
-  real(dpc)  :: re_zvals(nomega),im_zvals(nomega)
-!  real(dpc)  :: orig_refval(nomega),orig_imfval(nomega)
+  real(dp)  :: re_zvals(nomega),im_zvals(nomega)
+!  real(dp)  :: orig_refval(nomega),orig_imfval(nomega)
   complex(gwp) :: pole_func(nomega)
 ! *********************************************************************
 
@@ -439,9 +439,9 @@ subroutine init_peaks_from_grid(omega,fval,nomega,nfreqre,nfreqim,coeff,ncoeff,p
 !scalars
   integer,intent(in)   :: nomega,nfreqre,nfreqim,ncoeff,prtvol
 !arrays
-  complex(dpc) ,intent(in)  :: omega(nomega)
+  complex(dp) ,intent(in)  :: omega(nomega)
   real(gwp)   ,intent(out) :: coeff(ncoeff)
-  complex(gwpc),intent(in)  :: fval(nomega)
+  complex(gwp),intent(in)  :: fval(nomega)
 
 !Local variables-------------------------------
 !scalars
@@ -451,7 +451,6 @@ subroutine init_peaks_from_grid(omega,fval,nomega,nfreqre,nfreqim,coeff,ncoeff,p
 
 !arrays
   integer :: ploc(ncoeff/3)
-
 ! *********************************************************************
 
   npoles = ncoeff/3
@@ -555,7 +554,7 @@ subroutine init_single_peak(omega,refval,imfval,nomega,nfreqre,coeff,prtvol)
 !scalars
   integer,intent(in)   :: nomega,nfreqre,prtvol
 !arrays
-  complex(dpc),intent(in)  :: omega(nomega)
+  complex(dp),intent(in)  :: omega(nomega)
   real(gwp)  ,intent(out) :: coeff(3)
   real(gwp)  ,intent(in) :: refval(nomega),imfval(nomega)
 
@@ -623,15 +622,14 @@ subroutine init_peaks_even_dist(omega,fval,nomega,nfreqre,coeff,ncoeff,prtvol)
 !scalars
   integer,intent(in)   :: nomega,nfreqre,ncoeff,prtvol
 !arrays
-  complex(dpc) ,intent(in)  :: omega(nomega)
+  complex(dp) ,intent(in)  :: omega(nomega)
   real(gwp)   ,intent(out) :: coeff(ncoeff)
-  complex(gwpc),intent(in)  :: fval(nomega)
+  complex(gwp),intent(in)  :: fval(nomega)
 
 !Local variables-------------------------------
 !scalars
   integer :: npoles,ip,idx,iw
   real(gwp) :: delta,norm,div,val1,val2,osc,pol,gam
-
 ! *********************************************************************
 
   npoles = ncoeff/3
@@ -701,8 +699,8 @@ subroutine print_peaks(omega,fval,nomega,nfreqre,nfreqim)
 !scalars
   integer,intent(in)   :: nomega,nfreqre,nfreqim
 !arrays
-  complex(dpc) ,intent(in)  :: omega(nomega)
-  complex(gwpc),intent(in)  :: fval(nomega)
+  complex(dp) ,intent(in)  :: omega(nomega)
+  complex(gwp),intent(in)  :: fval(nomega)
 
 !Local variables-------------------------------
 !scalars
@@ -710,7 +708,6 @@ subroutine print_peaks(omega,fval,nomega,nfreqre,nfreqim)
   integer :: idx1,idx2,idx3
   real(gwp) :: rez,imz,val1,val2,val3
   character(len=500) :: msg
-
 ! *********************************************************************
 
   if (open_file("grid_peak_tree.dat", msg, newunit=unt_tmp) /= 0) then
@@ -833,18 +830,16 @@ subroutine find_peaks(fval,nomega,nfreqre,nfreqim,ploc,npoles,iline)
   integer, intent(inout) :: iline
 !arrays
   integer    ,intent(inout) :: ploc(npoles)
-  complex(gwpc), intent(in) :: fval(nomega)
+  complex(gwp), intent(in) :: fval(nomega)
 
 !Local variables-------------------------------
 !scalars
   integer    :: ire,iim,ipoles
   integer    :: idx1,idx2,idx3,ipol
   real(gwp) :: val1,val2,val3
-
 !arrays
   integer :: ploc_prev(npoles)
   real    :: pval(npoles),pval_prev(npoles)
-
 ! *********************************************************************
 
   ploc=-1; ploc_prev=-1
@@ -1004,13 +999,12 @@ subroutine remove_phase(fval,nomega,phase)
   integer,    intent(in)  :: nomega
   real(gwp), intent(out) :: phase
 !arrays
-  complex(gwpc), intent(inout) :: fval(nomega)
+  complex(gwp), intent(inout) :: fval(nomega)
 
 !Local variables-------------------------------
 !scalars
   integer       :: io
   real(gwp)    :: a,b,retemp,imtemp
-
 ! *********************************************************************
 
 ! The phase can be found by checking when the function is

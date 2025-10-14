@@ -1,4 +1,4 @@
-# Exercise IO routines in parallel with different combination 
+# Exercise IO routines in parallel with different combination
 # of parameters in the GS eigensolvers.
 
 ngfft 24 24 24
@@ -12,8 +12,8 @@ paral_kgb 1
 
 # Test the prt* variables used in outscf.
 prtden 1
-prtpot 1 
-prtgeo 1 
+prtpot 1
+prtgeo 1
 #prtstm 1
 prt1dm 1
 prtvha 1
@@ -31,21 +31,22 @@ iatsph 2
 
 ndtset 6
 
-bandpp 1
-
 # Dataset 1
 # Output the GS WFK with MPI-FFT.
 npband1 1 np_spkpt1 2 npfft1 2
+nblock_lobpcg1 12
 prtdos1 3
 
 # Dataset 2
 # Read the previous GS WFK. Use MPI-FFT but with different number of procs
 npband2 1 np_spkpt2 1 npfft2 4
+nblock_lobpcg2 12
 prtdos2 3
 
 # Dataset 3
 # Read the previous GS WFK in band-only mode.
 npband3 4 np_spkpt3 1 npfft3 1
+nblock_lobpcg3 3
 
 # Dataset 4
 # Read the previous DEN file in band-fft mode
@@ -53,10 +54,11 @@ getwfk4 0
 getden4 -1
 npband4 2 np_spkpt4 1 npfft4 2
 nstep4 5  #   Improves the portability of the test
+nblock_lobpcg4 6
 
 # Dataset 5
 # Read previous WFK file with the simple band-by-band CG solver.
-paral_kgb5 0 
+paral_kgb5 0
 iomode5 0  # CG with MPI-IO is buggy!
 prtdos5 3
 
@@ -66,17 +68,18 @@ ngfftdg6 48 48 48
 getden6 -1
 npband6 1 np_spkpt6 1 npfft6 4
 getwfk6 1
+nblock_lobpcg6 12
 
 # SCF parameters
-ecut 15. 
-nband 12 
+ecut 15.
+nband 12
 pawecutdg 50
-diemac 12.0d0  
+diemac 12.0d0
 
-occopt 7  
+occopt 7
 tsmear 0.001
 kptrlatt 4 0 0 0 4 0 0 0 4
-nshiftk 4 
+nshiftk 4
 shiftk 1/2 1/2 1/2 1/2 0.0 0.0 0.0 1/2 0.0 0.0 0.0 1/2
 tolwfr 1d-20
 # Added in v9.11:
@@ -93,8 +96,8 @@ xred 0.0  0.0  0.0
      0.25 0.25 0.25
 znucl 6
 
-ntypat 1 
-typat  1 1  
+ntypat 1
+typat  1 1
 natom 2
 
  pp_dirpath "$ABI_PSPDIR"
@@ -117,10 +120,10 @@ natom 2
 #%% [extra_info]
 #%% keywords = PAW
 #%% authors = M. Giantomassi
-#%% description = 
+#%% description =
 #%%   C-diamond, Bulk, 2 atoms, with PAW.
 #%%   Test the IO routines with paral_kgb in [1, 0] and different combinations
-#%%   of parameters (npfft, npband, np_spkpt). 
+#%%   of parameters (npfft, npband, np_spkpt).
 #%%   Test the plane wave load balancing procedure (pw_unbal_thresh).
 #%%   Test also the computation of PJDOS.
 #%%<END TEST_INFO>

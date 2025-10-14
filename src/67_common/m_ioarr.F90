@@ -47,7 +47,6 @@ MODULE m_ioarr
  use m_numeric_tools, only : interpolate_denpot
  use m_geometry,      only : metric
  use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp, initmpi_seq
- use m_distribfft,    only : init_distribfft_seq
  use m_fourier_interpol,only : fourier_interpol
 
  implicit none
@@ -300,11 +299,11 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
            call initmpi_seq(MPI_enreg_seq)
            ! Which one is coarse? Note that this part is not very robust and can fail!
            if (ngfft_in(2) * ngfft_in(3) < ngfft_out(2) * ngfft_out(3)) then
-             call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfft_in(2),ngfft_in(3),'all')
-             call init_distribfft_seq(MPI_enreg_seq%distribfft,'f',ngfft_out(2),ngfft_out(3),'all')
+             call MPI_enreg_seq%distribfft%init_seq('c',ngfft_in(2),ngfft_in(3),'all')
+             call MPI_enreg_seq%distribfft%init_seq('f',ngfft_out(2),ngfft_out(3),'all')
            else
-             call init_distribfft_seq(MPI_enreg_seq%distribfft,'f',ngfft_in(2),ngfft_in(3),'all')
-             call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfft_out(2),ngfft_out(3),'all')
+             call MPI_enreg_seq%distribfft%init_seq('f',ngfft_in(2),ngfft_in(3),'all')
+             call MPI_enreg_seq%distribfft%init_seq('c',ngfft_out(2),ngfft_out(3),'all')
            end if
 
            call fourier_interpol(cplex,hdr0%nspden,0,0,nfftot_in,ngfft_in,nfftot_out,ngfft_out,&

@@ -1,5 +1,6 @@
-from __future__ import print_function, division, unicode_literals
+
 import pytest
+
 from .fldiff import (
     Differ,
     LineCountDifference,
@@ -19,9 +20,9 @@ class TestDiffer:
         ' 5.8787 44.537e+056\n',
         ' .7856 5.0\n',
         '- This lines should be ignored\n',
-        '+ This line appears in output but is not counted as errorneous\n',
+        '+ This line appears in output but is not counted as erroneous\n',
         ': This line is always compared as characters 0.457896321545\n',
-        '. This one too but it will never be counted a errorneous 2.4354364\n',
+        '. This one too but it will never be counted a erroneous 2.4354364\n',
         '% This line have a fixed tolerance of 1.01e-2: 2.043643 5.5473684\n',
         'P P and , lines are handled according to parameters as + or - lines\n'
     ]
@@ -31,9 +32,9 @@ class TestDiffer:
         ' 5.8707 44.535e+056\n',
         ' .7856 8.0\n',
         '- This lines should be ignored\n',
-        '+ This line appears in output but is not counted as errorneous\n',
+        '+ This line appears in output but is not counted as erroneous\n',
         ': This line is always compared as characters 0.457896321545\n',
-        '. This one too but it will never be counted a errorneous 2.4354364\n',
+        '. This one too but it will never be counted a erroneous 2.4354364\n',
         '% This line have a fixed tolerance of 1.01e-2: 2.043644 5.4\n',
         'P P and , lines are handled according to parameters as + or - lines\n'
     ]
@@ -43,9 +44,9 @@ class TestDiffer:
         ' 5.8787 44.537e+056\n',
         ' .7856 5.0\n',
         '- Should this line be ignored ?\n',
-        '+ This line appears in output but is not counted as errorneous\n',
+        '+ This line appears in output but is not counted as erroneous\n',
         ': This line is always compared as characters 0.457896321546\n',
-        '. This one too but it will never be counted a errorneous 2.4354360\n',
+        '. This one too but it will never be counted a erroneous 2.4354360\n',
         '% This line have a fixed tolerance of 1.01e-2: 2.043643 5.5473684\n',
         'P , and P lines are handled according to parameters as + or - lines\n'
     ]
@@ -57,10 +58,10 @@ class TestDiffer:
         ' 5.8787 44.537e+056\n',
         ' .7856 5.0\n',
         '- This lines should be ignored\n',
-        '+ This line appears in output but is not counted as errorneous\n',
+        '+ This line appears in output but is not counted as erroneous\n',
         '- Ignored lines are everywhere\n',
         ': This line is always compared as characters 0.457896321545\n',
-        '. This one too but it will never be counted a errorneous 2.4354364\n',
+        '. This one too but it will never be counted a erroneous 2.4354364\n',
         '% This line have a fixed tolerance of 1.01e-2: 2.043643 5.5473684\n',
         'P P and , lines are handled according to parameters as + or - lines\n'
     ]
@@ -71,9 +72,9 @@ class TestDiffer:
         ' 5.8787 44.537e+056\n',
         ' .7856 5.0\n',
         '- This lines should be ignored\n',
-        '+ This line appears in output but is not counted as errorneous\n',
+        '+ This line appears in output but is not counted as erroneous\n',
         ': This line is always compared as characters 0.457896321545\n',
-        '. This one too but it will never be counted a errorneous 2.4354364\n',
+        '. This one too but it will never be counted a erroneous 2.4354364\n',
         '% This line have a fixed tolerance of 1.01e-2: 2.043643 5.5473684\n',
         'P P and , lines are handled according to parameters as + or - lines\n'
     ]

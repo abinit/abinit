@@ -8,9 +8,12 @@ ixc 40   # HF
 # Number of datasets: 2-step calculation
 ndtset 3  jdtset 1 2 3
 
-gw_icutcoul 0
+gw_icutcoul    0
 icutcoul    0
 rcut      5.0
+fock_icutcoul 0
+fock_rcut    0.0
+gw_rcut    5.0
 
 kptopt    1
 ngkpt     1 1 1              # Number of grid points for k-point generation
@@ -71,7 +74,7 @@ pseudos "H.psp8"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi
+#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi, haicgu_*
 #%% [files]
 #%% files_to_test =
 #%%   t11.abo, tolnlines=  15, tolabs=  3e-09, tolrel= 1.0

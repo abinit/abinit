@@ -30,10 +30,6 @@ MODULE m_results_respfn
  implicit none
 
  private
-
-! public procedures.
- public :: init_results_respfn
- public :: destroy_results_respfn
 !!***
 
 !!****t* m_results_respfn/results_respfn_type
@@ -60,6 +56,11 @@ MODULE m_results_respfn
   real(dp), allocatable :: gam_eig2nkq(:,:,:,:,:,:,:)  ! one half second derivatives of the electronic eigenvalues
   ! eig2nkq(2,mband*nsppol,nkpt,3,natom,3,natom)
 
+  contains
+
+   procedure :: init => results_respfn_init
+   procedure :: free => results_respfn_free
+
  end type results_respfn_type
 !!***
 
@@ -68,9 +69,9 @@ CONTAINS
 !===========================================================
 !!***
 
-!!****f* m_results_out/init_results_respfn
+!!****f* m_results_respfn/results_respfn_init
 !! NAME
-!!  init_results_respfn
+!!  results_respfn_init
 !!
 !! FUNCTION
 !!  Init all scalars and nullify pointers in the structure.
@@ -78,24 +79,20 @@ CONTAINS
 !! INPUTS
 !!  ndtset= number of datasets
 !!
-!! SIDE EFFECTS
-!!  results_respfn(:)=<type(results_respfn_type)>=results_respfn datastructure
-!!
 !! SOURCE
 
-subroutine init_results_respfn(dtsets,ndtset_alloc,results_respfn)
+subroutine results_respfn_init(results_respfn, dtsets, ndtset_alloc)
 
 !Arguments ------------------------------------
 !scalars
+ class(results_respfn_type),intent(inout) :: results_respfn
  integer,intent(in) :: ndtset_alloc
 !arrays
  type(dataset_type),intent(in) :: dtsets(0:ndtset_alloc)
- type(results_respfn_type),intent(inout) :: results_respfn
-!Local variables-------------------------------
-!scalars
- integer :: getgam_eig2nkq,idtset,idtset_gam
- character(len=500) :: message
 
+!Local variables-------------------------------
+ integer :: getgam_eig2nkq,idtset,idtset_gam
+ character(len=500) :: msg
 !************************************************************************
 
  results_respfn%gam_jdtset=0
@@ -108,54 +105,47 @@ subroutine init_results_respfn(dtsets,ndtset_alloc,results_respfn)
        if(dtsets(idtset_gam)%jdtset==getgam_eig2nkq)exit
      enddo
      if(dtsets(idtset_gam)%optdriver/=RUNL_RESPFN)then
-       write(message, '(a,i5,a,i5,2a,i5,3a)' )&
+       write(msg, '(a,i0,a,i0,2a,i0,3a)' )&
          'For jdtset=',dtsets(idtset)%jdtset,', getgam_eig2nkq=',getgam_eig2nkq,ch10,&
          'However this dataset with idtset=',idtset_gam, ' is not a phonon calculation;',ch10,&
-         'Action : correct the value of getgam_eig2nkq for that dataset.'
-       ABI_ERROR(message)
+         'Action: correct the value of getgam_eig2nkq for that dataset.'
+       ABI_ERROR(msg)
      endif
      if(results_respfn%gam_jdtset==0)then
        results_respfn%gam_jdtset=-getgam_eig2nkq ! Store a negative value, indicating that it is expected.
      else if(results_respfn%gam_jdtset/=-getgam_eig2nkq) then
-       write(message, '(a,i5,2a,i5,2a)' )&
+       write(msg, '(a,i5,2a,i5,2a)' )&
          'results_respfn%gam_jdtset=',results_respfn%gam_jdtset,ch10,&
          'dtsets(idtset)%getgam_eig2nkq=',getgam_eig2nkq,ch10,&
          'So, it seems that two gamma q point calculations should be stored, while this is not yet allowed.'
-       ABI_BUG(message)
+       ABI_BUG(msg)
      endif
    endif
  enddo
 
-end subroutine init_results_respfn
+end subroutine results_respfn_init
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_results_out/destroy_results_respfn
+!!****f* m_results_respfn/results_respfn_free
 !! NAME
-!!  destroy_results_respfn
+!!  results_respfn_free
 !!
 !! FUNCTION
 !!  Clean and destroy results_respfn datastructure
 !!
-!! INPUTS
-!!
-!! SIDE EFFECTS
-!!  results_respfn(:)=<type(results_respfn_type)>=results_respfn datastructure
-!!
 !! SOURCE
 
-subroutine destroy_results_respfn(results_respfn)
+subroutine results_respfn_free(results_respfn)
 
 !Arguments ------------------------------------
-!arrays
- type(results_respfn_type),intent(inout) :: results_respfn
-
+ class(results_respfn_type),intent(inout) :: results_respfn
 !************************************************************************
 
  ABI_SFREE(results_respfn%gam_eig2nkq)
 
-end subroutine destroy_results_respfn
+end subroutine results_respfn_free
 
 !----------------------------------------------------------------------
 

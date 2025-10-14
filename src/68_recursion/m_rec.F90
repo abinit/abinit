@@ -1387,8 +1387,7 @@ subroutine pspnl_hgh_rec(psps,temperature,nlrec,debug)
  real(dp) :: h_mat_init(3,3), rework(lwork)
  real(dp), allocatable :: g_mat(:,:),h_mat(:,:),eig_val_h(:)
  real(dp), allocatable :: identity(:,:),inv_g_mat(:,:),u_mat(:,:)
-
- complex(dpc),allocatable :: hg_mat(:,:)
+ complex(dp),allocatable :: hg_mat(:,:)
 ! *************************************************************************
 
  if(debug)then

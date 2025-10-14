@@ -5,21 +5,21 @@ nband     16
 so_psp   *0    # No SOC by default
 nsppol    1
 ecut      8
-ecutsigx  8 
+ecutsigx  8
 tolwfr    1e-10
 
 #kptopt   4
 nshiftk  1
 shiftk   0 0 0
-ngkpt    4 4 4 
+ngkpt    4 4 4
 
 # GW globals
 gwpara      2
 symsigma    0     # Disable symmetrization in self-energy
 nkptgw      2
 kptgw
-    0 0 0 
-    0.5 0 0 
+    0 0 0
+    0.5 0 0
 ixc_sigma 40
 
 #################
@@ -31,7 +31,7 @@ nspinor1  1 nspden1  1  nband1 8
 #################
 ### DATASET 2 ###
 #################
-# non-collinear non-magnetic GS. 
+# non-collinear non-magnetic GS.
 # Init wfs from previous WFK file.
 getwfk2    1
 nspinor2   2 nspden2  1 nband2 16
@@ -43,12 +43,12 @@ nspinor2   2 nspden2  1 nband2 16
 # Init wfs from previous WFK file.
 getwfk3    2
 nspinor3   2 nspden3  4 nband3 16
-so_psp3   *1 
+so_psp3   *1
 
 #################
 ### DATASET 4 ###
 #################
-# spin-unpolarized HF from WFK produced in Dataset 1 
+# spin-unpolarized HF from WFK produced in Dataset 1
 nspinor4  1 nspden4  1 nband4  8
 optdriver4  4
 getwfk4     1
@@ -59,7 +59,7 @@ bdgw4       1 6
 #################
 ### DATASET 5 ###
 #################
-# non-collinear non-magnetic HF. Start from WFK produced in Dataset 2 
+# non-collinear non-magnetic HF. Start from WFK produced in Dataset 2
 # without no SOC --> HF energies should be equivalent to those in DATASET 3
 nspinor5  2 nspden5  1
 optdriver5  4
@@ -75,26 +75,26 @@ bdgw5       1 12
 nspinor6   2 nspden6  4
 optdriver6  4
 getwfk6     3
-so_psp6    *1 
+so_psp6    *1
 gwcalctyp6  5  # HF
 bdgw6       1 12
             1 12
 
 
 # Definition of the unit cell: fcc
-acell  3*10.217        
+acell  3*10.217
 rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
        0.5  0.0  0.5
        0.5  0.5  0.0
 
 # Definition of the atom types
-ntypat 1          
-znucl 14         
+ntypat 1
+znucl 14
 
 # Definition of the atoms
-natom 2           
-typat 1 1         
-xred              
+natom 2
+typat 1 1
+xred
    0.0  0.0  0.0
    0.25 0.25 0.25
 
@@ -112,8 +112,8 @@ xred
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, GW, SOC
-#%% description = 
+#%% description =
 #%%   HF calculation with NC pseudopotentials, different combinations of nspinor in [1, 2], with/wo SOC
 #%%   Test WFK IO and wafunction conversion nspinor 1 --> nspinor 2
-#%%   HF results in dataset 4-5 should be indentical, dataset 6 should show SOC splitting.
+#%%   HF results in dataset 4-5 should be identical, dataset 6 should show SOC splitting.
 #%%<END TEST_INFO>

@@ -1,8 +1,8 @@
 
-.Version 9.8.1 of MRGDV 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.8.1 of MRGDV
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  MRGDV comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,69 +16,69 @@
 
 .Starting date : Wed 21 Dec 2022.
 - ( at 21h07 )
-  
-->> Enter name of output file: 
-->> Enter total number of DFPT POT files: 
-->> Enter name of POT file 1 : 
-->> Enter name of POT file 2 : 
-->> Enter name of POT file 3 : 
-->> Enter name of POT file 4 : 
-->> Enter name of POT file 5 : 
-->> Enter name of POT file 6 : 
-->> Enter name of POT file 7 : 
-->> Enter name of POT file 8 : 
-->> Enter name of POT file 9 : 
-->> Enter name of POT file 10 : 
-->> Enter name of POT file 11 : 
-->> Enter name of POT file 12 : 
-->> Enter name of POT file 13 : 
-->> Enter name of POT file 14 : 
-->> Enter name of POT file 15 : 
-->> Enter name of POT file 16 : 
-->> Enter name of POT file 17 : 
-->> Enter name of POT file 18 : 
-->> Enter name of POT file 19 : 
-->> Enter name of POT file 20 : 
-->> Enter name of POT file 21 : 
-->> Enter name of POT file 22 : 
-->> Enter name of POT file 23 : 
-->> Enter name of POT file 24 : 
-->> Enter name of POT file 25 : 
-->> Enter name of POT file 26 : 
-->> Enter name of POT file 27 : 
-->> Enter name of POT file 28 : 
-->> Enter name of POT file 29 : 
-->> Enter name of POT file 30 : 
-->> Enter name of POT file 31 : 
-->> Enter name of POT file 32 : 
-->> Enter name of POT file 33 : 
-->> Enter name of POT file 34 : 
-->> Enter name of POT file 35 : 
-->> Enter name of POT file 36 : 
-->> Enter name of POT file 37 : 
-->> Enter name of POT file 38 : 
-->> Enter name of POT file 39 : 
-->> Enter name of POT file 40 : 
-->> Enter name of POT file 41 : 
-->> Enter name of POT file 42 : 
-->> Enter name of POT file 43 : 
-->> Enter name of POT file 44 : 
-->> Enter name of POT file 45 : 
-->> Enter name of POT file 46 : 
-->> Enter name of POT file 47 : 
-->> Enter name of POT file 48 : 
-->> Enter name of POT file 49 : 
-->> Enter name of POT file 50 : 
-->> Enter name of POT file 51 : 
-->> Enter name of POT file 52 : 
-->> Enter name of POT file 53 : 
-->> Enter name of POT file 54 : 
-->> Enter name of POT file 55 : 
-->> Enter name of POT file 56 : 
-->> Enter name of POT file 57 : 
-->> Enter name of POT file 58 : 
-->> Enter name of POT file 59 : 
-->> Enter name of POT file 60 : 
+
+->> Enter name of output file:
+->> Enter total number of DFPT POT files:
+->> Enter name of POT file 1 :
+->> Enter name of POT file 2 :
+->> Enter name of POT file 3 :
+->> Enter name of POT file 4 :
+->> Enter name of POT file 5 :
+->> Enter name of POT file 6 :
+->> Enter name of POT file 7 :
+->> Enter name of POT file 8 :
+->> Enter name of POT file 9 :
+->> Enter name of POT file 10 :
+->> Enter name of POT file 11 :
+->> Enter name of POT file 12 :
+->> Enter name of POT file 13 :
+->> Enter name of POT file 14 :
+->> Enter name of POT file 15 :
+->> Enter name of POT file 16 :
+->> Enter name of POT file 17 :
+->> Enter name of POT file 18 :
+->> Enter name of POT file 19 :
+->> Enter name of POT file 20 :
+->> Enter name of POT file 21 :
+->> Enter name of POT file 22 :
+->> Enter name of POT file 23 :
+->> Enter name of POT file 24 :
+->> Enter name of POT file 25 :
+->> Enter name of POT file 26 :
+->> Enter name of POT file 27 :
+->> Enter name of POT file 28 :
+->> Enter name of POT file 29 :
+->> Enter name of POT file 30 :
+->> Enter name of POT file 31 :
+->> Enter name of POT file 32 :
+->> Enter name of POT file 33 :
+->> Enter name of POT file 34 :
+->> Enter name of POT file 35 :
+->> Enter name of POT file 36 :
+->> Enter name of POT file 37 :
+->> Enter name of POT file 38 :
+->> Enter name of POT file 39 :
+->> Enter name of POT file 40 :
+->> Enter name of POT file 41 :
+->> Enter name of POT file 42 :
+->> Enter name of POT file 43 :
+->> Enter name of POT file 44 :
+->> Enter name of POT file 45 :
+->> Enter name of POT file 46 :
+->> Enter name of POT file 47 :
+->> Enter name of POT file 48 :
+->> Enter name of POT file 49 :
+->> Enter name of POT file 50 :
+->> Enter name of POT file 51 :
+->> Enter name of POT file 52 :
+->> Enter name of POT file 53 :
+->> Enter name of POT file 54 :
+->> Enter name of POT file 55 :
+->> Enter name of POT file 56 :
+->> Enter name of POT file 57 :
+->> Enter name of POT file 58 :
+->> Enter name of POT file 59 :
+->> Enter name of POT file 60 :
 - Reading header of file [1]: MgB2_eph4isotc/flow_mgb2_phonons/w1/t0/outdata/out_POT1.nc
 - Merging file [1]: MgB2_eph4isotc/flow_mgb2_phonons/w1/t0/outdata/out_POT1.nc
 - Reading header of file [2]: MgB2_eph4isotc/flow_mgb2_phonons/w1/t1/outdata/out_POT3.nc
@@ -201,7 +201,7 @@
 - Merging file [60]: MgB2_eph4isotc/flow_mgb2_phonons/w1/t59/outdata/out_POT6.nc
  Merged successfully 60 files
 - Analyzing DVDB file: teph4isotc_1_DVDB ...
-- dvdb_new completed. cpu:  0.01 [s] , wall:  0.01 [s] <<< TIME
+- dvdb_init , wall:  0.01 [s] , cpu:  0.00 [s] <<< TIME
  ==== Info on the dvdb% object ====
  DVDB version: 2
  File path: teph4isotc_1_DVDB

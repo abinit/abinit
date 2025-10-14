@@ -234,7 +234,6 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  type(pawfgrtab_type),allocatable :: pawfgrtab_tmp(:)
  type(pawrhoij_type),pointer :: pawrhoij_tot(:)
  type(wfk_t) :: ddkfiles(3)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -253,8 +252,6 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  my_comm_atom=mpi_enreg%comm_atom
  my_atmtab=>mpi_enreg%my_atmtab
  ndat = dtset%bandpp
-
-
 
 !Compute gmet, gprimd and ucvol from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -882,11 +879,11 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
                    cg_left(:,1:npw_k*dtset%nspinor) = cg(:,1+(jband_me-1)*npw_k*dtset%nspinor+icg:jband_me*npw_k*dtset%nspinor+icg)
                    dotprod=0
                    call dotprod_g(dotprod(1),dotprod(2),istwf_k,npw_k*dtset%nspinor,2,cg_left,gh2c,mpi_enreg%me_g0,&
-  &                 mpi_enreg%comm_spinorfft)
+                     mpi_enreg%comm_spinorfft)
                    isub = iband-efmasdeg(ikpt)%degs_bounds(1,ideg)+1
                    jsub = jband-efmasdeg(ikpt)%degs_bounds(1,ideg)+1
 
-                   ch2c_tmp(jsub)=cmplx(dotprod(1),dotprod(2),kind=dpc)
+                   ch2c_tmp(jsub)=cmplx(dotprod(1),dotprod(2),kind=dp)
                  end do ! jband
                  !mpi_sum ch2c_tmp to get all jband contribs
                  call xmpi_sum(ch2c_tmp,mpi_enreg%comm_band,ierr)

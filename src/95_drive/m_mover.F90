@@ -641,8 +641,8 @@ real(dp) :: k0(3)
 !        MAIN CALL TO SELF-CONSISTENT FIELD ROUTINE
          if (need_scfcv_cycle) then
 
-           call dtfil_init_time(dtfil,iapp)
-           itimes(1)=itime ; itimes(2)=1
+           call dtfil%init_time(iapp)
+           itimes(1)=itime; itimes(2)=1
            if(present(itimimage_gstate))then
              itimes(2)=itimimage_gstate
            endif
@@ -1031,8 +1031,7 @@ real(dp) :: k0(3)
 
  call abihist_free(hist)
 
-
-   call abihist_free(hist_prev)
+ call abihist_free(hist_prev)
  call abimover_destroy(ab_mover)
  call abiforstr_fin(preconforstr)
 

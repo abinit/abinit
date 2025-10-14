@@ -39,10 +39,8 @@ module m_abihist
  use m_abicore
  use m_errors
  use m_xmpi
- use m_nctk
-#if defined HAVE_NETCDF
  use netcdf
-#endif
+ use m_nctk
 
  use m_geometry,  only : fcart2gred, xred2xcart
 
@@ -187,11 +185,9 @@ contains  !=============================================================
 subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
 
 !Arguments ------------------------------------
+ class(abihist),intent(inout) :: hist
  integer,intent(in) :: natom,mxhist
  logical,intent(in) :: isVUsed,isARused
- type(abihist),intent(inout) :: hist
-
-
 ! ***************************************************************
 
 !Initialize indexes
@@ -202,7 +198,6 @@ subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
 !Initialize flags
  hist%isVused=isVUsed
  hist%isARused=isARUsed
-
 
 !Allocate all the histories
  ABI_MALLOC(hist%acell,(3,mxhist))
@@ -262,7 +257,6 @@ subroutine abihist_init_1D(hist,natom,mxhist,isVUsed,isARUsed)
 
 !Local variables-------------------------------
  integer :: ii
-
 ! ***************************************************************
 
  do ii=1,size(hist)
@@ -286,8 +280,7 @@ end subroutine abihist_init_1D
 subroutine abihist_free_0D(hist)
 
 !Arguments ------------------------------------
- type(abihist),intent(inout) :: hist
-
+ class(abihist),intent(inout) :: hist
 ! ***************************************************************
 
  ABI_SFREE(hist%acell)
@@ -319,11 +312,10 @@ end subroutine abihist_free_0D
 subroutine abihist_free_1D(hist)
 
 !Arguments ------------------------------------
- type(abihist),intent(inout) :: hist(:)
+ class(abihist),intent(inout) :: hist(:)
 
 !Local variables-------------------------------
  integer :: ii
-
 ! ***************************************************************
 
  do ii=1,size(hist)
@@ -346,8 +338,6 @@ end subroutine abihist_free_1D
 !!  master=ID of the sending node in comm
 !!  comm=MPI Communicator
 !!
-!! OUTPUT
-!!
 !! SIDE EFFECTS
 !!  hist <type(abihist)> = The hist to broadcast
 !!
@@ -357,8 +347,8 @@ subroutine abihist_bcast_0D(hist,master,comm)
 
 !Arguments ------------------------------------
 !scalars
+ class(abihist),intent(inout) :: hist
  integer,intent(in) :: master,comm
- type(abihist),intent(inout) :: hist
 
 !Local variables-------------------------------
 !scalars
@@ -374,7 +364,6 @@ subroutine abihist_bcast_0D(hist,master,comm)
 !arrays
  integer,allocatable :: buffer_i(:)
  real(dp),allocatable :: buffer_r(:)
-
 ! ***************************************************************
 
  ierr=0
@@ -493,8 +482,7 @@ subroutine abihist_bcast_0D(hist,master,comm)
 
  if (rank/=master) then
    indx=0
-   hist%acell(1:sizeA1,1:sizeA2)=reshape(buffer_r(indx+1:indx+sizeA), &
-&                                       (/sizeA1,sizeA2/))
+   hist%acell(1:sizeA1,1:sizeA2)=reshape(buffer_r(indx+1:indx+sizeA), (/sizeA1,sizeA2/))
    indx=indx+sizeA
    hist%etot(1:sizeEt)=buffer_r(indx+1:indx+sizeEt)
    indx=indx+sizeEt
@@ -504,23 +492,17 @@ subroutine abihist_bcast_0D(hist,master,comm)
    indx=indx+sizeEnt
    hist%time(1:sizeT)=buffer_r(indx+1:indx+sizeT)
    indx=indx+sizeT
-   hist%rprimd(1:sizeR1,1:sizeR2,1:sizeR3)=reshape(buffer_r(indx+1:indx+sizeR), &
-&                                                 (/sizeR1,sizeR2,sizeR3/))
+   hist%rprimd(1:sizeR1,1:sizeR2,1:sizeR3)=reshape(buffer_r(indx+1:indx+sizeR), (/sizeR1,sizeR2,sizeR3/))
    indx=indx+sizeR
-   hist%strten(1:sizeS1,1:sizeS2)=reshape(buffer_r(indx+1:indx+sizeS), &
-&                                        (/sizeS1,sizeS2/))
+   hist%strten(1:sizeS1,1:sizeS2)=reshape(buffer_r(indx+1:indx+sizeS), (/sizeS1,sizeS2/))
    indx=indx+sizeS
-   hist%vel(1:sizeV1,1:sizeV2,1:sizeV3)=reshape(buffer_r(indx+1:indx+sizeV), &
-&                                              (/sizeV1,sizeV2,sizeV3/))
+   hist%vel(1:sizeV1,1:sizeV2,1:sizeV3)=reshape(buffer_r(indx+1:indx+sizeV), (/sizeV1,sizeV2,sizeV3/))
    indx=indx+sizeV
-   hist%vel_cell(1:sizeVc1,1:sizeVc2,1:sizeVc3)=reshape(buffer_r(indx+1:indx+sizeVc), &
-&                                                      (/sizeVc1,sizeVc2,sizeVc3/))
+   hist%vel_cell(1:sizeVc1,1:sizeVc2,1:sizeVc3)=reshape(buffer_r(indx+1:indx+sizeVc), (/sizeVc1,sizeVc2,sizeVc3/))
    indx=indx+sizeVc
-   hist%xred(1:sizeX1,1:sizeX2,1:sizeX3)=reshape(buffer_r(indx+1:indx+sizeX), &
-&                                               (/sizeX1,sizeX2,sizeX3/))
+   hist%xred(1:sizeX1,1:sizeX2,1:sizeX3)=reshape(buffer_r(indx+1:indx+sizeX), (/sizeX1,sizeX2,sizeX3/))
    indx=indx+sizeX
-   hist%fcart(1:sizeF1,1:sizeF2,1:sizeF3)=reshape(buffer_r(indx+1:indx+sizeF), &
-&                                                (/sizeF1,sizeF2,sizeF3/))
+   hist%fcart(1:sizeF1,1:sizeF2,1:sizeF3)=reshape(buffer_r(indx+1:indx+sizeF), (/sizeF1,sizeF2,sizeF3/))
  end if
  ABI_FREE(buffer_r)
 
@@ -540,11 +522,6 @@ end subroutine abihist_bcast_0D
 !!  master=ID of the sending node in comm
 !!  comm=MPI Communicator
 !!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!  hist(:) <type(abihist)> = The hist to broadcast
-!!
 !! SOURCE
 
 subroutine abihist_bcast_1D(hist,master,comm)
@@ -556,7 +533,6 @@ subroutine abihist_bcast_1D(hist,master,comm)
 
 !Local variables-------------------------------
  integer :: ii
-
 ! ***************************************************************
 
  do ii=1,size(hist)
@@ -593,8 +569,8 @@ subroutine var2hist(acell,hist,natom,rprimd,xred,zDEBUG)
 
 !Arguments ------------------------------------
 !scalars
+ class(abihist),intent(inout) :: hist
  integer,intent(in) :: natom
- type(abihist),intent(inout) :: hist
  logical,intent(in) :: zDEBUG
 !arrays
  real(dp),intent(in) :: acell(3)
@@ -602,9 +578,7 @@ subroutine var2hist(acell,hist,natom,rprimd,xred,zDEBUG)
  real(dp),intent(in) :: xred(3,natom)
 
 !Local variables-------------------------------
-!scalars
  integer :: kk
-
 ! *************************************************************
 
  hist%xred(:,:,hist%ihist)=xred(:,:)
@@ -649,14 +623,12 @@ function abihist_findIndex(hist,step) result(index)
 
 !Arguments ------------------------------------
 !scalars
+ class(abihist),intent(in) :: hist
  integer,intent(in) :: step
  integer :: index
-!arrays
- type(abihist),intent(in) :: hist
+
 !Local variables-------------------------------
-!scalars
  integer :: ii,mxhist
-!arrays
  character(len=500) :: msg
 ! *************************************************************
 
@@ -685,7 +657,6 @@ end function abihist_findIndex
 !----------------------------------------------------------------------
 
 !!****f* m_abihist/hist2var
-!!
 !! NAME
 !! hist2var
 !!
@@ -709,7 +680,7 @@ subroutine hist2var(acell,hist,natom,rprimd,xred,zDEBUG)
 !Arguments ------------------------------------
 !scalars
 integer,intent(in) :: natom
-type(abihist),intent(in) :: hist
+class(abihist),intent(in) :: hist
 logical,intent(in) :: zDEBUG
 !arrays
 real(dp),intent(out) :: acell(3)
@@ -717,9 +688,7 @@ real(dp),intent(out) :: rprimd(3,3)
 real(dp),intent(out) :: xred(3,natom)
 
 !Local variables-------------------------------
-!scalars
 integer :: kk
-
 ! *************************************************************
 
  xred  (:,:)=hist%xred(:,:,hist%ihist)
@@ -760,8 +729,6 @@ end subroutine hist2var
 !! vel(3,natom)= Velocities of the atoms
 !! vel_cell(3,3)= Velocities of the cell
 !!
-!! OUTPUT
-!!
 !! SIDE EFFECTS
 !! hist<type abihist>=Historical record of positions, forces, stresses, cell and energies,
 !!
@@ -771,7 +738,7 @@ subroutine vel2hist(amass,hist,vel,vel_cell)
 
 !Arguments ------------------------------------
 !scalars
-type(abihist),intent(inout) :: hist
+class(abihist),intent(inout) :: hist
 !arrays
 real(dp),intent(in) :: amass(:)
 real(dp),intent(in) :: vel(:,:)
@@ -781,7 +748,6 @@ real(dp),intent(in) :: vel_cell(:,:)
 !scalars
 integer :: ii,natom
 real(dp) :: ekin
-
 ! *************************************************************
 
  natom=size(vel,2)
@@ -819,27 +785,14 @@ end subroutine vel2hist
 !! FUNCTION
 !! Copy one HIST record in another
 !!
-!! INPUTS
-!!  hist_in <type(abihist)>
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!  hist_out <type(abihist)>
-!!
 !! SOURCE
 
-subroutine abihist_copy(hist_in,hist_out)
+subroutine abihist_copy(hist_in, hist_out)
 
 !Arguments ------------------------------------
 !scalars
-type(abihist),intent(in) :: hist_in
-type(abihist),intent(inout) :: hist_out
-
-!Local variables-------------------------------
-!scalars
-! character(len=500) :: msg
-
+class(abihist),intent(in) :: hist_in
+class(abihist),intent(inout) :: hist_out
 ! ***************************************************************
 
 !Check
@@ -898,14 +851,14 @@ subroutine abihist_compare_and_copy(hist_in,hist_out,natom,similar,tolerance,sto
 integer,intent(in) :: natom
 integer,intent(out) :: similar
 real(dp),intent(in) :: tolerance
-type(abihist),intent(in) :: hist_in
-type(abihist),intent(inout) :: hist_out
+class(abihist),intent(in) :: hist_in
+class(abihist),intent(inout) :: hist_out
 logical,intent(in) :: force_copy,store_all
+
 !Local variables-------------------------------
 !scalars
 integer :: kk,jj
-real(dp) :: maxdiff,diff
-real(dp) :: x,y
+real(dp) :: maxdiff,diff, x,y
 !array
 character(len= 500) :: msg
 ! ***************************************************************
@@ -1015,20 +968,19 @@ end subroutine abihist_compare_and_copy
 !! SOURCE
 
 subroutine write_md_hist(hist,filename,ifirst,itime,natom,nctime,ntypat,&
-&                        typat,amu,znucl,dtion,mdtemp)
+                        typat,amu,znucl,dtion,mdtemp)
 
 !Arguments ------------------------------------
 !scalars
+ class(abihist),intent(inout),target :: hist
  integer,intent(in) :: ifirst,itime,natom,nctime,ntypat
  real(dp),intent(in) :: dtion
  character(len=*),intent(in) :: filename
 !arrays
  integer,intent(in) :: typat(natom)
  real(dp),intent(in) :: amu(ntypat),znucl(:),mdtemp(2)
- type(abihist),intent(inout),target :: hist
 
 !Local variables-------------------------------
-#if defined HAVE_NETCDF
 !scalars
  integer :: itime_file,ncerr,ncid,npsp
  integer :: xcart_id,xred_id,fcart_id,gred_id
@@ -1036,12 +988,7 @@ subroutine write_md_hist(hist,filename,ifirst,itime,natom,nctime,ntypat,&
  integer :: ekin_id,entropy_id,mdtime_id
  logical :: has_nimage=.false.,need_to_write
  integer, parameter :: imgmov=0
-!arrays
-#endif
-
 ! *************************************************************************
-
-#if defined HAVE_NETCDF
 
  need_to_write = .FALSE.
  if(nctime==0 .or. ifirst==1) need_to_write = .TRUE.
@@ -1102,7 +1049,6 @@ subroutine write_md_hist(hist,filename,ifirst,itime,natom,nctime,ntypat,&
    ncerr = nf90_close(ncid)
    NCF_CHECK_MSG(ncerr," close netcdf history file")
  end if
-#endif
 
 end subroutine write_md_hist
 !!***
@@ -1162,7 +1108,6 @@ subroutine write_md_hist_img(hist,filename,ifirst,itime,natom,ntypat,&
  type(abihist),intent(inout),target :: hist(:)
 
 !Local variables-------------------------------
-#if defined HAVE_NETCDF
 !scalars
  integer :: ii,iimage,iimg,me_img,my_comm_img,my_nimage,ncerr
  integer :: ncid,nimage_,nproc_img,npsp,imgmov_
@@ -1175,11 +1120,7 @@ subroutine write_md_hist_img(hist,filename,ifirst,itime,natom,ntypat,&
  type(abihist),pointer :: hist_
 !arrays
  integer,allocatable :: my_imgtab(:)
-#endif
-
 ! *************************************************************************
-
-#if defined HAVE_NETCDF
 
 !Manage multiple images of the cell
  has_nimage=present(nimage)
@@ -1250,8 +1191,6 @@ subroutine write_md_hist_img(hist,filename,ifirst,itime,natom,ntypat,&
    end if
  end do
 
-#endif
-
 end subroutine write_md_hist_img
 !!***
 
@@ -1279,13 +1218,11 @@ subroutine read_md_hist(filename,hist,isVUsed,isARUsed,readOnlyLast)
 
 !Arguments ------------------------------------
 !scalars
+ class(abihist),intent(inout),target :: hist
  logical,intent(in) :: isVUsed,isARUsed,readOnlyLast
  character(len=*),intent(in) :: filename
-!arrays
- type(abihist),intent(inout),target :: hist
 
 !Local variables-------------------------------
-#if defined HAVE_NETCDF
 !scalars
  integer :: ncerr,ncid,nimage,natom,time,start_time, ntypat
  integer :: nimage_id,natom_id,xyz_id,time_id,six_id, ntypat_id
@@ -1293,11 +1230,7 @@ subroutine read_md_hist(filename,hist,isVUsed,isARUsed,readOnlyLast)
  integer :: mdtime_id,vel_id,vel_cell_id,etotal_id
  integer :: acell_id,rprimd_id,strten_id
  logical :: has_nimage
-#endif
-
 ! *************************************************************************
-
-#if defined HAVE_NETCDF
 
  hist%ihist=0 ; hist%mxhist=0
 
@@ -1339,8 +1272,6 @@ subroutine read_md_hist(filename,hist,isVUsed,isARUsed,readOnlyLast)
  ncerr = nf90_close(ncid)
  NCF_CHECK_MSG(ncerr," close netcdf history file")
 
-#endif
-
 end subroutine read_md_hist
 !!***
 
@@ -1379,7 +1310,6 @@ subroutine read_md_hist_img(filename,hist,isVUsed,isARused,imgtab)
  type(abihist),intent(inout),target :: hist(:)
 
 !Local variables-------------------------------
-#if defined HAVE_NETCDF
 !scalars
  integer :: iimage,iimg,my_nimage,ncerr,ncid,nimage,natom,time
  integer :: nimage_id,natom_id,xyz_id,time_id,six_id, ntypat, ntypat_id
@@ -1390,11 +1320,7 @@ subroutine read_md_hist_img(filename,hist,isVUsed,isARused,imgtab)
  !character(len=500) :: msg
  type(abihist),pointer :: hist_
  integer,allocatable :: my_imgtab(:)
-#endif
-
 ! *************************************************************************
-
-#if defined HAVE_NETCDF
 
  hist%ihist=0 ; hist%mxhist=0
 
@@ -1454,15 +1380,12 @@ subroutine read_md_hist_img(filename,hist,isVUsed,isARused,imgtab)
 
  ABI_FREE(my_imgtab)
 
-#endif
-
 end subroutine read_md_hist_img
 !!***
 
 !----------------------------------------------------------------------
 
 !!****f* m_abihist/def_file_hist
-!!
 !! NAME
 !! def_file_hist
 !!
@@ -1483,7 +1406,6 @@ subroutine def_file_hist(ncid,natom,nimage,ntypat,npsp,has_nimage)
  logical,intent(in) :: has_nimage
 
 !Local variables-------------------------------
-#if defined HAVE_NETCDF
 !scalars
  integer :: ncerr
  integer :: natom_id,nimage_id,ntypat_id,npsp_id,time_id,xyz_id,six_id
@@ -1494,14 +1416,9 @@ subroutine def_file_hist(ncid,natom,nimage,ntypat,npsp,has_nimage)
  !character(len=500) :: msg
 !arrays
  integer :: dim0(0),dim1(1),dim2(2),dim3(3),dim4(4)
-#endif
-
 ! *************************************************************************
 
-#if defined HAVE_NETCDF
-
 !1.Define the dimensions
-
  if (npsp/=ntypat) then
    ABI_WARNING('HIST file does not support alchemical mixing!')
  end if
@@ -1654,15 +1571,12 @@ subroutine def_file_hist(ncid,natom,nimage,ntypat,npsp,has_nimage)
  ncerr = nf90_enddef(ncid)
  NCF_CHECK_MSG(ncerr," end define mode")
 
-#endif
-
 end subroutine def_file_hist
 !!***
 
 !----------------------------------------------------------------------
 
 !!****f* m_abihist/get_dims_hist
-!!
 !! NAME
 !! get_dims_hist
 !!
@@ -1675,7 +1589,7 @@ end subroutine def_file_hist
 !! SOURCE
 
 subroutine get_dims_hist(ncid,natom,ntypat,nimage,time,&
-&          natom_id,ntypat_id,nimage_id,time_id,xyz_id,six_id,has_nimage)
+                         natom_id,ntypat_id,nimage_id,time_id,xyz_id,six_id,has_nimage)
 
 !Arguments ------------------------------------
 !scalars
@@ -1685,15 +1599,10 @@ subroutine get_dims_hist(ncid,natom,ntypat,nimage,time,&
  logical,intent(out) :: has_nimage
 
 !Local variables-------------------------------
-#if defined HAVE_NETCDF
-!scalars
  integer :: ncerr
  character(len=5) :: char_tmp
-#endif
-
 ! *************************************************************************
 
-#if defined HAVE_NETCDF
 !Inquire dimensions IDs
 
  ncerr = nf90_inq_dimid(ncid,"natom",natom_id)
@@ -1731,15 +1640,12 @@ subroutine get_dims_hist(ncid,natom,ntypat,nimage,time,&
  ncerr = nf90_inquire_dimension(ncid,time_id,char_tmp,time)
  NCF_CHECK_MSG(ncerr," inquire dimension time")
 
-#endif
-
 end subroutine get_dims_hist
 !!***
 
 !----------------------------------------------------------------------
 
 !!****f* m_abihist/get_varid_hist
-!!
 !! NAME
 !! get_varid_hist
 !!
@@ -1761,15 +1667,10 @@ subroutine get_varid_hist(ncid,xcart_id,xred_id,fcart_id,gred_id,vel_id,vel_cell
  integer,intent(out) :: vel_cell_id,rprimd_id,acell_id,strten_id
  integer,intent(out) :: etotal_id,ekin_id,entropy_id,mdtime_id
  logical,intent(in)  :: has_nimage
+
 !Local variables-------------------------------
-#if defined HAVE_NETCDF
-!scalars
  integer :: ncerr
-#endif
-
 ! *************************************************************************
-
-#if defined HAVE_NETCDF
 
  ncerr = nf90_inq_varid(ncid, "mdtime", mdtime_id)
  NCF_CHECK_MSG(ncerr," get the id for mdtime")
@@ -1812,8 +1713,6 @@ subroutine get_varid_hist(ncid,xcart_id,xred_id,fcart_id,gred_id,vel_id,vel_cell
  ncerr = nf90_inq_varid(ncid, "entropy", entropy_id)
  NCF_CHECK_MSG(ncerr," get the id for entropy")
 
-#endif
-
 end subroutine get_varid_hist
 !!***
 
@@ -1843,15 +1742,8 @@ subroutine read_csts_hist(ncid,dtion,typat,znucl,amu)
  real(dp),intent(out) :: amu(:),znucl(:)
 
 !Local variables-------------------------------
-#if defined HAVE_NETCDF
-!scalars
- integer :: ncerr
- integer :: typat_id,znucl_id,amu_id,dtion_id
-#endif
-
+ integer :: ncerr, typat_id,znucl_id,amu_id,dtion_id
 ! *************************************************************************
-
-#if defined HAVE_NETCDF
 
 !1.Get the IDs
  ncerr = nf90_inq_varid(ncid, "typat", typat_id)
@@ -1878,8 +1770,6 @@ subroutine read_csts_hist(ncid,dtion,typat,znucl,amu)
 
  ncerr = nf90_get_var(ncid, dtion_id, dtion)
  NCF_CHECK_MSG(ncerr," get variable dtion")
-
-#endif
 
 end subroutine read_csts_hist
 !!***
@@ -1911,15 +1801,10 @@ subroutine write_csts_hist(ncid,dtion,imgmov,typat,znucl,amu,mdtemp,ndof)
  real(dp),intent(in) :: amu(:),znucl(:), mdtemp(2)
 
 !Local variables-------------------------------
-#if defined HAVE_NETCDF
 !scalars
  integer :: ncerr
  integer :: typat_id,znucl_id,amu_id,dtion_id, imgmov_id, mdtemp_id, ndof_id
-#endif
-
 ! *************************************************************************
-
-#if defined HAVE_NETCDF
 
 !1.Get the IDs
 
@@ -1965,8 +1850,6 @@ subroutine write_csts_hist(ncid,dtion,imgmov,typat,znucl,amu,mdtemp,ndof)
  ncerr = nf90_put_var(ncid, dtion_id, dtion)
  NCF_CHECK_MSG(ncerr," write variable dtion")
 
-#endif
-
 end subroutine write_csts_hist
 !!***
 
@@ -1999,7 +1882,6 @@ subroutine write_vars_hist(ncid,hist,natom,has_nimage,iimg,itime,&
  type(abihist),intent(inout),target :: hist
 
 !Local variables-------------------------------
-#if defined HAVE_NETCDF
 !scalars
  integer :: ncerr
 !arrays
@@ -2007,11 +1889,7 @@ subroutine write_vars_hist(ncid,hist,natom,has_nimage,iimg,itime,&
  integer :: start1(1),start2(2),start3(3),start4(4)
  real(dp),allocatable :: conv(:,:)
  real(dp),pointer :: xred(:,:),fcart(:,:),rprimd(:,:),vel(:,:),vel_cell(:,:)
-#endif
-
 ! *************************************************************************
-
-#if defined HAVE_NETCDF
 
  xred     => hist%xred(:,:,hist%ihist)
  fcart    => hist%fcart(:,:,hist%ihist)
@@ -2127,8 +2005,6 @@ subroutine write_vars_hist(ncid,hist,natom,has_nimage,iimg,itime,&
    NCF_CHECK_MSG(ncerr," write variable entropy")
  end if
 
-#endif
-
 end subroutine write_vars_hist
 !!***
 
@@ -2162,17 +2038,12 @@ subroutine read_vars_hist(ncid,hist,natom,time,has_nimage,iimg,start_time,&
  type(abihist),intent(inout),target :: hist
 
 !Local variables-------------------------------
-#if defined HAVE_NETCDF
 !scalars
  integer :: ncerr
 !arrays
  integer :: count1(1),count2(2),count3(3),count4(4)
  integer :: start1(1),start2(2),start3(3),start4(4)
-#endif
-
 ! *************************************************************************
-
-#if defined HAVE_NETCDF
 
 !Variables not depending on imes
 
@@ -2255,8 +2126,6 @@ subroutine read_vars_hist(ncid,hist,natom,time,has_nimage,iimg,start_time,&
    ncerr = nf90_get_var(ncid,entropy_id,hist%entropy(:),count=count1,start=start1)
    NCF_CHECK_MSG(ncerr," read variable entropy")
  end if
-
-#endif
 
 end subroutine read_vars_hist
 !!***

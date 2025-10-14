@@ -63,7 +63,7 @@ module m_dfpt_cgwf
 !! stern_t
 !!
 !! FUNCTION
-!!  Simplied interface to the Sternheimer solver.
+!!  Simplified interface to the Sternheimer solver.
 !!  Wrapper around the dfpt_cgwf routine.
 !!
 !! SOURCE
@@ -197,7 +197,7 @@ contains
 !!            1: used as an input: - used only for ipert=natom+2
 !!                 NCPP: contains the ddk 1-st order WF
 !!                 PAW: contains frozen part of 1st-order hamiltonian
-!!            2: used as input/ouput: - used only for PAW and ipert=natom+2
+!!            2: used as input/output: - used only for PAW and ipert=natom+2
 !!                 At input: contains the ddk 1-st order WF (times i)
 !!                 At output: contains frozen part of 1st-order hamiltonian
 !!  prtvol=control print volume and debugging output
@@ -302,7 +302,6 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
  real(dp),pointer :: kinpw1(:)
  type(pawcprj_type),allocatable :: conjgrprj(:,:)
  type(pawcprj_type) :: cprj_dummy(1,1)
-
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -311,9 +310,9 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
 
  call timab(122,1,tsec)
 
- !======================================================================
- !========= LOCAL VARIABLES DEFINITIONS AND ALLOCATIONS ================
- !====================================================================
+ !==================================================================
+ !========= LOCAL VARIABLES DEFINITIONS AND ALLOCATIONS ============
+ !==================================================================
 
  u1_band = abs(u1_band_)
 
@@ -566,7 +565,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
      ABI_MALLOC(gvnlx1_saved,(2,npw1*nspinor))
      gvnlx1_saved(:,:) = gvnlx1(:,:)
    end if
-   call getgh1c(berryopt,cwave0,cwaveprj0,gh1c,gberry,gs1c,gs_hamkq,gvnlx1,idir,ipert,(/eshift/),&
+   call getgh1c(berryopt,cwave0,cwaveprj0,gh1c,gberry,gs1c,gs_hamkq,gvnlx1,idir,ipert,[eshift],&
      mpi_enreg,1,optlocal,optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
 
    if (gen_eigenpb) then
@@ -1129,7 +1128,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
    dedt=-two*two*dedt
 
    if((prtvol==-level.or.prtvol==-19.or.prtvol==-20).and.dedt-tol14>0) then
-     call wrtout(std_out,' DFPT_CGWF WARNING: dedt > 0')
+     call wrtout(std_out, ' DFPT_CGWF WARNING: dedt > 0')
    end if
    ABI_MALLOC(gvnlx_direc,(2,npw1*nspinor))
    ABI_MALLOC(gh_direc,(2,npw1*nspinor))
@@ -1202,7 +1201,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
      !write(std_out,*)' dfpt_cgwf: dedt,d2edt2=',dedt,d2edt2
 
    else
-     if (u1_band_ > 0) call wrtout(std_out, "DFPT_CGWF WARNING: d2edt2 is zero, skipping update")
+     if (u1_band_ > 0) call wrtout(std_out, " DFPT_CGWF WARNING: d2edt2 is zero, skipping update")
      theta=zero
    end if
 
@@ -1634,7 +1633,6 @@ subroutine full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_band
  real(dp) :: facti,factr,eta,delta_E,inv_delta_E,gkkr
 !arrays
  real(dp) :: tsec(2)
-
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -1748,9 +1746,9 @@ subroutine stern_init(stern, dtset, npw_k, npw_kq, nspinor, nband, nband_me, fer
  type(mpi_type),intent(in) :: mpi_enreg
 
 !Local variables ------------------------------
-!scalars
  integer :: natom, usepaw
 ! *************************************************************************
+
  natom = dtset%natom; usepaw = dtset%usepaw
 
  stern%npw_k = npw_k; stern%npw_kq = npw_kq; stern%nspinor = nspinor; stern%nband = nband; stern%dtset => dtset
@@ -1830,7 +1828,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  integer,intent(out) :: ierr
  character(len=*),intent(out) :: err_msg
  real(dp),optional,target,intent(out) :: full_cg1(2, stern%npw_kq*stern%nspinor)
- complex(gwpc),optional,intent(out) :: full_ur1(gs_hamkq%nfft*stern%nspinor)
+ complex(gwp),optional,intent(out) :: full_ur1(gs_hamkq%nfft*stern%nspinor)
 
 !Local variables ------------------------------
 !scalars
@@ -1840,10 +1838,10 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  type(rf2_t) :: rf2
 !arrays
  real(dp),allocatable :: grad_berry(:,:)
- complex(gwpc),allocatable :: cwork_sp(:)
+ complex(gwp),allocatable :: cwork_sp(:)
  logical :: cycle_bands(stern%nband)
 #ifdef HAVE_GW_DPC
- complex(gwpc),pointer :: full_ug1_dp_ptr(:)
+ complex(gwp),pointer :: full_ug1_dp_ptr(:)
 #endif
 ! *************************************************************************
 

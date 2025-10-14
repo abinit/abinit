@@ -113,7 +113,7 @@ subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsi
  integer :: hsize,xsf_unt,ncells,nvec
  integer :: sc_natom,master
  real(dp) :: ene_rt,k_dot_r12
- complex(dpc) :: res_coeff,antres_coeff,eikr12
+ complex(dp) :: res_coeff,antres_coeff,eikr12
  character(len=500) :: msg
  character(len=fnlen) :: eig_fname,out_fname
 !arrays
@@ -123,14 +123,13 @@ subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsi
  real(dp),parameter :: origin0(3)=(/zero,zero,zero/)
  real(dp) :: k_bz(3),eh_red(3),eh_shift(3),r12(3),sc_rprimd(3,3),scart_shift(3)
  real(dp),allocatable :: rclred(:,:),exc_phi2(:),sc_xcart(:,:) !,sc_znucl(:)
- complex(gwpc),allocatable :: exc_phi(:)
- complex(gwpc),allocatable :: ur_v(:),ur_c(:)
- complex(dpc),allocatable :: vec_list(:,:)
+ complex(gwp),allocatable :: exc_phi(:)
+ complex(gwp),allocatable :: ur_v(:),ur_c(:)
+ complex(dp),allocatable :: vec_list(:,:)
  !logical :: bbp_mask(Wfd%mband,Wfd%mband)
  type(pawcprj_type),allocatable :: Cp_v(:,:),Cp_c(:,:)
  type(Pawfgrtab_type),allocatable :: Pawfgrtab(:)
  type(paw_pwaves_lmn_t),allocatable :: Paw_onsite(:)
-
 !************************************************************************
 
  ABI_WARNING("Exc plot is still under development")
@@ -410,10 +409,9 @@ subroutine exc_den(BSp,BS_files,ngfft,nfftot,Kmesh,ktabr,Wfd)
 !arrays
  real(dp) :: n0(nfftot),rho_eh(nfftot),nexc(nfftot)
  real(dp),allocatable :: exc_ene(:)
- complex(dpc) :: rhor_h(nfftot),rhor_e(nfftot)
- complex(gwpc),allocatable :: wfr(:,:,:), wfrk(:,:)
- complex(dpc),allocatable :: exc_ene_cplx(:),exc_vec(:)
-
+ complex(dp) :: rhor_h(nfftot),rhor_e(nfftot)
+ complex(gwp),allocatable :: wfr(:,:,:), wfrk(:,:)
+ complex(dp),allocatable :: exc_ene_cplx(:),exc_vec(:)
 !************************************************************************
 
  ABI_CHECK(Wfd%nsppol==1,"nsppol==2 not coded")

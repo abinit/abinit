@@ -255,6 +255,7 @@ CONTAINS  !=====================================================================
 !1- Opening of OPT file and header writing
 !----------------------------------------------------------------------------------
 
+ iomode=dtset%iomode
  if (iomode /= NO_FILE_OUT) then
 !  I/O mode is netCDF or Fortran
    iomode=merge(IO_MODE_ETSF,IO_MODE_FORTRAN_MASTER,dtset%iomode==IO_MODE_ETSF)
@@ -731,7 +732,6 @@ CONTAINS  !=====================================================================
          if (.not.iomode_etsf_mpiio) then
            if (i_am_master) then
              if (iomode==IO_MODE_ETSF) then
-#ifdef HAVE_NETCDF
                if (nc_unlimited) then
                  nc_start_6=[1,1,1,ikpt,isppol,1] ; nc_count_6=[2,3,mband,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1]
                  NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
@@ -742,7 +742,6 @@ CONTAINS  !=====================================================================
                  nc_start_5=[1,1,1,ikpt,isppol] ; nc_count_5=[2,3,(mband*(mband+1))/2,1,1] ; nc_stride_5=[1,1,1,1,1]
                  NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_5,stride=nc_stride_5,count=nc_count_5))
                end if
-#endif
              else
                bsize=nband_k**2;if (store_half_dipoles) bsize=(nband_k*(nband_k+1))/2
                write(ount)(psinablapsi(1:2,1,ib),ib=1,bsize)
@@ -1600,14 +1599,13 @@ end if
  real(dp) :: e2rot(3,3),gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),rprimdinv(3,3),symd(3,3),symdinv(3,3)
  real(dp),allocatable :: e1(:,:,:),e2(:,:,:,:),epsilon_tot(:,:,:,:),eigen0(:),eig0_k(:)
  real(dp),allocatable :: kpts(:,:),occ(:),occ_k(:),oml1(:),wtk(:)
- complex(dpc),allocatable :: eps_work(:)
+ complex(dp),allocatable :: eps_work(:)
  character(len=fnlen) :: filnam1,filnam_gen
  character(len=500) :: msg
  type(hdr_type) :: hdr
  type(wffile_type) :: wff1
 !arrays
  real(dp),allocatable :: psinablapsi(:,:,:,:)
-
 ! *********************************************************************************
 
  DBG_ENTER("COLL")
@@ -1780,7 +1778,7 @@ end if
  only_check=0 ! compute real part of eps in kk routine
  do ii = 1, 3
    do jj = 1, 3
-     eps_work(:) = cmplx(0.0,epsilon_tot(2,ii,jj,:), kind=dpc)
+     eps_work(:) = cmplx(0.0,epsilon_tot(2,ii,jj,:), kind=dp)
      call kramerskronig(mom,oml1,eps_work,method,only_check)
      epsilon_tot(1,ii,jj,:) = real(eps_work(:))
      if (ii /= jj) epsilon_tot(1,ii,jj,:) = epsilon_tot(1,ii,jj,:)- 1.0

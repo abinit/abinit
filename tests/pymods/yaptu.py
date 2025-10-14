@@ -1,5 +1,4 @@
 """Yet Another Python Templating Utility, Version 1.2. Taken from http://code.activestate.com/recipes/52305/"""
-from __future__ import print_function, division, absolute_import #, unicode_literals
 
 import sys
 

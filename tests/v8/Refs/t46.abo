@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ANADDB, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.1.4.3 of ANADDB, released Jul 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,9 +14,9 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h14 )
-
+.Starting date : Wed 20 Aug 2025.
+- ( at 00h01 )
+  
 
 ================================================================================
 
@@ -28,8 +28,8 @@
          asr         2
  Interatomic Force Constants Inputs :
       dipdip         1
-      dipqua         1
-      quadqu         1
+     dipquad         0
+    quadquad         0
      nsphere        -1
       ifcana         0
       ifcout         0
@@ -65,11 +65,11 @@
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges
+ Dielectric Tensor and Effective Charges 
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges
+   and impose the ASR on the effective charges 
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -85,7 +85,7 @@
        3               2        0.000000        0.000000
        3               3        0.001180        0.000000
 
- Effective charge tensors after
+ Effective charge tensors after 
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -111,9 +111,8 @@
 
 ================================================================================
 
- Calculation of the interatomic forces
+ Calculation of the interatomic forces 
 
--begin at tcpu      0.240  and twall      0.240 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :      539
  greater than 80, so only write 20 of them
@@ -164,10 +163,10 @@
 -   1586    6.0651E-02           0    0.0000E+00     4.4187E+01
 -   1587    6.0031E-02           0    0.0000E+00     4.4187E+01
 -
-- Proc.   0 individual time (sec): cpu=         58.7  wall=         58.7
+- Proc.   0 individual time (sec): cpu=         59.0  wall=         59.0
 
 ================================================================================
 
-+Total cpu time     58.716  and wall time     58.725 sec
++Total cpu time     59.042  and wall time     59.048 sec
 
  anaddb : the run completed successfully.

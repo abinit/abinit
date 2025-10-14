@@ -1,8 +1,8 @@
 
 .Version 10.1.6.1 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a aarch64_darwin23.6.0_gnu14.2 computer) 
+.(MPI version, prepared for a aarch64_darwin23.6.0_gnu14.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Sat 28 Sep 2024.
 - ( at 13h48 )
-  
+
 - input  file    -> /Users/giantomassi/git_repos/abinit/_build/tests/Test_suite/tutorespfn_teph4zpr_1-teph4zpr_2-teph4zpr_3-teph4zpr_4-teph4zpr_5-teph4zpr_6-teph4zpr_7-teph4zpr_8-teph4zpr_9/teph4zpr_9.abi
 - output file    -> teph4zpr_9.abo
 - root for input  files -> teph4zpr_9i
@@ -30,12 +30,12 @@
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       2
     occopt =       1   xclevel =       2
--    mband =          20        mffmem =           1         mkmem =          72
+-    mband =          18        mffmem =           1         mkmem =          72
        mpw =        1304          nfft =       32768          nkpt =          72
 ================================================================================
-P This job should need less than                      41.415 Mbytes of memory.
+P This job should need less than                      38.525 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :     28.654 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
+_ WF disk file :     25.789 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
 
  DATASET    2 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
@@ -46,12 +46,12 @@ _ WF disk file :     28.654 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       2
     occopt =       1   xclevel =       2
--    mband =          20        mffmem =           1         mkmem =          72
+-    mband =          18        mffmem =           1         mkmem =          72
        mpw =        1304          nfft =       32768          nkpt =          72
 ================================================================================
-P This job should need less than                      41.415 Mbytes of memory.
+P This job should need less than                      45.380 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :     28.654 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
+_ WF disk file :     25.789 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -138,7 +138,7 @@ _ WF disk file :     28.654 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
           kptrlen      6.81917288E+01
 P           mkmem          72
             natom           2
-            nband          20
+            nband          18
            nbdbuf           8
            ndtset           2
            ndivsm1          0
@@ -151,7 +151,6 @@ P           mkmem          72
               occ      2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        2.000000  2.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000
         optdriver           7
         ph_ndivsm1          5
         ph_ndivsm2         20
@@ -187,7 +186,7 @@ P           mkmem          72
                        1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
                        0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
                       -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
-           tolwfr      1.00000000E-20
+           tolwfr      1.00000000E-22
             typat      2  1
            useylm1          0
            useylm2          1
@@ -222,7 +221,7 @@ P           mkmem          72
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
-dimensions: {natom: 2, nkpt: 72, mband: 20, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1304, }
+dimensions: {natom: 2, nkpt: 72, mband: 18, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1304, }
 cutoff_energies: {ecut:  35.0, pawecutdg:  -1.0, }
 electrons: {nelect:   1.60000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 7, eph_task: 18, }
@@ -264,11 +263,11 @@ meta: {optdriver: 7, eph_task: 18, }
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -284,7 +283,7 @@ meta: {optdriver: 7, eph_task: 18, }
        3               2       -0.000000        0.000000
        3               3       -0.085945        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -409,7 +408,7 @@ meta: {optdriver: 7, eph_task: 18, }
 27 [ 3.7500E-01,  3.7500E-01,  7.5000E-01]
 42 [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
-Computing g with eph_path_brange: [6, 8]
+ Computing g(k,q) with eph_path_brange: [6, 8]
 P Cartesian grid for spin 1: (pert_comm%nproc, qpt_comm%nproc, kpt_comm%nproc) = 1 1 1
  Reading KS GS potential from: MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc
  Cannot find all q-points in the DVDB --> Activating Fourier interpolation.
@@ -427,7 +426,8 @@ Phonon frequencies in meV along reduced direction: [ 2.5000E-02,  2.5000E-02,  5
  4    4.548501E+01
  5    4.548501E+01
  6    8.381291E+01
-Computation of g(k,q) completed. All NSCF runs converged within tolwfr 1.000000E-20
+
+Computation of g(k,q) completed. All NSCF runs converged within tolwfr: 1.000000E-22
 kpoints:
 	 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 qpoints:
@@ -476,10 +476,16 @@ qpoints:
  Energies_kq in eV for spin: 1
  ene:   -6.803079E+01   -3.475922E+01   -3.475922E+01   -3.475922E+01   -1.256368E+01    4.489774E+00    4.489774E+00    4.489775E+00
  ene:    8.968733E+00    2.026551E+01    2.026551E+01    2.026551E+01    2.396501E+01    2.594326E+01    2.594326E+01    2.827164E+01
- ene:    2.827164E+01    2.827164E+01    4.210632E+01    4.211650E+01
+ ene:    2.827164E+01    2.827164E+01
+ ene:   -6.803067E+01   -3.476177E+01   -3.476050E+01   -3.476050E+01   -1.254580E+01    4.382741E+00    4.470150E+00    4.470151E+00
+ ene:    9.090957E+00    1.995954E+01    2.030498E+01    2.030498E+01    2.435534E+01    2.551227E+01    2.598207E+01    2.833179E+01
+ ene:    2.833179E+01    2.865491E+01
+ ene:   -6.803067E+01   -3.476210E+01   -3.476063E+01   -3.476002E+01   -1.254616E+01    4.372890E+00    4.470340E+00    4.482917E+00
+ ene:    9.088146E+00    1.996546E+01    2.030323E+01    2.030656E+01    2.434375E+01    2.563232E+01    2.585284E+01    2.833155E+01
+ ene:    2.836285E+01    2.863335E+01
  ene:   -6.803079E+01   -3.475922E+01   -3.475922E+01   -3.475922E+01   -1.256368E+01    4.489774E+00    4.489774E+00    4.489775E+00
  ene:    8.968733E+00    2.026551E+01    2.026551E+01    2.026551E+01    2.396501E+01    2.594326E+01    2.594326E+01    2.827164E+01
- ene:    2.827164E+01    2.827164E+01    4.210632E+01    4.211650E+01
+ ene:    2.827164E+01    2.827164E+01
 
 
  Writing sqrt(1/N_b^2 \sum_{mn} |g_{mn,nu}(k, q)|^2) in meV for testing purpose.
@@ -487,15 +493,27 @@ qpoints:
      1     1     1     1     0.000000E+00
      2     1     1     1     0.000000E+00
      3     1     1     1     0.000000E+00
-     4     1     1     1     1.137653E-04
-     5     1     1     1     1.975894E-04
-     6     1     1     1     2.293568E-05
+     4     1     1     1     1.137702E-04
+     5     1     1     1     1.975926E-04
+     6     1     1     1     2.293486E-05
+     1     2     1     1     1.870484E+01
+     2     2     1     1     1.870414E+01
+     3     2     1     1     2.595196E+01
+     4     2     1     1     4.233516E+00
+     5     2     1     1     4.233404E+00
+     6     2     1     1     1.560232E+03
+     1    41     1     1     7.288324E+00
+     2    41     1     1     1.876691E+01
+     3    41     1     1     2.528631E+01
+     4    41     1     1     4.198038E+00
+     5    41     1     1     4.261698E+00
+     6    41     1     1     1.575121E+03
      1    42     1     1     0.000000E+00
      2    42     1     1     0.000000E+00
      3    42     1     1     0.000000E+00
-     4    42     1     1     1.137653E-04
-     5    42     1     1     1.975894E-04
-     6    42     1     1     2.293568E-05
+     4    42     1     1     1.137702E-04
+     5    42     1     1     1.975926E-04
+     6    42     1     1     2.293486E-05
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -504,7 +522,7 @@ qpoints:
 
 --- !DatasetInfo
 iteration_state: {dtset: 2, }
-dimensions: {natom: 2, nkpt: 72, mband: 20, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1304, }
+dimensions: {natom: 2, nkpt: 72, mband: 18, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1304, }
 cutoff_energies: {ecut:  35.0, pawecutdg:  -1.0, }
 electrons: {nelect:   1.60000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 7, eph_task: 18, }
@@ -546,11 +564,11 @@ meta: {optdriver: 7, eph_task: 18, }
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -566,7 +584,7 @@ meta: {optdriver: 7, eph_task: 18, }
        3               2       -0.000000        0.000000
        3               3       -0.085945        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -682,14 +700,20 @@ meta: {optdriver: 7, eph_task: 18, }
 --------------------------------------------------------------------------------
 
 ==== k-point path for g(k,q) with fixed q: [ 1.1000E-01,  0.0000E+00,  0.0000E+00] ====
- Number of points: 0 , ndivsmall: 0
+ Number of points: 42 , ndivsmall: 5
  Boundaries and corresponding index in the k-points array:
+1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+15 [ 5.0000E-01,  0.0000E+00,  5.0000E-01]
+22 [ 5.0000E-01,  2.5000E-01,  7.5000E-01]
+27 [ 3.7500E-01,  3.7500E-01,  7.5000E-01]
+42 [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
-Computing g with eph_path_brange: [6, 8]
+ Computing g(k,q) with eph_path_brange: [6, 8]
 P Cartesian grid for spin 1: (pert_comm%nproc, qpt_comm%nproc, kpt_comm%nproc) = 1 1 1
  Reading KS GS potential from: MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc
  Cannot find all q-points in the DVDB --> Activating Fourier interpolation.
-Computation of g(k,q) completed. All NSCF runs converged within tolwfr 1.000000E-20
+
+Computation of g(k,q) completed. All NSCF runs converged within tolwfr: 1.000000E-22
 kpoints:
 	 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 	 2 [ 3.5714E-02,  0.0000E+00,  3.5714E-02]
@@ -738,10 +762,16 @@ qpoints:
  Energies_k in eV for spin: 1
  ene:   -6.803079E+01   -3.475922E+01   -3.475922E+01   -3.475922E+01   -1.256368E+01    4.489774E+00    4.489774E+00    4.489775E+00
  ene:    8.968733E+00    2.026551E+01    2.026551E+01    2.026551E+01    2.396501E+01    2.594326E+01    2.594326E+01    2.827164E+01
- ene:    2.827164E+01    2.827164E+01    4.210632E+01    4.212325E+01
+ ene:    2.827164E+01    2.827164E+01
+ ene:   -6.803067E+01   -3.476177E+01   -3.476050E+01   -3.476050E+01   -1.254580E+01    4.382741E+00    4.470150E+00    4.470151E+00
+ ene:    9.090957E+00    1.995954E+01    2.030498E+01    2.030498E+01    2.435534E+01    2.551227E+01    2.598207E+01    2.833179E+01
+ ene:    2.833179E+01    2.865491E+01
+ ene:   -6.803067E+01   -3.476210E+01   -3.476063E+01   -3.476002E+01   -1.254616E+01    4.372890E+00    4.470340E+00    4.482917E+00
+ ene:    9.088146E+00    1.996546E+01    2.030323E+01    2.030656E+01    2.434375E+01    2.563232E+01    2.585284E+01    2.833155E+01
+ ene:    2.836285E+01    2.863335E+01
  ene:   -6.803079E+01   -3.475922E+01   -3.475922E+01   -3.475922E+01   -1.256368E+01    4.489774E+00    4.489774E+00    4.489775E+00
  ene:    8.968733E+00    2.026551E+01    2.026551E+01    2.026551E+01    2.396501E+01    2.594326E+01    2.594326E+01    2.827164E+01
- ene:    2.827164E+01    2.827164E+01    4.210632E+01    4.210773E+01
+ ene:    2.827164E+01    2.827164E+01
 
 
  Writing sqrt(1/N_b^2 \sum_{mn} |g_{mn,nu}(k, q)|^2) in meV for testing purpose.
@@ -752,6 +782,18 @@ qpoints:
      4     1     1     1     1.140998E+01
      5     1     1     1     1.140998E+01
      6     1     1     1     5.872131E+02
+     1     1     2     1     2.102634E+01
+     2     1     2     1     2.056379E+01
+     3     1     2     1     4.340518E+01
+     4     1     2     1     1.571271E+01
+     5     1     2     1     1.697490E+01
+     6     1     2     1     5.884793E+02
+     1     1    41     1     2.060105E+01
+     2     1    41     1     2.044619E+01
+     3     1    41     1     4.234146E+01
+     4     1    41     1     1.198568E+01
+     5     1    41     1     1.326860E+01
+     6     1    41     1     5.874623E+02
      1     1    42     1     2.052242E+01
      2     1    42     1     2.052179E+01
      3     1    42     1     4.203240E+01
@@ -761,7 +803,7 @@ qpoints:
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      1.59994000E+01  2.43050000E+01
@@ -785,7 +827,7 @@ qpoints:
           kptrlen      6.81917288E+01
 P           mkmem          72
             natom           2
-            nband          20
+            nband          18
            nbdbuf           8
            ndtset           2
            ndivsm1          0
@@ -798,7 +840,6 @@ P           mkmem          72
               occ      2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        2.000000  2.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000
         optdriver           7
         ph_ndivsm1          5
         ph_ndivsm2         20
@@ -838,7 +879,7 @@ P           mkmem          72
                        1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
                        0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
                       -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
-           tolwfr      1.00000000E-20
+           tolwfr      1.00000000E-22
             typat      2  1
            useylm1          0
            useylm2          1
@@ -884,7 +925,7 @@ P           mkmem          72
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -901,12 +942,12 @@ P           mkmem          72
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -924,7 +965,7 @@ P           mkmem          72
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -939,7 +980,7 @@ P           mkmem          72
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

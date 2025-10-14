@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -61,7 +57,7 @@ contains
   ! Write amn file
   subroutine write_Amn(A_matrix, fname, nsppol, mband, nkpt, num_bands, nwan, band_in)
     ! TODO use the A_matrix sizes instead of the nsppol, mband, nkpt, nwan
-    complex(dpc),pointer :: A_matrix(:,:,:,:)
+    complex(dp),pointer :: A_matrix(:,:,:,:)
     !type(dataset_type),intent(in) :: dtset
     logical, intent(in) :: band_in(:, :)
     integer, intent(in) :: nsppol, num_bands(nsppol), nwan(nsppol), mband, nkpt
@@ -199,7 +195,6 @@ contains
     integer :: n1tmp, n2tmp, n3tmp, jj1, jj2, jj3, ipw, ispinor
     character(len=1000) :: msg
 
-    ABI_UNUSED(nspinor)
     if(usepaw==1) then
        write(msg, '( a,a,a,a,a,a,a,a,a)')ch10,&
             &     "   WARNING: The UNK matrices will not contain the correct wavefunctions ",ch10,&
@@ -245,9 +240,13 @@ contains
           ABI_MALLOC(fofgout,(2,npw_k))
 
           !iun_plot=1000+ikpt+ikpt*(isppol-1)
-          write(wfnname,'("UNK",I5.5,".",I1)') ikpt, isppol
+          if (nspinor == 1) then
+            write(wfnname,'("UNK",I5.5,".",I1)') ikpt, isppol
+          else if (nspinor == 2) then
+            write(wfnname,'("UNK",I5.5,".NC")') ikpt
+          end if
           if (open_file(trim(wfnname), msg, newunit=iun_plot, &
-                       form="unformatted", status="unknown", action="write") /= 0) then
+                  form="unformatted", status="unknown", action="write") /= 0) then
              ABI_ERROR(msg)
           endif
 
@@ -276,18 +275,19 @@ contains
           do iband=1,mband
              if(band_in(iband,isppol)) then
                 ! TODO: check if this is the right order.
-                do ispinor = 1, nsppol
-                   do ipw = 1, npw_k
+                do ispinor = 1, nspinor
+                  cwavef = zero
+                  do ipw = 1, npw_k
                       !do ig=1,npw_k*dtset%nspinor
                       !cwavef(1,ig)=cg(1,ipw+iwav(ispinor, iband,ikpt,isppol))
                       !cwavef(2,ig)=cg(2,ipw+iwav(ispinor, iband,ikpt,isppol))
-                      ig = ipw + (ispinor-1)*npw_k
+                      !ig = ipw + (ispinor-1)*npw_k
+                      ig = ipw
                       cwavef(1,ig)=mywfc%cg_elem(1,ipw, ispinor, iband, ikpt, isppol)
                       cwavef(2,ig)=mywfc%cg_elem(2,ipw, ispinor, iband, ikpt, isppol)
-                   end do
-                end do
-                tim_fourwf=0
-                call fourwf(cplex,denpot,cwavef,fofgout,fofr,&
+                  end do
+                  tim_fourwf=0
+                  call fourwf(cplex,denpot,cwavef,fofgout,fofr,&
                      &           gbound,gbound,mywfc%hdr%istwfk(ikpt),kg_k,kg_k,mgfft,&
                      &           mpi_enreg,1,ngfft,npw_k,npw_k,n4,n5,n6,0,&
                      &           tim_fourwf,weight,weight,gpu_option=dtset%gpu_option)
@@ -299,8 +299,9 @@ contains
                 !          end do !jj2
                 !          end do !jj3
                 !          unformatted (must be one record)
-                write(iun_plot) (((fofr(1,jj1,jj2,jj3),fofr(2,jj1,jj2,jj3),&
+                  write(iun_plot) (((fofr(1,jj1,jj2,jj3),fofr(2,jj1,jj2,jj3),&
                                    jj1=1,n1,spacing),jj2=1,n2,spacing),jj3=1,n3,spacing)
+                end do !ispinor
              end if !iband
           end do ! iband
           ABI_FREE(cwavef)
@@ -394,7 +395,7 @@ contains
     integer, intent(in) :: g1(:, :, :)
     real(dp), intent(in) :: cm1(:,:,:,:,:,:)
     logical, intent(in) :: iam_master
-    complex(dpc),intent(inout) :: M_matrix(:,:,:,:,:)
+    complex(dp),intent(inout) :: M_matrix(:,:,:,:,:)
 
 !Local variables-------------------------------
 !scalars
@@ -429,7 +430,7 @@ contains
                  jband1=jband1+1
                  if(iam_master) write(iun(isppol),*) cm1(1,iband1,iband2,intot,ikpt1,isppol),cm1(2,iband1,iband2,intot,ikpt1,isppol)
                  M_matrix(jband1,jband2,intot,ikpt1,isppol)=&
-&                 cmplx(cm1(1,iband1,iband2,intot,ikpt1,isppol),cm1(2,iband1,iband2,intot,ikpt1,isppol), kind=dpc )
+&                 cmplx(cm1(1,iband1,iband2,intot,ikpt1,isppol),cm1(2,iband1,iband2,intot,ikpt1,isppol), kind=dp )
 !                write(2211,*) ikpt1,intot,iband1,iband2
 !                write(2211,*) cm1(1,iband1,iband2,intot,ikpt1,isppol),cm1(2,iband1,iband2,intot,ikpt1,isppol)
                end if ! band_in(iband1)

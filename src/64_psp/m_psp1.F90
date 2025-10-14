@@ -133,7 +133,6 @@ subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
  real(dp),allocatable :: drad(:),ekb_tmp(:,:),ffspl_tmp(:,:,:,:),rad(:),vloc(:)
  real(dp),allocatable :: vpspll(:,:),wfll(:,:),wksincos(:,:,:),work_space(:)
  real(dp),allocatable :: work_spl1(:),work_spl2(:)
-
 ! ***************************************************************************
 
 !Note: Teter s grid is hard-coded at mmax=2001

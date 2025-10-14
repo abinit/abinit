@@ -1,10 +1,10 @@
 #ifdef HAVE_DFTI
-!Local variables-------------------------------                             
-!scalars                                                                    
+!Local variables-------------------------------
+!scalars
  integer :: status,arr(4)
- type(DFTI_DESCRIPTOR),pointer :: Desc1                                     
-                                                                            
-! ************************************************************************* 
+ type(DFTI_DESCRIPTOR),pointer :: Desc1
+
+! *************************************************************************
 
  status = DftiCreateDescriptor(Desc1, DEV_DFTI_PRECISION, DFTI_COMPLEX, 3, (/nx ,ny ,nz/) )
  DFTI_CHECK(status)
@@ -27,7 +27,7 @@
    status = DftiComputeForward(Desc1, ff)
  else if (isign==+1) then
    status = DftiComputeBackward(Desc1, ff)
- else 
+ else
    ABI_ERROR("Wrong isign")
  end if
  DFTI_CHECK(status)
@@ -35,7 +35,7 @@
  status = DftiFreeDescriptor(Desc1)
  DFTI_CHECK(status)
 
-#else 
+#else
  ABI_ERROR("FFT_DFTI support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,iscale,isign/))
  ABI_UNUSED(ff)

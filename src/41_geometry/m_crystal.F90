@@ -39,6 +39,7 @@ module m_crystal
  use m_spgdata,        only : spgdata
  use m_geometry,       only : metric, xred2xcart, xcart2xred, remove_inversion, getspinrot, symredcart, normv
  use m_io_tools,       only : open_file
+ use m_pptools,        only : write_xsf
 
  implicit none
 
@@ -263,6 +264,9 @@ module m_crystal
 
    procedure :: get_redcart_qdirs => get_redcart_qdirs
    ! Return predefined list of 6 q-versors in reciprocal space reduced coordinates.
+
+   procedure :: write_xsf_data => crystal_write_xsf_data
+   !  Write array in real space in XSF format
 
  end type crystal_t
 
@@ -705,7 +709,7 @@ end subroutine crystal_malloc
 !!  crystal_free
 !!
 !! FUNCTION
-!!  Destroy the dynamic arrays in a crystal_t data type.
+!!  Free dynamic memory in a crystal_t data type.
 !!
 !! SOURCE
 
@@ -2195,6 +2199,41 @@ subroutine get_redcart_qdirs(cryst, nq, qdirs, qlen)
  if (present(qlen)) qdirs = qlen * qdirs
 
 end subroutine get_redcart_qdirs
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_crystal/crystal_write_xsf_data
+!! NAME
+!!  crystal_write_xsf_data
+!!
+!! FUNCTION
+!!  Write array in real space in XSF format
+!!
+!! INPUTS
+!!  filepath: Path to output file.
+!!  n1, n2, n3: Dimensions of input array.
+!!  datagrid(n1,n2,n3)=Array in real space.
+!!
+!! SOURCE
+
+subroutine crystal_write_xsf_data(cryst, filepath, n1, n2, n3, datagrid)
+
+!Arguments ------------------------------------
+ class(crystal_t),intent(in) :: cryst
+ character(len=*),intent(in) :: filepath
+ integer,intent(in) :: n1, n2, n3
+ real(dp),intent(in) :: datagrid(n1*n2*n3)
+
+!Local variables-------------------------------
+ integer,parameter :: realrecip = 0
+ real(dp),parameter :: origin(3) = zero
+! *************************************************************************
+
+ call write_xsf(filepath, n1, n2, n3, datagrid, cryst%rprimd, origin, &
+                cryst%natom, cryst%ntypat, cryst%typat, cryst%xcart, cryst%znucl, realrecip)
+
+end subroutine crystal_write_xsf_data
 !!***
 
 end module m_crystal
