@@ -641,7 +641,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: mpw,ierr,it,imyq,band, ignore_kq, ignore_ibsum_kq
  integer :: n1,n2,n3,n4,n5,n6,nspden,nu, iang
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
- integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart, enough_stern
+ integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg_kq,nq,cnt,imyp, q_start, q_stop, restart, enough_stern
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,my_ikcalc,ikcalc,bstart,bstop,iatom, sendcount
  integer :: comm_rpt, osc_npw, stern_comm
  integer :: nelem, cgq_request ! ffnl_k_request, ffnl_kq_request,
@@ -682,14 +682,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp),allocatable :: gkq_atm(:,:,:),gkq_nu(:,:,:),gkq0_atm(:,:,:,:), gaussw_qnu(:)
  real(dp),allocatable :: cg1s_kq(:,:,:,:), h1kets_kq_allperts(:,:,:,:)
  real(dp),allocatable :: stern_ppb(:,:,:,:), stern_dw(:,:,:,:)
- logical,allocatable :: ihave_ikibz_spin(:,:), bks_mask(:,:,:),keep_ur(:,:,:)
+ logical,allocatable :: ihave_ikibz_spin(:,:), bks_mask(:,:,:),keep_ur(:,:,:), osc_mask(:)
  real(dp),allocatable :: bra_kq(:,:),kets_k(:,:,:),h1kets_kq(:,:,:,:),cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: vtrial(:,:),gvnlx1(:,:),work(:,:,:,:), vcar_ibz(:,:,:,:)
  real(dp),allocatable :: gs1c(:,:),nqnu_tlist(:),dtw_weights(:,:),dt_tetra_weights(:,:,:),dwargs(:),alpha_mrta(:)
  real(dp),allocatable :: delta_e_minus_emkq(:), gkq_allgather(:,:,:),f_tlist_b(:,:)
- !real(dp),allocatable :: phfreqs_qibz(:,:), pheigvec_qibz(:,:,:,:), eigvec_qpt(:,:,:)
- logical,allocatable :: osc_mask(:)
  real(dp),allocatable :: gkq2_lr(:,:,:)
  complex(dp) :: cp3(3)
  complex(dp),allocatable :: osc_ks(:,:), fmw_frohl_sphcorr(:,:,:,:), cfact_wr(:), tpp_red(:,:)
@@ -1491,7 +1489,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        ! Get istwf_kq, npw_kq, kg_kq for k+q.
        call wfd%get_gvec_gbound(cryst%gmet, ecut, kq, ikq_ibz, isirr_kq, dtset%nloalg, & ! in
-                                istwf_kq, npw_kq, kg_kq, nkpg1, kpg_kq, gbound_kq)       ! out
+                                istwf_kq, npw_kq, kg_kq, nkpg_kq, kpg_kq, gbound_kq)       ! out
 
        !call timab(1901, 2, tsec)
        !call timab(1902, 1, tsec)
@@ -1693,7 +1691,8 @@ end if
 
              call timab(1909, 2, tsec)
 
-             call stern%solve(u1_band, band_me, idir, ipert, qpt, gs_ham_kq, rf_ham_kq, ebands%eig(:,ik_ibz,spin), ebands%eig(:,ikq_ibz,spin), &
+             call stern%solve(u1_band, band_me, idir, ipert, qpt, gs_ham_kq, rf_ham_kq, &
+                              ebands%eig(:,ik_ibz,spin), ebands%eig(:,ikq_ibz,spin), &
                               kets_k(:,:,ib_k), cwaveprj0, cg1s_kq(:,:,ipc,ib_k), cwaveprj, msg, ierr)
              ABI_CHECK(ierr == 0, msg)
              if (stern%has_band_para) call xmpi_bcast(cg1s_kq(:,:,ipc,ib_k), u1_master, sigma%bsum_comm%value, ierr)

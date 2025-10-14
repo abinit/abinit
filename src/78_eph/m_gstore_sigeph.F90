@@ -53,6 +53,7 @@ module m_gstore_sigeph
  use m_ebands,         only : ebands_t, gaps_t
  use m_kpts,           only : kpts_timrev_from_kptopt, kpts_map !, kpts_sort, kpts_pack_in_stars, kptrlatt_from_ngkpt
  use m_ioarr,          only : read_rhor
+ use m_fftcore,        only : ngfft_seq !, sphereboundary, get_kg, kgindex
  !use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack
  use m_ifc,            only : ifc_type
  use m_dfpt_cgwf,      only : stern_t
@@ -225,41 +226,47 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
 
 !Local variables-------------------------------
- integer,parameter :: master = 0, with_cplex1 = 1, cplex1 = 1, pawread0 = 0, ndat1 = 1, berryopt0 = 0
- integer :: n1, n2, n3, n4, n5, n6, nb_k, nb_kq, glob_nk, ntemp
+ integer,parameter :: master = 0, with_cplex1 = 1, cplex1 = 1, pawread0 = 0, ndat1 = 1, berryopt0 = 0, istwfk_1 = 1
+ integer :: n1, n2, n3, n4, n5, n6, nb_k, nb_kq, glob_nk, ntemp, cplex
  integer :: spin, my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, gap_err, my_rank, ip1, ip2, nu
- integer :: it, ik_ibz, ikq_ibz, band_k, band_kq, timrev_k, ii, ikcalc, natom, natom3, nsppol, nspden, nspinor, nkpt  !ik_bz,
- integer :: nfft, nfftf, mgfft, mgfftf !,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart, enough_stern
- integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
+ integer :: it, ik_ibz, ikq_ibz, band_k, band_kq, timrev_k, ii, ikcalc, natom, natom3, nsppol, nspden, nspinor, nkpt !,ik_bz
+ integer :: isym_k,isym_kq,trev_k,trev_kq, isym_q, trev_q
+ integer :: istwf_k, istwf_kq, istwf_kqirr, npw_k, npw_kq, npw_kqirr, nkpg_kq
+ integer :: nfft, nfftf, mgfft, mgfftf, nkpg !,nkpg1,nq,cnt,imyp, q_start, q_stop, restart, enough_stern
+ integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1, mpw, nbsum, ibsum_kq
  real(dp) :: wqnu, gkq2, weight_q, eig0nk, eig0mk, eig0mkq, ediff, gmod2, hmod2, gdw2 !, gdw2_stern, rtmp !,nqnu,gkq2,gkq2_pf,
  !real(dp) :: cpu, wall, gflops
- logical :: q_is_gamma, intra_band, same_band
+ logical :: q_is_gamma, intra_band, same_band, isirr_k, isirr_kq, stern_use_cache
  complex(dp) :: cfact !, sig_cplx
  character(len=5000) :: msg
  type(gaps_t) :: gaps
  type(lgroup_t) :: lg_myk
  type(gstore_t) :: gstore
  type(sep_t) :: sigma
- !type(stern_t) :: stern
  type(hdr_type) :: pot_hdr
  type(crystal_t) :: pot_cryst
  type(wfd_t) :: wfd
  !type(u1_cache_t) :: u1c
- !type(stern_t) :: stern
+ type(stern_t) :: stern
  type(gs_hamiltonian_type) :: gs_ham_kq
  type(rf_hamiltonian_type) :: rf_ham_kq
 !arrays
+ integer :: gmax(3), g0_k(3), g0_kq(3), work_ngfft(18) !,indkk_kq(6,1), qbz2dvdb(6), !, g0_q(3),
  integer :: units(2), my_kqmap(6)
  integer,allocatable :: phmodes_skip(:)
- real(dp) :: kk(3), qpt(3), kq(3)
+ real(dp) :: kk(3), kk_ibz(3), kq_ibz(3), qpt(3), kq(3)
  real(dp) :: displ_nu_cart(2, 3, cryst%natom), displ_nu_red(2, 3, cryst%natom)
- real(dp),allocatable :: vtrial(:,:) !,gvnlx1(:,:),work(:,:,:,:), vcar_ibz(:,:,:,:)
+ real(dp) :: fermie1_idir_ipert(3,cryst%natom)
+ real(dp),allocatable :: vtrial(:,:), work(:,:,:,:) !, !,gvnlx1(:,:),
  real(dp),allocatable :: grad_berry(:,:),kinpw_k(:), kinpw_kq(:),kpg_kq(:,:),kpg_k(:,:)
+ real(dp),allocatable :: ffnl_k(:,:,:,:),ffnl_kq(:,:,:,:),ph3d_k(:,:,:),ph3d_kq(:,:,:),v1scf(:,:,:,:)
  !real(dp),allocatable :: gkq_atm(:,:,:),gkq_nu(:,:,:) !,gkq0_atm(:,:,:,:), gaussw_qnu(:)
- integer,allocatable :: nband(:,:), wfd_istwfk(:) !, kg_k(:,:),kg_kq(:,:), , qselect(:),
- !integer,allocatable :: gbound_kq(:,:),
+ real(dp),allocatable :: cg1s_kq(:,:,:,:), h1kets_kq_allperts(:,:,:,:)
+ !real(dp),allocatable :: stern_ppb(:,:,:,:), stern_dw(:,:,:,:)
+ integer,allocatable :: nband(:,:), wfd_istwfk(:), kg_kq(:,:) !, , qselect(:), !, kg_k(:,:),
+ integer,allocatable :: gbound_kq(:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:) !, ihave_ikibz_spin(:,:)
- !real(dp),allocatable :: bra_kq(:,:),kets_k(:,:,:),h1kets_kq(:,:,:,:),cgwork(:,:)
+ real(dp),allocatable :: bra_kq(:,:) !, kets_k(:,:,:), h1kets_kq(:,:,:,:), cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: rfact_t(:), nqnu(:), f_mkq(:) !, f_nk(:),  g2_pmnk(:,:,:,:)
  complex(dp),allocatable :: cfact_t(:), tpp_red(:,:), cfact_wr(:) !,fmw_frohl_sphcorr(:,:,:,:),
@@ -277,8 +284,8 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  call gstore%from_ncpath(dtfil%filgstorein, with_cplex1, dtset, cryst, ebands, ifc, &
                          "phonon", dtset%gstore_gname, .True., comm)
 
- natom = cryst%natom; natom3 = 3 * cryst%natom; nsppol = dtset%nsppol; nkpt = ebands%nkpt
- nspden = dtset%nspden; nspinor = dtset%nspinor
+ natom = cryst%natom; natom3 = 3 * cryst%natom; nkpt = ebands%nkpt
+ nsppol = dtset%nsppol; nspden = dtset%nspden; nspinor = dtset%nspinor
 
  ! Consistency check.
  ierr = 0
@@ -375,7 +382,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  ABI_CALLOC(vlocal, (n4, n5, n6, gs_ham_kq%nvloc))
 
  if (dtset%eph_stern /= 0) then
-
    ! Read the GS potential (vtrial) from input POT file.
    ! In principle one may store vtrial in the DVDB but getpot_filepath is simpler to implement.
    call wrtout(units, sjoin(" Reading GS KS potential for Sternheimer from: ", dtfil%filpotin))
@@ -403,9 +409,21 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
    !  bks_mask = .True.; call wrtout(std_out, " Storing all bands for debugging purposes.")
    !end if
 
+   ! mpw is the maximum number of plane-waves over k and k+q where k and k+q are in the BZ.
+   ! we also need the max components of the G-spheres (k, k+q) in order to allocate the workspace array work
+   ! that will be used to symmetrize the wavefunctions in G-space.
+   call gstore%get_mpw_gmax(dtset%ecut, mpw, gmax)
+
    ! Init work_ngfft
-   !gmax = gmax + 4 ! FIXME: this is to account for umklapp, should also consider Gamma-only and istwfk
-   !gmax = 2*gmax + 1
+   gmax = gmax + 4 ! FIXME: this is to account for umklapp, should also consider Gamma-only and istwfk
+   gmax = 2*gmax + 1
+
+   call ngfft_seq(work_ngfft, gmax)
+   !write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
+   ABI_MALLOC(work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
+
+   ! Allocate PW-arrays. Note mpw in kg_kq
+   ABI_MALLOC(kg_kq, (3, mpw))
 
    ! Impose istwfk=1 for all k points. This is also done in respfn (see inkpts)
    ! wfd_read_wfk will handle a possible conversion if WFK contains istwfk /= 1.
@@ -440,6 +458,16 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
    !end if
 
    call dvdb%ftinterp_setup(dtset%ddb_ngqpt, gstore%qptopt, 1, dtset%ddb_shiftq, nfftf, ngfftf, xmpi_comm_self)
+
+   ! Allocate arrays for Debye-Waller
+   !if (.not. sigma%imag_only) then
+   !  ABI_CALLOC_OR_DIE(gkq0_atm, (2, nbcalc_ks, sigma%my_bsum_start:sigma%my_bsum_stop, natom3), ierr)
+   !  if (dtset%eph_stern /= 0) then
+   !    ABI_CALLOC(stern_dw, (2, natom3, natom3, nbcalc_ks))
+   !    enough_stern = 0
+   !  end if
+   !  ABI_FREE(gkq0_atm)
+   !end if
  end if ! eph_stern /= 0
 
  ! Allocate work space arrays used inside the loops. Then we are ready to go!
@@ -449,6 +477,10 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  ABI_MALLOC(f_mkq, (ntemp))
  ABI_MALLOC(cfact_t, (ntemp))
  ABI_MALLOC(rfact_t, (ntemp))
+
+ if (dtset%eph_stern /= 0) then
+   ABI_MALLOC(gbound_kq, (2*wfd%mgfft+8, 2))
+ end if
 
  call pstat_proc%print(_PSTAT_ARGS_)
 
@@ -473,7 +505,14 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
 
    ! Loop over my k-points in |n,k>
    do my_ik=1,gqk%my_nk
-     kk = gqk%my_kpts(:, my_ik); ik_ibz = gqk%my_k2ibz(1, my_ik)
+     kk = gqk%my_kpts(:, my_ik)
+
+     ik_ibz = gqk%my_k2ibz(1, my_ik); isym_k = gqk%my_k2ibz(2, my_ik)
+     trev_k = gqk%my_k2ibz(6, my_ik); g0_k = gqk%my_k2ibz(3:5, my_ik)
+     isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
+     ABI_CHECK(isirr_k, "For the time being the k-point in Sigma_{nk} must be in the IBZ")
+     kk_ibz = ebands%kptns(:,ik_ibz)
+
      ! Will store results using glob_ik index.
      ikcalc = gqk%my_k2glob(my_ik)
 
@@ -490,6 +529,12 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
          eig0nk = ebands%eig(band_k, ik_ibz, spin) - sigma%wr_step * (sigma%nwr / 2)
          sigma%wrmesh_b(:,in_k, ikcalc) = arth(eig0nk, sigma%wr_step, sigma%nwr)
       end do
+     end if
+
+     if (dtset%eph_stern /= 0) then
+       npw_k = wfd%npwarr(ik_ibz); istwf_k = wfd%istwfk(ik_ibz)
+       call gs_ham_kq%eph_setup_k("k", kk, istwfk_1, npw_k, wfd%kdata(ik_ibz)%kg_k, dtset, cryst, psps, & ! in
+                                  nkpg, kpg_k, ffnl_k, kinpw_k, ph3d_k, xmpi_comm_self)                   ! out
      end if
 
      ! Sum over my q-points.
@@ -509,11 +554,21 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
        end if
        ikq_ibz = my_kqmap(1)
 
-#if 0
-       if (dtset%eph_stern /= 0 .and. .not. sigma%imag_only) then
+       ikq_ibz = my_kqmap(1); isym_kq = my_kqmap(2)
+       trev_kq = my_kqmap(6); g0_kq = my_kqmap(3:5)
+       isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0))
+       kq_ibz = ebands%kptns(:, ikq_ibz)
 
-         ! Fourier interpolation.
-         call dvdb%get_ftqbz(qq_bz, cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
+       if (dtset%eph_stern /= 0 .and. .not. sigma%imag_only) then
+         ! Get istwf_kq, npw_kq, kg_kq for k+q.
+         call wfd%get_gvec_gbound(cryst%gmet, dtset%ecut, kq, ikq_ibz, isirr_kq, dtset%nloalg, & ! in
+                                  istwf_kq, npw_kq, kg_kq, nkpg_kq, kpg_kq, gbound_kq)           ! out
+
+         call gs_ham_kq%eph_setup_k("kq", kq, istwfk_1, npw_kq, kg_kq, dtset, cryst, psps, &   ! in
+                                    nkpg, kpg_kq, ffnl_kq, kinpw_kq, ph3d_kq, xmpi_comm_self)  ! out
+
+         ! Fourier interpolation of the DFPT potentials.
+         call dvdb%get_ftqbz(qpt, cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
 
          ! Build global array with GS wavefunctions cg_kq at k+q to prepare call to dfpt_cgwf.
          ! NB: bsum_range is not compatible with Sternheimer.
@@ -522,8 +577,8 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
          ! The static correction to FM_nk is:
          !    \sum_{qnu} (2n_qnu + 1) <H^1_{qnu} psi_nk| psi^1_{nk; qnu}>
 
-         call timab(1908, 1, tsec)
-         ABI_CALLOC(cg1s_kq, (2, npw_kq*nspinor, natom3, nbcalc_ks))
+         !call timab(1908, 1, tsec)
+         !ABI_CALLOC(cg1s_kq, (2, npw_kq*nspinor, natom3, nbcalc_ks))
 
          ! NOTE: in the present version, we need to gather all nbsum bands on each core before calling dfpt_cgwf.
          ! In principle one can call dfpt_cgwf in band-para mode but then
@@ -532,26 +587,32 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
          ! The present version is not memory efficient and leads to a big load imbalance if
          ! bsum%comm%nproc > nband_calc_ks
 
-         nband_me = nbsum
-         !stern_comm = xmpi_comm_self
-
          stern_use_cache = merge(.True., .False., dtset%eph_stern == 1)
-         call stern%init(dtset, npw_k, npw_kq, nspinor, nbsum, nband_me, fermie1_idir_ipert, &
+         fermie1_idir_ipert = zero
+         nbsum = gqk%nb_kq
+         call stern%init(dtset, npw_k, npw_kq, nspinor, nbsum, nbsum, fermie1_idir_ipert, &
                          stern_use_cache, work_ngfft, mpi_enreg, xmpi_comm_self)
 
-         do ibsum_kq=sigma%my_bsum_start, sigma%my_bsum_stop
+         ABI_MALLOC(bra_kq, (2, npw_kq*nspinor))
+         !ABI_MALLOC(cgwork, (2, npw_kqirr*nspinor))
 
+         do ibsum_kq=1, nbsum
             ! Reconstruct u_kq(G) from the IBZ image.
-            call wfd%rotate_cg(ibsum_kq, ndat1, spin, kq_ibz, npw_kq, kg_kq, istwf_kq, &
-                               cryst, sigma%indkk_kq(:,iq_ibz_k), gbound_kq, work_ngfft, work, bra_kq)
-
+           call wfd%rotate_cg(ibsum_kq, ndat1, spin, kq_ibz, npw_kq, kg_kq, istwf_kq, &
+                              cryst, my_kqmap, gbound_kq, work_ngfft, work, bra_kq)
             stern%cgq(:, :, ibsum_kq) = bra_kq
          end do ! ibsum_kq
 
-         cgq_request = xmpi_request_null
-         call timab(1908, 2, tsec)
+         ABI_FREE(bra_kq)
+
+         !cgq_request = xmpi_request_null
+         !call timab(1908, 2, tsec)
+         !ABI_FREE(gs1c)
+         !ABI_FREE(gvnlx1)
+         !ABI_FREE(vlocal1)
+         !ABI_FREE(v1scf)
+         call stern%free()
        end if ! eph_stern
-#endif
 
        ! Sum over my phonon modes.
        do my_ip=1,gqk%my_npert
@@ -560,7 +621,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
 
          ! Ignore unstable modes or modes that should be skipped.
          if (ephtk_skip_phmode(nu, wqnu, phmodes_skip, dtset%eph_phrange_w)) cycle
-
          nqnu(:) = occ_be(wqnu, sigma%kTmesh, zero)
 
          ! FIXME: Not sure this is correct!
@@ -682,12 +742,26 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
 
          end do ! im_kq
        end do ! my_ip
+
+       !ABI_FREE(bra_kq)
+       !ABI_FREE(cgwork)
+       !ABI_FREE(h1kets_kq)
+       ABI_SFREE(kpg_kq)
+       ABI_SFREE(ffnl_kq)
+       ABI_SFREE(kinpw_kq)
+       ABI_SFREE(ph3d_kq)
+       ABI_SFREE(v1scf)
      end do ! my_iq
+
      call lg_myk%free()
+
+     ABI_SFREE(kpg_k)
+     ABI_SFREE(ffnl_k)
+     ABI_SFREE(kinpw_k)
+     ABI_SFREE(ph3d_k)
    end do ! my_ik
 
    ! TODO: Implement Sternheimer with KS states.
-
    call sigma%gather_and_write_results(gstore, gqk, dtset, ebands)
    end associate
  end do ! my_is
@@ -700,9 +774,12 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  ABI_SFREE(vtrial)
  ABI_FREE(phmodes_skip)
  ABI_SFREE(cfact_wr)
+ ABI_FREE(ph1d)
  ABI_SFREE(vtrial)
  ABI_SFREE(vlocal)
- ABI_FREE(ph1d)
+ ABI_SFREE(kg_kq)
+ ABI_SFREE(gbound_kq)
+ ABI_SFREE(work)
 
  call wfd%free(); call gstore%free(); call sigma%free(); call gs_ham_kq%free()
 
