@@ -864,7 +864,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
        vwork(:,ispden)=vhartr(:)+vxc(:,ispden)
      end do
 
-     call fftdatar_write("vhxc",dtfil%fnameabo_app_vhxc,dtset%iomode,hdr,crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
+     call fftdatar_write("vhxc",dtfil%fnameabo_app_vhxc,dtset%iomode,hdr,&
+                          crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
      ABI_FREE(vwork)
    end if
 
