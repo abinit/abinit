@@ -1173,7 +1173,6 @@ end function itoa_4b
 !!
 !! FUNCTION
 !!  Convert an float into a string using format fmt  (es16.6 if fmt is not given).
-!!
 
 pure function ftoa(value, fmt)
 

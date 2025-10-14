@@ -939,12 +939,12 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
    if (dtset%prtdensph==1.and.dtset%usewvl==0) then
      if(all(dtset%constraint_kind(:)==0))then
-       call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,units,1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%znucl)
+       call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,units,1,dtset%qgbt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%znucl)
      else
-       call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,units,1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%znucl,dtset%ziontypat)
+       call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,units,1,dtset%qgbt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%znucl,dtset%ziontypat)
      endif
      if(any(dtset%constraint_kind(:)/=0))then
-       call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,units,21,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%znucl)
+       call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,units,21,dtset%qgbt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%znucl)
      endif
    end if !end prtdensph==1 .and. usewvl==0
 

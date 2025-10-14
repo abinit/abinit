@@ -847,7 +847,7 @@ end subroutine constrained_dft_free
  call calcdenmagsph(mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,&
                     xred,1,cplex1,qgbt,use_gbt,intgden=intgden,gr_intgden=gr_intgden,rhomag=rhomag,strs_intgden=strs_intgden)
 
- call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,[std_out],1,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat,c_dft%znucl)
+ call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,[std_out],1,qgbt,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat,c_dft%znucl)
 
 !DEBUG
 !write(std_out,*) ' intgden(1:nspden,1:natom)=',intgden(1:nspden,1:natom)
@@ -883,7 +883,7 @@ end subroutine constrained_dft_free
    if( mod(conkind,10)==0 .and. nspden>1)intgres(2:nspden,iatom)=zero
  enddo
 !Print the potential residuals
- call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,[std_out],11,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat,c_dft%znucl)
+ call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,[std_out],11,qgbt,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat,c_dft%znucl)
  ABI_FREE(intgres_tmp)
 
 !Also exchanges the spin and atom indices to prepare the solution of the linear system of equation
@@ -1237,7 +1237,7 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred,qgbt,use_gbt)
  call calcdenmagsph(mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,&
                     c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,xred,1,cplex1,qgbt,use_gbt,intgden=intgden,rhomag=rhomag)
 
- call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,[std_out],1,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat,c_dft%znucl)
+ call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,[std_out],1,qgbt,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat,c_dft%znucl)
 
 !Loop over atoms
 !-------------------------------------------
@@ -1383,7 +1383,7 @@ subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspde
  call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,rhor,rprimd,typat,xred,&
                     1,cplex1,qgbt,use_gbt,intgden=intgden,rhomag=rhomag)
 
- call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,[std_out],1,ratsm,ratsph,rhomag,typat,znucl)
+ call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,[std_out],1,qgbt,ratsm,ratsph,rhomag,typat,znucl)
 
  Epen=0
  Econstr=0
@@ -1963,7 +1963,7 @@ end subroutine calcdenmagsph
 !!
 !! SOURCE
 
-subroutine prtdenmagsph(cplex, intgden, natom, nspden, ntypat, units, option, ratsm, ratsph, rhomag, typat, znucl, ziontypat)
+subroutine prtdenmagsph(cplex, intgden, natom, nspden, ntypat, units, option, qgbt, ratsm, ratsph, rhomag, typat, znucl, ziontypat)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1974,7 +1974,7 @@ integer ,intent(in) :: option
 integer, intent(in) :: cplex
 !arrays
 integer,intent(in)  :: typat(natom)
-real(dp),intent(in) :: intgden(cplex,nspden,natom),znucl(ntypat)
+real(dp),intent(in) :: intgden(cplex,nspden,natom),qgbt(3),znucl(ntypat)
 real(dp),intent(in) :: ratsph(ntypat),rhomag(2,nspden)
 real(dp),intent(in),optional :: ziontypat(ntypat)
 
@@ -2194,17 +2194,28 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
          call wrtout(units,msg)
 
        if(option==1)then
-         write(msg, '(a)') ' Total magnetization (spheres)      '
-         call wrtout(units,msg)
+         if (any(qgbt /= zero)) then
+           write(msg, '(a,f12.6,f12.6,f12.6)') ' Cell sum of sphere magnetization'
+           call wrtout(units,msg)
+         else
+           write(msg, '(a)') ' Total magnetization (spheres)      '
+           call wrtout(units,msg)
+         endif
          write(msg, '(a,3f12.6)') ' (cart.coord.)                                  ', sum_mag_x,sum_mag_y,sum_mag_z
          call wrtout(units,msg)
          write(msg, '(a,f12.6,a,2f12.6)') ' (sph.coord.)                       ', sum_mag_r,"                                    ",sum_mag_theta,sum_mag_phi
          call wrtout(units,msg)
+
+         if (any(qgbt /= zero)) then
+           write(msg, '(a,f10.6,f12.6,f12.6)') ' Integral of periodic magnetization', mag_x, mag_y, mag_z
+           call wrtout(units,msg)
+         else
+           write(msg, '(a,f12.6,f12.6,4f12.6)') ' Total magnetization (exact) '
+           call wrtout(units,msg)
+         endif
          if (icplex==1) then
            vec = (/mag_x,mag_y,mag_z /)
            call vcart2ylm(vec, exact_mag_r, exact_mag_theta, exact_mag_phi)
-           write(msg, '(a,f12.6,f12.6,4f12.6)') ' Total magnetization (exact) '
-           call wrtout(units,msg)
            write(msg, '(a,3f12.6)') ' (cart.coord.)                                  ', mag_x,mag_y,mag_z
            call wrtout(units,msg)
            write(msg, '(a,f12.6,a,2f12.6)') ' (sph.coord.)                       ', exact_mag_r,"                                    ",exact_mag_theta,exact_mag_phi
@@ -2212,12 +2223,9 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
          elseif (icplex==2) then
            vec = (/mag_x_im,mag_y_im,mag_z_im /)
            call vcart2ylm(vec, exact_mag_r_im, exact_mag_theta_im, exact_mag_phi_im)
-           write(msg, '(a,f12.6,f12.6,4f12.6)') ' Total magnetization (exact) '
-           call wrtout(units,msg)
            write(msg, '(a,3f12.6)') ' (cart.coord.)                                  ', mag_x_im,mag_y_im,mag_z_im
            call wrtout(units,msg)
            write(msg,'(a,f12.6,a,2f12.6)')' (sph.coord.)                       ', exact_mag_r_im,"                                     ", exact_mag_theta_im,exact_mag_phi_im
-           call wrtout(units,msg)
          endif
        endif
        enddo

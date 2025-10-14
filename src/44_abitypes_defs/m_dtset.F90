@@ -278,14 +278,12 @@ type, public :: dataset_type
  integer :: gpu_option
  integer :: gpu_thread_limit
 
- integer :: gstore_cplex = 2
  integer :: gstore_with_vk = 1
  integer :: gstore_use_lgk = 0
  integer :: gstore_use_lgq = 0
  character(len=abi_slen) :: gstore_kzone = "ibz"
  character(len=abi_slen) :: gstore_qzone = "bz"
  character(len=abi_slen) :: gstore_kfilter = "none"
- character(len=abi_slen) :: gstore_gmode = "phonon"
  character(len=abi_slen) :: gstore_gname = "gvals"
  integer :: gstore_brange(2, 2) = 0
  real(dp) :: gstore_erange(2, 2) = zero
@@ -1033,7 +1031,8 @@ type, public :: dataset_type
  real(dp) :: pol(3)
  real(dp) :: polcen(3)
  real(dp) :: pvelmax(3)
- real(dp) :: qgbt(3)=[0.0_dp,0.0_dp,0.0_dp]
+ real(dp) :: qgbt(3)=zero
+ real(dp) :: qgbt_cart(3)=zero
  real(dp) :: qptn(3)
  real(dp) :: red_efield(3)
  real(dp) :: red_dfield(3)
@@ -1158,6 +1157,9 @@ type, public :: dataset_type
 
  procedure :: get_wrmesh_for_sigeph => dtset_get_wrmesh_for_sigeph
   ! Frequency mesh for sigma(w) and spectral functions (EPH self-energy)
+
+ procedure :: get_edos_params => dtset_get_edos_params
+  ! Return parameters for the computation of the electronic DOS.
 
  end type dataset_type
 !!***
@@ -1800,14 +1802,12 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gpu_option         = dtin%gpu_option
  dtout%gpu_thread_limit   = dtin%gpu_thread_limit
 
- dtout%gstore_cplex       = dtin%gstore_cplex
  dtout%gstore_with_vk     = dtin%gstore_with_vk
  dtout%gstore_use_lgk     = dtin%gstore_use_lgk
  dtout%gstore_use_lgq     = dtin%gstore_use_lgq
  dtout%gstore_kzone       = dtin%gstore_kzone
  dtout%gstore_qzone       = dtin%gstore_qzone
  dtout%gstore_kfilter     = dtin%gstore_kfilter
- dtout%gstore_gmode       = dtin%gstore_gmode
  dtout%gstore_gname       = dtin%gstore_gname
  dtout%gstore_brange      = dtin%gstore_brange
  dtout%gstore_erange      = dtin%gstore_erange
@@ -2439,6 +2439,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%polcen(:)          = dtin%polcen(:)
  dtout%pvelmax(:)         = dtin%pvelmax(:)
  dtout%qgbt(:)            = dtin%qgbt(:)
+ dtout%qgbt_cart(:)       = dtin%qgbt_cart(:)
  dtout%qptn(:)            = dtin%qptn(:)
  dtout%red_efield(:)      = dtin%red_efield(:)
  dtout%red_dfield(:)      = dtin%red_dfield(:)
@@ -3250,6 +3251,32 @@ subroutine dtset_get_wrmesh_for_sigeph(dtset, nwr, wr_step)
 end subroutine dtset_get_wrmesh_for_sigeph
 !!***
 
+!!****f* m_dtset/dtset_get_edos_params
+!! NAME
+!! dtset_get_edos_params
+!!
+!! FUNCTION
+!!   Return parameters for the computation of the electronic DOS.
+!!   to be passed to ebands%get_edos
+!!
+!! SOURCE
+
+subroutine dtset_get_edos_params(dtset, edos_intmeth, edos_step, edos_broad)
+
+!Arguments-------------------------------
+!scalars
+ class(dataset_type),intent(in) :: dtset
+ integer,intent(out) :: edos_intmeth
+ real(dp),intent(out) :: edos_step, edos_broad
+! *********************************************************************
+
+ edos_intmeth = 2; if (dtset%prtdos /= 0) edos_intmeth = dtset%prtdos
+ edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
+ edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
+
+end subroutine dtset_get_edos_params
+!!***
+
 !!****f* m_dtset/macroin
 !! NAME
 !! macroin
@@ -3706,7 +3733,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' gpu_devices gpu_kokkos_nthrd gpu_linalg_limit gpu_nl_distrib gpu_thread_limit'
  list_vars=trim(list_vars)//' gpu_nl_splitsize gpu_option'
  list_vars=trim(list_vars)//' gwaclowrank gwcalctyp gwcomp gwencomp gwgamma gwmem'
- list_vars=trim(list_vars)//' gstore_brange gstore_cplex gstore_erange gstore_kfilter gstore_gmode gstore_gname'
+ list_vars=trim(list_vars)//' gstore_brange gstore_erange gstore_kfilter gstore_gname'
  list_vars=trim(list_vars)//' gstore_kzone gstore_qzone gstore_with_vk gstore_use_lgk gstore_use_lgq'
  list_vars=trim(list_vars)//' gwpara gwrpacorr gwgmcorr gw_customnfreqsp gw1rdm'
  list_vars=trim(list_vars)//' gw_frqim_inzgrid gw_frqre_inzgrid gw_frqre_tangrid gw_freqsp'
@@ -3809,7 +3836,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' pseudos ptcharge'
  list_vars=trim(list_vars)//' pvelmax pw_unbal_thresh'
 !Q
- list_vars=trim(list_vars)//' q1shft qgbt qmass qprtrb qpt qptdm qptnrm qph1l'
+ list_vars=trim(list_vars)//' q1shft qgbt qgbt_cart qmass qprtrb qpt qptdm qptnrm qph1l'
  list_vars=trim(list_vars)//' qptopt quadquad qptrlatt quadmom'
 !R
  list_vars=trim(list_vars)//' random_atpos randomseed ratsm ratsph ratsph_extra rcut'
