@@ -1485,12 +1485,12 @@ subroutine prtene(dtset,energies,iout,usepaw)
 !Local variables-------------------------------
 !scalars
  integer :: ipositron,optdc
- logical :: directE_avail,testdmft,write_entropy=.false.,write_totalxc=.false.
+ logical :: directE_avail,testdmft,write_entropy=.false.,write_totalxc=.false.,write_epaw_core=.false.
  real(dp) :: eent,enevalue,etotal,etotaldc,exc_semilocal,el_temp
  ! Do not modify the length of these strings
  character(len=14) :: eneName
  character(len=500) :: info,msg
- type(yamldoc_t) :: edoc,dc_edoc,sdoc,ftxcdoc
+ type(yamldoc_t) :: edoc,dc_edoc,pawcore_edoc,sdoc,ftxcdoc
 !arrays
  !character(len=10) :: EPName(1:2)=(/"Positronic","Electronic"/)
 
@@ -1560,7 +1560,15 @@ subroutine prtene(dtset,energies,iout,usepaw)
          call edoc%add_real('non_local_psp+x', energies%e_nlpsp_vfock-energies%e_fock0)
        endif
      else
-       call edoc%add_real('spherical_terms', energies%e_paw)
+       if (dtset%use_rcpaw/=0) then
+         call edoc%add_real('PAW spherical_terms', energies%paw%epaw)
+         call edoc%add_real('PAW core', energies%paw%epaw_core)
+       else if (dtset%paw_add_core==1) then
+         call edoc%add_real('PAW spherical_terms', energies%paw%epaw-energies%paw%epaw_core)
+         call edoc%add_real('PAW core', energies%paw%epaw_core)
+       else
+         call edoc%add_real('PAW spherical_terms', energies%paw%epaw)
+       end if
        !!!XG20181025 Does not work (yet)...
        !!!if(abs(energies%e_nlpsp_vfock)>tol8)then
        !!!  write(msg, '(a,es21.14)' )'    Fock-type term  = ',energies%e_nlpsp_vfock
@@ -1568,9 +1576,6 @@ subroutine prtene(dtset,energies,iout,usepaw)
        !!!  write(msg, '(a,es21.14)' ) '    -frozen Fock en.= ',-energies%e_fock0
        !!!  call wrtout(iout,msg)
        !!!endif
-       if(abs(energies%e_cpaw)>tiny(0.0_dp)) then
-         call edoc%add_real('cpaw', energies%e_cpaw)
-       endif
      end if
      if (ANY(ABS(dtset%nucdipmom)>tol8)) then
        call edoc%add_real('nucl. magn. dipoles',energies%e_nucdip)
@@ -1656,10 +1661,15 @@ subroutine prtene(dtset,energies,iout,usepaw)
      call dc_edoc%add_real('electric_field', energies%e_elecfield)
    end if
    if (usepaw==1) then
-     call dc_edoc%add_real('spherical_terms', energies%e_pawdc)
-     if(abs(energies%e_cpawdc)>tiny(0.0_dp)) then
-       call dc_edoc%add_real('cpaw_dc', energies%e_cpawdc)
-     endif
+     if (dtset%use_rcpaw/=0) then
+       call dc_edoc%add_real('PAW spherical_terms', energies%paw%epaw_dc)
+       call dc_edoc%add_real('PAW core dc', energies%paw%epaw_core_dc)
+     else if (dtset%paw_add_core==1) then
+       call dc_edoc%add_real('PAW spherical_terms', energies%paw%epaw_dc-energies%paw%epaw_core)
+       call dc_edoc%add_real('PAW core', energies%paw%epaw_core)
+     else
+       call dc_edoc%add_real('PAW spherical_terms', energies%paw%epaw_dc)
+     end if
    end if
    if ((dtset%vdw_xc>=5.and.dtset%vdw_xc<=7).and.ipositron/=1) then
      call dc_edoc%add_real('VdWaals_dft_d', energies%e_vdw_dftd)
@@ -1710,7 +1720,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
    call dc_edoc%add_real('total_energy_dc', etotaldc)
  end if
 
-!======= Additional printing for compatibility  ==========
+!======= Additional printing ==========
 
  if (usepaw==0.and.optdc==0) then
    call edoc%add_real('total_energy_eV', etotal*Ha_eV)
@@ -1745,6 +1755,22 @@ subroutine prtene(dtset,energies,iout,usepaw)
    call edoc%add_real('monopole_correction_eV', energies%e_monopole*Ha_eV)
  end if
 
+!Print total energy including PAW core contribution
+ if (usepaw==1) then
+   if (dtset%paw_add_core==0.and.dtset%use_rcpaw==0) then
+     if (abs(energies%paw%epaw_core)>tiny(zero).or.abs(energies%paw%epaw_core_dc)>tiny(zero)) then
+       write_epaw_core=.true.
+       info = 'Components of total free energy, including PAW core contributions'
+       pawcore_edoc = yamldoc_open('EnergyTermsWithPAWCore', info=trim(adjustl(info)), &
+                                   width=20, real_fmt='(es21.14)')
+       call pawcore_edoc%add_real('Total energy', etotal+energies%paw%epaw_core)
+       if(optdc>=1) call pawcore_edoc%add_real('Total energy DC', etotaldc+energies%paw%epaw_core)
+       call pawcore_edoc%add_real('Total energy (eV)', (etotal+energies%paw%epaw_core)*Ha_eV)
+       if(optdc>=1) call pawcore_edoc%add_real('Total energy DC (eV)', (etotaldc+energies%paw%epaw_core)*Ha_eV)
+     end if
+   end if
+ end if
+
 !======== In case other sources of entropies than the non-interacting entropy =========
 !============= of the Kohn-Sham states come into play, print the details ==============
  if(dtset%occopt>=3.and.dtset%occopt<=8) then
@@ -1754,7 +1780,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
      & width=20, real_fmt="(es21.14)") ! in kB units
      call sdoc%add_real('noninteracting',energies%entropy_ks) ! Noninteracting entropy = Entropy of the Kohn-Sham states
      if(abs(energies%entropy_xc)>tiny(zero)) call sdoc%add_real('xc',energies%entropy_xc)
-     if(usepaw==1.and.abs(energies%entropy_paw)>tiny(zero)) call sdoc%add_real('spherical_terms',energies%entropy_paw)
+     if(usepaw==1.and.abs(energies%paw%entropy_paw)>tiny(zero)) call sdoc%add_real('spherical_terms',energies%paw%entropy_paw)
      if(abs(energies%entropy_extfpmd)>tiny(zero)) call sdoc%add_real('extfpmd',energies%entropy_extfpmd)
      if(abs(energies%entropy_imp)>tiny(zero)) call sdoc%add_real('impurity',energies%entropy_imp)
      call sdoc%add_real('total_entropy',energies%entropy) ! Total entropy energy
@@ -1774,10 +1800,10 @@ subroutine prtene(dtset,energies,iout,usepaw)
        ! For now, only finite-temperature xc functionals contribute to entropy_paw.
        ! We may introduce 'energies%entropy_pawxc' in the future.
        call ftxcdoc%add_real('xc',energies%e_xc)
-       call ftxcdoc%add_real('spherical_terms_xc',energies%e_pawxc)
-       call ftxcdoc%add_real('internal_xc',energies%e_xc+energies%e_pawxc)
-       call ftxcdoc%add_real('-kT*entropy_xc',-el_temp*(energies%entropy_xc+energies%entropy_paw))
-       call ftxcdoc%add_real('free_xc',energies%e_xc+energies%e_pawxc-el_temp*(energies%entropy_xc+energies%entropy_paw))
+       call ftxcdoc%add_real('spherical_terms_xc',energies%paw%epaw_xc)
+       call ftxcdoc%add_real('internal_xc',energies%e_xc+energies%paw%epaw_xc)
+       call ftxcdoc%add_real('-kT*entropy_xc',-el_temp*(energies%entropy_xc+energies%paw%entropy_paw))
+       call ftxcdoc%add_real('free_xc',energies%e_xc+energies%paw%epaw_xc-el_temp*(energies%entropy_xc+energies%paw%entropy_paw))
      else
        call ftxcdoc%add_real('internal_xc',energies%e_xc)
        call ftxcdoc%add_real('-kT*entropy_xc',-el_temp*energies%entropy_xc)
@@ -1789,6 +1815,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
  ! Write components of total energies in Yaml format.
  call edoc%write_and_free(iout)
  if(optdc >= 1) call dc_edoc%write_and_free(iout)
+ if (write_epaw_core) call pawcore_edoc%write_and_free(iout)
  if(write_entropy) call sdoc%write_and_free(iout)
  if(write_totalxc) call ftxcdoc%write_and_free(iout)
 

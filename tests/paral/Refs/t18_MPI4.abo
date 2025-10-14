@@ -477,7 +477,7 @@ xc                  : -4.40208073116916E+01
 Ewald energy        : -2.68369868855453E+02
 psp_core            :  1.45210172929893E+01
 local_psp           : -1.55198115839061E+02
-spherical_terms     : -3.31891000641260E+00
+PAW spherical_terms : -3.31891000641260E+00
 total_energy        : -3.07460460157599E+02
 total_energy_eV     : -8.36642460312067E+03
 ...
@@ -490,9 +490,19 @@ band_energy         : -1.96139198565192E+01
 Ewald energy        : -2.68369868855453E+02
 psp_core            :  1.45210172929893E+01
 xc_dc               : -2.63633504800957E+01
-spherical_terms     : -7.20976758752620E+00
+PAW spherical_terms : -7.20976758752620E+00
 total_energy_dc     : -3.07035889486605E+02
 total_energy_dc_eV  : -8.35487144761654E+03
+...
+
+
+--- !EnergyTermsWithPAWCore
+iteration_state     : {dtset: 1, }
+comment             : 'Components of total free energy, including PAW core contributions'
+Total energy        : -8.12199845545814E+03
+Total energy DC     : -8.12157388478715E+03
+Total energy (eV)   : -2.21010817681799E+05
+Total energy DC (eV): -2.20999264526294E+05
 ...
 
 
@@ -779,7 +789,7 @@ xc                  : -4.40208073116833E+01
 Ewald energy        : -2.68369868855453E+02
 psp_core            :  1.45210172929893E+01
 local_psp           : -1.55198115838992E+02
-spherical_terms     : -3.31891000639080E+00
+PAW spherical_terms : -3.31891000639080E+00
 total_energy        : -3.07460460157498E+02
 total_energy_eV     : -8.36642460311792E+03
 ...
@@ -792,9 +802,19 @@ band_energy         : -1.96139198567706E+01
 Ewald energy        : -2.68369868855453E+02
 psp_core            :  1.45210172929893E+01
 xc_dc               : -2.63633504800169E+01
-spherical_terms     : -7.20976758735143E+00
+PAW spherical_terms : -7.20976758735143E+00
 total_energy_dc     : -3.07035889486603E+02
 total_energy_dc_eV  : -8.35487144761648E+03
+...
+
+
+--- !EnergyTermsWithPAWCore
+iteration_state     : {dtset: 2, }
+comment             : 'Components of total free energy, including PAW core contributions'
+Total energy        : -8.12199845545804E+03
+Total energy DC     : -8.12157388478714E+03
+Total energy (eV)   : -2.21010817681796E+05
+Total energy DC (eV): -2.20999264526294E+05
 ...
 
 

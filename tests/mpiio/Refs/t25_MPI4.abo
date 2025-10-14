@@ -1,5 +1,5 @@
 
-.Version 10.3.4.4 of ABINIT, released Nov 2024.
+.Version 10.5.1.5 of ABINIT, released Jul 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 26 Jan 2025.
-- ( at 09h59 )
+.Starting date : Thu  9 Oct 2025.
+- ( at 18h15 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/TestBot_MPI4/mpiio_t25_MPI4/t25.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI4/mpiio_t25_MPI4/t25.abi
 - output file    -> t25_MPI4.abo
 - root for input  files -> t25_MPI4i
 - root for output files -> t25_MPI4o
@@ -165,8 +165,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 1, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/6c_lda.paw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/6c_lda.paw
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/6c_lda.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/6c_lda.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): carbon
 -  6.00000   4.00000  20041014                znucl, zion, pspdat
     7    2    1    0       467   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -436,7 +436,7 @@ xc                  : -3.90585024137886E+00
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  5.49532697036699E-01
 local_psp           : -6.85232874159803E+00
-spherical_terms     :  1.79560229866349E+00
+PAW spherical_terms :  1.79560229866349E+00
 total_energy        : -1.04187364981125E+01
 total_energy_eV     : -2.83508238186333E+02
 ...
@@ -449,7 +449,7 @@ band_energy         :  1.77721060313471E+00
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  5.49532697036699E-01
 xc_dc               : -6.32064312586102E-01
-spherical_terms     :  1.28263164470616E-01
+PAW spherical_terms :  1.28263164470616E-01
 total_energy_dc     : -1.04179435084070E+01
 total_energy_dc_eV  : -2.83486659839059E+02
 ...
@@ -627,4 +627,4 @@ P           mkmem           1
 
  Calculation completed.
 .Delivered   1 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.0  wall=          2.0
++Overall time at end (sec) : cpu=          1.9  wall=          1.9

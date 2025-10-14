@@ -693,7 +693,7 @@ xc                  : -4.83939225856703E+00
 Ewald energy        : -8.73435537339883E+00
 psp_core            : -6.14791273484789E-02
 local_psp           : -3.07417197065180E+00
-spherical_terms     :  5.86488508286166E+00
+PAW spherical_terms :  5.86488508286166E+00
 nucl. magn. dipoles : -8.88521137909025E-09
 total_energy        : -6.31870732945453E+00
 total_energy_eV     : -1.71940770640783E+02
@@ -707,9 +707,19 @@ band_energy         :  1.75685262290610E-01
 Ewald energy        : -8.73435537339883E+00
 psp_core            : -6.14791273484789E-02
 xc_dc               : -1.77252353729046E+00
-spherical_terms     :  4.07396300358077E+00
+PAW spherical_terms :  4.07396300358077E+00
 total_energy_dc     : -6.31870977216639E+00
 total_energy_dc_eV  : -1.71940837110353E+02
+...
+
+
+--- !EnergyTermsWithPAWCore
+iteration_state     : {dtset: 1, }
+comment             : 'Components of total free energy, including PAW core contributions'
+Total energy        : -5.85198392877039E+02
+Total energy DC     : -5.85198395319751E+02
+Total energy (eV)   : -1.59240581028322E+04
+Total energy DC (eV): -1.59240581693018E+04
 ...
 
 

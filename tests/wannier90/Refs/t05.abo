@@ -1,5 +1,5 @@
 
-.Version 10.4.4.2 of ABINIT, released May 2025.
+.Version 10.5.1.5 of ABINIT, released Jul 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 21 Jun 2025.
-- ( at 06h57 )
+.Starting date : Thu  9 Oct 2025.
+- ( at 18h11 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__mmignolet-10.4/tests/TestBot_MPI1/wannier90_t05/t05.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/wannier90_t05/t05.abi
 - output file    -> t05.abo
 - root for input  files -> t05i
 - root for output files -> t05o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__mmignolet-10.4/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
 
  invars1: COMMENT -
   With nspinor=2 and usepaw=1, pawspnorb=1 has been switched on by default.
@@ -624,9 +624,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.13671
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__mmignolet-10.4/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__mmignolet-10.4/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__mmignolet-10.4/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.11531574
@@ -1933,7 +1933,7 @@ xc                  : -3.46287865128333E+00
 Ewald energy        : -8.65492581278557E+01
 psp_core            :  6.37909129520393E+00
 local_psp           : -6.57248503783680E+01
-spherical_terms     : -1.15183767812807E+01
+PAW spherical_terms : -1.15183767812807E+01
 internal            : -1.24369341670813E+02
 '-kT*entropy'       : -1.01306924678454E-04
 total_energy        : -1.24369442977738E+02
@@ -1948,11 +1948,21 @@ band_energy         : -1.33230466064773E+01
 Ewald energy        : -8.65492581278557E+01
 psp_core            :  6.37909129520393E+00
 xc_dc               : -2.29095141865993E+01
-spherical_terms     : -7.96661511800672E+00
+PAW spherical_terms : -7.96661511800672E+00
 internal            : -1.24369342743735E+02
 '-kT*entropy'       : -1.01306924678454E-04
 total_energy_dc     : -1.24369444050660E+02
 total_energy_dc_eV  : -3.38426468251730E+03
+...
+
+
+--- !EnergyTermsWithPAWCore
+iteration_state     : {dtset: 1, }
+comment             : 'Components of total free energy, including PAW core contributions'
+Total energy        : -1.27271250040679E+03
+Total energy DC     : -1.27271250147971E+03
+Total energy (eV)   : -3.46322683919896E+04
+Total energy DC (eV): -3.46322684211853E+04
 ...
 
 
@@ -4106,10 +4116,10 @@ P           mkmem2         69
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         94.5  wall=         94.6
+- Proc.   0 individual time (sec): cpu=         94.6  wall=         94.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and  20 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         94.5  wall=         94.6
++Overall time at end (sec) : cpu=         94.6  wall=         94.7

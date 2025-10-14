@@ -1487,14 +1487,14 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      call paw_ij_reset_flags(paw_ij,self_consistent=.true.) ! Force the recomputation of Dij
      option=0;if (dtset%iscf>0.and.dtset%iscf<10.and.nstep>0) option=1
      ABI_NVTX_START_RANGE(NVTX_SCFCV_PAWDENPOT)
-     call pawdenpot(compch_sph,el_temp,energies%e_paw,energies%e_pawdc,energies%entropy_paw,&
+     call pawdenpot(compch_sph,el_temp,&
 &     gprimd,ipert,dtset%ixc,my_natom,dtset%natom,dtset%nspden,psps%ntypat,dtset%nucdipmom,nzlmopt,&
-&     option,paw_an,paw_an,paw_ij,pawang,dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,&
+&     option,paw_an,paw_an,energies%paw,paw_ij,pawang,dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,&
 &     pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,&
 &     dtset%xc_denpos,dtset%xc_taupos,xred,ucvol,psps%znuclpsp,&
 &     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
 &     hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,&
-&     electronpositron=electronpositron,vpotzero=vpotzero,epaw_xc=energies%e_pawxc,rcpaw=rcpaw,extfpmd=extfpmd)
+&     electronpositron=electronpositron,vpotzero=vpotzero,rcpaw=rcpaw,extfpmd=extfpmd)
      ABI_NVTX_END_RANGE()
 
 !    Correct the average potential with the calculated constant vpotzero
@@ -1507,10 +1507,10 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      vtrial(:,:)=vtrial(:,:)+SUM(vpotzero(:))
      if(option/=1)then
 !      Fix the direct total energy (non-zero only for charged systems)
-       energies%e_paw=energies%e_paw-SUM(vpotzero(:))*dtset%cellcharge(1)
+       energies%paw%epaw=energies%paw%epaw-SUM(vpotzero(:))*dtset%cellcharge(1)
 !      Fix the double counting total energy accordingly (for both charged AND
 !      neutral systems)
-       energies%e_pawdc=energies%e_pawdc-SUM(vpotzero(:))*zion+vpotzero(2)*dtset%cellcharge(1)
+       energies%paw%epaw_dc=energies%paw%epaw_dc-SUM(vpotzero(:))*zion+vpotzero(2)*dtset%cellcharge(1)
      end if
 
 !    PAW+U: impose density matrix if required
@@ -1983,14 +1983,14 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
        call paw_an_reset_flags(paw_an) ! Force the recomputation of on-site potentials
        option=2
        ABI_NVTX_START_RANGE(NVTX_SCFCV_PAWDENPOT)
-       call pawdenpot(compch_sph,el_temp,energies%e_paw,energies%e_pawdc,&
-&       energies%entropy_paw,gprimd,ipert,dtset%ixc,my_natom,dtset%natom,dtset%nspden,&
+       call pawdenpot(compch_sph,el_temp,gprimd,&
+&       ipert,dtset%ixc,my_natom,dtset%natom,dtset%nspden,&
 &       psps%ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,&
-&       paw_ij,pawang,dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,&
-&       pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,&
-&       xred,ucvol,psps%znuclpsp,&
-&       hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
-&       electronpositron=electronpositron,epaw_xc=energies%e_pawxc)
+&       energies%paw,paw_ij,pawang,dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,&
+&       pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,&
+&       dtset%xc_taupos,xred,ucvol,psps%znuclpsp,&
+&       hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,comm_atom=mpi_enreg%comm_atom,&
+&       mpi_atmtab=mpi_enreg%my_atmtab,electronpositron=electronpositron)
        ABI_NVTX_END_RANGE()
      end if
 
@@ -2278,7 +2278,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  esum=energies%e_kinetic+energies%e_ewald+energies%e_corepsp+energies%e_hartree+energies%e_xc&
  &+energies%e_localpsp+enonlocalpsp+energies%e_fock0&
  &+energies%e_hybcomp_E0+energies%e_hybcomp_v0+energies%e_hybcomp_v+energies%e_vdw_dftd&
- &+energies%e_elecfield+energies%e_magfield+energies%e_paw
+ &+energies%e_elecfield+energies%e_magfield+energies%paw%epaw
 
  if (me == 0) then
    write(std_out,'(a1)')' '
@@ -2288,7 +2288,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
    if(enonlocalpsp>1.0d-6) then
       write(std_out,'(a,2(es16.6,a))')' Evext_nl   = : ',enonlocalpsp       ,' Ha ,',enonlocalpsp*Ha_eV          ,' eV'
    endif
-   write(std_out,'(a,2(es16.6,a))')' Epsp_core  = : ',energies%e_corepsp    ,' Ha ,',energies%e_corepsp*Ha_eV      ,' eV'
+   write(std_out,'(a,2(es16.6,a))')' Epsp_core  = : ',energies%e_corepsp    ,' Ha ,',energies%e_corepsp*Ha_eV    ,' eV'
    write(std_out,'(a,2(es16.6,a))')' Ehartree   = : ',energies%e_hartree    ,' Ha ,',energies%e_hartree*Ha_eV    ,' eV'
    if(dtset%usefock==1) then
      write(std_out,'(a,2(es16.6,a))')' Efock      = : ',energies%e_fock0    ,' Ha ,',energies%e_fock0*Ha_eV      ,' eV'
@@ -2303,8 +2303,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
    if(abs(energies%e_magfield)>1.0d-6) then
      write(std_out,'(a,2(es16.6,a))')' Emfield    = : ',energies%e_magfield ,' Ha ,',energies%e_magfield*Ha_eV   ,' eV'
    endif
-   if(abs(energies%e_paw)>1.0d-6) then
-     write(std_out,'(a,2(es16.6,a))')' Epaw       = : ',energies%e_paw      ,' Ha ,',energies%e_paw*Ha_eV        ,' eV'
+   if(abs(energies%paw%epaw)>1.0d-6) then
+     write(std_out,'(a,2(es16.6,a))')' Epaw       = : ',energies%paw%epaw   ,' Ha ,',energies%paw%epaw*Ha_eV     ,' eV'
    endif
    write(std_out,'(a,2(es16.6,a))')' Enn        = : ',energies%e_ewald      ,' Ha ,',energies%e_ewald*Ha_eV      ,' eV'
    write(std_out,'(a98)')'-------------------------------------------------------------------------------------------------'
@@ -2611,14 +2611,16 @@ end subroutine scfcv_core
 !!   | e_nucdip(IN)=energy due to array of nuclear magnetic dipoles
 !!   | e_xc(IN)=exchange-correlation energy (hartree)
 !!   | e_xcdc(IN)=exchange-correlation double-counting energy (hartree)
-!!   | e_paw(IN)=PAW spherical part energy
-!!   | e_pawdc(IN)=PAW spherical part double-counting energy
 !!   | e_elecfield(OUT)=the term of the energy functional that depends explicitly
 !!   |                  on the electric field:  enefield = -ucvol*E*P
 !!   | e_magfield(OUT)=the term of the energy functional that depends explicitly
 !!   |                  on the magnetic field:  e_magfield = -ucvol*E*P
 !!   | e_entropy(OUT)=entropy energy due to the occupation number smearing (if metal)
 !!   |                this value is %entropy * dtset%tsmear (hartree).
+!!   | paw%epaw(IN)=PAW spherical part energy
+!!   | paw%epaw_dc(IN)=PAW spherical part double-counting energy
+!!   | paw%epaw_core(IN)=PAW spherical part energy from core electrons
+!!   | paw%epaw_core_dc(IN)=PAW spherical part double-counting energy from core electrons
 !!  ===== if optforces==1
 !!   forold(3,natom)=cartesian forces of previous SCF cycle (hartree/bohr)
 !!   grnl(3*natom)=gradients of Etot due to nonlocal contributions
@@ -2694,7 +2696,8 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 
 !Local variables-------------------------------
 !scalars
- integer :: comm_grid,dimnhat,ifft,ipositron,ispden,optgr,optgr2,option,optnc,optstr,optstr2,iir,jjr,kkr
+ integer :: comm_grid,dimnhat,ifft,ipositron,ispden,itypat,optgr,optgr2,option
+ integer :: optnc,optstr,optstr2,iir,jjr,kkr
  logical :: apply_residual
  real(dp) :: eenth,ucvol_
 !arrays
@@ -2797,9 +2800,9 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 !    XG 20181025 This gives a variational energy in case of NCPP with all bands occupied - not yet for metals.
      if (usepaw==0) etotal = etotal + energies%e_nlpsp_vfock - energies%e_fock0
 !    XG 20181025 I was expecting the following to give also a variational energy in case of PAW, but this is not true.
-!    if (usepaw==1) etotal = etotal + energies%e_paw + energies%e_nlpsp_vfock - energies%e_fock0
+!    if (usepaw==1) etotal = etotal + energies%paw%epaw + energies%e_nlpsp_vfock - energies%e_fock0
 !    XG 20181025 So, the following is giving a non-variational expression ...
-     if (usepaw==1) etotal = etotal + energies%e_paw + energies%e_fock
+     if (usepaw==1) etotal = etotal + energies%paw%epaw + energies%e_fock
      if (dtset%usedmft/=0) etotal = etotal + energies%e_hu - energies%e_dc
    end if
 
@@ -2810,7 +2813,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &     + energies%e_entropy + energies%e_elecfield + energies%e_magfield &
 &     + energies%e_hybcomp_E0 - energies%e_hybcomp_v0 + energies%e_constrained_dft
      etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
-     if (usepaw/=0) etotal = etotal + energies%e_pawdc
+     if (usepaw/=0) etotal = etotal + energies%paw%epaw_dc
      if (dtset%usedmft/=0) etotal = etotal + energies%e_hu - energies%e_dc
    end if
 
@@ -2842,10 +2845,16 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 
 ! Add the PAW core energy contribution to the internal energy
    if(associated(rcpaw)) then
-     energies%e_cpaw=rcpaw%ehnzc+rcpaw%ekinc
-     energies%e_cpawdc=rcpaw%eeigc-rcpaw%edcc+rcpaw%ehnzc
-     if(optene==0) etotal=etotal+energies%e_cpaw
-     if(optene==1) etotal=etotal+energies%e_cpawdc
+     energies%paw%epaw_core=rcpaw%ehnzc+rcpaw%ekinc
+     energies%paw%epaw_core_dc=rcpaw%eeigc-rcpaw%edcc+rcpaw%ehnzc
+     if (ipositron/=1) then
+       do itypat=1,dtset%ntypat
+         energies%paw%epaw_core=energies%paw%epaw_core+pawtab(itypat)%exccore*rcpaw%atm(itypat)%mult
+         energies%paw%epaw_core_dc=energies%paw%epaw_core_dc+pawtab(itypat)%exccore*rcpaw%atm(itypat)%mult
+       enddo
+     endif
+     if(optene==0) etotal=etotal+energies%paw%epaw_core
+     if(optene==1) etotal=etotal+energies%paw%epaw_core_dc
    end if
 
 !  Compute energy residual
