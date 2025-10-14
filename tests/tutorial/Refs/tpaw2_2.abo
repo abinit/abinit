@@ -1,5 +1,5 @@
 
-.Version 10.3.4.4 of ABINIT, released Nov 2024.
+.Version 10.5.1.5 of ABINIT, released Jul 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 26 Jan 2025.
-- ( at 09h45 )
+.Starting date : Thu  9 Oct 2025.
+- ( at 18h00 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/TestBot_MPI1/tutorial_tpaw2_2/tpaw2_2.abi
-- output file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/TestBot_MPI1/tutorial_tpaw2_2/tpaw2_2.abo
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/tutorial_tpaw2_2/tpaw2_2.abi
+- output file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/tutorial_tpaw2_2/tpaw2_2.abo
 - root for input  files -> tpaw2_2i
 - root for output files -> tpaw2_2o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Ni.PBE-paw.rrkj.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Ni.PBE-paw.rrkj.xml
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -427,9 +427,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Ni.PBE-paw.rrkj.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Ni.PBE-paw.rrkj.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Ni.PBE-paw.rrkj.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Ni.PBE-paw.rrkj.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Ni.PBE-paw.rrkj.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Ni.PBE-paw.rrkj.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.31145012
@@ -657,7 +657,7 @@ xc                  : -1.37298381593082E+00
 Ewald energy        : -3.45121552510625E+01
 psp_core            :  2.69117300535485E+00
 local_psp           : -1.48032911252229E+01
-spherical_terms     :  4.57749279617623E-01
+PAW spherical_terms :  4.57749279617623E-01
 internal            : -3.96267321147220E+01
 '-kT*entropy'       : -1.34876505883167E-03
 total_energy        : -3.96280808797808E+01
@@ -672,11 +672,21 @@ band_energy         :  2.91496955310350E+00
 Ewald energy        : -3.45121552510625E+01
 psp_core            :  2.69117300535485E+00
 xc_dc               : -3.24191597745329E+00
-spherical_terms     : -7.47880333126406E+00
+PAW spherical_terms : -7.47880333126406E+00
 internal            : -3.96267320013215E+01
 '-kT*entropy'       : -1.34876505883167E-03
 total_energy_dc     : -3.96280807663803E+01
 total_energy_dc_eV  : -1.07833491736906E+03
+...
+
+
+--- !EnergyTermsWithPAWCore
+iteration_state     : {dtset: 1, }
+comment             : 'Components of total free energy, including PAW core contributions'
+Total energy        : -1.52079752929134E+03
+Total energy DC     : -1.52079752917794E+03
+Total energy (eV)   : -4.13830053428864E+04
+Total energy DC (eV): -4.13830053398006E+04
 ...
 
 
@@ -1108,10 +1118,10 @@ P           mkmem          60
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         21.4  wall=         21.4
+- Proc.   0 individual time (sec): cpu=         21.3  wall=         21.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         21.4  wall=         21.4
++Overall time at end (sec) : cpu=         21.3  wall=         21.3

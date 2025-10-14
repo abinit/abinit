@@ -3190,6 +3190,18 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      ABI_ERROR_NOSTOP(msg, ierr)
    end if
 
+!  paw_add_core
+   if (usepaw==1) then
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'paw_add_core',dt%paw_add_core,2,(/0,1/),iout)
+     if (dt%paw_add_core==1.and.any(pspheads(1:npsp)%pspcod/=17)) then
+       write(msg, '(5a)' )&
+        'paw_add_core input variable can only be used PAW datasets in XML format.',ch10,&
+        'However one of your PAW atomic dataset is not in PAW-XML format!',ch10,&
+        'Action: change your pseudopotential file to a PAW-XML one '
+       ABI_ERROR_NOSTOP(msg,ierr)
+     end if
+   endif
+
 !  pawcpxocc
    if (usepaw==1) then
      call chkint_eq(0,0,cond_string,cond_values,ierr,'pawcpxocc',dt%pawcpxocc,2,(/1,2/),iout)
@@ -4225,7 +4237,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      end if
    end if
 
-!  usercpaw
+!  use_rcpaw
    call chkint_eq(0,0,cond_string,cond_values,ierr,'use_rcpaw',dt%use_rcpaw,2,(/0,1/),iout)
    if(dt%use_rcpaw==1) then
      if((dt%npfft/=1).or.(dt%occopt<3).or.(dt%occopt>8).or.&
@@ -4234,6 +4246,13 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
         (dt%usepaw/=1).or.(dt%usepawu==1).or.(dt%usedmft==1)) then
        ABI_ERROR('RCPAW: work in progress')
      endif
+     if (any(pspheads(1:npsp)%pspcod/=17)) then
+       write(msg, '(5a)' )&
+        'Relaxed-core PAW (use_rcpaw=1) can only be used PAW datasets in XML format.',ch10,&
+        'However one of your PAW atomic dataset is not in PAW-XML format!',ch10,&
+        'Action: change your pseudopotential file to a PAW-XML one '
+       ABI_ERROR_NOSTOP(msg,ierr)
+     end if
    endif
 
 !  usexcnhat

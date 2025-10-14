@@ -26,6 +26,7 @@ sources = [
  "m_paw_numeric.F90",
  "m_paw_sphharm.F90",
  "m_paw_io.F90",
+ "m_paw_energies.F90",
  "m_paw_lmn.F90",
  "m_pawang.F90",
  "m_pawrad.F90",
