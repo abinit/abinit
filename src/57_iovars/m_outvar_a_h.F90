@@ -116,7 +116,7 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  integer :: lpawu1,narr,mxnsp
  integer :: natnd,natom,nimfrqs,nimage
  integer :: ntypalch,ntypat,print_constraint,size1,size2,test_write,tmpimg0
- logical :: compute_static_images,test_triqs
+ logical :: compute_static_images
  real(dp) :: cpus
  character(len=1) :: firstchar_fftalg,firstchar_gpu
  character(len=14) :: str_hyb
@@ -650,8 +650,6 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%dmatudiag
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmatudiag','INT',0)
 
- test_triqs = any(dtsets(1:ndtset_alloc)%dmft_solv==6).or.any(dtsets(1:ndtset_alloc)%dmft_solv==7)
-
  intarr(1,:)=dtsets(:)%dmftbandf
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmftbandf','INT',0)
 
@@ -664,15 +662,11 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%dmftcheck
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmftcheck','INT',0)
 
- if (.not. test_triqs) then
-   intarr(1,:)=dtsets(:)%dmftctqmc_basis
-   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmftctqmc_basis','INT',0)
- end if
+ intarr(1,:)=dtsets(:)%dmftctqmc_basis
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmftctqmc_basis','INT',0)
 
- if (.not. test_triqs) then
-   intarr(1,:)=dtsets(:)%dmftctqmc_meas
-   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmftctqmc_meas','INT',0)
- end if
+ intarr(1,:)=dtsets(:)%dmftctqmc_meas
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmftctqmc_meas','INT',0)
 
  intarr(1,:)=dtsets(:)%dmft_dc
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_dc','INT',0)
@@ -697,10 +691,8 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'dmft_nominal','INT',multivals%natom)
 
- if (.not. test_triqs) then
-   intarr(1,:)=dtsets(:)%dmft_nwli
-   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_nwli','INT',0)
- end if
+ intarr(1,:)=dtsets(:)%dmft_nwli
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_nwli','INT',0)
 
  intarr(1,:)=dtsets(:)%dmft_nwlo
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_nwlo','INT',0)
@@ -725,17 +717,14 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%dmft_prtwan
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_prtwan','INT',0)
 
- if (.not. test_triqs) then
-   intarr(1,:)=dtsets(:)%dmftqmc_l
-   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmftqmc_l','INT',0)
+ intarr(1,:)=dtsets(:)%dmftqmc_l
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmftqmc_l','INT',0)
 
-   dprarr(1,:)=dtsets(:)%dmftqmc_n
-   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmftqmc_n','DPR',0)
+ dprarr(1,:)=dtsets(:)%dmftqmc_n
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmftqmc_n','DPR',0)
 
-   intarr(1,:)=dtsets(:)%dmftqmc_therm
-   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmftqmc_therm','INT',0)
-
- end if
+ intarr(1,:)=dtsets(:)%dmftqmc_therm
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmftqmc_therm','INT',0)
 
  intarr(1,:)=dtsets(:)%dmft_read_occnd
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_read_occnd','INT',0)
@@ -763,39 +752,35 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%dmft_tollc
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_tollc','DPR',0)
 
- if (test_triqs) then
+ intarr(1,:)=dtsets(:)%dmft_triqs_basis
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_basis','INT',0)
 
-   intarr(1,:)=dtsets(:)%dmftctqmc_basis
-   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_basis','INT',0)
+ dprarr(1,:)=dtsets(:)%dmft_triqs_dlr_epsilon
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_dlr_e','DPR',0)
 
-   dprarr(1,:)=dtsets(:)%dmft_triqs_epsilon
-   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_dlr_e','DPR',0)
+ dprarr(1,:)=dtsets(:)%dmft_triqs_dlr_wmax
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_dlr_w','DPR',0)
 
-   dprarr(1,:)=dtsets(:)%dmft_triqs_wmax
-   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_dlr_w','DPR',0)
+ intarr(1,:)=dtsets(:)%dmft_triqs_length_cycle
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_lengt','INT',0)
 
-   intarr(1,:)=dtsets(:)%dmftctqmc_meas
-   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_lengt','INT',0)
+ intarr(1,:)=dtsets(:)%dmft_triqs_n_cycles
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_n_cyc','INT',0)
 
-   intarr(1,:)=dtsets(:)%dmft_triqs_n_cycles
-   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_n_cyc','INT',0)
+ intarr(1,:)=dtsets(:)%dmft_triqs_n_iw
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_n_iw','INT',0)
 
-   intarr(1,:)=dtsets(:)%dmft_nwli
-   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_n_iw','INT',0)
+ intarr(1,:)=dtsets(:)%dmft_triqs_n_l
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_n_l','INT',0)
 
-   intarr(1,:)=dtsets(:)%dmft_triqs_nleg
-   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_n_l','INT',0)
+ intarr(1,:)=dtsets(:)%dmft_triqs_n_tau
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_n_tau','INT',0)
 
-   intarr(1,:)=dtsets(:)%dmftqmc_l
-   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_n_tau','INT',0)
+ intarr(1,:)=dtsets(:)%dmft_triqs_n_warmup_cycles_init
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_n_wai','INT',0)
 
-   intarr(1,:)=dtsets(:)%dmftqmc_therm
-   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_n_wai','INT',0)
-
-   intarr(1,:)=dtsets(:)%dmft_triqs_therm_restart
-   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_n_war','INT',0)
-
- end if
+ intarr(1,:)=dtsets(:)%dmft_triqs_n_warmup_cycles_restart
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_n_war','INT',0)
 
  intarr(1,:)=dtsets(:)%dmft_wanorthnorm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_wanorthnorm','INT',0)

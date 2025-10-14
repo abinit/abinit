@@ -741,7 +741,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  integer :: iatom1,iband,icb,ig,ik,ikg,ikpt,im,im1,indproj,iproj,ir,isppol
  integer :: itypat,jc1,jj,jm,ll,lpawu,lpawu1,maxlpawu,mband,mbandc,mesh_size,mesh_type
  integer :: mkmem,ml1,mm,mpw,ms1,myproc,natom,nband_k,ndim,nkpt,nproc,nproju,npw
- integer :: nspinor,nsppol,nsym,ntypat,off_diag,siz_paw,siz_proj,siz_wan,use_dmft
+ integer :: nspinor,nsppol,nsym,ntypat,nwli,off_diag,siz_paw,siz_proj,siz_wan,use_dmft
  logical :: t2g,use_full_chipsi,verif,x2my2d
  real(dp) :: bes,besp,fac_bessel,invsqrt2lp1,lstep,norm,onem,rad,rint,rstep,sumwtk,xj,xmj
  complex(dpc) :: j_l
@@ -1096,9 +1096,10 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
 !=======================
 
  paw_dmft%dmft_log_freq = merge(0,1,dmft_solv==6.or.dmft_solv==7.or.dmft_solv==9)
+ nwli = merge(dtset%dmft_triqs_n_iw,dtset%dmft_nwli,dmft_solv==6.or.dmft_solv==7)
 
- paw_dmft%dmft_nwli = dtset%dmft_nwli
- paw_dmft%dmft_nwlo = merge(dtset%dmft_nwlo,dtset%dmft_nwli,paw_dmft%dmft_log_freq==1)
+ paw_dmft%dmft_nwli = nwli
+ paw_dmft%dmft_nwlo = merge(dtset%dmft_nwlo,nwli,paw_dmft%dmft_log_freq==1)
  paw_dmft%dmft_nwr = 800
 
  paw_dmft%dmft_rslf = dtset%dmft_rslf
@@ -1108,17 +1109,17 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
 !==  CTQMC
 !=======================
 
- paw_dmft%dmftqmc_l     = dtset%dmftqmc_l
+ paw_dmft%dmftqmc_l     = merge(dtset%dmft_triqs_n_tau,dtset%dmftqmc_l,dmft_solv==6.or.dmft_solv==7)
  paw_dmft%dmftqmc_n     = dtset%dmftqmc_n
  paw_dmft%dmftqmc_seed  = dtset%dmftqmc_seed
- paw_dmft%dmftqmc_therm = dtset%dmftqmc_therm
+ paw_dmft%dmftqmc_therm = merge(dtset%dmft_triqs_n_warmup_cycles_init,dtset%dmftqmc_therm,dmft_solv==6.or.dmft_solv==7)
 
- paw_dmft%dmftctqmc_basis  = dtset%dmftctqmc_basis
+ paw_dmft%dmftctqmc_basis  = merge(dtset%dmft_triqs_basis,dtset%dmftctqmc_basis,dmft_solv==6.or.dmft_solv==7)
  paw_dmft%dmftctqmc_check  = dtset%dmftctqmc_check
  paw_dmft%dmftctqmc_correl = dtset%dmftctqmc_correl
  paw_dmft%dmftctqmc_gmove  = dtset%dmftctqmc_gmove
  paw_dmft%dmftctqmc_grnns  = dtset%dmftctqmc_grnns
- paw_dmft%dmftctqmc_meas   = dtset%dmftctqmc_meas
+ paw_dmft%dmftctqmc_meas   = merge(dtset%dmft_triqs_length_cycle,dtset%dmftctqmc_meas,dmft_solv==6.or.dmft_solv==7)
  paw_dmft%dmftctqmc_mrka   = dtset%dmftctqmc_mrka
  paw_dmft%dmftctqmc_mov    = dtset%dmftctqmc_mov
  paw_dmft%dmftctqmc_order  = dtset%dmftctqmc_order
@@ -1134,27 +1135,27 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
 !==  TRIQS CTQMC
 !=======================
 
- paw_dmft%dmft_triqs_nleg                          = dtset%dmft_triqs_nleg
- paw_dmft%dmft_triqs_therm_restart                 = dtset%dmft_triqs_therm_restart
+ paw_dmft%dmft_triqs_nleg                          = dtset%dmft_triqs_n_l
+ paw_dmft%dmft_triqs_therm_restart                 = dtset%dmft_triqs_n_warmup_cycles_restart
  paw_dmft%dmft_triqs_det_init_size                 = dtset%dmft_triqs_det_init_size
  paw_dmft%dmft_triqs_det_n_operations_before_check = dtset%dmft_triqs_det_n_operations_before_check
  paw_dmft%dmft_triqs_move_shift                    = (dtset%dmft_triqs_move_shift == 1)
  paw_dmft%dmft_triqs_move_double                   = (dtset%dmft_triqs_move_double == 1)
  paw_dmft%dmft_triqs_loc_n_min                     = dtset%dmft_triqs_loc_n_min
  paw_dmft%dmft_triqs_loc_n_max                     = dtset%dmft_triqs_loc_n_max
- paw_dmft%dmft_triqs_seed_a                        = dtset%dmft_triqs_seed_a
- paw_dmft%dmft_triqs_seed_b                        = dtset%dmft_triqs_seed_b
+ paw_dmft%dmft_triqs_seed_a                        = dtset%dmft_triqs_random_seed_a
+ paw_dmft%dmft_triqs_seed_b                        = dtset%dmft_triqs_random_seed_b
  paw_dmft%dmft_triqs_measure_density_matrix        = (dtset%dmft_triqs_measure_density_matrix == 1)
  paw_dmft%dmft_triqs_time_invariance               = (dtset%dmft_triqs_time_invariance == 1)
  paw_dmft%dmft_triqs_use_norm_as_weight            = (dtset%dmft_triqs_use_norm_as_weight == 1)
- paw_dmft%dmft_triqs_leg_measure                   = (dtset%dmft_triqs_leg_measure == 1)
+ paw_dmft%dmft_triqs_leg_measure                   = (dtset%dmft_triqs_measure_G_l == 1)
  paw_dmft%dmft_triqs_off_diag                      = (off_diag == 1)
  paw_dmft%dmft_triqs_imag_threshold                = dtset%dmft_triqs_imag_threshold
  paw_dmft%dmft_triqs_det_precision_warning         = dtset%dmft_triqs_det_precision_warning
  paw_dmft%dmft_triqs_det_precision_error           = dtset%dmft_triqs_det_precision_error
  paw_dmft%dmft_triqs_det_singular_threshold        = dtset%dmft_triqs_det_singular_threshold
- paw_dmft%dmft_triqs_epsilon                       = dtset%dmft_triqs_epsilon
- paw_dmft%dmft_triqs_lambda                        = dtset%dmft_triqs_wmax / dtset%tsmear
+ paw_dmft%dmft_triqs_epsilon                       = dtset%dmft_triqs_dlr_epsilon
+ paw_dmft%dmft_triqs_lambda                        = dtset%dmft_triqs_dlr_wmax / dtset%tsmear
  paw_dmft%dmft_triqs_entropy                       = dtset%dmft_triqs_entropy
  paw_dmft%dmft_triqs_compute_integral              = dtset%dmft_triqs_compute_integral
  paw_dmft%dmft_triqs_gaussorder                    = dtset%dmft_triqs_gaussorder
