@@ -3,7 +3,7 @@
  optdriver 7    # Enter EPH driver.
  eph_task 24    # ZPR computation from GSTORE file
 
- nband 9
+ nband 12
  ecut 45.0
  #prtvol 10
 
