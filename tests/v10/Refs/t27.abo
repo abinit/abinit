@@ -1,5 +1,5 @@
 
-.Version 10.5.6.1 of ABINIT, released Sep 2025.
+.Version 10.4.5.1 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -13,10 +13,11 @@
  Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
-Starting date : Thu  2 Oct 2025.
-- ( at 11h58 )
+
+.Starting date : Tue 14 Oct 2025.
+- ( at 13h30 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/leshu_gbt2/tests/TestBot_MPI1/v10_t27/t27.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v10_t27/t27.abi
 - output file    -> t27.abo
 - root for input  files -> t27i
 - root for output files -> t27o
@@ -155,8 +156,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.16198
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/leshu_gbt2/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/Fe.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/leshu_gbt2/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/Fe.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/Fe.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/Fe.psp8
 - Fe    ONCVPSP-3.3.0  r_core=   1.26437   1.20546   1.56719
 - 26.00000  16.00000    180420                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -244,10 +245,10 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
     1 Fe   2.00000       14.045260      3.088949    3.088737    0.022486    0.028368   89.473800    0.417112
  ------------------------------------------------------------------------------------------------------------
- Total magnetization (spheres)
+ Cell sum of sphere magnetization
  (cart.coord.)                                      3.088737    0.022486    0.028368
  (sph.coord.)                           3.088949                                       89.473800    0.417112
- Total magnetization (exact)
+ Integral of periodic magnetization  3.238660    0.023576    0.029702
  (cart.coord.)                                      3.238660    0.023576    0.029702
  (sph.coord.)                           3.238882                                       89.474559    0.417082
 ================================================================================
@@ -495,10 +496,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         19.2  wall=         19.2
+- Proc.   0 individual time (sec): cpu=         18.8  wall=         18.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         19.2  wall=         19.2
++Overall time at end (sec) : cpu=         18.8  wall=         18.8

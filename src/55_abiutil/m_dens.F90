@@ -2207,7 +2207,7 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
          call wrtout(units,msg)
 
          if (any(qgbt /= zero)) then
-           write(msg, '(a,f10.6,f12.6,f12.6)') ' Integral of periodic magnetization', mag_x, mag_y, mag_z
+           write(msg, '(a,f10.6,f12.6,f12.6)') ' Integral of periodic magnetization'
            call wrtout(units,msg)
          else
            write(msg, '(a,f12.6,f12.6,4f12.6)') ' Total magnetization (exact) '
@@ -2226,6 +2226,7 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
            write(msg, '(a,3f12.6)') ' (cart.coord.)                                  ', mag_x_im,mag_y_im,mag_z_im
            call wrtout(units,msg)
            write(msg,'(a,f12.6,a,2f12.6)')' (sph.coord.)                       ', exact_mag_r_im,"                                     ", exact_mag_theta_im,exact_mag_phi_im
+           call wrtout(units,msg)
          endif
        endif
        enddo
