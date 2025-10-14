@@ -80,7 +80,7 @@ MODULE m_bs_defs
    integer :: k = 0               ! Index of the k-point in the BZ
    integer :: v = 0               ! Valence band index.
    integer :: c = 0               ! Conduction band index.
-   complex(dpc) :: en=huge(one) ! Transition energy
+   complex(dp) :: en=huge(one) ! Transition energy
  end type transition
 
  public :: init_transitions     ! Main creation method.
@@ -207,7 +207,7 @@ type,public :: excparam
 
   real(dp),allocatable :: q(:,:)           ! Q-points for optical limit (reduced coordinates).
 
-  complex(dpc),allocatable :: omega(:)
+  complex(dp),allocatable :: omega(:)
   ! omega(nomega)
   ! Frequency mesh for epsilon (including the complex imaginary shift)
 
@@ -549,13 +549,13 @@ subroutine init_transitions(Trans,lomo_spin,humo_spin,ir_cut,uv_cut,nkbz,nbnds,n
  integer,intent(in) :: ktab(nkbz)
  integer,intent(out) :: nreh(nsppol)
  real(dp),intent(in) :: occ(nbnds,nkibz,nsppol)
- complex(dpc),intent(in) :: gw_energy(nbnds,nkibz,nsppol)
+ complex(dp),intent(in) :: gw_energy(nbnds,nkibz,nsppol)
 
 !Local variables ------------------------------
 !scalars
  integer :: spin,it,ik_bz,ik_ibz,iv,ic,max_occ,sweep,max_nreh,lomo,humo
  real(dp) :: tene, delta_f,min_tene,max_tene
- complex(dpc) :: cplx_enet
+ complex(dp) :: cplx_enet
  logical :: add_transition
 !************************************************************************
 

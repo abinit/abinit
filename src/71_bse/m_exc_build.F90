@@ -167,7 +167,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
 !arrays
  integer,intent(in) :: ngfft_osc(18)
  integer,intent(in) :: ktabr(nfftot_osc,Kmesh%nbz)
- complex(gwpc),intent(in) :: rhxtwg_q0(BSp%npweps,BSp%lomo_min:BSp%humo_max,BSp%lomo_min:BSp%humo_max,Wfd%nkibz,Wfd%nsppol)
+ complex(gwp),intent(in) :: rhxtwg_q0(BSp%npweps,BSp%lomo_min:BSp%humo_max,BSp%lomo_min:BSp%humo_max,Wfd%nkibz,Wfd%nsppol)
  type(Pawtab_type),intent(in) :: Pawtab(Psps%ntypat*Wfd%usepaw)
  type(pawpwff_t),intent(in) :: Paw_pwff(Psps%ntypat*Wfd%usepaw)
 
@@ -191,8 +191,8 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
  integer :: ierr,nproc,my_rank,mgfft_osc,fftalga_osc,comm
  integer(i8b) :: tot_nels,prev_nels,prev_ncols,nels,ir,it,itp,ist,iend,my_hsize
  real(dp) :: faq,kx_fact,cputime,walltime,gflops
- complex(spc) :: http,ctemp
- complex(dpc) :: ph_mkpt,ph_mkt,ene_t,ene_tp
+ complex(sp) :: http,ctemp
+ complex(dp) :: ph_mkpt,ph_mkt,ene_t,ene_tp
  logical,parameter :: with_umklp=.FALSE.
  logical :: use_mpiio,do_coulomb_term,do_exchange_term,w_is_diagonal,isirred
  logical :: is_qeq0
@@ -209,25 +209,25 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
  integer,allocatable :: col_start(:),col_stop(:)
  integer,allocatable :: gbound(:,:)
  real(dp) :: kbz(3),kpbz(3),qbz(3),spinrot_k(4),spinrot_kp(4),kmkp(3),tsec(2)
- complex(dpc),allocatable :: my_bsham(:),buffer(:),buffer_2d(:,:),my_kxssp(:,:),prev_col(:)
+ complex(dp),allocatable :: my_bsham(:),buffer(:),buffer_2d(:,:),my_kxssp(:,:),prev_col(:)
 !DBYG
- complex(dpc),allocatable :: acoeffs(:),bcoeffs(:),ccoeffs(:) ! Coeff of W = a/q^2 + b/q + c
+ complex(dp),allocatable :: acoeffs(:),bcoeffs(:),ccoeffs(:) ! Coeff of W = a/q^2 + b/q + c
  integer :: a_unt, b_unt, c_unt
- complex(dpc) :: aatmp, bbtmp, cctmp
- complex(gwpc),allocatable :: aa_vpv(:),aa_cpc(:),aa_ctccp(:)
- complex(gwpc),allocatable :: bb_vpv1(:),bb_cpc1(:),bb_ctccp1(:)
- complex(gwpc),allocatable :: bb_vpv2(:),bb_cpc2(:),bb_ctccp2(:)
- complex(gwpc),allocatable :: cc_vpv(:),cc_cpc(:),cc_ctccp(:)
- complex(dpc),allocatable :: abuffer(:),aprev_col(:)
- complex(dpc),allocatable :: bbuffer(:),bprev_col(:)
- complex(dpc),allocatable :: cbuffer(:),cprev_col(:)
+ complex(dp) :: aatmp, bbtmp, cctmp
+ complex(gwp),allocatable :: aa_vpv(:),aa_cpc(:),aa_ctccp(:)
+ complex(gwp),allocatable :: bb_vpv1(:),bb_cpc1(:),bb_ctccp1(:)
+ complex(gwp),allocatable :: bb_vpv2(:),bb_cpc2(:),bb_ctccp2(:)
+ complex(gwp),allocatable :: cc_vpv(:),cc_cpc(:),cc_ctccp(:)
+ complex(dp),allocatable :: abuffer(:),aprev_col(:)
+ complex(dp),allocatable :: bbuffer(:),bprev_col(:)
+ complex(dp),allocatable :: cbuffer(:),cprev_col(:)
  character(len=fnlen) :: tmpfname
  integer :: ii
 !END DBYG
- complex(gwpc),allocatable :: vc_sqrt_qbz(:)
- complex(gwpc),allocatable :: rhotwg1(:),rhotwg2(:),rhxtwg_vpv(:),rhxtwg_cpc(:),ctccp(:)
- complex(gwpc),target,allocatable :: ur_ckp(:),ur_vkp(:),ur_vk(:),ur_ck(:)
- complex(gwpc),ABI_CONTIGUOUS pointer :: ptur_ckp(:),ptur_vkp(:),ptur_vk(:),ptur_ck(:)
+ complex(gwp),allocatable :: vc_sqrt_qbz(:)
+ complex(gwp),allocatable :: rhotwg1(:),rhotwg2(:),rhxtwg_vpv(:),rhxtwg_cpc(:),ctccp(:)
+ complex(gwp),target,allocatable :: ur_ckp(:),ur_vkp(:),ur_vk(:),ur_ck(:)
+ complex(gwp),ABI_CONTIGUOUS pointer :: ptur_ckp(:),ptur_vkp(:),ptur_vk(:),ptur_ck(:)
  type(pawcprj_type),target,allocatable :: Cp_tmp1(:,:),Cp_tmp2(:,:)
  type(pawcprj_type),target,allocatable :: Cp_tmp3(:,:),Cp_tmp4(:,:)
  type(pawcprj_type),allocatable :: Cp_ckp(:,:),Cp_vkp(:,:)
@@ -241,7 +241,6 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
 #ifdef DEV_MG_DEBUG_MODE
  integer,allocatable :: ttp_check(:,:)
 #endif
-
 !************************************************************************
 
  call timab(680,1,tsec)
@@ -255,32 +254,28 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
  if (Wfd%nsppol==2) then
    ABI_WARNING("nsppol==2 is still under testing")
  end if
- !
  ! MPI variables.
  comm    = Wfd%comm
  nproc   = Wfd%nproc
  my_rank = Wfd%my_rank
 
- !
  ! Basic constants.
  nspinor = Wfd%nspinor
  nsppol  = Wfd%nsppol
  dim_rtwg=1; faq = one/(Cryst%ucvol*Kmesh%nbz)
  npweps = Bsp%npweps
- !
+
  ! Prepare the FFT tables to have u(r) on the ngfft_osc mesh.
  mgfft_osc = MAXVAL(ngfft_osc(1:3))
  fftalga_osc = ngfft_osc(7)/100
- if ( ANY(ngfft_osc(1:3) /= Wfd%ngfft(1:3)) ) then
-   call wfd%change_ngfft(Cryst,Psps,ngfft_osc)
- end if
+ if ( ANY(ngfft_osc(1:3) /= Wfd%ngfft(1:3)) ) call wfd%change_ngfft(Cryst,Psps,ngfft_osc)
 
  ABI_MALLOC(igfftg0,(npweps))
  ABI_MALLOC(ktabr_k,(nfftot_osc))
  ABI_MALLOC(ktabr_kp,(nfftot_osc))
  ABI_MALLOC(id_tab,(nfftot_osc))
  id_tab = (/(ic, ic=1,nfftot_osc)/)
- !
+
  ! Workspace arrays for wavefunctions and oscillator matrix elements.
  ABI_MALLOC(rhxtwg_vpv,(npweps))
  ABI_MALLOC(rhxtwg_cpc,(npweps))
@@ -365,25 +360,24 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
  if (is_resonant) then
    if (use_mpiio) then
      write(msg,'(2a,f6.2,a)')&
-&      ". Writing resonant excitonic Hamiltonian on file "//TRIM(fname)," via MPI-IO; file size= ",two*tot_nels*dpc*b2Gb," [Gb]."
+      ". Writing resonant excitonic Hamiltonian on file "//TRIM(fname)," via MPI-IO; file size= ",two*tot_nels*dp*b2Gb," [Gb]."
    else
      write(msg,'(2a,f6.2,a)')&
-&      ". Writing resonant excitonic Hamiltonian on file "//TRIM(fname),"; file size= ",two*dpc*tot_nels*b2Gb," [Gb]."
+      ". Writing resonant excitonic Hamiltonian on file "//TRIM(fname),"; file size= ",two*dp*tot_nels*b2Gb," [Gb]."
    end if
  else
    if (use_mpiio) then
      write(msg,'(2a,f6.2,a)')&
-&      ". Writing coupling excitonic Hamiltonian on file "//TRIM(fname)," via MPI-IO; file size= ",tot_nels*2*dpc*b2Gb," [Gb]."
+      ". Writing coupling excitonic Hamiltonian on file "//TRIM(fname)," via MPI-IO; file size= ",tot_nels*2*dp*b2Gb," [Gb]."
    else
      write(msg,'(2a,f6.2,a)')&
-&      ". Writing coupling excitonic Hamiltonian on file "//TRIM(fname),"; file size= ",two*dpc*tot_nels*b2Gb," [Gb]."
+      ". Writing coupling excitonic Hamiltonian on file "//TRIM(fname),"; file size= ",two*dp*tot_nels*b2Gb," [Gb]."
    end if
  end if
  call wrtout([std_out, ab_out], msg, do_flush=.True.)
- !
+
  ! Master writes the BSE header with Fortran IO.
  if (my_rank==master) then
-
    if (open_file(fname,msg,newunit=bsh_unt,form="unformatted",action="write") /= 0) then
       ABI_ERROR(msg)
    end if
@@ -547,7 +541,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
    my_ends   = [my_rows(2),my_cols(2)]
    !
    ! Announce the treatment of submatrix treated by each node.
-   bsize_my_block = 2*dpc*my_hsize
+   bsize_my_block = 2*dp*my_hsize
    write(msg,'(4(a,i0))')' Treating ',my_hsize,'/',nels,' matrix elements, from column ',my_cols(1),' up to column ',my_cols(2)
    call wrtout(std_out, msg)
 
@@ -562,7 +556,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
    ABI_MALLOC_OR_DIE(my_bsham,(t_start(my_rank):t_stop(my_rank)), ierr)
 
    if (BSp%prep_interp) then
-     ! Allocate big (scalable) buffers to store a,b,c coeffients
+     ! Allocate big (scalable) buffers to store a,b,c coefficients
      ABI_MALLOC_OR_DIE(acoeffs,(t_start (my_rank):t_stop(my_rank)), ierr)
      ABI_MALLOC_OR_DIE(bcoeffs,(t_start(my_rank):t_stop(my_rank)), ierr)
      ABI_MALLOC_OR_DIE(ccoeffs,(t_start(my_rank):t_stop(my_rank)), ierr)
@@ -651,7 +645,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
            ABI_MALLOC(gbound,(2*mgfft_osc+8,2*use_padfft))
          end if
          !
-         ! * Get iq_ibz, and symmetries from iq_bz
+         ! Get iq_ibz, and symmetries from iq_bz
          call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q)
          is_qeq0 = (normv(qbz,Cryst%gmet,'G')<GW_TOLQ0)
 
@@ -752,14 +746,14 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
                bb_cpc2(2:) = czero
 
                if(ik_bz == ikp_bz) then
-                  ! Enforce orthogonality of the wavefunctions.
-                  if(icp == ic) then
-                    aa_cpc(1) = cone
-                    bb_cpc2(1) = cone
-                  else
-                    aa_cpc(1) = czero
-                    bb_cpc2(1) = czero
-                  end if
+                 ! Enforce orthogonality of the wavefunctions.
+                 if(icp == ic) then
+                   aa_cpc(1) = cone
+                   bb_cpc2(1) = cone
+                 else
+                   aa_cpc(1) = czero
+                   bb_cpc2(1) = czero
+                 end if
                end if
 
                ! MG TODO: a does not require a call to w0gemv
@@ -1176,8 +1170,8 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
 
      if (offset_err/=0) then
        write(msg,"(3a)")&
-&        "Global position index cannot be stored in a standard Fortran integer. ",ch10,&
-&        "BSE matrix cannot be written with a single MPI-IO call. "
+        "Global position index cannot be stored in a standard Fortran integer. ",ch10,&
+        "BSE matrix cannot be written with a single MPI-IO call. "
        ABI_ERROR(msg)
      end if
      !
@@ -1237,7 +1231,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
          ist=iend+1
        end do
        write(msg,'(2(a,i0))')" Wraparound error: iend=",iend," my_hsize=",hsize_of(my_rank)
-       ABI_CHECK(iend==hsize_of(my_rank),msg)
+       ABI_CHECK(iend == hsize_of(my_rank),msg)
        ABI_FREE(my_bsham)
        if (BSp%prep_interp) then
          ABI_FREE(acoeffs)
@@ -1322,19 +1316,19 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
            iend = ist + nrows -1
            !write(std_out,*)"Using nrows, ist, iend=",nrows,ist,iend
            if (jj==1 .and. prev_nrows>0) then ! join prev_col and this subcolumn.
-             write(bsh_unt) CMPLX(prev_col,kind=dpc),CMPLX(buffer(ist:iend),kind=dpc)
+             write(bsh_unt) CMPLX(prev_col,kind=dp),CMPLX(buffer(ist:iend),kind=dp)
              if (BSp%prep_interp) then
-               write(a_unt) CMPLX(aprev_col,kind=dpc),CMPLX(abuffer(ist:iend),kind=dpc)
-               write(b_unt) CMPLX(bprev_col,kind=dpc),CMPLX(bbuffer(ist:iend),kind=dpc)
-               write(c_unt) CMPLX(cprev_col,kind=dpc),CMPLX(cbuffer(ist:iend),kind=dpc)
+               write(a_unt) CMPLX(aprev_col,kind=dp),CMPLX(abuffer(ist:iend),kind=dp)
+               write(b_unt) CMPLX(bprev_col,kind=dp),CMPLX(bbuffer(ist:iend),kind=dp)
+               write(c_unt) CMPLX(cprev_col,kind=dp),CMPLX(cbuffer(ist:iend),kind=dp)
              end if
              prev_nrows = prev_nrows + iend-ist+1
            else
-             write(bsh_unt) CMPLX(buffer(ist:iend),kind=dpc)
+             write(bsh_unt) CMPLX(buffer(ist:iend),kind=dp)
              if (BSp%prep_interp) then
-               write(a_unt) CMPLX(abuffer(ist:iend),kind=dpc)
-               write(b_unt) CMPLX(bbuffer(ist:iend),kind=dpc)
-               write(c_unt) CMPLX(cbuffer(ist:iend),kind=dpc)
+               write(a_unt) CMPLX(abuffer(ist:iend),kind=dp)
+               write(b_unt) CMPLX(bbuffer(ist:iend),kind=dp)
+               write(c_unt) CMPLX(cbuffer(ist:iend),kind=dp)
              end if
              prev_nrows=0
            end if
@@ -1731,8 +1725,8 @@ subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gs
  type(gsphere_t),intent(in) :: Gsph_x,Gsph_c
 !arrays
  integer(i8b),intent(in) :: t_start(0:nproc-1),t_stop(0:nproc-1)
- complex(gwpc),intent(in) :: rhxtwg_q0(npweps,BSp%lomo_min:BSp%humo_max,BSp%lomo_min:BSp%humo_max,Kmesh%nibz,nsppol)
- complex(dpc),intent(inout) :: my_bsham(t_start(my_rank):t_stop(my_rank))
+ complex(gwp),intent(in) :: rhxtwg_q0(npweps,BSp%lomo_min:BSp%humo_max,BSp%lomo_min:BSp%humo_max,Kmesh%nibz,nsppol)
+ complex(dp),intent(inout) :: my_bsham(t_start(my_rank):t_stop(my_rank))
 
 !Local variables ------------------------------
 !scalars
@@ -1744,7 +1738,7 @@ subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gs
  integer :: block
  integer(i8b) :: tot_nels,ir,it,itp
  real(dp) :: faq,kx_fact
- complex(spc) :: ctemp
+ complex(sp) :: ctemp
  character(len=500) :: msg
 !arrays
  integer :: bidx(2,4),spin_ids(2,3)
@@ -1753,8 +1747,8 @@ subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gs
  integer,allocatable :: ncols_of(:)
  integer,allocatable :: col_start(:),col_stop(:)
  real(dp) :: qbz(3),tsec(2) !kbz(3),kpbz(3),
- complex(dpc),allocatable :: my_kxssp(:,:)
- complex(gwpc),allocatable :: vc_sqrt_qbz(:),rhotwg1(:),rhotwg2(:)
+ complex(dp),allocatable :: my_kxssp(:,:)
+ complex(gwp),allocatable :: vc_sqrt_qbz(:),rhotwg1(:),rhotwg2(:)
 
 !************************************************************************
 
@@ -2116,8 +2110,7 @@ subroutine exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,
  !character(len=500) :: msg
 !arrays
  real(dp) :: tsec(2)
- complex(gwpc),allocatable :: all_mgq0(:,:,:,:,:)
-
+ complex(gwp),allocatable :: all_mgq0(:,:,:,:,:)
 !************************************************************************
 
  call timab(670,1,tsec)
@@ -2165,7 +2158,7 @@ subroutine exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,
  ! ========================
  ! ==== Coupling Block ====
  ! ========================
- if (do_coupling.and.BSp%use_coupling>0) then
+ if (do_coupling .and. BSp%use_coupling > 0) then
    call timab(673,1,tsec)
    call exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,&
                         Wfd,screen,Hdr_bse,nfftot_osc,ngfft_osc,Psps,Pawtab,Pawang,Paw_pwff,all_mgq0,.FALSE.,BS_files%out_hcoup)
@@ -2223,7 +2216,7 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
 !arrays
  integer,intent(in) :: lomo_spin(Wfd%nsppol),homo_spin(Wfd%nsppol),humo_spin(Wfd%nsppol)
  integer,intent(in) :: ngfft_osc(18)
- complex(gwpc),allocatable,intent(out) :: mgq0(:,:,:,:,:)
+ complex(gwp),allocatable,intent(out) :: mgq0(:,:,:,:,:)
  type(Pawtab_type),intent(in) :: Pawtab(Psps%ntypat)
  type(pawpwff_t),intent(in) :: Paw_pwff(Psps%ntypat*Wfd%usepaw)
 
@@ -2234,19 +2227,18 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
  integer :: ik_ibz,itim_k,isym_k,iq_bz,iq_ibz,isym_q,itim_q,iqbz0
  integer :: ierr,iv,ic,spin,lomo_min,humo_max !,inv_ipw,ipw
  real(dp) :: cpu,wall,gflops !q0vol,fcc_const
- complex(dpc) :: ph_mkt
+ complex(dp) :: ph_mkt
  character(len=500) :: msg
  type(wave_t),pointer :: wave_v, wave_c
 !arrays
  integer,allocatable :: igfftg0(:),task_distrib(:,:,:,:)
  integer,allocatable :: gbound(:,:),id_tab(:)
  real(dp) :: qbz(3),spinrot_k(4),tsec(2)
- complex(gwpc),allocatable :: rhotwg1(:)
- complex(gwpc),target,allocatable :: ur1(:),ur2(:)
- complex(gwpc),ABI_CONTIGUOUS pointer :: ptr_ur1(:),ptr_ur2(:)
+ complex(gwp),allocatable :: rhotwg1(:)
+ complex(gwp),target,allocatable :: ur1(:),ur2(:)
+ complex(gwp),ABI_CONTIGUOUS pointer :: ptr_ur1(:),ptr_ur2(:)
  type(pawcprj_type),allocatable :: Cp1(:,:),Cp2(:,:)
  type(pawpwij_t),allocatable :: Pwij_q0(:)
-
 !************************************************************************
 
  call timab(671,1,tsec)

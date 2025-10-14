@@ -70,7 +70,6 @@ MODULE m_fft_mesh
    module procedure calc_ceikr_dpc
  end interface calc_ceikr
 
-
  !interface times_eikr
  !  module procedure times_eikr_dp
  !  module procedure ctimes_eikr_dpc
@@ -84,7 +83,7 @@ MODULE m_fft_mesh
 !!  zpad_t
 !!
 !! FUNCTION
-!!   Store tables used for zero-padded FFTs.
+!!  Tables used for zero-padded FFTs.
 !!
 !! SOURCE
 
@@ -104,11 +103,10 @@ MODULE m_fft_mesh
    integer,allocatable :: linex2ifft_yz(:,:)
    ! linex2ifft_yz(2,nlinex)
    ! mapping 1D-FFT -> (FFT_index_y, FFT index_z)
-
+ contains
+    procedure :: init => zpad_init
+    procedure :: free => zpad_free
  end type zpad_t
-
- public :: zpad_init
- public :: zpad_free
 !!***
 
 CONTAINS  !========================================================================================
@@ -121,31 +119,26 @@ CONTAINS  !=====================================================================
 !!  zpad_init
 !!
 !! FUNCTION
-!!  Creation method
+!!  Creation method for zpad_t instance
 !!
 !! INPUTS
 !!   mgfft=MAX(nx,ny,nz), only used to dimension gbound
 !!   gbound(2*mgfft+8,2)= The boundaries of the basis sphere of G vectors at a given k-point.
 !!     See sphereboundary for more info.
 !!
-!! OUTPUT
-!!  zpad<type(zpad_t)>
-!!
 !! SOURCE
 
-subroutine zpad_init(zpad,nx,ny,nz,ldx,ldy,ldz,mgfft,gbound)
+subroutine zpad_init(zpad, nx, ny, nz, ldx, ldy, ldz, mgfft, gbound)
 
 !Arguments ------------------------------------
 !scalars
+ class(zpad_t),intent(out) :: zpad
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,mgfft
- type(zpad_t),intent(out) :: zpad
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2)
 
 !Local variables-------------------------------
-!scalars
  integer :: jj,g3_max,g3_min,gg3,ifft_g3,igb,g2min,g2max,nlinex
-
 ! *************************************************************************
 
  g3_min = gbound(3, 2)
@@ -205,19 +198,14 @@ end subroutine zpad_init
 !!  zpad_free
 !!
 !! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
+!!  Free dynamic memory
 !!
 !! SOURCE
 
 subroutine zpad_free(zpad)
 
 !Arguments ------------------------------------
-!scalars
- type(zpad_t),intent(inout) :: zpad
-
+ class(zpad_t),intent(inout) :: zpad
 ! *************************************************************************
 
  ABI_SFREE(zpad%zplane)
@@ -297,7 +285,6 @@ subroutine setmesh(gmet, gvec, ngfft, npwvec, npwsigx, npwwfn, nfftot, method, m
  !integer,allocatable :: pfactors(:),powers(:)
  integer,pointer :: symrel(:,:,:)
  real(dp),pointer :: tnons(:,:)
-
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -502,7 +489,7 @@ subroutine setmesh(gmet, gvec, ngfft, npwvec, npwsigx, npwwfn, nfftot, method, m
      end do
    end do rd
    !
-   ! * Warn if not compatibile with tnons or rotational part.
+   ! Warn if not compatible with tnons or rotational part.
    if (.not.fft_ok) then
      ABI_WARNING('FFT mesh is not compatible with non-symmorphic translations')
    end if
@@ -543,9 +530,9 @@ subroutine setmesh(gmet, gvec, ngfft, npwvec, npwsigx, npwwfn, nfftot, method, m
    idx=0
    do ! If a FFT division gets too large the code stops in size_goed_fft.
      if ( check_rot_fft(nsym,symrel,fftsym(1),fftsym(2),fftsym(3)) .and. &
-         (MOD(fftsym(1),fftnons(1))==0) .and.                           &
-         (MOD(fftsym(2),fftnons(2))==0) .and.                           &
-         (MOD(fftsym(3),fftnons(3))==0)                                 &
+         (MOD(fftsym(1),fftnons(1))==0) .and.                            &
+         (MOD(fftsym(2),fftnons(2))==0) .and.                            &
+         (MOD(fftsym(3),fftnons(3))==0)                                  &
      ) EXIT
      ii=MOD(idx,3)+1
      mdum(ii)=mdum(ii)+1
@@ -586,7 +573,7 @@ subroutine setmesh(gmet, gvec, ngfft, npwvec, npwsigx, npwwfn, nfftot, method, m
  ! * Presently only Goedecker"s library or FFTW3 are allowed, see size_goed_fft.F90
  fftalg=ngfft(7); fftalga=fftalg/100; fftalgc=MOD(fftalg,10)
 
- if ( ALL(fftalga /= [FFT_SG, FFT_FFTW3, FFT_DFTI]) ) then
+ if (all(fftalga /= [FFT_SG, FFT_FFTW3, FFT_DFTI]) ) then
    write(msg,'(6a)')ch10,&
     "Only Goedecker's routines with fftalg=1xx or FFTW3/DFTI routines are allowed in GW calculations. ",ch10,&
     "Action : check the value of fftalg in your input file, ",ch10,&
@@ -644,20 +631,19 @@ pure function check_rot_fft(nsym,symrel,nr1,nr2,nr3)
 
 !local variables
  integer :: is
-
 !************************************************************************
 
  ! The grid is compatible with the symmetries (only rotational part) if
  ! for each symmetry, each n_i and n_j ==> $n_i*R_{ij}/n_j$ is an integer
  check_rot_fft=.TRUE.
  do is=1,nsym
-   if ( MOD(symrel(2,1,is)*nr2, nr1) /=0 .or. &
-&       MOD(symrel(3,1,is)*nr3, nr1) /=0 .or. &
-&       MOD(symrel(1,2,is)*nr1, nr2) /=0 .or. &
-&       MOD(symrel(3,2,is)*nr3, nr2) /=0 .or. &
-&       MOD(symrel(1,3,is)*nr1, nr3) /=0 .or. &
-&       MOD(symrel(2,3,is)*nr2, nr3) /=0      &
-&     ) then
+   if (MOD(symrel(2,1,is)*nr2, nr1) /=0 .or. &
+       MOD(symrel(3,1,is)*nr3, nr1) /=0 .or. &
+       MOD(symrel(1,2,is)*nr1, nr2) /=0 .or. &
+       MOD(symrel(3,2,is)*nr3, nr2) /=0 .or. &
+       MOD(symrel(1,3,is)*nr1, nr3) /=0 .or. &
+       MOD(symrel(2,3,is)*nr2, nr3) /=0      &
+     ) then
      check_rot_fft=.FALSE.; EXIT
    end if
  end do
@@ -706,16 +692,15 @@ function fft_check_rotrans(nsym,symrel,tnons,ngfft,err) result(isok)
 !arrays
  integer :: Rm1(3,3,nsym),r1_FFT(3),red2fft(3,3)
  real(dp) :: Rm1_FFT(3,3,nsym),fft2red(3,3),r2_FFT(3),tnons_FFT(3,nsym)
-
 ! *************************************************************************
 
- ! === Precalculate R^-1 and fractional translations in FFT coordinates ===
+ ! Precalculate R^-1 and fractional translations in FFT coordinates
  ngfft1=ngfft(1)
  ngfft2=ngfft(2)
  ngfft3=ngfft(3)
 
- red2fft=RESHAPE((/ngfft1,0,0,0,ngfft2,0,0,0,ngfft3/),(/3,3/))
- fft2red=RESHAPE((/(one/ngfft1),zero,zero,zero,(one/ngfft2),zero,zero,zero,(one/ngfft3)/),(/3,3/))
+ red2fft=RESHAPE([ngfft1,0,0,0,ngfft2,0,0,0,ngfft3], [3,3])
+ fft2red=RESHAPE((/(one/ngfft1),zero,zero,zero,(one/ngfft2),zero,zero,zero, (one/ngfft3)/),(/3,3/))
  !
  ! === For a fully compatible mesh, each Rm1_FFT should be integer ===
  do isym=1,nsym
@@ -732,7 +717,7 @@ function fft_check_rotrans(nsym,symrel,tnons,ngfft,err) result(isok)
      R1_FFT(2)=DBLE(iy)
      do ix=0,ngfft1-1
        R1_FFT(1)=DBLE(ix)
-       do isym=1,nsym  ! Form R^-1 (r-\tau) in the FFT basis ===
+       do isym=1,nsym  ! Form R^-1 (r-\tau) in the FFT basis.
          R2_FFT(:)=MATMUL(Rm1_FFT(:,:,isym),R1_FFT(:)-tnons_FFT(:,isym))
          jx=NINT(R2_FFT(1)); err(1,isym)=MAX(err(1,isym),ABS(R2_FFT(1)-jx)/ngfft1)
          jy=NINT(R2_FFT(2)); err(2,isym)=MAX(err(2,isym),ABS(R2_FFT(2)-jy)/ngfft2)
@@ -802,12 +787,10 @@ subroutine rotate_fft_mesh(nsym, symrel, tnons, ngfft, irottb, preserve)
  !character(len=500) :: msg
 !arrays
  integer :: Rm1(3,3,nsym),r1_FFT(3),red2fft(3,3)
- real(dp) :: Rm1_FFT(3,3,nsym),err(3,nsym),fft2red(3,3),r2_FFT(3)
- real(dp) :: tnons_FFT(3,nsym)
-
+ real(dp) :: Rm1_FFT(3,3,nsym),err(3,nsym),fft2red(3,3),r2_FFT(3), tnons_FFT(3,nsym)
 ! *************************************************************************
 
- ! === Precalculate R^-1 and fractional translations in FFT coordinates ===
+ ! Precalculate R^-1 and fractional translations in FFT coordinates.
  ngfft1 = ngfft(1); ngfft2 = ngfft(2); ngfft3 = ngfft(3)
 
  red2fft = reshape([ngfft1, 0, 0, 0, ngfft2, 0, 0, 0, ngfft3], [3, 3])
@@ -823,7 +806,7 @@ subroutine rotate_fft_mesh(nsym, symrel, tnons, ngfft, irottb, preserve)
 
  err(:,:) = zero
 
-!$OMP PARALLEL DO PRIVATE(R1_FFT,ir1,R2_FFT,jx,jy,jz) reduction(MAX:err)
+ !$OMP PARALLEL DO PRIVATE(R1_FFT,ir1,R2_FFT,jx,jy,jz) reduction(MAX:err)
  do iz=0,ngfft3-1
    R1_FFT(3) = dble(iz)
    do iy=0,ngfft2-1
@@ -898,7 +881,6 @@ subroutine denpot_project(cplex,  ngfft, nspden, in_rhor, one_symrel, one_tnons,
  logical :: preserve
 !arrays
  integer,allocatable :: irottb(:)
-
 ! *************************************************************************
 
  nfft = product(ngfft(1:3))
@@ -981,8 +963,7 @@ subroutine cigfft(mG0,npwvec,ngfft,gvec,igfft,ierr)
        gmg0(2) = gvec(2,ig)-ig02
        do ig03=-mg0(3),mg0(3)
          gmg0(3) = gvec(3,ig)-ig03
-         ! === Calculate FFT index of G-G0 ===
-         ! * Consider possible wrap around errors.
+         ! Calculate FFT index of G-G0. Consider possible wrap around errors.
          gmg01=MODULO(gmg0(1),n1)
          gmg02=MODULO(gmg0(2),n2)
          gmg03=MODULO(gmg0(3),n3)
@@ -1031,7 +1012,6 @@ elemental integer function ig2gfft(ig, ng) result (gc)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ig,ng
-
 !************************************************************************
 
  ! Use the following indexing (N means ngfft of the adequate direction)
@@ -1077,9 +1057,7 @@ pure integer function g2ifft(gg,ngfft) result (gidx)
  integer,intent(in) :: gg(3),ngfft(3)
 
 !Local variables-------------------------------
-!scalars
  integer :: n1,n2,n3,ig1,ig2,ig3
-
 !************************************************************************
 
  ! Use the following indexing (N means ngfft of the adequate direction)
@@ -1132,10 +1110,8 @@ pure subroutine get_gfft(ngfft, kpt, gmet, gsq_max, gfft)
  real(dp),intent(in) :: kpt(3), gmet(3,3)
 
 !Local variables-------------------------------
-!scalars
  integer :: ifft,g1,g2,g3,i1,i2,i3
  real(dp) :: dsq
-
 !************************************************************************
 
  ifft=0; gsq_max=smallest_real
@@ -1189,10 +1165,9 @@ subroutine calc_ceigr_spc(gg, nfft, nspinor, ngfft, ceigr)
 !arrays
  integer,intent(in) :: gg(3)
  integer,intent(in) :: ngfft(18)
- complex(spc),intent(out) :: ceigr(nfft*nspinor)
+ complex(sp),intent(out) :: ceigr(nfft*nspinor)
 
 !Local variables-------------------------------
-!scalars
  integer :: ix,iy,iz,fft_idx,base,isp
  real(dp) :: gdotr
 ! *************************************************************************
@@ -1210,7 +1185,7 @@ subroutine calc_ceigr_spc(gg, nfft, nspinor, ngfft, ceigr)
                       +gg(2)*(iy/DBLE(ngfft(2))) &
                       +gg(3)*(iz/DBLE(ngfft(3))) )
        fft_idx = fft_idx+1
-       ceigr(fft_idx)=CMPLX(DCOS(gdotr),DSIN(gdotr), KIND=spc)
+       ceigr(fft_idx)=CMPLX(DCOS(gdotr),DSIN(gdotr), KIND=sp)
      end do
    end do
  end do
@@ -1253,10 +1228,9 @@ subroutine calc_ceigr_dpc(gg, nfft, nspinor, ngfft, ceigr)
 !arrays
  integer,intent(in) :: gg(3)
  integer,intent(in) :: ngfft(18)
- complex(dpc),intent(out) :: ceigr(nfft*nspinor)
+ complex(dp),intent(out) :: ceigr(nfft*nspinor)
 
 !Local variables-------------------------------
-!scalars
  integer :: ix,iy,iz,fft_idx,base,isp
  real(dp) :: gdotr
 ! *************************************************************************
@@ -1373,7 +1347,7 @@ pure subroutine calc_ceikr_dpc(kk, ngfft, nfft, nspinor, ceikr)
 !arrays
  real(dp),intent(in) :: kk(3)
  integer,intent(in) :: ngfft(18)
- complex(dpc),intent(out) :: ceikr(nfft*nspinor)
+ complex(dp),intent(out) :: ceikr(nfft*nspinor)
 
 !local variables-------------------------------
  integer :: ix, iy, iz, fft_idx
@@ -1430,7 +1404,7 @@ pure subroutine calc_ceikr_spc(kk, ngfft, nfft, nspinor, ceikr)
 !arrays
  real(dp),intent(in) :: kk(3)
  integer,intent(in) :: ngfft(18)
- complex(spc),intent(out) :: ceikr(nfft*nspinor)
+ complex(sp),intent(out) :: ceikr(nfft*nspinor)
 
 !local variables-------------------------------
  integer :: ix, iy, iz, fft_idx
@@ -1449,7 +1423,7 @@ pure subroutine calc_ceikr_spc(kk, ngfft, nfft, nspinor, ceikr)
                        +kk(2) * (iy / dble(ngfft(2))) &
                        +kk(3) * (iz / dble(ngfft(3))) )
        fft_idx = fft_idx + 1
-       ceikr(fft_idx) = cmplx(cos(kdotr), sin(kdotr), kind=spc)
+       ceikr(fft_idx) = cmplx(cos(kdotr), sin(kdotr), kind=sp)
      end do
    end do
  end do
@@ -1555,7 +1529,6 @@ subroutine times_eikr(kk, ngfft, nfft, ndat, ur)
 !Local variables-------------------------------
  integer :: ix,iy,iz,ifft,idat
  real(dp) :: kr, ph(2),val(2)
-
 ! *************************************************************************
 
  if (all(abs(kk) < tol12)) return
@@ -1619,7 +1592,7 @@ end subroutine ctimes_eikr
 !!  ph(2*ngfft)=phase array (complex)
 !!
 !! NOTES
-!! XG 990504 : changed the formulation, in order to preserve
+!! XG 990504: changed the formulation, in order to preserve
 !! the invariance between n and -n, that was broken for n=ngfft/2 if ngfft even.
 !! Simply suppresses the corresponding sine.
 !!
@@ -1634,7 +1607,6 @@ subroutine phase(ngfft, ph)
  real(dp),intent(out) :: ph(2*ngfft)
 
 !Local variables-------------------------------
-!scalars
  integer :: id,ig,nn
  real(dp) :: arg,fac
 ! *************************************************************************
@@ -1648,7 +1620,7 @@ subroutine phase(ngfft, ph)
    ph(2*ig)  =sin(arg)
  end do
 
-!XG 990504 Here zero the corresponding sine
+ ! XG 990504 Here zero the corresponding sine
  if((ngfft/2)*2==ngfft) ph(2*(id-1))=zero
 
 end subroutine phase
@@ -1681,7 +1653,6 @@ subroutine mkgrid_fft(ffti3_local,fftn3_distrib,gridcart,nfft,ngfft,rprimd)
  integer :: n1,n2,n3
  real(dp), dimension(3) :: coord
  real(dp), dimension(3,nfft) :: gridred
-
 ! *************************************************************************
 
  n1    = ngfft(1)

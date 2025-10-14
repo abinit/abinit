@@ -145,6 +145,12 @@ _ WF disk file :      0.041 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
            getwfk4          2
            getwfk5          2
            getwfk6          2
+          gw_rcut1     0.00000000E+00 Bohr
+          gw_rcut2     0.00000000E+00 Bohr
+          gw_rcut3     9.00000000E+00 Bohr
+          gw_rcut4     9.00000000E+00 Bohr
+          gw_rcut5     9.00000000E+00 Bohr
+          gw_rcut6     9.00000000E+00 Bohr
  gw_customnfreqsp1          0
  gw_customnfreqsp2          0
  gw_customnfreqsp3          1
@@ -196,12 +202,6 @@ P           mkmem           1
         optdriver4         66
         optdriver5         66
         optdriver6         66
-             rcut1     0.00000000E+00 Bohr
-             rcut2     0.00000000E+00 Bohr
-             rcut3     9.00000000E+00 Bohr
-             rcut4     9.00000000E+00 Bohr
-             rcut5     9.00000000E+00 Bohr
-             rcut6     9.00000000E+00 Bohr
           spgroup         215
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0  1  0   0  0 -1
                       -1  0  0   0 -1  0   0  0  1       1  0  0   0 -1  0   0  0 -1
@@ -1144,6 +1144,12 @@ force_length_stats: {min: null, max: null, mean: null, }
            getwfk4          2
            getwfk5          2
            getwfk6          2
+          gw_rcut1     0.00000000E+00 Bohr
+          gw_rcut2     0.00000000E+00 Bohr
+          gw_rcut3     9.00000000E+00 Bohr
+          gw_rcut4     9.00000000E+00 Bohr
+          gw_rcut5     9.00000000E+00 Bohr
+          gw_rcut6     9.00000000E+00 Bohr
  gw_customnfreqsp1          0
  gw_customnfreqsp2          0
  gw_customnfreqsp3          1
@@ -1195,12 +1201,6 @@ P           mkmem           1
         optdriver4         66
         optdriver5         66
         optdriver6         66
-             rcut1     0.00000000E+00 Bohr
-             rcut2     0.00000000E+00 Bohr
-             rcut3     9.00000000E+00 Bohr
-             rcut4     9.00000000E+00 Bohr
-             rcut5     9.00000000E+00 Bohr
-             rcut6     9.00000000E+00 Bohr
           spgroup         215
            strten1     2.2775297729E-05  2.2775297729E-05  2.2775297729E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00

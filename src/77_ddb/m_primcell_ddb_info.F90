@@ -75,30 +75,19 @@ contains
 !! FUNCTION
 !!  init and fill primcell_ddb_info
 !!
-!! COPYRIGHT
-!! Copyright (C) 1999-2025 ABINIT group (MJV)
-!! This file is distributed under the terms of the
-!! GNU General Public Licence, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!
 !! OUTPUT
 !!  pcell= structure to allocate and fill
 !!
-!! NOTES
-!!
 !! SOURCE
+
 subroutine init_primcell_ddb_info (pcell,brav,dipdip,mpert,msym,natom,nrpt,nsym,ntypat,ucvol,&
 &    indsym,symrec,symrel,typat,&
 &    acell,amu,dielt,dyewq0,gmet,gprim,rcan,rmet,rprim,rpt,trans,wghatm,xred,zeff)
 
- use defs_basis
-
 !Arguments ------------------------------------
- type(primcell_ddb_info), intent(inout) :: pcell
-
+ class(primcell_ddb_info), intent(inout) :: pcell
  integer, intent(in) :: brav,mpert,msym,natom,nrpt,nsym,ntypat,dipdip
  real(dp), intent(in) :: ucvol
 
@@ -121,9 +110,6 @@ subroutine init_primcell_ddb_info (pcell,brav,dipdip,mpert,msym,natom,nrpt,nsym,
  real(dp), intent(in) :: wghatm(natom,natom,nrpt)
  real(dp), intent(in) :: xred(3,natom)
  real(dp), intent(in) :: zeff(3,3,natom)
-
-!Local variables-------------------------------
-
 ! *************************************************************************
 
 ! init dimensions
@@ -194,25 +180,15 @@ subroutine init_primcell_ddb_info (pcell,brav,dipdip,mpert,msym,natom,nrpt,nsym,
 !! FUNCTION
 !!  read in and fill primcell_ddb_info from the file name given in input
 !!
-!! COPYRIGHT
-!! Copyright (C) 1999-2025 ABINIT group (MJV)
-!! This file is distributed under the terms of the
-!! GNU General Public Licence, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  filename= name of file to read in
 !!
 !! OUTPUT
 !!  t_primcell_ddb_info= structure to allocate and fill
 !!
-!! NOTES
-!!
 !! SOURCE
-subroutine read_primcell_ddb_info (filename,pcell)
 
- use defs_basis
+subroutine read_primcell_ddb_info (filename,pcell)
 
 !Arguments ------------------------------------
  character(len=*), intent(in) :: filename
@@ -222,7 +198,6 @@ subroutine read_primcell_ddb_info (filename,pcell)
  integer :: unit
  character(len=500) :: msg
  character(len=13):: buffer
-
 ! *************************************************************************
 
   if (open_file(filename,msg,newunit=unit) /= 0) then
@@ -318,13 +293,6 @@ subroutine read_primcell_ddb_info (filename,pcell)
 !! FUNCTION
 !!  write out primcell_ddb_info to the file name given in input
 !!
-!! COPYRIGHT
-!! Copyright (C) 1999-2025 ABINIT group (MJV)
-!! This file is distributed under the terms of the
-!! GNU General Public Licence, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  filename= name of file to read in
 !!  t_primcell_ddb_info= structure to allocate and fill
@@ -332,22 +300,17 @@ subroutine read_primcell_ddb_info (filename,pcell)
 !! OUTPUT
 !!   writes to file
 !!
-!! NOTES
-!!
 !! SOURCE
+
 subroutine write_primcell_ddb_info (filename,pcell)
 
- use defs_basis
-
 !Arguments ------------------------------------
-
  character(len=*), intent(in) :: filename
  type(primcell_ddb_info), intent(in) :: pcell
 
 !Local variables-------------------------------
  integer :: unit
  character(len=500) :: msg
-
 ! *************************************************************************
 
   if (open_file(filename,msg,newunit=unit, form="formatted",status="unknown") /= 0) then
@@ -420,84 +383,35 @@ subroutine write_primcell_ddb_info (filename,pcell)
 !! FUNCTION
 !!  deallocate stuoff in primcell_ddb_info
 !!
-!! COPYRIGHT
-!! Copyright (C) 1999-2025 ABINIT group (MJV)
-!! This file is distributed under the terms of the
-!! GNU General Public Licence, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! NOTES
-!!
 !! SOURCE
+
 subroutine destroy_primcell_ddb_info (pcell)
 
- use defs_basis
 
 !Arguments ------------------------------------
- type(primcell_ddb_info), intent(inout) :: pcell
-
+ class(primcell_ddb_info), intent(inout) :: pcell
 ! *************************************************************************
-  if (allocated(pcell%indsym))  then
-    ABI_FREE(pcell%indsym)
-  end if
-  if (allocated(pcell%symrec))  then
-    ABI_FREE(pcell%symrec)
-  end if
-  if (allocated(pcell%symrel))  then
-    ABI_FREE(pcell%symrel)
-  end if
-  if (allocated(pcell%typat ))  then
-    ABI_FREE(pcell%typat)
-  end if
-  if (allocated(pcell%acell ))  then
-    ABI_FREE(pcell%acell)
-  end if
-  if (allocated(pcell%amu   ))  then
-    ABI_FREE(pcell%amu)
-  end if
-  if (allocated(pcell%dielt ))  then
-    ABI_FREE(pcell%dielt)
-  end if
-  if (allocated(pcell%dyewq0))  then
-    ABI_FREE(pcell%dyewq0)
-  end if
-  if (allocated(pcell%gmet  ))  then
-    ABI_FREE(pcell%gmet)
-  end if
-  if (allocated(pcell%gprim ))  then
-    ABI_FREE(pcell%gprim)
-  end if
-  if (allocated(pcell%rcan  ))  then
-    ABI_FREE(pcell%rcan)
-  end if
-  if (allocated(pcell%rmet  ))  then
-    ABI_FREE(pcell%rmet)
-  end if
-  if (allocated(pcell%rprim ))  then
-    ABI_FREE(pcell%rprim)
-  end if
-  if (allocated(pcell%rpt   ))  then
-    ABI_FREE(pcell%rpt)
-  end if
-  if (allocated(pcell%trans ))  then
-    ABI_FREE(pcell%trans)
-  end if
-  if (allocated(pcell%wghatm))  then
-    ABI_FREE(pcell%wghatm)
-  end if
-  if (allocated(pcell%xred  ))  then
-    ABI_FREE(pcell%xred)
-  end if
-  if (allocated(pcell%zeff  ))  then
-    ABI_FREE(pcell%zeff)
-  end if
 
- end subroutine destroy_primcell_ddb_info
+  ABI_SFREE(pcell%indsym)
+  ABI_SFREE(pcell%symrec)
+  ABI_SFREE(pcell%symrel)
+  ABI_SFREE(pcell%typat)
+  ABI_SFREE(pcell%acell)
+  ABI_SFREE(pcell%amu)
+  ABI_SFREE(pcell%dielt)
+  ABI_SFREE(pcell%dyewq0)
+  ABI_SFREE(pcell%gmet)
+  ABI_SFREE(pcell%gprim)
+  ABI_SFREE(pcell%rcan)
+  ABI_SFREE(pcell%rmet)
+  ABI_SFREE(pcell%rprim)
+  ABI_SFREE(pcell%rpt)
+  ABI_SFREE(pcell%trans)
+  ABI_SFREE(pcell%wghatm)
+  ABI_SFREE(pcell%xred)
+  ABI_SFREE(pcell%zeff)
+
+end subroutine destroy_primcell_ddb_info
 
 end module m_primcell_ddb_info
 !!***

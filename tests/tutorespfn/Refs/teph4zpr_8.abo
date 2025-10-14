@@ -425,6 +425,7 @@ meta: {optdriver: 7, eph_task: 4, }
    2.46705647E+02                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
+ Will compute Sigma(omega) using 201 points and step: 1.000000E-02 (eV)
 
  === Gaps, band edges and relative position wrt Fermi level ===
  Direct band gap semiconductor
@@ -706,6 +707,7 @@ meta: {optdriver: 7, eph_task: 4, }
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
 
+ Will compute Sigma(omega) using 201 points and step: 1.000000E-02 (eV)
 
  === Gaps, band edges and relative position wrt Fermi level ===
  Direct band gap semiconductor

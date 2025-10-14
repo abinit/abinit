@@ -29,7 +29,6 @@ module m_gsphere
  use defs_basis
  use m_abicore
  use m_errors
- use m_distribfft
  use m_sort
 
  use defs_abitypes,   only : MPI_type
@@ -149,11 +148,11 @@ module m_gsphere
   ! Radius of each shell.
 
   !TODO switch to dpc
-  complex(gwpc),allocatable :: phmGt(:,:)
+  complex(gwp),allocatable :: phmGt(:,:)
   ! phmGt(ng,nsym)
   ! Phase factor e^{-i2\pi(G.\tau)} where $\tau$ is the fractional translation associated to isym.
 
-  complex(gwpc),allocatable :: phmSGt(:,:)
+  complex(gwp),allocatable :: phmSGt(:,:)
   ! phmSGt(ng,nsym)
   ! Phase factor e^{-i2\pi(SG.\tau)} where S is one of the symmetry properties in reciprocal space.
 
@@ -220,7 +219,7 @@ subroutine setup_G_rotation(nsym,symrec,timrev,npw,gvec,g2sh,nsh,shlim,grottb,gr
 !arrays
  integer :: gbase(3),grot(3)
 !************************************************************************
- !
+
  ! === Set up G-rotation table ===
  do ig1=1,npw
    ish1=g2sh(ig1) ; ss=shlim(ish1) ; ee=shlim(ish1+1)-1
@@ -270,7 +269,7 @@ end subroutine setup_G_rotation
 !!
 !! OUTPUT
 !!  Gsph<gsphere_t>=Data type containing information related to the set of G vectors
-!!   completetly initialized in output.
+!!   completely initialized in output.
 !!
 !! NOTES
 !!  gvec are supposed to be ordered with increasing norm.
@@ -327,7 +326,7 @@ subroutine gsph_init(Gsph, Cryst, ng, gvec, ecut)
    ABI_MALLOC(Gsph%gvec,(3,ng))
    Gsph%gvec=gvec
    !
-   ! Calculate cutoff energy.of the sphere.
+   ! Calculate cutoff energy of the sphere.
    max_ecut=-one
    do ig=1,ng
      g1=gvec(1,ig)
@@ -485,7 +484,6 @@ subroutine gsph_fft_tabs(Gsph, g0, mgfft, ngfft, use_padfft, gmg0_gbound, gmg0_i
 !arrays
  integer,allocatable :: gmg0(:,:)
  logical,allocatable :: kg_mask(:)
-
 ! *************************************************************************
 
  if (mgfft/=MAXVAL(ngfft(1:3))) then
@@ -518,7 +516,7 @@ subroutine gsph_fft_tabs(Gsph, g0, mgfft, ngfft, use_padfft, gmg0_gbound, gmg0_i
  if (use_padfft == 1) call sphereboundary(gmg0_gbound,1,gmg0,mgfft,ng)
 
  call initmpi_seq(MPI_enreg_seq) ! No FFT parallelism.
- call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfft(2),ngfft(3),'all')
+ call MPI_enreg_seq%distribfft%init_seq('c',ngfft(2),ngfft(3),'all')
 
  ABI_MALLOC(kg_mask, (ng))
  call kgindex(gmg0_ifft, gmg0, kg_mask, MPI_enreg_seq, ngfft, ng)
@@ -547,7 +545,7 @@ end subroutine gsph_fft_tabs
 !!
 !! OUTPUT
 !!  Gsph<gsphere_t>=Data type containing information related to the set of G vectors
-!!   completetly initialized in output.
+!!   completely initialized in output.
 !!
 !! SOURCE
 
@@ -562,7 +560,7 @@ subroutine gsph_in_fftbox(Gsph, Cryst, ngfft)
 
 !Local variables-------------------------------
 !scalars
- integer :: dir1,dir2,dir3,npw,ig,ist
+ integer :: dir1,dir2,dir3,npw,ig,i_st
  real(dp) :: ecut,trial_ene
 !arrays
  integer :: n1_max(3),n2_max(3),n3_max(3),vec(3)
@@ -604,10 +602,10 @@ subroutine gsph_in_fftbox(Gsph, Cryst, ngfft)
  ! Make sure that Gsph does not contain G vectors outside the FFT box.
  ! kpgsph might return G whose energy is larger than the input ecut.
  npw = Gsph%ng
- star_loop: do ist=1,Gsph%nsh-1
-   do ig=Gsph%shlim(ist),Gsph%shlim(ist+1)
+ star_loop: do i_st=1,Gsph%nsh-1
+   do ig=Gsph%shlim(i_st),Gsph%shlim(i_st+1)
      if ( ANY(Gsph%gvec(:,ig)>ngfft(1:3)/2) .or. ANY(Gsph%gvec(:,ig)<-(ngfft(1:3)-1)/2) ) then
-       npw = Gsph%shlim(ist)-1  ! Gsph exceeds the FFT box. Only the shells up to npw will be used.
+       npw = Gsph%shlim(i_st)-1  ! Gsph exceeds the FFT box. Only the shells up to npw will be used.
        EXIT star_loop
      end if
    end do
@@ -632,66 +630,58 @@ end subroutine gsph_in_fftbox
 !! gsph_print
 !!
 !! FUNCTION
-!!  Print the content of a gvectors data type
+!!  Print info on object.
 !!
 !! INPUTS
-!!  Gsph<gsphere_t>=Info on the G-sphere
 !!  unit=the unit number for output
 !!  prtvol = verbosity level
-!!  mode_paral =either "COLL" or "PERS"
-!!
-!! OUTPUT
-!!  Only writing.
 !!
 !! SOURCE
 
-subroutine gsph_print(Gsph, unit, prtvol, mode_paral)
+subroutine gsph_print(Gsph, units, prtvol, header)
 
 !Arguments ------------------------------------
 !scalars
  class(gsphere_t),intent(in) :: Gsph
- integer,intent(in),optional :: prtvol,unit
- character(len=4),intent(in),optional :: mode_paral
+ integer,intent(in) :: units(:), prtvol
+ character(len=*),optional,intent(in) :: header
 
 !Local variables-------------------------------
 !scalars
- integer :: ish,nsc,my_unt,my_prtvol
- real(dp) :: fact,kin
- character(len=4) :: my_mode
+ integer :: ish, nsc
+ real(dp) :: fact, kin
  character(len=500) :: msg
-
 ! *************************************************************************
 
- my_unt    =std_out; if (PRESENT(unit      )) my_unt    =unit
- my_prtvol=0       ; if (PRESENT(prtvol    )) my_prtvol=prtvol
- my_mode   ='COLL' ; if (PRESENT(mode_paral)) my_mode   =mode_paral
+ msg = ch10 // ' ==== Info on the G-sphere ==== ' // ch10
+ if (present(header)) msg = ' ==== '//trim(adjustl(header))//' ==== '
+ call wrtout(units, msg)
 
- write(msg,'(3a,2(a,i8,a))')ch10,&
-   ' ==== Info on the G-sphere ==== ',ch10,&
+ write(msg,'(2(a,i8,a))')&
    '  Number of G vectors ... ',Gsph%ng,ch10,&
    '  Number of shells ...... ',Gsph%nsh,ch10
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
 
- SELECT CASE (Gsph%timrev)
- CASE (1)
-   call wrtout(my_unt,' Time reversal symmetry cannot be used',my_mode)
- CASE (2)
-   call wrtout(my_unt,' Time reversal symmetry is used',my_mode)
- CASE DEFAULT
+ select case (Gsph%timrev)
+ case (1)
+   call wrtout(units, ' Time reversal symmetry cannot be used')
+ case (2)
+   call wrtout(units, ' Time reversal symmetry is used')
+ case default
    ABI_BUG("Wrong timrev")
- END SELECT
+ end select
 
- if (my_prtvol/=0) then
-   fact=half*two_pi**2
+ if (prtvol /= 0) then
+   fact = half*two_pi**2
    write(msg,'(a)')
-   call wrtout(my_unt,' Shell   Tot no. of Gs   Cutoff [Ha]',my_mode)
+   call wrtout(units, ' Shell   Tot no. of Gs   Cutoff [Ha]')
    do ish=1,Gsph%nsh
      nsc=Gsph%shlim(ish+1)-1
      kin=half*Gsph%shlen(ish)**2
-     write(msg,'(2x,i4,10x,i6,5x,f8.3)')ish,nsc,kin
-     call wrtout(my_unt,msg,'COLL')
+     write(msg, '(2x,i4,10x,i6,5x,f8.3)')ish,nsc,kin
+     call wrtout(units, msg)
    end do
-   call wrtout(my_unt,ch10,my_mode)
+   call wrtout(units, ch10)
  end if
 
 end subroutine gsph_print
@@ -706,16 +696,12 @@ end subroutine gsph_print
 !! FUNCTION
 !!  Deallocate the memory in a gsphere_t data type.
 !!
-!! INPUTS
-!!   Gsph = datatype to be freed
-!!
 !! SOURCE
 
 subroutine gsph_free(Gsph)
 
 !Arguments ------------------------------------
  class(gsphere_t),intent(inout) :: Gsph
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -773,10 +759,9 @@ pure function gsph_g_idx(Gsph, gg) result(g_idx)
  integer :: ishbsc,igs,ige
  real(dp) :: glen
  logical :: found
-
 ! *************************************************************************
 
- ! * Use shells and bisect to find the star and stop index thus avoiding the storage of a table (ig1,ig2)
+ ! Use shells and bisection to find the star and stop index thus avoiding the storage of a table (ig1,ig2)
  glen = two_pi*SQRT(DOT_PRODUCT(gg,MATMUL(Gsph%gmet,gg)))
 
  ishbsc = bisect(Gsph%shlen,glen)
@@ -830,12 +815,11 @@ pure function gsph_gmg_idx(Gsph, ig1, ig2) result(ig1mg2)
  logical :: found
 !arrays
  integer :: g1mg2(3)
-
 ! *************************************************************************
 
  g1mg2 = Gsph%gvec(:,ig1)-Gsph%gvec(:,ig2)
 
- ! * Use shells and bisect to find the star and stop index thus avoiding the storage of a table (ig1,ig2)
+ ! Use shells and bisect to find the star and stop index thus avoiding the storage of a table (ig1,ig2)
  difflen = two_pi*SQRT(DOT_PRODUCT(g1mg2,MATMUL(Gsph%gmet,g1mg2)))
 
  ! FIXME It seems bisect is not portable, on my laptop test v5/t72 the number of skipped G-vectors is > 0
@@ -888,7 +872,6 @@ pure function gsph_gmg_fftidx(Gsph, ig1, ig2, ngfft) result(fft_idx)
  integer :: id1,id2,id3
 !arrays
  integer :: g1mg2(3)
-
 ! *************************************************************************
 
  g1mg2(:)=Gsph%gvec(:,ig1)-Gsph%gvec(:,ig2)
@@ -960,19 +943,15 @@ subroutine merge_and_sort_kg(nkpt,kptns,ecut,nsym2,pinv,symrel2,gprimd,gbig,prtv
  character(len=500) :: msg
  type(MPI_type) :: MPI_enreg_seq
 !arrays
- integer :: gcur(3),geq(3)
- integer :: symrec2t(3,3,nsym2)
- integer :: dum_kg(3,0)
+ integer :: gcur(3),geq(3),dum_kg(3,0),symrec2t(3,3,nsym2)
  integer,allocatable :: gbase(:,:),gbasek(:,:,:)
  integer,allocatable :: gcurr(:,:),gshell(:,:),insort(:),gtmp(:,:)
- integer,allocatable :: nbasek(:),nshell(:),shlim(:)
- integer,allocatable :: npwarr(:)
+ integer,allocatable :: nbasek(:),nshell(:),shlim(:), npwarr(:)
  real(dp) :: kpoint(3),gmet(3,3)
  real(dp),allocatable :: cnorm(:),cnormk(:,:),ctmp(:)
-
 ! *********************************************************************
 
- ! * Fake MPI_type for the sequential part.
+ ! Fake MPI_type for the sequential part.
  ! This routine should not be parallelized as communicating gbig and other
  ! tables takes more time than recalculating them in sequential.
  call initmpi_seq(MPI_enreg_seq)
@@ -1047,7 +1026,7 @@ subroutine merge_and_sort_kg(nkpt,kptns,ecut,nsym2,pinv,symrel2,gprimd,gbig,prtv
  !
  !=== Reorder base G-vectors in order of increasing module ===
  !
- !Generate all shells of G-vectors: star of a g==set of all symetrics of this g
+ !Generate all shells of G-vectors: star of a g==set of all symmetrics of this g
  ABI_MALLOC(gshell,(3,2*nsym2))
  ABI_MALLOC(shlim,(nbase))
 
@@ -1073,12 +1052,12 @@ subroutine merge_and_sort_kg(nkpt,kptns,ecut,nsym2,pinv,symrel2,gprimd,gbig,prtv
    nshell(in)=0
    gcur(:)=gbase(:,insort(in))
 
-   do is=1,nsym2 !  Loop over all symetries:
+   do is=1,nsym2 !  Loop over all symmetries:
      do iinv=pinv,1,2
        geq(:)=iinv*(symrel2(1,:,is)*gcur(1)+symrel2(2,:,is)*gcur(2)+symrel2(3,:,is)*gcur(3))
 
        found=.FALSE.; ish=1
-       do while ((.not.found) .and. (ish<=nshell(in))) ! Search for symetric of g and eventually add it:
+       do while ((.not.found) .and. (ish<=nshell(in))) ! Search for symmetric of g and eventually add it:
          found=ALL(geq(:)==gshell(:,ish))
          ish=ish+1
        end do
@@ -1153,12 +1132,12 @@ subroutine merge_and_sort_kg(nkpt,kptns,ecut,nsym2,pinv,symrel2,gprimd,gbig,prtv
    write(msg,'(3a)')&
 &    ' Shells found:',ch10,&
 &    ' number of shell    number of G vectors      cut-off energy [Ha} '
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
    do in=1,nbase
      write(msg,'(12x,i4,17x,i6,12x,f8.3)')in,shlim(in),2*pi**2*cnorm(in)
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(std_out,msg)
    end do
-   call wrtout(std_out,ch10,'COLL')
+   call wrtout(std_out,ch10)
  end if
 
  ABI_FREE(gshell)
@@ -1226,7 +1205,6 @@ subroutine getfullg(nbase,nsym,pinv,sizepw,gbase,symrec,cnorm,maxpw,gbig,shlim,i
 !arrays
  integer :: gcur(3),geq(3)
  integer,allocatable :: gshell(:,:),insort(:),nshell(:)
-
 ! *************************************************************************
 
  if (pinv/=1.and.pinv/=-1) then
@@ -1243,7 +1221,7 @@ subroutine getfullg(nbase,nsym,pinv,sizepw,gbase,symrec,cnorm,maxpw,gbig,shlim,i
  call sort_dp(nbase,cnorm,insort,tol14)
  !
  ! === Generate all stars of G-vectors ===
- ! Star of G is the set of all symetrical images of the vector
+ ! Star of G is the set of all symmetrical images of the vector
  ! gshell contains the symmetrical G at fixed gbase. No need to add an additional dimension
  ! or initialize to zero the array inside the loop over nbase as we loop over (ish<=nshell(ibase))
  ABI_MALLOC(nshell,(nbase))
@@ -1263,7 +1241,7 @@ subroutine getfullg(nbase,nsym,pinv,sizepw,gbase,symrec,cnorm,maxpw,gbig,shlim,i
      do itim=pinv,1,2
        geq(:)=itim*MATMUL(symrec(:,:,isym),gcur)
        !
-       ! * Search for symetric of g and eventually add it:
+       ! * Search for symmetric of g and eventually add it:
        found=.FALSE. ; ish=1
        do while ((.not.found).and. (ish<=nshell(ibase)))
          found=ALL(geq(:)==gshell(:,ish))
@@ -1303,14 +1281,14 @@ subroutine getfullg(nbase,nsym,pinv,sizepw,gbase,symrec,cnorm,maxpw,gbig,shlim,i
  write(msg,'(3a)')&
 & ' Shells found:',ch10,&
 & ' number of shell    number of G vectors      cut-off energy [Ha] '
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out,msg)
 
  do ibase=1,nbase
    write(msg,'(12x,i4,17x,i6,12x,f8.3)')ibase,shlim(ibase),two*pi**2*cnorm(ibase)
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
  end do
  write(msg,'(a)')ch10
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out,msg)
  ABI_FREE(gshell)
  ABI_FREE(insort)
  ABI_FREE(nshell)
@@ -1365,7 +1343,6 @@ subroutine get_irredg(npw_k,nsym,pinv,gprimd,symrec,gcurr,nbasek,gbasek,cnormk)
 !arrays
  integer :: gbas(3),gcur(3),geq(3)
  real(dp) :: gcar(3)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1456,7 +1433,6 @@ subroutine merge_kgirr(nsym,pinv,nkpt,mpw,sizepw,symrec,nbasek,cnormk,gbasek,nba
  character(len=500) :: msg
 !arrays
  integer :: gbas(3),gcur(3),geq(3)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1984,7 +1960,6 @@ pure subroutine table_gbig2kg(npw_k,kg_k,maxpw,gbig,gamma2k,ierr)
  logical :: found
 !arrays
  integer :: gcur(3)
-
 ! *********************************************************************
 
  ierr=0
@@ -2037,7 +2012,6 @@ subroutine gsph_extend(in_Gsph, Cryst, new_ecut, new_Gsph)
  integer :: new_ng,in_ng,ig,ierr,sh
 !arrays
  integer,allocatable :: new_gvec(:,:)
-
 ! *********************************************************************
 
  call new_Gsph%init(Cryst, 0, ecut=new_ecut)
@@ -2126,7 +2100,6 @@ subroutine getkpgnorm(gprimd,kpt,kg_k,kpgnorm,npw_k)
  integer :: ipw
  real(dp) :: g11,g12,g13,g21,g22,g23,g31,g32,g33,k1,k2,k3,kpg1,kpg2,kpg3,rr,xx
  real(dp) :: yy,zz
-
 ! *************************************************************************
 
  k1=kpt(1) ; k2=kpt(2) ; k3=kpt(3)
@@ -2205,7 +2178,6 @@ subroutine symg(kg_diel,npwdiel,nsym,phdiel,sym_g,symrel,tmrev_g,tnons)
  !character(len=500) :: msg
 !arrays
  integer,allocatable :: grid(:,:,:)
-
 ! *************************************************************************
 
 !Determines maximal bounds of the zone spanned by the planewaves

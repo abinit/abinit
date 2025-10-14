@@ -32,7 +32,6 @@ module m_wfd
  use m_crystal
  use m_wfk
  use m_hdr
- use m_distribfft
  use m_cgtools
  use m_ebands
 
@@ -118,7 +117,7 @@ module m_wfd
 
    integer,allocatable :: kg_k(:,:)
    ! kg_k(3,npw)
-   ! G vector coordinates in reduced cordinates.
+   ! G vector coordinates in reduced coordinates.
 
    integer,allocatable :: gbound(:,:)
    ! gbound(2*mgfft+8,2))
@@ -200,11 +199,11 @@ module m_wfd
   ! Flag defining whether cprj are sorted by atom type or ordered according
   ! to the typat variable used in the input file.
 
-  complex(gwpc),allocatable :: ug(:)
+  complex(gwp),allocatable :: ug(:)
   ! ug(npw_k*nspinor)
   ! The periodic part of the Bloch wavefunction in G-space.
 
-  complex(gwpc),allocatable :: ur(:)
+  complex(gwp),allocatable :: ur(:)
   ! ur(nfft*nspinor)
   ! The periodic part of the Bloch wavefunction in real space.
 
@@ -915,7 +914,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
 
  ! Sequential MPI datatype to be passed to abinit routines.
  call initmpi_seq(Wfd%MPI_enreg)
- call init_distribfft(Wfd%MPI_enreg%distribfft,'c',Wfd%MPI_enreg%nproc_fft,ngfft(2),ngfft(3))
+ call Wfd%MPI_enreg%distribfft%init('c',Wfd%MPI_enreg%nproc_fft,ngfft(2),ngfft(3))
 
  ! TODO: To simply high-level API.
  !wfd%cryst => cryst
@@ -1013,7 +1012,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
 
  ! Allocate u(g) and, if required, also u(r)
  ug_size = one*nspinor*mpw*COUNT(bks_mask)
- write(msg,'(a,f8.1,a)')' Memory needed for Fourier components u(G): ',two*gwpc*ug_size*b2Mb, ' [Mb] <<< MEM'
+ write(msg,'(a,f8.1,a)')' Memory needed for Fourier components u(G): ',two*gwp*ug_size*b2Mb, ' [Mb] <<< MEM'
  call wrtout(std_out, msg)
 #ifdef HAVE_GW_DPC
  call wrtout(std_out, ' Storing wavefunctions in double precision as `enable_gw_dpc="no"`')
@@ -1029,7 +1028,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
  end if
 
  ur_size = one*nspinor*Wfd%nfft*COUNT(Wfd%keep_ur)
- write(msg,'(a,f8.1,a)')' Memory needed for real-space u(r): ',two*gwpc*ur_size*b2Mb,' [Mb] <<< MEM'
+ write(msg,'(a,f8.1,a)')' Memory needed for real-space u(r): ',two*gwp*ur_size*b2Mb,' [Mb] <<< MEM'
  call wrtout(std_out, msg)
 
  ! Count the number of spins treated by this proc.
@@ -1340,12 +1339,12 @@ function wfd_norm2(Wfd,Cryst,Pawtab,band,ik_ibz,spin) result(norm2)
 !Local variables ------------------------------
 !scalars
  integer :: npw_k,istwf_k
- complex(dpc) :: cdum
+ complex(dp) :: cdum
  type(wave_t),pointer :: wave
  character(len=500) :: msg
 !arrays
  real(dp) :: pawovlp(2)
- complex(gwpc),ABI_CONTIGUOUS pointer :: ug1(:)
+ complex(gwp),ABI_CONTIGUOUS pointer :: ug1(:)
  type(pawcprj_type),allocatable :: Cp1(:,:)
 !************************************************************************
 
@@ -1369,14 +1368,14 @@ function wfd_norm2(Wfd,Cryst,Pawtab,band,ik_ibz,spin) result(norm2)
    ! Avoid the computation if Cprj are already in memory with the correct order.
    if (wave%has_cprj == WFD_STORED .and. wave%cprj_order == CPR_RANDOM) then
        pawovlp = paw_overlap(wave%Cprj, wave%Cprj, Cryst%typat, Pawtab)
-       cdum = cdum + CMPLX(pawovlp(1),pawovlp(2), kind=dpc)
+       cdum = cdum + CMPLX(pawovlp(1),pawovlp(2), kind=dp)
    else
      ! Compute Cproj
      ABI_MALLOC(Cp1,(Wfd%natom,Wfd%nspinor))
      call pawcprj_alloc(Cp1,0,Wfd%nlmn_atm)
      call wfd%get_cprj(band,ik_ibz,spin,Cryst,Cp1,sorted=.FALSE.)
      pawovlp = paw_overlap(Cp1,Cp1,Cryst%typat,Pawtab)
-     cdum = cdum + CMPLX(pawovlp(1),pawovlp(2), kind=dpc)
+     cdum = cdum + CMPLX(pawovlp(1),pawovlp(2), kind=dp)
      call pawcprj_free(Cp1)
      ABI_FREE(Cp1)
    end if
@@ -1411,7 +1410,7 @@ function wfd_xdotc(Wfd,Cryst,Pawtab,band1,band2,ik_ibz,spin)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: band1,band2,ik_ibz,spin
- complex(gwpc) :: wfd_xdotc
+ complex(gwp) :: wfd_xdotc
  class(wfd_t),target,intent(inout) :: Wfd
  type(crystal_t),intent(in) :: Cryst
 !arrays
@@ -1424,7 +1423,7 @@ function wfd_xdotc(Wfd,Cryst,Pawtab,band1,band2,ik_ibz,spin)
  character(len=500) :: msg
 !arrays
  real(dp) :: pawovlp(2)
- complex(gwpc),ABI_CONTIGUOUS pointer :: ug1(:),ug2(:)
+ complex(gwp),ABI_CONTIGUOUS pointer :: ug1(:),ug2(:)
  type(pawcprj_type),allocatable :: Cp1(:,:),Cp2(:,:)
 !************************************************************************
 
@@ -1451,7 +1450,7 @@ function wfd_xdotc(Wfd,Cryst,Pawtab,band1,band2,ik_ibz,spin)
 
        pawovlp = paw_overlap(wave1%Cprj, wave2%Cprj,&
                              Cryst%typat,Pawtab,spinor_comm=Wfd%MPI_enreg%comm_spinor)
-       wfd_xdotc = wfd_xdotc + CMPLX(pawovlp(1),pawovlp(2), kind=gwpc)
+       wfd_xdotc = wfd_xdotc + CMPLX(pawovlp(1),pawovlp(2), kind=gwp)
    else
      ! Compute Cprj
      ABI_MALLOC(Cp1,(Wfd%natom,Wfd%nspinor))
@@ -1463,7 +1462,7 @@ function wfd_xdotc(Wfd,Cryst,Pawtab,band1,band2,ik_ibz,spin)
      call wfd%get_cprj(band2,ik_ibz,spin,Cryst,Cp2,sorted=.FALSE.)
 
      pawovlp = paw_overlap(Cp1,Cp2,Cryst%typat,Pawtab,spinor_comm=Wfd%MPI_enreg%comm_spinor)
-     wfd_xdotc = wfd_xdotc + CMPLX(pawovlp(1),pawovlp(2), kind=gwpc)
+     wfd_xdotc = wfd_xdotc + CMPLX(pawovlp(1),pawovlp(2), kind=gwp)
 
      call pawcprj_free(Cp1)
      ABI_FREE(Cp1)
@@ -1477,9 +1476,9 @@ end function wfd_xdotc
 
 !----------------------------------------------------------------------
 
-!!****f* m_wfd/wfd_get_gvec_kq
+!!****f* m_wfd/wfd_get_gvec_gbound
 !! NAME
-!! wfd_get_gvec_kq
+!! wfd_get_gvec_gbound
 !!
 !! FUNCTION
 !! Return the g-sphere centered on kq and gbound_kq,
@@ -1597,7 +1596,7 @@ subroutine wfd_get_many_ur(Wfd, bands, ik_ibz, spin, ur)
  class(wfd_t),intent(inout) :: Wfd
 !arrays
  integer,intent(in) :: bands(:)
- complex(gwpc),intent(out) :: ur(Wfd%nfft*Wfd%nspinor*SIZE(bands))
+ complex(gwp),intent(out) :: ur(Wfd%nfft*Wfd%nspinor*SIZE(bands))
 
 !Local variables ------------------------------
 !scalars
@@ -1646,7 +1645,7 @@ subroutine wfd_copy_cg(wfd, band, ik_ibz, spin, cg)
 
 !Local variables ------------------------------
 !scalars
- integer :: siz
+ integer :: csiz
  type(wave_t),pointer :: wave
  character(len=500) :: msg
 !************************************************************************
@@ -1658,12 +1657,12 @@ subroutine wfd_copy_cg(wfd, band, ik_ibz, spin, cg)
    ABI_ERROR(msg)
  end if
 
- siz = wfd%npwarr(ik_ibz) * wfd%nspinor
+ csiz = wfd%npwarr(ik_ibz) * wfd%nspinor
 #ifdef HAVE_GW_DPC
- call zcopy(siz, wave%ug, 1, cg, 1)
+ call zcopy(csiz, wave%ug, 1, cg, 1)
 #else
- cg(1,1:siz) = dble(wave%ug)
- cg(2,1:siz) = aimag(wave%ug)
+ cg(1,1:csiz) = dble(wave%ug)
+ cg(2,1:csiz) = aimag(wave%ug)
 #endif
 
 end subroutine wfd_copy_cg
@@ -1697,7 +1696,7 @@ subroutine wfd_get_ur(Wfd, band, ik_ibz, spin, ur)
  integer,intent(in) :: band,ik_ibz,spin
  class(wfd_t),target,intent(inout) :: Wfd
 !arrays
- complex(gwpc),intent(out) :: ur(Wfd%nfft*Wfd%nspinor)
+ complex(gwp),intent(out) :: ur(Wfd%nfft*Wfd%nspinor)
 
 !Local variables ------------------------------
 !scalars
@@ -1707,7 +1706,7 @@ subroutine wfd_get_ur(Wfd, band, ik_ibz, spin, ur)
  type(wave_t),pointer :: wave
 !arrays
  integer,ABI_CONTIGUOUS pointer :: kg_k(:,:),gbound(:,:)
- complex(gwpc),ABI_CONTIGUOUS pointer :: ug(:)
+ complex(gwp),ABI_CONTIGUOUS pointer :: ug(:)
 !************************************************************************
 
  npw_k  = Wfd%npwarr(ik_ibz)
@@ -1804,7 +1803,7 @@ subroutine wfd_print(Wfd, units, header, prtvol)
  write(msg,'(3(a,i0,a))')&
    '  Max number of G-vectors ............... ',mpw,ch10,&
    '  Total number of FFT points ............ ',Wfd%nfftot,ch10,&
-   '  Number of FFT points treated by me .... ',Wfd%nfft,ch10
+   '-  Number of FFT points treated by me .... ',Wfd%nfft,ch10
  call wrtout(units, msg)
 
  call print_ngfft(units, Wfd%ngfft, 'FFT mesh for wavefunctions', prtvol=my_prtvol)
@@ -1829,12 +1828,12 @@ subroutine wfd_print(Wfd, units, header, prtvol)
  call wrtout(units, msg, pre_newlines=1)
 
  ug_size = one * Wfd%nspinor * mpw * ug_cnt
- write(msg,'(a,f8.1,a)')'P Memory allocated for Fourier components u(G): ',two*gwpc*ug_size*b2Mb,' [Mb] <<< MEM'
+ write(msg,'(a,f8.1,a)')'P Memory allocated for Fourier components u(G): ',two*gwp*ug_size*b2Mb,' [Mb] <<< MEM'
  call wrtout(units, msg)
 
  if (any(wfd%keep_ur)) then
    ur_size = one * Wfd%nspinor * Wfd%nfft * ur_cnt
-   write(msg,'(a,f8.1,a)')'P Memory allocated for real-space u(r): ',two*gwpc*ur_size*b2Mb,' [Mb] <<< MEM'
+   write(msg,'(a,f8.1,a)')'P Memory allocated for real-space u(r): ',two*gwp*ur_size*b2Mb,' [Mb] <<< MEM'
    call wrtout(units, msg)
  end if
 
@@ -2094,11 +2093,11 @@ subroutine wave_free(Wave, what)
  my_what="ALL"; if (present(what)) my_what=toupper(what)
 
  if (.not.firstchar(my_what, ["A", "G", "R", "C"] )) then
-   ABI_ERROR(sjoin("Unknow what:", what))
+   ABI_ERROR(sjoin("Unknown what:", what))
  end if
 
  if (firstchar(my_what, ["A", "G"])) then
-    ABI_SFREE(Wave%ug)
+   ABI_SFREE(Wave%ug)
    Wave%has_ug = WFD_NOWAVE
  end if
 
@@ -2255,7 +2254,7 @@ subroutine wfd_push_ug(Wfd, band, ik_ibz, spin, Cryst, ug, update_ur, update_cpr
  class(wfd_t),target,intent(inout) :: Wfd
  type(crystal_t),intent(in) :: Cryst
 !arrays
- complex(gwpc),intent(inout) :: ug(:)
+ complex(gwp),intent(inout) :: ug(:)
 
 !Local variables ------------------------------
 !scalars
@@ -2688,7 +2687,7 @@ subroutine wfd_get_ug(Wfd, band, ik_ibz, spin, ug)
  integer,intent(in) :: band,ik_ibz,spin
  class(wfd_t),intent(inout) :: Wfd
 !arrays
- complex(gwpc),intent(out) :: ug(Wfd%npwarr(ik_ibz)*Wfd%nspinor)
+ complex(gwp),intent(out) :: ug(Wfd%npwarr(ik_ibz)*Wfd%nspinor)
 
 !Local variables ------------------------------
 !scalars
@@ -3060,7 +3059,7 @@ subroutine wfdgw_rotate(Wfd, Cryst, m_ks_to_qp, bmask)
  class(wfdgw_t),intent(inout) :: Wfd
  type(crystal_t),intent(in) :: Cryst
 !arrays
- complex(dpc),target,intent(in) :: m_ks_to_qp(Wfd%mband,Wfd%mband,Wfd%nkibz,Wfd%nsppol)
+ complex(dp),target,intent(in) :: m_ks_to_qp(Wfd%mband,Wfd%mband,Wfd%nkibz,Wfd%nsppol)
  logical,optional,intent(in) :: bmask(Wfd%mband,Wfd%nkibz,Wfd%nsppol)
 
 !Local variables-------------------------------
@@ -3070,9 +3069,9 @@ subroutine wfdgw_rotate(Wfd, Cryst, m_ks_to_qp, bmask)
  type(wave_t),pointer :: wave
 !arrays
  integer :: new_list(Wfd%mband),my_band_list(Wfd%mband)
- complex(dpc),ABI_CONTIGUOUS pointer :: umat_sk(:,:)
- complex(gwpc) :: mcol(Wfd%mband)
- complex(gwpc),allocatable :: new_ug(:,:) !, new_ur(:)
+ complex(dp),ABI_CONTIGUOUS pointer :: umat_sk(:,:)
+ complex(gwp) :: mcol(Wfd%mband)
+ complex(gwp),allocatable :: new_ug(:,:) !, new_ur(:)
 !************************************************************************
 
  ! Update the distribution table, first.
@@ -3217,7 +3216,7 @@ end function wfdgw_iterator_bks
 !!
 !! INPUTS
 !!  Wfd<wfd_t>=
-!!  [bks_mask(Wfd%mband,Wfd%nkibz,Wfd%nsppol)]=Mask used to skip selecter (b,k,s) entries.
+!!  [bks_mask(Wfd%mband,Wfd%nkibz,Wfd%nsppol)]=Mask used to skip selected (b,k,s) entries.
 !!  [got(Wfd%nproc)]=The number of tasks already assigned to the nodes.
 !!
 !! OUTPUT
@@ -3760,8 +3759,8 @@ subroutine wfd_change_ngfft(Wfd, Cryst, Psps, new_ngfft)
  Wfd%nfft   = Wfd%nfftot ! No FFT parallelism.
 
  ! Re-initialize fft distribution
- call destroy_distribfft(Wfd%MPI_enreg%distribfft)
- call init_distribfft(Wfd%MPI_enreg%distribfft,'c',Wfd%MPI_enreg%nproc_fft,new_ngfft(2),new_ngfft(3))
+ call Wfd%MPI_enreg%distribfft%free()
+ call Wfd%MPI_enreg%distribfft%init('c',Wfd%MPI_enreg%nproc_fft,new_ngfft(2),new_ngfft(3))
 
  ABI_REMALLOC(Wfd%ph1d,(2,3*(2*Wfd%mgfft+1)*Cryst%natom))
  call getph(Cryst%atindx,Cryst%natom,Wfd%ngfft(1),Wfd%ngfft(2),Wfd%ngfft(3),Wfd%ph1d,Cryst%xred)
@@ -3818,7 +3817,6 @@ end subroutine wfd_change_ngfft
 !!  Test the orthonormalization of the wavefunctions stored in Wfd.
 !!
 !! INPUTS
-!!  Wfd<wfd_t>=wavefunction descriptor.
 !!  Cryst<crystal_t>=Object defining the unit cell and its symmetries.
 !!  Pawtab(ntypat*usepaw)<type(pawtab_type)>=PAW tabulated starting data.
 !!
@@ -3842,7 +3840,7 @@ subroutine wfd_test_ortho(Wfd,Cryst,Pawtab,unit,mode_paral)
 !scalars
  integer :: ik_ibz,spin,band,band1,band2,ib,ib1,ib2,ierr,how_manyb,my_unt,npw_k,istwf_k
  real(dp) :: glob_cinf,my_cinf,glob_csup,my_csup,glob_einf,min_norm2,glob_esup,max_norm2
- complex(dpc) :: cdum
+ complex(dp) :: cdum
  logical :: bands_are_spread
  character(len=4) :: my_mode
  character(len=500) :: msg
@@ -3850,8 +3848,8 @@ subroutine wfd_test_ortho(Wfd,Cryst,Pawtab,unit,mode_paral)
 !arrays
  integer :: my_bandlist(Wfd%mband)
  real(dp) :: pawovlp(2)
- complex(gwpc),ABI_CONTIGUOUS pointer :: ug1(:),ug2(:)
- !complex(gwpc) :: ur(Wfd%nfft*Wfd%nspinor)
+ complex(gwp),ABI_CONTIGUOUS pointer :: ug1(:),ug2(:)
+ !complex(gwp) :: ur(Wfd%nfft*Wfd%nspinor)
  character(len=6) :: tag_spin(2)
  type(pawcprj_type),allocatable :: Cp1(:,:),Cp2(:,:)
 !************************************************************************
@@ -3893,7 +3891,7 @@ subroutine wfd_test_ortho(Wfd,Cryst,Pawtab,unit,mode_paral)
        if (Wfd%usepaw==1) then
          call wfd%get_cprj(band,ik_ibz,spin,Cryst,Cp1,sorted=.FALSE.)
          pawovlp = paw_overlap(Cp1,Cp1,Cryst%typat,Pawtab,spinor_comm=Wfd%MPI_enreg%comm_spinor)
-         cdum = cdum + CMPLX(pawovlp(1),pawovlp(2), kind=dpc)
+         cdum = cdum + CMPLX(pawovlp(1),pawovlp(2), kind=dp)
        end if
        !write(std_out,*)"ik_ibz, band, spin, cdum: ",ik_ibz,band,spin,cdum
        if (REAL(cdum)<min_norm2) min_norm2=REAL(cdum)
@@ -3924,7 +3922,7 @@ subroutine wfd_test_ortho(Wfd,Cryst,Pawtab,unit,mode_paral)
          end if
          if (Wfd%usepaw==1) then
            pawovlp = paw_overlap(Cp1,Cp2,Cryst%typat,Pawtab,spinor_comm=Wfd%MPI_enreg%comm_spinor)
-           cdum = cdum + CMPLX(pawovlp(1),pawovlp(2), kind=dpc)
+           cdum = cdum + CMPLX(pawovlp(1),pawovlp(2), kind=dp)
          end if
 
          if (ABS(cdum)<my_cinf) my_cinf=ABS(cdum)
@@ -4015,24 +4013,24 @@ subroutine wfd_sym_ur(Wfd,Cryst,Kmesh,band,ik_bz,spin,ur_kbz,trans,with_umklp,ur
  type(kmesh_t),intent(in) :: Kmesh
  class(wfd_t),intent(inout) :: Wfd
 !arrays
- complex(gwpc),intent(out) :: ur_kbz(Wfd%nfft*Wfd%nspinor)
- complex(gwpc),optional,intent(out) :: ur_kibz(Wfd%nfft*Wfd%nspinor)
+ complex(gwp),intent(out) :: ur_kbz(Wfd%nfft*Wfd%nspinor)
+ complex(gwp),optional,intent(out) :: ur_kibz(Wfd%nfft*Wfd%nspinor)
 
 !Local variables ------------------------------
 !scalars
  integer :: ik_ibz,isym_k,itim_k,nr,ispinor,spad,ir,ir2
  integer :: fft_idx,ix,iy,iz,nx,ny,nz,irot
  real(dp) :: gdotr
- complex(dpc) :: ph_mkt,u2b,u2a
- complex(gwpc) :: gwpc_ph_mkt
+ complex(dp) :: ph_mkt,u2b,u2a
+ complex(gwp) :: gwpc_ph_mkt
  logical :: isirred,my_with_umklp
  character(len=1) :: my_trans
  !character(len=500) :: msg
 !arrays
  integer :: umklp(3)
  real(dp) :: kbz(3),spinrot_k(4)
- complex(dpc) :: spinrot_mat(2,2)
- complex(gwpc),allocatable :: ur(:)
+ complex(dp) :: spinrot_mat(2,2)
+ complex(gwp),allocatable :: ur(:)
 !************************************************************************
 
  my_trans = "N"; if (present(trans)) my_trans = toupper(trans(1:1))
@@ -4193,7 +4191,7 @@ subroutine wfd_rotate_cg(wfd, band, ndat, spin, kk_ibz, npw_kbz, kg_kbz, istwf_k
  real(dp),intent(in) :: kk_ibz(3)
  real(dp),intent(out) :: work(2, work_ngfft(4), work_ngfft(5), work_ngfft(6))
  real(dp),target,intent(out) :: cgs_kbz(2, npw_kbz*wfd%nspinor, ndat)
- complex(gwpc),optional,intent(out) :: urs_kbz(wfd%nfft*wfd%nspinor, ndat)
+ complex(gwp),optional,intent(out) :: urs_kbz(wfd%nfft*wfd%nspinor, ndat)
 
 !Local variables ------------------------------
 !scalars
@@ -4203,9 +4201,9 @@ subroutine wfd_rotate_cg(wfd, band, ndat, spin, kk_ibz, npw_kbz, kg_kbz, istwf_k
 !arrays
  integer :: g0_k(3)
  real(dp),allocatable :: cg_kirr(:,:)
- complex(gwpc),allocatable :: cwork_sp(:,:)
+ complex(gwp),allocatable :: cwork_sp(:,:)
 #ifdef HAVE_GW_DPC
- complex(gwpc),pointer :: ugs_dp_ptr(:,:)
+ complex(gwp),pointer :: ugs_dp_ptr(:,:)
 #endif
 !************************************************************************
 
@@ -4216,8 +4214,9 @@ subroutine wfd_rotate_cg(wfd, band, ndat, spin, kk_ibz, npw_kbz, kg_kbz, istwf_k
  if (isirr_k) then
    do idat=1,ndat
      ! Copy u_k(G)
-     call wfd%copy_cg(band, ik_ibz, spin, cgs_kbz(:,:,idat))
-     if (present(urs_kbz)) call wfd%get_ur(band, ik_ibz, spin, urs_kbz(:,idat))
+     ib = band + idat - 1
+     call wfd%copy_cg(ib, ik_ibz, spin, cgs_kbz(:,:,idat))
+     if (present(urs_kbz)) call wfd%get_ur(ib, ik_ibz, spin, urs_kbz(:,idat))
    end do
 
  else
@@ -4226,7 +4225,7 @@ subroutine wfd_rotate_cg(wfd, band, ndat, spin, kk_ibz, npw_kbz, kg_kbz, istwf_k
    ABI_MALLOC(cg_kirr, (2, npw_kirr*wfd%nspinor))
 
    do idat=1,ndat
-     ib = band + idat -1
+     ib = band + idat - 1
      call wfd%copy_cg(ib, ik_ibz, spin, cg_kirr)
      call cgtk_rotate(cryst, kk_ibz, isym_k, trev_k, g0_k, wfd%nspinor, ndat1, &
                       wfd%npwarr(ik_ibz), wfd%kdata(ik_ibz)%kg_k, &
@@ -4380,7 +4379,7 @@ end subroutine wfd_sym_ug_kg
 !!  All the wavefunction are stored on each node, only the spin is distributed.
 !!
 !! INPUTS
-!!  Wfd<wfd_t>=Initialized wavefunction descritptor.
+!!  Wfd<wfd_t>=Initialized wavefunction descriptor.
 !!  wfk_fname=Name of the WFK file.
 !!
 !! OUTPUT
@@ -4645,6 +4644,18 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  mband_disk = MAXVAL(Hdr%nband)
  ABI_CHECK_ILEQ(Wfd%mband, mband_disk, "Not enough bands stored on WFK file")
 
+ ! Make sure wfd%kibz agrees the k-points reported in the hdr.
+ ABI_CHECK_IEQ(wfd%nkibz, hdr%nkpt, "wfd%nkibz != hdr%nkpt")
+ ierr = 0
+ do ik_ibz=1,wfd%nkibz
+   if (any(abs(wfd%kibz(:, ik_ibz) - hdr%kptns(:, ik_ibz)) > tol12)) then
+     ierr = ierr + 1
+     call wrtout(std_out, &
+       sjoin("For ik_ibz: ", itoa(ik_ibz), "wfd kpt:", ktoa(wfd%kibz(:, ik_ibz)), " /= ", ktoa(hdr%kptns(:,ik_ibz))))
+   end if
+ end do
+ ABI_CHECK_IEQ(ierr, 0, "kpoints in wfd% and WFK file do not agree. See messages above")
+
  ! Each node will read the waves whose status if (WFD_ALLOCATED|WFD_STORED).
  ! all_countks is a global array used to skip (ik_ibz, spin) if all MPI procs do not need bands for this (k, s)
  ABI_MALLOC(my_readmask, (mband_disk, Wfd%nkibz, Wfd%nsppol))
@@ -4745,9 +4756,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
             do ig=1,npw_disk
               icg = ig+cg_spad+cg_bpad
               igw = gf2wfd(ig)+gw_spad
-              if (gf2wfd(ig) /= 0) then
-                wave%ug(igw) = CMPLX(cg_k(1,icg), cg_k(2,icg), kind=gwpc)
-              end if
+              if (gf2wfd(ig) /= 0) wave%ug(igw) = CMPLX(cg_k(1,icg), cg_k(2,icg), kind=gwp)
             end do
           end do
           wave%has_ug = WFD_STORED
@@ -4884,7 +4893,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
                npw_disk, istwfk_disk, kg_k, cg_k(:, cg_bpad+1:), &
                wfd%npwarr(ik_ibz), wfd%istwfk(ik_ibz), wfd%kdata(ik_ibz)%kg_k, out_cg, work_ngfft, work)
 
-            wave%ug(:) = CMPLX(out_cg(1, :), out_cg(2, :), kind=gwpc)
+            wave%ug(:) = CMPLX(out_cg(1, :), out_cg(2, :), kind=gwp)
             !call wfd%push_ug(band, ik_ibz, spin, cryst, out_cg)
           else
             do spinor=1,Wfd%nspinor
@@ -4894,7 +4903,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
                 icg = ig+cg_spad+cg_bpad
                 igw = gf2wfd(ig)+gw_spad
                 if (gf2wfd(ig) /= 0) then
-                  wave%ug(igw) = CMPLX(cg_k(1,icg),cg_k(2,icg), kind=gwpc)
+                  wave%ug(igw) = CMPLX(cg_k(1,icg),cg_k(2,icg), kind=gwp)
                 end if
               end do
               !call wfd%push_ug(band, ik_ibz, spin, cryst, out_cg)
@@ -4916,15 +4925,14 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
         write(msg,'(4x,4(a,i0),a)') "Reading kpt [", ik_ibz, "/", wfd%nkibz, "] spin [", spin, "/", wfd%nsppol, "]"
         call cwtime_report(msg, cpu_ks, wall_ks, gflops_ks)
       end if
-    end do !ik_ibz
-  end do !spin
+    end do ! ik_ibz
+  end do ! spin
 
  else
    ABI_ERROR(sjoin("Wrong method: ", itoa(method)))
  end if
 
- call wfk%close()
- call Hdr%free()
+ call wfk%close(); call Hdr%free()
 
  ABI_FREE(my_readmask)
  ABI_FREE(all_countks)
@@ -4993,19 +5001,19 @@ subroutine wfd_paw_get_aeur(Wfd,band,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pa
  type(pawtab_type),intent(in) :: Pawtab(Cryst%ntypat)
  type(pawfgrtab_type),intent(in) :: Pawfgrtab(Cryst%natom)
  type(paw_pwaves_lmn_t),intent(in) :: Paw_onsite(Cryst%natom)
- complex(gwpc),intent(out) :: ur_ae(Wfd%nfft*Wfd%nspinor)
- complex(gwpc),optional,intent(out) :: ur_ae_onsite(Wfd%nfft*Wfd%nspinor)
- complex(gwpc),optional,intent(out) :: ur_ps_onsite(Wfd%nfft*Wfd%nspinor)
+ complex(gwp),intent(out) :: ur_ae(Wfd%nfft*Wfd%nspinor)
+ complex(gwp),optional,intent(out) :: ur_ae_onsite(Wfd%nfft*Wfd%nspinor)
+ complex(gwp),optional,intent(out) :: ur_ps_onsite(Wfd%nfft*Wfd%nspinor)
 
 !Local variables-------------------------------
 !scalars
  integer :: itypat,ln_size,lmn_size,iatom,spinor
  integer :: nfgd,ifgd,jlmn,jl,jm,ifftsph
  real(dp) :: phj,tphj,arg,re_cp,im_cp
- complex(dpc) :: cp,cnorm
+ complex(dp) :: cp,cnorm
 !arrays
  real(dp) :: kpoint(3)
- complex(dpc),allocatable :: ceikr(:),phk_atm(:)
+ complex(dp),allocatable :: ceikr(:),phk_atm(:)
  type(pawcprj_type),allocatable :: Cp1(:,:)
 ! *************************************************************************
 
@@ -5133,7 +5141,7 @@ subroutine wfdgw_plot_ur(Wfd,Cryst,Psps,Pawtab,Pawrad,ngfftf,bks_mask)
  integer :: my_band_list(Wfd%mband)
  real(dp),allocatable :: data_plot(:)
  logical,ABI_CONTIGUOUS pointer :: bmask(:)
- complex(gwpc),allocatable :: ur_ae(:),nc_ur(:)
+ complex(gwp),allocatable :: ur_ae(:),nc_ur(:)
  type(Pawfgrtab_type),allocatable :: Pawfgrtab(:)
  type(paw_pwaves_lmn_t),allocatable :: Paw_onsite(:)
 !************************************************************************
@@ -5306,7 +5314,7 @@ subroutine wfdgw_get_nl_me(Wfd, cryst, psps, pawtab, bks_mask, nl_bks)
  real(dp),allocatable :: kpg_k(:,:),vnl_psi(:,:),vectin(:,:)
  real(dp) :: opaw_psi(1,1)
  real(dp),ABI_CONTIGUOUS pointer :: ffnl_k(:,:,:,:),ph3d_k(:,:,:)
- complex(gwpc),ABI_CONTIGUOUS pointer :: ug1(:)
+ complex(gwp),ABI_CONTIGUOUS pointer :: ug1(:)
  type(pawcprj_type),allocatable :: cprj(:,:)
 !************************************************************************
 
@@ -5660,10 +5668,10 @@ subroutine wfdgw_mkrho(wfd, cryst, psps, ebands, ngfftf, nfftf, rhor, &
 !arrays
  integer,allocatable :: irrzon(:,:,:)
  real(dp),allocatable :: phnons(:,:,:),rhog(:,:),rhor_down(:),rhor_mx(:),rhor_my(:),cwavef(:,:)
- complex(dpc),allocatable :: wfr_x(:),wfr_y(:)
- complex(gwpc),allocatable :: gradug(:),work(:)
- complex(gwpc),allocatable,target :: wfr(:)
- complex(gwpc), ABI_CONTIGUOUS pointer :: cwavef1(:),cwavef2(:)
+ complex(dp),allocatable :: wfr_x(:),wfr_y(:)
+ complex(gwp),allocatable :: gradug(:),work(:)
+ complex(gwp),allocatable,target :: wfr(:)
+ complex(gwp), ABI_CONTIGUOUS pointer :: cwavef1(:),cwavef2(:)
  type(iter2_t) :: Iter_bks
 !*************************************************************************
 
@@ -5731,7 +5739,7 @@ subroutine wfdgw_mkrho(wfd, cryst, psps, ebands, ngfftf, nfftf, rhor, &
              cwavef(2,ipw)=cwavef(1,ipw)*kg_k_cart
              cwavef(1,ipw)=cwftmp
            end do
-           gradug(:)=CMPLX(cwavef(1,:),cwavef(2,:),gwpc)
+           gradug(:)=CMPLX(cwavef(1,:),cwavef(2,:),gwp)
            call fft_ug(Wfd%npwarr(ik),nfftf,Wfd%nspinor,ndat1,Wfd%mgfft,Wfd%ngfft,&
              Wfd%istwfk(ik),Wfd%Kdata(ik)%kg_k,Wfd%Kdata(ik)%gbound,gradug,work)
            cwavef1(:)=work(:)
@@ -5740,7 +5748,7 @@ subroutine wfdgw_mkrho(wfd, cryst, psps, ebands, ngfftf, nfftf, rhor, &
            ABI_FREE(gradug)
          end if
 
-!$OMP PARALLEL DO
+         !$OMP PARALLEL DO
          do ir=1,nfftf
            rhor(ir,is) = rhor(ir,is) + CONJG(cwavef1(ir)) * cwavef1(ir) * bks_weight
          end do
@@ -5757,7 +5765,7 @@ subroutine wfdgw_mkrho(wfd, cryst, psps, ebands, ngfftf, nfftf, rhor, &
            cwavef2 => wfr(1+nfftf:2*nfftf)
            wfr_x(:) = cwavef1(:) + cwavef2(:)       ! $(\Psi^{1}+\Psi^{2})$
            wfr_y(:) = cwavef1(:) -j_dpc*cwavef2(:)  ! $(\Psi^{1}-i\Psi^{2})$
-!$OMP PARALLEL DO
+           !$OMP PARALLEL DO
            do ir=1,nfftf
              rhor_down(ir) = rhor_down(ir) + CONJG(cwavef2(ir)) * cwavef2(ir) * bks_weight
              rhor_mx(ir) = rhor_mx(ir) + CONJG(wfr_x(ir)) * wfr_x(ir) * bks_weight
@@ -5880,7 +5888,7 @@ subroutine test_charge(nfftf,nelectron_exp,nspden,rhor,ucvol,&
 
  ! === For PAW output of compensation charges ===
  if (usepaw==1) then
-!if (usepaw==1.and.usexcnhat>0) then ! TODO I still dont understand this if!
+ !if (usepaw==1.and.usexcnhat>0) then ! TODO I still dont understand this if!
    write(msg,'(4a)')ch10,' PAW TEST:',ch10,' ==== Compensation charge inside spheres ============'
    if (compch_sph<greatest_real.and.compch_fft<greatest_real) &
      write(msg,'(3a)')TRIM(msg),ch10,' The following values must be close...'

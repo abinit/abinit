@@ -8,6 +8,7 @@ ndtset 3
 
 # Dataset 1 GS with paral_kgb == 1 and MPI-FFT.
 paral_kgb1 1
+nblock_lobpcg1 6
 npband1 2 np_spkpt1 1 npfft1 2
 tolwfr1 1e-12
 nqpt1   0          # Cancel default
@@ -35,7 +36,6 @@ toldfe3 1d-10
 # SCF parameters
 ecut 15.
 nband 12
-bandpp 1
 diemac 12.0d0
 
 kptrlatt 4 0 0 0 4 0 0 0 4
@@ -61,7 +61,7 @@ natom 2
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = atlas_gnu_14.2_triqs
+#%% exclude_builders = atlas_gnu_14.2_triqs, haicgu_*
 #%% [files]
 #%% [paral_info]
 #%% nprocs_to_test = 4

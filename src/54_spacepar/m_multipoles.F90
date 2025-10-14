@@ -111,7 +111,7 @@ subroutine multipoles_fftr(arraysp,dipole,nfft,ngfft,nspden,rprimd,origin,&
    my_distribfft => distribfft
  else
    ABI_MALLOC(my_distribfft,)
-   call init_distribfft_seq(my_distribfft,'f',n2,n3,'fourdp')
+   call my_distribfft%init_seq('f',n2,n3,'fourdp')
  end if
  fftgrid_found=.false.
  if (n2 == my_distribfft%n2_coarse ) then
@@ -180,7 +180,7 @@ subroutine multipoles_fftr(arraysp,dipole,nfft,ngfft,nspden,rprimd,origin,&
  end do
 
  if (.not.present(distribfft)) then
-   call destroy_distribfft(my_distribfft)
+   call my_distribfft%free()
    ABI_FREE(my_distribfft)
  end if
 

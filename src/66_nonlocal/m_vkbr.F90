@@ -81,10 +81,10 @@ MODULE m_vkbr
   real(dp) :: kpoint(3)
   ! The k-point in reduced coordinates.
 
-  complex(gwpc),allocatable :: fnl(:,:,:,:)
+  complex(gwp),allocatable :: fnl(:,:,:,:)
   ! fnl(npw,mpsang**2,mproj,natom)
 
-  complex(gwpc),allocatable :: fnld(:,:,:,:,:)
+  complex(gwp),allocatable :: fnld(:,:,:,:,:)
   ! fnld(3,npw,mpsang**2,mproj,natom)
 
  end type vkbr_t
@@ -172,11 +172,11 @@ subroutine vkbr_init(vkbr,cryst,psps,inclvkb,istwfk,npw,kpoint,gvec)
  select case (inclvkb)
  case (2)
    ! Complex spherical harmonics (CPU and mem \propto npw).
-   write(msg,'(a,f12.1)')'out-of-memory in fnl; Mb= ',one*npw*psps%mpsang**2*psps%mproj*cryst%natom*2*gwpc*b2Mb
+   write(msg,'(a,f12.1)')'out-of-memory in fnl; Mb= ',one*npw*psps%mpsang**2*psps%mproj*cryst%natom*2*gwp*b2Mb
    ABI_STAT_MALLOC(vkbr%fnl,(npw,psps%mpsang**2,psps%mproj,cryst%natom), ierr)
    ABI_CHECK(ierr==0, msg)
 
-   write(msg,'(a,f12.1)')'out-of-memory in fnld; Mb= ',three*npw*psps%mpsang**2*psps%mproj*cryst%natom*2*gwpc*b2Mb
+   write(msg,'(a,f12.1)')'out-of-memory in fnld; Mb= ',three*npw*psps%mpsang**2*psps%mproj*cryst%natom*2*gwp*b2Mb
    ABI_STAT_MALLOC(vkbr%fnld,(3,npw,psps%mpsang**2,psps%mproj,cryst%natom), ierr)
    ABI_CHECK(ierr==0, msg)
 
@@ -295,16 +295,15 @@ subroutine add_vnlr_commutator(vkbr,cryst,psps,npw,nspinor,ug1,ug2,rhotwx)
  type(crystal_t),intent(in) :: cryst
  type(pseudopotential_type),intent(in) :: psps
 !arrays
- complex(gwpc),target,intent(in) :: ug1(npw*nspinor),ug2(npw*nspinor)
- complex(gwpc),intent(inout) :: rhotwx(3,nspinor**2)
+ complex(gwp),target,intent(in) :: ug1(npw*nspinor),ug2(npw*nspinor)
+ complex(gwp),intent(inout) :: rhotwx(3,nspinor**2)
 
 !Local variables ------------------------------
 !scalars
  integer :: iat,ig,ilm,itypat,nlmn,ilmn,iln0,iln,il,in,im
- complex(gwpc) :: cta1,cta4
+ complex(gwp) :: cta1,cta4
 !arrays
- complex(gwpc) :: dum(3),cta2(3),cta3(3),gamma_term(3)
-
+ complex(gwp) :: dum(3),cta2(3),cta3(3),gamma_term(3)
 !************************************************************************
 
  ABI_CHECK(nspinor == 1, "inclvkb > 0 with nspinor == 2 is not coded")
@@ -546,16 +545,15 @@ function nc_ihr_comm(vkbr, cryst, psps, npw, nspinor, istwfk, inclvkb, kpoint, u
 !arrays
  integer,intent(in) :: gvec(3,npw)
  real(dp),intent(in) :: kpoint(3)
- complex(gwpc),intent(in) :: ug1(npw*nspinor),ug2(npw*nspinor)
- complex(gwpc) :: ihr_comm(3,nspinor**2)
+ complex(gwp),intent(in) :: ug1(npw*nspinor),ug2(npw*nspinor)
+ complex(gwp) :: ihr_comm(3,nspinor**2)
 
 !Local variables ------------------------------
 !scalars
  integer :: ig,iab,spad1,spad2
- complex(dpc) :: c_tmp
+ complex(dp) :: c_tmp
 !arrays
  integer :: spinorwf_pad(2,4)
-
 !************************************************************************
 
  ! [H, r] = -\nabla + [V_{nl}, r]
@@ -644,20 +642,20 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
  real(dp),intent(in) :: vkb(npw,psps%lnmax,cryst%ntypat)
  real(dp),intent(in) :: vkbd(npw,psps%lnmax,cryst%ntypat)
  real(dp),intent(in) :: vkbsign(psps%lnmax,cryst%ntypat)
- complex(gwpc),intent(out) :: fnl(npw,psps%mpsang**2,psps%mproj,cryst%natom)
- complex(gwpc),intent(out) :: fnld(3,npw,psps%mpsang**2,psps%mproj,cryst%natom)
+ complex(gwp),intent(out) :: fnl(npw,psps%mpsang**2,psps%mproj,cryst%natom)
+ complex(gwp),intent(out) :: fnld(3,npw,psps%mpsang**2,psps%mproj,cryst%natom)
 
 !Local variables-------------------------------
 !scalars
  integer :: ii,iat,ig,il,im,ilm,itypat,nlmn,iln0,iln,ilmn,in
  real(dp),parameter :: ppad=tol6
  real(dp) :: cosphi,costh,factor,mkg,mkg2,sinphi,sinth,sq,xdotg
- complex(dpc) :: dphi,dth,sfac
+ complex(dp) :: dphi,dth,sfac
  character(len=500) :: msg
 !arrays
  real(dp) :: gcart(3),kcart(3),kg(3)
  real(dp) :: b1(3),b2(3),b3(3),a1(3),a2(3),a3(3)
- complex(dpc) :: dylmcart(3),dylmcrys(3),gradphi(3),gradth(3)
+ complex(dp) :: dylmcart(3),dylmcrys(3),gradphi(3),gradth(3)
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -712,7 +710,7 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
      xdotg = gcart(1)*cryst%xcart(1,iat)+gcart(2)*Cryst%xcart(2,iat)+gcart(3)*Cryst%xcart(3,iat)
      ! Remember that in the GW code the reciprocal vectors
      ! are defined such as a_i*b_j = 2pi delta_ij, no need to introduce 2pi
-     sfac=CMPLX(COS(xdotg), SIN(xdotg), kind=dpc)
+     sfac=CMPLX(COS(xdotg), SIN(xdotg), kind=dp)
 
      iln0 = 0
      nlmn = count(psps%indlmn(3,:,itypat) > 0)

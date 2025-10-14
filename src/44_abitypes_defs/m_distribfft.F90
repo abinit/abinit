@@ -43,7 +43,7 @@ MODULE m_distribfft
 !!   1) One should create two separated tables: one for the wavefunctions and the other one for
 !!      fourdp on the dense/coarse mesh.
 !!
-!!   2) Use shorter names --> fftabs_type
+!!   2) Use shorter names --> fftabs_t
 !!
 !! SOURCE
 
@@ -95,12 +95,14 @@ MODULE m_distribfft
   integer, allocatable :: tab_fftdp3dg_local(:)
   ! local i3 indices in fourdp on fine grid
 
-end type distribfft_type
+  contains
 
- public :: init_distribfft         ! Initializes mpi information for FFT distribution.
- public :: init_distribfft_seq     ! Initializes a sequential FFT distribution.
- public :: destroy_distribfft      ! Free dynamic memory.
- public :: copy_distribfft         ! Copy datatype.
+   procedure :: init => init_distribfft         ! Initializes mpi information for FFT distribution.
+   procedure :: init_seq => init_distribfft_seq ! Initializes a sequential FFT distribution.
+   procedure :: free => destroy_distribfft      ! Free dynamic memory.
+   procedure :: copy => copy_distribfft         ! Copy datatype.
+
+end type distribfft_type
 !!***
 
 CONTAINS !===========================================================
@@ -126,19 +128,18 @@ CONTAINS !===========================================================
 !!
 !! SOURCE
 
-subroutine init_distribfft(distribfft_arg,grid_type,nproc_fft,n2,n3)
+subroutine init_distribfft(distribfft_arg, grid_type, nproc_fft, n2, n3)
 
 !Arguments ------------------------------------
 !scalars
+ class(distribfft_type), intent(inout) :: distribfft_arg
  integer, intent(in) :: nproc_fft,n2,n3
  character(len=1),intent(in) :: grid_type
- type(distribfft_type), intent(inout) :: distribfft_arg
 
 !Local variables-------------------------------
 !scalars
  integer :: i2,i3,n2_local,n3_local
  !character(len=500) :: msg
-
 ! ***********************************************************************
 
  DBG_ENTER("COLL")
@@ -248,15 +249,14 @@ subroutine init_distribfft_seq(distribfft_arg, grid_type, n2, n3, type_four)
 
 !Arguments ------------------------------------
 !scalars
+ class(distribfft_type), intent(inout) :: distribfft_arg
  integer, intent(in) :: n2,n3
  character(len=1),intent(in) :: grid_type
  character(len=*),intent(in) :: type_four
- type(distribfft_type), intent(inout) :: distribfft_arg
 
 !Local variables-------------------------------
 !scalars
  integer :: ii
-
 ! ***********************************************************************
 
  DBG_ENTER("COLL")
@@ -267,30 +267,20 @@ subroutine init_distribfft_seq(distribfft_arg, grid_type, n2, n3, type_four)
  case ('c')
    distribfft_arg%n2_coarse = n2
    if (type_four=='fourwf'.or.type_four(1:3)=='all') then
-     if (allocated(distribfft_arg%tab_fftwf2_distrib)) then
-       ABI_FREE(distribfft_arg%tab_fftwf2_distrib)
-     end if
-     if (allocated(distribfft_arg%tab_fftwf2_local)) then
-       ABI_FREE(distribfft_arg%tab_fftwf2_local)
-     end if
+     ABI_SFREE(distribfft_arg%tab_fftwf2_distrib)
+     ABI_SFREE(distribfft_arg%tab_fftwf2_local)
+
      ABI_MALLOC(distribfft_arg%tab_fftwf2_distrib,(n2))
      ABI_MALLOC(distribfft_arg%tab_fftwf2_local,(n2))
      distribfft_arg%tab_fftwf2_distrib=0
      distribfft_arg%tab_fftwf2_local=(/(ii,ii=1,n2)/)
    end if
    if (type_four=='fourdp'.or.type_four(1:3)=='all') then
-     if (allocated(distribfft_arg%tab_fftdp2_distrib)) then
-       ABI_FREE(distribfft_arg%tab_fftdp2_distrib)
-     end if
-     if (allocated(distribfft_arg%tab_fftdp2_local)) then
-       ABI_FREE(distribfft_arg%tab_fftdp2_local)
-     end if
-     if (allocated(distribfft_arg%tab_fftdp3_distrib)) then
-       ABI_FREE(distribfft_arg%tab_fftdp3_distrib)
-     end if
-     if (allocated(distribfft_arg%tab_fftdp3_local)) then
-       ABI_FREE(distribfft_arg%tab_fftdp3_local)
-     end if
+     ABI_SFREE(distribfft_arg%tab_fftdp2_distrib)
+     ABI_SFREE(distribfft_arg%tab_fftdp2_local)
+     ABI_SFREE(distribfft_arg%tab_fftdp3_distrib)
+     ABI_SFREE(distribfft_arg%tab_fftdp3_local)
+
      ABI_MALLOC(distribfft_arg%tab_fftdp2_distrib,(n2))
      ABI_MALLOC(distribfft_arg%tab_fftdp2_local,(n2))
      ABI_MALLOC(distribfft_arg%tab_fftdp3_distrib,(n3))
@@ -304,30 +294,20 @@ subroutine init_distribfft_seq(distribfft_arg, grid_type, n2, n3, type_four)
  case ('f')
    distribfft_arg%n2_fine = n2
    if (type_four=='fourwf'.or.type_four(1:3)=='all') then
-     if (allocated(distribfft_arg%tab_fftwf2dg_distrib)) then
-       ABI_FREE(distribfft_arg%tab_fftwf2dg_distrib)
-     end if
-     if (allocated(distribfft_arg%tab_fftwf2dg_local)) then
-       ABI_FREE(distribfft_arg%tab_fftwf2dg_local)
-     end if
+     ABI_SFREE(distribfft_arg%tab_fftwf2dg_distrib)
+     ABI_SFREE(distribfft_arg%tab_fftwf2dg_local)
+
      ABI_MALLOC(distribfft_arg%tab_fftwf2dg_distrib,(n2))
      ABI_MALLOC(distribfft_arg%tab_fftwf2dg_local,(n2))
      distribfft_arg%tab_fftwf2dg_distrib=0
      distribfft_arg%tab_fftwf2dg_local=(/(ii,ii=1,n2)/)
    end if
    if (type_four=='fourdp'.or.type_four(1:3)=='all') then
-     if (allocated(distribfft_arg%tab_fftdp2dg_distrib)) then
-       ABI_FREE(distribfft_arg%tab_fftdp2dg_distrib)
-     end if
-     if (allocated(distribfft_arg%tab_fftdp2dg_local)) then
-       ABI_FREE(distribfft_arg%tab_fftdp2dg_local)
-     end if
-     if (allocated(distribfft_arg%tab_fftdp3dg_distrib)) then
-       ABI_FREE(distribfft_arg%tab_fftdp3dg_distrib)
-     end if
-     if (allocated(distribfft_arg%tab_fftdp3dg_local)) then
-       ABI_FREE(distribfft_arg%tab_fftdp3dg_local)
-     end if
+     ABI_SFREE(distribfft_arg%tab_fftdp2dg_distrib)
+     ABI_SFREE(distribfft_arg%tab_fftdp2dg_local)
+     ABI_SFREE(distribfft_arg%tab_fftdp3dg_distrib)
+     ABI_SFREE(distribfft_arg%tab_fftdp3dg_local)
+
      ABI_MALLOC(distribfft_arg%tab_fftdp2dg_distrib,(n2))
      ABI_MALLOC(distribfft_arg%tab_fftdp2dg_local,(n2))
      ABI_MALLOC(distribfft_arg%tab_fftdp3dg_distrib,(n3))
@@ -365,8 +345,7 @@ end subroutine init_distribfft_seq
 subroutine destroy_distribfft(distribfft_arg)
 
 !Arguments ------------------------------------
- type(distribfft_type), intent(inout) :: distribfft_arg
-
+ class(distribfft_type), intent(inout) :: distribfft_arg
 ! ***********************************************************************
 
  DBG_ENTER("COLL")
@@ -374,45 +353,18 @@ subroutine destroy_distribfft(distribfft_arg)
  distribfft_arg%n2_coarse=0
  distribfft_arg%n2_fine  =0
 
- if (allocated(distribfft_arg%tab_fftwf2_distrib)) then
-   ABI_FREE(distribfft_arg%tab_fftwf2_distrib)
- end if
-
- if (allocated(distribfft_arg%tab_fftdp2_distrib)) then
-   ABI_FREE(distribfft_arg%tab_fftdp2_distrib)
- end if
- if (allocated(distribfft_arg%tab_fftdp3_distrib)) then
-   ABI_FREE(distribfft_arg%tab_fftdp3_distrib)
- end if
- if (allocated(distribfft_arg%tab_fftwf2dg_distrib)) then
-  ABI_FREE(distribfft_arg%tab_fftwf2dg_distrib)
- end if
- if (allocated(distribfft_arg%tab_fftdp2dg_distrib)) then
-  ABI_FREE(distribfft_arg%tab_fftdp2dg_distrib)
- end if
- if (allocated(distribfft_arg%tab_fftdp3dg_distrib)) then
-  ABI_FREE(distribfft_arg%tab_fftdp3dg_distrib)
- end if
-
- if (allocated(distribfft_arg%tab_fftwf2_local)) then
-  ABI_FREE(distribfft_arg%tab_fftwf2_local)
- end if
-
- if (allocated(distribfft_arg%tab_fftdp2_local)) then
-  ABI_FREE(distribfft_arg%tab_fftdp2_local)
- end if
- if (allocated(distribfft_arg%tab_fftdp3_local)) then
-  ABI_FREE(distribfft_arg%tab_fftdp3_local)
- end if
- if (allocated(distribfft_arg%tab_fftwf2dg_local)) then
-  ABI_FREE(distribfft_arg%tab_fftwf2dg_local)
- end if
- if (allocated(distribfft_arg%tab_fftdp2dg_local)) then
-   ABI_FREE(distribfft_arg%tab_fftdp2dg_local)
- end if
- if (allocated(distribfft_arg%tab_fftdp3dg_local)) then
-   ABI_FREE(distribfft_arg%tab_fftdp3dg_local)
- end if
+ ABI_SFREE(distribfft_arg%tab_fftwf2_distrib)
+ ABI_SFREE(distribfft_arg%tab_fftdp2_distrib)
+ ABI_SFREE(distribfft_arg%tab_fftdp3_distrib)
+ ABI_SFREE(distribfft_arg%tab_fftwf2dg_distrib)
+ ABI_SFREE(distribfft_arg%tab_fftdp2dg_distrib)
+ ABI_SFREE(distribfft_arg%tab_fftdp3dg_distrib)
+ ABI_SFREE(distribfft_arg%tab_fftwf2_local)
+ ABI_SFREE(distribfft_arg%tab_fftdp2_local)
+ ABI_SFREE(distribfft_arg%tab_fftdp3_local)
+ ABI_SFREE(distribfft_arg%tab_fftwf2dg_local)
+ ABI_SFREE(distribfft_arg%tab_fftdp2dg_local)
+ ABI_SFREE(distribfft_arg%tab_fftdp3dg_local)
 
  DBG_EXIT("COLL")
 
@@ -437,9 +389,8 @@ end subroutine destroy_distribfft
 subroutine copy_distribfft(distribfft_src, distribfft_dst)
 
 !Arguments ------------------------------------
- type(distribfft_type),intent(in)   :: distribfft_src
- type(distribfft_type),intent(out) :: distribfft_dst
-
+ class(distribfft_type),intent(in)   :: distribfft_src
+ class(distribfft_type),intent(out) :: distribfft_dst
 ! ***********************************************************************
 
  DBG_ENTER("COLL")

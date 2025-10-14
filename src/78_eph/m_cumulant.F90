@@ -27,13 +27,12 @@ module m_cumulant
  use m_xmpi
  use m_errors
  use m_ebands
- use m_nctk
  use m_sigmaph
  use m_dtset
  use m_dtfil
  use netcdf
+ use m_nctk
 
- !use m_ebands, only: ebands_free, ebands_get_carriers, ebands_get_muT_with_fd
  !use m_ebands,   only : ebands_t
  use defs_abitypes,    only : MPI_type
  use m_io_tools,       only : open_file, file_exists, is_open
@@ -41,7 +40,6 @@ module m_cumulant
  use m_crystal,        only : crystal_t
  use m_numeric_tools,  only : simpson_cplx, arth, c2r, simpson, safe_div, simpson_int, ctrap, linfit, linspace
  use m_fstrings,       only : strcat, sjoin, itoa, ltoa, stoa, ftoa
- use m_distribfft,     only : init_distribfft_seq
  !use m_kpts,           only : kpts_timrev_from_kptopt
  use m_mpinfo,         only : destroy_mpi_enreg, initmpi_seq
  use m_fft,            only : fourdp
@@ -168,7 +166,7 @@ module m_cumulant
    ! Allocate using only the relevant bands for transport
    ! including valence states to allow to compute different doping
 
-  complex(dpc) :: ieta
+  complex(dp) :: ieta
    ! Used to shift the poles in the complex plane (Ha units)
    ! Corresponds to `i eta` term in equations.
 
@@ -243,37 +241,37 @@ module m_cumulant
   ! Frequency mesh along the real axis (Ha units) used for the different bands
   ! Each mesh is **centered** on the corresponding KS energy.
 
-  complex(dpc),allocatable :: vals_e0ks(:,:,:,:)
+  complex(dp),allocatable :: vals_e0ks(:,:,:,:)
    ! vals_e0ks(ntemp, max_nbcalc, my_nkcalc, nsppol))
    ! Sigma_eph(omega=eKS, kT, band, ikcalc, spin).
    ! Fan-Migdal + Debye-Waller
 
-  complex(dpc),allocatable :: vals_wr(:,:,:,:,:)
+  complex(dp),allocatable :: vals_wr(:,:,:,:,:)
    ! vals_wr(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Sigma_eph(omega, kT, band, ikcalc, spin).
    ! enk_KS corresponds to nwr/2 + 1.
 
-     complex(dpc),allocatable :: ct_vals(:,:,:,:,:)
+     complex(dp),allocatable :: ct_vals(:,:,:,:,:)
    ! ct_vals(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Cumulant function (time, kT, band, ikcalc, spin).
 
-     complex(dpc),allocatable :: c1(:,:,:,:,:)
+     complex(dp),allocatable :: c1(:,:,:,:,:)
    ! FIXME ct_vals(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Cumulant function (time, kT, band, ikcalc, spin).
 
-     complex(dpc),allocatable :: c2(:,:,:,:,:)
+     complex(dp),allocatable :: c2(:,:,:,:,:)
    ! FIXME ct_vals(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Cumulant function (time, kT, band, ikcalc, spin).
 
-     complex(dpc),allocatable :: c3(:,:,:,:,:)
+     complex(dp),allocatable :: c3(:,:,:,:,:)
    ! FIXME ct_vals(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Cumulant function (time, kT, band, ikcalc, spin).
 
-     complex(dpc),allocatable :: gt_vals(:,:,:,:,:)
+     complex(dp),allocatable :: gt_vals(:,:,:,:,:)
    ! FIXME vals_wr(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Green's function in time domain (time, kT, band, ikcalc, spin).
 
-     complex(dpc),allocatable :: gw_vals(:,:,:,:,:)
+     complex(dp),allocatable :: gw_vals(:,:,:,:,:)
    ! gw_vals(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Green's function in frequency domain(omega, kT, band) for given (ikcalc, spin).
 
@@ -524,8 +522,8 @@ subroutine cumulant_init(self, dtset, dtfil, cryst, ebands, comm, sigmaph )
  !self%ce_ngfft(7)= 102
 
  call initmpi_seq(self%ce_mpi_enreg)
- call init_distribfft_seq(self%ce_mpi_enreg%distribfft, 'c', self%ce_ngfft(2), self%ce_ngfft(3), 'all')
- call init_distribfft_seq(self%ce_mpi_enreg%distribfft, 'f', self%ce_ngfft(2), self%ce_ngfft(3), 'all')
+ call self%ce_mpi_enreg%distribfft%init_seq('c', self%ce_ngfft(2), self%ce_ngfft(3), 'all')
+ call self%ce_mpi_enreg%distribfft%init_seq('f', self%ce_ngfft(2), self%ce_ngfft(3), 'all')
 
  call ngfft_seq(self%ce_ngfft_g, [self%nwr_ce, 1, 1])
  self%ce_ngfft_g(4:6) = self%ce_ngfft_g(1:3)
@@ -811,13 +809,13 @@ subroutine cumulant_compute(self)
 !arrays
  real(dp),allocatable :: temp_g(:,:,:), temp_r(:,:), temp_r_cplx(:,:), temp_g_ce(:,:,:)
  real(dp),allocatable :: betaoverw2(:) !, dfft(:)
- !complex(dpc),allocatable :: temp_reflex(:) ! betaoverw2c(:),
+ !complex(dp),allocatable :: temp_reflex(:) ! betaoverw2c(:),
  real(dp),allocatable :: wrmesh_shifted(:), wrmesh_shifted_ce(:), beta(:), c3(:)
  real(dp),allocatable :: time_mesh(:), time_mesh_temp(:)
  real(dp) :: output_c3!, output_test2r, output_test2i
  real(dp) :: m_fit_re, b_fit_re, m_fit_im, b_fit_im, res_re, res_im
- complex(dpc),allocatable :: c1(:), ct_temp(:), c_temp(:)
- complex(dpc),allocatable :: c2(:), ct(:), gt(:), gw(:), g1(:)
+ complex(dp),allocatable :: c1(:), ct_temp(:), c_temp(:)
+ complex(dp),allocatable :: c2(:), ct(:), gt(:), gw(:), g1(:)
  integer :: fftalg, fftalga
  logical :: use_fft
 
@@ -1148,7 +1146,7 @@ subroutine cumulant_compute(self)
  !
  !   integer,intent(in) :: f_size
  !   real(dp),intent(in) :: f_step
- !   complex(dpc),intent(in) :: f(f_size)
+ !   complex(dp),intent(in) :: f(f_size)
  !
  !   trapz = ( sum(f) - 0.5* f(1) - 0.5* f(f_size) )* f_step
  !

@@ -102,9 +102,9 @@ real(dp),     intent(in) :: list_external_omega(nfreq)
 integer,      intent(in) :: lmax
 integer,      intent(in) :: kmax_numeric
 integer,      intent(in) :: npt_gauss
-complex(dpc), intent(in) :: modified_Lbasis(npw_k,lmax)
-complex(dpc), intent(in) :: dielectric_array(lmax,lmax,npt_gauss+1)
-complex(dpc), intent(out):: array_integrand(npt_gauss+1,nfreq)
+complex(dp), intent(in) :: modified_Lbasis(npw_k,lmax)
+complex(dp), intent(in) :: dielectric_array(lmax,lmax,npt_gauss+1)
+complex(dp), intent(out):: array_integrand(npt_gauss+1,nfreq)
 
 
 ! local variables
@@ -118,30 +118,30 @@ integer      :: mpi_band_rank
 
 integer      :: k
 integer      :: iz, nz
-complex(dpc) :: z
+complex(dp) :: z
 
-complex(dpc), allocatable :: list_z(:)
+complex(dp), allocatable :: list_z(:)
 
 real(dp)     :: external_omega, omega_prime
 
 
-complex(dpc), allocatable :: matrix_elements_resolvent(:,:)
+complex(dp), allocatable :: matrix_elements_resolvent(:,:)
 
 real(dp),     allocatable :: psik_wrk(:,:)
 real(dp),     allocatable :: psikb_wrk(:,:)
 real(dp),     allocatable :: psikg_wrk(:,:)
 
-complex(dpc), allocatable :: seed_vector(:)
+complex(dp), allocatable :: seed_vector(:)
 
-complex(dpc), allocatable :: right_vec_FFT(:)
+complex(dp), allocatable :: right_vec_FFT(:)
 
-complex(dpc), allocatable :: right_vec_LA(:,:)
-complex(dpc), allocatable :: LR_M_matrix_LA(:,:,:)
-complex(dpc), allocatable :: Hamiltonian_Qk_LA(:,:,:)
-complex(dpc), allocatable :: left_vecs_LA(:,:)
-complex(dpc), allocatable :: shift_lanczos_matrix(:,:)
+complex(dp), allocatable :: right_vec_LA(:,:)
+complex(dp), allocatable :: LR_M_matrix_LA(:,:,:)
+complex(dp), allocatable :: Hamiltonian_Qk_LA(:,:,:)
+complex(dp), allocatable :: left_vecs_LA(:,:)
+complex(dp), allocatable :: shift_lanczos_matrix(:,:)
 
-complex(dpc), allocatable :: work_vec(:)
+complex(dp), allocatable :: work_vec(:)
 
 
 real(dp),     allocatable :: real_wrk_vec(:),   imag_wrk_vec(:)
@@ -479,13 +479,13 @@ real(dp),     intent(in) :: list_external_omega(nfreq)
 integer,      intent(in) :: lmax, blocksize_eps
 integer,      intent(in) :: kmax_numeric
 integer,      intent(in) :: npt_gauss
-complex(dpc), intent(in) :: modified_Lbasis(npw_k,lmax)
-complex(dpc), intent(in) :: dielectric_array(lmax, blocksize_eps, npt_gauss+1)
+complex(dp), intent(in) :: modified_Lbasis(npw_k,lmax)
+complex(dp), intent(in) :: dielectric_array(lmax, blocksize_eps, npt_gauss+1)
 
 logical, intent(in) :: model_lanczos_vector_belongs_to_this_node(lmax)
 integer, intent(in) :: model_lanczos_vector_index(lmax)
 
-complex(dpc), intent(out):: array_integrand(npt_gauss+1,nfreq)
+complex(dp), intent(out):: array_integrand(npt_gauss+1,nfreq)
 
 
 
@@ -500,30 +500,27 @@ integer      :: mpi_band_rank
 
 integer      :: k
 integer      :: iz, nz
-complex(dpc) :: z
+complex(dp) :: z
 
-complex(dpc), allocatable :: list_z(:)
+complex(dp), allocatable :: list_z(:)
 
 real(dp)     :: external_omega, omega_prime
 
 
-complex(dpc), allocatable :: matrix_elements_resolvent(:,:)
+complex(dp), allocatable :: matrix_elements_resolvent(:,:)
 
 real(dp),     allocatable :: psik_wrk(:,:)
 real(dp),     allocatable :: psikb_wrk(:,:)
 real(dp),     allocatable :: psikg_wrk(:,:)
 
-complex(dpc), allocatable :: seed_vector(:)
-
-complex(dpc), allocatable :: right_vec_FFT(:)
-
-complex(dpc), allocatable :: right_vec_LA(:,:)
-complex(dpc), allocatable :: LR_M_matrix_LA(:,:,:)
-complex(dpc), allocatable :: Hamiltonian_Qk_LA(:,:,:)
-complex(dpc), allocatable :: left_vecs_LA(:,:)
-complex(dpc), allocatable :: shift_lanczos_matrix(:,:)
-
-complex(dpc), allocatable :: work_vec(:)
+complex(dp), allocatable :: seed_vector(:)
+complex(dp), allocatable :: right_vec_FFT(:)
+complex(dp), allocatable :: right_vec_LA(:,:)
+complex(dp), allocatable :: LR_M_matrix_LA(:,:,:)
+complex(dp), allocatable :: Hamiltonian_Qk_LA(:,:,:)
+complex(dp), allocatable :: left_vecs_LA(:,:)
+complex(dp), allocatable :: shift_lanczos_matrix(:,:)
+complex(dp), allocatable :: work_vec(:)
 
 
 real(dp),     allocatable :: real_wrk_vec(:),   imag_wrk_vec(:)
