@@ -24649,28 +24649,6 @@ See line 743 in src/95_drive/screening.F90 .
 ),
 
 Variable(
-    abivarname="gstore_cplex",
-    varset="eph",
-    vartype="integer",
-    topics=['ElPhonInt_basic'],
-    dimensions="scalar",
-    defaultval=2,
-    mnemonics=r"GSTORE ComPLEX dimension",
-    requires="[[optdriver]] == 7",
-    added_in_version="9.6.2",
-    text=r"""
-This input variable specifies whether the EPH code should store $|g|^2$ or $g$
-when computing the e-ph matrix elements ([[eph_task]] == 11)
-Possible values are:
-
-1 --> compute and store $|g|^2$ in GSTORE.nc.
-      Use this option to reduce the size of the file but keep in mind
-      that the GSTORE can only be used to compute expressions in which only $|g|^2$ is needed.
-2 --> compute and store complex $g$ in GSTORE.nc (default)
-""",
-),
-
-Variable(
     abivarname="gstore_with_vk",
     varset="eph",
     vartype="integer",
@@ -24812,26 +24790,6 @@ Possible values are:
 
 Note that it is possible to use another filter based on the position of the energy states wrt to either
 the CBM/VBM or the position wrt to the Fermi level via [[gstore_erange]].
-""",
-),
-
-Variable(
-    abivarname="gstore_gmode",
-    varset="eph",
-    vartype="string",
-    topics=['ElPhonInt_basic'],
-    dimensions="scalar",
-    defaultval="phonon",
-    mnemonics=r"GSTORE GMODE",
-    requires="[[optdriver]] == 7",
-    added_in_version="10.1.2",
-    text=r"""
-This input variable specifies the representation used to store the e-ph matrix elements in the GSTORE.nc file
-
-Possible values are:
-
-- "phonon" --> Store e-ph matrix elements in the phonon representation (collective displacement)
-- "atom" -->  Store e-ph matrix elements in the atom representation (displacement of a single atom along one of the reduced directions)
 """,
 ),
 
@@ -25996,11 +25954,32 @@ Variable(
     topics=['spinpolarisation_basic', 'MagMom_useful'],
     dimensions=[3],
     defaultval=[0, 0, 0],
-    mnemonics="Q-point for Generalized Bloch Theorem.",
+    mnemonics="Q-point for Generalized Bloch Theorem in REDuced coordinates.",
     added_in_version="10.5.1",
     text=r"""
 Reduced coordinates of the wave-vector $\qq$ of the spin spiral when [[use_gbt]] /= 0.
+If you prefer to work only with cartesian coordinates, you may work entirely
+with "[[qgbt_cart]]" and ignore [[qgbt]], in which case [[qgbt]]
+must be absent from the input file.
+One and only one of [[qgbt]] or [[qgbt_cart]] must be provided.
 """,
 ),
 
+Variable(
+    abivarname="qgbt_cart",
+    varset="gstate",
+    vartype="real",
+    topics=['spinpolarisation_basic', 'MagMom_useful'],
+    dimensions=[3],
+    defaultval=[0, 0, 0],
+    mnemonics="Q-point for Generalized Bloch Theorem in CARTesian coordinates.",
+    added_in_version="10.5.1",
+    text=r"""
+Cartesian coordinates of the wave-vector $\qq$ of the spin spiral when [[use_gbt]] /= 0.
+If [[qgbt]] is ABSENT from the input file and [[qgbt_cart]] is
+provided, then the values of [[qgbt]] will be computed from the provided
+[[qgbt_cart]]
+One and only one of [[qgbt]] or [[qgbt_cart]] must be provided.
+""",
+),
 ]

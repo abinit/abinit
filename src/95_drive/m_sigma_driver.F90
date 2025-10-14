@@ -3032,7 +3032,11 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  Sigp%npwx   = Dtset%npwsigx
 
  ! Read parameters of the WFK, verifify them and retrieve all G-vectors.
- call wfk_read_eigenvalues(wfk_fname,energies_p,Hdr_wfk,comm)
+ if (dtset%userie == 456) then
+   call wfk_read_eigenvalues("SC_WFK",energies_p,Hdr_wfk,comm)
+ else
+   call wfk_read_eigenvalues(wfk_fname,energies_p,Hdr_wfk,comm)
+ end if
  mband = MAXVAL(Hdr_wfk%nband)
 
  remove_inv = .FALSE.

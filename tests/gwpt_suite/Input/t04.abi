@@ -17,10 +17,6 @@
  # Additional filter in k-space: only k-points corresponding to the band edges are considered
  gstore_kfilter "qprange"
 
- # store complex g matrix elements in the atomic representation in the GSTORE file.
- gstore_gmode "atom"
- gstore_cplex 2
-
  ecut 45.0          # Cutoff energy for wavefunctions.
  ecuteps  8         # Cutoff energy for screening (cannot be larger than the one found in the SCR file)
                     # SC TODO: on alps_gnu_14.2_cov, ecuteps here = ecuteps in the SCR file still results in an error
@@ -92,7 +88,7 @@
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = M. Giantomassi
-#%% keywords = NC, DFPT, EPH
+#%% keywords = NC, DFPT, EPH, GWPT, GSTORE
 #%% description = Calculation of GWPT e-ph matrix elements with precomputed SCR file.
-#%%     Preparatory run for computing the ZPR
+#%%     Preparatory run for computing the ZPR.
 #%%<END TEST_INFO>
