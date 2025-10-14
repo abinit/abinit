@@ -70,6 +70,7 @@ nav:
     - topics/Dev.md
     - topics/DFPT.md
     - topics/DMFT.md
+    - topics/DmftTriqsCthyb.md
     - topics/DynamicsMultibinit.md
     - topics/EffectiveMass.md
     - topics/EFG.md
@@ -153,7 +154,6 @@ nav:
         - Bethe-Salpeter: variables/bse.md
         - Developers: variables/dev.md
         - DMFT: variables/dmft.md
-        - DMFT_TRIQS: variables/dmft_triqs.md
         - Electron-Phonon: variables/eph.md
         - Varff: variables/ffield.md
         - File-handling: variables/files.md

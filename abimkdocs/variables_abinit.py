@@ -2979,7 +2979,7 @@ Variable(
     abivarname="dmft_charge_prec",
     varset="dmft",
     vartype="real",
-    topics=['DMFT_expert'],
+    topics=['DMFT_expert', 'DmftTriqsCthyb_expert'],
     dimensions="scalar",
     defaultval=1e-06,
     mnemonics="Dynamical Mean Field Theory: CHARGE density PRECision",
@@ -2995,7 +2995,7 @@ Variable(
     abivarname="dmft_dc",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_basic'],
+    topics=['DMFT_basic', 'DmftTriqsCthyb_compulsory'],
     dimensions="scalar",
     defaultval="None if [[dmft_solv]] in [6,7], 1 otherwise",
     mnemonics="Dynamical Mean Field Theory: Double Counting",
@@ -3045,7 +3045,7 @@ Variable(
     abivarname="dmft_fermi_step",
     varset="dmft",
     vartype="real",
-    topics=['DMFT_expert'],
+    topics=['DMFT_expert', 'DmftTriqsCthyb_expert'],
     dimensions="scalar",
     defaultval=0.02,
     mnemonics="Dynamical Mean Field Theory: FERMI search maximal STEP",
@@ -3062,7 +3062,7 @@ Variable(
     abivarname="dmft_iter",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_compulsory'],
+    topics=['DMFT_compulsory', 'DmftTriqsCthyb_compulsory'],
     dimensions="scalar",
     defaultval="None if [[dmft_solv]] in [6,7], 10 otherwise",
     mnemonics="Dynamical Mean Field Theory: number of DMFT ITERations",
@@ -3080,7 +3080,7 @@ Variable(
     abivarname="dmft_kspectralfunc",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_useful'],
+    topics=['DMFT_useful', 'DmftTriqsCthyb_useful'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="Dynamical Mean Field Theory: compute K-resolved SPECTRAL FUNCtion",
@@ -3141,7 +3141,7 @@ Variable(
     abivarname="dmft_mxsf",
     varset="dmft",
     vartype="real",
-    topics=['DMFT_useful'],
+    topics=['DMFT_useful', 'DmftTriqsCthyb_useful'],
     dimensions="scalar",
     defaultval=0.6,
     mnemonics="Dynamical Mean Field Theory: MiXing parameter for the SelF energy",
@@ -3174,7 +3174,7 @@ Variable(
     abivarname="dmft_nominal",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_useful'],
+    topics=['DMFT_useful', 'DmftTriqsCthyb_useful'],
     dimensions=['[[natom]]'],
     mnemonics="Dynamical Mean Field Theory: NOMINAL occupancies",
     requires="[[usedmft]] == 1, [[dmft_dc]] == 7",
@@ -3192,10 +3192,10 @@ Variable(
     topics=['DMFT_compulsory'],
     dimensions="scalar",
     mnemonics="Dynamical Mean Field Theory: Number of frequency omega (W) in the LInear mesh",
-    requires="[[usedmft]] == 1",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\ne$ [6,7]",
     added_in_version="before_v9",
     text=r"""
-Number of Matsubara frequencies (linear mesh).
+Number of Matsubara frequencies (linear mesh), only for the internal solvers of Abinit.
 """,
 ),
 
@@ -3211,7 +3211,7 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     added_in_version="before_v9",
     text=r"""
-Number of frequencies in the log mesh.
+Number of frequencies in the log mesh, only for the internal solvers of Abinit.
 """,
 ),
 
@@ -3235,7 +3235,7 @@ Variable(
     abivarname="dmft_orbital",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_expert'],
+    topics=['DMFT_expert', 'DmftTriqsCthyb_expert'],
     dimensions=['[[ntypat]]'],
     defaultval=1,
     mnemonics="Dynamical Mean Field Theory: correlated ORBITAL",
@@ -3258,7 +3258,7 @@ Variable(
     abivarname="dmft_orbital_filepath",
     varset="dmft",
     vartype="string",
-    topics=['DMFT_expert'],
+    topics=['DMFT_expert', 'DmftTriqsCthyb_expert'],
     dimensions="scalar",
     mnemonics="Dynamical Mean Field Theory: correlated ORBITAL FILEPATH",
     requires="[[usedmft]] == 1, [[dmft_orbital]] $\le$ 0",
@@ -3292,7 +3292,7 @@ Variable(
     abivarname="dmft_prt_maxent",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_expert'],
+    topics=['DMFT_expert', 'DmftTriqsCthyb_expert'],
     dimensions="scalar",
     defaultval=1,
     mnemonics="Dynamical Mean Field Theory: PRinT files for MAXENT",
@@ -3310,7 +3310,7 @@ Variable(
     abivarname="dmft_prtself",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_expert'],
+    topics=['DMFT_expert', 'DmftTriqsCthyb_expert'],
     dimensions="scalar",
     defaultval=1,
     mnemonics="Dynamical Mean Field Theory: PRinT SELF-energy",
@@ -3325,9 +3325,9 @@ to keep the last value only.
 
 Variable(
     abivarname="dmft_prtwan",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="integer",
-    topics=['DMFT_expert'],
+    topics=['DmftTriqsCthyb_expert'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="Dynamical Mean Field Theory: PRinT WANnier functions",
@@ -3339,7 +3339,7 @@ Compute and write on file the reduced radial part $u_l(r)$ of the Wannier functi
 This is computed on the same radial mesh as the PAW one, extended up to the radius [[dmft_wanrad]].
 It corresponds to the local orbital that is used in practice in the code, and is different from
 [[dmft_orbital]] in the general case (unless your energy window is large enough to have a closure
-relation).
+relation). This is only implemented in the case [[dmft_solv] in [6,7].
 """,
 ),
 
@@ -3406,7 +3406,7 @@ Variable(
     abivarname="dmft_shiftself",
     varset="dmft",
     vartype="real",
-    topics=['DMFT_expert'],
+    topics=['DMFT_expert', 'DmftTriqsCthyb_expert'],
     dimensions=['[[natom]]'],
     defaultval=0,
     mnemonics="Dynamical Mean Field Theory: spin SHIFT for the SELF-energy",
@@ -3425,7 +3425,7 @@ Variable(
     abivarname="dmft_solv",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_basic'],
+    topics=['DMFT_basic', 'DmftTriqsCthyb_basic'],
     dimensions="scalar",
     defaultval=5,
     mnemonics="Dynamical Mean Field Theory: choice of SOLVer",
@@ -3461,7 +3461,7 @@ Variable(
     abivarname="dmft_t2g",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_expert'],
+    topics=['DMFT_expert', 'DmftTriqsCthyb_expert'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="Dynamical Mean Field Theory: t2g orbitals",
@@ -3511,7 +3511,7 @@ that this variable is not required.
 
 Variable(
     abivarname="dmft_triqs_compute_integral",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3529,7 +3529,7 @@ for instance.
 
 Variable(
     abivarname="dmft_triqs_det_init_size",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3547,7 +3547,7 @@ this can take some time if this happens too often.
 
 Variable(
     abivarname="dmft_triqs_det_n_operations_before_check",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3567,7 +3567,7 @@ and you repeatedly get some error messages during this check, you should decreas
 
 Variable(
     abivarname="dmft_triqs_det_precision_error",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="real",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3585,7 +3585,7 @@ often, simply lower the value of [[dmft_triqs_det_n_operations_before_check]].
 
 Variable(
     abivarname="dmft_triqs_det_precision_warning",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="real",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3603,7 +3603,7 @@ often, simply lower the value of [[dmft_triqs_det_n_operations_before_check]].
 
 Variable(
     abivarname="dmft_triqs_det_singular_threshold",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="real",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3621,7 +3621,7 @@ if the absolute value of the determinant is below [[dmft_triqs_det_singular_thre
 
 Variable(
     abivarname="dmft_triqs_entropy",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3636,7 +3636,7 @@ Computes the DFT+DMFT entropy using thermodynamic integration.
 
 Variable(
     abivarname="dmft_triqs_epsilon",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="real",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3652,7 +3652,7 @@ It should always be higher than the statistical noise on your Green's function.
 
 Variable(
     abivarname="dmft_triqs_gaussorder",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3667,7 +3667,7 @@ thermodynamic integration interval (cf [[dmft_triqs_compute_integral]]).
 
 Variable(
     abivarname="dmft_triqs_imag_threshold",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="real",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3683,7 +3683,7 @@ having a maximal imaginary part below [[dmft_triqs_imag_threshold]] are kept.
 
 Variable(
     abivarname="dmft_triqs_leg_measure",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3703,7 +3703,7 @@ This option is only here for historical purposes.
 
 Variable(
     abivarname="dmft_triqs_loc_n_min",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3721,7 +3721,7 @@ with non-negligible contributions.
 
 Variable(
     abivarname="dmft_triqs_loc_n_max",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3739,7 +3739,7 @@ with non-negligible contributions.
 
 Variable(
     abivarname="dmft_triqs_measure_density_matrix",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3756,7 +3756,7 @@ Currently, TRIQS/CTHYB does not support this feature with off-diagonal component
 
 Variable(
     abivarname="dmft_triqs_move_double",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3771,7 +3771,7 @@ Set to 1 to activate the double moves in TRIQS/CTHYB.
 
 Variable(
     abivarname="dmft_triqs_move_shift",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3786,7 +3786,7 @@ Set to 1 to activate the shift move in TRIQS/CTHYB.
 
 Variable(
     abivarname="dmft_triqs_nleg",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3801,7 +3801,7 @@ function in TRIQS/CTHYB (cf [[cite:Boehnke2011]]).
 
 Variable(
     abivarname="dmft_triqs_nsubdivisions",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3821,7 +3821,7 @@ unstable.
 
 Variable(
     abivarname="dmft_triqs_off_diag",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="integer",
     topics=['DMFT_basic'],
     dimensions="scalar",
@@ -3837,7 +3837,7 @@ basis specified by [[dmftctqmc_basis]]).
 
 Variable(
     abivarname="dmft_triqs_pauli_prob",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="real",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3855,7 +3855,7 @@ only guaranteed if [[dmft_triqs_pauli_prob]] < 1.
 
 Variable(
     abivarname="dmft_triqs_read_ctqmcdata",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3875,7 +3875,7 @@ if you're not converged yet. In this case, disable this.
 
 Variable(
     abivarname="dmft_triqs_seed_a",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3890,7 +3890,7 @@ Controls the seed of TRIQS/CTHYB, which is [[dmft_triqs_seed_a]] + rank $\times$
 
 Variable(
     abivarname="dmft_triqs_seed_b",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3905,7 +3905,7 @@ Controls the seed of TRIQS/CTHYB, which is [[dmft_triqs_seed_a]] + rank $\times$
 
 Variable(
     abivarname="dmft_triqs_therm_restart",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="integer",
     topics=['DMFT_compulsory'],
     dimensions="scalar",
@@ -3920,7 +3920,7 @@ composed of [[dmftctqmc_meas]] sweeps.
 
 Variable(
     abivarname="dmft_triqs_time_invariance",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3937,7 +3937,7 @@ if you measure too often.
 
 Variable(
     abivarname="dmft_triqs_tol_block",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="real",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3956,7 +3956,7 @@ Otherwise, try not to set this value above numerical noise.
 
 Variable(
     abivarname="dmft_triqs_use_norm_as_weight",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -3973,7 +3973,7 @@ ergodicity.
 
 Variable(
     abivarname="dmft_triqs_wmax",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="real",
     topics=['DMFT_basic'],
     dimensions="scalar",
@@ -4021,7 +4021,7 @@ This is done by multiplication with the inverse square root of their overlaps.
 
 Variable(
     abivarname="dmft_wanrad",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="real",
     topics=['DMFT_expert'],
     dimensions="scalar",
@@ -6386,9 +6386,9 @@ equivalent to using a zero get variable).
 
 Variable(
     abivarname="getctqmcdata",
-    varset="dmft_triqs",
+    varset="dmft",
     vartype="integer",
-    topics=['DMFT_useful'],
+    topics=['DmftTriqsCthyb_useful'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="GET CTQMC DATA from...",
@@ -6851,7 +6851,7 @@ Variable(
     abivarname="getself",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_useful'],
+    topics=['DMFT_useful','DmftTriqsCthyb_useful'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="GET SELF-energy from...",
@@ -10558,7 +10558,7 @@ Variable(
     abivarname="jpawu",
     varset="paw",
     vartype="real",
-    topics=['DFT+U_compulsory'],
+    topics=['DFT+U_compulsory', 'DMFT_compulsory', 'DmftTriqsCthyb_compulsory'],
     dimensions=['[[ntypat]]'],
     defaultval=MultipleValue(number=None, value=0),
     mnemonics="value of J for PAW+U",
@@ -11234,7 +11234,7 @@ Variable(
     abivarname="lpawu",
     varset="paw",
     vartype="integer",
-    topics=['DFT+U_compulsory', 'DMFT_compulsory'],
+    topics=['DFT+U_compulsory', 'DMFT_compulsory', 'DmftTriqsCthyb_compulsory'],
     dimensions=['[[ntypat]]'],
     defaultval=MultipleValue(number=None, value=-1),
     mnemonics="value of angular momentum L for PAW+U",
@@ -21385,7 +21385,7 @@ Variable(
     abivarname="upawu",
     varset="paw",
     vartype="real",
-    topics=['DFT+U_compulsory'],
+    topics=['DFT+U_compulsory', 'DMFT_compulsory', 'DmftTriqsCthyb_compulsory'],
     dimensions=['[[ntypat]]'],
     defaultval=MultipleValue(number=None, value=0),
     mnemonics="value of U for PAW+U",
@@ -21682,7 +21682,7 @@ Variable(
     abivarname="usepawu",
     varset="paw",
     vartype="integer",
-    topics=['DFT+U_compulsory', 'PAW_useful', 'GW_useful', 'SelfEnergy_useful'],
+    topics=['DFT+U_compulsory', 'PAW_useful', 'GW_useful', 'SelfEnergy_useful', 'DMFT_compulsory', 'DmftTriqsCthyb_compulsory'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="USE PAW+U (spherical part)",
