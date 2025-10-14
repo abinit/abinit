@@ -36,8 +36,8 @@ module m_sigmaph
  use m_dvdb,           only : dvdb_t
  use m_fft
  use m_hamiltonian,    only : gs_hamiltonian_type, rf_hamiltonian_type
- use m_pawcprj
- use m_wfd,             only : wfd_t, u1_cache_t
+ use m_pawcprj,        only : pawcprj_type, pawcprj_free
+ use m_wfd,            only : wfd_t, u1_cache_t
  use m_wfk
  use m_skw
  use m_krank,           only : krank_t
