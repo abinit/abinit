@@ -1,8 +1,8 @@
 
-.Version 10.3.6.9 of ABINIT, released Apr 2025.
-.(MPI version, prepared for a x86_64_linux_gnu9.1 computer)
+.Version 10.5.1.5 of ABINIT, released Jul 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 14 May 2025.
-- ( at 14h34 )
-
-- input  file    -> /tmp/abinit/opt/Test_suite/tutorial_trttddft_1-trttddft_2-trttddft_3/Test_suite/tutorial_trttddft_1-trttddft_2-trttddft_3/trttddft_2.abi
+.Starting date : Thu  9 Oct 2025.
+- ( at 18h01 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/tutorial_trttddft_1-trttddft_2-trttddft_3/trttddft_2.abi
 - output file    -> trttddft_2.abo
 - root for input  files -> trttddft_2i
 - root for output files -> trttddft_2o
 
-- inpspheads : Reading pseudopotential header in XML form from
--   /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/tests/Pspdir/Psdj_paw_pw_std/C.xml
+- inpspheads : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/C.xml
  Symmetries : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need of the present run
@@ -50,7 +50,7 @@ _ WF disk file :      0.966 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 -   iomode0 =  0 , fftalg0 =512 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file
--  max_nthreads =    1
+-  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
             acell      6.6707332491E+00  6.6707332491E+00  6.6707332491E+00 Bohr
@@ -182,7 +182,7 @@ P           mkmem          28
 
 ================================================================================
 == DATASET  1 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -221,9 +221,9 @@ meta: {optdriver: 9, }
          ecut(hartree)=     36.000   => boxcut(ratio)=   2.04381
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/tests/Pspdir/Psdj_paw_pw_std/C.xml
-- pspatm: opening atomic psp file    /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/tests/Pspdir/Psdj_paw_pw_std/C.xml
-- pspatm : Reading pseudopotential header in XML form from /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/tests/Pspdir/Psdj_paw_pw_std/C.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/C.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/C.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/C.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.50736703
@@ -263,7 +263,7 @@ Integrated density (ie. total nb of electrons) =       8.0000035485
   -0.38952    0.27506    0.31786    0.34829    0.59404    0.67310    0.67501    0.90388
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.30    0.30
+- Time - cpu, wall (sec):    0.13    0.13
 
 
 ---------------------------------------------------------------------------
@@ -273,7 +273,7 @@ Integrated density (ie. total nb of electrons) =       8.0000035485
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      6.6707332491E+00  6.6707332491E+00  6.6707332491E+00 Bohr
               amu      1.20110000E+01
@@ -448,7 +448,7 @@ P           mkmem          28
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -460,12 +460,12 @@ P           mkmem          28
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -483,15 +483,15 @@ P           mkmem          28
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.6  wall=          1.6
+- Proc.   0 individual time (sec): cpu=          0.8  wall=          0.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.6  wall=          1.6
++Overall time at end (sec) : cpu=          0.8  wall=          0.9
