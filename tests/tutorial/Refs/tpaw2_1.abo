@@ -451,7 +451,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Ni   2.31145     4.848250     4.498062      9.346312     0.350189
  ------------------------------------------------------------------------------------------------------------
-  Sum:              4.848250     4.498062      9.346312     0.350189
+  Sum:                 4.848250     4.498062      9.346312     0.350189
  Total magnetization (from the atomic spheres):                0.350189
  Total magnetization (exact up - dn):                          0.341836
 

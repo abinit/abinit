@@ -344,7 +344,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Fe   2.00000     4.565602     1.467602      6.033205     3.098000
  ------------------------------------------------------------------------------------------------------------
-  Sum:              4.565602     1.467602      6.033205     3.098000
+  Sum:                 4.565602     1.467602      6.033205     3.098000
  Total magnetization (from the atomic spheres):                3.098000
  Total magnetization (exact up - dn):                          3.306432
 
@@ -500,7 +500,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Fe   2.00000     4.565602     1.467602      6.033205     3.098000
  ------------------------------------------------------------------------------------------------------------
-  Sum:              4.565602     1.467602      6.033205     3.098000
+  Sum:                 4.565602     1.467602      6.033205     3.098000
  Total magnetization (from the atomic spheres):                3.098000
  Total magnetization (exact up - dn):                          3.306432
 
@@ -609,7 +609,7 @@ tolerances: {tolvrs: 1.00E-08, }
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Fe   2.00000     2.011943    -1.499313      0.512631     3.511256
  ------------------------------------------------------------------------------------------------------------
-  Sum:              2.011943    -1.499313      0.512631     3.511256
+  Sum:                 2.011943    -1.499313      0.512631     3.511256
  Total magnetization (from the atomic spheres):                3.511256
  Total magnetization (exact up - dn):                          3.760129
 
@@ -679,7 +679,7 @@ tolerances: {tolvrs: 1.00E-08, }
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Fe   2.00000     0.000000    -0.000000      0.000000     0.000000
  ------------------------------------------------------------------------------------------------------------
-  Sum:              0.000000    -0.000000      0.000000     0.000000
+  Sum:                 0.000000    -0.000000      0.000000     0.000000
  Total magnetization (from the atomic spheres):                0.000000
  Total magnetization (exact up - dn):                          0.000000
 

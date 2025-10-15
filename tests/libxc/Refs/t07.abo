@@ -391,7 +391,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Bi   2.00000     0.647937     0.408134      1.056071     0.239803
  ------------------------------------------------------------------------------------------------------------
-  Sum:              0.647937     0.408134      1.056071     0.239803
+  Sum:                 0.647937     0.408134      1.056071     0.239803
  Total magnetization (from the atomic spheres):                0.239803
  Total magnetization (exact up - dn):                          3.000000
 
@@ -559,7 +559,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Bi   2.00000     0.638070     0.408706      1.046776     0.229364
  ------------------------------------------------------------------------------------------------------------
-  Sum:              0.638070     0.408706      1.046776     0.229364
+  Sum:                 0.638070     0.408706      1.046776     0.229364
  Total magnetization (from the atomic spheres):                0.229364
  Total magnetization (exact up - dn):                          3.000000
 
@@ -727,7 +727,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Bi   2.00000     0.633921     0.407639      1.041560     0.226282
  ------------------------------------------------------------------------------------------------------------
-  Sum:              0.633921     0.407639      1.041560     0.226282
+  Sum:                 0.633921     0.407639      1.041560     0.226282
  Total magnetization (from the atomic spheres):                0.226282
  Total magnetization (exact up - dn):                          3.000000
 
@@ -895,7 +895,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Bi   2.00000     0.648077     0.409131      1.057208     0.238945
  ------------------------------------------------------------------------------------------------------------
-  Sum:              0.648077     0.409131      1.057208     0.238945
+  Sum:                 0.648077     0.409131      1.057208     0.238945
  Total magnetization (from the atomic spheres):                0.238945
  Total magnetization (exact up - dn):                          3.000000
 
@@ -1063,7 +1063,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Bi   2.00000     0.645234     0.410557      1.055791     0.234677
  ------------------------------------------------------------------------------------------------------------
-  Sum:              0.645234     0.410557      1.055791     0.234677
+  Sum:                 0.645234     0.410557      1.055791     0.234677
  Total magnetization (from the atomic spheres):                0.234677
  Total magnetization (exact up - dn):                          3.000000
 
@@ -1231,7 +1231,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Bi   2.00000     0.647367     0.410937      1.058304     0.236430
  ------------------------------------------------------------------------------------------------------------
-  Sum:              0.647367     0.410937      1.058304     0.236430
+  Sum:                 0.647367     0.410937      1.058304     0.236430
  Total magnetization (from the atomic spheres):                0.236430
  Total magnetization (exact up - dn):                          3.000000
 
@@ -1399,7 +1399,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Bi   2.00000     0.646533     0.411136      1.057669     0.235397
  ------------------------------------------------------------------------------------------------------------
-  Sum:              0.646533     0.411136      1.057669     0.235397
+  Sum:                 0.646533     0.411136      1.057669     0.235397
  Total magnetization (from the atomic spheres):                0.235397
  Total magnetization (exact up - dn):                          3.000000
 
@@ -1567,7 +1567,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Bi   2.00000     0.652236     0.408374      1.060610     0.243862
  ------------------------------------------------------------------------------------------------------------
-  Sum:              0.652236     0.408374      1.060610     0.243862
+  Sum:                 0.652236     0.408374      1.060610     0.243862
  Total magnetization (from the atomic spheres):                0.243862
  Total magnetization (exact up - dn):                          3.000000
 
@@ -1735,7 +1735,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Bi   2.00000     0.640980     0.409589      1.050569     0.231390
  ------------------------------------------------------------------------------------------------------------
-  Sum:              0.640980     0.409589      1.050569     0.231390
+  Sum:                 0.640980     0.409589      1.050569     0.231390
  Total magnetization (from the atomic spheres):                0.231390
  Total magnetization (exact up - dn):                          3.000000
 
@@ -1903,7 +1903,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Bi   2.00000     0.640500     0.407205      1.047705     0.233295
  ------------------------------------------------------------------------------------------------------------
-  Sum:              0.640500     0.407205      1.047705     0.233295
+  Sum:                 0.640500     0.407205      1.047705     0.233295
  Total magnetization (from the atomic spheres):                0.233295
  Total magnetization (exact up - dn):                          3.000000
 

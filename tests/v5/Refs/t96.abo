@@ -602,7 +602,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Ni   2.00000     3.851830     3.232297      7.084127     0.619533
  ------------------------------------------------------------------------------------------------------------
-  Sum:              3.851830     3.232297      7.084127     0.619533
+  Sum:                 3.851830     3.232297      7.084127     0.619533
  Total magnetization (from the atomic spheres):                0.619533
  Total magnetization (exact up - dn):                          0.634140
 
@@ -764,7 +764,7 @@ tolerances: {tolvrs: 1.00E-05, }
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Ni   2.00000    -0.000352     0.000339     -0.000013    -0.000691
  ------------------------------------------------------------------------------------------------------------
-  Sum:             -0.000352     0.000339     -0.000013    -0.000691
+  Sum:                -0.000352     0.000339     -0.000013    -0.000691
  Total magnetization (from the atomic spheres):               -0.000691
  Total magnetization (exact up - dn):                         -0.000742
 
@@ -941,7 +941,7 @@ tolerances: {tolvrs: 1.00E-05, }
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Ni   2.00000    -0.000293     0.000282     -0.000011    -0.000574
  ------------------------------------------------------------------------------------------------------------
-  Sum:             -0.000293     0.000282     -0.000011    -0.000574
+  Sum:                -0.000293     0.000282     -0.000011    -0.000574
  Total magnetization (from the atomic spheres):               -0.000574
  Total magnetization (exact up - dn):                         -0.000616
 
@@ -1118,7 +1118,7 @@ tolerances: {tolvrs: 1.00E-05, }
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Ni   2.00000     0.000074    -0.000071      0.000003     0.000146
  ------------------------------------------------------------------------------------------------------------
-  Sum:              0.000074    -0.000071      0.000003     0.000146
+  Sum:                 0.000074    -0.000071      0.000003     0.000146
  Total magnetization (from the atomic spheres):                0.000146
  Total magnetization (exact up - dn):                          0.000156
 
@@ -1292,7 +1292,7 @@ tolerances: {tolvrs: 1.00E-05, }
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Ni   2.00000    -0.000002    -0.000003     -0.000005     0.000001
  ------------------------------------------------------------------------------------------------------------
-  Sum:             -0.000002    -0.000003     -0.000005     0.000001
+  Sum:                -0.000002    -0.000003     -0.000005     0.000001
  Total magnetization (from the atomic spheres):                0.000001
  Total magnetization (exact up - dn):                          0.000001
 
@@ -1301,7 +1301,7 @@ tolerances: {tolvrs: 1.00E-05, }
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Ni   2.00000    -7.573482    -6.581376    -14.154858    -0.992105
  ------------------------------------------------------------------------------------------------------------
-  Sum:             -7.573482    -6.581376    -14.154858    -0.992105
+  Sum:                -7.573482    -6.581376    -14.154858    -0.992105
  Total magnetization (from the atomic spheres):               -0.992105
  Total magnetization (exact up - dn):                         -0.881398
 
@@ -1446,7 +1446,7 @@ tolerances: {tolvrs: 1.00E-05, }
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Ni   2.00000    -0.000001    -0.000001     -0.000002     0.000000
  ------------------------------------------------------------------------------------------------------------
-  Sum:             -0.000001    -0.000001     -0.000002     0.000000
+  Sum:                -0.000001    -0.000001     -0.000002     0.000000
  Total magnetization (from the atomic spheres):                0.000000
  Total magnetization (exact up - dn):                          0.000000
 
@@ -1455,7 +1455,7 @@ tolerances: {tolvrs: 1.00E-05, }
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Ni   2.00000     0.000000     0.000003      0.000003    -0.000002
  ------------------------------------------------------------------------------------------------------------
-  Sum:              0.000000     0.000003      0.000003    -0.000002
+  Sum:                 0.000000     0.000003      0.000003    -0.000002
  Total magnetization (from the atomic spheres):               -0.000002
  Total magnetization (exact up - dn):                         -0.000005
 
@@ -1602,7 +1602,7 @@ tolerances: {tolvrs: 1.00E-05, }
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Ni   2.00000    -0.000011    -0.000013     -0.000024     0.000002
  ------------------------------------------------------------------------------------------------------------
-  Sum:             -0.000011    -0.000013     -0.000024     0.000002
+  Sum:                -0.000011    -0.000013     -0.000024     0.000002
  Total magnetization (from the atomic spheres):                0.000002
  Total magnetization (exact up - dn):                          0.000002
 
@@ -1611,7 +1611,7 @@ tolerances: {tolvrs: 1.00E-05, }
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Ni   2.00000     0.000000    -0.000003     -0.000003     0.000003
  ------------------------------------------------------------------------------------------------------------
-  Sum:              0.000000    -0.000003     -0.000003     0.000003
+  Sum:                 0.000000    -0.000003     -0.000003     0.000003
  Total magnetization (from the atomic spheres):                0.000003
  Total magnetization (exact up - dn):                          0.000005
 
@@ -1761,7 +1761,7 @@ tolerances: {tolvrs: 1.00E-05, }
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Ni   2.00000     0.000003     0.000000      0.000003     0.000002
  ------------------------------------------------------------------------------------------------------------
-  Sum:              0.000003     0.000000      0.000003     0.000002
+  Sum:                 0.000003     0.000000      0.000003     0.000002
  Total magnetization (from the atomic spheres):                0.000002
  Total magnetization (exact up - dn):                          0.000002
 
@@ -1770,7 +1770,7 @@ tolerances: {tolvrs: 1.00E-05, }
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Ni   2.00000    -7.478721    -6.180186    -13.658906    -1.298535
  ------------------------------------------------------------------------------------------------------------
-  Sum:             -7.478721    -6.180186    -13.658906    -1.298535
+  Sum:                -7.478721    -6.180186    -13.658906    -1.298535
  Total magnetization (from the atomic spheres):               -1.298535
  Total magnetization (exact up - dn):                         -1.320847
 
@@ -1931,7 +1931,7 @@ tolerances: {tolvrs: 1.00E-05, }
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Ni   2.00000    -0.000020     0.000002     -0.000017    -0.000022
  ------------------------------------------------------------------------------------------------------------
-  Sum:             -0.000020     0.000002     -0.000017    -0.000022
+  Sum:                -0.000020     0.000002     -0.000017    -0.000022
  Total magnetization (from the atomic spheres):               -0.000022
  Total magnetization (exact up - dn):                         -0.000019
 
@@ -1940,7 +1940,7 @@ tolerances: {tolvrs: 1.00E-05, }
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Ni   2.00000    -7.478761    -6.180153    -13.658914    -1.298608
  ------------------------------------------------------------------------------------------------------------
-  Sum:             -7.478761    -6.180153    -13.658914    -1.298608
+  Sum:                -7.478761    -6.180153    -13.658914    -1.298608
  Total magnetization (from the atomic spheres):               -1.298608
  Total magnetization (exact up - dn):                         -1.320979
 
@@ -2098,7 +2098,7 @@ tolerances: {tolvrs: 1.00E-05, }
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Ni   2.00000    -0.000002     0.000000     -0.000001    -0.000002
  ------------------------------------------------------------------------------------------------------------
-  Sum:             -0.000002     0.000000     -0.000001    -0.000002
+  Sum:                -0.000002     0.000000     -0.000001    -0.000002
  Total magnetization (from the atomic spheres):               -0.000002
  Total magnetization (exact up - dn):                         -0.000002
 
@@ -2107,7 +2107,7 @@ tolerances: {tolvrs: 1.00E-05, }
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Ni   2.00000    -0.000013    -0.000009     -0.000023    -0.000004
  ------------------------------------------------------------------------------------------------------------
-  Sum:             -0.000013    -0.000009     -0.000023    -0.000004
+  Sum:                -0.000013    -0.000009     -0.000023    -0.000004
  Total magnetization (from the atomic spheres):               -0.000004
  Total magnetization (exact up - dn):                         -0.000005
 
