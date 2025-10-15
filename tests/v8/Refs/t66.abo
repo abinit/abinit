@@ -352,7 +352,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Fe   2.00000     4.496153     1.611719      6.107872     2.884434
  ------------------------------------------------------------------------------------------------------------
-  Sum:              4.496153     1.611719      6.107872     2.884434
+  Sum:                 4.496153     1.611719      6.107872     2.884434
  Total magnetization (from the atomic spheres):                2.884434
  Total magnetization (exact up - dn):                          3.325184
 
@@ -515,7 +515,7 @@ tolerances: {toldfe: 1.00E-06, }
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Fe   2.00000    12.849999   -11.164985      1.685014    24.014983
  ------------------------------------------------------------------------------------------------------------
-  Sum:             12.849999   -11.164985      1.685014    24.014983
+  Sum:                12.849999   -11.164985      1.685014    24.014983
  Total magnetization (from the atomic spheres):               24.014983
  Total magnetization (exact up - dn):                         30.177205
 

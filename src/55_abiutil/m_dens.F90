@@ -2136,7 +2136,7 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
          end do
          write(msg, '(a)') ' ------------------------------------------------------------------------------------------------------------'
          call wrtout(units,msg)
-         write(msg, '(a,2f13.6,a,f12.6,a,f12.6)') '  Sum:         ', sum_rho_up,sum_rho_dn,'  ',sum_rho_tot,' ',sum_mag
+         write(msg, '(a,2f13.6,a,f12.6,a,f12.6)') '  Sum:            ', sum_rho_up,sum_rho_dn,'  ',sum_rho_tot,' ',sum_mag
          call wrtout(units,msg)
 
          if(option==1)then

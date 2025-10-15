@@ -524,7 +524,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1  V   2.20000     5.592263     5.592263     11.184526    -0.000000
  ------------------------------------------------------------------------------------------------------------
-  Sum:              5.592263     5.592263     11.184526    -0.000000
+  Sum:                 5.592263     5.592263     11.184526    -0.000000
  Total magnetization (from the atomic spheres):               -0.000000
  Total magnetization (exact up - dn):                         -0.000000
 
@@ -1394,7 +1394,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1  V   2.20000     5.743199     5.475665     11.218864     0.267533
  ------------------------------------------------------------------------------------------------------------
-  Sum:              5.743199     5.475665     11.218864     0.267533
+  Sum:                 5.743199     5.475665     11.218864     0.267533
  Total magnetization (from the atomic spheres):                0.267533
  Total magnetization (exact up - dn):                          0.326966
 
