@@ -773,10 +773,10 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    nbcalc_ks = bstart_ks + nbcalc_ks - 1
 
    ! FIXME: Handle degeneracies
-   !do spin=1,nsppol
-   !  gstore_brange_k(1, spin) = minval(bstart_ks(1:nkcalc, spin))
-   !  gstore_brange_k(2, spin) = maxval(nbcalc_ks(1:nkcalc, spin))
-   !end do
+   do spin=1,nsppol
+     gstore_brange_k(1, spin) = minval(bstart_ks(1:nkcalc, spin))
+     gstore_brange_k(2, spin) = maxval(nbcalc_ks(1:nkcalc, spin))
+   end do
 
    ABI_FREE(kcalc)
    ABI_FREE(bstart_ks)
