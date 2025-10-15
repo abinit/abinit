@@ -94,10 +94,10 @@ estimates the magnetic moment of NiO:
      ---------------------------------------------------------------------
      Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
      Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-        1   1.81432     8.564383     7.188016     15.752398     1.376367
-        2   1.81432     7.188016     8.564383     15.752398    -1.376367
-        3   1.41465     2.260902     2.260902      4.521804    -0.000000
-        4   1.41465     2.260902     2.260902      4.521804     0.000000
+     1 Ni   1.81432     8.564385     7.187993     15.752379     1.376392
+     2 Ni   1.81432     7.187993     8.564385     15.752379    -1.376392
+     3  O   1.41465     2.260909     2.260909      4.521817     0.000000
+     4  O   1.41465     2.260909     2.260909      4.521817     0.000000
      
 
 The atoms in the output file, are listed as in the [[typat]] variable (the
@@ -189,10 +189,10 @@ You can take a look at the result of the calculation. The magnetic moment is now
      ---------------------------------------------------------------------
      Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
      Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-        1   1.81432     8.749919     6.987384     15.737302     1.762535
-        2   1.81432     6.987384     8.749919     15.737302    -1.762535
-        3   1.41465     2.290397     2.290397      4.580793    -0.000000
-        4   1.41465     2.290397     2.290397      4.580793    -0.000000
+     1 Ni   1.81432     8.749918     6.987372     15.737289     1.762546
+     2 Ni   1.81432     6.987372     8.749918     15.737289    -1.762546
+     3  O   1.41465     2.290407     2.290407      4.580814    -0.000000
+     4  O   1.41465     2.290407     2.290407      4.580814    -0.000000
 
 
 NiO is found antiferromagnetic, with a moment that is in reasonable agreement
@@ -310,10 +310,10 @@ these results are not well converged. By contrast, the magnetization,
       ---------------------------------------------------------------------
       Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
       Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-         1   1.81432     8.675718     6.993823     15.669541     1.681895
-         2   1.81432     6.993823     8.675718     15.669541    -1.681895
-         3   1.41465     2.288681     2.288681      4.577361    -0.000000
-         4   1.41465     2.288681     2.288681      4.577361     0.000000
+      1 Ni   1.81432     8.675720     6.993816     15.669536     1.681904
+      2 Ni   1.81432     6.993816     8.675720     15.669536    -1.681904
+      3  O   1.41465     2.288685     2.288685      4.577371     0.000000
+      4  O   1.41465     2.288685     2.288685      4.577371    -0.000000
 
 
 is very similar to the DFT+U FLL. 

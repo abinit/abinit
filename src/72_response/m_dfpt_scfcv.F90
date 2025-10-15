@@ -75,7 +75,7 @@ module m_dfpt_scfcv
  use m_paw_dfpt,    only : pawdfptenergy
  use m_paw_nhat,    only : pawmknhat,pawnhatfr
  use m_rf2,         only : rf2_getidirs
- use m_dens,        only : calcdenmagsph, prtdenmagsph
+ use m_dens,        only : calcdenmagsph, prtdenmagsph, calmaxdifmag
  use m_dfpt_fef,    only : dfptff_initberry, qmatrix, dfptff_edie, dfptff_ebp, dfptff_die, dfptff_bec
  use m_dfpt_vtorho, only : dfpt_vtorho
  use m_paral_atom,  only : get_my_atmtab, free_my_atmtab
@@ -407,7 +407,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !integer :: pqmq ! pqmq = indicator for potential mixing
  logical :: need_fermie1,nmxc,paral_atom,use_nhat_gga
  real(dp) :: wtime_step,now,prev
- real(dp) :: born,born_bar,boxcut,deltae,diffor,diel_q,dum,ecut,ecutf,elast
+ real(dp) :: born,born_bar,boxcut,deltae,diffor,diel_q,dum,ecut,ecutf,elast,maxmag,difmag
  real(dp) :: evar,fe1fixed,fermie1,gsqcut,qphon_norm,maxfor,renorm,res2,res3,residm2
  real(dp) :: ucvol,vxcavg,elmag1,el_temp
  real(dp) :: res2_mq,fe1fixed_mq,elast_mq
@@ -430,7 +430,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp) :: favg(3),gmet(3,3),gprimd(3,3),q_cart(3),qphon2(3),qred2cart(3,3)
  real(dp) :: rhomag(2,nspden),rmet(3,3),tollist(12),tsec(2)
  real(dp) :: zeff_red(3),zeff_bar(3,3)
- real(dp) :: intgden(dtset%nspden,dtset%natom),dentot(dtset%nspden)
+ real(dp) :: intgden(cplex,dtset%nspden,dtset%natom),dentot(dtset%nspden)
+ real(dp) :: intgden0(cplex,dtset%nspden,dtset%natom)
 !real(dp) :: zdmc_red(3),zdmc_bar(3,3),mean_rhor1(1) !dynamic magnetic charges and mean density
  real(dp),allocatable :: dielinv(:,:,:,:,:)
  real(dp),allocatable :: fcart(:,:),nhat1(:,:),nhat1gr(:,:,:),nhatfermi(:,:),nvresid1(:,:),nvresid2(:,:)
@@ -446,7 +447,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  type(paw_ij_type),allocatable :: paw_ij1(:)
  type(pawrhoij_type),allocatable :: pawrhoijfermi(:)
 ! *********************************************************************
-
  DBG_ENTER("COLL")
 
  if (dtset%occopt == 9) then
@@ -478,6 +478,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  tollist(1)=dtset%tolmxf;tollist(2)=dtset%tolwfr
  tollist(3)=dtset%toldff;tollist(4)=dtset%toldfe
  tollist(6)=dtset%tolvrs;tollist(7)=dtset%tolrff
+ tollist(9)=dtset%toldmag
  nfftotf=product(ngfftf(1:3))
  nstep=dtset%nstep
  iscf_mod=dtset%iscf
@@ -525,12 +526,14 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !file (with choice=1, the only non-dummy arguments of scprqt are
 !nstep, tollist and iscf - still, diffor,res2,prtfor,fcart are here initialized to 0)
  choice=1 ; prtfor=0 ; diffor=zero ; res2=zero
+ maxmag=zero;difmag=zero
+ intgden=zero
  ABI_MALLOC(fcart,(3,dtset%natom))
 
 !At present, no double loop
  istep_mix=1 ; istep_fock_outer=1
 
- call scprqt(choice,cpus,deltae,diffor,dtset,eigen0,&
+ call scprqt(choice,cpus,deltae,diffor,maxmag,difmag,dtset,eigen0,&
 & etotal,favg,fcart,fermie,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
 & 1,iscf_mod,istep,istep_fock_outer,istep_mix,kpt_rbz,maxfor,&
 & mvdum,mpi_enreg,nband_rbz,nkpt_rbz,&
@@ -1041,7 +1044,14 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,evxctau0,evxctau1,exc1,ipert,dtset%natom,optene)
      call timab(152,1,tsec)
      choice=2
-     call scprqt(choice,cpus,deltae,diffor,dtset,eigen0,&
+     if((iscf_mod>0).and.(dtset%nsppol==2.or.dtset%nspden>1)) then
+       intgden0=intgden
+       call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
+&        dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
+&        prtopt,cplex,dtset%qgbt,dtset%use_gbt,intgden=intgden,dentot=dentot,rhomag=rhomag)
+       call calmaxdifmag(cplex,intgden,intgden0,dtset%natom,dtset%nspden,maxmag,difmag)
+     endif
+     call scprqt(choice,cpus,deltae,diffor,maxmag,difmag,dtset,eigen0,&
 &     etotal,favg,fcart,fermie,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
 &     1,iscf_mod,istep,istep_fock_outer,istep_mix,kpt_rbz,maxfor,&
 &     mvdum,mpi_enreg,nband_rbz,nkpt_rbz,&
@@ -1113,7 +1123,14 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      ! To take into account new definition of hdr_update;
      ! test to avoid dfpt and occopt 9 was already done
      ! so we can just set fermih = fermie
-     call scprqt(choice,cpus,deltae,diffor,dtset,eigen0,&
+     if((iscf_mod>0).and.(dtset%nsppol==2.or.dtset%nspden>1)) then
+       intgden0=intgden
+       call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
+&        dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
+&        prtopt,cplex,dtset%qgbt,dtset%use_gbt,intgden=intgden,dentot=dentot,rhomag=rhomag)
+       call calmaxdifmag(cplex,intgden,intgden0,dtset%natom,dtset%nspden,maxmag,difmag)
+     endif
+     call scprqt(choice,cpus,deltae,diffor,maxmag,difmag,dtset,eigen0,&
 &     etotal,favg,fcart,fermie,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
 &     1,iscf_mod,istep,istep_fock_outer,istep_mix,kpt_rbz,maxfor,&
 &     mvdum,mpi_enreg,nband_rbz,nkpt_rbz,&
@@ -1405,7 +1422,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !residm, diffor - infos from tollist have been saved inside )
 !Set also the value of conv_retcode
  choice=3
- call scprqt(choice,cpus,deltae,diffor,dtset,eigen0,&
+ call scprqt(choice,cpus,deltae,diffor,maxmag,difmag,dtset,eigen0,&
 & etotal,favg,fcart,fermie,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
 & 1,iscf_mod,istep,istep_fock_outer,istep_mix,kpt_rbz,maxfor,&
 & mvdum,mpi_enreg,nband_rbz,nkpt_rbz,&
@@ -1432,9 +1449,13 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
 &     dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
 &     prtopt,cplex,dtset%qgbt,dtset%use_gbt,intgden=intgden,dentot=dentot,rhomag=rhomag)
-     call  prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,[ab_out],prtopt,dtset%qgbt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
+     call prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,[ab_out],prtopt,dtset%qgbt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%znucl)
    end if
  end if
+ !if((dtset%iscf>0).and.(dtset%nsppol==2.or.dtset%nspden>1).and.(ipert/=dtset%natom+5)) then
+ if((iscf_mod>0).and.(dtset%nsppol==2.or.dtset%nspden>1)) then
+   call prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,[ab_out],1,dtset%qgbt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%znucl)
+ endif
 
  if (iwrite_fftdatar(mpi_enreg)) then
    if (dtset%prtden>0) then

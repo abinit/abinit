@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h07 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorial_tspin_2/tspin_2.abi
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h11 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/tutorial_tspin_2/tspin_2.abi
 - output file    -> tspin_2.abo
 - root for input  files -> tspin_2i
 - root for output files -> tspin_2o
@@ -154,8 +154,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     25.000   => boxcut(ratio)=   2.01949
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Fe.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Fe.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Fe.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Fe.psp8
 - Fe    ONCVPSP-3.3.0  r_core=   1.26437   1.20546   1.56719
 - 26.00000  16.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -182,40 +182,40 @@ solver: {iscf: 7, nstep: 70, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-07, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -249.41969413612    -2.494E+02 1.823E-01 2.806E+02
- ETOT  2  -249.45328362526    -3.359E-02 3.962E-03 6.592E+02
- ETOT  3  -249.72496424002    -2.717E-01 3.508E-03 1.797E+00
- ETOT  4  -249.72799524518    -3.031E-03 2.532E-04 5.244E-01
- ETOT  5  -249.72898140553    -9.862E-04 2.372E-04 2.880E-01
- ETOT  6  -249.72965822478    -6.768E-04 6.896E-05 5.518E-02
- ETOT  7  -249.72992295706    -2.647E-04 7.060E-05 2.178E-03
- ETOT  8  -249.72993190733    -8.950E-06 1.543E-05 1.001E-04
- ETOT  9  -249.72993197146    -6.413E-08 1.764E-05 1.821E-05
- ETOT 10  -249.72993197758    -6.128E-09 5.455E-06 2.780E-06
- ETOT 11  -249.72993197828    -6.953E-10 1.144E-05 2.753E-07
- ETOT 12  -249.72993197834    -6.585E-11 3.661E-06 1.565E-08
- ETOT 13  -249.72993197836    -1.941E-11 7.890E-06 4.240E-10
- ETOT 14  -249.72993197836     2.416E-12 2.551E-06 9.990E-12
- ETOT 15  -249.72993197836     2.842E-12 5.523E-06 6.572E-13
- ETOT 16  -249.72993197836    -1.592E-12 1.791E-06 1.828E-13
- ETOT 17  -249.72993197836    -2.103E-12 3.877E-06 5.763E-14
- ETOT 18  -249.72993197836    -4.263E-13 1.259E-06 6.942E-15
- ETOT 19  -249.72993197836    -1.251E-12 2.723E-06 6.719E-14
- ETOT 20  -249.72993197836     7.105E-13 8.851E-07 9.248E-14
- ETOT 21  -249.72993197837    -2.473E-12 1.911E-06 1.088E-13
- ETOT 22  -249.72993197837    -5.969E-13 6.216E-07 2.516E-14
- ETOT 23  -249.72993197836     1.535E-12 1.341E-06 7.404E-14
- ETOT 24  -249.72993197836    -2.842E-14 4.362E-07 8.320E-14
- ETOT 25  -249.72993197836     2.018E-12 9.401E-07 3.192E-13
- ETOT 26  -249.72993197836    -1.137E-12 3.059E-07 1.726E-13
- ETOT 27  -249.72993197837    -2.899E-12 6.590E-07 2.506E-13
- ETOT 28  -249.72993197836     2.103E-12 2.144E-07 1.808E-13
- ETOT 29  -249.72993197836     6.253E-12 4.617E-07 2.680E-13
- ETOT 30  -249.72993197837    -7.219E-12 1.502E-07 2.228E-13
- ETOT 31  -249.72993197836     1.336E-12 3.235E-07 2.531E-13
- ETOT 32  -249.72993197837    -2.018E-12 1.052E-07 2.547E-13
- ETOT 33  -249.72993197836     6.196E-12 9.746E-08 3.156E-13
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -249.41969413612    -2.494E+02 1.823E-01 2.806E+02 1.788E+00 1.788E+00
+ ETOT  2  -249.45328362526    -3.359E-02 3.962E-03 6.592E+02 4.077E-03 1.784E+00
+ ETOT  3  -249.72496424002    -2.717E-01 3.508E-03 1.797E+00 1.318E-01 1.652E+00
+ ETOT  4  -249.72799524518    -3.031E-03 2.532E-04 5.244E-01 1.462E-01 1.506E+00
+ ETOT  5  -249.72898140553    -9.862E-04 2.372E-04 2.880E-01 9.389E-02 1.412E+00
+ ETOT  6  -249.72965822478    -6.768E-04 6.896E-05 5.518E-02 1.058E-01 1.306E+00
+ ETOT  7  -249.72992295706    -2.647E-04 7.060E-05 2.178E-03 1.106E-01 1.196E+00
+ ETOT  8  -249.72993190733    -8.950E-06 1.543E-05 1.001E-04 2.118E-02 1.175E+00
+ ETOT  9  -249.72993197146    -6.413E-08 1.764E-05 1.821E-05 1.685E-03 1.173E+00
+ ETOT 10  -249.72993197758    -6.128E-09 5.455E-06 2.780E-06 2.549E-04 1.173E+00
+ ETOT 11  -249.72993197828    -6.953E-10 1.144E-05 2.753E-07 1.051E-04 1.173E+00
+ ETOT 12  -249.72993197834    -6.585E-11 3.661E-06 1.565E-08 6.501E-05 1.173E+00
+ ETOT 13  -249.72993197836    -1.941E-11 7.890E-06 4.240E-10 2.581E-05 1.173E+00
+ ETOT 14  -249.72993197836     2.416E-12 2.551E-06 9.990E-12 1.687E-06 1.173E+00
+ ETOT 15  -249.72993197836     2.842E-12 5.523E-06 6.572E-13 9.643E-07 1.173E+00
+ ETOT 16  -249.72993197836    -1.592E-12 1.791E-06 1.828E-13 3.679E-07 1.173E+00
+ ETOT 17  -249.72993197836    -2.103E-12 3.877E-06 5.763E-14 2.171E-08 1.173E+00
+ ETOT 18  -249.72993197836    -4.263E-13 1.259E-06 6.942E-15 1.065E-08 1.173E+00
+ ETOT 19  -249.72993197836    -1.251E-12 2.723E-06 6.719E-14 1.395E-08 1.173E+00
+ ETOT 20  -249.72993197836     7.105E-13 8.851E-07 9.248E-14 1.027E-08 1.173E+00
+ ETOT 21  -249.72993197837    -2.473E-12 1.911E-06 1.088E-13 3.141E-08 1.173E+00
+ ETOT 22  -249.72993197837    -5.969E-13 6.216E-07 2.516E-14 2.722E-08 1.173E+00
+ ETOT 23  -249.72993197836     1.535E-12 1.341E-06 7.404E-14 9.015E-09 1.173E+00
+ ETOT 24  -249.72993197836    -2.842E-14 4.362E-07 8.320E-14 7.860E-09 1.173E+00
+ ETOT 25  -249.72993197836     2.018E-12 9.401E-07 3.192E-13 5.117E-09 1.173E+00
+ ETOT 26  -249.72993197836    -1.137E-12 3.059E-07 1.726E-13 3.392E-08 1.173E+00
+ ETOT 27  -249.72993197837    -2.899E-12 6.590E-07 2.506E-13 2.788E-08 1.173E+00
+ ETOT 28  -249.72993197836     2.103E-12 2.144E-07 1.808E-13 8.313E-09 1.173E+00
+ ETOT 29  -249.72993197836     6.253E-12 4.617E-07 2.680E-13 1.502E-08 1.173E+00
+ ETOT 30  -249.72993197837    -7.219E-12 1.502E-07 2.228E-13 8.798E-09 1.173E+00
+ ETOT 31  -249.72993197836     1.336E-12 3.235E-07 2.531E-13 4.703E-08 1.173E+00
+ ETOT 32  -249.72993197837    -2.018E-12 1.052E-07 2.547E-13 1.845E-08 1.173E+00
+ ETOT 33  -249.72993197836     6.196E-12 9.746E-08 3.156E-13 8.116E-09 1.173E+00
 
  At SCF step   33   max residual=  9.75E-08 < tolwfr=  1.00E-07 =>converged.
 
@@ -254,15 +254,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     7.748236     6.575029     14.323265     1.173206
-    2   2.00000     6.575029     7.748236     14.323265    -1.173206
- ---------------------------------------------------------------------
-  Sum:             14.323265    14.323265     28.646531    -0.000000
- Total magnetization (from the atomic spheres):            -0.000000
- Total magnetization (exact up - dn):                      -0.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Fe   2.00000     7.748236     6.575029     14.323265     1.173206
+    2 Fe   2.00000     6.575029     7.748236     14.323265    -1.173206
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                14.323265    14.323265     28.646531    -0.000000
+ Total magnetization (from the atomic spheres):               -0.000000
+ Total magnetization (exact up - dn):                         -0.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -334,7 +335,7 @@ band_energy         : -2.19957036441668E+01
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      6.6000000000E+00  6.6000000000E+00  6.6000000000E+00 Bohr
               amu      5.58470000E+01
@@ -456,7 +457,7 @@ P           mkmem           4
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -473,12 +474,12 @@ P           mkmem           4
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -496,15 +497,15 @@ P           mkmem           4
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          3.0  wall=          3.0
+- Proc.   0 individual time (sec): cpu=          3.1  wall=          3.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.0  wall=          3.0
++Overall time at end (sec) : cpu=          3.1  wall=          3.1

@@ -94,7 +94,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
  integer :: mu,natom,nfft,nfftdg,nkpt,nloc_mem,nlpawu
  integer :: nproc,nthreads,nspden,nspinor,nsppol,optdriver,mismatch_fft_tnons,response !,so_psp
  integer :: fftalg,fftalga,usepaw,usewvl
- integer :: ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
+ integer :: ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr,ttoldmag
  logical :: test,twvl,allowed,berryflag
  logical :: wvlbigdft=.false.
  logical :: xc_is_lda,xc_is_gga,xc_is_mgga,xc_is_hybrid,xc_is_pot_only,xc_need_kden
@@ -283,8 +283,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    !  berryopt cannot be 4,6,7,14,16,17 when toldfe, tolvrs, toldff and tolrff are zero (or negative)
    if (any(dt%berryopt== [4,6,7,14,16,17] ) ) then
      cond_string(1)='berryopt' ; cond_values(1)=dt%berryopt
-     call chkdpr(1,1,cond_string,cond_values,ierr,'max(toldfe,toldff,tolrff,tolvrs)',&
-       max(dt%toldfe,dt%toldff,dt%tolrff,dt%tolvrs),1,tol16*tol16,iout)
+     call chkdpr(1,1,cond_string,cond_values,ierr,'max(toldfe,toldff,tolrff,tolvrs,toldmag)',&
+       max(dt%toldfe,dt%toldff,dt%tolrff,dt%tolvrs,dt%toldmag),1,tol16*tol16,iout)
    endif
    ! Non-zero berryopt and usepaw==1 cannot be done unless response==0
    if (usepaw==1.and.dt%berryopt/=0) then
@@ -4050,6 +4050,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !  tolwfr
    call chkdpr(0,0,cond_string,cond_values,ierr,'tolwfr',dt%tolwfr,1,zero,iout)
 
+!!  tolwfr
+   call chkdpr(0,0,cond_string,cond_values,ierr,'toldmag',dt%tolwfr,1,zero,iout)
+
 !  tsmear
    call chkdpr(0,0,cond_string,cond_values,ierr,'tsmear',dt%tsmear,1,zero,iout)
 !  Check that tsmear is non-zero positive for metallic occupation functions
@@ -4573,12 +4576,13 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
    ! Test on tolerances (similar tests are performed in scprqt, so keep the two versions in synch)
    if (any(optdriver == [RUNL_GSTATE, RUNL_RESPFN])) then
-     ttolwfr=0 ; ttoldff=0 ; ttoldfe=0 ; ttolvrs=0; ttolrff=0
+     ttolwfr=0 ; ttoldff=0 ; ttoldfe=0 ; ttolvrs=0; ttolrff=0; ttoldmag=0
      if(abs(dt%tolwfr)>tiny(zero))ttolwfr=1
      if(abs(dt%toldff)>tiny(zero))ttoldff=1
      if(abs(dt%tolrff)>tiny(zero))ttolrff=1
      if(abs(dt%toldfe)>tiny(zero))ttoldfe=1
      if(abs(dt%tolvrs)>tiny(zero))ttolvrs=1
+     if(abs(dt%toldmag)>tiny(zero))ttoldmag=1
 
      ! If non-scf calculations, tolwfr must be defined
      if(ttolwfr /= 1 .and. ((dt%iscf<0 .and. dt%iscf/=-3) .or. dt%rf2_dkdk/=0 .or. dt%rf2_dkde/=0))then
@@ -4595,12 +4599,12 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
      ! If SCF calculations, one and only one of these can differ from zero
      if ( (dt%iscf>0 .or. dt%iscf==-3) .and. &
-       & ( (ttolwfr==1.and.ttoldff+ttoldfe+ttolvrs+ttolrff>1) .or. (ttolwfr==0.and.ttoldff+ttoldfe+ttolvrs+ttolrff/=1) ) ) then
+       & ( (ttolwfr==1.and.ttoldff+ttoldfe+ttolvrs+ttolrff+ttoldmag>1) .or. (ttolwfr==0.and.ttoldff+ttoldfe+ttolvrs+ttolrff+ttoldmag/=1) ) ) then
        write(msg,'(6a,es14.6,a,es14.6,a,es14.6,a,a,es14.6,a,i0,2a)' )&
         'For the SCF case, one and only one of the input tolerance criteria ',ch10,&
-        'toldff, tolrff, toldfe or tolvrs ','must differ from zero, while they are',ch10,&
+        'toldff, tolrff, toldfe, toldmag or tolvrs ','must differ from zero, while they are',ch10,&
         'toldff=',dt%toldff,', tolrff=',dt%tolrff,', toldfe=',dt%toldfe,ch10,&
-        'and tolvrs=',dt%tolvrs,' for idtset: ', idtset, ch10,&
+        'toldmag=',dt%toldmag,'and tolvrs=',dt%tolvrs,' for idtset: ', idtset, ch10,&
         'Action: change your input file and resubmit the job.'
        ABI_ERROR_NOSTOP(msg, ierr)
      end if

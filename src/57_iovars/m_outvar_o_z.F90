@@ -1147,6 +1147,9 @@ contains
  dprarr(1,:)=dtsets(:)%toldff
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'toldff','DPR',0)
 
+ dprarr(1,:)=dtsets(:)%toldmag
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'toldmag','DPR',0)
+
  dprarr(1,:)=dtsets(:)%tolimg
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tolimg','ENE',0)
 

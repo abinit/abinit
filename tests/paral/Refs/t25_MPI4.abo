@@ -1,5 +1,9 @@
 
+<<<<<<< HEAD
 .Version 10.5.1.5 of ABINIT, released Jul 2025.
+=======
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
+>>>>>>> remotes/srostami/test
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +18,17 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
+<<<<<<< HEAD
 .Starting date : Thu  9 Oct 2025.
 - ( at 18h16 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI4/paral_t25_MPI4/t25.abi
+=======
+.Starting date : Sat 13 Sep 2025.
+- ( at 10h37 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI4/paral_t25_MPI4/t25.abi
+>>>>>>> remotes/srostami/test
 - output file    -> t25_MPI4.abo
 - root for input  files -> t25_MPI4i
 - root for output files -> t25_MPI4o
@@ -166,8 +177,13 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 1, }
 
 
 --- Pseudopotential description ------------------------------------------------
+<<<<<<< HEAD
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/6c_lda.paw
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/6c_lda.paw
+=======
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/6c_lda.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/6c_lda.paw
+>>>>>>> remotes/srostami/test
 - Paw atomic data extracted from US-psp (D.Vanderbilt): carbon
 -  6.00000   4.00000  20041014                znucl, zion, pspdat
     7    2    1    0       467   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -201,12 +217,21 @@ solver: {iscf: 17, nstep: 5, nline: 4, wfoptalg: 114, }
 tolerances: {toldfe: 1.00E-10, }
 ...
 
+<<<<<<< HEAD
      iter   Etot(hartree)      deltaE(h)  residm     nres2
  ETOT  1  -10.529009169654    -1.053E+01 2.860E-04 9.508E+01
  ETOT  2  -10.429282908306     9.973E-02 4.421E-06 9.390E+00
  ETOT  3  -10.417982468023     1.130E-02 4.619E-07 1.491E-01
  ETOT  4  -10.417942118393     4.035E-05 2.951E-08 2.432E-03
  ETOT  5  -10.417943508407    -1.390E-06 1.737E-10 2.648E-05
+=======
+     iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
+ ETOT  1  -10.529009169654    -1.053E+01 2.860E-04 9.508E+01 0.000E+00 0.000E+00
+ ETOT  2  -10.429282908306     9.973E-02 4.421E-06 9.390E+00 0.000E+00 0.000E+00
+ ETOT  3  -10.417982468023     1.130E-02 4.619E-07 1.491E-01 0.000E+00 0.000E+00
+ ETOT  4  -10.417942118393     4.035E-05 2.951E-08 2.432E-03 0.000E+00 0.000E+00
+ ETOT  5  -10.417943508407    -1.390E-06 1.737E-10 2.648E-05 0.000E+00 0.000E+00
+>>>>>>> remotes/srostami/test
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -8.18083676E-03  sigma(3 2)= -1.74490754E-03
@@ -248,8 +273,9 @@ force_length_stats: {min:   4.07878567E-01, max:   4.07878567E-01, mean:   4.078
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
+<<<<<<< HEAD
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   1.11202     0.715320     0.715320      1.430639    -0.000000
     2   1.11202     0.720654     0.720654      1.441309    -0.000000
@@ -257,6 +283,16 @@ force_length_stats: {min:   4.07878567E-01, max:   4.07878567E-01, mean:   4.078
   Sum:              1.435974     1.435974      2.871948    -0.000000
  Total magnetization (from the atomic spheres):            -0.000000
  Total magnetization (exact up - dn):                      -0.000000
+=======
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1  C   1.11202     0.715320     0.715320      1.430639    -0.000000
+    2  C   1.11202     0.720654     0.720654      1.441309    -0.000000
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 1.435974     1.435974      2.871948    -0.000000
+ Total magnetization (from the atomic spheres):               -0.000000
+ Total magnetization (exact up - dn):                         -0.000000
+
+>>>>>>> remotes/srostami/test
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -437,7 +473,11 @@ xc                  : -3.90585024137775E+00
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  5.49532697036699E-01
 local_psp           : -6.85232874162613E+00
+<<<<<<< HEAD
 PAW spherical_terms :  1.79560229870594E+00
+=======
+spherical_terms     :  1.79560229870594E+00
+>>>>>>> remotes/srostami/test
 total_energy        : -1.04187364980779E+01
 total_energy_eV     : -2.83508238185389E+02
 ...
@@ -450,7 +490,11 @@ band_energy         :  1.77721060312025E+00
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  5.49532697036699E-01
 xc_dc               : -6.32064312582743E-01
+<<<<<<< HEAD
 PAW spherical_terms :  1.28263164481768E-01
+=======
+spherical_terms     :  1.28263164481768E-01
+>>>>>>> remotes/srostami/test
 total_energy_dc     : -1.04179435084070E+01
 total_energy_dc_eV  : -2.83486659839058E+02
 ...
