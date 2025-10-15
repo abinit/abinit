@@ -903,8 +903,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_MALLOC_OR_DIE(my_gbuf_ks, (gqk%cplex, nb_kq, nb_k, natom3, gqk%my_nk, qbuf_size), ierr)
 
    ! Allocate memory to deal with frequencies in Sigma(w).
-   nw_nk = 1 + (bstop_k - bstart_k + 1)
-   nw_mkq = 1 + (bstop_kq - bstart_kq + 1)
+   ! Prepare list of omegas: first e_nk then e_mkq for all m indices.
+   !nw_nk = 1 + (bstop_k - bstart_k + 1)
+   !nw_mkq = 1 + (bstop_kq - bstart_kq + 1)
+   nw_nk = 1 + (bstop_kq - bstart_kq + 1)
+   nw_mkq = 1 + (bstop_k - bstart_k + 1)
    ABI_MALLOC(omegame0i_nk, (nw_nk))
    ABI_MALLOC(omegame0i_mkq, (nw_mkq))
    ABI_MALLOC(omegas_nk, (nw_nk))
