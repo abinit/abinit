@@ -248,7 +248,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cell sum of sphere magnetization
  (cart.coord.)                                      3.088737    0.022486    0.028368
  (sph.coord.)                           3.088949                                       89.473800    0.417112
- Integral of periodic magnetization  3.238660    0.023576    0.029702
+ Integral of periodic magnetization
  (cart.coord.)                                      3.238660    0.023576    0.029702
  (sph.coord.)                           3.238882                                       89.474559    0.417082
 ================================================================================
