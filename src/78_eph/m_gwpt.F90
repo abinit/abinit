@@ -183,7 +183,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: band, band_me, nband_me, stern_comm, nkpt, my_rank, nsppol, iq_ibz, iq_bz, my_npert
  integer :: nb_k, nb_kq, bstart_k, bstop_k, bstart_kq, bstop_kq
  integer :: cplex,drho_cplex,nkxc,nk3xc,option,usexcnhat,db_iqpt,natom,natom3,ipc,nspinor,nproc !, gsum_master
- integer :: ib_sum, ii, ib, u1_band !,u1c_ib_k,  jj, iw !ib_kq, band_ks, ib_k, ibsum_kq, u1_master, ip
+ integer :: ib_sum, ii, u1_band !,u1c_ib_k,  jj, iw !ib_kq, band_ks, ib_k, ibsum_kq, u1_master, ip
  integer :: my_is, spin, idir,ipert, ig, max_npw_xc, min_npw_xc, npw_x, npw_c, nw_nk, nw_mkq
  integer :: my_pp_start_spin(dtset%nsppol), my_pp_stop_spin(dtset%nsppol), my_npp(dtset%nsppol)
  integer :: isym_q, trev_q
@@ -585,9 +585,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        do band=gqk%bstart_k, gqk%bstop_k
          call wfd%copy_cg(band, ik_ibz, spin, cg_work)
          eig0nk = ebands%eig(band, ik_ibz, spin)
-         ib = band - gqk%bstart_k + 1
-         vnk_cart_ibz(:, ib, ik_ibz) = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, wfd%nspinor, cg_work, cwaveprj0)
-         count_bk(ib, ik_ibz) = count_bk(ib, ik_ibz) + 1
+         in_k = band - gqk%bstart_k + 1
+         vnk_cart_ibz(:, in_k, ik_ibz) = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, wfd%nspinor, cg_work, cwaveprj0)
+         count_bk(in_k, ik_ibz) = count_bk(in_k, ik_ibz) + 1
        end do
      end do ! my_ik
 
@@ -596,10 +596,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
      do ik_ibz=1, gstore%nkibz
        do band=gqk%bstart_k, gqk%bstop_k
-         ib = band - gqk%bstart_k + 1
-         if (count_bk(ib, ik_ibz) == 0) cycle
+         in_k = band - gqk%bstart_k + 1
+         if (count_bk(in_k, ik_ibz) == 0) cycle
          do ii=1,3
-           vnk_cart_ibz(ii,ib,ik_ibz) = vnk_cart_ibz(ii,ib,ik_ibz) / count_bk(ib, ik_ibz)
+           vnk_cart_ibz(ii,in_k,ik_ibz) = vnk_cart_ibz(ii,in_k,ik_ibz) / count_bk(in_k, ik_ibz)
          end do
        end do
      end do
@@ -1509,8 +1509,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
              ! Store KS e-ph matrix elements for this perturbation.
              if (pp_is_gamma) then
-               ib = ib_sum - bstart_kq + 1
-               gks_atm(:,:,ib,ipc) = stern_kmp%eig1_k(:, bstart_kq:bstop_kq, ib_sum)
+               if (ib_sum >= gqk%bstart_k .and. ib_sum <= gqk%bstop_k) then
+                 in_k = ib_sum - bstart_k + 1
+                 gks_atm(:,:,in_k,ipc) = stern_kmp%eig1_k(:, bstart_kq:bstop_kq, ib_sum)
+               end if
              end if
 
              ! <m,k+q|e^{i(p+G)r}|Delta_q psi_{bsum,k-p}>
@@ -1630,8 +1632,10 @@ if (.not. qq_is_gamma) then
 
              ! For debug, gks_atm2 and gks_atm should be consistent
              if (pp_is_gamma) then
-               ib = ib_sum - bstart_kq + 1
-               gks_atm2(:,:,ib,ipc) = stern_kqmp%eig1_k(:, bstart_kq:bstop_kq, ib_sum)
+               if (ib_sum >= gqk%bstart_k .and. ib_sum <= gqk%bstop_k) then
+                 in_k = ib_sum - bstart_k + 1
+                 gks_atm2(:,:,in_k,ipc) = stern_kqmp%eig1_k(:, bstart_kq:bstop_kq, ib_sum)
+               end if
              end if
 
              full_ur1_kmp = GWPC_CONJG(full_ur1_kmp)

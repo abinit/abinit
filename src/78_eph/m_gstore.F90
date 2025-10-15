@@ -773,10 +773,10 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    nbcalc_ks = bstart_ks + nbcalc_ks - 1
 
    ! FIXME: Handle degeneracies
-   do spin=1,nsppol
-     gstore_brange_k(1, spin) = minval(bstart_ks(1:nkcalc, spin))
-     gstore_brange_k(2, spin) = maxval(nbcalc_ks(1:nkcalc, spin))
-   end do
+   !do spin=1,nsppol
+   !  gstore_brange_k(1, spin) = minval(bstart_ks(1:nkcalc, spin))
+   !  gstore_brange_k(2, spin) = maxval(nbcalc_ks(1:nkcalc, spin))
+   !end do
 
    ABI_FREE(kcalc)
    ABI_FREE(bstart_ks)
@@ -4813,11 +4813,12 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
 !scalars
  integer,parameter :: master = 0
  integer :: root_ncid, spin_ncid, gstore_completed, spin, ik_glob, iq_glob, ipc, cplex, ncerr, natom3
- integer :: glob_nq, glob_nk, im_kq, in_k, nb_k, nb_kq, ib_k, ik_ibz
+ integer :: glob_nq, glob_nk, im_kq, in_k, m_kq, n_k, nb_k, nb_kq, ib_k, ik_ibz, bstart_k, bstart_kq
  logical :: with_ks__
  real(dp) :: g2, g2_ks
  character(len=abi_slen) :: gstore_gmode
 !arrays
+ !integer :: brange_kq(2, gstore%nsppol), brange_k(2, gstore%nsppol)
  integer,allocatable :: done_qbz_spin(:,:)
  real(dp),allocatable :: gslice_mn(:,:,:), gslice_ks_mn(:,:,:),vnk_cart_ibz(:,:) !, vnk_mat_cart_ibz(:,:,:,:)
 ! *************************************************************************
@@ -4846,7 +4847,6 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
    NCF_CHECK(nctk_get_dim(spin_ncid, "glob_nq", glob_nq))
    NCF_CHECK(nctk_get_dim(spin_ncid, "glob_nk", glob_nk))
    NCF_CHECK(nctk_get_dim(spin_ncid, "gstore_cplex", cplex))
-
    NCF_CHECK(nctk_get_dim(spin_ncid, "nb_k", nb_k))
    NCF_CHECK(nctk_get_dim(spin_ncid, "nb_kq", nb_kq))
 
@@ -4854,6 +4854,9 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
    write(ab_out, "(a,i0)")" gqk%nb_k: ", nb_k
    write(ab_out, "(a,i0)")" gqk%glob_nq: ", glob_nq
    write(ab_out, "(a,i0)")" gqk%glob_nk: ", glob_nk
+
+   bstart_k = gstore%brange_k_spin(1, spin)
+   bstart_kq = gstore%brange_kq_spin(1, spin)
 
    ! Handle the output of group velocities. On disk, we have:
    !
@@ -4922,9 +4925,11 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
           ! gvals only.
            write(ab_out, "(1x,5(a5,1x),a16)")"iq","ik", "pcase", "im_kq", "in_k", "|g|"
            do im_kq=1,nb_kq
+             m_kq = im_kq + bstart_kq - 1
              do in_k=1,nb_k
+               n_k = in_k + bstart_k - 1
                g2 = gslice_mn(1, im_kq, in_k)**2 + gslice_mn(2, im_kq, in_k)**2
-               write(ab_out, "(1x,5(i5,1x),es16.6)") iq_glob, ik_glob, ipc, im_kq, in_k, sqrt(g2)
+               write(ab_out, "(1x,5(i5,1x),es16.6)") iq_glob, ik_glob, ipc, m_kq, n_k, sqrt(g2)
              end do
            end do
         else
@@ -4934,10 +4939,12 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
           NCF_CHECK(ncerr)
           write(ab_out, "(1x,5(a5,1x),2a16)")"iq","ik", "pcase", "im_kq", "in_k", "|g^SE|", "|g^KS|"
           do im_kq=1,nb_kq
+            m_kq = im_kq + bstart_kq - 1
             do in_k=1,nb_k
+              n_k = in_k + bstart_k - 1
               g2 = gslice_mn(1, im_kq, in_k)**2 + gslice_mn(2, im_kq, in_k)**2
               g2_ks = gslice_ks_mn(1, im_kq, in_k)**2 + gslice_ks_mn(2, im_kq, in_k)**2
-              write(ab_out, "(1x,5(i5,1x),2(es16.6))") iq_glob, ik_glob, ipc, im_kq, in_k, sqrt(g2), sqrt(g2_ks)
+              write(ab_out, "(1x,5(i5,1x),2(es16.6))") iq_glob, ik_glob, ipc, m_kq, n_k, sqrt(g2), sqrt(g2_ks)
             end do
           end do
         end if
