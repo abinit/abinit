@@ -670,18 +670,21 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master = 0
+ integer,parameter :: master = 0, gstore_has_ifcs = 1
  integer :: all_nproc, my_rank, ierr, my_nshiftq, nsppol, spin, natom3, cnt, timrev_q, with_cplex
  integer :: ik_ibz, ik_bz, iq_bz, iq_ibz, max_nq, max_nk, ncid, spin_ncid, ncerr, gstore_fform
- integer :: my_is, my_ik, my_iq, nq
+ integer :: my_is, my_ik, my_iq, nq, gap_err, nkcalc
  logical :: keep_umats, has_abiwan, has_gwan, write_gstore
  real(dp) :: cpu, wall, gflops, weight_qq, gstore_fill_dp
  character(len=5000) :: msg
- integer, parameter :: gstore_has_ifcs = 1
+ type(gaps_t) :: gaps
 !arrays
  integer :: ngqpt(3), qptrlatt(3,3), comm_spin(ebands%nsppol), nproc_spin(ebands%nsppol), units(2)
+ integer :: gstore_brange_kq(2, 2), gstore_brange_k(2, 2)
  integer,allocatable :: qbz2ibz(:,:), kibz2bz(:), qibz2bz(:), qglob2bz(:,:)
  integer,allocatable :: select_qbz_spin(:,:), select_kbz_spin(:,:)
+ integer,allocatable :: bstart_ks(:,:), nbcalc_ks(:,:)
+ real(dp),allocatable :: kcalc(:,:)
  real(dp):: my_shiftq(3,1), kpt(3), kq(3), qpt(3)
  real(dp),allocatable :: wtk(:), kibz(:,:)
  type(wan_t),target :: wan_spin(ebands%nsppol)
@@ -744,8 +747,44 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  ! Distribute spins, create indirect mapping to spin index and init %brange_k_spin from dtset
  ! TODO Should I introduce dtset%gstore_brange_kq or compute it automatically
  ABI_CHECK_ILEQ(dtset%mband, ebands%mband, "dtset%mband > ebands%mband")
- call gstore%distribute_spins__(dtset%mband, dtset%gstore_brange, dtset%gstore_brange, nproc_spin, comm_spin, comm)
- !call gstore%distribute_spins__(dtset%mband, dtset%gstore_brange_kq, dtset%gstore_brange_k, nproc_spin, comm_spin, comm)
+
+ gstore_brange_k = dtset%gstore_brange
+ gstore_brange_kq = dtset%gstore_brange
+
+ if (gstore%kfilter == "qprange") then
+   ! Assume ZPR calculations requiring virtual k+q transitions from 1 up to nband.
+   gstore_brange_kq(:,1) = [1, dtset%mband]
+   gstore_brange_kq(:,2) = [1, dtset%mband]
+
+   ! The same set of calls is found in gstore_filter_gw_qprange__
+   ! The main difference is that here we set the bands while gstore_filter_gw_qprange__ sets the the k-points.
+   gaps = ebands%get_gaps(gap_err)
+
+   ! Compute nkcalc, kcalc, bstart_ks, nbcalc_ks
+   if (dtset%gw_qprange /= 0) then
+     call sigtk_kcalc_from_qprange(dtset, gstore%cryst, ebands, dtset%gw_qprange, nkcalc, kcalc, bstart_ks, nbcalc_ks)
+   else
+     ! gw_qprange is not specified in the input.
+     ! Include direct and fundamental KS gap or include states depending on the position wrt band edges.
+     call sigtk_kcalc_from_gaps(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks, nbcalc_ks)
+   end if
+
+   ! Convert to stop values
+   nbcalc_ks = bstart_ks + nbcalc_ks - 1
+
+   ! FIXME: Handle degeneracies
+   !do spin=1,nsppol
+   !  gstore_brange_k(1, spin) = minval(bstart_ks(1:nkcalc, spin))
+   !  gstore_brange_k(2, spin) = maxval(nbcalc_ks(1:nkcalc, spin))
+   !end do
+
+   ABI_FREE(kcalc)
+   ABI_FREE(bstart_ks)
+   ABI_FREE(nbcalc_ks)
+   call gaps%free()
+ end if
+
+ call gstore%distribute_spins__(dtset%mband, gstore_brange_kq, gstore_brange_k, nproc_spin, comm_spin, comm)
 
  if (has_abiwan) then
    ! Here we set brange_k_spin to be consistent with the wannierization step.
@@ -1282,7 +1321,8 @@ subroutine gstore_distribute_spins(gstore, mband, brange_kq, brange_k, nproc_spi
  ABI_MALLOC(gstore%brange_kq_spin, (2, nsppol))
 
  do spin=1,nsppol
-   ! NB: If MPI_UNDEFINED is passed as the colour value, the subgroup in which the calling MPI process will be placed is MPI_COMM_NULL
+   ! NB: If MPI_UNDEFINED is passed as the colour value, the subgroup in which
+   ! the calling MPI process will be placed is MPI_COMM_NULL
    color = 1
    if (nsppol == 2 .and. nprocs > 1) then
      color = xmpi_undefined
@@ -2066,7 +2106,7 @@ subroutine gstore_filter_erange__(gstore, qbz2ibz, qibz2bz, kibz2bz, select_qbz_
 
  assume_gap = .not. all(gstore%erange_spin < zero)
  gaps = ebands%get_gaps(gap_err)
- if (assume_gap) call gaps%print([std_out]) !, header=msg)
+ if (assume_gap) call gaps%print([std_out])
 
  select_kbz_spin = 0; cnt = 0
 
@@ -2184,7 +2224,7 @@ subroutine gstore_filter_gw_qprange__(gstore, dtset, qbz2ibz, qibz2bz, kibz2bz, 
 
 !Local variables-------------------------------
 !scalars
- integer :: spin, ik_bz, ik_ibz, gap_err, gw_qprange, ik_calc, nkcalc, mapl_kk(6), my_rank
+ integer :: spin, ik_bz, ik_ibz, gap_err, ik_calc, nkcalc, mapl_kk(6), my_rank
  type(gaps_t) :: gaps
 !arrays
  integer,allocatable :: bstart_ks(:,:), nbcalc_ks(:,:)
@@ -2198,8 +2238,7 @@ subroutine gstore_filter_gw_qprange__(gstore, dtset, qbz2ibz, qibz2bz, kibz2bz, 
 
  my_rank = xmpi_comm_rank(gstore%comm)
 
- gw_qprange = dtset%gw_qprange
- call wrtout(std_out, sjoin(" Filtering k-points using gw_qprange:", itoa(gw_qprange)))
+ call wrtout(std_out, sjoin(" Filtering k-points using gw_qprange:", itoa(dtset%gw_qprange)))
  if (gstore%qzone /= "bz") then
    ABI_ERROR(sjoin('gw_qprange filtering requires gstore_qzone = "bz" while it is: ', gstore%qzone))
  end if
@@ -2219,8 +2258,8 @@ subroutine gstore_filter_gw_qprange__(gstore, dtset, qbz2ibz, qibz2bz, kibz2bz, 
  !          Include all occupied states and `num` empty states.
 
  ! Compute nkcalc, kcalc, bstart_ks, nbcalc_ks
- if (gw_qprange /= 0) then
-   call sigtk_kcalc_from_qprange(dtset, gstore%cryst, ebands, gw_qprange, nkcalc, kcalc, bstart_ks, nbcalc_ks)
+ if (dtset%gw_qprange /= 0) then
+   call sigtk_kcalc_from_qprange(dtset, gstore%cryst, ebands, dtset%gw_qprange, nkcalc, kcalc, bstart_ks, nbcalc_ks)
  else
    ! gw_qprange is not specified in the input.
    ! Include direct and fundamental KS gap or include states depending on the position wrt band edges.
@@ -2252,7 +2291,6 @@ subroutine gstore_filter_gw_qprange__(gstore, dtset, qbz2ibz, qibz2bz, kibz2bz, 
  ABI_FREE(kcalc)
  ABI_FREE(bstart_ks)
  ABI_FREE(nbcalc_ks)
-
  call gaps%free()
  end associate
 
