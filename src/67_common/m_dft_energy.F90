@@ -185,8 +185,8 @@ contains
 !!   | e_ewald(IN)=Ewald energy (hartree)
 !!   | e_vdw_dftd(IN)=VdW DFT-D energy
 !!   | e_corepsp(IN)=psp core-core energy
-!!   | e_paw(IN)=PAW spherical part energy
-!!   | e_pawdc(IN)=PAW spherical part double-counting energy
+!!   | paw%epaw(IN)=PAW spherical part energy
+!!   | paw%epaw_dc(IN)=PAW spherical part double-counting energy
 !!   | e_eigenvalues(OUT)=Sum of the eigenvalues - Band energy (Hartree)
 !!   | e_hartree(OUT)=Hartree part of total energy (hartree units)
 !!   | e_kinetic(OUT)=kinetic energy part of total energy.
@@ -275,7 +275,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 !scalars
  integer :: bdtot_index,blocksize,choice,cplex,cplex_rhoij,cpopt,dimffnl
  integer :: iband,iband_last,iblock,iblocksize,icg,ider,idir,ierr,ifft,ikg,ikpt,ilm
- integer :: ipert,ipositron,iresid,ispden,isppol,istwf_k,izero
+ integer :: ipert,ipositron,iresid,ispden,isppol,istwf_k,itypat,izero
  integer :: me_distrb,mpi_comm_sphgrid,my_ikpt,my_nspinor,n1,n2,n3,n4,n5,n6
  integer :: nband_k,nblockbd,nfftotf,nkpg,nkxc,nk3xc,nnlout,npw_k,nspden_rhoij,option
  integer :: option_rhoij,paw_opt,signs,spaceComm,tim_mkrho,tim_nonlop
@@ -830,11 +830,11 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 !&   energies%e_nlpsp_vfock - energies%e_fock0 +
 !   Should compute the e_fock0 energy !! Also, the Fock contribution to e_nlpsp_vfock
 &   energies%e_nlpsp_vfock + energies%e_localpsp + energies%e_corepsp
-   if (psps%usepaw==1) etotal=etotal + energies%e_paw
+   if (psps%usepaw==1) etotal=etotal + energies%paw%epaw
  else if (optene==1.or.optene==3) then
    etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc - &
 &   energies%e_xcdc + energies%e_corepsp - energies%e_corepspdc
-   if (psps%usepaw==1) etotal=etotal + energies%e_pawdc
+   if (psps%usepaw==1) etotal=etotal + energies%paw%epaw_dc
  end if
  etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
 
@@ -849,10 +849,16 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  ! Add the contribution from cores
  if(present(rcpaw)) then
    if(associated(rcpaw)) then
-     energies%e_cpaw=rcpaw%ehnzc+rcpaw%ekinc
-     energies%e_cpawdc=rcpaw%eeigc-rcpaw%edcc+rcpaw%ehnzc
-     if(optene==0.or.optene==2) etotal=etotal+energies%e_cpaw
-     if(optene==1.or.optene==3) etotal=etotal+energies%e_cpawdc
+     energies%paw%epaw_core=rcpaw%ehnzc+rcpaw%ekinc
+     energies%paw%epaw_core_dc=rcpaw%eeigc-rcpaw%edcc+rcpaw%ehnzc
+     if (ipositron/=1) then
+       do itypat=1,dtset%ntypat
+         energies%paw%epaw_core=energies%paw%epaw_core+pawtab(itypat)%exccore*rcpaw%atm(itypat)%mult
+         energies%paw%epaw_core_dc=energies%paw%epaw_core_dc+pawtab(itypat)%exccore*rcpaw%atm(itypat)%mult
+       enddo
+     endif
+     if(optene==0.or.optene==2) etotal=etotal+energies%paw%epaw_core
+     if(optene==1.or.optene==3) etotal=etotal+energies%paw%epaw_core_dc
    endif
  endif
 
@@ -1149,7 +1155,7 @@ subroutine entropy(dtset,energies)
 !we sum all entropy terms. %entropy is now total entropy.
 !Examples of other sources of entropy: finite-temperature xc functionals, extfpmd, ...
  energies%entropy=energies%entropy_ks
- if(abs(energies%entropy_paw)>tiny(zero))     energies%entropy=energies%entropy+energies%entropy_paw
+ if(abs(energies%paw%entropy_paw)>tiny(zero))     energies%entropy=energies%entropy+energies%paw%entropy_paw
  if(abs(energies%entropy_xc)>tiny(zero))      energies%entropy=energies%entropy+energies%entropy_xc
  if(abs(energies%entropy_extfpmd)>tiny(zero)) energies%entropy=energies%entropy+energies%entropy_extfpmd
  if(abs(energies%entropy_imp)>tiny(zero))     energies%entropy=energies%entropy+energies%entropy_imp

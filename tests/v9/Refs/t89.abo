@@ -1,5 +1,5 @@
 
-.Version 10.3.4.4 of ABINIT, released Nov 2024.
+.Version 10.5.1.5 of ABINIT, released Jul 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 26 Jan 2025.
-- ( at 09h53 )
+.Starting date : Thu  9 Oct 2025.
+- ( at 18h10 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/TestBot_MPI1/v9_t89/t89.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/v9_t89/t89.abi
 - output file    -> t89.abo
 - root for input  files -> t89i
 - root for output files -> t89o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
 
  invars1: COMMENT -
   With nspinor=2 and usepaw=1, pawspnorb=1 has been switched on by default.
@@ -260,9 +260,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.07375
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.11531574
@@ -986,7 +986,7 @@ xc                  : -3.40623133859976E+00
 Ewald energy        : -8.59449965935601E+01
 psp_core            :  6.24641112286108E+00
 local_psp           : -6.64074955267220E+01
-spherical_terms     : -1.12225968902071E+01
+PAW spherical_terms : -1.12225968902071E+01
 internal            : -1.24674355907742E+02
 '-kT*entropy'       : -7.65367990412288E-18
 total_energy        : -1.24674355907742E+02
@@ -1001,11 +1001,21 @@ band_energy         : -1.41382865081255E+01
 Ewald energy        : -8.59449965935601E+01
 psp_core            :  6.24641112286108E+00
 xc_dc               : -2.31803230008701E+01
-spherical_terms     : -7.65716087144532E+00
+PAW spherical_terms : -7.65716087144532E+00
 internal            : -1.24674355851140E+02
 '-kT*entropy'       : -7.65367990412288E-18
 total_energy_dc     : -1.24674355851140E+02
 total_energy_dc_eV  : -3.39256175456361E+03
+...
+
+
+--- !EnergyTermsWithPAWCore
+iteration_state     : {dtset: 1, }
+comment             : 'Components of total free energy, including PAW core contributions'
+Total energy        : -1.27301741002783E+03
+Total energy DC     : -1.27301740997123E+03
+Total energy (eV)   : -3.46405654047303E+04
+Total energy DC (eV): -3.46405654031900E+04
 ...
 
 
@@ -1050,9 +1060,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.07375
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.11531574
@@ -1774,7 +1784,7 @@ xc                  : -3.40629378318278E+00
 Ewald energy        : -8.59449965935601E+01
 psp_core            :  6.24641112286108E+00
 local_psp           : -6.64055370213476E+01
-spherical_terms     : -1.12224794785341E+01
+PAW spherical_terms : -1.12224794785341E+01
 internal            : -1.24673777995443E+02
 '-kT*entropy'       : -7.65367990412288E-18
 total_energy        : -1.24673777995443E+02
@@ -1789,11 +1799,21 @@ band_energy         : -1.41395536073774E+01
 Ewald energy        : -8.59449965935601E+01
 psp_core            :  6.24641112286108E+00
 xc_dc               : -2.31789285993777E+01
-spherical_terms     : -7.65671031149131E+00
+PAW spherical_terms : -7.65671031149131E+00
 internal            : -1.24673777988945E+02
 '-kT*entropy'       : -7.65367990412288E-18
 total_energy_dc     : -1.24673777988945E+02
 total_energy_dc_eV  : -3.39254603013361E+03
+...
+
+
+--- !EnergyTermsWithPAWCore
+iteration_state     : {dtset: 2, }
+comment             : 'Components of total free energy, including PAW core contributions'
+Total energy        : -1.27301683211553E+03
+Total energy DC     : -1.27301683210903E+03
+Total energy (eV)   : -3.46405496789368E+04
+Total energy DC (eV): -3.46405496787600E+04
 ...
 
 
@@ -1838,9 +1858,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.07375
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.11531574
@@ -2564,7 +2584,7 @@ xc                  : -3.40629608740879E+00
 Ewald energy        : -8.59449965935601E+01
 psp_core            :  6.24641112286108E+00
 local_psp           : -6.64054937661732E+01
-spherical_terms     : -1.12224844940106E+01
+PAW spherical_terms : -1.12224844940106E+01
 internal            : -1.24673771926528E+02
 '-kT*entropy'       : -7.65367990412288E-18
 total_energy        : -1.24673771926528E+02
@@ -2579,11 +2599,21 @@ band_energy         : -1.41395761877161E+01
 Ewald energy        : -8.59449965935601E+01
 psp_core            :  6.24641112286108E+00
 xc_dc               : -2.31788980673513E+01
-spherical_terms     : -7.65671218858848E+00
+PAW spherical_terms : -7.65671218858848E+00
 internal            : -1.24673771914355E+02
 '-kT*entropy'       : -7.65367990412288E-18
 total_energy_dc     : -1.24673771914355E+02
 total_energy_dc_eV  : -3.39254586483560E+03
+...
+
+
+--- !EnergyTermsWithPAWCore
+iteration_state     : {dtset: 3, }
+comment             : 'Components of total free energy, including PAW core contributions'
+Total energy        : -1.27301682604661E+03
+Total energy DC     : -1.27301682603444E+03
+Total energy (eV)   : -3.46405495137933E+04
+Total energy DC (eV): -3.46405495134620E+04
 ...
 
 
@@ -2628,9 +2658,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.07375
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.11531574
@@ -3355,7 +3385,7 @@ xc                  : -3.42988203878366E+00
 Ewald energy        : -8.59449965935601E+01
 psp_core            :  6.24641112286108E+00
 local_psp           : -6.64659285424014E+01
-spherical_terms     : -1.11508950433899E+01
+PAW spherical_terms : -1.11508950433899E+01
 internal            : -1.24687159738300E+02
 '-kT*entropy'       : -7.65367990412288E-18
 total_energy        : -1.24687159738300E+02
@@ -3370,11 +3400,21 @@ band_energy         : -1.39954533784081E+01
 Ewald energy        : -8.59449965935601E+01
 psp_core            :  6.24641112286108E+00
 xc_dc               : -2.32148133188199E+01
-spherical_terms     : -7.77830750057801E+00
+PAW spherical_terms : -7.77830750057801E+00
 internal            : -1.24687159668505E+02
 '-kT*entropy'       : -7.65367990412288E-18
 total_energy_dc     : -1.24687159668505E+02
 total_energy_dc_eV  : -3.39291016415280E+03
+...
+
+
+--- !EnergyTermsWithPAWCore
+iteration_state     : {dtset: 4, }
+comment             : 'Components of total free energy, including PAW core contributions'
+Total energy        : -1.27303021385839E+03
+Total energy DC     : -1.27303021378859E+03
+Total energy (eV)   : -3.46409138146784E+04
+Total energy DC (eV): -3.46409138127792E+04
 ...
 
 
@@ -3419,9 +3459,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.07375
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.11531574
@@ -4147,7 +4187,7 @@ xc                  : -3.42988951601005E+00
 Ewald energy        : -8.59449965935601E+01
 psp_core            :  6.24641112286108E+00
 local_psp           : -6.64657193034201E+01
-spherical_terms     : -1.11509169605988E+01
+PAW spherical_terms : -1.11509169605988E+01
 internal            : -1.24687115910828E+02
 '-kT*entropy'       : -7.65367990412288E-18
 total_energy        : -1.24687115910828E+02
@@ -4162,11 +4202,21 @@ band_energy         : -1.39955209480123E+01
 Ewald energy        : -8.59449965935601E+01
 psp_core            :  6.24641112286108E+00
 xc_dc               : -2.32146656548761E+01
-spherical_terms     : -7.77834384309783E+00
+PAW spherical_terms : -7.77834384309783E+00
 internal            : -1.24687115916685E+02
 '-kT*entropy'       : -7.65367990412288E-18
 total_energy_dc     : -1.24687115916685E+02
 total_energy_dc_eV  : -3.39290897360524E+03
+...
+
+
+--- !EnergyTermsWithPAWCore
+iteration_state     : {dtset: 5, }
+comment             : 'Components of total free energy, including PAW core contributions'
+Total energy        : -1.27303017003091E+03
+Total energy DC     : -1.27303017003677E+03
+Total energy (eV)   : -3.46409126220723E+04
+Total energy DC (eV): -3.46409126222317E+04
 ...
 
 
@@ -4361,10 +4411,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         40.7  wall=         40.8
+- Proc.   0 individual time (sec): cpu=         40.4  wall=         40.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered  10 WARNINGs and  36 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         40.7  wall=         40.8
++Overall time at end (sec) : cpu=         40.4  wall=         40.5
