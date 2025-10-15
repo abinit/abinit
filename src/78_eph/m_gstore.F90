@@ -1415,9 +1415,8 @@ subroutine gstore_set_mpi_grid__(gstore, nproc_spin, comm_spin)
    bstop_kq = gstore%brange_kq_spin(2, spin)
    nb_kq = gstore%brange_kq_spin(2, spin) - gstore%brange_kq_spin(1, spin) + 1
 
-   ! FIXME: for the time being, nb_kq == nb_k
    gqk%nb_k = nb_k; gqk%bstart_k = bstart_k; gqk%bstop_k = bstop_k
-   gqk%nb_kq = nb_k; gqk%bstart_kq = bstart_kq; gqk%bstop_kq = bstop_kq
+   gqk%nb_kq = nb_kq; gqk%bstart_kq = bstart_kq; gqk%bstop_kq = bstop_kq
 
    ! Store global shape of the q/k matrix for this spin.
    gqk%glob_nq = gstore%glob_nq_spin(spin)
@@ -4032,7 +4031,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
        ! Save e-ph matrix elements in the buffer.
        my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gkq_atm
-
      end do ! my_ik
 
      ABI_FREE(v1scf)
