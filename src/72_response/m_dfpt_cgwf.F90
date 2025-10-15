@@ -109,8 +109,9 @@ module m_dfpt_cgwf
    real(dp),allocatable :: eig1_k(:,:,:)
    ! (2, nband, nband)
    ! matrix of first-order eigenvalues (hartree)
-   ! eig1_k(:,ii,jj)=<C0 ii|H1|C0 jj> for norm-conserving psps
-   ! eig1_k(:,ii,jj)=<C0 ii|H1-(eig0_k+eig0_k+q)/2.S(1)|C0 jj> for PAW
+   ! The array eig1_k contains:
+   ! <u_(jband,k+q)^(0)|H_(k+q,k)^(1)|u_(iband,k)^(0)>                              (NC psps)
+   ! <u_(jband,k+q)^(0)|H_(k+q,k)^(1)-(eig0_k+eig0_k+q)/2.S^(1)|u_(iband,k)^(0)>    (PAW)
 
    real(dp),allocatable :: dcwavef(:, :), gh1c_n(:, :), ghc(:,:), gsc(:,:), gvnlxc(:,:), gvnlx1(:,:)
    real(dp),allocatable :: cgq(:,:,:), gscq(:,:,:), work(:,:,:,:)
