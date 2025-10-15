@@ -1,5 +1,9 @@
 
+<<<<<<< HEAD
 .Version 10.5.1.5 of ABINIT, released Jul 2025.
+=======
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
+>>>>>>> remotes/srostami/test
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +18,17 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
+<<<<<<< HEAD
 .Starting date : Thu  9 Oct 2025.
 - ( at 18h15 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI4/mpiio_t22_MPI4/t22.abi
+=======
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h25 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI4/mpiio_t22_MPI4/t22.abi
+>>>>>>> remotes/srostami/test
 - output file    -> t22_MPI4.abo
 - root for input  files -> t22_MPI4i
 - root for output files -> t22_MPI4o
@@ -597,8 +608,13 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 1, }
 
 
 --- Pseudopotential description ------------------------------------------------
+<<<<<<< HEAD
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/6c_lda.paw
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/6c_lda.paw
+=======
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/6c_lda.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/6c_lda.paw
+>>>>>>> remotes/srostami/test
 - Paw atomic data extracted from US-psp (D.Vanderbilt): carbon
 -  6.00000   4.00000  20041014                znucl, zion, pspdat
     7    2    1    0       467   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -801,7 +817,11 @@ xc                  : -3.90839358059320E+00
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  5.49532697036699E-01
 local_psp           : -6.84969602975184E+00
+<<<<<<< HEAD
 PAW spherical_terms :  1.79538746653113E+00
+=======
+spherical_terms     :  1.79538746653113E+00
+>>>>>>> remotes/srostami/test
 total_energy        : -1.04209379188408E+01
 total_energy_eV     : -2.83568141890806E+02
 ...
@@ -814,7 +834,11 @@ band_energy         :  1.77616173592035E+00
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  5.49532697036699E-01
 xc_dc               : -6.33637788340407E-01
+<<<<<<< HEAD
 PAW spherical_terms :  1.28557622684951E-01
+=======
+spherical_terms     :  1.28557622684951E-01
+>>>>>>> remotes/srostami/test
 total_energy_dc     : -1.04202713931614E+01
 total_energy_dc_eV  : -2.83550004804691E+02
 ...
@@ -1055,7 +1079,11 @@ xc                  : -3.90839358059320E+00
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  5.49532697036699E-01
 local_psp           : -6.84969602975184E+00
+<<<<<<< HEAD
 PAW spherical_terms :  1.79538746653113E+00
+=======
+spherical_terms     :  1.79538746653113E+00
+>>>>>>> remotes/srostami/test
 internal            : -1.04209379188408E+01
 '-kT*entropy'       : -7.55261880796144E-19
 total_energy        : -1.04209379188408E+01
@@ -1070,7 +1098,11 @@ band_energy         :  1.77616173592035E+00
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  5.49532697036699E-01
 xc_dc               : -6.33637788340407E-01
+<<<<<<< HEAD
 PAW spherical_terms :  1.28557622684951E-01
+=======
+spherical_terms     :  1.28557622684951E-01
+>>>>>>> remotes/srostami/test
 internal            : -1.04202713931614E+01
 '-kT*entropy'       : -7.55261880796144E-19
 total_energy_dc     : -1.04202713931614E+01
@@ -1314,7 +1346,11 @@ xc                  : -3.73147576463846E+00
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  5.49532697036699E-01
 local_psp           : -5.55820922121672E+00
+<<<<<<< HEAD
 PAW spherical_terms :  1.76271070662965E+00
+=======
+spherical_terms     :  1.76271070662965E+00
+>>>>>>> remotes/srostami/test
 total_energy        : -1.14734844389121E+01
 total_energy_eV     : -3.12209389278974E+02
 ...
@@ -1327,7 +1363,11 @@ band_energy         :  2.94104129168851E-01
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  5.49532697036699E-01
 xc_dc               : -2.03968171783298E-01
+<<<<<<< HEAD
 PAW spherical_terms :  1.27954149948012E-01
+=======
+spherical_terms     :  1.27954149948012E-01
+>>>>>>> remotes/srostami/test
 total_energy_dc     : -1.14732628560927E+01
 total_energy_dc_eV  : -3.12203359703819E+02
 ...
@@ -1572,7 +1612,11 @@ xc                  : -3.73147576463846E+00
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  5.49532697036699E-01
 local_psp           : -5.55820922121672E+00
+<<<<<<< HEAD
 PAW spherical_terms :  1.76271070662965E+00
+=======
+spherical_terms     :  1.76271070662965E+00
+>>>>>>> remotes/srostami/test
 internal            : -1.14734844389121E+01
 '-kT*entropy'       : -7.55261880796144E-19
 total_energy        : -1.14734844389121E+01
@@ -1587,7 +1631,11 @@ band_energy         :  2.94104129168851E-01
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  5.49532697036699E-01
 xc_dc               : -2.03968171783298E-01
+<<<<<<< HEAD
 PAW spherical_terms :  1.27954149948012E-01
+=======
+spherical_terms     :  1.27954149948012E-01
+>>>>>>> remotes/srostami/test
 internal            : -1.14732628560927E+01
 '-kT*entropy'       : -7.55261880796144E-19
 total_energy_dc     : -1.14732628560927E+01
@@ -2162,7 +2210,11 @@ xc                  : -3.86355255457674E+00
 Ewald energy        : -1.24590591803448E+01
 psp_core            :  5.49532697036699E-01
 local_psp           : -6.31760853796450E+00
+<<<<<<< HEAD
 PAW spherical_terms :  1.77554284796248E+00
+=======
+spherical_terms     :  1.77554284796248E+00
+>>>>>>> remotes/srostami/test
 total_energy        : -1.06550379372533E+01
 total_energy_eV     : -2.89938327353462E+02
 ...
@@ -2175,7 +2227,11 @@ band_energy         :  1.53664417410792E+00
 Ewald energy        : -1.24590591803448E+01
 psp_core            :  5.49532697036699E-01
 xc_dc               : -4.10567023434893E-01
+<<<<<<< HEAD
 PAW spherical_terms :  1.28763285386582E-01
+=======
+spherical_terms     :  1.28763285386582E-01
+>>>>>>> remotes/srostami/test
 total_energy_dc     : -1.06546860472485E+01
 total_energy_dc_eV  : -2.89928751939466E+02
 ...
@@ -2754,7 +2810,11 @@ xc                  : -3.86333684291814E+00
 Ewald energy        : -1.24590501470554E+01
 psp_core            :  5.49532697036699E-01
 local_psp           : -6.31730711649548E+00
+<<<<<<< HEAD
 PAW spherical_terms :  1.77702181651259E+00
+=======
+spherical_terms     :  1.77702181651259E+00
+>>>>>>> remotes/srostami/test
 internal            : -1.06533306206567E+01
 '-kT*entropy'       : -7.55261880796144E-19
 total_energy        : -1.06533306206567E+01
@@ -2769,7 +2829,11 @@ band_energy         :  1.53601967768721E+00
 Ewald energy        : -1.24590501470554E+01
 psp_core            :  5.49532697036699E-01
 xc_dc               : -4.10288733032014E-01
+<<<<<<< HEAD
 PAW spherical_terms :  1.28742381975503E-01
+=======
+spherical_terms     :  1.28742381975503E-01
+>>>>>>> remotes/srostami/test
 internal            : -1.06550441233880E+01
 '-kT*entropy'       : -7.55261880796144E-19
 total_energy_dc     : -1.06550441233880E+01
@@ -2826,8 +2890,13 @@ meta: {optdriver: 0, ionmov: 3, optcell: 1, iscf: 17, paral_kgb: 1, }
          ecut(hartree)=     60.500   => boxcut(ratio)=   2.07719
 
 --- Pseudopotential description ------------------------------------------------
+<<<<<<< HEAD
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/6c_lda.paw
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/6c_lda.paw
+=======
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/6c_lda.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/6c_lda.paw
+>>>>>>> remotes/srostami/test
 - Paw atomic data extracted from US-psp (D.Vanderbilt): carbon
 -  6.00000   4.00000  20041014                znucl, zion, pspdat
     7    2    1    0       467   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3413,7 +3482,11 @@ xc                  : -3.83718617994413E+00
 Ewald energy        : -1.28815308182536E+01
 psp_core            :  6.29275625302212E-01
 local_psp           : -5.15446215572778E+00
+<<<<<<< HEAD
 PAW spherical_terms :  1.78466858033450E+00
+=======
+spherical_terms     :  1.78466858033450E+00
+>>>>>>> remotes/srostami/test
 total_energy        : -1.15074707407476E+01
 total_energy_eV     : -3.13134203584201E+02
 ...
@@ -3426,7 +3499,11 @@ band_energy         :  6.95786059404391E-01
 Ewald energy        : -1.28815308182536E+01
 psp_core            :  6.29275625302212E-01
 xc_dc               : -7.79726979978692E-02
+<<<<<<< HEAD
 PAW spherical_terms :  1.26970626947994E-01
+=======
+spherical_terms     :  1.26970626947994E-01
+>>>>>>> remotes/srostami/test
 total_energy_dc     : -1.15074712045969E+01
 total_energy_dc_eV  : -3.13134216206182E+02
 ...
@@ -4047,7 +4124,11 @@ xc                  : -3.83718617994413E+00
 Ewald energy        : -1.28815308182536E+01
 psp_core            :  6.29275625302212E-01
 local_psp           : -5.15446215572778E+00
+<<<<<<< HEAD
 PAW spherical_terms :  1.78466858033450E+00
+=======
+spherical_terms     :  1.78466858033450E+00
+>>>>>>> remotes/srostami/test
 internal            : -1.15074707407476E+01
 '-kT*entropy'       : -7.55261880796144E-19
 total_energy        : -1.15074707407476E+01
@@ -4062,7 +4143,11 @@ band_energy         :  6.95786059404391E-01
 Ewald energy        : -1.28815308182536E+01
 psp_core            :  6.29275625302212E-01
 xc_dc               : -7.79726979978692E-02
+<<<<<<< HEAD
 PAW spherical_terms :  1.26970626947994E-01
+=======
+spherical_terms     :  1.26970626947994E-01
+>>>>>>> remotes/srostami/test
 internal            : -1.15074712045969E+01
 '-kT*entropy'       : -7.55261880796144E-19
 total_energy_dc     : -1.15074712045969E+01
@@ -4126,8 +4211,13 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 1, }
 
 
 --- Pseudopotential description ------------------------------------------------
+<<<<<<< HEAD
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/6c_lda.paw
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/6c_lda.paw
+=======
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/6c_lda.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/6c_lda.paw
+>>>>>>> remotes/srostami/test
 - Paw atomic data extracted from US-psp (D.Vanderbilt): carbon
 -  6.00000   4.00000  20041014                znucl, zion, pspdat
     7    2    1    0       467   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4160,12 +4250,21 @@ solver: {iscf: 17, nstep: 5, nline: 4, wfoptalg: 114, }
 tolerances: {toldfe: 1.00E-10, }
 ...
 
+<<<<<<< HEAD
      iter   Etot(hartree)      deltaE(h)  residm     nres2
  ETOT  1  -10.528884660120    -1.053E+01 4.398E-04 9.502E+01
  ETOT  2  -10.429302253439     9.958E-02 2.339E-06 9.384E+00
  ETOT  3  -10.417980425761     1.132E-02 2.756E-07 1.479E-01
  ETOT  4  -10.417942351463     3.807E-05 2.187E-08 2.182E-03
  ETOT  5  -10.417943506030    -1.155E-06 9.328E-10 2.221E-05
+=======
+     iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
+ ETOT  1  -10.528884660120    -1.053E+01 4.398E-04 9.502E+01 0.000E+00 0.000E+00
+ ETOT  2  -10.429302253439     9.958E-02 2.339E-06 9.384E+00 0.000E+00 0.000E+00
+ ETOT  3  -10.417980425761     1.132E-02 2.756E-07 1.479E-01 0.000E+00 0.000E+00
+ ETOT  4  -10.417942351463     3.807E-05 2.187E-08 2.182E-03 0.000E+00 0.000E+00
+ ETOT  5  -10.417943506030    -1.155E-06 9.328E-10 2.221E-05 0.000E+00 0.000E+00
+>>>>>>> remotes/srostami/test
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -8.18104940E-03  sigma(3 2)= -1.74503349E-03
@@ -4207,15 +4306,16 @@ force_length_stats: {min:   4.07880939E-01, max:   4.07880939E-01, mean:   4.078
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.11202     0.715314     0.715314      1.430627     0.000000
-    2   1.11202     0.720648     0.720648      1.441297     0.000000
- ---------------------------------------------------------------------
-  Sum:              1.435962     1.435962      2.871924     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                      -0.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1  C   1.11202     0.715314     0.715314      1.430627     0.000000
+    2  C   1.11202     0.720648     0.720648      1.441297     0.000000
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 1.435962     1.435962      2.871924     0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                         -0.000000
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -4396,7 +4496,11 @@ xc                  : -3.90585973776920E+00
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  5.49532697036699E-01
 local_psp           : -6.85257789342987E+00
+<<<<<<< HEAD
 PAW spherical_terms :  1.79597957176297E+00
+=======
+spherical_terms     :  1.79597957176297E+00
+>>>>>>> remotes/srostami/test
 total_energy        : -1.04186182031112E+01
 total_energy_eV     : -2.83505019215641E+02
 ...
@@ -4409,7 +4513,11 @@ band_energy         :  1.77724308730491E+00
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  5.49532697036699E-01
 xc_dc               : -6.32091033277924E-01
+<<<<<<< HEAD
 PAW spherical_terms :  1.28257403368869E-01
+=======
+spherical_terms     :  1.28257403368869E-01
+>>>>>>> remotes/srostami/test
 total_energy_dc     : -1.04179435060304E+01
 total_energy_dc_eV  : -2.83486659774388E+02
 ...
@@ -4941,10 +5049,18 @@ P           mkmem9          1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
+<<<<<<< HEAD
 - Proc.   0 individual time (sec): cpu=          4.6  wall=          4.6
+=======
+- Proc.   0 individual time (sec): cpu=          4.7  wall=          4.8
+>>>>>>> remotes/srostami/test
 
 ================================================================================
 
  Calculation completed.
 .Delivered  21 WARNINGs and  24 COMMENTs to log file.
+<<<<<<< HEAD
 +Overall time at end (sec) : cpu=         17.8  wall=         17.8
+=======
++Overall time at end (sec) : cpu=         18.5  wall=         18.5
+>>>>>>> remotes/srostami/test

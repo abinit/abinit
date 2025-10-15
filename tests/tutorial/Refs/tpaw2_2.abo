@@ -1,5 +1,9 @@
 
+<<<<<<< HEAD
 .Version 10.5.1.5 of ABINIT, released Jul 2025.
+=======
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
+>>>>>>> remotes/srostami/test
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,16 +18,28 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
+<<<<<<< HEAD
 .Starting date : Thu  9 Oct 2025.
 - ( at 18h00 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/tutorial_tpaw2_2/tpaw2_2.abi
 - output file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/tutorial_tpaw2_2/tpaw2_2.abo
+=======
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h10 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/tutorial_tpaw2_2/tpaw2_2.abi
+- output file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/tutorial_tpaw2_2/tpaw2_2.abo
+>>>>>>> remotes/srostami/test
 - root for input  files -> tpaw2_2i
 - root for output files -> tpaw2_2o
 
 - inpspheads : Reading pseudopotential header in XML form from 
+<<<<<<< HEAD
 -   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Ni.PBE-paw.rrkj.xml
+=======
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Ni.PBE-paw.rrkj.xml
+>>>>>>> remotes/srostami/test
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -427,9 +443,15 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
+<<<<<<< HEAD
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Ni.PBE-paw.rrkj.xml
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Ni.PBE-paw.rrkj.xml
 - pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Ni.PBE-paw.rrkj.xml
+=======
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Ni.PBE-paw.rrkj.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Ni.PBE-paw.rrkj.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Ni.PBE-paw.rrkj.xml
+>>>>>>> remotes/srostami/test
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.31145012
@@ -460,35 +482,35 @@ solver: {iscf: 17, nstep: 35, nline: 4, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-12, }
 ...
 
-     iter   Etot(hartree)     deltaE(h) residm    nres2    magn
- ETOT  1  -39.978642480943    -4.00E+01 9.12E+01 4.47E+02 4.037
- ETOT  2  -42.439739414341    -2.46E+00 9.41E+00 5.62E+02 0.000
- ETOT  3  -39.507090477635     2.93E+00 1.51E+01 2.23E+02 0.335
- ETOT  4  -39.239622575406     2.67E-01 1.04E+01 8.26E+00 1.259
- ETOT  5  -39.517911909647    -2.78E-01 1.42E+00 5.93E-01 0.711
- ETOT  6  -39.624813219289    -1.07E-01 1.06E+00 6.50E+00 0.646
- ETOT  7  -39.841131817067    -2.16E-01 5.83E+00 5.96E+01 0.095
- ETOT  8  -39.620001782728     2.21E-01 3.54E+00 1.69E-01 0.654
- ETOT  9  -39.627740575953    -7.74E-03 3.84E-01 1.11E-01 0.619
- ETOT 10  -39.628561927997    -8.21E-04 1.55E-01 2.23E-01 0.595
- ETOT 11  -39.628002525984     5.59E-04 3.15E-02 2.67E-03 0.605
- ETOT 12  -39.628076969209    -7.44E-05 1.80E-02 2.01E-03 0.602
- ETOT 13  -39.628083230464    -6.26E-06 4.67E-03 9.64E-04 0.601
- ETOT 14  -39.628080608007     2.62E-06 4.31E-03 3.88E-05 0.601
- ETOT 15  -39.628080550928     5.71E-08 2.98E-03 2.35E-05 0.601
- ETOT 16  -39.628080617577    -6.66E-08 2.48E-03 4.00E-06 0.601
- ETOT 17  -39.628080760217    -1.43E-07 2.61E-03 1.37E-06 0.601
- ETOT 18  -39.628080759584     6.33E-10 2.52E-03 2.89E-06 0.601
- ETOT 19  -39.628080765677    -6.09E-09 2.07E-03 2.87E-07 0.601
- ETOT 20  -39.628080766379    -7.03E-10 2.44E-03 5.40E-08 0.601
- ETOT 21  -39.628080766416    -3.69E-11 1.23E-03 1.68E-08 0.601
- ETOT 22  -39.628080766395     2.16E-11 2.24E-03 3.87E-09 0.601
- ETOT 23  -39.628080766372     2.26E-11 1.13E-03 1.58E-09 0.601
- ETOT 24  -39.628080766382    -9.98E-12 1.97E-03 2.64E-10 0.601
- ETOT 25  -39.628080766381     8.03E-13 9.92E-04 7.00E-11 0.601
- ETOT 26  -39.628080766380     9.52E-13 1.66E-03 6.01E-12 0.601
- ETOT 27  -39.628080766381    -3.06E-13 8.30E-04 2.70E-12 0.601
- ETOT 28  -39.628080766380     2.56E-13 1.36E-03 4.40E-13 0.601
+     iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
+ ETOT  1  -39.978642480943    -3.998E+01 9.123E+01 4.470E+02 3.816E+00 3.816E+00
+ ETOT  2  -42.439739414341    -2.461E+00 9.412E+00 5.619E+02 3.814E+00 1.334E-03
+ ETOT  3  -39.507090477635     2.933E+00 1.511E+01 2.227E+02 2.957E-01 2.970E-01
+ ETOT  4  -39.239622575406     2.675E-01 1.043E+01 8.262E+00 1.053E+00 1.350E+00
+ ETOT  5  -39.517911909647    -2.783E-01 1.420E+00 5.927E-01 5.652E-01 7.847E-01
+ ETOT  6  -39.624813219289    -1.069E-01 1.055E+00 6.503E+00 8.582E-02 6.988E-01
+ ETOT  7  -39.841131817067    -2.163E-01 5.827E+00 5.964E+01 5.709E-01 1.280E-01
+ ETOT  8  -39.620001782728     2.211E-01 3.537E+00 1.691E-01 5.625E-01 6.905E-01
+ ETOT  9  -39.627740575953    -7.739E-03 3.840E-01 1.108E-01 4.331E-02 6.472E-01
+ ETOT 10  -39.628561927997    -8.214E-04 1.550E-01 2.225E-01 2.557E-02 6.216E-01
+ ETOT 11  -39.628002525984     5.594E-04 3.154E-02 2.672E-03 1.075E-02 6.323E-01
+ ETOT 12  -39.628076969209    -7.444E-05 1.800E-02 2.012E-03 2.400E-03 6.299E-01
+ ETOT 13  -39.628083230464    -6.261E-06 4.672E-03 9.638E-04 1.749E-03 6.282E-01
+ ETOT 14  -39.628080608007     2.622E-06 4.313E-03 3.876E-05 3.449E-04 6.285E-01
+ ETOT 15  -39.628080550928     5.708E-08 2.981E-03 2.347E-05 2.701E-04 6.288E-01
+ ETOT 16  -39.628080617577    -6.665E-08 2.479E-03 4.004E-06 4.755E-05 6.288E-01
+ ETOT 17  -39.628080760217    -1.426E-07 2.612E-03 1.372E-06 3.123E-06 6.288E-01
+ ETOT 18  -39.628080759584     6.335E-10 2.520E-03 2.894E-06 1.491E-06 6.288E-01
+ ETOT 19  -39.628080765677    -6.093E-09 2.071E-03 2.875E-07 9.356E-06 6.288E-01
+ ETOT 20  -39.628080766379    -7.027E-10 2.437E-03 5.404E-08 1.358E-05 6.287E-01
+ ETOT 21  -39.628080766416    -3.688E-11 1.235E-03 1.676E-08 1.706E-06 6.287E-01
+ ETOT 22  -39.628080766395     2.160E-11 2.243E-03 3.870E-09 2.446E-06 6.287E-01
+ ETOT 23  -39.628080766372     2.256E-11 1.134E-03 1.575E-09 4.402E-07 6.287E-01
+ ETOT 24  -39.628080766382    -9.983E-12 1.968E-03 2.637E-10 1.201E-06 6.287E-01
+ ETOT 25  -39.628080766381     8.029E-13 9.918E-04 7.003E-11 8.399E-07 6.287E-01
+ ETOT 26  -39.628080766380     9.521E-13 1.655E-03 6.009E-12 5.430E-07 6.287E-01
+ ETOT 27  -39.628080766381    -3.055E-13 8.297E-04 2.704E-12 2.610E-07 6.287E-01
+ ETOT 28  -39.628080766380     2.558E-13 1.362E-03 4.399E-13 1.872E-08 6.287E-01
 
  At SCF step   28       nres2   =  4.40E-13 < tolvrs=  1.00E-12 =>converged.
 
@@ -525,14 +547,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.31145     4.911610     4.282863      9.194473     0.628747
- ---------------------------------------------------------------------
-  Sum:              4.911610     4.282863      9.194473     0.628747
- Total magnetization (from the atomic spheres):             0.628747
- Total magnetization (exact up - dn):                       0.601364
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ni   2.31145     4.911610     4.282863      9.194473     0.628747
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 4.911610     4.282863      9.194473     0.628747
+ Total magnetization (from the atomic spheres):                0.628747
+ Total magnetization (exact up - dn):                          0.601364
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -1118,10 +1141,18 @@ P           mkmem          60
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
+<<<<<<< HEAD
 - Proc.   0 individual time (sec): cpu=         21.3  wall=         21.3
+=======
+- Proc.   0 individual time (sec): cpu=         22.0  wall=         22.0
+>>>>>>> remotes/srostami/test
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   5 COMMENTs to log file.
+<<<<<<< HEAD
 +Overall time at end (sec) : cpu=         21.3  wall=         21.3
+=======
++Overall time at end (sec) : cpu=         22.0  wall=         22.0
+>>>>>>> remotes/srostami/test

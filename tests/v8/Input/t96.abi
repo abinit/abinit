@@ -65,7 +65,7 @@ occopt1? 7
  tolvrs11 1.0d-7
  tolvrs 1.0d-8
  nstep  60
- ecut 5
+ ecut 6.5
  kptopt 0
  nkpt 1
  kpt 0.0 0.0 0.0
@@ -80,7 +80,7 @@ occopt1? 7
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t96.abo, tolnlines = 280, tolabs = 5.0, tolrel = 1.1, fld_options = -ridiculous
+#%%   t96.abo, tolnlines = 100, tolabs = 7.0, tolrel = 1.1, fld_options = -ridiculous
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

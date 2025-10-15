@@ -1,5 +1,9 @@
 
+<<<<<<< HEAD
 .Version 10.5.1.5 of ABINIT, released Jul 2025.
+=======
+.Version 10.4.5.9 of ABINIT, released Sep 2025.
+>>>>>>> remotes/srostami/test
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,16 +18,27 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
+<<<<<<< HEAD
 .Starting date : Thu  9 Oct 2025.
 - ( at 18h10 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/v9_t93/t93.abi
+=======
+.Starting date : Wed  1 Oct 2025.
+- ( at 11h05 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v9_t93/t93.abi
+>>>>>>> remotes/srostami/test
 - output file    -> t93.abo
 - root for input  files -> t93i
 - root for output files -> t93o
 
 - inpspheads : Reading pseudopotential header in XML form from 
+<<<<<<< HEAD
 -   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+=======
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+>>>>>>> remotes/srostami/test
  DATASET    1 : space group R-3 m (#166); Bravais hR (rhombohedral)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -439,9 +454,15 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
+<<<<<<< HEAD
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
 - pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+=======
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+>>>>>>> remotes/srostami/test
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.11531574
@@ -472,6 +493,7 @@ solver: {iscf: 17, nstep: 30, nline: 4, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-10, }
 ...
 
+<<<<<<< HEAD
      iter   Etot(hartree)     deltaE(h) residm    nres2    magn
  ETOT  1  -247.65096798148    -2.48E+02 3.19E+00 3.19E+01 0.943
  ETOT  2  -248.81784482518    -1.17E+00 4.66E-03 6.37E+01 3.792
@@ -488,6 +510,24 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT 13  -248.67497846316     2.04E-10 8.58E-11 2.68E-09 4.000
  ETOT 14  -248.67497846377    -6.13E-10 3.81E-12 4.57E-10 4.000
  ETOT 15  -248.67497846399    -2.15E-10 1.17E-12 2.13E-11 4.000
+=======
+     iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
+ ETOT  1  -247.65096798148    -2.477E+02 3.194E+00 3.186E+01 4.709E-01 4.709E-01
+ ETOT  2  -248.81784482518    -1.167E+00 4.663E-03 6.371E+01 1.436E+00 1.907E+00
+ ETOT  3  -248.63623618908     1.816E-01 2.979E-02 8.814E+00 9.129E-02 1.998E+00
+ ETOT  4  -248.61229208047     2.394E-02 4.646E-04 7.459E+00 3.247E-02 1.966E+00
+ ETOT  5  -248.65755789239    -4.527E-02 1.894E-04 1.803E+00 5.202E-02 2.018E+00
+ ETOT  6  -248.67344544309    -1.589E-02 2.529E-04 1.950E-01 4.079E-02 2.058E+00
+ ETOT  7  -248.67478118692    -1.336E-03 4.259E-05 1.973E-02 1.875E-02 2.077E+00
+ ETOT  8  -248.67497360182    -1.924E-04 6.335E-06 4.272E-04 7.570E-03 2.085E+00
+ ETOT  9  -248.67497825959    -4.658E-06 5.556E-07 1.253E-05 1.350E-03 2.086E+00
+ ETOT 10  -248.67497846810    -2.085E-07 2.221E-08 2.610E-06 2.633E-04 2.086E+00
+ ETOT 11  -248.67497846240     5.693E-09 3.898E-09 2.200E-07 5.307E-05 2.086E+00
+ ETOT 12  -248.67497846336    -9.570E-10 2.959E-10 2.252E-08 4.196E-06 2.086E+00
+ ETOT 13  -248.67497846316     2.041E-10 8.577E-11 2.684E-09 3.677E-06 2.086E+00
+ ETOT 14  -248.67497846377    -6.129E-10 3.810E-12 4.567E-10 5.194E-09 2.086E+00
+ ETOT 15  -248.67497846399    -2.148E-10 1.168E-12 2.134E-11 5.844E-07 2.086E+00
+>>>>>>> remotes/srostami/test
 
  At SCF step   15       nres2   =  2.13E-11 < tolvrs=  1.00E-10 =>converged.
 
@@ -526,15 +566,16 @@ force_length_stats: {min:   1.16173992E-01, max:   1.16173992E-01, mean:   1.161
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.11532     8.371558     6.285232     14.656790     2.086327
-    2   2.11532     8.371558     6.285232     14.656790     2.086327
- ---------------------------------------------------------------------
-  Sum:             16.743117    12.570463     29.313580     4.172653
- Total magnetization (from the atomic spheres):             4.172653
- Total magnetization (exact up - dn):                       4.000208
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Fe   2.11532     8.371558     6.285232     14.656790     2.086327
+    2 Fe   2.11532     8.371558     6.285232     14.656790     2.086327
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                16.743117    12.570463     29.313580     4.172653
+ Total magnetization (from the atomic spheres):                4.172653
+ Total magnetization (exact up - dn):                          4.000208
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -721,7 +762,11 @@ xc                  : -7.00655411678030E+00
 Ewald energy        : -1.78662593800648E+02
 psp_core            :  1.41464799821649E+01
 local_psp           : -1.25266851310859E+02
+<<<<<<< HEAD
 PAW spherical_terms : -2.32032535431759E+01
+=======
+spherical_terms     : -2.32032535431759E+01
+>>>>>>> remotes/srostami/test
 internal            : -2.48674977893042E+02
 '-kT*entropy'       : -9.49994450058935E-15
 total_energy        : -2.48674977893042E+02
@@ -736,7 +781,11 @@ band_energy         : -2.47431581480905E+01
 Ewald energy        : -1.78662593800648E+02
 psp_core            :  1.41464799821649E+01
 xc_dc               : -4.35255696856367E+01
+<<<<<<< HEAD
 PAW spherical_terms : -1.58901368117753E+01
+=======
+spherical_terms     : -1.58901368117753E+01
+>>>>>>> remotes/srostami/test
 internal            : -2.48674978463985E+02
 '-kT*entropy'       : -9.49994450058935E-15
 total_energy_dc     : -2.48674978463985E+02
@@ -815,8 +864,13 @@ solver: {iscf: 17, nstep: 30, nline: 4, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-10, }
 ...
 
+<<<<<<< HEAD
      iter   Etot(hartree)     deltaE(h) residm    nres2    magn
  ETOT  1  -248.67497846381    -2.49E+02 3.22E-16 2.94E-11 4.000
+=======
+     iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
+ ETOT  1  -248.67497846381    -2.487E+02 3.225E-16 2.936E-11 2.086E+00 2.086E+00
+>>>>>>> remotes/srostami/test
 
  At SCF step    1       nres2   =  2.94E-11 < tolvrs=  1.00E-10 =>converged.
 
@@ -855,15 +909,16 @@ force_length_stats: {min:   1.16174671E-01, max:   1.16174671E-01, mean:   1.161
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.11532     8.371558     6.285232     14.656791     2.086326
-    2   2.11532     8.371558     6.285232     14.656791     2.086326
- ---------------------------------------------------------------------
-  Sum:             16.743117    12.570464     29.313581     4.172653
- Total magnetization (from the atomic spheres):             4.172653
- Total magnetization (exact up - dn):                       4.000208
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Fe   2.11532     8.371558     6.285232     14.656791     2.086326
+    2 Fe   2.11532     8.371558     6.285232     14.656791     2.086326
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                16.743117    12.570464     29.313581     4.172653
+ Total magnetization (from the atomic spheres):                4.172653
+ Total magnetization (exact up - dn):                          4.000208
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -1050,7 +1105,11 @@ xc                  : -7.00655483905289E+00
 Ewald energy        : -1.78662593800648E+02
 psp_core            :  1.41464799821649E+01
 local_psp           : -1.25266848058995E+02
+<<<<<<< HEAD
 PAW spherical_terms : -2.32032543706206E+01
+=======
+spherical_terms     : -2.32032543706206E+01
+>>>>>>> remotes/srostami/test
 internal            : -2.48674979122407E+02
 '-kT*entropy'       : -9.50038967535120E-15
 total_energy        : -2.48674979122407E+02
@@ -1065,11 +1124,16 @@ band_energy         : -2.47431619668805E+01
 Ewald energy        : -1.78662593800648E+02
 psp_core            :  1.41464799821649E+01
 xc_dc               : -4.35255671795247E+01
+<<<<<<< HEAD
 PAW spherical_terms : -1.58901354989183E+01
+=======
+spherical_terms     : -1.58901354989183E+01
+>>>>>>> remotes/srostami/test
 internal            : -2.48674978463806E+02
 '-kT*entropy'       : -9.50038967535120E-15
 total_energy_dc     : -2.48674978463806E+02
 total_energy_dc_eV  : -6.76679029535587E+03
+<<<<<<< HEAD
 ...
 
 
@@ -1080,6 +1144,8 @@ Total energy        : -2.54536108736258E+03
 Total energy DC     : -2.54536108670398E+03
 Total energy (eV)   : -6.92627976105301E+04
 Total energy DC (eV): -6.92627975926087E+04
+=======
+>>>>>>> remotes/srostami/test
 ...
 
 
@@ -1131,9 +1197,15 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
+<<<<<<< HEAD
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
 - pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+=======
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+>>>>>>> remotes/srostami/test
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.11531574
@@ -1163,6 +1235,7 @@ solver: {iscf: 17, nstep: 30, nline: 4, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-10, }
 ...
 
+<<<<<<< HEAD
      iter   Etot(hartree)      deltaE(h)  residm     nres2
  ETOT  1  -244.67026274959    -2.447E+02 3.485E+01 7.046E+00
  ETOT  2  -248.63303206119    -3.963E+00 2.167E-02 7.126E+00
@@ -1194,6 +1267,39 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT 28  -248.67496491896     2.869E-07 6.112E-08 9.739E-07
  ETOT 29  -248.67496550759    -5.886E-07 7.982E-08 4.337E-07
  ETOT 30  -248.67496621054    -7.029E-07 4.979E-08 4.700E-07
+=======
+     iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
+ ETOT  1  -244.67026274959    -2.447E+02 3.485E+01 7.046E+00 4.682E-01 4.682E-01
+ ETOT  2  -248.63303206119    -3.963E+00 2.167E-02 7.126E+00 6.911E-01 1.159E+00
+ ETOT  3  -248.61765430707     1.538E-02 6.123E-03 1.110E+01 8.362E-01 1.996E+00
+ ETOT  4  -248.61678123004     8.731E-04 1.025E-04 1.141E+01 4.827E-03 1.991E+00
+ ETOT  5  -248.63140358718    -1.462E-02 2.364E-04 9.497E+00 1.519E-02 2.006E+00
+ ETOT  6  -248.65627931574    -2.488E-02 2.515E-04 4.258E+00 1.549E-02 2.021E+00
+ ETOT  7  -248.67413673281    -1.786E-02 2.215E-04 7.462E-01 2.523E-02 2.047E+00
+ ETOT  8  -248.67440174047    -2.650E-04 5.757E-04 1.829E-02 2.690E-02 2.073E+00
+ ETOT  9  -248.67476111301    -3.594E-04 3.352E-05 5.882E-03 2.571E-03 2.076E+00
+ ETOT 10  -248.67480376126    -4.265E-05 9.607E-06 2.445E-03 1.996E-03 2.078E+00
+ ETOT 11  -248.67481775566    -1.399E-05 1.322E-06 9.174E-04 1.633E-03 2.080E+00
+ ETOT 12  -248.67484523744    -2.748E-05 6.018E-07 5.486E-04 1.240E-03 2.081E+00
+ ETOT 13  -248.67486285595    -1.762E-05 1.816E-07 4.522E-04 6.394E-04 2.082E+00
+ ETOT 14  -248.67487580995    -1.295E-05 4.388E-07 3.911E-04 4.227E-04 2.082E+00
+ ETOT 15  -248.67489132208    -1.551E-05 9.464E-07 3.313E-04 2.773E-04 2.082E+00
+ ETOT 16  -248.67492378388    -3.246E-05 4.367E-06 1.861E-04 2.377E-04 2.082E+00
+ ETOT 17  -248.67495661271    -3.283E-05 7.720E-06 3.300E-05 2.857E-04 2.083E+00
+ ETOT 18  -248.67495715755    -5.448E-07 9.037E-07 2.327E-05 2.409E-04 2.083E+00
+ ETOT 19  -248.67496562020    -8.463E-06 2.551E-07 2.845E-06 3.626E-05 2.083E+00
+ ETOT 20  -248.67496316918     2.451E-06 4.390E-08 3.763E-06 1.620E-05 2.083E+00
+ ETOT 21  -248.67496388096    -7.118E-07 2.383E-08 1.564E-06 6.333E-07 2.083E+00
+ ETOT 22  -248.67496223576     1.645E-06 7.602E-08 1.921E-06 4.577E-06 2.083E+00
+ ETOT 23  -248.67496658173    -4.346E-06 1.548E-08 3.958E-07 2.910E-05 2.083E+00
+ ETOT 24  -248.67496535948     1.222E-06 6.671E-08 1.139E-06 8.717E-06 2.083E+00
+ ETOT 25  -248.67496570534    -3.459E-07 1.388E-07 8.275E-07 2.354E-06 2.083E+00
+ ETOT 26  -248.67496717231    -1.467E-06 4.312E-08 1.652E-07 1.265E-05 2.083E+00
+ ETOT 27  -248.67496520584     1.966E-06 1.387E-08 4.896E-07 1.467E-05 2.083E+00
+ ETOT 28  -248.67496491896     2.869E-07 6.112E-08 9.739E-07 8.379E-06 2.083E+00
+ ETOT 29  -248.67496550759    -5.886E-07 7.982E-08 4.337E-07 7.477E-06 2.083E+00
+ ETOT 30  -248.67496621054    -7.029E-07 4.979E-08 4.700E-07 1.187E-05 2.083E+00
+>>>>>>> remotes/srostami/test
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  5.57831869E-03  sigma(3 2)= -1.41423513E-04
@@ -1235,14 +1341,18 @@ force_length_stats: {min:   1.16108984E-01, max:   1.16108984E-01, mean:   1.161
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
- Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.11532       14.656846      0.206544    0.206266    2.062063
-    2   2.11532       14.656846      0.206266    0.206544    2.062063
- ---------------------------------------------------------------------
- Total magnetization (spheres)       0.412810    0.412810    4.124125
- Total magnetization (exact)         0.396467    0.396467    3.960719
+    Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
+    1 Fe   2.11532       14.656846      2.082621    0.206544    0.206266    2.062063    8.057125   44.961372
+    2 Fe   2.11532       14.656846      2.082621    0.206266    0.206544    2.062063    8.057125   45.038628
+ ------------------------------------------------------------------------------------------------------------
+ Total magnetization (spheres)
+ (cart.coord.)                                      0.412810    0.412810    4.124125
+ (sph.coord.)                           4.165241                                        8.057123   45.000000
+ Total magnetization (exact)
+ (cart.coord.)                                      0.396467    0.396467    3.960719
+ (sph.coord.)                           4.000208                                        8.057384   45.000000
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -1656,7 +1766,11 @@ xc                  : -7.00617618994906E+00
 Ewald energy        : -1.78662593800648E+02
 psp_core            :  1.41464799821649E+01
 local_psp           : -1.25268980324487E+02
+<<<<<<< HEAD
 PAW spherical_terms : -2.32015439745768E+01
+=======
+spherical_terms     : -2.32015439745768E+01
+>>>>>>> remotes/srostami/test
 internal            : -2.48674974282781E+02
 '-kT*entropy'       : -7.99217483089975E-16
 total_energy        : -2.48674974282781E+02
@@ -1671,11 +1785,16 @@ band_energy         : -2.47391581721962E+01
 Ewald energy        : -1.78662593800648E+02
 psp_core            :  1.41464799821649E+01
 xc_dc               : -4.35284850407403E+01
+<<<<<<< HEAD
 PAW spherical_terms : -1.58912091791170E+01
+=======
+spherical_terms     : -1.58912091791170E+01
+>>>>>>> remotes/srostami/test
 internal            : -2.48674966210537E+02
 '-kT*entropy'       : -7.99217483089975E-16
 total_energy_dc     : -2.48674966210537E+02
 total_energy_dc_eV  : -6.76678996192744E+03
+<<<<<<< HEAD
 ...
 
 
@@ -1686,6 +1805,8 @@ Total energy        : -2.54536108252295E+03
 Total energy DC     : -2.54536107445071E+03
 Total energy (eV)   : -6.92627974788372E+04
 Total energy DC (eV): -6.92627972591803E+04
+=======
+>>>>>>> remotes/srostami/test
 ...
 
 
@@ -1750,6 +1871,7 @@ solver: {iscf: 17, nstep: 30, nline: 4, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-10, }
 ...
 
+<<<<<<< HEAD
      iter   Etot(hartree)      deltaE(h)  residm     nres2
  ETOT  1  -248.67495880991    -2.487E+02 5.954E-09 8.499E-06
  ETOT  2  -248.67495798694     8.230E-07 1.047E-07 1.592E-05
@@ -1781,6 +1903,39 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT 28  -248.67496389678     2.982E-06 1.999E-08 1.114E-06
  ETOT 29  -248.67496421505    -3.183E-07 6.029E-08 6.893E-07
  ETOT 30  -248.67496519692    -9.819E-07 1.891E-08 4.988E-07
+=======
+     iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
+ ETOT  1  -248.67495880991    -2.487E+02 5.954E-09 8.499E-06 2.083E+00 2.083E+00
+ ETOT  2  -248.67495798694     8.230E-07 1.047E-07 1.592E-05 1.459E-05 2.083E+00
+ ETOT  3  -248.67496593949    -7.953E-06 1.090E-07 1.289E-06 5.686E-05 2.083E+00
+ ETOT  4  -248.67496693550    -9.960E-07 6.884E-08 6.540E-07 6.151E-06 2.083E+00
+ ETOT  5  -248.67496776857    -8.331E-07 6.510E-09 1.444E-07 6.078E-06 2.083E+00
+ ETOT  6  -248.67496791297    -1.444E-07 8.079E-10 1.012E-07 1.380E-06 2.083E+00
+ ETOT  7  -248.67496773845     1.745E-07 3.364E-09 1.686E-07 2.469E-07 2.083E+00
+ ETOT  8  -248.67496762155     1.169E-07 3.478E-09 1.409E-07 5.309E-07 2.083E+00
+ ETOT  9  -248.67496761766     3.884E-09 8.874E-12 1.402E-07 5.714E-08 2.083E+00
+ ETOT 10  -248.67496580393     1.814E-06 8.749E-09 5.842E-07 3.323E-05 2.083E+00
+ ETOT 11  -248.67496491351     8.904E-07 5.818E-09 4.543E-07 6.221E-06 2.083E+00
+ ETOT 12  -248.67496541211    -4.986E-07 1.666E-08 5.349E-07 1.517E-05 2.083E+00
+ ETOT 13  -248.67496576051    -3.484E-07 1.612E-08 2.799E-07 2.962E-06 2.083E+00
+ ETOT 14  -248.67496632962    -5.691E-07 1.299E-08 2.553E-07 3.922E-06 2.083E+00
+ ETOT 15  -248.67496666844    -3.388E-07 8.232E-09 3.333E-07 2.830E-06 2.083E+00
+ ETOT 16  -248.67496535065     1.318E-06 6.887E-09 4.937E-07 1.144E-05 2.083E+00
+ ETOT 17  -248.67496384886     1.502E-06 7.777E-08 1.464E-06 1.285E-05 2.083E+00
+ ETOT 18  -248.67496603398    -2.185E-06 7.649E-08 6.477E-07 2.023E-05 2.083E+00
+ ETOT 19  -248.67496518890     8.451E-07 1.310E-08 6.205E-07 6.918E-06 2.083E+00
+ ETOT 20  -248.67496647300    -1.284E-06 2.200E-08 2.991E-07 9.569E-06 2.083E+00
+ ETOT 21  -248.67496508312     1.390E-06 1.234E-08 5.354E-07 1.180E-05 2.083E+00
+ ETOT 22  -248.67496348265     1.600E-06 2.030E-08 9.289E-07 1.087E-05 2.083E+00
+ ETOT 23  -248.67496679019    -3.308E-06 1.500E-08 2.650E-07 2.497E-05 2.083E+00
+ ETOT 24  -248.67496731705    -5.269E-07 9.897E-09 1.318E-07 3.418E-06 2.083E+00
+ ETOT 25  -248.67496747736    -1.603E-07 8.932E-10 1.442E-07 1.118E-06 2.083E+00
+ ETOT 26  -248.67496343206     4.045E-06 3.471E-08 1.137E-06 3.473E-05 2.083E+00
+ ETOT 27  -248.67496687867    -3.447E-06 6.517E-08 4.040E-07 2.974E-05 2.083E+00
+ ETOT 28  -248.67496389678     2.982E-06 1.999E-08 1.114E-06 2.300E-05 2.083E+00
+ ETOT 29  -248.67496421505    -3.183E-07 6.029E-08 6.893E-07 2.452E-06 2.083E+00
+ ETOT 30  -248.67496519692    -9.819E-07 1.891E-08 4.988E-07 8.642E-06 2.083E+00
+>>>>>>> remotes/srostami/test
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  5.57844252E-03  sigma(3 2)= -1.41435713E-04
@@ -1822,14 +1977,27 @@ force_length_stats: {min:   1.16112524E-01, max:   1.16112524E-01, mean:   1.161
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
+<<<<<<< HEAD
  Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
     1   2.11532       14.656847      0.206530    0.206287    2.062054
     2   2.11532       14.656847      0.206287    0.206530    2.062054
  ---------------------------------------------------------------------
  Total magnetization (spheres)       0.412817    0.412817    4.124109
  Total magnetization (exact)         0.396448    0.396448    3.960723
+=======
+    Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
+    1 Fe   2.11532       14.656847      2.082613    0.206530    0.206287    2.062054    8.057292   44.966346
+    2 Fe   2.11532       14.656847      2.082613    0.206287    0.206530    2.062054    8.057292   45.033654
+ ------------------------------------------------------------------------------------------------------------
+ Total magnetization (spheres)
+ (cart.coord.)                                      0.412817    0.412817    4.124109
+ (sph.coord.)                           4.165226                                        8.057290   45.000000
+ Total magnetization (exact)
+ (cart.coord.)                                      0.396448    0.396448    3.960723
+ (sph.coord.)                           4.000208                                        8.057002   45.000000
+>>>>>>> remotes/srostami/test
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -2243,7 +2411,11 @@ xc                  : -7.00617499408113E+00
 Ewald energy        : -1.78662593800648E+02
 psp_core            :  1.41464799821649E+01
 local_psp           : -1.25268970036293E+02
+<<<<<<< HEAD
 PAW spherical_terms : -2.32015410278379E+01
+=======
+spherical_terms     : -2.32015410278379E+01
+>>>>>>> remotes/srostami/test
 internal            : -2.48674962068846E+02
 '-kT*entropy'       : -7.98115848535559E-16
 total_energy        : -2.48674962068846E+02
@@ -2258,11 +2430,16 @@ band_energy         : -2.47391666494604E+01
 Ewald energy        : -1.78662593800648E+02
 psp_core            :  1.41464799821649E+01
 xc_dc               : -4.35284753759934E+01
+<<<<<<< HEAD
 PAW spherical_terms : -1.58912093529811E+01
+=======
+spherical_terms     : -1.58912093529811E+01
+>>>>>>> remotes/srostami/test
 internal            : -2.48674965196918E+02
 '-kT*entropy'       : -7.98115848535559E-16
 total_energy_dc     : -2.48674965196918E+02
 total_energy_dc_eV  : -6.76678993434547E+03
+<<<<<<< HEAD
 ...
 
 
@@ -2273,6 +2450,8 @@ Total energy        : -2.54536107030902E+03
 Total energy DC     : -2.54536107343709E+03
 Total energy (eV)   : -6.92627971464792E+04
 Total energy DC (eV): -6.92627972315983E+04
+=======
+>>>>>>> remotes/srostami/test
 ...
 
 
@@ -2334,6 +2513,7 @@ solver: {iscf: 17, nstep: 30, nline: 4, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-10, }
 ...
 
+<<<<<<< HEAD
      iter   Etot(hartree)      deltaE(h)  residm     nres2
  ETOT  1  -244.76380779702    -2.448E+02 1.689E+01 6.605E+00
  ETOT  2  -248.62631405351    -3.863E+00 1.381E-02 1.258E+01
@@ -2365,6 +2545,39 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT 28  -248.67496675393     8.963E-08 4.347E-09 3.171E-07
  ETOT 29  -248.67496511487     1.639E-06 1.623E-08 4.465E-07
  ETOT 30  -248.67496734624    -2.231E-06 4.026E-09 1.737E-07
+=======
+     iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
+ ETOT  1  -244.76380779702    -2.448E+02 1.689E+01 6.605E+00 6.027E-01 6.027E-01
+ ETOT  2  -248.62631405351    -3.863E+00 1.381E-02 1.258E+01 1.185E+00 1.787E+00
+ ETOT  3  -248.63160718526    -5.293E-03 1.721E-03 8.924E+00 1.984E-01 1.986E+00
+ ETOT  4  -248.61659872594     1.501E-02 5.754E-04 1.179E+01 3.710E-02 1.949E+00
+ ETOT  5  -248.66817250944    -5.157E-02 3.328E-04 3.090E+00 6.166E-02 2.010E+00
+ ETOT  6  -248.67153094661    -3.358E-03 1.080E-03 6.788E-01 2.641E-02 2.037E+00
+ ETOT  7  -248.67443893981    -2.908E-03 1.179E-04 2.688E-02 2.974E-02 2.067E+00
+ ETOT  8  -248.67469725551    -2.583E-04 1.893E-05 1.131E-02 8.180E-03 2.075E+00
+ ETOT  9  -248.67475232951    -5.507E-05 5.446E-06 5.146E-03 2.729E-03 2.077E+00
+ ETOT 10  -248.67480806038    -5.573E-05 1.771E-06 7.323E-04 3.204E-03 2.081E+00
+ ETOT 11  -248.67483363460    -2.557E-05 2.810E-07 6.114E-04 7.755E-04 2.081E+00
+ ETOT 12  -248.67484873997    -1.511E-05 6.458E-07 5.352E-04 3.952E-04 2.082E+00
+ ETOT 13  -248.67488458860    -3.585E-05 4.559E-06 3.800E-04 6.713E-04 2.083E+00
+ ETOT 14  -248.67494940569    -6.482E-05 1.566E-05 7.618E-05 5.177E-04 2.083E+00
+ ETOT 15  -248.67495765794    -8.252E-06 1.486E-06 2.628E-05 3.337E-04 2.083E+00
+ ETOT 16  -248.67496071754    -3.060E-06 6.544E-07 1.514E-05 1.056E-04 2.083E+00
+ ETOT 17  -248.67496536346    -4.646E-06 4.463E-07 3.924E-06 5.210E-05 2.083E+00
+ ETOT 18  -248.67496197461     3.389E-06 4.205E-07 6.842E-06 6.766E-05 2.083E+00
+ ETOT 19  -248.67496470568    -2.731E-06 1.123E-07 2.734E-06 2.081E-05 2.083E+00
+ ETOT 20  -248.67496497196    -2.663E-07 6.614E-08 8.602E-07 6.451E-06 2.083E+00
+ ETOT 21  -248.67496476302     2.089E-07 5.035E-08 8.381E-07 4.061E-06 2.083E+00
+ ETOT 22  -248.67496593759    -1.175E-06 2.450E-08 6.996E-07 8.582E-07 2.083E+00
+ ETOT 23  -248.67496616525    -2.277E-07 2.750E-08 3.577E-07 8.206E-07 2.083E+00
+ ETOT 24  -248.67496500089     1.164E-06 1.693E-08 5.229E-07 5.773E-06 2.083E+00
+ ETOT 25  -248.67496482896     1.719E-07 8.317E-08 1.309E-06 8.415E-07 2.083E+00
+ ETOT 26  -248.67496568646    -8.575E-07 1.204E-07 4.734E-07 3.456E-06 2.083E+00
+ ETOT 27  -248.67496684355    -1.157E-06 4.117E-09 3.242E-07 8.684E-06 2.083E+00
+ ETOT 28  -248.67496675393     8.963E-08 4.347E-09 3.171E-07 8.546E-07 2.083E+00
+ ETOT 29  -248.67496511487     1.639E-06 1.623E-08 4.465E-07 1.194E-05 2.083E+00
+ ETOT 30  -248.67496734624    -2.231E-06 4.026E-09 1.737E-07 1.693E-05 2.083E+00
+>>>>>>> remotes/srostami/test
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  5.57858882E-03  sigma(3 2)= -1.41445760E-04
@@ -2406,14 +2619,18 @@ force_length_stats: {min:   1.16106347E-01, max:   1.16106347E-01, mean:   1.161
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
- Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.11532       14.656848      2.079061   -0.086111   -0.086299
-    2   2.11532       14.656848      2.079061   -0.086299   -0.086111
- ---------------------------------------------------------------------
- Total magnetization (spheres)       4.158121   -0.172411   -0.172411
- Total magnetization (exact)         3.993345   -0.165628   -0.165628
+    Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
+    1 Fe   2.11532       14.656848      2.082632    2.079061   -0.086111   -0.086299   92.374882   -2.371742
+    2 Fe   2.11532       14.656848      2.082632    2.079061   -0.086299   -0.086111   92.369703   -2.376916
+ ------------------------------------------------------------------------------------------------------------
+ Total magnetization (spheres)
+ (cart.coord.)                                      4.158121   -0.172411   -0.172411
+ (sph.coord.)                           4.165264                                       92.372293   -2.374329
+ Total magnetization (exact)
+ (cart.coord.)                                      3.993345   -0.165628   -0.165628
+ (sph.coord.)                           4.000208                                       92.373003   -2.375041
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -2827,7 +3044,11 @@ xc                  : -7.00617901635507E+00
 Ewald energy        : -1.78662593800648E+02
 psp_core            :  1.41464799821649E+01
 local_psp           : -1.25268954002644E+02
+<<<<<<< HEAD
 PAW spherical_terms : -2.32015455623172E+01
+=======
+spherical_terms     : -2.32015455623172E+01
+>>>>>>> remotes/srostami/test
 internal            : -2.48674975918961E+02
 '-kT*entropy'       : -7.99737180810935E-16
 total_energy        : -2.48674975918961E+02
@@ -2842,11 +3063,16 @@ band_energy         : -2.47391830724785E+01
 Ewald energy        : -1.78662593800648E+02
 psp_core            :  1.41464799821649E+01
 xc_dc               : -4.35284671730391E+01
+<<<<<<< HEAD
 PAW spherical_terms : -1.58912032822404E+01
+=======
+spherical_terms     : -1.58912032822404E+01
+>>>>>>> remotes/srostami/test
 internal            : -2.48674967346241E+02
 '-kT*entropy'       : -7.99737180810935E-16
 total_energy_dc     : -2.48674967346241E+02
 total_energy_dc_eV  : -6.76678999283153E+03
+<<<<<<< HEAD
 ...
 
 
@@ -2857,6 +3083,8 @@ Total energy        : -2.54536108415913E+03
 Total energy DC     : -2.54536107558641E+03
 Total energy (eV)   : -6.92627975233599E+04
 Total energy DC (eV): -6.92627972900844E+04
+=======
+>>>>>>> remotes/srostami/test
 ...
 
 
@@ -2918,6 +3146,7 @@ solver: {iscf: 17, nstep: 30, nline: 4, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-10, }
 ...
 
+<<<<<<< HEAD
      iter   Etot(hartree)      deltaE(h)  residm     nres2
  ETOT  1  -244.40608026692    -2.444E+02 1.801E+01 6.918E+00
  ETOT  2  -248.62492449795    -4.219E+00 5.602E-02 1.333E+01
@@ -2949,6 +3178,39 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT 28  -248.67496476293     1.043E-06 1.664E-08 3.551E-07
  ETOT 29  -248.67496596170    -1.199E-06 2.746E-08 5.648E-07
  ETOT 30  -248.67496569723     2.645E-07 4.530E-08 7.675E-07
+=======
+     iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
+ ETOT  1  -244.40608026692    -2.444E+02 1.801E+01 6.918E+00 6.741E-01 6.741E-01
+ ETOT  2  -248.62492449795    -4.219E+00 5.602E-02 1.333E+01 1.182E+00 1.856E+00
+ ETOT  3  -248.63088702378    -5.963E-03 2.708E-03 8.511E+00 1.373E-01 1.993E+00
+ ETOT  4  -248.62446217298     6.425E-03 1.008E-04 9.552E+00 5.622E-03 1.987E+00
+ ETOT  5  -248.67157393316    -4.711E-02 9.605E-04 1.435E+00 3.684E-02 2.024E+00
+ ETOT  6  -248.67322235292    -1.648E-03 7.191E-04 2.553E-01 2.691E-02 2.051E+00
+ ETOT  7  -248.67442448677    -1.202E-03 7.373E-05 7.102E-03 1.827E-02 2.069E+00
+ ETOT  8  -248.67457203317    -1.475E-04 1.296E-05 3.587E-03 4.904E-03 2.074E+00
+ ETOT  9  -248.67461886634    -4.683E-05 3.411E-06 3.085E-03 2.160E-03 2.076E+00
+ ETOT 10  -248.67465872545    -3.986E-05 7.463E-07 1.213E-03 2.414E-03 2.079E+00
+ ETOT 11  -248.67467881162    -2.009E-05 4.638E-07 1.094E-03 8.706E-04 2.080E+00
+ ETOT 12  -248.67470451378    -2.570E-05 2.628E-06 1.021E-03 3.719E-04 2.080E+00
+ ETOT 13  -248.67478143629    -7.692E-05 1.545E-05 7.368E-04 1.050E-03 2.081E+00
+ ETOT 14  -248.67493705243    -1.556E-04 1.203E-04 4.351E-04 2.114E-03 2.083E+00
+ ETOT 15  -248.67489584480     4.121E-05 1.410E-05 2.170E-04 1.293E-03 2.082E+00
+ ETOT 16  -248.67494751551    -5.167E-05 5.175E-06 3.234E-05 4.736E-04 2.082E+00
+ ETOT 17  -248.67495697081    -9.455E-06 2.718E-06 2.911E-05 2.469E-04 2.083E+00
+ ETOT 18  -248.67496362811    -6.657E-06 4.452E-07 1.804E-05 6.366E-05 2.083E+00
+ ETOT 19  -248.67496343486     1.932E-07 1.291E-07 4.413E-06 9.974E-05 2.083E+00
+ ETOT 20  -248.67496377086    -3.360E-07 1.357E-07 1.850E-06 8.924E-06 2.083E+00
+ ETOT 21  -248.67496354239     2.285E-07 2.386E-07 3.652E-06 8.737E-06 2.083E+00
+ ETOT 22  -248.67496504331    -1.501E-06 2.392E-07 1.918E-06 1.623E-05 2.083E+00
+ ETOT 23  -248.67496644007    -1.397E-06 6.101E-08 7.149E-07 9.108E-06 2.083E+00
+ ETOT 24  -248.67496222278     4.217E-06 1.378E-07 2.879E-06 4.106E-05 2.083E+00
+ ETOT 25  -248.67496692155    -4.699E-06 8.488E-08 3.084E-07 3.794E-05 2.083E+00
+ ETOT 26  -248.67496656021     3.613E-07 1.022E-08 2.973E-07 1.831E-06 2.083E+00
+ ETOT 27  -248.67496580621     7.540E-07 1.132E-08 2.616E-07 4.906E-06 2.083E+00
+ ETOT 28  -248.67496476293     1.043E-06 1.664E-08 3.551E-07 1.122E-05 2.083E+00
+ ETOT 29  -248.67496596170    -1.199E-06 2.746E-08 5.648E-07 1.429E-05 2.083E+00
+ ETOT 30  -248.67496569723     2.645E-07 4.530E-08 7.675E-07 1.881E-06 2.083E+00
+>>>>>>> remotes/srostami/test
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  5.57843197E-03  sigma(3 2)= -1.41438165E-04
@@ -2990,14 +3252,27 @@ force_length_stats: {min:   1.16110526E-01, max:   1.16110526E-01, mean:   1.161
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
+<<<<<<< HEAD
  Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
     1   2.11532       14.656847      0.351101    2.022644    0.350625
     2   2.11532       14.656847      0.350625    2.022644    0.351101
  ---------------------------------------------------------------------
  Total magnetization (spheres)       0.701726    4.045289    0.701726
  Total magnetization (exact)         0.674016    3.884981    0.674016
+=======
+    Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
+    1 Fe   2.11532       14.656847      2.082618    0.351101    2.022644    0.350625   80.307661   80.152428
+    2 Fe   2.11532       14.656847      2.082618    0.350625    2.022644    0.351101   80.294362   80.165530
+ ------------------------------------------------------------------------------------------------------------
+ Total magnetization (spheres)
+ (cart.coord.)                                      0.701726    4.045289    0.701726
+ (sph.coord.)                           4.165237                                       80.301011   80.158979
+ Total magnetization (exact)
+ (cart.coord.)                                      0.674016    3.884981    0.674016
+ (sph.coord.)                           4.000208                                       80.299667   80.157575
+>>>>>>> remotes/srostami/test
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -3411,7 +3686,11 @@ xc                  : -7.00617576532896E+00
 Ewald energy        : -1.78662593800648E+02
 psp_core            :  1.41464799821649E+01
 local_psp           : -1.25268971015345E+02
+<<<<<<< HEAD
 PAW spherical_terms : -2.32015430410793E+01
+=======
+spherical_terms     : -2.32015430410793E+01
+>>>>>>> remotes/srostami/test
 internal            : -2.48674966755040E+02
 '-kT*entropy'       : -7.98247876279480E-16
 total_energy        : -2.48674966755040E+02
@@ -3426,11 +3705,16 @@ band_energy         : -2.47391661220789E+01
 Ewald energy        : -1.78662593800648E+02
 psp_core            :  1.41464799821649E+01
 xc_dc               : -4.35284770159390E+01
+<<<<<<< HEAD
 PAW spherical_terms : -1.58912087407311E+01
+=======
+spherical_terms     : -1.58912087407311E+01
+>>>>>>> remotes/srostami/test
 internal            : -2.48674965697232E+02
 '-kT*entropy'       : -7.98247876279480E-16
 total_energy_dc     : -2.48674965697232E+02
 total_energy_dc_eV  : -6.76678994795971E+03
+<<<<<<< HEAD
 ...
 
 
@@ -3441,6 +3725,8 @@ Total energy        : -2.54536107499521E+03
 Total energy DC     : -2.54536107393740E+03
 Total energy (eV)   : -6.92627972739970E+04
 Total energy DC (eV): -6.92627972452126E+04
+=======
+>>>>>>> remotes/srostami/test
 ...
 
 
@@ -3502,6 +3788,7 @@ solver: {iscf: 17, nstep: 30, nline: 4, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-10, }
 ...
 
+<<<<<<< HEAD
      iter   Etot(hartree)      deltaE(h)  residm     nres2
  ETOT  1  -244.87006671413    -2.449E+02 1.998E+01 7.614E+00
  ETOT  2  -248.62657602907    -3.757E+00 6.879E-02 1.539E+01
@@ -3533,6 +3820,39 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT 28  -248.67496365732     2.059E-06 8.479E-09 1.012E-06
  ETOT 29  -248.67496599200    -2.335E-06 9.950E-09 4.222E-07
  ETOT 30  -248.67496615122    -1.592E-07 1.082E-08 3.837E-07
+=======
+     iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
+ ETOT  1  -244.87006671413    -2.449E+02 1.998E+01 7.614E+00 5.921E-01 5.921E-01
+ ETOT  2  -248.62657602907    -3.757E+00 6.879E-02 1.539E+01 1.282E+00 1.874E+00
+ ETOT  3  -248.62909068176    -2.515E-03 3.237E-03 9.306E+00 1.176E-01 1.991E+00
+ ETOT  4  -248.62117845770     7.912E-03 1.378E-04 1.053E+01 8.179E-03 1.983E+00
+ ETOT  5  -248.66727976532    -4.610E-02 4.954E-04 1.997E+00 3.938E-02 2.023E+00
+ ETOT  6  -248.67353678626    -6.257E-03 6.606E-04 1.702E-01 3.215E-02 2.055E+00
+ ETOT  7  -248.67442555067    -8.888E-04 2.907E-05 5.022E-03 1.520E-02 2.070E+00
+ ETOT  8  -248.67453577156    -1.102E-04 5.680E-06 3.876E-03 4.547E-03 2.074E+00
+ ETOT  9  -248.67457932156    -4.355E-05 1.027E-06 2.720E-03 2.269E-03 2.077E+00
+ ETOT 10  -248.67460821521    -2.889E-05 5.316E-07 1.170E-03 1.766E-03 2.079E+00
+ ETOT 11  -248.67462478648    -1.657E-05 7.358E-07 1.118E-03 6.704E-04 2.079E+00
+ ETOT 12  -248.67465663900    -3.185E-05 3.459E-06 1.040E-03 3.863E-04 2.080E+00
+ ETOT 13  -248.67479936350    -1.427E-04 4.887E-05 5.184E-04 1.600E-03 2.081E+00
+ ETOT 14  -248.67494377586    -1.444E-04 7.124E-05 1.509E-04 1.621E-03 2.083E+00
+ ETOT 15  -248.67490475859     3.902E-05 1.577E-06 1.932E-04 7.681E-04 2.082E+00
+ ETOT 16  -248.67496087579    -5.612E-05 1.049E-05 3.567E-05 5.973E-04 2.083E+00
+ ETOT 17  -248.67490364943     5.723E-05 5.444E-06 3.468E-04 8.980E-04 2.082E+00
+ ETOT 18  -248.67495921915    -5.557E-05 1.823E-05 1.865E-05 8.863E-04 2.083E+00
+ ETOT 19  -248.67496312120    -3.902E-06 4.835E-07 5.531E-06 4.380E-05 2.083E+00
+ ETOT 20  -248.67496540407    -2.283E-06 9.743E-09 2.655E-06 4.387E-06 2.083E+00
+ ETOT 21  -248.67496702569    -1.622E-06 2.756E-08 9.460E-07 2.832E-05 2.083E+00
+ ETOT 22  -248.67496562033     1.405E-06 2.844E-08 1.767E-06 2.289E-06 2.083E+00
+ ETOT 23  -248.67496274245     2.878E-06 1.404E-07 1.869E-06 1.562E-05 2.083E+00
+ ETOT 24  -248.67496372952    -9.871E-07 8.154E-08 1.653E-06 4.541E-06 2.083E+00
+ ETOT 25  -248.67496529273    -1.563E-06 1.641E-07 1.235E-06 9.509E-06 2.083E+00
+ ETOT 26  -248.67496481273     4.800E-07 1.717E-07 1.042E-06 5.852E-06 2.083E+00
+ ETOT 27  -248.67496571593    -9.032E-07 1.077E-08 7.707E-07 8.221E-06 2.083E+00
+ ETOT 28  -248.67496365732     2.059E-06 8.479E-09 1.012E-06 1.089E-05 2.083E+00
+ ETOT 29  -248.67496599200    -2.335E-06 9.950E-09 4.222E-07 1.499E-05 2.083E+00
+ ETOT 30  -248.67496615122    -1.592E-07 1.082E-08 3.837E-07 1.389E-06 2.083E+00
+>>>>>>> remotes/srostami/test
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  5.57827323E-03  sigma(3 2)= -1.41433663E-04
@@ -3574,14 +3894,18 @@ force_length_stats: {min:   1.16106358E-01, max:   1.16106358E-01, mean:   1.161
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
- Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.11532       14.656845      1.433573    1.432941    0.478393
-    2   2.11532       14.656845      1.432941    1.433573    0.478393
- ---------------------------------------------------------------------
- Total magnetization (spheres)       2.866514    2.866514    0.956787
- Total magnetization (exact)         2.752945    2.752945    0.918831
+    Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
+    1 Fe   2.11532       14.656845      2.082621    1.433573    1.432941    0.478393   76.720159   44.987371
+    2 Fe   2.11532       14.656845      2.082621    1.432941    1.433573    0.478393   76.720159   45.012629
+ ------------------------------------------------------------------------------------------------------------
+ Total magnetization (spheres)
+ (cart.coord.)                                      2.866514    2.866514    0.956787
+ (sph.coord.)                           4.165242                                       76.720158   45.000000
+ Total magnetization (exact)
+ (cart.coord.)                                      2.752945    2.752945    0.918831
+ (sph.coord.)                           4.000208                                       76.720843   45.000000
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -3995,7 +4319,11 @@ xc                  : -7.00617639237014E+00
 Ewald energy        : -1.78662593800648E+02
 psp_core            :  1.41464799821649E+01
 local_psp           : -1.25268984961091E+02
+<<<<<<< HEAD
 PAW spherical_terms : -2.32015472936524E+01
+=======
+spherical_terms     : -2.32015472936524E+01
+>>>>>>> remotes/srostami/test
 internal            : -2.48674978581616E+02
 '-kT*entropy'       : -7.99048328645302E-16
 total_energy        : -2.48674978581616E+02
@@ -4010,11 +4338,16 @@ band_energy         : -2.47391546706785E+01
 Ewald energy        : -1.78662593800648E+02
 psp_core            :  1.41464799821649E+01
 xc_dc               : -4.35284883480449E+01
+<<<<<<< HEAD
 PAW spherical_terms : -1.58912093140182E+01
+=======
+spherical_terms     : -1.58912093140182E+01
+>>>>>>> remotes/srostami/test
 internal            : -2.48674966151225E+02
 '-kT*entropy'       : -7.99048328645302E-16
 total_energy_dc     : -2.48674966151225E+02
 total_energy_dc_eV  : -6.76678996031348E+03
+<<<<<<< HEAD
 ...
 
 
@@ -4025,6 +4358,8 @@ Total energy        : -2.54536108682179E+03
 Total energy DC     : -2.54536107439140E+03
 Total energy (eV)   : -6.92627975958145E+04
 Total energy DC (eV): -6.92627972575663E+04
+=======
+>>>>>>> remotes/srostami/test
 ...
 
 
@@ -4376,10 +4711,19 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
+<<<<<<< HEAD
 - Proc.   0 individual time (sec): cpu=         28.8  wall=         28.8
+=======
+- Proc.   0 individual time (sec): cpu=         29.5  wall=         29.6
+>>>>>>> remotes/srostami/test
 
 ================================================================================
 
  Calculation completed.
+<<<<<<< HEAD
 .Delivered  18 WARNINGs and  55 COMMENTs to log file.
 +Overall time at end (sec) : cpu=         28.8  wall=         28.8
+=======
+.Delivered  14 WARNINGs and  58 COMMENTs to log file.
++Overall time at end (sec) : cpu=         29.5  wall=         29.6
+>>>>>>> remotes/srostami/test

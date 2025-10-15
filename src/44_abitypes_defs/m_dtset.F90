@@ -963,6 +963,7 @@ type, public :: dataset_type
  real(dp) :: toldfe
  real(dp) :: tolmxde
  real(dp) :: toldff
+ real(dp) :: toldmag
  real(dp) :: tolimg
  real(dp) :: tolmxf
  real(dp) :: tolrde
@@ -2393,6 +2394,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%toldfe             = dtin%toldfe
  dtout%tolmxde            = dtin%tolmxde
  dtout%toldff             = dtin%toldff
+ dtout%toldmag            = dtin%toldmag
  dtout%tolimg             = dtin%tolimg
  dtout%tolmxf             = dtin%tolmxf
  dtout%tolrde             = dtin%tolrde
@@ -3373,6 +3375,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
        dtsets(idtset)%tolvrs=tol3
        dtsets(idtset)%tolmxf=1.0d-3
        dtsets(idtset)%toldff=zero
+       dtsets(idtset)%toldmag=zero
        dtsets(idtset)%optforces=1
        dtsets(idtset)%timopt=0
        dtsets(idtset)%npulayit=4
@@ -3396,6 +3399,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
        dtsets(idtset)%tolvrs=tol5
        dtsets(idtset)%tolmxf=5.0d-4
        dtsets(idtset)%toldff=zero
+       dtsets(idtset)%toldmag=zero
        dtsets(idtset)%optforces=1
        dtsets(idtset)%timopt=0
        dtsets(idtset)%npulayit=7
@@ -3419,6 +3423,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
        dtsets(idtset)%tolvrs=tol7
        dtsets(idtset)%tolmxf=1.0d-4
        dtsets(idtset)%toldff=zero
+       dtsets(idtset)%toldmag=zero
        dtsets(idtset)%optforces=2
        dtsets(idtset)%timopt=1
        if(xmpi_paral==1) dtsets(idtset)%timopt = 0
@@ -3443,6 +3448,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
        dtsets(idtset)%tolvrs=tol9
        dtsets(idtset)%tolmxf=5.0d-5
        dtsets(idtset)%toldff=zero
+       dtsets(idtset)%toldmag=zero
        dtsets(idtset)%optforces=2
        dtsets(idtset)%timopt=1
        if(xmpi_paral==1) dtsets(idtset)%timopt = 0
@@ -3467,6 +3473,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
        dtsets(idtset)%tolvrs=tol10
        dtsets(idtset)%tolmxf=1.0d-6
        dtsets(idtset)%toldff=zero
+       dtsets(idtset)%toldmag=zero
        dtsets(idtset)%optforces=2
        dtsets(idtset)%timopt=1
        if(xmpi_paral==1) dtsets(idtset)%timopt = 0
@@ -3491,6 +3498,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
        dtsets(idtset)%tolvrs=tol12
        dtsets(idtset)%tolmxf=1.0d-6
        dtsets(idtset)%toldff=zero
+       dtsets(idtset)%toldmag=zero
        dtsets(idtset)%optforces=2
        dtsets(idtset)%timopt=1
        if(xmpi_paral==1) dtsets(idtset)%timopt = 0
@@ -3880,7 +3888,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' td_ef_type td_ef_induced_vecpot td_ef_tzero td_ef_tau td_ef_lambda td_ef_pol td_ef_ezero'
  list_vars=trim(list_vars)//' tfkinfunc temperature test_effpot test_prt_ph tfw_toldfe tim1rev timopt'
  list_vars=trim(list_vars)//' tmesh tmpdata_prefix transport_ngkpt'
- list_vars=trim(list_vars)//' tl_nprccg tl_radius tnons tolcum toldfe tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'
+ list_vars=trim(list_vars)//' tl_nprccg tl_radius tnons tolcum toldfe tolmxde toldff toldmag tolimg tolmxf tolrde tolrff tolsym'
  list_vars=trim(list_vars)//' tolvrs tolwfr tolwfr_diago tphysel ts_option tsmear typat'
 !U
  list_vars=trim(list_vars)//' ucrpa ucrpa_bands ucrpa_window udtset upawu usepead usedmatpu '

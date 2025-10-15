@@ -49,7 +49,7 @@ module m_scfcv_core
  use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : MPI_type
  use m_berryphase_new,   only : update_e_field_vars
- use m_dens,             only : constrained_dft_t, constrained_dft_ini, constrained_dft_free
+ use m_dens,             only : constrained_dft_t, constrained_dft_ini, constrained_dft_free, calcdenmagsph, calmaxdifmag
  use m_time,             only : timab
  use m_fstrings,         only : int2char4, sjoin, itoa
  use m_symtk,            only : symmetrize_xred
@@ -125,6 +125,7 @@ module m_scfcv_core
  use m_pspini,           only : pspcor
  use m_ewald,            only : ewald
  use m_atm2fft,          only : atm2fft
+ use m_paw_correlations, only : loc_orbmom_cal
 
 #if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
@@ -388,6 +389,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  real(dp) :: efield_old_cart(3), ptot_cart(3)
  real(dp) :: red_efield2(3),red_efield2_old(3)
  real(dp) :: vpotzero(2)
+ real(dp) :: maxmag , difmag  
+ real(dp) :: dmatdum(0,0,0,0)
+ real(dp) :: orb_mom_atom(10,3,dtset%natom)
 ! red_efield1(3),red_efield2(3) is reduced electric field, defined by Eq.(25) of Nat. Phys. suppl. (2009) [[cite:Stengel2009]]
 ! red_efield1(3) for fixed ebar calculation, red_efield2(3) for fixed reduced d calculation, in mixed BC
 ! red_efieldbar_lc(3) is local reduced electric field, defined by Eq.(28) of Nat. Phys. suppl. (2009) [[cite:Stengel2009]]
@@ -406,6 +410,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  real(dp),allocatable :: susmat(:,:,:,:,:),synlgr(:,:)
  real(dp),allocatable :: vectornd(:,:,:),vhartr(:),vpsp(:),vtrial(:,:)
  real(dp),allocatable :: vxc(:,:),vxc_hybcomp(:,:),vxctau(:,:,:),workr(:,:),xccc3d(:),xcctau3d(:),ylmdiel(:,:)
+ real(dp),allocatable :: intgden(:,:),intgden0(:,:)
  real(dp),pointer :: elfr(:,:),grhor(:,:,:),lrhor(:,:)
  type(scf_history_type) :: scf_history_wf
  type(constrained_dft_t) :: constrained_dft
@@ -461,6 +466,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  tollist(3)=dtset%toldff;tollist(4)=dtset%toldfe
  tollist(6)=dtset%tolvrs;tollist(7)=dtset%tolrff
  tollist(8)=dtset%vdw_df_threshold
+ tollist(9)=dtset%toldmag
  dielstrt=0
  finite_efield_flag=(dtset%berryopt == 4  .or. &
 & dtset%berryopt == 6  .or. &
@@ -616,12 +622,16 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  choice=1 ; diffor=zero ; res2=zero
  ABI_MALLOC(fcart,(3,dtset%natom))
  ABI_MALLOC(gred,(3,dtset%natom))
+ ABI_MALLOC(intgden,(dtset%nspden,dtset%natom))
+ ABI_MALLOC(intgden0,(dtset%nspden,dtset%natom))
  gred(:,:)=zero
  fcart(:,:)=results_gs%fcart(:,:) ! This is a side effect ...
+ intgden(:,:)=zero
+ orb_mom_atom=zero
 !results_gs should not be used as input of scfcv_core
 !HERE IS PRINTED THE FIRST LINE OF SCFCV
 
- call scprqt(choice,cpus,deltae,diffor,dtset,&
+ call scprqt(choice,cpus,deltae,diffor,maxmag,difmag,dtset,&
 & eigen,etotal,favg,fcart,energies%e_fermie,energies%e_fermih,dtfil%fnameabo_app_eig,&
 & dtfil%filnam_ds(1),initialized0,dtset%iscf,istep,istep_fock_outer,istep_mix,dtset%kptns,&
 & maxfor,moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,nstep,&
@@ -861,7 +871,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  if(any(dtset%constraint_kind(:)/=0).or.dtset%magconon/=0)then
    call constrained_dft_ini(dtset%chrgat,constrained_dft,dtset%constraint_kind,dtset%magconon,dtset%magcon_lambda,&
 &    mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nspden,dtset%ntypat,&
-&    dtset%ratsm,dtset%ratsph,rprimd,dtset%spinat,dtset%typat,xred,dtset%ziontypat,dtset%qgbt,dtset%use_gbt)
+&    dtset%ratsm,dtset%ratsph,rprimd,dtset%spinat,dtset%typat,xred,dtset%ziontypat,dtset%znucl,dtset%qgbt,dtset%use_gbt)
  endif
 
 !Here, allocate arrays for computation of susceptibility and dielectric matrix or for TDDFT
@@ -1761,7 +1771,20 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      if(paw_dmft%use_dmft==1) then
        call prtene(dtset,energies,std_out,psps%usepaw)
      end if
-     call scprqt(choice,cpus,deltae,diffor,dtset,&
+     if(response==0.and.(dtset%iscf>0.or.dtset%iscf==-3).and.(dtset%nsppol==2.or.dtset%nspden>1)) then
+       intgden0=intgden
+       call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nspden,&
+                            dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,dtset%qgbt,dtset%use_gbt,intgden=intgden)
+       !Compute maximal magnet and maximal difference of magnet
+       call calmaxdifmag(cplex1,intgden,intgden0,dtset%natom,dtset%nspden,maxmag,difmag)
+       if (dtset%prt_lorbmag==1 .and. (dtset%nspinor==2) .and. (dtset%nspden==4 ) .and. (dtset%usepawu .ne. 0)) then
+         call loc_orbmom_cal(1,0,dmatdum,0,0,indsym,my_natom,dtset%natom,dtset%natpawu,&
+         &   dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,paw_ij,pawang,pawrad,dtset%pawprtvol,&
+         &   pawrhoij,pawtab,dtset%spinat,dtset%symafm,dtset%typat,0,dtset%usepawu,dtset%znucl,&
+         &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,orb_mom_atom=orb_mom_atom,maxmag=maxmag,difmag=difmag)
+       endif
+     endif
+     call scprqt(choice,cpus,deltae,diffor,maxmag,difmag,dtset,&
 &     eigen,etotal,favg,fcart,energies%e_fermie,energies%e_fermih,dtfil%fnameabo_app_eig,&
 &     dtfil%filnam_ds(1),initialized0,dtset%iscf,istep,istep_fock_outer,istep_mix,dtset%kptns,&
 &     maxfor,moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,nstep,&
@@ -2023,7 +2046,21 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      call timab(1453,1,tsec)
      choice=2
      ABI_NVTX_START_RANGE(NVTX_SCFCV_SCPRQT)
-     call scprqt(choice,cpus,deltae,diffor,dtset,&
+     if(response==0.and.(dtset%iscf>0.or.dtset%iscf==-3).and.(dtset%nsppol==2.or.dtset%nspden>1)) then
+       intgden0=intgden
+       call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nspden,&
+                            dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,dtset%qgbt,dtset%use_gbt,intgden=intgden)
+       !Compute maximal magnet and maximal difference of magnet
+       call calmaxdifmag(cplex1,intgden,intgden0,dtset%natom,dtset%nspden,maxmag,difmag)
+       if (dtset%prt_lorbmag==1 .and. (dtset%nspinor==2) .and. (dtset%nspden==4 ) .and. (dtset%usepawu .ne. 0)) then
+         call loc_orbmom_cal(1,0,dmatdum,0,0,indsym,my_natom,dtset%natom,dtset%natpawu,&
+         &   dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,paw_ij,pawang,pawrad,dtset%pawprtvol,&
+         &   pawrhoij,pawtab,dtset%spinat,dtset%symafm,dtset%typat,0,dtset%usepawu,dtset%znucl,&
+         &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,orb_mom_atom=orb_mom_atom,maxmag=maxmag,difmag=difmag)
+       endif
+     endif
+
+     call scprqt(choice,cpus,deltae,diffor,maxmag,difmag,dtset,&
 &     eigen,etotal,favg,fcart,energies%e_fermie,energies%e_fermih,dtfil%fnameabo_app_eig,&
 &     dtfil%filnam_ds(1),initialized0,dtset%iscf,istep,istep_fock_outer,istep_mix,dtset%kptns,&
 &     maxfor,moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,nstep,&
@@ -2315,14 +2352,15 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  call timab(1459,2,tsec)
  call timab(1460,1,tsec)
 
+ !write(ab_out,*)"HHHHHHHHHHHH1"
 
 !SHOULD CLEAN THE ARGS OF THIS ROUTINE
  call afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
-& deltae,diffor,dtefield,dtfil,dtset,eigen,electronpositron,elfr,&
+& deltae,diffor,difmag,dtefield,dtfil,dtset,eigen,electronpositron,elfr,&
 & energies,etotal,extfpmd,favg,fcart,fock,forold,grchempottn,grcondft,&
 & gred,gresid,grewtn,grhf,grhor,grvdw,&
 & grxc,gsqcut,hdr,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,&
-& kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
+& kg,kxc,lrhor,maxfor,maxmag,mcg,mcprj,mgfftf,&
 & moved_atm_inside,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfft,ngfftf,ngrvdw,nhat,&
 & nkxc,npwarr,nvresid,occ,optres,paw_an,paw_ij,pawang,pawfgr,&
 & pawfgrtab,pawrad,pawrhoij,pawtab,pel,pel_cg,ph1d,ph1df,phnons,pion,prtfor,&
@@ -2331,6 +2369,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 & taur,tollist,usecprj,usevxctau,vhartr,vpsp,vtrial,vxc,vxctau,vxcavg,wvl,&
 & xccc3d,xcctau3d,xred,ylm,ylmgr,dtset%cellcharge(1)*SUM(vpotzero(:)),conv_retcode,xg_nonlop)
 
+! write(ab_out,*)"HHHHHHHHHHHH2"
 !Before leaving the present routine, save the current value of xred.
  xred_old(:,:)=xred(:,:)
 
@@ -2413,6 +2452,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  ABI_FREE(grhf)
  ABI_FREE(nvresid)
  ABI_FREE(nvtauresid)
+ ABI_FREE(intgden)
+ ABI_FREE(intgden0)
 
  if(allocated(vectornd)) then
     ABI_FREE(vectornd)

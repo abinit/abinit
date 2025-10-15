@@ -1,5 +1,9 @@
 
+<<<<<<< HEAD
 .Version 10.5.1.5 of ABINIT, released Jul 2025.
+=======
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
+>>>>>>> remotes/srostami/test
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,18 +18,31 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
+<<<<<<< HEAD
 .Starting date : Thu  9 Oct 2025.
 - ( at 18h10 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/v9_t142/t142.abi
+=======
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h21 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v9_t142/t142.abi
+>>>>>>> remotes/srostami/test
 - output file    -> t142.abo
 - root for input  files -> t142i
 - root for output files -> t142o
 
 - inpspheads : Reading pseudopotential header in XML form from 
+<<<<<<< HEAD
 -   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/P.xml
 - inpspheads : Reading pseudopotential header in XML form from 
 -   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+=======
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/P.xml
+- inpspheads : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+>>>>>>> remotes/srostami/test
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -55,6 +72,7 @@ _ WF disk file :      0.588 Mbytes ; DEN or POT disk file :      0.213 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          32
 -   mkqmem =          32        mk1mem =          32           mpw =         150
       nfft =        4096          nkpt =          32
+- my_mband =           4
 ================================================================================
 P This job should need less than                       3.920 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -234,9 +252,15 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
+<<<<<<< HEAD
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/P.xml
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/P.xml
 - pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/P.xml
+=======
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/P.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/P.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/P.xml
+>>>>>>> remotes/srostami/test
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90690075
@@ -254,9 +278,15 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
+<<<<<<< HEAD
 - pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
 - pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+=======
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+>>>>>>> remotes/srostami/test
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90363307
@@ -287,17 +317,17 @@ solver: {iscf: 17, nstep: 10, nline: 4, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-18, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -8.7885319693499    -8.789E+00 4.023E-02 8.824E-01
- ETOT  2  -8.7995960492722    -1.106E-02 9.674E-05 1.402E-01
- ETOT  3  -8.7986861219632     9.099E-04 6.266E-06 6.576E-03
- ETOT  4  -8.7988042825322    -1.182E-04 6.951E-08 6.592E-04
- ETOT  5  -8.7988412447869    -3.696E-05 1.626E-08 4.905E-05
- ETOT  6  -8.7988453665850    -4.122E-06 8.878E-10 2.374E-06
- ETOT  7  -8.7988455572349    -1.906E-07 4.092E-10 4.867E-08
- ETOT  8  -8.7988455588943    -1.659E-09 2.516E-11 1.023E-08
- ETOT  9  -8.7988455595755    -6.813E-10 4.241E-12 1.707E-09
- ETOT 10  -8.7988455596861    -1.106E-10 1.117E-13 2.978E-10
+     iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
+ ETOT  1  -8.7885319693499    -8.789E+00 4.023E-02 8.824E-01 0.000E+00 0.000E+00
+ ETOT  2  -8.7995960492722    -1.106E-02 9.674E-05 1.402E-01 0.000E+00 0.000E+00
+ ETOT  3  -8.7986861219632     9.099E-04 6.266E-06 6.576E-03 0.000E+00 0.000E+00
+ ETOT  4  -8.7988042825322    -1.182E-04 6.951E-08 6.592E-04 0.000E+00 0.000E+00
+ ETOT  5  -8.7988412447869    -3.696E-05 1.626E-08 4.905E-05 0.000E+00 0.000E+00
+ ETOT  6  -8.7988453665850    -4.122E-06 8.878E-10 2.374E-06 0.000E+00 0.000E+00
+ ETOT  7  -8.7988455572349    -1.906E-07 4.092E-10 4.867E-08 0.000E+00 0.000E+00
+ ETOT  8  -8.7988455588943    -1.659E-09 2.516E-11 1.023E-08 0.000E+00 0.000E+00
+ ETOT  9  -8.7988455595755    -6.813E-10 4.241E-12 1.707E-09 0.000E+00 0.000E+00
+ ETOT 10  -8.7988455596861    -1.106E-10 1.117E-13 2.978E-10 0.000E+00 0.000E+00
 
  scprqt:  WARNING -
   nstep=   10 was not enough SCF cycles to converge;
@@ -328,15 +358,16 @@ force_length_stats: {min: null, max: null, mean: null, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.90690     1.295536     1.295536      2.591073    -0.000000
-    2   1.90363     0.388718     0.388718      0.777437    -0.000000
- ---------------------------------------------------------------------
-  Sum:              1.684255     1.684255      3.368509    -0.000000
- Total magnetization (from the atomic spheres):            -0.000000
- Total magnetization (exact up - dn):                       0.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1  P   1.90690     1.295536     1.295536      2.591073    -0.000000
+    2 Al   1.90363     0.388718     0.388718      0.777437    -0.000000
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 1.684255     1.684255      3.368509    -0.000000
+ Total magnetization (from the atomic spheres):               -0.000000
+ Total magnetization (exact up - dn):                          0.000000
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -612,9 +643,15 @@ meta: {optdriver: 1, rfddk: 1, }
 
 
 --- Pseudopotential description ------------------------------------------------
+<<<<<<< HEAD
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/P.xml
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/P.xml
 - pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/P.xml
+=======
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/P.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/P.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/P.xml
+>>>>>>> remotes/srostami/test
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90690075
@@ -632,9 +669,15 @@ meta: {optdriver: 1, rfddk: 1, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
+<<<<<<< HEAD
 - pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
 - pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+=======
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+>>>>>>> remotes/srostami/test
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90363307
