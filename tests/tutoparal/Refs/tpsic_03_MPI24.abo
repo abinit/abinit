@@ -1,9 +1,5 @@
 
-<<<<<<< HEAD
-.Version 10.5.1.5 of ABINIT, released Jul 2025.
-=======
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
->>>>>>> remotes/srostami/test
+.Version 10.5.6.3 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu10.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -18,31 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-<<<<<<< HEAD
-.Starting date : Fri 10 Oct 2025.
-- ( at 09h32 )
+.Starting date : Thu 16 Oct 2025.
+- ( at 10h39 )
   
-- input  file    -> /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/TestBot_MPI24/tutoparal_tpsic_03_MPI24/tpsic_03.abi
-=======
-.Starting date : Wed 24 Sep 2025.
-- ( at 19h28 )
-  
-- input  file    -> /home/buildbot/ABINIT3/scope_gnu_10.2_paral/srostami_test/tests/TestBot_MPI24/tutoparal_tpsic_03_MPI24/tpsic_03.abi
->>>>>>> remotes/srostami/test
+- input  file    -> /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__srostami/tests/TestBot_MPI24/tutoparal_tpsic_03_MPI24/tpsic_03.abi
 - output file    -> tpsic_03_MPI24.abo
 - root for input  files -> tpsic_03_MPI24i
 - root for output files -> tpsic_03_MPI24o
 
 - inpspheads : Reading pseudopotential header in XML form from 
-<<<<<<< HEAD
--   /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
+-   /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/I.xml
-=======
--   /home/buildbot/ABINIT3/scope_gnu_10.2_paral/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
-- inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/scope_gnu_10.2_paral/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/I.xml
->>>>>>> remotes/srostami/test
+-   /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/I.xml
  Symmetries : space group Cm m m (# 65); Bravais oC (1-face-center ortho.)
 ================================================================================
  Values of the parameters that define the memory need of the present run
@@ -243,15 +226,9 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 17, paral_kgb: 1, }
          ecut(hartree)=     40.000   => boxcut(ratio)=   2.16148
 
 --- Pseudopotential description ------------------------------------------------
-<<<<<<< HEAD
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
-=======
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/scope_gnu_10.2_paral/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/scope_gnu_10.2_paral/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/scope_gnu_10.2_paral/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
->>>>>>> remotes/srostami/test
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.60198715
@@ -269,15 +246,9 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 17, paral_kgb: 1, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-<<<<<<< HEAD
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/I.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/I.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/I.xml
-=======
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/scope_gnu_10.2_paral/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/I.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/scope_gnu_10.2_paral/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/I.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/scope_gnu_10.2_paral/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/I.xml
->>>>>>> remotes/srostami/test
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/I.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/I.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/I.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 2.30022271
@@ -312,20 +283,6 @@ solver: {iscf: 17, nstep: 20, nline: 4, wfoptalg: 114, }
 tolerances: {toldff: 1.00E-06, }
 ...
 
-<<<<<<< HEAD
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -239.41908173182    -2.394E+02 2.666E-03 2.725E+00 2.658E-02 2.658E-02
- ETOT  2  -239.41779349972     1.288E-03 8.414E-08 5.099E-01 3.235E-03 2.761E-02
- ETOT  3  -239.41793570544    -1.422E-04 5.787E-05 9.123E-02 6.835E-04 2.693E-02
- ETOT  4  -239.41847988908    -5.442E-04 3.762E-06 3.321E-03 1.188E-03 2.574E-02
- ETOT  5  -239.41850412867    -2.424E-05 3.945E-06 2.767E-04 5.990E-04 2.520E-02
- ETOT  6  -239.41851916544    -1.504E-05 6.195E-08 4.471E-05 6.205E-05 2.514E-02
- ETOT  7  -239.41851979113    -6.257E-07 3.422E-08 1.882E-06 1.030E-04 2.505E-02
- ETOT  8  -239.41851996471    -1.736E-07 6.886E-11 3.689E-07 1.098E-05 2.506E-02
- ETOT  9  -239.41851996782    -3.115E-09 1.563E-11 3.844E-08 4.401E-06 2.505E-02
- ETOT 10  -239.41851996854    -7.146E-10 8.066E-12 1.761E-09 4.308E-07 2.505E-02
- ETOT 11  -239.41851996858    -4.519E-11 2.689E-14 2.494E-10 3.008E-07 2.505E-02
-=======
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
  ETOT  1  -239.41908173182    -2.394E+02 2.666E-03 2.725E+00 2.658E-02 2.658E-02 0.000E+00 0.000E+00
  ETOT  2  -239.41779349972     1.288E-03 8.414E-08 5.099E-01 3.235E-03 2.761E-02 0.000E+00 0.000E+00
@@ -338,7 +295,6 @@ tolerances: {toldff: 1.00E-06, }
  ETOT  9  -239.41851996782    -3.115E-09 1.563E-11 3.844E-08 4.401E-06 2.505E-02 0.000E+00 0.000E+00
  ETOT 10  -239.41851996854    -7.146E-10 8.066E-12 1.761E-09 4.308E-07 2.505E-02 0.000E+00 0.000E+00
  ETOT 11  -239.41851996858    -4.519E-11 2.689E-14 2.494E-10 3.008E-07 2.505E-02 0.000E+00 0.000E+00
->>>>>>> remotes/srostami/test
 
  At SCF step   11, forces are converged :
   for the second time, max diff in force=  3.008E-07 < toldff=  1.000E-06
@@ -392,21 +348,6 @@ force_length_stats: {min:   3.22280678E-05, max:   3.54315881E-02, mean:   9.051
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
-<<<<<<< HEAD
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.60199     3.809224     3.809224      7.618448    -0.000000
-    2   1.60199     3.807494     3.807494      7.614987    -0.000000
-    3   1.60199     3.807494     3.807494      7.614987    -0.000000
-    4   1.60199     3.809224     3.809224      7.618448    -0.000000
-    5   2.30022     2.003219     2.003219      4.006438     0.000000
-    6   2.30022     2.003219     2.003219      4.006438     0.000000
-    7   2.30022     2.002356     2.002356      4.004713    -0.000000
-    8   2.30022     2.002356     2.002356      4.004713    -0.000000
- ---------------------------------------------------------------------
-  Sum:             23.244585    23.244585     46.489171     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                      -0.000000
-=======
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Na   1.60199     3.809224     3.809224      7.618448    -0.000000
     2 Na   1.60199     3.807494     3.807494      7.614987    -0.000000
@@ -421,7 +362,6 @@ force_length_stats: {min:   3.22280678E-05, max:   3.54315881E-02, mean:   9.051
  Total magnetization (from the atomic spheres):                0.000000
  Total magnetization (exact up - dn):                         -0.000000
 
->>>>>>> remotes/srostami/test
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -593,11 +533,7 @@ xc                  : -2.78008049936722E+01
 Ewald energy        : -1.12290312699648E+02
 psp_core            :  1.17964436789057E+01
 local_psp           : -1.82958966747983E+02
-<<<<<<< HEAD
 PAW spherical_terms : -6.32437626695555E+01
-=======
-spherical_terms     : -6.32437626695555E+01
->>>>>>> remotes/srostami/test
 total_energy        : -2.39418514585041E+02
 total_energy_eV     : -6.51490910356457E+03
 ...
@@ -610,7 +546,6 @@ band_energy         : -4.91387196986795E+01
 Ewald energy        : -1.12290312699648E+02
 psp_core            :  1.17964436789057E+01
 xc_dc               : -8.38829600112851E+01
-<<<<<<< HEAD
 PAW spherical_terms : -5.90297123787520E+00
 total_energy_dc     : -2.39418519968583E+02
 total_energy_dc_eV  : -6.51490925005817E+03
@@ -624,11 +559,6 @@ Total energy        : -2.91158609609202E+04
 Total energy DC     : -2.91158609663038E+04
 Total energy (eV)   : -7.92282869021988E+05
 Total energy DC (eV): -7.92282869168482E+05
-=======
-spherical_terms     : -5.90297123787520E+00
-total_energy_dc     : -2.39418519968583E+02
-total_energy_dc_eV  : -6.51490925005817E+03
->>>>>>> remotes/srostami/test
 ...
 
 
@@ -665,15 +595,9 @@ total_energy_dc_eV  : -6.51490925005817E+03
          ecut(hartree)=     40.000   => boxcut(ratio)=   2.16148
 
 --- Pseudopotential description ------------------------------------------------
-<<<<<<< HEAD
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
-=======
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/scope_gnu_10.2_paral/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/scope_gnu_10.2_paral/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/scope_gnu_10.2_paral/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
->>>>>>> remotes/srostami/test
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.60198715
@@ -691,15 +615,9 @@ total_energy_dc_eV  : -6.51490925005817E+03
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-<<<<<<< HEAD
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/I.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/I.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/I.xml
-=======
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/scope_gnu_10.2_paral/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/I.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/scope_gnu_10.2_paral/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/I.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/scope_gnu_10.2_paral/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/I.xml
->>>>>>> remotes/srostami/test
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/I.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/I.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/I.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 2.30022271
@@ -734,20 +652,6 @@ solver: {iscf: 17, nstep: 20, nline: 4, wfoptalg: 114, }
 tolerances: {toldff: 1.00E-06, }
 ...
 
-<<<<<<< HEAD
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -239.41517119530    -2.394E+02 2.666E-03 2.667E+00 2.589E-02 2.589E-02
- ETOT  2  -239.41446476859     7.064E-04 6.387E-08 5.001E-01 3.218E-03 2.693E-02
- ETOT  3  -239.41465767155    -1.929E-04 3.857E-05 8.944E-02 6.884E-04 2.624E-02
- ETOT  4  -239.41517679452    -5.191E-04 2.690E-06 3.139E-03 1.126E-03 2.511E-02
- ETOT  5  -239.41520098900    -2.419E-05 3.010E-06 2.437E-04 4.933E-04 2.462E-02
- ETOT  6  -239.41521368796    -1.270E-05 5.085E-08 4.065E-05 5.676E-05 2.457E-02
- ETOT  7  -239.41521411912    -4.312E-07 3.096E-08 1.754E-06 8.821E-05 2.448E-02
- ETOT  8  -239.41521428083    -1.617E-07 6.000E-11 3.406E-07 7.660E-06 2.449E-02
- ETOT  9  -239.41521428427    -3.437E-09 1.273E-11 3.265E-08 4.142E-06 2.449E-02
- ETOT 10  -239.41521428481    -5.476E-10 2.158E-11 1.522E-09 3.298E-07 2.449E-02
- ETOT 11  -239.41521428487    -5.713E-11 1.398E-13 2.195E-10 4.611E-07 2.449E-02
-=======
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
  ETOT  1  -239.41517119530    -2.394E+02 2.666E-03 2.667E+00 2.589E-02 2.589E-02 6.104E-03 6.104E-03
  ETOT  2  -239.41446476859     7.064E-04 6.387E-08 5.001E-01 3.218E-03 2.693E-02 3.382E-04 5.765E-03
@@ -760,7 +664,6 @@ tolerances: {toldff: 1.00E-06, }
  ETOT  9  -239.41521428427    -3.437E-09 1.273E-11 3.265E-08 4.142E-06 2.449E-02 3.224E-06 6.077E-03
  ETOT 10  -239.41521428481    -5.476E-10 2.158E-11 1.522E-09 3.298E-07 2.449E-02 1.501E-06 6.077E-03
  ETOT 11  -239.41521428487    -5.713E-11 1.398E-13 2.195E-10 4.611E-07 2.449E-02 5.464E-07 6.076E-03
->>>>>>> remotes/srostami/test
 
  At SCF step   11, forces are converged :
   for the second time, max diff in force=  4.611E-07 < toldff=  1.000E-06
@@ -999,11 +902,7 @@ xc                  : -2.77930868996401E+01
 Ewald energy        : -1.12290312699648E+02
 psp_core            :  1.17964436789057E+01
 local_psp           : -1.82958465560508E+02
-<<<<<<< HEAD
 PAW spherical_terms : -6.32420176497174E+01
-=======
-spherical_terms     : -6.32420176497174E+01
->>>>>>> remotes/srostami/test
 total_energy        : -2.39415211104699E+02
 total_energy_eV     : -6.51481921129290E+03
 ...
@@ -1016,7 +915,6 @@ band_energy         : -4.91328632655650E+01
 Ewald energy        : -1.12290312699648E+02
 psp_core            :  1.17964436789057E+01
 xc_dc               : -8.38858005481437E+01
-<<<<<<< HEAD
 PAW spherical_terms : -5.90268145042047E+00
 total_energy_dc     : -2.39415214284872E+02
 total_energy_dc_eV  : -6.51481929782980E+03
@@ -1030,11 +928,6 @@ Total energy        : -2.91158576574399E+04
 Total energy DC     : -2.91158576606200E+04
 Total energy (eV)   : -7.92282779129717E+05
 Total energy DC (eV): -7.92282779216254E+05
-=======
-spherical_terms     : -5.90268145042047E+00
-total_energy_dc     : -2.39415214284872E+02
-total_energy_dc_eV  : -6.51481929782980E+03
->>>>>>> remotes/srostami/test
 ...
 
 
@@ -1071,15 +964,9 @@ total_energy_dc_eV  : -6.51481929782980E+03
          ecut(hartree)=     40.000   => boxcut(ratio)=   2.16148
 
 --- Pseudopotential description ------------------------------------------------
-<<<<<<< HEAD
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
-=======
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/scope_gnu_10.2_paral/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/scope_gnu_10.2_paral/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/scope_gnu_10.2_paral/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
->>>>>>> remotes/srostami/test
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.60198715
@@ -1097,15 +984,9 @@ total_energy_dc_eV  : -6.51481929782980E+03
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-<<<<<<< HEAD
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/I.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/I.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/I.xml
-=======
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/scope_gnu_10.2_paral/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/I.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/scope_gnu_10.2_paral/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/I.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/scope_gnu_10.2_paral/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/I.xml
->>>>>>> remotes/srostami/test
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/I.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/I.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/I.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 2.30022271
@@ -1140,20 +1021,6 @@ solver: {iscf: 17, nstep: 20, nline: 4, wfoptalg: 114, }
 tolerances: {toldff: 1.00E-06, }
 ...
 
-<<<<<<< HEAD
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -239.41126065878    -2.394E+02 2.666E-03 2.612E+00 2.520E-02 2.520E-02
- ETOT  2  -239.41112626397     1.344E-04 4.823E-08 4.908E-01 3.202E-03 2.625E-02
- ETOT  3  -239.41136217689    -2.359E-04 2.554E-05 8.769E-02 6.738E-04 2.557E-02
- ETOT  4  -239.41186234683    -5.002E-04 1.896E-06 2.971E-03 1.093E-03 2.448E-02
- ETOT  5  -239.41188681015    -2.446E-05 2.037E-06 2.150E-04 4.369E-04 2.405E-02
- ETOT  6  -239.41189759624    -1.079E-05 3.716E-08 3.531E-05 6.176E-05 2.398E-02
- ETOT  7  -239.41189784114    -2.449E-07 2.065E-08 1.583E-06 7.033E-05 2.392E-02
- ETOT  8  -239.41189797345    -1.323E-07 6.234E-11 2.866E-07 7.326E-06 2.392E-02
- ETOT  9  -239.41189797841    -4.957E-09 4.600E-12 2.744E-08 4.060E-06 2.392E-02
- ETOT 10  -239.41189797878    -3.716E-10 2.307E-11 1.247E-09 3.779E-07 2.392E-02
- ETOT 11  -239.41189797886    -7.941E-11 5.258E-13 2.388E-10 2.938E-07 2.392E-02
-=======
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
  ETOT  1  -239.41126065878    -2.394E+02 2.666E-03 2.612E+00 2.520E-02 2.520E-02 1.221E-02 1.221E-02
  ETOT  2  -239.41112626397     1.344E-04 4.823E-08 4.908E-01 3.202E-03 2.625E-02 6.576E-04 1.155E-02
@@ -1166,7 +1033,6 @@ tolerances: {toldff: 1.00E-06, }
  ETOT  9  -239.41189797841    -4.957E-09 4.600E-12 2.744E-08 4.060E-06 2.392E-02 7.028E-06 1.216E-02
  ETOT 10  -239.41189797878    -3.716E-10 2.307E-11 1.247E-09 3.779E-07 2.392E-02 2.682E-06 1.216E-02
  ETOT 11  -239.41189797886    -7.941E-11 5.258E-13 2.388E-10 2.938E-07 2.392E-02 1.078E-06 1.216E-02
->>>>>>> remotes/srostami/test
 
  At SCF step   11, forces are converged :
   for the second time, max diff in force=  2.938E-07 < toldff=  1.000E-06
@@ -1405,11 +1271,7 @@ xc                  : -2.77853701075017E+01
 Ewald energy        : -1.12290312699648E+02
 psp_core            :  1.17964436789057E+01
 local_psp           : -1.82957938186706E+02
-<<<<<<< HEAD
 PAW spherical_terms : -6.32402671521962E+01
-=======
-spherical_terms     : -6.32402671521962E+01
->>>>>>> remotes/srostami/test
 total_energy        : -2.39411896415845E+02
 total_energy_eV     : -6.51472901402211E+03
 ...
@@ -1422,7 +1284,6 @@ band_energy         : -4.91270007624703E+01
 Ewald energy        : -1.12290312699648E+02
 psp_core            :  1.17964436789057E+01
 xc_dc               : -8.38886365314444E+01
-<<<<<<< HEAD
 PAW spherical_terms : -5.90239166420343E+00
 total_energy_dc     : -2.39411897978861E+02
 total_energy_dc_eV  : -6.51472905655394E+03
@@ -1436,11 +1297,6 @@ Total energy        : -2.91158543427510E+04
 Total energy DC     : -2.91158543443140E+04
 Total energy (eV)   : -7.92282688932446E+05
 Total energy DC (eV): -7.92282688974978E+05
-=======
-spherical_terms     : -5.90239166420343E+00
-total_energy_dc     : -2.39411897978861E+02
-total_energy_dc_eV  : -6.51472905655394E+03
->>>>>>> remotes/srostami/test
 ...
 
 
@@ -1524,23 +1380,6 @@ solver: {iscf: 17, nstep: 20, nline: 4, wfoptalg: 114, }
 tolerances: {toldff: 1.00E-06, }
 ...
 
-<<<<<<< HEAD
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -239.40042283323    -2.394E+02 3.606E-03 8.559E-03 2.338E-02 2.338E-02
- ETOT  2  -239.41880443178    -1.838E-02 2.432E-08 7.326E-03 3.984E-03 2.488E-02
- ETOT  3  -239.41876935486     3.508E-05 1.660E-06 1.642E-03 1.712E-04 2.488E-02
- ETOT  4  -239.41876731229     2.043E-06 1.232E-08 7.943E-04 1.296E-04 2.490E-02
- ETOT  5  -239.41876621950     1.093E-06 1.100E-09 4.971E-04 5.828E-05 2.489E-02
- ETOT  6  -239.41876549898     7.205E-07 7.511E-09 3.222E-04 4.268E-05 2.489E-02
- ETOT  7  -239.41876496357     5.354E-07 1.435E-09 1.849E-04 3.771E-05 2.488E-02
- ETOT  8  -239.41876462123     3.423E-07 7.294E-09 1.016E-04 3.114E-05 2.488E-02
- ETOT  9  -239.41876425008     3.711E-07 9.457E-09 1.000E-05 5.608E-05 2.487E-02
- ETOT 10  -239.41876423588     1.421E-08 7.314E-10 2.562E-08 2.786E-05 2.487E-02
- ETOT 11  -239.41876423899    -3.110E-09 1.292E-12 7.286E-09 4.211E-06 2.487E-02
- ETOT 12  -239.41876423898     1.961E-12 3.031E-13 1.704E-09 1.016E-06 2.487E-02
- ETOT 13  -239.41876423900    -1.884E-11 4.339E-14 4.796E-10 2.028E-07 2.487E-02
- ETOT 14  -239.41876423900    -7.105E-13 5.758E-13 1.853E-10 1.074E-07 2.487E-02
-=======
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
  ETOT  1  -239.40042283323    -2.394E+02 3.606E-03 8.559E-03 2.338E-02 2.338E-02 0.000E+00 0.000E+00
  ETOT  2  -239.41880443178    -1.838E-02 2.432E-08 7.326E-03 3.984E-03 2.488E-02 0.000E+00 0.000E+00
@@ -1556,7 +1395,6 @@ tolerances: {toldff: 1.00E-06, }
  ETOT 12  -239.41876423898     1.961E-12 3.031E-13 1.704E-09 1.016E-06 2.487E-02 0.000E+00 0.000E+00
  ETOT 13  -239.41876423900    -1.884E-11 4.339E-14 4.796E-10 2.028E-07 2.487E-02 0.000E+00 0.000E+00
  ETOT 14  -239.41876423900    -7.105E-13 5.758E-13 1.853E-10 1.074E-07 2.487E-02 0.000E+00 0.000E+00
->>>>>>> remotes/srostami/test
 
  At SCF step   14, forces are converged :
   for the second time, max diff in force=  1.074E-07 < toldff=  1.000E-06
@@ -1610,21 +1448,6 @@ force_length_stats: {min:   2.94599960E-05, max:   3.51700118E-02, mean:   8.975
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
-<<<<<<< HEAD
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.60199     3.808767     3.808767      7.617533     0.000000
-    2   1.60199     3.807494     3.807494      7.614988     0.000000
-    3   1.60199     3.807494     3.807494      7.614988    -0.000000
-    4   1.60199     3.808767     3.808767      7.617533    -0.000000
-    5   2.30022     2.004130     2.004130      4.008259     0.000000
-    6   2.30022     2.004130     2.004130      4.008259     0.000000
-    7   2.30022     2.002348     2.002348      4.004696     0.000000
-    8   2.30022     2.002348     2.002348      4.004696     0.000000
- ---------------------------------------------------------------------
-  Sum:             23.245477    23.245477     46.490954     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                      -0.000000
-=======
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Na   1.60199     3.808767     3.808767      7.617533     0.000000
     2 Na   1.60199     3.807494     3.807494      7.614988     0.000000
@@ -1639,7 +1462,6 @@ force_length_stats: {min:   2.94599960E-05, max:   3.51700118E-02, mean:   8.975
  Total magnetization (from the atomic spheres):                0.000000
  Total magnetization (exact up - dn):                         -0.000000
 
->>>>>>> remotes/srostami/test
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -1811,11 +1633,7 @@ xc                  : -2.78006017357869E+01
 Ewald energy        : -1.12294253944786E+02
 psp_core            :  1.17964436789057E+01
 local_psp           : -1.82951261960070E+02
-<<<<<<< HEAD
 PAW spherical_terms : -6.32436357221067E+01
-=======
-spherical_terms     : -6.32436357221067E+01
->>>>>>> remotes/srostami/test
 total_energy        : -2.39418767690720E+02
 total_energy_eV     : -6.51491599092035E+03
 ...
@@ -1828,7 +1646,6 @@ band_energy         : -4.91388421534164E+01
 Ewald energy        : -1.12294253944786E+02
 psp_core            :  1.17964436789057E+01
 xc_dc               : -8.38791509353186E+01
-<<<<<<< HEAD
 PAW spherical_terms : -5.90296088438906E+00
 total_energy_dc     : -2.39418764239004E+02
 total_energy_dc_eV  : -6.51491589699438E+03
@@ -1842,11 +1659,6 @@ Total energy        : -2.91158612140259E+04
 Total energy DC     : -2.91158612105742E+04
 Total energy (eV)   : -7.92282875909344E+05
 Total energy DC (eV): -7.92282875815418E+05
-=======
-spherical_terms     : -5.90296088438906E+00
-total_energy_dc     : -2.39418764239004E+02
-total_energy_dc_eV  : -6.51491589699438E+03
->>>>>>> remotes/srostami/test
 ...
 
 
@@ -1897,22 +1709,6 @@ solver: {iscf: 17, nstep: 20, nline: 4, wfoptalg: 114, }
 tolerances: {toldff: 1.00E-06, }
 ...
 
-<<<<<<< HEAD
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -239.39697592187    -2.394E+02 3.594E-03 8.704E-03 2.278E-02 2.278E-02
- ETOT  2  -239.41549429380    -1.852E-02 2.415E-08 7.508E-03 3.880E-03 2.430E-02
- ETOT  3  -239.41545886678     3.543E-05 1.343E-06 1.683E-03 1.564E-04 2.431E-02
- ETOT  4  -239.41545625154     2.615E-06 9.661E-09 8.025E-04 1.334E-04 2.434E-02
- ETOT  5  -239.41545512430     1.127E-06 5.804E-10 5.023E-04 5.140E-05 2.432E-02
- ETOT  6  -239.41545435126     7.730E-07 7.086E-09 3.139E-04 4.664E-05 2.432E-02
- ETOT  7  -239.41545382562     5.256E-07 1.193E-09 1.815E-04 2.932E-05 2.431E-02
- ETOT  8  -239.41545340547     4.201E-07 4.055E-09 7.724E-05 4.435E-05 2.432E-02
- ETOT  9  -239.41545311297     2.925E-07 8.486E-09 4.509E-06 4.470E-05 2.431E-02
- ETOT 10  -239.41545311549    -2.521E-09 1.334E-10 1.750E-08 2.170E-05 2.431E-02
- ETOT 11  -239.41545311648    -9.975E-10 4.240E-13 6.182E-09 2.901E-06 2.430E-02
- ETOT 12  -239.41545311650    -1.785E-11 2.418E-12 2.402E-09 5.454E-07 2.430E-02
- ETOT 13  -239.41545311650    -8.527E-14 3.291E-14 6.307E-10 1.005E-07 2.430E-02
-=======
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
  ETOT  1  -239.39697592187    -2.394E+02 3.594E-03 8.704E-03 2.278E-02 2.278E-02 6.134E-03 6.134E-03
  ETOT  2  -239.41549429380    -1.852E-02 2.415E-08 7.508E-03 3.880E-03 2.430E-02 5.139E-05 6.083E-03
@@ -1927,7 +1723,6 @@ tolerances: {toldff: 1.00E-06, }
  ETOT 11  -239.41545311648    -9.975E-10 4.240E-13 6.182E-09 2.901E-06 2.430E-02 3.724E-08 6.087E-03
  ETOT 12  -239.41545311650    -1.785E-11 2.418E-12 2.402E-09 5.454E-07 2.430E-02 3.571E-09 6.087E-03
  ETOT 13  -239.41545311650    -8.527E-14 3.291E-14 6.307E-10 1.005E-07 2.430E-02 7.182E-09 6.087E-03
->>>>>>> remotes/srostami/test
 
  At SCF step   13, forces are converged :
   for the second time, max diff in force=  1.005E-07 < toldff=  1.000E-06
@@ -2166,11 +1961,7 @@ xc                  : -2.77928827968904E+01
 Ewald energy        : -1.12294253944786E+02
 psp_core            :  1.17964436789057E+01
 local_psp           : -1.82950753632490E+02
-<<<<<<< HEAD
 PAW spherical_terms : -6.32418926972340E+01
-=======
-spherical_terms     : -6.32418926972340E+01
->>>>>>> remotes/srostami/test
 total_energy        : -2.39415463974588E+02
 total_energy_eV     : -6.51482609223252E+03
 ...
@@ -2183,7 +1974,6 @@ band_energy         : -4.91329832145073E+01
 Ewald energy        : -1.12294253944786E+02
 psp_core            :  1.17964436789057E+01
 xc_dc               : -8.38819881875551E+01
-<<<<<<< HEAD
 PAW spherical_terms : -5.90267144856051E+00
 total_energy_dc     : -2.39415453116503E+02
 total_energy_dc_eV  : -6.51482579676899E+03
@@ -2197,11 +1987,6 @@ Total energy        : -2.91158579103098E+04
 Total energy DC     : -2.91158578994517E+04
 Total energy (eV)   : -7.92282786010656E+05
 Total energy DC (eV): -7.92282785715193E+05
-=======
-spherical_terms     : -5.90267144856051E+00
-total_energy_dc     : -2.39415453116503E+02
-total_energy_dc_eV  : -6.51482579676899E+03
->>>>>>> remotes/srostami/test
 ...
 
 
@@ -2252,22 +2037,6 @@ solver: {iscf: 17, nstep: 20, nline: 4, wfoptalg: 114, }
 tolerances: {toldff: 1.00E-06, }
 ...
 
-<<<<<<< HEAD
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -239.39351523185    -2.394E+02 3.573E-03 8.859E-03 2.218E-02 2.218E-02
- ETOT  2  -239.41217348746    -1.866E-02 2.391E-08 7.691E-03 3.767E-03 2.373E-02
- ETOT  3  -239.41213774022     3.575E-05 1.015E-06 1.726E-03 1.432E-04 2.374E-02
- ETOT  4  -239.41213455846     3.182E-06 8.861E-09 8.106E-04 1.350E-04 2.377E-02
- ETOT  5  -239.41213337794     1.181E-06 2.772E-10 5.037E-04 4.557E-05 2.375E-02
- ETOT  6  -239.41213255618     8.218E-07 5.627E-09 3.037E-04 4.648E-05 2.375E-02
- ETOT  7  -239.41213204636     5.098E-07 6.505E-10 1.755E-04 2.712E-05 2.375E-02
- ETOT  8  -239.41213156841     4.780E-07 3.334E-09 5.572E-05 5.024E-05 2.375E-02
- ETOT  9  -239.41213136452     2.039E-07 4.279E-09 3.034E-06 3.666E-05 2.374E-02
- ETOT 10  -239.41213136193     2.596E-09 8.201E-11 1.097E-08 1.732E-05 2.374E-02
- ETOT 11  -239.41213136239    -4.578E-10 1.315E-13 3.608E-09 2.061E-06 2.374E-02
- ETOT 12  -239.41213136241    -2.035E-11 8.975E-14 1.451E-09 3.210E-07 2.374E-02
- ETOT 13  -239.41213136241     8.242E-13 2.632E-14 3.263E-10 1.759E-07 2.374E-02
-=======
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
  ETOT  1  -239.39351523185    -2.394E+02 3.573E-03 8.859E-03 2.218E-02 2.218E-02 1.229E-02 1.229E-02
  ETOT  2  -239.41217348746    -1.866E-02 2.391E-08 7.691E-03 3.767E-03 2.373E-02 1.166E-04 1.218E-02
@@ -2282,7 +2051,6 @@ tolerances: {toldff: 1.00E-06, }
  ETOT 11  -239.41213136239    -4.578E-10 1.315E-13 3.608E-09 2.061E-06 2.374E-02 4.824E-08 1.218E-02
  ETOT 12  -239.41213136241    -2.035E-11 8.975E-14 1.451E-09 3.210E-07 2.374E-02 3.552E-08 1.218E-02
  ETOT 13  -239.41213136241     8.242E-13 2.632E-14 3.263E-10 1.759E-07 2.374E-02 1.094E-08 1.218E-02
->>>>>>> remotes/srostami/test
 
  At SCF step   13, forces are converged :
   for the second time, max diff in force=  1.759E-07 < toldff=  1.000E-06
@@ -2521,11 +2289,7 @@ xc                  : -2.77851653601996E+01
 Ewald energy        : -1.12294253944786E+02
 psp_core            :  1.17964436789057E+01
 local_psp           : -1.82950209112356E+02
-<<<<<<< HEAD
 PAW spherical_terms : -6.32401453222048E+01
-=======
-spherical_terms     : -6.32401453222048E+01
->>>>>>> remotes/srostami/test
 total_energy        : -2.39412140511785E+02
 total_energy_eV     : -6.51473565621045E+03
 ...
@@ -2538,7 +2302,6 @@ band_energy         : -4.91271223153084E+01
 Ewald energy        : -1.12294253944786E+02
 psp_core            :  1.17964436789057E+01
 xc_dc               : -8.38848167866920E+01
-<<<<<<< HEAD
 PAW spherical_terms : -5.90238199452493E+00
 total_energy_dc     : -2.39412131362405E+02
 total_energy_dc_eV  : -6.51473540724316E+03
@@ -2552,11 +2315,6 @@ Total energy        : -2.91158545868470E+04
 Total energy DC     : -2.91158545776976E+04
 Total energy (eV)   : -7.92282695574634E+05
 Total energy DC (eV): -7.92282695325667E+05
-=======
-spherical_terms     : -5.90238199452493E+00
-total_energy_dc     : -2.39412131362405E+02
-total_energy_dc_eV  : -6.51473540724316E+03
->>>>>>> remotes/srostami/test
 ...
 
 
@@ -2641,21 +2399,6 @@ solver: {iscf: 17, nstep: 20, nline: 4, wfoptalg: 114, }
 tolerances: {toldff: 1.00E-06, }
 ...
 
-<<<<<<< HEAD
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -239.40600543032    -2.394E+02 3.730E-03 9.108E-03 1.928E-02 1.928E-02
- ETOT  2  -239.42395071519    -1.795E-02 1.842E-08 8.334E-03 3.596E-03 2.114E-02
- ETOT  3  -239.42391256169     3.815E-05 3.380E-07 1.863E-03 1.370E-04 2.112E-02
- ETOT  4  -239.42390757403     4.988E-06 7.957E-09 7.915E-04 1.334E-04 2.111E-02
- ETOT  5  -239.42390596540     1.609E-06 2.942E-10 4.172E-04 4.734E-05 2.108E-02
- ETOT  6  -239.42390493218     1.033E-06 6.739E-09 1.801E-04 5.522E-05 2.107E-02
- ETOT  7  -239.42390442073     5.114E-07 1.715E-09 5.527E-05 4.191E-05 2.106E-02
- ETOT  8  -239.42390420893     2.118E-07 6.697E-10 2.689E-06 4.597E-05 2.105E-02
- ETOT  9  -239.42390420044     8.491E-09 4.856E-11 6.418E-08 6.698E-06 2.105E-02
- ETOT 10  -239.42390420035     9.365E-11 1.736E-13 1.237E-09 3.084E-06 2.104E-02
- ETOT 11  -239.42390420035    -3.638E-12 5.937E-15 1.061E-10 9.473E-08 2.104E-02
- ETOT 12  -239.42390420035    -1.762E-12 1.716E-13 9.041E-12 4.349E-08 2.105E-02
-=======
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
  ETOT  1  -239.40600543032    -2.394E+02 3.730E-03 9.108E-03 1.928E-02 1.928E-02 0.000E+00 0.000E+00
  ETOT  2  -239.42395071519    -1.795E-02 1.842E-08 8.334E-03 3.596E-03 2.114E-02 0.000E+00 0.000E+00
@@ -2669,7 +2412,6 @@ tolerances: {toldff: 1.00E-06, }
  ETOT 10  -239.42390420035     9.365E-11 1.736E-13 1.237E-09 3.084E-06 2.104E-02 0.000E+00 0.000E+00
  ETOT 11  -239.42390420035    -3.638E-12 5.937E-15 1.061E-10 9.473E-08 2.104E-02 0.000E+00 0.000E+00
  ETOT 12  -239.42390420035    -1.762E-12 1.716E-13 9.041E-12 4.349E-08 2.105E-02 0.000E+00 0.000E+00
->>>>>>> remotes/srostami/test
 
  At SCF step   12, forces are converged :
   for the second time, max diff in force=  4.349E-08 < toldff=  1.000E-06
@@ -2723,21 +2465,6 @@ force_length_stats: {min:   3.82810085E-05, max:   2.97621639E-02, mean:   7.525
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
-<<<<<<< HEAD
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.60199     3.808407     3.808407      7.616814    -0.000000
-    2   1.60199     3.807508     3.807508      7.615017     0.000000
-    3   1.60199     3.807508     3.807508      7.615017     0.000000
-    4   1.60199     3.808407     3.808407      7.616814    -0.000000
-    5   2.30022     2.001374     2.001374      4.002749     0.000000
-    6   2.30022     2.001374     2.001374      4.002749     0.000000
-    7   2.30022     1.998470     1.998470      3.996939     0.000000
-    8   2.30022     1.998470     1.998470      3.996939     0.000000
- ---------------------------------------------------------------------
-  Sum:             23.231519    23.231519     46.463037     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                      -0.000000
-=======
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Na   1.60199     3.808407     3.808407      7.616814    -0.000000
     2 Na   1.60199     3.807508     3.807508      7.615017     0.000000
@@ -2752,7 +2479,6 @@ force_length_stats: {min:   3.82810085E-05, max:   2.97621639E-02, mean:   7.525
  Total magnetization (from the atomic spheres):                0.000000
  Total magnetization (exact up - dn):                         -0.000000
 
->>>>>>> remotes/srostami/test
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -2924,11 +2650,7 @@ xc                  : -2.77962490655431E+01
 Ewald energy        : -1.12379195620087E+02
 psp_core            :  1.17964436789057E+01
 local_psp           : -1.82783956356351E+02
-<<<<<<< HEAD
 PAW spherical_terms : -6.32409801829061E+01
-=======
-spherical_terms     : -6.32409801829061E+01
->>>>>>> remotes/srostami/test
 total_energy        : -2.39423904958831E+02
 total_energy_eV     : -6.51505578309490E+03
 ...
@@ -2941,7 +2663,6 @@ band_energy         : -4.91424732710836E+01
 Ewald energy        : -1.12379195620087E+02
 psp_core            :  1.17964436789057E+01
 xc_dc               : -8.37959428158437E+01
-<<<<<<< HEAD
 PAW spherical_terms : -5.90273617224578E+00
 total_energy_dc     : -2.39423904200354E+02
 total_energy_dc_eV  : -6.51505576245571E+03
@@ -2955,11 +2676,6 @@ Total energy        : -2.91158663512940E+04
 Total energy DC     : -2.91158663505355E+04
 Total energy (eV)   : -7.92283015701519E+05
 Total energy DC (eV): -7.92283015680880E+05
-=======
-spherical_terms     : -5.90273617224578E+00
-total_energy_dc     : -2.39423904200354E+02
-total_energy_dc_eV  : -6.51505576245571E+03
->>>>>>> remotes/srostami/test
 ...
 
 
@@ -3010,21 +2726,6 @@ solver: {iscf: 17, nstep: 20, nline: 4, wfoptalg: 114, }
 tolerances: {toldff: 1.00E-06, }
 ...
 
-<<<<<<< HEAD
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -239.40237873588    -2.394E+02 3.720E-03 9.354E-03 1.869E-02 1.869E-02
- ETOT  2  -239.42052213735    -1.814E-02 1.890E-08 8.647E-03 3.478E-03 2.062E-02
- ETOT  3  -239.42048243056     3.971E-05 1.502E-07 1.932E-03 1.276E-04 2.059E-02
- ETOT  4  -239.42047687116     5.559E-06 9.133E-09 8.044E-04 1.261E-04 2.058E-02
- ETOT  5  -239.42047508483     1.786E-06 4.733E-10 4.018E-04 4.947E-05 2.056E-02
- ETOT  6  -239.42047399789     1.087E-06 4.194E-09 1.549E-04 5.472E-05 2.055E-02
- ETOT  7  -239.42047350348     4.944E-07 1.373E-09 3.623E-05 4.423E-05 2.054E-02
- ETOT  8  -239.42047336338     1.401E-07 2.852E-10 1.577E-06 3.367E-05 2.053E-02
- ETOT  9  -239.42047335771     5.669E-09 2.735E-11 5.183E-08 5.636E-06 2.053E-02
- ETOT 10  -239.42047335755     1.640E-10 2.257E-13 4.371E-10 1.897E-06 2.053E-02
- ETOT 11  -239.42047335755    -5.798E-12 8.104E-15 3.356E-11 1.297E-07 2.053E-02
- ETOT 12  -239.42047335755     2.331E-12 4.464E-14 2.457E-12 1.872E-08 2.053E-02
-=======
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
  ETOT  1  -239.40237873588    -2.394E+02 3.720E-03 9.354E-03 1.869E-02 1.869E-02 6.153E-03 6.153E-03
  ETOT  2  -239.42052213735    -1.814E-02 1.890E-08 8.647E-03 3.478E-03 2.062E-02 8.439E-05 6.069E-03
@@ -3038,7 +2739,6 @@ tolerances: {toldff: 1.00E-06, }
  ETOT 10  -239.42047335755     1.640E-10 2.257E-13 4.371E-10 1.897E-06 2.053E-02 5.476E-08 6.075E-03
  ETOT 11  -239.42047335755    -5.798E-12 8.104E-15 3.356E-11 1.297E-07 2.053E-02 1.628E-08 6.075E-03
  ETOT 12  -239.42047335755     2.331E-12 4.464E-14 2.457E-12 1.872E-08 2.053E-02 6.764E-09 6.074E-03
->>>>>>> remotes/srostami/test
 
  At SCF step   12, forces are converged :
   for the second time, max diff in force=  1.872E-08 < toldff=  1.000E-06
@@ -3277,11 +2977,7 @@ xc                  : -2.77885049226163E+01
 Ewald energy        : -1.12379195620087E+02
 psp_core            :  1.17964436789057E+01
 local_psp           : -1.82783275165864E+02
-<<<<<<< HEAD
 PAW spherical_terms : -6.32392679279518E+01
-=======
-spherical_terms     : -6.32392679279518E+01
->>>>>>> remotes/srostami/test
 total_energy        : -2.39420473773252E+02
 total_energy_eV     : -6.51496241578702E+03
 ...
@@ -3294,7 +2990,6 @@ band_energy         : -4.91365609282344E+01
 Ewald energy        : -1.12379195620087E+02
 psp_core            :  1.17964436789057E+01
 xc_dc               : -8.37987108897151E+01
-<<<<<<< HEAD
 PAW spherical_terms : -5.90244959842054E+00
 total_energy_dc     : -2.39420473357551E+02
 total_energy_dc_eV  : -6.51496240447523E+03
@@ -3308,11 +3003,6 @@ Total energy        : -2.91158629201084E+04
 Total energy DC     : -2.91158629196927E+04
 Total energy (eV)   : -7.92282922334211E+05
 Total energy DC (eV): -7.92282922322899E+05
-=======
-spherical_terms     : -5.90244959842054E+00
-total_energy_dc     : -2.39420473357551E+02
-total_energy_dc_eV  : -6.51496240447523E+03
->>>>>>> remotes/srostami/test
 ...
 
 
@@ -3363,21 +3053,6 @@ solver: {iscf: 17, nstep: 20, nline: 4, wfoptalg: 114, }
 tolerances: {toldff: 1.00E-06, }
 ...
 
-<<<<<<< HEAD
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -239.39873886920    -2.394E+02 3.701E-03 9.547E-03 1.810E-02 1.810E-02
- ETOT  2  -239.41708268054    -1.834E-02 1.928E-08 8.936E-03 3.346E-03 2.009E-02
- ETOT  3  -239.41704141143     4.127E-05 4.609E-08 2.000E-03 1.185E-04 2.007E-02
- ETOT  4  -239.41703539503     6.016E-06 5.407E-09 8.167E-04 1.173E-04 2.005E-02
- ETOT  5  -239.41703346780     1.927E-06 5.039E-10 3.937E-04 4.993E-05 2.004E-02
- ETOT  6  -239.41703215526     1.313E-06 1.463E-09 9.849E-05 6.481E-05 2.002E-02
- ETOT  7  -239.41703181080     3.445E-07 4.444E-10 1.501E-05 3.968E-05 2.001E-02
- ETOT  8  -239.41703175319     5.761E-08 1.000E-10 5.685E-07 1.983E-05 2.001E-02
- ETOT  9  -239.41703175116     2.028E-09 6.970E-12 2.006E-08 3.494E-06 2.001E-02
- ETOT 10  -239.41703175110     6.145E-11 5.790E-13 7.840E-11 1.002E-06 2.001E-02
- ETOT 11  -239.41703175110    -3.979E-13 2.117E-15 7.945E-12 8.743E-08 2.001E-02
- ETOT 12  -239.41703175110    -3.695E-13 3.586E-15 5.410E-13 1.781E-08 2.001E-02
-=======
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
  ETOT  1  -239.39873886920    -2.394E+02 3.701E-03 9.547E-03 1.810E-02 1.810E-02 1.232E-02 1.232E-02
  ETOT  2  -239.41708268054    -1.834E-02 1.928E-08 8.936E-03 3.346E-03 2.009E-02 1.817E-04 1.214E-02
@@ -3391,7 +3066,6 @@ tolerances: {toldff: 1.00E-06, }
  ETOT 10  -239.41703175110     6.145E-11 5.790E-13 7.840E-11 1.002E-06 2.001E-02 7.966E-08 1.215E-02
  ETOT 11  -239.41703175110    -3.979E-13 2.117E-15 7.945E-12 8.743E-08 2.001E-02 2.426E-08 1.215E-02
  ETOT 12  -239.41703175110    -3.695E-13 3.586E-15 5.410E-13 1.781E-08 2.001E-02 8.842E-09 1.215E-02
->>>>>>> remotes/srostami/test
 
  At SCF step   12, forces are converged :
   for the second time, max diff in force=  1.781E-08 < toldff=  1.000E-06
@@ -3630,11 +3304,7 @@ xc                  : -2.77807622270703E+01
 Ewald energy        : -1.12379195620087E+02
 psp_core            :  1.17964436789057E+01
 local_psp           : -1.82782564835921E+02
-<<<<<<< HEAD
 PAW spherical_terms : -6.32375511920273E+01
-=======
-spherical_terms     : -6.32375511920273E+01
->>>>>>> remotes/srostami/test
 total_energy        : -2.39417031753766E+02
 total_energy_eV     : -6.51486875367354E+03
 ...
@@ -3647,7 +3317,6 @@ band_energy         : -4.91306436219743E+01
 Ewald energy        : -1.12379195620087E+02
 psp_core            :  1.17964436789057E+01
 xc_dc               : -8.38014730308915E+01
-<<<<<<< HEAD
 PAW spherical_terms : -5.90216315705117E+00
 total_energy_dc     : -2.39417031751098E+02
 total_energy_dc_eV  : -6.51486875360094E+03
@@ -3661,11 +3330,6 @@ Total energy        : -2.91158594780889E+04
 Total energy DC     : -2.91158594780863E+04
 Total energy (eV)   : -7.92282828672097E+05
 Total energy DC (eV): -7.92282828672025E+05
-=======
-spherical_terms     : -5.90216315705117E+00
-total_energy_dc     : -2.39417031751098E+02
-total_energy_dc_eV  : -6.51486875360094E+03
->>>>>>> remotes/srostami/test
 ...
 
 
@@ -3750,21 +3414,6 @@ solver: {iscf: 17, nstep: 20, nline: 4, wfoptalg: 114, }
 tolerances: {toldff: 1.00E-06, }
 ...
 
-<<<<<<< HEAD
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -239.40715333510    -2.394E+02 3.783E-03 9.165E-03 1.831E-02 1.831E-02
- ETOT  2  -239.42515556262    -1.800E-02 1.818E-08 8.662E-03 3.337E-03 2.031E-02
- ETOT  3  -239.42511595289     3.961E-05 7.496E-08 1.958E-03 1.252E-04 2.027E-02
- ETOT  4  -239.42511023008     5.723E-06 1.115E-08 8.162E-04 1.187E-04 2.025E-02
- ETOT  5  -239.42510864807     1.582E-06 3.870E-10 4.623E-04 3.923E-05 2.023E-02
- ETOT  6  -239.42510776461     8.835E-07 1.428E-09 2.632E-04 3.689E-05 2.022E-02
- ETOT  7  -239.42510714557     6.190E-07 9.833E-10 1.185E-04 3.572E-05 2.020E-02
- ETOT  8  -239.42510674081     4.048E-07 4.129E-10 2.292E-05 4.025E-05 2.019E-02
- ETOT  9  -239.42510664978     9.103E-08 2.651E-10 1.155E-06 2.430E-05 2.018E-02
- ETOT 10  -239.42510664521     4.578E-09 1.739E-11 9.958E-10 7.395E-06 2.018E-02
- ETOT 11  -239.42510664524    -3.629E-11 7.758E-15 3.922E-10 2.272E-07 2.018E-02
- ETOT 12  -239.42510664524     2.245E-12 4.828E-15 1.069E-10 1.153E-07 2.018E-02
-=======
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
  ETOT  1  -239.40715333510    -2.394E+02 3.783E-03 9.165E-03 1.831E-02 1.831E-02 0.000E+00 0.000E+00
  ETOT  2  -239.42515556262    -1.800E-02 1.818E-08 8.662E-03 3.337E-03 2.031E-02 0.000E+00 0.000E+00
@@ -3778,7 +3427,6 @@ tolerances: {toldff: 1.00E-06, }
  ETOT 10  -239.42510664521     4.578E-09 1.739E-11 9.958E-10 7.395E-06 2.018E-02 0.000E+00 0.000E+00
  ETOT 11  -239.42510664524    -3.629E-11 7.758E-15 3.922E-10 2.272E-07 2.018E-02 0.000E+00 0.000E+00
  ETOT 12  -239.42510664524     2.245E-12 4.828E-15 1.069E-10 1.153E-07 2.018E-02 0.000E+00 0.000E+00
->>>>>>> remotes/srostami/test
 
  At SCF step   12, forces are converged :
   for the second time, max diff in force=  1.153E-07 < toldff=  1.000E-06
@@ -3832,21 +3480,6 @@ force_length_stats: {min:   3.77685363E-05, max:   2.85403115E-02, mean:   7.201
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
-<<<<<<< HEAD
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.60199     3.808252     3.808252      7.616504    -0.000000
-    2   1.60199     3.807512     3.807512      7.615024    -0.000000
-    3   1.60199     3.807512     3.807512      7.615024    -0.000000
-    4   1.60199     3.808252     3.808252      7.616504    -0.000000
-    5   2.30022     2.001593     2.001593      4.003187     0.000000
-    6   2.30022     2.001593     2.001593      4.003187     0.000000
-    7   2.30022     1.998706     1.998706      3.997412     0.000000
-    8   2.30022     1.998706     1.998706      3.997412     0.000000
- ---------------------------------------------------------------------
-  Sum:             23.232127    23.232127     46.464253     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                      -0.000000
-=======
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Na   1.60199     3.808252     3.808252      7.616504    -0.000000
     2 Na   1.60199     3.807512     3.807512      7.615024    -0.000000
@@ -3861,7 +3494,6 @@ force_length_stats: {min:   3.77685363E-05, max:   2.85403115E-02, mean:   7.201
  Total magnetization (from the atomic spheres):                0.000000
  Total magnetization (exact up - dn):                         -0.000000
 
->>>>>>> remotes/srostami/test
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -4033,11 +3665,7 @@ xc                  : -2.77952496081644E+01
 Ewald energy        : -1.12398263348885E+02
 psp_core            :  1.17964436789057E+01
 local_psp           : -1.82746228563146E+02
-<<<<<<< HEAD
 PAW spherical_terms : -6.32403741108479E+01
-=======
-spherical_terms     : -6.32403741108479E+01
->>>>>>> remotes/srostami/test
 total_energy        : -2.39425099707438E+02
 total_energy_eV     : -6.51508829385788E+03
 ...
@@ -4050,7 +3678,6 @@ band_energy         : -4.91435402976306E+01
 Ewald energy        : -1.12398263348885E+02
 psp_core            :  1.17964436789057E+01
 xc_dc               : -8.37770594234121E+01
-<<<<<<< HEAD
 PAW spherical_terms : -5.90268725421808E+00
 total_energy_dc     : -2.39425106645240E+02
 total_energy_dc_eV  : -6.51508848264507E+03
@@ -4064,11 +3691,6 @@ Total energy        : -2.91158675460426E+04
 Total energy DC     : -2.91158675529804E+04
 Total energy (eV)   : -7.92283048212282E+05
 Total energy DC (eV): -7.92283048401069E+05
-=======
-spherical_terms     : -5.90268725421808E+00
-total_energy_dc     : -2.39425106645240E+02
-total_energy_dc_eV  : -6.51508848264507E+03
->>>>>>> remotes/srostami/test
 ...
 
 
@@ -4119,21 +3741,6 @@ solver: {iscf: 17, nstep: 20, nline: 4, wfoptalg: 114, }
 tolerances: {toldff: 1.00E-06, }
 ...
 
-<<<<<<< HEAD
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -239.40347696915    -2.394E+02 3.775E-03 9.390E-03 1.773E-02 1.773E-02
- ETOT  2  -239.42169777003    -1.822E-02 1.867E-08 8.995E-03 3.214E-03 1.980E-02
- ETOT  3  -239.42165613597     4.163E-05 1.963E-08 2.031E-03 1.151E-04 1.976E-02
- ETOT  4  -239.42164999386     6.142E-06 9.751E-09 8.348E-04 1.089E-04 1.973E-02
- ETOT  5  -239.42164827584     1.718E-06 4.536E-10 4.611E-04 4.068E-05 1.972E-02
- ETOT  6  -239.42164717766     1.098E-06 4.135E-10 2.171E-04 4.292E-05 1.970E-02
- ETOT  7  -239.42164656493     6.127E-07 3.598E-10 7.530E-05 3.755E-05 1.969E-02
- ETOT  8  -239.42164627193     2.930E-07 3.394E-10 6.789E-06 3.744E-05 1.968E-02
- ETOT  9  -239.42164624381     2.812E-08 7.307E-11 1.199E-07 1.428E-05 1.967E-02
- ETOT 10  -239.42164624334     4.649E-10 8.579E-13 5.897E-10 2.075E-06 1.967E-02
- ETOT 11  -239.42164624334     7.958E-13 1.690E-14 6.086E-11 7.746E-08 1.967E-02
- ETOT 12  -239.42164624335    -3.610E-12 1.187E-14 9.584E-12 5.930E-08 1.967E-02
-=======
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
  ETOT  1  -239.40347696915    -2.394E+02 3.775E-03 9.390E-03 1.773E-02 1.773E-02 6.160E-03 6.160E-03
  ETOT  2  -239.42169777003    -1.822E-02 1.867E-08 8.995E-03 3.214E-03 1.980E-02 9.031E-05 6.069E-03
@@ -4147,7 +3754,6 @@ tolerances: {toldff: 1.00E-06, }
  ETOT 10  -239.42164624334     4.649E-10 8.579E-13 5.897E-10 2.075E-06 1.967E-02 5.614E-08 6.075E-03
  ETOT 11  -239.42164624334     7.958E-13 1.690E-14 6.086E-11 7.746E-08 1.967E-02 1.319E-08 6.075E-03
  ETOT 12  -239.42164624335    -3.610E-12 1.187E-14 9.584E-12 5.930E-08 1.967E-02 1.224E-08 6.075E-03
->>>>>>> remotes/srostami/test
 
  At SCF step   12, forces are converged :
   for the second time, max diff in force=  5.930E-08 < toldff=  1.000E-06
@@ -4386,11 +3992,7 @@ xc                  : -2.77875011344562E+01
 Ewald energy        : -1.12398263348885E+02
 psp_core            :  1.17964436789057E+01
 local_psp           : -1.82745507050873E+02
-<<<<<<< HEAD
 PAW spherical_terms : -6.32386728667553E+01
-=======
-spherical_terms     : -6.32386728667553E+01
->>>>>>> remotes/srostami/test
 total_energy        : -2.39421644770608E+02
 total_energy_eV     : -6.51499428024557E+03
 ...
@@ -4403,7 +4005,6 @@ band_energy         : -4.91376123104761E+01
 Ewald energy        : -1.12398263348885E+02
 psp_core            :  1.17964436789057E+01
 xc_dc               : -8.37798129279705E+01
-<<<<<<< HEAD
 PAW spherical_terms : -5.90240133492133E+00
 total_energy_dc     : -2.39421646243347E+02
 total_energy_dc_eV  : -6.51499432032085E+03
@@ -4417,11 +4018,6 @@ Total energy        : -2.91158640911058E+04
 Total energy DC     : -2.91158640925785E+04
 Total energy (eV)   : -7.92282954198669E+05
 Total energy DC (eV): -7.92282954238745E+05
-=======
-spherical_terms     : -5.90240133492133E+00
-total_energy_dc     : -2.39421646243347E+02
-total_energy_dc_eV  : -6.51499432032085E+03
->>>>>>> remotes/srostami/test
 ...
 
 
@@ -4472,21 +4068,6 @@ solver: {iscf: 17, nstep: 20, nline: 4, wfoptalg: 114, }
 tolerances: {toldff: 1.00E-06, }
 ...
 
-<<<<<<< HEAD
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -239.39979139125    -2.394E+02 3.756E-03 9.596E-03 1.713E-02 1.713E-02
- ETOT  2  -239.41822907833    -1.844E-02 1.906E-08 9.303E-03 3.074E-03 1.928E-02
- ETOT  3  -239.41818544267     4.364E-05 2.611E-08 2.095E-03 1.042E-04 1.925E-02
- ETOT  4  -239.41817897494     6.468E-06 2.193E-09 8.570E-04 9.604E-05 1.922E-02
- ETOT  5  -239.41817713480     1.840E-06 5.586E-10 4.626E-04 4.409E-05 1.921E-02
- ETOT  6  -239.41817590314     1.232E-06 6.652E-10 1.915E-04 4.480E-05 1.919E-02
- ETOT  7  -239.41817534106     5.621E-07 3.117E-10 6.263E-05 3.409E-05 1.918E-02
- ETOT  8  -239.41817508165     2.594E-07 4.584E-10 3.178E-06 3.492E-05 1.917E-02
- ETOT  9  -239.41817506848     1.316E-08 2.403E-11 7.538E-08 9.164E-06 1.917E-02
- ETOT 10  -239.41817506817     3.174E-10 5.655E-13 6.969E-10 1.523E-06 1.917E-02
- ETOT 11  -239.41817506817     4.832E-13 7.933E-14 1.413E-10 4.778E-08 1.917E-02
- ETOT 12  -239.41817506817    -9.663E-13 1.399E-14 1.816E-11 7.343E-08 1.917E-02
-=======
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
  ETOT  1  -239.39979139125    -2.394E+02 3.756E-03 9.596E-03 1.713E-02 1.713E-02 1.233E-02 1.233E-02
  ETOT  2  -239.41822907833    -1.844E-02 1.906E-08 9.303E-03 3.074E-03 1.928E-02 1.899E-04 1.214E-02
@@ -4500,7 +4081,6 @@ tolerances: {toldff: 1.00E-06, }
  ETOT 10  -239.41817506817     3.174E-10 5.655E-13 6.969E-10 1.523E-06 1.917E-02 4.954E-08 1.215E-02
  ETOT 11  -239.41817506817     4.832E-13 7.933E-14 1.413E-10 4.778E-08 1.917E-02 1.104E-08 1.215E-02
  ETOT 12  -239.41817506817    -9.663E-13 1.399E-14 1.816E-11 7.343E-08 1.917E-02 1.404E-08 1.215E-02
->>>>>>> remotes/srostami/test
 
  At SCF step   12, forces are converged :
   for the second time, max diff in force=  7.343E-08 < toldff=  1.000E-06
@@ -4739,11 +4319,7 @@ xc                  : -2.77797527085361E+01
 Ewald energy        : -1.12398263348885E+02
 psp_core            :  1.17964436789057E+01
 local_psp           : -1.82744755313685E+02
-<<<<<<< HEAD
 PAW spherical_terms : -6.32369649368280E+01
-=======
-spherical_terms     : -6.32369649368280E+01
->>>>>>> remotes/srostami/test
 total_energy        : -2.39418173529894E+02
 total_energy_eV     : -6.51489982298203E+03
 ...
@@ -4756,7 +4332,6 @@ band_energy         : -4.91316805077543E+01
 Ewald energy        : -1.12398263348885E+02
 psp_core            :  1.17964436789057E+01
 xc_dc               : -8.37825592195425E+01
-<<<<<<< HEAD
 PAW spherical_terms : -5.90211567089167E+00
 total_energy_dc     : -2.39418175068168E+02
 total_energy_dc_eV  : -6.51489986484060E+03
@@ -4770,11 +4345,6 @@ Total energy        : -2.91158606198651E+04
 Total energy DC     : -2.91158606214033E+04
 Total energy (eV)   : -7.92282859741406E+05
 Total energy DC (eV): -7.92282859783264E+05
-=======
-spherical_terms     : -5.90211567089167E+00
-total_energy_dc     : -2.39418175068168E+02
-total_energy_dc_eV  : -6.51489986484060E+03
->>>>>>> remotes/srostami/test
 ...
 
 
@@ -4859,22 +4429,6 @@ solver: {iscf: 17, nstep: 20, nline: 4, wfoptalg: 114, }
 tolerances: {toldff: 1.00E-06, }
 ...
 
-<<<<<<< HEAD
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -239.40737989939    -2.394E+02 3.796E-03 9.184E-03 1.809E-02 1.809E-02
- ETOT  2  -239.42541393960    -1.803E-02 1.810E-08 8.747E-03 3.259E-03 2.014E-02
- ETOT  3  -239.42537393663     4.000E-05 4.371E-08 1.982E-03 1.217E-04 2.009E-02
- ETOT  4  -239.42536809555     5.841E-06 8.066E-09 8.243E-04 1.145E-04 2.006E-02
- ETOT  5  -239.42536651534     1.580E-06 3.699E-10 4.732E-04 3.740E-05 2.004E-02
- ETOT  6  -239.42536568945     8.259E-07 7.181E-10 2.874E-04 3.265E-05 2.003E-02
- ETOT  7  -239.42536518957     4.999E-07 3.680E-10 1.711E-04 2.521E-05 2.002E-02
- ETOT  8  -239.42536482864     3.609E-07 1.539E-10 8.662E-05 2.418E-05 2.001E-02
- ETOT  9  -239.42536451517     3.135E-07 4.452E-10 1.272E-05 3.616E-05 2.000E-02
- ETOT 10  -239.42536446142     5.376E-08 1.945E-10 3.159E-10 2.375E-05 1.999E-02
- ETOT 11  -239.42536446186    -4.452E-10 3.913E-13 1.480E-09 1.423E-06 1.999E-02
- ETOT 12  -239.42536446186     9.663E-13 3.650E-15 7.609E-10 6.282E-08 1.999E-02
- ETOT 13  -239.42536446186     2.245E-12 3.522E-14 6.465E-11 1.123E-07 1.999E-02
-=======
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
  ETOT  1  -239.40737989939    -2.394E+02 3.796E-03 9.184E-03 1.809E-02 1.809E-02 0.000E+00 0.000E+00
  ETOT  2  -239.42541393960    -1.803E-02 1.810E-08 8.747E-03 3.259E-03 2.014E-02 0.000E+00 0.000E+00
@@ -4889,7 +4443,6 @@ tolerances: {toldff: 1.00E-06, }
  ETOT 11  -239.42536446186    -4.452E-10 3.913E-13 1.480E-09 1.423E-06 1.999E-02 0.000E+00 0.000E+00
  ETOT 12  -239.42536446186     9.663E-13 3.650E-15 7.609E-10 6.282E-08 1.999E-02 0.000E+00 0.000E+00
  ETOT 13  -239.42536446186     2.245E-12 3.522E-14 6.465E-11 1.123E-07 1.999E-02 0.000E+00 0.000E+00
->>>>>>> remotes/srostami/test
 
  At SCF step   13, forces are converged :
   for the second time, max diff in force=  1.123E-07 < toldff=  1.000E-06
@@ -4943,21 +4496,6 @@ force_length_stats: {min:   2.80098396E-05, max:   2.82749234E-02, mean:   7.140
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
-<<<<<<< HEAD
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.60199     3.809329     3.809329      7.618658     0.000000
-    2   1.60199     3.807513     3.807513      7.615025    -0.000000
-    3   1.60199     3.807513     3.807513      7.615025    -0.000000
-    4   1.60199     3.809329     3.809329      7.618658     0.000000
-    5   2.30022     2.001804     2.001804      4.003609    -0.000000
-    6   2.30022     2.001804     2.001804      4.003609    -0.000000
-    7   2.30022     1.998246     1.998246      3.996493    -0.000000
-    8   2.30022     1.998246     1.998246      3.996493     0.000000
- ---------------------------------------------------------------------
-  Sum:             23.233785    23.233785     46.467571    -0.000000
- Total magnetization (from the atomic spheres):            -0.000000
- Total magnetization (exact up - dn):                      -0.000000
-=======
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Na   1.60199     3.809329     3.809329      7.618658     0.000000
     2 Na   1.60199     3.807513     3.807513      7.615025    -0.000000
@@ -4972,7 +4510,6 @@ force_length_stats: {min:   2.80098396E-05, max:   2.82749234E-02, mean:   7.140
  Total magnetization (from the atomic spheres):               -0.000000
  Total magnetization (exact up - dn):                         -0.000000
 
->>>>>>> remotes/srostami/test
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -5144,11 +4681,7 @@ xc                  : -2.77950629277334E+01
 Ewald energy        : -1.12401246460393E+02
 psp_core            :  1.17964436789057E+01
 local_psp           : -1.82740399428064E+02
-<<<<<<< HEAD
 PAW spherical_terms : -6.32402594510988E+01
-=======
-spherical_terms     : -6.32402594510988E+01
->>>>>>> remotes/srostami/test
 total_energy        : -2.39425368760848E+02
 total_energy_eV     : -6.51509561517349E+03
 ...
@@ -5161,7 +4694,6 @@ band_energy         : -4.91437465993346E+01
 Ewald energy        : -1.12401246460393E+02
 psp_core            :  1.17964436789057E+01
 xc_dc               : -8.37741354126955E+01
-<<<<<<< HEAD
 PAW spherical_terms : -5.90267966833988E+00
 total_energy_dc     : -2.39425364461857E+02
 total_energy_dc_eV  : -6.51509549819200E+03
@@ -5175,11 +4707,6 @@ Total energy        : -2.91158678150960E+04
 Total energy DC     : -2.91158678107970E+04
 Total energy (eV)   : -7.92283055533597E+05
 Total energy DC (eV): -7.92283055416616E+05
-=======
-spherical_terms     : -5.90267966833988E+00
-total_energy_dc     : -2.39425364461857E+02
-total_energy_dc_eV  : -6.51509549819200E+03
->>>>>>> remotes/srostami/test
 ...
 
 
@@ -5230,21 +4757,6 @@ solver: {iscf: 17, nstep: 20, nline: 4, wfoptalg: 114, }
 tolerances: {toldff: 1.00E-06, }
 ...
 
-<<<<<<< HEAD
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -239.40369179662    -2.394E+02 3.788E-03 9.413E-03 1.751E-02 1.751E-02
- ETOT  2  -239.42194982969    -1.826E-02 1.860E-08 9.085E-03 3.133E-03 1.962E-02
- ETOT  3  -239.42190769307     4.214E-05 1.718E-08 2.054E-03 1.111E-04 1.958E-02
- ETOT  4  -239.42190146169     6.231E-06 8.497E-09 8.449E-04 1.032E-04 1.955E-02
- ETOT  5  -239.42189975749     1.704E-06 4.346E-10 4.754E-04 4.027E-05 1.953E-02
- ETOT  6  -239.42189877398     9.835E-07 2.586E-10 2.576E-04 3.563E-05 1.952E-02
- ETOT  7  -239.42189832308     4.509E-07 1.325E-10 1.539E-04 2.196E-05 1.951E-02
- ETOT  8  -239.42189786541     4.577E-07 2.536E-10 4.830E-05 3.223E-05 1.950E-02
- ETOT  9  -239.42189767361     1.918E-07 2.313E-10 3.890E-06 2.992E-05 1.949E-02
- ETOT 10  -239.42189765685     1.676E-08 5.725E-11 3.885E-10 1.229E-05 1.949E-02
- ETOT 11  -239.42189765693    -8.308E-11 3.098E-14 5.847E-10 6.322E-07 1.949E-02
- ETOT 12  -239.42189765694    -1.194E-12 4.041E-15 3.091E-10 3.160E-08 1.949E-02
-=======
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
  ETOT  1  -239.40369179662    -2.394E+02 3.788E-03 9.413E-03 1.751E-02 1.751E-02 6.161E-03 6.161E-03
  ETOT  2  -239.42194982969    -1.826E-02 1.860E-08 9.085E-03 3.133E-03 1.962E-02 9.064E-05 6.070E-03
@@ -5258,7 +4770,6 @@ tolerances: {toldff: 1.00E-06, }
  ETOT 10  -239.42189765685     1.676E-08 5.725E-11 3.885E-10 1.229E-05 1.949E-02 9.731E-08 6.077E-03
  ETOT 11  -239.42189765693    -8.308E-11 3.098E-14 5.847E-10 6.322E-07 1.949E-02 4.949E-09 6.077E-03
  ETOT 12  -239.42189765694    -1.194E-12 4.041E-15 3.091E-10 3.160E-08 1.949E-02 9.510E-10 6.077E-03
->>>>>>> remotes/srostami/test
 
  At SCF step   12, forces are converged :
   for the second time, max diff in force=  3.160E-08 < toldff=  1.000E-06
@@ -5497,11 +5008,7 @@ xc                  : -2.77873112614048E+01
 Ewald energy        : -1.12401246460393E+02
 psp_core            :  1.17964436789057E+01
 local_psp           : -1.82739670166909E+02
-<<<<<<< HEAD
 PAW spherical_terms : -6.32385572781809E+01
-=======
-spherical_terms     : -6.32385572781809E+01
->>>>>>> remotes/srostami/test
 total_energy        : -2.39421904968308E+02
 total_energy_eV     : -6.51500136058508E+03
 ...
@@ -5514,7 +5021,6 @@ band_energy         : -4.91378162286035E+01
 Ewald energy        : -1.12401246460393E+02
 psp_core            :  1.17964436789057E+01
 xc_dc               : -8.37768844138797E+01
-<<<<<<< HEAD
 PAW spherical_terms : -5.90239423296563E+00
 total_energy_dc     : -2.39421897656936E+02
 total_energy_dc_eV  : -6.51500116163252E+03
@@ -5528,11 +5034,6 @@ Total energy        : -2.91158643513035E+04
 Total energy DC     : -2.91158643439921E+04
 Total energy (eV)   : -7.92282961279009E+05
 Total energy DC (eV): -7.92282961080056E+05
-=======
-spherical_terms     : -5.90239423296563E+00
-total_energy_dc     : -2.39421897656936E+02
-total_energy_dc_eV  : -6.51500116163252E+03
->>>>>>> remotes/srostami/test
 ...
 
 
@@ -5583,21 +5084,6 @@ solver: {iscf: 17, nstep: 20, nline: 4, wfoptalg: 114, }
 tolerances: {toldff: 1.00E-06, }
 ...
 
-<<<<<<< HEAD
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -239.39999728706    -2.394E+02 3.769E-03 9.616E-03 1.691E-02 1.691E-02
- ETOT  2  -239.41847478634    -1.848E-02 1.899E-08 9.394E-03 2.991E-03 1.911E-02
- ETOT  3  -239.41843058527     4.420E-05 3.603E-08 2.116E-03 9.945E-05 1.907E-02
- ETOT  4  -239.41842403947     6.546E-06 1.791E-09 8.669E-04 9.227E-05 1.904E-02
- ETOT  5  -239.41842221649     1.823E-06 6.026E-10 4.774E-04 4.206E-05 1.903E-02
- ETOT  6  -239.41842119927     1.017E-06 5.267E-10 2.542E-04 3.374E-05 1.902E-02
- ETOT  7  -239.41842074864     4.506E-07 1.349E-10 1.523E-04 2.007E-05 1.901E-02
- ETOT  8  -239.41842019883     5.498E-07 6.813E-10 2.782E-05 3.840E-05 1.900E-02
- ETOT  9  -239.41842013550     6.333E-08 3.398E-11 1.330E-05 9.964E-06 1.899E-02
- ETOT 10  -239.41842007663     5.888E-08 1.561E-10 1.798E-10 1.970E-05 1.899E-02
- ETOT 11  -239.41842007689    -2.614E-10 5.479E-14 3.154E-10 7.499E-07 1.899E-02
- ETOT 12  -239.41842007688     4.803E-12 3.180E-14 1.209E-10 3.766E-08 1.899E-02
-=======
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
  ETOT  1  -239.39999728706    -2.394E+02 3.769E-03 9.616E-03 1.691E-02 1.691E-02 1.233E-02 1.233E-02
  ETOT  2  -239.41847478634    -1.848E-02 1.899E-08 9.394E-03 2.991E-03 1.911E-02 1.895E-04 1.214E-02
@@ -5611,7 +5097,6 @@ tolerances: {toldff: 1.00E-06, }
  ETOT 10  -239.41842007663     5.888E-08 1.561E-10 1.798E-10 1.970E-05 1.899E-02 3.155E-07 1.216E-02
  ETOT 11  -239.41842007689    -2.614E-10 5.479E-14 3.154E-10 7.499E-07 1.899E-02 9.259E-08 1.216E-02
  ETOT 12  -239.41842007688     4.803E-12 3.180E-14 1.209E-10 3.766E-08 1.899E-02 7.541E-09 1.216E-02
->>>>>>> remotes/srostami/test
 
  At SCF step   12, forces are converged :
   for the second time, max diff in force=  3.766E-08 < toldff=  1.000E-06
@@ -5850,11 +5335,7 @@ xc                  : -2.77795610050995E+01
 Ewald energy        : -1.12401246460393E+02
 psp_core            :  1.17964436789057E+01
 local_psp           : -1.82738908897908E+02
-<<<<<<< HEAD
 PAW spherical_terms : -6.32368490206498E+01
-=======
-spherical_terms     : -6.32368490206498E+01
->>>>>>> remotes/srostami/test
 total_energy        : -2.39418422653179E+02
 total_energy_eV     : -6.51490660197138E+03
 ...
@@ -5867,7 +5348,6 @@ band_energy         : -4.91318817042912E+01
 Ewald energy        : -1.12401246460393E+02
 psp_core            :  1.17964436789057E+01
 xc_dc               : -8.37796268856929E+01
-<<<<<<< HEAD
 PAW spherical_terms : -5.90210870541064E+00
 total_energy_dc     : -2.39418420076882E+02
 total_energy_dc_eV  : -6.51490653186677E+03
@@ -5881,11 +5361,6 @@ Total energy        : -2.91158608689884E+04
 Total energy DC     : -2.91158608664121E+04
 Total energy (eV)   : -7.92282866520395E+05
 Total energy DC (eV): -7.92282866450291E+05
-=======
-spherical_terms     : -5.90210870541064E+00
-total_energy_dc     : -2.39418420076882E+02
-total_energy_dc_eV  : -6.51490653186677E+03
->>>>>>> remotes/srostami/test
 ...
 
 
@@ -5970,21 +5445,6 @@ solver: {iscf: 17, nstep: 20, nline: 4, wfoptalg: 114, }
 tolerances: {toldff: 1.00E-06, }
 ...
 
-<<<<<<< HEAD
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -239.40755652389    -2.394E+02 3.807E-03 9.223E-03 1.791E-02 1.791E-02
- ETOT  2  -239.42562965494    -1.807E-02 1.800E-08 8.813E-03 3.173E-03 1.999E-02
- ETOT  3  -239.42558933221     4.032E-05 2.383E-08 1.996E-03 1.186E-04 1.994E-02
- ETOT  4  -239.42558341848     5.914E-06 1.093E-08 8.274E-04 1.101E-04 1.991E-02
- ETOT  5  -239.42558178534     1.633E-06 4.220E-10 4.656E-04 3.879E-05 1.989E-02
- ETOT  6  -239.42558085881     9.265E-07 5.220E-10 2.569E-04 3.638E-05 1.988E-02
- ETOT  7  -239.42558028946     5.693E-07 3.345E-10 1.239E-04 3.087E-05 1.987E-02
- ETOT  8  -239.42557988712     4.023E-07 3.405E-10 2.907E-05 3.588E-05 1.985E-02
- ETOT  9  -239.42557976768     1.194E-07 2.331E-10 8.368E-07 2.807E-05 1.984E-02
- ETOT 10  -239.42557976437     3.309E-09 1.064E-11 1.232E-09 5.903E-06 1.984E-02
- ETOT 11  -239.42557976440    -2.495E-11 8.282E-15 8.845E-10 1.763E-07 1.984E-02
- ETOT 12  -239.42557976440     7.105E-13 9.284E-15 4.864E-10 3.301E-08 1.984E-02
-=======
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
  ETOT  1  -239.40755652389    -2.394E+02 3.807E-03 9.223E-03 1.791E-02 1.791E-02 0.000E+00 0.000E+00
  ETOT  2  -239.42562965494    -1.807E-02 1.800E-08 8.813E-03 3.173E-03 1.999E-02 0.000E+00 0.000E+00
@@ -5998,7 +5458,6 @@ tolerances: {toldff: 1.00E-06, }
  ETOT 10  -239.42557976437     3.309E-09 1.064E-11 1.232E-09 5.903E-06 1.984E-02 0.000E+00 0.000E+00
  ETOT 11  -239.42557976440    -2.495E-11 8.282E-15 8.845E-10 1.763E-07 1.984E-02 0.000E+00 0.000E+00
  ETOT 12  -239.42557976440     7.105E-13 9.284E-15 4.864E-10 3.301E-08 1.984E-02 0.000E+00 0.000E+00
->>>>>>> remotes/srostami/test
 
  At SCF step   12, forces are converged :
   for the second time, max diff in force=  3.301E-08 < toldff=  1.000E-06
@@ -6052,21 +5511,6 @@ force_length_stats: {min:   1.14070503E-06, max:   2.80567346E-02, mean:   7.087
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
-<<<<<<< HEAD
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.60199     3.809951     3.809951      7.619902    -0.000000
-    2   1.60199     3.808119     3.808119      7.616237    -0.000000
-    3   1.60199     3.808119     3.808119      7.616237    -0.000000
-    4   1.60199     3.809951     3.809951      7.619902    -0.000000
-    5   2.30022     2.002029     2.002029      4.004058     0.000000
-    6   2.30022     2.002029     2.002029      4.004058     0.000000
-    7   2.30022     2.000069     2.000069      4.000137    -0.000000
-    8   2.30022     2.000069     2.000069      4.000137    -0.000000
- ---------------------------------------------------------------------
-  Sum:             23.240334    23.240334     46.480667     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                      -0.000000
-=======
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Na   1.60199     3.809951     3.809951      7.619902    -0.000000
     2 Na   1.60199     3.808119     3.808119      7.616237    -0.000000
@@ -6081,7 +5525,6 @@ force_length_stats: {min:   1.14070503E-06, max:   2.80567346E-02, mean:   7.087
  Total magnetization (from the atomic spheres):                0.000000
  Total magnetization (exact up - dn):                         -0.000000
 
->>>>>>> remotes/srostami/test
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -6253,11 +5696,7 @@ xc                  : -2.77949520370587E+01
 Ewald energy        : -1.12401660138411E+02
 psp_core            :  1.17964436789057E+01
 local_psp           : -1.82739798852448E+02
-<<<<<<< HEAD
 PAW spherical_terms : -6.32401789512916E+01
-=======
-spherical_terms     : -6.32401789512916E+01
->>>>>>> remotes/srostami/test
 total_energy        : -2.39425591752200E+02
 total_energy_eV     : -6.51510168307676E+03
 ...
@@ -6270,7 +5709,6 @@ band_energy         : -4.91438569011354E+01
 Ewald energy        : -1.12401660138411E+02
 psp_core            :  1.17964436789057E+01
 xc_dc               : -8.37738266353283E+01
-<<<<<<< HEAD
 PAW spherical_terms : -5.90267976842915E+00
 total_energy_dc     : -2.39425579764398E+02
 total_energy_dc_eV  : -6.51510135687209E+03
@@ -6284,11 +5722,6 @@ Total energy        : -2.91158680380874E+04
 Total energy DC     : -2.91158680260996E+04
 Total energy (eV)   : -7.92283061601501E+05
 Total energy DC (eV): -7.92283061275296E+05
-=======
-spherical_terms     : -5.90267976842915E+00
-total_energy_dc     : -2.39425579764398E+02
-total_energy_dc_eV  : -6.51510135687209E+03
->>>>>>> remotes/srostami/test
 ...
 
 
@@ -6339,21 +5772,6 @@ solver: {iscf: 17, nstep: 20, nline: 4, wfoptalg: 114, }
 tolerances: {toldff: 1.00E-06, }
 ...
 
-<<<<<<< HEAD
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -239.40385757218    -2.394E+02 3.799E-03 9.450E-03 1.732E-02 1.732E-02
- ETOT  2  -239.42216027326    -1.830E-02 1.852E-08 9.152E-03 3.045E-03 1.948E-02
- ETOT  3  -239.42211773774     4.254E-05 2.569E-08 2.067E-03 1.074E-04 1.943E-02
- ETOT  4  -239.42211145637     6.281E-06 4.960E-09 8.500E-04 9.824E-05 1.940E-02
- ETOT  5  -239.42210969832     1.758E-06 4.925E-10 4.690E-04 4.216E-05 1.938E-02
- ETOT  6  -239.42210862943     1.069E-06 4.452E-10 2.320E-04 3.862E-05 1.937E-02
- ETOT  7  -239.42210812084     5.086E-07 1.975E-10 1.147E-04 2.645E-05 1.936E-02
- ETOT  8  -239.42210768306     4.378E-07 5.136E-10 1.373E-05 4.025E-05 1.935E-02
- ETOT  9  -239.42210762815     5.490E-08 1.062E-10 9.159E-07 1.688E-05 1.934E-02
- ETOT 10  -239.42210762418     3.970E-09 7.807E-12 5.593E-10 5.575E-06 1.934E-02
- ETOT 11  -239.42210762420    -1.319E-11 1.030E-14 4.590E-10 3.081E-07 1.934E-02
- ETOT 12  -239.42210762420    -3.240E-12 1.266E-13 5.483E-11 1.164E-07 1.934E-02
-=======
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
  ETOT  1  -239.40385757218    -2.394E+02 3.799E-03 9.450E-03 1.732E-02 1.732E-02 6.157E-03 6.157E-03
  ETOT  2  -239.42216027326    -1.830E-02 1.852E-08 9.152E-03 3.045E-03 1.948E-02 9.082E-05 6.066E-03
@@ -6367,7 +5785,6 @@ tolerances: {toldff: 1.00E-06, }
  ETOT 10  -239.42210762418     3.970E-09 7.807E-12 5.593E-10 5.575E-06 1.934E-02 4.550E-08 6.073E-03
  ETOT 11  -239.42210762420    -1.319E-11 1.030E-14 4.590E-10 3.081E-07 1.934E-02 6.483E-09 6.073E-03
  ETOT 12  -239.42210762420    -3.240E-12 1.266E-13 5.483E-11 1.164E-07 1.934E-02 1.984E-09 6.073E-03
->>>>>>> remotes/srostami/test
 
  At SCF step   12, forces are converged :
   for the second time, max diff in force=  1.164E-07 < toldff=  1.000E-06
@@ -6606,11 +6023,7 @@ xc                  : -2.77871972606744E+01
 Ewald energy        : -1.12401660138411E+02
 psp_core            :  1.17964436789057E+01
 local_psp           : -1.82739055941059E+02
-<<<<<<< HEAD
 PAW spherical_terms : -6.32384736903902E+01
-=======
-spherical_terms     : -6.32384736903902E+01
->>>>>>> remotes/srostami/test
 total_energy        : -2.39422103729908E+02
 total_energy_eV     : -6.51500676916327E+03
 ...
@@ -6623,7 +6036,6 @@ band_energy         : -4.91379267303465E+01
 Ewald energy        : -1.12401660138411E+02
 psp_core            :  1.17964436789057E+01
 xc_dc               : -8.37765702613324E+01
-<<<<<<< HEAD
 PAW spherical_terms : -5.90239417301625E+00
 total_energy_dc     : -2.39422107624201E+02
 total_energy_dc_eV  : -6.51500687513235E+03
@@ -6637,11 +6049,6 @@ Total energy        : -2.91158645500651E+04
 Total energy DC     : -2.91158645539594E+04
 Total energy (eV)   : -7.92282966687587E+05
 Total energy DC (eV): -7.92282966793556E+05
-=======
-spherical_terms     : -5.90239417301625E+00
-total_energy_dc     : -2.39422107624201E+02
-total_energy_dc_eV  : -6.51500687513235E+03
->>>>>>> remotes/srostami/test
 ...
 
 
@@ -6692,21 +6099,6 @@ solver: {iscf: 17, nstep: 20, nline: 4, wfoptalg: 114, }
 tolerances: {toldff: 1.00E-06, }
 ...
 
-<<<<<<< HEAD
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -239.40015629254    -2.394E+02 3.780E-03 9.647E-03 1.672E-02 1.672E-02
- ETOT  2  -239.41867991780    -1.852E-02 1.890E-08 9.457E-03 2.901E-03 1.897E-02
- ETOT  3  -239.41863528428     4.463E-05 4.614E-08 2.125E-03 9.509E-05 1.893E-02
- ETOT  4  -239.41862869780     6.586E-06 1.627E-09 8.709E-04 8.960E-05 1.890E-02
- ETOT  5  -239.41862683145     1.866E-06 7.216E-10 4.732E-04 4.173E-05 1.888E-02
- ETOT  6  -239.41862575332     1.078E-06 7.307E-10 2.369E-04 3.534E-05 1.887E-02
- ETOT  7  -239.41862518842     5.649E-07 3.249E-10 1.092E-04 2.659E-05 1.886E-02
- ETOT  8  -239.41862473685     4.516E-07 1.034E-09 7.276E-06 4.117E-05 1.884E-02
- ETOT  9  -239.41862471386     2.299E-08 2.263E-11 1.849E-06 8.428E-06 1.884E-02
- ETOT 10  -239.41862470551     8.354E-09 2.151E-11 5.769E-10 6.868E-06 1.884E-02
- ETOT 11  -239.41862470554    -3.286E-11 2.710E-13 3.104E-10 2.337E-07 1.884E-02
- ETOT 12  -239.41862470554    -2.274E-12 8.934E-14 2.647E-11 5.259E-08 1.884E-02
-=======
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
  ETOT  1  -239.40015629254    -2.394E+02 3.780E-03 9.647E-03 1.672E-02 1.672E-02 1.232E-02 1.232E-02
  ETOT  2  -239.41867991780    -1.852E-02 1.890E-08 9.457E-03 2.901E-03 1.897E-02 1.889E-04 1.214E-02
@@ -6720,7 +6112,6 @@ tolerances: {toldff: 1.00E-06, }
  ETOT 10  -239.41862470551     8.354E-09 2.151E-11 5.769E-10 6.868E-06 1.884E-02 9.999E-08 1.215E-02
  ETOT 11  -239.41862470554    -3.286E-11 2.710E-13 3.104E-10 2.337E-07 1.884E-02 4.710E-08 1.215E-02
  ETOT 12  -239.41862470554    -2.274E-12 8.934E-14 2.647E-11 5.259E-08 1.884E-02 1.012E-08 1.215E-02
->>>>>>> remotes/srostami/test
 
  At SCF step   12, forces are converged :
   for the second time, max diff in force=  5.259E-08 < toldff=  1.000E-06
@@ -6959,11 +6350,7 @@ xc                  : -2.77794469061474E+01
 Ewald energy        : -1.12401660138411E+02
 psp_core            :  1.17964436789057E+01
 local_psp           : -1.82738288972081E+02
-<<<<<<< HEAD
 PAW spherical_terms : -6.32367691527199E+01
-=======
-spherical_terms     : -6.32367691527199E+01
->>>>>>> remotes/srostami/test
 total_energy        : -2.39418623598770E+02
 total_energy_eV     : -6.51491206997899E+03
 ...
@@ -6976,7 +6363,6 @@ band_energy         : -4.91319887462758E+01
 Ewald energy        : -1.12401660138411E+02
 psp_core            :  1.17964436789057E+01
 xc_dc               : -8.37793109000378E+01
-<<<<<<< HEAD
 PAW spherical_terms : -5.90210859972249E+00
 total_energy_dc     : -2.39418624705542E+02
 total_energy_dc_eV  : -6.51491210009577E+03
@@ -6990,11 +6376,6 @@ Total energy        : -2.91158610699339E+04
 Total energy DC     : -2.91158610710407E+04
 Total energy (eV)   : -7.92282871988403E+05
 Total energy DC (eV): -7.92282872018520E+05
-=======
-spherical_terms     : -5.90210859972249E+00
-total_energy_dc     : -2.39418624705542E+02
-total_energy_dc_eV  : -6.51491210009577E+03
->>>>>>> remotes/srostami/test
 ...
 
 
@@ -7293,18 +6674,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-<<<<<<< HEAD
-- Proc.   0 individual time (sec): cpu=        183.4  wall=        183.4
-=======
-- Proc.   0 individual time (sec): cpu=        175.2  wall=        175.2
->>>>>>> remotes/srostami/test
+- Proc.   0 individual time (sec): cpu=        172.6  wall=        172.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   0 COMMENTs to log file.
-<<<<<<< HEAD
-+Overall time at end (sec) : cpu=       4400.1  wall=       4400.4
-=======
-+Overall time at end (sec) : cpu=       4203.2  wall=       4203.5
->>>>>>> remotes/srostami/test
++Overall time at end (sec) : cpu=       4142.0  wall=       4142.3
