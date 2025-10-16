@@ -14582,8 +14582,8 @@ Variable(
     requires="[[usepaw]] == 1",
     added_in_version="v10",
     text=r"""
-If [[paw_add_core]] is activated (set to 1), then the core-electron contributions are added to the total energy displayed during the iterations and at the end of the calculation. These include the kinetic, electrostatic, and exchange-correlation contributions.  
-By default, this variable is not activated, and the core contributions are only listed at the end of the calculation, without being added to the total energy.  
+If [[paw_add_core]] is activated (set to 1), then the core-electron contributions are added to the total energy displayed during the iterations and at the end of the calculation. These include the kinetic, electrostatic, and exchange-correlation contributions.
+By default, this variable is not activated, and the core contributions are only listed at the end of the calculation, without being added to the total energy.
 This feature is available only when the PAW atomic data are in [PAW-XML](https://esl.cecam.org/en/data/paw-xml/) format.
 """,
 ),
