@@ -1,9 +1,5 @@
 
-<<<<<<< HEAD
-.Version 10.5.1.5 of ABINIT, released Jul 2025.
-=======
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
->>>>>>> remotes/srostami/test
+.Version 10.5.6.3 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -18,32 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-<<<<<<< HEAD
-.Starting date : Thu  9 Oct 2025.
-- ( at 17h59 )
+.Starting date : Wed 15 Oct 2025.
+- ( at 23h09 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/tutorial_tdftu_1/tdftu_1.abi
-- output file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/tutorial_tdftu_1/tdftu_1.abo
-=======
-.Starting date : Wed 10 Sep 2025.
-- ( at 12h09 )
-  
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/tutorial_tdftu_1/tdftu_1.abi
-- output file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/tutorial_tdftu_1/tdftu_1.abo
->>>>>>> remotes/srostami/test
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/TestBot_MPI1/tutorial_tdftu_1/tdftu_1.abi
+- output file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/TestBot_MPI1/tutorial_tdftu_1/tdftu_1.abo
 - root for input  files -> tdftu_1i
 - root for output files -> tdftu_1o
 
 - inpspheads : Reading pseudopotential header in XML form from 
-<<<<<<< HEAD
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/O.xml
-=======
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
-- inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/O.xml
->>>>>>> remotes/srostami/test
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/O.xml
  Magnetic group, Shubnikov type IV
  Fedorov space group R-3 m (#166)
  Magnetic Bravais lattice hR_I (rhombohedral, centered magnetic, #31)
@@ -209,15 +191,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.17444
 
 --- Pseudopotential description ------------------------------------------------
-<<<<<<< HEAD
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
-=======
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
->>>>>>> remotes/srostami/test
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 1.81432190
@@ -235,15 +211,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-<<<<<<< HEAD
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/O.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/O.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/O.xml
-=======
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/O.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/O.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/O.xml
->>>>>>> remotes/srostami/test
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/O.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/O.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -274,27 +244,6 @@ solver: {iscf: 17, nstep: 50, nline: 4, wfoptalg: 10, }
 tolerances: {toldfe: 1.00E-08, }
 ...
 
-<<<<<<< HEAD
-     iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -370.23175607564    -3.702E+02 7.946E+00 8.899E+01
- ETOT  2  -374.37076884000    -4.139E+00 1.521E-02 6.260E+02
- ETOT  3  -373.29067407154     1.080E+00 5.076E-02 2.331E+01
- ETOT  4  -373.27291146044     1.776E-02 1.241E-03 5.417E+00
- ETOT  5  -373.27276606638     1.454E-04 5.654E-04 2.852E+00
- ETOT  6  -373.27739422954    -4.628E-03 1.612E-04 3.320E+00
- ETOT  7  -373.28136835540    -3.974E-03 1.663E-04 2.637E+00
- ETOT  8  -373.28003865146     1.330E-03 2.114E-04 1.767E-01
- ETOT  9  -373.27998769701     5.095E-05 6.291E-05 2.012E-01
- ETOT 10  -373.28080633187    -8.186E-04 6.265E-05 1.965E-02
- ETOT 11  -373.28083517237    -2.884E-05 1.167E-05 2.205E-02
- ETOT 12  -373.28099305671    -1.579E-04 2.664E-05 1.586E-03
- ETOT 13  -373.28100571555    -1.266E-05 3.070E-06 2.908E-04
- ETOT 14  -373.28101096720    -5.252E-06 4.480E-06 1.209E-05
- ETOT 15  -373.28101122419    -2.570E-07 8.264E-07 1.691E-06
- ETOT 16  -373.28101124906    -2.486E-08 1.290E-06 3.620E-07
- ETOT 17  -373.28101125413    -5.079E-09 2.515E-07 7.333E-08
- ETOT 18  -373.28101125317     9.634E-10 3.946E-07 2.053E-09
-=======
      iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
  ETOT  1  -370.23175607564    -3.702E+02 7.946E+00 8.899E+01 2.982E-01 2.982E-01
  ETOT  2  -374.37076884000    -4.139E+00 1.521E-02 6.260E+02 2.709E-01 2.725E-02
@@ -314,7 +263,6 @@ tolerances: {toldfe: 1.00E-08, }
  ETOT 16  -373.28101124906    -2.486E-08 1.290E-06 3.620E-07 8.083E-05 1.376E+00
  ETOT 17  -373.28101125413    -5.079E-09 2.515E-07 7.333E-08 5.325E-05 1.376E+00
  ETOT 18  -373.28101125317     9.634E-10 3.946E-07 2.053E-09 1.203E-05 1.376E+00
->>>>>>> remotes/srostami/test
 
  At SCF step   18, etot is converged : 
   for the second time, diff in etot=  9.634E-10 < toldfe=  1.000E-08
@@ -360,17 +308,6 @@ force_length_stats: {min:   5.75061939E-32, max:   5.75061939E-32, mean:   5.750
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
-<<<<<<< HEAD
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.81432     8.564385     7.187993     15.752379     1.376392
-    2   1.81432     7.187993     8.564385     15.752379    -1.376392
-    3   1.41465     2.260909     2.260909      4.521817     0.000000
-    4   1.41465     2.260909     2.260909      4.521817     0.000000
- ---------------------------------------------------------------------
-  Sum:             20.274196    20.274196     40.548392     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                      -0.000000
-=======
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Ni   1.81432     8.564385     7.187993     15.752379     1.376392
     2 Ni   1.81432     7.187993     8.564385     15.752379    -1.376392
@@ -381,7 +318,6 @@ force_length_stats: {min:   5.75061939E-32, max:   5.75061939E-32, mean:   5.750
  Total magnetization (from the atomic spheres):                0.000000
  Total magnetization (exact up - dn):                         -0.000000
 
->>>>>>> remotes/srostami/test
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -553,11 +489,7 @@ xc                  : -1.95377752923170E+01
 Ewald energy        : -2.38122809319194E+02
 psp_core            :  1.02740489069164E+01
 local_psp           : -2.85860011802817E+02
-<<<<<<< HEAD
 PAW spherical_terms : -1.11468079773925E+01
-=======
-spherical_terms     : -1.11468079773925E+01
->>>>>>> remotes/srostami/test
 internal            : -3.73278367394632E+02
 '-kT*entropy'       : -2.64273092509388E-03
 total_energy        : -3.73281010125557E+02
@@ -572,16 +504,11 @@ band_energy         : -3.36831715477903E+01
 Ewald energy        : -2.38122809319194E+02
 psp_core            :  1.02740489069164E+01
 xc_dc               : -8.95974385077767E+01
-<<<<<<< HEAD
 PAW spherical_terms : -2.21489980544006E+01
-=======
-spherical_terms     : -2.21489980544006E+01
->>>>>>> remotes/srostami/test
 internal            : -3.73278368522245E+02
 '-kT*entropy'       : -2.64273092509388E-03
 total_energy_dc     : -3.73281011253170E+02
 total_energy_dc_eV  : -1.01574928848590E+04
-<<<<<<< HEAD
 ...
 
 
@@ -592,8 +519,6 @@ Total energy        : -3.19136030256964E+03
 Total energy DC     : -3.19136030369725E+03
 Total energy (eV)   : -8.68413302287882E+04
 Total energy DC (eV): -8.68413302594721E+04
-=======
->>>>>>> remotes/srostami/test
 ...
 
 
@@ -802,18 +727,10 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-<<<<<<< HEAD
-- Proc.   0 individual time (sec): cpu=          7.7  wall=          7.7
-=======
-- Proc.   0 individual time (sec): cpu=          7.9  wall=          8.0
->>>>>>> remotes/srostami/test
+- Proc.   0 individual time (sec): cpu=          7.8  wall=          7.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   2 COMMENTs to log file.
-<<<<<<< HEAD
-+Overall time at end (sec) : cpu=          7.7  wall=          7.7
-=======
-+Overall time at end (sec) : cpu=          7.9  wall=          8.0
->>>>>>> remotes/srostami/test
++Overall time at end (sec) : cpu=          7.8  wall=          7.8

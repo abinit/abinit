@@ -1,9 +1,5 @@
 
-<<<<<<< HEAD
-.Version 10.5.1.5 of ABINIT, released Jul 2025.
-=======
-.Version 10.4.5.9 of ABINIT, released Sep 2025.
->>>>>>> remotes/srostami/test
+.Version 10.5.6.3 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -18,27 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-<<<<<<< HEAD
-.Starting date : Thu  9 Oct 2025.
-- ( at 18h09 )
+.Starting date : Wed 15 Oct 2025.
+- ( at 23h19 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/v9_t14/t14.abi
-=======
-.Starting date : Wed  1 Oct 2025.
-- ( at 11h04 )
-  
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v9_t14/t14.abi
->>>>>>> remotes/srostami/test
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/TestBot_MPI1/v9_t14/t14.abi
 - output file    -> t14.abo
 - root for input  files -> t14i
 - root for output files -> t14o
 
 - inpspheads : Reading pseudopotential header in XML form from 
-<<<<<<< HEAD
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-=======
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
->>>>>>> remotes/srostami/test
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
  DATASET    1 : space group Im -3 m (#229); Bravais cI (body-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -611,15 +596,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.15090
 
 --- Pseudopotential description ------------------------------------------------
-<<<<<<< HEAD
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-=======
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
->>>>>>> remotes/srostami/test
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.11531574
@@ -878,11 +857,7 @@ tolerances: {tolwfr: 1.00E-12, }
    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    0.00000
    0.00000    0.00000    0.00000    0.00000
 
-<<<<<<< HEAD
- ETOT  3  -124.35003232112     4.77E-01 3.32E-01 3.59E+00 1.009
-=======
  ETOT  3  -124.35003232112     4.769E-01 3.321E-01 3.592E+00 9.758E-01 1.072E+00
->>>>>>> remotes/srostami/test
 
  prteigrs : about to open file t14o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.46613   Average Vxc (hartree)=  -0.59695
@@ -1092,11 +1067,7 @@ tolerances: {tolwfr: 1.00E-12, }
    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    0.00000
    0.00000    0.00000    0.00000    0.00000
 
-<<<<<<< HEAD
- ETOT  5  -124.33851642452    -3.35E-03 6.16E-03 9.35E-01 0.516
-=======
  ETOT  5  -124.33851642452    -3.354E-03 6.158E-03 9.349E-01 2.585E-01 5.513E-01
->>>>>>> remotes/srostami/test
 
  prteigrs : about to open file t14o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.44242   Average Vxc (hartree)=  -0.59425
@@ -2265,11 +2236,7 @@ xc                  : -1.19953899464545E+01
 Ewald energy        : -9.70462253202573E+01
 psp_core            :  1.00683191997598E+01
 local_psp           : -4.91464576597099E+01
-<<<<<<< HEAD
 PAW spherical_terms : -7.49727480099106E+00
-=======
-spherical_terms     : -7.49727480099106E+00
->>>>>>> remotes/srostami/test
 internal            : -1.24335960202364E+02
 '-kT*entropy'       : -1.97893947999587E-03
 total_energy        : -1.24337939141844E+02
@@ -2284,11 +2251,7 @@ band_energy         : -1.18855050830949E+01
 Ewald energy        : -9.70462253202573E+01
 psp_core            :  1.00683191997598E+01
 xc_dc               : -1.48452599711305E+01
-<<<<<<< HEAD
 PAW spherical_terms : -1.06272006298272E+01
-=======
-spherical_terms     : -1.06272006298272E+01
->>>>>>> remotes/srostami/test
 internal            : -1.24335871804550E+02
 '-kT*entropy'       : -1.97893947999587E-03
 total_energy_dc     : -1.24337850744030E+02
@@ -2357,15 +2320,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.15090
 
 --- Pseudopotential description ------------------------------------------------
-<<<<<<< HEAD
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-=======
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
->>>>>>> remotes/srostami/test
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.11531574
@@ -2545,11 +2502,7 @@ tolerances: {tolwfr: 1.00E-12, }
    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    0.08262    0.01168
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
 
-<<<<<<< HEAD
- ETOT  3  -124.38416476171    -5.333E-02 8.215E-02 4.381E+00
-=======
  ETOT  3  -124.38416476171    -5.333E-02 8.215E-02 4.381E+00 3.639E-02 1.091E+00
->>>>>>> remotes/srostami/test
 
  prteigrs : about to open file t14o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =   0.33902   Average Vxc (hartree)=  -0.60143
@@ -2759,11 +2712,7 @@ tolerances: {tolwfr: 1.00E-12, }
    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    0.00000    0.00000
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
 
-<<<<<<< HEAD
- ETOT  6  -124.33804257117    -1.521E-03 1.189E-03 1.505E-01
-=======
  ETOT  6  -124.33804257117    -1.521E-03 1.189E-03 1.505E-01 8.931E-02 4.639E-01
->>>>>>> remotes/srostami/test
 
  prteigrs : about to open file t14o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =   0.42272   Average Vxc (hartree)=  -0.59757
@@ -3655,11 +3604,7 @@ xc                  : -1.19953749467842E+01
 Ewald energy        : -9.70462253202573E+01
 psp_core            :  1.00683191997598E+01
 local_psp           : -4.91464207850594E+01
-<<<<<<< HEAD
 PAW spherical_terms : -7.49720413171887E+00
-=======
-spherical_terms     : -7.49720413171887E+00
->>>>>>> remotes/srostami/test
 internal            : -1.24335878815103E+02
 '-kT*entropy'       : -1.98018723100634E-03
 total_energy        : -1.24337859002334E+02
@@ -3674,16 +3619,11 @@ band_energy         : -1.18854776018262E+01
 Ewald energy        : -9.70462253202573E+01
 psp_core            :  1.00683191997598E+01
 xc_dc               : -1.48452526731016E+01
-<<<<<<< HEAD
 PAW spherical_terms : -1.06272339875595E+01
-=======
-spherical_terms     : -1.06272339875595E+01
->>>>>>> remotes/srostami/test
 internal            : -1.24335870382985E+02
 '-kT*entropy'       : -1.98018723100634E-03
 total_energy_dc     : -1.24337850570216E+02
 total_energy_dc_eV  : -3.38340498019346E+03
-<<<<<<< HEAD
 ...
 
 
@@ -3694,8 +3634,6 @@ Total energy        : -1.27268091312242E+03
 Total energy DC     : -1.27268090469030E+03
 Total energy (eV)   : -3.46314088582695E+04
 Total energy DC (eV): -3.46314086288199E+04
-=======
->>>>>>> remotes/srostami/test
 ...
 
 
@@ -3910,11 +3848,7 @@ tolerances: {tolwfr: 1.00E-12, }
    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    0.02613    0.01688
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
 
-<<<<<<< HEAD
- ETOT  3  -124.34954949170    -2.646E-02 3.745E-02 1.957E+00
-=======
  ETOT  3  -124.34954949170    -2.646E-02 3.745E-02 1.957E+00 4.339E-02 1.063E+00
->>>>>>> remotes/srostami/test
 
  prteigrs : about to open file t14o_DS3_EIG
  Fermi (or HOMO) energy (hartree) =   0.37374   Average Vxc (hartree)=  -0.59934
@@ -5016,11 +4950,7 @@ xc                  : -1.19953682022380E+01
 Ewald energy        : -9.70462253202573E+01
 psp_core            :  1.00683191997598E+01
 local_psp           : -4.91464634415390E+01
-<<<<<<< HEAD
 PAW spherical_terms : -7.49730617210189E+00
-=======
-spherical_terms     : -7.49730617210189E+00
->>>>>>> remotes/srostami/test
 internal            : -1.24335980261075E+02
 '-kT*entropy'       : -1.98119404157360E-03
 total_energy        : -1.24337961455117E+02
@@ -5035,11 +4965,7 @@ band_energy         : -1.18854753244326E+01
 Ewald energy        : -9.70462253202573E+01
 psp_core            :  1.00683191997598E+01
 xc_dc               : -1.48452880100482E+01
-<<<<<<< HEAD
 PAW spherical_terms : -1.06271998915714E+01
-=======
-spherical_terms     : -1.06271998915714E+01
->>>>>>> remotes/srostami/test
 internal            : -1.24335869346550E+02
 '-kT*entropy'       : -1.98119404157360E-03
 total_energy_dc     : -1.24337850540591E+02
@@ -5268,11 +5194,7 @@ tolerances: {tolwfr: 1.00E-12, }
    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    0.07750    0.00954
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
 
-<<<<<<< HEAD
- ETOT  3  -124.38446944541    -5.297E-02 7.795E-02 4.392E+00
-=======
  ETOT  3  -124.38446944541    -5.297E-02 7.795E-02 4.392E+00 2.689E-02 1.095E+00
->>>>>>> remotes/srostami/test
 
  prteigrs : about to open file t14o_DS4_EIG
  Fermi (or HOMO) energy (hartree) =   0.33876   Average Vxc (hartree)=  -0.60148
@@ -5412,11 +5334,7 @@ tolerances: {tolwfr: 1.00E-12, }
    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    0.00001    0.00000
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
 
-<<<<<<< HEAD
- ETOT  5  -124.33647094975    -3.632E-03 7.469E-03 2.115E-01
-=======
  ETOT  5  -124.33647094975    -3.632E-03 7.469E-03 2.115E-01 2.707E-01 5.572E-01
->>>>>>> remotes/srostami/test
 
  prteigrs : about to open file t14o_DS4_EIG
  Fermi (or HOMO) energy (hartree) =   0.42517   Average Vxc (hartree)=  -0.59652
@@ -6378,11 +6296,7 @@ xc                  : -1.19953778977385E+01
 Ewald energy        : -9.70462253202573E+01
 psp_core            :  1.00683191997598E+01
 local_psp           : -4.91464408183588E+01
-<<<<<<< HEAD
 PAW spherical_terms : -7.49717335216917E+00
-=======
-spherical_terms     : -7.49717335216917E+00
->>>>>>> remotes/srostami/test
 internal            : -1.24335855415382E+02
 '-kT*entropy'       : -1.98018416239170E-03
 total_energy        : -1.24337835599544E+02
@@ -6397,11 +6311,7 @@ band_energy         : -1.18854413572873E+01
 Ewald energy        : -9.70462253202573E+01
 psp_core            :  1.00683191997598E+01
 xc_dc               : -1.48452668930646E+01
-<<<<<<< HEAD
 PAW spherical_terms : -1.06272560185188E+01
-=======
-spherical_terms     : -1.06272560185188E+01
->>>>>>> remotes/srostami/test
 internal            : -1.24335870389368E+02
 '-kT*entropy'       : -1.98018416239170E-03
 total_energy_dc     : -1.24337850573530E+02
@@ -6770,11 +6680,7 @@ tolerances: {tolwfr: 1.00E-12, }
    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    0.00001    0.00000
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
 
-<<<<<<< HEAD
- ETOT  5  -124.33655028876    -3.528E-04 5.502E-03 1.954E-01
-=======
  ETOT  5  -124.33655028876    -3.528E-04 5.502E-03 1.954E-01 2.564E-01 5.635E-01
->>>>>>> remotes/srostami/test
 
  prteigrs : about to open file t14o_DS5_EIG
  Fermi (or HOMO) energy (hartree) =   0.42345   Average Vxc (hartree)=  -0.59671
@@ -6844,11 +6750,7 @@ tolerances: {tolwfr: 1.00E-12, }
    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    0.00000    0.00000
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
 
-<<<<<<< HEAD
- ETOT  6  -124.33794618193    -1.396E-03 1.195E-03 8.349E-02
-=======
  ETOT  6  -124.33794618193    -1.396E-03 1.195E-03 8.349E-02 6.707E-02 4.964E-01
->>>>>>> remotes/srostami/test
 
  prteigrs : about to open file t14o_DS5_EIG
  Fermi (or HOMO) energy (hartree) =   0.42439   Average Vxc (hartree)=  -0.59740
@@ -7740,11 +7642,7 @@ xc                  : -1.19953788783108E+01
 Ewald energy        : -9.70462253202573E+01
 psp_core            :  1.00683191997598E+01
 local_psp           : -4.91464469288454E+01
-<<<<<<< HEAD
 PAW spherical_terms : -7.49716773730401E+00
-=======
-spherical_terms     : -7.49716773730401E+00
->>>>>>> remotes/srostami/test
 internal            : -1.24335849714745E+02
 '-kT*entropy'       : -1.98012619763718E-03
 total_energy        : -1.24337829840943E+02
@@ -7759,11 +7657,7 @@ band_energy         : -1.18854278049885E+01
 Ewald energy        : -9.70462253202573E+01
 psp_core            :  1.00683191997598E+01
 xc_dc               : -1.48452711425726E+01
-<<<<<<< HEAD
 PAW spherical_terms : -1.06272653739828E+01
-=======
-spherical_terms     : -1.06272653739828E+01
->>>>>>> remotes/srostami/test
 internal            : -1.24335870442041E+02
 '-kT*entropy'       : -1.98012619763718E-03
 total_energy_dc     : -1.24337850568239E+02
@@ -8240,18 +8134,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-<<<<<<< HEAD
-- Proc.   0 individual time (sec): cpu=         13.9  wall=         13.9
-=======
-- Proc.   0 individual time (sec): cpu=         14.1  wall=         14.2
->>>>>>> remotes/srostami/test
+- Proc.   0 individual time (sec): cpu=         14.3  wall=         14.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered  10 WARNINGs and  30 COMMENTs to log file.
-<<<<<<< HEAD
-+Overall time at end (sec) : cpu=         13.9  wall=         13.9
-=======
-+Overall time at end (sec) : cpu=         14.1  wall=         14.2
->>>>>>> remotes/srostami/test
++Overall time at end (sec) : cpu=         14.3  wall=         14.4

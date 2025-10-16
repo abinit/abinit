@@ -1,9 +1,5 @@
 
-<<<<<<< HEAD
-.Version 10.5.1.5 of ABINIT, released Jul 2025.
-=======
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
->>>>>>> remotes/srostami/test
+.Version 10.5.6.3 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -18,31 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-<<<<<<< HEAD
-.Starting date : Thu  9 Oct 2025.
-- ( at 18h09 )
+.Starting date : Wed 15 Oct 2025.
+- ( at 23h19 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/v9_t11-t12/t11.abi
-=======
-.Starting date : Wed 10 Sep 2025.
-- ( at 12h19 )
-  
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v9_t11-t12/t11.abi
->>>>>>> remotes/srostami/test
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/TestBot_MPI1/v9_t11-t12/t11.abi
 - output file    -> t11.abo
 - root for input  files -> t11i
 - root for output files -> t11o
 
 - inpspheads : Reading pseudopotential header in XML form from 
-<<<<<<< HEAD
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Ga.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Ga.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/As.xml
-=======
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Ga.xml
-- inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/As.xml
->>>>>>> remotes/srostami/test
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/As.xml
  DATASET    1 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -516,15 +499,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     24.000   => boxcut(ratio)=   2.17791
 
 --- Pseudopotential description ------------------------------------------------
-<<<<<<< HEAD
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Ga.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Ga.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Ga.xml
-=======
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Ga.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Ga.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Ga.xml
->>>>>>> remotes/srostami/test
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Ga.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Ga.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Ga.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.10359248
@@ -542,15 +519,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-<<<<<<< HEAD
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/As.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/As.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/As.xml
-=======
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/As.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/As.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/As.xml
->>>>>>> remotes/srostami/test
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/As.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/As.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/As.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.10391912
@@ -2143,18 +2114,10 @@ P          mk1mem6         16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-<<<<<<< HEAD
-- Proc.   0 individual time (sec): cpu=          6.0  wall=          6.0
-=======
-- Proc.   0 individual time (sec): cpu=          6.1  wall=          6.1
->>>>>>> remotes/srostami/test
+- Proc.   0 individual time (sec): cpu=          6.1  wall=          6.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered  38 WARNINGs and  11 COMMENTs to log file.
-<<<<<<< HEAD
-+Overall time at end (sec) : cpu=          6.0  wall=          6.0
-=======
-+Overall time at end (sec) : cpu=          6.1  wall=          6.1
->>>>>>> remotes/srostami/test
++Overall time at end (sec) : cpu=          6.1  wall=          6.2

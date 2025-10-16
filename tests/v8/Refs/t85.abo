@@ -1,9 +1,5 @@
 
-<<<<<<< HEAD
-.Version 10.5.1.5 of ABINIT, released Jul 2025.
-=======
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
->>>>>>> remotes/srostami/test
+.Version 10.5.6.3 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -18,31 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-<<<<<<< HEAD
-.Starting date : Thu  9 Oct 2025.
-- ( at 18h08 )
+.Starting date : Wed 15 Oct 2025.
+- ( at 23h18 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/v8_t85-t86/t85.abi
-=======
-.Starting date : Wed 10 Sep 2025.
-- ( at 12h18 )
-  
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v8_t85-t86/t85.abi
->>>>>>> remotes/srostami/test
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/TestBot_MPI1/v8_t85-t86/t85.abi
 - output file    -> t85.abo
 - root for input  files -> t85i
 - root for output files -> t85o
 
 - inpspheads : Reading pseudopotential header in XML form from 
-<<<<<<< HEAD
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Al.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pw_std/Al.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/As.LDA_PW-JTH_sp.xml
-=======
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pw_std/Al.xml
-- inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/As.LDA_PW-JTH_sp.xml
->>>>>>> remotes/srostami/test
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/As.LDA_PW-JTH_sp.xml
  DATASET    1 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -405,15 +388,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.01497
 
 --- Pseudopotential description ------------------------------------------------
-<<<<<<< HEAD
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Al.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Al.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Al.xml
-=======
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pw_std/Al.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pw_std/Al.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pw_std/Al.xml
->>>>>>> remotes/srostami/test
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pw_std/Al.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pw_std/Al.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pw_std/Al.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90363307
@@ -431,15 +408,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-<<<<<<< HEAD
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/As.LDA_PW-JTH_sp.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/As.LDA_PW-JTH_sp.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/As.LDA_PW-JTH_sp.xml
-=======
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/As.LDA_PW-JTH_sp.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/As.LDA_PW-JTH_sp.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/As.LDA_PW-JTH_sp.xml
->>>>>>> remotes/srostami/test
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/As.LDA_PW-JTH_sp.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/As.LDA_PW-JTH_sp.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/As.LDA_PW-JTH_sp.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 2.10391912
@@ -519,15 +490,6 @@ force_length_stats: {min:   1.34293141E-27, max:   1.34293141E-27, mean:   1.342
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
-<<<<<<< HEAD
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.90363     0.369827     0.369827      0.739654    -0.000000
-    2   2.10392     1.382206     1.382206      2.764413    -0.000000
- ---------------------------------------------------------------------
-  Sum:              1.752034     1.752034      3.504067    -0.000000
- Total magnetization (from the atomic spheres):            -0.000000
- Total magnetization (exact up - dn):                       0.000000
-=======
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Al   1.90363     0.369827     0.369827      0.739654    -0.000000
     2 As   2.10392     1.382206     1.382206      2.764413    -0.000000
@@ -536,7 +498,6 @@ force_length_stats: {min:   1.34293141E-27, max:   1.34293141E-27, mean:   1.342
  Total magnetization (from the atomic spheres):               -0.000000
  Total magnetization (exact up - dn):                          0.000000
 
->>>>>>> remotes/srostami/test
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -686,11 +647,7 @@ band_energy         : -7.94192805339251E-01
 Ewald energy        : -8.45598635435666E+00
 psp_core            :  8.37953233227450E-01
 xc_dc               : -4.38355291386687E+00
-<<<<<<< HEAD
 PAW spherical_terms :  4.13780626448871E+00
-=======
-spherical_terms     :  4.13780626448871E+00
->>>>>>> remotes/srostami/test
 total_energy_dc     : -8.65797257584662E+00
 total_energy_dc_eV  : -2.35595415210715E+02
 ...
@@ -774,20 +731,6 @@ solver: {iscf: 17, nstep: 100, nline: 4, wfoptalg: 10, }
 tolerances: {tolwfr: 1.00E-22, }
 ...
 
-<<<<<<< HEAD
-     iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -8.6579725758279    -8.658E+00 2.864E-14 5.231E-09
- ETOT  2  -8.6579725754367     3.912E-10 6.130E-15 1.045E-10
- ETOT  3  -8.6579725754259     1.089E-11 1.481E-13 1.173E-11
- ETOT  4  -8.6579725754245     1.403E-12 9.340E-15 5.884E-13
- ETOT  5  -8.6579725754248    -3.180E-13 9.374E-16 5.536E-14
- ETOT  6  -8.6579725754246     1.279E-13 9.811E-18 3.407E-15
- ETOT  7  -8.6579725754247    -5.507E-14 5.020E-18 1.012E-16
- ETOT  8  -8.6579725754245     1.990E-13 1.758E-19 3.460E-17
- ETOT  9  -8.6579725754245    -4.263E-14 5.985E-20 1.073E-18
- ETOT 10  -8.6579725754243     2.434E-13 1.496E-21 1.777E-20
- ETOT 11  -8.6579725754246    -2.736E-13 9.752E-23 1.075E-21
-=======
      iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
  ETOT  1  -8.6579725758279    -8.658E+00 2.864E-14 5.231E-09 0.000E+00 0.000E+00
  ETOT  2  -8.6579725754367     3.912E-10 6.130E-15 1.045E-10 0.000E+00 0.000E+00
@@ -800,7 +743,6 @@ tolerances: {tolwfr: 1.00E-22, }
  ETOT  9  -8.6579725754245    -4.263E-14 5.985E-20 1.073E-18 0.000E+00 0.000E+00
  ETOT 10  -8.6579725754243     2.434E-13 1.496E-21 1.777E-20 0.000E+00 0.000E+00
  ETOT 11  -8.6579725754246    -2.736E-13 9.752E-23 1.075E-21 0.000E+00 0.000E+00
->>>>>>> remotes/srostami/test
 
  At SCF step   11   max residual=  9.75E-23 < tolwfr=  1.00E-22 =>converged.
 
@@ -841,15 +783,6 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
-<<<<<<< HEAD
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.90363     0.369836     0.369836      0.739672    -0.000000
-    2   2.10392     1.382191     1.382191      2.764382     0.000000
- ---------------------------------------------------------------------
-  Sum:              1.752027     1.752027      3.504054    -0.000000
- Total magnetization (from the atomic spheres):            -0.000000
- Total magnetization (exact up - dn):                       0.000000
-=======
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1 Al   1.90363     0.369836     0.369836      0.739672    -0.000000
     2 As   2.10392     1.382191     1.382191      2.764382     0.000000
@@ -858,7 +791,6 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Total magnetization (from the atomic spheres):               -0.000000
  Total magnetization (exact up - dn):                          0.000000
 
->>>>>>> remotes/srostami/test
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -995,11 +927,7 @@ xc                  : -7.46393962027346E+00
 Ewald energy        : -8.45598635435666E+00
 psp_core            :  8.37953233227450E-01
 local_psp           : -1.94398752723110E+00
-<<<<<<< HEAD
 PAW spherical_terms :  4.43142088540775E+00
-=======
-spherical_terms     :  4.43142088540775E+00
->>>>>>> remotes/srostami/test
 total_energy        : -8.65797257548136E+00
 total_energy_eV     : -2.35595415200776E+02
 ...
@@ -1012,11 +940,7 @@ band_energy         : -7.94183358978867E-01
 Ewald energy        : -8.45598635435666E+00
 psp_core            :  8.37953233227450E-01
 xc_dc               : -4.38356248696446E+00
-<<<<<<< HEAD
 PAW spherical_terms :  4.13780639164797E+00
-=======
-spherical_terms     :  4.13780639164797E+00
->>>>>>> remotes/srostami/test
 total_energy_dc     : -8.65797257542457E+00
 total_energy_dc_eV  : -2.35595415199231E+02
 ...
@@ -1388,23 +1312,6 @@ solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 10, }
 tolerances: {tolwfr: 1.00E-20, }
 ...
 
-<<<<<<< HEAD
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   6.6662613214530     -1.224E+01 2.977E-02 1.098E+03
- ETOT  2   5.5742520093097     -1.092E+00 3.906E-04 1.760E+02
- ETOT  3   5.3892481183958     -1.850E-01 1.032E-04 2.026E+00
- ETOT  4   5.3875999846045     -1.648E-03 3.443E-06 3.071E-02
- ETOT  5   5.3875775190927     -2.247E-05 3.624E-08 1.676E-03
- ETOT  6   5.3875763050426     -1.214E-06 2.631E-09 1.733E-04
- ETOT  7   5.3875761492333     -1.558E-07 3.158E-10 3.565E-06
- ETOT  8   5.3875761471293     -2.104E-09 9.039E-12 3.216E-08
- ETOT  9   5.3875761471085     -2.085E-11 4.345E-14 2.118E-09
- ETOT 10   5.3875761471073     -1.167E-12 2.770E-15 4.535E-11
- ETOT 11   5.3875761471073     -8.882E-15 2.294E-17 1.647E-12
- ETOT 12   5.3875761471073     -1.776E-14 5.525E-19 1.507E-13
- ETOT 13   5.3875761471073      1.776E-15 6.250E-20 1.140E-14
- ETOT 14   5.3875761471073      2.487E-14 6.270E-21 9.914E-16
-=======
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
 -ETOT  1   6.6662613214530     -1.224E+01 2.977E-02 1.098E+03 0.000E+00 0.000E+00
  ETOT  2   5.5742520093097     -1.092E+00 3.906E-04 1.760E+02 0.000E+00 0.000E+00
@@ -1420,7 +1327,6 @@ tolerances: {tolwfr: 1.00E-20, }
  ETOT 12   5.3875761471073     -1.776E-14 5.525E-19 1.507E-13 0.000E+00 0.000E+00
  ETOT 13   5.3875761471073      1.776E-15 6.250E-20 1.140E-14 0.000E+00 0.000E+00
  ETOT 14   5.3875761471073      2.487E-14 6.270E-21 9.914E-16 0.000E+00 0.000E+00
->>>>>>> remotes/srostami/test
 
  At SCF step   14   max residual=  6.27E-21 < tolwfr=  1.00E-20 =>converged.
 -open ddk wf file :t85o_DS3_1WF7
@@ -1484,24 +1390,6 @@ solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 10, }
 tolerances: {tolwfr: 1.00E-20, }
 ...
 
-<<<<<<< HEAD
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   32.510666670291     -6.198E+01 9.094E-02 2.032E+04
- ETOT  2   7.9360753670484     -2.457E+01 1.121E-02 2.000E+03
- ETOT  3   5.5005522772140     -2.436E+00 1.711E-03 2.796E+01
- ETOT  4   5.4715346478902     -2.902E-02 2.682E-05 5.968E-01
- ETOT  5   5.4711973526153     -3.373E-04 1.427E-06 7.489E-03
- ETOT  6   5.4711940513357     -3.301E-06 1.313E-08 3.083E-04
- ETOT  7   5.4711938413126     -2.100E-07 2.068E-10 1.371E-05
- ETOT  8   5.4711938235230     -1.779E-08 1.448E-11 6.492E-07
- ETOT  9   5.4711938225295     -9.935E-10 1.497E-12 1.132E-08
- ETOT 10   5.4711938225007     -2.888E-11 3.651E-14 1.637E-09
- ETOT 11   5.4711938224999     -8.100E-13 1.753E-15 4.404E-11
- ETOT 12   5.4711938224986     -1.236E-12 3.365E-17 3.077E-12
- ETOT 13   5.4711938224991      4.547E-13 1.036E-18 2.292E-13
- ETOT 14   5.4711938224999      7.958E-13 1.383E-20 2.105E-14
- ETOT 15   5.4711938224987     -1.137E-12 9.361E-21 1.905E-15
-=======
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
 -ETOT  1   32.510666670291     -6.198E+01 9.094E-02 2.032E+04 0.000E+00 0.000E+00
  ETOT  2   7.9360753670484     -2.457E+01 1.121E-02 2.000E+03 0.000E+00 0.000E+00
@@ -1518,7 +1406,6 @@ tolerances: {tolwfr: 1.00E-20, }
  ETOT 13   5.4711938224991      4.547E-13 1.036E-18 2.292E-13 0.000E+00 0.000E+00
  ETOT 14   5.4711938224999      7.958E-13 1.383E-20 2.105E-14 0.000E+00 0.000E+00
  ETOT 15   5.4711938224987     -1.137E-12 9.361E-21 1.905E-15 0.000E+00 0.000E+00
->>>>>>> remotes/srostami/test
 
  At SCF step   15   max residual=  9.36E-21 < tolwfr=  1.00E-20 =>converged.
 -open ddk wf file :t85o_DS3_1WF7
@@ -1583,24 +1470,6 @@ solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 10, }
 tolerances: {tolwfr: 1.00E-20, }
 ...
 
-<<<<<<< HEAD
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -334.31489598590     -3.343E+02 3.535E+00 8.708E+03
- ETOT  2  -344.85585750654     -1.054E+01 6.729E-03 9.089E+02
- ETOT  3  -346.03516728482     -1.179E+00 8.408E-04 1.048E+01
- ETOT  4  -346.04660416417     -1.144E-02 9.147E-06 3.806E-01
- ETOT  5  -346.04682068210     -2.165E-04 7.503E-07 8.543E-03
- ETOT  6  -346.04682552864     -4.847E-06 1.443E-08 4.478E-04
- ETOT  7  -346.04682586762     -3.390E-07 4.937E-10 7.394E-06
- ETOT  8  -346.04682587519     -7.563E-09 9.477E-12 2.864E-07
- ETOT  9  -346.04682587569     -5.053E-10 2.757E-13 1.914E-08
- ETOT 10  -346.04682587573     -3.718E-11 2.261E-14 3.367E-10
- ETOT 11  -346.04682587573     -4.547E-13 3.803E-16 2.266E-11
- ETOT 12  -346.04682587573     -2.842E-13 9.923E-18 1.634E-12
- ETOT 13  -346.04682587573      5.116E-13 3.303E-19 1.303E-13
- ETOT 14  -346.04682587573     -7.390E-13 2.992E-20 1.106E-14
- ETOT 15  -346.04682587573      9.663E-13 7.718E-21 1.012E-15
-=======
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
 -ETOT  1  -334.31489598590     -3.343E+02 3.535E+00 8.708E+03 0.000E+00 0.000E+00
  ETOT  2  -344.85585750654     -1.054E+01 6.729E-03 9.089E+02 0.000E+00 0.000E+00
@@ -1617,7 +1486,6 @@ tolerances: {tolwfr: 1.00E-20, }
  ETOT 13  -346.04682587573      5.116E-13 3.303E-19 1.303E-13 0.000E+00 0.000E+00
  ETOT 14  -346.04682587573     -7.390E-13 2.992E-20 1.106E-14 0.000E+00 0.000E+00
  ETOT 15  -346.04682587573      9.663E-13 7.718E-21 1.012E-15 0.000E+00 0.000E+00
->>>>>>> remotes/srostami/test
 
  At SCF step   15   max residual=  7.72E-21 < tolwfr=  1.00E-20 =>converged.
 -open ddk wf file :t85o_DS3_1WF7
@@ -1673,24 +1541,6 @@ solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 10, }
 tolerances: {tolwfr: 1.00E-20, }
 ...
 
-<<<<<<< HEAD
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -334.31489882124     -3.343E+02 3.535E+00 8.708E+03
- ETOT  2  -344.85585685403     -1.054E+01 6.729E-03 9.089E+02
- ETOT  3  -346.03516727829     -1.179E+00 8.408E-04 1.048E+01
- ETOT  4  -346.04660415535     -1.144E-02 9.147E-06 3.806E-01
- ETOT  5  -346.04682067153     -2.165E-04 7.504E-07 8.543E-03
- ETOT  6  -346.04682551800     -4.846E-06 1.443E-08 4.478E-04
- ETOT  7  -346.04682585697     -3.390E-07 4.937E-10 7.394E-06
- ETOT  8  -346.04682586453     -7.562E-09 9.485E-12 2.862E-07
- ETOT  9  -346.04682586504     -5.078E-10 2.762E-13 1.901E-08
- ETOT 10  -346.04682586507     -3.632E-11 2.249E-14 3.366E-10
- ETOT 11  -346.04682586507      0.000E+00 3.785E-16 2.265E-11
- ETOT 12  -346.04682586507     -2.274E-13 9.918E-18 1.633E-12
- ETOT 13  -346.04682586507     -3.979E-13 3.303E-19 1.304E-13
- ETOT 14  -346.04682586507      2.842E-13 3.002E-20 1.106E-14
- ETOT 15  -346.04682586507     -3.979E-13 9.625E-21 1.010E-15
-=======
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
 -ETOT  1  -334.31489882124     -3.343E+02 3.535E+00 8.708E+03 0.000E+00 0.000E+00
  ETOT  2  -344.85585685403     -1.054E+01 6.729E-03 9.089E+02 0.000E+00 0.000E+00
@@ -1707,7 +1557,6 @@ tolerances: {tolwfr: 1.00E-20, }
  ETOT 13  -346.04682586507     -3.979E-13 3.303E-19 1.304E-13 0.000E+00 0.000E+00
  ETOT 14  -346.04682586507      2.842E-13 3.002E-20 1.106E-14 0.000E+00 0.000E+00
  ETOT 15  -346.04682586507     -3.979E-13 9.625E-21 1.010E-15 0.000E+00 0.000E+00
->>>>>>> remotes/srostami/test
 
  At SCF step   15   max residual=  9.63E-21 < tolwfr=  1.00E-20 =>converged.
 -open ddk wf file :t85o_DS3_1WF8
@@ -1763,24 +1612,6 @@ solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 10, }
 tolerances: {tolwfr: 1.00E-20, }
 ...
 
-<<<<<<< HEAD
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -334.31489598052     -3.343E+02 3.535E+00 8.708E+03
- ETOT  2  -344.85585748545     -1.054E+01 6.729E-03 9.089E+02
- ETOT  3  -346.03516726365     -1.179E+00 8.408E-04 1.048E+01
- ETOT  4  -346.04660414287     -1.144E-02 9.147E-06 3.806E-01
- ETOT  5  -346.04682066080     -2.165E-04 7.503E-07 8.543E-03
- ETOT  6  -346.04682550734     -4.847E-06 1.443E-08 4.478E-04
- ETOT  7  -346.04682584632     -3.390E-07 4.937E-10 7.394E-06
- ETOT  8  -346.04682585389     -7.563E-09 9.477E-12 2.864E-07
- ETOT  9  -346.04682585439     -5.070E-10 2.757E-13 1.914E-08
- ETOT 10  -346.04682585443     -3.587E-11 2.261E-14 3.367E-10
- ETOT 11  -346.04682585443     -7.958E-13 3.803E-16 2.266E-11
- ETOT 12  -346.04682585443      1.705E-13 9.923E-18 1.634E-12
- ETOT 13  -346.04682585443     -1.705E-13 3.303E-19 1.303E-13
- ETOT 14  -346.04682585443      0.000E+00 2.995E-20 1.106E-14
- ETOT 15  -346.04682585443      1.705E-13 9.492E-21 1.007E-15
-=======
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
 -ETOT  1  -334.31489598052     -3.343E+02 3.535E+00 8.708E+03 0.000E+00 0.000E+00
  ETOT  2  -344.85585748545     -1.054E+01 6.729E-03 9.089E+02 0.000E+00 0.000E+00
@@ -1797,7 +1628,6 @@ tolerances: {tolwfr: 1.00E-20, }
  ETOT 13  -346.04682585443     -1.705E-13 3.303E-19 1.303E-13 0.000E+00 0.000E+00
  ETOT 14  -346.04682585443      0.000E+00 2.995E-20 1.106E-14 0.000E+00 0.000E+00
  ETOT 15  -346.04682585443      1.705E-13 9.492E-21 1.007E-15 0.000E+00 0.000E+00
->>>>>>> remotes/srostami/test
 
  At SCF step   15   max residual=  9.49E-21 < tolwfr=  1.00E-20 =>converged.
 -open ddk wf file :t85o_DS3_1WF9
@@ -2484,18 +2314,10 @@ P          mk1mem4         16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-<<<<<<< HEAD
-- Proc.   0 individual time (sec): cpu=         18.5  wall=         18.6
-=======
-- Proc.   0 individual time (sec): cpu=         18.8  wall=         18.8
->>>>>>> remotes/srostami/test
+- Proc.   0 individual time (sec): cpu=         19.1  wall=         19.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and  14 COMMENTs to log file.
-<<<<<<< HEAD
-+Overall time at end (sec) : cpu=         18.5  wall=         18.6
-=======
-+Overall time at end (sec) : cpu=         18.8  wall=         18.8
->>>>>>> remotes/srostami/test
++Overall time at end (sec) : cpu=         19.1  wall=         19.1
