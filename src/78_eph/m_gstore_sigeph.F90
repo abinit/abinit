@@ -195,8 +195,6 @@ contains
 !! dvdb<dbdb_type>=Database with the DFPT SCF potentials.
 !! ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
 !! pawfgr <type(pawfgr_type)>=fine grid parameters and related data
-!! pawang<pawang_type)>=PAW angular mesh and related data.
-!! pawrad(ntypat*usepaw)<pawrad_type>=Paw radial mesh and related data.
 !! pawtab(ntypat*usepaw)<pawtab_type>=Paw tabulated starting data.
 !! psps<pseudopotential_type>=Variables related to pseudopotentials.
 !!
@@ -205,7 +203,7 @@ contains
 !! SOURCE
 
 subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, dvdb, ifc, &
-                         pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+                         pawfgr, pawtab, psps, mpi_enreg, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -216,14 +214,13 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  type(ebands_t),intent(in) :: ebands
  type(dvdb_t),intent(inout) :: dvdb
  type(ifc_type),target,intent(in) :: ifc
- type(pawang_type),intent(in) :: pawang
  type(pseudopotential_type),intent(in) :: psps
  type(pawfgr_type),intent(in) :: pawfgr
  type(mpi_type),intent(inout) :: mpi_enreg
  integer,intent(in) :: comm
 !arrays
  integer,intent(in) :: ngfft(18),ngfftf(18)
- type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
+ !@type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
 
 !Local variables-------------------------------
@@ -231,8 +228,8 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  integer :: n1, n2, n3, n4, n5, n6, nb_k, nb_kq, glob_nk, ntemp, cplex
  integer :: spin, my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, gap_err, my_rank, ip1, ip2, nu, ipc, idir, ipert
  integer :: it, ik_ibz, ikq_ibz, band_k, band_kq, timrev_k, ii, ikcalc, natom, natom3, nsppol, nspden, nspinor, nkpt !,ik_bz
- integer :: isym_k,isym_kq,trev_k,trev_kq, isym_q, trev_q
- integer :: istwf_k, istwf_kq, istwf_kqirr, npw_k, npw_kq, npw_kqirr, nkpg_kq
+ integer :: isym_k,isym_kq,trev_k,trev_kq
+ integer :: istwf_k, istwf_kq, npw_k, npw_kq, nkpg_kq
  integer :: nfft, nfftf, mgfft, mgfftf, nkpg !,nkpg1,cnt, enough_stern
  integer :: usecprj, mpw, nbsum, ibsum_kq, band_me, u1_band ! usevnl,optlocal,optnl,opt_gvnlx1,
  real(dp) :: wqnu, gkq2, weight_q, eig0nk, eig0mk, eig0mkq, ediff, gmod2, hmod2, gdw2 !, gdw2_stern, rtmp !,nqnu,gkq2,gkq2_pf,
@@ -267,7 +264,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  integer,allocatable :: gbound_kq(:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:) !, ihave_ikibz_spin(:,:)
  real(dp),allocatable :: bra_kq(:,:), kets_k(:,:,:) !, h1kets_kq(:,:,:,:), cgwork(:,:)
- real(dp),allocatable :: stern_ppb(:,:,:,:), stern_dw(:,:,:,:)
+ real(dp),allocatable :: stern_ppb(:,:,:,:) !, stern_dw(:,:,:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: rfact_t(:), nqnu(:), f_mkq(:) !, f_nk(:),  g2_pmnk(:,:,:,:)
  complex(dp),allocatable :: cfact_t(:), tpp_red(:,:), cfact_wr(:) !,fmw_frohl_sphcorr(:,:,:,:),

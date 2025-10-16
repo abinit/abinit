@@ -695,9 +695,9 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
 
  case (24)
-   ! Compute e-ph self-energy from GSTORE.nc file
+   ! Compute e-ph self-energy from GSTORE.nc file.
    call gstore_sigeph(wfk0_path, ngfftc, ngfftf, dtset, dtfil, cryst, ebands, dvdb, ifc, &
-                      pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+                      pawfgr, pawtab, psps, mpi_enreg, comm)
 
  case (5, -5)
    ! Interpolate the DFPT potential.
@@ -744,7 +744,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
    ! Wannierize the e-ph matrix elements if the ABIWAN.nc file is provided.
    if (dtfil%filabiwanin /= ABI_NOFILE) then
-      ! Init gstore from pre-existent file. gstore_gname and read_dw are not relevant here.
+     ! Init gstore from pre-existent file. gstore_gname and read_dw are not relevant here.
      call gstore%from_ncpath(gstore_path, with_cplex2, dtset, cryst, ebands, ifc, &
                             "atom", dtset%gstore_gname, .False., comm)
      call gstore%wannierize_and_write_gwan(dvdb, dtfil)
@@ -797,8 +797,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (14)
    ! Molecular Berry Curvature.
-   ! ! Customize input vars for this eph_task.
-   ! dtset%gstore_qzone = "ibz"; dtset%gstore_kzone = "bz"; dtset%gstore_with_vk = 1
    call wrtout(units, sjoin(" Computing Berry curvature from pre-existent GSTORE file:", dtfil%filgstorein))
    call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, cryst, ebands, ifc, &
                            "atom", dtset%gstore_gname, .False., comm)
