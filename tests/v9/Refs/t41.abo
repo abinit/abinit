@@ -1,9 +1,5 @@
 
-<<<<<<< HEAD
-.Version 10.5.1.5 of ABINIT, released Jul 2025.
-=======
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
->>>>>>> remotes/srostami/test
+.Version 10.5.6.3 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -18,27 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-<<<<<<< HEAD
-.Starting date : Thu  9 Oct 2025.
-- ( at 18h09 )
+.Starting date : Wed 15 Oct 2025.
+- ( at 23h19 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/v9_t41/t41.abi
-=======
-.Starting date : Wed 10 Sep 2025.
-- ( at 12h19 )
-  
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v9_t41/t41.abi
->>>>>>> remotes/srostami/test
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/TestBot_MPI1/v9_t41/t41.abi
 - output file    -> t41.abo
 - root for input  files -> t41i
 - root for output files -> t41o
 
 - inpspheads : Reading pseudopotential header in XML form from 
-<<<<<<< HEAD
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-=======
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
->>>>>>> remotes/srostami/test
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
  DATASET    1 : space group Im -3 m (#229); Bravais cI (body-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -481,15 +466,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.15090
 
 --- Pseudopotential description ------------------------------------------------
-<<<<<<< HEAD
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-=======
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
->>>>>>> remotes/srostami/test
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.11531574
@@ -520,29 +499,6 @@ solver: {iscf: 17, nstep: 20, nline: 6, wfoptalg: 10, }
 tolerances: {tolwfr: 1.00E-18, }
 ...
 
-<<<<<<< HEAD
-     iter   Etot(hartree)     deltaE(h) residm    nres2    magn
- ETOT  1  -123.85179772267    -1.24E+02 1.61E+01 9.70E+01 1.337
- ETOT  2  -124.78117903634    -9.29E-01 3.35E-02 9.59E+01 2.187
- ETOT  3  -124.35458556441     4.27E-01 2.48E-01 6.22E-01 1.644
- ETOT  4  -124.34945726929     5.13E-03 1.62E-01 5.01E-01 1.671
- ETOT  5  -124.34835833632     1.10E-03 2.06E-02 3.06E-01 1.502
- ETOT  6  -124.34855015760    -1.92E-04 2.98E-03 2.25E-01 1.424
- ETOT  7  -124.34835898568     1.91E-04 3.83E-04 2.71E-02 1.274
- ETOT  8  -124.34830272913     5.63E-05 1.44E-05 5.57E-03 1.291
- ETOT  9  -124.34827252308     3.02E-05 5.59E-06 1.38E-03 1.300
- ETOT 10  -124.34826997288     2.55E-06 3.33E-06 9.02E-05 1.289
- ETOT 11  -124.34826954953     4.23E-07 1.45E-07 3.56E-05 1.289
- ETOT 12  -124.34826855639     9.93E-07 2.25E-07 1.81E-05 1.296
- ETOT 13  -124.34826924207    -6.86E-07 2.85E-08 3.07E-08 1.293
- ETOT 14  -124.34826928352    -4.15E-08 2.62E-10 4.06E-08 1.293
- ETOT 15  -124.34826926956     1.40E-08 2.04E-10 1.28E-08 1.293
- ETOT 16  -124.34826926815     1.42E-09 3.89E-11 1.62E-10 1.293
- ETOT 17  -124.34826926844    -2.96E-10 5.88E-13 8.54E-12 1.293
- ETOT 18  -124.34826926830     1.42E-10 1.01E-14 1.11E-12 1.293
- ETOT 19  -124.34826926822     7.81E-11 5.89E-16 1.22E-13 1.293
- ETOT 20  -124.34826926821     9.76E-12 2.55E-16 3.78E-15 1.293
-=======
      iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
  ETOT  1  -123.85179772267    -1.239E+02 1.610E+01 9.704E+01 1.304E+00 1.304E+00
  ETOT  2  -124.78117903634    -9.294E-01 3.354E-02 9.595E+01 9.132E-01 2.217E+00
@@ -564,7 +520,6 @@ tolerances: {tolwfr: 1.00E-18, }
  ETOT 18  -124.34826926830     1.417E-10 1.010E-14 1.111E-12 6.324E-07 1.319E+00
  ETOT 19  -124.34826926822     7.812E-11 5.891E-16 1.217E-13 1.926E-07 1.319E+00
  ETOT 20  -124.34826926821     9.763E-12 2.546E-16 3.782E-15 2.184E-08 1.319E+00
->>>>>>> remotes/srostami/test
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.51703996E-03  sigma(3 2)=  0.00000000E+00
@@ -738,11 +693,7 @@ xc                  : -3.59602985618659E+00
 Ewald energy        : -9.70462253202573E+01
 psp_core            :  8.99300246551396E+00
 local_psp           : -5.26757319771044E+01
-<<<<<<< HEAD
 PAW spherical_terms : -1.15138125174552E+01
-=======
-spherical_terms     : -1.15138125174552E+01
->>>>>>> remotes/srostami/test
 internal            : -1.24346761067678E+02
 '-kT*entropy'       : -1.50816510095134E-03
 total_energy        : -1.24348269232779E+02
@@ -757,11 +708,7 @@ band_energy         : -1.07550436536094E+01
 Ewald energy        : -9.70462253202573E+01
 psp_core            :  8.99300246551396E+00
 xc_dc               : -1.75261742160779E+01
-<<<<<<< HEAD
 PAW spherical_terms : -8.01232037868183E+00
-=======
-spherical_terms     : -8.01232037868183E+00
->>>>>>> remotes/srostami/test
 internal            : -1.24346761103112E+02
 '-kT*entropy'       : -1.50816510095134E-03
 total_energy_dc     : -1.24348269268213E+02
@@ -872,17 +819,10 @@ solver: {iscf: 7, nstep: 3, nline: 8, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-05, }
 ...
 
-<<<<<<< HEAD
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   325.80330735575      2.153E+02 8.075E-03 7.595E+05
- ETOT  2   19.616264551773     -3.062E+02 5.807E-04 4.819E+04
- ETOT  3   1.1588386494459     -1.846E+01 8.319E-05 7.476E+02
-=======
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
 -ETOT  1   325.80330735575      2.153E+02 8.075E-03 7.595E+05 9.751E-05 2.981E-04
  ETOT  2   19.616264551773     -3.062E+02 5.807E-04 4.819E+04 1.927E-03 1.478E-04
  ETOT  3   1.1588386494459     -1.846E+01 8.319E-05 7.476E+02 2.591E-02 1.450E-05
->>>>>>> remotes/srostami/test
 
  scprqt:  WARNING -
   nstep=    3 was not enough SCF cycles to converge;
@@ -959,17 +899,10 @@ solver: {iscf: 7, nstep: 3, nline: 8, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-05, }
 ...
 
-<<<<<<< HEAD
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   3315.9512795054      3.226E+03 1.300E-02 1.424E+07
- ETOT  2   59.411016210138     -3.257E+03 6.540E-03 1.988E+05
- ETOT  3   7.6803976277947     -5.173E+01 7.580E-05 1.615E+03
-=======
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
 -ETOT  1   3315.9512795054      3.226E+03 1.300E-02 1.424E+07 3.985E+01 2.455E+00
  ETOT  2   59.411016210138     -3.257E+03 6.540E-03 1.988E+05 2.070E+01 3.338E+00
  ETOT  3   7.6803976277947     -5.173E+01 7.580E-05 1.615E+03 2.321E+00 3.128E+00
->>>>>>> remotes/srostami/test
 
  scprqt:  WARNING -
   nstep=    3 was not enough SCF cycles to converge;
@@ -1536,18 +1469,10 @@ P          mk1mem          64
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-<<<<<<< HEAD
-- Proc.   0 individual time (sec): cpu=         16.3  wall=         16.3
-=======
-- Proc.   0 individual time (sec): cpu=         16.2  wall=         16.3
->>>>>>> remotes/srostami/test
+- Proc.   0 individual time (sec): cpu=         16.5  wall=         16.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered  12 WARNINGs and   4 COMMENTs to log file.
-<<<<<<< HEAD
-+Overall time at end (sec) : cpu=         16.3  wall=         16.3
-=======
-+Overall time at end (sec) : cpu=         16.2  wall=         16.3
->>>>>>> remotes/srostami/test
++Overall time at end (sec) : cpu=         16.5  wall=         16.6
