@@ -1148,7 +1148,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_triqs_measure_density_matrix        = (dtset%dmft_triqs_measure_density_matrix == 1)
  paw_dmft%dmft_triqs_time_invariance               = (dtset%dmft_triqs_time_invariance == 1)
  paw_dmft%dmft_triqs_use_norm_as_weight            = (dtset%dmft_triqs_use_norm_as_weight == 1)
- paw_dmft%dmft_triqs_leg_measure                   = (dtset%dmft_triqs_measure_G_l == 1)
+ paw_dmft%dmft_triqs_leg_measure                   = (dtset%dmft_triqs_measure_g_l == 1)
  paw_dmft%dmft_triqs_off_diag                      = (off_diag == 1)
  paw_dmft%dmft_triqs_imag_threshold                = dtset%dmft_triqs_imag_threshold
  paw_dmft%dmft_triqs_det_precision_warning         = dtset%dmft_triqs_det_precision_warning
@@ -2290,17 +2290,19 @@ subroutine print_dmft(paw_dmft,pawprtvol)
      & "  --- fermie_dft = ",paw_dmft%fermie_dft,ch10,&
      & "  --- temp       = ",paw_dmft%temp      ,ch10
    call wrtout(std_out,message,'COLL')
-   write(message,'(7(a,15x,i8,a),a,2x,e21.14,3a)') &
-     & "  --- natpawu    = ",paw_dmft%natpawu   ,ch10,&
-     & "  --- dmft_iter  = ",paw_dmft%dmft_iter ,ch10,&
-     & "  --- dmft_solv  = ",paw_dmft%dmft_solv ,ch10,&
-     & "  --- dmft_nwlo  = ",paw_dmft%dmft_nwlo ,ch10,&
-     & "  --- dmft_nwli  = ",paw_dmft%dmft_nwli ,ch10,&
-     & "  --- dmft_dc    = ",paw_dmft%dmft_dc   ,ch10,&
-     & "  --- dmftqmc_l  = ",paw_dmft%dmftqmc_l ,ch10,&
-     & "  --- dmftqmc_n  = ",paw_dmft%dmftqmc_n ,ch10,&
-     & "  -------------------------------------------------",ch10
-   call wrtout(std_out,message,'COLL')
+   if (paw_dmft%dmft_solv /= 6 .and. paw_dmft%dmft_solv /= 7) then
+     write(message,'(7(a,15x,i8,a),a,2x,e21.14,3a)') &
+       & "  --- natpawu    = ",paw_dmft%natpawu   ,ch10,&
+       & "  --- dmft_iter  = ",paw_dmft%dmft_iter ,ch10,&
+       & "  --- dmft_solv  = ",paw_dmft%dmft_solv ,ch10,&
+       & "  --- dmft_nwlo  = ",paw_dmft%dmft_nwlo ,ch10,&
+       & "  --- dmft_nwli  = ",paw_dmft%dmft_nwli ,ch10,&
+       & "  --- dmft_dc    = ",paw_dmft%dmft_dc   ,ch10,&
+       & "  --- dmftqmc_l  = ",paw_dmft%dmftqmc_l ,ch10,&
+       & "  --- dmftqmc_n  = ",paw_dmft%dmftqmc_n ,ch10,&
+       & "  -------------------------------------------------",ch10
+     call wrtout(std_out,message,'COLL')
+   end if
 
 !  write(message,'(4a,3(a,2x,f8.3,a),8(a,2x,i8,a),a)') "-----------------------------------------------",ch10,&
 !&   "--- Data for DMFT ",ch10,&

@@ -2997,7 +2997,7 @@ Variable(
     vartype="integer",
     topics=['DMFT_basic', 'DmftTriqsCthyb_compulsory'],
     dimensions="scalar",
-    defaultval="None if [[dmft_solv]] in [6,7], 1 otherwise",
+    defaultval="None if [[dmft_solv]] $\in$ [6,7], 1 otherwise",
     mnemonics="Dynamical Mean Field Theory: Double Counting",
     requires="[[usedmft]] == 1",
     added_in_version="before_v9",
@@ -3064,15 +3064,12 @@ Variable(
     vartype="integer",
     topics=['DMFT_compulsory', 'DmftTriqsCthyb_compulsory'],
     dimensions="scalar",
-    defaultval="None if [[dmft_solv]] in [6,7], 10 otherwise",
+    defaultval="None if [[dmft_solv]] $\in$ [6,7], 10 otherwise",
     mnemonics="Dynamical Mean Field Theory: number of DMFT ITERations",
     requires="[[usedmft]] == 1",
     added_in_version="before_v9",
     text=r"""
-Number of DMFT iterations in one DFT+DMFT cycle, with fixed density.
-The number of DFT+DMFT cycles is controlled by [[nstep]], for a total of
- [[nstep]] $\times$ [[dmft_iter]] DMFT iterations, with a charge self-consistent
-update every [[dmft_iter]] iterations.
+Number of iterations in the DMFT inner loop.
 """,
 ),
 
@@ -3235,7 +3232,7 @@ Variable(
     abivarname="dmft_orbital",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_expert', 'DmftTriqsCthyb_expert'],
+    topics=['DMFT_useful', 'DmftTriqsCthyb_useful'],
     dimensions=['[[ntypat]]'],
     defaultval=1,
     mnemonics="Dynamical Mean Field Theory: correlated ORBITAL",
@@ -3243,7 +3240,7 @@ Variable(
     added_in_version="before_v10.5.6",
     text=r"""
 Set the reduced radial wavefunction $u_l(r)$ of the local orbitals $\frac{u_l(r)}{r} Y_{lm}(\hat{r})$
-for each atom type, with $Y_{lm}(\hat{r})$ the real spherical harmonics.
+for each atom type, where $Y_{lm}(\hat{r})$ are the real spherical harmonics.
 For uncorrelated atom types, simply put any arbitrary value.
 The same radial wavefunction is used for all angular momentum channels $m$ of a given atom type.
 
@@ -3258,7 +3255,7 @@ Variable(
     abivarname="dmft_orbital_filepath",
     varset="dmft",
     vartype="string",
-    topics=['DMFT_expert', 'DmftTriqsCthyb_expert'],
+    topics=['DMFT_useful', 'DmftTriqsCthyb_useful'],
     dimensions="scalar",
     mnemonics="Dynamical Mean Field Theory: correlated ORBITAL FILEPATH",
     requires="[[usedmft]] == 1, [[dmft_orbital]] $\le$ 0",
@@ -3331,7 +3328,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Dynamical Mean Field Theory: PRinT WANnier functions",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7]",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 Compute and write on file the reduced radial part $u_l(r)$ of the Wannier functions
@@ -3339,7 +3336,7 @@ Compute and write on file the reduced radial part $u_l(r)$ of the Wannier functi
 This is computed on the same radial mesh as the PAW one, extended up to the radius [[dmft_wanrad]].
 It corresponds to the local orbital that is used in practice in the code, and is different from
 [[dmft_orbital]] in the general case (unless your energy window is large enough to have a closure
-relation). This is only implemented in the case [[dmft_solv] in [6,7].
+relation). This is only available in the case [[dmft_solv]] $\in$ [6,7].
 """,
 ),
 
@@ -3449,10 +3446,10 @@ rotationally invariant formulation, see e.g. [[cite:Antipov2012]].
 The ABINIT/CT Hyb implementation is discussed in [[cite:Gonze2016]].
 The TRIQS/CT Hyb implementation is described in [[cite:Seth2016]].
 
-See the useful variables for CT-QMC solver: [[dmftctqmc_basis]],
+See the useful variables for ABINIT/CT-QMC solver: [[dmftctqmc_basis]],
 [[dmftctqmc_check]], [[dmftctqmc_correl]], [[dmftctqmc_gmove]],
 [[dmftctqmc_grnns]], [[dmftctqmc_meas]], [[dmftctqmc_mrka]],
-[[dmftctqmc_mov]], [[dmftctqmc_order]], [[dmft_triqs_nleg]],
+[[dmftctqmc_mov]], [[dmftctqmc_order]],
 [[dmftqmc_l]], [[dmftqmc_n]], [[dmftqmc_seed]], [[dmftqmc_therm]]
 """,
 ),
@@ -3478,7 +3475,7 @@ Variable(
     abivarname="dmft_tolfreq",
     varset="dmft",
     vartype="real",
-    topics=['DMFT_expert'],
+    topics=['DMFT_expert', 'DmftTriqsCthyb_expert'],
     dimensions="scalar",
     defaultval=0.0001,
     mnemonics="Dynamical Mean Field Theory: TOLerance on DFT correlated electron occupation matrix for the definition of the FREQuency grid",
@@ -3488,8 +3485,9 @@ Variable(
 The DFT occupation matrix for correlated electrons can be computed by direct integration of the DFT
 Green's function. It can be compared to the calculation of the same quantity by downfolding Fermi-Dirac
 occupations. Because the Matsubara grid is finite, the two quantities numerically
-differ. This check allows to see if you [[dmft_nwli]] is large enough. If the difference is
-larger than [[dmft_tolfreq]], then the code stops and an error message is thrown.
+differ. This check allows to see if you [[dmft_nwli]]/[[dmft_triqs_n_iw]] (depending on your solver)
+is large enough.
+If the difference is larger than [[dmft_tolfreq]], then the code stops and an error message is thrown.
 """,
 ),
 
@@ -3497,15 +3495,51 @@ Variable(
     abivarname="dmft_tollc",
     varset="dmft",
     vartype="real",
-    topics=['DMFT_useful'],
+    topics=['DMFT_useful', 'DmftTriqsCthyb_useful'],
     dimensions="scalar",
     defaultval=1e-05,
     mnemonics="Dynamical Mean Field Theory: TOLerance on Local Charge for convergence of the DMFT loop",
     added_in_version="before_v9",
     text=r"""
-Tolerance for the variation of Local Charge for convergence of the DMFT Loop.
-Most of the time however, DFT+DMFT calculations can converge fastly using [[dmft_iter]]=1, so
-that this variable is not required.
+Tolerance criterion on the variation of Local Charge for the convergence of the DMFT Loop.
+However, most of the time, charge self-consistent DFT+DMFT calculations
+can converge faster using [[dmft_iter]]=1, so that this variable is not required.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_basis",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_compulsory'],
+    dimensions="scalar",
+    defaultval="None",
+    mnemonics="Dynamical Mean Field Theory: TRIQS, Continuous Time Quantum Monte Carlo BASIS",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v9",
+    text=r"""
+Choose the basis in which to perform CTQMC calculation. This basis should be carefully
+selected as it determines the magnitude of the off-diagonal elements as well as the
+conserved quantum numbers in the atomic Hamiltonian, and can therefore greatly
+impact the computation time.
+
+Note that if you choose the density-density solver ([[dmft_solv]]=6),
+the off-diagonal components of the electronic levels will be neglected by
+definition. As they carry most of the physics, it is important to choose a
+basis in which these off-diagonal components are weak.
+
+  * 0 --> Stay in the real spherical harmonics (cubic) basis. Useful for systems with cubic
+    symmetry whose off-diagonal elements vanish by symmetry in this basis. Provides a lot of
+    conserved quantum numbers.
+  * 1 --> Basis that diagonalizes the local electronic levels. Useful to reduce
+    the magnitude of the off-diagonal components, but do not usually provide a lot of conserved
+    quantum numbers.
+  * 2 --> Basis that diagonalizes the local occupation matrix. Useful to reduce
+    the magnitude of the off-diagonal components, but do not usually provide a lot of conserved
+    quantum numbers.
+  * 3 --> Spherical harmonics basis. Provides the most conserved quantum numbers.
+  * 4 (only when [[nspinor]]=2) --> JmJ basis. Useful for systems with spin-orbit coupling.
+    Provides a lot of conserved quantum numbers.
 """,
 ),
 
@@ -3513,11 +3547,11 @@ Variable(
     abivarname="dmft_triqs_compute_integral",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_expert'],
+    topics=['DmftTriqsCthyb_expert'],
     dimensions="scalar",
     defaultval=1,
     mnemonics="Dynamical Mean Field Theory: TRIQS, COMPUTE thermodynamic INTEGRAL",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7], [[dmft_triqs_entropy]] == 1, [[dmft_triqs_measure_density_matrix]] == 1",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_entropy]] == 1, [[dmft_triqs_measure_density_matrix]] == 1",
     added_in_version="before_v10.5.6",
     text=r"""
 Specify whether or not to compute the contribution from the impurity entropy by thermodynamic
@@ -3531,11 +3565,11 @@ Variable(
     abivarname="dmft_triqs_det_init_size",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_expert'],
+    topics=['DmftTriqsCthyb_expert'],
     dimensions="scalar",
     defaultval=100,
     mnemonics="Dynamical Mean Field Theory: TRIQS, DETerminant INITial SIZE",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7]",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 For the computation of the determinant of the hybridization matrix in TRIQS/CTHYB,
@@ -3549,11 +3583,11 @@ Variable(
     abivarname="dmft_triqs_det_n_operations_before_check",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_expert'],
+    topics=['DmftTriqsCthyb_expert'],
     dimensions="scalar",
     defaultval=10000,
     mnemonics="Dynamical Mean Field Theory: TRIQS, DETerminant Number of OPERATIONS BEFORE CHECK",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7]",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 At each move, the determinant in TRIQS/CTHYB is updated using the Sherman-Morrison formula.
@@ -3569,11 +3603,11 @@ Variable(
     abivarname="dmft_triqs_det_precision_error",
     varset="dmft",
     vartype="real",
-    topics=['DMFT_expert'],
+    topics=['DmftTriqsCthyb_expert'],
     dimensions="scalar",
     defaultval=1e-5,
     mnemonics="Dynamical Mean Field Theory: TRIQS, DETerminant PRECISION ERROR",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7]",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 After [[dmft_triqs_det_n_operations_before_check]], the determinant is recomputed from scratch
@@ -3587,11 +3621,11 @@ Variable(
     abivarname="dmft_triqs_det_precision_warning",
     varset="dmft",
     vartype="real",
-    topics=['DMFT_expert'],
+    topics=['DmftTriqsCthyb_expert'],
     dimensions="scalar",
     defaultval=1e-8,
     mnemonics="Dynamical Mean Field Theory: TRIQS, DETerminant PRECISION WARNING",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7]",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 After [[dmft_triqs_det_n_operations_before_check]], the determinant is recomputed from scratch
@@ -3605,11 +3639,11 @@ Variable(
     abivarname="dmft_triqs_det_singular_threshold",
     varset="dmft",
     vartype="real",
-    topics=['DMFT_expert'],
+    topics=['DmftTriqsCthyb_expert'],
     dimensions="scalar",
     defaultval=-1.0,
     mnemonics="Dynamical Mean Field Theory: TRIQS, DETerminant SINGULAR matrix THRESHOLD",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7]",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 Tolerance to check if the hybridization matrix is singular. An error is thrown if that is the
@@ -3620,14 +3654,58 @@ if the absolute value of the determinant is below [[dmft_triqs_det_singular_thre
 ),
 
 Variable(
+    abivarname="dmft_triqs_dlr_epsilon",
+    varset="dmft",
+    vartype="real",
+    topics=['DmftTriqsCthyb_compulsory'],
+    dimensions="scalar",
+    defaultval="None",
+    mnemonics="Dynamical Mean Field Theory: TRIQS, accuracy (EPSILON) for DLR representation",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_measure_g_l]] == 0",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Specify the accuracy parameter $\varepsilon$ for the DLR (Discrete Lehmann representation)
+frequencies used as a compact representation of the noisy imaginary-time Green's function
+from the CT-QMC.
+
+The DLR frequencies are then computed to ensure that they can represent any arbitrary
+Green's function with accuracy [[dmft_triqs_dlr_epsilon]] (cf [[cite:Kaye2022]]).
+
+This parameter should always be higher than the statistical noise of your Green's function, as
+you want to filter this noise rather than represent it.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_dlr_wmax",
+    varset="dmft",
+    vartype="real",
+    topics=['DmftTriqsCthyb_compulsory'],
+    dimensions="scalar",
+    mnemonics="Dynamical Mean Field Theory: TRIQS, frequency (W) MAXimal",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_measure_g_l]] == 0",
+    characteristics=['[[ENERGY]]'],
+    added_in_version="before_v10.5.6",
+    text=r"""
+Specify the maximal real frequency parameter $\omega_{\mathrm{max}}$ for the DLR
+(Discrete Lehmann representation) frequencies used as a compact representation of
+the noisy imaginary-time Green's function from the CT-QMC.
+
+The DLR frequencies are then computed to ensure that they can represent any arbitrary
+Green's function whose spectral function have a support
+in [ -[[dmft_triqs_dlr_wmax]], [[dmft_triqs_dlr_wmax]] ] (cf [[cite:Kaye2022]]).
+""",
+),
+
+Variable(
     abivarname="dmft_triqs_entropy",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_expert'],
+    topics=['DmftTriqsCthyb_useful'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="Dynamical Mean Field Theory: TRIQS, compute ENTROPY ",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7]",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 Computes the DFT+DMFT entropy using thermodynamic integration.
@@ -3635,29 +3713,13 @@ Computes the DFT+DMFT entropy using thermodynamic integration.
 ),
 
 Variable(
-    abivarname="dmft_triqs_epsilon",
-    varset="dmft",
-    vartype="real",
-    topics=['DMFT_expert'],
-    dimensions="scalar",
-    defaultval=1e-6,
-    mnemonics="Dynamical Mean Field Theory: TRIQS, accuracy (EPSILON) for DLR representation",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7], [[dmft_triqs_leg_measure]] == 0",
-    added_in_version="before_v10.5.6",
-    text=r"""
-Specify the accuracy required for the DLR representation (cf [[cite:Kaye2022]]).
-It should always be higher than the statistical noise on your Green's function.
-""",
-),
-
-Variable(
     abivarname="dmft_triqs_gaussorder",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_expert'],
+    topics=['DmftTriqsCthyb_useful'],
     dimensions="scalar",
     mnemonics="Dynamical Mean Field Theory: TRIQS, GAUSS-Legendre ORDER",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7], [[dmft_triqs_compute_integral]] == 1",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_compute_integral]] == 1",
     added_in_version="before_v9",
     text=r"""
 Order of Gauss-Legendre quadrature for each subdivision (cf [[dmft_triqs_nsubdivisions]]) of the
@@ -3669,11 +3731,11 @@ Variable(
     abivarname="dmft_triqs_imag_threshold",
     varset="dmft",
     vartype="real",
-    topics=['DMFT_expert'],
+    topics=['DmftTriqsCthyb_expert'],
     dimensions="scalar",
     defaultval=1e-13,
     mnemonics="Dynamical Mean Field Theory: TRIQS, IMAGinary part THRESHOLD",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7]",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 In the real version of TRIQS/CTHYB, only the hybridization components
@@ -3682,34 +3744,39 @@ having a maximal imaginary part below [[dmft_triqs_imag_threshold]] are kept.
 ),
 
 Variable(
-    abivarname="dmft_triqs_leg_measure",
+    abivarname="dmft_triqs_length_cycle",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_expert'],
+    topics=['DmftTriqsCthyb_compulsory'],
     dimensions="scalar",
-    defaultval=0,
-    mnemonics="Dynamical Mean Field Theory: TRIQS, LEGendre MEASUREment",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7]",
+    defaultval="None",
+    mnemonics="Dynamical Mean Field Theory: TRIQS, LENGTH of CYCLE",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
-Set to 1 if you want to sample the Green's function directly in the Legendre basis
-(cf [[cite:Boehnke2011]]). By default, the Green's function is sampled on the imaginary
-time axis, and a constrained fit is then performed to obtain the coefficients of the
-Discrete Lehmann representation (DLR, cf [[cite:Kaye2022]]). We strongly advise to use
-the DLR, as it significantly outperforms the Legendre representation for noise reduction.
-This option is only here for historical purposes.
+Sets the number of sweeps in one cycle of TRIQS/CT-HYB. Measurements are
+only performed at the end of each cycle.
+
+This variable allows to fully decorrelate a configuration before taking a new
+measurement, as only independent measurements matter for statistics.
+
+If this variable is lower than the autocorrelation time of the Markov chain, there
+will be no drawback on the statistics, but you are wasting time measuring correlated
+samples. Keep in mind that measurements can be very computationally heavy.
+
+If this variable is higher than the autocorrelation time, you will lose statistics.
 """,
 ),
 
 Variable(
-    abivarname="dmft_triqs_loc_n_min",
+    abivarname="dmft_triqs_loc_n_max",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_expert'],
+    topics=['DmftTriqsCthyb_expert'],
     dimensions="scalar",
-    defaultval=0,
-    mnemonics="Dynamical Mean Field Theory: TRIQS, LOCal Hilbert space Number MINimal",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7]",
+    defaultval=2147483647,
+    mnemonics="Dynamical Mean Field Theory: TRIQS, LOCal Hilbert space Number MAXimal",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 This allows to truncate the local Hilbert space in TRIQS/CTHYB by keeping only the states
@@ -3720,14 +3787,14 @@ with non-negligible contributions.
 ),
 
 Variable(
-    abivarname="dmft_triqs_loc_n_max",
+    abivarname="dmft_triqs_loc_n_min",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_expert'],
+    topics=['DmftTriqsCthyb_expert'],
     dimensions="scalar",
-    defaultval=2147483647,
-    mnemonics="Dynamical Mean Field Theory: TRIQS, LOCal Hilbert space Number MAXimal",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7]",
+    defaultval=0,
+    mnemonics="Dynamical Mean Field Theory: TRIQS, LOCal Hilbert space Number MINimal",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 This allows to truncate the local Hilbert space in TRIQS/CTHYB by keeping only the states
@@ -3741,11 +3808,11 @@ Variable(
     abivarname="dmft_triqs_measure_density_matrix",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_expert'],
+    topics=['DmftTriqsCthyb_expert'],
     dimensions="scalar",
     defaultval="1 if [[dmft_triqs_off_diag]]=0, 0 otherwise",
     mnemonics="Dynamical Mean Field Theory: TRIQS, MEASUREment of the DENSITY MATRIX",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7], [[dmft_triqs_use_norm_as_weight]] == 1, [[dmft_triqs_off_diag]] == 0",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_use_norm_as_weight]] == 1, [[dmft_triqs_off_diag]] == 0",
     added_in_version="before_v10.5.6",
     text=r"""
 Set to 1 to active the measurement of the impurity density matrix in TRIQS/CTHYB. This greatly
@@ -3755,14 +3822,34 @@ Currently, TRIQS/CTHYB does not support this feature with off-diagonal component
 ),
 
 Variable(
+    abivarname="dmft_triqs_measure_g_l",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Dynamical Mean Field Theory: TRIQS, MEASUREment of the G_l coefficients for Legendre representation",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Set to 1 if you want to sample the Green's function directly in the Legendre basis
+(cf [[cite:Boehnke2011]]). By default, the Green's function is sampled on the imaginary
+time axis, and a constrained fit is then performed to obtain the coefficients of the
+Discrete Lehmann representation (DLR, cf [[cite:Kaye2022]]). We strongly advise to use
+the DLR, as it significantly outperforms the Legendre representation for noise reduction.
+This option is only here for historical purposes.
+""",
+),
+
+Variable(
     abivarname="dmft_triqs_move_double",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_expert'],
+    topics=['DmftTriqsCthyb_expert'],
     dimensions="scalar",
     defaultval="[[dmft_triqs_off_diag]]",
     mnemonics="Dynamical Mean Field Theory: TRIQS, MOVEs DOUBLE",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7]",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 Set to 1 to activate the double moves in TRIQS/CTHYB.
@@ -3773,11 +3860,11 @@ Variable(
     abivarname="dmft_triqs_move_shift",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_expert'],
+    topics=['DmftTriqsCthyb_expert'],
     dimensions="scalar",
     defaultval=1,
     mnemonics="Dynamical Mean Field Theory: TRIQS, MOVE SHIFT",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7]",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 Set to 1 to activate the shift move in TRIQS/CTHYB.
@@ -3785,13 +3872,45 @@ Set to 1 to activate the shift move in TRIQS/CTHYB.
 ),
 
 Variable(
-    abivarname="dmft_triqs_nleg",
+    abivarname="dmft_triqs_n_cycles",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_expert'],
+    topics=['DmftTriqsCthyb_compulsory'],
+    dimensions="scalar",
+    defaultval="None",
+    mnemonics="Dynamical Mean Field Theory: TRIQS, Number of measurement CYCLES",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Number of measurement cycles on each CPU for TRIQS/CT-HYB. This parameter controls
+the level of statistical noise on your output quantities.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_n_iw",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_compulsory'],
+    dimensions="scalar",
+    defaultval="None",
+    mnemonics="Dynamical Mean Field Theory: TRIQS, Number of Imaginary frequencies (W)",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Number of linear Matsubara frequencies for the representation of the Green's function
+(only in the case [[dmft_solv]] $\in$ [6,7]).
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_n_l",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_useful'],
     dimensions="scalar",
     mnemonics="Dynamical Mean Field Theory: TRIQS, Number of LEGendre polynomials",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7], [[dmft_triqs_leg_measure]] == 1",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_measure_g_l]] == 1",
     added_in_version="before_v10.5.6",
     text=r"""
 Specify the number of Legendre polynomials used for the calculation of Green's
@@ -3800,14 +3919,65 @@ function in TRIQS/CTHYB (cf [[cite:Boehnke2011]]).
 ),
 
 Variable(
+    abivarname="dmft_triqs_n_tau",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_compulsory'],
+    dimensions="scalar",
+    mnemonics="Dynamical Mean Field Theory: TRIQS, Number of TAU points",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Specify the number of imaginary time points for the binned representation of the
+Green's function and hybridization function on the segment [0, $\beta$] in TRIQS/CT-HYB.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_n_warmup_cycles_init",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_compulsory'],
+    dimensions="scalar",
+    mnemonics="Dynamical Mean Field Theory: TRIQS, Number of WARMUP CYCLES at INITialization",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Specify the number of warmup cycles for each CPU when starting from an empty configuration in
+TRIQS/CT-HYB. This typically needs to be quite high, especially at low temperatures.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_n_warmup_cycles_restart",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_compulsory'],
+    dimensions="scalar",
+    mnemonics="Dynamical Mean Field Theory: TRIQS, Number of WARMUP CYCLES at RESTART",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Specify the number of warmup cycles for each CPU when restarting the TRIQS/CT-HYB simulation from
+a previous configuration. This typically does not need to be very high, and can even be set
+to 0 most of the time.
+
+At the initial DFT+DMFT iteration, a configuration file from a previous output can be specified
+via [[getctqmcdata]]. Afterwards, by default, the run automatically restarts from the last
+configuration of the previous run of the SCF cycle (this behavior is controlled by
+[[dmft_triqs_read_ctqmcdata]].
+""",
+),
+
+Variable(
     abivarname="dmft_triqs_nsubdivisions",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_expert'],
+    topics=['DmftTriqsCthyb_expert'],
     dimensions="scalar",
     defaultval=1,
     mnemonics="Dynamical Mean Field Theory: TRIQS, Number of SUBDIVISIONS",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7], [[dmft_triqs_compute_integral]] == 1",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_compute_integral]] == 1",
     added_in_version="before_v10.5.6",
     text=r"""
 Specify the number of subdivisions of the thermodynamic integration interval
@@ -3823,15 +3993,15 @@ Variable(
     abivarname="dmft_triqs_off_diag",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_basic'],
+    topics=['DmftTriqsCthyb_compulsory'],
     dimensions="scalar",
     mnemonics="Dynamical Mean Field Theory: TRIQS, OFF-DIAGonal components",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7]",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 Set to 1 to keep all off-diagonal components of the hybridization and electronic levels for the
-CT-HYB run. If set to 0, the off-diagonal elements are set to 0 before the Monte-Carlo run (in the
-basis specified by [[dmftctqmc_basis]]).
+TRIQS/CT-HYB run. If set to 0, the off-diagonal elements are set to 0 before the Monte-Carlo run (in the
+basis specified by [[dmft_triqs_basis]]).
 """,
 ),
 
@@ -3839,11 +4009,11 @@ Variable(
     abivarname="dmft_triqs_pauli_prob",
     varset="dmft",
     vartype="real",
-    topics=['DMFT_expert'],
+    topics=['DmftTriqsCthyb_expert'],
     dimensions="scalar",
     defaultval="0.8 if [[dmft_solv]]=7, 1 if [[dmft_solv]]=6",
     mnemonics="Dynamical Mean Field Theory: TRIQS, PAULI PROBability",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7]",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 For the insert/remove moves, a proportion [[dmft_triqs_pauli_prob]] of the moves will be
@@ -3854,14 +4024,46 @@ only guaranteed if [[dmft_triqs_pauli_prob]] < 1.
 ),
 
 Variable(
+    abivarname="dmft_triqs_random_seed_a",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval=34788,
+    mnemonics="Dynamical Mean Field Theory: TRIQS, RANDOM SEED A",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Controls the seed of TRIQS/CTHYB, which is [[dmft_triqs_random_seed_a]] + rank $\times$
+[[dmft_triqs_random_seed_b]].
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_random_seed_b",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval=928374,
+    mnemonics="Dynamical Mean Field Theory: TRIQS, RANDOM SEED B",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Controls the seed of TRIQS/CTHYB, which is [[dmft_triqs_random_seed_a]] + rank $\times$
+[[dmft_triqs_random_seed_b]].
+""",
+),
+
+Variable(
     abivarname="dmft_triqs_read_ctqmcdata",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_expert'],
+    topics=['DmftTriqsCthyb_expert'],
     dimensions="scalar",
     defaultval=1,
     mnemonics="Dynamical Mean Field Theory: TRIQS, READ CT-QMC DATA",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7]",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 At each CT-HYB run, the initial configuration of the Monte-Carlo is read from file
@@ -3874,59 +4076,14 @@ if you're not converged yet. In this case, disable this.
 ),
 
 Variable(
-    abivarname="dmft_triqs_seed_a",
-    varset="dmft",
-    vartype="integer",
-    topics=['DMFT_expert'],
-    dimensions="scalar",
-    defaultval=34788,
-    mnemonics="Dynamical Mean Field Theory: TRIQS, SEED A",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7]",
-    added_in_version="before_v10.5.6",
-    text=r"""
-Controls the seed of TRIQS/CTHYB, which is [[dmft_triqs_seed_a]] + rank $\times$ [[dmft_triqs_seed_b]].
-""",
-),
-
-Variable(
-    abivarname="dmft_triqs_seed_b",
-    varset="dmft",
-    vartype="integer",
-    topics=['DMFT_expert'],
-    dimensions="scalar",
-    defaultval=928374,
-    mnemonics="Dynamical Mean Field Theory: TRIQS, SEED B",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7]",
-    added_in_version="before_v10.5.6",
-    text=r"""
-Controls the seed of TRIQS/CTHYB, which is [[dmft_triqs_seed_a]] + rank $\times$ [[dmft_triqs_seed_b]].
-""",
-),
-
-Variable(
-    abivarname="dmft_triqs_therm_restart",
-    varset="dmft",
-    vartype="integer",
-    topics=['DMFT_compulsory'],
-    dimensions="scalar",
-    mnemonics="Dynamical Mean Field Theory: TRIQS, THERMalization steps when RESTARTing",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7], [[dmft_triqs_read_ctqmcdata]] == 1",
-    added_in_version="before_v10.5.6",
-    text=r"""
-Number of thermalization cycles when restarting from a configuration from file. A cycle is
-composed of [[dmftctqmc_meas]] sweeps.
-""",
-),
-
-Variable(
     abivarname="dmft_triqs_time_invariance",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_expert'],
+    topics=['DmftTriqsCthyb_expert'],
     dimensions="scalar",
     defaultval="[[dmft_triqs_measure_density_matrix]]",
     mnemonics="Dynamical Mean Field Theory: TRIQS, TIME INVARIANCE",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7], [[dmft_triqs_measure_density_matrix]] == 1",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_measure_density_matrix]] == 1",
     added_in_version="before_v10.5.6",
     text=r"""
 Set to 1 to activate an improved estimator for the density matrix in TRIQS/CTHYB.
@@ -3939,14 +4096,14 @@ Variable(
     abivarname="dmft_triqs_tol_block",
     varset="dmft",
     vartype="real",
-    topics=['DMFT_expert'],
+    topics=['DmftTriqsCthyb_expert'],
     dimensions="scalar",
     defaultval=1e-12,
     mnemonics="Dynamical Mean Field Theory: TRIQS, TOLerance for the BLOCK detection algorithm",
-    requires="[[usedmft]] = 1, [[dmft_solv]] in [6,7]",
+    requires="[[usedmft]] = 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
-Before any CT-HYB run, the code rotates in the basis specified by [[dmftctqmc_basis]]. Then,
+Before any CT-HYB run, the code rotates in the basis specified by [[dmft_triqs_basis]]. Then,
 all the off-diagonal elements below the threshold [[dmft_triqs_tol_block]] are set to 0 in
 order to try and reveal a compact block structure to reduce the computation time, which is
 automatically detected. If you have set [[dmft_triqs_off_diag]]=0, this option is useless.
@@ -3958,11 +4115,11 @@ Variable(
     abivarname="dmft_triqs_use_norm_as_weight",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_expert'],
+    topics=['DmftTriqsCthyb_expert'],
     dimensions="scalar",
     defaultval="[[dmft_triqs_measure_density_matrix]]",
     mnemonics="Dynamical Mean Field Theory: TRIQS, USE NORM of the matrix AS atomic WEIGHT",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7]",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 Set to 1 to use the Frobenius norm of the matrix instead of its trace as atomic weight in
@@ -3972,26 +4129,10 @@ ergodicity.
 ),
 
 Variable(
-    abivarname="dmft_triqs_wmax",
-    varset="dmft",
-    vartype="real",
-    topics=['DMFT_basic'],
-    dimensions="scalar",
-    mnemonics="Dynamical Mean Field Theory: TRIQS, frequency (W) MAXimal",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7], [[dmft_triqs_leg_measure]] == 0",
-    characteristics=['[[ENERGY]]'],
-    added_in_version="before_v10.5.6",
-    text=r"""
-The local spectral function is assumed to have a support in $[-\omega_{\text{max}},\omega_{\text{max}}]$
-when computing the DLR frequencies (cf [[cite:Kaye2022]]).
-""",
-),
-
-Variable(
     abivarname="dmft_wanorthnorm",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_expert'],
+    topics=['DMFT_expert', 'DmftTriqsCthyb_expert'],
     dimensions="scalar",
     defaultval=3,
     mnemonics="Dynamical Mean Field Theory: WANnier OrthoNormalization",
@@ -4014,7 +4155,7 @@ This is done by multiplication with the inverse square root of their overlaps.
     atom. With this choice, the fundamental identity Downfold(Upfold) = Id is only
     guaranteed for localized Wannier functions (i.e. large enough energy window),
     with no overlap to the neighboring atoms. This is the default choice when [[natom]]=1
-    or [[dmft_solv]] in [6,7] as this is the only rigorous choice to compare energies between
+    or [[dmft_solv]] $\in$ [6,7] as this is the only rigorous choice to compare energies between
     different systems.
 """,
 ),
@@ -4023,10 +4164,10 @@ Variable(
     abivarname="dmft_wanrad",
     varset="dmft",
     vartype="real",
-    topics=['DMFT_expert'],
+    topics=['DmftTriqsCthyb_expert'],
     dimensions="scalar",
     mnemonics="Dynamical Mean Field Theory: WANnier functions radius",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7], [[dmft_prtwan]] == 1",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_prtwan]] == 1",
     added_in_version="before_v10.5.6",
     text=r"""
 Set the maximal radius up to which the Wannier functions are computed when [[dmft_prtwan]]=1.
@@ -4038,7 +4179,7 @@ Variable(
     abivarname="dmft_x2my2d",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_expert'],
+    topics=['DMFT_expert', 'DmftTriqsCthyb_expert'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="Dynamical Mean Field Theory: x2my2d orbital",
@@ -4053,7 +4194,7 @@ Variable(
     abivarname="dmft_yukawa_epsilon",
     varset="dmft",
     vartype="real",
-    topics=['DMFT_expert'],
+    topics=['DMFT_expert', 'DmftTriqsCthyb_expert'],
     dimensions="scalar",
     mnemonics="Dynamical Mean Field Theory: dielectric constant (EPSILON) for YUKAWA potential",
     requires="[[usedmft]] == 1, [[dmft_yukawa_param]] == 4",
@@ -4068,7 +4209,7 @@ Variable(
     abivarname="dmft_yukawa_lambda",
     varset="dmft",
     vartype="real",
-    topics=['DMFT_expert'],
+    topics=['DMFT_expert', 'DmftTriqsCthyb_expert'],
     dimensions="scalar",
     mnemonics="Dynamical Mean Field Theory: inverse screening length (LAMBDA) for YUKAWA potential",
     requires="[[usedmft]] == 1, [[dmft_yukawa_param]] == 4",
@@ -4083,7 +4224,7 @@ Variable(
     abivarname="dmft_yukawa_param",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_expert'],
+    topics=['DMFT_expert', 'DmftTriqsCthyb_expert'],
     dimensions="scalar",
     defaultval=1,
     mnemonics="Dynamical Mean Field Theory: YUKAWA potential PARAMetrization",
@@ -4109,7 +4250,7 @@ Variable(
     abivarname="dmftbandf",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_compulsory'],
+    topics=['DMFT_compulsory', 'DmftTriqsCthyb_compulsory'],
     dimensions="scalar",
     mnemonics="Dynamical Mean Field Theory: BAND: Final",
     requires="[[usedmft]] == 1",
@@ -4125,7 +4266,7 @@ Variable(
     abivarname="dmftbandi",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_compulsory'],
+    topics=['DMFT_compulsory', 'DmftTriqsCthyb_compulsory'],
     dimensions="scalar",
     mnemonics="Dynamical Mean Field Theory: BAND: Initial",
     requires="[[usedmft]] == 1",
@@ -4159,35 +4300,20 @@ Variable(
     vartype="integer",
     topics=['DMFT_basic'],
     dimensions="scalar",
-    defaultval="None if [[dmft_solv]] in [6,7], 1 otherwise",
+    defaultval=1,
     mnemonics="Dynamical Mean Field Theory: Continuous Time Quantum Monte Carlo BASIS",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [5,6,7]",
+    requires="[[usedmft]] == 1, [[dmft_solv]] == 5",
     added_in_version="before_v9",
     text=r"""
-Choose the basis in which to perform CTQMC calculation. When using TRIQS
-([[dmft_solv]] in [6,7]), the basis should be carefully selected as it
-determines the magnitude of the off-diagonal elements as well as the
-conserved quantities in the atomic Hamiltonian, and can therefore greatly
-impact the computation time.
+Choose the basis to perform ABINIT/CTQMC calculation.
 
-Note that if you choose a density-density solver ([[dmft_solv]] in [5,6]),
-the off-diagonal components of the electronic levels will be neglected by
-definition. As they carry most of the physics, it is important to choose a
-basis in which these off-diagonal components are weak.
-
-  * 0 --> Stay in the real spherical harmonics (cubic) basis. Useful for physical insight/
-  conserved quantities and for systems with cubic symmetry.
-  * 1 --> Diagonalize the electronic levels (if they are not already diagonal in the
-  cubic basis). The best choice in general for [[dmft_solv]] in [5,6]. Useful to reduce
-  the magnitude of the off-diagonal components of the Green's function.
-  * 2 --> Diagonalize the local correlated occupation matrix. Can lead to non
-  diagonal atomic Hamiltonian that cannot be handled by [[dmft_solv]] in [5,6].
-  This option should be thus avoided when [[dmft_solv]] in [5,6]. Useful to reduce
-  the magnitude of the off-diagonal components of the Green's function.
-  * 3 (only when [[dmft_solv]] in [6,7]) --> Spherical harmonics basis. Useful for physical
-  insight/conserved quantities.
-  * 4 (only when [[dmft_solv]] in [6,7] and [[nspinor]]=2) --> JmJ basis. Useful for physical
-  insight/conserved quantities when adding spin-orbit coupling.
+  * 0 --> Use the local basis in the spherical harmonics basis.
+  Can be useful if the Hamiltonian has weak off diagonal terms and for this reason,
+  one want to keep the original basis for simplicity and for physical insight.
+  * 1 --> Default value, diagonalize the local Hamiltonian (but only if it is not diagonal).
+  The best choice in general.
+  * 2 --> Diagonalise the local correlated occupation matrix. Can lead to non
+  diagonal Hamiltonian that cannot be handled by CTQMC. This option should be thus avoided.
 """,
 ),
 
@@ -4234,32 +4360,6 @@ simulation. Slow down the simulation.
 ),
 
 Variable(
-    abivarname="dmftctqmc_localprop",
-    varset="dmft",
-    vartype="integer",
-    topics=['DMFT_expert'],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics="Dynamical Mean Field Theory: CTQMC: calculation of local properties",
-    characteristics=['[[DEVELOP]]'],
-    requires="[[dmft_solv]] in [5, 8]",
-    added_in_version="9.5.0",
-    text=r"""
-Compute properties of the local impurity during the CTQMC calculations.
-
-  * 0 --> Nothing done
-
-  * 1 --> Add the calculation of weight of configurations. For example, for a calculation on $d$ orbitals, the calculations
-gives the weight of the 0,1,2,3,4,5,6,7,8,9 and 10 electrons configurations.
-
-  * 2 --> Add the calculation of local magnetic susceptibility. For [[nspinor]] == 1, the operator corresponds to $g_e\hat{S}_z$,
-whereas for [[nspinor]] == 2 the operator corresponds to $\hat{L}_z+g_e\hat{S}_z$.
-
-  * 3 --> Add the calculation of local charge susceptibility.
-""",
-),
-
-Variable(
     abivarname="dmftctqmc_gmove",
     varset="dmft",
     vartype="integer",
@@ -4297,19 +4397,44 @@ is a good approximation only if there is enough Monte Carlo sweeps per cpu.
 ),
 
 Variable(
+    abivarname="dmftctqmc_localprop",
+    varset="dmft",
+    vartype="integer",
+    topics=['DMFT_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Dynamical Mean Field Theory: CTQMC: calculation of local properties",
+    characteristics=['[[DEVELOP]]'],
+    requires="[[dmft_solv]] in [5, 8]",
+    added_in_version="9.5.0",
+    text=r"""
+Compute properties of the local impurity during the CTQMC calculations.
+
+  * 0 --> Nothing done
+
+  * 1 --> Add the calculation of weight of configurations. For example, for a calculation on $d$ orbitals, the calculations
+gives the weight of the 0,1,2,3,4,5,6,7,8,9 and 10 electrons configurations.
+
+  * 2 --> Add the calculation of local magnetic susceptibility. For [[nspinor]] == 1, the operator corresponds to $g_e\hat{S}_z$,
+whereas for [[nspinor]] == 2 the operator corresponds to $\hat{L}_z+g_e\hat{S}_z$.
+
+  * 3 --> Add the calculation of local charge susceptibility.
+""",
+),
+
+Variable(
     abivarname="dmftctqmc_meas",
     varset="dmft",
     vartype="integer",
     topics=['DMFT_basic'],
     dimensions="scalar",
-    defaultval="None if [[dmft_solv]] in [6,7], 1 otherwise",
+    defaultval=1,
     mnemonics="Dynamical Mean Field Theory: Continuous Time Quantum Monte Carlo MEASurements",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [5,6,7]",
+    requires="[[usedmft]] == 1, [[dmft_solv]] == 5",
     added_in_version="before_v9",
     text=r"""
-In the CT-QMC, measurements are performed every [[dmftctqmc_meas]] sweeps. If you see that measurements
-take too long, you should increase its value. However, it should never be higher than the autocorrelation
-time, otherwise you will lose statistics.
+The modulo used to measure the interaction energy and the number of electrons.
+Example: 2 means the measure is perform every two sweeps.
 """,
 ),
 
@@ -4380,12 +4505,12 @@ Variable(
     topics=['DMFT_compulsory'],
     dimensions="scalar",
     mnemonics="Dynamical Mean Field Theory: Quantum Monte Carlo time sLices",
-    requires="[[dmft_solv]] >= 5",
+    requires=r"[[dmft_solv]] >= 5, [[dmft_solv]] $\ne$ [6,7]",
     added_in_version="before_v9",
     text=r"""
-Number of time slices used to represent the imaginary time Green's function. With
-[[dmft_solv]] = 5, this value should be carefully chosen according to Nyquist frequency
-and the [[tsmear]] value.
+Number of time slices used to represent the time green function. This value
+should be carefully chosen according to Niquist frequency and the [[tsmear]] value.
+This is only used for ABINIT internal solvers.
 """,
 ),
 
@@ -4396,12 +4521,11 @@ Variable(
     topics=['DMFT_compulsory'],
     dimensions="scalar",
     mnemonics="Dynamical Mean Field Theory: Quantum Monte Carlo Number of sweeps",
-    requires="[[dmft_solv]] >= 5",
+    requires=r"[[dmft_solv]] >= 5, [[dmft_solv]] $\ne$ [6,7]",
     added_in_version="before_v9",
     text=r"""
-Number of Monte Carlo sweeps. Should be at least $10^6$ for a physical solution.
-With TRIQS/CTHYB, this is the total number of cycles over all CPUs. A cycle is comprised
-of [[dmftctqmc_meas]] sweeps.
+Number of Monte Carlo sweeps. Should be at least 10<sup>6</sup>. This is only used for
+ABINIT internal solvers.
 """,
 ),
 
@@ -4414,7 +4538,7 @@ Variable(
     defaultval="[[jdtset]]",
     mnemonics="Dynamical Mean Field Theory: Quantum Monte Carlo SEED",
     characteristics=['[[DEVELOP]]'],
-    requires="[[dmft_solv]] >= 5",
+    requires=r"[[dmft_solv]] >= 5, [[dmft_solv]] $\ne$ [6,7]",
     added_in_version="before_v9",
     text=r"""
 Seed to initialize the random number generator.
@@ -4432,12 +4556,11 @@ Variable(
     topics=['DMFT_compulsory'],
     dimensions="scalar",
     mnemonics="Dynamical Mean Field Theory: Quantum Monte Carlo THERMalization",
-    requires="[[dmft_solv]] in [5,6,7]",
+    requires="[[dmft_solv]] == 5",
     added_in_version="before_v9",
     text=r"""
-Number of Monte Carlo sweeps for the thermalization. With TRIQS/CTHYB, this is the
-number of warmup cycles on each CPU. A cycle is comprised
-of [[dmftctqmc_meas]] sweeps.
+Number of Monte Carlo sweeps for the thermalization. This is only used for
+ABINIT internal solvers.
 """,
 ),
 
@@ -6392,7 +6515,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="GET CTQMC DATA from...",
-    requires="[[usedmft]] == 1, [[dmft_solv]] in [6,7]",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before v10.5.6",
     text=r"""
 Eventually used when [[ndtset]] > 0 (multi-dataset mode) to indicate
@@ -10563,7 +10686,7 @@ Variable(
     defaultval=MultipleValue(number=None, value=0),
     mnemonics="value of J for PAW+U",
     characteristics=['[[ENERGY]]'],
-    requires="[[usepaw]] == 1 and [[usepawu]] == 1",
+    requires="[[usepaw]] == 1 and [[usepawu]] > 0",
     added_in_version="before_v9",
     text=r"""
 Gives the value of the screened exchange interaction between correlated
@@ -21390,7 +21513,7 @@ Variable(
     defaultval=MultipleValue(number=None, value=0),
     mnemonics="value of U for PAW+U",
     characteristics=['[[ENERGY]]'],
-    requires="[[usepaw]] == 1 and [[usepawu]] == 1",
+    requires="[[usepaw]] == 1 and [[usepawu]] > 0",
     added_in_version="before_v9",
     text=r"""
 Gives the value of the screened coulomb interaction between correlated
@@ -21535,13 +21658,12 @@ The sign of [[usedmatpu]] has influence only when [[geoopt]] or [[moldyn]] are n
 
 Variable(
     abivarname="usedmft",
-    varset="dev",
+    varset="dmft",
     vartype="integer",
-    topics=['DMFT_compulsory'],
+    topics=['DMFT_compulsory', 'DmftTriqsCthyb_compulsory'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="USE Dynamical Mean Field Theory",
-    characteristics=['[[DEVELOP]]'],
     added_in_version="before_v9",
     text=r"""
 If set to 1, enable the use of DFT+DMFT, see in particular the important
@@ -21561,27 +21683,26 @@ The current implementation uses Wannier functions obtained from
 [[ cite:Amadon2008 | projected local orbitals ]] as
 correlated orbitals (see [[dmftbandi]] and [[dmftbandf]] input variables to define them).
 
-The Green functions are computed on a mesh of linear Matsubara frequencies.
+The Green's functions are computed on a mesh of linear Matsubara frequencies.
 However, most of the code uses logarithmic Matsubara grid to lower the
 computational cost. Both [[dmft_nwli]] and [[dmft_nwlo]] are thus convergence parameters.
+In the case where you are using the internal interface with TRIQS/CT-HYB ([[dmft_solv]] $\in$ [6,7]),
+we use a linear mesh with [[dmft_triqs_n_iw]] Matsubara frequencies, where the high-frequency
+behavior is described by a moment expansion up to order 5.
 
-DMFT is currently available for collinear ([[nspinor]] = 1) polarized or
+DFT+DMFT is currently available for collinear ([[nspinor]] = 1) polarized or
 unpolarized calculations ([[nspden]] = [[nsppol]] = 2 or [[nspden]] = [[nsppol]] = 1)
-and for non collinear calculations ([[nspinor]] = 2,[[nspden]] = 4,[[nsppol]] = 1).
+and for non collinear calculations ([[nspinor]] = 2, [[nspden]] = 4, [[nsppol]] = 1).
 However it is not yet available for collinear antiferromagnetic calculations
-([[nspden]] = 2,[[nsppol]] = 1) and non collinear non magnetic calculations
-([[nspden]] = 1, [[nsppol]] = 1,[[nspinor]] = 2). CTQMC calculations
+([[nspden]] = 2, [[nsppol]] = 1) and non collinear non magnetic calculations
+([[nspden]] = 1, [[nsppol]] = 1, [[nspinor]] = 2). CTQMC calculations
 ([[dmft_solv]] = 5) are not yet possible if [[nspinor]] = 2.
 
 Only static calculations without relaxation or dynamics are possible (forces
 and stress are not computed in the scheme: so the computed values should NOT
 be trusted).
 
-When correlated density matrices are diagonal, all values of [[upawu]] and
-[[jpawu]] are possible. If the correlated density matrices are non diagonal,
-only [[jpawu]] = 0 is implemented.
-
-Relevant direct output quantities from converged DMFT calculations are total
+Relevant direct output quantities from converged DFT+DMFT calculations are total
 energy and occupation of correlated orbitals. For Hubbard I calculation
 ([[dmft_solv]] = 2), total and partial spectral functions can be obtained with
 prtdos=1 and can be found in files OUTSpFunc* (where OUT is the root for
@@ -21690,7 +21811,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Must be non-zero if a DFT+U calculation is done, or if a GW calculation
-following a DFT+U calculation is done (important!), or if a DMFT calculation is done..
+following a DFT+U calculation is done (important!), or if a DFT+DMFT calculation is done.
 
   * If set to 0, the DFT+U method is not used.
 
@@ -21698,15 +21819,18 @@ following a DFT+U calculation is done (important!), or if a DMFT calculation is 
 The full rotationally invariant formulation is used (see Eq. (3) of [[cite:Liechtenstein1995]]) for the interaction term of the energy.
 Three choices are allowed concerning the double counting term:
 
-    * If abs([[usepawu]]) = 1 or 10, the Full Localized Limit (FLL) (or Atomic limit) double counting is used (cf Eq. (4) of [[cite:Liechtenstein1995]] or Eq. (8) of [[cite:Czyzyk1994]]).
+    * If abs([[usepawu]]) = 1, the Full Localized Limit (FLL) (or Atomic limit) double counting is used (cf Eq. (4) of [[cite:Liechtenstein1995]] or Eq. (8) of [[cite:Czyzyk1994]]).
 
     * If abs([[usepawu]]) = 2, the Around Mean Field (AMF) double counting is used (cf Eq. (7) of [[cite:Czyzyk1994]]). Not valid if nspinor=2.
 
-    * If abs([[usepawu]]) = 4 or 14, the FLL double counting is used. However, and in comparison to usepaw=1, the calculation is done without
+    * If abs([[usepawu]]) = 4, the FLL double counting is used. However, and in comparison to usepaw=1, the calculation is done without
     polarization in the exchange correlation functional (cf [[cite:Park2015]] and [[cite:Chen2016a]]). In this case, one must use [[iscf]]<10.
 
-For DMFT calculations [[usedmft]]=1, only [[usepawu]]=10 or 14 is permitted. For other types of calculations, abs([[usepawu]])=10 or 14 cannot be used.
-Positive and negative values of [[usedmft]], only differ by their internal implementation. At some stage, only positive values will be used again.
+ * For DFT+DMFT calculations ([[usedmft]]=1), only [[usepawu]]=10 or 14 is permitted. For other types of calculations, abs([[usepawu]])=10 or 14 cannot be used.
+
+    * If [[usepawu]] = 10, the calculation is done with polarized exchange correlation functional.
+
+    * If [[usepawu]] = 14, the calculation is done without spin polarization in the exchange correlation functional, and magnetism solely arises from DMFT.
 
 If [[nspden]] = 4 (non-collinear calculations) with GGA, one needs to use [[pawxcdev]] = 1,
 and either abs([[usepawu]])=0, 1, 4, 10 or 14.

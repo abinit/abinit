@@ -153,10 +153,10 @@ type, public :: dataset_type
  integer :: dmft_triqs_entropy
  integer :: dmft_triqs_gaussorder
  integer :: dmft_triqs_length_cycle
- integer :: dmft_triqs_loc_n_min
  integer :: dmft_triqs_loc_n_max
+ integer :: dmft_triqs_loc_n_min
  integer :: dmft_triqs_measure_density_matrix
- integer :: dmft_triqs_measure_G_l
+ integer :: dmft_triqs_measure_g_l
  integer :: dmft_triqs_move_double
  integer :: dmft_triqs_move_shift
  integer :: dmft_triqs_n_cycles
@@ -1603,10 +1603,10 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmft_triqs_gaussorder = dtin%dmft_triqs_gaussorder
  dtout%dmft_triqs_imag_threshold = dtin%dmft_triqs_imag_threshold
  dtout%dmft_triqs_length_cycle = dtin%dmft_triqs_length_cycle
- dtout%dmft_triqs_loc_n_min = dtin%dmft_triqs_loc_n_min
  dtout%dmft_triqs_loc_n_max = dtin%dmft_triqs_loc_n_max
+ dtout%dmft_triqs_loc_n_min = dtin%dmft_triqs_loc_n_min
  dtout%dmft_triqs_measure_density_matrix = dtin%dmft_triqs_measure_density_matrix
- dtout%dmft_triqs_measure_G_l = dtin%dmft_triqs_measure_G_l
+ dtout%dmft_triqs_measure_g_l = dtin%dmft_triqs_measure_g_l
  dtout%dmft_triqs_move_double = dtin%dmft_triqs_move_double
  dtout%dmft_triqs_move_shift = dtin%dmft_triqs_move_shift
  dtout%dmft_triqs_n_cycles = dtin%dmft_triqs_n_cycles
@@ -3638,8 +3638,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmft_triqs_det_n_operations_before_check dmft_triqs_det_precision_error'
  list_vars=trim(list_vars)//' dmft_triqs_det_precision_warning dmft_triqs_det_singular_threshold dmft_triqs_dlr_epsilon dmft_triqs_dlr_wmax'
  list_vars=trim(list_vars)//' dmft_triqs_entropy dmft_triqs_gaussorder dmft_triqs_imag_threshold'
- list_vars=trim(list_vars)//' dmft_triqs_length_cycle dmft_triqs_loc_n_min dmft_triqs_loc_n_max'
- list_vars=trim(list_vars)//' dmft_triqs_measure_density_matrix dmft_triqs_measure_G_l dmft_triqs_move_double'
+ list_vars=trim(list_vars)//' dmft_triqs_length_cycle dmft_triqs_loc_n_max dmft_triqs_loc_n_min'
+ list_vars=trim(list_vars)//' dmft_triqs_measure_density_matrix dmft_triqs_measure_g_l dmft_triqs_move_double'
  list_vars=trim(list_vars)//' dmft_triqs_move_shift dmft_triqs_n_cycles dmft_triqs_n_iw dmft_triqs_n_l dmft_triqs_n_tau dmft_triqs_n_warmup_cycles_init'
  list_vars=trim(list_vars)//' dmft_triqs_n_warmup_cycles_restart dmft_triqs_nsubdivisions dmft_triqs_off_diag dmft_triqs_pauli_prob'
  list_vars=trim(list_vars)//' dmft_triqs_random_seed_a dmft_triqs_random_seed_b dmft_triqs_read_ctqmcdata'

@@ -2362,7 +2362,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_triqs_loc_n_min=0
    dtsets(idtset)%dmft_triqs_loc_n_max=huge(0)
    dtsets(idtset)%dmft_triqs_measure_density_matrix=1
-   dtsets(idtset)%dmft_triqs_measure_G_l=0
+   dtsets(idtset)%dmft_triqs_measure_g_l=0
    dtsets(idtset)%dmft_triqs_move_double=0
    dtsets(idtset)%dmft_triqs_move_shift=1
    dtsets(idtset)%dmft_triqs_n_cycles=0

@@ -64,8 +64,8 @@
 # DMFT Calculation
 ############################
 
- usedmft2 1         # DMFT calculation
- nstep2    15       # Number of iterations for the DFT+DMFT convergence
+ usedmft2  1        # DMFT calculation
+ nstep2    20       # Number of iterations for the DFT+DMFT convergence
  nline2    10       # Number of line minimisations
  nnsclo2   10       # Number of non-self consistent loops
  tolvrs2   1.0d-12  # Tolerance of the density for DFT+DMFT convergence
@@ -80,17 +80,17 @@
  dmft_mxsf 1.0           # Mixing parameter for self-energy
 
 #Definition of impurity solver
- dmft_solv 6                   # TRIQS/CT-HYB solver in density-density approximation
- dmft_nwli 500                 # Number of Matsubara frequencies
- dmftqmc_l 50                  # Number of imaginary time points
- dmftqmc_n 1.d2                # Number of measurement cycles
- dmftqmc_therm 100             # Number of warmup cycles
- dmft_triqs_therm_restart 1    # Number of warmup cycles when restarting
- dmftctqmc_meas 1000           # Length of a cycle
- dmftctqmc_basis 0             # Basis for CT-QMC
- dmft_triqs_off_diag 0         # Neglect off-diagonal elements
- dmft_triqs_wmax 30 eV         # Maximal frequency for DLR representation
- dmft_triqs_epsilon 1.d-2      # Accuracy of DLR representation
+ dmft_solv 6                              # TRIQS/CT-HYB solver in density-density approximation
+ dmft_triqs_n_iw 500                      # Number of Matsubara frequencies
+ dmft_triqs_n_tau 200                     # Number of imaginary time points
+ dmft_triqs_n_cycles 250                  # Number of measurement cycles
+ dmft_triqs_n_warmup_cycles_init  100     # Number of warmup cycles for initial iteration
+ dmft_triqs_n_warmup_cycles_restart 0     # Number of warmup cycles when restarting
+ dmft_triqs_length_cycle 100              # Length of a cycle
+ dmft_triqs_basis 0                       # Basis for CT-QMC
+ dmft_triqs_off_diag 0                    # Neglect off-diagonal elements
+ dmft_triqs_dlr_wmax 30 eV                # Maximal frequency for DLR representation
+ dmft_triqs_dlr_epsilon 1.d-2             # Accuracy of DLR representation
 
 #Definition of interaction parameters
  usepawu1    4
