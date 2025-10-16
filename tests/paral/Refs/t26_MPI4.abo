@@ -1,9 +1,5 @@
 
-<<<<<<< HEAD
-.Version 10.5.1.5 of ABINIT, released Jul 2025.
-=======
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
->>>>>>> remotes/srostami/test
+.Version 10.5.6.3 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -18,17 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-<<<<<<< HEAD
-.Starting date : Thu  9 Oct 2025.
-- ( at 18h16 )
+.Starting date : Wed 15 Oct 2025.
+- ( at 23h26 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI4/paral_t26_MPI4/t26.abi
-=======
-.Starting date : Sat 13 Sep 2025.
-- ( at 10h37 )
-  
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI4/paral_t26_MPI4/t26.abi
->>>>>>> remotes/srostami/test
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/TestBot_MPI4/paral_t26_MPI4/t26.abi
 - output file    -> t26_MPI4.abo
 - root for input  files -> t26_MPI4i
 - root for output files -> t26_MPI4o
@@ -642,13 +631,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 1, }
 
 
 --- Pseudopotential description ------------------------------------------------
-<<<<<<< HEAD
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/6c_lda.paw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/6c_lda.paw
-=======
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/6c_lda.paw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/6c_lda.paw
->>>>>>> remotes/srostami/test
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/6c_lda.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/6c_lda.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): carbon
 -  6.00000   4.00000  20041014                znucl, zion, pspdat
     7    2    1    0       467   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -851,11 +835,7 @@ xc                  : -3.90838516786599E+00
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  5.49532697036699E-01
 local_psp           : -6.84945237961728E+00
-<<<<<<< HEAD
 PAW spherical_terms :  1.79502335279176E+00
-=======
-spherical_terms     :  1.79502335279176E+00
->>>>>>> remotes/srostami/test
 total_energy        : -1.04210470247025E+01
 total_energy_eV     : -2.83571110812292E+02
 ...
@@ -868,11 +848,7 @@ band_energy         :  1.77613226268290E+00
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  5.49532697036699E-01
 xc_dc               : -6.33613944135728E-01
-<<<<<<< HEAD
 PAW spherical_terms :  1.28563248620736E-01
-=======
-spherical_terms     :  1.28563248620736E-01
->>>>>>> remotes/srostami/test
 total_energy_dc     : -1.04202713962584E+01
 total_energy_dc_eV  : -2.83550004888965E+02
 ...
@@ -1113,11 +1089,7 @@ xc                  : -3.90838516786599E+00
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  5.49532697036699E-01
 local_psp           : -6.84945237961728E+00
-<<<<<<< HEAD
 PAW spherical_terms :  1.79502335279176E+00
-=======
-spherical_terms     :  1.79502335279176E+00
->>>>>>> remotes/srostami/test
 internal            : -1.04210470247025E+01
 '-kT*entropy'       : -7.55261880796144E-19
 total_energy        : -1.04210470247025E+01
@@ -1132,11 +1104,7 @@ band_energy         :  1.77613226268290E+00
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  5.49532697036699E-01
 xc_dc               : -6.33613944135728E-01
-<<<<<<< HEAD
 PAW spherical_terms :  1.28563248620736E-01
-=======
-spherical_terms     :  1.28563248620736E-01
->>>>>>> remotes/srostami/test
 internal            : -1.04202713962584E+01
 '-kT*entropy'       : -7.55261880796144E-19
 total_energy_dc     : -1.04202713962584E+01
@@ -1380,11 +1348,7 @@ xc                  : -3.73146388752362E+00
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  5.49532697036699E-01
 local_psp           : -5.55808304579419E+00
-<<<<<<< HEAD
 PAW spherical_terms :  1.76255824995637E+00
-=======
-spherical_terms     :  1.76255824995637E+00
->>>>>>> remotes/srostami/test
 total_energy        : -1.14735083214686E+01
 total_energy_eV     : -3.12210039156387E+02
 ...
@@ -1397,11 +1361,7 @@ band_energy         :  2.94072716627188E-01
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  5.49532697036699E-01
 xc_dc               : -2.03939226012985E-01
-<<<<<<< HEAD
 PAW spherical_terms :  1.27956618088816E-01
-=======
-spherical_terms     :  1.27956618088816E-01
->>>>>>> remotes/srostami/test
 total_energy_dc     : -1.14732628547233E+01
 total_energy_dc_eV  : -3.12203359666554E+02
 ...
@@ -1646,11 +1606,7 @@ xc                  : -3.73146388752362E+00
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  5.49532697036699E-01
 local_psp           : -5.55808304579419E+00
-<<<<<<< HEAD
 PAW spherical_terms :  1.76255824995637E+00
-=======
-spherical_terms     :  1.76255824995637E+00
->>>>>>> remotes/srostami/test
 internal            : -1.14735083214686E+01
 '-kT*entropy'       : -7.55261880796144E-19
 total_energy        : -1.14735083214686E+01
@@ -1665,11 +1621,7 @@ band_energy         :  2.94072716627188E-01
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  5.49532697036699E-01
 xc_dc               : -2.03939226012985E-01
-<<<<<<< HEAD
 PAW spherical_terms :  1.27956618088816E-01
-=======
-spherical_terms     :  1.27956618088816E-01
->>>>>>> remotes/srostami/test
 internal            : -1.14732628547233E+01
 '-kT*entropy'       : -7.55261880796144E-19
 total_energy_dc     : -1.14732628547233E+01
@@ -2244,11 +2196,7 @@ xc                  : -3.86355301483505E+00
 Ewald energy        : -1.24590583509645E+01
 psp_core            :  5.49532697036699E-01
 local_psp           : -6.31761323055126E+00
-<<<<<<< HEAD
 PAW spherical_terms :  1.77554275716646E+00
-=======
-spherical_terms     :  1.77554275716646E+00
->>>>>>> remotes/srostami/test
 total_energy        : -1.06550385141314E+01
 total_energy_eV     : -2.89938343051114E+02
 ...
@@ -2261,11 +2209,7 @@ band_energy         :  1.53664059095202E+00
 Ewald energy        : -1.24590583509645E+01
 psp_core            :  5.49532697036699E-01
 xc_dc               : -4.10568902771700E-01
-<<<<<<< HEAD
 PAW spherical_terms :  1.28763272294613E-01
-=======
-spherical_terms     :  1.28763272294613E-01
->>>>>>> remotes/srostami/test
 total_energy_dc     : -1.06546906934529E+01
 total_energy_dc_eV  : -2.89928878369117E+02
 ...
@@ -2844,11 +2788,7 @@ xc                  : -3.86333852473717E+00
 Ewald energy        : -1.24590432687784E+01
 psp_core            :  5.49532697036699E-01
 local_psp           : -6.31733349859964E+00
-<<<<<<< HEAD
 PAW spherical_terms :  1.77702570902607E+00
-=======
-spherical_terms     :  1.77702570902607E+00
->>>>>>> remotes/srostami/test
 internal            : -1.06533406570709E+01
 '-kT*entropy'       : -7.55261880796144E-19
 total_energy        : -1.06533406570709E+01
@@ -2863,11 +2803,7 @@ band_energy         :  1.53601321880530E+00
 Ewald energy        : -1.24590432687784E+01
 psp_core            :  5.49532697036699E-01
 xc_dc               : -4.10294251117773E-01
-<<<<<<< HEAD
 PAW spherical_terms :  1.28742700519162E-01
-=======
-spherical_terms     :  1.28742700519162E-01
->>>>>>> remotes/srostami/test
 internal            : -1.06550489035350E+01
 '-kT*entropy'       : -7.55261880796144E-19
 total_energy_dc     : -1.06550489035350E+01
@@ -2924,13 +2860,8 @@ meta: {optdriver: 0, ionmov: 3, optcell: 1, iscf: 17, paral_kgb: 1, }
          ecut(hartree)=     60.500   => boxcut(ratio)=   2.07719
 
 --- Pseudopotential description ------------------------------------------------
-<<<<<<< HEAD
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/6c_lda.paw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/6c_lda.paw
-=======
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/6c_lda.paw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/6c_lda.paw
->>>>>>> remotes/srostami/test
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/6c_lda.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/6c_lda.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): carbon
 -  6.00000   4.00000  20041014                znucl, zion, pspdat
     7    2    1    0       467   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3283,9 +3214,9 @@ force_length_stats: {min:   2.68354423E-02, max:   2.68354423E-02, mean:   2.683
  Lengths [Bohr]
   4.76980693829584E+00  4.76980693829584E+00  4.76980693829584E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  2.93813520920835E-04 -3.79331828237095E-05 -3.79331828237118E-05
- -3.79331828237095E-05  2.93813520920833E-04 -3.79331828237122E-05
- -3.79331828237118E-05 -3.79331828237122E-05  2.93813520920835E-04
+  2.93813520920835E-04 -3.79331828237088E-05 -3.79331828237096E-05
+ -3.79331828237088E-05  2.93813520920836E-04 -3.79331828237097E-05
+ -3.79331828237096E-05 -3.79331828237097E-05  2.93813520920836E-04
  Total energy (etotal) [Ha]= -1.15063865831181E+01
 
  Difference of energy with previous step (new-old):
@@ -3304,11 +3235,11 @@ tolerances: {toldff: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -11.507474502764    -1.151E+01 4.023E-14 4.268E-03 1.353E-02 1.967E-03
- ETOT  2  -11.507471384309     3.118E-06 4.774E-18 4.517E-04 8.274E-05 1.884E-03
+ ETOT  1  -11.507474502764    -1.151E+01 4.019E-14 4.268E-03 1.353E-02 1.967E-03
+ ETOT  2  -11.507471384309     3.118E-06 5.036E-18 4.517E-04 8.274E-05 1.884E-03
  ETOT  3  -11.507471237313     1.470E-07 9.482E-14 6.716E-06 3.180E-05 1.852E-03
  ETOT  4  -11.507471238829    -1.516E-09 5.518E-16 5.530E-08 1.025E-06 1.853E-03
- ETOT  5  -11.507471238869    -3.963E-11 3.227E-19 1.464E-09 1.378E-07 1.853E-03
+ ETOT  5  -11.507471238869    -3.959E-11 3.227E-19 1.464E-09 1.378E-07 1.853E-03
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -6.14782805E-05  sigma(3 2)= -5.28383878E-06
@@ -3331,7 +3262,7 @@ lattice_vectors:
 lattice_lengths: [   4.73116,    4.73116,    4.73116, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   7.4883970E+01
-convergence: {deltae: -3.963E-11, res2:  1.464E-09, residm:  3.227E-19, diffor:  1.378E-07, }
+convergence: {deltae: -3.959E-11, res2:  1.464E-09, residm:  3.227E-19, diffor:  1.378E-07, }
 etotal    :  -1.15074712E+01
 entropy   :   0.00000000E+00
 fermie    :   3.56373330E-01
@@ -3358,8 +3289,8 @@ force_length_stats: {min:   3.20975185E-03, max:   3.20975185E-03, mean:   3.209
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      0.251121845194204
- Compensation charge over fine fft grid    =      0.251125852816651
+ Compensation charge over spherical meshes =      0.251121845194216
+ Compensation charge over fine fft grid    =      0.251125852816657
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -3428,32 +3359,32 @@ force_length_stats: {min:   3.20975185E-03, max:   3.20975185E-03, mean:   3.209
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -9.80827925439787E-02 -9.80827925439787E-02 -9.80827925439787E-02
-  1.57007541097052E+00  1.57007541097052E+00  1.57007541097052E+00
+ -9.80827925439856E-02 -9.80827925439856E-02 -9.80827925439857E-02
+  1.57007541097051E+00  1.57007541097051E+00  1.57007541097051E+00
  Reduced coordinates (xred)
- -1.46591865268597E-02 -1.46591865268597E-02 -1.46591865268597E-02
-  2.34659186526860E-01  2.34659186526860E-01  2.34659186526860E-01
+ -1.46591865268610E-02 -1.46591865268610E-02 -1.46591865268610E-02
+  2.34659186526861E-01  2.34659186526861E-01  2.34659186526861E-01
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.85315E-03 1.85315E-03 (free atoms)
- -1.85315109483153E-03 -1.85315109483152E-03 -1.85315109483152E-03
-  1.85315109483153E-03  1.85315109483152E-03  1.85315109483152E-03
+ -1.85315109482470E-03 -1.85315109482470E-03 -1.85315109482470E-03
+  1.85315109482470E-03  1.85315109482470E-03  1.85315109482470E-03
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  1.23992033291867E-02  1.23992033291867E-02  1.23992033291867E-02
- -1.23992033291867E-02 -1.23992033291867E-02 -1.23992033291867E-02
+  1.23992033291408E-02  1.23992033291408E-02  1.23992033291408E-02
+ -1.23992033291408E-02 -1.23992033291408E-02 -1.23992033291408E-02
  Scale of Primitive Cell (acell) [bohr]
-  6.69087553830247E+00  6.69087553830247E+00  6.69087553830247E+00
+  6.69087553830236E+00  6.69087553830236E+00  6.69087553830236E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.34543776915124E+00  3.34543776915124E+00
-  3.34543776915124E+00  0.00000000000000E+00  3.34543776915124E+00
-  3.34543776915124E+00  3.34543776915124E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  7.48839703562838E+01
+  0.00000000000000E+00  3.34543776915118E+00  3.34543776915118E+00
+  3.34543776915118E+00  0.00000000000000E+00  3.34543776915118E+00
+  3.34543776915118E+00  3.34543776915118E+00  0.00000000000000E+00
+ Unitary Cell Volume (ucvol) [Bohr^3]=  7.48839703562800E+01
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  4.73116346520887E+00  4.73116346520887E+00  4.73116346520887E+00
+  4.73116346520879E+00  4.73116346520879E+00  4.73116346520879E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
- -6.14782804769093E-05 -5.28383878231683E-06 -5.28383878231269E-06
- -5.28383878231683E-06 -6.14782804769076E-05 -5.28383878231627E-06
- -5.28383878231269E-06 -5.28383878231627E-06 -6.14782804769093E-05
+ -6.14782804777506E-05 -5.28383878233022E-06 -5.28383878233000E-06
+ -5.28383878233022E-06 -6.14782804777506E-05 -5.28383878232971E-06
+ -5.28383878233000E-06 -5.28383878232971E-06 -6.14782804777506E-05
  Total energy (etotal) [Ha]= -1.15074712388689E+01
 
  Difference of energy with previous step (new-old):
@@ -3477,17 +3408,17 @@ force_length_stats: {min:   3.20975185E-03, max:   3.20975185E-03, mean:   3.209
     2      -0.012399203329     -0.012399203329     -0.012399203329
 
  cartesian coordinates (angstrom) at end:
-    1     -0.05190317836913    -0.05190317836913    -0.05190317836913
-    2      0.83084812325318     0.83084812325318     0.83084812325318
+    1     -0.05190317836914    -0.05190317836914    -0.05190317836914
+    2      0.83084812325317     0.83084812325317     0.83084812325317
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00185315109483    -0.00185315109483    -0.00185315109483
-    2      0.00185315109483     0.00185315109483     0.00185315109483
+    1     -0.00185315109482    -0.00185315109482    -0.00185315109482
+    2      0.00185315109482     0.00185315109482     0.00185315109482
  frms,max,avg= 1.8531511E-03 1.8531511E-03   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.09529285270317    -0.09529285270317    -0.09529285270317
-    2      0.09529285270317     0.09529285270317     0.09529285270317
+    1     -0.09529285270282    -0.09529285270282    -0.09529285270282
+    2      0.09529285270282     0.09529285270282     0.09529285270282
  frms,max,avg= 9.5292853E-02 9.5292853E-02   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  6.690875538302  6.690875538302  6.690875538302 bohr
               =  3.540658840382  3.540658840382  3.540658840382 angstroms
@@ -3510,34 +3441,26 @@ force_length_stats: {min:   3.20975185E-03, max:   3.20975185E-03, mean:   3.209
 --- !EnergyTerms
 iteration_state     : {dtset: 7, itime: 3, icycle: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  6.99826933987525E+00
-hartree             :  9.53484230889865E-01
-xc                  : -3.83718194604025E+00
-Ewald energy        : -1.28815100237735E+01
-psp_core            :  6.29272573912646E-01
-local_psp           : -5.15447161356482E+00
-<<<<<<< HEAD
-PAW spherical_terms :  1.78466677362935E+00
-=======
-spherical_terms     :  1.78466677362935E+00
->>>>>>> remotes/srostami/test
+kinetic             :  6.99826933987538E+00
+hartree             :  9.53484230889844E-01
+xc                  : -3.83718194604027E+00
+Ewald energy        : -1.28815100237737E+01
+psp_core            :  6.29272573912677E-01
+local_psp           : -5.15447161356472E+00
+PAW spherical_terms :  1.78466677362937E+00
 total_energy        : -1.15074706650714E+01
-total_energy_eV     : -3.13134201524949E+02
+total_energy_eV     : -3.13134201524948E+02
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 7, itime: 3, icycle: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  6.95771645079388E-01
-Ewald energy        : -1.28815100237735E+01
-psp_core            :  6.29272573912646E-01
-xc_dc               : -7.79761172934093E-02
-<<<<<<< HEAD
-PAW spherical_terms :  1.26970683205941E-01
-=======
-spherical_terms     :  1.26970683205941E-01
->>>>>>> remotes/srostami/test
+band_energy         :  6.95771645079538E-01
+Ewald energy        : -1.28815100237737E+01
+psp_core            :  6.29272573912677E-01
+xc_dc               : -7.79761172933613E-02
+PAW spherical_terms :  1.26970683205937E-01
 total_energy_dc     : -1.15074712388689E+01
 total_energy_dc_eV  : -3.13134217138772E+02
 ...
@@ -3922,9 +3845,9 @@ force_length_stats: {min:   2.68354423E-02, max:   2.68354423E-02, mean:   2.683
  Lengths [Bohr]
   4.76980693829584E+00  4.76980693829584E+00  4.76980693829584E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  2.93813520920835E-04 -3.79331828237095E-05 -3.79331828237118E-05
- -3.79331828237095E-05  2.93813520920833E-04 -3.79331828237122E-05
- -3.79331828237118E-05 -3.79331828237122E-05  2.93813520920835E-04
+  2.93813520920835E-04 -3.79331828237088E-05 -3.79331828237096E-05
+ -3.79331828237088E-05  2.93813520920836E-04 -3.79331828237097E-05
+ -3.79331828237096E-05 -3.79331828237097E-05  2.93813520920836E-04
  Total energy (etotal) [Ha]= -1.15063865831181E+01
 
  Difference of energy with previous step (new-old):
@@ -3943,11 +3866,11 @@ tolerances: {toldff: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -11.507474502764    -1.151E+01 4.017E-14 4.268E-03 1.353E-02 1.967E-03
- ETOT  2  -11.507471384309     3.118E-06 5.364E-18 4.517E-04 8.274E-05 1.884E-03
+ ETOT  1  -11.507474502764    -1.151E+01 4.022E-14 4.268E-03 1.353E-02 1.967E-03
+ ETOT  2  -11.507471384309     3.118E-06 4.914E-18 4.517E-04 8.274E-05 1.884E-03
  ETOT  3  -11.507471237313     1.470E-07 9.482E-14 6.716E-06 3.180E-05 1.852E-03
  ETOT  4  -11.507471238829    -1.516E-09 5.518E-16 5.530E-08 1.025E-06 1.853E-03
- ETOT  5  -11.507471238869    -3.964E-11 3.227E-19 1.464E-09 1.378E-07 1.853E-03
+ ETOT  5  -11.507471238869    -3.959E-11 3.227E-19 1.464E-09 1.378E-07 1.853E-03
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -6.14782805E-05  sigma(3 2)= -5.28383878E-06
@@ -3970,7 +3893,7 @@ lattice_vectors:
 lattice_lengths: [   4.73116,    4.73116,    4.73116, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   7.4883970E+01
-convergence: {deltae: -3.964E-11, res2:  1.464E-09, residm:  3.227E-19, diffor:  1.378E-07, }
+convergence: {deltae: -3.959E-11, res2:  1.464E-09, residm:  3.227E-19, diffor:  1.378E-07, }
 etotal    :  -1.15074712E+01
 entropy   :   0.00000000E+00
 fermie    :   6.24598913E-01
@@ -3997,8 +3920,8 @@ force_length_stats: {min:   3.20975185E-03, max:   3.20975185E-03, mean:   3.209
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      0.251121845194207
- Compensation charge over fine fft grid    =      0.251125852816650
+ Compensation charge over spherical meshes =      0.251121845194215
+ Compensation charge over fine fft grid    =      0.251125852816662
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -4067,32 +3990,32 @@ force_length_stats: {min:   3.20975185E-03, max:   3.20975185E-03, mean:   3.209
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -9.80827925439787E-02 -9.80827925439787E-02 -9.80827925439787E-02
-  1.57007541097052E+00  1.57007541097052E+00  1.57007541097052E+00
+ -9.80827925439856E-02 -9.80827925439856E-02 -9.80827925439856E-02
+  1.57007541097051E+00  1.57007541097051E+00  1.57007541097051E+00
  Reduced coordinates (xred)
- -1.46591865268597E-02 -1.46591865268597E-02 -1.46591865268597E-02
-  2.34659186526860E-01  2.34659186526860E-01  2.34659186526860E-01
+ -1.46591865268610E-02 -1.46591865268610E-02 -1.46591865268610E-02
+  2.34659186526861E-01  2.34659186526861E-01  2.34659186526861E-01
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.85315E-03 1.85315E-03 (free atoms)
- -1.85315109483129E-03 -1.85315109483129E-03 -1.85315109483129E-03
-  1.85315109483129E-03  1.85315109483129E-03  1.85315109483129E-03
+ -1.85315109482399E-03 -1.85315109482399E-03 -1.85315109482399E-03
+  1.85315109482399E-03  1.85315109482399E-03  1.85315109482399E-03
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  1.23992033291852E-02  1.23992033291852E-02  1.23992033291852E-02
- -1.23992033291852E-02 -1.23992033291852E-02 -1.23992033291852E-02
+  1.23992033291361E-02  1.23992033291361E-02  1.23992033291361E-02
+ -1.23992033291361E-02 -1.23992033291361E-02 -1.23992033291361E-02
  Scale of Primitive Cell (acell) [bohr]
-  6.69087553830247E+00  6.69087553830247E+00  6.69087553830247E+00
+  6.69087553830236E+00  6.69087553830236E+00  6.69087553830236E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.34543776915124E+00  3.34543776915124E+00
-  3.34543776915124E+00  0.00000000000000E+00  3.34543776915124E+00
-  3.34543776915124E+00  3.34543776915124E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  7.48839703562838E+01
+  0.00000000000000E+00  3.34543776915118E+00  3.34543776915118E+00
+  3.34543776915118E+00  0.00000000000000E+00  3.34543776915118E+00
+  3.34543776915118E+00  3.34543776915118E+00  0.00000000000000E+00
+ Unitary Cell Volume (ucvol) [Bohr^3]=  7.48839703562800E+01
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  4.73116346520887E+00  4.73116346520887E+00  4.73116346520887E+00
+  4.73116346520879E+00  4.73116346520879E+00  4.73116346520879E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
- -6.14782804769318E-05 -5.28383878231125E-06 -5.28383878231393E-06
- -5.28383878231125E-06 -6.14782804769301E-05 -5.28383878231239E-06
- -5.28383878231393E-06 -5.28383878231239E-06 -6.14782804769284E-05
+ -6.14782804776413E-05 -5.28383878231483E-06 -5.28383878231617E-06
+ -5.28383878231483E-06 -6.14782804776413E-05 -5.28383878231613E-06
+ -5.28383878231617E-06 -5.28383878231613E-06 -6.14782804776413E-05
  Total energy (etotal) [Ha]= -1.15074712388689E+01
 
  Difference of energy with previous step (new-old):
@@ -4107,7 +4030,7 @@ force_length_stats: {min:   3.20975185E-03, max:   3.20975185E-03, mean:   3.209
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   18.843E-21; max=  32.271E-20
+ Mean square residual over all n,k,spin=   18.843E-21; max=  32.272E-20
  reduced coordinates (array xred) for    2 atoms
       -0.014659186527     -0.014659186527     -0.014659186527
        0.234659186527      0.234659186527      0.234659186527
@@ -4116,17 +4039,17 @@ force_length_stats: {min:   3.20975185E-03, max:   3.20975185E-03, mean:   3.209
     2      -0.012399203329     -0.012399203329     -0.012399203329
 
  cartesian coordinates (angstrom) at end:
-    1     -0.05190317836913    -0.05190317836913    -0.05190317836913
-    2      0.83084812325318     0.83084812325318     0.83084812325318
+    1     -0.05190317836914    -0.05190317836914    -0.05190317836914
+    2      0.83084812325317     0.83084812325317     0.83084812325317
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00185315109483    -0.00185315109483    -0.00185315109483
-    2      0.00185315109483     0.00185315109483     0.00185315109483
+    1     -0.00185315109482    -0.00185315109482    -0.00185315109482
+    2      0.00185315109482     0.00185315109482     0.00185315109482
  frms,max,avg= 1.8531511E-03 1.8531511E-03   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.09529285270316    -0.09529285270316    -0.09529285270316
-    2      0.09529285270316     0.09529285270316     0.09529285270316
+    1     -0.09529285270278    -0.09529285270278    -0.09529285270278
+    2      0.09529285270278     0.09529285270278     0.09529285270278
  frms,max,avg= 9.5292853E-02 9.5292853E-02   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  6.690875538302  6.690875538302  6.690875538302 bohr
               =  3.540658840382  3.540658840382  3.540658840382 angstroms
@@ -4152,36 +4075,28 @@ force_length_stats: {min:   3.20975185E-03, max:   3.20975185E-03, mean:   3.209
 --- !EnergyTerms
 iteration_state     : {dtset: 8, itime: 3, icycle: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  6.99826933987524E+00
-hartree             :  9.53484230889866E-01
-xc                  : -3.83718194604025E+00
-Ewald energy        : -1.28815100237735E+01
-psp_core            :  6.29272573912646E-01
-local_psp           : -5.15447161356483E+00
-<<<<<<< HEAD
+kinetic             :  6.99826933987538E+00
+hartree             :  9.53484230889838E-01
+xc                  : -3.83718194604028E+00
+Ewald energy        : -1.28815100237737E+01
+psp_core            :  6.29272573912677E-01
+local_psp           : -5.15447161356471E+00
 PAW spherical_terms :  1.78466677362936E+00
-=======
-spherical_terms     :  1.78466677362936E+00
->>>>>>> remotes/srostami/test
-internal            : -1.15074706650715E+01
+internal            : -1.15074706650714E+01
 '-kT*entropy'       : -7.55261880796144E-19
-total_energy        : -1.15074706650715E+01
-total_energy_eV     : -3.13134201524949E+02
+total_energy        : -1.15074706650714E+01
+total_energy_eV     : -3.13134201524948E+02
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 8, itime: 3, icycle: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  6.95771645079393E-01
-Ewald energy        : -1.28815100237735E+01
-psp_core            :  6.29272573912646E-01
-xc_dc               : -7.79761172934084E-02
-<<<<<<< HEAD
-PAW spherical_terms :  1.26970683205936E-01
-=======
-spherical_terms     :  1.26970683205936E-01
->>>>>>> remotes/srostami/test
+band_energy         :  6.95771645079537E-01
+Ewald energy        : -1.28815100237737E+01
+psp_core            :  6.29272573912677E-01
+xc_dc               : -7.79761172933604E-02
+PAW spherical_terms :  1.26970683205934E-01
 internal            : -1.15074712388689E+01
 '-kT*entropy'       : -7.55261880796144E-19
 total_energy_dc     : -1.15074712388689E+01
@@ -4245,13 +4160,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 1, }
 
 
 --- Pseudopotential description ------------------------------------------------
-<<<<<<< HEAD
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/6c_lda.paw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/6c_lda.paw
-=======
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/6c_lda.paw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/6c_lda.paw
->>>>>>> remotes/srostami/test
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/6c_lda.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/6c_lda.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): carbon
 -  6.00000   4.00000  20041014                znucl, zion, pspdat
     7    2    1    0       467   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4284,21 +4194,12 @@ solver: {iscf: 17, nstep: 5, nline: 4, wfoptalg: 114, }
 tolerances: {toldfe: 1.00E-10, }
 ...
 
-<<<<<<< HEAD
-     iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -10.529010105653    -1.053E+01 2.931E-04 9.508E+01
- ETOT  2  -10.429281810701     9.973E-02 3.678E-07 9.390E+00
- ETOT  3  -10.417982529732     1.130E-02 7.356E-08 1.491E-01
- ETOT  4  -10.417942115260     4.041E-05 8.362E-09 2.434E-03
- ETOT  5  -10.417943509205    -1.394E-06 1.375E-10 2.587E-05
-=======
      iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
  ETOT  1  -10.529010105653    -1.053E+01 2.931E-04 9.508E+01 0.000E+00 0.000E+00
  ETOT  2  -10.429281810701     9.973E-02 3.678E-07 9.390E+00 0.000E+00 0.000E+00
  ETOT  3  -10.417982529732     1.130E-02 7.356E-08 1.491E-01 0.000E+00 0.000E+00
  ETOT  4  -10.417942115260     4.041E-05 8.362E-09 2.434E-03 0.000E+00 0.000E+00
  ETOT  5  -10.417943509205    -1.394E-06 1.375E-10 2.587E-05 0.000E+00 0.000E+00
->>>>>>> remotes/srostami/test
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -8.18087895E-03  sigma(3 2)= -1.74490145E-03
@@ -4342,15 +4243,6 @@ force_length_stats: {min:   4.07878180E-01, max:   4.07878180E-01, mean:   4.078
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
-<<<<<<< HEAD
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.11202     0.715319     0.715319      1.430639    -0.000000
-    2   1.11202     0.720654     0.720654      1.441308    -0.000000
- ---------------------------------------------------------------------
-  Sum:              1.435974     1.435974      2.871947    -0.000000
- Total magnetization (from the atomic spheres):            -0.000000
- Total magnetization (exact up - dn):                       0.000000
-=======
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1  C   1.11202     0.715319     0.715319      1.430639    -0.000000
     2  C   1.11202     0.720654     0.720654      1.441308    -0.000000
@@ -4359,7 +4251,6 @@ force_length_stats: {min:   4.07878180E-01, max:   4.07878180E-01, mean:   4.078
  Total magnetization (from the atomic spheres):               -0.000000
  Total magnetization (exact up - dn):                          0.000000
 
->>>>>>> remotes/srostami/test
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -4540,11 +4431,7 @@ xc                  : -3.90585170612370E+00
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  5.49532697036699E-01
 local_psp           : -6.85233773471402E+00
-<<<<<<< HEAD
 PAW spherical_terms :  1.79561900839151E+00
-=======
-spherical_terms     :  1.79561900839151E+00
->>>>>>> remotes/srostami/test
 total_energy        : -1.04187268356939E+01
 total_energy_eV     : -2.83507975258551E+02
 ...
@@ -4557,11 +4444,7 @@ band_energy         :  1.77721472174861E+00
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  5.49532697036699E-01
 xc_dc               : -6.32068257556697E-01
-<<<<<<< HEAD
 PAW spherical_terms :  1.28262990028914E-01
-=======
-spherical_terms     :  1.28262990028914E-01
->>>>>>> remotes/srostami/test
 total_energy_dc     : -1.04179435092054E+01
 total_energy_dc_eV  : -2.83486659860785E+02
 ...
@@ -4919,9 +4802,9 @@ P           mkmem9          1
                       -4.6519939871E-03 -4.6519939871E-03 -4.6519939871E-03
            strten6    -6.2064633273E-03 -6.2064633273E-03 -6.2064633273E-03
                       -4.6493450598E-03 -4.6493450598E-03 -4.6493450598E-03
-           strten7    -6.1478280477E-05 -6.1478280477E-05 -6.1478280477E-05
+           strten7    -6.1478280478E-05 -6.1478280478E-05 -6.1478280478E-05
                       -5.2838387823E-06 -5.2838387823E-06 -5.2838387823E-06
-           strten8    -6.1478280477E-05 -6.1478280477E-05 -6.1478280477E-05
+           strten8    -6.1478280478E-05 -6.1478280478E-05 -6.1478280478E-05
                       -5.2838387823E-06 -5.2838387823E-06 -5.2838387823E-06
            strten9    -8.1808789497E-03 -8.1808789497E-03 -8.1808789497E-03
                       -1.7449014550E-03 -1.7449014550E-03 -1.7449014550E-03
@@ -5127,18 +5010,10 @@ P           mkmem9          1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-<<<<<<< HEAD
-- Proc.   0 individual time (sec): cpu=          5.5  wall=          5.6
-=======
-- Proc.   0 individual time (sec): cpu=          5.3  wall=          5.3
->>>>>>> remotes/srostami/test
+- Proc.   0 individual time (sec): cpu=          5.6  wall=          5.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered  21 WARNINGs and  24 COMMENTs to log file.
-<<<<<<< HEAD
-+Overall time at end (sec) : cpu=         21.6  wall=         21.6
-=======
-+Overall time at end (sec) : cpu=         20.6  wall=         20.6
->>>>>>> remotes/srostami/test
++Overall time at end (sec) : cpu=         21.9  wall=         21.9
