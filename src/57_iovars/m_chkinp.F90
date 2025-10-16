@@ -922,7 +922,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_entropy',dt%dmft_triqs_entropy,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_measure_G_l',dt%dmft_triqs_measure_G_l,2,(/0,1/),iout)
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_measure_g_l',dt%dmft_triqs_measure_g_l,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_loc_n_min',dt%dmft_triqs_loc_n_min,0,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
@@ -966,11 +966,11 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_use_norm_as_weight',dt%dmft_triqs_use_norm_as_weight,1,(/1/),iout)
      end if
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     cond_string(2)='dmft_triqs_measure_G_l' ; cond_values(2)=dt%dmft_triqs_measure_G_l
-     if (dt%dmft_triqs_measure_G_l==0) then
+     cond_string(2)='dmft_triqs_measure_g_l' ; cond_values(2)=dt%dmft_triqs_measure_g_l
+     if (dt%dmft_triqs_measure_g_l==0) then
        call chkdpr(0,2,cond_string,cond_values,ierr,'dmft_triqs_dlr_wmax',dt%dmft_triqs_dlr_wmax,1,zero,iout)
        cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-       cond_string(2)='dmft_triqs_measure_G_l' ; cond_values(2)=dt%dmft_triqs_measure_G_l
+       cond_string(2)='dmft_triqs_measure_g_l' ; cond_values(2)=dt%dmft_triqs_measure_g_l
        call chkdpr(0,2,cond_string,cond_values,ierr,'dmft_triqs_dlr_epsilon',dt%dmft_triqs_dlr_epsilon,1,zero,iout)
      else
        call chkint_ge(0,2,cond_string,cond_values,ierr,'dmft_triqs_n_l',dt%dmft_triqs_n_l,1,iout)

@@ -2698,8 +2698,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        dtset%dmft_triqs_time_invariance=0
        dtset%dmft_triqs_use_norm_as_weight=0
      end if
-     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_measure_G_l',tread,'INT')
-     if(tread==1) dtset%dmft_triqs_measure_G_l=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_measure_g_l',tread,'INT')
+     if(tread==1) dtset%dmft_triqs_measure_g_l=intarr(1)
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_move_double',tread,'INT')
      if(tread==1) dtset%dmft_triqs_move_double=intarr(1)
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_move_shift',tread,'INT')

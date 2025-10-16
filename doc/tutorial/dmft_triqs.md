@@ -7,16 +7,16 @@ author: ECastiel
 ## Introduction
 
 In this tutorial, you will learn how to run a DFT+DMFT calculation using the interface
-between Abinit and TRIQS/CT-HYB. We show an example on iron.
+between ABINIT and TRIQS/CT-HYB. We show an example on iron.
 TRIQS/CT-HYB is used as the impurity solver,
-while Abinit drives the calculation and connects to TRIQS/CT-HYB
+while ABINIT drives the calculation and connects to TRIQS/CT-HYB
 as an external library.
 
-Before starting, you should already know how to do a basic DFT calculation with Abinit
+Before starting, you should already know how to do a basic DFT calculation with ABINIT
 (see [basic1](/tutorial/base1), [basic2](/tutorial/base2), [basic3](/tutorial/base3),
 and [basic4](/tutorial/base4)). It also helps if you're familiar with PAW
 (see [PAW1](/tutorial/paw1) and [PAW2](/tutorial/paw2)), [DFT+U](/tutorial/dftu),
-and Abinit's internal DMFT solvers (see [DMFT](/tutorial/dmft)).
+and ABINIT's internal DMFT solvers (see [DMFT](/tutorial/dmft)).
 
 We also recommend that you're comfortable with TRIQS/CT-HYB, and we'll assume you already
 have at least a basic idea of how the DFT+DMFT method works.
@@ -27,7 +27,7 @@ The whole tutorial should take a few hours to complete.
 
 ## Presentation
 
-Abinit comes with its own internal DMFT code and solvers, but they aren't numerically exact
+ABINIT comes with its own internal DMFT code and solvers, but they aren't numerically exact
 and rely on the density-density approximation. TRIQS/CT-HYB, on the other hand, can handle the
 full interaction Hamiltonian.
 
@@ -40,16 +40,26 @@ self-consistent fashion.
 That said, our interface does not handle toy models - TRIQS's Python API and built-in tools
 already handle those efficiently.
 
-The list of input variables that are specific to the CT-HYB solver of TRIQS can be found in the
-[[varset:dmft_triqs|DMFT_TRIQS]] of the variable glossary.
+Even though our interface with TRIQS/CT-HYB roughly follows the internal DMFT implementation
+of ABINIT, there are a few important differences in input variables or available features, and
+it is more than just swapping out the impurity solver.
 
-Some input variables are shared with Abinit's internal DMFT, while others are specific
-to either the TRIQS interface or the internal implementation. You can find the full list in the
-[[varset:dmft|DMFT]] and
-[[varset:dmft_triqs|DMFT_TRIQS]] sections of the variable glossary.
-Most TRIQS/CT-HYB specific variables directly correspond to TRIQS/CT-HYB's own inputs, so if you're
-already familiar with it, you shouldn't get lost. Finally, we encourage you to read the
-[[topic:DMFT|topic on DMFT]].
+You can find all the input variables related to DMFT listed [[varset:dmft|here]].
+
+The input variables that are specific to the TRIQS/CT-HYB solver start with `dmft_triqs_`, and
+many of them are direct copies of TRIQS/CT-HYB's own API inputs - so if you have used TRIQS
+before, you should not get lost.
+
+On the other hand, variables related to ABINIT's internal segment solver start with
+`dmftctqmc_` or `dmftqmc_`. These don't apply here, so you can safely ignore them for this
+tutorial.
+
+Finally, variables that control the self-consistent cycle itself start with `dmft_`. Most of
+these are shared between the internal DMFT and the TRIQS/CT-HYB interface, but some features
+are available only in one or the other. The glossary clearly points out when that is the case.
+
+If you want a good overview of the input variables relevant for the TRIQS/CT-HYB interface, we
+recommend checking out the dedicated [[topic:DmftTriqsCthyb|topic]].
 
 ## Installation
 
@@ -61,7 +71,7 @@ CT-HYB calculations can be very computationally demanding, so take your time whe
 compiling and pick an efficient BLAS implementation, as it can make a big difference
 in performance.
 
-After that, you need to reconfigure Abinit to link it with TRIQS. Add the following line to your
+After that, you need to reconfigure ABINIT to link it with TRIQS. Add the following line to your
 configuration file:
 
     with_triqs="yes"
@@ -72,7 +82,7 @@ the complex version of TRIQS/CT-HYB, also add:
 
     enable_triqs_complex="yes"
 
-Next, make sure your options are recognized correctly and that Abinit can
+Next, make sure your options are recognized correctly and that ABINIT can
 successfully link to TRIQS and compile a test code. When configuring, pay attention
 to these lines:
 
@@ -84,18 +94,19 @@ and:
 
 If something goes wrong, carefully check the `config.log` file. Ask yourself: Why did the
 test code fail to compile ? Was the library found and linked properly ? Is the test code
-using syntax or functions from a more recent TRIQS/CT-HYB version ?
+using syntax or functions from a more recent TRIQS/CT-HYB version ? This tutorial has
+been written with version 4.0.x of TRIQS/CT-HYB.
 
 Remember, you can override any automatically added compilation or linker flags using the
 configuration files variables: `TRIQS_CPPFLAGS`, `TRIQS_CFLAGS`, `TRIQS_CXXFLAGS`,
 `TRIQS_LDFLAGS`, and `TRIQS_LIBS`.
 
 As a last resort, if you still can't solve the issue, post a question on the
-[[https://discourse.abinit.org/|Abinit user forum]].
+[[https://discourse.abinit.org/|ABINIT user forum]].
 
-Once everything is set, simply recompile Abinit.
+Once everything is set, simply recompile ABINIT.
 
-## Electronic structure of Fe within DFT
+## Fatbands of Fe within DFT
 
 Before jumping into the DFT+DMFT calculation for Fe, it is useful to first get some physical insight into
 its electronic structure at the DFT level. This will help later when choosing some of the key DMFT
@@ -116,7 +127,7 @@ cp ../tdmft_triqs_1.abi .
 
 {% dialog tests/tutoparal/Input/tdmft_triqs_1.abi %}
 
-Launch the input file with Abinit. For the rest of this tutorial, we will run everything on 4 CPUs,
+Launch the input file with ABINIT. For the rest of this tutorial, we will run everything on 4 CPUs,
 but feel free to use more if you can:
 
     mpirun -n 4 abinit tdmft_triqs_1.abi > log 2>&1
@@ -164,9 +175,6 @@ bands.
 
 So when you move to the DMFT calculation, you will need to be careful in selecting which bands to
 include, to make sure you capture as much of the $d$ spectral weight as possible.
-
-
-
 
 ## Basic parameters for DFT+DMFT
 
@@ -283,7 +291,7 @@ When combining DFT and DMFT, you run into the double counting problem - some of 
 are already partly included at the DFT level, so they need to be subtracted and replaced by their exact
 DMFT values.
 
-Abinit provides the exact double counting formula, which removes these contributions exactly. It is a
+ABINIT provides the exact double counting formula, which removes these contributions exactly. It is a
 bit more involved to use, so we will cover it later in its own section.
 
 There are also several simpler, commonly used approximate formulas, which you can select using the
@@ -291,7 +299,7 @@ variable [[dmft_dc]].
 
 ### Impurity Solver
 
-We haven't yet told Abinit to use the TRIQS/CT-HYB interface instead of its internal DMFT solvers.
+We haven't yet told ABINIT to use the TRIQS/CT-HYB interface instead of its internal DMFT solvers.
 This is done with [[dmft_solv]], which sets the impurity solver to use.
 
 For TRIQS/CT-HYB, there are two relevant options:
@@ -302,7 +310,7 @@ For TRIQS/CT-HYB, there are two relevant options:
   * [[dmft_solv]]=7: Uses the full rotationally invariant Slater Hamiltonian, giving the most accurate
     treatment of interactions.
 
-If instead you want to use Abinit's internal DMFT implementation with its built-in solvers, check out the
+If instead you want to use ABINIT's internal DMFT implementation with its built-in solvers, check out the
 dedicated [DMFT tutorial](/tutorial/dmft).
 
 ** How to run a charge self-consistent DFT+DMFT calculation: an example on Fe **
@@ -310,7 +318,7 @@ dedicated [DMFT tutorial](/tutorial/dmft).
 Let's now go through a simple charge self-consistent DFT+DMFT calculation on iron, applying DMFT to the
 3d orbitals ([[lpawu]]=2).
 
-Start by copying the second input file and running it with Abinit. Note that this calculation can take
+Start by copying the second input file and running it with ABINIT. Note that this calculation can take
 a while - expect at least a few minutes.
 
 ```sh
