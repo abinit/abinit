@@ -3050,11 +3050,14 @@ Variable(
     defaultval=0.02,
     mnemonics="Dynamical Mean Field Theory: FERMI search maximal STEP",
     requires="[[usedmft]] == 1",
+    characteristics=['[[ENERGY]]'],
     added_in_version="before_v10.5.6",
     text=r"""
 Set the value of the maximal step increment in the Fermi level search. If it is too low, the
 root-finding algorithm will be significantly slowed down. If it is too high, the root-finding
 algorithm might encounter instabilities and fail to converge.
+
+Can be specified in the unit of your choice (Ha, Ry, eV, K) since it has the [[ENERGY]] characteristics.
 """,
 ),
 
@@ -3408,6 +3411,7 @@ Variable(
     defaultval=0,
     mnemonics="Dynamical Mean Field Theory: spin SHIFT for the SELF-energy",
     requires="[[usedmft]] == 1, [[nsppol]] == 2, [[usepawu]] == 14",
+    characteristics=['[[ENERGY]]'],
     added_in_version="before_v10.5.6",
     text=r"""
 When you are performing a magnetic calculation with a non-magnetic DFT, the magnetization
@@ -3415,6 +3419,8 @@ can take quite some time to arise (especially if it's very low) since you start 
 paramagnetic configuration. In this case, it is useful to start directly from a ferromagnetic
 self-energy to speed up convergence. Thus, at the first iteration, an initial static shift
 [[dmft_shiftself]] is applied between the two spin channels of the DMFT self-energy.
+
+Can be specified in the unit of your choice (Ha, Ry, eV, K) since it has the [[ENERGY]] characteristics.
 """,
 ),
 
@@ -3694,6 +3700,8 @@ the noisy imaginary-time Green's function from the CT-QMC.
 The DLR frequencies are then computed to ensure that they can represent any arbitrary
 Green's function whose spectral function have a support
 in [ -[[dmft_triqs_dlr_wmax]], [[dmft_triqs_dlr_wmax]] ] (cf [[cite:Kaye2022]]).
+
+Can be specified in the unit of your choice (Ha, Ry, eV, K) since it has the [[ENERGY]] characteristics.
 """,
 ),
 
@@ -3980,7 +3988,7 @@ Variable(
     requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_compute_integral]] == 1",
     added_in_version="before_v10.5.6",
     text=r"""
-Specify the number of subdivisions of the thermodynamic integration interval
+Specify the number of regular subdivisions of the thermodynamic integration interval
 (cf [[dmft_triqs_compute_integral]]). Each subdivision will contain [[dmft_triqs_gaussorder]]
 Gauss-Legendre quadrature points, for a total of [[dmft_triqs_nsubdivisions]] $\times$
 [[dmft_triqs_gaussorder]] integration points. You only need to care about increasing the number of
@@ -4168,10 +4176,13 @@ Variable(
     dimensions="scalar",
     mnemonics="Dynamical Mean Field Theory: WANnier functions radius",
     requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_prtwan]] == 1",
+    characteristics=['[[LENGTH]]'],
     added_in_version="before_v10.5.6",
     text=r"""
 Set the maximal radius up to which the Wannier functions are computed when [[dmft_prtwan]]=1.
 The PAW grid is extended if needed.
+
+Can be specified in the unit of your choice (Bohr, Angstrom) as it has the [[LENGTH]] characteristics.
 """,
 ),
 
@@ -4215,7 +4226,7 @@ Variable(
     requires="[[usedmft]] == 1, [[dmft_yukawa_param]] == 4",
     added_in_version="before_v10.5.6",
     text=r"""
-Set the value of the inverse screening length $\lambda$ for the Yukawa screened potential (cf
+Set the value of the inverse screening length $\lambda$ (in atomic units) for the Yukawa screened potential (cf
 [[dmft_yukawa_param]]).
 """,
 ),
