@@ -199,7 +199,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp) :: drude_plsmf, my_plsmf
  real(dp) :: fact_spin, theta_mu_minus_e0i, tol_empty, tol_empty_in !, e_mkq, e_nk ! e0i,
  real(dp),contiguous, pointer :: qp_ene(:,:,:), qp_occ(:,:,:)
- real(dp) :: ecut,weight_q,bigexc,bigsxc,vxcavg ! ediff, eshift, q0rad, bz_vol,
+ real(dp) :: weight_q,bigexc,bigsxc,vxcavg ! ediff, eshift, q0rad, bz_vol,
  logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, qq_is_gamma, pp_is_gamma, isirr_q
  logical :: stern_use_cache, stern_has_band_para, use_ftinterp
  logical :: print_time_qq, print_time_kk, print_time_pp, non_magnetic_xc, need_x_kmp, need_x_kqmp
@@ -304,7 +304,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor; nspden = dtset%nspden
- ecut = dtset%ecut ! dtset%dilatmx
  ieta = +j_dpc * dtset%zcut
 
  ! Set tolerance used to decide if a band is empty
@@ -478,7 +477,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  ! Also, compute mpw and gmax including the additional pp
  ! This is the maximum number of PWs for all possible k+q treated.
- call gstore%fill_bks_mask_pp_mesh(ecut, dtset%mband, nkpt, nsppol, my_pp_start_spin, my_pp_stop_spin, pp_mesh, &
+ call gstore%fill_bks_mask_pp_mesh(dtset%ecut, dtset%mband, nkpt, nsppol, my_pp_start_spin, my_pp_stop_spin, pp_mesh, &
                                    my_bsum_start, my_bsum_stop, bks_mask, mpw, gmax)
 
  ! Init work_ngfft
@@ -501,7 +500,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  wfd_istwfk = 1
 
  call wfd%init(cryst, pawtab, psps, keep_ur, dtset%mband, nband, nkpt, nsppol, bks_mask,&
-               nspden, nspinor, ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ebands%kptns, ngfft,&
+               nspden, nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ebands%kptns, ngfft,&
                dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 
  call pstat_proc%print(_PSTAT_ARGS_)
@@ -1073,7 +1072,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        if (print_time_kk) call cwtime(cpu_kk, wall_kk, gflops_kk, "start")
 
        ! Get npw_k, kg_k for kk
-       call wfd%get_gvec_gbound(cryst%gmet, ecut, kk, ik_ibz, isirr_k, dtset%nloalg, & ! in
+       call wfd%get_gvec_gbound(cryst%gmet, dtset%ecut, kk, ik_ibz, isirr_k, dtset%nloalg, & ! in
                                 istwf_k, npw_k, kg_k, nkpg_k, kpg_k, gbound_k)         ! out
 
        ! Find k + q in the extended zone and extract symmetry info.
@@ -1093,7 +1092,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        istwf_kq_ibz = wfd%istwfk(ikq_ibz); npw_kq_ibz = wfd%npwarr(ikq_ibz)
 
        ! Get npw_kq, kg_kq for k+q.
-       call wfd%get_gvec_gbound(cryst%gmet, ecut, kq, ikq_ibz, isirr_kq, dtset%nloalg, &  ! in
+       call wfd%get_gvec_gbound(cryst%gmet, dtset%ecut, kq, ikq_ibz, isirr_kq, dtset%nloalg, &  ! in
                                 istwf_kq, npw_kq, kg_kq, nkpg_kq, kpg_kq, gbound_kq)      ! out
 
        ABI_MALLOC(ug_k, (2, npw_k*nspinor))
@@ -1181,7 +1180,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          istwf_kmp_ibz = wfd%istwfk(ikmp_ibz); npw_kmp_ibz = wfd%npwarr(ikmp_ibz)
 
          ! Get npw_kmp, kg_kmp for k-p.
-         call wfd%get_gvec_gbound(cryst%gmet, ecut, kmp, ikmp_ibz, isirr_kmp, dtset%nloalg, &  ! in
+         call wfd%get_gvec_gbound(cryst%gmet, dtset%ecut, kmp, ikmp_ibz, isirr_kmp, dtset%nloalg, &  ! in
                                   istwf_kmp, npw_kmp, kg_kmp, nkpg_kmp, kpg_kmp, gbound_kmp)   ! out
 
          ! Compute nonlocal form factors ffnl_kmp at (k-p+G).
@@ -1201,7 +1200,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          istwf_kqmp_ibz = wfd%istwfk(ikqmp_ibz); npw_kqmp_ibz = wfd%npwarr(ikqmp_ibz)
 
          ! Get npw_kqmp, kg_kqmp for k+q-p
-         call wfd%get_gvec_gbound(cryst%gmet, ecut, kqmp, ikqmp_ibz, isirr_kqmp, dtset%nloalg, &    ! in
+         call wfd%get_gvec_gbound(cryst%gmet, dtset%ecut, kqmp, ikqmp_ibz, isirr_kqmp, dtset%nloalg, &    ! in
                                   istwf_kqmp, npw_kqmp, kg_kqmp, nkpg_kqmp, kpg_kqmp, gbound_kqmp)  ! out
 
          ! Compute nonlocal form factors ffnl_kmp at (k-p+G).
