@@ -1,5 +1,5 @@
 
-.Version 10.5.1.5 of ABINIT, released Jul 2025.
+.Version 10.5.6.3 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,18 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  9 Oct 2025.
-- ( at 18h09 )
+.Starting date : Wed 15 Oct 2025.
+- ( at 23h19 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/v9_t22/t22.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/TestBot_MPI1/v9_t22/t22.abi
 - output file    -> t22.abo
 - root for input  files -> t22i
 - root for output files -> t22o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/I.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/I.xml
  DATASET    1 : space group Cm m m (# 65); Bravais oC (1-face-center ortho.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -224,9 +224,9 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.16148
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Na.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.60198715
@@ -244,9 +244,9 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/I.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/I.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/I.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/I.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/I.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/I.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 2.30022271
@@ -279,11 +279,11 @@ solver: {iscf: 17, nstep: 4, nline: 4, wfoptalg: 10, }
 tolerances: {toldff: 1.00E-06, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -213.96262611385    -2.140E+02 4.409E-01 7.441E+02 4.369E-02 4.369E-02
- ETOT  2  -190.50127389921     2.346E+01 6.810E-03 5.022E+01 6.810E-02 5.082E-02
- ETOT  3  -189.77671644674     7.246E-01 3.493E-03 2.360E+00 1.026E-01 5.181E-02
- ETOT  4  -189.66592519232     1.108E-01 8.347E-04 8.628E-02 4.282E-02 4.866E-02
+     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
+ ETOT  1  -213.96262611385    -2.140E+02 4.409E-01 7.441E+02 4.369E-02 4.369E-02 0.000E+00 0.000E+00
+ ETOT  2  -190.50127389921     2.346E+01 6.810E-03 5.022E+01 6.810E-02 5.082E-02 0.000E+00 0.000E+00
+ ETOT  3  -189.77671644674     7.246E-01 3.493E-03 2.360E+00 1.026E-01 5.181E-02 0.000E+00 0.000E+00
+ ETOT  4  -189.66592519232     1.108E-01 8.347E-04 8.628E-02 4.282E-02 4.866E-02 0.000E+00 0.000E+00
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.84410115E-02  sigma(3 2)=  0.00000000E+00
@@ -337,21 +337,22 @@ force_length_stats: {min:   6.00105443E-03, max:   6.88139297E-02, mean:   2.535
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.60199     2.643698     2.643698      5.287396     0.000000
-    2   1.60199     2.622346     2.622346      5.244692     0.000000
-    3   1.60199     2.622346     2.622346      5.244692    -0.000000
-    4   1.60199     2.643698     2.643698      5.287396     0.000000
-    5   2.30022     1.975217     1.975217      3.950434    -0.000000
-    6   2.30022     1.975217     1.975217      3.950434    -0.000000
-    7   2.30022     1.909165     1.909165      3.818330    -0.000000
-    8   2.30022     1.909165     1.909165      3.818330    -0.000000
- ---------------------------------------------------------------------
-  Sum:             18.300852    18.300852     36.601704    -0.000000
- Total magnetization (from the atomic spheres):            -0.000000
- Total magnetization (exact up - dn):                       0.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Na   1.60199     2.643698     2.643698      5.287396     0.000000
+    2 Na   1.60199     2.622346     2.622346      5.244692     0.000000
+    3 Na   1.60199     2.622346     2.622346      5.244692    -0.000000
+    4 Na   1.60199     2.643698     2.643698      5.287396     0.000000
+    5  I   2.30022     1.975217     1.975217      3.950434    -0.000000
+    6  I   2.30022     1.975217     1.975217      3.950434    -0.000000
+    7  I   2.30022     1.909165     1.909165      3.818330    -0.000000
+    8  I   2.30022     1.909165     1.909165      3.818330    -0.000000
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                18.300852    18.300852     36.601704    -0.000000
+ Total magnetization (from the atomic spheres):               -0.000000
+ Total magnetization (exact up - dn):                          0.000000
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -606,11 +607,11 @@ solver: {iscf: 17, nstep: 4, nline: 4, wfoptalg: 10, }
 tolerances: {toldff: 1.00E-06, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -213.96415815341    -2.140E+02 4.409E-01 7.441E+02 4.373E-02 4.373E-02
- ETOT  2  -190.49993582957     2.346E+01 6.802E-03 5.022E+01 6.822E-02 5.093E-02
- ETOT  3  -189.77330786826     7.266E-01 3.542E-03 2.359E+00 1.029E-01 5.197E-02
- ETOT  4  -189.66315498766     1.102E-01 8.761E-04 8.314E-02 4.330E-02 4.795E-02
+     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
+ ETOT  1  -213.96415815341    -2.140E+02 4.409E-01 7.441E+02 4.373E-02 4.373E-02 9.259E-04 9.259E-04
+ ETOT  2  -190.49993582957     2.346E+01 6.802E-03 5.022E+01 6.822E-02 5.093E-02 1.581E-03 2.127E-03
+ ETOT  3  -189.77330786826     7.266E-01 3.542E-03 2.359E+00 1.029E-01 5.197E-02 4.769E-03 5.669E-03
+ ETOT  4  -189.66315498766     1.102E-01 8.761E-04 8.314E-02 4.330E-02 4.795E-02 5.258E-03 5.570E-03
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.84412409E-02  sigma(3 2)=  0.00000000E+00
@@ -664,21 +665,22 @@ force_length_stats: {min:   6.06898889E-03, max:   6.78161134E-02, mean:   2.507
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.60199     2.643662     2.643690      5.287352    -0.000028
-    2   1.60199     2.622293     2.622286      5.244579     0.000007
-    3   1.60199     2.622293     2.622286      5.244579     0.000007
-    4   1.60199     2.643662     2.643690      5.287352    -0.000028
-    5   2.30022     1.969834     1.975404      3.945238    -0.005570
-    6   2.30022     1.969834     1.975404      3.945238    -0.005570
-    7   2.30022     1.910549     1.911189      3.821738    -0.000640
-    8   2.30022     1.910549     1.911189      3.821738    -0.000640
- ---------------------------------------------------------------------
-  Sum:             18.292675    18.305139     36.597813    -0.012464
- Total magnetization (from the atomic spheres):            -0.012464
- Total magnetization (exact up - dn):                      -0.025000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Na   1.60199     2.643662     2.643690      5.287352    -0.000028
+    2 Na   1.60199     2.622293     2.622286      5.244579     0.000007
+    3 Na   1.60199     2.622293     2.622286      5.244579     0.000007
+    4 Na   1.60199     2.643662     2.643690      5.287352    -0.000028
+    5  I   2.30022     1.969834     1.975404      3.945238    -0.005570
+    6  I   2.30022     1.969834     1.975404      3.945238    -0.005570
+    7  I   2.30022     1.910549     1.911189      3.821738    -0.000640
+    8  I   2.30022     1.910549     1.911189      3.821738    -0.000640
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                18.292675    18.305139     36.597813    -0.012464
+ Total magnetization (from the atomic spheres):               -0.012464
+ Total magnetization (exact up - dn):                         -0.025000
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -933,11 +935,11 @@ solver: {iscf: 17, nstep: 4, nline: 4, wfoptalg: 10, }
 tolerances: {toldff: 1.00E-06, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -213.96569019298    -2.140E+02 4.409E-01 7.442E+02 4.377E-02 4.377E-02
- ETOT  2  -190.49860212756     2.347E+01 6.795E-03 5.023E+01 6.833E-02 5.104E-02
- ETOT  3  -189.76991575501     7.287E-01 3.589E-03 2.357E+00 1.032E-01 5.213E-02
- ETOT  4  -189.66040461163     1.095E-01 9.324E-04 8.038E-02 4.378E-02 4.725E-02
+     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
+ ETOT  1  -213.96569019298    -2.140E+02 4.409E-01 7.442E+02 4.377E-02 4.377E-02 1.852E-03 1.852E-03
+ ETOT  2  -190.49860212756     2.347E+01 6.795E-03 5.023E+01 6.833E-02 5.104E-02 3.168E-03 4.261E-03
+ ETOT  3  -189.76991575501     7.287E-01 3.589E-03 2.357E+00 1.032E-01 5.213E-02 9.567E-03 1.136E-02
+ ETOT  4  -189.66040461163     1.095E-01 9.324E-04 8.038E-02 4.378E-02 4.725E-02 1.056E-02 1.116E-02
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.84414669E-02  sigma(3 2)=  0.00000000E+00
@@ -991,21 +993,22 @@ force_length_stats: {min:   6.13833970E-03, max:   6.68173692E-02, mean:   2.478
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.60199     2.643626     2.643683      5.287309    -0.000057
-    2   1.60199     2.622239     2.622225      5.244464     0.000014
-    3   1.60199     2.622239     2.622225      5.244464     0.000014
-    4   1.60199     2.643626     2.643683      5.287309    -0.000057
-    5   2.30022     1.964409     1.975573      3.939982    -0.011164
-    6   2.30022     1.964409     1.975573      3.939982    -0.011164
-    7   2.30022     1.911965     1.913237      3.825203    -0.001272
-    8   2.30022     1.911965     1.913237      3.825203    -0.001272
- ---------------------------------------------------------------------
-  Sum:             18.284478    18.309437     36.593915    -0.024959
- Total magnetization (from the atomic spheres):            -0.024959
- Total magnetization (exact up - dn):                      -0.050000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Na   1.60199     2.643626     2.643683      5.287309    -0.000057
+    2 Na   1.60199     2.622239     2.622225      5.244464     0.000014
+    3 Na   1.60199     2.622239     2.622225      5.244464     0.000014
+    4 Na   1.60199     2.643626     2.643683      5.287309    -0.000057
+    5  I   2.30022     1.964409     1.975573      3.939982    -0.011164
+    6  I   2.30022     1.964409     1.975573      3.939982    -0.011164
+    7  I   2.30022     1.911965     1.913237      3.825203    -0.001272
+    8  I   2.30022     1.911965     1.913237      3.825203    -0.001272
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                18.284478    18.309437     36.593915    -0.024959
+ Total magnetization (from the atomic spheres):               -0.024959
+ Total magnetization (exact up - dn):                         -0.050000
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -1293,11 +1296,11 @@ solver: {iscf: 17, nstep: 4, nline: 4, wfoptalg: 10, }
 tolerances: {toldff: 1.00E-06, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -187.97626723665    -1.880E+02 2.303E+00 7.988E-01 3.355E-02 3.355E-02
- ETOT  2  -189.71698815447    -1.741E+00 3.243E-05 6.088E-01 5.989E-02 3.077E-02
- ETOT  3  -189.68052644610     3.646E-02 1.184E-04 1.492E-01 1.369E-02 3.238E-02
- ETOT  4  -189.67463153170     5.895E-03 6.581E-05 6.581E-02 3.708E-03 2.867E-02
+     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
+ ETOT  1  -187.97626723665    -1.880E+02 2.303E+00 7.988E-01 3.355E-02 3.355E-02 0.000E+00 0.000E+00
+ ETOT  2  -189.71698815447    -1.741E+00 3.243E-05 6.088E-01 5.989E-02 3.077E-02 0.000E+00 0.000E+00
+ ETOT  3  -189.68052644610     3.646E-02 1.184E-04 1.492E-01 1.369E-02 3.238E-02 0.000E+00 0.000E+00
+ ETOT  4  -189.67463153170     5.895E-03 6.581E-05 6.581E-02 3.708E-03 2.867E-02 0.000E+00 0.000E+00
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.84681192E-02  sigma(3 2)=  0.00000000E+00
@@ -1351,21 +1354,22 @@ force_length_stats: {min:   4.02968771E-03, max:   4.05470466E-02, mean:   1.769
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.60199     2.610677     2.610677      5.221354    -0.000000
-    2   1.60199     2.622759     2.622759      5.245518    -0.000000
-    3   1.60199     2.622759     2.622759      5.245518    -0.000000
-    4   1.60199     2.610677     2.610677      5.221354    -0.000000
-    5   2.30022     1.965529     1.965529      3.931059     0.000000
-    6   2.30022     1.965529     1.965529      3.931059     0.000000
-    7   2.30022     1.961784     1.961784      3.923568     0.000000
-    8   2.30022     1.961784     1.961784      3.923568     0.000000
- ---------------------------------------------------------------------
-  Sum:             18.321499    18.321499     36.642997     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                      -0.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Na   1.60199     2.610677     2.610677      5.221354    -0.000000
+    2 Na   1.60199     2.622759     2.622759      5.245518    -0.000000
+    3 Na   1.60199     2.622759     2.622759      5.245518    -0.000000
+    4 Na   1.60199     2.610677     2.610677      5.221354    -0.000000
+    5  I   2.30022     1.965529     1.965529      3.931059     0.000000
+    6  I   2.30022     1.965529     1.965529      3.931059     0.000000
+    7  I   2.30022     1.961784     1.961784      3.923568     0.000000
+    8  I   2.30022     1.961784     1.961784      3.923568     0.000000
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                18.321499    18.321499     36.642997     0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                         -0.000000
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -1620,11 +1624,11 @@ solver: {iscf: 17, nstep: 4, nline: 4, wfoptalg: 10, }
 tolerances: {toldff: 1.00E-06, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -187.98116566043    -1.880E+02 2.320E+00 7.720E-01 3.360E-02 3.360E-02
- ETOT  2  -189.71307909003    -1.732E+00 3.333E-05 5.888E-01 5.803E-02 2.975E-02
- ETOT  3  -189.67782167124     3.526E-02 1.195E-04 1.459E-01 1.306E-02 3.164E-02
- ETOT  4  -189.67195181689     5.870E-03 6.677E-05 6.442E-02 3.527E-03 2.811E-02
+     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
+ ETOT  1  -187.98116566043    -1.880E+02 2.320E+00 7.720E-01 3.360E-02 3.360E-02 2.334E-03 2.334E-03
+ ETOT  2  -189.71307909003    -1.732E+00 3.333E-05 5.888E-01 5.803E-02 2.975E-02 3.867E-03 6.201E-03
+ ETOT  3  -189.67782167124     3.526E-02 1.195E-04 1.459E-01 1.306E-02 3.164E-02 2.434E-04 5.958E-03
+ ETOT  4  -189.67195181689     5.870E-03 6.677E-05 6.442E-02 3.527E-03 2.811E-02 3.213E-05 5.926E-03
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.84706782E-02  sigma(3 2)=  0.00000000E+00
@@ -1678,21 +1682,22 @@ force_length_stats: {min:   4.01880294E-03, max:   3.97583773E-02, mean:   1.740
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.60199     2.610646     2.610664      5.221310    -0.000018
-    2   1.60199     2.622740     2.622738      5.245478     0.000001
-    3   1.60199     2.622740     2.622738      5.245478     0.000001
-    4   1.60199     2.610646     2.610664      5.221310    -0.000018
-    5   2.30022     1.960740     1.966666      3.927406    -0.005926
-    6   2.30022     1.960740     1.966666      3.927406    -0.005926
-    7   2.30022     1.961681     1.961966      3.923647    -0.000285
-    8   2.30022     1.961681     1.961966      3.923647    -0.000285
- ---------------------------------------------------------------------
-  Sum:             18.311613    18.324069     36.635683    -0.012456
- Total magnetization (from the atomic spheres):            -0.012456
- Total magnetization (exact up - dn):                      -0.025000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Na   1.60199     2.610646     2.610664      5.221310    -0.000018
+    2 Na   1.60199     2.622740     2.622738      5.245478     0.000001
+    3 Na   1.60199     2.622740     2.622738      5.245478     0.000001
+    4 Na   1.60199     2.610646     2.610664      5.221310    -0.000018
+    5  I   2.30022     1.960740     1.966666      3.927406    -0.005926
+    6  I   2.30022     1.960740     1.966666      3.927406    -0.005926
+    7  I   2.30022     1.961681     1.961966      3.923647    -0.000285
+    8  I   2.30022     1.961681     1.961966      3.923647    -0.000285
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                18.311613    18.324069     36.635683    -0.012456
+ Total magnetization (from the atomic spheres):               -0.012456
+ Total magnetization (exact up - dn):                         -0.025000
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -1947,11 +1952,11 @@ solver: {iscf: 17, nstep: 4, nline: 4, wfoptalg: 10, }
 tolerances: {toldff: 1.00E-06, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -187.98551536430    -1.880E+02 2.338E+00 7.497E-01 3.353E-02 3.353E-02
- ETOT  2  -189.70940516084    -1.724E+00 3.422E-05 5.723E-01 5.624E-02 2.874E-02
- ETOT  3  -189.67514283997     3.426E-02 1.204E-04 1.434E-01 1.243E-02 3.087E-02
- ETOT  4  -189.66926982618     5.873E-03 6.763E-05 6.321E-02 3.307E-03 2.757E-02
+     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
+ ETOT  1  -187.98551536430    -1.880E+02 2.338E+00 7.497E-01 3.353E-02 3.353E-02 4.632E-03 4.632E-03
+ ETOT  2  -189.70940516084    -1.724E+00 3.422E-05 5.723E-01 5.624E-02 2.874E-02 7.754E-03 1.239E-02
+ ETOT  3  -189.67514283997     3.426E-02 1.204E-04 1.434E-01 1.243E-02 3.087E-02 4.670E-04 1.192E-02
+ ETOT  4  -189.66926982618     5.873E-03 6.763E-05 6.321E-02 3.307E-03 2.757E-02 6.676E-05 1.185E-02
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.84728427E-02  sigma(3 2)=  0.00000000E+00
@@ -2005,21 +2010,22 @@ force_length_stats: {min:   4.01507540E-03, max:   3.89854673E-02, mean:   1.711
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.60199     2.610614     2.610650      5.221264    -0.000036
-    2   1.60199     2.622722     2.622718      5.245440     0.000004
-    3   1.60199     2.622722     2.622718      5.245440     0.000004
-    4   1.60199     2.610614     2.610650      5.221264    -0.000036
-    5   2.30022     1.955957     1.967810      3.923767    -0.011853
-    6   2.30022     1.955957     1.967810      3.923767    -0.011853
-    7   2.30022     1.961625     1.962205      3.923830    -0.000580
-    8   2.30022     1.961625     1.962205      3.923830    -0.000580
- ---------------------------------------------------------------------
-  Sum:             18.301836    18.326766     36.628602    -0.024930
- Total magnetization (from the atomic spheres):            -0.024930
- Total magnetization (exact up - dn):                      -0.050000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Na   1.60199     2.610614     2.610650      5.221264    -0.000036
+    2 Na   1.60199     2.622722     2.622718      5.245440     0.000004
+    3 Na   1.60199     2.622722     2.622718      5.245440     0.000004
+    4 Na   1.60199     2.610614     2.610650      5.221264    -0.000036
+    5  I   2.30022     1.955957     1.967810      3.923767    -0.011853
+    6  I   2.30022     1.955957     1.967810      3.923767    -0.011853
+    7  I   2.30022     1.961625     1.962205      3.923830    -0.000580
+    8  I   2.30022     1.961625     1.962205      3.923830    -0.000580
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                18.301836    18.326766     36.628602    -0.024930
+ Total magnetization (from the atomic spheres):               -0.024930
+ Total magnetization (exact up - dn):                         -0.050000
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -2308,11 +2314,11 @@ solver: {iscf: 17, nstep: 4, nline: 4, wfoptalg: 10, }
 tolerances: {toldff: 1.00E-06, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -187.82175809570    -1.878E+02 2.686E+00 1.391E+00 6.410E-02 6.410E-02
- ETOT  2  -189.74884365764    -1.927E+00 4.702E-05 1.066E+00 7.998E-02 4.297E-02
- ETOT  3  -189.68255681148     6.629E-02 1.746E-04 2.293E-01 2.157E-02 3.260E-02
- ETOT  4  -189.67657551996     5.981E-03 7.769E-06 1.016E-01 6.402E-03 2.676E-02
+     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
+ ETOT  1  -187.82175809570    -1.878E+02 2.686E+00 1.391E+00 6.410E-02 6.410E-02 0.000E+00 0.000E+00
+ ETOT  2  -189.74884365764    -1.927E+00 4.702E-05 1.066E+00 7.998E-02 4.297E-02 0.000E+00 0.000E+00
+ ETOT  3  -189.68255681148     6.629E-02 1.746E-04 2.293E-01 2.157E-02 3.260E-02 0.000E+00 0.000E+00
+ ETOT  4  -189.67657551996     5.981E-03 7.769E-06 1.016E-01 6.402E-03 2.676E-02 0.000E+00 0.000E+00
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.84848173E-02  sigma(3 2)=  0.00000000E+00
@@ -2366,21 +2372,22 @@ force_length_stats: {min:   1.87640548E-03, max:   3.78506570E-02, mean:   1.701
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.60199     2.643850     2.643850      5.287701    -0.000000
-    2   1.60199     2.605608     2.605608      5.211215    -0.000000
-    3   1.60199     2.605608     2.605608      5.211215     0.000000
-    4   1.60199     2.643850     2.643850      5.287701    -0.000000
-    5   2.30022     1.989725     1.989725      3.979449     0.000000
-    6   2.30022     1.989725     1.989725      3.979449     0.000000
-    7   2.30022     1.959499     1.959499      3.918999    -0.000000
-    8   2.30022     1.959499     1.959499      3.918999    -0.000000
- ---------------------------------------------------------------------
-  Sum:             18.397364    18.397364     36.794728     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                       0.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Na   1.60199     2.643850     2.643850      5.287701    -0.000000
+    2 Na   1.60199     2.605608     2.605608      5.211215    -0.000000
+    3 Na   1.60199     2.605608     2.605608      5.211215     0.000000
+    4 Na   1.60199     2.643850     2.643850      5.287701    -0.000000
+    5  I   2.30022     1.989725     1.989725      3.979449     0.000000
+    6  I   2.30022     1.989725     1.989725      3.979449     0.000000
+    7  I   2.30022     1.959499     1.959499      3.918999    -0.000000
+    8  I   2.30022     1.959499     1.959499      3.918999    -0.000000
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                18.397364    18.397364     36.794728     0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                          0.000000
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -2635,11 +2642,11 @@ solver: {iscf: 17, nstep: 4, nline: 4, wfoptalg: 10, }
 tolerances: {toldff: 1.00E-06, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -187.81816118029    -1.878E+02 2.683E+00 1.364E+00 6.381E-02 6.381E-02
- ETOT  2  -189.74403621397    -1.926E+00 5.047E-05 1.041E+00 7.871E-02 4.223E-02
- ETOT  3  -189.67964580216     6.439E-02 1.586E-04 2.232E-01 2.116E-02 3.187E-02
- ETOT  4  -189.67385467501     5.791E-03 6.591E-06 1.001E-01 6.243E-03 2.614E-02
+     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
+ ETOT  1  -187.81816118029    -1.878E+02 2.683E+00 1.364E+00 6.381E-02 6.381E-02 2.471E-03 2.471E-03
+ ETOT  2  -189.74403621397    -1.926E+00 5.047E-05 1.041E+00 7.871E-02 4.223E-02 3.293E-03 5.765E-03
+ ETOT  3  -189.67964580216     6.439E-02 1.586E-04 2.232E-01 2.116E-02 3.187E-02 6.094E-04 6.047E-03
+ ETOT  4  -189.67385467501     5.791E-03 6.591E-06 1.001E-01 6.243E-03 2.614E-02 5.599E-05 5.996E-03
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.84870811E-02  sigma(3 2)=  0.00000000E+00
@@ -2693,21 +2700,22 @@ force_length_stats: {min:   1.92213802E-03, max:   3.69636971E-02, mean:   1.675
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.60199     2.643813     2.643828      5.287640    -0.000015
-    2   1.60199     2.605605     2.605601      5.211206     0.000004
-    3   1.60199     2.605605     2.605601      5.211206     0.000004
-    4   1.60199     2.643813     2.643828      5.287640    -0.000015
-    5   2.30022     1.984756     1.990752      3.975508    -0.005996
-    6   2.30022     1.984756     1.990752      3.975508    -0.005996
-    7   2.30022     1.959531     1.959877      3.919408    -0.000346
-    8   2.30022     1.959531     1.959877      3.919408    -0.000346
- ---------------------------------------------------------------------
-  Sum:             18.387409    18.400115     36.787524    -0.012705
- Total magnetization (from the atomic spheres):            -0.012705
- Total magnetization (exact up - dn):                      -0.025000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Na   1.60199     2.643813     2.643828      5.287640    -0.000015
+    2 Na   1.60199     2.605605     2.605601      5.211206     0.000004
+    3 Na   1.60199     2.605605     2.605601      5.211206     0.000004
+    4 Na   1.60199     2.643813     2.643828      5.287640    -0.000015
+    5  I   2.30022     1.984756     1.990752      3.975508    -0.005996
+    6  I   2.30022     1.984756     1.990752      3.975508    -0.005996
+    7  I   2.30022     1.959531     1.959877      3.919408    -0.000346
+    8  I   2.30022     1.959531     1.959877      3.919408    -0.000346
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                18.387409    18.400115     36.787524    -0.012705
+ Total magnetization (from the atomic spheres):               -0.012705
+ Total magnetization (exact up - dn):                         -0.025000
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -2962,11 +2970,11 @@ solver: {iscf: 17, nstep: 4, nline: 4, wfoptalg: 10, }
 tolerances: {toldff: 1.00E-06, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -187.81478147260    -1.878E+02 2.681E+00 1.338E+00 6.348E-02 6.348E-02
- ETOT  2  -189.73922391985    -1.924E+00 5.598E-05 1.015E+00 7.737E-02 4.146E-02
- ETOT  3  -189.67673404032     6.249E-02 1.545E-04 2.173E-01 2.072E-02 3.114E-02
- ETOT  4  -189.67112641538     5.608E-03 6.844E-06 9.862E-02 6.084E-03 2.552E-02
+     iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor   difmagsph maxmagsph
+ ETOT  1  -187.81478147260    -1.878E+02 2.681E+00 1.338E+00 6.348E-02 6.348E-02 4.967E-03 4.967E-03
+ ETOT  2  -189.73922391985    -1.924E+00 5.598E-05 1.015E+00 7.737E-02 4.146E-02 6.818E-03 1.178E-02
+ ETOT  3  -189.67673404032     6.249E-02 1.545E-04 2.173E-01 2.072E-02 3.114E-02 9.712E-04 1.209E-02
+ ETOT  4  -189.67112641538     5.608E-03 6.844E-06 9.862E-02 6.084E-03 2.552E-02 1.054E-04 1.200E-02
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.84894039E-02  sigma(3 2)=  0.00000000E+00
@@ -3020,21 +3028,22 @@ force_length_stats: {min:   1.97422222E-03, max:   3.60946754E-02, mean:   1.649
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.60199     2.643777     2.643807      5.287583    -0.000030
-    2   1.60199     2.605603     2.605594      5.211197     0.000009
-    3   1.60199     2.605603     2.605594      5.211197     0.000009
-    4   1.60199     2.643777     2.643807      5.287583    -0.000030
-    5   2.30022     1.979755     1.991757      3.971512    -0.012002
-    6   2.30022     1.979755     1.991757      3.971512    -0.012002
-    7   2.30022     1.959549     1.960240      3.919790    -0.000691
-    8   2.30022     1.959549     1.960240      3.919790    -0.000691
- ---------------------------------------------------------------------
-  Sum:             18.377368    18.402797     36.780165    -0.025429
- Total magnetization (from the atomic spheres):            -0.025429
- Total magnetization (exact up - dn):                      -0.050000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Na   1.60199     2.643777     2.643807      5.287583    -0.000030
+    2 Na   1.60199     2.605603     2.605594      5.211197     0.000009
+    3 Na   1.60199     2.605603     2.605594      5.211197     0.000009
+    4 Na   1.60199     2.643777     2.643807      5.287583    -0.000030
+    5  I   2.30022     1.979755     1.991757      3.971512    -0.012002
+    6  I   2.30022     1.979755     1.991757      3.971512    -0.012002
+    7  I   2.30022     1.959549     1.960240      3.919790    -0.000691
+    8  I   2.30022     1.959549     1.960240      3.919790    -0.000691
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                18.377368    18.402797     36.780165    -0.025429
+ Total magnetization (from the atomic spheres):               -0.025429
+ Total magnetization (exact up - dn):                         -0.050000
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -3511,10 +3520,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         15.0  wall=         15.0
+- Proc.   0 individual time (sec): cpu=         15.2  wall=         15.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  54 WARNINGs and  17 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         15.0  wall=         15.0
++Overall time at end (sec) : cpu=         15.2  wall=         15.3
