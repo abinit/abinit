@@ -128,7 +128,7 @@ module m_gstore_sigeph
   ! (ntemp, nb_k, nkcalc)
   ! Fan-Migdal
 
-  !complex(dp),allocatable :: fan_stern_vals(:,:,:)
+  complex(dp),allocatable :: fan_stern_vals(:,:,:)
   ! (ntemp, nb_k, nkcalc)
   ! Fan-Migdal adiabatic Sternheimer part
 
@@ -140,7 +140,7 @@ module m_gstore_sigeph
   !  dw_vals(ntemp, nb_k, nkcalc) for given (ikcalc, spin)
   !  Debye-Waller term (static).
 
-  !real(dp),allocatable :: dw_stern_vals(:,:,:)
+  real(dp),allocatable :: dw_stern_vals(:,:,:)
    !  dw_stern_vals(ntemp, nb_k, nkcalc)
    !  Debye-Waller Sternheimer term (static) .
 
@@ -367,7 +367,10 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
   comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab, mpi_spintab=mpi_enreg%my_isppoltab,&
   usecprj=usecprj, ph1d=ph1d, nucdipmom=dtset%nucdipmom, gpu_option=dtset%gpu_option)
 
- if (dtset%eph_stern /= 0) then
+ if (dtset%eph_stern /= 0 .and. .not. sigma%imag_only) then
+   ! Prepare call to Sternheimer solver.
+   ! The static correction to FM_nk is:
+   !    \sum_{qnu} (2n_qnu + 1) <H^1_{qnu} psi_nk| psi^1_{nk; qnu}>
 
    ! Allocate work space arrays.
    ! vtrial and vlocal are required for Sternheimer (H0). DFPT routines do not need it.
@@ -394,7 +397,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
 
    nband = dtset%mband; bks_mask = .False.; keep_ur = .False.
 
-   ! initialize bks_mask
+   ! Initialize bks_mask
    call gstore%fill_bks_mask(dtset%mband, nkpt, nsppol, bks_mask)
 
    !if (dtset%userie == 124) then
@@ -423,9 +426,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
    ABI_MALLOC(wfd_istwfk, (nkpt))
    wfd_istwfk = 1
 
-   ! The static correction to FM_nk is:
-   !    \sum_{qnu} (2n_qnu + 1) <H^1_{qnu} psi_nk| psi^1_{nk; qnu}>
-
    call wfd%init(cryst, pawtab, psps, keep_ur, dtset%mband, nband, nkpt, nsppol, bks_mask,&
                  dtset%nspden, nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ebands%kptns, ngfft,&
                  dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
@@ -453,14 +453,13 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
    call dvdb%ftinterp_setup(dtset%ddb_ngqpt, gstore%qptopt, 1, dtset%ddb_shiftq, nfftf, ngfftf, xmpi_comm_self)
 
    ! Allocate arrays for Debye-Waller
-   !if (.not. sigma%imag_only) then
-   !  ABI_CALLOC_OR_DIE(gkq0_atm, (2, nbcalc_ks, sigma%my_bsum_start:sigma%my_bsum_stop, natom3), ierr)
-   !  if (dtset%eph_stern /= 0) then
-   !    ABI_CALLOC(stern_dw, (2, natom3, natom3, nbcalc_ks))
-   !    enough_stern = 0
-   !  end if
-   !  ABI_FREE(gkq0_atm)
-   !end if
+   !ABI_CALLOC_OR_DIE(gkq0_atm, (2, nbcalc_ks, sigma%my_bsum_start:sigma%my_bsum_stop, natom3), ierr)
+   !ABI_CALLOC(stern_dw, (2, natom3, natom3, nbcalc_ks))
+   !enough_stern = 0
+   !ABI_FREE(gkq0_atm)
+   !ABI_FREE(stern_dw)
+
+   ABI_MALLOC(gbound_kq, (2*wfd%mgfft+8, 2))
  end if ! eph_stern /= 0
 
  ! Allocate work space arrays used inside the loops. Then we are ready to go!
@@ -470,10 +469,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  ABI_MALLOC(f_mkq, (ntemp))
  ABI_MALLOC(cfact_t, (ntemp))
  ABI_MALLOC(rfact_t, (ntemp))
-
- if (dtset%eph_stern /= 0) then
-   ABI_MALLOC(gbound_kq, (2*wfd%mgfft+8, 2))
- end if
 
  call pstat_proc%print(_PSTAT_ARGS_)
 
@@ -488,7 +483,9 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
    ABI_CALLOC(sigma%vals_e0ks, (ntemp, nb_k, glob_nk))
    ABI_CALLOC(sigma%dvals_de0ks, (ntemp, nb_k, glob_nk))
    ABI_CALLOC(sigma%fan_vals, (ntemp, nb_k, glob_nk))
+   ABI_CALLOC(sigma%fan_stern_vals, (ntemp, nb_k, glob_nk))
    ABI_CALLOC(sigma%dw_vals, (ntemp, nb_k, glob_nk))
+   ABI_CALLOC(sigma%dw_stern_vals, (ntemp, nb_k, glob_nk))
 
    ! Prepare computation of Sigma_{nk}(w) and spectral function.
    if (sigma%nwr > 0) then
@@ -569,9 +566,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
          ! Build global array with GS wavefunctions cg_kq at k+q to prepare call to dfpt_cgwf.
          ! NB: bsum_range is not compatible with Sternheimer.
          ! There's a check at the level of the parser in chkinp.
-
-         ! The static correction to FM_nk is:
-         !    \sum_{qnu} (2n_qnu + 1) <H^1_{qnu} psi_nk| psi^1_{nk; qnu}>
 
          ! NOTE: in the present version, we need to gather all nbsum bands on each core before calling dfpt_cgwf.
          ! In principle one can call dfpt_cgwf in band-para mode but then
@@ -818,7 +812,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
      ABI_SFREE(ph3d_k)
    end do ! my_ik
 
-   ! TODO: Implement Sternheimer with KS states.
    call sigma%gather_and_write_results(gstore, gqk, dtset, ebands)
    end associate
  end do ! my_is
@@ -873,8 +866,8 @@ subroutine sep_gather_and_write_results(sigma, gstore, gqk, dtset, ebands)
  !integer :: nq_ibzk_eff, nelem, imyq, iq_ibz_k, sr_ncid
  logical :: changed !, iwrite
  real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond,qpe_oms,qpe_oms_val,qpe_oms_cond
- !real(dp) :: ravg2 ! invsig2fmts, tau
- complex(dp) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2,cavg3 !,cavg4
+ real(dp) :: ravg2 ! invsig2fmts, tau
+ complex(dp) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2,cavg3,cavg4
  character(len=500) :: this_gtype ! msg
  !integer :: grp_ncid, ncerr
  type(degtab_t) :: degtab
@@ -895,7 +888,9 @@ subroutine sep_gather_and_write_results(sigma, gstore, gqk, dtset, ebands)
  call xmpi_sum(sigma%vals_e0ks, gqk%comm%value, ierr)
  call xmpi_sum(sigma%dvals_de0ks, gqk%comm%value, ierr)
  call xmpi_sum(sigma%fan_vals, gqk%comm%value, ierr)
+ call xmpi_sum(sigma%fan_stern_vals, gqk%comm%value, ierr)
  call xmpi_sum(sigma%dw_vals, gqk%comm%value, ierr)
+ call xmpi_sum(sigma%dw_stern_vals, gqk%comm%value, ierr)
  if (sigma%nwr > 0) call xmpi_sum(sigma%vals_wr, gqk%comm%value, ierr)
 
  ! Only procs inside ncwrite_comm perform IO (ab_out and ncid)
@@ -973,17 +968,17 @@ subroutine sep_gather_and_write_results(sigma, gstore, gqk, dtset, ebands)
          cavg1 = sum(sigma%vals_e0ks(it, bids(:), ikcalc)) / nstates
          cavg2 = sum(sigma%dvals_de0ks(it, bids(:), ikcalc)) / nstates
          cavg3 = sum(sigma%fan_vals(it, bids(:), ikcalc)) / nstates
-         !cavg4 = sum(sigma%fan_stern_vals(it, bids(:), ikcalc)) / nstates
+         cavg4 = sum(sigma%fan_stern_vals(it, bids(:), ikcalc)) / nstates
          ravg = sum(sigma%dw_vals(it, bids(:), ikcalc)) / nstates
-         !ravg2 = sum(sigma%dw_stern_vals(it, bids(:), ikcalc)) / nstates
+         ravg2 = sum(sigma%dw_stern_vals(it, bids(:), ikcalc)) / nstates
 
          do ii=1,nstates
            sigma%vals_e0ks(it, bids(ii), ikcalc) = cavg1
            sigma%dvals_de0ks(it, bids(ii), ikcalc) = cavg2
            sigma%fan_vals(it, bids(ii), ikcalc) = cavg3
-           !sigma%fan_stern_vals(it, bids(ii), ikcalc) = cavg4
+           sigma%fan_stern_vals(it, bids(ii), ikcalc) = cavg4
            sigma%dw_vals(it, bids(ii), ikcalc) = ravg
-           !sigma%dw_stern_vals(it, bids(ii), ikcalc) = ravg2
+           sigma%dw_stern_vals(it, bids(ii), ikcalc) = ravg2
          end do ! ii
 
          if (sigma%nwr > 0) then

@@ -535,11 +535,11 @@ type, public :: gstore_t
 
   real(dp),allocatable :: qbz(:,:)
   ! q-points in the BZ.
-  ! TODO: Use MPI shared memory.
+  ! TODO: Use MPI shared memory?
 
   real(dp),allocatable :: kbz(:,:)
   ! k-points in the BZ.
-  ! TODO: Use MPI shared memory.
+  ! TODO: Use MPI shared memory?
 
   !integer :: qptrlatt(3, 3) = -1  ! kptrlatt(3, 3) = -1,
    ! k-mesh and q-mesh

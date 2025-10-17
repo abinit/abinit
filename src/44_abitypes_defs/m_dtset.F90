@@ -872,7 +872,7 @@ type, public :: dataset_type
  real(dp) :: ecutwfn
  real(dp) :: effmass_free
  real(dp) :: efmas_deg_tol
- real(dp) :: elph2_imagden
+ real(dp) :: elph2_imagden = 0.1_dp * eV_Ha
  real(dp) :: eph_ecutosc = zero
  real(dp) :: eph_extrael = zero
  real(dp) :: eph_fermie = zero
