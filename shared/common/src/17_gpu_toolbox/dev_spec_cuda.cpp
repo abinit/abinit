@@ -27,12 +27,17 @@ static int s__nprocs_per_gpu = 1;
 // display CUDA device info
 static void prt_dev_info()
 {
-  int deviceCount;
+  int deviceCount, clockRate;
   cudaGetDeviceCount(&deviceCount);
   for (int dev = 0; dev < deviceCount; ++dev)
     {
       cudaDeviceProp deviceProp;
       cudaGetDeviceProperties(&deviceProp, dev);
+#if CUDA_VERSION >= 13000
+      cudaDeviceGetAttribute (&clockRate, cudaDevAttrClockRate, dev);
+#else
+      clockRate = deviceProp.clockRate;
+#endif
       int NProcs=deviceProp.multiProcessorCount;
       int NCores=version_2_cores(deviceProp.major, deviceProp.minor);
       printf("\n___________________________________________________________________\n");
@@ -48,7 +53,7 @@ static void prt_dev_info()
       if (NCores<0) {
         printf("  Max FP64 GFLOPS:                                    undefined (add new def. in version_2_cores function)\n");
       } else {
-        printf("  Max FP64 GFLOPS:                                    %d GFP\n", NCores*deviceProp.multiProcessorCount * deviceProp.clockRate/1000000);
+        printf("  Max FP64 GFLOPS:                                    %d GFP\n", NCores*deviceProp.multiProcessorCount * clockRate/1000000);
       }
       printf("  Total amount of constant memory:               %d bytes\n",(int) deviceProp.totalConstMem);
       printf("  Total amount of shared memory per block:       %d bytes\n",(int) deviceProp.sharedMemPerBlock);
@@ -219,7 +224,12 @@ extern "C"
 void gpu_data_prefetch_async_cpp(const void* devPtr, size_t count, int deviceId)
 {
 
+#if CUDA_VERSION >= 13000
+  cudaMemLocation location = {.type = cudaMemLocationTypeDevice, .id = deviceId};
+  CHECK_CUDA_ERROR( cudaMemPrefetchAsync(devPtr, count, location, 0) );
+#else
   CHECK_CUDA_ERROR( cudaMemPrefetchAsync(devPtr, count, deviceId) );
+#endif
 
   return;
 }
@@ -229,7 +239,12 @@ extern "C"
 void gpu_memory_advise_cpp(const void* devPtr, size_t count, cudaMemoryAdvise advice, int deviceId)
 {
 
+#if CUDA_VERSION >= 13000
+  cudaMemLocation location = {.type = cudaMemLocationTypeDevice, .id = deviceId};
+  CHECK_CUDA_ERROR( cudaMemAdvise(devPtr, count, advice, location) );
+#else
   CHECK_CUDA_ERROR( cudaMemAdvise(devPtr, count, advice, deviceId) );
+#endif
 
   return;
 }
@@ -272,10 +287,16 @@ void  get_dev_info_(int* device,
   vers[0] = deviceProp.major;
   vers[1] = deviceProp.minor;
   *globalmem = deviceProp.totalGlobalMem/1048576.;
-  *clockrate = deviceProp.clockRate/1000000.;
+  int clockRate;
+#if CUDA_VERSION >= 13000
+  cudaDeviceGetAttribute (&clockRate, cudaDevAttrClockRate, *device);
+#else
+  clockRate = deviceProp.clockRate;
+#endif
+  *clockrate = clockRate/1000000.;
   *nprocs = deviceProp.multiProcessorCount;
   *ncores = version_2_cores(deviceProp.major,deviceProp.minor);
-  *gflops = int(deviceProp.multiProcessorCount*version_2_cores(deviceProp.major,deviceProp.minor)*(deviceProp.clockRate/1000000.));
+  *gflops = int(deviceProp.multiProcessorCount*version_2_cores(deviceProp.major,deviceProp.minor)*(clockRate/1000000.));
   *constmem = deviceProp.totalConstMem;
   *sharemem =  deviceProp.sharedMemPerBlock;
   *regist = deviceProp.regsPerBlock;
