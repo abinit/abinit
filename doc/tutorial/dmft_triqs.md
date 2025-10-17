@@ -166,189 +166,119 @@ and this for the $d$ fatbands:
 ![dmft_cycle_tuto](dmft_triqs_assets/fatbands.png)
 
 From the DOS, you can see that most of the $d$-electron spectral weight lies close to the Fermi level,
-within an energy window of about 5 eV.
+within an energy window of about $5$ eV.
 
 From the fatbands, you can tell that while the strongest $d$ character is indeed around the Fermi level,
-it is not confined to the $3d$ bands (bands 6-10). There is significant hybridization with the $4s$
-(band 5) and $4p$ (bands 11-13) states, and even some weaker but noticeable hybridization with higher
+it is not confined to the $3d$ bands (bands $6-10$). There is significant hybridization with the $4s$
+(band $5$) and $4p$ (bands $11-13$) states, and even some weaker but noticeable hybridization with higher
 bands.
 
 So when you move to the DMFT calculation, you will need to be careful in selecting which bands to
 include, to make sure you capture as much of the $d$ spectral weight as possible.
 
-## Basic parameters for DFT+DMFT
+## Charge self-consistent DFT+DMFT calculation on Fe
 
-Several key parameters are needed for a DFT+DMFT calculation. You can check out the
-[[topic:DMFT|DMFT topic]] later, especially the "compulsory" and "basic" sections, which
-cover the main input variables you need to understand.
+We will now walk you through the basics of running a charge self-consistent DFT+DMFT calculation,
+using iron as an example. Along the way, we will introduce the main input variables you need to know,
+show you how our implementation works, and go over the output files. We will also look at the main
+convergence parameters and share some tips on how to choose their values wisely.
 
-A DFT+DMFT charge self-consistent calculation usually involves two datasets: the first
-is a well-converged DFT calculation, and the second a DFT+DMFT calculation that uses the
-DFT output density from the first dataset as its starting point.
+Before we start, an important note: do not use the values from our example input file as reference for
+your own convergence parameters. We intentionally picked small values here to keep the runtime
+reasonable. Our implementation is purposely strict about this - we do not provide default values for
+many parameters, because we want users to choose them consciously.
 
-We won't go over DFT parameters or how to converge them here since that's already covered in the
-DFT tutorials. Still, keep in mind that you may need to adjust your values and redo convergence
-studies once DMFT is added. For example, you may need to converge your Kohn-Sham wavefunctions
-better by increasing [[nline]] and [[nnsclo]]. Also, the electronic temperature (set via [[tsmear]])
-becomes more important when DMFT is included, as temperature effects are explicitly treated
-in the impurity solver, while they are often neglected in the DFT exchange-correlation functional.
+Indeed, we feel that most of the inconsistencies found in DFT+DMFT results across the literature come
+from poorly chosen convergence parameters. So, always perform proper convergence tests, and redo them
+for each system you study - there is no one-size-fits-all setup.
 
-Now let's go through the main DMFT variables ; you'll find more details in the variable glossary.
-
-### Activate DMFT
-
-To turn on DMFT, just set [[usedmft]]=1 in your input.
-
-### Correlated electrons
-
-Next, choose the correlated angular momentum $l$=0 ($s$), 1 ($p$), 2 ($d$)... for each atom type that will
-be treated within DMFT. This works like in DFT+U using the variable [[lpawu]].
-Currently, you can only choose one value per type of atom, and we only support [[lpawu]] $\le$ 3.
-
-Set [[lpawu]]=-1 if you don't want DMFT on that atom type.
-
-If you want DMFT on a subset of $d$ orbitals, use [[dmft_t2g]] (for $t_{2g}$ orbitals only) or
-[[dmft_x2my2d]] (for the $d_{x^2-y^2}$ orbital only).
-
-Our interface will then solve the impurity problem for each atom of this type separately, and interatomic
-interactions are therefore not handled dynamically.
-
-### Correlated orbital
-
-After choosing the correlated channel (angular part), you need to define the radial part $u_l(r)$ of the
-correlated orbitals $\frac{u_l(r)}{r} \, Y_{lm}(\hat{r})$. This is controlled
-by the variable [[dmft_orbital]].
-
-Pick an orbital that captures as many electrons as possible for DMFT, focusing on those near half-filling
-around the Fermi level where correlations matter most.
-
-Since DMFT usually applies to localized electrons (like $3d$ or $4f$), an atomic orbital is often best.
-By default, [[dmft_orbital]] corresponds to the most bound atomic orbital in your PAW dataset,
-but you can also select a different one or provide a custom orbital from a file.
-
-For technical reasons, this orbital must then be projected onto a finite set of Kohn-Sham bands,
-defined by [[dmftbandi]] and [[dmftbandf]]. A wider energy window gives more localized orbitals,
-while an infinite window brings you back to the original [[dmft_orbital]]. Make sure the window is
-large enough to avoid overlaps with orbitals of neighboring atoms.
-
-Because the orbitals are projected onto a finite energy window, they're no longer orthonormal.
-To fix this, Wannier functions are built by orthonormalizing the projected orbitals,
-following the scheme specified by [[dmft_wanorthnorm]].
-
-### Interaction tensor
-
-In DMFT, electrons don't interact through the bare Coulomb potential - instead, they feel a screened
-interaction, which you'll need to specify. We assume spherical symmetry (the Slater parametrization),
-so the full interaction tensor can be defined using just the Slater integrals $F^k$.
-
-In practice, it is more common to use the average interaction $U$ and Hund's exchange $J$, set with
-[[upawu]] and [[jpawu]] for each atom type. These are directly related to the Slater integrals.
-
-By default, the higher-order Slater integrals are determined using the atomic ratios $F^k / F^2$,
-but you can manually adjust them with [[f4of2_sla]] and [[f6of2_sla]] if needed.
-
-### Self-consistent cycle
-
-A charge self-consistent DFT+DMFT calculation involves two nested loops:
-
-  * The outer DFT+DMFT loop, controlled by [[nstep]]
-  * The inner DMFT loop, controlled by [[dmft_iter]]
-
-This means the impurity solver is called a total of [[nstep]] x [[dmft_iter]] times. Each DMFT loop
-runs at fixed electronic density, and that density gets updated [[nstep]] times in total - once every
-[[dmft_iter]] DMFT iterations.
-
-You can adjust how the self-energy is mixed using [[dmft_mxsf]].
-
-Here's a schematic showing how the DFT+DMFT self-consistent cycle works:
-
-![dmft_cycle_tuto](dmft_triqs_assets/dmft_cycle_tuto.png)
-
-### Magnetism
-
-Next, you will need to decide what kind of magnetism you want to include. If you set [[nsppol]]=1
-and [[nspden]]=1, a paramagnetic solution is enforced by symmetrizing the two spin channels of the
-Green's function. Even so, the impurity solver is solved with all spin channels, so local
-magnetic moments can still form.
-
-If you set [[nsppol]]=2 and [[nspden]]=2, you enable collinear magnetism.
-
-In some cases, it is better to keep the DFT exchange-correlation potential non-magnetic and let
-magnetism emerge purely from DMFT. You can do that by setting [[usepawu]].
-
-Finally, non-collinear calculations are also supported by our interface ([[nspinor]]=2 and [[nspden]]=4).
-Here, we only treat spin-orbit coupling (SOC) as a perturbation at the DFT level - it is not included
-in the DMFT model itself. SOC introduces spin off-diagonal terms, sometimes with an imaginary part,
-and our interface can handle those.
-However, a few features are missing in this case - for example, measuring the density matrix in the
-solver ([[dmft_triqs_measure_density_matrix]]) isn't supported, which makes structural property
-calculations impractical unless you neglect the off-diagonal terms. We emphasize that this limitation
-comes from TRIQS∕CT-HYB itself, not from our implementation.
-
-### Double counting
-
-When combining DFT and DMFT, you run into the double counting problem - some of the local interactions
-are already partly included at the DFT level, so they need to be subtracted and replaced by their exact
-DMFT values.
-
-ABINIT provides the exact double counting formula, which removes these contributions exactly. It is a
-bit more involved to use, so we will cover it later in its own section.
-
-There are also several simpler, commonly used approximate formulas, which you can select using the
-variable [[dmft_dc]].
-
-### Impurity Solver
-
-We haven't yet told ABINIT to use the TRIQS/CT-HYB interface instead of its internal DMFT solvers.
-This is done with [[dmft_solv]], which sets the impurity solver to use.
-
-For TRIQS/CT-HYB, there are two relevant options:
-
-  * [[dmft_solv]]=6: Uses TRIQS/CT-HYB but keeps only the density-density terms in the interaction
-    tensor. This is much faster, though if that's what you need, a segment solver would be more
-    efficient.
-  * [[dmft_solv]]=7: Uses the full rotationally invariant Slater Hamiltonian, giving the most accurate
-    treatment of interactions.
-
-If instead you want to use ABINIT's internal DMFT implementation with its built-in solvers, check out the
-dedicated [DMFT tutorial](/tutorial/dmft).
-
-** How to run a charge self-consistent DFT+DMFT calculation: an example on Fe **
-
-Let's now go through a simple charge self-consistent DFT+DMFT calculation on iron, applying DMFT to the
-3d orbitals ([[lpawu]]=2).
-
-Start by copying the second input file and running it with ABINIT. Note that this calculation can take
-a while - expect at least a few minutes.
+Alright, let's dive in. Start by copying the second input file and running it with ABINIT. Feel free
+to use more CPUs if you have them available:
 
 ```sh
 cp ../tdmft_triqs_2.abi .
 mpirun -n 4 abinit tdmft_triqs_2.abi > log 2>&1
 ```
 
-While it runs, open the input file and get familiar with the variables - many of them should already
-look familiar.
-We will go over the new ones shortly and explain how to choose their values. For even more details,
-check out the variable glossary.
+{% dialog tests/tutoparal/Input/tdmft_triqs_2.abi %}
 
-In this example, we run at high temperature ([[tsmear]]=3000 K) and use the density-density Hamiltonian
-([[dmft_solv]]=6) to make things a bit lighter computationally.
+This calculation might take a few minutes, so while it runs, let's take a look at the input file and
+see what's going on.
 
-When doing a charge self-consistent calculation, it is usually best to set [[dmft_iter]]=1 and only
-adjust [[nstep]] to control convergence speed. That is because trying to reach self-consistency in the
-DMFT loop before the charge density converges just wastes time.
+A charge self-consistent DFT+DMFT calculation usually consists of two datasets:
 
-We also perform a magnetic calculation ([[nsppol]]=2), but with a non-magnetic XC potential
-([[usepawu]]=14), to avoid artificial magnetization from double counting. To help convergence, we
-apply an initial shift between the two spin channels of the DMFT self-energy using [[dmft_shiftself]].
+  1. The first one is a well-converged DFT calculation.
+  2. The second one is a DFT+DMFT calculation, which starts from the DFT output density of
+     the first dataset.
 
-For the double-counting correction, we use the AMF scheme ([[dmft_dc]]=6), which works better for metals.
-The correlated orbital is an atomic 3d orbital ([[dmft_orbital]]=1), projected onto Kohn-Sham bands 5 to
-13 ([[dmftbandi]] and [[dmftbandf]]), which - as we saw earlier - carry most of the 3d spectral weight.
+We won't revisit the DFT parameters or how to converge them here - that is already covered in the
+DFT tutorials. However, remember that once you include DMFT, you'll likely need to readjust your
+parameters and redo your convergence studies. For instance, you will often need to converge your
+Kohn-Sham wavefunctions more tightly by increasing [[nline]] and [[nnsclo]].
 
-Once the calculation is finished, let's go through the log file and take a quick look at how the code
-actually works. This will help you understand how to set the convergence parameters and make sense of
-all the output files.
+Also, the electronic temperature (set via [[tsmear]]$=1/\beta$) becomes much more important when
+DMFT is active, since temperature effects are explicitly included in the impurity solver -
+unlike in the DFT exchange-correlation functional, where they are usually neglected.
+
+Here, we use a CT-HYB solver, which represents the Green's function $G(\tau)$ on the imaginary
+time axis, with $\tau$ ranging from $0$ to $\beta$. Because the impurity problem becomes more
+complex as $\beta$ increases, we are choosing a high temperature ([[tsmear]]$=3000K$) to keep
+things simpler and faster for this example.
+
+For the second dataset, we start by activating DMFT by setting [[usedmft]]$=1$.
+
+### Correlated Electrons
+
+Next, we need to choose which angular momentum channel - that is, which type of orbital
+($s$,$p$,$d$,...) - we want to treat as correlated within DMFT. Each channel corresponds
+to a value of $l=0,1,2$..., and we select it using the variable [[lpawu]], just like in
+DFT+U.
+
+For each atom type, you specify the value of $l$ you want to apply DMFT to. If you do not
+want to apply DMFT on a given atom type, simply set [[lpawu]]$=-1$.
+
+Each correlated channel will then correspond to $2 \times (2l+1)$ orbitals per correlated
+atom - the factor of $2$ accounts for spin degeneracy, and the $2l+1$ comes from the different
+magnetic quantum numbers $m = -l,...l$.
+Keep in mind that the complexity of the impurity problem increases exponentially with this
+number of orbitals, so choosing your correlated channel wisely is important.
+
+At the moment, only values of [[lpawu]] $\le 3$ are supported - anything higher would be
+computationally impractical anyway.
+
+In our iron example, the localized orbitals that show strong correlation effects are the $3d$
+orbitals. Since there is only one atom type (Fe), we simply set [[lpawu]]$=2$.
+
+### Correlated Orbital
+
+Now that we have defined which angular momentum channel we are treating as correlated, we need
+to specify the radial part of the correlated orbital - the reduced radial wavefunction $u_l(r)$.
+
+Our convention for the local orbitals follows ABINIT's internal PAW convention:
+$\frac{u_l(r)}{r} Y_{lm}(\hat{r})$ where $Y_{lm}(\hat{r})$ are real spherical harmonics.
+
+The choice of the radial wavefunction is made through the variable [[dmft_orbital]]. For iron, the
+$3d$ orbitals remain quite localized and keep their atomic character, so we usually just take the
+lowest-energy atomic orbital from the PAW dataset (truncated at the PAW radius). That is the default
+choice, [[dmft_orbital]]=1, but you can pick any orbital from your PAW dataset or even provide a
+custom one from a file if needed.
+
+When the calculation starts, you can see how the radial orbital is defined in the `log` file, right
+at the beginning of the self-consistent cycle:
+
+```sh
+   =====  Build DMFT radial orbital for atom type 1 ========
+
+   Using atomic orbital number 1 from PAW dataset
+   Squared norm of the DMFT orbital: 0.8514
+```
+
+This lets you check the normalization of the orbital. The radial function $u_l(r)$ is also written
+to the file `tdmft_triqs_2o_DS2_DMFTORBITAL_itypat0001.dat`. You can plot it with your favorite tool
+ - for instance, all DMFT-related outputs are compatible with xmgrace. If you plot this file, you
+should clearly see the $3d$ atomic orbital from your PAW dataset:
+
+![dmft_cycle_tuto](dmft_triqs_assets/3d_orbital.png)
 
 
 

@@ -2301,8 +2301,18 @@ subroutine print_dmft(paw_dmft,pawprtvol)
        & "  --- dmftqmc_l  = ",paw_dmft%dmftqmc_l ,ch10,&
        & "  --- dmftqmc_n  = ",paw_dmft%dmftqmc_n ,ch10,&
        & "  -------------------------------------------------",ch10
-     call wrtout(std_out,message,'COLL')
+   else
+     write(message,'(7(a,15x,i8,a),2a)') &
+       & "  --- natpawu    = ",paw_dmft%natpawu   ,ch10,&
+       & "  --- dmft_iter  = ",paw_dmft%dmft_iter ,ch10,&
+       & "  --- dmft_solv  = ",paw_dmft%dmft_solv ,ch10,&
+       & "  --- n_iw       = ",paw_dmft%dmft_nwli ,ch10,&
+       & "  --- dmft_dc    = ",paw_dmft%dmft_dc   ,ch10,&
+       & "  --- n_tau      = ",paw_dmft%dmftqmc_l ,ch10,&
+       & "  --- n_cycles   = ",paw_dmft%dmft_triqs_n_cycles ,ch10,&
+       & "  -------------------------------------------------",ch10
    end if
+   call wrtout(std_out,message,'COLL')
 
 !  write(message,'(4a,3(a,2x,f8.3,a),8(a,2x,i8,a),a)') "-----------------------------------------------",ch10,&
 !&   "--- Data for DMFT ",ch10,&
