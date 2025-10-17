@@ -2820,6 +2820,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%toldfe=zero
    dtsets(idtset)%tolmxde=zero
    dtsets(idtset)%toldff=zero
+   dtsets(idtset)%toldmag=zero
    dtsets(idtset)%tolimg=5.0d-5
    dtsets(idtset)%tolrde=0.005_dp
    dtsets(idtset)%tolrff=zero
