@@ -795,7 +795,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
          end do ! im_kq
        end do ! my_ip
 
-       !ABI_FREE(bra_kq)
        !ABI_FREE(cgwork)
        !ABI_FREE(h1kets_kq)
        ABI_SFREE(kpg_kq)
@@ -1134,7 +1133,9 @@ subroutine sep_free(sigma)
  ABI_SFREE(sigma%vals_e0ks)
  ABI_SFREE(sigma%dvals_de0ks)
  ABI_SFREE(sigma%fan_vals)
+ ABI_SFREE(sigma%fan_stern_vals)
  ABI_SFREE(sigma%dw_vals)
+ ABI_SFREE(sigma%dw_stern_vals)
  ABI_SFREE(sigma%vals_wr)
  ABI_SFREE(sigma%wrmesh_b)
 
