@@ -5,7 +5,7 @@
  ecut 45.0
  nstep 150
  iscf -2          # NSCF run
- tolwfr 1e-14     # 1e-20 is the recommended value
+ tolwfr 1e-20     # 1e-20 is the recommended value
  nband  70        # occ + empty states .
  nbdbuf -10       # A negative value means 10% of nband as buffer.
 
