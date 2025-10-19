@@ -1504,7 +1504,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              if (ierr /= 0) then
                ABI_WARNING(sjoin("Stern at +q", qkp_string, msg))
                full_cg1_kqmp = zero; full_ur1_kqmp = zero
-               stern_kmp%eig1_k(:, bstart_kq:bstop_kq, ib_sum) = zero
+               !stern_kmp%eig1_k(:, bstart_kq:bstop_kq, ib_sum) = zero
                stern_qq_ierr = stern_qq_ierr + 1
                !cycle
              end if
@@ -1629,7 +1629,7 @@ if (.not. qq_is_gamma) then
              if (ierr /= 0) then
                ABI_WARNING(sjoin("Stern at -q:", qkp_string, msg))
                full_cg1_kmp = zero; full_ur1_kmp = zero
-               stern_kqmp%eig1_k(:, bstart_kq:bstop_kq, ib_sum) = zero
+               !stern_kqmp%eig1_k(:, bstart_kq:bstop_kq, ib_sum) = zero
                stern_mq_ierr = stern_mq_ierr + 1
                !cycle
              end if
