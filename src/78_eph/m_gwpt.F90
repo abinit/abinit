@@ -193,7 +193,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: ikqmp_ibz, isym_kqmp, trev_kqmp, npw_kqmp, istwf_kqmp, npw_kqmp_ibz, istwf_kqmp_ibz, mpw,ierr,nqbz,ncerr !,spad
  integer :: n1,n2,n3,n4,n5,n6,nspden, mqmem, im_kq, m_kq, in_k, n_k, restart, root_ncid, spin_ncid, usecprj !,sij_opt
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg_k,nkpg_kq,nkpg_kqmp,nkpg_kmp,imyp, cnt, nvloc, iw_nk, iw_mkq, ndone, nmiss
- integer :: my_ipp, ipp_bz, ipp_ibz, isym_pp, itim_pp, comm_rpt, nqlwl, scr_iomode
+ integer :: my_ipp, ipp_bz, ipp_ibz, isym_pp, itim_pp, comm_rpt, nqlwl, scr_iomode, stern_ierr
  integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt, timrev_k, timrev_q, iq_start, my_nqibz
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_qq, wall_qq, gflops_qq, cpu_kk, wall_kk, gflops_kk, cpu_pp, wall_pp, gflops_pp
  real(dp) :: drude_plsmf, my_plsmf
@@ -876,6 +876,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! Loop over MPI distributed spins in Sigma (gqk%comm)
  ! ===================================================
 
+ stern_ierr = 0
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is); my_npert = gqk%my_npert
    ABI_CHECK_IEQ(my_npert, gqk%my_npert, "my_npert")
@@ -1504,6 +1505,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                ABI_WARNING(sjoin("Stern at +q", qkp_string, msg))
                full_cg1_kqmp = zero; full_ur1_kqmp = zero
                stern_kmp%eig1_k(:, bstart_kq:bstop_kq, ib_sum) = zero
+               stern_ierr = stern_ierr + 1
                !cycle
              end if
 
@@ -1628,6 +1630,7 @@ if (.not. qq_is_gamma) then
                ABI_WARNING(sjoin("Stern at -q:", qkp_string, msg))
                full_cg1_kmp = zero; full_ur1_kmp = zero
                stern_kqmp%eig1_k(:, bstart_kq:bstop_kq, ib_sum) = zero
+               stern_ierr = stern_ierr + 1
                !cycle
              end if
 
@@ -1831,6 +1834,9 @@ end if ! .not qq_is_gamma.
    end if
  end do ! my_is
 
+ call xmpi_sum(stern_ierr, comm, ierr)
+ call wrtout(units, sjoin(" Total number of failures in Sternheimer solvers:", itoa(stern_ierr)))
+
  call cwtime_report(" gwpt_eph full calculation", cpu_all, wall_all, gflops_all, end_str=ch10)
 
  ! Set gstore_completed to 1 so that we can easily check if restarted is needed.
@@ -1920,6 +1926,7 @@ subroutine dump_my_gbuf()
  ! as all the local buffers store results for all natom3 perturbations.
 
  integer :: ii, iq_bz, iq_glob, my_iq
+ !integer,allocatable :: itab_k(:)
 
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  ! FIXME: Recheck this part as we have way more levels of parallelism in GWPT
@@ -1955,6 +1962,14 @@ subroutine dump_my_gbuf()
    do ii=1,iqbuf_cnt
      iq_bz = iq_buf(2, ii)
      NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_done_qbz_spin"), 1, start=[iq_bz, spin]))
+
+     !ABI_ICALLOC(itab_k, (gqk%my_nk))
+     !itab_k = 1
+     !ncerr = nf90_put_var(root_ncid, root_vid("gstore_kq_tab"), itab_k, &
+     !                     start=[gqk%my_kstart, iq_bz, spin], &
+     !                     count=[gqk%my_nk, 1, 1])
+     !NCF_CHECK(ncerr)
+     !ABI_FREE(itab_k)
    end do
  !end if
 
