@@ -1042,8 +1042,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      nctkarr_t("gstore_qbz2ibz", "i", "six, gstore_nqbz"), &
      nctkarr_t("gstore_qglob2bz", "i", "gstore_max_nq, number_of_spins"), &
      nctkarr_t("gstore_kglob2bz", "i", "gstore_max_nk, number_of_spins"), &
-     ! TODO
-     !nctkarr_t("gstore_kqs_symtab", "i", "gstore_max_nk, gstore_max_nq, number_of_spins"), &
+     !nctkarr_t("gstore_kq_tab", "i", "gstore_max_nk, gstore_max_nq, number_of_spins"), &
      ! These quantities are needed to interface GSTORE.nc with external codes.
      ! For the meaning of the different variables and conventions see m_ifc module.
      nctkarr_t("ifc_zeff", "dp", "three, three, number_of_atoms"), &
@@ -1067,12 +1066,12 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    !  0 --> (ib_bz, spin) has not been computed.
    !  1 --> (iq_bz, spin) has been computed.
    ! In order to check if the whole generation is completed, one should test if "gstore_completed" == 1
-   !NCF_CHECK(nf90_def_var_fill(ncid, vid("gstore_done_qbz_spin"), NF90_FILL, 0))
+   NCF_CHECK(nf90_def_var_fill(ncid, vid("gstore_done_qbz_spin"), NF90_FILL, 0))
 
    !  0 --> (k, q, spin) has not been computed.
    !  1 --> (k, q, spin) has been computed.
    !  2 --> (k, q, spin) has been reconstructed by symmetry.
-   !NCF_CHECK(nf90_def_var_fill(ncid, vid("gstore_kqs_symtab"), NF90_FILL, 0))
+   !NCF_CHECK(nf90_def_var_fill(ncid, vid("gstore_kq_tab"), NF90_FILL, 0))
 
    ! Optional arrays
    if (allocated(gstore%delta_ef_kibz_spin)) then
@@ -4116,6 +4115,7 @@ subroutine dump_my_gbuf()
  ! as all the local buffers store results for all natom3 perturbations.
 
  integer :: ii, iq_bz, iq_glob, my_iq
+ !integer,allocatable :: itab_k(:)
 
  if (gqk%coords_qkpb_sumbp(3) /= 0) goto 10 ! Yes, I'm very proud of this GOTO.
 
@@ -4139,6 +4139,14 @@ subroutine dump_my_gbuf()
    do ii=1,iqbuf_cnt
      iq_bz = iq_buf(2, ii)
      NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_done_qbz_spin"), 1, start=[iq_bz, spin]))
+
+     !ABI_ICALLOC(itab_k, (gqk%my_nk))
+     !itab_k = 1
+     !ncerr = nf90_put_var(root_ncid, root_vid("gstore_kq_tab"), itab_k, &
+     !                     start=[gqk%my_kstart, iq_bz, spin], &
+     !                     count=[gqk%my_nk, 1, 1])
+     !NCF_CHECK(ncerr)
+     !ABI_FREE(itab_k)
    end do
  !end if
 

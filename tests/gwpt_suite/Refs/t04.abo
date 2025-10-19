@@ -384,6 +384,7 @@ force_plsmf:   0.00000000E+00
 ...
 
  Only q-points in the IBZ_k will be computed.
+ Total number of failures in Sternheimer solvers: 84
 
  gstore_completed: 1
  gstore_done_qbz_spin: 4
