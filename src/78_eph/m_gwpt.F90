@@ -193,7 +193,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: ikqmp_ibz, isym_kqmp, trev_kqmp, npw_kqmp, istwf_kqmp, npw_kqmp_ibz, istwf_kqmp_ibz, mpw,ierr,nqbz,ncerr !,spad
  integer :: n1,n2,n3,n4,n5,n6,nspden, mqmem, im_kq, m_kq, in_k, n_k, restart, root_ncid, spin_ncid, usecprj !,sij_opt
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg_k,nkpg_kq,nkpg_kqmp,nkpg_kmp,imyp, cnt, nvloc, iw_nk, iw_mkq, ndone, nmiss
- integer :: my_ipp, ipp_bz, ipp_ibz, isym_pp, itim_pp, comm_rpt, nqlwl, scr_iomode, stern_ierr
+ integer :: my_ipp, ipp_bz, ipp_ibz, isym_pp, itim_pp, comm_rpt, nqlwl, scr_iomode, stern_qq_ierr, stern_mq_ierr
  integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt, timrev_k, timrev_q, iq_start, my_nqibz
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_qq, wall_qq, gflops_qq, cpu_kk, wall_kk, gflops_kk, cpu_pp, wall_pp, gflops_pp
  real(dp) :: drude_plsmf, my_plsmf
@@ -876,7 +876,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! Loop over MPI distributed spins in Sigma (gqk%comm)
  ! ===================================================
 
- stern_ierr = 0
+ stern_qq_ierr = 0; stern_mq_ierr = 0
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is); my_npert = gqk%my_npert
    ABI_CHECK_IEQ(my_npert, gqk%my_npert, "my_npert")
@@ -1505,7 +1505,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                ABI_WARNING(sjoin("Stern at +q", qkp_string, msg))
                full_cg1_kqmp = zero; full_ur1_kqmp = zero
                stern_kmp%eig1_k(:, bstart_kq:bstop_kq, ib_sum) = zero
-               stern_ierr = stern_ierr + 1
+               stern_qq_ierr = stern_qq_ierr + 1
                !cycle
              end if
 
@@ -1630,7 +1630,7 @@ if (.not. qq_is_gamma) then
                ABI_WARNING(sjoin("Stern at -q:", qkp_string, msg))
                full_cg1_kmp = zero; full_ur1_kmp = zero
                stern_kqmp%eig1_k(:, bstart_kq:bstop_kq, ib_sum) = zero
-               stern_ierr = stern_ierr + 1
+               stern_mq_ierr = stern_mq_ierr + 1
                !cycle
              end if
 
@@ -1834,8 +1834,10 @@ end if ! .not qq_is_gamma.
    end if
  end do ! my_is
 
- call xmpi_sum(stern_ierr, comm, ierr)
- call wrtout(units, sjoin(" Total number of failures in Sternheimer solvers:", itoa(stern_ierr)))
+ call xmpi_sum(stern_qq_ierr, comm, ierr)
+ call xmpi_sum(stern_mq_ierr, comm, ierr)
+ call wrtout(units, sjoin(" Total number of failures in Sternheimer solvers at +q:", itoa(stern_qq_ierr)))
+ call wrtout(units, sjoin(" Total number of failures in Sternheimer solvers at -q:", itoa(stern_mq_ierr)))
 
  call cwtime_report(" gwpt_eph full calculation", cpu_all, wall_all, gflops_all, end_str=ch10)
 
