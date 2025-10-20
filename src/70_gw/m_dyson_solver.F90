@@ -151,6 +151,7 @@ subroutine solve_dyson(ikcalc, minbnd, maxbnd, nomega_sigc, dtset, Sigp, Kmesh, 
 !arrays
  real(dp),intent(in) :: qp_ene(Sr%nbnds,Sr%nkibz,Sr%nsppol)
  complex(dp),intent(in) :: sigcme(nomega_sigc,minbnd:maxbnd,minbnd:maxbnd,Sigp%nsppol*Sigp%nsig_ab)
+ complex(dp) :: sigcme_tmp(nomega_sigc)
 
 !Local variables-------------------------------
 !scalars
@@ -359,23 +360,34 @@ subroutine solve_dyson(ikcalc, minbnd, maxbnd, nomega_sigc, dtset, Sigp, Kmesh, 
 
 !#define _DEV_PERTURBATIVE
 !#ifdef _DEV_PERTURBATIVE
-#if 0
+#if 1
        call wrtout(units, "COMMENT: Using perturbative approach with Z.")
 
        ! Note vxc[n_val] instead of vxc[n_val + n_nlcc] with the model core charge.
        vxc_val = ks_me%vxcval(jb, jb, ik_ibz, spin)
+       if (Sr%nsig_ab > 1) vxc_val = SUM(ks_me%vxcval(jb, jb, ik_ibz, :))
        vu = zero; if (dtset%usepawu /= 0) vu = ks_me%vu(jb, jb, ik_ibz, spin)
        v_meanf = vxc_val + vu
 
        ! qp_ene = e0 + z_e0 * (sigc_e0__ + sigx - v_meanf)
-       Sr%egw(jb,ik_ibz,spin) = Sr%e0(jb,ik_ibz,spin) + Sr%ze0(jb,ik_ibz,spin) * &
-         (Sr%sigcmee0(jb,ik_ibz,spin) + Sr%sigxme(jb,ik_ibz,spin) - v_meanf)
+       if (Sr%nsig_ab == 1) then
+          Sr%egw(jb,ik_ibz,spin) = Sr%e0(jb,ik_ibz,spin) + Sr%ze0(jb,ik_ibz,spin) * &
+            (Sr%sigcmee0(jb,ik_ibz,spin) + Sr%sigxme(jb,ik_ibz,spin) - v_meanf)
 
-       Sr%degw(jb,ik_ibz,spin) = Sr%egw(jb,ik_ibz,spin) - Sr%e0(jb,ik_ibz,spin)
+          Sr%degw(jb,ik_ibz,spin) = Sr%egw(jb,ik_ibz,spin) - Sr%e0(jb,ik_ibz,spin)
 
-       ! Estimate Sigma at the QP-energy: Sigma(E_qp)=Sigma(E0)+(E_qp-E0)*dSigma/dE
-       Sr%sigmee(jb,ik_ibz,spin) = &
-         Sr%sigxme(jb,ik_ibz,spin)+Sr%sigcmee0(jb,ik_ibz,spin)+Sr%degw(jb,ik_ibz,spin)*Sr%dsigmee0(jb,ik_ibz,spin)
+          ! Estimate Sigma at the QP-energy: Sigma(E_qp)=Sigma(E0)+(E_qp-E0)*dSigma/dE
+          Sr%sigmee(jb,ik_ibz,spin) = &
+            Sr%sigxme(jb,ik_ibz,spin)+Sr%sigcmee0(jb,ik_ibz,spin)+Sr%degw(jb,ik_ibz,spin)*Sr%dsigmee0(jb,ik_ibz,spin)
+       else
+          Sr%egw(jb,ik_ibz,1) = Sr%e0(jb,ik_ibz,1) + Sr%ze0(jb,ik_ibz,1) * &
+            (SUM(Sr%sigcmee0(jb,ik_ibz,:)+Sr%sigxme(jb,ik_ibz,:))-v_meanf)
+
+          Sr%degw(jb,ik_ibz,1) = Sr%egw(jb,ik_ibz,1) - Sr%e0(jb,ik_ibz,1)
+
+          Sr%sigmee(jb,ik_ibz,1) = &
+            SUM(Sr%sigxme(jb,ik_ibz,:)+Sr%sigcmee0(jb,ik_ibz,:))+Sr%degw(jb,ik_ibz,1)*SUM(Sr%dsigmee0(jb,ik_ibz,:))
+       end if
 
 #else
        ! MG FIXME: Here we are solving the non-linear QP equation using the Pade' continuation + root finding
