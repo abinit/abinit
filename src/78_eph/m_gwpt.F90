@@ -1534,10 +1534,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                  call sigtk_multiply_by_vc_sqrt("C", npw_c, nspinor, ndat1, vc_sqrt_gx, rhotwg_c)
                end if
 
-               !if (m_kq == 1 .AND. ipc == 1) &
-               !   print *, "|vec_gx_nk|^2,+q,ib=", ib_sum, sum(abs(vec_gx_nk(:, 1))*abs(vec_gx_nk(:, 1)))
-               !if (m_kq == 1 .AND. ipc == 1) &
-               !   print *, "|rhotwg_x|^2,+q,ib=", ib_sum, sum(abs(rhotwg_x)*abs(rhotwg_x))
+               if (m_kq == 1 .AND. ipc == 1) &
+                  print *, "|vec_gx_nk|^2,+q,ib=", ib_sum, sum(abs(vec_gx_nk(:, 1))*abs(vec_gx_nk(:, 1)))
+               if (m_kq == 1 .AND. ipc == 1) &
+                  print *, "|rhotwg_x|^2,+q,ib=", ib_sum, sum(abs(rhotwg_x)*abs(rhotwg_x))
 
                do n_k=bstart_k, bstop_k ! do n_k=gqk%n_start, gqk%n_stop
                  in_k = n_k - bstart_k + 1
@@ -1659,10 +1659,10 @@ if (.not. qq_is_gamma) then
                  call sigtk_multiply_by_vc_sqrt("N", npw_c, nspinor, ndat1, vc_sqrt_gx, rhotwg_c)
                end if
 
-               !if (n_k == 1 .AND. ipc == 1) &
-               !   print *, "|vec_gx_mkq|^2,-q,ib=", ib_sum, sum(abs(vec_gx_mkq(:, 1))*abs(vec_gx_mkq(:, 1)))
-               !if (n_k == 1 .AND. ipc == 1) &
-               !   print *, "|rhotwg_x|^2,-q,ib=", ib_sum, sum(abs(rhotwg_x)*abs(rhotwg_x))
+               if (n_k == 1 .AND. ipc == 1) &
+                  print *, "|vec_gx_mkq|^2,-q,ib=", ib_sum, sum(abs(vec_gx_mkq(:, 1))*abs(vec_gx_mkq(:, 1)))
+               if (n_k == 1 .AND. ipc == 1) &
+                  print *, "|rhotwg_x|^2,-q,ib=", ib_sum, sum(abs(rhotwg_x)*abs(rhotwg_x))
 
                do m_kq=bstart_kq, bstop_kq
                  im_kq = m_kq - bstart_kq + 1
