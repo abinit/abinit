@@ -71,10 +71,8 @@ module m_dyson_solver
     complex(dp),allocatable :: zmesh(:)
     ! input mesh
 
-    complex(dp),allocatable :: sigc_cvals(:)
+    complex(dp),allocatable :: sigc_cvals(:,:)
     ! values on mesh
-
-    complex(dp),allocatable :: sigc_cvals_spinor(:,:)
 
  contains
 
@@ -790,9 +788,9 @@ subroutine sigma_pade_init(self, npts, zmesh, sigc_cvals, alphac_pm, betar_pm, z
 
  self%npts = npts
  ABI_MALLOC(self%zmesh, (npts))
- ABI_MALLOC(self%sigc_cvals, (npts))
+ ABI_MALLOC(self%sigc_cvals, (npts,1))
  self%zmesh = zmesh
- self%sigc_cvals = sigc_cvals
+ self%sigc_cvals(:,1) = sigc_cvals
  self%nspinor = 1
 
  self%alphac_pm = alphac_pm
@@ -824,9 +822,9 @@ subroutine sigma_pade_init_spinor(self, npts, zmesh, nspinor, sigc_cvals, alphac
 
  self%npts = npts
  ABI_MALLOC(self%zmesh, (npts))
- ABI_MALLOC(self%sigc_cvals_spinor, (npts,nspinor))
+ ABI_MALLOC(self%sigc_cvals, (npts,nspinor))
  self%zmesh = zmesh
- self%sigc_cvals_spinor = sigc_cvals
+ self%sigc_cvals = sigc_cvals
  self%nspinor = nspinor
 
  self%alphac_pm = alphac_pm
@@ -845,7 +843,6 @@ subroutine sigma_pade_free(self)
 
  ABI_SFREE(self%zmesh)
  ABI_SFREE(self%sigc_cvals)
- ABI_SFREE(self%sigc_cvals_spinor)
 
 end subroutine sigma_pade_free
 !!***
@@ -874,39 +871,22 @@ subroutine sigma_pade_eval(self, zz, val, &
 ! *************************************************************************
 
  ! if zz in 2 or 3 quadrant, avoid branch cut in the complex plane using Sigma(-iw) = Sigma(iw)*.
- if (self%nspinor == 1) then
-  if (real(zz) > zero) then
-    val = pade(self%npts, self%zmesh, self%sigc_cvals, zz)
-
-    if (present(dvdz)) then
-      dvdz = dpade(self%npts, self%zmesh, self%sigc_cvals, zz)
-    end if
-
-  else
-    val = pade(self%npts, -self%zmesh, conjg(self%sigc_cvals), zz)
-
-    if (present(dvdz)) then
-      dvdz = dpade(self%npts, -self%zmesh, conjg(self%sigc_cvals), zz)
-    end if
-  end if
- else
   val = czero
   if (present(dvdz)) dvdz = czero
 
   do iab = 1, self%nspinor
     if (real(zz) > zero) then
-      val = val + pade(self%npts, self%zmesh, self%sigc_cvals_spinor(:,iab), zz)
+      val = val + pade(self%npts, self%zmesh, self%sigc_cvals(:,iab), zz)
       if (present(dvdz)) then
-        dvdz = dvdz + dpade(self%npts, self%zmesh, self%sigc_cvals_spinor(:,iab), zz)
+        dvdz = dvdz + dpade(self%npts, self%zmesh, self%sigc_cvals(:,iab), zz)
       end if
     else
-      val = val + pade(self%npts, -self%zmesh, conjg(self%sigc_cvals_spinor(:,iab)), zz)
+      val = val + pade(self%npts, -self%zmesh, conjg(self%sigc_cvals(:,iab)), zz)
       if (present(dvdz)) then
-        dvdz = dvdz + dpade(self%npts, -self%zmesh, conjg(self%sigc_cvals_spinor(:,iab)), zz)
+        dvdz = dvdz + dpade(self%npts, -self%zmesh, conjg(self%sigc_cvals(:,iab)), zz)
       end if
     end if
   end do
- end if
 
   if (self%do_sigma_fit) then
     ! Add analytic expression.
