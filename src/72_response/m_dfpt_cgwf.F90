@@ -211,6 +211,8 @@ contains
 !!             1: used as input
 !!             2: used as output
 !!  wfoptalg=govern the choice of algorithm for wf optimisation (0 or 10, at present)
+!!  [usetolrde]: 0 if the reduction in trial energy deltae should not be checked (see below). Default 1.
+!!               0 is used in NSCF mode to prevent an early return before nline iterations.
 !!
 !! OUTPUT
 !!  eig1_k(2*nband**2)=matrix of first-order eigenvalues (hartree)
@@ -247,7 +249,8 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
 & gs_hamkq,gvnlxc,gvnlx1,icgq,idir,ipert,igscq,&
 & mcgq,mgscq,mpi_enreg,mpw1,natom,nband,nband_me,nbdbuf,nline_in,npw,npw1,nspinor,&
 & opt_gvnlx1,prtvol,quit,resid,rf_hamkq,dfpt_sciss,tolrde,tolwfr,&
-& usedcwavef,wfoptalg,nlines_done)
+& usedcwavef,wfoptalg,nlines_done, &
+  usetolrde) ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -257,6 +260,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
  integer,intent(in) :: nbdbuf,nline_in,npw,npw1,nspinor,opt_gvnlx1
  integer,intent(in) :: prtvol,quit,usedcwavef,wfoptalg
  integer,intent(inout) :: nlines_done
+ integer,optional,intent(in) :: usetolrde
  real(dp),intent(in) :: dfpt_sciss,tolrde,tolwfr
  real(dp),intent(out) :: resid
  type(MPI_type),intent(in) :: mpi_enreg
@@ -286,7 +290,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
  integer :: cpopt,iband,igs,iline,indx_cgq,ipw,me_g0,comm_fft
  integer :: iband_me, jband_me, ierr, me_band, np_band, band_off, u1_band !, unit_me
  integer :: ipws,ispinor,istwf_k,jband,nline,optlocal,optnl,dc_shift_band,sij_opt
- integer :: test_is_ok,useoverlap,usepaw,usevnl,usetolrde
+ integer :: test_is_ok,useoverlap,usepaw,usevnl,usetolrde__
  real(dp) :: d2edt2,d2te,d2teold,dedt,deltae,deold,dotgg
  real(dp) :: dotgp,doti,dotr,eshift,eshiftkq,gamma,optekin,prod1,prod2
  real(dp) :: theta,tol_restart,u1h0me0u1
@@ -317,9 +321,6 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
 
  u1_band = abs(u1_band_)
 
- nline = nline_in
- usetolrde = 1
-
  ! LB-23/04/17:
  ! For ipert=natom+10 or ipert=natom+11, the Sternheimer equation is non-self-consistent, so we have
  ! to solve a true linear problem (A.X = B) for each kpoint and band. In this case, the conjugate
@@ -329,12 +330,15 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
  ! we want to leave this routine only if 'tolwfr' is reached. Consequently, 'tolrde' is not used and 'nline' is set to 100.
  ! One could use nline=npw1*nspinor (>> 100 !) instead, but when the method cannot converge (i.e when tolwfr is lower than the
  ! numerical noise) the program could be stuck here for a very long time.
- ! NOTE : This is also true for ipert==natom+1, but a lot of references in the test suite have to be changed...
+ ! NOTE: This is also true for ipert==natom+1, but a lot of references in the test suite have to be changed...
+ nline = nline_in
+ usetolrde__ = 1
  if(ipert==natom+10.or.ipert==natom+11) then
    nline = 100 ! The default value is only 4... This should be sufficient to converge with nstep=1 or 2
    if (nline_in > 100) nline = nline_in ! Keep the possibility to increase nline
-   usetolrde = 0  ! see below
+   usetolrde__ = 0  ! see below
  end if
+ if (present(usetolrde)) usetolrde__ = usetolrde
 
  if (prtvol>=10) then
    !Tell us what is going on:
@@ -1247,7 +1251,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
    ! =========== CHECK CONVERGENCE AGAINST TRIAL ENERGY ===================
    ! ======================================================================
 
-   if(usetolrde/=0) then
+   if (usetolrde__ /= 0) then
      ! Check reduction in trial energy deltae, Eq.(28) of PRB55, 10337 (1997) [[cite:Gonze1997]]
      deltae=half*d2edt2*theta**2+theta*dedt
 
@@ -1883,7 +1887,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
    stern%mcgq, stern%mgscq, stern%mpi_enreg, grad_berry_size_mpw1, stern%dtset%natom, stern%nband, stern%nband_me, &
    nbdbuf0, stern%nline_in, stern%npw_k, stern%npw_kq, stern%nspinor, &
    opt_gvnlx1, stern%dtset%prtvol, quit0, out_resid, rf_hamkq, stern%dtset%dfpt_sciss, -one, stern%dtset%tolwfr, &
-   stern%usedcwavef, stern%dtset%wfoptalg, stern%nlines_done)
+   stern%usedcwavef, stern%dtset%wfoptalg, stern%nlines_done, usetolrde=0)
 
  ABI_FREE(grad_berry)
 
