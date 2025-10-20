@@ -259,6 +259,9 @@ contains
  intarr(1,:)=dtsets(:)%paral_rf
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'paral_rf','INT',0)
 
+ intarr(1,:)=dtsets(:)%paw_add_core
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'paw_add_core','INT',0)
+
  intarr(1,:)=dtsets(:)%pawcpxocc
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'pawcpxocc','INT',0)
 
@@ -704,8 +707,13 @@ contains
  dprarr(2,:)=dtsets(:)%qgbt(2)
  dprarr(3,:)=dtsets(:)%qgbt(3)
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'qgbt','DPR',0)
+ 
+ dprarr(1,:)=dtsets(:)%qgbt_cart(1)
+ dprarr(2,:)=dtsets(:)%qgbt_cart(2)
+ dprarr(3,:)=dtsets(:)%qgbt_cart(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'qgbt_cart','DPR',0)
 
-!qptdm
+ !qptdm
  narr=3*dtsets(1)%nqptdm ! default size for all datasets
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    if(idtset/=0)then
@@ -1138,6 +1146,9 @@ contains
 
  dprarr(1,:)=dtsets(:)%toldff
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'toldff','DPR',0)
+
+ dprarr(1,:)=dtsets(:)%toldmag
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'toldmag','DPR',0)
 
  dprarr(1,:)=dtsets(:)%tolimg
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tolimg','ENE',0)

@@ -77,7 +77,9 @@ MODULE m_geometry
  public :: wedge_basis        ! compute rprimd x gprimd vectors needed for generalized cross product
  public :: wedge_product      ! compute wedge product given wedge basis
  public :: d3lwsym
- public :: sylwtens             ! Determines the set of irreductible elements of the spatial-dispersion tensors
+ public :: sylwtens           ! Determines the set of irreductible elements of the spatial-dispersion tensors
+ public :: vcart2ylm          ! Convert Cartesian vector to spherical coordinates for Y_lm
+
 
  interface normv
   module procedure normv_rdp_vector
@@ -350,7 +352,7 @@ complex(dp) function vdotw_rc_vector(xv, xw, met, space) result(res)
  character(len=1),intent(in) :: space
 !arrays
  real(dp),intent(in) :: met(3,3),xv(3)
- complex(dpc),intent(in) :: xw(3)
+ complex(dp),intent(in) :: xw(3)
 ! *************************************************************************
 
  res = (  met(1,1)* xv(1)*xw(1)                &
@@ -954,7 +956,7 @@ pure function spinrot_cmat(spinrot)
 
 !Arguments ------------------------------------
  real(dp),intent(in) :: spinrot(4)
- complex(dpc) :: spinrot_cmat(2,2)
+ complex(dp) :: spinrot_cmat(2,2)
 ! *************************************************************************
 
  ! Build rotation matrix from spinrot:
@@ -3560,11 +3562,6 @@ end subroutine irreducible_set_pert
 !!   element of d3 is available (1 if available, 0 otherwise)
 !!  d3(2,3,mpert,3,mpert,3,mpert)= matrix of the 3DTE
 !!
-!! PARENTS
-!!      m_ddb,m_nonlinear
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 !subroutine d3lwsym(blkflg,d3,has_strain,indsym,mpert,natom,nsym,symrec,symrel,symrel_cart)
@@ -3843,14 +3840,8 @@ end subroutine d3lwsym
 !!      -1   ->   use symmetry operations to obtain the corresponding element
 !!      -2   ->   element is zero by symmetry
 !!
-!! PARENTS
-!!      m_ddb,m_nonlinear,m_respfn_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-!subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel,symrel_cart)
 subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 
 !Arguments -------------------------------
@@ -4089,6 +4080,60 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
  ABI_FREE(pertsy)
 
 end subroutine sylwtens
+!!***
+!!****f* m_geometry/vcart2ylm
+!! NAME
+!! vcart2ylm
+!!
+!! FUNCTION
+!! Convert a 3D Cartesian vector into spherical coordinates (r, theta, phi)
+!! suitable for spherical harmonics calculations (Y_lm).
+!! Angles are returned in degrees.
+!!
+!! INPUTS
+!!  vector(3) = Cartesian vector (x, y, z)
+!!
+!! OUTPUTS
+!!  length = radial distance r = sqrt(x^2+y^2+z^2)
+!!  theta  = polar angle (from +z axis), in degrees
+!!  phi    = azimuthal angle (from +x axis in xy-plane), in degrees
+!!
+!! NOTES
+!!  - If the vector magnitude is very small (<1e-9), theta and phi are set to 0.
+!!  - Uses the physics/Y_lm convention: theta = polar, phi = azimuth.
+!!  - phi is computed using atan2 to account for the correct quadrant.
+!!  - This routine assumes input vector is real(8).
+!!  - Can be easily extended to arrays of vectors.
+
+subroutine vcart2ylm(vector, length, theta, phi)
+
+!Arguments ---------------------------------------------
+!arrays
+  real(8),intent(in) :: vector(3)
+!scalars
+  real(8),intent(out) :: length, theta, phi
+
+! Local 
+  real(8):: pi 
+
+  pi=4.0d0*datan(1.0d0)
+  ! Compute spherical coordinates
+  length = sqrt(vector(1)**2+vector(2)**2+vector(3)**2)
+
+  if (length > tol6) then
+     theta = acos(vector(3) / length) * 180.d0 / pi
+     if (abs(vector(1)) > tol6 .or. abs(vector(2)) > tol6) then
+        phi = atan2(vector(2), vector(1)) * 180.d0 / pi
+        if (phi<-179) phi=180
+     else
+        phi = 0.d0
+     end if
+  else
+     theta = 0.d0
+     phi   = 0.d0
+  end if
+
+end subroutine vcart2ylm
 !!***
 
 end module  m_geometry

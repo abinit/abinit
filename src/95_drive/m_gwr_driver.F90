@@ -242,9 +242,9 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
 ! call wrtout(units, msg)
 !
 #if defined HAVE_GW_DPC
- write(msg,'(a,i2,a)')'.Using double precision arithmetic; gwpc = ',gwpc,ch10
+ write(msg,'(a,i2,a)')'.Using double precision arithmetic; gwpc = ',gwp,ch10
 #else
- write(msg,'(a,i2,a)')'.Using single precision arithmetic; gwpc = ',gwpc,ch10
+ write(msg,'(a,i2,a)')'.Using single precision arithmetic; gwpc = ',gwp,ch10
 #endif
  call wrtout(units, msg)
 
@@ -519,12 +519,11 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
 
    !  Calculate onsite vxc with and without core charge.
    nzlmopt=-1; option=0; compch_sph=greatest_real
-   call pawdenpot(compch_sph,el_temp,KS_energies%e_paw,KS_energies%e_pawdc,&
-     KS_energies%entropy_paw,Cryst%gprimd,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
-     Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,KS_Paw_an,KS_Paw_an,KS_paw_ij,&
+   call pawdenpot(compch_sph,el_temp,Cryst%gprimd,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
+     Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,KS_Paw_an,KS_Paw_an,KS_energies%paw,KS_paw_ij,&
      Pawang,Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,&
      Pawtab,Dtset%pawxcdev,Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,&
-     Cryst%xred,Cryst%ucvol,Psps%znuclpsp,epaw_xc=KS_energies%e_pawxc)
+     Cryst%xred,Cryst%ucvol,Psps%znuclpsp)
 
  else
    ABI_MALLOC(ks_nhatgr, (0, 0, 0))
@@ -1141,7 +1140,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  integer,pointer :: gvec_max(:,:)
  integer,allocatable,target :: m_gvec(:,:), sorted_kg_k(:,:)
  complex(dp),allocatable :: ug1_batch(:,:), ur1_batch(:,:), ur2_batch(:,:), ur12_batch(:,:), ug12_batch(:,:), cwork(:)
- complex(gwpc),allocatable :: sqrt_vc(:), paw_rhotwg(:)
+ complex(gwp),allocatable :: sqrt_vc(:), paw_rhotwg(:)
  type(pawpwij_t),allocatable :: pwij(:)
  type(pawcprj_type),allocatable :: cprj1(:,:)
 ! *************************************************************************

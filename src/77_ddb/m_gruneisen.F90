@@ -656,11 +656,9 @@ end subroutine gruns_qmesh
 subroutine gruns_free(gruns)
 
 !Arguments ------------------------------------
-!array
  class(gruns_t),intent(inout) :: gruns
 
 !Local variables-------------------------------
-!scalars
  integer :: ii
 ! ************************************************************************
 

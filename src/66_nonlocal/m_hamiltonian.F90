@@ -1290,7 +1290,7 @@ end subroutine gsham_load_kprime
 !! SOURCE
 
 subroutine gsham_eph_setup_k(gs_ham, which_k, kk, istwf_k, npw_k, kg_k, dtset, cryst, psps, &  ! in
-                             nkpg_k, kpg_k, ffnl_k, kinpw_k, ph3d_k, comm)                  ! out
+                             nkpg_k, kpg_k, ffnl_k, kinpw_k, ph3d_k, comm)                     ! out
 
 !Arguments ------------------------------------
 !scalars
@@ -1734,7 +1734,7 @@ subroutine rfham_init(rf_ham, cplex, gs_Ham, ipert,&
 
 !Local variables-------------------------------
 !scalars
- integer :: cplex_dij1,isp,jsp,my_comm_atom,my_nsppol,my_zora
+ integer :: cplex_dij1,isp,jsp,my_comm_atom,my_nsppol
  logical :: has_e1kbsc_
 !arrays
  integer :: my_spintab(2)

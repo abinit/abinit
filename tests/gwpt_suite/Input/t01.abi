@@ -12,7 +12,7 @@ diamond_eph_gwpt/dfpto_DS3_POT1.nc
 #%% [setup]
 #%% executable = mrgdv
 #%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi
-#%% test_chain = t01.abi, t02.abi, t03.abi, t04.abi
+#%% test_chain = t01.abi, t02.abi, t03.abi, t04.abi, t05.abi
 #%% [files]
 #%% use_git_submodule = diamond_eph_gwpt
 #%% files_to_test =
@@ -21,6 +21,6 @@ diamond_eph_gwpt/dfpto_DS3_POT1.nc
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = M. Giantomassi
-#%% keywords = NC, DFPT, EPH
+#%% keywords = NC, DFPT, EPH, GWPT
 #%% description = Merge precomputed DFPT POT files stored in diamond_eph_gwpt git submodule
 #%%<END TEST_INFO>

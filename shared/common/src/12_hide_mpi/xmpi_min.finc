@@ -14,11 +14,6 @@
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce
-!!
 !! SOURCE
 
 subroutine xmpi_min_intv(xval,xmin,comm,ier)
@@ -70,11 +65,6 @@ end subroutine xmpi_min_intv
 !! SIDE EFFECTS
 !!  xval= buffer array
 !!  xmin= number of elements in send buffer
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce
 !!
 !! SOURCE
 

@@ -4235,10 +4235,15 @@ Variable(
 
 The variable [[elph2_imagden]] determines the imaginary shift of the
 denominator of the sum-over-states in the perturbation,
-$(e_{nk}-e_{n'k'}+i$[[elph2_imagden]]). One should use a width comparable with
-the Debye frequency or the maximum phonon frequency.
-Can be specified in Ha (the default), Ry, eV or Kelvin, since [[ecut]] has the
+$(e_{nk}-e_{n'k'}+i$[[elph2_imagden]]).
+One should use a width comparable with the Debye frequency or the maximum phonon frequency.
+Can be specified in Ha (the default), Ry, eV or Kelvin, since [[elph2_imagden]] has the
 [[ENERGY]] characteristics (1 Ha = 27.2113845 eV).
+
+!!! important
+
+    The default value of [[elph2_imagden]] changed in version 10.5.6. Now it is 0.1 eV.
+    In previous versiohs, it was zero.
 """,
 ),
 
@@ -4409,7 +4414,7 @@ Variable(
     text=r"""
 This variable defines the technique for the integration over the Brillouin zone in the EPH code.
 
-* 1 --> Gaussian technique with broadening factor
+* 1 --> Gaussian technique with broadening factor.
 * 2 --> Tetrahedron method.
 
 Note that the default value depends on the value of [[eph_task]] i.e. on the physical properties
@@ -14572,6 +14577,23 @@ perturbations for the specified q-point in the log file (YAML format) and then s
 ),
 
 Variable(
+    abivarname="paw_add_core",
+    varset="paw",
+    vartype="integer",
+    topics=['PAW_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="PAW - ADD CORE contribution to total energy",
+    requires="[[usepaw]] == 1",
+    added_in_version="v10",
+    text=r"""
+If [[paw_add_core]] is activated (set to 1), then the core-electron contributions are added to the total energy displayed during the iterations and at the end of the calculation. These include the kinetic, electrostatic, and exchange-correlation contributions.
+By default, this variable is not activated, and the core contributions are only listed at the end of the calculation, without being added to the total energy.
+This feature is available only when the PAW atomic data are in [PAW-XML](https://esl.cecam.org/en/data/paw-xml/) format.
+""",
+),
+
+Variable(
     abivarname="pawcpxocc",
     varset="paw",
     vartype="integer",
@@ -19852,7 +19874,7 @@ the default Pulay mixing is used).
 
 Since the convergence of the self-consistent cycle is determined directly by
 the convergence of the density: [[toldfe]], [[toldff]], [[tolrff]],
-[[tolvrs]], [[tolwfr]] are not used, and are replaced by [[rectolden]]; the
+[[tolvrs]], [[tolwfr]] , [[toldmag]]are not used, and are replaced by [[rectolden]]; the
 energetic values, except for the fermi energy, are only computed during the
 latest SFC cycle: the output file will show a jump of the total energy at the
 end, but it is not because of a bad convergence behavior. Computational speed
@@ -20022,8 +20044,8 @@ Variable(
     defaultval=0.0,
     mnemonics="TOLerance on the DiFference of total Energy",
     characteristics=['[[ENERGY]]'],
-    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] can differ from zero.",
-    excludes="[[toldff]] or [[tolrff]] or [[tolvrs]]",
+    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[toldff]], [[tolrff]], [[toldfe]], [[toldmag]] or [[tolvrs]] can differ from zero.",
+    excludes="[[toldff]] or [[tolrff]] or [[tolvrs]] or [[toldmag]]",
     added_in_version="before_v9",
     text=r"""
 Sets a tolerance for absolute differences of total energy that, reached TWICE
@@ -20048,7 +20070,7 @@ characteristics. When all forces vanish by symmetry (e.g. optimization of the
 lattice parameters of a high-symmetry crystal), then place [[toldfe]] to
 1.0d-12, or use (better) [[tolvrs]].
 
-Since [[toldfe]], [[toldff]], [[tolrff]] and [[tolvrs]] are aimed
+Since [[toldfe]], [[toldff]], [[tolrff]], [[toldmag]] and [[tolvrs]] are aimed
 at the same goal (causing the SCF cycle to stop), they are seen as a unique
 input variable at reading. Hence, it is forbidden that two of these input
 variables have non-zero values for the same dataset, or generically (for all
@@ -20099,6 +20121,41 @@ See [[tolwfr]] for more details about coupling two criteria.
 """,
 ),
 
+Variable(
+    abivarname="toldmag",
+    varset="basic",
+    vartype="real",
+    topics=['SCFControl_basic', 'ForcesStresses_basic'],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="TOLerance on the DiFference of MAGnetizations",
+    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[toldff]], [[tolrff]], [[toldfe]], [[toldmag]] or [[tolvrs]] can differ from zero.",
+    excludes="[[toldfe]] or [[tolrff]] or [[tolvrs]]",
+    added_in_version="v10.5",
+    text=r"""
+Sets a tolerance for differences of magnetization (in atomic unit ) that, reached
+TWICE successively, will cause one SCF cycle to stop (and ions to be moved).
+If set to zero, this stopping condition is ignored.
+Effective only when SCF cycles are done ([[iscf]]>0). This tolerance applies
+to any particular cartesian component of any atom. 
+
+This stopping criterion is not allowed for RF calculations.
+Since [[toldfe]], [[toldff]], [[tolrff]], [[toldmag]] and [[tolvrs]] are aimed
+at the same goal (causing the SCF cycle to stop), they are seen as a unique
+input variable at reading. Hence, it is forbidden that two of these input
+variables have non-zero values for the same dataset, or generically (for all
+datasets). However, a non-zero value for one such variable for one dataset
+will have precedence on the non-zero value for another input variable defined generically.
+
+**toldmag** can be coupled with [[tolwfr]]. In that case, SCF cycle is stopped when both criteria are satisfied.
+To do so one has to specify both criteria for the same dataset.
+Note that a tolerance defined generically does not couple with a criterion defined for one particular dataset.
+See [[tolwfr]] for more details about coupling two criteria.
+
+When the maximum magnetization among all atoms and directions is smaller than 10e^-8, both the maximum of magnetization 
+and its difference are reset to zero. In this case, the toldmag convergence criterion cannot be used.
+""",
+),
 Variable(
     abivarname="tolimg",
     varset="rlx",
@@ -20256,8 +20313,8 @@ Variable(
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="TOLerance on the potential V(r) ReSidual",
-    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] can differ from zero.",
-    excludes="[[toldfe]] or [[toldff]] or [[tolrff]]'",
+    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] or [[toldmag]] can differ from zero.",
+    excludes="[[toldfe]] or [[toldff]] or [[tolrff]] or [[toldmag]]'",
     added_in_version="before_v9",
     text=r"""
 Sets a tolerance for potential residual that, when reached, will cause one SCF
@@ -20278,7 +20335,7 @@ tolerance on the potential residual is imposed by first subtracting the mean
 of the residual of the potential (or the trace of the potential matrix, if the
 system is spin-polarized), then summing the square of this function over all
 FFT grid points. The result should be lower than [[tolvrs]].
-Since [[toldfe]], [[toldff]], [[tolrff]] and [[tolvrs]] are aimed
+Since [[toldfe]], [[toldff]], [[tolrff]], [[toldmag]] and [[tolvrs]] are aimed
 at the same goal (causing the SCF cycle to stop), they are seen as a unique
 input variable at reading. Hence, it is forbidden that two of these input
 variables have non-zero values for the same dataset, or generically (for all
@@ -20330,7 +20387,7 @@ Note that **tolwfr** is often used in the test cases, but this is
 purely for historical reasons: except when [[iscf]] < 0, **other criteria should be used**.
 Indeed, the squared residual can be small even with non self-consistent density and potential.
 
-**tolwfr** alone should not be used as SCF criterion, but it can be coupled with [[toldfe]], [[toldff]], [[tolrff]] or [[tolvrs]].
+**tolwfr** alone should not be used as SCF criterion, but it can be coupled with [[toldfe]], [[toldff]], [[tolrff]], [[toldmag]] or [[tolvrs]].
 In that case, SCF cycle is stopped when both criteria are satisfied.
 That way one can insure that physical properties are converged (=SCF converged) while insuring that wavefunctions are converged.
 For example, a ground state computations done before DFPT can use stringent values of **tolwfr** in addition to a desired criterion on self-consistency.
@@ -24614,28 +24671,6 @@ See line 743 in src/95_drive/screening.F90 .
 ),
 
 Variable(
-    abivarname="gstore_cplex",
-    varset="eph",
-    vartype="integer",
-    topics=['ElPhonInt_basic'],
-    dimensions="scalar",
-    defaultval=2,
-    mnemonics=r"GSTORE ComPLEX dimension",
-    requires="[[optdriver]] == 7",
-    added_in_version="9.6.2",
-    text=r"""
-This input variable specifies whether the EPH code should store $|g|^2$ or $g$
-when computing the e-ph matrix elements ([[eph_task]] == 11)
-Possible values are:
-
-1 --> compute and store $|g|^2$ in GSTORE.nc.
-      Use this option to reduce the size of the file but keep in mind
-      that the GSTORE can only be used to compute expressions in which only $|g|^2$ is needed.
-2 --> compute and store complex $g$ in GSTORE.nc (default)
-""",
-),
-
-Variable(
     abivarname="gstore_with_vk",
     varset="eph",
     vartype="integer",
@@ -24650,10 +24685,64 @@ This input variable specifies whether the EPH code should compute and store
 the matrix elements of the velocity operator when computing the e-ph matrix elements ([[eph_task]] == 11)
 Possible values are:
 
-    0 --> Do not compute velocity matrix elements
-    1 --> compute and store the diagonal matrix elements (default)
-    2 --> compute and store diagonal + off-diagonal terms.
+0 --> Do not compute velocity matrix elements
+1 --> compute and store the diagonal matrix elements (default)
+2 --> compute and store diagonal + off-diagonal terms.
 """,
+),
+
+Variable(
+    abivarname="gstore_use_lgk",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics=r"GSTORE USE Little Group of K",
+    requires="[[optdriver]] == 7",
+    added_in_version="10.5.6",
+    text=r"""
+When generating a GSTORE file, setting [[gstore_use_lgk]] to 1,
+instructs Abinit to restrict the computation of the g(k,q) to the
+$\qq$-points in the IBZ_k where IBZ_k is the irreducibile zone
+defined by the little group of the $\kk$-point.
+This allows one to reduce the number of e-ph matrix elements, but keep in mind that
+the generated GSTORE can only be used to compute electronic properties such
+as the electron self-energy $\Sigma_\kk$.
+By default, little group symmetries are not used.
+
+!!! important
+
+    [[gstore_use_lgk]] = 1 is only compatible with [[gstore_qzone]] == "bz".
+""",
+),
+
+Variable(
+    abivarname="gstore_use_lgq",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics=r"GSTORE USE Little Group of Q",
+    requires="[[optdriver]] == 7",
+    added_in_version="10.5.6",
+    text=r"""
+When generating a GSTORE file, setting [[gstore_use_lgq]] to 1,
+instructs Abinit to restrict the computation of the g(k,q) to the
+$\kk$-points in the IBZ_q where IBZ_q is the irreducibile zone
+defined by the little group of the $\qq$-point.
+This allows one to reduce the number of e-ph matrix elements, but keep in mind that
+the generated GSTORE can only be used to compute phonon properties such
+as the phonon self-energy $\Pi_\kk$.
+By default, little group symmetries are not used.
+
+!!! important
+
+    [[gstore_use_lgq]] = 1 is only compatible with [[gstore_kzone]] == "bz".
+""",
+
+
 ),
 
 Variable(
@@ -24727,22 +24816,41 @@ the CBM/VBM or the position wrt to the Fermi level via [[gstore_erange]].
 ),
 
 Variable(
-    abivarname="gstore_gmode",
+    abivarname="gstore_vname",
     varset="eph",
     vartype="string",
-    topics=['ElPhonInt_basic'],
+    topics=['ElPhonInt_expert'],
     dimensions="scalar",
-    defaultval="phonon",
-    mnemonics=r"GSTORE GMODE",
+    defaultval="gvals",
+    mnemonics=r"GSTORE Variable NAME",
     requires="[[optdriver]] == 7",
-    added_in_version="10.1.2",
+    added_in_version="10.5.6",
     text=r"""
-This input variable specifies the representation used to store the e-ph matrix elements in the GSTORE.nc file
+This input variable specifies the name of the netcdf variable from which the e-ph matrix elements
+will be **read** from the GSTORE.nc file.
+Possible values are: "gvals" (default) or "gvals_ks"
+This variable has an effect only where reading a GSTORE file produced by
+the GWPT subdriver ([[eph_task]] 17) for post-processing purposes.
+In this case, indeed, the "gvals" netcdf variables stores the GWPT electron-matrix elements
+while "gvals_ks" contains the KS e-ph matrix elements.
+Use "gvals_ks" if you want to compute physical properties using KS matrix elements instead of the GWPT ones
+for comparison purposes.
 
-Possible values are:
+This input variable specifies the name of the NetCDF variable from which
+the electron–phonon matrix elements will be read in the GSTORE.nc file.
 
-- "phonon" --> Store e-ph matrix elements in the phonon representation (collective displacement)
-- "atom" -->  Store e-ph matrix elements in the atom representation (displacement of a single atom along one of the reduced directions)
+Valid options are:
+
+- "gvals" (default)
+- "gvals_ks"
+
+This variable is only relevant when reading a GSTORE.nc file produced by
+the GWPT subdriver ([[eph_task]] = 17) for post-processing.
+In such cases: "gvals" stores the GWPT-renormalized electron–phonon matrix elements while
+"gvals_ks" contains the Kohn–Sham (KS) electron–phonon matrix elements.
+
+Select "gvals_ks" if you wish to compute physical properties using the KS matrix elements
+instead of the GWPT ones, for comparison purposes.
 """,
 ),
 
@@ -24858,7 +24966,7 @@ Variable(
     dimensions=[2, "[[nsppol]]"],
     characteristics=['[[ENERGY]]'],
     requires="[[optdriver]] == 7",
-    mnemonics="GSTORE Energy  RANGE",
+    mnemonics="GSTORE Energy RANGE",
     added_in_version="9.6.2",
     text=r"""
 This variable is used when [[eph_task]] = 11 to define the k/q points that should be considered when
@@ -25868,11 +25976,32 @@ Variable(
     topics=['spinpolarisation_basic', 'MagMom_useful'],
     dimensions=[3],
     defaultval=[0, 0, 0],
-    mnemonics="Q-point for Generalized Bloch Theorem.",
+    mnemonics="Q-point for Generalized Bloch Theorem in REDuced coordinates.",
     added_in_version="10.5.1",
     text=r"""
 Reduced coordinates of the wave-vector $\qq$ of the spin spiral when [[use_gbt]] /= 0.
+If you prefer to work only with cartesian coordinates, you may work entirely
+with "[[qgbt_cart]]" and ignore [[qgbt]], in which case [[qgbt]]
+must be absent from the input file.
+One and only one of [[qgbt]] or [[qgbt_cart]] must be provided.
 """,
 ),
 
+Variable(
+    abivarname="qgbt_cart",
+    varset="gstate",
+    vartype="real",
+    topics=['spinpolarisation_basic', 'MagMom_useful'],
+    dimensions=[3],
+    defaultval=[0, 0, 0],
+    mnemonics="Q-point for Generalized Bloch Theorem in CARTesian coordinates.",
+    added_in_version="10.5.1",
+    text=r"""
+Cartesian coordinates of the wave-vector $\qq$ of the spin spiral when [[use_gbt]] /= 0.
+If [[qgbt]] is ABSENT from the input file and [[qgbt_cart]] is
+provided, then the values of [[qgbt]] will be computed from the provided
+[[qgbt_cart]]
+One and only one of [[qgbt]] or [[qgbt_cart]] must be provided.
+""",
+),
 ]

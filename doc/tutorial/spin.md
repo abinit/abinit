@@ -96,7 +96,7 @@ Now you can move down in the output file and look at the following section:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     7.658786     6.158329     13.817115     1.500458
+ 1 Fe   2.00000     7.658786     6.158329     13.817115     1.500458
  ---------------------------------------------------------------------
   Sum:              7.658786     6.158329     13.817115     1.500458
  Total magnetization (from the atomic spheres):             1.500458
@@ -247,8 +247,8 @@ indication of the magnetic moment carried by each atom:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     7.748236     6.575029     14.323265     1.173206
-    2   2.00000     6.575029     7.748236     14.323265    -1.173206
+ 1 Fe   2.00000     7.748236     6.575029     14.323265     1.173206
+ 2 Fe   2.00000     6.575029     7.748236     14.323265    -1.173206
  ---------------------------------------------------------------------
   Sum:             14.323265    14.323265     28.646531    -0.000000
  Total magnetization (from the atomic spheres):            -0.000000

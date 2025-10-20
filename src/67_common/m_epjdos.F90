@@ -912,8 +912,8 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
  integer, allocatable :: ispinors(:)
  real(dp) :: c1(2),c2(2), sum_1atom(natsph),sum_1ll(mlang),sum_1lm(mlang**2)
  real(dp) :: func(nradintmax), func_cplx(nradintmax,2)
- complex(dpc) :: vect(npw_k)
- complex(dpc),allocatable :: tmppsia(:,:),tmppsim(:,:),dotc(:), values(:,:,:,:)
+ complex(dp) :: vect(npw_k)
+ complex(dp),allocatable :: tmppsia(:,:),tmppsim(:,:),dotc(:), values(:,:,:,:)
 ! *************************************************************************
 
  ! Workspace array (used to reduce the number of MPI communications)
@@ -1184,7 +1184,7 @@ contains
    integer,intent(in) :: ll,mm, mp
 
    real(dp) :: sy(2)
-   complex(dpc) :: ys_val
+   complex(dp) :: ys_val
 
    ! Computes the matrix element <Yl'm'|Slm>
    call ys(ll,mp,ll,mm,ys_val)
@@ -1918,7 +1918,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
  real(dp),allocatable :: ph3d(:,:,:),ratsph(:),rint(:),sum_1ll_1atom(:,:,:)
  real(dp),allocatable :: sum_1lm_1atom(:,:,:), cplx_1lm_1atom(:,:,:,:)
  real(dp),allocatable :: xred_sph(:,:),znucl_sph(:),phkxred(:,:)
- complex(dpc) :: cgcmat(2,2)
+ complex(dp) :: cgcmat(2,2)
 !*************************************************************************
 
 ! write(std_out, '(a)') ' m_epjdos%partial_dos_fractions : enter '

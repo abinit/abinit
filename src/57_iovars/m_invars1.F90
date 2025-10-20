@@ -2673,6 +2673,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    end if
 !  P
    dtsets(idtset)%paral_atom=paral_atom_default
+   dtsets(idtset)%paw_add_core=0
    dtsets(idtset)%pawcpxocc=1
    dtsets(idtset)%pawcross=0
    dtsets(idtset)%pawecutdg=-one
@@ -2743,6 +2744,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 !  Q
    dtsets(idtset)%qmass(:)=ten
    dtsets(idtset)%qgbt(3)=zero
+   dtsets(idtset)%qgbt_cart(3)=zero
    dtsets(idtset)%qprtrb(1:3)=0
    dtsets(idtset)%qptdm(:,:)=zero
    dtsets(idtset)%quadmom(:) = zero
@@ -2818,6 +2820,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%toldfe=zero
    dtsets(idtset)%tolmxde=zero
    dtsets(idtset)%toldff=zero
+   dtsets(idtset)%toldmag=zero
    dtsets(idtset)%tolimg=5.0d-5
    dtsets(idtset)%tolrde=0.005_dp
    dtsets(idtset)%tolrff=zero

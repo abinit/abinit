@@ -408,7 +408,7 @@ meta: {optdriver: 7, eph_task: 18, }
 27 [ 3.7500E-01,  3.7500E-01,  7.5000E-01]
 42 [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
-Computing g with eph_path_brange: [6, 8]
+ Computing g(k,q) with eph_path_brange: [6, 8]
 P Cartesian grid for spin 1: (pert_comm%nproc, qpt_comm%nproc, kpt_comm%nproc) = 1 1 1
  Reading KS GS potential from: MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc
  Cannot find all q-points in the DVDB --> Activating Fourier interpolation.
@@ -708,7 +708,7 @@ meta: {optdriver: 7, eph_task: 18, }
 27 [ 3.7500E-01,  3.7500E-01,  7.5000E-01]
 42 [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
-Computing g with eph_path_brange: [6, 8]
+ Computing g(k,q) with eph_path_brange: [6, 8]
 P Cartesian grid for spin 1: (pert_comm%nproc, qpt_comm%nproc, kpt_comm%nproc) = 1 1 1
  Reading KS GS potential from: MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc
  Cannot find all q-points in the DVDB --> Activating Fourier interpolation.

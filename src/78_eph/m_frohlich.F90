@@ -79,7 +79,7 @@ module m_frohlich
   integer :: ndeg
    ! Number of degenerate bands taken into account
 
-  complex(dpc), allocatable :: eig2_diag_cart(:,:,:,:)
+  complex(dp), allocatable :: eig2_diag_cart(:,:,:,:)
    ! Band curvature double tensor in Cartesian coordinates
    ! (3, 3, ndeg, ndeg)
 
@@ -675,8 +675,7 @@ subroutine frohlich_calc_polaronmass(self)
  real(dp), allocatable :: intsum(:,:,:,:)
  real(dp), allocatable :: zpr(:,:,:), zpr_ddk(:,:)
  real(dp), allocatable :: intsuminv(:,:)
- complex(dpc), allocatable :: work(:)
-
+ complex(dp), allocatable :: work(:)
 ! *************************************************************************
 
  ! TODO: check if the electronic and phonon parts are initialized
@@ -898,10 +897,9 @@ subroutine frohlich_calc_zpr(self)
  real(dp), allocatable :: efmas_qdir(:,:)
  real(dp), allocatable :: invefmas_avg(:)
  real(dp), allocatable :: eigenval(:), rwork(:)
- complex(dpc), allocatable :: eigenvec(:,:), work(:)
- complex(dpc), allocatable :: f3d(:,:)
+ complex(dp), allocatable :: eigenvec(:,:), work(:)
+ complex(dp), allocatable :: f3d(:,:)
  logical, allocatable :: efmas_pos(:)
-
 ! *************************************************************************
 
  ! TODO: check if the electronic and phonon parts are initialized
@@ -1054,7 +1052,7 @@ subroutine frohlich_init_el(self, cryst, kpt, ndeg, eig2_diag)
  integer,intent(in) :: ndeg
 !arrays
  real(dp), intent(in) :: kpt(3)
- complex(dpc), intent(in) :: eig2_diag(3, 3, ndeg, ndeg)
+ complex(dp), intent(in) :: eig2_diag(3, 3, ndeg, ndeg)
 
 !Local variables-------------------------------
 !scalars
@@ -1065,10 +1063,9 @@ subroutine frohlich_init_el(self, cryst, kpt, ndeg, eig2_diag)
  real(dp) :: unit_kdir(3, 3)
  real(dp) :: eigenval(ndeg), lutt_eigenval(ndeg, ndeg)
  real(dp), allocatable :: rwork(:)
- complex(dpc) :: eigenvec(ndeg, ndeg), lutt_eigenvec(ndeg, ndeg)
- complex(dpc), allocatable :: work(:)
+ complex(dp) :: eigenvec(ndeg, ndeg), lutt_eigenvec(ndeg, ndeg)
+ complex(dp), allocatable :: work(:)
  logical :: lutt_found(3)
-
 ! *************************************************************************
 
  self%kpt(:) = kpt(:)

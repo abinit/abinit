@@ -4,8 +4,7 @@
 !!
 !! FUNCTION
 !!  Helper functions common to electron self-energy calculations. Provides tools to:
-!!
-!!      - Define list of k-points and bands in sel-energy matrix elements from input variables.
+!!  Define list of k-points and bands in sel-energy matrix elements from input variables.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2025 ABINIT group (MG)
@@ -40,6 +39,8 @@ module m_sigtk
  use m_io_tools,     only : open_file
  use defs_datatypes, only : pseudopotential_type
  use defs_wvltypes,  only : wvl_internal_type
+ use m_gwdefs,       only : sigijtab_t, sigijtab_free
+ use m_esymm,        only : esymm_t, esymm_failed
  use m_pawtab,       only : pawtab_type
  use m_kpts,         only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map
 
@@ -57,7 +58,6 @@ module m_sigtk
  public :: sigtk_dw_tpp_red
 !!***
 
-
  ! Tables for degenerated KS states.
  type, public :: bids_t
    integer, allocatable :: vals(:)
@@ -65,6 +65,8 @@ module m_sigtk
 
  type, public :: degtab_t
    type(bids_t), allocatable :: bids(:)
+   contains
+   procedure :: free => degtab_free
  end type degtab_t
 
  public :: degtab_array_free   ! Free array of degtab_t objects.
@@ -107,7 +109,6 @@ subroutine sigtk_kcalc_from_nkptgw(dtset, mband, nkcalc, kcalc, bstart_ks, nbcal
 !scalars
  integer :: spin, ierr, ikcalc
  character(len=500) :: msg
-
 ! *************************************************************************
 
  call wrtout(std_out, " Generating list of k-points for self-energy from kptgw and bdgw.")
@@ -183,10 +184,8 @@ subroutine sigtk_kcalc_from_qprange(dtset, cryst, ebands, qprange, nkcalc, kcalc
 !scalars
  integer :: spin, ik, bstop, mband, sigma_nkbz
 !arrays
- integer :: kptrlatt(3,3)
- integer :: val_indices(ebands%nkpt, ebands%nsppol)
+ integer :: kptrlatt(3,3), val_indices(ebands%nkpt, ebands%nsppol)
  real(dp),allocatable :: sigma_wtk(:),sigma_kbz(:,:)
-
 ! *************************************************************************
 
  mband = ebands%mband
@@ -273,12 +272,11 @@ subroutine sigtk_kcalc_from_gaps(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks, 
 
 !Local variables ------------------------------
 !scalars
- integer :: spin, nsppol, ii, ik, nk_found, ifo, jj
- logical :: found
+ real(dp),parameter :: TOL_EDIFF = 0.001_dp * eV_Ha
+ integer :: spin, nsppol, ii, ik_ibz, nk_found, ifo, jj, ib_min, ib_max
+ logical :: found, changed
 !arrays
- integer :: val_indices(ebands%nkpt, ebands%nsppol)
- integer :: kpos(6)
-
+ integer :: val_indices(ebands%nkpt, ebands%nsppol), kpos(6)
 ! *************************************************************************
 
  ABI_UNUSED((/dtset%natom/))
@@ -297,13 +295,13 @@ subroutine sigtk_kcalc_from_gaps(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks, 
  ! Find the list of `interesting` kpoints.
  do spin=1,nsppol
    do ifo=1,3
-     ik = gaps%fo_kpos(ifo, spin)
+     ik_ibz = gaps%fo_kpos(ifo, spin)
      found = .False.; jj = 0
      do while (.not. found .and. jj < nk_found)
-       jj = jj + 1; found = (kpos(jj) == ik)
+       jj = jj + 1; found = (kpos(jj) == ik_ibz)
      end do
      if (.not. found) then
-       nk_found = nk_found + 1; kpos(nk_found) = ik
+       nk_found = nk_found + 1; kpos(nk_found) = ik_ibz
      end if
    end do
  end do
@@ -315,11 +313,15 @@ subroutine sigtk_kcalc_from_gaps(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks, 
  ABI_MALLOC(nbcalc_ks, (nkcalc, nsppol))
 
  do ii=1,nkcalc
-   ik = kpos(ii)
-   kcalc(:,ii) = ebands%kptns(:,ik)
+   ik_ibz = kpos(ii)
+   kcalc(:,ii) = ebands%kptns(:,ik_ibz)
    do spin=1,nsppol
-     bstart_ks(ii,spin) = val_indices(ik,spin)
-     nbcalc_ks(ii,spin) = 2
+     ! Enlarge initial band range to include degenerate states.
+     ib_min = val_indices(ik_ibz, spin)
+     ib_max = ib_min + 1
+     call ebands%enclose_degbands(ik_ibz, spin, ib_min, ib_max, changed, TOL_EDIFF)
+     bstart_ks(ii,spin) = ib_min
+     nbcalc_ks(ii,spin) = ib_max - ib_min + 1
    end do
  end do
 
@@ -374,11 +376,9 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
  character(len=500) :: msg
  type(krank_t) :: krank
 !arrays
- integer :: kptrlatt(3,3), units(1)
+ integer :: kptrlatt(3,3), units(1), kpos(ebands%nkpt)
  integer,allocatable :: ib_work(:,:,:), sigmak2ebands(:), indkk(:,:)
- integer :: kpos(ebands%nkpt)
  real(dp),allocatable :: sigma_wtk(:),sigma_kbz(:,:),tmp_kcalc(:,:)
-
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm) !; nprocs = xmpi_comm_size(comm)
@@ -409,7 +409,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
 
     ABI_MALLOC(indkk, (6, tmp_nkpt))
 
-    krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
+    call krank%from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
 
     if (kpts_map("symrec", ebands%kptopt, cryst, krank, tmp_nkpt, tmp_kcalc, indkk) /= 0) then
       write(msg, '(3a)' )&
@@ -583,7 +583,6 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  integer :: fine_kptrlatt(3,3), band_block(2), units(2)
  integer,allocatable :: kshe_mask(:,:,:), krange2ibz(:)
  real(dp) :: params(4)
-
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
@@ -710,8 +709,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  cnt = 0
  do ikf_ibz=1,fine_ebands%nkpt
    if (any(kshe_mask(ikf_ibz,:,:) /= 0)) then
-     cnt = cnt + 1
-     krange2ibz(cnt) = ikf_ibz
+     cnt = cnt + 1; krange2ibz(cnt) = ikf_ibz
    end if
  end do
  nkpt_inerange = cnt
@@ -777,15 +775,22 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  ABI_FREE(kshe_mask)
  ABI_FREE(krange2ibz)
 
- call fine_gaps%free()
- call fine_ebands%free()
- call fine_hdr%free()
+ call fine_gaps%free(); call fine_ebands%free(); call fine_hdr%free()
 
 end subroutine sigtk_kpts_in_erange
 !!***
 
+subroutine degtab_free(degtab)
+ class(degtab_t),intent(inout) :: degtab
+ integer :: ii
+ do ii=1,size(degtab%bids)
+   ABI_SFREE(degtab%bids(ii)%vals)
+ end do
+ ABI_FREE(degtab%bids)
+end subroutine degtab_free
+
 subroutine degtab_array_free(degtab)
- type(degtab_t),intent(inout) :: degtab(:,:)
+ class(degtab_t),intent(inout) :: degtab(:,:)
 
  integer :: jj, ii, ideg
 
@@ -813,13 +818,13 @@ end subroutine degtab_array_free
 !!  taking into account the kind of self-energies and symmetries from esymm.
 !!
 !! INPUTS
-!!  nkcalc: Number of k-points to compute
-!!  nkibz: Number of k-points in the IBZ
-!!  nsppol: Number of spins
-!!  bstart_ks, bstop_ks: First and last band for each (ikcalc, spin)
-!!  kcalc2ibz: Mapping kcalc --> IBZ
-!!  only_diago: True if only diagonal matrix elements are wanted
-!!  sigc_is_herm: True is Sigma_c is Hermitian
+!!  nkcalc: Number of k-points to compute.
+!!  nkibz: Number of k-points in the IBZ.
+!!  nsppol: Number of spins.
+!!  bstart_ks, bstop_ks: First and last band for each (ikcalc, spin).
+!!  kcalc2ibz: Mapping kcalc --> IBZ.
+!!  only_diago: True if only diagonal matrix elements are wanted.
+!!  sigc_is_herm: True is Sigma_c is Hermitian.
 !!  [esymm]: Band symmetries
 !!
 !! OUTPUT
@@ -829,9 +834,6 @@ end subroutine degtab_array_free
 
 subroutine sigtk_sigma_tables(nkcalc, nkibz, nsppol, bstart_ks, bstop_ks, kcalc2ibz, &
                               only_diago, sigc_is_herm, sigxij_tab, sigcij_tab, esymm)
-
- use m_gwdefs,        only : sigijtab_t, sigijtab_free
- use m_esymm,         only : esymm_t, esymm_failed
 
 !Arguments ------------------------------------
  integer,intent(in) :: nkcalc, nkibz, nsppol
@@ -848,7 +850,6 @@ subroutine sigtk_sigma_tables(nkcalc, nkibz, nsppol, bstart_ks, bstop_ks, kcalc2
 !arrays
  integer,allocatable :: sigc_bidx(:), sigx_bidx(:)
  logical :: use_sym_at(nkibz, nsppol)
-
 ! *************************************************************************
 
  if (allocated(Sigxij_tab)) then
@@ -996,10 +997,10 @@ end subroutine sigtk_sigma_tables
 !!
 !! INPUTS
 !!  trans="C" to take the complex conjugate of rhotwg. "N" to use rhotwg directly.
-!!  npw=Number of PWs
-!!  nspinor: Number of spinor components
-!!  ndat=Number of bands in rhotwh
-!!  vc_sqrt: square root of the Coulomb interaction vc(q,g)
+!!  npw=Number of PWs.
+!!  nspinor: Number of spinor components.
+!!  ndat=Number of bands in rhotwh.
+!!  vc_sqrt: square root of the Coulomb interaction vc(q,g).
 !!
 !! SIDE EFFECTS
 !!  rhotgw:
@@ -1012,8 +1013,8 @@ subroutine sigtk_multiply_by_vc_sqrt(trans, npw, nspinor, ndat, vc_sqrt, rhotwg)
 
  character(len=1),intent(in) :: trans
  integer,intent(in) :: npw, nspinor, ndat
- complex(gwpc),intent(in) :: vc_sqrt(npw)
- complex(gwpc),intent(inout) :: rhotwg(npw*nspinor, ndat)
+ complex(gwp),intent(in) :: vc_sqrt(npw)
+ complex(gwp),intent(inout) :: rhotwg(npw*nspinor, ndat)
 
 !Local variables ------------------------------
  integer :: ii, spad, idat

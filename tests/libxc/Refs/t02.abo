@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h01 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/libxc_t02/t02.abi
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h05 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/libxc_t02/t02.abi
 - output file    -> t02.abo
 - root for input  files -> t02i
 - root for output files -> t02o
@@ -463,8 +463,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.00709
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -479,8 +479,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -502,9 +502,9 @@ solver: {iscf: 7, nstep: 2, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.4891024736420    -5.489E+00 4.122E-03 2.655E+01
- ETOT  2  -5.4962311626230    -7.129E-03 1.177E-09 1.065E+01
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -5.4891024736420    -5.489E+00 4.122E-03 2.655E+01 4.481E-01 4.481E-01
+ ETOT  2  -5.4962311626230    -7.129E-03 1.177E-09 1.065E+01 2.864E-02 4.768E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.75232418E-05  sigma(3 2)=  0.00000000E+00
@@ -544,14 +544,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.907950     0.431163      1.339113     0.476786
- ---------------------------------------------------------------------
-  Sum:              0.907950     0.431163      1.339113     0.476786
- Total magnetization (from the atomic spheres):             0.476786
- Total magnetization (exact up - dn):                       3.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Bi   2.00000     0.907950     0.431163      1.339113     0.476786
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 0.907950     0.431163      1.339113     0.476786
+ Total magnetization (from the atomic spheres):                0.476786
+ Total magnetization (exact up - dn):                          3.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -632,8 +633,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.00709
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -648,8 +649,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -670,9 +671,9 @@ solver: {iscf: 7, nstep: 2, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.4891025693926    -5.489E+00 4.122E-03 2.655E+01
- ETOT  2  -5.4962312622240    -7.129E-03 1.177E-09 1.065E+01
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -5.4891025693926    -5.489E+00 4.122E-03 2.655E+01 4.481E-01 4.481E-01
+ ETOT  2  -5.4962312622240    -7.129E-03 1.177E-09 1.065E+01 2.864E-02 4.768E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.75232506E-05  sigma(3 2)=  0.00000000E+00
@@ -712,14 +713,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.907950     0.431163      1.339113     0.476786
- ---------------------------------------------------------------------
-  Sum:              0.907950     0.431163      1.339113     0.476786
- Total magnetization (from the atomic spheres):             0.476786
- Total magnetization (exact up - dn):                       3.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Bi   2.00000     0.907950     0.431163      1.339113     0.476786
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 0.907950     0.431163      1.339113     0.476786
+ Total magnetization (from the atomic spheres):                0.476786
+ Total magnetization (exact up - dn):                          3.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -805,8 +807,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.00709
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -821,8 +823,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -843,9 +845,9 @@ solver: {iscf: 7, nstep: 2, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.4895514693416    -5.490E+00 4.130E-03 2.675E+01
- ETOT  2  -5.4966384400241    -7.087E-03 1.169E-09 1.078E+01
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -5.4895514693416    -5.490E+00 4.130E-03 2.675E+01 4.486E-01 4.486E-01
+ ETOT  2  -5.4966384400241    -7.087E-03 1.169E-09 1.078E+01 2.831E-02 4.769E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.74440463E-05  sigma(3 2)=  0.00000000E+00
@@ -885,14 +887,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.908221     0.431350      1.339571     0.476871
- ---------------------------------------------------------------------
-  Sum:              0.908221     0.431350      1.339571     0.476871
- Total magnetization (from the atomic spheres):             0.476871
- Total magnetization (exact up - dn):                       3.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Bi   2.00000     0.908221     0.431350      1.339571     0.476871
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 0.908221     0.431350      1.339571     0.476871
+ Total magnetization (from the atomic spheres):                0.476871
+ Total magnetization (exact up - dn):                          3.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -973,8 +976,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.00709
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -989,8 +992,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -1011,9 +1014,9 @@ solver: {iscf: 7, nstep: 2, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.4895514095976    -5.490E+00 4.130E-03 2.675E+01
- ETOT  2  -5.4966383796659    -7.087E-03 1.169E-09 1.078E+01
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -5.4895514095976    -5.490E+00 4.130E-03 2.675E+01 4.486E-01 4.486E-01
+ ETOT  2  -5.4966383796659    -7.087E-03 1.169E-09 1.078E+01 2.831E-02 4.769E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.74440434E-05  sigma(3 2)=  0.00000000E+00
@@ -1053,14 +1056,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.908221     0.431350      1.339571     0.476871
- ---------------------------------------------------------------------
-  Sum:              0.908221     0.431350      1.339571     0.476871
- Total magnetization (from the atomic spheres):             0.476871
- Total magnetization (exact up - dn):                       3.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Bi   2.00000     0.908221     0.431350      1.339571     0.476871
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 0.908221     0.431350      1.339571     0.476871
+ Total magnetization (from the atomic spheres):                0.476871
+ Total magnetization (exact up - dn):                          3.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1146,8 +1150,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.00709
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1162,8 +1166,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -1184,9 +1188,9 @@ solver: {iscf: 7, nstep: 2, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.5255107113953    -5.526E+00 4.708E-03 6.201E+01
- ETOT  2  -5.5337440205538    -8.233E-03 1.847E-09 2.420E+01
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -5.5255107113953    -5.526E+00 4.708E-03 6.201E+01 4.559E-01 4.559E-01
+ ETOT  2  -5.5337440205538    -8.233E-03 1.847E-09 2.420E+01 2.169E-02 4.775E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.86279149E-05  sigma(3 2)=  0.00000000E+00
@@ -1226,14 +1230,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.913642     0.436095      1.349738     0.477547
- ---------------------------------------------------------------------
-  Sum:              0.913642     0.436095      1.349738     0.477547
- Total magnetization (from the atomic spheres):             0.477547
- Total magnetization (exact up - dn):                       3.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Bi   2.00000     0.913642     0.436095      1.349738     0.477547
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 0.913642     0.436095      1.349738     0.477547
+ Total magnetization (from the atomic spheres):                0.477547
+ Total magnetization (exact up - dn):                          3.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1314,8 +1319,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.00709
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1330,8 +1335,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -1352,9 +1357,9 @@ solver: {iscf: 7, nstep: 2, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.5255105941176    -5.526E+00 4.708E-03 6.201E+01
- ETOT  2  -5.5337439106331    -8.233E-03 1.847E-09 2.420E+01
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -5.5255105941176    -5.526E+00 4.708E-03 6.201E+01 4.559E-01 4.559E-01
+ ETOT  2  -5.5337439106331    -8.233E-03 1.847E-09 2.420E+01 2.169E-02 4.775E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.86279120E-05  sigma(3 2)=  0.00000000E+00
@@ -1394,14 +1399,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.913642     0.436095      1.349738     0.477547
- ---------------------------------------------------------------------
-  Sum:              0.913642     0.436095      1.349738     0.477547
- Total magnetization (from the atomic spheres):             0.477547
- Total magnetization (exact up - dn):                       3.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Bi   2.00000     0.913642     0.436095      1.349738     0.477547
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 0.913642     0.436095      1.349738     0.477547
+ Total magnetization (from the atomic spheres):                0.477547
+ Total magnetization (exact up - dn):                          3.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1487,8 +1493,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.00709
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1503,8 +1509,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -1525,9 +1531,9 @@ solver: {iscf: 7, nstep: 2, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.5396834488808    -5.540E+00 4.899E-03 1.058E+02
- ETOT  2  -5.5485535677420    -8.870E-03 1.863E-09 3.748E+01
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -5.5396834488808    -5.540E+00 4.899E-03 1.058E+02 4.574E-01 4.574E-01
+ ETOT  2  -5.5485535677420    -8.870E-03 1.863E-09 3.748E+01 2.129E-02 4.787E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.89510919E-05  sigma(3 2)=  0.00000000E+00
@@ -1567,14 +1573,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.915630     0.436904      1.352535     0.478726
- ---------------------------------------------------------------------
-  Sum:              0.915630     0.436904      1.352535     0.478726
- Total magnetization (from the atomic spheres):             0.478726
- Total magnetization (exact up - dn):                       3.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Bi   2.00000     0.915630     0.436904      1.352535     0.478726
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 0.915630     0.436904      1.352535     0.478726
+ Total magnetization (from the atomic spheres):                0.478726
+ Total magnetization (exact up - dn):                          3.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1655,8 +1662,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.00709
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1671,8 +1678,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -1693,9 +1700,9 @@ solver: {iscf: 7, nstep: 2, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.5396833298606    -5.540E+00 4.899E-03 1.058E+02
- ETOT  2  -5.5485534568678    -8.870E-03 1.863E-09 3.748E+01
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -5.5396833298606    -5.540E+00 4.899E-03 1.058E+02 4.574E-01 4.574E-01
+ ETOT  2  -5.5485534568678    -8.870E-03 1.863E-09 3.748E+01 2.129E-02 4.787E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.89510887E-05  sigma(3 2)=  0.00000000E+00
@@ -1735,14 +1742,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.915630     0.436904      1.352534     0.478726
- ---------------------------------------------------------------------
-  Sum:              0.915630     0.436904      1.352534     0.478726
- Total magnetization (from the atomic spheres):             0.478726
- Total magnetization (exact up - dn):                       3.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Bi   2.00000     0.915630     0.436904      1.352534     0.478726
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 0.915630     0.436904      1.352534     0.478726
+ Total magnetization (from the atomic spheres):                0.478726
+ Total magnetization (exact up - dn):                          3.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1828,8 +1836,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.00709
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1844,8 +1852,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -1866,9 +1874,9 @@ solver: {iscf: 7, nstep: 2, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.5297951951549    -5.530E+00 6.513E-03 8.834E+03
- ETOT  2  -5.5504451747140    -2.065E-02 1.615E-09 2.150E+03
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -5.5297951951549    -5.530E+00 6.513E-03 8.834E+03 4.480E-01 4.480E-01
+ ETOT  2  -5.5504451747140    -2.065E-02 1.615E-09 2.150E+03 4.656E-02 4.945E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.48234168E-05  sigma(3 2)=  0.00000000E+00
@@ -1908,14 +1916,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.930541     0.436023      1.366565     0.494518
- ---------------------------------------------------------------------
-  Sum:              0.930541     0.436023      1.366565     0.494518
- Total magnetization (from the atomic spheres):             0.494518
- Total magnetization (exact up - dn):                       3.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Bi   2.00000     0.930541     0.436023      1.366565     0.494518
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 0.930541     0.436023      1.366565     0.494518
+ Total magnetization (from the atomic spheres):                0.494518
+ Total magnetization (exact up - dn):                          3.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1996,8 +2005,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.00709
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2012,8 +2021,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -2034,9 +2043,9 @@ solver: {iscf: 7, nstep: 2, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.5297952174994    -5.530E+00 6.513E-03 8.833E+03
- ETOT  2  -5.5504451820215    -2.065E-02 1.615E-09 2.150E+03
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -5.5297952174994    -5.530E+00 6.513E-03 8.833E+03 4.480E-01 4.480E-01
+ ETOT  2  -5.5504451820215    -2.065E-02 1.615E-09 2.150E+03 4.656E-02 4.945E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.48234253E-05  sigma(3 2)=  0.00000000E+00
@@ -2076,14 +2085,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.930541     0.436023      1.366565     0.494518
- ---------------------------------------------------------------------
-  Sum:              0.930541     0.436023      1.366565     0.494518
- Total magnetization (from the atomic spheres):             0.494518
- Total magnetization (exact up - dn):                       3.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Bi   2.00000     0.930541     0.436023      1.366565     0.494518
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 0.930541     0.436023      1.366565     0.494518
+ Total magnetization (from the atomic spheres):                0.494518
+ Total magnetization (exact up - dn):                          3.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -2169,8 +2179,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.00709
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2185,8 +2195,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -2207,9 +2217,9 @@ solver: {iscf: 7, nstep: 2, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.5430624819928    -5.543E+00 4.770E-03 2.570E+03
- ETOT  2  -5.5526089230880    -9.546E-03 9.640E-10 7.427E+02
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -5.5430624819928    -5.543E+00 4.770E-03 2.570E+03 4.695E-01 4.695E-01
+ ETOT  2  -5.5526089230880    -9.546E-03 9.640E-10 7.427E+02 2.529E-02 4.948E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.52021951E-05  sigma(3 2)=  0.00000000E+00
@@ -2249,14 +2259,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.929804     0.435044      1.364849     0.494760
- ---------------------------------------------------------------------
-  Sum:              0.929804     0.435044      1.364849     0.494760
- Total magnetization (from the atomic spheres):             0.494760
- Total magnetization (exact up - dn):                       3.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Bi   2.00000     0.929804     0.435044      1.364849     0.494760
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 0.929804     0.435044      1.364849     0.494760
+ Total magnetization (from the atomic spheres):                0.494760
+ Total magnetization (exact up - dn):                          3.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -2337,8 +2348,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.00709
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2353,8 +2364,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -2375,9 +2386,9 @@ solver: {iscf: 7, nstep: 2, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.5430625235383    -5.543E+00 4.770E-03 2.570E+03
- ETOT  2  -5.5526089470395    -9.546E-03 9.640E-10 7.427E+02
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -5.5430625235383    -5.543E+00 4.770E-03 2.570E+03 4.695E-01 4.695E-01
+ ETOT  2  -5.5526089470395    -9.546E-03 9.640E-10 7.427E+02 2.529E-02 4.948E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.52022037E-05  sigma(3 2)=  0.00000000E+00
@@ -2417,14 +2428,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.929804     0.435044      1.364849     0.494760
- ---------------------------------------------------------------------
-  Sum:              0.929804     0.435044      1.364849     0.494760
- Total magnetization (from the atomic spheres):             0.494760
- Total magnetization (exact up - dn):                       3.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Bi   2.00000     0.929804     0.435044      1.364849     0.494760
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 0.929804     0.435044      1.364849     0.494760
+ Total magnetization (from the atomic spheres):                0.494760
+ Total magnetization (exact up - dn):                          3.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -2510,8 +2522,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.00709
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2526,8 +2538,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -2548,9 +2560,9 @@ solver: {iscf: 7, nstep: 2, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.5514481552817    -5.551E+00 4.960E-03 3.685E+03
- ETOT  2  -5.5603607128409    -8.913E-03 9.689E-10 1.023E+03
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -5.5514481552817    -5.551E+00 4.960E-03 3.685E+03 4.711E-01 4.711E-01
+ ETOT  2  -5.5603607128409    -8.913E-03 9.689E-10 1.023E+03 2.405E-02 4.951E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.46004958E-05  sigma(3 2)=  0.00000000E+00
@@ -2590,14 +2602,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.930854     0.435738      1.366592     0.495115
- ---------------------------------------------------------------------
-  Sum:              0.930854     0.435738      1.366592     0.495115
- Total magnetization (from the atomic spheres):             0.495115
- Total magnetization (exact up - dn):                       3.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Bi   2.00000     0.930854     0.435738      1.366592     0.495115
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 0.930854     0.435738      1.366592     0.495115
+ Total magnetization (from the atomic spheres):                0.495115
+ Total magnetization (exact up - dn):                          3.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -2678,8 +2691,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.00709
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2694,8 +2707,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -2716,9 +2729,9 @@ solver: {iscf: 7, nstep: 2, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.5514481957785    -5.551E+00 4.960E-03 3.685E+03
- ETOT  2  -5.5603607370488    -8.913E-03 9.689E-10 1.023E+03
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -5.5514481957785    -5.551E+00 4.960E-03 3.685E+03 4.711E-01 4.711E-01
+ ETOT  2  -5.5603607370488    -8.913E-03 9.689E-10 1.023E+03 2.405E-02 4.951E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.46005064E-05  sigma(3 2)=  0.00000000E+00
@@ -2758,14 +2771,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.930853     0.435739      1.366592     0.495115
- ---------------------------------------------------------------------
-  Sum:              0.930853     0.435739      1.366592     0.495115
- Total magnetization (from the atomic spheres):             0.495115
- Total magnetization (exact up - dn):                       3.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Bi   2.00000     0.930853     0.435739      1.366592     0.495115
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 0.930853     0.435739      1.366592     0.495115
+ Total magnetization (from the atomic spheres):                0.495115
+ Total magnetization (exact up - dn):                          3.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -2851,8 +2865,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.00709
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2867,8 +2881,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -2889,9 +2903,9 @@ solver: {iscf: 7, nstep: 2, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.5646841575383    -5.565E+00 4.609E-03 1.407E+04
- ETOT  2  -5.5753436668733    -1.066E-02 3.107E-09 4.244E+03
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -5.5646841575383    -5.565E+00 4.609E-03 1.407E+04 4.786E-01 4.786E-01
+ ETOT  2  -5.5753436668733    -1.066E-02 3.107E-09 4.244E+03 2.000E-02 4.986E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.45612984E-05  sigma(3 2)=  0.00000000E+00
@@ -2931,14 +2945,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.932963     0.434393      1.367356     0.498569
- ---------------------------------------------------------------------
-  Sum:              0.932963     0.434393      1.367356     0.498569
- Total magnetization (from the atomic spheres):             0.498569
- Total magnetization (exact up - dn):                       3.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Bi   2.00000     0.932963     0.434393      1.367356     0.498569
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 0.932963     0.434393      1.367356     0.498569
+ Total magnetization (from the atomic spheres):                0.498569
+ Total magnetization (exact up - dn):                          3.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -3019,8 +3034,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.00709
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3035,8 +3050,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -3057,9 +3072,9 @@ solver: {iscf: 7, nstep: 2, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.5646842301638    -5.565E+00 4.609E-03 1.407E+04
- ETOT  2  -5.5753436806802    -1.066E-02 3.107E-09 4.244E+03
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -5.5646842301638    -5.565E+00 4.609E-03 1.407E+04 4.786E-01 4.786E-01
+ ETOT  2  -5.5753436806802    -1.066E-02 3.107E-09 4.244E+03 2.000E-02 4.986E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.45613092E-05  sigma(3 2)=  0.00000000E+00
@@ -3099,14 +3114,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.932963     0.434393      1.367356     0.498569
- ---------------------------------------------------------------------
-  Sum:              0.932963     0.434393      1.367356     0.498569
- Total magnetization (from the atomic spheres):             0.498569
- Total magnetization (exact up - dn):                       3.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Bi   2.00000     0.932963     0.434393      1.367356     0.498569
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 0.932963     0.434393      1.367356     0.498569
+ Total magnetization (from the atomic spheres):                0.498569
+ Total magnetization (exact up - dn):                          3.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -3192,8 +3208,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.00709
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3208,8 +3224,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -3230,9 +3246,9 @@ solver: {iscf: 7, nstep: 2, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.5098134173308    -5.510E+00 4.700E-03 7.417E+01
- ETOT  2  -5.5179175223159    -8.104E-03 1.956E-09 2.692E+01
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -5.5098134173308    -5.510E+00 4.700E-03 7.417E+01 4.526E-01 4.526E-01
+ ETOT  2  -5.5179175223159    -8.104E-03 1.956E-09 2.692E+01 2.219E-02 4.748E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.89201514E-05  sigma(3 2)=  0.00000000E+00
@@ -3272,14 +3288,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.909988     0.435199      1.345187     0.474789
- ---------------------------------------------------------------------
-  Sum:              0.909988     0.435199      1.345187     0.474789
- Total magnetization (from the atomic spheres):             0.474789
- Total magnetization (exact up - dn):                       3.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Bi   2.00000     0.909988     0.435199      1.345187     0.474789
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 0.909988     0.435199      1.345187     0.474789
+ Total magnetization (from the atomic spheres):                0.474789
+ Total magnetization (exact up - dn):                          3.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -3360,8 +3377,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.00709
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3376,8 +3393,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -3398,9 +3415,9 @@ solver: {iscf: 7, nstep: 2, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.5098133013481    -5.510E+00 4.700E-03 7.417E+01
- ETOT  2  -5.5179174131549    -8.104E-03 1.956E-09 2.692E+01
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -5.5098133013481    -5.510E+00 4.700E-03 7.417E+01 4.526E-01 4.526E-01
+ ETOT  2  -5.5179174131549    -8.104E-03 1.956E-09 2.692E+01 2.219E-02 4.748E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.89201487E-05  sigma(3 2)=  0.00000000E+00
@@ -3440,14 +3457,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.909988     0.435199      1.345187     0.474789
- ---------------------------------------------------------------------
-  Sum:              0.909988     0.435199      1.345187     0.474789
- Total magnetization (from the atomic spheres):             0.474789
- Total magnetization (exact up - dn):                       3.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Bi   2.00000     0.909988     0.435199      1.345187     0.474789
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 0.909988     0.435199      1.345187     0.474789
+ Total magnetization (from the atomic spheres):                0.474789
+ Total magnetization (exact up - dn):                          3.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -3506,7 +3524,7 @@ band_energy         : -1.53346722895353E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.4000000000E+01  1.4000000000E+01  1.4000000000E+01 Bohr
               amu      2.08980370E+02
@@ -3695,7 +3713,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -3707,12 +3725,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -3730,7 +3748,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -3745,15 +3763,15 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          6.5  wall=          6.6
+- Proc.   0 individual time (sec): cpu=          6.3  wall=          6.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered  71 WARNINGs and  41 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.5  wall=          6.6
++Overall time at end (sec) : cpu=          6.3  wall=          6.4

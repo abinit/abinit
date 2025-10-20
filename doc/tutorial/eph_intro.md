@@ -636,3 +636,8 @@ TODO: Recheck the code, perhaps I can use the ab-initio band edge if its greater
 The most important thing is that SKW reproduces the position of the band edges as these values are then used
 that the position of the SKW band edge is consistent
 -->
+
+
+<!--
+## GSTORE.nc file
+-->

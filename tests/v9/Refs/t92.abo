@@ -1,8 +1,8 @@
 
-.Version 10.1.1.1 of ABINIT, released Nov 2024.
-.(sequential version, prepared for a x86_64_linux_gnu13.2 computer) 
+.Version 10.5.1.5 of ABINIT, released Jul 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  7 Nov 2024.
-- ( at 20h48 )
+.Starting date : Thu  9 Oct 2025.
+- ( at 18h10 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_serial/blanchet_ftxc/tests/TestBot_MPI1/v9_t92/t92.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/v9_t92/t92.abi
 - output file    -> t92.abo
 - root for input  files -> t92i
 - root for output files -> t92o
 
-- inpspheads : Reading pseudopotential header in XML form from
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Al.LDA-PW-paw.xml
+- inpspheads : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Al.LDA-PW-paw.xml
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -391,9 +391,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.07746
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Al.LDA-PW-paw.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Al.LDA-PW-paw.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Al.LDA-PW-paw.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Al.LDA-PW-paw.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Al.LDA-PW-paw.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Al.LDA-PW-paw.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.60997197
@@ -437,10 +437,10 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  8  -561.19352238840     1.344E-05 1.304E-03 1.224E-09
  ETOT  9  -561.19352376996    -1.382E-06 3.278E-03 1.793E-11
  ETOT 10  -561.19352395181    -1.819E-07 7.150E-04 2.566E-14
- ETOT 11  -561.19352394219     9.619E-09 1.339E-03 3.786E-15
+ ETOT 11  -561.19352394219     9.620E-09 1.339E-03 3.786E-15
 
- At SCF step   11, etot is converged :
-  for the second time, diff in etot=  9.619E-09 < toldfe=  1.000E-06
+ At SCF step   11, etot is converged : 
+  for the second time, diff in etot=  9.620E-09 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -8.48012861E-01  sigma(3 2)=  0.00000000E+00
@@ -458,7 +458,7 @@ lattice_vectors:
 lattice_lengths: [   5.41030,    5.41030,    5.41030, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.1198210E+02
-convergence: {deltae:  9.619E-09, res2:  3.786E-15, residm:  1.339E-03, diffor: null, }
+convergence: {deltae:  9.620E-09, res2:  3.786E-15, residm:  1.339E-03, diffor: null, }
 etotal    :  -5.61193524E+02
 entropy   :   0.00000000E+00
 fermie    :  -3.78380631E+01
@@ -561,11 +561,11 @@ comment             : Components of total free energy in Hartree
 kinetic             :  5.15320097506385E+00
 extfpmd             :  1.56282101587808E+02
 hartree             :  1.07089413181343E-01
-xc                  : -4.18426125765764E+00
+xc                  : -4.18426125765766E+00
 Ewald energy        : -3.62531249988025E+01
 psp_core            :  6.96266374422875E-01
-local_psp           : -4.75457885557429E+00
-spherical_terms     : -2.43539804965816E-01
+local_psp           : -4.75457885557431E+00
+PAW spherical_terms : -2.43539804965815E-01
 internal            :  1.16803153433476E+02
 '-kT*entropy'       : -6.77996677261127E+02
 total_energy        : -5.61193523827652E+02
@@ -576,12 +576,12 @@ total_energy_eV     : -1.52708523966203E+04
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -5.72116471896630E-01
+band_energy         : -5.72116471896633E-01
 extfpmd_dc          :  1.51747474255051E+02
 Ewald energy        : -3.62531249988025E+01
 psp_core            :  6.96266374422875E-01
-xc_dc               :  1.17678617679609E+00
-spherical_terms     :  7.86798336258356E-03
+xc_dc               :  1.17678617679610E+00
+PAW spherical_terms :  7.86798336258356E-03
 internal            :  1.16803153318933E+02
 '-kT*entropy'       : -6.77996677261127E+02
 total_energy_dc     : -5.61193523942194E+02
@@ -662,7 +662,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT 10  -561.45725674218    -3.157E-07 7.148E-04 2.757E-14
  ETOT 11  -561.45725672798     1.420E-08 1.340E-03 4.408E-15
 
- At SCF step   11, etot is converged :
+ At SCF step   11, etot is converged : 
   for the second time, diff in etot=  1.420E-08 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -788,7 +788,7 @@ xc                  : -4.18463184049977E+00
 Ewald energy        : -3.62531249988025E+01
 psp_core            :  6.96266374422875E-01
 local_psp           : -4.74215645197939E+00
-spherical_terms     : -2.42891238737688E-01
+PAW spherical_terms : -2.42891238737688E-01
 internal            :  1.17472859078195E+02
 '-kT*entropy'       : -6.78183932173439E+02
 total_energy        : -5.60711073095244E+02
@@ -804,7 +804,7 @@ extfpmd_dc          :  1.51669993958414E+02
 Ewald energy        : -3.62531249988025E+01
 psp_core            :  6.96266374422875E-01
 xc_dc               :  1.17746001703732E+00
-spherical_terms     :  7.87701632000923E-03
+PAW spherical_terms :  7.87701632000923E-03
 internal            :  1.16726675445461E+02
 '-kT*entropy'       : -6.78183932173439E+02
 total_energy_dc     : -5.61457256727978E+02
@@ -885,7 +885,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT 10  -560.59610440102    -2.226E-07 7.141E-04 2.837E-14
  ETOT 11  -560.59610438758     1.344E-08 1.336E-03 3.573E-15
 
- At SCF step   11, etot is converged :
+ At SCF step   11, etot is converged : 
   for the second time, diff in etot=  1.344E-08 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1011,7 +1011,7 @@ xc                  : -4.18355491030140E+00
 Ewald energy        : -3.62531249988025E+01
 psp_core            :  6.96266374422875E-01
 local_psp           : -4.77826512394468E+00
-spherical_terms     : -2.44776256767061E-01
+PAW spherical_terms : -2.44776256767061E-01
 internal            :  1.15550992820786E+02
 '-kT*entropy'       : -6.77546574703683E+02
 total_energy        : -5.61995581882897E+02
@@ -1027,7 +1027,7 @@ extfpmd_dc          :  1.51896688697277E+02
 Ewald energy        : -3.62531249988025E+01
 psp_core            :  6.96266374422875E-01
 xc_dc               :  1.17549734665954E+00
-spherical_terms     :  7.85013443489622E-03
+PAW spherical_terms :  7.85013443489622E-03
 internal            :  1.16950470316106E+02
 '-kT*entropy'       : -6.77546574703683E+02
 total_energy_dc     : -5.60596104387577E+02
@@ -1106,10 +1106,10 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  8  -561.14447966978     1.348E-05 1.304E-03 1.224E-09
  ETOT  9  -561.14448105456    -1.385E-06 3.278E-03 1.793E-11
  ETOT 10  -561.14448123718    -1.826E-07 7.150E-04 2.566E-14
- ETOT 11  -561.14448122753     9.653E-09 1.339E-03 3.785E-15
+ ETOT 11  -561.14448122753     9.652E-09 1.339E-03 3.785E-15
 
- At SCF step   11, etot is converged :
-  for the second time, diff in etot=  9.653E-09 < toldfe=  1.000E-06
+ At SCF step   11, etot is converged : 
+  for the second time, diff in etot=  9.652E-09 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -8.48012913E-01  sigma(3 2)=  0.00000000E+00
@@ -1127,7 +1127,7 @@ lattice_vectors:
 lattice_lengths: [   5.41030,    5.41030,    5.41030, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.1198210E+02
-convergence: {deltae:  9.653E-09, res2:  3.785E-15, residm:  1.339E-03, diffor: null, }
+convergence: {deltae:  9.652E-09, res2:  3.785E-15, residm:  1.339E-03, diffor: null, }
 etotal    :  -5.61144481E+02
 entropy   :   0.00000000E+00
 fermie    :  -3.78380623E+01
@@ -1151,8 +1151,8 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      0.302664959800439
- Compensation charge over fft grid         =      0.302678984193439
+ Compensation charge over spherical meshes =      0.302664959800497
+ Compensation charge over fft grid         =      0.302678984193440
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -1227,17 +1227,17 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 4, }
 comment             : Components of total free energy in Hartree
-kinetic             :  5.15320136475818E+00
+kinetic             :  5.15320136475820E+00
 extfpmd             :  1.56282110063370E+02
-hartree             :  1.07089428522225E-01
-xc                  : -4.18426124751268E+00
+hartree             :  1.07089428522237E-01
+xc                  : -4.18426124751266E+00
 Ewald energy        : -3.62531249988025E+01
 psp_core            :  6.96266374422875E-01
-local_psp           : -4.75457919565890E+00
-spherical_terms     : -2.43539822723143E-01
+local_psp           : -4.75457919565921E+00
+PAW spherical_terms : -2.43539822723234E-01
 internal            :  1.16803161966376E+02
-'-kT*entropy'       : -6.77947643079364E+02
-total_energy        : -5.61144481112989E+02
+'-kT*entropy'       : -6.77947643079366E+02
+total_energy        : -5.61144481112990E+02
 total_energy_eV     : -1.52695178764861E+04
 ...
 
@@ -1245,15 +1245,15 @@ total_energy_eV     : -1.52695178764861E+04
 --- !EnergyTermsDC
 iteration_state     : {dtset: 4, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -5.72116480552889E-01
-extfpmd_dc          :  1.51747482815330E+02
+band_energy         : -5.72116480552868E-01
+extfpmd_dc          :  1.51747482815331E+02
 Ewald energy        : -3.62531249988025E+01
 psp_core            :  6.96266374422875E-01
-xc_dc               :  1.17678615832865E+00
-spherical_terms     :  7.86798311217769E-03
-internal            :  1.16803161851838E+02
-'-kT*entropy'       : -6.77947643079364E+02
-total_energy_dc     : -5.61144481227526E+02
+xc_dc               :  1.17678615832861E+00
+PAW spherical_terms :  7.86798311216888E-03
+internal            :  1.16803161851839E+02
+'-kT*entropy'       : -6.77947643079366E+02
+total_energy_dc     : -5.61144481227528E+02
 total_energy_dc_eV  : -1.52695178796028E+04
 ...
 
@@ -1262,8 +1262,8 @@ total_energy_dc_eV  : -1.52695178796028E+04
 iteration_state     : {dtset: 4, }
 comment             : Components of total entropy
 noninteracting      :  1.00540673653474E+01
-extfpmd             :  5.77406969425891E+01
-total_entropy       :  6.77947643079364E+01
+extfpmd             :  5.77406969425893E+01
+total_entropy       :  6.77947643079366E+01
 ...
 
 
@@ -1331,7 +1331,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT 10  -560.99240337250    -1.821E-07 7.148E-04 2.570E-14
  ETOT 11  -560.99240336289     9.608E-09 1.338E-03 3.791E-15
 
- At SCF step   11, etot is converged :
+ At SCF step   11, etot is converged : 
   for the second time, diff in etot=  9.608E-09 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1457,7 +1457,7 @@ xc                  : -4.18407969217323E+00
 Ewald energy        : -3.62531249988025E+01
 psp_core            :  6.96266374422875E-01
 local_psp           : -4.76066632109030E+00
-spherical_terms     : -2.43857600406703E-01
+PAW spherical_terms : -2.43857600406703E-01
 internal            :  1.16943925028585E+02
 '-kT*entropy'       : -6.77936328276860E+02
 total_energy        : -5.60992403248275E+02
@@ -1473,7 +1473,7 @@ extfpmd_dc          :  1.51888735244287E+02
 Ewald energy        : -3.62531249988025E+01
 psp_core            :  6.96266374422875E-01
 xc_dc               :  1.17645544269342E+00
-spherical_terms     :  7.86347453378805E-03
+PAW spherical_terms :  7.86347453378805E-03
 internal            :  1.16943924913970E+02
 '-kT*entropy'       : -6.77936328276860E+02
 total_energy_dc     : -5.60992403362890E+02
@@ -1571,7 +1571,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT 27  -561.19352275604    -7.885E-07 1.431E-07 2.915E-12
  ETOT 28  -561.19352322086    -4.648E-07 9.594E-08 4.573E-12
 
- At SCF step   28, etot is converged :
+ At SCF step   28, etot is converged : 
   for the second time, diff in etot=  4.648E-07 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1614,8 +1614,8 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      0.302664872990718
- Compensation charge over fft grid         =      0.302678966318423
+ Compensation charge over spherical meshes =      0.302664872990724
+ Compensation charge over fft grid         =      0.302678966318422
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -1688,14 +1688,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 6, }
 comment             : Components of total free energy in Hartree
-kinetic             :  5.15320086343015E+00
+kinetic             :  5.15320086343014E+00
 extfpmd             :  1.56282102220653E+02
-hartree             :  1.07089344770294E-01
-xc                  : -4.18426128148038E+00
+hartree             :  1.07089344770298E-01
+xc                  : -4.18426128148032E+00
 Ewald energy        : -3.62531249988025E+01
 psp_core            :  6.96266374422875E-01
-local_psp           : -4.75457838698544E+00
-spherical_terms     : -2.43539710221745E-01
+local_psp           : -4.75457838698547E+00
+PAW spherical_terms : -2.43539710221723E-01
 internal            :  1.16803154425786E+02
 '-kT*entropy'       : -6.77996677155524E+02
 total_energy        : -5.61193522729737E+02
@@ -1706,12 +1706,12 @@ total_energy_eV     : -1.52708523667445E+04
 --- !EnergyTermsDC
 iteration_state     : {dtset: 6, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -5.72116561014821E-01
+band_energy         : -5.72116561014809E-01
 extfpmd_dc          :  1.51747474882680E+02
 Ewald energy        : -3.62531249988025E+01
 psp_core            :  6.96266374422875E-01
-xc_dc               :  1.17678625247645E+00
-spherical_terms     :  7.86798490286915E-03
+xc_dc               :  1.17678625247639E+00
+PAW spherical_terms :  7.86798490287323E-03
 internal            :  1.16803153934665E+02
 '-kT*entropy'       : -6.77996677155524E+02
 total_energy_dc     : -5.61193523220859E+02
@@ -1740,7 +1740,7 @@ total_entropy       :  6.77996677155524E+01
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      7.6513171070E+00  7.6513171070E+00  7.6513171070E+00 Bohr
               amu      2.69815390E+01
@@ -1971,60 +1971,10 @@ P           mkmem           2
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          7.6        0.13      0.002
-- Total wall clock time (s,m,h):          7.7        0.13      0.002
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0
--
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            7.6, wall_time =            7.7
--
-- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
--                                                                                (-1=no count)
-- fourwf%(pot)                              2.088  27.3         2.084  27.1          45117      -1.00        1.00       1.00
-- vtowfk(ssdiag)                            1.348  17.7         1.350  17.6             -1      -1.00        1.00       1.00
-- projbd                                    0.631   8.3         0.648   8.4          34317      -1.00        0.97       0.97
-- nonlop(apply)                             0.435   5.7         0.429   5.6          45117      -1.00        1.01       1.01
-- pspini                                    0.391   5.1         0.391   5.1              6      -1.00        1.00       1.00
-- getghc(/=fourXX,nonlop,fock_XX)           0.313   4.1         0.299   3.9             -1      -1.00        1.05       1.05
-- fourwf%(den)                              0.224   2.9         0.221   2.9           8300      -1.00        1.01       1.01
-- pawdenpot                                 0.181   2.4         0.176   2.3             83      -1.00        1.03       1.03
-- get_dtsets_pspheads                       0.172   2.3         0.172   2.2              1      -1.00        1.00       1.00
-- timing timab                              0.115   1.5         0.116   1.5             10      -1.00        1.00       1.00
-- vtowfk(contrib)                           0.098   1.3         0.099   1.3            166      -1.00        0.99       0.99
-- xc:pot/=fourdp                            0.088   1.2         0.087   1.1             89      -1.00        1.01       1.01
-- newkpt(excl. rwwf   )                     0.075   1.0         0.075   1.0             -1      -1.00        1.00       1.00
-- others (146)                              0.363   4.8         0.402   5.2             -1      -1.00        0.90       0.90
--<END_TIMER>
--
-- subtotal                                  6.522  85.4         6.549  85.3                                  1.00       1.00
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           7.6, wall_time =           7.7
--
-- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
--                                                                                (-1=no count)
-- fourwf%(pot)                              2.088  27.3         2.084  27.1          45117      -1.00        1.00       1.00
-- vtowfk(ssdiag)                            1.348  17.7         1.350  17.6             -1      -1.00        1.00       1.00
-- projbd                                    0.631   8.3         0.648   8.4          34317      -1.00        0.97       0.97
-- nonlop(apply)                             0.435   5.7         0.429   5.6          45117      -1.00        1.01       1.01
-- pspini                                    0.391   5.1         0.391   5.1              6      -1.00        1.00       1.00
-- getghc(/=fourXX,nonlop,fock_XX)           0.313   4.1         0.299   3.9             -1      -1.00        1.05       1.05
-- fourwf%(den)                              0.224   2.9         0.221   2.9           8300      -1.00        1.01       1.01
-- pawdenpot                                 0.181   2.4         0.176   2.3             83      -1.00        1.03       1.03
-- get_dtsets_pspheads                       0.172   2.3         0.172   2.2              1      -1.00        1.00       1.00
-- timing timab                              0.115   1.5         0.116   1.5             10      -1.00        1.00       1.00
-- vtowfk(contrib)                           0.098   1.3         0.099   1.3            166      -1.00        0.99       0.99
-- xc:pot/=fourdp                            0.088   1.2         0.087   1.1             89      -1.00        1.01       1.01
-- newkpt(excl. rwwf   )                     0.075   1.0         0.075   1.0             -1      -1.00        1.00       1.00
-- others (146)                              0.363   4.8         0.402   5.2             -1      -1.00        0.90       0.90
--<END_TIMER>
 
-- subtotal                                  6.522  85.4         6.549  85.3                                  1.00       1.00
 
 ================================================================================
 
@@ -2064,7 +2014,7 @@ P           mkmem           2
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -2076,12 +2026,12 @@ P           mkmem           2
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -2099,15 +2049,15 @@ P           mkmem           2
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          7.6  wall=          7.7
+- Proc.   0 individual time (sec): cpu=          5.7  wall=          5.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered   1 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.6  wall=          7.7
+.Delivered   0 WARNINGs and   6 COMMENTs to log file.
++Overall time at end (sec) : cpu=          5.7  wall=          5.8

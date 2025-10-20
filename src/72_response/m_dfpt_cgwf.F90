@@ -89,9 +89,9 @@ module m_dfpt_cgwf
    ! Max number of line minimization.
    integer :: nlines_done = -1
    ! Number of line minimization in stern_solve.
-   integer :: usedcwavef
+   integer :: usedcwavef = 0
    ! flag controlling the use of dcwavef array (PAW only):
-   integer :: usepaw
+   integer :: usepaw = -1
    ! 1 if PAW is used.
 
    integer :: work_ngfft(18)
@@ -109,8 +109,9 @@ module m_dfpt_cgwf
    real(dp),allocatable :: eig1_k(:,:,:)
    ! (2, nband, nband)
    ! matrix of first-order eigenvalues (hartree)
-   ! eig1_k(:,ii,jj)=<C0 ii|H1|C0 jj> for norm-conserving psps
-   ! eig1_k(:,ii,jj)=<C0 ii|H1-(eig0_k+eig0_k+q)/2.S(1)|C0 jj> for PAW
+   ! The array eig1_k contains:
+   ! <u_(jband,k+q)^(0)|H_(k+q,k)^(1)|u_(iband,k)^(0)>                              (NC psps)
+   ! <u_(jband,k+q)^(0)|H_(k+q,k)^(1)-(eig0_k+eig0_k+q)/2.S^(1)|u_(iband,k)^(0)>    (PAW)
 
    real(dp),allocatable :: dcwavef(:, :), gh1c_n(:, :), ghc(:,:), gsc(:,:), gvnlxc(:,:), gvnlx1(:,:)
    real(dp),allocatable :: cgq(:,:,:), gscq(:,:,:), work(:,:,:,:)
@@ -210,6 +211,8 @@ contains
 !!             1: used as input
 !!             2: used as output
 !!  wfoptalg=govern the choice of algorithm for wf optimisation (0 or 10, at present)
+!!  [usetolrde]: 0 if the reduction in trial energy deltae should not be checked (see below). Default 1.
+!!               0 is used in NSCF mode to prevent an early return before nline iterations.
 !!
 !! OUTPUT
 !!  eig1_k(2*nband**2)=matrix of first-order eigenvalues (hartree)
@@ -246,7 +249,8 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
 & gs_hamkq,gvnlxc,gvnlx1,icgq,idir,ipert,igscq,&
 & mcgq,mgscq,mpi_enreg,mpw1,natom,nband,nband_me,nbdbuf,nline_in,npw,npw1,nspinor,&
 & opt_gvnlx1,prtvol,quit,resid,rf_hamkq,dfpt_sciss,tolrde,tolwfr,&
-& usedcwavef,wfoptalg,nlines_done)
+& usedcwavef,wfoptalg,nlines_done, &
+  usetolrde) ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -256,6 +260,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
  integer,intent(in) :: nbdbuf,nline_in,npw,npw1,nspinor,opt_gvnlx1
  integer,intent(in) :: prtvol,quit,usedcwavef,wfoptalg
  integer,intent(inout) :: nlines_done
+ integer,optional,intent(in) :: usetolrde
  real(dp),intent(in) :: dfpt_sciss,tolrde,tolwfr
  real(dp),intent(out) :: resid
  type(MPI_type),intent(in) :: mpi_enreg
@@ -285,7 +290,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
  integer :: cpopt,iband,igs,iline,indx_cgq,ipw,me_g0,comm_fft
  integer :: iband_me, jband_me, ierr, me_band, np_band, band_off, u1_band !, unit_me
  integer :: ipws,ispinor,istwf_k,jband,nline,optlocal,optnl,dc_shift_band,sij_opt
- integer :: test_is_ok,useoverlap,usepaw,usevnl,usetolrde
+ integer :: test_is_ok,useoverlap,usepaw,usevnl,usetolrde__
  real(dp) :: d2edt2,d2te,d2teold,dedt,deltae,deold,dotgg
  real(dp) :: dotgp,doti,dotr,eshift,eshiftkq,gamma,optekin,prod1,prod2
  real(dp) :: theta,tol_restart,u1h0me0u1
@@ -316,9 +321,6 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
 
  u1_band = abs(u1_band_)
 
- nline = nline_in
- usetolrde = 1
-
  ! LB-23/04/17:
  ! For ipert=natom+10 or ipert=natom+11, the Sternheimer equation is non-self-consistent, so we have
  ! to solve a true linear problem (A.X = B) for each kpoint and band. In this case, the conjugate
@@ -328,12 +330,15 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
  ! we want to leave this routine only if 'tolwfr' is reached. Consequently, 'tolrde' is not used and 'nline' is set to 100.
  ! One could use nline=npw1*nspinor (>> 100 !) instead, but when the method cannot converge (i.e when tolwfr is lower than the
  ! numerical noise) the program could be stuck here for a very long time.
- ! NOTE : This is also true for ipert==natom+1, but a lot of references in the test suite have to be changed...
+ ! NOTE: This is also true for ipert==natom+1, but a lot of references in the test suite have to be changed...
+ nline = nline_in
+ usetolrde__ = 1
  if(ipert==natom+10.or.ipert==natom+11) then
    nline = 100 ! The default value is only 4... This should be sufficient to converge with nstep=1 or 2
    if (nline_in > 100) nline = nline_in ! Keep the possibility to increase nline
-   usetolrde = 0  ! see below
+   usetolrde__ = 0  ! see below
  end if
+ if (present(usetolrde)) usetolrde__ = usetolrde
 
  if (prtvol>=10) then
    !Tell us what is going on:
@@ -980,7 +985,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
      call sqnorm_g(resid,istwf_k,npw1*nspinor,gresid,me_g0,comm_fft)
      if (prtvol==-level.or.prtvol==-19)then
        write(msg,'(a,a,i3,f14.6,a,a,4es12.4)') ch10,&
-        ' dfpt_cgwf : iline,eshift     =',iline,eshift,ch10,&
+        ' dfpt_cgwf: iline,eshift     =',iline,eshift,ch10,&
         '         resid,prod1,prod2,d2te=',resid,prod1,prod2,d2te
        call wrtout(std_out,msg)
      end if
@@ -990,7 +995,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
    if (resid<tolwfr .and. skipme == 0) then
      if(prtvol>=10)then
        write(msg,'(a,i4,a,i2,a,es12.4)')&
-           ' dfpt_cgwf: band',u1_band,' converged after ',iline,' line minimizations: resid = ',resid
+         ' dfpt_cgwf: band',u1_band,' converged after ',iline,' line minimizations: resid = ',resid
        call wrtout(std_out,msg)
      end if
      nskip=nskip+(nline-iline+1)  ! Number of two-way 3D ffts skipped
@@ -1008,7 +1013,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
    ! Check that d2te is decreasing on succeeding lines:
    if (iline/=1) then
      if (d2te>d2teold+tol6 .and. u1_band_ > 0) then
-       write(msg,'(a,i0,a,e14.6,a,e14.6)')'New trial energy at line ',iline,' = ',d2te,' is higher than former: ',d2teold
+       write(msg,'(a,i0,a,e16.8,a,e16.9)')'New trial energy at iline ',iline,' = ',d2te,' is higher than former: ',d2teold
        ABI_WARNING(msg)
      end if
    end if
@@ -1018,14 +1023,14 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
 
    !DEBUG Keep this debugging feature !
    !call sqnorm_g(dotr,istwf_k,npw1*nspinor,direc,me_g0,comm_fft)
-   !write(std_out,*)' dfpt_cgwf : before precon, direc**2=',dotr
+   !write(std_out,*)' dfpt_cgwf: before precon, direc**2=',dotr
    !if (gen_eigenpb) then
    !call dotprod_g(dotr,doti,istwf_k,npw1*nspinor,1,cwaveq,&
    !&                 gscq(:,1+npw1*nspinor*(u1_band-1)+igscq:npw1*nspinor*u1_band+igscq),me_g0,mpi_enreg%comm_spinorfft)
    !else
    !call sqnorm_g(dotr,istwf_k,npw1*nspinor,cwaveq,me_g0,comm_fft)
    !end if
-   !write(std_out,*)' dfpt_cgwf : before precon, cwaveq**2=',dotr
+   !write(std_out,*)' dfpt_cgwf: before precon, cwaveq**2=',dotr
    !ENDDEBUG
 
    ! ======================================================================
@@ -1049,7 +1054,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
 
    !DEBUG Keep this debugging feature !
    !call sqnorm_g(dotr,istwf_k,npw1*nspinor,direc,me_g0,comm_fft)
-   !write(std_out,*)' dfpt_cgwf : after precon, direc**2=',dotr
+   !write(std_out,*)' dfpt_cgwf: after precon, direc**2=',dotr
    !ENDDEBUG
 
    ! ======================================================================
@@ -1086,8 +1091,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
 
    !DEBUG Keep this debugging feature !
    !call sqnorm_g(dotr,istwf_k,npw1*nspinor,direc,me_g0,comm_fft)
-   !write(std_out,*)' dfpt_cgwf : after projbd, direc**2=',dotr
-   !ENDDEBUG
+   !write(std_out,*)' dfpt_cgwf: after projbd, direc**2=',dotr
 
    ! ======================================================================
    ! ================= COMPUTE THE CONJUGATE-GRADIENT =====================
@@ -1235,12 +1239,8 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
      call cg_zaxpy(npw1*nspinor, [theta, zero], gh_direc,ghc)
      call cg_zaxpy(npw1*nspinor, [theta, zero], gvnlx_direc,gvnlxc)
 
-     if (gen_eigenpb) then
-       call cg_zaxpy(npw1*nspinor, [theta, zero], sconjgr, gsc)
-     end if
-     if (usepaw==1) then
-       call pawcprj_axpby(theta,one,conjgrprj,cwaveprj)
-     end if
+     if (gen_eigenpb) call cg_zaxpy(npw1*nspinor, [theta, zero], sconjgr, gsc)
+     if (usepaw==1) call pawcprj_axpby(theta,one,conjgrprj,cwaveprj)
    end if
 
    ABI_FREE(gh_direc)
@@ -1251,7 +1251,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
    ! =========== CHECK CONVERGENCE AGAINST TRIAL ENERGY ===================
    ! ======================================================================
 
-   if(usetolrde/=0) then
+   if (usetolrde__ /= 0) then
      ! Check reduction in trial energy deltae, Eq.(28) of PRB55, 10337 (1997) [[cite:Gonze1997]]
      deltae=half*d2edt2*theta**2+theta*dedt
 
@@ -1260,7 +1260,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
        ! The extra factor of two should be removed !
      else if (abs(deltae)<tolrde*two*abs(deold) .and. iline/=nline) then
        if(prtvol>=10.or.prtvol==-level.or.prtvol==-19)then
-         write(msg, '(a,i4,1x,a,1p,e12.4,a,e12.4,a)' ) &
+         write(msg, '(a,i0,1x,a,1p,e12.4,a,e12.4,a)' ) &
           ' dfpt_cgwf: line',iline,' deltae=',deltae,' < tolrde*',deold,' =>skip lines'
          call wrtout(std_out,msg)
        end if
@@ -1278,9 +1278,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
    call xmpi_sum(bands_skipped_now,mpi_enreg%comm_band,ierr)
 
    ! bands_skipped_now = bands_skipped_now - bands_treated_now
-   if (sum(abs(bands_skipped_now - bands_treated_now)) == 0) then
-     exit
-   end if
+   if (sum(abs(bands_skipped_now - bands_treated_now)) == 0) exit
 
    nlines_done = nlines_done + 1
  end do ! iline
@@ -1332,7 +1330,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
        doti=prod2+half*rf2%amn(2,iband+(u1_band-1)*nband)
      else
        write(msg,'(a)') 'CGWF3_WARNING : Use prtvol=-19 to test orthogonality for ipert=natom+10 or +11'
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(std_out,msg)
      end if
      dotr=sqrt(dotr**2+doti**2)
      if(dotr>tol10) then
@@ -1340,7 +1338,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
        !  write(msg,'(2a,i3,a,2es22.15)') 'CGWF3_WARNING : <Psi^(1)_i,k,q|S^(0)|Psi^(0)_j,k+q>',&
        !    '+ 1/2<Psi^(0)_i,k|S^(1)|Psi^(0)_j,k+q>, for j= ',iband,' is ',dotr,doti
        !else
-       write(msg,'(a,i3,a,es22.15)') 'CGWF3_WARNING : |<Psi^(0)_i,k+q|Psi^(1)_j,k,q>+amn(i,j)/2|, for j= ',iband,' is ',dotr
+       write(msg,'(a,i0,a,es22.15)') 'CGWF3_WARNING : |<Psi^(0)_i,k+q|Psi^(1)_j,k,q>+amn(i,j)/2|, for j= ',iband,' is ',dotr
        !end if
        call wrtout(std_out,msg)
      end if
@@ -1469,7 +1467,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
    cwwork=cwwork+gh1c
    call sqnorm_g(dotr,istwf_k,npw1*nspinor,cwwork,me_g0,comm_fft)
    ABI_FREE(cwwork)
-   write(msg,'(a,i3,a,es22.15,2a,i4)') &
+   write(msg,'(a,i0,a,es22.15,2a,i4)') &
      '*** CGWF3 Sternheimer equation test for band ',u1_band,'=',sqrt(dotr),ch10,&
      'It should go to zero for large nline : nlines_done = ',nlines_done
    call wrtout(std_out,msg)
@@ -1509,7 +1507,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
      doti = doti - eig1_k(2*iband  +jband)
      dotr = sqrt(dotr**2+doti**2)
      if (dotr > tol8) then
-       write(msg,'(2(a,i3),a,es22.15)') &
+       write(msg,'(2(a,i0),a,es22.15)') &
          'CGWF3_WARNING < Psi^(0) | ( H^(0)-eps^(0) S^(0) ) | Psi^(1) > for i=',iband,' j=',u1_band,&
        ' : ',sqrt(dotr**2+doti**2)
        call wrtout(std_out,msg)
@@ -1529,9 +1527,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
  ABI_FREE(cwaveq)
  ABI_FREE(direc)
  ABI_FREE(gresid)
- if (usepaw==1) then
-   call pawcprj_free(conjgrprj)
- end if
+ if (usepaw==1) call pawcprj_free(conjgrprj)
  ABI_FREE(conjgrprj)
 
  if(u1_band>max(1,nband-nbdbuf))then
@@ -1828,7 +1824,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  integer,intent(out) :: ierr
  character(len=*),intent(out) :: err_msg
  real(dp),optional,target,intent(out) :: full_cg1(2, stern%npw_kq*stern%nspinor)
- complex(gwpc),optional,intent(out) :: full_ur1(gs_hamkq%nfft*stern%nspinor)
+ complex(gwp),optional,intent(out) :: full_ur1(gs_hamkq%nfft*stern%nspinor)
 
 !Local variables ------------------------------
 !scalars
@@ -1838,10 +1834,10 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  type(rf2_t) :: rf2
 !arrays
  real(dp),allocatable :: grad_berry(:,:)
- complex(gwpc),allocatable :: cwork_sp(:)
+ complex(gwp),allocatable :: cwork_sp(:)
  logical :: cycle_bands(stern%nband)
 #ifdef HAVE_GW_DPC
- complex(gwpc),pointer :: full_ug1_dp_ptr(:)
+ complex(gwp),pointer :: full_ug1_dp_ptr(:)
 #endif
 ! *************************************************************************
 
@@ -1891,7 +1887,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
    stern%mcgq, stern%mgscq, stern%mpi_enreg, grad_berry_size_mpw1, stern%dtset%natom, stern%nband, stern%nband_me, &
    nbdbuf0, stern%nline_in, stern%npw_k, stern%npw_kq, stern%nspinor, &
    opt_gvnlx1, stern%dtset%prtvol, quit0, out_resid, rf_hamkq, stern%dtset%dfpt_sciss, -one, stern%dtset%tolwfr, &
-   stern%usedcwavef, stern%dtset%wfoptalg, stern%nlines_done)
+   stern%usedcwavef, stern%dtset%wfoptalg, stern%nlines_done, usetolrde=0)
 
  ABI_FREE(grad_berry)
 
@@ -1905,15 +1901,15 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  err_msg = ""; ierr = 0
  if (u1_band > 0) then
    if (out_resid > stern%dtset%tolwfr) then
-     write(err_msg, "(a,i0,a, 2(a,es13.5), 2a,i0,a)") &
-       " Sternheimer didn't convergence for band: ", u1_band, ch10, &
+     write(err_msg, "(2(a,i0),a, 2(a,es13.5), 2a,i0,a)") &
+       " Sternheimer didn't convergence for band: ", u1_band, "/", stern%nband, ch10, &
        " resid:", out_resid, " >= tolwfr: ", stern%dtset%tolwfr, ch10, &
        " after nline: ", stern%nlines_done, " iterations. Increase nline and/or tolwfr."
      ierr = 1
 
    else if (out_resid < zero) then
-     write(err_msg, "(a,i0,a, (a,es13.5), a,i0)") &
-       " Sternheimer solver didn't convergence for band: ", u1_band, ch10, &
+     write(err_msg, "(2(a,i0),a, (a,es13.5), a,i0)") &
+       " Sternheimer solver didn't convergence for band: ", u1_band, "/", stern%nband, ch10, &
        " resid:", out_resid, ", after nline: ", stern%nlines_done
      ! This may happen when the eigenvalue eig_mk(0) is higher than
      ! the lowest non-treated eig_mk+q(0). The solution adopted here

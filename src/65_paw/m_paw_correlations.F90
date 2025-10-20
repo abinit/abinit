@@ -42,6 +42,8 @@ MODULE m_paw_correlations
  use m_paw_yukawa,  only : compute_slater,get_lambda
  use m_paral_atom,  only : get_my_atmtab,free_my_atmtab
  use m_copy,        only : alloc_copy
+ use m_geometry,    only : vcart2ylm
+ use m_atomdata 
 
  implicit none
 
@@ -1713,8 +1715,8 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
  real(dp) :: ro(2),sumocc(2)
  real(dp),allocatable :: eig(:),hdp(:,:,:),hdp2(:,:),noccmmptemp(:,:,:,:),noccmmp_tmp(:,:,:,:)
  real(dp),allocatable :: rwork(:),noccmmp2(:,:,:,:),nocctot2(:)
- complex(dpc),allocatable :: noccmmp_ylm(:,:,:),noccmmp_jmj(:,:),noccmmp_slm(:,:,:)
- complex(dpc),allocatable :: zhdp(:,:),zhdp2(:,:),znoccmmp_tmp(:,:),zwork(:)
+ complex(dp),allocatable :: noccmmp_ylm(:,:,:),noccmmp_jmj(:,:),noccmmp_slm(:,:,:)
+ complex(dp),allocatable :: zhdp(:,:),zhdp2(:,:),znoccmmp_tmp(:,:),zwork(:)
  character(len=9),parameter :: dspin(6)=  (/"up       ","down     ","up-up    ","down-down","Re[up-dn]","Im[up-dn]"/)
  character(len=9),parameter :: dspinc(6)= (/"up       ","down     ","up-up    ","down-down","up-dn    ","dn-up    "/)
 ! character(len=9),parameter :: dspinc2(6)=(/"up       ","down     ","dn-dn    ","up-up    ","dn-up    ","up-dn    "/)
@@ -1722,10 +1724,9 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
  type(coeff4_type),allocatable :: tmp_noccmmp(:)
 
  real(dp),allocatable :: l_noccmmp_tmp(:,:,:,:)
- real(dpc),optional,allocatable :: my_l_occmat(:,:,:,:)
+ real(dp),optional,allocatable :: my_l_occmat(:,:,:,:)
  logical :: cal_lmom
  integer :: atom_min,atom_max
-
 !*********************************************************************
 
  DBG_ENTER("COLL")
@@ -3113,20 +3114,12 @@ end subroutine setrhoijpbe0
 !! OUTPUT
 !! printing the values of orbital magnetic moments for atoms in the output file
 !!
-!! NOTES
-!!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      m_paw_correlations
-!!
 !! SOURCE
 
 subroutine loc_orbmom_cal(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym,my_natom,natom,&
 &                     natpawu,nspinor,nsppol,nsym,ntypat,paw_ij,pawang,pawrad,pawprtvol,pawrhoij,pawtab,&
-&                     spinat,symafm,typat,useexexch,usepawu, &
-&                     mpi_atmtab,comm_atom) ! optional arguments (parallelism)
+&                     spinat,symafm,typat,useexexch,usepawu,znucl, &
+&                     mpi_atmtab,comm_atom,orb_mom_atom,maxmag,difmag) ! optional arguments (parallelism)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -3143,21 +3136,26 @@ subroutine loc_orbmom_cal(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,in
  type(paw_ij_type),intent(in) :: paw_ij(my_natom)
  type(pawrhoij_type),intent(in) :: pawrhoij(my_natom)
  type(pawtab_type),intent(in) :: pawtab(ntypat)
+ real(dp),intent(in) :: znucl(ntypat)
  integer,pointer :: my_atmtab(:)
+ real(dp),intent(inout), optional :: orb_mom_atom(10,3,natom),maxmag,difmag
+ real(dp):: orb_mom_atom0(10,3,natom)
 !Local variables ---------------------------------------
 !scalars
 logical :: paral_atom,my_atmtab_allocated
 character(len=5) :: orb_char
  integer :: cplex_dij,im1,im2,ndij,itypat,my_comm_atom
- integer :: my_lcur,my_iatom,coor,isp,lmin,lmax,me_atom
+ integer :: my_lcur,my_iatom,coor,isp,lmin,lmax,me_atom,mu
  real(dp),allocatable :: my_l_occmat(:,:,:,:)
- complex(dpc),allocatable :: op_l(:,:,:),cmfoccmat(:,:,:)
+ complex(dp),allocatable :: op_l(:,:,:),cmfoccmat(:,:,:)
  real(dp) :: orb_mom(3)
  real(dp) :: sum_orb_mom(3)
- complex(dpc) :: my_sls_val
+ real(dp) :: orbmag_r, orbmag_theta, orbmag_phi
+ complex(dp) :: my_sls_val
  character(len=500) :: message
  type(paw_ij_type), ABI_CONTIGUOUS pointer :: paw_ij_all(:)
  type(pawrhoij_type),ABI_CONTIGUOUS pointer :: pawrhoij_all(:)
+ type(atomdata_t) :: atom
  !!****************************************************************
     type(pawtab_type),allocatable :: pawtab_tmp(:)
     type(pawrad_type) :: pawrad(ntypat)
@@ -3165,18 +3163,22 @@ character(len=5) :: orb_char
     integer :: llexexch(ntypat),llpawu(ntypat),nn,ii
 !*********************************************************************
 orb_char='pdfgh'
+if (.not. present(orb_mom_atom)) then
    write(message,*) '  '
     call wrtout([std_out, ab_out], message)
        write(message,*) '  '
     call wrtout([std_out, ab_out], message)
    write(message,*) 'Integrated orbital magnetic moments inside the PAW spheres:'
     call wrtout([std_out, ab_out], message)
-   write(message,*) '--------------------------------------------------'
+   write(message,*) '--------------------------------------------------------------------------------------------'
     call wrtout([std_out, ab_out], message)
-   write(message,*) 'Atom  orbital   orbmag(x)   orbmag(y)   orbmag(z)  '
+   write(message,*) '   Atom  orbital   |orbmag|    orbmag(x)   orbmag(y)   orbmag(z) orbmag(theta) orbmag(phi)  '
     call wrtout([std_out, ab_out], message)
-    write(message,*) '--------------------------------------------------'
+   write(message,*) '--------------------------------------------------------------------------------------------'
     call wrtout([std_out, ab_out], message)
+else
+    orb_mom_atom0=orb_mom_atom
+endif
 
 
 !Set up parallelism over atoms
@@ -3387,27 +3389,45 @@ call  setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym,nato
              end if
 
   sum_orb_mom=sum_orb_mom+orb_mom
+
+call vcart2ylm(orb_mom, orbmag_r, orbmag_theta, orbmag_phi)
+call atomdata_from_znucl(atom, znucl(typat(my_iatom)))
+if (.not. present(orb_mom_atom)) then
   if (my_lcur==1) then
-      write(message,'(i5,a8,3f12.6)') my_iatom, orb_char(my_lcur:my_lcur), orb_mom(1),orb_mom(2),orb_mom(3)
+      write(message,'(i5,a3,a8,4f12.6,2f13.6)') my_iatom,atom%symbol, orb_char(my_lcur:my_lcur),orbmag_r, orb_mom(1),orb_mom(2),orb_mom(3),orbmag_theta,orbmag_phi
   else
-      write(message,'(a5,a8,3f12.6)') '', orb_char(my_lcur:my_lcur), orb_mom(1),orb_mom(2),orb_mom(3)
+      write(message,'(a5,a11,4f12.6,2f13.6)') '', orb_char(my_lcur:my_lcur), orbmag_r,orb_mom(1),orb_mom(2),orb_mom(3) ,orbmag_theta,orbmag_phi
   end if
 
   call wrtout([std_out, ab_out], message)
+else
+  orb_mom_atom(my_lcur,:,my_iatom)=orb_mom
+  do mu=1,3
+    maxmag=max(maxmag,abs(orb_mom_atom(my_lcur,mu,my_iatom)))
+    difmag=max(difmag,abs(orb_mom_atom(my_lcur,mu,my_iatom)-orb_mom_atom0(my_lcur,mu,my_iatom)))
+  enddo
+endif
 
 
 end do    !!!!!!!!! END DO lcur
-    write(message,*) '--------------------------------------------------'
+if (.not. present(orb_mom_atom)) then
+    write(message,*) '--------------------------------------------------------------------------------------------'
     call wrtout([std_out, ab_out], message)
+endif
 end do   !!!!!!!!! END DO natoms
 
 
-    write(message,'(a,3f12.6)') ' Total (sum) ', sum_orb_mom(1),sum_orb_mom(2),sum_orb_mom(3)
+call vcart2ylm(sum_orb_mom(1:3), orbmag_r, orbmag_theta, orbmag_phi)
+if (.not. present(orb_mom_atom)) then
+    write(message,'(a,3f12.6)') ' Sum (cart.coord.)          ', sum_orb_mom(1),sum_orb_mom(2),sum_orb_mom(3)
     call wrtout([std_out, ab_out], message)
-    write(message,*) '--------------------------------------------------'
+    write(message,'(a,1f11.6,a,2f13.6)') '     (sph.coord.)', orbmag_r,'                                    ',orbmag_theta, orbmag_phi
+    call wrtout([std_out, ab_out], message)
+    write(message,*) '--------------------------------------------------------------------------------------------'
     call wrtout([std_out, ab_out], message)
     write(message,*) ' '
     call wrtout([std_out, ab_out], message)
+endif
 
 end if  !!!!!!!!!!
 

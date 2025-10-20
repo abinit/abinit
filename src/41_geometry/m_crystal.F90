@@ -709,7 +709,7 @@ end subroutine crystal_malloc
 !!  crystal_free
 !!
 !! FUNCTION
-!!  Destroy the dynamic arrays in a crystal_t data type.
+!!  Free dynamic memory in a crystal_t data type.
 !!
 !! SOURCE
 

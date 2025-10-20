@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.1.5 of ABINIT, released Jul 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h06 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorial_tpositron_2/tpositron_2.abi
+.Starting date : Thu  9 Oct 2025.
+- ( at 18h00 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/tutorial_tpositron_2/tpositron_2.abi
 - output file    -> tpositron_2.abo
 - root for input  files -> tpositron_2i
 - root for output files -> tpositron_2o
 
-- inpspheads : Reading pseudopotential header in XML form from
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pw_std/Si.xml
+- inpspheads : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Si.xml
  DATASET    1 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -242,9 +242,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.13510
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pw_std/Si.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pw_std/Si.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pw_std/Si.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Si.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Si.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Si.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90944987
@@ -284,7 +284,7 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  6  -60.147231150204     6.147E-06 1.095E-04 5.428E-05
  ETOT  7  -60.147231225728    -7.552E-08 1.290E-04 2.212E-06
  ETOT  8  -60.147231262968    -3.724E-08 1.759E-04 7.896E-07
- ETOT  9  -60.147231255433     7.535E-09 1.133E-04 8.810E-08
+ ETOT  9  -60.147231255432     7.536E-09 1.133E-04 8.810E-08
  ETOT 10  -60.147231254157     1.276E-09 1.127E-04 9.697E-09
 
  At SCF step   10       nres2   =  9.70E-09 < tolvrs=  1.00E-08 =>converged.
@@ -347,8 +347,8 @@ force_length_stats: {min: null, max: null, mean: null, }
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -1.557977773495632
- Compensation charge over fine fft grid    =     -1.557998822267869
+ Compensation charge over spherical meshes =     -1.557977773499665
+ Compensation charge over fine fft grid    =     -1.557998822258495
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -476,28 +476,38 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.23432184067698E+01
-hartree             :  5.15956628174318E+00
-xc                  : -3.56390095163746E+01
+kinetic             :  2.23432184067739E+01
+hartree             :  5.15956628174225E+00
+xc                  : -3.56390095163775E+01
 Ewald energy        : -6.05835621191802E+01
 psp_core            :  1.63269192139636E+00
-local_psp           : -2.07370728544821E+01
-spherical_terms     :  2.76769233745481E+01
-total_energy        : -6.01472445055795E+01
-total_energy_eV     : -1.63668975836260E+03
+local_psp           : -2.07370728544820E+01
+PAW spherical_terms :  2.76769233745509E+01
+total_energy        : -6.01472445055763E+01
+total_energy_eV     : -1.63668975836251E+03
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -5.76972468709001E-01
+band_energy         : -5.76972468725090E-01
 Ewald energy        : -6.05835621191802E+01
 psp_core            :  1.63269192139636E+00
-xc_dc               : -1.50781158770500E+01
-spherical_terms     :  1.44587272893858E+01
-total_energy_dc     : -6.01472312541571E+01
-total_energy_dc_eV  : -1.63668939777306E+03
+xc_dc               : -1.50781158770492E+01
+PAW spherical_terms :  1.44587272894011E+01
+total_energy_dc     : -6.01472312541569E+01
+total_energy_dc_eV  : -1.63668939777305E+03
+...
+
+
+--- !EnergyTermsWithPAWCore
+iteration_state     : {dtset: 1, }
+comment             : 'Components of total free energy, including PAW core contributions'
+Total energy        : -4.33545266553807E+03
+Total energy DC     : -4.33545265228665E+03
+Total energy (eV)   : -1.17973666688817E+05
+Total energy DC (eV): -1.17973666328227E+05
 ...
 
 
@@ -534,9 +544,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.13510
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pw_std/Si.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pw_std/Si.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pw_std/Si.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Si.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Si.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Si.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90944987
@@ -638,8 +648,8 @@ force_length_stats: {min: null, max: null, mean: null, }
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.001661456771314
- Compensation charge over fine fft grid    =     -0.001675575990837
+ Compensation charge over spherical meshes =     -0.001661456771295
+ Compensation charge over fine fft grid    =     -0.001675575990819
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -715,7 +725,7 @@ force_length_stats: {min: null, max: null, mean: null, }
    Plane-wave contribution to ann.rate          (ns-1) =  3.68186803E+00
    Plane-wave valence contribution to ann.rate  (ns-1) =  3.56660625E+00
    On-site core contribution to ann.rate        (ns-1) =  4.36935524E-02
-   On-site valence contribution to ann.rate     (ns-1) = -6.70696162E-03
+   On-site valence contribution to ann.rate     (ns-1) = -6.70696158E-03
    Plane-wave contribution to ann.rate with IPM (ns-1) =  3.63165894E+00
    Plane-wave core contrb. to ann.rate with IPM (ns-1) =  5.45846052E-02
 
@@ -741,7 +751,7 @@ force_length_stats: {min: null, max: null, mean: null, }
    Plane-wave contribution to ann.rate          (ns-1) =  4.01286347E+00
    Plane-wave valence contribution to ann.rate  (ns-1) =  3.89762988E+00
    On-site core contribution to ann.rate        (ns-1) =  4.36851214E-02
-   On-site valence contribution to ann.rate     (ns-1) = -6.70691261E-03
+   On-site valence contribution to ann.rate     (ns-1) = -6.70691262E-03
    Plane-wave contribution to ann.rate with IPM (ns-1) =  3.96266437E+00
    Plane-wave core contrb. to ann.rate with IPM (ns-1) =  5.45846052E-02
 
@@ -815,12 +825,12 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.11932176576050E-01
-local_psp           : -5.49848386881383E-01
-spherical_terms     : -7.72686718332659E-03
-positronic          : -4.45643077488660E-01
-electronic          : -6.01472312541571E+01
-electron_positron_interaction:  1.45172301507361E-02
+kinetic             :  1.11932176576049E-01
+local_psp           : -5.49848386882354E-01
+PAW spherical_terms : -7.72686718322459E-03
+positronic          : -4.45643077489528E-01
+electronic          : -6.01472312541569E+01
+electron_positron_interaction:  1.45172301515115E-02
 total_energy        : -6.05783571014950E+01
 total_energy_eV     : -1.64842092869694E+03
 ...
@@ -829,12 +839,12 @@ total_energy_eV     : -1.64842092869694E+03
 --- !EnergyTermsDC
 iteration_state     : {dtset: 2, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -4.31176720711844E-01
-spherical_terms     :  0.00000000000000E+00
-electron_positron_dc: -1.45172348180143E-02
-positronic          : -4.45693955529861E-01
-electronic          : -6.01472312541571E+01
-electron_positron_interaction:  1.45172301507361E-02
+band_energy         : -4.31176720711907E-01
+PAW spherical_terms :  0.00000000000000E+00
+electron_positron_dc: -1.45172348188172E-02
+positronic          : -4.45693955530721E-01
+electronic          : -6.01472312541569E+01
+electron_positron_interaction:  1.45172301515115E-02
 total_energy_dc     : -6.05784079795362E+01
 total_energy_dc_eV  : -1.64842231315885E+03
 ...
@@ -842,7 +852,7 @@ total_energy_dc_eV  : -1.64842231315885E+03
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.0261212902E+01  1.0261212902E+01  1.0261212902E+01 Bohr
               amu      2.80855000E+01
@@ -1066,7 +1076,7 @@ P           mkmem2          1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1078,12 +1088,12 @@ P           mkmem2          1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1101,15 +1111,15 @@ P           mkmem2          1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         12.0  wall=         12.6
+- Proc.   0 individual time (sec): cpu=         11.9  wall=         11.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered  44 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         12.0  wall=         12.6
++Overall time at end (sec) : cpu=         11.9  wall=         11.9

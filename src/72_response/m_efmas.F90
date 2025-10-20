@@ -60,6 +60,7 @@ module m_efmas
 !!***
 
 CONTAINS
+
 !===========================================================
 
 !!****f* m_efmas/efmasval_free
@@ -79,7 +80,6 @@ subroutine efmasval_free(efmasval)
 
  !Arguments ------------------------------------
  type(efmasval_type),intent(inout) :: efmasval
-
  ! *********************************************************************
 
  ABI_SFREE(efmasval%ch2c)
@@ -827,10 +827,9 @@ end subroutine efmas_ncread
   real(dp) :: deltae, dot2i,dot2r,dot3i,dot3r,doti,dotr
   real(dp), allocatable :: cg0(:,:), cg1_pert2(:,:),cg1_pert1(:,:)
   real(dp), allocatable :: gh1c_pert2(:,:),gh1c_pert1(:,:),gh0c1_pert1(:,:)
-  complex(dpc) :: eig2_part(3,3), eig2_ch2c(3,3), eig2_paral(3,3), eig2_gauge_change(3,3)
-  complex(dpc) :: eig1a, eig1b, g_ch
-  complex(dpc), allocatable :: eigen1_deg(:,:), eig2_diag(:,:,:,:), eig2_diag_cart(:,:,:,:)
-
+  complex(dp) :: eig2_part(3,3), eig2_ch2c(3,3), eig2_paral(3,3), eig2_gauge_change(3,3)
+  complex(dp) :: eig1a, eig1b, g_ch
+  complex(dp), allocatable :: eigen1_deg(:,:), eig2_diag(:,:,:,:), eig2_diag_cart(:,:,:,:)
 ! *********************************************************************
 
   debug = .false. ! Prints additional info to std_out
@@ -895,7 +894,7 @@ end subroutine efmas_ncread
           do iband=1,deg_dim
             do jband=1,deg_dim
               eigen1_deg(iband,jband) = cmplx(eigen1(2*(jband+degl)-1+(iband+degl-1)*2*nband_k,adir,ipert),&
-&                                             eigen1(2*(jband+degl)  +(iband+degl-1)*2*nband_k,adir,ipert),dpc)
+&                                             eigen1(2*(jband+degl)  +(iband+degl-1)*2*nband_k,adir,ipert),dp)
             end do
           end do
 
@@ -931,14 +930,14 @@ end subroutine efmas_ncread
               do kband=1,nband_k
                 !!! Equivalent to the gauge change in eig2stern.F90, but works also for other choices than the parallel gauge.
                 eig1a = cmplx( eigen1(2*kband-1+(degl+iband-1)*2*nband_k+band2tot_index,adir,ipert), &
-&                -eigen1(2*kband+(degl+iband-1)*2*nband_k+band2tot_index,adir,ipert), kind=dpc )
+&                -eigen1(2*kband+(degl+iband-1)*2*nband_k+band2tot_index,adir,ipert), kind=dp )
                 eig1b = cmplx( eigen1(2*kband-1+(degl+jband-1)*2*nband_k+band2tot_index,bdir,ipert), &
-&                eigen1(2*kband+(degl+jband-1)*2*nband_k+band2tot_index,bdir,ipert), kind=dpc )
+&                eigen1(2*kband+(degl+jband-1)*2*nband_k+band2tot_index,bdir,ipert), kind=dp )
                 g_ch = eig1a*eig1b
                 eig1a = cmplx( eigen1(2*kband-1+(degl+iband-1)*2*nband_k+band2tot_index,bdir,ipert), &
-&                -eigen1(2*kband+(degl+iband-1)*2*nband_k+band2tot_index,bdir,ipert), kind=dpc )
+&                -eigen1(2*kband+(degl+iband-1)*2*nband_k+band2tot_index,bdir,ipert), kind=dp )
                 eig1b = cmplx( eigen1(2*kband-1+(degl+jband-1)*2*nband_k+band2tot_index,adir,ipert), &
-&                eigen1(2*kband+(degl+jband-1)*2*nband_k+band2tot_index,adir,ipert), kind=dpc )
+&                eigen1(2*kband+(degl+jband-1)*2*nband_k+band2tot_index,adir,ipert), kind=dp )
                 g_ch = g_ch + eig1a*eig1b
 
                 deltae = eigen0(kband+bandtot_index) - eigen0((degl+iband)+bandtot_index)
@@ -971,9 +970,9 @@ end subroutine efmas_ncread
               call dotprod_g(dot3r,dot3i,istwf_k,npw_k*nspinor,2,gh0c1_pert1,cg1_pert2,mpi_enreg%me_g0,&
 &              mpi_enreg%comm_spinorfft)
 
-              eig2_part(adir,bdir) = cmplx(dotr+dot2r+dot3r,doti+dot2i+dot3i,kind=dpc)
-              !eig2_part(adir,bdir) = cmplx(dotr+dot2r,doti+dot2i,kind=dpc)  !DEBUG
-              !eig2_part(adir,bdir) = cmplx(dotr,doti,kind=dpc)              !DEBUG
+              eig2_part(adir,bdir) = cmplx(dotr+dot2r+dot3r,doti+dot2i+dot3i,kind=dp)
+              !eig2_part(adir,bdir) = cmplx(dotr+dot2r,doti+dot2i,kind=dp)  !DEBUG
+              !eig2_part(adir,bdir) = cmplx(dotr,doti,kind=dp)              !DEBUG
 
               eig2_ch2c(adir,bdir) = efmasval(ideg,ikpt)%ch2c(adir,bdir,iband,jband)
 
@@ -1104,12 +1103,12 @@ end subroutine efmas_ncread
   real(dp), allocatable :: dirs(:,:)
   real(dp),allocatable :: prodr(:,:)
   !real(dp), allocatable :: f3dfd(:,:,:)
-  complex(dpc) :: matr2d(2,2)
-  complex(dpc), allocatable :: eigenvec(:,:), work(:)
-  complex(dpc), allocatable :: eig2_diag_cart(:,:,:,:)
-  complex(dpc), allocatable :: f3d(:,:), df3d_dth(:,:), df3d_dph(:,:)
-  complex(dpc), allocatable :: unitary_tr(:,:), eff_mass(:,:)
-  complex(dpc),allocatable :: prodc(:,:)
+  complex(dp) :: matr2d(2,2)
+  complex(dp), allocatable :: eigenvec(:,:), work(:)
+  complex(dp), allocatable :: eig2_diag_cart(:,:,:,:)
+  complex(dp), allocatable :: f3d(:,:), df3d_dth(:,:), df3d_dph(:,:)
+  complex(dp), allocatable :: unitary_tr(:,:), eff_mass(:,:)
+  complex(dp),allocatable :: prodc(:,:)
 
 ! *********************************************************************
 
@@ -1963,13 +1962,12 @@ function MATMUL_DPC(aa,bb,mm,nn,transa,transb)
  integer,intent(in) :: mm,nn
  character(len=1),optional,intent(in) :: transa,transb
 !arrays
- complex(dpc),intent(in) :: aa(:,:),bb(:,:)
- complex(dpc) :: MATMUL_DPC(mm,nn)
+ complex(dp),intent(in) :: aa(:,:),bb(:,:)
+ complex(dp) :: MATMUL_DPC(mm,nn)
 
 !Local variables-------------------------------
  integer :: kk,lda,ldb
  character(len=1) :: transa_,transb_
-
 ! *************************************************************************
 
  transa_='n';if (present(transa)) transa_=transa
