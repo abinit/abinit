@@ -24,14 +24,10 @@
  boxcutmin 1.1
  tolwfr 1e-20       # Tolerance for Sternheimer solver.
 
- #nband 9           # Number of bands to build G with Lehmnann's representation.
-                   # This value cannot be larger that the number of bands in the WFK file.
-
  nband 12          # Number of bands to build G with Lehmnann's representation.
+                   # This value cannot be larger that the number of bands in the WFK file.
  #prtvol 10
 
- # TODO: elph2_imagden Should have a default value
- elph2_imagden 0.1 eV
  zcut 0.01 eV
 
  # Specify ppmodel used to evalue convolution between G and W.
@@ -83,7 +79,7 @@
 #%% [files]
 #%% use_git_submodule = diamond_eph_gwpt
 #%% files_to_test =
-#%%   t04.abo, tolnlines= 700, tolabs= 1.0e+5, tolrel= 10.0
+#%%   t04.abo, tolnlines= 700, tolabs= 1.0e+2, tolrel= 10.0
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

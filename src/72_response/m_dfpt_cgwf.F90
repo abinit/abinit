@@ -33,7 +33,7 @@ module m_dfpt_cgwf
  use m_cgtools
  use m_rf2
 
- use m_fstrings,    only : sjoin, ftoa, itoa
+ use m_fstrings,    only : sjoin, ftoa, itoa, ktoa
  use defs_abitypes, only : MPI_type
  use m_dtset,       only : dataset_type
  use m_time,        only : timab
@@ -1807,8 +1807,9 @@ end subroutine stern_init
 !!
 !! SOURCE
 
-subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_hamkq, eig0_k, eig0_kq, cwave0, &
-                       cwaveprj0, cwavef, cwaveprj, err_msg, ierr, &
+subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_hamkq, eig0_k, eig0_kq, &
+                       cwave0, cwaveprj0, &               ! in
+                       cwavef, cwaveprj, err_msg, ierr, & ! out
                        full_cg1, full_ur1) ! optional
 
 !Arguments ------------------------------------
@@ -1840,6 +1841,10 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  complex(gwp),pointer :: full_ug1_dp_ptr(:)
 #endif
 ! *************************************************************************
+
+ !if (any(abs(gs_hamkq%kpt_k + qpt - gs_hamkq%kpt_kp) > tol12)) then
+ !  ABI_ERROR(sjoin(ktoa(gs_hamkq%kpt_k + qpt), " != ",  ktoa(gs_hamkq%kpt_kp)))
+ !end if
 
  ! TODO: grad_berry is problematic because in dfpt_cgwf, the array is declared with
  !

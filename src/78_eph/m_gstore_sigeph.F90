@@ -480,6 +480,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
    ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
    ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
 
+   ! Allocate arrays for self-energy matrix elements.
    ABI_CALLOC(sigma%vals_e0ks, (ntemp, nb_k, glob_nk))
    ABI_CALLOC(sigma%dvals_de0ks, (ntemp, nb_k, glob_nk))
    ABI_CALLOC(sigma%fan_vals, (ntemp, nb_k, glob_nk))
@@ -503,7 +504,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
      ABI_CHECK(isirr_k, "For the time being the k-point in Sigma_{nk} must be in the IBZ")
      kk_ibz = ebands%kptns(:,ik_ibz)
 
-     ! Will store results using glob_ik index.
+     ! Will store results in sigma% using glob_ik index.
      ikcalc = gqk%my_k2glob(my_ik)
 
      ! Compute the little group of the k-point so that we can sum g(k,q) only for q in the IBZ_k.
@@ -604,9 +605,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
          ABI_CALLOC(stern_ppb, (2, natom3, natom3, nb_k))
 
          do my_ip=1, gqk%my_npert
-           ipc = gqk%my_pertcases(my_ip)
-           idir = mod(ipc-1, 3) + 1
-           ipert = (ipc - idir) / 3 + 1
+           ipc = gqk%my_pertcases(my_ip); idir = mod(ipc-1, 3) + 1; ipert = (ipc - idir) / 3 + 1
            !print *, "idir, ipert:", idir, ipert
 
            ! Set up local potential vlocal1 with proper dimensioning, from vtrial1 taking into account the spin.
@@ -716,6 +715,19 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
              ! Re + Im of Fan-Migdal self-energy
              ! (my_npert, nb_kq, my_nq, nb_k, my_nk)
              gkq2 = weight_q * gqk%my_g2(my_ip, im_kq, my_iq, in_k, my_ik)
+
+             ! Compute contribution to Fan-Migdal for M > sigma%nbsum
+             !if (dtset%eph_stern /= 0) then
+             !  ! sum_{pp'} d_p* Stern_{pp'} d_p' with d = displ_red(:,:,:,nu) and S = stern_ppb(:,:,:,ib_k)
+             !  vec_natom3 = zero
+             !  call cg_zgemm("N", "N", natom3, natom3, 1, stern_ppb(:,:,:,ib_k), displ_red(:,:,:,nu), vec_natom3)
+             !  dotri = cg_zdotc(natom3, displ_red(:,:,:,nu), vec_natom3)
+             !  !write(std_out, *)"dotri:", dotri
+             !  rfact = dotri(1)
+             !  !rfact = cg_real_zdotc(natom3, displ_red(:,:,:,nu), vec_natom3)
+             !  rfact = rfact * sigma%wtq_k(iq_ibz_k) / (two * wqnu)
+             !end if
+
              !print *, "gkq2", gkq2
              cfact_t = cfact_t * gkq2
              sigma%vals_e0ks(:, in_k, ikcalc) = sigma%vals_e0ks(:, in_k, ikcalc) + cfact_t

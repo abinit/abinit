@@ -1411,7 +1411,7 @@ end subroutine dvdb_readsym_qbz
 !!  dvdb_read_vxc1_qbz
 !!
 !! FUNCTION
-!! Compute the first-order change of exchange-correlation potential
+!! Compute the first-order change of the exchange-correlation potential
 !! for a q-point in the BZ starting from its symmetrical image in the IBZ.
 !!
 !! INPUTS
