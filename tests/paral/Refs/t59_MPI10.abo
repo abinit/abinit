@@ -71,7 +71,6 @@ _ WF disk file :      0.822 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
           bdeigrf           8
            diemac      6.00000000E+00
              ecut      1.50000000E+01 Hartree
-    elph2_imagden      3.67493254E-03 Hartree
            enunit           2
 -          fftalg         512
            getwfk1          0
@@ -965,7 +964,6 @@ tolerances: {tolwfr: 1.00E-16, }
           bdeigrf           8
            diemac      6.00000000E+00
              ecut      1.50000000E+01 Hartree
-    elph2_imagden      3.67493254E-03 Hartree
            enunit           2
            etotal1    -1.1997097513E+01
            etotal2     8.4269409608E+00
