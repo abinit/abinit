@@ -28,6 +28,8 @@
                    # This value cannot be larger that the number of bands in the WFK file.
  #prtvol 10
 
+ # TODO: elph2_imagden Should have a default value
+ elph2_imagden 0.1 eV
  zcut 0.01 eV
 
  # Specify ppmodel used to evalue convolution between G and W.
