@@ -2576,12 +2576,12 @@ subroutine get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl,
      ABI_COMMENT(sjoin("File not found. Will try netcdf file: ", w_fname))
    end if
    ! Master reads npw and nqlwl from the SCR file.
-   call wrtout(std_out, sjoin('Testing file: ', w_fname))
+   call wrtout(std_out, sjoin('Testing SCR file: ', w_fname))
    call hscr%from_file(w_fname, fform, xmpi_comm_self)
 
    ! Have to change %npweps if it was larger than dim on disk.
-   npwe_file = Hscr%npwe
-   nqlwl     = Hscr%nqlwl
+   npwe_file = hscr%npwe
+   nqlwl     = hscr%nqlwl
 
    if (dtset%npweps > npwe_file) then
      write(msg,'(2(a,i0),2a,i0)')&
@@ -2616,19 +2616,19 @@ subroutine get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl,
  end if
 
  call xmpi_bcast(w_fname, master, comm, ierr)
- call Hscr%bcast(master, my_rank, comm)
+ call hscr%bcast(master, my_rank, comm)
  call xmpi_bcast(dtset%npweps, master, comm, ierr)
  call xmpi_bcast(nqlwl, master, comm, ierr)
 
  if (nqlwl > 0) then
    ABI_MALLOC(qlwl, (3, nqlwl))
-   qlwl = Hscr%qlwl
+   qlwl = hscr%qlwl
  end if
 
  ! Init qmesh from the SCR file.
- call Qmesh%init(cryst, Hscr%nqibz, Hscr%qibz, dtset%kptopt)
+ call qmesh%init(cryst, hscr%nqibz, hscr%qibz, dtset%kptopt)
 
- call Gsph_c%init(cryst, dtset%npweps, gvec=Hscr%gvec)
+ call gsph_c%init(cryst, dtset%npweps, gvec=hscr%gvec)
 
 end subroutine get_hscr_qmesh_gsph
 !!***

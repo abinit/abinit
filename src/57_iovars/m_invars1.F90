@@ -2430,7 +2430,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%efmas_dim=3
    dtsets(idtset)%efmas_dirs=zero
    dtsets(idtset)%efmas_ntheta=1000
-   dtsets(idtset)%elph2_imagden=zero
+   !dtsets(idtset)%elph2_imagden=zero
    dtsets(idtset)%enunit=0
    dtsets(idtset)%eshift=zero
    dtsets(idtset)%esmear=0.01_dp
