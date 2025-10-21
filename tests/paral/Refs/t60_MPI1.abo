@@ -65,6 +65,7 @@ _ WF disk file :      0.144 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           8
 -   mkqmem =           8        mk1mem =           8           mpw =         116
       nfft =        3375          nkpt =           8
+- my_mband =          10
 ================================================================================
 P This job should need less than                       1.631 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -114,6 +115,7 @@ _ WF disk file :      0.144 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           8
 -   mkqmem =           8        mk1mem =           8           mpw =         116
       nfft =        3375          nkpt =           8
+- my_mband =          10
 ================================================================================
 P This job should need less than                       1.811 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -163,6 +165,7 @@ _ WF disk file :      0.144 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           8
 -   mkqmem =           8        mk1mem =           8           mpw =         116
       nfft =        3375          nkpt =           8
+- my_mband =          10
 ================================================================================
 P This job should need less than                       1.811 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -185,7 +188,6 @@ _ WF disk file :      0.144 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
           bdeigrf          10
            diemac      6.00000000E+00
              ecut      1.00000000E+01 Hartree
-    elph2_imagden      3.67493254E-03 Hartree
            enunit           2
 -          fftalg         512
            getden11         0
@@ -2921,7 +2923,6 @@ tolerances: {tolwfr: 1.00E-08, }
           bdeigrf          10
            diemac      6.00000000E+00
              ecut      1.00000000E+01 Hartree
-    elph2_imagden      3.67493254E-03 Hartree
            enunit           2
            etotal11   -1.1692125618E+01
            etotal13    1.7649158459E+01

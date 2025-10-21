@@ -65,6 +65,7 @@ _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           8
 -   mkqmem =           8        mk1mem =           8           mpw =         821
       nfft =       19683          nkpt =           8
+- my_mband =          12
 ================================================================================
 P This job should need less than                       8.620 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -114,6 +115,7 @@ _ WF disk file :      1.183 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           8
 -   mkqmem =           8        mk1mem =           8           mpw =         821
       nfft =       19683          nkpt =           8
+- my_mband =          12
 ================================================================================
 P This job should need less than                       9.671 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -163,6 +165,7 @@ _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           8
 -   mkqmem =           8        mk1mem =           8           mpw =         821
       nfft =       19683          nkpt =           8
+- my_mband =          12
 ================================================================================
 P This job should need less than                       9.671 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -212,6 +215,7 @@ _ WF disk file :      1.199 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           8
 -   mkqmem =           8        mk1mem =           8           mpw =         821
       nfft =       19683          nkpt =           8
+- my_mband =          12
 ================================================================================
 P This job should need less than                       9.671 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -261,6 +265,7 @@ _ WF disk file :      1.183 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           8
 -   mkqmem =           8        mk1mem =           8           mpw =         821
       nfft =       19683          nkpt =           8
+- my_mband =          12
 ================================================================================
 P This job should need less than                       9.671 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -310,6 +315,7 @@ _ WF disk file :      1.199 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           8
 -   mkqmem =           8        mk1mem =           8           mpw =         821
       nfft =       19683          nkpt =           8
+- my_mband =          12
 ================================================================================
 P This job should need less than                       9.671 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -359,6 +365,7 @@ _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           8
 -   mkqmem =           8        mk1mem =           8           mpw =         821
       nfft =       19683          nkpt =           8
+- my_mband =          12
 ================================================================================
 P This job should need less than                       9.671 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -408,6 +415,7 @@ _ WF disk file :      1.199 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           8
 -   mkqmem =           8        mk1mem =           8           mpw =         821
       nfft =       19683          nkpt =           8
+- my_mband =          12
 ================================================================================
 P This job should need less than                       9.671 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -429,7 +437,6 @@ _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
               amu      1.20110000E+01
            diemac      6.00000000E+00
              ecut      3.70000000E+01 Hartree
-    elph2_imagden      3.67493254E-03 Hartree
            enunit           2
 -          fftalg         512
            getden11         0
@@ -7713,7 +7720,6 @@ tolerances: {tolwfr: 1.00E-08, }
               amu      1.20110000E+01
            diemac      6.00000000E+00
              ecut      3.70000000E+01 Hartree
-    elph2_imagden      3.67493254E-03 Hartree
            enunit           2
            etotal11   -1.1945661669E+01
            etotal13    1.3599660641E+01
