@@ -1486,18 +1486,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              ! TODO: The last states may fail to converge and we have to decide how to handle this.
              if (ierr /= 0) then
                ABI_WARNING(sjoin("Stern at +q", qkp_string, msg))
-               full_cg1_kqmp = zero; full_ur1_kqmp = zero
-               !stern_kmp%eig1_k(:, bstart_kq:bstop_kq, ib_sum) = zero
-               stern_qq_ierr = stern_qq_ierr + 1
+               full_cg1_kqmp = zero; full_ur1_kqmp = zero; stern_qq_ierr = stern_qq_ierr + 1
                !cycle
              end if
 
              ! Store KS e-ph matrix elements for this perturbation.
-             if (pp_is_gamma) then
-               if (ib_sum >= gqk%bstart_k .and. ib_sum <= gqk%bstop_k) then
-                 in_k = ib_sum - bstart_k + 1
-                 gks_atm(:,:,in_k,ipc) = stern_kmp%eig1_k(:, bstart_kq:bstop_kq, ib_sum)
-               end if
+             if (pp_is_gamma .and. (ib_sum >= gqk%bstart_k .and. ib_sum <= gqk%bstop_k)) then
+               in_k = ib_sum - bstart_k + 1
+               gks_atm(:,:,in_k,ipc) = stern_kmp%eig1_k(:, bstart_kq:bstop_kq, ib_sum)
              end if
 
              ! <m,k+q|e^{i(p+G)r}|Delta_q psi_{bsum,k-p}>
@@ -1596,7 +1592,7 @@ if (.not. qq_is_gamma) then
                NOT_IMPLEMENTED_ERROR()
              end if
 
-              ! (k-p, k+q-p)
+             ! (k-p, k+q-p)
              call stern_kqmp%solve(u1_band, band_me, idir, ipert, -qq_bz, gs_ham_kmp, rf_ham_kmp, &
                                    ebands%eig(:,ikqmp_ibz,spin), ebands%eig(:,ikmp_ibz,spin), &
                                    cg_kqmp, cwaveprj0, cg1_kmp, cwaveprj, msg, ierr, &
@@ -1615,18 +1611,14 @@ if (.not. qq_is_gamma) then
              ! TODO: The last states may fail to converge and we have to decide how to handle this.
              if (ierr /= 0) then
                ABI_WARNING(sjoin("Stern at -q:", qkp_string, msg))
-               full_cg1_kmp = zero; full_ur1_star_kmp = zero
-               !stern_kqmp%eig1_k(:, bstart_kq:bstop_kq, ib_sum) = zero
-               stern_mq_ierr = stern_mq_ierr + 1
+               full_cg1_kmp = zero; full_ur1_star_kmp = zero; stern_mq_ierr = stern_mq_ierr + 1
                !cycle
              end if
 
              ! For debug, gks_atm2 and gks_atm should be consistent
-             if (pp_is_gamma) then
-               if (ib_sum >= gqk%bstart_k .and. ib_sum <= gqk%bstop_k) then
-                 in_k = ib_sum - bstart_k + 1
-                 gks_atm2(:,:,in_k,ipc) = stern_kqmp%eig1_k(:, bstart_kq:bstop_kq, ib_sum)
-               end if
+             if (pp_is_gamma .and. (ib_sum >= gqk%bstart_k .and. ib_sum <= gqk%bstop_k)) then
+               in_k = ib_sum - bstart_k + 1
+               gks_atm2(:,:,in_k,ipc) = stern_kqmp%eig1_k(:, bstart_kq:bstop_kq, ib_sum)
              end if
 
              do n_k=bstart_k, bstop_k
@@ -1656,9 +1648,9 @@ if (.not. qq_is_gamma) then
                  !if (n_k == 1 .AND. m_kq == 1 .AND. ipc == 1) &
                  !  print *, "|rhotwg_c|^2,-q,ib=", ib_sum, sum(abs(rhotwg_c)*abs(rhotwg_c))
 
-                  ! Take the average
-                  iw_nk = n_k - bstart_k + 1
-                  ctmp_gwpc = half * sum(rhotwg_c(:) * (vec_gwc_mkq(:,1,m_kq) + vec_gwc_mkq(:,iw_nk,m_kq)))
+                 ! Take the average
+                 iw_nk = n_k - bstart_k + 1
+                 ctmp_gwpc = half * sum(rhotwg_c(:) * (vec_gwc_mkq(:,1,m_kq) + vec_gwc_mkq(:,iw_nk,m_kq)))
 
                  if (need_x_kmp) then
                    ! TODO recheck
