@@ -61,7 +61,7 @@ module m_dyson_solver
 
     integer :: npts
     ! Number of points
-    integer :: nspinor
+    integer :: nsig_ab
     ! Number of spinor components
 
     real(dp) :: betar_pm(2), zcut_pm(2)
@@ -791,7 +791,7 @@ subroutine sigma_pade_init(self, npts, zmesh, sigc_cvals, alphac_pm, betar_pm, z
  ABI_MALLOC(self%sigc_cvals, (npts,1))
  self%zmesh = zmesh
  self%sigc_cvals(:,1) = sigc_cvals
- self%nspinor = 1
+ self%nsig_ab = 1
 
  self%alphac_pm = alphac_pm
  self%betar_pm = betar_pm
@@ -811,21 +811,21 @@ end subroutine sigma_pade_init
 !!
 !! SOURCE
 
-subroutine sigma_pade_init_spinor(self, npts, zmesh, nspinor, sigc_cvals, alphac_pm, betar_pm, zcut_pm)
+subroutine sigma_pade_init_spinor(self, npts, zmesh, nsig_ab, sigc_cvals, alphac_pm, betar_pm, zcut_pm)
 
 !Arguments ------------------------------------
  class(sigma_pade_t),intent(out) :: self
- integer,intent(in) :: npts, nspinor
- complex(dp),target,intent(in) :: zmesh(npts), sigc_cvals(npts,nspinor), alphac_pm(2)
+ integer,intent(in) :: npts, nsig_ab
+ complex(dp),target,intent(in) :: zmesh(npts), sigc_cvals(npts,nsig_ab), alphac_pm(2)
  real(dp),intent(in) :: betar_pm(2), zcut_pm(2)
 ! *************************************************************************
 
  self%npts = npts
  ABI_MALLOC(self%zmesh, (npts))
- ABI_MALLOC(self%sigc_cvals, (npts,nspinor))
+ ABI_MALLOC(self%sigc_cvals, (npts,nsig_ab))
  self%zmesh = zmesh
  self%sigc_cvals = sigc_cvals
- self%nspinor = nspinor
+ self%nsig_ab = nsig_ab
 
  self%alphac_pm = alphac_pm
  self%betar_pm = betar_pm
@@ -874,7 +874,7 @@ subroutine sigma_pade_eval(self, zz, val, &
   val = czero
   if (present(dvdz)) dvdz = czero
 
-  do iab = 1, self%nspinor
+  do iab = 1, self%nsig_ab
     if (real(zz) > zero) then
       val = val + pade(self%npts, self%zmesh, self%sigc_cvals(:,iab), zz)
       if (present(dvdz)) then
