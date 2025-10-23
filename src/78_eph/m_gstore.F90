@@ -312,8 +312,10 @@ type, public :: gqk_t
   ! Also, m, n bands are EXCHANGED (first n then m).
 
   real(dp), allocatable :: my_g2(:,:,:,:,:)
+
+  real(dp), allocatable :: my_gdw2(:,:,:,:,:)
   ! (my_npert, nb_kq, my_nq, nb_k, my_nk)
-  ! |g|^2 (local buffer). Allocated if cplex == 1
+  ! gDW^2 (local buffer).
 
   integer :: coords_qkpb_sumbp(ndims) = 0
   ! Coordinates of this processor in the (q, k, pert, band, band_sum, pp_sum) Cartesian grid.
@@ -1720,7 +1722,7 @@ subroutine gstore_print(gstore, units, header, prtvol)
 
    ! Print memory
    if (allocated(gqk%my_g2)) then
-     write(msg,'(a,f8.1,a)')'- Local memory allocated for |g|^2 array: ',ABI_MEM_MB(gqk%my_g2),' [Mb] <<< MEM'
+     write(msg,'(a,f8.1,a)')'- local memory allocated for |g|^2 array: ',ABI_MEM_MB(gqk%my_g2),' [mb] <<< mem'
      call wrtout(units, msg)
    end if
    if  (allocated(gqk%my_g)) then
@@ -1731,6 +1733,9 @@ subroutine gstore_print(gstore, units, header, prtvol)
      write(msg,'(a,f8.1,a)')'- Local memory allocated for g0nm_atm array: ',ABI_MEM_MB(gqk%my_gq0nm_atm),' [Mb] <<< MEM'
      call wrtout(units, msg)
    end if
+   !if (allocated(gqk%my_gdw2)) then
+   !  write(msg,'(a,f8.1,a)')'- local memory allocated for |gDW|^2 array: ',abi_mem_mb(gqk%my_gdw2),' [mb] <<< mem'
+   !end if
    if (allocated(gqk%vnk_cart_ibz)) then
      write(msg,'(a,f8.1,a)')'- Local memory allocated for vnk_cart_ibz: ',ABI_MEM_MB(gqk%vnk_cart_ibz),' [Mb] <<< MEM'
      call wrtout(units, msg)
@@ -1903,6 +1908,11 @@ subroutine gstore_malloc__(gstore, with_cplex, max_nq, qglob2bz, max_nk, kglob2b
      case default
        ABI_ERROR(sjoin("Wrong with_cplex:", itoa(with_cplex)))
      end select
+
+     ! Allocate local buffer for gDW2.
+     !if (with_gdw2) then
+     !ABI_CALLOC(gqk%my_gdw2, (gqk%my_npert, nb_kq, gqk%my_nq, nb_k, gqk%my_nk))
+     !end if
 
      ! Allocate storage for MPI-distributed dH/dk matrix elements.
      if (any(gstore%with_vk == [1, 2])) then
@@ -3287,6 +3297,7 @@ subroutine gqk_free(gqk)
  ABI_SFREE(gqk%my_g)
  ABI_SFREE(gqk%my_gq0nm_atm)
  ABI_SFREE(gqk%my_g2)
+ ABI_SFREE(gqk%my_gdw2)
  ABI_SFREE(gqk%my_pertcases)
  ABI_SFREE(gqk%vnk_cart_ibz)
  ABI_SFREE(gqk%vnk_mat_cart_ibz)
@@ -4277,6 +4288,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  real(dp),allocatable :: gwork_q(:,:,:,:,:), slice_bb(:,:,:)
  real(dp),allocatable :: phfreqs_ibz(:,:), pheigvec_cart_ibz(:,:,:,:,:), pheigvec_cart_qbz(:,:,:,:)
  real(dp),allocatable :: displ_cart_qbz(:,:,:,:), displ_red_qbz(:,:,:,:), gmn_nu(:,:,:,:)
+
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
@@ -4585,14 +4597,78 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
 
        ! Allocate my_gq0nm_atm and transfer data. Note TRANSPOSITION in (m, n) indices.
        ABI_MALLOC(gqk%my_gq0nm_atm, (nb_k, nb_kq, natom3, gqk%my_nk))  ! nb_k, nb_kq
-        do my_ik=1,gqk%my_nk
-          ik_glob = my_ik + gqk%my_kstart - 1
-          do ib_m=1,nb_kq
-            do ib_n=1,nb_k
-              gqk%my_gq0nm_atm(ib_n,ib_m,:,my_ik) = gwork_q(1,ib_m,ib_n,:,ik_glob) + j_dpc * gwork_q(2,ib_m,ib_n,:,ik_glob)
-            end do
-          end do
-        end do
+       do my_ik=1,gqk%my_nk
+         ik_glob = my_ik + gqk%my_kstart - 1
+         do ib_m=1,nb_kq
+           do ib_n=1,nb_k
+             gqk%my_gq0nm_atm(ib_n,ib_m,:,my_ik) = gwork_q(1,ib_m,ib_n,:,ik_glob) + j_dpc * gwork_q(2,ib_m,ib_n,:,ik_glob)
+           end do
+         end do
+       end do
+
+#if 0
+       block
+       integer :: ip1, ip2
+       real(dp) :: wqnu, gdw2
+       complex(dp) :: cfact
+       real(dp),allocatable :: tpp_red(:,:)
+       real(dp) :: displ_nu_cart(2, 3, cryst%natom), displ_nu_red(2, 3, cryst%natom)
+       ABI_MALLOC(tpp_red, (natom3, natom3))
+
+       do ii=1, gstore%glob_nq_spin(spin)
+         iq_bz = qglob2bz(ii, spin)
+
+         !call wrtout(std_out, " Computing and storing phonons in the full BZ by rotating the data in the IBZ...")
+         iq_ibz = gqk%my_q2ibz(1, my_iq); isym_q = gqk%my_q2ibz(2, my_iq)
+         trev_q = gqk%my_q2ibz(6, my_iq); g0_q = gqk%my_q2ibz(3:5, my_iq)
+         !isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
+         isirr_q = (isym_q == 1 .and. trev_q == 0)
+         tsign_q = 1; if (trev_q == 1) tsign_q = -1
+         qq_ibz = gstore%qibz(:, iq_ibz)
+
+         ! Here we get the ph displacement for this q-point in the BZ from the image in the IBZ.
+         ! This is important for complex g as we have to enforce the gauge in the ph eigenvectors, including e(-q) = e(q)^*.
+         call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_cart_ibz(:,:,:,:,iq_ibz), pheigvec_cart_qbz, displ_cart_qbz, &
+                              displ_red_qbz=displ_red_qbz)
+
+         ! FIXME: Not sure this is correct!
+         !displ_nu_cart = gqk%my_displ_cart(:,:,:,my_ip,my_iq)
+         !call phdispl_cart2red_nmodes(natom, 1, cryst%gprimd, displ_nu_cart, displ_nu_red)
+
+         ! Compute T_pp'(q,nu) matrix in reduced coordinates for DW.
+         call sigtk_dw_tpp_red(natom, displ_nu_red, tpp_red)
+
+         ! Compute DW term following XG paper. Check prefactor.
+         ! gkq0_atm(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
+         ! (nb_k, nb_kq, natom3, my_nk)
+
+         !associate (gkq0_atm => gqk%my_gq0nm_atm(:,:,:,my_ik))
+         gdw2 = zero
+         do ip2=1,natom3
+           do ip1=1,natom3
+             !cfact = ( &
+             !  + real(gkq0_atm(in_k, im_kq, ip1)) * real(gkq0_atm(in_k, im_kq, ip2)) &
+             !  + aimag(gkq0_atm(in_k, im_kq, ip1)) * aimag(gkq0_atm(in_k, im_kq, ip2)) &
+             !  + real(gkq0_atm(in_k, im_kq, ip2)) * real(gkq0_atm(in_k, im_kq, ip1)) &
+             !  + aimag(gkq0_atm(in_k, im_kq, ip2)) * aimag(gkq0_atm(in_k, im_kq, ip1)) &
+              !+ gkq0_atm(1, in_k, im_kq, ip1) * gkq0_atm(1, in_k, im_kq, ip2) &
+              !+ gkq0_atm(2, in_k, im_kq, ip1) * gkq0_atm(2, in_k, im_kq, ip2) &
+              !+ gkq0_atm(1, in_k, im_kq, ip2) * gkq0_atm(1, in_k, im_kq, ip1) &
+              !+ gkq0_atm(2, in_k, im_kq, ip2) * gkq0_atm(2, in_k, im_kq, ip1) &
+             !)
+             !
+             gdw2 = gdw2 + real(tpp_red(ip1,ip2) * cfact)
+           end do
+         end do
+         !end associate
+
+         gdw2 = gdw2 / (four * two * wqnu)
+
+         end do
+         !print *, "gdw2", gdw2
+         ABI_FREE(tpp_red)
+       end block
+#endif
      end if ! read_dw
 
      if (from_atm_to_nu) then
@@ -4611,8 +4687,8 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
         tsign_q = 1; if (trev_q == 1) tsign_q = -1
         qq_ibz = gstore%qibz(:, iq_ibz)
 
-        ! Here we get the ph displacement for this q-point in the BZ from the imange in the IBZ.
-        ! This s important for complex g as we have to enforce the gauge in the ph eigenvectors, including e(-q) = e(q)^*.
+        ! Here we get the ph displacement for this q-point in the BZ from the image in the IBZ.
+        ! This is important for complex g as we have to enforce the gauge in the ph eigenvectors, including e(-q) = e(q)^*.
         call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_cart_ibz(:,:,:,:,iq_ibz), pheigvec_cart_qbz, displ_cart_qbz, &
                              displ_red_qbz=displ_red_qbz)
 
