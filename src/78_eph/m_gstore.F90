@@ -149,6 +149,7 @@ module m_gstore
  use m_krank,          only : krank_t, get_ibz2bz, star_from_ibz_idx
  use m_io_tools,       only : iomode_from_fname, file_exists
  use m_special_funcs,  only : gaussian
+ use m_geometry,       only : phdispl_cart2red_nmodes
  use m_copy,           only : alloc_copy
  use m_fftcore,        only : ngfft_seq, get_kg
  use m_cgtools,        only : cg_zdotc
@@ -4273,9 +4274,10 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  integer,parameter :: master = 0
  integer :: my_rank, ncid, spin, spin_ncid, nproc, ierr, fform, max_nb, ib, natom, natom3, varid, ib_m, ib_n
  integer :: max_nq, max_nk, ncerr, my_is, my_iq, iq_glob, my_ik, ik_glob
- integer :: nb_k, nb_kq, nb_k_file, nb_kq_file, gstore_cplex
- integer :: my_ip, ipert, iq_ibz, iq_bz, isym_q, trev_q, tsign_q, ii
- real(dp) :: cpu, wall, gflops
+ integer :: nb_k, nb_kq, nb_k_file, nb_kq_file, gstore_cplex, ip1, ip2
+ integer :: my_ip, ipert, iq_ibz, iq_bz, isym_q, trev_q, tsign_q, ii, im_kq, in_k
+ real(dp) :: cpu, wall, gflops, wqnu, gdw2
+ complex(dp) :: cfact
  logical :: isirr_q, from_atm_to_nu
  type(hdr_type) :: wfk0_hdr
  type(crystal_t) :: gstore_cryst
@@ -4283,12 +4285,13 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
 !arrays
  integer :: units(2), ibuffer(9), nproc_spin(ebands%nsppol), comm_spin(ebands%nsppol)
  integer :: brange_k_spin(2, ebands%nsppol), brange_kq_spin(2, ebands%nsppol), g0_q(3)
- integer,allocatable :: qglob2bz(:,:), qbz2ibz(:,:) !, kbz2ibz(:,:)
+ integer,allocatable :: qglob2bz(:,:), qbz2ibz(:,:)
  real(dp) :: qq_ibz(3)
+ real(dp) :: displ_nu_red(2, 3, cryst%natom)
  real(dp),allocatable :: gwork_q(:,:,:,:,:), slice_bb(:,:,:)
  real(dp),allocatable :: phfreqs_ibz(:,:), pheigvec_cart_ibz(:,:,:,:,:), pheigvec_cart_qbz(:,:,:,:)
  real(dp),allocatable :: displ_cart_qbz(:,:,:,:), displ_red_qbz(:,:,:,:), gmn_nu(:,:,:,:)
-
+ complex(dp),allocatable :: tpp_red(:,:)
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
@@ -4553,6 +4556,10 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  end if
  gstore%gmode = with_gmode
 
+ if (read_dw) then
+   ABI_MALLOC(tpp_red, (natom3, natom3))
+ end if
+
  do spin=1,gstore%nsppol
    my_is = gstore%spin2my_is(spin)
 
@@ -4579,16 +4586,16 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
 
      ! Read my_gq0nm_atm matrix elements for DW in the RIA.
      if (read_dw) then
-        ! Find the index of q = 0.
-        iq_glob = -1
-        do ii=1, gstore%glob_nq_spin(spin)
-          iq_bz = qglob2bz(ii, spin)
-          if (sum(gstore%qbz(:, iq_bz)**2) < tol4) then
-            iq_glob = ii; exit
-          end if
-        end do
-        ABI_CHECK_INEQ(iq_glob, -1, "Cannot finq q=0 in g(k,q)!")
-        call wrtout(std_out, sjoin(" Reading g_atm(k,q=0) for Debye-Waller with iq_glob:", itoa(iq_glob)))
+       ! Find the index of q = 0.
+       iq_glob = -1
+       do ii=1, gstore%glob_nq_spin(spin)
+         iq_bz = qglob2bz(ii, spin)
+         if (sum(gstore%qbz(:, iq_bz)**2) < tol4) then
+           iq_glob = ii; exit
+         end if
+       end do
+       ABI_CHECK_INEQ(iq_glob, -1, "Cannot finq q=0 in g(k,q)!")
+       call wrtout(std_out, sjoin(" Reading g_atm(k,q=0) for Debye-Waller with iq_glob:", itoa(iq_glob)))
 
        ! Read q-slice of the e-ph matrix elements (individual IO).
        ! Note gvals_name so that we can read either g^KS or g^Sigma.
@@ -4605,70 +4612,6 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
            end do
          end do
        end do
-
-#if 0
-       block
-       integer :: ip1, ip2
-       real(dp) :: wqnu, gdw2
-       complex(dp) :: cfact
-       real(dp),allocatable :: tpp_red(:,:)
-       real(dp) :: displ_nu_cart(2, 3, cryst%natom), displ_nu_red(2, 3, cryst%natom)
-       ABI_MALLOC(tpp_red, (natom3, natom3))
-
-       do ii=1, gstore%glob_nq_spin(spin)
-         iq_bz = qglob2bz(ii, spin)
-
-         !call wrtout(std_out, " Computing and storing phonons in the full BZ by rotating the data in the IBZ...")
-         iq_ibz = gqk%my_q2ibz(1, my_iq); isym_q = gqk%my_q2ibz(2, my_iq)
-         trev_q = gqk%my_q2ibz(6, my_iq); g0_q = gqk%my_q2ibz(3:5, my_iq)
-         !isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
-         isirr_q = (isym_q == 1 .and. trev_q == 0)
-         tsign_q = 1; if (trev_q == 1) tsign_q = -1
-         qq_ibz = gstore%qibz(:, iq_ibz)
-
-         ! Here we get the ph displacement for this q-point in the BZ from the image in the IBZ.
-         ! This is important for complex g as we have to enforce the gauge in the ph eigenvectors, including e(-q) = e(q)^*.
-         call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_cart_ibz(:,:,:,:,iq_ibz), pheigvec_cart_qbz, displ_cart_qbz, &
-                              displ_red_qbz=displ_red_qbz)
-
-         ! FIXME: Not sure this is correct!
-         !displ_nu_cart = gqk%my_displ_cart(:,:,:,my_ip,my_iq)
-         !call phdispl_cart2red_nmodes(natom, 1, cryst%gprimd, displ_nu_cart, displ_nu_red)
-
-         ! Compute T_pp'(q,nu) matrix in reduced coordinates for DW.
-         call sigtk_dw_tpp_red(natom, displ_nu_red, tpp_red)
-
-         ! Compute DW term following XG paper. Check prefactor.
-         ! gkq0_atm(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
-         ! (nb_k, nb_kq, natom3, my_nk)
-
-         !associate (gkq0_atm => gqk%my_gq0nm_atm(:,:,:,my_ik))
-         gdw2 = zero
-         do ip2=1,natom3
-           do ip1=1,natom3
-             !cfact = ( &
-             !  + real(gkq0_atm(in_k, im_kq, ip1)) * real(gkq0_atm(in_k, im_kq, ip2)) &
-             !  + aimag(gkq0_atm(in_k, im_kq, ip1)) * aimag(gkq0_atm(in_k, im_kq, ip2)) &
-             !  + real(gkq0_atm(in_k, im_kq, ip2)) * real(gkq0_atm(in_k, im_kq, ip1)) &
-             !  + aimag(gkq0_atm(in_k, im_kq, ip2)) * aimag(gkq0_atm(in_k, im_kq, ip1)) &
-              !+ gkq0_atm(1, in_k, im_kq, ip1) * gkq0_atm(1, in_k, im_kq, ip2) &
-              !+ gkq0_atm(2, in_k, im_kq, ip1) * gkq0_atm(2, in_k, im_kq, ip2) &
-              !+ gkq0_atm(1, in_k, im_kq, ip2) * gkq0_atm(1, in_k, im_kq, ip1) &
-              !+ gkq0_atm(2, in_k, im_kq, ip2) * gkq0_atm(2, in_k, im_kq, ip1) &
-             !)
-             !
-             gdw2 = gdw2 + real(tpp_red(ip1,ip2) * cfact)
-           end do
-         end do
-         !end associate
-
-         gdw2 = gdw2 / (four * two * wqnu)
-
-         end do
-         !print *, "gdw2", gdw2
-         ABI_FREE(tpp_red)
-       end block
-#endif
      end if ! read_dw
 
      if (from_atm_to_nu) then
@@ -4677,57 +4620,99 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
 
      ! Read my e-ph matrix elements.
      do my_iq=1,gqk%my_nq
-        iq_glob = my_iq + gqk%my_qstart - 1
+       iq_glob = my_iq + gqk%my_qstart - 1
 
-        !call wrtout(std_out, " Computing and storing phonons in the full BZ by rotating the data in the IBZ...")
-        iq_ibz = gqk%my_q2ibz(1, my_iq); isym_q = gqk%my_q2ibz(2, my_iq)
-        trev_q = gqk%my_q2ibz(6, my_iq); g0_q = gqk%my_q2ibz(3:5, my_iq)
-        !isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
-        isirr_q = (isym_q == 1 .and. trev_q == 0)
-        tsign_q = 1; if (trev_q == 1) tsign_q = -1
-        qq_ibz = gstore%qibz(:, iq_ibz)
+       !call wrtout(std_out, " Computing and storing phonons in the full BZ by rotating the data in the IBZ...")
+       iq_ibz = gqk%my_q2ibz(1, my_iq); isym_q = gqk%my_q2ibz(2, my_iq)
+       trev_q = gqk%my_q2ibz(6, my_iq); g0_q = gqk%my_q2ibz(3:5, my_iq)
+       !isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
+       isirr_q = (isym_q == 1 .and. trev_q == 0)
+       tsign_q = 1; if (trev_q == 1) tsign_q = -1
+       qq_ibz = gstore%qibz(:, iq_ibz)
 
-        ! Here we get the ph displacement for this q-point in the BZ from the image in the IBZ.
-        ! This is important for complex g as we have to enforce the gauge in the ph eigenvectors, including e(-q) = e(q)^*.
-        call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_cart_ibz(:,:,:,:,iq_ibz), pheigvec_cart_qbz, displ_cart_qbz, &
-                             displ_red_qbz=displ_red_qbz)
+       ! Here we get the ph displacement for this q-point in the BZ from the image in the IBZ.
+       ! This is important for complex g as we have to enforce the gauge in the ph eigenvectors, including e(-q) = e(q)^*.
+       call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_cart_ibz(:,:,:,:,iq_ibz), pheigvec_cart_qbz, displ_cart_qbz, &
+                            displ_red_qbz=displ_red_qbz)
 
-        ! Save my frequencies and my phonon displacements.
-        gqk%my_wnuq(:, my_iq) = phfreqs_ibz(gqk%my_pertcases(:), iq_ibz)
-        gqk%my_displ_cart(:,:,:,:,my_iq) = displ_cart_qbz(:,:,:,gqk%my_pertcases(:))
+       ! Save my frequencies and my phonon displacements.
+       gqk%my_wnuq(:, my_iq) = phfreqs_ibz(gqk%my_pertcases(:), iq_ibz)
+       gqk%my_displ_cart(:,:,:,:,my_iq) = displ_cart_qbz(:,:,:,gqk%my_pertcases(:))
 
-        ! Read q-slice (individual IO).
-        ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_name), gwork_q, start=[1, 1, 1, 1, 1, iq_glob])
-        NCF_CHECK(ncerr)
+       if (read_dw) then
+         do my_ip=1,gqk%my_npert
+           call phdispl_cart2red_nmodes(natom, 1, cryst%gprimd, gqk%my_displ_cart(:,:,:,my_ip,my_iq), displ_nu_red)
 
-        do my_ik=1,gqk%my_nk
-          ik_glob = my_ik + gqk%my_kstart - 1
+           ! Compute T_pp'(q,nu) matrix in reduced coordinates for DW.
+           call sigtk_dw_tpp_red(natom, displ_nu_red, tpp_red)
+           wqnu = gqk%my_wnuq(my_ip, my_iq)
 
-          if (from_atm_to_nu) then
-            ! Here we convert from g(k,q)_atm to g(k,q)_phonon and replace data in gwork_q at ik_glob
-            call ephtk_gkknu_from_atm(nb_kq, nb_k, 1, natom, gwork_q(:,:,:,:, ik_glob), &
-                                      phfreqs_ibz(:, iq_ibz), displ_red_qbz, gmn_nu)
-            gwork_q(:,:,:,:, ik_glob) = gmn_nu
-          end if
+           do my_ik=1,gqk%my_nk
+           associate (gkq0_atm => gqk%my_gq0nm_atm(:,:,:,my_ik))
+           ! Loop over bands in |m,k+q>
+           do im_kq=1,gqk%nb_kq
+           ! Loop over the n index in |n,k>.
+           do in_k=1,nb_k
+           ! Compute DW term following XG paper. Check prefactor.
+           gdw2 = zero
+           do ip2=1,natom3
+             do ip1=1,natom3
+               cfact = ( &
+                 + real(gkq0_atm(in_k, im_kq, ip1)) * real(gkq0_atm(in_k, im_kq, ip2)) &
+                 + aimag(gkq0_atm(in_k, im_kq, ip1)) * aimag(gkq0_atm(in_k, im_kq, ip2)) &
+                 + real(gkq0_atm(in_k, im_kq, ip2)) * real(gkq0_atm(in_k, im_kq, ip1)) &
+                 + aimag(gkq0_atm(in_k, im_kq, ip2)) * aimag(gkq0_atm(in_k, im_kq, ip1)) &
+               !+ gkq0_atm(1, in_k, im_kq, ip1) * gkq0_atm(1, in_k, im_kq, ip2) &
+               !+ gkq0_atm(2, in_k, im_kq, ip1) * gkq0_atm(2, in_k, im_kq, ip2) &
+               !+ gkq0_atm(1, in_k, im_kq, ip2) * gkq0_atm(1, in_k, im_kq, ip1) &
+               !+ gkq0_atm(2, in_k, im_kq, ip2) * gkq0_atm(2, in_k, im_kq, ip1) &
+               )
 
-          do my_ip=1,gqk%my_npert
-            ipert = gqk%my_pertcases(my_ip)
-            slice_bb = gwork_q(:,:,:, ipert, ik_glob)
+               gdw2 = gdw2 + real(tpp_red(ip1,ip2) * cfact)
+             end do
+           end do
 
-            ! Put data in the right place and handle conversion g --> |g|^2.
-            if (with_cplex == gstore_cplex) then
-              if (with_cplex == 1) gqk%my_g2(my_ip,:,my_iq,:,my_ik) = slice_bb(1,:,:)
-              if (with_cplex == 2) gqk%my_g(my_ip,:,my_iq,:,my_ik) = slice_bb(1,:,:) + j_dpc * slice_bb(2,:,:)
-            else
-              if (with_cplex == 1 .and. gstore_cplex == 2) then
-                gqk%my_g2(my_ip, :, my_iq, :, my_ik) = slice_bb(1,:,:) ** 2 + slice_bb(2,:,:) ** 2
-              else
-                ABI_ERROR("Conversion from g2 on file to g_complex in memory is not possible!")
-              end if
-            end if
+           gdw2 = gdw2 / (four * two * wqnu)
+           !print *, "gdw2", gdw2
+           gqk%my_gdw2(my_ip,im_kq,my_iq,in_k,my_ik) = gdw2
 
-          end do ! my_ip
-        end do ! my_ik
+           end do ! in_k
+           end do ! im_kq
+           end associate
+           end do ! my_ik
+         end do ! my_ip
+       end if
+
+       ! Read q-slice of g(k,q) in the atom representation. (individual IO).
+       ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_name), gwork_q, start=[1, 1, 1, 1, 1, iq_glob])
+       NCF_CHECK(ncerr)
+
+       do my_ik=1,gqk%my_nk
+         ik_glob = my_ik + gqk%my_kstart - 1
+         if (from_atm_to_nu) then
+           ! Here we convert from g(k,q)_atom to g(k,q)_phonon and replace data in gwork_q at ik_glob
+           call ephtk_gkknu_from_atm(nb_kq, nb_k, 1, natom, gwork_q(:,:,:,:, ik_glob), &
+                                     phfreqs_ibz(:, iq_ibz), displ_red_qbz, gmn_nu)
+           gwork_q(:,:,:,:, ik_glob) = gmn_nu
+         end if
+
+         do my_ip=1,gqk%my_npert
+           ipert = gqk%my_pertcases(my_ip)
+           slice_bb = gwork_q(:,:,:, ipert, ik_glob)
+
+           ! Put data in the right place and handle conversion g --> |g|^2.
+           if (with_cplex == gstore_cplex) then
+             if (with_cplex == 1) gqk%my_g2(my_ip,:,my_iq,:,my_ik) = slice_bb(1,:,:)
+             if (with_cplex == 2) gqk%my_g(my_ip,:,my_iq,:,my_ik) = slice_bb(1,:,:) + j_dpc * slice_bb(2,:,:)
+           else
+             if (with_cplex == 1 .and. gstore_cplex == 2) then
+               gqk%my_g2(my_ip, :, my_iq, :, my_ik) = slice_bb(1,:,:) ** 2 + slice_bb(2,:,:) ** 2
+             else
+               ABI_ERROR("Conversion from g2 on file to g_complex in memory is not possible!")
+             end if
+           end if
+         end do ! my_ip
+       end do ! my_ik
 
      end do ! my_iq
 
@@ -4767,6 +4752,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  ABI_FREE(displ_cart_qbz)
  ABI_FREE(displ_red_qbz)
  ABI_FREE(pheigvec_cart_qbz)
+ ABI_SFREE(tpp_red)
 
  call xmpi_barrier(gstore%comm)
  call pstat_proc%print(_PSTAT_ARGS_)
