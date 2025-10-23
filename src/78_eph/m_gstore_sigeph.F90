@@ -253,7 +253,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  integer :: units(2), my_kqmap(6)
  integer,allocatable :: phmodes_skip(:)
  real(dp) :: kk(3), kk_ibz(3), kq_ibz(3), qpt(3), kq(3)
- real(dp) :: displ_nu_cart(2, 3, cryst%natom), displ_nu_red(2, 3, cryst%natom)
  real(dp) :: fermie1_idir_ipert(3,cryst%natom)
  real(dp),allocatable :: vtrial(:,:), work(:,:,:,:)
  real(dp),allocatable :: kinpw_k(:), kinpw_kq(:),kpg_kq(:,:),kpg_k(:,:)
@@ -267,7 +266,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  real(dp),allocatable :: stern_ppb(:,:,:,:) !, stern_dw(:,:,:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: rfact_t(:), nqnu(:), f_mkq(:) !, f_nk(:),  g2_pmnk(:,:,:,:)
- complex(dp),allocatable :: cfact_t(:), tpp_red(:,:), cfact_wr(:) !,fmw_frohl_sphcorr(:,:,:,:),
+ complex(dp),allocatable :: cfact_t(:), cfact_wr(:) !,fmw_frohl_sphcorr(:,:,:,:),
  type(pawrhoij_type),allocatable :: pot_pawrhoij(:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
 !----------------------------------------------------------------------
@@ -464,7 +463,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
 
  ! Allocate work space arrays used inside the loops. Then we are ready to go!
  ntemp = sigma%ntemp
- ABI_MALLOC(tpp_red, (natom3, natom3))
  ABI_MALLOC(nqnu, (ntemp))
  ABI_MALLOC(f_mkq, (ntemp))
  ABI_MALLOC(cfact_t, (ntemp))
@@ -674,18 +672,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
          if (ephtk_skip_phmode(nu, wqnu, phmodes_skip, dtset%eph_phrange_w)) cycle
          nqnu(:) = occ_be(wqnu, sigma%kTmesh, zero)
 
-         ! FIXME: Not sure this is correct!
-         displ_nu_cart = gqk%my_displ_cart(:,:,:,my_ip,my_iq)
-         call phdispl_cart2red_nmodes(natom, 1, cryst%gprimd, displ_nu_cart, displ_nu_red)
-
-         ! For the DW, we need gkq_atm at q = 0, for all atomic perturbations
-         ! Copy data to improve memory access in the loops below.
-         ! (my_npert, nb_kq, my_nq, nb_k, my_nk)
-         !g2_pmnk = gqk%my_g2(my_ip,:,my_iq,:,my_ik)
-
-         ! Compute T_pp'(q,nu) matrix in reduced coordinates for DW.
-         call sigtk_dw_tpp_red(natom, displ_nu_red, tpp_red)
-
          ! Sum over bands in |m,k+q>
          do im_kq=1,gqk%nb_kq
            band_kq = im_kq + gqk%bstart_kq - 1
@@ -761,30 +747,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
                end do
              end if ! nwr > 0
 
-             ! Compute DW term following XG paper. Check prefactor.
-             ! gkq0_atm(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
-             ! (nb_k, nb_kq, natom3, my_nk)
-             associate (gkq0_atm => gqk%my_gq0nm_atm(:,:,:,my_ik))
-             gdw2 = zero
-             do ip2=1,natom3
-               do ip1=1,natom3
-                 cfact = ( &
-                   + real(gkq0_atm(in_k, im_kq, ip1)) * real(gkq0_atm(in_k, im_kq, ip2)) &
-                   + aimag(gkq0_atm(in_k, im_kq, ip1)) * aimag(gkq0_atm(in_k, im_kq, ip2)) &
-                   + real(gkq0_atm(in_k, im_kq, ip2)) * real(gkq0_atm(in_k, im_kq, ip1)) &
-                   + aimag(gkq0_atm(in_k, im_kq, ip2)) * aimag(gkq0_atm(in_k, im_kq, ip1)) &
-                  !+ gkq0_atm(1, in_k, im_kq, ip1) * gkq0_atm(1, in_k, im_kq, ip2) &
-                  !+ gkq0_atm(2, in_k, im_kq, ip1) * gkq0_atm(2, in_k, im_kq, ip2) &
-                  !+ gkq0_atm(1, in_k, im_kq, ip2) * gkq0_atm(1, in_k, im_kq, ip1) &
-                  !+ gkq0_atm(2, in_k, im_kq, ip2) * gkq0_atm(2, in_k, im_kq, ip1) &
-                 )
-                 !
-                 gdw2 = gdw2 + real(tpp_red(ip1,ip2) * cfact)
-               end do
-             end do
-             end associate
-
-             gdw2 = gdw2 / (four * two * wqnu)
+             gdw2 = gqk%my_gdw2(my_ip, im_kq, my_iq, in_k, my_ik)
              !print *, "gdw2", gdw2
 
              ! Accumulate DW for each T, add it to Sigma(e0) and Sigma(w) as well
@@ -831,7 +794,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  ABI_FREE(f_mkq)
  ABI_FREE(cfact_t)
  ABI_FREE(rfact_t)
- ABI_FREE(tpp_red)
  ABI_SFREE(vtrial)
  ABI_FREE(phmodes_skip)
  ABI_SFREE(cfact_wr)
