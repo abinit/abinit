@@ -4232,8 +4232,8 @@ end function gstore_check_cplex_qkzone_gmode
 !!  with_gmode: "phonon" to have g in the phonon representation or "atom" to have them in atom representation.
 !!  gvals_name: "gvals" or "gvals_ks" to read the KS gs produced by the GWPT code.
 !!    This option is valid only for gstore files produced by the GWPT code.
-!!  with_g2dw: True if Debye-Waller g2 in the RIZ should be computed and stored in memory.
-!!  comm: MPI communicator
+!!  with_g2dw: True if Debye-Waller g2 in the RIA should be computed and stored in memory.
+!!  comm: MPI communicator.
 !!
 !! SOURCE
 
@@ -4657,7 +4657,11 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
                end do
              end do
 
-             gdw2 = gdw2 / (four * two * wqnu)
+             if (wqnu < EPHTK_WTOL) then
+               gdw2 = zero
+             else
+               gdw2 = gdw2 / (four * two * wqnu)
+             end if
              !print *, "gdw2", gdw2
              gqk%my_gdw2(my_ip, im_kq, my_iq, in_k, my_ik) = gdw2
              end do ! in_k
