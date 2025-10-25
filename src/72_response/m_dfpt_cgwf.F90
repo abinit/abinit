@@ -1830,7 +1830,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
 !scalars
  integer,parameter :: berryopt0 = 0, igscq0 = 0, icgq0 = 0, ibgq0 = 0, nbdbuf0 = 0, quit0 = 0, istwfk1 = 1, ndat1 = 1, timcount0 = 0
  integer :: opt_gvnlx1, grad_berry_size_mpw1, iband
- real(dp) :: out_resid, fermie1, eig0nk
+ real(dp) :: out_resid, fermie1, eig0nk, dotr
  type(rf2_t) :: rf2
 !arrays
  real(dp),allocatable :: grad_berry(:,:)
@@ -1956,7 +1956,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
    ! Compute full first order wavefunction
    ! =====================================
 
-   ! WARNING: Assuming all bands are on this cpu.
+   ! WARNING: Assuming all bands at k+q are on this cpu.
    cycle_bands(:) = .False.
    !call proc_distrb_cycle_bands(cycle_bands, stern%mpi_enreg%proc_distrb, ikpt, isppol, me)
    ABI_CHECK_IGEQ(u1_band, 1, "u1_band")
@@ -1967,7 +1967,13 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
    call full_active_wf1(stern%cgq, stern%cprjq, cwavef, full_cg1, cwaveprj, stern%cwaveprj1, cycle_bands, stern%eig1_k, fermie1, &
                         eig0nk, eig0_kq, stern%dtset%elph2_imagden, iband, ibgq0, icgq0, stern%mcgq, stern%mcprjq, stern%mpi_enreg, &
                         stern%dtset%natom, stern%nband, stern%npw_kq, stern%nspinor, timcount0, gs_hamkq%usepaw)
+
    !print *, "cwavef:", cwavef(:,1); print *, "full_cg1:", full_cg1(:,1)
+   !call sqnorm_g(dotr, istwfk1, stern%npw_kq*stern%nspinor, cwavef, stern%mpi_enreg%me_g0, xmpi_comm_self)
+   !print *, "cwavef", sqrt(dotr)
+   !call sqnorm_g(dotr, istwfk1, stern%npw_kq*stern%nspinor, full_cg1, stern%mpi_enreg%me_g0, xmpi_comm_self)
+   !print *, "norm of full_cg1", sqrt(dotr)
+   !full_cg1 = full_cg1 / sqrt(dotr)
 
    if (present(full_ur1)) then
      ! Note the use use of _kp pointers in gs_hamkq as full_ug1 is given on the k+q g-sphere.
@@ -1984,6 +1990,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
                  istwfk1, gs_hamkq%kg_kp, gs_hamkq%gbound_kp, cwork_sp, full_ur1)
      ABI_FREE(cwork_sp)
 #endif
+     !print *, "norm of full_ur1:", sum(abs(full_ur1)**2) / gs_hamkq%nfft  ! * gs_hamkq%ucvol
    end if
  end if
 
