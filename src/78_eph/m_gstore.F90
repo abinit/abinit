@@ -1000,6 +1000,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
       nctkdim_t("gstore_max_nk", max_nk), &
       nctkdim_t("gstore_max_nb", maxval(gstore%brange_k_spin(2, :) - gstore%brange_k_spin(1, :) + 1) ), &
       nctkdim_t("nrpt", ifc%nrpt), &
+      nctkdim_t("ifc_nqbz", size(ifc%dynmat, dim=6)), &
       nctkdim_t("natom", gstore%cryst%natom), &
       nctkdim_t("natom3", 3 * gstore%cryst%natom), &
       nctkdim_t("gstore_cplex", 2) &
@@ -1052,7 +1053,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      ncerr = nctk_def_arrays(ncid, [ &
         nctkarr_t("ifc_rpt", "dp", "three, nrpt"), &
         nctkarr_t("ifc_wghatm", "dp", "natom, natom, nrpt"), &
-        nctkarr_t("ifc_dynmat", "dp", "two, three, natom, three, natom, gstore_nqbz"), &
+        nctkarr_t("ifc_dynmat", "dp", "two, three, natom, three, natom, ifc_nqbz"), &
         nctkarr_t("ifc_short_atmfrc", "dp", "three, natom, three, natom, nrpt") &
      ])
      NCF_CHECK(ncerr)
