@@ -233,7 +233,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  integer :: istwf_k, istwf_kq, npw_k, npw_kq, nkpg_kq
  integer :: nfft, nfftf, mgfft, mgfftf, nkpg !,nkpg1,cnt, enough_stern
  integer :: usecprj, mpw, nbsum, ibsum_kq, band_me, u1_band ! usevnl,optlocal,optnl,opt_gvnlx1,
- real(dp) :: wqnu, gkq2, weight_q, eig0nk, eig0mk, eig0mkq, ediff, gmod2, hmod2, gdw2, rfact !, gdw2_stern, rtmp !,nqnu,gkq2,gkq2_pf,
+ real(dp) :: wqnu, gkq2, weight_q, eig0nk, eig0mk, eig0mkq, ediff, gmod2, hmod2, gdw2, rfact, gdw2_stern, rtmp !,nqnu,gkq2,gkq2_pf,
  !real(dp) :: cpu, wall, gflops
  logical :: q_is_gamma, intra_band, same_band, isirr_k, isirr_kq, stern_use_cache
  complex(dp) :: cfact !, sig_cplx
@@ -264,11 +264,11 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  integer,allocatable :: gbound_kq(:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:) !, ihave_ikibz_spin(:,:)
  real(dp) :: vec_natom3(2, 3*cryst%natom) ! zpr_frohl_sphcorr(3*cryst%natom),
- real(dp),allocatable :: bra_kq(:,:), kets_k(:,:,:) !, h1kets_kq(:,:,:,:), cgwork(:,:)
+ real(dp),allocatable :: bra_kq(:,:), kets_k(:,:,:)
  real(dp),allocatable :: stern_ppb(:,:,:,:), stern_fan_t(:) !, stern_dw(:,:,:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
- real(dp),allocatable :: rfact_t(:), nqnu_t(:), f_mkq(:) !, f_nk(:),  g2_pmnk(:,:,:,:)
- complex(dp),allocatable :: cfact_t(:), cfact_wr(:) !,fmw_frohl_sphcorr(:,:,:,:),
+ real(dp),allocatable :: rfact_t(:), nqnu_t(:), f_mkq(:) !, f_nk(:)
+ complex(dp),allocatable :: cfact_t(:), cfact2_t(:), cfact_wr(:), tpp_red(:,:) !,fmw_frohl_sphcorr(:,:,:,:),
  type(pawrhoij_type),allocatable :: pot_pawrhoij(:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
 !----------------------------------------------------------------------
@@ -460,6 +460,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
    !ABI_FREE(gkq0_atm)
    !ABI_FREE(stern_dw)
 
+   ABI_MALLOC(tpp_red, (natom3, natom3))
    ABI_MALLOC(gbound_kq, (2*wfd%mgfft+8, 2))
  end if ! eph_stern /= 0
 
@@ -468,6 +469,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  ABI_MALLOC(nqnu_t, (ntemp))
  ABI_MALLOC(f_mkq, (ntemp))
  ABI_MALLOC(cfact_t, (ntemp))
+ ABI_MALLOC(cfact2_t, (ntemp))
  ABI_MALLOC(rfact_t, (ntemp))
  ABI_MALLOC(stern_fan_t, (ntemp))
 
@@ -583,7 +585,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
                          stern_use_cache, work_ngfft, mpi_enreg, xmpi_comm_self)
 
          ABI_MALLOC(bra_kq, (2, npw_kq*nspinor))
-         !ABI_MALLOC(cgwork, (2, npw_kqirr*nspinor))
 
          do ibsum_kq=1, nbsum
            ! Reconstruct u_kq(G) from the IBZ image.
@@ -649,12 +650,13 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
            call rf_ham_kq%free()
          end do ! my_ip  (loop over my perturbations)
 
+         ! <D_p H psi_nk | D_p' psi_nk>
          do in_k=1,nb_k
            call cg_zgemm("C", "N", npw_kq*nspinor, natom3, natom3, &
              h1kets_kq_allperts(:,:,:,in_k), cg1s_kq(:,:,:,in_k), stern_ppb(:,:,:,in_k))
 
-           !! Save data for Debye-Waller that is performed outside the q-loop.
-           !if (q_is_gamma) stern_dw(:,:,:,in_k) = stern_ppb(:,:,:,in_k)
+            ! Save data for Debye-Waller that is performed outside the q-loop.
+            !if (q_is_gamma) stern_dw(:,:,:,in_k) = stern_ppb(:,:,:,in_k)
          end do
 
          ABI_FREE(cg1s_kq)
@@ -663,7 +665,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
          call stern%free()
 
          ABI_FREE(h1kets_kq_allperts)
-
        end if ! eph_stern
 
        ! Sum over my phonon modes.
@@ -676,6 +677,9 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
 
          nqnu_t(:) = occ_be(wqnu, sigma%kTmesh, zero)
          call phdispl_cart2red_nmodes(natom, 1, cryst%gprimd, gqk%my_displ_cart(:,:,:,my_ip,my_iq), displ_red_nu)
+
+         ! Compute T_pp'(q,nu) matrix in reduced coordinates.
+         if (dtset%eph_stern /= 0) call sigtk_dw_tpp_red(natom, displ_red_nu, tpp_red)
 
          ! Sum over bands in |m,k+q>
          do im_kq=1,gqk%nb_kq
@@ -721,6 +725,19 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
                stern_fan_t = (two * nqnu_t(:) + one) * rfact
                sigma%fan_stern_vals(:, in_k, ikcalc) = sigma%fan_stern_vals(:, in_k, ikcalc) + stern_fan_t
                cfact_t = cfact_t + stern_fan_t
+
+               if (q_is_gamma .and. im_kq == 1) then
+                 ! Compute DW term for m > nband
+                 cfact = zero
+                 do ip2=1,natom3
+                   do ip1=1,natom3
+                     cfact = cfact + tpp_red(ip1, ip2) * cmplx(stern_ppb(1,ip1,ip2,in_k), stern_ppb(2,ip1,ip2,in_k), kind=dp)
+                   end do
+                 end do
+                 ! There's no 1/two here because I don't symmetrize the expression.
+                 ! TODO: Test symmetrization, real quantity? add support for the different Eliashberg functions with Stern
+                 gdw2_stern = real(cfact) / (four * wqnu)
+               end if
              end if
 
              sigma%vals_e0ks(:, in_k, ikcalc) = sigma%vals_e0ks(:, in_k, ikcalc) + cfact_t
@@ -769,6 +786,14 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
              else
                cfact_t(:) = zero
              endif
+
+             if (dtset%eph_stern /= 0 .and. im_kq == 1) then ! TODO: and gqk%qpt_kpt_comm%me == 0
+               ! Add contribution due to the Sternheimer. ediff is absorbed in Sternheimer.
+               cfact2_t = - weight_q * gdw2_stern * (two * nqnu_t(it) + one)
+               cfact_t = cfact_t + cfact2_t
+               sigma%dw_stern_vals(:, in_k, ikcalc) = sigma%dw_stern_vals(:, in_k, ikcalc) + real(cfact2_t)
+             end if
+
              sigma%dw_vals(:, in_k, ikcalc) = sigma%dw_vals(:, in_k, ikcalc) + real(cfact_t)
              sigma%vals_e0ks(:, in_k, ikcalc) = sigma%vals_e0ks(:, in_k, ikcalc) + real(cfact_t)
 
@@ -783,8 +808,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
          end do ! im_kq
        end do ! my_ip
 
-       !ABI_FREE(cgwork)
-       !ABI_FREE(h1kets_kq)
        ABI_SFREE(kpg_kq)
        ABI_SFREE(ffnl_kq)
        ABI_SFREE(kinpw_kq)
@@ -807,16 +830,18 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  ABI_FREE(nqnu_t)
  ABI_FREE(f_mkq)
  ABI_FREE(cfact_t)
+ ABI_FREE(cfact2_t)
  ABI_FREE(rfact_t)
  ABI_FREE(stern_fan_t)
- ABI_SFREE(vtrial)
  ABI_FREE(phmodes_skip)
- ABI_SFREE(cfact_wr)
  ABI_FREE(ph1d)
+ ABI_SFREE(vtrial)
+ ABI_SFREE(cfact_wr)
  ABI_SFREE(vtrial)
  ABI_SFREE(vlocal)
  ABI_SFREE(kg_kq)
  ABI_SFREE(gbound_kq)
+ ABI_SFREE(tpp_red)
  ABI_SFREE(work)
 
  call wfd%free(); call gstore%free(); call sigma%free(); call gs_ham_kq%free()
