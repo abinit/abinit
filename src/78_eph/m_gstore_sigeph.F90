@@ -39,6 +39,7 @@ module m_gstore_sigeph
  use m_ephtk
  !use m_mkffnl
  use m_sigtk
+ use m_cgtools
 
  !use m_time,           only : cwtime, cwtime_report, sec2str
  use m_io_tools,       only : iomode_from_fname !, file_exists, is_open, open_file, flush_unit
@@ -232,7 +233,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  integer :: istwf_k, istwf_kq, npw_k, npw_kq, nkpg_kq
  integer :: nfft, nfftf, mgfft, mgfftf, nkpg !,nkpg1,cnt, enough_stern
  integer :: usecprj, mpw, nbsum, ibsum_kq, band_me, u1_band ! usevnl,optlocal,optnl,opt_gvnlx1,
- real(dp) :: wqnu, gkq2, weight_q, eig0nk, eig0mk, eig0mkq, ediff, gmod2, hmod2, gdw2 !, gdw2_stern, rtmp !,nqnu,gkq2,gkq2_pf,
+ real(dp) :: wqnu, gkq2, weight_q, eig0nk, eig0mk, eig0mkq, ediff, gmod2, hmod2, gdw2, rfact !, gdw2_stern, rtmp !,nqnu,gkq2,gkq2_pf,
  !real(dp) :: cpu, wall, gflops
  logical :: q_is_gamma, intra_band, same_band, isirr_k, isirr_kq, stern_use_cache
  complex(dp) :: cfact !, sig_cplx
@@ -252,20 +253,21 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  integer :: gmax(3), g0_k(3), g0_kq(3), work_ngfft(18) !, g0_q(3),
  integer :: units(2), my_kqmap(6)
  integer,allocatable :: phmodes_skip(:)
- real(dp) :: kk(3), kk_ibz(3), kq_ibz(3), qpt(3), kq(3)
- real(dp) :: fermie1_idir_ipert(3,cryst%natom)
+ real(dp) :: kk(3), kk_ibz(3), kq_ibz(3), qpt(3), kq(3), fermie1_idir_ipert(3,cryst%natom), dotri(2)
  real(dp),allocatable :: vtrial(:,:), work(:,:,:,:)
  real(dp),allocatable :: kinpw_k(:), kinpw_kq(:),kpg_kq(:,:),kpg_k(:,:)
  real(dp),allocatable :: ffnl_k(:,:,:,:),ffnl_kq(:,:,:,:),ph3d_k(:,:,:),ph3d_kq(:,:,:),v1scf(:,:,:,:)
+ real(dp) :: displ_red_nu(2, 3, cryst%natom)
  !real(dp),allocatable :: gkq_atm(:,:,:), gkq_nu(:,:,:) !,gkq0_atm(:,:,:,:), gaussw_qnu(:)
  real(dp),allocatable :: cg1s_kq(:,:,:,:), h1kets_kq_allperts(:,:,:,:)
  integer,allocatable :: nband(:,:), wfd_istwfk(:), kg_kq(:,:) !, , qselect(:), !, kg_k(:,:),
  integer,allocatable :: gbound_kq(:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:) !, ihave_ikibz_spin(:,:)
+ real(dp) :: vec_natom3(2, 3*cryst%natom) ! zpr_frohl_sphcorr(3*cryst%natom),
  real(dp),allocatable :: bra_kq(:,:), kets_k(:,:,:) !, h1kets_kq(:,:,:,:), cgwork(:,:)
- real(dp),allocatable :: stern_ppb(:,:,:,:) !, stern_dw(:,:,:,:)
+ real(dp),allocatable :: stern_ppb(:,:,:,:), stern_fan_t(:) !, stern_dw(:,:,:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
- real(dp),allocatable :: rfact_t(:), nqnu(:), f_mkq(:) !, f_nk(:),  g2_pmnk(:,:,:,:)
+ real(dp),allocatable :: rfact_t(:), nqnu_t(:), f_mkq(:) !, f_nk(:),  g2_pmnk(:,:,:,:)
  complex(dp),allocatable :: cfact_t(:), cfact_wr(:) !,fmw_frohl_sphcorr(:,:,:,:),
  type(pawrhoij_type),allocatable :: pot_pawrhoij(:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
@@ -463,10 +465,11 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
 
  ! Allocate work space arrays used inside the loops. Then we are ready to go!
  ntemp = sigma%ntemp
- ABI_MALLOC(nqnu, (ntemp))
+ ABI_MALLOC(nqnu_t, (ntemp))
  ABI_MALLOC(f_mkq, (ntemp))
  ABI_MALLOC(cfact_t, (ntemp))
  ABI_MALLOC(rfact_t, (ntemp))
+ ABI_MALLOC(stern_fan_t, (ntemp))
 
  call pstat_proc%print(_PSTAT_ARGS_)
 
@@ -660,7 +663,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
          call stern%free()
 
          ABI_FREE(h1kets_kq_allperts)
-         ABI_FREE(stern_ppb)
+
        end if ! eph_stern
 
        ! Sum over my phonon modes.
@@ -670,7 +673,9 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
 
          ! Ignore unstable modes or modes that should be skipped.
          if (ephtk_skip_phmode(nu, wqnu, phmodes_skip, dtset%eph_phrange_w)) cycle
-         nqnu(:) = occ_be(wqnu, sigma%kTmesh, zero)
+
+         nqnu_t(:) = occ_be(wqnu, sigma%kTmesh, zero)
+         call phdispl_cart2red_nmodes(natom, 1, cryst%gprimd, gqk%my_displ_cart(:,:,:,my_ip,my_iq), displ_red_nu)
 
          ! Sum over bands in |m,k+q>
          do im_kq=1,gqk%nb_kq
@@ -692,41 +697,43 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
 
              ! The frequency dependent part evaluated at eig0nk for all T.
              if (dtset%eph_ahc_type == 1) then
-               cfact_t(:) =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) + &
-                             (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta)
+               cfact_t(:) =  (nqnu_t + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) + &
+                             (nqnu_t - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta)
              else
-               cfact_t(:) =  (two * nqnu + one) / (eig0nk - eig0mkq + sigma%ieta)
+               cfact_t(:) =  (two * nqnu_t + one) / (eig0nk - eig0mkq + sigma%ieta)
              end if
 
              ! Re + Im of Fan-Migdal self-energy
              ! (my_npert, nb_kq, my_nq, nb_k, my_nk)
              gkq2 = weight_q * gqk%my_g2(my_ip, im_kq, my_iq, in_k, my_ik)
-
-             ! Compute contribution to Fan-Migdal for M > sigma%nbsum
-             !if (dtset%eph_stern /= 0) then
-             !  ! sum_{pp'} d_p* Stern_{pp'} d_p' with d = displ_red(:,:,:,nu) and S = stern_ppb(:,:,:,ib_k)
-             !  vec_natom3 = zero
-             !  call cg_zgemm("N", "N", natom3, natom3, 1, stern_ppb(:,:,:,ib_k), displ_red(:,:,:,nu), vec_natom3)
-             !  dotri = cg_zdotc(natom3, displ_red(:,:,:,nu), vec_natom3)
-             !  !write(std_out, *)"dotri:", dotri
-             !  rfact = dotri(1)
-             !  !rfact = cg_real_zdotc(natom3, displ_red(:,:,:,nu), vec_natom3)
-             !  rfact = rfact * sigma%wtq_k(iq_ibz_k) / (two * wqnu)
-             !end if
-
              !print *, "gkq2", gkq2
              cfact_t = cfact_t * gkq2
+
+             ! Compute contribution to Fan-Migdal for M > sigma%nbsum
+             if (dtset%eph_stern /= 0) then
+               ! sum_{pp'} d_p* Stern_{pp'} d_p' with d = displ_red_nu and S = stern_ppb(:,:,:,in_k)
+               vec_natom3 = zero
+               call cg_zgemm("N", "N", natom3, natom3, 1, stern_ppb(:,:,:,in_k), displ_red_nu, vec_natom3)
+               dotri = cg_zdotc(natom3, displ_red_nu, vec_natom3)
+               !write(std_out, *)"dotri:", dotri
+               rfact = dotri(1)
+               rfact = rfact * weight_q / (two * wqnu)
+               stern_fan_t = (two * nqnu_t(:) + one) * rfact
+               sigma%fan_stern_vals(:, in_k, ikcalc) = sigma%fan_stern_vals(:, in_k, ikcalc) + stern_fan_t
+               cfact_t = cfact_t + stern_fan_t
+             end if
+
              sigma%vals_e0ks(:, in_k, ikcalc) = sigma%vals_e0ks(:, in_k, ikcalc) + cfact_t
              sigma%fan_vals(:, in_k, ikcalc) = sigma%fan_vals(:, in_k, ikcalc) + cfact_t
 
              ! Derivative of FM sigma at eig0nk for all T.
              ! Accumulate d(Re Sigma) / dw(w=eKS) for state in_k
-             !cfact(x) =  (nqnu + f_mkq      ) / (x - eig0mkq + wqnu + sigma%ieta) + &
-             !            (nqnu - f_mkq + one) / (x - eig0mkq - wqnu + sigma%ieta)
+             !cfact(x) =  (nqnu_t + f_mkq      ) / (x - eig0mkq + wqnu + sigma%ieta) + &
+             !            (nqnu_t - f_mkq + one) / (x - eig0mkq - wqnu + sigma%ieta)
              gmod2 = (eig0nk - eig0mkq + wqnu) ** 2
              hmod2 = (eig0nk - eig0mkq - wqnu) ** 2
-             rfact_t(:) = (nqnu + f_mkq      ) * (-gmod2 + aimag(sigma%ieta)**2) / (gmod2 + aimag(sigma%ieta)**2) ** 2 + &
-                          (nqnu - f_mkq + one) * (-hmod2 + aimag(sigma%ieta)**2) / (hmod2 + aimag(sigma%ieta)**2) ** 2
+             rfact_t(:) = (nqnu_t + f_mkq      ) * (-gmod2 + aimag(sigma%ieta)**2) / (gmod2 + aimag(sigma%ieta)**2) ** 2 + &
+                          (nqnu_t - f_mkq + one) * (-hmod2 + aimag(sigma%ieta)**2) / (hmod2 + aimag(sigma%ieta)**2) ** 2
 
              sigma%dvals_de0ks(:, in_k, ikcalc) = sigma%dvals_de0ks(:, in_k, ikcalc) + gkq2 * rfact_t
 
@@ -734,8 +741,8 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
              if (sigma%nwr > 0) then
                ! Zcut version
                do it=1,ntemp
-                 cfact_wr(:) = (nqnu(it) + f_mkq(it)      ) / (sigma%wrmesh_b(:,in_k, ikcalc) - eig0mkq + wqnu + sigma%ieta) + &
-                               (nqnu(it) - f_mkq(it) + one) / (sigma%wrmesh_b(:,in_k, ikcalc) - eig0mkq - wqnu + sigma%ieta)
+                 cfact_wr(:) = (nqnu_t(it) + f_mkq(it)      ) / (sigma%wrmesh_b(:,in_k, ikcalc) - eig0mkq + wqnu + sigma%ieta) + &
+                               (nqnu_t(it) - f_mkq(it) + one) / (sigma%wrmesh_b(:,in_k, ikcalc) - eig0mkq - wqnu + sigma%ieta)
                  cfact_wr(:) = gkq2 * cfact_wr(:)
 
                  !if (intra_band .and. sigma%frohl_model == 1)  then
@@ -744,6 +751,11 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
                  !end if
 
                  sigma%vals_wr(:,it,in_k,ikcalc) = sigma%vals_wr(:,it,in_k,ikcalc) + cfact_wr(:)
+
+                 ! Add static term from Sternheimer to Sigma(w) as well.
+                 !if (dtset%eph_stern /= 0) then
+                 !  sigma%vals_wr(:, it, in_k, ikcalc) = sigma%vals_wr(:, it, in_k, ikcalc) + rtmp
+                 !end if
                end do
              end if ! nwr > 0
 
@@ -753,12 +765,13 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
              ! Accumulate DW for each T, add it to Sigma(e0) and Sigma(w) as well
              ! - (2 n_{q\nu} + 1) * gdw2 / (e_nk - e_mk)
              if (abs(ediff) > EPHTK_WTOL) then
-               cfact_t(:) = - weight_q * gdw2 * (two * nqnu + one)  / (ediff + sigma%ieta)
+               cfact_t(:) = - weight_q * gdw2 * (two * nqnu_t + one)  / (ediff + sigma%ieta)
              else
                cfact_t(:) = zero
              endif
              sigma%dw_vals(:, in_k, ikcalc) = sigma%dw_vals(:, in_k, ikcalc) + real(cfact_t)
              sigma%vals_e0ks(:, in_k, ikcalc) = sigma%vals_e0ks(:, in_k, ikcalc) + real(cfact_t)
+
              if (sigma%nwr > 0) then
                ! Add static DW term to Sigma(w).
                do it=1,ntemp
@@ -776,6 +789,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
        ABI_SFREE(ffnl_kq)
        ABI_SFREE(kinpw_kq)
        ABI_SFREE(ph3d_kq)
+       ABI_SFREE(stern_ppb)
      end do ! my_iq
 
      call lg_myk%free()
@@ -790,10 +804,11 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
    end associate
  end do ! my_is
 
- ABI_FREE(nqnu)
+ ABI_FREE(nqnu_t)
  ABI_FREE(f_mkq)
  ABI_FREE(cfact_t)
  ABI_FREE(rfact_t)
+ ABI_FREE(stern_fan_t)
  ABI_SFREE(vtrial)
  ABI_FREE(phmodes_skip)
  ABI_SFREE(cfact_wr)
