@@ -258,14 +258,14 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  real(dp),allocatable :: kinpw_k(:), kinpw_kq(:),kpg_kq(:,:),kpg_k(:,:)
  real(dp),allocatable :: ffnl_k(:,:,:,:),ffnl_kq(:,:,:,:),ph3d_k(:,:,:),ph3d_kq(:,:,:),v1scf(:,:,:,:)
  real(dp) :: displ_red_nu(2, 3, cryst%natom)
- !real(dp),allocatable :: gkq_atm(:,:,:), gkq_nu(:,:,:) !,gkq0_atm(:,:,:,:), gaussw_qnu(:)
+ !real(dp),allocatable :: gkq_atm(:,:,:), gkq_nu(:,:,:) gaussw_qnu(:)
  real(dp),allocatable :: cg1s_kq(:,:,:,:), h1kets_kq_allperts(:,:,:,:)
  integer,allocatable :: nband(:,:), wfd_istwfk(:), kg_kq(:,:) !, , qselect(:), !, kg_k(:,:),
  integer,allocatable :: gbound_kq(:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:) !, ihave_ikibz_spin(:,:)
  real(dp) :: vec_natom3(2, 3*cryst%natom) ! zpr_frohl_sphcorr(3*cryst%natom),
  real(dp),allocatable :: bra_kq(:,:), kets_k(:,:,:)
- real(dp),allocatable :: stern_ppb(:,:,:,:), stern_fan_t(:) !, stern_dw(:,:,:,:)
+ real(dp),allocatable :: stern_ppb(:,:,:,:), stern_fan_t(:), stern_dw(:,:,:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: rfact_t(:), nqnu_t(:), f_mkq(:) !, f_nk(:)
  complex(dp),allocatable :: cfact_t(:), cfact2_t(:), cfact_wr(:), tpp_red(:,:) !,fmw_frohl_sphcorr(:,:,:,:),
@@ -453,13 +453,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
 
    call dvdb%ftinterp_setup(dtset%ddb_ngqpt, gstore%qptopt, 1, dtset%ddb_shiftq, nfftf, ngfftf, xmpi_comm_self)
 
-   ! Allocate arrays for Debye-Waller
-   !ABI_CALLOC_OR_DIE(gkq0_atm, (2, nbcalc_ks, sigma%my_bsum_start:sigma%my_bsum_stop, natom3), ierr)
-   !ABI_CALLOC(stern_dw, (2, natom3, natom3, nbcalc_ks))
    !enough_stern = 0
-   !ABI_FREE(gkq0_atm)
-   !ABI_FREE(stern_dw)
-
    ABI_MALLOC(tpp_red, (natom3, natom3))
    ABI_MALLOC(gbound_kq, (2*wfd%mgfft+8, 2))
  end if ! eph_stern /= 0
@@ -495,9 +489,11 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
    if (sigma%nwr > 0) then
      ABI_CALLOC(sigma%vals_wr, (sigma%nwr, ntemp, nb_k, glob_nk))
      ABI_CALLOC(sigma%wrmesh_b, (sigma%nwr, nb_k, glob_nk))
-   end if ! nwr
+   end if
 
-   ! Loop over my k-points in |n,k>
+   ABI_CALLOC(stern_dw, (2, natom3, natom3, nb_k))
+
+   ! Loop over my k-points in |n,k>.
    do my_ik=1,gqk%my_nk
      kk = gqk%my_kpts(:, my_ik)
 
@@ -555,7 +551,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
 
        if (dtset%eph_stern /= 0 .and. .not. sigma%imag_only) then
          ! Activate Sternheimer.
-         ! NB: Assume adiabatic AHC expression to compute the contribution of states above nbsum.
+         ! NB: Assume adiabatic AHC expression to compute the contribution of states above gqk%nb
 
          ! Get istwf_kq, npw_kq, kg_kq for k+q.
          call wfd%get_gvec_gbound(cryst%gmet, dtset%ecut, kq, ikq_ibz, isirr_kq, dtset%nloalg, & ! in
@@ -585,14 +581,12 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
                          stern_use_cache, work_ngfft, mpi_enreg, xmpi_comm_self)
 
          ABI_MALLOC(bra_kq, (2, npw_kq*nspinor))
-
          do ibsum_kq=1, nbsum
            ! Reconstruct u_kq(G) from the IBZ image.
            call wfd%rotate_cg(ibsum_kq, ndat1, spin, kq_ibz, npw_kq, kg_kq, istwf_kq, &
                               cryst, my_kqmap, gbound_kq, work_ngfft, work, bra_kq)
            stern%cgq(:, :, ibsum_kq) = bra_kq
          end do ! ibsum_kq
-
          ABI_FREE(bra_kq)
 
          ! Loop over all 3*natom perturbations (Each core prepares its own potentials)
@@ -641,7 +635,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
                               kets_k(:,:,in_k), cwaveprj0, cg1s_kq(:,:,ipc,in_k), cwaveprj, msg, ierr)
              ABI_CHECK(ierr == 0, msg)
 
-             ! Compute H(1) applied to GS wavefunction Psi_nk(0)
+             ! Store H(1) applied to GS wavefunction Psi_nk(0)
              ! stern%gh1c_n stores <G|H1|C0 band,k>
              h1kets_kq_allperts(:,:,ipc,in_k) = stern%gh1c_n
            end do ! in_k
@@ -650,36 +644,36 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
            call rf_ham_kq%free()
          end do ! my_ip  (loop over my perturbations)
 
-         ! <D_p H psi_nk | D_p' psi_nk>
+         ! Compute <D_p H psi_nk | D_p' psi_nk> and store it in stern_ppb
          do in_k=1,nb_k
            call cg_zgemm("C", "N", npw_kq*nspinor, natom3, natom3, &
              h1kets_kq_allperts(:,:,:,in_k), cg1s_kq(:,:,:,in_k), stern_ppb(:,:,:,in_k))
 
             ! Save data for Debye-Waller that is performed outside the q-loop.
-            !if (q_is_gamma) stern_dw(:,:,:,in_k) = stern_ppb(:,:,:,in_k)
+            if (q_is_gamma) stern_dw(:,:,:,in_k) = stern_ppb(:,:,:,in_k)
          end do
 
          ABI_FREE(cg1s_kq)
          ABI_FREE(v1scf)
          ABI_FREE(vlocal1)
-         call stern%free()
-
          ABI_FREE(h1kets_kq_allperts)
+         call stern%free()
        end if ! eph_stern
 
        ! Sum over my phonon modes.
        do my_ip=1,gqk%my_npert
-         wqnu = gqk%my_wnuq(my_ip, my_iq)
          nu = my_ip + gqk%my_pert_start - 1
-
+         wqnu = gqk%my_wnuq(my_ip, my_iq)
          ! Ignore unstable modes or modes that should be skipped.
          if (ephtk_skip_phmode(nu, wqnu, phmodes_skip, dtset%eph_phrange_w)) cycle
 
          nqnu_t(:) = occ_be(wqnu, sigma%kTmesh, zero)
-         call phdispl_cart2red_nmodes(natom, 1, cryst%gprimd, gqk%my_displ_cart(:,:,:,my_ip,my_iq), displ_red_nu)
 
          ! Compute T_pp'(q,nu) matrix in reduced coordinates.
-         if (dtset%eph_stern /= 0) call sigtk_dw_tpp_red(natom, displ_red_nu, tpp_red)
+         if (dtset%eph_stern /= 0) then
+           call phdispl_cart2red_nmodes(natom, 1, cryst%gprimd, gqk%my_displ_cart(:,:,:,my_ip,my_iq), displ_red_nu)
+           call sigtk_dw_tpp_red(natom, displ_red_nu, tpp_red)
+         end if
 
          ! Sum over bands in |m,k+q>
          do im_kq=1,gqk%nb_kq
@@ -707,14 +701,12 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
                cfact_t(:) =  (two * nqnu_t + one) / (eig0nk - eig0mkq + sigma%ieta)
              end if
 
-             ! Re + Im of Fan-Migdal self-energy
-             ! (my_npert, nb_kq, my_nq, nb_k, my_nk)
-             gkq2 = weight_q * gqk%my_g2(my_ip, im_kq, my_iq, in_k, my_ik)
-             !print *, "gkq2", gkq2
+             gkq2 = weight_q * gqk%my_g2(my_ip, im_kq, my_iq, in_k, my_ik) !; print *, "gkq2", gkq2
              cfact_t = cfact_t * gkq2
 
-             ! Compute contribution to Fan-Migdal for M > sigma%nbsum
-             if (dtset%eph_stern /= 0) then
+             ! Compute contribution to Fan-Migdal for M > gqk%nb_kq
+             !if (dtset%eph_stern /= 0) then
+             if (dtset%eph_stern /= 0 .and. im_kq == 1 .and. gqk%qpt_kpt_comm%me == 0) then
                ! sum_{pp'} d_p* Stern_{pp'} d_p' with d = displ_red_nu and S = stern_ppb(:,:,:,in_k)
                vec_natom3 = zero
                call cg_zgemm("N", "N", natom3, natom3, 1, stern_ppb(:,:,:,in_k), displ_red_nu, vec_natom3)
@@ -725,19 +717,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
                stern_fan_t = (two * nqnu_t(:) + one) * rfact
                sigma%fan_stern_vals(:, in_k, ikcalc) = sigma%fan_stern_vals(:, in_k, ikcalc) + stern_fan_t
                cfact_t = cfact_t + stern_fan_t
-
-               if (q_is_gamma .and. im_kq == 1) then
-                 ! Compute DW term for m > nband
-                 cfact = zero
-                 do ip2=1,natom3
-                   do ip1=1,natom3
-                     cfact = cfact + tpp_red(ip1, ip2) * cmplx(stern_ppb(1,ip1,ip2,in_k), stern_ppb(2,ip1,ip2,in_k), kind=dp)
-                   end do
-                 end do
-                 ! There's no 1/two here because I don't symmetrize the expression.
-                 ! TODO: Test symmetrization, real quantity? add support for the different Eliashberg functions with Stern
-                 gdw2_stern = real(cfact) / (four * wqnu)
-               end if
              end if
 
              sigma%vals_e0ks(:, in_k, ikcalc) = sigma%vals_e0ks(:, in_k, ikcalc) + cfact_t
@@ -787,7 +766,19 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
                cfact_t(:) = zero
              endif
 
-             if (dtset%eph_stern /= 0 .and. im_kq == 1) then ! TODO: and gqk%qpt_kpt_comm%me == 0
+             if (dtset%eph_stern /= 0 .and. im_kq == 1 .and. gqk%qpt_kpt_comm%me == 0) then
+
+               ! Compute DW term for M > gqk%nb_kq
+               cfact = zero
+               do ip2=1,natom3
+                 do ip1=1,natom3
+                   cfact = cfact + tpp_red(ip1, ip2) * cmplx(stern_dw(1,ip1,ip2,in_k), stern_dw(2,ip1,ip2,in_k), kind=dp)
+                 end do
+               end do
+               ! There's no 1/two here because I don't symmetrize the expression.
+               ! TODO: Test symmetrization, real quantity? add support for the different Eliashberg functions with Stern
+               gdw2_stern = real(cfact) / (four * wqnu)
+
                ! Add contribution due to the Sternheimer. ediff is absorbed in Sternheimer.
                cfact2_t = - weight_q * gdw2_stern * (two * nqnu_t(it) + one)
                cfact_t = cfact_t + cfact2_t
@@ -823,6 +814,8 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
      ABI_SFREE(ph3d_k)
    end do ! my_ik
 
+   ABI_SFREE(stern_dw)
+
    call sigma%gather_and_write_results(gstore, gqk, dtset, ebands)
    end associate
  end do ! my_is
@@ -843,6 +836,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  ABI_SFREE(gbound_kq)
  ABI_SFREE(tpp_red)
  ABI_SFREE(work)
+
 
  call wfd%free(); call gstore%free(); call sigma%free(); call gs_ham_kq%free()
 
