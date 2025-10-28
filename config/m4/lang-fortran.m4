@@ -1466,6 +1466,39 @@ AC_DEFUN([ABI_FC_MOD_CASE],[
   AC_MSG_RESULT([${fc_mod_uppercase}])
 ]) # ABI_FC_MOD_CASE
 
+AC_DEFUN([ABI_FC_MODDIR_FLAG], [
+  AC_REQUIRE([AC_PROG_FC])
+  AC_MSG_CHECKING([how to set Fortran module output directory])
+  FC_MODDIR_FLAG=""
+  for flag in "-Jconftest_moddir" "-module conftest_moddir" "-Mmod=conftest_moddir" "-mdir conftest_moddir"; do
+    rm -rf conftest_moddir conftest.f90 conftest.o conftest.mod
+    mkdir -p conftest_moddir
+    echo "      module conftest" > conftest.f90
+    echo "      end module conftest" >> conftest.f90
+    if $FC $flag -c conftest.f90 > /dev/null 2>&1; then
+      # Check if .mod file was created in the target directory
+      if test -f conftest_moddir/conftest.mod; then
+        case $flag in
+          -J*) FC_MODDIR_FLAG="-J" ;;
+          -module*) FC_MODDIR_FLAG="-module " ;;
+          -Mmod=*) FC_MODDIR_FLAG="-Mmod=" ;;
+          -mdir*) FC_MODDIR_FLAG="-mdir=" ;;
+        esac
+        AC_MSG_RESULT([$FC_MODDIR_FLAG])
+        break
+      fi
+    fi
+    rm -rf conftest_moddir conftest.f90 conftest.o conftest.mod
+  done
+  if test -z "$FC_MODDIR_FLAG"; then
+    AC_MSG_RESULT([none])
+    AC_MSG_WARN([Could not determine Fortran module output flag])
+  fi
+  FCFLAGS_MODDIR="${FC_MODDIR_FLAG}../mods"
+  AC_SUBST([FCFLAGS_MODDIR])
+])
+
+
 
 # ABI_FC_MOD_INCS(MODULE)
 # -----------------------
