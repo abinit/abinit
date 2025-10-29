@@ -519,8 +519,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
        npw_k = wfd%npwarr(ik_ibz); istwf_k = wfd%istwfk(ik_ibz)
        call gs_ham_kq%eph_setup_k("k", kk, istwfk_1, npw_k, wfd%kdata(ik_ibz)%kg_k, dtset, cryst, psps, & ! in
                                   nkpg, kpg_k, ffnl_k, kinpw_k, ph3d_k, xmpi_comm_self)                   ! out
-
-
      end if
 
      ! Sum over my q-points.
@@ -577,7 +575,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
 
          ! h1kets_kq are MPI distributed inside pert_comm but we need off-diagonal pp' terms --> collect results.
          ABI_CALLOC(h1kets_kq_allperts, (2, npw_kq*nspinor, natom3, nb_k))
-         ! Compute S_pp' = <D_{qp} vscf u_nk|u'_{nk+q p'}>
 
          do my_ip=1, gqk%my_npert
            ipc = gqk%my_pertcases(my_ip); idir = mod(ipc-1, 3) + 1; ipert = (ipc - idir) / 3 + 1
@@ -622,7 +619,9 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
          end do ! my_ip  (loop over my perturbations)
 
          call xmpi_sum(h1kets_kq_allperts, gqk%pert_comm%value, ierr)
+         call xmpi_sum(cg1s_kq, gqk%pert_comm%value, ierr)
 
+         ! Compute S_pp' = <D_{qp} vscf u_nk|u'_{nk+q p'}>
          ! Compute <D^q_p H psi_nk | D^q_p' psi_nk> and store it in stern_ppb
          do in_k=1,nb_k
            !call xmpi_allgather(h1kets_kq(:,:,:,in_k), 2*npw_kq*nspinor*gqk%my_npert, &
@@ -645,6 +644,8 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
          if (my_iq == 1) then
            if (gqk%qpt_comm%me == master) then
              ABI_CHECK(q_is_gamma, "Master in qpt_comm% should have Gamma when my_iq == 1")
+           else
+             ABI_CHECK(.not.q_is_gamma, "Rank in qpt_comm% should not have Gamma when my_iq == 1")
            end if
            call xmpi_bcast(stern_dw, master, gqk%qpt_comm%value, ierr)
          end if
@@ -703,7 +704,8 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
              cfact_t = cfact_t * gkq2
 
              ! Compute contribution to Fan-Migdal for M > nb_kq
-             if (dtset%eph_stern /= 0 .and. im_kq == 1 .and. gqk%qpt_comm%me == master) then
+             !if (dtset%eph_stern /= 0 .and. im_kq == 1 .and. gqk%qpt_comm%me == master) then
+             if (dtset%eph_stern /= 0 .and. im_kq == 1) then
                ! sum_{pp'} d_p* Stern_{pp'} d_p' with d = displ_red_nu and S = stern_ppb(:,:,:,in_k)
                vec_natom3 = zero
                call cg_zgemm("N", "N", natom3, natom3, 1, stern_ppb(:,:,:,in_k), displ_red_nu, vec_natom3)
@@ -763,7 +765,8 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
                cfact_t(:) = zero
              endif
 
-             if (dtset%eph_stern /= 0 .and. im_kq == 1 .and. gqk%qpt_comm%me == master) then
+             !if (dtset%eph_stern /= 0 .and. im_kq == 1 .and. gqk%qpt_comm%me == master) then
+             if (dtset%eph_stern /= 0 .and. im_kq == 1) then
                ! Compute DW term for M > nb_kq.
                cfact = zero
                do ip2=1,natom3
