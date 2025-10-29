@@ -485,6 +485,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
    end if
 
    ABI_CALLOC(stern_dw, (2, natom3, natom3, nb_k))
+   ABI_CALLOC(stern_ppb, (2, natom3, natom3, nb_k))
 
    ! Loop over my k-points in |n,k>.
    do my_ik=1,gqk%my_nk
@@ -518,17 +519,13 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
        npw_k = wfd%npwarr(ik_ibz); istwf_k = wfd%istwfk(ik_ibz)
        call gs_ham_kq%eph_setup_k("k", kk, istwfk_1, npw_k, wfd%kdata(ik_ibz)%kg_k, dtset, cryst, psps, & ! in
                                   nkpg, kpg_k, ffnl_k, kinpw_k, ph3d_k, xmpi_comm_self)                   ! out
+
+
      end if
 
      ! Sum over my q-points.
      do my_iq=1,gqk%my_nq
        call gqk%myqpt(my_iq, gstore, weight_q, qpt); q_is_gamma = sum(qpt**2) < tol14
-
-       ! weight_q is computed here. It depends whether we are summing over the full BZ or IBZ_k.
-       weight_q = one / gstore%nqbz
-       if (dtset%gstore_use_lgk /= 0) then
-         ii = lg_myk%findq_ibzk(qpt); if (ii == -1) cycle; weight_q = lg_myk%weights(ii)
-       end if
 
        ! Find the image of k+q in the IBZ.
        kq = kk + qpt
@@ -581,7 +578,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
          ! h1kets_kq are MPI distributed inside pert_comm but we need off-diagonal pp' terms --> collect results.
          ABI_CALLOC(h1kets_kq_allperts, (2, npw_kq*nspinor, natom3, nb_k))
          ! Compute S_pp' = <D_{qp} vscf u_nk|u'_{nk+q p'}>
-         ABI_CALLOC(stern_ppb, (2, natom3, natom3, nb_k))
 
          do my_ip=1, gqk%my_npert
            ipc = gqk%my_pertcases(my_ip); idir = mod(ipc-1, 3) + 1; ipert = (ipc - idir) / 3 + 1
@@ -654,6 +650,14 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
          end if
        end if ! eph_stern
 
+       ! weight_q is computed here. It depends whether we are summing over the full BZ or IBZ_k.
+       ! IMPORTANT: This check should be done here so that we can Broadcast stern_dw if eph_stern /= 0
+       ! when iq_ibz == 1. Do not move this section above!!!!
+       weight_q = one / gstore%nqbz
+       if (dtset%gstore_use_lgk /= 0) then
+         ii = lg_myk%findq_ibzk(qpt); if (ii == -1) goto 10; weight_q = lg_myk%weights(ii)
+       end if
+
        ! Sum over my phonon modes.
        do my_ip=1,gqk%my_npert
          nu = my_ip + gqk%my_pert_start - 1; wqnu = gqk%my_wnuq(my_ip, my_iq)
@@ -699,7 +703,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
              cfact_t = cfact_t * gkq2
 
              ! Compute contribution to Fan-Migdal for M > nb_kq
-             if (dtset%eph_stern /= 0 .and. im_kq == 1 .and. gqk%qpt_kpt_comm%me == master) then
+             if (dtset%eph_stern /= 0 .and. im_kq == 1 .and. gqk%qpt_comm%me == master) then
                ! sum_{pp'} d_p* Stern_{pp'} d_p' with d = displ_red_nu and S = stern_ppb(:,:,:,in_k)
                vec_natom3 = zero
                call cg_zgemm("N", "N", natom3, natom3, 1, stern_ppb(:,:,:,in_k), displ_red_nu, vec_natom3)
@@ -759,7 +763,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
                cfact_t(:) = zero
              endif
 
-             if (dtset%eph_stern /= 0 .and. im_kq == 1 .and. gqk%qpt_kpt_comm%me == master) then
+             if (dtset%eph_stern /= 0 .and. im_kq == 1 .and. gqk%qpt_comm%me == master) then
                ! Compute DW term for M > nb_kq.
                cfact = zero
                do ip2=1,natom3
@@ -786,26 +790,26 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
                  sigma%vals_wr(:, it, in_k, ikcalc) = sigma%vals_wr(:, it, in_k, ikcalc) + real(cfact_t(it))
                end do
              end if
-           end do ! in_k
 
+           end do ! in_k
          end do ! im_kq
        end do ! my_ip
 
+10     continue
        ABI_SFREE(kpg_kq)
        ABI_SFREE(ffnl_kq)
        ABI_SFREE(kinpw_kq)
        ABI_SFREE(ph3d_kq)
-       ABI_SFREE(stern_ppb)
      end do ! my_iq
-
-     call lg_myk%free()
 
      ABI_SFREE(kpg_k)
      ABI_SFREE(ffnl_k)
      ABI_SFREE(kinpw_k)
      ABI_SFREE(ph3d_k)
+     call lg_myk%free()
    end do ! my_ik
 
+   ABI_SFREE(stern_ppb)
    ABI_SFREE(stern_dw)
 
    call sigma%gather_and_write_results(gstore, gqk, dtset, ebands)
