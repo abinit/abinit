@@ -220,6 +220,8 @@ MODULE m_nctk
  public :: nctk_write_datar
  public :: nctk_read_datar
  public :: nctk_prepare_mpiio
+ ! This function appears to be required to prevent deadlocks during I/O operations in single mode.
+ ! It's called automatically when using nctk_open_modify and nctk_open_read
 
  public :: create_nc_file              ! FIXME: Deprecated
  public :: write_var_netcdf            ! FIXME: Deprecated
@@ -700,6 +702,7 @@ integer function nctk_open_read(ncid, path, comm) result(ncerr)
    ABI_WARNING("Netcdf without MPI support. Cannot open file, will abort in caller")
 #endif
    NCF_CHECK_MSG(ncerr, sjoin("opening file:", path))
+   NCF_CHECK(nctk_prepare_mpiio(ncid))
  else
    ncerr = nf90_open(path, mode=nf90_nowrite, ncid=ncid)
    NCF_CHECK_MSG(ncerr, sjoin("Opening file:", path))
@@ -842,6 +845,7 @@ integer function nctk_open_modify(ncid, path, comm) result(ncerr)
 #else
    ABI_ERROR("nprocs > 1 but netcdf does not support MPI-IO")
 #endif
+   NCF_CHECK(nctk_prepare_mpiio(ncid))
  else
    call wrtout(std_out, sjoin("- Opening netcdf file without MPI-IO support:", path))
    ncerr = nf90_open(path, nf90_write, ncid)
@@ -2239,6 +2243,10 @@ end function nctk_read_datar
 !! nctk_mpiio
 !!
 !! FUNCTION
+!! This function appears to be required to prevent deadlocks during I/O operations in single mode.
+!! Although single mode is the default, on some architectures or compilers, nf90_put_var
+!! can deadlock if not all processors in the communicator invoke the function.
+!! This solution was proposed by Hsiao-Yi Tsai.
 
 integer function nctk_prepare_mpiio(ncid) result(ncerr)
 
