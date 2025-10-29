@@ -4640,9 +4640,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      if (dt%nshiftk /= 1 .or. any(abs(dt%shiftk(:,1)) > tol6)) then
        ABI_ERROR_NOSTOP('GWR requires Gamma-centered k-meshes', ierr)
      end if
-     if (dt%nspinor == 2 .and. .not. string_in(dt%gwr_task, "HDIAGO, HDIAGO_FULL")) then
-       ABI_ERROR_NOSTOP('GWR does not support nspinor == 2', ierr)
-     end if
+    !  if (dt%nspinor == 2 .and. .not. string_in(dt%gwr_task, "HDIAGO, HDIAGO_FULL")) then
+    !    ABI_ERROR_NOSTOP('GWR does not support nspinor == 2', ierr)
+    !  end if
    end if
 
    ! ===========================================================
