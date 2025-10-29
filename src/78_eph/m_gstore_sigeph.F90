@@ -42,19 +42,19 @@ module m_gstore_sigeph
  use m_cgtools
 
  !use m_time,           only : cwtime, cwtime_report, sec2str
- use m_io_tools,       only : iomode_from_fname !, file_exists, is_open, open_file, flush_unit
- use m_numeric_tools,  only : arth !, c2r, get_diag, linfit, iseven, simpson_cplx, simpson, print_arr, inrange
+ use m_io_tools,       only : iomode_from_fname
+ use m_numeric_tools,  only : arth !, c2r
  use m_fstrings,       only : tolower, itoa, ftoa, sjoin, ktoa, ltoa, strcat, replace_ch0, yesno, string_in
- use m_cgtools,        only : cg_zgemm !, cg_zdotc
- use m_kg,             only : getph !, mkkpg, mkkin
+ use m_cgtools,        only : cg_zgemm, cg_zdotc
+ use m_kg,             only : getph
  use defs_datatypes,   only : pseudopotential_type
  use defs_abitypes,    only : mpi_type
  use m_hdr,            only : hdr_type, fform_from_ext
  use m_geometry,       only : phdispl_cart2red_nmodes
  use m_ebands,         only : ebands_t, gaps_t
- use m_kpts,           only : kpts_timrev_from_kptopt, kpts_map !, kpts_sort, kpts_pack_in_stars, kptrlatt_from_ngkpt
+ use m_kpts,           only : kpts_timrev_from_kptopt, kpts_map
  use m_ioarr,          only : read_rhor
- use m_fftcore,        only : ngfft_seq !, sphereboundary, get_kg, kgindex
+ use m_fftcore,        only : ngfft_seq !, get_kg
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack
  use m_ifc,            only : ifc_type
  use m_dfpt_cgwf,      only : stern_t
@@ -183,8 +183,9 @@ contains
 !!  gstore_sigeph
 !!
 !! FUNCTION
-!!  Compute matrix elements of the e-ph self-energy (Fan Migdal + Debye Waller).
+!!  Compute diagonal matrix elements of the e-ph self-energy (Fan Migdal + Debye Waller).
 !!  using precomputed e-ph matrix elements.
+!!  See also m_sigmaph, for a version in which the g-matrix elements are computed on-the-fly.
 !!
 !! INPUTS
 !! wfk0_path=String with the path to the GS unperturbed WFK file.
@@ -199,7 +200,11 @@ contains
 !! pawtab(ntypat*usepaw)<pawtab_type>=Paw tabulated starting data.
 !! psps<pseudopotential_type>=Variables related to pseudopotentials.
 !!
+!! TODO:
+!! For off-diagonal terms, see https://journals.aps.org/prb/abstract/10.1103/PhysRevB.101.121102
+!!
 !! OUTPUT
+!! Write results to ab_out and netcdf files.
 !!
 !! SOURCE
 
@@ -226,13 +231,13 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
 
 !Local variables-------------------------------
  integer,parameter :: master = 0, with_cplex1 = 1, cplex1 = 1, pawread0 = 0, ndat1 = 1, berryopt0 = 0, istwfk_1 = 1
- integer :: n1, n2, n3, n4, n5, n6, nb_k, nb_kq, glob_nk, ntemp, cplex
+ integer :: n1, n2, n3, n4, n5, n6, nb_k, nb_kq, glob_nk, ntemp, cplex, my_npert
  integer :: spin, my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, gap_err, my_rank, ip1, ip2, nu, ipc, idir, ipert
  integer :: it, ik_ibz, ikq_ibz, band_k, band_kq, timrev_k, ii, ikcalc, natom, natom3, nsppol, nspden, nspinor, nkpt !,ik_bz
  integer :: isym_k,isym_kq,trev_k,trev_kq
  integer :: istwf_k, istwf_kq, npw_k, npw_kq, nkpg_kq
  integer :: nfft, nfftf, mgfft, mgfftf, nkpg !,nkpg1,cnt, enough_stern
- integer :: usecprj, mpw, nbsum, ibsum_kq, band_me, u1_band ! usevnl,optlocal,optnl,opt_gvnlx1,
+ integer :: usecprj, mpw, ibsum_kq, band_me, u1_band
  real(dp) :: wqnu, gkq2, weight_q, eig0nk, eig0mk, eig0mkq, ediff, gmod2, hmod2, gdw2, rfact, gdw2_stern, rtmp !,nqnu,gkq2,gkq2_pf,
  !real(dp) :: cpu, wall, gflops
  logical :: q_is_gamma, intra_band, same_band, isirr_k, isirr_kq, stern_use_cache
@@ -250,7 +255,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  type(gs_hamiltonian_type) :: gs_ham_kq
  type(rf_hamiltonian_type) :: rf_ham_kq
 !arrays
- integer :: gmax(3), g0_k(3), g0_kq(3), work_ngfft(18) !, g0_q(3),
+ integer :: gmax(3), g0_k(3), g0_kq(3), work_ngfft(18)
  integer :: units(2), my_kqmap(6)
  integer,allocatable :: phmodes_skip(:)
  real(dp) :: kk(3), kk_ibz(3), kq_ibz(3), qpt(3), kq(3), fermie1_idir_ipert(3,cryst%natom), dotri(2)
@@ -260,14 +265,14 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  real(dp) :: displ_red_nu(2, 3, cryst%natom)
  !real(dp),allocatable :: gkq_atm(:,:,:), gkq_nu(:,:,:) gaussw_qnu(:)
  real(dp),allocatable :: cg1s_kq(:,:,:,:), h1kets_kq_allperts(:,:,:,:)
- integer,allocatable :: nband(:,:), wfd_istwfk(:), kg_kq(:,:) !, , qselect(:), !, kg_k(:,:),
+ integer,allocatable :: nband(:,:), wfd_istwfk(:), kg_kq(:,:) !, kg_k(:,:),
  integer,allocatable :: gbound_kq(:,:)
- logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:) !, ihave_ikibz_spin(:,:)
+ logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  real(dp) :: vec_natom3(2, 3*cryst%natom) ! zpr_frohl_sphcorr(3*cryst%natom),
  real(dp),allocatable :: bra_kq(:,:), kets_k(:,:,:)
  real(dp),allocatable :: stern_ppb(:,:,:,:), stern_fan_t(:), stern_dw(:,:,:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
- real(dp),allocatable :: rfact_t(:), nqnu_t(:), f_mkq(:) !, f_nk(:)
+ real(dp),allocatable :: rfact_t(:), nqnu_t(:), f_mkq(:)
  complex(dp),allocatable :: cfact_t(:), cfact2_t(:), cfact_wr(:), tpp_red(:,:) !,fmw_frohl_sphcorr(:,:,:,:),
  type(pawrhoij_type),allocatable :: pot_pawrhoij(:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
@@ -279,8 +284,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  call wrtout(std_out, " Computing Fan-Migdal + DW self-energy from GSTORE.nc", pre_newlines=1)
 
  ! Init gstore and MPI grid from file and dtset.
- ! The Fan-Migdal SE requires |g(k,q)|^2 in the phonon representation but
- ! we also need complex g(k,q=Gamma) in the atom representation for the DW term in the RIA.
+ ! The Fan-Migdal SE requires |g(k,q)|^2 as well as g2DW in the phonon representation.
  call gstore%from_ncpath(dtfil%filgstorein, with_cplex1, dtset, cryst, ebands, ifc, &
                          "phonon", dtset%gstore_gname, .True., comm)
 
@@ -292,9 +296,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  if (gstore%qzone /= "bz") then
    ABI_ERROR_NOSTOP("gstore_sigeph assumes qzone == `bz`", ierr)
  end if
- if (gstore%has_used_lgk /= 0) then
-   ABI_ERROR_NOSTOP("gstore_sigeph does not support use_lgk /=0.", ierr)
- end if
  if (gstore%has_used_lgq /= 0) then
    ABI_ERROR_NOSTOP("gstore_sigeph does not support use_lgq /=0.", ierr)
  end if
@@ -305,8 +306,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
      'In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
    ABI_ERROR(msg)
  end if
-
- ! TODO: For off-diagonal terms, see https://journals.aps.org/prb/abstract/10.1103/PhysRevB.101.121102
 
  ! Check consistency of little group options
  ABI_CHECK(gstore%check_little_group(dtset, msg) == 0, msg)
@@ -350,7 +349,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  ! Setup a mask to skip accumulating the contribution of certain phonon modes.
  call ephtk_set_phmodes_skip(dtset%natom, dtset%eph_phrange, phmodes_skip)
 
- ! This part is taken from dfpt_vtorho
  !==== Initialize most of the Hamiltonian (and derivative) ====
  ! 1) Allocate all arrays and initialize quantities that do not depend on k and spin.
  ! 2) Perform the setup needed for the non-local factors:
@@ -446,14 +444,12 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
    call dvdb%open_read(ngfftf, xmpi_comm_self)
    ABI_CHECK(dvdb%has_fields("pot1", msg), msg)
 
-   !if (sigma%pert_comm%nproc > 1) then
-   !  ! Activate parallelism over perturbations
-   !  call dvdb%set_pert_distrib(sigma%my_npert, natom3, sigma%my_pinfo, sigma%pert_table, sigma%pert_comm%value)
-   !end if
+   ! Activate parallelism over perturbations
+   call gstore%set_perts_distrib(cryst, dvdb, my_npert)
 
+   ! Prepare FT interpolation of DFPT potentials.
    call dvdb%ftinterp_setup(dtset%ddb_ngqpt, gstore%qptopt, 1, dtset%ddb_shiftq, nfftf, ngfftf, xmpi_comm_self)
 
-   !enough_stern = 0
    ABI_MALLOC(tpp_red, (natom3, natom3))
    ABI_MALLOC(gbound_kq, (2*wfd%mgfft+8, 2))
  end if ! eph_stern /= 0
@@ -473,9 +469,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  do my_is=1,gstore%my_nspins
    associate (gqk => gstore%gqk(my_is), cryst => gstore%cryst)
    spin = gstore%my_spins(my_is); nb_k = gqk%nb_k; nb_kq = gqk%nb_kq; glob_nk = gqk%glob_nk
-
-   ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
-   ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
 
    ! Allocate arrays for self-energy matrix elements.
    ABI_CALLOC(sigma%vals_e0ks, (ntemp, nb_k, glob_nk))
@@ -551,7 +544,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
 
        if (dtset%eph_stern /= 0 .and. .not. sigma%imag_only) then
          ! Activate Sternheimer.
-         ! NB: Assume adiabatic AHC expression to compute the contribution of states above gqk%nb
+         ! NB: Assume adiabatic AHC expression to compute the contribution of states above gqk%nb.
 
          ! Get istwf_kq, npw_kq, kg_kq for k+q.
          call wfd%get_gvec_gbound(cryst%gmet, dtset%ecut, kq, ikq_ibz, isirr_kq, dtset%nloalg, & ! in
@@ -563,30 +556,20 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
          ! Fourier interpolation of the DFPT potentials.
          call dvdb%get_ftqbz(qpt, cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
 
-         ! Build global array with GS wavefunctions cg_kq at k+q to prepare call to dfpt_cgwf.
-         ! NB: bsum_range is not compatible with Sternheimer.
-         ! There's a check at the level of the parser in chkinp.
-
-         ! NOTE: in the present version, we need to gather all nbsum bands on each core before calling dfpt_cgwf.
-         ! In principle one can call dfpt_cgwf in band-para mode but then
-         ! we are obliged to call the sternheimer solver with one psi1 and all procs in bsum_comm
-         ! just to to be able to apply the projector operator.
-         ! The present version is not memory efficient and leads to a big load imbalance if
-         ! bsum%comm%nproc > nband_calc_ks
-
-         stern_use_cache = merge(.True., .False., dtset%eph_stern == 1)
+         ! Build array with GS wavefunctions cg_kq at k+q to prepare call to dfpt_cgwf.
+         !stern_use_cache = merge(.True., .False., dtset%eph_stern == 1)
+         stern_use_cache = .False.
          fermie1_idir_ipert = zero ! FIXME: This is needed for metals.
-         nbsum = gqk%nb_kq
-         call stern%init(dtset, npw_k, npw_kq, nspinor, nbsum, nbsum, fermie1_idir_ipert, &
+         call stern%init(dtset, npw_k, npw_kq, nspinor, nb_kq, nb_kq, fermie1_idir_ipert, &
                          stern_use_cache, work_ngfft, mpi_enreg, xmpi_comm_self)
 
          ABI_MALLOC(bra_kq, (2, npw_kq*nspinor))
-         do ibsum_kq=1, nbsum
+         do ibsum_kq=1, nb_kq
            ! Reconstruct u_kq(G) from the IBZ image.
            call wfd%rotate_cg(ibsum_kq, ndat1, spin, kq_ibz, npw_kq, kg_kq, istwf_kq, &
                               cryst, my_kqmap, gbound_kq, work_ngfft, work, bra_kq)
-           stern%cgq(:, :, ibsum_kq) = bra_kq
-         end do ! ibsum_kq
+           stern%cgq(:,:,ibsum_kq) = bra_kq
+         end do
          ABI_FREE(bra_kq)
 
          ! Loop over all 3*natom perturbations (Each core prepares its own potentials)
@@ -602,7 +585,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
 
          do my_ip=1, gqk%my_npert
            ipc = gqk%my_pertcases(my_ip); idir = mod(ipc-1, 3) + 1; ipert = (ipc - idir) / 3 + 1
-           !print *, "idir, ipert:", idir, ipert
 
            ! Set up local potential vlocal1 with proper dimensioning, from vtrial1 taking into account the spin.
            ! Each CPU prepares its own potentials.
@@ -636,7 +618,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
              ABI_CHECK(ierr == 0, msg)
 
              ! Store H(1) applied to GS wavefunction Psi_nk(0)
-             ! stern%gh1c_n stores <G|H1|C0 band,k>
              h1kets_kq_allperts(:,:,ipc,in_k) = stern%gh1c_n
            end do ! in_k
 
@@ -644,12 +625,17 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
            call rf_ham_kq%free()
          end do ! my_ip  (loop over my perturbations)
 
-         ! Compute <D_p H psi_nk | D_p' psi_nk> and store it in stern_ppb
+         call xmpi_sum(h1kets_kq_allperts, gqk%pert_comm%value, ierr)
+
+         ! Compute <D^q_p H psi_nk | D^q_p' psi_nk> and store it in stern_ppb
          do in_k=1,nb_k
+           !call xmpi_allgather(h1kets_kq(:,:,:,in_k), 2*npw_kq*nspinor*gqk%my_npert, &
+           !                    h1kets_kq_allperts(:,:,:,in_k), gqk%pert_comm%value, ierr)
+
            call cg_zgemm("C", "N", npw_kq*nspinor, natom3, natom3, &
              h1kets_kq_allperts(:,:,:,in_k), cg1s_kq(:,:,:,in_k), stern_ppb(:,:,:,in_k))
 
-            ! Save data for Debye-Waller that is performed outside the q-loop.
+            ! Save data for Debye-Waller
             if (q_is_gamma) stern_dw(:,:,:,in_k) = stern_ppb(:,:,:,in_k)
          end do
 
@@ -658,34 +644,42 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
          ABI_FREE(vlocal1)
          ABI_FREE(h1kets_kq_allperts)
          call stern%free()
+
+         ! Broadcast stern_dw here
+         if (my_iq == 1) then
+           if (gqk%qpt_comm%me == master) then
+             ABI_CHECK(q_is_gamma, "Master in qpt_comm% should have Gamma when my_iq == 1")
+           end if
+           call xmpi_bcast(stern_dw, master, gqk%qpt_comm%value, ierr)
+         end if
        end if ! eph_stern
 
        ! Sum over my phonon modes.
        do my_ip=1,gqk%my_npert
-         nu = my_ip + gqk%my_pert_start - 1
-         wqnu = gqk%my_wnuq(my_ip, my_iq)
+         nu = my_ip + gqk%my_pert_start - 1; wqnu = gqk%my_wnuq(my_ip, my_iq)
+
          ! Ignore unstable modes or modes that should be skipped.
          if (ephtk_skip_phmode(nu, wqnu, phmodes_skip, dtset%eph_phrange_w)) cycle
 
          nqnu_t(:) = occ_be(wqnu, sigma%kTmesh, zero)
 
-         ! Compute T_pp'(q,nu) matrix in reduced coordinates.
          if (dtset%eph_stern /= 0) then
+           ! Compute T_pp'(q,nu) matrix in reduced coordinates.
            call phdispl_cart2red_nmodes(natom, 1, cryst%gprimd, gqk%my_displ_cart(:,:,:,my_ip,my_iq), displ_red_nu)
            call sigtk_dw_tpp_red(natom, displ_red_nu, tpp_red)
          end if
 
-         ! Sum over bands in |m,k+q>
+         ! Sum over bands in |m,k+q>.
          do im_kq=1,gqk%nb_kq
            band_kq = im_kq + gqk%bstart_kq - 1
            eig0mkq = ebands%eig(band_kq, ikq_ibz, spin)
 
-           ! Compute electronic occ for all Temps (note mu_e(it) Fermi level)
+           ! Compute electronic occupations for all Temps (note mu_e(it) Fermi level)
            do it=1,ntemp
              f_mkq(it) = occ_fd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
            end do
 
-           ! Loop over the n index in |n,k>.
+           ! Loop over the n band index in |n,k>.
            do in_k=1,nb_k
              band_k = in_k + gqk%bstart_k - 1
              eig0nk = ebands%eig(band_k, ik_ibz, spin)
@@ -704,9 +698,8 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
              gkq2 = weight_q * gqk%my_g2(my_ip, im_kq, my_iq, in_k, my_ik) !; print *, "gkq2", gkq2
              cfact_t = cfact_t * gkq2
 
-             ! Compute contribution to Fan-Migdal for M > gqk%nb_kq
-             !if (dtset%eph_stern /= 0) then
-             if (dtset%eph_stern /= 0 .and. im_kq == 1 .and. gqk%qpt_kpt_comm%me == 0) then
+             ! Compute contribution to Fan-Migdal for M > nb_kq
+             if (dtset%eph_stern /= 0 .and. im_kq == 1 .and. gqk%qpt_kpt_comm%me == master) then
                ! sum_{pp'} d_p* Stern_{pp'} d_p' with d = displ_red_nu and S = stern_ppb(:,:,:,in_k)
                vec_natom3 = zero
                call cg_zgemm("N", "N", natom3, natom3, 1, stern_ppb(:,:,:,in_k), displ_red_nu, vec_natom3)
@@ -715,6 +708,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
                rfact = dotri(1)
                rfact = rfact * weight_q / (two * wqnu)
                stern_fan_t = (two * nqnu_t(:) + one) * rfact
+
                sigma%fan_stern_vals(:, in_k, ikcalc) = sigma%fan_stern_vals(:, in_k, ikcalc) + stern_fan_t
                cfact_t = cfact_t + stern_fan_t
              end if
@@ -733,7 +727,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
 
              sigma%dvals_de0ks(:, in_k, ikcalc) = sigma%dvals_de0ks(:, in_k, ikcalc) + gkq2 * rfact_t
 
-             ! Accumulate Sigma(w) for state in_k if spectral function is wanted.
+             ! Accumulate Sigma(w) for state |nk> if spectral function is wanted.
              if (sigma%nwr > 0) then
                ! Zcut version
                do it=1,ntemp
@@ -755,8 +749,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
                end do
              end if ! nwr > 0
 
-             gdw2 = gqk%my_gdw2(my_ip, im_kq, my_iq, in_k, my_ik)
-             !print *, "gdw2", gdw2
+             gdw2 = gqk%my_gdw2(my_ip, im_kq, my_iq, in_k, my_ik) !; print *, "gdw2", gdw2
 
              ! Accumulate DW for each T, add it to Sigma(e0) and Sigma(w) as well
              ! - (2 n_{q\nu} + 1) * gdw2 / (e_nk - e_mk)
@@ -766,9 +759,8 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
                cfact_t(:) = zero
              endif
 
-             if (dtset%eph_stern /= 0 .and. im_kq == 1 .and. gqk%qpt_kpt_comm%me == 0) then
-
-               ! Compute DW term for M > gqk%nb_kq
+             if (dtset%eph_stern /= 0 .and. im_kq == 1 .and. gqk%qpt_kpt_comm%me == master) then
+               ! Compute DW term for M > nb_kq.
                cfact = zero
                do ip2=1,natom3
                  do ip1=1,natom3
@@ -837,7 +829,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  ABI_SFREE(tpp_red)
  ABI_SFREE(work)
 
-
  call wfd%free(); call gstore%free(); call sigma%free(); call gs_ham_kq%free()
 
 end subroutine gstore_sigeph
@@ -861,17 +852,20 @@ end subroutine gstore_sigeph
 
 subroutine sep_gather_and_write_results(sigma, gstore, gqk, dtset, ebands)
 
-!Local variables-------------------------------
+
+!Arguments ------------------------------------
  class(sep_t),intent(inout) :: sigma
  type(gstore_t),intent(in) :: gstore
  type(gqk_t),intent(in) :: gqk
  type(ebands_t),intent(in) :: ebands
  type(dataset_type),intent(in) :: dtset
- integer,parameter :: max_ntemp = 50
+
+!Local variables-------------------------------
+ integer,parameter :: max_ntemp = 50, master = 0
  integer :: it, in_k, ikcalc, ik_bz, spin, ierr, bstart_k, bstop_k, cnt, ndeg
  integer :: band_k,ik_ibz,ib_val,ib_cond,jj,ideg,ii,iw,nstates !, nb_k
  !integer :: nq_ibzk_eff, nelem, imyq, iq_ibz_k, sr_ncid
- logical :: changed !, iwrite
+ logical :: changed, iwrite
  real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond,qpe_oms,qpe_oms_val,qpe_oms_cond
  real(dp) :: ravg2 ! invsig2fmts, tau
  complex(dp) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2,cavg3,cavg4
@@ -901,8 +895,7 @@ subroutine sep_gather_and_write_results(sigma, gstore, gqk, dtset, ebands)
  if (sigma%nwr > 0) call xmpi_sum(sigma%vals_wr, gqk%comm%value, ierr)
 
  ! Only procs inside ncwrite_comm perform IO (ab_out and ncid)
- !iwrite = self%ncwrite_comm%value /= xmpi_comm_null
- !if (.not. iwrite) return
+ iwrite = gqk%comm%me == 0; if (.not. iwrite) return
 
  this_gtype = "KS"
  if (gstore%gtype == "gwpt" .and. dtset%gstore_gname == "gvals") this_gtype = "GWPT"

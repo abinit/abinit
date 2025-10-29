@@ -367,6 +367,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
  optekin=0;if (wfoptalg>=10) optekin=1
  tol_restart=tol12;if (gen_eigenpb) tol_restart=tol8
  if (ipert == natom+10 .or. ipert == natom+11) tol_restart = tol7
+ !tol_restart = tol7
 
  kinpw1 => gs_hamkq%kinpw_kp
 
@@ -968,9 +969,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
      ghc    =zero
      gvnlxc  =zero
      if (gen_eigenpb) gsc(:,:)=zero
-     if (usepaw==1) then
-       call pawcprj_set_zero(cwaveprj)
-     end if
+     if (usepaw==1) call pawcprj_set_zero(cwaveprj)
      ! A negative residual will be the signal of this problem ...
      resid=-one
      if (prtvol > 0) call wrtout(std_out,' dfpt_cgwf: problem of minimisation (likely metallic), set resid to -1')
@@ -1173,8 +1172,6 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
    ! ======================================================================
    ! ======= COMPUTE MIXING FACTOR - CHECK FOR CONVERGENCE ===============
    ! ======================================================================
-
-
    ! see Eq.(31) of PRB55, 10337 (1997) [[cite:Gonze1997]]
    !
    if(d2edt2<-tol_restart .and. skipme == 0)then
@@ -1192,7 +1189,9 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
      if (usepaw==1) call pawcprj_set_zero(cwaveprj)
 
      ! A negative residual will be the signal of this problem ...
-     !write(msg,'(a,3es14.6)') 'dfpt_cgwf: dedt,d2edt2,resid=',dedt,d2edt2,resid; call wrtout(std_out,msg)
+     !write(msg,'(a,3es16.6)') ' dfpt_cgwf: dedt,d2edt2,resid=',dedt,d2edt2,resid; call wrtout(std_out, msg)
+     !write(msg, "(a, es16.6)")" eig0_k(n_k):", eig0_k(u1_band); call wrtout(std_out, msg)
+     !write(msg, "(a, es16.6)")" eig0_kq(nband):", eig0_kq(nband); call wrtout(std_out, msg)
 
      resid=-two
      if (prtvol > 0 .and. u1_band_ > 0) then
