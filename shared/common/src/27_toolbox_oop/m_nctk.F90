@@ -219,6 +219,7 @@ MODULE m_nctk
 
  public :: nctk_write_datar
  public :: nctk_read_datar
+ public :: nctk_prepare_mpiio
 
  public :: create_nc_file              ! FIXME: Deprecated
  public :: write_var_netcdf            ! FIXME: Deprecated
@@ -2231,6 +2232,29 @@ integer function nctk_read_datar(path,varname,ngfft,cplex,nfft,nspden,&
  end if
 
 end function nctk_read_datar
+!!***
+
+!!****f* m_nctk/nctk_prepare_mpiio
+!! NAME
+!! nctk_mpiio
+!!
+!! FUNCTION
+
+integer function nctk_prepare_mpiio(ncid) result(ncerr)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: ncid
+
+!Local variables-------------------------------
+ integer :: nvars
+ character(len=nctk_slen) :: varname
+! *************************************************************************
+
+ ncerr = nf90_inquire(ncid, nVariables=nvars)
+ if (ncerr /= NF90_NOERR) return
+ ncerr = nf90_inquire_variable(ncid, nvars, varname)
+
+end function nctk_prepare_mpiio
 !!***
 
 !----------------------------------------------------------------------
