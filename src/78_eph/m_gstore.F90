@@ -4327,15 +4327,15 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_qptopt"), gstore%qptopt))
 
    ! little group variables were added in Abinit v10.5.6.
-   gstore%has_used_lgk = 0; gstore%has_used_lgq = 0
-   ncerr = nf90_inq_varid(ncid, "gstore_has_used_lgk", varid)
-   if (ncerr == nf90_noerr) then
-     NCF_CHECK(nf90_get_var(ncid, vid("gstore_has_used_lgk"), gstore%has_used_lgk))
-   end if
-   ncerr = nf90_inq_varid(ncid, "gstore_has_used_lgq", varid)
-   if (ncerr == nf90_noerr) then
-     NCF_CHECK(nf90_get_var(ncid, vid("gstore_has_used_lgq"), gstore%has_used_lgq))
-   end if
+   !gstore%has_used_lgk = 0; gstore%has_used_lgq = 0
+   !ncerr = nf90_inq_varid(ncid, "gstore_has_used_lgk", varid)
+   !if (ncerr == nf90_noerr) then
+   NCF_CHECK(nf90_get_var(ncid, vid("gstore_use_lgk"), gstore%has_used_lgk))
+   !end if
+   !ncerr = nf90_inq_varid(ncid, "gstore_has_used_lgq", varid)
+   !if (ncerr == nf90_noerr) then
+   NCF_CHECK(nf90_get_var(ncid, vid("gstore_use_lgq"), gstore%has_used_lgq))
+   !end if
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_kzone"), gstore%kzone))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_qzone"), gstore%qzone))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_kfilter"), gstore%kfilter))
@@ -4433,8 +4433,6 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
      ABI_MALLOC(gstore%kglob2bz, (max_nk, gstore%nsppol))
    end if
 
-   call xmpi_bcast(gstore%has_used_lgk, master, comm, ierr)
-   call xmpi_bcast(gstore%has_used_lgq, master, comm, ierr)
    call xmpi_bcast(gstore%qptopt, master, comm, ierr)
    call xmpi_bcast(gstore%has_used_lgk, master, comm, ierr)
    call xmpi_bcast(gstore%has_used_lgq, master, comm, ierr)
@@ -4653,7 +4651,6 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
                  !+ gkq0_atm(1, in_k, im_kq, ip2) * gkq0_atm(1, in_k, im_kq, ip1) &
                  !+ gkq0_atm(2, in_k, im_kq, ip2) * gkq0_atm(2, in_k, im_kq, ip1) &
                  )
-
                  gdw2 = gdw2 + real(tpp_red(ip1,ip2) * cfact)
                end do
              end do
