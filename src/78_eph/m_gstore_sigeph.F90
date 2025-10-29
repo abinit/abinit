@@ -644,8 +644,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
          if (my_iq == 1) then
            if (gqk%qpt_comm%me == master) then
              ABI_CHECK(q_is_gamma, "Master in qpt_comm% should have Gamma when my_iq == 1")
-           else
-             ABI_CHECK(.not.q_is_gamma, "Rank in qpt_comm% should not have Gamma when my_iq == 1")
            end if
            call xmpi_bcast(stern_dw, master, gqk%qpt_comm%value, ierr)
          end if
@@ -704,7 +702,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
              cfact_t = cfact_t * gkq2
 
              ! Compute contribution to Fan-Migdal for M > nb_kq
-             !if (dtset%eph_stern /= 0 .and. im_kq == 1 .and. gqk%qpt_comm%me == master) then
              if (dtset%eph_stern /= 0 .and. im_kq == 1) then
                ! sum_{pp'} d_p* Stern_{pp'} d_p' with d = displ_red_nu and S = stern_ppb(:,:,:,in_k)
                vec_natom3 = zero
@@ -765,7 +762,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
                cfact_t(:) = zero
              endif
 
-             !if (dtset%eph_stern /= 0 .and. im_kq == 1 .and. gqk%qpt_comm%me == master) then
              if (dtset%eph_stern /= 0 .and. im_kq == 1) then
                ! Compute DW term for M > nb_kq.
                cfact = zero
