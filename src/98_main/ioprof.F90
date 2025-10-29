@@ -160,6 +160,7 @@ program ioprof
 
    new_filename = "__IOPROF__.nc"
    NCF_CHECK(nctk_open_create(ncid, new_filename, comm))
+   NCF_CHECK(nctk_prepare_mpiio(ncid))
 
    ! Define dimensions.
    nkibz = nprocs; nband = 101
@@ -180,6 +181,7 @@ program ioprof
 
    ! Compress waves to reduce size on disk.
    NCF_CHECK(nf90_def_var_deflate(ncid, vid("compressed_waves"), shuffle=1, deflate=1, deflate_level=5))
+   !NCF_CHECK(nctk_prepare_mpiio(ncid))
 
    ! Begin writing.
    NCF_CHECK(nctk_set_datamode(ncid))
