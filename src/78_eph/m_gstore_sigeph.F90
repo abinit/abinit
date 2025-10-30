@@ -238,7 +238,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  integer :: istwf_k, istwf_kq, npw_k, npw_kq, nkpg_kq
  integer :: nfft, nfftf, mgfft, mgfftf, nkpg !,nkpg1,cnt, enough_stern
  integer :: usecprj, mpw, ibsum_kq, band_me, u1_band
- real(dp) :: wqnu, gkq2, weight_q, eig0nk, eig0mk, eig0mkq, ediff, gmod2, hmod2, gdw2, rfact, gdw2_stern, rtmp !,nqnu,gkq2,gkq2_pf,
+ real(dp) :: wqnu, gkq2, weight_q, eig0nk, eig0mk, eig0mkq, ediff, gmod2, hmod2, gdw2, rfact, gdw2_stern !, rtmp !,nqnu,gkq2,gkq2_pf,
  !real(dp) :: cpu, wall, gflops
  logical :: q_is_gamma, intra_band, same_band, isirr_k, isirr_kq, stern_use_cache
  complex(dp) :: cfact !, sig_cplx
@@ -698,7 +698,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
                cfact_t(:) =  (two * nqnu_t + one) / (eig0nk - eig0mkq + sigma%ieta)
              end if
 
-             gkq2 = weight_q * gqk%my_g2(my_ip, im_kq, my_iq, in_k, my_ik) !; print *, "gkq2", gkq2
+             gkq2 = weight_q * gqk%my_g2(my_ip, im_kq, my_iq, in_k, my_ik)
              cfact_t = cfact_t * gkq2
 
              ! Compute contribution to Fan-Migdal for M > nb_kq
@@ -752,7 +752,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
                end do
              end if ! nwr > 0
 
-             gdw2 = gqk%my_gdw2(my_ip, im_kq, my_iq, in_k, my_ik) !; print *, "gdw2", gdw2
+             gdw2 = gqk%my_gdw2(my_ip, im_kq, my_iq, in_k, my_ik)
 
              ! Accumulate DW for each T, add it to Sigma(e0) and Sigma(w) as well
              ! - (2 n_{q\nu} + 1) * gdw2 / (e_nk - e_mk)
