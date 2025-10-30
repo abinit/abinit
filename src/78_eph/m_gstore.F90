@@ -137,7 +137,6 @@ module m_gstore
  use m_ephtk
  use m_mkffnl
  use m_sigtk
- use m_copy
 
  use defs_abitypes,    only : mpi_type
  use defs_datatypes,   only : pseudopotential_type
