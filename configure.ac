@@ -1266,8 +1266,9 @@ ABI_OUTPUT
 
 # FIXME: Generate fake makefile for the fallbacks until the test farm is
 #        updated
+AC_MSG_NOTICE(["INSTALL is ${INSTALL}"])
 test -e "fallbacks" || ${INSTALL} -d -m 755 "fallbacks"
-${INSTALL} -m 644 "${abinit_srcdir}/config/makefiles/fallbacks.mf" \
+${INSTALL} -m 644 "${abinit_srcdir}/fallbacks/Makefile.am" \
   "fallbacks/Makefile"
 
 # Call CMake to generate Makefile for Kokkos sources directories
