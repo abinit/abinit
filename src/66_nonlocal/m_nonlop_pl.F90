@@ -5,10 +5,15 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, GZ, MT, FF, DRH)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, GZ, MT, FF, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!      m_nonlop
+!!
+!! CHILDREN
 !!
 !! SOURCE
 
@@ -164,6 +169,16 @@ contains
 !!    In particular, the OMP parallelisation is still missing,
 !!    but it matters here only when nspinor==2.
 !!  - Warning 2: the order of atoms is governed by atindx
+!!
+!! PARENTS
+!!      nonlop
+!!
+!! CHILDREN
+!!      cont13,cont22,cont22cso,cont22so,cont24,cont3,cont33cso,cont33so,cont35
+!!      contistr01,contistr03,contistr12,contstr21,contstr23,contstr25
+!!      contstr25a,contstr26,ddkten,metcon,metcon_so,metric_so,metstr,opernl2
+!!      opernl3,opernl4a,opernl4b,ph1d3d,scalewf_nonlop,strconv,strsocv,trace2
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -565,7 +580,60 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 !        XG030513 : MPIWF, at this place, one should perform the reduction
 !        and spread of data of gxa, dgxdt and dgxds
 
-!        Loop over spins:
+
+
+! BUG FIX START
+!        MS100725: First loop over spins, ilang, proj to take care of the ddk
+!        decompaction PRIOR to entering the main loop. This fixes a subtle bug 
+!        in the calculation of the velocity operator with SOC
+         do isp=1,nspinor
+           ispin=isp;if (mpi_enreg%paral_spinor==1) ispin=ispinor_index
+
+           do ia=1,nincat
+             do ilang=1,nlang
+               nproj=jproj(ilang)
+               if(nproj/=0) then
+                 ilang2=(ilang*(ilang+1))/2
+                 do iproj=1,nproj
+
+!                  The rank of the tensor gxa equals l:
+                   rank=ilang-1
+!                  jjs gives the starting address of the relevant components
+                   jjs=1+((ilang-1)*ilang*(ilang+1))/6
+                   if (ilang>4) then
+                     write(msg,'(a,i0)')' ilang must fall in range [1..4] but value is ',ilang
+                     ABI_BUG(msg)
+                   end if
+
+!                  Eventual tensorial decompaction for ddk perturbation:
+                   if(choice==5 .and. ilang>=2) then
+                     jjk=1+((ilang-2)*(ilang-1)*ilang)/6
+                     compact=-1
+                     temp(:,1:(rank*(rank+1))/2)= &
+&                     dgxdt(:,2,jjk:jjk-1+(rank*(rank+1))/2,ia,iproj,ispin)
+                     call ddkten(compact,idir,rank,temp,tmpfac)
+                     dgxdt(:,1,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj,ispin)=&
+&                     dgxdt(:,1,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj,ispin)&
+&                     +tmpfac(:,1:((rank+1)*(rank+2))/2)
+                    end if
+
+!                  End loop over iproj:
+                 end do
+!                End condition of existence of a reference state:
+               end if
+
+!              End loop over ilang:
+             end do
+
+!            End loop over ia:
+           end do
+
+!            End loop over isp
+         end do
+! BUG FIX END
+
+
+!        Main loop over spins:
          do isp=1,nspinor
            ispin=isp;if (mpi_enreg%paral_spinor==1) ispin=ispinor_index
 
@@ -622,17 +690,21 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
                      end do
                    end if
 
-!                  Eventual tensorial compaction/decompaction for ddk
+!                  Eventual tensorial compaction of gxafac for ddk
 !                  perturbation:
                    if(choice==5 .and. ilang>=2) then
                      jjk=1+((ilang-2)*(ilang-1)*ilang)/6
-                     compact=-1
-                     temp(:,1:(rank*(rank+1))/2)= &
-&                     dgxdt(:,2,jjk:jjk-1+(rank*(rank+1))/2,ia,iproj,ispin)
-                     call ddkten(compact,idir,rank,temp,tmpfac)
-                     dgxdt(:,1,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj,ispin)= &
-&                     dgxdt(:,1,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj,ispin)&
-&                     +tmpfac(:,1:((rank+1)*(rank+2))/2)
+! BUG FIX START
+! MS100725: Moved this chunk of code to a separate preliminary loop (see above),
+!           to fix the k-derivative of the SOC Hamiltonian 
+!                     compact=-1
+!                     temp(:,1:(rank*(rank+1))/2)= &
+!&                     dgxdt(:,2,jjk:jjk-1+(rank*(rank+1))/2,ia,iproj,ispin)
+!                     call ddkten(compact,idir,rank,temp,tmpfac)
+!                     dgxdt(:,1,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj,ispin)= &
+!&                     dgxdt(:,1,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj,ispin)&
+!&                     +tmpfac(:,1:((rank+1)*(rank+2))/2)
+! BUG FIX END
                      compact=1
                      tmpfac(:,1:((rank+1)*(rank+2))/2)= &
 &                     gxafac(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj)
@@ -1288,6 +1360,11 @@ contains
 !! The components are given in the order 11 22 33 32 31 21.
 !! The initial 2 handles the Re and Im parts.
 !!
+!! PARENTS
+!!      m_nonlop_pl
+!!
+!! CHILDREN
+!!
 !! SOURCE
 
 subroutine trace2(gxa,gmet,trace)
@@ -1347,6 +1424,11 @@ end subroutine trace2
 !! cart(3,1) & = &  0.5 ( & red(i,j,3) G(3,i) G(2,j) + red(i,j,1) G(2,i) G(1,j)) \nonumber
 !! cart(2,1) & = &  0.5 ( & red(i,j,2) G(3,i) G(2,j) + red(i,j,1) G(1,i) G(3,j))
 !! \end{eqnarray} }}
+!!
+!! PARENTS
+!!      m_nonlop_pl
+!!
+!! CHILDREN
 !!
 !! SOURCE
 
@@ -1425,6 +1507,11 @@ end subroutine strsocv
 !! NOTES
 !!  XG030513 : MPIWF One should pay attention to the
 !!  G=0 component, that will be only one one proc...
+!!
+!! PARENTS
+!!      m_nonlop_pl
+!!
+!! CHILDREN
 !!
 !! SOURCE
 
@@ -1530,6 +1617,11 @@ end subroutine scalewf_nonlop
 !!
 !! NOTES
 !! For l=0, there is no contribution.
+!!
+!! PARENTS
+!!      m_nonlop_pl
+!!
+!! CHILDREN
 !!
 !! SOURCE
 
