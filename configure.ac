@@ -1311,3 +1311,19 @@ fi
 #fi
 ABI_MSG_FC_BUGGY(${abi_fc_vendor})
 ABI_MSG_END
+
+
+
+if test "x${mandatory}" = "x#"; then
+  FALLBACKS_SUBDIRS="fallbacks"
+else
+  FALLBACKS_SUBDIRS=""
+fi
+
+AC_SUBST(FALLBACKS_SUBDIRS)
+
+AC_OUTPUT
+if test "x${mandatory}" = "x#"; then
+  ABI_TRIGGERS_SUMMARY	
+  ABI_MSG_NOTICE_L([help-fb], [Missing Mandatory library!])
+fi 
