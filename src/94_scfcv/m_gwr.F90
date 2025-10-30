@@ -8357,11 +8357,12 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
                !cg_jb  => wave_jb%ug
                !ctmp = xdotc(npw_k, cg_sum(1:), 1, cg_jb(1:), 1)
                !!! FIXME TSAI: Need double check
-               associate (ugb_kcalcibz => gwr%ugb(ikcalc_ibz, spin)%buffer_cplx(:,il_b))
-                 ABI_CHECK(size(ug_ksum) == size(ugb_kcalcibz), "Size mismatch in Sigma_x")
-                 ctmp = xdotc(npw_k, ug_ksum(1:), 1, ugb_kcalcibz(1:), 1)
+               associate (ugb_kcalcibz => gwr%ugb(ikcalc_ibz, spin)%buffer_cplx(:,il_b), &
+                          ugb_ksum => gwr%ugb(ik_ibz, spin)%buffer_cplx(:, il_b))
+                 ABI_CHECK(size(ugb_ksum) == size(ugb_kcalcibz), "Size mismatch in Sigma_x")
+                 ctmp = xdotc(npw_k, ugb_ksum(1:), 1, ugb_kcalcibz(1:), 1)
                  rhotwg_ki(1, jb) = cmplx(sqrt(gwr%vcgen%i_sz), 0.0_gwp) * real(ctmp)
-                 ctmp = xdotc(npw_k, ug_ksum(npw_k+1:), 1, ugb_kcalcibz(npw_k+1:), 1)
+                 ctmp = xdotc(npw_k, ugb_ksum(npw_k+1:), 1, ugb_kcalcibz(npw_k+1:), 1)
                  rhotwg_ki(npwx+1, jb) = cmplx(sqrt(gwr%vcgen%i_sz), 0.0_gwp) * real(ctmp)
                end associate
              end if
