@@ -1023,11 +1023,11 @@ fi
 
 if test "${sd_linalg_enable}" != "yes"; then
       ABI_MSG_NOTICE_L([linalg-mandatory],[__CAUTION__ : linalg is __MANDATORY__ !])
-      mandatory="#"
+      mandatory="fail"
 fi
 
 # Check HDF5 serial
-if test "${sd_hdf5_enable}" = "no"; then
+if test "${sd_hdf5_enable}" = "no" -o "${sd_hdf5_init}" = "fb"; then
       ABI_MSG_NOTICE_L([hdf5-mandatory],[__CAUTION__ : HDF5 is __MANDATORY__ !])
       mandatory="#"
 else
@@ -1037,9 +1037,9 @@ else
   fi
 fi
 
-if test "${sd_hdf5_ok}" = "yes";then
+if test "${sd_hdf5_ok}" = "yes" -o "${sd_hdf5_init}" = "fb";then
 # Check NetCDF
-  if test "${sd_netcdf_enable}" = "no"; then
+  if test "${sd_netcdf_enable}" = "no" -o "${sd_netcdf_init}" = "fb"; then
       ABI_MSG_NOTICE_L([netcdf-mandatory],[__CAUTION__ : NetCDF is __MANDATORY__ !])
       mandatory="#"
   else
@@ -1050,7 +1050,7 @@ if test "${sd_hdf5_ok}" = "yes";then
   fi
 
 # Check NetCDF_fortran
-  if test "${sd_netcdf_fortran_enable}" = "no"; then
+  if test "${sd_netcdf_fortran_enable}" = "no" -o "${sd_netcdf_fortran_init}" = "fb"; then
       ABI_MSG_NOTICE_L([netcdf_fortran-mandatory],[__CAUTION__ : NetCDF Fortran is __MANDATORY__ !])
       mandatory="#"
   else
@@ -1100,9 +1100,14 @@ if test "${sd_xmlf90_enable}" = "yes"; then
 fi
 
 # Help to produce libraires
-if test ! -z "${mandatory}"; then
+if test "${mandatory}" = "#"; then
       ABI_MSG_NOTICE_L([help-fb],[We can __help__ you !])
+else 
+   if test "${mandatory}" = "fail"; then
+   	ABI_MSG_NOTICE_S([ __Problems must be solved before continuing__ ])
+   fi
 fi
+
 
 if test ! -z "${status}" -o ! -z "${mandatory}"; then
       ABI_MSG_NOTICE_S([ __Problems must be solved before continuing__ ])
