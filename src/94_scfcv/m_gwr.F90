@@ -7307,8 +7307,9 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, wt_space, keep_file, filepath)
  NCF_CHECK(nctk_open_modify(ncid, filepath, gwr%comm%value))
 
  !!! THIS SOLVES A DEADLOCK BUT WHY???
- NCF_CHECK(nf90_inquire(ncid, nVariables=nvars))
- NCF_CHECK(nf90_inquire_variable(ncid, nvars, varname))
+!  NCF_CHECK(nf90_inquire(ncid, nVariables=nvars))
+!  NCF_CHECK(nf90_inquire_variable(ncid, nvars, varname))
+ !!! NOW IT'S DONE IN OPEN_MODIFY 
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
