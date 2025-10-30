@@ -7222,9 +7222,9 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, wt_space, keep_file, filepath)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: my_is, my_iqi, my_it, spin, iq_ibz, itau, npwtot_q, my_ncols, my_gcol_start, ncid, ncerr, var_id, nvars,i !, ierr
+ integer :: my_is, my_iqi, my_it, spin, iq_ibz, itau, npwtot_q, my_ncols, my_gcol_start, ncid, ncerr, var_id !, nvars,i !, ierr
  real(dp) :: cpu, wall, gflops
- character(len=500) :: varname
+!  character(len=500) :: varname
 !arrays
  real(dp), contiguous, pointer :: fptr(:,:,:)
  type(__slkmat_t), pointer :: mats(:)
@@ -7309,7 +7309,11 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, wt_space, keep_file, filepath)
  !!! THIS SOLVES A DEADLOCK BUT WHY???
 !  NCF_CHECK(nf90_inquire(ncid, nVariables=nvars))
 !  NCF_CHECK(nf90_inquire_variable(ncid, nvars, varname))
- !!! NOW IT'S DONE IN OPEN_MODIFY 
+ if (wt_space == "omega") then
+   NCF_CHECK(nctk_prepare_mpiio(ncid, "mats_w"))
+ else if (wt_space == "tau") then
+   NCF_CHECK(nctk_prepare_mpiio(ncid, "mats_tau"))
+ end if
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
