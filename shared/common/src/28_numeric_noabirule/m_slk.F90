@@ -326,7 +326,7 @@ module m_slk
    procedure :: set_head_and_wings => slkmat_sp_set_head_and_wings
     ! Set head and the wings of the matrix starting from global arrays.
 
-   !procedure :: cut => slkmat_cut
+   procedure :: cut => slkmat_sp_cut
     ! Extract submatrix and create new matrix with `size_blocs` and `processor`
 
    procedure :: collect_cplx => slkmat_sp_collect_cplx
