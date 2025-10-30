@@ -4945,13 +4945,13 @@ subroutine slkmat_sp_cut(in_mat, glob_nrows, glob_ncols, out_mat, &
 
  if (allocated(in_mat%buffer_cplx)) then
 #ifdef HAVE_LINALG_SCALAPACK
-   call pzgemr2d(glob_nrows, glob_ncols, &
+   call pcgemr2d(glob_nrows, glob_ncols, &
                  in_mat%buffer_cplx, ija__(1), ija__(2), in_mat%desc,   &
                  out_mat%buffer_cplx, ijb__(1), ijb__(2), out_mat%desc, &
                  processor__%grid%comm)
 
  else if (allocated(in_mat%buffer_real)) then
-   call pdgemr2d(glob_nrows, glob_ncols, &
+   call psgemr2d(glob_nrows, glob_ncols, &
                  in_mat%buffer_real, ija__(1), ija__(2), in_mat%desc,   &
                  out_mat%buffer_real, ijb__(1), ijb__(2), out_mat%desc, &
                  processor__%grid%comm)
