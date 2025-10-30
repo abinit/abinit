@@ -8062,7 +8062,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
  logical :: isirr_k, isirr_q, sigc_is_herm, compute_qp__
  real(dp) :: fact_spin, theta_mu_minus_esum, theta_mu_minus_esum2, tol_empty, tol_empty_in, gwr_boxcutmin_x
  real(dp) :: cpu_k, wall_k, gflops_k, cpu_all, wall_all, gflops_all
- complex(dp) :: gwpc_sigxme, gwpc_sigxme2, xdot_tmp
+ complex(dp) :: gwpc_sigxme, gwpc_sigxme2, xdot_tmp, ctmp
  character(len=5000) :: msg
  logical :: q_is_gamma
  type(__slkmat_t),pointer :: ugb_kibz
@@ -8349,8 +8349,6 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
              !rhotwg_ki(1,jb) = czero_gw ! DEBUG
 
            else
-            !  ABI_ERROR("Not implemented Error")
-                  !!! FIXME TSAI: spinor=2 not working
              rhotwg_ki(1, jb) = zero; rhotwg_ki(npwx+1, jb) = zero
              if (band_sum == jb) then
                !ABI_CHECK(wfd%get_wave_ptr(band_sum, ik_ibz, spin, wave_sum, msg) == 0, msg)
@@ -8358,9 +8356,14 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
                !ABI_CHECK(wfd%get_wave_ptr(jb, jk_ibz, spin, wave_jb, msg) == 0, msg)
                !cg_jb  => wave_jb%ug
                !ctmp = xdotc(npw_k, cg_sum(1:), 1, cg_jb(1:), 1)
-               rhotwg_ki(1, jb) = cmplx(sqrt(gwr%vcgen%i_sz), 0.0_gwp)  !* real(ctmp)
-               !ctmp = xdotc(npw_k, cg_sum(npw_k+1:), 1, cg_jb(npw_k+1:), 1)
-               rhotwg_ki(npwx+1, jb) = cmplx(sqrt(gwr%vcgen%i_sz), 0.0_gwp) ! * real(ctmp)
+               !!! FIXME TSAI: Need double check
+               associate (ugb_kcalcibz => gwr%ugb(ikcalc_ibz, spin)%buffer_cplx(:,il_b))
+                 ABI_CHECK(size(ug_ksum) == size(ugb_kcalcibz), "Size mismatch in Sigma_x")
+                 ctmp = xdotc(npw_k, ug_ksum(1:), 1, ugb_kcalcibz(1:), 1)
+                 rhotwg_ki(1, jb) = cmplx(sqrt(gwr%vcgen%i_sz), 0.0_gwp) * real(ctmp)
+                 ctmp = xdotc(npw_k, ug_ksum(npw_k+1:), 1, ugb_kcalcibz(npw_k+1:), 1)
+                 rhotwg_ki(npwx+1, jb) = cmplx(sqrt(gwr%vcgen%i_sz), 0.0_gwp) * real(ctmp)
+               end associate
              end if
              !!!rhotwg_ki(1, jb) = zero; rhotwg_ki(npwx+1, jb) = zero
              !!! PAW is missing
