@@ -22,12 +22,11 @@
                     # SC TODO: on alps_gnu_14.2_cov, ecuteps here = ecuteps in the SCR file still results in an error
  ecutsigx 8         # Cutoff energy for exchange part.
  boxcutmin 1.1
- tolwfr 1e-20       # Tolerance for Sternheimer solver.
-
- #nband 9           # Number of bands to build G with Lehmnann's representation.
-                   # This value cannot be larger that the number of bands in the WFK file.
+ tolwfr 1e-16       # Tolerance for Sternheimer solver.
+ nstep 150
 
  nband 12          # Number of bands to build G with Lehmnann's representation.
+                   # This value cannot be larger that the number of bands in the WFK file.
  #prtvol 10
 
  # TODO: elph2_imagden Should have a default value
@@ -83,7 +82,7 @@
 #%% [files]
 #%% use_git_submodule = diamond_eph_gwpt
 #%% files_to_test =
-#%%   t04.abo, tolnlines= 700, tolabs= 1.0e+5, tolrel= 10.0
+#%%   t04.abo, tolnlines= 700, tolabs= 1.0e+1, tolrel= 0.5
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

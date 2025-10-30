@@ -477,8 +477,8 @@ module m_sigmaph
    ! d Re Sigma_frohl(omega, kT, band, kcalc, spin) / d omega (omega=eKS)
 
   real(dp),allocatable :: dw_vals(:,:)
-   !  dw_vals(ntemp, max_nbcalc) for given (ikcalc, spin)
-   !  Debye-Waller term (static).
+   ! dw_vals(ntemp, max_nbcalc) for given (ikcalc, spin)
+   ! Debye-Waller term (static).
 
   real(dp),allocatable :: dw_stern_vals(:,:)
    !  dw_stern_vals(ntemp, max_nbcalc) for given (ikcalc, spin)
@@ -1780,7 +1780,6 @@ end if
                sigma%fan_stern_vals(it, ib_k) = sigma%fan_stern_vals(it, ib_k) + rtmp
                ! Add static term from Sternheimer to Sigma(w) as well.
                if (sigma%nwr > 0) sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + rtmp
-               !if (sigma%nwr > 0) sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + gkq2 * cfact_wr(:)
              end do
 
              ! TODO Eliashberg functions with Sternheimer
