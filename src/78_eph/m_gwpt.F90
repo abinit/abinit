@@ -331,6 +331,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  end if
 
  ! Open GSTORE.nc file and go to data mode.
+ ! TODO: Fix problem with IO (some q-points are not written)
  NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, comm))
  !NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, xmpi_comm_self))
  NCF_CHECK(nctk_set_datamode(root_ncid))
@@ -351,6 +352,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_MALLOC(buf_wqnu, (natom3, my_nqibz))
    ABI_MALLOC(buf_eigvec_cart, (2, 3, natom, natom3, my_nqibz))
    ABI_MALLOC(displ_cart_qibz, (2, 3, cryst%natom, natom3))
+
+   NCF_CHECK(nctk_prepare_mpiio(root_ncid, "phfreqs_ibz"))
+   NCF_CHECK(nctk_prepare_mpiio(root_ncid, "pheigvec_cart_ibz"))
 
    do ii=1,my_nqibz
      iq_ibz = my_iqibz_inds(ii)
@@ -568,6 +572,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ABI_ERROR("gstore%with_vk 2 not implemented")
      end if
 
+     NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
+     NCF_CHECK(nctk_prepare_mpiio(spin_ncid, "vk_cart_ibz"))
+
      do my_ik=1,gqk%my_nk
        ! The k-point and the symmetries relating the BZ k-point to the IBZ.
        kk = gqk%my_kpts(:, my_ik)
@@ -603,7 +610,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
      ! Write v_nk to disk.
      !if (gqk%comm%me == master) then
-       NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
        NCF_CHECK(nf90_put_var(spin_ncid, spin_vid("vk_cart_ibz"), vnk_cart_ibz))
      !end if
 
@@ -883,6 +889,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_CHECK_IGEQ(nbsum, gqk%bstop_kq, "nband must be greater than the max band in the e-ph matrix elements")
 
    NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
+   NCF_CHECK(nctk_prepare_mpiio(spin_ncid, "gvals"))
+   NCF_CHECK(nctk_prepare_mpiio(spin_ncid, "gvals_ks"))
+   NCF_CHECK(nctk_prepare_mpiio(root_ncid, "gstore_done_qbz_spin"))
 
    ! Note the possibility of specifying different number of states for the incoming and the intermediate states.
    nb_k = gqk%nb_k; bstart_k = gqk%bstart_k; bstop_k = gqk%bstop_k

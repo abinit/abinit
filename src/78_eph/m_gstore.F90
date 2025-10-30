@@ -3671,6 +3671,9 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    ABI_MALLOC(buf_wqnu, (natom3, my_nqibz))
    ABI_MALLOC(buf_eigvec_cart, (2, 3, natom, natom3, my_nqibz))
 
+   NCF_CHECK(nctk_prepare_mpiio(root_ncid, "phfreqs_ibz"))
+   NCF_CHECK(nctk_prepare_mpiio(root_ncid, "pheigvec_cart_ibz"))
+
    do ii=1,my_nqibz
      iq_ibz = my_iqibz_inds(ii)
      call ifc%fourq(cryst, gstore%qibz(:, iq_ibz), buf_wqnu(:,ii), displ_cart_qibz, &
@@ -3714,8 +3717,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    ABI_MALLOC(cgwork, (2, mpw*wfd%nspinor))
 
    do my_is=1,gstore%my_nspins
-     gqk => gstore%gqk(my_is)
-     spin = gstore%my_spins(my_is)
+     spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is)
+     nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
 
      if (gstore%with_vk == 1) then
        ABI_CALLOC(vnk_cart_ibz, (3, gqk%nb_k, gstore%nkibz))
@@ -3723,6 +3726,9 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      else
        ABI_ERROR("gstore%with_vk 2 not implemented")
      end if
+
+     NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
+     NCF_CHECK(nctk_prepare_mpiio(spin_ncid, "vk_cart_ibz"))
 
      cnt = 0
      do my_ik=1,gqk%my_nk
@@ -3776,10 +3782,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      !call xmpi_sum(vkq_cart_ibz, gqk%comm%value, ierr)
 
      !if (gqk%comm%me == master) then
-       NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
+       !NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
        NCF_CHECK(nf90_put_var(spin_ncid, spin_vid("vk_cart_ibz"), vnk_cart_ibz))
-       !NCF_CHECK(nf90_put_var(spin_ncid, spin_vid("vkq_cart_ibz"), vk_cart_ibz))
-
      !end if
      ABI_SFREE(vnk_cart_ibz)
      !ABI_SFREE(vkq_cart_ibz)
@@ -3812,7 +3816,10 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is)
    my_npert = gqk%my_npert
+
    NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
+   NCF_CHECK(nctk_prepare_mpiio(spin_ncid, "gvals"))
+   NCF_CHECK(nctk_prepare_mpiio(root_ncid, "gstore_done_qbz_spin"))
 
    ! Allocate workspace for wavefunctions using mpw and nb
    ! FIXME: Should be allocated with npw_k and npw_kw but one has to change wfd_sym_ug_kg to get rid of mpw
