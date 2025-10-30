@@ -1375,25 +1375,27 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
    end do ! my_ik
    ! Collect data if k-points parallelism.
    !call xmpi_sum(self%conductivity_mu , self%kcalc_comm%value, ierr)
+
+
+
+   ! calculate the transport coefficients from the l0 l1 l2
+   call inv33(self%l0(:, :, ieh, spin, itemp), work_33)
+   l0inv_33nw(:,:,ieh) = work_33
+   self%seebeck(:,:,ieh,spin,itemp) = matmul(work_33, self%l1(:,:,ieh,spin,itemp)) / Tkelv
+  
+   call inv33(self%l0_dm(:, :, ieh, spin, itemp), work_33)
+   l0inv_33nw_dm(:,:,ieh) = work_33
+   self%seebeck_dm(:,:,ieh,spin,itemp) = matmul(work_33, self%l1_dm(:,:,ieh,spin,itemp)) / Tkelv
+  
+   work_33 = self%l1(:, :, ieh, spin, itemp)
+   work_33 = self%l2(:, :, ieh, spin, itemp) - matmul(work_33, matmul(l0inv_33nw(:, :, ieh), work_33))
+   self%kappa(:,:,ieh,spin,itemp) = work_33 / Tkelv
+  
+   work_33 = self%l1_dm(:, :, ieh, spin, itemp)
+   work_33 = self%l2_dm(:, :, ieh, spin, itemp) - matmul(work_33, matmul(l0inv_33nw_dm(:, :, ieh), work_33))
+   self%kappa_dm(:,:,ieh,spin,itemp) = work_33 / Tkelv
+   !self%conductivity_mu( :, :, ieh, spin, itemp ) = self%conductivity_mu( :, :, ieh, spin, itemp ) + integration*vv_tens(:,:)*wtk
  end do !my_spin
-
- ! calculate the transport coefficients from the l0 l1 l2
- call inv33(self%l0(:, :, ieh, spin, itemp), work_33)
- l0inv_33nw(:,:,ieh) = work_33
- self%seebeck(:,:,ieh,spin,itemp) = matmul(work_33, self%l1(:,:,ieh,spin,itemp)) / Tkelv
-
- call inv33(self%l0_dm(:, :, ieh, spin, itemp), work_33)
- l0inv_33nw_dm(:,:,ieh) = work_33
- self%seebeck_dm(:,:,ieh,spin,itemp) = matmul(work_33, self%l1_dm(:,:,ieh,spin,itemp)) / Tkelv
-
- work_33 = self%l1(:, :, ieh, spin, itemp)
- work_33 = self%l2(:, :, ieh, spin, itemp) - matmul(work_33, matmul(l0inv_33nw(:, :, ieh), work_33))
- self%kappa(:,:,ieh,spin,itemp) = work_33 / Tkelv
-
- work_33 = self%l1_dm(:, :, ieh, spin, itemp)
- work_33 = self%l2_dm(:, :, ieh, spin, itemp) - matmul(work_33, matmul(l0inv_33nw_dm(:, :, ieh), work_33))
- self%kappa_dm(:,:,ieh,spin,itemp) = work_33 / Tkelv
- !self%conductivity_mu( :, :, ieh, spin, itemp ) = self%conductivity_mu( :, :, ieh, spin, itemp ) + integration*vv_tens(:,:)*wtk
 
  max_occ = two / (self%nspinor * self%nsppol)
  fact0 = max_occ * (siemens_SI / Bohr_meter / cryst%ucvol) / 100
