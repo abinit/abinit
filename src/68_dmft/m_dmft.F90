@@ -449,7 +449,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 !  green= ks green function and occupations comes from old_self
    call compute_energy(energies_dmft,green,paw_dmft,pawprtvol,pawtab(:),self_new,occ_type="nlda",part=part2)
    if (paw_dmft%dmft_triqs_entropy == 1) then
-     call compute_free_energy(energies_dmft,paw_dmft,green,"impu",self_new,weiss=weiss)
+     call compute_free_energy(energies_dmft,paw_dmft,green,"impu",self_new)
    end if
 
 !  ==  Mix new and old self_energies and double countings

@@ -3555,15 +3555,19 @@ Variable(
     vartype="integer",
     topics=['DmftTriqsCthyb_expert'],
     dimensions="scalar",
-    defaultval=1,
+    defaultval=2,
     mnemonics="Dynamical Mean Field Theory: TRIQS, COMPUTE thermodynamic INTEGRAL",
     requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_entropy]] == 1, [[dmft_triqs_measure_density_matrix]] == 1",
     added_in_version="before_v10.5.6",
     text=r"""
-Specify whether or not to compute the contribution from the impurity entropy by thermodynamic
-integration. As this is the main bottleneck of a free energy calculation, it can be useful
-to disable it and only compute the bath contribution when you only want to check convergence
-for instance.
+Specify how to compute the contribution from the impurity entropy.
+
+  * 0 --> Neglect it. As this is the main bottleneck of a free energy calculation, it can be useful
+          to disable it and only compute the remaining contribution.
+  * 1 --> Compute it using thermodynamic integration over interaction strength. This option is not
+          really advised, as it can lead to unphysical impurity problems and numerical issues.
+  * 2 --> Compute it using thermodynamic integration over both interaction and double counting
+          strength.
 """,
 ),
 
