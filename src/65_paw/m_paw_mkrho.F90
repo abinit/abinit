@@ -24,6 +24,7 @@ MODULE m_paw_mkrho
  use defs_basis
  use m_abicore
  use m_errors
+ use m_extfpmd
  use m_xmpi
 
  use defs_abitypes,      only : MPI_type
@@ -133,7 +134,7 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
 &          my_natom,natom,nspden,nsym,ntypat,paral_kgb,pawang,pawfgr,pawfgrtab,pawprtvol,&
 &          pawrhoij,pawrhoij_unsym,&
 &          pawtab,qphon,rhopsg,rhopsr,rhor,rprimd,symafm,symrec,typat,ucvol,usewvl,xred,&
-&          pawang_sym,pawnhat,pawnhatgr,pawrhoij0,rhog) ! optional arguments
+&          extfpmd,pawang_sym,pawnhat,pawnhatgr,pawrhoij0,rhog) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -141,6 +142,7 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
  integer,intent(in) :: usewvl
  real(dp),intent(in) :: ucvol
  real(dp),intent(out) :: compch_fft
+ type(extfpmd_type),intent(in),pointer,optional :: extfpmd
  type(MPI_type),intent(in) :: mpi_enreg
  type(pawang_type),intent(in) :: pawang
  type(pawang_type),intent(in),optional :: pawang_sym
@@ -250,6 +252,17 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
 
 !  Add pseudo density and compensation charge density (on fine grid)
    rhor(:,:)=rhor(:,:)+pawnhat_ptr(:,:)
+
+!  Add extfpmd electrons contribution to density in paw case (on fine grid).
+   if(present(extfpmd)) then
+     if(associated(extfpmd)) then
+       if(extfpmd%version==10) then
+         rhor(:,:)=rhor(:,:)+extfpmd%nelectarr(:,:)/ucvol/nspden
+       else
+         rhor(:,:)=rhor(:,:)+extfpmd%nelect/ucvol/nspden
+       end if
+     end if
+   end if
 
 !  Compute compensated pseudo density in reciprocal space
    if (present(rhog)) then
