@@ -1504,7 +1504,6 @@ subroutine wfd_get_gvec_gbound(wfd, gmet, ecut, kq, ikq_ibz, isirr_kq, nloalg, &
 !Local variables ------------------------------
  integer :: mpw
  integer,allocatable :: gtmp(:,:)
-
 ! *********************************************************************
 
  mpw = size(kg_kq, dim=2)
@@ -1599,7 +1598,6 @@ subroutine wfd_get_many_ur(Wfd, bands, ik_ibz, spin, ur)
  complex(gwp),intent(out) :: ur(Wfd%nfft*Wfd%nspinor*SIZE(bands))
 
 !Local variables ------------------------------
-!scalars
  integer :: dat,ptr,band
 !************************************************************************
 
@@ -1919,7 +1917,6 @@ subroutine wfd_ug2cprj(Wfd,band,ik_ibz,spin,choice,idir,natom,Cryst,cwaveprj,sor
  real(dp),ABI_CONTIGUOUS pointer :: ph3d(:,:,:)    ! ph3d(2,npw_k,matblk)
  real(dp),ABI_CONTIGUOUS pointer :: ffnl(:,:,:,:)  ! ffnl(npw_k,dimffnl,lmnmax,ntypat)
  type(pawcprj_type),allocatable :: Cprj_srt(:,:)
-
 ! *********************************************************************
 
  ! Different form factors have to be calculated and stored in Kdata.
@@ -2031,7 +2028,6 @@ subroutine wave_init(Wave, usepaw, npw, nfft, nspinor, natom, nlmn_size, cprj_or
  integer,intent(in) :: nlmn_size(:)
 
 !Local variables ------------------------------
-!scalars
  integer,parameter :: ncpgr0=0  ! For the time being, no derivatives
 !************************************************************************
 
@@ -2086,7 +2082,6 @@ subroutine wave_free(Wave, what)
  character(len=*),optional,intent(in) :: what
 
 !Local variables ------------------------------
-!scalars
  character(len=10) :: my_what
 !************************************************************************
 
@@ -2196,7 +2191,6 @@ integer function wfd_get_wave_ptr(wfd, band, ik_ibz, spin, wave_ptr, msg) result
  character(len=*),intent(out) :: msg
 
 !Local variables ------------------------------
-!scalars
  integer :: ib, ik, is
 !************************************************************************
 
@@ -2538,7 +2532,6 @@ subroutine wfd_mybands(Wfd, ik_ibz, spin, how_manyb, my_band_list, how)
  integer,intent(out) :: my_band_list(Wfd%mband)
 
 !Local variables ------------------------------
-!scalars
  integer :: band
  logical :: do_have
 !************************************************************************
@@ -2643,7 +2636,6 @@ subroutine wfdgw_bands_of_rank(Wfd,rank,ik_ibz,spin,how_manyb,rank_band_list)
  integer,intent(out) :: rank_band_list(Wfd%mband)
 
 !Local variables ------------------------------
-!scalars
  integer :: band
  logical :: it_has
 !************************************************************************
