@@ -42,6 +42,7 @@ module m_gwpt
  use m_mkffnl
  use m_xcdata
 
+ use m_gwdefs,         only : czero_gw
  use defs_abitypes,    only : mpi_type
  use defs_datatypes,   only : pseudopotential_type
  use m_dtfil,          only : datafiles_type
@@ -49,7 +50,7 @@ module m_gwpt
  use m_gwdefs,         only : GW_Q0_DEFAULT
  use m_time,           only : cwtime, cwtime_report, timab, sec2str
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
- use m_numeric_tools,  only : arth, c2r, get_diag, linfit, iseven, simpson_cplx, print_arr, inrange
+ use m_numeric_tools,  only : arth, c2r, r2c, get_diag, linfit, iseven, simpson_cplx, print_arr, inrange
  use m_io_tools,       only : iomode_from_fname
  use m_fftcore,        only : ngfft_seq, sphereboundary, print_ngfft
  use m_cgtk,           only : cgtk_rotate
@@ -229,7 +230,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, qq_is_gamma, pp_is_gamma, isirr_q
  logical :: stern_use_cache, use_ftinterp
  logical :: print_time_qq, print_time_kk, print_time_pp, non_magnetic_xc, need_x_kmp, need_x_kqmp
- complex(dp) :: ieta
+ complex(dp) :: ieta, idelta_sum
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_ham_kqmp, gs_ham_kmp
  type(rf_hamiltonian_type) :: rf_ham_kqmp, rf_ham_kmp
@@ -261,6 +262,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer, contiguous, pointer :: kg_c(:,:), kg_x(:,:)
  real(dp) :: eig0nk, cpu, wall, gflops !, cpu_q, wall_q, gflops_q, cpu_all, wall_all, gflops_all
  complex(gwp) :: ctmp_gwpc, xdot_tmp
+ complex(dp) :: gc_tmp
 !arrays
  real(dp) :: fermie1_idir_ipert(3,cryst%natom), ylmgr_dum(1,1,1), dum_nhat(0), dum_xccc3d(0)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3), kqmp(3), kmp(3), pp(3), kmp_ibz(3), kqmp_ibz(3)
@@ -306,6 +308,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm); units = [std_out, ab_out]
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor; nspden = dtset%nspden
  ieta = +j_dpc * dtset%zcut
+ idelta_sum = +j_dpc * dtset%elph2_imagden
 
  ! Set tolerance used to decide if a band is empty
  ! and normalization of theta_mu_minus_esum. If nsppol == 2, qp_occ $\in [0,1]$
@@ -344,7 +347,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! Make sure internal table with gstore_done_qbz_spin is properly filled.
  ! TODO: Similar piece of code in gstore_compute, should write method...
  ! FIXME: Something wrong here.
- if (ndone == 0) then
+ !if (ndone == 0) then
    call wrtout(std_out, " Computing phonon frequencies and displacements in the IBZ ...", pre_newlines=1)
    call cwtime(cpu, wall, gflops, "start")
 
@@ -382,9 +385,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_FREE(buf_wqnu)
    ABI_FREE(buf_eigvec_cart)
    call cwtime_report(" Phonon computation + output", cpu, wall, gflops)
- else
-   call wrtout(std_out, sjoin(" Restarting GSTORE calculation. Found: ", itoa(ndone), " (qpt, spin) entries already computed"))
- end if
+ !else
+ !  call wrtout(std_out, sjoin(" Restarting GSTORE calculation. Found: ", itoa(ndone), " (qpt, spin) entries already computed"))
+ !end if
 
  ! ================
  ! HANDLE SCREENING
@@ -1325,6 +1328,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            if (gqk%pert_comm%nproc > 1) vec_gwc_nk = zero
 
            do n_k=bstart_k, bstop_k
+             in_k = ib_sum - bstart_k + 1
              !if gqk%pert_comm%skip(n_k) cycle ! MPI parallelism inside pert_comm
 
              ! Compute <bsum,k-p|e^{-i(p+G')}r|n,k> * vc_sqrt(p,G')
@@ -1333,6 +1337,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              if (need_x_kmp) then
                call fft_ur(npw_x, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_x, gbound_x, cwork_ur, rhotwg_x)
                call sigtk_multiply_by_vc_sqrt("N", npw_x, nspinor, ndat1, vc_sqrt_gx, rhotwg_x)
+               if (pp_is_gamma) then
+                 rhotwg_x(1) = czero_gw; if (ib_sum == n_k) rhotwg_x(1) = cmplx(sqrt(vcp%i_sz),0.0_gwp)
+               end if
+
                vec_gx_nk(:,n_k) = rhotwg_x(1:npw_c*nspinor)
                if (dtset%userid /= 0) vec_gx_nk(:,n_k) = zero
                ! FIXME: This is wrong if nspinor == 2
@@ -1341,6 +1349,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              else
                call fft_ur(npw_c, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_c, gbound_c, cwork_ur, rhotwg_c)
                call sigtk_multiply_by_vc_sqrt("N", npw_c, nspinor, ndat1, vc_sqrt_gx, rhotwg_c)
+               if (pp_is_gamma) then
+                 rhotwg_c(1) = czero_gw; if (ib_sum == n_k) rhotwg_c(1) = cmplx(sqrt(vcp%i_sz),0.0_gwp)
+               end if
              end if
 
              ! FIXME: npw_x should be npw_c here
@@ -1381,6 +1392,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            if (gqk%pert_comm%nproc > 1) vec_gwc_mkq = zero
 
            do m_kq=bstart_kq, bstop_kq
+             im_kq = m_kq - bstart_kq + 1
              !if (gqk%pert_sumcomm%skip(m_kq)) cycle ! MPI parallelism inside pert_comm
 
              ! <m,k+q|e^{i(p+G)}r|bsum,k+q-p> * vc_sqrt(p,G).
@@ -1390,6 +1402,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              if (need_x_kqmp) then
                call fft_ur(npw_x, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_x, gbound_x, cwork_ur, rhotwg_x)
                call sigtk_multiply_by_vc_sqrt("C", npw_x, nspinor, ndat1, vc_sqrt_gx, rhotwg_x)
+               if (pp_is_gamma) then
+                 rhotwg_x(1) = czero_gw; if (ib_sum == m_kq) rhotwg_x(1) = cmplx(sqrt(vcp%i_sz),0.0_gwp)
+               end if
+
                vec_gx_mkq(:,m_kq) = rhotwg_x(1:npw_c*nspinor)
                if (dtset%userid /= 0) vec_gx_mkq(:,m_kq) = zero
                rhotwg_c(:) = rhotwg_x(1:npw_c*nspinor)
@@ -1397,6 +1413,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              else
                call fft_ur(npw_c, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_c, gbound_c, cwork_ur, rhotwg_c)
                call sigtk_multiply_by_vc_sqrt("C", npw_c, nspinor, ndat1, vc_sqrt_gx, rhotwg_c)
+               if (pp_is_gamma) then
+                 rhotwg_c(1) = czero_gw; if (ib_sum == m_kq) rhotwg_c(1) = cmplx(sqrt(vcp%i_sz),0.0_gwp)
+               end if
              end if
 
              ! Prepare list of omegas: first e_mkq then e_nk for all n indices.
@@ -1489,8 +1508,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
              ! Store KS e-ph matrix elements for this perturbation.
              if (pp_is_gamma .and. (ib_sum >= gqk%bstart_k .and. ib_sum <= gqk%bstop_k)) then
-               in_k = ib_sum - bstart_k + 1
-               gks_atm(:,:,in_k,ipc) = stern_kmp%eig1_k(:, bstart_kq:bstop_kq, ib_sum)
+               ii = ib_sum - bstart_k + 1
+               gks_atm(:,:,ii,ipc) = stern_kmp%eig1_k(:, bstart_kq:bstop_kq, ib_sum)
              end if
 
              ! <m,k+q|e^{i(p+G)r}|Delta_q psi_{bsum,k-p}>
@@ -1504,10 +1523,20 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                if (need_x_kqmp) then
                  call fft_ur(npw_x, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_x, gbound_x, cwork_ur, rhotwg_x)
                  call sigtk_multiply_by_vc_sqrt("C", npw_x, nspinor, ndat1, vc_sqrt_gx, rhotwg_x)
+                 if (pp_is_gamma) then
+                   !gc_tmp = r2c(stern_kmp%eig1_k(:, m_kq, ib_sum))
+                   !rhotwg_x(1) = czero_gw; if (ib_sum == m_kq) rhotwg_x(1) = cmplx(sqrt(vcp%i_sz),0.0_gwp)
+                   rhotwg_x(1) = rhotwg_x(1) * cmplx(sqrt(vcp%i_sz),0.0_gwp)
+                 end if
                  rhotwg_c(:) = rhotwg_x(1:npw_c*nspinor)
                else
                  call fft_ur(npw_c, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_c, gbound_c, cwork_ur, rhotwg_c)
                  call sigtk_multiply_by_vc_sqrt("C", npw_c, nspinor, ndat1, vc_sqrt_gx, rhotwg_c)
+                 if (pp_is_gamma) then
+                   !gc_tmp = r2c(stern_kmp%eig1_k(:, m_kq, ib_sum))
+                   !rhotwg_c(1) = czero_gw; if (ib_sum == m_kq) rhotwg_c(1) = cmplx(sqrt(vcp%i_sz),0.0_gwp)
+                   rhotwg_c(1) = rhotwg_c(1) * cmplx(sqrt(vcp%i_sz),0.0_gwp)
+                 end if
                end if
 
                !if (m_kq == 1 .AND. ipc == 1) &
@@ -1515,7 +1544,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                !if (m_kq == 1 .AND. ipc == 1) &
                !   print *, "|rhotwg_x|^2,+q,ib=", ib_sum, sum(abs(rhotwg_x)*abs(rhotwg_x))
 
-               do n_k=bstart_k, bstop_k ! do n_k=gqk%n_start, gqk%n_stop
+               do n_k=bstart_k, bstop_k
                  in_k = n_k - bstart_k + 1
                  !if (m_kq == 1 .AND. n_k == 1 .AND. ipc == 1) &
                  !  print *, "|vec_gwc_nk|^2,+q,ib=", ib_sum, sum(abs(vec_gwc_nk(:, 1, n_k))*abs(vec_gwc_nk(:, 1, n_k)))
@@ -1627,10 +1656,21 @@ if (.not. qq_is_gamma) then
                if (need_x_kmp) then
                  call fft_ur(npw_x, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_x, gbound_x, cwork_ur, rhotwg_x)
                  call sigtk_multiply_by_vc_sqrt("N", npw_x, nspinor, ndat1, vc_sqrt_gx, rhotwg_x)
+                 if (pp_is_gamma) then
+                   !gc_tmp = r2c(stern_kqmp%eig1_k(:, n_k, ib_sum))
+                   !rhotwg_x(1) = czero_gw; if (ib_sum == n_k) rhotwg_x(1) = cmplx(sqrt(vcp%i_sz),0.0_gwp)
+                   rhotwg_x(1) = rhotwg_x(1) * cmplx(sqrt(vcp%i_sz),0.0_gwp)
+                 end if
+
                  rhotwg_c(:) = rhotwg_x(1:npw_c*nspinor)
                else
                  call fft_ur(npw_c, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_c, gbound_c, cwork_ur, rhotwg_c)
                  call sigtk_multiply_by_vc_sqrt("N", npw_c, nspinor, ndat1, vc_sqrt_gx, rhotwg_c)
+                 if (pp_is_gamma) then
+                   !gc_tmp = r2c(stern_kqmp%eig1_k(:, n_k, ib_sum))
+                   !rhotwg_c(1) = czero_gw; if (ib_sum == n_k) rhotwg_c(1) = cmplx(sqrt(vcp%i_sz),0.0_gwp)
+                   rhotwg_c(1) = rhotwg_c(1) * cmplx(sqrt(vcp%i_sz),0.0_gwp)
+                 end if
                end if
 
                !if (n_k == 1 .AND. ipc == 1) &

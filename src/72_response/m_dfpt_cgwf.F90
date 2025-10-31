@@ -1806,8 +1806,8 @@ end subroutine stern_init
 !! SOURCE
 
 subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_hamkq, eig0_k, eig0_kq, &
-                       cwave0, cwaveprj0, &               ! in
-                       cwavef, cwaveprj, err_msg, ierr, & ! out
+                       ug0_nk, cprj0_nk, &                  ! in
+                       ug1_nkq, cprj1_nkq, err_msg, ierr, & ! out
                        full_cg1, full_ur1) ! optional
 
 !Arguments ------------------------------------
@@ -1817,9 +1817,9 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  integer,intent(in) :: u1_band, band_me, idir, ipert
 !arrays
  real(dp),intent(in) :: qpt(3), eig0_k(stern%nband), eig0_kq(stern%nband)
- real(dp),intent(inout) :: cwave0(2, stern%npw_k*stern%nspinor), cwavef(2, stern%npw_kq*stern%nspinor)
- type(pawcprj_type),intent(inout) :: cwaveprj0(gs_hamkq%natom, stern%nspinor*gs_hamkq%usecprj)
- type(pawcprj_type),intent(inout) :: cwaveprj(gs_hamkq%natom, stern%nspinor)
+ real(dp),intent(inout) :: ug0_nk(2, stern%npw_k*stern%nspinor), ug1_nkq(2, stern%npw_kq*stern%nspinor)
+ type(pawcprj_type),intent(inout) :: cprj0_nk(gs_hamkq%natom, stern%nspinor*gs_hamkq%usecprj)
+ type(pawcprj_type),intent(inout) :: cprj1_nkq(gs_hamkq%natom, stern%nspinor)
  integer,intent(out) :: ierr
  character(len=*),intent(out) :: err_msg
  real(dp),optional,target,intent(out) :: full_cg1(2, stern%npw_kq*stern%nspinor)
@@ -1865,7 +1865,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
 
  ! Init entry in cg1s_kq, either from cache or with zeros.
  if (stern%use_cache) then
-    cwavef = zero
+    ug1_nkq = zero
     !u1c_ib_k = stern%u1c%find_band(band_ks)
     !if (u1c_ib_k /= -1) then
     !  call cgtk_change_gsphere(stern%nspinor, &
@@ -1876,13 +1876,13 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
     !end if
  else
     !cg1s_kq(:,:,ipc,ib_k) = zero
-    cwavef = zero
+    ug1_nkq = zero
  end if
 
  call dfpt_cgwf(u1_band, band_me, stern%rank_band, stern%bands_treated_now, berryopt0, &
    !stern%cgq, cg1s_kq(:,:,ipc,ib_k), kets_k(:,:,ib_k), &  ! Important stuff
-   stern%cgq, cwavef, cwave0, &  ! Important stuff
-   cwaveprj, cwaveprj0, rf2, stern%dcwavef, &
+   stern%cgq, ug1_nkq, ug0_nk, &  ! Important stuff
+   cprj1_nkq, cprj0_nk, rf2, stern%dcwavef, &
    !ebands%eig(:, ik_ibz, spin), ebands%eig(:, ikq_ibz, spin), stern%eig1_k, &
    eig0_k, eig0_kq, stern%eig1_k, &
    stern%ghc, stern%gh1c_n, grad_berry, stern%gsc, stern%gscq, &
@@ -1940,7 +1940,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
    ABI_CHECK(present(full_cg1), "full_ur1 requires full_cg1")
  end if
 
- ! At this stage, the 1st order function cwavef is orthogonal to cgq (unlike
+ ! At this stage, the 1st order function ug1_nkq is orthogonal to cgq (unlike
  ! when it is input to dfpt_cgwf). Here, restore the "active space" content
  ! of the first-order wavefunction, to give cwave1.
  ! PAW: note that dcwavef (1st-order change of WF due to overlap change)
@@ -1963,7 +1963,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
    fermie1 = zero; if (sum(qpt**2) < tol14) fermie1 = stern%fermie1_idir_ipert(idir, ipert)
 
    iband = u1_band
-   call full_active_wf1(stern%cgq, stern%cprjq, cwavef, full_cg1, cwaveprj, stern%cwaveprj1, cycle_bands, stern%eig1_k, fermie1, &
+   call full_active_wf1(stern%cgq, stern%cprjq, ug1_nkq, full_cg1, cprj1_nkq, stern%cwaveprj1, cycle_bands, stern%eig1_k, fermie1, &
                         eig0nk, eig0_kq, stern%dtset%elph2_imagden, iband, ibgq0, icgq0, stern%mcgq, stern%mcprjq, stern%mpi_enreg, &
                         stern%dtset%natom, stern%nband, stern%npw_kq, stern%nspinor, timcount0, gs_hamkq%usepaw)
 

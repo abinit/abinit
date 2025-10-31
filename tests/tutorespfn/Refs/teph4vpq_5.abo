@@ -599,7 +599,6 @@ meta: {optdriver: 7, eph_task: 13, }
 - Reading e-ph matrix elements from: teph4vpq_3o_DS2_GSTORE.nc
  Asking for with_cplex: 2
  Asking for with_gmode: phonon
- Asking for with_cplex: 2
  Asking for gvals_name: gvals
  Asking for g2dw: no
  Initializing gstore object from: teph4vpq_3o_DS2_GSTORE.nc
@@ -859,7 +858,6 @@ meta: {optdriver: 7, eph_task: 13, }
 - Reading e-ph matrix elements from: teph4vpq_3o_DS3_GSTORE.nc
  Asking for with_cplex: 2
  Asking for with_gmode: phonon
- Asking for with_cplex: 2
  Asking for gvals_name: gvals
  Asking for g2dw: no
  Initializing gstore object from: teph4vpq_3o_DS3_GSTORE.nc
