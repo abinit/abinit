@@ -39,7 +39,6 @@ module m_gstore_sigeph
  use m_ephtk
  !use m_mkffnl
  use m_sigtk
- use m_cgtools
 
  !use m_time,           only : cwtime, cwtime_report, sec2str
  use m_io_tools,       only : iomode_from_fname
@@ -775,7 +774,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
                gdw2_stern = real(cfact) / (four * wqnu)
 
                ! Add contribution due to the Sternheimer. ediff is absorbed in Sternheimer.
-               cfact2_t = - weight_q * gdw2_stern * (two * nqnu_t(it) + one)
+               cfact2_t = - weight_q * gdw2_stern * (two * nqnu_t(:) + one)
                cfact_t = cfact_t + cfact2_t
                sigma%dw_stern_vals(:, in_k, ikcalc) = sigma%dw_stern_vals(:, in_k, ikcalc) + real(cfact2_t)
              end if

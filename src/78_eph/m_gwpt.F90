@@ -176,6 +176,8 @@ contains  !=====================================================
 !! for all the pp wavevectors in the BZ (or better in the IBZ_{q,k,alpha}. The use of symmetries is rendered complicated
 !! by the parallelism over pp but perhaps one can precompute \Delta psi with all MPI procs and write the results to temporary files.
 !!
+!! 3) Check gstore_brange less than nband
+!!
 !! SOURCE
 
 subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, drhodb, ifc, wfk_hdr, &
