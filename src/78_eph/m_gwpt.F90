@@ -1462,6 +1462,15 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                                         pawfgr, mpi_enreg, vtrial, v1scf_qq(:,:,:,imyp), vlocal, vlocal1_qq(:,:,:,:,imyp))
 
              call gs_ham_kqmp%load_spin(spin, vlocal=vlocal, with_nonlocal=.true.)
+             call gs_ham_kqmp%load_spin(spin, vlocal=vlocal, with_nonlocal=.true.)
+
+             ! Load the k dependent parts of the Hamiltonian
+             !call gs_ham_kqmp%load_k(kpt_k=kmp, npw_k=npw_kmp, istwf_k=istwf_kmp, kg_k=kg_kmp, kpg_k=kpg_kmp, kinpw_k=kinpw_kmp, &
+             !  ph3d_k=ph3d_kmp, ffnl_k=ffnl_kmp, compute_ph3d=.true., compute_gbound=.true.)
+             !call gs_ham_kqmp%load_kprime(kpt_kp=kqmp, npw_kp=npw_kqmp, istwf_kp=istwf_kqmp, kg_kp=kg_kqmp, kpg_kp=kpg_kqmp,
+             !  kinpw_kp=kinpw_kqmp, &
+             !  ph3d_kp=ph3d_kqmp, ffnl_kp=ffnl_kqmp, compute_ph3d=.true., compute_gbound=.true.)
+
              call rf_ham_kqmp%init(cplex, gs_ham_kqmp, ipert, has_e1kbsc=.true.)
              call rf_ham_kqmp%load_spin(spin, vlocal1=vlocal1_qq(:,:,:,:,imyp), with_nonlocal=.true.)
 
@@ -1596,6 +1605,14 @@ if (.not. qq_is_gamma) then
              ! Same operations but for -qq
              ! ===========================
              call gs_ham_kmp%load_spin(spin, vlocal=vlocal, with_nonlocal=.true.)
+
+             ! Load the k dependent parts of the Hamiltonian
+             !call gs_ham_kmp%load_k(kpt_k=kqmp, npw_k=npw_kqmp, istwf_k=istwf_kqmp, kg_k=kg_kqmp, kpg_k=kpg_kqmp, kinpw_k=kinpw_kqmp, &
+             !  ph3d_k=ph3d_kqmp, ffnl_k=ffnl_kqmp, compute_ph3d=.true., compute_gbound=.true.)
+             !call gs_ham_kmp%load_kprime(kpt_kp=kmp, npw_kp=npw_kmp, istwf_kp=istwf_kmp, kg_kp=kg_kmp, kpg_kp=kpg_kmp,
+             !  kinpw_kp=kinpw_kmp, &
+             !  ph3d_kp=ph3d_kmp, ffnl_kp=ffnl_kmp, compute_ph3d=.true., compute_gbound=.true.)
+
              call rf_ham_kmp%init(cplex, gs_ham_kmp, ipert, has_e1kbsc=.true.)
              call rf_ham_kmp%load_spin(spin, vlocal1=vlocal1_mqq(:,:,:,:,imyp), with_nonlocal=.true.)
 
