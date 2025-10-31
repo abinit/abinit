@@ -197,7 +197,7 @@ to use more CPUs if you have them available:
 
 ```sh
 cp ../tdmft_triqs_2.abi .
-mpirun -n 4 abinit tdmft_triqs_2.abi > log 2>&1
+mpirun -n 4 abinit tdmft_triqs_2.abi > log2 2>&1
 ```
 
 {% dialog tests/tutoparal/Input/tdmft_triqs_2.abi %}
@@ -222,15 +222,15 @@ unlike in the DFT exchange-correlation functional, where they are usually neglec
 
 Here, we use a CT-HYB solver, which represents the Green's function $G(\tau)$ on the imaginary
 time axis, with $\tau$ ranging from $0$ to $\beta$. Because the impurity problem becomes more
-complex as $\beta$ increases, we are choosing a high temperature ([[tsmear]]$=3000K$) to keep
+complex as $\beta$ increases, we are choosing a high temperature ([[tsmear]]$=3000 \, \mathrm{K}$) to keep
 things simpler and faster for this example.
 
-For the second dataset, we start by activating DMFT by setting [[usedmft]]$=1$.
+For the second dataset, we start by activating DMFT, setting [[usedmft]]$=1$.
 
 ### Correlated Electrons
 
-Next, we need to choose which angular momentum channel - that is, which type of orbital
-($s$,$p$,$d$,...) - we want to treat as correlated within DMFT. Each channel corresponds
+Next, we need to choose which angular momentum channel ($s$,$p$,$d$,...) we want to treat as
+correlated within DMFT. Each channel corresponds
 to a value of $l=0,1,2$..., and we select it using the variable [[lpawu]], just like in
 DFT+U.
 
@@ -260,10 +260,14 @@ $\frac{u_l(r)}{r} Y_{lm}(\hat{r})$ where $Y_{lm}(\hat{r})$ are real spherical ha
 The choice of the radial wavefunction is made through the variable [[dmft_orbital]]. For iron, the
 $3d$ orbitals remain quite localized and keep their atomic character, so we usually just take the
 lowest-energy atomic orbital from the PAW dataset (truncated at the PAW radius). That is the default
-choice, [[dmft_orbital]]=1, but you can pick any orbital from your PAW dataset or even provide a
+choice, [[dmft_orbital]]$=1$, but you can pick any orbital from your PAW dataset or even provide a
 custom one from a file if needed.
 
-When the calculation starts, you can see how the radial orbital is defined in the `log` file, right
+!!! tip
+
+    More generally, you should pick a radial orbital that captures as much spectral weight as possible in DMFT, especially near the Fermi level, since that's where electron correlations have the biggest impact.
+
+When the calculation starts, you can see how the radial orbital is defined in the `log2` file, right
 at the beginning of the self-consistent cycle:
 
 ```sh
@@ -280,18 +284,254 @@ should clearly see the $3d$ atomic orbital from your PAW dataset:
 
 ![dmft_cycle_tuto](dmft_triqs_assets/3d_orbital.png)
 
+### Energy window
 
+Unfortunately, we cannot compute the lattice Green's function over the entire Hilbert space, as it would be too computationally expensive.
+Instead, we work in a smaller subspace $\mathcal{H}$ spanned by basis elements with low energy. Since what ultimately matters for DMFT is the
+local Green's function (its projection onto the local orbitals), this is equivalent to downfolding the full Green's function onto the projection
+of [[dmft_orbital]] within $\mathcal{H}$.
 
+In our implementation, since we use the Kohn-Sham basis, this means we project the orbital onto a finite set of Kohn-Sham bands - specifically those
+between [[dmftbandi]] and [[dmftbandf]].
 
+We would like to emphasize, however, that when we compute the trace of the Green's function - for instance, to locate the Fermi level - we include all
+bands (from $1$ to [[nband]]). This differs from many implementations that limit themselves strictly to the correlated energy window.
 
+As we have seen with the calculation of the fatbands, the main spectral weight of the $d$ orbitals is contained within the bands $5$ to $13$, which we choose here.
 
+However, since we project the orbitals on a finite dimensional Hilbert space, they are no longer orthonormal. You can check this in the `log2` file:
 
+```sh
+ == The DMFT orbitals are now projected on the correlated bands
 
+ == Check: Downfolded Occupations and Norm of unnormalized projected orbitals
 
+  ------ Symmetrized Occupations
 
+   -------> For Correlated Atom 1
 
+          -- polarization spin component 1
+        0.50385   0.00000   0.00000   0.00000  -0.00000
+        0.00000   0.50385  -0.00000   0.00000   0.00000
+        0.00000   0.00000   0.45679   0.00000   0.00000
+        0.00000   0.00000   0.00000   0.50385   0.00000
+       -0.00000   0.00000   0.00000   0.00000   0.45679
 
+  ------ Symmetrized Norm
 
+   -------> For Correlated Atom 1
 
+          -- polarization spin component 1
+        0.80454   0.00000   0.00000   0.00000   0.00000
+        0.00000   0.80454   0.00000   0.00000  -0.00000
+        0.00000   0.00000   0.80154   0.00000   0.00000
+       -0.00000   0.00000   0.00000   0.80454  -0.00000
+        0.00000  -0.00000   0.00000   0.00000   0.80154
+```
+
+Here, the occupation and overlap matrices (before orthonormalization) are
+printed. All local operators are stored and displayed in matrix form in the
+`log` file, separately for each spin component.
+By default, all quantities are handled and printed in the real spherical
+harmonics (cubic) basis. The only exception is when they are passed
+to the CT-HYB solver, where they are rotated to the CT-QMC basis
+(see the next section). Whenever quantities are represented in the CT-QMC
+basis instead of the cubic basis, this is explicitly indicated in the `log`.
+
+As you can see, the norms of the projected orbitals are slightly lower than the original atomic orbital, which was
+not even normalized to begin with.
+
+If we had an infinite energy window, the projection would fully recover the original atomic orbital through the closure relation. You can check this as an exercise: try increasing
+[[dmftbandf]] and see that the overlap values move closer to $0.8514$.
+
+Finally, we promote the projected orbitals to proper Wannier functions by orthonormalizing them via the scheme specified by [[dmft_wanorthnorm]].
+
+### Interaction tensor
+
+In a solid, the correlated electrons do not interact via the bare Coulomb potential - their interaction is screened by all the other electrons in the system. Because of this,
+you need to provide the screened interaction tensor $U_{ijkl}$.
+
+In our implementation, we use the Slater parametrization, which expresses the full interaction tensor in terms of just a few Slater integrals $F^k$ ($k = 2i$, with $i = 0, l$).
+
+By default, the ratios $F^k / F^2$ (for $k \ge 4$) are kept at their atomic values, which is usually a good approximation for $3d$ transition metals and rare-earth elements.
+If you want to adjust them manually, you can do so via the variables [[f4of2_sla]] and [[f6of2_sla]].
+
+Once these ratios are fixed, the two remaining Slater integrals can be determined uniquely from the average screened interaction $U$ and the screened Hund’s exchange $J$.
+These parameters have clear physical meanings — $U$ sets the overall interaction strength, while $J$ controls the tendency of electrons to align their spins.
+You can set them for each atom type using [[upawu]] and [[jpawu]].
+
+There are several ways to compute these parameters directly within ABINIT — for example, using [cRPA](/tutorial/ucalc_crpa) or [linear response](/tutorial/lruj) - but those
+are beyond the scope of this tutorial. Here, we will simply treat $U$ and $J$ as input parameters.
+
+Keep in mind that these are matrix elements of the screened potential, meaning their values depend on the shape of the local orbitals.
+So, if you change your energy window, you may need to readjust $U$ and $J$.
+
+For this example, we will use the same parameters as in [[cite:Han2018]] —
+$U = 5.5$ eV and $J = 0.84$ eV — since their chosen energy window is similar to ours.
+
+### Self-consistent cycle
+
+A charge self-consistent DFT+DMFT calculation involves two nested loops:
+
+  * The outer DFT+DMFT loop, whose number of iterations is controlled by [[nstep]]
+  * The inner DMFT loop, whose number of iterations is controlled by [[dmft_iter]]
+
+This means the impurity solver is called a total of [[nstep]] $\times$ [[dmft_iter]] times. Each DMFT loop is performed at fixed electronic density, and that density gets updated
+[[nstep]] times in total - once every [[dmft_iter]] DMFT iterations.
+
+Here’s a schematic showing how the DFT+DMFT self-consistent cycle works:
+
+![dmft_cycle_tuto](dmft_triqs_assets/dmft_cycle_tuto.png)
+
+When doing a charge self-consistent calculation, it is usually best to set [[dmft_iter]]$=1$ and only adjust [[nstep]] to control convergence speed.
+That is because trying to reach self-consistency in the DMFT loop before the charge density converges just wastes time.
+
+### Magnetism
+
+The next step is to decide what type of magnetism you want to include. Here, we choose [[nsppol]]$=$[[nspden]]$=1$, which enforces a collinear paramagnetic solution by
+symmetrizing the two spin channels of the Green’s function. Even so, the impurity solver is solved with all spin channels, meaning local magnetic moments can still form.
+
+Collinear magnetism can be enabled with [[nsppol]]$=$[[nspden]]$=2$. In this case, it can sometimes be better to keep the DFT exchange-correlation potential non-magnetic and let magnetism emerge purely from DMFT. You can do that by setting [[usepawu]]$=10$. Otherwise, set [[usepawu]]$=14$ for a magnetic XC potential.
+
+Finally, non-collinear calculations are also supported by our interface ([[nspinor]]$=2$ and [[nspden]]$=4$).
+
+### Double counting
+
+When combining DFT and DMFT, you run into the double counting problem - some of the local interactions are already partly included at the DFT level, so they need to be subtracted and
+replaced by their exact DMFT values.
+
+ABINIT provides the exact double counting formula, which removes these contributions exactly. It is a bit more involved to use, so we will cover it later in its own section.
+
+There are also several simpler, commonly used approximate formulas, which you can select using the variable [[dmft_dc]]. Here, we choose [[dmft_dc]]$=6$, corresponding to the AMF correction, better suited for metals.
+
+### Impurity solver
+
+We haven’t yet told ABINIT to use the TRIQS/CT-HYB interface instead of its internal DMFT solvers. This is done with [[dmft_solv]], which sets the impurity solver to be used.
+
+For TRIQS/CT-HYB, there are two relevant options:
+
+  * [[dmft_solv]]$=6$: Uses TRIQS/CT-HYB but keeps only the density-density terms in the interaction tensor. This is much faster, though if that’s what you need, a segment solver would be
+      more efficient.
+  * [[dmft_solv]]$=7$: Uses the full rotationally invariant Slater Hamiltonian, giving the most accurate treatment of interactions.
+
+If instead you want to use ABINIT’s internal DMFT implementation with its built-in solvers, check out the dedicated [DMFT tutorial](/tutorial/dmft).
+
+### Matsubara Mesh
+
+In our implementation, the Green’s function is represented in imaginary frequencies as $G(i\omega_n)$, and is computed exactly on the first [[dmft_triqs_n_iw]] = $n_{i\omega}$ Matsubara frequencies, defined as
+\begin{equation*}
+    \omega_n = (2n + 1)\frac{\pi}{\beta}
+\end{equation*}
+
+During the calculation, several steps require integrating over all Matsubara frequencies.
+However, directly summing:
+\begin{equation*}
+    \sum_{n=-n_{i \omega}}^{n_{i \omega}-1} G(i\omega_n) e^{i 0^{+}}
+\end{equation*}
+(with $e^{i0^+}$ a small damping factor) would be impractical — it would take far too long to converge.
+
+To make this efficient, we use a moment expansion of the Green’s function up to fifth order:
+
+\begin{equation*}
+    \sum_{n=-\infty}^{\infty} G(i\omega_n) e^{i 0^{+}} \approx \sum_{n=-n_{i\omega}}^{n_{i\omega}-1} \left[ G(i\omega_n) - \sum_{j=1}^{5} \frac{G_j}{(i\omega_n)^j} \right] + \sum_{n=-\infty}^{\infty} \frac{G_j}{(i\omega_n)^j} e^{i 0^{+}}
+\end{equation*}
+where $G_j$ are the moments of the Green’s function.
+
+The first term is computed numerically, while the second term is handled analytically.
+Since the moments $G_j$ are obtained analytically in our implementation,
+this approach is both efficient and guaranteed to converge to the exact result.
+
+To ensure consistency, the code automatically compares this summation to the corresponding value for the DFT Green’s function, where the sum reduces to a Fermi–Dirac occupation factor.
+If the difference is too large, the code stops and raises an error — this is a helpful way to check whether your [[dmft_triqs_n_iw]] value is properly chosen.
+
+You can find this check in your `log2` file. If everything is working correctly, you’ll see lines similar to:
+
+```sh
+** Differences between occupations from DFT Green's function and
+   Fermi-Dirac occupations are small enough:
+   0.1460E-11 is lower than  0.1000E-03
+```
+
+and:
+
+```sh
+== Compute DFT Band Energy terms
+     Differences between band energy with Fermi-Dirac occupations
+     and occupations from DFT Green's function is:   -0.000000
+     which is smaller than          0.00001
+```
+
+As you can see, this integration method is highly efficient — in this example, only about $500$ frequencies were needed to reach excellent accuracy.
+
+!!! tip
+
+    When you change the temperature, remember to increase the number of Matsubara frequencies linearly with $\beta$ to maintain the same effective energy range.
+
+### CT-QMC basis
+
+In the SCF cycle, we work in the real spherical harmonics (cubic) basis.
+However, even though [[dmft_solv]]$=7$ is fully rotationally invariant and
+basis independent, the choice of solver basis can in practice have a
+huge impact on computation time.
+
+Strong off-diagonal components in the hybridization function can make the sign problem worse. On the other hand, TRIQS/CT-HYB relies on conserved quantities (like angular momentum
+or spin) to partition the local Hilbert space of size $2^{2 \times (2l+1)}$, which reduces the size of the matrices that need to be handled during the simulation. These conserved
+quantities are detected automatically, and their number depends strongly on the choice of basis.
+
+TRIQS/CT-HYB prints the number of subspaces it finds:
+
+```sh
+  Using autopartition algorithm to partition the local Hilbert space
+  Found 1024 subspaces.
+```
+
+A higher number of subspaces (thus with smaller dimensions) means smaller matrices, which reduces computation time. In this example, the local Hilbert space size is $2^{10}=1024$
+($l=2$), and we see $1024$ subspaces, each of dimension $1$. Thus, we only handle scalars, and do not even need a matrix solver, as we make the density-density approximation in this
+example. You can check as an exercise that the matrix sizes will increase by setting [[dmft_solv]]$=7$, depending again on your basis choice.
+
+So, there is a trade-off: you want to reduce off-diagonal components and maximize the number of subspaces, which isn't always easy. Fortunately, our interface provides many basis
+options that can be set via [[dmft_triqs_basis]] - check the glossary for all available choices.
+
+Even though our interface handles the full off-diagonal hybridization and Green's function, some features are not available in this case. For instance, density matrix sampling
+([[dmft_triqs_measure_density_matrix]]) cannot be performed, making the sampling of static observables (like energy or electron number) much noisier. We wish to emphasize that
+this limitation comes from TRIQS/CT-HYB itself, not our interface.
+
+To simplify things, you can set the off-diagonal components to zero in the CT-QMC basis via [[dmft_triqs_off_diag]]$=0$. Be careful, as this is no longer numerically exact.
+
+In this example, we choose to stay in the cubic basis ([[dmft_triqs_basis]]$=0$) and neglect the off-diagonal components, since they vanish by symmetry anyway. The code then
+automatically detects and prints the most compact block structure of the hybridization function and electronic levels:
+
+```sh
+   == Searching for the most optimal block structure of the electronic levels and the hybridization
+
+   == Solving impurity model for atom 1, where there are 10 blocks
+
+  --> Block 0 contains flavor 0
+  --> Block 1 contains flavor 1
+  --> Block 2 contains flavor 2
+  --> Block 3 contains flavor 3
+  --> Block 4 contains flavor 4
+  --> Block 5 contains flavor 5
+  --> Block 6 contains flavor 6
+  --> Block 7 contains flavor 7
+  --> Block 8 contains flavor 8
+  --> Block 9 contains flavor 9
+
+   == Schematic of the block structure
+
+      0  .  .  .  .  .  .  .  .  .
+      .  1  .  .  .  .  .  .  .  .
+      .  .  2  .  .  .  .  .  .  .
+      .  .  .  3  .  .  .  .  .  .
+      .  .  .  .  4  .  .  .  .  .
+      .  .  .  .  .  5  .  .  .  .
+      .  .  .  .  .  .  6  .  .  .
+      .  .  .  .  .  .  .  7  .  .
+      .  .  .  .  .  .  .  .  8  .
+      .  .  .  .  .  .  .  .  .  9
+```
+
+This allows TRIQS/CT-HYB to discard some irrelevant moves, and to optimize the computation of the determinant of the hybridization matrix. In our case, there are
+$10$ blocks of size $1$, as there are no off-diagonal components.
 
 

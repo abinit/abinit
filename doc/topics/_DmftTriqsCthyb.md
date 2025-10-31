@@ -47,10 +47,6 @@ not available in ABINIT's internal DMFT implementation.
 
 {{ related_variables }}
 
-## Selected Input Files
-
-{{ selected_input_files }}
-
 ## Tutorials
 
 * [[tutorial:dmft_triqs|The tutorial on DFT+DMFT with TRIQS/CT-HYB]] shows how to use the interface
