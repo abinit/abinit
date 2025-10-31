@@ -28,6 +28,7 @@ module m_extraprho
  use m_cgtools
  use m_dtset
 
+ use m_extfpmd,    only : extfpmd_type
  use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
  use m_atomdata, only : atom_length
@@ -116,7 +117,7 @@ contains
 subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
 & kg,mcg,mcprj,mgfft,mpi_enreg,mqgrid,my_natom,nattyp,nfft,ngfft,npwarr,ntypat,pawrhoij,&
 & pawtab,ph1d,psps,qgrid,rhor,rprimd,scf_history,ucvol,usepaw,&
-& xred_new,xred_old,ylm,zion,znucl)
+& xred_new,xred_old,ylm,zion,znucl,extfpmd)
 
 !Arguments ------------------------------------
 !scalars
@@ -126,6 +127,7 @@ subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
  type(dataset_type),intent(in) :: dtset
  type(scf_history_type),intent(inout) :: scf_history
  type(pseudopotential_type),intent(in) :: psps
+ type(extfpmd_type),intent(in),optional,pointer :: extfpmd
 !arrays
  integer,intent(in) :: atindx(dtset%natom),atindx1(dtset%natom),kg(3,dtset%mpw*dtset%mkmem)
  integer,intent(in) :: nattyp(ntypat),ngfft(18),npwarr(dtset%nkpt)
@@ -440,6 +442,20 @@ subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
    end do !iatom
  end if !usepaw
 
+ if(present(extfpmd)) then
+   if(associated(extfpmd)) then
+     scf_history%nextfpmd(ind1new)=extfpmd%nelect
+     if(hasmoved) then
+       extfpmd%nelect=(one+alpha)*extfpmd%nelect
+       if (abs(beta-alpha)>tol14.and.ind1>0) then
+         extfpmd%nelect=extfpmd%nelect+(beta-alpha)*scf_history%nextfpmd(ind1)
+       endif
+       if (abs(beta)>tol14.and.ind2>0) then
+         extfpmd%nelect=extfpmd%nelect-beta*scf_history%nextfpmd(ind2)
+       endif
+     endif
+   endif
+ endif
 
  scf_history%alpha=alpha
  scf_history%beta=beta
