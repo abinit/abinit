@@ -1362,42 +1362,50 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
 ! END TODO
 
 ! TODO : check these equations for l1 l2, they should not depend on the band indices, as we are inside the ib loop!!
-         self%l1( :, :, ieh, spin, itemp ) = self%l1( :, :, ieh, spin, itemp ) + integration*vv_tens(:,:)*wtk*(eig_nk - self%mu_e(itemp))
-         self%l2( :, :, ieh, spin, itemp ) = self%l2( :, :, ieh, spin, itemp ) + integration*vv_tens(:,:)*wtk*(eig_nk - self%mu_e(itemp))**2
-         self%l1_dm( :, :, ieh, spin, itemp ) = self%l1_dm( :, :, ieh, spin, itemp ) + integration_dm*vv_tens(:,:)*wtk*(eig_nk - self%mu_e(itemp))
-         self%l2_dm( :, :, ieh, spin, itemp ) = self%l2_dm( :, :, ieh, spin, itemp ) + integration_dm*vv_tens(:,:)*wtk*(eig_nk - self%mu_e(itemp))**2
+         self%l1( :, :, ieh, spin, itemp ) = self%l1( :, :, ieh, spin, itemp ) &
+             & + integration*vv_tens(:,:)*wtk*(eig_nk - self%mu_e(itemp))
+         self%l2( :, :, ieh, spin, itemp ) = self%l2( :, :, ieh, spin, itemp ) &
+             & + integration*vv_tens(:,:)*wtk*(eig_nk - self%mu_e(itemp))**2
+         self%l1_dm( :, :, ieh, spin, itemp ) = self%l1_dm( :, :, ieh, spin, itemp ) &
+             & + integration_dm*vv_tens(:,:)*wtk*(eig_nk - self%mu_e(itemp))
+         self%l2_dm( :, :, ieh, spin, itemp ) = self%l2_dm( :, :, ieh, spin, itemp ) &
+             & + integration_dm*vv_tens(:,:)*wtk*(eig_nk - self%mu_e(itemp))**2
 
 !         call xmpi_sum(self%conductivity_mu(:, :, ieh, spin, itemp) , self%wt_comm%value, ierr)
-         end do ! itemp
+       end do ! itemp
 
      end do !ib
 
    end do ! my_ik
-   ! Collect data if k-points parallelism.
+   ! Collect data if k-points parallelism. TODO: if this is reactivated, mpi_sum the l0 l1 l2 arrays instead
    !call xmpi_sum(self%conductivity_mu , self%kcalc_comm%value, ierr)
 
-
-
-   do ieh = 1, 2
-     ! calculate the transport coefficients from the l0 l1 l2
-     call inv33(self%l0(:, :, ieh, spin, itemp), work_33)
-     l0inv_33nw(:,:,ieh) = work_33
-     self%seebeck(:,:,ieh,spin,itemp) = matmul(work_33, self%l1(:,:,ieh,spin,itemp)) / Tkelv
-    
-     call inv33(self%l0_dm(:, :, ieh, spin, itemp), work_33)
-     l0inv_33nw_dm(:,:,ieh) = work_33
-     self%seebeck_dm(:,:,ieh,spin,itemp) = matmul(work_33, self%l1_dm(:,:,ieh,spin,itemp)) / Tkelv
-    
-     work_33 = self%l1(:, :, ieh, spin, itemp)
-     work_33 = self%l2(:, :, ieh, spin, itemp) - matmul(work_33, matmul(l0inv_33nw(:, :, ieh), work_33))
-     self%kappa(:,:,ieh,spin,itemp) = work_33 / Tkelv
-    
-     work_33 = self%l1_dm(:, :, ieh, spin, itemp)
-     work_33 = self%l2_dm(:, :, ieh, spin, itemp) - matmul(work_33, matmul(l0inv_33nw_dm(:, :, ieh), work_33))
-     self%kappa_dm(:,:,ieh,spin,itemp) = work_33 / Tkelv
-     !self%conductivity_mu( :, :, ieh, spin, itemp ) = self%conductivity_mu( :, :, ieh, spin, itemp ) + integration*vv_tens(:,:)*wtk
-   end do ! ieh
  end do !my_spin
+
+ do itemp = 1, self%ntemp
+   do my_spin=1,self%my_nspins
+     spin = self%my_spins(my_spin)
+     do ieh = 1, 2
+       ! calculate the transport coefficients from the l0 l1 l2
+       call inv33(self%l0(:, :, ieh, spin, itemp), work_33)
+       l0inv_33nw(:,:,ieh) = work_33
+       self%seebeck(:,:,ieh,spin,itemp) = matmul(work_33, self%l1(:,:,ieh,spin,itemp)) / Tkelv
+      
+       call inv33(self%l0_dm(:, :, ieh, spin, itemp), work_33)
+       l0inv_33nw_dm(:,:,ieh) = work_33
+       self%seebeck_dm(:,:,ieh,spin,itemp) = matmul(work_33, self%l1_dm(:,:,ieh,spin,itemp)) / Tkelv
+      
+       work_33 = self%l1(:, :, ieh, spin, itemp)
+       work_33 = self%l2(:, :, ieh, spin, itemp) - matmul(work_33, matmul(l0inv_33nw(:, :, ieh), work_33))
+       self%kappa(:,:,ieh,spin,itemp) = work_33 / Tkelv
+      
+       work_33 = self%l1_dm(:, :, ieh, spin, itemp)
+       work_33 = self%l2_dm(:, :, ieh, spin, itemp) - matmul(work_33, matmul(l0inv_33nw_dm(:, :, ieh), work_33))
+       self%kappa_dm(:,:,ieh,spin,itemp) = work_33 / Tkelv
+       !self%conductivity_mu( :, :, ieh, spin, itemp ) = self%conductivity_mu( :, :, ieh, spin, itemp ) + integration*vv_tens(:,:)*wtk
+     end do ! ieh
+   end do !my_spin
+ end do ! itemp
 
  max_occ = two / (self%nspinor * self%nsppol)
  fact0 = max_occ * (siemens_SI / Bohr_meter / cryst%ucvol) / 100
