@@ -320,6 +320,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! Check if a previous GSTORE.nc file is present to restart the calculation if dtset%eph_restart == 1,
  ! and use done_qbz_spin mask to cycle the loops below if restart /= 0.
  gstore_filepath = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
+
+ !gstore_filepath = dtfil%filgstorein
+ restart = 0
  call gstore_check_restart(gstore_filepath, dtset, nqbz, done_qbz_spin, restart, comm)
 
  if (restart == 0) then
@@ -346,8 +349,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! inside the loop over my_iq if filtering has been used.
  ! Make sure internal table with gstore_done_qbz_spin is properly filled.
  ! TODO: Similar piece of code in gstore_compute, should write method...
- ! FIXME: Something wrong here.
- !if (ndone == 0) then
+ if (ndone == 0) then
    call wrtout(std_out, " Computing phonon frequencies and displacements in the IBZ ...", pre_newlines=1)
    call cwtime(cpu, wall, gflops, "start")
 
@@ -385,9 +387,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_FREE(buf_wqnu)
    ABI_FREE(buf_eigvec_cart)
    call cwtime_report(" Phonon computation + output", cpu, wall, gflops)
- !else
- !  call wrtout(std_out, sjoin(" Restarting GSTORE calculation. Found: ", itoa(ndone), " (qpt, spin) entries already computed"))
- !end if
+ else
+   call wrtout(std_out, sjoin(" Restarting GSTORE calculation. Found: ", itoa(ndone), " (qpt, spin) entries already computed"))
+ end if
 
  ! ================
  ! HANDLE SCREENING

@@ -3317,7 +3317,7 @@ subroutine gstore_get_missing_qbz_spin(gstore, done_qbz_spin, ndone, nmiss)
  integer :: my_is, my_iq, iq_bz, spin, ierr, nscale
 !----------------------------------------------------------------------
 
- nmiss = 0
+ ndone = 0; nmiss = 0
  do my_is=1,gstore%my_nspins
    associate (gqk => gstore%gqk(my_is))
    spin = gstore%my_spins(my_is)
