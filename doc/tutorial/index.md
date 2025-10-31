@@ -1434,6 +1434,9 @@ Theory (GW approximation, Bethe-Salpeter equation) is to be done sequentially:**
   * [The tutorial on DFT+DMFT](dmft) shows how to perform a DFT+DMFT calculation on SrVO3
     using projected Wannier functions. Prerequisite: DFT+U.
 
+  * [The tutorial on DFT+DMFT with TRIQS/CT-HYB](dmft_triqs) shows how to perform a self-consistent
+    DFT+DMFT calculation on Fe using the interface with TRIQS/CT-HYB.
+
   * [The tutorial on TDDFT](tddft) deals with the computation of the excitation spectrum of finite systems,
     thanks to the Time-Dependent Density Functional Theory approach, in the Casida formalism.
 
