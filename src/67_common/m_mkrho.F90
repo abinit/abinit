@@ -1090,10 +1090,12 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  if(present(extfpmd)) then
    if(associated(extfpmd)) then
      if(extfpmd%version==10) then
-       do ispden=1,dtset%nspden
-         do ifft=1,dtset%nfft
+       do ifft=1,dtset%nfft
+         do ispden=1,dtset%nspden
            rhor(ifft,ispden)=rhor(ifft,ispden)+extfpmd%nelectarr(ifft,ispden)/ucvol/dtset%nspden
          end do
+         ! Approximated by: rhog(1,1)=rhog(1,1)+extfpmd%nelect/ucvol/dtset%nspden
+         ! but this should depend on G.
        end do
      else
        rhor(:,:)=rhor(:,:)+extfpmd%nelect/ucvol/dtset%nspden
