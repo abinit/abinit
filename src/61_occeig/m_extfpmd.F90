@@ -236,17 +236,17 @@ contains
   !!  this=extfpmd_type object concerned
   !!
   !! SOURCE
-  subroutine compute_eshift(this,eigen,eknk,mband,nband,nfft,nkpt,nsppol,nspden,wtk,vtrial)
+  subroutine compute_eshift(this,eigen,eknk,mband,nband,nfftf,nkpt,nsppol,nspden,wtk,vtrial)
     ! Arguments -------------------------------
     ! Scalars
     class(extfpmd_type),intent(inout) :: this
-    integer,intent(in) :: mband,nfft,nkpt,nsppol,nspden
+    integer,intent(in) :: mband,nfftf,nkpt,nsppol,nspden
     ! Arrays
     integer,intent(in) :: nband(nkpt*nsppol)
     real(dp),intent(in) :: eigen(mband*nkpt*nsppol)
     real(dp),intent(in) :: eknk(mband*nkpt*nsppol)
     real(dp),intent(in) :: wtk(nkpt)
-    real(dp),intent(in) :: vtrial(nfft,nspden)
+    real(dp),intent(in) :: vtrial(nfftf,nspden)
 
     ! Local variables -------------------------
     ! Scalars
@@ -293,7 +293,7 @@ contains
       ! Computes U_0 from the sum of local
       ! potentials (vtrial), averaging over all space.
       ! Simplest and most precise way to evaluate U_0.
-      this%eshift=sum(this%vtrial)/(this%nfft*this%nspden)
+      this%eshift=sum(this%vtrial)/(nfftf*this%nspden)
     end if
 
     ! Get extended FPMD band energy cutoff
