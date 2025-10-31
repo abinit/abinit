@@ -1174,14 +1174,13 @@ end subroutine compute_noninterentropy
 !!
 !! SOURCE
 
-subroutine compute_free_energy(energies_dmft,paw_dmft,green,part,self,weiss)
+subroutine compute_free_energy(energies_dmft,paw_dmft,green,part,self)
 
 !Arguments ------------------------------------
  type(energy_type), intent(inout) :: energies_dmft
  type(paw_dmft_type), intent(in) :: paw_dmft
  type(green_type), intent(in) :: green
  type(self_type), optional, intent(in) :: self
- type(green_type), optional, intent(in) :: weiss
  character(len=4), intent(in) :: part
 !Local variables-------------------------------
  integer :: integral
@@ -1202,9 +1201,8 @@ subroutine compute_free_energy(energies_dmft,paw_dmft,green,part,self,weiss)
    ! Ekin_imp
    energies_dmft%ekin_imp = green%ekin_imp
 
-   if (integral == 1) then
-     ! Tr(log(G0)) (careful, we set opt_inv to 1 since weiss contains G0^-1 rather than G0 after the dyson call)
-     call compute_trace_log_loc(weiss,paw_dmft,energies_dmft%fband_weiss,opt_inv=1)
+   if (integral > 0) then
+     energies_dmft%fband_weiss = green%fband_weiss
      energies_dmft%fimp = energies_dmft%fband_weiss + green%integral
    else
      energies_dmft%fimp = energies_dmft%ekin_imp + energies_dmft%e_hu_tot
@@ -1262,6 +1260,8 @@ end subroutine compute_free_energy
 !!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
 !!  opt_inv = 0 (default) when green = G
 !!          = 1 when green = G^-1 (useful for the Weiss field)
+!!          = 2 when green = G^-1 and you want to remove the double counting
+!!  opt_hdc = double counting
 !!
 !! OUTPUT
 !!  trace = Tr(log(G_loc))
@@ -1270,13 +1270,14 @@ end subroutine compute_free_energy
 !!
 !! SOURCE
 
-subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
+subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv,opt_hdc)
 
 !Arguments ------------------------------------
- type(green_type), intent(in) :: green
+ type(green_type), target, intent(in) :: green
  type(paw_dmft_type), intent(in) :: paw_dmft
  real(dp), intent(out) :: trace
  integer, optional, intent(in) :: opt_inv
+ type(oper_type), optional, intent(in) :: opt_hdc
 !Local variables-------------------------------
  integer :: i,iatom,ierr,ifreq,info,isppol,lpawu,lwork,natom,ndim
  integer :: nmoments,nspinor,nsppol,nwlo,optinv
@@ -1284,6 +1285,8 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
  complex(dp) :: trace_tmp
  real(dp), allocatable :: eig(:),rwork(:)
  complex(dp), allocatable :: mat_temp(:,:),omega_fac(:),work(:)
+ complex(dp), target, allocatable :: mat_temp2(:,:)
+ complex(dp), pointer :: mat_pt(:,:) => null()
 ! *********************************************************************
 
  optinv = 0
@@ -1319,15 +1322,26 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
      ndim = nspinor * (2*lpawu+1)
      ABI_MALLOC(mat_temp,(ndim,ndim))
      do isppol=1,nsppol
-       call abi_xgemm("n","c",ndim,ndim,ndim,cone,green%oper(ifreq)%matlu(iatom)%mat(:,:,isppol),ndim,&
-                    & green%oper(ifreq)%matlu(iatom)%mat(:,:,isppol),ndim,czero,mat_temp(:,:),ndim)
+
+       if (optinv <= 1) then
+         mat_pt => green%oper(ifreq)%matlu(iatom)%mat(:,:,isppol)
+       else if (optinv == 2) then
+         ABI_MALLOC(mat_temp2,(ndim,ndim))
+         mat_temp2(:,:) = green%oper(ifreq)%matlu(iatom)%mat(:,:,isppol) - opt_hdc%matlu(iatom)%mat(:,:,isppol)
+         mat_pt => mat_temp2(:,:)
+       end if
+
+       call abi_xgemm("n","c",ndim,ndim,ndim,cone,mat_pt(:,:),ndim,mat_pt(:,:),ndim, &
+                    & czero,mat_temp(:,:),ndim)
        call zheev('n','u',ndim,mat_temp(:,:),ndim,eig(:),work(:),lwork,rwork(1:3*ndim-2),info)
 
-       if (optinv == 1) then
+       if (optinv > 0) then
          trace_tmp = trace_tmp - sum(log(eig(1:ndim)/freq2))
        else
          trace_tmp = trace_tmp + sum(log(eig(1:ndim)*freq2))
        end if
+
+       ABI_SFREE(mat_temp2)
 
      end do ! isppol
      if (ifreq == nwlo) then
@@ -1339,6 +1353,7 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
    trace = trace + dble(trace_tmp)*fac
  end do ! ifreq
 
+ mat_pt => null()
  ABI_FREE(rwork)
  ABI_FREE(work)
  ABI_FREE(eig)

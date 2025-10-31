@@ -159,6 +159,9 @@
   real(dp) :: ekin_imp
   ! Kinetic energy of the impurity
 
+  real(dp) :: fband_weiss
+  ! Tr(log(G0))
+
   real(dp) :: integral
   ! Integral of the interaction energy divided by U
 
@@ -4710,25 +4713,30 @@ end subroutine compute_trace_moments_ks
 !!               has been removed)
 !!  opt_log = if set to 1, also computes the trace of the moments of log(G)+log(iw*Id) and
 !!            log(G0)+log(iw*Id) in green%trace_moments_log_loc and weiss%trace_moments_log_loc
+!!            if set to 2, the double counting is subtracted in the definition of G0
+!!  opt_hdc = double counting
 !!
 !! OUTPUTS
 !!
 !! SOURCE
 
-subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log)
+subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log,opt_hdc)
 
 !Arguments ------------------------------------
  type(green_type), intent(inout) :: green,weiss
  type(self_type), intent(inout) :: self
- type(oper_type), intent(in) :: energy_level
+ type(oper_type), target, intent(in) :: energy_level
  integer, intent(in) :: option
  integer, optional, intent(in) :: opt_log
+ type(oper_type), optional, intent(in) :: opt_hdc
 !Local variables ------------------------------
  integer :: i,natom,nspinor,nsppol,optlog
  complex(dp) :: trace
+ type(matlu_type), target, allocatable :: level_no_hdc(:)
  integer, allocatable :: lpawu(:)
  complex(dp), allocatable :: trace_loc(:)
  type(matlu_type), allocatable :: matlu(:,:)
+ type(matlu_type), pointer :: level(:) => null()
 !************************************************************************
 
  optlog = 0
@@ -4756,19 +4764,29 @@ subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log)
    call add_matlu(green%moments(2)%matlu(:),energy_level%matlu(:),self%moments(1)%matlu(:),natom,-1)
  end if ! option
 
- if (optlog == 1) then
-   call trace_matlu(energy_level%matlu(:),natom,itau=0,trace=weiss%trace_moments_log_loc(1))
+ if (optlog > 0) then
+
+   if (optlog == 1) then
+     level => energy_level%matlu(:)
+   else
+     ABI_MALLOC(level_no_hdc,(natom))
+     call init_matlu(natom,nspinor,nsppol,lpawu(:),level_no_hdc(:))
+     call add_matlu(energy_level%matlu(:),opt_hdc%matlu(:),level_no_hdc(:),natom,1)
+     level => level_no_hdc(:)
+   end if
+
+   call trace_matlu(level(:),natom,itau=0,trace=weiss%trace_moments_log_loc(1))
    do i=2,green%nmoments-1
      call trace_matlu(weiss%moments(i)%matlu(:),natom,itau=0,trace=weiss%trace_moments_log_loc(i))
    end do ! i
-   call prod_matlu(energy_level%matlu(:),energy_level%matlu(:),matlu(:,1),natom)
+   call prod_matlu(level(:),level(:),matlu(:,1),natom)
    call trace_matlu(matlu(:,1),natom,itau=0,trace=trace)
    weiss%trace_moments_log_loc(2) = weiss%trace_moments_log_loc(2) + trace*half
-   call trace_prod_matlu(energy_level%matlu(:),weiss%moments(2)%matlu(:),natom,trace_loc(:),trace_tot=trace)
+   call trace_prod_matlu(level(:),weiss%moments(2)%matlu(:),natom,trace_loc(:),trace_tot=trace)
    weiss%trace_moments_log_loc(3) = weiss%trace_moments_log_loc(3) + trace
-   call trace_prod_matlu(energy_level%matlu(:),matlu(:,1),natom,trace_loc(:),trace_tot=trace)
+   call trace_prod_matlu(level(:),matlu(:,1),natom,trace_loc(:),trace_tot=trace)
    weiss%trace_moments_log_loc(3) = weiss%trace_moments_log_loc(3) + trace*third
-   call trace_prod_matlu(energy_level%matlu(:),weiss%moments(3)%matlu(:),natom,trace_loc(:),trace_tot=trace)
+   call trace_prod_matlu(level(:),weiss%moments(3)%matlu(:),natom,trace_loc(:),trace_tot=trace)
    weiss%trace_moments_log_loc(4) = weiss%trace_moments_log_loc(4) + trace
    call trace_prod_matlu(weiss%moments(2)%matlu(:),weiss%moments(2)%matlu(:),natom,trace_loc(:),trace_tot=trace)
    weiss%trace_moments_log_loc(4) = weiss%trace_moments_log_loc(4) + trace*half
@@ -4778,13 +4796,20 @@ subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log)
    weiss%trace_moments_log_loc(4) = weiss%trace_moments_log_loc(4) + trace*quarter
 
    call trace_matlu(green%moments(2)%matlu(:),natom,itau=0,trace=green%trace_moments_log_loc(1))
- end if ! optlog=1
+
+   if (optlog == 2) then
+     call destroy_matlu(level_no_hdc(:),natom)
+     ABI_FREE(level_no_hdc)
+   end if
+
+   level => null()
+ end if ! optlog
 
  call prod_matlu(green%moments(2)%matlu(:),green%moments(2)%matlu(:),matlu(:,1),natom) ! matlu=m0m0
 
  call add_matlu(green%moments(3)%matlu(:),matlu(:,1),matlu(:,2),natom,-1) ! matlu2=m1
 
- if (optlog == 1) then
+ if (optlog > 0) then
    call trace_matlu(matlu(:,2),natom,itau=0,trace=green%trace_moments_log_loc(2))
    call trace_matlu(matlu(:,1),natom,itau=0,trace=trace)
    green%trace_moments_log_loc(2) = green%trace_moments_log_loc(2) + half*trace
@@ -4799,7 +4824,7 @@ subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log)
  call prod_matlu(green%moments(2)%matlu(:),matlu(:,1),matlu(:,3),natom) ! matlu3=m0m0m0
  call add_matlu(green%moments(4)%matlu(:),matlu(:,3),matlu(:,1),natom,-1) ! matlu=green%moments(4)-m0m0m0
 
- if (optlog == 1) then
+ if (optlog > 0) then
    call trace_matlu(matlu(:,3),natom,itau=0,trace=trace)
    green%trace_moments_log_loc(3) = trace * third
  end if ! optlog
@@ -4809,14 +4834,14 @@ subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log)
 
  call add_matlu(matlu(:,4),matlu(:,5),matlu(:,6),natom,1) ! matlu6=m0m1+m1m0
 
- if (optlog == 1) then
+ if (optlog > 0) then
    call trace_matlu(matlu(:,4),natom,itau=0,trace=trace)
    green%trace_moments_log_loc(3) = trace + green%trace_moments_log_loc(3)
  end if ! optlog
 
  call add_matlu(matlu(:,1),matlu(:,6),matlu(:,5),natom,-1) ! matlu5=m2
 
- if (optlog == 1) then
+ if (optlog > 0) then
    call trace_matlu(matlu(:,5),natom,itau=0,trace=trace)
    green%trace_moments_log_loc(3) = trace + green%trace_moments_log_loc(3)
  end if ! optlog
@@ -4832,7 +4857,7 @@ subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log)
  call prod_matlu(green%moments(2)%matlu(:),matlu(:,4),matlu(:,6),natom) ! matlu6 = m0m0m1
  call add_matlu(matlu(:,3),matlu(:,6),matlu(:,4),natom,1) ! matlu4 = m0m1m0+m1m0m0+m0m0m1
 
- if (optlog == 1) then
+ if (optlog > 0) then
    call trace_matlu(matlu(:,4),natom,itau=0,trace=trace)
    green%trace_moments_log_loc(4) = trace * third
    call trace_matlu(matlu(:,1),natom,itau=0,trace=trace)
@@ -4847,7 +4872,7 @@ subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log)
  call prod_matlu(matlu(:,2),matlu(:,2),matlu(:,1),natom) ! matlu=m1m1
  call add_matlu(matlu(:,1),matlu(:,5),matlu(:,2),natom,1) ! matlu2=m1m1+m0m2+m2m0
 
- if (optlog == 1) then
+ if (optlog > 0) then
    call trace_matlu(matlu(:,2),natom,itau=0,trace=trace)
    green%trace_moments_log_loc(4) = green%trace_moments_log_loc(4) + trace*half
  end if ! optlog
@@ -4855,7 +4880,7 @@ subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log)
  call add_matlu(green%moments(5)%matlu(:),matlu(:,2),matlu(:,1),natom,-1)
  call add_matlu(matlu(:,1),matlu(:,3),matlu(:,2),natom,-1) ! matlu2=m3
 
- if (optlog == 1) then
+ if (optlog > 0) then
    call trace_matlu(matlu(:,2),natom,itau=0,trace=trace)
    green%trace_moments_log_loc(4) = green%trace_moments_log_loc(4) + trace
  end if ! optlog

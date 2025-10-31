@@ -202,7 +202,9 @@ MODULE m_paw_dmft
 
   integer :: dmft_triqs_compute_integral
   ! Only relevant when dmft_triqs_entropy=1.
-  ! =1: Compute the impurity entropy by thermodynamic integration over the impurity models.
+  ! =2: Compute the impurity entropy by thermodynamic integration over both interaction
+  !     and double counting strength.
+  ! =1: Compute the impurity entropy by thermodynamic integration over interaction strength.
   ! =0: Do not compute the impurity entropy. All the other contributions to the free
   ! energy are still computed.
 

@@ -15,7 +15,7 @@ using namespace mpi;
 using namespace triqs::gfs;
 
 void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_double, bool measure_density_matrix,
-                     bool time_invariance, bool use_norm_as_weight, bool compute_entropy, int loc_n_min, int loc_n_max,
+                     bool time_invariance, bool use_norm_as_weight, int integral, int loc_n_min, int loc_n_max,
                      int seed_a, int seed_b, int num_orbitals, int n_tau, int n_l, int n_cycles, int cycle_length,
                      int ntherm, int ntherm_restart, int det_init_size, int det_n_operations_before_check, int rank,
                      int nblocks, int read_data, int verbo, double beta, double imag_threshold, double det_precision_warning,
@@ -209,7 +209,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
   paramCTQMC.measure_G_l = leg_measure;
   paramCTQMC.n_warmup_cycles = therm;
 
-  if (compute_entropy) {
+  if (integral > 0) {
     paramCTQMC.measure_G_l = false;
     paramCTQMC.measure_G_tau = false;
   }
@@ -311,7 +311,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
   }
 #endif
 
-  if (!compute_entropy) {
+  if (integral == 0) {
 
     for (int iblock : range(nblocks))
       for (int tau : range(n_tau))
@@ -344,7 +344,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
     auto subspaces = h_loc_diag.n_subspaces();
     auto rho = solver.density_matrix();
 
-    if (!compute_entropy) {
+    if (integral != 1) {
       complex<double> occ_tmp [num_orbitals] = {0};
 
       for (int iblock : range(nblocks))
@@ -358,7 +358,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
       MPI_Allreduce(occ_tmp,occ,num_orbitals,MPI_C_DOUBLE_COMPLEX,MPI_SUM,comm);
     }
 
-    if (rank == 0 && !compute_entropy) {
+    if (rank == 0 && integral == 0) {
 
       ofstream occ_file;
       occ_file.open(hist_fname);
@@ -409,13 +409,11 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
       }
     }
 
-    if (itask == rank || compute_entropy) *eu = trace_rho_op(rho,Hint,h_loc_diag);
-    if (!compute_entropy) {
-      mpi_broadcast(*eu,comm,itask);
-      itask = (itask+1)%nproc;
-    }
+    if (itask == rank) *eu = trace_rho_op(rho,Hint,h_loc_diag);
+    mpi_broadcast(*eu,comm,itask);
+    itask = (itask+1)%nproc;
 
-    if (!leg_measure && !compute_entropy) { // Get moments of the self-energy
+    if (!leg_measure && integral == 0) { // Get moments of the self-energy
 
       many_body_operator commut,commut2,Sinf_op,S1_op;
 

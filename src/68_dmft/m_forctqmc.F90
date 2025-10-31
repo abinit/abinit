@@ -37,7 +37,7 @@ MODULE m_forctqmc
 
  use m_crystal, only : crystal_t
  use m_datafordmft, only : compute_levels,hybridization_asymptotic_coefficient
- use m_energy, only : compute_migdal_energy
+ use m_energy, only : compute_migdal_energy,compute_trace_log_loc
  use m_fstrings, only : int2char4
  use m_green, only : compute_moments_loc,copy_green,destroy_green,green_type, &
     & init_green,int_fct,occup_green_tau,print_green
@@ -3189,6 +3189,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  real(dp) :: besp,bespp,beta,dx,elam,emig_tot,err,err_,fact,fact2,tau,tol,xtau,xx
  complex(dp) :: mself_1,mself_2,occ_tmp,u_nl
  complex(dp), target :: eu
+ type(oper_type) :: hdc_ctqmc
  type(oper_type), target :: energy_level
  type(self_type) :: hybmwdhyb
  type(c_ptr) :: block_ptr,eu_ptr,flavor_ptr,fname_data_ptr,fname_dataw_ptr,fname_histo_ptr,ftau_ptr,gl_ptr,gtau_ptr
@@ -3263,6 +3264,11 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
  call init_vee(paw_dmft,vee_rot(:))
 
+ if (entropy .and. integral == 2) then
+   call init_oper(paw_dmft,hdc_ctqmc,opt_ksloc=2)
+   call copy_matlu(self%hdc%matlu(:),hdc_ctqmc%matlu(:),natom)
+ end if
+
  call compute_levels(energy_level,self%hdc,paw_dmft)
 
  write(message,'(a,3x,a)') ch10,"== Print Occupation matrix in cubic basis"
@@ -3335,6 +3341,9 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
      if (weiss%distrib%procf(ifreq) /= myproc) cycle
      call slm2ylm_matlu(weiss%oper(ifreq)%matlu(:),natom,paw_dmft,1,0)
    end do ! ifreq
+   if (entropy .and. integral == 2) then
+     call slm2ylm_matlu(hdc_ctqmc%matlu(:),natom,paw_dmft,1,0)
+   end if
  end if ! basis>0
 
  if (basis == 1 .or. basis == 2) then
@@ -3377,6 +3386,9 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
      if (weiss%distrib%procf(ifreq) /= myproc) cycle
      call rotate_matlu(weiss%oper(ifreq)%matlu(:),eigvectmatlu(:),natom,1)
    end do ! ifreq
+   if (entropy .and. integral == 2) then
+     call rotate_matlu(hdc_ctqmc%matlu(:),eigvectmatlu(:),natom,1)
+   end if
  end if ! basis=1 or 2
 
  if (basis == 4) then
@@ -3389,6 +3401,9 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
      if (weiss%distrib%procf(ifreq) /= myproc) cycle
      call ylm2jmj_matlu(weiss%oper(ifreq)%matlu(:),natom,1,paw_dmft)
    end do ! ifreq
+   if (entropy .and. integral == 2) then
+     call ylm2jmj_matlu(hdc_ctqmc%matlu(:),natom,1,paw_dmft)
+   end if
  end if ! basis=4
 
  if (basis == 0) then
@@ -3445,12 +3460,18 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
                       & "part is non negligible !"
    ABI_WARNING(message)
  end if ! err>tol
+ if (entropy .and. integral == 2) then
+   call zero_matlu(hdc_ctqmc%matlu(:),natom,onlyimag=1)
+ end if
 #endif
 
  err = zero
  if ((.not. rot_inv) .or. (.not. off_diag)) then
    call zero_matlu(energy_level%matlu(:),natom,onlynondiag=1,err=err_)
    if (err_ > err) err = err_
+   if (entropy .and. integral == 2) then
+     call zero_matlu(hdc_ctqmc%matlu(:),natom,onlynondiag=1)
+   end if
  end if
 
  if (.not. off_diag) then
@@ -3543,7 +3564,8 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    do isub=1,nsub
      ! For each interval, the Gauss-Legendre grid of size ngauss is mapped from the
      ! t-world where t in [-1,1] to the x-world where x in [x_{isub},x_{isub+1}]
-     ! We want an array sorted in descending order. No need to flip the tweights, as they are symmetric.
+     ! We want an array sorted in descending order to optimize restart.
+     ! No need to flip the tweights, as they are symmetric.
      lam_list(ntot-isub*ngauss:ntot-(isub-1)*ngauss-1) = (dble(isub)*two+tpoints(ngauss:1:-1)-one) * dx * half
    end do ! ilam
 
@@ -3714,7 +3736,22 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
      if (ilam /= ntot) then
        write(message,'(a,3x,a,f6.4,a)') ch10,"== Thermodynamic integration over interaction for lambda= ",lam_list(ilam),ch10
        call wrtout(std_out,message,'COLL')
+       if (integral == 2) then
+         do isppol=1,nsppol
+           levels_ctqmc(1+(isppol-1)*ndim:tndim+(isppol-1)*ndim,1+(isppol-1)*ndim:tndim+(isppol-1)*ndim) = &
+             & energy_level%matlu(iatom)%mat(:,:,isppol) + (one-lam_list(ilam))*hdc_ctqmc%matlu(iatom)%mat(:,:,isppol)
+           if (nsppol == 1 .and. nspinor == 1) levels_ctqmc(1+ndim:2*ndim,1+ndim:2*ndim) = levels_ctqmc(1:ndim,1:ndim)
+         end do ! isppol
+       end if ! integral=2
      end if ! ilam/=ntot
+
+     if (ilam == ntot .and. entropy .and. integral == 2) then
+       do isppol=1,nsppol
+         levels_ctqmc(1+(isppol-1)*ndim:tndim+(isppol-1)*ndim,1+(isppol-1)*ndim:tndim+(isppol-1)*ndim) = &
+            & energy_level%matlu(iatom)%mat(:,:,isppol)
+         if (nsppol == 1 .and. nspinor == 1) levels_ctqmc(1+ndim:2*ndim,1+ndim:2*ndim) = levels_ctqmc(1:ndim,1:ndim)
+       end do ! isppol
+     end if
 
      if (ilam == 2) verbo = 0
 
@@ -3774,7 +3811,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 #if defined HAVE_TRIQS_v4_0 || defined HAVE_TRIQS_v3_2
      call Ctqmc_triqs_run(rot_inv,leg_measure,paw_dmft%dmft_triqs_move_shift,paw_dmft%dmft_triqs_move_double, &
                         & density_matrix,paw_dmft%dmft_triqs_time_invariance,paw_dmft%dmft_triqs_use_norm_as_weight, &
-                        & (ilam/=ntot.and.integral==1),paw_dmft%dmft_triqs_loc_n_min,paw_dmft%dmft_triqs_loc_n_max, &
+                        & merge(integral,0,ilam/=ntot),paw_dmft%dmft_triqs_loc_n_min,paw_dmft%dmft_triqs_loc_n_max, &
                         & paw_dmft%dmft_triqs_seed_a,paw_dmft%dmft_triqs_seed_b,nflavor,ntau,nleg, &
                         & paw_dmft%dmft_triqs_n_cycles,paw_dmft%dmftctqmc_meas,paw_dmft%dmftqmc_therm, &
                         & paw_dmft%dmft_triqs_therm_restart,paw_dmft%dmft_triqs_det_init_size, &
@@ -4069,10 +4106,30 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
      end if ! ilam=ntot
 
      if (integral > 0 .and. ilam < ntot .and. entropy) then
+
        elam = dble(eu)
+
+       if (integral == 2) then
+         ! CAREFUL: if one day the density matrix sampling is implemented for
+         ! off-diagonal components, you would need to add them here
+         do isppol=1,nsppol
+           do im=1,tndim
+             iflavor = im + (isppol-1)*ndim
+
+             if (nsppol == 1 .and. nspinor == 1) then
+               occ_tmp = occ(iflavor) + occ(iflavor+ndim)
+             else
+               occ_tmp = occ(iflavor)
+             end if
+             elam = elam - dble(hdc_ctqmc%matlu(iatom)%mat(im,im,isppol)*occ_tmp)
+           end do ! im
+         end do ! isppol
+       end if ! integral=2
+
        i = mod(ilam-1,ngauss) + 1
        green%integral = green%integral + tweights(i)*elam*dx*half
        elam_list(ilam) = elam
+
      end if ! integral and ilam<ntot and entropy
 
      if (integral > 0 .and. ilam == ntot-1 .and. entropy) then
@@ -4135,10 +4192,19 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  if (basis > 0) then
    if (basis == 1 .or. basis == 2) then
      call rotate_matlu(energy_level%matlu(:),eigvectmatlu(:),natom,0)
+     if (entropy .and. integral == 2) then
+       call rotate_matlu(hdc_ctqmc%matlu(:),eigvectmatlu(:),natom,0)
+     end if
    else if (basis == 4) then
      call ylm2jmj_matlu(energy_level%matlu(:),natom,2,paw_dmft)
+     if (entropy .and. integral == 2) then
+       call ylm2jmj_matlu(hdc_ctqmc%matlu(:),natom,2,paw_dmft)
+     end if
    end if ! basis /= 3
    call slm2ylm_matlu(energy_level%matlu(:),natom,paw_dmft,2,0)
+   if (entropy .and. integral == 2) then
+     call slm2ylm_matlu(hdc_ctqmc%matlu(:),natom,paw_dmft,2,0)
+   end if
    do i=2,weiss%nmoments-1
      if (basis == 1 .or. basis == 2) then
        call rotate_matlu(weiss%moments(i)%matlu(:),eigvectmatlu(:),natom,0)
@@ -4178,6 +4244,9 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  ! Since we possibly neglected some off-diagonal elements and imaginary part,
  ! the levels and hybridization might not be symmetrized anymore
  call sym_matlu(energy_level%matlu(:),paw_dmft)
+ if (entropy .and. integral == 2) then
+   call sym_matlu(hdc_ctqmc%matlu(:),paw_dmft)
+ end if
  do i=2,weiss%nmoments-1
    call sym_matlu(weiss%moments(i)%matlu(:),paw_dmft)
  end do ! i
@@ -4197,13 +4266,21 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  call gather_oper(weiss%oper(:),weiss%distrib,paw_dmft,opt_ksloc=2)
  call gather_oper(green%oper(:),green%distrib,paw_dmft,opt_ksloc=2)
 
- call compute_moments_loc(green,self_new,energy_level,weiss,1,opt_log=paw_dmft%dmft_triqs_entropy)
+ call compute_moments_loc(green,self_new,energy_level,weiss,1,opt_log=merge(max(1,integral),0,entropy),opt_hdc=hdc_ctqmc)
+
+ if (entropy .and. integral > 0) then
+   call compute_trace_log_loc(weiss,paw_dmft,green%fband_weiss,opt_inv=max(1,integral),opt_hdc=hdc_ctqmc)
+ end if
 
  call destroy_matlu(dmat_ctqmc(:),natom)
  call destroy_matlu(eigvectmatlu(:),natom)
  call destroy_matlu(ftau(:),natom)
  call destroy_matlu(matlu_tmp(:),natom)
  call destroy_matlu(udens_rot(:),natom)
+
+ if (entropy .and. integral == 2) then
+   call destroy_oper(hdc_ctqmc)
+ end if
 
  call destroy_oper(energy_level)
 
