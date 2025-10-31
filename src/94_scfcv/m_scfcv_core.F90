@@ -267,7 +267,7 @@ contains
 !! SOURCE
 
 subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
-&  dtset,ecore,eigen,electronpositron,fatvshift,hdr,extfpmd,indsym,&
+&  dtset,ecore,eigen,electronpositron,fatvshift,hdr,extfpmd,rcpaw,indsym,&
 &  initialized,irrzon,itimes,kg,mcg,mcprj,mpi_enreg,my_natom,nattyp,ndtpawuj,nfftf,npwarr,occ,&
 &  paw_dmft,pawang,pawfgr,pawrad,pawrhoij,pawtab,phnons,psps,pwind,&
 &  pwind_alloc,pwnsfac,rec_set,resid,results_gs,rhog,rhor,rprimd,&
@@ -287,6 +287,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  type(electronpositron_type),pointer:: electronpositron
  type(hdr_type),intent(inout) :: hdr
  type(extfpmd_type),pointer,intent(inout) :: extfpmd
+ type(rcpaw_type), pointer,intent(inout) :: rcpaw
  type(pawang_type),intent(in) :: pawang
  type(pawfgr_type),intent(inout) :: pawfgr
  type(pseudopotential_type),intent(inout) :: psps
@@ -369,7 +370,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  logical :: recompute_cprj=.false.,reset_mixing=.false.
  logical,save :: tfw_activated=.false.
  logical :: wvlbigdft=.false.
- type(rcpaw_type), pointer :: rcpaw => null()
 !type(energies_type),pointer :: energies_wvl  ! TO BE ACTIVATED LATER
 !arrays
  integer :: ngfft(18),ngfftdiel(18),ngfftf(18),ngfftmix(18),npwarr_diel(1)
@@ -744,13 +744,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
    end if
 
    eijkl_is_sym=.true.
-   if (dtset%use_rcpaw==1) then
-     ABI_WARNING("Untested Mode RCPAW")
-     if(.not.associated(rcpaw)) then
-       ABI_MALLOC(rcpaw,)
-     endif
-     call rcpaw_init(rcpaw,dtset,psps%filpsp,pawrad,pawtab,psps%ntypat,paw_an,my_natom,mpi_enreg%comm_atom,mpi_enreg%my_atmtab)
-   end if
 
 !  Allocation of projected WF (optional)
    if (usecprj==1) then
@@ -1182,7 +1175,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &         scf_history%icall,kg,mcg,mcprj,mgfftf,mpi_enreg,psps%mqgrid_vl,&
 &         my_natom,nattyp,nfftf,ngfftf,npwarr,psps%ntypat,pawrhoij,pawtab,&
 &         ph1df,psps,psps%qgrid_vl,rhor,rprimd,scf_history,ucvol,&
-&         psps%usepaw,xred,xred_old,ylm,psps%ziontypat,psps%znuclpsp)
+&         psps%usepaw,xred,xred_old,ylm,psps%ziontypat,psps%znuclpsp,extfpmd=extfpmd)
        end if
        call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
      end if
@@ -1790,7 +1783,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &     maxfor,moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,nstep,&
 &     occ,optres,prtfor,prtxml,quit,res2,resid,residm,response,tollist,&
 &     psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,&
-&     electronpositron=electronpositron,fock=fock)
+&     electronpositron=electronpositron,fock=fock,rcpaw=rcpaw)
      call timab(1453,2,tsec)
 
 !    Check if we need to exit the loop
@@ -1843,8 +1836,21 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
        end if
      end if
 
+     if(associated(extfpmd).and..not.moved_rhor==1.and.dtset%extfpmd_pawsph==1) then
+       if(istep==1) then
+         dielar(3)=one
+         dielar(4)=one
+         dielar(7)=one
+       else if(istep==2) then
+         istep_mix=1
+         dielar(3)=dtset%diemac
+         dielar(4)=dtset%diemix
+         dielar(7)=dtset%diemix
+       endif
+     endif
+
      if(associated(rcpaw)) then
-       if(istep<=rcpaw%nfrpaw+1) then
+       if(istep>=rcpaw%updatepaw(1).and.istep<=rcpaw%updatepaw(2)+1.and.rcpaw%updatepaw(2)>0) then
          istep_mix=1
          dielar(3)=one
          dielar(4)=one
@@ -1947,9 +1953,13 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
        call paw_relax_core(pawtab,pawrad,pawang,pawrhoij,dtset%ntypat,rcpaw,psps,dtset,&
 &       cplex,nzlmopt,option,ucvol_local,paw_an,my_natom,&
 &       mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,extfpmd=extfpmd)
-       if(.not.rcpaw%all_atoms_relaxed) then
+       if(istep>=rcpaw%updatepaw(1).and.istep<=rcpaw%updatepaw(2).and.dtset%cprj_in_memory==1)then
+         call xg_nonlop_destroy_Sij(xg_nonlop)
+         call xg_nonlop_make_Sij(xg_nonlop,pawtab,inv_sij=dtset%wfoptalg==111) 
+       endif
+       if(.not.rcpaw%all_atoms_relaxed.and.any(rcpaw%atm(:)%zcore_orig>0)) then
          optn=1
-         if(rcpaw%istep>rcpaw%nfrtnc) optn=0
+         if(rcpaw%istep>rcpaw%updatetnc.and.rcpaw%updatetnc>0) optn=0
          call atm2fft(atindx1,xccc3d,vpsp,dummy01,dummy02,dummy03,dummy04,&
 &         gmet,gprimd,dummy05,dummy06,gsqcut,mgfftf,psps%mqgrid_vl,dtset%natom,nattyp,nfftf,ngfftf,psps%ntypat,&
 &         1,0,0,0,optn,1,0,1,psps,pawtab,ph1df,psps%qgrid_vl,dtset%qprtrb,&
@@ -1979,8 +1989,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      if(associated(rcpaw)) then
        if(.not.rcpaw%all_atoms_relaxed) then
          call rcpaw_core_eig(pawtab,pawrad,dtset%ntypat,rcpaw,dtset,&
-&         nfftf,vtrial,cplex,ucvol_local,paw_an,&
-&         gmet,rprimd,xred,ngfftf,my_natom,&
+&         nfftf,vhartr+vpsp,cplex,ucvol_local,paw_an,&
+&         gmet,rprimd,xred,ngfftf,my_natom,extfpmd,&
 &         distribfft=mpi_enreg%distribfft,comm_fft=spaceComm_fft,&
 &         mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
        endif
@@ -2270,6 +2280,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 & dtset%prtwant  ==3  .or. &
 & dtset%prtnabla > 0  .or. &
 & dtset%prtdos   ==3  .or. &
+& dtset%prtdos   ==4  .or. &
 & dtset%berryopt /=0  .or. &
 & dtset%kssform  ==3  .or. &
 & dtset%pawfatbnd> 0  .or. &
@@ -2388,7 +2399,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 & nfftf,ngfftf,nhat,dtset%nkpt,npwarr,dtset%nspden,&
 & dtset%nsppol,dtset%nsym,psps%ntypat,n3xccc,occ,paw_dmft,pawang,pawfgr,pawfgrtab,&
 & pawrad,pawrhoij,pawtab,paw_an,paw_ij,dtset%prtvol,psps,results_gs,&
-& rhor,rprimd,taur,ucvol,usecprj,vhartr,vpsp,vtrial,vxc,wvl%den,xccc3d,xred)
+& rhor,rprimd,taur,ucvol,usecprj,vhartr,vpsp,vtrial,vxc,wvl%den,xccc3d,xred,rcpaw=rcpaw)
 
  call timab(1461,2,tsec)
  call timab(1462,1,tsec)
@@ -2460,8 +2471,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  end if
 
  if(associated(rcpaw)) then
-   call rcpaw_destroy(rcpaw)
-   ABI_FREE(rcpaw)
+   call rcpaw_reinit(rcpaw)
  endif
 
  if((nstep>0.and.dtset%iscf>0).or.dtset%iscf==-1) then

@@ -1545,6 +1545,12 @@ subroutine pawpsp_read_corewf(Atm,filename_,rcut,radmesh_in)
  Atm%mesh_size=0
  Atm%mult=1
  Atm%rcore=0.0_dp
+ LIBPAW_ALLOCATE(Atm%mode,(1,1))
+ atm%mode = ORB_FROZEN
+ atm%zcore_conv=.false.
+ atm%nc_conv=.false.
+ atm%nresid_c=one
+
 
 !Core WF file is in (proprietary) format
 ! if (.not.oldformat) then
@@ -1710,13 +1716,8 @@ subroutine pawpsp_read_corewf(Atm,filename_,rcut,radmesh_in)
      end do
 
      LIBPAW_DEALLOCATE(orbitals)
-     LIBPAW_ALLOCATE(Atm%mode,(Atm%ln_size,Atm%nsppol))
-     Atm%mode = ORB_FROZEN
      LIBPAW_ALLOCATE(Atm%max_occ,(Atm%ln_size,Atm%nsppol))
      Atm%max_occ=Atm%occ
-     atm%zcore_conv=.false.
-     atm%nc_conv=.false.
-     atm%nresid_c=one
 
      ! * Setup of kln2ln.
      !TODO this has to be tested
