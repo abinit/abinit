@@ -60,7 +60,7 @@ module m_gwpt
  use m_kg,             only : getph, mkkin
  use m_bz_mesh,        only : isamek, kmesh_t
  use m_gsphere,        only : gsphere_t
- use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
+ use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack
  use m_ioarr,          only : read_rhor
  use m_hdr,            only : hdr_type
  use m_dvdb,           only : dvdb_t
@@ -270,11 +270,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3), kqmp(3), kmp(3), pp(3), kmp_ibz(3), kqmp_ibz(3)
  real(dp) :: qq_ibz(3), qq_bz(3)
  real(dp),allocatable :: qlwl(:,:), vnk_cart_ibz(:,:,:)
- real(dp),allocatable :: kpg_k(:,:),kpg_kq(:,:),kpg_kmp(:,:),kpg_kqmp(:,:), dkinpw(:)
+ real(dp),allocatable :: kpg_k(:,:),kpg_kq(:,:),kpg_kmp(:,:),kpg_kqmp(:,:)
  real(dp),allocatable :: ffnl_kmp(:,:,:,:),ffnl_kqmp(:,:,:,:)
  real(dp),allocatable :: kinpw_k(:), kinpw_kq(:), kinpw_kqmp(:), kinpw_kmp(:)
  real(dp),allocatable :: ph3d_k(:,:,:), ph3d_kq(:,:,:), ph3d_kqmp(:,:,:), ph3d_kmp(:,:,:)
- real(dp),allocatable :: ph3d1_kmp(:,:,:), ph3d1_kqmp(:,:,:)
+ !real(dp),allocatable :: ph3d1_kmp(:,:,:), ph3d1_kqmp(:,:,:)
  real(dp),allocatable, target :: vxc1_qq(:,:,:,:)
  real(dp),target,allocatable :: gsig_atm(:,:,:,:)
  real(dp),allocatable :: displ_cart_qibz(:,:,:,:)
@@ -1085,12 +1085,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        call wfd%get_gvec_gbound(cryst%gmet, dtset%ecut, kk, ik_ibz, isirr_k, dtset%nloalg, & ! in
                                 istwf_k, npw_k, kg_k, nkpg_k, kpg_k, gbound_k)               ! out
 
-       ABI_MALLOC(ph3d_k, (2, npw_k, matblk))
-       ABI_MALLOC(kinpw_k, (npw_k))
-       call mkkin(dtset%ecut, dtset%ecutsm, dtset%effmass_free, cryst%gmet, kg_k, kinpw_k, kk, npw_k, 0, 0)
-
-       ABI_FREE(ph3d_k)
-       ABI_FREE(kinpw_k)
+       !ABI_MALLOC(ph3d_k, (2, npw_k, matblk))
+       !ABI_MALLOC(kinpw_k, (npw_k))
+       !call mkkin(dtset%ecut, dtset%ecutsm, dtset%effmass_free, cryst%gmet, kg_k, kinpw_k, kk, npw_k, 0, 0)
+       !ABI_FREE(ph3d_k)
+       !ABI_FREE(kinpw_k)
 
        ! Find k + q in the extended zone and extract symmetry info.
        ! Be careful here because there are two umklapp vectors to be considered as:
@@ -1112,12 +1111,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        call wfd%get_gvec_gbound(cryst%gmet, dtset%ecut, kq, ikq_ibz, isirr_kq, dtset%nloalg, &  ! in
                                 istwf_kq, npw_kq, kg_kq, nkpg_kq, kpg_kq, gbound_kq)      ! out
 
-       ABI_MALLOC(ph3d_kq, (2, npw_kq, matblk))
-       ABI_MALLOC(kinpw_kq, (npw_kq))
-       call mkkin(dtset%ecut, dtset%ecutsm, dtset%effmass_free, cryst%gmet, kg_kq, kinpw_kq, kq, npw_kq, 0, 0)
-
-       ABI_FREE(kinpw_kq)
-       ABI_FREE(ph3d_kq)
+       !ABI_MALLOC(ph3d_kq, (2, npw_kq, matblk))
+       !ABI_MALLOC(kinpw_kq, (npw_kq))
+       !call mkkin(dtset%ecut, dtset%ecutsm, dtset%effmass_free, cryst%gmet, kg_kq, kinpw_kq, kq, npw_kq, 0, 0)
+       !ABI_FREE(kinpw_kq)
+       !ABI_FREE(ph3d_kq)
 
        ABI_MALLOC(ug_k, (2, npw_k*nspinor))
        ABI_MALLOC(ug_kq, (2, npw_kq*nspinor))
@@ -1207,9 +1205,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ABI_MALLOC(kinpw_kmp, (npw_kmp))
          call mkkin(dtset%ecut, dtset%ecutsm, dtset%effmass_free, cryst%gmet, kg_kmp, kinpw_kmp, kmp, npw_kmp, 0, 0)
 
-         ABI_FREE(kinpw_kmp)
-         ABI_FREE(ph3d_kmp)
-
          ! Compute nonlocal form factors ffnl_kmp at (k-p+G).
          ABI_MALLOC(ffnl_kmp, (npw_kmp, 1, psps%lmnmax, psps%ntypat))
 
@@ -1230,35 +1225,35 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          call wfd%get_gvec_gbound(cryst%gmet, dtset%ecut, kqmp, ikqmp_ibz, isirr_kqmp, dtset%nloalg, &  ! in
                                   istwf_kqmp, npw_kqmp, kg_kqmp, nkpg_kqmp, kpg_kqmp, gbound_kqmp)      ! out
 
-         ABI_MALLOC(ph3d_kmp, (2, npw_kqmp, matblk))
-         ABI_MALLOC(kinpw_kqmp, (npw_kqmp))
-         call mkkin(dtset%ecut, dtset%ecutsm, dtset%effmass_free, cryst%gmet, kg_kqmp, kinpw_kqmp, kqmp, npw_kqmp, 0, 0)
-
-         ABI_FREE(kinpw_kqmp)
-         ABI_FREE(ph3d_kmp)
-
-         ! Compute nonlocal form factors ffnl_kqmp at (k+q-p+G).
-         ABI_MALLOC(ffnl_kqmp, (npw_kqmp, 1, psps%lmnmax, psps%ntypat))
          ABI_MALLOC(full_cg1_kqmp, (2, npw_kqmp*nspinor))
          ABI_MALLOC(full_cg1_kmp, (2, npw_kmp*nspinor))
 
+         ABI_MALLOC(ph3d_kqmp, (2, npw_kqmp, matblk))
+         ABI_MALLOC(kinpw_kqmp, (npw_kqmp))
+         call mkkin(dtset%ecut, dtset%ecutsm, dtset%effmass_free, cryst%gmet, kg_kqmp, kinpw_kqmp, kqmp, npw_kqmp, 0, 0)
+
+         ! Compute nonlocal form factors ffnl_kqmp at (k+q-p+G).
+         ABI_MALLOC(ffnl_kqmp, (npw_kqmp, 1, psps%lmnmax, psps%ntypat))
          call mkffnl_objs(cryst, psps, 1, ffnl_kqmp, ider0, idir0, kg_kqmp, kpg_kqmp, kqmp, nkpg_kqmp, &
                           npw_kqmp, ylm_kqmp, ylmgr_dum) ! , comm=gqk%pert_comm%value, request=ffnl_kqmp_request)
 
+         ! =============================================
          ! Load the k dependent parts of the Hamiltonian
-         !call gs_ham_kqmp%load_k(kpt_k=kmp, npw_k=npw_kmp, istwf_k=istwf_kmp, kg_k=kg_kmp, kpg_k=kpg_kmp, kinpw_k=kinpw_kmp, &
-         !  ph3d_k=ph3d_kmp, ffnl_k=ffnl_kmp, compute_ph3d=.true., compute_gbound=.true.)
+         ! =============================================
 
-         !call gs_ham_kqmp%load_kprime(kpt_kp=kqmp, npw_kp=npw_kqmp, istwf_kp=istwf_kqmp, kg_kp=kg_kqmp, kpg_kp=kpg_kqmp,
-         !  kinpw_kp=kinpw_kqmp, ph3d_kp=ph3d_kqmp, ffnl_kp=ffnl_kqmp, compute_ph3d=.true., compute_gbound=.true.)
+         ! (k+q-p, k-p)
+         call gs_ham_kqmp%load_k(kpt_k=kmp, npw_k=npw_kmp, istwf_k=istwf_kmp, kg_k=kg_kmp, kpg_k=kpg_kmp, kinpw_k=kinpw_kmp, &
+           ph3d_k=ph3d_kmp, ffnl_k=ffnl_kmp, compute_ph3d=.true., compute_gbound=.true.)
 
-         ! Load the k dependent parts of the Hamiltonian
-         !call gs_ham_kmp%load_k(kpt_k=kqmp, npw_k=npw_kqmp, istwf_k=istwf_kqmp, kg_k=kg_kqmp, kpg_k=kpg_kqmp, kinpw_k=kinpw_kqmp, &
-         !  ph3d_k=ph3d_kqmp, ffnl_k=ffnl_kqmp, compute_ph3d=.true., compute_gbound=.true.)
+         call gs_ham_kqmp%load_kprime(kpt_kp=kqmp, npw_kp=npw_kqmp, istwf_kp=istwf_kqmp, kg_kp=kg_kqmp, kpg_kp=kpg_kqmp, &
+           kinpw_kp=kinpw_kqmp, ph3d_kp=ph3d_kqmp, ffnl_kp=ffnl_kqmp, compute_ph3d=.true., compute_gbound=.true.)
 
-         !call gs_ham_kmp%load_kprime(kpt_kp=kmp, npw_kp=npw_kmp, istwf_kp=istwf_kmp, kg_kp=kg_kmp, kpg_kp=kpg_kmp,
-         !  kinpw_kp=kinpw_kmp, &
-         !  ph3d_kp=ph3d_kmp, ffnl_kp=ffnl_kmp, compute_ph3d=.true., compute_gbound=.true.)
+         ! (k-p, k+q-p)
+         call gs_ham_kmp%load_k(kpt_k=kqmp, npw_k=npw_kqmp, istwf_k=istwf_kqmp, kg_k=kg_kqmp, kpg_k=kpg_kqmp, kinpw_k=kinpw_kqmp, &
+           ph3d_k=ph3d_kqmp, ffnl_k=ffnl_kqmp, compute_ph3d=.true., compute_gbound=.true.)
+
+         call gs_ham_kmp%load_kprime(kpt_kp=kmp, npw_kp=npw_kmp, istwf_kp=istwf_kmp, kg_kp=kg_kmp, kpg_kp=kpg_kmp, &
+           kinpw_kp=kinpw_kmp, ph3d_kp=ph3d_kmp, ffnl_kp=ffnl_kmp, compute_ph3d=.true., compute_gbound=.true.)
 
          ! ====================================
          ! This is the g-sphere for W_{gg'}(pp)
@@ -1512,23 +1507,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
              call gs_ham_kqmp%load_spin(spin, vlocal=vlocal, with_nonlocal=.true.)
 
-             ! Load the k dependent parts of the Hamiltonian
-             !call gs_ham_kqmp%load_k(kpt_k=kmp, npw_k=npw_kmp, istwf_k=istwf_kmp, kg_k=kg_kmp, kpg_k=kpg_kmp, kinpw_k=kinpw_kmp, &
-             !  ph3d_k=ph3d_kmp, ffnl_k=ffnl_kmp, compute_ph3d=.true., compute_gbound=.true.)
-             !call gs_ham_kqmp%load_kprime(kpt_kp=kqmp, npw_kp=npw_kqmp, istwf_kp=istwf_kqmp, kg_kp=kg_kqmp, kpg_kp=kpg_kqmp,
-             !  kinpw_kp=kinpw_kqmp, ph3d_kp=ph3d_kqmp, ffnl_kp=ffnl_kqmp, compute_ph3d=.true., compute_gbound=.true.)
-
              call rf_ham_kqmp%init(cplex, gs_ham_kqmp, ipert, has_e1kbsc=.true.)
              call rf_ham_kqmp%load_spin(spin, vlocal1=vlocal1_qq(:,:,:,:,imyp), with_nonlocal=.true.)
-
-             ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
-             ! TODO: Replace this call with low-level operations
-             ! (k+q-p, k-p)
-             call getgh1c_setup(gs_ham_kqmp, rf_ham_kqmp, dtset, psps, kmp, kqmp, idir, ipert, &           ! In
-               natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwf_kmp, &                                   ! In
-               npw_kmp, npw_kqmp, useylmgr1, kg_kmp, ylm_kmp, kg_kqmp, ylm_kqmp, ylmgr_kqmp, &             ! In
-               dkinpw, nkpg_kmp, nkpg_kqmp, kpg_kmp, kpg_kqmp, kinpw_kqmp, ffnl_kmp, ffnl_kqmp, ph3d_kmp, ph3d1_kqmp , & ! InOut
-               reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)                                ! Reuse some arrays
 
              ! =====================
              ! NSCF Sternheimer at qq
@@ -1548,11 +1528,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                                   ebands%eig(:,ikmp_ibz,spin), ebands%eig(:,ikqmp_ibz,spin), &
                                   cg_kmp, cwaveprj0, cg1_kqmp, cwaveprj, msg, ierr, &
                                   full_cg1=full_cg1_kqmp, full_ur1=full_ur1_kqmp)
-
-             ABI_FREE(kinpw_kqmp)
-             ABI_FREE(dkinpw)
-             ABI_FREE(ph3d_kmp)
-             ABI_SFREE(ph3d1_kqmp)
 
              ! Debug: Mute Delta_{q} (stern_kmp) by
              !full_ur1_kqmp = zero
@@ -1652,24 +1627,8 @@ if (.not. qq_is_gamma) then
              ! Same operations but for -qq
              ! ===========================
              call gs_ham_kmp%load_spin(spin, vlocal=vlocal, with_nonlocal=.true.)
-
-             ! Load the k dependent parts of the Hamiltonian
-             !call gs_ham_kmp%load_k(kpt_k=kqmp, npw_k=npw_kqmp, istwf_k=istwf_kqmp, kg_k=kg_kqmp, kpg_k=kpg_kqmp, kinpw_k=kinpw_kqmp, &
-             !  ph3d_k=ph3d_kqmp, ffnl_k=ffnl_kqmp, compute_ph3d=.true., compute_gbound=.true.)
-             !call gs_ham_kmp%load_kprime(kpt_kp=kmp, npw_kp=npw_kmp, istwf_kp=istwf_kmp, kg_kp=kg_kmp, kpg_kp=kpg_kmp,
-             !  kinpw_kp=kinpw_kmp, &
-             !  ph3d_kp=ph3d_kmp, ffnl_kp=ffnl_kmp, compute_ph3d=.true., compute_gbound=.true.)
-
              call rf_ham_kmp%init(cplex, gs_ham_kmp, ipert, has_e1kbsc=.true.)
              call rf_ham_kmp%load_spin(spin, vlocal1=vlocal1_mqq(:,:,:,:,imyp), with_nonlocal=.true.)
-
-             ! TODO: Replace this call with low-level operations
-             ! (k-p, k+q-p)
-             call getgh1c_setup(gs_ham_kmp, rf_ham_kmp, dtset, psps, kqmp, kmp, idir, ipert, &             ! In
-               natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwf_kmp, &                                   ! In
-               npw_kqmp, npw_kmp, useylmgr1, kg_kqmp, ylm_kqmp, kg_kmp, ylm_kmp, ylmgr_kmp, &              ! In
-               dkinpw, nkpg_kqmp, nkpg_kmp, kpg_kqmp, kpg_kmp, kinpw_kmp, ffnl_kqmp, ffnl_kmp, ph3d_kqmp, ph3d1_kmp, & ! InOut
-               reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)                                ! Reuse some arrays
 
              ! ======================
              ! NSCF Sternheimer at -q
@@ -1691,11 +1650,6 @@ if (.not. qq_is_gamma) then
                                    full_cg1=full_cg1_kmp, full_ur1=full_ur1_star_kmp)
 
              full_ur1_star_kmp = GWPC_CONJG(full_ur1_star_kmp)
-
-             ABI_FREE(kinpw_kmp)
-             ABI_FREE(dkinpw)
-             ABI_FREE(ph3d_kqmp)
-             ABI_SFREE(ph3d1_kmp)
 
              ! Debug: Mute Delta_{-q} (stern_kqmp) by
              !full_ur1_star_kmp = zero
@@ -1808,6 +1762,10 @@ end if ! .not qq_is_gamma.
          ABI_FREE(rhotwg_c)
          ABI_FREE(rhotwg_x)
          ABI_FREE(vc_sqrt_gx)
+         ABI_FREE(kinpw_kmp)
+         ABI_FREE(ph3d_kmp)
+         ABI_FREE(kinpw_kqmp)
+         ABI_FREE(ph3d_kqmp)
 
          ABI_SFREE(botsq_pbz)
          ABI_SFREE(otq_pbz)
