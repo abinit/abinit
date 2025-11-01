@@ -152,7 +152,7 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
  integer,intent(in) :: indsym(4,nsym,natom)
  integer,intent(in) :: symafm(nsym),symrec(3,3,nsym),typat(natom)
  real(dp),intent(in) :: gprimd(3,3),qphon(3),rprimd(3,3),xred(3,natom)
- real(dp),intent(inout),target,optional :: pawnhat(cplex*pawfgr%nfft,nspden) !vz_i
+ real(dp),intent(inout),target,optional :: pawnhat(:,:) !vz_i
  real(dp),intent(inout),target,optional :: pawnhatgr(:,:,:) !vz_i
  real(dp),intent(inout) :: rhor(cplex*pawfgr%nfft,nspden*compute_rhor_rhog)
  real(dp),intent(out),optional :: rhog(2,pawfgr%nfft*compute_rhor_rhog)
