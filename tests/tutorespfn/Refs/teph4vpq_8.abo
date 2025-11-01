@@ -1,5 +1,5 @@
 
-.Version 10.5.6.1 of ABINIT, released Sep 2025.
+.Version 10.5.8.7 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
@@ -413,22 +413,22 @@ P Number of CPUs for parallelism over k-points: 1
     iq    ik pcase  m_kq   n_k        |g| in Ha
  |g(k,q)| in Ha for iq: 1 ik: 1 pcase: 4
     iq    ik pcase  m_kq   n_k              |g|
-     1     1     4     6     6     9.129338E-09
+     1     1     4     6     6     2.369238E-08
  |g(k,q)| in Ha for iq: 1 ik: 1 pcase: 6
     iq    ik pcase  m_kq   n_k              |g|
-     1     1     6     6     6     4.058752E-08
+     1     1     6     6     6     2.307791E-08
  |g(k,q)| in Ha for iq: 597 ik: 1 pcase: 4
     iq    ik pcase  m_kq   n_k              |g|
-   597     1     4     6     6     7.813350E-01
+   597     1     4     6     6     7.813351E-01
  |g(k,q)| in Ha for iq: 597 ik: 1 pcase: 6
     iq    ik pcase  m_kq   n_k              |g|
    597     1     6     6     6     4.982705E-01
  |g(k,q)| in Ha for iq: 1 ik: 89 pcase: 4
     iq    ik pcase  m_kq   n_k              |g|
-     1    89     4     6     6     8.988575E-09
+     1    89     4     6     6     2.433022E-08
  |g(k,q)| in Ha for iq: 1 ik: 89 pcase: 6
     iq    ik pcase  m_kq   n_k              |g|
-     1    89     6     6     6     4.171257E-08
+     1    89     6     6     6     2.528762E-08
  |g(k,q)| in Ha for iq: 597 ik: 89 pcase: 4
     iq    ik pcase  m_kq   n_k              |g|
    597    89     4     6     6     8.165923E-01

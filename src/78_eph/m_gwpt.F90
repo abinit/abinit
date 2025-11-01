@@ -264,7 +264,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer, contiguous, pointer :: kg_c(:,:), kg_x(:,:)
  real(dp) :: eig0nk, cpu, wall, gflops !, cpu_q, wall_q, gflops_q, cpu_all, wall_all, gflops_all
  complex(gwp) :: ctmp_gwpc, xdot_tmp
- complex(dp) :: gc_tmp
+ !complex(dp) :: gc_tmp
 !arrays
  real(dp) :: fermie1_idir_ipert(3,cryst%natom), ylmgr_dum(1,1,1), dum_nhat(0), dum_xccc3d(0)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3), kqmp(3), kmp(3), pp(3), kmp_ibz(3), kqmp_ibz(3)
@@ -272,9 +272,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),allocatable :: qlwl(:,:), vnk_cart_ibz(:,:,:)
  real(dp),allocatable :: kpg_k(:,:),kpg_kq(:,:),kpg_kmp(:,:),kpg_kqmp(:,:)
  real(dp),allocatable :: ffnl_kmp(:,:,:,:),ffnl_kqmp(:,:,:,:)
- real(dp),allocatable :: kinpw_k(:), kinpw_kq(:), kinpw_kqmp(:), kinpw_kmp(:)
- real(dp),allocatable :: ph3d_k(:,:,:), ph3d_kq(:,:,:), ph3d_kqmp(:,:,:), ph3d_kmp(:,:,:)
- !real(dp),allocatable :: ph3d1_kmp(:,:,:), ph3d1_kqmp(:,:,:)
+ real(dp),allocatable :: kinpw_kqmp(:), kinpw_kmp(:), ph3d_kqmp(:,:,:), ph3d_kmp(:,:,:)
  real(dp),allocatable, target :: vxc1_qq(:,:,:,:)
  real(dp),target,allocatable :: gsig_atm(:,:,:,:)
  real(dp),allocatable :: displ_cart_qibz(:,:,:,:)
@@ -1019,7 +1017,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      ABI_CHECK_IEQ(cplex, drho_cplex, "Different values of cplex for v1 and rho1!")
      cvxc1_qq_ptr => null(); if (cplex == 2) call c_f_pointer(c_loc(vxc1_qq), cvxc1_qq_ptr, [nfft, nspden, my_npert])
 
-     ! Allocate vlocal1_qq with correct cplex. Note nvloc
+     ! Allocate vlocal1_qq with correct cplex and nvloc.
      ABI_MALLOC(vlocal1_qq, (cplex*n4, n5, n6, nvloc, my_npert))
      ABI_MALLOC(vlocal1_mqq, (cplex*n4, n5, n6, nvloc, my_npert))
 
@@ -1041,7 +1039,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        if (dtset%gstore_use_lgk /= 0) then
          ii = lg_myk(my_ik)%findq_ibzk(qq_bz)
          if (ii == -1) then
-           call wrtout(std_out, sjoin(" iq_bz:", itoa(iq_bz), qq_bz_string, " not in IBZ_k --> skipping iteration"))
+           !call wrtout(std_out, sjoin(" iq_bz:", itoa(iq_bz), qq_bz_string, " not in IBZ_k --> skipping iteration"))
            cycle ! TODO: Check fillvalue (should be zero)
          end if
        end if
@@ -1049,7 +1047,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        if (dtset%gstore_use_lgq /= 0) then
          ii = lg_myq%findq_ibzk(kk)
          if (ii == -1) then
-           call wrtout(std_out, sjoin(" my_ik:", itoa(my_ik), kk_string, " not in IBZ_q --> skipping iteration"))
+           !call wrtout(std_out, sjoin(" my_ik:", itoa(my_ik), kk_string, " not in IBZ_q --> skipping iteration"))
            cycle ! TODO: Check fillvalue (should be zero)
          end if
        end if
@@ -1073,10 +1071,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        trev_k = gqk%my_k2ibz(6, my_ik); g0_k = gqk%my_k2ibz(3:5,my_ik)
        isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
        mapl_k = gqk%my_k2ibz(:, my_ik)
-       !print *, "my_ik", my_ik, " of my_nk:", gqk%my_nk
 
        kk_ibz = ebands%kptns(:,ik_ibz)
        istwf_k_ibz = wfd%istwfk(ik_ibz); npw_k_ibz = wfd%npwarr(ik_ibz)
+       !print *, "my_ik", my_ik, " of my_nk:", gqk%my_nk
        !print *, "ik_ibz:", ik_ibz, "kk:", kk, "kk_ibz:", kk_ibz
 
        print_time_kk = my_rank == 0 .and. (my_ik <= LOG_MODK .or. mod(my_ik, LOG_MODK) == 0)
@@ -1085,12 +1083,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! Get npw_k, kg_k for kk
        call wfd%get_gvec_gbound(cryst%gmet, dtset%ecut, kk, ik_ibz, isirr_k, dtset%nloalg, & ! in
                                 istwf_k, npw_k, kg_k, nkpg_k, kpg_k, gbound_k)               ! out
-
-       !ABI_MALLOC(ph3d_k, (2, npw_k, matblk))
-       !ABI_MALLOC(kinpw_k, (npw_k))
-       !call mkkin(dtset%ecut, dtset%ecutsm, dtset%effmass_free, cryst%gmet, kg_k, kinpw_k, kk, npw_k, 0, 0)
-       !ABI_FREE(ph3d_k)
-       !ABI_FREE(kinpw_k)
 
        ! Find k + q in the extended zone and extract symmetry info.
        ! Be careful here because there are two umklapp vectors to be considered as:
@@ -1111,12 +1103,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! Get npw_kq, kg_kq for k+q.
        call wfd%get_gvec_gbound(cryst%gmet, dtset%ecut, kq, ikq_ibz, isirr_kq, dtset%nloalg, &  ! in
                                 istwf_kq, npw_kq, kg_kq, nkpg_kq, kpg_kq, gbound_kq)      ! out
-
-       !ABI_MALLOC(ph3d_kq, (2, npw_kq, matblk))
-       !ABI_MALLOC(kinpw_kq, (npw_kq))
-       !call mkkin(dtset%ecut, dtset%ecutsm, dtset%effmass_free, cryst%gmet, kg_kq, kinpw_kq, kq, npw_kq, 0, 0)
-       !ABI_FREE(kinpw_kq)
-       !ABI_FREE(ph3d_kq)
 
        ABI_MALLOC(ug_k, (2, npw_k*nspinor))
        ABI_MALLOC(ug_kq, (2, npw_kq*nspinor))
