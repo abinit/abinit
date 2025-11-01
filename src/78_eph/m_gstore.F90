@@ -4076,7 +4076,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  call xmpi_barrier(gstore%comm)
 
  ! Output some of the results to ab_out for testing purposes
- call gstore%print_for_abitests(dtset, ebands)
+ call gstore%print_for_abitests(dtset, ebands, .False.)
 
  ! Free memory
  ABI_FREE(gvnlx1)
@@ -4864,12 +4864,13 @@ end subroutine gstore_check_restart
 !!
 !! SOURCE
 
-subroutine gstore_print_for_abitests(gstore, dtset, ebands, with_ks)
+subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
 
 !Arguments ------------------------------------
  class(gstore_t),intent(inout) :: gstore
  type(dataset_type),intent(in) :: dtset
  type(ebands_t),intent(in) :: ebands
+ logical,intent(in) :: do_avg
  logical,optional,intent(in) :: with_ks
 
 !Local variables-------------------------------
@@ -4880,7 +4881,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, with_ks)
  integer :: bstart_k, bstop_k, bstart_kq, bstop_kq, max_nk, max_nq
  integer :: ik_bz, ik_ibz, ib_min_k, ib_max_k, iq_bz
  integer :: ikq_bz, ikq_ibz, ib_min_kq, ib_max_kq
- logical :: with_ks__, changed_k, changed_kq, do_avg
+ logical :: with_ks__, changed_k, changed_kq
  real(dp),parameter :: TOL_EDIFF = 0.001_dp * eV_Ha
  real(dp) :: g2, g2_ks
  character(len=abi_slen) :: gstore_gmode
@@ -4917,7 +4918,6 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, with_ks)
  NCF_CHECK(nf90_get_var(root_ncid, root_vid("gstore_qglob2bz"), qglob2bz))
 
  gstore_gmode = GSTORE_GMODE_ATOM
- do_avg = .False.
 
  do spin=1,gstore%nsppol
    NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
@@ -4926,15 +4926,17 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, with_ks)
    NCF_CHECK(nctk_get_dim(spin_ncid, "nb_k", nb_k))
    NCF_CHECK(nctk_get_dim(spin_ncid, "nb_kq", nb_kq))
 
-   write(ab_out, "(a,i0)")" gqk%nb_kq: ", nb_kq
-   write(ab_out, "(a,i0)")" gqk%nb_k: ", nb_k
-   write(ab_out, "(a,i0)")" gqk%glob_nq: ", glob_nq
-   write(ab_out, "(a,i0)")" gqk%glob_nk: ", glob_nk
-
    bstart_k = gstore%brange_k_spin(1, spin)
    bstop_k = gstore%brange_k_spin(2, spin)
    bstart_kq = gstore%brange_kq_spin(1, spin)
    bstop_kq = gstore%brange_kq_spin(2, spin)
+
+   !write(ab_out, "(a,i0)")" bstart_kq: ", bstart_kq
+   write(ab_out, "(a,i0)")" gqk%nb_kq: ", nb_kq
+   !write(ab_out, "(a,i0)")" bstart_k: ", bstart_k
+   write(ab_out, "(a,i0)")" gqk%nb_k: ", nb_k
+   write(ab_out, "(a,i0)")" gqk%glob_nq: ", glob_nq
+   write(ab_out, "(a,i0)")" gqk%glob_nk: ", glob_nk
 
    ! Handle the output of group velocities. On disk, we have:
    !
@@ -4974,16 +4976,20 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, with_ks)
    ! These e-ph matrix elements are ALWAYS in the atom representation.
    ABI_MALLOC(gslice_mn, (2, nb_kq, nb_k))
    ABI_MALLOC(gslice_ks_mn, (2, nb_kq, nb_k))
-
    ABI_MALLOC(g2_mn, (nb_kq, nb_k))
    ABI_MALLOC(g2ks_mn, (nb_kq, nb_k))
 
    write(ab_out,"(a)") " E-PH matrix elements in the atom representation: pcase = (idir, iatom)"
+   if (do_avg) then
+     write(ab_out,"(a)") " NB: Values are averaged over e_mk+q, and e_nk degenerate states."
+   else
+     write(ab_out,"(a)") " NB: Values are NOT averaged over e_mk+q, and e_nk degenerate states."
+   end if
 
    if (with_ks__) then
-     write(ab_out, "(1x,5(a5,1x),2(a16))") "iq","ik", "pcase", "im_kq", "in_k", "|g^SE| in Ha", "|g^KS| in Ha"
+     write(ab_out, "(1x,5(a5,1x),2(a16))") "iq", "ik", "pcase", "m_kq", "n_k", "|g^SE| in Ha", "|g^KS| in Ha"
    else
-     write(ab_out, "(1x,5(a5,1x),a16)") "iq","ik", "pcase", "im_kq", "in_k", "|g| in Ha"
+     write(ab_out, "(1x,5(a5,1x),a16)") "iq", "ik", "pcase", "m_kq", "n_k", "|g| in Ha"
    end if
 
    do ik_glob=1,glob_nk
@@ -5036,19 +5042,17 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, with_ks)
          ncerr = nf90_get_var(spin_ncid, spin_vid("gvals"), gslice_mn, &
                               start=[1,1,1,ipc,ik_glob,iq_glob], count=[2,nb_kq,nb_k,1,1,1])
          NCF_CHECK(ncerr)
-
          call average_g2_mn(do_avg, nb_kq, nb_k, bstart_kq, bstart_k, degblock_kq, degblock_k, gslice_mn, g2_mn)
 
          write(ab_out, "(3(a,1x,i0,1x))")" |g(k,q)| in Ha for iq:", iq_glob, "ik:", ik_glob, "pcase:", ipc
 
          if (.not. with_ks__) then
           ! gvals only.
-           write(ab_out, "(1x,5(a5,1x),a16)")"iq","ik", "pcase", "im_kq", "in_k", "|g|"
+           write(ab_out, "(1x,5(a5,1x),a16)")"iq", "ik", "pcase", "m_kq", "n_k", "|g|"
            do im_kq=1,nb_kq
              m_kq = im_kq + bstart_kq - 1
              do in_k=1,nb_k
                n_k = in_k + bstart_k - 1
-               !g2 = gslice_mn(1, im_kq, in_k)**2 + gslice_mn(2, im_kq, in_k)**2
                g2 = g2_mn(im_kq, in_k)
                write(ab_out, "(1x,5(i5,1x),es16.6)") iq_glob, ik_glob, ipc, m_kq, n_k, sqrt(g2)
              end do
@@ -5060,13 +5064,11 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, with_ks)
           NCF_CHECK(ncerr)
           call average_g2_mn(do_avg, nb_kq, nb_k, bstart_kq, bstart_k, degblock_kq, degblock_k, gslice_ks_mn, g2ks_mn)
 
-          write(ab_out, "(1x,5(a5,1x),2a16)")"iq","ik", "pcase", "im_kq", "in_k", "|g^SE|", "|g^KS|"
+          write(ab_out, "(1x,5(a5,1x),2a16)")"iq", "ik", "pcase", "m_kq", "n_k", "|g^SE|", "|g^KS|"
           do im_kq=1,nb_kq
             m_kq = im_kq + bstart_kq - 1
             do in_k=1,nb_k
               n_k = in_k + bstart_k - 1
-              !g2 = gslice_mn(1, im_kq, in_k)**2 + gslice_mn(2, im_kq, in_k)**2
-              !g2_ks = gslice_ks_mn(1, im_kq, in_k)**2 + gslice_ks_mn(2, im_kq, in_k)**2
               g2 = g2_mn(im_kq, in_k)
               g2_ks = g2ks_mn(im_kq, in_k)
               write(ab_out, "(1x,5(i5,1x),2(es16.6))") iq_glob, ik_glob, ipc, m_kq, n_k, sqrt(g2), sqrt(g2_ks)
@@ -5110,7 +5112,7 @@ subroutine average_g2_mn(do_avg, nb_kq, nb_k, bstart_kq, bstart_k, degblock_kq, 
  logical,intent(in) :: do_avg
  integer,intent(in) :: nb_kq, nb_k, bstart_kq, bstart_k
  integer,intent(in) :: degblock_kq(:,:), degblock_k(:,:)
- real(dp),intent(in) :: g_mn (2, nb_kq, nb_k)
+ real(dp),intent(in) :: g_mn(2, nb_kq, nb_k)
  real(dp),intent(out) :: g2_mn(nb_kq, nb_k)
 
 !Local variables-------------------------------
@@ -5120,26 +5122,34 @@ subroutine average_g2_mn(do_avg, nb_kq, nb_k, bstart_kq, bstart_k, degblock_kq, 
 
  if (do_avg) then
    ! Average over electronic degenerate states at k and k+q
+   g2_mn = -one
    do im_group = 1, size(degblock_kq, dim=2)
      do in_group = 1, size(degblock_k, dim=2)
-       g2_avg = zero
-       count = 0
+       g2_avg = zero; count = 0
        do m_kq = degblock_kq(1, im_group), degblock_kq(2, im_group)
          im_kq = m_kq - bstart_kq + 1
-         do n_k = degblock_k(1, in_group), degblock_kq(2, in_group)
+         do n_k = degblock_k(1, in_group), degblock_k(2, in_group)
            in_k = n_k - bstart_k + 1
            g2_avg = g2_avg + g_mn(1, im_kq, in_k)**2 + g_mn(2, im_kq, in_k)**2
            count = count + 1
          end do
        end do
        g2_avg = g2_avg / count
-       g2_mn(im_kq, in_k) = g2_avg
-       !write(ab_out, "(1x,3(i5,1x),es16.6)") iq_glob, ik_glob, ipc, sqrt(g2_avg)
-     end do
-   end do
+
+       ! Loop again over degenerate state and copy average.
+       do m_kq = degblock_kq(1, im_group), degblock_kq(2, im_group)
+         im_kq = m_kq - bstart_kq + 1
+         do n_k = degblock_k(1, in_group), degblock_k(2, in_group)
+           in_k = n_k - bstart_k + 1
+           g2_mn(im_kq, in_k) = g2_avg
+         end do
+       end do
+
+     end do ! in_group
+   end do ! im_group
 
  else
-   ! No average
+   ! No average here.
    do im_kq=1, nb_kq
      do in_k=1, nb_k
        g2_mn(im_kq, in_k) = g_mn(1, im_kq, in_k)**2 + g_mn(2, im_kq, in_k)**2
