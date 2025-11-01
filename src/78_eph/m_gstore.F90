@@ -4880,7 +4880,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
  integer :: glob_nq, glob_nk, im_kq, in_k, m_kq, n_k, nb_k, nb_kq, ib_k, ii
  integer :: bstart_k, bstop_k, bstart_kq, bstop_kq, max_nk, max_nq
  integer :: ik_bz, ik_ibz, ib_min_k, ib_max_k, iq_bz
- integer :: ikq_bz, ikq_ibz, ib_min_kq, ib_max_kq
+ integer :: ikq_ibz, ib_min_kq, ib_max_kq
  logical :: with_ks__, changed_k, changed_kq
  real(dp),parameter :: TOL_EDIFF = 0.001_dp * eV_Ha
  real(dp) :: g2, g2_ks
