@@ -1888,7 +1888,7 @@ end if ! .not qq_is_gamma.
  call xmpi_barrier(comm)
 
  ! Output some of the results to ab_out for testing purposes
- call gstore%print_for_abitests(dtset, with_ks=.True.)
+ call gstore%print_for_abitests(dtset, ebands, with_ks=.True.)
 
  ! Free memory
  ABI_FREE(kg_k)
