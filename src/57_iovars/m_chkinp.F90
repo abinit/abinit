@@ -2735,6 +2735,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
         'Action: re-run with PAW '
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
+  
+     !  paral_atom not allowed at present
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'paral_atom',dt%paral_atom,1,(/0/),iout)
 
 !    nucdipmom requires complex rhoij
      if(dt%pawcpxocc/=2)then
