@@ -213,6 +213,7 @@ contains
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
 !!  electronpositron <type(electronpositron_type)>=quantities for
 !!     the electron-positron annihilation
+!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
 !!  hdr <type(hdr_type)>=the header of wf, den and pot files
 !!  indsym(4,nsym,natom)=indirect indexing array for atom labels
 !!  initialized= if 0 the initialization of the gstate run is not yet finished
@@ -2567,6 +2568,7 @@ end subroutine scfcv_core
 !!   | tsmear=smearing energy or temperature (if metal)
 !!   | typat(natom)=type integer for each atom in cell
 !!   | wtatcon(3,natom,nconeq)=weights for atomic constraints
+!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
 !!  gmet(3,3)=metric tensor for G vecs (in bohr**-2)
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
 !!  grchempottn(3,natom)=grads of spatially-varying chemical potential energy (hartree)

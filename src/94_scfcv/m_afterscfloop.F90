@@ -120,6 +120,7 @@ contains
 !!   | nsppol=1 for unpolarized, 2 for spin-polarized
 !!   | nsym=number of symmetries in space group
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
+!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
 !!  grchempottn(3,natom)=d(E_chemical_potential)/d(xred) (hartree)
 !!  grcondft(3,natom)=d(E_constrained_DFT)/d(xred) (hartree)

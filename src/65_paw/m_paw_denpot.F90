@@ -88,6 +88,7 @@ CONTAINS  !=====================================================================
 !!
 !! INPUTS
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation (optional argument)
+!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
 !!  [hyb_mixing, hyb_mixing_sr]= -- optional-- mixing factors for the global (resp. screened) XC hybrid functional
 !!  el_temp=electronic temperature (hartree)
 !!  gprimd=reciprocal lattice translations

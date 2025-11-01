@@ -125,6 +125,7 @@ contains
 !!   | occopt=option for occupancies
 !!   | tsmear=smearing energy or temperature (if metal)
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
+!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
 !!  gsqcut=G^2 cutoff from gsqcut=ecut/(2 Pi^2)
 !!  indsym(4,nsym,natom)=indirect indexing array for atom labels
 !!  irrzon(nfft**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4))=irreducible zone data
