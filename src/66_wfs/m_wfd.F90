@@ -39,7 +39,7 @@ module m_wfd
  use defs_abitypes,    only : mpi_type
  use m_gwdefs,         only : one_gw
  use m_time,           only : cwtime, cwtime_report, timab
- use m_fstrings,       only : toupper, firstchar, int2char10, sjoin, itoa, strcat, itoa, yesno, ltoa, ktoa
+ use m_fstrings,       only : toupper, firstchar, int2char10, sjoin, itoa, strcat, itoa, yesno, ltoa, ktoa, ftoa
  use m_io_tools,       only : get_unit, iomode_from_fname, iomode2str, open_file
  use m_numeric_tools,  only : imin_loc, list2blocks, bool2index
  use m_hide_blas,      only : xcopy, xdotc
@@ -4176,7 +4176,7 @@ subroutine wfd_rotate_cg(wfd, band, ndat, spin, kk_ibz, npw_kbz, kg_kbz, istwf_k
  integer,intent(in) :: band, ndat, spin, npw_kbz, istwf_kbz
  type(crystal_t),intent(in) :: cryst
 !arrays
- integer :: work_ngfft(18)
+ integer,intent(in) :: work_ngfft(18)
  integer,intent(in) :: indkk(6)
  integer,intent(in) :: gbound_kbz(2*wfd%mgfft+8, 2)
  integer,intent(in) :: kg_kbz(3, npw_kbz)
@@ -4190,6 +4190,7 @@ subroutine wfd_rotate_cg(wfd, band, ndat, spin, kk_ibz, npw_kbz, kg_kbz, istwf_k
  integer,parameter :: ndat1 = 1
  integer :: ik_ibz, isym_k, trev_k, idat, istwf_kirr, npw_kirr, ib
  logical :: isirr_k
+ !real(dp) :: norm
 !arrays
  integer :: g0_k(3)
  real(dp),allocatable :: cg_kirr(:,:)
@@ -4241,6 +4242,14 @@ subroutine wfd_rotate_cg(wfd, band, ndat, spin, kk_ibz, npw_kbz, kg_kbz, istwf_k
 #endif
    end if
  end if
+
+ ! Debug section
+ !do idat=1,ndat
+ !  norm = sqrt(cg_dznrm2(npw_kbz*wfd%nspinor, cgs_kbz(:, :, idat)))
+ !  if (abs(norm - one) > tol12) then
+ !    ABI_ERROR(sjoin("norm:", ftoa(norm)))
+ !  end if
+ !end do
 
 end subroutine wfd_rotate_cg
 !!***

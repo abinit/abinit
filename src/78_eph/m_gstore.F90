@@ -677,8 +677,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  integer :: ngqpt(3), qptrlatt(3,3), comm_spin(ebands%nsppol), nproc_spin(ebands%nsppol), units(2)
  integer :: gstore_brange_kq(2, 2), gstore_brange_k(2, 2)
  integer,allocatable :: qbz2ibz(:,:), kibz2bz(:), qibz2bz(:), qglob2bz(:,:)
- integer,allocatable :: select_qbz_spin(:,:), select_kbz_spin(:,:)
- integer,allocatable :: bstart_ks(:,:), nbcalc_ks(:,:)
+ integer,allocatable :: bstart_ks(:,:), nbcalc_ks(:,:), select_qbz_spin(:,:), select_kbz_spin(:,:)
  real(dp),allocatable :: kcalc(:,:)
  real(dp):: my_shiftq(3,1), kpt(3), kq(3), qpt(3)
  real(dp),allocatable :: wtk(:), kibz(:,:)
@@ -4875,15 +4874,15 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: root_ncid, spin_ncid, gstore_completed, spin, ik_glob, iq_glob, ipc, cplex, ncerr, natom3
+ integer :: root_ncid, spin_ncid, gstore_completed, spin, ik_glob, iq_glob, ipc, ncerr, natom3
  integer :: glob_nq, glob_nk, im_kq, in_k, m_kq, n_k, nb_k, nb_kq, ib_k, ik_ibz, bstart_k, bstart_kq
  logical :: with_ks__
  real(dp) :: g2, g2_ks
  character(len=abi_slen) :: gstore_gmode
 !arrays
- !integer :: brange_kq(2, gstore%nsppol), brange_k(2, gstore%nsppol)
  integer,allocatable :: done_qbz_spin(:,:)
- real(dp),allocatable :: gslice_mn(:,:,:), gslice_ks_mn(:,:,:),vnk_cart_ibz(:,:) !, vnk_mat_cart_ibz(:,:,:,:)
+ real(dp),allocatable :: gslice_mn(:,:,:), gslice_ks_mn(:,:,:) !, gwork_mn(:,:,:)
+ real(dp),allocatable :: vnk_cart_ibz(:,:) !, vnk_mat_cart_ibz(:,:,:,:)
 ! *************************************************************************
 
  ! Only master prints to ab_out
@@ -4909,7 +4908,6 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
    NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
    NCF_CHECK(nctk_get_dim(spin_ncid, "glob_nq", glob_nq))
    NCF_CHECK(nctk_get_dim(spin_ncid, "glob_nk", glob_nk))
-   NCF_CHECK(nctk_get_dim(spin_ncid, "gstore_cplex", cplex))
    NCF_CHECK(nctk_get_dim(spin_ncid, "nb_k", nb_k))
    NCF_CHECK(nctk_get_dim(spin_ncid, "nb_kq", nb_kq))
 
@@ -4957,8 +4955,9 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
    !    nctkarr_t("gvals", "dp", "gstore_cplex, nb_kq, nb_k, natom3, glob_nk, glob_nq")
 
    ! These e-ph matrix elements are ALWAYS in the atom representation.
-   ABI_MALLOC(gslice_mn, (cplex, nb_kq, nb_k))
-   ABI_MALLOC(gslice_ks_mn, (cplex, nb_kq, nb_k))
+   ABI_MALLOC(gslice_mn, (2, nb_kq, nb_k))
+   ABI_MALLOC(gslice_ks_mn, (2, nb_kq, nb_k))
+   !ABI_MALLOC(gwork_mn, (2, nb_kq, nb_k))
 
    write(ab_out,"(a)") " E-PH matrix elements in the atom representation: pcase = (idir, iatom)"
 
@@ -4968,19 +4967,42 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
      write(ab_out, "(1x,5(a5,1x),a16)") "iq","ik", "pcase", "im_kq", "in_k", "|g| in Ha"
    end if
 
-   do iq_glob=1,glob_nq
-     ! Write the first and the last q-point.
-     if (iq_glob /= 1 .and. iq_glob /= glob_nq) cycle
+   do ik_glob=1,glob_nk
+     ! Write the first and the last k-point.
+     if (ik_glob /= 1 .and. ik_glob /= glob_nk) cycle
 
-     do ik_glob=1,glob_nk
-       ! Write the first and the last k-point.
-       if (ik_glob /= 1 .and. ik_glob /= glob_nk) cycle
+     !ik_bz = gstore%kglob2bz(ik_glob, spin)
+     !ik_ibz = gstore%kbz2ibz(1, ik_bz)
+     !ib_min_k = gqk%bstart_k; ib_max_k = ib_min_k + gqk%bstart_k - 1
+     !kk = ebands%kptns(:,ik_ibz)
+     !call ebands%enclose_degbands(ik_ibz, spin, ib_min_k, ib_max_k, changed, tol_enedif, &
+     !                             degblock=degblock_k)
+     !ABI_FREE(degblock_k)
+
+     do iq_glob=1,glob_nq
+       ! Write the first and the last q-point.
+       if (iq_glob /= 1 .and. iq_glob /= glob_nq) cycle
+
+       !iq_ibz = qglob2bz(iq_glob, spin)
+       !qq = gstore%qbz(:, iq_ibz)
+       !kq = kk + qq
+       !if (kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, 1, kq, mapl_kq) /= 0) then
+       !  write(msg, '(4a)' )"k-mesh is not closed!",ch10, "k+q could not be generated from a symmetrical one.",trim(ltoa(kq))
+       !  ABI_ERROR(msg)
+       !end if
+       !ikq_ibz = mapl_kq(1)
+       !ib_min_kq = gqk%bstart_kq; ib_max_kq = ib_min_kq + gqk%bstart_kq - 1
+       !call ebands%enclose_degbands(ikq_ibz, spin, ib_min_kq, ib_max_kq, changed, tol_enedif, &
+       !                             degblock=degblock_kq)
+       !ABI_FREE(degblock_q)
+
        do ipc=1,natom3
          ! Write the 4th and the last perturbation.
          if (ipc /= 4 .and. ipc /= natom3) cycle
          ncerr = nf90_get_var(spin_ncid, spin_vid("gvals"), gslice_mn, &
-                              start=[1,1,1,ipc,ik_glob,iq_glob], count=[cplex,nb_kq,nb_k,1,1,1])
+                              start=[1,1,1,ipc,ik_glob,iq_glob], count=[2,nb_kq,nb_k,1,1,1])
          NCF_CHECK(ncerr)
+         !call average_mn(gslice_mn, g2_mn)
 
          write(ab_out, "(3(a,1x,i0,1x))")" |g(k,q)| in Ha for iq:", iq_glob, "ik:", ik_glob, "pcase:", ipc
 
@@ -4998,8 +5020,10 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
         else
           ! g^SE and g^KS
           ncerr = nf90_get_var(spin_ncid, spin_vid("gvals_ks"), gslice_ks_mn, &
-                               start=[1,1,1,ipc,ik_glob,iq_glob], count=[cplex,nb_kq,nb_k,1,1,1])
+                               start=[1,1,1,ipc,ik_glob,iq_glob], count=[2,nb_kq,nb_k,1,1,1])
           NCF_CHECK(ncerr)
+          !call average_mn(gslice_ks_mn, g2_ks_mn)
+
           write(ab_out, "(1x,5(a5,1x),2a16)")"iq","ik", "pcase", "im_kq", "in_k", "|g^SE|", "|g^KS|"
           do im_kq=1,nb_kq
             m_kq = im_kq + bstart_kq - 1
@@ -5012,13 +5036,14 @@ subroutine gstore_print_for_abitests(gstore, dtset, with_ks)
           end do
         end if
 
-       end do
-     end do
-   end do
+       end do ! ipc
+     end do ! iq_glob
+   end do ! ik_glob
 
    ABI_FREE(gslice_mn)
    ABI_FREE(gslice_ks_mn)
- end do
+   !ABI_FREE(gwork_mn)
+ end do ! spin
 
  NCF_CHECK(nf90_close(root_ncid))
 
@@ -5032,6 +5057,31 @@ integer function spin_vid(var_name)
   character(len=*),intent(in) :: var_name
   spin_vid = nctk_idname(spin_ncid, var_name)
 end function spin_vid
+
+!subroutine average_g2_mn(g_mn, g2_mn)
+!  integer :: im_group, in_group, count
+!  real(dp) :: g2_avg
+!
+!  !gwork_mn = g_mn
+!  do im_group = 1, size(degblok_kq, dim=2)
+!    do in_group = 1, size(degblok_k, dim=2)
+!      g2_avg = zero
+!      count = 0
+!      do m_kq = degblok_kq(1, im_group), degblok_kq(2, im_group)
+!        im_kq = m_kq - bstart_kq + 1
+!        do n_k = degblok_k(1, in_group), degblok_kq(2, in_group)
+!          in_k = n_k - bstart_k + 1
+!          g2_avg = g2_avg + g_mn(1, im_kq, in_k)**2 + g_mn(2, im_kq, in_k)**2
+!          count = count + 1
+!        end do
+!      end do
+!      g2_avg = g2_avg / count
+!      !write(ab_out, "(1x,3(i5,1x),es16.6)") iq_glob, ik_glob, ipc, sqrt(g2_avg)
+!      g2_mn(im_kq, in_k) = g2_avg
+!    end do
+!  end do
+!
+!end subroutine average_g2_mn
 
 end subroutine gstore_print_for_abitests
 !!***
