@@ -103,7 +103,7 @@ contains
 !!   | symafm(nsym)=(anti)ferromagnetic part of symmetry operations
 !!   | symrel(3,3,nsym)=symmetry matrices in real space (integers)
 !!   | wtk(nkpt)=k point weights (they sum to 1.0)
-!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
+!!  extfpmd <type(extfpmd_type)>=--optional--extended first-principles molecular dynamics type
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
 !!  irrzon(nfft**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4))=irreducible zone data
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates

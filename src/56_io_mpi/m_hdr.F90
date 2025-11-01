@@ -2362,6 +2362,7 @@ end subroutine hdr_skip_wfftype
 !! INPUTS
 !! bantot=total number of bands
 !! etot=total energy (Hartree)
+!! extfpmd_eshift=--optional-- extfpmd energy shift (Hartree)
 !! fermie=Fermi energy (Hartree)
 !! fermih=Fermi energy for holes (Hartree), useful when occopt = 9
 !! mpi_atmtab(:)=--optional-- indexes of the atoms treated by current proc

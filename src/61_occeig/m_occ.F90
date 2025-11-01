@@ -101,7 +101,7 @@ contains
 !! unitdos=unit number of output of the DOS. Not needed if option==1
 !! wtk(nkpt)=k point weights
 !! iB1, iB2 = band min and max between which to calculate the number of electrons
-!! extfpmd_nbdbuf=Number of bands in the buffer to converge scf cycle with extfpmd models
+!! extfpmd_nbdbuf=--optional--number of bands forced to be unoccupied for extfpmd calculations
 !!
 !! OUTPUT
 !! doccde(mband*nkpt*nsppol)=derivative of occupancies wrt the energy for each band and k point.
@@ -122,9 +122,9 @@ contains
 !!
 !! SOURCE
 
-subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mband, nband, &
-                  nelect, nkpt, nsppol, occ, occopt, option, tphysel, tsmear, unitdos, wtk, &
-                  iB1, iB2, extfpmd_nbdbuf,rcpaw) ! optional parameters
+subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,fermih,maxocc,mband,nband,&
+                  nelect,nkpt,nsppol,occ,occopt,option,tphysel,tsmear,unitdos,wtk,&
+                  iB1,iB2,extfpmd_nbdbuf,rcpaw) ! optional parameters
 
 !Arguments ------------------------------------
 !scalars
@@ -477,7 +477,7 @@ end subroutine getnel
 !!  prtvol=control print volume and debugging output
 !!  stmbias= optional, if non-zero, compute occupation numbers for STM (non-zero around the Fermi energy)
 !!   NOTE: in this case, only fermie and occ are meaningful outputs.
-!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
+!!  extfpmd <type(extfpmd_type)>=--optional--extended first-principles molecular dynamics type
 !!  tphysel="physical" electronic temperature with FD occupations
 !!  tsmear=smearing width (or temperature)
 !!  wtk(nkpt)=k point weights
