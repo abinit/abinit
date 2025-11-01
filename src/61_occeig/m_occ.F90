@@ -477,6 +477,7 @@ end subroutine getnel
 !!  prtvol=control print volume and debugging output
 !!  stmbias= optional, if non-zero, compute occupation numbers for STM (non-zero around the Fermi energy)
 !!   NOTE: in this case, only fermie and occ are meaningful outputs.
+!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
 !!  tphysel="physical" electronic temperature with FD occupations
 !!  tsmear=smearing width (or temperature)
 !!  wtk(nkpt)=k point weights
@@ -491,9 +492,9 @@ end subroutine getnel
 !!
 !! SOURCE
 
-subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarget, mband, nband, &
-  nelect, ne_qFD, nh_qFD, nkpt, nspinor, nsppol, occ, occopt, prtvol, tphysel, tsmear, wtk, &
-  prtstm, stmbias, extfpmd,rcpaw) ! Optional argument
+subroutine newocc(doccde,eigen,entropy,fermie,fermih,ivalence,spinmagntarget,mband,nband,&
+  nelect,ne_qFD,nh_qFD,nkpt,nspinor,nsppol,occ,occopt,prtvol,tphysel,tsmear,wtk,&
+  prtstm,stmbias,extfpmd,rcpaw) ! Optional argument
 
 !Arguments ------------------------------------
 !scalars

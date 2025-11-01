@@ -76,6 +76,7 @@ CONTAINS  !=====================================================================
 !!                     if 0: compute only the compensating charge
 !!  cplex: if 1, real space 1-order functions on FFT grid are REAL, if 2, COMPLEX
 !!         1 for GS calculations
+!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
 !!  gprimd(3,3)=dimensional primitive translations for reciprocal space(bohr^-1).
 !!  indsym(4,nsym,natom)=indirect indexing array for atom labels
 !!  ipert=index of perturbation if pawrhoij is a pertubed rhoij

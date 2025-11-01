@@ -166,6 +166,7 @@ contains
 !!   | typat= array of types of the natoms
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation
 !!  etotal=total energy (Ha) - only needed for tddft
+!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
 !!  gbound_diel(2*mgfftdiel+8,2)=G sphere boundary for the dielectric matrix
 !!  gmet(3,3)=reciprocal space metric tensor in bohr**-2.
