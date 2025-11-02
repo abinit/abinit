@@ -24,7 +24,6 @@ MODULE m_paw_mkrho
  use defs_basis
  use m_abicore
  use m_errors
- use m_extfpmd
  use m_xmpi
 
  use defs_abitypes,      only : MPI_type
