@@ -3402,7 +3402,6 @@ end subroutine gstore_set_perts_distrib
 !! dtset<dataset_type>=All input variables for this dataset.
 !! ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
 !! dvdb<dbdb_type>=Database with the DFPT SCF potentials.
-!! ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
 !! pawfgr <type(pawfgr_type)>=fine grid parameters and related data
 !! pawang<pawang_type)>=PAW angular mesh and related data.
 !! pawrad(ntypat*usepaw)<pawrad_type>=Paw radial mesh and related data.
@@ -3415,7 +3414,7 @@ end subroutine gstore_set_perts_distrib
 !!
 !! SOURCE
 
-subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
+subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands, dvdb, &
                           pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
 !Arguments ------------------------------------
@@ -3430,7 +3429,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  type(pawang_type),intent(in) :: pawang
  type(pseudopotential_type),intent(in) :: psps
  type(pawfgr_type),intent(in) :: pawfgr
- type(ifc_type),intent(in) :: ifc
  type(mpi_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18),ngfftf(18)
@@ -3447,7 +3445,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  integer :: mpw, ierr,cnt, n1,n2,n3,n4,n5,n6,nspden,ndone, db_iqpt
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf, nkpg_k, nkpg_kq, qbuf_size, iqbuf_cnt, root_ncid, spin_ncid, ncerr
- integer :: ii, my_nqibz, iq_start, iq_ibz, isym_q, trev_q
+ integer :: ii, iq_ibz, isym_q, trev_q
  real(dp) :: cpu, wall, gflops, cpu_q, wall_q, gflops_q, cpu_all, wall_all, gflops_all
  real(dp) :: ecut, eshift, eig0nk, weight_q, weight_k
  logical :: gen_eigenpb, isirr_k, isirr_kq, isirr_q, print_time, need_ftinterp, qq_is_gamma
@@ -3461,7 +3459,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 !arrays
  integer :: g0_k(3), g0_kq(3), g0_q(3), work_ngfft(18),gmax(3),indkk_kq(6,1), units(2), qbz2dvdb(6)
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), nband(:,:), wfd_istwfk(:), qmap_symrec(:,:)
- integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:), my_iqibz_inds(:)
+ integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:)
  !integer,allocatable :: qibz2dvdb(:) !, displs(:), recvcounts(:)
  real(dp) :: kk_bz(3),kq_bz(3),kk_ibz(3),kq_ibz(3), qq_bz(3), qq_ibz(3), v_nk(3)
  real(dp),allocatable :: displ_cart_qibz(:,:,:,:)
@@ -3472,7 +3470,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1(:,:,:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:), gvnlx1(:,:), work(:,:,:,:)
  real(dp),allocatable :: gs1c_kq(:,:), vnk_cart_ibz(:,:,:) !, vkq_cart_ibz(:,:,:)  !, vnk_mat_cart_ibz(:,:,:,:)
- real(dp),allocatable :: my_gbuf(:,:,:,:,:,:), buf_wqnu(:,:), buf_eigvec_cart(:,:,:,:,:)
+ real(dp),allocatable :: my_gbuf(:,:,:,:,:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
  type(lgroup_t),allocatable :: lg_myk(:)
@@ -4849,8 +4847,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
  integer :: root_ncid, spin_ncid, gstore_completed, spin, ik_glob, iq_glob, ipc, ncerr, natom3
  integer :: glob_nq, glob_nk, im_kq, in_k, m_kq, n_k, nb_k, nb_kq, ib_k, ii
  integer :: bstart_k, bstop_k, bstart_kq, bstop_kq, max_nk, max_nq
- integer :: ik_bz, ik_ibz, ib_min_k, ib_max_k, iq_bz
- integer :: ikq_ibz, ib_min_kq, ib_max_kq
+ integer :: ik_bz, ik_ibz, ib_min_k, ib_max_k, iq_bz, ikq_ibz, ib_min_kq, ib_max_kq
  logical :: with_ks__, changed_k, changed_kq
  real(dp),parameter :: TOL_EDIFF = 0.001_dp * eV_Ha
  real(dp) :: g2, g2_ks, vnk
@@ -4972,6 +4969,10 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
 
      ik_bz = gstore%kglob2bz(ik_glob, spin)
      ik_ibz = gstore%kbz2ibz(1, ik_bz)
+     !ik_ibz = gstore%bz2ibz(1, ik_bz); isym_k = gstore%bz2ibz(2, ik_bz)
+     !trev_k = gstore%bz2ibz(6, ik_bz); g0_k = gstore%bz2ibz(3:5, ik_bz)
+     !isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
+
      kk = ebands%kptns(:,ik_ibz)
      ib_min_k = bstart_k; ib_max_k = bstop_k
 
@@ -4989,6 +4990,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
        ! Write the first and the last q-point.
        if (iq_glob /= 1 .and. iq_glob /= glob_nq) cycle
 
+       ! Find k-q image in the IBZ.
        iq_bz = qglob2bz(iq_glob, spin)
        qq = gstore%qbz(:, iq_bz)
        kq = kk + qq
@@ -5010,6 +5012,10 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
          end do
        end if
 
+       ! g(Sk, q) = g(k, S^{-1}q)
+       ! Note symrel convention here.
+       !ss = transpose(gstore%cryst%symrel(:,:, isym_k))
+
        do ipc=1,natom3
          ! Write the 4th and the last perturbation.
          if (ipc /= 4 .and. ipc /= natom3) cycle
@@ -5028,6 +5034,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
              do in_k=1,nb_k
                n_k = in_k + bstart_k - 1
                g2 = g2_mn(im_kq, in_k)
+               if (sqrt(g2) < tol6 .and. g2 /= zero) g2 = tol6 ** 2
                write(ab_out, "(1x,5(i5,1x),es16.6)") iq_glob, ik_glob, ipc, m_kq, n_k, sqrt(g2)
              end do
            end do
@@ -5044,7 +5051,9 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
             do in_k=1,nb_k
               n_k = in_k + bstart_k - 1
               g2 = g2_mn(im_kq, in_k)
+              if (sqrt(g2) < tol6 .and. g2 /= zero) g2 = tol6 ** 2
               g2_ks = g2ks_mn(im_kq, in_k)
+              if (sqrt(g2_ks) < tol6 .and. g2_ks /= zero) g2_ks = tol6 ** 2
               write(ab_out, "(1x,5(i5,1x),2(es16.6))") iq_glob, ik_glob, ipc, m_kq, n_k, sqrt(g2), sqrt(g2_ks)
             end do
           end do
@@ -5109,7 +5118,6 @@ subroutine average_g2_mn(do_avg, nb_kq, nb_k, bstart_kq, bstart_k, degblock_kq, 
          end do
        end do
        g2_avg = g2_avg / count
-       if (sqrt(g2_avg) < tol6 .and. g2_avg /= zero) g2_avg = tol6 ** 2
 
        ! Loop again over degenerate bands and copy average.
        do m_kq = degblock_kq(1, im_group), degblock_kq(2, im_group)
