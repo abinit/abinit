@@ -624,6 +624,9 @@ contains
   procedure :: wannierize_and_write_gwan => gstore_wannierize_and_write_gwan
   ! Compute g(R_e,R_ph) from g(k,q) and save results to GWAN.nc file
 
+  procedure :: compute_and_write_ph => gstore_compute_and_write_ph
+  ! Compute phonon frequencies and eigenvectors in the IBZ. Write results to disk
+
 end type gstore_t
 !!***
 
@@ -3662,40 +3665,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ! NB: Write phonon data here as we are not guaranteed to have all the IBZ q-points
  ! inside the loop over my_iq if filtering has been used.
  if (ndone == 0) then
-   call wrtout(std_out, " Computing phonon frequencies and displacements in the IBZ", pre_newlines=1)
-   call cwtime(cpu, wall, gflops, "start")
-
-   call xmpi_split_block(gstore%nqibz, gstore%comm, my_nqibz, my_iqibz_inds)
-   ABI_MALLOC(buf_wqnu, (natom3, my_nqibz))
-   ABI_MALLOC(buf_eigvec_cart, (2, 3, natom, natom3, my_nqibz))
-
-   NCF_CHECK(nctk_prepare_mpiio(root_ncid, "phfreqs_ibz"))
-   NCF_CHECK(nctk_prepare_mpiio(root_ncid, "pheigvec_cart_ibz"))
-
-   do ii=1,my_nqibz
-     iq_ibz = my_iqibz_inds(ii)
-     call ifc%fourq(cryst, gstore%qibz(:, iq_ibz), buf_wqnu(:,ii), displ_cart_qibz, &
-                    out_eigvec=buf_eigvec_cart(:,:,:,:,ii))
-   end do
-   if (nproc > 1 .and. gstore%nqibz >= nproc) then
-     NCF_CHECK(nctk_set_collective(root_ncid, root_vid("phfreqs_ibz")))
-     NCF_CHECK(nctk_set_collective(root_ncid, root_vid("pheigvec_cart_ibz")))
-   end if
-   call xmpi_barrier(gstore%comm)
-
-   if (my_nqibz > 0) then
-     iq_start = my_iqibz_inds(1)
-     ncerr = nf90_put_var(root_ncid, root_vid("phfreqs_ibz"), buf_wqnu, start=[1, iq_start], count=[natom3, my_nqibz])
-     NCF_CHECK(ncerr)
-     ncerr = nf90_put_var(root_ncid, root_vid("pheigvec_cart_ibz"), buf_eigvec_cart, &
-                          start=[1,1,1,1,iq_start], count=[2, 3, natom, natom3, my_nqibz])
-     NCF_CHECK(ncerr)
-   end if
-
-   ABI_FREE(my_iqibz_inds)
-   ABI_FREE(buf_wqnu)
-   ABI_FREE(buf_eigvec_cart)
-   call cwtime_report(" Phonon computation + output", cpu, wall, gflops)
+   call gstore%compute_and_write_ph(root_ncid)
  else
    call wrtout(std_out, sjoin(" Restarting GSTORE calculation. Found: ", itoa(ndone), " (qpt, spin) entries already computed"))
  end if
@@ -3923,7 +3893,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        if (dtset%gstore_use_lgk /= 0) then
          ii = lg_myk(my_ik)%findq_ibzk(qq_bz)
          if (ii == -1) then
-           call wrtout(std_out, sjoin(" iq_bz:", itoa(iq_bz), qq_bz_string, " not in IBZ_k --> skipping iteration"))
+           !call wrtout(std_out, sjoin(" iq_bz:", itoa(iq_bz), qq_bz_string, " not in IBZ_k --> skipping iteration"))
            cycle
            ! TODO: Check fillvalue (should be zero)
          end if
@@ -3932,7 +3902,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        if (dtset%gstore_use_lgq /= 0) then
          ii = lg_myq%findq_ibzk(kk_bz)
          if (ii == -1) then
-           call wrtout(std_out, sjoin(" my_ik:", itoa(my_ik), kk_string, " not in IBZ_q --> skipping iteration"))
+           !call wrtout(std_out, sjoin(" my_ik:", itoa(my_ik), kk_string, " not in IBZ_q --> skipping iteration"))
            cycle
            ! TODO: Check fillvalue (should be zero)
          end if
@@ -5135,8 +5105,9 @@ subroutine average_g2_mn(do_avg, nb_kq, nb_k, bstart_kq, bstart_k, degblock_kq, 
          end do
        end do
        g2_avg = g2_avg / count
+       !if (abs(g2_avg) < tol6)) g2_avg = tol6
 
-       ! Loop again over degenerate state and copy average.
+       ! Loop again over degenerate band and copy average.
        do m_kq = degblock_kq(1, im_group), degblock_kq(2, im_group)
          im_kq = m_kq - bstart_kq + 1
          do n_k = degblock_k(1, in_group), degblock_k(2, in_group)
@@ -5697,6 +5668,84 @@ subroutine gqk_filter_erange(gqk, gstore, erange)
  call krank_kpts%free()
 
 end subroutine gqk_filter_erange
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gstore/gstore_compute_and_write_ph
+!! NAME
+!!  gstore_compute_and_write_ph
+!!
+!! FUNCTION
+!!  Compute phonon frequencies and eigenvectors in the IBZ. Write results to disk
+!!
+!! SOURCE
+
+subroutine gstore_compute_and_write_ph(gstore, root_ncid)
+
+!Arguments ------------------------------------
+!scalars
+ class(gstore_t), intent(in) :: gstore
+ integer,intent(in) :: root_ncid
+
+!Local variables-------------------------------
+!scalars
+ integer :: natom, natom3, nproc, ii, iq_ibz, my_nqibz, iq_start, ncerr
+ real(dp) :: cpu, wall, gflops
+!arrays
+ integer,allocatable :: my_iqibz_inds(:)
+ real(dp),allocatable :: buf_wqnu(:,:), buf_eigvec_cart(:,:,:,:,:), displ_cart_qibz(:,:,:,:)
+!----------------------------------------------------------------------
+
+ nproc = xmpi_comm_size(gstore%comm)
+ natom = gstore%cryst%natom; natom3 = 3 * natom
+
+ call wrtout(std_out, " Computing phonon frequencies and displacements in the IBZ ...", pre_newlines=1)
+ call cwtime(cpu, wall, gflops, "start")
+
+ call xmpi_split_block(gstore%nqibz, gstore%comm, my_nqibz, my_iqibz_inds)
+ ABI_MALLOC(buf_wqnu, (natom3, my_nqibz))
+ ABI_MALLOC(buf_eigvec_cart, (2, 3, natom, natom3, my_nqibz))
+ ABI_MALLOC(displ_cart_qibz, (2, 3, natom, natom3))
+
+ NCF_CHECK(nctk_prepare_mpiio(root_ncid, "phfreqs_ibz"))
+ NCF_CHECK(nctk_prepare_mpiio(root_ncid, "pheigvec_cart_ibz"))
+
+ do ii=1,my_nqibz
+   iq_ibz = my_iqibz_inds(ii)
+   call gstore%ifc%fourq(gstore%cryst, gstore%qibz(:, iq_ibz), buf_wqnu(:,ii), displ_cart_qibz, &
+                         out_eigvec=buf_eigvec_cart(:,:,:,:,ii))
+ end do
+
+ if (nproc > 1 .and. gstore%nqibz >= nproc) then
+   NCF_CHECK(nctk_set_collective(root_ncid, root_vid("phfreqs_ibz")))
+   NCF_CHECK(nctk_set_collective(root_ncid, root_vid("pheigvec_cart_ibz")))
+ end if
+ call xmpi_barrier(gstore%comm)
+
+ if (my_nqibz > 0) then
+   iq_start = my_iqibz_inds(1)
+   ncerr = nf90_put_var(root_ncid, root_vid("phfreqs_ibz"), buf_wqnu, start=[1, iq_start], count=[natom3, my_nqibz])
+   NCF_CHECK(ncerr)
+   ncerr = nf90_put_var(root_ncid, root_vid("pheigvec_cart_ibz"), buf_eigvec_cart, &
+                        start=[1,1,1,1,iq_start], count=[2, 3, natom, natom3, my_nqibz])
+   NCF_CHECK(ncerr)
+ end if
+
+ ABI_FREE(displ_cart_qibz)
+ ABI_FREE(my_iqibz_inds)
+ ABI_FREE(buf_wqnu)
+ ABI_FREE(buf_eigvec_cart)
+ call cwtime_report(" Phonon computation + output", cpu, wall, gflops)
+
+contains
+
+integer function root_vid(var_name)
+  character(len=*),intent(in) :: var_name
+  root_vid = nctk_idname(root_ncid, var_name)
+end function root_vid
+
+end subroutine gstore_compute_and_write_ph
 !!***
 
 end module m_gstore

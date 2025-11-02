@@ -274,11 +274,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),allocatable :: ffnl_kmp(:,:,:,:),ffnl_kqmp(:,:,:,:)
  real(dp),allocatable :: kinpw_kqmp(:), kinpw_kmp(:), ph3d_kqmp(:,:,:), ph3d_kmp(:,:,:)
  real(dp),allocatable, target :: vxc1_qq(:,:,:,:)
- real(dp),target,allocatable :: gsig_atm(:,:,:,:)
  real(dp),allocatable :: displ_cart_qibz(:,:,:,:)
- real(dp),allocatable :: gxc_atm(:,:,:,:), gks_atm(:,:,:,:), gks_atm2(:,:,:,:)
- real(dp),allocatable :: cg_work(:,:), ug_k(:,:), ug_kq(:,:)
- real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1_qq(:,:,:,:,:), v1scf_qq(:,:,:,:), vlocal1_mqq(:,:,:,:,:), v1scf_mq(:,:,:,:)
+ real(dp),allocatable :: gxc_atm(:,:,:,:), gks_atm(:,:,:,:), gks_atm2(:,:,:,:), gsig_atm(:,:,:,:)
+ real(dp),allocatable :: cg_work(:,:), ug_k(:,:), ug_kq(:,:), ph1d(:,:)
+ real(dp),allocatable :: vlocal(:,:,:,:), vlocal1_qq(:,:,:,:,:), v1scf_qq(:,:,:,:), vlocal1_mqq(:,:,:,:,:), v1scf_mq(:,:,:,:)
  real(dp),allocatable :: ylm_k(:,:), ylm_kq(:,:), ylm_kmp(:,:), ylm_kqmp(:,:)
  real(dp),allocatable :: ylmgr_kq(:,:,:), ylmgr_kmp(:,:,:), ylmgr_kqmp(:,:,:)
  real(dp),allocatable :: vtrial(:,:), work(:,:,:,:), rhor(:,:), vxc(:,:), kxc(:,:)
@@ -352,43 +351,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! Make sure internal table with gstore_done_qbz_spin is properly filled.
  ! TODO: Similar piece of code in gstore_compute, should write method...
  if (ndone == 0) then
-   call wrtout(std_out, " Computing phonon frequencies and displacements in the IBZ ...", pre_newlines=1)
-   call cwtime(cpu, wall, gflops, "start")
-
-   call xmpi_split_block(gstore%nqibz, gstore%comm, my_nqibz, my_iqibz_inds)
-   ABI_MALLOC(buf_wqnu, (natom3, my_nqibz))
-   ABI_MALLOC(buf_eigvec_cart, (2, 3, natom, natom3, my_nqibz))
-   ABI_MALLOC(displ_cart_qibz, (2, 3, cryst%natom, natom3))
-
-   NCF_CHECK(nctk_prepare_mpiio(root_ncid, "phfreqs_ibz"))
-   NCF_CHECK(nctk_prepare_mpiio(root_ncid, "pheigvec_cart_ibz"))
-
-   do ii=1,my_nqibz
-     iq_ibz = my_iqibz_inds(ii)
-     call ifc%fourq(cryst, gstore%qibz(:, iq_ibz), buf_wqnu(:,ii), displ_cart_qibz, &
-                    out_eigvec=buf_eigvec_cart(:,:,:,:,ii))
-   end do
-
-   if (nproc > 1 .and. gstore%nqibz >= nproc) then
-     NCF_CHECK(nctk_set_collective(root_ncid, root_vid("phfreqs_ibz")))
-     NCF_CHECK(nctk_set_collective(root_ncid, root_vid("pheigvec_cart_ibz")))
-   end if
-   call xmpi_barrier(gstore%comm)
-
-   if (my_nqibz > 0) then
-     iq_start = my_iqibz_inds(1)
-     ncerr = nf90_put_var(root_ncid, root_vid("phfreqs_ibz"), buf_wqnu, start=[1, iq_start], count=[natom3, my_nqibz])
-     NCF_CHECK(ncerr)
-     ncerr = nf90_put_var(root_ncid, root_vid("pheigvec_cart_ibz"), buf_eigvec_cart, &
-                          start=[1,1,1,1,iq_start], count=[2, 3, natom, natom3, my_nqibz])
-     NCF_CHECK(ncerr)
-   end if
-
-   ABI_FREE(displ_cart_qibz)
-   ABI_FREE(my_iqibz_inds)
-   ABI_FREE(buf_wqnu)
-   ABI_FREE(buf_eigvec_cart)
-   call cwtime_report(" Phonon computation + output", cpu, wall, gflops)
+   call gstore%compute_and_write_ph(root_ncid)
  else
    call wrtout(std_out, sjoin(" Restarting GSTORE calculation. Found: ", itoa(ndone), " (qpt, spin) entries already computed"))
  end if
@@ -549,7 +512,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! Diagonal elements of velocity operator in cartesian coordinates for all kk in the IBZ.
  ! Use ndone to understand if velocities have been already compured in a previous run.
 
- !if (.False.) then
  if (gstore%with_vk /= 0 .and. ndone == 0) then
    call wrtout(std_out, " computing and writing velocity operator matrix elements in the ibz")
    call wrtout(std_out, " note that not all the k-points in the ibz are computed when kfilter is activated!")
@@ -1122,7 +1084,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! ===========================
        ! Compute <m,k+q|vxc1_qq|n,k>
        ! ===========================
-       ! Parallelized in gqk%pert_ppsum_comm
        gxc_atm = czero; cnt = 0
        do m_kq=bstart_kq, bstop_kq
          im_kq = m_kq - bstart_kq + 1
@@ -1130,6 +1091,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
             in_k = n_k - bstart_k + 1
             cnt = cnt + 1
             if (gqk%pp_sum_comm%skip(cnt)) cycle ! MPI parallelism inside pp_sum_comm
+            ! Parallelized inside gqk%pert_ppsum_comm
             do imyp=1,gqk%my_npert
               if (cplex == 1) then
                 ctmp_gwpc = sum(GWPC_CONJG(ur_mkq(:,m_kq)) * ur_nk(:,n_k) * vxc1_qq(1,:,spin,imyp)) / nfftf
@@ -1159,7 +1121,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        gsig_atm = zero
 
        do ipp_bz=my_pp_start_spin(spin), my_pp_stop_spin(spin)
-         ! NB: All procs in gqk%pert_comm and gqk%bsum_com enter this section.
+         ! All procs in gqk%pert_comm and gqk%bsum_com enter this section.
 
          my_ipp = ipp_bz - my_pp_start_spin(spin) + 1
          print_time_pp = my_rank == 0 .and. (my_ipp <= LOG_MODP .or. mod(my_ipp, LOG_MODP) == 0)
@@ -1463,7 +1425,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              vec_gwc_mkq(:,:,m_kq) = zero
              !print *, "omegame0i_mkq:", omegame0i_mkq
              call ppm%calc_sigc(nspinor, npw_c, nw_mkq, rhotwg_c, trans_botsq_pbz, trans_otq_pbz, &
-                                omegame0i_mkq, dtset%zcut, theta_mu_minus_e0i, trans_dmeig_pbz, npw_c, vec_gwc_mkq(:,:,m_kq), sigcme_mkq)
+                                omegame0i_mkq, dtset%zcut, theta_mu_minus_e0i, trans_dmeig_pbz, npw_c, &
+                                vec_gwc_mkq(:,:,m_kq), sigcme_mkq)
              if (dtset%useric /= 0) vec_gwc_mkq(:,:,m_kq) = zero
            end do ! m_kq
 
