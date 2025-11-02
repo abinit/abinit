@@ -319,7 +319,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &           pwind,pwind_alloc,pwnsfac,results_gs,resid,residm,rhog,rhor,&
 &           rmet,rprimd,susmat,symrec,taug,taur,tauresid,&
 &           ucvol,usecprj,usevxctau,wffnew,with_vectornd,vectornd,vtrial,vxctau,wvl,&
-&           xg_nonlop,xred,ylm,ylmgr,ylmdiel, rmm_diis_status,rcpaw)
+&           xg_nonlop,xred,ylm,ylmgr,ylmdiel,rmm_diis_status,rcpaw)
 
 !Arguments -------------------------------
 !scalars
@@ -335,7 +335,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type), intent(inout) :: energies
  type(hdr_type), intent(inout) :: hdr
- type(extfpmd_type),pointer,intent(inout) :: extfpmd
+ type(extfpmd_type), pointer, intent(inout) :: extfpmd
  type(paw_dmft_type), intent(inout)  :: paw_dmft
  type(pawang_type), intent(in) :: pawang
  type(pawfgr_type), intent(in) :: pawfgr
