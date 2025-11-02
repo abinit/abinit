@@ -409,12 +409,12 @@ force_plsmf:   0.00000000E+00
 
  Group velocities |v_nk| in atomic units:
  For k-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] , spin 1
- ib_k: 1     1.052310E-16
- ib_k: 2     8.544686E-17
- ib_k: 3     2.123845E-16
- ib_k: 4     1.831232E-16
- ib_k: 5     4.725870E-17
- ib_k: 6     1.735714E-16
+ ib_k: 1     1.178238E-08
+ ib_k: 2     1.550852E-08
+ ib_k: 3     1.422713E-08
+ ib_k: 4     1.140384E-08
+ ib_k: 5     2.335135E-08
+ ib_k: 6     9.666061E-09
  For k-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] , spin 1
  ib_k: 1     0.000000E+00
  ib_k: 2     0.000000E+00
@@ -423,15 +423,16 @@ force_plsmf:   0.00000000E+00
  ib_k: 5     0.000000E+00
  ib_k: 6     0.000000E+00
  For k-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] , spin 1
- ib_k: 1     1.309502E-16
- ib_k: 2     2.703465E-16
- ib_k: 3     1.074004E-16
- ib_k: 4     1.501611E-16
- ib_k: 5     1.215746E-16
- ib_k: 6     4.179089E-16
+ ib_k: 1     1.812065E-08
+ ib_k: 2     1.830054E-08
+ ib_k: 3     3.217163E-08
+ ib_k: 4     1.272013E-08
+ ib_k: 5     1.602090E-08
+ ib_k: 6     1.216509E-08
 
  E-PH matrix elements in the atom representation: pcase = (idir, iatom)
  NB: Values are averaged over e_mk+q, and e_nk degenerate states.
+ Values smaller than 1e-6 are set to 1e-6.
     iq    ik pcase  m_kq   n_k     |g^SE| in Ha    |g^KS| in Ha
  |g(k,q)| in Ha for iq: 1 ik: 1 pcase: 4
     iq    ik pcase  m_kq   n_k           |g^SE|          |g^KS|

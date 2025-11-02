@@ -485,9 +485,9 @@ P Number of CPUs for parallelism over k-points: 1
  ib_k: 2     0.000000E+00
  ib_k: 3     0.000000E+00
  For k-point: [ 5.5556E-02,  0.0000E+00,  0.0000E+00] , spin 1
- ib_k: 1     2.843409E-01
- ib_k: 2     1.349631E-01
- ib_k: 3     5.051486E-02
+ ib_k: 1     5.332362E-01
+ ib_k: 2     3.673733E-01
+ ib_k: 3     2.247551E-01
  For k-point: [ 3.3333E-01,  2.7778E-01,  5.0000E-01] , spin 1
  ib_k: 1     0.000000E+00
  ib_k: 2     0.000000E+00

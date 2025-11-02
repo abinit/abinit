@@ -857,9 +857,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_CHECK_IGEQ(nbsum, gqk%bstop_kq, "nband must be greater than the max band in the e-ph matrix elements")
 
    NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
+   NCF_CHECK(nctk_prepare_mpiio(root_ncid, "gstore_done_qbz_spin"))
    NCF_CHECK(nctk_prepare_mpiio(spin_ncid, "gvals"))
    NCF_CHECK(nctk_prepare_mpiio(spin_ncid, "gvals_ks"))
-   NCF_CHECK(nctk_prepare_mpiio(root_ncid, "gstore_done_qbz_spin"))
 
    ! Note the possibility of specifying different number of states for the incoming and the intermediate states.
    nb_k = gqk%nb_k; bstart_k = gqk%bstart_k; bstop_k = gqk%bstop_k
