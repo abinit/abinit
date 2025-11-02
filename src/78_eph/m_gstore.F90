@@ -4853,7 +4853,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
  integer :: ikq_ibz, ib_min_kq, ib_max_kq
  logical :: with_ks__, changed_k, changed_kq
  real(dp),parameter :: TOL_EDIFF = 0.001_dp * eV_Ha
- real(dp) :: g2, g2_ks
+ real(dp) :: g2, g2_ks, vnk
  character(len=abi_slen) :: gstore_gmode
  character(len=500) :: msg
 !arrays
@@ -4920,6 +4920,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
 
    case (1)
      write(ab_out,"(2a)") ch10," Group velocities |v_nk| in atomic units:"
+     !write(ab_out,"(2a)") " Values smaller than 1e-8 are set to zero"
 
      ABI_MALLOC(vnk_cart_ibz, (3, nb_k))
      do ik_ibz=1,gstore%nkibz
@@ -4929,7 +4930,9 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
 
        write(ab_out, "(a)")sjoin(" For k-point:", ktoa(gstore%kibz(:,ik_ibz)), ", spin", itoa(spin))
        do ib_k=1,min(nb_k, 10)
-         write(ab_out, "(a,i0,1x,es16.6)")" ib_k: ", ib_k, norm2(vnk_cart_ibz(:,ib_k))
+         vnk = sqrt(norm2(vnk_cart_ibz(:,ib_k)))
+         !if (vnk < tol8) vnk = zero
+         write(ab_out, "(a,i0,1x,es16.6)")" ib_k: ", ib_k, vnk
        end do
      end do
      ABI_FREE(vnk_cart_ibz)
@@ -4952,6 +4955,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
    write(ab_out,"(a)") " E-PH matrix elements in the atom representation: pcase = (idir, iatom)"
    if (do_avg) then
      write(ab_out,"(a)") " NB: Values are averaged over e_mk+q, and e_nk degenerate states."
+     write(ab_out,"(a)") " Values smaller than 1e-6 are set to 1e-6."
    else
      write(ab_out,"(a)") " NB: Values are NOT averaged over e_mk+q, and e_nk degenerate states."
    end if
@@ -5105,9 +5109,9 @@ subroutine average_g2_mn(do_avg, nb_kq, nb_k, bstart_kq, bstart_k, degblock_kq, 
          end do
        end do
        g2_avg = g2_avg / count
-       !if (abs(g2_avg) < tol6)) g2_avg = tol6
+       if (sqrt(g2_avg) < tol6 .and. g2_avg /= zero) g2_avg = tol6 ** 2
 
-       ! Loop again over degenerate band and copy average.
+       ! Loop again over degenerate bands and copy average.
        do m_kq = degblock_kq(1, im_group), degblock_kq(2, im_group)
          im_kq = m_kq - bstart_kq + 1
          do n_k = degblock_k(1, in_group), degblock_k(2, in_group)
