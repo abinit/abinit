@@ -223,7 +223,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: n1,n2,n3,n4,n5,n6,nspden, mqmem, im_kq, m_kq, in_k, n_k, restart, root_ncid, spin_ncid, usecprj !,sij_opt
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg_k,nkpg_kq,nkpg_kqmp,nkpg_kmp,imyp, cnt, nvloc, iw_nk, iw_mkq, ndone, nmiss
  integer :: my_ipp, ipp_bz, ipp_ibz, isym_pp, itim_pp, comm_rpt, nqlwl, scr_iomode, stern_qq_ierr, stern_mq_ierr
- integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt, timrev_k, timrev_q, iq_start, my_nqibz
+ integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt, timrev_k, timrev_q
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_qq, wall_qq, gflops_qq, cpu_kk, wall_kk, gflops_kk, cpu_pp, wall_pp, gflops_pp
  real(dp) :: drude_plsmf, my_plsmf
  real(dp) :: fact_spin, theta_mu_minus_e0i, tol_empty, tol_empty_in !, e_mkq, e_nk ! e0i,
@@ -259,10 +259,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), kg_kmp(:,:), kg_kqmp(:,:), my_pp_inds(:)
  integer,allocatable :: gbound_k(:,:), gbound_kq(:,:), gbound_kmp(:,:), gbound_kqmp(:,:), gbound_c(:,:), gbound_x(:,:)
  integer,allocatable :: nband(:,:), wfd_istwfk(:), count_bk(:,:), qibz2dvdb(:)
- integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:), my_iqibz_inds(:)
+ integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:)
  integer(i1b),allocatable :: itreat_qibz(:)
  integer, contiguous, pointer :: kg_c(:,:), kg_x(:,:)
- real(dp) :: eig0nk, cpu, wall, gflops !, cpu_q, wall_q, gflops_q, cpu_all, wall_all, gflops_all
+ real(dp) :: eig0nk !, cpu, wall, gflops !, cpu_q, wall_q, gflops_q, cpu_all, wall_all, gflops_all
  complex(gwp) :: ctmp_gwpc, xdot_tmp
  !complex(dp) :: gc_tmp
 !arrays
@@ -274,7 +274,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),allocatable :: ffnl_kmp(:,:,:,:),ffnl_kqmp(:,:,:,:)
  real(dp),allocatable :: kinpw_kqmp(:), kinpw_kmp(:), ph3d_kqmp(:,:,:), ph3d_kmp(:,:,:)
  real(dp),allocatable, target :: vxc1_qq(:,:,:,:)
- real(dp),allocatable :: displ_cart_qibz(:,:,:,:)
  real(dp),allocatable :: gxc_atm(:,:,:,:), gks_atm(:,:,:,:), gks_atm2(:,:,:,:), gsig_atm(:,:,:,:)
  real(dp),allocatable :: cg_work(:,:), ug_k(:,:), ug_kq(:,:), ph1d(:,:)
  real(dp),allocatable :: vlocal(:,:,:,:), vlocal1_qq(:,:,:,:,:), v1scf_qq(:,:,:,:), vlocal1_mqq(:,:,:,:,:), v1scf_mq(:,:,:,:)
@@ -282,7 +281,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),allocatable :: ylmgr_kq(:,:,:), ylmgr_kmp(:,:,:), ylmgr_kqmp(:,:,:)
  real(dp),allocatable :: vtrial(:,:), work(:,:,:,:), rhor(:,:), vxc(:,:), kxc(:,:)
  real(dp),allocatable :: omegame0i_nk(:), omegame0i_mkq(:), omegas_nk(:), omegas_mkq(:)
- real(dp),allocatable :: my_gbuf(:,:,:,:,:,:), my_gbuf_ks(:,:,:,:,:,:), buf_wqnu(:,:), buf_eigvec_cart(:,:,:,:,:)
+ real(dp),allocatable :: my_gbuf(:,:,:,:,:,:), my_gbuf_ks(:,:,:,:,:,:)
  real(dp),allocatable :: cg_kmp(:,:), cg_kqmp(:,:), cg1_kqmp(:,:), cg1_kmp(:,:), full_cg1_kqmp(:,:), full_cg1_kmp(:,:)
  complex(dp), contiguous, pointer :: cvxc1_qq_ptr(:,:,:)
  complex(gwp),allocatable :: ur_star_kmp(:), ur_star_kqmp(:), cwork_ur(:), rhotwg_c(:), rhotwg_x(:), vc_sqrt_gx(:)
