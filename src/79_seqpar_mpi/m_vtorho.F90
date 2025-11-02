@@ -416,7 +416,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer(int32), ABI_CONTIGUOUS pointer :: kg_k(:,:) => null()
  real(dp) :: dielar(7),dphase_k(3),kpoint(3),qpt(3),rhodum(1),tsec(2),ylmgr_dum(0,0,0), kphq(3)
  real(dp),allocatable :: EigMin(:,:),buffer1(:),cgq(:,:)
- real(dp),allocatable :: cgrkxc(:,:),doccde(:)
+ real(dp),allocatable :: cgrvtrial(:,:),cgrkxc(:,:),doccde(:)
  real(dp),allocatable :: dphasek(:,:),ek_k(:),ek_k_nd(:,:,:),eknk(:),eknk_nd(:,:,:,:,:),end_k(:)
  real(dp),allocatable :: enlx_k(:),enlxnk(:),focknk(:),fockfornk(:,:,:),ffnl(:,:,:,:), ffnl_kphq(:,:,:,:)
  real(dp),allocatable :: grnlnk(:,:), grnl_k(:,:), xcart(:,:)
@@ -1415,8 +1415,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      ! Compute extfpmd energy shift
      if(associated(extfpmd)) then
-       call extfpmd%compute_eshift(eigen,eknk,dtset%mband,&
-         dtset%nband,nfftf,dtset%nkpt,dtset%nsppol,dtset%nspden,dtset%wtk,vtrial)
+       ABI_MALLOC(cgrvtrial,(dtset%nfft,dtset%nspden))
+       call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vtrial)
+       call extfpmd%compute_eshift(eigen,eknk,dtset%mband,dtset%nband,&
+         dtset%nfft,dtset%nkpt,dtset%nsppol,dtset%nspden,dtset%wtk,cgrvtrial)
+       ABI_FREE(cgrvtrial)
      end if
 
      ! RCPAW
@@ -1937,7 +1940,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,extfpmd=extfpmd)
      else
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
-       rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+       rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,extfpmd=extfpmd)
      end if
 
      ABI_NVTX_END_RANGE()
@@ -2037,8 +2040,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !    Compute extended plane waves contributions
      if(associated(extfpmd)) then
+       ABI_MALLOC(cgrvtrial,(dtset%nfft,dtset%nspden))
+       call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vtrial)
        call extfpmd%compute_eshift(eigen,eknk,dtset%mband,dtset%nband,&
-         nfftf,dtset%nkpt,dtset%nsppol,dtset%nspden,dtset%wtk,vtrial)
+         dtset%nfft,dtset%nkpt,dtset%nsppol,dtset%nspden,dtset%wtk,cgrvtrial)
+       ABI_FREE(cgrvtrial)
        extfpmd%nelect=zero
        call extfpmd%compute_nelect(energies%e_fermie,dtset%nband,extfpmd%nelect,dtset%nkpt,&
          dtset%nspinor,dtset%nsppol,dtset%wtk)
@@ -2046,8 +2052,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          dtset%nsppol,dtset%nband,dtset%wtk)
        call extfpmd%compute_entropy(energies%entropy_extfpmd,energies%e_fermie,dtset%nkpt,&
          dtset%nsppol,dtset%nspinor,dtset%wtk,dtset%nband)
-       ! CHECK number of electrons integrating rhor.
-       ! write(0,*) sum(rhor(:,:))*extfpmd%ucvol/dtset%nfft
      end if
 
 !    Compute the highest occupied eigenenergy
@@ -2260,7 +2264,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call pawmkrho(1,compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
 &       my_natom,natom,dtset%nspden,dtset%nsym,ntypat,dtset%paral_kgb,pawang,pawfgr,pawfgrtab,&
 &       dtset%pawprtvol,pawrhoij,pawrhoij_unsym,pawtab,qpt,rhowfg,rhowfr,rhor,rprimd,dtset%symafm,&
-&       symrec,dtset%typat,ucvol,dtset%usewvl,xred,pawnhat=nhat,rhog=rhog,extfpmd=extfpmd)
+&       symrec,dtset%typat,ucvol,dtset%usewvl,xred,pawnhat=nhat,rhog=rhog)
        if (dtset%usekden==1) then
 !        DO WE NEED TAUG?
          call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,tauwfg,taug,tauwfr,taur)
