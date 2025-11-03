@@ -402,10 +402,12 @@ force_plsmf:   0.00000000E+00
 
  gstore_completed: 1
  gstore_done_qbz_spin: 4
- gqk%nb_kq: 12
- gqk%nb_k: 6
- gqk%glob_nq: 8
- gqk%glob_nk: 2
+ nb_k: 6
+ bstart_k: 2
+ nb_kq: 12
+ bstart_kq: 1
+ glob_nq: 8
+ glob_nk: 2
 
  Group velocities |v_nk| in atomic units:
  For k-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] , spin 1
@@ -432,7 +434,6 @@ force_plsmf:   0.00000000E+00
 
  E-PH matrix elements in the atom representation: pcase = (idir, iatom)
  NB: Values are averaged over e_mk+q, and e_nk degenerate states.
- Values smaller than 1e-6 are set to 1e-6.
     iq    ik pcase  m_kq   n_k     |g^SE| in Ha    |g^KS| in Ha
  |g(k,q)| in Ha for iq: 1 ik: 1 pcase: 4
     iq    ik pcase  m_kq   n_k           |g^SE|          |g^KS|

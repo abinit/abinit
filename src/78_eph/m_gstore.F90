@@ -3890,20 +3890,12 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
        if (dtset%gstore_use_lgk /= 0) then
          ii = lg_myk(my_ik)%findq_ibzk(qq_bz)
-         if (ii == -1) then
-           !call wrtout(std_out, sjoin(" iq_bz:", itoa(iq_bz), qq_bz_string, " not in IBZ_k --> skipping iteration"))
-           cycle
-           ! TODO: Check fillvalue (should be zero)
-         end if
+         if (ii == -1) cycle
        end if
 
        if (dtset%gstore_use_lgq /= 0) then
          ii = lg_myq%findq_ibzk(kk_bz)
-         if (ii == -1) then
-           !call wrtout(std_out, sjoin(" my_ik:", itoa(my_ik), kk_string, " not in IBZ_q --> skipping iteration"))
-           cycle
-           ! TODO: Check fillvalue (should be zero)
-         end if
+         if (ii == -1) cycle
        end if
 
        ! =========================================
@@ -4898,12 +4890,12 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
    bstart_kq = gstore%brange_kq_spin(1, spin)
    bstop_kq = gstore%brange_kq_spin(2, spin)
 
-   !write(ab_out, "(a,i0)")" bstart_kq: ", bstart_kq
-   write(ab_out, "(a,i0)")" gqk%nb_kq: ", nb_kq
-   !write(ab_out, "(a,i0)")" bstart_k: ", bstart_k
-   write(ab_out, "(a,i0)")" gqk%nb_k: ", nb_k
-   write(ab_out, "(a,i0)")" gqk%glob_nq: ", glob_nq
-   write(ab_out, "(a,i0)")" gqk%glob_nk: ", glob_nk
+   write(ab_out, "(a,i0)")" nb_k: ", nb_k
+   write(ab_out, "(a,i0)")" bstart_k: ", bstart_k
+   write(ab_out, "(a,i0)")" nb_kq: ", nb_kq
+   write(ab_out, "(a,i0)")" bstart_kq: ", bstart_kq
+   write(ab_out, "(a,i0)")" glob_nq: ", glob_nq
+   write(ab_out, "(a,i0)")" glob_nk: ", glob_nk
 
    ! Handle the output of group velocities. On disk, we have:
    !
@@ -4917,7 +4909,6 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
 
    case (1)
      write(ab_out,"(2a)") ch10," Group velocities |v_nk| in atomic units:"
-     !write(ab_out,"(2a)") " Values smaller than 1e-8 are set to zero"
 
      ABI_MALLOC(vnk_cart_ibz, (3, nb_k))
      do ik_ibz=1,gstore%nkibz
@@ -4928,7 +4919,6 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
        write(ab_out, "(a)")sjoin(" For k-point:", ktoa(gstore%kibz(:,ik_ibz)), ", spin", itoa(spin))
        do ib_k=1,min(nb_k, 10)
          vnk = sqrt(norm2(vnk_cart_ibz(:,ib_k)))
-         !if (vnk < tol8) vnk = zero
          write(ab_out, "(a,i0,1x,es16.6)")" ib_k: ", ib_k, vnk
        end do
      end do
@@ -4952,7 +4942,6 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
    write(ab_out,"(a)") " E-PH matrix elements in the atom representation: pcase = (idir, iatom)"
    if (do_avg) then
      write(ab_out,"(a)") " NB: Values are averaged over e_mk+q, and e_nk degenerate states."
-     write(ab_out,"(a)") " Values smaller than 1e-6 are set to 1e-6."
    else
      write(ab_out,"(a)") " NB: Values are NOT averaged over e_mk+q, and e_nk degenerate states."
    end if
@@ -4990,7 +4979,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
        ! Write the first and the last q-point.
        if (iq_glob /= 1 .and. iq_glob /= glob_nq) cycle
 
-       ! Find k-q image in the IBZ.
+       ! Find k+q image in the IBZ.
        iq_bz = qglob2bz(iq_glob, spin)
        qq = gstore%qbz(:, iq_bz)
        kq = kk + qq
@@ -5034,7 +5023,6 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
              do in_k=1,nb_k
                n_k = in_k + bstart_k - 1
                g2 = g2_mn(im_kq, in_k)
-               if (sqrt(g2) < tol6 .and. g2 /= zero) g2 = tol6 ** 2
                write(ab_out, "(1x,5(i5,1x),es16.6)") iq_glob, ik_glob, ipc, m_kq, n_k, sqrt(g2)
              end do
            end do
@@ -5051,9 +5039,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
             do in_k=1,nb_k
               n_k = in_k + bstart_k - 1
               g2 = g2_mn(im_kq, in_k)
-              if (sqrt(g2) < tol6 .and. g2 /= zero) g2 = tol6 ** 2
               g2_ks = g2ks_mn(im_kq, in_k)
-              if (sqrt(g2_ks) < tol6 .and. g2_ks /= zero) g2_ks = tol6 ** 2
               write(ab_out, "(1x,5(i5,1x),2(es16.6))") iq_glob, ik_glob, ipc, m_kq, n_k, sqrt(g2), sqrt(g2_ks)
             end do
           end do
