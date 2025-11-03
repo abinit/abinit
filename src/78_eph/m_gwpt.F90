@@ -998,19 +998,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
        ! Here we skip points if little group tricks are activated.
        if (dtset%gstore_use_lgk /= 0) then
-         ii = lg_myk(my_ik)%findq_ibzk(qq_bz)
-         if (ii == -1) then
-           !call wrtout(std_out, sjoin(" iq_bz:", itoa(iq_bz), qq_bz_string, " not in IBZ_k --> skipping iteration"))
-           cycle ! TODO: Check fillvalue (should be zero)
-         end if
+         ii = lg_myk(my_ik)%findq_ibzk(qq_bz); if (ii == -1) cycle
        end if
 
        if (dtset%gstore_use_lgq /= 0) then
-         ii = lg_myq%findq_ibzk(kk)
-         if (ii == -1) then
-           !call wrtout(std_out, sjoin(" my_ik:", itoa(my_ik), kk_string, " not in IBZ_q --> skipping iteration"))
-           cycle ! TODO: Check fillvalue (should be zero)
-         end if
+         ii = lg_myq%findq_ibzk(kk); if (ii == -1) cycle
        end if
 
        ! NB: All procs in gqk%pert_comm and gqk%bsum_comm and gqk%pp_sum_comm enter this section.
@@ -1484,7 +1476,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              if (ierr /= 0) then
                ABI_WARNING(sjoin("Stern at +q", qkp_string, msg))
                full_cg1_kqmp = zero; full_ur1_kqmp = zero; stern_qq_ierr = stern_qq_ierr + 1
-               !cycle
              end if
 
              ! Store KS e-ph matrix elements for this perturbation.
@@ -1606,7 +1597,6 @@ if (.not. qq_is_gamma) then
              if (ierr /= 0) then
                ABI_WARNING(sjoin("Stern at -q:", qkp_string, msg))
                full_cg1_kmp = zero; full_ur1_star_kmp = zero; stern_mq_ierr = stern_mq_ierr + 1
-               !cycle
              end if
 
              ! For debug, gks_atm2 and gks_atm should be consistent

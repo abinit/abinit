@@ -30,19 +30,12 @@ module m_gstore_sigeph
  use m_errors
  use netcdf
  use m_nctk
- use m_dvdb,           only : dvdb_t
- use m_crystal,        only : crystal_t
- use m_hamiltonian,    only : gs_hamiltonian_type, rf_hamiltonian_type
- use m_dtset,          only : dataset_type
- use m_dtfil,          only : datafiles_type
- use m_wfd,            only : wfd_t
  use m_ephtk
- !use m_mkffnl
  use m_sigtk
 
  !use m_time,           only : cwtime, cwtime_report, sec2str
  use m_io_tools,       only : iomode_from_fname
- use m_numeric_tools,  only : arth !, c2r
+ use m_numeric_tools,  only : arth, c2r
  use m_fstrings,       only : tolower, itoa, ftoa, sjoin, ktoa, ltoa, strcat, replace_ch0, yesno, string_in
  use m_cgtools,        only : cg_zgemm, cg_zdotc
  use m_kg,             only : getph
@@ -53,7 +46,7 @@ module m_gstore_sigeph
  use m_ebands,         only : ebands_t, gaps_t
  use m_kpts,           only : kpts_timrev_from_kptopt, kpts_map
  use m_ioarr,          only : read_rhor
- use m_fftcore,        only : ngfft_seq !, get_kg
+ use m_fftcore,        only : ngfft_seq
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack
  use m_ifc,            only : ifc_type
  use m_dfpt_cgwf,      only : stern_t
@@ -66,6 +59,12 @@ module m_gstore_sigeph
  use m_pstat,          only : pstat_proc
  use m_occ,            only : occ_be, occ_fd
  use m_lgroup,         only : lgroup_t
+ use m_dvdb,           only : dvdb_t
+ use m_crystal,        only : crystal_t
+ use m_hamiltonian,    only : gs_hamiltonian_type, rf_hamiltonian_type
+ use m_dtset,          only : dataset_type
+ use m_dtfil,          only : datafiles_type
+ use m_wfd,            only : wfd_t
  use m_gstore,         only : gstore_t, gqk_t
 
  implicit none
@@ -225,7 +224,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  integer,intent(in) :: comm
 !arrays
  integer,intent(in) :: ngfft(18),ngfftf(18)
- !@type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
 
 !Local variables-------------------------------
@@ -236,12 +234,13 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  integer :: isym_k,isym_kq,trev_k,trev_kq
  integer :: istwf_k, istwf_kq, npw_k, npw_kq, nkpg_kq
  integer :: nfft, nfftf, mgfft, mgfftf, nkpg !,nkpg1,cnt, enough_stern
- integer :: usecprj, mpw, ibsum_kq, band_me, u1_band
+ integer :: usecprj, mpw, ibsum_kq, band_me, u1_band, ncid, ncerr
  real(dp) :: wqnu, gkq2, weight_q, eig0nk, eig0mk, eig0mkq, ediff, gmod2, hmod2, gdw2, rfact, gdw2_stern !, rtmp !,nqnu,gkq2,gkq2_pf,
  !real(dp) :: cpu, wall, gflops
  logical :: q_is_gamma, intra_band, same_band, isirr_k, isirr_kq, stern_use_cache
  complex(dp) :: cfact !, sig_cplx
  character(len=5000) :: msg
+ character(len=fnlen) :: path
  type(gaps_t) :: gaps
  type(lgroup_t) :: lg_myk
  type(gstore_t) :: gstore
@@ -254,31 +253,28 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  type(gs_hamiltonian_type) :: gs_ham_kq
  type(rf_hamiltonian_type) :: rf_ham_kq
 !arrays
- integer :: gmax(3), g0_k(3), g0_kq(3), work_ngfft(18)
- integer :: units(2), my_kqmap(6)
- integer,allocatable :: phmodes_skip(:)
+ integer :: gmax(3), g0_k(3), g0_kq(3), work_ngfft(18), units(2), my_kqmap(6)
+ integer,allocatable :: phmodes_skip(:), gbound_kq(:,:)
+ integer,allocatable :: nband(:,:), wfd_istwfk(:), kg_kq(:,:) !, kg_k(:,:), gaussw_qnu(:)
  real(dp) :: kk(3), kk_ibz(3), kq_ibz(3), qpt(3), kq(3), fermie1_idir_ipert(3,cryst%natom), dotri(2)
  real(dp),allocatable :: vtrial(:,:), work(:,:,:,:)
  real(dp),allocatable :: kinpw_k(:), kinpw_kq(:),kpg_kq(:,:),kpg_k(:,:)
  real(dp),allocatable :: ffnl_k(:,:,:,:),ffnl_kq(:,:,:,:),ph3d_k(:,:,:),ph3d_kq(:,:,:),v1scf(:,:,:,:)
  real(dp) :: displ_red_nu(2, 3, cryst%natom)
- !real(dp),allocatable :: gkq_atm(:,:,:), gkq_nu(:,:,:) gaussw_qnu(:)
  real(dp),allocatable :: cg1s_kq(:,:,:,:), h1kets_kq_allperts(:,:,:,:)
- integer,allocatable :: nband(:,:), wfd_istwfk(:), kg_kq(:,:) !, kg_k(:,:),
- integer,allocatable :: gbound_kq(:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  real(dp) :: vec_natom3(2, 3*cryst%natom) ! zpr_frohl_sphcorr(3*cryst%natom),
  real(dp),allocatable :: bra_kq(:,:), kets_k(:,:,:)
  real(dp),allocatable :: stern_ppb(:,:,:,:), stern_fan_t(:), stern_dw(:,:,:,:)
- real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
- real(dp),allocatable :: rfact_t(:), nqnu_t(:), f_mkq(:)
+ real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:), rfact_t(:), nqnu_t(:), f_mkq(:)
  complex(dp),allocatable :: cfact_t(:), cfact2_t(:), cfact_wr(:), tpp_red(:,:) !,fmw_frohl_sphcorr(:,:,:,:),
  type(pawrhoij_type),allocatable :: pot_pawrhoij(:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
 !----------------------------------------------------------------------
 
- units = [std_out, ab_out]
- my_rank = xmpi_comm_rank(comm)
+ my_rank = xmpi_comm_rank(comm); units = [std_out, ab_out]
+ natom = cryst%natom; natom3 = 3 * cryst%natom; nkpt = ebands%nkpt
+ nsppol = dtset%nsppol; nspden = dtset%nspden; nspinor = dtset%nspinor
 
  call wrtout(std_out, " Computing Fan-Migdal + DW self-energy from GSTORE.nc", pre_newlines=1)
 
@@ -286,10 +282,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  ! The Fan-Migdal SE requires |g(k,q)|^2 as well as g2DW in the phonon representation.
  call gstore%from_ncpath(dtfil%filgstorein, with_cplex1, dtset, cryst, ebands, ifc, &
                          "phonon", dtset%gstore_gname, .True., comm)
-
- natom = cryst%natom; natom3 = 3 * cryst%natom; nkpt = ebands%nkpt
- nsppol = dtset%nsppol; nspden = dtset%nspden; nspinor = dtset%nspinor
-
  ! Consistency check.
  ierr = 0
  if (gstore%qzone /= "bz") then
@@ -464,6 +456,139 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
 
  call pstat_proc%print(_PSTAT_ARGS_)
 
+! Create netcdf file (only master works, HDF5 + MPI-IO is handled afterwards by reopening the file inside ncwrite_comm)
+ path = strcat(dtfil%filnam_ds(4), "_GSEPH.nc")
+ if (my_rank == master) then
+   ! Master creates the netcdf file used to store the results of the calculation.
+   NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
+   !sigma%ncid = ncid
+   !NCF_CHECK(wfk_hdr%ncwrite(ncid, fform_from_ext("SIGEPH.nc"), nc_define=.True.))
+   NCF_CHECK(cryst%ncwrite(ncid))
+   NCF_CHECK(ebands%ncwrite(ncid))
+
+   ! Add dimensions.
+   ncerr = nctk_def_dims(ncid, [ &
+     nctkdim_t("nsppol", nsppol), nctkdim_t("ntemp", ntemp), nctkdim_t("natom3", 3 * natom3) &
+     !nctkdim_t("nkcalc", sigma%nkcalc), nctkdim_t("max_nbcalc", sigma%max_nbcalc), &
+     !nctkdim_t("phmesh_size", sigma%phmesh_size), &
+     !nctkdim_t("nqibz", sigma%nqibz), nctkdim_t("nqbz", sigma%nqbz)
+     ], &
+     defmode=.True.)
+   NCF_CHECK(ncerr)
+
+   !if (sigma%nwr > 0) then
+   !  NCF_CHECK(nctk_def_dims(ncid, [nctkdim_t("nwr", sigma%nwr)]))
+   !end if
+   !if (dtset%prteliash == 3) then
+   !  NCF_CHECK(nctk_def_dims(ncid, [nctkdim_t("a2f_ne", sigma%a2f_ne)]))
+   !end if
+
+   !ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
+   !  "symsigma", "nbsum", "bsum_start", "bsum_stop", "symdynmat", &
+   !  "ph_intmeth", "eph_intmeth", "qint_method", "eph_transport", &
+   !  "imag_only", "symv1scf", "dvdb_add_lr", "mrta", "ibte_prep", "eph_prtscratew", "eph_ahc_type"])
+   !NCF_CHECK(ncerr)
+   !ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
+   !  "eta", "wr_step", "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie", &
+   !  "ph_wstep", "ph_smear", "eph_phwinfact"])
+   !NCF_CHECK(ncerr)
+
+   ! Define arrays with results.
+   ncerr = nctk_def_arrays(ncid, [ &
+     !nctkarr_t("ngqpt", "int", "three"), &
+     !nctkarr_t("eph_ngqpt_fine", "int", "three"), &
+     !nctkarr_t("eph_phrange", "int", "two"), &
+     !nctkarr_t("eph_phrange_w", "dp", "two"), &
+     !nctkarr_t("ddb_ngqpt", "int", "three"), &
+     !nctkarr_t("ph_ngqpt", "int", "three"), &
+     !nctkarr_t("sigma_ngkpt", "int", "three"), &
+     !nctkarr_t("sigma_erange", "dp", "two"), &
+     !!nctkarr_t("frohl_params", "dp", "four"), &
+     !nctkarr_t("bstart_ks", "int", "nkcalc, nsppol"), &
+     !nctkarr_t("nbcalc_ks", "int", "nkcalc, nsppol"), &
+     !nctkarr_t("kcalc", "dp", "three, nkcalc"), &
+     !nctkarr_t("kcalc2ibz", "int", "nkcalc, six"), &
+     nctkarr_t("kTmesh", "dp", "ntemp"), &
+     nctkarr_t("mu_e", "dp", "ntemp") &
+     !nctkarr_t("qp_done", "int", "nkcalc, nsppol"), &
+   ])
+   NCF_CHECK(ncerr)
+
+   !if (sigma%nwr > 0) then
+   !  ! Make room for the spectral function. These arrays get two extra dimensions on file (nkcalc, nsppol).
+   !  ncerr = nctk_def_arrays(ncid, [ &
+   !    nctkarr_t("wrmesh_b", "dp", "nwr, max_nbcalc, nkcalc, nsppol"), &
+   !    nctkarr_t("vals_wr", "dp", "two, nwr, ntemp, max_nbcalc, nkcalc, nsppol"), &
+   !    nctkarr_t("spfunc_wr", "dp", "nwr, ntemp, max_nbcalc, nkcalc, nsppol") &
+   !  ])
+   !  NCF_CHECK(ncerr)
+   !end if
+
+   !if (dtset%prteliash /= 0) then
+   !  ncerr = nctk_def_arrays(ncid, [ &
+   !    nctkarr_t("gfw_vals", "dp", "phmesh_size, three, max_nbcalc, nkcalc, nsppol") &
+   !  ])
+   !  NCF_CHECK(ncerr)
+   !  if (dtset%prteliash == 3) then
+   !    ncerr = nctk_def_arrays(ncid, [ &
+   !      nctkarr_t("a2f_emesh", "dp", "a2f_ne"), &
+   !      nctkarr_t("a2few", "dp", "a2f_ne, phmesh_size, max_nbcalc, nkcalc, nsppol") &
+   !    ])
+   !    NCF_CHECK(ncerr)
+   !  end if
+   !end if
+
+   ! ======================================================
+   ! Write data that do not depend on the (kpt, spin) loop.
+   ! ======================================================
+   NCF_CHECK(nctk_set_datamode(ncid))
+
+   ii = 0; if (sigma%imag_only) ii = 1
+   !ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
+   !  "symsigma", "nbsum", "bsum_start", "bsum_stop", &
+   !  "symdynmat", "ph_intmeth", "eph_intmeth", "qint_method", &
+   !  "eph_transport", "imag_only", "symv1scf", "dvdb_add_lr", "mrta", "ibte_prep", "eph_prtscratew", "eph_ahc_type"], &
+   !  [self%symsigma, self%nbsum, self%bsum_start, self%bsum_stop, &
+   !   dtset%symdynmat, dtset%ph_intmeth, dtset%eph_intmeth, self%qint_method, dtset%eph_transport, ii, &
+   !   dtset%symv1scf, dtset%dvdb_add_lr, self%mrta, dtset%ibte_prep, dtset%eph_prtscratew, dtset%eph_ahc_type])
+   !NCF_CHECK(ncerr)
+   !ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
+   !  "eta", "wr_step", "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie", "ph_wstep", "ph_smear", "eph_phwinfact"], &
+   !  [aimag(self%ieta), self%wr_step, dtset%eph_fsewin, dtset%eph_fsmear, dtset%eph_extrael, dtset%eph_fermie, &
+   !  dtset%ph_wstep, dtset%ph_smear, dtset%eph_phwinfact])
+   !NCF_CHECK(ncerr)
+
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), sigma%ngqpt))
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eph_ngqpt_fine"), dtset%eph_ngqpt_fine))
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ddb_ngqpt"), dtset%ddb_ngqpt))
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ph_ngqpt"), dtset%ph_ngqpt))
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sigma_ngkpt"), dtset%sigma_ngkpt))
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sigma_erange"), dtset%sigma_erange))
+   !!NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "frohl_params"), dtset%frohl_params))
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eph_phrange"), dtset%eph_phrange))
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eph_phrange_w"), dtset%eph_phrange_w))
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "bstart_ks"), sigma%bstart_ks))
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nbcalc_ks"), sigma%nbcalc_ks))
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc"), sigma%kcalc))
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc2ibz"), sigma%kcalc2ibz))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kTmesh"), sigma%kTmesh))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "mu_e"), sigma%mu_e))
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eta"), aimag(sigma%ieta)))
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phmesh"), sigma%phmesh))
+   !if (dtset%prteliash == 3) then
+   !  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "a2f_emesh"), sigma%a2f_emesh))
+   !end if
+   !NCF_CHECK(nf90_close(ncid))
+ end if ! master
+
+ call xmpi_barrier(comm)
+
+ ! Now reopen the file inside ncwrite_comm to perform parallel-IO (required for k-point parallelism).
+ !if (self%ncwrite_comm%value /= xmpi_comm_null) then
+ !  NCF_CHECK(nctk_open_modify(ncid, path, self%ncwrite_comm%value))
+ !  NCF_CHECK(nctk_set_datamode(ncid))
+ !end if
+
  ! Loop over collinear spins.
  do my_is=1,gstore%my_nspins
    associate (gqk => gstore%gqk(my_is), cryst => gstore%cryst)
@@ -590,8 +715,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
            call rf_ham_kq%init(cplex, gs_ham_kq, ipert, has_e1kbsc=.true.)
            call rf_ham_kq%load_spin(spin, vlocal1=vlocal1(:,:,:,:,my_ip), with_nonlocal=.true.)
 
-           ! Wait for gatherv operation
-           !if (.not. stern%has_band_para .and. cgq_request /= xmpi_request_null) call xmpi_wait(cgq_request, ierr)
            ABI_MALLOC(kets_k, (2, npw_k*nspinor, nb_k))
 
            do in_k=1,nb_k
@@ -810,7 +933,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
    ABI_SFREE(stern_ppb)
    ABI_SFREE(stern_dw)
 
-   call sigma%gather_and_write_results(gstore, gqk, dtset, ebands)
+   call sigma%gather_and_write_results(ncid, gstore, gqk, dtset, ebands)
    end associate
  end do ! my_is
 
@@ -852,11 +975,11 @@ end subroutine gstore_sigeph
 !!
 !! SOURCE
 
-subroutine sep_gather_and_write_results(sigma, gstore, gqk, dtset, ebands)
-
+subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, ebands)
 
 !Arguments ------------------------------------
  class(sep_t),intent(inout) :: sigma
+ integer,intent(in) :: root_ncid
  type(gstore_t),intent(in) :: gstore
  type(gqk_t),intent(in) :: gqk
  type(ebands_t),intent(in) :: ebands
@@ -864,24 +987,22 @@ subroutine sep_gather_and_write_results(sigma, gstore, gqk, dtset, ebands)
 
 !Local variables-------------------------------
  integer,parameter :: max_ntemp = 50, master = 0
- integer :: it, in_k, ikcalc, ik_bz, spin, ierr, bstart_k, bstop_k, cnt, ndeg
- integer :: band_k,ik_ibz,ib_val,ib_cond,jj,ideg,ii,iw,nstates !, nb_k
- !integer :: nq_ibzk_eff, nelem, imyq, iq_ibz_k, sr_ncid
+ integer :: it, in_k, ikcalc, ik_bz, spin, ierr, bstart_k, bstop_k, cnt, ndeg, spin_ncid, ncerr
+ integer :: band_k,ik_ibz,ib_val,ib_cond,jj,ideg,ii,iw, nstates !, nb_k
+ !integer :: nq_ibzk_eff, nelem, imyq, iq_ibz_k, sr_ncid, spin_ncid, ncerr
  logical :: changed, iwrite
  real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond,qpe_oms,qpe_oms_val,qpe_oms_cond
  real(dp) :: ravg2 ! invsig2fmts, tau
  complex(dp) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2,cavg3,cavg4
  character(len=500) :: this_gtype ! msg
- !integer :: grp_ncid, ncerr
  type(degtab_t) :: degtab
 !arrays
- real(dp) :: kcalc(3)
- !integer, allocatable :: recvcounts(:), displs(:), nq_rank(:), kq_symtab(:,:), my_kq_symtab(:,:)
  integer,allocatable :: degblock(:,:)
- real(dp) :: qp_gaps(sigma%ntemp),qpoms_gaps(sigma%ntemp)
+ !integer, allocatable :: recvcounts(:), displs(:), nq_rank(:), kq_symtab(:,:), my_kq_symtab(:,:)
+ real(dp) :: kcalc(3)
+ real(dp) :: qp_gaps(sigma%ntemp),qpoms_gaps(sigma%ntemp) !, gfw_avg(sigma%phmesh_size, 3)
  !real(dp),allocatable :: aw(:,:,:), a2few_avg(:,:), gather_srate(:,:,:,:), grp_srate(:,:,:,:)
  real(dp) :: ks_enes(gqk%nb_k), ze0_vals(sigma%ntemp, gqk%nb_k)
- !real(dp) :: gfw_avg(sigma%phmesh_size, 3)
  complex(dp) :: qpoms_enes(sigma%ntemp, gqk%nb_k),qp_enes(sigma%ntemp, gqk%nb_k)
 !! *************************************************************************
 
@@ -932,11 +1053,8 @@ subroutine sep_gather_and_write_results(sigma, gstore, gqk, dtset, ebands)
    ik_ibz = gstore%kbz2ibz(1, ik_bz)
    kcalc = gstore%kbz(:, ik_bz)
 
-   if (abs(dtset%symsigma) == 1) then
+   if (dtset%symsigma == +1) then
      ! Average self-energy matrix elements in the degenerate subspace.
-     ! We will have to average the QP corrections over degenerate states if symsigma=1 is used.
-     ! Here we make sure that all the degenerate states are included.
-     ! Store also band indices of the degenerate sets, used to average final results.
      bstart_k = gqk%bstart_k; bstop_k = gqk%bstop_k
      call ebands%enclose_degbands(ik_ibz, spin, bstart_k, bstop_k, changed, TOL_EDIFF, degblock=degblock)
      !if (changed) then
@@ -1110,6 +1228,56 @@ subroutine sep_gather_and_write_results(sigma, gstore, gqk, dtset, ebands)
    write(ab_out, "(a,i0,a)")" No more than ", max_ntemp, " temperatures are written to the main output file."
    write(ab_out, "(2a)")" Please use SIGEPH.nc file and AbiPy to analyze the results.",ch10
  end if
+
+ ! Write self-energy matrix elements for this spin
+ ! NB: Only master writes
+ ! Create hdf group for this spin.
+ NCF_CHECK(nf90_def_grp(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
+ !NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("data_spin", itoa(spin)), spin_ncid))
+
+ ! Define dimensions and arrays inside group at runtime
+ ncerr = nctk_def_dims(spin_ncid, [ &
+   nctkdim_t("glob_nk", gqk%glob_nk), &
+   nctkdim_t("nb_kq", gqk%nb_kq), &
+   nctkdim_t("nb_k", gqk%nb_k) &
+ ], defmode=.True.)
+ NCF_CHECK(ncerr)
+
+ ncerr = nctk_def_arrays(spin_ncid, [ &
+   nctkarr_t("vals_e0ks", "dp", "two, ntemp, nb_k, glob_nk"), &
+   nctkarr_t("fan_vals", "dp", "two, ntemp, nb_k, glob_nk"), &
+   nctkarr_t("fan_stern_vals", "dp", "two, ntemp, nb_k, glob_nk"), &
+   nctkarr_t("dvals_de0ks", "dp", "two, ntemp, nb_k, glob_nk"), &
+   nctkarr_t("dw_vals", "dp", "ntemp, nb_k, glob_nk"), &
+   nctkarr_t("dw_stern_vals", "dp", "ntemp, nb_k, glob_nk") &
+   !nctkarr_t("qpoms_enes", "dp", "two, ntemp, nb_k, glob_nk"), &
+   !nctkarr_t("qp_enes", "dp", "two, ntemp, nb_k, glob_nk"), &
+   !nctkarr_t("ze0_vals", "dp", "ntemp, nb_k, glob_nk"), &
+   !nctkarr_t("ks_enes", "dp", "nk_k, glob_nk"), &
+   !nctkarr_t("ks_gaps", "dp", "nb_k, glob_nk"), &
+   !nctkarr_t("qpoms_gaps", "dp", "ntemp, nb_k, glob_nk"), &
+   !nctkarr_t("qp_gaps", "dp", "ntemp, nb_k, glob_nk"), &
+   !nctkarr_t("phmesh", "dp", "phmesh_size"), &
+   !nctkarr_t("vcar_calc", "dp", "three, max_nbcalc, nkcalc, nsppol") &
+ ])
+ NCF_CHECK(ncerr)
+
+ ! Write data.
+ !NCF_CHECK(nctk_set_datamode(spin_ncid))
+ NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "vals_e0ks"), c2r(sigma%vals_e0ks)))
+ NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "fan_vals"), c2r(sigma%fan_vals)))
+ NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "fan_stern_vals"), c2r(sigma%fan_stern_vals)))
+ NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "dvals_de0ks"), c2r(sigma%dvals_de0ks)))
+ NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "dw_vals"), sigma%dw_vals))
+ NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "dw_stern_vals"), sigma%dw_stern_vals))
+ ! Dump QP energies and gaps for this spin.
+ !NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "qpoms_enes"), c2r(qpoms_enes)))
+ !NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "qp_enes"), c2r(qp_enes)))
+ !NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "ze0_vals"), ze0_vals))
+ !NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "ks_enes"), ks_enes))
+ !NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "ks_gaps"), ks_gap))
+ !NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "qpoms_gaps"), qpoms_gaps))
+ !NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "qp_gaps"), qp_gaps))
 
 end subroutine sep_gather_and_write_results
 !!***

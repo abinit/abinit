@@ -393,10 +393,12 @@ P Number of CPUs for parallelism over k-points: 1
 
  gstore_completed: 1
  gstore_done_qbz_spin: 597
- gqk%nb_kq: 1
- gqk%nb_k: 1
- gqk%glob_nq: 597
- gqk%glob_nk: 89
+ nb_k: 1
+ bstart_k: 6
+ nb_kq: 1
+ bstart_kq: 6
+ glob_nq: 597
+ glob_nk: 89
 
  Group velocities |v_nk| in atomic units:
  For k-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] , spin 1
