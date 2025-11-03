@@ -694,13 +694,13 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    if (psps%usepaw==0) then
      call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
 &     npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-&     option=1)
+&     option=1,extfpmd=extfpmd)
    else
      ABI_MALLOC(tauwfg,(2,dtset%nfft))
      ABI_MALLOC(tauwfr,(dtset%nfft,dtset%nspden))
      call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
 &     npwarr,occ,paw_dmft,phnons,tauwfg,tauwfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-&     option=1)
+&     option=1,extfpmd=extfpmd)
      call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,tauwfg,taug,tauwfr,taur)
      ABI_FREE(tauwfg)
      ABI_FREE(tauwfr)
