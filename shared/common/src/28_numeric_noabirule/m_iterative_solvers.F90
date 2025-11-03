@@ -26,6 +26,8 @@ module m_iterative_solvers
  
     contains
 
+! TODO : Delete writes
+
 !-------------------------------------------------------------------------------------------
 ! Eigensolvers
 !-------------------------------------------------------------------------------------------
@@ -89,7 +91,7 @@ module m_iterative_solvers
         ! Conjugate Gradient iterations to minimize Rayleigh quotient
         do iter = 1, max_iter
             call cg_update(n, matvec, x, Ax, p, g, beta, rayleigh_quotient, residual_norm)
-                write(6,*)'chi0diel cg_eigen_solver_treshold : iter, rayleigh_quotient, residual norm', iter, rayleigh_quotient, residual_norm; flush(6) !DEBUG
+                write(6,*)'cg_eigen_solver_treshold : iter, rayleigh_quotient, residual norm', iter, rayleigh_quotient, residual_norm; flush(6) !DEBUG
             if (residual_norm < tol) exit
         end do
 
@@ -100,7 +102,7 @@ module m_iterative_solvers
 
         ! If more eigenvalues are required, use deflation to compute subsequent eigenvalues
         do j = 2, max_neig
-            write(6,*)'chi0diel cg_eigen_solver_treshold : eigenvalues(1:j-1)', eigenvalues(1:j-1); flush(6) !DEBUG
+            write(6,*)'cg_eigen_solver_treshold : eigenvalues(1:j-1)', eigenvalues(1:j-1); flush(6) !DEBUG
 
             ! Check if the eigenvalue is below the threshold
             if (eigenvalues(j-1) < eigenvalue_threshold) exit
@@ -122,7 +124,7 @@ module m_iterative_solvers
             ! Perform conjugate gradient iterations
             do iter = 1, max_iter
                 call cg_update(n, matvec, x, Ax, p, g, beta, rayleigh_quotient, residual_norm, eigenvectors(:, 1:j-1))
-                write(6,*)'chi0diel cg_eigen_solver_treshold : iter, rayleigh_quotient, residual norm', iter, rayleigh_quotient, residual_norm; flush(6) !DEBUG
+                write(6,*)'cg_eigen_solver_treshold : iter, rayleigh_quotient, residual norm', iter, rayleigh_quotient, residual_norm; flush(6) !DEBUG
                 if (residual_norm < tol) exit
             end do
 
@@ -244,7 +246,6 @@ module m_iterative_solvers
         end if
 
         discriminant = b**2 - 4.0_dp * a * c
-        write(6,*)'chi0diel quadratic_roots : a, b, c, discriminant = ', a, b, c, discriminant; flush(6) !DEBUG
         if (discriminant < 0.0_dp) then
             r(1) = 0.0_dp
             r(2) = 0.0_dp
@@ -254,9 +255,6 @@ module m_iterative_solvers
         sqrt_discriminant = sqrt(discriminant)
         r(1) = (-b + sqrt_discriminant) / (2.0_dp * a)
         r(2) = (-b - sqrt_discriminant) / (2.0_dp * a)
-
-        write(6,*)'chi0diel quadratic_roots : a*r(1)**2 + b*r(1) + c = ', a*r(1)**2 + b*r(1)+c; flush(6) !DEBUG
-        write(6,*)'chi0diel quadratic_roots : a*r(2)**2 + b*r(2) + c = ', a*r(2)**2 + b*r(2)+c; flush(6) !DEBUG
 
     end function quadratic_roots
 
@@ -307,9 +305,6 @@ module m_iterative_solvers
         end do
 
     end subroutine cg_linear_solver
-
-
-
 
     !****f* m_iterative_solvers/call_FGMRES
     !! NAME
@@ -506,10 +501,8 @@ module m_iterative_solvers
         
         !TODO : dirty check of MKL availability
 #if defined HAVE_LINALG_MKL_OMATCOPY
-write(6,*)'chi0diel FGMRES'; flush(6) !DEBUG
         call call_FGMRES(n, matvec, rhs, est, gmres_maxiter, gmres_rtol)
 #else
-write(6,*)'chi0diel gmresm'; flush(6) !DEBUG
         call call_gmresm(n, matvec, est, rhs, gmres_maxiter, gmres_rtol)
 #endif
       
