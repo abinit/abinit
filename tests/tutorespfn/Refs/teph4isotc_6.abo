@@ -1,5 +1,5 @@
 
-.Version 10.5.6.1 of ABINIT, released Sep 2025.
+.Version 10.5.8.7 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
@@ -485,9 +485,9 @@ P Number of CPUs for parallelism over k-points: 1
  ib_k: 2     0.000000E+00
  ib_k: 3     0.000000E+00
  For k-point: [ 5.5556E-02,  0.0000E+00,  0.0000E+00] , spin 1
- ib_k: 1     2.843409E-01
- ib_k: 2     1.349631E-01
- ib_k: 3     5.051486E-02
+ ib_k: 1     5.332362E-01
+ ib_k: 2     3.673733E-01
+ ib_k: 3     2.247551E-01
  For k-point: [ 3.3333E-01,  2.7778E-01,  5.0000E-01] , spin 1
  ib_k: 1     0.000000E+00
  ib_k: 2     0.000000E+00
@@ -498,9 +498,10 @@ P Number of CPUs for parallelism over k-points: 1
  ib_k: 3     0.000000E+00
 
  E-PH matrix elements in the atom representation: pcase = (idir, iatom)
-    iq    ik pcase im_kq  in_k        |g| in Ha
+ NB: Values are NOT averaged over e_mk+q, and e_nk degenerate states.
+    iq    ik pcase  m_kq   n_k        |g| in Ha
  |g(k,q)| in Ha for iq: 1 ik: 1 pcase: 4
-    iq    ik pcase im_kq  in_k              |g|
+    iq    ik pcase  m_kq   n_k              |g|
      1     1     4     3     3     5.552265E-01
      1     1     4     3     4     3.325623E-01
      1     1     4     3     5     1.188569E-01
@@ -511,7 +512,7 @@ P Number of CPUs for parallelism over k-points: 1
      1     1     4     5     4     9.164973E-02
      1     1     4     5     5     9.008441E-03
  |g(k,q)| in Ha for iq: 1 ik: 1 pcase: 9
-    iq    ik pcase im_kq  in_k              |g|
+    iq    ik pcase  m_kq   n_k              |g|
      1     1     9     3     3     2.321400E-06
      1     1     9     3     4     1.369718E-08
      1     1     9     3     5     7.266558E-08
@@ -521,30 +522,8 @@ P Number of CPUs for parallelism over k-points: 1
      1     1     9     5     3     8.541084E-08
      1     1     9     5     4     1.064084E-08
      1     1     9     5     5     1.472566E-07
- |g(k,q)| in Ha for iq: 1 ik: 173 pcase: 4
-    iq    ik pcase im_kq  in_k              |g|
-     1   173     4     3     3     7.710080E-02
-     1   173     4     3     4     3.245321E-08
-     1   173     4     3     5     1.699203E-01
-     1   173     4     4     3     2.945127E-08
-     1   173     4     4     4     2.722889E-01
-     1   173     4     4     5     2.231525E-08
-     1   173     4     5     3     1.699203E-01
-     1   173     4     5     4     5.232250E-08
-     1   173     4     5     5     2.114425E-01
- |g(k,q)| in Ha for iq: 1 ik: 173 pcase: 9
-    iq    ik pcase im_kq  in_k              |g|
-     1   173     9     3     3     1.290148E-06
-     1   173     9     3     4     2.996643E-02
-     1   173     9     3     5     1.060632E-06
-     1   173     9     4     3     2.996642E-02
-     1   173     9     4     4     1.700860E-06
-     1   173     9     4     5     7.745099E-02
-     1   173     9     5     3     1.086875E-06
-     1   173     9     5     4     7.745110E-02
-     1   173     9     5     5     1.476621E-06
  |g(k,q)| in Ha for iq: 216 ik: 1 pcase: 4
-    iq    ik pcase im_kq  in_k              |g|
+    iq    ik pcase  m_kq   n_k              |g|
    216     1     4     3     3     0.000000E+00
    216     1     4     3     4     0.000000E+00
    216     1     4     3     5     0.000000E+00
@@ -555,7 +534,7 @@ P Number of CPUs for parallelism over k-points: 1
    216     1     4     5     4     0.000000E+00
    216     1     4     5     5     0.000000E+00
  |g(k,q)| in Ha for iq: 216 ik: 1 pcase: 9
-    iq    ik pcase im_kq  in_k              |g|
+    iq    ik pcase  m_kq   n_k              |g|
    216     1     9     3     3     0.000000E+00
    216     1     9     3     4     0.000000E+00
    216     1     9     3     5     0.000000E+00
@@ -565,8 +544,30 @@ P Number of CPUs for parallelism over k-points: 1
    216     1     9     5     3     0.000000E+00
    216     1     9     5     4     0.000000E+00
    216     1     9     5     5     0.000000E+00
+ |g(k,q)| in Ha for iq: 1 ik: 173 pcase: 4
+    iq    ik pcase  m_kq   n_k              |g|
+     1   173     4     3     3     7.710080E-02
+     1   173     4     3     4     3.245321E-08
+     1   173     4     3     5     1.699203E-01
+     1   173     4     4     3     2.945127E-08
+     1   173     4     4     4     2.722889E-01
+     1   173     4     4     5     2.231525E-08
+     1   173     4     5     3     1.699203E-01
+     1   173     4     5     4     5.232250E-08
+     1   173     4     5     5     2.114425E-01
+ |g(k,q)| in Ha for iq: 1 ik: 173 pcase: 9
+    iq    ik pcase  m_kq   n_k              |g|
+     1   173     9     3     3     1.290148E-06
+     1   173     9     3     4     2.996643E-02
+     1   173     9     3     5     1.060632E-06
+     1   173     9     4     3     2.996642E-02
+     1   173     9     4     4     1.700860E-06
+     1   173     9     4     5     7.745099E-02
+     1   173     9     5     3     1.086875E-06
+     1   173     9     5     4     7.745110E-02
+     1   173     9     5     5     1.476621E-06
  |g(k,q)| in Ha for iq: 216 ik: 173 pcase: 4
-    iq    ik pcase im_kq  in_k              |g|
+    iq    ik pcase  m_kq   n_k              |g|
    216   173     4     3     3     0.000000E+00
    216   173     4     3     4     0.000000E+00
    216   173     4     3     5     0.000000E+00
@@ -577,7 +578,7 @@ P Number of CPUs for parallelism over k-points: 1
    216   173     4     5     4     0.000000E+00
    216   173     4     5     5     0.000000E+00
  |g(k,q)| in Ha for iq: 216 ik: 173 pcase: 9
-    iq    ik pcase im_kq  in_k              |g|
+    iq    ik pcase  m_kq   n_k              |g|
    216   173     9     3     3     0.000000E+00
    216   173     9     3     4     0.000000E+00
    216   173     9     3     5     0.000000E+00

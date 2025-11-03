@@ -69,7 +69,7 @@ module m_sigmaph
  use m_crystal,        only : crystal_t
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map
  use m_occ,            only : occ_fd, occ_be
- use m_kg,             only : getph, mkkpg, mkkin
+ use m_kg,             only : getph, mkkpg
  use m_bz_mesh,        only : isamek
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack
  use m_ioarr,          only : read_rhor
@@ -477,8 +477,8 @@ module m_sigmaph
    ! d Re Sigma_frohl(omega, kT, band, kcalc, spin) / d omega (omega=eKS)
 
   real(dp),allocatable :: dw_vals(:,:)
-   !  dw_vals(ntemp, max_nbcalc) for given (ikcalc, spin)
-   !  Debye-Waller term (static).
+   ! dw_vals(ntemp, max_nbcalc) for given (ikcalc, spin)
+   ! Debye-Waller term (static).
 
   real(dp),allocatable :: dw_stern_vals(:,:)
    !  dw_stern_vals(ntemp, max_nbcalc) for given (ikcalc, spin)
@@ -1489,7 +1489,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        ! Get istwf_kq, npw_kq, kg_kq for k+q.
        call wfd%get_gvec_gbound(cryst%gmet, ecut, kq, ikq_ibz, isirr_kq, dtset%nloalg, & ! in
-                                istwf_kq, npw_kq, kg_kq, nkpg_kq, kpg_kq, gbound_kq)       ! out
+                                istwf_kq, npw_kq, kg_kq, nkpg_kq, kpg_kq, gbound_kq)     ! out
 
        !call timab(1901, 2, tsec)
        !call timab(1902, 1, tsec)
@@ -1780,7 +1780,6 @@ end if
                sigma%fan_stern_vals(it, ib_k) = sigma%fan_stern_vals(it, ib_k) + rtmp
                ! Add static term from Sternheimer to Sigma(w) as well.
                if (sigma%nwr > 0) sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + rtmp
-               !if (sigma%nwr > 0) sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + gkq2 * cfact_wr(:)
              end do
 
              ! TODO Eliashberg functions with Sternheimer

@@ -1,5 +1,5 @@
 
-.Version 10.5.6.1 of ABINIT, released Sep 2025.
+.Version 10.5.8.7 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
@@ -400,39 +400,40 @@ P Number of CPUs for parallelism over k-points: 1
 
  Group velocities |v_nk| in atomic units:
  For k-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] , spin 1
- ib_k: 1     5.654169E-17
+ ib_k: 1     7.519421E-09
  For k-point: [ 7.6923E-02,  0.0000E+00,  0.0000E+00] , spin 1
- ib_k: 1     1.151920E-01
+ ib_k: 1     3.393995E-01
  For k-point: [-3.0769E-01,  4.6154E-01,  1.5385E-01] , spin 1
  ib_k: 1     0.000000E+00
  For k-point: [-3.0769E-01,  4.6154E-01,  2.3077E-01] , spin 1
  ib_k: 1     0.000000E+00
 
  E-PH matrix elements in the atom representation: pcase = (idir, iatom)
-    iq    ik pcase im_kq  in_k        |g| in Ha
+ NB: Values are NOT averaged over e_mk+q, and e_nk degenerate states.
+    iq    ik pcase  m_kq   n_k        |g| in Ha
  |g(k,q)| in Ha for iq: 1 ik: 1 pcase: 4
-    iq    ik pcase im_kq  in_k              |g|
+    iq    ik pcase  m_kq   n_k              |g|
      1     1     4     6     6     2.369238E-08
  |g(k,q)| in Ha for iq: 1 ik: 1 pcase: 6
-    iq    ik pcase im_kq  in_k              |g|
+    iq    ik pcase  m_kq   n_k              |g|
      1     1     6     6     6     2.307791E-08
- |g(k,q)| in Ha for iq: 1 ik: 89 pcase: 4
-    iq    ik pcase im_kq  in_k              |g|
-     1    89     4     6     6     2.433022E-08
- |g(k,q)| in Ha for iq: 1 ik: 89 pcase: 6
-    iq    ik pcase im_kq  in_k              |g|
-     1    89     6     6     6     2.528762E-08
  |g(k,q)| in Ha for iq: 597 ik: 1 pcase: 4
-    iq    ik pcase im_kq  in_k              |g|
+    iq    ik pcase  m_kq   n_k              |g|
    597     1     4     6     6     7.813351E-01
  |g(k,q)| in Ha for iq: 597 ik: 1 pcase: 6
-    iq    ik pcase im_kq  in_k              |g|
+    iq    ik pcase  m_kq   n_k              |g|
    597     1     6     6     6     4.982705E-01
+ |g(k,q)| in Ha for iq: 1 ik: 89 pcase: 4
+    iq    ik pcase  m_kq   n_k              |g|
+     1    89     4     6     6     2.433022E-08
+ |g(k,q)| in Ha for iq: 1 ik: 89 pcase: 6
+    iq    ik pcase  m_kq   n_k              |g|
+     1    89     6     6     6     2.528762E-08
  |g(k,q)| in Ha for iq: 597 ik: 89 pcase: 4
-    iq    ik pcase im_kq  in_k              |g|
+    iq    ik pcase  m_kq   n_k              |g|
    597    89     4     6     6     8.165923E-01
  |g(k,q)| in Ha for iq: 597 ik: 89 pcase: 6
-    iq    ik pcase im_kq  in_k              |g|
+    iq    ik pcase  m_kq   n_k              |g|
    597    89     6     6     6     5.482770E-01
 
 == END DATASET(S) ==============================================================

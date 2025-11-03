@@ -219,6 +219,9 @@ MODULE m_nctk
 
  public :: nctk_write_datar
  public :: nctk_read_datar
+ public :: nctk_prepare_mpiio
+ ! This function appears to be required to prevent deadlocks during I/O operations in single mode.
+ ! It's called automatically when using nctk_open_modify and nctk_open_read
 
  public :: create_nc_file              ! FIXME: Deprecated
  public :: write_var_netcdf            ! FIXME: Deprecated
@@ -2231,6 +2234,33 @@ integer function nctk_read_datar(path,varname,ngfft,cplex,nfft,nspden,&
  end if
 
 end function nctk_read_datar
+!!***
+
+!!****f* m_nctk/nctk_prepare_mpiio
+!! NAME
+!! nctk_mpiio
+!!
+!! FUNCTION
+!! This function appears to be required to prevent deadlocks during I/O operations in single mode.
+!! Although single mode is the default, on some architectures or compilers, nf90_put_var
+!! can deadlock if not all processors in the communicator invoke the function.
+!! This solution was proposed by Hsiao-Yi Tsai.
+
+integer function nctk_prepare_mpiio(ncid, varname) result(ncerr)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: ncid
+ character(len=*),intent(in) :: varname
+
+!Local variables-------------------------------
+ integer :: vid
+ character(len=nctk_slen) :: out_varname
+! *************************************************************************
+
+ vid = nctk_idname(ncid, varname)
+ ncerr = nf90_inquire_variable(ncid, vid, out_varname)
+
+end function nctk_prepare_mpiio
 !!***
 
 !----------------------------------------------------------------------

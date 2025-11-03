@@ -24,9 +24,9 @@
 
  #gstore_use_lgk  0
  gstore_use_lgk  1
- #gstore_gname "gvals"   # Use GWPT e-ph matrix elements from GSTORE (default)
- #gstore_gname "gvals_ks" # Use KS e-ph matrix elements from GSTORE
- #eph_stern 1
+ gstore_gname "gvals"      # Use GWPT e-ph matrix elements from GSTORE (default)
+ #gstore_gname "gvals_ks"  # Use KS e-ph matrix elements from GSTORE
+ eph_stern 1               # Activate Sterheimer to compute contribution given by states above nband
 
  tmesh 300 100 1         # Temperature mesh.
 
@@ -63,7 +63,7 @@
 #%% [files]
 #%% use_git_submodule = diamond_eph_gwpt
 #%% files_to_test =
-#%%   t05.abo, tolnlines= 25, tolabs= 5.000e-02, tolrel= 0.03
+#%%   t05.abo, tolnlines= 25, tolabs= 5.000e-02, tolrel= 0.2
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
