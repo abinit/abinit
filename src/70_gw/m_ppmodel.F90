@@ -251,6 +251,8 @@ subroutine ppm_get_qbz(ppm, Gsph, Qmesh, iq_bz, botsq, otq, eig)
  ! Here there is a problem with the small q, still cannot use BZ methods
  iq_ibz = Qmesh%tab(iq_bz); isym_q = Qmesh%tabo(iq_bz); itim_q = (3-Qmesh%tabi(iq_bz))/2
 
+ ABI_CHECK(all(abs(qmesh%umklp(:, iq_bz)) < tol6), "umklapp in get_qbz are not supported!")
+
  !call Qmesh%get_bz_item(iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
  iq_curr = iq_ibz; if (ppm%mqmem == 0) iq_curr = 1
 

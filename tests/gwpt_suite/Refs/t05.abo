@@ -1,6 +1,6 @@
 
-.Version 10.5.6.9 of ABINIT, released Sep 2025.
-.(MPI version, prepared for a aarch64_darwin23.6.0_gnu14.2 computer)
+.Version 10.5.8.7 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -53,6 +53,7 @@ _ WF disk file :      0.230 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
               amu      1.20110000E+01
         ddb_ngqpt        2    2    2
              ecut      4.50000000E+01 Hartree
+        eph_stern           1
          eph_task          24
 -          fftalg         512
    gstore_use_lgk        1
@@ -68,6 +69,7 @@ P           mkmem           3
             nband          12
             ngfft          30      30      30
              nkpt           3
+            nline         100
              nsym          48
            ntypat           1
               occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
@@ -231,10 +233,10 @@ meta: {optdriver: 7, eph_task: 24, }
 
 
 - Reading e-ph matrix elements from: t04o_GSTORE.nc
- Asking for with_gmode: phonon
  Asking for with_cplex: 1
- Asking for gvals_name: gvals_ks
- Asking for g(k,q=Gamma): yes
+ Asking for with_gmode: phonon
+ Asking for gvals_name: gvals
+ Asking for g2dw: yes
  Initializing gstore object from: t04o_GSTORE.nc
 
  Reading KS e-ph matrix elements
@@ -255,7 +257,7 @@ P pp_sum_comm can use shmem: yes
  glob_nq_spin: [8]
  kptopt: 1
  qptopt: 1
- has_used_lgk: 0
+ has_used_lgk: 1
  has_used_lgq: 0
  with_vk: 1
 
@@ -293,6 +295,7 @@ P Number of CPUs for parallelism over k-points: 1
  300.0     0.026    13.558     3.336     1.478
 
 
+ Reading GS KS potential for Sternheimer from: diamond_eph_gwpt/gso_POT.nc
 ================================================================================
  Final results in eV.
  Notations:
@@ -312,30 +315,30 @@ P Number of CPUs for parallelism over k-points: 1
 
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   13.558
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   2  10.221   10.255    0.034    0.202   -0.050    0.169    0.842   -0.640    0.000    0.000
-   3  10.221   10.255    0.034    0.202   -0.050    0.169    0.842   -0.640    0.000    0.000
-   4  10.221   10.255    0.034    0.202   -0.050    0.169    0.842   -0.640    0.000    0.000
-   5  15.832   15.750   -0.081   -0.459   -0.047    0.177   -0.347   -0.112    5.611    5.495
-   6  15.832   15.750   -0.081   -0.459   -0.047    0.177   -0.347   -0.112    0.000    0.000
-   7  15.832   15.750   -0.081   -0.459   -0.047    0.177   -0.347   -0.112    0.000    0.000
+   2  10.221   10.240    0.018    0.110   -0.050    0.169   -0.665    0.774    0.000    0.000
+   3  10.221   10.240    0.018    0.110   -0.050    0.169   -0.665    0.774    0.000    0.000
+   4  10.221   10.240    0.018    0.110   -0.050    0.169   -0.665    0.774    0.000    0.000
+   5  15.832   15.752   -0.080   -0.451   -0.047    0.177   -1.787    1.336    5.611    5.512
+   6  15.832   15.752   -0.080   -0.451   -0.047    0.177   -1.787    1.336    0.000    0.000
+   7  15.832   15.752   -0.080   -0.451   -0.047    0.177   -1.787    1.336    0.000    0.000
 
  KS gap:    5.611 (assuming bval:4 ==> bcond:5)
- QP gap:    5.495 (OTMS:    4.949)
- QP_gap - KS_gap:   -0.115 (OTMS:   -0.661)
+ QP gap:    5.512 (OTMS:    5.050)
+ QP_gap - KS_gap:   -0.098 (OTMS:   -0.560)
 
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:   13.558
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   2  -2.521   -2.089    0.432    2.168   -0.040    0.199    1.210    0.958    0.000    0.000
-   3   3.934    3.843   -0.091   -0.329   -0.026    0.277    0.160   -0.489    6.455    5.932
-   4   3.934    3.843   -0.091   -0.329   -0.026    0.277    0.160   -0.489    0.000    0.000
-   5  15.036   14.902   -0.134   -1.695   -0.119    0.079   -1.651   -0.043   11.102   11.059
-   6  15.036   14.902   -0.134   -1.695   -0.119    0.079   -1.651   -0.043    0.000    0.000
-   7  26.960   26.849   -0.111   -1.264   -0.105    0.088   -1.197   -0.067   11.924   11.947
+   2  -2.521   -2.095    0.426    2.137   -0.040    0.199    0.808    1.329    0.000    0.000
+   3   3.934    3.839   -0.095   -0.344   -0.026    0.277   -0.937    0.593    6.455    5.934
+   4   3.934    3.839   -0.095   -0.344   -0.026    0.277   -0.937    0.593    0.000    0.000
+   5  15.036   14.904   -0.132   -1.671   -0.119    0.079   -2.012    0.342   11.102   11.065
+   6  15.036   14.904   -0.132   -1.671   -0.119    0.079   -2.012    0.342    0.000    0.000
+   7  26.960   26.856   -0.104   -1.184   -0.105    0.088   -4.166    2.982   11.924   11.952
 
  KS gap:   11.102 (assuming bval:4 ==> bcond:5)
- QP gap:   11.059 (OTMS:    9.736)
- QP_gap - KS_gap:   -0.043 (OTMS:   -1.366)
+ QP gap:   11.065 (OTMS:    9.775)
+ QP_gap - KS_gap:   -0.037 (OTMS:   -1.327)
 
 ============================================================================================
 
@@ -347,6 +350,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:   13.558
               amu      1.20110000E+01
         ddb_ngqpt        2    2    2
              ecut      4.50000000E+01 Hartree
+        eph_stern           1
          eph_task          24
            etotal      0.0000000000E+00
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -361,6 +365,7 @@ P           mkmem           3
             nband          12
             ngfft          30      30      30
              nkpt           3
+            nline         100
              nsym          48
            ntypat           1
               occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
