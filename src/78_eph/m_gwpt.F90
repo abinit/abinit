@@ -216,7 +216,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: my_is, spin, idir,ipert, ig, max_npw_xc, min_npw_xc, npw_x, npw_c, nw_nk, nw_mkq
  integer :: my_pp_start_spin(dtset%nsppol), my_pp_stop_spin(dtset%nsppol), my_npp(dtset%nsppol)
  integer :: isym_q, trev_q
- integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_k_ibz, istwf_k_ibz
+ integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_k_ibz, istwf_k_ibz, ik_glob, ik_bz
  integer :: ikq_ibz, isym_kq, trev_kq, npw_kq, istwf_kq,  npw_kq_ibz, istwf_kq_ibz
  integer :: ikmp_ibz, isym_kmp, trev_kmp, npw_kmp, istwf_kmp
  integer :: ikqmp_ibz, isym_kqmp, trev_kqmp, npw_kqmp, istwf_kqmp, npw_kqmp_ibz, istwf_kqmp_ibz, mpw,ierr,nqbz,ncerr !,spad
@@ -288,7 +288,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  complex(gwp),allocatable :: full_ur1_kqmp(:), full_ur1_star_kmp(:), sigcme_nk(:), sigcme_mkq(:), ur_nk(:,:), ur_mkq(:,:)
  complex(gwp),allocatable :: vec_gwc_nk(:,:,:), vec_gwc_mkq(:,:,:), vec_gx_nk(:,:), vec_gx_mkq(:,:)
  complex(gwp),allocatable :: botsq_pbz(:,:), otq_pbz(:,:), dmeig_pbz(:,:), epsm1_ggw(:,:,:)
- complex(gwp),allocatable :: trans_botsq_pbz(:,:), trans_otq_pbz(:,:), trans_dmeig_pbz(:,:)
+ complex(gwp),allocatable :: trans_botsq_pbz(:,:), trans_otq_pbz(:,:), trans_dmeig_pbz(:,:), sigx_nk(:,:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
  type(pawrhoij_type),allocatable :: pot_pawrhoij(:), den_pawrhoij(:)
@@ -869,6 +869,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_MALLOC(gks_atm, (2, nb_kq, nb_k, natom3))
    ABI_MALLOC(gks_atm2, (2, nb_kq, nb_k, natom3))
    ABI_MALLOC(gxc_atm, (2, nb_kq, nb_k, natom3))
+   ABI_CALLOC(sigx_nk, (nb_k, gqk%glob_nk))
 
    ABI_MALLOC(ur_nk,  (nfft*nspinor, bstart_k:bstop_k))
    ABI_MALLOC(ur_mkq, (nfft*nspinor, bstart_kq:bstop_kq))
@@ -990,6 +991,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      ! =============================================================
      do my_ik=1,gqk%my_nk
        kk = gqk%my_kpts(:, my_ik); kk_string = ktoa(kk)
+       ik_glob = gqk%my_k2glob(my_ik)
 
        if (dtset%userib /= 0) then
          if (any(abs(gqk%my_kpts(:, my_ik) - [0.25, 0.0, 0.0]) > tol14) .and. &
@@ -1313,7 +1315,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            if (gqk%pert_comm%nproc > 1) vec_gwc_nk = zero
 
            do n_k=bstart_k, bstop_k
-             in_k = ib_sum - bstart_k + 1
+             in_k = n_k - bstart_k + 1
              !if gqk%pert_comm%skip(n_k) cycle ! MPI parallelism inside pert_comm
 
              ! Compute <bsum,k-p|e^{-i(p+G')}r|n,k> * vc_sqrt(p,G')
@@ -1330,6 +1332,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                if (dtset%userid /= 0) vec_gx_nk(:,n_k) = zero
                ! FIXME: This is wrong if nspinor == 2
                rhotwg_c(:) = rhotwg_x(1:npw_c*nspinor)
+
+               if (qq_is_gamma) then
+                 sigx_nk(in_k, ik_glob) = sigx_nk(in_k, ik_glob) + dot_product(rhotwg_x, rhotwg_x)
+               end if
 
              else
                call fft_ur(npw_c, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_c, gbound_c, cwork_ur, rhotwg_c)
@@ -1801,6 +1807,22 @@ end if ! .not qq_is_gamma.
    ABI_FREE(vec_gx_mkq)
    ABI_FREE(sigcme_nk)
    ABI_FREE(sigcme_mkq)
+
+   call xmpi_sum(sigx_nk, gqk%comm%value, ierr)
+   sigx_nk = -sigx_nk * (one / (cryst%ucvol * pp_mesh%nbz))
+
+   if (gqk%comm%me == master) then
+     write(ab_out, "(a)") " Sigma^x_nk in eV:"
+     do ik_glob=1, gqk%glob_nk
+       ik_bz = gstore%kglob2bz(ik_glob, spin)
+       write(ab_out, "(2a)") "Band, Sigx for k-point:", trim(ktoa(gstore%kbz(:, ik_bz)))
+       do band=gqk%bstart_k, gqk%bstop_k
+         in_k = band - gqk%bstart_k + 1
+         write(ab_out, *) band, sigx_nk(in_k, ik_glob) * Ha_eV
+       end do
+     end do
+   end if
+   ABI_SFREE(sigx_nk)
 
    if (dtset%gstore_use_lgk /= 0) then
      do my_ik=1,gqk%my_nk

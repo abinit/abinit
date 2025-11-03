@@ -501,8 +501,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
      !nctkarr_t("eph_phrange_w", "dp", "two"), &
      !nctkarr_t("ddb_ngqpt", "int", "three"), &
      !nctkarr_t("ph_ngqpt", "int", "three"), &
-     !nctkarr_t("sigma_ngkpt", "int", "three"), &
-     !nctkarr_t("sigma_erange", "dp", "two"), &
      !!nctkarr_t("frohl_params", "dp", "four"), &
      !nctkarr_t("bstart_ks", "int", "nkcalc, nsppol"), &
      !nctkarr_t("nbcalc_ks", "int", "nkcalc, nsppol"), &
@@ -510,7 +508,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
      !nctkarr_t("kcalc2ibz", "int", "nkcalc, six"), &
      nctkarr_t("kTmesh", "dp", "ntemp"), &
      nctkarr_t("mu_e", "dp", "ntemp") &
-     !nctkarr_t("qp_done", "int", "nkcalc, nsppol"), &
    ])
    NCF_CHECK(ncerr)
 
@@ -1024,6 +1021,48 @@ subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, eb
  if (gstore%gtype == "gwpt" .and. dtset%gstore_gname == "gvals") this_gtype = "GWPT"
  if (gstore%gtype == "gwpt" .and. dtset%gstore_gname == "gvals_ks") this_gtype = "KS"
 
+ ! Write self-energy matrix elements for this spin
+ ! NB: Only master writes
+ ! Create hdf group for this spin.
+ NCF_CHECK(nf90_def_grp(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
+ !NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("data_spin", itoa(spin)), spin_ncid))
+
+ ! Define dimensions and arrays inside group at runtime
+ ncerr = nctk_def_dims(spin_ncid, [ &
+   nctkdim_t("glob_nk", gqk%glob_nk), &
+   nctkdim_t("nb_kq", gqk%nb_kq), &
+   nctkdim_t("nb_k", gqk%nb_k) &
+ ], defmode=.True.)
+ NCF_CHECK(ncerr)
+
+ ncerr = nctk_def_arrays(spin_ncid, [ &
+   nctkarr_t("vals_e0ks", "dp", "two, ntemp, nb_k, glob_nk"), &
+   nctkarr_t("fan_vals", "dp", "two, ntemp, nb_k, glob_nk"), &
+   nctkarr_t("fan_stern_vals", "dp", "two, ntemp, nb_k, glob_nk"), &
+   nctkarr_t("dvals_de0ks", "dp", "two, ntemp, nb_k, glob_nk"), &
+   nctkarr_t("dw_vals", "dp", "ntemp, nb_k, glob_nk"), &
+   nctkarr_t("dw_stern_vals", "dp", "ntemp, nb_k, glob_nk") &
+   !nctkarr_t("qpoms_enes", "dp", "two, ntemp, nb_k, glob_nk"), &
+   !nctkarr_t("qp_enes", "dp", "two, ntemp, nb_k, glob_nk"), &
+   !nctkarr_t("ze0_vals", "dp", "ntemp, nb_k, glob_nk"), &
+   !nctkarr_t("ks_enes", "dp", "nk_k, glob_nk"), &
+   !nctkarr_t("ks_gaps", "dp", "nb_k, glob_nk"), &
+   !nctkarr_t("qpoms_gaps", "dp", "ntemp, nb_k, glob_nk"), &
+   !nctkarr_t("qp_gaps", "dp", "ntemp, nb_k, glob_nk"), &
+   !nctkarr_t("phmesh", "dp", "phmesh_size"), &
+   !nctkarr_t("vcar_calc", "dp", "three, max_nbcalc, nkcalc, nsppol") &
+ ])
+ NCF_CHECK(ncerr)
+
+ ! Write data.
+ !NCF_CHECK(nctk_set_datamode(spin_ncid))
+ NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "vals_e0ks"), c2r(sigma%vals_e0ks)))
+ NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "fan_vals"), c2r(sigma%fan_vals)))
+ NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "fan_stern_vals"), c2r(sigma%fan_stern_vals)))
+ NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "dvals_de0ks"), c2r(sigma%dvals_de0ks)))
+ NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "dw_vals"), sigma%dw_vals))
+ NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "dw_stern_vals"), sigma%dw_stern_vals))
+
  ! Write legend.
  if (spin == 1) then
    write(ab_out,"(a)")repeat("=", 80)
@@ -1222,62 +1261,22 @@ subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, eb
      end if
 
    end do ! it
+
+   ! Dump QP energies and gaps for this kpoint.
+   !start = [ikcalc, spin]
+   !NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "qpoms_enes"), c2r(qpoms_enes)))
+   !NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "qp_enes"), c2r(qp_enes)))
+   !NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "ze0_vals"), ze0_vals))
+   !NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "ks_enes"), ks_enes))
+   !NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "ks_gaps"), ks_gap))
+   !NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "qpoms_gaps"), qpoms_gaps))
+   !NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "qp_gaps"), qp_gaps))
  end do ! ikcalc
 
  if (sigma%ntemp > max_ntemp) then
    write(ab_out, "(a,i0,a)")" No more than ", max_ntemp, " temperatures are written to the main output file."
    write(ab_out, "(2a)")" Please use SIGEPH.nc file and AbiPy to analyze the results.",ch10
  end if
-
- ! Write self-energy matrix elements for this spin
- ! NB: Only master writes
- ! Create hdf group for this spin.
- NCF_CHECK(nf90_def_grp(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
- !NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("data_spin", itoa(spin)), spin_ncid))
-
- ! Define dimensions and arrays inside group at runtime
- ncerr = nctk_def_dims(spin_ncid, [ &
-   nctkdim_t("glob_nk", gqk%glob_nk), &
-   nctkdim_t("nb_kq", gqk%nb_kq), &
-   nctkdim_t("nb_k", gqk%nb_k) &
- ], defmode=.True.)
- NCF_CHECK(ncerr)
-
- ncerr = nctk_def_arrays(spin_ncid, [ &
-   nctkarr_t("vals_e0ks", "dp", "two, ntemp, nb_k, glob_nk"), &
-   nctkarr_t("fan_vals", "dp", "two, ntemp, nb_k, glob_nk"), &
-   nctkarr_t("fan_stern_vals", "dp", "two, ntemp, nb_k, glob_nk"), &
-   nctkarr_t("dvals_de0ks", "dp", "two, ntemp, nb_k, glob_nk"), &
-   nctkarr_t("dw_vals", "dp", "ntemp, nb_k, glob_nk"), &
-   nctkarr_t("dw_stern_vals", "dp", "ntemp, nb_k, glob_nk") &
-   !nctkarr_t("qpoms_enes", "dp", "two, ntemp, nb_k, glob_nk"), &
-   !nctkarr_t("qp_enes", "dp", "two, ntemp, nb_k, glob_nk"), &
-   !nctkarr_t("ze0_vals", "dp", "ntemp, nb_k, glob_nk"), &
-   !nctkarr_t("ks_enes", "dp", "nk_k, glob_nk"), &
-   !nctkarr_t("ks_gaps", "dp", "nb_k, glob_nk"), &
-   !nctkarr_t("qpoms_gaps", "dp", "ntemp, nb_k, glob_nk"), &
-   !nctkarr_t("qp_gaps", "dp", "ntemp, nb_k, glob_nk"), &
-   !nctkarr_t("phmesh", "dp", "phmesh_size"), &
-   !nctkarr_t("vcar_calc", "dp", "three, max_nbcalc, nkcalc, nsppol") &
- ])
- NCF_CHECK(ncerr)
-
- ! Write data.
- !NCF_CHECK(nctk_set_datamode(spin_ncid))
- NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "vals_e0ks"), c2r(sigma%vals_e0ks)))
- NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "fan_vals"), c2r(sigma%fan_vals)))
- NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "fan_stern_vals"), c2r(sigma%fan_stern_vals)))
- NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "dvals_de0ks"), c2r(sigma%dvals_de0ks)))
- NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "dw_vals"), sigma%dw_vals))
- NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "dw_stern_vals"), sigma%dw_stern_vals))
- ! Dump QP energies and gaps for this spin.
- !NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "qpoms_enes"), c2r(qpoms_enes)))
- !NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "qp_enes"), c2r(qp_enes)))
- !NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "ze0_vals"), ze0_vals))
- !NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "ks_enes"), ks_enes))
- !NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "ks_gaps"), ks_gap))
- !NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "qpoms_gaps"), qpoms_gaps))
- !NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "qp_gaps"), qp_gaps))
 
 end subroutine sep_gather_and_write_results
 !!***
