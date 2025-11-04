@@ -45,6 +45,7 @@ module m_gwpt
  use m_gwdefs,         only : czero_gw
  use defs_abitypes,    only : mpi_type
  use defs_datatypes,   only : pseudopotential_type
+ use m_array,          only : array2_gwpc_t
  use m_dtfil,          only : datafiles_type
  use m_dtset,          only : dataset_type
  use m_gwdefs,         only : GW_Q0_DEFAULT
@@ -82,6 +83,7 @@ module m_gwpt
  use m_occ,            only : get_fact_spin_tol_empty
  use m_ebands,         only : ebands_t
  use m_pstat,          only : pstat_proc
+ use m_screen,         only : em1_symmetrize_op
  use m_ppmodel,        only : ppmodel_t
  use m_lgroup,         only : lgroup_t
 
@@ -215,10 +217,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: ib_sum, ii, u1_band !,u1c_ib_k,  jj, iw !ib_kq, band_ks, ib_k, ibsum_kq, u1_master, ip
  integer :: my_is, spin, idir,ipert, ig, max_npw_xc, min_npw_xc, npw_x, npw_c, nw_nk, nw_mkq
  integer :: my_pp_start_spin(dtset%nsppol), my_pp_stop_spin(dtset%nsppol), my_npp(dtset%nsppol)
- integer :: isym_q, trev_q
+ integer :: isym_q, trev_q, ip_ibz
  integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_k_ibz, istwf_k_ibz, ik_glob, ik_bz
  integer :: ikq_ibz, isym_kq, trev_kq, npw_kq, istwf_kq,  npw_kq_ibz, istwf_kq_ibz
- integer :: ikmp_ibz, isym_kmp, trev_kmp, npw_kmp, istwf_kmp
+ integer :: ikmp_ibz, isym_kmp, trev_kmp, npw_kmp, istwf_kmp, use_coh
  integer :: ikqmp_ibz, isym_kqmp, trev_kqmp, npw_kqmp, istwf_kqmp, npw_kqmp_ibz, istwf_kqmp_ibz, mpw,ierr,nqbz,ncerr !,spad
  integer :: n1,n2,n3,n4,n5,n6,nspden, mqmem, im_kq, m_kq, in_k, n_k, restart, root_ncid, spin_ncid, usecprj !,sij_opt
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg_k,nkpg_kq,nkpg_kqmp,nkpg_kmp,imyp, cnt, nvloc, iw_nk, iw_mkq, ndone, nmiss
@@ -287,12 +289,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  complex(gwp),allocatable :: ur_star_kmp(:), ur_star_kqmp(:), cwork_ur(:), rhotwg_c(:), rhotwg_x(:), vc_sqrt_gx(:)
  complex(gwp),allocatable :: full_ur1_kqmp(:), full_ur1_star_kmp(:), sigcme_nk(:), sigcme_mkq(:), ur_nk(:,:), ur_mkq(:,:)
  complex(gwp),allocatable :: vec_gwc_nk(:,:,:), vec_gwc_mkq(:,:,:), vec_gx_nk(:,:), vec_gx_mkq(:,:)
+ complex(gwp),allocatable :: vec_coh_nk(:,:), vec_coh_mkq(:,:), out_epsm1(:,:)
  complex(gwp),allocatable :: botsq_pbz(:,:), otq_pbz(:,:), dmeig_pbz(:,:), epsm1_ggw(:,:,:)
  complex(gwp),allocatable :: trans_botsq_pbz(:,:), trans_otq_pbz(:,:), trans_dmeig_pbz(:,:), sigx_nk(:,:), sigce0_nk(:,:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
  type(pawrhoij_type),allocatable :: pot_pawrhoij(:), den_pawrhoij(:)
  type(lgroup_t),allocatable :: lg_myk(:)
+ type(array2_gwpc_t),allocatable :: epsm1_pibz(:)
 !************************************************************************
 
  if (psps%usepaw == 1) then
@@ -767,11 +771,22 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  scr_iomode = iomode_from_fname(screen_filepath)
  ABI_MALLOC(epsm1_ggw, (npw_c, npw_c, hscr%nomega))
 
+ use_coh = 1
+ if (use_coh /= 0) then
+   ! Need to store static screening.
+   ABI_MALLOC(out_epsm1, (npw_c, npw_c))
+   ABI_MALLOC(epsm1_pibz, (pp_mesh%nibz))
+ end if
+
  do iq_ibz=1,pp_mesh%nibz
    call read_screening("inverse_dielectric_function", screen_filepath, &
                        npw_c, 1, hscr%nomega, epsm1_ggw, scr_iomode, comm, iqiA=iq_ibz)
 
    call ppm%new_setup(iq_ibz, cryst, pp_mesh, npw_c, hscr%nomega, hscr%omega, epsm1_ggw, nfftf, gsph_c%gvec, ngfftf, rhor(:,1))
+   if (use_coh /= 0) then
+     ABI_MALLOC(epsm1_pibz(iq_ibz)%vals, (npw_c, npw_c))
+     epsm1_pibz(iq_ibz)%vals = epsm1_ggw(:,:,1)
+   end if
  end do ! iq_ibz
 
  ABI_FREE(epsm1_ggw)
@@ -852,6 +867,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! Loop over MPI distributed spins in Sigma (gqk%comm)
  ! ===================================================
 
+
  stern_qq_ierr = 0; stern_mq_ierr = 0
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is); my_npert = gqk%my_npert
@@ -903,6 +919,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ! Exchange part
    ABI_MALLOC(vec_gx_nk, (npw_x*nspinor,  bstart_k:bstop_k))
    ABI_MALLOC(vec_gx_mkq, (npw_x*nspinor, bstart_kq:bstop_kq))
+
+   if (use_coh /= 0) then
+     ABI_MALLOC(vec_coh_nk, (npw_c, bstart_k:bstop_k))
+     ABI_MALLOC(vec_coh_mkq, (npw_c, bstart_kq:bstop_kq))
+   end if
 
    ! Compute the little group of the k-point so that we can compute g(k,q) only for q in the IBZ_k
    if (dtset%gstore_use_lgk /= 0) then
@@ -1292,6 +1313,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            vc_sqrt_gx(gsph_x%rottb(ig, itim_pp, isym_pp)) = vcp%vc_sqrt(ig, ipp_ibz)
          end do
 
+         if (use_coh /= 0) then
+           call em1_symmetrize_op(ipp_bz, npw_c, 1, gsph_c, pp_mesh, epsm1_pibz(ipp_ibz)%vals, out_epsm1)
+         end if
+
          ! ===========================================
          ! Sum over bands (n' index in equations)
          ! All procs in gqk%pert_comm enter this part.
@@ -1324,8 +1349,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            if (gqk%pert_comm%nproc > 1) vec_gwc_nk = zero
 
            do n_k=bstart_k, bstop_k
-             in_k = n_k - bstart_k + 1
-             !if gqk%pert_comm%skip(n_k) cycle ! MPI parallelism inside pert_comm
+             in_k = n_k - bstart_k + 1 !; if gqk%pert_comm%skip(n_k) cycle ! MPI parallelism inside pert_comm
 
              ! Compute <bsum,k-p|e^{-i(p+G')}r|n,k> * vc_sqrt(p,G')
              cwork_ur = ur_star_kmp * ur_nk(:,n_k)
@@ -1367,6 +1391,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              vec_gwc_nk(:,:,n_k) = zero
              call ppm%calc_sigc(nspinor, npw_c, nw_nk, rhotwg_c, botsq_pbz, otq_pbz, &
                                 omegame0i_nk, dtset%zcut, theta_mu_minus_e0i, dmeig_pbz, npw_c, vec_gwc_nk(:,:,n_k), sigcme_nk)
+
+             !if (use_coh /= 0) then
+             !  vec_coh_nk(:, n_k) = matmul(wmw_ggp, rhotw_c)
+             !end if
 
              if (qq_is_gamma) then
                sigce0_nk(in_k, ik_glob) = sigce0_nk(in_k, ik_glob) + dot_product(rhotwg_c, vec_gwc_nk(:,1,n_k))
@@ -1438,6 +1466,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              call ppm%calc_sigc(nspinor, npw_c, nw_mkq, rhotwg_c, trans_botsq_pbz, trans_otq_pbz, &
                                 omegame0i_mkq, dtset%zcut, theta_mu_minus_e0i, trans_dmeig_pbz, npw_c, &
                                 vec_gwc_mkq(:,:,m_kq), sigcme_mkq)
+
+             !if (use_coh /= 0) then
+             !  vec_coh_mkq(:, m_kq) = matmul(conj(rhotw_c), wmw_ggp)
+             !end if
+
              if (dtset%useric /= 0) vec_gwc_mkq(:,:,m_kq) = zero
            end do ! m_kq
 
@@ -1552,6 +1585,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                    xdot_tmp = - xdotu(npw_x*nspinor, rhotwg_x, 1, vec_gx_nk(:,n_k), 1)
                    ctmp_gwpc = ctmp_gwpc + xdot_tmp ! * theta_mu_minus_e0i  ! theta_mu_minus_e0i is only needed for metals
                  end if
+
+                 !if (use_coh /= 0) then
+                 !  ctmp_gwpc = ctmp_gwpc - quarter * dot_product(conjg(rhotwg_c), vec_coh_nk(:, nk)
+                 !end if
 
                  !if (n_k == 1 .and. m_kq == 1 .and. ipc == 1 .and. ib_sum == 4) then
                  if (n_k == 1 .and. m_kq == 1 .and. ipc == 1) then
@@ -1672,6 +1709,10 @@ if (.not. qq_is_gamma) then
                    xdot_tmp = - xdotu(npw_x*nspinor, vec_gx_mkq(:,m_kq), 1, rhotwg_x, 1)
                    ctmp_gwpc = ctmp_gwpc + xdot_tmp ! * theta_mu_minus_e0i ! theta_mu_minus_e0i is only needed for metals
                  end if
+
+                 !if (use_coh /= 0) then
+                 !  ctmp_gwpc = ctmp_gwpc - quarter * dot_product(conjg(rhotwg_c), vec_coh_nk(:, m_kq)
+                 !end if
 
                  !if (n_k == 1 .and. m_kq == 1 .and. ipc == 1 .and. ib_sum == 4) then
                  if (n_k == 1 .and. m_kq == 1 .and. ipc == 1) then
@@ -1822,6 +1863,9 @@ end if ! .not qq_is_gamma.
    ABI_FREE(sigcme_nk)
    ABI_FREE(sigcme_mkq)
 
+   ABI_SFREE(vec_coh_nk)
+   ABI_SFREE(vec_coh_mkq)
+
    call xmpi_sum(vxc_nk, gqk%kpt_comm%value, ierr)
    call xmpi_sum(sigx_nk, gqk%comm%value, ierr)
    call xmpi_sum(sigce0_nk, gqk%comm%value, ierr)
@@ -1910,6 +1954,14 @@ end if ! .not qq_is_gamma.
  ABI_FREE(rhor)
  ABI_FREE(kxc)
  ABI_FREE(vxc)
+
+ if (use_coh /= 0) then
+   ABI_FREE(out_epsm1)
+   do ip_ibz=1,pp_mesh%nibz
+     call epsm1_pibz(ip_ibz)%free()
+   end do
+   ABI_FREE(epsm1_pibz)
+ end if
 
  call gs_ham_kqmp%free(); call gs_ham_kmp%free(); call wfd%free(); call vcp%free(); call ppm%free()
  call pp_mesh%free(); call gsph_c%free(); call gsph_x%free(); call gstore%free()
