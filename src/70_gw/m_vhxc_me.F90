@@ -141,7 +141,7 @@ subroutine calc_vhxc_me(Wfd, Mflags, Mels, Cryst, Dtset, nfftf, ngfftf, &
 
 !Local variables-------------------------------
 !scalars
- integer :: auxc_ixc,iat,ikc,ik_ibz,ib,jb,is,b_start,b_stop,istwf_k
+ integer :: auxc_ixc,iat,ikc,ik_ibz,ib,jb,is,b_start,b_stop,istwf_k,ii
  integer :: itypat,lmn_size,j0lmn,jlmn,ilmn,klmn,klmn1,lmn2_size_max
  integer :: isppol,cplex_dij,npw_k,nspinor,nsppol,nspden,nk_calc,rank
  integer :: iab,isp1,isp2,ixc_sigma,nsploop,nkxc,option,n3xccc_,nk3xc,my_nbbp,my_nmels
@@ -241,6 +241,11 @@ subroutine calc_vhxc_me(Wfd, Mflags, Mels, Cryst, Dtset, nfftf, ngfftf, &
  call rhotoxc(bigexc_val,bigsxc_val,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
               nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc_,option,rhor,Cryst%rprimd,&
               usexcnhat,vxc_val,vxcval_avg,xccc3d_,xcdata,taur=taur)
+
+ !do ii=1,nfftf
+ !  write(666,*)rhor(ii, 1)
+ !  write(667,*)vxc_val(ii, 1)
+ !end do
 
  ! FABIEN's development
  ! Hybrid functional treatment

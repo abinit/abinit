@@ -987,7 +987,7 @@ subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, eb
  integer :: it, in_k, ikcalc, ik_bz, spin, ierr, bstart_k, bstop_k, cnt, ndeg, spin_ncid, ncerr
  integer :: band_k,ik_ibz,ib_val,ib_cond,jj,ideg,ii,iw, nstates !, nb_k
  !integer :: nq_ibzk_eff, nelem, imyq, iq_ibz_k, sr_ncid, spin_ncid, ncerr
- logical :: changed, iwrite
+ logical :: changed_k, iwrite
  real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond,qpe_oms,qpe_oms_val,qpe_oms_cond
  real(dp) :: ravg2 ! invsig2fmts, tau
  complex(dp) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2,cavg3,cavg4
@@ -1045,7 +1045,7 @@ subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, eb
    !nctkarr_t("qpoms_enes", "dp", "two, ntemp, nb_k, glob_nk"), &
    !nctkarr_t("qp_enes", "dp", "two, ntemp, nb_k, glob_nk"), &
    !nctkarr_t("ze0_vals", "dp", "ntemp, nb_k, glob_nk"), &
-   !nctkarr_t("ks_enes", "dp", "nk_k, glob_nk"), &
+   !nctkarr_t("ks_enes", "dp", "nb_k, glob_nk"), &
    !nctkarr_t("ks_gaps", "dp", "nb_k, glob_nk"), &
    !nctkarr_t("qpoms_gaps", "dp", "ntemp, nb_k, glob_nk"), &
    !nctkarr_t("qp_gaps", "dp", "ntemp, nb_k, glob_nk"), &
@@ -1095,11 +1095,11 @@ subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, eb
    if (dtset%symsigma == +1) then
      ! Average self-energy matrix elements in the degenerate subspace.
      bstart_k = gqk%bstart_k; bstop_k = gqk%bstop_k
-     call ebands%enclose_degbands(ik_ibz, spin, bstart_k, bstop_k, changed, TOL_EDIFF, degblock=degblock)
-     !if (changed) then
+     call ebands%enclose_degbands(ik_ibz, spin, bstart_k, bstop_k, changed_k, TOL_EDIFF, degblock=degblock)
+     bstart_k = gqk%bstart_k; bstop_k = gqk%bstop_k
+     !if (changed_k) then
      !  ABI_WARNING("Changed")
      !end if
-     bstart_k = gqk%bstart_k; bstop_k = gqk%bstop_k
 
      ! Store band indices used for averaging (shifted by bstart_k)
      ndeg = size(degblock, dim=2)

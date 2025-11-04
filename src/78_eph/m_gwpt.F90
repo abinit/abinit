@@ -282,13 +282,13 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),allocatable :: vtrial(:,:), work(:,:,:,:), rhor(:,:), vxc(:,:), kxc(:,:)
  real(dp),allocatable :: omegame0i_nk(:), omegame0i_mkq(:), omegas_nk(:), omegas_mkq(:)
  real(dp),allocatable :: my_gbuf(:,:,:,:,:,:), my_gbuf_ks(:,:,:,:,:,:)
- real(dp),allocatable :: cg_kmp(:,:), cg_kqmp(:,:), cg1_kqmp(:,:), cg1_kmp(:,:), full_cg1_kqmp(:,:), full_cg1_kmp(:,:)
+ real(dp),allocatable :: cg_kmp(:,:), cg_kqmp(:,:), cg1_kqmp(:,:), cg1_kmp(:,:), full_cg1_kqmp(:,:), full_cg1_kmp(:,:), vxc_nk(:,:)
  complex(dp), contiguous, pointer :: cvxc1_qq_ptr(:,:,:)
  complex(gwp),allocatable :: ur_star_kmp(:), ur_star_kqmp(:), cwork_ur(:), rhotwg_c(:), rhotwg_x(:), vc_sqrt_gx(:)
  complex(gwp),allocatable :: full_ur1_kqmp(:), full_ur1_star_kmp(:), sigcme_nk(:), sigcme_mkq(:), ur_nk(:,:), ur_mkq(:,:)
  complex(gwp),allocatable :: vec_gwc_nk(:,:,:), vec_gwc_mkq(:,:,:), vec_gx_nk(:,:), vec_gx_mkq(:,:)
  complex(gwp),allocatable :: botsq_pbz(:,:), otq_pbz(:,:), dmeig_pbz(:,:), epsm1_ggw(:,:,:)
- complex(gwp),allocatable :: trans_botsq_pbz(:,:), trans_otq_pbz(:,:), trans_dmeig_pbz(:,:), sigx_nk(:,:)
+ complex(gwp),allocatable :: trans_botsq_pbz(:,:), trans_otq_pbz(:,:), trans_dmeig_pbz(:,:), sigx_nk(:,:), sigce0_nk(:,:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
  type(pawrhoij_type),allocatable :: pot_pawrhoij(:), den_pawrhoij(:)
@@ -833,6 +833,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call rhotoxc(bigexc, bigsxc, kxc, mpi_enreg, nfft, ngfft, &
               dum_nhat, 0, dum_nhat, 0, nkxc, nk3xc, non_magnetic_xc, n3xccc0, option, rhor, &
               cryst%rprimd, usexcnhat, vxc, vxcavg, dum_xccc3d, xcdata)
+ !do ii=1, nfft
+ !  write(566,*)rhor(ii, 1)
+ !  write(567,*) vxc(ii, 1)
+ !end do
  call pstat_proc%print(_PSTAT_ARGS_)
 
  ! Here we decide if the q-points can be reduced to the IBZ(k)
@@ -869,7 +873,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_MALLOC(gks_atm, (2, nb_kq, nb_k, natom3))
    ABI_MALLOC(gks_atm2, (2, nb_kq, nb_k, natom3))
    ABI_MALLOC(gxc_atm, (2, nb_kq, nb_k, natom3))
+
+   ABI_CALLOC(vxc_nk, (nb_k, gqk%glob_nk))
    ABI_CALLOC(sigx_nk, (nb_k, gqk%glob_nk))
+   ABI_CALLOC(sigce0_nk, (nb_k, gqk%glob_nk))
 
    ABI_MALLOC(ur_nk,  (nfft*nspinor, bstart_k:bstop_k))
    ABI_MALLOC(ur_mkq, (nfft*nspinor, bstart_kq:bstop_kq))
@@ -1065,8 +1072,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! Precompute ur_nk and ur_mkq for all m and n band indices treated.
        ! TODO: Can distribute operations inside gqk%pert_comm
        do n_k=bstart_k, bstop_k
+         in_k = n_k - bstart_k + 1
          call wfd%rotate_cg(n_k, ndat1, spin, kk_ibz, npw_k, kg_k, istwf_k, &
                             cryst, mapl_k, gbound_k, work_ngfft, work, ug_k, urs_kbz=ur_nk(:,n_k))
+         vxc_nk(in_k, ik_glob) = dot_product(ur_nk(:,n_k), vxc(:, spin) * ur_nk(:,n_k)) / nfftf
        end do
 
        do m_kq=bstart_kq, bstop_kq
@@ -1358,6 +1367,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              vec_gwc_nk(:,:,n_k) = zero
              call ppm%calc_sigc(nspinor, npw_c, nw_nk, rhotwg_c, botsq_pbz, otq_pbz, &
                                 omegame0i_nk, dtset%zcut, theta_mu_minus_e0i, dmeig_pbz, npw_c, vec_gwc_nk(:,:,n_k), sigcme_nk)
+
+             if (qq_is_gamma) then
+               sigce0_nk(in_k, ik_glob) = sigce0_nk(in_k, ik_glob) + dot_product(rhotwg_c, vec_gwc_nk(:,1,n_k))
+             end if
+
              if (dtset%useric /= 0) vec_gwc_nk(:,:,n_k) = zero
            end do ! n_k
 
@@ -1808,21 +1822,31 @@ end if ! .not qq_is_gamma.
    ABI_FREE(sigcme_nk)
    ABI_FREE(sigcme_mkq)
 
+   call xmpi_sum(vxc_nk, gqk%kpt_comm%value, ierr)
    call xmpi_sum(sigx_nk, gqk%comm%value, ierr)
+   call xmpi_sum(sigce0_nk, gqk%comm%value, ierr)
    sigx_nk = -sigx_nk * (one / (cryst%ucvol * pp_mesh%nbz))
+   sigce0_nk =  sigce0_nk * (one / (cryst%ucvol * pp_mesh%nbz))
 
    if (gqk%comm%me == master) then
-     write(ab_out, "(a)") " Sigma^x_nk in eV:"
-     do ik_glob=1, gqk%glob_nk
-       ik_bz = gstore%kglob2bz(ik_glob, spin)
-       write(ab_out, "(2a)") "Band, Sigx for k-point:", trim(ktoa(gstore%kbz(:, ik_bz)))
-       do band=gqk%bstart_k, gqk%bstop_k
-         in_k = band - gqk%bstart_k + 1
-         write(ab_out, *) band, sigx_nk(in_k, ik_glob) * Ha_eV
-       end do
-     end do
+     !write(ab_out, "(a)") " Sigma^x_nk and Sigma^c_nk(E0) in eV:"
+     !do ik_glob=1, gqk%glob_nk
+     !  ik_bz = gstore%kglob2bz(ik_glob, spin)
+     !  ik_ibz = gstore%kbz2ibz(1, ik_bz)
+     !  write(ab_out, "(2a)") "Band     E0    <VxcDFT>   SigX SigC(E0)  for k-point:", trim(ktoa(gstore%kbz(:, ik_bz)))
+     !  do band=gqk%bstart_k, gqk%bstop_k
+     !    in_k = band - gqk%bstart_k + 1
+     !    write(ab_out, "(i5, 4(f8.3))") &
+     !      band,  ebands%eig(band, ik_ibz, spin) * Ha_eV, &
+     !      vxc_nk(in_k, ik_glob) * Ha_eV,  &
+     !      real(sigx_nk(in_k, ik_glob)) * Ha_eV, &
+     !      real(sigce0_nk(in_k, ik_glob)) * Ha_eV
+     !  end do
+     !end do
    end if
+   ABI_SFREE(vxc_nk)
    ABI_SFREE(sigx_nk)
+   ABI_SFREE(sigce0_nk)
 
    if (dtset%gstore_use_lgk /= 0) then
      do my_ik=1,gqk%my_nk
