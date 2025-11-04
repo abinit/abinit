@@ -4472,14 +4472,14 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    end do
 
   ! ZORA
-  ! only values of -3,-2,-1,0,1,2,3 are allowed. 0 is the default.
-  call chkint_eq(0,0,cond_string,cond_values,ierr,'zora',dt%zora,7,(/-3,-2,-1,0,1,2,3/),iout)
+  ! only values of -4,-3,-2,-1,0,1,2,3 are allowed. 0 is the default.
+  call chkint_eq(0,0,cond_string,cond_values,ierr,'zora',dt%zora,8,(/-4,-3,-2,-1,0,1,2,3/),iout)
   if(dt%zora .NE. 0) then
      cond_string(1)='zora';cond_values(1)=dt%zora
   !  require PAW
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',dt%usepaw,1,(/1/),iout)
   end if
-  if(dt%zora .GT. 1) then
+  if(dt%zora .NE. 0 .and. dt%zora .NE. 1) then
      cond_string(1)='zora';cond_values(1)=dt%zora
      ! require nspinor 2
      call chkint_eq(1,1,cond_string,cond_values,ierr,'nspinor',dt%nspinor,1,(/2/),iout)

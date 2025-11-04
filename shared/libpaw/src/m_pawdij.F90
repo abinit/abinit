@@ -2905,6 +2905,8 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,pawang,pawrad,pawtab,&
  indklmn => pawtab%indklmn
 
  select case(zora)
+   case(-4)
+     use_soc=.FALSE.; use_sd=.TRUE.; use_fc=.TRUE.
    case(-3)
      use_soc=.FALSE.; use_sd=.FALSE.; use_fc=.TRUE.
    case(-2)
