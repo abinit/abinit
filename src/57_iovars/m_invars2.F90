@@ -935,6 +935,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
 !LONG WAVE integer input variables
  call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'d3e_pert1_magat',tread,'INT')
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rf1magat',tread_alt,'INT')
  if(tread==1.or.tread_alt==1) dtset%d3e_pert1_magat(1:2)=intarr(1:2)
  if (tread_alt==1) tread_key=1
  if(dtset%d3e_pert1_magat(1)==-1)then
@@ -945,6 +946,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  endif
 
  call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'d3e_pert2_magat',tread,'INT')
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rf2magat',tread_alt,'INT')
  if(tread==1.or.tread_alt==1) dtset%d3e_pert2_magat(1:2)=intarr(1:2)
  if (tread_alt==1) tread_key=1
  if(dtset%d3e_pert2_magat(1)==-1)then

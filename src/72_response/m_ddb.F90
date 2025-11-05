@@ -3821,7 +3821,7 @@ subroutine ddb_write_block(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
    write(nunit, '(a,3es16.8,f6.1)' )' qpt',(ddb%qpt(ii,iblok),ii=1,3),ddb%nrm(1,iblok)
 
    ! Write the perturbation frequency
-   write(nunit, '(a,1es16.8)' )' frequency',ddb%omega(1,iblok)
+!   write(nunit, '(a,1es16.8)' )' frequency',ddb%omega(1,iblok)
 
    ! Write the matrix elements
    if(choice==2)then
@@ -3850,10 +3850,10 @@ subroutine ddb_write_block(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
    write(nunit, '(a,3es16.8,f6.1)' )'    ',(ddb%qpt(ii,iblok),ii=4,6),ddb%nrm(2,iblok)
    write(nunit, '(a,3es16.8,f6.1)' )'    ',(ddb%qpt(ii,iblok),ii=7,9),ddb%nrm(3,iblok)
 
-   ! Write the perturbation frequency
-   write(nunit, '(a,1es16.8)' )' frequency',ddb%omega(1,iblok)
-   write(nunit, '(a,1es16.8)' )'          ',ddb%omega(2,iblok)
-   write(nunit, '(a,1es16.8)' )'          ',ddb%omega(3,iblok)
+!   ! Write the perturbation frequency
+!   write(nunit, '(a,1es16.8)' )' frequency',ddb%omega(1,iblok)
+!   write(nunit, '(a,1es16.8)' )'          ',ddb%omega(2,iblok)
+!   write(nunit, '(a,1es16.8)' )'          ',ddb%omega(3,iblok)
 
    ! Write the matrix elements
    if(choice==2)then
