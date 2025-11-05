@@ -791,6 +791,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
  character(len=500) :: message
 !arrays
 
+!     write(ab_out,*)"CCCCHECK ek0 -02 ", ar,diag,filter,istwf_k,vect,vect1,use_ndo,ar_im
 ! *************************************************************************
  me_g0 = mpi_enreg%me_g0
 

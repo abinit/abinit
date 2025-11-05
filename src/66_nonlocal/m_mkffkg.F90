@@ -84,7 +84,7 @@ contains
 
 subroutine dfpt_mkffkg(choice,ffkg,ffnl,gmet,idir,indlmn,ipw1,ispinor,itypat,&
 &                  kg_k,kpg_k,kpgx,kpt,lmnmax,mblkpw,ndgxdt,nffkg,nffnl,nincpw,nkpg,nlang,&
-&                  npw,ntens,ntypat,parity,dkpg)
+&                  npw,ntens,ntypat,parity)
 
 !Arguments ------------------------------------
 !scalars
@@ -95,7 +95,7 @@ subroutine dfpt_mkffkg(choice,ffkg,ffnl,gmet,idir,indlmn,ipw1,ispinor,itypat,&
  integer,intent(out) :: parity(nffkg)
  real(dp),intent(in) :: ffnl(npw,nffnl,lmnmax,ntypat),gmet(3,3),kpg_k(npw,nkpg)
  real(dp),intent(in) :: kpt(3)
- real(dp),intent(out) ::ffkg(nffkg,mblkpw),kpgx(mblkpw,ntens),dkpg(mblkpw,ntens)
+ real(dp),intent(out) :: ffkg(nffkg,mblkpw),kpgx(mblkpw,ntens)
 
 !Local variables-------------------------------
 !scalars
@@ -106,8 +106,6 @@ subroutine dfpt_mkffkg(choice,ffkg,ffnl,gmet,idir,indlmn,ipw1,ispinor,itypat,&
 ! *************************************************************************
 
  jj=0;ilangx=0
-
- dkpg(:,:) = 0.d0
 
 !This will be useless after all the modifications have been done
  do ipw=1,nincpw
@@ -128,12 +126,6 @@ subroutine dfpt_mkffkg(choice,ffkg,ffnl,gmet,idir,indlmn,ipw1,ispinor,itypat,&
        kpgx(ipw,3)=kpt(2)+dble(kg_k(2,ig))
        kpgx(ipw,4)=kpt(3)+dble(kg_k(3,ig))
        ig=ig+1
-     end do
-   end if
-! k-derivative (MS,Jul25)
-   if (idir==1 .or. idir==2 .or. idir==3) then 
-     do ipw=1,nincpw
-       dkpg(ipw,idir+1)=1.d0
      end do
    end if
  end if
@@ -157,24 +149,6 @@ subroutine dfpt_mkffkg(choice,ffkg,ffnl,gmet,idir,indlmn,ipw1,ispinor,itypat,&
        kpgx(ipw,10) =      kpgx(ipw, 3)*kpgx(ipw, 2)
      end do
    end if
-!k-derivs
-     if (.true.) then
-     do ipw=1,nincpw
-       if (idir.eq.1) then
-         dkpg(ipw, 5) = 2.d0 * kpgx(ipw, 2)
-         dkpg(ipw, 9) =        kpgx(ipw, 4)
-         dkpg(ipw,10) =        kpgx(ipw, 3)
-       else if (idir.eq.2) then
-         dkpg(ipw, 6) = 2.d0 * kpgx(ipw, 3)
-         dkpg(ipw, 8) =        kpgx(ipw, 4)
-         dkpg(ipw,10) =        kpgx(ipw, 2)
-       else if (idir.eq.3) then
-         dkpg(ipw, 7) = 2.d0 * kpgx(ipw, 4)
-         dkpg(ipw, 8) =        kpgx(ipw, 3)
-         dkpg(ipw, 9) =        kpgx(ipw, 2)
-       end if
-     end do
-     end if
  end if
  if (nlang>=4 .or. ((choice==3.or.choice==23) .and. nlang>=2) .or. choice==6) then
 !  Define (k+G) part of rank 3 symmetric tensor (10 components), l=3
@@ -468,13 +442,10 @@ subroutine dfpt_mkffkg(choice,ffkg,ffnl,gmet,idir,indlmn,ipw1,ispinor,itypat,&
                end do
              else
                do ipw=1,nincpw
-!MS: modified to incorporate ffnl(:,1) times the k-derivative of the product of
-!(G+k)'s
                  ffkg(iffkg,ipw)=ffnl(ig,2,ilmn,itypat)*kpgx(ipw,jj)*&
 &                 (kpgx(ipw,2)*gmet(1,idir)+ &
 &                 kpgx(ipw,3)*gmet(2,idir)+ &
-&                 kpgx(ipw,4)*gmet(3,idir) ) + &
-&                 ffnl(ig,1,ilmn,itypat)*dkpg(ipw,jj)
+&                 kpgx(ipw,4)*gmet(3,idir) )
                  ig=ig+1
                end do
              end if
@@ -599,7 +570,7 @@ subroutine dfpt_mkffkg(choice,ffkg,ffnl,gmet,idir,indlmn,ipw1,ispinor,itypat,&
                ig=ipw1
                iffkg=iffkg+1
                do ipw=1,nincpw
-                 ffkg(iffkg,ipw)=0.d0 !ffnl(ig,1,ilmn,itypat)*kpgx(ipw,jj)
+                 ffkg(iffkg,ipw)=ffnl(ig,1,ilmn,itypat)*kpgx(ipw,jj)
                  ig=ig+1
                end do
                if(ilang==2 .or. ilang==4)parity(iffkg)=2

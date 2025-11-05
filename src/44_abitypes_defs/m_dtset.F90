@@ -2594,7 +2594,6 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
  if(dtset%rfphon==1)rfpert(dtset%rfatpol(1):dtset%rfatpol(2))=1
 
  if(dtset%rfddk==1)rfpert(dtset%natom+1)=1
- if(dtset%rfddk==2)rfpert(dtset%natom+6)=1
 
  if(dtset%rf2_dkdk/=0) rfpert(dtset%natom+10)=1
  if(dtset%rf2_dkde/=0) rfpert(dtset%natom+11)=1
@@ -2604,9 +2603,6 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
 
  if(dtset%rfstrs==1.or.dtset%rfstrs==3)rfpert(dtset%natom+3)=1
  if(dtset%rfstrs==2.or.dtset%rfstrs==3)rfpert(dtset%natom+4)=1
-
- if(dtset%rfuser==1.or.dtset%rfuser==3)rfpert(dtset%natom+6)=1
- if(dtset%rfuser==2.or.dtset%rfuser==3)rfpert(dtset%natom+7)=1
 
  if(dtset%rfmagn==1) rfpert(dtset%natom+5)=1
  if(dtset%rfmagn==2) rfpert(dtset%natom+11+dtset%rfatpol(1):dtset%natom+11+dtset%rfatpol(2))=1
@@ -3482,8 +3478,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' rfatpol rfddk rfdir rfelfd rfeta rfmagn rfmeth rfomega rfphon'
  list_vars=trim(list_vars)//' rfstrs rfstrs_ref rfuser rf2_dkdk rf2_dkde rf2_pert1_dir rf2_pert2_dir rhoqpmix rifcsph rprim'
  !These input parameters are obsolete (keep them for compatibility)
- list_vars=trim(list_vars)//' rf1atpol rf1dir rf1elfd rf1phon'
- list_vars=trim(list_vars)//' rf2atpol rf2dir rf2elfd rf2phon rf2strs'
+ list_vars=trim(list_vars)//' rf1atpol rf1dir rf1elfd rf1phon rf1magat'
+ list_vars=trim(list_vars)//' rf2atpol rf2dir rf2elfd rf2phon rf2strs rf2magat'
  list_vars=trim(list_vars)//' rf3atpol rf3dir rf3elfd rf3phon'
  list_vars=trim(list_vars)//' rmm_diis rmm_diis_savemem'
 !S

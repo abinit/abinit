@@ -209,6 +209,7 @@ contains
    if (ipert==natom+6) idir_eff= 4
    ABI_MALLOC(v1zeeman,(cplex*nfft,nspden))
    call dfpt_v1zeeman(nspden,nfft,cplex,idir_eff,v1zeeman)
+   if (ipert==natom+5) v1zeeman=0.5d0*v1zeeman
  end if
 
 !Preconditioned DFPT

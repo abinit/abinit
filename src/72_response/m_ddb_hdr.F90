@@ -45,7 +45,7 @@ MODULE m_ddb_hdr
  public :: ioddb8_in        ! Temporary
  public :: psddb8           ! Temporary
 
- integer,public,parameter :: DDB_VERSION=20240201
+ integer,public,parameter :: DDB_VERSION=100401
  ! DDB Version number.
  ! 6 digit integer giving date, in form yymmdd for month=mm(1-12),
  !  day=dd(1-31), and year=yy(90-99 for 1990 to 1999,00-89 for 2000 to 2089),

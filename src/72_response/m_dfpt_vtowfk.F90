@@ -489,6 +489,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !      Compute the 0-order kinetic operator contribution (with cwavef)
        call meanvalue_g(ar,kinpw1,0,gs_hamkq%istwf_k,mpi_enreg,npw1_k,nspinor,cwavef,cwavef,0)
 !      There is an additional factor of 2 with respect to the bare matrix element
+!     write(ab_out,*)"CCCCHECK ek0 -02 ",ar
        ek0_k(iband)=energy_factor*ar
 !      Compute the 1-order kinetic operator contribution (with cwave1 and cwave0), if needed.
 !      Note that this is called only for ddk or strain, so that npw1_k=npw_k

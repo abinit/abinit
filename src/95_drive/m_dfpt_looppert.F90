@@ -401,7 +401,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  nkpt_max=50;if (xmpi_paral==1) nkpt_max=-1
 !TODO: this flag for paral_atom is ignored below
  paral_atom=(dtset%natom/=my_natom)
- cplex=2-timrev ! cplex=2 ! DEBUG: impose cplex=2
+ cplex=2-timrev !cplex=2 ! DEBUG: impose cplex=2
  first_entry=.true.
  initialized=0
  ecore=zero ; ek=zero ; ehart=zero ; enxc=zero ; eei=zero ; enl=zero ; eii=zero
@@ -526,7 +526,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    end if
    do idir=1,maxidir
      to_compute_this_pert = 0
-     if(ipert<dtset%natom+10.and. rfpert(ipert)==1 .and. rfdir(idir) == 1 ) then
+     if(ipert<dtset%natom+10 .and. rfpert(ipert)==1 .and. rfdir(idir) == 1 ) then
        if ((pertsy(idir,ipert)==1).or.&
 &       ((dtset%prepanl == 1).and.(ipert == dtset%natom+2)).or.&
 &       ((dtset%prepgkk == 1).and.(ipert <= dtset%natom))  ) then

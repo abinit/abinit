@@ -314,20 +314,20 @@ _ WF disk file :      0.123 Mbytes ; DEN or POT disk file :      0.100 Mbytes.
   d3e_pert1_atpol33         1       2
   d3e_pert1_atpol34         1       2
   d3e_pert1_atpol35         1       1
-    d3e_pert1_dir11         0       0       0
-    d3e_pert1_dir12         0       0       0
-    d3e_pert1_dir13         0       0       0
-    d3e_pert1_dir14         0       0       0
+    d3e_pert1_dir11         1       1       1
+    d3e_pert1_dir12         1       1       1
+    d3e_pert1_dir13         1       1       1
+    d3e_pert1_dir14         1       1       1
     d3e_pert1_dir15         1       0       0
-    d3e_pert1_dir21         0       0       0
-    d3e_pert1_dir22         0       0       0
-    d3e_pert1_dir23         0       0       0
-    d3e_pert1_dir24         0       0       0
+    d3e_pert1_dir21         1       1       1
+    d3e_pert1_dir22         1       1       1
+    d3e_pert1_dir23         1       1       1
+    d3e_pert1_dir24         1       1       1
     d3e_pert1_dir25         1       0       0
-    d3e_pert1_dir31         0       0       0
-    d3e_pert1_dir32         0       0       0
-    d3e_pert1_dir33         0       0       0
-    d3e_pert1_dir34         0       0       0
+    d3e_pert1_dir31         1       1       1
+    d3e_pert1_dir32         1       1       1
+    d3e_pert1_dir33         1       1       1
+    d3e_pert1_dir34         1       1       1
     d3e_pert1_dir35         1       0       0
    d3e_pert1_elfd11         0
    d3e_pert1_elfd12         0
@@ -359,20 +359,20 @@ _ WF disk file :      0.123 Mbytes ; DEN or POT disk file :      0.100 Mbytes.
    d3e_pert1_phon33         0
    d3e_pert1_phon34         0
    d3e_pert1_phon35         1
-    d3e_pert2_dir11         0       0       0
-    d3e_pert2_dir12         0       0       0
-    d3e_pert2_dir13         0       0       0
-    d3e_pert2_dir14         0       0       0
+    d3e_pert2_dir11         1       1       1
+    d3e_pert2_dir12         1       1       1
+    d3e_pert2_dir13         1       1       1
+    d3e_pert2_dir14         1       1       1
     d3e_pert2_dir15         1       0       0
-    d3e_pert2_dir21         0       0       0
-    d3e_pert2_dir22         0       0       0
-    d3e_pert2_dir23         0       0       0
-    d3e_pert2_dir24         0       0       0
+    d3e_pert2_dir21         1       1       1
+    d3e_pert2_dir22         1       1       1
+    d3e_pert2_dir23         1       1       1
+    d3e_pert2_dir24         1       1       1
     d3e_pert2_dir25         1       0       0
-    d3e_pert2_dir31         0       0       0
-    d3e_pert2_dir32         0       0       0
-    d3e_pert2_dir33         0       0       0
-    d3e_pert2_dir34         0       0       0
+    d3e_pert2_dir31         1       1       1
+    d3e_pert2_dir32         1       1       1
+    d3e_pert2_dir33         1       1       1
+    d3e_pert2_dir34         1       1       1
     d3e_pert2_dir35         1       0       0
    d3e_pert2_elfd11         0
    d3e_pert2_elfd12         0
@@ -389,20 +389,20 @@ _ WF disk file :      0.123 Mbytes ; DEN or POT disk file :      0.100 Mbytes.
    d3e_pert2_elfd33         0
    d3e_pert2_elfd34         0
    d3e_pert2_elfd35         1
-    d3e_pert3_dir11         0       0       0
-    d3e_pert3_dir12         0       0       0
-    d3e_pert3_dir13         0       0       0
-    d3e_pert3_dir14         0       0       0
+    d3e_pert3_dir11         1       1       1
+    d3e_pert3_dir12         1       1       1
+    d3e_pert3_dir13         1       1       1
+    d3e_pert3_dir14         1       1       1
     d3e_pert3_dir15         1       0       0
-    d3e_pert3_dir21         0       0       0
-    d3e_pert3_dir22         0       0       0
-    d3e_pert3_dir23         0       0       0
-    d3e_pert3_dir24         0       0       0
+    d3e_pert3_dir21         1       1       1
+    d3e_pert3_dir22         1       1       1
+    d3e_pert3_dir23         1       1       1
+    d3e_pert3_dir24         1       1       1
     d3e_pert3_dir25         1       0       0
-    d3e_pert3_dir31         0       0       0
-    d3e_pert3_dir32         0       0       0
-    d3e_pert3_dir33         0       0       0
-    d3e_pert3_dir34         0       0       0
+    d3e_pert3_dir31         1       1       1
+    d3e_pert3_dir32         1       1       1
+    d3e_pert3_dir33         1       1       1
+    d3e_pert3_dir34         1       1       1
     d3e_pert3_dir35         1       0       0
    d3e_pert3_elfd11         0
    d3e_pert3_elfd12         0
@@ -5411,20 +5411,20 @@ meta: {optdriver: 5, }
   d3e_pert1_atpol33         1       2
   d3e_pert1_atpol34         1       2
   d3e_pert1_atpol35         1       1
-    d3e_pert1_dir11         0       0       0
-    d3e_pert1_dir12         0       0       0
-    d3e_pert1_dir13         0       0       0
-    d3e_pert1_dir14         0       0       0
+    d3e_pert1_dir11         1       1       1
+    d3e_pert1_dir12         1       1       1
+    d3e_pert1_dir13         1       1       1
+    d3e_pert1_dir14         1       1       1
     d3e_pert1_dir15         1       0       0
-    d3e_pert1_dir21         0       0       0
-    d3e_pert1_dir22         0       0       0
-    d3e_pert1_dir23         0       0       0
-    d3e_pert1_dir24         0       0       0
+    d3e_pert1_dir21         1       1       1
+    d3e_pert1_dir22         1       1       1
+    d3e_pert1_dir23         1       1       1
+    d3e_pert1_dir24         1       1       1
     d3e_pert1_dir25         1       0       0
-    d3e_pert1_dir31         0       0       0
-    d3e_pert1_dir32         0       0       0
-    d3e_pert1_dir33         0       0       0
-    d3e_pert1_dir34         0       0       0
+    d3e_pert1_dir31         1       1       1
+    d3e_pert1_dir32         1       1       1
+    d3e_pert1_dir33         1       1       1
+    d3e_pert1_dir34         1       1       1
     d3e_pert1_dir35         1       0       0
    d3e_pert1_elfd11         0
    d3e_pert1_elfd12         0
@@ -5456,20 +5456,20 @@ meta: {optdriver: 5, }
    d3e_pert1_phon33         0
    d3e_pert1_phon34         0
    d3e_pert1_phon35         1
-    d3e_pert2_dir11         0       0       0
-    d3e_pert2_dir12         0       0       0
-    d3e_pert2_dir13         0       0       0
-    d3e_pert2_dir14         0       0       0
+    d3e_pert2_dir11         1       1       1
+    d3e_pert2_dir12         1       1       1
+    d3e_pert2_dir13         1       1       1
+    d3e_pert2_dir14         1       1       1
     d3e_pert2_dir15         1       0       0
-    d3e_pert2_dir21         0       0       0
-    d3e_pert2_dir22         0       0       0
-    d3e_pert2_dir23         0       0       0
-    d3e_pert2_dir24         0       0       0
+    d3e_pert2_dir21         1       1       1
+    d3e_pert2_dir22         1       1       1
+    d3e_pert2_dir23         1       1       1
+    d3e_pert2_dir24         1       1       1
     d3e_pert2_dir25         1       0       0
-    d3e_pert2_dir31         0       0       0
-    d3e_pert2_dir32         0       0       0
-    d3e_pert2_dir33         0       0       0
-    d3e_pert2_dir34         0       0       0
+    d3e_pert2_dir31         1       1       1
+    d3e_pert2_dir32         1       1       1
+    d3e_pert2_dir33         1       1       1
+    d3e_pert2_dir34         1       1       1
     d3e_pert2_dir35         1       0       0
    d3e_pert2_elfd11         0
    d3e_pert2_elfd12         0
@@ -5486,20 +5486,20 @@ meta: {optdriver: 5, }
    d3e_pert2_elfd33         0
    d3e_pert2_elfd34         0
    d3e_pert2_elfd35         1
-    d3e_pert3_dir11         0       0       0
-    d3e_pert3_dir12         0       0       0
-    d3e_pert3_dir13         0       0       0
-    d3e_pert3_dir14         0       0       0
+    d3e_pert3_dir11         1       1       1
+    d3e_pert3_dir12         1       1       1
+    d3e_pert3_dir13         1       1       1
+    d3e_pert3_dir14         1       1       1
     d3e_pert3_dir15         1       0       0
-    d3e_pert3_dir21         0       0       0
-    d3e_pert3_dir22         0       0       0
-    d3e_pert3_dir23         0       0       0
-    d3e_pert3_dir24         0       0       0
+    d3e_pert3_dir21         1       1       1
+    d3e_pert3_dir22         1       1       1
+    d3e_pert3_dir23         1       1       1
+    d3e_pert3_dir24         1       1       1
     d3e_pert3_dir25         1       0       0
-    d3e_pert3_dir31         0       0       0
-    d3e_pert3_dir32         0       0       0
-    d3e_pert3_dir33         0       0       0
-    d3e_pert3_dir34         0       0       0
+    d3e_pert3_dir31         1       1       1
+    d3e_pert3_dir32         1       1       1
+    d3e_pert3_dir33         1       1       1
+    d3e_pert3_dir34         1       1       1
     d3e_pert3_dir35         1       0       0
    d3e_pert3_elfd11         0
    d3e_pert3_elfd12         0

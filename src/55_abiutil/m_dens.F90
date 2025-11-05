@@ -2190,9 +2190,9 @@ msg='  Atom    Radius         Re[dens]          Im[dens]           Re[mag(x)]   
        do iatom=1,natom
          if(option/=21)then
            if (cplex==1) then
-             write(msg, '(i5,f10.5,f20.12,a,3f20.12)' ) iatom,ratsph(typat(iatom)),intgden(1,1,iatom),'  ',(intgden(1,ix,iatom),ix=2,4)
+             write(msg, '(i5,f10.5,f16.6,a,3f12.6)' ) iatom,ratsph(typat(iatom)),intgden(1,1,iatom),'  ',(intgden(1,ix,iatom),ix=2,4)
            else if (cplex==2) then
-             write(msg, '(i5,f10.5,2f20.12,a,6f20.12)' ) iatom,ratsph(typat(iatom)),intgden(1,1,iatom),intgden(2,1,iatom),'  ', &
+             write(msg, '(i5,f10.5,2f16.6,a,6f12.6)' ) iatom,ratsph(typat(iatom)),intgden(1,1,iatom),intgden(2,1,iatom),'  ', &
 &                               ((intgden(ic,ix,iatom),ic=1,2),ix=2,4)
            end if
          else
@@ -2215,18 +2215,18 @@ msg='  Atom    Radius         Re[dens]          Im[dens]           Re[mag(x)]   
        call wrtout(nunit,msg,'COLL')
 
        if(option==1.and.cplex==1)then
-         write(msg, '(a,f20.12,f20.12,f20.12)') ' Total magnetization (spheres)   ', sum_mag_x,sum_mag_y,sum_mag_z
+         write(msg, '(a,f12.6,f12.6,f12.6)') ' Total magnetization (spheres)   ', sum_mag_x,sum_mag_y,sum_mag_z
          call wrtout(nunit,msg,'COLL')
-         write(msg, '(a,f20.12,f20.12,f20.12)') ' Total magnetization (exact)     ', mag_x,mag_y,mag_z
+         write(msg, '(a,f12.6,f12.6,f12.6)') ' Total magnetization (exact)     ', mag_x,mag_y,mag_z
          call wrtout(nunit,msg,'COLL')
        else if(option==1.and.cplex==2)then
-         write(msg, '(a,f20.12,f20.12,f20.12)') ' Total magnetization (spheres) [Real part]  ',  sum_mag_x,sum_mag_y,sum_mag_z
+         write(msg, '(a,f12.6,f12.6,f12.6)') ' Total magnetization (spheres) [Real part]  ',  sum_mag_x,sum_mag_y,sum_mag_z
          call wrtout(nunit,msg,'COLL')
-         write(msg, '(a,f20.12,f20.12,f20.12)') ' Total magnetization (spheres) [Imag. part]  ',  sum_mag_x_im,sum_mag_y_im,sum_mag_z_im
+         write(msg, '(a,f12.6,f12.6,f12.6)') ' Total magnetization (spheres) [Imag. part]  ',  sum_mag_x_im,sum_mag_y_im,sum_mag_z_im
          call wrtout(nunit,msg,'COLL')
-         write(msg, '(a,f20.12,f20.12,f20.12)') ' Total magnetization (exact) [Real part]  ',  mag_x,mag_y,mag_z
+         write(msg, '(a,f12.6,f12.6,f12.6)') ' Total magnetization (exact) [Real part]  ',  mag_x,mag_y,mag_z
          call wrtout(nunit,msg,'COLL')
-         write(msg, '(a,f20.12,f20.12,f20.12)') ' Total magnetization (exact) [Imag. part]  ',  mag_x_im,mag_y_im,mag_z_im
+         write(msg, '(a,f12.6,f12.6,f12.6)') ' Total magnetization (exact) [Imag. part]  ',  mag_x_im,mag_y_im,mag_z_im
          call wrtout(nunit,msg,'COLL')
        endif
 
@@ -2313,18 +2313,18 @@ msg='  Atom    Radius         Re[dens]          Im[dens]           Re[mag(x)]   
 
      elseif (nspden==4) then
        if(cplex==1) then
-         write(msg, '(a,e20.12)') '     mx^(1)   = ', mag_x
+         write(msg, '(a,e16.8)') '     mx^(1)   = ', mag_x
          call wrtout(nunit,msg,'COLL')
-         write(msg, '(a,e20.12)') '     my^(1)   = ', mag_y
+         write(msg, '(a,e16.8)') '     my^(1)   = ', mag_y
          call wrtout(nunit,msg,'COLL')
-         write(msg, '(a,e20.12)') '     mz^(1)   = ', mag_z
+         write(msg, '(a,e16.8)') '     mz^(1)   = ', mag_z
          call wrtout(nunit,msg,'COLL')
        else
-         write(msg, '(a,e20.12,a,e20.12)') '  Re[mx^(1)]= ',  mag_x, "   Im[mx^(1)]= ", mag_x_im
+         write(msg, '(a,e16.8,a,e16.8)') '  Re[mx^(1)]= ',  mag_x, "   Im[mx^(1)]= ", mag_x_im
          call wrtout(nunit,msg,'COLL')
-         write(msg, '(a,e20.12,a,e20.12)') '  Re[my^(1)]= ',  mag_y, "   Im[my^(1)]= ", mag_y_im
+         write(msg, '(a,e16.8,a,e16.8)') '  Re[my^(1)]= ',  mag_y, "   Im[my^(1)]= ", mag_y_im
          call wrtout(nunit,msg,'COLL')
-         write(msg, '(a,e20.12,a,e20.12)') '  Re[mz^(1)]= ',  mag_z, "   Im[mz^(1)]= ", mag_z_im
+         write(msg, '(a,e16.8,a,e16.8)') '  Re[mz^(1)]= ',  mag_z, "   Im[mz^(1)]= ", mag_z_im
          call wrtout(nunit,msg,'COLL')
        end if
      end if

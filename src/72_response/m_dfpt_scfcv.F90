@@ -986,7 +986,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &   vectornd,vtrial,vtrial1,with_vectornd,wtk_rbz,xred,ylm,ylm1,ylmgr1,&
 &   eta=eta,omega=omega) !optional arguments for finite-w calculation
 
-!   write(*,*) "ITERATION +:", istep,ek0,edocc,eeig0,eloc0,enl0,enl1
+!     write(ab_out,*)"CCCCHECK ek0 0 ",ek0
 
    if (.not.kramers_deg) then
      rhor1_pq(:,:)=rhor1(:,:) !at this stage rhor1_pq contains only one term of the 1st order density at +q
@@ -1074,11 +1074,13 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
    if (iscf_mod>=10) then
      optene = 0 
+!     write(ab_out,*)"CCCCHECK 1 "
      call dfpt_etot(dtset%berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,&
 &     efrloc,efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,elmag1,eloc0,elpsp1,emagpen1,&
 &     end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,dtset%natom,optene)
      call timab(152,1,tsec)
      if(.not.kramers_deg) then
+!     write(ab_out,*)"CCCCHECK 2 "
        call dfpt_etot(dtset%berryopt,deltae_mq,eberry_mq,edocc_mq,eeig0_mq,eew,efrhar,efrkin,&
 &        efrloc,efrnl,efrx1,efrx2,ehart1,ek0_mq,ek1_mq,eii,elast_mq,elmag1,eloc0_mq,elpsp1,emagpen1,&
 &        end0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1,ipert,dtset%natom,optene)
@@ -1163,12 +1165,15 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      end if
 
      optene = 0 ! use direct scheme
+!     write(ab_out,*)"CCCCHECK ek0 ",ek0
+!     write(ab_out,*)"CCCCHECK 3 "
      call dfpt_etot(dtset%berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,&
 &     efrloc,efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,elmag1,eloc0,elpsp1,emagpen1,&
 &     end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,dtset%natom,optene)
 !&     enl0,enl1,epaw1,etotal,evar,evdw,exc1,elmag1,ipert,dtset%natom,optene)
 !    !debug: compute the d2E/d-qd+q energy, should be equal to the one from previous line
      if(.not.kramers_deg) then
+!     write(ab_out,*)"CCCCHECK 4 "
        call dfpt_etot(dtset%berryopt,deltae_mq,eberry_mq,edocc_mq,eeig0_mq,eew,efrhar,efrkin,&
 &        efrloc,efrnl,efrx1,efrx2,ehart1,ek0_mq,ek1_mq,eii,elast_mq,elmag1,eloc0_mq,elpsp1,emagpen1,&
 &        end0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1,ipert,dtset%natom,optene)
@@ -1815,11 +1820,12 @@ subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc
 
 !    terms for Zeeman or scalar potential perturbation, SPr 2deb
      else if ( ipert==natom+5 .or. ipert==natom+6 ) then
-       evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+epaw1+emagpen1+elmag1
+       evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+epaw1+emagpen1!+elmag1
+!       write(ab_out,*)"HHHEREEEEE",ek0,edocc,eeig0,eloc0,enl0,ehart1,exc1,epaw1
 
 !    terms for atomic-spheres local Zeeman perturbation
      else if ( ipert>natom+11.and.ipert<=2*natom+11 ) then
-       evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+epaw1+emagpen1+elmag1
+       evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+epaw1+emagpen1!+elmag1
      end if
    end if
 

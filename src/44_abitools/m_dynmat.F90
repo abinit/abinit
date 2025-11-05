@@ -1509,15 +1509,15 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
 !conserves the wavevector, or not
  if(timrev==0.and.abs(eta_)<tol8)then
 
-  do ipert1=1,mpert !See notes
-!   do ipert1=1,min(natom+2,mpert)
+!  do ipert1=1,mpert !See notes
+   do ipert1=1,min(natom+2,mpert)
      do idir1=1,3
 
 !      Since the matrix is hermitian, the diagonal elements are real
        d2(2,idir1,ipert1,idir1,ipert1)=zero
 
-      do ipert2=1,mpert !See notes
-!       do ipert2=1,min(natom+2,mpert)
+!      do ipert2=1,mpert !See notes
+       do ipert2=1,min(natom+2,mpert)
          do idir2=1,3
 
 !          If an element exists
@@ -1553,11 +1553,11 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
 !  Here, case with time-reversal symmetry
  else
 
-  do ipert1=1,mpert !See notes
-!   do ipert1=1,min(natom+2,mpert)
+!  do ipert1=1,mpert !See notes
+   do ipert1=1,min(natom+2,mpert)
      do idir1=1,3
-      do ipert2=1,mpert !See notes
-!       do ipert2=1,min(natom+2,mpert)
+!      do ipert2=1,mpert !See notes
+       do ipert2=1,min(natom+2,mpert)
          do idir2=1,3
            d2(2,idir1,ipert1,idir2,ipert2)=zero
 
