@@ -1,5 +1,5 @@
 
-.Version 10.5.8.7 of ABINIT, released Oct 2025.
+.Version 10.5.8.8 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
@@ -807,13 +807,13 @@ force_plsmf:   0.00000000E+00
      1     2     4    12     7     7.063902E-01    5.634877E-01
  |g(k,q)| in Ha for iq: 1 ik: 2 pcase: 6
     iq    ik pcase  m_kq   n_k           |g^SE|          |g^KS|
-     1     2     6     1     2     1.841889E-03    1.000000E-06
+     1     2     6     1     2     1.841889E-03    7.144525E-07
      1     2     6     1     3     1.553305E-01    4.545478E-01
      1     2     6     1     4     1.553305E-01    4.545478E-01
      1     2     6     1     5     1.130904E-03    1.016431E-06
      1     2     6     1     6     1.130904E-03    1.016431E-06
      1     2     6     1     7     5.879124E-01    1.829848E-01
-     1     2     6     2     2     1.841889E-03    1.000000E-06
+     1     2     6     2     2     1.841889E-03    7.144525E-07
      1     2     6     2     3     1.553305E-01    4.545478E-01
      1     2     6     2     4     1.553305E-01    4.545478E-01
      1     2     6     2     5     1.130904E-03    1.016431E-06
@@ -834,14 +834,14 @@ force_plsmf:   0.00000000E+00
      1     2     6     5     2     1.327652E-03    1.072050E-06
      1     2     6     5     3     7.986474E-01    5.827063E-01
      1     2     6     5     4     7.986474E-01    5.827063E-01
-     1     2     6     5     5     1.574728E-03    1.000000E-06
-     1     2     6     5     6     1.574728E-03    1.000000E-06
+     1     2     6     5     5     1.574728E-03    8.341760E-07
+     1     2     6     5     6     1.574728E-03    8.341760E-07
      1     2     6     5     7     2.146234E+00    1.381436E+00
      1     2     6     6     2     1.327652E-03    1.072050E-06
      1     2     6     6     3     7.986474E-01    5.827063E-01
      1     2     6     6     4     7.986474E-01    5.827063E-01
-     1     2     6     6     5     1.574728E-03    1.000000E-06
-     1     2     6     6     6     1.574728E-03    1.000000E-06
+     1     2     6     6     5     1.574728E-03    8.341760E-07
+     1     2     6     6     6     1.574728E-03    8.341760E-07
      1     2     6     6     7     2.146234E+00    1.381436E+00
      1     2     6     7     2     5.977628E-02    1.219646E-01
      1     2     6     7     3     8.281484E-04    1.489469E-06
@@ -1228,8 +1228,3 @@ P           mkmem           3
  Calculation completed.
 .Delivered  86 WARNINGs and   9 COMMENTs to log file.
 +Overall time at end (sec) : cpu=         23.4  wall=         23.4
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
--   There were 34 allocations and 34 deallocations in C code
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 4628916 allocations and 4628916 deallocations in Fortran
--   Remaining memory at the end of the calculation is 0
