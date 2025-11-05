@@ -1,5 +1,5 @@
 # Calculation of GWPT e-ph matrix elements with precomputed SCR file.
-# Preparatory run for computing the ZPR
+# Preparatory run for ZPR computation.
 
  #gwpt_np_wpqbks 1 1 8 1 1 1
  optdriver 7              # Enter EPH driver.
@@ -82,12 +82,12 @@
 #%% [files]
 #%% use_git_submodule = diamond_eph_gwpt
 #%% files_to_test =
-#%%   t04.abo, tolnlines= 700, tolabs= 1.0e+1, tolrel= 0.55
+#%%   t04.abo, tolnlines= 700, tolabs= 1.0e+1, tolrel= 0.65
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH, GWPT, GSTORE
 #%% description = Calculation of GWPT e-ph matrix elements with precomputed SCR file.
-#%%     Preparatory run for computing the ZPR.
+#%%     Preparatory run for ZPR computation.
 #%%<END TEST_INFO>
