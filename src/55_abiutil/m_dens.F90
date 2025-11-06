@@ -451,11 +451,12 @@ end subroutine dens_hirsh
 !! SOURCE
 
 subroutine add_atomic_fcts(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,option,ratsph, &
-  ratsm, typat,coeffs_constr_dft,nv_constr_dft_r,xred)
+  ratsm, typat,coeffs_constr_dft,nv_constr_dft_r,xred,use_gbt,qgbt)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,nfft,nspden,ntypat,option
+ integer,intent(in) :: use_gbt
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in)  :: typat(natom)
@@ -466,7 +467,7 @@ subroutine add_atomic_fcts(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,optio
  real(dp),intent(in) :: ratsm ! Ben change
  real(dp),intent(in) :: rprimd(3,3)
  real(dp),intent(in) :: xred(3,natom)
-
+ real(dp),intent(in) :: qgbt(3)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: ishift=5
@@ -476,7 +477,7 @@ subroutine add_atomic_fcts(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,optio
  integer :: ifft_local
  integer ::  i1,i2,i3,ix,iy,iz,izloc
  real(dp) :: dfsm,dify,difz,fsm,r2atsph,rr1,rr2,rr3,ratsm2,rx23,ry23,rz23 !Ben change: remove ratsm
- real(dp) :: r2,r2_11,r2_123,r2_23
+ real(dp) :: r2,r2_11,r2_123,r2_23,qr,mx,my,coeffs_constr_dft_local(nspden,natom)
  real(dp) :: ucvol
  real(dp),parameter :: delta=0.99_dp
 !arrays
@@ -553,8 +554,20 @@ subroutine add_atomic_fcts(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,optio
            ix=mod(i1+ishift*n1,n1)
 !          Identify the fft indexes of the rectangular grid around the atom
            ifft_local=1+ix+n1*(iy+n2*izloc)
-           nv_constr_dft_r(ifft_local,1:nspden)=nv_constr_dft_r(ifft_local,1:nspden) + fsm*coeffs_constr_dft(1:nspden,iatom)
 
+           if (nspden==4 .and. use_gbt /= 0) then
+             ! using GBT in constrained mag, rotate back to the periodic mag (inverse rotation, +qr) 
+             qr = two_pi * (qgbt(1)*dble(i1)/dble(n1) + qgbt(2)*dble(i2)/dble(n2) + qgbt(3)*dble(i3)/dble(n3))
+             mx = coeffs_constr_dft(2,iatom)
+             my = coeffs_constr_dft(3,iatom)
+             coeffs_constr_dft_local(1,iatom) = coeffs_constr_dft(1,iatom)
+             coeffs_constr_dft_local(2,iatom) = cos(qr)*mx + sin(qr)*my ! mx
+             coeffs_constr_dft_local(3,iatom) = -sin(qr)*mx + cos(qr)*my ! my
+             coeffs_constr_dft_local(4,iatom) =  coeffs_constr_dft(4,iatom) ! mz
+           else
+             coeffs_constr_dft_local(1:nspden,iatom) = coeffs_constr_dft(1:nspden,iatom)
+           end if ! GBT
+           nv_constr_dft_r(ifft_local,1:nspden)=nv_constr_dft_r(ifft_local,1:nspden) + fsm*coeffs_constr_dft_local(1:nspden,iatom)
          end do  ! i1
        end do  ! i2
      end if  ! if this is my fft slice
@@ -848,6 +861,7 @@ end subroutine constrained_dft_free
  call calcdenmagsph(mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,&
 &  c_dft%ratsm,c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,xred,11,cplex1,qgbt,use_gbt,intgden=intgres_tmp,rhomag=rhomag)
 
+
 !DEBUG
 !write(std_out,*) ' intgres_tmp(1:nspden,1:natom)=',intgres_tmp(1:nspden,1:natom)
 !ENDDEBUG
@@ -871,6 +885,7 @@ end subroutine constrained_dft_free
    if(conkind <10)intgres(1,iatom)=zero
    if( mod(conkind,10)==0 .and. nspden>1)intgres(2:nspden,iatom)=zero
  enddo
+
 !Print the potential residuals
  call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,[std_out],11,qgbt,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat)
  ABI_FREE(intgres_tmp)
@@ -1090,8 +1105,6 @@ end subroutine constrained_dft_free
    endif
 
    if( mod(conkind,10)==1 .and. nspden>1)then
-
-     !Fix the different components of the magnetization vector
      if(nspden==2)corr_denmag(2)=intgden_delta(2,iatom)*c_dft%magcon_lambda - intgres(2,iatom)
      if(nspden==4)corr_denmag(2:4)=intgden_delta(2:4,iatom)*c_dft%magcon_lambda - intgres(2:4,iatom)
 
@@ -1146,7 +1159,7 @@ end subroutine constrained_dft_free
 !Now compute the new residual, by adding the spherical functions
  option=1
  call add_atomic_fcts(natom,nspden,c_dft%rprimd,mpi_enreg,nfftf,c_dft%ngfftf,ntypat,option,&
-&  c_dft%ratsph,c_dft%ratsm,c_dft%typat,coeffs_constr_dft,vresid,xred) ! Ben change: add ratsm
+&  c_dft%ratsph,c_dft%ratsm,c_dft%typat,coeffs_constr_dft,vresid,xred,use_gbt,qgbt) ! Ben change: add ratsm
 
  ABI_FREE(coeffs_constr_dft)
  ABI_FREE(intgden)
@@ -1311,7 +1324,7 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred,qgbt,use_gbt)
 !Now compute the potential in real space
  option=0
  call add_atomic_fcts(natom,nspden,c_dft%rprimd,mpi_enreg,nfftf,c_dft%ngfftf,ntypat,option,c_dft%ratsph, &
-   c_dft%ratsm,c_dft%typat,coeffs_constr_dft,nv_constr_dft_r,xred) ! Ben change: add ratsm
+   c_dft%ratsm,c_dft%typat,coeffs_constr_dft,nv_constr_dft_r,xred,use_gbt,qgbt) ! Ben change: add ratsm
 
  ABI_FREE(coeffs_constr_dft)
  ABI_FREE(intgden)
@@ -1687,7 +1700,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
              mx = rhor(ifft_local,2)
              my = rhor(ifft_local,3)
              mz = rhor(ifft_local,4)
-             ! e^-iqr :cos(qr)-isin(qr)
+             ! e^-iqr:cos(qr)-isin(qr)
              rhor_local(2) = cos(qr)*mx - sin(qr)*my ! mx
              rhor_local(3) = sin(qr)*mx + cos(qr)*my ! my
              rhor_local(4) = mz
