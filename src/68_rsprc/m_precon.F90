@@ -84,6 +84,7 @@ module m_precon
         real(dp), pointer :: vxc(:, :)
 
         !Logical variables :
+        logical :: use_precon
         logical :: use_ldos
         logical :: use_kxc
         logical :: use_ridgereg
@@ -113,7 +114,7 @@ module m_precon
         procedure :: init_kxc => precon_init_kxc            ! Initialize kxc in the precon_object.
         procedure :: update => precon_update                ! Update the precon_object according to iprcel.
         procedure :: free => precon_free                    ! Dealocate arrays that are allocated in precon_init.
-        procedure :: save => precon_save                    ! Save the LDOS or local polarizability contained in the precon_object in a file.
+        procedure :: save => precon_save                    ! Save the LDOS contained in the precon_object in a file. (Debug)
 
         procedure :: apply_dielmat => apply_dielmat         ! Apply the dielectric matrix to an input vector.
         procedure :: apply_adjdielmat => apply_adjdielmat   ! Apply the adjoint dielectric matrix to an input vector.
@@ -126,6 +127,12 @@ module m_precon
     end type precon_object
 
 contains 
+
+    ! TODO :  
+    ! - precision of precon inversion ... solve desync issue
+    ! - check that the band distrib is always done the way it is assumed here
+    ! - non coll and non col with band paral
+    ! - PAW
 
     !****f* m_precon/precon_init
     !! NAME
@@ -197,24 +204,28 @@ contains
         write(6,*)'chi0diel precon%init'; flush(6) !DEBUG
 
         this%iprcel = dtset%iprcel
-        !Logical variables that describe the preconditioner :
-        this%use_ldos = .false.                     ! this%use_ldos = .true. activates the computation of the ldos.
-        if (this%iprcel == 202 .or. this%iprcel == 203 .or. this%iprcel == 204) this%use_ldos = .true.
-        this%use_kxc = .false.                      ! this%use_kxc = .true. activates the use of the exchange and correlation kernel.
-                                                    ! If this%use_kxc = .false. the RPA will be used.
-        if (this%iprcel == 203) this%use_kxc = .true.
-        if (this%iprcel == 204) this%use_kxc = .true.
-        this%use_ridgereg = .false.                 ! this%use_ridgereg = .true. activates the use of an adapted linear solver.
-        !if (this%iprcel == 203) this%use_ridgereg = .true.
-        
-        this%need_cg_fft = .false.                  ! this%need_cg_fft = .true. indicates that we need the array 'cg' to be transposed 
-                                                    ! from the linalg representation to the fft representation to apply the preconditioner.
-        if (this%iprcel == 203 .and. dtset%paral_kgb == 1 .and. dtset%npband > 1) this%need_cg_fft = .true.
-        if (this%iprcel == 204 .and. dtset%paral_kgb == 1 .and. dtset%npband > 1) this%need_cg_fft = .true.
-        
-        ! Other than here, iprcel is only used in apply_chi0, apply_dielmat and apply_adjdielmat.
+        this%use_precon = .false.
 
         if (this%iprcel >= 200 .and. this%iprcel < 300) then
+
+            this%use_precon = .true.
+            
+            !Logical variables that describe the preconditioner :
+            this%use_ldos = .false.                     ! this%use_ldos = .true. activates the computation of the ldos.
+            if (this%iprcel == 202 .or. this%iprcel == 203 .or. this%iprcel == 204) this%use_ldos = .true.
+            this%use_kxc = .false.                      ! this%use_kxc = .true. activates the use of the exchange and correlation kernel.
+                                                        ! If this%use_kxc = .false. the RPA will be used.
+            if (this%iprcel == 203) this%use_kxc = .true.
+            if (this%iprcel == 204) this%use_kxc = .true.
+            this%use_ridgereg = .false.                 ! this%use_ridgereg = .true. activates the use of an adapted linear solver.
+            !if (this%iprcel == 203) this%use_ridgereg = .true.
+            
+            this%need_cg_fft = .false.                  ! this%need_cg_fft = .true. indicates that we need the array 'cg' to be transposed 
+                                                        ! from the linalg representation to the fft representation to apply the preconditioner.
+            if (this%iprcel == 203 .and. dtset%paral_kgb == 1 .and. dtset%npband > 1) this%need_cg_fft = .true.
+            if (this%iprcel == 204 .and. dtset%paral_kgb == 1 .and. dtset%npband > 1) this%need_cg_fft = .true.
+            
+            ! Other than here, iprcel is only used in apply_chi0, apply_dielmat and apply_adjdielmat.
 
             !Constant data from dtset
             this%dielng = dtset%dielng
@@ -283,10 +294,11 @@ contains
             end if
 
             !Linear solver parameters
-            this%linsolve_maxiter = 5
-            this%linsolve_rtol = tol6
+            this%linsolve_maxiter = 100
+            this%linsolve_rtol = tol12
                 ! For inversion of non positive definite (adjointe) dielectric matrix
             this%ridge_param = 0.01
+            
             !chi0_deigvals parameters
             this%deigvals_tol_fp = tol10
             ! TODO : Make these parameters user-defined.
@@ -295,9 +307,6 @@ contains
             ABI_MALLOC(this%cg_indices, (2*dtset%nspinor, dtset%mband, dtset%nkpt, dtset%nsppol))
             ABI_MALLOC(this%kg_indices, (2, dtset%nkpt))
             if (this%need_cg_fft) then
-                if (allocated(this%cg_fft_indices)) then 
-                    deallocate(this%cg_fft_indices)
-                end if
                 ABI_MALLOC(this%cg_fft_indices, (2*dtset%nspinor, dtset%mband, dtset%nkpt, dtset%nsppol))
             end if
             
@@ -325,9 +334,10 @@ contains
 
         ! *************************************************************************
         write(6,*)'chi0diel precon%init_kxc'; flush(6) !DEBUG
-
-        if (this%use_kxc) then
-            this%kxc => kxc
+        if (this%use_precon) then
+            if (this%use_kxc) then
+                this%kxc => kxc
+            end if
         end if
 
     end subroutine precon_init_kxc
@@ -361,21 +371,23 @@ contains
 
         ! *************************************************************************
         write(6,*)'chi0diel precon%update'; flush(6) !DEBUG
-        write(100+mpi_enreg%me,*)'apply_precon%update : dtset%nband', dtset%nband; flush(100+mpi_enreg%me)
+        !write(100+mpi_enreg%me,*)'apply_precon%update : dtset%nband', dtset%nband; flush(100+mpi_enreg%me)
+        if (this%use_precon) then
+            
+            ! Indices in cg array
+            call compute_cg_indices(dtset, mpi_enreg, this%npwarr, this%cg_indices)
+            call compute_kg_indices(dtset, mpi_enreg, this%npwarr, this%kg_indices)
+            
+            !LDOS
+            if (this%use_ldos) then 
+                !update ldos
+                call compute_ldos(this, dtset, mpi_enreg, this%ldos)
+                !update tdos
+                this%tdos = sum(this%ldos(:, 1)) * this%dvol
+                ! TODO : More options to control when the ldos is updated
+            end if
 
-        ! Indices in cg array
-        call compute_cg_indices(dtset, mpi_enreg, this%npwarr, this%cg_indices)
-        call compute_kg_indices(dtset, mpi_enreg, this%npwarr, this%kg_indices)
-        
-        !LDOS
-        if (this%use_ldos) then 
-            !update ldos
-            call compute_ldos(this, dtset, mpi_enreg, this%ldos)
-            !update tdos
-            this%tdos = sum(this%ldos(:, 1)) * this%dvol
-            ! TODO : More options to control when the ldos is updated
         end if
-       
     end subroutine precon_update
 
     !****f* m_precon/precon_free
@@ -393,18 +405,20 @@ contains
         
         ! *************************************************************************
         write(6,*)'chi0diel precon%free'; flush(6) !DEBUG
-       
-        ABI_FREE(this%cg_indices)
-        ABI_FREE(this%kg_indices)
-        if (this%need_cg_fft) then
-            ABI_FREE(this%cg_fft_indices)
-        end if
+        if (this%use_precon) then
 
-        if (this%use_ldos) then
-            !Deallocating the array containing ldos and tdos
-            ABI_FREE(this%ldos)
-        end if
+            ABI_FREE(this%cg_indices)
+            ABI_FREE(this%kg_indices)
+            if (this%need_cg_fft) then
+                ABI_FREE(this%cg_fft_indices)
+            end if
 
+            if (this%use_ldos) then
+                !Deallocating the array containing ldos and tdos
+                ABI_FREE(this%ldos)
+            end if
+
+        end if
     end subroutine precon_free
 
     !****f* m_precon/compute_r
@@ -549,19 +563,21 @@ contains
         integer :: io, n, i
 
         ! *************************************************************************
+        if (this%use_precon) then
         
-        n = size(this%ldos, 1)
+            n = size(this%ldos, 1)
 
-        if (this%iprcel==202) then
-            n = size(this%ldos(:, ispden))
-            ! Writing the file
-            open(newunit=io, file="ldos.txt", status="replace", action="write")
-                do i=1,n
-                    write (io, '(*(G0.6,:,","))') matmul(this%rprimd, get_r_vector(i, ngfft)), this%ldos(i, ispden)
-                end do
-            close(io)
-        end if 
+            if (this%iprcel==202) then
+                n = size(this%ldos(:, ispden))
+                ! Writing the file
+                open(newunit=io, file="ldos.txt", status="replace", action="write")
+                    do i=1,n
+                        write (io, '(*(G0.6,:,","))') matmul(this%rprimd, get_r_vector(i, ngfft)), this%ldos(i, ispden)
+                    end do
+                close(io)
+            end if 
 
+        end if
     end subroutine precon_save
 
     !!****f* ABINIT/to_pauli
@@ -912,6 +928,39 @@ contains
         end if
 
     end subroutine apply_kernel
+
+    !****f* m_precon/precon_increased_tsmear
+    !! NAME
+    !!  precon_increased_tsmear
+    !!
+    !! FUNCTION
+    !!
+    !! INPUTS
+    !!
+    !! OUTPUT
+    !!  increased_tsmear = 
+    !!
+    !! SOURCE
+    function precon_increased_tsmear(dtset) result(increased_tsmear)
+
+        !Arguments ------------------------------------
+        !scalars
+        type(dataset_type),intent(in) :: dtset
+        
+        !Local variables-------------------------------
+        !scalars
+        real(dp) :: kpt_density, tsmear_max
+
+        !Returned variable-------------------------------
+        real(dp) :: increased_tsmear
+        
+        ! *************************************************************************
+
+        tsmear_max = 0.1
+        kpt_density = 1 ! TODO
+        increased_tsmear = max(min(6000/kpt_density, tsmear_max), dtset%tsmear)
+        
+    end function precon_increased_tsmear
 
     !****f* m_precon/derivative_occ
     !! NAME
@@ -1633,7 +1682,7 @@ contains
             &           gbound, gbound, istwf_k, kg_k, kg_k, dtset%mgfft, mpi_enreg, ndat, dtset%ngfft, npw_k, &
             &           dummy_int, n4, n5, n6, option, tim_fourwf, weight_r, weight_i)
             !write(6,*)'chi0diel compute_rhoii_coll i_cg = ', j_cg+1, j_cg+npw_k; flush(6)  !DEBUG
-            write(100+mpi_enreg%me,*)'chi0diel compute_rhoi_coll i_cg(1), i_cg(2)', j_cg+1, j_cg+npw_k; flush(100+mpi_enreg%me)    !DEBUG
+            !write(100+mpi_enreg%me,*)'chi0diel compute_rhoi_coll i_cg(1), i_cg(2)', j_cg+1, j_cg+npw_k; flush(100+mpi_enreg%me)    !DEBUG
             !write(100+mpi_enreg%me,*)'chi0diel compute_rhoi_coll this%cg(:, i_cg(1):i_cg(2))', this%cg(:, j_cg+1:j_cg+npw_k); flush(100+mpi_enreg%me)
 
             ! In PAW : We need to add the correction (hat) term if pawsushat=1.
@@ -1980,7 +2029,6 @@ contains
 
                 !MPI parallelization over kpoints : cycle if kpt does not belong to current processor.
                 if (proc_distrb_cycle(mpi_enreg%proc_distrb, ikpt, 1, nband_k, isppol, mpi_enreg%me_kpt)) then
-                    write(100+mpi_enreg%me,*)'chi0diel compute_weights cycle ', mpi_enreg%me; flush(100+mpi_enreg%me) !DEBUG
                     cycle
                 end if
 
@@ -2131,10 +2179,12 @@ contains
 
     ! Return the index of the eigenvalue corresponding to iband, ikpt, isppol in the 'eigen' array
     function get_eigen_index(dtset, iband, ikpt, isppol) result(i_eigen)
+        
         !Arguments ------------------------------------
         !scalars
         type(dataset_type),intent(in) :: dtset
         integer, intent(in) :: iband, ikpt, isppol
+        
         !Returned variable-------------------------------
         integer :: i_eigen
 
@@ -2145,6 +2195,7 @@ contains
     end function get_eigen_index
 
     subroutine compute_cg_indices(dtset, mpi_enreg, npwarr, cg_indices)
+        
         !Arguments ------------------------------------
         type(dataset_type),intent(in) :: dtset
         type(MPI_type), intent(in) :: mpi_enreg
@@ -2182,6 +2233,7 @@ contains
     end subroutine compute_cg_indices
 
     subroutine compute_kg_indices(dtset, mpi_enreg, npwarr, kg_indices)
+        
         !Arguments ------------------------------------
         type(dataset_type),intent(in) :: dtset
         type(MPI_type), intent(in) :: mpi_enreg
@@ -2209,6 +2261,7 @@ contains
 
     ! Compute rho_i in collinear case without PAW corrections
     subroutine compute_rhoi_coll(this, dtset,  mpi_enreg, iband, ikpt, isppol, rhoi_r)
+        
         !Arguments ------------------------------------
         class(precon_object), intent(inout) :: this
         !scalars
@@ -2243,6 +2296,9 @@ contains
         n6 = dtset%ngfft(6)
         
         ! TODO : check iband, ikpt, isppol belong to proc and return error if not
+        !if () then
+        !    ABI_BUG("iprcel=20? : nfftprc /= nfft in norm-conserving not implemented.")
+        !end if
 
         ! No spin or collinear spins - Wafefunctions have one spin component.
         if (dtset%nspinor == 1) then
@@ -2325,134 +2381,33 @@ contains
     end subroutine compute_rhoi_coll
 
     ! Compute rho_i in non-collinear case without PAW corrections
-    subroutine compute_rhoi_noncoll(this, dtset, mpi_enreg, iband, isppol, gbound, ikpt, istwf_k, kg_k, nband_k, npw_k, rhoi_r)
+    subroutine compute_rhoi_noncoll(this, dtset,  mpi_enreg, iband, ikpt, isppol, rhoi_r)
         !Arguments ------------------------------------
         class(precon_object), intent(inout) :: this
         !scalars
         type(dataset_type),intent(in) :: dtset
         type(MPI_type), intent(in) :: mpi_enreg
-        integer, intent(in) :: isppol, ikpt, iband, istwf_k, nband_k, npw_k
-        !arrays
-        integer, intent(in) :: gbound(2*dtset%mgfft+8,2)
-        integer, intent(in) :: kg_k(:, :)
-        real(dp), intent(inout) :: rhoi_r(this%nfftprc, 4)
+        integer, intent(in) :: isppol, ikpt, iband 
+        real(dp), intent(inout) :: rhoi_r(this%nfftprc, 1)
        
         !Local variables-------------------------------
         !scalars
-        integer :: cplex, optgrid, optin, optout
-        integer :: ispden, ndat, option, tim_fourwf, ier
+        integer :: cplex, optin, optout, optgrid
+        integer :: ndat, option, tim_fourwf, ier
+        integer :: i_cg(2), i_kg(2)
         integer :: n1, n2, n3, n4, n5, n6
-        integer :: i_cg(4)
+        integer :: istwf_k, npw_k
         !arrays
-        real(dp), allocatable :: psi_i_up_r(:, :, :, :), psi_i_down_r(:, :, :, :)
-        real(dp), allocatable :: rhoi_aug_r(:, :, :, :), rhoi_coarse_r(:, :)
+        integer :: gbound(2*dtset%mgfft+8,2)
+        integer, allocatable :: kg_k(:, :)
+        real(dp), allocatable :: rhoi_aug_r(:, :, :), rhoi_coarse_r(:, :)
         !dummy arguments
         integer :: dummy_int
-        real(dp) :: dummy_real
-        real(dp) :: dummy_denpot(0, dtset%ngfft(5), dtset%ngfft(6))
         real(dp) :: dummy_fofgout(2, 0), dummy_fofrout(2, dtset%ngfft(4), dtset%ngfft(5), dtset%ngfft(6))
         real(dp), allocatable :: dummy_rhog(:, :), dummy_rhogf(:, :)
         
         ! *************************************************************************
-        write(6,*)'chi0diel compute_rhoi_noncoll'; flush(6) !DEBUG
-        n1 = dtset%ngfft(1)
-        n2 = dtset%ngfft(2)
-        n3 = dtset%ngfft(3)
-        n4 = dtset%ngfft(4)
-        n5 = dtset%ngfft(5)
-        n6 = dtset%ngfft(6)
-
-        ! Non collinear spins - Wavefunctions have two spins components.
-        if (dtset%nspinor == 2) then
-
-            ! Indices range of psi_i in 'cg' array
-            i_cg = get_cg_indices(dtset, this%npwarr, iband, ikpt, isppol)
-
-            !1) Compute psi_up and psi_down in real space :
-            ABI_MALLOC(psi_i_up_r, (2, n4, n5, n6))
-            ABI_MALLOC(psi_i_down_r, (2, n4, n5, n6))
-            ! Input parameters for fourwf :
-            option = 0          ! Only do the FFT.
-            ndat = 1
-            tim_fourwf = 0
-            !FFT for psi_up
-            call fourwf(dummy_int, dummy_denpot, this%cg(:, i_cg(1):i_cg(2)), dummy_fofgout, psi_i_up_r,  &
-            &           gbound, gbound, istwf_k, kg_k, kg_k, dtset%mgfft, mpi_enreg, ndat, dtset%ngfft, npw_k, &
-            &           dummy_int, n4, n5, n6, option, tim_fourwf, dummy_real, dummy_real)
-            !FFT for psi_down
-            call fourwf(dummy_int, dummy_denpot, this%cg(:, i_cg(3):i_cg(4)), dummy_fofgout, psi_i_down_r,  &
-            &           gbound, gbound, istwf_k, kg_k, kg_k, dtset%mgfft, mpi_enreg, ndat, dtset%ngfft, npw_k, &
-            &           dummy_int, n4, n5, n6, option, tim_fourwf, dummy_real, dummy_real)
-            !   (done separately for convenience & readability)
-            
-            !2) Compute the 4 components of the orbital density rhoi_aug_r :
-            !   (in the Pauli basis for spins and real augmented basis for space)
-            ABI_MALLOC(rhoi_aug_r, (n4, n5, n6, 4))
-            ispden = 1  ! rho_sigma0 = |psi_up|^2 + |psi_down|^2
-            rhoi_aug_r(:, :, :, ispden) = psi_i_up_r(1, :, :, :)**2 + psi_i_up_r(2, :, :, :)**2 + psi_i_down_r(1, :, :, :)**2 + psi_i_down_r(2, :, :, :)**2
-            ispden = 2  ! rho_sigma1 = psi_up* psi_down + psi_down* psi_up
-            rhoi_aug_r(:, :, :, ispden) = 2*( psi_i_up_r(1, :, :, :)*psi_i_down_r(1, :, :, :) + psi_i_up_r(2, :, :, :)*psi_i_down_r(2, :, :, :) )
-            ispden = 3  ! rho_sigma2 = i*(psi_down* psi_up - psi_up* psi_down)
-            rhoi_aug_r(:, :, :, ispden) = 2*( psi_i_up_r(2, :, :, :)*psi_i_down_r(1, :, :, :) - psi_i_up_r(1, :, :, :)*psi_i_down_r(2, :, :, :) )
-            ispden = 4  ! rho_sigma3 = |psi_up|^2 - |psi_down|^2
-            rhoi_aug_r(:, :, :, ispden) = psi_i_up_r(1, :, :, :)**2 + psi_i_up_r(2, :, :, :)**2 - psi_i_down_r(1, :, :, :)**2 + psi_i_down_r(2, :, :, :)**2
-
-            ABI_FREE(psi_i_up_r)
-            ABI_FREE(psi_i_down_r)
-
-            !3) Transfer rhoi_aug_r defined on the augmented (wavefunction) fft-grid to the preconditioning fft-grid.
-            if (this%psps%usepaw==1) then
-                ! In NC, the preconditioning grid should be the density/potential grid.
-                if (this%nfftprc == n1*n2*n3) then
-                    do ispden= 1, 4
-                        call fftpac(ispden, mpi_enreg, 4, n1, n2, n3, n4, n5, n6, dtset%ngfft, &
-                        &       rhoi_r(:, ispden), rhoi_aug_r(:, :, :, ispden), 1)
-                    end do
-                else
-                    ABI_BUG("iprcel=203 : nfftprc /= nfft in norm-conserving not implemented.")
-                end if
-            else
-                ! In PAW, the preconditioning grid should be the fine grid.
-                if (this%nfftprc == this%pawfgr%nfft) then
-                    ! Augmented grid to coarse grid :
-                    ABI_MALLOC(rhoi_coarse_r, (dtset%nfft, 4))
-                    do ispden = 1, 4
-                        call fftpac(ispden, mpi_enreg, 4, n1, n2, n3, n4, n5, n6, dtset%ngfft, &
-                        &       rhoi_coarse_r(:, ispden), rhoi_aug_r(:, :, :, ispden), 1)
-                    end do
-                    ! Coarse grid to fine grid :
-                    cplex = 1
-                    optgrid = 1 ! coarse to fine
-                    optin = 0   ! real space
-                    optout = 0  !
-                    ABI_MALLOC(dummy_rhog, (2, this%pawfgr%nfftc))
-                    ABI_MALLOC(dummy_rhogf, (2, this%pawfgr%nfft))
-                    call transgrid(cplex, mpi_enreg, 1, optgrid, optin, optout, dtset%paral_kgb, this%pawfgr, dummy_rhog, dummy_rhogf, rhoi_coarse_r, rhoi_r)
-                    ABI_FREE(dummy_rhog)
-                    ABI_FREE(dummy_rhogf)
-                    ABI_FREE(rhoi_coarse_r)
-
-                else
-                    ABI_BUG("iprcel=2** : nfftprc /= pawfgr%nfft in PAW not implemented.")
-                end if
-
-            end if
-            ABI_FREE(rhoi_aug_r)
-
-            !3) Sum over MPI processes (for parallelization over bands).
-            ier = 0
-            call xmpi_sum(rhoi_r, mpi_enreg%comm_bandfft, ier)
-            !call xmpi_sum(rhoi_r, mpi_enreg%comm_bandspinorfft, ier)   ! TODO : something like that
-
-            !4) Normalize rhoi_r.
-            do ispden = 1, 4
-                ! TODO noncoll : check that normalizing each component make sense.
-                rhoi_r(:, ispden) = rhoi_r(:, ispden) / (sum(rhoi_r(:, ispden)) * this%dvol) !Normalizing rho_ii_r.
-            end do
-
-        else
-            ABI_BUG("iprcel=203 : compute_rhoii_noncoll called with collinear magnetism")
-        end if
+        
 
     end subroutine compute_rhoi_noncoll
 
@@ -2495,7 +2450,6 @@ contains
                     fp = derivative_occ(dtset%occopt, this%eigen(i_eigen), this%fermie, dtset%tsmear) * maxocc
 
                     if (abs(fp) > this%deigvals_tol_fp) then
-                        write(100+mpi_enreg%me,*)'                      needed'; flush(100+mpi_enreg%me)
                         needed_bands_bounds(1, i_kpt_sppol) = min(needed_bands_bounds(1, i_kpt_sppol), iband)   ! iband_min
                         needed_bands_bounds(2, i_kpt_sppol) = max(needed_bands_bounds(2, i_kpt_sppol), iband)   ! iband_max
                     end if
@@ -2521,7 +2475,7 @@ contains
        
         !Local variables-------------------------------
         !scalars
-        integer :: istwf_k, nband_k, npw_k, nspin, option
+        integer :: istwf_k, nband_k, npw_k, nspin, option, rank
         integer :: i_eigen, ikpt, iband, isppol, ier
         integer :: i_kg(2)
         integer :: n1, n2, n3, n4, n5, n6
@@ -2584,13 +2538,8 @@ contains
                     cycle
                 end if
                 
-                do iband = 1, nband_k
-
-                    ! MPI parallelization over bands : cycle if band does not belong to current processor.
-                    !       Workaround : check if cg_fft_indices is not (0, 0)
-                    if (this%need_cg_fft .and. (this%cg_fft_indices(1, iband, ikpt, isppol) == 0)) then
-                        cycle
-                    end if
+                rank = xmpi_comm_rank(mpi_enreg%comm_bandfft)
+                do iband = 1 + mpi_enreg%bandpp*rank, mpi_enreg%bandpp*(rank+1)
 
                     !Indices
                     i_eigen = get_eigen_index(dtset, iband, ikpt, isppol)  ! Index of (iband, ikpt, isppol) in eigen array.
@@ -2756,7 +2705,7 @@ contains
                     end if
                     fi = this%occ(i_eigen)
 
-                    i_cg = get_cg_indices(dtset, this%npwarr, isppol, ikpt, iband)
+                    i_cg = this%cg_indices(:, iband, ikpt, isppol)
                     write(6,*)'chi0diel compute_delta_wf - i_cg = ', i_cg; flush(6) !DEBUG
 
                     !Input parameters for fourwf :
@@ -2841,7 +2790,7 @@ contains
        
         !Local variables-------------------------------
         integer :: iband, isppol, ispden, ikpt, istwf_k, i_eigen, nband_k, npw_k
-        integer :: ier
+        integer :: ier, rank
         integer :: n1, n2, n3, n4, n5, n6
         integer :: tim_fourwf, ndat, option
         !arrays
@@ -2896,14 +2845,8 @@ contains
                     call sphereboundary(gbound, istwf_k, kg_k, dtset%mgfft, npw_k)
                 end if      ! TODO : Not very nice to have a if here ....
 
-                do iband = 1, nband_k
-
-                    ! MPI parallelization over bands : cycle if band does not belong to current processor.
-                    !       Workaround : check if cg_fft_indices is not (0, 0)
-                    ! TODO : this or directely loop on the bands assigned to the processor ?
-                    if (this%need_cg_fft .and. (this%cg_fft_indices(1, iband, ikpt, isppol) == 0)) then
-                        cycle
-                    end if
+                rank = xmpi_comm_rank(mpi_enreg%comm_bandfft)
+                do iband = 1 + mpi_enreg%bandpp*rank, mpi_enreg%bandpp*(rank+1)
 
                     !Indices
                     i_eigen = get_eigen_index(dtset, iband, ikpt, isppol)       ! Index of (iband, ikpt, isppol) in eigen array.
@@ -2941,8 +2884,9 @@ contains
                     !write(6,*)'chi0diel  ok6'; flush(6) !DEBUG
                     
                     !2) Contribution of wavefunction variation (if applicable)
-                    if (norm2(delta_wf(:, i_cg(1):i_cg(2))) > tol14) then ! TODO : what tol ?
-                        
+                    if (.false.) then 
+                    !if (norm2(delta_wf(:, i_cg(1):i_cg(2))) > tol14) then ! TODO : what tol ?
+                        ! TODO : his part is probably incorrect ! 
                         write(6,*)'chi0diel compute_delta_rho if delta_wf ok'; flush(6) !DEBUG
                         ! IFFT for delta_wf (wavefunction variation)
                         call fourwf(1, dummy_denpot, delta_wf(:, i_cg(1):i_cg(2)), dummy_fofgout, delta_wf_aug_r_i,  &
@@ -2966,10 +2910,10 @@ contains
                         end if
                     end if
 
-                end do
+                end do  ! iband
 
                 ABI_FREE(kg_k)
-            end do  !ikpt
+            end do  ! ikpt
         end do  ! isppol
 
         ABI_FREE(rho_aug_r_i)
@@ -3119,70 +3063,72 @@ contains
         
         ! *************************************************************************
         write(6,*)'chi0diel apply_adjdielmat'; flush(6) !DEBUG
+        if (this%use_precon) then
 
-        if (this%iprcel == 200) then
-        ! P=I : No preconditioning
-            adjdielmat_rho_r = rho_r
+            if (this%iprcel == 200) then
+            ! P=I : No preconditioning
+                adjdielmat_rho_r = rho_r
 
-        elseif (this%iprcel == 202) then
-        ! More efficient implementation for the LDOS preconditioner.
-            call apply_adjdielmat_ldos(this, dtset, mpi_enreg, rho_r, adjdielmat_rho_r)
+            elseif (this%iprcel == 202) then
+            ! More efficient implementation for the LDOS preconditioner.
+                call apply_adjdielmat_ldos(this, dtset, mpi_enreg, rho_r, adjdielmat_rho_r)
 
-        elseif (this%iprcel == 203) then
-        ! When iprcel = 203 , P = (I - chi0_ldos*vc - chi0_diag*Kxc)
-            
-            !1) Compute adjdielmat_rho_r = rho_r - chi0_ldos * vc *rho_r
-            call apply_adjdielmat_ldos(this, dtset, mpi_enreg, rho_r, adjdielmat_rho_r)
+            elseif (this%iprcel == 203) then
+            ! When iprcel = 203 , P = (I - chi0_ldos*vc - chi0_diag*Kxc)
+                
+                !1) Compute adjdielmat_rho_r = rho_r - chi0_ldos * vc *rho_r
+                call apply_adjdielmat_ldos(this, dtset, mpi_enreg, rho_r, adjdielmat_rho_r)
 
-            !2) Add -(chi0_diag * Kxc * rho_r) to adjdielmat_rho_r
-            ABI_MALLOC(kxc_rho_r, (this%nfftprc, dtset%nspden))
-            ABI_MALLOC(chi0_kxc_rho_r, (this%nfftprc, dtset%nspden))
-            
-            !2.2) Apply Kxc to vec_r
-            call apply_kxc(this, dtset, mpi_enreg, rho_r, kxc_rho_r)
-            !2.3) Apply chi0_deigvals + chi0_dfermie to Kxc*vec_r (in place)
-            chi0_kxc_rho_r = kxc_rho_r
-            call apply_chi0_deigvals(this, dtset, mpi_enreg, chi0_kxc_rho_r)
-            call apply_chi0_dfermie(this, dtset, mpi_enreg, kxc_rho_r)
-            chi0_kxc_rho_r = chi0_kxc_rho_r + kxc_rho_r
-            !2.5) Add this contribution to adjdielmat_rho_r
-            adjdielmat_rho_r = adjdielmat_rho_r - chi0_kxc_rho_r
-            
-            ABI_FREE(chi0_kxc_rho_r)
-            ABI_FREE(kxc_rho_r)
+                !2) Add -(chi0_diag * Kxc * rho_r) to adjdielmat_rho_r
+                ABI_MALLOC(kxc_rho_r, (this%nfftprc, dtset%nspden))
+                ABI_MALLOC(chi0_kxc_rho_r, (this%nfftprc, dtset%nspden))
+                
+                !2.2) Apply Kxc to vec_r
+                call apply_kxc(this, dtset, mpi_enreg, rho_r, kxc_rho_r)
+                !2.3) Apply chi0_deigvals + chi0_dfermie to Kxc*vec_r (in place)
+                chi0_kxc_rho_r = kxc_rho_r
+                call apply_chi0_deigvals(this, dtset, mpi_enreg, chi0_kxc_rho_r)
+                call apply_chi0_dfermie(this, dtset, mpi_enreg, kxc_rho_r)
+                chi0_kxc_rho_r = chi0_kxc_rho_r + kxc_rho_r
+                !2.5) Add this contribution to adjdielmat_rho_r
+                adjdielmat_rho_r = adjdielmat_rho_r - chi0_kxc_rho_r
+                
+                ABI_FREE(chi0_kxc_rho_r)
+                ABI_FREE(kxc_rho_r)
 
-        elseif (this%iprcel == 204) then
-        ! When iprcel = 204 , P = (I - chi0_ldos*vc - chi0_quasidiag*Kxc)
-            
-            !1) Compute adjdielmat_rho_r = rho_r - chi0_ldos * vc *rho_r
-            call apply_adjdielmat_ldos(this, dtset, mpi_enreg, rho_r, adjdielmat_rho_r)
+            elseif (this%iprcel == 204) then
+            ! When iprcel = 204 , P = (I - chi0_ldos*vc - chi0_quasidiag*Kxc)
+                
+                !1) Compute adjdielmat_rho_r = rho_r - chi0_ldos * vc *rho_r
+                call apply_adjdielmat_ldos(this, dtset, mpi_enreg, rho_r, adjdielmat_rho_r)
 
-            !2) Add -(chi0_diag * Kxc * rho_r) to adjdielmat_rho_r
-            ABI_MALLOC(chi0_kxc_rho_r, (this%nfftprc, dtset%nspden))
-            
-            !2.2) Apply Kxc to vec_r
-            call apply_kxc(this, dtset, mpi_enreg, rho_r, chi0_kxc_rho_r)
-            !2.3) Apply chi0_quasidiag to Kxc*vec_r (in place)
-            call apply_chi0_quasidiag(this, dtset, mpi_enreg, chi0_kxc_rho_r)
-            !2.5) Add this contribution to adjdielmat_rho_r
-            adjdielmat_rho_r = adjdielmat_rho_r - chi0_kxc_rho_r
-            
-            ABI_FREE(chi0_kxc_rho_r)
+                !2) Add -(chi0_diag * Kxc * rho_r) to adjdielmat_rho_r
+                ABI_MALLOC(chi0_kxc_rho_r, (this%nfftprc, dtset%nspden))
+                
+                !2.2) Apply Kxc to vec_r
+                call apply_kxc(this, dtset, mpi_enreg, rho_r, chi0_kxc_rho_r)
+                !2.3) Apply chi0_quasidiag to Kxc*vec_r (in place)
+                call apply_chi0_quasidiag(this, dtset, mpi_enreg, chi0_kxc_rho_r)
+                !2.5) Add this contribution to adjdielmat_rho_r
+                adjdielmat_rho_r = adjdielmat_rho_r - chi0_kxc_rho_r
+                
+                ABI_FREE(chi0_kxc_rho_r)
 
-        else
-        ! In the general case, P = (I - K*chi0_model) where K and chi0_model are defined 
-        ! in the subroutine apply_kernel and apply_chi0 (depending on iprcel).
-            
-            adjdielmat_rho_r = rho_r
-            !1) Apply the Kernel (vc or vc + Kxc depending on iprcel)
-            call apply_kernel(this, dtset, mpi_enreg, adjdielmat_rho_r)
-            !2) Applythe model chi0 operator
-            call apply_chi0(this, dtset, mpi_enreg, adjdielmat_rho_r)
-            !3) adjdielmat_rho_r = rho_r - K * chi0 * rho_r = adjdielmat * rho_r
-            adjdielmat_rho_r = rho_r - adjdielmat_rho_r
-            
+            else
+            ! In the general case, P = (I - K*chi0_model) where K and chi0_model are defined 
+            ! in the subroutine apply_kernel and apply_chi0 (depending on iprcel).
+                
+                adjdielmat_rho_r = rho_r
+                !1) Apply the Kernel (vc or vc + Kxc depending on iprcel)
+                call apply_kernel(this, dtset, mpi_enreg, adjdielmat_rho_r)
+                !2) Applythe model chi0 operator
+                call apply_chi0(this, dtset, mpi_enreg, adjdielmat_rho_r)
+                !3) adjdielmat_rho_r = rho_r - K * chi0 * rho_r = adjdielmat * rho_r
+                adjdielmat_rho_r = rho_r - adjdielmat_rho_r
+                
+            end if
+
         end if
-        
     end subroutine apply_adjdielmat
     !!***
     
@@ -3220,87 +3166,189 @@ contains
         
         ! *************************************************************************
         write(6,*)'chi0diel apply_dielmat'; flush(6) !DEBUG
-        write(100+mpi_enreg%me,*)'chi0diel apply_dielmat'; flush(100+mpi_enreg%me)   !DEBUG
+        !write(100+mpi_enreg%me,*)'chi0diel apply_dielmat'; flush(100+mpi_enreg%me)   !DEBUG
+        if (this%use_precon) then
 
-        if (this%iprcel == 200) then
-        ! P=I : No preconditioning
-            dielmat_v_r = v_r
-        
-        elseif (this%iprcel == 202) then
-        ! More efficient implementation for the LDOS preconditioner.
-            call apply_dielmat_ldos(this, dtset, mpi_enreg, v_r, dielmat_v_r) 
-
-        elseif (this%iprcel == 203) then
-        ! When iprcel = 203 , P = (I - vc*chi0_ldos - Kxc*chi0_diag)
+            if (this%iprcel == 200) then
+            ! P=I : No preconditioning
+                dielmat_v_r = v_r
             
-            !1) Compute dielmat_v_r = v_r - vc * chi0_ldos *v_r
-            call apply_dielmat_ldos(this, dtset, mpi_enreg, v_r, dielmat_v_r) 
-            !dielmat_v_r = v_r  !DEBUG
+            elseif (this%iprcel == 202) then
+            ! More efficient implementation for the LDOS preconditioner.
+                call apply_dielmat_ldos(this, dtset, mpi_enreg, v_r, dielmat_v_r) 
 
-            !2) Add -(Kxc * chi0_deigvals * v_r) to dielmat_v_r
-            
-            !2.1) Apply chi0_deigvals + chi0_dfermie to v_r
-            ABI_MALLOC(kxc_chi0_v_r, (this%nfftprc, dtset%nspden))
-            ABI_MALLOC(chi0_v_r, (this%nfftprc, dtset%nspden))
-            kxc_chi0_v_r = v_r
-            chi0_v_r = v_r
-            call apply_chi0_deigvals(this, dtset, mpi_enreg, chi0_v_r)
-            !write(6,*)'chi0diel apply_dielmat after deigvals, chi0_v_r 1 = ', chi0_v_r(1:20, 1); flush(6) !DEBUG
-            !write(6,*)'chi0diel apply_dielmat after deigvals, chi0_v_r 2 = ', chi0_v_r(1:20, 2); flush(6) !DEBUG
-            call apply_chi0_dfermie(this, dtset, mpi_enreg, kxc_chi0_v_r)   !kxc_chi0_v_r used as temporary storage.
-            !write(6,*)'chi0diel apply_dielmat after dfermie, kxc_chi0_v_r 1 = ', kxc_chi0_v_r(1:20, 1); flush(6) !DEBUG
-            !write(6,*)'chi0diel apply_dielmat after dfermie, kxc_chi0_v_r 2 = ', kxc_chi0_v_r(1:20, 2); flush(6) !DEBUG
-            chi0_v_r = kxc_chi0_v_r + chi0_v_r
-            !chi0_v_r = kxc_chi0_v_r    ! DEBUG
-            !write(6,*)'chi0diel apply_dielmat, chi0_v_r 1 = ', chi0_v_r(1:20, 1); flush(6) !DEBUG
-            !write(6,*)'chi0diel apply_dielmat, chi0_v_r 2 = ', chi0_v_r(1:20, 2); flush(6) !DEBUG
+            elseif (this%iprcel == 203) then
+            ! When iprcel = 203 , P = (I - vc*chi0_ldos - Kxc*chi0_diag)
+                
+                !1) Compute dielmat_v_r = v_r - vc * chi0_ldos *v_r
+                call apply_dielmat_ldos(this, dtset, mpi_enreg, v_r, dielmat_v_r) 
+                !dielmat_v_r = v_r  !DEBUG
 
-            !2.2) Apply Kxc to chi0*v_r
-            call apply_kxc(this, dtset, mpi_enreg, chi0_v_r, kxc_chi0_v_r)
-            !2.3) Add this contribution to dielmat_v_r
-            dielmat_v_r = dielmat_v_r - kxc_chi0_v_r
-            ABI_FREE(kxc_chi0_v_r)
-            ABI_FREE(chi0_v_r)
+                !2) Add -(Kxc * chi0_deigvals * v_r) to dielmat_v_r
+                
+                !2.1) Apply chi0_deigvals + chi0_dfermie to v_r
+                ABI_MALLOC(kxc_chi0_v_r, (this%nfftprc, dtset%nspden))
+                ABI_MALLOC(chi0_v_r, (this%nfftprc, dtset%nspden))
+                kxc_chi0_v_r = v_r
+                chi0_v_r = v_r
+                call apply_chi0_deigvals(this, dtset, mpi_enreg, chi0_v_r)
+                !write(6,*)'chi0diel apply_dielmat after deigvals, chi0_v_r 1 = ', chi0_v_r(1:20, 1); flush(6) !DEBUG
+                !write(6,*)'chi0diel apply_dielmat after deigvals, chi0_v_r 2 = ', chi0_v_r(1:20, 2); flush(6) !DEBUG
+                call apply_chi0_dfermie(this, dtset, mpi_enreg, kxc_chi0_v_r)   !kxc_chi0_v_r used as temporary storage.
+                !write(6,*)'chi0diel apply_dielmat after dfermie, kxc_chi0_v_r 1 = ', kxc_chi0_v_r(1:20, 1); flush(6) !DEBUG
+                !write(6,*)'chi0diel apply_dielmat after dfermie, kxc_chi0_v_r 2 = ', kxc_chi0_v_r(1:20, 2); flush(6) !DEBUG
+                chi0_v_r = kxc_chi0_v_r + chi0_v_r
+                !chi0_v_r = kxc_chi0_v_r    ! DEBUG
+                !write(6,*)'chi0diel apply_dielmat, chi0_v_r 1 = ', chi0_v_r(1:20, 1); flush(6) !DEBUG
+                !write(6,*)'chi0diel apply_dielmat, chi0_v_r 2 = ', chi0_v_r(1:20, 2); flush(6) !DEBUG
 
-        elseif (this%iprcel == 204) then
-        ! When iprcel = 204 , P = (I - vc*chi0_ldos - Kxc*chi0_diag)
-            
-            !1) Compute dielmat_v_r = v_r - vc * chi0_ldos *v_r
-            call apply_dielmat_ldos(this, dtset, mpi_enreg, v_r, dielmat_v_r) 
-            !dielmat_v_r = v_r   !DEBUG
+                !2.2) Apply Kxc to chi0*v_r
+                call apply_kxc(this, dtset, mpi_enreg, chi0_v_r, kxc_chi0_v_r)
+                !2.3) Add this contribution to dielmat_v_r
+                dielmat_v_r = dielmat_v_r - kxc_chi0_v_r
+                ABI_FREE(kxc_chi0_v_r)
+                ABI_FREE(chi0_v_r)
 
-            !2) Add -(Kxc * chi0_quasidiag * v_r) to dielmat_v_r
-            
-            !2.1) Apply chi0_quasidiag to v_r
-            ABI_MALLOC(chi0_v_r, (this%nfftprc, dtset%nspden))
-            chi0_v_r = v_r
-            call apply_chi0_quasidiag(this, dtset, mpi_enreg, chi0_v_r)
-            !write(6,*)'chi0diel apply_dielmat, chi0_v_r 1 = ', chi0_v_r(1:20, 1); flush(6) !DEBUG
-            !write(6,*)'chi0diel apply_dielmat, chi0_v_r 2 = ', chi0_v_r(1:20, 2); flush(6) !DEBUG
-            !2.2) Apply Kxc to chi0*v_r
-            ABI_MALLOC(kxc_chi0_v_r, (this%nfftprc, dtset%nspden))
-            kxc_chi0_v_r = zero ! To be sure ... TODO : delete
-            call apply_kxc(this, dtset, mpi_enreg, chi0_v_r, kxc_chi0_v_r)
-            !2.3) Add this contribution to dielmat_v_r
-            dielmat_v_r = dielmat_v_r - kxc_chi0_v_r
-            ABI_FREE(kxc_chi0_v_r)
-            ABI_FREE(chi0_v_r)
+            elseif (this%iprcel == 204) then
+            ! When iprcel = 204 , P = (I - vc*chi0_ldos - Kxc*chi0_diag)
+                
+                !1) Compute dielmat_v_r = v_r - vc * chi0_ldos *v_r
+                call apply_dielmat_ldos(this, dtset, mpi_enreg, v_r, dielmat_v_r) 
+                !dielmat_v_r = v_r   !DEBUG
 
-        else
-        ! In the general case, P = (I - K*chi0_model) where K and chi0_model are defined 
-        ! in the subroutine apply_kernel and apply_chi0 (depending on iprcel).
-            
-            dielmat_v_r = v_r
-            !1) Apply the model chi0 operator
-            call apply_chi0(this, dtset, mpi_enreg, dielmat_v_r)
-            !2) Apply the Kernel (vc or vc + Kxc depending on iprcel)
-            call apply_kernel(this, dtset, mpi_enreg, dielmat_v_r)
-            !3) dielmat_v_r = v_r - K * chi0 * v_r = dielmat * v_r
-            dielmat_v_r = v_r - dielmat_v_r
-            
+                !2) Add -(Kxc * chi0_quasidiag * v_r) to dielmat_v_r
+                
+                !2.1) Apply chi0_quasidiag to v_r
+                ABI_MALLOC(chi0_v_r, (this%nfftprc, dtset%nspden))
+                chi0_v_r = v_r
+                call apply_chi0_quasidiag(this, dtset, mpi_enreg, chi0_v_r)
+                !write(6,*)'chi0diel apply_dielmat, chi0_v_r 1 = ', chi0_v_r(1:20, 1); flush(6) !DEBUG
+                !write(6,*)'chi0diel apply_dielmat, chi0_v_r 2 = ', chi0_v_r(1:20, 2); flush(6) !DEBUG
+                !2.2) Apply Kxc to chi0*v_r
+                ABI_MALLOC(kxc_chi0_v_r, (this%nfftprc, dtset%nspden))
+                kxc_chi0_v_r = zero ! To be sure ... TODO : delete
+                call apply_kxc(this, dtset, mpi_enreg, chi0_v_r, kxc_chi0_v_r)
+                !2.3) Add this contribution to dielmat_v_r
+                dielmat_v_r = dielmat_v_r - kxc_chi0_v_r
+                ABI_FREE(kxc_chi0_v_r)
+                ABI_FREE(chi0_v_r)
+
+            else
+            ! In the general case, P = (I - K*chi0_model) where K and chi0_model are defined 
+            ! in the subroutine apply_kernel and apply_chi0 (depending on iprcel).
+                
+                dielmat_v_r = v_r
+                !1) Apply the model chi0 operator
+                call apply_chi0(this, dtset, mpi_enreg, dielmat_v_r)
+                !2) Apply the Kernel (vc or vc + Kxc depending on iprcel)
+                call apply_kernel(this, dtset, mpi_enreg, dielmat_v_r)
+                !3) dielmat_v_r = v_r - K * chi0 * v_r = dielmat * v_r
+                dielmat_v_r = v_r - dielmat_v_r
+                
+            end if
+
         end if
-        
     end subroutine apply_dielmat
+    !!***
+
+    !!****f* ABINIT/compute_cg_fft
+    !! NAME
+    !!  compute_cg_fft
+    !!
+    !! FUNCTION
+    !!  Allocate and fill the array cg_fft and cg_fft_indices from the module precon.
+    !!
+    !! INPUTS
+    !!  dtset       = All input variables for this dataset.
+    !!  mpi_enreg   = Information about MPI parallelization.
+    !!
+    !! SIDE EFFECTS
+    !!  
+    !!
+    !! NOTES
+    !!
+    !! SOURCE
+    subroutine compute_cg_fft(this, dtset, mpi_enreg)
+        
+        !Arguments ------------------------------------
+        class(precon_object), intent(inout) :: this
+        type(dataset_type),intent(in) :: dtset
+        type(MPI_type),intent(in) :: mpi_enreg
+        
+        !Local variables-------------------------------
+        integer :: nband_k, nband_t, npw_t, cg_fft_size, rank
+        integer :: iband, i_cg_linalg_1, i_cg_linalg_2, i_cg_fft, i_cg_fft_block, i_kpt_sppol, ikpt, isppol
+        integer, allocatable :: needed_bands_bounds(:, :), index_wavef_band(:), needed_bands_number(:)
+        real(dp), allocatable :: cg_fft_block(:, :)
+        
+        ! *************************************************************************
+
+        ! Retrieve which band will be needed to apply the preconditioner and deduce the size of cg_fft
+        ABI_MALLOC(needed_bands_bounds, (2, dtset%nkpt*dtset%nsppol))
+        ABI_MALLOC(needed_bands_number, (dtset%nkpt*dtset%nsppol))
+        call get_needed_bands_delta_occ(this, dtset, mpi_enreg, needed_bands_bounds, needed_bands_number)
+        cg_fft_size = 0
+        do isppol =1, dtset%nsppol
+            do ikpt = 1, dtset%nkpt
+                i_kpt_sppol = ikpt+(isppol-1)*dtset%nkpt
+                cg_fft_size = cg_fft_size + needed_bands_number(i_kpt_sppol)*bandfft_kpt(ikpt)%npw_tot
+            end do
+        end do
+        ABI_MALLOC(this%cg_fft, (2, cg_fft_size))  
+        
+        this%cg_fft_indices = zero  ! Indices mapping for cg_fft (transposed) array.
+        i_cg_fft = 1
+
+        do isppol =1, dtset%nsppol
+            do ikpt = 1, dtset%nkpt
+
+                i_kpt_sppol = ikpt+(isppol-1)*dtset%nkpt
+                nband_k = dtset%nband(i_kpt_sppol)
+
+                !MPI parallelization over kpoints : cycle if kpt does not belong to current processor.
+                if (proc_distrb_cycle(mpi_enreg%proc_distrb, ikpt, 1, nband_k, isppol, mpi_enreg%me_kpt)) then
+                    cycle
+                end if
+                write(6,*)'apply_precon (transpose) : needed_bands_bounds(:, i_kpt_sppol)', needed_bands_bounds(:, i_kpt_sppol); flush(6)   !DEBUG
+                                    
+                i_cg_linalg_1 = this%cg_indices(1, 1, ikpt, isppol)
+                i_cg_linalg_2 = this%cg_indices(2*dtset%nspinor, nband_k, ikpt, isppol)
+                call bandfft_kpt_set_ikpt(ikpt, mpi_enreg)
+                call paral_kgb_transpose(this%cg(:, i_cg_linalg_1:i_cg_linalg_2), cg_fft_block, mpi_enreg, nband_t, npw_t, dtset%nspinor, 1, index_wavef_band)
+                ! This allocates cg_fft_block and index wavef_band
+                
+                i_cg_fft_block = 1
+                
+                ! Loop over bands that belong to this processor
+                rank = xmpi_comm_rank(mpi_enreg%comm_bandfft)
+
+                do iband = 1 + mpi_enreg%bandpp*rank, mpi_enreg%bandpp*(rank+1)
+                    
+                    ! Check if this band is needed by the preconditioner
+                    if (iband <= needed_bands_bounds(2, i_kpt_sppol) .and. iband >= needed_bands_bounds(1, i_kpt_sppol)) then
+                        ! Store the band in cg_fft
+                        this%cg_fft(:, i_cg_fft:i_cg_fft+npw_t*dtset%nspinor) = cg_fft_block(:, i_cg_fft_block:i_cg_fft_block+npw_t*dtset%nspinor)   ! TODO : these could probably be copied all at once
+                        ! Update cg_fft_indices array
+                        this%cg_fft_indices(1, iband, ikpt, isppol) = i_cg_fft
+                        this%cg_fft_indices(2, iband, ikpt, isppol) = this%cg_fft_indices(1, iband, ikpt, isppol) + npw_t - 1
+                        i_cg_fft = this%cg_fft_indices(2, iband, ikpt, isppol) + 1
+                        if (dtset%nspinor == 2) then
+                            this%cg_fft_indices(3, iband, ikpt, isppol) = i_cg_fft
+                            this%cg_fft_indices(4, iband, ikpt, isppol) = this%cg_fft_indices(3, iband, ikpt, isppol) + npw_t - 1
+                            i_cg_fft = this%cg_fft_indices(4, iband, ikpt, isppol) + 1
+                        end if
+                    end if
+                    i_cg_fft_block = i_cg_fft_block + npw_t*dtset%nspinor
+                end do
+
+                ABI_FREE(cg_fft_block)
+                ABI_FREE(index_wavef_band)
+
+            end do  !ikpt
+        end do  !isppol
+        ABI_FREE(needed_bands_bounds)
+        ABI_FREE(needed_bands_number)
+    end subroutine compute_cg_fft
     !!***
 
     !****f* m_precon/apply_precon
@@ -3349,181 +3397,97 @@ contains
         !arrays
         real(dp), allocatable :: rhs(:), est(:), P_rhs(:)
         real(dp), allocatable :: work_g(:, :, :)
-        !for paral_kgb_transpose
-        integer :: nband_k, nbdblock, blocksize, nband_t, npw_t, cg_fft_size, rank
-        integer :: iblock, iband, iband_1, iband_2, i_cg_linalg_1, i_cg_linalg_2, i_cg_fft, i_cg_fft_block, i_kpt_sppol, ikpt, isppol
-        integer, allocatable :: needed_bands_bounds(:, :), index_wavef_band(:), needed_bands_number(:)
-        real(dp), allocatable :: cg_fft_block(:, :)
-        integer, allocatable :: rank_band(:)
 
         ! *************************************************************************
+        if (this%use_precon) then
 
-        ! The preconditioned density/potential residual vrespc = P^-1 * vresid is computed 
-        ! by sovling the linear equation P * vrespc = vresid approximately with GMRES.
+            ! The preconditioned density/potential residual vrespc = P^-1 * vresid is computed 
+            ! by sovling the linear equation P * vrespc = vresid approximately with GMRES.
 
-        n = dtset%nspden*1*this%nfftprc
-        
-        !0.1) Convert the input to direct/real space if needed.
-        if (optreal==0) then
-            ! vresid is given in the Fourier space : We need to do a ifft.
-            ABI_MALLOC(work_g, (2, this%nfftprc, dtset%nspden))
-            work_g = reshape(vresid, (/2,this%nfftprc, dtset%nspden/))
-            call fourdp(1, work_g, vrespc(1:this%nfftprc, :), 1, mpi_enreg, this%nfftprc, dtset%nspden, this%ngfftprc, 0)
-        else
-            vrespc = vresid
-        end if
-
-        !0.2) Convert the input to the Pauli basis
-        call to_pauli(this, optres, vrespc)
-
-        !0.3) Transpose the wavefunctions (cg) in the fft representation, 
-        !     in case of band parallelism (npband > 1) for preconditionners that need it.
-        if (this%need_cg_fft) then
-
-            ABI_MALLOC(needed_bands_bounds, (2, dtset%nkpt*dtset%nsppol))
-            ABI_MALLOC(needed_bands_number, (dtset%nkpt*dtset%nsppol))
-            call get_needed_bands_delta_occ(this, dtset, mpi_enreg, needed_bands_bounds, needed_bands_number)
-            !write(100+mpi_enreg%me,*)'apply_precon (transpose) : needed_bands_number', needed_bands_number; flush(100+mpi_enreg%me)   !DEBUG
-            cg_fft_size = 0
-            do isppol =1, dtset%nsppol
-                do ikpt = 1, dtset%nkpt
-                    i_kpt_sppol = ikpt+(isppol-1)*dtset%nkpt
-                    cg_fft_size = cg_fft_size + needed_bands_number(i_kpt_sppol)*bandfft_kpt(ikpt)%npw_tot
-                end do
-            end do
-            ABI_MALLOC(this%cg_fft, (2, cg_fft_size))  
+            n = dtset%nspden*1*this%nfftprc
             
-            this%cg_fft_indices = zero  ! Indices mapping for cg_fft (transposed) array.
-            i_cg_fft = 1
-
-            do isppol =1, dtset%nsppol
-                do ikpt = 1, dtset%nkpt
-
-                    i_kpt_sppol = ikpt+(isppol-1)*dtset%nkpt
-                    nband_k = dtset%nband(i_kpt_sppol)
-
-                    !write(100+mpi_enreg%me,*)'apply_precon (transpose) : isppol, ikpt, i_kpt_sppol, ', isppol, ikpt, i_kpt_sppol; flush(100+mpi_enreg%me)   !DEBUG
-                    !write(100+mpi_enreg%me,*)'apply_precon (transpose) : dtset%nband', dtset%nband; flush(100+mpi_enreg%me)   !DEBUG
-                    !write(100+mpi_enreg%me,*)'apply_precon (transpose) : nband_k', nband_k; flush(100+mpi_enreg%me)   !DEBUG
-                    !write(100+mpi_enreg%me,*)'apply_precon (transpose) : mpi_enreg%proc_distrb(ikpt,1:nband_k,isppol)', mpi_enreg%proc_distrb(ikpt,1:nband_k,isppol); flush(100+mpi_enreg%me)   !DEBUG
-                    !write(100+mpi_enreg%me,*)'apply_precon (transpose) : mpi_enreg%me_kpt', mpi_enreg%me_kpt; flush(100+mpi_enreg%me)   !DEBUG
-
-                    !MPI parallelization over kpoints : cycle if kpt does not belong to current processor.
-                    if (proc_distrb_cycle(mpi_enreg%proc_distrb, ikpt, 1, nband_k, isppol, mpi_enreg%me_kpt)) then
-                        cycle
-                    end if
-                    write(6,*)'apply_precon (transpose) : needed_bands_bounds(:, i_kpt_sppol)', needed_bands_bounds(:, i_kpt_sppol); flush(6)
-                                        
-                    i_cg_linalg_1 = this%cg_indices(1, 1, ikpt, isppol)
-                    i_cg_linalg_2 = this%cg_indices(2*dtset%nspinor, nband_k, ikpt, isppol)
-                    call bandfft_kpt_set_ikpt(ikpt, mpi_enreg)
-                    call paral_kgb_transpose(this%cg(:, i_cg_linalg_1:i_cg_linalg_2), cg_fft_block, mpi_enreg, nband_t, npw_t, dtset%nspinor, 1, index_wavef_band)
-                    ! This allocates cg_fft_block and index wavef_band
-                    !write(100+mpi_enreg%me,*)'apply_precon (transpose) : npw_t, nband_t', npw_t, nband_t; flush(100+mpi_enreg%me)   !DEBUG
-                    !write(100+mpi_enreg%me,*)'apply_precon (transpose) : size(cg_fft_block, 2)', size(cg_fft_block, 2); flush(100+mpi_enreg%me)   !DEBUG
-                    !write(100+mpi_enreg%me,*)'apply_precon (transpose) : size(this%cg_fft, 2)', size(this%cg_fft, 2); flush(100+mpi_enreg%me)   !DEBUG
-                    
-                    i_cg_fft_block = 1
-                    !write(100+mpi_enreg%me,*)'apply_precon (transpose) : size(cg_fft_block)', size(cg_fft_block); flush(100+mpi_enreg%me)   !DEBUG
-                    !write(100+mpi_enreg%me,*)'apply_precon (transpose) : cg_fft_block(:, 1:5)', cg_fft_block(:, 1:5); flush(100+mpi_enreg%me)   !DEBUG
-                    
-                    ! Loop over bands that belong to this processor
-                    rank = xmpi_comm_rank(mpi_enreg%comm_bandfft)
-                    !write(100+mpi_enreg%me,*)'apply_precon (transpose) : rank', rank; flush(100+mpi_enreg%me)   !DEBUG
-
-                    do iband = 1 + mpi_enreg%bandpp*rank, mpi_enreg%bandpp*(rank+1)
-                        !write(100+mpi_enreg%me,*)'apply_precon (transpose) : iband', iband; flush(100+mpi_enreg%me)   !DEBUG
-                        
-                        ! Check if this band is needed by the preconditioner
-                        if (iband <= needed_bands_bounds(2, i_kpt_sppol) .and. iband >= needed_bands_bounds(1, i_kpt_sppol)) then
-                            ! Store the band in cg_fft
-                            this%cg_fft(:, i_cg_fft:i_cg_fft+npw_t*dtset%nspinor) = cg_fft_block(:, i_cg_fft_block:i_cg_fft_block+npw_t*dtset%nspinor)   ! TODO : these could probably be copied all at once
-                            ! Update cg_fft_indices array
-                            this%cg_fft_indices(1, iband, ikpt, isppol) = i_cg_fft
-                            this%cg_fft_indices(2, iband, ikpt, isppol) = this%cg_fft_indices(1, iband, ikpt, isppol) + npw_t - 1
-                            i_cg_fft = this%cg_fft_indices(2, iband, ikpt, isppol) + 1
-                            if (dtset%nspinor == 2) then
-                                this%cg_fft_indices(3, iband, ikpt, isppol) = i_cg_fft
-                                this%cg_fft_indices(4, iband, ikpt, isppol) = this%cg_fft_indices(3, iband, ikpt, isppol) + npw_t - 1
-                                i_cg_fft = this%cg_fft_indices(4, iband, ikpt, isppol) + 1
-                            end if
-                        end if
-                        i_cg_fft_block = i_cg_fft_block + npw_t*dtset%nspinor
-                        !write(100+mpi_enreg%me,*)'apply_precon (transpose) : i_cg_fft, i_cg_fft_block', i_cg_fft, i_cg_fft_block; flush(100+mpi_enreg%me)   !DEBUG
-                    end do
-
-                    ABI_FREE(cg_fft_block)
-                    ABI_FREE(index_wavef_band)
-
-                end do  !ikpt
-            end do  !isppol
-            ABI_FREE(needed_bands_bounds)
-            ABI_FREE(needed_bands_number)
-        end if  ! TODO : put all this in independant subroutine
-        !write(100+mpi_enreg%me,*)'apply_precon transpose done '; flush(100+mpi_enreg%me)   !DEBUG
-        !write(6,*)'apply_precon transpose done '; flush(6)   !DEBUG
-
-        !1) Right-hand side : rhs is vresid (flattened) in the direct/real space.
-        ABI_MALLOC(rhs, (n))
-        do ispden = 1, dtset%nspden
-            ! Indices of the ispden component in the flattened (this%nfftprc, dtset%nspden)-array 'rhs'.
-            start_ispden = 1+(ispden-1)*this%nfftprc
-            end_ispden = ispden*this%nfftprc
-            rhs(start_ispden:end_ispden) = vrespc(1:this%nfftprc, ispden)
-        end do
-
-        !2) Initial guess :
-        ABI_MALLOC(est, (n))
-        est = 0
-        ! Is est = rhs a better starting point ?
-        !est = rhs
-
-        !3) Resolution of the linear system :
-        write(6,*)'chi0diel linsolve : '; flush(6) !DEBUG
-        if (this%use_ridgereg) then
-            write(6,*)'chi0diel linsolve with CG'; flush(6) !DEBUG
-            ! P is ill-conditionned :
-            ! Ridge/Tikhonov regularization and CG : 
-            ! We solve (P^*P + ridge_param*I) * est = P * rhs
-            ! (P^*P + ridge_param*I) is self-adjoint and can be solved with CG.
-            ABI_MALLOC(P_rhs, (n))
-            call matvec(n, rhs, P_rhs)  ! TODO apply P_adj !!!
-            call cg_linear_solver(n, ridge_matvec, P_rhs, est, (this%linsolve_maxiter-1)/2+1, this%linsolve_rtol)
-            ABI_FREE(P_rhs)
-        else
-            ! P is well conditionned :
-            ! GMRES (P is not self-adjoint)
-            write(6,*)'chi0diel linsolve with GMRES'; flush(6) !DEBUG
-            call gmres_linear_solver(n, matvec, rhs, est, this%linsolve_maxiter, this%linsolve_rtol)
-
-        end if
-
-        !4.0) Deallocate cg_fft_array if needed
-        if (this%need_cg_fft) then
-            ABI_FREE(this%cg_fft)
-        end if
-       
-       !4) Reshaping the final result :
-        do ispden = 1, dtset%nspden
-            ! Indices of the ispden component in the flattened (this%nfftprc, dtset%nspden)-array 'est'.
-            start_ispden = 1+(ispden-1)*this%nfftprc
-            end_ispden = ispden*this%nfftprc
-            if (optreal==1) then
-                ! vrespc must be returned in the direct/real space.
-                vrespc(:, ispden) = est(start_ispden:end_ispden)
+            !0.1) Convert the input to direct/real space if needed.
+            if (optreal==0) then
+                ! vresid is given in the Fourier space : We need to do a ifft.
+                ABI_MALLOC(work_g, (2, this%nfftprc, dtset%nspden))
+                work_g = reshape(vresid, (/2,this%nfftprc, dtset%nspden/))
+                call fourdp(1, work_g, vrespc(1:this%nfftprc, :), 1, mpi_enreg, this%nfftprc, dtset%nspden, this%ngfftprc, 0)
             else
-                ! vrespc must be returned in the fourier space, we need to do a fft.
-                call fourdp(1, work_g, est(start_ispden:end_ispden), -1, mpi_enreg, this%nfftprc, 1, this%ngfftprc, 0)
-                vrespc = reshape(work_g, (/2*this%nfftprc, dtset%nspden/))
-                ! TODO :  the ffts could be done in parallel
+                vrespc = vresid
             end if
-        end do
-        ! vrespc must be returned in the default Abinit spin-basis.
-        call from_pauli(this, optres, vrespc)
-        ! TODO noncoll : Check this basis change for potentials in Fourier space with non-collinear magnetism.
-       
-        ABI_FREE(rhs)
-        ABI_FREE(est)
+
+            !0.2) Convert the input to the Pauli basis
+            call to_pauli(this, optres, vrespc)
+
+            !0.3) Transpose the wavefunctions (cg) in the fft representation, 
+            !     in case of band parallelism (npband > 1) for preconditionners that need it.
+            if (this%need_cg_fft) then
+                call compute_cg_fft(this, dtset, mpi_enreg)
+            end if
+
+            !1) Right-hand side : rhs is vresid (flattened) in the direct/real space.
+            ABI_MALLOC(rhs, (n))
+            do ispden = 1, dtset%nspden
+                ! Indices of the ispden component in the flattened (this%nfftprc, dtset%nspden)-array 'rhs'.
+                start_ispden = 1+(ispden-1)*this%nfftprc
+                end_ispden = ispden*this%nfftprc
+                rhs(start_ispden:end_ispden) = vrespc(1:this%nfftprc, ispden)
+            end do
+
+            !2) Initial guess :
+            ABI_MALLOC(est, (n))
+            est = 0
+            ! Is est = rhs a better starting point ?
+            !est = rhs
+
+            !3) Resolution of the linear system :
+            write(6,*)'chi0diel linsolve : '; flush(6) !DEBUG
+            if (this%use_ridgereg) then
+                write(6,*)'chi0diel linsolve with CG'; flush(6) !DEBUG
+                ! P is ill-conditionned :
+                ! Ridge/Tikhonov regularization and CG : 
+                ! We solve (P^*P + ridge_param*I) * est = P * rhs
+                ! (P^*P + ridge_param*I) is self-adjoint and can be solved with CG.
+                ABI_MALLOC(P_rhs, (n))
+                call matvec(n, rhs, P_rhs)  ! TODO apply P_adj !!!
+                call cg_linear_solver(n, ridge_matvec, P_rhs, est, (this%linsolve_maxiter-1)/2+1, this%linsolve_rtol)
+                ABI_FREE(P_rhs)
+            else
+                ! P is well conditionned :
+                ! GMRES (P is not self-adjoint)
+                write(6,*)'chi0diel linsolve with GMRES'; flush(6) !DEBUG
+                call gmres_linear_solver(n, matvec, rhs, est, this%linsolve_maxiter, this%linsolve_rtol)
+
+            end if
+
+            !4.0) Deallocate 'cg_fft' array if needed
+            if (this%need_cg_fft) then
+                ABI_FREE(this%cg_fft)
+            end if
+        
+        !4) Reshaping the final result :
+            do ispden = 1, dtset%nspden
+                ! Indices of the ispden component in the flattened (this%nfftprc, dtset%nspden)-array 'est'.
+                start_ispden = 1+(ispden-1)*this%nfftprc
+                end_ispden = ispden*this%nfftprc
+                if (optreal==1) then
+                    ! vrespc must be returned in the direct/real space.
+                    vrespc(:, ispden) = est(start_ispden:end_ispden)
+                else
+                    ! vrespc must be returned in the fourier space, we need to do a fft.
+                    call fourdp(1, work_g, est(start_ispden:end_ispden), -1, mpi_enreg, this%nfftprc, 1, this%ngfftprc, 0)
+                    vrespc = reshape(work_g, (/2*this%nfftprc, dtset%nspden/))
+                    ! TODO :  the ffts could be done in parallel
+                end if
+            end do
+            ! vrespc must be returned in the default Abinit spin-basis.
+            call from_pauli(this, optres, vrespc)
+            ! TODO noncoll : Check this basis change for potentials in Fourier space with non-collinear magnetism.
+        
+            ABI_FREE(rhs)
+            ABI_FREE(est)
+        
+        end if
        
         contains
 

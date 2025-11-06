@@ -3,7 +3,7 @@
 !!  m_iterative_solvers
 !!
 !! FUNCTION
-!!  This module contains basic (matrix-free) iterative solvers (GMRES, CG).
+!!  This module contains basic (matrix-free) MPI-aware iterative solvers (GMRES, CG).
 !!
 !! COPYRIGHT
 !! TODO
@@ -19,6 +19,7 @@ module m_iterative_solvers
 #if defined HAVE_LINALG_MKL_OMATCOPY
     use mkl_rci, only : dfgmres, dfgmres_check, dfgmres_get, dfgmres_init
 #endif
+    use m_xmpi
 
     implicit none
     private
@@ -57,6 +58,7 @@ module m_iterative_solvers
     !!
     !! SOURCE
     subroutine cg_eigen_solver_treshold(n, matvec, x0, tol, max_iter, max_neig, eigenvalue_threshold, eigenvalues, eigenvectors, n_eig)
+        
         ! Input parameters
         integer, intent(in) :: n, max_iter, max_neig
         real(dp), intent(in) :: tol, eigenvalue_threshold
@@ -77,6 +79,8 @@ module m_iterative_solvers
         real(dp) :: x(n), Ax(n), p(n), g(n), beta
         real(dp) :: residual_norm, rayleigh_quotient
         integer :: i, j, iter
+        logical :: do_exit
+        integer :: ierr
         
         ! *************************************************************************
         
@@ -91,8 +95,10 @@ module m_iterative_solvers
         ! Conjugate Gradient iterations to minimize Rayleigh quotient
         do iter = 1, max_iter
             call cg_update(n, matvec, x, Ax, p, g, beta, rayleigh_quotient, residual_norm)
-                write(6,*)'cg_eigen_solver_treshold : iter, rayleigh_quotient, residual norm', iter, rayleigh_quotient, residual_norm; flush(6) !DEBUG
-            if (residual_norm < tol) exit
+            write(6,*)'cg_eigen_solver_treshold : iter, rayleigh_quotient, residual norm', iter, rayleigh_quotient, residual_norm; flush(6) !DEBUG
+            do_exit = (residual_norm < tol)
+            call xmpi_bcast(do_exit, 0, xmpi_world, ierr)
+            if (do_exit) exit
         end do
 
         ! Store the computed eigenvalue and eigenvector
@@ -105,7 +111,9 @@ module m_iterative_solvers
             write(6,*)'cg_eigen_solver_treshold : eigenvalues(1:j-1)', eigenvalues(1:j-1); flush(6) !DEBUG
 
             ! Check if the eigenvalue is below the threshold
-            if (eigenvalues(j-1) < eigenvalue_threshold) exit
+            do_exit = (eigenvalues(j-1) < eigenvalue_threshold)
+            call xmpi_bcast(do_exit, 0, xmpi_world, ierr)
+            if (do_exit) exit
 
             ! If it is not, we need to compute more eigenvalues :
             ! Orthogonalize the initial guess against previously computed eigenvectors
@@ -124,8 +132,10 @@ module m_iterative_solvers
             ! Perform conjugate gradient iterations
             do iter = 1, max_iter
                 call cg_update(n, matvec, x, Ax, p, g, beta, rayleigh_quotient, residual_norm, eigenvectors(:, 1:j-1))
+                do_exit = (residual_norm < tol)
+                call xmpi_bcast(do_exit, 0, xmpi_world, ierr)   ! MPI aware: avoid desynchronization.
                 write(6,*)'cg_eigen_solver_treshold : iter, rayleigh_quotient, residual norm', iter, rayleigh_quotient, residual_norm; flush(6) !DEBUG
-                if (residual_norm < tol) exit
+                if (do_exit) exit
             end do
 
             ! Store the computed eigenvalue and eigenvector
@@ -263,6 +273,7 @@ module m_iterative_solvers
 !-------------------------------------------------------------------------------------------
 
     subroutine cg_linear_solver(n, matvec, rhs, est, cg_maxiter, cg_rtol)
+        
         !Arguments ------------------------------------
         integer, intent(in) :: n, cg_maxiter
         real(dp), intent(in) :: cg_rtol
@@ -274,10 +285,14 @@ module m_iterative_solvers
                 double precision, intent(inout), target :: x(n_), y(n_)
             end subroutine matvec
         end interface
+
         !Local variables-------------------------------
         real(dp) :: r(n), p(n), Ap(n)
         real(dp) :: alpha, beta, rsold, rsnew
         integer :: iter
+        logical :: do_exit
+        integer :: ierr
+
         ! *************************************************************************
 
         ! Initialize
@@ -293,9 +308,11 @@ module m_iterative_solvers
             est = est + alpha * p
             r = r - alpha * Ap
             rsnew = dot_product(r, r)
-
+            
             ! Check for convergence
-            if (sqrt(rsnew) < cg_rtol) exit
+            do_exit = (sqrt(rsnew) < cg_rtol)
+            call xmpi_bcast(do_exit, 0, xmpi_world, ierr)   ! MPI aware: avoid desynchronization.
+            if (do_exit) exit
 
             beta = rsnew / rsold
             p = r + beta * p
@@ -311,7 +328,7 @@ module m_iterative_solvers
     !!  call_FGMRES
     !!
     !! FUNCTION
-    !!  Call the MKL FGMRES routine to solve a linear system.
+    !!  Call the MKL FGMRES routine to solve a linear system. MPI aware.
     !!
     !! INPUTS
     !!  n              = Size of the matrix.
@@ -342,6 +359,7 @@ module m_iterative_solvers
         integer :: ipar(128)
         real(dp) :: dpar(128)
         real(dp), allocatable :: tmp(:)
+        integer :: ierr
 
         ! *************************************************************************
         
@@ -380,8 +398,8 @@ module m_iterative_solvers
                 call matvec(n, tmp(ipar(22):ipar(22)+2*size_vres-1), tmp(ipar(23):ipar(23)+2*size_vres-1))
             !    proceed with FGMRES iterations
                 call dfgmres(2*size_vres, est, rhs, RCI_request, ipar, dpar, tmp)
-        !---------------------------------------------------------------------
-        !  FGMRES Errors
+            !---------------------------------------------------------------------
+            !  FGMRES Errors
             else if (RCI_request==-10) then
                 ABI_BUG('FGMRES : attempt to divide by zero')
                 exit
@@ -395,7 +413,11 @@ module m_iterative_solvers
             else
                 ABI_BUG('FGMRES : RCI_request has unexpected value')
             end if
-        !---------------------------------------------------------------------
+            !---------------------------------------------------------------------
+
+            ! MPI aware: broadcast the 'RCI_request' of master to avoid desynchronization.
+            call xmpi_bcast(RCI_request, 0, xmpi_world, ierr)
+
         end do
         ABI_FREE(tmp)
     end subroutine call_FGMRES
@@ -501,8 +523,10 @@ module m_iterative_solvers
         
         !TODO : dirty check of MKL availability
 #if defined HAVE_LINALG_MKL_OMATCOPY
+        write(6,*)'    FGMRES'; flush(6) !DEBUG
         call call_FGMRES(n, matvec, rhs, est, gmres_maxiter, gmres_rtol)
 #else
+        write(6,*)'    gmresm'; flush(6) !DEBUG
         call call_gmresm(n, matvec, est, rhs, gmres_maxiter, gmres_rtol)
 #endif
       
@@ -561,7 +585,8 @@ module m_iterative_solvers
    integer :: imx, piv(m), rank, i
    double precision, save :: beta
    integer, save :: j
-   logical :: done   
+   logical :: done
+   integer :: ierr   
 
    if(info==2) then
       call hookstep(j,h,m,beta,del, y)
@@ -628,6 +653,9 @@ module m_iterative_solvers
          goto 1       ! (j==m) restart
       end if
       res_ = res*stgn
+
+      ! MPI aware: broadcast the 'res' value of master to avoid desynchronization.
+      call xmpi_bcast(res, 0, xmpi_world, ierr)
 
    end do   
  
