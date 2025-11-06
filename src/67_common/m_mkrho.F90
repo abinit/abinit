@@ -1087,15 +1087,16 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
  nfftot=dtset%ngfft(1) * dtset%ngfft(2) * dtset%ngfft(3)
 
-!Add extfpmd electrons contribution to density.
+!Add extfpmd electrons contributions to density on coarse grid.
+!When using a fine grid, space-dependant contributions to the
+!density are added in the pawmkrho subroutine.
  if(present(extfpmd)) then
    if(associated(extfpmd)) then
-     if(extfpmd%version==10) then
+     if(extfpmd%version==10.and.allocated(extfpmd%nelectarr)) then
        rhor(:,:)=rhor(:,:)+extfpmd%nelectarr(:,:)/ucvol/dtset%nspden
      else
        rhor(:,:)=rhor(:,:)+extfpmd%nelect/ucvol/dtset%nspden
      end if
-     rhog(1,1)=rhog(1,1)+extfpmd%nelect/ucvol/dtset%nspden
    end if
  end if
 
