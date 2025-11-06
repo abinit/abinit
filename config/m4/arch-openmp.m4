@@ -218,6 +218,8 @@ if test "${abi_openmp_offload_enable}" = "yes"; then
     if test ${nvhpc_version} -eq 2403; then
       gpu_unified_flag="-gpu=unified"
     fi
+    AC_DEFINE([HAVE_GPU_UNIFIED_MEMORY],1,
+      [Define to 1 if code was built with GPU unified memory support.])
     FCFLAGS_OPENMP_OFFLOAD="${FCFLAGS_OPENMP_OFFLOAD} ${gpu_unified_flag}"
   fi
 
