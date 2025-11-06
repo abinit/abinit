@@ -200,6 +200,27 @@ if test "${abi_openmp_offload_enable}" = "yes"; then
     FC_LDFLAGS_EXTRA="-lcraymp ${FC_LDFLAGS_EXTRA}"
   fi
 
+  # Toggle use GPU unified memory feature, specific to NVHPC with OpenMP offload, on NVIDIA GPUs
+  # This flag is supported for OpenMP since NVHPC v24.3
+  # On AMD GPU, this feature seem to be controled using env variables.
+  if test "${abi_gpu_nvidia_unified_memory_enable}" == "yes"; then
+    if test "${abi_fc_vendor}" != "nvhpc" -o "${abi_openmp_offload_enable}" = "no"; then
+      AC_MSG_ERROR([Unified memory setting is only supported with NVHPC SDK and OpenMP offload enabled !])
+    fi
+    nvhpc_version_major=`echo ${abi_fc_version} | sed "s/-.*//" | cut -f1 -d'.'`
+    nvhpc_version_minor=`echo ${abi_fc_version} | sed "s/-.*//" | cut -f2 -d'.'`
+    nvhpc_version=`printf %d%02d ${nvhpc_version_major} ${nvhpc_version_minor}`
+    if test ${nvhpc_version} -lt 2403; then
+      AC_MSG_ERROR([Unified memory setting is only supported since NVHPC SDK version 24.3. Your NVHPC is too old.])
+    fi
+    gpu_unified_flag="-gpu=mem:unified"
+    # Use older flag for NVHPC 24.3, deprecated in newer versions
+    if test ${nvhpc_version} -eq 2403; then
+      gpu_unified_flag="-gpu=unified"
+    fi
+    FCFLAGS_OPENMP_OFFLOAD="${FCFLAGS_OPENMP_OFFLOAD} ${gpu_unified_flag}"
+  fi
+
 else
   FCFLAGS_OPENMP_OFFLOAD=""
 fi
