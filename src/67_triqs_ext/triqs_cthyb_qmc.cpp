@@ -9,10 +9,19 @@
 #include <triqs_cthyb/configuration.hpp>
 #include <triqs_cthyb/solver_core.hpp>
 #include <triqs_cthyb_qmc.hpp>
+#include <triqs/atom_diag/atom_diag.hpp>
 
 using namespace h5;
 using namespace mpi;
 using namespace triqs::gfs;
+
+#define ATOM_DIAG triqs::atom_diag::atom_diag<Complex>
+#define ATOM_DIAG_T typename triqs::atom_diag::atom_diag<Complex>
+
+template <bool Complex>
+ATOM_DIAG_T::scalar_t trace_rho_op_paral(ATOM_DIAG_T::block_matrix_t const &density_matrix,
+                                         ATOM_DIAG_T::many_body_op_t const &op, ATOM_DIAG const &atom,
+                                         int rank, int nproc);
 
 void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_double, bool measure_density_matrix,
                      bool time_invariance, bool use_norm_as_weight, int integral, int loc_n_min, int loc_n_max,
@@ -31,7 +40,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
   auto comm = MPI_COMM_WORLD;
   int iflavor, iflavor1, nproc;
   MPI_Comm_size(comm,&nproc);
-  int itask = 0, therm = ntherm;
+  int therm = ntherm;
 
   // Hamiltonian definition
   many_body_op_t H;
@@ -351,11 +360,8 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
         for (int o : range(siz_list[iblock])) {
           iflavor = flavor_list[o+iblock*num_orbitals];
           n_op = c_dag(to_string(iblock),o) * c(to_string(iblock),o);
-          if (itask == rank) occ_tmp[iflavor] = trace_rho_op(rho,n_op,h_loc_diag);
-          itask = (itask+1)%nproc;
+          occ_tmp[iflavor] = trace_rho_op_paral(rho,n_op,h_loc_diag,rank,nproc);
         }
-
-      MPI_Allreduce(occ_tmp,occ,num_orbitals,MPI_C_DOUBLE_COMPLEX,MPI_SUM,comm);
     }
 
     if (rank == 0 && integral == 0) {
@@ -409,9 +415,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
       }
     }
 
-    if (itask == rank) *eu = trace_rho_op(rho,Hint,h_loc_diag);
-    mpi_broadcast(*eu,comm,itask);
-    itask = (itask+1)%nproc;
+    *eu = trace_rho_op_paral(rho,Hint,h_loc_diag,rank,nproc);
 
     if (!leg_measure && integral == 0) { // Get moments of the self-energy
 
@@ -428,14 +432,9 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
           Sinf_op = - commut*c_dag(to_string(iblock),o) - c_dag(to_string(iblock),o)*commut;
           commut2 = c_dag(to_string(iblock),o)*Hint - Hint*c_dag(to_string(iblock),o);
           S1_op = commut2*commut + commut*commut2;
-          if (itask == rank) Sinf_mat(iflavor,iflavor) = trace_rho_op(rho,Sinf_op,h_loc_diag);
-          itask = (itask+1)%nproc;
-          if (itask == rank) mself2[iflavor] = trace_rho_op(rho,S1_op,h_loc_diag);
-          itask = (itask+1)%nproc;
+          Sinf_mat(iflavor,iflavor) = trace_rho_op_paral(rho,Sinf_op,h_loc_diag,rank,nproc);
+          mself2[iflavor] = trace_rho_op_paral(rho,S1_op,h_loc_diag,rank,nproc);
         }
-
-      Sinf_mat = all_reduce(Sinf_mat,comm);
-      MPI_Allreduce(mself2,moments_self_2,num_orbitals,MPI_C_DOUBLE_COMPLEX,MPI_SUM,comm);
 
       for (int iflavor : range(num_orbitals)) moments_self_1[iflavor] = Sinf_mat(iflavor,iflavor);
 
@@ -503,4 +502,48 @@ void build_dlr(int wdlr_size, int *ndlr, double *wdlr, double lam, double eps) {
   if (*ndlr > wdlr_size) return;
   for (int i : range((*ndlr))) wdlr[i] = omega[i];
 }
+
+// This is a copy from a function of TRIQS, which I parallelized since they are not doing it and this function takes forever (E. Castiel)
+// Please make sure it is kept up to date with the official function
+template <bool Complex>
+ATOM_DIAG_T::scalar_t trace_rho_op_paral(ATOM_DIAG_T::block_matrix_t const &density_matrix,
+                                         ATOM_DIAG_T::many_body_op_t const &op,
+                                         ATOM_DIAG const &atom, int rank, int nproc) {
+  ATOM_DIAG_T::scalar_t result = 0;
+  if (atom.n_subspaces() != density_matrix.size()) TRIQS_RUNTIME_ERROR << "trace_rho_op : size mismatch : number of blocks differ";
+
+  int itask = -1;
+
+  for (int sp = 0; sp < atom.n_subspaces(); ++sp) {
+    if (atom.get_subspace_dim(sp) != first_dim(density_matrix[sp]))
+      TRIQS_RUNTIME_ERROR << "trace_rho_op : size mismatch : size of block " << sp << " differ";
+    for (auto const &x : op) {
+      itask = (itask+1)%nproc;
+      if (itask != rank) continue;
+      auto b_m = atom.get_matrix_element_of_monomial(x.monomial, sp);
+      if (b_m.first == sp) result += x.coef * trace(b_m.second * density_matrix[sp]);
+    }
+  }
+
+  // little helper function to check block matrix hermiticity
+
+  auto is_block_matrix_hermitian = [](ATOM_DIAG_T::block_matrix_t const &bm) {
+    return std::all_of(bm.begin(), bm.end(), [](ATOM_DIAG_T::matrix_t const &mat) { return max_element(abs(mat - dagger(mat))) == 0.0; });
+  };
+
+  result = all_reduce(result,MPI_COMM_WORLD);
+
+  // check if op && density matrix are hermitian, if so return real(result)
+  // The product of two hermitian matrices is hermitian, hence the Tr(rho * Op)
+  // needs to be real in this case. Here, each monomial b_m is represented in the
+  // eigenbasis of atom diag. This unitary rotation should not change any of the
+  // above statements (Tr is invariant under trafo) However, the eigenbasis is obtained
+  // via LAPACK up to machine prec, introducing tiny imaginary elements. Here, we filter those.
+  // Note: Here it assumed that op & den mat are truely hermitian, 0 tolerance
+  if (is_op_hermitian(op) && is_block_matrix_hermitian(density_matrix))
+    return std::real(result);
+  else
+    return result;
+}
+
 
