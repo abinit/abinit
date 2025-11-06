@@ -6,19 +6,19 @@ author: ECastiel
 
 ## Introduction
 
-In this tutorial, you will learn how to run a DFT+DMFT calculation using the interface
-between ABINIT and TRIQS/CT-HYB. We show an example on iron.
+In this tutorial, you will learn how to run a DFT+DMFT calculation on iron using the interface
+between ABINIT and TRIQS/CT-HYB.
 TRIQS/CT-HYB is used as the impurity solver,
 while ABINIT drives the calculation and connects to TRIQS/CT-HYB
 as an external library.
 
 Before starting, you should already know how to do a basic DFT calculation with ABINIT
 (see [basic1](/tutorial/base1), [basic2](/tutorial/base2), [basic3](/tutorial/base3),
-and [basic4](/tutorial/base4)). It also helps if you're familiar with PAW
+and [basic4](/tutorial/base4)). It also helps if you are familiar with PAW
 (see [PAW1](/tutorial/paw1) and [PAW2](/tutorial/paw2)), [DFT+U](/tutorial/dftu),
 and ABINIT's internal DMFT solvers (see [DMFT](/tutorial/dmft)).
 
-We also recommend that you're comfortable with TRIQS/CT-HYB, and we'll assume you already
+We also recommend that you are comfortable with TRIQS/CT-HYB, and we will assume you already
 have at least a basic idea of how the DFT+DMFT method works.
 
 The whole tutorial should take a few hours to complete.
@@ -27,7 +27,7 @@ The whole tutorial should take a few hours to complete.
 
 ## Presentation
 
-ABINIT comes with its own internal DMFT code and solvers, but they aren't numerically exact
+ABINIT comes with its own internal DMFT code and solvers, but they are not numerically exact
 and rely on the density-density approximation. TRIQS/CT-HYB, on the other hand, can handle the
 full interaction Hamiltonian.
 
@@ -138,8 +138,8 @@ While it runs, take a look at the input file. It has two datasets:
   2. A non self-consistent dataset to compute the band structure along a specific $k$-path in the
      Brillouin zone (defined by [[kptbounds]]).
 
-The fatbands are computed using the variable [[pawfatbnd]]. Here, it is set to 1, meaning fatbands are
-computed for each angular momentum $l$. If you want orbitally resolved fatbands, set it to 2 instead.
+The fatbands are computed using the variable [[pawfatbnd]]. Here, it is set to $1$, meaning fatbands are
+computed for each angular momentum $l$. If you want orbitally resolved fatbands, set it to $2$ instead.
 
 Once the calculation finishes, you will find:
 
@@ -190,7 +190,7 @@ many parameters, because we want users to choose them consciously.
 
 Indeed, we feel that most of the inconsistencies found in DFT+DMFT results across the literature come
 from poorly chosen convergence parameters. So, always perform proper convergence tests, and redo them
-for each system you study - there is no one-size-fits-all setup.
+for each system you study.
 
 Alright, let's dive in. Start by copying the second input file and running it with ABINIT. Feel free
 to use more CPUs if you have them available:
@@ -207,7 +207,7 @@ see what's going on.
 
 A charge self-consistent DFT+DMFT calculation usually consists of two datasets:
 
-  1. The first one is a well-converged DFT calculation.
+  1. The first one is a DFT calculation (that should be in principle well converged).
   2. The second one is a DFT+DMFT calculation, which starts from the DFT output density of
      the first dataset.
 
@@ -243,8 +243,9 @@ magnetic quantum numbers $m = -l,...l$.
 Keep in mind that the complexity of the impurity problem increases exponentially with this
 number of orbitals, so choosing your correlated channel wisely is important.
 
-At the moment, only values of [[lpawu]] $\le 3$ are supported - anything higher would be
-computationally impractical anyway.
+!!! note
+
+    At the moment, only values of [[lpawu]] $\le 3$ are supported - anything higher would be computationally impractical anyway.
 
 In our iron example, the localized orbitals that show strong correlation effects are the $3d$
 orbitals. Since there is only one atom type (Fe), we simply set [[lpawu]]$=2$.
@@ -258,7 +259,7 @@ Our convention for the local orbitals follows ABINIT's internal PAW convention:
 $\frac{u_l(r)}{r} Y_{lm}(\hat{r})$ where $Y_{lm}(\hat{r})$ are real spherical harmonics.
 
 The choice of the radial wavefunction is made through the variable [[dmft_orbital]]. For iron, the
-$3d$ orbitals remain quite localized and keep their atomic character, so we usually just take the
+$3d$ orbitals remain quite localized and keep their atomic character, so we just take the
 lowest-energy atomic orbital from the PAW dataset (truncated at the PAW radius). That is the default
 choice, [[dmft_orbital]]$=1$, but you can pick any orbital from your PAW dataset or even provide a
 custom one from a file if needed.
@@ -286,20 +287,71 @@ should clearly see the $3d$ atomic orbital from your PAW dataset:
 
 ### Energy window
 
-Unfortunately, we cannot compute the lattice Green's function over the entire Hilbert space, as it would be too computationally expensive.
-Instead, we work in a smaller subspace $\mathcal{H}$ spanned by basis elements with low energy. Since what ultimately matters for DMFT is the
-local Green's function (its projection onto the local orbitals), this is equivalent to downfolding the full Green's function onto the projection
-of [[dmft_orbital]] within $\mathcal{H}$.
+Unfortunately, we cannot directly compute the lattice Green's function over the full Hilbert space - it
+would be far too computationally demanding. Instead, we restrict ourselves to a smaller subspace
+$\mathcal{H}$, made up of low-energy basis elements. We then downfold this Green's function, which is
+projected onto $\mathcal{H}$, onto the local orbitals defined by [[dmft_orbital]] in order to retrieve
+the local Green's function.
 
-In our implementation, since we use the Kohn-Sham basis, this means we project the orbital onto a finite set of Kohn-Sham bands - specifically those
-between [[dmftbandi]] and [[dmftbandf]].
+But notice: this is actually the same as downfolding the full lattice Green's function onto the
+projection of [[dmft_orbital]] onto $\mathcal{H}$.
 
-We would like to emphasize, however, that when we compute the trace of the Green's function - for instance, to locate the Fermi level - we include all
-bands (from $1$ to [[nband]]). This differs from many implementations that limit themselves strictly to the correlated energy window.
+Therefore, the DMFT local orbitals that are effectively handled in the code are not exactly the ones
+defined by [[dmft_orbital]], but rather their projection on $\mathcal{H}$.
 
-As we have seen with the calculation of the fatbands, the main spectral weight of the $d$ orbitals is contained within the bands $5$ to $13$, which we choose here.
+In our implementation, the lattice Green's function is represented in the Kohn-Sham basis, and
+our low-energy Hilbert space is built from all Kohn-Sham wavefunctions whose band indices fall between
+[[dmftbandi]] and [[dmftbandf]] - the range that defines the correlated energy window.
 
-However, since we project the orbitals on a finite dimensional Hilbert space, they are no longer orthonormal. You can check this in the `log2` file:
+!!! note
+
+    We would like to emphasize, however, that when we compute the trace of the Green's function - for instance, to locate the Fermi level - we include all bands (from $1$ to [[nband]]). This differs from many implementations that limit themselves strictly to the correlated energy window.
+
+Since Kohn-Sham wavefunctions form a complete basis, you could in theory recover the original orbital
+defined by [[dmft_orbital]] by setting [[dmftbandi]] to $1$ and converging [[dmftbandf]] to infinity.
+In practice, however, this is not feasible - especially when your atomic orbital is truncated -
+because it would involve an unmanageable number of bands.
+
+The choice of your energy window is therefore critical. It directly governs both the spatial spread of
+your orbital and your computation time.
+
+  * A wider energy window yields a more localized orbital, but also increases hybridization with the
+    bath. Since we use a hybridization-expansion impurity solver, a larger hybridization significantly
+    slows down the solver and the evaluation of the Green's function.
+  * A narrower energy window may leave out part of the spectral weight of your target orbital
+    [[dmft_orbital]]. In this case, the projected orbital may become too extended, potentially
+    overlapping with neighboring atoms. That would violate a key approximation of the method - that
+    interatomic elements of the Green's function can be neglected.
+
+This is extremely important since if this approximation breaks, the very important identity
+Downfold(Upfold) = Identity might break down, which can lead to inaccuracies and unstability.
+You can check the deviation in the `log2` file:
+
+```sh
+  == Check downfold(upfold)=identity ==
+
+--- !WARNING
+src_file: m_matlu.F90
+src_line: 1373
+message: |
+
+    Differences between Downfold(Upfold) and
+       Identity is too large:
+         0.1284E-03 is larger than  0.1000E-03
+...
+```
+
+As an exercise, you can check that this deviation becomes lower whenever you increase the energy window.
+
+!!! tip
+
+    Because Kohn-Sham wavefunctions vary between systems, the projection of [[dmft_orbital]] onto your subspace $\mathcal{H}$ will also vary, especially if the energy window is too narrow. To reliably compare energies between systems, you have to use the same orbital for all calculations, and converge your results with respect to [[dmftbandi]] and [[dmftbandf]]. See the section on the exact double counting formula for more guidance.
+
+As shown earlier from the fatband analysis, the main spectral weight for the $d$ orbitals lie between
+bands $5$ and $13$, so we use this as our energy window.
+
+Once the orbitals have been projected onto this finite Hilbert space, they are no longer orthonormal.
+You can inspect this in the `log2` file:
 
 ```sh
  == The DMFT orbitals are now projected on the correlated bands
@@ -329,20 +381,18 @@ However, since we project the orbitals on a finite dimensional Hilbert space, th
         0.00000  -0.00000   0.00000   0.00000   0.80154
 ```
 
-Here, the occupation and overlap matrices (before orthonormalization) are
-printed. All local operators are stored and displayed in matrix form in the
-`log` file, separately for each spin component.
-By default, all quantities are handled and printed in the real spherical
-harmonics (cubic) basis. The only exception is when they are passed
-to the CT-HYB solver, where they are rotated to the CT-QMC basis
-(see the next section). Whenever quantities are represented in the CT-QMC
-basis instead of the cubic basis, this is explicitly indicated in the `log`.
+Here, the occupation and norm matrices (prior to orthonormalization) are
+shown. All local operators are printed in matrix form in the `log` file,
+sorted by spin and increasing magnetic quantum number $m$.
 
-As you can see, the norms of the projected orbitals are slightly lower than the original atomic orbital, which was
-not even normalized to begin with.
+By default, all quantities are output in the real spherical harmonics (cubic) basis. The only exception
+occurs when data is passed to the CT-HYB solver, which requires a rotation to the CT-QMC basis (see the
+corresponding subsection for details). Wherever a basis change occurs, it is clearly indicated in the
+`log`.
 
-If we had an infinite energy window, the projection would fully recover the original atomic orbital through the closure relation. You can check this as an exercise: try increasing
-[[dmftbandf]] and see that the overlap values move closer to $0.8514$.
+As shown above, the norms of the projected orbitals are slightly below the original atomic value
+(which wasn't normalized to begin with). Try increasing [[dmftbandf]], and you will see the norms
+approach the true atomic value of $0.8514$.
 
 Finally, we promote the projected orbitals to proper Wannier functions by orthonormalizing them via the scheme specified by [[dmft_wanorthnorm]].
 
@@ -469,7 +519,7 @@ As you can see, this integration method is highly efficient — in this example,
 
 ### CT-QMC basis
 
-In the SCF cycle, we work in the real spherical harmonics (cubic) basis.
+In the SCF cycle, we work in the cubic basis.
 However, even though [[dmft_solv]]$=7$ is fully rotationally invariant and
 basis independent, the choice of solver basis can in practice have a
 huge impact on computation time.
@@ -492,11 +542,11 @@ example. You can check as an exercise that the matrix sizes will increase by set
 So, there is a trade-off: you want to reduce off-diagonal components and maximize the number of subspaces, which isn't always easy. Fortunately, our interface provides many basis
 options that can be set via [[dmft_triqs_basis]] - check the glossary for all available choices.
 
-Even though our interface handles the full off-diagonal hybridization and Green's function, some features are not available in this case. For instance, density matrix sampling
-([[dmft_triqs_measure_density_matrix]]) cannot be performed, making the sampling of static observables (like energy or electron number) much noisier. We wish to emphasize that
-this limitation comes from TRIQS/CT-HYB itself, not our interface.
+!!! note
 
-To simplify things, you can set the off-diagonal components to zero in the CT-QMC basis via [[dmft_triqs_off_diag]]$=0$. Be careful, as this is no longer numerically exact.
+    Even though our interface handles the full off-diagonal hybridization and Green's function, some features are not available in this case. For instance, density matrix sampling ([[dmft_triqs_measure_density_matrix]]) cannot be performed, making the sampling of static observables (like energy or electron number) much noisier. We wish to emphasize that this limitation comes from TRIQS/CT-HYB itself, not our interface.
+
+To simplify things, you can set the off-diagonal components to zero in the CT-QMC basis via [[dmft_triqs_off_diag]]$=0$. Be careful, as the calculation is no longer numerically exact in this case.
 
 In this example, we choose to stay in the cubic basis ([[dmft_triqs_basis]]$=0$) and neglect the off-diagonal components, since they vanish by symmetry anyway. The code then
 automatically detects and prints the most compact block structure of the hybridization function and electronic levels:
@@ -533,5 +583,83 @@ automatically detects and prints the most compact block structure of the hybridi
 
 This allows TRIQS/CT-HYB to discard some irrelevant moves, and to optimize the computation of the determinant of the hybridization matrix. In our case, there are
 $10$ blocks of size $1$, as there are no off-diagonal components.
+
+### CT-HYB parameters
+
+The key controls for the TRIQS/CT-HYB solver are [[dmft_triqs_n_cycles]], [[dmft_triqs_length_cycle]],
+[[dmft_triqs_n_warmup_cycles_init]] and [[dmft_triqs_n_warmup_cycles_restart]]. These parameters are
+crucial for both performance and accuracy and should be carefully converged.
+
+Every CT-QMC simulation begins with a warmup phase, where the Markov chain hasn't reached equilibrium
+yet, so no measurements are taken. Each warmup phase consists of a number of cycles, and each cycle
+contains [[dmft_triqs_length_cycle]] sweeps.
+
+There are two kinds of warmup:
+
+  1. The initial warmup, triggered at the first DMFT iteration, when we start from scratch (i.e. an empty
+     configuration) and no initial configuration is provided by the user via [[getctqmcdata]]. It is
+     controlled by [[dmft_triqs_n_warmup_cycles_init]], can be quite long, and must be carefully
+     converged.
+  2. The restart warmup, used from the second DMFT iteration onward, and at the first iteration if
+     a configuration file is provided via [[getctqmcdata]]. We automatically restart from the last saved
+     CT-QMC configuration (`tdmft_triqs_2o_DS2_CTQMC_DATA_iatom0001.h5`), and thus the warmup can be
+     much shorter, driven by [[dmft_triqs_n_warmup_cycles_restart]] - which can often be set to $0$.
+
+The restart behavior can be disabled by [[dmft_triqs_read_ctqmcdata]] as it can cause some issues in
+some rare occasions - at very low temperature for instance, when the configuration weights become
+extremely low.
+
+After warmup, the solver moves into the measurement phase, which lasts [[dmft_triqs_n_cycles]] cycles.
+During this phase, observables are measured at the end of each cycle.
+
+One key aspect to keep in mind is that only decorrelated/independent measurements matter for statistics.
+That is why [[dmft_triqs_length_cycle]] should in theory be set to match the autocorrelation time.
+
+If it is too small, you are measuring correlated samples - wasting time on measurement - and if it is
+too big, you are discarding valid statistics - getting fewer meaningful samples.
+
+In practice, to set this value, we advise you to keep increasing it until the time spent in measurement printed here:
+
+```sh
+  Total measure time                         | 0.0910871
+```
+
+is negligible compared to the simulation time. Then, check that you haven't lost statistics on your quantity of interest.
+
+!!! tip
+
+    We do not advise to check the autocorrelation time printed by TRIQS/CT-HYB (unlike what is said in this tutorial), as an automatic measurement of this quantity is highly unreliable.
+
+At the end of a CT-HYB simulation, you will see a summary of the different Monte-Carlo moves and their
+acceptance rates:
+
+```sh
+  Move set Insert two operators: 0.401734
+  Move set Remove two operators: 0.404321
+  Move  Shift one operator: 0.518682
+```
+
+These numbers give important clues about the sampling efficiency. If a move has a very low acceptance
+rate and is not essential for ergodicity, you can disable it, but be sure of what you are doing.
+
+You will find detailed explanations of the moves on the TRIQS/CT-HYB
+[[https://triqs.github.io/cthyb/latest/basicnotions/moves.html|website]].
+
+The key parameters to control the proposal distribution are [[dmft_triqs_move_double]], [[dmft_triqs_move_shift]] and [[dmft_triqs_pauli_prob]].
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
