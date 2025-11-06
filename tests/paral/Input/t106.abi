@@ -77,7 +77,7 @@ lpawu   2 -1   # U on d-orbitals of Ni, no U on oxygen
 upawu1  0.00  0.0   # values in Hartree
 jpawu1  0.0000 0.0  # values in Hartree
 upawu2  0.30  0.0   # values in Hartree
-jpawu2  0.0000 0.0  # values in Hartree
+jpawu2  0.1000 0.0  # values in Hartree
 
 pp_dirpath "$ABI_PSPDIR"
 pseudos "28ni.paw, 8o.2.paw"
