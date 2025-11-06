@@ -986,3 +986,70 @@ def get_cache_info_windows() -> dict:
     except Exception:
         pass
     return caches
+
+def _extract_errors(logfile, context_lines: int = 5) -> list[str]:
+    """
+    Extract error lines and some context.
+
+    Args:
+        context_lines: how many lines of context before/after the match
+
+    """
+    print(f"Extracting error lines and some context from {logfile}...")
+
+    with open(logfile, 'r', errors='ignore') as f:
+        lines = f.readlines()
+
+    # Common patterns indicating critical problems
+    ERROR_PATTERNS = [
+        r'error',                # generic errors
+        r'fail',                 # tests failing
+        r'cannot\s+find',        # missing library or header
+        r'no\s+such\s+file',     # missing file
+        r'not\s+found',          # program not found
+        r'undefined\s+reference' # linking errors
+    ]
+
+    import re
+    regex = re.compile('|'.join(ERROR_PATTERNS), re.IGNORECASE)
+    n = len(lines)
+    errors = []
+    for i, line in enumerate(lines):
+        if regex.search(line):
+            # Ignore maches such as `sd_yakl_options='optional fail'
+            if line.startswith("sd_") and "fail" in line: continue
+            # Capture context
+            start = max(0, i - context_lines)
+            end = min(n, i + context_lines + 1)
+            context = ''.join(lines[start:end])
+            errors.append(context.strip())
+
+    return errors
+
+
+def find_filename(filename, start_dir: Path = Path.cwd()) -> Path:
+    """Walk upward until filename is found, or return None."""
+    current = start_dir.resolve()
+    while True:
+        candidate = current / filename
+        if candidate.exists():
+            return candidate
+        if current.parent == current:  # reached filesystem root
+            raise FileNotFoundError(f"File '{filename}' not found.")
+        current = current.parent
+
+
+@task
+def config_log(ctx, log_path="config.log"):
+    """Parse a configure-generated config.log file to extract critical errors."""
+    log_path = find_filename(log_path)
+    results = _extract_errors(log_path)
+    if not results:
+        print("✅ No critical errors detected.")
+        return
+
+    print("❌ Critical errors found:\n")
+    for idx, block in enumerate(results, start=1):
+        print(f"--- Error block #{idx} ---")
+        print(block)
+        print("-" * 40)

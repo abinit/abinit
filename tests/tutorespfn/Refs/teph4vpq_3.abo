@@ -408,10 +408,12 @@ P Number of CPUs for parallelism over k-points: 1
 
  gstore_completed: 1
  gstore_done_qbz_spin: 27
- gqk%nb_kq: 3
- gqk%nb_k: 3
- gqk%glob_nq: 27
- gqk%glob_nk: 27
+ nb_k: 3
+ bstart_k: 3
+ nb_kq: 3
+ bstart_kq: 3
+ glob_nq: 27
+ glob_nk: 27
 
  Group velocities |v_nk| in atomic units:
  For k-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] , spin 1
@@ -707,10 +709,12 @@ P Number of CPUs for parallelism over k-points: 1
 
  gstore_completed: 1
  gstore_done_qbz_spin: 64
- gqk%nb_kq: 3
- gqk%nb_k: 3
- gqk%glob_nq: 64
- gqk%glob_nk: 64
+ nb_k: 3
+ bstart_k: 3
+ nb_kq: 3
+ bstart_kq: 3
+ glob_nq: 64
+ glob_nk: 64
 
  Group velocities |v_nk| in atomic units:
  For k-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] , spin 1
@@ -1006,10 +1010,12 @@ P Number of CPUs for parallelism over k-points: 1
 
  gstore_completed: 1
  gstore_done_qbz_spin: 125
- gqk%nb_kq: 3
- gqk%nb_k: 3
- gqk%glob_nq: 125
- gqk%glob_nk: 125
+ nb_k: 3
+ bstart_k: 3
+ nb_kq: 3
+ bstart_kq: 3
+ glob_nq: 125
+ glob_nk: 125
 
  Group velocities |v_nk| in atomic units:
  For k-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] , spin 1
