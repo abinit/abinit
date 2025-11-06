@@ -1570,10 +1570,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                  end if
                end if
 
-               if (m_kq == 1 .AND. ipc == 1) &
-                  print *, "|vec_gx_nk|^2,+q,ib=", ib_sum, sum(abs(vec_gx_nk(:, 1))*abs(vec_gx_nk(:, 1)))
-               if (m_kq == 1 .AND. ipc == 1) &
-                  print *, "|rhotwg_x|^2,+q,ib=", ib_sum, sum(abs(rhotwg_x)*abs(rhotwg_x))
+               !if (m_kq == 1 .AND. ipc == 1) &
+               !   print *, "|vec_gx_nk|^2,+q,ib=", ib_sum, sum(abs(vec_gx_nk(:, 1))*abs(vec_gx_nk(:, 1)))
+               !if (m_kq == 1 .AND. ipc == 1) &
+               !   print *, "|rhotwg_x|^2,+q,ib=", ib_sum, sum(abs(rhotwg_x)*abs(rhotwg_x))
 
                do n_k=bstart_k, bstop_k
                  in_k = n_k - bstart_k + 1
@@ -1706,10 +1706,10 @@ if (.not. qq_is_gamma) then
                  end if
                end if
 
-               if (n_k == 1 .AND. ipc == 1) &
-                  print *, "|vec_gx_mkq|^2,-q,ib=", ib_sum, sum(abs(vec_gx_mkq(:, 1))*abs(vec_gx_mkq(:, 1)))
-               if (n_k == 1 .AND. ipc == 1) &
-                  print *, "|rhotwg_x|^2,-q,ib=", ib_sum, sum(abs(rhotwg_x)*abs(rhotwg_x))
+               !if (n_k == 1 .AND. ipc == 1) &
+               !   print *, "|vec_gx_mkq|^2,-q,ib=", ib_sum, sum(abs(vec_gx_mkq(:, 1))*abs(vec_gx_mkq(:, 1)))
+               !if (n_k == 1 .AND. ipc == 1) &
+               !   print *, "|rhotwg_x|^2,-q,ib=", ib_sum, sum(abs(rhotwg_x)*abs(rhotwg_x))
 
                do m_kq=bstart_kq, bstop_kq
                  im_kq = m_kq - bstart_kq + 1
@@ -1835,8 +1835,10 @@ end if ! .not qq_is_gamma.
 
        if (dtset%useria == 0) then
         gsig_atm = gsig_atm + gks_atm - gxc_atm
-       else if (dtset%useria /= 0) then
+       else if (dtset%useria > 0) then
         gsig_atm = gxc_atm
+       else if (dtset%useria < 0) then
+        gsig_atm = gsig_atm
        end if
 
        !print *, "gks_atm(:, 1, 1, 1) - gxc_atm(:, 1, 1, 1):",  gks_atm(:, 1, 1, 1) - gxc_atm(:, 1, 1, 1)
