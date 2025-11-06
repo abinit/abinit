@@ -1011,7 +1011,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
 
    ! Check that d2te is decreasing on succeeding lines:
    if (iline/=1) then
-     if (d2te>d2teold+tol6 .and. u1_band_ > 0) then
+     if (d2te>d2teold+tol6 .and. u1_band_ > 0 .and. prtvol > 0) then
        write(msg,'(a,i0,a,e16.8,a,e16.9)')'New trial energy at iline ',iline,' = ',d2te,' is higher than former: ',d2teold
        ABI_WARNING(msg)
      end if
