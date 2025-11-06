@@ -1285,6 +1285,7 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
      trev_k = self%kcalc2ibz(ikcalc, 6)
 
      wtk = self%ebands%wtk(ik_ibz)
+     ! TODO: this S is not used below - remove
      S = transpose(cryst%symrel_cart(:,:,isym_k))
 
      nbands = self%nbcalc_ks(ikcalc, spin)
@@ -1371,37 +1372,41 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
          self%l2_dm( :, :, ieh, spin, itemp ) = self%l2_dm( :, :, ieh, spin, itemp ) &
              & + integration_dm*vv_tens(:,:)*wtk*(eig_nk - self%mu_e(itemp))**2
 
-!         call xmpi_sum(self%conductivity_mu(:, :, ieh, spin, itemp) , self%wt_comm%value, ierr)
        end do ! itemp
 
      end do !ib
 
    end do ! my_ik
-   ! Collect data if k-points parallelism. TODO: if this is reactivated, mpi_sum the l0 l1 l2 arrays instead
-   !call xmpi_sum(self%conductivity_mu , self%kcalc_comm%value, ierr)
 
  end do !my_spin
 
+ ! Collect data if k-points parallelism. TODO: if this is reactivated, mpi_sum the l0 l1 l2 arrays instead
+ !call xmpi_sum(self%l0, self%kcalc_comm%value, ierr)
+ !call xmpi_sum(self%l1, self%kcalc_comm%value, ierr)
+ !call xmpi_sum(self%l2, self%kcalc_comm%value, ierr)
+
  do itemp = 1, self%ntemp
+   Tkelv = self%kTmesh(itemp) / kb_HaK; if (Tkelv < one) Tkelv = one
    do my_spin=1,self%my_nspins
      spin = self%my_spins(my_spin)
      do ieh = 1, 2
        ! calculate the transport coefficients from the l0 l1 l2
-       call inv33(self%l0(:, :, ieh, spin, itemp), work_33)
-       l0inv_33nw(:,:,ieh) = work_33
-       self%seebeck(:,:,ieh,spin,itemp) = matmul(work_33, self%l1(:,:,ieh,spin,itemp)) / Tkelv
+       call inv33(self%l0(:, :, ieh, spin, itemp), l0inv_33nw(:,:,ieh))
+       self%seebeck(:,:,ieh,spin,itemp) = matmul(l0inv_33nw(:,:,ieh), self%l1(:,:,ieh,spin,itemp)) / Tkelv
       
-       call inv33(self%l0_dm(:, :, ieh, spin, itemp), work_33)
-       l0inv_33nw_dm(:,:,ieh) = work_33
-       self%seebeck_dm(:,:,ieh,spin,itemp) = matmul(work_33, self%l1_dm(:,:,ieh,spin,itemp)) / Tkelv
+       call inv33(self%l0_dm(:, :, ieh, spin, itemp), l0inv_33nw_dm(:,:,ieh))
+       self%seebeck_dm(:,:,ieh,spin,itemp) = matmul(l0inv_33nw_dm(:,:,ieh), self%l1_dm(:,:,ieh,spin,itemp)) / Tkelv
       
        work_33 = self%l1(:, :, ieh, spin, itemp)
+       ! TODO: check if one of the work_33 below is incorrect or needs a transpose 
        work_33 = self%l2(:, :, ieh, spin, itemp) - matmul(work_33, matmul(l0inv_33nw(:, :, ieh), work_33))
        self%kappa(:,:,ieh,spin,itemp) = work_33 / Tkelv
       
        work_33 = self%l1_dm(:, :, ieh, spin, itemp)
        work_33 = self%l2_dm(:, :, ieh, spin, itemp) - matmul(work_33, matmul(l0inv_33nw_dm(:, :, ieh), work_33))
        self%kappa_dm(:,:,ieh,spin,itemp) = work_33 / Tkelv
+
+       !TODO: leftover below - can this be removed?
        !self%conductivity_mu( :, :, ieh, spin, itemp ) = self%conductivity_mu( :, :, ieh, spin, itemp ) + integration*vv_tens(:,:)*wtk
      end do ! ieh
    end do !my_spin
@@ -1416,10 +1421,6 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
  self%conductivity_mu_dm = fact0 * self%l0_dm  ! siemens cm^-1
  self%seebeck_dm = - volt_SI  * max_occ * self%seebeck_dm
  self%kappa_dm = + volt_SI**2 * fact0 * self%kappa_dm
-
- do itemp=1, self%ntemp
-   Tkelv = self%kTmesh(itemp) / kb_HaK; if (Tkelv < one) Tkelv = one
- end do
 
  ! Scale by the carrier concentration
  fact = 100**3 / e_Cb
