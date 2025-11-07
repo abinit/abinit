@@ -492,6 +492,12 @@ contains
  intarr(1,:)=dtsets(:)%ppmodel
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ppmodel','INT',0)
 
+ intarr(1,:)=dtsets(:)%precon_ls_maxite
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'precon_ls_maxite','INT',0)
+
+ dprarr(1,:)=dtsets(:)%precon_ls_rtol
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'precon_ls_rtol','DPR',0)
+
  intarr(1,:)=dtsets(:)%prepalw
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prepalw','INT',0)
 

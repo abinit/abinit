@@ -1877,9 +1877,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
        endif
      endif
 
-!    Updating precon-object for chi0-based preconditioning
-     call precon%update(dtset, istep, mpi_enreg)
-
      ABI_NVTX_START_RANGE(NVTX_SCFCV_NEWRHO)
      call newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,&
 &     dtset,etotal,fcart,pawfgr%fintocoa,&
@@ -2137,9 +2134,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 
 !    Precondition the residual and forces, then determine the new vtrial
 !    (Warning: the (H)xc potential may have been subtracted from vtrial)
-
-!    Updating precon-object for chi0-based preconditioning
-     call precon%update(dtset, istep, mpi_enreg)
 
      call newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
 &     dtn_pc,dtset,etotal,fcart,pawfgr%fintocoa,&
