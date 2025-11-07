@@ -248,7 +248,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp) :: fact_spin, theta_mu_minus_e0i, tol_empty, tol_empty_in !, e_mkq, e_nk ! e0i
  real(dp),contiguous, pointer :: qp_ene(:,:,:), qp_occ(:,:,:)
  real(dp) :: weight_q,bigexc,bigsxc,vxcavg ! ediff, eshift, q0rad, bz_vol
- logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, qq_is_gamma, pp_is_gamma, isirr_q, qq_is_L
+ logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, qq_is_gamma, pp_is_gamma, isirr_q
  logical :: stern_use_cache, use_ftinterp
  logical :: print_time_qq, print_time_kk, print_time_pp, non_magnetic_xc, need_x_kmp, need_x_kqmp
  complex(dp) :: ieta, idelta_sum
@@ -964,7 +964,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      if (dtset%userib /= 0 .and. (any(abs(qq_bz - [0.5, 0.0, 0.0]) > tol14))) cycle
 
      iq_bz = gqk%my_q2bz(my_iq); qq_is_gamma = sum(qq_bz**2) < tol14; qq_bz_string = ktoa(qq_bz)
-     qq_is_L = (all(abs(qq_bz - [0.5, 0.0, 0.0]) < tol14))
 
      ! Handle possible restart.
      if (done_qbz_spin(iq_bz, spin) == 1) then
@@ -1390,8 +1389,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                ! FIXME: This is wrong if nspinor == 2
                rhotwg_c(:) = rhotwg_x(1:npw_c*nspinor)
 
-               ! Sometime we exlude qq=Gamma for debugging purposes, while qq=L is always included.
-               if (qq_is_L) then
+               if (qq_is_gamma) then
                  sigx_nk(in_k, ik_glob) = sigx_nk(in_k, ik_glob) + dot_product(rhotwg_x, rhotwg_x)
                end if
 
@@ -1421,8 +1419,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                vec_coh_nk(:, n_k) = matmul(wc0_pbz, rhotwg_c)
              end if
 
-             ! Sometime we exlude qq=Gamma for debugging purposes, while qq=L is always included.
-             if (qq_is_L) then
+             if (qq_is_gamma) then
                sigce0_nk(in_k, ik_glob) = sigce0_nk(in_k, ik_glob) + dot_product(rhotwg_c, vec_gwc_nk(:,1,n_k))
              end if
 
