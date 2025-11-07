@@ -1041,14 +1041,14 @@ subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, eb
    nctkarr_t("fan_stern_vals", "dp", "two, ntemp, nb_k, glob_nk"), &
    nctkarr_t("dvals_de0ks", "dp", "two, ntemp, nb_k, glob_nk"), &
    nctkarr_t("dw_vals", "dp", "ntemp, nb_k, glob_nk"), &
-   nctkarr_t("dw_stern_vals", "dp", "ntemp, nb_k, glob_nk") &
-   !nctkarr_t("qpoms_enes", "dp", "two, ntemp, nb_k, glob_nk"), &
-   !nctkarr_t("qp_enes", "dp", "two, ntemp, nb_k, glob_nk"), &
-   !nctkarr_t("ze0_vals", "dp", "ntemp, nb_k, glob_nk"), &
-   !nctkarr_t("ks_enes", "dp", "nb_k, glob_nk"), &
-   !nctkarr_t("ks_gaps", "dp", "nb_k, glob_nk"), &
-   !nctkarr_t("qpoms_gaps", "dp", "ntemp, nb_k, glob_nk"), &
-   !nctkarr_t("qp_gaps", "dp", "ntemp, nb_k, glob_nk"), &
+   nctkarr_t("dw_stern_vals", "dp", "ntemp, nb_k, glob_nk"), &
+   nctkarr_t("qpoms_enes", "dp", "two, ntemp, nb_k, glob_nk"), &
+   nctkarr_t("qp_enes", "dp", "two, ntemp, nb_k, glob_nk"), &
+   nctkarr_t("ze0_vals", "dp", "ntemp, nb_k, glob_nk"), &
+   nctkarr_t("ks_enes", "dp", "nb_k, glob_nk"), &
+   nctkarr_t("ks_gaps", "dp", "nb_k, glob_nk"), &
+   nctkarr_t("qpoms_gaps", "dp", "ntemp, nb_k, glob_nk"), &
+   nctkarr_t("qp_gaps", "dp", "ntemp, nb_k, glob_nk") &
    !nctkarr_t("phmesh", "dp", "phmesh_size"), &
    !nctkarr_t("vcar_calc", "dp", "three, max_nbcalc, nkcalc, nsppol") &
  ])
@@ -1056,12 +1056,12 @@ subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, eb
 
  ! Write data.
  !NCF_CHECK(nctk_set_datamode(spin_ncid))
- NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "vals_e0ks"), c2r(sigma%vals_e0ks)))
- NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "fan_vals"), c2r(sigma%fan_vals)))
- NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "fan_stern_vals"), c2r(sigma%fan_stern_vals)))
- NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "dvals_de0ks"), c2r(sigma%dvals_de0ks)))
- NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "dw_vals"), sigma%dw_vals))
- NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "dw_stern_vals"), sigma%dw_stern_vals))
+ NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("vals_e0ks"), c2r(sigma%vals_e0ks)))
+ NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("fan_vals"), c2r(sigma%fan_vals)))
+ NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("fan_stern_vals"), c2r(sigma%fan_stern_vals)))
+ NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("dvals_de0ks"), c2r(sigma%dvals_de0ks)))
+ NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("dw_vals"), sigma%dw_vals))
+ NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("dw_stern_vals"), sigma%dw_stern_vals))
 
  ! Write legend.
  if (spin == 1) then
@@ -1263,20 +1263,25 @@ subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, eb
    end do ! it
 
    ! Dump QP energies and gaps for this kpoint.
-   !start = [ikcalc, spin]
-   !NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "qpoms_enes"), c2r(qpoms_enes)))
-   !NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "qp_enes"), c2r(qp_enes)))
-   !NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "ze0_vals"), ze0_vals))
-   !NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "ks_enes"), ks_enes))
-   !NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "ks_gaps"), ks_gap))
-   !NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "qpoms_gaps"), qpoms_gaps))
-   !NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "qp_gaps"), qp_gaps))
+   NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("qpoms_enes"), c2r(qpoms_enes), start=[1,1,1,ikcalc]))
+   NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("qp_enes"), c2r(qp_enes), start=[1,1,1,ikcalc]))
+   NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("ze0_vals"), ze0_vals, start=[1,1,ikcalc]))
+   NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("ks_enes"), ks_enes, start=[1,ikcalc]))
+   NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("ks_gaps"), ks_gap, start=[1,ikcalc]))
+   NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("qpoms_gaps"), qpoms_gaps, start=[1,ikcalc]))
+   NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("qp_gaps"), qp_gaps, start=[1,ikcalc]))
  end do ! ikcalc
 
  if (sigma%ntemp > max_ntemp) then
    write(ab_out, "(a,i0,a)")" No more than ", max_ntemp, " temperatures are written to the main output file."
-   write(ab_out, "(2a)")" Please use SIGEPH.nc file and AbiPy to analyze the results.",ch10
+   write(ab_out, "(2a)")" Please use the GSEPH.nc file and AbiPy to analyze the results.",ch10
  end if
+
+contains
+ integer function vid_spin(var_name)
+   character(len=*),intent(in) :: var_name
+   vid_spin = nctk_idname(spin_ncid, var_name)
+ end function vid_spin
 
 end subroutine sep_gather_and_write_results
 !!***
