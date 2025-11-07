@@ -202,8 +202,6 @@ MODULE m_paw_dmft
 
   integer :: dmft_triqs_compute_integral
   ! Only relevant when dmft_triqs_entropy=1.
-  ! =2: Compute the impurity entropy by thermodynamic integration over both interaction
-  !     and double counting strength.
   ! =1: Compute the impurity entropy by thermodynamic integration over interaction strength.
   ! =0: Do not compute the impurity entropy. All the other contributions to the free
   ! energy are still computed.
@@ -492,6 +490,9 @@ MODULE m_paw_dmft
 
   real(dp) :: dmft_triqs_pauli_prob
   ! TRIQS CTQMC: Probability for proposing Pauli-aware insert and remove
+
+  real(dp) :: dmft_triqs_shift_level
+  ! TRIQS CTQMC: Shift for the electronic levels for thermodynamic integration
 
   real(dp) :: dmft_triqs_tol_block
   ! TRIQS CTQMC: Off-diagonal elements below this threshold are set to 0
@@ -1170,6 +1171,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_triqs_pauli_prob                    = dtset%dmft_triqs_pauli_prob
  paw_dmft%dmft_triqs_n_cycles                      = dtset%dmft_triqs_n_cycles
  paw_dmft%dmft_triqs_debug                         = (dtset%dmft_triqs_debug == 1)
+ paw_dmft%dmft_triqs_shift_level                   = dtset%dmft_triqs_shift_level
 
 !==============================
 !==  Variables for DMFT itself

@@ -4713,14 +4713,13 @@ end subroutine compute_trace_moments_ks
 !!               has been removed)
 !!  opt_log = if set to 1, also computes the trace of the moments of log(G)+log(iw*Id) and
 !!            log(G0)+log(iw*Id) in green%trace_moments_log_loc and weiss%trace_moments_log_loc
-!!            if set to 2, the double counting is subtracted in the definition of G0
-!!  opt_hdc = double counting
+!!  shift_level = shift to apply to the impurity levels for the moments of G0
 !!
 !! OUTPUTS
 !!
 !! SOURCE
 
-subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log,opt_hdc)
+subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log,shift_level)
 
 !Arguments ------------------------------------
  type(green_type), intent(inout) :: green,weiss
@@ -4728,15 +4727,14 @@ subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log,opt_
  type(oper_type), target, intent(in) :: energy_level
  integer, intent(in) :: option
  integer, optional, intent(in) :: opt_log
- type(oper_type), optional, intent(in) :: opt_hdc
+ real(dp), optional, intent(in) :: shift_level
 !Local variables ------------------------------
  integer :: i,natom,nspinor,nsppol,optlog
  complex(dp) :: trace
- type(matlu_type), target, allocatable :: level_no_hdc(:)
+ type(matlu_type), target, allocatable :: level_shift(:)
  integer, allocatable :: lpawu(:)
- complex(dp), allocatable :: trace_loc(:)
+ complex(dp), allocatable :: shift(:),trace_loc(:)
  type(matlu_type), allocatable :: matlu(:,:)
- type(matlu_type), pointer :: level(:) => null()
 !************************************************************************
 
  optlog = 0
@@ -4766,27 +4764,26 @@ subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log,opt_
 
  if (optlog > 0) then
 
-   if (optlog == 1) then
-     level => energy_level%matlu(:)
-   else
-     ABI_MALLOC(level_no_hdc,(natom))
-     call init_matlu(natom,nspinor,nsppol,lpawu(:),level_no_hdc(:))
-     call add_matlu(energy_level%matlu(:),opt_hdc%matlu(:),level_no_hdc(:),natom,1)
-     level => level_no_hdc(:)
-   end if
+   ABI_MALLOC(level_shift,(natom))
+   ABI_MALLOC(shift,(natom))
+   call init_matlu(natom,nspinor,nsppol,lpawu(:),level_shift(:))
+   call copy_matlu(energy_level%matlu(:),level_shift(:),natom)
 
-   call trace_matlu(level(:),natom,itau=0,trace=weiss%trace_moments_log_loc(1))
+   shift(:) = cmplx(shift_level,zero,kind=dp)
+   call shift_matlu(level_shift(:),natom,shift(:),-1)
+
+   call trace_matlu(level_shift(:),natom,itau=0,trace=weiss%trace_moments_log_loc(1))
    do i=2,green%nmoments-1
      call trace_matlu(weiss%moments(i)%matlu(:),natom,itau=0,trace=weiss%trace_moments_log_loc(i))
    end do ! i
-   call prod_matlu(level(:),level(:),matlu(:,1),natom)
+   call prod_matlu(level_shift(:),level_shift(:),matlu(:,1),natom)
    call trace_matlu(matlu(:,1),natom,itau=0,trace=trace)
    weiss%trace_moments_log_loc(2) = weiss%trace_moments_log_loc(2) + trace*half
-   call trace_prod_matlu(level(:),weiss%moments(2)%matlu(:),natom,trace_loc(:),trace_tot=trace)
+   call trace_prod_matlu(level_shift(:),weiss%moments(2)%matlu(:),natom,trace_loc(:),trace_tot=trace)
    weiss%trace_moments_log_loc(3) = weiss%trace_moments_log_loc(3) + trace
-   call trace_prod_matlu(level(:),matlu(:,1),natom,trace_loc(:),trace_tot=trace)
+   call trace_prod_matlu(level_shift(:),matlu(:,1),natom,trace_loc(:),trace_tot=trace)
    weiss%trace_moments_log_loc(3) = weiss%trace_moments_log_loc(3) + trace*third
-   call trace_prod_matlu(level(:),weiss%moments(3)%matlu(:),natom,trace_loc(:),trace_tot=trace)
+   call trace_prod_matlu(level_shift(:),weiss%moments(3)%matlu(:),natom,trace_loc(:),trace_tot=trace)
    weiss%trace_moments_log_loc(4) = weiss%trace_moments_log_loc(4) + trace
    call trace_prod_matlu(weiss%moments(2)%matlu(:),weiss%moments(2)%matlu(:),natom,trace_loc(:),trace_tot=trace)
    weiss%trace_moments_log_loc(4) = weiss%trace_moments_log_loc(4) + trace*half
@@ -4797,12 +4794,10 @@ subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log,opt_
 
    call trace_matlu(green%moments(2)%matlu(:),natom,itau=0,trace=green%trace_moments_log_loc(1))
 
-   if (optlog == 2) then
-     call destroy_matlu(level_no_hdc(:),natom)
-     ABI_FREE(level_no_hdc)
-   end if
+   call destroy_matlu(level_shift(:),natom)
+   ABI_FREE(level_shift)
+   ABI_FREE(shift)
 
-   level => null()
  end if ! optlog
 
  call prod_matlu(green%moments(2)%matlu(:),green%moments(2)%matlu(:),matlu(:,1),natom) ! matlu=m0m0

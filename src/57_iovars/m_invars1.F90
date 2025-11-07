@@ -2347,7 +2347,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_tolfreq=tol4
    dtsets(idtset)%dmft_tollc=tol5
    dtsets(idtset)%dmft_triqs_basis=-1
-   dtsets(idtset)%dmft_triqs_compute_integral=2
+   dtsets(idtset)%dmft_triqs_compute_integral=1
    dtsets(idtset)%dmft_triqs_debug=0
    dtsets(idtset)%dmft_triqs_det_init_size=100
    dtsets(idtset)%dmft_triqs_det_n_operations_before_check=10000
@@ -2378,6 +2378,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_triqs_random_seed_a=34788
    dtsets(idtset)%dmft_triqs_random_seed_b=928374
    dtsets(idtset)%dmft_triqs_read_ctqmcdata=1
+   dtsets(idtset)%dmft_triqs_shift_level=0.0_dp
    dtsets(idtset)%dmft_triqs_time_invariance=1
    dtsets(idtset)%dmft_triqs_tol_block=tol12
    dtsets(idtset)%dmft_triqs_use_norm_as_weight=1
