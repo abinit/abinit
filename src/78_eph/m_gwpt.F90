@@ -180,6 +180,25 @@ contains  !=====================================================
 !!
 !! 3) Check gstore_brange less than nband
 !!
+!! Debugging options:
+!! useria =  1 # write gvals=gxc to GSTORE.nc
+!! useria =  0 (default) # write gvals=gks-gxc+gsigx+gsigc to GSTORE.n
+!! useria = -1 # write gvals=gsigx (when userid=0) + gsigc (when useric=0) to GSTORE.nc
+!!
+!! userib = 0 (default) # calculate all k and q
+!! userib = 1 # filter k and q, only calculate k=Lambda, and q=L (for comparesion with finite difference GW)
+!!
+!! useric = 0 (default) # include the correlation part of Sigma
+!! useric = 1 # exclude the correlation part of Sigma
+!!
+!! userid = 0 (default) # include the exchange part of Sigma
+!! userid = 1 # exclude the exchange part of Sigma
+!!
+!! userie =  1 : Exclude pp = Gamma
+!! userie =  0 : Use all pp of the given p-grid
+!! userie = -1 : Use only pp = Gamma
+!!
+!!
 !! SOURCE
 
 subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, drhodb, ifc, wfk_hdr, &
@@ -340,8 +359,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  ! Open GSTORE.nc file and go to data mode.
  ! TODO: Fix problem with IO (some q-points are not written)
- NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, comm))
- !NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, xmpi_comm_self))
+ !NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, comm))
+ ! use xmpi_comm_self otherwise there will be a deadlock on lemaitre4
+ NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, xmpi_comm_self))
  NCF_CHECK(nctk_set_datamode(root_ncid))
 
  call gstore%get_missing_qbz_spin(done_qbz_spin, ndone, nmiss)
@@ -1152,7 +1172,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          pp = pp_mesh%bz(:,ipp_bz); pp_is_gamma = sum(pp**2) < tol14; pp_string = ktoa(pp)
 
          ! Debug, include only pp=Gamma
-         if (dtset%userie /= 0 .and. .not. pp_is_gamma) cycle
+         if (dtset%userie > 0) then
+            if (.not. pp_is_gamma) cycle
+         end if
 
          qkp_string = sjoin("While treating qq_bz: ", qq_bz_string, "kpt:", kk_string, "pp:", pp_string, ch10)
 
@@ -1604,8 +1626,18 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                   !print *, 'exchange contribution,+q:', xdot_tmp
                  end if
 
-                 gsig_atm(1, im_kq, in_k, ipc) = gsig_atm(1, im_kq, in_k, ipc) + real(ctmp_gwpc)
-                 gsig_atm(2, im_kq, in_k, ipc) = gsig_atm(2, im_kq, in_k, ipc) + aimag(ctmp_gwpc)
+                 if (dtset%userie < 0) then
+                    if (pp_is_gamma) then
+                      gsig_atm(1, m_kq, n_k, ipc) = gsig_atm(1, m_kq, n_k, ipc)
+                      gsig_atm(2, m_kq, n_k, ipc) = gsig_atm(2, m_kq, n_k, ipc)
+                    else
+                      gsig_atm(1, m_kq, n_k, ipc) = gsig_atm(1, m_kq, n_k, ipc) + real(ctmp_gwpc)
+                      gsig_atm(2, m_kq, n_k, ipc) = gsig_atm(2, m_kq, n_k, ipc) + aimag(ctmp_gwpc)
+                    end if
+                 else
+                   gsig_atm(1, m_kq, n_k, ipc) = gsig_atm(1, m_kq, n_k, ipc) + real(ctmp_gwpc)
+                   gsig_atm(2, m_kq, n_k, ipc) = gsig_atm(2, m_kq, n_k, ipc) + aimag(ctmp_gwpc)
+                 end if
 
                  ! DEBUG
                  if (n_k == 1 .and. m_kq == 1 .and. ipc == 1) then
@@ -1730,8 +1762,18 @@ if (.not. qq_is_gamma) then
                   !print *, 'exchange contribution,-q:', xdot_tmp
                  end if
 
-                 gsig_atm(1, im_kq, in_k, ipc) = gsig_atm(1, im_kq, in_k, ipc) + real(ctmp_gwpc)
-                 gsig_atm(2, im_kq, in_k, ipc) = gsig_atm(2, im_kq, in_k, ipc) + aimag(ctmp_gwpc)
+                 if (dtset%userie < 0) then
+                    if (pp_is_gamma) then
+                      gsig_atm(1, m_kq, n_k, ipc) = gsig_atm(1, m_kq, n_k, ipc)
+                      gsig_atm(2, m_kq, n_k, ipc) = gsig_atm(2, m_kq, n_k, ipc)
+                    else
+                      gsig_atm(1, m_kq, n_k, ipc) = gsig_atm(1, m_kq, n_k, ipc) + real(ctmp_gwpc)
+                      gsig_atm(2, m_kq, n_k, ipc) = gsig_atm(2, m_kq, n_k, ipc) + aimag(ctmp_gwpc)
+                    end if
+                 else
+                   gsig_atm(1, m_kq, n_k, ipc) = gsig_atm(1, m_kq, n_k, ipc) + real(ctmp_gwpc)
+                   gsig_atm(2, m_kq, n_k, ipc) = gsig_atm(2, m_kq, n_k, ipc) + aimag(ctmp_gwpc)
+                 end if
 
                  ! DEBUG
                  if (n_k == 1 .and. m_kq == 1 .and. ipc == 1) then
@@ -1751,10 +1793,12 @@ end if ! .not qq_is_gamma.
            call rf_ham_kqmp%free(); call rf_ham_kmp%free()
          end do ! ib_sum (sum over bands)
 
-         if (print_time_pp) then
+         ! Show progress of all pp points
+         !if (print_time_pp) then
            call inds2str(1, " My pp-point:", my_ipp, my_npp(spin), pp_mesh%nbz, msg)
-           call cwtime_report(msg, cpu_pp, wall_pp, gflops_pp); if (my_ipp == LOG_MODP) call wrtout(std_out, "...", do_flush=.True.)
-         end if
+           call cwtime_report(msg, cpu_pp, wall_pp, gflops_pp);
+           !if (my_ipp == LOG_MODP) call wrtout(std_out, "...", do_flush=.True.)
+         !end if
 
          ABI_FREE(kpg_kmp)
          ABI_FREE(kpg_kqmp)
@@ -1809,8 +1853,10 @@ end if ! .not qq_is_gamma.
 
        if (dtset%useria == 0) then
         gsig_atm = gsig_atm + gks_atm - gxc_atm
-       else if (dtset%useria /= 0) then
-        gsig_atm = gks_atm
+       else if (dtset%useria > 0) then
+        gsig_atm = gxc_atm
+       else if (dtset%useria < 0) then
+        gsig_atm = gsig_atm
        end if
 
        !print *, "gks_atm(:, 1, 1, 1) - gxc_atm(:, 1, 1, 1):",  gks_atm(:, 1, 1, 1) - gxc_atm(:, 1, 1, 1)
