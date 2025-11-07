@@ -3835,14 +3835,6 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
          end if
        end do ! isppol
 
-       if (ilam < ntot) then
-         call occup_green_tau(green)
-
-         write(message,'(a,3x,a)') ch10,"== Print Occupation matrix in CTQMC basis"
-         call wrtout(std_out,message,"COLL")
-         call print_matlu(green%occup_tau%matlu(:),natom,1)
-       end if
-
        if ((.not. leg_measure) .and. density_matrix) then
 
          ! Constrain the occupations and high-frequency moments with the more accurate values sampled from the CTQMC
@@ -3892,6 +3884,14 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
          end do ! isppol
 
        end if ! density_matrix
+
+       if (ilam < ntot) then
+         call occup_green_tau(green)
+
+         write(message,'(a,3x,a)') ch10,"== Print Occupation matrix in CTQMC basis"
+         call wrtout(std_out,message,"COLL")
+         call print_matlu(green%occup_tau%matlu(:),natom,1)
+       end if
 
        if (leg_measure) then
 
