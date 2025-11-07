@@ -180,6 +180,25 @@ contains  !=====================================================
 !!
 !! 3) Check gstore_brange less than nband
 !!
+!! Debugging options:
+!! useria =  1 # write gvals=gxc to GSTORE.nc
+!! useria =  0 (default) # write gvals=gks-gxc+gsigx+gsigc to GSTORE.n
+!! useria = -1 # write gvals=gsigx (when userid=0) + gsigc (when useric=0) to GSTORE.nc
+!!
+!! userib = 0 (default) # calculate all k and q
+!! userib = 1 # filter k and q, only calculate k=Lambda, and q=L (for comparesion with finite difference GW)
+!!
+!! useric = 0 (default) # include the correlation part of Sigma
+!! useric = 1 # exclude the correlation part of Sigma
+!!
+!! userid = 0 (default) # include the exchange part of Sigma
+!! userid = 1 # exclude the exchange part of Sigma
+!!
+!! userie =  1 : Exclude pp = Gamma
+!! userie =  0 : Use all pp of the given p-grid
+!! userie = -1 : Use only pp = Gamma
+!!
+!! 
 !! SOURCE
 
 subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, drhodb, ifc, wfk_hdr, &
