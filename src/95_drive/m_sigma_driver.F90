@@ -3038,7 +3038,9 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  mband = MAXVAL(Hdr_wfk%nband)
 
  remove_inv = .FALSE.
+ if (dtset%userie /= 456) then
  call hdr_wfk%vs_dtset(dtset)
+ end if
 
  test_npwkss = 0
  call make_gvec_kss(Dtset%nkpt,Dtset%kptns,Hdr_wfk%ecut_eff,Dtset%symmorphi,Dtset%nsym,Dtset%symrel,Dtset%tnons,&
@@ -3646,12 +3648,15 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
 
  end do
 
-#if 0
+#if 1
  ! Using the random q for the optical limit is one of the reasons
  ! why sigma breaks the initial energy degeneracies.
+ if (dtset%userra > 100) then
+ print *, "DEBUG, I am setting Vcp%i_sz=zero, Vcp%vc_sqrt(1,1)=czero, Vcp%vcqlwl_sqrt(1,1)=czero"
  Vcp%i_sz=zero
  Vcp%vc_sqrt(1,1)=czero
  Vcp%vcqlwl_sqrt(1,1)=czero
+ end if
 #endif
 
  ABI_FREE(qlwl)
