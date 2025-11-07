@@ -216,7 +216,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: ib_sum, ii, u1_band !,u1c_ib_k,  jj, iw !ib_kq, band_ks, ib_k, ibsum_kq, u1_master, ip
  integer :: my_is, spin, idir,ipert, ig, max_npw_xc, min_npw_xc, npw_x, npw_c, nw_nk, nw_mkq
  integer :: isym_q, trev_q, ip_ibz
- integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_k_ibz, istwf_k_ibz, ik_glob !, ik_bz
+ integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_k_ibz, istwf_k_ibz, ik_glob, ik_bz
  integer :: ikq_ibz, isym_kq, trev_kq, npw_kq, istwf_kq,  npw_kq_ibz, istwf_kq_ibz
  integer :: ikmp_ibz, isym_kmp, trev_kmp, npw_kmp, istwf_kmp
  integer :: ikqmp_ibz, isym_kqmp, trev_kqmp, npw_kqmp, istwf_kqmp, npw_kqmp_ibz, istwf_kqmp_ibz, mpw,ierr,nqbz,ncerr !,spad
@@ -229,7 +229,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp) :: fact_spin, theta_mu_minus_e0i, tol_empty, tol_empty_in !, e_mkq, e_nk ! e0i
  real(dp),contiguous, pointer :: qp_ene(:,:,:), qp_occ(:,:,:)
  real(dp) :: weight_q,bigexc,bigsxc,vxcavg ! ediff, eshift, q0rad, bz_vol
- logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, qq_is_gamma, pp_is_gamma, isirr_q
+ logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, qq_is_gamma, pp_is_gamma, isirr_q, qq_is_L
  logical :: stern_use_cache, use_ftinterp
  logical :: print_time_qq, print_time_kk, print_time_pp, non_magnetic_xc, need_x_kmp, need_x_kqmp
  complex(dp) :: ieta, idelta_sum
@@ -945,6 +945,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      if (dtset%userib /= 0 .and. (any(abs(qq_bz - [0.5, 0.0, 0.0]) > tol14))) cycle
 
      iq_bz = gqk%my_q2bz(my_iq); qq_is_gamma = sum(qq_bz**2) < tol14; qq_bz_string = ktoa(qq_bz)
+     qq_is_L = (all(abs(qq_bz - [0.5, 0.0, 0.0]) < tol14))
 
      ! Handle possible restart.
      if (done_qbz_spin(iq_bz, spin) == 1) then
@@ -1370,7 +1371,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                ! FIXME: This is wrong if nspinor == 2
                rhotwg_c(:) = rhotwg_x(1:npw_c*nspinor)
 
-               if (qq_is_gamma) then
+               ! Sometime we exlude qq=Gamma for debugging purposes, while qq=L is always included.
+               if (qq_is_L) then
                  sigx_nk(in_k, ik_glob) = sigx_nk(in_k, ik_glob) + dot_product(rhotwg_x, rhotwg_x)
                end if
 
@@ -1400,7 +1402,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                vec_coh_nk(:, n_k) = matmul(wc0_pbz, rhotwg_c)
              end if
 
-             if (qq_is_gamma) then
+             ! Sometime we exlude qq=Gamma for debugging purposes, while qq=L is always included.
+             if (qq_is_L) then
                sigce0_nk(in_k, ik_glob) = sigce0_nk(in_k, ik_glob) + dot_product(rhotwg_c, vec_gwc_nk(:,1,n_k))
              end if
 
@@ -1905,20 +1908,20 @@ end if ! .not qq_is_gamma.
    sigce0_nk =  sigce0_nk * (one / (cryst%ucvol * pp_mesh%nbz))
 
    if (gqk%comm%me == master) then
-     !write(ab_out, "(a)") " Sigma^x_nk and Sigma^c_nk(E0) in eV:"
-     !do ik_glob=1, gqk%glob_nk
-     !  ik_bz = gstore%kglob2bz(ik_glob, spin)
-     !  ik_ibz = gstore%kbz2ibz(1, ik_bz)
-     !  write(ab_out, "(2a)") "Band     E0    <VxcDFT>   SigX SigC(E0)  for k-point:", trim(ktoa(gstore%kbz(:, ik_bz)))
-     !  do band=gqk%bstart_k, gqk%bstop_k
-     !    in_k = band - gqk%bstart_k + 1
-     !    write(ab_out, "(i5, 4(f8.3))") &
-     !      band,  ebands%eig(band, ik_ibz, spin) * Ha_eV, &
-     !      vxc_nk(in_k, ik_glob) * Ha_eV,  &
-     !      real(sigx_nk(in_k, ik_glob)) * Ha_eV, &
-     !      real(sigce0_nk(in_k, ik_glob)) * Ha_eV
-     !  end do
-     !end do
+     write(ab_out, "(a)") " Sigma^x_nk and Sigma^c_nk(E0) in eV:"
+     do ik_glob=1, gqk%glob_nk
+       ik_bz = gstore%kglob2bz(ik_glob, spin)
+       ik_ibz = gstore%kbz2ibz(1, ik_bz)
+       write(ab_out, "(2a)") "Band     E0    <VxcDFT>   SigX SigC(E0)  for k-point:", trim(ktoa(gstore%kbz(:, ik_bz)))
+       do band=gqk%bstart_k, gqk%bstop_k
+         in_k = band - gqk%bstart_k + 1
+         write(ab_out, "(i5, 4(f8.3))") &
+           band,  ebands%eig(band, ik_ibz, spin) * Ha_eV, &
+           vxc_nk(in_k, ik_glob) * Ha_eV,  &
+           real(sigx_nk(in_k, ik_glob)) * Ha_eV, &
+           real(sigce0_nk(in_k, ik_glob)) * Ha_eV
+       end do
+     end do
    end if
    ABI_SFREE(vxc_nk)
    ABI_SFREE(sigx_nk)
