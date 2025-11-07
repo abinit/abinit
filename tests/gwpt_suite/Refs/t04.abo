@@ -397,6 +397,22 @@ force_plsmf:   0.00000000E+00
 ...
 
  Only q-points in the IBZ_k will be computed.
+
+ Sigma^x_nk and Sigma^c_nk(E0) in eV:
+Band     E0    <VxcDFT>   SigX SigC(E0)  for k-point:[ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+    2  10.221 -16.927 -19.764   4.004
+    3  10.221 -16.930 -19.764   4.006
+    4  10.221 -16.927 -19.764   4.006
+    5  15.832 -15.625  -7.951  -4.397
+    6  15.832 -15.623  -7.951  -4.389
+    7  15.832 -15.624  -7.951  -4.387
+Band     E0    <VxcDFT>   SigX SigC(E0)  for k-point:[ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+    2  -2.521 -15.646 -21.842   6.109
+    3   3.934 -15.890 -19.769   4.667
+    4   3.934 -15.893 -19.769   4.680
+    5  15.036 -13.573  -6.886  -4.616
+    6  15.036 -13.573  -6.886  -4.620
+    7  26.960 -17.095  -6.633  -6.456
  Total number of failures in Sternheimer solvers at +q: 48
  Total number of failures in Sternheimer solvers at -q: 36
 
@@ -408,30 +424,6 @@ force_plsmf:   0.00000000E+00
  bstart_kq: 1
  glob_nq: 8
  glob_nk: 2
-
- Group velocities |v_nk| in atomic units:
- For k-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] , spin 1
- ib_k: 1     1.025821E-08
- ib_k: 2     9.243747E-09
- ib_k: 3     1.457342E-08
- ib_k: 4     1.353230E-08
- ib_k: 5     6.874496E-09
- ib_k: 6     1.317465E-08
- For k-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] , spin 1
- ib_k: 1     0.000000E+00
- ib_k: 2     0.000000E+00
- ib_k: 3     0.000000E+00
- ib_k: 4     0.000000E+00
- ib_k: 5     0.000000E+00
- ib_k: 6     0.000000E+00
- For k-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] , spin 1
- ib_k: 1     1.144335E-08
- ib_k: 2     1.644222E-08
- ib_k: 3     1.036342E-08
- ib_k: 4     1.225403E-08
- ib_k: 5     1.102609E-08
- ib_k: 6     2.044282E-08
-
  E-PH matrix elements in the atom representation: pcase = (idir, iatom)
  NB: Values are averaged over e_mk+q, and e_nk degenerate states.
     iq    ik pcase  m_kq   n_k     |g^SE| in Ha    |g^KS| in Ha

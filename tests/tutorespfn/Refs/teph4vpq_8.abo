@@ -399,17 +399,6 @@ P Number of CPUs for parallelism over k-points: 1
  bstart_kq: 6
  glob_nq: 597
  glob_nk: 89
-
- Group velocities |v_nk| in atomic units:
- For k-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] , spin 1
- ib_k: 1     7.519421E-09
- For k-point: [ 7.6923E-02,  0.0000E+00,  0.0000E+00] , spin 1
- ib_k: 1     3.393995E-01
- For k-point: [-3.0769E-01,  4.6154E-01,  1.5385E-01] , spin 1
- ib_k: 1     0.000000E+00
- For k-point: [-3.0769E-01,  4.6154E-01,  2.3077E-01] , spin 1
- ib_k: 1     0.000000E+00
-
  E-PH matrix elements in the atom representation: pcase = (idir, iatom)
  NB: Values are NOT averaged over e_mk+q, and e_nk degenerate states.
     iq    ik pcase  m_kq   n_k        |g| in Ha
