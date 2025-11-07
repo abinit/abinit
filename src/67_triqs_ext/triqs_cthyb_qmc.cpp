@@ -24,7 +24,7 @@ ATOM_DIAG_T::scalar_t trace_rho_op_paral(ATOM_DIAG_T::block_matrix_t const &dens
                                          int rank, int nproc);
 
 void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_double, bool measure_density_matrix,
-                     bool time_invariance, bool use_norm_as_weight, int integral, int loc_n_min, int loc_n_max,
+                     bool time_invariance, bool use_norm_as_weight, bool debug, int integral, int loc_n_min, int loc_n_max,
                      int seed_a, int seed_b, int num_orbitals, int n_tau, int n_l, int n_cycles, int cycle_length,
                      int ntherm, int ntherm_restart, int det_init_size, int det_n_operations_before_check, int rank,
                      int nblocks, int read_data, int verbo, double beta, double imag_threshold, double det_precision_warning,
@@ -218,7 +218,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
   paramCTQMC.measure_G_l = leg_measure;
   paramCTQMC.n_warmup_cycles = therm;
 
-  if (integral > 0) {
+  if (integral > 0 && !debug) {
     paramCTQMC.measure_G_l = false;
     paramCTQMC.measure_G_tau = false;
   }
@@ -320,7 +320,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
   }
 #endif
 
-  if (integral == 0) {
+  if (integral == 0 || debug) {
 
     for (int iblock : range(nblocks))
       for (int tau : range(n_tau))
@@ -353,7 +353,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
     auto subspaces = h_loc_diag.n_subspaces();
     auto rho = solver.density_matrix();
 
-    if (integral != 1) {
+    if (integral != 1 || debug) {
 
       for (int iblock : range(nblocks))
         for (int o : range(siz_list[iblock])) {
@@ -363,7 +363,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
         }
     }
 
-    if (rank == 0 && integral == 0) {
+    if (rank == 0 && (integral == 0 || debug)) {
 
       ofstream occ_file;
       occ_file.open(hist_fname);
@@ -416,7 +416,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
 
     *eu = trace_rho_op_paral(rho,Hint,h_loc_diag,rank,nproc);
 
-    if (!leg_measure && integral == 0) { // Get moments of the self-energy
+    if (!leg_measure && (integral == 0 || debug)) { // Get moments of the self-energy
 
       many_body_operator commut,commut2,Sinf_op,S1_op;
 

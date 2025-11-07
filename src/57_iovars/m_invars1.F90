@@ -2348,6 +2348,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_tollc=tol5
    dtsets(idtset)%dmft_triqs_basis=-1
    dtsets(idtset)%dmft_triqs_compute_integral=2
+   dtsets(idtset)%dmft_triqs_debug=0
    dtsets(idtset)%dmft_triqs_det_init_size=100
    dtsets(idtset)%dmft_triqs_det_n_operations_before_check=10000
    dtsets(idtset)%dmft_triqs_det_precision_error=1.0d-5

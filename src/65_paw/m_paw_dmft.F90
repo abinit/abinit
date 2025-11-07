@@ -421,6 +421,9 @@ MODULE m_paw_dmft
   integer :: use_sc_dmft
   ! 1 for charge-self consistent calculations
 
+  logical :: dmft_triqs_debug
+  ! TRIQS CTQMC: Flag to activate debug for entropy calculation
+
   logical :: dmft_triqs_leg_measure
   ! TRIQS CTQMC: Flag to activate Legendre measurement
 
@@ -1166,6 +1169,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_triqs_read_ctqmcdata                = dtset%dmft_triqs_read_ctqmcdata
  paw_dmft%dmft_triqs_pauli_prob                    = dtset%dmft_triqs_pauli_prob
  paw_dmft%dmft_triqs_n_cycles                      = dtset%dmft_triqs_n_cycles
+ paw_dmft%dmft_triqs_debug                         = (dtset%dmft_triqs_debug == 1)
 
 !==============================
 !==  Variables for DMFT itself
