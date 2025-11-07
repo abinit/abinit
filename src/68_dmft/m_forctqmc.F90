@@ -3185,7 +3185,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  integer :: itau,itypat,iw,l,len_t,lpawu,myproc,natom,ncon,ndim,nflavor,nflavor_max,ngauss,nleg,nmoments
  integer :: nspinor,nsppol,nsub,ntau,ntot,nwlo,p,pad_elam,pad_lambda,read_data,rot_type_vee,tndim,unt,verbo,wdlr_size
  integer, target :: ndlr
- logical :: density_matrix,entropy,leg_measure,lexist,nondiag,off_diag,rot_inv
+ logical :: debug,density_matrix,entropy,leg_measure,lexist,nondiag,off_diag,rot_inv
  real(dp) :: besp,bespp,beta,dx,elam,emig_tot,err,err_,fact,fact2,tau,tol,xtau,xx
  complex(dp) :: mself_1,mself_2,occ_tmp,u_nl
  complex(dp), target :: eu
@@ -3216,6 +3216,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
  basis          = paw_dmft%dmftctqmc_basis
  beta           = one / paw_dmft%temp
+ debug          = paw_dmft%dmft_triqs_debug
  density_matrix = paw_dmft%dmft_triqs_measure_density_matrix
  entropy        = (paw_dmft%dmft_triqs_entropy == 1)
  integral       = paw_dmft%dmft_triqs_compute_integral
@@ -3802,7 +3803,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
      len_t = len(trim(adjustl(fname_dataw))) + 1
      fname_dataw(len_t:len_t) = c_null_char
 
-     fname_histo = trim(adjustl(paw_dmft%filapp)) // "_CTQMC_HISTOGRAM_iatom" // tag_at // ".dat"
+     fname_histo = trim(adjustl(paw_dmft%filapp)) // "_CTQMC_HISTOGRAM_iatom" // tag_at // trim(adjustl(tag_lam2)) // ".dat"
      len_t = len(trim(adjustl(fname_histo))) + 1
      fname_histo(len_t:len_t) = c_null_char
 
@@ -3811,7 +3812,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 #if defined HAVE_TRIQS_v4_0 || defined HAVE_TRIQS_v3_2
      call Ctqmc_triqs_run(rot_inv,leg_measure,paw_dmft%dmft_triqs_move_shift,paw_dmft%dmft_triqs_move_double, &
                         & density_matrix,paw_dmft%dmft_triqs_time_invariance,paw_dmft%dmft_triqs_use_norm_as_weight, &
-                        & merge(integral,0,ilam/=ntot),paw_dmft%dmft_triqs_loc_n_min,paw_dmft%dmft_triqs_loc_n_max, &
+                        & debug,merge(integral,0,ilam/=ntot),paw_dmft%dmft_triqs_loc_n_min,paw_dmft%dmft_triqs_loc_n_max, &
                         & paw_dmft%dmft_triqs_seed_a,paw_dmft%dmft_triqs_seed_b,nflavor,ntau,nleg, &
                         & paw_dmft%dmft_triqs_n_cycles,paw_dmft%dmftctqmc_meas,paw_dmft%dmftqmc_therm, &
                         & paw_dmft%dmft_triqs_therm_restart,paw_dmft%dmft_triqs_det_init_size, &
@@ -3824,7 +3825,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
      call flush_unit(std_out)
 
-     if (ilam == ntot) then
+     if (ilam == ntot .or. debug) then
 
        do isppol=1,nsppol
          if (nsppol == 1 .and. nspinor == 1) then
@@ -3833,6 +3834,14 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
            green%oper_tau(1)%matlu(iatom)%mat(:,:,isppol) = gtau(1,1+(isppol-1)*ndim:tndim+(isppol-1)*ndim,1+(isppol-1)*ndim:tndim+(isppol-1)*ndim)
          end if
        end do ! isppol
+
+       if (ilam < ntot) then
+         call occup_green_tau(green)
+
+         write(message,'(a,3x,a)') ch10,"== Print Occupation matrix in CTQMC basis"
+         call wrtout(std_out,message,"COLL")
+         call print_matlu(green%occup_tau%matlu(:),natom,1)
+       end if
 
        if ((.not. leg_measure) .and. density_matrix) then
 
@@ -3952,7 +3961,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
          if (myproc == 0 .and. off_diag) then
 
-           if (open_file(trim(paw_dmft%filapp)//"_Gtau_offdiag_Leg_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+           if (open_file(trim(paw_dmft%filapp)//"_Gtau_offdiag_Leg_iatom"//tag_at//trim(adjustl(tag_lam2))//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
            write(unt,'(6a)') "# Off-diagonal components of Legendre-sampled G(tau) in the CTQMC basis",ch10, &
                            & "# Columns are ordered this way:",ch10, &
                            & "# Imaginary Time     ((Re(G_{ij}) Im(G_{ij}),i=1,2*(2*l+1)),j=1,2*(2*l+1)) where the", &
@@ -3967,7 +3976,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
          if (myproc == 0) then
 
-           if (open_file(trim(paw_dmft%filapp)//"_Gtau_diag_Leg_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+           if (open_file(trim(paw_dmft%filapp)//"_Gtau_diag_Leg_iatom"//tag_at//trim(adjustl(tag_lam2))//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
            write(unt,'(5a)') "# Diagonal components of Legendre-sampled G(tau) in the CTQMC basis",ch10, &
                            & "# Columns are ordered this way:",ch10, &
                            & "# Imaginary Time     (G_{ii},i=1,2*(2*l+1))"
@@ -4031,7 +4040,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
          if (myproc == 0 .and. off_diag) then
 
-           if (open_file(trim(paw_dmft%filapp)//"_Gtau_offdiag_DLR_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+           if (open_file(trim(paw_dmft%filapp)//"_Gtau_offdiag_DLR_iatom"//tag_at//trim(adjustl(tag_lam2))//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
            write(unt,'(6a)') "# Off-diagonal components of DLR fit of G(tau) in the CTQMC basis",ch10, &
                            & "# Columns are ordered this way:",ch10, &
                            & "# Imaginary Time     ((Re(G_{ij}) Im(G_{ij}),i=1,2*(2*l+1)),j=1,2*(2*l+1)) where the", &
@@ -4047,7 +4056,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
          if (myproc == 0) then
 
-           if (open_file(trim(paw_dmft%filapp)//"_Gtau_diag_DLR_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+           if (open_file(trim(paw_dmft%filapp)//"_Gtau_diag_DLR_iatom"//tag_at//trim(adjustl(tag_lam2))//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
            write(unt,'(5a)') "# Diagonal components of DLR fit of G(tau) in the CTQMC basis",ch10, &
                            & "# Columns are ordered this way:",ch10, &
                            & "# Imaginary Time     (G_{ii},i=1,2*(2*l+1))"
@@ -4069,7 +4078,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
        if (myproc == 0 .and. off_diag) then
 
-         if (open_file(trim(paw_dmft%filapp)//"_Gtau_offdiag_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+         if (open_file(trim(paw_dmft%filapp)//"_Gtau_offdiag_iatom"//tag_at//trim(adjustl(tag_lam2))//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
          write(unt,'(6a)') "# Off-diagonal components of binned G(tau) in the CTQMC basis",ch10, &
                          & "# Columns are ordered this way:",ch10, &
                          & "# Imaginary Time     ((Re(G_{ij}) Im(G_{ij}),i=1,2*(2*l+1)),j=1,2*(2*l+1)) where the", &
@@ -4085,7 +4094,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
        if (myproc == 0) then
 
-         if (open_file(trim(paw_dmft%filapp)//"_Gtau_diag_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+         if (open_file(trim(paw_dmft%filapp)//"_Gtau_diag_iatom"//tag_at//trim(adjustl(tag_lam2))//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
          write(unt,'(5a)') "# Diagonal components of binned G(tau) in the CTQMC basis",ch10, &
                          & "# Columns are ordered this way:",ch10, &
                          & "# Imaginary Time     (G_{ii},i=1,2*(2*l+1))"
@@ -4096,14 +4105,14 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
        end if ! myproc
 
-       if (entropy) then
+       if (entropy .and. (.not. debug)) then
 
          call compute_migdal_energy(emig(:),emig_tot,green,paw_dmft,hybmwdhyb,iatom=iatom)
          green%ekin_imp = green%ekin_imp + two*emig_tot
 
        end if ! entropy
 
-     end if ! ilam=ntot
+     end if ! ilam=ntot or debug
 
      if (integral > 0 .and. ilam < ntot .and. entropy) then
 

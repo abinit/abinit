@@ -2666,6 +2666,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      if(tread==1) dtset%dmft_triqs_basis=intarr(1)
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_compute_integral',tread,'INT')
      if(tread==1) dtset%dmft_triqs_compute_integral=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_debug',tread,'INT')
+     if(tread==1) dtset%dmft_triqs_debug=intarr(1)
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_det_init_size',tread,'INT')
      if(tread==1) dtset%dmft_triqs_det_init_size=intarr(1)
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_det_n_operations_before_check',tread,'INT')
