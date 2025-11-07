@@ -4837,7 +4837,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
 !scalars
  integer,parameter :: master = 0
  integer :: root_ncid, spin_ncid, gstore_completed, spin, ik_glob, iq_glob, ipc, ncerr, natom3
- integer :: glob_nq, glob_nk, im_kq, in_k, m_kq, n_k, nb_k, nb_kq, ib_k, ii
+ integer :: glob_nq, glob_nk, im_kq, in_k, m_kq, n_k, nb_k, nb_kq, ii ! ib_k,
  integer :: bstart_k, bstop_k, bstart_kq, bstop_kq, max_nk, max_nq
  integer :: ik_bz, ik_ibz, ib_min_k, ib_max_k, iq_bz, ikq_ibz, ib_min_kq, ib_max_kq
  logical :: with_ks__, changed_k, changed_kq
@@ -4908,6 +4908,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
      continue
 
    case (1)
+     continue
      !write(ab_out,"(2a)") ch10," Group velocities |v_nk| in atomic units:"
 
      !ABI_MALLOC(vnk_cart_ibz, (3, nb_k))
