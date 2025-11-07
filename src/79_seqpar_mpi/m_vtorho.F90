@@ -1416,7 +1416,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      ! Compute extfpmd energy shift
      if(associated(extfpmd)) then
        call extfpmd%compute_eshift(eigen,eknk,dtset%mband,dtset%nband,&
-         dtset%nfft,dtset%nkpt,dtset%nsppol,dtset%nspden,dtset%wtk,vtrial)
+         nfftf,dtset%nkpt,dtset%nsppol,dtset%nspden,dtset%wtk,vtrial)
      end if
 
      ! RCPAW
@@ -2038,7 +2038,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !    Compute extended plane waves contributions
      if(associated(extfpmd)) then
        call extfpmd%compute_eshift(eigen,eknk,dtset%mband,dtset%nband,&
-         dtset%nfft,dtset%nkpt,dtset%nsppol,dtset%nspden,dtset%wtk,vtrial)
+         nfftf,dtset%nkpt,dtset%nsppol,dtset%nspden,dtset%wtk,vtrial)
        extfpmd%nelect=zero
        call extfpmd%compute_nelect(energies%e_fermie,dtset%nband,extfpmd%nelect,dtset%nkpt,&
          dtset%nspinor,dtset%nsppol,dtset%wtk)
