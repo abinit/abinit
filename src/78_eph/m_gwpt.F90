@@ -216,7 +216,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: ib_sum, ii, u1_band !,u1c_ib_k,  jj, iw !ib_kq, band_ks, ib_k, ibsum_kq, u1_master, ip
  integer :: my_is, spin, idir,ipert, ig, max_npw_xc, min_npw_xc, npw_x, npw_c, nw_nk, nw_mkq
  integer :: isym_q, trev_q, ip_ibz
- integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_k_ibz, istwf_k_ibz, ik_glob !, ik_bz
+ integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_k_ibz, istwf_k_ibz, ik_glob, ik_bz
  integer :: ikq_ibz, isym_kq, trev_kq, npw_kq, istwf_kq,  npw_kq_ibz, istwf_kq_ibz
  integer :: ikmp_ibz, isym_kmp, trev_kmp, npw_kmp, istwf_kmp
  integer :: ikqmp_ibz, isym_kqmp, trev_kqmp, npw_kqmp, istwf_kqmp, npw_kqmp_ibz, istwf_kqmp_ibz, mpw,ierr,nqbz,ncerr !,spad
@@ -325,7 +325,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  gstore_filepath = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
 
  !gstore_filepath = dtfil%filgstorein
- restart = 0
  call gstore_check_restart(gstore_filepath, dtset, nqbz, done_qbz_spin, restart, comm)
 
  if (restart == 0) then
@@ -969,7 +968,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      if (print_time_qq) then
        call cwtime(cpu_qq, wall_qq, gflops_qq, "start")
        call inds2str(0, sjoin(" Computing g^Sigma(k, q) for qq_bz:", qq_bz_string), my_iq, gqk%my_nq, gqk%glob_nq, msg)
-       call wrtout(std_out, sjoin(msg, ", for spin:", itoa(spin)), pre_newlines=1)
+       call wrtout(std_out, sjoin(msg, ", and spin:", itoa(spin)), pre_newlines=1)
        !print *, "iq_ibz:", iq_ibz, "qq_bz:", qq_bz, "qq_ibz:", qq_ibz
      end if
 
@@ -1871,6 +1870,7 @@ end if ! .not qq_is_gamma.
    ABI_SFREE(vec_coh_nk)
    ABI_SFREE(vec_coh_mkq)
 
+   ! Collect self-energy matrix elements.
    call xmpi_sum(vxc_nk, gqk%kpt_comm%value, ierr)
    call xmpi_sum(sigx_nk, gqk%comm%value, ierr)
    call xmpi_sum(sigce0_nk, gqk%comm%value, ierr)
@@ -1878,20 +1878,20 @@ end if ! .not qq_is_gamma.
    sigce0_nk =  sigce0_nk * (one / (cryst%ucvol * pp_mesh%nbz))
 
    if (gqk%comm%me == master) then
-     !write(ab_out, "(a)") " Sigma^x_nk and Sigma^c_nk(E0) in eV:"
-     !do ik_glob=1, gqk%glob_nk
-     !  ik_bz = gstore%kglob2bz(ik_glob, spin)
-     !  ik_ibz = gstore%kbz2ibz(1, ik_bz)
-     !  write(ab_out, "(2a)") "Band     E0    <VxcDFT>   SigX SigC(E0)  for k-point:", trim(ktoa(gstore%kbz(:, ik_bz)))
-     !  do band=gqk%bstart_k, gqk%bstop_k
-     !    in_k = band - gqk%bstart_k + 1
-     !    write(ab_out, "(i5, 4(f8.3))") &
-     !      band,  ebands%eig(band, ik_ibz, spin) * Ha_eV, &
-     !      vxc_nk(in_k, ik_glob) * Ha_eV,  &
-     !      real(sigx_nk(in_k, ik_glob)) * Ha_eV, &
-     !      real(sigce0_nk(in_k, ik_glob)) * Ha_eV
-     !  end do
-     !end do
+     write(ab_out, "(2a)") ch10, " Sigma^x_nk and Sigma^c_nk(E0) in eV:"
+     do ik_glob=1, gqk%glob_nk
+       ik_bz = gstore%kglob2bz(ik_glob, spin)
+       ik_ibz = gstore%kbz2ibz(1, ik_bz)
+       write(ab_out, "(2a)") "Band     E0    <VxcDFT>   SigX SigC(E0)  for k-point:", trim(ktoa(gstore%kbz(:, ik_bz)))
+       do band=gqk%bstart_k, gqk%bstop_k
+         in_k = band - gqk%bstart_k + 1
+         write(ab_out, "(i5, 4(f8.3))") &
+           band,  ebands%eig(band, ik_ibz, spin) * Ha_eV, &
+           vxc_nk(in_k, ik_glob) * Ha_eV,  &
+           real(sigx_nk(in_k, ik_glob)) * Ha_eV, &
+           real(sigce0_nk(in_k, ik_glob)) * Ha_eV
+       end do
+     end do
    end if
    ABI_SFREE(vxc_nk)
    ABI_SFREE(sigx_nk)

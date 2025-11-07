@@ -4842,7 +4842,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
  integer :: ik_bz, ik_ibz, ib_min_k, ib_max_k, iq_bz, ikq_ibz, ib_min_kq, ib_max_kq
  logical :: with_ks__, changed_k, changed_kq
  real(dp),parameter :: TOL_EDIFF = 0.001_dp * eV_Ha
- real(dp) :: g2, g2_ks, vnk
+ real(dp) :: g2, g2_ks !, vnk
  character(len=abi_slen) :: gstore_gmode
  character(len=500) :: msg
 !arrays
@@ -4850,7 +4850,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
  integer,allocatable :: done_qbz_spin(:,:), qglob2bz(:,:), degblock_k(:,:), degblock_kq(:,:)
  real(dp) :: kk(3), qq(3), kq(3)
  real(dp),allocatable :: gslice_mn(:,:,:), gslice_ks_mn(:,:,:), g2_mn(:,:), g2ks_mn(:,:)
- real(dp),allocatable :: vnk_cart_ibz(:,:) !, vnk_mat_cart_ibz(:,:,:,:)
+ !real(dp),allocatable :: vnk_cart_ibz(:,:) !, vnk_mat_cart_ibz(:,:,:,:)
 ! *************************************************************************
 
  ! Only master prints to ab_out
@@ -4908,22 +4908,22 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
      continue
 
    case (1)
-     write(ab_out,"(2a)") ch10," Group velocities |v_nk| in atomic units:"
+     !write(ab_out,"(2a)") ch10," Group velocities |v_nk| in atomic units:"
 
-     ABI_MALLOC(vnk_cart_ibz, (3, nb_k))
-     do ik_ibz=1,gstore%nkibz
-       ! Only a subset of k-points are written to ab_out.
-       if (all(ik_ibz /= [1, 2, gstore%nkibz - 1, gstore%nkibz])) cycle
-       NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("vk_cart_ibz"), vnk_cart_ibz, start=[1,1,ik_ibz], count=[3,nb_k,1]))
+     !ABI_MALLOC(vnk_cart_ibz, (3, nb_k))
+     !do ik_ibz=1,gstore%nkibz
+     !  ! Only a subset of k-points are written to ab_out.
+     !  if (all(ik_ibz /= [1, 2, gstore%nkibz - 1, gstore%nkibz])) cycle
+     !  NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("vk_cart_ibz"), vnk_cart_ibz, start=[1,1,ik_ibz], count=[3,nb_k,1]))
 
-       write(ab_out, "(a)")sjoin(" For k-point:", ktoa(gstore%kibz(:,ik_ibz)), ", spin", itoa(spin))
-       do ib_k=1,min(nb_k, 10)
-         vnk = sqrt(norm2(vnk_cart_ibz(:,ib_k)))
-         write(ab_out, "(a,i0,1x,es16.6)")" ib_k: ", ib_k, vnk
-       end do
-     end do
-     ABI_FREE(vnk_cart_ibz)
-     write(ab_out, "(a)")" "
+     !  write(ab_out, "(a)")sjoin(" For k-point:", ktoa(gstore%kibz(:,ik_ibz)), ", spin", itoa(spin))
+     !  do ib_k=1,min(nb_k, 10)
+     !    vnk = sqrt(norm2(vnk_cart_ibz(:,ib_k)))
+     !    write(ab_out, "(a,i0,1x,es16.6)")" ib_k: ", ib_k, vnk
+     !  end do
+     !end do
+     !ABI_FREE(vnk_cart_ibz)
+     !write(ab_out, "(a)")" "
 
    case (2)
      ABI_ERROR(" TEXT output of vkmat is not coded yet!")
@@ -5698,7 +5698,7 @@ subroutine gstore_compute_and_write_ph(gstore, root_ncid)
  nproc = xmpi_comm_size(gstore%comm)
  natom = gstore%cryst%natom; natom3 = 3 * natom
 
- call wrtout(std_out, " Computing phonon frequencies and displacements in the IBZ ...", pre_newlines=1)
+ call wrtout(std_out, " Computing phonon frequencies and displacements in the IBZ ...", pre_newlines=1, do_flush=.True.)
  call cwtime(cpu, wall, gflops, "start")
 
  call xmpi_split_block(gstore%nqibz, gstore%comm, my_nqibz, my_iqibz_inds)
@@ -5723,7 +5723,8 @@ subroutine gstore_compute_and_write_ph(gstore, root_ncid)
 
  if (my_nqibz > 0) then
    iq_start = my_iqibz_inds(1)
-   ncerr = nf90_put_var(root_ncid, root_vid("phfreqs_ibz"), buf_wqnu, start=[1, iq_start], count=[natom3, my_nqibz])
+   ncerr = nf90_put_var(root_ncid, root_vid("phfreqs_ibz"), buf_wqnu, &
+                        start=[1, iq_start], count=[natom3, my_nqibz])
    NCF_CHECK(ncerr)
    ncerr = nf90_put_var(root_ncid, root_vid("pheigvec_cart_ibz"), buf_eigvec_cart, &
                         start=[1,1,1,1,iq_start], count=[2, 3, natom, natom3, my_nqibz])
