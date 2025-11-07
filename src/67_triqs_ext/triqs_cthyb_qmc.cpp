@@ -353,15 +353,12 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
     auto subspaces = h_loc_diag.n_subspaces();
     auto rho = solver.density_matrix();
 
-    if (integral != 1 || debug) {
-
-      for (int iblock : range(nblocks))
-        for (int o : range(siz_list[iblock])) {
-          iflavor = flavor_list[o+iblock*num_orbitals];
-          n_op = c_dag(to_string(iblock),o) * c(to_string(iblock),o);
-          occ[iflavor] = trace_rho_op_paral(rho,n_op,h_loc_diag,rank,nproc);
-        }
-    }
+    for (int iblock : range(nblocks))
+      for (int o : range(siz_list[iblock])) {
+        iflavor = flavor_list[o+iblock*num_orbitals];
+        n_op = c_dag(to_string(iblock),o) * c(to_string(iblock),o);
+        occ[iflavor] = trace_rho_op_paral(rho,n_op,h_loc_diag,rank,nproc);
+      }
 
     if (rank == 0 && (integral == 0 || debug)) {
 

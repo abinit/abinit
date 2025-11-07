@@ -1201,7 +1201,7 @@ subroutine compute_free_energy(energies_dmft,paw_dmft,green,part,self)
    ! Ekin_imp
    energies_dmft%ekin_imp = green%ekin_imp
 
-   if (integral > 0) then
+   if (integral == 1) then
      energies_dmft%fband_weiss = green%fband_weiss
      energies_dmft%fimp = energies_dmft%fband_weiss + green%integral
    else
@@ -1260,8 +1260,6 @@ end subroutine compute_free_energy
 !!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
 !!  opt_inv = 0 (default) when green = G
 !!          = 1 when green = G^-1 (useful for the Weiss field)
-!!          = 2 when green = G^-1 and you want to remove the double counting
-!!  opt_hdc = double counting
 !!
 !! OUTPUT
 !!  trace = Tr(log(G_loc))
@@ -1270,16 +1268,15 @@ end subroutine compute_free_energy
 !!
 !! SOURCE
 
-subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv,opt_hdc)
+subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
 
 !Arguments ------------------------------------
  type(green_type), target, intent(in) :: green
  type(paw_dmft_type), intent(in) :: paw_dmft
  real(dp), intent(out) :: trace
  integer, optional, intent(in) :: opt_inv
- type(oper_type), optional, intent(in) :: opt_hdc
 !Local variables-------------------------------
- integer :: i,iatom,ierr,ifreq,info,isppol,lpawu,lwork,natom,ndim
+ integer :: i,iatom,ierr,ifreq,im,info,isppol,lpawu,lwork,natom,ndim
  integer :: nmoments,nspinor,nsppol,nwlo,optinv
  real(dp) :: correction,fac,freq2,temp
  complex(dp) :: trace_tmp
@@ -1323,11 +1320,14 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv,opt_hdc)
      ABI_MALLOC(mat_temp,(ndim,ndim))
      do isppol=1,nsppol
 
-       if (optinv <= 1) then
+       if (optinv == 0) then
          mat_pt => green%oper(ifreq)%matlu(iatom)%mat(:,:,isppol)
-       else if (optinv == 2) then
+       else if (optinv == 1) then
          ABI_MALLOC(mat_temp2,(ndim,ndim))
-         mat_temp2(:,:) = green%oper(ifreq)%matlu(iatom)%mat(:,:,isppol) - opt_hdc%matlu(iatom)%mat(:,:,isppol)
+         mat_temp2(:,:) = green%oper(ifreq)%matlu(iatom)%mat(:,:,isppol)
+         do im=1,ndim
+           mat_temp2(im,im) = mat_temp2(im,im) - paw_dmft%dmft_triqs_shift_level
+         end do ! im
          mat_pt => mat_temp2(:,:)
        end if
 
@@ -1335,7 +1335,7 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv,opt_hdc)
                     & czero,mat_temp(:,:),ndim)
        call zheev('n','u',ndim,mat_temp(:,:),ndim,eig(:),work(:),lwork,rwork(1:3*ndim-2),info)
 
-       if (optinv > 0) then
+       if (optinv == 1) then
          trace_tmp = trace_tmp - sum(log(eig(1:ndim)/freq2))
        else
          trace_tmp = trace_tmp + sum(log(eig(1:ndim)*freq2))
