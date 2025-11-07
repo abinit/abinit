@@ -407,8 +407,10 @@ contains
     if(this%version==10) then
       ABI_MALLOC(gamma_hybrid_tf,(this%nfftf,this%nspden))
       ABI_MALLOC(xcut_hybrid_tf,(this%nfftf,this%nspden))
-      if(.not.allocated(this%nelectarr)) ABI_MALLOC(this%nelectarr,(this%nfftf,this%nspden))
-      this%nelectarr(:,:)=zero
+      if(.not.allocated(this%nelectarr)) then
+        ABI_MALLOC(this%nelectarr,(this%nfftf,this%nspden))
+        this%nelectarr(:,:)=zero
+      end if
       gamma_hybrid_tf(:,:)=(fermie-this%vtrial(:,:))/this%el_temp
       xcut_hybrid_tf(:,:)=(this%ebcut-this%vtrial(:,:))/this%el_temp
       if(ANY(this%ebcut.lt.this%vtrial(:,:))) xcut_hybrid_tf(:,:)=zero
