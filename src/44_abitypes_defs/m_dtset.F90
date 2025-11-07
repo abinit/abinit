@@ -585,6 +585,8 @@ type, public :: dataset_type
  integer :: positron
  integer :: posnstep
  integer :: ppmodel = 1
+ integer :: precon_ls_maxite = 20
+ real(dp) :: precon_ls_rtol = tol6
  integer :: prepalw
  integer :: prepanl
  integer :: prepgkk = 0
@@ -2151,6 +2153,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%positron           = dtin%positron
  dtout%posnstep           = dtin%posnstep
  dtout%ppmodel            = dtin%ppmodel
+ dtout%precon_ls_maxite   = dtin%precon_ls_maxite
+ dtout%precon_ls_rtol     = dtin%precon_ls_rtol
  dtout%prepalw            = dtin%prepalw
  dtout%prepanl            = dtin%prepanl
  dtout%prepgkk            = dtin%prepgkk
@@ -3939,6 +3943,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' plowan_natom plowan_nbl plowan_nt plowan_projcalc plowan_realspace'
  list_vars=trim(list_vars)//' polcen posdoppler positron posnstep posocc postoldfe postoldff'
  list_vars=trim(list_vars)//' ppmfrq ppmodel pp_dirpath'
+ list_vars=trim(list_vars)//' precon_ls_maxite precon_ls_rtol'
  list_vars=trim(list_vars)//' prepalw prepanl prepgkk'
  list_vars=trim(list_vars)//' printfiles prtatlist prtbbb prtbltztrp prtchkprdm prtcif prtcurrent prtddb prtden'
  list_vars=trim(list_vars)//' prt1mag prtdensph prtdipole prtdos prtdosm'
