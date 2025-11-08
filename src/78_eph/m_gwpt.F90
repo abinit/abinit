@@ -1628,15 +1628,15 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
                  if (dtset%userie < 0) then
                     if (pp_is_gamma) then
-                      gsig_atm(1, m_kq, n_k, ipc) = gsig_atm(1, m_kq, n_k, ipc)
-                      gsig_atm(2, m_kq, n_k, ipc) = gsig_atm(2, m_kq, n_k, ipc)
+                      gsig_atm(1, im_kq, in_k, ipc) = gsig_atm(1, im_kq, in_k, ipc)
+                      gsig_atm(2, im_kq, in_k, ipc) = gsig_atm(2, im_kq, in_k, ipc)
                     else
-                      gsig_atm(1, m_kq, n_k, ipc) = gsig_atm(1, m_kq, n_k, ipc) + real(ctmp_gwpc)
-                      gsig_atm(2, m_kq, n_k, ipc) = gsig_atm(2, m_kq, n_k, ipc) + aimag(ctmp_gwpc)
+                      gsig_atm(1, im_kq, in_k, ipc) = gsig_atm(1, im_kq, in_k, ipc) + real(ctmp_gwpc)
+                      gsig_atm(2, im_kq, in_k, ipc) = gsig_atm(2, im_kq, in_k, ipc) + aimag(ctmp_gwpc)
                     end if
                  else
-                   gsig_atm(1, m_kq, n_k, ipc) = gsig_atm(1, m_kq, n_k, ipc) + real(ctmp_gwpc)
-                   gsig_atm(2, m_kq, n_k, ipc) = gsig_atm(2, m_kq, n_k, ipc) + aimag(ctmp_gwpc)
+                   gsig_atm(1, im_kq, in_k, ipc) = gsig_atm(1, im_kq, in_k, ipc) + real(ctmp_gwpc)
+                   gsig_atm(2, im_kq, in_k, ipc) = gsig_atm(2, im_kq, in_k, ipc) + aimag(ctmp_gwpc)
                  end if
 
                  ! DEBUG
@@ -1764,15 +1764,15 @@ if (.not. qq_is_gamma) then
 
                  if (dtset%userie < 0) then
                     if (pp_is_gamma) then
-                      gsig_atm(1, m_kq, n_k, ipc) = gsig_atm(1, m_kq, n_k, ipc)
-                      gsig_atm(2, m_kq, n_k, ipc) = gsig_atm(2, m_kq, n_k, ipc)
+                      gsig_atm(1, im_kq, in_k, ipc) = gsig_atm(1, im_kq, in_k, ipc)
+                      gsig_atm(2, im_kq, in_k, ipc) = gsig_atm(2, im_kq, in_k, ipc)
                     else
-                      gsig_atm(1, m_kq, n_k, ipc) = gsig_atm(1, m_kq, n_k, ipc) + real(ctmp_gwpc)
-                      gsig_atm(2, m_kq, n_k, ipc) = gsig_atm(2, m_kq, n_k, ipc) + aimag(ctmp_gwpc)
+                      gsig_atm(1, im_kq, in_k, ipc) = gsig_atm(1, im_kq, in_k, ipc) + real(ctmp_gwpc)
+                      gsig_atm(2, im_kq, in_k, ipc) = gsig_atm(2, im_kq, in_k, ipc) + aimag(ctmp_gwpc)
                     end if
                  else
-                   gsig_atm(1, m_kq, n_k, ipc) = gsig_atm(1, m_kq, n_k, ipc) + real(ctmp_gwpc)
-                   gsig_atm(2, m_kq, n_k, ipc) = gsig_atm(2, m_kq, n_k, ipc) + aimag(ctmp_gwpc)
+                   gsig_atm(1, im_kq, in_k, ipc) = gsig_atm(1, im_kq, in_k, ipc) + real(ctmp_gwpc)
+                   gsig_atm(2, im_kq, in_k, ipc) = gsig_atm(2, im_kq, in_k, ipc) + aimag(ctmp_gwpc)
                  end if
 
                  ! DEBUG
