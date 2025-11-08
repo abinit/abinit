@@ -162,29 +162,47 @@ AC_DEFUN([_ABI_FC_CHECK_IBM],[
 # If yes, tries to determine its version number and sets the abi_fc_vendor
 # and abi_fc_version variables accordingly.
 #
-AC_DEFUN([_ABI_FC_CHECK_INTEL],[
+AC_DEFUN([_ABI_FC_CHECK_INTEL], [
   # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
-  dnl AC_MSG_CHECKING([if we are using the Intel Fortran compiler])
-  fc_info_string=`$1 -V 2>&1 | head -n 1`
-  abi_result=`echo "${fc_info_string}" | grep '^Intel(R) Fortran'`
-  if test "${abi_result}" = ""; then
+  AC_MSG_CHECKING([if we are using the Intel Fortran compiler])
+
+  fc_command="$1"
+  fc_output=`$fc_command -V 2>&1 | head -n 1`
+  intel_check=`echo "${fc_output}" | grep '^Intel(R) Fortran'`
+  # If using mpiifx, it may crash with "usage: mpiifort"
+  #
+  if test "${intel_check}" = ""; then
+    fc_output=`$fc_command -V 2>&1`
+    usage_line=`echo "${fc_output}" | grep '^usage:'`
+    if test "${usage_line}" != ""; then
+      fallback_fc=`echo "${usage_line}" | cut -d " " -f 2`
+      if command -v "${fallback_fc}" >/dev/null 2>&1; then
+        fc_output=`${fallback_fc} -V 2>&1 | head -n 1`
+        intel_check=`echo "${fc_output}" | grep '^Intel(R) Fortran'`
+        fc_command="${fallback_fc}"
+      fi
+    fi
+  fi
+
+  if test "${intel_check}" = ""; then
     abi_result="no"
-    fc_info_string=""
+    fc_output=""
     abi_fc_vendor="unknown"
     abi_fc_version="unknown"
   else
-    AC_DEFINE([FC_INTEL],1,
+    AC_DEFINE([FC_INTEL], 1,
       [Define to 1 if you are using the Intel Fortran compiler.])
     abi_fc_vendor="intel"
-    abi_fc_version=`echo "${fc_info_string}" | sed -e 's/.*Version //;s/ .*//'`
+    abi_fc_version=`echo "${fc_output}" | sed -e 's/.*Version //;s/ .*//'`
     if test "${abi_fc_version}" = ""; then
       abi_fc_version="unknown"
     fi
     abi_result="yes"
   fi
-  dnl AC_MSG_RESULT(${abi_result})
+
+  AC_MSG_RESULT([${abi_result}])
 ]) # _ABI_FC_CHECK_INTEL
 
 
