@@ -32,6 +32,7 @@
  # TODO: elph2_imagden Should have a default value
  elph2_imagden 0.1 eV
  zcut 0.01 eV
+ #gw_icutcoul 16      # Monte-carlo integration
 
  # Specify ppmodel used to evalue convolution between G and W.
  # MG: TODO: ppmodel 2 leads to a SIGFPE on eos_gnu_13.2_mpich
