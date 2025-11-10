@@ -162,6 +162,7 @@ MODULE m_numeric_tools
  end interface l2int
 
  interface r2c
+   module procedure rdp2cdp_0D
    module procedure rdp2cdp_1D
    module procedure rdp2cdp_2D
    module procedure rdp2cdp_3D
@@ -995,6 +996,36 @@ pure function l2int_3D(larr) result(int_arr)
  end where
 
 end function l2int_3D
+!!***
+
+!----------------------------------------------------------------------
+
+!!***!!****f* m_numeric_tools/rdp2cdp_0D
+!! NAME
+!!  rdp2cdp_0D
+!!
+!! FUNCTION
+!!  Create a complex number starting from a real array containing real and imaginary part
+!!
+!! INPUTS
+!!  rr(:)=the real array
+!!
+!! OUTPUT
+!!  cc(:)=the complex array
+!!
+!! SOURCE
+
+pure function rdp2cdp_0D(rr) result(cc)
+
+!Arguments ------------------------------------
+!scalars
+ real(dp),intent(in) :: rr(2)
+ complex(dp) :: cc
+! *********************************************************************
+
+ cc = CMPLX(rr(1), rr(2), kind=dp)
+
+end function rdp2cdp_0D
 !!***
 
 !----------------------------------------------------------------------

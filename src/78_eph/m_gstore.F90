@@ -4841,8 +4841,10 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
  integer :: bstart_k, bstop_k, bstart_kq, bstop_kq, max_nk, max_nq
  integer :: ik_bz, ik_ibz, ib_min_k, ib_max_k, iq_bz, ikq_ibz, ib_min_kq, ib_max_kq
  logical :: with_ks__, changed_k, changed_kq
+ !logical,parameter :: all_gs = .True.
+ logical,parameter :: all_gs = .False.
  real(dp),parameter :: TOL_EDIFF = 0.001_dp * eV_Ha
- real(dp) :: g2, g2_ks !, vnk
+ real(dp) :: gg, gg_ks, g_ratio !, vnk
  character(len=abi_slen) :: gstore_gmode
  character(len=500) :: msg
 !arrays
@@ -4955,7 +4957,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
 
    do ik_glob=1,glob_nk
      ! Write the first and the last k-point.
-     if (ik_glob /= 1 .and. ik_glob /= glob_nk) cycle
+     if ((ik_glob /= 1 .and. ik_glob /= glob_nk) .and. .not. all_gs) cycle
 
      ik_bz = gstore%kglob2bz(ik_glob, spin)
      ik_ibz = gstore%kbz2ibz(1, ik_bz)
@@ -4978,7 +4980,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
 
      do iq_glob=1,glob_nq
        ! Write the first and the last q-point.
-       if (iq_glob /= 1 .and. iq_glob /= glob_nq) cycle
+       if ((iq_glob /= 1 .and. iq_glob /= glob_nq) .and. .not. all_gs) cycle
 
        ! Find k+q image in the IBZ.
        iq_bz = qglob2bz(iq_glob, spin)
@@ -5008,7 +5010,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
 
        do ipc=1,natom3
          ! Write the 4th and the last perturbation.
-         if (ipc /= 4 .and. ipc /= natom3) cycle
+         if ((ipc /= 4 .and. ipc /= natom3) .and. .not. all_gs) cycle
          ncerr = nf90_get_var(spin_ncid, spin_vid("gvals"), gslice_mn, &
                               start=[1,1,1,ipc,ik_glob,iq_glob], count=[2,nb_kq,nb_k,1,1,1])
          NCF_CHECK(ncerr)
@@ -5023,8 +5025,8 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
              m_kq = im_kq + bstart_kq - 1
              do in_k=1,nb_k
                n_k = in_k + bstart_k - 1
-               g2 = g2_mn(im_kq, in_k)
-               write(ab_out, "(1x,5(i5,1x),es16.6)") iq_glob, ik_glob, ipc, m_kq, n_k, sqrt(g2)
+               gg = sqrt(g2_mn(im_kq, in_k))
+               write(ab_out, "(1x,5(i5,1x),es16.6)") iq_glob, ik_glob, ipc, m_kq, n_k, gg
              end do
            end do
         else
@@ -5034,14 +5036,17 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
           NCF_CHECK(ncerr)
           call average_g2_mn(do_avg, nb_kq, nb_k, bstart_kq, bstart_k, degblock_kq, degblock_k, gslice_ks_mn, g2ks_mn)
 
-          write(ab_out, "(1x,5(a5,1x),2a16)")"iq", "ik", "pcase", "m_kq", "n_k", "|g^SE|", "|g^KS|"
+          write(ab_out, "(1x,5(a5,1x),3a16)")"iq", "ik", "pcase", "m_kq", "n_k", "|g^SE|", "|g^KS|"
+          !write(ab_out, "(1x,5(a5,1x),3a16)")"iq", "ik", "pcase", "m_kq", "n_k", "|g^SE|", "|g^KS|", "SE/KS"
           do im_kq=1,nb_kq
             m_kq = im_kq + bstart_kq - 1
             do in_k=1,nb_k
               n_k = in_k + bstart_k - 1
-              g2 = g2_mn(im_kq, in_k)
-              g2_ks = g2ks_mn(im_kq, in_k)
-              write(ab_out, "(1x,5(i5,1x),2(es16.6))") iq_glob, ik_glob, ipc, m_kq, n_k, sqrt(g2), sqrt(g2_ks)
+              gg = sqrt(g2_mn(im_kq, in_k))
+              gg_ks = sqrt(g2ks_mn(im_kq, in_k))
+              write(ab_out, "(1x,5(i5,1x),2(es16.6))") iq_glob, ik_glob, ipc, m_kq, n_k, gg, gg_ks
+              !call safe_div(gg, gg_ks, -one, g_ratio)
+              !write(ab_out, "(1x,5(i5,1x),3(es16.6))") iq_glob, ik_glob, ipc, m_kq, n_k, gg, gg_ks, g_ratio
             end do
           end do
         end if

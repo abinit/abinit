@@ -245,13 +245,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt, timrev_k, timrev_q
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_qq, wall_qq, gflops_qq, cpu_kk, wall_kk, gflops_kk, cpu_pp, wall_pp, gflops_pp
  real(dp) :: drude_plsmf, my_plsmf
- real(dp) :: fact_spin, theta_mu_minus_e0i, tol_empty, tol_empty_in !, e_mkq, e_nk ! e0i
+ real(dp) :: fact_spin, theta_mu_minus_e0i, tol_empty, tol_empty_in, e_nk, e_mkq, ebsum_kmp, ebsum_kqmp ! e0i
+ real(dp) :: eta_sum, delta_E, inv_delta_E
  real(dp),contiguous, pointer :: qp_ene(:,:,:), qp_occ(:,:,:)
  real(dp) :: weight_q,bigexc,bigsxc,vxcavg ! ediff, eshift, q0rad, bz_vol
  logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, qq_is_gamma, pp_is_gamma, isirr_q
  logical :: stern_use_cache, use_ftinterp
  logical :: print_time_qq, print_time_kk, print_time_pp, non_magnetic_xc, need_x_kmp, need_x_kqmp
- complex(dp) :: ieta, idelta_sum
+ complex(dp) :: ieta !, idelta_sum
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_ham_kqmp, gs_ham_kmp
  type(rf_hamiltonian_type) :: rf_ham_kqmp, rf_ham_kmp
@@ -284,7 +285,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer, contiguous, pointer :: kg_c(:,:), kg_x(:,:)
  real(dp) :: eig0nk !, cpu, wall, gflops !, cpu_q, wall_q, gflops_q, cpu_all, wall_all, gflops_all
  complex(gwp) :: ctmp_gwpc, xdot_tmp
- !complex(dp) :: gc_tmp
+ complex(dp) :: ctmp_dp
 !arrays
  real(dp) :: fermie1_idir_ipert(3,cryst%natom), ylmgr_dum(1,1,1), dum_nhat(0), dum_xccc3d(0)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3), kqmp(3), kmp(3), pp(3), kmp_ibz(3), kqmp_ibz(3)
@@ -330,7 +331,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm); units = [std_out, ab_out]
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor; nspden = dtset%nspden
  ieta = +j_dpc * dtset%zcut
- idelta_sum = +j_dpc * dtset%elph2_imagden
+ !idelta_sum = +j_dpc * dtset%elph2_imagden
+ eta_sum = dtset%elph2_imagden
 
  ! Set tolerance used to decide if a band is empty
  ! and normalization of theta_mu_minus_esum. If nsppol == 2, qp_occ $\in [0,1]$
@@ -424,6 +426,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  ! Initialize Coulomb term on the IBZ of the pp_mesh. Use largest G-sphere.
  call kmesh%init(cryst, wfk_hdr%nkpt, wfk_hdr%kptns, dtset%kptopt)
+
+ ! Some required information are not filled up inside kmesh_init
+ ! So doing it here, even though it is not clean
+ Kmesh%kptrlatt(:,:) =Dtset%kptrlatt(:,:)
+ Kmesh%nshift        =Dtset%nshiftk
+ ABI_MALLOC(Kmesh%shift,(3,Kmesh%nshift))
+ Kmesh%shift(:,:)    =Dtset%shiftk(:,1:Dtset%nshiftk)
+
  npw_x = gsph_x%ng; npw_c = gsph_c%ng
  min_npw_xc = min(npw_x, npw_c)
  max_npw_xc = max(npw_x, npw_c)
@@ -447,6 +457,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  ABI_CHECK_IGE(npw_x, 1, "npw_x <= 1")
  ABI_CHECK_IGE(npw_c, 1, "npw_c <= 1")
+ ABI_CHECK_IGEQ(npw_x, npw_c, "npw_x < npw_c is not supported")
 
  ! Initialize the wave function descriptor.
  ! Each node has all k-points and spins and bands between my_bsum_start and my_bsum_stop
@@ -1328,7 +1339,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ! Get Fourier components of the Coulomb interaction in the BZ
          ! In 3D systems, neglecting umklapp: vc(Sq,sG) = vc(q,G) = 4pi/|q+G|**2
          ! The same relation holds for 0-D systems, but not in 1-D or 2D systems. It depends on S.
-
          ! NOTE: vc_sqrt_gx is dimensioned with npw_x --> use rottb table from gsph_x.
          do ig=1,npw_x
            vc_sqrt_gx(gsph_x%rottb(ig, itim_pp, isym_pp)) = vcp%vc_sqrt(ig, ipp_ibz)
@@ -1350,6 +1360,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                               cryst, mapl_kmp, gbound_kmp, work_ngfft, work, cg_kmp, urs_kbz=ur_star_kmp)
 
            ur_star_kmp = GWPC_CONJG(ur_star_kmp)
+           ebsum_kmp = ebands%eig(ib_sum, ikmp_ibz, spin)
+           ebsum_kqmp = ebands%eig(ib_sum, ikqmp_ibz, spin)
 
            ! =====================================
            ! Precompute oscillator matrix elements
@@ -1443,7 +1455,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            !
            !    \int de' Wc_{gg'}(pp, e') / (omega - e_{bsum, kqmp) - e')
            !
-           ! Store results in vec_gwc_mkq(:,:,m_kq),
+           ! Store results in vec_gwc_mkq(:,:,m_kq).
            if (gqk%pert_comm%nproc > 1) vec_gwc_mkq = zero
 
            do m_kq=bstart_kq, bstop_kq
@@ -1525,9 +1537,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              call rf_ham_kqmp%init(cplex, gs_ham_kqmp, ipert, has_e1kbsc=.true.)
              call rf_ham_kqmp%load_spin(spin, vlocal1=vlocal1_qq(:,:,:,:,imyp), with_nonlocal=.true.)
 
-             ! =====================
+             ! ======================
              ! NSCF Sternheimer at qq
-             ! =====================
+             ! ======================
              ! Compute Delta_{q,idir,ipert} \psi_{bsum, k-p}
              call wfd%rotate_cg(ib_sum, ndat1, spin, kmp_ibz, npw_kmp, kg_kmp, istwf_kmp, &
                                 cryst, mapl_kmp, gbound_kmp, work_ngfft, work, cg_kmp)
@@ -1547,7 +1559,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              ! Debug: Mute Delta_{q} (stern_kmp) by
              !full_ur1_kqmp = zero
 
-             ! TODO: The last states may fail to converge and we have to decide how to handle this.
+             ! The last bands may fail to converge with resid=-two. In this case we ignore the contribution.
              if (ierr /= 0) then
                full_cg1_kqmp = zero; full_ur1_kqmp = zero; stern_qq_ierr = stern_qq_ierr + 1
                if (stern_qq_ierr <= ENOUGH_STERN) then
@@ -1555,13 +1567,13 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                end if
              end if
 
-             ! Store KS e-ph matrix elements for this perturbation.
+             ! Store KS e-ph matrix elements for this ipc perturbation.
              if (pp_is_gamma .and. (ib_sum >= gqk%bstart_k .and. ib_sum <= gqk%bstop_k)) then
                ii = ib_sum - bstart_k + 1
                gks_atm(:,:,ii,ipc) = stern_kmp%eig1_k(:, bstart_kq:bstop_kq, ib_sum)
              end if
 
-             ! <m,k+q|e^{i(p+G)r}|Delta_q psi_{bsum,k-p}>
+             ! Compute <m,k+q|e^{i(p+G)r}|Delta_q psi_{bsum,k-p}>
              ! Exchange bra and ket and take the CC of the FFT.
              full_ur1_kqmp = GWPC_CONJG(full_ur1_kqmp)
 
@@ -1569,22 +1581,35 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                im_kq = m_kq - bstart_kq + 1
                cwork_ur = full_ur1_kqmp * ur_mkq(:,m_kq)
 
+               ctmp_dp = r2c(stern_kmp%eig1_k(:, m_kq, ib_sum))
+               e_mkq = ebands%eig(m_kq, ikq_ibz, spin)
+               delta_E = ebsum_kmp - e_mkq
+               inv_delta_E = delta_E / ( delta_E ** 2 + eta_sum ** 2)
+               ctmp_dp = ctmp_dp * inv_delta_E * sqrt(vcp%i_sz)
+               !ctmp_dp = zero
+               !if (qq_is_gamma) ctmp_dp = zero
+
                if (need_x_kqmp) then
                  call fft_ur(npw_x, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_x, gbound_x, cwork_ur, rhotwg_x)
+                 !if (pp_is_gamma) print *, "rhotwg_x(1)", rhotwg_x(1), "vc(0)", vc_sqrt_gx(1)
+                 ctmp_gwpc = rhotwg_x(1)
                  call sigtk_multiply_by_vc_sqrt("C", npw_x, nspinor, ndat1, vc_sqrt_gx, rhotwg_x)
                  if (pp_is_gamma) then
-                   !gc_tmp = r2c(stern_kmp%eig1_k(:, m_kq, ib_sum))
-                   !rhotwg_x(1) = czero_gw; if (ib_sum == m_kq) rhotwg_x(1) = cmplx(sqrt(vcp%i_sz),0.0_gwp)
-                   rhotwg_x(1) = rhotwg_x(1) * cmplx(sqrt(vcp%i_sz),0.0_gwp)
+                   !rhotwg_x(1) = rhotwg_x(1) * cmplx(sqrt(vcp%i_sz),0.0_gwp)
+                   !rhotwg_x(1) = ctmp_gwpc * cmplx(sqrt(vcp%i_sz),0.0_gwp)
+                   !print *, "ctmp_dp +qq", ctmp_gwpc
+                   !print *, "rhotwg_x(1)", rhotwg_x(1)
+                   !rhotwg_x(1) = ctmp_dp
                  end if
                  rhotwg_c(:) = rhotwg_x(1:npw_c*nspinor)
                else
                  call fft_ur(npw_c, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_c, gbound_c, cwork_ur, rhotwg_c)
+                 ctmp_gwpc = rhotwg_c(1)
                  call sigtk_multiply_by_vc_sqrt("C", npw_c, nspinor, ndat1, vc_sqrt_gx, rhotwg_c)
                  if (pp_is_gamma) then
-                   !gc_tmp = r2c(stern_kmp%eig1_k(:, m_kq, ib_sum))
-                   !rhotwg_c(1) = czero_gw; if (ib_sum == m_kq) rhotwg_c(1) = cmplx(sqrt(vcp%i_sz),0.0_gwp)
-                   rhotwg_c(1) = rhotwg_c(1) * cmplx(sqrt(vcp%i_sz),0.0_gwp)
+                   !rhotwg_c(1) = rhotwg_c(1) * cmplx(sqrt(vcp%i_sz),0.0_gwp)
+                   !rhotwg_c(1) = ctmp_gwpc * cmplx(sqrt(vcp%i_sz),0.0_gwp)
+                   !rhotwg_c(1) = ctmp_dp
                  end if
                end if
 
@@ -1605,7 +1630,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                   ctmp_gwpc = half * sum(rhotwg_c(:) * (vec_gwc_nk(:,1,n_k) + vec_gwc_nk(:,iw_mkq,n_k)))
 
                  if (need_x_kqmp) then
-                   ! TODO recheck
                    xdot_tmp = - xdotu(npw_x*nspinor, rhotwg_x, 1, vec_gx_nk(:,n_k), 1)
                    ctmp_gwpc = ctmp_gwpc + xdot_tmp ! * theta_mu_minus_e0i  ! theta_mu_minus_e0i is only needed for metals
                  end if
@@ -1615,7 +1639,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                  end if
 
                  !if (n_k == 1 .and. m_kq == 1 .and. ipc == 1 .and. ib_sum == 4) then
-                 if (n_k == 1 .and. m_kq == 1 .and. ipc == 1) then
+                 !if (n_k == 1 .and. m_kq == 1 .and. ipc == 1) then
                   !print *, 'rhotwg_x'
                   !print *, rhotwg_x
                   !print *, 'vec_gx_nk(:,n_k)'
@@ -1624,7 +1648,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                   !print *, 'ib_sum', ib_sum
                   !print *, 'correlation contribution,+q:', ctmp_gwpc
                   !print *, 'exchange contribution,+q:', xdot_tmp
-                 end if
+                 !end if
 
                  if (dtset%userie < 0) then
                     if (pp_is_gamma) then
@@ -1640,14 +1664,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                  end if
 
                  ! DEBUG
-                 if (n_k == 1 .and. m_kq == 1 .and. ipc == 1) then
+                 !if (n_k == 1 .and. m_kq == 1 .and. ipc == 1) then
                    !print '(A7, A7, A7, A7, A7, A7)', 'my_is', 'my_iq', 'my_ik', 'ipp_bz', 'ib_sum', 'imyp'
                    !print '(I7, I7, I7, I7, I7, I7)', my_is,  my_iq,  my_ik,  ipp_bz,  ib_sum,  imyp
                    !print *, "gsig_atm(:, 1, 1, 1):", gsig_atm(:, 1, 1, 1)
                    !print *, "gks_atm(:, 1, 1, 1):", gks_atm(:, 1, 1, 1)
                    !print *, "gks_atm2(:, 1, 1, 1):", gks_atm2(:, 1, 1, 1)
                    !print *, ' '
-                 end if
+                 !end if
 
                end do ! n_k
              end do ! m_kq
@@ -1684,7 +1708,7 @@ if (.not. qq_is_gamma) then
              ! Debug: Mute Delta_{-q} (stern_kqmp) by
              !full_ur1_star_kmp = zero
 
-             ! TODO: The last states may fail to converge and we have to decide how to handle this.
+             ! The last bands may fail to converge with resid=-two. In this case we ignore the contribution.
              if (ierr /= 0) then
                full_cg1_kmp = zero; full_ur1_star_kmp = zero; stern_mq_ierr = stern_mq_ierr + 1
                if (stern_mq_ierr <= ENOUGH_STERN) then
@@ -1704,23 +1728,36 @@ if (.not. qq_is_gamma) then
                ! <Delta_{-q} psi_{bsum,k+q-p}|e^{-i(p+G')r}|n,k>
                cwork_ur = full_ur1_star_kmp * ur_nk(:,n_k)
 
+               ! TODO: Recheck equations, may need a complex conjugate
+               ctmp_dp = r2c(stern_kqmp%eig1_k(:, n_k, ib_sum))
+               e_nk = ebands%eig(n_k, ik_ibz, spin)
+               delta_E = ebsum_kqmp - e_nk
+               inv_delta_E = delta_E / ( delta_E ** 2 + eta_sum ** 2)
+               ctmp_dp = ctmp_dp * inv_delta_E * sqrt(vcp%i_sz)
+               !ctmp_dp = zero
+               !if (qq_is_gamma) ctmp_dp = zero
+
                if (need_x_kmp) then
                  call fft_ur(npw_x, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_x, gbound_x, cwork_ur, rhotwg_x)
+                 ctmp_gwpc = rhotwg_x(1)
                  call sigtk_multiply_by_vc_sqrt("N", npw_x, nspinor, ndat1, vc_sqrt_gx, rhotwg_x)
                  if (pp_is_gamma) then
-                   !gc_tmp = r2c(stern_kqmp%eig1_k(:, n_k, ib_sum))
-                   !rhotwg_x(1) = czero_gw; if (ib_sum == n_k) rhotwg_x(1) = cmplx(sqrt(vcp%i_sz),0.0_gwp)
-                   rhotwg_x(1) = rhotwg_x(1) * cmplx(sqrt(vcp%i_sz),0.0_gwp)
+                   !rhotwg_x(1) = rhotwg_x(1) * cmplx(sqrt(vcp%i_sz),0.0_gwp)
+                   !rhotwg_x(1) = ctmp_gwpc * cmplx(sqrt(vcp%i_sz),0.0_gwp)
+                   !print *, "ctmp_dp -qq", ctmp_dp
+                   !print *, "rhotwg_x(1)", rhotwg_x(1)
+                   !rhotwg_x(1) = ctmp_dp
                  end if
 
                  rhotwg_c(:) = rhotwg_x(1:npw_c*nspinor)
                else
                  call fft_ur(npw_c, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_c, gbound_c, cwork_ur, rhotwg_c)
+                 ctmp_gwpc = rhotwg_c(1)
                  call sigtk_multiply_by_vc_sqrt("N", npw_c, nspinor, ndat1, vc_sqrt_gx, rhotwg_c)
                  if (pp_is_gamma) then
-                   !gc_tmp = r2c(stern_kqmp%eig1_k(:, n_k, ib_sum))
-                   !rhotwg_c(1) = czero_gw; if (ib_sum == n_k) rhotwg_c(1) = cmplx(sqrt(vcp%i_sz),0.0_gwp)
-                   rhotwg_c(1) = rhotwg_c(1) * cmplx(sqrt(vcp%i_sz),0.0_gwp)
+                   !rhotwg_c(1) = rhotwg_c(1) * cmplx(sqrt(vcp%i_sz),0.0_gwp)
+                   !rhotwg_c(1) = ctmp_gwpc * cmplx(sqrt(vcp%i_sz),0.0_gwp)
+                   !rhotwg_c(1) = ctmp_dp
                  end if
                end if
 
@@ -1751,7 +1788,7 @@ if (.not. qq_is_gamma) then
                  end if
 
                  !if (n_k == 1 .and. m_kq == 1 .and. ipc == 1 .and. ib_sum == 4) then
-                 if (n_k == 1 .and. m_kq == 1 .and. ipc == 1) then
+                 !if (n_k == 1 .and. m_kq == 1 .and. ipc == 1) then
                   !print *, 'rhotwg_x'
                   !print *, rhotwg_x
                   !print *, 'vec_gx_mkq(:,m_kq)'
@@ -1760,7 +1797,7 @@ if (.not. qq_is_gamma) then
                   !print *, 'ib_sum', ib_sum
                   !print *, 'correlation contribution,-q:', ctmp_gwpc
                   !print *, 'exchange contribution,-q:', xdot_tmp
-                 end if
+                 !end if
 
                  if (dtset%userie < 0) then
                     if (pp_is_gamma) then
@@ -1776,14 +1813,14 @@ if (.not. qq_is_gamma) then
                  end if
 
                  ! DEBUG
-                 if (n_k == 1 .and. m_kq == 1 .and. ipc == 1) then
+                 !if (n_k == 1 .and. m_kq == 1 .and. ipc == 1) then
                    !print '(A7, A7, A7, A7, A7, A7)', 'my_is', 'my_iq', 'my_ik', 'ipp_bz', 'ib_sum', 'imyp'
                    !print '(I7, I7, I7, I7, I7, I7)', my_is,  my_iq,  my_ik,  ipp_bz,  ib_sum,  imyp
                    !print *, "gsig_atm(:, 1, 1, 1):", gsig_atm(:, 1, 1, 1)
                    !print *, "gks_atm(:, 1, 1, 1):", gks_atm(:, 1, 1, 1)
                    !print *, "gks_atm2(:, 1, 1, 1):", gks_atm2(:, 1, 1, 1)
                    !print *, ' '
-                 end if
+                 !end if
 
                end do ! n_k
              end do ! m_kq
@@ -1794,11 +1831,11 @@ end if ! .not qq_is_gamma.
          end do ! ib_sum (sum over bands)
 
          ! Show progress of all pp points
-         !if (print_time_pp) then
+         if (print_time_pp) then
            call inds2str(1, " My pp-point:", my_ipp, my_npp(spin), pp_mesh%nbz, msg)
            call cwtime_report(msg, cpu_pp, wall_pp, gflops_pp);
-           !if (my_ipp == LOG_MODP) call wrtout(std_out, "...", do_flush=.True.)
-         !end if
+           if (my_ipp == LOG_MODP) call wrtout(std_out, "...", do_flush=.True.)
+         end if
 
          ABI_FREE(kpg_kmp)
          ABI_FREE(kpg_kqmp)
@@ -1841,10 +1878,7 @@ end if ! .not qq_is_gamma.
        call xmpi_sum(gks_atm, gqk%pert_ppsum_bsum_comm%value, ierr)
        call xmpi_sum(gks_atm2, gqk%pert_ppsum_bsum_comm%value, ierr)
 
-       ! TODO gks_atm and gks_nsu
-       !TODO: it may be that pp_mesh should be replaced by the kk_mesh (they are not always the same)
        gsig_atm = gsig_atm / (cryst%ucvol * pp_mesh%nbz)
-       !gsig_atm = gsig_atm / pp_mesh%nbz
 
        ! DEBUG
        !print *, ' '
@@ -1861,7 +1895,6 @@ end if ! .not qq_is_gamma.
 
        !print *, "gks_atm(:, 1, 1, 1) - gxc_atm(:, 1, 1, 1):",  gks_atm(:, 1, 1, 1) - gxc_atm(:, 1, 1, 1)
        !print *, "gsig_atm(:, 1, 1, 1)+ gks_atm(:, 1, 1, 1) - gxc_atm(:, 1, 1, 1):", gsig_atm(:, 1, 1, 1)
-
        !print *, "gsig_average", sum(abs(gsig_atm)) / size(gsig_atm) / two
        !print *, "gks_average", sum(abs(gks_atm)) / size(gks_atm) / two
 
