@@ -1595,8 +1595,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                  ctmp_gwpc = rhotwg_x(1)
                  call sigtk_multiply_by_vc_sqrt("C", npw_x, nspinor, ndat1, vc_sqrt_gx, rhotwg_x)
                  if (pp_is_gamma) then
-                   !rhotwg_x(1) = rhotwg_x(1) * cmplx(sqrt(vcp%i_sz),0.0_gwp)
-                   !rhotwg_x(1) = ctmp_gwpc * cmplx(sqrt(vcp%i_sz),0.0_gwp)
+                   rhotwg_x(1) = ctmp_gwpc * cmplx(sqrt(vcp%i_sz),0.0_gwp)
                    !print *, "ctmp_dp +qq", ctmp_gwpc
                    !print *, "rhotwg_x(1)", rhotwg_x(1)
                    !rhotwg_x(1) = ctmp_dp
@@ -1607,8 +1606,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                  ctmp_gwpc = rhotwg_c(1)
                  call sigtk_multiply_by_vc_sqrt("C", npw_c, nspinor, ndat1, vc_sqrt_gx, rhotwg_c)
                  if (pp_is_gamma) then
-                   !rhotwg_c(1) = rhotwg_c(1) * cmplx(sqrt(vcp%i_sz),0.0_gwp)
-                   !rhotwg_c(1) = ctmp_gwpc * cmplx(sqrt(vcp%i_sz),0.0_gwp)
+                   rhotwg_c(1) = ctmp_gwpc * cmplx(sqrt(vcp%i_sz),0.0_gwp)
                    !rhotwg_c(1) = ctmp_dp
                  end if
                end if
@@ -1742,8 +1740,7 @@ if (.not. qq_is_gamma) then
                  ctmp_gwpc = rhotwg_x(1)
                  call sigtk_multiply_by_vc_sqrt("N", npw_x, nspinor, ndat1, vc_sqrt_gx, rhotwg_x)
                  if (pp_is_gamma) then
-                   !rhotwg_x(1) = rhotwg_x(1) * cmplx(sqrt(vcp%i_sz),0.0_gwp)
-                   !rhotwg_x(1) = ctmp_gwpc * cmplx(sqrt(vcp%i_sz),0.0_gwp)
+                   rhotwg_x(1) = ctmp_gwpc * cmplx(sqrt(vcp%i_sz),0.0_gwp)
                    !print *, "ctmp_dp -qq", ctmp_dp
                    !print *, "rhotwg_x(1)", rhotwg_x(1)
                    !rhotwg_x(1) = ctmp_dp
@@ -1755,8 +1752,7 @@ if (.not. qq_is_gamma) then
                  ctmp_gwpc = rhotwg_c(1)
                  call sigtk_multiply_by_vc_sqrt("N", npw_c, nspinor, ndat1, vc_sqrt_gx, rhotwg_c)
                  if (pp_is_gamma) then
-                   !rhotwg_c(1) = rhotwg_c(1) * cmplx(sqrt(vcp%i_sz),0.0_gwp)
-                   !rhotwg_c(1) = ctmp_gwpc * cmplx(sqrt(vcp%i_sz),0.0_gwp)
+                   rhotwg_c(1) = ctmp_gwpc * cmplx(sqrt(vcp%i_sz),0.0_gwp)
                    !rhotwg_c(1) = ctmp_dp
                  end if
                end if
