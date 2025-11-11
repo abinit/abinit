@@ -33,9 +33,9 @@ module m_gstore_sigeph
  use m_ephtk
  use m_sigtk
 
- !use m_time,           only : cwtime, cwtime_report, sec2str
  use m_io_tools,       only : iomode_from_fname
  use m_numeric_tools,  only : arth, c2r
+ use m_time,           only : cwtime, cwtime_report
  use m_fstrings,       only : tolower, itoa, ftoa, sjoin, ktoa, ltoa, strcat, replace_ch0, yesno, string_in
  use m_cgtools,        only : cg_zgemm, cg_zdotc
  use m_kg,             only : getph
@@ -227,19 +227,19 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
 
 !Local variables-------------------------------
- integer,parameter :: master = 0, with_cplex1 = 1, cplex1 = 1, pawread0 = 0, ndat1 = 1, berryopt0 = 0, istwfk_1 = 1
- integer :: n1, n2, n3, n4, n5, n6, nb_k, nb_kq, glob_nk, ntemp, cplex, my_npert
+ integer,parameter :: master = 0, with_cplex1 = 1, cplex1 = 1, pawread0 = 0, ndat1 = 1, istwfk_1 = 1
+ integer,parameter :: LOG_MODQ = 100, LOG_MODK = 1
+ integer :: n1, n2, n3, n4, n5, n6, nb_k, nb_kq, glob_nk, ntemp, cplex, my_npert, use_lgk
  integer :: spin, my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, gap_err, my_rank, ip1, ip2, nu, ipc, idir, ipert
  integer :: it, ik_ibz, ikq_ibz, band_k, band_kq, timrev_k, ii, ikcalc, natom, natom3, nsppol, nspden, nspinor, nkpt !,ik_bz
  integer :: isym_k,isym_kq,trev_k,trev_kq
- integer :: istwf_k, istwf_kq, npw_k, npw_kq, nkpg_kq
- integer :: nfft, nfftf, mgfft, mgfftf, nkpg !,nkpg1,cnt, enough_stern
+ integer :: istwf_k, istwf_kq, npw_k, npw_kq, nkpg_kq, nfft, nfftf, mgfft, mgfftf, nkpg
  integer :: usecprj, mpw, ibsum_kq, band_me, u1_band, ncid, ncerr
  real(dp) :: wqnu, gkq2, weight_q, eig0nk, eig0mk, eig0mkq, ediff, gmod2, hmod2, gdw2, rfact, gdw2_stern !, rtmp !,nqnu,gkq2,gkq2_pf,
- !real(dp) :: cpu, wall, gflops
- logical :: q_is_gamma, intra_band, same_band, isirr_k, isirr_kq, stern_use_cache
+ real(dp) :: cpu_kk, wall_kk, gflops_kk, cpu_qq, wall_qq, gflops_qq, cpu_all, wall_all, gflops_all
+ logical :: q_is_gamma, intra_band, same_band, isirr_k, isirr_kq, stern_use_cache, print_time_kk, print_time_qq
  complex(dp) :: cfact !, sig_cplx
- character(len=5000) :: msg
+ character(len=5000) :: msg, qq_bz_string !, kk_string
  character(len=fnlen) :: path
  type(gaps_t) :: gaps
  type(lgroup_t) :: lg_myk
@@ -277,6 +277,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  nsppol = dtset%nsppol; nspden = dtset%nspden; nspinor = dtset%nspinor
 
  call wrtout(std_out, " Computing Fan-Migdal + DW self-energy from GSTORE.nc", pre_newlines=1)
+ call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  ! Init gstore and MPI grid from file and dtset.
  ! The Fan-Migdal SE requires |g(k,q)|^2 as well as g2DW in the phonon representation.
@@ -300,6 +301,11 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
 
  ! Check consistency of little group options
  ABI_CHECK(gstore%check_little_group(dtset, msg) == 0, msg)
+
+ use_lgk = dtset%gstore_use_lgk
+ if (gstore%has_used_lgk /= 0) use_lgk = gstore%has_used_lgk
+ if (use_lgk == 0) call wrtout(units, " Little group operations of the k-point won't be used to symmetry reduce the integral in q-space.")
+ if (use_lgk /= 0) call wrtout(units, " Little group operations of the k-point will be used to symmetry reduce the integral in q-space.")
 
  ! FFT meshes from input file, not necessarily equal to the ones found in the external files.
  nfftf = product(ngfftf(1:3)); mgfftf = maxval(ngfftf(1:3))
@@ -461,7 +467,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  if (my_rank == master) then
    ! Master creates the netcdf file used to store the results of the calculation.
    NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
-   !sigma%ncid = ncid
    !NCF_CHECK(wfk_hdr%ncwrite(ncid, fform_from_ext("SIGEPH.nc"), nc_define=.True.))
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands%ncwrite(ncid))
@@ -586,6 +591,8 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  !  NCF_CHECK(nctk_set_datamode(ncid))
  !end if
 
+ call wrtout(std_out, " Begin computation of the self-energy matrix elements.")
+
  ! Loop over collinear spins.
  do my_is=1,gstore%my_nspins
    associate (gqk => gstore%gqk(my_is), cryst => gstore%cryst)
@@ -611,6 +618,8 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
    ! Loop over my k-points in |n,k>.
    do my_ik=1,gqk%my_nk
      kk = gqk%my_kpts(:, my_ik)
+     print_time_kk = my_rank == 0 .and. (my_ik <= LOG_MODK .or. mod(my_ik, LOG_MODK) == 0)
+     if (print_time_kk) call cwtime(cpu_kk, wall_kk, gflops_kk, "start")
 
      ik_ibz = gqk%my_k2ibz(1, my_ik); isym_k = gqk%my_k2ibz(2, my_ik)
      trev_k = gqk%my_k2ibz(6, my_ik); g0_k = gqk%my_k2ibz(3:5, my_ik)
@@ -622,7 +631,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
      ikcalc = gqk%my_k2glob(my_ik)
 
      ! Compute the little group of the k-point so that we can sum g(k,q) only for q in the IBZ_k.
-     if (dtset%gstore_use_lgk /= 0) then
+     if (use_lgk /= 0) then
        timrev_k = kpts_timrev_from_kptopt(ebands%kptopt)
        call lg_myk%init(cryst, kk, timrev_k, gstore%nqbz, gstore%qbz, gstore%nqibz, gstore%qibz, xmpi_comm_self)
      end if
@@ -645,6 +654,17 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
      ! Sum over my q-points.
      do my_iq=1,gqk%my_nq
        call gqk%myqpt(my_iq, gstore, weight_q, qpt); q_is_gamma = sum(qpt**2) < tol14
+
+       !iq_bz = gqk%my_q2bz(my_iq); qq_is_gamma = sum(qq_bz**2) < tol14
+       qq_bz_string = ktoa(qpt)
+
+       print_time_qq = my_rank == 0 .and. (my_iq <= LOG_MODQ .or. mod(my_iq, LOG_MODQ) == 0)
+       if (print_time_qq) then
+         call cwtime(cpu_qq, wall_qq, gflops_qq, "start")
+         call inds2str(0, sjoin(" Computing Sigma_eph for qq_bz:", qq_bz_string), my_iq, gqk%my_nq, gqk%glob_nq, msg)
+         call wrtout(std_out, sjoin(msg, ", and spin:", itoa(spin)), pre_newlines=1)
+         !print *, "iq_ibz:", iq_ibz, "qq_bz:", qq_bz, "qq_ibz:", qq_ibz
+       end if
 
        ! Find the image of k+q in the IBZ.
        kq = kk + qpt
@@ -698,6 +718,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
          ABI_CALLOC(h1kets_kq_allperts, (2, npw_kq*nspinor, natom3, nb_k))
 
          do my_ip=1, gqk%my_npert
+           !print *, "my_ip:", my_ip
            ipc = gqk%my_pertcases(my_ip); idir = mod(ipc-1, 3) + 1; ipert = (ipc - idir) / 3 + 1
 
            ! Set up local potential vlocal1 with proper dimensioning, from vtrial1 taking into account the spin.
@@ -771,8 +792,9 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
        ! weight_q is computed here. It depends whether we are summing over the full BZ or IBZ_k.
        ! IMPORTANT: This check should be done here so that we can Broadcast stern_dw if eph_stern /= 0
        ! when iq_ibz == 1. Do not move this section above!!!!
+       ! FIXME: This is highly inefficient if use_lgk /= 0
        weight_q = one / gstore%nqbz
-       if (dtset%gstore_use_lgk /= 0) then
+       if (use_lgk /= 0) then
          ii = lg_myk%findq_ibzk(qpt); if (ii == -1) goto 10; weight_q = lg_myk%weights(ii)
        end if
 
@@ -919,6 +941,11 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
        ABI_SFREE(ffnl_kq)
        ABI_SFREE(kinpw_kq)
        ABI_SFREE(ph3d_kq)
+
+       if (print_time_qq) then
+         call inds2str(2, "My q-point", my_iq, gqk%my_nq, gqk%glob_nq, msg)
+         call cwtime_report(msg, cpu_qq, wall_qq, gflops_qq); if (my_iq == LOG_MODQ) call wrtout(std_out, "...", do_flush=.True.)
+       end if
      end do ! my_iq
 
      ABI_SFREE(kpg_k)
@@ -926,6 +953,11 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
      ABI_SFREE(kinpw_k)
      ABI_SFREE(ph3d_k)
      call lg_myk%free()
+
+     if (print_time_kk) then
+       call inds2str(3, "My k-point", my_ik, gqk%my_nk, gqk%glob_nk, msg)
+       call cwtime_report(msg, cpu_kk, wall_kk, gflops_kk); if (my_ik == LOG_MODK) call wrtout(std_out, "...", do_flush=.True.)
+     end if
    end do ! my_ik
 
    ABI_SFREE(stern_ppb)
@@ -934,6 +966,8 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
    call sigma%gather_and_write_results(ncid, gstore, gqk, dtset, ebands)
    end associate
  end do ! my_is
+
+ call cwtime_report(" gstore_sigeph full calculation", cpu_all, wall_all, gflops_all, end_str=ch10)
 
  ABI_FREE(nqnu_t)
  ABI_FREE(f_mkq)
@@ -953,6 +987,17 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  ABI_SFREE(work)
 
  call wfd%free(); call gstore%free(); call sigma%free(); call gs_ham_kq%free()
+
+contains
+
+subroutine inds2str(level, prefix, my_ik, my_nk, nk_tot, out_str)
+ character(len=*),intent(in) :: prefix
+ integer,intent(in) :: level, my_ik, my_nk, nk_tot
+ character(len=*),intent(out) :: out_str
+
+ out_str = sjoin(prefix, itoa(my_ik), "/", itoa(my_nk), "[", itoa(nk_tot), "]")
+ out_str = repeat(' ', 4 * level) // trim(out_str)
+end subroutine  inds2str
 
 end subroutine gstore_sigeph
 !!***

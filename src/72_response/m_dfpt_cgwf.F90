@@ -1758,10 +1758,10 @@ subroutine stern_init(stern, dtset, npw_k, npw_kq, nspinor, nband, nband_me, fer
  stern%fermie1_idir_ipert = fermie1_idir_ipert
 
  call copy_mpi_enreg(mpi_enreg, stern%mpi_enreg)
- stern%mpi_enreg%comm_band = comm_band
- stern%mpi_enreg%me_band = xmpi_comm_rank(comm_band)
- stern%mpi_enreg%nproc_band = xmpi_comm_size(comm_band)
- stern%has_band_para = stern%mpi_enreg%nproc_band /= 1
+   stern%mpi_enreg%comm_band = comm_band
+   stern%mpi_enreg%me_band = xmpi_comm_rank(comm_band)
+   stern%mpi_enreg%nproc_band = xmpi_comm_size(comm_band)
+   stern%has_band_para = stern%mpi_enreg%nproc_band /= 1
 
  ABI_CALLOC(stern%eig1_k, (2, nband, nband))
  ABI_MALLOC(stern%dcwavef, (2, npw_kq*nspinor*stern%usedcwavef))
@@ -1778,6 +1778,9 @@ subroutine stern_init(stern, dtset, npw_k, npw_kq, nspinor, nband, nband_me, fer
  stern%rank_band = 0
 
  stern%nline_in = min(100, npw_kq); if (dtset%nline > stern%nline_in) stern%nline_in = min(dtset%nline, npw_kq)
+ if (dtset%tolwfr <= tiny(one)) then
+   ABI_ERROR("tolwfr must be specified in input when solving the Sterheimer equation non-self-consistently")
+ end if
 
  ABI_MALLOC(stern%cgq, (2, npw_kq * nspinor, stern%nband_me))
  ABI_MALLOC(stern%gscq, (2, npw_kq * nspinor, nband_me*usepaw))
