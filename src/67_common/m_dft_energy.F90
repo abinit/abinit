@@ -53,6 +53,7 @@ module m_dft_energy
  use m_pawfgr,           only : pawfgr_type
  use m_paw_dmft,         only : paw_dmft_type
  use m_paw_nhat,         only : pawmknhat
+ use m_paw_mkrho,        only : pawmkrho
  use m_paw_occupancies,  only : pawaccrhoij
  use m_rcpaw,            only : rcpaw_type
  use m_fft,              only : fftpac, fourdp
@@ -125,6 +126,7 @@ contains
 !!   | occopt=option for occupancies
 !!   | tsmear=smearing energy or temperature (if metal)
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
+!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
 !!  gsqcut=G^2 cutoff from gsqcut=ecut/(2 Pi^2)
 !!  indsym(4,nsym,natom)=indirect indexing array for atom labels
 !!  irrzon(nfft**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4))=irreducible zone data
@@ -903,11 +905,6 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
    call pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,0,dtset%natom,dtset%nsym,&
 &   dtset%ntypat,option,pawang,dtset%pawprtvol,pawtab,rprimd,dtset%symafm,symrec,dtset%typat,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-   call pawrhoij_free_unpacked(pawrhoij_unsym)
-   if (paral_atom) then
-     call pawrhoij_free(pawrhoij_unsym)
-     ABI_FREE(pawrhoij_unsym)
-   end if
    ider=0;izero=0;cplex=1;ipert=0;idir=0;qpt(:)=zero
    call pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 &   my_natom,dtset%natom,nfftf,ngfftf,&
@@ -921,12 +918,17 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
    ABI_MALLOC(rhowfg,(2,dtset%nfft))
    rhowfr(:,:)=zero
    call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
-&   npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol_local,wvl_den,wfs,&
-&   extfpmd=extfpmd)
+&   npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol_local,wvl_den,wfs)
 
-   call transgrid(1,mpi_enreg,dtset%nspden,+1,1,0,dtset%paral_kgb,pawfgr,rhowfg,rhodum,rhowfr,rhor)
-   rhor(:,:)=rhor(:,:)+nhat(:,:)
-   call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
+   call pawmkrho(1,compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
+&   my_natom,dtset%natom,dtset%nspden,dtset%nsym,dtset%ntypat,dtset%paral_kgb,pawang,pawfgr,pawfgrtab,&
+&   dtset%pawprtvol,pawrhoij,pawrhoij_unsym,pawtab,qpt,rhowfg,rhowfr,rhor,rprimd,dtset%symafm,&
+&   symrec,dtset%typat,ucvol,dtset%usewvl,xred,pawnhat=nhat,rhog=rhog,extfpmd=extfpmd)
+   call pawrhoij_free_unpacked(pawrhoij_unsym)
+   if (paral_atom) then
+     call pawrhoij_free(pawrhoij_unsym)
+     ABI_FREE(pawrhoij_unsym)
+   end if
    if(dtset%usekden==1)then
      call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
 &               rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl_den,wfs,option=1)

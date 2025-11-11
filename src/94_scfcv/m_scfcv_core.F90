@@ -213,6 +213,7 @@ contains
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
 !!  electronpositron <type(electronpositron_type)>=quantities for
 !!     the electron-positron annihilation
+!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
 !!  hdr <type(hdr_type)>=the header of wf, den and pot files
 !!  indsym(4,nsym,natom)=indirect indexing array for atom labels
 !!  initialized= if 0 the initialization of the gstate run is not yet finished
@@ -1292,7 +1293,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
              ABI_MALLOC(rhowfr,(dtset%nfft,dtset%nspden))
 !          1-Compute density from WFs
              call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,&
-&                       rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,extfpmd=extfpmd)
+&                       rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
              call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,rhog,rhowfr,rhor)
 !          2-Compute rhoij
              call pawmkrhoij(atindx,atindx1,cprj,dimcprj,dtset%istwfk,dtset%kptopt,dtset%mband,mband_cprj,&
@@ -1306,7 +1307,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &             my_natom,dtset%natom,dtset%nspden,dtset%nsym,dtset%ntypat,&
 &             dtset%paral_kgb,pawang,pawfgr,pawfgrtab,dtset%pawprtvol,pawrhoij,pawrhoij,&
 &             pawtab,qpt,rhowfg,rhowfr,rhor,rprimd,dtset%symafm,symrec,dtset%typat,ucvol,&
-&             dtset%usewvl,xred,pawnhat=nhat,rhog=rhog)
+&             dtset%usewvl,xred,pawnhat=nhat,rhog=rhog,extfpmd=extfpmd)
 !          2-Take care of kinetic energy density
              if(dtset%usekden==1)then
                call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,&
@@ -2567,6 +2568,7 @@ end subroutine scfcv_core
 !!   | tsmear=smearing energy or temperature (if metal)
 !!   | typat(natom)=type integer for each atom in cell
 !!   | wtatcon(3,natom,nconeq)=weights for atomic constraints
+!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
 !!  gmet(3,3)=metric tensor for G vecs (in bohr**-2)
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
 !!  grchempottn(3,natom)=grads of spatially-varying chemical potential energy (hartree)
