@@ -88,6 +88,7 @@ contains
 !!   | pawoptmix=-PAW- 1 if the computed residuals include the PAW (rhoij) part
 !!   | prtvol=control print volume and debugging
 !!  etotal=the total energy obtained from the input density
+!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
 !!  fnametmp_fft=name of _FFT file
 !!  fcart(3,natom)=cartesian forces (hartree/bohr)
 !!  ffttomix(nfft*(1-nfftmix/nfft))=Index of the points of the FFT (fine) grid on the grid used for mixing (coarse)
