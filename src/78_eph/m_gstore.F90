@@ -3657,15 +3657,16 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  !end if
 
  if (my_rank == master) call gstore%print([std_out])
-
  ndone = count(done_qbz_spin == 1)
 
- ! NB: Write phonon data here as we are not guaranteed to have all the IBZ q-points
- ! inside the loop over my_iq if filtering has been used.
  if (ndone == 0) then
+   ! Write phonon data here as we are not guaranteed to have all the IBZ q-points
+   ! inside the loop over my_iq if filtering has been used.
+   ! Make sure internal table with gstore_done_qbz_spin is properly filled.
    call gstore%compute_and_write_ph(root_ncid)
  else
-   call wrtout(std_out, sjoin(" Restarting GSTORE calculation. Found: ", itoa(ndone), " (qpt, spin) entries already computed"))
+   call wrtout(units, sjoin("- Restarting GSTORE calculation from file:", gstore%path))
+   call wrtout(units, sjoin(" Found: ", itoa(ndone), " (qpt, spin) entries already computed"))
  end if
 
  ! Create ddkop object to compute group velocities (if needed)

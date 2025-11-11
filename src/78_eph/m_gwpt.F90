@@ -372,11 +372,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! NB: Write phonon data here as we are not guaranteed to have all the IBZ q-points
  ! inside the loop over my_iq if filtering has been used.
  ! Make sure internal table with gstore_done_qbz_spin is properly filled.
- ! TODO: Similar piece of code in gstore_compute, should write method...
  if (ndone == 0) then
    call gstore%compute_and_write_ph(root_ncid)
  else
-   call wrtout(std_out, sjoin(" Restarting GSTORE calculation. Found: ", itoa(ndone), " (qpt, spin) entries already computed"))
+   call wrtout(units, sjoin("- Restarting GSTORE calculation from file:", gstore%path))
+   call wrtout(units, sjoin(" Found: ", itoa(ndone), " (qpt, spin) entries already computed"))
  end if
 
  ! ================
