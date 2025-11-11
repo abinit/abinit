@@ -795,6 +795,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
          do im_kq=1,gqk%nb_kq
            band_kq = im_kq + gqk%bstart_kq - 1
            eig0mkq = ebands%eig(band_kq, ikq_ibz, spin)
+           eig0mk = ebands%eig(band_kq, ik_ibz, spin)
 
            ! Compute electronic occupations for all Temps (note mu_e(it) Fermi level)
            do it=1,ntemp
@@ -879,7 +880,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
                cfact_t(:) = - weight_q * gdw2 * (two * nqnu_t + one)  / (ediff + sigma%ieta)
              else
                cfact_t(:) = zero
-             endif
+             end if
 
              if (dtset%eph_stern /= 0 .and. im_kq == 1) then
                ! Compute DW term for M > nb_kq.
