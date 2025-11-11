@@ -2453,8 +2453,8 @@ subroutine pawdijnd(dijnd,cplex_dij,gprimd,iatom,natom,ndij,nspden,nucdipmom,&
  lmn2_size=pawtab%lmn2_size
  usezora=((zora.EQ.1).OR.(zora.EQ.3))
 
- write(std_out,'(a,I4,L4)')'JWZ debug pawdijnd zora use_zora ', &
-   & zora,usezora
+ !write(std_out,'(a,I4,L4)')'JWZ debug pawdijnd zora use_zora ', &
+ !  & zora,usezora
 
 !Check data consistency
  if (cplex_dij/=2) then
@@ -2935,8 +2935,8 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,pawang,pawrad,pawtab,&
      use_soc=.TRUE.; use_sd=.FALSE.; use_fc=.FALSE.
  end select
 
- write(std_out,'(a,3L4)')'JWZ debug pawdijso use_soc use_sd use_fc : ',&
-   & use_soc,use_sd,use_fc
+ !write(std_out,'(a,3L4)')'JWZ debug pawdijso use_soc use_sd use_fc : ',&
+ !  & use_soc,use_sd,use_fc
 
 !Check data consistency
  if (qphase/=1) then
