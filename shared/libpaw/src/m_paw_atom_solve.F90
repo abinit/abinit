@@ -29,6 +29,7 @@ module m_paw_atom_solve
  USE_MPI_WRAPPERS
  USE_MEMORY_PROFILING
 
+ USE ieee_arithmetic
  use m_libpaw_libxc
  use m_pawtab
  use m_pawrad
@@ -52,7 +53,7 @@ module m_paw_atom_solve
  
  ! Numerics
  logical,private,save :: has_to_print
- real(dp),private,save :: machine_zero, machine_precision,machine_infinity 
+ real(dp),private,save :: machine_zero,machine_precision,machine_infinity,practical_zero
  real(dp), PRIVATE,save :: minlog,maxlog,minexp,maxexp 
  real(dp), PRIVATE,save :: minlogarg,maxlogarg,minexparg,maxexparg
  real(dp), PARAMETER, PRIVATE :: MaxMix=0.5_dp,seterr=tol11,settoosmall=tol16
@@ -312,7 +313,7 @@ END TYPE Anderson_Context
 TYPE,private ::  Pseudoinfo
   CHARACTER(132) :: exctype
   INTEGER  :: lmax,irc,irc_shap,irc_vloc,irc_core,coretailpoints,mesh_size
-  INTEGER  :: ivale,itau,ivion
+  INTEGER  :: ivale,itau,ivion,mxbase
   CHARACTER(15) :: orthogonalization_scheme
   CHARACTER(132) :: Vloc_description
   CHARACTER(132) :: Proj_description
@@ -976,6 +977,7 @@ subroutine atompaw_init(pawtab,pawrad,atp,znucl,atm,sctol,orbshift,potshift)
  ENDDO
  machine_zero= machine_precision**5
  machine_infinity = 1._dp/machine_zero
+ practical_zero=machine_precision**2
  minlogarg=machine_precision; minlog=LOG(minlogarg)
  maxlogarg=1._dp/machine_precision; maxlog=LOG(maxlogarg)
  minexparg=LOG(machine_precision);  minexp=0._dp
@@ -1307,11 +1309,11 @@ subroutine marsman_tphi(atp,map,l_in,n)
  integer, intent(in) :: map(atp%PAW%nbase)
  integer :: io,nodes,ii,match,irc
  integer :: io2,l2,jj,ioj,kk,l,ir,ir1
- real(dp):: energy,v0,v0p,zeroval,min_match
+ real(dp):: energy,v0,v0p,zeroval
  real(dp), allocatable :: ksi_i0(:,:),ksi_ij(:,:,:)
  real(dp), allocatable :: ksi_i0_0(:),ksi_ij_0(:,:)
  REAL(dp), ALLOCATABLE :: p1(:),p2(:)
- real(dp), allocatable :: AA(:,:), BB(:),proj(:)
+ real(dp), allocatable :: AA(:,:), BB(:)
  real(dp) :: dp1(atp%PAW%irc),dp2(atp%PAW%irc)
  real(dp) :: x1,y1,y2,a,b,c,r1,r2
  logical :: need_fit
@@ -1738,7 +1740,7 @@ end subroutine Prepare_Orbit
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine print_check_atompaw_params(atp)
  type(atompaw_type),intent(in) :: atp
- integer :: norb,io,ll,nn,ii,ik,kk
+ integer :: norb,io
  if(atp%finitenucleus) then
    LIBPAW_ERROR('Finitenucleus not implemented')
  endif
@@ -2467,7 +2469,7 @@ SUBROUTINE LDAGGASub(w,energy,residue,err,success,update,atp)
  CALL Updatewfn(atp%Grid,tmpPot,tmpOrbit,w,success,atp%BDsolve,atp%usespline,atp%spline,atp%itype)
  if(has_to_print) write(std_out,*) 'completed updatewfn with success ', success
  If (.not.success) then   !  attempt to stablize solution
-   w=w+tmpPot%rvn
+   !w=w+tmpPot%rvn
    if(has_to_print) write(std_out,*) 'Current eigs', (atp%Orbit%eig(io),io=1,atp%Orbit%norbit)
    j=n
    x=atp%Orbit%eig(1)
@@ -2489,7 +2491,7 @@ SUBROUTINE LDAGGASub(w,energy,residue,err,success,update,atp)
    if(has_to_print) write(std_out,*) 'Reset tmpPot ', j
    if(has_to_print) write(std_out,*) '   Last points '
    if(has_to_print) write(std_out,'(1p,20e15.7)') atp%Grid%r(n),w(n)
-   w=w-tmpPot%rvn
+   !w=w-tmpPot%rvn
    CALL Updatewfn(atp%Grid,tmpPot,tmpOrbit,w,success,atp%BDsolve,atp%usespline,atp%spline,atp%itype)
    if(has_to_print) write(std_out,*) 'after updatwfn from reset ',success;
  Endif
@@ -2532,10 +2534,9 @@ SUBROUTINE DENITERSub(w,energy,residue,err,success,update,atp)
   type(atompaw_type), intent(inout) :: atp
   LOGICAL, INTENT(OUT) :: success
   LOGICAL, INTENT(IN) :: update
-  INTEGER :: i,j,k,n,io,nw
+  INTEGER :: n,nw
   REAL(dp),ALLOCATABLE :: dum(:)
   REAL(dp) :: x,y
-  INTEGER:: fcount=0,dcount=0
   TYPE (OrbitInfo) :: tmpOrbit
   TYPE (PotentialInfo) :: tmpPot
   n=atp%Grid%n
@@ -2559,7 +2560,7 @@ SUBROUTINE DENITERSub(w,energy,residue,err,success,update,atp)
   if(has_to_print) write(std_out,*) 'after exch   exvct, eexc ',x,y
   tmpPot%rv=tmpPot%rvn+tmpPot%rvh+tmpPot%rvx
   tmpOrbit%den=w
-  CALL Updatewfnwden(atp%Grid,tmpPot,tmpOrbit,w,success,atp%usespline,atp%spline,atp%itype)
+  CALL Updatewfnwden(atp%Grid,tmpPot,tmpOrbit,success,atp%usespline,atp%spline,atp%itype)
   if(has_to_print) write(std_out,*) 'completed updatewfnwden with success ', success
   IF (.NOT.success) THEN
      WRITE(STD_OUT,*) 'Bad luck in Sub'
@@ -2608,7 +2609,7 @@ SUBROUTINE Get_EXC(atp,Pot,Orbit)
  n=atp%Grid%n
  fin=atp%grid%n
  if(atp%frozenvalecalculation) fin=atp%PAW%irc+5
- CALL exch(atp%Grid,Orbit%den,Pot%rvx,etxc,eex,itype=atp%itype,ixc=atp%ixc,xclevel=atp%xclevel,&
+ CALL exch(atp%Grid,Orbit%den,Pot%rvx,etxc,eex,itype=atp%itype,&
 & needvtau=Pot%needvtau,tau=Orbit%tau,vtau=Pot%vtau,fin=fin,xc_functionals=atp%xc_functionals)
  atp%SCF%eexc=eex
  etot = atp%SCF%ekin+atp%SCF%estatic+atp%SCF%eexc
@@ -2761,7 +2762,7 @@ END SUBROUTINE radialexcpbe
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !! exch
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-SUBROUTINE exch(Grid,den,rvxc,etxc,eexc,itype,ixc,xclevel,fin,v0,v0p,needvtau,tau,vtau,xc_functionals)
+SUBROUTINE exch(Grid,den,rvxc,etxc,eexc,itype,fin,v0,v0p,needvtau,tau,vtau,xc_functionals)
  !  calculate exchange correlation potentials and energies
  !    for density functional theory from electron density
  !  den(n) is electron density * (4*pi*r**2)
@@ -2781,8 +2782,6 @@ SUBROUTINE exch(Grid,den,rvxc,etxc,eexc,itype,ixc,xclevel,fin,v0,v0p,needvtau,ta
  REAL(dp), INTENT(INOUT) :: rvxc(:),etxc,eexc
  type(libxc_functional_type),intent(inout),optional :: xc_functionals(2)
  integer, intent(in) :: itype
- INTEGER, INTENT(IN),optional :: ixc
- INTEGER, INTENT(IN),optional :: xclevel
  INTEGER, INTENT(IN), OPTIONAL :: fin
  REAL(dp), INTENT(OUT), OPTIONAL :: v0,v0p
  LOGICAL, INTENT(OUT), OPTIONAL :: needvtau
@@ -2996,10 +2995,10 @@ SUBROUTINE exch(Grid,den,rvxc,etxc,eexc,itype,ixc,xclevel,fin,v0,v0p,needvtau,ta
 !   call extrapolate(tmpv)
 !   if (needvtau) vtau=tmpvt
    do i=1,n
-     if (isnan(tmpv(i)).or.abs(tmpv(i)).lt.machine_zero) tmpv(i)=0.d0
-     if (isnan(exci(i)).or.abs(exci(i)).lt.machine_zero) exci(i)=0.d0
-     if (isnan(vtau(i)).or.abs(vtau(i)).lt.machine_zero) vtau(i)=0.d0
-     if (isnan(tmpd(i)).or.abs(tmpd(i)).lt.machine_zero) tmpd(i)=0.d0
+     if (.not.ieee_is_normal(tmpv(i)).or.abs(tmpv(i)).lt.practical_zero) tmpv(i)=0.d0
+     if (.not.ieee_is_normal(exci(i)).or.abs(exci(i)).lt.practical_zero)exci(i)=0.d0
+     if (.not.ieee_is_normal(vtau(i)).or.abs(vtau(i)).lt.practical_zero)vtau(i)=0.d0
+     if (.not.ieee_is_normal(tmpd(i)).or.abs(tmpd(i)).lt.practical_zero)tmpd(i)=0.d0
    enddo
    rvxc=0.d0
    rvxc(1:n)=tmpv(1:n)*Grid%r(1:n)
@@ -3193,14 +3192,14 @@ SUBROUTINE r2scanfun(rho,grad,tau,exc,vtau,vxcn,vxcs)
   REAL(dp) :: rr,ss,tt,sigma
   REAL(dp) :: kF,ks,rs,U,s,p,t,W,baralpha
   REAL(dp) :: gx,x,h0x,h1x,fx,ffx,exarg,ddfx,vxtau,ex,vx
-  REAL(dp) :: ELDA,ELDA0,betc,fc,ddfc,w1,w0,ginfinity,H0c,H1c,ec0,ec1,y,yy
+  REAL(dp) :: ELDA,ELDA0,fc,ddfc,w1,w0,ginfinity,H0c,H1c,ec0,ec1,y
   REAL(dp) :: beta,srs,ddLDA,difddLDA,gg,corarg,ddy,vctau
   REAL(dp) :: alphadenom,dalphadn,dalphads
   REAL(dp) :: gxp,dpdn,dgxdn,dpds,dgxds,drsdn,dt2ds,dt2dn,t2
   REAL(dp) :: h1xx,xp,dh1xdn,dh1xds,vxn,vxs
   REAL(dp) :: vcn,vcs,dLDA0dn,dH0cdn,dw0dn,dgindn,dw1dn
   REAL(dp) :: dH0cds,dginds,dbetadn,dif2ddLDA,dLDAdn
-  REAL(dp) :: pp,dppds,dppdn,dyds,dydn,dUdn,dUds,dWds,dWdn
+  REAL(dp) :: pp,dppds,dppdn,dyds,dydn,dUdn,dWds,dWdn
   REAL(dp) :: term1,term4,dddyds,dddydnp,dddydnw,dddydnr,dH1cds
   REAL(dp) :: stf1,stf2,stf3,stf4,stf5,stf6,stf7
   REAL(dp) :: dddydnn,dddydn,dH1cdwn,dH1cdn,dec1dn,dec1ds
@@ -3665,17 +3664,16 @@ END SUBROUTINE Updatewfn
 !!      Orbit%den=w on input
 !!     only splinesolver works for now
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-SUBROUTINE Updatewfnwden(Grid,Pot,Orbit,w,success,usespline,spline,itype)
+SUBROUTINE Updatewfnwden(Grid,Pot,Orbit,success,usespline,spline,itype)
   integer, intent(in) :: itype
   type(splinesolvinfo),intent(inout) :: spline
   TYPE (GridInfo), INTENT(INOUT) :: Grid
   TYPE (PotentialInfo), INTENT(INOUT) :: Pot
   TYPE (OrbitInfo), INTENT(INOUT) :: Orbit
-  REAL(dp), INTENT(IN) ::  w(:)    
   LOGICAL,intent(inout) :: success
   LOGICAL,intent(in) :: usespline
-  INTEGER :: icount,i,j,k,n,it,start,np,ierr,nroot,s1,s2,s2t
-  INTEGER :: is,ip,id,jf,ig,io,l,nfix,ir,nzeff,jierr,nz,kappa
+  INTEGER :: icount,n,it,start,nroot,s1,s2,s2t
+  INTEGER :: io,l,jierr,nz
   LOGICAL :: calc_s,calc_p,calc_d,calc_f,calc_g
   REAL(dp) :: h,emin,zz
   REAL(dp), ALLOCATABLE :: dum(:)
@@ -5414,7 +5412,7 @@ SUBROUTINE SolveAXeqB(n,A,B,conditionNo)
   REAL(dp), ALLOCATABLE :: WORK(:)
   REAL(dp), ALLOCATABLE :: S(:)
   REAL(dp), PARAMETER :: rtol=1.d-9
-  INTEGER :: i,j,LWORK
+  INTEGER :: i,LWORK
   REAL(dp) :: xx,tol
   REAL(dp), PARAMETER :: one=1,zero=0
   IF (n == 1) THEN
@@ -6812,11 +6810,11 @@ SUBROUTINE SetPAWOptions2(atp,success)
     !Calculate PAW%vtau and PAW%tvtau     
     CALL calculate_tvtau(atp%Grid,atp%PAW,atp%itype)
     !Set pseudoptentials     
-    IF (Vlocalindex==MTROULLIER.and.(TRIM(atp%Orbit%exctype)/='HF')) then
-      if(has_to_print) WRITE(STD_OUT,*) 'TROULLIER PS not available for MGGA '
-      if(has_to_print) WRITE(STD_OUT,*) ' calling VPSmatch with norm conservation instead '     
-      CALL VPSmatch(atp%Grid,atp%Pot,atp%PAW,l,e,.true.,atp%scalarrelativistic)
-    ENDIF         
+ !   IF (Vlocalindex==MTROULLIER.and.(TRIM(atp%Orbit%exctype)/='HF')) then
+ !     if(has_to_print) WRITE(STD_OUT,*) 'TROULLIER PS not available for MGGA '
+ !     if(has_to_print) WRITE(STD_OUT,*) ' calling VPSmatch with norm conservation instead '     
+ !     CALL VPSmatch(atp%Grid,atp%Pot,atp%PAW,l,e,.true.,atp%scalarrelativistic)
+ !   ENDIF         
     IF (Vlocalindex==VPSMATCHNNC) CALL VPSmatch(atp%Grid,atp%Pot,atp%PAW,l,e,.false.,atp%scalarrelativistic)
     IF (Vlocalindex==VPSMATCHNC) CALL VPSmatch(atp%Grid,atp%Pot,atp%PAW,l,e,.true.,atp%scalarrelativistic)
     IF (Vlocalindex==ULTRASOFT) CALL nonncps(atp%Grid,atp%Pot,atp%PAW,l,e,atp%scalarrelativistic)
@@ -6999,7 +6997,7 @@ SUBROUTINE setbasis(Grid,Pot,Orbit,PAW,atp)
  PAW%rvx=Pot%rvx
  PAW%exctype=Orbit%exctype
  nbase=PAW%nbase
- mxbase=nbase+5*max(1,PAW%lmax)
+ mxbase=PAW%mxbase
  ! "filter" occupied states for long-range noise
  DO io=1,Orbit%norbit
    Call Filter(n,Orbit%wfn(:,io),machine_zero)
@@ -7159,9 +7157,9 @@ SUBROUTINE smoothpower(Grid,power,orig,smooth,PAW)
   REAL(dp), INTENT(IN) :: orig(:)
   REAL(dp), INTENT(INOUT) :: smooth(:)
   INTEGER, parameter :: terms=5
-  REAL(dp) :: rc,h,x,y,z,u0,u2,u4
+  REAL(dp) :: rc,h,x
   REAL(dp) :: aa(terms,terms),Ci(terms)
-  INTEGER :: i,j,k,n,irc,many
+  INTEGER :: i,j,n,irc
   n=Grid%n
   h=Grid%h
   irc=PAW%irc_core
@@ -7241,7 +7239,6 @@ SUBROUTINE nonncps(Grid,Pot,PAW,l,e,scalarrelativistic)
   REAL(8) :: b(4),c(4),d(4),amat(4,4)
   REAL(8),ALLOCATABLE ::  VNC(:),wfn(:),aux(:)
   REAL(8),POINTER :: r(:),rv(:)
-  CHARACTER(132) :: line
   !Polynomial definitions
   p0(x,y1,y2,y3)=(x-y1)*(x-y2)*(x-y3)
   p1(x,y1,y2,y3)=(x-y2)*(x-y3)+(x-y1)*(x-y3)+(x-y1)*(x-y2)
@@ -7341,11 +7338,10 @@ SUBROUTINE VPSmatch(Grid,Pot,PAW,l,e,NC,scalarrelativistic)
   REAL(dp),INTENT(IN) :: e
   LOGICAL,INTENT(IN), OPTIONAL :: NC
   REAL(dp), ALLOCATABLE :: VNC(:)
-  REAL(dp) :: A0,A,B,B0,C,C0,D,F,S
-  REAL(dp) :: Coef(6),Coef0,Coef0old
+  REAL(dp) :: C0,S
+  REAL(dp) :: Coef0,Coef0old
   REAL(dp) :: h,rc,delta,x
-  REAL(dp) :: gam,bet
-  INTEGER :: i,j,k,n,iter,nr,nodes,irc,ok,m,wavetype
+  INTEGER :: i,j,n,iter,nr,nodes,irc
   INTEGER, parameter :: match=6
   REAL(dp) :: AAA(match,match),BBB(match)
   REAL(dp) :: AAAA(match-1,match-1),BBBB(match-1)
@@ -7353,7 +7349,6 @@ SUBROUTINE VPSmatch(Grid,Pot,PAW,l,e,NC,scalarrelativistic)
   REAL(dp), PARAMETER :: small=1.0d-9
   REAL(dp), ALLOCATABLE :: wfn(:),p(:),dum(:),aux(:),Kaux(:),v(:),dp1(:),ddp(:)
   REAL(dp), POINTER :: r(:),rv(:)
-  CHARACTER(132) :: line
   LOGICAL :: normcons
   normcons=.false.
   if(PRESENT(NC)) normcons=NC
@@ -7522,10 +7517,10 @@ SUBROUTINE calculate_tvtau(Grid,PAW,itype)
   TYPE(GridInfo), INTENT(IN) :: Grid
   type(pseudoInfo),intent(inout) :: PAW
   integer,intent(in) :: itype
-  INTEGER :: i,j,k,l
+  INTEGER :: i
   REAL(dp), allocatable :: dp1(:),ddp(:),vxc(:),tvxc(:),locald(:),localtd(:)
   REAL(dp), allocatable :: Ktvxc(:),Kd(:)
-  REAL(dp) :: fac,exc,texc,sum,tsum
+  REAL(dp) :: exc,texc,sum,tsum
   REAL(dp), parameter :: small=1.d-5
   LIBPAW_ALLOCATE(dp1,(Grid%n))
   LIBPAW_ALLOCATE(ddp,(Grid%n))
@@ -7729,7 +7724,8 @@ SUBROUTINE InitPAW(PAW,Grid,Orbit)
      ENDIF
    ENDDO
  ENDDO
- mxbase=nbase+5*max(1,PAW%lmax) !Estimate excess
+ PAW%mxbase=nbase+6*max(1,PAW%lmax)
+ mxbase=PAW%mxbase !Estimate excess
  PAW%nbase=nbase
  if(has_to_print) WRITE(STD_OUT,*) 'Found ', nbase,' valence basis functions '
  if(has_to_print) WRITE(STD_OUT,*) 'Allocating for ', mxbase, ' total basis functions'
@@ -8463,7 +8459,7 @@ SUBROUTINE unboundked(Grid,Pot,nr,l,energy,wfn,nodes)
   REAL(dp), INTENT(IN) :: energy
   REAL(dp), INTENT(INOUT) :: wfn(:)
   INTEGER, INTENT(INOUT) :: nodes
-  INTEGER :: n,i,j,k,ierr,istart
+  INTEGER :: n,istart
   REAL(dp) :: oneplusvtau(Grid%n),dvtaudr(Grid%n)
   REAL(dp) :: scale,qq,zxc
   REAL(dp), allocatable :: lwfn(:),zz(:,:,:),yy(:,:)
@@ -8477,7 +8473,7 @@ SUBROUTINE unboundked(Grid,Pot,nr,l,energy,wfn,nodes)
   LIBPAW_ALLOCATE(zz,(2,2,nr))
   LIBPAW_ALLOCATE(yy,(2,nr))
   lwfn=0;zz=0;yy=0;
-  call wfnkedinit(Grid,l,Pot%nz,Pot%v0,energy,wfn,lwfn,istart,zxc,oneplusvtau,dvtaudr)
+  call wfnkedinit(Grid,l,Pot%nz,wfn,lwfn,istart,zxc,oneplusvtau,dvtaudr)
   call setupforcfdsol(Grid,Pot%rv,1,istart,nr,l,energy,wfn,lwfn,yy,zz,oneplusvtau,dvtaudr)
   call cfdsoliter(Grid,zz,yy,istart,nr)
   call getwfnfromcfdsol(1,nr,yy,wfn)
@@ -8503,10 +8499,9 @@ Subroutine Set_Pot(Grid,Pot,qq,zxc,oneplusvtau,dvtaudr)
   real(dp),intent(inout) :: oneplusvtau(:),dvtaudr(:)
   Type(GridInfo), INTENT(IN) :: Grid
   TYPE(PotentialInfo), INTENT(IN) :: Pot
-  INTEGER :: i,j,k,n,nfit
+  INTEGER :: n
   REAL(dp),parameter ::  smallr=0.001d0
   INTEGER, parameter :: order=4
-  REAL(dp) :: A(4,4),X(4),B(4),xx,xxx
   n=Grid%n
   !  check for possible ionic charge
   qq=-Pot%rv(n)/two
@@ -8519,7 +8514,7 @@ END Subroutine Set_Pot
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! SUBROUTINE wfnkedinit(Grid,l,nz,v0,energy,wfn,lwfn,istart)
+! SUBROUTINE wfnkedinit(Grid,l,nz,v0,wfn,lwfn,istart)
 !   returns the solution of the modified KS equations near r=0
 !   using power series expansion assuming including vtau contributions
 !   wfn=P(r)   lwfn=(1+vtau)*dP/dr
@@ -8527,16 +8522,15 @@ END Subroutine Set_Pot
 !   Assumes v(r) ~~ -2*nz/r+zxc/r   for r-->0
 !   Assumes vtau(r) -- t0 +t1*r  for r-->0
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-SUBROUTINE wfnkedinit(Grid,l,nz,v0,energy,wfn,lwfn,istart,zxc,oneplusvtau,dvtaudr)
+SUBROUTINE wfnkedinit(Grid,l,nz,wfn,lwfn,istart,zxc,oneplusvtau,dvtaudr)
   real(dp),intent(in) :: zxc
   real(dp),intent(in) :: oneplusvtau(:),dvtaudr(:)
   Type(GridInfo), INTENT(IN) :: Grid
   INTEGER, INTENT(IN) :: l,nz
-  REAL(dp), INTENT(IN) :: v0,energy
   REAL(dp),INTENT(INOUT) :: wfn(:),lwfn(:)
   INTEGER, INTENT(OUT) :: istart
-  REAL(dp) :: rr,c1,c2,t1,t0
-  INTEGER :: i,j,n
+  REAL(dp) :: rr,c1,t1,t0
+  INTEGER :: i
   t0=oneplusvtau(1);t1=dvtaudr(1)
   wfn=zero; lwfn=zero
   c1=-(two*nz-zxc+l*t1)/(two*(l+1)*(oneplusvtau(1)))
@@ -8603,7 +8597,7 @@ SUBROUTINE initsplinesolver(Grid,splns,splr0,needvtau,spline)
   INTEGER, INTENT(IN) :: splns  !spline grid
   REAL(dp), INTENT(IN) :: splr0  !spline r0
   INTEGER :: i,nf
-  REAL(dp) :: hf,x
+  REAL(dp) :: hf
   spline%r0=splr0
   spline%ns=splns
   spline%h=log(1.d0+Grid%r(Grid%n)/spline%r0)/spline%ns
@@ -8651,8 +8645,7 @@ SUBROUTINE initpotforsplinesolver(Grid,Pot,den,tau,spline,itype)
   integer,intent(in) :: itype
   Type(Potentialinfo), INTENT(INOUT) :: Pot   !Universal grid
   REAL(dp), INTENT(IN) :: den(:),tau(:)  !Universal grid
-  INTEGER :: i,j,k,l,m,n
-  INTEGER :: icount=0
+  INTEGER :: i,n
   REAL(dp), allocatable :: dum(:),dum1(:)
   REAL(dp) :: etxc,eexc
   n=Grid%n
@@ -8701,9 +8694,8 @@ SUBROUTINE Boundsplinesolver(Grid,l,neig,eig,wfn,otau,OK,spline)
   REAL(dp), allocatable :: P(:),MP(:)
   REAL(dp), allocatable :: dum(:),dP1(:)
   REAL(dp), allocatable :: F1(:,:),F2(:,:),S(:),E(:),V(:)
-  integer :: i,j,m,n, info,lwork,nu
+  integer :: i,m,n, info,lwork,nu
   real(dp) :: ol,x
-  integer :: icount=0
   if(has_to_print) write(std_out,*) 'entering boundspline with l,neig ', l, neig
   if(has_to_print) write(std_out,*) 'in splinesolver '
   OK=.false.
@@ -8815,7 +8807,7 @@ SUBROUTINE Boundsplinesolver(Grid,l,neig,eig,wfn,otau,OK,spline)
     endif
     MP=spline%pref*(MP-0.25d0*P)/spline%rr2
     P=spline%pref*P
-    call specialinterp(l,n,spline%Grids%r,P,MP,Grid%n,Grid%r,wfn(:,m),dP1(:))
+    call specialinterp(n,spline%Grids%r,P,MP,Grid%n,Grid%r,wfn(:,m),dP1(:))
     dum=0.d0; dum(2:nu)=wfn(2:nu,m)/Grid%r(2:nu)
     call extrapolate(dum)
     do i=1,nu
@@ -8934,11 +8926,11 @@ SUBROUTINE boundD(Grid,Pot,eig,wfn,lwfn,kappa,nroot,emin,ierr,success)
   REAL(dp), ALLOCATABLE :: p1(:),lp1(:),p2(:),lp2(:),dd(:)
   INTEGER :: n
   REAL(dp) :: nz,h,v0,v0p
-  REAL(dp) :: err,convrez,energy,zeroval
+  REAL(dp) :: err,convrez,energy
   REAL(dp) :: scale,emax,best,rout
-  REAL(dp) :: arg,r,r2,veff,pppp1,rin,dele,x,rvp1,pnp1,bnp1
-  INTEGER :: iter,i,j,k,node,match,mxroot,ntroot,ir,iroot,l
-  INTEGER :: least,many,ifac,istart,iend
+  REAL(dp) :: arg,rin,dele,x
+  INTEGER :: iter,i,j,node,match,mxroot,ntroot,ir,iroot,l
+  INTEGER :: ifac,istart,iend
   LOGICAL :: ok
   Real(dp) :: A0,B0,A1,B1,s
   REAL(dp), allocatable :: zz(:,:,:),yy(:,:)
@@ -8967,7 +8959,7 @@ SUBROUTINE boundD(Grid,Pot,eig,wfn,lwfn,kappa,nroot,emin,ierr,success)
   energy = zero
   call Dzeroexpand(Grid,Pot,kappa,energy,A0,A1,B0,B1,s)
   zz=zero;yy=zero
-  call wfnDinit(Grid,l,p1,lp1,istart,A0,A1,B0,B1,s,Pot%finitenucleus)
+  call wfnDinit(Grid,p1,lp1,istart,A0,A1,B0,B1,s,Pot%finitenucleus)
   !start outward integration
   call prepareforcfdsolD(Grid,1,istart,n,kappa,p1,lp1,yy,zz,Pot%ww,Pot%jj)
   call cfdsoliter(Grid,zz,yy,istart,n)
@@ -9008,7 +9000,7 @@ SUBROUTINE boundD(Grid,Pot,eig,wfn,lwfn,kappa,nroot,emin,ierr,success)
       call getwfnfromcfdsolD(match,n,yy,p2,lp2)
       match=match+6
       rin=lp2(match)/p2(match)
-      call wfnDinit(Grid,l,p1,lp1,istart,A0,A1,B0,B1,s,Pot%finitenucleus)
+      call wfnDinit(Grid,p1,lp1,istart,A0,A1,B0,B1,s,Pot%finitenucleus)
       call prepareforcfdsolD(Grid,1,istart,n,kappa,p1,lp1,yy,zz,Pot%ww,Pot%jj)
       call cfdsoliter(Grid,zz,yy,istart,match+6)
       call getwfnfromcfdsolD(1,match+6,yy,p1,lp1)
@@ -9145,8 +9137,8 @@ Subroutine Dzeroexpand(Grid,Pot,kappa,energy,A0,A1,B0,B1,s,nr)
   Integer, INTENT(IN) :: kappa
   Real(dp), INTENT(IN) :: energy
   Integer, optional, INTENT(IN) :: nr
-  Integer :: i,j,k,n
-  Real(dp) :: nz,xx,yy,angm,alpha2,balpha2
+  Integer :: n
+  Real(dp) :: nz,alpha2,balpha2
   Real(dp) :: x,y,z
   n=Grid%n
   if (present(nr)) n=min(n,nr)
@@ -9178,15 +9170,14 @@ end subroutine Dzeroexpand
 !! returns the solution of the Dirac relativistic equations near r=0
 !!  using power series expansion
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-SUBROUTINE wfnDinit(Grid,kappa,wfn,lwfn,istart,A0,A1,B0,B1,s,finitenucleus)
+SUBROUTINE wfnDinit(Grid,wfn,lwfn,istart,A0,A1,B0,B1,s,finitenucleus)
   logical,intent(in) :: finitenucleus
   Real(dp), intent(in) :: A0,B0,A1,B1,s
   Type(GridInfo), INTENT(IN) :: Grid
-  INTEGER, INTENT(IN) :: kappa
   REAL(dp),INTENT(INOUT) :: wfn(:),lwfn(:)
   INTEGER, INTENT(OUT) :: istart
-  REAL(dp) :: rr,M
-  INTEGER :: i,j,n
+  REAL(dp) :: rr
+  INTEGER :: i
   wfn=zero; lwfn=zero
   istart=6
   do i=1,istart
@@ -9212,8 +9203,8 @@ subroutine wfnDasym(Grid,wfn,lwfn,energy,iend)
   REAL(dp),INTENT(INOUT) :: wfn(:),lwfn(:)
   REAL(dp), INTENT(IN) :: energy
   INTEGER, INTENT(OUT) :: iend
-  REAL(dp) :: rr,x,m,qx
-  INTEGER :: i,j,n
+  REAL(dp) :: rr,x,m
+  INTEGER :: i,n
   if (energy>0.d0) then
     write(std_out,*) 'Error in wfnDasym -- energy > 0', energy
     stop
@@ -9265,7 +9256,7 @@ SUBROUTINE interpfunc(nin,rin,fin,nout,rout,fout)
   REAL(dp), INTENT(IN) :: rin(:),fin(:),rout(:)
   REAL(dp), INTENT(INOUT) :: fout(:)
   REAL(dp), ALLOCATABLE :: c(:,:)
-  INTEGER :: i,j,nacount=0
+  INTEGER :: i,j
   REAL(dp) :: x,s
   LOGICAL :: leftin,lefton,leftout,rightin,righton,rightout
   !  check if grid is within interpolation range
@@ -9446,14 +9437,13 @@ END subroutine cubspl
 !     it is assumed that yout=r**(l+1)(W0+W1*r) where l denotes
 !     the angular momentum of the function
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-subroutine specialinterp(l,nin,rin,yin,MMin,nout,rout,yout,ypout)
-  integer, intent(IN) :: l,nin,nout
+subroutine specialinterp(nin,rin,yin,MMin,nout,rout,yout,ypout)
+  integer, intent(IN) :: nin,nout
   real(dp), intent(IN) :: rin(:),yin(:),MMin(:),rout(:)
   real(dp), intent(INOUT) :: yout(:),ypout(:)
   real(dp), allocatable :: h(:),C(:,:)
-  real(dp) :: W0,W1,x
-  integer :: i,j,k
-  logical :: ok
+  real(dp) :: x
+  integer :: i,j
   LOGICAL :: leftin,lefton,leftout,rightin,righton,rightout
   LIBPAW_ALLOCATE(h,(nin))
   LIBPAW_ALLOCATE(C,(4,nin))

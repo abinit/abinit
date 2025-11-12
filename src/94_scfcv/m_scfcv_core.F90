@@ -1989,8 +1989,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      if(associated(rcpaw)) then
        if(.not.rcpaw%all_atoms_relaxed) then
          call rcpaw_core_eig(pawtab,pawrad,dtset%ntypat,rcpaw,dtset,&
-&         nfftf,vhartr+vpsp,cplex,ucvol_local,paw_an,&
-&         gmet,rprimd,xred,ngfftf,my_natom,extfpmd,&
+&         nfftf,vhartr+vpsp,cplex,ucvol_local,&
+&         gmet,rprimd,xred,ngfftf,my_natom,&
 &         distribfft=mpi_enreg%distribfft,comm_fft=spaceComm_fft,&
 &         mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
        endif
