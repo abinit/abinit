@@ -5026,7 +5026,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
              do in_k=1,nb_k
                n_k = in_k + bstart_k - 1
                gg = sqrt(g2_mn(im_kq, in_k))
-               write(ab_out, "(1x,5(i5,1x),es16.6)") iq_glob, ik_glob, ipc, m_kq, n_k, gg
+               write(ab_out, "(a1,5(i5,1x),es16.6)")"-", iq_glob, ik_glob, ipc, m_kq, n_k, gg
              end do
            end do
         else
@@ -5044,9 +5044,9 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
               n_k = in_k + bstart_k - 1
               gg = sqrt(g2_mn(im_kq, in_k))
               gg_ks = sqrt(g2ks_mn(im_kq, in_k))
-              write(ab_out, "(1x,5(i5,1x),2(es16.6))") iq_glob, ik_glob, ipc, m_kq, n_k, gg, gg_ks
+              write(ab_out, "(a1,5(i5,1x),2(es16.6))")"-", iq_glob, ik_glob, ipc, m_kq, n_k, gg, gg_ks
               !call safe_div(gg, gg_ks, -one, g_ratio)
-              !write(ab_out, "(1x,5(i5,1x),3(es16.6))") iq_glob, ik_glob, ipc, m_kq, n_k, gg, gg_ks, g_ratio
+              !write(ab_out, "(a1,5(i5,1x),3(es16.6))")"-", iq_glob, ik_glob, ipc, m_kq, n_k, gg, gg_ks, g_ratio
             end do
           end do
         end if
