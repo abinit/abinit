@@ -421,7 +421,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
     *eu = trace_rho_op_paral(rho,Hint,h_loc_diag,rank,nproc);
     *eu = all_reduce(*eu,comm);
 
-    if (!leg_measure && (integral == 0 || debug)) { // Get moments of the self-energy
+    if (!leg_measure && integral == 0) { // Get moments of the self-energy
 
       many_body_operator commut,commut2,Sinf_op,S1_op;
 
