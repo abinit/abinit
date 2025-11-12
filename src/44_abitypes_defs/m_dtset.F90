@@ -148,7 +148,6 @@ type, public :: dataset_type
  integer :: dmft_t2g
  integer :: dmft_triqs_basis
  integer :: dmft_triqs_compute_integral
- integer :: dmft_triqs_debug
  integer :: dmft_triqs_det_init_size
  integer :: dmft_triqs_det_n_operations_before_check
  integer :: dmft_triqs_entropy
@@ -168,6 +167,7 @@ type, public :: dataset_type
  integer :: dmft_triqs_n_warmup_cycles_restart
  integer :: dmft_triqs_nsubdivisions
  integer :: dmft_triqs_off_diag
+ integer :: dmft_triqs_prt_entropy
  integer :: dmft_triqs_random_seed_a
  integer :: dmft_triqs_random_seed_b
  integer :: dmft_triqs_read_ctqmcdata
@@ -1594,7 +1594,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmft_tollc         = dtin%dmft_tollc
  dtout%dmft_triqs_basis   = dtin%dmft_triqs_basis
  dtout%dmft_triqs_compute_integral = dtin%dmft_triqs_compute_integral
- dtout%dmft_triqs_debug = dtin%dmft_triqs_debug
  dtout%dmft_triqs_det_init_size = dtin%dmft_triqs_det_init_size
  dtout%dmft_triqs_det_n_operations_before_check = dtin%dmft_triqs_det_n_operations_before_check
  dtout%dmft_triqs_det_precision_error = dtin%dmft_triqs_det_precision_error
@@ -1621,6 +1620,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmft_triqs_nsubdivisions = dtin%dmft_triqs_nsubdivisions
  dtout%dmft_triqs_off_diag = dtin%dmft_triqs_off_diag
  dtout%dmft_triqs_pauli_prob = dtin%dmft_triqs_pauli_prob
+ dtout%dmft_triqs_prt_entropy = dtin%dmft_triqs_prt_entropy
  dtout%dmft_triqs_random_seed_a = dtin%dmft_triqs_random_seed_a
  dtout%dmft_triqs_random_seed_b = dtin%dmft_triqs_random_seed_b
  dtout%dmft_triqs_read_ctqmcdata = dtin%dmft_triqs_read_ctqmcdata
@@ -3638,7 +3638,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmft_nlambda dmft_nominal dmft_nwli dmft_nwlo'
  list_vars=trim(list_vars)//' dmft_occnd_imag dmft_orbital dmft_orbital_filepath dmft_prt_maxent dmft_prtself dmft_prtwan dmft_read_occnd'
  list_vars=trim(list_vars)//' dmft_rslf dmft_shiftself dmft_solv dmft_t2g dmft_tolfreq dmft_tollc'
- list_vars=trim(list_vars)//' dmft_triqs_basis dmft_triqs_compute_integral dmft_triqs_debug dmft_triqs_det_init_size'
+ list_vars=trim(list_vars)//' dmft_triqs_basis dmft_triqs_compute_integral dmft_triqs_det_init_size'
  list_vars=trim(list_vars)//' dmft_triqs_det_n_operations_before_check dmft_triqs_det_precision_error'
  list_vars=trim(list_vars)//' dmft_triqs_det_precision_warning dmft_triqs_det_singular_threshold dmft_triqs_dlr_epsilon dmft_triqs_dlr_wmax'
  list_vars=trim(list_vars)//' dmft_triqs_entropy dmft_triqs_gaussorder dmft_triqs_imag_threshold'
@@ -3646,7 +3646,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmft_triqs_measure_density_matrix dmft_triqs_measure_g_l dmft_triqs_move_double'
  list_vars=trim(list_vars)//' dmft_triqs_move_shift dmft_triqs_n_cycles dmft_triqs_n_iw dmft_triqs_n_l dmft_triqs_n_tau dmft_triqs_n_warmup_cycles_init'
  list_vars=trim(list_vars)//' dmft_triqs_n_warmup_cycles_restart dmft_triqs_nsubdivisions dmft_triqs_off_diag dmft_triqs_pauli_prob'
- list_vars=trim(list_vars)//' dmft_triqs_random_seed_a dmft_triqs_random_seed_b dmft_triqs_read_ctqmcdata dmft_triqs_shift_mu'
+ list_vars=trim(list_vars)//' dmft_triqs_prt_entropy dmft_triqs_random_seed_a dmft_triqs_random_seed_b dmft_triqs_read_ctqmcdata dmft_triqs_shift_mu'
  list_vars=trim(list_vars)//' dmft_triqs_time_invariance dmft_triqs_tol_block dmft_triqs_use_norm_as_weight'
  list_vars=trim(list_vars)//' dmft_wanorthnorm dmft_wanrad dmft_x2my2d dmft_yukawa_epsilon dmft_yukawa_lambda dmft_yukawa_param'
  list_vars=trim(list_vars)//' dmftbandf dmftbandi dmftcheck dmftctqmc_basis'

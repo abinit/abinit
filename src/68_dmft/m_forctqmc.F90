@@ -3215,7 +3215,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
  basis          = paw_dmft%dmftctqmc_basis
  beta           = one / paw_dmft%temp
- debug          = paw_dmft%dmft_triqs_debug
+ debug          = paw_dmft%dmft_triqs_prt_entropy
  density_matrix = paw_dmft%dmft_triqs_measure_density_matrix
  entropy        = (paw_dmft%dmft_triqs_entropy == 1)
  integral       = paw_dmft%dmft_triqs_compute_integral
@@ -3797,7 +3797,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
          end if
        end do ! isppol
 
-       if ((.not. leg_measure) .and. density_matrix) then
+       if ((.not. leg_measure) .and. density_matrix .and. ilam == ntot) then
 
          ! Constrain the occupations and high-frequency moments with the more accurate values sampled from the CTQMC
 
@@ -3987,7 +3987,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
          ABI_FREE(gl_tmp)
          ABI_FREE(t_lp)
 
-       else
+       else if (ilam == ntot) then
 
          ABI_MALLOC(gl_dlr,(ndlr,tndim,tndim,nsppol))
          ABI_MALLOC(gl_dlr_re,(ndlr))

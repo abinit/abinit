@@ -419,9 +419,6 @@ MODULE m_paw_dmft
   integer :: use_sc_dmft
   ! 1 for charge-self consistent calculations
 
-  logical :: dmft_triqs_debug
-  ! TRIQS CTQMC: Flag to activate debug for entropy calculation
-
   logical :: dmft_triqs_leg_measure
   ! TRIQS CTQMC: Flag to activate Legendre measurement
 
@@ -436,6 +433,9 @@ MODULE m_paw_dmft
 
   logical :: dmft_triqs_off_diag
   ! TRIQS CTQMC: Flag to sample the off-diagonal elements of the Green's function
+
+  logical :: dmft_triqs_prt_entropy
+  ! TRIQS CTQMC: Flag to print more information during entropy calculation
 
   logical :: dmft_triqs_time_invariance
   ! TRIQS CTQMC: Flag to activate the use of time invariance for the sampling
@@ -1170,7 +1170,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_triqs_read_ctqmcdata                = dtset%dmft_triqs_read_ctqmcdata
  paw_dmft%dmft_triqs_pauli_prob                    = dtset%dmft_triqs_pauli_prob
  paw_dmft%dmft_triqs_n_cycles                      = dtset%dmft_triqs_n_cycles
- paw_dmft%dmft_triqs_debug                         = (dtset%dmft_triqs_debug == 1)
+ paw_dmft%dmft_triqs_prt_entropy                   = (dtset%dmft_triqs_prt_entropy == 1)
  paw_dmft%dmft_triqs_shift_mu                      = dtset%dmft_triqs_shift_mu
 
 !==============================

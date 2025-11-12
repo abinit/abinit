@@ -2336,7 +2336,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_occnd_imag=1
    dtsets(idtset)%dmft_orbital(:)=1
    dtsets(idtset)%dmft_prt_maxent=1
-   dtsets(idtset)%dmft_prtself=1
+   dtsets(idtset)%dmft_prtself=0
    dtsets(idtset)%dmft_prtwan=0
    dtsets(idtset)%dmft_read_occnd=0
    dtsets(idtset)%dmft_rslf=1
@@ -2348,7 +2348,6 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_tollc=tol5
    dtsets(idtset)%dmft_triqs_basis=-1
    dtsets(idtset)%dmft_triqs_compute_integral=1
-   dtsets(idtset)%dmft_triqs_debug=0
    dtsets(idtset)%dmft_triqs_det_init_size=100
    dtsets(idtset)%dmft_triqs_det_n_operations_before_check=10000
    dtsets(idtset)%dmft_triqs_det_precision_error=1.0d-5
@@ -2375,6 +2374,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_triqs_nsubdivisions=1
    dtsets(idtset)%dmft_triqs_off_diag=-1
    dtsets(idtset)%dmft_triqs_pauli_prob=0.8
+   dtsets(idtset)%dmft_triqs_prt_entropy=0
    dtsets(idtset)%dmft_triqs_random_seed_a=34788
    dtsets(idtset)%dmft_triqs_random_seed_b=928374
    dtsets(idtset)%dmft_triqs_read_ctqmcdata=1

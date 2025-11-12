@@ -3312,7 +3312,7 @@ Variable(
     vartype="integer",
     topics=['DMFT_expert', 'DmftTriqsCthyb_expert'],
     dimensions="scalar",
-    defaultval=1,
+    defaultval=0,
     mnemonics="Dynamical Mean Field Theory: PRinT SELF-energy",
     requires="[[usedmft]] == 1",
     added_in_version="before_v10.5.6",
