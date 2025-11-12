@@ -491,8 +491,8 @@ MODULE m_paw_dmft
   real(dp) :: dmft_triqs_pauli_prob
   ! TRIQS CTQMC: Probability for proposing Pauli-aware insert and remove
 
-  real(dp) :: dmft_triqs_shift_level
-  ! TRIQS CTQMC: Shift for the electronic levels for thermodynamic integration
+  real(dp) :: dmft_triqs_shift_mu
+  ! TRIQS CTQMC: Shift of the chemical potential for thermodynamic integration
 
   real(dp) :: dmft_triqs_tol_block
   ! TRIQS CTQMC: Off-diagonal elements below this threshold are set to 0
@@ -1171,7 +1171,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_triqs_pauli_prob                    = dtset%dmft_triqs_pauli_prob
  paw_dmft%dmft_triqs_n_cycles                      = dtset%dmft_triqs_n_cycles
  paw_dmft%dmft_triqs_debug                         = (dtset%dmft_triqs_debug == 1)
- paw_dmft%dmft_triqs_shift_level                   = dtset%dmft_triqs_shift_level
+ paw_dmft%dmft_triqs_shift_mu                      = dtset%dmft_triqs_shift_mu
 
 !==============================
 !==  Variables for DMFT itself
