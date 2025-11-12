@@ -4037,7 +4037,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  call xmpi_barrier(gstore%comm)
 
  ! Output some of the results to ab_out for testing purposes
- call gstore%print_for_abitests(dtset, ebands, .False.)
+ call gstore%print_for_abitests(dtset, ebands, .True.)
 
  ! Free memory
  ABI_FREE(gvnlx1)
@@ -4841,11 +4841,9 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
  integer :: glob_nq, glob_nk, im_kq, in_k, m_kq, n_k, nb_k, nb_kq, ii ! ib_k,
  integer :: bstart_k, bstop_k, bstart_kq, bstop_kq, max_nk, max_nq
  integer :: ik_bz, ik_ibz, ib_min_k, ib_max_k, iq_bz, ikq_ibz, ib_min_kq, ib_max_kq
- logical :: with_ks__, changed_k, changed_kq
- !logical,parameter :: all_gs = .True.
- logical,parameter :: all_gs = .False.
+ logical :: with_ks__, changed_k, changed_kq, all_gs
  real(dp),parameter :: TOL_EDIFF = 0.001_dp * eV_Ha
- real(dp) :: gg, gg_ks, g_ratio !, vnk
+ real(dp) :: gg, gg_ks !, g_ratio !, vnk
  character(len=abi_slen) :: gstore_gmode
  character(len=500) :: msg
 !arrays
@@ -4860,6 +4858,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
  if (xmpi_comm_rank(gstore%comm) /= master) return
 
  with_ks__ = .False.; if (present(with_ks)) with_ks__ = with_ks
+ all_gs = .False. ; if (dtset%prtvol >= 10) all_gs = .True.
 
  natom3 = dtset%natom * 3
  max_nq = maxval(gstore%glob_nq_spin) ! Max dim over spin
