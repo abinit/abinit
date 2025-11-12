@@ -3485,6 +3485,13 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      call chkint_eq(1,3,cond_string,cond_values,ierr,'prtden',dt%prtden,1,(/1/),iout)
    end if
 
+! prepalw
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'projected_so',dt%projected_so,2,(/0,1/),iout)
+   if (dt%projected_so /= 0) then
+     ABI_CHECK_NOSTOP(dt%use_gbt == 1, 'projected_so requires GBT', ierr)
+     ABI_CHECK_NOSTOP(any(dt%so_psp(1:npsp) > 0), 'projected_so requires so_psp > 0 ', ierr)
+   end if
+
 !  prtbbb
 !  Not allowed for PAW
    if(usepaw==1.and.dt%prtbbb==1)then
@@ -4641,7 +4648,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      ABI_CHECK_NOSTOP(dt%gpu_option == ABI_GPU_DISABLED, 'GBT is not compatible with GPUs', ierr)
      ABI_CHECK_NOSTOP(dt%nspinor == 2, 'GBT requires nspinor 2', ierr)
      ABI_CHECK_NOSTOP(dt%nspden == 4, 'GBT requires nspden 4', ierr)
-     ABI_CHECK_NOSTOP(all(dt%so_psp(1:npsp) == 0), 'GBT requires so_psp == 0', ierr)
+!     ABI_CHECK_NOSTOP(all(dt%so_psp(1:npsp) == 0), 'GBT requires so_psp == 0', ierr)
      ABI_CHECK_NOSTOP(all(dt%istwfk(1:nkpt) == 1), 'GBT requires istwfk == 1', ierr)
      ABI_CHECK_NOSTOP(dt%usefock == 0, 'GBT with Fock is not coded', ierr)
      ABI_CHECK_NOSTOP(.not. xc_is_mgga, 'GBT with meta-GGA is not coded', ierr)

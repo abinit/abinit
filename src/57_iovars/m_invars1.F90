@@ -255,6 +255,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  dtsets(:)%userre=zero
  dtsets(:)%usewvl = 0
  dtsets(:)%plowan_compute=0
+ dtsets(:)%projected_so=0
 
  ! Loop on datasets, to find natom and mxnatom, as well as useri and userr
  do idtset=1,ndtset_alloc
@@ -368,6 +369,10 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ! Read plowan_compute
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'plowan_compute',tread,'INT')
    if(tread==1) dtsets(idtset)%plowan_compute=intarr(1)
+
+   ! Read projected_so
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'projected_so',tread,'INT')
+   if(tread==1) dtsets(idtset)%projected_so=intarr(1)
 
    ! Read extfpmd calculations
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useextfpmd',tread,'INT')
