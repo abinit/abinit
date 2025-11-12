@@ -481,7 +481,7 @@ P Number of CPUs for parallelism over k-points: 1
  glob_nq: 216
  glob_nk: 173
  E-PH matrix elements in the atom representation: pcase = (idir, iatom)
- NB: Values are NOT averaged over e_mk+q, and e_nk degenerate states.
+ NB: Values are averaged over e_mk+q, and e_nk degenerate states.
     iq    ik pcase  m_kq   n_k        |g| in Ha
  |g(k,q)| in Ha for iq: 1 ik: 1 pcase: 4
     iq    ik pcase  m_kq   n_k              |g|

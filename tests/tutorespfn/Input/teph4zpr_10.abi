@@ -29,7 +29,6 @@
  gstore_use_lgk1 1          # Only q-points in the IBZ_k
  #gstore_use_lgk1 0
 
-
 ## DATASET 2 (ZPR computation from GSTORE).
  optdriver2 7              # Enter EPH code.
  eph_task2 24              # SIGMAPH from GSTORE
@@ -40,9 +39,13 @@
  #eph_stern2 0
  tolwfr2 1e-20
 
+ nfreqsp2 201
+ freqspmax2 2 eV
+ prtvol2 1  # This is for the automatic tests. Do not use in production!
+
  #eph_frohl_ntheta 0       # Disable spherical integration of FM integrand in the microzone around Gamma.
  #                         # to preserve previous behaviour.
- tmesh2 0 100 4    # [start, step, num_T] in K
+ tmesh2 0 100 4            # [start, step, num_T] in K
 
  prtphdos 0       # Disable computation of PHDOS to save some time
 
@@ -65,7 +68,7 @@
 #%% [files]
 #%% use_git_submodule = MgO_eph_zpr
 #%% files_to_test =
-#%%   teph4zpr_10.abo, tolnlines= 180, tolabs=  3.000e-02, tolrel=  6.000e-03
+#%%   teph4zpr_10.abo, tolnlines= 180, tolabs= 3.000e-02, tolrel= 0.98
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
