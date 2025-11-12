@@ -1271,25 +1271,6 @@ test -e "fallbacks" || ${INSTALL} -d -m 755 "fallbacks"
 ${INSTALL} -m 644 "${abinit_srcdir}/fallbacks/Makefile.am" \
   "fallbacks/Makefile"
 
-# Call CMake to generate Makefile for Kokkos sources directories
-if test "${sd_kokkos_enable}" = "yes"; then
-  rm ${abinit_builddir}/src/16_kokkos_toolbox/Makefile
-  cd ${abinit_builddir}/src/16_kokkos_toolbox && \
-    cmake ${abinit_srcdir}/shared/common/src/16_kokkos_toolbox/. -Wno-dev  \
-    -DUSE_AUTOTOOLS_BUILD_COMPAT=ON -DABINIT_SRC_DIR=${abinit_srcdir} \
-    -DCMAKE_C_FLAGS="${CFLAGS}" -DCMAKE_Fortran_FLAGS="${FCFLAGS}"  \
-    -DCMAKE_CXX_FLAGS="-O2" -DCMAKE_C_COMPILER=${CC}  -DCMAKE_CXX_COMPILER=${CXX} \
-    -DCMAKE_Fortran_COMPILER=${FC} && \
-    cd -
-  rm ${abinit_builddir}/src/44_manage_kokkos/Makefile
-  cd ${abinit_builddir}/src/44_manage_kokkos && \
-    cmake ${abinit_srcdir}/src/44_manage_kokkos/. -Wno-dev  \
-    -DUSE_AUTOTOOLS_BUILD_COMPAT=ON -DABINIT_SRC_DIR=${abinit_srcdir} \
-    -DCMAKE_C_FLAGS="${CFLAGS}" -DCMAKE_Fortran_FLAGS="${FCFLAGS}"  \
-    -DCMAKE_CXX_FLAGS="-O2" -DCMAKE_C_COMPILER=${CC}  -DCMAKE_CXX_COMPILER=${CXX} \
-    -DCMAKE_Fortran_COMPILER=${FC} && \
-    cd -
-fi
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
@@ -1324,6 +1305,29 @@ fi
 AC_SUBST(FALLBACKS_SUBDIRS)
 
 AC_OUTPUT
+
+
+# Call CMake to generate Makefile for Kokkos sources directories
+if test "${sd_kokkos_enable}" = "yes"; then
+  rm ${abinit_builddir}/src/16_kokkos_toolbox/Makefile
+  cd ${abinit_builddir}/src/16_kokkos_toolbox && \
+    cmake ${abinit_srcdir}/shared/common/src/16_kokkos_toolbox/. -Wno-dev  \
+    -DUSE_AUTOTOOLS_BUILD_COMPAT=ON -DABINIT_SRC_DIR=${abinit_srcdir} \
+    -DCMAKE_C_FLAGS="${CFLAGS}" -DCMAKE_Fortran_FLAGS="${FCFLAGS}"  \
+    -DCMAKE_CXX_FLAGS="-O2" -DCMAKE_C_COMPILER=${CC}  -DCMAKE_CXX_COMPILER=${CXX} \
+    -DCMAKE_Fortran_COMPILER=${FC} && \
+    cd -
+  rm ${abinit_builddir}/src/44_manage_kokkos/Makefile
+  cd ${abinit_builddir}/src/44_manage_kokkos && \
+    cmake ${abinit_srcdir}/src/44_manage_kokkos/. -Wno-dev  \
+    -DUSE_AUTOTOOLS_BUILD_COMPAT=ON -DABINIT_SRC_DIR=${abinit_srcdir} \
+    -DCMAKE_C_FLAGS="${CFLAGS}" -DCMAKE_Fortran_FLAGS="${FCFLAGS}"  \
+    -DCMAKE_CXX_FLAGS="-O2" -DCMAKE_C_COMPILER=${CC}  -DCMAKE_CXX_COMPILER=${CXX} \
+    -DCMAKE_Fortran_COMPILER=${FC} && \
+    cd -
+fi
+
+
 if test "x${mandatory}" = "x#"; then
   ABI_TRIGGERS_SUMMARY	
   ABI_MSG_NOTICE_L([help-fb], [Missing Mandatory library!])
