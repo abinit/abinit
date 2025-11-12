@@ -318,6 +318,9 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
 
     qmc_data_hfilew.close();
   }
+
+  if (rank == 0) cout << endl << "   == File written " << endl;
+
 #endif
 
   if (integral == 0 || debug) {
@@ -353,12 +356,16 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
     auto subspaces = h_loc_diag.n_subspaces();
     auto rho = solver.density_matrix();
 
+    complex<double> occ_tmp [num_orbitals] = {0};
+
     for (int iblock : range(nblocks))
       for (int o : range(siz_list[iblock])) {
         iflavor = flavor_list[o+iblock*num_orbitals];
         n_op = c_dag(to_string(iblock),o) * c(to_string(iblock),o);
-        occ[iflavor] = trace_rho_op_paral(rho,n_op,h_loc_diag,rank,nproc);
+        occ_tmp[iflavor] = trace_rho_op_paral(rho,n_op,h_loc_diag,rank,nproc);
       }
+
+    MPI_Allreduce(occ_tmp,occ,num_orbitals,MPI_C_DOUBLE_COMPLEX,MPI_SUM,comm);
 
     if (rank == 0 && (integral == 0 || debug)) {
 
@@ -412,11 +419,13 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
     }
 
     *eu = trace_rho_op_paral(rho,Hint,h_loc_diag,rank,nproc);
+    *eu = all_reduce(*eu,comm);
 
     if (!leg_measure && (integral == 0 || debug)) { // Get moments of the self-energy
 
       many_body_operator commut,commut2,Sinf_op,S1_op;
 
+      complex<double> mself2 [num_orbitals] = {0};
       auto Sinf_mat = matrix_t(num_orbitals,num_orbitals);
       Sinf_mat = h_scalar_t{0};
 
@@ -428,8 +437,11 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
           commut2 = c_dag(to_string(iblock),o)*Hint - Hint*c_dag(to_string(iblock),o);
           S1_op = commut2*commut + commut*commut2;
           Sinf_mat(iflavor,iflavor) = trace_rho_op_paral(rho,Sinf_op,h_loc_diag,rank,nproc);
-          moments_self_2[iflavor] = trace_rho_op_paral(rho,S1_op,h_loc_diag,rank,nproc);
+          mself2[iflavor] = trace_rho_op_paral(rho,S1_op,h_loc_diag,rank,nproc);
         }
+
+      Sinf_mat = all_reduce(Sinf_mat,comm);
+      MPI_Allreduce(mself2,moments_self_2,num_orbitals,MPI_C_DOUBLE_COMPLEX,MPI_SUM,comm);
 
       for (int iflavor : range(num_orbitals)) moments_self_1[iflavor] = Sinf_mat(iflavor,iflavor);
 
@@ -500,6 +512,7 @@ void build_dlr(int wdlr_size, int *ndlr, double *wdlr, double lam, double eps) {
 
 // This is a copy from a function of TRIQS, which I parallelized since they are not doing it and this function takes forever (E. Castiel)
 // Please make sure it is kept up to date with the official function
+// CAREFUL: the result is not reduced on all CPUs, you have to do it manually after calling the routine
 template <bool Complex>
 ATOM_DIAG_T::scalar_t trace_rho_op_paral(ATOM_DIAG_T::block_matrix_t const &density_matrix,
                                          ATOM_DIAG_T::many_body_op_t const &op,
@@ -525,8 +538,6 @@ ATOM_DIAG_T::scalar_t trace_rho_op_paral(ATOM_DIAG_T::block_matrix_t const &dens
   auto is_block_matrix_hermitian = [](ATOM_DIAG_T::block_matrix_t const &bm) {
     return std::all_of(bm.begin(), bm.end(), [](ATOM_DIAG_T::matrix_t const &mat) { return max_element(abs(mat - dagger(mat))) == 0.0; });
   };
-
-  result = all_reduce(result,MPI_COMM_WORLD);
 
   // check if op && density matrix are hermitian, if so return real(result)
   // The product of two hermitian matrices is hermitian, hence the Tr(rho * Op)

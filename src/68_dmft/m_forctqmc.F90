@@ -3186,7 +3186,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  integer :: nspinor,nsppol,nsub,ntau,ntot,nwlo,p,pad_elam,pad_lambda,read_data,rot_type_vee,tndim,unt,verbo,wdlr_size
  integer, target :: ndlr
  logical :: debug,density_matrix,entropy,leg_measure,nondiag,off_diag,rot_inv
- real(dp) :: besp,bespp,beta,dx,elam,emig_tot,err,err_,fact,fact2,shift_level,tau,tol,xtau,xx
+ real(dp) :: besp,bespp,beta,dx,elam,emig_tot,err,err_,fact,fact2,shift_mu,tau,tol,xtau,xx
  complex(dp) :: mself_1,mself_2,occ_tmp,u_nl
  complex(dp), target :: eu
  type(oper_type), target :: energy_level
@@ -3232,7 +3232,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  nwlo           = paw_dmft%dmft_nwlo
  off_diag       = paw_dmft%dmft_triqs_off_diag
  rot_inv        = (paw_dmft%dmft_solv == 7)
- shift_level    = paw_dmft%dmft_triqs_shift_level
+ shift_mu       = paw_dmft%dmft_triqs_shift_mu
  tol            = paw_dmft%dmft_triqs_tol_block
 
  if (rot_inv) then
@@ -3720,7 +3720,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
        do isppol=1,nsppol
          do im=1,tndim
            iflavor = im + (isppol-1)*ndim
-           levels_ctqmc(iflavor,iflavor) = energy_level%matlu(iatom)%mat(im,im,isppol) + (one-lam_list(ilam))*shift_level
+           levels_ctqmc(iflavor,iflavor) = energy_level%matlu(iatom)%mat(im,im,isppol) + (lam_list(ilam)-one)*shift_mu
            if (nsppol == 1 .and. nspinor == 1) levels_ctqmc(iflavor+ndim,iflavor+ndim) = levels_ctqmc(iflavor,iflavor)
          end do ! im
        end do ! isppol
@@ -4089,7 +4089,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
            else
              occ_tmp = occ(iflavor)
            end if
-           elam = elam - dble(shift_level*occ_tmp)
+           elam = elam + dble(shift_mu*occ_tmp)
          end do ! im
        end do ! isppol
 
@@ -4221,7 +4221,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  call gather_oper(weiss%oper(:),weiss%distrib,paw_dmft,opt_ksloc=2)
  call gather_oper(green%oper(:),green%distrib,paw_dmft,opt_ksloc=2)
 
- call compute_moments_loc(green,self_new,energy_level,weiss,1,opt_log=paw_dmft%dmft_triqs_entropy,shift_level=shift_level)
+ call compute_moments_loc(green,self_new,energy_level,weiss,1,opt_log=paw_dmft%dmft_triqs_entropy,shift_mu=shift_mu)
 
  if (entropy .and. integral > 0) then
    call compute_trace_log_loc(weiss,paw_dmft,green%fband_weiss,opt_inv=1)

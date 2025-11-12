@@ -1259,7 +1259,9 @@ end subroutine compute_free_energy
 !!  green  <type(green_type)>= green function data
 !!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
 !!  opt_inv = 0 (default) when green = G
-!!          = 1 when green = G^-1 (useful for the Weiss field)
+!!          = 1 when green = G^-1 (used for Weiss field)
+!!              CAREFUL: in this case, the chemical potential is shifted
+!!              by dmft_triqs_shift_mu
 !!
 !! OUTPUT
 !!  trace = Tr(log(G_loc))
@@ -1326,7 +1328,7 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
          ABI_MALLOC(mat_temp2,(ndim,ndim))
          mat_temp2(:,:) = green%oper(ifreq)%matlu(iatom)%mat(:,:,isppol)
          do im=1,ndim
-           mat_temp2(im,im) = mat_temp2(im,im) - paw_dmft%dmft_triqs_shift_level
+           mat_temp2(im,im) = mat_temp2(im,im) + paw_dmft%dmft_triqs_shift_mu
          end do ! im
          mat_pt => mat_temp2(:,:)
        end if

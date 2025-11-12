@@ -4713,13 +4713,13 @@ end subroutine compute_trace_moments_ks
 !!               has been removed)
 !!  opt_log = if set to 1, also computes the trace of the moments of log(G)+log(iw*Id) and
 !!            log(G0)+log(iw*Id) in green%trace_moments_log_loc and weiss%trace_moments_log_loc
-!!  shift_level = shift to apply to the impurity levels for the moments of G0
+!!  shift_mu = shift to apply to the chemical potential for the moments of G0
 !!
 !! OUTPUTS
 !!
 !! SOURCE
 
-subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log,shift_level)
+subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log,shift_mu)
 
 !Arguments ------------------------------------
  type(green_type), intent(inout) :: green,weiss
@@ -4727,7 +4727,7 @@ subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log,shif
  type(oper_type), target, intent(in) :: energy_level
  integer, intent(in) :: option
  integer, optional, intent(in) :: opt_log
- real(dp), optional, intent(in) :: shift_level
+ real(dp), optional, intent(in) :: shift_mu
 !Local variables ------------------------------
  integer :: i,natom,nspinor,nsppol,optlog
  complex(dp) :: trace
@@ -4769,8 +4769,8 @@ subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log,shif
    call init_matlu(natom,nspinor,nsppol,lpawu(:),level_shift(:))
    call copy_matlu(energy_level%matlu(:),level_shift(:),natom)
 
-   shift(:) = cmplx(shift_level,zero,kind=dp)
-   call shift_matlu(level_shift(:),natom,shift(:),-1)
+   shift(:) = cmplx(shift_mu,zero,kind=dp)
+   call shift_matlu(level_shift(:),natom,shift(:),signe=1)
 
    call trace_matlu(level_shift(:),natom,itau=0,trace=weiss%trace_moments_log_loc(1))
    do i=2,green%nmoments-1
