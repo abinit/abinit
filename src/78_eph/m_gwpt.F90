@@ -1372,6 +1372,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            theta_mu_minus_e0i = fact_spin * qp_occ(ib_sum, ikmp_ibz, spin)
            need_x_kmp = (abs(theta_mu_minus_e0i / fact_spin) >= tol_empty) ! allow negative occ numbers
            !need_x_kmp = .True.
+           !print *, "kmp, ib_sum, theta_mu_minus_e0i", ib_sum, theta_mu_minus_e0i
 
            ! Contract immediately over g' with the frequency convolution:
            !
@@ -1449,6 +1450,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            !omegame0i_mkq = omegas_mkq - qp_ene(ib_sum, ikqmp_ibz, spin)
 
            need_x_kqmp = (abs(theta_mu_minus_e0i / fact_spin) >= tol_empty) ! allow negative occ numbers
+           !print *, "kqmp, ib_sum, theta_mu_minus_e0i", ib_sum, theta_mu_minus_e0i
            !need_x_kqmp = .True.
 
            ! Contract immediately over g with the frequency convolution:
