@@ -801,7 +801,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_MALLOC(epsm1_ggw, (npw_c, npw_c, hscr%nomega))
 
  if (dtset%gwcomp == 2) then
-   ! Allocate memory to store static screening in the IBZ and workspace array for value pp_bz BZ.
+   ! Allocate memory to store static screening in the IBZ and workspace array for the value at pp_bz in the BZ.
    ! TODO: Store only the ip_ibz needed by this MPI rank to save memory.
    call wrtout(units, " Activating COH remainder technique")
    ABI_MALLOC(wc0_pibz, (pp_mesh%nibz))

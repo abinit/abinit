@@ -1,6 +1,6 @@
-!!****m* ABINIT/m_gstore_sigeph
+!!****m* ABINIT/m_gstore_sigmaph
 !! NAME
-!! m_gstore_sigeph
+!! m_gstore_sigmaph
 !!
 !! FUNCTION
 !!  Compute (diagonal) matrix elements of the e-ph self-energy (Fan Migdal + Debye Waller).
@@ -21,7 +21,7 @@
 
 #include "abi_common.h"
 
-module m_gstore_sigeph
+module m_gstore_sigmaph
 
  use, intrinsic :: iso_c_binding
  use defs_basis
@@ -70,14 +70,14 @@ module m_gstore_sigeph
  implicit none
 
  private
- public :: gstore_sigeph
+ public :: gstore_sigmaph
 
  real(dp),private,parameter :: TOL_EDIFF = 0.001_dp * eV_Ha
 !!***
 
 !----------------------------------------------------------------------
 
-!!****t* m_gstore_sigeph/sep_t
+!!****t* m_gstore_sigmaph/sep_t
 !! NAME
 !! sep_t
 !!
@@ -176,9 +176,9 @@ contains
 
 !----------------------------------------------------------------------
 
-!!****f* m_gstore_sigeph/gstore_sigeph
+!!****f* m_gstore_sigmaph/gstore_sigmaph
 !! NAME
-!!  gstore_sigeph
+!!  gstore_sigmaph
 !!
 !! FUNCTION
 !!  Compute diagonal matrix elements of the e-ph self-energy (Fan Migdal + Debye Waller).
@@ -206,8 +206,8 @@ contains
 !!
 !! SOURCE
 
-subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, dvdb, ifc, &
-                         pawfgr, pawtab, psps, mpi_enreg, comm)
+subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, dvdb, ifc, &
+                          pawfgr, pawtab, psps, mpi_enreg, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -284,10 +284,10 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  ! Consistency check.
  ierr = 0
  if (gstore%qzone /= "bz") then
-   ABI_ERROR_NOSTOP("gstore_sigeph assumes qzone == `bz`", ierr)
+   ABI_ERROR_NOSTOP("gstore_sigmaph assumes qzone == `bz`", ierr)
  end if
  if (gstore%has_used_lgq /= 0) then
-   ABI_ERROR_NOSTOP("gstore_sigeph does not support use_lgq /=0.", ierr)
+   ABI_ERROR_NOSTOP("gstore_sigmaph does not support use_lgq /=0.", ierr)
  end if
  if (ierr /= 0) then
    write(msg,'(a,i0,5a)')&
@@ -464,7 +464,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  if (my_rank == master) then
    ! Master creates the netcdf file used to store the results of the calculation.
    NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
-   !NCF_CHECK(wfk_hdr%ncwrite(ncid, fform_from_ext("SIGEPH.nc"), nc_define=.True.))
+   !NCF_CHECK(wfk_hdr%ncwrite(ncid, fform_from_ext("GSEPH.nc"), nc_define=.True.))
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands%ncwrite(ncid))
 
@@ -940,7 +940,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
    end associate
  end do ! my_is
 
- call cwtime_report(" gstore_sigeph full calculation", cpu_all, wall_all, gflops_all, end_str=ch10)
+ call cwtime_report(" gstore_sigmaph full calculation", cpu_all, wall_all, gflops_all, end_str=ch10)
 
  ABI_FREE(nqnu_t)
  ABI_FREE(f_mkq)
@@ -972,12 +972,12 @@ subroutine inds2str(level, prefix, my_ik, my_nk, nk_tot, out_str)
  out_str = repeat(' ', 4 * level) // trim(out_str)
 end subroutine  inds2str
 
-end subroutine gstore_sigeph
+end subroutine gstore_sigmaph
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_gstore_sigeph/sep_gather_and_write_results
+!!****f* m_gstore_sigmaph/sep_gather_and_write_results
 !! NAME
 !!  sep_gather_and_write_results
 !!
@@ -1376,7 +1376,7 @@ end subroutine sep_gather_and_write_results
 
 !----------------------------------------------------------------------
 
-!!****f* m_gstore_sigeph/sep_free
+!!****f* m_gstore_sigmaph/sep_free
 !! NAME
 !!  sep_free
 !!
@@ -1405,5 +1405,5 @@ subroutine sep_free(sigma)
 end subroutine sep_free
 !!***
 
-end module m_gstore_sigeph
+end module m_gstore_sigmaph
 !!***

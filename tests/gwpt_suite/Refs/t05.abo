@@ -280,6 +280,7 @@ P Number of CPUs for parallelism over k-points: 1
  k-points included in gstore:
 1 : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 2 : [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Little group operations of the k-point will be used to symmetry reduce the integral in q-space.
 
  === Gaps, band edges and relative position wrt Fermi level ===
  Indirect band gap semiconductor
