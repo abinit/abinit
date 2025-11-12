@@ -319,7 +319,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  call dtset%get_ktmesh(sigma%ntemp, sigma%kTmesh)
 
  ! Compute the chemical potential at the different physical temperatures with Fermi-Dirac.
- ! TODO: One should check that nband is > nbocc to avoid inaccuracies in mu_e.
  ABI_MALLOC(sigma%mu_e, (sigma%ntemp))
  sigma%mu_e(:) = ebands%fermie
  if (dtset%eph_fermie == zero) then
