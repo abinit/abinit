@@ -1,6 +1,6 @@
 
-.Version 10.5.8.7 of ABINIT, released Oct 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.1 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a aarch64_darwin23.6.0_gnu14.2 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 21 Sep 2025.
-- ( at 16h44 )
+.Starting date : Wed 12 Nov 2025.
+- ( at 16h25 )
 
-- input  file    -> /Users/giantomassi/git_repos/abinit/_build/tests/Test_suite/gwpt_suite_t01-t02-t03-t04-t05/t05.abi
-- output file    -> t05.abo
-- root for input  files -> t05i
-- root for output files -> t05o
+- input  file    -> /Users/giantomassi/git_repos/abinit/_build/tests/Test_suite/gwpt_suite_t01-t02-t03-t04-t05-t06/t06.abi
+- output file    -> t06.abo
+- root for input  files -> t06i
+- root for output files -> t06o
 
  Symmetries : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -33,9 +33,9 @@
 -    mband =          12        mffmem =           1         mkmem =           3
        mpw =         553          nfft =       27000          nkpt =           3
 ================================================================================
-P This job should need less than                       9.561 Mbytes of memory.
+P This job should need less than                       9.637 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.230 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
+_ WF disk file :      0.306 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -43,7 +43,7 @@ _ WF disk file :      0.230 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values
--   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
@@ -234,7 +234,7 @@ meta: {optdriver: 7, eph_task: 24, }
 - Reading e-ph matrix elements from: t04o_GSTORE.nc
  Asking for with_cplex: 1
  Asking for with_gmode: phonon
- Asking for gvals_name: gvals
+ Asking for gvals_name: gvals_ks
  Asking for g2dw: yes
  Initializing gstore object from: t04o_GSTORE.nc
 
@@ -310,35 +310,35 @@ P Number of CPUs for parallelism over k-points: 1
      mu_e: Fermi level for given (T, nelect)
 
 
- Using g(k,q) of type: GWPT
+ Using g(k,q) of type: KS
 
 
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   13.558
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   2  10.221   10.240    0.018    0.110   -0.050    0.169   -0.665    0.774    0.000    0.000
-   3  10.221   10.240    0.018    0.110   -0.050    0.169   -0.665    0.774    0.000    0.000
-   4  10.221   10.240    0.018    0.110   -0.050    0.169   -0.665    0.774    0.000    0.000
-   5  15.832   15.752   -0.080   -0.451   -0.047    0.177   -1.787    1.336    5.611    5.512
-   6  15.832   15.752   -0.080   -0.451   -0.047    0.177   -1.787    1.336    0.000    0.000
-   7  15.832   15.752   -0.080   -0.451   -0.047    0.177   -1.787    1.336    0.000    0.000
+   2  10.221   10.370    0.149    0.894   -0.050    0.167   -0.723    1.617    0.000    0.000
+   3  10.221   10.370    0.149    0.894   -0.050    0.167   -0.723    1.617    0.000    0.000
+   4  10.221   10.370    0.149    0.894   -0.050    0.167   -0.723    1.617    0.000    0.000
+   5  15.832   15.756   -0.076   -0.418   -0.046    0.181   -1.912    1.493    5.611    5.386
+   6  15.832   15.756   -0.076   -0.418   -0.046    0.181   -1.912    1.493    0.000    0.000
+   7  15.832   15.756   -0.076   -0.418   -0.046    0.181   -1.912    1.493    0.000    0.000
 
  KS gap:    5.611 (assuming bval:4 ==> bcond:5)
- QP gap:    5.512 (OTMS:    5.050)
- QP_gap - KS_gap:   -0.098 (OTMS:   -0.560)
+ QP gap:    5.386 (OTMS:    4.298)
+ QP_gap - KS_gap:   -0.225 (OTMS:   -1.312)
 
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:   13.558
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   2  -2.521   -2.095    0.426    2.137   -0.040    0.199    0.808    1.329    0.000    0.000
-   3   3.934    3.839   -0.095   -0.344   -0.026    0.277   -0.937    0.593    6.455    5.934
-   4   3.934    3.839   -0.095   -0.344   -0.026    0.277   -0.937    0.593    0.000    0.000
-   5  15.036   14.904   -0.132   -1.671   -0.119    0.079   -2.012    0.342   11.102   11.065
-   6  15.036   14.904   -0.132   -1.671   -0.119    0.079   -2.012    0.342    0.000    0.000
-   7  26.960   26.856   -0.104   -1.184   -0.105    0.088   -4.166    2.982   11.924   11.952
+   2  -2.521   -2.400    0.121    0.669   -0.046    0.181    0.242    0.427    0.000    0.000
+   3   3.934    3.998    0.064    0.143   -0.013    0.447   -1.024    1.167    6.455    6.398
+   4   3.934    3.998    0.064    0.143   -0.013    0.447   -1.024    1.167    0.000    0.000
+   5  15.036   14.878   -0.158   -0.870   -0.046    0.182   -1.174    0.304   11.102   10.880
+   6  15.036   14.878   -0.158   -0.870   -0.046    0.182   -1.174    0.304    0.000    0.000
+   7  26.960   26.864   -0.096   -0.855   -0.080    0.112   -3.961    3.106   11.924   11.986
 
  KS gap:   11.102 (assuming bval:4 ==> bcond:5)
- QP gap:   11.065 (OTMS:    9.775)
- QP_gap - KS_gap:   -0.037 (OTMS:   -1.327)
+ QP gap:   10.880 (OTMS:   10.088)
+ QP_gap - KS_gap:   -0.222 (OTMS:   -1.013)
 
 ============================================================================================
 
@@ -532,15 +532,15 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.2
+- Proc.   0 individual time (sec): cpu=          1.9  wall=          1.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered   1 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.2  wall=          0.2
+.Delivered   2 WARNINGs and   2 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.9  wall=          1.9
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
 -   There were 32 allocations and 32 deallocations in C code
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 796547 allocations and 796547 deallocations in Fortran
+-   There were 929690 allocations and 929690 deallocations in Fortran
 -   Remaining memory at the end of the calculation is 0

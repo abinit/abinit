@@ -1,4 +1,5 @@
-# ZPR computation for Diamond with GWPT e-ph matrix elements.
+# ZPR computation for Diamond with KS e-ph matrix elements.
+# SImilar to t05.abi but here we read the KS matrix elements from the GSTORE.
 
  optdriver 7    # Enter EPH driver.
  eph_task 24    # ZPR computation from GSTORE file
@@ -22,10 +23,10 @@
  getddb_filepath "diamond_eph_gwpt/out_DDB"
  getgstore_filepath "t04o_GSTORE.nc"
 
- gstore_gname "gvals"      # Use GWPT e-ph matrix elements from GSTORE (default)
- eph_stern 1               # Activate Sterheimer to compute contribution given by states above nband
+ gstore_gname "gvals_ks"  # Use KS e-ph matrix elements from GSTORE
+ eph_stern 1              # Activate Sterheimer to compute contribution given by states above nband
 
- tmesh 300 100 1         # Temperature mesh.
+ tmesh 300 100 1          # Temperature mesh.
 
  ddb_ngqpt 2 2 2          # The code expects to find in the DDB
                           # all the IBZ q-points corresponding to a 2x2x2 q-mesh
@@ -60,11 +61,12 @@
 #%% [files]
 #%% use_git_submodule = diamond_eph_gwpt
 #%% files_to_test =
-#%%   t05.abo, tolnlines= 25, tolabs= 5.000e-02, tolrel= 0.2
+#%%   t06.abo, tolnlines= 25, tolabs= 5.000e-02, tolrel= 0.2
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH, GWPT, GSTORE
-#%% description = ZPR computation for Diamond with GWPT e-ph matrix elements.
+#%% description = ZPR computation for Diamond with KS e-ph matrix elements.
+#%%   SImilar to t05.abi but here we read the KS matrix elements from the GSTORE.
 #%%<END TEST_INFO>
