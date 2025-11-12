@@ -37,7 +37,8 @@
  # Activate Sterhneimer
  eph_stern2 1
  #eph_stern2 0
- tolwfr2 1e-20
+ tolwfr2 1e-18
+ nline2  100
 
  nfreqsp2 201
  freqspmax2 2 eV
