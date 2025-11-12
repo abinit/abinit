@@ -1,0 +1,78 @@
+#################################################################
+# Automatic test for ABINIT:                                    #
+#    Testing TB09 XC functional within PAW approach             #
+#    Also testing the following variables:                      #
+#        - xc_taupos : filtering of the kinetic energy density  #
+#        - getkden   : read KE density from previous dataset    #
+#        - irdkden   : read KE density from an external file    #
+# This test is a starting point for libxc#t24                   #
+#                                                               #
+# Cristalline silicon                                   MT 2023 #
+#################################################################
+
+#==== Print wf/densities for a following test
+prtwf       1
+prtden      1
+prtkden     1
+
+#---- SCF cycle control
+tolvrs      1.0d-15
+nstep       18
+diemac      12.0
+
+#---- Plane-wave basis
+ecut        6.
+pawecutdg   10.
+
+#---- Brillouin zone sampling
+kptopt      1
+ngkpt       2 2 2
+nshiftk     1
+shiftk      0.0 0.0 0.0
+occopt      1
+
+#---- Atomic structure
+acell       3*10.26
+rprim       0.0  0.5  0.5
+            0.5  0.0  0.5
+            0.5  0.5  0.0
+ntypat      1
+znucl       14
+natom       2
+typat       1 1
+xred        0    0    0
+            1/4  1/4  1/4
+nband       5
+ixc         -208012  # TB09 xc functional
+
+pp_dirpath "$ABI_PSPDIR"
+pseudos "Psdj_paw_pbe_std/Si.xml"
+
+#---- Miscellaneous
+enunit      1
+
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t23.abi, t24.abi
+#%% [files]
+#%% files_to_test =
+#%%   t23.abo, tolnlines = 10, tolabs = 0.02, tolrel = 1.1, fld_options = -easy
+#%% [shell]
+#%% post_commands =
+#%%   ww_cp t23o_WFK t24i_DS1_WFK;
+#%%   ww_cp t23o_DEN t24i_DS1_DEN;
+#%%   ww_cp t23o_KDEN t24i_DS1_KDEN
+#%% [paral_info]
+#%% max_nprocs = 8
+#%% [extra_info]
+#%% authors = M. Torrent
+#%% keywords = PAW
+#%% description = Testing TB09 XC functional within PAW approach.
+#%%   Cristalline silicon
+#%%   Also testing the following variables:
+#%%     - xc_taupos : filtering of the kinetic energy density
+#%%     - getkden   : read KE density from previous dataset
+#%%     - irdkden   : read KE density from an external file
+#%%<END TEST_INFO>

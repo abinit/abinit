@@ -1,10 +1,10 @@
-# Polaron effective mass for triply degenerate bands in cubic materials in CaO. 
-  
+# Polaron effective mass for triply degenerate bands in cubic materials in CaO.
+
 ndtset     6
 
  kptopt    1
  kptrlatt -2  2  2      # In cartesian coordinates, this grid is simple cubic
-           2 -2  2      
+           2 -2  2
            2  2 -2
    tolvrs  1.0d-10
      nqpt  1
@@ -54,16 +54,16 @@ ndtset     6
   getwfk5  4
   get1wf5  2
   kptopt5  0        # Here one perform a GS calculation for the K-points for which the effective mass is sought.
-    nkpt5  1        
-     kpt5  0.00 0.00 0.00   # Gamma                                                                       
+    nkpt5  1
+     kpt5  0.00 0.00 0.00   # Gamma
   tolwfr5   1.0d-10  # Must use tolwfr for non-self-consistent calculations.
-  
+
     efmas5        1     # Triggers the calculation of effective mass tensors for the specified k-points.
     efmas_bands5  6 9   # The range of bands for which the effective mass tensors will be computed, for each k-point.
 efmas_calc_dirs5  1
    efmas_n_dirs5  7
    efmas_ntheta5  100
-     efmas_dirs5 
+     efmas_dirs5
               1 0 0
               0 1 0
               0 0 1
@@ -89,7 +89,7 @@ eph_frohlichm6  1
      prtphdos6  0
        chneut6  0  # Don't enforce ASR on BECS (not a good idea, just for testing purposes)
 
-#######################################################################   
+#######################################################################
 acell 3*9.136
 xred
    0.0000000000    0.0000000000    0.0000000000
@@ -105,11 +105,11 @@ znucl 20 8
 nband 12
 nbdbuf 2
 diemac 6
- ecut 30               # Underconverged ecut. 
+ ecut 30               # Underconverged ecut.
 nstep 100
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8, O.psp8"
+ pseudos "Psdj_nc_sr_04_pbe_std_psp8/Ca.psp8, O.psp8"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -125,8 +125,8 @@ nstep 100
 #%% authors = B. Guster
 #%% keywords = NC, DFPT, EPH
 #%% description =
-#%%  CaO polaron effective mass along different direction: 100,110,111. 
+#%%  CaO polaron effective mass along different direction: 100,110,111.
 #%%  Frohlich ZPR is also computed.
 #%%  Method available only for cubic materials.
-#%% topics = 
+#%% topics =
 #%%<END TEST_INFO>

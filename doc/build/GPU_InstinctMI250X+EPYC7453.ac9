@@ -1,0 +1,61 @@
+# ================================================================
+# Configuration file for ABINIT 10.5 compilation
+#
+# CPU: AMD Trento EPYC 7453
+# GPU: AMD Instinct MI250X 64 GB
+# Compilers: Cray Compiling Environment 23.12
+# Libraries: FTTW3, libSCI, HIP+ROCm
+# ================================================================
+
+#prefix=${ROOT}/install/${MY_ARCH}/abinit-gpu
+
+ROCM_PREFIX=${ROCM_PATH}
+
+# Compilers + flags
+# ========================================
+with_optim_flavor="standard"
+
+# Parallel compilation
+# ========================================
+with_mpi="yes"
+with_debug_flavor="none"
+enable_mpi_io="yes"
+enable_openmp="yes"
+
+# AMD GPU
+# ========================================
+with_rocm="${ROCM_PREFIX}"
+enable_openmp_offload="yes"
+enable_mpi_inplace="yes"
+GPU_ARCH=gfx90a
+
+# Linear Algebra library
+# ========================================
+BLAS_PREFIX="$CRAY_LIBSCI_PREFIX_DIR"
+with_linalg="$BLAS_PREFIX"
+LINALG_FCFLAGS="-I${BLAS_PREFIX}/include"
+LINALG_LIBS="-L${BLAS_PREFIX}/lib -lsci_cray"
+
+# FFTW3
+# ================================
+with_fft_flavor="fftw3"
+with_fftw3="${FFTW_ROOT}"
+FFTW3_CFLAGS="-I${FFTW_ROOT}/include"
+FFTW3_FCFLAGS="-I${FFTW_ROOT}/include"
+FFTW3_CPPFLAGS="-I${FFTW_ROOT}/include"
+FFTW3_LIBS="-L${FFTW_ROOT}/lib -lfftw3 -lfftw3f -lfftw3_threads "
+
+# NetCDF library
+# ========================================
+with_hdf5="${HDF5_DIR}"
+with_netcdf="${NETCDF_DIR}"
+with_netcdf_fortran="${NETCDF_DIR}"
+
+# Additional plugins & libs
+# ========================================
+with_libxc="${LIBXC_ROOT}"
+
+# Miscellaneous options
+# ========================================
+enable_zdot_bugfix="no"
+enable_gw_dpc="yes"

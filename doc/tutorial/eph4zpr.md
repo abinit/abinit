@@ -522,7 +522,7 @@ and the following input file:
     particular $\qq$-point. The *pertcase* index is computed as:
 
     ```fortran
-    pertcase = idir + ipert
+    pertcase = idir + 3 * (ipert-1)
     ```
 
     where *idir* gives the direction ([1, 2, 3]) and *ipert* specifies the perturbation type:
@@ -994,13 +994,21 @@ nband+ 10
 
 in order to monitor the convergence of the QP corrections.
 
+!!! warning
+
+    Please, avoid using the Sternheimer method with only occupied bands because EPH needs
+    to compute the chemical potential as a function of temperature.
+    It is recommended to include enough conduction bands (including degenerate states at the VBM)
+    to obtain a decent description of the electronic DOS around the VBM and prevent
+    inaccuracies in the calculation of $\mu(T)$.
+
+
 To analyze the convergence behavior, we can extract the results from the main output file
 
 {% dialog tests/tutorespfn/Refs/teph4zpr_6.abo %}
 
 
-or, alternatively, we can pass the list of SIGEPH files to the |abicomp| script and use the
-`sigpeh` command:
+or, alternatively, we can pass the list of SIGEPH files to the |abicomp| script and use the `sigpeh` command:
 
 ```sh
 abicomp.py sigeph teph4zpr_6o_DS*_SIGEPH.nc -e

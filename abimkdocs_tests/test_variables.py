@@ -189,7 +189,7 @@ class VariablesTest(AbimkdocsTest):
         # TODO: should parse chkvars and
         black_list = set([
             "atompaw", "cut3d", "multibinit", "fftprof", "conducti", "mrgscr", "aTDEP",
-            "mrgddb", "mrggkk", "mrgdv", "band2eps", "ujdet", "fold2Bloch", "macroave", "testtransposer",
+            "mrgddb", "mrggkk", "mrgdv", "band2eps", "lruj", "fold2Bloch", "macroave", "testtransposer",
         ])
         for test in tests:
             if test.executable in black_list: continue

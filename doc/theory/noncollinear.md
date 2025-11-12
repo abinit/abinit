@@ -9,7 +9,7 @@ authors: G. Zerah
 We will denote the spinor by $\Psi^{\alpha\beta}$, ${\alpha, \beta}$ being the two spin indexes.
 The magnetic properties are well represented by introducing the spin density matrix:
 
-$$ \rho^{\alpha\beta}(\rr) = \sum_n f_n \la \rr|\Psi_n^\alpha\ra \la\Psi_n^\beta|\rr\ra $$
+$$ \rho^{\alpha\beta}(\rr) = \sum_n f_n \la \rr|\Psi_n^\alpha\ra \la\Psi_n^\beta|\rr\ra ,$$
 
 where the sum runs over all states and $f_n$ is the occupation of state $n$.
 
@@ -30,11 +30,12 @@ The expression of $V_{xc}$ taking into account the above expression of $E_{xc}$ 
 
 $$
 V_{xc}^{\alpha\beta}(\rr)={\delta E_{xc} \over \delta \rho (\rr)} \delta_{\alpha\beta} +
-\sum_{i=1}^3 {\delta E_{xc} \over \delta m_i (\rr) }\sigma_i^{\alpha\beta}
+\sum_{i=1}^3 {\delta E_{xc} \over \delta m_i (\rr) }\sigma_i^{\alpha\beta}.
 $$
 
-In the LDA approximation, due to its rotational invariance, $E_{xc}$ is indeed a functional of $n(\rr)$ and $|m(\rr)|$ only.
-In the GGA approximation, on the contrary, we **assume** that it is a functional of $n(\rr)$ and $|m(\rr)|$ and their gradients.
+In the LDA approximation, due to its rotational invariance, $E_{xc}$ is a functional of $n(\rr)$ and 
+the norm of the magnetization vector $|m(\rr)|$ only.
+In the GGA approximation, however, we **assume** that it is a functional of $n(\rr)$ and $|m(\rr)|$ and their gradients.
 (This is not the most general functional of $\vec m(\rr)$ dependent upon first order derivatives, and rotationally invariant.)
 We therefore use exactly the same functional as in the spin polarized situation, using the local direction
 of $\vec m(\rr)$ as polarization direction.
@@ -42,10 +43,10 @@ of $\vec m(\rr)$ as polarization direction.
 We then have
 
 $$ 
-{\delta E_{xc} \over \delta m_i (\rr) }={\delta E_{xc} \over \delta |m_i (\rr)| } \widehat {m(\rr)},
+{\delta E_{xc} \over \delta m_i (\rr) }={\delta E_{xc} \over \delta |m (\rr)| } \Big( \widehat {m(\rr)} \Big)_i,
 $$
 
-where $\widehat {m(\rr)} = {m(\rr) \over |m(\rr)|}$.
+where we define $\widehat {m(\rr)} = {\vec m(\rr) \over |m(\rr)|}$, the unit vector along the magnetization direction.
 Now, in the LDA-GGA formulations, $n_\uparrow + n_\downarrow =n$ and $|n_\uparrow-n_\downarrow|=|m|$
 and therefore, if we set $n_\uparrow = (n+m)/2$ and $n_\downarrow=(n-n_\uparrow)$, we have:
 
@@ -62,16 +63,16 @@ $$
 {\delta E_{xc} \over \delta |m (\rr)| }={1 \over 2} \Bigl ( 
 {\delta E_{xc} \over \delta n_\uparrow(\rr)} -
 {\delta E_{xc} \over \delta n_\downarrow(\rr)}
-\Bigr )
+\Bigr ) .
 $$
 
 This makes the connection with the more usual spin polarized case.
 
-Expression of $V_{xc}$ in LDA-GGA
+Expression of $V_{xc}$ in LDA-GGA :
 
 $$
 V_{xc}(\rr) = {\delta E_{xc} \over \delta \rho (\rr)} \delta_{\alpha\beta}+ {\delta E_{xc} \over \delta |m (\rr)| }
- {\widehat m(\rr)}.\sigma
+ \big( {\widehat m(\rr)}.\sigma \big) .
 $$
 
 ## Implementation

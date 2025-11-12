@@ -7,7 +7,7 @@
 !!   observables (PAW approach).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2022 ABINIT group (JWZ, MT)
+!! Copyright (C) 2018-2025 ABINIT group (JWZ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -93,8 +93,6 @@ CONTAINS  !=====================================================================
 subroutine make_efg_onsite(efg,my_natom,natom,nsym,ntypat,paw_an,pawang,pawrhoij,pawrad,pawtab, &
 &                          rprimd,symrel,tnons,xred,&
 &                          mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -293,8 +291,6 @@ subroutine make_efg_onsite(efg,my_natom,natom,nsym,ntypat,paw_an,pawang,pawrhoij
 
 subroutine make_fc_paw(fc,my_natom,natom,nspden,ntypat,pawrhoij,pawrad,pawtab,&
 &                      mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -6,7 +6,7 @@
 !!  This module contains low-level procedures to check assertions and handle errors.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2022 ABINIT group (MG,YP,NCJ,MT)
+!! Copyright (C) 2008-2025 ABINIT group (MG,YP,NCJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,12 +25,8 @@ MODULE m_errors
  use m_profiling_abi
  use m_xmpi
  use m_specialmsg, only : wrtout
-#ifdef HAVE_NETCDF
+ USE_MPI
  use netcdf
-#endif
-#ifdef HAVE_MPI2
- use mpi
-#endif
 #ifdef FC_NAG
  use f90_unix_proc
 #endif
@@ -38,7 +34,9 @@ MODULE m_errors
  use ifcore
 #endif
 
- use m_io_tools,        only : flush_unit, lock_and_write, file_exists, num_opened_units, show_units, open_file
+ use iso_c_binding,     only : c_ptr, c_size_t, c_associated
+
+ use m_io_tools,        only : flush_unit, lock_and_write, file_exists, num_opened_units, show_units, open_file, is_open
  use m_fstrings,        only : toupper, basename, indent, lstrip, atoi, strcat, itoa
  use m_build_info,      only : dump_config, abinit_version
  use m_cppopts_dumper,  only : dump_cpp_options
@@ -76,9 +74,7 @@ include "fexcp.h"
  public :: abi_cabort            ! C-interoperable version.
 
  ! This flag activate the output of the backtrace in msg_hndl
- ! Unfortunately, gcc4.9 seems to crash inside this routine
- ! hence, for the time being, this optional feature has been disabled
- integer, save, private :: m_errors_show_backtrace = 0
+ integer, save, private :: m_errors_show_backtrace = 1
 
  interface assert_eq
    module procedure assert_eq2
@@ -104,6 +100,8 @@ include "fexcp.h"
    module procedure unused_logical
    module procedure unused_logical1B
    module procedure unused_ch
+   module procedure unused_c_ptr
+   module procedure unused_c_size_t
  end interface unused_var
 
 CONTAINS  !===========================================================
@@ -136,7 +134,6 @@ function assert_eq2(l1,l2,message,file,line)
 !Local variables-------------------------------
  integer :: f90line=0
  character(len=500) :: f90name='Subroutine Unknown'
-
 ! *************************************************************************
 
  if (l1==l2) then
@@ -281,7 +278,7 @@ end function assert_eqn
 !!
 !! INPUTS
 !!  l1,l2,.. logical values to be checked (array version is also provided)
-!!  message(len=*)=tag with additiona information
+!!  message(len=*)=tag with additional information.
 !!
 !! SOURCE
 
@@ -488,10 +485,8 @@ subroutine netcdf_check(ncerr, msg, file, line)
  character(len=500) :: f90name
  character(len=1024) :: nc_msg
  character(len=2048) :: my_msg
-
 ! *************************************************************************
 
-#ifdef HAVE_NETCDF
  if (ncerr /= NF90_NOERR) then
 
    f90line = 0; if (present(line)) f90line = line
@@ -503,7 +498,6 @@ subroutine netcdf_check(ncerr, msg, file, line)
 
    call msg_hndl(my_msg, "ERROR", "PERS", f90name, f90line)
  end if
-#endif
 
 end subroutine netcdf_check
 !!***
@@ -550,7 +544,6 @@ subroutine sentinel(level,mode_paral,file,func,line)
  character(len=10) :: lnum
  character(len=500) :: my_func, my_file
  character(len=500) :: msg
-
 ! *********************************************************************
 
  ! initialize the variable
@@ -623,7 +616,6 @@ subroutine die(message,file,line)
  character(len=10) :: lnum,strank
  character(len=500) :: f90name='Subroutine Unknown'
  character(len=500) :: msg
-
 ! *********************************************************************
 
  if (PRESENT(line)) f90line=line
@@ -684,13 +676,12 @@ subroutine msg_hndl(message, level, mode_paral, file, line, NODUMP, NOSTOP, unit
 
 !Local variables-------------------------------
  integer :: f90line,ierr,unit_
- logical :: is_open_unit
  character(len=10) :: lnum
  character(len=500) :: f90name
  character(len=LEN(message)) :: my_msg
  character(len=MAX(4*LEN(message),2000)) :: sbuf ! Increase size and keep fingers crossed!
-
 ! *********************************************************************
+
  unit_ = std_out; if (present(unit)) unit_ = unit
 
  if (PRESENT(line)) then
@@ -729,6 +720,10 @@ subroutine msg_hndl(message, level, mode_paral, file, line, NODUMP, NOSTOP, unit
      "--- !",TRIM(level),ch10,&
      "message: |",ch10,TRIM(indent(my_msg)),ch10,"..."
    call wrtout(unit_, sbuf, mode_paral, do_flush=.True.)
+
+   ! Write error message to ab_out as well, provided this proc is connected to ab_out
+   !if (unit_ /= ab_out .and. is_open(ab_out)) call wrtout(ab_out, sbuf, mode_paral="PERS", do_flush=.True.)
+
    if (.not.present(NOSTOP)) call abi_abort(mode_paral, print_config=.FALSE.)
 
  case default
@@ -745,11 +740,12 @@ subroutine msg_hndl(message, level, mode_paral, file, line, NODUMP, NOSTOP, unit
      "mpi_rank: ",xmpi_comm_rank(xmpi_world),ch10,&
      "message: |",ch10,TRIM(indent(my_msg)),ch10,&
      "...",ch10
-   call wrtout(unit_, sbuf, mode_paral)
+   call wrtout(unit_, sbuf, mode_paral=mode_paral, do_flush=.True.)
 
-   ! Write error message to ab_out is unit is connected.
-   inquire(unit=ab_out, opened=is_open_unit)
-   if (is_open_unit) call wrtout(ab_out, sbuf) !, mode_paral="PERS")
+   ! Write error message to ab_out as well, provided this proc is connected to ab_out
+   if (is_open(ab_out)) then
+     call wrtout(ab_out, sbuf, mode_paral="PERS", do_flush=.True.)
+   end if
 
    if (.not.present(NOSTOP)) then
      ! The first MPI proc that gets here, writes the ABI_MPIABORTFILE with the message!
@@ -757,7 +753,7 @@ subroutine msg_hndl(message, level, mode_paral, file, line, NODUMP, NOSTOP, unit
      if (.not. file_exists(ABI_MPIABORTFILE) .and. xmpi_comm_size(xmpi_world) > 1) then
         call lock_and_write(ABI_MPIABORTFILE, sbuf, ierr)
      end if
-     ! And now we die!
+     ! And now we're gonna die!
      call abi_abort(mode_paral, print_config=.FALSE.)
    end if
 
@@ -981,10 +977,10 @@ end subroutine unused_real_sp
 elemental subroutine unused_cplx_spc(var)
 
 !Arguments ------------------------------------
- complex(spc),intent(in) :: var
+ complex(sp),intent(in) :: var
 
 !Local variables-------------------------------
- complex(spc) :: dummy
+ complex(sp) :: dummy
 ! *********************************************************************
 
  dummy = var
@@ -1013,10 +1009,10 @@ end subroutine unused_cplx_spc
 elemental subroutine unused_cplx_dpc(var)
 
 !Arguments ------------------------------------
- complex(dpc),intent(in) :: var
+ complex(dp),intent(in) :: var
 
 !Local variables-------------------------------
- complex(dpc) :: dummy
+ complex(dp) :: dummy
 ! *********************************************************************
 
  dummy = var
@@ -1120,6 +1116,79 @@ end subroutine unused_ch
 
 !----------------------------------------------------------------------
 
+!!****f* m_errors/unused_c_ptr
+!! NAME
+!!  unused_c_ptr
+!!
+!! FUNCTION
+!!  Helper function used to silence compiler warnings due to unused variables.
+!!  Interfaced via the ABI_UNUSED macro.
+!!
+!! INPUTS
+!!  var=type(c_ptr) value
+!!
+!! OUTPUT
+!!  None
+!!
+!! SOURCE
+
+elemental subroutine unused_c_ptr(var)
+
+!Arguments ------------------------------------
+type(c_ptr), intent(IN) :: var
+
+!Local variables-------------------------------
+#ifdef FC_NAG
+logical :: dummy
+#else
+type(c_ptr) :: dummy
+#endif
+! *********************************************************************
+
+#ifdef FC_NAG
+if (.false.) dummy = c_associated(var)
+#else
+dummy = var
+#endif
+
+end subroutine unused_c_ptr
+!!***
+
+
+!----------------------------------------------------------------------
+
+!!****f* m_errors/unused_c_size_t
+!! NAME
+!!  unused_c_size_t
+!!
+!! FUNCTION
+!!  Helper function used to silence compiler warnings due to unused variables.
+!!  Interfaced via the ABI_UNUSED macro.
+!!
+!! INPUTS
+!!  var=type(c_size_t) value
+!!
+!! OUTPUT
+!!  None
+!!
+!! SOURCE
+
+elemental subroutine unused_c_size_t(var)
+
+!Arguments ------------------------------------
+integer(kind=c_size_t), intent(IN) :: var
+
+!Local variables-------------------------------
+integer(kind=c_size_t) :: dummy
+! *********************************************************************
+
+ dummy = var
+
+end subroutine unused_c_size_t
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_errors/bigdft_lib_error
 !! NAME
 !!  bigdft_lib_error
@@ -1142,7 +1211,6 @@ subroutine bigdft_lib_error(file,line)
 
 !Local variables-------------------------------
  character(len=500) :: message
-
 ! *********************************************************************
 
   write(message,'(4a)') ch10,&
@@ -1232,11 +1300,14 @@ subroutine abinit_doctor(prefix, print_mem_report)
  character(len=fnlen) :: path
  character(len=5000) :: errmsg
 #endif
-
 ! *************************************************************************
 
  do_mem_report = 1; if (present(print_mem_report)) do_mem_report = print_mem_report
  my_rank = xmpi_comm_rank(xmpi_world)
+
+ if (allocated(INPUT_STRING)) then
+   ABI_FREE_SCALAR(INPUT_STRING)
+ end if
 
 #ifdef HAVE_MEM_PROFILING
  errmsg = ""; ierr = 0
@@ -1332,6 +1403,15 @@ subroutine abinit_doctor(prefix, print_mem_report)
 #endif
  end if
 
+ ! Check for MPI windows.
+ if (xmpi_count_wins /= 0) then
+   write(msg, "(a,i0,a)")"Leaking ", xmpi_count_wins, " MPI windows at the end of the run"
+   ABI_WARNING(msg)
+#ifdef HAVE_MEM_PROFILING
+   ABI_ERROR(msg)
+#endif
+ end if
+
 end subroutine abinit_doctor
 !!***
 
@@ -1375,7 +1455,6 @@ subroutine abi_abort(mode_paral,exit_status,print_config)
 
 !Local variables-------------------------------
  logical :: print_config_
-
 ! **********************************************************************
 
  call wrtout(std_out, ch10//' abinit_abort: decision taken to exit. Check above messages for more info', 'PERS')

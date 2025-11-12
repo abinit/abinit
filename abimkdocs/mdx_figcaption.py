@@ -8,8 +8,7 @@ A simple example:
 
     ![](http://lorempixel.com/350/150/)
     :   Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-        Praesent at consequat magna, faucibus ornare eros. Nam et
-        mattis urna. Cras sodales, massa id gravida
+        Praesent at consequat magna, faucibus ornare eros.
 
 Outputs:
 
@@ -17,8 +16,8 @@ Outputs:
         <img alt="" src="http://lorempixel.com/350/150/" />
         <figcaption>
             <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            Praesent at consequat magna, faucibus ornare eros. Nam et
-            mattis urna. Cras sodales, massa id gravida</p>
+            Praesent at consequat magna, faucibus ornare eros.
+            </p>
         </figcaption>
     </figure>
 
@@ -31,7 +30,11 @@ from __future__ import unicode_literals
 from markdown import Extension
 from markdown.inlinepatterns import IMAGE_LINK_RE, IMAGE_REFERENCE_RE
 from markdown.blockprocessors import BlockProcessor
-from markdown.util import etree
+try:
+    from markdown.util import etree
+except ImportError:
+    import xml.etree.ElementTree as etree
+
 import re
 
 import logging
@@ -96,13 +99,16 @@ class FigcaptionProcessor(BlockProcessor):
 class FigcaptionExtension(Extension):
     """ Add definition lists to Markdown. """
 
-    def extendMarkdown(self, md, md_globals):
+    #def extendMarkdown(self, md, md_globals):
+    def extendMarkdown(self, md,):
         """ Add an instance of FigcaptionProcessor to BlockParser. """
 
         # def_list = 'def_list' in md.registeredExtensions
-        md.parser.blockprocessors.add('figcaption',
-                                      FigcaptionProcessor(md.parser),
-                                      '<ulist')
+        #md.parser.blockprocessors.add('figcaption',
+        md.parser.blockprocessors.register(
+                                      FigcaptionProcessor(md.parser), 'figcaption', -10
+                                      #'figcaption', FigcaptionProcessor(md.parser), '<ulist'
+                                      )
 
 
 def makeExtension(**kwargs):

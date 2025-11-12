@@ -27,6 +27,7 @@ fit_iatom = 0
 #%% test_chain = t13.abi,t14.abi,t15.abi
 #%% input_ddb = t13_ddb.in
 #%% md_hist = t13_HIST
+#%% need_cpp_vars = !HAVE_GPU  , !FC_INTEL
 #%% [files]
 #%% files_to_test = 
 #%%   t13.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;

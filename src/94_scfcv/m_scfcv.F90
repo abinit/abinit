@@ -6,12 +6,10 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2022 ABINIT group (JB)
+!!  Copyright (C) 2014-2025 ABINIT group (JB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -35,6 +33,7 @@ module m_scfcv
  use m_hdr
  use m_extfpmd
  use m_dtfil
+ use m_xg_nonlop
 
  use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : MPI_type
@@ -70,12 +69,6 @@ module m_scfcv
 !! FUNCTION
 !!  This structured datatype contains the necessary data
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2014-2022 ABINIT group (JB)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! SOURCE
 
  type, public :: scfcv_t
@@ -107,6 +100,7 @@ module m_scfcv
    type(wffile_type),pointer :: wffnow => null()
    type(wvl_data),pointer :: wvl => null()
    type(paw_dmft_type), pointer :: paw_dmft => null()
+   type(xg_nonlop_t) :: xg_nonlop
 
    !arrays
    integer,pointer :: atindx(:) => null()
@@ -161,11 +155,6 @@ contains
 !!  argin(sizein)=description
 !!
 !! OUTPUT
-!!  argout(sizeout)=description
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -175,7 +164,7 @@ subroutine scfcv_init(this,atindx,atindx1,cg,cprj,cpus,&
 &  nfftf,npwarr,occ,pawang,pawfgr,pawrad,pawrhoij,&
 &  pawtab,phnons,psps,pwind,pwind_alloc,pwnsfac,rec_set,&
 &  resid,results_gs,scf_history,fatvshift,&
-&  symrec,taug,taur,wvl,ylm,ylmgr,paw_dmft,wffnew,wffnow)
+&  symrec,taug,taur,wvl,ylm,ylmgr,paw_dmft,wffnew,wffnow,xg_nonlop)
 
 
 !Arguments ------------------------------------
@@ -229,6 +218,7 @@ subroutine scfcv_init(this,atindx,atindx1,cg,cprj,cpus,&
  type(paw_dmft_type), intent(in),target :: paw_dmft
  type(wffile_type),intent(in),target :: wffnew,wffnow
  type(pawcprj_type), allocatable,intent(in),target :: cprj(:,:)
+ type(xg_nonlop_t),intent(inout) :: xg_nonlop
 !Local variables -------------------------
 !scalars
  logical :: DEBUG=.FALSE.
@@ -321,6 +311,7 @@ subroutine scfcv_init(this,atindx,atindx1,cg,cprj,cpus,&
  this%wffnow=>wffnow
  !this%xred=>xred
  !this%xred_old=>xred_old
+ this%xg_nonlop=xg_nonlop
 
 
  !!!!!!!!! INITIALIZE or REINITIALIZE parallelization here !!
@@ -352,12 +343,6 @@ end subroutine scfcv_init
 !!
 !! INPUTS
 !!  scfcv=structure of scfcv
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -616,7 +601,7 @@ subroutine scfcv_runWEntropyDMFT(this,electronpositron,itimes,rhog,rhor,rprimd,x
  end do !!! End loop for entropy DMFT
 
  ! GATHER DATA HERE OR INSIDE THE NEXT CALL ?
- call entropyDMFT_computeEntropy(this%entropyDMFT,this%results_gs%energies%entropy)
+ call entropyDMFT_computeEntropy(this%entropyDMFT,this%results_gs%energies%entropy_ks)
  !-----------------------------------------------------
  ! This call should be done inside destroy_sc_dmft
  !if ( this%dtset%usedmft /= 0 ) then
@@ -639,8 +624,6 @@ end subroutine scfcv_runWEntropyDMFT
 !! INPUTS
 !!  scfcv=structure of scfcv
 !!  itimes(2)=itime array, contain itime=itimes(1) and itimimage_gstate=itimes(2) from outer loops
-!!
-!! OUTPUT
 !!
 !! NOTES
 !!  Wrapper to scfcv to avoid circular dependencies ...
@@ -666,7 +649,7 @@ subroutine scfcv_scfcv(this, electronpositron, itimes, rhog, rhor, rprimd, xred,
     this%nfftf,this%npwarr,&
     this%occ,this%paw_dmft,this%pawang,this%pawfgr,this%pawrad,this%pawrhoij,this%pawtab,this%phnons,this%psps,this%pwind,&
     this%pwind_alloc,this%pwnsfac,this%rec_set,this%resid,this%results_gs,rhog,rhor,rprimd,&
-    this%scf_history,this%symrec,this%taug,this%taur,this%wffnew,this%wvl,xred,xred_old,this%ylm,this%ylmgr,&
+    this%scf_history,this%symrec,this%taug,this%taur,this%wffnew,this%wvl,this%xg_nonlop,xred,xred_old,this%ylm,this%ylmgr,&
     conv_retcode)
 
 end subroutine scfcv_scfcv

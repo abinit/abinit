@@ -5,7 +5,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 
 import re
 
-# This one is problematic. The firs one is stricter but it does not play well with the other code!!
+# This one is problematic. The first one is stricter but it does not play well with the other code!!
 # I use the old one used by abilint
 #RE_FUNC_END = re.compile('^[ \t]*end[ \t]*(function\n)',re.I).match
 
@@ -52,11 +52,14 @@ import re
 #ARITH_GOTO_RE = re.compile("go\s*to\s*\([0-9,\s]+\)",re.I)
 #CALL_RE = re.compile("(?:^|[^a-zA-Z0-9_% ]\s*)(\w+)(?=\s*\(\s*(?:.*?)\s*\))",re.I)
 
-class HasRegex(object):
+
+class HasRegex:
     """
     Mixin class providing regular expressions used to analyze Fortran code.
     Many regexs use `^` so we assume source lines have been already stripped.
     """
+    USE_MPI_EXPLICIT = re.compile(r"use\s+mpi\s*", re.I)
+
     # https://software.intel.com/en-us/fortran-compiler-18.0-developer-guide-and-reference-interface
 
     # A quoted expression.
@@ -66,6 +69,8 @@ class HasRegex(object):
     RE_OMP_SENTINEL = re.compile(r"\s*!\$OMP", re.I)
 
     RE_SEARCH_PROC = re.compile(r"(subroutine|function|program)", re.I)
+
+    RE_IMPLICIT_NONE = re.compile(r'\s*implicit\s+none\s*', re.I)
 
     # We don't allow plain `end`.
     # end subroutine name is mandatory
@@ -123,7 +128,7 @@ re.I | re.VERBOSE)
 
     # [if ()] call <name> [([<dummy-arg-list>])]
     #RE_SUBCALL = re.compile("^(?:if\s*\(.*\)\s*)?call\s+(?P<name>\w+)\s*(?:\(\s*(.*?)\s*\))?\Z", re.I)
-    RE_SUBCALL = re.compile("^(?:if\s*\(.*\)\s*)?call\s+(?P<name>\w+)", re.I)
+    RE_SUBCALL = re.compile(r"^(?:if\s*\(.*\)\s*)?call\s+(?P<name>\w+)", re.I)
 
     # TYPE [[,attr-list] :: ] name [(type-param-name-list)]
     #    [type-param-def-stmts]
@@ -162,7 +167,7 @@ re.I | re.VERBOSE)
     RE_INTENT = re.compile(r",\s+intent\s*\(\s*(?P<value>in|out|inout)\s*\)", re.I)
 
     # For type(xxx)
-    RE_TYPECLASS_DEC = re.compile('^(?P<ftype>(type|class))\s*\(\s*(?P<name>\w+)\s*\)', re.I)
+    RE_TYPECLASS_DEC = re.compile(r'^(?P<ftype>(type|class))\s*\(\s*(?P<name>\w+)\s*\)', re.I)
 
     RE_NUMBOOL_DEC = re.compile(r"""
 ^(?P<ftype>(integer|real|double\s*precision|complex|double\s*complex|logical))\s*
@@ -171,7 +176,7 @@ re.I | re.VERBOSE)
 re.I | re.VERBOSE)
 
     # Include statement (CPP and F version).
-    RE_INCLUDE = re.compile("#?include\s+(?P<path>.+)", re.I)
+    RE_INCLUDE = re.compile(r"#?include\s+(?P<path>.+)", re.I)
 
     #re_cpp_begin= re.compile("^[ ]*#[ \t]*if[ \t]*defined[ \t]*"+my_active_macro)
     #re_cpp_end  = re.compile("^[ ]*#[ \t]*endif")

@@ -9,7 +9,7 @@
 !!  used, or be written to disk. All combinations should be feasible.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2022 ABINIT group (MVer, MG)
+!! Copyright (C) 2004-2025 ABINIT group (MVer, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -306,16 +306,12 @@ CONTAINS
 !! INPUTS
 !!  elph_ds = elphon datastructure
 !!
-!! NOTES
-!!
 !! SOURCE
 
 subroutine elph_ds_clean(elph_ds)
 
 !Arguments ------------------------------------
-!scalars
- type(elph_type), intent(inout) :: elph_ds
-
+ class(elph_type), intent(inout) :: elph_ds
 ! *************************************************************************
 
  !@elph_type
@@ -354,16 +350,12 @@ end subroutine elph_ds_clean
 !! INPUTS
 !!  elph_tr_ds = elphon transport datastructure
 !!
-!! NOTES
-!!
 !! SOURCE
 
 subroutine elph_tr_ds_clean(elph_tr_ds)
 
 !Arguments ------------------------------------
-!scalars
- type(elph_tr_type), intent(inout) :: elph_tr_ds
-
+ class(elph_tr_type), intent(inout) :: elph_tr_ds
 ! *************************************************************************
 
  !@elph_tr_type
@@ -417,10 +409,8 @@ end subroutine elph_tr_ds_clean
 subroutine elph_k_copy(elph_k_in, elph_k_out)
 
 !Arguments ------------------------------------
-!scalars
- type(elph_kgrid_type), intent(in) :: elph_k_in
- type(elph_kgrid_type), intent(out) :: elph_k_out
-
+ class(elph_kgrid_type), intent(in) :: elph_k_in
+ class(elph_kgrid_type), intent(out) :: elph_k_out
 ! *************************************************************************
 
  !@elph_kgrid_type
@@ -477,16 +467,12 @@ end subroutine elph_k_copy
 !! INPUTS
 !!  elph_k = elphon k-points datastructure
 !!
-!! NOTES
-!!
 !! SOURCE
 
 subroutine elph_k_destroy(elph_k)
 
 !Arguments ------------------------------------
-!scalars
- type(elph_kgrid_type), intent(inout) :: elph_k
-
+ class(elph_kgrid_type), intent(inout) :: elph_k
 ! *************************************************************************
 
  !@elph_kgrid_type
@@ -535,14 +521,12 @@ subroutine elph_k_procs(nproc, elph_k)
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: nproc
- type(elph_kgrid_type), intent(inout) :: elph_k
+ class(elph_kgrid_type), intent(inout) :: elph_k
 
  integer :: ikpt, me, ik_this_proc
 ! *************************************************************************
 
- if (allocated(elph_k%my_kpt)) then
-   ABI_FREE (elph_k%my_kpt)
- end if
+ ABI_SFREE (elph_k%my_kpt)
  ABI_MALLOC (elph_k%my_kpt, (elph_k%nkpt))
 
  elph_k%my_kpt = 0
@@ -554,9 +538,7 @@ subroutine elph_k_procs(nproc, elph_k)
  end do
 
 ! create inverse mapping from ik_this_proc to ikpt
- if (allocated(elph_k%my_ikpt)) then
-   ABI_FREE (elph_k%my_ikpt)
- end if
+ ABI_SFREE (elph_k%my_ikpt)
  ABI_MALLOC (elph_k%my_ikpt, (elph_k%my_nkpt))
  elph_k%my_ikpt = 0
 
@@ -607,13 +589,11 @@ subroutine gam_mult_displ(nbranch, displ_red, gam_bare, gam_now)
 
 !Local variables -------------------------
  real(dp) :: zgemm_tmp_mat(2,nbranch,nbranch)
-
 ! *********************************************************************
 
  gam_now = zero
 
  call zgemm('c','n',nbranch,nbranch,nbranch,cone,displ_red,nbranch,gam_bare,nbranch,czero,zgemm_tmp_mat,nbranch)
-
  call zgemm('n','n',nbranch,nbranch,nbranch,cone,zgemm_tmp_mat,nbranch,displ_red,nbranch,czero,gam_now,nbranch)
 
 end subroutine gam_mult_displ
@@ -652,8 +632,8 @@ subroutine complete_gamma(Cryst,nbranch,nsppol,nqptirred,nqpt_full,ep_scalprod,q
 
 !Local variables-------------------------------
 !scalars
- integer :: ibranch,ieqqpt,ii,natom,nsym,iqpt,isppol,isym
- integer :: itim,jbranch,jj,kk,ll,neqqpt,iatom,ancestor_iatom,iqpt_fullbz
+ integer :: ibranch,ieqqpt,natom,nsym,iqpt,isppol,isym
+ integer :: itim,jbranch,neqqpt,iatom,ancestor_iatom,iqpt_fullbz
 !arrays
  integer :: symmetrized_qpt(nqpt_full)
  integer :: gkk_flag(nbranch,nbranch,nsppol,nqpt_full)
@@ -661,9 +641,8 @@ subroutine complete_gamma(Cryst,nbranch,nsppol,nqptirred,nqpt_full,ep_scalprod,q
  real(dp) :: tmp_mat(2,nbranch,nbranch)
  real(dp) :: tmp_mat2(2,nbranch,nbranch)
  real(dp) :: ss_allatoms(2,nbranch,nbranch)
- complex(dpc) :: c_one, c_zero
+ complex(dp) :: c_one, c_zero
  real(dp),allocatable :: gkk_qpt_new(:,:,:),gkk_qpt_tmp(:,:,:)
-
 ! *********************************************************************
 
  c_one = dcmplx(one,zero)
@@ -723,22 +702,11 @@ subroutine complete_gamma(Cryst,nbranch,nsppol,nqptirred,nqpt_full,ep_scalprod,q
 !      matrices here use different rel/rec, instead of just being multiplied by the rprim gprim...
 !
        if (ep_scalprod==1) then
-         do ii=1,3
-           do jj=1,3
-             ss(ii,jj)=zero
-             do kk=1,3
-               do ll=1,3
-                 ss(ii,jj)=ss(ii,jj)+Cryst%rprimd(ii,kk)*Cryst%symrel(kk,ll,isym)*Cryst%gprimd(ll,jj)
-               end do
-             end do
-           end do
-         end do
+         ! ss(ii,jj)=ss(ii,jj)+Cryst%rprimd(ii,kk)*Cryst%symrel(kk,ll,isym)*Cryst%gprimd(ll,jj)
+         ss(:,:) = MATMUL(Cryst%rprimd, MATMUL(Cryst%symrel(:,:,isym), Cryst%gprimd))
        else
-         do ii=1,3
-           do jj=1,3
-             ss(ii,jj) = Cryst%symrec(ii,jj,isym)
-           end do
-         end do
+         ! ss(ii,jj) = Cryst%symrec(ii,jj,isym)
+         ss(:,:) = Cryst%symrec(:,:,isym)
        end if
 
        ss_allatoms(:,:,:) = zero
@@ -788,23 +756,12 @@ subroutine complete_gamma(Cryst,nbranch,nsppol,nqptirred,nqpt_full,ep_scalprod,q
 
 !      use symrec matrices to get inverse transform from isym^{-1}
        if (ep_scalprod==1) then
-         do ii=1,3
-           do jj=1,3
-             ss(ii,jj)=zero
-             do kk=1,3
-               do ll=1,3
-!                Use inverse of symop matrix here to get back to ieqqpt (inv+transpose is in symrec and in gprimd)
-                 ss(ii,jj)=ss(ii,jj)+Cryst%rprimd(ii,kk)*Cryst%symrec(ll,kk,isym)*Cryst%gprimd(ll,jj)
-               end do
-             end do
-           end do
-         end do
+         ! Use inverse of symop matrix here to get back to ieqqpt (inv+transpose is in symrec and in gprimd)
+         ! ss(ii,jj)=ss(ii,jj)+Cryst%rprimd(ii,kk)*Cryst%symrec(ll,kk,isym)*Cryst%gprimd(ll,jj)
+         ss(:,:) = MATMUL(Cryst%rprimd, MATMUL(TRANSPOSE(Cryst%symrec(:,:,isym)), Cryst%gprimd))
        else
-         do ii=1,3
-           do jj=1,3
-             ss(ii,jj) = Cryst%symrel(jj,ii,isym)
-           end do
-         end do
+          ! ss(ii,jj) = Cryst%symrel(jj,ii,isym)
+          ss(:,:) = TRANSPOSE(Cryst%symrel(:,:,isym))
        end if
 
        ss_allatoms(:,:,:) = zero
@@ -895,10 +852,10 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
 
 !Local variables-------------------------------
 !scalars
- integer :: ieqqpt,ii,iqpt,isppol,isym
- integer :: itim,jj,kk,ll,neqqpt
+ integer :: ieqqpt,iqpt,isppol,isym
+ integer :: itim,neqqpt
  integer :: iatom,ancestor_iatom
- integer :: iqpt_fullbz,imode, itensor
+ integer :: iqpt_fullbz,imode, itensor,reim
  real(dp),parameter :: tol=2.d-8
 !arrays
  integer :: symrel(3,3,crystal%nsym),symrec(3,3,crystal%nsym)
@@ -906,13 +863,12 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
  integer :: gkk_flag(nbranch,nbranch,nsppol,nqpt_full)
  real(dp) :: gprimd(3,3),rprimd(3,3)
  real(dp) :: ss(3,3), sscart(3,3)
- real(dp) :: tmp_mat(2,nbranch,nbranch)
- real(dp) :: tmp_mat2(2,nbranch,nbranch)
- real(dp) :: tmp_tensor(2,3,3)
- real(dp) :: tmp_tensor2(2,3,3)
+ real(dp) :: tmp_mat(nbranch,nbranch)
+ real(dp) :: tmp_mat2(nbranch,nbranch)
+ real(dp) :: tmp_tensor(3,3)
+ real(dp) :: tmp_tensor2(3,3)
  real(dp) :: ss_allatoms(nbranch,nbranch)
  real(dp),allocatable :: gkk_qpt_new(:,:,:,:),gkk_qpt_tmp(:,:,:,:)
-
 ! *********************************************************************
 
  gprimd = crystal%gprimd
@@ -969,34 +925,14 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
 !      I believe everything is settled, but still do not know why the 2 versions of the ss
 !      matrices here use different rel/rec, instead of just being multiplied by the rprim gprim...
 !
-       do ii=1,3
-         do jj=1,3
-           sscart(ii,jj)=0.0_dp
-           do kk=1,3
-             do ll=1,3
-               sscart(ii,jj)=sscart(ii,jj)+rprimd(ii,kk)*symrel(kk,ll,isym)*gprimd(ll,jj)
-!              sscart(ii,jj)=sscart(ii,jj)+rprimd(ii,kk)*symrel(kk,ll,isym)*gprimd(ll,jj)
-             end do
-           end do
-         end do
-       end do
+       ! sscart(ii,jj)=sscart(ii,jj)+rprimd(ii,kk)*symrel(kk,ll,isym)*gprimd(ll,jj)
+       sscart(:,:) = MATMUL(rprimd, MATMUL(symrel(:,:,isym), gprimd))
        if (ep_scalprod==1) then
-         do ii=1,3
-           do jj=1,3
-             ss(ii,jj)=0.0_dp
-             do kk=1,3
-               do ll=1,3
-                 ss(ii,jj)=ss(ii,jj)+rprimd(ii,kk)*symrel(kk,ll,isym)*gprimd(ll,jj)
-               end do
-             end do
-           end do
-         end do
+         ! ss(ii,jj)=ss(ii,jj)+rprimd(ii,kk)*symrel(kk,ll,isym)*gprimd(ll,jj)
+         ss(:,:) = MATMUL(rprimd, MATMUL(symrel(:,:,isym), gprimd))
        else
-         do ii=1,3
-           do jj=1,3
-             ss(ii,jj) = symrec(ii,jj,isym)
-           end do
-         end do
+         ! ss(ii,jj) = symrec(ii,jj,isym)
+         ss(:,:) = symrec(:,:,isym)
        end if
 
        ss_allatoms(:,:) = zero
@@ -1013,47 +949,25 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
 
 !        for each tensor component, rotate the cartesian directions of phonon modes
          do itensor = 1, 9
-!          multiply by the ss matrices
-           tmp_mat2(:,:,:) = zero
-           tmp_mat(:,:,:) = reshape(gkk_qpt_tmp(:,itensor,:,isppol),&
-&           (/2,nbranch,nbranch/))
-           call DGEMM ('N','N',nbranch,nbranch,nbranch,&
-&           one,ss_allatoms,nbranch,tmp_mat(1,:,:),nbranch,zero,&
-&           tmp_mat2(1,:,:),nbranch)
-           call DGEMM ('N','N',nbranch,nbranch,nbranch,&
-&           one,ss_allatoms,nbranch,tmp_mat(2,:,:),nbranch,zero,&
-&           tmp_mat2(2,:,:),nbranch)
-
-           call DGEMM ('N','T',nbranch,nbranch,nbranch,&
-&           one,tmp_mat2(1,:,:),nbranch,ss_allatoms,nbranch,zero,&
-&           tmp_mat(1,:,:),nbranch)
-           call DGEMM ('N','T',nbranch,nbranch,nbranch,&
-&           one,tmp_mat2(2,:,:),nbranch,ss_allatoms,nbranch,zero,&
-&           tmp_mat(2,:,:),nbranch)
-
-           gkk_qpt_tmp(:,itensor,:,isppol) = reshape (tmp_mat, (/2,nbranch*nbranch/))
+           do reim=1,2  ! Real/Imaginary parts
+!            Multiply by the ss matrices
+             tmp_mat2(:,:) = zero
+             tmp_mat(:,:) = reshape(gkk_qpt_tmp(reim,itensor,:,isppol),(/nbranch,nbranch/))
+             call DGEMM ('N','N',nbranch,nbranch,nbranch,one,ss_allatoms,nbranch,tmp_mat,nbranch,zero,tmp_mat2,nbranch)
+             call DGEMM ('N','T',nbranch,nbranch,nbranch,one,tmp_mat2,nbranch,ss_allatoms,nbranch,zero,tmp_mat,nbranch)
+             gkk_qpt_tmp(reim,itensor,:,isppol) = reshape (tmp_mat, (/nbranch*nbranch/))
+           enddo
          end do ! itensor
 
 !        for each cartesian direction/phonon mode, rotate the tensor components
          do imode = 1, nbranch*nbranch
-           tmp_tensor2(:,:,:) = zero
-           tmp_tensor(:,:,:) = reshape(gkk_qpt_tmp(:,:,imode,isppol),&
-&           (/2,3,3/))
-           call DGEMM ('N','N',3,3,3,&
-&           one,sscart,3,tmp_tensor(1,:,:),3,zero,&
-&           tmp_tensor2(1,:,:),3)
-           call DGEMM ('N','T',3,3,3,&
-&           one,tmp_tensor2(1,:,:),3,sscart,3,zero,&
-&           tmp_tensor(1,:,:),3)
-
-           call DGEMM ('N','N',3,3,3,&
-&           one,sscart,3,tmp_tensor(2,:,:),3,zero,&
-&           tmp_tensor2(2,:,:),3)
-           call DGEMM ('N','T',3,3,3,&
-&           one,tmp_tensor2(2,:,:),3,sscart,3,zero,&
-&           tmp_tensor(2,:,:),3)
-
-           gkk_qpt_tmp(:,:,imode,isppol) = reshape (tmp_tensor, (/2,9/)) ! modified by BX
+           do reim=1,2  ! Real/Imaginary parts
+             tmp_tensor2(:,:) = zero
+             tmp_tensor(:,:) = reshape(gkk_qpt_tmp(reim,:,imode,isppol),(/3,3/))
+             call DGEMM ('N','N',3,3,3,one,sscart,3,tmp_tensor,3,zero,tmp_tensor2,3)
+             call DGEMM ('N','T',3,3,3,one,tmp_tensor2,3,sscart,3,zero,tmp_tensor,3)
+             gkk_qpt_tmp(reim,:,imode,isppol) = reshape (tmp_tensor, (/9/)) ! modified by BX
+           enddo
          end do ! imode
 
 !        add to gkk_qpt_new
@@ -1080,36 +994,18 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
        gkk_qpt_tmp = zero
 
 !      use symrec matrices to get inverse transform from isym^{-1}
-       do ii=1,3
-         do jj=1,3
-           sscart(ii,jj)=0.0_dp
-           do kk=1,3
-             do ll=1,3
 !              Use inverse of symop matrix here to get back to ieqqpt (inv+transpose is in symrec and in gprimd)
 !              sscart(ii,jj)=sscart(ii,jj)+rprimd(ii,kk)*symrec(ll,kk,isym)*gprimd(ll,jj)
-               sscart(ii,jj)=sscart(ii,jj)+rprimd(ii,kk)*symrec(ll,kk,isym)*gprimd(ll,jj)
-             end do
-           end do
-         end do
-       end do
+       ! sscart(ii,jj)=sscart(ii,jj)+rprimd(ii,kk)*symrec(ll,kk,isym)*gprimd(ll,jj)
+       sscart(:,:) = MATMUL(rprimd, MATMUL(TRANSPOSE(symrec(:,:,isym)), gprimd))
        if (ep_scalprod==1) then
-         do ii=1,3
-           do jj=1,3
-             ss(ii,jj)=0.0_dp
-             do kk=1,3
-               do ll=1,3
 !                Use inverse of symop matrix here to get back to ieqqpt (inv+transpose is in symrec and in gprimd)
-                 ss(ii,jj)=ss(ii,jj)+rprimd(ii,kk)*symrec(ll,kk,isym)*gprimd(ll,jj)
-               end do
-             end do
-           end do
-         end do
+         ! ss(ii,jj)=ss(ii,jj)+rprimd(ii,kk)*symrec(ll,kk,isym)*gprimd(ll,jj)
+         ss(:,:) = MATMUL(rprimd, MATMUL(TRANSPOSE(symrec(:,:,isym)), gprimd))
+
        else
-         do ii=1,3
-           do jj=1,3
-             ss(ii,jj) = symrel(jj,ii,isym)
-           end do
-         end do
+         ! ss(ii,jj) = symrel(jj,ii,isym)
+         ss(:,:) = TRANSPOSE(symrel(:,:,isym))
        end if
 
        ss_allatoms(:,:) = zero
@@ -1124,51 +1020,26 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
 
        do isppol=1,nsppol
          do itensor = 1, 9
-!          multiply by the ss^{-1} matrices
-           tmp_mat2(:,:,:) = zero
-           tmp_mat(:,:,:) = reshape(gkk_qpt_new(:,itensor,:,isppol),&
-&           (/2,nbranch,nbranch/))
-
-
-           call DGEMM ('N','N',nbranch,nbranch,nbranch,&
-&           one,ss_allatoms,nbranch,tmp_mat(1,:,:),nbranch,zero,&
-&           tmp_mat2(1,:,:),nbranch)
-           call DGEMM ('N','N',nbranch,nbranch,nbranch,&
-&           one,ss_allatoms,nbranch,tmp_mat(2,:,:),nbranch,zero,&
-&           tmp_mat2(2,:,:),nbranch)
-
-           call DGEMM ('N','T',nbranch,nbranch,nbranch,&
-&           one,tmp_mat2(1,:,:),nbranch,ss_allatoms,nbranch,zero,&
-&           tmp_mat(1,:,:),nbranch)
-           call DGEMM ('N','T',nbranch,nbranch,nbranch,&
-&           one,tmp_mat2(2,:,:),nbranch,ss_allatoms,nbranch,zero,&
-&           tmp_mat(2,:,:),nbranch)
-
-
-           gkk_qpt_tmp(:,itensor,:,isppol) = reshape (tmp_mat, (/2,nbranch*nbranch/))
+           do reim=1,2  ! Real/Imaginary parts
+!            Multiply by the ss^{-1} matrices
+             tmp_mat2(:,:) = zero
+             tmp_mat(:,:) = reshape(gkk_qpt_new(reim,itensor,:,isppol),(/nbranch,nbranch/))
+             call DGEMM ('N','N',nbranch,nbranch,nbranch,one,ss_allatoms,nbranch,tmp_mat,nbranch,zero,tmp_mat2,nbranch)
+             call DGEMM ('N','T',nbranch,nbranch,nbranch,one,tmp_mat2,nbranch,ss_allatoms,nbranch,zero,tmp_mat,nbranch)
+             gkk_qpt_tmp(reim,itensor,:,isppol) = reshape (tmp_mat, (/nbranch*nbranch/))
+           enddo
          end do ! itensor
 
 !        for each cartesian direction/phonon mode, rotate the tensor components
          do imode = 1, nbranch*nbranch
-           tmp_tensor2(:,:,:) = zero
-           tmp_tensor(:,:,:) = reshape(gkk_qpt_tmp(:,:,imode,isppol),&
-&           (/2,3,3/))
-           call DGEMM ('N','N',3,3,3,&
-&           one,sscart,3,tmp_tensor(1,:,:),3,zero,&
-&           tmp_tensor2(1,:,:),3)
-           call DGEMM ('N','T',3,3,3,&
-&           one,tmp_tensor2(1,:,:),3,sscart,3,zero,&
-&           tmp_tensor(1,:,:),3)
-
-           call DGEMM ('N','N',3,3,3,&
-&           one,sscart,3,tmp_tensor(2,:,:),3,zero,&
-&           tmp_tensor2(2,:,:),3)
-           call DGEMM ('N','T',3,3,3,&
-&           one,tmp_tensor2(2,:,:),3,sscart,3,zero,&
-&           tmp_tensor(2,:,:),3)
-
-!          gkk_qpt_new(:,:,imode,isppol) = reshape (tmp_tensor, (/2,9/)) ! Modified by BX
-           gkk_qpt_tmp(:,:,imode,isppol) = reshape (tmp_tensor, (/2,9/)) ! Modified by BX
+           do reim=1,2  ! Real/Imaginary parts
+             tmp_tensor2(:,:) = zero
+             tmp_tensor(:,:) = reshape(gkk_qpt_tmp(reim,:,imode,isppol),(/3,3/))
+             call DGEMM ('N','N',3,3,3,one,sscart,3,tmp_tensor,3,zero,tmp_tensor2,3)
+             call DGEMM ('N','T',3,3,3,one,tmp_tensor2,3,sscart,3,zero,tmp_tensor,3)
+!            gkk_qpt_new(:,:,imode,isppol) = reshape (tmp_tensor, (/2,9/)) ! Modified by BX
+             gkk_qpt_tmp(reim,:,imode,isppol) = reshape (tmp_tensor, (/9/)) ! Modified by BX
+           enddo
          end do ! imode
 
          if (gkk_flag (1,1,isppol,ieqqpt) == -1) then
@@ -1241,12 +1112,11 @@ subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_
  type(krank_t) :: krank
 !arrays
  real(dp) :: tmpkpt(3),gamma_kpt(3)
-
 ! *************************************************************************
 
  call wrtout(std_out,' mkqptequiv : making rankkpt_phon and invrankkpt_phon',"COLL")
 
- krank = krank_new(nkpt_phon, kpt_phon)
+ call krank%init(nkpt_phon, kpt_phon)
 
  FSfullpqtofull = -999
  gamma_kpt(:) = zero
@@ -1286,7 +1156,7 @@ subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_
  ! start over with q grid
  call wrtout(std_out,' mkqptequiv : FSfullpqtofull made. Do qpttoqpt',"COLL")
 
- krank = krank_new(nqpt, qpt_full)
+ call krank%init(nqpt, qpt_full)
 
  qpttoqpt(:,:,:) = -1
  do iFSqpt=1,nqpt

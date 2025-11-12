@@ -12,9 +12,9 @@
 !!  B is also positive definite.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2022 ABINIT group (LNguyen,FDahm,MT)
+!!  Copyright (C) 2001-2025 ABINIT group (LNguyen,FDahm,MT)
 !!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~ABINIT/Infos/copyright
+!!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! SOURCE
@@ -33,7 +33,8 @@
 !!
 
   subroutine abi_dhegv(itype,jobz,uplo,n,a,lda,b,ldb,w, &
-&            x_cplx,istwf_k,timopt,tim_xeigen,use_slk,use_gpu)
+&            x_cplx,istwf_k,timopt,tim_xeigen,&
+&            use_slk,use_gpu_elpa,use_gpu_magma)
 
 !Arguments ------------------------------------
  integer, intent(in) :: itype
@@ -46,10 +47,10 @@
  integer, optional, intent(in) :: x_cplx
  integer, optional, intent(in) :: istwf_k
  integer, optional, intent(in) :: timopt,tim_xeigen
- integer, optional, intent(in) :: use_gpu,use_slk
+ integer, optional, intent(in) :: use_gpu_elpa,use_gpu_magma,use_slk
 
 !Local variables ------------------------------------
- integer :: cplx_,istwf_k_,usegpu_,use_slk_
+ integer :: cplx_,istwf_k_,use_gpu_elpa_,use_gpu_magma_,use_slk_
  integer :: info
  real(dp) :: tsec(2)
 
@@ -64,12 +65,17 @@
  end if
 
  cplx_=1 ; if(present(x_cplx)) cplx_ = x_cplx
- usegpu_=0; if (present(use_gpu)) usegpu_=use_gpu
+ use_gpu_magma_=0; if (present(use_gpu_magma)) use_gpu_magma_=use_gpu_magma
  use_slk_=0; if (present(use_slk)) use_slk_=use_slk
  istwf_k_=1; if (present(istwf_k)) istwf_k_=istwf_k
+ use_gpu_elpa_=0
+#ifdef HAVE_LINALG_ELPA
+ if (present(use_gpu_elpa)) use_gpu_elpa_=use_gpu_elpa
+#endif
+
 
 !===== MAGMA
- if (ABI_LINALG_MAGMA_ISON.and.usegpu_==1) then
+ if (ABI_LINALG_MAGMA_ISON.and.use_gpu_magma_==1) then
 #if defined HAVE_LINALG_MAGMA
    ABI_CHECK((lapack_divide_conquer),"BUG(4) in abi_dhegv (d&c)!")
    if (cplx_ == 2) then
@@ -85,7 +91,8 @@
  else if (ABI_LINALG_SCALAPACK_ISON.and.use_slk_==1.and.n>slk_minsize) then
 #if defined HAVE_LINALG_SCALAPACK
    ABI_CHECK(present(x_cplx),"BUG(5) in abi_dhegv (x_cplx)!")
-   call compute_eigen2(slk_communicator,slk_processor,cplx_,n,n,a,b,w,istwf_k_)
+   call compute_eigen2(slk_communicator,slk_processor,cplx_,n,n,a,b,w,istwf_k_,&
+&                      use_gpu_elpa=use_gpu_elpa_)
    info = 0 ! This is to avoid unwanted warning but it's not clean
 #endif
 
@@ -123,6 +130,10 @@
 
  ABI_CHECK(info==0,"abi_dhegv returned info!=0!")
 
+#ifndef HAVE_LINALG_ELPA
+ ABI_UNUSED(use_gpu_elpa)
+#endif
+
 end subroutine abi_dhegv
 !!***
 
@@ -147,15 +158,14 @@ subroutine abi_chegv(itype,jobz,uplo,n,a,lda,b,ldb,w)
  character(len=1), intent(in) :: jobz
  character(len=1), intent(in) :: uplo
  integer, intent(in) :: n,lda,ldb
- complex(spc), intent(inout) :: a(lda,*)
- complex(spc), intent(inout) :: b(ldb,*)
+ complex(sp), intent(inout) :: a(lda,*)
+ complex(sp), intent(inout) :: b(ldb,*)
  real(sp), intent(out) :: w(n)
 
 !Local variables-------------------------------
  integer :: info,lwork
  real(sp),pointer :: rwork(:)
- complex(spc),pointer :: work(:)
-
+ complex(sp),pointer :: work(:)
 ! *********************************************************************
 
  ABI_CHECK(lapack_full_storage,"BUG(1) in abi_chegv (storage)!")
@@ -229,15 +239,14 @@ subroutine abi_zhegv(itype,jobz,uplo,n,a,lda,b,ldb,w)
  character(len=1), intent(in) :: jobz
  character(len=1), intent(in) :: uplo
  integer, intent(in) :: n,lda,ldb
- complex(dpc), intent(inout) :: a(lda,*)
- complex(dpc), intent(inout) :: b(ldb,*)
+ complex(dp), intent(inout) :: a(lda,*)
+ complex(dp), intent(inout) :: b(ldb,*)
  real(dp), intent(out) :: w(n)
 
 !Local variables-------------------------------
  integer :: info,lwork
  real(dp),pointer :: rwork(:)
- complex(dpc),pointer :: work(:)
-
+ complex(dp),pointer :: work(:)
 ! *********************************************************************
 
  ABI_CHECK(lapack_full_storage,"BUG(1) in abi_zhegv (storage)!")

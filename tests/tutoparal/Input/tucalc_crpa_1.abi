@@ -3,13 +3,13 @@ ndtset 2
 jdtset 1 2
 #jdtset 1 2 3 4
 pawprtvol 3
-getden -1 
+getden -1
 
 #==================================================================================
 ############ Parameters common to all DATASETS
 #==================================================================================
 ##### CONVERGENCE PARAMETERS
-nstep     40   
+nstep     40
 nline     3          #Number of LINE minimisations
 nnsclo    3          #Number of Non-Self Consistent LOops
 ecut      12.0        # Maximal kinetic energy cut-off, in Hartree
@@ -52,9 +52,9 @@ kssform2   3
 pawfatbnd2  1
 
 
-#Parameters (to uncomment) for bands structure 
-iscf2      -2                                    
-kptopt2     -4                           
+#Parameters (to uncomment) for bands structure
+iscf2      -2
+kptopt2     -4
 ndivk2      18 20 20 28
 kptbounds2  1/4 1/4 1/4 #R'
             0.0 0.0 0.0 #Gamma
@@ -63,7 +63,7 @@ kptbounds2  1/4 1/4 1/4 #R'
             0.0 0.0 0.0 #Gamma
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_paw_pw_standard/V.xml, Pseudodojo_paw_pw_standard/Sr.xml, Pseudodojo_paw_pw_standard/O.xml"
+ pseudos "Psdj_paw_pw_std/V.xml, Psdj_paw_pw_std/Sr.xml, Psdj_paw_pw_std/O.xml"
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
@@ -73,7 +73,7 @@ kptbounds2  1/4 1/4 1/4 #R'
 #%% executable = abinit
 #%% test_chain = tucalc_crpa_1.abi
 #%% [files]
-#%% [shell] 
+#%% [shell]
 #%% [paral_info]
 #%% max_nprocs = 24
 #%% nprocs_to_test = 24

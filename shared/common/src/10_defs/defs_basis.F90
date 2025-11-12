@@ -7,7 +7,7 @@
 !! physical constants, as well as associated datatypes and methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2022 ABINIT group (HM, XG,XW, EB)
+!! Copyright (C) 2000-2025 ABINIT group (HM, XG,XW, EB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -46,33 +46,23 @@ module defs_basis
 !nb of bytes related to default simple-precision real/complex subtypes
 !(= 4 for many machine architectures, = 8 for e.g. Cray)
  integer, parameter :: sp=kind(1.0)          ! Single precision should not be used
- integer, parameter :: spc=kind((1.0,1.0))
 
 !nb of bytes related to default double-precision real/complex subtypes
 !(= 8 for many machine architectures)
  integer, parameter :: dp=kind(1.0d0)
- integer, parameter :: dpc=kind((1.0_dp,1.0_dp))  ! Complex should not be used presently
-                                                  ! except for use of libraries
+
+! Please DO NOT USE use complex(dpc) as complex(dp) is completely equivalent.
+! dpc is still needed because nvfortran with ELPA (eos_nvhpc_23.9_elpa), for unknown reasons,
+! raises an internal compiler error when compiling m_slk if dpc is not declared here.
+ integer, parameter :: dpc=kind((1.0_dp,1.0_dp))
 
 !nb of bytes related to GW arrays, that can be tuned from sp to dp independently
 !of other variables in ABINIT. Presently single-precision is the default (see config/specs/options.conf)..
 #if defined HAVE_GW_DPC
  integer, parameter :: gwp=kind(1.0d0)
- integer, parameter :: gwpc=kind((1.0_dp,1.0_dp))
-
 #else
  integer, parameter :: gwp=kind(1.0)
- integer, parameter :: gwpc=kind((1.0,1.0))
 #endif
-
-!Example:
-! integer, parameter :: urp=selected_real_kind((p=)12,(r=)50)
-! real((kind=)urp) :: d
-! d=5.04876_urp   ! for a real d with 12 significative digits
-! and such as 10^-50 < |d| < 10^50
-
-!To modify sp/spc and / or dp/dpc, insert instructions such as 'dp='
-! but do not modify the other declarations in this module
 
 !The default lengths
 ! TODO: We should increase fnlen to be able to handle multiple pseudos paths in the input file
@@ -82,12 +72,14 @@ module defs_basis
  integer, parameter :: fnlen=264     ! maximum length of file name variables
  integer, parameter :: strlen=2000000 ! maximum length of input string
 
- ! The input file used to run the code, set by parsefile.
+ ! The input file used to run the code, allocated and set by parsefile.
  ! It will be added to the netcdf files in ntck_open_create
- character(len=strlen), save :: INPUT_STRING = ""
+ character(len=:), allocatable, save :: INPUT_STRING
 
- integer, parameter :: md5_slen = 32 ! lenght of strings storing the pseudos' md5 checksum.
+ integer, parameter :: md5_slen = 32 ! length of strings storing the pseudos' md5 checksum.
  character(len=md5_slen),parameter :: md5_none = "None"
+
+ integer, parameter :: abi_slen=80 ! maximum length of string variables
 
 !Some constants:
 
@@ -121,7 +113,7 @@ module defs_basis
  integer,public,parameter :: ABI_RECL=524288  ! 2**19
 
  integer,public,parameter :: MAX_NSHIFTK = 210
- ! Maximun number of shifts in input k-mesh.
+ ! Maximum number of shifts in input k-mesh.
 
 !Real dp constants
  real(dp), parameter :: zero=0._dp
@@ -192,7 +184,7 @@ module defs_basis
  real(dp), parameter :: tol14=0.00000000000001_dp
  real(dp), parameter :: tol15=0.000000000000001_dp
  real(dp), parameter :: tol16=0.0000000000000001_dp
- real(dp), parameter :: tol17=0.00000000000000010_dp
+ real(dp), parameter :: tol17=0.00000000000000001_dp
  real(dp), parameter :: tol18=0.000000000000000001_dp
  real(dp), parameter :: tol19=0.0000000000000000001_dp
  real(dp), parameter :: tol20=0.00000000000000000001_dp
@@ -218,7 +210,7 @@ module defs_basis
  ! Max Memory in Mb available for a MPI processor
  ! This quantity might be used at runtime to determine how to distribute memory.
  ! The default value (2Gb) can be changed at runtime via the command line interface.
- real(dp), protected :: mem_per_cpu_mb = two * 1024_dp
+ real(dp), save, protected :: mem_per_cpu_mb = two * 1024_dp
 
 !Real physical constants
 !Revised fundamental constants from http://physics.nist.gov/cuu/Constants/index.html
@@ -263,20 +255,22 @@ module defs_basis
 
 !Complex constants
  !double precision
- complex(dpc), parameter :: czero = (0._dp,0._dp)
- complex(dpc), parameter :: cone  = (1._dp,0._dp)
- complex(dpc), parameter :: j_dpc = (0._dp,1.0_dp)
+ complex(dp), parameter :: czero = (0._dp,0._dp)
+ complex(dp), parameter :: cone  = (1._dp,0._dp)
+ complex(dp), parameter :: ctwo  = (2._dp,0._dp)
+ complex(dp), parameter :: j_dpc = (0._dp,1.0_dp)
 
  ! single-precision
- complex(spc), parameter :: czero_sp = (0._sp,0._sp)
- complex(spc), parameter :: cone_sp  = (1._sp,0._sp)
- complex(spc), parameter :: j_sp     = (0._sp,1.0_sp)
+ complex(sp), parameter :: czero_sp = (0._sp,0._sp)
+ complex(sp), parameter :: cone_sp  = (1._sp,0._sp)
+ complex(sp), parameter :: ctwo_sp  = (2._sp,0._sp)
+ complex(sp), parameter :: j_sp     = (0._sp,1.0_sp)
 
 !Pauli matrix
- complex(dpc), parameter :: pauli_mat(2,2,0:3) = reshape([cone,czero,czero,cone, &
-                                                          czero,cone,cone,czero,&
-                                                          czero,j_dpc,-j_dpc,czero,&
-                                                          cone,czero,czero,-cone], [2,2,4])
+ complex(dp), parameter :: pauli_mat(2,2,0:3) = reshape([cone,czero,czero,cone, &
+                                                         czero,cone,cone,czero,&
+                                                         czero,j_dpc,-j_dpc,czero,&
+                                                         cone,czero,czero,-cone], [2,2,4])
 
 !Character constants
  character(len=1), parameter :: ch10 = char(10)
@@ -284,7 +278,7 @@ module defs_basis
 
  ! File used to dump the error message in m_error.
  ! Extremely useful when we run on many CPUs since logging, in this case, is automatically disabled
- ! As a consequence, we get error messages in the main log only if the problem is encoutered by the master node!
+ ! As a consequence, we get error messages in the main log only if the problem is encountered by the master node!
  ! Note that the file is removed in xmpi_init (if present).
  character(len=fnlen),parameter :: ABI_MPIABORTFILE="__ABI_MPIABORTFILE__"
 
@@ -327,6 +321,8 @@ module defs_basis
  integer,public,parameter :: WFK_TASK_OPTICS_FULLBZ = 7
  integer,public,parameter :: WFK_TASK_KPTS_ERANGE= 8
  integer,public,parameter :: WFK_TASK_CHECK_SYMTAB = 9
+ integer,public,parameter :: WFK_TASK_WANNIER = 10
+ integer,public,parameter :: WFK_TASK_PSEUDOBANDS = 11
 
 ! Flags defining the method used for performing IO (input variable iomode)
  integer, parameter, public :: IO_MODE_FORTRAN_MASTER = -1
@@ -345,8 +341,22 @@ module defs_basis
   integer,parameter,public :: NLO_MBLKPW = 199
   integer,parameter,public :: NLO_MINCAT = 10
 
-! Parameter to compute the maximum index of the perturbation
+! This is used to compute the maximum index of the perturbation as 2natom + MPERT_MAX
+! GA: But this is not actually the maximum perturbation, see m_dfpt_loopert
   integer,parameter,public :: MPERT_MAX = 11
+
+! Parameters for the GPU implementation(s)
+ ! GPU implementation undetermined
+ integer,parameter,public :: ABI_GPU_UNKNOWN  =-1
+ ! Not using any GPU implementation, implies running on CPU
+ integer,parameter,public :: ABI_GPU_DISABLED = 0
+ ! Legacy GPU implementation relying on NVIDIA CUDA kernels, not preferred
+ integer,parameter,public :: ABI_GPU_LEGACY   = 1
+ ! GPU implementation relying on OpenMP v5 "TARGET" construct
+ integer,parameter,public :: ABI_GPU_OPENMP   = 2
+ ! GPU implementation relying on Kokkos + cuda framework
+ integer,parameter,public :: ABI_GPU_KOKKOS   = 3
+ ! Please note that a GPU linalg library supported in gpu_toolbox (ie: CUDA) backs up OpenMP and Kokkos variants.
 
 !Parameters for LOG/STATUS files treatment
 !This variables tell the code if some lines have to be written in a LOG/STATUS file
@@ -392,7 +402,7 @@ module defs_basis
  end type coeff2_type
 !A small datatype for ragged complex 2D-arrays
  type coeff2c_type
-  complex(dpc), allocatable :: value(:,:)
+  complex(dp), allocatable :: value(:,:)
  end type coeff2c_type
 !A small datatype for ragged real 3D-arrays
  type coeff3_type
@@ -436,7 +446,6 @@ subroutine abi_log_status_state(new_do_write_log,new_do_write_status)
 
 !Arguments ------------------------------------
  logical,optional,intent(in) :: new_do_write_log,new_do_write_status
-
 !************************************************************************
 
  if (PRESENT(new_do_write_log))    do_write_log   =new_do_write_log
@@ -467,7 +476,6 @@ subroutine abi_io_redirect(new_ab_out,new_std_out,new_io_comm)
 
 !Arguments ------------------------------------
  integer,optional,intent(in) :: new_std_out,new_ab_out,new_io_comm
-
 !************************************************************************
 
  if (PRESENT(new_ab_out))  ab_out  = new_ab_out
@@ -498,14 +506,13 @@ subroutine print_kinds(unit)
 
 !Local variables-------------------------------
  integer :: my_unt
-
 ! *********************************************************************
 
  my_unt=std_out; if (PRESENT(unit)) my_unt = unit
 
  write(my_unt,'(a)')' DATA TYPE INFORMATION: '
 
- write(my_unt,'(a,/,2(a,i6,/),2(a,e15.8e3,/),a,e15.8e3)')&
+ write(my_unt,'(a,/,2(a,i6,/),2(a,e16.8e3,/),a,e16.8e3)')&
    ' REAL:      Data type name: REAL(DP) ',&
    '            Kind value: ',KIND(0.0_dp),&
    '            Precision:  ',PRECISION(0.0_dp),&
@@ -544,7 +551,6 @@ integer pure function str2wfktask(str) result(wfk_task)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: str
-
 !************************************************************************
 
  select case (str)
@@ -562,10 +568,14 @@ integer pure function str2wfktask(str) result(wfk_task)
    wfk_task = WFK_TASK_DDK_DIAGO
  case ("wfk_kpts_erange")
    wfk_task = WFK_TASK_KPTS_ERANGE
- case ("optics_fullbz")
+ case ("optics_fullbz", "wfk_optics_fullbz")
    wfk_task = WFK_TASK_OPTICS_FULLBZ
  case ("check_symtab")
    wfk_task = WFK_TASK_CHECK_SYMTAB
+ case ("wannier")
+   wfk_task = WFK_TASK_WANNIER
+ case ("pseudobands")
+   wfk_task = WFK_TASK_PSEUDOBANDS
  case default
    wfk_task = WFK_TASK_NONE
  end select
@@ -588,7 +598,6 @@ subroutine set_mem_per_cpu_mb(mem_mb)
 
 !Arguments-------------------------------------
  real(dp),intent(in) :: mem_mb
-
 ! *********************************************************************
 
  !print *, "Setting mem_per_cpu_mb to", mem_mb

@@ -6,7 +6,7 @@
 !! Initialize geometry variables for the ABINIT code.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (XG, RC)
+!!  Copyright (C) 1998-2025 ABINIT group (XG, RC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,11 +28,12 @@ module m_ingeo
  use m_sort
  use m_dtset
 
- use m_symtk,      only : mati3inv, chkorthsy, symrelrot, mati3det, &
-&                         symmetrize_rprimd, symmetrize_tnons,symmetrize_xred, symatm
+ use m_matrix,     only : mati3inv, mati3det
+ use m_symtk,      only : chkorthsy, symrelrot, chkprimit, symatm, &
+&                         symmetrize_rprimd, symmetrize_tnons,symmetrize_xred
  use m_spgbuilder, only : gensymspgr, gensymshub, gensymshub4
- use m_symfind,    only : symfind, symanal, symlatt
- use m_geometry,   only : mkradim, mkrdim, xcart2xred, xred2xcart, randomcellpos, metric
+ use m_symfind,    only : symfind, symfind_expert, symanal, symlatt
+ use m_geometry,   only : mkradim, mkrdim, xcart2xred, xred2xcart, randomcellpos, metric, reduce2primitive
  use m_parser,     only : intagm, intagm_img, geo_t, geo_from_abivar_string, get_acell_rprim
 
  implicit none
@@ -91,6 +92,9 @@ contains
 !! amu(ntypat)=mass of each atomic type
 !! bravais(11)=characteristics of Bravais lattice (see symlatt.F90)
 !! chrgat(natom)=target charge for each atom. Not always used, it depends on the value of constraint_kind
+!! field_red(3)=applied field direction in reduced coordinates
+!! field_red_axial(3) = direction of applied axial (pseudo-)vector field
+!!                      (e.g., magnetic field) expressed in reduced coordinates
 !! genafm(3)=magnetic translation generator (in case of Shubnikov group type IV)
 !! iatfix(3,natom)=indices for atoms fixed along some (or all) directions
 !! jellslab=not zero if jellslab keyword is activated
@@ -127,9 +131,9 @@ contains
 !!
 !! SOURCE
 
-subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
-  genafm,iatfix,icoulomb,iimage,iout,jdtset,jellslab,lenstr,mixalch,&
-  msym,natom,nimage,npsp,npspalch,nspden,nsppol,nsym,ntypalch,ntypat,&
+subroutine ingeo (acell,amu,atndlist,bravais,chrgat,dtset,field_red,field_red_axial,&
+  genafm,iatfix,iatnd,icoulomb,iimage,iout,jdtset,jellslab,lenstr,mixalch,&
+  msym,natnd,natom,nimage,npsp,npspalch,nspden,nsppol,nsym,ntypalch,ntypat,&
   nucdipmom,nzchempot,pawspnorb,&
   ptgroupma,ratsph,rprim,slabzbeg,slabzend,spgroup,spinat,string,supercell_lattice,symafm,&
   symmorphi,symrel,tnons,tolsym,typat,vel,vel_cell,xred,znucl,comm)
@@ -137,7 +141,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iimage,iout,jdtset,lenstr,msym
- integer,intent(in) :: nimage,npsp,npspalch,nspden,nsppol
+ integer,intent(in) :: natnd,nimage,npsp,npspalch,nspden,nsppol
  integer,intent(in) :: ntypalch,ntypat,nzchempot,pawspnorb,comm
  integer,intent(inout) :: natom,symmorphi
  integer,intent(out) :: icoulomb,jellslab,ptgroupma,spgroup !vz_i
@@ -147,14 +151,14 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 !arrays
  integer,intent(in) :: supercell_lattice(3)
  integer,intent(out) :: bravais(11),iatfix(3,natom) !vz_i
- integer,intent(inout) :: symafm(msym) !vz_i
+ integer,intent(inout) :: iatnd(natnd),symafm(msym) !vz_i
  integer,intent(inout) :: symrel(3,3,msym) !vz_i
  integer,intent(out) :: typat(natom)
- real(dp),intent(inout) :: chrgat(natom)
- real(dp),intent(inout) :: nucdipmom(3,natom)
- real(dp),intent(in) :: ratsph(ntypat)
+ real(dp),intent(inout) :: atndlist(3,natnd),chrgat(natom)
+ real(dp),intent(inout) :: nucdipmom(3,natom),ratsph(ntypat)
  real(dp),intent(inout) :: spinat(3,natom)
- real(dp),intent(out) :: acell(3),amu(ntypat),genafm(3),mixalch(npspalch,ntypalch)
+ real(dp),intent(out) :: acell(3),amu(ntypat),field_red(3),field_red_axial(3)
+ real(dp),intent(out) :: genafm(3),mixalch(npspalch,ntypalch)
  real(dp),intent(inout) :: rprim(3,3),tnons(3,msym) !vz_i
  real(dp),intent(out) :: vel(3,natom),vel_cell(3,3),xred(3,natom)
  real(dp),intent(in) :: znucl(npsp)
@@ -164,11 +168,11 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  character(len=*), parameter :: format01110 ="(1x,a6,1x,(t9,8i8) )"
  character(len=*), parameter :: format01160 ="(1x,a6,1x,1p,(t9,3g18.10)) "
 !scalars
- integer, save :: print_comment_tolsym=1
- integer :: bckbrvltt,brvltt,chkprim,expert_user,fixed_mismatch,i1,i2,i3,iatom,iatom_supercell,idir,ierr,iexit,ii
- integer :: ipsp,irreducible,isym,itypat,jsym,marr,mismatch_fft_tnons,multiplicity,natom_uc,natfix,natrd
- integer :: nobj,noncoll,nptsym,nsym_now,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
- integer :: spgroupma,tgenafm,tnatrd,tread,tscalecart,tspgroupma, tread_geo
+ integer :: bckbrvltt,brvltt,chkprim,chkprim_fake,expert_user
+ integer :: fixed_mismatch,i1,i2,i3,iatom,iatom_supercell,idir,ierr,iexit,ii
+ integer :: invar_z,ipsp,irreducible,isym,itranslat,itypat,jsym,marr,mismatch_fft_tnons,multi,multiplicity,natom_uc,natfix,natrd
+ integer :: nobj,noncoll,nptsym,nsym_now,ntranslat,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
+ integer :: spgroupma,tgenafm,tnatrd,tread,try_primitive,tscalecart,tspgroupma, tread_geo
  integer :: txcart,txred,txrandom,use_inversion
  real(dp) :: amu_default,ucvol,sumalch
  character(len=1000) :: msg
@@ -176,12 +180,13 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  type(atomdata_t) :: atom
  type(geo_t) :: geo
 !arrays
- integer,allocatable :: ptsymrel(:,:,:),typat_read(:),symrec(:,:,:),indsym(:,:,:)
+ integer :: bravais_reduced(11)
  integer,allocatable :: intarr(:)
+ integer,allocatable :: is_translation(:)
+ integer,allocatable :: ptsymrel(:,:,:),typat_read(:)
  real(dp) :: angdeg(3), field_xred(3),gmet(3,3),gprimd(3,3),rmet(3,3),rcm(3)
- real(dp) :: rprimd(3,3),rprimd_read(3,3),rprimd_new(3,3),scalecart(3)
- real(dp),allocatable :: mass_psp(:)
- real(dp),allocatable :: tnons_cart(:,:),tnons_new(:,:)
+ real(dp) :: rprimd(3,3),rprimd_read(3,3),rprimd_new(3,3),rprimd_primitive(3,3),scalecart(3)
+ real(dp),allocatable :: mass_psp(:),tnons_cart(:,:),tnons_new(:,:),translations(:,:)
  real(dp),allocatable :: xcart(:,:),xcart_read(:,:),xred_read(:,:),dprarr(:)
 
 ! *************************************************************************
@@ -250,6 +255,36 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  call mkrdim(acell, rprim, rprimd)
  call metric(gmet, gprimd, -1, rmet, rprimd, ucvol)
 
+ if (dtset%berryopt ==4) then
+   do ii=1,3
+     field_red(ii)=dot_product(dtset%efield(:),gprimd(:,ii))
+   end do
+ else if (dtset%berryopt == 6 ) then
+   do ii=1,3
+     field_red(ii)=dot_product(dtset%dfield(:),gprimd(:,ii))
+     field_red(ii)=field_red(ii)+ dot_product(dtset%efield(:),gprimd(:,ii)) ! note: symmetry broken by D and E
+   end do
+ else if (dtset%berryopt == 14) then
+   do ii=1,3
+     field_red(ii)=dot_product(dtset%red_efieldbar(:),gmet(:,ii))
+   end do
+ else if (dtset%berryopt == 16) then
+   do ii=1,3
+     field_red(ii)=dtset%red_dfield(ii)+dtset%red_efield(ii)  ! symmetry broken by reduced d and e
+   end do
+ else if (dtset%berryopt == 17) then
+   do ii=1,3
+     field_red(ii)=dot_product(dtset%red_efieldbar(:),gmet(:,ii))
+     if(dtset%jfielddir(ii)==2) field_red(ii)=dtset%red_dfield(ii)
+   end do
+end if
+
+do ii = 1, 3
+  if (norm2(dtset%hspinfield) > tol8) then
+    field_red_axial(ii) = dot_product(dtset%hspinfield(:), gprimd(:, ii))
+  end if
+end do
+
 !tolsym = tol8
 !XG20200801 New default value for tolsym. This default value is also defined in m_invars1.F90
  tolsym = tol5
@@ -265,7 +300,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  ! Note that the Bravais lattice might not be the correct one yet (because the
  ! actual atomic locations might lower the symmetry obtained from the lattice parameters only)
  ABI_MALLOC(ptsymrel,(3,3,msym))
- call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
+ call symlatt(bravais,dev_null,msym,nptsym,ptsymrel,rprimd,tolsym)
 
  ! 3) Possibly, initialize a jellium slab
  jellslab=0
@@ -360,8 +395,11 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  !This should not be printed if randomcellpos did nothing - it contains garbage. Spurious output anyway
  !end if
 
- if (tread_geo == 0) then
+ if (tread_geo /= 0) then
+   txcart = 0; txrandom = 0; txred = 1
+   xred_read = geo%xred
 
+ else
    call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'xred',txred,'DPR')
    if (txred==1 .and. txrandom == 0) xred_read(:,1:natrd) = reshape(dprarr(1:3*natrd) , [3, natrd])
    call intagm_img(xred_read,iimage,jdtset,lenstr,nimage,3,natrd,string,"xred",txred,'DPR')
@@ -379,9 +417,14 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      if (txcart==1 .and. txrandom==0) xcart_read(:,1:natrd) = reshape(dprarr(1:3*natrd), [3, natrd])
    end if
 
- else
-   txcart = 0; txrandom = 0; txred = 1
-   xred_read = geo%xred
+   !TODO: Might initialize xred from getxred/xcart: NOT POSSIBLE YET. NEEDS INTER DTSET COMMUNICATION AT INVARS1 TIME
+!   if (txred+txcart+txrandom==0) then
+!     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getxred',txred,'INT')
+!     if (txred==1 .and. txrandom==0) xred_read(:,1:natrd) =
+!
+!     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getxcart',txcart,'INT')
+!     if (txcart==1 .and. txrandom==0) xcart_read(:,1:natrd) =
+!   end if
  end if
 
  if (txred + txcart + txrandom == 0) then
@@ -532,10 +575,19 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      ABI_ERROR(msg)
    end if
 
-   ! nucdipmom is read for each atom, from 1 to natom
-   call intagm(dprarr,intarr,jdtset,marr,3*natom,string(1:lenstr),'nucdipmom',tread,'DPR')
-   if(tread==1) then
-     nucdipmom(1:3,1:natom) = reshape( dprarr(1:3*natom), [3, natom])
+   ! nucdipmom is read for each irreducible atom, from 1 to natom
+   nucdipmom=zero
+   if(natnd > 0) then
+     call intagm(dprarr,intarr,jdtset,marr,natnd,string(1:lenstr),'iatnd',tread,'INT')
+     if(tread==1) iatnd(1:natnd)=intarr(1:natnd)
+     call intagm(dprarr,intarr,jdtset,marr,3*natnd,string(1:lenstr),'atndlist',tread,'DPR')
+     if(tread==1) atndlist(1:3,1:natnd)=reshape(dprarr(1:3*natnd),[3,natnd])
+     do ii=1,natnd
+       nucdipmom(1:3,iatnd(ii))=atndlist(1:3,ii)
+     end do
+   else
+     call intagm(dprarr,intarr,jdtset,marr,3*natom,string(1:lenstr),'nucdipmom',tread,'DPR')
+     if(tread==1)nucdipmom(1:3,1:natom) = reshape( dprarr(1:3*natom) , [3, natom])
    end if
 
    ! Will use the geometry builder
@@ -572,8 +624,19 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    if(tread==1)spinat(1:3,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natrd])
 
    ! nucdipmom is read for each irreducible atom, from 1 to natrd
-   call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'nucdipmom',tread,'DPR')
-   if(tread==1)nucdipmom(1:3,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natrd])
+   nucdipmom=zero
+   if(natnd > 0) then
+     call intagm(dprarr,intarr,jdtset,marr,natnd,string(1:lenstr),'iatnd',tread,'INT')
+     if(tread==1) iatnd(1:natnd)=intarr(1:natnd)
+     call intagm(dprarr,intarr,jdtset,marr,3*natnd,string(1:lenstr),'atndlist',tread,'DPR')
+     if(tread==1) atndlist(1:3,1:natnd)=reshape(dprarr(1:3*natnd),[3,natnd])
+     do ii=1,natnd
+       nucdipmom(1:3,iatnd(ii))=atndlist(1:3,ii)
+     end do
+   else
+     call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'nucdipmom',tread,'DPR')
+     if(tread==1)nucdipmom(1:3,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natrd])
+   end if
 
    ! Compute xred/typat and spinat for the supercell
    if(multiplicity > 1)then
@@ -776,7 +839,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          rprimd(:,:)=rprimd_new(:,:)
          rprim(:,:)=rprimd_new(:,:)
          call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-         call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
+         call symlatt(bravais,std_out,msym,nptsym,ptsymrel,rprimd,tolsym)
        end if
 
      end if
@@ -808,104 +871,110 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          'Action: modify your input file',ch10,&
          '(either natrd, or natom, or spgroup, or nsym)'
        ABI_ERROR(msg)
-     else
+     endif
+     if (multiplicity==1) typat(:)=typat_read(:)
 
-       if (multiplicity==1) typat(:)=typat_read(:)
-       ! Find the symmetry operations: nsym, symafm, symrel and tnons.
-       ! Use nptsym and ptsymrel, as determined by symlatt
-       noncoll=0; if (nspden == 4) noncoll=1
-       use_inversion=1
-       if (dtset%usepaw == 1 .and. (nspden==4.or.pawspnorb>0)) then
-         ABI_COMMENT("Removing inversion and improper rotations from initial space group because of PAW + SOC")
-         use_inversion=0
-       end if
+     ! Find the symmetry operations: nsym, symafm, symrel and tnons.
+     ! Use nptsym and ptsymrel, as determined by symlatt
+     ! Will possibly correct xred and tnons.
 
-       ! Get field in reduced coordinates (reduced e/d field)
+     noncoll=0; if (nspden == 4) noncoll=1
 
-       field_xred(:)=zero
-       if (dtset%berryopt ==4) then
-         do ii=1,3
-           field_xred(ii)=dot_product(dtset%efield(:),gprimd(:,ii))
-         end do
-       else if (dtset%berryopt == 6 ) then
-         do ii=1,3
-           field_xred(ii)=dot_product(dtset%dfield(:),gprimd(:,ii))
-           field_xred(ii)=field_xred(ii)+ dot_product(dtset%efield(:),gprimd(:,ii)) ! note: symmetry broken by D and E
-         end do
-       else if (dtset%berryopt == 14) then
-         do ii=1,3
-           field_xred(ii)=dot_product(dtset%red_efieldbar(:),gmet(:,ii))
-         end do
-       else if (dtset%berryopt == 16) then
-         do ii=1,3
-           field_xred(ii)=dtset%red_dfield(ii)+dtset%red_efield(ii)  ! symmetry broken by reduced d and e
-         end do
-       else if (dtset%berryopt == 17) then
-         do ii=1,3
-           field_xred(ii)=dot_product(dtset%red_efieldbar(:),gmet(:,ii))
-           if(dtset%jfielddir(ii)==2) field_xred(ii)=dtset%red_dfield(ii)
-         end do
-       end if
+     use_inversion=1
+     if (dtset%usepaw == 1 .and. (nspden==4.or.pawspnorb>0)) then
+       ABI_COMMENT("Removing inversion and improper rotations from initial space group because of PAW + SOC")
+       ! MMignolet: PAW can be used with inversion, however it results in seg faults in the dmft code. To enable when this is fixed...
+       use_inversion=0
+     end if
 
-       call symfind(dtset%berryopt,field_xred,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
-         nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
-         chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr)
+     ! Get field in reduced coordinates (reduced e/d field)
 
-       !If the group closure is not obtained, which should be exceptional, try with a larger tolsym (three times larger)
-       if(ierr/=0)then
-         ABI_WARNING('Will try to obtain group closure by using a tripled tolsym.')
-         call symfind(dtset%berryopt,field_xred,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
-           nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,three*tolsym,typat,use_inversion,xred,&
-           chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr)
-         ABI_CHECK(ierr==0,"Error in group closure")
-         ABI_WARNING('Succeeded to obtain group closure by using a tripled tolsym.')
+     field_xred(:)=zero
+     if (dtset%berryopt ==4) then
+       do ii=1,3
+         field_xred(ii)=dot_product(dtset%efield(:),gprimd(:,ii))
+       end do
+     else if (dtset%berryopt == 6 ) then
+       do ii=1,3
+         field_xred(ii)=dot_product(dtset%dfield(:),gprimd(:,ii))
+         field_xred(ii)=field_xred(ii)+ dot_product(dtset%efield(:),gprimd(:,ii)) ! note: symmetry broken by D and E
+       end do
+     else if (dtset%berryopt == 14) then
+       do ii=1,3
+         field_xred(ii)=dot_product(dtset%red_efieldbar(:),gmet(:,ii))
+       end do
+     else if (dtset%berryopt == 16) then
+       do ii=1,3
+         field_xred(ii)=dtset%red_dfield(ii)+dtset%red_efield(ii)  ! symmetry broken by reduced d and e
+       end do
+     else if (dtset%berryopt == 17) then
+       do ii=1,3
+         field_xred(ii)=dot_product(dtset%red_efieldbar(:),gmet(:,ii))
+         if(dtset%jfielddir(ii)==2) field_xred(ii)=dtset%red_dfield(ii)
+       end do
+     end if
+
+     ! Loop on trials to generate better point symmetries by relying on a primitive cell instead (possibly) of a non-primitive one,
+     ! This loop has been disactivated, because it is not clear that one can generate a more complete set of point symmetries
+     ! WITH INTEGER components of symrel from a primitive cell. One should allow non-integer components, but this would
+     ! be a large departure from the current implementation. Still, the detection of the existence of the primitive cell
+     ! and the corresponding Bravais lattice is activated.
+     do try_primitive=1,1
+
+       invar_z=0 ; if(jellslab/=0 .or. nzchempot/=0)invar_z=2
+       call symfind_expert(gprimd,msym,natom,nptsym,nspden,nsym,&
+       pawspnorb,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,dtset%usepaw,xred,&
+       chrgat=chrgat,nucdipmom=nucdipmom,invardir_red=dtset%field_red,invaraxial_red=dtset%field_red_axial,invar_z=invar_z)
+
+       chkprim_fake=-1
+       ABI_MALLOC(is_translation,(nsym))
+       call chkprimit(chkprim_fake, multi, nsym, symafm, symrel, is_translation)
+
+       if(multi/=1)then ! The cell is not primitive, get the point symmetries from a primitive cell.
+         ntranslat=multi
+         ABI_MALLOC(translations,(3,ntranslat))
+         itranslat=0
+         do isym=1,nsym
+           if(is_translation(isym)==1)then
+             itranslat=itranslat+1
+             translations(:,itranslat)=tnons(:,isym)
+           endif
+         enddo
+         ABI_FREE(is_translation)
+         call reduce2primitive(ntranslat, rprimd, rprimd_primitive, tolsym, translations)
+         ABI_FREE(translations)
+         !Find the Bravais lattice of the primitive cell, and the point symmetries (however, in the primitive basis)
+         call symlatt(bravais_reduced,dev_null,msym,nptsym,ptsymrel,rprimd_primitive,tolsym)
+         write(msg,'(2a,3(3es16.8,a),2(a,i4,a),3(a,3i4,a),a,i4)')&
+&          ' The cell is not primitive. One could obtain a primitive cell using the following primitive vectors (rprimd) :',ch10,&
+&          rprimd_primitive(1:3,1),ch10,&
+&          rprimd_primitive(1:3,2),ch10,&
+&          rprimd_primitive(1:3,3),ch10,&
+&          ' This Bravais lattice has iholohedry   =',bravais(1),ch10,&
+&          '                          center       =',bravais(2),ch10,&
+&          '                          bravais(3:5) =',bravais(3:5),ch10,&
+&          '                          bravais(6:8) =',bravais(6:8),ch10,&
+&          '                          bravais(9:11)=',bravais(9:11),ch10,&
+&          ' The number of point symmetries would be nptsym=',nptsym
+         ABI_COMMENT(msg)
+
+         !Convert the point symmetries to the non-primitive reduced coordinates
+         call symrelrot(nsym, rprimd_primitive, rprimd, ptsymrel, tolsym, ierr)
+         !Perhaps not all components of symrel are integers. This generates a return code, and precludes upgrading ptsymrel.
+         if(ierr/=0)then
+           write(msg,'(a)')&
+&           ' Not all components of symrel are integers in the primitive cell coordinate system.'
+           ABI_COMMENT(msg)
+           exit
+         endif
+       else ! The cell is primitive
+         ABI_FREE(is_translation)
+         exit
        endif
 
-       ! If the tolerance on symmetries is bigger than 1.e-8, symmetrize tnons for gliding or screw operations, 
-       ! symmetrize the atomic positions and recompute the symmetry operations 
-       if(tolsym>1.00001e-8)then
-         call symmetrize_tnons(nsym,symrel,tnons,tolsym)
-         ABI_MALLOC(indsym,(4,natom,nsym))
-         ABI_MALLOC(symrec,(3,3,nsym))
-         do isym=1,nsym
-           call mati3inv(symrel(:,:,isym),symrec(:,:,isym))
-         end do
-         call symatm(indsym,natom,nsym,symrec,tnons,tolsym,typat,xred)
-         call symmetrize_xred(natom,nsym,symrel,tnons,xred,indsym=indsym)
-         ABI_FREE(indsym)
-         ABI_FREE(symrec)
+     enddo ! try_primitive
 
-         if(print_comment_tolsym==1)then
-           write(msg,'(a,es12.3,18a)')&
-&           'The tolerance on symmetries =',tolsym,' is bigger than 1.0e-8.',ch10,&
-&           'In order to avoid spurious effects, the atomic coordinates have been',ch10,&
-&           'symmetrized before storing them in the dataset internal variable.',ch10,&
-&           'So, do not be surprised by the fact that your input variables (xcart, xred, ...)',ch10,&
-&           'do not correspond exactly to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
-&           'This is not a problem per se.',ch10,&
-&           'Still, in order to avoid this symmetrization (e.g. for specific debugging/development),',&
-&           ' decrease tolsym to 1.0e-8 or lower,',ch10,&
-&           'or (much preferred) use input primitive vectors that are accurate to better than 1.0e-8.',ch10,&
-&           'This message will only be printed once, even if there are other datasets where tolsym is bigger than 1.0e-8.'
-           ABI_COMMENT(msg)
-           print_comment_tolsym=0
-         endif
-
-         call symfind(dtset%berryopt,field_xred,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
-           nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
-           chrgat=chrgat,nucdipmom=nucdipmom)
-
-         !Needs one more resymmetrization, for the tnons
-         ABI_MALLOC(tnons_new,(3,nsym))
-
-         call symmetrize_xred(natom,nsym,symrel,tnons,xred,&
-&          fixed_mismatch=fixed_mismatch,mismatch_fft_tnons=mismatch_fft_tnons,tnons_new=tnons_new,tolsym=tolsym)
-         tnons(:,1:nsym)=tnons_new(:,:)
-         ABI_FREE(tnons_new)
-
-       end if
-     end if
-   end if
+   end if ! spgroup==0 and nsym==0
 
    ! Finalize the computation of coordinates: produce xcart
    call xred2xcart(natom,rprimd,xcart,xred)
@@ -955,8 +1024,18 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  !
  !========================================================================================================
 
+!DEBUG
+!write(std_out,'(a)')' m_ingeo%ingeo : before symanal '
+!call flush(std_out)
+!ENDDEBUG
+
  ! Here, determine correctly the Bravais lattice and other space group or shubnikov group characteristics
  call symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tolsym)
+
+!DEBUG
+!write(std_out,'(a)')' m_ingeo%ingeo : after symanal '
+!call flush(std_out)
+!ENDDEBUG
 
  ! If the tolerance on symmetries is bigger than 1.e-8, symmetrize the rprimd. Keep xred fixed.
  if(tolsym>1.00001e-8)then
@@ -974,7 +1053,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
         'symmetrized before storing them in the dataset internal variable.',ch10,&
         'So, do not be surprised by the fact that your input variables (acell, rprim, xcart, xred, ...)',ch10,&
         'do not correspond exactly to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
-&       'This is not a problem per se.',ch10,& 
+&       'This is not a problem per se.',ch10,&
 &       'Still, in order to avoid this symmetrization (e.g. for specific debugging/development),',&
 &       ' decrease tolsym to 1.0e-8 or lower.',ch10,&
         'or (much preferred) use input primitive vectors that are accurate to better than 1.0e-8.'
@@ -1050,7 +1129,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      write(msg, '(a,a,a,i0,a,i4,a,a,a)' )&
        'The input variables natfix, natfixx, natfixy and natfixz must be',ch10,&
        'between 0 and natom (= ',natom,'), while one of them is ',natfix,'.',ch10,&
-       'Action: correct that occurence in your input file.'
+       'Action: correct that occurrence in your input file.'
      ABI_ERROR(msg)
    end if
 
@@ -1090,7 +1169,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          write(msg, '(a,a,a,i0,a,a,a)' )&
            'The input variables iatfix, iatfixx, iatfixy and iatfixz must be',ch10,&
            'between 1 and natom, while one of them is ',intarr(ii),'.',ch10,&
-           'Action: correct that occurence in your input file.'
+           'Action: correct that occurrence in your input file.'
          ABI_ERROR(msg)
        end if
        ! Finally set the value of the internal iatfix array
@@ -1814,11 +1893,11 @@ end subroutine ingeobld
 !!
 !! FUNCTION
 !! Computes the atomic position of all the atoms in the unit cell starting
-!! with the symmetry operations and the atoms from the asymetric unit cell.
+!! with the symmetry operations and the atoms from the asymmetric unit cell.
 !!
 !! INPUTS
 !!  chrgat(natom)=target charge for each atom. Not always used, it depends on the value of constraint_kind
-!!  natrd = number of atoms in the assymetric unit cell
+!!  natrd = number of atoms in the asymmetric unit cell
 !!  natom = total number of atoms (to be checked)
 !!  nsym = number of symmetry operations
 !!  symafm(nsym)=(anti)ferromagnetic part of symmetry operations
@@ -1832,7 +1911,7 @@ end subroutine ingeobld
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!  At input, for the assymetric unit cell
+!!  At input, for the asymmetric unit cell
 !!  nucdipmom(3,1:natrd)=nuclear magnetic dipole moments of the atoms
 !!  spinat(3,1:natrd)=spin-magnetization of the atoms
 !!  typat(1:natrd)=type integer for each atom in cell
@@ -1886,7 +1965,7 @@ subroutine fillcell(chrgat,natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons
 !Cycle over all the symmetry operations
  do ii=1,nsym
 
-!  Cycle over all the atoms in the assymetric unit cell
+!  Cycle over all the atoms in the asymmetric unit cell
    do jj=1,natrd
 
 !    Symmetry operation application

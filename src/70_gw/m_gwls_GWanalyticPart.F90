@@ -6,7 +6,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2022 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2025 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -52,7 +52,7 @@ private
 !real(dp),allocatable :: lanczos_basis_complement(:,:,:)
 
 
-complex(dpc),public, allocatable :: A_array(:,:)
+complex(dp),public, allocatable :: A_array(:,:)
 
 integer, public  :: model_number
 real(dp),public  :: model_parameter
@@ -85,9 +85,7 @@ subroutine get_projection_band_indices(omega,band_index_below, band_index_above)
 !                Pe : projection on states such that epsilon_n < omega
 !                Qe : projection on states such that epsilon_n > omega
 !----------------------------------------------------------------------------------------------------
-implicit none
-
-real(dp),intent(in)  :: omega 
+real(dp),intent(in)  :: omega
 integer, intent(out) :: band_index_below, band_index_above
 
 ! *************************************************************************

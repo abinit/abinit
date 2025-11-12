@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (DC)
+!!  Copyright (C) 2008-2025 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,7 +23,8 @@ module m_ab7_symmetry
   use defs_basis
   use m_abicore
 
-  use m_symtk,     only : mati3inv, mati3det, symatm, symcharac
+  use m_matrix,    only : mati3inv, mati3det
+  use m_symtk,     only : symatm, symcharac
   use m_symfind,   only : symfind, symanal, symlatt
   use m_geometry,  only : metric
   use m_spgdata,   only : spgdata
@@ -44,6 +45,7 @@ module m_ab7_symmetry
 
      logical :: withField
      real(dp) :: field(3)
+     real(dp) :: field_axial(3)
 
      logical :: withJellium
 
@@ -500,10 +502,10 @@ contains
     end if
   end subroutine symmetry_set_spin_orbit
 
-  subroutine symmetry_set_field(id, field, errno)
+  subroutine symmetry_set_field(id, field, field_axial, errno)
 
     integer, intent(in) :: id
-    real(dp), intent(in) :: field(3)
+    real(dp), intent(in) :: field(3), field_axial(3)
     integer, intent(out) :: errno
 
     type(symmetry_list), pointer :: token
@@ -519,7 +521,8 @@ contains
 
     token%data%withField = .true.
     token%data%field = field
-
+    token%data%field_axial = field_axial
+    
     ! We unset all the computed symmetries
     token%data%nBravSym = -1
     if (token%data%auto) then
@@ -639,7 +642,7 @@ contains
        berryopt = 0
     end if
     if (AB_DBG) write(std_err,*) "AB symmetry: call ABINIT symlatt."
-    call symlatt(sym%bravais, AB7_MAX_SYMMETRIES, &
+    call symlatt(sym%bravais, std_out, AB7_MAX_SYMMETRIES, &
          & sym%nBravSym, sym%bravSym, sym%rprimd, sym%tolsym)
     if (AB_DBG) write(std_err,*) "AB symmetry: call ABINIT OK."
     if (AB_DBG) write(std_err, "(A,I3)") "  nSymBrav :", sym%nBravSym
@@ -684,7 +687,7 @@ contains
     type(symmetry_type), intent(inout) :: sym
     integer, intent(out) :: errno
 
-    integer :: berryopt, jellslab, noncol
+    integer :: berryopt, invar_z
     integer :: use_inversion
     real(dp), pointer :: spinAt_(:,:)
     integer  :: sym_(3, 3, AB7_MAX_SYMMETRIES)
@@ -703,19 +706,14 @@ contains
     else
        berryopt = 0
     end if
-    if (sym%withJellium) then
-       jellslab = 1
+    if (sym%withJellium .or. sym%nzchempot/=0) then
+       invar_z = 2
     else
-       jellslab = 0
+       invar_z = 0
     end if
-    if (sym%withSpin == 4) then
-       noncol = 1
-       spinAt_ => sym%spinAt
-    else if (sym%withSpin == 2) then
-       noncol = 0
+    if (sym%withSpin == 2 .or. sym%withSpin == 4) then
        spinAt_ => sym%spinAt
     else
-       noncol = 0
        ABI_MALLOC(spinAt_,(3, sym%nAtoms))
        spinAt_ = 0
     end if
@@ -727,10 +725,10 @@ contains
 
     if (sym%nsym == 0) then
        if (AB_DBG) write(std_err,*) "AB symmetry: call ABINIT symfind."
-       call symfind(berryopt, sym%field, sym%gprimd, jellslab, AB7_MAX_SYMMETRIES, &
-            & sym%nAtoms, noncol, sym%nBravSym, sym%nSym, sym%nzchempot, 0, sym%bravSym, spinAt_, &
+       call symfind(sym%gprimd, AB7_MAX_SYMMETRIES, &
+            & sym%nAtoms, sym%nBravSym, sym%withSpin, sym%nSym, 0, sym%bravSym, spinAt_, &
             & symAfm_, sym_, transNon_, sym%tolsym, sym%typeAt, &
-            & use_inversion, sym%xRed)
+            & use_inversion, sym%xRed, invardir_red=sym%field, invaraxial_red=sym%field_axial, invar_z=invar_z)
        if (AB_DBG) write(std_err,*) "AB symmetry: call ABINIT OK."
        if (AB_DBG) write(std_err, "(A,I3)") "  nSym:", sym%nSym
        if (associated(sym%sym))  then

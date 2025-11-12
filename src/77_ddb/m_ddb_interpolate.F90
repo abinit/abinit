@@ -7,7 +7,7 @@
 !! the interatomic force constants and write the result in a DDB file.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (GA)
+!!  Copyright (C) 2008-2025 ABINIT group (GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,11 +30,10 @@ module m_ddb_interpolate
  use m_ddb_hdr
  use m_ifc
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_anaddb_dataset, only : anaddb_dataset_type
+ use m_bz_mesh,         only : make_path
  use m_crystal,        only : crystal_t
  use m_io_tools,       only : get_unit
  use m_fstrings,       only : strcat
@@ -68,7 +67,7 @@ contains
 !!
 !! SOURCE
 
-subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
+subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, comm)
 
 !Arguments -------------------------------
 !scalars
@@ -79,14 +78,13 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
  type(ddb_hdr_type),intent(inout) :: ddb_hdr
  type(asrq0_t),intent(inout) :: asrq0
  integer,intent(in) :: comm
- character(len=*),intent(in) :: prefix
 !arrays
 
 !Local variables -------------------------
 !scalars
  integer,parameter :: master=0
  integer :: nsym,natom,ntypat,mband,nqpt_fine
- integer :: msize,nsize,mpert,nblok,mtyp
+ integer :: msize,nsize,mpert,nblok
  integer :: rftyp
  integer :: ii,iblok,jblok,iqpt,ipert1,ipert2,idir1,idir2
  integer :: nprocs,my_rank
@@ -99,6 +97,8 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
  real(dp) :: qpt(3), qptnrm(3), qpt_padded(3,3)
  real(dp),allocatable :: d2cart(:,:,:,:,:),d2red(:,:,:,:,:)
  real(dp),pointer :: qpt_fine(:,:)
+ integer,allocatable :: ndiv(:)
+ real(dp),allocatable,target :: alloc_path(:,:)
 
 ! *********************************************************************
 
@@ -119,6 +119,18 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
  nqpt_fine = inp%nph1l
  qpt_fine => inp%qph1l
 
+ if(inp%nph1l==0) then
+   if (inp%nqpath==0) then
+     return ! if there is nothing to do, return
+   else
+     ! allow override of nph1l with nqpath if the former is not set
+     ABI_MALLOC(ndiv,(inp%nqpath-1))
+     call make_path(inp%nqpath,inp%qpath,Crystal%gmet,'G',inp%ndivsm,ndiv,nqpt_fine,alloc_path,std_out)
+     ABI_FREE(ndiv)
+     qpt_fine => alloc_path
+   end if
+ end if
+
  rftyp=inp%rfmeth
 
  nsym = Crystal%nsym
@@ -127,11 +139,14 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
 
  mband = ddb_hdr%mband
 
- mtyp = max(ddb_hdr%mblktyp, 2)  ! Limited to 2nd derivatives of total energy
- ddb_hdr%mblktyp = mtyp
+ ! Interpolation is limited to 2nd derivatives of total energy
+ ! GA: What??
+ ddb_hdr%has_d3E_xx = .false.
+ ddb_hdr%has_d3E_lw = .false.
+ ddb_hdr%has_d2eig = .false.
 
  mpert = ddb%mpert
- msize = 3 * mpert * 3 * mpert  !; if (mtyp==3) msize=msize*3*mpert
+ msize = 3 * mpert * 3 * mpert  !; if (ddb_hdr%has_d3E_xx) msize=msize*3*mpert
  nsize = 3 * mpert * 3 * mpert
  nblok = nqpt_fine
 
@@ -139,7 +154,11 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
  call ddb_new%malloc(msize,nblok,natom,ntypat,mpert)
  ddb_new%flg = 0
  ddb_new%amu = ddb%amu
- ddb_new%typ = 1
+ if (rftyp == 1 .or. rftyp == 2) then
+   ddb_new%typ = 1
+ else if (rftyp == 85) then
+   ddb_new%typ = 85
+ end if
  ddb_new%qpt = zero
  ddb_new%nrm = one
 
@@ -198,6 +217,7 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
    call d2cart_to_red(d2cart,d2red,crystal%gprimd,crystal%rprimd,mpert, &
 &   natom,ntypat,crystal%typat,crystal%ucvol,crystal%zion)
 
+   ! TODO (GA): Should replace this with ddb_set_d2matr
    ! Store the dynamical matrix into a block of the new ddb
    jblok = iqpt
    ddb_new%val(1,1:nsize,jblok) = reshape(d2red(1,:,:,:,:), shape = (/nsize/))
@@ -253,15 +273,19 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
 
  if (my_rank == master) then
 
-   ddb_out_filename = strcat(prefix, "_DDB")
+   ! GA: TODO choice of txt vs. nc should be set by user
+   ddb_out_filename = strcat(inp%prefix_outdata, "_DDB")
 
    call ddb_new%write_txt(ddb_hdr, ddb_out_filename)
 
+   ddb_out_nc_filename = strcat(inp%prefix_outdata, "_DDB.nc")
+   call ddb_new%write_nc(ddb_hdr, ddb_out_nc_filename)
+
    ! Write one separate nc file for each q-point
-   do jblok=1,nblok
-     write(ddb_out_nc_filename,'(2a,i5.5,a)') trim(prefix),'_qpt_',jblok,'_DDB.nc'
-     call ddb_new%write_nc(ddb_hdr, ddb_out_nc_filename, jblok)
-   end do
+   !do jblok=1,nblok
+   !  write(ddb_out_nc_filename,'(2a,i5.5,a)') trim(prefix),'_qpt_',jblok,'_DDB.nc'
+   !  call ddb_new%write_nc(ddb_hdr, ddb_out_nc_filename, jblok)
+   !end do
 
  end if
 

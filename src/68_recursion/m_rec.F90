@@ -9,7 +9,7 @@
 !!  of recursion_type
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2022 ABINIT group (MMancini)
+!! Copyright (C) 2002-2025 ABINIT group (MMancini)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -57,7 +57,6 @@ module m_rec
  use m_hidecudarec,     only : InitRecGPU, CleanRecGPU
 #endif
 
-
  implicit none
 
  private ::           &
@@ -98,8 +97,6 @@ CONTAINS  !===========================================================
 !! SOURCE
 
 subroutine H_D_distrib(rset,nfft,gratio,proc_pt_dev,beta_coeff)
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) :: nfft,gratio
@@ -217,8 +214,6 @@ end subroutine H_D_distrib
 
 subroutine find_maxmin_proc(recpar,nproc,me,gratio,ngfft,proc_pt_dev)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in)   :: nproc,me,gratio
  integer,intent(in)   :: ngfft(3)
@@ -277,8 +272,6 @@ end subroutine find_maxmin_proc
 
  subroutine cpu_distribution(gratio,rset,ngfft,beta_coeff,calc_type)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in)  :: gratio,calc_type
  real(dp),intent(in) :: beta_coeff
@@ -307,8 +300,10 @@ end subroutine find_maxmin_proc
 #if defined HAVE_GPU_CUDA
  else
    if(rset%tp==4)then
-     ABI_MALLOC(rset%GPU%par%displs,(0:rset%mpi%nproc-1))
-     ABI_MALLOC(rset%GPU%par%vcount,(0:rset%mpi%nproc-1))
+     if(.not. allocated(rset%GPU%par%displs)) then
+       ABI_MALLOC(rset%GPU%par%displs,(0:rset%mpi%nproc-1))
+       ABI_MALLOC(rset%GPU%par%vcount,(0:rset%mpi%nproc-1))
+     end if
    endif
    recpar => rset%GPU%par
 #endif
@@ -404,7 +399,6 @@ subroutine InitRec(dtset,mpi_ab,rset,rmet,mproj)
  use m_hidecudarec,only   :InitRecGPU_0
 #include "cuda_common.h"
 #endif
- implicit none
 
 !Arguments ------------------------------------
 ! scalars
@@ -569,7 +563,6 @@ end subroutine InitRec
 
 subroutine Init_MetricRec(metrec,nlpsp,rmet,ucvol,rprimd,xred,ngfft,natom,debug)
 
- implicit none
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) ::natom
@@ -636,7 +629,6 @@ end subroutine Init_MetricRec
 
 subroutine Init_nlpspRec(tempe,psps,nlrec,metrec,ngfftrec,debug)
 
- implicit none
 !Arguments ------------------------------------
 ! scalars
  logical,intent(in) :: debug
@@ -732,8 +724,6 @@ end subroutine Init_nlpspRec
 
 subroutine CleanRec(rset)
 
- implicit none
-
 !Arguments ------------------------------------
 ! scalars
  type(recursion_type),intent(inout) :: rset
@@ -742,39 +732,17 @@ subroutine CleanRec(rset)
 
  ! @recursion_type
 
- if (allocated(rset%ZT_p))  then
-   ABI_FREE(rset%ZT_p)
- end if
- if (allocated(rset%par%displs))  then
-   ABI_FREE(rset%par%displs)
- end if
- if (allocated(rset%par%vcount))  then
-   ABI_FREE(rset%par%vcount)
- end if
- if (allocated(rset%nl%mat_exp_psp_nl))  then
-   ABI_FREE(rset%nl%mat_exp_psp_nl)
- end if
- if (allocated(rset%nl%eival))  then
-   ABI_FREE(rset%nl%eival)
- end if
- if (allocated(rset%nl%eivec))  then
-   ABI_FREE(rset%nl%eivec)
- end if
- if (allocated(rset%nl%pspinfo))  then
-   ABI_FREE(rset%nl%pspinfo)
- end if
- if (allocated(rset%nl%radii))  then
-   ABI_FREE(rset%nl%radii)
- end if
- if (allocated(rset%nl%indlmn))  then
-   ABI_FREE(rset%nl%indlmn)
- end if
- if (allocated(rset%nl%projec))  then
-   ABI_FREE(rset%nl%projec)
- end if
- if (allocated(rset%inf%gcart))  then
-   ABI_FREE(rset%inf%gcart)
- end if
+  ABI_SFREE(rset%ZT_p)
+  ABI_SFREE(rset%par%displs)
+  ABI_SFREE(rset%par%vcount)
+  ABI_SFREE(rset%nl%mat_exp_psp_nl)
+  ABI_SFREE(rset%nl%eival)
+  ABI_SFREE(rset%nl%eivec)
+  ABI_SFREE(rset%nl%pspinfo)
+  ABI_SFREE(rset%nl%radii)
+  ABI_SFREE(rset%nl%indlmn)
+  ABI_SFREE(rset%nl%projec)
+  ABI_SFREE(rset%inf%gcart)
 
  call pawfgr_destroy(rset%pawfgr)
 
@@ -805,8 +773,6 @@ end subroutine CleanRec
 !! SOURCE
 
 subroutine Calcnrec(rset,b2)
-
- implicit none
 
  !Arguments ------------------------------------
  ! scalars
@@ -870,8 +836,6 @@ end subroutine Calcnrec
 !! SOURCE
 
 subroutine getngrec(ngfft,rmet,ngfftrec,nfftrec,recrcut,delta,tronc)
-
-implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1184,8 +1148,6 @@ end subroutine getngrec
 
 subroutine pspnl_operat_rec(nlrec,metrec,ngfftrec,debug)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  logical,intent(in) :: debug
@@ -1403,7 +1365,6 @@ end subroutine pspnl_operat_rec
 subroutine pspnl_hgh_rec(psps,temperature,nlrec,debug)
 
  use m_linalg_interfaces
- implicit none
 
 !Arguments -----------------------------------
 !scalars
@@ -1426,8 +1387,7 @@ subroutine pspnl_hgh_rec(psps,temperature,nlrec,debug)
  real(dp) :: h_mat_init(3,3), rework(lwork)
  real(dp), allocatable :: g_mat(:,:),h_mat(:,:),eig_val_h(:)
  real(dp), allocatable :: identity(:,:),inv_g_mat(:,:),u_mat(:,:)
-
- complex(dpc),allocatable :: hg_mat(:,:)
+ complex(dp),allocatable :: hg_mat(:,:)
 ! *************************************************************************
 
  if(debug)then

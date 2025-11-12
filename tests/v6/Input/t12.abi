@@ -46,14 +46,14 @@ prtlden 1 # Test the Laplacian of electronic density.
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%   t12.abo, tolnlines = 0, tolabs = 1.0e-6, tolrel = 1.0e-4, fld_options =  -easy
+#%% files_to_test =
+#%%   t12.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options =  -easy
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = 
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   Isolated Hydrogen atom.
 #%%   Treated with GGA C09x exchange functional (ixc=24).
 #%%   The total energy is -0.429523 Ha.

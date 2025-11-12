@@ -5,14 +5,14 @@
 !!****m* ABINIT/m_Ctqmcoffdiag
 !! NAME
 !!  m_Ctqmcoffdiag
-!! 
-!! FUNCTION 
+!!
+!! FUNCTION
 !!  Manage and drive all the CTQMC
 !!  Should not be used if you don't know what you do
 !!  Please use CtqmcoffdiagInterface
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder, B. Amadon, J. Denier)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder, B. Amadon, J. Denier)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +28,7 @@
 ! Coupe modNoise1 en 2000
 #define CTQMC_SEGME  1
 #define CTQMC_ANTIS -2
-#define CTQMC_ADDED  3  
+#define CTQMC_ADDED  3
 #define CTQMC_REMOV  4
 #define CTQMC_DETSI  5
 MODULE m_Ctqmcoffdiag
@@ -40,9 +40,9 @@ MODULE m_Ctqmcoffdiag
  USE m_Stat
  USE m_FFTHyb
  USE m_OurRng
-#ifdef HAVE_MPI2
- USE mpi
-#endif
+ use defs_basis
+ USE_MPI
+
  IMPLICIT NONE
 
  public :: Ctqmcoffdiag_init
@@ -77,6 +77,7 @@ MODULE m_Ctqmcoffdiag
  public :: Ctqmcoffdiag_printCorrelation
  public :: Ctqmcoffdiag_printSpectra
  public :: Ctqmcoffdiag_destroy
+ public :: Ctqmcoffdiag_setMagmom
 
 !!***
 
@@ -88,7 +89,7 @@ MODULE m_Ctqmcoffdiag
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -116,13 +117,13 @@ TYPE Ctqmcoffdiag
 ! Flag:  do we have parameters in input
 
   LOGICAL :: have_MPI = .FALSE.
-! Flag: 
+! Flag:
 
   INTEGER :: opt_movie = 0
 !
 
   INTEGER :: opt_analysis = 0
-! correlations 
+! correlations
 
   INTEGER :: opt_check = 0
 ! various check 0
@@ -155,13 +156,19 @@ TYPE Ctqmcoffdiag
 ! printing
 
   INTEGER :: flavors
-! number of flavors 
+! number of flavors
+
+  INTEGER :: nspinor
+! number of spinor
 
   INTEGER :: measurements
-!  The modulo used to measure the interaction energy and the number of electrons. Example : 2 means the measure is perform every two sweeps. 
+!  The modulo used to measure the interaction energy and the number of electrons. Example : 2 means the measure is perform every two sweeps.
 
   INTEGER :: samples
 ! nb of L points (dmftqmc_l)
+
+! INTEGER :: endDensity
+! second dimension of density allocatable array
 
   INTEGER(8) :: seed
 !
@@ -203,7 +210,7 @@ TYPE Ctqmcoffdiag
   DOUBLE PRECISION :: signvalue
 
   INTEGER :: MY_COMM
-! 
+!
 
   INTEGER :: rank
 !
@@ -212,7 +219,7 @@ TYPE Ctqmcoffdiag
 ! size of MY_COMM
 
   DOUBLE PRECISION :: runTime ! time for the run routine
-!  
+!
 
   DOUBLE PRECISION :: beta
 !
@@ -225,11 +232,11 @@ TYPE Ctqmcoffdiag
   COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:,:) :: hybri_limit
 ! coeff A such that F=-A/(iwn)
 
-  TYPE(GreenHyboffdiag)                        :: Greens 
+  TYPE(GreenHyboffdiag)                        :: Greens
 ! Green's function
 
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: measN 
-! measure of occupations (3or4,flavor) 
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: measN
+! measure of occupations (3or4,flavor)
 
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:  ) :: measDE
 !  (flavor,flavor) double occupancies
@@ -244,8 +251,8 @@ TYPE Ctqmcoffdiag
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:) :: abNoiseG   !(ab,tau,flavor)
 ! Noise but for G
 
-  TYPE(Vector)             , DIMENSION(1:2) :: measNoise 
-  TYPE(Vector), ALLOCATABLE, DIMENSION(:,:,:) :: measNoiseG       !(tau,flavor,mod) 
+  TYPE(Vector)             , DIMENSION(1:2) :: measNoise
+  TYPE(Vector), ALLOCATABLE, DIMENSION(:,:,:) :: measNoiseG       !(tau,flavor,mod)
 ! accumulate each value relataed to measurenoise 1 2
 
 !#ifdef CTCtqmcoffdiag_ANALYSIS
@@ -253,22 +260,37 @@ TYPE Ctqmcoffdiag
   DOUBLE PRECISION                            :: inv_dt
 ! 1/(beta/L)
 
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:  ) :: measPerturbation 
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:  ) :: measPerturbation
 ! opt_order,nflavor
 
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: occup_histo_time
 ! nflavor
 
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: occupconfig
+! 2**nflavor
+
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: suscep
+! samples
+
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: chi
+! samples
+
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: chicharge
+! samples
+
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: ntot
+! occupation total, t2g, eg
+
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:  ) :: meas_fullemptylines
 ! opt_order,nflavor
 
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:) :: measCorrelation 
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:) :: measCorrelation
 ! segment,antisegment,nflavor,nflavor
 
 !#endif
 !#ifdef CTCtqmcoffdiag_CHECK
   DOUBLE PRECISION :: errorImpurity
-! check 
+! check
 
   DOUBLE PRECISION :: errorBath
 ! for check
@@ -300,7 +322,7 @@ CONTAINS
 !!  Allocate all the non optional variables
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -332,7 +354,7 @@ include 'mpif.h'
   INTEGER  , INTENT(IN   )                      :: ostream
   INTEGER  , INTENT(IN   )                      :: istream
   LOGICAL  , INTENT(IN   )                      :: bFile
-  DOUBLE PRECISION, DIMENSION(1:10), OPTIONAL, INTENT(IN) :: iBuffer
+  DOUBLE PRECISION, DIMENSION(1:11), OPTIONAL, INTENT(IN) :: iBuffer
   INTEGER  , OPTIONAL, INTENT(IN   )                      :: MY_COMM
 !Local variables ------------------------------
 #ifdef HAVE_MPI
@@ -344,11 +366,11 @@ include 'mpif.h'
 !  CHARACTER(LEN=5)                              :: Cpid
 !
 #endif
-  DOUBLE PRECISION, DIMENSION(1:10)             :: buffer
+  DOUBLE PRECISION, DIMENSION(1:11)             :: buffer
 
   op%ostream = ostream
   op%istream = istream
-  
+
 ! --- RENICE ---
 !#ifdef __GFORTRAN__
 !  pid = GetPid()
@@ -394,6 +416,7 @@ include 'mpif.h'
       READ(istream,*) buffer(7) !op%beta
       READ(istream,*) buffer(8) !U
       READ(istream,*) buffer(9) !iTech
+      READ(istream,*) buffer(11)!op%nspinor
       !READ(istream,*) buffer(9) !Wmax
 !#ifdef CTCtqmcoffdiag_ANALYSIS
       !READ(istream,*) buffer(10) !order
@@ -402,11 +425,11 @@ include 'mpif.h'
 
 #ifdef HAVE_MPI
     IF ( op%have_MPI .EQV. .TRUE. ) &
-      CALL MPI_Bcast(buffer, 10, MPI_DOUBLE_PRECISION, 0,    &
+      CALL MPI_Bcast(buffer, 11, MPI_DOUBLE_PRECISION, 0,    &
                    op%MY_COMM, ierr)
 #endif
   ELSE IF ( PRESENT(iBuffer) ) THEN
-    buffer(1:10) = iBuffer(1:10)
+    buffer(1:11) = iBuffer(1:11)
   ELSE
     CALL ERROR("Ctqmcoffdiag_init : No input parameters                    ")
   END IF
@@ -457,7 +480,7 @@ END SUBROUTINE Ctqmcoffdiag_init
 !!  set all parameters and operators
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -478,7 +501,7 @@ SUBROUTINE Ctqmcoffdiag_setParameters(op,buffer)
 
 !Arguments ------------------------------------
   TYPE(Ctqmcoffdiag), INTENT(INOUT)                         :: op
-  DOUBLE PRECISION, DIMENSION(1:10), INTENT(IN   ) :: buffer
+  DOUBLE PRECISION, DIMENSION(1:11), INTENT(IN   ) :: buffer
 
 
   op%thermalization = INT(buffer(3)) !op%thermalization
@@ -491,6 +514,7 @@ SUBROUTINE Ctqmcoffdiag_setParameters(op,buffer)
   op%beta           = buffer(7)      !op%beta
   op%U              = buffer(8)      !U
   op%opt_nondiag    = INT(buffer(10))
+  op%nspinor        = INT(buffer(11)) !op%nspinor
 !  op%mu             = buffer(9)      !op%mu
   !op%Wmax           = INT(buffer(9)) !Freq
 !#ifdef CTCtqmcoffdiag_ANALYSIS
@@ -521,7 +545,7 @@ END SUBROUTINE Ctqmcoffdiag_setParameters
 !!  set the number of sweeps
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -576,7 +600,7 @@ END SUBROUTINE Ctqmcoffdiag_setSweeps
 !!  initialize random number generator
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -625,7 +649,7 @@ END SUBROUTINE Ctqmcoffdiag_setSeed
 !!  Allocate all non option variables
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -659,16 +683,26 @@ SUBROUTINE Ctqmcoffdiag_allocateAll(op)
   MALLOC(op%measN,(1:4,1:flavors))
   op%measN = 0.d0
 
-!  double occupancies 
+!  double occupancies
   FREEIF(op%measDE)
   MALLOC(op%measDE,(1:flavors,1:flavors) )
   op%measDE = 0.d0
 
   FREEIF(op%mu)
-  MALLOC(op%mu,(1:flavors) )
+#ifdef FC_LLVM
+  ! LLVM 16 doesn't recognize this macro here
+  MALLOC(op%mu, (1:flavors) )
+#else
+  MALLOC(op%mu, (1:flavors))
+#endif
   op%mu = 0.d0
   FREEIF(op%hybri_limit)
-  MALLOC(op%hybri_limit,(flavors,flavors) )
+#ifdef FC_LLVM
+  ! LLVM 16 doesn't recognize this macro here
+  MALLOC(op%hybri_limit, (flavors,flavors) )
+#else
+  MALLOC(op%hybri_limit, (flavors,flavors))
+#endif
   op%hybri_limit = czero
 END SUBROUTINE Ctqmcoffdiag_allocateAll
 !!***
@@ -679,10 +713,10 @@ END SUBROUTINE Ctqmcoffdiag_allocateAll
 !!  Ctqmcoffdiag_allocateOpt
 !!
 !! FUNCTION
-!!  allocate all option variables 
+!!  allocate all option variables
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -729,6 +763,21 @@ SUBROUTINE Ctqmcoffdiag_allocateOpt(op)
     FREEIF(op%occup_histo_time)
     MALLOC(op%occup_histo_time,(1:op%flavors+1))
     op%occup_histo_time= 0.d0
+    FREEIF(op%occupconfig)
+    MALLOC(op%occupconfig,(1:2**op%flavors))
+    op%occupconfig= 0.d0
+    FREEIF(op%suscep)
+    MALLOC(op%suscep,(1:3,1:op%samples))
+    op%suscep= 0.d0
+    FREEIF(op%chi)
+    MALLOC(op%chi,(1:3,1:op%samples))
+    op%chi= 0.d0
+    FREEIF(op%chicharge)
+    MALLOC(op%chicharge,(1:3,1:op%samples))
+    op%chicharge= 0.d0
+    FREEIF(op%ntot)
+    MALLOC(op%ntot,(1:3))
+    op%ntot= 0.d0
   END IF
 
   IF ( op%opt_noise .EQ. 1 ) THEN
@@ -766,6 +815,9 @@ SUBROUTINE Ctqmcoffdiag_allocateOpt(op)
     i = CEILING(DBLE(op%thermalization+op%sweeps)/DBLE(op%measurements*op%opt_spectra))
     MALLOC(op%density,(1:op%flavors+1,1:i))
     op%density = 0.d0
+!   op%endDensity=i
+!ENDPROBLEM
+
   END IF
 !#endif
 END SUBROUTINE Ctqmcoffdiag_allocateOpt
@@ -788,7 +840,7 @@ END SUBROUTINE Ctqmcoffdiag_allocateOpt
 !#endif
 !
 !  IF ( .NOT. op%para ) &
-!    CALL ERROR("Ctqmcoffdiag_setG0wFile : Ctqmcoffdiag_setParameters never called   ") 
+!    CALL ERROR("Ctqmcoffdiag_setG0wFile : Ctqmcoffdiag_setParameters never called   ")
 !
 !  flavors = op%flavors
 !
@@ -827,7 +879,7 @@ END SUBROUTINE Ctqmcoffdiag_allocateOpt
 !
 !!  stop
 !!  op%inF = .TRUE.
-!!  op%set = .TRUE. 
+!!  op%set = .TRUE.
 !
 !END SUBROUTINE Ctqmcoffdiag_setG0wFile
 !!***
@@ -840,7 +892,7 @@ END SUBROUTINE Ctqmcoffdiag_allocateOpt
 !!  Set Gow from input array
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -868,7 +920,7 @@ SUBROUTINE Ctqmcoffdiag_setG0wTab(op,Gomega,opt_fk)
   DOUBLE PRECISION, DIMENSION(:,:,:), ALLOCATABLE :: F
 
   IF ( .NOT. op%para ) &
-    CALL ERROR("Ctqmcoffdiag_setG0wTab : Ctqmcoffdiag_setParameters never called    ") 
+    CALL ERROR("Ctqmcoffdiag_setG0wTab : Ctqmcoffdiag_setParameters never called    ")
 
   MALLOC(F,(1:op%samples+1,1:op%flavors,1:op%flavors))
   CALL Ctqmcoffdiag_computeF(op,Gomega, F, opt_fk)  ! mu is changed
@@ -879,7 +931,7 @@ SUBROUTINE Ctqmcoffdiag_setG0wTab(op,Gomega,opt_fk)
   FREE(F)
 
   op%inF = .TRUE.
-  op%set = .TRUE. 
+  op%set = .TRUE.
 
 END SUBROUTINE Ctqmcoffdiag_setG0wTab
 !!***
@@ -889,7 +941,7 @@ END SUBROUTINE Ctqmcoffdiag_setG0wTab
 !  DOUBLE PRECISION, DIMENSION(:,:), ALLOCATABLE :: F
 !
 !  IF ( .NOT. op%para ) &
-!    CALL ERROR("Ctqmcoffdiag_setG0wTab : Ctqmcoffdiag_setParameters never called    ") 
+!    CALL ERROR("Ctqmcoffdiag_setG0wTab : Ctqmcoffdiag_setParameters never called    ")
 !
 !  MALLOC(F,(1:op%samples+1,1:op%flavors))
 !  CALL Ctqmcoffdiag_computeFK(op,Gomega, op%Wmax, F)  ! mu is changed
@@ -898,7 +950,7 @@ END SUBROUTINE Ctqmcoffdiag_setG0wTab
 !  FREE(F)
 !
 !  op%inF = .TRUE.
-!  op%set = .TRUE. 
+!  op%set = .TRUE.
 !
 !END SUBROUTINE Ctqmcoffdiag_setFwK
 !!***
@@ -923,7 +975,7 @@ END SUBROUTINE Ctqmcoffdiag_setG0wTab
 !!  set the interaction matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -963,7 +1015,7 @@ END SUBROUTINE Ctqmcoffdiag_setU
 !!  clear a ctqmc run
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1004,7 +1056,7 @@ SUBROUTINE Ctqmcoffdiag_clear(op)
 !  op%signvaluemeas    = 0.d0
   op%swap         = 0.d0
   op%runTime      = 0.d0
-  op%modGlobalMove(2) = 0 
+  op%modGlobalMove(2) = 0
   CALL Vector_clear(op%measNoise(1))
   CALL Vector_clear(op%measNoise(2))
 !#ifdef CTCtqmcoffdiag_CHECK
@@ -1013,8 +1065,8 @@ SUBROUTINE Ctqmcoffdiag_clear(op)
 !#endif
   CALL GreenHyboffdiag_clear(op%Greens)
 !#ifdef CTCtqmcoffdiag_ANALYSIS
-  IF ( op%opt_analysis .EQ. 1 .AND. ALLOCATED(op%measCorrelation) ) &    
-    op%measCorrelation = 0.d0 
+  IF ( op%opt_analysis .EQ. 1 .AND. ALLOCATED(op%measCorrelation) ) &
+    op%measCorrelation = 0.d0
   IF ( op%opt_order .GT. 0 .AND. ALLOCATED(op%measPerturbation) ) &
     op%measPerturbation = 0.d0
   IF ( op%opt_order .GT. 0 .AND. ALLOCATED(op%meas_fullemptylines) ) &
@@ -1043,7 +1095,7 @@ END SUBROUTINE Ctqmcoffdiag_clear
 !!  reset a ctqmc simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1102,7 +1154,7 @@ END SUBROUTINE Ctqmcoffdiag_reset
 !!  impose energy levels
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1143,7 +1195,7 @@ END SUBROUTINE Ctqmcoffdiag_setMu
 !!  use coefficient A such that F=-A/(iwn) given by DMFT code.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1170,7 +1222,7 @@ SUBROUTINE Ctqmcoffdiag_sethybri_limit(op, hybri_limit)
   IF ( op%flavors .NE. SIZE(hybri_limit,1) ) &
     CALL ERROR("Error in sethybri_limit")
 
-  op%hybri_limit(:,:)=hybri_limit(:,:)  
+  op%hybri_limit(:,:)=hybri_limit(:,:)
   op%opt_hybri_limit = 1
 END SUBROUTINE Ctqmcoffdiag_sethybri_limit
 !!***
@@ -1182,7 +1234,7 @@ END SUBROUTINE Ctqmcoffdiag_sethybri_limit
 !!  Compute the hybridization function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1239,7 +1291,7 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
   op%Wmax=SIZE(Gomega,1)
 !sui!write(std_out,*) "op%Wmax",op%Wmax
   !=================================
-  ! --- Initialize F_tmp 
+  ! --- Initialize F_tmp
   !=================================
   IF ( op%have_MPI .EQV. .TRUE. ) THEN
     CALL GreenHyboffdiag_init(F_tmp,samples,op%beta,flavors,MY_COMM=op%MY_COMM)
@@ -1268,7 +1320,7 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
 
   !IF ( op%rank .EQ. 0 ) &
     !OPEN(UNIT=9876,FILE="K.dat",POSITION="APPEND")
-  
+
   !=============================================================================================
   ! --- Compute Bath Green's function from Hybridization function in imaginary time
   !=============================================================================================
@@ -1282,14 +1334,14 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
    !        write(330,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,real(Gomega_tmp(iomega,iflavor,iflavor2))
    !        write(331,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,imag(Gomega_tmp(iomega,iflavor,iflavor2))
    !      enddo
-   !        write(330,*) 
-   !        write(331,*) 
+   !        write(330,*)
+   !        write(331,*)
    !    END DO
    !  END DO
    ENDIF
      DO iomega=1,op%Wmax
-     !  be careful...here 
-     ! Gomega in input is Fomega and 
+     !  be careful...here
+     ! Gomega in input is Fomega and
      ! F_omega is   Gomega.
      ! COMPUTE G0 FROM F
        do iflavor=1,flavors
@@ -1312,8 +1364,8 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
   !         write(334,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,real(F_omega(iomega,iflavor,iflavor2))
   !         write(335,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,imag(F_omega(iomega,iflavor,iflavor2))
   !       enddo
-  !         write(334,*) 
-  !         write(335,*) 
+  !         write(334,*)
+  !         write(335,*)
   !     END DO
   !   END DO
   ! ENDIF
@@ -1336,8 +1388,8 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
    !        write(332,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,real(F_omega(iomega,iflavor,iflavor2))
    !        write(333,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,imag(F_omega(iomega,iflavor,iflavor2))
    !      enddo
-   !        write(332,*) 
-   !        write(333,*) 
+   !        write(332,*)
+   !        write(333,*)
    !    END DO
    !  END DO
    !ENDIF
@@ -1355,8 +1407,8 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
   !          write(336,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,real(F_tmp%oper_w(iomega,iflavor,iflavor2))
   !          write(337,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,imag(F_tmp%oper_w(iomega,iflavor,iflavor2))
   !        enddo
-  !          write(336,*) 
-  !          write(337,*) 
+  !          write(336,*)
+  !          write(337,*)
   !      END DO
   !    END DO
   !  ENDIF
@@ -1376,7 +1428,7 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
      !      do  itau=1,op%samples+1
      !        write(346,*) (itau-1)*op%beta/(op%samples),real(F(itau,iflavor,iflavor2))
      !      enddo
-     !        write(346,*) 
+     !        write(346,*)
      !    END DO
      !  END DO
      !ENDIF
@@ -1398,7 +1450,7 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
            do  itau=1,op%samples+1
              write(4367,*) (itau-1)*op%beta/(op%samples),F(itau,iflavor,iflavor2)
            enddo
-             write(4367,*) 
+             write(4367,*)
          END DO
        !sui!write(std_out,'(5x,14(2f9.5,2x))') (F(op%samples+1,iflavor,iflavor2),iflavor2=1,flavors)
        END DO
@@ -1406,7 +1458,7 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
      !call flush(437)
      close(4367)
      !call flush(6)
-     
+
      call xmpi_barrier(op%MY_COMM)
      !CALL ERROR("END OF CALCULATION")
      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1439,7 +1491,7 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
         ELSE
           K = -REAL(F_omega(op%Wmax, iflavor,iflavor))
 !        op%mu = K
-          op%mu(iflavor) = K 
+          op%mu(iflavor) = K
         END IF
       ELSE
         K=0.d0
@@ -1463,7 +1515,7 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
     !   !   !if(iflavor==1.and.op%rank==0) then
     !   !     !write(224,*) (2.d0*DBLE(iomega)-1.d0) * pi_invBeta, real(F_omega(iomega,iflavor)),imag(F_omega(iomega,iflavor))
     !   !     !write(225,*) (2.d0*DBLE(iomega)-1.d0) * pi_invBeta, real(Gomega_tmp(iomega, iflavor)),imag(Gomega_tmp(iomega, iflavor))
-    !   !   !end if 
+    !   !   !end if
     !   ! END DO
     !  ELSE
     !    DO iomega = 1, op%Wmax
@@ -1473,7 +1525,7 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
     !      !if(iflavor==1.and.op%rank==0) then
     !        !write(224,*) (2.d0*DBLE(iomega)-1.d0) * pi_invBeta, real(F_omega(iomega,iflavor)),imag(F_omega(iomega,iflavor))
     !        !write(225,*) (2.d0*DBLE(iomega)-1.d0) * pi_invBeta, real(Gomega_tmp(iomega, iflavor)),imag(Gomega_tmp(iomega, iflavor))
-    !      !end if 
+    !      !end if
     !    END DO
     !  END IF
   ! --- compute residual K (?)
@@ -1501,24 +1553,24 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
 !          write(336,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,real(F_tmp%oper_w(iomega,iflavor,iflavor2))
 !          write(337,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,imag(F_tmp%oper_w(iomega,iflavor,iflavor2))
 !        enddo
-!        write(336,*) 
-!        write(337,*) 
+!        write(336,*)
+!        write(337,*)
 !        write(136,*) "#",iflavor,iflavor2
 !        write(137,*) "#",iflavor,iflavor2
 !        do  iomega=1,op%Wmax
 !        write(136,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,real(F_tmp%oper_w(iomega,iflavor,iflavor2)-op%hybri_limit(iflavor,iflavor2)/(cmplx(0.d0,(2.d0*DBLE(iomega)-1.d0) * pi_invBeta,kind=8)))
 !        write(137,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,imag(F_tmp%oper_w(iomega,iflavor,iflavor2)-op%hybri_limit(iflavor,iflavor2)/(cmplx(0.d0,(2.d0*DBLE(iomega)-1.d0) * pi_invBeta,kind=8)))
 !        enddo
-!        write(136,*) 
-!        write(137,*) 
+!        write(136,*)
+!        write(137,*)
 !        write(836,*) "#",iflavor,iflavor2
 !        write(837,*) "#",iflavor,iflavor2
 !        do  iomega=1,op%Wmax
 !        write(836,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,real(op%hybri_limit(iflavor,iflavor2)/(cmplx(0.d0,(2.d0*DBLE(iomega)-1.d0) * pi_invBeta)))
 !        write(837,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,imag(op%hybri_limit(iflavor,iflavor2)/(cmplx(0.d0,(2.d0*DBLE(iomega)-1.d0) * pi_invBeta)))
 !        enddo
-!        write(836,*) 
-!        write(837,*) 
+!        write(836,*)
+!        write(837,*)
 !      END DO
 !    END DO
 !  ENDIF
@@ -1535,7 +1587,7 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
    !   do  iomega=1,F_tmp%Wmax
    !   write(unitnb,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,real(F_tmp%oper_w(iomega,iflavor,iflavor2))
    !   enddo
-   !   write(unitnb,*) 
+   !   write(unitnb,*)
    !   END DO
    ! END DO
 
@@ -1564,7 +1616,7 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
 !       do  itau=1,op%samples+1
 !         write(346,*) itau,real(F(itau,iflavor,iflavor2))
 !       enddo
-!       write(346,*) 
+!       write(346,*)
 !     END DO
 !   END DO
 ! ENDIF
@@ -1608,7 +1660,7 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
         do  itau=1,op%samples+1
           write(436,*) itau,F(itau,iflavor,iflavor2)
         enddo
-          write(436,*) 
+          write(436,*)
       END DO
     END DO
   ENDIF
@@ -1658,14 +1710,14 @@ END SUBROUTINE Ctqmcoffdiag_computeF
 !    K = REAL(Gomega(Wmax, iflavor))
 !    WRITE(op%ostream,*) "CTQMC K, op%mu = ",K,op%mu
 !    WRITE(op%ostream,*) "CTQMC beta     = ",op%beta
-!    op%mu(iflavor) = K 
+!    op%mu(iflavor) = K
 !    DO iomega = 1, Wmax
 !      F_omega(iomega,iflavor) = Gomega(iomega,iflavor) &
 !                  - CMPLX(K, 0.d0, 8)
 !      !if(iflavor==1.and.op%rank==0) then
 !        !write(224,*) (2.d0*DBLE(iomega)-1.d0) * pi_invBeta, real(F_omega(iomega,iflavor)),imag(F_omega(iomega,iflavor))
 !        !write(225,*) (2.d0*DBLE(iomega)-1.d0) * pi_invBeta, real(Gomega(iomega, iflavor)),imag(Gomega(iomega, iflavor))
-!      !end if 
+!      !end if
 !    END DO
 !    CALL GreenHyboffdiag_backFourier(F_tmp,F_omega(:,iflavor))
 !    F(1:samples+1,iflavor) = (/ (-F_tmp%oper(samples+1-itau),itau=0,samples) /)
@@ -1683,7 +1735,7 @@ END SUBROUTINE Ctqmcoffdiag_computeF
 !!  set all options and run a simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1725,6 +1777,7 @@ include 'mpif.h'
 !Local variables ------------------------------
 #ifdef HAVE_MPI
   INTEGER                            :: ierr
+  DOUBLE PRECISION                   :: rtime(1)
 #endif
 !#ifdef CTCtqmcoffdiag_MOVIE
   INTEGER                            :: ilatex
@@ -1749,11 +1802,11 @@ include 'mpif.h'
   IF ( PRESENT( opt_analysis ) ) &
     op%opt_analysis = opt_analysis
   IF ( PRESENT ( opt_order ) ) &
-    op%opt_order = opt_order 
+    op%opt_order = opt_order
   IF ( PRESENT ( opt_histo ) ) &
-    op%opt_histo = opt_histo 
+    op%opt_histo = opt_histo
   IF ( PRESENT ( opt_noise ) ) THEN
-    op%opt_noise = opt_noise 
+    op%opt_noise = opt_noise
   END IF
   IF ( PRESENT ( opt_spectra ) ) &
     op%opt_spectra = opt_spectra
@@ -1767,19 +1820,19 @@ include 'mpif.h'
       op%modGlobalMove(1) = max(op%sweeps,op%thermalization)+1 ! No Global Move
       !write(std_out,*) "op%sweeps",op%sweeps, op%modGlobalMove(1)
       CALL WARNALL("Ctqmcoffdiag_run : global moves option is <= 0 or > sweeps/cpu -> No global Moves")
-    ELSE 
-      op%modGlobalMove(1) = opt_gMove 
+    ELSE
+      op%modGlobalMove(1) = opt_gMove
     END IF
   END IF
 !sui!write(std_out,*) "op%sweeps",op%thermalization,op%sweeps
 
   CALL Ctqmcoffdiag_allocateOpt(op)
-  
-!#ifdef CTCtqmcoffdiag_MOVIE  
+
+!#ifdef CTCtqmcoffdiag_MOVIE
   ilatex = 0
   IF ( op%opt_movie .EQ. 1 ) THEN
     Cchar ="0000"
-    WRITE(Cchar,'(I4)') op%rank 
+    WRITE(Cchar,'(I4)') op%rank
     ilatex = 87+op%rank
     OPEN(UNIT=ilatex, FILE="Movie_"//TRIM(ADJUSTL(Cchar))//".tex")
     WRITE(ilatex,'(A)') "\documentclass{beamer}"
@@ -1788,30 +1841,30 @@ include 'mpif.h'
     WRITE(ilatex,'(A)') "\setbeamersize{sidebar width right=0pt}"
     WRITE(ilatex,'(A)') "\setbeamersize{text width left=0pt}"
     WRITE(ilatex,'(A)') "\setbeamersize{text width right=0pt}"
-    WRITE(ilatex,*) 
+    WRITE(ilatex,*)
     WRITE(ilatex,'(A)') "\begin{document}"
-    WRITE(ilatex,*) 
+    WRITE(ilatex,*)
   END IF
 !#endif
 
   IF ( op%rank .EQ. 0 ) THEN
     WRITE(op%ostream,'(A29)') "Starting QMC (Thermalization)"
   END IF
-  
+
   !=================================
-  ! STARTING THERMALIZATION 
+  ! STARTING THERMALIZATION
   !=================================
   !write(std_out,*) "sweeps before thermalization",op%sweeps
   !write(std_out,*) "op%stats",op%stats
   CALL Ctqmcoffdiag_loop(op,op%thermalization,ilatex)
   !=================================
-  ! ENDING   THERMALIZATION 
+  ! ENDING   THERMALIZATION
   !=================================
 
   estimatedTime = op%runTime
 #ifdef HAVE_MPI
-  CALL MPI_REDUCE(op%runTime, estimatedTime, 1, MPI_DOUBLE_PRECISION, MPI_MAX, &
-             0, op%MY_COMM, ierr)
+  CALL MPI_REDUCE([op%runTime], rtime, 1, MPI_DOUBLE_PRECISION, MPI_MAX, 0, op%MY_COMM, ierr)
+  estimatedTime=rtime(1)
 #endif
 
   IF ( op%rank .EQ. 0 ) THEN
@@ -1822,18 +1875,18 @@ include 'mpif.h'
   END IF
 
   !=================================
-  ! CLEANING CTQMC          
+  ! CLEANING CTQMC
   !=================================
   CALL Ctqmcoffdiag_clear(op)
 
   !=================================
-  ! STARTING CTQMC          
+  ! STARTING CTQMC
   !=================================
   !write(std_out,*) "sweeps before loop",op%sweeps
   !write(std_out,*) "op%stats",op%stats
   CALL Ctqmcoffdiag_loop(op,op%sweeps,ilatex)
   !=================================
-  ! ENDING   CTQMC          
+  ! ENDING   CTQMC
   !=================================
 
   IF ( op%opt_movie .EQ. 1 ) THEN
@@ -1856,7 +1909,7 @@ END SUBROUTINE Ctqmcoffdiag_run
 !!  Definition the main loop of the CT-QMC
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1881,7 +1934,7 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
   INTEGER    , INTENT(IN   )         :: itotal
   INTEGER    , INTENT(IN   )         :: ilatex
 !Local variables ------------------------------
-  LOGICAL                            :: updated 
+  LOGICAL                            :: updated
   LOGICAL                            :: updated_seg
   LOGICAL, DIMENSION(:), ALLOCATABLE :: updated_swap
 
@@ -1891,7 +1944,7 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
   INTEGER                            :: modNoise2
   INTEGER                            :: modGlobalMove
   INTEGER                            :: sp1
-  INTEGER                            :: itau   
+  INTEGER                            :: itau
   INTEGER                            :: ind
   INTEGER                            :: endDensity
   INTEGER                            :: indDensity
@@ -1923,6 +1976,11 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
   sp1            = op%samples+1
   IF ( op%opt_histo .GT. 0 ) THEN
     op%occup_histo_time= 0.d0
+    op%occupconfig= 0.d0
+    op%suscep= 0.d0
+    op%chi= 0.d0
+    op%chicharge= 0.d0
+    op%ntot= 0.d0
   END IF
 
   old_percent    = 0
@@ -1941,7 +1999,11 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
   MALLOC(gtmp_old2,(1,1))
   gtmp_old2 = 0.d0
 
+!PROBLEM eos_gnu_13.2_mpich . %endDensity was introduced throughout
   endDensity = SIZE(op%density,2)
+! endDensity=op%endDensity
+!ENDPROBLEM
+
 
   IF ( op%opt_noise .GT. 0 ) THEN
     FREEIF(gtmp_new)
@@ -1982,7 +2044,7 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
       updated_swap(iflavor) = .FALSE.
       if ( op%opt_nondiag >0 )  iflavor_d=0
       if ( op%opt_nondiag==0 )  iflavor_d=iflavor
-      CALL GreenHyboffdiag_measHybrid(op%Greens, op%Bath%M, op%Impurity%Particles, updated,op%signvalue,iflavor_d) 
+      CALL GreenHyboffdiag_measHybrid(op%Greens, op%Bath%M, op%Impurity%Particles, updated,op%signvalue,iflavor_d)
 
       CALL Ctqmcoffdiag_measN        (op, iflavor, updated)
       IF ( op%opt_analysis .EQ. 1 ) &
@@ -1990,7 +2052,7 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
       IF ( op%opt_order .GT. 0 ) &
         CALL Ctqmcoffdiag_measPerturbation(op, iflavor)
     END DO
-    !CALL GreenHyboffdiag_measHybrid(op%Greens, op%Bath%M, op%Impurity%Particles, updated,op%signvalue,iflavor_d) 
+    !CALL GreenHyboffdiag_measHybrid(op%Greens, op%Bath%M, op%Impurity%Particles, updated,op%signvalue,iflavor_d)
     !DO iflavor = 1,flavors
     !  CALL Ctqmcoffdiag_measN        (op, iflavor, updated)
     !END DO
@@ -2004,8 +2066,8 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
         updated_swap(swapUpdate2) = .TRUE.
       END IF
     END IF
-    
-    IF ( MOD(isweep,measurements) .EQ. 0 ) THEN ! default is always 
+
+    IF ( MOD(isweep,measurements) .EQ. 0 ) THEN ! default is always
       CALL ImpurityOperator_measDE(op%Impurity,op%measDE)
       IF ( op%opt_spectra .GE. 1 .AND. MOD(isweep,measurements*op%opt_spectra) .EQ. 0 ) THEN
         op%density(1:flavors,indDensity) = op%measN(3,1:flavors)
@@ -2015,7 +2077,8 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
 
     IF ( MOD(isweep,measurements) .EQ. 0 ) THEN
       IF ( op%opt_histo .GT. 0 ) THEN
-        CALL ImpurityOperator_occup_histo_time(op%Impurity,op%occup_histo_time)
+        CALL ImpurityOperator_occup_histo_time(op%Impurity,op%occup_histo_time,op%occupconfig,op%suscep,op%samples,op%chi,&
+& op%chicharge,op%ntot,op%opt_histo,op%nspinor)
       END IF
     ENDIF
 
@@ -2032,7 +2095,7 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
         DO ifl1 = 1, flavors
           DO ind = 1, op%Greens%map(ifl1,ifl1)%tail
             itau = op%Greens%map(ifl1,ifl1)%listINT(ind)
-            gtmp_new(itau,ifl1) = op%Greens%oper(itau,ifl1,ifl1) & 
+            gtmp_new(itau,ifl1) = op%Greens%oper(itau,ifl1,ifl1) &
                      +op%Greens%map(ifl1,ifl1)%listDBLE(ind)*DBLE(op%Greens%factor)
           END DO
           DO itau = 1, sp1
@@ -2051,19 +2114,19 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
         DO ifl1 = 1, flavors
           DO ind = 1, op%Greens%map(ifl1,ifl1)%tail
             itau = op%Greens%map(ifl1,ifl1)%listINT(ind)
-            gtmp_new(itau,ifl1) = op%Greens%oper(itau,ifl1,ifl1) & 
+            gtmp_new(itau,ifl1) = op%Greens%oper(itau,ifl1,ifl1) &
                   +op%Greens%map(ifl1,ifl1)%listDBLE(ind)*op%Greens%factor
           END DO
           DO itau = 1, sp1
             CALL Vector_pushBack(op%measNoiseG(itau,ifl1,2), gtmp_new(itau,ifl1) - gtmp_old2(itau,ifl1))
             gtmp_old2(itau,ifl1) = gtmp_new(itau,ifl1)
           END DO
-        END DO 
+        END DO
       END IF
 
-      IF ( op%rank .EQ. 0 ) THEN 
+      IF ( op%rank .EQ. 0 ) THEN
         new_percent = CEILING(DBLE(isweep)*100.d0/DBLE(itotal))
-        DO ipercent = old_percent+1, new_percent 
+        DO ipercent = old_percent+1, new_percent
           WRITE(op%ostream,'(A)',ADVANCE="NO") "-"
         END DO
         old_percent = new_percent
@@ -2083,7 +2146,7 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
     END DO
     WRITE(op%ostream,'(A)') "|"
   END IF
- 
+
   FREE(gtmp_new)
   FREE(gtmp_old1)
   FREE(gtmp_old2)
@@ -2111,7 +2174,7 @@ END SUBROUTINE Ctqmcoffdiag_loop
 !!  Try to add or remove a segment and an anti-segment
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2132,8 +2195,8 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
 
 !Arguments ------------------------------------
   TYPE(Ctqmcoffdiag)             , INTENT(INOUT) :: op
-!  TYPE(BathOperatoroffdiag)    , INTENT(INOUT) :: Bath 
-!  TYPE(ImpurityOperator), INTENT(INOUT) :: Impurity 
+!  TYPE(BathOperatoroffdiag)    , INTENT(INOUT) :: Bath
+!  TYPE(ImpurityOperator), INTENT(INOUT) :: Impurity
   LOGICAL               , INTENT(  OUT) :: updated
 !Local variables ------------------------------
   INTEGER                               :: position
@@ -2172,7 +2235,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
   ! First choose segment or antisegment
   !=====================================
   DO i = 1, 2
-    signe = SIGN(1.d0,DBLE(nature(i))) 
+    signe = SIGN(1.d0,DBLE(nature(i)))
 !      -----  1: segment        signe= 1  ( CTQMC_SEGME =  1 )
 !      -----  2: antisegment    signe=-1  ( CTQMC_ANTIS = -2 )
 !    NB: Sign(a,b) = sign(b) * a
@@ -2201,7 +2264,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
       CALL OurRng(op%seed,time1)
       time1 = time1 * beta
 
-      ! time_avail is the distance between between time1 and 
+      ! time_avail is the distance between between time1 and
       !   - the next start of a segment for a segment addition
       !   - the next end of a segment for an antisegment addition
       ! ImpurityOperator_getAvailableTime > 0 for a segment      (signe>0) -> time_avail>0
@@ -2217,7 +2280,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
         IF ( time2 .EQ. 0.d0 ) CALL OurRng(op%seed,time2) ! Prevent null segment
 
         ! Now time2 is the time at the end of the proposed new (anti) segment
-        ! time2 > time1 
+        ! time2 > time1
         !====================================================================
         time2     = time1 + time2 * time_avail
       !sui!write(std_out,*) tailint+1,time1,time2,position
@@ -2240,7 +2303,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
         !write(std_out,*) "      length", length
 
 !      -----  Computes the determinant ratio
-        det_ratio = BathOperatoroffdiag_getDetAdd(op%Bath,CdagC_1,position,op%Impurity%particles) 
+        det_ratio = BathOperatoroffdiag_getDetAdd(op%Bath,CdagC_1,position,op%Impurity%particles)
 
 !      -----  Computes the overlap
         overlap   = ImpurityOperator_getNewOverlap(op%Impurity,CdagC_1)
@@ -2251,7 +2314,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
         !write(std_out,*) "      Rnd", time1
         signdet=1.d0
         det_ratio=det_ratio*signdetprev
-                 
+
         IF ( det_ratio .LT. 0.d0 ) THEN
         !sui!write(std_out,*) "         NEGATIVE DET",det_ratio,signdetprev
           det_ratio   = - det_ratio
@@ -2276,7 +2339,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
           CALL ImpurityOperator_add(op%Impurity,CdagC_1,position)
 !          write(*,*) "after "
 !          CALL ListCdagCoffdiag_print(op%Impurity%particles(op%Impurity%activeFlavor),6)
-          CALL BathOperatoroffdiag_setMAdd(op%bath,op%Impurity%particles) 
+          CALL BathOperatoroffdiag_setMAdd(op%bath,op%Impurity%particles)
           op%stats(nature(i)+CTQMC_ADDED) = op%stats(nature(i)+CTQMC_ADDED)  + 1.d0
           updated = .TRUE. .OR. updated
           tail = tail + 1.d0
@@ -2296,10 +2359,10 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
         !sui!write(6,*) "                  signvalue",op%signvalue
         ELSE
      !ii  write(6,*) "        Refused      addition: proba",time1
-        END IF 
+        END IF
       ELSE
     !sui!write(6,*) "        Refused      addition: time_avail <0"
-      END IF 
+      END IF
 
     !========================================
     ! Remove segment/antisegment
@@ -2309,7 +2372,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
       IF ( tail .GT. 0.d0 ) THEN
         CALL OurRng(op%seed,time1)
         position = INT(((time1 * tail) + 1.d0) * signe )
-        !prt!if(op%prtopt==1)  write(6,*) "         position",position 
+        !prt!if(op%prtopt==1)  write(6,*) "         position",position
         time_avail = ImpurityOperator_getAvailedTime(op%Impurity,position)
         det_ratio  = BathOperatoroffdiag_getDetRemove(op%Bath,position)
         !write(6,*) "        det_ratio", det_ratio
@@ -2331,7 +2394,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
 !          op%seg_sign = op%seg_sign + 1.d0
           op%stats(nature(i)+CTQMC_DETSI) = op%stats(nature(i)+CTQMC_DETSI) + 1.d0
           signdet=-1.d0
-        ELSE 
+        ELSE
           sign_det_ratio=1
         !sui!write(6,*) "                  DET",det_ratio,signdetprev
         END IF
@@ -2339,7 +2402,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
         IF ( (time1 * beta * time_avail * DEXP(op%mu(op%Impurity%activeFlavor)*length+overlap)) &
              .LT. (tail * det_ratio ) ) THEN
           CALL ImpurityOperator_remove(op%Impurity,position)
-          CALL BathOperatoroffdiag_setMRemove(op%Bath,op%Impurity%particles) 
+          CALL BathOperatoroffdiag_setMRemove(op%Bath,op%Impurity%particles)
           !op%seg_removed = op%seg_removed  + 1.d0
           op%stats(nature(i)+CTQMC_REMOV) = op%stats(nature(i)+CTQMC_REMOV)  + 1.d0
           updated = .TRUE. .OR. updated
@@ -2371,8 +2434,8 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!***
 
 !!SUBROUTINE Ctqmcoffdiag_trySegment(op,updated)
-!!!  TYPE(BathOperatoroffdiag)    , INTENT(INOUT) :: Bath 
-!!!  TYPE(ImpurityOperator), INTENT(INOUT) :: Impurity 
+!!!  TYPE(BathOperatoroffdiag)    , INTENT(INOUT) :: Bath
+!!!  TYPE(ImpurityOperator), INTENT(INOUT) :: Impurity
 !!  LOGICAL               , INTENT(INOUT) :: updated
 !!  INTEGER                               :: position
 !!  DOUBLE PRECISION                      :: action
@@ -2393,7 +2456,7 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!  tail     = DBLE(op%Impurity%particles(op%Impurity%activeFlavor)%tail)
 !!
 !!  CALL RANDOM_NUMBER(action)
-!!  
+!!
 !!  updated = .FALSE.
 !!
 !!  IF ( action .LT. .5d0 ) THEN ! Ajout de segment
@@ -2407,7 +2470,7 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!      CdagC_1(Cdag_) = time1
 !!      CdagC_1(C_   ) = time2
 !!!      length    = CdagC_length(CdagC_1)
-!!      length    = time2 - time1 
+!!      length    = time2 - time1
 !!      det_ratio = BathOperatoroffdiag_getDetAdd(op%Bath,CdagC_1,position,op%Impurity%particles(op%Impurity%activeFlavor))
 !!      overlap   = ImpurityOperator_getNewOverlap(op%Impurity,CdagC_1)
 !!      CALL RANDOM_NUMBER(time1)
@@ -2422,8 +2485,8 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!        CALL BathOperatoroffdiag_setMAdd(op%bath,op%Impurity%particles(op%Impurity%activeFlavor))
 !!        op%stats(CTQMC_SEGME+CTQMC_ADDED) = op%stats(CTQMC_SEGME+CTQMC_ADDED)  + 1.d0
 !!        updated = .TRUE.
-!!      END IF 
-!!    END IF 
+!!      END IF
+!!    END IF
 !!
 !!  ELSE ! Supprimer un segment
 !!    IF ( tail .GT. 0.d0 ) THEN
@@ -2456,8 +2519,8 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!***
 !!
 !!SUBROUTINE Ctqmcoffdiag_tryAntiSeg(op, updated)
-!!!  TYPE(BathOperatoroffdiag)    , INTENT(INOUT) :: Bath 
-!!!  TYPE(ImpurityOperator), INTENT(INOUT) :: Impurity 
+!!!  TYPE(BathOperatoroffdiag)    , INTENT(INOUT) :: Bath
+!!!  TYPE(ImpurityOperator), INTENT(INOUT) :: Impurity
 !!  LOGICAL               , INTENT(INOUT) :: updated
 !!  INTEGER                               :: position
 !!  DOUBLE PRECISION                      :: action
@@ -2501,23 +2564,23 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!!        op%anti_sign = op%anti_sign + 1.d0
 !!        op%stats(CTQMC_ANTIS+CTQMC_DETSI) = op%stats(CTQMC_ANTIS+CTQMC_DETSI) + SIGN(1.d0,det_ratio)
 !!      END IF
-!!      IF ( (time1 * (tail + 1.d0 )) & 
+!!      IF ( (time1 * (tail + 1.d0 )) &
 !!           .LT. (beta * ABS(time_avail) * det_ratio * DEXP(op%mu(op%Impurity%activeFlavor)*length + overlap) ) ) THEN
-!!        CALL ImpurityOperator_add(op%Impurity,CdagC_1,position) 
+!!        CALL ImpurityOperator_add(op%Impurity,CdagC_1,position)
 !!        !write(*,*) position
-!!        CALL BathOperatoroffdiag_setMAdd(op%bath,op%Impurity%particles(op%Impurity%activeFlavor)) 
+!!        CALL BathOperatoroffdiag_setMAdd(op%bath,op%Impurity%particles(op%Impurity%activeFlavor))
 !!        !op%anti_added = op%anti_added  + 1.d0
 !!        op%stats(CTQMC_ANTIS+CTQMC_ADDED) = op%stats(CTQMC_ANTIS+CTQMC_ADDED)  + 1.d0
 !!        updated = .TRUE.
-!!      END IF 
-!!    END IF 
+!!      END IF
+!!    END IF
 !!  ELSE ! Supprimer un antiseg
 !!    IF ( tail .GT. 0.d0 ) THEN
 !!      CALL RANDOM_NUMBER(time1)
 !!      position = -(INT(time1 * tail) + 1)
 !!      time_avail = ImpurityOperator_getAvailedTime(op%Impurity,position)!OK
 !!      det_ratio  = BathOperatoroffdiag_getDetRemove(op%Bath,position)!OK
-!!      CdagC_1    = ImpurityOperator_getSegment(op%Impurity,position)!OK 
+!!      CdagC_1    = ImpurityOperator_getSegment(op%Impurity,position)!OK
 !!!      length     = CdagC_length(CdagC_1) ! /!\ length is negative
 !!      length = CdagC_1(C_) - CdagC_1(Cdag_)
 !!      overlap    = ImpurityOperator_getNewOverlap(op%Impurity,CdagC_1) !OK
@@ -2549,7 +2612,7 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!  try a global move (swap to flavors)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2571,8 +2634,8 @@ SUBROUTINE Ctqmcoffdiag_trySwap(op,flav_i,flav_j)
 
 !Arguments ------------------------------------
   TYPE(Ctqmcoffdiag)           , INTENT(INOUT) :: op
-!  TYPE(BathOperatoroffdiag)    , INTENT(INOUT) :: Bath 
-!  TYPE(ImpurityOperator), INTENT(INOUT) :: Impurity 
+!  TYPE(BathOperatoroffdiag)    , INTENT(INOUT) :: Bath
+!  TYPE(ImpurityOperator), INTENT(INOUT) :: Impurity
   INTEGER               , INTENT(  OUT) :: flav_i
   INTEGER               , INTENT(  OUT) :: flav_j
 !Local variables ------------------------------
@@ -2601,7 +2664,7 @@ SUBROUTINE Ctqmcoffdiag_trySwap(op,flav_i,flav_j)
   CALL OurRng(op%seed,rnd)
   flavor_j = NINT(rnd*DBLE(op%flavors-1.d0))+1
   !ii write(6,'(a,2i4)') "--------------- new swap --------------------------------",flavor_i,flavor_j
-  
+
   flav_i = 0
   flav_j = 0
   !ii   do iflavor=1,op%flavors
@@ -2675,7 +2738,7 @@ SUBROUTINE Ctqmcoffdiag_trySwap(op,flav_i,flav_j)
    !ii    write(6,*) "Gmove accepted",rnd,local_ratio*det_ratio
       CALL ImpurityOperator_swap(op%Impurity, flavor_i,flavor_j)
       CALL BathOperatoroffdiag_swap    (op%Bath    , flavor_i,flavor_j) !  use op%Bath%M_update to built new op%Bath%M
-      
+
       op%swap = op%swap + 1.d0
       flav_i = flavor_i
       flav_j = flavor_j
@@ -2716,7 +2779,7 @@ END SUBROUTINE Ctqmcoffdiag_trySwap
 !!  with the correct weight.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2745,14 +2808,14 @@ SUBROUTINE Ctqmcoffdiag_measN(op, iflavor, updated)
 !  IF ( .NOT. op%set ) &
 !    CALL ERROR("Ctqmcoffdiag_measN : QMC not set                           ")
 
-  
+
   IF ( updated .EQV. .TRUE. ) THEN
 !  --- accumulate occupations with values op%measN(3,iflavor) from the last measurements with the corresponding weight
 !  ---  op*measN(4,iflavor)
     op%measN(1,iflavor) = op%measN(1,iflavor) + op%measN(3,iflavor)*op%measN(4,iflavor)
    ! write(6,*) "Cllll42"
 
-!  --- Compute total number of new measurements 
+!  --- Compute total number of new measurements
     op%measN(2,iflavor) = op%measN(2,iflavor) + op%measN(4,iflavor)
 
    ! write(6,*) "Allll42"
@@ -2781,7 +2844,7 @@ END SUBROUTINE Ctqmcoffdiag_measN
 !!  measure all correlations in times for a flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2825,7 +2888,7 @@ SUBROUTINE Ctqmcoffdiag_measCorrelation(op, iflavor)
   beta = op%beta
 
   IF ( size .EQ. 0 ) RETURN
-  
+
   inv_dt = op%inv_dt
 
   DO iCdag = 1, size ! first segments
@@ -2850,7 +2913,7 @@ SUBROUTINE Ctqmcoffdiag_measCorrelation(op, iflavor)
 !      index = INT( ( time * inv_dt ) + .5d0 ) + 1
 !      op%measCorrelation(index,3,iflavor) = op%measCorrelation(index,3,iflavor) + 1.d0
 !    END DO
-    DO iC = 1, size!  op%Greens(iflavor)%index_old%tail 
+    DO iC = 1, size!  op%Greens(iflavor)%index_old%tail
 !todoba        op%measCorrelation(op%Greens(iflavor)%map%listINT(iC+(iCdag-1)*size),3,iflavor) = &
 !todoba        op%measCorrelation(op%Greens(iflavor)%map%listINT(iC+(iCdag-1)*size),3,iflavor) + 1.d0
     END DO
@@ -2867,7 +2930,7 @@ END SUBROUTINE Ctqmcoffdiag_measCorrelation
 !!  measure perturbation order
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2919,7 +2982,7 @@ END SUBROUTINE Ctqmcoffdiag_measPerturbation
 !!  reduce everything to get the result of the simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder,F. Gendron)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2935,7 +2998,7 @@ END SUBROUTINE Ctqmcoffdiag_measPerturbation
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_getResult(op)
+SUBROUTINE Ctqmcoffdiag_getResult(op,Iatom,fname)
 
 
 #ifdef HAVE_MPI1
@@ -2943,11 +3006,16 @@ include 'mpif.h'
 #endif
 !Arguments ------------------------------------
   TYPE(Ctqmcoffdiag)  , INTENT(INOUT)                    :: op
+  INTEGER, INTENT(IN ) :: Iatom
+  character(len=fnlen), INTENT(INOUT) :: fname
 !Local variables ------------------------------
   INTEGER                                       :: iflavor
+!  INTEGER                                       :: iflavor1
+!  INTEGER                                       :: iflavor2
   INTEGER                                       :: flavors
   INTEGER                                       :: itau
   INTEGER                                       :: endDensity
+  character(len=2)                              :: atomnb
   DOUBLE PRECISION                              :: inv_flavors
   DOUBLE PRECISION                              :: a
   DOUBLE PRECISION                              :: b
@@ -2960,23 +3028,32 @@ include 'mpif.h'
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:)   :: freqs
   INTEGER, ALLOCATABLE, DIMENSION(:)   :: counts
   INTEGER, ALLOCATABLE, DIMENSION(:)   :: displs
-  INTEGER                                       :: sp1
+  INTEGER, ALLOCATABLE, DIMENSION(:)   :: occtot
+  INTEGER, ALLOCATABLE, DIMENSION(:)   :: spintot
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)   :: occ
+  INTEGER                                       :: sp1,spinmax,spinmin,dspin,nelec,spin
   INTEGER                                       :: spAll
   INTEGER                                       :: last
   INTEGER                                       :: n1
-  INTEGER                                       :: n2
+  INTEGER                                       :: n2,n3,quotient,remainder,signe
   INTEGER                                       :: debut
   DOUBLE PRECISION                                       :: signvaluemeassum
 !  INTEGER                                       :: fin
 #ifdef HAVE_MPI
   INTEGER                                       :: ierr
+  DOUBLE PRECISION,              DIMENSION(1)   :: arr
 #endif
   INTEGER                                       :: sizeoper,nbprocs,myrank
-  DOUBLE PRECISION                              :: inv_size,sumh
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: buffer 
+  DOUBLE PRECISION                              :: inv_size,sumh,sumtot
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: buffer
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:) :: buffer2,buffer2s
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: fullempty
   TYPE(FFTHyb) :: FFTmrka
+
+#if defined HAVE_MPI && !defined HAVE_MPI2_INPLACE
+   DOUBLE PRECISION, ALLOCATABLE , DIMENSION(:)   :: buffer1_out,freqs_buf
+   DOUBLE PRECISION, ALLOCATABLE , DIMENSION(:,:) :: buffer2_out
+#endif
 
   IF ( .NOT. op%done ) &
     CALL ERROR("Ctqmcoffdiag_getResult : Simulation not run                ")
@@ -2991,8 +3068,8 @@ include 'mpif.h'
 
 !#ifdef CTCtqmcoffdiag_CHECK
   IF ( op%opt_check .GT. 0 ) THEN
-    op%errorImpurity = ImpurityOperator_getError(op%Impurity) * inv_flavors 
-    op%errorBath     = BathOperatoroffdiag_getError    (op%Bath    ) * inv_flavors 
+    op%errorImpurity = ImpurityOperator_getError(op%Impurity) * inv_flavors
+    op%errorBath     = BathOperatoroffdiag_getError    (op%Bath    ) * inv_flavors
   END IF
 !#endif
 
@@ -3006,15 +3083,15 @@ include 'mpif.h'
     MALLOC(beta,(1:op%samples+1,1:flavors))
   END IF
 
-  IF ( op%have_MPI .EQV. .TRUE.) THEN 
+  IF ( op%have_MPI .EQV. .TRUE.) THEN
     sp1   = 0
-    spAll = sp1 + flavors + 6 
+    spAll = sp1 + flavors + 6
 
 !#ifdef CTCtqmcoffdiag_ANALYSIS
     IF ( op%opt_analysis .EQ. 1 ) &
-      spAll = spAll + 3*sp1 
+      spAll = spAll + 3*sp1
     IF ( op%opt_order .GT. 0 ) &
-      spAll = spAll + op%opt_order 
+      spAll = spAll + op%opt_order
     IF ( op%opt_noise .EQ. 1 ) &
       spAll = spAll + 2*(op%samples + 1)
 !#endif
@@ -3023,7 +3100,7 @@ include 'mpif.h'
     MALLOC(buffer,(1:spAll,1:MAX(2,flavors)))
   END IF
 
-!  op%seg_added    = op%seg_added    * inv_flavors 
+!  op%seg_added    = op%seg_added    * inv_flavors
 !  op%seg_removed  = op%seg_removed  * inv_flavors
 !  op%seg_sign     = op%seg_sign     * inv_flavors
 !  op%anti_added   = op%anti_added   * inv_flavors
@@ -3050,22 +3127,22 @@ include 'mpif.h'
     IF ( op%opt_analysis .EQ. 1 ) THEN
       op%measCorrelation (:,1,iflavor) = op%measCorrelation  (:,1,iflavor) &
                                     / SUM(op%measCorrelation (:,1,iflavor)) &
-                                    * op%inv_dt 
+                                    * op%inv_dt
       op%measCorrelation (:,2,iflavor) = op%measCorrelation  (:,2,iflavor) &
                                     / SUM(op%measCorrelation (:,2,iflavor)) &
-                                    * op%inv_dt 
+                                    * op%inv_dt
       op%measCorrelation (:,3,iflavor) = op%measCorrelation  (:,3,iflavor) &
                                     / SUM(op%measCorrelation (:,3,iflavor)) &
-                                    * op%inv_dt 
+                                    * op%inv_dt
     END IF
 !#endif
     IF ( op%opt_noise .EQ. 1 ) THEN
       TabX(1) = DBLE(op%modNoise2)
       TabX(2) = DBLE(op%modNoise1)
       DO itau = 1, op%samples+1
-        op%measNoiseG(itau,iflavor,2)%vec = -op%measNoiseG(itau,iflavor,2)%vec*op%inv_dt &  
+        op%measNoiseG(itau,iflavor,2)%vec = -op%measNoiseG(itau,iflavor,2)%vec*op%inv_dt &
                                            /(op%beta*DBLE(op%modNoise2))
-        op%measNoiseG(itau,iflavor,1)%vec = -op%measNoiseG(itau,iflavor,1)%vec*op%inv_dt &  
+        op%measNoiseG(itau,iflavor,1)%vec = -op%measNoiseG(itau,iflavor,1)%vec*op%inv_dt &
                                            /(op%beta*DBLE(op%modNoise1))
         n2 = op%measNoiseG(itau,iflavor,2)%tail
         TabY(1) = Stat_deviation(op%measNoiseG(itau,iflavor,2)%vec(1:n2))!*SQRT(n2/(n2-1))
@@ -3100,7 +3177,7 @@ include 'mpif.h'
   MALLOC(buffer2s,(1:sizeoper,flavors,flavors))
   MALLOC(fullempty,(2,flavors))
       !sui!write(6,*) "greens1"
-  IF ( op%have_MPI .EQV. .TRUE. ) THEN 
+  IF ( op%have_MPI .EQV. .TRUE. ) THEN
       !sui!write(6,*) "greens2"
     fullempty=0.d0
     buffer2 = op%Greens%oper
@@ -3124,6 +3201,11 @@ include 'mpif.h'
 
   IF ( op%opt_histo .GT. 0 ) THEN
     op%occup_histo_time(:) = op%occup_histo_time(:) / INT(op%sweeps/op%measurements)
+    op%occupconfig(:) = op%occupconfig(:) / INT(op%sweeps/op%measurements)
+    op%suscep(:,:) = op%suscep(:,:) / INT(op%sweeps/op%measurements)
+    op%chi(:,:) = op%chi(:,:) / INT(op%sweeps/op%measurements)
+    op%chicharge(:,:) = op%chicharge(:,:) / INT(op%sweeps/op%measurements)
+    op%ntot(:) = op%ntot(:) / INT(op%sweeps/op%measurements)
   END IF
 ! HISTO before MPI_SUM
 !  write(6,*) "=== Histogram of occupations for complete simulation 3 ====",INT(op%sweeps/op%measurements)
@@ -3145,13 +3227,22 @@ include 'mpif.h'
     FREEIF(freqs)
     MALLOC(freqs,(1:op%size*n1))
     freqs = 0.d0
-    freqs(n1*op%rank+1:n1*(op%rank+1)) = op%measNoise(1)%vec(1:n1) 
     counts(:) = n1
     displs(:) = (/ ( iflavor*n1, iflavor=0, op%size-1 ) /)
 #ifdef HAVE_MPI
+#if defined HAVE_MPI2_INPLACE
+    freqs(n1*op%rank+1:n1*(op%rank+1)) = op%measNoise(1)%vec(1:n1)
     CALL MPI_ALLGATHERV(MPI_IN_PLACE, 0, MPI_DOUBLE_PRECISION, &
                         freqs, counts, displs, &
                         MPI_DOUBLE_PRECISION, op%MY_COMM, ierr)
+#else
+    MALLOC(freqs_buf,(n1))
+    freqs_buf(1:n2)=op%measNoise(2)%vec(1:n1)
+    CALL MPI_ALLGATHERV(freqs_buf, n1, MPI_DOUBLE_PRECISION, &
+                        freqs, counts, displs, &
+                        MPI_DOUBLE_PRECISION, op%MY_COMM, ierr)
+    FREE(freqs_buf)
+#endif
 #endif
     n1 = op%size*n1
     CALL Vector_setSize(op%measNoise(1),n1)
@@ -3160,13 +3251,22 @@ include 'mpif.h'
     FREE(freqs)
     MALLOC(freqs,(1:op%size*n2))
     freqs = 0.d0
-    freqs(n2*op%rank+1:n2*(op%rank+1)) = op%measNoise(2)%vec(1:n2) 
     counts(:) = n2
     displs(:) = (/ ( iflavor*n2, iflavor=0, op%size-1 ) /)
 #ifdef HAVE_MPI
-    CALL MPI_ALLGATHERV(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, &
+#if defined HAVE_MPI2_INPLACE
+    freqs(n2*op%rank+1:n2*(op%rank+1)) = op%measNoise(2)%vec(1:n2)
+    CALL MPI_ALLGATHERV(MPI_IN_PLACE, 0, MPI_DOUBLE_PRECISION, &
                         freqs, counts, displs, &
                         MPI_DOUBLE_PRECISION, op%MY_COMM, ierr)
+#else
+    MALLOC(freqs_buf,(n2))
+    freqs_buf(1:n2)=op%measNoise(2)%vec(1:n2)
+    CALL MPI_ALLGATHERV(freqs_buf, n2, MPI_DOUBLE_PRECISION, &
+                        freqs, counts, displs, &
+                        MPI_DOUBLE_PRECISION, op%MY_COMM, ierr)
+    FREE(freqs_buf)
+#endif
 #endif
     n2 = op%size*n2
     CALL Vector_setSize(op%measNoise(2),n2)
@@ -3263,8 +3363,8 @@ include 'mpif.h'
   CALL ImpurityOperator_getErrorOverlap(op%Impurity,op%measDE)
   ! Add the difference between true calculation and quick calculation of the
   ! last sweep overlap to measDE(2,2)
-  !op%measDE = op%measDE * DBLE(op%measurements) 
-  IF ( op%have_MPI .EQV. .TRUE. ) THEN 
+  !op%measDE = op%measDE * DBLE(op%measurements)
+  IF ( op%have_MPI .EQV. .TRUE. ) THEN
     IF ( op%opt_analysis .EQ. 1 ) THEN
       buffer(last+1:last+sp1,:) = op%measCorrelation(:,1,:)
       last = last + sp1
@@ -3285,12 +3385,12 @@ include 'mpif.h'
     END IF
 !  op%measDE(2,2) = a*EXP(b*LOG(DBLE(op%sweeps*op%size)))
     buffer(spall-(flavors+5):spAll-6,:) = op%measDE(:,:)
-!    buffer(spAll  ,1) = op%seg_added   
-!    buffer(spAll-1,1) = op%seg_removed 
-!    buffer(spAll-2,1) = op%seg_sign    
-!    buffer(spAll  ,2) = op%anti_added  
+!    buffer(spAll  ,1) = op%seg_added
+!    buffer(spAll-1,1) = op%seg_removed
+!    buffer(spAll-2,1) = op%seg_sign
+!    buffer(spAll  ,2) = op%anti_added
 !    buffer(spAll-1,2) = op%anti_removed
-!    buffer(spAll-2,2) = op%anti_sign   
+!    buffer(spAll-2,2) = op%anti_sign
     buffer(spAll  ,1) = op%stats(1)
     buffer(spAll-1,1) = op%stats(2)
     buffer(spAll-2,1) = op%stats(3)
@@ -3303,37 +3403,60 @@ include 'mpif.h'
     buffer(spAll-4,2) = b
 !#ifdef CTCtqmcoffdiag_CHECK
     buffer(spAll-5,1) = op%errorImpurity
-    buffer(spAll-5,2) = op%errorBath 
+    buffer(spAll-5,2) = op%errorBath
     signvaluemeassum = 0
 !#endif
 
 #ifdef HAVE_MPI
-   !write(6,*) "bufferbefore",buffer(1,1)
+#if defined HAVE_MPI2_INPLACE
     CALL MPI_ALLREDUCE(MPI_IN_PLACE, buffer, spAll*flavors, &
                      MPI_DOUBLE_PRECISION, MPI_SUM, op%MY_COMM, ierr)
-   !write(6,*) "bufferafter",buffer(1,1)
-   ! CALL MPI_ALLREDUCE(MPI_IN_PLACE, buffer2, sp1*flavors*flavors, &
-   !                  MPI_DOUBLE_PRECISION, MPI_SUM, op%MY_COMM, ierr)
-    CALL MPI_ALLREDUCE( buffer2, buffer2s, sizeoper*flavors*flavors, &
+#else
+    MALLOC(buffer2_out,(spAll,flavors))
+    CALL MPI_ALLREDUCE(buffer, buffer2_out, spAll*flavors, &
                      MPI_DOUBLE_PRECISION, MPI_SUM, op%MY_COMM, ierr)
-   !write(6,*) "justaftermpi",op%Greens%oper(1,1,1) ,buffer2s(1,1,1)
-    CALL MPI_ALLREDUCE(MPI_IN_PLACE, op%runTime, 1, MPI_DOUBLE_PRECISION, MPI_MAX, &
-             op%MY_COMM, ierr)
-    CALL MPI_ALLREDUCE(op%Greens%signvaluemeas, signvaluemeassum , 1, MPI_DOUBLE_PRECISION, MPI_SUM, &
-             op%MY_COMM, ierr)
+    buffer(1:spAll,1:flavors)=buffer2_out(1:spAll,1:flavors)
+    FREE(buffer2_out)
+#endif
+    CALL MPI_ALLREDUCE(buffer2, buffer2s, sizeoper*flavors*flavors, &
+                     MPI_DOUBLE_PRECISION, MPI_SUM, op%MY_COMM, ierr)
+    CALL MPI_ALLREDUCE([op%runtime], arr, 1, MPI_DOUBLE_PRECISION, MPI_MAX, op%MY_COMM, ierr)
+    op%runtime=arr(1)
+    CALL MPI_ALLREDUCE([op%Greens%signvaluemeas], arr, 1, MPI_DOUBLE_PRECISION, MPI_SUM, op%MY_COMM, ierr)
+    signvaluemeassum=arr(1)
+#if defined HAVE_MPI2_INPLACE
     IF ( op%opt_histo .GT. 0 ) THEN
-      CALL MPI_ALLREDUCE(MPI_IN_PLACE, op%occup_histo_time, flavors+1, MPI_DOUBLE_PRECISION, MPI_SUM, &
+      CALL MPI_ALLREDUCE(MPI_IN_PLACE,op%occup_histo_time, flavors+1, MPI_DOUBLE_PRECISION, MPI_SUM, &
              op%MY_COMM, ierr)
+      CALL MPI_ALLREDUCE(MPI_IN_PLACE, op%occupconfig, 2**flavors, MPI_DOUBLE_PRECISION, MPI_SUM, &
+               op%MY_COMM, ierr)
+      CALL MPI_ALLREDUCE(MPI_IN_PLACE, op%suscep, 3*op%samples, MPI_DOUBLE_PRECISION, MPI_SUM, &
+               op%MY_COMM, ierr)
+      CALL MPI_ALLREDUCE(MPI_IN_PLACE, op%chi, 3*op%samples, MPI_DOUBLE_PRECISION, MPI_SUM, &
+               op%MY_COMM, ierr)
+      CALL MPI_ALLREDUCE(MPI_IN_PLACE, op%chicharge, 3*op%samples, MPI_DOUBLE_PRECISION, MPI_SUM, &
+               op%MY_COMM, ierr)
+      CALL MPI_ALLREDUCE(MPI_IN_PLACE, op%ntot, 3, MPI_DOUBLE_PRECISION, MPI_SUM, &
+               op%MY_COMM, ierr)
     END IF
     CALL MPI_ALLREDUCE(MPI_IN_PLACE, sumh, 1, MPI_DOUBLE_PRECISION, MPI_SUM, &
+              op%MY_COMM, ierr)
+#else
+      MALLOC(buffer1_out,(flavors+1))
+      CALL MPI_ALLREDUCE(op%occup_histo_time, buffer1_out, flavors+1, MPI_DOUBLE_PRECISION, MPI_SUM, &
              op%MY_COMM, ierr)
+      op%occup_histo_time(1:flavors+1) =buffer1_out(1:flavors+1)
+      FREE(buffer1_out)
+#endif
+    CALL MPI_ALLREDUCE([sumh], arr, 1, MPI_DOUBLE_PRECISION, MPI_SUM, op%MY_COMM, ierr)
+    sumh=arr(1)
     IF ( op%opt_order .GT. 0 ) THEN
       CALL MPI_ALLREDUCE(op%meas_fullemptylines, fullempty, 2*flavors, MPI_DOUBLE_PRECISION, MPI_SUM, &
                op%MY_COMM, ierr)
     ENDIF
 #endif
 
-  
+
     buffer          = buffer * inv_size
     op%measDE(:,:)  = buffer(spall-(flavors+5):spAll-6,:)
 !    op%seg_added    = buffer(spAll  ,1)
@@ -3350,11 +3473,11 @@ include 'mpif.h'
     op%stats(6)    = buffer(spAll-2,2)
     op%swap         = buffer(spAll-3,1)
     op%modGlobalMove(2) = NINT(buffer(spAll-3,2))
-    a               = buffer(spAll-4,1) 
+    a               = buffer(spAll-4,1)
     b               = buffer(spAll-4,2)
 !!#ifdef CTCtqmcoffdiag_CHECK
-    op%errorImpurity= buffer(spAll-5,1) 
-    op%errorBath    = buffer(spAll-5,2)   
+    op%errorImpurity= buffer(spAll-5,1)
+    op%errorBath    = buffer(spAll-5,2)
 !#endif
 
    ! DO iflavor = 1, flavors
@@ -3377,11 +3500,11 @@ include 'mpif.h'
    !write(6,*) "aftermpi",op%Greens%oper(1,1,1) ,buffer2s(1,1,1)
     last = sp1
     IF ( op%opt_analysis .EQ. 1 ) THEN
-      op%measCorrelation(:,1,:) = buffer(last+1:last+sp1,:) 
+      op%measCorrelation(:,1,:) = buffer(last+1:last+sp1,:)
       last = last + sp1
-      op%measCorrelation(:,2,:) = buffer(last+1:last+sp1,:) 
+      op%measCorrelation(:,2,:) = buffer(last+1:last+sp1,:)
       last = last + sp1
-      op%measCorrelation(:,3,:) = buffer(last+1:last+sp1,:) 
+      op%measCorrelation(:,3,:) = buffer(last+1:last+sp1,:)
       last = last + sp1
     END IF
     IF ( op%opt_order .GT. 0 ) THEN
@@ -3405,14 +3528,18 @@ include 'mpif.h'
   FREE(fullempty)
 
   IF ( op%opt_spectra .GE. 1 ) THEN
+!PROBLEM eos_gnu_13.2_mpich . %endDensity was introduced throughout
     endDensity = SIZE(op%density,2)
+!   endDensity=op%endDensity
+!ENDPROBLEM
+
     IF ( op%density(1,endDensity) .EQ. -1.d0 ) &
       endDensity = endDensity - 1
     CALL FFTHyb_init(FFTmrka,endDensity,DBLE(op%thermalization)/DBLE(op%measurements*op%opt_spectra))
-    ! Not very Beauty 
+    ! Not very Beauty
     MALLOC(freqs,(1:FFTmrka%size/2))
     DO iflavor = 1, flavors
-      ! mean value is removed to supress the continue composent 
+      ! mean value is removed to supress the continue composent
       CALL FFTHyb_setData(FFTmrka,op%density(iflavor,1:endDensity)/op%beta+op%Greens%oper(op%samples+1,iflavor,iflavor))
       CALL FFTHyb_run(FFTmrka,1)
       CALL FFTHyb_getData(FFTmrka,endDensity,op%density(iflavor,:),freqs)
@@ -3441,7 +3568,135 @@ include 'mpif.h'
     enddo
        write(op%ostream,'(a,f10.4)') " all" , sumh
     write(op%ostream,*) "================================="
+
+    MALLOC(occ,(2**op%flavors,1:flavors))
+#ifdef FC_LLVM
+    MALLOC(occtot,(2**op%flavors) )
+    MALLOC(spintot,(2**op%flavors) )
+#else
+    MALLOC(occtot,(2**op%flavors))
+    MALLOC(spintot,(2**op%flavors))
+#endif
+    do n1=1,2**op%flavors
+      ! Compute occupations of individual Orbitals
+      n3=n1-1
+      occtot(n1)=0
+      spintot(n1)=0
+      signe=1
+      do n2=1,op%flavors
+        remainder=modulo(n3,2)
+        quotient=(n3-remainder)/2
+        occ(n1,n2)=remainder
+        n3=quotient
+        occtot(n1)=occtot(n1)+occ(n1,n2)
+        if(n2>=7) signe =-1
+        !if(n2>=7) signe =0
+        spintot(n1)=spintot(n1)+occ(n1,n2)*signe
+      enddo
+      op%occupconfig(n1)=op%occupconfig(n1)/float(nbprocs)
+    enddo
+
+    write(op%ostream,*) "=== Histogram of occupations of configurations for complete simulation  ===="
+    sumh=0
+    if(op%flavors==14) then
+      do n1=1,2**op%flavors
+         write(op%ostream,'(i4,14i2,f20.2)')  n1, (occ(n1,n2),n2=1,op%flavors),op%occupconfig(n1)
+         sumh=sumh+op%occupconfig(n1)
+      enddo
+    else if(op%flavors==10) then
+      do n1=1,2**op%flavors
+         write(op%ostream,'(i4,10i2,f20.2)')  n1, (occ(n1,n2),n2=1,op%flavors),op%occupconfig(n1)
+         sumh=sumh+op%occupconfig(n1)
+      enddo
+    end if
+    write(op%ostream,'(a,f10.4)') " all" , sumh
+
+    sumtot=0
+    do nelec=0,10
+      spinmin=modulo(nelec,2)
+      if(nelec<=5) spinmax=nelec
+      if(nelec>=6) spinmax=10-nelec
+      spinmax=6
+      dspin=1
+      write(op%ostream,*) "=== Histogram of occupations of configurations for total number of electrons",nelec
+      do spin=spinmin,spinmax,dspin
+        sumh=0
+        do n1=1,2**op%flavors
+          if(occtot(n1)==nelec.and.abs(spintot(n1))==spin) then
+            sumh=sumh+op%occupconfig(n1)
+            if(op%flavors==14) then
+              write(op%ostream,'(i8,14i2,a,i2,i3,f10.4)')  n1,(occ(n1,n2),n2=1,op%flavors),"  ",occtot(n1),spintot(n1),&
+& op%occupconfig(n1)
+            else if(op%flavors==10) then
+              write(op%ostream,'(i8,10i2,a,i2,i3,f10.4)')  n1,(occ(n1,n2),n2=1,op%flavors),"  ",occtot(n1),spintot(n1),&
+ op%occupconfig(n1)
+            end if
+          endif
+        enddo
+        write(op%ostream,'(a,i4,a,i4,a,f10.4)') " === Sum of weights for",nelec," electrons and spin",spin," is ",sumh
+        sumtot=sumtot+sumh
+      enddo
+    enddo
+    write(op%ostream,'(a,f10.4)') "Full sum is",sumtot
+
+   FREE(occ)
+    FREE(occtot)
+    FREE(spintot)
+  !END IF
+
+    !==============================
+    ! Write Susceptibilities
+    !==============================
+    if(Iatom .lt. 10) then
+       write(atomnb, '("0",i1)') Iatom
+    else
+       write(atomnb, '(i2)') Iatom
+    end if
+    ! Local Magnetic Susceptibility
+    if(op%opt_histo .gt. 1) then
+      ! Scalar
+      if(op%nspinor .eq. 1) then
+        open (unit=735,file=trim(fname)//'_LocalSpinSuscept_atom_'//atomnb//'.dat',status='unknown',form='formatted')
+        write(735,*) '#Tau Total t2g eg'
+        do n1=1,op%samples
+          op%suscep(:,n1)=op%suscep(:,n1)/float(nbprocs)/float(op%samples)
+          write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (n1-1)*op%beta/op%samples,(op%suscep(n2,n1),n2=1,3)
+        enddo
+        !add tau=beta
+        write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (op%samples)*op%beta/op%samples,(op%suscep(n2,1),n2=1,3)
+
+      else
+        ! SOC
+        open (unit=735,file=trim(fname)//'_LocalMagnSuscept_atom_'//atomnb//'.dat',status='unknown',form='formatted')
+        write(735,*) '#Tau Total Orbital Spin'
+        do n1=1,op%samples
+          op%chi(:,n1) = op%chi(:,n1)/float(nbprocs)/float(op%samples)
+          write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (n1-1)*op%beta/op%samples,(op%chi(n2,n1),n2=1,3)
+        end do
+        !add tau=beta
+        write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (op%samples)*op%beta/op%samples,(op%chi(n2,1),n2=1,3)
+      endif
+    close(unit=735)
+    endif
+
+    ! Local Charge Susceptiblity
+    if(op%opt_histo .gt. 2) then
+      op%ntot(:) = op%ntot(:)/float(nbprocs)/float(op%samples)
+      open (unit=735,file=trim(fname)//'_LocalChargeSuscept_atom_'//atomnb//'.dat',status='unknown',form='formatted')
+      write(735,*) '#Tau Total <ntot>'
+      do n1=1,op%samples
+        op%chicharge(1,n1)=(op%chicharge(1,n1)/float(nbprocs)/float(op%samples))-(op%ntot(1)*op%ntot(1))
+        !op%chicharge(2,n1)=(op%chicharge(2,n1)/float(nbprocs)/float(op%samples))-(op%ntot(2)*op%ntot(2))
+        !op%chicharge(3,n1)=(op%chicharge(3,n1)/float(nbprocs)/float(op%samples))-(op%ntot(3)*op%ntot(3))
+        write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (n1-1)*op%beta/op%samples,(op%chicharge(1,n1)),op%ntot(1)
+      enddo
+      !add tau=beta
+      write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (op%samples)*op%beta/op%samples,(op%chicharge(1,1)),op%ntot(1)
+      close(unit=735)
+    endif
+
   END IF
+
 
 END SUBROUTINE Ctqmcoffdiag_getResult
 !!***
@@ -3454,7 +3709,7 @@ END SUBROUTINE Ctqmcoffdiag_getResult
 !!  optionnaly symmetrize the green functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3491,7 +3746,7 @@ SUBROUTINE Ctqmcoffdiag_symmetrizeGreen(op, syms)
 !    CALL WARNALL("Ctqmcoffdiag_symmetrizeGreen : wrong opt_sym -> not symmetrizing")
 !    RETURN
 !  END IF
-! 
+!
 !  MALLOC(green_tmp,(1:op%samples+1,flavors))
 !  green_tmp(:,:) = 0.d0
 !  MALLOC(n_tmp,(1:flavors))
@@ -3521,7 +3776,7 @@ END SUBROUTINE Ctqmcoffdiag_symmetrizeGreen
 !!  Get the full green functions in time and/or frequency
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3554,7 +3809,7 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
   INTEGER                            :: iflavor3
   INTEGER                            :: flavors,tail
   INTEGER                            :: ifreq,itime
-  DOUBLE PRECISION :: u1 
+  DOUBLE PRECISION :: u1
   DOUBLE PRECISION :: u2
   DOUBLE PRECISION :: u3
   DOUBLE PRECISION :: Un
@@ -3573,15 +3828,15 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
       Un = op%Impurity%mat_U(iflavor2,iflavor1) * op%measN(1,iflavor2)
 !      Un = op%Impurity%mat_U(iflavor2,iflavor1) * (op%Greens%oper(1,iflavor2,iflavor2) + 1.d0)
       !write(6,*) "forsetmoments",iflavor1,iflavor2,(op%Greens%oper(1,iflavor2,iflavor2) + 1.d0), Un
-      u1 = u1 + Un 
-      u2 = u2 + Un*op%Impurity%mat_U(iflavor2,iflavor1) 
+      u1 = u1 + Un
+      u2 = u2 + Un*op%Impurity%mat_U(iflavor2,iflavor1)
       DO iflavor3 = 1, flavors
         IF ( iflavor3 .EQ. iflavor2 .OR. iflavor3 .EQ. iflavor1 ) CYCLE
         UUnn = (op%Impurity%mat_U(iflavor2,iflavor1)*op%Impurity%mat_U(iflavor3,iflavor1)) * &
-&                                                    op%measDE(iflavor2,iflavor3) 
-        u2 = u2 + UUnn 
+&                                                    op%measDE(iflavor2,iflavor3)
+        u2 = u2 + UUnn
       END DO
-    END DO  
+    END DO
      ! write(6,*) "u1,u2",u1,u2
 
     DO iflavor1b = 1, flavors
@@ -3596,7 +3851,7 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
     DO iflavor1 = 1, flavors
       DO iflavor2 = 1, flavors
         Gtau(1:op%samples,iflavor1,iflavor2) = op%Greens%oper(1:op%samples,iflavor1,iflavor2)
-      END DO  
+      END DO
     END DO ! iflavor1
   END IF
 ! !--------- Write Occupation matrix before Gtau
@@ -3624,7 +3879,7 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
     DO iflavor1 = 1, flavors
       DO iflavor1b = 1, flavors
        !call nfourier3(op%Greens%oper(1:op%samples,iflavor1,iflavor1b),Gw(1:op%samples,iflavor1,iflavor1b),iflavor1==iflavor1b,op%Greens%samples,op%Greens%samples-1,op%Greens%beta,1.d0,op%Greens%Mk(iflavor1,iflavor1b,1),op%Greens%Mk(iflavor1,iflavor1b,2),op%Greens%Mk(iflavor1,iflavor1b,3))
-      END DO  
+      END DO
     END DO ! iflavor1
 !    ============== write Gomega_nd.dat
     if(op%rank==0) then
@@ -3632,8 +3887,8 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
     WRITE(cflavors,'(I4)') 2*(flavors*flavors+1)
     string = '(1x,'//TRIM(ADJUSTL(cflavors))//'E15.5)'
     !write(6,*) " op%Greens%Wmax", op%Greens%Wmax
-    do  iflavor1=1, flavors 
-      do  iflavor1b=1, flavors 
+    do  iflavor1=1, flavors
+      do  iflavor1b=1, flavors
     write(44,*) "#op%Greens%Mk(iflavor1,iflavor2,1",op%Greens%Mk(iflavor1,iflavor1b,:)
         DO ifreq = 1, op%samples
 !      !write(6,string) (DBLE(ifreq)*2-1)*3.1415/op%Greens%beta, &
@@ -3642,10 +3897,10 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
         iw=aimag(Gw(ifreq,op%flavors,op%flavors+1))
          WRITE(44,string) aimag(Gw(ifreq,op%flavors,op%flavors+1)),&
          real(Gw(ifreq,iflavor1,iflavor1b)),aimag(Gw(ifreq,iflavor1,iflavor1b)),&
-            ( -op%Greens%Mk(iflavor1,iflavor1b,2) )/(iw*iw) , (op%Greens%Mk(iflavor1,iflavor1b,1))/iw!-op%Greens%Mk(iflavor1,iflavor1b,3)/(iw*iw))/iw 
+            ( -op%Greens%Mk(iflavor1,iflavor1b,2) )/(iw*iw) , (op%Greens%Mk(iflavor1,iflavor1b,1))/iw!-op%Greens%Mk(iflavor1,iflavor1b,3)/(iw*iw))/iw
       !   WRITE(102,*) aimag(Gw(ifreq,op%flavors,op%flavors+1)), (op%Greens%Mk(iflavor1,iflavor1b,1))/iw,op%Greens%Mk(iflavor1,iflavor1b,1),iw
         END DO
-         WRITE(44,*) 
+         WRITE(44,*)
       END DO
     END DO
     close(44)
@@ -3655,13 +3910,13 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
 !================================================
        !!write(6,*) "present gw", present(gw)
   IF ( PRESENT( Gw ) ) THEN
-     !!write(6,*) "size gw",SIZE(Gw,DIM=2) ,flavors+1 
+     !!write(6,*) "size gw",SIZE(Gw,DIM=2) ,flavors+1
     IF ( SIZE(Gw,DIM=3) .EQ. flavors+1 ) THEN
      ! CALL GreenHyboffdiag_forFourier(op%Greens, Gomega=Gw, omega=Gw(:,op%flavors,op%flavors+1))
       CALL GreenHyboffdiag_forFourier(op%Greens, Gomega=Gw, omega=Gw(:,op%flavors,op%flavors+1))
       !write(6,*) "1"
       !IF ( op%rank .EQ. 0 ) write(20,*) Gw(:,iflavor1)
-    ELSE IF ( SIZE(Gw,DIM=3) .EQ. flavors ) THEN  
+    ELSE IF ( SIZE(Gw,DIM=3) .EQ. flavors ) THEN
       CALL GreenHyboffdiag_forFourier(op%Greens,Gomega=Gw)
       !write(6,*) "2"
     ELSE
@@ -3681,10 +3936,10 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
   WRITE(cflavors,'(I4)') 2*(flavors*flavors+1)
   string = '(1x,'//TRIM(ADJUSTL(cflavors))//'E15.5)'
   !write(6,*) " op%Greens%Wmax", op%Greens%Wmax
-  do  iflavor1=1, flavors 
-    do  iflavor1b=1, flavors 
+  do  iflavor1=1, flavors
+    do  iflavor1b=1, flavors
   write(44,*) "#op%Greens%Mk(iflavor1,iflavor2,1",op%Greens%Mk(iflavor1,iflavor1b,:)
-      DO ifreq = 1, SIZE(Gw,1)    
+      DO ifreq = 1, SIZE(Gw,1)
 !    !write(6,string) (DBLE(ifreq)*2-1)*3.1415/op%Greens%beta, &
 !    (/ ((real(Gw(ifreq,iflavor1,iflavor1b)),imag(Gw(ifreq,iflavor1,iflavor1b)), iflavor1=1, flavors),iflavor1b=1,flavors) /)
 !    WRITE(44,string) (DBLE(ifreq)*2.d0-1.d0)*3.1415926/op%Greens%beta, &
@@ -3692,9 +3947,9 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
        WRITE(44,string) aimag(Gw(ifreq,op%flavors,op%flavors+1)),&
        real(Gw(ifreq,iflavor1,iflavor1b)),aimag(Gw(ifreq,iflavor1,iflavor1b)),&
           ( -op%Greens%Mk(iflavor1,iflavor1b,2) )/(iw*iw) , &
-&          (op%Greens%Mk(iflavor1,iflavor1b,1)-op%Greens%Mk(iflavor1,iflavor1b,3)/(iw*iw))/iw 
+&          (op%Greens%Mk(iflavor1,iflavor1b,1)-op%Greens%Mk(iflavor1,iflavor1b,3)/(iw*iw))/iw
       END DO
-       WRITE(44,*) 
+       WRITE(44,*)
     END DO
   END DO
   endif
@@ -3704,7 +3959,7 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
 
 
 !  ==============================
-  ! --- Initialize F_tmp 
+  ! --- Initialize F_tmp
   !write(6,*) "10"
 
   IF ( op%have_MPI .EQV. .TRUE. ) THEN
@@ -3719,7 +3974,7 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
   !write(6,*) "11"
 !  CALL GreenHyboffdiag_setOperW(F_tmp,Gw)
 
-  tail = op%samples 
+  tail = op%samples
   F_tmp%Wmax=op%samples ! backFourier only works for linear freq: calculation of A and etc..
   MALLOC(F_tmp%oper_w,(1:tail,op%flavors,op%flavors))
   F_tmp%oper_w(1:tail,1:F_tmp%nflavors,1:F_tmp%nflavors) = Gw(1:tail,1:F_tmp%nflavors,1:F_tmp%nflavors)
@@ -3738,8 +3993,8 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
   if(3==4) then
 !================================================
     OPEN(UNIT=3337, FILE="Gomega_nd2.dat")
-    do  iflavor1=1, flavors 
-      do  iflavor1b=1, flavors 
+    do  iflavor1=1, flavors
+      do  iflavor1b=1, flavors
         do  ifreq=1, tail
 !         write(3337,*) (2.d0*DBLE(ifreq)-1.d0) * 3.1415/op%beta,real(F_tmp%oper_w(ifreq,iflavor1,iflavor1b)),&
 !   &     imag(F_tmp%oper_w(ifreq,iflavor1,iflavor1b))
@@ -3748,9 +4003,9 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
 
       !    omega=(2.d0*DBLE(ifreq)-1.d0) * 3.1415/op%beta
  !        F_tmp%oper_w(ifreq,iflavor1,iflavor1b)=0.1**2/Gw(ifreq,op%flavors,op%flavors+1)
-        enddo 
+        enddo
         write(3337,*)
-      enddo 
+      enddo
     enddo
     close(3337)
 !================================================
@@ -3793,7 +4048,7 @@ END SUBROUTINE Ctqmcoffdiag_getGreen
 !!  get double occupation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3847,7 +4102,7 @@ END SUBROUTINE Ctqmcoffdiag_getD
 !!  get interaction energy and noise on it
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3872,7 +4127,7 @@ SUBROUTINE Ctqmcoffdiag_getE(op,E,noise)
   DOUBLE PRECISION, INTENT(OUT) :: E
   DOUBLE PRECISION, INTENT(OUT) :: Noise
 
-  E = op%measDE(1,1)  
+  E = op%measDE(1,1)
   Noise = op%a_Noise*(DBLE(op%sweeps)*DBLE(op%size))**op%b_Noise
 END SUBROUTINE Ctqmcoffdiag_getE
 !!***
@@ -3885,7 +4140,7 @@ END SUBROUTINE Ctqmcoffdiag_getE
 !!  print different functions computed during the simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3937,7 +4192,7 @@ END SUBROUTINE Ctqmcoffdiag_printAll
 !!  print ctqmc statistics
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4040,12 +4295,12 @@ SUBROUTINE Ctqmcoffdiag_printQMC(op)
   WRITE(ostream,'(A28,F8.4,A3,F7.4)') "Noise                 [U] : ", op%a_Noise, " x^", op%b_Noise
   WRITE(ostream,'(A28,E10.2)')  "Niquist puls.     [/beta] : ", ACOS(-1.d0)*op%inv_dt
   WRITE(ostream,'(A28,E22.14)') "Max Acc. Epot Error   [U] : ", op%measDE(2,2)/(op%beta*op%modNoise1*2.d0)*sweeps
-  
+
   !WRITE(ostream,'(A28,F7.4,A3,F7.4,A4,E20.14)') "Noise            [G(tau)] : ", op%a_Noise(2), "x^", op%b_Noise(2), " -> ", &
                                                               !op%a_Noise(2)*(sweeps*DBLE(op%size))**op%b_Noise(2)
  !----- PERTURBATION ORDER------------------------------------------------------------------
-  IF ( op%opt_order .GT. 0 ) THEN 
-    write(ostream,*) 
+  IF ( op%opt_order .GT. 0 ) THEN
+    write(ostream,*)
     WRITE(a,'(I2)') op%flavors
     string = '(A28,'//TRIM(ADJUSTL(a))//'(1x,I3))'
     WRITE(ostream,string) "Perturbation orders       : ",(/ (MAXLOC(op%measPerturbation(:, iflavor))-1, iflavor=1, op%flavors) /)
@@ -4060,8 +4315,8 @@ SUBROUTINE Ctqmcoffdiag_printQMC(op)
   END IF
  !------------------------------------------------------------------------------------------
  !----- PERTURBATION ORDER------------------------------------------------------------------
-  IF ( op%opt_order .GT. 0 ) THEN 
-    write(ostream,*) 
+  IF ( op%opt_order .GT. 0 ) THEN
+    write(ostream,*)
     write(ostream,'(17x,a)') "Proportion of full and empty orbital for order 0"
     write(ostream,'(17x,30i10)') (iflavorbis,iflavorbis=1,op%flavors)
     write(ostream,'(18x,30a)') ("----------",iflavorbis=1,op%flavors)
@@ -4072,7 +4327,7 @@ SUBROUTINE Ctqmcoffdiag_printQMC(op)
   !CALL FLUSH(op%ostream)
   IF ( ABS(((op%stats(4) *invSweeps*100.d0) / (op%stats(5) *invSweeps*100.d0) - 1.d0)) .GE. 0.02d0 &
    .OR. ABS(((op%stats(1)*invSweeps*100.d0) / (op%stats(2)*invSweeps*100.d0) - 1.d0)) .GE. 0.02d0 ) &
-    THEN 
+    THEN
     CALL WARNALL("Ctqmcoffdiag_printQMC : bad statistic according to moves. Increase sweeps")
   END IF
   IF ( ABS(op%b_Noise+0.5)/0.5d0 .GE. 0.05d0 ) &
@@ -4092,7 +4347,7 @@ END SUBROUTINE Ctqmcoffdiag_printQMC
 !!  print green functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4179,7 +4434,7 @@ SUBROUTINE Ctqmcoffdiag_printGreen(op, oFileIn)
 !     WRITE(44,string) DBLE(itime-1)*dt, &
 !     & (op%Greens%oper(itime,iflavor,iflavor), iflavor=1, flavors)
     END DO
-      WRITE(43,*) 
+      WRITE(43,*)
   END IF
 !    DO iflavor = 1, flavors
 !      DO iflavor2 = 1, flavors
@@ -4187,7 +4442,7 @@ SUBROUTINE Ctqmcoffdiag_printGreen(op, oFileIn)
 !        do  itime=1,sp1
 !          write(4436,*) DBLE(itime-1)*dt,real(op%Greens%oper(itime,iflavor,iflavor2))
 !        enddo
-!          write(4436,*) 
+!          write(4436,*)
 !      END DO
 !    END DO
 !    close(4436)
@@ -4211,7 +4466,7 @@ END SUBROUTINE Ctqmcoffdiag_printGreen
 !!  print individual double occupancy
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4264,10 +4519,10 @@ END SUBROUTINE Ctqmcoffdiag_printD
 !!  Ctqmcoffdiag_printE
 !!
 !! FUNCTION
-!!  print energy and noise 
+!!  print energy and noise
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4322,7 +4577,7 @@ END SUBROUTINE Ctqmcoffdiag_printE
 !!  print perturbation order
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4364,7 +4619,7 @@ SUBROUTINE Ctqmcoffdiag_printPerturbation(op, oFileIn)
   ELSE
     OPEN(UNIT=oFile, FILE="Perturbation.dat")
   END IF
-    
+
   order        =  op%opt_order
   flavors      =  op%flavors
 
@@ -4387,7 +4642,7 @@ END SUBROUTINE Ctqmcoffdiag_printPerturbation
 !!  print correlation fonctions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4461,7 +4716,7 @@ END SUBROUTINE Ctqmcoffdiag_printCorrelation
 !!  print fourier transform of time evolution of number of electrons
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4508,7 +4763,10 @@ SUBROUTINE Ctqmcoffdiag_printSpectra(op, oFileIn)
   formatSpectra ='(1x,'//TRIM(ADJUSTL(a))//'ES22.14)'
   WRITE(oFile,*) "# freq[/hermalization] FFT"
 
+!PROBLEM eos_gnu_13.2_mpich . %endDensity was introduced throughout
   endDensity = SIZE(op%density,2)
+! endDensity=op%endDensity
+!ENDPROBLEM
   DO WHILE ( op%density(flavors+1,endDensity) .EQ. -1 )
     endDensity = endDensity -1
   END DO
@@ -4530,7 +4788,7 @@ END SUBROUTINE Ctqmcoffdiag_printSpectra
 !!  destroy and deallocate all variables
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4573,6 +4831,11 @@ SUBROUTINE Ctqmcoffdiag_destroy(op)
   FREEIF(op%measN)
   IF ( op%opt_histo .GT. 0 ) THEN
     FREEIF(op%occup_histo_time)
+    FREEIF(op%suscep)
+    FREEIF(op%occupconfig)
+    FREEIF(op%chi)
+    FREEIF(op%chicharge)
+    FREEIF(op%ntot)
   END IF
   FREEIF(op%measDE)
   FREEIF(op%mu)
@@ -4592,10 +4855,11 @@ SUBROUTINE Ctqmcoffdiag_destroy(op)
 !#endif
   op%ostream        = 0
   op%istream        = 0
- 
+
   op%sweeps         = 0
   op%thermalization = 0
   op%flavors        = 0
+! op%endDensity     = 0
   op%samples        = 0
   op%beta           = 0.d0
 !  op%seg_added      = 0.d0
@@ -4614,13 +4878,58 @@ SUBROUTINE Ctqmcoffdiag_destroy(op)
 END SUBROUTINE Ctqmcoffdiag_destroy
 !!***
 
+!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_setMagmom
+!! NAME
+!!  Ctqmcoffdiag_setMagmom
+!!
+!! FUNCTION
+!!  set the Magnetic moment matrix for susceptibility
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2013-2025 ABINIT group (F. Gendron)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+SUBROUTINE Ctqmcoffdiag_setMagmom(op,Magmom_orb, Magmom_spin, Magmom_tot)
+
+!Arguments ------------------------------------
+  TYPE(Ctqmcoffdiag), INTENT(INOUT) ::op
+  DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN) :: Magmom_orb
+  DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN) :: Magmom_spin
+  DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN) :: Magmom_tot
+!Local variables ------------------------------
+!  INTEGER :: iflavor1,iflavor2
+
+ ! do iflavor1=1,10
+ !   do iflavor2=1,10
+ !      if(iflavor1==iflavor2) THEN
+ !        write(6,*) iflavor1, iflavor2, Magmom(iflavor1,iflavor2)
+ !      end if
+ !   end do
+ ! end do
+
+  IF ( SIZE(Magmom_orb) .NE. op%flavors*op%flavors ) &
+    CALL ERROR("Ctqmcoffdiag_setU : Wrong Magnetic Moment matrix (size)        ")
+
+  CALL ImpurityOperator_setMagmommat(op%Impurity, Magmom_orb, Magmom_spin, Magmom_tot)
+
+END SUBROUTINE Ctqmcoffdiag_setMagmom
+!!***
+
 END MODULE m_Ctqmcoffdiag
 !!***
 
 #undef CTQMC_SLICE1
 #undef CTQMC_SLICE2
-#undef CTQMC_SEGME 
-#undef CTQMC_ANTIS 
-#undef CTQMC_ADDED 
-#undef CTQMC_REMOV 
-#undef CTQMC_DETSI 
+#undef CTQMC_SEGME
+#undef CTQMC_ANTIS
+#undef CTQMC_ADDED
+#undef CTQMC_REMOV
+#undef CTQMC_DETSI

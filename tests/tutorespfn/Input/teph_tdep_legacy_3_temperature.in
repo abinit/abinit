@@ -1,12 +1,13 @@
-1                  
-2                  
+1
+2
 temperature_3
-0.1                
-0.1                
-0 0.5              
-0 1000 50          
-8                  
-teph_tdep_legacy_3o_DS13_DDB 
+0.1
+0.1
+0 0.5
+0 1000 50
+8
+0.01563 0.12500 0.06250 0.09375 0.37500 0.18750 0.04688 0.09375
+teph_tdep_legacy_3o_DS13_DDB
 teph_tdep_legacy_3o_DS23_DDB
 teph_tdep_legacy_3o_DS33_DDB
 teph_tdep_legacy_3o_DS43_DDB

@@ -6,7 +6,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2022 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2025 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -321,7 +321,7 @@ logical        :: file_exists
 
 
 
-complex(dpc), allocatable :: seeds(:,:)
+complex(dp), allocatable :: seeds(:,:)
 
 ! *************************************************************************
 
@@ -612,23 +612,22 @@ end interface
 real(dp) :: compute_pole_contribution
 
 integer,       intent(in) :: nseeds, kmax
-complex(dpc),  intent(in) :: seeds(npw_k,nseeds)
+complex(dp),  intent(in) :: seeds(npw_k,nseeds)
 logical,       intent(in) :: debug
 
 ! local variables
 
 integer  :: mpi_communicator
 
-complex(dpc),allocatable :: local_seeds(:,:)
-
-complex(dpc),allocatable :: Lbasis(:,:)  ! array containing the Lanczos basis
-complex(dpc),allocatable :: alpha(:,:,:)
-complex(dpc),allocatable :: beta (:,:,:)
+complex(dp),allocatable :: local_seeds(:,:)
+complex(dp),allocatable :: Lbasis(:,:)  ! array containing the Lanczos basis
+complex(dp),allocatable :: alpha(:,:,:)
+complex(dp),allocatable :: beta (:,:,:)
 real(dp),    allocatable :: epsilon_eigenvalues(:)
 
 real(dp):: matrix_elements
 
-complex(dpc) :: cmplx_value
+complex(dp) :: cmplx_value
 integer :: l, s
 integer :: ierr
 

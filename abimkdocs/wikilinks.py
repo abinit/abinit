@@ -50,7 +50,8 @@ class WikiLinkExtension(Extension):
 
         super(WikiLinkExtension, self).__init__(*args, **kwargs)
 
-    def extendMarkdown(self, md, md_globals):
+    def extendMarkdown(self, md):
+    #def extendMarkdown(self, md, md_globals):
         self.md = md
 
         # append to end of inline patterns
@@ -58,7 +59,10 @@ class WikiLinkExtension(Extension):
         wikilinkPattern.md = md
         #md.inlinePatterns.add('wikilink', wikilinkPattern, "<not_strong")
         # This needed to treat [[ngfft]](1:3) before []() markdown syntax
-        md.inlinePatterns.add('wikilink', wikilinkPattern, "<link")
+        # 160 is the priority of link!
+        md.inlinePatterns.register(wikilinkPattern, 'wikilink', 161)
+        #md.inlinePatterns.register('wikilink', wikilinkPattern, "<link")
+        #md.inlinePatterns.add('wikilink', wikilinkPattern, "<link")
 
 
 class WikiLinks(Pattern):
@@ -73,7 +77,7 @@ class WikiLinks(Pattern):
         #page_rpath = "??"
         #if hasattr(self.md, 'Meta') and "rpath" in self.md.Meta:
         #    page_rpath = self.md.Meta["rpath"][0]
-        # Remove quotes (neeeded in py2.7 because mkdocs does not use pyyaml to parse meta).
+        # Remove quotes (needed in py2.7 because mkdocs does not use pyyaml to parse meta).
         #if "authors" in self.md.Meta:
         #    print("authors", self.md.Meta["authors"])
         website = Website.get()

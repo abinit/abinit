@@ -40,8 +40,8 @@
  optcell8 1 ecutsm8 0.5 dilatmx8 1.1
 
  occopt9 1
- nkpt9 1 istwfk9 1 toldfe9 1.0d-10 
- nsppol9 2    
+ nkpt9 1 istwfk9 1 toldfe9 1.0d-10
+ nsppol9 2
  spinmagntarget9  0.0d0
  ixc9 1
 
@@ -62,14 +62,14 @@
  timopt 0
  np_spkpt 1
  npband 2
+ nblock_lobpcg 6 # Problably not optimal (LB:07-2025)
  npfft 2
  paral_kgb 1
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "6c_lda.paw"
 
-# This test is disabled on abiref, because a problem with SIGFPE is triggered inside the MPI layer (MPI_ALLREDUCE) when input arrays are not initialized with zeros.
-# MPI_SUM may overflow depending on the (random) memory chunks returned by C malloc. See several Gitlab comments from Matteo about this problem.
+# This test is disabled on eos_nvhpc_23.1_elpa, because of erratic problems, either numerical or seg fault. However it passes correctly on eos_nvhpc_23.9_elpa !
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -82,7 +82,7 @@
 #%% [extra_info]
 #%% keywords = PAW
 #%% authors = Unknown
-#%% description = 
+#%% description =
 #%%    C-diamond, Bulk, 2 atoms, paral_kgb, with PAW.
 #%%    Test of ground state with different occs(7 and 0),
 #%%    and also ionmov 2. Only with 0 and 4 procs.

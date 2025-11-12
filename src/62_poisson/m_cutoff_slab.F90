@@ -124,7 +124,7 @@ subroutine cutoff_slab(qpt, ng, gvec, gprimd, rcut, boxcenter, pdir, alpha, vc_c
 
    ! Calculate truncated Coulomb interaction for a infinite surface
    ! supposing input q-points are different from zero.
-   igs=1; if (SQRT(DOT_PRODUCT(qc,qc))<tol16) igs=2 ! avoid (q=0, G=0)
+   igs=1; if (NORM2(qc)<tol16) igs=2 ! avoid (q=0, G=0)
    do ig=igs,ng
      gcart(:) = b1(:)*gvec(1,ig)+b2(:)*gvec(2,ig)+b3(:)*gvec(3,ig)
      qpg(:) = qc(:) + gcart(:)

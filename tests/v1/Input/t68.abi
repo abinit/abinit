@@ -81,14 +81,14 @@
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%  t68.abo, tolnlines = 0, tolabs = 1.451e-08, tolrel = 2.000e-10, fld_options = -medium
+#%% files_to_test =
+#%%  t68.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% keywords = NC
 #%% authors = Unknown
-#%% description = 
+#%% description =
 #%%   Compute an optimal densty parameter for N2. Molecular computation,
 #%%   using multi-dataset mode.
 #%%<END TEST_INFO>

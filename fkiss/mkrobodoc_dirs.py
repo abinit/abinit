@@ -41,7 +41,7 @@ def list_strings(arg):
         return arg
 
 
-class WildCard(object):
+class WildCard:
     """
     This object provides an easy-to-use interface for
     filename matching with shell patterns (fnmatch).
@@ -109,7 +109,7 @@ def robodoc_dheader(dirname):
 !!  FIXME: Description is missing
 !!
 !! COPYRIGHT
-!! Copyright (C) 2020-2022 ABINIT Group
+!! Copyright (C) 2020-2025 ABINIT Group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

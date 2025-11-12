@@ -6,20 +6,22 @@ authors: XG, DCA
 
 This page complements the main [[help:abinit]], for matters related
 to responses to perturbations computed with DFPT.
-It will be easier to discover the present file with the help of the [[tutorial:rf1|DFPT1 tutorial]].  
+This file is complementary to the [[tutorial:rf1|DFPT1 tutorial]], and it might
+be easiest to read through both at the same time. 
 
 <a id="intro"></a> 
 ## 0 Introducing the computation of responses
   
 ABINIT can compute the response to different perturbations, and provide access
-to quantities that are second derivatives of total energy (2DTE) with respect
+to quantities that are second derivatives of the total energy (2DTE) with respect
 to these perturbations. 
-Presently, they can be of four types: 
+Presently, five types of perturbations are treated:
 
 1. phonons 
 2. static homogeneous electric field
 3. strain  
 4. magnetic field (coupling to the spin, not the orbital motion)
+5. long-wave perturbations (including magnetic field that couples to the orbital motion)
 
 The physical properties connected to 2DTE with respect to perturbations (1) and (2) are the phonon
 dynamical matrices, the dielectric tensor, and the Born effective charges,
@@ -29,16 +31,21 @@ The magnetic field perturbation is a recent addition to ABINIT, and will not be 
 
 
 More functionalities of the computation of responses should be implemented
-sooner or later. Some third derivatives of the
-total energy (3DTE) are also implemented. The 3DTE might give phonon-phonon
-coupling, non-linear electric response, anharmonic elastic constants, Gruneisen parameters,...
+eventually. Some third derivatives of the
+total energy (3DTE) are also implemented. The 3DTE gives access to quantities
+such as phonon-phonon
+coupling, non-linear electric response, anharmonic elastic constants, Gruneisen parameters,
+and so forth.
 
 The basic quantities that ABINIT will compute are the **first-order** derivatives
 of the wavefunctions (1WF) with respect to these perturbations. The later
 calculation of the 2DTE and 3DTE from these 1WF is an easy computational task:
 the construction of the 2DTE with respect to perturbations j1 and j2
 involves mainly evaluating matrix elements between the 1WF of j1 and/or the 1WF of j2. 
-More details on this technique can be found in [[cite:Gonze1997]] and [[cite:Gonze1997a]].
+
+A basic introduction to the theory is given in [[cite:Gonze2005]]. 
+You might also benefit from reading the longer review [[cite:Baroni2001]].
+Further details are in [[cite:Gonze1997]] and [[cite:Gonze1997a]].
 
 The calculation of the 1WF for a particular perturbation is done using a
 variational principle and an algorithm rather similar to the one used to find
@@ -48,7 +55,7 @@ calculations. This justifies the development of one unique code for these two
 classes of properties: many of the routines of abinit are common in these
 calculations, or had to be duplicated, but with relatively small modifications.
 
-The ABINIT code performs a rather primitive analysis of the calculated 2DTEs.
+The ABINIT code performs a rather simple analysis of the calculated 2DTEs.
 For example, it gives the phonon frequencies, electronic dielectric tensor and
 effective charges. But the main output of the code is the Derivative DataBase
 (DDB): a file that contains the set of all 2DTEs and 3DTEs calculated by the
@@ -57,12 +64,22 @@ the Anaddb code. See the corresponding [[help:mrgddb]] and [[help:anaddb]].
 
 <a id="1"></a>
 ## 1 Description of perturbations
+
+Perturbations are described by two indices, **ipert** and **idir**, and possibly a wavevector. 
+The first index runs (at present) from 1 to [[natom]]+11, while the second one runs from 1 to 3 in some
+cases, and 1 to 6 or 1 to 9 for perturbations with multiple indices.
+We also define the index of the perturbation, called *pertcase*, which combines ipert and idir into
+a single unique index. This index will be
+needed to identify output and input files, see section 6.
   
+### 1.1 Atomic displacements / phonons
+
 The perturbation of the **phonon** type is the displacement of one atom along
 one of the axis of the unit cell, by a unit of length (in reduced coordinates).
-It is characterized by two integer numbers and one wavevector.
+It is characterized by the above-mentioned two integer numbers and one wavevector.
 The two integer numbers are the number of the moved atom, which will be noted
-**ipert**, and the number of the axis of the unit cell, which will be noted **idir**. 
+**ipert**, and the number of the axis of the unit cell, which will be noted **idir**, 
+for the direction of the displacement of the moved atom. 
 
 !!! important
 
@@ -76,6 +93,8 @@ variable [[rfatpol]]. The set of directions to be considered in one dataset of
 ABINIT is determined by the input variable [[rfdir]]. The wavevector to be
 considered in one dataset of ABINIT is determined by the input variables
 [[nqpt]], [[qpt]], and [[qptnrm]].
+
+### 1.2 Electric field (and associated change of wavevector)
 
 The perturbations of the **electric field** type are
 
@@ -109,6 +128,8 @@ envisioned for a future version of the code, at present only homogeneous
 fields are considered. So the wavevector of the electric field type
 perturbations is $\Gamma$ (q=0).
 
+### 1.3 Strain
+
 The perturbations of the **strain** type are either an uniaxial strain or a
 shear strain. The strain perturbations are considered in cartesian coordinates
 (x,y,z). They are characterized by two numbers, with *ipert* being natom + 3 for
@@ -138,16 +159,40 @@ Limitations of the present implementation (as of v5.7):
   * Symmetry is presently used to skip redundant k points in the BZ sum, 
     but not to skip redundant strain perturbations.
 
-We also define the index of the perturbation, called *pertcase*, equal to idir + 3 * (ipert - 1). 
-Accordingly, pertcase runs from 1 to 3 * (natom + 4), and will be
-needed to identify output and input files, see section 6.
+### 1.4 Zeeman magnetic field
+
+The perturbations of the **Zeeman magnetic field** type couple to the spin of the electrons,
+not to their orbital moment. They are considered in cartesian coordinates (x,y,z). 
+They are characterized by two numbers, with *ipert* being natom+5, and 
+*idir* being 1 for the x direction, 2 for the y direction and 3 for the z direction.
+Calculations for such perturbations are driven by the input variable [[rfmagn]].
+Such perturbation only have a relevance in the non-collinear-spin case, with [[nspinor]]=2.
+
+### 1.5 Long-wave type perturbations.
+
+Long-wave type perturbations are related to the long-wave formalism developed by M. Stengel,
+M. Royo, and coworkers over the years. See for example [[cite:Royo2019]].
+Also, similar quantities have been used (and implemented before) by 
+L. Baguet and M. Torrent for the specific computation of Raman spectra,
+see the section 3.2.3 of [[cite:Gonze2020]] and the section 5 of [[cite:Romero2020]].
+The description of the long-wave formalism goes beyond this introductory user guide.
+If interested, the user should consult the above references, as well as the description of the 
+[[rf2_dkdk]] and [[rf2_dkde]] input variables. This formalism allows one to define
+a magnetic field that couples with the orbital motion, complementary to the one that couples to the 
+spin-magnetization.
+
+The associated values of **ipert** are [[natom]]+8 (ddq), [[natom]]+10 (dkdk) and [[natom]]+11 (dkde).
+
+The values [[natom]]+6 and [[natom]]+7 had been booked, but their implementation has been halted in 2015 and these values
+are not currently used.
 
 !!! summary
 
     To summarize, the perturbations are characterized by two numbers, **ipert** from
-    1 to natom + 4, and **idir**, from 1 to 3, as well as one wavevector (that is
+    1 to [[natom]] + 11, and **idir**, from 1 to 3, 6, or 9, as well as one wavevector (that is
     gamma when a non-phonon perturbation is considered). A number called
-    **pertcase** combines *ipert* and *idir*, and runs from 1 to 3 * (natom + 4).
+    **pertcase** combines *ipert* and *idir*,  into a single unique index.
+    Not all values of **ipert** in the range from 1 to [[natom]]+11 are attributed, though.
 
 The 2DTE, being derivative of the total energy with respect to two
 perturbations, will be characterized by two sets of (idir,ipert), or by two
@@ -362,24 +407,27 @@ In the first part, every perturbation is examined, one at a time, separately:
 <a id="5"></a>
 ## 5 List of relevant input variables
   
-A subset of the ABINIT input variables have a modified meaning or a modified
-behaviour in case of RF calculations. Here is the list of these input
-variables, together with the variables that applies only to RF computations.
+Some input variables are new for RF calculations.
+Also, a subset of the ABINIT input variables have a modified meaning or a modified
+behaviour in case of such calculations. Here is the list of the most relevant input
+variables.
 Note that the code will do a RF calculation ([[optdriver]]=1) when one of
-[[rfphon]] or [[rfelfd]] is non-zero.
+[[rfphon]] or [[rfelfd]] or [[rfstrs]] is non-zero.
 
   * [[amu]]
+  * [[asr]]
+  * [[chneut]]
   * [[getwfk]], [[getwfq]], [[get1wf]], [[getddk]] 
   * [[irdwfk]], [[irdwfq]], [[ird1wf]], [[irdddk]] 
   * [[iscf]]
   * [[nkpt]]
   * [[nqpt]], [[qpt]], [[qptnrm]] 
   * [[nsym]]
-  * [[rfasr]]
   * [[rfatpol]]
   * [[rfdir]]
   * [[rfelfd]]
   * [[rfphon]]
+  * [[rfstrs]]
   * [[dfpt_sciss]]
   * [[tolwfr]], [[toldfe]], [[tolvrs]]
 
@@ -404,9 +452,9 @@ related to response functions will be intertwined with those concerned with
 ground-state case. We explain here the parts related to the RF computation.
 
 The initialisation part is the same as for the GS. So, the reader is advised
-to read the [[help:abinit#outputfile|section 6.2]] of the abinit help file,
-as well as the first paragraph of the section [[help:abinit#6.3|6.3]] of
-this file. Afterwards, the content of the main output file differs a bit...
+to read [[help:abinit#outputfile|section 5.2]] of the abinit help file,
+as well as the first paragraph of section [[#1WFfiles|6.3]] of
+this file. Afterwards, the content of the main output file differs a bit.
 
 The main output file reports on the initialisation of the ground-state
 wavefunctions at k+q, then the loop on the perturbations begins. For each
@@ -452,7 +500,7 @@ A Warning message is issued if the above information cannot be trusted.
 
 Finally, the code provides the timing information.
 
-<a id="6.3"></a>
+<a id="1WFfiles"></a>
 **6.3. The first-order wavefunction (1WF) files**
 
 These are unformatted data files containing the planewaves coefficients of all
@@ -500,8 +548,41 @@ Here, rhor1 is the change of electron density in electrons/Bohr^3. The
 parameter cplex is 1 when q=0 and 2 when q/=0 . Indeed, for q=0, the density
 change is a real quantity, while it is complex in general when q/=0 .
 
+<a id="ipertcase"></a>
+**6.5. Summary of output file numbering**
+
+As noted in [[#1|Section 1]], the various perturbations and directions are indexed by
+a combination of **ipert** and **idir**, to form a unique index **ipertcase**.
+This index is used in the output file
+naming. The following table summarizes the various output possibilities.
+
+|Perturbation | ipert | idir | ipertcase |
+|-------------|-------|------|-----------|
+| Phonons     | 1..natom | 1..3 | 1..3*natom |
+| DDK         | (natom+1)  | 1..3 | (3*natom+1)..(3*natom+3) |
+| E-field     | (natom+2)  | 1..3 | (3*natom+4)..(3*natom+6) |
+| Strain (long.)     | (natom+3)  | 1..3 | (3*natom+7)..(3*natom+9) |
+| Strain (shear)     | (natom+4)  | 1..3 | (3*natom+10)..(3*natom+12) |
+| Zeeman magn.     | (natom+5)  | 1..3 | (3*natom+13)..(3*natom+15) |
+| Unused | (natom+6) | | |
+| Unused | (natom+7) | | |
+| DDQ | (natom+8) | 1..3 | (3*natom+16)..(3*natom+18) |
+| Unused | (natom+9) | | |
+| DKDK | (natom+10) | 1..9 | (3*natom+19)..(3*natom+27) |
+| DKDE | (natom+11) | 1..9 | (3*natom+28)..(3*natom+36) |
+
+As an example, consider a compound like AlP, with two atoms in the unit cell. Then
+there are 6 possible phonon perturbations (each of two atoms can move in any of three
+directions), with output wavefunction files 
+abo_1WF1, abo_1WF2, ... , abo_1WF6. The DDK output files would be named
+abo_1WF7, abo_1WF8, and abo_1WF9. The electric field files would be 
+abo_1WF10, abo_1WF11, and abo_1WF12, and so forth.
+
+Note that because of ABINIT's intelligent use of symmetry, not every one of these files
+is always produced, because some of them would be redundant. 
+
 <a id="ddb"></a>
-**6.5. The derivative database (DDB)**
+**6.6. The derivative database (DDB)**
 
 It is made of two parts. The first should allow one to unambiguously identify
 the run that has generated the DDB, while the second part contains the 2DTE,

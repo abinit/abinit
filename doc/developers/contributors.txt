@@ -3,7 +3,7 @@ Contributors
 
 The ABINIT package : list of contributors.
 
-Copyright (C) 2000-2022 ABINIT group (XG)
+Copyright (C) 2000-2025 ABINIT group (XG)
 This file is distributed under the terms of the
 GNU General Public License, see ~abinit/COPYING
 or http://www.gnu.org/copyleft/gpl.txt .
@@ -14,7 +14,7 @@ For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 The ABINIT project has been initiated by the Universite Catholique
 de Louvain (X. Gonze) and Corning Incorporated (D.C. Allan).
 
-Seven other institutions have also clearly shown their implication
+Nine other institutions have also clearly shown their implication
 in the ABINIT project in the past or currently :
 - l'Universite de Liege (Ph. Ghosez, M. Verstraete),
 - le Commissariat a l'Energie Atomique, Bruyeres-le-chatel (F. Jollet, M. Torrent, B. Amadon),
@@ -24,11 +24,68 @@ in the ABINIT project in the past or currently :
 - U. de Montr\'{e}al (M. Cot\'{e})
 - le Commissariat a l'Energie Atomique, Grenoble (T. Deutsch, D. Caliste),
 - University of West Virginia (A. Romero),
+- Dalhousie University (J. Zwanziger),
+- Institut de Ci\'{e}ncia de Materials de Barcelona (ICMAB-CSIC) (M. Stengel, M. Royo).
 
 Coming now to individuals,
-recent direct contributors to ABINIT (versions 8.10.0 to 9.8.0) are listed below.
+recent direct contributors to ABINIT (versions 9.11.6 to 10.4) are listed below.
 For reasons of privacy, we do not provide the e-mail address anymore.
 If you need to contact somebody, try the forum or the github.
+
+G. Allemand
+B. Amadon
+G. Antonius
+M. Azizi
+L. Baguet
+S. Bandyopadhyay
+L. Bastogne
+R. Béjaud
+J.-M. Beuken
+O. Bistoni
+A. Blanchet
+F. Bottin
+J. Bouchet
+J. Bouquiaux
+J. Boust
+F. Brieuc
+F. Bruneval
+E. Castiel
+Siyu Chen
+Q. Delacroix
+A. Donkov
+F. Gendron
+G. Geneste
+M. Giantomassi
+O. Gingras
+F. Gomez-Ortiz
+X. Gonze
+F. Goudreault
+R. Gupta
+B. Guster
+P. Kestener
+I.-M. Lygatsika
+O. Mattelaer
+L. MacEnulty
+M. Mignolet
+Ch. Paillard
+G. Petretto
+S. Ponce
+S. Rostami
+M. Royo
+M. Sarraute
+A. Sasani
+Le Shu
+M. Torrent
+Hsiaoyi Tsai
+V. Vasilchenko
+M. Verstraete
+He Xu
+Huazhang Zhang
+J. Zwanziger
+
+
+direct contributors to ABINIT (versions 8.10.0 to 9.11.6)
+F. Akhmetov (Radioteddy on abinit github)
 B. Amadon
 G. Antonius
 L. Baguet
@@ -39,6 +96,7 @@ J. Bieder
 A. Blanchet
 F. Bottin
 J. Bouchet
+J. Bouquiaux
 E. Bousquet
 F. Brieuc
 V. Brousseau
@@ -49,7 +107,9 @@ Wei Chen
 J.-B. Charraud
 J. Clerouin
 M. Cote
+A. Donkov
 C. Espejo
+F. Gendron
 Ph. Ghosez
 M. Giantomassi
 O. Gingras
@@ -59,13 +119,16 @@ B. Guster
 G. Hautier
 Xu He
 N. Helbig
-F. Jollet 
+F. Jollet
 T. Karatsu
 P. Kestener
 A. H. Larsen
+L. MacEnulty
+M. Mignolet
 H. Miranda
 F. Naccarato
 O. Nadeau
+D. D. O'Regan
 R. Outerovitch
 Ch. Paillard
 G. Petretto
@@ -75,7 +138,9 @@ Y. Pouillon
 F. Ricci
 G.-M. Rignanese
 M. Rodriguez-Mayorga
+S. Rostami
 M. Royo
+M. Sarraute
 A. Sasani
 B. Sataric
 M. Schmitt
@@ -84,20 +149,21 @@ F. Soubiran
 M. Stengel
 M. Torrent
 J. Van Bever
+V. Vasilchenko
 M. Verstraete
 He Xu
 J. Zwanziger
 
 direct contributors to ABINIT (versions 8.0 to 9.0.0) are :
-name                      
-Flavio Abreu Araujo      
-Florian Altvater        
-Bernard Amadon         
-Gabriel Antonius      
-Frederic Arnardi     
-Lucas Baguet        
-Jean-Michel Beuken 
-Jordan Bieder     
+name
+Flavio Abreu Araujo
+Florian Altvater
+Bernard Amadon
+Gabriel Antonius
+Frederic Arnardi
+Lucas Baguet
+Jean-Michel Beuken
+Jordan Bieder
 Anton Bokhanchuk
 Fran\c{c}ois Bottin
 Yohann Bouchet
@@ -118,7 +184,7 @@ Matteo Giantomassi
 Olivier Gingras
 Yannick Gillet
 Xavier Gonze
-Felix Goudreault 
+Felix Goudreault
 Bogdan Guster
 Xu He
 Francois Jollet
@@ -155,7 +221,6 @@ Bin Xu
 Joe Zwanziger
 
 direct contributors to ABINIT (versions 7.0 to 7.11-8.0) are :
-name                      email
 Flavio Abreu Araujo
 Joseba Alberdi
 Bernard Amadon
@@ -232,7 +297,6 @@ Vittorio Zecca
 Joe Zwanziger
 
 direct contributors to ABINIT (version 6.0 to 6.12) are :
-name                      email
 Donat Adams
 Stephan Albrecht
 Bernard Amadon
@@ -305,7 +369,6 @@ Joe Zwanziger
 
 
 direct contributors to ABINIT (versions 5.0 to 5.9) are :
-name                      email
 Bernard Amadon
 Pierre-Matthieu Anglade
 Masao Arai
@@ -382,257 +445,250 @@ Joe Zwanziger
 
 
 direct contributors to ABINIT (versions 4.1 to 4.6) are :
-
-name                    initials          email
-Doug Allan                dca         
-Bohdan Andriyevsky        bandri      
-Fred Arnold               farnold     
-Nuno Bandeira             nbandera    
-Michel Beland             mbeland     
-Jean-Michel Beuken        jmb         
-Paul Boulanger            pboulanger  
-Mireille Boulet           mboulet     
-Francois Bottin           fbottin     
-Fabien Bruneval           fbruneval   
-Razvan Caracas            rc          
-Narayani Choudhury        nchoudhury  
-Fabrizio Cleri            fcleri      
-Michel Cote'              mcote       
-Jean-Francois Danel       jfdanel     
-Clovis Darrigan           cdarrigan   
-Thierry Deutsch           td          
-Kay Dewhurst              kdewhurst   
-Alexey Dick               adick       
-Paul Fons                 pfons       
-Alberto Garcia            agarcia     
-Matteo Gatti              matgat      
-Luigi Genovese            lg          
-Philippe Ghosez           phg         
-Prasenjit Ghosh           pghosh      
-Xavier Gonze              xg          
-Don Hamann                drh         
-Sebastien Hamel           shamel      
-Takumi Hasegawa           thasegawa   
-Luc Henrard               lhenrard    
-N.D.M.Hine                ndmhine     
-Steven Homolya            shomolya    
-Yusuke Iguchi             yiguchi     
-Jorge Iniguez             jiniguez   
-Jacob (Jouk) Jansen       jjansen     
-Lu Jianmin                jmlv        
-Francois Jollet           fj          
-Gerald Jomard             gjomard     
-Javier Junquera           jjunquera   
-Luc Kazandjian            lkazandjian 
-Sylvain Latil             slatil      
-Mikey Lee                 mikeylee    
-Javier Lopez              jlopez      
-Nicola Marzari            nmarzari    
-Thomas Maxisch            tmaxisch    
-Marcello Merli            mmerli      
-Ralf Meyer                rmeyer      
-Masayoshi Mikami          mm          
-Jean-Paul Minet           jpminet     
-Christian Morari          cmorari     
-Yann-Michel Niquet        ymniquet    
-Kunio Nishida             knishida    
-Fred Nastos               fn          
-Artem Oganov              aoganov     
-Giovanni Onida            gonida      
-Pablo Ordejon             pordejon    
-Valerio Olevano           vo          
-Bart Partoens             bpartoens   
-Wolfgang Pichl            wpichl      
-Yann Pouillon             ypouillon   
-Geoffrey Pourtois         gpourtois   
-Simon Pesant              spesant     
+Doug Allan                dca
+Bohdan Andriyevsky        bandri
+Fred Arnold               farnold
+Nuno Bandeira             nbandera
+Michel Beland             mbeland
+Jean-Michel Beuken        jmb
+Paul Boulanger            pboulanger
+Mireille Boulet           mboulet
+Francois Bottin           fbottin
+Fabien Bruneval           fbruneval
+Razvan Caracas            rc
+Narayani Choudhury        nchoudhury
+Fabrizio Cleri            fcleri
+Michel Cote'              mcote
+Jean-Francois Danel       jfdanel
+Clovis Darrigan           cdarrigan
+Thierry Deutsch           td
+Kay Dewhurst              kdewhurst
+Alexey Dick               adick
+Paul Fons                 pfons
+Alberto Garcia            agarcia
+Matteo Gatti              matgat
+Luigi Genovese            lg
+Philippe Ghosez           phg
+Prasenjit Ghosh           pghosh
+Xavier Gonze              xg
+Don Hamann                drh
+Sebastien Hamel           shamel
+Takumi Hasegawa           thasegawa
+Luc Henrard               lhenrard
+N.D.M.Hine                ndmhine
+Steven Homolya            shomolya
+Yusuke Iguchi             yiguchi
+Jorge Iniguez             jiniguez
+Jacob (Jouk) Jansen       jjansen
+Lu Jianmin                jmlv
+Francois Jollet           fj
+Gerald Jomard             gjomard
+Javier Junquera           jjunquera
+Luc Kazandjian            lkazandjian
+Sylvain Latil             slatil
+Mikey Lee                 mikeylee
+Javier Lopez              jlopez
+Nicola Marzari            nmarzari
+Thomas Maxisch            tmaxisch
+Marcello Merli            mmerli
+Ralf Meyer                rmeyer
+Masayoshi Mikami          mm
+Jean-Paul Minet           jpminet
+Christian Morari          cmorari
+Yann-Michel Niquet        ymniquet
+Kunio Nishida             knishida
+Fred Nastos               fn
+Artem Oganov              aoganov
+Giovanni Onida            gonida
+Pablo Ordejon             pordejon
+Valerio Olevano           vo
+Bart Partoens             bpartoens
+Wolfgang Pichl            wpichl
+Yann Pouillon             ypouillon
+Geoffrey Pourtois         gpourtois
+Simon Pesant              spesant
 David Prendergast         dprendergast
-Wirawan Purwanto          wpurvanto   
-James Raynolds            jraynolds   
-Vanina Recoules           vr          
-Gian-Marco Rignanese      gmr         
-Eric Roman                eroman      
-Aline Roy                 ar          
-Miguel Salvado            ms          
-Riad Shaltaf              rshaltaf    
-Sangeeta Sharma           ssharma     
-K.V. Shanavas             kshanavas   
-William Shelton           wshelton    
-Luc Sindic                lsi         
-Jose Soler                jsoler      
-Ivo Souza                 isouza      
-Derek Stewart             dstewart    
-Mark Storr                mstorr      
-Martin Tijssens           mtijssens   
-Marc Torrent              mt          
-Florent Tournus           ftournus    
-M.D.Towler                mdtowler    
-David Vanderbilt          dhv        
-Bernard Van Renterghem    bvr         
-Marek Veithen             mkv         
-Matthieu Verstraete       mv          
-Craig Wiegert             cwiegert    
-Egon Willighagen          ew          
-Eric J. Walter            ewalter     
-David M. Wood             dmwood      
-Xifan Wu                  xw         
-Gilles Zerah              gz          
-Yao Zhenhua               yzhenhua    
-Barry Zorman              bzorman     
+Wirawan Purwanto          wpurvanto
+James Raynolds            jraynolds
+Vanina Recoules           vr
+Gian-Marco Rignanese      gmr
+Eric Roman                eroman
+Aline Roy                 ar
+Miguel Salvado            ms
+Riad Shaltaf              rshaltaf
+Sangeeta Sharma           ssharma
+K.V. Shanavas             kshanavas
+William Shelton           wshelton
+Luc Sindic                lsi
+Jose Soler                jsoler
+Ivo Souza                 isouza
+Derek Stewart             dstewart
+Mark Storr                mstorr
+Martin Tijssens           mtijssens
+Marc Torrent              mt
+Florent Tournus           ftournus
+M.D.Towler                mdtowler
+David Vanderbilt          dhv
+Bernard Van Renterghem    bvr
+Marek Veithen             mkv
+Matthieu Verstraete       mv
+Craig Wiegert             cwiegert
+Egon Willighagen          ew
+Eric J. Walter            ewalter
+David M. Wood             dmwood
+Xifan Wu                  xw
+Gilles Zerah              gz
+Yao Zhenhua               yzhenhua
+Barry Zorman              bzorman
 
 
 direct contributors to ABINIT (versions 4.0 or before) are :
-
-name                    initials          email
-Doug Allan                dca         
-Christophe Audouze        cau         
-Givanni Bachelet          gb          
-Fabio Bernardini          fb          
-Jean-Michel Beuken        jmb         
-Lilia Boeri               lboeri      
-Francois Bottin           fb          
-Mireille Boulet           mboulet     
-Jean-Francois Briere      jfb         
-Fabien Bruneval           fbruneval   
-Nathalie Capron-Joubert   ncj         
-Razvan Caracas            rc          
-Petr Casek                pcasek      
-Michel Cote'              mcote       
-Francois Detraux          fd          
-Thierry Deutsch           td          
-Steve Erwin               se          
-Fabio Finocchi            ff          
-Martin Fuchs              mf          
-Javier Fuhr               jf          
-Lu Fu-Fa                  lff         
-Philippe Ghosez           phg         
-Xavier Gonze              xg          
-Rex Godby                 rg          
-Stefan Goedecker          sgoedecker  
-Ikutaro Hamada            ih          
-Don Hamann                drh         
-Francois Jollet           fj          
-Gyuchang Jun              gj          
-Chris Krenn               ck          
-Nicola Marzari            nmarzari    
-A. Masago                 am          
-Herve Matthis             hm          
-Thomas Maxisch            tmaxisch    
-Masayoshi Mikami          mm          
-Jun Mimaki                jmimaki     
-Fred Nastos               fn          
-Ivan Naumov               in          
-Artem Oganov              aoganov     
-Valerio Olevano           vo          
-Giovanni Onida            go          
-Wolfgang Pichl            wpichl      
-Laurent Pizzagalli        lpizzagalli 
-Geoffrey Pourtois         gpourtois   
-Jean-Yves Raty            jyr         
-James Raynolds            jraynolds   
-Vanina Recoules           vr          
-Lucia Reining             lr          
-Gian-Marco Rignanese      gmr         
-Doug Ritchie              dr          
-Catherine Roult           cr          
-Aline Roy                 ar          
-Na Sai                    ns          
-Miguel Salvado            ms          
-Luc Sindic                lsi         
-Jorge Sofo                jsofo       
-Jay Sullivan              js          
-Yazuko Suzukawa           ys          
-Stefan Tausendpfund       st          
-Pascal Thibaudeau         pt          
-Martin Tijssens           mtijssens   
-Marc Torrent              mt          
-David Vanderbilt          dhv         
-Bernard Van Renterghem    bvr         
-Marek Veithen             mkv         
-Matthieu Verstraete       mv          
-Gilles Zerah              gz          
-Mike Zhang                mz          
+Doug Allan                dca
+Christophe Audouze        cau
+Givanni Bachelet          gb
+Fabio Bernardini          fb
+Jean-Michel Beuken        jmb
+Lilia Boeri               lboeri
+Francois Bottin           fb
+Mireille Boulet           mboulet
+Jean-Francois Briere      jfb
+Fabien Bruneval           fbruneval
+Nathalie Capron-Joubert   ncj
+Razvan Caracas            rc
+Petr Casek                pcasek
+Michel Cote'              mcote
+Francois Detraux          fd
+Thierry Deutsch           td
+Steve Erwin               se
+Fabio Finocchi            ff
+Martin Fuchs              mf
+Javier Fuhr               jf
+Lu Fu-Fa                  lff
+Philippe Ghosez           phg
+Xavier Gonze              xg
+Rex Godby                 rg
+Stefan Goedecker          sgoedecker
+Ikutaro Hamada            ih
+Don Hamann                drh
+Francois Jollet           fj
+Gyuchang Jun              gj
+Chris Krenn               ck
+Nicola Marzari            nmarzari
+A. Masago                 am
+Herve Matthis             hm
+Thomas Maxisch            tmaxisch
+Masayoshi Mikami          mm
+Jun Mimaki                jmimaki
+Fred Nastos               fn
+Ivan Naumov               in
+Artem Oganov              aoganov
+Valerio Olevano           vo
+Giovanni Onida            go
+Wolfgang Pichl            wpichl
+Laurent Pizzagalli        lpizzagalli
+Geoffrey Pourtois         gpourtois
+Jean-Yves Raty            jyr
+James Raynolds            jraynolds
+Vanina Recoules           vr
+Lucia Reining             lr
+Gian-Marco Rignanese      gmr
+Doug Ritchie              dr
+Catherine Roult           cr
+Aline Roy                 ar
+Na Sai                    ns
+Miguel Salvado            ms
+Luc Sindic                lsi
+Jorge Sofo                jsofo
+Jay Sullivan              js
+Yazuko Suzukawa           ys
+Stefan Tausendpfund       st
+Pascal Thibaudeau         pt
+Martin Tijssens           mtijssens
+Marc Torrent              mt
+David Vanderbilt          dhv
+Bernard Van Renterghem    bvr
+Marek Veithen             mkv
+Matthieu Verstraete       mv
+Gilles Zerah              gz
+Mike Zhang                mz
 
 
 
 direct contributors to ABINIT (version 3.0 or before) are :
-
-name                    initials          email
-Doug Allan                dca         
-Gabriel Bester            gbester     
-Jean-Michel Beuken        jmb         
-Stephane Bernard          sb          
-Razvan Caracas            rc          
-Francois Detraux          fd          
-Steve Erwin               se          
-Alessio Filipetti         af          
-Martin Fuchs              mf          
-Xavier Gonze              xg          
-Francois Jollet           fj          
-Bernard Magne             bm          
-Masayoshi Mikami          mm          
-Alexander Quandt          aq          
-Jean-Yves Raty            jyr         
-Gian-Marco Rignanese      gmr         
-Aline Roy                 ar          
-Na Sai                    sn          
-Massimiliano Stengel      ms         
-Patrick Tepesch           pt         
-Marc Torrent              mt          
-John Tse                  jts         
-Matthieu Verstraete       mv          
-Gilles Zerah              gz          
+Doug Allan                dca
+Gabriel Bester            gbester
+Jean-Michel Beuken        jmb
+Stephane Bernard          sb
+Razvan Caracas            rc
+Francois Detraux          fd
+Steve Erwin               se
+Alessio Filipetti         af
+Martin Fuchs              mf
+Xavier Gonze              xg
+Francois Jollet           fj
+Bernard Magne             bm
+Masayoshi Mikami          mm
+Alexander Quandt          aq
+Jean-Yves Raty            jyr
+Gian-Marco Rignanese      gmr
+Aline Roy                 ar
+Na Sai                    sn
+Massimiliano Stengel      ms
+Patrick Tepesch           pt
+Marc Torrent              mt
+John Tse                  jts
+Matthieu Verstraete       mv
+Gilles Zerah              gz
 
 
 Advisory committee (v5)
 
-Doug Allan                dca         
-Michel Cote'              mcote       
-Thierry Deutsch           tdeutsch    
-Philippe Ghosez           phg         
-Xavier Gonze              xg          
-Don Hamann                drh         
-Nicola Spaldin            nspaldin    
-Francois Jollet           fj          
-Masayoshi Mikami          mm          
-Lucia Reining             lr          
-Gian-Marco Rignanese      gmr         
-Gilles Zerah              gz          
+Doug Allan                dca
+Michel Cote'              mcote
+Thierry Deutsch           tdeutsch
+Philippe Ghosez           phg
+Xavier Gonze              xg
+Don Hamann                drh
+Nicola Spaldin            nspaldin
+Francois Jollet           fj
+Masayoshi Mikami          mm
+Lucia Reining             lr
+Gian-Marco Rignanese      gmr
+Gilles Zerah              gz
 
 
 Advisory committee (v4)
 
-Doug Allan                dca         
-Steve Erwin               se          
-Philippe Ghosez           phg         
-Xavier Gonze              xg          
-Don Hamann                drh         
-Nicola Spaldin            nspaldin    
-Francois Jollet           fj          
-Masayoshi Mikami          mm          
-Lucia Reining             lr          
-Gian-Marco Rignanese      gmr         
-Gilles Zerah              gz          
+Doug Allan                dca
+Steve Erwin               se
+Philippe Ghosez           phg
+Xavier Gonze              xg
+Don Hamann                drh
+Nicola Spaldin            nspaldin
+Francois Jollet           fj
+Masayoshi Mikami          mm
+Lucia Reining             lr
+Gian-Marco Rignanese      gmr
+Gilles Zerah              gz
 
 
 Advisory committee (v3)
 
-Doug Allan                dca         
-Philippe Ghosez           phg         
-Xavier Gonze              xg          
-Nicola Hill               nh          
-Masayoshi Mikami          mm          
-Karin Rabe                kr          
-Lucia Reining             lr          
-Gian-Marco Rignanese      gmr         
-David Teter               dt          
-Gilles Zerah              gz          
+Doug Allan                dca
+Philippe Ghosez           phg
+Xavier Gonze              xg
+Nicola Hill               nh
+Masayoshi Mikami          mm
+Karin Rabe                kr
+Lucia Reining             lr
+Gian-Marco Rignanese      gmr
+David Teter               dt
+Gilles Zerah              gz
 
 
 Also, the following persons have contributed to either the Corning code
 or the Respfn code (predecessors of ABINIT), or produced pseudopotentials :
 
-name                    initials  email
 Jean-Christophe Charlier  jcc     (1992, Cornell U.)
 Philippe Ghosez           phg     (1992-1998, U.C.L., tests of respfn)
 Stefan Goedecker          sg      (1993, Cornell U., and pseudopotentials)

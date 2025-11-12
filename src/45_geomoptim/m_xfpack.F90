@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (XG, MJV, DCA, GMR, JCC, SE)
+!!  Copyright (C) 1998-2025 ABINIT group (XG, MJV, DCA, GMR, JCC, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,7 +25,7 @@ module m_xfpack
  use m_abicore
  use m_abimover
 
- use m_symtk,      only : matr3inv
+ use m_matrix,     only : matr3inv
  use m_geometry,   only : mkradim, mkrdim, metric, strainsym
  use m_results_gs , only : results_gs_type
  use m_bfgs,        only : hessupdt
@@ -146,8 +146,7 @@ subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
    ABI_BUG(message)
  end if
  
- if( (optcell==2 .or. optcell==3) &
-& .and. ndim/=3*natom+6)then
+ if( (optcell==2 .or. optcell==3) .and. ndim/=3*natom+6) then
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=2 or 3, ndim MUST be equal to 3*natom+6,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+6=',3*natom+6,'.'

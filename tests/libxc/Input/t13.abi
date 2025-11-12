@@ -63,7 +63,7 @@ rprim 0.5 0.5 0.0
 #%% description = 
 #%%   Isolated Carbon atom
 #%%   Test the mGGA functionals generating directly XC potentials.
-#%%   To make the test more poratble, we generate GGA-PBE wave functions as starting point.
+#%%   To make the test more portable, we generate GGA-PBE wave functions as starting point.
 #%%   Similar to test 08, but with smaller acell and ecut.
 #%%   Without the use of a "large" xc_denpos, Tran-Blaha is hard to converge. Hypothesis : there is a strong non-linear
 #%%   region, preventing the Anderson method to work effectively.

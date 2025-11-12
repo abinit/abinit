@@ -1,10 +1,6 @@
-# FIXME: the following file belongs to nVidia Corp.
-#        IT MUST BE REMOVED AS SOON AS POSSIBLE!!!
-#nodist_lib52_manage_cuda_a_SOURCES = fortran.c
-
-# FIXME: the following file belongs to nVidia Corp.
-#        IT MUST BE REMOVED AS SOON AS POSSIBLE!!!
-#EXTRA_DIST = deviceQuery.cu
-
-#noinst_HEADERS = cuda_rec_head.h
-
+EXTRA_DIST += \
+  abi_gpu_header.h \
+  gpu_apply_invovl_inner.h \
+  gpu_apply_invovl_inner_kernel.h \
+  gpu_gemm_nonlop.h \
+  gpu_gemm_nonlop_kernel.h

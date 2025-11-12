@@ -1,0 +1,155 @@
+#Si structure.
+# Very rough 2x2x2 q-point grid; low ecut.
+ndtset 7
+
+getwfk   20      # Read GS wavefunctions from DS20_WFK
+getddb   20      # Read DDB files from DS20_DDB
+
+# Global parameters.
+ecut   35
+ecutsm 0.5
+tolwfr 1e-16
+prteliash 1
+
+# K-mesh (must equal the one used to produce the WFK file)
+ngkpt    4 4 4
+nshiftk  1
+shiftk   0.0 0.0 0.0
+
+ddb_ngqpt 2 2 2  # q-mesh used to produce the DDB file (must be consistent with DDB data)
+
+
+##############
+# Dataset 1/2
+##############
+mixprec 1
+
+
+# Test computation of Sigma_nk(w)
+prtvol 1
+nfreqsp 135
+freqspmax 1 eV
+
+optdriver  7
+nband     20
+eph_task   4
+#gw_qprange -2
+tmesh 3000 50 1
+
+
+# q-path for phonon band structure.
+ph_ndivsm 20
+ph_nqpath 3
+ph_qpath
+  0.0000000000    0.0000000000    0.0000000000
+  0.5000000000    0.0000000000    0.5000000000
+  0.5000000000    0.2500000000    0.7500000000
+
+# phonon DOS obtained via Fourier interpolation
+ph_intmeth 2          # Tetra for phonon DOS and A2F
+ph_smear   0.001 eV
+ph_wstep   0.0001 eV
+ph_ngqpt   16 16 16   # Q-mesh for Fourier interpolatation of IFC and a2F(w)
+ph_nqshift 1
+ph_qshift  0 0 0
+
+
+############
+# Dataset 3
+############
+# Interpolate DFPT potentials, produced new DVDB file with 4x4x4 q-mesh.
+eph_task3 5
+eph_ngqpt_fine3  4 4 4
+
+#############
+## Dataset 4
+#############
+# Read previous (interpolated) DVDB file and use it to compute the QP
+# corrections on a 4x4x4 q-mesh.
+eph_task4 4
+getdvdb4 -1
+eph_ngqpt_fine4  4 4 4
+symsigma4 1
+
+#############
+## Dataset 5
+#############
+# Calculation with Sternheimer.
+eph_task5 4
+eph_stern5 1
+eph_ngqpt_fine5  4 4 4
+getdvdb_filepath5 "t107o_DS20_DVDB"
+getpot_filepath5 "t104o_DS1_POT"
+symsigma5 1
+nband5   20
+
+############
+# DATASET 6
+############
+eph_task6  4
+eph_stern6 1
+getdvdb_filepath6 "t107o_DS20_DVDB"
+getpot_filepath6 "t104o_DS1_POT"
+sigma_erange6  0.0 1.0 eV
+eph_ngqpt_fine6  4  4  4
+eph_doping6 -1e18
+tmesh6 3000 50 1
+occopt6 3
+zcut6 0.001
+nband6 20
+###########################
+## Dataset 7
+############################
+##Calculation of Cumulant / DM mobilities
+eph_task7 9
+getsigeph_filepath7 "t107o_DS6_SIGEPH.nc"
+eph_stern7 1
+getdvdb_filepath7 "t107o_DS20_DVDB"
+getpot_filepath7 "t104o_DS1_POT"
+tmesh7 3000 50 1
+eph_ngqpt_fine7  4  4  4
+sigma_erange7  0.0 1.0 eV
+eph_doping7 -1e18
+occopt7 3
+zcut7 0.001
+nband7 20
+tolcum7 1e-3
+
+#########
+# Global
+#########
+
+# Structure
+ chksymbreak 0
+ natom 2
+ ntypat 1
+ typat 1 1
+ znucl 14
+ xred
+    0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+    2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
+ acell    1.0000000000E+00  1.0000000000E+00  1.0000000000E+00
+ rprim
+    6.3285005244E+00  0.0000000000E+00  3.6537614813E+00
+    2.1095001748E+00  5.9665675141E+00  3.6537614813E+00
+    0.0000000000E+00  0.0000000000E+00  7.3075229627E+00
+pp_dirpath "$ABI_PSPDIR"
+ pseudos "Si-GGA.psp8"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi
+#%% test_chain = t104.abi, t105.abi, t106.abi, t107.abi
+#%% need_cpp_vars = HAVE_NETCDF_MPI
+#%% [files]
+#%% files_to_test =
+#%%   t107.abo, tolnlines = 150, tolabs = 0.62, tolrel = 0.38
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = R. Gupta M. Verstraete
+#%% keywords = NC, DFPT, EPH
+#%% description =
+#%%   Calculation of the Fan-Migdal + Debye-Waller self-energy matrix elements and Cumulant + DM mobilities in Silicon.
+#%%<END TEST_INFO>

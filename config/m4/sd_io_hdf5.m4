@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2022 ABINIT group (Yann Pouillon)
+## Copyright (C) 2019-2025 ABINIT group (Yann Pouillon)
 
 #
 # HDF5 I/O support
@@ -92,7 +92,7 @@ AC_DEFUN([SD_HDF5_INIT], [
   esac
 
   # Declare configure option
-  # TODO: make it switchable for the implicit case 
+  # TODO: make it switchable for the implicit case
   AC_ARG_WITH([hdf5],
     [AS_HELP_STRING([--with-hdf5],
       [Install prefix of the HDF5 library (e.g. /usr/local).])],
@@ -112,6 +112,7 @@ AC_DEFUN([SD_HDF5_INIT], [
   AC_ARG_VAR([HDF5_CFLAGS], [C flags for HDF5.])
   AC_ARG_VAR([HDF5_CXXFLAGS], [C flags for HDF5.])
   AC_ARG_VAR([HDF5_FCFLAGS], [Fortran flags for HDF5.])
+  AC_ARG_VAR([HDF5_FFLAGS], [Fortran flags for HDF5 (better use HDF5_FCFLAGS).])
   AC_ARG_VAR([HDF5_LDFLAGS], [Linker flags for HDF5.])
   AC_ARG_VAR([HDF5_LIBS], [Library flags for HDF5.])
 
@@ -125,7 +126,7 @@ AC_DEFUN([SD_HDF5_INIT], [
   if test "${sd_hdf5_enable}" != "no" -o "${sd_hdf5_init}" = "def"; then
     tmp_hdf5_vars="${HDF5_CPPFLAGS}${HDF5_CFLAGS}${HDF5_LDFLAGS}${HDF5_LIBS}"
     if test "${sd_hdf5_enable_fc}" = "yes"; then
-      tmp_hdf5_vars="${tmp_hdf5_vars}${HDF5_FCFLAGS}"
+      tmp_hdf5_vars="${tmp_hdf5_vars}${HDF5_FFLAGS}${HDF5_FCFLAGS}"
     fi
     if test ! -z "${tmp_hdf5_vars}"; then
       case "${sd_hdf5_init}" in
@@ -139,6 +140,28 @@ AC_DEFUN([SD_HDF5_INIT], [
       esac
     fi
   fi
+
+   # if mode is def and pkg_config exists and no prefix -> use pkg_config
+   #
+   if test "${sd_hdf5_enable}" = "yes" -a \( "${sd_hdf5_init}" = "def" -o "${sd_hdf5_init}" = "yon" \) -a "${sd_hdf5_prefix}" = ""; then
+      #check if PKG_CONFIG exists (if not keep default mode)
+      AC_MSG_NOTICE([setting for ${sd_hdf5_init} potential move to pkg])
+      AC_CHECK_PROG([PKG_CONFIG], [pkg-config], [pkg-config], [no])
+
+      AC_MSG_NOTICE([setting for ${sd_hdf5_init} potential move to pkg, PKG=${PKG_CONFIG}])
+      if test "$PKG_CONFIG" != "no"; then
+         AC_MSG_CHECKING([for hdf5 via pkg-config])
+          AC_PATH_TOOL(PKG_CONFIG,pkg-config)
+          if "$PKG_CONFIG" --exists hdf5; then
+                AC_MSG_RESULT([yes])
+                sd_hdf5_init="pkg"
+         else
+                AC_MSG_RESULT([no])
+                #sd_hdf5_init="def" or yon keep it
+         fi
+      fi
+   fi
+
 
   # Make sure configuration is correct
   if test "${STEREDEG_BYPASS_CONSISTENCY}" != "yes"; then
@@ -174,6 +197,19 @@ AC_DEFUN([SD_HDF5_INIT], [
       env)
         _SD_HDF5_SET_ENV
         ;;
+
+      pkg)
+         TMP_HDF5_CPPFLAGS=`$PKG_CONFIG --cflags --keep-system-cflags hdf5`
+         TMP_HDF5_FFFLAGS="${TMP_HDF5_CPPFLAGS}"
+         TMP_HDF5_LIBS=`$PKG_CONFIG --libs  --keep-system-libs hdf5`
+         sd_hdf5_cppflags="${TMP_HDF5_CPPFLAGS} "
+         sd_hdf5_cflags="${TMP_HDF5_CPPFLAGS}"
+         sd_hdf5_cxxflags="${TMP_HDF5_CPPFLAGS}"
+         test "${sd_hdf5_enable_fc}" = "yes" && \
+              sd_hdf5_fcflags="${TMP_HDF5_FFLAGS}"
+         sd_hdf5_ldflags="${TMP_HDF5_LIBS}"
+         sd_hdf5_libs="${TMP_HDF5_LIBS}"
+         ;;
 
       *)
         AC_MSG_ERROR([invalid init type for HDF5: '${sd_hdf5_init}'])
@@ -481,7 +517,7 @@ AC_DEFUN([_SD_HDF5_CHECK_CONFIG], [
   fi
 
   # Environment variables conflict with --with-* options
-  tmp_hdf5_vars="${HDF5_CPPFLAGS}${HDF5_CFLAGS}${HDF5_FCFLAGS}${HDF5_LDFLAGS}${HDF5_LIBS}"
+  tmp_hdf5_vars="${HDF5_CPPFLAGS}${HDF5_CFLAGS}${HDF5_FFLAGS}${HDF5_FCFLAGS}${HDF5_LDFLAGS}${HDF5_LIBS}"
   tmp_hdf5_invalid="no"
   if test ! -z "${tmp_hdf5_vars}" -a ! -z "${sd_hdf5_prefix}"; then
     case "${sd_hdf5_policy}" in
@@ -495,14 +531,18 @@ AC_DEFUN([_SD_HDF5_CHECK_CONFIG], [
         tmp_hdf5_invalid="yes"
         ;;
       warn)
-        AC_MSG_WARN([conflicting option settings for HDF5])
-        tmp_hdf5_invalid="yes"
+        if test "${sd_hdf5_init}" = "dir" ; then
+          AC_MSG_WARN([conflicting option settings for HDF5 : when giving a path, environment variables are ignored. Set with_hdf5="yes" to use environment variables])
+        else
+          AC_MSG_WARN([conflicting option settings for HDF5])
+          tmp_hdf5_invalid="yes"
+        fi
         ;;
     esac
   fi
 
   # When using environment variables, triggers must be set to yes
-  if test -n "${tmp_hdf5_vars}"; then
+  if test -n "${tmp_hdf5_vars}" -a ! "${sd_hdf5_init}" = "dir" ; then
     sd_hdf5_enable="yes"
     sd_hdf5_init="env"
     if test "${tmp_hdf5_invalid}" = "yes"; then
@@ -620,7 +660,8 @@ AC_DEFUN([_SD_HDF5_CHECK_COMPILERS], [
     unset tmp_hdf5_hl
 
     AC_MSG_CHECKING([for HDF5 extra dependencies])
-    sd_hdf5_libs_extra=`${sd_hdf5_h5cc} -showconfig | grep 'Extra libraries: ' | sed -e 's/.*Extra libraries: //'`
+    sd_hdf5_libs_extra=`${sd_hdf5_h5cc} -showconfig | grep 'Extra libraries: ' | sed -e 's/.*Extra libraries: //' -e 's/m\;dl\;//' -e 's/m\;dl//'`
+    # Proposed change to be more general : sd_hdf5_libs_extra=`${sd_hdf5_h5cc} -showconfig | egrep 'LDFLAGS: |Extra libraries: ' | sed -e 's/.*Extra libraries: //;s/.*LDFLAGS: //:'`
     if test "${sd_hdf5_libs_extra}" = ""; then
       AC_MSG_RESULT([none])
     else
@@ -629,7 +670,7 @@ AC_DEFUN([_SD_HDF5_CHECK_COMPILERS], [
 
     if test "${sd_mpi_ok}" = "yes"; then
       AC_MSG_CHECKING([whether HDF5 supports MPI])
-      sd_hdf5_has_mpi=`${sd_hdf5_h5cc} -showconfig | grep 'Parallel HDF5:' | awk '{print [$]NF}'`
+      sd_hdf5_has_mpi=`${sd_hdf5_h5cc} -showconfig | grep 'Parallel HDF5:' | awk '{print [$]NF}' | sed 's/ON/yes/'`
       test "${sd_hdf5_has_mpi}" = "" && sd_hdf5_has_mpi="no"
       AC_MSG_RESULT([${sd_hdf5_has_mpi}])
     else
@@ -719,6 +760,7 @@ AC_DEFUN([_SD_HDF5_SET_ENV], [
   test ! -z "${HDF5_CFLAGS}" && sd_hdf5_cflags="${HDF5_CFLAGS}"
   test ! -z "${HDF5_CXXFLAGS}" && sd_hdf5_cxxflags="${HDF5_CXXFLAGS}"
   if test "${sd_hdf5_enable_fc}" = "yes"; then
+    test ! -z "${HDF5_FFLAGS}" && sd_hdf5_fcflags="${HDF5_FFLAGS}"
     test ! -z "${HDF5_FCFLAGS}" && sd_hdf5_fcflags="${HDF5_FCFLAGS}"
   fi
   test ! -z "${HDF5_LDFLAGS}" && sd_hdf5_ldflags="${HDF5_LDFLAGS}"

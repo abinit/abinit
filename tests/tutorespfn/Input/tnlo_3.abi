@@ -13,12 +13,12 @@ tnlo_2o_DS5_DDB
 #%% executable = mrgddb
 #%% test_chain = tnlo_2.abi, tnlo_3.abi, tnlo_4.abi
 #%% [files]
-#%% files_to_test = 
-#%%   tnlo_3.ddb.out, tolnlines=  0, tolabs=  1.143e-09, tolrel=  3.000e-09, fld_options=-medium
+#%% files_to_test =
+#%%   tnlo_3.ddb.out, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options=-medium
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = J. Zwanziger, M. Veithen, P. Ghosez
-#%% keywords = 
+#%% keywords =
 #%% description = mrgddb input file
 #%%<END TEST_INFO>

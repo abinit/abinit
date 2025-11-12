@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.5.1.5 of ABINIT, released Jul 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h31 )
+.Starting date : Thu  9 Oct 2025.
+- ( at 18h06 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v7_t26/t26.in
-- output file    -> t26.out
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/v7_t26/t26.abi
+- output file    -> t26.abo
 - root for input  files -> t26i
 - root for output files -> t26o
-
 
  DATASET    1 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -36,11 +35,10 @@
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        30    nfftf =     27000
 ================================================================================
-P This job should need less than                       8.137 Mbytes of memory.
+P This job should need less than                       8.260 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.126 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -55,11 +53,10 @@ _ WF disk file :      0.126 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        30    nfftf =     27000
 ================================================================================
-P This job should need less than                       8.137 Mbytes of memory.
+P This job should need less than                       8.260 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.126 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -74,7 +71,7 @@ _ WF disk file :      0.126 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        30    nfftf =     27000
 ================================================================================
-P This job should need less than                       8.137 Mbytes of memory.
+P This job should need less than                       8.260 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.126 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
@@ -83,10 +80,10 @@ _ WF disk file :      0.126 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 = 10
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -96,7 +93,7 @@ _ WF disk file :      0.126 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
            diemac      2.00000000E+00
              ecut      1.00000000E+01 Hartree
            enunit           1
--          fftalg         312
+-          fftalg         512
               ixc           7
            jdtset        1    2    3
               kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
@@ -232,8 +229,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Li.LDA-PW-paw.abinit
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Li.LDA-PW-paw.abinit
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Li.LDA-PW-paw.abinit
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Li.LDA-PW-paw.abinit
 - Paw atomic data for element Li - Generated by atompaw v3.0.1.9 & AtomPAW2Abinit v3.3.1
 -  3.00000   3.00000  20130717                znucl, zion, pspdat
     7    7    1    0      1277   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -255,8 +252,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/H.LDA-PW-paw.abinit
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/H.LDA-PW-paw.abinit
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/H.LDA-PW-paw.abinit
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/H.LDA-PW-paw.abinit
 - Paw atomic data for element H - Generated by atompaw v3.0.1.9 & AtomPAW2Abinit v3.3.1
 -  1.00000   1.00000  20130717                znucl, zion, pspdat
     7    7    0    0       366   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -349,8 +346,8 @@ force_length_stats: {min: null, max: null, mean: null, }
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      3.835610522571552
- Compensation charge over fine fft grid    =      3.835669406442018
+ Compensation charge over spherical meshes =      3.835610522574099
+ Compensation charge over fine fft grid    =      3.835669406437909
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -374,8 +371,8 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  Mean square residual over all n,k,spin=   22.400E-07; max=  26.863E-06
    0.2500  0.2500  0.2500    1  2.68632E-05 kpt; spin; max resid(k); each band:
-   5.88E-13  2.67E-14  3.13E-14  2.22E-10  2.07E-10  5.71E-12  8.22E-12  6.69E-12
-   6.66E-12  7.41E-11  1.59E-08  2.69E-05
+  5.88E-13 2.67E-14 3.13E-14 2.22E-10 2.07E-10 5.71E-12 8.22E-12 6.69E-12
+  6.66E-12 7.41E-11 1.59E-08 2.69E-05
  reduced coordinates (array xred) for    7 atoms
        0.500000000000      0.500000000000      0.500000000000
        0.000000000000      0.500000000000      0.500000000000
@@ -423,15 +420,15 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  5.67300568315773E+00
-hartree             :  3.36794112968313E+00
-xc                  : -3.07480543888060E+00
+kinetic             :  5.67300568317513E+00
+hartree             :  3.36794112968409E+00
+xc                  : -3.07480543888012E+00
 Ewald energy        : -9.60643650480815E+00
 psp_core            :  2.86909616680841E-01
-local_psp           : -1.25247663393140E+01
-spherical_terms     : -8.67589167057253E+00
-total_energy        : -2.45540435240536E+01
-total_energy_eV     : -6.68149503648169E+02
+local_psp           : -1.25247663393170E+01
+PAW spherical_terms : -8.67589167057129E+00
+total_energy        : -2.45540435240365E+01
+total_energy_eV     : -6.68149503647705E+02
 monopole_correction :  1.86664307860572E-01
 monopole_correction_eV:  5.07939413415525E+00
 ...
@@ -440,11 +437,11 @@ monopole_correction_eV:  5.07939413415525E+00
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -1.07838798797110E+01
+band_energy         : -1.07838798797066E+01
 Ewald energy        : -9.60643650480815E+00
 psp_core            :  2.86909616680841E-01
-xc_dc               : -2.43023480036088E+00
-spherical_terms     : -2.02042389498348E+00
+xc_dc               : -2.43023480036199E+00
+PAW spherical_terms : -2.02042389498677E+00
 total_energy_dc     : -2.45540654631827E+01
 total_energy_dc_eV  : -6.68150100642233E+02
 ...
@@ -567,8 +564,8 @@ force_length_stats: {min: null, max: null, mean: null, }
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      3.837363878142393
- Compensation charge over fine fft grid    =      3.837422846789861
+ Compensation charge over spherical meshes =      3.837363878138750
+ Compensation charge over fine fft grid    =      3.837422846797336
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -592,8 +589,8 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  Mean square residual over all n,k,spin=   22.662E-07; max=  27.178E-06
    0.2500  0.2500  0.2500    1  2.71781E-05 kpt; spin; max resid(k); each band:
-   5.59E-13  2.50E-14  3.00E-14  2.13E-10  1.97E-10  5.64E-12  8.14E-12  6.62E-12
-   6.58E-12  6.95E-11  1.57E-08  2.72E-05
+  5.59E-13 2.49E-14 3.01E-14 2.13E-10 1.97E-10 5.64E-12 8.14E-12 6.62E-12
+  6.58E-12 6.95E-11 1.57E-08 2.72E-05
  reduced coordinates (array xred) for    7 atoms
        0.500000000000      0.500000000000      0.500000000000
        0.000000000000      0.500000000000      0.500000000000
@@ -641,15 +638,15 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  5.67173320877419E+00
-hartree             :  3.36845527270467E+00
-xc                  : -3.07403544007679E+00
+kinetic             :  5.67173320877032E+00
+hartree             :  3.36845527270220E+00
+xc                  : -3.07403544007726E+00
 Ewald energy        : -9.60643650480815E+00
 psp_core            :  2.86909616680841E-01
-local_psp           : -1.25257457375538E+01
-spherical_terms     : -8.66203229016252E+00
-total_energy        : -2.45411518744415E+01
-total_energy_eV     : -6.67798704021987E+02
+local_psp           : -1.25257457375471E+01
+PAW spherical_terms : -8.66203229016093E+00
+total_energy        : -2.45411518744401E+01
+total_energy_eV     : -6.67798704021947E+02
 monopole_correction :  1.86664307860572E-01
 monopole_correction_eV:  5.07939413415525E+00
 ...
@@ -658,13 +655,13 @@ monopole_correction_eV:  5.07939413415525E+00
 --- !EnergyTermsDC
 iteration_state     : {dtset: 2, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -1.06096225281094E+01
+band_energy         : -1.06096225281166E+01
 Ewald energy        : -9.60643650480815E+00
 psp_core            :  2.86909616680841E-01
-xc_dc               : -2.43098612955403E+00
-spherical_terms     : -2.18103621211958E+00
+xc_dc               : -2.43098612955145E+00
+PAW spherical_terms : -2.18103621211507E+00
 total_energy_dc     : -2.45411717579104E+01
-total_energy_dc_eV  : -6.67799245078690E+02
+total_energy_dc_eV  : -6.67799245078691E+02
 ...
 
 
@@ -738,7 +735,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  6  -24.531994396865    -4.142E-07 2.230E-05 2.675E-05
  ETOT  7  -24.531994092996     3.039E-07 9.300E-05 7.719E-07
  ETOT  8  -24.531994104531    -1.154E-08 7.166E-06 1.015E-07
- ETOT  9  -24.531994103294     1.238E-09 2.686E-05 6.848E-09
+ ETOT  9  -24.531994103293     1.238E-09 2.686E-05 6.848E-09
 
  At SCF step    9, etot is converged : 
   for the second time, diff in etot=  1.238E-09 < toldfe=  1.000E-07
@@ -785,8 +782,8 @@ force_length_stats: {min: null, max: null, mean: null, }
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      3.835610267257929
- Compensation charge over fine fft grid    =      3.835669151288623
+ Compensation charge over spherical meshes =      3.835610267256555
+ Compensation charge over fine fft grid    =      3.835669151285636
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -810,8 +807,8 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  Mean square residual over all n,k,spin=   22.400E-07; max=  26.863E-06
    0.2500  0.2500  0.2500    1  2.68634E-05 kpt; spin; max resid(k); each band:
-   5.88E-13  2.67E-14  3.13E-14  2.22E-10  2.08E-10  5.71E-12  8.22E-12  6.69E-12
-   6.66E-12  7.41E-11  1.59E-08  2.69E-05
+  5.88E-13 2.67E-14 3.13E-14 2.22E-10 2.08E-10 5.71E-12 8.22E-12 6.69E-12
+  6.66E-12 7.41E-11 1.59E-08 2.69E-05
  reduced coordinates (array xred) for    7 atoms
        0.500000000000      0.500000000000      0.500000000000
        0.000000000000      0.500000000000      0.500000000000
@@ -859,15 +856,15 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !EnergyTerms
 iteration_state     : {dtset: 3, }
 comment             : Components of total free energy in Hartree
-kinetic             :  5.67300605856512E+00
-hartree             :  3.36794108995364E+00
-xc                  : -3.07480560102106E+00
+kinetic             :  5.67300605855032E+00
+hartree             :  3.36794108995247E+00
+xc                  : -3.07480560102125E+00
 Ewald energy        : -9.60643650480815E+00
 psp_core            :  0.00000000000000E+00
-local_psp           : -1.22157853778008E+01
-spherical_terms     : -8.67589182838265E+00
-total_energy        : -2.45319721634939E+01
-total_energy_eV     : -6.67548911383666E+02
+local_psp           : -1.22157853777980E+01
+PAW spherical_terms : -8.67589182838206E+00
+total_energy        : -2.45319721635067E+01
+total_energy_eV     : -6.67548911384015E+02
 monopole_correction :  1.86664307860572E-01
 monopole_correction_eV:  5.07939413415525E+00
 ...
@@ -876,13 +873,13 @@ monopole_correction_eV:  5.07939413415525E+00
 --- !EnergyTermsDC
 iteration_state     : {dtset: 3, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -1.04748993213997E+01
+band_energy         : -1.04748993214028E+01
 Ewald energy        : -9.60643650480815E+00
 psp_core            :  0.00000000000000E+00
-xc_dc               : -2.43023471025959E+00
-spherical_terms     : -2.02042356682608E+00
+xc_dc               : -2.43023471025836E+00
+PAW spherical_terms : -2.02042356682410E+00
 total_energy_dc     : -2.45319941032935E+01
-total_energy_dc_eV  : -6.67549508395976E+02
+total_energy_dc_eV  : -6.67549508395975E+02
 ...
 
 
@@ -920,7 +917,7 @@ total_energy_dc_eV  : -6.67549508395976E+02
                        9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
                        9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
                        9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
--          fftalg         312
+-          fftalg         512
               ixc           7
            jdtset        1    2    3
               kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
@@ -1098,10 +1095,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.5  wall=          3.5
+- Proc.   0 individual time (sec): cpu=          2.0  wall=          2.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered   3 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.5  wall=          3.5
+.Delivered   0 WARNINGs and  13 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.0  wall=          2.1

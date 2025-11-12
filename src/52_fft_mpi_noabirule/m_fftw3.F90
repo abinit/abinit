@@ -6,7 +6,7 @@
 !!  This module provides wrappers for the FFTW3 routines: in-place and out-of-place version.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2022 ABINIT group (MG, FD)
+!! Copyright (C) 2009-2025 ABINIT group (MG, FD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,17 @@
 #undef DEV_RC_BUG
 
 #define FFTLIB "FFTW3"
-#define FFT_PREF(name) CONCAT(fftw3_,name)
+! do not use FFT_PREF(name) since not working with NAG compiler
+#define FFT_PREF_fftrisc fftw3_fftrisc
+#define FFT_PREF_fftrisc_mixprec fftw3_fftrisc_mixprec
+#define FFT_PREF_fftpad fftw3_fftpad
+#define FFT_PREF_fftug_dp fftw3_fftug_dp
+#define FFT_PREF_fftur_dp fftw3_fftur_dp
+#define FFT_PREF_fftug fftw3_fftug
+#define FFT_PREF_fftur fftw3_fftur
+
+
+
 #define SPAWN_THREADS_HERE(ndat, nthreads) fftw3_spawn_threads_here(ndat, nthreads)
 #define FFT_DOUBLE 1
 #define FFT_SINGLE 2
@@ -54,7 +64,7 @@ MODULE m_fftw3
  use defs_abitypes,    only : MPI_type
  use m_mpinfo,         only : ptabs_fourwf
  use m_fstrings,       only : strcat, itoa, sjoin
- use m_fft_mesh,       only : zpad_t, zpad_init, zpad_free
+ use m_fft_mesh,       only : zpad_t
 
  implicit none
 
@@ -77,6 +87,7 @@ MODULE m_fftw3
  public :: fftw3_fftug          ! G-->R. 3D zero-padded FFT of lengths nx, ny, nz. Mainly used for wavefunctions
  public :: fftw3_fftur          ! R-->G, 3D zero-padded FFT of lengths nx, ny, nz. Mainly used for wavefunctions
  public :: fftw3_use_lib_threads
+ public :: fftw3_spawn_threads_here
 
  public :: fftw3_mpifourdp
 
@@ -304,8 +315,7 @@ subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_
 !scalars
  integer,parameter :: iscale1 = 1
  integer :: my_flags,ii,jj
- complex(spc), allocatable :: work_sp(:)
-
+ complex(sp), allocatable :: work_sp(:)
 ! *************************************************************************
 
  my_flags = ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags= fftw_flags
@@ -314,12 +324,12 @@ subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_
  case (2)
    ! Complex to Complex.
    if (fftcore_mixprec == 1) then
-     ! Mixed precision: copyin + in-place + copyout
+     ! Mixed precision: copy in + in-place + copyout
      ABI_MALLOC(work_sp, (ldx*ldy*ldz*ndat))
      if (isign == ABI_FFTW_BACKWARD) then ! +1
-       work_sp(:) = cmplx(fofg(1::2), fofg(2::2), kind=spc)
+       work_sp(:) = cmplx(fofg(1::2), fofg(2::2), kind=sp)
      else if (isign == ABI_FFTW_FORWARD) then ! -1
-       work_sp(:) = cmplx(fofr(1::2), fofr(2::2), kind=spc)
+       work_sp(:) = cmplx(fofr(1::2), fofr(2::2), kind=sp)
      else
        ABI_BUG("Wrong isign")
      end if
@@ -467,7 +477,6 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
  integer,parameter :: shiftg(3)=(/0,0,0/)
  integer :: symm(3,3)
 #endif
-
 ! *************************************************************************
 
  if (all(option /= [0, 1, 2, 3])) then
@@ -519,15 +528,15 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
            ptg = 1 + (dat-1)*npwin
            ptr = 1 + (dat-1)*ldx*ldy*ldz
            call fftw3_fftrisc_dp(cplex,denpot,fofgin(1,ptg),fofgout,fofr(1,ptr),gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
-&            mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+             mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
          end do
        else
-!$OMP PARALLEL DO PRIVATE(ptg,ptr)
+         !$OMP PARALLEL DO PRIVATE(ptg,ptr)
          do dat=1,ndat
            ptg = 1 + (dat-1)*npwin
            ptr = 1 + (dat-1)*ldx*ldy*ldz
            call fftw3_fftrisc_dp(cplex,denpot,fofgin(1,ptg),fofgout,fofr(1,ptr),gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
-&            mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+             mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
          end do
        end if
 
@@ -540,7 +549,7 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
          ptg = 1 + (dat-1)*npwin
          ptr = 1 + (dat-1)*ldx*ldy*ldz
          call fftw3_fftrisc_dp(cplex,denpot,fofgin(1,ptg),fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
-&          mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+           mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
        end do
 
        ! This version doesn't seem efficient
@@ -576,12 +585,12 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
            end if
          end do
        else
-!$OMP PARALLEL DO PRIVATE(ptgin,ptgout)
+         !$OMP PARALLEL DO PRIVATE(ptgin,ptgout)
          do dat=1,ndat
            ptgin  = 1 + (dat-1)*npwin
            ptgout = 1 + (dat-1)*npwout
            call fftw3_fftrisc_dp(cplex,denpot,fofgin(1,ptgin),fofgout(1,ptgout),fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
-&            mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+             mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
          end do
        end if
 
@@ -592,15 +601,15 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
            ptr    = 1 + (dat-1)*ldx*ldy*ldz
            ptgout = 1 + (dat-1)*npwout
            call fftw3_fftrisc_dp(cplex,denpot,fofgin,fofgout(1,ptgout),fofr(1,ptr),gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
-&            mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+              mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
          end do
        else
-!$OMP PARALLEL DO PRIVATE(ptr,ptgout)
+         !$OMP PARALLEL DO PRIVATE(ptr,ptgout)
          do dat=1,ndat
            ptr    = 1 + (dat-1)*ldx*ldy*ldz
            ptgout = 1 + (dat-1)*npwout
            call fftw3_fftrisc_dp(cplex,denpot,fofgin,fofgout(1,ptgout),fofr(1,ptr),gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
-&            mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+             mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
          end do
        end if
 
@@ -621,7 +630,7 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
      if (.not.fftw3_spawn_threads_here(ndat,nthreads)) then
        call fftw3_fftug_dp(fftalg,fftcache,npwin,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_kin,gboundin,fofgin,fofr)
      else
-!$OMP PARALLEL DO PRIVATE(ptg, ptr)
+       !$OMP PARALLEL DO PRIVATE(ptg, ptr)
        do dat=1,ndat
          ptg = 1 + (dat-1)*npwin
          ptr = 1 + (dat-1)*ldx*ldy*ldz
@@ -647,12 +656,12 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
        call cg_box2gsph(nx,ny,nz,ldx,ldy,ldz,ndat,npwout,kg_kout,fofr,fofgout)
      else
 
-!$OMP PARALLEL DO PRIVATE(ptg, ptr)
+       !$OMP PARALLEL DO PRIVATE(ptg, ptr)
        do dat=1,ndat
          ptg = 1 + (dat-1)*npwin
          ptr = 1 + (dat-1)*ldx*ldy*ldz
          call fftw3_fftug_dp(fftalg,fftcache,npwin,nx,ny,nz,ldx,ldy,ldz,ndat1,&
-&          istwf_k,mgfft,kg_kin,gboundin,fofgin(1,ptg),fofr(1,ptr))
+           istwf_k,mgfft,kg_kin,gboundin,fofgin(1,ptg),fofr(1,ptr))
 
          call cg_vlocpsi(nx,ny,nz,ldx,ldy,ldz,ndat1,cplex,denpot,fofr(1,ptr))
 
@@ -670,7 +679,7 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
        call fftw3_fftpad_dp(fofr,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,-1,gboundout)
        call cg_box2gsph(nx,ny,nz,ldx,ldy,ldz,ndat,npwout,kg_kout,fofr,fofgout)
      else
-!$OMP PARALLEL DO PRIVATE(ptg, ptr)
+       !$OMP PARALLEL DO PRIVATE(ptg, ptr)
        do dat=1,ndat
          ptg = 1 + (dat-1)*npwout
          ptr = 1 + (dat-1)*ldx*ldy*ldz
@@ -683,7 +692,6 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
      write(msg,'(a,i0,a)')'Option',option,' is not allowed. Only option=0, 1, 2 or 3 are allowed presently.'
      ABI_ERROR(msg)
    END SELECT
-
 
 #else
    symm=0; symm(1,1)=1; symm(2,2)=1; symm(3,3)=1
@@ -786,7 +794,6 @@ subroutine fftw3_fftrisc_sp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,
  real(sp),intent(inout) :: fofgout(2,npwout)
  logical,optional,intent(in) :: abi_convention
  integer,optional,intent(in) :: iscale
-
 ! *************************************************************************
 
 #ifdef HAVE_FFTW3
@@ -798,7 +805,7 @@ subroutine fftw3_fftrisc_sp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,
 #undef  MYCONJG
 
 #define FFT_PRECISION FFT_SINGLE
-#define MYKIND SPC
+#define MYKIND SP
 #define MYCZERO (0._sp,0._sp)
 #define MYCMPLX  CMPLX
 #define MYCONJG  CONJG
@@ -904,7 +911,6 @@ subroutine fftw3_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,
  real(dp),intent(inout) :: fofgout(2,npwout)
  logical,optional,intent(in) :: abi_convention
  integer,optional,intent(in) :: iscale
-
 ! *************************************************************************
 
 #ifdef HAVE_FFTW3
@@ -916,7 +922,7 @@ subroutine fftw3_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,
 #undef  MYCONJG
 
 #define FFT_PRECISION FFT_DOUBLE
-#define MYKIND DPC
+#define MYKIND DP
 #define MYCZERO (0._dp,0._dp)
 #define MYCMPLX  DCMPLX
 #define MYCONJG  DCONJG
@@ -961,7 +967,6 @@ subroutine fftw3_fftrisc_mixprec(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboun
  real(dp),intent(inout) :: fofgout(2,npwout)
  logical,optional,intent(in) :: abi_convention
  integer,optional,intent(in) :: iscale
-
 ! *************************************************************************
 
 #ifdef HAVE_FFTW3
@@ -973,7 +978,7 @@ subroutine fftw3_fftrisc_mixprec(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboun
 #undef  MYCONJG
 
 #define FFT_PRECISION FFT_MIXPREC
-#define MYKIND SPC
+#define MYKIND SP
 #define MYCZERO (0._sp,0._sp)
 #define MYCMPLX  CMPLX
 #define MYCONJG  CONJG
@@ -1002,7 +1007,7 @@ end subroutine fftw3_fftrisc_mixprec
 !! TARGET: dp arrays with real and imaginary part
 !!
 !! INPUTS
-!! fftalg=FFT algorith (see input variable)
+!! fftalg=FFT algorithm (see input variable)
 !! fftcache=size of the cache (kB)
 !! npw_k=number of plane waves for this k-point.
 !! nx,ny,nz=Number of point along the three directions.
@@ -1040,7 +1045,6 @@ subroutine fftw3_fftug_dp(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
  integer :: iscale__, isign__
  real(dp) :: fofgout(2,0)
  real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
-
 ! *************************************************************************
 
  iscale__ = 0; if (present(iscale)) iscale__ = iscale
@@ -1048,6 +1052,10 @@ subroutine fftw3_fftug_dp(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cg_,name)
+#undef TK_PREF_box2gsph
+#define TK_PREF_box2gsph cg_box2gsph
+#undef TK_PREF_gsph2box
+#define TK_PREF_gsph2box cg_gsph2box
 
 #undef  FFT_PRECISION
 #define FFT_PRECISION FFT_DOUBLE
@@ -1091,8 +1099,8 @@ subroutine fftw3_fftug_spc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
  integer,optional,intent(in) :: isign, iscale
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2),kg_k(3,npw_k)
- complex(spc),target,intent(in) :: ug(npw_k*ndat)
- complex(spc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
+ complex(sp),target,intent(in) :: ug(npw_k*ndat)
+ complex(sp),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
 
 #ifdef HAVE_FFTW3
 !Local variables-------------------------------
@@ -1102,7 +1110,6 @@ subroutine fftw3_fftug_spc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
 !arrays
  real(sp) :: fofgout(2,0)
  real(sp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
-
 ! *************************************************************************
 
  iscale__ = 0; if (present(iscale)) iscale__ = iscale
@@ -1110,6 +1117,10 @@ subroutine fftw3_fftug_spc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
+#undef TK_PREF_box2gsph
+#define TK_PREF_box2gsph cplx_box2gsph
+#undef TK_PREF_gsph2box
+#define TK_PREF_gsph2box cplx_gsph2box
 
 #undef  FFT_PRECISION
 #define FFT_PRECISION FFT_SINGLE
@@ -1137,7 +1148,7 @@ end subroutine fftw3_fftug_spc
 !! FUNCTION
 !! Compute ndat zero-padded FFTs.
 !! Mainly used for the transform of wavefunctions.
-!! TARGET: DPC arrays
+!! TARGET: DP arrays
 !! See fftw3_fftug_dp for API docs.
 !!
 !! SOURCE
@@ -1152,8 +1163,8 @@ subroutine fftw3_fftug_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
  integer,intent(in) :: npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2),kg_k(3,npw_k)
- complex(dpc),target,intent(in) :: ug(npw_k*ndat)
- complex(dpc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
+ complex(dp),target,intent(in) :: ug(npw_k*ndat)
+ complex(dp),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
  integer,optional,intent(in) :: isign, iscale
 
 #ifdef HAVE_FFTW3
@@ -1164,7 +1175,6 @@ subroutine fftw3_fftug_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
 !arrays
  real(dp) :: fofgout(2,0)
  real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
-
 ! *************************************************************************
 
  iscale__ = 0; if (present(iscale)) iscale__ = iscale
@@ -1172,6 +1182,10 @@ subroutine fftw3_fftug_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
+#undef TK_PREF_box2gsph
+#define TK_PREF_box2gsph cplx_box2gsph
+#undef TK_PREF_gsph2box
+#define TK_PREF_gsph2box cplx_gsph2box
 
 #undef  FFT_PRECISION
 #define FFT_PRECISION FFT_DOUBLE
@@ -1202,7 +1216,7 @@ end subroutine fftw3_fftug_dpc
 !! TARGET: dp arrays
 !!
 !! INPUTS
-!! fftalg=FFT algorith (see input variable)
+!! fftalg=FFT algorithm (see input variable)
 !! fftcache=size of the cache (kB)
 !! npw_k=number of plane waves for this k-point.
 !! nx,ny,nz=Number of point along the three directions.
@@ -1243,7 +1257,6 @@ subroutine fftw3_fftur_dp(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
 !arrays
  real(dp) :: dum_ugin(2,0)
  real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
-
 ! *************************************************************************
 
  iscale__ = 1; if (present(iscale)) iscale__ = iscale
@@ -1251,6 +1264,10 @@ subroutine fftw3_fftur_dp(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cg_,name)
+#undef TK_PREF_box2gsph
+#define TK_PREF_box2gsph cg_box2gsph
+#undef TK_PREF_gsph2box
+#define TK_PREF_gsph2box cg_gsph2box
 
 #undef  FFT_PRECISION
 #define FFT_PRECISION FFT_DOUBLE
@@ -1295,8 +1312,8 @@ subroutine fftw3_fftur_spc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
  integer,optional,intent(in) :: isign, iscale
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2),kg_k(3,npw_k)
- complex(spc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
- complex(spc),target,intent(inout) :: ug(npw_k*ndat)
+ complex(sp),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
+ complex(sp),target,intent(inout) :: ug(npw_k*ndat)
 
 #ifdef HAVE_FFTW3
 !Local variables-------------------------------
@@ -1306,7 +1323,6 @@ subroutine fftw3_fftur_spc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
 !arrays
  real(sp) :: dum_ugin(2,0)
  real(sp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
-
 ! *************************************************************************
 
  iscale__ = 1; if (present(iscale)) iscale__ = iscale
@@ -1314,6 +1330,10 @@ subroutine fftw3_fftur_spc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
+#undef TK_PREF_box2gsph
+#define TK_PREF_box2gsph cplx_box2gsph
+#undef TK_PREF_gsph2box
+#define TK_PREF_gsph2box cplx_gsph2box
 
 #undef  FFT_PRECISION
 #define FFT_PRECISION FFT_SINGLE
@@ -1342,7 +1362,7 @@ end subroutine fftw3_fftur_spc
 !! FUNCTION
 !! Compute ndat zero-padded FFTs from R ro G.
 !! Mainly used for the transform of wavefunctions.
-!! TARGET: DPC arrays
+!! TARGET: DP arrays
 !! See fftw3_fftur_dp for API doc.
 !!
 !! SOURCE
@@ -1358,8 +1378,8 @@ subroutine fftw3_fftur_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
  integer,optional,intent(in) :: isign, iscale
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2),kg_k(3,npw_k)
- complex(dpc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
- complex(dpc),target,intent(inout) :: ug(npw_k*ndat)
+ complex(dp),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
+ complex(dp),target,intent(inout) :: ug(npw_k*ndat)
 
 #ifdef HAVE_FFTW3
 !Local variables-------------------------------
@@ -1369,7 +1389,6 @@ subroutine fftw3_fftur_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
 !arrays
  real(dp) :: dum_ugin(2,0)
  real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
-
 ! *************************************************************************
 
  iscale__ = 1; if (present(iscale)) iscale__ = iscale
@@ -1377,6 +1396,10 @@ subroutine fftw3_fftur_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
+#undef TK_PREF_box2gsph
+#define TK_PREF_box2gsph cplx_box2gsph
+#undef TK_PREF_gsph2box
+#define TK_PREF_gsph2box cplx_gsph2box
 
 #undef  FFT_PRECISION
 #define FFT_PRECISION FFT_DOUBLE
@@ -1429,7 +1452,7 @@ subroutine fftw3_c2c_ip_spc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff, 
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,iscale,isign
  integer,optional,intent(in) :: fftw_flags
 !arrays
- complex(spc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
+ complex(sp),intent(inout) :: ff(ldx*ldy*ldz*ndat)
 
 #ifdef HAVE_FFTW3
 !Local variables-------------------------------
@@ -1439,7 +1462,6 @@ subroutine fftw3_c2c_ip_spc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff, 
  integer(KIND_FFTW_PLAN) :: my_plan
 !arrays
  integer :: embed(rank3),n(rank3)
-
 ! *************************************************************************
 
  my_flags=ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags=fftw_flags
@@ -1507,7 +1529,7 @@ subroutine fftw3_fftpad_spc(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, g
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2)
- complex(spc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
+ complex(sp),intent(inout) :: ff(ldx*ldy*ldz*ndat)
  integer,optional,intent(in) :: iscale
 
 #ifdef HAVE_FFTW3
@@ -1515,7 +1537,6 @@ subroutine fftw3_fftpad_spc(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, g
  integer,parameter :: dst=1
  integer :: iscale__
  real(sp) :: fact
-
 ! *************************************************************************
 
  iscale__ = merge(1, 0, isign == -1); if (present(iscale)) iscale__ = iscale
@@ -1564,7 +1585,7 @@ subroutine fftw3_c2c_ip_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff, 
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,iscale,isign
  integer,optional,intent(in) :: fftw_flags
 !arrays
- complex(dpc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
+ complex(dp),intent(inout) :: ff(ldx*ldy*ldz*ndat)
 
 #ifdef HAVE_FFTW3
 !Local variables-------------------------------
@@ -1574,7 +1595,6 @@ subroutine fftw3_c2c_ip_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff, 
  integer(KIND_FFTW_PLAN) :: my_plan
 !arrays
  integer :: embed(rank3),n(rank3)
-
 ! *************************************************************************
 
  my_flags=ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags=fftw_flags
@@ -1640,8 +1660,8 @@ subroutine fftw3_c2c_op_spc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff, 
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,iscale,isign,ndat
  integer,optional,intent(in) :: fftw_flags
 !arrays
- complex(spc),intent(in) :: ff(ldx*ldy*ldz*ndat)
- complex(spc),intent(out) :: gg(ldx*ldy*ldz*ndat)
+ complex(sp),intent(in) :: ff(ldx*ldy*ldz*ndat)
+ complex(sp),intent(out) :: gg(ldx*ldy*ldz*ndat)
 
 #ifdef HAVE_FFTW3
 !Local variables-------------------------------
@@ -1651,7 +1671,6 @@ subroutine fftw3_c2c_op_spc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff, 
  integer(KIND_FFTW_PLAN) :: my_plan
 !arrays
  integer :: embed(rank3),n(rank3)
-
 ! *************************************************************************
 
  my_flags=ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags= fftw_flags
@@ -1717,8 +1736,8 @@ subroutine fftw3_c2c_op_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff, 
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,isign,ndat,iscale
  integer,optional,intent(in) :: fftw_flags
 !arrays
- complex(dpc),intent(in) :: ff(ldx*ldy*ldz*ndat)
- complex(dpc),intent(out) :: gg(ldx*ldy*ldz*ndat)
+ complex(dp),intent(in) :: ff(ldx*ldy*ldz*ndat)
+ complex(dp),intent(out) :: gg(ldx*ldy*ldz*ndat)
 
 #ifdef HAVE_FFTW3
 !Local variables-------------------------------
@@ -1728,7 +1747,6 @@ subroutine fftw3_c2c_op_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff, 
  integer(KIND_FFTW_PLAN) :: my_plan
 !arrays
  integer :: embed(rank3),n(rank3)
-
 ! *************************************************************************
 
  my_flags=ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags= fftw_flags
@@ -1809,7 +1827,6 @@ subroutine fftw3_r2c_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
  integer :: inembed(rank3),onembed(rank3),n(rank3)
  integer,allocatable :: i1inver(:),i2inver(:),i3inver(:)
  real(dp),allocatable :: gg_hp(:,:)
-
 ! *************************************************************************
 
  my_flags=ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags= fftw_flags
@@ -1958,7 +1975,6 @@ subroutine fftw3_c2r_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
 !arrays
  integer :: inembed(rank3),onembed(rank3),n(rank3)
  real(dp),allocatable :: ff_hp(:,:)
-
 ! *************************************************************************
 
 #ifdef DEV_RC_BUG
@@ -1984,7 +2000,7 @@ subroutine fftw3_c2r_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
  do idat=1,ndat
    padatf=(idat-1)*ldx*ldy*ldz
    padatp=(idat-1)*padx*ny*nz
-!$OMP PARALLEL DO PRIVATE(igf,igp)
+   !$OMP PARALLEL DO PRIVATE(igf,igp)
    do i3=1,nz
      do i2=1,ny
        igf = (i3-1)*ldx*ldy + (i2-1)*ldx   + padatf
@@ -2067,7 +2083,6 @@ subroutine fftw3_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout,fftw_flags
  integer(KIND_FFTW_PLAN) :: my_plan
 !arrays
  integer :: embed(rank3),n(rank3)
-
 ! *************************************************************************
 
  my_flags=ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags= fftw_flags
@@ -2145,7 +2160,6 @@ subroutine fftw3_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,finout,fftw_flags)
  integer(KIND_FFTW_PLAN) :: my_plan
 !arrays
  integer :: embed(rank3),n(rank3)
-
 ! *************************************************************************
 
  my_flags=ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags= fftw_flags
@@ -2202,8 +2216,6 @@ end subroutine fftw3_many_dft_ip
 
 subroutine fftw3_cleanup()
 
-! *************************************************************************
-
 #ifdef HAVE_FFTW3_MPI
  call fftw_mpi_cleanup()
 #endif
@@ -2239,7 +2251,6 @@ subroutine fftw3_destroy_plan(plan)
 !Arguments ------------------------------------
 !scalars
  integer(KIND_FFTW_PLAN),intent(in) :: plan
-
 ! *************************************************************************
 
 #ifdef HAVE_FFTW3
@@ -2279,7 +2290,6 @@ subroutine fftw3_init_threads()
 #ifdef HAVE_FFTW3_THREADS
  integer :: iret
 #endif
-
 ! *************************************************************************
 
 #ifdef HAVE_FFTW3_THREADS
@@ -2338,7 +2348,6 @@ subroutine fftw3_set_nthreads(nthreads)
  integer,parameter :: enough=1
  integer,save :: nwarns=0
 #endif
-
 ! *************************************************************************
 
 #ifdef HAVE_FFTW3_THREADS
@@ -2418,7 +2427,6 @@ subroutine fftw3_fftpad_dp(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gb
  integer,parameter :: dst=2
  integer :: iscale__
  real(dp) :: fact
-
 ! *************************************************************************
 
  iscale__ = merge(1, 0, isign == -1); if (present(iscale)) iscale__ = iscale
@@ -2471,14 +2479,13 @@ subroutine fftw3_fftpad_dpc(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, g
  integer,optional,intent(in) :: iscale
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2)
- complex(dpc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
+ complex(dp),intent(inout) :: ff(ldx*ldy*ldz*ndat)
 
 #ifdef HAVE_FFTW3
 !Local variables-------------------------------
  integer,parameter :: dst=1
  integer :: iscale__
  real(dp) :: fact
-
 ! *************************************************************************
 
  iscale__ = merge(1, 0, isign == -1); if (present(iscale)) iscale__ = iscale
@@ -2522,23 +2529,22 @@ function dplan_many_dft_1D(rank,n,howmany,fin,inembed,istride,idist,fout,onembed
 
 !Local variables-------------------------------
  character(len=500) :: msg,frmt
-
 ! *************************************************************************
 
-!$OMP CRITICAL (OMPC_dfftw_plan_many_dft_1D)
+ !$OMP CRITICAL (OMPC_dfftw_plan_many_dft_1D)
  call fftw3_set_nthreads(nthreads)
 
  call dfftw_plan_many_dft(plan, rank, n, howmany, &
-&  fin, inembed, istride, idist, fout, onembed, ostride, odist, sign, flags)
-!$OMP END CRITICAL (OMPC_dfftw_plan_many_dft_1D)
+   fin, inembed, istride, idist, fout, onembed, ostride, odist, sign, flags)
+ !$OMP END CRITICAL (OMPC_dfftw_plan_many_dft_1D)
 
  if (plan==NULL_PLAN) then
    call wrtout(std_out, "dfftw_plan_many_dft returned NULL_PLAN!")
    write(frmt,*)"(a,",rank,"(1x,i0),3(a,i0),a,2(a,",rank,"(1x,i0),2(a,i0),a))"
    write(msg,frmt)&
-&    " n= ",n," howmany= ",howmany," sign= ",sign," flags= ",flags,ch10,&
-&    " inembed= ",inembed," istride= ",istride," idist=",idist,ch10,    &
-&    " onembed= ",onembed," ostride= ",ostride," odist=",idist,ch10
+    " n= ",n," howmany= ",howmany," sign= ",sign," flags= ",flags,ch10,&
+    " inembed= ",inembed," istride= ",istride," idist=",idist,ch10,    &
+    " onembed= ",onembed," ostride= ",ostride," odist=",idist,ch10
    call wrtout(std_out, msg)
    ABI_ERROR("Check FFTW library and/or abinit code")
  end if
@@ -2555,8 +2561,6 @@ end function dplan_many_dft_1D
 !!
 !! INPUTS
 !!
-!! SIDE EFFECTS
-!!
 !! SOURCE
 
 function dplan_many_dft_2D(rank,n,howmany,fin,inembed,istride,idist,fout,onembed,ostride,odist,sign,flags,nthreads) result(plan)
@@ -2571,23 +2575,22 @@ function dplan_many_dft_2D(rank,n,howmany,fin,inembed,istride,idist,fout,onembed
 
 !Local variables-------------------------------
  character(len=500) :: msg,frmt
-
 ! *************************************************************************
 
-!$OMP CRITICAL (OMPC_dfftw_plan_many_dft_2D)
+ !$OMP CRITICAL (OMPC_dfftw_plan_many_dft_2D)
  call fftw3_set_nthreads(nthreads)
 
  call dfftw_plan_many_dft(plan, rank, n, howmany, &
-&  fin, inembed, istride, idist, fout, onembed, ostride, odist, sign, flags)
-!$OMP END CRITICAL (OMPC_dfftw_plan_many_dft_2D)
+   fin, inembed, istride, idist, fout, onembed, ostride, odist, sign, flags)
+ !$OMP END CRITICAL (OMPC_dfftw_plan_many_dft_2D)
 
  if (plan==NULL_PLAN) then
    call wrtout(std_out, "dfftw_plan_many_dft returned NULL_PLAN!")
    write(frmt,*)"(a,",rank,"(1x,i0),3(a,i0),a,2(a,",rank,"(1x,i0),2(a,i0),a))"
    write(msg,frmt)&
-&    " n= ",n," howmany= ",howmany," sign= ",sign," flags= ",flags,ch10,&
-&    " inembed= ",inembed," istride= ",istride," idist=",idist,ch10,    &
-&    " onembed= ",onembed," ostride= ",ostride," odist=",idist,ch10
+     " n= ",n," howmany= ",howmany," sign= ",sign," flags= ",flags,ch10,&
+     " inembed= ",inembed," istride= ",istride," idist=",idist,ch10,    &
+     " onembed= ",onembed," ostride= ",ostride," odist=",idist,ch10
    call wrtout(std_out, msg)
    ABI_ERROR("Check FFTW library and/or abinit code")
  end if
@@ -2617,27 +2620,26 @@ function cplan_many_dft(rank,n,howmany,fin,inembed,istride,idist,fout,onembed,os
  integer,intent(in) :: n(rank),inembed(rank),onembed(rank)
  integer(KIND_FFTW_PLAN) :: plan
 !arrays
- complex(spc) :: fin(*),fout(*)
+ complex(sp) :: fin(*),fout(*)
 
 !Local variables-------------------------------
  character(len=500) :: msg,frmt
-
 ! *************************************************************************
 
-!$OMP CRITICAL (OMPC_cplan_many_dft)
+ !$OMP CRITICAL (OMPC_cplan_many_dft)
  call fftw3_set_nthreads(nthreads)
 
  call sfftw_plan_many_dft(plan, rank, n, howmany, &
-&  fin, inembed, istride, idist, fout, onembed, ostride, odist, sign, flags)
-!$OMP END CRITICAL (OMPC_cplan_many_dft)
+   fin, inembed, istride, idist, fout, onembed, ostride, odist, sign, flags)
+ !$OMP END CRITICAL (OMPC_cplan_many_dft)
 
  if (plan==NULL_PLAN) then ! handle the error
    call wrtout(std_out, "sfftw_plan_many_dft returned NULL_PLAN (complex version)")
    write(frmt,*)"(a,",rank,"(1x,i0),3(a,i0),a,2(a,",rank,"(1x,i0),2(a,i0),a))"
    write(msg,frmt)&
-&    " n = ",n," howmany = ",howmany," sign = ",sign," flags = ",flags,ch10,&
-&    " inembed = ",inembed," istride = ",istride," idist =",idist,ch10,     &
-&    " onembed = ",onembed," ostride = ",ostride," odist =",idist,ch10
+     " n = ",n," howmany = ",howmany," sign = ",sign," flags = ",flags,ch10,&
+     " inembed = ",inembed," istride = ",istride," idist =",idist,ch10,     &
+     " onembed = ",onembed," ostride = ",ostride," odist =",idist,ch10
    call wrtout(std_out, msg)
    ABI_ERROR("Check FFTW library and/or abinit code")
  end if
@@ -2667,27 +2669,26 @@ function zplan_many_dft(rank,n,howmany,fin,inembed,istride,idist,fout,onembed,os
  integer,intent(in) :: n(rank),inembed(rank),onembed(rank)
  integer(KIND_FFTW_PLAN) :: plan
 !arrays
- complex(dpc) :: fin(*),fout(*)
+ complex(dp) :: fin(*),fout(*)
 
 !Local variables-------------------------------
  character(len=500) :: msg,frmt
-
 ! *************************************************************************
 
-!$OMP CRITICAL (OMPC_zplan_many_dft)
+ !$OMP CRITICAL (OMPC_zplan_many_dft)
  call fftw3_set_nthreads(nthreads)
 
  call dfftw_plan_many_dft(plan, rank, n, howmany, &
-&  fin, inembed, istride, idist, fout, onembed, ostride, odist, sign, flags)
-!$OMP END CRITICAL (OMPC_zplan_many_dft)
+   fin, inembed, istride, idist, fout, onembed, ostride, odist, sign, flags)
+ !$OMP END CRITICAL (OMPC_zplan_many_dft)
 
  if (plan==NULL_PLAN) then ! handle the error
    call wrtout(std_out, "dfftw_plan_many_dft returned NULL_PLAN (complex version)")
    write(frmt,*)"(a,",rank,"(1x,i0),3(a,i0),a,2(a,",rank,"(1x,i0),2(a,i0),a))"
    write(msg,frmt)&
-&    " n = ",n," howmany = ",howmany," sign = ",sign," flags = ",flags,ch10,&
-&    " inembed = ",inembed," istride = ",istride," idist =",idist,ch10,     &
-&    " onembed = ",onembed," ostride = ",ostride," odist =",idist,ch10
+     " n = ",n," howmany = ",howmany," sign = ",sign," flags = ",flags,ch10,&
+     " inembed = ",inembed," istride = ",istride," idist =",idist,ch10,     &
+     " onembed = ",onembed," ostride = ",ostride," odist =",idist,ch10
    call wrtout(std_out, msg)
    ABI_ERROR("Check FFTW library and/or abinit code")
  end if
@@ -2722,23 +2723,22 @@ function dplan_many_dft_r2c(rank,n,howmany,fin,inembed,istride,idist,fout,onembe
 
 !Local variables-------------------------------
  character(len=500) :: msg,frmt
-
 ! *************************************************************************
 
-!$OMP CRITICAL (OMPC_dplan_many_dft_r2c)
+ !$OMP CRITICAL (OMPC_dplan_many_dft_r2c)
  call fftw3_set_nthreads(nthreads)
 
  call dfftw_plan_many_dft_r2c(plan, rank, n, howmany, &
-&  fin, inembed, istride, idist, fout, onembed, ostride, odist, flags)
-!$OMP END CRITICAL (OMPC_dplan_many_dft_r2c)
+   fin, inembed, istride, idist, fout, onembed, ostride, odist, flags)
+ !$OMP END CRITICAL (OMPC_dplan_many_dft_r2c)
 
  if (plan==NULL_PLAN) then ! handle the error.
    call wrtout(std_out, "dfftw_plan_many_dft_r2c returned NULL_PLAN")
    write(frmt,*)"(a,",rank,"(1x,i0),2(a,i0),a,2(a,",rank,"(1x,i0),2(a,i0),a))"
    write(msg,frmt)&
-&    " n = ",n," howmany = ",howmany," flags = ",flags,ch10,&
-&    " inembed = ",inembed," istride = ",istride," idist = ",idist,ch10,&
-&    " onembed = ",onembed," ostride = ",ostride," odist = ",idist,ch10
+    " n = ",n," howmany = ",howmany," flags = ",flags,ch10,&
+    " inembed = ",inembed," istride = ",istride," idist = ",idist,ch10,&
+    " onembed = ",onembed," ostride = ",ostride," odist = ",idist,ch10
    call wrtout(std_out, msg)
    ABI_ERROR("Check FFTW library and/or abinit code")
  end if
@@ -2771,23 +2771,22 @@ function dplan_many_dft_c2r(rank,n,howmany,fin,inembed,istride,idist,fout,onembe
 
 !Local variables-------------------------------
  character(len=500) :: msg,frmt
-
 ! *************************************************************************
 
-!$OMP CRITICAL (OMPC_dplan_many_dft_c2r)
+ !$OMP CRITICAL (OMPC_dplan_many_dft_c2r)
  call fftw3_set_nthreads(nthreads)
 
  call dfftw_plan_many_dft_c2r(plan, rank, n, howmany, &
-&  fin, inembed, istride, idist, fout, onembed, ostride, odist, flags)
-!$OMP END CRITICAL (OMPC_dplan_many_dft_c2r)
+  fin, inembed, istride, idist, fout, onembed, ostride, odist, flags)
+ !$OMP END CRITICAL (OMPC_dplan_many_dft_c2r)
 
  if (plan==NULL_PLAN) then ! handle the error.
    call wrtout(std_out, "dfftw_plan_many_dft_c2r returned NULL_PLAN")
    write(frmt,*)"(a,",rank,"(1x,i0),2(a,i0),a,2(a,",rank,"(1x,i0),2(a,i0),a))"
    write(msg,frmt)&
-&    " n = ",n," howmany = ",howmany," flags = ",flags,ch10,&
-&    " inembed = ",inembed," istride = ",istride," idist = ",idist,ch10,&
-&    " onembed = ",onembed," ostride = ",ostride," odist = ",idist,ch10
+    " n = ",n," howmany = ",howmany," flags = ",flags,ch10,&
+    " inembed = ",inembed," istride = ",istride," idist = ",idist,ch10,&
+    " onembed = ",onembed," ostride = ",ostride," odist = ",idist,ch10
    call wrtout(std_out, msg)
    ABI_ERROR("Check FFTW library and/or abinit code")
  end if
@@ -2825,7 +2824,6 @@ subroutine fftw3_execute_dft_dp(plan, in, out)
  integer(KIND_FFTW_PLAN),intent(in) :: plan
  real(C_DOUBLE),intent(inout) :: in(*)
  real(C_DOUBLE),intent(out) :: out(*)
-
 ! *************************************************************************
 
  call dfftw_execute_dft(plan, in, out)
@@ -2852,7 +2850,6 @@ subroutine fftw3_execute_dft_spc(plan, in, out)
  integer(KIND_FFTW_PLAN),intent(in) :: plan
  complex(C_FLOAT_COMPLEX),intent(inout) :: in(*)
  complex(C_FLOAT_COMPLEX),intent(out) :: out(*)
-
 ! *************************************************************************
 
  call sfftw_execute_dft(plan, in, out)
@@ -2879,7 +2876,6 @@ subroutine fftw3_execute_dft_dpc(plan, in, out)
  integer(KIND_FFTW_PLAN),intent(in) :: plan
  complex(C_DOUBLE_COMPLEX),intent(inout) :: in(*)
  complex(C_DOUBLE_COMPLEX),intent(out) :: out(*)
-
 ! *************************************************************************
 
  call dfftw_execute_dft(plan, in, out)
@@ -2908,7 +2904,6 @@ subroutine fftw3_alloc_real1d_dp(size,cptr,fptr)
  integer,intent(in) :: size
  real(dp),ABI_CONTIGUOUS pointer :: fptr(:)
  type(C_PTR),intent(out) :: cptr
-
 ! *************************************************************************
 
  cptr = fftw_malloc( INT(size*C_DOUBLE, KIND=C_SIZE_T))
@@ -2940,7 +2935,6 @@ subroutine fftw3_alloc_real2d_dp(shape,cptr,fptr)
  integer,intent(in) :: shape(2)
  real(dp),ABI_CONTIGUOUS pointer :: fptr(:,:)
  type(C_PTR),intent(out) :: cptr
-
 ! *************************************************************************
 
  cptr = fftw_malloc( INT(product(shape)*C_DOUBLE, KIND=C_SIZE_T))
@@ -2970,9 +2964,8 @@ subroutine fftw3_alloc_complex1d_spc(size,cptr,fptr)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: size
- complex(spc),ABI_CONTIGUOUS pointer :: fptr(:)
+ complex(sp),ABI_CONTIGUOUS pointer :: fptr(:)
  type(C_PTR),intent(out) :: cptr
-
 ! *************************************************************************
 
  cptr = fftw_malloc( INT(2*size*C_FLOAT, KIND=C_SIZE_T))
@@ -3002,9 +2995,8 @@ subroutine fftw3_alloc_complex1d_dpc(size,cptr,fptr)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: size
- complex(dpc),ABI_CONTIGUOUS pointer :: fptr(:)
+ complex(dp),ABI_CONTIGUOUS pointer :: fptr(:)
  type(C_PTR),intent(out) :: cptr
-
 ! *************************************************************************
 
  cptr = fftw_malloc( INT(2*size*C_DOUBLE, KIND=C_SIZE_T))
@@ -3041,7 +3033,6 @@ function fftw3_spawn_threads_here(ndat,nthreads) result(ans)
 !scalars
  integer,intent(in) :: ndat,nthreads
  logical :: ans
-
 ! *************************************************************************
 
  ans = .FALSE.
@@ -3069,9 +3060,7 @@ end function fftw3_spawn_threads_here
 subroutine fftw3_use_lib_threads(logvar)
 
 !Arguments ------------------------------------
-!scalars
  logical,intent(in) :: logvar
-
 ! *************************************************************************
 
  USE_LIB_THREADS = logvar
@@ -3086,7 +3075,7 @@ end subroutine fftw3_use_lib_threads
 !!  fftwmpi_get_work_array
 !!
 !! FUNCTION
-!! Driver routine for allocate fftw work arrray for 3D complex-to-complex FFTs of lengths nx, ny, nz.
+!! Driver routine for allocate fftw work array for 3D complex-to-complex FFTs of lengths nx, ny, nz.
 !!
 !! INPUTS
 !! nx,ny,nz=Number of points along the three directions.
@@ -3114,7 +3103,6 @@ subroutine fftwmpi_get_work_array(cdata_f,cdata_r,rank,nx,ny,nz,ndat,comm_fft,n0
  integer(C_INTPTR_T) :: alloc_local
 !arrays
  integer(C_INTPTR_T) :: fft_sizes(4)
-
 ! *************************************************************************
 
  ! Dimensions are inverted here (C interface).
@@ -3148,7 +3136,7 @@ end subroutine fftwmpi_get_work_array
 !!  fftwmpi_free_work_array
 !!
 !! FUNCTION
-!!  routine for freeing fftw work arrray
+!!  routine for freeing fftw work array
 !!
 !! INPUTS
 !!
@@ -3162,7 +3150,6 @@ subroutine fftwmpi_free_work_array(cdata_f,cdata_r)
 !Arguments ------------------------------------
 !scalars
  type(C_PTR), intent(inout) :: cdata_f,cdata_r
-
 ! *************************************************************************
 
 #ifdef HAVE_FFTW3_MPI
@@ -3227,7 +3214,6 @@ subroutine fftw3mpi_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout,comm_ff
  type(C_PTR) :: plan, cdata
  complex(C_DOUBLE_COMPLEX), ABI_CONTIGUOUS pointer :: data(:,:,:)
  integer(C_INTPTR_T) :: i, j, k, alloc_local, local_n0, local_0_start,fft_sizes(4)
-
 !*************************************************************************
 
  my_flags=ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags= fftw_flags
@@ -3236,17 +3222,17 @@ subroutine fftw3mpi_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout,comm_ff
  fft_sizes = [nz,ny,nx,ndat]
 
  alloc_local = fftw_mpi_local_size_many( &
-&      rank3,fft_sizes(1:3),fft_sizes(4),&
-&      FFTW_MPI_DEFAULT_BLOCK, comm_fft, &
-&      local_n0,local_0_start)
+      rank3,fft_sizes(1:3),fft_sizes(4),&
+      FFTW_MPI_DEFAULT_BLOCK, comm_fft, &
+      local_n0,local_0_start)
 
  ! Allocate cdata, build the plane and copy data: fin --> data
  cdata = fftw_alloc_complex(alloc_local)
  call c_f_pointer(cdata, data, [fft_sizes(3),fft_sizes(2), local_n0])
 
  plan = fftw_mpi_plan_many_dft(rank3,fft_sizes(1:3),fft_sizes(4), &
-&                               FFTW_MPI_DEFAULT_BLOCK,FFTW_MPI_DEFAULT_BLOCK, &
-&                               data,data,comm_fft,isign,my_flags)
+                               FFTW_MPI_DEFAULT_BLOCK,FFTW_MPI_DEFAULT_BLOCK, &
+                               data,data,comm_fft,isign,my_flags)
 
  do k=1, local_n0*ndat
     do j=1, ny
@@ -3335,7 +3321,6 @@ subroutine fftw3mpi_many_dft_tr(nx,ny,nz,ndat,isign,fin,fout,comm_fft,fftw_flags
  !FFTWMPI stuff
  type(C_PTR) :: plan
  integer(C_INTPTR_T) :: fft_sizes(4)
-
 !*************************************************************************
 
  my_flags=ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags= fftw_flags
@@ -3419,7 +3404,6 @@ subroutine fftw3_mpifourdp_c2r(nfft,ngfft,ndat,&
 !arrays
  complex(C_DOUBLE_COMPLEX), ABI_CONTIGUOUS pointer :: data_cplx(:,:,:)
  real(C_DOUBLE), ABI_CONTIGUOUS pointer :: data_real(:,:,:)
-
 ! *************************************************************************
 
  !ABI_CHECK(ndat==1, "ndat > 1 not implemented yet")
@@ -3434,10 +3418,10 @@ subroutine fftw3_mpifourdp_c2r(nfft,ngfft,ndat,&
  fft_sizes(4)=ndat
 
  alloc_local = fftw_mpi_local_size_many_transposed(&
-&      rank3,fft_sizes(1:3),fft_sizes(4), &
-&      FFTW_MPI_DEFAULT_BLOCK,FFTW_MPI_DEFAULT_BLOCK, comm_fft, &
-&      local_n0,local_0_start, &
-&      local_n1,local_1_start)
+      rank3,fft_sizes(1:3),fft_sizes(4), &
+      FFTW_MPI_DEFAULT_BLOCK,FFTW_MPI_DEFAULT_BLOCK, comm_fft, &
+      local_n0,local_0_start, &
+      local_n1,local_1_start)
 
  cdata_cplx = fftw_alloc_complex(alloc_local)
  cdata_real = fftw_alloc_real(alloc_local*2)
@@ -3456,10 +3440,10 @@ subroutine fftw3_mpifourdp_c2r(nfft,ngfft,ndat,&
 
  fft_sizes(3)=nx
  plan_bw =  fftw_mpi_plan_many_dft_c2r(&
-&      rank3,fft_sizes(1:3),fft_sizes(4), &
-&      FFTW_MPI_DEFAULT_BLOCK,FFTW_MPI_DEFAULT_BLOCK, &
-&      data_cplx, data_real , &
-&      comm_fft,ior(ABI_FFTW_ESTIMATE,ABI_FFTW_MPI_TRANSPOSED_IN))
+      rank3,fft_sizes(1:3),fft_sizes(4), &
+      FFTW_MPI_DEFAULT_BLOCK,FFTW_MPI_DEFAULT_BLOCK, &
+      data_cplx, data_real , &
+      comm_fft,ior(ABI_FFTW_ESTIMATE,ABI_FFTW_MPI_TRANSPOSED_IN))
 
  do idat=1,ndat
    do k=1, nz
@@ -3530,12 +3514,11 @@ end subroutine fftw3_mpifourdp_c2r
 !! LOCAL DATA FOR FOURIER TRANSFORMS : TRANSPOSED ORDER AND DISTRIBUTED
 !! real space     --> dim = [  nx  | ny | nz/np_fft ]
 !! fourier  space --> dim = [  nx | nz | ny/np_fft ]
-!! we can't take in account the symetric of the real case because after
-!! fft have been computed, the symetric data needed are dispatched over
+!! we can't take in account the symmetric of the real case because after
+!! fft have been computed, the symmetric data needed are dispatched over
 !! other process in parallel
 !!
 !! SOURCE
-
 
 subroutine fftw3_mpifourdp_r2c(nfft,ngfft,ndat,&
   fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft,fftw_flags)
@@ -3563,7 +3546,6 @@ subroutine fftw3_mpifourdp_r2c(nfft,ngfft,ndat,&
 !arrays
  complex(C_DOUBLE_COMPLEX), ABI_CONTIGUOUS pointer :: data_cplx(:,:,:),data_real(:,:,:)
  integer(C_INTPTR_T) :: fft_sizes(4)
-
 ! *************************************************************************
 
  nproc_fft = xmpi_comm_size(comm_fft)
@@ -3579,10 +3561,10 @@ subroutine fftw3_mpifourdp_r2c(nfft,ngfft,ndat,&
 
  ! Get parallel sizes
  alloc_local = fftw_mpi_local_size_many_transposed(&
-&      rank3,fft_sizes(1:3),fft_sizes(4), &
-&      FFTW_MPI_DEFAULT_BLOCK,FFTW_MPI_DEFAULT_BLOCK, comm_fft, &
-&      local_n0,local_0_start, &
-&      local_n1,local_1_start)
+      rank3,fft_sizes(1:3),fft_sizes(4), &
+      FFTW_MPI_DEFAULT_BLOCK,FFTW_MPI_DEFAULT_BLOCK, comm_fft, &
+      local_n0,local_0_start, &
+      local_n1,local_1_start)
 
  ! Allocate data and reference it
 
@@ -3597,10 +3579,10 @@ subroutine fftw3_mpifourdp_r2c(nfft,ngfft,ndat,&
  ! TODO: Use true real to complex API!
  ! Create Plan C2C (nx,ny,nz)
  plan_fw =  fftw_mpi_plan_many_dft(&
-&      rank3,fft_sizes(1:3),fft_sizes(4), &
-&      FFTW_MPI_DEFAULT_BLOCK,FFTW_MPI_DEFAULT_BLOCK, &
-&      data_real, data_cplx , &
-&      comm_fft,ABI_FFTW_FORWARD,ior(ABI_FFTW_ESTIMATE,ABI_FFTW_MPI_TRANSPOSED_OUT))
+      rank3,fft_sizes(1:3),fft_sizes(4), &
+      FFTW_MPI_DEFAULT_BLOCK,FFTW_MPI_DEFAULT_BLOCK, &
+      data_real, data_cplx , &
+      comm_fft,ABI_FFTW_FORWARD,ior(ABI_FFTW_ESTIMATE,ABI_FFTW_MPI_TRANSPOSED_OUT))
 
  ! Copy input data in correct format
  do idat=1,ndat
@@ -3698,7 +3680,6 @@ subroutine old_fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
 !Local variables-------------------------------
 !scalars
  integer :: nx,ny,nz,my_flags
-
 ! *************************************************************************
 
  my_flags=ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags= fftw_flags
@@ -3727,7 +3708,7 @@ subroutine old_fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
    case (ABI_FFTW_BACKWARD)
      ! -1; G --> R
     call fftw3_mpifourdp_c2r(nfft,ngfft,ndat,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,&
-&     fofg,fofr,comm_fft,fftw_flags=my_flags)
+     fofg,fofr,comm_fft,fftw_flags=my_flags)
 
    case default
      ABI_BUG("Wrong isign")
@@ -3736,7 +3717,7 @@ subroutine old_fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
  case (2)
    ! Complex to Complex.
    call fftw3_mpifourdp_c2c(cplex,nfft,ngfft,ndat,isign,&
-&    fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft,fftw_flags=my_flags)
+    fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft,fftw_flags=my_flags)
 
  case default
    ABI_BUG(" Wrong value for cplex")
@@ -3792,7 +3773,7 @@ end subroutine old_fftw3_mpifourdp
 !! SOURCE
 
 subroutine fftw3_mpifourdp_c2c(cplex,nfft,ngfft,ndat,isign,&
-&  fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft,fftw_flags)
+   fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft,fftw_flags)
 
 !Arguments ------------------------------------
 !scalars
@@ -3814,7 +3795,6 @@ subroutine fftw3_mpifourdp_c2c(cplex,nfft,ngfft,ndat,isign,&
 !arrays
  integer(C_INTPTR_T) :: fft_sizes(4)
  complex(C_DOUBLE_COMPLEX), ABI_CONTIGUOUS pointer :: f03_cdata(:)
-
 !*************************************************************************
 
  my_flags=ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags= fftw_flags
@@ -3840,10 +3820,10 @@ subroutine fftw3_mpifourdp_c2c(cplex,nfft,ngfft,ndat,isign,&
  end if
 
  alloc_local = fftw_mpi_local_size_many_transposed(&
-&      rank3,fft_sizes(1:3),fft_sizes(4), &
-&      FFTW_MPI_DEFAULT_BLOCK,FFTW_MPI_DEFAULT_BLOCK, comm_fft, &
-&      local_n0,local_0_start, &
-&      local_n1,local_1_start)
+      rank3,fft_sizes(1:3),fft_sizes(4), &
+      FFTW_MPI_DEFAULT_BLOCK,FFTW_MPI_DEFAULT_BLOCK, comm_fft, &
+      local_n0,local_0_start, &
+      local_n1,local_1_start)
 
  ! C to F
  !local_0_start = local_0_start + 1
@@ -3857,8 +3837,8 @@ subroutine fftw3_mpifourdp_c2c(cplex,nfft,ngfft,ndat,isign,&
  call c_f_pointer(cptr_cdata, f03_cdata, [alloc_local])
 
  plan = fftw_mpi_plan_many_dft(rank3,fft_sizes(1:3),fft_sizes(4), &
-&                              FFTW_MPI_DEFAULT_BLOCK,FFTW_MPI_DEFAULT_BLOCK, &
-&                              f03_cdata,f03_cdata,comm_fft,isign,my_flags)
+                              FFTW_MPI_DEFAULT_BLOCK,FFTW_MPI_DEFAULT_BLOCK, &
+                              f03_cdata,f03_cdata,comm_fft,isign,my_flags)
 
  select case (isign)
  case (ABI_FFTW_BACKWARD)
@@ -3967,7 +3947,7 @@ end subroutine fftw3_mpifourdp_c2c
 !! SOURCE
 
 subroutine fftw3_mpiback_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
-&  max1,max2,max3,m1,m2,m3,md1,md2proc,md3,zf,zr,comm_fft)
+                            max1,max2,max3,m1,m2,m3,md1,md2proc,md3,zf,zr,comm_fft)
 
 !Arguments ------------------------------------
  integer,intent(in) :: cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc
@@ -3993,7 +3973,6 @@ subroutine fftw3_mpiback_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  !real(dp),ABI_CONTIGUOUS pointer :: zw(:,:),zt(:,:,:)
 ! FFT work arrays
  real(dp) :: tsec(2)
-
 ! *************************************************************************
 
  !call wrtout(std_out,"mpiback standard ALLTOALL + FFTW3")
@@ -4009,9 +3988,9 @@ subroutine fftw3_mpiback_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  ncache=2*max(n1,n2,n3,1024)
  if (ncache/(2*max(n1,n2,n3))<1) then
    write(msg,"(5a)") &
-&    'ncache has to be enlarged to be able to hold at',ch10, &
-&    'least one 1-d FFT of each size even though this will',ch10,&
-&    'reduce the performance for shorter transform lengths'
+    'ncache has to be enlarged to be able to hold at',ch10, &
+    'least one 1-d FFT of each size even though this will',ch10,&
+    'reduce the performance for shorter transform lengths'
     ABI_ERROR(msg)
  end if
 
@@ -4063,40 +4042,40 @@ subroutine fftw3_mpiback_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  !nthreads = 1
 
  bw_plan3_lot = dplan_many_dft_2D(1, [n3], lot3, &
-&    zw, [ncache/2], lot3, 1,                          &
-&    zw, [ncache/2], lot3, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2], lot3, 1,                          &
+    zw, [ncache/2], lot3, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(m1, lot3) /= 0) then
    bw_plan3_rest = dplan_many_dft_2D(1, [n3], mod(m1, lot3), &
-&      zw, [ncache/2], lot3, 1,                                    &
-&      zw, [ncache/2], lot3, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+      zw, [ncache/2], lot3, 1,                                    &
+      zw, [ncache/2], lot3, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  bw_plan1_lot = dplan_many_dft_2D(1, [n1], lot1, &
-&    zw, [ncache/2],  lot1, 1,                         &
-&    zt, [lzt, m1zt], lzt, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2],  lot1, 1,                         &
+    zt, [lzt, m1zt], lzt, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(m2eff, lot1) /= 0) then
    bw_plan1_rest = dplan_many_dft_2D(1, [n1], mod(m2eff, lot1), &
-&      zw, [ncache/2],  lot1, 1,                                      &
-&      zt, [lzt, m1zt], lzt, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+      zw, [ncache/2],  lot1, 1,                                      &
+      zt, [lzt, m1zt], lzt, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  bw_plan2_lot = dplan_many_dft_2D(1, [n2], lot2, &
-&    zw, [ncache/2], lot2, 1,                          &
-&    zr, [nd1,nd2,nd3proc,ndat], nd1, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2], lot2, 1,                          &
+    zr, [nd1,nd2,nd3proc,ndat], nd1, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(n1eff, lot2) /= 0) then
    bw_plan2_rest = dplan_many_dft_2D(1, [n2], mod(n1eff,lot2), &
-&      zw, [ncache/2], lot2, 1,                                      &
-&      zr, [nd1,nd2,nd3proc,ndat], nd1, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+      zw, [ncache/2], lot2, 1,                                      &
+      zr, [nd1,nd2,nd3proc,ndat], nd1, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  do idat=1,ndat
     ! transform along z axis
     ! input: G1,G3,G2,(Gp2)
 
-    ! Loop over the y planes treated by this node and trasform n1ddft G_z lines.
+    ! Loop over the y planes treated by this node and transform n1ddft G_z lines.
     do j2=1,md2proc
       ! if (me_fft*md2proc+j2<=m2eff) then !a faire plus tard
       do i1=1,m1,lot3
@@ -4129,7 +4108,7 @@ subroutine fftw3_mpiback_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
     if (nproc_fft>1) then
       call timab(543,1,tsec)
       call xmpi_alltoall(zmpi2,2*md1*md2proc*nd3proc, &
-&                        zmpi1,2*md1*md2proc*nd3proc,comm_fft,ierr)
+                        zmpi1,2*md1*md2proc*nd3proc,comm_fft,ierr)
       call timab(543,2,tsec)
     end if
 
@@ -4149,10 +4128,10 @@ subroutine fftw3_mpiback_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
           ! output: G2,G1,R3,JG2,(Rp3)
           if (nproc_fft==1) then
             call mpiswitch_cent(j3,n1dfft,Jp2st,J2st,lot1,max1,md1,m1,n1,&
-&             md2proc,nd3proc,nproc_fft,ioption,zmpi2,zw,max2,m2,n2)
+             md2proc,nd3proc,nproc_fft,ioption,zmpi2,zw,max2,m2,n2)
           else
             call mpiswitch_cent(j3,n1dfft,Jp2st,J2st,lot1,max1,md1,m1,n1,&
-&             md2proc,nd3proc,nproc_fft,ioption,zmpi1,zw,max2,m2,n2)
+             md2proc,nd3proc,nproc_fft,ioption,zmpi1,zw,max2,m2,n2)
           end if
 
           ! Transform along x
@@ -4223,19 +4202,13 @@ subroutine fftw3_mpiback_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  end do ! idat
 
  call dfftw_destroy_plan(bw_plan3_lot)
- if (mod(m1, lot3) /= 0) then
-   call dfftw_destroy_plan(bw_plan3_rest)
- end if
+ if (mod(m1, lot3) /= 0) call dfftw_destroy_plan(bw_plan3_rest)
 
  call dfftw_destroy_plan(bw_plan1_lot)
- if (mod(m2eff, lot1) /= 0) then
-   call dfftw_destroy_plan(bw_plan1_rest)
- end if
+ if (mod(m2eff, lot1) /= 0) call dfftw_destroy_plan(bw_plan1_rest)
 
  call dfftw_destroy_plan(bw_plan2_lot)
- if (mod(n1eff, lot2) /= 0) then
-   call dfftw_destroy_plan(bw_plan2_rest)
- end if
+ if (mod(n1eff, lot2) /= 0) call dfftw_destroy_plan(bw_plan2_rest)
 
  ABI_FREE(zmpi2)
  ABI_FREE(zw)
@@ -4341,7 +4314,6 @@ subroutine fftw3_mpiforw_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  real(dp),allocatable :: zw(:,:),zt(:,:,:) ! cache work array and array for transpositions
 ! FFT work arrays
  real(dp) :: tsec(2)
-
 ! *************************************************************************
 
  ! FIXME must provide a default value but which one?
@@ -4357,9 +4329,9 @@ subroutine fftw3_mpiforw_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 
  if (ncache/(2*max(n1,n2,n3))<1) then
    write(msg,'(5a)') &
-&    'ncache has to be enlarged to be able to hold at',ch10, &
-&    'least one 1-d FFT of each size even though this will',ch10,&
-&    'reduce the performance for shorter transform lengths'
+    'ncache has to be enlarged to be able to hold at',ch10, &
+    'least one 1-d FFT of each size even though this will',ch10,&
+    'reduce the performance for shorter transform lengths'
    ABI_ERROR(msg)
  end if
 
@@ -4406,33 +4378,33 @@ subroutine fftw3_mpiforw_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  !nthreads = 1
 
  fw_plan3_lot = dplan_many_dft_2D(1, [n3], lot3, &
-&    zw, [ncache/2], lot3, 1,                          &
-&    zw, [ncache/2], lot3, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE,nthreads)
+    zw, [ncache/2], lot3, 1,                          &
+    zw, [ncache/2], lot3, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE,nthreads)
 
  if (mod(m1, lot3) /= 0) then
    fw_plan3_rest = dplan_many_dft_2D(1, [n3], mod(m1, lot3), &
-&    zw, [ncache/2], lot3, 1,                                      &
-&    zw, [ncache/2], lot3, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2], lot3, 1,                                      &
+    zw, [ncache/2], lot3, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  fw_plan1_lot = dplan_many_dft_2D(1, [n1], lot1, &
-&    zt, [lzt, m1zt],   lzt,  1,                       &
-&    zw, [ncache/2], lot1, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zt, [lzt, m1zt],   lzt,  1,                       &
+    zw, [ncache/2], lot1, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(m2eff, lot1) /= 0) then
    fw_plan1_rest = dplan_many_dft_2D(1, [n1], mod(m2eff, lot1), &
-&    zt, [lzt, m1zt],   lzt, 1,                                       &
-&    zw, [ncache/2], lot1, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zt, [lzt, m1zt],   lzt, 1,                                       &
+    zw, [ncache/2], lot1, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  fw_plan2_lot = dplan_many_dft_2D(1, [n2], lot2, &
-&    zr, [nd1,nd2,nd3proc,ndat], nd1, 1,               &
-&    zw, [ncache/2], lot2, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zr, [nd1,nd2,nd3proc,ndat], nd1, 1,               &
+    zw, [ncache/2], lot2, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(n1eff, lot2) /= 0) then
    fw_plan2_rest = dplan_many_dft_2D(1, [n2], mod(n1eff,lot2), &
-&    zr, [nd1,nd2,nd3proc,ndat], nd1, 1,                             &
-&    zw, [ncache/2], lot2, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zr, [nd1,nd2,nd3proc,ndat], nd1, 1,                             &
+    zw, [ncache/2], lot2, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  do idat=1,ndat
@@ -4502,10 +4474,10 @@ subroutine fftw3_mpiforw_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
          ! output: G1,G2,R3,Gp2,(Rp3)
          if (nproc_fft==1) then
            call unmpiswitch_cent(j3,n1dfft,Jp2st,J2st,lot1,max1,md1,m1,n1,&
-&            md2proc,nd3proc,nproc_fft,ioption,zw,zmpi2)
+            md2proc,nd3proc,nproc_fft,ioption,zw,zmpi2)
          else
            call unmpiswitch_cent(j3,n1dfft,Jp2st,J2st,lot1,max1,md1,m1,n1,&
-&            md2proc,nd3proc,nproc_fft,ioption,zw,zmpi1)
+            md2proc,nd3proc,nproc_fft,ioption,zw,zmpi1)
          end if
        end do
 
@@ -4518,7 +4490,7 @@ subroutine fftw3_mpiforw_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
     if (nproc_fft>1) then
       call timab(544,1,tsec)
       call xmpi_alltoall(zmpi1,2*md1*md2proc*nd3proc, &
-&                        zmpi2,2*md1*md2proc*nd3proc,comm_fft,ierr)
+                        zmpi2,2*md1*md2proc*nd3proc,comm_fft,ierr)
       call timab(544,2,tsec)
     end if
 
@@ -4574,19 +4546,13 @@ subroutine fftw3_mpiforw_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  end do ! idat
 
  call dfftw_destroy_plan(fw_plan3_lot)
- if (mod(m1, lot3) /= 0) then
-   call dfftw_destroy_plan(fw_plan3_rest)
- end if
+ if (mod(m1, lot3) /= 0) call dfftw_destroy_plan(fw_plan3_rest)
 
  call dfftw_destroy_plan(fw_plan1_lot)
- if (mod(m2eff, lot1) /= 0) then
-   call dfftw_destroy_plan(fw_plan1_rest)
- end if
+ if (mod(m2eff, lot1) /= 0) call dfftw_destroy_plan(fw_plan1_rest)
 
  call dfftw_destroy_plan(fw_plan2_lot)
- if (mod(n1eff, lot2) /= 0) then
-   call dfftw_destroy_plan(fw_plan2_rest)
- end if
+ if (mod(n1eff, lot2) /= 0) call dfftw_destroy_plan(fw_plan2_rest)
 
  ABI_FREE(zmpi2)
  ABI_FREE(zw)
@@ -4680,7 +4646,6 @@ subroutine fftw3_mpiback(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,
 !arrays
  real(dp), allocatable :: zmpi1(:,:,:,:),zmpi2(:,:,:,:) ! work arrays for MPI
  real(dp),allocatable :: zw(:,:),zt(:,:,:) ! cache work array and array for transpositions
-
 ! *************************************************************************
 
  nproc_fft = xmpi_comm_size(comm_fft); me_fft = xmpi_comm_rank(comm_fft)
@@ -4690,9 +4655,9 @@ subroutine fftw3_mpiback(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,
 
  if (ncache/(2*max(n1,n2,n3))<1) then
    write(msg,'(5a)') &
-&    'ncache has to be enlarged to be able to hold at',ch10, &
-&    'least one 1-d FFT of each size even though this will',ch10,&
-&    'reduce the performance for shorter transform lengths'
+    'ncache has to be enlarged to be able to hold at',ch10, &
+    'least one 1-d FFT of each size even though this will',ch10,&
+    'reduce the performance for shorter transform lengths'
    ABI_ERROR(msg)
  end if
 
@@ -4744,33 +4709,33 @@ subroutine fftw3_mpiback(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,
  !nthreads = 1
 
  bw_plan3_lot = dplan_many_dft_2D(1, [n3], lot3, &
-&    zw, [ncache/2], lot3, 1,                          &
-&    zw, [ncache/2], lot3, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2], lot3, 1,                          &
+    zw, [ncache/2], lot3, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(n1, lot3) /= 0) then
    bw_plan3_rest = dplan_many_dft_2D(1, [n3], mod(n1, lot3), &
-&      zw, [ncache/2], lot3, 1,                                    &
-&      zw, [ncache/2], lot3, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+      zw, [ncache/2], lot3, 1,                                    &
+      zw, [ncache/2], lot3, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  bw_plan1_lot = dplan_many_dft_2D(1, [n1], lot1, &
-&    zw, [ncache/2],  lot1, 1,                         &
-&    zt, [lzt, n1zt], lzt, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2],  lot1, 1,                         &
+    zt, [lzt, n1zt], lzt, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(n2eff, lot1) /= 0) then
    bw_plan1_rest = dplan_many_dft_2D(1, [n1], mod(n2eff, lot1), &
-&      zw, [ncache/2], lot1, 1,                                       &
-&      zt, [lzt, n1zt],   lzt, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+      zw, [ncache/2], lot1, 1,                                       &
+      zt, [lzt, n1zt],   lzt, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  bw_plan2_lot = dplan_many_dft_2D(1, [n2], lot2, &
-&    zw, [ncache/2], lot2, 1,                          &
-&    zr, [nd1eff,nd2,nd3proc,ndat], nd1eff, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2], lot2, 1,                          &
+    zr, [nd1eff,nd2,nd3proc,ndat], nd1eff, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(n1eff, lot2) /= 0) then
    bw_plan2_rest = dplan_many_dft_2D(1, [n2], mod(n1eff,lot2), &
-&      zw, [ncache/2], lot2, 1,                                      &
-&      zr, [nd1eff,nd2,nd3proc,ndat], nd1eff, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+      zw, [ncache/2], lot2, 1,                                      &
+      zr, [nd1eff,nd2,nd3proc,ndat], nd1eff, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  do idat=1,ndat
@@ -4807,7 +4772,7 @@ subroutine fftw3_mpiback(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,
    ! output: G1,G2,G3,Gp2,(Rp3)
    if (nproc_fft>1) then
      call xmpi_alltoall(zmpi2,2*n1*nd2proc*nd3proc, &
-&                       zmpi1,2*n1*nd2proc*nd3proc,comm_fft,ierr)
+                       zmpi1,2*n1*nd2proc*nd3proc,comm_fft,ierr)
    end if
 
    do j3=1,nd3proc
@@ -4871,19 +4836,13 @@ subroutine fftw3_mpiback(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,
  end do ! idat
 
  call dfftw_destroy_plan(bw_plan3_lot)
- if (mod(n1, lot3) /= 0) then
-   call dfftw_destroy_plan(bw_plan3_rest)
- end if
+ if (mod(n1, lot3) /= 0) call dfftw_destroy_plan(bw_plan3_rest)
 
  call dfftw_destroy_plan(bw_plan1_lot)
- if (mod(n2eff, lot1) /= 0) then
-   call dfftw_destroy_plan(bw_plan1_rest)
- end if
+ if (mod(n2eff, lot1) /= 0) call dfftw_destroy_plan(bw_plan1_rest)
 
  call dfftw_destroy_plan(bw_plan2_lot)
- if (mod(n1eff, lot2) /= 0) then
-   call dfftw_destroy_plan(bw_plan2_rest)
- end if
+ if (mod(n1eff, lot2) /= 0) call dfftw_destroy_plan(bw_plan2_rest)
 
  ABI_FREE(zmpi2)
  ABI_FREE(zw)
@@ -4975,7 +4934,6 @@ subroutine fftw3_mpiforw(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,
 !arrays
  real(dp), allocatable :: zmpi1(:,:,:,:),zmpi2(:,:,:,:) ! work arrays for MPI
  real(dp),allocatable :: zw(:,:),zt(:,:,:) ! cache work array and array for transpositions
-
 ! *************************************************************************
 
  nproc_fft = xmpi_comm_size(comm_fft); me_fft = xmpi_comm_rank(comm_fft)
@@ -4984,9 +4942,9 @@ subroutine fftw3_mpiforw(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,
  ncache=2*max(n1,n2,n3,1024)
  if (ncache/(2*max(n1,n2,n3))<1) then
    write(msg,'(5a)')&
-&     'ncache has to be enlarged to be able to hold at',ch10, &
-&     'least one 1-d FFT of each size even though this will',ch10,&
-&     'reduce the performance for shorter transform lengths'
+     'ncache has to be enlarged to be able to hold at',ch10, &
+     'least one 1-d FFT of each size even though this will',ch10,&
+     'reduce the performance for shorter transform lengths'
    ABI_ERROR(msg)
  end if
 
@@ -5029,33 +4987,33 @@ subroutine fftw3_mpiforw(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,
  !nthreads = 1
 
  fw_plan3_lot = dplan_many_dft_2D(1, [n3], lot3, &
-&    zw, [ncache/2], lot3, 1,                          &
-&    zw, [ncache/2], lot3, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2], lot3, 1,                          &
+    zw, [ncache/2], lot3, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(n1, lot3) /= 0) then
    fw_plan3_rest = dplan_many_dft_2D(1, [n3], mod(n1, lot3), &
-&    zw, [ncache/2], lot3, 1,                                      &
-&    zw, [ncache/2], lot3, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2], lot3, 1,                                      &
+    zw, [ncache/2], lot3, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  fw_plan1_lot = dplan_many_dft_2D(1, [n1], lot1, &
-&    zt, [lzt, n1zt],   lzt,  1,                       &
-&    zw, [ncache/2], lot1, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zt, [lzt, n1zt],   lzt,  1,                       &
+    zw, [ncache/2], lot1, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(n2eff, lot1) /= 0) then
    fw_plan1_rest = dplan_many_dft_2D(1, [n1], mod(n2eff, lot1), &
-&    zt, [lzt, n1zt],   lzt, 1,                                       &
-&    zw, [ncache/2], lot1, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zt, [lzt, n1zt],   lzt, 1,                                       &
+    zw, [ncache/2], lot1, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  fw_plan2_lot = dplan_many_dft_2D(1, [n2], lot2, &
-&    zr, [nd1eff,nd2,nd3proc,ndat], nd1eff, 1,         &
-&    zw, [ncache/2], lot2, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zr, [nd1eff,nd2,nd3proc,ndat], nd1eff, 1,         &
+    zw, [ncache/2], lot2, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(n1eff, lot2) /= 0) then
    fw_plan2_rest = dplan_many_dft_2D(1, [n2], mod(n1eff,lot2), &
-&    zr, [nd1eff,nd2,nd3proc,ndat], nd1eff, 1,                       &
-&    zw, [ncache/2], lot2, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zr, [nd1eff,nd2,nd3proc,ndat], nd1eff, 1,                       &
+    zw, [ncache/2], lot2, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  do idat=1,ndat
@@ -5117,7 +5075,7 @@ subroutine fftw3_mpiforw(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,
    ! output: G1,G2,R3,Rp3,(Gp2)
    if (nproc_fft>1) then
      call xmpi_alltoall(zmpi1,2*n1*nd2proc*nd3proc, &
-&                       zmpi2,2*n1*nd2proc*nd3proc,comm_fft,ierr)
+                        zmpi2,2*n1*nd2proc*nd3proc,comm_fft,ierr)
    end if
 
    ! transform along z axis
@@ -5149,19 +5107,13 @@ subroutine fftw3_mpiforw(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,
  end do ! idat
 
  call dfftw_destroy_plan(fw_plan3_lot)
- if (mod(n1, lot3) /= 0) then
-   call dfftw_destroy_plan(fw_plan3_rest)
- end if
+ if (mod(n1, lot3) /= 0) call dfftw_destroy_plan(fw_plan3_rest)
 
  call dfftw_destroy_plan(fw_plan1_lot)
- if (mod(n2eff, lot1) /= 0) then
-   call dfftw_destroy_plan(fw_plan1_rest)
- end if
+ if (mod(n2eff, lot1) /= 0) call dfftw_destroy_plan(fw_plan1_rest)
 
  call dfftw_destroy_plan(fw_plan2_lot)
- if (mod(n1eff, lot2) /= 0) then
-   call dfftw_destroy_plan(fw_plan2_rest)
- end if
+ if (mod(n1eff, lot2) /= 0) call dfftw_destroy_plan(fw_plan2_rest)
 
  ABI_FREE(zmpi2)
  ABI_FREE(zw)
@@ -5197,7 +5149,7 @@ end subroutine fftw3_mpiforw
 !! cplex=1 if fofr is real, 2 if fofr is complex
 !! nfft=(effective) number of FFT grid points (for this processor)
 !! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
-!! ndat=Numbre of FFT transforms
+!! ndat=Number of FFT transforms
 !! isign=sign of Fourier transform exponent: current convention uses
 !!    +1 for transforming from G to r
 !!    -1 for transforming from r to G.
@@ -5213,7 +5165,7 @@ end subroutine fftw3_mpiforw
 !! SOURCE
 
 subroutine fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
-&  fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
+                           fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
 
 !Arguments ------------------------------------
 !scalars
@@ -5229,7 +5181,6 @@ subroutine fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
  integer :: n1,n2,n3,n4,n5,n6,nd2proc,nd3proc,nproc_fft,me_fft
 !arrays
  real(dp),allocatable :: workf(:,:,:,:,:),workr(:,:,:,:,:)
-
 ! *************************************************************************
 
  ! Note the only c2c is supported in parallel.
@@ -5355,7 +5306,6 @@ subroutine fftw3_applypot(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
  real(dp), allocatable :: zmpi1(:,:,:,:),zmpi2(:,:,:,:) ! work arrays for MPI
  real(dp),allocatable :: zw(:,:),zt(:,:,:) ! cache work array and array for transpositions
 ! FFT work arrays
-
 ! *************************************************************************
 
  !ioption=0 ! This was in the old version.
@@ -5364,9 +5314,9 @@ subroutine fftw3_applypot(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
  ncache=2*max(n1,n2,n3,1024)
  if (ncache/(2*max(n1,n2,n3)) < 1) then
    write(msg,"(5a)") &
-&    'ncache has to be enlarged to be able to hold at',ch10,&
-&    'least one 1-d FFT of each size even though this will',ch10,&
-&    'reduce the performance for shorter transform lengths'
+    'ncache has to be enlarged to be able to hold at',ch10,&
+    'least one 1-d FFT of each size even though this will',ch10,&
+    'reduce the performance for shorter transform lengths'
    ABI_ERROR(msg)
  end if
 
@@ -5407,66 +5357,66 @@ subroutine fftw3_applypot(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 
  ! Create plans for G --> R (see back_wf)
  bw_plan3_lot = dplan_many_dft_2D(1, [n3], lot3, &
-&    zw, [ncache/2], lot3, 1,                          &
-&    zw, [ncache/2], lot3, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2], lot3, 1,                          &
+    zw, [ncache/2], lot3, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(m1i, lot3) /= 0) then
    bw_plan3_rest = dplan_many_dft_2D(1, [n3], mod(m1i, lot3),&
-&      zw, [ncache/2], lot3, 1,                                    &
-&      zw, [ncache/2], lot3, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+      zw, [ncache/2], lot3, 1,                                    &
+      zw, [ncache/2], lot3, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  bw_plan1_lot = dplan_many_dft_2D(1, [n1], lot1, &
-&    zw, [ncache/2],  lot1, 1,                         &
-&    zt, [lzt, m1zt], lzt, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2],  lot1, 1,                         &
+    zt, [lzt, m1zt], lzt, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(m2ieff, lot1) /= 0) then
    bw_plan1_rest = dplan_many_dft_2D(1, [n1], mod(m2ieff, lot1), &
-&      zw, [ncache/2],  lot1, 1,                                       &
-&      zt, [lzt, m1zt], lzt, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+      zw, [ncache/2],  lot1, 1,                                       &
+      zt, [lzt, m1zt], lzt, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  !TODO this won't work if iclexwf==1
  ! Recheck this
  bw_plan2_lot = dplan_many_dft_2D(1, [n2], lot2, &
-&    zw, [ncache/2], lot2, 1,                          &
-&    zw, [ncache/2], lot2, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2], lot2, 1,                          &
+    zw, [ncache/2], lot2, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(n1eff, lot2) /= 0) then
    bw_plan2_rest = dplan_many_dft_2D(1, [n2], mod(n1eff,lot2), &
-&      zw, [ncache/2], lot2, 1,                                      &
-&      zw, [ncache/2], lot2, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+      zw, [ncache/2], lot2, 1,                                      &
+      zw, [ncache/2], lot2, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  ! Create plans for G --> R (see forw_wf)
  fw_plan3_lot = dplan_many_dft_2D(1, [n3], lot3, &
-&    zw, [ncache/2], lot3, 1,                          &
-&    zw, [ncache/2], lot3, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2], lot3, 1,                          &
+    zw, [ncache/2], lot3, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(m1o, lot3) /= 0) then
    fw_plan3_rest = dplan_many_dft_2D(1, [n3], mod(m1o, lot3),&
-&    zw, [ncache/2], lot3, 1,                                      &
-&    zw, [ncache/2], lot3, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2], lot3, 1,                                      &
+    zw, [ncache/2], lot3, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  fw_plan1_lot = dplan_many_dft_2D(1, [n1], lot1,&
-&    zt, [lzt, m1zt], lzt,  1,                        &
-&    zw, [ncache/2],  lot1, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zt, [lzt, m1zt], lzt,  1,                        &
+    zw, [ncache/2],  lot1, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(m2oeff, lot1) /= 0) then
    fw_plan1_rest = dplan_many_dft_2D(1, [n1], mod(m2oeff, lot1),&
-&    zt, [lzt, m1zt], lzt,  1,                                        &
-&    zw, [ncache/2],  lot1, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zt, [lzt, m1zt], lzt,  1,                                        &
+    zw, [ncache/2],  lot1, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  fw_plan2_lot = dplan_many_dft_2D(1, [n2], lot2,&
-&    zw, [ncache/2], lot2, 1,                         &
-&    zw, [ncache/2], lot2, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2], lot2, 1,                         &
+    zw, [ncache/2], lot2, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(n1eff, lot2) /= 0) then
    fw_plan2_rest = dplan_many_dft_2D(1, [n2], mod(n1eff,lot2),&
-&    zw, [ncache/2], lot2, 1,                                       &
-&    zw, [ncache/2], lot2, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2], lot2, 1,                                       &
+    zw, [ncache/2], lot2, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  do idat=1,ndat
@@ -5504,7 +5454,7 @@ subroutine fftw3_applypot(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
    if (nproc_fft > 1) then
      call timab(543,1,tsec)
      call xmpi_alltoall(zmpi2,2*md1*md2proc*nd3proc,&
-&                       zmpi1,2*md1*md2proc*nd3proc,comm_fft,ierr)
+                        zmpi1,2*md1*md2proc*nd3proc,comm_fft,ierr)
      call timab(543,2,tsec)
    end if
 
@@ -5525,10 +5475,10 @@ subroutine fftw3_applypot(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
          ! output: G2,G1,R3,G2,(Rp3)
          if (nproc_fft == 1) then
            call mpiswitch_cent(j3,n1dfft,Jp2stb,J2stb,lot1,max1i,md1,m1i,n1,&
-&           md2proc,nd3proc,nproc_fft,ioption,zmpi2,zw, unused0, unused0, unused0)
+            md2proc,nd3proc,nproc_fft,ioption,zmpi2,zw, unused0, unused0, unused0)
          else
            call mpiswitch_cent(j3,n1dfft,Jp2stb,J2stb,lot1,max1i,md1,m1i,n1,&
-&           md2proc,nd3proc,nproc_fft,ioption,zmpi1,zw, unused0, unused0, unused0)
+            md2proc,nd3proc,nproc_fft,ioption,zmpi1,zw, unused0, unused0, unused0)
          end if
 
          ! Transform along x
@@ -5619,10 +5569,10 @@ subroutine fftw3_applypot(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
          ! output: G1,G2,R3,Gp2,(Rp3)
          if (nproc_fft == 1) then
            call unmpiswitch_cent(j3,n1dfft,Jp2stf,J2stf,lot1,max1o,md1,m1o,n1,&
-&           md2proc,nd3proc,nproc_fft,ioption,zw,zmpi2)
+            md2proc,nd3proc,nproc_fft,ioption,zw,zmpi2)
          else
            call unmpiswitch_cent(j3,n1dfft,Jp2stf,J2stf,lot1,max1o,md1,m1o,n1,&
-&           md2proc,nd3proc,nproc_fft,ioption,zw,zmpi1)
+            md2proc,nd3proc,nproc_fft,ioption,zw,zmpi1)
          end if
        end do ! j
      end if
@@ -5634,7 +5584,7 @@ subroutine fftw3_applypot(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
    if (nproc_fft > 1) then
      call timab(544,1,tsec)
      call xmpi_alltoall(zmpi1,2*md1*md2proc*nd3proc, &
-&                       zmpi2,2*md1*md2proc*nd3proc,comm_fft,ierr)
+                        zmpi2,2*md1*md2proc*nd3proc,comm_fft,ierr)
      call timab(544,2,tsec)
    end if
 
@@ -5688,34 +5638,22 @@ subroutine fftw3_applypot(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
  end do ! idat
 
  call dfftw_destroy_plan(bw_plan3_lot)
- if (mod(m1i, lot3) /= 0) then
-   call dfftw_destroy_plan(bw_plan3_rest)
- end if
+ if (mod(m1i, lot3) /= 0) call dfftw_destroy_plan(bw_plan3_rest)
 
  call dfftw_destroy_plan(bw_plan1_lot)
- if (mod(m2ieff, lot1) /= 0) then
-   call dfftw_destroy_plan(bw_plan1_rest)
- end if
+ if (mod(m2ieff, lot1) /= 0) call dfftw_destroy_plan(bw_plan1_rest)
 
  call dfftw_destroy_plan(bw_plan2_lot)
- if (mod(n1eff, lot2) /= 0) then
-   call dfftw_destroy_plan(bw_plan2_rest)
- end if
+ if (mod(n1eff, lot2) /= 0) call dfftw_destroy_plan(bw_plan2_rest)
 
  call dfftw_destroy_plan(fw_plan3_lot)
- if (mod(m1o, lot3) /= 0) then
-   call dfftw_destroy_plan(fw_plan3_rest)
- end if
+ if (mod(m1o, lot3) /= 0) call dfftw_destroy_plan(fw_plan3_rest)
 
  call dfftw_destroy_plan(fw_plan1_lot)
- if (mod(m2oeff, lot1) /= 0) then
-   call dfftw_destroy_plan(fw_plan1_rest)
- end if
+ if (mod(m2oeff, lot1) /= 0) call dfftw_destroy_plan(fw_plan1_rest)
 
  call dfftw_destroy_plan(fw_plan2_lot)
- if (mod(n1eff, lot2) /= 0) then
-   call dfftw_destroy_plan(fw_plan2_rest)
- end if
+ if (mod(n1eff, lot2) /= 0) call dfftw_destroy_plan(fw_plan2_rest)
 
  ABI_FREE(zmpi2)
  ABI_FREE(zw)
@@ -5814,7 +5752,6 @@ subroutine fftw3_accrho(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
  real(dp), allocatable :: zmpi1(:,:,:,:),zmpi2(:,:,:,:) ! work arrays for MPI
  real(dp),allocatable :: zw(:,:),zt(:,:,:) ! cache work array and array for transpositions
  real(dp) :: tsec(2)
-
 ! *************************************************************************
 
  !ioption=0 ! This was in the old version.
@@ -5826,9 +5763,9 @@ subroutine fftw3_accrho(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
  ncache=2*max(n1,n2,n3,1024)
  if (ncache/(2*max(n1,n2,n3)) < 1) then
     write(msg,"(5a)") &
-&     'ncache has to be enlarged to be able to hold at',ch10,&
-&     'least one 1-d FFT of each size even though this will',ch10,&
-&     'reduce the performance for shorter transform lengths'
+     'ncache has to be enlarged to be able to hold at',ch10,&
+     'least one 1-d FFT of each size even though this will',ch10,&
+     'reduce the performance for shorter transform lengths'
     ABI_ERROR(msg)
  end if
 
@@ -5866,34 +5803,34 @@ subroutine fftw3_accrho(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
  !nthreads = 1
 
  bw_plan3_lot = dplan_many_dft_2D(1, [n3], lot3, &
-&    zw, [ncache/2], lot3, 1,                          &
-&    zw, [ncache/2], lot3, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2], lot3, 1,                          &
+    zw, [ncache/2], lot3, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(m1, lot3) /= 0) then
    bw_plan3_rest = dplan_many_dft_2D(1, [n3], mod(m1, lot3), &
-&      zw, [ncache/2], lot3, 1,                                    &
-&      zw, [ncache/2], lot3, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+      zw, [ncache/2], lot3, 1,                                    &
+      zw, [ncache/2], lot3, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  bw_plan1_lot = dplan_many_dft_2D(1, [n1], lot1, &
-&    zw, [ncache/2],  lot1, 1,                         &
-&    zt, [lzt, m1zt], lzt, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2],  lot1, 1,                         &
+    zt, [lzt, m1zt], lzt, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(m2eff, lot1) /= 0) then
    bw_plan1_rest = dplan_many_dft_2D(1, [n1], mod(m2eff, lot1), &
-&      zw, [ncache/2],  lot1, 1,                                      &
-&      zt, [lzt, m1zt], lzt, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+      zw, [ncache/2],  lot1, 1,                                      &
+      zt, [lzt, m1zt], lzt, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  ! FIXME THis won't work if ixplexwf == 1
  bw_plan2_lot = dplan_many_dft_2D(1, [n2], lot2, &
-&    zw, [ncache/2], lot2, 1,                          &
-&    zw, [ncache/2], lot2, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2], lot2, 1,                          &
+    zw, [ncache/2], lot2, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(n1eff, lot2) /= 0) then
    bw_plan2_rest = dplan_many_dft_2D(1, [n2], mod(n1eff,lot2), &
-&      zw, [ncache/2], lot2, 1,                                      &
-&      zw, [ncache/2], lot2, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+      zw, [ncache/2], lot2, 1,                                      &
+      zw, [ncache/2], lot2, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  do idat=1,ndat
@@ -5901,9 +5838,9 @@ subroutine fftw3_accrho(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
    ! input: I1,I3,J2,(Jp2)
    !lot=ncache/(4*n3)
 
-   ! Loop over the y planes treated by this node and trasform n1ddft G_z lines.
+   ! Loop over the y planes treated by this node and transform n1ddft G_z lines.
    do j2=1,md2proc
-     if (me_fft*md2proc+j2 <= m2eff) then ! MG REMOVED TO BE COSISTENT WITH BACK_WF
+     if (me_fft*md2proc+j2 <= m2eff) then ! MG REMOVED TO BE CONSISTENT WITH BACK_WF
        do i1=1,m1,lot3
          ma=i1
          mb=min(i1+(lot3-1),m1)
@@ -5935,7 +5872,7 @@ subroutine fftw3_accrho(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
    if (nproc_fft > 1) then
      call timab(543,1,tsec)
      call xmpi_alltoall(zmpi2,2*md1*md2proc*nd3proc, &
-&                       zmpi1,2*md1*md2proc*nd3proc,comm_fft,ierr)
+                        zmpi1,2*md1*md2proc*nd3proc,comm_fft,ierr)
      call timab(543,2,tsec)
    end if
 
@@ -5957,10 +5894,10 @@ subroutine fftw3_accrho(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
          ! output: G2,G1,R3,JG2,(Rp3)
          if (nproc_fft == 1) then
           call mpiswitch_cent(j3,n1dfft,Jp2st,J2st,lot1,max1,md1,m1,n1,&
-&           md2proc,nd3proc,nproc_fft,ioption,zmpi2,zw,unused0, unused0,unused0)
+           md2proc,nd3proc,nproc_fft,ioption,zmpi2,zw,unused0, unused0,unused0)
          else
           call mpiswitch_cent(j3,n1dfft,Jp2st,J2st,lot1,max1,md1,m1,n1,&
-&           md2proc,nd3proc,nproc_fft,ioption,zmpi1,zw, unused0,unused0,unused0)
+           md2proc,nd3proc,nproc_fft,ioption,zmpi1,zw, unused0,unused0,unused0)
          end if
 
          ! Transform along x
@@ -6021,19 +5958,13 @@ subroutine fftw3_accrho(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
  end do ! idat
 
  call dfftw_destroy_plan(bw_plan3_lot)
- if (mod(m1, lot3) /= 0) then
-   call dfftw_destroy_plan(bw_plan3_rest)
- end if
+ if (mod(m1, lot3) /= 0) call dfftw_destroy_plan(bw_plan3_rest)
 
  call dfftw_destroy_plan(bw_plan1_lot)
- if (mod(m2eff, lot1) /= 0) then
-   call dfftw_destroy_plan(bw_plan1_rest)
- end if
+ if (mod(m2eff, lot1) /= 0) call dfftw_destroy_plan(bw_plan1_rest)
 
  call dfftw_destroy_plan(bw_plan2_lot)
- if (mod(n1eff, lot2) /= 0) then
-   call dfftw_destroy_plan(bw_plan2_rest)
- end if
+ if (mod(n1eff, lot2) /= 0) call dfftw_destroy_plan(bw_plan2_rest)
 
  ABI_FREE(zmpi2)
  ABI_FREE(zw)
@@ -6140,12 +6071,9 @@ subroutine fftw3_mpiback_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  !real(dp),ABI_CONTIGUOUS pointer :: zw(:,:),zt(:,:,:)
 ! FFT work arrays
  real(dp) :: tsec(2)
-
 ! *************************************************************************
 
  !call wrtout(std_out,"mpiback with non-blocking IALLTOALL + FFTW3")
-
-
  ! FIXME must provide a default value but which one?
  ! ioption = 0
  ioption = 1
@@ -6157,9 +6085,9 @@ subroutine fftw3_mpiback_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  ncache=2*max(n1,n2,n3,1024)
  if (ncache/(2*max(n1,n2,n3))<1) then
    write(msg,"(5a)") &
-&    'ncache has to be enlarged to be able to hold at',ch10, &
-&    'least one 1-d FFT of each size even though this will',ch10,&
-&    'reduce the performance for shorter transform lengths'
+    'ncache has to be enlarged to be able to hold at',ch10, &
+    'least one 1-d FFT of each size even though this will',ch10,&
+    'reduce the performance for shorter transform lengths'
     ABI_ERROR(msg)
  end if
 
@@ -6202,40 +6130,40 @@ subroutine fftw3_mpiback_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  !nthreads = 1
 
  bw_plan3_lot = dplan_many_dft_2D(1, [n3], lot3, &
-&    zw, [ncache/2], lot3, 1,                          &
-&    zw, [ncache/2], lot3, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2], lot3, 1,                          &
+    zw, [ncache/2], lot3, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(m1, lot3) /= 0) then
    bw_plan3_rest = dplan_many_dft_2D(1, [n3], mod(m1, lot3), &
-&      zw, [ncache/2], lot3, 1,                                    &
-&      zw, [ncache/2], lot3, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+      zw, [ncache/2], lot3, 1,                                    &
+      zw, [ncache/2], lot3, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  bw_plan1_lot = dplan_many_dft_2D(1, [n1], lot1, &
-&    zw, [ncache/2],  lot1, 1,                         &
-&    zt, [lzt, m1zt], lzt, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2],  lot1, 1,                         &
+    zt, [lzt, m1zt], lzt, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(m2eff, lot1) /= 0) then
    bw_plan1_rest = dplan_many_dft_2D(1, [n1], mod(m2eff, lot1), &
-&      zw, [ncache/2],  lot1, 1,                                      &
-&      zt, [lzt, m1zt], lzt, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+      zw, [ncache/2],  lot1, 1,                                      &
+      zt, [lzt, m1zt], lzt, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  bw_plan2_lot = dplan_many_dft_2D(1, [n2], lot2, &
-&    zw, [ncache/2], lot2, 1,                          &
-&    zr, [nd1,nd2,nd3proc,ndat], nd1, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2], lot2, 1,                          &
+    zr, [nd1,nd2,nd3proc,ndat], nd1, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(n1eff, lot2) /= 0) then
    bw_plan2_rest = dplan_many_dft_2D(1, [n2], mod(n1eff,lot2), &
-&      zw, [ncache/2], lot2, 1,                                      &
-&      zr, [nd1,nd2,nd3proc,ndat], nd1, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+      zw, [ncache/2], lot2, 1,                                      &
+      zr, [nd1,nd2,nd3proc,ndat], nd1, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  do idat=1,ndat
     ! transform along z axis
     ! input: G1,G3,G2,(Gp2)
 
-    ! Loop over the y planes treated by this node and trasform n1ddft G_z lines.
+    ! Loop over the y planes treated by this node and transform n1ddft G_z lines.
     do j2=1,md2proc
       ! if (me_fft*md2proc+j2<=m2eff) then !a faire plus tard
       do i1=1,m1,lot3
@@ -6268,7 +6196,7 @@ subroutine fftw3_mpiback_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
     if (nproc_fft>1) then
       call timab(543,1,tsec)
       call xmpi_ialltoall(zmpi2(:,:,:,:,idat),2*md1*md2proc*nd3proc, &
-&                         zmpi1(:,:,:,:,idat),2*md1*md2proc*nd3proc,comm_fft,requests(idat))
+                          zmpi1(:,:,:,:,idat),2*md1*md2proc*nd3proc,comm_fft,requests(idat))
       call timab(543,2,tsec)
     end if
  end do
@@ -6291,10 +6219,10 @@ subroutine fftw3_mpiback_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
           ! output: G2,G1,R3,JG2,(Rp3)
           if (nproc_fft==1) then
             call mpiswitch_cent(j3,n1dfft,Jp2st,J2st,lot1,max1,md1,m1,n1,&
-&             md2proc,nd3proc,nproc_fft,ioption,zmpi2(:,:,:,:,idat),zw,max2,m2,n2)
+             md2proc,nd3proc,nproc_fft,ioption,zmpi2(:,:,:,:,idat),zw,max2,m2,n2)
           else
             call mpiswitch_cent(j3,n1dfft,Jp2st,J2st,lot1,max1,md1,m1,n1,&
-&             md2proc,nd3proc,nproc_fft,ioption,zmpi1(:,:,:,:,idat),zw,max2,m2,n2)
+             md2proc,nd3proc,nproc_fft,ioption,zmpi1(:,:,:,:,idat),zw,max2,m2,n2)
           end if
 
           ! Transform along x
@@ -6366,19 +6294,13 @@ subroutine fftw3_mpiback_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  end do ! idat
 
  call dfftw_destroy_plan(bw_plan3_lot)
- if (mod(m1, lot3) /= 0) then
-   call dfftw_destroy_plan(bw_plan3_rest)
- end if
+ if (mod(m1, lot3) /= 0) call dfftw_destroy_plan(bw_plan3_rest)
 
  call dfftw_destroy_plan(bw_plan1_lot)
- if (mod(m2eff, lot1) /= 0) then
-   call dfftw_destroy_plan(bw_plan1_rest)
- end if
+ if (mod(m2eff, lot1) /= 0) call dfftw_destroy_plan(bw_plan1_rest)
 
  call dfftw_destroy_plan(bw_plan2_lot)
- if (mod(n1eff, lot2) /= 0) then
-   call dfftw_destroy_plan(bw_plan2_rest)
- end if
+ if (mod(n1eff, lot2) /= 0) call dfftw_destroy_plan(bw_plan2_rest)
 
  ABI_FREE(zmpi2)
  ABI_FREE(zw)
@@ -6485,7 +6407,6 @@ subroutine fftw3_mpiforw_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  real(dp),allocatable :: zw(:,:),zt(:,:,:) ! cache work array and array for transpositions
 ! FFT work arrays
  real(dp) :: tsec(2)
-
 ! *************************************************************************
 
  ! FIXME must provide a default value but which one?
@@ -6501,9 +6422,9 @@ subroutine fftw3_mpiforw_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 
  if (ncache/(2*max(n1,n2,n3))<1) then
    write(msg,'(5a)') &
-&    'ncache has to be enlarged to be able to hold at',ch10, &
-&    'least one 1-d FFT of each size even though this will',ch10,&
-&    'reduce the performance for shorter transform lengths'
+    'ncache has to be enlarged to be able to hold at',ch10, &
+    'least one 1-d FFT of each size even though this will',ch10,&
+    'reduce the performance for shorter transform lengths'
    ABI_ERROR(msg)
  end if
 
@@ -6541,33 +6462,33 @@ subroutine fftw3_mpiforw_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  !nthreads = 1
 
  fw_plan3_lot = dplan_many_dft_2D(1, [n3], lot3, &
-&    zw, [ncache/2], lot3, 1,                          &
-&    zw, [ncache/2], lot3, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2], lot3, 1,                          &
+    zw, [ncache/2], lot3, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(m1, lot3) /= 0) then
    fw_plan3_rest = dplan_many_dft_2D(1, [n3], mod(m1, lot3), &
-&    zw, [ncache/2], lot3, 1,                                      &
-&    zw, [ncache/2], lot3, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2], lot3, 1,                                      &
+    zw, [ncache/2], lot3, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  fw_plan1_lot = dplan_many_dft_2D(1, [n1], lot1, &
-&    zt, [lzt, m1zt],   lzt,  1,                       &
-&    zw, [ncache/2], lot1, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zt, [lzt, m1zt],   lzt,  1,                       &
+    zw, [ncache/2], lot1, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(m2eff, lot1) /= 0) then
    fw_plan1_rest = dplan_many_dft_2D(1, [n1], mod(m2eff, lot1), &
-&    zt, [lzt, m1zt],   lzt, 1,                                       &
-&    zw, [ncache/2], lot1, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zt, [lzt, m1zt],   lzt, 1,                                       &
+    zw, [ncache/2], lot1, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  fw_plan2_lot = dplan_many_dft_2D(1, [n2], lot2, &
-&    zr, [nd1,nd2,nd3proc,ndat], nd1, 1,               &
-&    zw, [ncache/2], lot2, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zr, [nd1,nd2,nd3proc,ndat], nd1, 1,               &
+    zw, [ncache/2], lot2, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(n1eff, lot2) /= 0) then
    fw_plan2_rest = dplan_many_dft_2D(1, [n2], mod(n1eff,lot2), &
-&    zr, [nd1,nd2,nd3proc,ndat], nd1, 1,                             &
-&    zw, [ncache/2], lot2, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zr, [nd1,nd2,nd3proc,ndat], nd1, 1,                             &
+    zw, [ncache/2], lot2, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  do idat=1,ndat
@@ -6652,7 +6573,7 @@ subroutine fftw3_mpiforw_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
    if (nproc_fft>1) then
      call timab(544,1,tsec)
      call xmpi_ialltoall(zmpi1(:,:,:,:,idat),2*md1*md2proc*nd3proc, &
-&                        zmpi2(:,:,:,:,idat),2*md1*md2proc*nd3proc,comm_fft,requests(idat))
+                         zmpi2(:,:,:,:,idat),2*md1*md2proc*nd3proc,comm_fft,requests(idat))
      call timab(544,2,tsec)
    end if
  end do
@@ -6711,19 +6632,13 @@ subroutine fftw3_mpiforw_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  end do ! idat
 
  call dfftw_destroy_plan(fw_plan3_lot)
- if (mod(m1, lot3) /= 0) then
-   call dfftw_destroy_plan(fw_plan3_rest)
- end if
+ if (mod(m1, lot3) /= 0) call dfftw_destroy_plan(fw_plan3_rest)
 
  call dfftw_destroy_plan(fw_plan1_lot)
- if (mod(m2eff, lot1) /= 0) then
-   call dfftw_destroy_plan(fw_plan1_rest)
- end if
+ if (mod(m2eff, lot1) /= 0) call dfftw_destroy_plan(fw_plan1_rest)
 
  call dfftw_destroy_plan(fw_plan2_lot)
- if (mod(n1eff, lot2) /= 0) then
-   call dfftw_destroy_plan(fw_plan2_rest)
- end if
+ if (mod(n1eff, lot2) /= 0) call dfftw_destroy_plan(fw_plan2_rest)
 
  ABI_FREE(zmpi2)
  ABI_FREE(zw)
@@ -6795,8 +6710,8 @@ end subroutine fftw3_mpiforw_manywf
 
 
 subroutine fftw3_applypot_many(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
-&  max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3,&
-&  max1o,max2o,max3o,m1o,m2o,m3o,comm_fft,nproc_fft,me_fft,pot,zf)
+                                max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3,&
+                                max1o,max2o,max3o,m1o,m2o,m3o,comm_fft,nproc_fft,me_fft,pot,zf)
 
 !Arguments ------------------------------------
  integer,intent(in) :: cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc
@@ -6826,7 +6741,6 @@ subroutine fftw3_applypot_many(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
  real(dp) ABI_ASYNC, allocatable :: zmpi1(:,:,:,:,:),zmpi2(:,:,:,:,:) ! work arrays for MPI
  real(dp),allocatable :: zw(:,:),zt(:,:,:) ! cache work array and array for transpositions
 ! FFT work arrays
-
 ! *************************************************************************
 
  !ioption=0 ! This was in the old version.
@@ -6835,9 +6749,9 @@ subroutine fftw3_applypot_many(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
  ncache=2*max(n1,n2,n3,1024)
  if (ncache/(2*max(n1,n2,n3)) < 1) then
    write(msg,"(5a)") &
-&    'ncache has to be enlarged to be able to hold at',ch10,&
-&    'least one 1-d FFT of each size even though this will',ch10,&
-&    'reduce the performance for shorter transform lengths'
+    'ncache has to be enlarged to be able to hold at',ch10,&
+    'least one 1-d FFT of each size even though this will',ch10,&
+    'reduce the performance for shorter transform lengths'
    ABI_ERROR(msg)
  end if
 
@@ -6879,66 +6793,66 @@ subroutine fftw3_applypot_many(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 
  ! Create plans for G --> R (see back_wf)
  bw_plan3_lot = dplan_many_dft_2D(1, [n3], lot3, &
-&    zw, [ncache/2], lot3, 1,                          &
-&    zw, [ncache/2], lot3, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2], lot3, 1,                          &
+    zw, [ncache/2], lot3, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(m1i, lot3) /= 0) then
    bw_plan3_rest = dplan_many_dft_2D(1, [n3], mod(m1i, lot3),&
-&      zw, [ncache/2], lot3, 1,                                    &
-&      zw, [ncache/2], lot3, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+      zw, [ncache/2], lot3, 1,                                    &
+      zw, [ncache/2], lot3, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  bw_plan1_lot = dplan_many_dft_2D(1, [n1], lot1, &
-&    zw, [ncache/2],  lot1, 1,                         &
-&    zt, [lzt, m1zt], lzt, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2],  lot1, 1,                         &
+    zt, [lzt, m1zt], lzt, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(m2ieff, lot1) /= 0) then
    bw_plan1_rest = dplan_many_dft_2D(1, [n1], mod(m2ieff, lot1), &
-&      zw, [ncache/2],  lot1, 1,                                       &
-&      zt, [lzt, m1zt], lzt, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+      zw, [ncache/2],  lot1, 1,                                       &
+      zt, [lzt, m1zt], lzt, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  !TODO this won't work if iclexwf==1
  ! Recheck this
  bw_plan2_lot = dplan_many_dft_2D(1, [n2], lot2, &
-&    zw, [ncache/2], lot2, 1,                          &
-&    zw, [ncache/2], lot2, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2], lot2, 1,                          &
+    zw, [ncache/2], lot2, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(n1eff, lot2) /= 0) then
    bw_plan2_rest = dplan_many_dft_2D(1, [n2], mod(n1eff,lot2), &
-&      zw, [ncache/2], lot2, 1,                                      &
-&      zw, [ncache/2], lot2, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+      zw, [ncache/2], lot2, 1,                                      &
+      zw, [ncache/2], lot2, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  ! Create plans for G --> R (see forw_wf)
  fw_plan3_lot = dplan_many_dft_2D(1, [n3], lot3, &
-&    zw, [ncache/2], lot3, 1,                          &
-&    zw, [ncache/2], lot3, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2], lot3, 1,                          &
+    zw, [ncache/2], lot3, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(m1o, lot3) /= 0) then
    fw_plan3_rest = dplan_many_dft_2D(1, [n3], mod(m1o, lot3),&
-&    zw, [ncache/2], lot3, 1,                                      &
-&    zw, [ncache/2], lot3, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2], lot3, 1,                                      &
+    zw, [ncache/2], lot3, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  fw_plan1_lot = dplan_many_dft_2D(1, [n1], lot1,&
-&    zt, [lzt, m1zt], lzt,  1,                        &
-&    zw, [ncache/2],  lot1, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zt, [lzt, m1zt], lzt,  1,                        &
+    zw, [ncache/2],  lot1, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(m2oeff, lot1) /= 0) then
    fw_plan1_rest = dplan_many_dft_2D(1, [n1], mod(m2oeff, lot1),&
-&    zt, [lzt, m1zt], lzt,  1,                                        &
-&    zw, [ncache/2],  lot1, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zt, [lzt, m1zt], lzt,  1,                                        &
+    zw, [ncache/2],  lot1, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  fw_plan2_lot = dplan_many_dft_2D(1, [n2], lot2,&
-&    zw, [ncache/2], lot2, 1,                         &
-&    zw, [ncache/2], lot2, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2], lot2, 1,                         &
+    zw, [ncache/2], lot2, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  if (mod(n1eff, lot2) /= 0) then
    fw_plan2_rest = dplan_many_dft_2D(1, [n2], mod(n1eff,lot2),&
-&    zw, [ncache/2], lot2, 1,                                       &
-&    zw, [ncache/2], lot2, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+    zw, [ncache/2], lot2, 1,                                       &
+    zw, [ncache/2], lot2, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
  end if
 
  ! Here we take advantage of non-blocking IALLTOALL:
@@ -6978,7 +6892,7 @@ subroutine fftw3_applypot_many(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
    if (nproc_fft > 1) then
      call timab(543,1,tsec)
      call xmpi_ialltoall(zmpi2(:,:,:,:,idat),2*md1*md2proc*nd3proc,&
-&                        zmpi1(:,:,:,:,idat),2*md1*md2proc*nd3proc,comm_fft,requests(idat))
+                         zmpi1(:,:,:,:,idat),2*md1*md2proc*nd3proc,comm_fft,requests(idat))
      call timab(543,2,tsec)
    end if
  end do ! idat
@@ -7005,10 +6919,10 @@ subroutine fftw3_applypot_many(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
          ! output: G2,G1,R3,G2,(Rp3)
          if (nproc_fft == 1) then
            call mpiswitch_cent(j3,n1dfft,Jp2stb,J2stb,lot1,max1i,md1,m1i,n1,&
-&           md2proc,nd3proc,nproc_fft,ioption,zmpi2(:,:,:,:,idat),zw, unused0, unused0, unused0)
+           md2proc,nd3proc,nproc_fft,ioption,zmpi2(:,:,:,:,idat),zw, unused0, unused0, unused0)
          else
            call mpiswitch_cent(j3,n1dfft,Jp2stb,J2stb,lot1,max1i,md1,m1i,n1,&
-&           md2proc,nd3proc,nproc_fft,ioption,zmpi1(:,:,:,:,idat),zw, unused0, unused0, unused0)
+           md2proc,nd3proc,nproc_fft,ioption,zmpi1(:,:,:,:,idat),zw, unused0, unused0, unused0)
          end if
 
          ! Transform along x
@@ -7099,10 +7013,10 @@ subroutine fftw3_applypot_many(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
          ! output: G1,G2,R3,Gp2,(Rp3)
          if (nproc_fft == 1) then
            call unmpiswitch_cent(j3,n1dfft,Jp2stf,J2stf,lot1,max1o,md1,m1o,n1,&
-&           md2proc,nd3proc,nproc_fft,ioption,zw,zmpi2(:,:,:,:,idat))
+            md2proc,nd3proc,nproc_fft,ioption,zw,zmpi2(:,:,:,:,idat))
          else
            call unmpiswitch_cent(j3,n1dfft,Jp2stf,J2stf,lot1,max1o,md1,m1o,n1,&
-&           md2proc,nd3proc,nproc_fft,ioption,zw,zmpi1(:,:,:,:,idat))
+            md2proc,nd3proc,nproc_fft,ioption,zw,zmpi1(:,:,:,:,idat))
          end if
        end do ! j
      end if
@@ -7114,7 +7028,7 @@ subroutine fftw3_applypot_many(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
    if (nproc_fft > 1) then
      call timab(544,1,tsec)
      call xmpi_ialltoall(zmpi1(:,:,:,:,idat),2*md1*md2proc*nd3proc, &
-&                        zmpi2(:,:,:,:,idat),2*md1*md2proc*nd3proc,comm_fft,requests(idat))
+                         zmpi2(:,:,:,:,idat),2*md1*md2proc*nd3proc,comm_fft,requests(idat))
      call timab(544,2,tsec)
    end if
  end do
@@ -7171,34 +7085,22 @@ subroutine fftw3_applypot_many(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
  end do ! idat
 
  call dfftw_destroy_plan(bw_plan3_lot)
- if (mod(m1i, lot3) /= 0) then
-   call dfftw_destroy_plan(bw_plan3_rest)
- end if
+ if (mod(m1i, lot3) /= 0) call dfftw_destroy_plan(bw_plan3_rest)
 
  call dfftw_destroy_plan(bw_plan1_lot)
- if (mod(m2ieff, lot1) /= 0) then
-   call dfftw_destroy_plan(bw_plan1_rest)
- end if
+ if (mod(m2ieff, lot1) /= 0) call dfftw_destroy_plan(bw_plan1_rest)
 
  call dfftw_destroy_plan(bw_plan2_lot)
- if (mod(n1eff, lot2) /= 0) then
-   call dfftw_destroy_plan(bw_plan2_rest)
- end if
+ if (mod(n1eff, lot2) /= 0) call dfftw_destroy_plan(bw_plan2_rest)
 
  call dfftw_destroy_plan(fw_plan3_lot)
- if (mod(m1o, lot3) /= 0) then
-   call dfftw_destroy_plan(fw_plan3_rest)
- end if
+ if (mod(m1o, lot3) /= 0) call dfftw_destroy_plan(fw_plan3_rest)
 
  call dfftw_destroy_plan(fw_plan1_lot)
- if (mod(m2oeff, lot1) /= 0) then
-   call dfftw_destroy_plan(fw_plan1_rest)
- end if
+ if (mod(m2oeff, lot1) /= 0) call dfftw_destroy_plan(fw_plan1_rest)
 
  call dfftw_destroy_plan(fw_plan2_lot)
- if (mod(n1eff, lot2) /= 0) then
-   call dfftw_destroy_plan(fw_plan2_rest)
- end if
+ if (mod(n1eff, lot2) /= 0) call dfftw_destroy_plan(fw_plan2_rest)
 
  ABI_FREE(zmpi2)
  ABI_FREE(zw)
@@ -7264,7 +7166,6 @@ subroutine fftw3_poisson(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,vg,nr)
  integer(KIND_FFTW_PLAN) :: bw_plan_xy,bw_plan3
  integer(KIND_FFTW_PLAN) :: fw_plan_xy,fw_plan3
  real(dp) :: fft_fact,vg_fftfact
-
 ! *************************************************************************
 
  !write(std_out,*)"in poisson"
@@ -7280,21 +7181,21 @@ subroutine fftw3_poisson(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,vg,nr)
 
  ! 1) ldx*ldy transforms along Rz.
  fw_plan3 = fftw3_plan_many_dft(rank1, (/nz/), ldx*ldy, & ! We have to visit the entire augmented x-y plane!
-&   nr, (/ldx, ldy, ldz/), ldx*ldy, 1,                  &
-&   nr, (/ldx, ldy, ldz/), ldx*ldy, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+   nr, (/ldx, ldy, ldz/), ldx*ldy, 1,                  &
+   nr, (/ldx, ldy, ldz/), ldx*ldy, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  call fftw3_execute_dft(fw_plan3, nr, nr) ! Now we have nr(x,y,Gz)
  call fftw3_destroy_plan(fw_plan3)
 
  ! R --> G Transforms in x-y plane
  fw_plan_xy = fftw3_plan_many_dft(rank2, [nx,ny], 1, &
-&     nr, (/ldx, ldy, ldz/), 1, 1,                   &
-&     nr, (/ldx, ldy, ldz/), 1, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+     nr, (/ldx, ldy, ldz/), 1, 1,                   &
+     nr, (/ldx, ldy, ldz/), 1, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  ! G --> R Transforms in x-y plane
  bw_plan_xy = fftw3_plan_many_dft(rank2, [nx, ny], 1, &
-&     nr, (/ldx, ldy, ldz/), 1, 1,                    &
-&     nr, (/ldx, ldy, ldz/), 1, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+     nr, (/ldx, ldy, ldz/), 1, 1,                    &
+     nr, (/ldx, ldy, ldz/), 1, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  ! Loop on z-planes.
  do kk=1,nz
@@ -7329,8 +7230,8 @@ subroutine fftw3_poisson(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,vg,nr)
 
  ! Final transforms of vc(x,y,Gz) along Gz to get vc(x,y,z)
  bw_plan3 = fftw3_plan_many_dft(rank1, (/nz/), ldx*ldy, & ! We have to visit the entire augmented x-y plane!
-&   nr, (/ldx, ldy, ldz/), ldx*ldy, 1,                  &
-&   nr, (/ldx, ldy, ldz/), ldx*ldy, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+   nr, (/ldx, ldy, ldz/), ldx*ldy, 1,                  &
+   nr, (/ldx, ldy, ldz/), ldx*ldy, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
 
  call fftw3_execute_dft(bw_plan3, nr, nr)
  call fftw3_destroy_plan(bw_plan3)

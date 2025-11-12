@@ -8,7 +8,7 @@
 !! to the next generation. Those are chosen from ga_opt_percent% best fit and (1-ga_opt_percent)% from Genetic rules
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2022 ABINIT group (XG, AHR)
+!! Copyright (C) 2009-2025 ABINIT group (XG, AHR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -65,7 +65,7 @@ MODULE m_use_ga
  use m_geometry,       only : mkradim, mkrdim, metric, dist2
  use m_results_img,    only : results_img_type,gather_array_img
  use m_numeric_tools,  only : uniformrandom
- 
+
  implicit none
 
  private
@@ -76,8 +76,6 @@ CONTAINS
 
 subroutine predict_ga(itimimage_eff,idum,ga_param,natom,nimage,&
 &                     ntimimage_stored,results_img)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -469,8 +467,6 @@ end subroutine predict_ga
 
 INTEGER FUNCTION choosefather(fitf,n,idum)
 
- implicit none
-
  integer,intent(in) :: n
  integer,intent(inout) :: idum
  real(dp), dimension(:), intent(in) :: fitf
@@ -506,7 +502,6 @@ INTEGER FUNCTION comp_indiv(distances,indiv,natom,nimage)
 !! We assume, all distances for a given individual are ordered and
 !! we define a metric from the total difference distances between individuals.
 !! if comp_indiv is 0, means that two individuals are two close.
- implicit none
 
  integer, intent(in) :: indiv,natom,nimage
  real(dp),intent(in) ::distances(natom,nimage)
@@ -531,7 +526,6 @@ end FUNCTION comp_indiv
 SUBROUTINE randomize_parent(parent,natom,idum)
 
 ! take a parent and randomize the positions of the atoms
-implicit none
 
 integer,intent(in)     :: natom
 integer,intent(inout)     :: idum
@@ -587,7 +581,6 @@ end SUBROUTINE randomize_parent
 SUBROUTINE convert_gentocoor(parent,coor,natom)
 
 ! convert gene (single vector) to coordinates (3,natom)
-implicit none
 
 integer,intent(in) :: natom
 double precision,intent(out)    :: parent(3,natom)
@@ -608,7 +601,6 @@ end SUBROUTINE convert_gentocoor
 SUBROUTINE convert_coortogen(parent,coor,natom)
 
 ! convert coordinates in gene notation (single vector with all coordinates)
-implicit none
 
 integer,intent(in) :: natom
 double precision,intent(in)    :: parent(3,natom)
@@ -628,7 +620,6 @@ end SUBROUTINE convert_coortogen
 SUBROUTINE initialize_perm(iperm,nimage)
 
 !! initialize the vector iperm with corresponding indices.
- implicit none
 
  integer, intent(in) :: nimage
  integer, intent(inout) :: iperm(nimage)
@@ -649,7 +640,6 @@ INTEGER FUNCTION checkatomicdist(natom,coord,rprimd)
 
 !! check if two atoms are two close.
 !! if they are, checkatomicdist=0
- implicit none
 
  integer, intent(in) :: natom
  real(dp), intent(in) :: coord(3,natom),rprimd(3,3)
@@ -671,44 +661,8 @@ INTEGER FUNCTION checkatomicdist(natom,coord,rprimd)
 
 END FUNCTION checkatomicdist
 
-SUBROUTINE checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup)
-
-  implicit none
-
-!Arguments ------------------------------------
-!scalars
-  integer,intent(in) :: msym,natom
-  integer,intent(in)  :: typat(natom)
-  integer,intent(out) :: ptgroupma,spgroup
-! Arrays
-  real(dp),intent(in) :: rprimd(3,3),xred(3,natom)
-
-!Local variables ---------------------------------------
-!scalars
-  integer :: berryopt,jellslab=0,noncoll,nptsym,nzchempot=0,use_inversion 
-  integer :: chkprim,nsym
-! Arrays
-  integer :: bravais(11),ptsymrel(3,3,msym)
-  integer :: symafm(msym),symrel(3,3,msym)
-  real(dp) :: efield(3),gprimd(3,3),spinat(3,natom)
-  real(dp) :: tnons(3,msym)
-  real(dp) :: genafm(3)
-
-! given the acel, rprim and coor
-! this suroutine find the symmetry group
-
-  call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tol3)
-
-  call symfind(berryopt,efield,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
-&           nzchempot,0,ptsymrel,spinat,symafm,symrel,tnons,tol3,typat,use_inversion,xred)
-
-  call symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tol3)
-
-END SUBROUTINE checksymmetrygroup
-
 DOUBLE PRECISION FUNCTION gaussian_random(idum,sigma)
 
-  implicit none
 
   integer,intent(inout) :: idum
   real(dp), intent(in) :: sigma

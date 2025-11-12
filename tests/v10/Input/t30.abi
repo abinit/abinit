@@ -1,0 +1,84 @@
+# Crystalline Cr2O3 : computation of the total energy under hspinfield (axial symmetry)
+# Test axial vector symmetry for the hspinfield
+# 8 datasets = 4 field directions \times 2 symmetry settings (full/nsym=1)
+
+ ndtset 8
+ udtset 4 2
+
+#Definition of the unit cell
+ acell    3*1.0074001628E+01
+ rprim      5.1437386382E-01  0.0000000000E+00  8.5756604890E-01
+           -2.5718693191E-01  4.4546083311E-01  8.5756604890E-01
+           -2.5718693191E-01 -4.4546083311E-01  8.5756604890E-01
+
+#Definition of the atom types and positions
+ natom 10
+ ntypat 2
+ typat 1 1 1 1 2 2 2 2 2 2
+ znucl 24 8
+ xred                  3.4218392891E-01  3.4218392891E-01  3.4218392891E-01
+                       1.5781607109E-01  1.5781607109E-01  1.5781607109E-01
+                       6.5781607109E-01  6.5781607109E-01  6.5781607109E-01
+                       8.4218392891E-01  8.4218392891E-01  8.4218392891E-01
+                       5.6943311308E-01  2.5000000000E-01  9.3056688692E-01
+                       2.5000000000E-01  9.3056688692E-01  5.6943311308E-01
+                       9.3056688692E-01  5.6943311308E-01  2.5000000000E-01
+                       4.3056688692E-01  7.5000000000E-01  6.9433113078E-02
+                       6.9433113078E-02  4.3056688692E-01  7.5000000000E-01
+                       7.5000000000E-01  6.9433113078E-02  4.3056688692E-01
+
+# SPIN
+ nspinor  2
+ nsppol   1
+ nspden   4
+ spinat   0.0 0.0  -3.0
+          0.0 0.0   3.0
+          0.0 0.0   3.0
+          0.0 0.0  -3.0
+          18*0
+
+# symmetry setting 
+nsym?2 1
+
+# hspinfield field definition
+hspinfield2?   1   0   0
+hspinfield3?   0   1   0
+hspinfield4?   0   0   1
+
+
+#Definition of the planewave basis set
+ecut  8       # Maximal kinetic energy cut-off, in Hartree
+
+#Definition of the k-point grids
+kptopt 0
+
+#Definition of the SCF procedure
+nstep   4         # Maximal number of SCF cycles, # Very low value, only for testing purposes
+toldfe  1.0d-6    # Will stop when this tolerance is achieved on total energy
+diemac  12.0
+
+
+pp_dirpath "$ABI_PSPDIR"                # This is the path to the directory were
+                               # pseudopotentials for tests are stored
+pseudos "Cr_r_LDA_1012_dojov0.4.psp8, O_r_LDA.psp8"
+                               # Name and location of the pseudopotential
+ 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = t30.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00 
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description =  Cr2O3 total energy under hspinfield in x/y/z direction,
+#%%   with and without enforcing nsym=1 (identity symmetry only).
+#%%   Used to verify correct axial vector symmetry handling.
+#%% WARNING: In non-collinear calculations, the total energy differs between nsym=1
+#%%         and default symmetry settings for the hspinfield response.  
+#%%<END TEST_INFO>

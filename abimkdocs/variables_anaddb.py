@@ -1,10 +1,15 @@
 # coding: utf-8
 from __future__ import print_function, division, unicode_literals, absolute_import
-from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
+
+try:
+    from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
+except ImportError:
+    # This is needed for importing this module within Abipy.
+    from abipy.abio.abivar_database.variables import ValueWithUnit, MultipleValue, Range
 
 executable = "anaddb"
 
-#from abipy.abio.abivar_database.variables import ValueWithUnit, MultipleValue, Range, ValueWithConditions
+
 ValueWithConditions = dict
 Variable = dict
 
@@ -56,7 +61,8 @@ of uniaxial crystals, the z-axis should be chosen along the optical axis.
         commentdefault="was 0 before v5.3",
         added_in_version="before_v9",
         text=r"""
-Governs the imposition of the Acoustic Sum Rule (ASR).
+Governs the imposition of the Acoustic Sum Rule (ASR) in the ANADDB application.
+Note that there is a similar input variable [[asr]] for ABINIT.
 
   * 0 --> no ASR for interatomic force constants is imposed.
   * 1 or 2 --> the ASR for interatomic force constants is imposed by modifying
@@ -84,9 +90,10 @@ So, if **asr** is non-zero, the correction to the self-force will be
 determined, and the self-force will be imposed to be consistent with the ASR.
 This correction will work if IFCs are computed ([[anaddb:ifcflag]]/=0), as
 well as if the IFCs are not computed ([[anaddb:ifcflag]]==0). In both cases,
-the phonon frequencies will not be the same as the ones determined by the
-output of abinit, RF case. If you want to check that the DDB is correct, by
-comparing phonon frequencies from abinit and anaddb, you should turn off both
+the phonon frequencies might not be the same as the ones determined by the
+output of abinit, RF case, unless the same values of asr and chneut are used,
+if the IFCs are not computed. If you want to check that the DDB is correct, by
+comparing phonon frequencies from abinit and anaddb, it is best to turn off both
 **asr** and [[anaddb:chneut]].
 
 Until now, we have not explained the difference between **asr** =1 and **asr**
@@ -107,8 +114,7 @@ exactly the same likely due to an extra symmetrisation in the
 diagonalisation routine. Of course, when the matrix at Gamma has been
 generated from IFCs coming from dynamical matrices none of which are Gamma,
 the breaking of the ASR is rather severe. In order to clear the situation, one
-should use a diagonalisation routine for non-hermitian matrices. So, at the
-present status of understanding, one should always use the **asr** =2 option
+should use a diagonalisation routine for non-hermitian matrices.
 ).
 """,
     ),
@@ -125,9 +131,6 @@ present status of understanding, one should always use the **asr** =2 option
         text=r"""
 The actual numbers of the atoms for which the interatomic force constant have
 to be written and eventually analysed.
-
-WARNING: there will be an in-place change of meaning of atifc (this is
-confusing, and should be taken away in one future version - sorry for this).
 """,
     ),
 
@@ -193,22 +196,25 @@ based on Wigner-Seitz cells (new as v8.7). The default algorithm has a correct t
         topics=['Phonons_useful'],
         dimensions="scalar",
         defaultval=0,
-        mnemonics="Integer for CHarge NEUTrality treatment",
+        mnemonics="CHarge NEUTrality treatment",
         added_in_version="before_v9",
         text=r"""
-Set the treatment of the Charge Neutrality requirement for the effective charges.
+Set the treatment of the Charge Neutrality requirement for the effective charges in the ANADDB application.
+Note that there is a similar input variable [[abinit:chneut]] for ABINIT, however its default value is different..
 
-  * chneut=0 --> no ASR for effective charges is imposed
-  * chneut=1 --> the ASR for effective charges is imposed by giving to each atom
+  * **chneut**=0 --> no charge neutrality for effective charges is imposed
+  * **chneut**=1 --> the charge neutrality for effective charges is imposed by giving to each atom
     an equal portion of the missing charge. See Eq.(48) in [[cite:Gonze1997a]].
-  * chneut=2 --> the ASR for effective charges is imposed by giving to each atom a portion
+  * **chneut**=2 --> the charge neutrality for effective charges is imposed by giving to each atom a portion
     of the missing charge proportional to the screening charge already present.
     See Eq.(49) in [[cite:Gonze1997a]].
 
 More detailed explanation: the sum of the effective charges in the unit cell
 should be equal to zero. It is not the case in the DDB, and this sum rule is
 sometimes strongly violated. In particular, this will make the lowest
-frequencies at Gamma non-zero. There is no "best" way of imposing the ASR on effective charges.
+frequencies at Gamma non-zero. There is no "best" way of imposing the cherge neutrality on effective charges.
+
+See also [[asr@anaddb]] and [[asr]].
 """,
     ),
 
@@ -356,6 +362,8 @@ Frequency-dependent dielectric tensor flag.
         text=r"""
 The input variable **dosdeltae** is used to define the step of the frequency
 grid used to calculate the phonon density of states when [[anaddb:prtdos]] = 1.
+
+Prior to v9.10, the default was 1 cm$^{-1}$.
 """,
     ),
 
@@ -372,6 +380,8 @@ grid used to calculate the phonon density of states when [[anaddb:prtdos]] = 1.
         text=r"""
 **dossmear** defines the gaussian broadening used to calculate the phonon
 density of states when [[anaddb:prtdos]] = 1.
+
+Prior to v9.10, the default was 5 cm$^{-1}$.
 """,
     ),
 
@@ -815,7 +825,8 @@ number of DDB files is defined by [[anaddb:gruns_nddbs]] (possible values are:
 3,5,7,9) The DDB files correspond to phonon calculations performed at
 different volumes (usually ± 1% of the equilibrium volume). The DDB files must
 be ordered according to the volume of the unit cell (the DDB with smallest
-volume comes first) and the volume increment must be constant. The code
+volume comes first) and the volume increment must be constant to a precision of
+better than 1 part in $10^4$. The code
 computes the derivative of the dynamical matrix wrt the volume using central finite difference.
 """,
     ),
@@ -831,7 +842,10 @@ computes the derivative of the dynamical matrix wrt the volume using central fin
         added_in_version="before_v9",
         text=r"""
 This variable defines the number of DDB files (read from [[anaddb:gruns_ddbs]])
-used for the calculation of the Gruneisen parameters.
+used for the calculation of the Gruneisen parameters. Note that computation of
+the Grunheisen parameters is currently incompatible with many other features of
+ANADDB, and so should be computed in a separate run from calculation of other
+possible responses.
 """,
     ),
 
@@ -905,7 +919,7 @@ the matrix in local coordinates).
   * 0 --> do all calculations directly from the DDB, without the use of the interatomic force constant.
   * 1 --> calculate and use the interatomic force constants for interpolating the phonon spectrum
     and dynamical matrices at every q wavevector, and eventually analyse the interatomic force constants,
-    according to the informations given by [[anaddb:atifc]], [[anaddb:dipdip]], [[anaddb:ifcana]], [[anaddb:ifcout]],
+    according to the information given by [[anaddb:atifc]], [[anaddb:dipdip]], [[anaddb:ifcana]], [[anaddb:ifcout]],
     [[anaddb:natifc]], [[anaddb:nsphere]], [[anaddb:rifcsph]]
 
 More detailed explanations: if the dynamical matrices are known on a regular
@@ -2428,7 +2442,7 @@ the small sphere around the Gamma point (Bohr$^{-1}$). The second entry gives th
 absolute tolerance in kilometer/second. The speed of sound is evaluated by
 performing a spherical average on the small sphere using Lebedev-Laikov grids
 (typical values for q-radius: 0.1 Bohr$^{-1}$) The number of radial points is
-increased until the integration converges twice withing the tolerance
+increased until the integration converges twice within the tolerance
 specified by the user (typical values for tolkms: 0.05 km/s).
 
 The default values will not work.

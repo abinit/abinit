@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (DC)
+!!  Copyright (C) 2008-2025 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -70,7 +70,6 @@ subroutine wvl_denspot_set(den,gth_params,ixc,natom,nsppol,rprimd,wvl,&
  use BigDFT_API,only: initialize_DFT_local_fields,allocateRhoPot, &
 &                     input_variables,dpbox_set,density_descriptors
 #endif
- implicit none
 
 !Arguments ------------------------------------
   integer,intent(in):: ixc,natom,nsppol,wvl_mpi_comm
@@ -175,7 +174,6 @@ subroutine wvl_denspot_free(den)
       & deallocate_denspot_distribution, denspot_free_history
  use dynamic_memory
 #endif
- implicit none
 
 !Arguments ------------------------------------
  type(wvl_denspot_type), intent(inout) :: den

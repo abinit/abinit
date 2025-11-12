@@ -6,7 +6,7 @@
 !!  parameters and function for wave functions copy
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2022 ABINIT group (CS,GZ,FB)
+!!  Copyright (C) 2001-2025 ABINIT group (CS,GZ,FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -67,8 +67,6 @@ contains
 !!
 subroutine setWFParameter(cplx,me_g0,npw_k,nspinor,icg,igsc,blocksize)
 
- implicit none
-
 !Arguments ------------------------------------
  integer, intent(in) :: cplx,me_g0,npw_k,nspinor
  integer, intent(in) :: icg,igsc,blocksize
@@ -91,8 +89,6 @@ end subroutine setWFParameter
 ! this is the index of a given band in cg array
 integer function x_cgindex(iblocksize)
 
- implicit none
-
  integer, intent(in) :: iblocksize
 
  x_cgindex=x_npw_k*x_nspinor*(iblocksize-1)+x_icg+1
@@ -103,8 +99,6 @@ end function x_cgindex
 ! this is the index of a given band in gsc array
 integer function x_gscindex(iblocksize)
 
- implicit none
-
  integer, intent(in) :: iblocksize
 
  x_gscindex=x_npw_k*x_nspinor*(iblocksize-1)+x_igsc+1
@@ -113,8 +107,6 @@ end function x_gscindex
 
 integer function x_windex(iblocksize)
 
- implicit none
-
  integer, intent(in) :: iblocksize
 
  x_windex=x_npw_k*x_nspinor*(iblocksize-1)+1
@@ -122,8 +114,6 @@ integer function x_windex(iblocksize)
 end function x_windex
 
 integer function wfindex(iblocksize,indtype)
-
- implicit none
 
  integer, intent(in) :: iblocksize
  character(len=1), intent(in) :: indtype
@@ -171,8 +161,6 @@ end function wfindex
 !!
 subroutine wfcopy(direction,size,tsrc,incsrc,tdest,incdest,blockiter,iblock,indtype,&
 &                withbbloc,timopt,tim_wfcopy) ! optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
  character(len=1), intent(in) :: direction

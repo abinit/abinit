@@ -6,7 +6,7 @@
 !! Calculate thermal corrections to the eigenvalues.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (PB, XG, GA)
+!!  Copyright (C) 2008-2025 ABINIT group (PB, XG, GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,7 +33,8 @@ module m_thmeig
 
  use m_geometry,       only : mkrdim, xred2xcart, metric
  use m_symfind,        only : symfind, symlatt
- use m_symtk,          only : mati3inv, matr3inv, symatm
+ use m_matrix,         only : mati3inv, matr3inv
+ use m_symtk,          only : symatm
  use m_crystal,        only : crystal_t
  use m_io_tools,       only : open_file
  use m_dynmat,         only : asria_corr, dfpt_phfrq
@@ -69,15 +70,14 @@ contains
 !!
 !! SOURCE
 
-subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, natom, mpert, msize, d2asr, comm)
+subroutine thmeig(inp, ddb, crystal, iout, natom, mpert, msize, d2asr, comm)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(inout) :: natom
  integer,intent(in) :: mpert,msize
  integer,intent(in) :: comm
- character(len=*),intent(in) :: elph_base_name, eig2_filnam
- integer,intent(in) :: ddbun,iout
+ integer,intent(in) :: iout
  type(crystal_t), intent(inout) :: crystal
  type(anaddb_dataset_type),intent(inout) :: inp
  type(ddb_type),intent(inout) :: ddb
@@ -108,14 +108,14 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
  real(dp) :: rcvol,tmp,tol,vec1i,vec1r,vec2i,vec2r,veci,vecr,xx
  real(dp) :: tolsym,tolsym8  !new
  character(len=500) :: message
- character(len=fnlen) :: outfile
+ character(len=fnlen) :: outfile, elph_base_name, eig2_filnam
  type(ddb_type) :: ddb_eig2
  type(ddb_hdr_type) :: ddb_hdr
 !arrays
  ! FIXME now these must be allocated
  integer :: ngqpt(9),qptrlatt(3,3),rfelfd(4),rfphon(4),rfstrs(4),vacuum(3)
  integer :: bravais(11)
- integer,allocatable :: typat(:),atifc(:)
+ integer,allocatable :: typat(:)
  integer,allocatable :: symrel(:,:,:),symrec(:,:,:)
  integer,allocatable :: indsym(:,:,:)
  integer,allocatable :: indqpt(:)
@@ -167,6 +167,10 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
 !0) Initializations
 !=========================================================================
 
+ !GA: TODO Perhaps those should be created at initialization of inp
+ elph_base_name = trim(inp%prefix_outdata)//"_ep" 
+ eig2_filnam = inp%filename_eigr2d
+
 
  g2fsmear = inp%a2fsmear
 
@@ -183,9 +187,9 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
  write(std_out, '(a)' )  '- thmeig: Initialize the second-order electron-phonon file with name :'
  write(std_out, '(a,a)' )'-         ',trim(eig2_filnam)
 
- call ddb_hdr%open_read(eig2_filnam, ddbun, xmpi_comm_self)
+ call ddb_hdr%open_read(eig2_filnam, xmpi_comm_self)
 
- mband = ddb_hdr%mband
+ mband = ddb_hdr%mband * ddb_hdr%nsppol
  nkpt = ddb_hdr%nkpt
  ntypat = ddb_hdr%ntypat
 
@@ -196,7 +200,6 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
  usepaw = ddb_hdr%usepaw
 
  ABI_MALLOC(typat, (natom))
- ABI_MALLOC(atifc, (natom))
  ABI_MALLOC(zion, (ntypat))
  ABI_MALLOC(amu, (ntypat))
 
@@ -225,14 +228,13 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
  mpert_eig2=natom
  msize2=3*mpert_eig2*3*mpert_eig2
 
+ ddb_eig2%nsppol = ddb_hdr%nsppol
  call ddb_eig2%malloc(msize2,nblok2,natom,ntypat,mpert_eig2,nkpt,mband)
 
  ABI_MALLOC(eig2dGamma,(2,msize2,mband,nkpt))
 
  ABI_MALLOC(eigvec,(2,3,natom,3*natom))
  ABI_MALLOC(phfreq,(3*natom,ddb%nblok))
-
- atifc = inp%atifc
 
  !amu = ddb%amu
  amu(:) = ddb_hdr%amu(1:ntypat)
@@ -277,10 +279,6 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
  tolsym8=tol8
  call symatm(indsym,natom,nsym,symrec(:,:,1:nsym),tnons(:,1:nsym),tolsym8,typat,xred)
 
-!Check the correctness of some input parameters,
-!and perform small treatment if needed.
- call chkin9(atifc,natifc,natom)
-
  eig2dGamma(:,:,:,:)=zero
 
  ABI_MALLOC(carflg_eig2,(3,mpert_eig2,3,mpert_eig2))
@@ -308,7 +306,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
    found=0
    do iblok2=1,nblok2
 
-     call ddb_eig2%read_eig2d(ddbun, iblok2)
+     call ddb_eig2%read_d2eig(ddb_hdr, iblok2, iblok2)
 
      qnrm = ddb_eig2%qpt(1,iblok2)*ddb_eig2%qpt(1,iblok2)+ &
 &     ddb_eig2%qpt(2,iblok2)*ddb_eig2%qpt(2,iblok2)+ &
@@ -335,7 +333,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
 
  end if
 
- close(ddbun)
+ call ddb_hdr%close()
 
 !=========================================================================
 !2) Calculation of dE(n,k)/dn(Q,j) : consider all q and modes
@@ -370,9 +368,9 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
    if(thmflag==7 .or. thmflag==8) then
 !    Re-generate symmetry operations from the lattice and atomic coordinates
      tolsym=tol8
-     call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
+     call symlatt(bravais,std_out,msym,nptsym,ptsymrel,rprimd,tolsym)
      use_inversion=1
-     call symfind(0,(/zero,zero,zero/),gprimd,0,msym,natom,0,nptsym,nsym_new,0,0,&
+     call symfind(gprimd,msym,natom,nptsym,1,nsym_new,0,&
 &     ptsymrel,spinat,symafm_new,symrel_new,tnons_new,tolsym,typat,use_inversion,xred)
      write(std_out,*)' thmeig : found ',nsym_new,' symmetries ',ch10
      qptopt=1
@@ -438,7 +436,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
  dedni(:,:,:,:) = zero
 
 !!Prepare the reading of the EIG2 files
- call ddb_hdr%open_read(eig2_filnam, ddbun, xmpi_comm_self, msym=msym)
+ call ddb_hdr%open_read(eig2_filnam, xmpi_comm_self, msym=msym)
  call ddb_hdr%free()
 
 !iqpt2 will be the index of the q point bloks inside the EIG2 file
@@ -494,7 +492,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
    found=0 ; iqpt2_previous=iqpt2
    do while (iqpt2<nblok2)
      iqpt2=iqpt2+1
-     call ddb_eig2%read_eig2d(ddbun, iqpt2)
+     call ddb_eig2%read_d2eig(ddb_hdr, iqpt2, iqpt2)
      diff_qpt(:)=ddb_eig2%qpt(1:3,iqpt2)/ddb_eig2%nrm(1,iqpt2)-spqpt(:,iqpt)
      if(diff_qpt(1)**2+diff_qpt(2)**2+diff_qpt(3)**2 < DDB_QTOL )then
        found=1
@@ -507,15 +505,14 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
 
 !    If the EIG2 database file has to be read again, close it, then search for the right q point,
 !    from the beginning of the file
-     close(ddbun)
+     call ddb_hdr%close()
 
-     call ddb_hdr%open_read(eig2_filnam, ddbun, xmpi_comm_self, msym=msym)
-     call ddb_hdr%free()
+     call ddb_hdr%open_read(eig2_filnam, xmpi_comm_self, msym=msym)
 
 !    And examine again the EIG2 file. Still, not beyond the previously examined value.
      found=0
      do iqpt2=1,iqpt2_previous
-       call ddb_eig2%read_eig2d(ddbun, iqpt2)
+       call ddb_eig2%read_d2eig(ddb_hdr, iqpt2, iqpt2)
        diff_qpt(:)=ddb_eig2%qpt(1:3,iqpt2)/ddb_eig2%nrm(1,iqpt2)-spqpt(:,iqpt)
        if(diff_qpt(1)**2+diff_qpt(2)**2+diff_qpt(3)**2 < DDB_QTOL )then
          found=1
@@ -529,6 +526,8 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
 &       'Action: compute the contribution from this point, and merge it in your EIG2 DDB file.'
        ABI_ERROR(message)
      end if
+
+     call ddb_hdr%free()
 
    end if
 
@@ -614,7 +613,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
    end do ! imod
  end do !iqpt
 
- close(ddbun)
+ call ddb_hdr%close()
 
 
 !=============================================================================
@@ -929,7 +928,6 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
  end do
 
  ABI_FREE(typat)
- ABI_FREE(atifc)
  ABI_FREE(zion)
  ABI_FREE(amu)
  ABI_FREE(xcart)

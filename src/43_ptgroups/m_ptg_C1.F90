@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2022 ABINIT group (MG)
+!! Copyright (C) 2010-2025 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -49,14 +49,14 @@ contains
  character(len=5),allocatable,intent(out) :: class_names(:)
  type(irrep_t),allocatable,intent(out) :: Irr(:)
  !Local variables-------------------------------
- complex(dpc) :: j=(0.0_dp,1.0_dp)
+ complex(dp) :: j=(0.0_dp,1.0_dp)
  ! ********************************************************************************
 ! List of symmetries packed in classes
  nsym = 1
  ABI_MALLOC(sym, (3,3,nsym))
  sym(:,:,1) = RESHAPE( (/1, 0, 0, 0, 1, 0, 0, 0, 1/) ,(/3,3/) )
 
-! Number of classes and corresponding indeces
+! Number of classes and corresponding indices
  nclass = 1
  ABI_MALLOC(class_ids, (2,nclass))
  class_ids(1,1) = 1

@@ -1,6 +1,6 @@
 # Crystalline silicon : computation of the total energy using Fock functional,
 # without an auxiliary XC functional for the SCF cycle, 
-# and some over relaxation in a simple mixing scheme..
+# and some over relaxation in a simple mixing scheme.
 # Norm-conserving
 
  nstep 40          # Maximal number of SCF cycles

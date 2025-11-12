@@ -9,15 +9,10 @@
 !!  xmpi_allgatherv is the generic function.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2022 ABINIT group (AR,XG)
+!!  Copyright (C) 2001-2025 ABINIT group (AR,XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -32,7 +27,6 @@ subroutine xmpi_allgatherv_int2d(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
 
 !Local variables--------------
  integer :: cc,dd,sz1
-
 ! *************************************************************************
 
  ier=0
@@ -73,11 +67,6 @@ end subroutine xmpi_allgatherv_int2d
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
-!!
 !! SOURCE
 
 subroutine xmpi_allgatherv_int(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
@@ -91,7 +80,6 @@ subroutine xmpi_allgatherv_int(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
 
 !Local variables-------------------
  integer :: cc,dd
-
 ! *************************************************************************
 
  ier=0
@@ -132,11 +120,6 @@ end subroutine xmpi_allgatherv_int
 !!  buf_dp_size_all=size of buffer dp array gathered
 !!  ier=exit status, a non-zero value meaning there is an error
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
-!!
 !! SOURCE
 
 subroutine xmpi_allgatherv_int1_dp1(buf_int,buf_int_size,buf_dp,buf_dp_size,&
@@ -166,7 +149,6 @@ subroutine xmpi_allgatherv_int1_dp1(buf_int,buf_int_size,buf_dp,buf_dp_size,&
  integer,pointer :: outbuf_int(:)
  real(dp),pointer:: outbuf_dp(:)
  character,allocatable :: buf_pack(:),buf_pack_tot(:)
-
 ! *************************************************************************
 
  ier=0
@@ -333,11 +315,6 @@ end subroutine xmpi_allgatherv_int1_dp1
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
-!!
 !! SOURCE
 
 subroutine xmpi_allgatherv_dp(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
@@ -391,11 +368,6 @@ end subroutine xmpi_allgatherv_dp
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
-!!
 !! SOURCE
 
 subroutine xmpi_allgatherv_dp2d(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
@@ -429,6 +401,49 @@ subroutine xmpi_allgatherv_dp2d(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
 end subroutine xmpi_allgatherv_dp2d
 !!***
 
+!!****f* ABINIT/get_gcd_of_array
+!! NAME
+!!  get_gcd_of_array
+!!
+!! FUNCTION
+!!  Returns the GCD (Greatest Common Divider, or PGCD in French)
+!!  of an integer array.
+!!
+!! INPUTS
+!!  tab= integer array
+!!
+!! OUTPUT
+!!  r= GCD
+!!
+!! SOURCE
+
+function get_gcd_of_array(array) result(r)
+
+!Arguments-------------------------
+ integer, intent(in) :: array(:)
+
+!Local variables--------------
+ integer :: r, i, a, b, temp
+
+! *************************************************************************
+
+ r = array(1)
+ do i = 2, size(array)
+   a = r
+   b = array(i)
+   do while (b /= 0)
+     temp = b
+     b = mod(a, b)
+     a = temp
+   end do
+   r = a
+   if (r == 1) then
+     return
+   end if
+ end do
+end function get_gcd_of_array
+!!***
+
 !!****f* ABINIT/xmpi_allgatherv_dp3d
 !! NAME
 !!  xmpi_allgatherv_dp3d
@@ -450,11 +465,6 @@ end subroutine xmpi_allgatherv_dp2d
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
-!!
 !! SOURCE
 
 subroutine xmpi_allgatherv_dp3d(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
@@ -462,20 +472,49 @@ subroutine xmpi_allgatherv_dp3d(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:,:)
  real(dp), DEV_CONTARRD intent(inout) :: recvbuf(:,:,:)
- integer, DEV_CONTARRD intent(in) :: recvcounts(:),displs(:)
+ integer, target, DEV_CONTARRD intent(in) :: recvcounts(:),displs(:)
  integer,intent(in) :: nelem,comm
  integer,intent(out) :: ier
 
 !Local variables--------------
  integer :: cc,dd,sz12
+ integer :: my_dt,my_op,n1,n2,n3,nn,r,i
+ integer(kind=int64) :: ntot
+ integer, DEV_CONTARRD pointer :: my_recvcounts(:),my_displs(:)
 
 ! *************************************************************************
 
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
-   call MPI_ALLGATHERV(xval,nelem,MPI_DOUBLE_PRECISION,recvbuf,recvcounts,displs,&
-&   MPI_DOUBLE_PRECISION,comm,ier)
+   n1 = size(recvbuf,dim=1)
+   n2 = size(recvbuf,dim=2)
+   n3 = size(recvbuf,dim=3)
+
+   !This product of dimensions can be greater than a 32bit integer
+   !We use a INT64 to store it. If it is too large, we switch to an
+   !alternate routine because MPI<4 doesnt handle 64 bit counts.
+   ntot=int(n1,kind=int64)*n2*n3
+   if (ntot<=xmpi_maxint32_64) then
+     nn=nelem ; my_dt=MPI_DOUBLE_PRECISION
+     my_recvcounts => recvcounts; my_displs => displs
+   else
+     r=get_gcd_of_array(recvcounts)
+     nn=nelem/r ; call xmpi_largetype_create(int(r,int64),MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_OP_NULL)
+     ABI_MALLOC(my_recvcounts, (size(recvcounts)))
+     my_recvcounts(:)=recvcounts(:)/r
+     ABI_MALLOC(my_displs, (size(displs)))
+     my_displs(1)=0
+     do i=2,size(displs)
+       my_displs(i)=my_displs(i-1)+my_recvcounts(i-1)
+     end do
+   end if
+   call MPI_ALLGATHERV(xval,nn,my_dt,recvbuf,my_recvcounts,my_displs,&
+&   my_dt,comm,ier)
+   if (ntot>xmpi_maxint32_64) then
+     call xmpi_largetype_free(my_dt,my_op)
+     ABI_FREE(my_recvcounts); ABI_FREE(my_displs)
+   end if
  else if (comm == MPI_COMM_SELF) then
 #endif
    sz12=size(xval,1)*size(xval,2)
@@ -508,11 +547,6 @@ end subroutine xmpi_allgatherv_dp3d
 !!
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -567,11 +601,6 @@ end subroutine xmpi_allgatherv_dp4d
 !!
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -628,11 +657,6 @@ end subroutine xmpi_allgatherv_dp5d
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
-!!
 !! SOURCE
 
 subroutine xmpi_allgatherv_dp6d(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
@@ -683,11 +707,6 @@ end subroutine xmpi_allgatherv_dp6d
 !!  ier= exit status, a non-zero value meaning there is an error
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -833,13 +852,6 @@ end subroutine xmpi_allgatherv_coeff2d
 !!  xval_out = coeff2d_type array structure
 !!  ierr= exit status, a non-zero value meaning there is an error
 !!
-!! SIDE EFFECTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_allgatherv
-!!
 !! SOURCE
 
 subroutine xmpi_allgatherv_coeff2d_indx(xval_in,xval_out,comm,indx,ierr)
@@ -952,4 +964,56 @@ subroutine xmpi_allgatherv_coeff2d_indx(xval_in,xval_out,comm,indx,ierr)
 #endif
 
 end subroutine xmpi_allgatherv_coeff2d_indx
+!!***
+
+!!****f* ABINIT/xmpi_allgatherv_dc
+!! NAME
+!!  xmpi_allgatherv_dc
+!!
+!! FUNCTION
+!!  Gathers data from all tasks and delivers it to all.
+!!  Target: one-dimensional double complex arrays.
+!!
+!! INPUTS
+!!  xval= buffer array
+!!  recvcounts= number of received elements
+!!  displs= relative offsets for incoming data
+!!  nelem= number of elements
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  recvbuf= received buffer
+!!
+!! SOURCE
+
+subroutine xmpi_allgatherv_dc(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
+
+!Arguments-------------------------
+ complex(dp), DEV_CONTARRD intent(in) :: xval(:)
+ complex(dp), DEV_CONTARRD intent(inout) :: recvbuf(:)
+ integer,intent(in) :: recvcounts(:),displs(:)
+ integer,intent(in) :: nelem,comm
+ integer,intent(out) :: ier
+
+!Local variables--------------
+ integer :: cc,dd
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_ALLGATHERV(xval,nelem,MPI_DOUBLE_COMPLEX,recvbuf,recvcounts,displs,&
+&   MPI_DOUBLE_COMPLEX,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
+#endif
+   dd=0;if (size(displs)>0) dd=displs(1)
+   cc=size(xval);if (size(recvcounts)>0) cc=recvcounts(1)
+   recvbuf(dd+1:dd+cc)=xval(1:cc)
+#if defined HAVE_MPI
+ end if
+#endif
+end subroutine xmpi_allgatherv_dc
 !!***

@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MG)
+!!  Copyright (C) 2008-2025 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,11 +34,8 @@ module m_migdal_eliashberg
 
  use m_time,            only : cwtime, cwtime_report, sec2str
  use m_fstrings,        only : strcat, sjoin !, tolower, itoa, ftoa, ktoa, ltoa, strcat
- !use m_numeric_tools,  only : arth, get_diag
  use m_copy,            only : alloc_copy
- use defs_datatypes ,   only : ebands_t
- !use m_kpts,           only : kpts_timrev_from_kptopt
- use m_ebands,          only : edos_t, ebands_get_edos
+ use m_ebands,          only : ebands_t, edos_t
  use m_gstore,          only : gstore_t
 
  implicit none
@@ -94,8 +91,6 @@ contains
   procedure :: solve => iso_solver_solve
 
 end type iso_solver_t
-
-!private :: iso_solver_new
 !!***
 
 contains
@@ -108,10 +103,7 @@ contains
 !! iso_solver_free
 !!
 !! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
+!!  Free dynamic memory
 !!
 !! SOURCE
 
@@ -250,28 +242,24 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: nproc, my_rank, ierr, itemp, ntemp, niw, ncid !, my_nshiftq, nsppol !, iq_glob, ik_glob, ii ! out_nkibz,
+ integer :: nproc, my_rank, ierr, itemp, ntemp, niw, ncid
  integer :: edos_intmeth
  !integer :: spin, natom3, cnt !, band, ib, nb, my_ik, my_iq, my_is
- !integer :: ik_ibz, ik_bz, ebands_timrev
- !integer :: iq_bz, iq_ibz !, ikq_ibz, ikq_bz
+ !integer :: ik_ibz, ik_bz, ebands_timrev, iq_bz, iq_ibz !, ikq_ibz, ikq_bz
  !integer :: ncid, spin_ncid, ncerr, gstore_fform
- integer :: phmesh_size !, iw
- real(dp) :: kt, wmax, cpu, wall, gflops
- real(dp) :: edos_step, edos_broad !, sigma, ecut, eshift, eig0nk
+ integer :: phmesh_size, units(2) !, iw
+ real(dp) :: kt, wmax, cpu, wall, gflops, edos_step, edos_broad !, sigma, ecut, eshift, eig0nk
  !character(len=5000) :: msg
  class(crystal_t),pointer :: cryst
  class(ebands_t),pointer :: ebands
- !class(ifc_type),target,intent(in) :: ifc
- !type(gqk_t),pointer :: gqk
  type(iso_solver_t) :: iso
  type(edos_t) :: edos
 !arrays
  real(dp),allocatable :: ktmesh(:), lambda_ij(:), imag_w(:), imag_2w(:), phmesh(:), a2fw(:)
-
 !----------------------------------------------------------------------
 
  nproc = xmpi_comm_size(gstore%comm); my_rank = xmpi_comm_rank(gstore%comm)
+ units = [std_out, ab_out]
 
  call wrtout(std_out, " Solving isotropic Migdal-Eliashberg equations on the imaginary axis", pre_newlines=2)
  call cwtime(cpu, wall, gflops, "start")
@@ -282,20 +270,16 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  ! Consistency check
  ierr = 0
  ABI_CHECK_NOSTOP(gstore%qzone == "bz", "qzone == 'bz' is required", ierr)
- ABI_CHECK_NOSTOP(gstore%gqk(1)%cplex == 1, "cplex == 1 is required", ierr)
  ABI_CHECK(ierr == 0, "Wrong gstore object for migdal_eliashberg_iso. See messages above")
 
  ! Compute electron DOS.
- edos_intmeth = 2; if (dtset%prtdos /= 0) edos_intmeth = dtset%prtdos
- edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
- edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
- edos = ebands_get_edos(ebands, cryst, edos_intmeth, edos_step, edos_broad, gstore%comm)
+ call dtset%get_edos_params(edos_intmeth, edos_step, edos_broad)
+ edos = ebands%get_edos(cryst, edos_intmeth, edos_step, edos_broad, gstore%comm)
 
  !! Store DOS per spin channel
  !n0(:) = edos%gef(1:edos%nsppol)
  if (my_rank == master) then
-   call edos%print(unit=std_out)
-   !call edos%print(unit=ab_out)
+   call edos%print(units)
    !path = strcat(dtfil%filnam_ds(4), "_EDOS")
    !call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path, ch10))
    !call edos%write(path)
@@ -303,9 +287,6 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
 
  ! Compute phonon frequency mesh.
  call gstore%ifc%get_phmesh(dtset%ph_wstep, phmesh_size, phmesh)
-
- ! Compute and store my phonon quantities
- call gstore%calc_my_phonons(store_phdispl=.False.)
 
  ! Compute Eliashberg function a2F(w)
  ABI_MALLOC(a2fw, (phmesh_size))
@@ -326,7 +307,17 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  call edos%free()
 
  call dtset%get_ktmesh(ntemp, ktmesh)
+
+ !NVHPC and LLVM don't like using this constructor because allocatable arrays aren't set.
+#if defined FC_NVHPC || defined FC_LLVM
+  iso%ntemp=ntemp
+  iso%max_niter=10
+  iso%tolerance=tol10
+  iso%ncid=ncid
+  iso%comm=gstore%comm
+#else
  iso = iso_solver_t(ntemp=ntemp, max_niter=10, tolerance=tol10, ncid=ncid, comm=gstore%comm)
+#endif
 
  do itemp=1,ntemp
    ! Generate Matsubara mesh for this T with cutoff wmax.
@@ -339,7 +330,7 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
    ABI_MALLOC(imag_2w, (2 * niw))
 
    !call wrtout(std_out, " Computing lambda_iso_iw...")
-   !call gstore%get_lambda_iso_iw(dtset, 2 * niw, imag_2w, lambda_ij)
+   !call gstore%get_lambda_iso_iw(2 * niw, imag_2w, lambda_ij)
    ABI_FREE(imag_2w)
 
    !call iso%solve(itemp, kt, niw, imag_w, lambda_ij)
@@ -404,7 +395,7 @@ subroutine matsubara_mesh(bosons_or_fermions, kt, wmax, niw, imag_w)
    end do
 
  case default
-   ABI_ERROR(sjoin("Wrong bosons_or_fermions:", bosons_or_fermions))
+   ABI_ERROR(sjoin("Wrong values for bosons_or_fermions:", bosons_or_fermions))
  end select
 
 end subroutine matsubara_mesh

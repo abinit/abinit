@@ -3,7 +3,7 @@ ndtset      3
 ############
 # Dataset 1
 ############
-# SCF-GS run 
+# SCF-GS run
 nband1    8
 ############
 # Dataset 2
@@ -27,39 +27,39 @@ getwfk3       -2       # Obtain WFK file from dataset 1
 getscr3       -1       # Obtain SCR file from previous dataset
 nband3         8       # Bands to be used in the Self-Energy calculation
 ecutsigx3    8.0
-nomegasi3     20       # Number of freqs (w) in Imag axis used for Sigma_c(iw) 
+nomegasi3     20       # Number of freqs (w) in Imag axis used for Sigma_c(iw)
 
 nkptgw3        6       # number of k-point where to calculate the GW correction
 kptgw3                 # k-points in reduced coordinates, read from output
-    -2.50000000E-01 -2.50000000E-01  0.00000000E+00 
-    -2.50000000E-01  2.50000000E-01  0.00000000E+00 
-     5.00000000E-01  5.00000000E-01  0.00000000E+00 
-    -2.50000000E-01  5.00000000E-01  2.50000000E-01 
-     5.00000000E-01  0.00000000E+00  0.00000000E+00 
-     0.00000000E+00  0.00000000E+00  0.00000000E+00 
+    -2.50000000E-01 -2.50000000E-01  0.00000000E+00
+    -2.50000000E-01  2.50000000E-01  0.00000000E+00
+     5.00000000E-01  5.00000000E-01  0.00000000E+00
+    -2.50000000E-01  5.00000000E-01  2.50000000E-01
+     5.00000000E-01  0.00000000E+00  0.00000000E+00
+     0.00000000E+00  0.00000000E+00  0.00000000E+00
 
-bdgw3      
+bdgw3
             1  8     # calculate GW corrections for bands from 1 to 8
-            1  8     
-            1  8    
-            1  8    
-            1  8     
-            1  8     
+            1  8
+            1  8
+            1  8
+            1  8
+            1  8
 # Data common to the three different datasets
 
 # Definition of the unit cell: fcc
 acell  3*10.260        # This is equivalent to   10.260 10.260 10.260
 rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
-       0.5  0.0  0.5   
+       0.5  0.0  0.5
        0.5  0.5  0.0
 
 # Definition of the atom types
 ntypat  1         # There is only one type of atom
-znucl   14        # The keyword "znucl" refers to the atomic number of the 
-                  # possible type(s) of atom. The pseudopotential(s) 
+znucl   14        # The keyword "znucl" refers to the atomic number of the
+                  # possible type(s) of atom. The pseudopotential(s)
                   # mentioned in the "files" file must correspond
                   # to the type(s) of atom. Here, the only type Silicon.
-                         
+
 # Definition of the atoms
 natom  2          # There is one atom
 typat  1 1        # of type 1, that is, Silicon.
@@ -68,7 +68,7 @@ xred              # Reduced coordinate of atoms
       0.25  0.25  0.25
 
 # Definition of the k-point grid
-ngkpt   2 2 2  
+ngkpt   2 2 2
 nshiftk 4
 shiftk  0.0 0.0 0.0  # These shifts will be the same for all grids
         0.0 0.5 0.5
@@ -102,7 +102,7 @@ diemac  12.0      # Although this is not mandatory, it is worth to
 #%% max_nprocs = 8
 #%% [extra_info]
 #%% authors = M. Rodriguez-Mayorga
-#%% keywords = NC, GW
-#%% description = 
+#%% keywords = NC, GW, AC
+#%% description =
 #%%  GW.at.KS density matrix test for Silicon
 #%%<END TEST_INFO>

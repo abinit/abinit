@@ -7,7 +7,7 @@
 !!    correlations in the PAW approach (DFT+U, exact-exchange, ...).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2022 ABINIT group (BA,FJ,MT)
+!! Copyright (C) 2018-2025 ABINIT group (BA,FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,16 +29,21 @@ MODULE m_paw_correlations
  use m_dtset
  use m_linalg_interfaces
  use m_special_funcs
-
- use m_io_tools,    only : open_file
+ use m_fstrings,    only : int2char4
+ use m_io_tools,    only : get_unit,open_file
+ use m_paw_dmft,    only : paw_dmft_type
  use m_pawang,      only : pawang_type,pawang_init,pawang_free
- use m_pawrad,      only : pawrad_type,simp_gen,nderiv_gen,pawrad_ifromr,poisson
- use m_pawtab,      only : pawtab_type
- use m_pawrhoij,    only : pawrhoij_type
- use m_paw_ij,      only : paw_ij_type
- use m_paw_sphharm, only : mat_mlms2jmj,mat_slm2ylm
+ use m_pawrad,      only : pawrad_free,pawrad_init,pawrad_type,simp_gen,nderiv_gen,pawrad_ifromr,poisson
+ use m_pawtab,      only : pawtab_type,pawtab_nullify,pawtab_free,pawtab_set_flags
+ use m_pawrhoij,    only : pawrhoij_type,pawrhoij_gather, pawrhoij_nullify, pawrhoij_free
+ use m_paw_ij,      only : paw_ij_type,paw_ij_gather, paw_ij_free, paw_ij_nullify
+ use m_paw_sphharm, only : mat_mlms2jmj,mat_slm2ylm,slxyzs
  use m_paw_io,      only : pawio_print_ij
+ use m_paw_yukawa,  only : compute_slater,get_lambda
  use m_paral_atom,  only : get_my_atmtab,free_my_atmtab
+ use m_copy,        only : alloc_copy
+ use m_geometry,    only : vcart2ylm
+ use m_atomdata 
 
  implicit none
 
@@ -52,7 +57,7 @@ MODULE m_paw_correlations
  public :: setnoccmmp   ! Compute DFT+U density matrix nocc_{m,m_prime} or impose it
  public :: setrhoijpbe0 ! Impose value of rhoij for using an auxiliairy file (PBE0 only)
  public :: calc_ubare   ! Calculate the bare interaction on atomic orbitals
-
+ public :: loc_orbmom_cal ! calculate local orbital magnetic moments
 CONTAINS  !========================================================================================
 !!***
 
@@ -73,6 +78,9 @@ CONTAINS  !=====================================================================
 !!
 !! INPUTS
 !!  dmatpuopt= select expression for the density matrix
+!!  dmft_dc= option for the double-counting scheme in DMFT
+!!  dmft_orbital(ntypat)= option for the choice of the DMFT radial orbital
+!!  dmft_orbital_filepath= name of the DMFT orbital file
 !!  exchmix= mixing factor for local exact-exchange
 !!  is_dfpt=true if we are running a DFPT calculation
 !!  jpawu(ntypat)= value of J
@@ -114,7 +122,8 @@ CONTAINS  !=====================================================================
  subroutine pawpuxinit(dmatpuopt,exchmix,f4of2_sla,f6of2_sla,is_dfpt,jpawu,llexexch,llpawu,&
 &           nspinor,ntypat,option_interaction,pawang,pawprtvol,pawrad,pawtab,upawu,use_dmft,&
 &           useexexch,usepawu,&
-&           ucrpa) ! optional argument
+&           ucrpa,lmagCalc,dmft_orbital,dmft_dc,dmft_orbital_filepath,& ! optional argument
+&           dmft_yukawa_param,dmft_lambda_yukawa,dmft_epsilon_yukawa) ! optional argument
 
 !Arguments ---------------------------------------------
 !scalars
@@ -128,34 +137,45 @@ CONTAINS  !=====================================================================
  logical :: is_dfpt
  real(dp),intent(in) :: exchmix
  type(pawang_type), intent(in) :: pawang
- integer,optional, intent(in) :: ucrpa
+ integer,optional, intent(in) :: dmft_dc,ucrpa
 !arrays
  integer,intent(in) :: llexexch(ntypat),llpawu(ntypat)
  real(dp),intent(in) :: jpawu(ntypat),upawu(ntypat)
  real(dp),intent(in) :: f4of2_sla(ntypat),f6of2_sla(ntypat)
  type(pawrad_type),intent(inout) :: pawrad(ntypat)
  type(pawtab_type),target,intent(inout) :: pawtab(ntypat)
-
+ logical,optional,intent(in) :: lmagCalc
+ integer,optional,intent(in) :: dmft_yukawa_param
+ integer,optional,intent(in) :: dmft_orbital(ntypat)
+ real(dp),optional,intent(in) :: dmft_epsilon_yukawa,dmft_lambda_yukawa
+ character(len=fnlen),optional,intent(in) :: dmft_orbital_filepath
 !Local variables ---------------------------------------
 !scalars
- integer :: icount,il,ilmn,ilmnp,isela,iselb,itemp,itypat,iu,iup,j0lmn,jl,jlmn,jlmnp,ju,jup
+ integer :: icount,ierr,il,ilmn,ilmnp,ir,isela,iselb,itemp,itypat,iu,iup,j0lmn,jl,jlmn,jlmnp,ju,jup
  integer :: klm0x,klma,klmb,klmn,klmna,klmnb,kln,kln1,kln2,kyc,lcur,lexexch,lkyc,ll,ll1
  integer :: lmexexch,lmkyc,lmn_size,lmn2_size,lpawu
  integer :: m1,m11,m2,m21,m3,m31,m4,m41
- integer :: mesh_size,int_meshsz,mkyc,sz1
- integer :: option_interaction_
- logical :: compute_euijkl,compute_euij_fll
- real(dp) :: ak,f4of2,f6of2,int1,intg,phiint_ij,phiint_ipjp,vee1,vee2
- character(len=500) :: message
-
+ integer :: me,mesh_size,mesh_type,meshsz,int_meshsz,mkyc,unt,sz1
+ integer :: option_interaction_, Loc_prtvol
+ logical :: compute_euijkl,compute_euij_fll,lexist
+ real(dp) :: ak,eps,f4of2,f6of2,int1,intg,jh,lambda,lstep,phiint_ij,phiint_ipjp,rstep,uh,vee1,vee2
+ character(len=4) :: tag,tag2
+ character(len=500) :: message,tmpfil
+ logical :: lmagCalc_
 !arrays
  integer,ABI_CONTIGUOUS pointer :: indlmn(:,:)
  real(dp) :: euijkl_temp(3),euijkl_temp2(3),euijkl_dc(3)
- real(dp),allocatable :: ff(:),gg(:)
-
+ real(dp),allocatable :: ff(:),fk(:),gg(:)
+ type(pawrad_type) :: pawrad_tmp
 ! *************************************************************************
 
  DBG_ENTER("COLL")
+ Loc_prtvol = 3
+ lmagCalc_ = .False.
+ if (present(lmagCalc)) then
+   if (lmagCalc .eqv. .True.) lmagCalc_ = .True.
+   Loc_prtvol = 0
+ end if
 
 !No correlations= nothing to do
  if(useexexch==0.and.usepawu==0.and.use_dmft==0) then
@@ -180,7 +200,7 @@ CONTAINS  !=====================================================================
  end if
 
 !Print title
- if((abs(usepawu)>=1.and.abs(usepawu)<=4).or.useexexch/=0) &
+    if((abs(usepawu)>=1.and.abs(usepawu)<=4).or.useexexch/=0.and.(.not.lmagCalc_)) &
 &  write(message, '(3a)' ) ch10,ch10," ******************************************"
  if(usepawu==1) then
    write(message, '(3a)' ) trim(message),ch10," DFT+U Method used: FLL"
@@ -199,13 +219,13 @@ CONTAINS  !=====================================================================
      & (no use of occupation matrix) - experimental"
  end if
  if(useexexch/=0) write(message, '(3a)' ) trim(message),ch10," PAW Local Exact exchange: PBE0"
- if((abs(usepawu)>=1.and.abs(usepawu)<=4).or.useexexch/=0) then
+    if((abs(usepawu)>=1.and.abs(usepawu)<=4).or.useexexch/=0 .and.(.not.lmagCalc_)) then
    if (nspinor==2) then
      write(message, '(3a,i1)' ) trim(message),ch10," Magnetic DC : option_interaction = ",option_interaction
    end if
    write(message, '(3a)' ) trim(message),ch10," ******************************************"
  end if
- if(use_dmft==0 .and. abs(usepawu)<=4) then
+    if(use_dmft==0 .and. abs(usepawu)<=4 .and.(.not.lmagCalc_)) then
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
  end if
@@ -214,12 +234,12 @@ CONTAINS  !=====================================================================
 !call wrtout(ab_out,message,'COLL')
 !endif
  option_interaction_ = option_interaction
- if(abs(usepawu)>=10.and.nspinor==2.and.option_interaction/=1) then
+    if(abs(usepawu)>=10.and.nspinor==2.and.option_interaction/=1 .and.(.not.lmagCalc_)) then
    option_interaction_ = 1
    write(message, '(a)' ) "When usepawu>=10, option_interaction for DC is set to 1"
    call wrtout(std_out,message,'COLL')
  end if
- if(usepawu<0.and.nspinor==2.and.option_interaction_==2) then
+    if(usepawu<0.and.nspinor==2.and.option_interaction_==2 .and.(.not.lmagCalc_)) then
    write(message, '(a)' ) "option_interaction=2 is not implemented for usepawu<0. Change 'usepawu' or 'optdcmagpawu' in the input."
    ABI_ERROR(message)
  end if
@@ -232,6 +252,14 @@ CONTAINS  !=====================================================================
    mesh_size=pawtab(itypat)%mesh_size
    int_meshsz=pawrad(itypat)%int_meshsz
    lcur=-1
+
+   if (use_dmft > 0) then
+     if (dmft_dc == 8 .and. (f4of2_sla(itypat) >= -0.1_dp .or. &
+         & f6of2_sla(itypat) >= -0.1_dp) .and. dmft_yukawa_param == 1) then
+       message = "dmft_dc=8 and dmft_yukawa_param=1 not compatible with custom f4of2 and f6of2"
+       ABI_ERROR(message)
+     end if
+   end if
 
 !  PAW+U data
    if (usepawu/=0.or.use_dmft>0) then
@@ -279,11 +307,13 @@ CONTAINS  !=====================================================================
        message = 'pawpuxinit: Error on the number of projectors '
        ABI_BUG(message)
      end if
+          if ((.not.lmagCalc_)) then
      write(message, '(a,a,i4,a,a,i4)' ) ch10,&
 &     ' pawpuxinit : for species ',itypat,ch10,&
 &     '   number of projectors is',pawtab(itypat)%nproju
      call wrtout(std_out,message,'COLL')
 
+          end if
      pawtab(itypat)%ij_proj=pawtab(itypat)%nproju*(pawtab(itypat)%nproju+1)/2
 
 !    ==================================================
@@ -324,7 +354,7 @@ CONTAINS  !=====================================================================
 !    ==================================================
 !    B-PAW+U: overlap between atomic wavefunctions
 !    --------------------------------------------------
-     if(dmatpuopt==1) then
+          if(dmatpuopt==1 .and.(.not.lmagCalc_)) then
        write(message, '(4a)' ) ch10,&
 &       ' pawpuxinit : dmatpuopt=1 ',ch10,&
 &       '   PAW+U: dens. mat. constructed by projection on atomic wfn inside PAW augm. region(s)'
@@ -335,13 +365,13 @@ CONTAINS  !=====================================================================
 &       '                      - Is normalized ',ch10, &
 &       '                      In other cases, choose dmatpuopt=2'
        call wrtout(std_out,message,'COLL')
-     else if(dmatpuopt==2) then
+          else if(dmatpuopt==2 .and.(.not.lmagCalc_)) then
        write(message, '(6a)' ) ch10,&
 &       ' pawpuxinit : dmatpuopt=2 ',ch10,&
 &       '   PAW+U: dens. mat. constructed by selecting contribution',ch10,&
 &       '          for each angular momentum to the density (inside PAW augm. region(s))'
        call wrtout(std_out,message,'COLL')
-     else if(dmatpuopt==3) then
+          else if(dmatpuopt==3 .and.(.not.lmagCalc_)) then
        write(message, '(a,a,a,a,a,a)' ) ch10,&
 &       ' pawpuxinit : dmatpuopt=3 ',ch10,&
 &       '    PAW+U: dens. mat. constructed by projection on atomic wfn inside PAW augm. region(s)',ch10,&
@@ -456,8 +486,9 @@ CONTAINS  !=====================================================================
        end if
        sz1=2*lpawu+1
        ABI_MALLOC(pawtab(itypat)%vee,(sz1,sz1,sz1,sz1))
+
        call calc_vee(pawtab(itypat)%f4of2_sla,pawtab(itypat)%f6of2_sla,pawtab(itypat)%jpawu,&
-&       pawtab(itypat)%lpawu,pawang,pawtab(itypat)%upawu,pawtab(itypat)%vee)
+             &       pawtab(itypat)%lpawu,pawang,pawtab(itypat)%upawu,pawtab(itypat)%vee,Loc_prtvol)
 
       ! testu=0
       ! write(std_out,*) " Matrix of interaction vee(m1,m2,m1,m2)"
@@ -467,6 +498,7 @@ CONTAINS  !=====================================================================
       !     testu=testu+ pawtab(itypat)%vee(m1,m2,m1,m2)
       !  enddo
       ! enddo
+             if (.not.lmagCalc_) then
        write(message,'(a)') ch10
        call wrtout(std_out,message,'COLL')
        write(message,'(a)') " Matrix of interaction vee(m1,m2,m1,m2)"
@@ -480,6 +512,7 @@ CONTAINS  !=====================================================================
        enddo
        write(message,'(a)') ch10
        call wrtout(std_out,message,'COLL')
+     end if
 
      !  testu=testu/((two*lpawu+one)**2)
      !  write(std_out,*) "------------------------"
@@ -788,6 +821,154 @@ CONTAINS  !=====================================================================
          call calc_ubare(itypat,lcur,pawang,pawrad(itypat),pawtab(itypat),pawtab(itypat)%rpaw)
        end if
      end if
+
+     if (use_dmft > 0) then
+
+       write(tag,'(i4)') itypat
+       write(message,'(4a)') &
+         & ch10,' =====  Build DMFT radial orbital for atom type ',trim(adjustl(tag)),' ========'
+       call wrtout(std_out,message,"COLL")
+
+       ABI_SFREE(pawtab(itypat)%proj)
+       ABI_SFREE(pawtab(itypat)%proj2)
+
+       me = xmpi_comm_rank(xmpi_world)
+
+       if (dmft_orbital(itypat) > 0) then ! use atomic orbital from PAW dataset
+         if (dmft_orbital(itypat) > pawtab(itypat)%nproju) then
+           write(message,*) "For atom type:",itypat,"you need to set dmft_orbital to a value", &
+                        & " lower than",pawtab(itypat)%nproju
+           ABI_ERROR(message)
+         end if
+         write(message,'(2a,i1,a)') ch10," Using atomic orbital number ",dmft_orbital(itypat)," from PAW dataset"
+         call wrtout(std_out,message,"COLL")
+         meshsz = pawrad(itypat)%int_meshsz
+         ABI_MALLOC(pawtab(itypat)%proj,(meshsz))
+         pawtab(itypat)%proj(:) = pawtab(itypat)%phi(1:meshsz,pawtab(itypat)%lnproju(dmft_orbital(itypat)))
+       else  ! read orbital from file
+         call int2char4(itypat,tag2)
+         tmpfil = trim(adjustl(dmft_orbital_filepath)) // '_' // tag2
+         write(message,'(3a)') ch10," Using wavefunction from file ",trim(tmpfil)
+         call wrtout(std_out,message,"COLL")
+         inquire(file=trim(tmpfil),exist=lexist)
+         if (.not. lexist) ABI_ERROR("File "//trim(tmpfil)//" does not exist !")
+         if (me == 0) then
+           unt = get_unit()
+           open(unit=unt,file=trim(tmpfil),status='unknown',form='formatted')
+           read(unt,*,iostat=ierr) meshsz
+         end if ! me=0
+         call xmpi_bcast(meshsz,0,xmpi_world,ierr)
+         ABI_MALLOC(pawtab(itypat)%proj,(meshsz))
+         if (me == 0) then
+           do ir=1,meshsz
+             read(unt,*,iostat=ierr) pawtab(itypat)%proj(ir)
+           end do ! ir
+           close(unt)
+         end if ! me=0
+         call xmpi_bcast(ierr,0,xmpi_world,ir)
+         if (ierr /= 0) ABI_ERROR("Error when reading file "//trim(tmpfil))
+         call xmpi_bcast(pawtab(itypat)%proj(:),0,xmpi_world,ierr)
+       end if ! dmft_orbital
+
+       mesh_type = pawrad(itypat)%mesh_type
+       lstep = pawrad(itypat)%lstep
+       rstep = pawrad(itypat)%rstep
+
+       call pawrad_init(pawrad_tmp,meshsz,mesh_type,rstep,lstep)
+       call simp_gen(int1,pawtab(itypat)%proj(1:meshsz)**2,pawrad_tmp)
+
+       write(message,'(a,f6.4)') " Squared norm of the DMFT orbital: ",int1
+       call wrtout(std_out,message,"COLL")
+
+       int1 = sqrt(int1)
+
+       if (dmft_dc == 8) then
+
+         if (dmft_orbital(itypat) > 0) then
+           write(message ,'(7a)') "WARNING: You are using dmft_dc=8 while using an atomic orbital from ", &
+               & "the PAW dataset. In our current implementation, we assume that ", &
+               & "the projection of the orbital on [dmftbandi,dmftbandf] is the same ", &
+               & "as the orbital itself, and this can hardly be the case with a truncated atomic ", &
+               & "orbital. Please compute the projection of the atomic orbital with dmft_prtwan=1, ", &
+               & "and then use this projection as your DMFT orbital with dmft_orbital=-1. This is explained ",&
+               & "in the tutorial."
+           ABI_WARNING(message)
+         end if
+
+         ABI_MALLOC(pawtab(itypat)%proj2,(meshsz))
+         pawtab(itypat)%proj2(:) = (pawtab(itypat)%proj(:)/int1)**2
+
+         ABI_MALLOC(fk,(lcur+1))
+
+         if (dmft_yukawa_param <= 2) then
+           ! Get correspondence U,J <-> lambda,epsilon or U <-> lambda depending on the value of dmft_yukawa_param
+           call get_lambda(lcur,pawrad_tmp,pawtab(itypat)%proj2(:),meshsz, &
+                         & pawtab(itypat)%upawu,pawtab(itypat)%jpawu,lambda,eps,dmft_yukawa_param)
+         else if (dmft_yukawa_param == 3) then
+           call compute_slater(lcur,pawrad_tmp,pawtab(itypat)%proj2(:),meshsz,zero,one,fk(:))
+           lambda = zero
+           eps    = fk(1) / pawtab(itypat)%upawu
+           fk(:)  = fk(:) / eps
+         else if (dmft_yukawa_param == 4) then
+           lambda = dmft_lambda_yukawa
+           eps    = dmft_epsilon_yukawa
+         end if
+
+         pawtab(itypat)%lambda = lambda
+         pawtab(itypat)%eps = eps
+
+         ! Recompute Slater integrals
+         if (dmft_yukawa_param /= 3) then
+           call compute_slater(lcur,pawrad_tmp,pawtab(itypat)%proj2(:),meshsz,lambda,eps,fk(:))
+         end if
+
+         write(message,'(3a)') ch10," Yukawa parameters for atom type: ",adjustl(tag)
+         call wrtout(std_out,message,"COLL")
+         write(message,'(a,f9.4)') " Lambda: ",lambda
+         call wrtout(std_out,message,"COLL")
+         write(message,'(a,f9.4)') " Epsilon:",eps
+         call wrtout(std_out,message,"COLL")
+
+         ! Recompute U tensor with new Slater integrals
+         f4of2 = - one
+         f6of2 = - one
+         uh = fk(1)
+
+         if (lcur == 0) then
+           jh = zero
+         else if (lcur == 1) then
+           jh = fk(2) / dble(5.)
+         else if (lcur == 2) then
+           f4of2 = fk(3) / fk(2)
+           jh = fk(2) * (one + f4of2) / dble(14.)
+         else if (lcur == 3) then
+           f6of2 = fk(4) / fk(2)
+           f4of2 = fk(3) / fk(2)
+           jh = fk(2) * (dble(286.)+dble(195.)*f4of2+dble(250.)*f6of2) / dble(6435.)
+         else
+           write(message,'(a,i0,2a)') ' lpawu=',lpawu,ch10, &
+             & ' lpawu not equal to 0, 1, 2 or 3 is not allowed'
+           ABI_ERROR(message)
+         end if
+
+         write(message,'(a,6x,f9.4)') " U:",uh
+         call wrtout(std_out,message,"COLL")
+         write(message,'(a,6x,f9.4)') " J:",jh
+         call wrtout(std_out,message,"COLL")
+
+         pawtab(itypat)%upawu = uh
+         pawtab(itypat)%jpawu = jh
+
+         call calc_vee(f4of2,f6of2,jh,lcur,pawang,uh,pawtab(itypat)%vee(:,:,:,:),Loc_prtvol)
+
+         ABI_FREE(fk)
+
+       end if ! dmft_dc=8
+
+       call pawrad_free(pawrad_tmp)
+
+     end if ! use_dmft > 0
+
    end if !lcur/=-1
  end do !end loop on typat
 
@@ -819,11 +1000,12 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
- subroutine calc_vee(f4of2_sla,f6of2_sla,jpawu,lpawu,pawang,upawu,vee)
+  subroutine calc_vee(f4of2_sla,f6of2_sla,jpawu,lpawu,pawang,upawu,vee,prtvol)
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: lpawu
+ integer,optional,intent(in) :: prtvol
  real(dp),intent(in) :: upawu,jpawu
  real(dp),intent(inout) :: f4of2_sla,f6of2_sla
  type(pawang_type), intent(in) :: pawang
@@ -835,7 +1017,7 @@ CONTAINS  !=====================================================================
  integer :: isela,iselb
  integer :: klm0u,klma,klmb,kyc,lkyc
  integer :: lmkyc,lmpawu
- integer :: m1,m11,m2,m21,m3,m31,m4,m41
+ integer :: m1,m11,m2,m21,m3,m31,m4,m41,prtvol_
  integer :: mkyc,sz1
  real(dp) :: ak,f4of2,f6of2
  character(len=500) :: message
@@ -847,6 +1029,10 @@ CONTAINS  !=====================================================================
  DBG_ENTER("COLL")
 
 
+    prtvol_ = 3
+    if (present(prtvol)) then
+       prtvol_ = prtvol
+    end if
 !  Select only atoms with +U
    if(lpawu/=-1) then
 
@@ -874,11 +1060,11 @@ CONTAINS  !=====================================================================
          end if
          fk(2)=jpawu*14._dp/(One+f4of2)
          fk(3)=fk(2)*f4of2
-!        if(abs(pawprtvol)>=2) then
+          if(abs(prtvol_)>=2) then
          write(message,'(a,3x,a,f9.4,f9.4,f9.4,f9.4)') ch10,&
 &         "Slater parameters F^0, F^2, F^4 are",fk(1),fk(2),fk(3)
          call wrtout(std_out,message,'COLL')
-!        end if
+          end if
        else if(lpawu==3) then
          f4of2=0.6681_dp
          f6of2=0.4943_dp
@@ -897,8 +1083,10 @@ CONTAINS  !=====================================================================
          fk(2)=jpawu*6435._dp/(286._dp+195._dp*f4of2+250._dp*f6of2)
          fk(3)=fk(2)*f4of2
          fk(4)=fk(2)*f6of2
+          if(abs(prtvol_)>=2) then
          write(std_out,'(a,3x,a,f9.4,f9.4,f9.4,f9.4)') ch10,&
 &         "Slater parameters F^0, F^2, F^4, F^6 are",fk(1),fk(2),fk(3),fk(4)
+          end if
        else
          write(message, '(a,i0,2a)' )&
 &         ' lpawu=',lpawu,ch10,&
@@ -984,7 +1172,7 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
  subroutine pawuenergy(iatom,edftumdc,edftumdcdc,noccmmp,nocctot,pawprtvol,pawtab,&
- &                     dmft_dc,e_ee,e_dc,e_dcdc,u_dmft,j_dmft) ! optional arguments (DMFT)
+ &                     dmft_dc,e_ee,e_dc,e_dcdc,u_dmft,j_dmft,paw_dmft) ! optional arguments (DMFT)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -994,8 +1182,8 @@ CONTAINS  !=====================================================================
  real(dp),intent(inout) :: edftumdc,edftumdcdc
  real(dp),optional,intent(inout) :: e_ee,e_dc,e_dcdc
  real(dp),optional,intent(in) :: j_dmft,u_dmft
+ type(paw_dmft_type),optional,intent(in) :: paw_dmft
  type(pawtab_type),intent(in) :: pawtab
-
 !Local variables ---------------------------------------
 !scalars
  integer :: cplex_occ,dmftdc,ispden,jspden,lpawu,m1,m11,m2,m21,m3,m31,m4,m41,nspden
@@ -1007,8 +1195,8 @@ CONTAINS  !=====================================================================
  real(dp) :: n34_ud_re,n34_du_re
  real(dp) :: upawu
  real(dp),allocatable :: n12_sig(:),n34_msig(:),n34_sig(:)
+ character(len=4) :: tag
  character(len=500) :: message
-
 ! *****************************************************
 
  nspden=size(nocctot)
@@ -1253,6 +1441,12 @@ CONTAINS  !=====================================================================
      write(message,fmt=11) "(eks+edcdc_opt3)/2  ",(eks_opt3+edcdc_opt3)/2.d0
      call wrtout(std_out,message,'COLL')
    end if
+ else if(dmftdc==7) then
+   edctemp=upawu*(dble(paw_dmft%dmft_nominal(iatom))-half)*n_tot-half*jpawu*(dble(paw_dmft%dmft_nominal(iatom))-one)*n_tot
+   edcdctemp=zero
+ else if(dmftdc==8) then
+   edctemp=paw_dmft%edc(iatom)
+   edcdctemp=paw_dmft%edc(iatom)-paw_dmft%edcdc(iatom)
  end if
 
  edftumdc  =edftumdc  +edftutemp-edctemp
@@ -1260,18 +1454,20 @@ CONTAINS  !=====================================================================
 
 !if(pawtab%usepawu/=10.or.pawprtvol>=3) then
  if(abs(pawprtvol)>=3) then
+   write(tag,'(i4)') iatom
+   tag = trim(adjustl(tag))
    if(pawtab%usepawu<10) then
-     write(message, '(5a,i4)')ch10,'======= DFT+U Energy terms (in Hartree) ====',ch10,&
-&     ch10,' For Atom ',iatom
+     write(message, '(6a)') ch10,'======= DFT+U Energy terms (in Hartree) ====',ch10,&
+&     ch10,' For Atom ',tag
    else if (pawtab%usepawu >= 10) then
-     write(message, '(5a,i4)')ch10,'  ===   DFT+U Energy terms for the DMFT occupation matrix ==',ch10,&
-&     ch10,' For Atom ',iatom
+     write(message, '(6a)') ch10,'  ===   DFT+U Energy terms from the DMFT occupation matrix ==',ch10,&
+&     ch10,' For Atom ',tag
    end if
 
    call wrtout(std_out,message,'COLL')
    write(message, '(a)' )"   Contributions to the direct expression of energy:"
    call wrtout(std_out,  message,'COLL')
-   write(message,fmt=11) "     Double counting  correction   =",edctemp
+   write(message,fmt=11) "     Double counting correction    =",edctemp
    call wrtout(std_out,  message,'COLL')
    write(message,fmt=11) "     Interaction energy            =",edftutemp
    call wrtout(std_out,  message,'COLL')
@@ -1482,7 +1678,7 @@ CONTAINS  !=====================================================================
 subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym,my_natom,natom,&
 &                     natpawu,nspinor,nsppol,nsym,ntypat,paw_ij,pawang,pawprtvol,pawrhoij,pawtab,&
 &                     spinat,symafm,typat,useexexch,usepawu, &
-&                     mpi_atmtab,comm_atom) ! optional arguments (parallelism)
+&                     mpi_atmtab,comm_atom,l_orbmom,atom_orbmom,my_l_occmat) ! optional arguments (parallelism) and printing lorb mag
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1494,8 +1690,8 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
 !arrays
  integer,intent(in) :: indsym(4,nsym,natom),symafm(nsym),typat(natom)
  integer,optional,target,intent(in) :: mpi_atmtab(:)
+ integer,optional,intent(in) :: l_orbmom,atom_orbmom
  real(dp),intent(in) :: dmatpawu(dimdmat,dimdmat,nspinor*nsppol,natpawu*impose_dmat)
- !real(dp),intent(in) :: dmatpawu(:,:,:,:)
  real(dp),intent(in) :: spinat(3,natom)
  type(paw_ij_type),intent(inout) :: paw_ij(my_natom)
  type(pawrhoij_type),intent(in) :: pawrhoij(my_natom)
@@ -1510,7 +1706,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
  logical,parameter :: afm_noncoll=.true.  ! TRUE if antiferro symmetries are used with non-collinear magnetism
  logical :: antiferro,my_atmtab_allocated,noccsym_error,paral_atom,use_afm
 ! real(dp),parameter :: invsqrt2=one/sqrt2
- real(dp) :: factafm,mnorm,mx,my,mz,ntot,nup,ndn,snorm,sx,sy,szp,szm
+ real(dp) :: factafm,mnorm,mx,my,mz,ntot,nup,ndn,snorm,sx,sy,szm,szp
  character(len=4) :: wrt_mode
  character(len=500) :: message
 !arrays
@@ -1519,17 +1715,32 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
  real(dp) :: ro(2),sumocc(2)
  real(dp),allocatable :: eig(:),hdp(:,:,:),hdp2(:,:),noccmmptemp(:,:,:,:),noccmmp_tmp(:,:,:,:)
  real(dp),allocatable :: rwork(:),noccmmp2(:,:,:,:),nocctot2(:)
- complex(dpc),allocatable :: noccmmp_ylm(:,:,:),noccmmp_jmj(:,:),noccmmp_slm(:,:,:)
- complex(dpc),allocatable :: zhdp(:,:),zhdp2(:,:),znoccmmp_tmp(:,:),zwork(:)
+ complex(dp),allocatable :: noccmmp_ylm(:,:,:),noccmmp_jmj(:,:),noccmmp_slm(:,:,:)
+ complex(dp),allocatable :: zhdp(:,:),zhdp2(:,:),znoccmmp_tmp(:,:),zwork(:)
  character(len=9),parameter :: dspin(6)=  (/"up       ","down     ","up-up    ","down-down","Re[up-dn]","Im[up-dn]"/)
  character(len=9),parameter :: dspinc(6)= (/"up       ","down     ","up-up    ","down-down","up-dn    ","dn-up    "/)
 ! character(len=9),parameter :: dspinc2(6)=(/"up       ","down     ","dn-dn    ","up-up    ","dn-up    ","up-dn    "/)
  character(len=9),parameter :: dspinm(6)= (/"dn       ","up i     ","n        ","mx       ","my       ","mz       "/)
  type(coeff4_type),allocatable :: tmp_noccmmp(:)
 
+ real(dp),allocatable :: l_noccmmp_tmp(:,:,:,:)
+ real(dp),optional,allocatable :: my_l_occmat(:,:,:,:)
+ logical :: cal_lmom
+ integer :: atom_min,atom_max
 !*********************************************************************
 
  DBG_ENTER("COLL")
+!in case of calculating orbital magnetic moments, only the occupation matrix for atoms atom_orbmom and orbital l_orbmom
+!is calculated and returned in my_l_occmat.
+if (present(l_orbmom) .and. present(atom_orbmom))  then
+    cal_lmom= .true.
+    atom_min=atom_orbmom
+    atom_max=atom_orbmom
+else
+    cal_lmom=.false.
+    atom_min=1
+    atom_max=my_natom
+end if
 
 !Tests
  if (my_natom>0) then
@@ -1598,27 +1809,29 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
        else
          ABI_MALLOC(tmp_noccmmp(iatom_tot)%value,(cplex_dij,2*lpawu+1,2*lpawu+1,ndij))
          tmp_noccmmp(iatom_tot)%value=zero
-         if(limp==0) then ! default reading
+         if (limp==0) then ! default reading
            snorm=sqrt(spinat(1,iatom_tot)**2+spinat(1,iatom_tot)**2+spinat(3,iatom_tot)**2)
-           if (snorm>tol12) then
+           if (snorm>tol12.and.nspden/=1) then
              sx=half*spinat(1,iatom_tot)/snorm
              sy=half*spinat(2,iatom_tot)/snorm
              szp=half*(one+spinat(3,iatom_tot)/snorm)
              szm=half*(one-spinat(3,iatom_tot)/snorm)
            else
              sx=zero;sy=zero
-             szp=one;szm=zero
+             szp=half;szm=half
            end if
            do im2=1,2*lpawu+1
              do im1=1,2*lpawu+1
                nup=dmatpawu(im1,im2,1,iatpawu);ndn=dmatpawu(im1,im2,2,iatpawu)
+!              if (nspden==1) tmp_noccmmp(iatom_tot)%value(1,im1,im2,1:2)=half*(nup+ndn)
                tmp_noccmmp(iatom_tot)%value(1,im1,im2,1)=nup*szp+ndn*szm
                tmp_noccmmp(iatom_tot)%value(1,im1,im2,2)=nup*szm+ndn*szp
                tmp_noccmmp(iatom_tot)%value(1,im1,im2,3)=(nup-ndn)*sx
                tmp_noccmmp(iatom_tot)%value(1,im1,im2,4)=(ndn-nup)*sy
              end do
            end do
-         else if(limp>=1) then
+
+         else if (limp>=1) then
            ABI_MALLOC(noccmmp_ylm,(2*lpawu+1,2*lpawu+1,ndij))
            noccmmp_ylm=czero
            ABI_MALLOC(noccmmp_slm,(2*lpawu+1,2*lpawu+1,ndij))
@@ -1637,7 +1850,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
              call mat_mlms2jmj(lpawu,noccmmp_ylm,noccmmp_jmj,ndij,&
 &             2,2,pawprtvol,std_out,wrt_mode) !  optspin=1: up spin are first
            end if
-           if(limp==2) then ! read input matrix in Ylm basis
+           if (limp==2) then ! read input matrix in Ylm basis
              noccmmp_ylm=czero
              do im1=1,2*lpawu+1
                noccmmp_ylm(im1,im1,1)=cmplx(dmatpawu(im1,im1,1,iatpawu),zero,kind=dp)
@@ -1650,7 +1863,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
            call mat_slm2ylm(lpawu,noccmmp_ylm,noccmmp_slm,ndij,&
 &           2,2,pawprtvol,std_out,wrt_mode) ! optspin=1 because up spin are first
 !          interchange upup and dndn
-           if(limp>=1) then
+           if (limp>=1) then
              tmp_noccmmp(iatom_tot)%value(1,:,:,1)=real(noccmmp_slm(:,:,2))
              tmp_noccmmp(iatom_tot)%value(2,:,:,1)=aimag(noccmmp_slm(:,:,2))
              tmp_noccmmp(iatom_tot)%value(1,:,:,2)=real(noccmmp_slm(:,:,1))
@@ -1699,16 +1912,20 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
  end if
 
 !Loops over atoms
- do iatom=1,my_natom
+ do iatom=atom_min,atom_max
    iatom_tot=iatom;if (paral_atom) iatom_tot=my_atmtab(iatom)
    itypat=pawrhoij(iatom)%itypat
    cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
 
+   if (.not. cal_lmom) then
    if (useexexch/=0) then
      lcur=pawtab(itypat)%lexexch
    else if (usepawu/=0) then
      lcur=pawtab(itypat)%lpawu
    end if
+   end if
+
+   if (cal_lmom) lcur=l_orbmom
    if (lcur/=-1) then
 
 !    ########################################################################################
@@ -1717,7 +1934,8 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
      if ((usepawu/=0.and.compute_dmat/=0).or.useexexch/=0) then
 
 
-       paw_ij(iatom)%noccmmp(:,:,:,:)=zero
+       ABI_MALLOC(l_noccmmp_tmp,(cplex_dij,2*lcur+1,2*lcur+1,ndij))
+       l_noccmmp_tmp(:,:,:,:)=zero
 
 !      Loop over spin components
        ABI_MALLOC(noccmmptemp,(cplex_dij,2*lcur+1,2*lcur+1,ndij))
@@ -1731,7 +1949,8 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
          end if
          ABI_MALLOC(nocctot2,(ndij))
        end if
-       do ispden=1,ndij
+       nsploop=ndij
+       do ispden=1,nsploop
          jrhoij=1
          do irhoij=1,pawrhoij(iatom)%nrhoijsel
            klmn=pawrhoij(iatom)%rhoijselect(irhoij)
@@ -1750,7 +1969,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
 
            if(lmin==0.and.lmax==2*lcur) then
              icount=in1+(in2*(in2-1))/2
-             if(pawtab(itypat)%ij_proj<icount)  then
+             if(pawtab(itypat)%ij_proj<icount .and.  (.not. cal_lmom) )  then
                message='PAW+U: Problem in the loop calculating noccmmp!'
                ABI_BUG(message)
              end if
@@ -1761,7 +1980,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
                end if
              end if
              if(im2>=im1) then
-               paw_ij(iatom)%noccmmp(1:cplex_dij,im1,im2,ispden)=paw_ij(iatom)%noccmmp(1:cplex_dij,im1,im2,ispden) &
+               l_noccmmp_tmp(1:cplex_dij,im1,im2,ispden)=l_noccmmp_tmp(1:cplex_dij,im1,im2,ispden) &
 &                           +ro(1:cplex_dij)*pawtab(itypat)%phiphjint(icount)
              end if
            end if
@@ -1769,16 +1988,16 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
          end do ! irhoij
          do im2=1,2*lcur+1
            do im1=1,im2
-             paw_ij(iatom)%noccmmp(1,im1,im2,ispden)=paw_ij(iatom)%noccmmp(1,im1,im2,ispden) &
+             l_noccmmp_tmp(1,im1,im2,ispden)=l_noccmmp_tmp(1,im1,im2,ispden) &
 &             +noccmmptemp(1,im2,im1,ispden)
-             if(cplex_dij==2) paw_ij(iatom)%noccmmp(2,im1,im2,ispden)=paw_ij(iatom)%noccmmp(2,im1,im2,ispden) &
+             if(cplex_dij==2) l_noccmmp_tmp(2,im1,im2,ispden)=l_noccmmp_tmp(2,im1,im2,ispden) &
 &             -noccmmptemp(2,im2,im1,ispden)
            end do
          end do
          do im1=1,2*lcur+1
            do im2=1,im1
-             paw_ij(iatom)%noccmmp(1,im1,im2,ispden)=paw_ij(iatom)%noccmmp(1,im2,im1,ispden)
-             if(cplex_dij==2) paw_ij(iatom)%noccmmp(2,im1,im2,ispden)=-paw_ij(iatom)%noccmmp(2,im2,im1,ispden)
+             l_noccmmp_tmp(1,im1,im2,ispden)=l_noccmmp_tmp(1,im2,im1,ispden)
+             if(cplex_dij==2) l_noccmmp_tmp(2,im1,im2,ispden)=-l_noccmmp_tmp(2,im2,im1,ispden)
            end do
          end do
        end do ! ispden
@@ -1788,17 +2007,17 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
          noccmmp2(:,:,:,:)=zero
          do im1=1,2*lcur+1
            do im2=1,2*lcur+1
-             noccmmp2(1,im1,im2,1)=half*(paw_ij(iatom)%noccmmp(1,im1,im2,1)+paw_ij(iatom)%noccmmp(1,im1,im2,4))
-             noccmmp2(2,im1,im2,1)=half*(paw_ij(iatom)%noccmmp(2,im1,im2,1)+paw_ij(iatom)%noccmmp(2,im1,im2,4))
-             noccmmp2(1,im1,im2,2)=half*(paw_ij(iatom)%noccmmp(1,im1,im2,1)-paw_ij(iatom)%noccmmp(1,im1,im2,4))
-             noccmmp2(2,im1,im2,2)=half*(paw_ij(iatom)%noccmmp(2,im1,im2,1)-paw_ij(iatom)%noccmmp(2,im1,im2,4))
-             noccmmp2(1,im1,im2,3)=half*(paw_ij(iatom)%noccmmp(1,im1,im2,2)+paw_ij(iatom)%noccmmp(2,im1,im2,3))
-             noccmmp2(2,im1,im2,3)=half*(paw_ij(iatom)%noccmmp(2,im1,im2,2)-paw_ij(iatom)%noccmmp(1,im1,im2,3))
-             noccmmp2(1,im1,im2,4)=half*(paw_ij(iatom)%noccmmp(1,im1,im2,2)-paw_ij(iatom)%noccmmp(2,im1,im2,3))
-             noccmmp2(2,im1,im2,4)=half*(paw_ij(iatom)%noccmmp(2,im1,im2,2)+paw_ij(iatom)%noccmmp(1,im1,im2,3))
+             noccmmp2(1,im1,im2,1)=half*(l_noccmmp_tmp(1,im1,im2,1)+l_noccmmp_tmp(1,im1,im2,4))
+             noccmmp2(2,im1,im2,1)=half*(l_noccmmp_tmp(2,im1,im2,1)+l_noccmmp_tmp(2,im1,im2,4))
+             noccmmp2(1,im1,im2,2)=half*(l_noccmmp_tmp(1,im1,im2,1)-l_noccmmp_tmp(1,im1,im2,4))
+             noccmmp2(2,im1,im2,2)=half*(l_noccmmp_tmp(2,im1,im2,1)-l_noccmmp_tmp(2,im1,im2,4))
+             noccmmp2(1,im1,im2,3)=half*(l_noccmmp_tmp(1,im1,im2,2)+l_noccmmp_tmp(2,im1,im2,3))
+             noccmmp2(2,im1,im2,3)=half*(l_noccmmp_tmp(2,im1,im2,2)-l_noccmmp_tmp(1,im1,im2,3))
+             noccmmp2(1,im1,im2,4)=half*(l_noccmmp_tmp(1,im1,im2,2)-l_noccmmp_tmp(2,im1,im2,3))
+             noccmmp2(2,im1,im2,4)=half*(l_noccmmp_tmp(2,im1,im2,2)+l_noccmmp_tmp(1,im1,im2,3))
            end do
          end do
-         if(abs(pawprtvol)>=1) then
+         if(abs(pawprtvol)>=1 .and. (.not. cal_lmom)) then
            write(message,'(2a)') ch10,"== Calculated occupation matrix for correlated orbitals in the n, m basis :"
            call wrtout(std_out,message,wrt_mode)
            do ispden=1,ndij
@@ -1807,11 +2026,11 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
              do im1=1,lcur*2+1  ! ( order of indices in noccmmp is exchanged in order to have the same convention as rhoij: transposition is done after )
                if(cplex_dij==1)&
 &               write(message,'(12(1x,9(1x,f10.5)))')&
-&               (paw_ij(iatom)%noccmmp(1,im2,im1,ispden),im2=1,lcur*2+1)
+&               (l_noccmmp_tmp(1,im2,im1,ispden),im2=1,lcur*2+1)
                if(cplex_dij==2)&
 !              &               write(message,'(12(1x,9(1x,"(",f7.3,",",f7.3,")")))')&
 &               write(message,'(12(1x,9(1x,"(",f10.5,",",f10.5,")")))')&
-&               (paw_ij(iatom)%noccmmp(:,im2,im1,ispden),im2=1,lcur*2+1)
+&               (l_noccmmp_tmp(:,im2,im1,ispden),im2=1,lcur*2+1)
                call wrtout(std_out,message,wrt_mode)
              end do
            end do
@@ -1819,25 +2038,27 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
        end if
 
 !      Compute total number of electrons per spin
+       if (.not. cal_lmom) then
        paw_ij(iatom)%nocctot(:)=zero ! contains nmmp in the n m representation
        if(ndij==4) nocctot2(:)=zero ! contains nmmp in the upup dndn updn dnup  representation
        do ispden=1,ndij
          do im1=1,2*lcur+1
            if(ndij==4) then
-             paw_ij(iatom)%nocctot(ispden)=paw_ij(iatom)%nocctot(ispden)+paw_ij(iatom)%noccmmp(1,im1,im1,ispden)
+                 paw_ij(iatom)%nocctot(ispden)=paw_ij(iatom)%nocctot(ispden)+l_noccmmp_tmp(1,im1,im1,ispden)
              nocctot2(ispden)=nocctot2(ispden)+noccmmp2(1,im1,im1,ispden)
            else
-             paw_ij(iatom)%nocctot(ispden)=paw_ij(iatom)%nocctot(ispden)+paw_ij(iatom)%noccmmp(1,im1,im1,ispden)
+                 paw_ij(iatom)%nocctot(ispden)=paw_ij(iatom)%nocctot(ispden)+l_noccmmp_tmp(1,im1,im1,ispden)
            end if
          end do
        end do
+       end if
 !      noccmmp will now be in the up up , dn dn... representation and now n_mmp=<m|n|mp> instead of <mp|n|m> !
        if(ndij==4) then
          do ispden=1,ndij
            do iplex=1,cplex_dij
              do im1=1,2*lcur+1
                do im2=1,2*lcur+1
-                 paw_ij(iatom)%noccmmp(iplex,im1,im2,ispden)=noccmmp2(iplex,im2,im1,ispden) ! now, noccmmp is in the upup dndn updn dnup representation
+                 l_noccmmp_tmp(iplex,im1,im2,ispden)=noccmmp2(iplex,im2,im1,ispden) ! now, noccmmp is in the upup dndn updn dnup representation
                end do
              end do
            end do
@@ -1845,6 +2066,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
          ABI_FREE(noccmmp2)
        end if
 !      Printing of new nocc_mmp
+      if (.not. cal_lmom) then
        if ((usepawu/=0.and.abs(usepawu)<10).or.(usepawu>=10.and.pawprtvol>=3)) then
          write(message, '(2a)' )  ch10, &
 &         '========== DFT+U DATA =================================================== '
@@ -1916,10 +2138,10 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
            do im1=1,lcur*2+1
              if(cplex_dij==1)&
 &             write(message,'(12(1x,9(1x,f10.5)))')&
-&             (paw_ij(iatom)%noccmmp(1,im1,im2,ispden),im2=1,lcur*2+1)
+&             (l_noccmmp_tmp(1,im1,im2,ispden),im2=1,lcur*2+1)
              if(cplex_dij==2)&
 &             write(message,'(12(1x,9(1x,"(",f7.3,",",f7.3,")")))')&
-&             (paw_ij(iatom)%noccmmp(:,im1,im2,ispden),im2=1,lcur*2+1)
+&             (l_noccmmp_tmp(:,im1,im2,ispden),im2=1,lcur*2+1)
              call wrtout(std_out,message,wrt_mode)
            end do
          end do
@@ -1934,8 +2156,8 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
          ABI_MALLOC(noccmmp_jmj,(2*(2*lcur+1),2*(2*lcur+1)))
          noccmmp_jmj=czero
 !        go from real notation for complex noccmmp to complex notation in noccmmp_slm
-         noccmmp_slm(:,:,:)=cmplx(paw_ij(iatom)%noccmmp(1,:,:,:)&
-&         ,paw_ij(iatom)%noccmmp(2,:,:,:),kind=dp)
+         noccmmp_slm(:,:,:)=cmplx(l_noccmmp_tmp(1,:,:,:)&
+&         ,l_noccmmp_tmp(2,:,:,:),kind=dp)
          call mat_slm2ylm(lcur,noccmmp_slm,noccmmp_ylm,ndij,1,1,pawprtvol,std_out,wrt_mode) ! optspin=1: up spin are first
 
          do ispden=1,ndij
@@ -1951,13 +2173,31 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
          ABI_FREE(noccmmp_jmj)
          ABI_FREE(noccmmp_slm)
        end if !ndij==4
+           paw_ij(iatom)%noccmmp(:,:,:,:)=zero
+           paw_ij(iatom)%noccmmp(:,:,:,:)=l_noccmmp_tmp(:,:,:,:)
+           ABI_FREE(l_noccmmp_tmp)
+       else
+
+         if(allocated(my_l_occmat)) then
+           ABI_FREE(my_l_occmat)
+         end if
+
+                if(allocated(nocctot2)) then
+                  ABI_FREE(nocctot2)
+                end if
+         ABI_MALLOC(my_l_occmat,(cplex_dij,2*lcur+1,2*lcur+1,ndij))
+         my_l_occmat(:,:,:,:)=zero
+         my_l_occmat=l_noccmmp_tmp(:,:,:,:)
+         ABI_FREE(l_noccmmp_tmp)
+
+       end if  ! not cal_lmom
 
      end if ! impose_dmat==0
 
 !    ########################################################################################
 !    # Diagonalize nocc_mmp
 !    ########################################################################################
-     if(usepawu/=0.and.dmatudiag_loc>0) then
+     if(usepawu/=0.and.dmatudiag_loc>0.and.(.not. cal_lmom)) then
 
        lpawu=lcur;ldim=2*lpawu+1
        ABI_MALLOC(noccmmp_tmp,(1,ldim,ldim,ndij))
@@ -2105,7 +2345,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
 !    ########################################################################################
 !    # Impose value of nocc_mmp from dmatpu; symetrize it
 !    ########################################################################################
-     if (usepawu/=0.and.impose_dmat/=0) then
+     if (usepawu/=0.and.impose_dmat/=0.and.(.not.cal_lmom)) then
 
        lpawu=lcur
        nsploop=nsppol;if (ndij==4) nsploop=4
@@ -2234,7 +2474,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
 !    ########################################################################################
 !    # Rotate imposed occupation matrix in the non-diagonal basis
 !    ########################################################################################
-     if (usepawu/=0.and.impose_dmat/=0.and.dmatudiag_loc==2) then
+     if (usepawu/=0.and.impose_dmat/=0.and.dmatudiag_loc==2.and.(.not. cal_lmom)) then
 
        lpawu=lcur;ldim=2*lpawu+1
 
@@ -2834,8 +3074,399 @@ end subroutine setrhoijpbe0
 
  end subroutine calc_ubare
 !!***
+!!****f* m_paw_correlations/loc_orbmom_cal
+!! NAME
+!! loc_orbmom_cal
+!!
+!! FUNCTION
+!! Calculate the orbital magnetic moments in PAW spheres
+!!
+!! INPUTS
+!! INPUTS
+!!  compute_dmat= flag: if 1, nocc_{m,mp} is computed
+!!  dimdmat=first dimension of dmatpawu array
+!!  dmatpawu(dimdmat,dimdmat,nsppol*nspinor,natpawu)=input density matrix to be copied into noccmpp
+!!  dmatudiag= flag controlling the use of diagonalization:
+!!             0: no diagonalization of nocc_{m,mp}
+!!             1: diagonalized nocc_{m,mp} matrix is printed
+!!             2: dmatpawu matrix is expressed in the basis where nocc_(m,mp} is diagonal
+!!  impose_dmat= flag: if 1, nocc_{m,mp} is replaced by dmatpawu
+!!  indsym(4,nsym,natom)=indirect indexing array for atom labels
+!!  mpi_atmtab(:)=--optional-- indexes of the atoms treated by current proc
+!!  comm_atom=--optional-- MPI communicator over atoms
+!!  my_natom=number of atoms treated by current processor
+!!  natom=number of atoms in cell
+!!  natpawu=number of atoms on which PAW+U is applied
+!!  nspinor=number of spinorial components of the wavefunctions
+!!  nsppol=number of independant spin components
+!!  nsym=number of symmetry elements in space group
+!!  ntypat=number of atom types
+!!  paw_ij(my_natom) <type(paw_ij_type)>=paw arrays given on (i,j) channels
+!!  pawang <type(pawang_type)>=paw angular mesh and related data
+!!  pawrhoij(my_natom) <type(pawrhoij_type)>= paw rhoij occupancies and related data
+!!  pawtab(ntypat) <type(pawtab_type)>=paw tabulated starting data
+!!  spinat(3,matom)=initial spin of each atom, in unit of hbar/2
+!!  symafm(nsym)=(anti)ferromagnetic part of symmetry operations
+!!  typat(natom)=type for each atom
+!!  useexexch=1 if local-exact-exchange is activated
+!!  usepawu= /=0 if PAW+U is activated
+!!
+!! OUTPUT
+!! printing the values of orbital magnetic moments for atoms in the output file
+!!
+!! SOURCE
 
-!----------------------------------------------------------------------
+subroutine loc_orbmom_cal(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym,my_natom,natom,&
+&                     natpawu,nspinor,nsppol,nsym,ntypat,paw_ij,pawang,pawrad,pawprtvol,pawrhoij,pawtab,&
+&                     spinat,symafm,typat,useexexch,usepawu,znucl, &
+&                     mpi_atmtab,comm_atom,orb_mom_atom,maxmag,difmag) ! optional arguments (parallelism)
 
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: compute_dmat,dimdmat,dmatudiag,impose_dmat,my_natom,natom,natpawu
+ integer,intent(in) :: nspinor,nsppol,nsym,ntypat,useexexch,usepawu
+ integer,optional,intent(in) :: comm_atom
+ type(pawang_type),intent(in) :: pawang
+ integer,intent(in) :: pawprtvol
+!arrays
+ integer,intent(in) :: indsym(4,nsym,natom),symafm(nsym),typat(natom)
+ integer,optional,target,intent(in) :: mpi_atmtab(:)
+ real(dp),intent(in) :: dmatpawu(dimdmat,dimdmat,nspinor*nsppol,natpawu*impose_dmat)
+ real(dp),intent(in) :: spinat(3,natom)
+ type(paw_ij_type),intent(in) :: paw_ij(my_natom)
+ type(pawrhoij_type),intent(in) :: pawrhoij(my_natom)
+ type(pawtab_type),intent(in) :: pawtab(ntypat)
+ real(dp),intent(in) :: znucl(ntypat)
+ integer,pointer :: my_atmtab(:)
+ real(dp),intent(inout), optional :: orb_mom_atom(10,3,natom),maxmag,difmag
+ real(dp):: orb_mom_atom0(10,3,natom)
+!Local variables ---------------------------------------
+!scalars
+logical :: paral_atom,my_atmtab_allocated
+character(len=5) :: orb_char
+ integer :: cplex_dij,im1,im2,ndij,itypat,my_comm_atom
+ integer :: my_lcur,my_iatom,coor,isp,lmin,lmax,me_atom,mu
+ real(dp),allocatable :: my_l_occmat(:,:,:,:)
+ complex(dp),allocatable :: op_l(:,:,:),cmfoccmat(:,:,:)
+ real(dp) :: orb_mom(3)
+ real(dp) :: sum_orb_mom(3)
+ real(dp) :: orbmag_r, orbmag_theta, orbmag_phi
+ complex(dp) :: my_sls_val
+ character(len=500) :: message
+ type(paw_ij_type), ABI_CONTIGUOUS pointer :: paw_ij_all(:)
+ type(pawrhoij_type),ABI_CONTIGUOUS pointer :: pawrhoij_all(:)
+ type(atomdata_t) :: atom
+ !!****************************************************************
+    type(pawtab_type),allocatable :: pawtab_tmp(:)
+    type(pawrad_type) :: pawrad(ntypat)
+    real(dp) :: f6of2_sla(ntypat),f4of2_sla(ntypat),upawu(ntypat),jpawu(ntypat)
+    integer :: llexexch(ntypat),llpawu(ntypat),nn,ii
+!*********************************************************************
+orb_char='pdfgh'
+if (.not. present(orb_mom_atom)) then
+   write(message,*) '  '
+    call wrtout([std_out, ab_out], message)
+       write(message,*) '  '
+    call wrtout([std_out, ab_out], message)
+   write(message,*) 'Integrated orbital magnetic moments inside the PAW spheres:'
+    call wrtout([std_out, ab_out], message)
+   write(message,*) '--------------------------------------------------------------------------------------------'
+    call wrtout([std_out, ab_out], message)
+   write(message,*) '   Atom  orbital   |orbmag|    orbmag(x)   orbmag(y)   orbmag(z) orbmag(theta) orbmag(phi)  '
+    call wrtout([std_out, ab_out], message)
+   write(message,*) '--------------------------------------------------------------------------------------------'
+    call wrtout([std_out, ab_out], message)
+else
+    orb_mom_atom0=orb_mom_atom
+endif
+
+
+!Set up parallelism over atoms
+
+ paral_atom=(present(comm_atom).and.(my_natom/=natom))
+ nullify(my_atmtab);if (present(mpi_atmtab)) my_atmtab => mpi_atmtab
+ my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
+ call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom) !vz_d
+
+
+ if (paral_atom) then
+  me_atom=xmpi_comm_rank(my_comm_atom)
+ else
+   me_atom=0
+ end if
+
+
+
+!If atomic data are distributed, retrieve all paw_ij on master proc
+ if (paral_atom) then
+   if (me_atom==0) then
+     ABI_MALLOC(paw_ij_all,(natom))
+     call paw_ij_nullify(paw_ij_all)
+   else
+     ABI_MALLOC(paw_ij_all,(0))
+   end if
+   call paw_ij_gather(paw_ij,paw_ij_all,0,my_comm_atom)
+ else
+
+   ABI_MALLOC(paw_ij_all,(natom))
+   call paw_ij_nullify(paw_ij_all)
+   paw_ij_all = paw_ij
+ end if
+
+
+ !If atomic data are distributed, retrieve all Rhoij on master proc
+ if (paral_atom) then
+   if (me_atom==0) then
+     ABI_MALLOC(pawrhoij_all,(natom))
+          call pawrhoij_nullify(pawrhoij_all)
+   else
+     ABI_MALLOC(pawrhoij_all,(0))
+   end if
+   call pawrhoij_gather(pawrhoij,pawrhoij_all,0,my_comm_atom,&
+&   with_grhoij=.false.,with_lmnmix=.false.,&
+&   with_rhoij_=.false.,with_rhoijres=.false.)
+
+    else
+   ABI_MALLOC(pawrhoij_all,(natom))
+   call pawrhoij_nullify(pawrhoij_all)
+   pawrhoij_all = pawrhoij
+ end if
+
+
+if (me_atom==0) then   !!!!!!!!
+      nn=size(pawtab)
+      ABI_MALLOC(pawtab_tmp,(nn))
+      call pawtab_nullify(pawtab_tmp)
+
+      ! ABI_MALLOC(pawtab_tmp,(nn))
+
+      if (nn.gt.0) then
+         do ii=1,nn
+            pawtab_tmp(ii)%basis_size = pawtab(ii)%basis_size
+            pawtab_tmp(ii)%lmn_size = pawtab(ii)%lmn_size
+            pawtab_tmp(ii)%lmn2_size = pawtab(ii)%lmn2_size
+            pawtab_tmp(ii)%rpaw = pawtab(ii)%rpaw
+            pawtab_tmp(ii)%rshp = pawtab(ii)%rshp
+            pawtab_tmp(ii)%shape_type = pawtab(ii)%shape_type
+            if (allocated(pawtab(ii)%dij0)) then
+               ! ABI_MALLOC(pawtab_tmp(ii)%dij0,())
+               call alloc_copy(pawtab(ii)%dij0, pawtab_tmp(ii)%dij0)
+            end if
+
+            if (allocated(Pawtab(ii)%indlmn))  then
+               call alloc_copy(pawtab(ii)%indlmn, pawtab_tmp(ii)%indlmn)
+            end if
+
+            if (allocated(Pawtab(ii)%phi))  then
+               call alloc_copy(pawtab(ii)%phi, pawtab_tmp(ii)%phi)
+            end if
+
+             if (allocated(Pawtab(ii)%indklmn))  then
+               call alloc_copy(pawtab(ii)%indklmn, pawtab_tmp(ii)%indklmn)
+            end if
+         end do
+
+         ! pawtab_tmp%has_fock = Pawtab%has_fock   !
+         ! pawtab_tmp%has_kij = Pawtab%has_kij !
+         ! pawtab_tmp%has_tproj = Pawtab%has_tproj !
+         ! pawtab_tmp%has_tvale = Pawtab%has_tvale
+         ! pawtab_tmp%has_coretau = Pawtab%has_coretau
+         ! pawtab_tmp%has_vhtnzc = Pawtab%has_vhtnzc
+         ! pawtab_tmp%has_vhnzc = Pawtab%has_vhnzc
+         ! pawtab_tmp%has_vminushalf = Pawtab%has_vminushalf
+         ! pawtab_tmp%has_nabla = Pawtab%has_nabla
+         ! pawtab_tmp%has_nablaphi =Pawtab%has_nablaphi
+         ! pawtab_tmp%has_shapefncg =Pawtab%has_shapefncg
+         ! pawtab_tmp%has_wvl =Pawtab%has_wvl
+
+         ! pawtab_tmp%usetcore =Pawtab%usetcore
+         ! pawtab_tmp%usexcnhat =Pawtab%usexcnhat
+         ! pawtab_tmp%useexexch =Pawtab%useexexch
+         pawtab_tmp%usepawu = Pawtab%usepawu
+         ! pawtab_tmp%usepotzero =Pawtab%usepotzero
+         pawtab_tmp%usespnorb =Pawtab%usespnorb
+         ! pawtab_tmp%mqgrid =Pawtab%mqgrid
+         ! pawtab_tmp%mqgrid_shp =Pawtab%mqgrid_shp
+
+         pawtab_tmp%basis_size =Pawtab%basis_size
+         pawtab_tmp%ij_proj =Pawtab%ij_proj
+         pawtab_tmp%ij_size =Pawtab%ij_size
+         pawtab_tmp%lcut_size =Pawtab%lcut_size
+         pawtab_tmp%l_size =Pawtab%l_size
+         pawtab_tmp%lexexch =Pawtab%lexexch
+         pawtab_tmp%lmn_size =Pawtab%lmn_size
+         pawtab_tmp%lmn2_size =Pawtab%lmn2_size
+         pawtab_tmp%lmnmix_sz =Pawtab%lmnmix_sz
+         pawtab_tmp%lpawu =Pawtab%lpawu
+         pawtab_tmp%nproju =Pawtab%nproju
+         pawtab_tmp%option_interaction_pawu =Pawtab%option_interaction_pawu
+         pawtab_tmp%mesh_size =Pawtab%mesh_size
+         pawtab_tmp%partialwave_mesh_size =Pawtab%partialwave_mesh_size
+         pawtab_tmp%core_mesh_size =Pawtab%core_mesh_size
+         pawtab_tmp%coretau_mesh_size =Pawtab%coretau_mesh_size
+         pawtab_tmp%vminus_mesh_size =Pawtab%vminus_mesh_size
+         pawtab_tmp%tnvale_mesh_size =Pawtab%tnvale_mesh_size
+         pawtab_tmp%shape_type =Pawtab%shape_type
+
+      end if
+
+sum_orb_mom=zero
+
+       f4of2_sla = pawtab(:)%f4of2_sla
+       f6of2_sla = pawtab(:)%f6of2_sla
+       llexexch= -1*one !(/-1,-1/)
+
+       lmin=1
+do my_iatom=1,natom
+itypat=pawrhoij_all(my_iatom)%itypat
+lmax=((pawtab(itypat)%l_size)-1)/2
+
+          do my_lcur=lmin,lmax
+
+            if (my_lcur == pawtab(itypat)%lpawu) then
+                upawu=  pawtab(:)%upawu
+                jpawu= pawtab(:)%jpawu
+                llpawu=  pawtab(:)%lpawu
+            else
+                upawu=  zero
+                jpawu= zero
+                llpawu=  one
+end if
+
+             call pawpuxinit(2,pawtab(1)%exchmix ,f4of2_sla,f6of2_sla,.False.,jpawu ,llexexch,llpawu,&
+                  &           nspinor,ntypat,pawtab_tmp(itypat)%option_interaction_pawu,pawang,pawprtvol,pawrad,pawtab_tmp,upawu,0,&
+                  &           useexexch,usepawu,&
+                  &           0,lmagCalc=.True.)
+ cplex_dij=paw_ij_all(my_iatom)%cplex_dij
+ ndij=paw_ij_all(my_iatom)%ndij
+
+
+ ABI_MALLOC(op_l,(2*my_lcur+1,2*my_lcur+1,3))
+ ABI_MALLOC(my_l_occmat,(cplex_dij,2*my_lcur+1,2*my_lcur+1,ndij))
+ ABI_MALLOC(cmfoccmat,(2*my_lcur+1,2*my_lcur+1,ndij))
+
+call  setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym,natom,natom,&
+&                     natpawu,nspinor,nsppol,nsym,ntypat,paw_ij_all,pawang,pawprtvol,pawrhoij_all,pawtab_tmp,&
+&                     spinat,symafm,typat,useexexch,usepawu, &
+&                     mpi_atmtab,comm_atom,l_orbmom=my_lcur,atom_orbmom=my_iatom,my_l_occmat=my_l_occmat)
+
+  cmfoccmat(:,:,:)=cmplx(my_l_occmat(1,:,:,:),my_l_occmat(2,:,:,:))
+
+  my_sls_val=zero
+  orb_mom=zero
+  op_l=czero
+
+  do coor=1,3
+     do im1=1,2*my_lcur+1
+     do im2=1,2*my_lcur+1
+     call slxyzs(my_lcur,im2-(my_lcur+1),coor,my_lcur,im1-(my_lcur+1),my_sls_val)
+     op_l(im1,im2,coor)=my_sls_val
+     end do
+     end do
+ end do
+
+
+!!! calculating for spin upup and dndn
+
+  do isp=1,2 ! upup and dndn spin components are considered
+  do coor=1,3
+     do im1=1,2*my_lcur+1
+     do im2=1,2*my_lcur+1
+            orb_mom(coor)=orb_mom(coor)+op_l(im2,im1,coor)*conjg(cmfoccmat(im1,im2,isp))
+     end do
+     end do
+   end do
+   end do
+
+             if (allocated(op_l)) then
+   ABI_FREE(op_l)
+             end if
+             if (allocated(my_l_occmat)) then
+   ABI_FREE(my_l_occmat)
+             end if
+             if (allocated(cmfoccmat)) then
+   ABI_FREE(cmfoccmat)
+             end if
+
+  sum_orb_mom=sum_orb_mom+orb_mom
+
+call vcart2ylm(orb_mom, orbmag_r, orbmag_theta, orbmag_phi)
+call atomdata_from_znucl(atom, znucl(typat(my_iatom)))
+if (.not. present(orb_mom_atom)) then
+  if (my_lcur==1) then
+      write(message,'(i5,a3,a8,4f12.6,2f13.6)') my_iatom,atom%symbol, orb_char(my_lcur:my_lcur),orbmag_r, orb_mom(1),orb_mom(2),orb_mom(3),orbmag_theta,orbmag_phi
+  else
+      write(message,'(a5,a11,4f12.6,2f13.6)') '', orb_char(my_lcur:my_lcur), orbmag_r,orb_mom(1),orb_mom(2),orb_mom(3) ,orbmag_theta,orbmag_phi
+  end if
+
+  call wrtout([std_out, ab_out], message)
+else
+  orb_mom_atom(my_lcur,:,my_iatom)=orb_mom
+  do mu=1,3
+    maxmag=max(maxmag,abs(orb_mom_atom(my_lcur,mu,my_iatom)))
+    difmag=max(difmag,abs(orb_mom_atom(my_lcur,mu,my_iatom)-orb_mom_atom0(my_lcur,mu,my_iatom)))
+  enddo
+endif
+
+
+end do    !!!!!!!!! END DO lcur
+if (.not. present(orb_mom_atom)) then
+    write(message,*) '--------------------------------------------------------------------------------------------'
+    call wrtout([std_out, ab_out], message)
+endif
+end do   !!!!!!!!! END DO natoms
+
+
+call vcart2ylm(sum_orb_mom(1:3), orbmag_r, orbmag_theta, orbmag_phi)
+if (.not. present(orb_mom_atom)) then
+    write(message,'(a,3f12.6)') ' Sum (cart.coord.)          ', sum_orb_mom(1),sum_orb_mom(2),sum_orb_mom(3)
+    call wrtout([std_out, ab_out], message)
+    write(message,'(a,1f11.6,a,2f13.6)') '     (sph.coord.)', orbmag_r,'                                    ',orbmag_theta, orbmag_phi
+    call wrtout([std_out, ab_out], message)
+    write(message,*) '--------------------------------------------------------------------------------------------'
+    call wrtout([std_out, ab_out], message)
+    write(message,*) ' '
+    call wrtout([std_out, ab_out], message)
+endif
+
+end if  !!!!!!!!!!
+
+      if (allocated(pawtab_tmp)) then
+          call pawtab_nullify(pawtab_tmp)
+          call pawtab_free(pawtab_tmp)
+         ABI_FREE(pawtab_tmp)
+      end if
+
+   if (paral_atom) then
+      if (me_atom==0) then
+
+         do my_iatom=1,natom
+            if (allocated(paw_ij_all(my_iatom)%noccmmp)) then
+               ABI_FREE(paw_ij_all(my_iatom)%noccmmp)
+            end if
+            if (allocated(paw_ij_all(my_iatom)%nocctot)) then
+               ABI_FREE(paw_ij_all(my_iatom)%nocctot)
+            end if
+         end do
+      end if
+
+     call pawrhoij_nullify(pawrhoij_all)
+     call pawrhoij_free(pawrhoij_all)
+     ABI_FREE(pawrhoij_all)
+
+     call paw_ij_nullify(paw_ij_all)
+     call paw_ij_free(paw_ij_all)
+     ABI_FREE(paw_ij_all)
+   else
+
+      call pawrhoij_nullify(pawrhoij_all)
+      ABI_FREE(pawrhoij_all)
+
+      call paw_ij_nullify(paw_ij_all)
+      ABI_FREE(paw_ij_all)
+   end if
+
+  end subroutine loc_orbmom_cal
+  !----------------------------------------------------------------------
 END MODULE m_paw_correlations
 !!***

@@ -21,9 +21,11 @@ tolerance on some measure of the convergence. The user must choose among
   * [[tolwfr]] is interesting for non-self-consistent calculations.
   * For molecular dynamics (which rely on the accuracy of forces), one might prefer [[tolrff]].
 
+Note that [[tolwfr]] (which controls the precision of wavefunctions), can be coupled with the other tolerances (which control the precision of physical quantities and/or the SCF loop).
+
 Some input variables relate to the solution of the Schrodinger equation.
 However, usually the related iterative techniques are well-tuned, so that
-these input variables ([[nline]] and [[tolrde]]) are usually used only by
+these input variables ([[nline]], [[tolrde]], [[mdeg_filter]], or [[tolwfr_diago]]) are usually used only by
 experts. However, in cases where the convergence is difficult, it might be
 interesting to test improving them, as well as modifying [[nnsclo]].
 
@@ -41,6 +43,6 @@ setting automatically up to seventeen variables.
 
 ## Tutorials
 
-* [[tutorial:base2|The tutorial 2]] deals again with the H2 molecule: convergence studies, LDA versus GGA 
+* [[tutorial:base2|The tutorial 2]] deals again with the H2 molecule: convergence studies, LDA versus GGA
 * [[tutorial:base3|The tutorial 3]] deals with crystalline silicon (an insulator): the definition of a k-point grid, the smearing of the cut-off energy, the computation of a band structure, and again, convergence studies ...
 

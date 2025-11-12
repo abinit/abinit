@@ -6,7 +6,7 @@
 !!  Conjugate-gradient eigensolver.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (DCA, XG, GMR, MT, MVeithen, ISouza, JIniguez)
+!!  Copyright (C) 2008-2025 ABINIT group (DCA, XG, GMR, MT, MVeithen, ISouza, JIniguez, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,27 +27,89 @@ module m_cgwf
  use m_abicore
  use m_cgtools
  use m_efield
+ use m_dtfil
+ use m_distribfft
 
  use defs_abitypes,   only : MPI_type
+ use defs_datatypes,  only : pseudopotential_type
+ use m_fstrings,      only : sjoin, itoa, ftoa, ktoa
+ use m_dtset,         only : dataset_type
+ use m_hdr,           only : hdr_type, fform_contains
  use m_time,          only : timab
  use m_numeric_tools, only : rhophi
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_copy, &
                              pawcprj_get, pawcprj_mpi_allgather, pawcprj_free, pawcprj_symkn
- use m_hamiltonian,   only : gs_hamiltonian_type
- use m_fock,          only : fock_set_ieigen,fock_set_getghc_call
+ use m_hamiltonian,   only : gs_hamiltonian_type, gspot_transgrid_and_pack
+ use m_crystal,       only : crystal_t
+ use m_fock,          only : fock_set_ieigen, fock_set_getghc_call
  use m_getghc,        only : getghc
  use m_berrytk,       only : smatrix
- use m_nonlop,      only : nonlop
+ use m_nonlop,        only : nonlop
  use m_paw_overlap,   only : smatrix_k_paw
  use m_cgprj,         only : getcprj
+ use m_mpinfo,        only : initmpi_seq, destroy_mpi_enreg
+ use m_pawtab,        only : pawtab_type
+ use m_fftcore,       only : get_kg, ngfft_seq
+ use m_kg,            only : mkkin, mkkpg, getph
+ use m_ioarr,         only : read_rhor
+ use m_pawrhoij,      only : pawrhoij_type
+ use m_pawfgr,        only : pawfgr_type
+ use m_mkffnl,        only : mkffnl_objs
+ use m_initylmg,      only : initylmg_k
+ use m_abi_linalg,    only : abi_linalg_init, abi_linalg_finalize
+ use m_cgtk,          only : cgtk_fixphase
+ use m_gemm_nonlop_projectors, only : gemm_nonlop_use_gemm
 
  implicit none
 
  private
 !!***
 
- public :: cgwf
+!!****t* m_cgwf/nscf_t
+!! NAME
+!! nscf_t
+!!
+!! FUNCTION
+!!  Simplified interface to the cgwf routine (congjugate gradient) to perform
+!!  NSCF calculations starting from the KS potential read from file.
+!!
+!! SOURCE
 
+ type,public :: nscf_t
+
+   integer :: paral_kgb0 = 0
+
+   integer :: ngfft(18), ngfftf(18)
+   ! FFT meshes (coarse and fine)
+
+   type(mpi_type) :: mpi_enreg
+   ! Info on parallelism.
+
+   real(dp),allocatable :: vtrial(:,:)
+   ! (nfftf, nspden)
+   ! KS potential in real-space.
+
+ contains
+
+   procedure :: init => nscf_init
+    ! Initialize the object.
+
+   procedure :: setup_spin => nscf_setup_spin
+
+   procedure :: setup_kpt => nscf_setup_kpt
+    ! Prepare call to nscf_solve_kpt.
+    ! Computes k-dependent terms, gs_ham_k and allocates wavefunction block for this k-point
+
+   procedure :: solve_kpt => nscf_solve_kpt
+    ! Solves the NSCF equation for given k-point and spin.
+
+   procedure :: free => nscf_free
+    ! Free dynamic memory.
+
+ end type nscf_t
+!!***
+
+ public :: cgwf  ! Conjugate-gradient solver.
 !!***
 
 contains
@@ -61,12 +123,12 @@ contains
 !! Update all wavefunction |C>, non self-consistently.
 !! also compute the corresponding H|C> and Vnl|C> (and S|C> if paw).
 !! Uses a conjugate-gradient algorithm.
-!! In case of paw, resolves a generalized eigenproblem using an
-!!  overlap matrix (not used for norm conserving psps).
+!! In case of PAW, resolves a generalized eigenproblem using an
+!! overlap matrix (not used for norm conserving psps).
 !!
 !! INPUTS
 !!  berryopt == 4/14: electric field is on;
-!           6/7/16/7: electric displacement field is on;
+!               6/7/16/7: electric displacement field is on;
 !!              all other values, no field is present
 !!  chkexit= if non-zero, check whether the user wishes to exit
 !!  cpus = CPU time limit
@@ -94,20 +156,18 @@ contains
 !!  nsppol=number of spin polarizations
 !!  ortalg=governs the choice of the algorithm for orthogonalisation.
 !!  prtvol=control print volume and debugging output
-!!  pwind(pwind_alloc,2,3) = array used to compute
-!!           the overlap matrix smat between k-points (see initberry.f)
+!!  pwind(pwind_alloc,2,3) = array used to compute the overlap matrix smat between k-points (see initberry.f)
 !!  pwind_alloc = first dimension of pwind
-!!  pwnsfac(2,pwind_alloc) = phase factors for non-symmorphic translations
-!!                           (see initberry.f)
-!!  pwnsfacq(2,mkgq) = phase factors for the nearest neighbours of the
-!!                     current k-point (electric field, MPI //)
+!!  pwnsfac(2,pwind_alloc) = phase factors for non-symmorphic translations (see initberry.f)
+!!  pwnsfacq(2,mkgq) = phase factors for the nearest neighbours of the current k-point (electric field, MPI //)
+!!  quit= if 1, proceeds to smooth ending of the job.
 !!  tolrde=tolerance on the ratio of differences of energies (for the line minimisation)
 !!  tolwfr=tolerance on largest wf residual
 !!  use_subovl=1 if the overlap matrix is not identity in WFs subspace
 !!  use_subvnlx=1 if subvnlx has to be computed
 !!  wfoptalg=govern the choice of algorithm for wf optimisation
-!!   (0, 1, 10 and 11 : in the present routine, usual CG algorithm ;
-!!   (2 and 3 : use shifted square Hamiltonian)
+!!   (0, 1, 10 and 11 : in the present routine, usual CG algorithm;
+!!   (2 and 3: use shifted square Hamiltonian)
 !!  zshift(nband)=in case wfoptalg is 2 or 3, shift of the Hamiltonian
 !!
 !! OUTPUT
@@ -115,20 +175,16 @@ contains
 !!  resid(nband)=wf residual for new states=|(H-e)|C>|^2 (hartree^2)
 !!  subham(nband*(nband+1))=Hamiltonian expressed in the WFs subspace
 !!  subovl(nband*(nband+1)*use_subovl)=overlap matrix expressed in the WFs subspace
-!!  subvnlx(nband*(nband+1)*use_subvnlx))=non-local Hamiltonian (if NCPP)  plus Fock ACE operator (if usefock_ACE)
-!!   expressed in the WFs subspace
+!!  subvnlx(nband*(nband+1)*use_subvnlx))=non-local Hamiltonian (if NCPP) plus Fock ACE operator (if usefock_ACE) expressed in the WFs subspace
 !!
 !! SIDE EFFECTS
 !!  cg(2,mcg)
 !!    at input =wavefunction <G|C band,k> coefficients for ALL bands
-!!    at output same as input except that
-!!      the current band, with number 'band' has been updated
-!!  dtefield <type(efield_type)> = variables related to Berry phase
-!!      calculations (see initberry.f)
-!!  quit= if 1, proceeds to smooth ending of the job.
+!!    at output same as input except that the current band, with number 'band' has been updated
+!!  dtefield <type(efield_type)> = variables related to Berry phase calculations (see initberry.f)
+!!
 !!  if(gs_hamk%usepaw==1)
-!!   gsc(2,mgsc)=<G|S|C band,k> coefficients for ALL bands
-!!               where S is the overlap matrix (used only for paw)
+!!   gsc(2,mgsc)=<G|S|C band,k> coefficients for ALL bands where S is the overlap matrix (used only for paw)
 !!
 !! NOTES
 !!  1) cg should not be filtered and normalized: it should already be OK at input !
@@ -138,19 +194,18 @@ contains
 !! SOURCE
 
 subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
-&                filnam_ds1,gsc,gs_hamk,icg,igsc,ikpt,inonsc,&
-&                isppol,mband,mcg,mcgq,mgsc,mkgq,mpi_enreg,&
-&                mpw,nband,nbdblock,nkpt,nline,npw,npwarr,&
-&                nspinor,nsppol,ortalg,prtvol,pwind,&
-&                pwind_alloc,pwnsfac,pwnsfacq,quit,resid,subham,subovl,&
-&                subvnlx,tolrde,tolwfr,use_subovl,use_subvnlx,wfoptalg,zshift)
+                filnam_ds1,gsc,gs_hamk,icg,igsc,ikpt,inonsc,&
+                isppol,mband,mcg,mcgq,mgsc,mkgq,mpi_enreg,&
+                mpw,nband,nbdblock,nkpt,nline,npw,npwarr,&
+                nspinor,nsppol,ortalg,prtvol,pwind,&
+                pwind_alloc,pwnsfac,pwnsfacq,quit,resid,subham,subovl,&
+                subvnlx,tolrde,tolwfr,use_subovl,use_subvnlx,wfoptalg,zshift)
 
 !Arguments ------------------------------------
  integer,intent(in) :: berryopt,chkexit,icg,igsc,ikpt,inonsc,isppol
  integer,intent(in) :: mband,mcg,mcgq,mgsc,mkgq,mpw,nband,nbdblock,nkpt,nline
  integer,intent(in) :: npw,nspinor,nsppol,ortalg,prtvol,pwind_alloc
- integer,intent(in) :: use_subovl,use_subvnlx,wfoptalg
- integer,intent(in) :: quit
+ integer,intent(in) :: use_subovl,use_subvnlx,wfoptalg, quit
  real(dp),intent(in) :: cpus,tolrde,tolwfr
  character(len=*),intent(in) :: filnam_ds1
  type(MPI_type),intent(in) :: mpi_enreg
@@ -167,7 +222,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  real(dp),intent(out) :: resid(nband)
 
 !Local variables-------------------------------
- integer,parameter :: level=113,tim_getghc=1,tim_projbd=1,type_calc=0
+ integer,parameter :: level=113,tim_getghc=1,tim_projbd=1,type_calc=0, enough_warning = 3
  integer,save :: nskip=0
  integer :: choice,counter,cpopt,ddkflag,dimenlc1,dimenlr1,dimenl2,iat,iatom,itypat
  integer :: iband,ibandmin,ibandmax,me_g0
@@ -175,31 +230,25 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  integer :: ikpt2,ikpt2f,ikptf,iline,iproc,ipw,ispinor,istwf_k,isubh,isubo,itrs
  integer :: job,mcg_q,me_distrb,natom,ncpgr,nblock,nproc_distrb,npw_k2
  integer :: optekin,paw_opt,signs,shiftbd,sij_opt,spaceComm_distrb
- integer :: useoverlap,wfopta10
+ integer :: useoverlap,wfopta10,gpu_option_save, num_warning
  real(dp) :: chc,costh,deltae,deold,dhc,dhd,diff,dotgg,dotgp,doti,dotr
  real(dp) :: dphase_aux2,e0,e0_old,e1,e1_old,eval,gamma
- real(dp) :: lam0,lamold,root,sinth,sintn,swap,tan2th,theta,thetam
- real(dp) :: xnorm
+ real(dp) :: lam0,lamold,root,sinth,sintn,swap,tan2th,theta,thetam, xnorm
  logical :: gen_eigenpb, finite_field
- character(len=500) :: message
+ character(len=500) :: msg
  integer :: hel(2,3)
  integer,allocatable :: dimlmn(:),dimlmn_srt(:),ikptf_recv(:),pwind_k(:),sflag_k(:)
- real(dp) :: bcut(2,3),dphase_aux1(3),dtm_k(2),phase_end(3)
- real(dp) :: phase_init(3),tsec(2)
+ real(dp) :: bcut(2,3),dphase_aux1(3),dtm_k(2),phase_end(3), phase_init(3),tsec(2), gsc_dummy(0,0)
  real(dp),allocatable :: cg1_k(:,:),cgq_k(:,:),conjgr(:,:),cwavef(:,:)
  real(dp),allocatable :: detovc(:,:,:),detovd(:,:,:),direc(:,:),direc_tmp(:,:)
  real(dp),allocatable :: gh_direc(:,:),gh_direcws(:,:),ghc(:,:),ghc_all(:,:),ghcws(:,:)
  real(dp),allocatable :: grad_berry(:,:),grad_total(:,:),gs_direc(:,:)
- real(dp) :: gsc_dummy(0,0)
  real(dp),allocatable :: gvnlxc(:,:),gvnlx_direc(:,:),gvnlx_dummy(:,:)
  real(dp),allocatable :: pcon(:),pwnsfac_k(:,:),scprod(:,:),scwavef(:,:)
  real(dp),allocatable :: smat_inv(:,:,:),smat_k(:,:,:),smat_k_paw(:,:,:),swork(:,:),vresid(:,:),work(:,:)
- real(dp),pointer :: kinpw(:)
  type(pawcprj_type) :: cprj_dum(1,1)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kb(:,:)
- type(pawcprj_type),allocatable :: cprj_direc(:,:),cprj_band_srt(:,:),cprj_gat(:,:)
- type(pawcprj_type),allocatable :: cprj_fkn(:,:),cprj_ikn(:,:)
-
+ type(pawcprj_type),allocatable :: cprj_direc(:,:),cprj_band_srt(:,:),cprj_gat(:,:), cprj_fkn(:,:),cprj_ikn(:,:)
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -225,6 +274,10 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  nproc_distrb=xmpi_comm_size(spaceComm_distrb)
  me_distrb=mpi_enreg%me_kpt
  me_g0 = mpi_enreg%me_g0
+ gpu_option_save=gs_hamk%gpu_option
+ !Using cgwf with ndat=1 in getghc calls isn't beneficial in most cases, hence we disable GPU here
+ gs_hamk%gpu_option=ABI_GPU_DISABLED
+ if(gpu_option_save==ABI_GPU_OPENMP) gemm_nonlop_use_gemm=.false.
 
 !if PAW, one has to solve a generalized eigenproblem (H|Psi>=Lambda.S|Psi>)
 !else,   one has to solve a classical eigenproblem   (H|Psi>=Lambda.|Psi>)
@@ -239,7 +292,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  optekin=0;if (wfoptalg>=10) optekin=1
  natom=gs_hamk%natom
  cpopt=-1
- kinpw => gs_hamk%kinpw_k
+ num_warning = 0
 
  ABI_MALLOC(pcon,(npw))
  ABI_MALLOC(ghc,(2,npw*nspinor))
@@ -288,11 +341,11 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
 !if "generalized eigenproblem", not sure of wfoptalg=2,3 algorithms
  if ((gen_eigenpb).and.(wfopta10==2.or.wfopta10==3)) then
-   write(message, '(a,a,a,a,a)' ) &
+   write(msg, '(a,a,a,a,a)' ) &
 &   'Conjugate gradient algorithm not tested with',ch10,&
 &   'wfoptalg=2 or 3 and usepaw==1 !',ch10,&
 &   'Program will continue at your own risk...'
-   ABI_WARNING(message)
+   ABI_WARNING(msg)
  end if
 
 !Electric field: definition of local variables:
@@ -406,19 +459,15 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
        call fock_set_ieigen(gs_hamk%fockcommon,iband)
        sij_opt=1
        if (finite_field .and. gs_hamk%usepaw == 1) then
-         call getghc(0,cwavef,cprj_band_srt,ghc,scwavef,gs_hamk,gvnlxc,&
-           &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
+         call getghc(0,cwavef,cprj_band_srt,ghc,scwavef,gs_hamk,gvnlxc,eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
          call pawcprj_put(gs_hamk%atindx,cprj_band_srt,cprj_k,natom,iband,0,ikpt,&
-&         1,isppol,mband,1,natom,1,mband,dimlmn,nspinor,nsppol,0,&
-&         mpicomm=spaceComm_distrb,proc_distrb=mpi_enreg%proc_distrb)
+         1,isppol,mband,1,natom,1,mband,dimlmn,nspinor,nsppol,0,mpicomm=spaceComm_distrb,proc_distrb=mpi_enreg%proc_distrb)
        else
-         call getghc(cpopt,cwavef,cprj_dum,ghc,scwavef,gs_hamk,gvnlxc,&
-           &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
+         call getghc(cpopt,cwavef,cprj_dum,ghc,scwavef,gs_hamk,gvnlxc,eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
        end if
 
        call cg_zcopy(npw*nspinor,ghc,ghc_all(1,1+icg_shift-icg))
        call cg_zcopy(npw*nspinor,scwavef,gsc(1,1+igsc_shift))
-
      end do
    end do
  end if
@@ -444,8 +493,8 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
      ! ======================================================================
 
      if (prtvol>=10) then ! Tell us what is going on:
-       write(message, '(a,i6,2x,a,i3,a)' )' --- cgwf is called for band',iband,'for',nline,' lines'
-       call wrtout(std_out,message,'PERS')
+       write(msg, '(a,i6,2x,a,i3,a)' )' --- cgwf is called for band',iband,'for',nline,' lines'
+       call wrtout(std_out,msg,'PERS')
      end if
 
      dotgp=one
@@ -481,14 +530,14 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
      end if
 
      if (prtvol==-level) then
-       write(message,'(a,f14.6)')' cgwf: xnorm = ',xnorm
-       call wrtout(std_out,message,'PERS')
+       write(msg,'(a,f14.6)')' cgwf: xnorm = ',xnorm
+       call wrtout(std_out,msg,'PERS')
      end if
 
      ! Compute (or extract) <g|H|c>
      if (gen_eigenpb.and.(inonsc==1)) then
 
-!$OMP PARALLEL DO PRIVATE(ipw)
+       !$OMP PARALLEL DO PRIVATE(ipw)
        do ipw=1,npw*nspinor
          ghc(1,ipw)=xnorm*ghc_all(1,ipw+icg_shift-icg)
          ghc(2,ipw)=xnorm*ghc_all(2,ipw+icg_shift-icg)
@@ -498,10 +547,8 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 !      By setting ieigen to iband, Fock contrib. of this iband to the energy will be calculated
        call fock_set_ieigen(gs_hamk%fockcommon,iband)
        sij_opt=0
-       call getghc(cpopt,cwavef,cprj_dum,ghc,gsc_dummy,gs_hamk,gvnlxc,&
-         &       eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
+       call getghc(cpopt,cwavef,cprj_dum,ghc,gsc_dummy,gs_hamk,gvnlxc, eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
      end if
-
 
      ! Minimisation of the residual: compute <G|(H-zshift)^2|C iband,k>
      if(wfopta10==2 .or. wfopta10==3) then
@@ -513,8 +560,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          sij_opt=0
          work(:,:)=ghc(:,:)-zshift(iband)*cwavef(:,:)
        end if
-       call getghc(cpopt,work,cprj_dum,ghc,swork,gs_hamk,gvnlx_dummy,&
-         &       eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
+       call getghc(cpopt,work,cprj_dum,ghc,swork,gs_hamk,gvnlx_dummy, eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
        if (gen_eigenpb) then
          ghc(:,:)=ghc(:,:)-zshift(iband)*swork(:,:)
        else
@@ -539,31 +585,31 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            if (iline==1) then
              lamold=lam0
            else
-             if (lam0 > lamold+tol12) then
-               write(message, '(a,i8,a,1p,e14.6,a1,3x,a,1p,e14.6,a1)')&
-&               'New trial energy at line ',iline,' = ',lam0,ch10,&
-&               'is higher than former =',lamold,ch10
-               ABI_WARNING(message)
+             if (lam0 > lamold+tol12 .and. num_warning <= enough_warning) then
+               num_warning = num_warning + 1
+               write(msg, '(a,i0,a,e14.6,a,e14.6)')&
+                'New trial energy at line: ',iline,' = ',lam0,' is higher than former: ',lamold
+               ABI_WARNING(msg)
              end if
              lamold=lam0
            end if
          end if
 
          ! Compute residual vector:
-         ! Note that vresid is precomputed to garantee cancellation of errors
+         ! Note that vresid is precomputed to guarantee cancellation of errors
          ! and allow residuals to reach values as small as 1.0d-24 or better.
 
          if (wfopta10<=1) then
            eval=chc
            if (gen_eigenpb) then
 
-!$OMP PARALLEL DO
+             !$OMP PARALLEL DO
              do ipw=1,npw*nspinor
                vresid(1,ipw)=ghc(1,ipw)-chc*scwavef(1,ipw)
                vresid(2,ipw)=ghc(2,ipw)-chc*scwavef(2,ipw)
              end do
            else
-!$OMP PARALLEL DO
+             !$OMP PARALLEL DO
              do ipw=1,npw*nspinor
                vresid(1,ipw)=ghc(1,ipw)-chc*cwavef(1,ipw)
                vresid(2,ipw)=ghc(2,ipw)-chc*cwavef(2,ipw)
@@ -572,13 +618,13 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          else
            call dotprod_g(eval,doti,istwf_k,npw*nspinor,1,cwavef,ghcws,me_g0,mpi_enreg%comm_spinorfft)
            if (gen_eigenpb) then
-!$OMP PARALLEL DO
+             !$OMP PARALLEL DO
              do ipw=1,npw*nspinor
                vresid(1,ipw)=ghcws(1,ipw)-eval*scwavef(1,ipw)
                vresid(2,ipw)=ghcws(2,ipw)-eval*scwavef(2,ipw)
              end do
            else
-!$OMP PARALLEL DO
+             !$OMP PARALLEL DO
              do ipw=1,npw*nspinor
                vresid(1,ipw)=ghcws(1,ipw)-eval*cwavef(1,ipw)
                vresid(2,ipw)=ghcws(2,ipw)-eval*cwavef(2,ipw)
@@ -590,8 +636,8 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          call sqnorm_g(resid(iband),istwf_k,npw*nspinor,vresid,me_g0,mpi_enreg%comm_fft)
 
          if (prtvol==-level) then
-           write(message,'(a,i0,2f14.6)')' cgwf: iline,eval,resid = ',iline,eval,resid(iband)
-           call wrtout(std_out,message,'PERS')
+           write(msg,'(a,i0,2f14.6)')' cgwf: iline,eval,resid = ',iline,eval,resid(iband)
+           call wrtout(std_out,msg,'PERS')
          end if
 
          ! ======================================================================
@@ -601,9 +647,9 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          ! If residual sufficiently small stop line minimizations
          if (resid(iband)<tolwfr) then
            if (prtvol>=10) then
-             write(message, '(a,i4,a,i2,a,es12.4)' ) &
+             write(msg, '(a,i4,a,i2,a,es12.4)' ) &
               ' cgwf: band ',iband,' converged after ',iline,' line minimizations: resid =',resid(iband)
-             call wrtout(std_out,message,'PERS')
+             call wrtout(std_out,msg,'PERS')
            end if
            nskip=nskip+(nline-iline+1)  ! Number of two-way 3D ffts skipped
            exit                         ! Exit from the loop on iline
@@ -611,8 +657,8 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
          ! If user require exiting the job, stop line minimisations
          if (quit==1) then
-           write(message, '(a,i0)' )' cgwf: user require exiting => skip update of band ',iband
-           call wrtout(std_out,message,'PERS')
+           write(msg, '(a,i0)' )' cgwf: user require exiting => skip update of band ',iband
+           call wrtout(std_out,msg,'PERS')
 
            nskip=nskip+(nline-iline+1)  ! Number of two-way 3D ffts skipped
            exit                         ! Exit from the loop on iline
@@ -634,8 +680,8 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          if (finite_field) then
 
            call make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield,grad_berry,&
-&           gs_hamk,iband,icg,ikpt,isppol,mband,mcg,mcgq,mkgq,mpi_enreg,mpw,natom,nkpt,npw,npwarr,&
-&           nspinor,nsppol,pwind,pwind_alloc,pwnsfac,pwnsfacq)
+                                gs_hamk,iband,icg,ikpt,isppol,mband,mcg,mcgq,mkgq,mpi_enreg,mpw,natom,nkpt,npw,npwarr,&
+                                nspinor,nsppol,pwind,pwind_alloc,pwnsfac,pwnsfacq)
 
 !          Add grad_berry to direc and store original gradient
            direc(:,:) = direc(:,:) + grad_berry(:,:)
@@ -673,10 +719,10 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          if(ortalg>=0)then
            if (gen_eigenpb) then
              call projbd(cg,direc,iband,icg,igsc,istwf_k,mcg,mgsc,nband,npw,nspinor,&
-&             gsc,scprod,0,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
+                         gsc,scprod,0,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
            else
              call projbd(cg,direc,-1   ,icg,igsc,istwf_k,mcg,mgsc,nband,npw,nspinor,&
-&             gsc,scprod,0,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
+                         gsc,scprod,0,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
            end if
          else
 !          For negative ortalg must still project current band out of conjugate vector (unneeded if gen_eigenpb)
@@ -699,14 +745,20 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
          ! If wfoptalg>=10, the precondition matrix is kept constant during iteration ; otherwise it is recomputed
          if (wfoptalg<10.or.iline==1) then
-           call cg_precon(cwavef,zero,istwf_k,kinpw,npw,nspinor,me_g0,optekin,pcon,direc,mpi_enreg%comm_fft)
+           if (gs_hamk%use_gbt == 0) then
+             call cg_precon(cwavef,zero,istwf_k,gs_hamk%kinpw_k,npw,nspinor,me_g0,optekin,pcon,direc,mpi_enreg%comm_fft)
+           else
+             call cg_precon(cwavef,zero,istwf_k,gs_hamk%kinpw_k,npw,1,me_g0,optekin,pcon,direc,mpi_enreg%comm_fft)
+             call cg_precon(cwavef(:,npw+1:),zero,istwf_k,gs_hamk%kinpw_kp,npw,1,me_g0,optekin,pcon,&
+                            direc(:,npw+1:),mpi_enreg%comm_fft)
+           end if
 
-           ! Minimisation of the residual: must precondition twice
-           ! (might make only one call, with modified precon routine - might also make a shift !!!)
            if(wfopta10==2 .or. wfopta10==3)then
-             call cg_precon(cwavef,zero,istwf_k,kinpw,npw,nspinor,me_g0,optekin,pcon,direc,mpi_enreg%comm_fft)
+             ! Minimisation of the residual: must precondition twice
+             ! (might make only one call, with modified precon routine - might also make a shift !!!)
+             call cg_precon(cwavef,zero,istwf_k,gs_hamk%kinpw_k,npw,nspinor,me_g0,optekin,pcon,direc,mpi_enreg%comm_fft)
              if(iline==1)then
-!$OMP PARALLEL DO
+               !$OMP PARALLEL DO
                do ipw=1,npw
                  pcon(ipw)=pcon(ipw)**2
                  pcon(ipw)=pcon(ipw)**2
@@ -716,7 +768,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          else
            do ispinor=1,nspinor
              igs=(ispinor-1)*npw
-!$OMP PARALLEL DO
+             !$OMP PARALLEL DO
              do ipw=1+igs,npw+igs
                direc(1,ipw)=direc(1,ipw)*pcon(ipw-igs)
                direc(2,ipw)=direc(2,ipw)*pcon(ipw-igs)
@@ -728,7 +780,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          ! ========= OVER THE SUBSPACE ORTHOGONAL TO OTHER BANDS ================
          ! Projecting again out all bands (not normalized).
          call projbd(cg,direc,-1,icg,igsc,istwf_k,mcg,mgsc,nband,npw,nspinor,&
-&         gsc,scprod,0,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
+                     gsc,scprod,0,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
 
          ! ======================================================================
          ! ================= COMPUTE THE CONJUGATE-GRADIENT =====================
@@ -739,9 +791,8 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            !DEBUG (electric field)
            !check that the dotproduct is real
            !if (abs(doti) > tol8) then
-           !write(std_out,*) ' cgwf-berry: ERROR'
-           !write(std_out,*) ' doti = ',doti
-           !stop
+           !  write(std_out,*) ' cgwf-berry: ERROR'; write(std_out,*) ' doti = ',doti
+           !  stop
            !end if
            !ENDDEBUG
          else
@@ -761,8 +812,8 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            dotgp=dotgg
            call cg_zcopy(npw*nspinor,direc,conjgr)
            if (prtvol==-level)then
-             write(message,'(a,es21.10e3)')' cgwf: dotgg = ',dotgg
-             call wrtout(std_out,message,'PERS')
+             write(msg,'(a,es21.10e3)')' cgwf: dotgg = ',dotgg
+             call wrtout(std_out,msg,'PERS')
            end if
 
          else
@@ -770,18 +821,18 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            dotgp=dotgg
 
            if (prtvol==-level)then
-             write(message,'(a,2es16.6)')' cgwf: dotgg,gamma = ',dotgg,gamma
-             call wrtout(std_out,message,'PERS')
+             write(msg,'(a,2es16.6)')' cgwf: dotgg,gamma = ',dotgg,gamma
+             call wrtout(std_out,msg,'PERS')
            end if
 
-           ! Note: another way to compute gamma: Polak, Ribiere no real improvement ; to be more carrefully tested
+           ! Note: another way to compute gamma: Polak, Ribiere no real improvement ; to be more carefully tested
            ! call dotprod_g(dotgg,doti,istwf_k,mpi_enreg,npw*nspinor,1,direc,direc_tmp)
            ! !direcp must be set to zero at the beginning
            ! direcp=direc-direcp
            ! call dotprod_g(dotgmg,doti,istwf_k,mpi_enreg,npw*nspinor,1,direcp,direc_tmp)
            ! direcp=direc;gamma=dotgmg/dotgp;dotgp=dotgmg
 
-!$OMP PARALLEL DO
+           !$OMP PARALLEL DO
            do ipw=1,npw*nspinor
              conjgr(1,ipw)=direc(1,ipw)+gamma*conjgr(1,ipw)
              conjgr(2,ipw)=direc(2,ipw)+gamma*conjgr(2,ipw)
@@ -804,13 +855,13 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          ! that direc --> conjgr
          if(istwf_k==1)then
 
-!$OMP PARALLEL DO
+           !$OMP PARALLEL DO
            do ipw=1,npw*nspinor
              direc(1,ipw)=conjgr(1,ipw)-(dotr*cwavef(1,ipw)-doti*cwavef(2,ipw))
              direc(2,ipw)=conjgr(2,ipw)-(dotr*cwavef(2,ipw)+doti*cwavef(1,ipw))
            end do
          else
-!$OMP PARALLEL DO
+           !$OMP PARALLEL DO
            do ipw=1,npw*nspinor
              direc(1,ipw)=conjgr(1,ipw)-dotr*cwavef(1,ipw)
              direc(2,ipw)=conjgr(2,ipw)-dotr*cwavef(2,ipw)
@@ -833,8 +884,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          ! Compute gh_direc = <G|H|D> and eventually gs_direc = <G|S|D>
          sij_opt=0;if (gen_eigenpb) sij_opt=1
 
-         call getghc(cpopt,direc,cprj_dum,gh_direc,gs_direc,gs_hamk,gvnlx_direc,&
-           &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
+         call getghc(cpopt,direc,cprj_dum,gh_direc,gs_direc,gs_hamk,gvnlx_direc,eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
 
          if(wfopta10==2 .or. wfopta10==3)then
            ! Minimisation of the residual, so compute <G|(H-zshift)^2|D>
@@ -847,8 +897,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
              work(:,:)=gh_direc(:,:)-zshift(iband)*direc(:,:)
            end if
 
-           call getghc(cpopt,work,cprj_dum,gh_direc,swork,gs_hamk,gvnlx_dummy,&
-             &           eval,mpi_enreg,1,prtvol,0,tim_getghc,type_calc)
+           call getghc(cpopt,work,cprj_dum,gh_direc,swork,gs_hamk,gvnlx_dummy,eval,mpi_enreg,1,prtvol,0,tim_getghc,type_calc)
 
            if (gen_eigenpb) then
              gh_direc(:,:)=gh_direc(:,:)-zshift(iband)*swork(:,:)
@@ -872,8 +921,8 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          dhd=dhd*xnorm**2
 
          if(prtvol==-level)then
-           write(message,'(a,3f14.6)') 'cgwf: chc,dhc,dhd=',chc,dhc,dhd
-           call wrtout(std_out,message,'PERS')
+           write(msg,'(a,3f14.6)') 'cgwf: chc,dhc,dhd=',chc,dhc,dhd
+           call wrtout(std_out,msg,'PERS')
          end if
 
          ! ======================================================================
@@ -890,8 +939,10 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
              ! Check that result is above machine precision
              if (abs(sinth)<epsilon(0._dp)) then
-               write(message, '(a,es16.4)' ) ' cgwf: converged with tan2th=',tan2th
-               call wrtout(std_out,message,'PERS')
+               if (prtvol > 0) then
+                 write(msg, '(a,es16.4)' ) ' cgwf: converged with tan2th=',tan2th
+                 call wrtout(std_out,msg,'PERS')
+               end if
                ! Number of one-way 3D ffts skipped
                nskip=nskip+2*(nline-iline)
                exit ! Exit from the loop on iline
@@ -911,13 +962,13 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
              costh=-sinth
              sinth=swap
              if(prtvol<0 .or. prtvol>=10)then
-               write(message,*)'   Note: swap roots, iline,diff=',iline,diff
-               call wrtout(std_out,message,'PERS')
+               write(msg,*)'   Note: swap roots, iline,diff=',iline,diff
+               call wrtout(std_out,msg,'PERS')
              end if
            end if
 
          else
-           ! In case the eletric field is on, the line minimization has to be done numerically
+           ! In case the electric field is on, the line minimization has to be done numerically
 
            ! Compute determinant of the overlap matrix where in the band-th line
            ! the wavefunction is replaced by the search direction
@@ -955,7 +1006,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
                icg1 = 0 ; ddkflag = 0
                if (gen_eigenpb) then
-!$OMP PARALLEL DO
+                 !$OMP PARALLEL DO
                  do ipw=1,npw*nspinor
                    direc_tmp(1,ipw)=direc(1,ipw)*xnorm
                    direc_tmp(2,ipw)=direc(2,ipw)*xnorm
@@ -964,7 +1015,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
                  call getcprj(1,0,direc_tmp,cprj_band_srt,&
 &                 gs_hamk%ffnl_k,0,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%kg_k,&
 &                 gs_hamk%kpg_k,gs_hamk%kpt_k,gs_hamk%lmnmax,gs_hamk%mgfft,&
-&                 mpi_enreg,gs_hamk%natom,gs_hamk%nattyp,gs_hamk%ngfft,gs_hamk%nloalg,&
+&                 mpi_enreg,1,gs_hamk%natom,gs_hamk%nattyp,gs_hamk%ngfft,gs_hamk%nloalg,&
 &                 gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,gs_hamk%phkxred,gs_hamk%ph1d,&
 &                 gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
 
@@ -1040,7 +1091,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
          sintn=sinth*xnorm
 
-!$OMP PARALLEL DO
+         !$OMP PARALLEL DO
          do ipw=1,npw*nspinor
            cwavef(1,ipw)=cwavef(1,ipw)*costh+direc(1,ipw)*sintn
            cwavef(2,ipw)=cwavef(2,ipw)*costh+direc(2,ipw)*sintn
@@ -1056,7 +1107,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
 
          if (use_subvnlx==1) then
-!$OMP PARALLEL DO
+           !$OMP PARALLEL DO
            do ipw=1,npw*nspinor
              gvnlxc(1,ipw)=gvnlxc(1,ipw)*costh + gvnlx_direc(1,ipw)*sintn
              gvnlxc(2,ipw)=gvnlxc(2,ipw)*costh + gvnlx_direc(2,ipw)*sintn
@@ -1065,7 +1116,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          end if
 
          if (gen_eigenpb) then
-!$OMP PARALLEL DO
+           !$OMP PARALLEL DO
            do ipw=1,npw*nspinor
              scwavef(1,ipw)=scwavef(1,ipw)*costh+gs_direc(1,ipw)*sintn
              scwavef(2,ipw)=scwavef(2,ipw)*costh+gs_direc(2,ipw)*sintn
@@ -1078,7 +1129,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            if (finite_field) then  ! must update cprj for the new wavefunction
              call getcprj(1,0,cwavef,cprj_band_srt,&
 &             gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
-&             gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
+&             gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,1,natom,gs_hamk%nattyp,&
 &             gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
 &             gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
              call pawcprj_put(gs_hamk%atindx,cprj_band_srt,cprj_k,gs_hamk%natom,iband,0,ikpt,&
@@ -1089,7 +1140,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
          if(wfopta10==2 .or. wfopta10==3)then
            ! Need to keep track of ghcws, in order to avoid recomputing it
-!$OMP PARALLEL DO
+           !$OMP PARALLEL DO
            do ipw=1,npw*nspinor
              ghcws(1,ipw)=ghcws(1,ipw)*costh + gh_direcws(1,ipw)*sintn
              ghcws(2,ipw)=ghcws(2,ipw)*costh + gh_direcws(2,ipw)*sintn
@@ -1114,29 +1165,27 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 &           dtefield%efield_dot,e0_old,e1_old,&
 &           hel,dtefield%fnkpt,dtefield%nstr,dtefield%sdeg,theta)
            deltae = e0 - e0_old
-!          DEBUG
-!          write(std_out,*) 'e0, e0_old, deltae', e0, e0_old, deltae
-!          ENDDEBUG
-!          Check that e0 is decreasing on succeeding lines:
-!          if (deltae > zero) then
-           if (deltae > tol12) then ! exploring different checks for finit_field
-             write(message, '(3a,i8,a,1p,e14.6,a1,3x,a,1p,e14.6,a1)')&
-&             '  (electric field)',ch10,&
-&             '  New trial energy at line',iline,' = ',e0,ch10,&
-&             '  is higher than former:',e0_old,ch10
-             ABI_WARNING(message)
+           ! write(std_out,*) 'e0, e0_old, deltae', e0, e0_old, deltae
+           ! Check that e0 is decreasing on succeeding lines:
+           ! if (deltae > zero) then
+           if (deltae > tol12 .and. num_warning <= enough_warning) then ! exploring different checks for finit_field
+             num_warning = num_warning + 1
+             write(msg, '(3a,i8,a,1p,e14.6,a1,3x,a,1p,e14.6,a1)')&
+             '  (electric field)',ch10,&
+             '  New trial energy at line',iline,' = ',e0,ch10,&
+             '  is higher than former:',e0_old,ch10
+             ABI_WARNING(msg)
            end if
          end if         ! finite_field
 
-!        Check convergence and eventually exit
+         ! Check convergence and eventually exit
          if (iline==1) then
            deold=deltae
          else if (abs(deltae)<tolrde*abs(deold) .and. iline/=nline .and. wfopta10<2)then
            if(prtvol>=10)then
-             write(message, '(a,i4,1x,a,1p,e12.4,a,e12.4,a)' ) &
-&             ' cgwf: line',iline,&
-&             ' deltae=',deltae,' < tolrde*',deold,' =>skip lines'
-             call wrtout(std_out,message,'PERS')
+             write(msg, '(a,i4,1x,a,1p,e12.4,a,e12.4,a)' ) &
+              ' cgwf: line',iline,' deltae=',deltae,' < tolrde*',deold,' =>skip lines'
+             call wrtout(std_out,msg,'PERS')
            end if
            nskip=nskip+2*(nline-iline)  ! Number of one-way 3D ffts skipped
            exit                         ! Exit from the loop on iline
@@ -1184,8 +1233,8 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
      ! At the end of the treatment of a set of bands, write the number of one-way 3D ffts skipped
      if (xmpi_paral==0 .and. mpi_enreg%paral_kgb==0 .and. iband==nband .and. prtvol/=0) then
-       write(message,'(a,i0)')' cgwf: number of one-way 3D ffts skipped in cgwf until now =',nskip
-       call wrtout(std_out,message,'PERS')
+       write(msg,'(a,i0)')' cgwf: number of one-way 3D ffts skipped in cgwf until now =',nskip
+       call wrtout(std_out,msg,'PERS')
      end if
 
    end do !  End big iband loop. iband in a block
@@ -1194,14 +1243,12 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
    !  ============= COMPUTE HAMILTONIAN IN WFs SUBSPACE ====================
    !  ======================================================================
    call mksubham(cg,ghc,gsc,gvnlxc,iblock,icg,igsc,istwf_k,&
-&   isubh,isubo,mcg,mgsc,nband,nbdblock,npw,&
-&   nspinor,subham,subovl,subvnlx,use_subovl,use_subvnlx,me_g0)
+                 isubh,isubo,mcg,mgsc,nband,nbdblock,npw,&
+                 nspinor,subham,subovl,subvnlx,use_subovl,use_subvnlx,me_g0)
 
  end do ! iblock End loop over block of bands
 
- if (allocated(dimlmn_srt)) then
-   ABI_FREE(dimlmn_srt)
- end if
+ ABI_SFREE(dimlmn_srt)
 
  if (finite_field .and. gs_hamk%usepaw == 1) then ! store updated cprjs for this kpt
    ! switch from ikptf to ikpt
@@ -1222,19 +1269,19 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
    end do
  end if
 
- ! Debugging ouputs
+ ! Debugging outputs
  if(prtvol==-level)then
    isubh=1
-   if (use_subvnlx==1) write(message,'(a)') ' cgwf : isubh  subham(isubh:isubh+1)  subvnlx(isubh:isubh+1)'
-   if (use_subvnlx==0) write(message,'(a)') ' cgwf : isubh  subham(isubh:isubh+1)'
+   if (use_subvnlx==1) write(msg,'(a)') ' cgwf : isubh  subham(isubh:isubh+1)  subvnlx(isubh:isubh+1)'
+   if (use_subvnlx==0) write(msg,'(a)') ' cgwf : isubh  subham(isubh:isubh+1)'
    do iband=1,nband
      do ii=1,iband
        if (use_subvnlx==1) then
-         write(message,'(i5,4es16.6)')isubh,subham(isubh:isubh+1),subvnlx(isubh:isubh+1)
+         write(msg,'(i5,4es16.6)')isubh,subham(isubh:isubh+1),subvnlx(isubh:isubh+1)
        else
-         write(message,'(i5,2es16.6)')isubh,subham(isubh:isubh+1)
+         write(msg,'(i5,2es16.6)')isubh,subham(isubh:isubh+1)
        end if
-       call wrtout(std_out,message,'PERS')
+       call wrtout(std_out,msg,'PERS')
        isubh=isubh+2
      end do
    end do
@@ -1254,27 +1301,15 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  ABI_FREE(gvnlx_direc)
  ABI_FREE(vresid)
  ABI_FREE(gs_direc)
-
- if (gen_eigenpb)  then
-   ABI_FREE(scwavef)
-   ABI_FREE(direc_tmp)
- end if
-
- if (gen_eigenpb.and.(inonsc==1))  then
-   ABI_FREE(ghc_all)
- end if
-
- if(wfopta10==2.or.wfopta10==3)  then
-   ABI_FREE(ghcws)
-   ABI_FREE(gh_direcws)
- end if
  ABI_FREE(gvnlx_dummy)
-
- if(wfopta10==2.or.wfopta10==3)  then
-   ABI_FREE(work)
- end if
-
  ABI_FREE(swork)
+
+ ABI_SFREE(scwavef)
+ ABI_SFREE(direc_tmp)
+ ABI_SFREE(ghc_all)
+ ABI_SFREE(ghcws)
+ ABI_SFREE(gh_direcws)
+ ABI_SFREE(work)
 
  if (finite_field) then
    ABI_FREE(cg1_k)
@@ -1311,8 +1346,11 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
    ABI_FREE(cprj_band_srt)
  end if
 
+ gs_hamk%gpu_option=gpu_option_save
+ if(gpu_option_save==ABI_GPU_OPENMP) gemm_nonlop_use_gemm=.true.
+
 ! Do not delete this line, needed to run with open MP
- write(unit=message,fmt=*) resid(1)
+ write(unit=msg,fmt=*) resid(1)
 
  call timab(22,2,tsec)
 
@@ -1391,7 +1429,7 @@ subroutine linemin(bcut,chc,costh,detovc,detovd,dhc,dhd,dphase_aux1,&
  real(dp) :: excentr,iab,phase0,phase_min,phi_0,rdum,sgn,small_axis,sphi_0
  real(dp) :: theta,theta_0,val
  logical :: flag_neg
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp) :: g_theta(2),theta_min(2),theta_try(2)
  real(dp) :: esave(251),e1save(251)   !!REC
@@ -1437,15 +1475,10 @@ subroutine linemin(bcut,chc,costh,detovc,detovd,dhc,dhd,dphase_aux1,&
 
      if (bb < zero) theta_0 = theta_0 + pi*half
 
-     g_theta(:) = cos(theta_0)*detovc(:,ifor,idir) + &
-&     sin(theta_0)*detovd(:,ifor,idir)
-!    DEBUG
-!    write(std_out,*)'before rhophi, g_theta =',g_theta
-!    ENDDEBUG
+     g_theta(:) = cos(theta_0)*detovc(:,ifor,idir) + sin(theta_0)*detovd(:,ifor,idir)
+     ! write(std_out,*)'before rhophi, g_theta =',g_theta
      call rhophi(g_theta,phi_0,rdum)
-!    DEBUG
-!    write(std_out,*)'after rhophi, phi_0 = ',phi_0
-!    ENDDEBUG
+     ! write(std_out,*)'after rhophi, phi_0 = ',phi_0
 
      cphi_0 = cos(phi_0)
      sphi_0 = sin(phi_0)
@@ -1548,22 +1581,20 @@ subroutine linemin(bcut,chc,costh,detovc,detovd,dhc,dhd,dphase_aux1,&
 
  if (abs(theta_min(1) - ten) < tol10) then
 !  REC start
-   write(message,'(a,a)')ch10,&
-&   ' linemin: ERROR- cannot find theta_min.'
-   call wrtout(std_out,message,'COLL')
-   write(message,'(a,a)')ch10,&
-&   ' igrid      theta          esave(igrid)    e1save(igrid) '
-   call wrtout(std_out,message,'COLL')
+   write(msg,'(a,a)')ch10,' linemin: ERROR- cannot find theta_min.'
+   call wrtout(std_out,msg,'COLL')
+   write(msg,'(a,a)')ch10,' igrid      theta          esave(igrid)    e1save(igrid) '
+   call wrtout(std_out,msg,'COLL')
    do igrid = 1, ngrid+1
      theta = (igrid - 1)*delta_theta - pi*half
      write(std_out,'(i6,3f16.9)')igrid,theta,esave(igrid),e1save(igrid)
      !write(101,'(i6,3f16.9)')igrid,theta,esave(igrid),e1save(igrid)
    end do
-   write(message,'(6a)')ch10,&
-&   ' linemin: ERROR - ',ch10,&
-&   '  Cannot find theta_min. No minimum exists: the field is too strong ! ',ch10,&
-&   '  Try decreasing difference between D and 4 Pi P by changing structure or D (only for fixed D calculation)'
-   call wrtout(std_out,message,'COLL')
+   write(msg,'(6a)')ch10,&
+    ' linemin: ERROR - ',ch10,&
+    '  Cannot find theta_min. No minimum exists: the field is too strong ! ',ch10,&
+    '  Try decreasing difference between D and 4 Pi P by changing structure or D (only for fixed D calculation)'
+   call wrtout(std_out,msg,'COLL')
    ABI_ERROR('linemin cannot find theta_min')
  end if
 
@@ -1611,13 +1642,9 @@ subroutine linemin(bcut,chc,costh,detovc,detovd,dhc,dhd,dphase_aux1,&
    do ifor = 1, 2
 
      g_theta(:) = detovc(:,ifor,idir)
-!    DEBUG
-!    write(std_out,*)'before rhophi (2nd call), g_theta =',g_theta
-!    ENDDEBUG
+     ! write(std_out,*)'before rhophi (2nd call), g_theta =',g_theta
      call rhophi(g_theta,phase0,rdum)
-!    DEBUG
-!    write(std_out,*)'after rhophi, phase0 = ',phase0
-!    ENDDEBUG
+     ! write(std_out,*)'after rhophi, phase0 = ',phase0
 
      if(iline == 1) phase_init(idir) = phase_init(idir) + sgn*phase0
 
@@ -1733,8 +1760,7 @@ subroutine etheta(bcut,chc,detovc,detovd,dhc,dhd,efield_dot,e0,e1,&
      if (theta >= bcut(ifor,idir)) phase = phase + hel(ifor,idir)*two_pi
 
 !    DEBUG
-!    unit = 100 + 10*idir + ifor
-!    write(unit,'(4(f16.9))')theta,g_theta(:),phase
+!    unit = 100 + 10*idir + ifor; write(unit,'(4(f16.9))')theta,g_theta(:),phase
 !    ENDDEBUG
 
      e0 = e0 + sgn*sdeg*efield_dot(idir)*phase/(two_pi*nstr(idir))
@@ -2047,7 +2073,7 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
   integer :: idir,ifor,ikgf,ikptf,ikpt2,ikpt2f,ipw,i_paw_band,ispinor,itrs,itypat,job
   integer :: klmn,mcg1_k,mcg_q,nbo,npw_k2,nspinortot,paw_opt,shiftbd,signs
   real(dp) :: fac
-  character(len=500) :: message
+  character(len=500) :: msg
   !arrays
   integer :: pwind_k(npw),sflag_k(dtefield%mband_occ)
   real(dp) :: cg1_k(2,npw*nspinor),dtm_k(2),pwnsfac_k(4,mpw)
@@ -2060,11 +2086,7 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
   ! 15 June 2012 J Zwanziger
   type(pawcprj_type),allocatable :: cprj_kb(:,:),cprj_band_srt(:,:)
   type(pawcprj_type),allocatable :: cprj_fkn(:,:),cprj_ikn(:,:)
-
-
   ! *********************************************************************
-
-  !DBG_ENTER("COLL")
 
   nbo = dtefield%mband_occ
 
@@ -2172,16 +2194,15 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
         ABI_FREE(cgq_k)
         detovc(:,ifor,idir) = dtm_k(:) !store the determinant of the overlap
         if (sqrt(dtm_k(1)*dtm_k(1) + dtm_k(2)*dtm_k(2)) < tol12) then
-           write(message,'(3a,i5,a,i3,a,a,a)') &
-                &       '  (electric field)',ch10,&
-                &       '  For k-point #',ikpt,' and band # ',iband,',',ch10,&
-                &       '  the determinant of the overlap matrix is found to be 0. Fixing...'
+           write(msg,'(3a,i5,a,i3,a,a,a)') &
+                       '  (electric field)',ch10,&
+                       '  For k-point #',ikpt,' and band # ',iband,',',ch10,&
+                       '  the determinant of the overlap matrix is found to be 0. Fixing...'
            !      REC try this:
-           write(std_out,*)message,dtm_k(1:2)
+           write(std_out,*)msg,dtm_k(1:2)
            if(abs(dtm_k(1))<=1d-12)dtm_k(1)=1d-12
            if(abs(dtm_k(2))<=1d-12)dtm_k(2)=1d-12
            write(std_out,*)' Changing to:',dtm_k(1:2)
-           !      REC       ABI_BUG(message)
         end if
 
         if (gs_hamk%usepaw == 1) then
@@ -2264,7 +2285,7 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
      !  grad_berry(:,:) = grad_berry(:,:) - dtefield%efield_dot(idir)*grad_berry_ev(:,:)/two_pi
      !  end if
 
-  end do    ! idir
+  end do ! idir
 
   !deallocations
   if(gs_hamk%usepaw /= 0) then
@@ -2284,11 +2305,471 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
   ABI_FREE(cprj_fkn)
   ABI_FREE(cprj_ikn)
 
-  !DBG_EXIT("COLL")
-
 end subroutine make_grad_berry
 !!***
 
+!!****f* m_cgwf/nscf_init
+!! NAME
+!!  nscf_init
+!!
+!! FUNCTION
+!!  Initialize the object.
+!!
+!! INPUT
+!! dtset<dataset_type>=All input variables for this dataset.
+!! dtfil<datafiles_type>=Variables related to files.
+!! cryst=Crystalline structure
+!! comm=MPI communicator.
+!!
+!! SOURCE
+
+subroutine nscf_init(nscf, dtset, dtfil, cryst, comm)
+
+!Arguments ------------------------------------
+ class(nscf_t),intent(out) :: nscf
+ type(dataset_type),intent(in) :: dtset
+ type(datafiles_type),intent(in) :: dtfil
+ type(crystal_t),intent(in) :: cryst
+ integer,intent(in) :: comm
+
+!Local variables ------------------------------
+!scalars
+ integer,parameter :: cplex1 = 1, pawread0 = 0
+ integer :: fform, nfftf
+ type(crystal_t) :: pot_cryst
+ type(hdr_type) :: pot_hdr
+ character(len=500) :: msg
+!arrays
+ integer :: units(2)
+ type(pawrhoij_type),allocatable :: pot_pawrhoij(:)
+! *************************************************************************
+
+ units = [std_out, ab_out]
+ ABI_CHECK(dtset%usepaw == 0, "PAW not implemented!")
+ if (dtset%usekden /= 0) then
+   ABI_ERROR("nscf_init with MGGA not yet coded")
+ end if
+
+ call wrtout(units, sjoin(" Reading KS GS potential from: ", dtfil%filpotin))
+ call pot_hdr%from_fname(dtfil%filpotin, fform, comm)
+ ABI_CHECK(fform /= 0, "hdr_read_from_fname returned fform 0")
+ ABI_CHECK(fform_contains(fform, "vtrial", msg), msg)
+
+ ! Init FFT mesh from file as we don't want to interpolate the KS potential.
+ call ngfft_seq(nscf%ngfftf, pot_hdr%ngfft)
+ call ngfft_seq(nscf%ngfft, pot_hdr%ngfft)
+ call pot_hdr%free()
+
+ if (dtset%usepaw == 0) then
+   ABI_CHECK(all(nscf%ngfft(1:6) == dtset%ngfft(1:6)), "different ngfft meshes")
+ else
+   ABI_CHECK(all(nscf%ngfftf(1:6) == dtset%ngfftdg(1:6)),  "different ngfftf meshes")
+ end if
+
+ call initmpi_seq(nscf%mpi_enreg)
+ call nscf%mpi_enreg%distribfft%init_seq('c', nscf%ngfft(2), nscf%ngfft(3), 'all')
+ call nscf%mpi_enreg%distribfft%init_seq('f', nscf%ngfftf(2), nscf%ngfftf(3), 'all')
+
+ ! Read KS potential from file.
+ nfftf = product(nscf%ngfftf(1:3))
+ ABI_MALLOC(nscf%vtrial, (nfftf, dtset%nspden))
+
+ call read_rhor(dtfil%filpotin, cplex1, dtset%nspden, nfftf, nscf%ngfftf, pawread0, nscf%mpi_enreg, &
+                nscf%vtrial, pot_hdr, pot_pawrhoij, comm, allow_interp=.False., want_varname="vtrial")
+
+ pot_cryst = pot_hdr%get_crystal()
+ if (cryst%compare(pot_cryst, header=" Comparing input crystal with POT crystal") /= 0) then
+   ABI_ERROR("Crystal structure from WFK and POT files do not agree! Check messages above!")
+ end if
+ call pot_cryst%free(); call pot_hdr%free()
+
+end subroutine nscf_init
+!!***
+
+!!****f* m_cgwf/nscf_setup_spin
+!! NAME
+!!  nscf_setup_spin
+!!
+!! FUNCTION
+!!
+!! INPUT
+!! isppol=Spin index.
+!! dtset<dataset_type>=All input variables for this dataset.
+!! pawfgr=<type(pawfgr_type)>=fine grid parameters and related data
+!! gs_ham_k=<type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
+!!
+!! OUTPUT
+!! vlocal: KS potential for this spin.
+!!
+!! SOURCE
+
+subroutine nscf_setup_spin(nscf, isppol, dtset, pawfgr, gs_ham_k, vlocal)
+
+!Arguments ------------------------------------
+ class(nscf_t),intent(inout) :: nscf
+ integer,intent(in) :: isppol
+ type(dataset_type),intent(in) :: dtset
+ type(pawfgr_type),intent(in) :: pawfgr
+ type(gs_hamiltonian_type),intent(inout) :: gs_ham_k
+!arrays
+ real(dp),allocatable,intent(out) :: vlocal(:,:,:,:)
+
+!Local variables ------------------------------
+ integer :: nvloc, n1, n2, n3, n4, n5, n6, nfft, nfftf, mgfft, mgfftf
+! *************************************************************************
+
+ ! See vtorho.F90 for the sequence of calls needed to initialize the GS Hamiltonian.
+ ! The Hamiltonian has references to the _k arrays allocated here and returned
+ associate (mpi_enreg => nscf%mpi_enreg)
+
+ !==== Initialize most of the Hamiltonian ====
+ ! Allocate all arrays and initialize quantities that do not depend on k and spin.
+
+ ! FFT meshes from input file, not necessary equal to the ones found in the external files.
+ nfftf = product(nscf%ngfftf(1:3)); mgfftf = maxval(nscf%ngfftf(1:3))
+ nfft = product(nscf%ngfft(1:3)) ; mgfft = maxval(nscf%ngfft(1:3))
+ n1 = nscf%ngfft(1); n2 = nscf%ngfft(2); n3 = nscf%ngfft(3); n4 = nscf%ngfft(4); n5 = nscf%ngfft(5); n6 = nscf%ngfft(6)
+
+ ! Set up local potential vlocal on the coarse FFT mesh from vtrial taking into account the spin.
+ ! Also, continue to initialize the Hamiltonian.
+ nvloc = gs_ham_k%nvloc
+ ABI_CALLOC(vlocal, (n4, n5, n6, nvloc))
+
+ call gspot_transgrid_and_pack(isppol, dtset%usepaw, nscf%paral_kgb0, nfft, nscf%ngfft, nfftf, &
+                               dtset%nspden, gs_ham_k%nvloc, 1, pawfgr, mpi_enreg, nscf%vtrial, vlocal)
+
+ call gs_ham_k%load_spin(isppol, vlocal=vlocal, with_nonlocal=.true.)
+
+ if (dtset%usekden /= 0) then
+   ABI_ERROR("nscf_init with mgga not yet coded")
+   !call gspot_transgrid_and_pack(isppol, dtset%usepaw, paral_kgb0, dtset%nfft, dtset%ngfft, nfftf, &
+   !                              dtset%nspden, gs_ham_k%nvloc, 4, pawfgr, mpi_enreg, vxctau, vxctaulocal)
+   !call gs_ham_k%load_spin(isppol, vxctaulocal=vxctaulocal)
+ end if
+
+ end associate
+
+end subroutine nscf_setup_spin
+!!***
+
+!!****f* m_cgwf/nscf_setup_kpt
+!! NAME
+!!  nscf_setup_kpt
+!!
+!! FUNCTION
+!!  Prepare call to nscf_solve_kpt.
+!!  Compute k-dependent terms, gs_ham_k and allocate wavefunction block for this k-point.
+!!
+!! INPUT
+!! isppol=Spin index
+!! kpt(3)=K-point
+!! istwf_k=wavefunction storage.
+!! nband_k=Number of bands.
+!! cryst=Crystalline structure.
+!! dtset<dataset_type>=All input variables for this dataset.
+!! psps<pseudopotential_type>=Variables related to pseudopotentials.
+!! pawtab(ntypat*usepaw)<pawtab_type>=Paw tabulated starting data.
+!! pawfgr <type(pawfgr_type)>=fine grid parameters and related data.
+!!
+!! OUTPUT
+!!  kg_k=
+!!  cg_k
+!!  gsc_k
+!!  eig_k
+!!  gs_ham_k=all data for the Hamiltonian at k-point kpt.
+!!
+!! SOURCE
+
+subroutine nscf_setup_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, psps, pawtab, pawfgr, &  ! in
+                          npw_k, kg_k, kpg_k, ph3d_k, kinpw_k, ffnl_k, vlocal, cg_k, gsc_k, gs_ham_k) ! out
+
+!Arguments ------------------------------------
+ class(nscf_t),intent(inout) :: nscf
+ integer,intent(in) :: isppol, istwf_k, nband_k
+ real(dp),intent(in) :: kpt(3)
+ type(dataset_type),intent(in) :: dtset
+ type(crystal_t),intent(in) :: cryst
+ type(pseudopotential_type),intent(in) :: psps
+ type(pawtab_type),intent(in) :: pawtab(cryst%ntypat*psps%usepaw)
+ type(pawfgr_type),intent(in) :: pawfgr
+ type(gs_hamiltonian_type),intent(out) :: gs_ham_k
+!arrays
+ integer,intent(out) :: npw_k
+ integer,allocatable,intent(out) :: kg_k(:,:)
+ real(dp),allocatable,intent(out) :: kpg_k(:,:), ph3d_k(:,:,:), kinpw_k(:), ffnl_k(:,:,:,:), vlocal(:,:,:,:)
+ real(dp),allocatable,intent(out) :: cg_k(:,:,:), gsc_k(:,:,:)
+
+!Local variables ------------------------------
+!scalars
+ integer,parameter :: nkpt1 = 1, use_subovl0 = 0, ider0 = 0, idir0 = 0, mkmem1 = 1, useylmgr0 = 0, optder0=0
+ integer :: nvloc, nkpg, n1, n2, n3, n4, n5, n6, nfft, nfftf, mgfft, mgfftf, nspinor, ncomp
+ !character(len=500) :: msg
+!arrays
+ real(dp) :: ylmgr_dum(1,1,1)
+ real(dp),allocatable :: ph1d(:,:), ylm_k(:,:)
+! *************************************************************************
+
+ ABI_CHECK_IEQ(gs_ham_k%use_gbt, 0, "use_gbt /= 0 not coded")
+
+ ! See vtorho.F90 for the sequence of calls needed to initialize the GS Hamiltonian.
+ ! The Hamiltonian has references to the _k arrays that allocated here and returned to the caller.
+ associate (mpi_enreg => nscf%mpi_enreg)
+
+ !==== Initialize most of the Hamiltonian ====
+ ! Allocate all arrays and initialize quantities that do not depend on k and spin.
+
+ ! FFT meshes from input file, not necessary equal to the ones found in the external files.
+ nfftf = product(nscf%ngfftf(1:3)); mgfftf = maxval(nscf%ngfftf(1:3))
+ nfft = product(nscf%ngfft(1:3)) ; mgfft = maxval(nscf%ngfft(1:3))
+ n1 = nscf%ngfft(1); n2 = nscf%ngfft(2); n3 = nscf%ngfft(3); n4 = nscf%ngfft(4); n5 = nscf%ngfft(5); n6 = nscf%ngfft(6)
+ nspinor = dtset%nspinor
+
+ ! Compute g-sphere for this k-point from ecut
+ call get_kg(kpt, istwf_k, dtset%ecut, cryst%gmet, npw_k, kg_k)
+
+ ! Compute kinetic energy for this k-point.
+ ABI_MALLOC(kinpw_k, (npw_k))
+ call mkkin(dtset%ecut, dtset%ecutsm, dtset%effmass_free, cryst%gmet, kg_k, kinpw_k, kpt, npw_k, 0, 0)
+
+ ! Compute (k+G) vectors (only if useylm=1)
+ nkpg = 3 * dtset%nloalg(3)
+ ABI_MALLOC(kpg_k, (npw_k, nkpg))
+ if (nscf%paral_kgb0 /= 1 .and. nkpg > 0) call mkkpg(kg_k, kpg_k, kpt, nkpg, npw_k)
+
+ ! Get one-dimensional structure factor information on the coarse grid.
+ ABI_MALLOC(ph1d, (2,3*(2*mgfft+1)*cryst%natom))
+ call getph(cryst%atindx, cryst%natom, n1, n2, n3, ph1d, cryst%xred)
+
+ ! Initi GS Hamiltonian.
+ call gs_ham_k%init(psps, pawtab, nspinor, dtset%nsppol, dtset%nspden, cryst%natom, &
+                    dtset%typat, cryst%xred, nfft, mgfft, nscf%ngfft, cryst%rprimd, dtset%nloalg, &
+                    comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab, mpi_spintab=mpi_enreg%my_isppoltab, &
+                    usecprj=dtset%usepaw, ph1d=ph1d, nucdipmom=dtset%nucdipmom, gpu_option=dtset%gpu_option)
+ ABI_FREE(ph1d)
+
+ ! Set up local potential vlocal on the coarse FFT mesh from vtrial taking into account the spin.
+ ! Also, continue to initialize the Hamiltonian.
+ nvloc = gs_ham_k%nvloc
+ ABI_CALLOC(vlocal, (n4, n5, n6, nvloc))
+
+ ! ncomp=Number of extra components in vtrial and vlocal (e.g. 1 if LDA/GGA pot, 4 for Meta-GGA, etc).
+ ncomp = 1
+ call gspot_transgrid_and_pack(isppol, psps%usepaw, nscf%paral_kgb0, nfft, nscf%ngfft, nfftf, &
+                               dtset%nspden, gs_ham_k%nvloc, ncomp, pawfgr, mpi_enreg, nscf%vtrial, vlocal)
+
+ call gs_ham_k%load_spin(isppol, vlocal=vlocal, with_nonlocal=.true.)
+
+ if (dtset%usekden /= 0) then
+   ABI_ERROR("nscf_init with mgga not yet coded")
+   !call gspot_transgrid_and_pack(isppol, psps%usepaw, nscf%paral_kgb0, dtset%nfft, dtset%ngfft, nfftf, &
+   !                              dtset%nspden, gs_ham_k%nvloc, 4, pawfgr, mpi_enreg, vxctau, vxctaulocal)
+   !call gs_ham_k%load_spin(isppol, vxctaulocal=vxctaulocal)
+ end if
+
+ ! Set up the spherical harmonics (Ylm) at k.
+ ABI_MALLOC(ylm_k, (npw_k, psps%mpsang**2 * psps%useylm))
+ if (psps%useylm == 1) then
+   call initylmg_k(npw_k, psps%mpsang, optder0, cryst%rprimd, cryst%gprimd, kpt, kg_k, ylm_k, ylmgr_dum)
+ end if
+
+ ! Compute nonlocal form factors ffnl_k at (k+G)
+ ABI_MALLOC(ffnl_k, (npw_k, 1, psps%lmnmax, psps%ntypat))
+ call mkffnl_objs(cryst, psps, 1, ffnl_k, ider0, idir0, kg_k, kpg_k, kpt, nkpg, npw_k, ylm_k, ylmgr_dum)
+ ABI_FREE(ylm_k)
+
+ ! Load k-dependent part in the Hamiltonian datastructure
+ !  - Compute 3D phase factors
+ !  - Prepare various tabs in case of band-FFT parallelism
+ !  - Load k-dependent quantities in the Hamiltonian
+
+ ABI_MALLOC(ph3d_k, (2, npw_k, gs_ham_k%matblk))
+ call gs_ham_k%load_k(kpt_k=kpt, istwf_k=istwf_k, npw_k=npw_k, &
+                      kinpw_k=kinpw_k, kg_k=kg_k, kpg_k=kpg_k, ffnl_k=ffnl_k, ph3d_k=ph3d_k, &
+                      compute_ph3d=(nscf%paral_kgb0/=1), compute_gbound=(nscf%paral_kgb0/=1))
+
+ ! Allocate output buffers.
+ ABI_MALLOC(cg_k, (2, npw_k*nspinor, nband_k))
+ ABI_MALLOC(gsc_k, (2, npw_k*nspinor, nband_k*dtset%usepaw))
+ end associate
+
+end subroutine nscf_setup_kpt
+!!***
+
+!!****f* m_cgwf/nscf_solve_kpt
+!! NAME
+!!  nscf_solve_kpt
+!!
+!! FUNCTION
+!!  Solves the NSCF equation. Simplified wrapper around cgwf.
+!!
+!! INPUT
+!! isppol=Spin index
+!! kpt(3)=K-point
+!! cryst=Crystalline structure
+!! dtset<dataset_type>=All input variables for this dataset.
+!! dtfil <type(datafiles_type)>=variables related to files
+!! gs_ham_k <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
+!! use_cg_k: True if input cg_k should be used to initialize the eigensolver.
+!! npw_k=Number of planewaves
+!!
+!! OUTPUT
+!! kg_k=g-vectors for this k-point
+!! cg_k=Wavefunction block.
+!! gsc_k=<g|S|c> for PAW
+!! eig_k=Eigenvalues.
+!! msg=Error message.
+!! ierr=Exit status.
+!!
+!! SOURCE
+
+subroutine nscf_solve_kpt(nscf, isppol, kpt, istwf_k, nband_k, cryst, dtset, dtfil, gs_ham_k, use_cg_k, & ! in
+                          npw_k, cg_k, gsc_k, eig_k, msg, ierr)  ! out
+
+!Arguments ------------------------------------
+ class(nscf_t),intent(inout) :: nscf
+ logical,intent(in) :: use_cg_k
+ integer,intent(in) :: isppol, istwf_k, nband_k, npw_k
+ real(dp),intent(in) :: kpt(3)
+ type(dataset_type),intent(in) :: dtset
+ type(datafiles_type), intent(in) :: dtfil
+ type(crystal_t),intent(in) :: cryst
+ type(gs_hamiltonian_type),intent(inout) :: gs_ham_k
+!arrays
+ real(dp),intent(inout) :: cg_k(2, npw_k * dtset%nspinor, nband_k)
+ real(dp),intent(inout) :: gsc_k(2, npw_k * dtset%nspinor, nband_k * dtset%usepaw)
+ real(dp),allocatable,intent(out) :: eig_k(:)
+ integer,intent(out) :: ierr
+ character(len=*),intent(out) :: msg
+
+!Local variables ------------------------------
+!scalars
+ integer,parameter :: mcgq0 = 0, mkgq0 = 0, nkpt1 = 1, pwind_alloc0 = 0, use_subvnlx0 = 0, use_subovl0 = 0, ider0 = 0, idir0 = 0
+ integer,parameter :: icg0 = 0, igsc0 = 0, ikpt0 = 0, quit0 = 0, ortalgo_3 = 3, mkmem1 = 1, useylmgr0 = 0
+ integer :: mcg, mgsc, n1, n2, n3, n4, n5, n6, nfft, nfftf, mgfft, mgfftf, inonsc, npwsp, me_g0, linalg_max_size
+ integer :: nspinor, ii, iband
+ real(dp),parameter :: cpus0 = zero
+ real(dp) :: max_resid
+ type(efield_type) :: dtefield
+!arrays
+ integer :: npwarr_k(1), pwind(pwind_alloc0,2,3)
+ real(dp) :: pwnsfac(2,pwind_alloc0), pwnsfacq(2,mkgq0), zshift(nband_k), cgq(2, mcgq0), dphase_k(3)
+ real(dp) :: subovl(nband_k*(nband_k+1)*use_subovl0), subvnlx(nband_k*(nband_k+1)*use_subvnlx0)
+ real(dp),allocatable :: subham(:), resid_k(:), evec(:,:)
+! *************************************************************************
+
+ ! See vtorho.F90 for the sequence of calls required to initialize the GS Hamiltonian.
+ associate (mpi_enreg => nscf%mpi_enreg, kg_k => gs_ham_k%kg_k)
+
+ ! FFT meshes from input file, not necessary equal to the ones found in the external files.
+ nfftf = product(nscf%ngfftf(1:3)); mgfftf = maxval(nscf%ngfftf(1:3))
+ nfft = product(nscf%ngfft(1:3)) ; mgfft = maxval(nscf%ngfft(1:3))
+ n1 = nscf%ngfft(1); n2 = nscf%ngfft(2); n3 = nscf%ngfft(3); n4 = nscf%ngfft(4); n5 = nscf%ngfft(5); n6 = nscf%ngfft(6)
+ nspinor = dtset%nspinor
+
+ npwarr_k = npw_k; npwsp = npw_k * nspinor; me_g0 = 1; mcg = npw_k * nspinor * nband_k; mgsc = mcg * dtset%usepaw
+
+ ABI_MALLOC(resid_k, (nband_k))
+ ABI_MALLOC(eig_k, (nband_k))
+
+ if (.not. use_cg_k) then
+   ! Initialize the wavefunctions with random numbers.
+   call cg_randomize(istwf_k, npw_k, nspinor, nband_k, me_g0, cg_k)
+   ! Multiply with envelope function to reduce kinetic energy.
+   call cg_envlop(cg_k, dtset%ecut, cryst%gmet, icg0, kg_k, kpt, mcg, nband_k, npw_k, nspinor)
+ end if
+
+ ! Ortoghonalize input trial states (this is important, even when cg_k is already initialized from a previous k-point.
+ call pw_orthon(icg0, igsc0, istwf_k, mcg, mgsc, npwsp, nband_k, ortalgo_3, gsc_k, dtset%usepaw, cg_k, me_g0, xmpi_comm_self)
+ !call cg_kfilter(npw_k, nspinor, nband_k, gs_ham_k%kinpw_k, cg_k)
+
+ ! linalg initialisation (required by subdiago)
+ linalg_max_size = maxval(dtset%nband(:))
+ call abi_linalg_init(linalg_max_size, RUNL_GSTATE, dtset%wfoptalg, nscf%paral_kgb0,&
+                      dtset%gpu_option, dtset%use_slk, dtset%np_slk, nscf%mpi_enreg%comm_bandspinorfft)
+
+ ABI_MALLOC(subham, (nband_k*(nband_k+1)))
+ ABI_MALLOC(evec, (2*nband_k, nband_k))
+
+ ! NSCF iterations.
+ ierr = 1; msg = ""
+ do inonsc=1,dtset%nstep
+
+   call cgwf(dtset%berryopt, cg_k, cgq, dtset%chkexit, cpus0, dphase_k, dtefield, dtfil%filnam_ds(1), &
+             gsc_k, gs_ham_k, icg0, igsc0, ikpt0, inonsc, isppol, nband_k, mcg, mcgq0, mgsc, mkgq0, &
+             mpi_enreg, npw_k, nband_k, dtset%nbdblock, nkpt1, dtset%nline, npw_k, npwarr_k, dtset%nspinor, &
+             dtset%nsppol, dtset%ortalg, dtset%prtvol, &
+             pwind, pwind_alloc0, pwnsfac, pwnsfacq, quit0, resid_k, &
+             subham, subovl, subvnlx, dtset%tolrde, dtset%tolwfr_diago, use_subovl0, use_subvnlx0, mod(dtset%wfoptalg, 100), zshift)
+
+   ! subspace rotation (without this, cgwf will never converge!)
+   call subdiago(cg_k, eig_k, evec, gsc_k, icg0, igsc0, istwf_k, mcg, mgsc, nband_k, npw_k, dtset%nspinor, nscf%paral_kgb0, &
+                 subham, subovl, use_subovl0, gs_ham_k%usepaw, me_g0)
+
+   ! Check for convergence.
+   if (dtset%nbdbuf >= 0) then
+     max_resid = maxval(resid_k(1:max(1,nband_k-dtset%nbdbuf)))
+   else
+     ABI_ERROR(sjoin('Bad value for nbdbuf:', itoa(dtset%nbdbuf)))
+   end if
+
+   ! Exit loop over inonsc if converged
+   if (max_resid < dtset%tolwfr) then
+     ierr = 0
+     msg = sjoin(" NSCF for kpt:", ktoa(kpt), "spin:", itoa(isppol))
+     msg = sjoin(msg, ", completed in: ", itoa(inonsc), "steps. max_resid:", ftoa(max_resid))
+     call wrtout(std_out, msg)
+
+     ! Print energies and residuals
+     if (dtset%prtvol > 10) then
+       do ii=0,(nband_k-1)/8
+         write(msg, '(a,8es10.2)' )' ene:',(eig_k(iband) * Ha_eV,iband=1+ii*8,min(nband_k,8+ii*8)); call wrtout(std_out, msg)
+         write(msg, '(a,8es10.2)' )' res:',(resid_k(iband),        iband=1+ii*8,min(nband_k,8+ii*8)); call wrtout(std_out, msg)
+       end do
+     end if
+
+     exit  ! EXIT NSCF cycle
+   end if
+ end do ! inonsc (NON SELF-CONSISTENT LOOP)
+
+ if (ierr /= 0) then
+   msg = sjoin(" NSCF run for kpt:", ktoa(kpt), "spin", itoa(isppol))
+   msg = sjoin(msg, " didn't converge after", itoa(dtset%nstep), " steps", ch10)
+   msg = sjoin(msg, "max_resid:", ftoa(max_resid), " >= tolwfr:", ftoa(dtset%tolwfr))
+ end if
+
+ ! Fix the phase of the wavefunctions.
+ call cgtk_fixphase(cg_k, gsc_k, icg0, igsc0, istwf_k, mcg, mgsc, mpi_enreg, nband_k, npw_k, dtset%usepaw)
+
+ call abi_linalg_finalize(dtset%gpu_option)
+
+ ABI_FREE(subham)
+ ABI_FREE(evec)
+ ABI_FREE(resid_k)
+ end associate
+
+end subroutine nscf_solve_kpt
+!!***
+
+!!****f* m_cgwf/nscf_free
+!! NAME
+!!  nscf_free
+!!
+!! FUNCTION
+!!  Free dynamic memory
+!!
+!! SOURCE
+
+subroutine nscf_free(nscf)
+
+!Arguments ------------------------------------
+ class(nscf_t),intent(inout) :: nscf
+!************************************************************************
+
+ ABI_SFREE(nscf%vtrial)
+ call destroy_mpi_enreg(nscf%mpi_enreg)
+
+end subroutine nscf_free
+!!***
 
 end module m_cgwf
 !!***

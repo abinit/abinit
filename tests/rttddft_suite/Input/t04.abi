@@ -1,0 +1,86 @@
+########################################################
+# Automatic test for ABINIT:                           #
+#   Nickel 4 atoms, non-magnetic, FCC, GGA, PAW        #
+#   DS1: GS calculation to create initial WFK          #
+#   DS2: RT-TDDFT -- first half of trajectory          #
+#   DS3: RT-TDDFT -- second half of trajectory         #
+#   Test restart capabilities in non stationary case   #
+########################################################
+
+ndtset 3
+
+optdriver1 0     # GS
+optdriver 9      # RT-TDDFT
+dtele 0.04       # Electronic timestep
+getwfk2  1       # Initial wavefunctions
+ntime 10         # Number of steps
+td_exp_order 4   # Order of the Taylor expansion used to approximate the exponential
+td_propagator 0  # Propagator (0: ER, 1: EMR)
+td_prtstr 1      # Print striding
+td_restart3 1    # restart (1: restart 0: from scratch)
+
+# Unit cell
+acell  3*3.351 angstrom
+ntypat 1
+natom  4
+typat *1
+znucl 28
+rprim
+   1.0  0.0  0.0
+   0.0  1.0  0.0
+   0.0  0.0  1.0
+xred
+   0.0  0.0  0.0
+   0.0  0.5  0.5
+   0.5  0.0  0.5
+   0.5  0.5  0.0
+chkprim 0
+
+# K-points and occupations
+kptopt 1
+ngkpt 2 2 2
+nshiftk 1
+shiftk 0 0 0
+istwfk *1
+occopt 3
+tsmear1 300 K
+tsmear 2000 K
+nband 42
+
+# Convergence parameters
+ecut 8
+pawecutdg 16
+tolvrs 1.d-12
+nstep 20
+
+pp_dirpath "$ABI_PSPDIR/Psdj_paw_pbe_std"
+pseudos "Ni.xml"
+
+# Printing parameters
+prtwf1 1  # Print initial wavefunctions needed for RT-TDDFT calculations
+prtwf 0
+prtden 0
+prteig 0
+prtebands 0
+prtdos 0
+pawprtdos 0
+pawprtvol 0
+prtgsr 0
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t04.abo, tolnlines = 3, tolabs = 2e-5, tolrel = 1e-2, fld_options= -medium;
+#%%   t04o_DS2_TDENER, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -medium;
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = F. Brieuc
+#%% keywords = RTTDDFT, PAW, GGA
+#%% description =
+#%%   FCC Ni, nonmagnetic, GGA, PAW.
+#%%   Tests RT-TDDFT restart capabilities.
+#%% topics = RTTDDFT
+#%%<END TEST_INFO>

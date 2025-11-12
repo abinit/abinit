@@ -6,7 +6,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2022 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2025 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +30,6 @@ use m_gwls_hamiltonian
 use defs_basis
 use m_abicore
 use m_xmpi
-implicit none
 save
 private
 !!***
@@ -73,7 +72,6 @@ subroutine prepareValenceWavefunctions()
 !      Valence wavefunctions will be stored in Fourier space instead.
 !
 !--------------------------------------------------------------------------------
-implicit none
 
 !integer  :: v, kmin, kmax
 !
@@ -135,7 +133,6 @@ subroutine cleanupValenceWavefunctions()
 ! This subroutine deallocates the array valence_wfr once it is no longer needed.
 !
 !--------------------------------------------------------------------------------
-implicit none
 
 ! *************************************************************************
 
@@ -165,7 +162,6 @@ subroutine compute_Exchange_and_Correlation_energies(e_index, exchange_energy, V
 ! This subroutine computes the exchange and correlation energies.
 !
 !--------------------------------------------------------------------------------
-implicit none
 
 integer, intent(in)    :: e_index
 real(dp), intent(out)  :: exchange_energy

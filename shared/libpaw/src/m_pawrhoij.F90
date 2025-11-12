@@ -8,7 +8,7 @@
 !!  pawrhoij_type variables define rhoij occupancies matrixes used within PAW formalism.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2022 ABINIT group (MT, FJ)
+!! Copyright (C) 2012-2025 ABINIT group (MT, FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2298,6 +2298,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
  integer :: nselect,my_cplex,my_cplex_eff,my_qphase,my_natinc,my_natom,my_nspden,ngrhoijmx,size_rhoij2
  integer :: iomode,ncid,natom_id,cplex_id,qphase_id,nspden_id,nsel56_id
  integer :: buffer_id,ibuffer_id,ncerr,bsize_id,bufsize_id
+ integer :: iq0,itypat,lmn_size
  logical :: paral_atom
  character(len=500) :: msg
 !arrays
@@ -2451,9 +2452,18 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
          pawrhoij(iatom)%rhoijselect(1:nselect)=ibuffer(ii+1:ii+nselect)
          ii=ii+nselect
          do ispden=1,my_nspden
-           pawrhoij(iatom)%rhoijp(1:my_cplex*my_qphase*nselect,ispden)= &
-&                          buffer(jj+1:jj+my_cplex*my_qphase*nselect)
-           jj=jj+my_cplex*my_qphase*nselect
+           pawrhoij(iatom)%rhoijp(1:my_cplex*nselect,ispden)= &
+                  buffer(jj+1:jj+my_cplex*nselect)
+           jj=jj+my_cplex*nselect
+           if (my_qphase==2) then
+             itypat=typat(iatom)
+             lmn_size=nlmn_type(itypat)
+             lmn2_size=lmn_size*(lmn_size+1)/2
+             iq0 = my_cplex*lmn2_size
+             pawrhoij(iatom)%rhoijp(iq0+1:iq0+my_cplex*nselect,ispden)= &
+                  buffer(jj+1:jj+my_cplex*nselect)
+             jj=jj+my_cplex*nselect
+           end if
          end do
        end do
        LIBPAW_DEALLOCATE(ibuffer)
@@ -2537,9 +2547,15 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
        ibuffer(ii+1:ii+nselect)=pawrhoij(iatom)%rhoijselect(1:nselect)
        ii=ii+nselect
        do ispden=1,my_nspden
-         buffer(jj+1:jj+my_cplex*my_qphase*nselect)= &
-&                      pawrhoij(iatom)%rhoijp(1:my_cplex*my_qphase*nselect,ispden)
-         jj=jj+my_cplex*my_qphase*nselect
+         buffer(jj+1:jj+my_cplex*nselect)=&
+                pawrhoij(iatom)%rhoijp(1:my_cplex*nselect,ispden)
+         jj=jj+my_cplex*nselect
+         if (my_qphase==2) then
+           iq0 = my_cplex*pawrhoij(iatom)%lmn2_size
+           buffer(jj+1:jj+my_cplex*nselect)=&
+                  pawrhoij(iatom)%rhoijp(iq0+1:iq0+my_cplex*nselect,ispden)
+           jj=jj+my_cplex*nselect
+         end if
        end do
      end do
      if (iomode == fort_binary) then
@@ -3394,7 +3410,7 @@ subroutine pawrhoij_print_rhoij(rhoij,cplex,qphase,iatom,natom,&
    test_value_eff=-one;if(my_test_value>zero.and.irhoij==1) test_value_eff=my_test_value
    call pawio_print_ij(my_unt,rhoij_,rhoij_size,my_cplex,my_lmn_size,my_l_only,l_index,my_opt_pack,&
 &                      my_prtvol,my_rhoijselect,test_value_eff,1,opt_sym=my_opt_sym,&
-&                      mode_paral=my_mode)
+&                      mode_paral=my_mode,force_print=.true.)
 
   end do !irhoij
 
@@ -3449,6 +3465,8 @@ end subroutine pawrhoij_print_rhoij
 !!  symrec(3,3,nsym)=symmetries of group in terms of operations on
 !!                   reciprocal space primitive translations
 !!  typat(natom)=type for each atom
+!!  [use_zeromag]=--optional-- .TRUE. if rhoij "magnetization" is enforced to be zero
+!!                Applies only when nspden_rhoij=4 (note: only the real part is set to zero)
 !!
 !! OUTPUT
 !!
@@ -3472,12 +3490,13 @@ end subroutine pawrhoij_print_rhoij
 
 subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsym,&
 &                            ntypat,optrhoij,pawang,pawprtvol,pawtab,rprimd,symafm,symrec,typat, &
-&                            mpi_atmtab,comm_atom,qphon) ! optional arguments (parallelism)
+&                            mpi_atmtab,comm_atom,qphon,use_zeromag) ! optional arguments (parallelism)
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: choice,ipert,natom,nsym,ntypat,optrhoij,pawprtvol
  integer,optional,intent(in) :: comm_atom
+ logical,optional,intent(in) :: use_zeromag
  type(pawang_type),intent(in) :: pawang
 !arrays
  integer,intent(in) :: indsym(4,nsym,natom)
@@ -3498,7 +3517,9 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
  integer :: lmn_size,lmn2_size,mi,mj,my_comm_atom,mu,mua,mub,mushift
  integer :: natinc,ngrhoij,nrhoij,nrhoij1,nrhoij_unsym
  integer :: nselect,nu,nushift,qphase,sz1,sz2
+ real(dp) :: det
  logical,parameter :: afm_noncoll=.true.  ! TRUE if antiferro symmetries are used with non-collinear magnetism
+ logical :: use_zeromag_
  real(dp) :: arg,factafm,ro,syma,zarot2
  logical :: antiferro,has_qphase,my_atmtab_allocated,noncoll
  logical :: paral_atom,paral_atom_unsym,use_afm,use_res
@@ -3509,6 +3530,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
  integer :: nsym_used(2)
  integer, pointer :: indlmn(:,:)
  integer,pointer :: my_atmtab(:)
+ integer,allocatable :: symrec_det(:)
  real(dp) :: fact(2),factsym(2),phase(2),rhoijc(2),rotmag(2,3,2),rotrho(2,2,2)
  real(dp) :: summag(2,3,2),sumrho(2,2,2),sum1(2),work1(2,3,3),xsym(3)
  real(dp),allocatable :: rotgr(:,:,:,:),rotmaggr(:,:,:,:),sumgr(:,:,:),summaggr(:,:,:,:)
@@ -3551,6 +3573,8 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
  noncoll=.false.;if (nrhoij>0) noncoll=(pawrhoij(1)%nspden==4)
 !Do we use antiferro symmetries ?
  use_afm=((antiferro).or.(noncoll.and.afm_noncoll))
+!Do we impose zero magnetization?
+ use_zeromag_=.false. ; if (present(use_zeromag)) use_zeromag_=use_zeromag
 
 ! Does not symmetrize imaginary part for GS calculations
  cplex_eff=1
@@ -3569,7 +3593,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
  end if
 
 !Printing of unsymetrized Rhoij
- if (nrhoij>0.and.optrhoij==1.and.pawprtvol/=-10001) then
+ if (nrhoij>0.and.optrhoij==1.and.pawprtvol/=0) then
    wrt_mode='COLL';if (paral_atom) wrt_mode='PERS'
    pertstrg="RHOIJ";if (ipert>0) pertstrg="RHOIJ(1)"
    natinc=1;if(nrhoij>1.and.pawprtvol>=0) natinc=nrhoij-1
@@ -3611,8 +3635,19 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
 !  Several inits/allocations
    if (noncoll) then
      LIBPAW_ALLOCATE(symrec_cart,(3,3,nsym))
+     LIBPAW_ALLOCATE(symrec_det,(nsym))
      do irot=1,nsym
        symrec_cart(:,:,irot)=symrhoij_symcart(gprimd,rprimd,symrec(:,:,irot))
+       ! compute the sign of the determinant of the symmetries
+       ! to be able to apply only the proper part of the symmetries to the magn. components
+       ! (magnetization == pseudo-vector)
+       det = symrec_cart(1,1,irot)*symrec_cart(2,2,irot)*symrec_cart(3,3,irot)+&
+         &   symrec_cart(2,1,irot)*symrec_cart(3,2,irot)*symrec_cart(1,3,irot)+&
+         &   symrec_cart(1,2,irot)*symrec_cart(2,3,irot)*symrec_cart(3,1,irot) - &
+         &  (symrec_cart(3,1,irot)*symrec_cart(2,2,irot)*symrec_cart(1,3,irot)+&
+         &   symrec_cart(2,1,irot)*symrec_cart(1,2,irot)*symrec_cart(3,3,irot)+&
+         &   symrec_cart(3,2,irot)*symrec_cart(2,3,irot)*symrec_cart(1,1,irot))
+       symrec_det(irot) = nint(det) ! should return 1 or -1
      end do
    end if
    ishift2=0;ishift3=0;ishift4=0
@@ -3875,7 +3910,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
              if (has_qphase) then
                !Remember, RHOij is stored as follows:
                ! RHOij=  [rhoij(2klmn-1)+i.rhoij(2klmn)]
-               !      +i.[rhoij(lnm2_size+2klmn-1)+i.rhoij(lmn2_size+2klmn)]
+               !      +i.[rhoij(2lnm2_size+2klmn-1)+i.rhoij(2lmn2_size+2klmn)]
                if (optrhoij==1) then
                  do iplex=1,cplex_rhoij
                    rhoijc(1)=sumrho(iplex,iafm,1)
@@ -3935,7 +3970,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
                  do nu=1,3
                    do mu=1,3
                      rotmag(1:cplex_eff,mu,iq)=rotmag(1:cplex_eff,mu,iq) &
-&                      +symrec_cart(mu,nu,irot)*summag(1:cplex_eff,nu,iq)
+&                      +symrec_det(irot)*symrec_cart(mu,nu,irot)*summag(1:cplex_eff,nu,iq)
                    end do
                  end do
                end do
@@ -3959,7 +3994,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
                        mushift=mua+ishift2
                        sum1(:)=zero;xsym(1:3)=dble(symrec(mua,1:3,irot))
                        do nu=1,3
-                         syma=symrec_cart(mub,nu,irot)
+                         syma=symrec_det(irot)*symrec_cart(mub,nu,irot)
                          sum1(1:cplex_eff)=sum1(1:cplex_eff)+syma &
 &                         *(summaggr(1:cplex_eff,ishift2+1,nu,iq)*xsym(1) &
 &                          +summaggr(1:cplex_eff,ishift2+2,nu,iq)*xsym(2) &
@@ -4031,7 +4066,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
 !          Rhoij
            if (optrhoij==1) then
              do iq=1,qphase
-               klmn1q=klmn1+(iq-1)*lmn2_size
+               klmn1q=klmn1+(iq-1)*lmn2_size*cplex_rhoij
                pawrhoij(iatm)%rhoijp(klmn1q,ispden)=rotrho(1,1,iq)/nsym_used(1)
                if (cplex_rhoij==2) then
                  if (cplex_eff==1) ro=pawrhoij_unsym_all(iatom)%rhoij_(klmn1q+1,ispden)
@@ -4045,8 +4080,12 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
            if (noncoll.and.optrhoij==1) then
              do mu=2,4
                do iq=1,qphase
-                 klmn1q=klmn1+(iq-1)*lmn2_size
-                 pawrhoij(iatm)%rhoijp(klmn1q,mu)=rotmag(1,mu-1,iq)/nsym_used(1)
+                 klmn1q=klmn1+(iq-1)*lmn2_size*cplex_rhoij
+                 if (use_zeromag_) then
+                   pawrhoij(iatm)%rhoijp(klmn1q,mu)=zero
+                 else
+                   pawrhoij(iatm)%rhoijp(klmn1q,mu)=rotmag(1,mu-1,iq)/nsym_used(1)
+                 end if
                  if (cplex_rhoij==2) then
                    if (cplex_eff==1) ro=pawrhoij_unsym_all(iatom)%rhoij_(klmn1q+1,mu)
                    if (cplex_eff==2) ro=rotmag(2,mu-1,iq)/nsym_used(1)
@@ -4060,7 +4099,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
            if (antiferro.and.optrhoij==1) then
              if (nsym_used(2)>0) then
                do iq=1,qphase
-                 klmn1q=klmn1+(iq-1)*lmn2_size
+                 klmn1q=klmn1+(iq-1)*lmn2_size*cplex_rhoij
                  pawrhoij(iatm)%rhoijp(klmn1q,2)=rotrho(1,2,iq)/nsym_used(2)
                  if (cplex_rhoij==2) then
                    if (cplex_eff==1) ro=pawrhoij_unsym_all(iatom)%rhoij_(klmn1q+1,2)
@@ -4074,15 +4113,19 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
 !          Gradients of rhoij
            if (choice>1) then
              do iq=1,qphase
-               klmn1q=klmn1+(iq-1)*lmn2_size
+               klmn1q=klmn1+(iq-1)*lmn2_size*cplex_rhoij
                do iplex=1,cplex_eff
                  do mu=1,ngrhoij
                    pawrhoij(iatm)%grhoij(mu,klmn1q,ispden)=rotgr(iplex,mu,1,iq)/nsym_used(1)
                  end do
                  if (noncoll) then
-                   do nu=1,3
-                     pawrhoij(iatm)%grhoij(mu,klmn1q,1+nu)=rotmaggr(iplex,mu,nu,iq)/nsym_used(1)
-                   end do
+                   if (use_zeromag_.and.iplex==1) then
+                     pawrhoij(iatm)%grhoij(mu,klmn1q,2:4)=zero
+                   else
+                     do nu=1,3
+                       pawrhoij(iatm)%grhoij(mu,klmn1q,1+nu)=rotmaggr(iplex,mu,nu,iq)/nsym_used(1)
+                     end do
+                   end if
                  end if
                  if (antiferro.and.nsym_used(2)>0) then
                    do mu=1,ngrhoij
@@ -4114,7 +4157,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
      if (optrhoij==1.and.use_res) then
        do ispden=1,pawrhoij(iatm)%nspden
          do iq=1,qphase
-           iq0=(iq-1)*lmn2_size
+           iq0=(iq-1)*lmn2_size*cplex_rhoij
            if (cplex_rhoij==1) then
              do irhoij=1,pawrhoij(iatm)%nrhoijsel
                klmn1=iq0+pawrhoij(iatm)%rhoijselect(irhoij) ; jrhoij=iq0+irhoij
@@ -4138,6 +4181,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
 
    if (noncoll)  then
      LIBPAW_DEALLOCATE(symrec_cart)
+     LIBPAW_DEALLOCATE(symrec_det)
    end if
    if (choice>1) then
      if (.not.paral_atom_unsym) then
@@ -4183,7 +4227,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
        if (use_res) then
          pawrhoij(iatm)%rhoijres(:,:)=zero
          do iq=1,qphase
-           iq0=(iq-1)*lmn2_size
+           iq0=(iq-1)*lmn2_size*cplex_rhoij
            if (cplex_rhoij==1) then
              do ispden=1,pawrhoij(iatm)%nspden
                do irhoij=1,pawrhoij(iatm)%nrhoijsel
@@ -4212,7 +4256,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
        if (use_res) then
          do ispden=1,pawrhoij(iatm)%nspden
            do iq=1,qphase
-             iq0=(iq-1)*lmn2_size
+             iq0=(iq-1)*lmn2_size*cplex_rhoij
              if (cplex_rhoij==1) then
                do irhoij=1,pawrhoij(iatm)%nrhoijsel
                  klmn1=iq0+pawrhoij(iatm)%rhoijselect(irhoij) ; jrhoij=iq0+irhoij
@@ -4239,7 +4283,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
 
 !*********************************************************************
 !Printing of symetrized Rhoij
- if (nrhoij>0.and.optrhoij==1.and.pawprtvol/=-10001) then
+ if (nrhoij>0.and.optrhoij==1.and.pawprtvol/=0) then
    wrt_mode='COLL';if (paral_atom) wrt_mode='PERS'
    pertstrg="RHOIJ";if (ipert>0) pertstrg="RHOIJ(1)"
    natinc=1;if(nrhoij>1.and.pawprtvol>=0) natinc=nrhoij-1

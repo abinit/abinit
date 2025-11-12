@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_mlwfovlp_qp
 !! NAME
 !!  m_mlwfovlp_qp
@@ -7,7 +6,7 @@
 !!  Interpolate GW corrections with Wannier functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (DRH)
+!!  Copyright (C) 2008-2025 ABINIT group (DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,7 +30,6 @@ module m_mlwfovlp_qp
  use m_dtset
  use m_dtfil
 
- use defs_datatypes,   only : ebands_t
  use defs_abitypes,    only : MPI_type
  use m_mpinfo,         only : destroy_mpi_enreg, initmpi_seq
  use m_pawtab,         only : pawtab_type
@@ -42,7 +40,7 @@ module m_mlwfovlp_qp
  use m_crystal,        only : crystal_t
  use m_kpts,           only : listkk
  use m_bz_mesh,        only : kmesh_t
- use m_ebands,         only : ebands_init, ebands_free
+ use m_ebands,         only : ebands_t
  use m_qparticles,     only : rdqps, rdgw
  use m_sort,           only : sort_dp
 
@@ -148,11 +146,10 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  real(dp),allocatable :: kibz(:,:),wtk_ibz(:)
  real(dp),allocatable :: doccde_ibz(:),occfact_ibz(:),eigen_ibz(:)
  real(dp),allocatable ::  igwene(:,:,:)
- complex(dpc),allocatable :: m_ks_to_qp(:,:,:,:),m_ks_to_qp_BZ(:,:,:,:) !,ortho(:)
- complex(dpc),allocatable :: m_tmp(:,:),cg_k(:,:),cg_qpk(:,:)
+ complex(dp),allocatable :: m_ks_to_qp(:,:,:,:),m_ks_to_qp_BZ(:,:,:,:) !,ortho(:)
+ complex(dp),allocatable :: m_tmp(:,:),cg_k(:,:),cg_qpk(:,:)
  type(Pawrhoij_type),allocatable :: prev_Pawrhoij(:)
  !type(pawcprj_type),pointer :: Cp1(:,:),Cp2(:,:)
-
 !************************************************************************
 
  ABI_UNUSED(mkmem)
@@ -263,17 +260,11 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
    end do
  end do
 
- ! CP modified
-! call ebands_init(bantot_ibz,QP_bst,Dtset%nelect,doccde_ibz,eigen_ibz,istwfk_ibz,kibz,nband_ibz,&
-!  nkibz,npwarr_ibz,nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact_ibz,wtk_ibz,&
-!  dtset%cellcharge(1),dtset%kptopt,dtset%kptrlatt_orig,dtset%nshiftk_orig,dtset%shiftk_orig,&
-!  dtset%kptrlatt,dtset%nshiftk,dtset%shiftk)
- call ebands_init(bantot_ibz,QP_bst,Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
+ call QP_bst%init(bantot_ibz,Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
   doccde_ibz,eigen_ibz,istwfk_ibz,kibz,nband_ibz,&
   nkibz,npwarr_ibz,nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact_ibz,wtk_ibz,&
   dtset%cellcharge(1),dtset%kptopt,dtset%kptrlatt_orig,dtset%nshiftk_orig,dtset%shiftk_orig,&
   dtset%kptrlatt,dtset%nshiftk,dtset%shiftk)
- ! End CP modified
 
  ABI_FREE(kibz)
  ABI_FREE(wtk_ibz)
@@ -510,7 +501,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  call wrtout(std_out,msg,'COLL')
 
  ABI_FREE(m_ks_to_qp)
- call ebands_free(QP_bst)
+ call QP_bst%free()
  call destroy_mpi_enreg(MPI_enreg_seq)
 
  DBG_EXIT("COLL")
@@ -551,7 +542,7 @@ subroutine update_cprj(natom,nkibz,nbnds,nsppol,nspinor,m_ks_to_qp,dimlmn,Cprj_i
  integer,intent(in) :: natom,nbnds,nkibz,nsppol,nspinor
 !arrays
  integer,intent(in) :: dimlmn(natom)
- complex(dpc),intent(in) :: m_ks_to_qp(nbnds,nbnds,nkibz,nsppol)
+ complex(dp),intent(in) :: m_ks_to_qp(nbnds,nbnds,nkibz,nsppol)
  type(pawcprj_type),intent(inout) :: Cprj_ibz(natom,nspinor*nbnds*nkibz*nsppol)
 
 !Local variables-------------------------------
@@ -560,7 +551,6 @@ subroutine update_cprj(natom,nkibz,nbnds,nsppol,nspinor,m_ks_to_qp,dimlmn,Cprj_i
 !arrays
  real(dp),allocatable :: re_p(:),im_p(:),vect(:,:),umat(:,:,:)
  type(pawcprj_type),allocatable :: Cprj_ks(:,:)
-
 !************************************************************************
 
  DBG_ENTER("COLL")

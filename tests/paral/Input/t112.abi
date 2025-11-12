@@ -1,0 +1,152 @@
+# Test K-resolved Spectral function of Iron BCC
+fftalg 112 #only for test
+
+# Parameters are not realistics
+# Multi-dataset parameters
+ndtset 2    #
+jdtset 3 4    #
+getden2 1
+getden3 2    # take density from DMFT
+getden4 2
+getself3 2    # take self-energy from previous DMFT
+getself4 2
+
+# Definition of the unit cell
+acell   3*5.5         # Cubic cell with
+rprim -0.5  0.5  0.5  # real space primitive translation vectors
+       0.5 -0.5  0.5
+       0.5  0.5 -0.5
+
+# Definition of the atom types and pseudopotentials
+natom  1                # number atom
+ntypat 1                # Types of atom
+znucl  26               # Z of Iron
+typat 1                 # Fe
+xred 0.00 0.00 0.00     # This keyword indicates that the location of the atoms
+
+pp_dirpath "$ABI_PSPDIR"  # This is the path to the directory where
+pseudos "26fe.lda2.paw"   # pseudopotentials for tests are stored
+
+# Planewave basis set, number of bands and occupations
+ecut      24.0          # Maximal plane-wave kinetic energy cut-off, in Hartree
+pawecutdg 48.0          # PAW: Energy Cutoff for the Double Grid
+nband     40            # Number of bands
+occopt    3             # Occupation option for metal
+tsmear    1000 K        # Temperature of smearing
+
+pawprtvol 3             # Printing additional information
+
+# Definition of k-points grid
+kptopt 4
+ngkpt 2 2 2
+nshiftk 2
+shiftk 0.25 0.25 0.25
+      -0.25 -0.25 -0.25
+
+istwfk *1
+
+#First dataset specific parameters
+nstep1    30            # Number of iterations for the DFT convergence
+#nline1    10            # Number of line minimisations
+#nnsclo1   10            # Number of non-self consistent loops
+tolvrs 1.0d-15
+
+#Define spin properties
+nsppol 1                # Non spin-polarized wavefunction
+nspden 4                # Non magnetic
+nspinor 2
+
+#DFT alone
+usedmft1 0
+
+#Second dataset specific parameters
+nstep2    1             # Number of iterations for the DFT+DMFT convergence
+nline2    10             # Number of line minimisations
+nnsclo2   10             # Number of non-self consistent loops
+#DFT+DMFT
+usedmft2  1              # Active DMFT
+dmftbandi 9              # First band included in the projection. Initial
+dmftbandf 25             # and final bands.
+dmft_nwli 1000        # Linear freqeuncy mesh
+dmft_iter 1              # Number of iterations of the DMFT part.
+                         # We often use single-shot, since anyway the charge density
+                         # changes through the DFT+DMFT anyway.
+dmft_mxsf 0.8            # Mixing of the old and new self-energy at every iterations.
+dmft_dc   6              # Double counting type. 1 is Fully Localized Limit (FLL)
+
+#CTQMC
+dmft_solv        6      # Choice of solver: Internal CT-SEG.
+#
+dmftqmc_l        500     # Number of time slices for G(tau).
+dmftqmc_n        1.d5    # Number of QMC sweeps
+dmftqmc_therm    1000    # Thermalization
+dmftctqmc_meas   100
+dmftctqmc_basis  2
+dmft_triqs_off_diag 0
+dmft_triqs_wmax 1.0
+
+#Hubbard
+usepawu1     4          # For density matrix printout.
+usepawu2    14
+dmatpuopt   2           # The density matrix: the simplest expression.
+lpawu       2           # Angular momentum for the projected Hamiltonian
+upawu1      0.00   eV
+upawu2      5.5  eV     # Values of U for each angular momentum
+jpawu1      0.0
+jpawu2      0.84  eV    # Values of J for each angular momentum
+
+#=====================
+#
+# Spectral Function SECTION
+#
+#=====================
+nbdbuf 10
+nstep 75                # Number of iterations
+usedmft 1               # Use dmft
+usepawu 14
+tolwfr 1.0d-12
+
+nbandkss   20            # Number of states
+kssform    3
+dmft_kspectralfunc  1    # Activate k-resolved spectral function
+iscf       -2            #
+kptopt3    -1            # Bandstructure: 5 segments
+ndivsm3     4            # Lengths of minimal segment
+kptbounds3               # The four segments of the band structure are
+#                        # connecting 5 points of the Brillouin zone,
+#                        # given here.
+        0.0 0.0 0.0      # Gamma
+        0.0 1/2 0.0      # N
+
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% need_cpp_vars = HAVE_TRIQS_v3_2
+#%% [shell]
+#%% pre_commands = iw_cp t112_MPI8o_DS2_DEN .;
+#%%                iw_cp t112i_DS3_OVERLAP t112_MPI8i_DS3_DMFTOVERLAP_iatom0001_isppol1;
+#%%                iw_cp t112i_DS3_OVERLAP t112_MPI8i_DS4_DMFTOVERLAP_iatom0001_isppol1;
+#%%                iw_cp t112i_DS3_Self_ra t112_MPI8i_DS3_Self_ra-omega_iatom0001_isppol1;
+#%%                iw_cp t112i_DS3_Self_ra t112_MPI8i_DS4_Self_ra-omega_iatom0001_isppol1;
+#%%                iw_cp t112i_DS3_UMat t112_MPI8i_DS3_UnitaryMatrix_iatom0001;
+#%%                iw_cp t112i_DS3_UMat t112_MPI8i_DS4_UnitaryMatrix_iatom0001;
+#%%                iw_cp t112o_DS3_grid t112_MPI8o_DS3_spectralfunction_realgrid;
+#%%                iw_cp t112o_DS3_grid t112_MPI8o_DS4_spectralfunction_realgrid;
+#%%                iw_cp t112o_DS2_Self t112_MPI8o_DS2_Self-omega_iatom0001_isppol1;
+#%% [NCPU_8]
+#%% files_to_test = t112_MPI8.abo, tolnlines = 2, tolabs = 1.e-2, tolrel = 1.e-2;
+#%%                 t112_MPI8o_DS3_DFTDMFT_SpectralFunction_kres, tolnlines = 12, tolabs = 1.e-2, tolrel = 1.e-4, fld_options=-easy;
+#%%                 t112_MPI8o_DS4_DFTDMFT_Self_backtransform.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%                 t112_MPI8o_DS4_DFTDMFT_Self_realaxis.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%                 t112_MPI8o_DS4_DFTDMFT_SpFunloc_iatom0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
+#%%                 t112_MPI8o_DS4_SpFunc-from_realaxisself, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
+#%% [paral_info]
+#%% nprocs_to_test = 8
+#%% max_nprocs = 8
+#%% [extra_info]
+#%% authors = F. Gendron, E. Castiel
+#%% keywords = dmft_kspectralfunc, DMFT, TRIQS
+#%% description = Test for the spectral function with TRIQS
+#%%<END TEST_INFO>
+

@@ -6,7 +6,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2022 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2025 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,9 +42,9 @@ implicit none
 
 private
 
-complex(dpc), public, parameter :: cmplx_i = (0.0_dp,1.0_dp)
-complex(dpc), public, parameter :: cmplx_1 = (1.0_dp,0.0_dp)
-complex(dpc), public, parameter :: cmplx_0 = (0.0_dp,0.0_dp)
+complex(dp), public, parameter :: cmplx_i = (0.0_dp,1.0_dp)
+complex(dp), public, parameter :: cmplx_1 = (1.0_dp,0.0_dp)
+complex(dp), public, parameter :: cmplx_0 = (0.0_dp,0.0_dp)
 
 logical, public  :: master_debug
 character(len=100), public :: files_status_new='new'
@@ -71,15 +71,12 @@ contains
 !!
 !! SOURCE
 
-complex(dpc) function complex_vector_product(v1,v2,l)
+complex(dp) function complex_vector_product(v1,v2,l)
 !--------------------------------------------------------------------------
 ! This function computes the vector product of two complex vectors.
 !--------------------------------------------------------------------------
-implicit none
-
 integer,     intent(in)  :: l
-complex(dpc),intent(in)  :: v1(l), v2(l)
-
+complex(dp),intent(in)  :: v1(l), v2(l)
 ! *************************************************************************
 
 complex_vector_product = sum(conjg(v1(:))*v2(:))
@@ -116,15 +113,11 @@ subroutine orthogonalize(mpi_communicator, Hsize,Qsize,Xsize,Q,X)
 !  Hsize means "dimension of the Hilbert space", so typically the number
 !  of plane waves...
 !--------------------------------------------------------------------------
-implicit none
-
 integer,     intent(in)  :: mpi_communicator
 integer,     intent(in)  :: Hsize, Qsize, Xsize
-complex(dpc),intent(in)  :: Q(Hsize,Qsize)
-
-complex(dpc),intent(inout)  :: X(Hsize,Xsize)
-
-complex(dpc),allocatable :: C(:,:)
+complex(dp),intent(in)  :: Q(Hsize,Qsize)
+complex(dp),intent(inout)  :: X(Hsize,Xsize)
+complex(dp),allocatable :: C(:,:)
 
 integer :: ierr
 
@@ -192,10 +185,8 @@ subroutine driver_invert_positive_definite_hermitian_matrix(matrix,ldim)
 !
 !        The subroutine overwrites the input.
 !----------------------------------------------------------------------------------------------------
-implicit none
-
 integer     , intent(in)    :: ldim
-complex(dpc), intent(inout) :: matrix(ldim,ldim)
+complex(dp), intent(inout) :: matrix(ldim,ldim)
 
 ! local variables
 integer      :: i, j
@@ -272,8 +263,6 @@ subroutine ritz_analysis_general(mpi_communicator,matrix_function,lmax,Hsize,Lba
 !                       eigenvalues      : the computed approximate eigenvalues
 !                                        of the matrix
 !----------------------------------------------------------------------
-implicit none
-
 interface
   subroutine matrix_function(v_out,v_in,l)
   use defs_basis
@@ -287,13 +276,13 @@ end interface
 
 
 integer,      intent(in)    :: Hsize, lmax , mpi_communicator
-complex(dpc), intent(in)    :: Lbasis(Hsize,lmax)
+complex(dp), intent(in)    :: Lbasis(Hsize,lmax)
 real(dp),     intent(in)    :: eigenvalues(lmax)
 
 
 ! local variables
-complex(dpc),allocatable :: check_matrix(:,:)
-complex(dpc),allocatable :: yl(:), rl(:), Ayl(:)
+complex(dp),allocatable :: check_matrix(:,:)
+complex(dp),allocatable :: yl(:), rl(:), Ayl(:)
 
 real(dp)     :: lambda_l
 real(dp)     :: check_norm

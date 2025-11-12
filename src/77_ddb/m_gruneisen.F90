@@ -7,7 +7,7 @@
 !!  of dynamical matrices obtained with different unit cell volumes.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2022 ABINIT group (MG)
+!! Copyright (C) 2011-2025 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,16 +33,14 @@ MODULE m_gruneisen
  use m_ifc
  use m_cgtools
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_io_tools,            only : get_unit, open_file
  use m_time,                only : cwtime, cwtime_report
  use m_fstrings,            only : sjoin, itoa, ltoa, ftoa, strcat
  use m_numeric_tools,       only : central_finite_diff, arth
  use m_kpts,                only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt
- use m_bz_mesh,             only : kpath_t, kpath_new
+ use m_bz_mesh,             only : kpath_t
  use m_anaddb_dataset,      only : anaddb_dataset_type
  use m_dynmat,              only : massmult_and_breaksym, dfpt_phfrq, gtdyn9
 
@@ -150,8 +148,8 @@ type(gruns_t) function gruns_new(ddb_filepaths, inp, comm) result(new)
  do ivol=1,new%nvols
    call wrtout(ab_out, sjoin(" Reading DDB file:", ddb_filepaths(ivol)))
 
-   call new%ddb_vol(ivol)%from_file(ddb_filepaths(ivol), inp%brav, &
-                      ddb_hdr, new%cryst_vol(ivol), comm)
+   call new%ddb_vol(ivol)%from_file(ddb_filepaths(ivol), ddb_hdr, new%cryst_vol(ivol), comm)
+   call new%ddb_vol(ivol)%set_brav(inp%brav)
    natom = ddb_hdr%natom
    call ddb_hdr%free()
 
@@ -239,7 +237,7 @@ subroutine gruns_fourq(gruns, qpt, wvols, gvals, dwdq, phdispl_cart)
 
 !Arguments ------------------------------------
 !scalars
- type(gruns_t),intent(in) :: gruns
+ class(gruns_t),intent(in) :: gruns
 !arrays
  real(dp),intent(in) :: qpt(3)
  real(dp),intent(out) :: wvols(gruns%natom3,gruns%nvols),gvals(gruns%natom3),dwdq(3,gruns%natom3)
@@ -325,8 +323,8 @@ subroutine gruns_qpath(gruns, prefix, qpath, ncid, comm)
 
 !Arguments ------------------------------------
 !scalars
+ class(gruns_t),intent(in) :: gruns
  integer,intent(in) :: ncid,comm
- type(gruns_t),intent(in) :: gruns
  type(kpath_t),intent(in) :: qpath
  character(len=*),intent(in) :: prefix
 
@@ -371,7 +369,7 @@ subroutine gruns_qpath(gruns, prefix, qpath, ncid, comm)
    end if
    write(unt,'(a)')'# Phonon band structure, Gruneisen parameters and group velocity'
    write(unt,'(a)')"# Energy in Hartree, DOS in states/Hartree"
-   call qpath%print(unit=unt, pre="#")
+   call qpath%print([unt], pre="#")
    write(unt,'(5a)')&
      "# phfreq(mode=1) gruneisen(mode=1) velocity(mode=1)    phfreq(mode=2) gruneisen(mode=2) velocity(mode=2)   ..."
    do iqpt=1,qpath%npts
@@ -384,7 +382,6 @@ subroutine gruns_qpath(gruns, prefix, qpath, ncid, comm)
    close(unt)
  end if
 
-#ifdef HAVE_NETCDF
  if (my_rank == master .and. ncid /= nctk_noid) then
    ncerr = nctk_def_dims(ncid, [nctkdim_t("gruns_nqpath", qpath%npts)], defmode=.True.)
    NCF_CHECK(ncerr)
@@ -412,7 +409,6 @@ subroutine gruns_qpath(gruns, prefix, qpath, ncid, comm)
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_dwdq_qpath"), dwdq_qpath))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_phdispl_cart_qpath"), phdispl_cart_qpath))
  end if
-#endif
 
  ABI_FREE(wvols_qpath)
  ABI_FREE(gvals_qpath)
@@ -449,9 +445,9 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
 
 !Arguments ------------------------------------
 !scalars
+ class(gruns_t),intent(in) :: gruns
  integer,intent(in) :: nshiftq,ncid,comm
  real(dp),intent(in) :: dosdeltae !,dossmear
- type(gruns_t),intent(in) :: gruns
  character(len=*),intent(in) :: prefix
 !arrays
  integer,intent(in) :: ngqpt(3)
@@ -575,7 +571,6 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
    close(unt)
  end if
 
-#ifdef HAVE_NETCDF
  ! Write netcdf files.
  if (my_rank == master .and. ncid /= nctk_noid) then
    ncerr = nctk_def_dims(ncid, [ &
@@ -625,7 +620,6 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_v2dos"), v2dos))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_vdos"), vdos))
  end if
-#endif
 
  ABI_FREE(qibz)
  ABI_FREE(wtq)
@@ -662,13 +656,10 @@ end subroutine gruns_qmesh
 subroutine gruns_free(gruns)
 
 !Arguments ------------------------------------
-!array
- type(gruns_t),intent(inout) :: gruns
+ class(gruns_t),intent(inout) :: gruns
 
 !Local variables-------------------------------
-!scalars
  integer :: ii
-
 ! ************************************************************************
 
  if (allocated(gruns%ifc_vol)) then
@@ -714,24 +705,19 @@ end subroutine gruns_free
 !!
 !! SOURCE
 
-subroutine gruns_anaddb(inp, prefix, comm)
+subroutine gruns_anaddb(inp, comm)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
- character(len=*),intent(in) :: prefix
- type(anaddb_dataset_type) :: inp
+ type(anaddb_dataset_type),intent(inout) :: inp
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: ii,nprocs,my_rank,ncid,iv0
-#ifdef HAVE_NETCDF
- integer :: ncerr
-#endif
+ integer :: ii,nprocs,my_rank,ncid,iv0, ncerr
  real(dp) :: cpu,wall,gflops
  type(gruns_t),target :: gruns
  type(kpath_t) :: qpath
-
 ! ************************************************************************
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -744,9 +730,8 @@ subroutine gruns_anaddb(inp, prefix, comm)
  iv0 = gruns%iv0
 
  ncid = nctk_noid
-#ifdef HAVE_NETCDF
  if (my_rank == master) then
-   NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_GRUNS.nc"), xmpi_comm_self), "Creating _GRUNS.nc")
+   NCF_CHECK_MSG(nctk_open_create(ncid, strcat(inp%filename_output, "_GRUNS.nc"), xmpi_comm_self), "Creating _GRUNS.nc")
 
    ! Write structure corresponding to iv0
    NCF_CHECK(gruns%cryst_vol(iv0)%ncwrite(ncid))
@@ -778,19 +763,18 @@ subroutine gruns_anaddb(inp, prefix, comm)
    !call phonons_ncwrite(ncid,natom,nfineqpath,save_qpoints,weights,save_phfrq,save_phdispl_cart)
    !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'atomic_mass_units'), ddb%amu))
  end if
-#endif
 
  ! Compute gruneisen parameters on the q-mesh.
  if (all(inp%ng2qpt /= 0)) then
-   call gruns_qmesh(gruns, prefix, inp%dosdeltae, inp%ng2qpt, 1, inp%q2shft, ncid, comm)
+   call gruns_qmesh(gruns, inp%filename_output, inp%dosdeltae, inp%ng2qpt, 1, inp%q2shft, ncid, comm)
  else
    ABI_WARNING("Cannot compute Gruneisen parameters on q-mesh because ng2qpt == 0")
  end if
 
  ! Compute gruneisen on the q-path.
  if (inp%nqpath /= 0) then
-   qpath = kpath_new(inp%qpath, gruns%cryst_vol(iv0)%gprimd, inp%ndivsm)
-   call gruns_qpath(gruns, prefix, qpath, ncid, comm)
+   call qpath%init(inp%qpath, gruns%cryst_vol(iv0)%gprimd, inp%ndivsm)
+   call gruns_qpath(gruns, inp%filename_output, qpath, ncid, comm)
    call qpath%free()
  else
    ABI_WARNING("Cannot compute Gruneisen parameters on q-path because nqpath == 0")
@@ -806,11 +790,9 @@ subroutine gruns_anaddb(inp, prefix, comm)
    call gruns%ifc_vol(iv0)%calcnwrite_nana_terms(gruns%cryst_vol(iv0), inp%nph2l, inp%qph2l, inp%qnrml2, ncid)
  end if
 
-#ifdef HAVE_NETCDF
  if (my_rank == master) then
    NCF_CHECK(nf90_close(ncid))
  end if
-#endif
 
  call gruns_free(gruns)
  call cwtime_report("gruns_anaddb", cpu, wall, gflops)

@@ -29,6 +29,9 @@
   diemac3  1.0
   tolwfr3  1.0d-15
 
+#Compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
 
 #Common data
  acell   2*10.00  12.50

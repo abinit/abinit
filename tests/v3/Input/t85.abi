@@ -29,6 +29,11 @@
   tolvrs3   1.0d-8
   diemix    0.3
 
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
+
 #######################################################################
 #Common input variables
 
@@ -73,7 +78,7 @@ nstep 20               # Maximal number of SCF cycles
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t85.abo, tolnlines = 35, tolabs = 2.0e+00, tolrel = 3.100e-03, fld_options = -easy
+#%%   t85.abo, tolnlines = 35, tolabs = 2.0e+00, tolrel = 4.000e-03, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

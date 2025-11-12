@@ -22,6 +22,9 @@ inp_files = [
 "t07.abi",
 "t08.abi",
 "t09.abi",
+"t18.abi", # test cprj_in_memory when atoms are not ordered by type.
+"t19.abi", # test cprj_in_memory=1 (dilatmx>1,PAW,istwfk>1,DFTI)
+"t20.abi", # test cprj_in_memory=1 (dilatmx>1,PAW,istwfk>1,no DFTI)
 "t21.abi",
 "t22.abi",
 "-t23.abi", # disabled
@@ -34,7 +37,23 @@ inp_files = [
 "t30.abi",
 "t31.abi",
 "t32.abi",
+"t33.abi", # test npband>1 for Norm-Conserving
+"t34.abi", # test chebfi oracle (PAW,istwfk=1)
+"t35.abi", # test xg_nonlop_option=1 (PAW,istwfk=1)
+"t36.abi", # test cprj_in_memory=1 (PAW,istwfk>1,no DFTI)
+"t37.abi", # test cprj_in_memory=1 (NC,istwfk>1,no DFTI)
+"t38.abi", # test cprj_in_memory=1 (PAW,nspinor=2,compare xg_nonlop_option=0 and 1)
+"t39.abi", # test cprj_in_memory=1 (PAW,istwfk=1,npkpt>1)
+"t40.abi", # test cprj_in_memory=1 (PAW,nspinor=2)
 "t41.abi",
+"t43.abi", # test chebfi2 (paw+soc)
+"t44.abi", # test chebfi2 (istwfk>1,paw,DFTI)
+"t45.abi", # test chebfi2 (istwfk>1,norm conserving,DFTI)
+"t46.abi", # test chebfi2 (istwfk>1,paw,not DFTI)
+"t47.abi", # test chebfi2 (istwfk>1,norm conserving,not DFTI)
+"t48.abi", # test cprj_in_memory=1 (PAW,istwfk>1,DFTI)
+"t49.abi", # test cprj_in_memory=1 (NC,istwfk>1,DFTI)
+#"t50.abi", # test cprj_in_memory=1 (NC,nspinor=2) ! not working yet
 "t51.abi",
 "t52.abi",
 "t53.abi",
@@ -58,7 +77,7 @@ inp_files = [
 "t75.abi",
 "t76.abi",
 "t77.abi",
-#"t78.abi", # GWR
+"t78.abi", # GWR
 #"t79.abi", # GWR
 "t80.abi",
 "t81.abi",
@@ -76,4 +95,18 @@ inp_files = [
 "t97.abi",
 "t98.abi",
 "t99.abi",
+"t100.abi", #DMFT ctqmc_localprop scalar
+"t101.abi", #DMFT ctqmc_localprop soc
+"t102.abi", #DMFT kspectralfunc=1
+"t103.abi", #DMFT magnfield=1
+"t104.abi", #DMFT magnfield=2
+"t105.abi",
+"t106.abi",
+"t107.abi",
+"t108.abi",
+"t109.abi",
+"t110.abi",
+"t111.abi",
+"t112.abi",
+"t120.abi", # Test meta-GGA + PAW + paral_kgb + cprj_in_memory + istwfk
 ]

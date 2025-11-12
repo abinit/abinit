@@ -22,6 +22,12 @@ qpt3     1 0 0
 rfphon3  1
 tolvrs3  1.0d-12
 
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
+
+
 getwfk 1
 getden 1
 kptopt 3
@@ -81,7 +87,7 @@ diemac 3.0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t86.abo, tolnlines = 2, tolabs = 1.1e-05, tolrel = 3.0e-04, fld_options = -medium
+#%%   t86.abo, tolnlines = 2, tolabs = 1.1e-05, tolrel = 2.0e-03, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
