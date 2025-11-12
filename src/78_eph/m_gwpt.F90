@@ -1811,14 +1811,17 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                  end if
 
                  ! DEBUG
-                 !if (n_k == 1 .and. m_kq == 1 .and. ipc == 1) then
-                   !print '(A7, A7, A7, A7, A7, A7)', 'my_is', 'my_iq', 'my_ik', 'ipp_bz', 'ib_sum', 'imyp'
-                   !print '(I7, I7, I7, I7, I7, I7)', my_is,  my_iq,  my_ik,  ipp_bz,  ib_sum,  imyp
-                   !print *, "gsig_atm(:, 1, 1, 1):", gsig_atm(:, 1, 1, 1)
-                   !print *, "gks_atm(:, 1, 1, 1):", gks_atm(:, 1, 1, 1)
-                   !print *, "gks_atm2(:, 1, 1, 1):", gks_atm2(:, 1, 1, 1)
-                   !print *, ' '
-                 !end if
+                 if (qq_is_gamma .and. im_kq <= 10  .and. in_k <= 10 .and. ipp_bz == 2 .and. ib_sum == 1 .and. my_rank == master) then
+                   ! kk is gamma
+                   if (sum(kk**2) < tol14) then
+                   print '(A7, A7, A7, A7, A7, A7)', 'my_is', 'im_kq', 'in_k', 'ipp_bz', 'ib_sum', 'ipc'
+                   print '(I7, I7, I7, I7, I7, I7)', my_is,  im_kq,  in_k,  ipp_bz,  ib_sum,  ipc
+                   !print *, "gsig_atm(:, im_kq, in_k, ipc):", gsig_atm(:, im_kq, in_k, ipc)
+                   print *, "gks_atm(:, im_kq, in_k, ipc):", gks_atm(:, im_kq, in_k, ipc)
+                   print *, "gks_atm2(:, im_kq, in_k, ipc):", gks_atm2(:, im_kq, in_k, ipc)
+                   print *, ' '
+                   end if
+                 end if
 
                end do ! n_k
              end do ! m_kq
