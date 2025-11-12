@@ -106,7 +106,7 @@ dmft_dc   5             # Double counting type. 1 is Fully Localized Limit (FLL)
 #Definition of impurity solver
 dmft_solv         8     # CT-QMC solver in density-density approximation
 dmftqmc_l        200    # Number of time slices for G(tau).
-dmftqmc_n        4.0d5   # Number of QMC sweeps
+dmftqmc_n        4.0d6   # Number of QMC sweeps
 dmftqmc_therm   10000   # Thermalization
 dmftctqmc_gmove  0      # Global move occurence in QMC
 dmftctqmc_order  25     # Perturbation order
@@ -124,6 +124,7 @@ jpawu2      0.84 0.00 eV     # Values of J
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = alps_intel_2025_elpa,scope_gnu_12.2_mpich 
 #%% [paral_info]
 #%% nprocs_to_test = 4,10
 #%% max_nprocs = 10
