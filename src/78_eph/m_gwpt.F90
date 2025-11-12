@@ -1676,7 +1676,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                end do ! n_k
              end do ! m_kq
 
-if (.not. qq_is_gamma) then
+!if (.not. qq_is_gamma) then
              ! ===========================
              ! Same operations but for -qq
              ! ===========================
@@ -1822,7 +1822,7 @@ if (.not. qq_is_gamma) then
 
                end do ! n_k
              end do ! m_kq
-end if ! .not qq_is_gamma.
+!end if ! .not qq_is_gamma.
 
            end do  ! imyp (my perturbations)
            call rf_ham_kqmp%free(); call rf_ham_kmp%free()
