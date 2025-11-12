@@ -171,7 +171,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 &                     ffnlin,ffnlout,gmet,gprimd,idir,indlmn,istwf_k,kgin,kgout,kpgin,kpgout,&
 &                     kptin,kptout,lmnmax,matblk,mgfft,mpi_enreg,mpsang,mpssoang,&
 &                     natom,nattyp,ngfft,nkpgin,nkpgout,nloalg,npwin,npwout,nspinor,nspinortot,&
-&                     ntypat,only_SO,phkxredin,phkxredout,ph1d,ph3din,ph3dout,signs,&
+&                     ntypat,only_SO,phkxredin,phkxredout,ph1d,ph3din,ph3dout,projected_so,signs,&
 &                     ucvol,vectin,vectout)
 
 !Arguments ------------------------------------
@@ -181,7 +181,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 !scalars
  integer,intent(in) :: choice,dimekb1,dimekb2,dimffnlin,dimffnlout,idir,istwf_k
  integer,intent(in) :: lmnmax,matblk,mgfft,mpsang,mpssoang,natom,nkpgin,nkpgout
- integer,intent(in) :: npwin,npwout,nspinor,nspinortot,ntypat,only_SO,signs
+ integer,intent(in) :: npwin,npwout,nspinor,nspinortot,ntypat,only_SO,projected_so,signs
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -601,24 +601,27 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
                      gxafac(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj)=zero
 !                    Contraction over spins:
                      do ispinp=1,nspinortot
-!                      => Imaginary part (multiplying by i, then by the Im of amet):
-                       temp(1,1:((rank+1)*(rank+2))/2)= &
-&                       -gxa(2,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj,ispinp)
-                       temp(2,1:((rank+1)*(rank+2))/2)= &
-&                       gxa(1,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj,ispinp)
-                       amet_lo(:,:)=amet(2,:,:,ispin,ispinp)
-                       call metcon_so(rank,gmet,amet_lo,temp,tmpfac)
-                       gxafac(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj)= &
-&                       gxafac(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj)+ &
-&                       wt(ilang,iproj)*tmpfac(:,1:((rank+1)*(rank+2))/2)
-!                      => Real part:
-                       temp(:,1:((rank+1)*(rank+2))/2)= &
-&                       gxa(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj,ispinp)
-                       amet_lo(:,:)=amet(1,:,:,ispin,ispinp)
-                       call metcon_so(rank,gmet,amet_lo,temp,tmpfac)
-                       gxafac(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj)= &
-&                       gxafac(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj)+ &
-&                       wt(ilang,iproj)*tmpfac(:,1:((rank+1)*(rank+2))/2)
+!                      projected_so = 0: full SOC; = 1: only z component for GBT
+                       if (projected_so == 0.or.ispin == ispinp) then
+!                        => Imaginary part (multiplying by i, then by the Im of amet):
+                         temp(1,1:((rank+1)*(rank+2))/2)= &
+&                         -gxa(2,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj,ispinp)
+                         temp(2,1:((rank+1)*(rank+2))/2)= &
+&                          gxa(1,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj,ispinp)
+                         amet_lo(:,:)=amet(2,:,:,ispin,ispinp)
+                         call metcon_so(rank,gmet,amet_lo,temp,tmpfac)
+                         gxafac(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj)= &
+&                         gxafac(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj)+ &
+&                         wt(ilang,iproj)*tmpfac(:,1:((rank+1)*(rank+2))/2)
+!                        => Real part:
+                         temp(:,1:((rank+1)*(rank+2))/2)= &
+&                         gxa(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj,ispinp)
+                         amet_lo(:,:)=amet(1,:,:,ispin,ispinp)
+                         call metcon_so(rank,gmet,amet_lo,temp,tmpfac)
+                         gxafac(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj)= &
+&                         gxafac(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj)+ &
+&                         wt(ilang,iproj)*tmpfac(:,1:((rank+1)*(rank+2))/2)
+                       end if
                      end do
                    end if
 
