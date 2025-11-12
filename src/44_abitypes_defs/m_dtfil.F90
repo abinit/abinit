@@ -6,7 +6,7 @@
 !!   object and procedures dealing with input/output filenames
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (XG, MT)
+!!  Copyright (C) 2008-2025 ABINIT group (XG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,15 +25,16 @@ module m_dtfil
  use m_abicore
  use m_errors
  use m_xmpi
- use m_build_info
  use m_dtset
 
+ use m_build_info,   only : abinit_version
  use defs_abitypes,  only : MPI_type
- use m_clib,         only : clib_rename
- use m_fstrings,     only : int2char4, rmquotes, sjoin, strcat, basename
+ use m_clib,         only : clib_rename, clib_mkdir_if_needed
+ use m_fstrings,     only : int2char4, rmquotes, sjoin, strcat, basename, itoa
  use m_io_tools,     only : open_file, file_exists
  use m_libpaw_tools, only : libpaw_log_flag_set
  use m_parser,       only : parsefile, intagm
+ use m_pstat,        only : pstat_proc
 
  implicit none
 
@@ -72,20 +73,32 @@ module m_dtfil
    !     0: no image
    !    >0: index of an image
 
+  integer :: getkden_from_image
+   ! index of image from which read KDEN file (0 if standard KDEN)
+   !    -1: the same image as current one
+   !     0: no image
+   !    >0: index of an image
+
   integer :: getpawden_from_image
    ! index of image from which read PAWDEN file (0 if standard PAWDEN)
    !    -1: the same image as current one
    !     0: no image
    !    >0: index of an image
 
+  integer :: ireadctqmcdata
+   ! ireadctqmcdata non-zero if the ctqmcdata file must be read
+
   integer :: ireadddb
-   ! ireadddb non-zero  if the ddb file must be read
+   ! ireadddb non-zero if the ddb file must be read
 
   integer :: ireadden
-   ! ireadden non-zero  if the den file must be read
+   ! ireadden non-zero if the den file must be read
 
   integer :: ireadkden
-   ! ireadkden non-zero  if the kden file must be read
+   ! ireadkden non-zero if the kden file must be read
+
+  integer :: ireadself
+   ! ireadself non-zero if the self file must be read
 
   integer :: ireadwf
    ! if(optdriver/=1), that is, no response-function computation,
@@ -131,10 +144,15 @@ module m_dtfil
    !   ab_in, ab_out, abi, abo, tmp
    ! if dataset mode, the same 5 filenames, appended with //'_DS'//trim(jdtset)
 
+  character(len=fnlen) :: filctqmcdatain
+   ! if no dataset mode                   : abi//'_CTQMC_DATA'
+   ! if dataset mode, and getctqmcdata==0 : abi//'_DS'//trim(jdtset)//'_CTQMC_DATA'
+   ! if dataset mode, and getctqmcdata/=0 : abo//'_DS'//trim(jgetctqmcdata)//'_CTQMC_DATA'
+
   character(len=fnlen) :: filddbsin
    ! if no dataset mode             : abi//'DDB'
-   ! if dataset mode, and getden==0 : abi//'_DS'//trim(jdtset)//'DDB'
-   ! if dataset mode, and getden/=0 : abo//'_DS'//trim(jgetden)//'DDB'
+   ! if dataset mode, and getddb==0 : abi//'_DS'//trim(jdtset)//'DDB'
+   ! if dataset mode, and getddb/=0 : abo//'_DS'//trim(jgetddb)//'DDB'
 
   character(len=fnlen) :: fildensin
    ! if no dataset mode             : abi//'DEN'
@@ -142,31 +160,53 @@ module m_dtfil
    ! if dataset mode, and getden/=0 : abo//'_DS'//trim(jgetden)//'DEN'
 
   character(len=fnlen) :: fildvdbin
-   ! if no dataset mode             : abi//'DVDB'
+   ! if no dataset mode              : abi//'DVDB'
    ! if dataset mode, and getdvdb==0 : abi//'_DS'//trim(jdtset)//'DVDB'
-   ! if dataset mode, and getdvdb/=0 : abo//'_DS'//trim(jgetden)//'DVDB'
+   ! if dataset mode, and getdvdb/=0 : abo//'_DS'//trim(jgetdvdb)//'DVDB'
+
+  character(len=fnlen) :: fildrhodbin
+  ! if no dataset mode              : abi//'DRHODB'
+  ! if dataset mode, and getdrhodb==0 : abi//'_DS'//trim(jdtset)//'DRHODB'
+  ! if dataset mode, and getdrhodb/=0 : abo//'_DS'//trim(jgetdrhodb)//'DRHODB'
 
   character(len=fnlen) :: filpotin
    ! Filename used to read POT file.
    ! Initialize via getpot_filepath
 
   character(len=fnlen) :: filkdensin
-   ! if no dataset mode             : abi//'KDEN'
-   ! if dataset mode, and getden==0 : abi//'_DS'//trim(jdtset)//'KDEN'
-   ! if dataset mode, and getden/=0 : abo//'_DS'//trim(jgetden)//'KDEN'
+   ! if no dataset mode              : abi//'KDEN'
+   ! if dataset mode, and getkden==0 : abi//'_DS'//trim(jdtset)//'KDEN'
+   ! if dataset mode, and getkden/=0 : abo//'_DS'//trim(jgetkden)//'KDEN'
 
   character(len=fnlen) :: filpawdensin
-   ! if no dataset mode             : abi//'PAWDEN'
-   ! if dataset mode, and getden==0 : abi//'_DS'//trim(jdtset)//'PAWDEN'
-   ! if dataset mode, and getden/=0 : abo//'_DS'//trim(jgetden)//'PAWDEN'
+   ! if no dataset mode                : abi//'PAWDEN'
+   ! if dataset mode, and getpawden==0 : abi//'_DS'//trim(jdtset)//'PAWDEN'
+   ! if dataset mode, and getpawden/=0 : abo//'_DS'//trim(jgetpawden)//'PAWDEN'
+
+  character(len=fnlen) :: filselfin
+   ! if no dataset mode              : abi//'_Self-omega'
+   ! if dataset mode, and getself==0 : abi//'_DS'//trim(jdtset)//'_Self-omega'
+   ! if dataset mode, and getself/=0 : abo//'_DS'//trim(jgetself)//'_Self-omega'
 
   character(len=fnlen) :: filsigephin
    ! Filename used to read SIGEPH.nc file.
    ! Initialize via getsigeph_filepath
 
   character(len=fnlen) :: filgstorein
-   ! Filename used to read GSTOR.ncE file.
+   ! Filename used to read GSTORE.nc file.
    ! Initialize via getgstore_filepath
+
+  character(len=fnlen) :: filabiwanin
+   ! Filename used to read ABIWAN.nc file.
+   ! Initialize via getabiwan_filepath
+
+  character(len=fnlen) :: filgwanin
+   ! Filename used to read GWAN.nc file.
+   ! Initialize via getgwan_filepath
+
+  character(len=fnlen) :: filvpqin
+   ! Filename used to read VPQ.nc file.
+   ! Initialize via getvpq_filepath
 
   character(len=fnlen) :: filstat
    ! tmp//'_STATUS'
@@ -328,7 +368,9 @@ module m_dtfil
   character(len=fnlen) :: fnameabo_sig
   character(len=fnlen) :: fnameabo_spcur
   character(len=fnlen) :: fnameabo_sus
+  character(len=fnlen) :: fnameabo_td_current
   character(len=fnlen) :: fnameabo_td_ener
+  character(len=fnlen) :: fnameabo_td_ef
   character(len=fnlen) :: fnameabo_vha
   character(len=fnlen) :: fnameabo_vpsp
   character(len=fnlen) :: fnameabo_vso
@@ -372,6 +414,7 @@ module m_dtfil
   character(len=fnlen) :: fnameabo_app_pot
   character(len=fnlen) :: fnameabo_app_opt
   character(len=fnlen) :: fnameabo_app_opt2
+  character(len=fnlen) :: fnameabo_app_orbmag
   character(len=fnlen) :: fnameabo_app_stm
   character(len=fnlen) :: fnameabo_app_vclmb
   character(len=fnlen) :: fnameabo_app_vha
@@ -386,12 +429,13 @@ module m_dtfil
   character(len=fnlen) :: fnametmp_app_den
   character(len=fnlen) :: fnametmp_app_kden
 
+  contains
+    procedure  :: init => dtfil_init
+    procedure  :: init_img => dtfil_init_img
+    procedure  :: init_time => dtfil_init_time
  end type datafiles_type
 !!***
 
- public :: dtfil_init
- public :: dtfil_init_img
- public :: dtfil_init_time
  public :: mkfilename
  public :: isfile
  public :: iofn1
@@ -407,8 +451,7 @@ contains
 !!
 !! FUNCTION
 !! Initialize most of the dtfil structured variable
-!! (what is left should be initialized inside the itimimage,
-!! iimage and itime loops).
+!! (what is left should be initialized inside the itimimage, iimage and itime loops).
 !!
 !! INPUTS
 !! dtset=<type datasets_type>contain all input variables for the current dataset
@@ -437,19 +480,19 @@ contains
 !! SOURCE
 
 subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset,&
-&                      image_index) ! optional argument
+                      image_index) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
+ class(datafiles_type),intent(inout) :: dtfil
+ type(dataset_type),intent(in) :: dtset
  integer, intent(in) :: idtset,ndtset
  integer, optional, intent(in) :: image_index
  character(len=fnlen),intent(in) :: filstat
  type(MPI_type),intent(in) :: mpi_enreg
- type(datafiles_type),intent(inout) :: dtfil !vz_i
 !arrays
  integer :: jdtset_(0:ndtset)
  character(len=fnlen),intent(in) :: filnam(5)
- type(dataset_type),intent(in) :: dtset
 
 !Local variables-------------------------------
 !scalars
@@ -465,19 +508,18 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  integer,parameter :: unwff1=1,unwff2=2,unwff3=8,unwffgs=3,unwfkq=4,unwft1=11
  integer,parameter :: unwft2=12,unwft3=15,unwftgs=13,unwftkq=14,unylm=24,unylm1=25
  integer,parameter :: unkss=40,unscr=41,unqps=43
- integer :: ii,iimage,ireadden,ireadkden,ireadwf,ixx,jdtset,will_read
+ integer :: ii,iimage,ireadctqmcdata,ireadden,ireadkden,ireadself,ireadwf,ixx,jdtset,will_read
  character(len=10) :: appen,tag
  character(len=9) :: stringvar
  character(len=15) :: stringfile
  character(len=500) :: msg
- character(len=fnlen) :: filsus,filddbsin,fildens1in,fildensin,filpawdensin,filkdensin,filqps,filscr,fil_efmas
+ character(len=fnlen) :: filsus,filctqmcdatain,filddbsin,fildens1in,fildensin,filpawdensin,filkdensin,filqps,filscr,filselfin,fil_efmas
  character(len=fnlen) :: fnamewff1,fnamewffddk,fnamewffdelfd,fnamewffdkdk,fnamewffdkde,fnamewffk,fnamewffmq,fnamewffq
  character(len=fnlen) :: filbseig,filfft,filhaydock,fil_bsreso,fil_bscoup
  character(len=fnlen) :: filwfkfine
  character(len=fnlen) :: filnam_ds(5)
  character(len=fnlen) :: tmpfil(14)
  integer :: idtmpfil(14)
-
 !******************************************************************
 
  DBG_ENTER("COLL")
@@ -581,17 +623,17 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
    stringfile='_1WF' ; stringvar='ddk'
    call mkfilename(filnam,fnamewffddk,dtset%getddk,idtset,dtset%irdddk,jdtset_,ndtset,stringfile,stringvar,will_read)
 
-   ! According to getdelfd, build _1WF file name, referred as fnamewffdelfd
+   ! According to getdelfd and irddelfd, build _1WF file name, referred as fnamewffdelfd
    stringfile='_1WF' ; stringvar='delfd'
-   call mkfilename(filnam,fnamewffdelfd,dtset%getdelfd,idtset,0,jdtset_,ndtset,stringfile,stringvar,will_read)
+   call mkfilename(filnam,fnamewffdelfd,dtset%getdelfd,idtset,dtset%irddelfd,jdtset_,ndtset,stringfile,stringvar,will_read)
 
-   ! According to getdkdk, build _1WF file name, referred as fnamewffdkdk
+   ! According to getdkdk and irddkdk, build _1WF file name, referred as fnamewffdkdk
    stringfile='_1WF' ; stringvar='dkdk'
-   call mkfilename(filnam,fnamewffdkdk,dtset%getdkdk,idtset,0,jdtset_,ndtset,stringfile,stringvar,will_read)
+   call mkfilename(filnam,fnamewffdkdk,dtset%getdkdk,idtset,dtset%irddkdk,jdtset_,ndtset,stringfile,stringvar,will_read)
 
-   ! According to getdkde, build _1WF file name, referred as fnamewffdkde
+   ! According to getdkde and irddkde, build _1WF file name, referred as fnamewffdkde
    stringfile='_1WF' ; stringvar='dkde'
-   call mkfilename(filnam,fnamewffdkde,dtset%getdkde,idtset,0,jdtset_,ndtset,stringfile,stringvar,will_read)
+   call mkfilename(filnam,fnamewffdkde,dtset%getdkde,idtset,dtset%irddkde,jdtset_,ndtset,stringfile,stringvar,will_read)
  end if
 
 !-------------------------------------------------------------------------------------------
@@ -600,18 +642,24 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  ! According to getddb, build _DDB file name, referred as filddbsin
  stringfile='_DDB'; stringvar='ddb'
  call mkfilename(filnam,filddbsin,dtset%getddb,idtset,dtset%irdddb,jdtset_,ndtset,stringfile,stringvar,will_read, &
-                  getpath=dtset%getddb_filepath)
+                 getpath=dtset%getddb_filepath)
 
  ! According to getpot, build _POT file name
  stringfile='_POT'; stringvar='pot'
  call mkfilename(filnam, dtfil%filpotin, 0, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
-                  getpath=dtset%getpot_filepath)
+                 getpath=dtset%getpot_filepath)
 
  ! According to getdvdb, build _DVDB file name
  stringfile='_DVDB'; stringvar='dvdb'
  call mkfilename(filnam,dtfil%fildvdbin,dtset%getdvdb,idtset,dtset%irddvdb,jdtset_,ndtset,stringfile,stringvar,will_read, &
-                  getpath=dtset%getdvdb_filepath)
+                 getpath=dtset%getdvdb_filepath)
  if (will_read == 0) dtfil%fildvdbin = ABI_NOFILE
+
+ ! According to getdrhodb, build _DRHODB file name
+ stringfile='_DRHODB'; stringvar='drhodb'
+ call mkfilename(filnam,dtfil%fildrhodbin,dtset%getdrhodb,idtset,dtset%irddrhodb,jdtset_,ndtset,stringfile,stringvar,will_read, &
+                  getpath=dtset%getdrhodb_filepath)
+ if (will_read == 0) dtfil%fildrhodbin = ABI_NOFILE
 
  ! According to getsigeph_filepath, build _SIGEPH file name
  stringfile='_SIGEPH.nc'; stringvar='sigeph'
@@ -625,6 +673,24 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  call mkfilename(filnam, dtfil%filgstorein, 0, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
                  getpath=dtset%getgstore_filepath)
  if (will_read == 0) dtfil%filgstorein = ABI_NOFILE
+
+ ! According to getabiwan_filepath, build _ABIWAN file name
+ stringfile='_ABIWAN.nc'; stringvar='abiwan'
+ call mkfilename(filnam, dtfil%filabiwanin, dtset%getabiwan, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
+                 getpath=dtset%getabiwan_filepath)
+ if (will_read == 0) dtfil%filabiwanin = ABI_NOFILE
+
+ ! According to getgwan_filepath, build _GWAN file name
+ stringfile='_GWAN.nc'; stringvar='gwan'
+ call mkfilename(filnam, dtfil%filgwanin, dtset%getgwan, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
+                 getpath=dtset%getgwan_filepath)
+ if (will_read == 0) dtfil%filgwanin = ABI_NOFILE
+
+ ! According to getvpq_filepath, build _VPQ file name
+ stringfile='_VPQ.nc'; stringvar='vpq'
+ call mkfilename(filnam, dtfil%filvpqin, dtset%getvpq, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
+                 getpath=dtset%getvpq_filepath)
+ if (will_read == 0) dtfil%filvpqin = ABI_NOFILE
 
  ! According to getden, build _DEN file name, referred as fildensin
  ! A default is available if getden is 0
@@ -641,14 +707,34 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  stringvar='den'
  call mkfilename(filnam,fildensin,dtset%getden,idtset,dtset%irdden,jdtset_,ndtset,stringfile,stringvar, will_read, &
                  getpath=dtset%getden_filepath)
-
  if(will_read==0)fildensin=trim(filnam_ds(3))//'_DEN'
  ireadden=will_read
-
  if ((dtset%optdriver==RUNL_GWLS.or.dtset%optdriver==RUNL_GSTATE) .and.dtset%iscf<0) ireadden=1
 
+ ! According to getkden and usekden, build _KDEN file name, referred as filkdensin
+ ! A default is available if getkden is 0
+ if(dtset%usekden==1)then
+   if (iimage>0.and.dtfil%getkden_from_image/=0) then
+     if (dtfil%getkden_from_image==-1) then
+       call appdig(iimage,'',appen)
+     else
+       call appdig(dtfil%getkden_from_image,'',appen)
+     end if
+     stringfile='_IMG'//trim(appen)//'_KDEN'
+   else
+     stringfile='_KDEN'
+   end if
+   stringvar='kden'
+   call mkfilename(filnam,filkdensin,dtset%getkden,idtset,dtset%irdkden,jdtset_,ndtset,stringfile,stringvar,will_read)
+   if(will_read==0)filkdensin=trim(filnam_ds(3))//'_KDEN'
+   ireadkden=will_read
+   if ((dtset%optdriver==RUNL_GSTATE.or.dtset%optdriver==RUNL_GWLS).and.dtset%iscf<0) ireadkden=1
+ else
+   ireadkden=0
+ end if
+
  ! According to getpawden, build _PAWDEN file name, referred as filpawdensin
- ! A default is available if getden is 0
+ ! A default is available if getpawden is 0
  if (iimage>0.and.dtfil%getpawden_from_image/=0) then
    if (dtfil%getpawden_from_image==-1) then
      call appdig(iimage,'',appen)
@@ -662,28 +748,6 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  stringvar='pawden'
  call mkfilename(filnam,filpawdensin,dtset%getpawden,idtset,dtset%irdden,jdtset_,ndtset,stringfile,stringvar,will_read)
  if(will_read==0)filpawdensin=trim(filnam_ds(3))//'_PAWDEN'
-
- ! According to getden and usekden, build _KDEN file name, referred as filkdensin
- ! A default is available if getden is 0
- if(dtset%usekden==1)then
-   if (iimage>0.and.dtfil%getden_from_image/=0) then
-     if (dtfil%getden_from_image==-1) then
-       call appdig(iimage,'',appen)
-     else
-       call appdig(dtfil%getden_from_image,'',appen)
-     end if
-     stringfile='_IMG'//trim(appen)//'_KDEN'
-   else
-     stringfile='_KDEN'
-   end if
-   stringvar='kden'
-   call mkfilename(filnam,filkdensin,dtset%getden,idtset,dtset%irdden,jdtset_,ndtset,stringfile,stringvar,will_read)
-   if(will_read==0)filkdensin=trim(filnam_ds(3))//'_KDEN'
-   ireadkden=will_read
-   if ((dtset%optdriver==RUNL_GSTATE.or.dtset%optdriver==RUNL_GWLS).and.dtset%iscf<0) ireadkden=1
- else
-   ireadkden=0
- end if
 
  ! According to get1den, build _DEN file name, referred as fildens1in
  ! A default is available if get1den is 0
@@ -747,9 +811,25 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
                  getpath=dtset%getwfkfine_filepath)
  if(will_read==0)filwfkfine=trim(filnam_ds(3))//'_WFK'
 
+ ! According to getself, build _Self-omega file name, referred as filselfin
+ ! A default is available if getself is 0
+ stringfile='_Self-omega' ; stringvar='self'
+ call mkfilename(filnam,filselfin,dtset%getself,idtset,0,jdtset_,ndtset,stringfile,stringvar,will_read)
+ if(will_read==0)filselfin=trim(filnam_ds(3))//'_Self-omega'
+ ireadself=will_read
+
+ ! According to getctqmcdata, build _CTQMC_DATA file name, referred as filctqmcdatain
+ ! A default is available if getctqmcdata is 0
+ stringfile='_CTQMC_DATA' ; stringvar='ctqmcdata'
+ call mkfilename(filnam,filctqmcdatain,dtset%getctqmcdata,idtset,0,jdtset_,ndtset,stringfile,stringvar,will_read)
+ if(will_read==0)filctqmcdatain=trim(filnam_ds(3))//'_CTQMC_DATA'
+ ireadctqmcdata=will_read
+
  dtfil%ireadden      =ireadden
  dtfil%ireadkden     =ireadkden
  dtfil%ireadwf       =ireadwf
+ dtfil%ireadself     =ireadself
+ dtfil%ireadctqmcdata=ireadctqmcdata
  dtfil%filnam_ds(1:5)=filnam_ds(1:5)
 
  dtfil%fnameabi_bsham_reso=fil_bsreso
@@ -760,11 +840,13 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  dtfil%fnameabi_qps  =filqps
  dtfil%fnameabi_scr  =filscr
  dtfil%fnameabi_efmas=fil_efmas
+ dtfil%filctqmcdatain=filctqmcdatain
  dtfil%filddbsin     =filddbsin
  dtfil%fildensin     =fildensin
  dtfil%fildens1in    =fildens1in
  dtfil%filkdensin    =filkdensin
  dtfil%filpawdensin  =filpawdensin
+ dtfil%filselfin     =filselfin
  dtfil%fnameabi_wfkfine = filwfkfine
  dtfil%filstat       =filstat
  dtfil%fnamewffk     =fnamewffk
@@ -816,7 +898,9 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  dtfil%fnameabo_sig=trim(dtfil%filnam_ds(4))//'_SIG'
  dtfil%fnameabo_spcur=trim(dtfil%filnam_ds(4))//'_SPCUR'
  dtfil%fnameabo_sus=trim(dtfil%filnam_ds(4))//'_SUS'
+ dtfil%fnameabo_td_current=trim(dtfil%filnam_ds(4))//'_TDCURRENT'
  dtfil%fnameabo_td_ener=trim(dtfil%filnam_ds(4))//'_TDENER'
+ dtfil%fnameabo_td_ef=trim(dtfil%filnam_ds(4))//'_TDEFIELD'
  dtfil%fnameabo_vha=trim(dtfil%filnam_ds(4))//'_VHA'
  dtfil%fnameabo_vpsp=trim(dtfil%filnam_ds(4))//'_VPSP'
  dtfil%fnameabo_vso=trim(dtfil%filnam_ds(4))//'_VSO'
@@ -950,6 +1034,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  if (iimage==0) then
    dtfil%getwfk_from_image   =0
    dtfil%getden_from_image   =0
+   dtfil%getkden_from_image  =0
    dtfil%getpawden_from_image=0
  end if
 
@@ -959,7 +1044,6 @@ end subroutine dtfil_init
 !!***
 
 !!****f* m_dtfil/dtfil_init_time
-!!
 !! NAME
 !! dtfil_init_time
 !!
@@ -974,25 +1058,20 @@ end subroutine dtfil_init
 !!         if -1 : append "_TIM0" (called from brdmin)
 !!         if -2, -3, -4, -5: append "_TIMA", ... ,"_TIMD", (called from move)
 !!
-!! OUTPUT
-!!
 !! SIDE EFFECTS
 !! dtfil=<type datafiles_type>infos about file names, file unit numbers
 !!  (part of which were initialized previously)
 !!
 !! SOURCE
 
-subroutine dtfil_init_time(dtfil,iapp)
+subroutine dtfil_init_time(dtfil, iapp)
 
 !Arguments ------------------------------------
-!scalars
+ class(datafiles_type),intent(inout) :: dtfil
  integer, intent(in) :: iapp
- type(datafiles_type),intent(inout) :: dtfil
 
 !Local variables-------------------------------
-!scalars
  character(len=fnlen) :: filapp,filprot
-
 !******************************************************************
 
  DBG_ENTER("COLL")
@@ -1027,6 +1106,7 @@ subroutine dtfil_init_time(dtfil,iapp)
  dtfil%fnameabo_app_nesting=trim(filapp)//'_NEST'
  dtfil%fnameabo_app_opt=trim(filapp)//'_OPT'
  dtfil%fnameabo_app_opt2=trim(filapp)//'_OPT2'
+ dtfil%fnameabo_app_orbmag=trim(filapp)//'_ORBMAG'
  dtfil%fnameabo_app_pawden=trim(filapp)//'_PAWDEN'
  dtfil%fnameabo_app_pot=trim(filapp)//'_POT'
  dtfil%fnameabo_app_stm=trim(filapp)//'_STM'
@@ -1080,7 +1160,7 @@ end subroutine dtfil_init_time
 !! SOURCE
 
 subroutine fappnd(filapp,filnam,iapp,&
-&                 suff) ! optional argument
+                  suff) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
@@ -1095,7 +1175,6 @@ subroutine fappnd(filapp,filnam,iapp,&
  character(len=3) :: suffixe
  character(len=8) :: nchar
  character(len=500) :: msg
-
 ! *************************************************************************
 
  if(iapp==0)then
@@ -1164,17 +1243,15 @@ subroutine dtfil_init_img(dtfil,dtset,dtsets,idtset,jdtset,ndtset,ndtset_alloc)
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: idtset,ndtset,ndtset_alloc
- type(datafiles_type),intent(out) :: dtfil
+ class(datafiles_type),intent(inout) :: dtfil
  type(dataset_type),intent(in) :: dtset
+ integer, intent(in) :: idtset,ndtset,ndtset_alloc
 !arrays
  integer,intent(in) :: jdtset(0:ndtset)
  type(dataset_type),intent(in) :: dtsets(0:ndtset_alloc)
 
 !Local variables -------------------------
-!scalars
  integer :: iget
-
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -1182,6 +1259,7 @@ subroutine dtfil_init_img(dtfil,dtset,dtsets,idtset,jdtset,ndtset,ndtset_alloc)
 !Default values
  dtfil%getwfk_from_image   =0 ! Get standard WFK from previous dataset
  dtfil%getden_from_image   =0 ! Get standard DEN from previous dataset
+ dtfil%getkden_from_image  =0 ! Get standard KDEN from previous dataset
  dtfil%getpawden_from_image=0 ! Get standard PAWDEN from previous dataset
 
  if (dtset%optdriver==RUNL_GSTATE.and.dtset%nimage>1) then
@@ -1212,6 +1290,21 @@ subroutine dtfil_init_img(dtfil,dtset,dtsets,idtset,jdtset,ndtset,ndtset_alloc)
          dtfil%getden_from_image=-1     ! Get DEN from the same image of previous dataset
        else if (dtsets(iget)%nimage>1) then
          dtfil%getden_from_image=1      ! Get DEN from the first image of previous dataset
+       end if
+     end if
+   end if
+
+!  Define getkden_from_image
+   if (dtset%getkden/=0.or.dtset%irdkden/=0) then
+     iget=-1
+     if(dtset%getkden<0) iget=jdtset(idtset+dtset%getkden)
+     if(dtset%getkden>0) iget=dtset%getkden
+     if(dtset%irdkden>0) iget=0
+     if (iget>=0) then
+       if (iget==0.or.dtsets(iget)%nimage==dtset%nimage) then
+         dtfil%getkden_from_image=-1     ! Get KDEN from the same image of previous dataset
+       else if (dtsets(iget)%nimage>1) then
+         dtfil%getkden_from_image=1      ! Get KDEN from the first image of previous dataset
        end if
      end if
    end if
@@ -1284,7 +1377,6 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
  character(len=4) :: appen
  character(len=500) :: msg
  character(len=fnlen) :: filnam_appen
-
 ! *************************************************************************
 
  ! Here, defaults if no get variable
@@ -1411,7 +1503,6 @@ subroutine isfile(filnam, status)
  integer :: ii,ios, ioserr
  character(len=500) :: msg
  character(len=fnlen) :: filnam_tmp, trialnam
-
 ! *************************************************************************
 
  filnam_tmp=filnam
@@ -1500,7 +1591,8 @@ end subroutine isfile
 !! iofn1
 !!
 !! FUNCTION
-!! Begin by eventual redefinition of unit std_in and std_out
+!! Define values of do_write_log and do_write_status parameters
+!! Eventual redefinition of unit std_in and std_out
 !! Then, print greetings for interactive user.
 !! Next, read filenames from unit std_in, AND check that new
 !! output file does not already exist.
@@ -1537,21 +1629,22 @@ subroutine iofn1(input_path, filnam, filstat, comm)
 !Local variables-------------------------------
  character(len=1) :: blank
  integer,parameter :: master = 0
- integer :: me, ios, nproc, ierr, ndtset, lenstr, marr, jdtset, tread, i1,i2
+ integer :: me, ios, nproc, ierr, ndtset, lenstr, marr, jdtset, tread, i1,i2, ii
  logical :: ex
  character(len=fnlen) :: fillog, tmpfil, fname
  character(len=10) :: tag
  character(len=500) :: msg, errmsg
  character(len=strlen) :: string
+ character(len=fnlen) :: dirpath
 !arrays
  integer,allocatable :: intarr(:)
  real(dp),allocatable :: dprarr(:)
 !*************************************************************************
 
- ! NOTE: In this routine it's very important to perform tests
+ ! NOTE: In this routine it is very important to perform tests
  ! on possible IO errors (err=10, iomsg) because we are initializing the IO stuff
- ! It there's some problem with the hardware or some misconfiguration,
- ! it's very likely that the code will crash here and we should try to give useful error messages.
+ ! If there is some problem with the hardware or some misconfiguration,
+ ! it is very likely that the code will crash here and we should try to give useful error messages.
 
  blank = ' '; tmpfil = ''
 
@@ -1703,7 +1796,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
    call isfile(filnam(2), 'new')
 
    ! Check that root name for generic input and output differ
-   if ( trim(filnam(3)) == trim(filnam(4)) ) then
+   if (trim(filnam(3)) == trim(filnam(4)) ) then
      write(msg, '(3a)' )&
      'Root name for generic input and output files must differ ',ch10,&
      'Action: correct your "file" file.'
@@ -1711,7 +1804,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
    end if
 
    ! Check that root names are at least 20 characters less than fnlen
-   if ( len_trim(filnam(3)) >= (fnlen-20) ) then
+   if (len_trim(filnam(3)) >= (fnlen-20) ) then
      write(msg, '(a,a,a,a,a,i0,a,i0,a,a)' )&
      'Root name for generic input files is too long. ',ch10,&
      'It must be 20 characters less than the maximal allowed ',ch10,&
@@ -1719,7 +1812,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      'Action: correct your "file" file.'
      ABI_ERROR(msg)
    end if
-   if ( len_trim(filnam(4)) >= (fnlen-20) ) then
+   if (len_trim(filnam(4)) >= (fnlen-20) ) then
      write(msg, '(a,a,a,a,a,i0,a,i0,a,a)' )&
      'Root name for generic output files is too long. ',ch10,&
      'It must be 20 characters less than the maximal allowed ',ch10,&
@@ -1727,7 +1820,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      'Action: correct your "file" file.'
      ABI_ERROR(msg)
    end if
-   if ( len_trim(filnam(5)) >= (fnlen-20) ) then
+   if (len_trim(filnam(5)) >= (fnlen-20) ) then
      write(msg, '(a,a,a,a,a,i0,a,i0,a,a)' )&
      'Root name for generic temporary files is too long. ',ch10,&
      'It must be 20 characters less than the maximal allowed ',ch10,&
@@ -1736,10 +1829,15 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      ABI_ERROR(msg)
    end if
 
-   ! TODO: Create directories if needed but I need C routines to be portable.
-   !i = index(filnam(5), "/"); if (i > 0) call mkdir(filnam(5)(1:i-1), ierr)
-   !i = index(filnam(6), "/"); if (i > 0) call mkdir(filnam(6)(1:i-1), ierr)
-
+   do i1=3,5
+     ! Create input/output/temporary directories if they don't exist yet.
+     ii = index(filnam(i1), "/", back=.True.)
+     if (ii > 0) then
+       dirpath = filnam(i1)(1:ii-1)
+       call clib_mkdir_if_needed(dirpath, ierr)
+       ABI_CHECK(ierr == 0, sjoin("Error", itoa(ierr), "while trying to create directory:", dirpath))
+     end if
+   end do
  end if ! master only
 
  ! Communicate filenames to all processors
@@ -1759,6 +1857,10 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      if (open_file(fillog,msg,unit=std_out,status='unknown',action="write") /= 0) then
        ABI_ERROR(msg)
      end if
+!    Print greetings for interactive user
+     write(std_out,*,err=10,iomsg=errmsg)' ABINIT ',trim(abinit_version)
+     write(std_out,*,err=10,iomsg=errmsg)' '
+     write(std_out,*,err=10,iomsg=errmsg)' I am not the master. Writing log in ',fillog
    else
      close(std_out, err=10, iomsg=errmsg)
      if (open_file(NULL_FILE,msg,unit=std_out,action="write") /= 0) then
@@ -1766,6 +1868,9 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      end if
    end if
  end if
+
+ ! Init pstat_proc.
+ call pstat_proc%from_pid()
 
  call xmpi_barrier(comm)
  return

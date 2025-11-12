@@ -25,7 +25,6 @@ Copyright (C) 2008-2011 Volvox Development Team
 
 ANSII Color formatting for output in terminal.
 """
-from __future__ import print_function, unicode_literals, absolute_import
 
 import os
 
@@ -178,8 +177,8 @@ def colored_map(text, cmap):
 
 def cprint_map(text, cmap, **kwargs):
     """
-    Print colorize text. 
-    cmap is a dict mapping keys to color options. 
+    Print colorize text.
+    cmap is a dict mapping keys to color options.
     kwargs are passed to print function
 
     Example:
@@ -196,8 +195,8 @@ def cprint_map(text, cmap, **kwargs):
 def get_terminal_size():
     """"
     Return the size of the terminal as (nrow, ncols)
-    
-    Based on: 
+
+    Based on:
 
         http://stackoverflow.com/questions/566746/how-to-get-console-window-width-in-python
     """
@@ -274,9 +273,9 @@ if __name__ == '__main__':
            ['underline'])
     cprint('Reversed green on red color', 'green', 'on_red', ['reverse'])
 
-    # Test cprint_keys 
+    # Test cprint_keys
     cprint_map("Hello world", {"Hello": "red"})
     cprint_map("Hello world", {"Hello": {"color": "blue", "on_color": "on_red"}})
-    
+
     # Test terminal size.
     print("terminal size: %s", get_terminal_size())

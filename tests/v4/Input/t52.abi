@@ -106,6 +106,11 @@ optdriver5   5
 
 nbdbuf 0
 
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
+
  pp_dirpath "$ABI_PSPDIR"
  pseudos "PseudosTM_pwteter/13al.pspnc, PseudosTM_pwteter/33as.pspnc"
 
@@ -114,14 +119,14 @@ nbdbuf 0
 #%% executable = abinit
 #%% test_chain = t52.abi, t53.abi, t54.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t52.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = M. Veithen
 #%% keywords = NC, DFPT, NONLINEAR
-#%% description = 
+#%% description =
 #%%     AlAs, zinc-blende structure.
 #%%     Code abinit (gstate+respfn+nonlinear)
 #%%     Generate the linear and non-linear coefficients, in two DDBs,

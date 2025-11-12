@@ -5,9 +5,10 @@ import os
 import re
 import sys
 
-fortran = re.compile("\.([Ff]|[Ff]90)$")
+fortran = re.compile(r"\.([Ff]|[Ff]90)$")
 cppline = re.compile("^#")
-cppkeys = ("define .*","include.*","ifdef","ifndef","elif","^if ","else","endif","defined","undef","!","&&","\|\|","\(","\)")
+cppkeys = ("define .*", "include.*", "ifdef", "ifndef", "elif", "^if ", "else", "endif", "defined", "undef",
+           "!", "&&", r"\|\|", r"\(", r"\)")
 
 def list_cpp_options(top):
   cppopts = dict()
@@ -30,8 +31,8 @@ def list_cpp_options(top):
               else:
                 cppopts[item] = 1
 
-  print ("Option                             Occurences")
-  print ("--------------------------------   ----------")
+  print ("Option                             Occurrences")
+  print ("--------------------------------   -----------")
   names = sorted(cppopts.keys())
   for opt in names:
     print ("%-32s   %10d" % (opt,cppopts[opt]))

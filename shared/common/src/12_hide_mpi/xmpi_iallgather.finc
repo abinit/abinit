@@ -9,7 +9,7 @@
 !!  xmpi_iallgather is the generic function.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2022 ABINIT group (MG)
+!!  Copyright (C) 2001-2025 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -38,11 +38,6 @@
 !! SIDE EFFECTS
 !!  recvbuf= received elements
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allgather
-!!
 !! SOURCE
 
 subroutine xmpi_iallgather_dp4d(xval, nelem, recvbuf, comm, request)
@@ -68,7 +63,7 @@ subroutine xmpi_iallgather_dp4d(xval, nelem, recvbuf, comm, request)
    recvbuf = xval
    request = xmpi_request_null
  end if
- return 
+ return
 #endif
 
  ! Call the blocking version and return null request.

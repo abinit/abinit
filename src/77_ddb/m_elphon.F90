@@ -7,7 +7,7 @@
 !! elements and calculates related properties - Tc, phonon linewidths...
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2022 ABINIT group (MVer, BXu, MG, JPC)
+!! Copyright (C) 2004-2025 ABINIT group (MVer, BXu, MG, JPC)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,7 +32,6 @@ module m_elphon
  use m_hdr
  use m_ebands
 
- use defs_datatypes,    only : ebands_t
  use m_fstrings,        only : int2char4
  use m_io_tools,        only : open_file, is_open, get_unit
  use m_time,            only : timein
@@ -112,7 +111,7 @@ contains
 !!     rpt(3,nprt) =canonical positions of R points in the unit cell
 !!     nrpt =number of real space points used to integrate IFC (for interpolation of dynamical matrices)
 !!     wghatm(natom,natom,nrpt) =Weight for the pair of atoms and the R vector
-!! filnam(8)=character strings giving file names
+!! anaddb_dtset%prefix_outdata=character strings giving file names
 !! comm=MPI communicator.
 !!
 !! OUTPUT
@@ -128,7 +127,7 @@ contains
 !!
 !! SOURCE
 
-subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
+subroutine elphon(anaddb_dtset,Cryst,Ifc,comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -136,8 +135,6 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
  type(crystal_t),intent(in) :: Cryst
  type(ifc_type),intent(inout) :: Ifc
  integer,intent(in) :: comm
-!arrays
- character(len=fnlen),intent(in) :: filnam(8)
 
 !Local variables-------------------------------
 !scalars
@@ -174,10 +171,10 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
  real(dp),allocatable :: wtk_fullbz(:),wtk_folded(:)
  real(dp),allocatable :: a2f_1d(:),dos_phon(:)
  real(dp),allocatable :: eigenGS(:,:,:),eigenGS_fine(:,:,:)
+ real(dp),allocatable :: gam_qpt(:,:,:),gam_rpt(:,:,:)
  real(dp),allocatable :: v_surf(:,:,:,:,:,:)
  real(dp),allocatable :: tmp_veloc_sq1(:,:), tmp_veloc_sq2(:,:)
  real(dp),allocatable :: coskr(:,:), sinkr(:,:)
-
 ! *************************************************************************
 
  write(message, '(a,a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,ch10,&
@@ -201,15 +198,15 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 !==================================
 
  if (master == me) then
-   gkk_fname = filnam(5)
+   gkk_fname = anaddb_dtset%filename_gkk
    ABI_CHECK(len_trim(gkk_fname) > 0, "gkk_fname is not defined")
    if (open_file(gkk_fname,message,newunit=unitgkk,form="unformatted",status="old",action="read") /=0) then
      ABI_ERROR(message)
    end if
  end if
 
- elph_base_name=trim(filnam(8))//"_ep"
- ddkfilename=trim(filnam(7))
+ elph_base_name=trim(anaddb_dtset%prefix_outdata)//"_ep"
+ ddkfilename=trim(anaddb_dtset%filename_ddk)
  ABI_CHECK(len_trim(ddkfilename) > 0, "ddkfilename is not defined")
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -386,7 +383,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    elph_ds%fermie = anaddb_dtset%elph_fermie
    write(message,'(a,E20.12)')' Fermi level set by the user at :',elph_ds%fermie
    call wrtout(std_out,message,'COLL')
-   Bst = ebands_from_hdr(Hdr,nband,eigenGS)
+   call Bst%from_hdr(Hdr,nband,eigenGS)
  else if (abs(anaddb_dtset%ep_extrael) > tol10) then
    if (abs(anaddb_dtset%ep_extrael) > 1.0d2) then
      write(message,'(a,E20.12)')' Doping set by the user is (negative for el doping) :',&
@@ -398,19 +395,19 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 &   anaddb_dtset%ep_extrael
    call wrtout(std_out,message,'COLL')
    elph_ds%nelect = elph_ds%nelect + anaddb_dtset%ep_extrael
-   bst = ebands_from_hdr(Hdr,nband,eigenGS,nelect=elph_ds%nelect)
+   call bst%from_hdr(Hdr,nband,eigenGS,nelect=elph_ds%nelect)
 
 !  set Bst to use FD occupations:
    Bst%occopt = 3
 !   Bst%tsmear = 0.00001_dp ! is this small etol9 Bst%tsmeatol90001_dp ! last used
    Bst%tsmear = tol9 ! is this small etol9 Bst%tsmeatol90001_dp ! last used
 !  Calculate occupation numbers.
-   call ebands_update_occ(Bst,-99.99_dp)
+   call Bst%update_occ(-99.99_dp)
    write(message,'(a,E20.12)')' Fermi level is now calculated to be :',Bst%fermie
    call wrtout(std_out,message,'COLL')
    elph_ds%fermie = BSt%fermie
  else
-   bst = ebands_from_hdr(Hdr,nband,eigenGS)
+   call bst%from_hdr(Hdr,nband,eigenGS)
  end if
  call wrtout(std_out,message,'COLL')
 
@@ -470,24 +467,24 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
      elph_ds%fermie = anaddb_dtset%elph_fermie
      write(message,'(a,E20.12)')' Fermi level set by the user at :',elph_ds%fermie
      call wrtout(std_out,message,'COLL')
-     bst = ebands_from_hdr(Hdr,nband,eigenGS)
+     call bst%from_hdr(Hdr,nband,eigenGS)
    else if (abs(anaddb_dtset%ep_extrael) > tol10) then
      write(message,'(a,E20.12)')' Additional electrons per unit cell set by the user at :',anaddb_dtset%ep_extrael
      call wrtout(std_out,message,'COLL')
      elph_ds%nelect = elph_ds%nelect + anaddb_dtset%ep_extrael
-     bst = ebands_from_hdr(Hdr,nband,eigenGS,nelect=elph_ds%nelect)
+     call bst%from_hdr(Hdr,nband,eigenGS,nelect=elph_ds%nelect)
 
 !    set Bst to use FD occupations:
      Bst%occopt = 3
 !     Bst%tsmear = 0.00001_dp ! is this small etol9 Bst%tsmeatol90001_dp ! last used
      Bst%tsmear = tol9 ! is this small etol9 Bst%tsmeatol90001_dp ! last used
 !    Calculate occupation numbers.
-     call ebands_update_occ(Bst,-99.99_dp)
+     call Bst%update_occ(-99.99_dp)
      write(message,'(a,E20.12)')' Fermi level is now calculated to be :',Bst%fermie
      call wrtout(std_out,message,'COLL')
      elph_ds%fermie = BSt%fermie
    else
-     bst = ebands_from_hdr(Hdr,nband,eigenGS)
+     call bst%from_hdr(Hdr,nband,eigenGS)
    end if
    call wrtout(std_out,message,'COLL')
  end if !modify band_gap
@@ -607,7 +604,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
        ABI_ERROR(message)
      end if
      !read the header of file
-     call hdr_fort_read(hdr1, unitfskgrid, fform)
+     call hdr1%fort_read(unitfskgrid, fform)
      ABI_CHECK(fform/=0,'denser grid GKK header was mis-read. fform == 0')
    end if
    call hdr1%bcast(master,me,comm)
@@ -626,8 +623,8 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 
 !  Reinit the structure storing the eigevalues.
 !  Be careful. This part has not been tested.
-   call ebands_free(Bst)
-   bst = ebands_from_hdr(hdr1,nband,eigenGS_fine)
+   call Bst%free()
+   call bst%from_hdr(hdr1,nband,eigenGS_fine)
 
    elph_ds%k_fine%nkptirr = hdr1%nkpt
    ABI_MALLOC(elph_ds%k_fine%kptirr,(3,elph_ds%k_fine%nkptirr))
@@ -777,7 +774,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 !Output of the Fermi Surface
  if (anaddb_dtset%prtfsurf == 1 .and. master == me) then
    fname=trim(elph_ds%elph_base_name) // '_BXSF'
-   if (ebands_write_bxsf(Bst, Cryst, fname) /= 0) then
+   if (bst%write_bxsf(Cryst, fname) /= 0) then
      ABI_WARNING("Cannot produce file for Fermi surface, check log file for more info")
    end if
  end if
@@ -1201,6 +1198,8 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    s2ofssp = (/1,-1,1,-1/)
 
 !  Get gamma
+   ABI_MALLOC(gam_qpt,(2,3*natom*3*natom,elph_ds%nqpt_full))
+   ABI_MALLOC(gam_rpt,(2,3*natom*3*natom,Ifc%nrpt))
    do ie=1,elph_ds%n_pair
      ie1 = red2pair(1,ie)
      ie2 = red2pair(2,ie)
@@ -1230,15 +1229,19 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
        qtor = 1 ! q --> r
        do isppol=1,elph_ds%nsppol
          do idir=1,9
+           gam_qpt(:,:,:)=elph_tr_ds%gamma_qpt_tr(:,idir,:,isppol,:)
            call ftgam(Ifc%wghatm,elph_tr_ds%gamma_qpt_tr(:,idir,:,isppol,:),&
 &           elph_tr_ds%gamma_rpt_tr(:,idir,:,isppol,:,ssp,ie),natom,&
 &           elph_ds%nqpt_full,Ifc%nrpt,qtor,coskr, sinkr)
+           elph_tr_ds%gamma_rpt_tr(:,idir,:,isppol,:,ssp,ie)=gam_rpt(:,:,:)
          end do
        end do
 
      end do !ss
    end do !ie
 
+   ABI_FREE(gam_qpt)
+   ABI_FREE(gam_rpt)
    ABI_FREE(tmp_veloc_sq1)
    ABI_FREE(tmp_veloc_sq2)
  end if ! ifltransport
@@ -1366,7 +1369,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 !=====================================================
 
 !clean and deallocate junk
- call ebands_free(Bst)
+ call Bst%free()
  call elph_ds_clean(elph_ds)
  call elph_tr_ds_clean(elph_tr_ds)
  call hdr%free()
@@ -1416,7 +1419,6 @@ subroutine outelph(elph_ds,enunit,fname)
 !arrays
  integer :: qbranch_max(2)
  real(dp),allocatable :: lambda_q(:,:),nestfactor(:),qirred(:,:)
-
 ! *************************************************************************
 
  if ( ALL (enunit /= (/0,1,2/)) )  then
@@ -1591,7 +1593,7 @@ subroutine outelph(elph_ds,enunit,fname)
    qirred(:,iqirr)=elph_ds%qpt_full(:,elph_ds%qirredtofull(iqirr))
  end do
 
- krank = krank_new(elph_ds%k_phon%nkpt, elph_ds%k_phon%kpt)
+ call krank%init(elph_ds%k_phon%nkpt, elph_ds%k_phon%kpt)
 
  ABI_MALLOC(nestfactor,(nqptirred))
 
@@ -1760,7 +1762,6 @@ subroutine rchkGSheader (hdr,natom,nband,unitgkk)
 !scalars
  integer :: fform
  character(len=500) :: message
-
 ! *************************************************************************
 !
 !read in general header of _GKK file
@@ -1769,7 +1770,7 @@ subroutine rchkGSheader (hdr,natom,nband,unitgkk)
 !using ddb files from other configurations
 !
  rewind(unitgkk)
- call hdr_fort_read(hdr, unitgkk, fform)
+ call hdr%fort_read(unitgkk, fform)
  ABI_CHECK(fform/=0," GKK header mis-read. fform == 0")
 
  if (hdr%natom /= natom) then
@@ -1837,11 +1838,8 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
 
 !arrays
  real(dp) :: kpt(3),redkpt(3)
- integer, allocatable :: sortindexing(:), rankallk(:)
-
- integer, allocatable :: tmpkphon_full2irr(:,:)
+ integer, allocatable :: sortindexing(:), rankallk(:), tmpkphon_full2irr(:,:)
  real(dp), allocatable :: tmpkpt(:,:)
-
 ! *************************************************************************
 
  if(timrev /= 1 .and. timrev /= 0)then
@@ -1858,7 +1856,7 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
  elph_k%wtkirr(:) = zero
 
 !first allocation for irred kpoints - will be destroyed below
- elph_k%krank = krank_new(elph_k%nkptirr, elph_k%kptirr)
+ call elph_k%krank%init(elph_k%nkptirr, elph_k%kptirr)
  ABI_MALLOC(rankallk,(elph_k%krank%max_rank))
 
 !elph_k%krank%invrank is used as a placeholder in the following loop
@@ -1932,7 +1930,7 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
  call elph_k%krank%free()
 
 !make proper full rank arrays
- elph_k%krank = krank_new(elph_k%nkpt, elph_k%kpt)
+ call elph_k%krank%init(elph_k%nkpt, elph_k%kpt)
 
 !find correspondence table between irred FS kpoints and a full one
  ABI_MALLOC(elph_k%irr2full,(elph_k%nkptirr))
@@ -2758,11 +2756,10 @@ subroutine order_fs_kpts(kptns, nkpt, kptirr,nkptirr,FSirredtoGS)
  type(krank_t) :: krank
 !arrays
  integer :: kptirrank(nkptirr)
-
 ! *************************************************************************
 
-!rank is used to order kpoints
- krank = krank_new(nkpt, kptns)
+ ! rank is used to order kpoints
+ call krank%init(nkpt, kptns)
 
  ik=1
  do ikpt=1,nkpt
@@ -3041,7 +3038,7 @@ subroutine mkph_linwid(Cryst,ifc,elph_ds,nqpath,qpath_vertices)
 !arrays
  integer :: ndiv(nqpath-1)
  integer, allocatable :: indxprtqpt(:)
- complex(dpc),parameter :: c0=dcmplx(0._dp,0._dp),c1=dcmplx(1._dp,0._dp)
+ complex(dp),parameter :: c0=dcmplx(0._dp,0._dp),c1=dcmplx(1._dp,0._dp)
  real(dp) :: displ_cart(2,3*Cryst%natom,3*Cryst%natom)
  real(dp) :: displ_red(2,3*Cryst%natom,3*Cryst%natom)
  real(dp) :: eigval(3*Cryst%natom)
@@ -3373,7 +3370,6 @@ subroutine get_fs_bands(eigenGS,hdr,fermie,ep_b_min,ep_b_max,minFSband,maxFSband
  real(dp) :: epsFS,gausstol,gaussig
  character(len=500) :: message
  integer :: kpt_phonflag(hdr%nkpt)
-
 ! *************************************************************************
 
 !supposes nband is equal for all kpts
@@ -3505,7 +3501,6 @@ subroutine get_all_gkk2(crystal,ifc,elph_ds,kptirr_phon,kpt_phon)
  integer :: iost,onediaggkksize,sz1,sz2,sz3,sz4
  real(dp) :: realdp_ex
  !character(len=500) :: msg
-
 ! *************************************************************************
 
  if (elph_ds%nsppol /= 1) then
@@ -3610,13 +3605,9 @@ subroutine interpolate_gkk(crystal,ifc,elph_ds,kpt_phon)
  real(dp) :: eigvec(3*3*crystal%natom*3*crystal%natom)
  real(dp) :: pheigvec(2*elph_ds%nbranch*elph_ds%nbranch)
  real(dp) :: phfrq_tmp(elph_ds%nbranch),qphon(3),redkpt(3)
- real(dp),allocatable :: gkk2_diag_tmp(:,:,:,:),gkk2_tmp(:,:,:,:,:,:,:)
- real(dp),allocatable :: matrx(:,:),zhpev1(:,:)
- real(dp),allocatable :: zhpev2(:)
-
+ real(dp),allocatable :: gkk2_diag_tmp(:,:,:,:),gkk2_tmp(:,:,:,:,:,:,:), matrx(:,:),zhpev1(:,:), zhpev2(:)
 ! *************************************************************************
 
-!
 !NOTE: mjv 18/5/2008 reverted to old style of ftgkk with all kpt done together.
 !may want to modify this later to use the new cleaner format with 1 FT at a
 !time.
@@ -3847,7 +3838,6 @@ subroutine get_all_gkq (elph_ds,Cryst,ifc,Bst,FSfullpqtofull,nband,n1wf,onegkksi
  character(len=fnlen) :: fname
 !arrays
  integer,allocatable :: gkk_flag(:,:,:,:,:)
-
 ! *************************************************************************
 
 !attribute file unit number
@@ -3992,7 +3982,6 @@ subroutine get_all_gkr (elph_ds,gprim,natom,nrpt,onegkksize,rpt,qpt_full,wghatm)
 !Local variables-------------------------------
 !scalars
  integer :: ikpt_phon0,iost,qtor,sz2,sz3,sz4,sz5
-
 ! *************************************************************************
 
 !
@@ -4127,9 +4116,7 @@ subroutine complete_gkk(elph_ds,gkk_flag,gprimd,indsym,natom,nsym,qpttoqpt,rprim
  real(dp),allocatable :: gkk_qpt_new(:,:,:,:,:),gkk_qpt_tmp(:,:,:,:,:)
 
  real(dp) :: ss_allatoms(2,elph_ds%nbranch,elph_ds%nbranch)
- complex(dpc) :: c_one, c_zero
-
-
+ complex(dp) :: c_one, c_zero
 ! *********************************************************************
 
  c_one = dcmplx(one,zero)
@@ -4454,12 +4441,8 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
  real(dp) :: eff_mass1, eff_mass2, tmp_dos
  character(len=500) :: message
 !arrays
- real(dp) :: gprimd(3,3)
- real(dp) :: kpt_2nd(3), e_cb_2nd(2), en1(2)
- real(dp),allocatable :: dos_e1(:,:),tmp_wtk(:,:,:,:)
- real(dp),allocatable :: phfrq(:,:)
- real(dp),allocatable :: displ(:,:,:,:)
-
+ real(dp) :: gprimd(3,3), kpt_2nd(3), e_cb_2nd(2), en1(2)
+ real(dp),allocatable :: dos_e1(:,:),tmp_wtk(:,:,:,:), phfrq(:,:), displ(:,:,:,:)
 ! *************************************************************************
 
  gprimd = crystal%gprimd
@@ -4945,7 +4928,6 @@ subroutine get_nv_fs_temp(elph_ds,BSt,eigenGS,gprimd,max_occ,elph_tr_ds)
  real(dp) :: Temp, tmp_elphsmear, tmp_delta_e
 ! real(dp) :: xtr, e1
 ! real(dp),allocatable :: tmp_wtk(:,:)
-
 ! *************************************************************************
 
  ABI_MALLOC(elph_tr_ds%dos_n0,(elph_ds%ntemper,elph_ds%nsppol))
@@ -4966,7 +4948,7 @@ subroutine get_nv_fs_temp(elph_ds,BSt,eigenGS,gprimd,max_occ,elph_tr_ds)
    Bst%occopt = 3
    Bst%tsmear = Temp*kb_HaK
    tmp_elphsmear = Temp*kb_HaK
-   call ebands_update_occ(Bst,-99.99_dp)
+   call Bst%update_occ(-99.99_dp)
    write(message,'(a,f12.6,a,E20.12)')'At T=',Temp,' Fermi level is:',Bst%fermie
    call wrtout(std_out,message,'COLL')
    if (abs(elph_ds%fermie) < tol10) then
@@ -5123,7 +5105,6 @@ subroutine integrate_gamma(elph_ds,FSfullpqtofull)
  character(len=fnlen) :: fname
 !arrays
  real(dp),allocatable :: tmp_gkk(:,:,:,:)
-
 ! *************************************************************************
 
  comm = xmpi_world
@@ -5250,11 +5231,8 @@ subroutine integrate_gamma_tr(elph_ds,FSfullpqtofull,s1,s2, veloc_sq1,veloc_sq2,
  real(dp) :: wtk, wtkpq, interm
  real(dp) :: veloc1_i, veloc1_j, veloc2_i, veloc2_j
 !arrays
- real(dp) :: elvelock(3), elvelockpq(3)
- real(dp) :: velocwtk(3), velocwtkpq(3)
- real(dp) :: vvelocwtk(3,3), vvelocwtkpq(3,3)
+ real(dp) :: elvelock(3), elvelockpq(3), velocwtk(3), velocwtkpq(3), vvelocwtk(3,3), vvelocwtkpq(3,3)
  real(dp),allocatable :: tmp_gkk(:,:,:,:)
-
 ! *************************************************************************
 
  comm = xmpi_world
@@ -5406,7 +5384,6 @@ subroutine integrate_gamma_tr_lova(elph_ds,FSfullpqtofull,elph_tr_ds)
 !arrays
  real(dp) :: elvelock(3), elvelockpq(3)
  real(dp),allocatable :: tmp_gkk(:,:,:,:)
-
 ! *************************************************************************
 
  comm = xmpi_world

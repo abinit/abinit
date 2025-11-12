@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_invars1
 !! NAME
 !!  m_invars1
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, AR, MKV, FF, MM)
+!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, AR, MKV, FF, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,8 +28,14 @@ module m_invars1
  use m_atomdata
  use m_dtset
  use m_nctk
-#ifdef HAVE_NETCDF
+ use m_xomp
  use netcdf
+ use m_gwdefs
+#if defined DEV_YP_VDWXC
+ use m_xc_vdw
+#endif
+#if defined HAVE_GPU
+ use m_gpu_toolbox
 #endif
 
  use m_fstrings, only : inupper, itoa, endswith, strcat, sjoin, startswith
@@ -38,11 +43,9 @@ module m_invars1
  use m_parser,   only : intagm, intagm_img, chkint_ge, ab_dimensions, geo_t, geo_from_abivar_string
  use m_inkpts,   only : inkpts, inqpt
  use m_ingeo,    only : ingeo, invacuum
- use m_symtk,    only : mati3det
-
-#if defined HAVE_GPU_CUDA
- use m_gpu_toolbox
-#endif
+ use m_matrix,   only : mati3det
+ use m_mep,      only : MEP_SOLVER_STEEPEST,NEB_ALGO_IMPROVED_TAN,NEB_CELL_ALGO_NONE,STRING_ALGO_SIMPLIFIED_EQUAL
+ use m_fftcore,      only : get_cache_kb, fftalg_for_npfft
 
  implicit none
 
@@ -68,6 +71,7 @@ contains
 !! needed for allocating some input arrays in abinit, and also useri
 !! and userr. The variable usewvl is also read here for later reading
 !! of input path for the atomic orbital file (if required).
+!! Also initialize as soon as possible GPU related parameters
 !!
 !! INPUTS
 !!  lenstr=actual length of string
@@ -107,21 +111,21 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 
 !Local variables-------------------------------
 !scalars
- integer :: i1,i2,idtset,ii,jdtset,marr,multiplicity,tjdtset,tread,treadh,treadm,tread_pseudos,cnt, tread_geo
- integer :: treads, use_gpu_cuda
+ integer :: i1,i2,idtset,ii,jdtset,marr,multiplicity,tjdtset,tread,treadh,treadm
+ integer :: tread_pseudos,cnt,tread_geo,tread_gpu_option,treads
+ integer :: idev,gpu_option
  real(dp) :: cpus
  character(len=500) :: msg
- character(len=fnlen) :: pp_dirpath
+ character(len=fnlen) :: pp_dirpath,gpu_option_string
  character(len=20*fnlen) :: pseudos_string ! DO NOT decrease len
  character(len=len(string)) :: geo_string
  type(geo_t) :: geo
 !arrays
  integer,allocatable :: intarr(:), sidx(:)
  real(dp),allocatable :: dprarr(:)
-
 !******************************************************************
 
- !write(std_out,"(3a)")"invars1 with string:", ch10, trim(string)
+!write(std_out,"(3a)")" m_invars1%invars0 : enter with string:", ch10, trim(string)
 
  marr=max(9,ndtset_alloc,2)
  ABI_MALLOC(dprarr,(marr))
@@ -238,6 +242,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  dtsets(:)%ntypat=1 ; dtsets(0)%ntypat=0    ! Will always echo ntypat
  dtsets(:)%macro_uj=0
  dtsets(:)%maxnsym=384
+ dtsets(:)%use_gbt=0
  dtsets(:)%useria=0
  dtsets(:)%userib=0
  dtsets(:)%useric=0
@@ -254,17 +259,6 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  ! Loop on datasets, to find natom and mxnatom, as well as useri and userr
  do idtset=1,ndtset_alloc
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
-
-   ! proposal: supercell generation in input string before it is read in
-   ! call expand_supercell_input(jdtset, lenstr, string)
-   !  find supercell, else exit
-   !  determinant = ncells
-   !  copy rprim,    acell,    xred,    xcart,    vel,    typat,   to
-   !       rprim_uc, acell_uc, xred_uc, xcart_uc, vel_uc, typat_uc
-   !     NB: also rprim and angdeg need to be updated in non diagonal case!!!
-   !  generate supercell info for each of these copying out with translation vectors etc...
-   !  set chkprim to 0
-   !  done!
 
    !  Generate the supercell if supercell_latt is specified and update string
    dtsets(idtset)%supercell_latt(:) = 0
@@ -379,6 +373,10 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useextfpmd',tread,'INT')
    if(tread==1) dtsets(idtset)%useextfpmd=intarr(1)
 
+   ! Read use_gbt
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gbt',tread,'INT')
+   if (tread==1) dtsets(idtset)%use_gbt=intarr(1)
+
    ! Read user* variables
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useria',tread,'INT')
    if(tread==1) dtsets(idtset)%useria=intarr(1)
@@ -475,15 +473,6 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  pp_dirpath = ""
  call intagm(dprarr, intarr, 0, marr, 1, string(1:lenstr), 'pp_dirpath', tread, 'KEY', key_value=pp_dirpath)
  if (tread == 1) then
-!! XG2020_07_20 Now, the replacement of environment variables is done at the level of the parser
-!  if (pp_dirpath(1:1) == "$") then
-!    shell_var = pp_dirpath(2:)
-!    call get_environment_variable(shell_var, pp_dirpath, status=ierr)
-!    if (ierr == -1) ABI_ERROR(sjoin(shell_var, "is present but string too short for the environment variable"))
-!    if (ierr == +1) ABI_ERROR(sjoin(shell_var, "variable is not defined!"))
-!    if (ierr == +2) ABI_ERROR(sjoin(shell_var, "used in input file but processor does not support environment variables"))
-!    call wrtout(std_out, sjoin(shell_var, "found in env. Assuming pseudos located in:",  pp_dirpath))
-!  end if
    if (.not. endswith(pp_dirpath, "/")) pp_dirpath = strcat(pp_dirpath, "/")
  end if
 
@@ -512,8 +501,8 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    end do
    if (cnt /= npsp) then
      write(msg,'(4a)')&
-&      "Not enough pseudopotentials in input `pseudos` string, expecting npsp: ",itoa(npsp),ch10,&
-&      "Perhaps the separator (=a comma) is missing between pseudopotentials in input `pseudos` string."
+      "Not enough pseudopotentials in input `pseudos` string, expecting npsp: ",itoa(npsp),ch10,&
+      "Perhaps the separator (=a comma) is missing between pseudopotentials in input `pseudos` string."
      ABI_ERROR(msg)
    end if
 
@@ -548,63 +537,112 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
       'Action: check the input file.'
      ABI_ERROR(msg)
    end if
-
-
  end do
 
- dtsets(:)%diago_apply_block_sliced=1
- do idtset=1,ndtset_alloc
-    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
-    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'diago_apply_block_sliced',tread,'INT')
-    if(tread==1)dtsets(idtset)%diago_apply_block_sliced=intarr(1)
- end do
-
-
-!GPU information
- use_gpu_cuda=0
- dtsets(:)%use_gpu_cuda=0
-#if defined HAVE_GPU_CUDA && defined HAVE_GPU_CUDA_DP
- call Get_ndevice(ii)
- if (ii>0) then
+ ! GPU related parameters
+ dtsets(:)%gpu_option=ABI_GPU_DISABLED
+#if defined HAVE_GPU
+ call Get_ndevice(idev)
+ if (idev>0) then
    do i1=1,ndtset_alloc
-     dtsets(i1)%use_gpu_cuda=-1
+     dtsets(i1)%gpu_option=ABI_GPU_UNKNOWN
    end do
  end if
+#else
+ ABI_UNUSED(idev)
 #endif
- do idtset=1,ndtset_alloc
-   jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gpu_cuda',tread,'INT')
-   if(tread==1)dtsets(idtset)%use_gpu_cuda=intarr(1)
-   if (dtsets(idtset)%use_gpu_cuda==1) use_gpu_cuda=1
-end do
 
- dtsets(:)%use_nvtx=0
-#if defined HAVE_GPU_CUDA && defined HAVE_GPU_NVTX_V3
+ gpu_option=ABI_GPU_DISABLED
  do idtset=1,ndtset_alloc
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_nvtx',tread,'INT')
-   if(tread==1)dtsets(idtset)%use_nvtx=intarr(1)
+
+   gpu_option_string = "" ; intarr(1)=0
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),"gpu_option",tread_gpu_option,'INT_OR_KEY',&
+               key_value=gpu_option_string)
+   if (tread_gpu_option==1) then
+     if (len(trim(gpu_option_string))>0) then
+       call inupper(gpu_option_string)
+       if (trim(gpu_option_string)=="GPU_DISABLED") dtsets(idtset)%gpu_option=ABI_GPU_DISABLED
+       if (trim(gpu_option_string)=="GPU_LEGACY")   dtsets(idtset)%gpu_option=ABI_GPU_LEGACY
+       if (trim(gpu_option_string)=="GPU_KOKKOS")   dtsets(idtset)%gpu_option=ABI_GPU_KOKKOS
+       if (trim(gpu_option_string)=="GPU_OPENMP")   dtsets(idtset)%gpu_option=ABI_GPU_OPENMP
+     else
+       dtsets(idtset)%gpu_option=intarr(1)
+     end if
+   end if
+
+   if (dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED) gpu_option=dtsets(idtset)%gpu_option
  end do
-#endif
 
- if (use_gpu_cuda==1) then
-#if defined HAVE_GPU_CUDA && defined HAVE_GPU_CUDA_DP
-   if (ii<=0) then
+ if (gpu_option/=ABI_GPU_DISABLED) then
+#if defined HAVE_GPU
+   if (idev<=0) then
      write(msg,'(5a)')&
-&     'Input variables use_gpu_cuda is on',ch10,&
-&     'but no available GPU device has been detected !',ch10,&
-&     'Action: change the input variable use_gpu_cuda.'
+     'Input variable gpu_option is on (/=0),',ch10,&
+     'but no available GPU device has been detected !',ch10,&
+     'Action: change the input variable gpu_option.'
      ABI_ERROR(msg)
+   end if
+   if(gpu_option==ABI_GPU_OPENMP) then
+#if !defined HAVE_OPENMP_OFFLOAD
+     write(msg,'(7a)')&
+     'Input variable gpu_option is set to use OpenMP GPU backend but abinit hasn''t been built',ch10,&
+     'with OpenMP GPU offloading enabled!',ch10,&
+     'Action: change the input variable gpu_option',ch10,&
+     '        or re-compile ABINIT with OpenMP GPU offloading enabled.'
+     ABI_ERROR(msg)
+#endif
+#if defined HAVE_OPENMP_OFFLOAD
+     if(xomp_get_num_devices() == 0) then
+       write(msg,'(13a)')&
+       'Input variable gpu_option is set to use OpenMP GPU backend ',ch10,&
+       'but no GPU is visible by OpenMP.',ch10,&
+       'It usually happens when env variable OMP_TARGET_OFFLOAD is set to DISABLED (not default) ',ch10,&
+       'or if there are inconsistencies between GPU driver and compiler ',ch10,&
+       'as to which CUDA version is supported.',ch10,&
+       'Action: check the value OMP_TARGET_OFFLOAD is not set to DISABLED,',ch10,&
+       '        otherwise make sure CUDA/HIP version you use is supported by BOTH your driver and compiler.'
+       ABI_ERROR(msg)
+     end if
+#endif
+   else if(gpu_option==ABI_GPU_KOKKOS) then
+#if !defined HAVE_KOKKOS || !defined HAVE_YAKL
+     write(msg,'(7a)')&
+     'Input variable gpu_option is set to use Kokkos backend but abinit hasn''t been built',ch10,&
+     'with Kokkos and/or YAKL dependencies enabled!',ch10,&
+     'Action: change the input variable gpu_option',ch10,&
+     '        or re-compile ABINIT with BOTH Kokkos and YAKL enabled.'
+     ABI_ERROR(msg)
+#endif
    end if
 #else
    write(msg,'(7a)')&
-&   'Input variables use_gpu_cuda is on but abinit hasn''t been built',ch10,&
-&   'with (double precision) gpu mode enabled !',ch10,&
-&   'Action: change the input variable use_gpu_cuda',ch10,&
-&   '        or re-compile ABINIT with double-precision Cuda enabled.'
+   'Input variable gpu_option is on',ch10,&
+   'but ABINIT hasn''t been built with GPU mode enabled!',ch10,&
+   'Action: change the input variable gpu_option',ch10,&
+   '        or re-compile ABINIT with GPU enabled.'
    ABI_ERROR(msg)
 #endif
  end if
+
+!Set gpu_option default value
+!gpu_option=ABI_GPU_UNKNOWN means undetermined
+ do idtset=1,ndtset_alloc
+   if (dtsets(idtset)%gpu_option==ABI_GPU_UNKNOWN) then
+     !FIXME We may want to have GPU enabled by default if a GPU device is available.
+     !      Now, we use CPU to stay safe, as some code section aren't checked for GPU use yet.
+
+!#if defined HAVE_OPENMP_OFFLOAD
+!     dtsets(idtset)%gpu_option=ABI_GPU_OPENMP
+!#elif defined HAVE_KOKKOS && defined HAVE_YAKL
+!     dtsets(idtset)%gpu_option=ABI_GPU_KOKKOS
+!#elif defined HAVE_GPU_CUDA
+!     dtsets(idtset)%gpu_option=ABI_GPU_LEGACY
+!#else
+     dtsets(idtset)%gpu_option=ABI_GPU_DISABLED
+!#endif
+   end if
+ end do
 
  ABI_FREE(dprarr)
  ABI_FREE(intarr)
@@ -616,13 +654,18 @@ end do
    ABI_MALLOC(dtsets(idtset)%acell_orig,(3,mxnimage))
    ABI_MALLOC(dtsets(idtset)%algalch,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%amu_orig,(mxntypat,mxnimage))
+   ABI_MALLOC(dtsets(idtset)%atndlist,(3,mxnatom))
    ABI_MALLOC(dtsets(idtset)%cellcharge,(mxnimage))
    ABI_MALLOC(dtsets(idtset)%chrgat,(mxnatom))
    ABI_MALLOC(dtsets(idtset)%constraint_kind,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%corecs,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%densty,(mxntypat,4))
+   ABI_MALLOC(dtsets(idtset)%dmft_nominal,(mxnatom))
+   ABI_MALLOC(dtsets(idtset)%dmft_orbital,(mxntypat))
+   ABI_MALLOC(dtsets(idtset)%dmft_shiftself,(mxnatom))
    ABI_MALLOC(dtsets(idtset)%dynimage,(mxnimage))
    ABI_MALLOC(dtsets(idtset)%iatfix,(3,mxnatom))
+   ABI_MALLOC(dtsets(idtset)%iatnd,(mxnatom))
    ABI_MALLOC(dtsets(idtset)%f4of2_sla,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%f6of2_sla,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%jpawu,(mxntypat,mxnimage))
@@ -651,6 +694,8 @@ end do
    ABI_MALLOC(dtsets(idtset)%plowan_nbl,(mxnatom))
    ABI_MALLOC(dtsets(idtset)%plowan_lcalc,(12*mxnatom))
    ABI_MALLOC(dtsets(idtset)%plowan_projcalc,(12*mxnatom))
+   ABI_MALLOC(dtsets(idtset)%rcpaw_frtypat,(mxntypat))
+   ABI_MALLOC(dtsets(idtset)%rcpaw_scenergy,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%vel_orig,(3,mxnatom,mxnimage))
    ABI_MALLOC(dtsets(idtset)%vel_cell_orig,(3,3,mxnimage))
    ABI_MALLOC(dtsets(idtset)%xred_orig,(3,mxnatom,mxnimage))
@@ -658,13 +703,10 @@ end do
    ABI_MALLOC(dtsets(idtset)%znucl,(npsp))
  end do
 
-!DEBUG
-!write(std_out,*)' invars0 : nimage, mxnimage = ',dtsets(:)%nimage, mxnimage
-!write(std_out,*)' invars0 : natom = ',dtsets(:)%natom
-!write(std_out,*)' invars0 : mxnatom = ',mxnatom
-!write(std_out,*)' m_invars1%invars0 : exit '
-!call flush(std_out)
-!ENDDEBUG
+ !write(std_out,*)' invars0 : nimage, mxnimage = ',dtsets(:)%nimage, mxnimage
+ !write(std_out,*)' invars0 : natom = ',dtsets(:)%natom
+ !write(std_out,*)' invars0 : mxnatom = ',mxnatom
+ !write(std_out,*)' m_invars1%invars0 : exit '; call flush(std_out)
 
 end subroutine invars0
 !!***
@@ -703,7 +745,7 @@ end subroutine invars0
 !! SOURCE
 
 subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
-& msym, ndtset, ndtset_alloc, string, npsp, zionpsp, comm)
+                    msym, ndtset, ndtset_alloc, string, npsp, zionpsp, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -720,16 +762,11 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
 !scalars
  integer :: idtset,ii,jdtset,lpawu,mband_upper,iatom,nat,nsp
 !arrays
- integer,allocatable :: symafm_(:,:),symrel_(:,:,:,:)
- integer,allocatable :: symafm(:),symrel(:,:,:)
+ integer,allocatable :: symafm_(:,:),symrel_(:,:,:,:), symafm(:),symrel(:,:,:)
  real(dp),allocatable :: tnons_(:,:,:),tnons(:,:)
-
 !******************************************************************
 
-!DEBUG
-!write(std_out,'(a)')' m_invars1%invars1m : enter '
-!call flush(std_out)
-!ENDDEBUG
+ !write(std_out,'(a)')' m_invars1%invars1m : enter '; call flush(std_out)
 
  ! Here, allocation of the arrays that depend on msym.
  ABI_MALLOC(symrel_,(3,3,msym,0:ndtset_alloc))
@@ -756,6 +793,7 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
  dtsets(0)%npfft=1
  dtsets(0)%npband=1
  dtsets(0)%bandpp=1
+ dtsets(0)%nblock_lobpcg=1
 
  symafm_(:,0)=1
  symrel_(:,:,:,0)=0
@@ -775,7 +813,7 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
    tnons(:,:)=tnons_(:,:,0)
 
    call invars1(dtsets(idtset)%bravais,dtsets(idtset),iout,jdtset,lenstr,&
-&   mband_upper,msym,npsp,string,symafm,symrel,tnons,zionpsp, comm)
+                mband_upper,msym,npsp,string,symafm,symrel,tnons,zionpsp, comm)
 
    mband_upper_ (idtset)=mband_upper
    symafm_(:,idtset)=symafm(:)
@@ -832,7 +870,7 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
      lpawu=maxval(dtsets(ii)%lpawu(:))
      mx%lpawu=max(lpawu,mx%lpawu)
      !dtsets(ii)%natpawu=count(dtsets(ii)%lpawu(dtsets(ii)%typat((/(i1,i1=1,dtsets(ii)%natom)/)))/=-1)
-     ! Old fashon way that should do fine
+     ! Old fashion way that should do fine
      dtsets(ii)%natpawu = 0
      do iatom=1, dtsets(ii)%natom
        if (dtsets(ii)%lpawu(dtsets(ii)%typat(iatom)) /= -1 ) dtsets(ii)%natpawu = dtsets(ii)%natpawu + 1
@@ -890,10 +928,7 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
  ABI_FREE(symrel)
  ABI_FREE(tnons)
 
-!DEBUG
-!write(std_out,'(a)')' m_invars1%invars1m : exit '
-!call flush(std_out)
-!ENDDEBUG
+ !write(std_out,'(a)')' m_invars1%invars1m : exit '; call flush(std_out)
 
 end subroutine invars1m
 !!***
@@ -903,7 +938,7 @@ end subroutine invars1m
 !! indefo1
 !!
 !! FUNCTION
-!! Initialisation phase : defaults values for a first batch of input variables
+!! Initialisation phase: defaults values for a first batch of input variables
 !! (especially dimensions, needed to allocate other parts of dtsets, as well
 !!  as other input variables whose existence is needed for other initialisations to proceed).
 !!
@@ -924,11 +959,10 @@ subroutine indefo1(dtset)
 !Local variables -------------------------------
 !scalars
  !integer :: ii
-
 !******************************************************************
 
 !Set up default values. All variables to be output in outvars.f
-!should have a default, even if a nonsensible one can be chosen to garantee print in that routine.
+!should have a default, even if a nonsensible one can be chosen to guarantee print in that routine.
 
  DBG_ENTER("COLL")
 
@@ -937,6 +971,7 @@ subroutine indefo1(dtset)
 !A
  dtset%acell_orig(:,:)=zero
  dtset%algalch(:)=1
+ dtset%atndlist(:,:)=zero
  dtset%amu_orig(:,:)=-one
  dtset%autoparal=0
 !B
@@ -958,13 +993,18 @@ subroutine indefo1(dtset)
  dtset%efmas_calc_dirs=0
  dtset%efmas_n_dirs=0
 !F
+ dtset%field_red(:)=zero
+ dtset%field_red_axial(:)=zero
 !G
  dtset%ga_n_rules=1
  dtset%gw_customnfreqsp=0
  dtset%gw_nqlwl=0
  dtset%gwls_n_proj_freq=0
+!H
+ dtset%hspinfield(:)=zero
 !I
  dtset%iatfix(:,:)=0
+ dtset%iatnd(:)=0
  dtset%icoulomb=0
  dtset%imgmov=0
  dtset%ivalence=0
@@ -984,10 +1024,12 @@ subroutine indefo1(dtset)
  dtset%mkqmem=-1
  dtset%mk1mem=-1
 !N
+ dtset%natnd=0
  dtset%natpawu=0
  dtset%natsph=0
  dtset%natsph_extra=0
  dtset%natvshift=0
+ dtset%nblock_lobpcg=1
  dtset%nconeq=0
  dtset%ndynimage=1
  dtset%ne_qFD=zero
@@ -1062,7 +1104,7 @@ subroutine indefo1(dtset)
  dtset%xred_orig(:,:,:)=zero
 !Y
 !Z
- dtset%zeemanfield(:)=zero
+ dtset%zora=0
 
  DBG_EXIT("COLL")
 
@@ -1141,9 +1183,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  integer,parameter :: master = 0
  integer :: chksymbreak,expert_user,found,ierr,iatom,ii,ikpt,iimage,index_blank,index_lower, tread_geo
  integer :: index_typsymb,index_upper,ipsp,iscf,intimage,itypat,leave,marr
- integer :: natom,nkpt,nkpthf,npsp,npspalch, ncid
+ integer :: natnd,natom,nkpt,nkpthf,npsp,npspalch, ncid
  integer :: nqpt,nspinor,nsppol,ntypat,ntypalch,ntyppure,occopt,response
- integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
+ integer :: rfddk,rfelfd,rfphon,rfstrs,rf2_dkdk,rf2_dkde,rfmagn
  integer :: tfband,tnband,tread,tread_alt, my_rank, nprocs
  real(dp) :: cellcharge,cellcharge_min, fband,kptnrm,kptrlen,sum_spinat,zelect,zval
  character(len=1) :: blank=' ',string1
@@ -1152,23 +1194,18 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  type(atomdata_t) :: atom
 !arrays
  integer :: cond_values(4),vacuum(3)
- integer,allocatable :: iatfix(:,:),intarr(:),istwfk(:),nband(:),typat(:)
+ integer,allocatable :: iatfix(:,:),iatnd(:),intarr(:),istwfk(:),nband(:),typat(:)
  real(dp) :: acell(3),rprim(3,3)
-!real(dp) :: field(3)
- real(dp),allocatable :: amu(:),chrgat(:),dprarr(:),kpt(:,:),kpthf(:,:),mixalch(:,:),nucdipmom(:,:)
- real(dp),allocatable :: ratsph(:),reaalloc(:),spinat(:,:)
+ real(dp),allocatable :: amu(:),atndlist(:,:),chrgat(:),dprarr(:),kpt(:,:),kpthf(:,:),mixalch(:,:)
+ real(dp),allocatable :: nucdipmom(:,:),ratsph(:),reaalloc(:),spinat(:,:)
  real(dp),allocatable :: vel(:,:),vel_cell(:,:),wtk(:),xred(:,:),znucl(:)
  character(len=32) :: cond_string(4)
  character(len=fnlen) :: key_value
  character(len=len(string)) :: geo_string
  type(geo_t) :: geo
-
 !************************************************************************
 
-!DEBUG
-!write(std_out,'(a)')' m_invars1%invars1 : enter '
-!call flush(std_out)
-!ENDDEBUG
+ !write(std_out,'(a)')' m_invars1%invars1 : enter '; call flush(std_out)
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
@@ -1189,7 +1226,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
 !---------------------------------------------------------------------------
 
- rfddk=0; rfelfd=0; rfphon=0; rfmagn=0; rfstrs=0; rfuser=0; rf2_dkdk=0; rf2_dkde=0
+ rfddk=0; rfelfd=0; rfphon=0; rfmagn=0; rfstrs=0; rf2_dkdk=0; rf2_dkde=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfddk',tread,'INT')
  if(tread==1) rfddk=intarr(1)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfelfd',tread,'INT')
@@ -1200,15 +1237,13 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(tread==1) rfphon=intarr(1)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfstrs',tread,'INT')
  if(tread==1) rfstrs=intarr(1)
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfuser',tread,'INT')
- if(tread==1) rfuser=intarr(1)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rf2_dkdk',tread,'INT')
  if(tread==1) rf2_dkdk=intarr(1)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rf2_dkde',tread,'INT')
  if(tread==1) rf2_dkde=intarr(1)
 
  response=0
- if(rfddk/=0.or.rf2_dkdk/=0.or.rf2_dkde/=0.or.rfelfd/=0.or.rfphon/=0.or.rfstrs/=0.or.rfuser/=0.or.rfmagn/=0)response=1
+ if(rfddk/=0.or.rf2_dkdk/=0.or.rf2_dkde/=0.or.rfelfd/=0.or.rfphon/=0.or.rfstrs/=0.or.rfmagn/=0)response=1
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optdriver',tread,'INT')
  if (tread==1) then
@@ -1272,7 +1307,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
 !Special treatment of _TYPAX (from a XYZ file), taking into account
 !the fact that znucl does NOT depend on the dataset
-!Examine all occurences of '_TYPAX'
+!Examine all occurrences of '_TYPAX'
 
  do
    index_typsymb=index(string(1:lenstr),'_TYPAX')
@@ -1362,6 +1397,16 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'jfielddir',tread,'INT')
  if(tread==1) dtset%jfielddir(1:3)=intarr(1:3)
 
+ ! read in natnd and initialize iatnd, atndlist helper variables
+ ! these provide a simpler alternative to inputting the full nucdipmom list
+ natnd=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natnd',tread,'INT')
+ if(tread==1) natnd=intarr(1)
+ dtset%natnd=natnd
+ ABI_MALLOC(iatnd,(natnd))
+ ABI_MALLOC(atndlist,(3,natnd))
+ iatnd(:)=0; atndlist(:,:)=zero
+
  ! We need to know nsppol/nspinor/nspden before calling ingeo
  nsppol=dtset%nsppol
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nsppol',tread,'INT')
@@ -1382,11 +1427,16 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  end if
  dtset%nsppol=nsppol
 
+! here are ZORA, nspinor, pawspnorb flags
+! flag for ZORA (zeroth order regularized approximation for relativistic terms)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'zora',tread,'INT')
+ if (tread == 1) dtset%zora = intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nspinor',tread,'INT')
  if(tread==1) dtset%nspinor=intarr(1)
 
 !Has to read pawspnorb now, in order to adjust nspinor
-!Also, if nspinor=1, turn on spin-orbit coupling by default, here for the PAW case. NC case is treated elsewhere.
+!Also, if nspinor=2, turn on spin-orbit coupling by default, here for the PAW case. NC case is treated elsewhere.
  if (dtset%usepaw>0)then
 !  Change the default value
    if(dtset%nspinor==2)dtset%pawspnorb=1
@@ -1397,11 +1447,15 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    else
      if(dtset%nspinor==2)then
        write(msg, '(4a)' ) ch10,&
-&       ' invars1: COMMENT -',ch10,&
-&       '  With nspinor=2 and usepaw=1, pawspnorb=1 has been switched on by default.'
+       ' invars1: COMMENT -',ch10,&
+       '  With nspinor=2 and usepaw=1, pawspnorb=1 has been switched on by default.'
        call wrtout(iout, msg,'COLL')
      end if
    end if
+ end if
+ if ( (dtset%zora .GT. 1) .OR. (dtset%zora < 0) ) then
+   dtset%nspinor=2
+   dtset%pawspnorb=1
  end if
  nspinor=dtset%nspinor
 
@@ -1447,22 +1501,32 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    end if
  end if
 
-!Read the Zeeman field
- call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'zeemanfield',tread,'BFI')
+!Read the hspinfield
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'hspinfield',tread,'BFI')
+ if(tread==0) then
+   call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'zeemanfield',tread,'BFI')
+   if (tread == 1) then
+     write(msg, '(3a)')&
+      'Input variable "zeemanfield" is deprecated.', ch10, &
+      'Its value has been assigned to "hspinfield", please update your input.'
+     ABI_COMMENT(msg)
+   end if
+ end if
+
  if(tread==1) then
    if(dtset%nspden == 2)then
      write(msg,'(7a)')&
-      'A Zeeman field has been specified without noncollinear spins.',ch10,&
+      'A spin magnetic field (hspinfield) has been specified without noncollinear spins.',ch10,&
       'Only the z-component of the magnetic field will be used.'
      ABI_WARNING(msg)
    else if (dtset%nspden == 1)then
      write(msg, '(a,a,a)' )&
-      'A Zeeman field has been specified for a non-spin-polarized calculation.',ch10,&
+      'A spin magnetic field (hspinfield) has been specified for a non-spin-polarized calculation.',ch10,&
       'Action: check the input file.'
      ABI_ERROR(msg)
    end if
 
-   dtset%zeemanfield(1:3) = dprarr(1:3)
+   dtset%hspinfield(1:3) = dprarr(1:3)
  end if
 
 !Initialize geometry of the system, for different images. Also initialize cellcharge_min to be used later for estimating mband_upper..
@@ -1494,6 +1558,17 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    vel=dtset%vel_orig(1:3,1:natom,iimage)
    vel_cell=dtset%vel_cell_orig(1:3,1:3,iimage)
    xred=dtset%xred_orig(1:3,1:natom,iimage)
+
+! if getxred or getxcart we need to import xred before entering ingeo.
+! NB: xred/cart might be re-updated at runtime after running source dtset
+!   call intagm(dprarr,intarr,source_dtset,marr,3,string(1:lenstr),'getxred',tread,'INT')
+!   if (tread==1 .or. tread_geo==1)
+!     source_dtset =
+!     if (== -1) source_dtset = jdtset-1
+!   end if
+!   call intagm(dprarr,intarr,source_dtset,marr,3,string(1:lenstr),'getxcart',tread_geo,'INT')
+!
+
    ABI_MALLOC(chrgat,(natom))
    ABI_MALLOC(iatfix,(3,natom))
    ABI_MALLOC(nucdipmom,(3,natom))
@@ -1505,14 +1580,19 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    spinat(1:3,1:natom)=dtset%spinat(1:3,1:natom)
    znucl(1:dtset%npsp)=dtset%znucl(1:dtset%npsp)
 
-   call ingeo(acell,amu,bravais,chrgat,dtset,dtset%genafm(1:3),iatfix,&
-    dtset%icoulomb,iimage,iout,jdtset,dtset%jellslab,lenstr,mixalch,&
-    msym,natom,dtset%nimage,dtset%npsp,npspalch,dtset%nspden,dtset%nsppol,&
+   !write(std_out,'(a)')' m_invars1%invars1 : before ingeo '; call flush(std_out)
+
+   call ingeo(acell,amu,atndlist,bravais,chrgat,dtset,dtset%field_red(1:3),&
+    dtset%field_red_axial(1:3),dtset%genafm(1:3),iatfix,&
+    iatnd,dtset%icoulomb,iimage,iout,jdtset,dtset%jellslab,lenstr,mixalch,&
+    msym,natnd,natom,dtset%nimage,dtset%npsp,npspalch,dtset%nspden,dtset%nsppol,&
     dtset%nsym,ntypalch,dtset%ntypat,nucdipmom,dtset%nzchempot,&
     dtset%pawspnorb,dtset%ptgroupma,ratsph,&
     rprim,dtset%slabzbeg,dtset%slabzend,dtset%spgroup,spinat,&
     string,dtset%supercell_latt,symafm,dtset%symmorphi,symrel,tnons,dtset%tolsym,&
     typat,vel,vel_cell,xred,znucl, comm)
+
+   !write(std_out,'(a)')' m_invars1%invars1 : after ingeo '; call flush(std_out)
 
    dtset%chrgat(1:natom)=chrgat(1:natom)
    dtset%iatfix(1:3,1:natom)=iatfix(1:3,1:natom)
@@ -1533,6 +1613,17 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    dtset%vel_cell_orig(1:3,1:3,iimage)=vel_cell
    dtset%xred_orig(1:3,1:natom,iimage)=xred
    call mkrdim(dtset%acell_orig(1:3,iimage),dtset%rprim_orig(1:3,1:3,iimage),dtset%rprimd_orig(1:3,1:3,iimage))
+
+   if(allocated(dtset%iatnd)) then
+     ABI_FREE(dtset%iatnd)
+   end if
+   ABI_MALLOC(dtset%iatnd,(natnd))
+   dtset%iatnd(1:natnd)=iatnd(1:natnd)
+   if(allocated(dtset%atndlist)) then
+     ABI_FREE(dtset%atndlist)
+   end if
+   ABI_MALLOC(dtset%atndlist,(3,natnd))
+   dtset%atndlist(1:3,1:natnd)=atndlist(1:3,1:natnd)
 
 !  Read cellcharge for each image, but use it only to initialize cellcharge_min
 !  The old name 'charge' is still tolerated. Will be removed in due time.
@@ -1555,8 +1646,14 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    endif
 
    if(cellcharge < cellcharge_min)cellcharge_min=cellcharge
-
  end do
+
+ if(allocated(iatnd)) then
+   ABI_FREE(iatnd)
+ end if
+ if(allocated(atndlist)) then
+   ABI_FREE(atndlist)
+ end if
 
  ABI_FREE(amu)
  ABI_FREE(mixalch)
@@ -1566,7 +1663,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
  ! Examine whether there is some vacuum space in the unit cell
  call invacuum(jdtset,lenstr,natom,dtset%rprimd_orig(1:3,1:3,intimage),string,vacuum,&
-& dtset%xred_orig(1:3,1:natom,intimage))
+                dtset%xred_orig(1:3,1:natom,intimage))
+
+!write(std_out,'(a)')' m_invars1%invars1 : after invacuum '; call flush(std_out)
 
 !write(std_out,*)' invars1: before inkpts, dtset%mixalch_orig(1:npspalch,1:ntypalch,:)=',&
 !dtset%mixalch_orig(1:npspalch,1:ntypalch,1:dtset%nimage)
@@ -1580,7 +1679,14 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'kptopt',tread,'INT')
  if(tread==1) dtset%kptopt=intarr(1)
 
+ ! In EPH we may want to change qptopt when generating the IBZ for phonons and DFPT potentials.
+ ! Typical example: we have a DDB/DDVB with q/-q and we want to reintroduce TR for testing purposes.
+ ! For this reason, the default value of qptopt is set to zero if RUNL_EPH.
+ ! EPH will use this value as sentinel to understand if qptopt should be set equal to kptopt
+ ! or if it should be taken from the input file.
+
  dtset%qptopt=1
+ if (dtset%optdriver == RUNL_EPH) dtset%qptopt = 0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'qptopt',tread,'INT')
  if(tread==1) dtset%qptopt=intarr(1)
 
@@ -1631,7 +1737,6 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr), "getkerange_filepath", tread, 'KEY', key_value=key_value)
  if (tread==1) dtset%getkerange_filepath = key_value
 
-#ifdef HAVE_NETCDF
  if (dtset%getkerange_filepath /= ABI_NOFILE) then
    ! Get number of k-points in sigma_erange energy windows.
    !dtset%kptopt = 0
@@ -1642,7 +1747,6 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    end if
    call xmpi_bcast(nkpt, master, comm, ierr)
  end if
-#endif
 
  dtset%nkpt = nkpt
 
@@ -1658,6 +1762,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  ! Will compute the actual value of nkpt, if needed. Otherwise,
  ! test that the value of nkpt is OK, if kptopt/=0
  ! Set up dummy arrays istwfk, kpt, wtk
+
+ !write(std_out,'(a)')' m_invars1%invars1 : before nkpt/=0 '; call flush(std_out)
 
  if(nkpt/=0 .or. dtset%kptopt/=0)then
    ABI_MALLOC(istwfk,(nkpt))
@@ -1686,6 +1792,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    ! Use the first image to predict k and/or q points, except if an intermediate image is available
    intimage=1; if(dtset%nimage>2)intimage=(1+dtset%nimage)/2
 
+   !write(std_out,'(a)')' m_invars1%invars1 : before inqpt'; call flush(std_out)
+
    ! Find the q-point, if any.
    if(nqpt/=0)then
      call inqpt(chksymbreak,std_out,jdtset,lenstr,msym,natom,dtset%qptn,dtset%wtq,&
@@ -1700,6 +1808,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
      occopt,dtset%qptn,response,dtset%rprimd_orig(1:3,1:3,intimage),dtset%shiftk,&
      string,symafm,symrel,vacuum,wtk,comm)
 
+   !write(std_out,'(a)')' m_invars1%invars1 : after inkpts'; call flush(std_out)
+
    ABI_FREE(istwfk)
    ABI_FREE(kpt)
    ABI_FREE(kpthf)
@@ -1709,6 +1819,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    dtset%nkpt=nkpt
    dtset%nkpthf=nkpthf
  end if
+
+ !write(std_out,'(a)')' m_invars1%invars1 : after nkpt/=0 '; call flush(std_out)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nqptdm',tread,'INT')
  if(tread==1) dtset%nqptdm=intarr(1)
@@ -1774,6 +1886,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  end if
 
 !---------------------------------------------------------------------------
+
+ !write(std_out,'(a)')' m_invars1%invars1 : before nnos '; call flush(std_out)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nnos',tread,'INT')
  if(tread==1) dtset%nnos=intarr(1)
@@ -1854,10 +1968,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    end do
  end if
 
- ! CP modified
- !if (occopt==0 .or. occopt==1 .or. (occopt>=3 .and. occopt<=8) ) then
  if (occopt==0 .or. occopt==1 .or. (occopt>=3 .and. occopt<=9) ) then
- ! End CP modified
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nband',tnband,'INT')
    ! Note: mband_upper is initialized, not nband
    if(tnband==1) mband_upper=intarr(1)
@@ -1949,7 +2060,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ucrpa',tread,'INT')
  if(tread==1) dtset%ucrpa=intarr(1)
 
- if (dtset%ucrpa > 0 .and. dtset%usedmft > 0) then
+ if (dtset%ucrpa > 0 .and. (dtset%usedmft > 0 .and. dtset%usedmft /= 10)) then
    write(msg, '(9a)' )&
    'usedmft and ucrpa are both activated in the input file ',ch10,&
    'In the following, abinit assume you are doing a ucrpa calculation and ',ch10,&
@@ -1973,7 +2084,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  dtset%usedmatpu=0
  dtset%lpawu(1:dtset%ntypat)=-1
  dtset%optdcmagpawu=3
- if (dtset%usepawu/=0.or.dtset%usedmft>0) then
+ if (dtset%usepawu/=0.or.(dtset%usedmft>0.and.dtset%usedmft/=10)) then
    call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'lpawu',tread,'INT')
    if(tread==1) dtset%lpawu(1:dtset%ntypat)=intarr(1:dtset%ntypat)
 
@@ -2029,15 +2140,26 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'constraint_kind',tread,'INT')
  if(tread==1) dtset%constraint_kind(1:dtset%ntypat)=intarr(1:dtset%ntypat)
 
+!Some special cases are not compatible with GPU implementation
+ if (dtset%optdriver/=RUNL_GSTATE .and. dtset%optdriver/=RUNL_RESPFN) then
+   dtset%gpu_option=ABI_GPU_DISABLED  ! GPU only compatible with GS and RESPFN
+ end if
+ if (dtset%optdriver==RUNL_RESPFN .and. dtset%gpu_option/=ABI_GPU_OPENMP) then
+   dtset%gpu_option=ABI_GPU_DISABLED  ! RESPFN on GPU only implemented with OpenMP
+ end if
+ if (dtset%tfkinfunc/=0) dtset%gpu_option=ABI_GPU_DISABLED  ! Recursion method has its own GPU impl
+ if (dtset%nspinor/=1) then
+   if (dtset%gpu_option/=ABI_GPU_DISABLED .and. dtset%gpu_option/=ABI_GPU_OPENMP) then
+     dtset%gpu_option=ABI_GPU_DISABLED  ! nspinor=2 not supported outside of CPU and OpenMP GPU
+   end if
+ end if
+
  ABI_FREE(nband)
  ABI_FREE(ratsph)
  ABI_FREE(intarr)
  ABI_FREE(dprarr)
 
-!DEBUG
-!write(std_out,'(a)')' m_invars1%invars1 : exit '
-!call flush(std_out)
-!ENDDEBUG
+!write(std_out,'(a)')' m_invars1%invars1 : exit '; call flush(std_out)
 
 end subroutine invars1
 !!***
@@ -2071,18 +2193,11 @@ end subroutine invars1
 
 subroutine indefo(dtsets, ndtset_alloc, nprocs)
 
- use m_gwdefs
-#if defined DEV_YP_VDWXC
- use m_xc_vdw
-#endif
-
- use m_fftcore,      only : get_cache_kb, fftalg_for_npfft
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ndtset_alloc,nprocs
 !arrays
- type(dataset_type),intent(inout) :: dtsets(0:ndtset_alloc) !vz_i
+ type(dataset_type),intent(inout) :: dtsets(0:ndtset_alloc)
 
 !Local variables -------------------------------
 !scalars
@@ -2091,13 +2206,12 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 #if defined DEV_YP_VDWXC
  type(xc_vdw_type) :: vdw_defaults
 #endif
-
 !******************************************************************
 
  DBG_ENTER("COLL")
 
 !Set up default values. All variables to be output in outvars.f
-!should have a default, even if a nonsensible one can be chosen to garantee print in that routine.
+!should have a default, even if a nonsensible one can be chosen to guarantee print in that routine.
 !Some default values are also set at the definition of the input variables (m_dtset.F90).
 
 !These variables have already been initialized, for idtset/=0
@@ -2127,15 +2241,6 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 
    wvl_bigdft=.false.
    if(dtsets(idtset)%usewvl==1 .and. dtsets(idtset)%wvl_bigdft_comp==1) wvl_bigdft=.true.
-!  Special case of use_gpu_cuda (can be undertermined at this point)
-!  use_gpu_cuda=-1 means undetermined ; here impose its value due to some restrictions
-   if (dtsets(idtset)%use_gpu_cuda==-1) then
-     if (dtsets(idtset)%optdriver/=0.or. dtsets(idtset)%tfkinfunc/=0.or. dtsets(idtset)%nspinor/=1) then
-       dtsets(idtset)%use_gpu_cuda=0
-     else
-       dtsets(idtset)%use_gpu_cuda=1
-     end if
-  end if
 
 !  A
 !  Here we change the default value of iomode according to the configuration options.
@@ -2144,7 +2249,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 !  MG FIXME Sun Sep 6 2015: Many tests fail if IO_MODE_MPI is used as default. IO errors in v1, v2 ...
 !  with np=1 and wonderful deadlocks if np>1.
 
-!  Note that this default value might be overriden for specific datasets later, in case of parallelism
+!  Note that this default value might be overridden for specific datasets later, in case of parallelism
    dtsets(idtset)%iomode=IO_MODE_FORTRAN
 #ifdef HAVE_NETCDF_DEFAULT
    dtsets(idtset)%iomode=IO_MODE_ETSF
@@ -2156,6 +2261,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%adpimd=0
    dtsets(idtset)%adpimd_gamma=one
    dtsets(idtset)%accuracy=0
+   dtsets(idtset)%asr=1
    dtsets(idtset)%atvshift(:,:,:)=zero
    dtsets(idtset)%auxc_ixc=11
    dtsets(idtset)%auxc_scal=one
@@ -2180,14 +2286,18 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%cd_frqim_method=1
    dtsets(idtset)%cd_full_grid=0
    dtsets(idtset)%cellcharge(:)=zero
+   dtsets(idtset)%chebfi_oracle=0
    dtsets(idtset)%chempot(:,:,:)=zero
    dtsets(idtset)%chkdilatmx=1
    dtsets(idtset)%chkexit=0
+   dtsets(idtset)%chkparal=1
    dtsets(idtset)%chksymbreak=1
    dtsets(idtset)%chksymtnons=1
+   dtsets(idtset)%chneut=1
    dtsets(idtset)%cineb_start=7
    dtsets(idtset)%corecs(:) = zero
-   dtsets(idtset)%cprj_update_lvl=0
+   dtsets(idtset)%cprj_in_memory=0
+   dtsets(idtset)%cprj_update_lvl=3
 !  D
    dtsets(idtset)%ddamp=0.1_dp
    dtsets(idtset)%delayperm=0
@@ -2210,43 +2320,86 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmatpuopt=2
    if (size(dtsets(idtset)%dmatpawu,4)>0) dtsets(idtset)%dmatpawu=-10._dp
    dtsets(idtset)%dmatudiag=0
+   dtsets(idtset)%dmft_charge_prec=tol6
+   dtsets(idtset)%dmft_dc=1
    dtsets(idtset)%dmft_entropy=0
-   dtsets(idtset)%dmft_dc  =1
-   dtsets(idtset)%dmft_iter=0
+   dtsets(idtset)%dmft_epsilon_yukawa=-1.0_dp
+   dtsets(idtset)%dmft_fermi_step=0.02_dp
+   dtsets(idtset)%dmft_iter=10
    dtsets(idtset)%dmft_kspectralfunc=0
+   dtsets(idtset)%dmft_lambda_yukawa=-1.0_dp
+   dtsets(idtset)%dmft_magnfield=0
+   if (dtsets(idtset)%dmft_magnfield .gt. 0) dtsets(idtset)%dmft_magnfield_b=0.0_dp
+   dtsets(idtset)%dmft_mxsf=0.6_dp
    dtsets(idtset)%dmft_nlambda=6
+   dtsets(idtset)%dmft_nominal(:)=0
    dtsets(idtset)%dmft_nwli=0
    dtsets(idtset)%dmft_nwlo=0
-   dtsets(idtset)%dmft_mxsf=0.3_dp
    dtsets(idtset)%dmft_occnd_imag=1
+   dtsets(idtset)%dmft_optim=0
+   dtsets(idtset)%dmft_orbital(:)=1
+   dtsets(idtset)%dmft_prt_maxent=1
+   dtsets(idtset)%dmft_prtself=1
+   dtsets(idtset)%dmft_prtwan=0
    dtsets(idtset)%dmft_read_occnd=0
-   dtsets(idtset)%dmft_rslf=0
+   dtsets(idtset)%dmft_rslf=1
+   dtsets(idtset)%dmft_shiftself(:)=0.0_dp
    dtsets(idtset)%dmft_solv=5
    if(dtsets(idtset)%ucrpa>0.and.dtsets(idtset)%usedmft==1) dtsets(idtset)%dmft_solv=0
    dtsets(idtset)%dmft_t2g=0
-!  dtsets(idtset)%dmft_x2my2d=0
    dtsets(idtset)%dmft_tolfreq=tol4
    dtsets(idtset)%dmft_tollc=tol5
-   dtsets(idtset)%dmft_charge_prec=tol6
+   dtsets(idtset)%dmft_triqs_compute_integral=1
+   dtsets(idtset)%dmft_triqs_det_init_size=100
+   dtsets(idtset)%dmft_triqs_det_n_operations_before_check=10000
+   dtsets(idtset)%dmft_triqs_det_precision_error=1.0d-5
+   dtsets(idtset)%dmft_triqs_det_precision_warning=1.0d-8
+   dtsets(idtset)%dmft_triqs_det_singular_threshold=-1.0_dp
+   dtsets(idtset)%dmft_triqs_entropy=0
+   dtsets(idtset)%dmft_triqs_epsilon=1.0d-6
+   dtsets(idtset)%dmft_triqs_gaussorder=0
+   dtsets(idtset)%dmft_triqs_imag_threshold=1.0d-13
+   dtsets(idtset)%dmft_triqs_leg_measure=0
+   dtsets(idtset)%dmft_triqs_loc_n_min=0
+   dtsets(idtset)%dmft_triqs_loc_n_max=huge(0)
+   dtsets(idtset)%dmft_triqs_measure_density_matrix=1
+   dtsets(idtset)%dmft_triqs_move_double=0
+   dtsets(idtset)%dmft_triqs_move_shift=1
+   dtsets(idtset)%dmft_triqs_nleg=0
+   dtsets(idtset)%dmft_triqs_nsubdivisions=1
+   dtsets(idtset)%dmft_triqs_off_diag=-1
+   dtsets(idtset)%dmft_triqs_pauli_prob=0.8
+   dtsets(idtset)%dmft_triqs_read_ctqmcdata=1
+   dtsets(idtset)%dmft_triqs_seed_a=34788
+   dtsets(idtset)%dmft_triqs_seed_b=928374
+   dtsets(idtset)%dmft_triqs_therm_restart=0
+   dtsets(idtset)%dmft_triqs_time_invariance=1
+   dtsets(idtset)%dmft_triqs_tol_block=tol12
+   dtsets(idtset)%dmft_triqs_use_norm_as_weight=1
+   dtsets(idtset)%dmft_triqs_wmax=-1.0_dp
+   dtsets(idtset)%dmft_use_all_bands=0
+   dtsets(idtset)%dmft_use_full_chipsi=0
    dtsets(idtset)%dmft_wanorthnorm=3
+   dtsets(idtset)%dmft_wanrad=-1.0_dp
+   dtsets(idtset)%dmft_x2my2d=0
+   dtsets(idtset)%dmft_yukawa_param=1
    dtsets(idtset)%dmftbandi=0
    dtsets(idtset)%dmftbandf=0
    dtsets(idtset)%dmftcheck=0
-   dtsets(idtset)%dmftctqmc_basis =1
-   dtsets(idtset)%dmftctqmc_check =0
+   dtsets(idtset)%dmftctqmc_basis=1
+   dtsets(idtset)%dmftctqmc_check=0
    dtsets(idtset)%dmftctqmc_correl=0
-   dtsets(idtset)%dmftctqmc_grnns =0
-   dtsets(idtset)%dmftctqmc_config =0
-   dtsets(idtset)%dmftctqmc_meas  =1
-   dtsets(idtset)%dmftctqmc_mrka  =0
-   dtsets(idtset)%dmftctqmc_mov   =0
-   dtsets(idtset)%dmftctqmc_order =0
-   dtsets(idtset)%dmftctqmc_triqs_nleg=30
+   dtsets(idtset)%dmftctqmc_gmove=0
+   dtsets(idtset)%dmftctqmc_grnns=0
+   dtsets(idtset)%dmftctqmc_localprop=0
+   dtsets(idtset)%dmftctqmc_meas=1
+   dtsets(idtset)%dmftctqmc_mrka=0
+   dtsets(idtset)%dmftctqmc_mov=0
+   dtsets(idtset)%dmftctqmc_order=0
    dtsets(idtset)%dmftqmc_l=0
    dtsets(idtset)%dmftqmc_n=0.0_dp
    dtsets(idtset)%dmftqmc_seed=jdtset
-   dtsets(idtset)%dmftqmc_therm=1000
-   dtsets(idtset)%dmftctqmc_gmove = dtsets(idtset)%dmftqmc_therm / 10
+   dtsets(idtset)%dmftqmc_therm=0
    dtsets(idtset)%dosdeltae=0.0
    dtsets(idtset)%dtion=100.0_dp
    dtsets(idtset)%dtele=0.1_dp
@@ -2295,9 +2448,11 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%focktoldfe=zero
    dtsets(idtset)%fockoptmix=0
    dtsets(idtset)%fockdownsampling(:)=1
-   dtsets(idtset)%fock_icutcoul=3
+   dtsets(idtset)%fock_icutcoul=0  ! Spherical-cutoff for legacy reasons
+   dtsets(idtset)%fock_rcut=zero   ! Spencer-Alavi by default
    dtsets(idtset)%freqim_alpha=five
    dtsets(idtset)%friction=0.001_dp
+   dtsets(idtset)%frictionbar=0.001_dp
    dtsets(idtset)%frzfermi=0
    dtsets(idtset)%fxcartfactor=one ! Should be adjusted to the H2 conversion factor
 !  G
@@ -2305,10 +2460,18 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%ga_fitness =1
    dtsets(idtset)%ga_opt_percent =0.2_dp
    dtsets(idtset)%ga_rules(:) =1
+   dtsets(idtset)%geoopt = "none"
    dtsets(idtset)%goprecon =0
    dtsets(idtset)%goprecprm(:)=0
-   dtsets(idtset)%gpu_devices=(/-1,-1,-1,-1,-1/)
+   dtsets(idtset)%gpu_devices=(/-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1/)
+   dtsets(idtset)%gpu_kokkos_nthrd=xomp_get_num_threads(open_parallel=.true.)
    dtsets(idtset)%gpu_linalg_limit=2000000
+   dtsets(idtset)%gpu_nl_distrib=0
+   dtsets(idtset)%gpu_nl_splitsize=1
+   dtsets(idtset)%gpu_thread_limit=0
+   if(dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED) then
+     dtsets(idtset)%gpu_thread_limit=min(4,xomp_get_num_threads(open_parallel=.true.))
+   end if
    if (dtsets(idtset)%gw_customnfreqsp/=0) dtsets(idtset)%gw_freqsp(:) = zero
    if ( dtsets(idtset)%gw_nqlwl > 0 ) then
      dtsets(idtset)%gw_qlwl(:,:)=zero
@@ -2322,6 +2485,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%gw_invalid_freq=0
    dtsets(idtset)%gw_icutcoul=6
    dtsets(idtset)%gw_qprange=0
+   dtsets(idtset)%gw_rcut=zero   ! Spencer-Alavi value by default
    dtsets(idtset)%gw_sigxcore=0
    dtsets(idtset)%gwls_stern_kmax=1
    dtsets(idtset)%gwls_model_parameter=1.0_dp
@@ -2360,6 +2524,10 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%imgwfstor=0
    dtsets(idtset)%intxc=0
    ! if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%intxc=0
+   dtsets(idtset)%invovl_blksliced=1
+   if(dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED.and.dtsets(idtset)%gpu_option/=ABI_GPU_LEGACY) then
+     if (dtsets(idtset)%usepaw==1) dtsets(idtset)%invovl_blksliced=0
+   end if
    dtsets(idtset)%ionmov=0
    dtsets(idtset)%densfor_pred=2
    if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%densfor_pred=6 ! Recommended for band-FFT parallelism
@@ -2414,15 +2582,17 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%magpen = zero
    dtsets(idtset)%mband = -1
    dtsets(idtset)%mdtemp(:)=300.0_dp
+   dtsets(idtset)%mdeg_filter = 6
    dtsets(idtset)%mdwall=10000_dp
    dtsets(idtset)%mep_mxstep=100._dp
-   dtsets(idtset)%mep_solver=0
+   dtsets(idtset)%mep_solver=MEP_SOLVER_STEEPEST
    dtsets(idtset)%mffmem=1
    dtsets(idtset)%mgfft = -1
    dtsets(idtset)%mgfftdg = -1
    dtsets(idtset)%mixesimgf(:)=zero
    dtsets(idtset)%mpatpol(1:2)=-1 
    dtsets(idtset)%mpdir(1:3)=0
+   dtsets(idtset)%moldyn = "none"
    dtsets(idtset)%mpw = -1
    dtsets(idtset)%mqgrid=0
    dtsets(idtset)%mqgriddg=0
@@ -2438,10 +2608,12 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    else
      dtsets(idtset)%nc_xccc_gspace = 1
    end if
-   dtsets(idtset)%nctime=0
+   dtsets(idtset)%nctime = 0
+   dtsets(idtset)%ncout = 1
    dtsets(idtset)%ndtset = -1
-   dtsets(idtset)%neb_algo=1
-   dtsets(idtset)%neb_spring(1:2)=(/0.05_dp,0.05_dp/)
+   dtsets(idtset)%neb_algo = NEB_ALGO_IMPROVED_TAN
+   dtsets(idtset)%neb_cell_algo = NEB_CELL_ALGO_NONE
+   dtsets(idtset)%neb_spring(1:2) = (/0.05_dp,0.05_dp/)
    dtsets(idtset)%nfft = -1
    dtsets(idtset)%nfftdg = -1
 
@@ -2457,13 +2629,14 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 !
    !nline
    dtsets(idtset)%nline=4
-
+   !For Chebyshev filtering algo, nline is the degree of the Chebyshev polynomial
+   if (mod(dtsets(idtset)%wfoptalg,10) == 1) then
+     dtsets(idtset)%nline = dtsets(idtset)%mdeg_filter
+   end if
+   !Specific value for wavelets
    if(dtsets(idtset)%usewvl==1 .and. .not. wvl_bigdft) then
-     if(dtsets(idtset)%usepaw==1) then
-       dtsets(idtset)%nline=4
-     else
-       dtsets(idtset)%nline=2
-     end if
+     if(dtsets(idtset)%usepaw==1) dtsets(idtset)%nline=4
+     if(dtsets(idtset)%usepaw/=1) dtsets(idtset)%nline=2
    end if
 
 !  nloalg is also a special case
@@ -2496,9 +2669,11 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%occ_orig(:,:)=zero
    dtsets(idtset)%optcell=0
    dtsets(idtset)%optforces=2
-   if(dtsets(idtset)%usedmft>0) dtsets(idtset)%optforces=0
+   if(dtsets(idtset)%usedmft>0 .and. dtsets(idtset)%usedmft/=0) dtsets(idtset)%optforces=0
    dtsets(idtset)%optstress=1
    dtsets(idtset)%optnlxccc=1
+   dtsets(idtset)%oracle_factor=0.1_dp
+   dtsets(idtset)%oracle_min_occ=0.0001_dp
    dtsets(idtset)%orbmag=0
    if (dtsets(idtset)%usepaw==0) then
      dtsets(idtset)%ortalg=2
@@ -2507,6 +2682,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    end if
 !  P
    dtsets(idtset)%paral_atom=paral_atom_default
+   dtsets(idtset)%paw_add_core=0
    dtsets(idtset)%pawcpxocc=1
    dtsets(idtset)%pawcross=0
    dtsets(idtset)%pawecutdg=-one
@@ -2559,9 +2735,11 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%postoldff=zero
    dtsets(idtset)%prepalw=0
    dtsets(idtset)%prepanl=0
+   dtsets(idtset)%prtcurrent=0
    dtsets(idtset)%prtden=1    ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtden=0
    dtsets(idtset)%prtebands=1 ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtebands=0
    dtsets(idtset)%prteig=1    ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prteig=0
+   dtsets(idtset)%prtevk=0
    dtsets(idtset)%prtgsr=1    ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtgsr=0
    dtsets(idtset)%prtkpt = -1
    dtsets(idtset)%prt1mag = 0
@@ -2575,6 +2753,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%pw_unbal_thresh=40._dp
 !  Q
    dtsets(idtset)%qmass(:)=ten
+   dtsets(idtset)%qgbt(3)=zero
+   dtsets(idtset)%qgbt_cart(3)=zero
    dtsets(idtset)%qprtrb(1:3)=0
    dtsets(idtset)%qptdm(:,:)=zero
    dtsets(idtset)%quadmom(:) = zero
@@ -2592,9 +2772,11 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%recptrott=0
    dtsets(idtset)%rectesteg=0
    dtsets(idtset)%rectolden=zero
+   dtsets(idtset)%rcpaw_scenergy(:)=-two
+   dtsets(idtset)%rcpaw_frtypat(:)=0
    dtsets(idtset)%rcut=zero
    dtsets(idtset)%restartxf=0
-   dtsets(idtset)%rfasr=0
+!  dtsets(idtset)%rfasr=0
    dtsets(idtset)%rfatpol(1:2)=-1
    dtsets(idtset)%rfddk=0
    dtsets(idtset)%rfdir(1:3)=1
@@ -2606,7 +2788,6 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%rfphon=0
    dtsets(idtset)%rfstrs=0
    dtsets(idtset)%rfstrs_ref=0
-   dtsets(idtset)%rfuser=0
    dtsets(idtset)%rf2_dkdk=0
    dtsets(idtset)%rf2_dkde=0
    dtsets(idtset)%rf2_pert1_dir(1:3)=1
@@ -2625,18 +2806,25 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%spnorbscl=one
    dtsets(idtset)%stmbias=zero
    dtsets(idtset)%strfact=100.0_dp
-   dtsets(idtset)%string_algo=1
+   dtsets(idtset)%string_algo=STRING_ALGO_SIMPLIFIED_EQUAL
    dtsets(idtset)%strprecon=one
    dtsets(idtset)%strtarget(1:6)=zero
 !  T
    dtsets(idtset)%td_exp_order=4
    dtsets(idtset)%td_maxene=zero
    dtsets(idtset)%td_mexcit=0
-   dtsets(idtset)%td_scnmax=3
-   dtsets(idtset)%td_prtstr=10
+   dtsets(idtset)%td_scnmax=6
+   dtsets(idtset)%td_prtstr=1
    dtsets(idtset)%td_restart=0
-   dtsets(idtset)%td_propagator=1
+   dtsets(idtset)%td_propagator=0
    dtsets(idtset)%td_scthr=1e-7_dp
+   dtsets(idtset)%td_ef_type=0
+   dtsets(idtset)%td_ef_induced_vecpot=0
+   dtsets(idtset)%td_ef_tzero=zero
+   dtsets(idtset)%td_ef_tau=1000.0_dp
+   dtsets(idtset)%td_ef_pol=[1.0_dp,0.0_dp,0.0_dp]
+   dtsets(idtset)%td_ef_lambda=10000.0_dp
+   dtsets(idtset)%td_ef_ezero=0.1_dp
    dtsets(idtset)%tfw_toldfe=0.000001_dp
    dtsets(idtset)%timdisp=0
    dtsets(idtset)%tim1rev = 1
@@ -2646,12 +2834,14 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%toldfe=zero
    dtsets(idtset)%tolmxde=zero
    dtsets(idtset)%toldff=zero
+   dtsets(idtset)%toldmag=zero
    dtsets(idtset)%tolimg=5.0d-5
    dtsets(idtset)%tolrde=0.005_dp
    dtsets(idtset)%tolrff=zero
    dtsets(idtset)%tolmxf=5.0d-5
    dtsets(idtset)%tolvrs=zero
    dtsets(idtset)%tolwfr=zero
+   dtsets(idtset)%tolwfr_diago=zero
 
    dtsets(idtset)%tsmear=0.01_dp
 !  U
@@ -2713,10 +2903,12 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%wvl_nprccg  = 10
    dtsets(idtset)%w90iniprj   = 1
    dtsets(idtset)%w90prtunk   = 0
-
+   dtsets(idtset)%write_files = "default"
 !  X
    dtsets(idtset)%xclevel  = 0
+   dtsets(idtset)%xg_nonlop_option  = 0
    dtsets(idtset)%xc_denpos = tol14
+   dtsets(idtset)%xc_taupos = tol14
    dtsets(idtset)%xc_tb09_c = 99.99_dp
    dtsets(idtset)%xredsph_extra(:,:)=zero
 !  Y
@@ -2732,37 +2924,6 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    !  dtsets(idtset)%mixprec = 1
    !  dtsets(idtset)%boxcutmin = 1.1_dp
    !end if
-
-! JB:UNINITIALIZED VALUES (not found in this file neither indefo1)
-! They might be initialized somewhereelse, I don't know.
-! That might cause unitialized error with valgrind depending on the compiler
-! chkprim
-! maxnsym
-! nsym
-! macro_uj
-! prtpmp
-! timopt
-! useria
-! userib
-! useric
-! userid
-! userie
-! bravais
-! symafm
-! symrel
-! fband
-! nelect
-! userra
-! userrb
-! userrc
-! userrd
-! userre
-! vacwidth
-! genafm
-! kptns
-! rprimd_orig
-! tnons
-
  end do
 
  DBG_EXIT("COLL")

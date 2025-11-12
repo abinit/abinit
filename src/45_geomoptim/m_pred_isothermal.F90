@@ -10,7 +10,7 @@
 !! Mol. Phys., 1996, Vol. 87, pp. 1117-1157 [[cite:Martyna1996]]
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, JCC, JYR, SE)
+!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, JCC, JYR, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -83,8 +83,6 @@ contains
 
 subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(abimover),intent(in)       :: ab_mover
@@ -128,12 +126,8 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 !***************************************************************************
 
  if(iexit/=0)then
-   if (allocated(fcart_m))       then
-     ABI_FREE(fcart_m)
-   end if
-   if (allocated(vel_nexthalf))  then
-     ABI_FREE(vel_nexthalf)
-   end if
+   ABI_SFREE(fcart_m)
+   ABI_SFREE(vel_nexthalf)
    return
  end if
 
@@ -155,12 +149,8 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 !###     dataset that exit before itime==ntime
 
  if(itime==1)then
-   if (allocated(fcart_m))       then
-     ABI_FREE(fcart_m)
-   end if
-   if (allocated(vel_nexthalf))  then
-     ABI_FREE(vel_nexthalf)
-   end if
+   ABI_SFREE(fcart_m)
+   ABI_SFREE(vel_nexthalf)
  end if
 
  if (.not.allocated(fcart_m))       then
@@ -612,8 +602,6 @@ end subroutine pred_isothermal
 
 subroutine isotemp(amass,dtion,ekin,iatfix,ktemp,mttk_vars,natom,nnos,qmass,vel)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom
@@ -745,8 +733,6 @@ end subroutine isotemp
 
  subroutine isopress(amass,bmass,dtion,ekin,iatfix,ktemp,mttk_vars,natom,nnos,qmass,&
    & strten,strtarget,ucvol,vel,vlogv)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -915,7 +901,6 @@ end subroutine isopress
    & qmass,strten,strtarget,ucvol,vel)
 
  use m_linalg_interfaces
- implicit none
 
 !Arguments ------------------------------------
 !scalars

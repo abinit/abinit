@@ -6,7 +6,7 @@
 !!  Functions to estimate memory requirements from the calculation parameters.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (XG, DC, DW)
+!!  Copyright (C) 2008-2025 ABINIT group (XG, DC, DW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +30,8 @@ MODULE m_memeval
  use defs_datatypes, only : pspheader_type
  use defs_abitypes,   only : MPI_type
  use m_geometry,      only : mkradim, mkrdim, xred2xcart, metric
- use m_symtk,         only : mati3inv, littlegroup_q
+ use m_matrix,        only : mati3inv
+ use m_symtk,         only : littlegroup_q
  use m_spgdata,       only : prtspgroup
  use m_fftcore,       only : getng
  use m_kg,            only : getmpw
@@ -92,7 +93,7 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
  integer :: nfftdiel,nfftf,nkpt,nproc_fft,nptsgvec,npulayit,npwdiel,nspden,nspinor
  integer :: nsppol,nsym,ntypat,occopt,optddk,optforces,optphon,optstress
  integer :: optstrs,paral_fft,pawcpxocc,pawmixdg,pawnhatxc,pawspnorb,pawstgylm,prtvol,ptgroupma,response
- integer :: spgroup,timrev,usepaw,useylm,use_gpu_cuda,xclevel
+ integer :: spgroup,timrev,usepaw,useylm,gpu_option,xclevel
  real(dp) :: diecut,dilatmx,ecut,ecut_eff,ecutdg_eff,ecutsus,ucvol
 !arrays
  integer :: bravais(11),mkmems(3),ngfftdiel(18)
@@ -148,13 +149,14 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    spgroup   =dtsets(idtset)%spgroup
    usepaw=dtsets(idtset)%usepaw
    useylm=dtsets(idtset)%useylm
-   use_gpu_cuda=dtsets(idtset)%use_gpu_cuda
+   gpu_option=dtsets(idtset)%gpu_option
    xclevel=dtsets(idtset)%xclevel
 
    ABI_MALLOC(symrel,(3,3,nsym))
    symrel(:,:,1:nsym)=dtsets(idtset)%symrel(:,:,1:nsym)
 
 !  Space group output
+   call prtspgroup(bravais,genafm,std_out,jdtset,ptgroupma,spgroup)
    call prtspgroup(bravais,genafm,iout,jdtset,ptgroupma,spgroup)
 
    if (dtsets(idtset)%toldff>tol16.and.optforces==0) optforces=1
@@ -228,8 +230,7 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    response=0
    if(dtsets(idtset)%rfddk/=0  .or. dtsets(idtset)%rf2_dkdk/=0 .or. dtsets(idtset)%rf2_dkde/=0 .or. &
 &   dtsets(idtset)%rfphon/=0 .or. dtsets(idtset)%rfelfd/=0 .or. &
-&   dtsets(idtset)%rfstrs/=0 .or. dtsets(idtset)%rfuser/=0 .or. &
-&   dtsets(idtset)%rfmagn/=0    ) response=1
+&   dtsets(idtset)%rfstrs/=0 .or. dtsets(idtset)%rfmagn/=0    ) response=1
 
 !  Compute mgfftdiel,npwdiel,nfftdiel for this data set
    if((modulo(iprcel,100)>=20 .and.modulo(iprcel,100) < 71).or. iscf==-1)then
@@ -247,7 +248,7 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      call getng(dtsets(idtset)%boxcutmin,dtsets(idtset)%chksymtnons,&
 &     ecut_eff,gmet,k0,me_fft,mgfftdiel,nfftdiel,&
 &     ngfftdiel,nproc_fft,nsym,paral_fft,symrel,dtsets(idtset)%tnons,&
-&     use_gpu_cuda=dtsets(idtset)%use_gpu_cuda)
+&     gpu_option=dtsets(idtset)%gpu_option)
 !    Compute the size of the dielectric matrix : npwdiel
      kpt_diel(1:3)=(/ 0.0_dp, 0.0_dp, 0.0_dp /)
      ecut_eff=diecut*dilatmx**2
@@ -286,7 +287,7 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 &       dtsets(idtset)%ngfft,ngfftdiel,ngfftf,dtsets(idtset)%nimage,nkpt,nloalg,npsp,npulayit,npwdiel,nspden,nspinor,&
 &       nsppol,nsym,ntypat,occopt,optforces,mem_test,optstress,pawcpxocc,pawmixdg,&
 &       pawnhatxc,pawspnorb,pawstgylm,prtvol,pspheads,qphon,dtsets(idtset)%tfkinfunc,&
-&       dtsets(idtset)%typat,ucvol,usepaw,useylm,use_gpu_cuda,xclevel)
+&       dtsets(idtset)%typat,ucvol,usepaw,useylm,gpu_option,xclevel)
      else if( dtsets(idtset)%usepaw==0) then
        if (mpi_enregs(idtset)%me == 0) then
          call wvl_memory(dtsets(idtset), idtset, mpi_enregs(idtset), npsp, 1, pspheads)
@@ -314,7 +315,7 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 &     iscf,jdtset,lmnmax_eff,lnmax_eff,mband,mffmem,dtsets(idtset)%mgfft,&
 &     mkmems,mpi_enregs(idtset),mpsang,mpssoang,mpw,mqgrid_ff,natom,nband,dtsets(idtset)%nfft,&
 &     dtsets(idtset)%ngfft,nkpt,nloalg,nspden,nspinor,nsppol,nsym,&
-&     ntypat,occopt,optddk,optphon,mem_test,optstrs,prtvol,useylm,use_gpu_cuda,xclevel)
+&     ntypat,occopt,optddk,optphon,mem_test,optstrs,prtvol,useylm,gpu_option,xclevel)
    end if
 
 !  Deallocate temporary arrays (when they will really be temporary !)
@@ -408,7 +409,7 @@ end subroutine memory_eval
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
 !!  useylm=governs the way the nonlocal operator is to be applied:
 !!         1=using Ylm, 0=using Legendre polynomials
-!!  use_gpu_cuda=1 if Cuda (GPU) is on
+!!  gpu_option= GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!  xclevel=XC functional level
 !!
 !! OUTPUT
@@ -475,7 +476,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 & natom,nband,nfft,nfftdiel,nfftf,ngfft,ngfftdiel,ngfftf,nimage,&
 & nkpt,nloalg,npsp,npulayit,npwdiel,nspden,nspinor,nsppol,nsym,ntypat,&
 & occopt,optforces,option,optstress,pawcpxocc,pawmixdg,pawnhatxc,pawspnorb,pawstgylm,&
-& prtvol,pspheads,qphon,tfkinfunc,typat,ucvol,usepaw,useylm,use_gpu_cuda,xclevel)
+& prtvol,pspheads,qphon,tfkinfunc,typat,ucvol,usepaw,useylm,gpu_option,xclevel)
 
 !Arguments ------------------------------------
 !scalars
@@ -486,7 +487,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
  integer,intent(in) :: npulayit,npwdiel,nspden,nspinor,nsppol,nsym,ntypat
  integer,intent(in) :: occopt,optforces,option,optstress
  integer,intent(in) :: pawcpxocc,pawmixdg,pawnhatxc,pawspnorb,pawstgylm
- integer,intent(in) :: prtvol,tfkinfunc,usepaw,useylm,use_gpu_cuda,xclevel
+ integer,intent(in) :: prtvol,tfkinfunc,usepaw,useylm,gpu_option,xclevel
  real(dp) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -538,7 +539,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
    ABI_BUG(msg)
  end if
 
-!firstchar=' ';if (use_gpu_cuda==1) firstchar='_'
+!firstchar=' ';if (gpu_option/=0) firstchar='_'
  cmpw(:)=zero ; cfft(:)=zero ; cfftf(:)=zero ; cadd(:)=zero
  dttyp(:)=0
 
@@ -607,7 +608,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
  end if
 
 !Additional information if GPU
- if (use_gpu_cuda==1) then
+ if (gpu_option/=ABI_GPU_DISABLED) then
 !  write(msg, '(a)' )' GPU method is used'
 !  call wrtout(iout,msg)
 !  call wrtout(std_out,msg)
@@ -1857,7 +1858,7 @@ end subroutine memana
 !!  prtvol=control print volume
 !!  useylm=governs the way the nonlocal operator is to be applied:
 !!         1=using Ylm, 0=using Legendre polynomials
-!!  use_gpu_cuda=1 if Cuda (GPU) is on
+!!  gpu_option= GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!  xclevel= level of the XC functional
 !!
 !! OUTPUT
@@ -1887,7 +1888,7 @@ end subroutine memana
 !! driver - respfn - dfpt_looppert - dfpt_scfcv - dfpt_vtorho - dfpt_vtowfk -
 !!     dfpt_cgwf - getghc - fourwf or (nonlop+opernl)
 !!
-!! Also, it is assumed that the potentials are non-local, even if there
+!! Also, it is assumed that the potentials are non-local, even if they
 !!     are local ! It would be necessary to update this routine
 !!     now that the beginning of psp files is read before
 !!     the present call (XG 980502)
@@ -1902,7 +1903,7 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
 & mkmems,mpi_enreg,mpsang,mpssoang,mpw,mqgrid,&
 & natom,nband,nfft,ngfft,&
 & nkpt,nloalg,nspden,nspinor,nsppol,nsym,ntypat,&
-& occopt,optddk,optphon,option,optstrs,prtvol,useylm,use_gpu_cuda,xclevel)
+& occopt,optddk,optphon,option,optstrs,prtvol,useylm,gpu_option,xclevel)
 
 !Arguments ------------------------------------
 !scalars
@@ -1911,7 +1912,7 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
  integer,intent(in) :: mpssoang,mpw,mqgrid,n1xccc,natom,nfft,nkpt
  integer,intent(in) :: nspden,nspinor,nsppol,nsym,ntypat,occopt
  integer,intent(in) :: optddk,option,optphon,optstrs,prtvol,useylm
- integer,intent(in) :: use_gpu_cuda,xclevel
+ integer,intent(in) :: gpu_option,xclevel
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: mkmems(3),nband(nkpt*nsppol),ngfft(18)
@@ -1930,6 +1931,7 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
  integer :: fftalgb,matblk,maxmkmem,mincat,mk1mem,mkmem,mkqmem,mu,n_fftgr
  integer :: narr_fourdp,ngrad,nprocwf
  integer :: my_natom
+ integer :: my_mband
  real(dp) :: mbcg,mbdiskpd,mbdiskwf,mbf_fftgr,mbgylm
  character(len=500) :: msg
  character(len=1) :: firstchar
@@ -1946,7 +1948,7 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
    ABI_BUG(msg)
  end if
 
- firstchar=' ';if (use_gpu_cuda==1) firstchar='_'
+ firstchar=' ';if (gpu_option/=ABI_GPU_DISABLED) firstchar='_'
  cmpw(:)=zero ; cfft(:)=zero ; cadd(:)=zero
  dttyp(:)=0
 
@@ -1969,6 +1971,9 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
  mkqmem=mkmems(2)
  mk1mem=mkmems(3)
  my_natom=natom;if (mpi_enreg%nproc_atom>1) my_natom=mpi_enreg%my_natom
+ ! TODO: this does not work yet, as nproc_band is not initialized in the DFPT case (paralkgb is 0)
+ ! solution:  around src/57_iovars/m_mpi_setup.F90 line 1341, update to give nproc_band a value
+ my_mband = CEILING(dble(mband)/ max(mpi_enreg%nproc_band,1))
 
  write(msg,'( 4(a,i8),a,4(a,i8) )' ) &
 & '     intxc =',intxc   ,'      iscf =',iscf,&
@@ -1993,6 +1998,11 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
 & '-   mkqmem =',mkqmem ,'        mk1mem =',mk1mem,&
 & '           mpw =',mpw  ,ch10,&
 & '      nfft =',nfft ,'          nkpt =',nkpt
+ call wrtout(iout,msg)
+ call wrtout(std_out,msg)
+
+ write(msg,'(4(3(a,i12),a))') &
+& '- my_mband =',my_mband 
  call wrtout(iout,msg)
  call wrtout(std_out,msg)
 
@@ -2065,13 +2075,13 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
 !kg
  cmpw(18)=3*mkmem              ; dttyp(18)=4
 !cg
- cmpw(19)=2*nspinor*mband*mkmem*nsppol  ; dttyp(19)=8
+ cmpw(19)=2*nspinor*my_mband*mkmem*nsppol  ; dttyp(19)=8
 !kg1
  cmpw(21)=3*mk1mem             ; dttyp(21)=4
 !cgq
- cmpw(22)=2*nspinor*mband*mkqmem*nsppol  ; dttyp(22)=8
+ cmpw(22)=2*nspinor*my_mband*mkqmem*nsppol  ; dttyp(22)=8
 !cg1
- cmpw(23)=2*nspinor*mband*mk1mem*nsppol  ; dttyp(23)=8
+ cmpw(23)=2*nspinor*my_mband*mk1mem*nsppol  ; dttyp(23)=8
 !rhor1,rhog1
  cfft(24)=cplex*nspden+2       ; dttyp(24)=8
 !eigen1
@@ -2101,7 +2111,7 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
 
  if(mkqmem==0)then
 !  cgq_disk
-   cmpw(45)=2*nspinor*mband      ; dttyp(45)=8
+   cmpw(45)=2*nspinor*my_mband      ; dttyp(45)=8
  end if
 !doccde_k,doccde_kq,eig0_k, ..., eig1_k, rocceig
  cadd(47)=(14+3*mband)*mband   ; dttyp(47)=8
@@ -2200,10 +2210,10 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
 
 !Determine the largest array out of cg,cg1,cgq, cg_disk or f_fftgr (f_fftgr_disk)
  if(mkmem==0 .and. mk1mem==0 .and. mkqmem==0)then
-   mbcg=(8*2*mpw*nspinor*mband)/1024._dp**2 + 0.002_dp
+   mbcg=(8*2*mpw*nspinor*my_mband)/1024._dp**2 + 0.002_dp
  else
    maxmkmem=maxval(mkmems(:))
-   mbcg=(8*2*mpw*nspinor*mband*maxmkmem*nsppol)/1024._dp**2 + 0.002_dp
+   mbcg=(8*2*mpw*nspinor*my_mband*maxmkmem*nsppol)/1024._dp**2 + 0.002_dp
  end if
  if(mffmem==0)then
    mbf_fftgr=(8*cplex*nfft*n_fftgr)/1024._dp**2 + 0.002_dp

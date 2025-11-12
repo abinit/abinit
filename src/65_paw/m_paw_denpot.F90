@@ -6,7 +6,7 @@
 !!  This module contains routines related to PAW on-site densities and on-site potentials.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2022 ABINIT group (FJ, MT)
+!! Copyright (C) 2018-2025 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -18,15 +18,23 @@
 #endif
 
 #include "abi_common.h"
-
+	
 MODULE m_paw_denpot
 
  use defs_basis
+ use defs_abitypes
+ use m_dtset
+ use defs_datatypes,     only : pseudopotential_type
+ use m_paw_init
  use m_abicore
  use m_errors
  use m_xmpi
  use m_time, only : timab
 
+ use m_rcpaw
+ use m_paw_atom_solve
+ use m_extfpmd,          only : extfpmd_type
+ use m_paw_atomorb,      only : orb_relaxed_core
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type,pawrad_deducer0,poisson,simp_gen
  use m_pawtab,           only : pawtab_type
@@ -35,7 +43,9 @@ MODULE m_paw_denpot
  use m_pawfgrtab,        only : pawfgrtab_type
  use m_pawrhoij,         only : pawrhoij_type
  use m_pawdij,           only : pawdijhartree,pawdiju_euijkl,pawdijnd,pawdijso,pawxpot,pawdijfock,symdij,symdij_all
- use m_pawxc,            only : pawxc,pawxc_dfpt,pawxcm,pawxcm_dfpt,pawxcpositron,pawxcmpositron,pawxc_get_usekden
+ use m_pawxc,            only : pawxc,pawxc_dfpt,pawxcm,pawxcm_dfpt,pawxcpositron,pawxcmpositron, &
+&                               pawxc_get_usekden
+ use m_paw_energies,     only : paw_energies_type,paw_energies_setzero,paw_energies_to_array,n_paw_energies
  use m_paw_finegrid,     only : pawgylm
  use m_paral_atom,       only : get_my_atmtab,free_my_atmtab
  use m_paw_correlations, only : pawuenergy,pawxenergy,setnoccmmp
@@ -53,12 +63,14 @@ MODULE m_paw_denpot
  private
 
 !public procedures.
- public :: pawdenpot           ! Compute different (PAW) energies, densities and potentials inside PAW spheres
- public :: pawdensities        ! Compute PAW on-site densities (all-electron, pseudo and compensation)
- public :: pawkindensities     ! Compute PAW on-site kinetic energy densities (all-electron, pseudo)
- public :: pawaccenergy        ! Accumulate the atomic contribution of a PAW on-site energy
- public :: pawaccenergy_nospin ! As pawaccenergy, but with no spin polarization
- public :: paw_mknewh0         ! Compute bare PAW on-site Hamiltonian (-> GW calculations)
+ public :: pawdenpot            ! Compute different (PAW) energies, densities and potentials inside PAW spheres
+ public :: pawdensities         ! Compute PAW on-site densities (all-electron, pseudo and compensation)
+ public :: pawkindensities      ! Compute PAW on-site kinetic energy densities (all-electron, pseudo)
+ public :: pawaccenergy         ! Accumulate the atomic contribution of a PAW on-site energy
+ public :: pawaccenergy_nospin  ! As pawaccenergy, but with no spin polarization
+ public :: paw_mknewh0          ! Compute bare PAW on-site Hamiltonian (-> GW calculations)
+ public :: paw_relax_core       ! Relax PAW core
+!public :: paw_energies_setzero ! Set all energies in a paw_energies datastructure to zero
 
 CONTAINS  !========================================================================================
 !!***
@@ -77,6 +89,8 @@ CONTAINS  !=====================================================================
 !! INPUTS
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation (optional argument)
 !!  [hyb_mixing, hyb_mixing_sr]= -- optional-- mixing factors for the global (resp. screened) XC hybrid functional
+!!  el_temp=electronic temperature (hartree)
+!!  gprimd=reciprocal lattice translations
 !!  ipert=index of perturbation (used only for RF calculation ; set ipert<=0 for GS calculations.
 !!  ixc= choice of exchange-correlation scheme (see above, and below)
 !!  mpi_atmtab(:)=--optional-- indexes of the atoms treated by current proc
@@ -107,15 +121,22 @@ CONTAINS  !=====================================================================
 !!  pawxcdev=Choice of XC development (0=no dev. (use of angular mesh) ; 1 or 2=dev. on moments)
 !!  ucvol=unit cell volume (bohr^3)
 !!  xclevel= XC functional level
-!!  xc_denpos= lowest allowe density (usually for the computation of the XC functionals)
+!!  xc_denpos= lowest allowed density (usually for the computation of the XC functionals)
+!!  xc_taupos= lowest allowed kinetic energy density (for mGGA XC functionals)
+!!  xred=atom positions in reduced coordinates
 !!  znucl(ntypat)=gives the nuclear charge for all types of atoms
 !!
 !! OUTPUT
 !!  paw_ij(my_natom)%dijhartree(qphase*lmn2_size)=Hartree contribution to dij;
 !!                                      Enters into calculation of hartree energy
 !!  ==== if option=0 or 2
-!!    epaw=contribution to total energy from the PAW "on-site" part
-!!    epawdc=contribution to total double-counting energy from the PAW "on-site" part
+!!  paw_energies <type(pawang_type)>=several contributions to on-site PAW energies 
+!!    %epaw= total on-site PAW energy (direct scheme)
+!!    %epaw_dc= total on-site PAW energy (double counting scheme)
+!!    %epaw_core= core contribution to PAW energy (direct scheme)
+!!    %epaw_core_dc= core contribution to PAW energy (double counting scheme)
+!!    %epaw_xc= exchange-correlation on-site contribution to PAW energy
+!!    %entropy_paw= on-site PAW contribution to total entropy
 !!  ==== if option=0 or 2 and ipert<=0
 !!    compch_sph=compensation charge integral inside spheres computed over spherical meshes
 !!  ==== if (option=0 or 1) and paw_an(:)%has_vxc=1
@@ -141,24 +162,27 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
-& my_natom,natom,nspden,ntypat,nucdipmom,nzlmopt,option,paw_an,paw_an0,&
-& paw_ij,pawang,pawprtvol,pawrad,pawrhoij,pawspnorb,pawtab,pawxcdev,spnorbscl,xclevel,xc_denpos,ucvol,znucl,&
-& electronpositron,mpi_atmtab,comm_atom,vpotzero,hyb_mixing,hyb_mixing_sr) ! optional arguments
+subroutine pawdenpot(compch_sph,el_temp,gprimd,ipert,ixc,my_natom,natom,nspden,ntypat,nucdipmom,&
+& nzlmopt,option,paw_an,paw_an0,paw_energies,paw_ij,pawang,pawprtvol,pawrad,pawrhoij,&
+& pawspnorb,pawtab,pawxcdev,spnorbscl,xclevel,xc_denpos,xc_taupos,xred,ucvol,znucl,&
+& electronpositron,mpi_atmtab,comm_atom,vpotzero,hyb_mixing,hyb_mixing_sr,rcpaw,extfpmd) ! optional arguments
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: ipert,ixc,my_natom,natom,nspden,ntypat,nzlmopt,option,pawprtvol
  integer,intent(in) :: pawspnorb,pawxcdev,xclevel
  integer,optional,intent(in) :: comm_atom
- real(dp), intent(in) :: spnorbscl,xc_denpos,ucvol
+ real(dp),intent(in) :: spnorbscl,xc_denpos,xc_taupos,ucvol,el_temp
  real(dp),intent(in),optional :: hyb_mixing,hyb_mixing_sr
- real(dp),intent(out) :: compch_sph,epaw,epawdc
+ real(dp),intent(out) :: compch_sph
  type(electronpositron_type),pointer,optional :: electronpositron
  type(pawang_type),intent(in) :: pawang
+ type(paw_energies_type),intent(out) :: paw_energies
+ type(rcpaw_type),pointer,intent(inout),optional :: rcpaw
+ type(extfpmd_type),pointer, intent(in), optional :: extfpmd
 !arrays
  integer,optional,target,intent(in) :: mpi_atmtab(:)
- real(dp),intent(in) :: nucdipmom(3,natom),znucl(ntypat)
+ real(dp),intent(in) :: gprimd(3,3),nucdipmom(3,natom),xred(3,natom),znucl(ntypat)
  real(dp),intent(out),optional :: vpotzero(2)
  type(paw_an_type),intent(inout) :: paw_an(my_natom)
  type(paw_an_type), intent(in) :: paw_an0(my_natom)
@@ -171,16 +195,17 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 !scalars
  integer, parameter :: PAWU_ALGO_1=1,PAWU_ALGO_2=2
  integer, parameter :: PAWU_FLL=1,PAWU_AMF=2
- integer :: cplex,cplex_dij,cplex_rhoij,has_kxc,has_k3xc,has_vxctau
+ integer :: add_core_energy,cplex,cplex_dij,cplex_rhoij,has_kxc,has_k3xc,has_vxctau
  integer :: iatom,iatom_tot,idum,ierr,ii,ipositron,iq,iq0_dij,iq0_rhoij
  integer :: itypat,itypat0,lm_size,lmn2_size,mesh_size
  integer :: my_comm_atom,ndij,nkxc1,nk3xc1,nsppol,opt_compch,pawu_algo,pawu_dblec
  integer :: qphase,usecore,usekden,usetcore,usepawu,usexcnhat,usenhat,usefock
  logical :: keep_vhartree,my_atmtab_allocated,need_kxc,need_k3xc,need_vxctau
- logical :: non_magnetic_xc,paral_atom,temp_vxc
- real(dp) :: e1t10,e1xc,e1xcdc,efock,efockdc,eexc,eexcdc,eexdctemp
- real(dp) :: eexc_val,eexcdc_val,eexex,eexexdc,eextemp,eh2
- real(dp) :: edftumdc,edftumdcdc,edftufll,enucdip,etmp,espnorb,etild1xc,etild1xcdc
+ logical :: non_magnetic_xc,paral_atom,temp_vxc,eijkl_is_sym,rcpaw_has_valdens,usercpaw
+ real(dp) :: e1t10,e1xc,e1xcdc,efock,efockdc,eexc,ssxc,eexcdc,eexdctemp
+ real(dp) :: eexc_val,ssxc_val,eexcdc_val,eexex,eexexdc,eextemp,ssxtemp,eh2
+ real(dp) :: edftumdc,edftumdcdc,edftufll,ehnzc,ekincore,enucdip,etmp,espnorb,etild1xc,etild1xcdc
+ real(dp) :: s1xc,stild1xc,sxccore,extfpmd_rho
  real(dp) :: exccore,exchmix,hyb_mixing_,hyb_mixing_sr_,rdum
  character(len=3) :: pertstrg
  character(len=500) :: msg
@@ -188,10 +213,10 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
  integer :: idum1(0),idum3(0,0,0)
  integer,pointer :: my_atmtab(:)
  logical,allocatable :: lmselect_cur(:),lmselect_cur_ep(:),lmselect_ep(:),lmselect_tmp(:)
- real(dp) :: mpiarr(7),tsec(2)
+ real(dp) :: tsec(2)
  real(dp),allocatable :: dij_ep(:),dijfock_vv(:,:),dijfock_cv(:,:)
  real(dp),allocatable :: one_over_rad2(:),kxc_tmp(:,:,:),k3xc_tmp(:,:,:)
- real(dp),allocatable :: nhat1(:,:,:),nhat1_ep(:,:,:)
+ real(dp),allocatable :: mpiarr(:),nhat1(:,:,:),nhat1_ep(:,:,:)
  real(dp) :: rdum2(0,0),rdum3(0,0,0),rdum3a(0,0,0),rdum4(0,0,0,0)
  real(dp),allocatable :: rho(:),rho1(:,:,:),rho1_ep(:,:,:),rho1xx(:,:,:)
  real(dp),allocatable :: tau1(:,:,:),ttau1(:,:,:), trho1(:,:,:),trho1_ep(:,:,:)
@@ -206,8 +231,10 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 !Various inits
  hyb_mixing_   =zero ; if(present(hyb_mixing))    hyb_mixing_   =hyb_mixing
  hyb_mixing_sr_=zero ; if(present(hyb_mixing_sr)) hyb_mixing_sr_=hyb_mixing_sr
+ usercpaw=.false. ; if (present(rcpaw)) usercpaw=associated(rcpaw)
  usefock=0;if (abs(hyb_mixing_)>tol8.or.abs(hyb_mixing_sr_)>tol8) usefock=1
  usexcnhat=maxval(pawtab(1:ntypat)%usexcnhat)
+ add_core_energy=minval(pawtab(1:ntypat)%add_core_energy)
  usekden=pawxc_get_usekden(ixc)
  usenhat = usexcnhat
  keep_vhartree=(maxval(paw_an(:)%has_vhartree)>0)
@@ -251,8 +278,10 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      ABI_BUG(msg)
    end if
    if (ipert>0.and.paw_an(1)%has_vxctau==1.and.usekden==1) then
-     msg='computation of vxctau not compatible with RF (ipert>0)!'
-     ABI_BUG(msg)
+      if (ipert .NE. natom+1) then
+        msg='computation of vxctau not compatible with RF (ipert>0)!'
+        ABI_BUG(msg)
+     end if
    end if
    if (ipert>0.and.paw_an(1)%has_vhartree==1) then
      msg='computation of vhartree not compatible with RF (ipert>0)!'
@@ -284,29 +313,28 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
  call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,&
 & my_natom_ref=my_natom)
 
-!For some perturbations, nothing to do
- if (ipert==natom+1.or.ipert==natom+10) then
-   if (option/=1) then
-     epaw=zero;epawdc=zero
-   end if
-   return
- end if
-
 !Init energies
  if (option/=1) then
+   call paw_energies_setzero(paw_energies)
    e1xc=zero     ; e1xcdc=zero
    etild1xc=zero ; etild1xcdc=zero
+   s1xc=zero     ; stild1xc=zero ; sxccore=zero
    exccore=zero  ; eh2=zero ; e1t10=zero
    edftumdc=zero ; edftumdcdc=zero ; edftufll=zero
    eexex=zero    ; eexexdc=zero
    eextemp=zero  ; eexdctemp=zero
    espnorb=zero  ; enucdip=zero
    efock=zero    ; efockdc=zero
+   ekincore=zero ; ehnzc=zero
    if (ipositron/=0) then
      electronpositron%e_paw  =zero
      electronpositron%e_pawdc=zero
    end if
  end if
+
+!For some perturbations, nothing to do
+ if (ipert==natom+1.or.ipert==natom+10) return
+
 !vpotzero is needed for both the energy and the potential
  if (present(vpotzero)) vpotzero(:)=zero
 
@@ -350,7 +378,6 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
    lmn2_size=paw_ij(iatom)%lmn2_size
    lm_size=paw_an(iatom)%lm_size
    mesh_size=pawtab(itypat)%mesh_size
-
    usecore=1;usetcore =pawtab(itypat)%usetcore
    if (ipert/=0) usecore=0  ! This is true for phonons and Efield pert.
    if (ipert/=0) usetcore=0 ! This is true for phonons and Efield pert.
@@ -415,9 +442,26 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 !  ===== Compute "on-site" densities (n1, ntild1, nhat1) =====
 !  ==========================================================
 
-   call pawdensities(compch_sph,cplex,iatom_tot,lmselect_cur,paw_an(iatom)%lmselect,lm_size,&
-&   nhat1,nspden,nzlmopt,opt_compch,1-usenhat,-1,1,pawang,pawprtvol,pawrad(itypat),&
-&   pawrhoij(iatom),pawtab(itypat),rho1,trho1,one_over_rad2=one_over_rad2)
+   rcpaw_has_valdens=.false.
+   if(usercpaw) then
+     rcpaw_has_valdens=rcpaw%val(iatom)%has_dens
+   endif
+   if(rcpaw_has_valdens) then
+     rho1=rcpaw%val(iatom)%rho1
+     trho1=rcpaw%val(iatom)%trho1
+     if(usenhat==1) nhat1=rcpaw%val(iatom)%nhat1
+     compch_sph=rcpaw%val(iatom)%compch_sph
+   else
+     extfpmd_rho=zero
+     if(present(extfpmd)) then
+       if(associated(extfpmd)) then
+         !extfpmd_rho=extfpmd%nelect/ucvol !This needs testing but is probably correct
+       endif
+     endif
+     call pawdensities(compch_sph,cplex,iatom_tot,lmselect_cur,paw_an(iatom)%lmselect,lm_size,&
+&     nhat1,nspden,nzlmopt,opt_compch,1-usenhat,-1,1,pawang,pawprtvol,pawrad(itypat),&
+&     pawrhoij(iatom),pawtab(itypat),rho1,trho1,extfpmd_rho=extfpmd_rho,one_over_rad2=one_over_rad2)
+   endif
 
    if (usekden==1) then
      ABI_MALLOC(lmselect_tmp,(lm_size))
@@ -493,31 +537,34 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
    if (ipositron/=1) then
      if (pawxcdev/=0) then
        if (ipert==0) then
-         call pawxcm(pawtab(itypat)%coredens,eexc,eexcdc,idum,hyb_mixing_,ixc,kxc_tmp,lm_size,&
+         call pawxcm(pawtab(itypat)%coredens,eexc,eexcdc,ssxc,idum,hyb_mixing_,ixc,kxc_tmp,lm_size,&
 &         paw_an(iatom)%lmselect,nhat1,nkxc1,non_magnetic_xc,mesh_size,nspden,option,&
-&         pawang,pawrad(itypat),pawxcdev,rho1,usecore,0,vxc_tmp,xclevel,xc_denpos)
+&         pawang,pawrad(itypat),pawxcdev,rho1,usecore,0,vxc_tmp,xclevel,xc_denpos,el_temp)
        else
          call pawxcm_dfpt(pawtab(itypat)%coredens,cplex,cplex,eexc,ixc,paw_an0(iatom)%kxc1,lm_size,&
 &         paw_an(iatom)%lmselect,nhat1,paw_an0(iatom)%nkxc1,non_magnetic_xc,mesh_size,nspden,option,&
 &         pawang,pawrad(itypat),rho1,usecore,0,vxc_tmp,xclevel)
          eexcdc=zero
+         ssxc=zero ! Forcing entropy to zero when using dfpt for now
        end if
      else
        if (ipert==0) then
-         call pawxc(pawtab(itypat)%coredens,eexc,eexcdc,hyb_mixing_,ixc,kxc_tmp,k3xc_tmp,lm_size,&
+         call pawxc(pawtab(itypat)%coredens,eexc,eexcdc,ssxc,hyb_mixing_,ixc,kxc_tmp,k3xc_tmp,lm_size,&
 &         paw_an(iatom)%lmselect,nhat1,nkxc1,nk3xc1,non_magnetic_xc,mesh_size,nspden,option,&
-&         pawang,pawrad(itypat),rho1,usecore,0,vxc_tmp,xclevel,xc_denpos,&
-&         coretau=pawtab(itypat)%coretau,taur=tau1,vxctau=vxctau_tmp)
+&         pawang,pawrad(itypat),rho1,usecore,0,vxc_tmp,xclevel,xc_denpos,el_temp,&
+&         coretau=pawtab(itypat)%coretau,taur=tau1,vxctau=vxctau_tmp,xc_taupos=xc_taupos)
        else
          call pawxc_dfpt(pawtab(itypat)%coredens,cplex,cplex,eexc,ixc,paw_an0(iatom)%kxc1,lm_size,&
 &         paw_an(iatom)%lmselect,nhat1,paw_an0(iatom)%nkxc1,non_magnetic_xc,mesh_size,nspden,option,&
 &         pawang,pawrad(itypat),rho1,usecore,0,paw_an0(iatom)%vxc1,vxc_tmp,xclevel)
          eexcdc=zero
+         ssxc=zero ! Forcing entropy to zero when using dfpt for now
        end if
      end if
      if (option/=1) then
        e1xc=e1xc+eexc
        e1xcdc=e1xcdc+eexcdc
+       s1xc=s1xc+ssxc
      end if
      if (option<2.or.temp_vxc) paw_an(iatom)%vxc1(:,:,:)=vxc_tmp(:,:,:)
      if (option<2.and.need_vxctau) paw_an(iatom)%vxctau1(:,:,:)=vxctau_tmp(:,:,:)
@@ -527,7 +574,6 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      if (option<2.or.temp_vxc) paw_an(iatom)%vxc1(:,:,:)=zero
      if (need_kxc.and.nkxc1>0) paw_an(iatom)%kxc1(:,:,:)=zero
    end if
-
 
 !  Additional electron-positron XC term (if ipositron/=0)
    if (ipositron/=0) then
@@ -555,34 +601,37 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      if (pawxcdev/=0) then
        if (ipert==0) then
          call pawxcm(pawtab(itypat)%tcoredens(:,1),&
-&         eexc,eexcdc,idum,hyb_mixing_,ixc,kxc_tmp,lm_size,&
+&         eexc,eexcdc,ssxc,idum,hyb_mixing_,ixc,kxc_tmp,lm_size,&
 &         paw_an(iatom)%lmselect,nhat1,nkxc1,non_magnetic_xc,mesh_size,nspden,option,&
-&         pawang,pawrad(itypat),pawxcdev,trho1,usetcore,2*usexcnhat,vxc_tmp,xclevel,xc_denpos)
+&         pawang,pawrad(itypat),pawxcdev,trho1,usetcore,2*usexcnhat,vxc_tmp,xclevel,xc_denpos,el_temp)
        else
          call pawxcm_dfpt(pawtab(itypat)%tcoredens(:,1),&
 &         cplex,cplex,eexc,ixc,paw_an0(iatom)%kxct1,lm_size,&
 &         paw_an(iatom)%lmselect,nhat1,paw_an0(iatom)%nkxc1,non_magnetic_xc,mesh_size,nspden,option,&
 &         pawang,pawrad(itypat),trho1,usetcore,2*usexcnhat,vxc_tmp,xclevel)
          eexcdc=zero
+         ssxc=zero ! Forcing entropy to zero when using dfpt for now
        end if
      else
        if (ipert==0) then
          call pawxc(pawtab(itypat)%tcoredens(:,1),&
-&         eexc,eexcdc,hyb_mixing_,ixc,kxc_tmp,k3xc_tmp,lm_size,&
+&         eexc,eexcdc,ssxc,hyb_mixing_,ixc,kxc_tmp,k3xc_tmp,lm_size,&
 &         paw_an(iatom)%lmselect,nhat1,nkxc1,nk3xc1,non_magnetic_xc,mesh_size,nspden,option,&
-&         pawang,pawrad(itypat),trho1,usetcore,2*usexcnhat,vxc_tmp,xclevel,xc_denpos,&
-&         coretau=pawtab(itypat)%tcoretau,taur=ttau1,vxctau=vxctau_tmp)
+&         pawang,pawrad(itypat),trho1,usetcore,2*usexcnhat,vxc_tmp,xclevel,xc_denpos,el_temp,&
+&         coretau=pawtab(itypat)%tcoretau,taur=ttau1,vxctau=vxctau_tmp,xc_taupos=xc_taupos)
        else
          call pawxc_dfpt(pawtab(itypat)%tcoredens(:,1),&
 &         cplex,cplex,eexc,ixc,paw_an0(iatom)%kxct1,lm_size,&
 &         paw_an(iatom)%lmselect,nhat1,paw_an0(iatom)%nkxc1,non_magnetic_xc,mesh_size,nspden,option,&
 &         pawang,pawrad(itypat),trho1,usetcore,2*usexcnhat,paw_an0(iatom)%vxct1,vxc_tmp,xclevel)
          eexcdc=zero
+         ssxc=zero ! Forcing entropy to zero when using dfpt for now
        end if
      end if
      if (option/=1) then
        etild1xc=etild1xc+eexc
        etild1xcdc=etild1xcdc+eexcdc
+       stild1xc=stild1xc+ssxc
      end if
      if (option<2) paw_an(iatom)%vxct1(:,:,:)=vxc_tmp(:,:,:)
      if (option<2.and.need_vxctau) paw_an(iatom)%vxcttau1(:,:,:)=vxctau_tmp(:,:,:)
@@ -622,7 +671,10 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
    if (need_kxc.and.nkxc1>0) paw_an(iatom)%has_kxc=2
 
 !  Update core XC contribution to energy
-   if (option/=1.and.ipositron/=1) exccore=exccore+pawtab(itypat)%exccore
+   if (option/=1.and.ipositron/=1) then
+     exccore=exccore+pawtab(itypat)%exccore
+     sxccore=sxccore+pawtab(itypat)%sxccore
+   end if
 
 !  =========== Compute valence-only XC potentials ===========
 !  ==========================================================
@@ -637,16 +689,16 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 &       ' pawdenpot : Computing valence-only v_xc[n1] using moments ',ch10,&
 &       '             Min density rho1 = ',MINVAL(rho1)
        call wrtout(std_out,msg,'COLL')
-       call pawxcm(pawtab(itypat)%coredens,eexc_val,eexcdc_val,idum,hyb_mixing_,ixc,kxc_tmp,lm_size,&
+       call pawxcm(pawtab(itypat)%coredens,eexc_val,eexcdc_val,ssxc_val,idum,hyb_mixing_,ixc,kxc_tmp,lm_size,&
 &       paw_an(iatom)%lmselect,nhat1,nkxc1,non_magnetic_xc,mesh_size,nspden,option,&
-&       pawang,pawrad(itypat),pawxcdev,rho1,0,0,vxc_tmp,xclevel,xc_denpos)
+&       pawang,pawrad(itypat),pawxcdev,rho1,0,0,vxc_tmp,xclevel,xc_denpos,el_temp)
      else
        write(msg,'(2a)')ch10,' pawdenpot : Computing valence-only v_xc[n1] using angular mesh '
        call wrtout(std_out,msg,'COLL')
 
-       call pawxc(pawtab(itypat)%coredens,eexc_val,eexcdc_val,hyb_mixing_,ixc,kxc_tmp,k3xc_tmp,lm_size,&
+       call pawxc(pawtab(itypat)%coredens,eexc_val,eexcdc_val,ssxc_val,hyb_mixing_,ixc,kxc_tmp,k3xc_tmp,lm_size,&
 &       paw_an(iatom)%lmselect,nhat1,nkxc1,nk3xc1,non_magnetic_xc,mesh_size,nspden,option,&
-&       pawang,pawrad(itypat),rho1,0,0,vxc_tmp,xclevel,xc_denpos)
+&       pawang,pawrad(itypat),rho1,0,0,vxc_tmp,xclevel,xc_denpos,el_temp)
      end if
      if (option<2) paw_an(iatom)%vxc1_val(:,:,:)=vxc_tmp(:,:,:)
 
@@ -664,16 +716,16 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
        end if
        call wrtout(std_out,msg,'COLL')
        call pawxcm(pawtab(itypat)%tcoredens(:,1),&
-&       eexc_val,eexcdc_val,idum,hyb_mixing_,ixc,kxc_tmp,lm_size,&
+&       eexc_val,eexcdc_val,ssxc_val,idum,hyb_mixing_,ixc,kxc_tmp,lm_size,&
 &       paw_an(iatom)%lmselect,nhat1,nkxc1,non_magnetic_xc,mesh_size,nspden,option,&
-&       pawang,pawrad(itypat),pawxcdev,trho1,0,2*usexcnhat,vxc_tmp,xclevel,xc_denpos)
+&       pawang,pawrad(itypat),pawxcdev,trho1,0,2*usexcnhat,vxc_tmp,xclevel,xc_denpos,el_temp)
      else
        write(msg,'(2a)')ch10,' pawdenpot : Computing valence-only v_xc[tn1+nhat] using angular mesh'
        call wrtout(std_out,msg,'COLL')
        call pawxc(pawtab(itypat)%tcoredens(:,1),&
-&       eexc_val,eexcdc_val,hyb_mixing_,ixc,kxc_tmp,k3xc_tmp,lm_size,&
+&       eexc_val,eexcdc_val,ssxc_val,hyb_mixing_,ixc,kxc_tmp,k3xc_tmp,lm_size,&
 &       paw_an(iatom)%lmselect,nhat1,nkxc1,nk3xc1,non_magnetic_xc,mesh_size,nspden,option,&
-&       pawang,pawrad(itypat),trho1,0,2*usexcnhat,vxc_tmp,xclevel,xc_denpos)
+&       pawang,pawrad(itypat),trho1,0,2*usexcnhat,vxc_tmp,xclevel,xc_denpos,el_temp)
      end if
      if (option<2) then
        paw_an(iatom)%vxct1_val(:,:,:)=vxc_tmp(:,:,:)
@@ -682,9 +734,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
    end if ! valence-only XC potentials
 
    ABI_FREE(vxc_tmp)
-   if (usekden==1) then
-     ABI_FREE(vxctau_tmp)
-   end if
+   ABI_FREE(vxctau_tmp)
    ABI_FREE(kxc_tmp)
    ABI_FREE(k3xc_tmp)
 
@@ -705,12 +755,13 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 !    ===== Re-compute Exc1 and Vxc1; for local exact-exchange, this is done in GGA only
      ABI_MALLOC(vxc_tmp,(mesh_size,lm_size,nspden))
      ABI_MALLOC(kxc_tmp,(mesh_size,lm_size,nkxc1))
-     call pawxcm(pawtab(itypat)%coredens,eextemp,eexdctemp,pawtab(itypat)%useexexch,hyb_mixing_,ixc,kxc_tmp,lm_size,&
+     call pawxcm(pawtab(itypat)%coredens,eextemp,eexdctemp,ssxtemp,pawtab(itypat)%useexexch,hyb_mixing_,ixc,kxc_tmp,lm_size,&
 &     paw_an(iatom)%lmselect,nhat1,nkxc1,non_magnetic_xc,mesh_size,nspden,option,pawang,pawrad(itypat),pawxcdev,&
-&     rho1xx,0,0,vxc_tmp,xclevel,xc_denpos)
+&     rho1xx,0,0,vxc_tmp,xclevel,xc_denpos,el_temp)
      if (option/=1) then
        e1xc=e1xc-eextemp*exchmix
        e1xcdc=e1xcdc-eexdctemp*exchmix
+       s1xc=s1xc-ssxtemp*exchmix
      end if
      if (option<2) then
        paw_an(iatom)%vxc_ex(:,:,:)=vxc_tmp(:,:,:)
@@ -734,7 +785,12 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 
 !  Hartree Dij computation
    if (ipositron/=1) then
-     call pawdijhartree(paw_ij(iatom)%dijhartree,cplex,nspden,pawrhoij(iatom),pawtab(itypat))
+     eijkl_is_sym=.true.
+     if(usercpaw) then
+       eijkl_is_sym=rcpaw%eijkl_is_sym(itypat)
+     endif
+     call pawdijhartree(paw_ij(iatom)%dijhartree,cplex,nspden,pawrhoij(iatom),pawtab(itypat),&
+&     is_sym=eijkl_is_sym)
    else
      paw_ij(iatom)%dijhartree(:)=zero
    end if
@@ -743,6 +799,13 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 !  Hartree energy computation
    if (option/=1) then
      call pawaccenergy_nospin(eh2,pawrhoij(iatom),paw_ij(iatom)%dijhartree,1,qphase,pawtab(itypat))
+   end if
+
+!  Core + nucleus Hartree energy accumulation
+!  Core kinetic energy accumulation
+   if (option/=1) then
+     ehnzc=ehnzc+pawtab(itypat)%ehnzc
+     ekincore=ekincore+pawtab(itypat)%ekincore
    end if
 
 !  Electron-positron calculation:
@@ -767,7 +830,8 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 !  Equation 10 (density) and up to 43 (Hartree potential of density)
 !    of Kresse and Joubert PRB 59 1758 (1999) [[cite:Kresse1999]]
    keep_vhartree=(paw_an(iatom)%has_vhartree>0)
-   if ((pawspnorb>0.and.ipert==0.and.ipositron/=1).or.keep_vhartree) then
+   if ((pawspnorb>0.and.ipert==0.and.ipositron/=1).or.keep_vhartree.or.&
+     (any(abs(nucdipmom(:,iatom))>tol8))) then
 
      !In the first clause case, would it not be simpler just to turn on has_vhartree?
      if (.not. allocated(paw_an(iatom)%vh1)) then
@@ -862,13 +926,16 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 
 !    Compute nuclear dipole contribution to Dij if necessary
      if (paw_ij(iatom)%has_dijnd/=2) then
-       call pawdijnd(paw_ij(iatom)%dijnd,cplex_dij,ndij,nucdipmom(:,iatom),pawrad(itypat),pawtab(itypat))
+       call pawdijnd(paw_ij(iatom)%dijnd,cplex_dij,gprimd,iatom,natom,ndij,nspden,&
+         & nucdipmom(1:3,1:natom),pawang,pawrad(itypat),pawtab(itypat),pawxcdev,qphase,&
+         & paw_an(iatom)%vh1,paw_an(iatom)%vxc1,xred,znucl(itypat),paw_ij(iatom)%zora)
        paw_ij(iatom)%has_dijnd=2
      end if
 
 !    Compute nuclear dipole contribution to energy
      if (option/=1) then
-       call pawaccenergy_nospin(enucdip,pawrhoij(iatom),paw_ij(iatom)%dijnd,cplex_dij,1,pawtab(itypat))
+       call pawaccenergy_nospin(enucdip,pawrhoij(iatom),paw_ij(iatom)%dijnd,&
+         & cplex_dij,1,pawtab(itypat))
      end if
 
    end if
@@ -880,14 +947,17 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 
 !    Compute spin-orbit contribution to Dij
      if (option/=2.or.cplex_rhoij==2) then
-       call pawdijso(paw_ij(iatom)%dijso,cplex_dij,cplex,ndij,nspden,pawang,pawrad(itypat),pawtab(itypat), &
-&                    pawxcdev,spnorbscl,paw_an(iatom)%vh1,paw_an(iatom)%vxc1)
+       call pawdijso(paw_ij(iatom)%dijso,cplex_dij,cplex,ndij,nspden,pawang,&
+         & pawrad(itypat),pawtab(itypat),pawxcdev,spnorbscl,paw_an(iatom)%vh1,&
+         & paw_an(iatom)%vxc1,znucl(itypat),paw_ij(iatom)%zora,&
+         & nucdipmom=nucdipmom(1:3,iatom))
        paw_ij(iatom)%has_dijso=2
      end if
 
 !    Compute spin-orbit contribution to on-site energy
      if (option/=1.and.cplex_rhoij==2) then
-       call pawaccenergy(espnorb,pawrhoij(iatom),paw_ij(iatom)%dijso,cplex_dij,qphase,ndij,pawtab(itypat))
+       call pawaccenergy(espnorb,pawrhoij(iatom),paw_ij(iatom)%dijso,&
+         & cplex_dij,qphase,ndij,pawtab(itypat))
      end if
 
    end if
@@ -1020,11 +1090,25 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 
  if (option/=1) then
    if (ipert==0) then
-     epaw=e1xc+half*eh2+e1t10-exccore-etild1xc+edftumdc+edftufll+eexex+espnorb+efock+enucdip
-     epawdc=e1xc-e1xcdc-half*eh2-exccore-etild1xc+etild1xcdc+edftumdcdc-eexex-efockdc
+     paw_energies%epaw=e1xc+half*eh2+e1t10-exccore-etild1xc+edftumdc+edftufll+eexex+espnorb+efock+enucdip
+     paw_energies%epaw_dc=e1xc-e1xcdc-half*eh2-exccore-etild1xc+etild1xcdc+edftumdcdc-eexex-efockdc
+     paw_energies%epaw_xc=e1xc-etild1xc !+eexex
+     paw_energies%entropy_paw=s1xc-sxccore-stild1xc ! PAW entropy coming from finite-temperature xc functionals
+     paw_energies%epaw_core=zero ; paw_energies%epaw_core_dc=zero
+     if (abs(ekincore)>tiny(zero).and.ipositron/=1) then
+       paw_energies%epaw_core=exccore+ekincore+ehnzc
+       paw_energies%epaw_core_dc=paw_energies%epaw_core
+     end if
+     if (add_core_energy==1.and.(.not.usercpaw)) then
+       paw_energies%epaw=paw_energies%epaw+paw_energies%epaw_core
+       paw_energies%epaw_dc=paw_energies%epaw_dc+paw_energies%epaw_core_dc
+     endif
    else
-     epaw=e1xc-etild1xc+eh2+two*edftumdc
-     epawdc=zero
+     paw_energies%epaw=e1xc-etild1xc+eh2+two*edftumdc
+     paw_energies%epaw_dc=zero
+     paw_energies%epaw_core=zero
+     paw_energies%epaw_core_dc=zero
+     paw_energies%entropy_paw=zero ! Force PAW entropy contribution to zero when using RF.
    end if
  end if
 
@@ -1034,28 +1118,47 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
  if (paral_atom) then
    if (option/=1)  then
      call timab(48,1,tsec)
-     mpiarr=zero
-     mpiarr(1)=compch_sph;mpiarr(2)=epaw;mpiarr(3)=epawdc
+     ABI_MALLOC(mpiarr,(5+n_paw_energies))
+     mpiarr=zero ; ii=0
+     call paw_energies_to_array(paw_energies,mpiarr(ii+1:ii+n_paw_energies),1)
+     ii=ii+n_paw_energies
+     mpiarr(ii+1)=compch_sph ; ii=ii+1
      if (ipositron/=0) then
-       mpiarr(4)=electronpositron%e_paw
-       mpiarr(5)=electronpositron%e_pawdc
+       mpiarr(ii+1)=electronpositron%e_paw
+       mpiarr(ii+2)=electronpositron%e_pawdc
+       ii=ii+2
      end if
      if (present(vpotzero)) then
-       mpiarr(6)=vpotzero(1)
-       mpiarr(7)=vpotzero(2)
+       mpiarr(ii+1:ii+2)=vpotzero(1:2)
+       ii=ii+2
      end if
      call xmpi_sum(mpiarr,my_comm_atom,ierr)
-     compch_sph=mpiarr(1);epaw=mpiarr(2);epawdc=mpiarr(3)
+     ii=0
+     call paw_energies_to_array(paw_energies,mpiarr(ii+1:ii+n_paw_energies),-1)
+     ii=ii+n_paw_energies
+     compch_sph=mpiarr(ii+1) ; ii=ii+1     
      if (ipositron/=0) then
-       electronpositron%e_paw=mpiarr(4)
-       electronpositron%e_pawdc=mpiarr(5)
+       electronpositron%e_paw=mpiarr(ii+1)
+       electronpositron%e_pawdc=mpiarr(ii+2)
+       ii=ii+2
      end if
      if (present(vpotzero)) then
-       vpotzero(1)=mpiarr(6)
-       vpotzero(2)=mpiarr(7)
+       vpotzero(1:2)=mpiarr(ii+1:ii+2)
+       ii=ii+2
      end if
+     ABI_FREE(mpiarr)
      call timab(48,2,tsec)
    end if
+ end if
+
+!In case we have an entropy associated with PAW contribution
+!(e.g. using finite-temperature exchange-correlation functionals),
+!we retrieve exchange-correlation internal energies e_paw, e_pawdc
+!using entropy spaw.
+ if(option/=1.and.abs(paw_energies%entropy_paw)>tiny(zero)) then
+   paw_energies%epaw=paw_energies%epaw+el_temp*paw_energies%entropy_paw
+   paw_energies%epaw_dc=paw_energies%epaw_dc+el_temp*paw_energies%entropy_paw
+   paw_energies%epaw_xc=paw_energies%epaw_xc+el_temp*paw_energies%entropy_paw
  end if
 
 !Destroy atom table used for parallelism
@@ -1124,12 +1227,13 @@ end subroutine pawdenpot
 
 subroutine pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,lm_size,nhat1,nspden,nzlmopt,&
 &          opt_compch,opt_dens,opt_l,opt_print,pawang,pawprtvol,pawrad,pawrhoij,pawtab,rho1,trho1,&
-&          one_over_rad2) ! optional
+&          extfpmd_rho,one_over_rad2) ! optional
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: cplex,iatom,lm_size,nspden,nzlmopt,opt_compch,opt_dens,opt_l,opt_print,pawprtvol
  real(dp),intent(inout) :: compch_sph
+ real(dp),intent(in),optional :: extfpmd_rho
  type(pawang_type),intent(in) :: pawang
  type(pawrad_type),intent(in) :: pawrad
  type(pawrhoij_type),intent(in) :: pawrhoij
@@ -1353,6 +1457,14 @@ subroutine pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,lm_size,nh
      ABI_FREE(aa)
      ABI_FREE(bb)
    end if
+
+! Add extfpmd contribution
+   if(present(extfpmd_rho)) then
+     rho1(:,1,:)=rho1(:,1,:)+sqrt(four_pi)*extfpmd_rho
+     if(opt_dens<=1) then
+       trho1(:,1,:)=trho1(:,1,:)+sqrt(four_pi)*extfpmd_rho
+     endif
+   endif
 
 !  -- Test moments of densities and store non-zero ones
    if (nzlmopt==-1) then
@@ -1639,9 +1751,9 @@ subroutine pawkindensities(cplex,lmselectin,lm_size,nspden,nzlmopt,&
                  phiphj=pawtab%nablaphi(ir,iln)*pawtab%nablaphi(ir,jln)
                  tphitphj=pawtab%tnablaphi(ir,iln)*pawtab%tnablaphi(ir,jln)
                  tau1(cplex*ir-dplex:ir*cplex,ilm,ispden)=tau1(cplex*ir-dplex:ir*cplex,ilm,ispden)&
-    &             +ro_rg(1:cplex)*phiphj*one_over_rad2_(ir)
+&                 +ro_rg(1:cplex)*phiphj*one_over_rad2_(ir)
                  ttau1(cplex*ir-dplex:ir*cplex,ilm,ispden)=ttau1(cplex*ir-dplex:ir*cplex,ilm,ispden)&
-    &             +ro_rg(1:cplex)*tphitphj*one_over_rad2_(ir)
+&                 +ro_rg(1:cplex)*tphitphj*one_over_rad2_(ir)
                end do
              end if
            end if
@@ -2317,6 +2429,138 @@ end subroutine paw_mknewh0
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_paw_denpot/paw_relax_core
+!! NAME
+!! paw_relax_core
+!!
+!! FUNCTION
+!! Relaxes the PAW cores
+!!
+!! INPUTS
+!!
+!! SIDE EFFECTS
+!!
+!! SOURCE
+
+subroutine paw_relax_core(pawtab,pawrad,pawang,pawrhoij,ntypat,rcpaw,psps,dtset,&
+& cplex,nzlmopt,option,ucvol,paw_an,my_natom,&
+&  mpi_atmtab,comm_atom,extfpmd)
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: ntypat,cplex,nzlmopt,option
+ integer,intent(in) :: my_natom
+ integer,optional,intent(in) :: comm_atom
+ real(dp), intent(in) :: ucvol
+ type(extfpmd_type), pointer,intent(in), optional :: extfpmd
+ type(rcpaw_type),pointer, intent(inout) :: rcpaw
+ type(dataset_type), intent(in) :: dtset
+ type(pseudopotential_type),intent(inout) :: psps
+ type(pawang_type),intent(in),target :: pawang
+!arrays
+ integer,optional,target,intent(in) :: mpi_atmtab(:)
+ type(pawtab_type), target,intent(inout) :: pawtab(ntypat)
+ type(pawrad_type), intent(in) :: pawrad(ntypat)
+ type(pawrhoij_type),intent(in) :: pawrhoij(my_natom)
+ type(paw_an_type),intent(inout) :: paw_an(my_natom)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iatom,itypat
+ integer :: mesh_size
+ integer :: ispden
+ integer :: lm_size
+ integer :: my_comm_atom,iat,ierr
+ integer :: opt_compch
+ logical :: my_atmtab_allocated,paral_atom
+ real(dp) :: extfpmd_rho
+ type(pawang_type),pointer :: pawang_
+!arrays
+ integer,pointer :: my_atmtab(:)
+ logical,allocatable :: lmselect_cur(:)
+ real(dp), allocatable :: nval(:),nval_tmp(:)
+
+!******************************************************************************************
+
+ !Set up parallelism over atoms
+ paral_atom=(present(comm_atom).and.(my_natom/=dtset%natom))
+ nullify(my_atmtab);if (present(mpi_atmtab)) my_atmtab => mpi_atmtab
+ my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
+ call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,dtset%natom,my_natom_ref=my_natom)
+
+ ! Some setup
+ if(cplex.ne.1) then
+   ABI_ERROR('RCPAW: cplex not 1')
+ endif
+ opt_compch=0;if (option/=1) opt_compch=1
+ pawang_=>pawang
+ extfpmd_rho=zero
+ if(present(extfpmd)) then
+   if(associated(extfpmd)) then
+     extfpmd_rho=extfpmd%nelect/ucvol
+   endif
+ endif
+
+ ! loop over atoms
+ do itypat=1,dtset%ntypat
+   mesh_size=pawtab(itypat)%mesh_size
+   ABI_MALLOC(nval,(mesh_size))
+   ABI_MALLOC(nval_tmp,(mesh_size))
+   nval=zero
+   nval_tmp=zero
+   do iat=1,my_natom
+     iatom=iat;if (paral_atom) iatom=my_atmtab(iat)
+     if(dtset%typat(iatom)==itypat) then ! Average over atoms of same typat
+       mesh_size=pawtab(itypat)%mesh_size
+       lm_size=pawtab(itypat)%lcut_size**2
+       ABI_MALLOC(lmselect_cur,(lm_size))
+       lmselect_cur(:)=.true.
+       if (nzlmopt==1) lmselect_cur(:)=paw_an(iat)%lmselect(:)
+       rcpaw%val(iat)%compch_sph=zero
+       call pawdensities(rcpaw%val(iat)%compch_sph,cplex,itypat,lmselect_cur,paw_an(iat)%lmselect,lm_size,&
+&      rcpaw%val(iat)%nhat1,dtset%nspden,nzlmopt,&
+&      opt_compch,0,-1,1,pawang_,dtset%pawprtvol,pawrad(itypat),pawrhoij(iat),pawtab(itypat),rcpaw%val(iat)%rho1,rcpaw%val(iat)%trho1,extfpmd_rho)
+       rcpaw%val(iat)%has_dens=.true.
+       do ispden=1,dtset%nspden
+         nval_tmp(1:pawtab(itypat)%mesh_size)=nval_tmp(1:pawtab(itypat)%mesh_size)+rcpaw%val(iat)%rho1(1:pawtab(itypat)%mesh_size,1,ispden)*&
+&              sqrt(four*pi)*pawrad(itypat)%rad(1:pawtab(itypat)%mesh_size)**2
+       end do
+       ABI_FREE(lmselect_cur)
+       nval=nval+nval_tmp
+     endif
+   enddo
+   ABI_FREE(nval_tmp)
+   ! mpi reduction
+   if(paral_atom) then
+     call xmpi_sum(nval,my_comm_atom,ierr)
+     call xmpi_bcast(nval,0,my_comm_atom,ierr)
+   endif
+   nval=nval/rcpaw%atm(itypat)%mult ! Average over atoms of same typat
+   if(rcpaw%atm(itypat)%mode(1,1)==orb_relaxed_core) then ! Relax the core
+     write(std_out,*) 'RCPAW: core relaxation for typat ',itypat
+     call atompaw_solve(rcpaw%atp(itypat),pawrad(itypat),pawtab(itypat),&
+&          nval,psps%mqgrid_vl,psps%qgrid_vl,psps%epsatm(itypat),psps%vlspl(:,:,itypat),&
+&          psps%ziontypat(itypat),&
+&          (rcpaw%istep<=rcpaw%nfrpaw),(rcpaw%istep<=rcpaw%nfrtnc),rcpaw%atm(itypat))
+   endif
+   ABI_FREE(nval)
+ enddo
+
+ ! Updae PAW transform related quantities
+ if(rcpaw%istep<=rcpaw%nfrpaw+1) then
+   call pawinit(zero,0,zero,zero,dtset%pawlcutd,0,0,0,0,0,pawang_,pawrad,0,pawtab,0,0,0,rcpaw_update=.true.)
+ endif
+ rcpaw%eijkl_is_sym=.false.
+
+ ! Update core energies
+ call rcpaw_core_energies(rcpaw,ntypat)
+
+ !Destroy atom table used for parallelism
+ call free_my_atmtab(my_atmtab,my_atmtab_allocated)
+
+end subroutine paw_relax_core
+!!***
 
 END MODULE m_paw_denpot
 !!***

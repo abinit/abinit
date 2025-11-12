@@ -3,11 +3,10 @@
 !!  m_psps
 !!
 !! FUNCTION
-!!  This module provides method to allocate/free/initialize the
-!!  pseudopotential_type object.
+!!  This module provides method to allocate/free/initialize the pseudopotential_type object.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2022 ABINIT group (XG,DC,MG)
+!!  Copyright (C) 2014-2025 ABINIT group (XG,DC,MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,13 +28,11 @@ module m_psps
  use m_nctk
  use m_copy
  use m_dtset
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_fstrings,      only : itoa, sjoin, yesno, atoi
  use m_io_tools,      only : open_file
- use m_symtk,         only : matr3inv
+ use m_matrix,        only : matr3inv
  use defs_datatypes,  only : pspheader_type, pseudopotential_type, pseudopotential_gth_type, nctab_t
  use m_paw_numeric,   only : paw_spline
  use m_pawrad,        only : pawrad_type, pawrad_init, pawrad_free, simp_gen
@@ -50,12 +47,24 @@ module m_psps
  ! Helper functions
  public :: test_xml_xmlpaw_upf     ! Test if a pseudo potential file is in XML, XML-PAW or in UPF format.
 
+!type, extends(pseudopotentials_base_t), public :: pseudopotentials_type
+!contains
+!end type pseudopotentials_base_type
+!!***
+
  public :: psps_init_global        ! Allocate and init all part of psps structure that are independent of a given dataset.
  public :: psps_init_from_dtset    ! Allocate and init all part of psps structure that are dependent of a given dataset.
  public :: psps_free               ! Deallocate all memory of psps structure.
  public :: psps_copy               ! Copy the psps structure.
  public :: psps_print              ! Print info on the pseudopotentials.
- public :: psps_ncwrite            ! Write psps data in netcdf format.
+ public :: psps_ncwrite_path       ! Create a netcdf file and write psps data.
+ public :: psps_ncwrite            ! Write psps data in an open netcdf file.
+ public :: psps_ncread             ! Read psps data from an open netcdf file.
+
+!type, extends(nctab_base_t), public :: nctab_t
+!contains
+!end type nctab_t
+!!***
 
  public :: nctab_init              ! Create the object.
  public :: nctab_free              ! Free memory.
@@ -96,7 +105,6 @@ subroutine test_xml_xmlpaw_upf(path, usexml, xmlpaw, useupf)
  integer :: temp_unit, ii
  character(len=500) :: msg,errmsg
  character(len=70) :: testxml
-
 ! *************************************************************************
 
 !  Check if the file pseudopotential file is written in XML
@@ -164,8 +172,6 @@ end subroutine test_xml_xmlpaw_upf
 !! pspheads(npsp)=<type pspheader_type>all the important information from the
 !!   pseudopotential file header, as well as the psp file name
 !!
-!! OUTPUT
-!!
 !! SIDE EFFECTS
 !! psps=<type pseudopotential_type>the pseudopotentials description
 !!
@@ -181,9 +187,7 @@ subroutine psps_init_global(psps, mtypalch, npsp, pspheads)
  type(pspheader_type),intent(in) :: pspheads(npsp)
 
 !Local variables-------------------------------
-!scalars
  integer :: ii, mpsang, n1xccc
-
 ! *************************************************************************
 
 !Allocation of some arrays independent of the dataset
@@ -195,6 +199,7 @@ subroutine psps_init_global(psps, mtypalch, npsp, pspheads)
  ABI_MALLOC(psps%title,(npsp))
  ABI_MALLOC(psps%zionpsp,(npsp))
  ABI_MALLOC(psps%znuclpsp,(npsp))
+ ABI_MALLOC(psps%epsatm,(npsp))
  call psp2params_init(psps%gth_params, npsp)
 
  psps%filpsp(1:npsp)=pspheads(1:npsp)%filpsp
@@ -265,7 +270,6 @@ subroutine psps_init_from_dtset(psps, dtset, idtset, pspheads)
  integer :: ipsp,lmnmax,lmnmaxso,lnmax,lnmaxso,newmqgrid,newmqgriddg,nptsgvec
  integer :: changed,ii,itypat
  real(dp) :: gprimd_orig(3,3)
-
 ! *************************************************************************
 
  psps%optnlxccc   = dtset%optnlxccc
@@ -279,7 +283,7 @@ subroutine psps_init_from_dtset(psps, dtset, idtset, pspheads)
  call matr3inv(dtset%rprimd_orig(:,:,1),gprimd_orig)
  if ( dtset%usewvl == 0) then
    call setmqgrid(newmqgrid,newmqgriddg,dtset%ecut*dtset%dilatmx**2,&
-&       dtset%pawecutdg*dtset%dilatmx**2,gprimd_orig,nptsgvec,psps%usepaw)
+                  dtset%pawecutdg*dtset%dilatmx**2,gprimd_orig,nptsgvec,psps%usepaw)
  else
    call setmqgrid(newmqgrid,newmqgriddg,one,one,gprimd_orig,nptsgvec,psps%usepaw)
  end if
@@ -292,7 +296,7 @@ subroutine psps_init_from_dtset(psps, dtset, idtset, pspheads)
 
 !Determine the maximum number of projectors, for the set of pseudo atom
  call getdim_nloc(lmnmax,lmnmaxso,lnmax,lnmaxso,dtset%mixalch_orig,dtset%nimage,psps%npsp,dtset%npspalch,&
-& dtset%ntypat,dtset%ntypalch,pspheads)
+                  dtset%ntypat,dtset%ntypalch,pspheads)
 
  psps%npspalch = dtset%npspalch
  psps%ntypat   = dtset%ntypat
@@ -326,11 +330,6 @@ subroutine psps_init_from_dtset(psps, dtset, idtset, pspheads)
  do ipsp=1,dtset%npsp
    if(dtset%nspinor==1)then
      psps%pspso(ipsp)=0
-     ! This is needed to treate SOC perturbatively in sigma.
-     !if (dtset%optdriver == RUNL_SIGMA .and. dtset%so_psp(ipsp) /= 0) then
-     !  ABI_WARNING("Setting pspso to 2 although nspinor == 1")
-     !  psps%pspso(ipsp) = 2
-     !end if
 
      ! Ideally the following line should not exist, but at present, the space has to be booked
      if(pspheads(ipsp)%pspso/=0)psps%mpspso=2
@@ -380,6 +379,7 @@ subroutine psps_init_from_dtset(psps, dtset, idtset, pspheads)
      ABI_SFREE(psps%ekb)
    end if
    ABI_MALLOC(psps%ekb,(psps%dimekb,dtset%ntypat*(1-psps%usepaw)))
+   psps%ekb = zero
    dimekb_old=psps%dimekb
  end if
 
@@ -389,6 +389,7 @@ subroutine psps_init_from_dtset(psps, dtset, idtset, pspheads)
      ABI_SFREE(psps%indlmn)
    end if
    ABI_MALLOC(psps%indlmn,(6,psps%lmnmax,dtset%ntypat))
+   psps%indlmn = zero
    lmnmax_old=psps%lmnmax
  end if
 
@@ -400,6 +401,8 @@ subroutine psps_init_from_dtset(psps, dtset, idtset, pspheads)
    end if
    ABI_MALLOC(psps%ffspl,(psps%mqgrid_ff,2,psps%lnmax,dtset%ntypat))
    ABI_MALLOC(psps%qgrid_ff,(psps%mqgrid_ff))
+   psps%ffspl = zero
+   psps%qgrid_ff = zero
    mqgridff_old=psps%mqgrid_ff
    lnmax_old=psps%lnmax
  end if
@@ -422,6 +425,8 @@ subroutine psps_init_from_dtset(psps, dtset, idtset, pspheads)
 
    ABI_MALLOC(psps%qgrid_vl,(psps%mqgrid_vl))
    ABI_MALLOC(psps%vlspl,(psps%mqgrid_vl,2,dtset%ntypat))
+   psps%qgrid_vl = zero
+   psps%vlspl = zero
 
    if (psps%usepaw == 0) then
      ! If you change usepaw in the input, you will get what you deserve!
@@ -433,6 +438,7 @@ subroutine psps_init_from_dtset(psps, dtset, idtset, pspheads)
 
    if (.not.psps%vlspl_recipSpace) then
      ABI_MALLOC(psps%dvlspl,(psps%mqgrid_vl,2,dtset%ntypat))
+     psps%dvlspl = zero
    end if
    mqgridvl_old=psps%mqgrid_vl
  end if
@@ -441,8 +447,12 @@ subroutine psps_init_from_dtset(psps, dtset, idtset, pspheads)
    changed = changed + 1
    if(idtset/=1) then
      ABI_SFREE(psps%xccc1d)
+     ABI_SFREE(psps%xcctau1d)
    end if
    ABI_MALLOC(psps%xccc1d,(psps%n1xccc*(1-psps%usepaw),6,dtset%ntypat))
+   ABI_MALLOC(psps%xcctau1d,(psps%n1xccc*(1-psps%usepaw),6,dtset%ntypat))
+   psps%xccc1d = zero
+   psps%xcctau1d = zero
    usepaw_old=psps%usepaw
  end if
 
@@ -456,6 +466,9 @@ subroutine psps_init_from_dtset(psps, dtset, idtset, pspheads)
    ABI_MALLOC(psps%xcccrc,(dtset%ntypat))
    ABI_MALLOC(psps%znucltypat,(dtset%ntypat))
    ABI_MALLOC(psps%ziontypat,(dtset%ntypat))
+   psps%xcccrc = zero
+   psps%znucltypat = zero
+   psps%ziontypat = zero
    ntypat_old=dtset%ntypat
  end if
 
@@ -478,11 +491,10 @@ end subroutine psps_init_from_dtset
 subroutine psps_free(psps)
 
 !Arguments ------------------------------------
- type(pseudopotential_type),intent(inout) :: psps
+ class(pseudopotential_type),intent(inout) :: psps
 
 !Local variables-------------------------------
  integer :: ii
-
 ! *************************************************************************
 
 !Allocation of some arrays independent of the dataset
@@ -492,8 +504,6 @@ subroutine psps_free(psps)
  ABI_SFREE(psps%pspso)
  ABI_SFREE(psps%pspxc)
  ABI_SFREE(psps%title)
- ABI_SFREE(psps%zionpsp)
- ABI_SFREE(psps%znuclpsp)
  ABI_SFREE(psps%algalch)
  ABI_SFREE(psps%mixalch)
  ABI_SFREE(psps%ekb)
@@ -504,10 +514,14 @@ subroutine psps_free(psps)
  ABI_SFREE(psps%vlspl)
  ABI_SFREE(psps%dvlspl)
  ABI_SFREE(psps%xccc1d)
+ ABI_SFREE(psps%xcctau1d)
  ABI_SFREE(psps%xcccrc)
  ABI_SFREE(psps%ziontypat)
+ ABI_SFREE(psps%zionpsp)
  ABI_SFREE(psps%znucltypat)
+ ABI_SFREE(psps%znuclpsp)
  ABI_SFREE(psps%md5_pseudos)
+ ABI_SFREE(psps%epsatm)
 
  ! Free types.
  call psp2params_free(psps%gth_params)
@@ -537,11 +551,10 @@ subroutine psps_copy(pspsin, pspsout)
 
 !Arguments ------------------------------------
  class(pseudopotential_type),intent(in) :: pspsin
- class(pseudopotential_type),intent(out) :: pspsout
+ class(pseudopotential_type),intent(inout) :: pspsout
 
 !Local variables-------------------------------
  integer :: ii
-
 ! *************************************************************************
 
  ! integer
@@ -580,19 +593,34 @@ subroutine psps_copy(pspsin, pspsout)
  if (allocated(pspsin%pspxc)) call alloc_copy(pspsin%pspxc, pspsout%pspxc)
 
  ! real allocatable
- if (allocated(pspsin%ekb)) call alloc_copy( pspsin%ekb, pspsout%ekb)
+ if (pspsin%dimekb > 0 .and. pspsin%usepaw==0) then
+   if (allocated(pspsin%ekb)) then
+     call alloc_copy( pspsin%ekb, pspsout%ekb)
+   end if
+ else
+   ABI_MALLOC(pspsout%ekb,(pspsout%dimekb,pspsout%ntypat * (1 - pspsout%usepaw)))
+   pspsout%ekb = zero
+ end if
  if (allocated(pspsin%ffspl)) call alloc_copy( pspsin%ffspl, pspsout%ffspl)
  if (allocated(pspsin%mixalch)) call alloc_copy(pspsin%mixalch, pspsout%mixalch)
  if (allocated(pspsin%qgrid_ff)) call alloc_copy(pspsin%qgrid_ff, pspsout%qgrid_ff)
  if (allocated(pspsin%qgrid_vl)) call alloc_copy(pspsin%qgrid_vl, pspsout%qgrid_vl)
  if (allocated(pspsin%vlspl)) call alloc_copy(pspsin%vlspl, pspsout%vlspl)
  if (allocated(pspsin%dvlspl)) call alloc_copy(pspsin%dvlspl, pspsout%dvlspl)
- if (allocated(pspsin%xcccrc)) call alloc_copy(pspsin%xcccrc, pspsout%xcccrc)
- if (allocated(pspsin%xccc1d)) call alloc_copy(pspsin%xccc1d, pspsout%xccc1d)
- if (allocated(pspsin%zionpsp)) call alloc_copy(pspsin%zionpsp, pspsout%zionpsp)
+
  if (allocated(pspsin%ziontypat)) call alloc_copy(pspsin%ziontypat, pspsout%ziontypat)
- if (allocated(pspsin%znuclpsp)) call alloc_copy(pspsin%znuclpsp, pspsout%znuclpsp)
  if (allocated(pspsin%znucltypat)) call alloc_copy(pspsin%znucltypat, pspsout%znucltypat)
+ if (allocated(pspsin%epsatm)) call alloc_copy(pspsin%epsatm,pspsout%epsatm)
+
+ ! GA: Could make a check on mtypalch here
+ if (allocated(pspsin%znuclpsp)) call alloc_copy(pspsin%znuclpsp, pspsout%znuclpsp)
+ if (allocated(pspsin%zionpsp)) call alloc_copy(pspsin%zionpsp, pspsout%zionpsp)
+
+ if (pspsin%n1xccc > 0) then
+   if (allocated(pspsin%xcccrc)) call alloc_copy(pspsin%xcccrc, pspsout%xcccrc)
+   if (allocated(pspsin%xccc1d)) call alloc_copy(pspsin%xccc1d, pspsout%xccc1d)
+   if (allocated(pspsin%xcctau1d)) call alloc_copy(pspsin%xcctau1d, pspsout%xcctau1d)
+ end if
 
  ! allocate and copy character strings
  ABI_MALLOC(pspsout%filpsp,(pspsout%npsp))
@@ -607,9 +635,11 @@ subroutine psps_copy(pspsin, pspsout)
  ! allocate and copy objects
  if (allocated(pspsin%nctab)) then
    ABI_MALLOC(pspsout%nctab,(pspsout%ntypat))
-   do ii=1,pspsout%ntypat
-     call nctab_copy(pspsin%nctab(ii), pspsout%nctab(ii))
-   end do
+   if (pspsin%usepaw==0) then
+     do ii=1,pspsout%ntypat
+       call nctab_copy(pspsin%nctab(ii), pspsout%nctab(ii))
+     end do
+   end if
  end if
 
  call psp2params_copy(pspsin%gth_params, pspsout%gth_params)
@@ -628,7 +658,7 @@ end subroutine psps_copy
 !!
 !! INPUTS
 !!  psps=<type pseudopotential_type>=Info on the pseudopotentials.
-!!  unit(optional)=unit number for output
+!!  units=unit numbers for output
 !!  prtvol(optional)=verbosity level
 !!  mode_paral(optional): either "COLL" or "PERS"
 !!
@@ -637,112 +667,108 @@ end subroutine psps_copy
 !!
 !! SOURCE
 
-subroutine psps_print(psps, unit, prtvol, mode_paral)
+subroutine psps_print(psps, units, prtvol, mode_paral)
 
 !Arguments ------------------------------------
 !scalars
  class(pseudopotential_type),intent(in) :: psps
- integer,intent(in),optional :: prtvol,unit
+ integer,intent(in) :: units(:)
+ integer,intent(in),optional :: prtvol
  character(len=4),intent(in),optional :: mode_paral
 
 !Local variables-------------------------------
 !scalars
- integer :: ierr,ips,ipsp_alch,ityp_alch,itypat,unt,my_prtvol
+ integer :: ips,ipsp_alch,ityp_alch,itypat,my_prtvol
  character(len=4) :: mode
  character(len=500) :: msg
 !arrays
- integer :: cond_values(4)
- character(len=9) :: cond_string(4)
-
 ! *************************************************************************
 
  ! Provide defaults
  my_prtvol=0; if (present(prtvol)) my_prtvol=prtvol
- unt=std_out; if (present(unit)) unt=unit
  mode='COLL'; if (present(mode_paral)) mode=mode_paral
- ierr=0; cond_string(1:4)=' '; cond_values(:)=0
 
  ! General info including spin-orbit
- call wrtout(unt,' ==== Info on pseudopotentials ==== ', mode)
+ call wrtout(units,' ==== Info on pseudopotentials ==== ', mode)
 
- SELECT CASE (psps%usepaw)
- CASE (0)
-   call wrtout(unt,'  Norm-conserving pseudopotentials ', mode)
-   !call wrtout(unt, sjoin('  Max number of Kleinman-Bylander energies ', itoa(psps%dimekb)), mode)
+ select case (psps%usepaw)
+ case (0)
+   call wrtout(units,'  Norm-conserving pseudopotentials ', mode)
+   !call wrtout(units, sjoin('  Max number of Kleinman-Bylander energies ', itoa(psps%dimekb)), mode)
    !do itypat=1,psps%ntypat
    ! write(msg,'(a,i4,a,f9.4)')' Type ',itypat,' K-B energies ',(psps%ekb(ikbe,itypat),ikbe=1,psps%dimekb)
    !end do
- CASE (1)
+ case (1)
    write(msg,'(a)')
-   call wrtout(unt,'  PAW calculation', mode)
-   !call wrtout(unt,sjoin('  Max number of D_ij coefficients ', itoa(psps%dimekb)), mode)
- CASE DEFAULT
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'usepaw',psps%usepaw,2,[0,1],unt)
- END SELECT
+   call wrtout(units,'  PAW calculation', mode)
+   !call wrtout(units,sjoin('  Max number of D_ij coefficients ', itoa(psps%dimekb)), mode)
+ case default
+   ABI_ERROR(sjoin("Invalid usepaw: ", itoa(psps%usepaw)))
+ end select
 
- !SELECT CASE (psps%positron)
- !CASE (0)
- !  call wrtout(unt, '  Standard Electron Calculation ', mode)
- !CASE (1,2)
+ !select case (psps%positron)
+ !case (0)
+ !  call wrtout(units, '  Standard Electron Calculation ', mode)
+ !case (1,2)
  !  write(msg,'(a,i0)')'  Positron Calculation with positron .. ',psps%positron
- !  call wrtout(unt,msg,mode)
- !CASE DEFAULT
- !  call chkint_eq(0,0,cond_string,cond_values,ierr,'positron',psps%positron,3,[0,1,2],unt)
- !END SELECT
+ !  call wrtout(units,msg,mode)
+ !case default
+ !   ABI_ERROR(sjoin("Invalid positron: ", itoa(psps%positron)))
+ !end select
 
  write(msg,'(a,i4,2a,i4)')&
   '  Number of pseudopotentials .. ',psps%npsp,ch10,&
   '  Number of types of atoms   .. ',psps%ntypat
- call wrtout(unt,msg,mode)
+ call wrtout(units,msg,mode)
 
  if (psps%usepaw==0) then
-   SELECT CASE (psps%mpspso)
-   CASE (1)
-     call wrtout(unt,'  Scalar calculation (no spin-orbit term) ',mode)
-   CASE (2)
+   select case (psps%mpspso)
+   case (1)
+     call wrtout(units,'  Scalar calculation (no spin-orbit term) ',mode)
+   case (2)
      write(msg,'(3a,i3)')&
       '  Calculation with spin-orbit coupling ',ch10,&
       '  Max number of channels (spin-orbit included) ',psps%mpssoang
-     call wrtout(unt,msg,mode)
+     call wrtout(units,msg,mode)
      do itypat=1,psps%ntypat
        if (psps%pspso(itypat) /= 1) then
          write(msg,'(a,i4,a,i2,a)')&
           '  - Atom type ',itypat,' has spin-orbit characteristics (pspso= ',psps%pspso(itypat),")"
-         call wrtout(unt,msg,mode)
+         call wrtout(units,msg,mode)
        end if
      end do
-   CASE DEFAULT
-     call chkint_eq(0,0,cond_string,cond_values,ierr,'mpspso',psps%mpspso,2,[1,2],unt)
-   END SELECT
+   case default
+     ABI_ERROR(sjoin("Invalid mpspso: ", itoa(psps%mpspso)))
+   end select
  else
-   SELECT CASE (maxval(psps%pspso))
-   CASE (0,1)
+   select case (maxval(psps%pspso))
+   case (0,1)
      msg='  Scalar calculation (no spin-orbit term) '
-   CASE (2)
+   case (2)
      msg='  Calculation with spin-orbit coupling '
-   END SELECT
-   call wrtout(unt,msg,mode)
+   end select
+   call wrtout(units,msg,mode)
  end if
 
  ! Info on nonlocal part
- SELECT CASE (psps%useylm)
- CASE (0)
+ select case (psps%useylm)
+ case (0)
    msg = '  Nonlocal part applied using Legendre polynomials '
- CASE (1)
+ case (1)
    msg = '  Nonlocal part applied using real spherical harmonics '
- CASE DEFAULT
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'psps%useylm',psps%useylm,2,(/0,1/),unt)
- END SELECT
- call wrtout(unt,msg,mode)
+ case default
+   ABI_ERROR(sjoin("Invalid useylm: ", itoa(psps%useylm)))
+ end select
+ call wrtout(units,msg,mode)
 
  write(msg,'(a,i3)')'  Max number of non-local projectors over l and type ',psps%mproj
- call wrtout(unt,msg,mode)
+ call wrtout(units,msg,mode)
 
  write(msg,'(a,i3,2a,i3,2a,i3)')&
  '  Highest angular momentum +1 ....... ',psps%mpsang,ch10,&
  '  Max number of (l,n)   components .. ',psps%lnmax, ch10,&
  '  Max number of (l,m,n) components .. ',psps%lmnmax
- call wrtout(unt,msg,mode)
+ call wrtout(units,msg,mode)
 
  !FIXME for paw n1xccc==1
  ! Non-linear Core correction
@@ -752,10 +778,10 @@ subroutine psps_print(psps, unit, prtvol, mode_paral)
     '   Number of radial points for pseudo-core charge .. ',psps%n1xccc,ch10,&
     '   XC core-correction treatment (optnlxccc) ........ ',psps%optnlxccc,ch10,&
     '   Radius for pseudo-core charge for each type ..... ',ch10
-   call wrtout(unt,msg,mode)
+   call wrtout(units,msg,mode)
    do itypat=1,psps%ntypat
-     write(msg,'(a,i4,a,f7.4)')'  - Atom type ',itypat,' has pseudo-core radius .. ',psps%xcccrc(itypat)
-     call wrtout(unt,msg,mode)
+     write(msg,'(a,i4,a,f12.4)')'  - Atom type ',itypat,' has pseudo-core radius .. ',psps%xcccrc(itypat)
+     call wrtout(units,msg,mode)
    end do
  end if
 
@@ -766,7 +792,7 @@ subroutine psps_print(psps, unit, prtvol, mode_paral)
     '   Number of pure pseudoatoms .... ',psps%ntyppure,ch10,&
     '   Number of pseudos for mixing .. ',psps%npspalch,ch10,&
     '   Alchemical pseudoatoms ........ ',psps%ntypalch,ch10
-   call wrtout(unt,msg,mode)
+   call wrtout(units,msg,mode)
    do ipsp_alch=1,psps%npspalch
      do ityp_alch=1,psps%ntypalch
        write(std_out,*)' mixalch ',psps%mixalch(ipsp_alch,ityp_alch)
@@ -774,7 +800,7 @@ subroutine psps_print(psps, unit, prtvol, mode_paral)
    end do
    do ityp_alch=1,psps%ntypalch
      write(msg,'(a,i4,a,i4)')' For alchemical atom no. ',ityp_alch,' algalch is .. ',psps%algalch(ityp_alch)
-     call wrtout(unt,msg,mode)
+     call wrtout(units,msg,mode)
    end do
  end if
 
@@ -783,26 +809,26 @@ subroutine psps_print(psps, unit, prtvol, mode_paral)
   ' Info on the Q-grid used for form factors in spline form: ',ch10,&
   '   Number of q-points for radial functions ffspl .. ',psps%mqgrid_ff,ch10,&
   '   Number of q-points for vlspl ................... ',psps%mqgrid_vl
- call wrtout(unt,msg,mode)
+ call wrtout(units,msg,mode)
 
  if (psps%vlspl_recipSpace) then
-   call wrtout(unt,'   vloc is computed in Reciprocal Space ',mode)
+   call wrtout(units,'   vloc is computed in Reciprocal Space ',mode)
  else
-   call wrtout(unt,'   vloc is computed in Real Space ',mode)
+   call wrtout(units,'   vloc is computed in Real Space ',mode)
  end if
  if (psps%usepaw == 0) then
-   if (psps%nc_xccc_gspace == 0) call wrtout(unt,'   model core charge treated in real-space', mode)
-   if (psps%nc_xccc_gspace == 1) call wrtout(unt,'   model core charge treated in G-space', mode)
+   if (psps%nc_xccc_gspace == 0) call wrtout(units,'   model core charge treated in real-space', mode)
+   if (psps%nc_xccc_gspace == 1) call wrtout(units,'   model core charge treated in G-space', mode)
  end if
 
  !TODO additional stuff that might be printed
- call wrtout(unt, "", mode)
+ call wrtout(units, "", mode)
  do itypat=1,psps%ntypat
    write(msg,'(a,i0,a,i0)')'  XC functional for type ',itypat,' is ',psps%pspxc(itypat)
-   call wrtout(unt,msg,mode)
+   call wrtout(units,msg,mode)
    !write(std_out,*)psps%ziontypat(itypat),psps%znucltypat(itypat)
    if (psps%usepaw == 0) then
-     call wrtout(unt, sjoin("  Pseudo valence available: ", yesno(psps%nctab(itypat)%has_tvale)), mode)
+     call wrtout(units, sjoin("  Pseudo valence available: ", yesno(psps%nctab(itypat)%has_tvale)), mode)
    end if
  end do
 
@@ -818,9 +844,43 @@ subroutine psps_print(psps, unit, prtvol, mode_paral)
    end do
  end if
 
- call wrtout(unt, "", mode)
+ call wrtout(units, "", mode)
 
 end subroutine psps_print
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_psps/psps_ncwrite_path
+!! NAME
+!! psps_ncwrite_path
+!!
+!! FUNCTION
+!!  Create a new NETCDF file,
+!!  and output the most important arrays defined in the pseudopotential_type
+!!  for futher post-processing.
+!!  This function should be called by master node only.
+!!
+!! INPUTS
+!!   path=File name.
+!!
+!! SOURCE
+
+subroutine psps_ncwrite_path(psps, path)
+
+!Arguments ------------------------------------
+ class(pseudopotential_type),intent(in) :: psps
+ character(len=*),intent(in) :: path
+
+!Local variables-------------------------------
+ integer :: ncid
+! *************************************************************************
+
+ NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
+ call psps_ncwrite(psps, ncid)
+ NCF_CHECK(nf90_close(ncid))
+
+end subroutine psps_ncwrite_path
 !!***
 
 !----------------------------------------------------------------------
@@ -830,27 +890,51 @@ end subroutine psps_print
 !! psps_ncwrite
 !!
 !! FUNCTION
-!!  Writes on file the most important arrays defined in the pseudopotential_type
-!!  for futher post-processing. This function should be called by master node only.
+!!  Output the most important arrays defined in the pseudopotential_type
+!!  in NETCDF file format for futher post-processing.
+!!  This function should be called by master node only.
 !!
 !! INPUTS
-!!   path=File name.
+!!  ncid=NC file handle.
 !!
 !! SOURCE
 
-subroutine psps_ncwrite(psps, path)
+subroutine psps_ncwrite(psps, ncid)
 
 !Arguments ------------------------------------
  class(pseudopotential_type),intent(in) :: psps
- character(len=*),intent(in) :: path
+ integer,intent(in) :: ncid
 
 !Local variables-------------------------------
- integer :: ipsp,itypat,ncid,ncerr
-
+!scalars
+ integer :: ipsp,itypat,ncerr
+ integer :: with_xccc, n1xccc, with_alch
+ integer :: with_xcctau
+!arrays
+ real(dp), allocatable :: dummy3(:,:,:)
+ !real(dp), allocatable :: dummy1(:)
 ! *************************************************************************
 
-#ifdef HAVE_NETCDF
- NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
+ with_alch = 0  ! Alchemical IO not supported at the moment.
+ !psps%mtypalch = zero
+
+ ! GA: Note that lnmax is not used in the DDB text format,
+ !     so lnmax and lmnmax may be inconsistent in the netcdf file.
+ !NCF_CHECK(nctk_set_defmode(ncid))
+
+ with_xccc = 0
+ if (psps%n1xccc > 0) then
+   with_xccc = 1
+   with_xcctau = 1
+ end if
+ n1xccc = max(1, psps%n1xccc)
+
+ if (.not. allocated(psps%xcccrc) .or. .not. allocated(psps%xccc1d) .or. psps%usepaw /= 0) then
+   with_xccc = 0
+ end if
+ if (.not. allocated(psps%xcctau1d) .or. psps%usepaw /= 0) then
+   with_xcctau = 0
+ end if
 
  ! Define dimensions
  ncerr = nctk_def_dims(ncid, [ &
@@ -859,28 +943,27 @@ subroutine psps_ncwrite(psps, path)
      nctkdim_t("ntypat", psps%ntypat), &
      nctkdim_t("npsp", psps%npsp), &
      nctkdim_t("lnmax", psps%lnmax), &
-     nctkdim_t("lmnmax", psps%lnmax), &
+     nctkdim_t("lmnmax", psps%lmnmax), &
      nctkdim_t("dimekb", psps%dimekb), &
      nctkdim_t("mqgrid_vl", psps%mqgrid_vl), &
-     nctkdim_t("mqgrid_ff", psps%mqgrid_ff) &
+     nctkdim_t("mqgrid_ff", psps%mqgrid_ff), &
+     nctkdim_t("n1xccc", n1xccc) &
  ])
  NCF_CHECK(ncerr)
 
- if (psps%n1xccc /= 0) then ! 0 means unlimited!
-   NCF_CHECK(nctk_def_dims(ncid, nctkdim_t("n1xccc", psps%n1xccc)))
- end if
-
  ! Define variables
- ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "usepaw", "useylm"])
+ ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
+                                  "usepaw", "useylm", "with_xccc", "with_xcctau", "with_alch"])
  NCF_CHECK(ncerr)
 
+ ! Arrays
  ncerr = nctk_def_arrays(ncid, [&
    nctkarr_t("ziontypat", "dp", "ntypat"), &
    nctkarr_t("znucltypat", "dp", "ntypat"), &
+   nctkarr_t("spinorbit", "int", "npsp"), &
    nctkarr_t("qgrid_vl", "dp", "mqgrid_vl"), &
    nctkarr_t("qgrid_ff", "dp", "mqgrid_ff"), &
    nctkarr_t("vlspl", "dp", "mqgrid_vl, two, ntypat"), &
-   nctkarr_t("xcccrc", "dp", "ntypat"), &
    nctkarr_t("indlmn", "int", "six, lmnmax, ntypat"), &
    nctkarr_t("ffspl", "dp", "mqgrid_ff, two, lnmax, ntypat"), &
    nctkarr_t("filpsp", "char", "fnlen, npsp"), &
@@ -890,29 +973,47 @@ subroutine psps_ncwrite(psps, path)
 
  if (psps%usepaw == 0) then
    NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("ekb", "dp", "dimekb, ntypat")))
-   if (psps%n1xccc /= 0) then
-     NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("xccc1d", "dp", "n1xccc, six, ntypat")))
+   !if (with_xccc > 0) then
+   NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("xccc1d", "dp", "n1xccc, six, ntypat")))
+   if (with_xcctau > 0) then
+     NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("xcctau1d", "dp", "n1xccc, six, ntypat")))
    end if
+   NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("xcccrc", "dp", "ntypat")))
+
    ncerr = nctk_def_arrays(ncid, [&
      nctkarr_t("nc_tvalespl", "dp", "mqgrid_vl, two, ntypat"), &
-     nctkarr_t("nc_tcorespl", "dp", "mqgrid_vl, two, ntypat")  &
+     nctkarr_t("nc_tcorespl", "dp", "mqgrid_vl, two, ntypat"),  &
+     nctkarr_t("nc_ttaucorespl", "dp", "mqgrid_vl, two, ntypat")  &
    ])
    NCF_CHECK(ncerr)
  end if
 
  ! Write data
- NCF_CHECK(nf90_enddef(ncid))
- NCF_CHECK(nf90_put_var(ncid, vid("usepaw"), psps%usepaw))
- NCF_CHECK(nf90_put_var(ncid, vid("useylm"), psps%useylm))
  NCF_CHECK(nf90_put_var(ncid, vid("ziontypat"), psps%ziontypat))
  NCF_CHECK(nf90_put_var(ncid, vid("znucltypat"), psps%znucltypat))
+ ! Note that znuclpsp and ziopsp are not read, since we set with_alch=0
+
+ ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
+                             "usepaw", "useylm", "with_xccc", "with_xcctau", "with_alch"], &
+                             [psps%usepaw, psps%useylm, with_xccc, with_xcctau, with_alch])
+ NCF_CHECK(ncerr)
+
+ if (allocated(psps%pspso)) then
+    NCF_CHECK(nf90_put_var(ncid, vid("spinorbit"), psps%pspso))
+ end if
  do ipsp=1,psps%npsp
    NCF_CHECK(nf90_put_var(ncid, vid("filpsp"), trim(psps%filpsp(ipsp)), start=[1, ipsp]))
    NCF_CHECK(nf90_put_var(ncid, vid("md5_pseudos"), trim(psps%md5_pseudos(ipsp)), start=[1, ipsp]))
  end do
- NCF_CHECK(nf90_put_var(ncid, vid("qgrid_vl"), psps%qgrid_vl))
- NCF_CHECK(nf90_put_var(ncid, vid("qgrid_ff"), psps%qgrid_ff))
- NCF_CHECK(nf90_put_var(ncid, vid("indlmn"), psps%indlmn))
+ if (allocated(psps%qgrid_vl)) then
+   NCF_CHECK(nf90_put_var(ncid, vid("qgrid_vl"), psps%qgrid_vl))
+ end if
+ if (allocated(psps%qgrid_ff)) then
+   NCF_CHECK(nf90_put_var(ncid, vid("qgrid_ff"), psps%qgrid_ff))
+ end if
+ if (allocated(psps%indlmn)) then
+   NCF_CHECK(nf90_put_var(ncid, vid("indlmn"), psps%indlmn))
+ end if
 
  ! Local part in q-space and second derivative
  if (allocated(psps%vlspl)) then
@@ -925,32 +1026,67 @@ subroutine psps_ncwrite(psps, path)
    NCF_CHECK(nf90_put_var(ncid, vid("ffspl"), psps%ffspl))
  end if
 
+ if (with_xccc > 0) then
+
  ! Pseudo-core charge for each type of atom, on the real-space radial
- NCF_CHECK(nf90_put_var(ncid, vid("xcccrc"), psps%xcccrc))
- if (psps%usepaw == 0 .and. allocated(psps%xccc1d)) then
+   NCF_CHECK(nf90_put_var(ncid, vid("xcccrc"), psps%xcccrc))
    NCF_CHECK(nf90_put_var(ncid, vid("xccc1d"), psps%xccc1d))
+   if (with_xcctau > 0) then
+     NCF_CHECK(nf90_put_var(ncid, vid("xcctau1d"), psps%xcctau1d))
+   end if
+
+ !else
+
+ !  ABI_MALLOC(dummy1, (psps%ntypat))
+ !  dummy1 = zero
+ !  NCF_CHECK(nf90_put_var(ncid, vid("xcccrc"), dummy1))
+ !  ABI_FREE(dummy1)
+
+ !  ABI_MALLOC(dummy3, (n1xccc, 6, psps%ntypat))
+ !  dummy3 = zero
+ !  NCF_CHECK(nf90_put_var(ncid, vid("xccc1d"), dummy3))
+ !  ABI_FREE(dummy3)
+
  end if
 
  ! NC-only: add tcore_spl and tvalespl in q-space
  if (psps%usepaw == 0) then
-   NCF_CHECK(nf90_put_var(ncid, vid("ekb"), psps%ekb))
+   if (allocated(psps%ekb)) then
+     NCF_CHECK(nf90_put_var(ncid, vid("ekb"), psps%ekb))
+   end if
    do itypat=1,psps%ntypat
+
+     ! TODO Could write variables has_tvale and has_tcore
      if (psps%nctab(itypat)%has_tvale) then
        ncerr = nf90_put_var(ncid, vid("nc_tvalespl"), psps%nctab(itypat)%tvalespl, start=[1,1,itypat])
        NCF_CHECK(ncerr)
+     else
+       ABI_MALLOC(dummy3, (psps%mqgrid_vl, 2, psps%ntypat))
+       dummy3 = zero
+       ncerr = nf90_put_var(ncid, vid("nc_tvalespl"), dummy3)
+       NCF_CHECK(ncerr)
+       ABI_FREE(dummy3)
      end if
      if (psps%nctab(itypat)%has_tcore) then
        ncerr = nf90_put_var(ncid, vid("nc_tcorespl"), psps%nctab(itypat)%tcorespl, start=[1,1,itypat])
        NCF_CHECK(ncerr)
+       if (with_xcctau > 0) then
+         ncerr = nf90_put_var(ncid, vid("nc_ttaucorespl"), psps%nctab(itypat)%ttaucorespl, start=[1,1,itypat])
+         NCF_CHECK(ncerr)
+       end if
+     else
+       ABI_MALLOC(dummy3, (psps%mqgrid_vl, 2, psps%ntypat))
+       dummy3 = zero
+       ncerr = nf90_put_var(ncid, vid("nc_tcorespl"), dummy3)
+       NCF_CHECK(ncerr)
+       if (with_xcctau > 0) then
+         ncerr = nf90_put_var(ncid, vid("nc_ttaucorespl"), dummy3)
+         NCF_CHECK(ncerr)
+       end if
+       ABI_FREE(dummy3)
      end if
    end do
  end if
-
- NCF_CHECK(nf90_close(ncid))
-
-#else
- ABI_WARNING("netcdf support not activated. psps file cannot be created!")
-#endif
 
 contains
  integer function vid(vname)
@@ -959,6 +1095,196 @@ contains
  end function vid
 
 end subroutine psps_ncwrite
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_psps/psps_ncread
+!! NAME
+!! psps_ncread
+!!
+!! FUNCTION
+!!  Read the most important arrays defined in the pseudopotential_type
+!!  in NETCDF file format.
+!!  This function should be called by master node only.
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine psps_ncread(psps, ncid)
+
+!Arguments ------------------------------------
+ class(pseudopotential_type),intent(inout) :: psps
+ integer,intent(in) :: ncid
+
+!Local variables-------------------------------
+!scalars
+ integer :: ipsp,itypat, ncerr, with_xccc, with_xcctau
+! *********************************************************************
+
+ ! Note: Some dimensions and variables are written conditionally,
+ !       so try to read those but ignore errors
+ call psps_free(psps)
+
+ psps%dimekb         = zero
+ psps%lmnmax         = zero
+ psps%lnmax          = zero
+ psps%mproj          = zero
+ psps%mpsang         = zero
+ psps%mpspso         = zero
+ psps%mpssoang       = zero
+ psps%mqgrid_ff      = zero
+ psps%mqgrid_vl      = zero
+ psps%mtypalch       = zero
+ psps%npsp           = zero
+ psps%npspalch       = zero
+ psps%ntypat         = zero
+ psps%ntypalch       = zero
+ psps%ntyppure       = zero
+ psps%n1xccc         = zero
+ psps%optnlxccc      = zero
+ psps%positron       = zero
+ psps%usepaw         = zero
+ psps%usewvl         = zero
+ psps%useylm         = zero
+ psps%nc_xccc_gspace = zero
+ psps%vlspl_recipSpace = .false.
+
+ ! Read dimensions
+ NCF_CHECK(nctk_get_dim(ncid, "ntypat", psps%ntypat))
+ NCF_CHECK(nctk_get_dim(ncid, "npsp", psps%npsp))
+ NCF_CHECK(nctk_get_dim(ncid, "lnmax", psps%lnmax))
+ NCF_CHECK(nctk_get_dim(ncid, "lmnmax", psps%lmnmax))
+ NCF_CHECK(nctk_get_dim(ncid, "dimekb", psps%dimekb))
+ NCF_CHECK(nctk_get_dim(ncid, "mqgrid_vl", psps%mqgrid_vl))
+ NCF_CHECK(nctk_get_dim(ncid, "mqgrid_ff", psps%mqgrid_ff))
+ NCF_CHECK(nctk_get_dim(ncid, "n1xccc", psps%n1xccc))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "usepaw"), psps%usepaw))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "useylm"), psps%useylm))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "with_xccc"), with_xccc))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "with_xcctau"), with_xcctau))
+
+ if (psps%usepaw > 0) then
+   with_xccc = 0
+   with_xcctau = 0
+ end if
+ if (with_xccc == 0) psps%n1xccc = 0
+
+ ! Allocate arrays
+ call psp2params_init(psps%gth_params, psps%npsp)
+ ABI_MALLOC(psps%filpsp,(psps%npsp))
+ ABI_MALLOC(psps%title,(psps%npsp))
+ ABI_MALLOC(psps%md5_pseudos,(psps%npsp))
+
+ ABI_MALLOC(psps%pspcod,(psps%npsp))
+ ABI_MALLOC(psps%pspdat,(psps%npsp))
+ ABI_MALLOC(psps%pspxc,(psps%npsp))
+ ABI_MALLOC(psps%pspso,(psps%npsp))
+
+ psps%pspcod = zero
+ psps%pspdat = zero
+ psps%pspxc = zero
+ psps%pspso = zero
+
+ ! GA: zionpsp and znuclpsp dont get written. We assume they are the same
+ ! as ziontypat and znucltypat
+ ABI_MALLOC(psps%zionpsp,(psps%npsp))
+ ABI_MALLOC(psps%znuclpsp,(psps%npsp))
+ ABI_MALLOC(psps%ziontypat,(psps%ntypat))
+ ABI_MALLOC(psps%znucltypat,(psps%ntypat))
+ ABI_MALLOC(psps%xcccrc,(psps%ntypat))
+ ABI_MALLOC(psps%qgrid_vl,(psps%mqgrid_vl))
+ ABI_MALLOC(psps%qgrid_ff,(psps%mqgrid_ff))
+ ABI_MALLOC(psps%indlmn,(6,psps%lmnmax,psps%ntypat))
+ ABI_MALLOC(psps%vlspl,(psps%mqgrid_vl,2,psps%ntypat))
+ ABI_MALLOC(psps%ffspl,(psps%mqgrid_ff,2,psps%lmnmax,psps%ntypat))
+ ABI_MALLOC(psps%ekb,(psps%dimekb,psps%ntypat * (1 - psps%usepaw)))
+ ABI_MALLOC(psps%xccc1d,(psps%n1xccc,6,psps%ntypat))
+ ABI_MALLOC(psps%xcctau1d,(psps%n1xccc,6,psps%ntypat))
+ ABI_MALLOC(psps%nctab,(psps%ntypat))
+ if (psps%usepaw == 0) then
+   do itypat=1,psps%ntypat
+     psps%nctab(itypat)%mqgrid_vl  = psps%mqgrid_vl
+     psps%nctab(itypat)%dncdq0     = zero
+     psps%nctab(itypat)%d2ncdq0    = zero
+     psps%nctab(itypat)%dtaucdq0     = zero
+     psps%nctab(itypat)%d2taucdq0    = zero
+     psps%nctab(itypat)%dnvdq0     = zero
+     psps%nctab(itypat)%num_tphi   = zero
+     psps%nctab(itypat)%has_jtot   = .False.
+
+     psps%nctab(itypat)%has_tvale  = .False.
+     psps%nctab(itypat)%has_tcore  = .False.
+     ! GA: Do we even need those?
+     ABI_MALLOC(psps%nctab(itypat)%tvalespl,(psps%mqgrid_vl,2))
+     ABI_MALLOC(psps%nctab(itypat)%tcorespl,(psps%mqgrid_vl,2))
+     ABI_MALLOC(psps%nctab(itypat)%ttaucorespl,(psps%mqgrid_vl,2))
+     psps%nctab(itypat)%tvalespl = zero
+     psps%nctab(itypat)%tcorespl = zero
+     psps%nctab(itypat)%ttaucorespl = zero
+   end do
+ end if
+
+ psps%ekb = zero
+ psps%indlmn = zero
+ psps%xccc1d = zero
+ psps%xcctau1d = zero
+ psps%xcccrc = zero
+ psps%vlspl = zero
+ psps%ffspl = zero
+ psps%qgrid_vl = zero
+ psps%qgrid_ff = zero
+
+ psps%zionpsp = zero
+ psps%znuclpsp = zero
+ psps%ziontypat = zero
+ psps%znucltypat = zero
+
+ ! Read variables
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "ziontypat"), psps%ziontypat))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "znucltypat"), psps%znucltypat))
+ ! Not dealing with alchemical at the moment.
+
+
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "spinorbit"), psps%pspso))
+
+ do ipsp=1,psps%npsp
+   ncerr = nf90_get_var(ncid, nctk_idname(ncid, "filpsp"), psps%filpsp(ipsp), start=[1,ipsp])
+   ncerr = nf90_get_var(ncid, nctk_idname(ncid, "md5_pseudos"), psps%md5_pseudos(ipsp), start=[1,ipsp])
+   psps%title(ipsp) = ''
+ end do
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "qgrid_vl"), psps%qgrid_vl))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "qgrid_ff"), psps%qgrid_ff))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "indlmn"), psps%indlmn))
+ ncerr = nf90_get_var(ncid, nctk_idname(ncid, "vlspl"), psps%vlspl)
+ ncerr = nf90_get_var(ncid, nctk_idname(ncid, "ffspl"), psps%ffspl)
+
+ if (psps%usepaw == 0) then
+   ncerr = nf90_get_var(ncid, nctk_idname(ncid, "ekb"), psps%ekb)
+
+   if (with_xccc > 0) then
+     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "xcccrc"), psps%xcccrc))
+     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "xccc1d"), psps%xccc1d))
+     if (with_xcctau > 0) then
+       NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "xcctau1d"), psps%xcctau1d))
+     end if
+   end if
+
+   ! GA: Why bother reading it?
+   do itypat=1,psps%ntypat
+     ncerr = nf90_get_var(ncid, nctk_idname(ncid, "nc_tvalespl"), psps%nctab(itypat)%tvalespl, start=[1,1,itypat])
+     ncerr = nf90_get_var(ncid, nctk_idname(ncid, "nc_tcorespl"), psps%nctab(itypat)%tcorespl, start=[1,1,itypat])
+   end do
+   if (with_xcctau > 0) then
+     do itypat=1,psps%ntypat
+       ncerr = nf90_get_var(ncid, nctk_idname(ncid, "nc_ttaucorespl"), psps%nctab(itypat)%ttaucorespl, start=[1,1,itypat])
+     end do
+   end if
+
+ end if
+
+end subroutine psps_ncread
 !!***
 
 !----------------------------------------------------------------------
@@ -988,7 +1314,6 @@ subroutine psp2params_init(gth_params, npsp)
 !Arguments ------------------------------------
  class(pseudopotential_gth_type),intent(out) :: gth_params
  integer,intent(in) :: npsp
-
 ! *********************************************************************
 
 !Check array, no params are currently set.
@@ -1009,6 +1334,7 @@ subroutine psp2params_init(gth_params, npsp)
 
 !Different radii
  ABI_MALLOC(gth_params%radii_cf,(npsp, 3))
+ gth_params%radii_cf = zero
 
 end subroutine psp2params_init
 !!***
@@ -1031,8 +1357,7 @@ subroutine psp2params_copy(gth_paramsin, gth_paramsout)
 
 !Arguments ------------------------------------
  class(pseudopotential_gth_type),intent(in) :: gth_paramsin
- class(pseudopotential_gth_type),intent(out) :: gth_paramsout
-
+ class(pseudopotential_gth_type),intent(inout) :: gth_paramsout
 ! *********************************************************************
 
  if (allocated(gth_paramsin%psppar)) then
@@ -1073,9 +1398,7 @@ end subroutine psp2params_copy
 subroutine psp2params_free(gth_params)
 
 !Arguments ------------------------------------
-!scalars
- type(pseudopotential_gth_type),intent(inout) :: gth_params
-
+ class(pseudopotential_gth_type),intent(inout) :: gth_params
 ! *********************************************************************
 
  ABI_SFREE(gth_params%set)
@@ -1113,7 +1436,6 @@ subroutine nctab_init(nctab, mqgrid_vl, has_tcore, has_tvale)
  class(nctab_t),intent(inout) :: nctab
  integer,intent(in) :: mqgrid_vl
  logical,intent(in) :: has_tcore, has_tvale
-
 ! *************************************************************************
 
  nctab%mqgrid_vl = mqgrid_vl
@@ -1123,7 +1445,9 @@ subroutine nctab_init(nctab, mqgrid_vl, has_tcore, has_tvale)
  ! has_tcore tells us whether the model core charge is present or not.
  nctab%has_tcore = has_tcore
  nctab%dncdq0 = zero; nctab%d2ncdq0 = zero
+ nctab%dtaucdq0 = zero; nctab%d2taucdq0 = zero
  ABI_CALLOC(nctab%tcorespl, (mqgrid_vl, 2))
+ ABI_CALLOC(nctab%ttaucorespl, (mqgrid_vl, 2))
 
  ! tvalespl is allocated only if available.
  nctab%has_tvale = has_tvale
@@ -1148,11 +1472,11 @@ subroutine nctab_free(nctab)
 
 !Arguments ------------------------------------
  class(nctab_t),intent(inout) :: nctab
-
 ! *************************************************************************
 
  ABI_SFREE(nctab%tvalespl)
  ABI_SFREE(nctab%tcorespl)
+ ABI_SFREE(nctab%ttaucorespl)
  ABI_SFREE(nctab%tphi_qspl)
  ABI_SFREE(nctab%tphi_n)
  ABI_SFREE(nctab%tphi_l)
@@ -1175,8 +1499,7 @@ subroutine nctab_copy(nctabin, nctabout)
 
 !Arguments ------------------------------------
  class(nctab_t),intent(in) :: nctabin
- class(nctab_t),intent(out) :: nctabout
-
+ class(nctab_t),intent(inout) :: nctabout
 ! *************************************************************************
 
  nctabout%mqgrid_vl  = nctabin%mqgrid_vl
@@ -1184,10 +1507,14 @@ subroutine nctab_copy(nctabin, nctabout)
  nctabout%has_tcore  = nctabin%has_tcore
  nctabout%dncdq0     = nctabin%dncdq0
  nctabout%d2ncdq0    = nctabin%d2ncdq0
+ nctabout%dtaucdq0   = nctabin%dtaucdq0
+ nctabout%d2taucdq0  = nctabin%d2taucdq0
  nctabout%dnvdq0     = nctabin%dnvdq0
 
+ ! TODO Why not check values of has_tvale and has_tcore?
  if (allocated(nctabin%tvalespl)) call alloc_copy(nctabin%tvalespl, nctabout%tvalespl)
  if (allocated(nctabin%tcorespl)) call alloc_copy(nctabin%tcorespl, nctabout%tcorespl)
+ if (allocated(nctabin%ttaucorespl)) call alloc_copy(nctabin%ttaucorespl, nctabout%ttaucorespl)
 
 end subroutine nctab_copy
 !!***
@@ -1208,7 +1535,8 @@ end subroutine nctab_copy
 !!
 !! SIDE EFFECTS
 !!  nctabl%tvalspl(mqgrid_vl,2)
-!!  nctab%d2ncdq0
+!!  nctab%dnvdq0
+!!  nctab%d2nvdq0
 !!
 !! SOURCE
 
@@ -1224,7 +1552,6 @@ subroutine nctab_eval_tvalespl(nctab, zion, mesh, valr, mqgrid_vl, qgrid_vl)
 
 !Local variables-------------------------------
  real(dp) :: fact,yp1,ypn,d2nvdq0
-
 ! *************************************************************************
 
  nctab%has_tvale = .True.
@@ -1268,15 +1595,22 @@ end subroutine nctab_eval_tvalespl
 !!  xccc1d(n1xccc,6)= The component xccc1d(n1xccc,1) is the pseudo-core charge
 !!   on the radial grid. The components xccc1d(n1xccc,ideriv) give the ideriv-th derivative of the
 !!   pseudo-core charge with respect to the radial distance.
+!!  xcctau1d(n1xccc,6)= The component xcctau1d(n1xccc,1) is the pseudo-core kinetic energy density
+!!   on the radial grid. The components xcctau1d(n1xccc,ideriv) give the ideriv-th derivative of the
+!!   pseudo-core kinE den with respect to the radial distance.
 !!
 !! SIDE EFFECTS
 !!  nctabl%tcorespl(mqgrid_vl,2)
 !!  nctab%d2ncdq0
 !!  nctab%dncdq0
 !!
+!!  nctabl%ttaucorespl(mqgrid_vl,2)
+!!  nctab%d2taucdq0
+!!  nctab%dtaucdq0
+!!
 !! SOURCE
 
-subroutine nctab_eval_tcorespl(nctab, n1xccc, xcccrc, xccc1d, mqgrid_vl, qgrid_vl)
+subroutine nctab_eval_tcorespl(nctab, n1xccc, xcccrc, xccc1d, xcctau1d, mqgrid_vl, qgrid_vl)
 
 !Arguments ------------------------------------
 !scalars
@@ -1284,12 +1618,11 @@ subroutine nctab_eval_tcorespl(nctab, n1xccc, xcccrc, xccc1d, mqgrid_vl, qgrid_v
  integer,intent(in) :: n1xccc,mqgrid_vl
  real(dp),intent(in) :: xcccrc
 !arrays
- real(dp),intent(in) :: xccc1d(n1xccc,6),qgrid_vl(mqgrid_vl)
+ real(dp),intent(in) :: xccc1d(n1xccc,6),qgrid_vl(mqgrid_vl), xcctau1d(n1xccc,6)
 
 !Local variables-------------------------------
  real(dp) :: amesh,yp1,ypn
  type(pawrad_type) :: core_mesh
-
 ! *************************************************************************
 
  ABI_CHECK(mqgrid_vl == nctab%mqgrid_vl, "wrong mqgrid_vl")
@@ -1298,6 +1631,12 @@ subroutine nctab_eval_tcorespl(nctab, n1xccc, xcccrc, xccc1d, mqgrid_vl, qgrid_v
    ABI_CALLOC(nctab%tcorespl, (mqgrid_vl, 2))
  else
    ABI_CHECK(size(nctab%tcorespl, dim=1) == mqgrid_vl, "wrong mqgrid_vl")
+ end if
+
+ if (.not. allocated(nctab%ttaucorespl)) then
+   ABI_CALLOC(nctab%ttaucorespl, (mqgrid_vl, 2))
+ else
+   ABI_CHECK(size(nctab%ttaucorespl, dim=1) == mqgrid_vl, "wrong mqgrid_vl")
  end if
 
  ! Skip loop if this atom has no core charge
@@ -1318,6 +1657,12 @@ subroutine nctab_eval_tcorespl(nctab, n1xccc, xcccrc, xccc1d, mqgrid_vl, qgrid_v
 
  ! Compute second derivative of tcorespl(q)
  call paw_spline(qgrid_vl, nctab%tcorespl(:,1), mqgrid_vl, yp1, ypn, nctab%tcorespl(:,2))
+
+ ! idem for kinetic energy density
+ call pawpsp_cg(nctab%dtaucdq0, nctab%d2taucdq0, mqgrid_vl, qgrid_vl, nctab%ttaucorespl(:,1), &
+                core_mesh, xcctau1d(:,1), yp1, ypn)
+ call paw_spline(qgrid_vl, nctab%ttaucorespl(:,1), mqgrid_vl, yp1, ypn, nctab%ttaucorespl(:,2))
+
  call pawrad_free(core_mesh)
 
 end subroutine nctab_eval_tcorespl
@@ -1359,7 +1704,6 @@ subroutine nctab_mixalch(nctabs, npspalch, ntypalch, algalch, mixalch, mixtabs)
  logical :: has_tcore, has_tvale
  real(dp) :: mc
  type(nctab_t),pointer :: mix
-
 ! *************************************************************************
 
  ABI_CHECK(all(nctabs(:)%mqgrid_vl == nctabs(1)%mqgrid_vl), "Wrong mqgrid_vl")
@@ -1388,8 +1732,11 @@ subroutine nctab_mixalch(nctabs, npspalch, ntypalch, algalch, mixalch, mixtabs)
      ! Mix core for NLCC
      if (has_tcore) then
        mix%tcorespl = mix%tcorespl + mc * nctabs(ipspalch)%tcorespl
+       mix%ttaucorespl = mix%ttaucorespl + mc * nctabs(ipspalch)%ttaucorespl
        mix%dncdq0 = mix%dncdq0 + mc * nctabs(ipspalch)%dncdq0
        mix%d2ncdq0 = mix%d2ncdq0 + mc * nctabs(ipspalch)%d2ncdq0
+       mix%dtaucdq0 = mix%dtaucdq0 + mc * nctabs(ipspalch)%dtaucdq0
+       mix%d2taucdq0 = mix%d2taucdq0 + mc * nctabs(ipspalch)%d2taucdq0
      end if
      ! Mix pseudo valence charge.
      if (has_tvale) then

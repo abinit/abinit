@@ -1,0 +1,69 @@
+
+.Version 10.1.4.5 of MRGDDB, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+
+.Copyright (C) 1998-2025 ABINIT group . 
+ MRGDDB comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see https://www.abinit.org .
+
+.Starting date : Sat 14 Sep 2024.
+- ( at 06h52 )
+  
+  Give name for output derivative database : 
+ t160o.ddb.nc
+  Give short description of the derivative database :
+ BaTiO3 DDB file converted from text to netcdf
+  Give number of input ddbs
+           1
+  Give name for derivative database number           1  : 
+ BTO.DDB
+
+  merge_ddb: Reading all headers.
+ Opening DDB file: BTO.DDB
+ Opening DDB file: BTO.DDB
+
+ read the input derivative database number     1
+ Opening DDB file: BTO.DDB
+ compare the current and input DDB information
+
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  7.4964981  0.0000000  0.0000000  G(1)=  0.1333956  0.0000000  0.0000000
+ R(2)=  0.0000000  7.4964981  0.0000000  G(2)=  0.0000000  0.1333956  0.0000000
+ R(3)=  0.0000000  0.0000000  7.4964981  G(3)=  0.0000000  0.0000000  0.1333956
+ Unit cell volume ucvol=  4.2128434E+02 bohr^3
+ Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Ba
+    2)    0.5000000  0.5000000  0.5000000  Ti
+    3)    0.5000000  0.5000000  0.0000000   O
+    4)    0.0000000  0.5000000  0.5000000   O
+    5)    0.5000000  0.0000000  0.5000000   O
+
+ DDB file with 12 blocks has been read.
+ add block #    1 from file BTO.DDB
+ add block #    2 from file BTO.DDB
+ add block #    3 from file BTO.DDB
+ add block #    4 from file BTO.DDB
+ add block #    5 from file BTO.DDB
+ add block #    6 from file BTO.DDB
+ add block #    7 from file BTO.DDB
+ add block #    8 from file BTO.DDB
+ add block #    9 from file BTO.DDB
+ add block #   10 from file BTO.DDB
+ add block #   11 from file BTO.DDB
+ add block #   12 from file BTO.DDB
+ Final DDB has     12 blocks.
+- Creating HDf5 file with MPI-IO support: t160o.ddb.nc
+-
+- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
++mrgddb : the run completed successfully

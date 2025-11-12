@@ -14,7 +14,7 @@ getwfk -1
 acell   3*7.2605        # Cubic cell with
 rprim 1.0 0.0 0.0       # real space primitive translation vectors
       0.0 1.0 0.0
-      0.0 0.0 1.0 
+      0.0 0.0 1.0
 
 #Definition of the atom types and pseudopotentials
 natom 5                 # Five atoms
@@ -26,13 +26,13 @@ xred 0.00 0.00 0.00     # This keyword indicates that the location of the atoms
                         # will follow, one triplet of number for each atom.
                         # We use relative distance, along the translational
                         # lattice vectors.
-     0.50 0.50 0.50 
-     0.50 0.00 0.00 
-     0.00 0.50 0.00 
+     0.50 0.50 0.50
+     0.50 0.00 0.00
+     0.00 0.50 0.00
      0.00 0.00 0.50
 pp_dirpath "$ABI_PSPDIR"        # This is the path to the directory where
                                 # pseudopotentials for tests are stored
-pseudos "Pseudodojo_paw_pw_standard/V.xml, Pseudodojo_paw_pw_standard/Sr.xml, Pseudodojo_paw_pw_standard/O.xml" # Name and location of the pseudopotentials
+pseudos "Psdj_paw_pw_std/V.xml, Psdj_paw_pw_std/Sr.xml, Psdj_paw_pw_std/O.xml" # Name and location of the pseudopotentials
 
 #Planewave basis set, number of bands and occupations
 ecut      12.0          # Maximal plane-wave kinetic energy cut-off, in Hartree
@@ -88,11 +88,11 @@ dmftqmc_therm    10000  # Thermalization
 dmftctqmc_gmove  0      # Global move occurence in QMC
 dmftctqmc_order  50     # Perturbation order
 #DFT+U
-usepawu1    1  
+usepawu1    1
 usepawu     10
 dmatpuopt   1           # The density matrix: the simplest expression.
 lpawu       2 -1 -1     # Angular momentum for the projected Hamiltonian
-f4of2_sla3  0.0  0.0  0.0 
+f4of2_sla3  0.0  0.0  0.0
 upawu1      0.00  0.0  0.0  eV
 upawu2      3.1333333333333333  0.0  0.0  eV  # Values of U for each angular momentum
 jpawu2      0.7583333333333333  0.0  0.0  eV  # Values of J

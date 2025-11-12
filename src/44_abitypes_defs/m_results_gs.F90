@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_results_gs
 !! NAME
 !!  m_results_gs
@@ -8,7 +7,7 @@
 !!  used to store results from GS calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2022 ABINIT group (MT)
+!! Copyright (C) 2011-2025 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,9 +32,7 @@ MODULE m_results_gs
  use m_stream_string
  use m_pair_list
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_io_tools,      only : file_exists
  use m_fstrings,      only : sjoin
@@ -107,17 +104,15 @@ MODULE m_results_gs
   real(dp) :: entropy  ! entropy (Hartree)
 !!!  real(dp) :: enxc     ! exchange-correlation energy (Hartree)
 !!!  real(dp) :: enxcdc   ! exchange-correlation double-counting energy (Hartree)
-!!!  real(dp) :: epaw     ! PAW spherical energy (Hartree)
-!!!  real(dp) :: epawdc   ! PAW spherical double-counting energy (Hartree)
-  real(dp) :: entropy_extfpmd ! Entropy contribution of the Extended FPMD model
-                              ! for high temperature simulations
+!!!  real(dp) :: paw%epaw ! PAW spherical energy (Hartree)
+!!!  real(dp) :: paw%epaw_dc ! PAW spherical double-counting energy (Hartree)
   real(dp) :: etotal   ! total energy (Hartree)
                        ! for fixed occupation numbers (occopt==0,1,or 2):
                        !   etotal=ek+ehart+enxc+eei+eew+eii+enl+PAW_spherical_part
                        ! for varying occupation numbers (occopt>=3):
                        !   etotal=ek+ehart+enxc+eei+eew+eii+enl - tsmear*entropy +PAW_spherical_part
   real(dp) :: fermie   ! Fermi energy (Hartree)
-  real(dp) :: fermih   ! Fermi energy (Hartree) for excited holes in case occopt 9 (CP added)
+  real(dp) :: fermih   ! Fermi energy (Hartree) for excited holes in case occopt 9
   real(dp) :: residm   ! maximum value for the residual over all bands, all k points,
                        !   and all spins (Hartree or Hartree**2, to be checked !)
   real(dp) :: res2     ! density/potential residual (squared)
@@ -193,7 +188,7 @@ MODULE m_results_gs
   real(dp) :: pion(3)
    ! ucvol times the ionic polarization in reduced coordinates
 
-  real(dp) :: shiftfactor_extfpmd
+  real(dp) :: extfpmd_eshift
    ! Energy shift factor of the Extended FPMD model for high temperature simulations
 
   real(dp) :: strten(6)
@@ -210,18 +205,17 @@ MODULE m_results_gs
 
  contains
 
-  procedure :: yaml_write => results_gs_yaml_write
+   procedure :: init => init_results_gs
+   procedure :: free => destroy_results_gs
+   procedure :: copy => copy_results_gs
+   procedure :: ncwrite => results_gs_ncwrite
+   procedure :: yaml_write => results_gs_yaml_write
     ! Write the most important results in Yaml format.
 
  end type results_gs_type
 
-!public procedures.
- public :: init_results_gs
  public :: init_results_gs_array
- public :: destroy_results_gs
  public :: destroy_results_gs_array
- public :: copy_results_gs
- public :: results_gs_ncwrite
 !!***
 
 CONTAINS
@@ -243,25 +237,17 @@ CONTAINS
 !!            if this flag is activated only the following parts of results_gs
 !!            are initalized: all scalars, fcart,gred,strten
 !!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!  results_gs=<type(results_gs_type)>=results_gs datastructure
-!!
 !! SOURCE
 
-subroutine init_results_gs(natom,nspden,nsppol,results_gs,only_part)
+subroutine init_results_gs(results_gs, natom, nspden, nsppol, only_part)
 
 !Arguments ------------------------------------
-!scalars
+ class(results_gs_type),intent(inout) :: results_gs
  integer,intent(in) :: natom,nspden,nsppol
  logical,optional,intent(in) :: only_part
-!arrays
- type(results_gs_type),intent(inout) :: results_gs
-!Local variables-------------------------------
-!scalars
- logical :: full_init
 
+!Local variables-------------------------------
+ logical :: full_init
 !************************************************************************
 
  !@results_gs_type
@@ -277,46 +263,34 @@ subroutine init_results_gs(natom,nspden,nsppol,results_gs,only_part)
  results_gs%deltae =zero
  results_gs%diffor =zero
  results_gs%entropy=zero
- results_gs%entropy_extfpmd=zero
  results_gs%etotal =zero
  results_gs%fermie =zero
- results_gs%fermih =zero ! CP added for case occopt 9
+ results_gs%fermih =zero
  results_gs%nelect_extfpmd=zero
  results_gs%residm =zero
  results_gs%res2   =zero
- results_gs%shiftfactor_extfpmd=zero
+ results_gs%extfpmd_eshift=zero
  results_gs%vxcavg =zero
 
- call energies_init(results_gs%energies)
+ call results_gs%energies%init()
 
  results_gs%strten=zero
- ABI_MALLOC(results_gs%fcart,(3,natom))
- results_gs%fcart=zero
- ABI_MALLOC(results_gs%gred,(3,natom))
- results_gs%gred =zero
- ABI_MALLOC(results_gs%gaps,(3,nsppol))
- results_gs%gaps =zero
- ABI_MALLOC(results_gs%intgres,(nspden,natom))
- results_gs%intgres=zero
+ ABI_CALLOC(results_gs%fcart,(3,natom))
+ ABI_CALLOC(results_gs%gred,(3,natom))
+ ABI_CALLOC(results_gs%gaps,(3,nsppol))
+ ABI_CALLOC(results_gs%intgres,(nspden,natom))
 
  if (full_init) then
    results_gs%pel=zero
    results_gs%pion=zero
 
-   ABI_MALLOC(results_gs%grchempottn,(3,natom))
-   results_gs%grchempottn=zero
-   ABI_MALLOC(results_gs%grcondft,(3,natom))
-   results_gs%grcondft=zero
-   ABI_MALLOC(results_gs%gresid,(3,natom))
-   results_gs%gresid=zero
-   ABI_MALLOC(results_gs%grewtn,(3,natom))
-   results_gs%grewtn=zero
-   ABI_MALLOC(results_gs%grvdw,(3,natom))
-   results_gs%grvdw=zero
-   ABI_MALLOC(results_gs%grxc,(3,natom))
-   results_gs%grxc  =zero
-   ABI_MALLOC(results_gs%synlgr,(3,natom))
-   results_gs%synlgr=zero
+   ABI_CALLOC(results_gs%grchempottn,(3,natom))
+   ABI_CALLOC(results_gs%grcondft,(3,natom))
+   ABI_CALLOC(results_gs%gresid,(3,natom))
+   ABI_CALLOC(results_gs%grewtn,(3,natom))
+   ABI_CALLOC(results_gs%grvdw,(3,natom))
+   ABI_CALLOC(results_gs%grxc,(3,natom))
+   ABI_CALLOC(results_gs%synlgr,(3,natom))
  end if
 
 end subroutine init_results_gs
@@ -345,7 +319,7 @@ end subroutine init_results_gs
 !!
 !! SOURCE
 
-subroutine init_results_gs_array(natom,nspden,nsppol,results_gs,only_part)
+subroutine init_results_gs_array(natom, nspden, nsppol, results_gs, only_part)
 
 !Arguments ------------------------------------
 !scalars
@@ -353,12 +327,11 @@ subroutine init_results_gs_array(natom,nspden,nsppol,results_gs,only_part)
  logical,optional,intent(in) :: only_part
 !arrays
  type(results_gs_type),intent(inout) :: results_gs(:,:)
+
 !Local variables-------------------------------
 !scalars
  integer :: ii,jj,results_gs_size1,results_gs_size2
  logical :: full_init
-!arrays
-
 !************************************************************************
 
  !@results_gs_type
@@ -381,17 +354,16 @@ subroutine init_results_gs_array(natom,nspden,nsppol,results_gs,only_part)
        results_gs(jj,ii)%deltae =zero
        results_gs(jj,ii)%diffor =zero
        results_gs(jj,ii)%entropy=zero
-       results_gs(jj,ii)%entropy_extfpmd=zero
        results_gs(jj,ii)%etotal =zero
        results_gs(jj,ii)%fermie =zero
-       results_gs(jj,ii)%fermih =zero ! CP added for occopt 9 cases
+       results_gs(jj,ii)%fermih =zero
        results_gs(jj,ii)%nelect_extfpmd=zero
        results_gs(jj,ii)%residm =zero
        results_gs(jj,ii)%res2   =zero
-       results_gs(jj,ii)%shiftfactor_extfpmd=zero
+       results_gs(jj,ii)%extfpmd_eshift=zero
        results_gs(jj,ii)%vxcavg =zero
 
-       call energies_init(results_gs(jj,ii)%energies)
+       call results_gs(jj,ii)%energies%init()
 
        results_gs(jj,ii)%strten=zero
        ABI_MALLOC(results_gs(jj,ii)%fcart,(3,natom))
@@ -438,21 +410,12 @@ end subroutine init_results_gs_array
 !! FUNCTION
 !!  Clean and destroy a results_gs datastructure
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!  results_gs(:)=<type(results_gs_type)>=results_gs datastructure
-!!
 !! SOURCE
 
 subroutine destroy_results_gs(results_gs)
 
 !Arguments ------------------------------------
-!arrays
- type(results_gs_type),intent(inout) :: results_gs
-
+ class(results_gs_type),intent(inout) :: results_gs
 !************************************************************************
 
  !@results_gs_type
@@ -499,12 +462,10 @@ end subroutine destroy_results_gs
 subroutine destroy_results_gs_array(results_gs)
 
 !Arguments ------------------------------------
-!arrays
  type(results_gs_type),intent(inout) :: results_gs(:,:)
-!Local variables-------------------------------
-!scalars
- integer :: ii,jj,results_gs_size1,results_gs_size2
 
+!Local variables-------------------------------
+ integer :: ii,jj,results_gs_size1,results_gs_size2
 !************************************************************************
 
  !@results_gs_type
@@ -548,25 +509,17 @@ end subroutine destroy_results_gs_array
 !! FUNCTION
 !!  Copy a results_gs datastructure into another
 !!
-!! INPUTS
-!!  results_gs_in=<type(results_gs_type)>=input results_gs datastructure
-!!
-!! OUTPUT
-!!  results_gs_out=<type(results_gs_type)>=output results_gs datastructure
-!!
 !! SOURCE
 
-subroutine copy_results_gs(results_gs_in,results_gs_out)
+subroutine copy_results_gs(results_gs_in, results_gs_out)
 
 !Arguments ------------------------------------
 !arrays
  class(results_gs_type),intent(in) :: results_gs_in
- type(results_gs_type),intent(inout) :: results_gs_out !vz_i
+ class(results_gs_type),intent(inout) :: results_gs_out
 
 !Local variables-------------------------------
-!scalars
  integer :: natom_in,natom_out,ngrvdw_in,nspden_in,nspden_out,nsppol_in,nsppol_out
-
 !************************************************************************
 
  !@results_gs_type
@@ -634,7 +587,6 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
    end if
  endif
 
-
  results_gs_out%natom  =results_gs_in%natom
  results_gs_out%ngrvdw =results_gs_in%ngrvdw
  results_gs_out%nspden =results_gs_in%nspden
@@ -643,17 +595,16 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
  results_gs_out%deltae =results_gs_in%deltae
  results_gs_out%diffor =results_gs_in%diffor
  results_gs_out%entropy=results_gs_in%entropy
- results_gs_out%entropy_extfpmd=results_gs_in%entropy_extfpmd
  results_gs_out%etotal =results_gs_in%etotal
  results_gs_out%fermie =results_gs_in%fermie
- results_gs_out%fermih =results_gs_in%fermih ! CP added for occopt 9
+ results_gs_out%fermih =results_gs_in%fermih
  results_gs_out%nelect_extfpmd=results_gs_in%nelect_extfpmd
  results_gs_out%residm =results_gs_in%residm
  results_gs_out%res2   =results_gs_in%res2
- results_gs_out%shiftfactor_extfpmd=results_gs_in%shiftfactor_extfpmd
+ results_gs_out%extfpmd_eshift=results_gs_in%extfpmd_eshift
  results_gs_out%vxcavg =results_gs_in%vxcavg
 
- call energies_copy(results_gs_in%energies,results_gs_out%energies)
+ call results_gs_in%energies%copy(results_gs_out%energies)
 
  results_gs_out%pel(:)=results_gs_in%pel(:)
  results_gs_out%pion(:)=results_gs_in%pion(:)
@@ -662,15 +613,14 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
  if (allocated(results_gs_in%fcart))  results_gs_out%fcart(:,1:natom_in) =results_gs_in%fcart(:,1:natom_in)
  if (allocated(results_gs_in%gred))   results_gs_out%gred(:,1:natom_in)  =results_gs_in%gred(:,1:natom_in)
  if (allocated(results_gs_in%gaps))   results_gs_out%gaps(:,1:nsppol_in) =results_gs_in%gaps(:,1:nsppol_in)
- if (allocated(results_gs_in%grchempottn))&
-&  results_gs_out%grchempottn(:,1:natom_in)=results_gs_in%grchempottn(:,1:natom_in)
+ if (allocated(results_gs_in%grchempottn)) results_gs_out%grchempottn(:,1:natom_in)=results_gs_in%grchempottn(:,1:natom_in)
  if (allocated(results_gs_in%grcondft)) results_gs_out%grcondft(:,1:natom_in)=results_gs_in%grcondft(:,1:natom_in)
  if (allocated(results_gs_in%gresid)) results_gs_out%gresid(:,1:natom_in)=results_gs_in%gresid(:,1:natom_in)
  if (allocated(results_gs_in%grewtn)) results_gs_out%grewtn(:,1:natom_in)=results_gs_in%grewtn(:,1:natom_in)
  if (allocated(results_gs_in%grxc))   results_gs_out%grxc(:,1:natom_in)  =results_gs_in%grxc(:,1:natom_in)
  if (allocated(results_gs_in%intgres))results_gs_out%intgres(1:nspden_in,1:natom_in)  =results_gs_in%intgres(1:nspden_in,1:natom_in)
  if (allocated(results_gs_in%synlgr)) results_gs_out%synlgr(:,1:natom_in)=results_gs_in%synlgr(:,1:natom_in)
- if (allocated(results_gs_in%grvdw).and.ngrvdw_in>0) then
+ if (allocated(results_gs_in%grvdw) .and. ngrvdw_in>0) then
    results_gs_out%grvdw(:,1:ngrvdw_in)=results_gs_in%grvdw(:,1:ngrvdw_in)
  end if
 
@@ -684,6 +634,7 @@ end subroutine copy_results_gs
 !! results_gs_ncwrite
 !!
 !! FUNCTION
+!!  Write object to netcdf file.
 !!
 !! INPUTS
 !!  ncid=NC file handle
@@ -696,15 +647,9 @@ end subroutine copy_results_gs
 integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
 
 !Arguments ------------------------------------
-!scalars
+ class(results_gs_type),intent(in) :: res
  integer,intent(in) :: ncid
  real(dp),intent(in) :: ecut,pawecutdg
- class(results_gs_type),intent(in) :: res
-
-!Local variables-------------------------------
-!scalars
-#ifdef HAVE_NETCDF
-
 ! *************************************************************************
 
  ! ==============================================
@@ -717,13 +662,9 @@ integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
 
 ! Define variables.
 ! scalars passed in input (not belonging to results_gs) as well as scalars defined in results_gs
-! CP modified
-!ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
-!  "ecut", "pawecutdg", "deltae", "diffor", "entropy", "etotal", "fermie", "residm", "res2"])
  ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
-   "ecut", "pawecutdg", "deltae", "diffor", "entropy", "entropy_extfpmd", "etotal", "fermie", "fermih",&
-&  "nelect_extfpmd", "residm", "res2", "shiftfactor_extfpmd"]) ! CP added fermih
- ! End CP modified
+   "ecut", "pawecutdg", "deltae", "diffor", "entropy", "etotal", "fermie", "fermih",&
+   "nelect_extfpmd", "residm", "res2", "extfpmd_eshift"])
  NCF_CHECK(ncerr)
 
  ! arrays
@@ -744,20 +685,14 @@ integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
    NCF_CHECK(ncerr)
  end if
 
-! Write data.
+! Write data
 ! Write variables
-! CP modified
-! ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-!&  'ecut', 'pawecutdg', 'deltae', 'diffor', 'entropy', 'etotal', 'fermie', 'residm', 'res2'],&
-!&  [ecut, pawecutdg, res%deltae, res%diffor, res%entropy, res%etotal, res%fermie, res%residm, res%res2],&
-!&  datamode=.True.)
  ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-&  'ecut', 'pawecutdg', 'deltae', 'diffor', 'entropy', 'entropy_extfpmd', 'etotal', 'fermie', 'fermih',&
-&  'nelect_extfpmd', 'residm', 'res2', 'shiftfactor_extfpmd'],&
-&  [ecut, pawecutdg, res%deltae, res%diffor, res%entropy, res%entropy_extfpmd, res%etotal, res%fermie, res%fermih,&
-&  res%nelect_extfpmd, res%residm, res%res2, res%shiftfactor_extfpmd],&
-&  datamode=.True.)
- ! End CP modified
+  'ecut', 'pawecutdg', 'deltae', 'diffor', 'entropy', 'etotal', 'fermie', 'fermih',&
+  'nelect_extfpmd', 'residm', 'res2', 'extfpmd_eshift'],&
+  [ecut, pawecutdg, res%deltae, res%diffor, res%entropy, res%etotal, res%fermie, res%fermih,&
+  res%nelect_extfpmd, res%residm, res%res2, res%extfpmd_eshift],&
+  datamode=.True.)
  NCF_CHECK(ncerr)
 
  NCF_CHECK(nctk_set_datamode(ncid))
@@ -770,15 +705,10 @@ integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
  end if
 
 ! Add energies
- call energies_ncwrite(res%energies, ncid)
-
-#else
- ABI_ERROR("netcdf support is not activated.")
-#endif
+ call res%energies%ncwrite(ncid)
 
 contains
  integer function vid(vname)
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -804,15 +734,14 @@ end function results_gs_ncwrite
 !!  [with_conv]: optional True if the convergence dictionary with residuals and diffs should be written.
 !!
 !! SOURCE
-! CP modified argument list
-!subroutine results_gs_yaml_write(results, unit, cryst, with_conv, info)
-subroutine results_gs_yaml_write(results, unit, cryst, info, occopt, with_conv)
-! End CP modified
 
+subroutine results_gs_yaml_write(results, unit, cryst, info, occopt, with_conv)
+
+!Arguments ------------------------------------
  class(results_gs_type),intent(in) :: results
  integer,intent(in) :: unit
  type(crystal_t),intent(in),optional :: cryst
- integer, intent(in),optional :: occopt ! CP added for special output in the case occopt 9
+ integer, intent(in),optional :: occopt
  logical,intent(in),optional :: with_conv
  character(len=*),intent(in),optional :: info
 
@@ -823,7 +752,6 @@ subroutine results_gs_yaml_write(results, unit, cryst, info, occopt, with_conv)
 !arrays
  real(dp) :: strten(3,3), abc(3), fnorms(results%natom)
  character(len=2) :: species(results%natom)
-
 !************************************************************************
 
  if (unit == dev_null) return
@@ -837,7 +765,12 @@ subroutine results_gs_yaml_write(results, unit, cryst, info, occopt, with_conv)
  ! Write lattice parameters
  if (present(cryst)) then
   call ydoc%add_real2d('lattice_vectors', cryst%rprimd, real_fmt="(f11.7)")
-  abc = [(sqrt(sum(cryst%rprimd(:, ii) ** 2)), ii=1,3)]
+  !ori abc = [(sqrt(sum(cryst%rprimd(:, ii) ** 2)), ii=1,3)]
+  !replace the implicit loop by an explicit one
+  !workaround works with both ifort and ifx on oneapi 2024
+  do ii=1,3
+    abc(ii) = sqrt(sum(cryst%rprimd(:, ii) ** 2))
+  end do
   call ydoc%add_real1d('lattice_lengths', abc, real_fmt="(f10.5)")
   call ydoc%add_real1d('lattice_angles', cryst%angdeg, real_fmt="(f7.3)", comment="degrees, (23, 13, 12)")
   call ydoc%add_real('lattice_volume', cryst%ucvol + tol10, real_fmt="(es15.7)")
@@ -861,9 +794,6 @@ subroutine results_gs_yaml_write(results, unit, cryst, info, occopt, with_conv)
  endif
 
  ! Write energies.
- ! CP modified
- !call ydoc%add_reals("etotal, entropy, fermie", [results%etotal, results%entropy, results%fermie])
- ! CP add modificatopm for occopt 9: fermih
  if (present(occopt))then
    if (occopt == 9) then
      call ydoc%add_reals("etotal, entropy, fermie, fermih", [results%etotal, results%entropy, results%fermie, results%fermih])
@@ -873,7 +803,6 @@ subroutine results_gs_yaml_write(results, unit, cryst, info, occopt, with_conv)
  else
    call ydoc%add_reals("etotal, entropy, fermie", [results%etotal, results%entropy, results%fermie])
  endif
- ! End CP modified
 
  ! Cartesian stress tensor and forces.
  call stress_voigt_to_mat(results%strten, strten)

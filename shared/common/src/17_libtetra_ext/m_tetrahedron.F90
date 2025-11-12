@@ -7,13 +7,13 @@
 !!  depends on sort_tetra and on m_kpt_rank
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2022 ABINIT group (MJV)
+!!  Copyright (C) 2010-2025 ABINIT group (MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! TODO
-!!  1) Test carefully the case of degenerate tethraedron
+!!  1) Test carefully the case of degenerate tetrahedron
 !!  2) Change API so that we can pass the energy mesh instead of omega_min and omega_max
 !!  3) Add table ik_ibz --> tetra_list to avoid cycling inside big loop over ntetra
 !!  4) Add options to get only delta and/or theta ?
@@ -28,12 +28,14 @@
 
 module m_tetrahedron
 
+  ! make sure stdout is defined, as libtetra.h needs it
+ use, intrinsic :: iso_fortran_env, only : stdin=>input_unit, &
+                                          stdout=>output_unit, &
+                                          stderr=>error_unit
  USE_MEMORY_PROFILING
  USE_MSG_HANDLING
  use m_krank
-#ifdef HAVE_MPI2
- use mpi
-#endif
+ USE_MPI
 #ifdef HAVE_LIBTETRA_ABINIT
  use m_io_tools, only : open_file
  use m_xmpi
@@ -109,7 +111,7 @@ public :: destroy_tetra            ! Free memory.
 public :: tetra_write              ! Write text file (XML format) with tetra info.
 public :: tetralib_has_mpi         ! Return True if the library has been compiled with MPI support.
 public :: tetra_get_onewk          ! Calculate integration weights and their derivatives for a single k-point in the IBZ.
-public :: tetra_get_onewk_wvals    ! Similar to tetra_get_onewk_wvalsa but reveives arbitrary list of frequency points.
+public :: tetra_get_onewk_wvals    ! Similar to tetra_get_onewk_wvalsa but receives arbitrary list of frequency points.
 public :: tetra_get_onetetra_wvals ! Get weights for one tetrahedra with arbitrary list of frequency points
 !!***
 
@@ -287,7 +289,7 @@ subroutine init_tetra(indkpt, gprimd, klatt, kpt_fullbz, nkpt_fullbz, tetra, ier
 
  ! Make full k-point rank arrays
  ! TODO: Lot of memory allocated here if dense mesh e.g ~ 300 ** 3
- krank = krank_new(nkpt_fullbz, kpt_fullbz)
+ call krank%init(nkpt_fullbz, kpt_fullbz)
 
  ialltetra = 1
  do ikpt_full=1,nkpt_fullbz
@@ -304,7 +306,7 @@ subroutine init_tetra(indkpt, gprimd, klatt, kpt_fullbz, nkpt_fullbz, tetra, ier
        symrankkpt =  krank%get_rank(k1)
        ikpt2 = krank%invrank(symrankkpt)
        if (ikpt2 < 1) then
-         errorstring='Error in ranking k-points - exiting with un-initialized tetrahedra.'
+         errorstring = 'Error in ranking k-points - exiting with un-initialized tetrahedra.'
          ierr = 2
          call krank%free()
          TETRA_ALLOCATE(tetra%tetra_full, (4,2,1))

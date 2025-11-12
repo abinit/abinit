@@ -6,7 +6,7 @@
 !! This module contains datatypes for efmas functionalities.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2022 ABINIT group (JLJ)
+!! Copyright (C) 2001-2025 ABINIT group (JLJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,9 +24,7 @@ module m_efmas
  use defs_basis
  use m_errors
  use m_abicore
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_efmas_defs
  use m_nctk
  use m_cgtools
@@ -62,6 +60,7 @@ module m_efmas
 !!***
 
 CONTAINS
+
 !===========================================================
 
 !!****f* m_efmas/efmasval_free
@@ -81,7 +80,6 @@ subroutine efmasval_free(efmasval)
 
  !Arguments ------------------------------------
  type(efmasval_type),intent(inout) :: efmasval
-
  ! *********************************************************************
 
  ABI_SFREE(efmasval%ch2c)
@@ -337,22 +335,18 @@ end subroutine efmasdeg_free
  type(efmasval_type), intent(in) :: efmasval(:,:)
 
 !Local variables-------------------------------
- integer :: deg_dim,eig2_diag_arr_dim
+ integer :: deg_dim,eig2_diag_arr_dim, ncerr
  integer :: iband,ideg,ideg_tot,ieig,ikpt
  integer :: jband,mband,ndegs_tot,nkpt,nkptdeg,nkptval
  integer, allocatable :: nband_arr(:), ndegs_arr(:), degs_range_arr(:,:)
  integer, allocatable :: ideg_arr(:,:), degs_bounds_arr(:,:)
  real(dp), allocatable :: ch2c_arr(:,:,:,:), eig2_diag_arr(:,:,:,:), max_abs_eigen1(:)
  character(len=500) :: msg
-#ifdef HAVE_NETCDF
- integer :: ncerr
-#endif
 !----------------------------------------------------------------------
 
 !XG20180519 Here, suppose that dtset%nkpt=nkpt_rbz (as done by Jonathan).
 !To be reexamined/corrected at the time of parallelization.
 
-#ifdef HAVE_NETCDF
  nkptdeg=size(efmasdeg,1)
  nkptval=size(efmasval,2)
  if(nkptdeg/=nkptval) then
@@ -461,7 +455,6 @@ end subroutine efmasdeg_free
  ABI_FREE(ch2c_arr)
  ABI_FREE(eig2_diag_arr)
  ABI_FREE(max_abs_eigen1)
-#endif
 
 end subroutine print_efmas
 !!***
@@ -503,7 +496,6 @@ end subroutine print_efmas
  real(dp), allocatable :: ch2c_arr(:,:,:,:), eig2_diag_arr(:,:,:,:), max_abs_eigen1(:)
 !----------------------------------------------------------------------
 
-#ifdef HAVE_NETCDF
  NCF_CHECK(nctk_set_datamode(ncid))
  NCF_CHECK(nctk_get_dim(ncid, "number_of_kpoints", nkpt))
  NCF_CHECK(nctk_get_dim(ncid, "max_number_of_states", mband))
@@ -582,10 +574,8 @@ end subroutine print_efmas
  ABI_FREE(ch2c_arr)
  ABI_FREE(eig2_diag_arr)
  ABI_FREE(max_abs_eigen1)
-#endif
 
- end subroutine efmas_ncread
-
+end subroutine efmas_ncread
 !!***
 
 !----------------------------------------------------------------------
@@ -622,7 +612,7 @@ end subroutine print_efmas
    integer :: iband, adir
    character(len=22) :: format_eigvec
    character(len=500) :: msg, tmpstr
-   real(dp) :: vec(3)
+   real(dp) :: vec(3),mat(3,3)
 
    if(deg_dim>1) then
      extras = present(efmas_eigval) .and. present(efmas_eigvec)
@@ -717,7 +707,8 @@ end subroutine print_efmas
                write(io_unit,'(i3,a)') adir, ' Eigenvalue degenerate => eigenvector undefined'
              else
                vec=zero; vec(1:mdim)=efmas_eigvec(adir,:,iband)
-               vec=matmul(transpose(rprimd)/two_pi,vec); vec=vec/sqrt(sum(vec**2))
+               mat = transpose(rprimd)/two_pi
+               vec=matmul(mat,vec); vec=vec/sqrt(sum(vec**2))
                write(io_unit,format_eigvec) adir, efmas_eigvec(adir,:,iband), ' / ', vec
              end if
            end do
@@ -740,7 +731,8 @@ end subroutine print_efmas
      write(io_unit,'(a)') ' Effective masses along directions: (cart. coord. / red. coord. -> eff. mass)'
      do adir=1,ndirs
        vec=dirs(:,adir)
-       vec=matmul(transpose(rprimd)/two_pi,vec); vec=vec/sqrt(sum(vec**2))
+       mat = transpose(rprimd)/two_pi
+       vec=matmul(mat,vec); vec=vec/sqrt(sum(vec**2))
        write(io_unit,'(i5,a,3f10.6,a,3f10.6,a,f14.10)') adir,': ', dirs(:,adir), ' / ', vec, ' -> ', m_cart(adir,iband)
      end do
    end do
@@ -835,10 +827,9 @@ end subroutine print_efmas
   real(dp) :: deltae, dot2i,dot2r,dot3i,dot3r,doti,dotr
   real(dp), allocatable :: cg0(:,:), cg1_pert2(:,:),cg1_pert1(:,:)
   real(dp), allocatable :: gh1c_pert2(:,:),gh1c_pert1(:,:),gh0c1_pert1(:,:)
-  complex(dpc) :: eig2_part(3,3), eig2_ch2c(3,3), eig2_paral(3,3), eig2_gauge_change(3,3)
-  complex(dpc) :: eig1a, eig1b, g_ch
-  complex(dpc), allocatable :: eigen1_deg(:,:), eig2_diag(:,:,:,:), eig2_diag_cart(:,:,:,:)
-
+  complex(dp) :: eig2_part(3,3), eig2_ch2c(3,3), eig2_paral(3,3), eig2_gauge_change(3,3)
+  complex(dp) :: eig1a, eig1b, g_ch
+  complex(dp), allocatable :: eigen1_deg(:,:), eig2_diag(:,:,:,:), eig2_diag_cart(:,:,:,:)
 ! *********************************************************************
 
   debug = .false. ! Prints additional info to std_out
@@ -903,7 +894,7 @@ end subroutine print_efmas
           do iband=1,deg_dim
             do jband=1,deg_dim
               eigen1_deg(iband,jband) = cmplx(eigen1(2*(jband+degl)-1+(iband+degl-1)*2*nband_k,adir,ipert),&
-&                                             eigen1(2*(jband+degl)  +(iband+degl-1)*2*nband_k,adir,ipert),dpc)
+&                                             eigen1(2*(jband+degl)  +(iband+degl-1)*2*nband_k,adir,ipert),dp)
             end do
           end do
 
@@ -939,14 +930,14 @@ end subroutine print_efmas
               do kband=1,nband_k
                 !!! Equivalent to the gauge change in eig2stern.F90, but works also for other choices than the parallel gauge.
                 eig1a = cmplx( eigen1(2*kband-1+(degl+iband-1)*2*nband_k+band2tot_index,adir,ipert), &
-&                -eigen1(2*kband+(degl+iband-1)*2*nband_k+band2tot_index,adir,ipert), kind=dpc )
+&                -eigen1(2*kband+(degl+iband-1)*2*nband_k+band2tot_index,adir,ipert), kind=dp )
                 eig1b = cmplx( eigen1(2*kband-1+(degl+jband-1)*2*nband_k+band2tot_index,bdir,ipert), &
-&                eigen1(2*kband+(degl+jband-1)*2*nband_k+band2tot_index,bdir,ipert), kind=dpc )
+&                eigen1(2*kband+(degl+jband-1)*2*nband_k+band2tot_index,bdir,ipert), kind=dp )
                 g_ch = eig1a*eig1b
                 eig1a = cmplx( eigen1(2*kband-1+(degl+iband-1)*2*nband_k+band2tot_index,bdir,ipert), &
-&                -eigen1(2*kband+(degl+iband-1)*2*nband_k+band2tot_index,bdir,ipert), kind=dpc )
+&                -eigen1(2*kband+(degl+iband-1)*2*nband_k+band2tot_index,bdir,ipert), kind=dp )
                 eig1b = cmplx( eigen1(2*kband-1+(degl+jband-1)*2*nband_k+band2tot_index,adir,ipert), &
-&                eigen1(2*kband+(degl+jband-1)*2*nband_k+band2tot_index,adir,ipert), kind=dpc )
+&                eigen1(2*kband+(degl+jband-1)*2*nband_k+band2tot_index,adir,ipert), kind=dp )
                 g_ch = g_ch + eig1a*eig1b
 
                 deltae = eigen0(kband+bandtot_index) - eigen0((degl+iband)+bandtot_index)
@@ -979,9 +970,9 @@ end subroutine print_efmas
               call dotprod_g(dot3r,dot3i,istwf_k,npw_k*nspinor,2,gh0c1_pert1,cg1_pert2,mpi_enreg%me_g0,&
 &              mpi_enreg%comm_spinorfft)
 
-              eig2_part(adir,bdir) = cmplx(dotr+dot2r+dot3r,doti+dot2i+dot3i,kind=dpc)
-              !eig2_part(adir,bdir) = cmplx(dotr+dot2r,doti+dot2i,kind=dpc)  !DEBUG
-              !eig2_part(adir,bdir) = cmplx(dotr,doti,kind=dpc)              !DEBUG
+              eig2_part(adir,bdir) = cmplx(dotr+dot2r+dot3r,doti+dot2i+dot3i,kind=dp)
+              !eig2_part(adir,bdir) = cmplx(dotr+dot2r,doti+dot2i,kind=dp)  !DEBUG
+              !eig2_part(adir,bdir) = cmplx(dotr,doti,kind=dp)              !DEBUG
 
               eig2_ch2c(adir,bdir) = efmasval(ideg,ikpt)%ch2c(adir,bdir,iband,jband)
 
@@ -1028,7 +1019,6 @@ end subroutine print_efmas
 
       ABI_FREE(eig2_diag)
       ABI_FREE(eig2_diag_cart)
-
     end do !ideg
 
     ABI_FREE(cg1_pert2)
@@ -1113,12 +1103,12 @@ end subroutine print_efmas
   real(dp), allocatable :: dirs(:,:)
   real(dp),allocatable :: prodr(:,:)
   !real(dp), allocatable :: f3dfd(:,:,:)
-  complex(dpc) :: matr2d(2,2)
-  complex(dpc), allocatable :: eigenvec(:,:), work(:)
-  complex(dpc), allocatable :: eig2_diag_cart(:,:,:,:)
-  complex(dpc), allocatable :: f3d(:,:), df3d_dth(:,:), df3d_dph(:,:)
-  complex(dpc), allocatable :: unitary_tr(:,:), eff_mass(:,:)
-  complex(dpc),allocatable :: prodc(:,:)
+  complex(dp) :: matr2d(2,2)
+  complex(dp), allocatable :: eigenvec(:,:), work(:)
+  complex(dp), allocatable :: eig2_diag_cart(:,:,:,:)
+  complex(dp), allocatable :: f3d(:,:), df3d_dth(:,:), df3d_dph(:,:)
+  complex(dp), allocatable :: unitary_tr(:,:), eff_mass(:,:)
+  complex(dp),allocatable :: prodc(:,:)
 
 ! *********************************************************************
 
@@ -1972,13 +1962,12 @@ function MATMUL_DPC(aa,bb,mm,nn,transa,transb)
  integer,intent(in) :: mm,nn
  character(len=1),optional,intent(in) :: transa,transb
 !arrays
- complex(dpc),intent(in) :: aa(:,:),bb(:,:)
- complex(dpc) :: MATMUL_DPC(mm,nn)
+ complex(dp),intent(in) :: aa(:,:),bb(:,:)
+ complex(dp) :: MATMUL_DPC(mm,nn)
 
 !Local variables-------------------------------
  integer :: kk,lda,ldb
  character(len=1) :: transa_,transb_
-
 ! *************************************************************************
 
  transa_='n';if (present(transa)) transa_=transa

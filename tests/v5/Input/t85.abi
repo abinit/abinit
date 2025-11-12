@@ -88,6 +88,11 @@ nline10      1
 getwfk10     6
 get1den10    5
 
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
+
 # The kpoint grid is minimalistic to keep the calculation manageable.
 ngkpt        4 4 4
 kptopt       3

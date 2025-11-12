@@ -3,7 +3,7 @@
 !! m_FFT_prof
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MG)
+!!  Copyright (C) 2008-2025 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -77,7 +77,7 @@ MODULE m_FFT_prof
    integer :: npw_k = -1
    integer :: npw_kout = -1
    integer :: paral_kgb = -1
-   integer :: use_gpu = 0
+   integer :: gpu_option = 0
 
    real(dp) :: ecut=zero
    integer :: ngfft(18)=-1
@@ -128,13 +128,13 @@ MODULE m_FFT_prof
  type,public :: FFT_prof_t
    integer :: ncalls
    integer :: ndat
-   integer :: use_gpu
+   integer :: gpu_option
    integer :: nthreads
    real(dp) :: cpu_time
    real(dp) :: wall_time
    real(dp) :: gflops
    character(len=TNAME_LEN) :: test_name
-   complex(dpc),allocatable :: results(:)
+   complex(dp),allocatable :: results(:)
 
  contains
    procedure :: init => fftprof_init
@@ -209,12 +209,12 @@ subroutine fft_test_init(Ftest, fft_setup, kpoint, ecut, boxcutmin, rprimd, nsym
  Ftest%gmet   = gmet
  Ftest%ecut   = ecut
 
- fftalg          = fft_setup(1)
- fftcache        = fft_setup(2)
- ndat            = fft_setup(3)
- Ftest%nthreads  = fft_setup(4)
- Ftest%available = fft_setup(5)
- Ftest%use_gpu   = fft_setup(6)
+ fftalg               = fft_setup(1)
+ fftcache             = fft_setup(2)
+ ndat                 = fft_setup(3)
+ Ftest%nthreads       = fft_setup(4)
+ Ftest%available      = fft_setup(5)
+ Ftest%gpu_option = fft_setup(6)
 
  Ftest%paral_kgb = 0
  Ftest%kpoint    = kpoint
@@ -234,11 +234,11 @@ subroutine fft_test_init(Ftest, fft_setup, kpoint, ecut, boxcutmin, rprimd, nsym
  ABI_CALLOC(tnons,(3,nsym))
 
  call getng(boxcutmin,0,ecut,gmet,k0,Ftest%MPI_enreg%me_fft,Ftest%mgfft,Ftest%nfft,Ftest%ngfft,Ftest%MPI_enreg%nproc_fft,nsym,&
-&  Ftest%MPI_enreg%paral_kgb,symrel,tnons, unit=dev_null, use_gpu_cuda=ftest%use_gpu)
+   Ftest%MPI_enreg%paral_kgb,symrel,tnons, unit=dev_null, gpu_option=ftest%gpu_option)
 
  ABI_FREE(tnons)
 
- call init_distribfft(Ftest%MPI_enreg%distribfft,'c',Ftest%MPI_enreg%nproc_fft,Ftest%ngfft(2),Ftest%ngfft(3))
+ call Ftest%MPI_enreg%distribfft%init('c',Ftest%MPI_enreg%nproc_fft,Ftest%ngfft(2),Ftest%ngfft(3))
 
  ! Compute the index of each plane wave in the FFT grid.
  ABI_MALLOC(Ftest%indpw_k,(Ftest%npw_k))
@@ -355,7 +355,7 @@ subroutine fft_test_print(Ftest, header, unit, mode_paral, prtvol)
  end if
 
  write(msg,'(a,i3)')"FFT setup for fftalg ",Ftest%ngfft(7)
- call print_ngfft(Ftest%ngfft, header=msg, unit=my_unt)
+ call print_ngfft([my_unt], Ftest%ngfft, header=msg)
 
 end subroutine fft_test_print
 !!***
@@ -385,13 +385,13 @@ character(len=TNAME_LEN) function get_name(Ftest)
 
 ! *********************************************************************
 
- if (ftest%use_gpu == 0) then
+ if (ftest%gpu_option == 0) then
    call fftalg_info(Ftest%ngfft(7), library_name, cplex_mode, padding_mode)
    !get_name = TRIM(library_name)//"; "//TRIM(cplex_mode)//"; "//TRIM(padding_mode)
    write(get_name,'(i3)')Ftest%ngfft(7)
    get_name = TRIM(library_name)//" ("//TRIM(get_name)//")"
  else
-   get_name = "GPU"
+   get_name = "GPU_FLAVOR"
  end if
 
 end function get_name
@@ -413,26 +413,25 @@ end function get_name
 !!
 !! SOURCE
 
-subroutine fftprof_init(Ftprof, test_name, nthreads, ncalls, ndat, use_gpu, cpu_time, wall_time, gflops, results)
+subroutine fftprof_init(Ftprof, test_name, nthreads, ncalls, ndat, gpu_option, cpu_time, wall_time, gflops, results)
 
 !Arguments -----------------------------------
  class(FFT_prof_t),intent(out) :: Ftprof
- integer,intent(in) :: ncalls,nthreads,ndat, use_gpu
+ integer,intent(in) :: ncalls,nthreads,ndat, gpu_option
  real(dp),intent(in) :: cpu_time,wall_time,gflops
  character(len=*),intent(in) :: test_name
 !arrays
- complex(dpc),optional,intent(in) :: results(:)
-
+ complex(dp),optional,intent(in) :: results(:)
 ! *************************************************************************
 
- Ftprof%ncalls    = ncalls
- Ftprof%nthreads  = nthreads
- Ftprof%ndat      = ndat
- Ftprof%use_gpu   = use_gpu
- Ftprof%cpu_time  = cpu_time
- Ftprof%wall_time = wall_time
- Ftprof%gflops    = gflops
- Ftprof%test_name = test_name
+ Ftprof%ncalls         = ncalls
+ Ftprof%nthreads       = nthreads
+ Ftprof%ndat           = ndat
+ Ftprof%gpu_option = gpu_option
+ Ftprof%cpu_time       = cpu_time
+ Ftprof%wall_time      = wall_time
+ Ftprof%gflops         = gflops
+ Ftprof%test_name      = test_name
 
  if (present(results)) then
    ABI_REMALLOC(Ftprof%results, (size(results)))
@@ -632,8 +631,7 @@ subroutine time_fourdp(Ftest, isign, cplex, header, Ftprof)
  integer,parameter :: g0(3)=(/1,2,-1/)
  integer :: gg(3)
  real(dp),allocatable :: fofg(:,:),fofr(:)
- complex(dpc),allocatable :: results(:),ctmp(:)
-
+ complex(dp),allocatable :: results(:),ctmp(:)
 ! *********************************************************************
 
  test_name = Ftest%get_name()
@@ -708,7 +706,7 @@ subroutine time_fourdp(Ftest, isign, cplex, header, Ftprof)
  end do
 
  call cwtime(cpu_time, wall_time, gflops, "stop")
- call Ftprof%init(test_name,Ftest%nthreads,NCALLS_FOR_TEST,Ftest%ndat,ftest%use_gpu, &
+ call Ftprof%init(test_name,Ftest%nthreads,NCALLS_FOR_TEST,Ftest%ndat,ftest%gpu_option, &
                   cpu_time,wall_time,gflops,results=results)
 
  ABI_FREE(fofg)
@@ -752,7 +750,7 @@ subroutine time_fftbox(Ftest, isign, inplace, header, Ftprof)
 !arrays
  integer,parameter :: g0(3) = [1,-2,1]
  integer :: gg(3)
- complex(dpc),allocatable :: ffc(:),ggc(:),results(:)
+ complex(dp),allocatable :: ffc(:),ggc(:),results(:)
 ! *********************************************************************
 
  test_name = Ftest%get_name()
@@ -805,7 +803,7 @@ subroutine time_fftbox(Ftest, isign, inplace, header, Ftprof)
  call cwtime(cpu_time, wall_time, gflops, "start")
 
  ! No augmentation here.
- call plan%init(ndat, Ftest%ngfft(1:3), Ftest%ngfft(1:3), Ftest%ngfft(7), fftcache0, ftest%use_gpu)
+ call plan%init(ndat, Ftest%ngfft(1:3), Ftest%ngfft(1:3), Ftest%ngfft(7), fftcache0, ftest%gpu_option)
 
  select case (inplace)
  case (0)
@@ -827,7 +825,7 @@ subroutine time_fftbox(Ftest, isign, inplace, header, Ftprof)
  end select
 
  call cwtime(cpu_time, wall_time, gflops, "stop")
- call Ftprof%init(test_name,Ftest%nthreads,NCALLS_FOR_TEST,Ftest%ndat,ftest%use_gpu, &
+ call Ftprof%init(test_name,Ftest%nthreads,NCALLS_FOR_TEST,Ftest%ndat,ftest%gpu_option, &
                   cpu_time,wall_time,gflops,results=results)
 
  call plan%free()
@@ -876,8 +874,7 @@ subroutine time_fourwf(Ftest, cplex, option_fourwf, header, Ftprof)
  integer :: gg(3)
  integer,allocatable :: gbound_in(:,:),gbound_out(:,:)
  real(dp),allocatable :: denpot(:,:,:),fofg_in(:,:), fofr_4(:,:,:,:),fofg_out(:,:)
- complex(dpc),allocatable :: results(:)
-
+ complex(dp),allocatable :: results(:)
 ! *********************************************************************
 
  test_name = Ftest%get_name()
@@ -1015,7 +1012,7 @@ subroutine time_fourwf(Ftest, cplex, option_fourwf, header, Ftprof)
 
    call fourwf(cplex,denpot,fofg_in,fofg_out,fofr_4,gbound_in,gbound_out,Ftest%istwf_k,&
     Ftest%kg_k,Ftest%kg_kout,Ftest%mgfft,Ftest%MPI_enreg,ndat,Ftest%ngfft,Ftest%npw_k,npw_out,n4,n5,n6,option_fourwf,&
-    tim0,weight_r,weight_i, use_gpu_cuda=ftest%use_gpu)
+    tim0,weight_r,weight_i, gpu_option=ftest%gpu_option)
 
    ! Store results at the first call.
    if (icall == 1) then
@@ -1093,7 +1090,7 @@ subroutine time_fourwf(Ftest, cplex, option_fourwf, header, Ftprof)
  end do
 
  call cwtime(cpu_time, wall_time, gflops, "stop")
- call Ftprof%init(test_name,Ftest%nthreads,NCALLS_FOR_TEST,Ftest%ndat,ftest%use_gpu,&
+ call Ftprof%init(test_name,Ftest%nthreads,NCALLS_FOR_TEST,Ftest%ndat,ftest%gpu_option,&
                   cpu_time,wall_time,gflops,results=results)
 
  ABI_FREE(denpot)
@@ -1166,7 +1163,7 @@ subroutine time_rhotwg(Ftest, map2sphere, use_padfft, osc_npw, osc_gvec, header,
  integer,parameter :: nspinor1=1,dim_rtwg1=1,istwfk1=1
  integer :: icall,ifft,itim1,itim2,nfft,dat,sprc,ptr,ndat, n1,n2,n3,n4,n5,n6
  real(dp) :: cpu_time,wall_time,gflops
- complex(dpc) :: ktabp1 = cone, ktabp2 = cone
+ complex(dp) :: ktabp1 = cone, ktabp2 = cone
  character(len=TNAME_LEN) :: test_name
  logical :: not_implemented
  type(MPI_type) :: MPI_enreg_seq
@@ -1176,9 +1173,8 @@ subroutine time_rhotwg(Ftest, map2sphere, use_padfft, osc_npw, osc_gvec, header,
  integer,allocatable :: gbound(:,:), ktabr1(:), ktabr2(:), igfftg0(:)
  real(dp),parameter :: spinrot1(4)=(/one,zero,zero,one/),spinrot2(4)=(/one,zero,zero,one/)
  logical,allocatable :: mask(:)
- complex(dpc),allocatable :: results(:)
- complex(gwpc),allocatable :: rhotwg(:), wfn1(:), wfn2(:)
-
+ complex(dp),allocatable :: results(:)
+ complex(gwp),allocatable :: rhotwg(:), wfn1(:), wfn2(:)
 ! *********************************************************************
 
  test_name = Ftest%get_name()
@@ -1202,7 +1198,7 @@ subroutine time_rhotwg(Ftest, map2sphere, use_padfft, osc_npw, osc_gvec, header,
  if (Ftest%ngfft(7)/100 == FFT_FFTW3) call fftw3_set_nthreads(Ftest%nthreads)
 
  call initmpi_seq(MPI_enreg_seq)
- call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',n2,n3,'all')
+ call MPI_enreg_seq%distribfft%init_seq('c',n2,n3,'all')
 
  itim1=1; itim2=1
  ABI_MALLOC(ktabr1,(nfft))
@@ -1252,7 +1248,7 @@ subroutine time_rhotwg(Ftest, map2sphere, use_padfft, osc_npw, osc_gvec, header,
  end do
 
  call cwtime(cpu_time, wall_time, gflops, "stop")
- call Ftprof%init(test_name,Ftest%nthreads,NCALLS_FOR_TEST,Ftest%ndat,ftest%use_gpu, &
+ call Ftprof%init(test_name,Ftest%nthreads,NCALLS_FOR_TEST,Ftest%ndat,ftest%gpu_option, &
                   cpu_time,wall_time,gflops,results=results)
 
  ABI_FREE(ktabr1)
@@ -1304,7 +1300,7 @@ subroutine time_fftu(Ftest, isign, header, Ftprof)
  integer,parameter :: g0(3) = [1,-2,1]
  integer :: gg(3)
  integer,allocatable :: kg_k(:,:),gbound(:,:)
- complex(dpc),allocatable :: ug(:),results(:),ur(:)
+ complex(dp),allocatable :: ug(:),results(:),ur(:)
 ! *********************************************************************
 
  test_name = Ftest%get_name()
@@ -1407,7 +1403,7 @@ subroutine time_fftu(Ftest, isign, header, Ftprof)
  end do
 
  call cwtime(cpu_time, wall_time, gflops, "stop")
- call Ftprof%init(test_name,Ftest%nthreads,NCALLS_FOR_TEST,ndat,ftest%use_gpu, &
+ call Ftprof%init(test_name,Ftest%nthreads,NCALLS_FOR_TEST,ndat,ftest%gpu_option, &
                   cpu_time,wall_time,gflops,results=results)
 
  ABI_FREE(kg_k)
@@ -1481,7 +1477,7 @@ subroutine prof_fourdp(fft_setups, isign, cplex, necut, ecut_arth, boxcutmin, rp
     ", ndat = "     ,fft_setups(3,set), &
     ", nthreads = " ,fft_setups(4,set), &
     ", available = ",fft_setups(5,set), &
-    ", use_gpu = ",fft_setups(6,set)
+    ", gpu_option = ",fft_setups(6,set)
  end do
 
  ABI_MALLOC(prof_res,(2,necut,nsetups))
@@ -1577,7 +1573,7 @@ subroutine prof_fourwf(fft_setups, cplex, option, kpoint, necut, ecut_arth, &
     ", ndat = "     ,fft_setups(3,set), &
     ", nthreads = " ,fft_setups(4,set), &
     ", available = ",fft_setups(5,set), &
-    ", use_gpu = ",fft_setups(6,set)
+    ", gpu_option = ",fft_setups(6,set)
  end do
 
  ABI_MALLOC(prof_res,(2,necut,nsetups))
@@ -1674,7 +1670,7 @@ subroutine prof_rhotwg(fft_setups,map2sphere,use_padfft,necut,ecut_arth,osc_ecut
     ", ndat = "     ,fft_setups(3,set),&
     ", nthreads = " ,fft_setups(4,set),&
     ", available = ",fft_setups(5,set),&
-    ", use_gpu = ",fft_setups(6,set)
+    ", gpu_option = ",fft_setups(6,set)
  end do
 
  call get_kg([zero,zero,zero],1,osc_ecut,gmet,osc_npw,osc_gvec)

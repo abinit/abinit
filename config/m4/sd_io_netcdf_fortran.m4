@@ -1,4 +1,4 @@
-## Copyright (C) 2020 Yann Pouillon
+## Copyright (C) 2020-2024 Yann Pouillon
 
 #
 # NetCDF I/O library - Fortran interface
@@ -72,7 +72,7 @@ AC_DEFUN([SD_NETCDF_FORTRAN_INIT], [
   esac
 
   # Declare configure option
-  # TODO: make it switchable for the implicit case 
+  # TODO: make it switchable for the implicit case
   AC_ARG_WITH([netcdf-fortran],
     [AS_HELP_STRING([--with-netcdf-fortran],
       [Install prefix of the NetCDF Fortran interface library (e.g. /usr/local).])],
@@ -91,19 +91,36 @@ AC_DEFUN([SD_NETCDF_FORTRAN_INIT], [
   AC_ARG_VAR([NETCDF_FORTRAN_CFLAGS], [C flags for NetCDF Fortran interface.])
   AC_ARG_VAR([NETCDF_FORTRAN_CXXFLAGS], [C++ flags for NetCDF Fortran interface.])
   AC_ARG_VAR([NETCDF_FORTRAN_FCFLAGS], [Fortran flags for NetCDF Fortran interface.])
+  AC_ARG_VAR([NETCDF_FORTRAN_FFLAGS], [Fortran flags for NetCDF Fortran interface (better use NETCDF_FORTRAN_FCFLAGS).])
   AC_ARG_VAR([NETCDF_FORTRAN_LDFLAGS], [Linker flags for NetCDF Fortran interface.])
   AC_ARG_VAR([NETCDF_FORTRAN_LIBS], [Library flags for NetCDF Fortran interface.])
 
   # Detect use of environment variables
   if test "${sd_netcdf_fortran_enable}" = "yes" -o "${sd_netcdf_fortran_enable}" = "auto"; then
-    tmp_netcdf_fortran_vars="${NETCDF_FORTRAN_CPPFLAGS}${NETCDF_FORTRAN_CFLAGS}${NETCDF_FORTRAN_CXXFLAGS}${NETCDF_FORTRAN_FCFLAGS}${NETCDF_FORTRAN_LDFLAGS}${NETCDF_FORTRAN_LIBS}"
+    tmp_netcdf_fortran_vars="${NETCDF_FORTRAN_CPPFLAGS}${NETCDF_FORTRAN_CFLAGS}${NETCDF_FORTRAN_CXXFLAGS}${NETCDF_FORTRAN_FFLAGS}${NETCDF_FORTRAN_FCFLAGS}${NETCDF_FORTRAN_LDFLAGS}${NETCDF_FORTRAN_LIBS}"
     if test "${sd_netcdf_fortran_init}" = "def" -a \
             ! -z "${tmp_netcdf_fortran_vars}"; then
       sd_netcdf_fortran_enable="yes"
       sd_netcdf_fortran_init="env"
     fi
   fi
-
+  # if mode is def and pkg_config exists and no prefix -> use pkg_config
+  #
+  #AC_MSG_NOTICE([setting sd_netcdf_fortran_init to '${sd_netcdf_fortran_init}'])
+  #AC_MSG_NOTICE([setting sd_netcdf_fortran_enable to '${sd_netcdf_fortran_enable}'])
+  #AC_MSG_NOTICE([setting sd_netcdf_fortran_prefix to '${sd_netcdf_fortran_prefix}'])
+  if test "${sd_netcdf_fortran_enable}" = "yes" -a "${sd_netcdf_fortran_init}" = "def" -a "${sd_netcdf_fortran_prefix}" = ""; then
+     #check if PKG_CONFIG exists (if not keep default mode)
+     AC_CHECK_PROG([PKG_CONFIG], [pkg-config], [pkg-config], [no])
+     if test "$PKG_CONFIG" != "no"; then
+         AC_PATH_TOOL(PKG_CONFIG,pkg-config)
+         if $PKG_CONFIG  netcdf-fortran; then
+	    sd_netcdf_fortran_init="pkg"
+        else
+            sd_netcdf_fortran_init="def"
+        fi
+     fi
+  fi
   # Make sure configuration is correct
   if test "${STEREDEG_BYPASS_CONSISTENCY}" != "yes"; then
     _SD_NETCDF_FORTRAN_CHECK_CONFIG
@@ -143,11 +160,23 @@ AC_DEFUN([SD_NETCDF_FORTRAN_INIT], [
         test ! -z "${NETCDF_FORTRAN_CPPFLAGS}" && sd_netcdf_fortran_cppflags="${NETCDF_FORTRAN_CPPFLAGS}"
         test ! -z "${NETCDF_FORTRAN_CFLAGS}" && sd_netcdf_fortran_cflags="${NETCDF_FORTRAN_CFLAGS}"
         test ! -z "${NETCDF_FORTRAN_CXXFLAGS}" && sd_netcdf_fortran_cxxflags="${NETCDF_FORTRAN_CXXFLAGS}"
+        test ! -z "${NETCDF_FORTRAN_FFLAGS}" && sd_netcdf_fortran_fcflags="${NETCDF_FORTRAN_FFLAGS}"
         test ! -z "${NETCDF_FORTRAN_FCFLAGS}" && sd_netcdf_fortran_fcflags="${NETCDF_FORTRAN_FCFLAGS}"
         test ! -z "${NETCDF_FORTRAN_LDFLAGS}" && sd_netcdf_fortran_ldflags="${NETCDF_FORTRAN_LDFLAGS}"
         test ! -z "${NETCDF_FORTRAN_LIBS}" && sd_netcdf_fortran_libs="${NETCDF_FORTRAN_LIBS}"
         ;;
 
+      pkg)
+	TMP_NETCDF_FORTRAN_CPPFLAGS=`$PKG_CONFIG --cflags --keep-system-cflags netcdf-fortran`
+        TMP_NETCDF_FORTRAN_FFLAGS=`$PKG_CONFIG --cflags --keep-system-cflags netcdf-fortran`
+        TMP_NETCDF_FORTRAN_LIBS=`$PKG_CONFIG --libs netcdf-fortran`
+        sd_netcdf_fortran_cppflags="${TMP_NETCDF_FORTRAN_CPPFLAGS}"
+        sd_netcdf_fortran_cflags="${TMP_NETCDF_FORTRAN_CPPFLAGS}"
+        sd_netcdf_fortran_cxxflags="${TMP_NETCDF_FORTRAN_CPPFLAGS}"
+        sd_netcdf_fortran_fcflags="${TMP_NETCDF_FORTRAN_FFLAGS}"
+        sd_netcdf_fortran_ldflags="${TMP_NETCDF_FORTRAN_LIBS}"
+        sd_netcdf_fortran_libs="${TMP_NETCDF_FORTRAN_LIBS}"
+        ;;
       *)
         AC_MSG_ERROR([invalid init type for the NetCDF Fortran interface: '${sd_netcdf_fortran_init}'])
         ;;
@@ -412,7 +441,7 @@ AC_DEFUN([_SD_NETCDF_FORTRAN_CHECK_CONFIG], [
   fi
 
   # Environment variables conflict with --with-* options
-  tmp_netcdf_fortran_vars="${NETCDF_FORTRAN_CPPFLAGS}${NETCDF_FORTRAN_CFLAGS}${NETCDF_FORTRAN_FCFLAGS}${NETCDF_FORTRAN_LDFLAGS}${NETCDF_FORTRAN_LIBS}"
+  tmp_netcdf_fortran_vars="${NETCDF_FORTRAN_CPPFLAGS}${NETCDF_FORTRAN_CFLAGS}${NETCDF_FORTRAN_FFLAGS}${NETCDF_FORTRAN_FCFLAGS}${NETCDF_FORTRAN_LDFLAGS}${NETCDF_FORTRAN_LIBS}"
   tmp_netcdf_fortran_invalid="no"
   if test ! -z "${tmp_netcdf_fortran_vars}" -a ! -z "${sd_netcdf_fortran_prefix}"; then
     case "${sd_netcdf_fortran_policy}" in
@@ -426,14 +455,18 @@ AC_DEFUN([_SD_NETCDF_FORTRAN_CHECK_CONFIG], [
         tmp_netcdf_fortran_invalid="yes"
         ;;
       warn)
-        AC_MSG_WARN([conflicting option settings for NetCDF Fortran interface])
-        tmp_netcdf_fortran_invalid="yes"
+        if test "${sd_netcdf_fortran_init}" = "dir" ; then
+          AC_MSG_WARN([conflicting option settings for NETCDF Fortran: when giving a path, environment variables are ignored. Set with_netcdf="yes" to use environment variables])
+        else
+          AC_MSG_WARN([conflicting option settings for NETCDF Fortran])
+          tmp_netcdf_fortran_invalid="yes"
+        fi
         ;;
     esac
   fi
 
   # When using environment variables, triggers must be set to yes
-  if test -n "${tmp_netcdf_fortran_vars}"; then
+  if test -n "${tmp_netcdf_fortran_vars}" -a ! "${sd_netcdf_fortran_init}" = "dir" -a ! "${sd_netcdf_fortran_init}" = "pkg" ; then
     sd_netcdf_fortran_enable="yes"
     sd_netcdf_fortran_init="env"
     if test "${tmp_netcdf_fortran_invalid}" = "yes"; then
@@ -441,6 +474,20 @@ AC_DEFUN([_SD_NETCDF_FORTRAN_CHECK_CONFIG], [
       AC_MSG_NOTICE([overriding --with-netcdf with NETCDF_FORTRAN_{FCFLAGS,LDFLAGS,LIBS}])
     fi
   fi
+
+  # This could have side effects if "nf-config --fflags" contains compiler options
+  #if test "${sd_netcdf_fortran_init}" = "dir" ; then
+  #  sd_netcdf_fortran_nfconfig="${sd_netcdf_fortran_prefix}/bin/nf-config"
+  #  AC_MSG_CHECKING([for nf-config binary])
+  #  if test -x "${sd_netcdf_fortran_nfconfig}" ; then
+  #    sd_netcdf_fortran_fcflags=$($sd_netcdf_fortran_nfconfig --fflags)
+  #    sd_netcdf_fortran_libs=$($sd_netcdf_fortran_nfconfig --flibs)
+  #    sd_netcdf_fortran_cppflags=$($sd_netcdf_fortran_nfconfig --fflags)
+  #    AC_MSG_RESULT([${sd_netcdf_fortran_nfconfig}])
+  #  else
+  #    AC_MSG_ERROR([nf-config binary not found or cannot be executed : ${sd_netcdf_fortran_nfconfig}])
+  #  fi
+  #fi
 
   # Implicit status overrides everything
   if test "${sd_netcdf_fortran_status}" = "implicit"; then

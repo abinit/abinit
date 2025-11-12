@@ -1,0 +1,75 @@
+
+.Version 10.3.4.4 of LRUJ, released Nov 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+
+.Copyright (C) 1998-2025 ABINIT group . 
+ LRUJ comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see https://www.abinit.org .
+
+.Starting date : Sun 26 Jan 2025.
+- ( at 09h54 )
+  
+ Number of perturbations detected:  4
+ Including unperturbed state, we have  5 data points.
+ Hunds J determination, implemented by L. MacEnulty August 2021
+ Maximum degree of polynomials analyzed:  3
+ NOTE: Unlike the ujdet utility, lruj treats the 
+ response functions as scalars, not matrices!
+ See lruj tutorial for more information.
+
+
+*************************************************************************************************
+**************************************  Linear Response J  **************************************
+
+ Total number of atoms:    2
+ Index of perturbed atom:    1
+ Value of macro_uj:     4
+ Value of dmatpuopt:     3
+ Mixing constant factored out of Chi0:   0.450
+ Percentage of AE orbital within the PAW sphere of perturbed subspace:     85.43329%
+
+  Perturbations         Magnetizations
+ --------------- -----------------------------
+    beta [eV]     Unscreened      Screened
+ --------------- -----------------------------
+  -0.2000000902   2.4896727783   2.6045578688
+  -0.1000000451   2.4595063690   2.5194819691
+   0.0000000000   2.4288294495   2.4288294495
+   0.1000000451   2.3977878258   2.3331872867
+   0.2000000902   2.3663753744   2.2331857521
+                                                                       RMS Errors
+                                                         ---------------------------------------
+ Regression   Chi0 [eV^-1]   Chi [eV^-1]      J [eV]    | Chi0 [eV^-1]  Chi [eV^-1]     J [eV]
+--------------------------------------------------------|---------------------------------------
+ Linear:        -0.6851405    -0.9290385     0.3831730  |    0.0008500    0.0046598    0.0056944
+ Quadratic:     -0.6851405    -0.9290385     0.3831730  |    0.0000531    0.0001925    0.0002500
+ Cubic:         -0.6860200    -0.9324874     0.3852830  |    0.0000202    0.0000026    0.0000430
+*************************************************************************************************
+*************************************************************************************************
+ 
+Linear Response UJ (LRUJ) program complete. Live long and prosper. ~LMac
+
+
+--- !LRUJ_Abipy_Plots
+natom: 2
+ndata: 5
+pawujat: 1
+macro_uj: 4
+diem_token: diemixmag
+diem:   4.50000000E-01
+chi0_coefficients_degree1: [  2.42843436E+00,  -3.08313212E-01, ]
+chi_coefficients_degree1: [  2.42384847E+00,  -9.29038497E-01, ]
+chi0_coefficients_degree2: [  2.42884247E+00,  -3.08313212E-01,  -2.04056125E-02, ]
+chi_coefficients_degree2: [  2.42882574E+00,  -9.29038497E-01,  -2.48863439E-01, ]
+chi0_coefficients_degree3: [  2.42884247E+00,  -3.08708979E-01,  -2.04056125E-02,   1.16401860E-02, ]
+chi_coefficients_degree3: [  2.42882574E+00,  -9.32487365E-01,  -2.48863439E-01,   1.01437219E-01, ]
+...
+

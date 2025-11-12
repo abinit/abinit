@@ -7,7 +7,7 @@
 !! the irreducible representations associated to electronic eigenstates.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MG)
+!!  Copyright (C) 2008-2025 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +27,8 @@ MODULE m_esymm
  use m_errors
 
  use m_io_tools,       only : file_exists
- use m_symtk,          only : matr3inv, chkgrp, symrelrot, littlegroup_q
+ use m_matrix,         only : matr3inv
+ use m_symtk,          only : sg_multable, symrelrot, littlegroup_q
  use m_symfind,        only : symbrav
  use m_fstrings,       only : int2char10, itoa, sjoin
  use m_numeric_tools,  only : print_arr, set2unit, get_trace
@@ -35,7 +36,7 @@ MODULE m_esymm
  use m_crystal,        only : crystal_t
  use m_defs_ptgroups,  only : point_group_t, irrep_t
  use m_ptgroups,       only : get_classes, point_group_init, irrep_free,&
-&                             copy_irrep, init_irrep, mult_table, sum_irreps
+                              copy_irrep, init_irrep, mult_table, sum_irreps
 
  implicit none
 
@@ -154,8 +155,8 @@ MODULE m_esymm
   type(coeffi1_type),allocatable :: irrep2b(:)
   ! irrep2b(0:nclass)%value(:)
   ! Ragged arrays with the mapping between the set of irreducible representation and the band indices.
-  ! irrep2b(irp)%value(:) gives the indeces of the states belonging to irrep irp, irp=1,nclass
-  ! irrep2b(0)%value(:) stores the indeces of the states that have not been classified due to
+  ! irrep2b(irp)%value(:) gives the indices of the states belonging to irrep irp, irp=1,nclass
+  ! irrep2b(0)%value(:) stores the indices of the states that have not been classified due to
   !   the presence of an accidental degeneracy.
 
   integer,allocatable :: degs_bounds(:,:)
@@ -262,7 +263,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
  integer :: iel,icls,msym,iord !isym1,!iprod,dim_irrep,icls2, isym2,isym_tr,
  integer :: spgroup,chkprim !,ptgroupma
  real(dp) :: mkt
- !complex(dpc) :: phase_k
+ !complex(dp) :: phase_k
  character(len=5) :: ptgroup,ptgroup_name
  character(len=10) :: spgroup_str
  character(len=1000) :: msg
@@ -281,8 +282,8 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
  integer,allocatable :: new_idx(:),new_g0(:,:),tmp_symrec(:,:,:),conv_symrec(:,:,:) !,tr_conv_symrec(:,:,:)
  integer,allocatable :: dummy_symafm(:)
  real(dp) :: conv_gprimd(3,3),axes(3,3) !,tau2(3)
- !complex(dpc),allocatable :: her_test(:) !,mat_test(:,:)
- complex(dpc),allocatable :: phase_mkt(:)
+ !complex(dp),allocatable :: her_test(:) !,mat_test(:,:)
+ complex(dp),allocatable :: phase_mkt(:)
  type(point_group_t) :: Ptg
 
 ! *************************************************************************
@@ -340,15 +341,15 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
  ! For the time being, AFM symmetries are not treated.
 
  write(msg,'(a,3(1x,f7.4))')" Finding the little group of k-point: ",esymm%kpt
- call wrtout(std_out,msg,"COLL")
+ call wrtout(std_out,msg)
 
  ! Only FM symmetries are used.
  nsym_fm = COUNT(Cryst%symafm==1)
 
  if (nsym_fm /= Cryst%nsym) then
    write(msg,'(4a)')ch10,&
-&    "Band classification in terms of magnetic space groups not coded! ",ch10,&
-&    "Only the ferromagnetic subgroup will be used "
+    "Band classification in terms of magnetic space groups not coded! ",ch10,&
+    "Only the ferromagnetic subgroup will be used "
    ABI_COMMENT(msg)
  end if
 
@@ -421,9 +422,9 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
  ABI_MALLOC(dum_symafm,(esymm%nsym_gk))
  dum_symafm=1
 
- call chkgrp(esymm%nsym_gk,dum_symafm,sgk,grp_ierr)
-
- ABI_CHECK(grp_ierr==0,"chkgrp failed")
+!Check group closure
+ call sg_multable(esymm%nsym_gk,dum_symafm,sgk,grp_ierr)
+ ABI_CHECK(grp_ierr==0,"sg_multable failed")
  ABI_FREE(dum_symafm)
 
  ABI_MALLOC(tmp_nelements,(esymm%nsym_gk))
@@ -465,7 +466,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
 
    spgroup=0
    chkprim=1 ! Cell must be primitive.
-   !call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
+   !call symlatt(bravais,std_out,msym,nptsym,ptsymrel,rprimd,tolsym)
    !call symspgr(bravais,Cryst%nsym,spgroup,Cryst%symrel,Cryst%tnons,tolsym)
 
    !call symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tolsym)
@@ -493,7 +494,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
 
      esymm%has_chtabs = .FALSE.
 
-     ! Reorder indeces such that symmetries are packed in classes.
+     ! Reorder indices such that symmetries are packed in classes.
      ABI_MALLOC(new_idx,(esymm%nsym_gk))
      ABI_MALLOC(new_g0,(3,esymm%nsym_gk))
      new_g0=0; iord = 0
@@ -556,7 +557,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
    select case (ptgroup_name)
 
    case ("3m","-3m")
-     call wrtout(std_out," Changing the conventional cell: rhombohedral --> triple hexagonal","COLL")
+     call wrtout(std_out," Changing the conventional cell: rhombohedral --> triple hexagonal")
      ! Transformation matrices: primitive rhombohedral --> triple hexagonal cell obverse setting. Table 5.1.3.1 ITA page 81.
      pmat1 = RESHAPE( (/ 1,-1, 0, 0, 1,-1, 1, 1, 1/), (/3,3/) ) ! R1
      pmat2 = RESHAPE( (/ 0, 1,-1,-1, 0, 1, 1, 1, 1/), (/3,3/) ) ! R2
@@ -573,7 +574,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
      !write(std_out,*)" New conv_gprimd:", conv_gprimd
 
    case ("mm2")
-     call wrtout(std_out," Changing the conventional cell: unconventional orthorhombic setting --> conventional","COLL")
+     call wrtout(std_out," Changing the conventional cell: unconventional orthorhombic setting --> conventional")
      ! Transformation matrices: unconvential orthorhombic --> conventional orthorhombic. Table 5.1.3.1 ITA page 81.
      pmat1 = RESHAPE( (/ 0, 1, 0, 1, 0, 0, 0, 0,-1/), (/3,3/) )  ! ( b, a,-c) --> (a,b,c)
      pmat2 = RESHAPE( (/ 0, 1, 0, 0, 0, 1, 1, 0, 0/), (/3,3/) )  ! ( c, a, b) --> (a,b,c)
@@ -593,7 +594,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
    !call symrelrot(esymm%nsym_gk,conv_gprimd,axes,conv_symrec,tolsym)
    call symrelrot(esymm%nsym_gk,Cryst%gprimd,conv_gprimd,conv_symrec,tolsym)
 
-   ! 3) Reorder indeces such that symmetries are packed in classes.
+   ! 3) Reorder indices such that symmetries are packed in classes.
    ABI_MALLOC(found,(esymm%nsym_gk))
    ABI_MALLOC(new_idx,(esymm%nsym_gk))
    ABI_MALLOC(new_g0,(3,esymm%nsym_gk))
@@ -849,11 +850,11 @@ subroutine esymm_print(esymm,unit,mode_paral,prtvol)
 
  write(fmt,*)'(2a,3f8.4,3a,i4,2a,i3,2a,i2,2a,i2,a,',esymm%nclass,'i2,a)'
  write(msg,fmt)ch10,&
-&  ' ===== Character of bands at k-point: ',esymm%kpt,' ===== ',ch10,&
-&  '   Total number of bands analyzed .................. ',esymm%nbnds,ch10,&
-&  '   Number of degenerate sets detected .............. ',esymm%ndegs,ch10,&
-&  '   Number of operations in the little group of k ... ',esymm%nsym_gk,ch10,&
-&  '   Number of classes (irreps) in the group of k .... ',esymm%nclass,' (',(esymm%nelements(icl),icl=1,esymm%nclass),' )'
+  ' ===== Character of bands at k-point: ',esymm%kpt,' ===== ',ch10,&
+  '   Total number of bands analyzed .................. ',esymm%nbnds,ch10,&
+  '   Number of degenerate sets detected .............. ',esymm%ndegs,ch10,&
+  '   Number of operations in the little group of k ... ',esymm%nsym_gk,ch10,&
+  '   Number of classes (irreps) in the group of k .... ',esymm%nclass,' (',(esymm%nelements(icl),icl=1,esymm%nclass),' )'
  call wrtout(my_unt,msg,my_mode)
 
  if (esymm%nonsymmorphic_at_zoneborder) then
@@ -1029,16 +1030,15 @@ subroutine esymm_finalize(esymm,prtvol)
  !real(dp),parameter :: TOL_TRACE=0.01_dp,TOL_ORTHO=0.01_dp,TOL_UNITARY=0.01_dp ! Large tolerance is needed to avoid problems.
  !real(dp),parameter :: TOL_TRACE=tol3,TOL_ORTHO=tol3,TOL_UNITARY=tol3 ! Large tolerance is needed to avoid problems.
  real(dp) :: uerr,max_err
- complex(dpc) :: ctest
+ complex(dp) :: ctest
  logical :: isnew
  character(len=500) :: msg
 !arrays
  integer,allocatable :: dims_seen(:)
- complex(dpc),allocatable :: traces_seen(:,:)
- complex(dpc),pointer :: trace(:)
- complex(dpc),pointer :: calc_mat(:,:),trace1(:),trace2(:)
- complex(dpc),allocatable :: cidentity(:,:)
-
+ complex(dp),allocatable :: traces_seen(:,:)
+ complex(dp),pointer :: trace(:)
+ complex(dp),pointer :: calc_mat(:,:),trace1(:),trace2(:)
+ complex(dp),allocatable :: cidentity(:,:)
 ! *************************************************************************
 
  !@esymm_t
@@ -1085,16 +1085,16 @@ subroutine esymm_finalize(esymm,prtvol)
 
    if (nseen>esymm%nclass) then
      write(msg,'(3a)')&
-&      "The number of different calculated traces is found to be greater than nclasses!",ch10,&
-&      "Heuristic method clearly failed. Symmetry analysis cannot be performed."
+      "The number of different calculated traces is found to be greater than nclasses!",ch10,&
+      "Heuristic method clearly failed. Symmetry analysis cannot be performed."
      ABI_WARNING(msg)
      esymm%err_status = ESYM_HEUR_WRONG_NCLASSES
      esymm%err_msg    = msg
 
      do isn=1,nseen
        write(msg,'(a,i0)')" Representation: ",isn
-       call wrtout(std_out,msg,"COLL")
-       call print_arr(traces_seen(:,isn),max_r=esymm%nsym_gk,unit=std_out,mode_paral="COLL")
+       call wrtout(std_out,msg)
+       call print_arr([std_out], traces_seen(:,isn),max_r=esymm%nsym_gk)
      end do
 
    else  ! It seems that the Heuristic method succeeded.
@@ -1107,8 +1107,8 @@ subroutine esymm_finalize(esymm,prtvol)
            esymm%b2irrep(ib1:ib2)=isn
            if (esymm%Calc_irreps(idg)%dim /= dims_seen(isn)) then
              write(msg,'(3a)')&
-&              "Found two set of degenerate states with same character but different dimension!",ch10,&
-&              "heuristic method clearly failed. Symmetry analysis cannot be performed."
+              "Found two set of degenerate states with same character but different dimension!",ch10,&
+              "heuristic method clearly failed. Symmetry analysis cannot be performed."
              ABI_ERROR(msg)
              esymm%err_status = ESYM_HEUR_WRONG_DIMS
              esymm%err_msg    = msg
@@ -1143,7 +1143,7 @@ subroutine esymm_finalize(esymm,prtvol)
    end do
  end if
  !
- ! %irrep2b(0)) gives the indeces of the states that have not been classified.
+ ! %irrep2b(0)) gives the indices of the states that have not been classified.
  ABI_MALLOC(esymm%irrep2b,(0:esymm%nclass))
 
  !write(std_out,*)"b2irrep",esymm%b2irrep
@@ -1175,7 +1175,7 @@ subroutine esymm_finalize(esymm,prtvol)
    !
    ! 1) \sum_R \chi^*_a(R)\chi_b(R)= N_R \delta_{ab}
    !
-   !call wrtout(std_out," \sum_R \chi^*_a(R)\chi_b(R) = N_R \delta_{ab} ","COLL")
+   !call wrtout(std_out," \sum_R \chi^*_a(R)\chi_b(R) = N_R \delta_{ab} ")
    max_err=zero
    do idg2=1,esymm%ndegs
      trace2 => esymm%Calc_irreps(idg2)%trace(1:esymm%nsym_gk)
@@ -1193,8 +1193,8 @@ subroutine esymm_finalize(esymm,prtvol)
        max_err = MAX(max_err,ABS(ctest))
        if (.FALSE..and.ABS(ctest)>tol3) then
          write(msg,'(a,4i3,2es16.8)')&
-&          ' WARNING: should be delta_ij: cx1 cx2, irr1, irr2, ctest: ',idg1,idg2,irr_idx1,irr_idx2,ctest
-         call wrtout(std_out,msg,"COLL")
+          ' WARNING: should be delta_ij: cx1 cx2, irr1, irr2, ctest: ',idg1,idg2,irr_idx1,irr_idx2,ctest
+         call wrtout(std_out,msg)
        end if
      end do
    end do
@@ -1206,7 +1206,7 @@ subroutine esymm_finalize(esymm,prtvol)
      esymm%err_msg    =  msg
    else
      write(msg,'(a,es10.2)')" maximum error on \sum_R \chi^*_a(R)\chi_b(R) = N_R \delta_{ab}: ",max_err
-     call wrtout(std_out,msg,"COLL")
+     call wrtout(std_out,msg)
    end if
 
    if (.not.esymm%only_trace) then
@@ -1227,8 +1227,8 @@ subroutine esymm_finalize(esymm,prtvol)
          ABI_FREE(cidentity)
          if (.FALSE..and.prtvol>=10) then
            write(std_out,'(a,i3,a,i2,a,es16.8,a)')&
-&          " === idg: ",idg1,", isym: ",isym,", Error on U^* U = 1: ",uerr," ==="
-           call print_arr(calc_mat,dim_mat,dim_mat,unit=std_out,mode_paral="COLL")
+           " === idg: ",idg1,", isym: ",isym,", Error on U^* U = 1: ",uerr," ==="
+           call print_arr([std_out], calc_mat,dim_mat,dim_mat)
          end if
        end do
      end do
@@ -1240,7 +1240,7 @@ subroutine esymm_finalize(esymm,prtvol)
        esymm%err_status = ESYM_UNITARY_ERROR
      else
        write(msg,'(a,es10.2)')" maximum error on the unitary of representions matrices: ",max_err
-       call wrtout(std_out,msg,"COLL")
+       call wrtout(std_out,msg)
      end if
 
    end if
@@ -1274,12 +1274,11 @@ function which_irrep(esymm,trace,tolerr)
  real(dp),intent(in) :: tolerr
  type(esymm_t),intent(in) :: esymm
 !arrays
- complex(dpc),intent(in) :: trace(esymm%nsym_gk)
+ complex(dp),intent(in) :: trace(esymm%nsym_gk)
 
 !Local variables-------------------------------
 !scalars
  integer :: irp
-
 ! *********************************************************************
 
  which_irrep = 0
@@ -1315,18 +1314,17 @@ subroutine esymm_symmetrize_mels(esymm,lbnd,ubnd,in_me,out_me)
  integer :: lbnd,ubnd
  type(esymm_t),target,intent(in) :: esymm
 !arrays
- complex(dpc),intent(in) :: in_me(2,lbnd:ubnd,lbnd:ubnd)
- complex(dpc),intent(out) :: out_me(lbnd:ubnd,lbnd:ubnd)
+ complex(dp),intent(in) :: in_me(2,lbnd:ubnd,lbnd:ubnd)
+ complex(dp),intent(out) :: out_me(lbnd:ubnd,lbnd:ubnd)
 
 !Local variables-------------------------------
 !scalars
  integer :: idg1,b1_start,b1_stop,irp1
  integer :: idg2,b2_start,b2_stop,irp2
  integer :: ii,jj,ib,jb,kk,kb,lb,ll
- complex(dpc) :: tr_ofd,ofd,dsd,tr_dsd
+ complex(dp) :: tr_ofd,ofd,dsd,tr_dsd
  type(irrep_t),pointer :: Irrep1,Irrep2
  type(irrep_t),pointer :: tr_Irrep1,tr_Irrep2
-
 ! *********************************************************************
 
  if (esymm_failed(esymm)) then
@@ -1338,7 +1336,7 @@ subroutine esymm_symmetrize_mels(esymm,lbnd,ubnd,in_me,out_me)
    b1_stop  = esymm%degs_bounds(2,idg1)
 
    !if (b1_stop<lbnd .or. b2_start >ubnd) then
-   !  ABI_ERROR("Wrong band indeces, check esymm initialization")
+   !  ABI_ERROR("Wrong band indices, check esymm initialization")
    !end if
 
    Irrep1 => esymm%Calc_irreps(idg1)
@@ -1357,7 +1355,7 @@ subroutine esymm_symmetrize_mels(esymm,lbnd,ubnd,in_me,out_me)
      if (esymm%can_use_tr) tr_Irrep2 => esymm%trCalc_irreps(idg2)
      !
      ! Symmetrize the off-diagonal matrix elements.
-     ! summing over kk and ll. ii and jj are the indeces of the bands that are symmetrized
+     ! summing over kk and ll. ii and jj are the indices of the bands that are symmetrized
      do ii=1,b1_stop-b1_start+1
        ib= ii+b1_start-1
        do jj=1,b2_stop-b2_start+1
@@ -1372,7 +1370,7 @@ subroutine esymm_symmetrize_mels(esymm,lbnd,ubnd,in_me,out_me)
              dsd = sum_irreps(Irrep1,Irrep2,kk,ii,ll,jj)
              ofd = ofd + dsd * in_me(1,kb,lb)
              if (esymm%can_use_tr) then
-               tr_dsd = sum_irreps(tr_Irrep1,tr_Irrep2,kk,jj,ll,ii) ! Exchange of band indeces.
+               tr_dsd = sum_irreps(tr_Irrep1,tr_Irrep2,kk,jj,ll,ii) ! Exchange of band indices.
                tr_ofd = tr_ofd + tr_dsd * in_me(2,kb,lb)            ! Contribution obtained from TR.
              end if
            end do
@@ -1439,9 +1437,8 @@ subroutine polish_irreps(Irreps)
  integer :: irp,sym,dim,ldvr,ii,ivec,jvec,info
  !character(len=500) :: msg
 !arrays
- complex(dpc),allocatable :: vl(:,:),vr(:,:),vrm1(:,:),overlap(:,:)
- complex(dpc),allocatable :: cmat(:,:),eigval(:)
-
+ complex(dp),allocatable :: vl(:,:),vr(:,:),vrm1(:,:),overlap(:,:)
+ complex(dp),allocatable :: cmat(:,:),eigval(:)
 ! *********************************************************************
 
  ! Eigen decomposition: A = V D V^{-1}.

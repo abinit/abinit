@@ -3,8 +3,8 @@
 
 # BSE run with Haydock iterative method (only resonant + W + v)
 optdriver 99  # BS calculation
-irdwfk  1     # Read the WFK file produced in tbs_1 
-irdscr  1     # Read the SCR file produced in tbs_1 
+irdwfk  1     # Read the WFK file produced in tbs_1
+irdscr  1     # Read the SCR file produced in tbs_1
 
 bs_calctype       1       # L0 is constructed with KS orbitals and energies.
 mbpt_sciss          0.8 eV  # Scissors operator used to correct the KS band structure.
@@ -12,7 +12,7 @@ bs_exchange_term  1       # Exchange term included.
 bs_coulomb_term   11      # Coulomb term included using the full matrix W_GG'
 bs_coupling       0       # Tamm-Dancoff approximation.
 
-bs_loband         2 
+bs_loband         2
 nband             8
 
 bs_freq_mesh 0 6 0.02 eV   # Frequency mesh.
@@ -57,7 +57,7 @@ xred              # Reduced coordinate of atoms
    0.0  0.0  0.0
    0.25 0.25 0.25
 
-# Definition of the planewave basis set 
+# Definition of the planewave basis set
 ecut 12        # Maximal kinetic energy cut-off, in Hartree
 
 istwfk *1
@@ -66,7 +66,7 @@ diemac 12.0
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8"
+ pseudos "Psdj_nc_sr_04_pw_std_psp8/Si.psp8"
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
@@ -76,14 +76,14 @@ diemac 12.0
 #%% executable = abinit
 #%% test_chain = tbs_1.abi, tbs_2.abi, tbs_3.abi, tbs_4.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   tbs_2.abo, tolnlines= 10, tolabs=  1.1e-2,    tolrel=  4.0e-2, fld_options =-ridiculous
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = GW, BSE
-#%% description = 
+#%% description =
 #%%  Crystalline silicon
 #%%   BS run: Tamm-Dancoff approximation solved with the Haydock algorithm.
 #%%<END TEST_INFO>

@@ -1,6 +1,6 @@
 #  Isolated Bi atom. Spin-polarized, collinear.
 
-  zeemanfield 0.0 0.0 1.0
+  hspinfield 0.0 0.0 1.0
 
   ndtset   6
   udtset   3 2
@@ -60,7 +60,7 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t17.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%%   t17.abo, tolnlines = 2, tolabs = 2.1e-06, tolrel = 1.0e-08
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
@@ -68,6 +68,6 @@
 #%% keywords = 
 #%% description = 
 #%%   Bi atom in a big supercell.
-#%%   Test the application of a Zeeman field.
+#%%   Test the application of hspinfield.
 #%% topics = MagField
 #%%<END TEST_INFO>

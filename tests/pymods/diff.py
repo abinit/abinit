@@ -1,12 +1,12 @@
 #!/usr/bin/env python
-""" Command line interface to difflib.py providing diffs in four formats:
+"""
+Command line interface to difflib.py providing diffs in four formats:
 
 * ndiff:    lists every line and highlights interline changes.
 * context:  highlights clusters of changes in a before/after format.
 * unified:  highlights clusters of changes in an inline format.
 * html:     generates side by side comparison with change highlights.
 """
-from __future__ import print_function, division, absolute_import, unicode_literals
 
 import sys
 import os
@@ -52,7 +52,7 @@ def main():
                         help='Write diff to file FILE. stdout is used if not specified', metavar='FILE')
 
     parser.add_argument('-j', '--abinit-junk', action='store_true', default=False,
-                        help='Use Abinit output specific heuristic instead of builtin heuristic to syncronise lines.')
+                        help='Use Abinit output specific heuristic instead of builtin heuristic to synchronise lines.')
 
     parser.add_argument('fromfile', help='Reference file')
     parser.add_argument('tofile', help='Compared file')

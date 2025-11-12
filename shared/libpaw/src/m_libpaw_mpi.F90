@@ -8,7 +8,7 @@
 !!  a set of generic interfaces wrapping MPI primitives.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2022 ABINIT group (MT, MG, ...)
+!!  Copyright (C) 2014-2025 ABINIT group (MT, MG, ...)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,12 +24,9 @@
 #include "libpaw.h"
 
 module m_libpaw_mpi
-    
- USE_DEFS
 
-#ifdef HAVE_MPI2
- use mpi
-#endif
+ USE_DEFS
+ USE_MPI
 
  implicit none
 
@@ -796,7 +793,7 @@ subroutine xpaw_mpi_allgatherv_dp2d(xval,nelem,recvbuf,recvcounts,displs,spaceCo
 
 !Local variables--------------
  integer :: cc,dd,sz1
- 
+
 ! *************************************************************************
  ier=0
 #if defined HAVE_MPI
@@ -952,7 +949,7 @@ subroutine xpaw_mpi_scatterv_dp2d(xval,sendcounts,displs,recvbuf,recvcount,root,
  integer, intent(out) :: ier
 
 !Local variables-------------------
- integer :: cc,dd,sz1 
+ integer :: cc,dd,sz1
 
 ! *************************************************************************
  ier=0
@@ -1123,7 +1120,7 @@ end subroutine xpaw_mpi_alltoall_dp2d
 !!  xval= buffer array
 !!  sendcnts= number of elements to send to each processor
 !!  sdispls= displacements from which to take the outgoing data
-!!  recvcnts= number of elements that can be received from each processor 
+!!  recvcnts= number of elements that can be received from each processor
 !!  rdispls= displacement at which to place the incoming data from each processor
 !!  comm= MPI communicator
 !!
@@ -1179,7 +1176,7 @@ end subroutine xpaw_mpi_alltoallv_int1d
 !!  xval= buffer array
 !!  sendcnts= number of elements to send to each processor
 !!  sdispls= displacements from which to take the outgoing data
-!!  recvcnts= number of elements that can be received from each processor 
+!!  recvcnts= number of elements that can be received from each processor
 !!  rdispls= displacement at which to place the incoming data from each processor
 !!  comm= MPI communicator
 !!
@@ -1232,7 +1229,7 @@ end subroutine xpaw_mpi_alltoallv_dp1d
 !!  xval= buffer array
 !!  sendcnts= number of elements to send to each processor
 !!  sdispls= displacements from which to take the outgoing data
-!!  recvcnts= number of elements that can be received from each processor 
+!!  recvcnts= number of elements that can be received from each processor
 !!  rdispls= displacement at which to place the incoming data from each processor
 !!  comm= MPI communicator
 !!
@@ -1255,7 +1252,7 @@ subroutine xpaw_mpi_alltoallv_dp2d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispl
 
 !Local variables-------------------
  integer :: sc,sds,sdr,sz1
- 
+
 ! *********************************************************************
  ier=0
 #if defined HAVE_MPI
@@ -1304,12 +1301,17 @@ subroutine xpaw_mpi_bcast_int(xval,master,spaceComm,ier)
  integer, intent(out) :: ier
 
 !Local variables-------------------------------
+#if defined HAVE_MPI
+ integer :: arr_xval(1)
+#endif
 
 ! *************************************************************************
  ier=0
 #if defined HAVE_MPI
  if (spaceComm /= xpaw_mpi_comm_self .and. spaceComm /= xpaw_mpi_comm_null) then
-   call MPI_BCAST(xval,1,MPI_INTEGER,master,spaceComm,ier)
+   arr_xval(1)=xval
+   call MPI_BCAST(arr_xval,1,MPI_INTEGER,master,spaceComm,ier)
+   xval=arr_xval(1)
  end if
 #endif
 end subroutine xpaw_mpi_bcast_int
@@ -2677,9 +2679,7 @@ subroutine xpaw_mpi_sum_int(xval,comm,ier)
 !Local variables-------------------
 #if defined HAVE_MPI
  integer :: nproc
-#if !defined HAVE_MPI2 || !defined HAVE_MPI2_INPLACE
- integer :: xsum
-#endif
+ integer :: arr_xval(1),arr_xsum(1)
 #endif
 
 ! *************************************************************************
@@ -2688,14 +2688,11 @@ subroutine xpaw_mpi_sum_int(xval,comm,ier)
  if (comm /= xpaw_mpi_comm_self .and. comm /= xpaw_mpi_comm_null) then
    call MPI_COMM_SIZE(comm,nproc,ier)
    if (nproc /= 1) then
-#if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,1,MPI_INTEGER,MPI_SUM,comm,ier)
-#else
-     call MPI_ALLREDUCE(xval,xsum,1,MPI_INTEGER,MPI_SUM,comm,ier)
-     xval=xsum
-#endif
+     arr_xval(1)=xval
+     call MPI_ALLREDUCE(arr_xval,arr_xsum,1,MPI_INTEGER,MPI_SUM,comm,ier)
+     xval=arr_xsum(1)
    end if
- end if
+  end if
 #endif
 end subroutine xpaw_mpi_sum_int
 !!***
@@ -2728,7 +2725,7 @@ subroutine xpaw_mpi_sum_int1d(xval,comm,ier)
 !Local variables-------------------
 #if defined HAVE_MPI
  integer :: n1,nproc
-#if !defined HAVE_MPI2 || !defined HAVE_MPI2_INPLACE
+#if !defined HAVE_MPI2_INPLACE
  integer :: xsum(size(xval,dim=1))
 #endif
 #endif
@@ -2740,7 +2737,7 @@ subroutine xpaw_mpi_sum_int1d(xval,comm,ier)
    call MPI_COMM_SIZE(comm,nproc,ier)
    if (nproc /= 1) then
      n1=size(xval,dim=1)
-#if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+#if defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1,MPI_INTEGER,MPI_SUM,comm,ier)
 #else
      call MPI_ALLREDUCE(xval,xsum,n1,MPI_INTEGER,MPI_SUM,comm,ier)
@@ -2780,7 +2777,7 @@ subroutine xpaw_mpi_sum_dp1d(xval,comm,ier)
 !Local variables-------------------
 #if defined HAVE_MPI
  integer :: n1,nproc
-#if !defined HAVE_MPI2 || !defined HAVE_MPI2_INPLACE
+#if !defined HAVE_MPI2_INPLACE
  real(dp) :: xsum(size(xval,dim=1))
 #endif
 #endif
@@ -2792,7 +2789,7 @@ subroutine xpaw_mpi_sum_dp1d(xval,comm,ier)
    call MPI_COMM_SIZE(comm,nproc,ier)
    if (nproc /= 1) then
      n1=size(xval,dim=1)
-#if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+#if defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
 #else
      call MPI_ALLREDUCE(xval,xsum,n1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
@@ -2832,7 +2829,7 @@ subroutine xpaw_mpi_sum_dp2d(xval,comm,ier)
 !Local variables-------------------
 #if defined HAVE_MPI
  integer :: n1,n2,nproc
-#if !defined HAVE_MPI2 || !defined HAVE_MPI2_INPLACE
+#if !defined HAVE_MPI2_INPLACE
  real(dp) :: xsum(size(xval,dim=1),size(xval,dim=2))
 #endif
 #endif
@@ -2844,7 +2841,7 @@ subroutine xpaw_mpi_sum_dp2d(xval,comm,ier)
    call MPI_COMM_SIZE(comm,nproc,ier)
    if (nproc /= 1) then
      n1=size(xval,dim=1) ; n2=size(xval,dim=2)
-#if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+#if defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
 #else
      call MPI_ALLREDUCE(xval,xsum,n1*n2,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
@@ -2884,7 +2881,7 @@ subroutine xpaw_mpi_sum_dp3d(xval,comm,ier)
 !Local variables-------------------
 #if defined HAVE_MPI
  integer :: n1,n2,n3,nproc
-#if !defined HAVE_MPI2 || !defined HAVE_MPI2_INPLACE
+#if !defined HAVE_MPI2_INPLACE
  real(dp) :: xsum(size(xval,dim=1),size(xval,dim=2),size(xval,dim=3))
 #endif
 #endif
@@ -2896,7 +2893,7 @@ subroutine xpaw_mpi_sum_dp3d(xval,comm,ier)
    call MPI_COMM_SIZE(comm,nproc,ier)
    if (nproc /= 1) then
      n1=size(xval,dim=1) ; n2=size(xval,dim=2) ; n3=size(xval,dim=3)
-#if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+#if defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
 #else
      call MPI_ALLREDUCE(xval,xsum,n1*n2*n3,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)

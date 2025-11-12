@@ -51,6 +51,15 @@ before moving to EPH computations.
 For further information about the difference between EPH and ANADDB, see also [[cite:Gonze2019]].
 Further details about the EPH implementation are available in [[cite:Brunin2020b]].
 
+!!! tip
+
+    To run all the tests associated to the GWR code with `NUM` MPI processes
+    and `PYTASKS` python multiprocessing, use:
+
+    ```
+    runtests.py -k GWR -n NUM -j PYTASKS
+    ```
+
 ## EPH workflow
 
 A typical EPH workflow with arrows denoting dependencies between the different steps
@@ -626,4 +635,9 @@ the [mobility tutorial](/tutorial/eph4mob#how-to-compute-only-the-k-points-close
 TODO: Recheck the code, perhaps I can use the ab-initio band edge if its greater/smaller than the SKW one.
 The most important thing is that SKW reproduces the position of the band edges as these values are then used
 that the position of the SKW band edge is consistent
+-->
+
+
+<!--
+## GSTORE.nc file
 -->

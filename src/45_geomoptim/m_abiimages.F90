@@ -23,7 +23,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2022 ABINIT group (XG)
+!! Copyright (C) 2001-2025 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -114,8 +114,6 @@ contains
 
 subroutine abiimages_ini(images,nimages,natom,nrecord)
 
- implicit none
-
 !Arguments ------------------------------------
  type(abiimages) ,intent(out) :: images
  integer         ,intent(in)  :: natom,nimages
@@ -163,8 +161,6 @@ end subroutine abiimages_ini
 !! SOURCE
 
 subroutine abiimages_fin(images)
-
- implicit none
 
 !Arguments ------------------------------------
  type(abiimages),intent(inout) :: images

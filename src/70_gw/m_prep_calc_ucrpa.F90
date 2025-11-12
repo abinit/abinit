@@ -6,7 +6,7 @@
 !! Prepare data for the calculation of U with the CRPA method: oscillators strenghs and k-points.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2022 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2025 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,7 +33,7 @@ MODULE m_prep_calc_ucrpa
  use m_defs_ptgroups
  use m_errors
 
- use defs_datatypes,  only : pseudopotential_type, ebands_t
+ use defs_datatypes,  only : pseudopotential_type
  use m_time,          only : timab
  use m_hide_blas,     only : xdotc
  use m_geometry,      only : normv
@@ -55,7 +55,8 @@ MODULE m_prep_calc_ucrpa
  use m_oscillators,   only : rho_tw_g
  use m_esymm,         only : esymm_t, esymm_failed
  use m_read_plowannier, only : read_plowannier
- use m_plowannier, only : plowannier_type,operwan_realspace_type
+ use m_plowannier,     only : plowannier_type,operwan_realspace_type
+ use m_ebands,         only : ebands_t
 
  implicit none
 
@@ -74,7 +75,7 @@ contains
 !! Prepare data for the calculation of U with the CRPA method: oscillators strenghs and k-points.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2022 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf,TApplencourt,BAmadon)
+!! Copyright (C) 1999-2025 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf,TApplencourt,BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -174,8 +175,8 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  type(pawang_type),intent(in) :: Pawang
  class(wfd_t),target,intent(inout) :: Wfd,Wfdf
 !arrays
- complex(dpc), intent(out) :: rhot1_q_m(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,2*lpawu+1,2*lpawu+1,sigp%npwx,Qmesh%nibz)
- complex(dpc), intent(out) :: M1_q_m(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,2*lpawu+1,2*lpawu+1,sigp%npwx,Qmesh%nibz)
+ complex(dp), intent(out) :: rhot1_q_m(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,2*lpawu+1,2*lpawu+1,sigp%npwx,Qmesh%nibz)
+ complex(dp), intent(out) :: M1_q_m(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,2*lpawu+1,2*lpawu+1,sigp%npwx,Qmesh%nibz)
  integer,intent(in) :: gwx_ngfft(18),ngfftf(18)
  type(Pawtab_type),intent(in) :: Pawtab(Psps%ntypat)
  type(pawpwff_t),intent(in) :: Paw_pwff(Psps%ntypat*Psps%usepaw)
@@ -200,7 +201,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  integer :: nhat12_grdim
  integer :: iatom1,iatom2,il1,il2,im1,im2,ispinor2,pos1,pos2,wan_jb,wan_ib_sum,pwx
  real(dp) :: fact_sp,theta_mu_minus_esum,tol_empty,norm,weight
- complex(dpc) :: ctmp,scprod,ph_mkgwt,ph_mkt,eikr
+ complex(dp) :: ctmp,scprod,ph_mkgwt,ph_mkt,eikr
  logical :: iscompatibleFFT,q_is_gamma
  character(len=500) :: msg
  type(wave_t),pointer :: wave_sum, wave_jb
@@ -213,15 +214,15 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  real(dp) :: spinrot_kbz(4),spinrot_kgw(4)
  real(dp),pointer :: qp_ene(:,:,:),qp_occ(:,:,:)
  real(dp),allocatable :: nhat12(:,:,:),grnhat12(:,:,:,:)
- complex(gwpc),allocatable :: vc_sqrt_qbz(:)
- complex(gwpc),allocatable :: rhotwg_ki(:,:)
- complex(gwpc),allocatable :: wfr_bdgw(:,:),wfr_sum(:)
- complex(gwpc),allocatable :: ur_ae_sum(:),ur_ae_onsite_sum(:),ur_ps_onsite_sum(:)
- complex(gwpc),allocatable :: ur_ae_bdgw(:,:),ur_ae_onsite_bdgw(:,:),ur_ps_onsite_bdgw(:,:)
- complex(gwpc),pointer :: cg_jb(:),cg_sum(:)
- complex(dpc) :: ovlp(2)
- complex(dpc),allocatable :: coeffW_BZ(:,:,:,:,:,:)
- complex(dpc),pointer :: ptr_rhot(:,:,:,:,:)
+ complex(gwp),allocatable :: vc_sqrt_qbz(:)
+ complex(gwp),allocatable :: rhotwg_ki(:,:)
+ complex(gwp),allocatable :: wfr_bdgw(:,:),wfr_sum(:)
+ complex(gwp),allocatable :: ur_ae_sum(:),ur_ae_onsite_sum(:),ur_ps_onsite_sum(:)
+ complex(gwp),allocatable :: ur_ae_bdgw(:,:),ur_ae_onsite_bdgw(:,:),ur_ps_onsite_bdgw(:,:)
+ complex(gwp),pointer :: cg_jb(:),cg_sum(:)
+ complex(dp) :: ovlp(2)
+ complex(dp),allocatable :: coeffW_BZ(:,:,:,:,:,:)
+ complex(dp),pointer :: ptr_rhot(:,:,:,:,:)
  logical :: can_symmetrize(Wfd%nsppol)
  logical,allocatable :: bks_mask(:,:,:)
  type(pawcprj_type),allocatable :: Cprj_kgw(:,:),Cprj_ksum(:,:)
@@ -707,7 +708,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 
            izero=0
            call pawmknhat_psipsi(Cprj_ksum,Cprj_kgw(:,i2:i2+spad),ider0,izero,Cryst%natom,&
-&            Cryst%natom,gwx_nfftot,gwx_ngfft,nhat12_grdim,nspinor,Cryst%ntypat,Pawang,Pawfgrtab,&
+&            Cryst%natom,gwx_nfftot,gwx_ngfft,nhat12_grdim,nspinor,Cryst%ntypat,1,1,Pawang,Pawfgrtab,&
 &            grnhat12,nhat12,pawtab)
 
 #if 1
@@ -729,8 +730,8 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
            if (Psps%usepaw==1.and.use_pawnhat==0) then ! Add on-site contribution, projectors are already in BZ.
              i2=jb; if (nspinor==2) i2=(2*jb-1)
              spad=(nspinor-1)
-             call paw_rho_tw_g(Sigp%npwx,nspinor,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,Gsph_x%gvec,&
-&              Cprj_ksum(:,:),Cprj_kgw(:,i2:i2+spad),Pwij_qg,rhotwg_ki(:,jb))
+             call paw_rho_tw_g(cryst, Pwij_qg,Sigp%npwx,nspinor,nspinor,Gsph_x%gvec,&
+               Cprj_ksum(:,:),Cprj_kgw(:,i2:i2+spad),rhotwg_ki(:,jb))
            end if
            if(iq_bz==1) then
              if((ib_sum/=jb).and.(abs(rhotwg_ki(1,jb))>tol8)) then

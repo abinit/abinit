@@ -6,7 +6,7 @@
 !! Sorting algorithms.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (XG)
+!!  Copyright (C) 2008-2025 ABINIT group (XG, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,6 +36,7 @@ module m_sort
  ! Helper functions to perform common operations.
  public :: sort_rpts     ! Sort list of real points by |r|
  public :: sort_rvals    ! Out-of-place sort of real values
+ public :: sort_gvecs    ! Sort list of g-vectors by norm
 
 CONTAINS  !====================================================================================================
 !!***
@@ -54,6 +55,7 @@ CONTAINS  !=====================================================================
 !!  tol: numbers within tolerance are equal
 !!  list(n)  intent(inout) list of double precision numbers to be sorted
 !!  iperm(n) intent(inout) iperm(i)=i (very important)
+!!  [order]: order of sorting (ascending or descending)
 !!
 !! OUTPUT
 !!  list(n)  sorted list
@@ -62,7 +64,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine sort_dp(n, list, iperm, tol)
+subroutine sort_dp(n, list, iperm, tol, order)
 
 !Arguments ------------------------------------
 !scalars
@@ -70,10 +72,11 @@ subroutine sort_dp(n, list, iperm, tol)
  integer, intent(inout) :: iperm(n)
  real(dp), intent(inout) :: list(n)
  real(dp), intent(in) :: tol
+ integer, optional, intent(in) :: order
 
 !Local variables-------------------------------
 !scalars
- integer :: l,ir,iap,i,j
+ integer :: l,ir,iap,i,j,my_order
  real(dp) :: ap
  character(len=500) :: msg
 
@@ -96,6 +99,18 @@ subroutine sort_dp(n, list, iperm, tol)
 
   l=n/2+1
   ir=n
+
+  my_order = 1; if (present(order)) my_order = order
+  if (abs(my_order) /= 1) then
+    write(msg, "(a,i0,2a)")&
+      "sort_dp has been called with an invalid order= ",my_order, ch10, &
+      "This is not allowed."
+    ABI_ERROR(msg)
+  end if
+  if (my_order==-1) then
+    ! Descending order
+    list = -list
+  end if
 
   do   ! Infinite do-loop
 
@@ -144,6 +159,11 @@ subroutine sort_dp(n, list, iperm, tol)
 
   enddo ! End infinite do-loop
 
+  if (my_order == -1) then
+    ! Descending order
+    list = -list
+  end if
+
  end if ! n>1
 
 end subroutine sort_dp
@@ -161,6 +181,7 @@ end subroutine sort_dp
 !!  n: dimension of the list
 !!  list(n)  intent(inout) list of double precision numbers to be sorted
 !!  iperm(n) intent(inout) iperm(i)=i (very important)
+!!  [order]: order of sorting (ascending or descending)
 !!
 !! OUTPUT
 !!  list(n): sorted list
@@ -169,16 +190,17 @@ end subroutine sort_dp
 !!
 !! SOURCE
 
-subroutine sort_int(n, list, iperm)
+subroutine sort_int(n, list, iperm, order)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
  integer,intent(inout) :: list(n),iperm(n)
+ integer,optional,intent(in) :: order
 
 !Local variables-------------------------------
 !scalars
- integer :: l,ir,i,j,ip,ipp
+ integer :: l,ir,i,j,ip,ipp,my_order
  character(len=500) :: msg
 ! *************************************************************************
 
@@ -201,6 +223,18 @@ subroutine sort_int(n, list, iperm)
 
   l=n/2+1
   ir=n
+
+  my_order = 1; if (present(order)) my_order = order
+  if (abs(my_order) /= 1) then
+    write(msg, "(a,i0,2a)")&
+      "sort_int has been called with an invalid order= ",my_order, ch10, &
+      "This is not allowed."
+    ABI_ERROR(msg)
+  end if
+  if (my_order==-1) then
+    ! Descending order
+    list = -list
+  end if
 
   do   ! Infinite do-loop
 
@@ -248,6 +282,11 @@ subroutine sort_int(n, list, iperm)
 
   enddo ! End infinite do-loop
 
+  if (my_order == -1) then
+    ! Descending order
+    list = -list
+  end if
+
  end if ! n>1
 
 end subroutine sort_int
@@ -268,6 +307,7 @@ end subroutine sort_int
 !!  rpts(3, n): points in reduced coordinates
 !!  metric: Metric used to compute |r|.
 !!  [tol]: numbers within tolerance are equal.
+!!  [order]: order of sorting (ascending or descending)
 !!
 !! OUTPUT
 !!  iperm(n) index of permutation giving the right ascending order:
@@ -276,7 +316,7 @@ end subroutine sort_int
 !!
 !! SOURCE
 
-subroutine sort_rpts(n, rpts, metric, iperm, tol, rmod)
+subroutine sort_rpts(n, rpts, metric, iperm, tol, rmod, order)
 
 !Arguments ------------------------------------
 !scalars
@@ -284,12 +324,13 @@ subroutine sort_rpts(n, rpts, metric, iperm, tol, rmod)
  integer,allocatable,intent(out) :: iperm(:)
  real(dp),optional,allocatable,intent(out) :: rmod(:)
  real(dp),optional,intent(in) :: tol
+ integer,optional,intent(in) :: order
 !arrays
  real(dp),intent(in) :: rpts(3,n), metric(3,3)
 
 !Local variables-------------------------------
 !scalars
- integer :: ii
+ integer :: ii, my_order
  real(dp) :: my_tol
 !arrays
  real(dp),allocatable :: my_rmod(:)
@@ -297,6 +338,7 @@ subroutine sort_rpts(n, rpts, metric, iperm, tol, rmod)
 !************************************************************************
 
  my_tol = tol12; if (present(tol)) my_tol = tol
+ my_order = 1; if (present(order)) my_order = order
 
  ABI_MALLOC(my_rmod, (n))
  do ii=1,n
@@ -304,7 +346,7 @@ subroutine sort_rpts(n, rpts, metric, iperm, tol, rmod)
  end do
  ABI_MALLOC(iperm, (n))
  iperm = [(ii, ii=1,n)]
- call sort_dp(n, my_rmod, iperm, my_tol)
+ call sort_dp(n, my_rmod, iperm, my_tol, order = my_order)
 
  if (present(rmod)) then
    call move_alloc(my_rmod, rmod)
@@ -329,15 +371,16 @@ end subroutine sort_rpts
 !!  n: dimension of the list
 !!  in_vals(n): input weigts.
 !!  [tol]: tolerance for comparison
+!!  [order]: order of sorting (ascending or descending)
 !!
 !! OUTPUT
 !!  iperm(n) index of permutation giving the right ascending order:
 !!      the i-th element of the ordered list had index iperm(i) in in_vals.
-!!  [sorted_in_vals(n)]= list of sorted weigts.
+!!  [sorted_in_vals(n)]= list of sorted values.
 !!
 !! SOURCE
 
-subroutine sort_rvals(n, in_vals, iperm, sorted_vals, tol)
+subroutine sort_rvals(n, in_vals, iperm, sorted_vals, tol, order)
 
 !Arguments ------------------------------------
 !scalars
@@ -346,23 +389,126 @@ subroutine sort_rvals(n, in_vals, iperm, sorted_vals, tol)
  integer,allocatable,intent(out) :: iperm(:)
  real(dp),allocatable,intent(out) :: sorted_vals(:)
  real(dp),optional,intent(in) :: tol
+ integer,optional,intent(in) :: order
 
 !Local variables-------------------------------
 !scalars
- integer :: ii
+ integer :: ii, my_order
  real(dp) :: my_tol
 
 !************************************************************************
 
  my_tol = tol12; if (present(tol)) my_tol = tol
+ my_order = 1; if (present(order)) my_order = order
 
  ABI_MALLOC(sorted_vals, (n))
  sorted_vals = in_vals
  ABI_MALLOC(iperm, (n))
  iperm = [(ii, ii=1,n)]
- call sort_dp(n, sorted_vals, iperm, my_tol)
+ call sort_dp(n, sorted_vals, iperm, my_tol, order = my_order)
 
 end subroutine sort_rvals
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_sort/sort_gvecs
+!! NAME
+!!  sort_gvecs
+!!
+!! FUNCTION
+!!  Sort list of g-vectors (ascending order)
+!!  Input list is not modified.
+!!
+!! INPUTS
+!!  npw_k: dimension of the list
+!!  kpoint(3): K-point
+!!  gmet(3,3): metric matrix.
+!!  kg_k(3,npw_k): input weigts.
+!!  [tol]: tolerance for comparison
+!!  [order]: order of sorting (ascending or descending)
+!!
+!! OUTPUT
+!!  [out_gvec(3,npw_k)]: list of sorted g-vectors
+!!  [iperm(npw_k) index of permutation giving the right ascending order:
+!!      the i-th element of the ordered list had index iperm(i) in in_vals.
+!!
+!! SOURCE
+
+subroutine sort_gvecs(npw_k, kpoint, gmet, in_gvec, out_gvec, iperm, tol, order)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: npw_k, in_gvec(3,npw_k)
+ real(dp),intent(in) :: kpoint(3), gmet(3,3)
+ integer,allocatable,intent(out) :: out_gvec(:,:)
+ integer,allocatable,optional,intent(out) :: iperm(:)
+ real(dp),optional,intent(in) :: tol
+ integer,optional,intent(in) :: order
+
+!Local variables-------------------------------
+!scalars
+ integer :: ig, ig_sort, my_order
+ real(dp) :: my_tol
+ integer,allocatable :: iperm__(:)
+ real(dp),allocatable :: kin_kg(:)
+
+!************************************************************************
+
+ my_tol = tol14; if (present(tol)) my_tol = tol
+ my_order = 1; if (present(order)) my_order = order
+
+ ABI_MALLOC(kin_kg, (npw_k))
+ ABI_MALLOC(iperm__, (npw_k))
+ iperm__ = [(ig, ig=1,npw_k)]
+ do ig=1,npw_k
+   kin_kg(ig) = half * normv(kpoint + in_gvec(:, ig), gmet, "G") ** 2
+ end do
+
+ call sort_dp(npw_k, kin_kg, iperm__, my_tol, order = my_order)
+ ABI_FREE(kin_kg)
+
+ ABI_MALLOC(out_gvec, (3, npw_k))
+ do ig=1,npw_k
+   ig_sort = iperm__(ig)
+   out_gvec(:,ig) = in_gvec(:,ig_sort)
+ end do
+
+ if (present(iperm)) then
+   ABI_MALLOC(iperm, (npw_k))
+   iperm = iperm__
+ end if
+ ABI_FREE(iperm__)
+
+contains
+function normv(xv, met, space) result(res)
+
+!Arguments ------------------------------------
+!scalars
+ real(dp) :: res
+ character(len=1),intent(in) :: space
+!arrays
+ real(dp),intent(in) :: met(3,3)
+ real(dp),intent(in) :: xv(3)
+
+! *************************************************************************
+
+ res =  ( xv(1)*met(1,1)*xv(1) + xv(2)*met(2,2)*xv(2) + xv(3)*met(3,3)*xv(3)  &
+&  +two*( xv(1)*met(1,2)*xv(2) + xv(1)*met(1,3)*xv(3) + xv(2)*met(2,3)*xv(3)) )
+
+ select case (space)
+ case ('r','R')
+   res=SQRT(res)
+ case ('g','G')
+   res=two_pi*SQRT(res)
+ case default
+   ABI_BUG('Wrong value for space')
+ end select
+
+end function normv
+!!***
+
+end subroutine sort_gvecs
 !!***
 
 end module m_sort

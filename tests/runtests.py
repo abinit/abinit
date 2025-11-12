@@ -4,11 +4,12 @@ from __future__ import print_function, division, absolute_import #, unicode_lite
 
 import sys
 import os
-# Set ABI_PSPDIR env variable to point to the absolute path of Psps_for_tests
-os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(os.path.dirname(__file__), "Psps_for_tests"))
+# Set ABI_PSPDIR env variable to point to the absolute path of Pspdir
+os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(os.path.dirname(__file__), "Pspdir"))
 #print("ABI_PSPDIR:", os.environ["ABI_PSPDIR"])
 import platform
 import time
+import pickle
 
 from warnings import warn
 from optparse import OptionParser
@@ -16,13 +17,6 @@ from socket import gethostname
 
 import logging
 logger = logging.getLogger(__name__)
-
-py2 = sys.version_info[0] <= 2
-if py2:
-    import cPickle as pickle
-    #import pickle as pickle
-else:
-    import pickle
 
 # We don't install with setup.py hence we have to add the directory [...]/abinit/tests to $PYTHONPATH
 # TODO: Use Absolute imports and rename tests --> abitests to
@@ -39,18 +33,42 @@ import tests
 abenv = tests.abenv
 abitests = tests.abitests
 
-from tests.pymods.devtools import number_of_cpus
+from tests.pymods.devtools import number_of_cpus, number_of_gpus
 from tests.pymods.tools import which, ascii_abinit, prompt
 from tests.pymods import termcolor
 from tests.pymods.termcolor import get_terminal_size, cprint
 from tests.pymods.testsuite import find_top_build_tree, AbinitTestSuite, BuildEnvironment
 from tests.pymods.jobrunner import JobRunner, OMPEnvironment, TimeBomb
 
-__version__ = "0.6.0"
+__version__ = "0.7.0"
 __author__ = "Matteo Giantomassi"
 
 _my_name = os.path.basename(__file__) + "-" + __version__
 
+ALL_BINARIES = [
+    "abinit",
+    "abitk",
+    "aim",
+    "anaddb",
+    "band2eps",
+    "conducti",
+    "cut3d",
+    "dummy_tests",
+    "fftprof",
+    "fold2Bloch",
+    "ioprof",
+    "lapackprof",
+    "macroave",
+    "mrgddb",
+    "mrgdv",
+    "mrggkk",
+    "mrgscr",
+    "multibinit",
+    "optic",
+    "atdep",
+    "testtransposer",
+    "lruj",
+]
 
 def str_examples():
     return """
@@ -118,18 +136,25 @@ def vararg_callback(option, opt_str, value, parser):
     setattr(parser.values, option.dest, value)
 
 
-def make_abinit(num_threads, touch_patterns=None):
+def make_abinit(num_threads, touch_patterns=None, target=""):
     """
     Find the top-level directory of the build tree and issue `make -j num_threads`.
-
-    Returns: Exit status of the subprocess.
+    Return: Exit status of the subprocess.
     """
     top = find_top_build_tree(".", with_abinit=False)
 
     if touch_patterns:
         abenv.touch_srcfiles([s.strip() for s in touch_patterns.split(",") if s])
 
-    return os.system("cd %s && make -j%d" % (top, num_threads))
+    retcode = os.system("cd %s && make %s -j%d" % (top, target, num_threads))
+
+    #if retcode == 0 and  platform.system() == "Darwin":
+    #    for binary in ALL_BINARIES:
+    #        cmd = f"codesign -v --force --deep {top}/src/98_main/{binary}"
+    #        cprint("Executing: %s" % cmd, "yellow")
+    #        os.system(cmd)
+
+    return retcode
 
 
 def parse_stats(stats):
@@ -166,7 +191,6 @@ def reload_test_suite(status_list):
 
 
 def main():
-
     usage = "usage: %prog [suite_args] [options]. Use [-h|--help] for help."
     version = "%prog " + str(__version__)
 
@@ -185,7 +209,7 @@ def main():
                       help="Read options from configuration FILE.", metavar="FILE")
 
     parser.add_option("--force-mpirun", default=False, action="store_true",
-                      help="Force execution via mpiruner even for sequential jobs, i.e. np==1, defaults to False")
+                      help="Force execution via mpirunner even for sequential jobs, i.e. np==1, defaults to False")
 
     parser.add_option("--mpi-args", type="string", help="Options passed to mpirun.", default="")
 
@@ -208,7 +232,7 @@ def main():
                       ))
 
     parser.add_option("-j", "--jobs", dest="py_nprocs", type="int", default=1,
-                      help="Number of python processes.")
+                      help="Number of python processes used to run the tests")
 
     parser.add_option("--use-cache", default=False, action="store_true",
                       help=("Load database from pickle file."
@@ -238,7 +262,7 @@ def main():
 
     parser.add_option("--nag", action="store_true", help="Activate NAG mode. Option used by developers")
 
-    parser.add_option("--perf", default="", help="Use `perf` command to profile the test")
+    parser.add_option("--perf", default="", help="Use `perf` command to profile the test (Linux only)")
 
     parser.add_option("--abimem", action="store_true", default=False,
                        help=("Inspect abimem.mocc files produced by the tests. "
@@ -247,16 +271,34 @@ def main():
     parser.add_option("--etsf", action="store_true", default=False,
                        help="Validate netcdf files produced by the tests. Requires netcdf4")
 
+    parser.add_option("-Y", "--yaml-simplified-diff", dest="yaml_simplified_diff", default=False, action="store_true",
+                      help="Will only perform a simplified diff when comparing .abo files (based only on YAML sections)")
+
+    parser.add_option("-T", "--forced-tolerance", dest="forced_tolerance", type="string", default="default",
+                      help="[string] Force the use of fldiff comparison tool with the specified tolerance. "+
+                           "Possible values are: default (from test config), high (1.e-10), medium (1.e-8), easy (1.e-5), ridiculous (1.e-2).")
+
+    parser.add_option("--abimem-level", type=int, default=0, help="Run executable with abimem-level option.")
+    parser.add_option("--useylm", type=int, default=None, help="Use useylm in all the ABINIT input files.")
+    parser.add_option("--gpu-option", type=int, default=None, help="Use gpu_option in all the ABINIT input files.")
+    parser.add_option("--show-exclude-builders", action="store_true", default=False,
+                      help="Show tests grouped by exclude_builders value and exit")
+
     parser.add_option("--touch", default="",
                       help=("Used in conjunction with `-m`."
                             "Touch the source files containing the given expression(s) before recompiling the code. "
                             "Use comma-separated strings *without* empty spaces to specify more than one pattern."))
+    parser.add_option("--target", default="",
+                      help="Used in conjunction with `-m` to specify the make target e.g. `abinit` to build abinit only")
 
     parser.add_option("-s", "--show-info", dest="show_info", default=False, action="store_true",
-                      help="Show information on the test suite (keywords, authors ...) and exit")
+                      help="Show information on the test suite (keywords, authors ...) and exit.")
 
     parser.add_option("-l", "--list-tests-info", dest="list_info", default=False, action="store_true",
-                      help="List the tests in test suite (echo description section in ListOfFile files) and exit")
+                      help="List the tests in test suite (echo description section in ListOfFile files) and exit.")
+
+    parser.add_option("--tolerances", default=False, action="store_true",
+                      help="Write csv files with the tolerances of each test.")
 
     parser.add_option("-m", "--make", dest="make", type="int", default=0,
                       help="Find the abinit build tree, and compile to code with 'make -j#NUM' before running the tests.")
@@ -321,7 +363,7 @@ def main():
                             "default=0\n") )
 
     parser.add_option("--sub-timeout", dest="sub_timeout", type="int", default=30,
-                      help="Timeout (s) for small subprocesses (fldiff.pl, python functions)")
+                      help="Timeout (s) for small subprocesses (diff.py, python functions)")
 
     parser.add_option("--with-pickle", type="int",  default=1,
                       help="Save test database in pickle format (default: True).")
@@ -332,8 +374,12 @@ def main():
     # Parse command line.
     options, suite_args = parser.parse_args()
 
+    #all_cpp_vars = abitests.get_all_need_cppvars()
+    #print(all_cpp_vars)
+    #return 0
+
     if options.show_info:
-        abitests.show_info()
+        abitests.show_info(verbose=options.verbose)
         return 0
 
     # loglevel is bound to the string value obtained from the command line argument.
@@ -353,19 +399,19 @@ def main():
         if ncols > 100: cprint(ascii_abinit(), "green")
 
     ncpus_detected = max(1, number_of_cpus())
+    ngpus_detected = max(0, number_of_gpus())
     system, node, release, version, machine, processor = platform.uname()
 
     mpi_nprocs = options.mpi_nprocs
     omp_nthreads = options.omp_nthreads
-    py_nprocs = options.py_nprocs
 
-    cprint("Running on %s -- system %s -- ncpus %s -- Python %s -- %s" % (
-          gethostname(), system, ncpus_detected, platform.python_version(), _my_name),
-          'green', attrs=['underline'])
+    cprint("Running on %s -- system %s -- ncpus %s -- ngpus %s -- Python %s -- %s" % (
+          gethostname(), system, ncpus_detected, ngpus_detected, platform.python_version(), _my_name),
+          color='green', attrs=['underline'])
 
     # Compile the code before running the tests.
     if options.make:
-        retcode = make_abinit(options.make, touch_patterns=options.touch)
+        retcode = make_abinit(options.make, touch_patterns=options.touch, target=options.target)
         if retcode: return retcode
 
     # Initialize info on the build. User's option has the precedence.
@@ -393,15 +439,15 @@ def main():
         # read the [mpi] and the [openmp] sections from the external cfg file.
         assert omp_nthreads == 0
         cfg_fname = options.cfg_fname
-        logger.info("Initalizing JobRunner from cnf file: %s" % cfg_fname)
+        logger.info("Initializing JobRunner from cnf file: %s" % cfg_fname)
         runner = JobRunner.fromfile(cfg_fname, timebomb=timebomb)
 
     else:
         if mpi_nprocs == 1 and not (options.force_mpirun or options.use_srun):
-            logger.info("Initalizing JobRunner for sequential runs.")
+            logger.info("Initializing JobRunner for sequential runs.")
             runner = JobRunner.sequential(timebomb=timebomb)
         else:
-            logger.info("Initalizing JobRunner assuming generic_mpi. [-c option not provided]")
+            logger.info("Initializing JobRunner assuming generic_mpi. [-c option not provided]")
             # Decide whether we should use mpirun or mpiexec
             # If `use_mpiexec` is specified on the command line args, use it (user is always right)
             # else test for the presence of (mpirun, mpiexec) in $PATH, in this order
@@ -413,8 +459,7 @@ def main():
                     raise ValueError("use_srun and use_mpiexec are mutually exclusive")
 
                 if which("srun") is None:
-                    raise RuntimeError("Cannot locate srun in $PATH. "
-                                       "Please check your environment")
+                    raise RuntimeError("Cannot locate srun in $PATH. Please check your environment")
 
                 runner = JobRunner.srun(timebomb=timebomb, mpi_args=options.mpi_args)
 
@@ -428,8 +473,7 @@ def main():
                         use_mpiexec = False
                     elif which("mpiexec") is None:
                         raise RuntimeError(
-                            "Cannot locate neither mpirun nor mpiexec in $PATH. "
-                            "Please check your environment")
+                            "Cannot locate neither mpirun nor mpiexec in $PATH. Please check your environment")
 
                 runner = JobRunner.generic_mpi(use_mpiexec=use_mpiexec, timebomb=timebomb,
                                                mpi_args=options.mpi_args)
@@ -460,7 +504,7 @@ def main():
 
     # Select tests according to the input variables.
     # Note that the parser is very primitive and it does not
-    # have acces to the default values used by the codes.
+    # have access to the default values used by the codes.
     ivars = None
     if options.input_vars:
         ivars = {}
@@ -490,15 +534,28 @@ def main():
                                                keys=options.keys, authors=options.authors,
                                                ivars=ivars, with_pickle=options.with_pickle)
         except Exception as exc:
-            raise
             show_examples_and_exit(str(exc))
-
-    #test_suite.git_rename()
-    #return 1
+            raise
 
     if not test_suite:
         cprint("No test fulfills the requirements specified by the user!", "red")
         return 99
+
+    if options.show_exclude_builders:
+        # Show excluded tests and exit.
+        from collections import defaultdict
+        d = defaultdict(list)
+        for test in test_suite:
+            for builder in test.exclude_builders:
+                d[builder].append(test)
+
+        for builder, tests in d.items():
+            print(">>> Tests excluded on builder:", builder)
+            for test in tests:
+                print(test, "\n")
+            print("")
+
+        sys.exit(0)
 
     workdir = options.workdir
     if not workdir:
@@ -510,11 +567,16 @@ def main():
     else:
         cprint("%s directory already exists. Files will be removed" % workdir, "yellow")
 
-    # Run the tested selected by the user.
+    # Run the tests selected by the user.
+    py_nprocs = options.py_nprocs
+    if py_nprocs <= 0:
+        py_nprocs = ncpus_detected // (mpi_nprocs * max(omp_nthreads, 1))
+        py_nprocs = max(py_nprocs // 2, 1)
+        print("py_nprocs has been computed automatically. py_nprocs=", py_nprocs)
+
     if omp_nthreads == 0:
         ncpus_used = mpi_nprocs * py_nprocs
-        msg = ("Running %s test(s) with MPI_procs: %s, py_nprocs: %s"
-               % (test_suite.full_length, mpi_nprocs, py_nprocs))
+        msg = ("Running %s test(s) with MPI_procs: %s, py_nprocs: %s" % (test_suite.full_length, mpi_nprocs, py_nprocs))
     else:
         ncpus_used = mpi_nprocs * omp_nthreads * py_nprocs
         msg = ("Running %s test(s) with MPI_nprocs: %s, OMP_nthreads: %s, py_nprocs: %s"
@@ -522,7 +584,7 @@ def main():
     cprint(msg, "yellow")
 
     if ncpus_used < 0.3 * ncpus_detected:
-        msg = ("[TIP] runtests.py is using %s CPUs but your architecture has %s CPUs (including Hyper-Threading)\n"
+        msg = ("[TIP] runtests.py is using %s CPUs but your architecture has %s CPUs (assuming x2 Hyper-Threading)\n"
               "You may want to use python processes to speed up the execution\n"
               "Use `runtests -jNUM` to run with NUM processes" % (ncpus_used, ncpus_detected))
         cprint(msg, "blue")
@@ -540,6 +602,37 @@ def main():
             fh.write(test_suite.make_listoftests(width=100, html=False))
         sys.exit(0)
 
+    if options.tolerances:
+        def get_tol_rows(this_test):
+            rows = []
+            print("test:", this_test, this_test.__class__.__name__)
+            for f in this_test.files_to_test:
+                print("file_name:", f.name, ", f.tolnlines:", f.tolnlines, ", tolabs: ", f.tolabs, ", tolrel:", f.tolrel)
+                d = dict(test=str(test), cls=this_test.__class__.__name__,
+                         file_name=f.name, tolnlines=f.tolnlines, tolabs=f.tolabs, tolrel=f.tolrel)
+                rows.append(d)
+            return rows
+
+        dict_list = []
+        for test in test_suite:
+            if test.is_chain:
+                for child_test in test:
+                    rows = get_tol_rows(child_test)
+                    dict_list.extend(rows)
+            else:
+                rows = get_tol_rows(test)
+                dict_list.extend(rows)
+
+        import pandas as pd
+        df = pd.DataFrame(dict_list)
+        #print(df)
+
+        filepath = "tolerances.csv"
+        print("Writing dataframe with tolerances to:", filepath)
+        df.to_csv(filepath, index=False)
+
+        sys.exit(0)
+
     if options.dry_run:
         print("Dry-run mode, print list of tests and exit(0)")
         for i, test in enumerate(test_suite):
@@ -551,15 +644,25 @@ def main():
     if mpi_nprocs > 1: runmode = "dynamic"
 
     results = test_suite.run_tests(build_env, workdir, runner,
-                                   nprocs=mpi_nprocs,
+                                   mpi_nprocs=mpi_nprocs,
+                                   omp_nthreads=omp_nthreads,
+                                   max_cpus=ncpus_detected,
+                                   max_gpus=ngpus_detected,
                                    py_nprocs=py_nprocs,
                                    runmode=runmode,
+                                   verbose=options.verbose,
                                    erase_files=options.erase_files,
                                    make_html_diff=options.make_html_diff,
                                    sub_timeout=options.sub_timeout,
                                    pedantic=options.pedantic,
                                    abimem_check=options.abimem,
-                                   etsf_check=options.etsf)
+                                   etsf_check=options.etsf,
+                                   simplified_diff=options.yaml_simplified_diff,
+                                   forced_tolerance=options.forced_tolerance,
+                                   abimem_level=options.abimem_level,
+                                   useylm=options.useylm,
+                                   gpu_option=options.gpu_option,
+                                   )
     if results is None: return 99
 
     if options.looponfail:
@@ -585,37 +688,34 @@ def main():
                     print("Invoking `make` because the following files have been changed:")
                     for i, path in enumerate(changed):
                         print("[%d] %s" % (i, os.path.relpath(path)))
-                    rc = make_abinit(ncpus_detected)
+                    rc = make_abinit(ncpus_detected, target=options.target)
                     if rc != 0:
                         cprint("make_abinit returned %s, tests are postponed" % rc, "red")
                         continue
 
                     test_suite = AbinitTestSuite(test_suite.abenv, test_list=test_list)
                     results = test_suite.run_tests(build_env, workdir, runner,
-                                                   nprocs=mpi_nprocs,
+                                                   mpi_nprocs=mpi_nprocs,
+                                                   omp_nthreads=omp_nthreads,
+                                                   max_cpus=ncpus_detected,
+                                                   max_gpus=ngpus_detected,
                                                    py_nprocs=py_nprocs,
                                                    runmode=runmode,
+                                                   verbose=options.verbose,
                                                    erase_files=options.erase_files,
                                                    make_html_diff=options.make_html_diff,
                                                    sub_timeout=options.sub_timeout,
                                                    pedantic=options.pedantic,
                                                    abimem_check=options.abimem,
-                                                   etsf_check=options.etsf)
+                                                   etsf_check=options.etsf,
+                                                   abimem_level=options.abimem_level,
+                                                   useylm=options.useylm,
+                                                   gpu_option=options.gpu_option,
+                                                   )
                     if results is None: return 99
 
         if count == max_iterations:
             cprint("Reached max_iterations", "red")
-
-    # Threads do not play well with KeyBoardInterrupt
-    #except KeyboardInterrupt:
-    #    all_programs = ["abinit", "anaddb", "mrgscr", "mrgddb", "mrgdv", "mpirun", "mpiexec"]
-    #    cprint("Interrupt sent by user. Will try to `killall executables` where:")
-    #    print("executables:", str(all_programs))
-    #    answer = prompt("Do you want to kill'em all? [Y/n]")
-    #    if not answer.lower().strip() in ["n", "no"]:
-    #        for prog in all_programs:
-    #            os.system("killall %s" % prog)
-    #    return 66
 
     # Edit input files.
     if options.edit:
@@ -656,17 +756,36 @@ def main():
 
 
 if __name__ == "__main__":
+    #import multiprocessing
+    #multiprocessing.set_start_method("fork")  # Ensure compatibility on macOS/Linux
+
     # Check whether we are in profiling mode
+    arg0 = None
     try:
-        do_prof = sys.argv[1] == "prof"
-        if do_prof: sys.argv.pop(1)
+        do_prof = sys.argv[1] in ("prof", "tuna", "snakeviz")
+        if do_prof:
+            arg0 = sys.argv.pop(1)
     except Exception:
         do_prof = False
 
     if not do_prof:
+        # No profiling. Run script as usual.
         sys.exit(main())
     else:
+        print("Entering profiling mode...")
         import pstats, cProfile
-        cProfile.runctx("main()", globals(), locals(), "Profile.prof")
-        s = pstats.Stats("Profile.prof")
+        import tempfile
+        #prof_file = kwargs.get("prof_file", None)
+        prof_file = None
+        if prof_file is None:
+            _, prof_file = tempfile.mkstemp()
+            print(f"Profiling data stored in: {prof_file}")
+
+        cProfile.runctx("main()", globals(), locals(), prof_file)
+        s = pstats.Stats(prof_file)
         s.strip_dirs().sort_stats("time").print_stats()
+
+        if arg0 in ("tuna", "snakeviz"):
+            cmd = f"{arg0} {prof_file}"
+            print(f"Executing {cmd=}")
+            os.system(cmd)

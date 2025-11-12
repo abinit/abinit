@@ -97,7 +97,7 @@ grep "<<< MEM" run.log -A 3
 No, [[paral_kgb]] = 1 refers to a particular MPI-distribution of the wavefunctions that is only available
 for GS calculations (total energy calculations, relaxations, molecular dynamics as well
 as NSCF band structure calculations).
-Variables such as [[npkpt]], [[npband]], [[npfft]], [[npspinor]] are relevant only if [[paral_kgb]] = 1.
+Variables such as [[np_spkpt]], [[npband]], [[npfft]], [[npspinor]] are relevant only if [[paral_kgb]] = 1.
 All the other Abinit drivers (e.g. DFPT, GW, BSE, EPH) use a completely different approach to parallelize
 the calculation and distribute memory.
 
@@ -114,11 +114,9 @@ No, the two implementations are mutually exclusive.
 
 ## Can I use UPF pseudos with Abinit?
 
-Pseudos in UPF2 format are not supported.
-Note that it is not just a matter of format.
-There are indeed fundamental differences between the formalism implemented in
-Abinit and the one used by QE, especially for PAW and NC-pseudos with SOC.
-The pseudodojo project provides NC-pseudos.
+Pseudos in UPF2 format are supported but only for norm-conserving.
+For PAW, indeed, there are fundamental differences between the formalism implemented in
+Abinit and QE.
 
 ## Can I run calculations with an XC functional different from the one used to generate the pseudos?
 
@@ -192,8 +190,8 @@ If you have a good reason not to use the primitive cell, you can override abinit
 by setting [[chkprim]] 1 in the input file.
 
 One possible reason to do this is, for example, making a large supercell of a crystal (say 3x3x3 primitive unit cells)
-in which you want to introduce a defect. 
-Doing the pristine crystal calculation in the 3x3x3 supercell is possible, but not useful 
+in which you want to introduce a defect.
+Doing the pristine crystal calculation in the 3x3x3 supercell is possible, but not useful
 (you will just get 27 times the energy). Moreover, the pure translation symmetries will be incorporated in the symmetry recognition algorithm,
 and you might end up with a number of symmetry operations that exceeds ABINIT internal maximum.
 Once you have introduced the defect, of course,

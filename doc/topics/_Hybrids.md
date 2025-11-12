@@ -22,6 +22,8 @@ The energy, forces and stresses are available in the norm-conserving and PAW
 frameworks.  
 A one-shot G0W0 calculation can follow, only in the norm-conserving case at present.
 
+Parallelism is available for spin and k-points [[np_spkpt]], as well as over occupied bands [[nphf]].
+
 !!! warning 
 
     Use [[istwfk]]=1, [[iscf]]=2, [[paral_kgb]]=0, [[paral_atom]]=0.  

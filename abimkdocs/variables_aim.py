@@ -3,8 +3,12 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 
 executable = "aim"
 
-from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
-#from abipy.abio.abivar_database.variables import ValueWithUnit, MultipleValue, Range, ValueWithConditions
+try:
+    from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
+except ImportError:
+    # This is needed for importing this module within Abipy
+    from abipy.abio.abivar_database.variables import ValueWithUnit, MultipleValue, Range
+
 ValueWithConditions = dict
 Variable=dict
 
@@ -228,7 +232,7 @@ Variable(
     topics=['Bader_expert'],
     dimensions="scalar",
     defaultval=100,
-    mnemonics="numer of INtegration PoinTs",
+    mnemonics="number of INtegration PoinTs",
     added_in_version="before_v9",
     text=r"""
 Number of radial points used for integration of the Bader charge (not too

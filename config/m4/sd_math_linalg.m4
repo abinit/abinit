@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2020 Yann Pouillon, Marc Torrent
+# Copyright (C) 2005-2024 Yann Pouillon, Marc Torrent
 #
 # This file is part of the Steredeg software package. For license information,
 # please see the COPYING file in the top-level directory of the source
@@ -47,6 +47,7 @@ AC_DEFUN([SD_LINALG_INIT], [
   sd_linalg_has_lapacke="unknown"
   sd_linalg_has_blacs="unknown"
   sd_linalg_has_scalapack="unknown"
+  sd_linalg_has_buggy_zdot="unknown"
   sd_linalg_has_elpa="unknown"
   sd_linalg_has_elpa_2013="unknown"
   sd_linalg_has_elpa_2014="unknown"
@@ -116,17 +117,33 @@ AC_DEFUN([SD_LINALG_INIT], [
       fi],
     [ sd_linalg_enable="${sd_linalg_enable_def}"; sd_linalg_init="def"])
 
+  AC_ARG_WITH([elpa],
+    [AS_HELP_STRING([--with-elpa],
+      [Install prefix of the ELPA library (e.g. /usr/local).])],
+    [ sd_linalg_elpa_enable="yes"
+      sd_linalg_elpa_init="dir"
+      test -d "${withval}/lib" && sd_linalg_elpa_libs="${withval}/lib"
+      test -d "${withval}/lib64" && sd_linalg_elpa_libs="${withval}/lib64"
+      for d in "${withval}/include"/*/modules; do
+        if test -d "$d"; then
+          sd_linalg_elpa_mods="$d"
+          break
+        fi
+      done],
+    [ sd_linalg_elpa_enable="${sd_linalg_elpa_enable_def}"; sd_linalg_init="def"])
+
   # Declare environment variables
   AC_ARG_VAR([LINALG_CPPFLAGS], [C preprocessing flags for linear algebra.])
   AC_ARG_VAR([LINALG_CFLAGS], [C flags for linear algebra.])
   AC_ARG_VAR([LINALG_CXXFLAGS], [C++ flags for linear algebra.])
   AC_ARG_VAR([LINALG_FCFLAGS], [Fortran flags for linear algebra.])
+  AC_ARG_VAR([LINALG_FFLAGS], [Fortran flags for linear algebra (better use LINALG_FCFLAGS).])
   AC_ARG_VAR([LINALG_LDFLAGS], [Linker flags for linear algebra.])
   AC_ARG_VAR([LINALG_LIBS], [Library flags for linear algebra.])
 
   # Detect use of environment variables
   if test "${sd_linalg_enable}" = "yes" -o "${sd_linalg_enable}" = "auto"; then
-    tmp_linalg_vars="${LINALG_CPPFLAGS}${LINALG_CFLAGS}${LINALG_CXXFLAGS}${LINALG_FCFLAGS}${LINALG_LDFLAGS}${LINALG_LIBS}"
+    tmp_linalg_vars="${LINALG_CPPFLAGS}${LINALG_CFLAGS}${LINALG_CXXFLAGS}${LINALG_FFLAGS}${LINALG_FCFLAGS}${LINALG_LDFLAGS}${LINALG_LIBS}"
     if test "${sd_linalg_init}" = "def" -a ! -z "${tmp_linalg_vars}"; then
       sd_linalg_enable="yes"
       sd_linalg_init="env"
@@ -174,6 +191,7 @@ AC_DEFUN([SD_LINALG_INIT], [
         test ! -z "${LINALG_CPPFLAGS}" && sd_linalg_cppflags="${LINALG_CPPFLAGS}"
         test ! -z "${LINALG_CFLAGS}" && sd_linalg_cflags="${LINALG_CFLAGS}"
         test ! -z "${LINALG_CXXFLAGS}" && sd_linalg_cxxflags="${LINALG_CXXFLAGS}"
+        test ! -z "${LINALG_FFLAGS}" && sd_linalg_fcflags="${LINALG_FFLAGS}"
         test ! -z "${LINALG_FCFLAGS}" && sd_linalg_fcflags="${LINALG_FCFLAGS}"
         test ! -z "${LINALG_LDFLAGS}" && sd_linalg_ldflags="${LINALG_LDFLAGS}"
         test ! -z "${LINALG_LIBS}" && sd_linalg_libs="${LINALG_LIBS}"
@@ -185,6 +203,10 @@ AC_DEFUN([SD_LINALG_INIT], [
 
     esac
 
+    if test "${sd_linalg_elpa_enable}" = "yes" -o "${sd_linalg_elpa_enable}" = "auto"; then
+      sd_linalg_fcflags="${sd_linalg_fcflags} -I${sd_linalg_elpa_mods}"
+      sd_linalg_libs="${sd_linalg_elpa_libs}/libelpa.a ${sd_linalg_libs}"
+    fi
   fi
 
   # Export configuration
@@ -464,10 +486,18 @@ AC_DEFUN([_SD_LINALG_CHECK_FLAVOR], [
           sd_linalg_chk_serial="mkl ${sd_linalg_chk_serial}"
         fi
         sd_linalg_chk_serial="openblas atlas ${sd_linalg_chk_serial}"
+	AC_CHECK_PROG([PKG_CONFIG], [pkg-config], [pkg-config], [no])
+	if test "$PKG_CONFIG" != "no"; then
+		sd_linalg_chk_serial="${sd_linalg_chk_serial} openblas_pkg"
+	fi
         ;;
       intel)
         sd_linalg_chk_serial="mkl atlas ${sd_linalg_chk_serial}"
         sd_linalg_chk_mpi="mkl netlib"
+	AC_CHECK_PROG([PKG_CONFIG], [pkg-config], [pkg-config], [no])
+	if test "$PKG_CONFIG" != "no"; then
+		sd_linalg_chk_serial="${sd_linalg_chk_serial} openblas_pkg"
+	fi
         ;;
     esac
 

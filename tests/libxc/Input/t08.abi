@@ -52,5 +52,5 @@ prtden 0 prtwf 0
 #%%   Isolated Carbon atom
 #%%   Test the Becke-Johnson mGGA functional, generating directly XC potentials. 
 #%%   Convergence parameters are quite high, and the test is reasonably portable.
-#%%   To make the test more poratble, we generate GGA-PBE wave functions as starting point.
+#%%   To make the test more portable, we generate GGA-PBE wave functions as starting point.
 #%%<END TEST_INFO>

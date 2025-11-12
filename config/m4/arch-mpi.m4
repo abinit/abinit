@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2022 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2025 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -148,6 +148,8 @@ AC_DEFUN([_ABI_MPI_CHECK_FC_LEVEL], [
     # Try to compile a MPI-2 Fortran program
     AC_MSG_CHECKING([which level of MPI is supported by the Fortran compiler])
     AC_LANG_PUSH([Fortran])
+
+    # Try to compile a MPI-2 Fortran program
     AC_LINK_IFELSE([AC_LANG_PROGRAM([],
       [[
               use mpi
@@ -155,6 +157,7 @@ AC_DEFUN([_ABI_MPI_CHECK_FC_LEVEL], [
               call mpi_init(ierr)
               call mpi_finalize(ierr)
       ]])], [abi_mpi_fc_level="2"], [abi_mpi_fc_level="1"])
+
     AC_LANG_POP([Fortran])
     AC_MSG_RESULT([${abi_mpi_fc_level}])
 
@@ -163,6 +166,96 @@ AC_DEFUN([_ABI_MPI_CHECK_FC_LEVEL], [
 
   fi # sd_mpi_fc_ok = yes
 ]) # _ABI_MPI_CHECK_FC_LEVEL
+
+
+                    # ------------------------------------ #
+
+
+# _ABI_MPI_CHECK_INPLACE()
+# ------------------------------------
+#
+# Checks whether the MPI library provides MPI_INPLACE.
+#
+AC_DEFUN([_ABI_MPI_CHECK_INPLACE], [
+  # Set default values
+  abi_mpi_inplace="no"
+
+  if test "${abi_mpi_fc_level}" -ge "2"; then
+
+    # Back-up build environment
+    ABI_ENV_BACKUP
+
+    # Prepare build environment
+    CPPFLAGS="${CPPFLAGS} ${abi_mpi_incs}"
+    LDFLAGS="${FC_LDFLAGS}"
+    LIBS="${FC_LIBS} ${abi_mpi_libs}"
+
+    AC_MSG_CHECKING([whether MPI provides MPI_IN_PLACE])
+    AC_LANG_PUSH([Fortran])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+      [[
+        use mpi
+        integer :: comm,ierr,counts(3),displs(3)
+        real*8 :: xval(5)
+        call mpi_init(ierr)
+        call mpi_allreduce(MPI_IN_PLACE,xval,5,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ierr)
+        call mpi_allgather(MPI_IN_PLACE,1,MPI_DOUBLE_PRECISION,xval,5,MPI_DOUBLE_PRECISION,comm,ierr)
+        call mpi_allgatherv(MPI_IN_PLACE,1,MPI_DOUBLE_PRECISION,xval,counts,displs,MPI_DOUBLE_PRECISION,comm,ierr)
+        call mpi_finalize(ierr)
+      ]])],
+      [abi_mpi_inplace="yes"], [abi_mpi_inplace="no"])
+    AC_LANG_POP([Fortran])
+    AC_MSG_RESULT([${abi_mpi_inplace}])
+
+    # Restore build environment
+    ABI_ENV_RESTORE
+  fi
+]) # _ABI_MPI_CHECK_INPLACE
+
+
+                    # ------------------------------------ #
+
+
+# _ABI_MPI_CHECK_BUGGY()
+# ------------------------------------
+#
+# Checks whether the MPI library has buggy interfaces for scalars.
+#
+AC_DEFUN([_ABI_MPI_CHECK_BUGGY], [
+  # Set default values
+  abi_mpi_buggy="no"
+
+  if test "${abi_mpi_fc_level}" -ge "2"; then
+
+    # Back-up build environment
+    ABI_ENV_BACKUP
+
+    # Prepare build environment
+    CPPFLAGS="${CPPFLAGS} ${abi_mpi_incs}"
+    LDFLAGS="${FC_LDFLAGS}"
+    LIBS="${FC_LIBS} ${abi_mpi_libs}"
+
+    AC_MSG_CHECKING([whether MPI has buggy interfaces for scalars])
+    AC_LANG_PUSH([Fortran])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+      [[
+        use mpi
+        integer :: comm,ierr,ival,isum
+        real*8 :: xval,xsum
+        call mpi_init(ierr)
+        call mpi_allreduce(ival,isum,1,MPI_INTEGER,MPI_SUM,comm,ierr)
+        call mpi_allreduce(xval,xsum,1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ierr)
+        call mpi_allgather(xval,1,MPI_DOUBLE_PRECISION,xsum,1,MPI_DOUBLE_PRECISION,comm,ierr)
+        call mpi_finalize(ierr)
+      ]])],
+      [abi_mpi_buggy="no"], [abi_mpi_buggy="yes"])
+    AC_LANG_POP([Fortran])
+    AC_MSG_RESULT([${abi_mpi_buggy}])
+
+    # Restore build environment
+    ABI_ENV_RESTORE
+  fi
+]) # _ABI_MPI_CHECK_BUGGY
 
 
                     # ------------------------------------ #
@@ -191,7 +284,7 @@ AC_DEFUN([_ABI_MPI_CHECK_INTEGER16], [
   AC_MSG_CHECKING([whether the MPI library supports MPI_INTEGER16])
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [[  
+    [[
       use mpi
 
       integer, parameter :: ii = MPI_INTEGER16
@@ -359,7 +452,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IBCAST],[
 
   dnl Back-up build environment
   ABI_ENV_BACKUP
-                                                                                            
+
   dnl Prepare build environment
   CPPFLAGS="${CPPFLAGS} ${lib_mpi_incs}"
   LDFLAGS="${FC_LDFLAGS}"
@@ -367,7 +460,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IBCAST],[
 
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [[  
+    [[
       use mpi
 
       integer,parameter :: siz=5
@@ -383,11 +476,11 @@ AC_DEFUN([_ABI_MPI_CHECK_IBCAST],[
       !  IN comm	communicator (handle)
       !  OUT request	communication request (handle)
 
-      call MPI_IBCAST(buffer, siz, MPI_INTEGER, root, comm, request, ierr) 
+      call MPI_IBCAST(buffer, siz, MPI_INTEGER, root, comm, request, ierr)
 
     ]])], [abi_mpi_ibcast_ok="yes"], [abi_mpi_ibcast_ok="no"])
   AC_LANG_POP
-                                                                                            
+
   dnl Restore build environment
   ABI_ENV_RESTORE
 
@@ -400,7 +493,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IBCAST],[
     AC_MSG_WARN([Your MPI library does not support non-blocking communications. The wall time of certain algorithms will increase with the number of MPI processes. It is strongly suggested to use a more recent MPI2+ library!])
   fi
 
-]) # _ABI_MPI_CHECK_IBCAST     
+]) # _ABI_MPI_CHECK_IBCAST
 
 
                     ########################################
@@ -428,7 +521,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLGATHER], [
   AC_MSG_CHECKING([whether the MPI library supports MPI_IALLGATHER (MPI3)])
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [[  
+    [[
       use mpi
 
       integer, parameter :: siz=5
@@ -460,7 +553,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLGATHER], [
   else
     AC_MSG_WARN([Your MPI library does not support non-blocking communications. The wall time of certain algorithms will increase with the number of MPI processes. It is strongly suggested to use a more recent MPI2+ library!])
   fi
-]) # _ABI_MPI_CHECK_IALLGATHER     
+]) # _ABI_MPI_CHECK_IALLGATHER
 
 
                     # ------------------------------------ #
@@ -488,7 +581,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLTOALL], [
   AC_MSG_CHECKING([whether the MPI library supports MPI_IALLTOALL (MPI3)])
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [[  
+    [[
       use mpi
 
       integer, parameter :: siz=5
@@ -518,7 +611,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLTOALL], [
   else
     AC_MSG_WARN([Your MPI library does not support non-blocking communications. The wall time of certain algorithms will increase with the number of MPI processes. It is strongly suggested to use a more recent MPI2+ library!])
   fi
-]) # _ABI_MPI_CHECK_IALLTOALL     
+]) # _ABI_MPI_CHECK_IALLTOALL
 
 
                     # ------------------------------------ #
@@ -546,7 +639,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLTOALLV], [
   AC_MSG_CHECKING([whether the MPI library supports MPI_IALLTOALLV (MPI3)])
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [[  
+    [[
       use mpi
 
       integer, parameter :: siz=5, group_size=3
@@ -599,7 +692,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IGATHERV],[
 
   # Back-up build environment
   ABI_ENV_BACKUP
-                                                                                            
+
   # Prepare build environment
   CPPFLAGS="${CPPFLAGS} ${lib_mpi_incs}"
   LDFLAGS="${FC_LDFLAGS}"
@@ -607,7 +700,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IGATHERV],[
 
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [[  
+    [[
       use mpi
 
       integer,parameter :: siz=5,group_size=3
@@ -625,7 +718,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IGATHERV],[
 
     ]])], [abi_mpi_igatherv_ok="yes"], [abi_mpi_igatherv_ok="no"])
   AC_LANG_POP
-                                                                                            
+
   # Restore build environment
   ABI_ENV_RESTORE
 
@@ -666,7 +759,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLREDUCE], [
   AC_MSG_CHECKING([whether the MPI library supports MPI_IALLREDUCE (MPI3)])
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [[  
+    [[
       use mpi
 
       integer, parameter :: count=5
@@ -692,11 +785,69 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLREDUCE], [
   else
     AC_MSG_WARN([Your MPI library does not support non-blocking communications. The wall time of certain algorithms will increase with the number of MPI processes. It is strongly suggested to use a more recent MPI2+ library!])
   fi
-]) # _ABI_MPI_CHECK_IALLREDUCE     
+]) # _ABI_MPI_CHECK_IALLREDUCE
 
 
                     # ------------------------------------ #
 
+# _ABI_MPI_CHECK_ALLOCATE_SHARED_PTR()
+# ---------------------------
+#
+# Checks whether the MPI library supports MPI_WIN_ALLOCATE_SHARED with C_PTR
+#
+
+AC_DEFUN([_ABI_MPI_CHECK_ALLOCATE_SHARED_PTR], [
+  # Set default values
+  abi_mpi_allocate_shared_ok="no"
+
+  # Back-up build environment
+  ABI_ENV_BACKUP
+
+  # Prepare build environment
+  CPPFLAGS="${CPPFLAGS} ${abi_mpi_incs}"
+  LDFLAGS="${FC_LDFLAGS}"
+  LIBS="${FC_LIBS} ${abi_mpi_libs}"
+
+  # Try to compile a Fortran MPI program
+  # Note: we assume a MPI implementation that provides the mpi module
+  AC_MSG_CHECKING([whether the MPI library supports MPI_ALLOCATE_SHARED with C_PTR)])
+  AC_LANG_PUSH([Fortran])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+       use mpi
+       use iso_c_binding
+
+       integer :: win, disp_unit, ierr, comm
+       type(c_ptr) :: baseptr
+       integer(kind=MPI_ADDRESS_KIND) :: my_size
+
+       ! Here we pass a c_ptr although the "standard" API defined in mpi module expects integer(MPI_ADDRESS_KIND).
+       ! For real world applications we need an API that supports C_PTR so that we can convert to a Fortran pointer.
+       ! This problem was fixed in mpi_f08 but Abinit is not ready for that.
+       ! See also https://github.com/pmodels/mpich/issues/2659
+
+       my_size = 0; my_size =  disp_unit
+       call MPI_WIN_ALLOCATE_SHARED(my_size, disp_unit, MPI_INFO_NULL, comm, baseptr, win, ierr)
+       call MPI_WIN_SHARED_QUERY(win, 0, my_size, disp_unit, baseptr, ierr)
+    ]])], [abi_mpi_allocate_shared_ok="yes"], [abi_mpi_allocate_shared_ok="no"])
+  AC_LANG_POP([Fortran])
+  AC_MSG_RESULT([${abi_mpi_allocate_shared_ok}])
+
+  # Restore build environment
+  ABI_ENV_RESTORE
+
+  # Forward information to the compiler
+  if test "${abi_mpi_allocate_shared_ok}" = "yes"; then
+    AC_DEFINE([HAVE_MPI_ALLOCATE_SHARED_CPTR], 1,
+      [Define to 1 if your MPI library supports MPI_ALLOCATE_SHARE with C_PTR.])
+  else
+    AC_MSG_WARN([Your MPI library does not support MPI_ALLOCATE_SHARE with C_PTR.])
+  fi
+
+]) # _ABI_MPI_CHECK_ALLOCATE_SHARED_PTR
+
+
+                    # ------------------------------------ #
 
 # _ABI_MPI_CREATE_WRAPPER(COMPILER_TYPE, SERIAL_COMPILER, MPI_COMPILER)
 # ---------------------------------------------------------------------
@@ -887,7 +1038,7 @@ AC_DEFUN([ABI_MPI_DETECT], [
       else
         AC_MSG_NOTICE([forcing MPI-${abi_mpi_level} standard level support])
         if test "${abi_mpi_level}" != "${abi_mpi_fc_level}"; then
-        AC_MSG_WARN([detected MPI-${abi_mpi_fc_level} support but using MPI-${abi_mpi_level} instructions])
+          AC_MSG_WARN([detected MPI-${abi_mpi_fc_level} support but using MPI-${abi_mpi_level} instructions])
         fi
       fi
 
@@ -909,6 +1060,41 @@ AC_DEFUN([ABI_MPI_DETECT], [
           ;;
       esac
 
+      # Test if MPI has buggy interfaces for scalars
+      if test "${abi_mpi_interfaces_bugfix_enable}" = "no" -o "${abi_mpi_interfaces_bugfix_enable}" = "auto"; then
+        _ABI_MPI_CHECK_BUGGY
+        if test "${abi_mpi_buggy}" = "yes" -a "${abi_mpi_interfaces_bugfix_enable}" = "no"; then
+          AC_MSG_ERROR([--enable-mpi-interfaces-bugfix option is deactivated but MPI seems to have buggy interfaces!])
+        fi
+        if test "${abi_mpi_interfaces_bugfix_enable}" = "auto"; then
+          abi_mpi_interfaces_bugfix_enable="${abi_mpi_buggy}"
+        fi
+      fi
+      if test "${abi_mpi_interfaces_bugfix_enable}" = "yes"; then
+        AC_DEFINE([HAVE_MPI_BUGGY_INTERFACES], 1,
+          [Define to 1 if your MPI has buggy interfaces for scalars.])
+      fi
+
+      # Test the availability of MPI_IN_PLACE
+      if test "${abi_mpi_inplace_enable}" = "yes" -o "${abi_mpi_inplace_enable}" = "auto"; then
+        if test "${abi_mpi_buggy}" = "no"; then
+          _ABI_MPI_CHECK_INPLACE
+          if test "${abi_mpi_inplace}" = "no" -a "${abi_mpi_inplace_enable}" = "yes"; then
+            AC_MSG_ERROR([--enable-mpi-inplace option is activated but MPI_IN_PLACE is not available!])
+          fi
+        else
+          AC_MSG_WARN([MPI_IN_PLACE is deactivated because MPI has buggy interfaces])
+          abi_mpi_inplace = "no"
+        fi
+        if test "${abi_mpi_inplace_enable}" = "auto"; then
+          abi_mpi_inplace_enable="${abi_mpi_inplace}"
+        fi
+      fi
+      if test "${abi_mpi_inplace_enable}" = "yes"; then
+        AC_DEFINE([HAVE_MPI2_INPLACE], 1,
+          [Define to 1 if you want MPI_IN_PLACE support.])
+      fi
+
       # Test the availability of problematic MPI constants
       _ABI_MPI_CHECK_INTEGER16
 
@@ -929,6 +1115,7 @@ AC_DEFUN([ABI_MPI_DETECT], [
       _ABI_MPI_CHECK_IALLTOALLV()
       _ABI_MPI_CHECK_IGATHERV()
       _ABI_MPI_CHECK_IALLREDUCE()
+      _ABI_MPI_CHECK_ALLOCATE_SHARED_PTR()
 
     fi # sd_mpi_ok
 

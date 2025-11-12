@@ -1,0 +1,142 @@
+
+ Version 4.4.4  of ANADDB
+ (sequential version, prepared for a MacOSX computer)
+
+ Copyright (C) 1998-2004 ABINIT group .
+ ANADDB comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see https://www.abinit.org .
+
+ Starting date : Tue  3 May 2005.
+
+
+================================================================================
+
+ -outvars9: echo values of input variables ----------------------
+
+ Flags :
+     elaflag         3
+   instrflag         1
+   piezoflag         3
+ Miscellaneous information :
+         asr         1
+      chneut         2
+
+================================================================================
+
+ read the DDB information and perform some checks
+
+-begin at tcpu      0.020  and twall      0.020 sec
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.3197589  5.3197589  G(1)= -0.0939892  0.0939892  0.0939892
+ R(2)=  5.3197589  0.0000000  5.3197589  G(2)=  0.0939892 -0.0939892  0.0939892
+ R(3)=  5.3197589  5.3197589  0.0000000  G(3)=  0.0939892  0.0939892 -0.0939892
+ Unit cell volume ucvol=  3.0109659E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Now the whole DDB is in central memory
+
+================================================================================
+
+ Calculation of the internal-strain  tensor
+
+-begin at tcpu      0.020   and twall      0.028sec
+
+ Force-response internal strain tensor(Unit:Hartree/bohr)
+
+ Atom dir   strainxx    strainyy    strainzz    strainyz    strainxz    strainxy
+  1  x     0.0000000   0.0000000   0.0000000   0.1586801   0.0000000   0.0000000
+  1  y     0.0000000   0.0000000   0.0000000   0.0000000   0.1586801   0.0000000
+  1  z     0.0000000   0.0000000   0.0000000   0.0000000   0.0000000   0.1586801
+  2  x     0.0000000   0.0000000   0.0000000  -0.1586801   0.0000000   0.0000000
+  2  y     0.0000000   0.0000000   0.0000000   0.0000000  -0.1586801   0.0000000
+  2  z     0.0000000   0.0000000   0.0000000   0.0000000   0.0000000  -0.1586801
+
+ Displacement-response internal strain tensor (Unit:Bohr)
+
+ Atom dir   strainxx    strainyy    strainzz    strainyz    strainxz    strainxy
+  1  x     0.0000000   0.0000000   0.0000000   0.8142816   0.0000000   0.0000000
+  1  y     0.0000000   0.0000000   0.0000000   0.0000000   0.8142816   0.0000000
+  1  z     0.0000000   0.0000000   0.0000000   0.0000000   0.0000000   0.8142814
+  2  x     0.0000000   0.0000000   0.0000000  -0.8142816   0.0000000   0.0000000
+  2  y     0.0000000   0.0000000   0.0000000   0.0000000  -0.8142816   0.0000000
+  2  z     0.0000000   0.0000000   0.0000000   0.0000000   0.0000000  -0.8142814
+
+================================================================================
+
+ Calculation of the elastic and compliances tensor
+
+-begin at tcpu      0.020   and twall      0.029sec
+
+ Elastic Tensor(clamped ion)(Unit:10^2GP,VOIGT notation):
+
+   1.1376259   0.5724193   0.5724193   0.0000000   0.0000000   0.0000000
+   0.5724193   1.1376258   0.5724193   0.0000000   0.0000000   0.0000000
+   0.5724193   0.5724193   1.1376259   0.0000000   0.0000000   0.0000000
+   0.0000000   0.0000000   0.0000000   0.7849251   0.0000000   0.0000000
+   0.0000000   0.0000000   0.0000000   0.0000000   0.7849251   0.0000000
+   0.0000000   0.0000000   0.0000000   0.0000000   0.0000000   0.7849252
+
+ Elastic Tensor(relaxed ion)(Unit:10^2GP,VOIGT notation):
+
+   1.1376259   0.5724193   0.5724193   0.0000000   0.0000000   0.0000000
+   0.5724193   1.1376258   0.5724193   0.0000000   0.0000000   0.0000000
+   0.5724193   0.5724193   1.1376259   0.0000000   0.0000000   0.0000000
+   0.0000000   0.0000000   0.0000000   0.5324149   0.0000000   0.0000000
+   0.0000000   0.0000000   0.0000000   0.0000000   0.5324149   0.0000000
+   0.0000000   0.0000000   0.0000000   0.0000000   0.0000000   0.5324151
+
+ Compliance Tensor(clamped on) (Unit: 10^-2GP^-1):
+
+   1.3255508  -0.4437139  -0.4437140   0.0000000   0.0000000   0.0000000
+  -0.4437140   1.3255509  -0.4437140   0.0000000   0.0000000   0.0000000
+  -0.4437140  -0.4437139   1.3255508   0.0000000   0.0000000   0.0000000
+   0.0000000   0.0000000   0.0000000   1.2740069   0.0000000   0.0000000
+   0.0000000   0.0000000   0.0000000   0.0000000   1.2740069   0.0000000
+   0.0000000   0.0000000   0.0000000   0.0000000   0.0000000   1.2740068
+
+ Compliance Tensor(relaxeded  ion)(Unit: 10^-2GP^-1):
+
+   1.3255508  -0.4437139  -0.4437140   0.0000000   0.0000000   0.0000000
+  -0.4437140   1.3255509  -0.4437140   0.0000000   0.0000000   0.0000000
+  -0.4437140  -0.4437139   1.3255508   0.0000000   0.0000000   0.0000000
+   0.0000000   0.0000000   0.0000000   1.8782344   0.0000000   0.0000000
+   0.0000000   0.0000000   0.0000000   0.0000000   1.8782344   0.0000000
+   0.0000000   0.0000000   0.0000000   0.0000000   0.0000000   1.8782338
+
+================================================================================
+
+ Calculation of the piezoelectric tensor
+
+-begin at tcpu      0.030   and twall      0.031sec
+
+ Proper piezoelectric constants(clamped ion)(Unit:c/m^2)
+
+      0.00000000      0.00000000      0.00000000
+      0.00000000      0.00000000      0.00000000
+      0.00000000      0.00000000      0.00000000
+     -0.69084784      0.00000000      0.00000000
+      0.00000000     -0.69084784      0.00000000
+      0.00000000      0.00000000     -0.69084791
+
+ Proper piezoelectric constants(relaxed ion)(Unit:c/m^2)
+
+      0.00000000      0.00000000      0.00000000
+      0.00000000      0.00000000      0.00000000
+      0.00000000      0.00000000      0.00000000
+     -0.03251216      0.00000000      0.00000000
+      0.00000000     -0.03251218      0.00000000
+      0.00000000      0.00000000     -0.03251235
+
+================================================================================
+
++Total cpu time      0.030  and wall time      0.031 sec
+
+ anaddb : the run completed succesfully.

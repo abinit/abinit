@@ -8,7 +8,7 @@
 !!  wrt k, and the corresponding wave functions
 !!
 !! COPYRIGHT
-!! Copyright (C) 2016-2022 ABINIT group (MJV, HM, MG)
+!! Copyright (C) 2016-2025 ABINIT group (MG, HM, MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,7 +37,6 @@ MODULE m_ddk
  use m_cgtools
  use m_hamiltonian
  use m_initylmg
- use m_ebands
  use m_pawcprj
  use m_getgh1c
  use netcdf
@@ -46,11 +45,12 @@ MODULE m_ddk
  use m_io_tools,      only : iomode_from_fname
  use m_time,          only : cwtime, cwtime_report
  use defs_abitypes,   only : MPI_type
- use defs_datatypes,  only : ebands_t, pseudopotential_type
+ use defs_datatypes,  only : pseudopotential_type
  use m_vkbr,          only : vkbr_t, nc_ihr_comm, vkbr_init, vkbr_free
  use m_pawtab,        only : pawtab_type
  use m_wfk,           only : wfk_read_ebands !, wfk_read_h1mat
- use m_wfd,           only : wfd_t, wfd_init, wave_t
+ use m_wfd,           only : wfd_t, wave_t
+ use m_ebands,        only : ebands_t
 
  implicit none
 
@@ -122,6 +122,9 @@ MODULE m_ddk
 
  contains
 
+   procedure :: init => ddkop_init
+    ! Build object
+
    procedure :: setup_spin_kpoint => ddkop_setup_spin_kpoint
     ! Prepare application of dH/dk for given spin, k-point.
 
@@ -141,12 +144,6 @@ MODULE m_ddk
     ! Free memory.
 
  end type ddkop_t
-
- public :: ddkop_new   ! Build object
-
- !interface ddkop_t
- !  procedure ddkop_new
- !end interface ddkop_t
 !!***
 
 !!****t* m_ddk/ddkstore_t
@@ -189,8 +186,6 @@ MODULE m_ddk
 
  end type ddkstore_t
 !!***
-
- !public :: ddkop_new   ! Build object
 
 CONTAINS
 
@@ -243,10 +238,9 @@ subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfft
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
  real(dp) :: kpt(3), vv(2, 3)
  real(dp),allocatable :: cg_c(:,:), cg_v(:,:)
- complex(dpc) :: vg(3), vr(3)
- complex(gwpc),allocatable :: ihrc(:,:), ug_c(:), ug_v(:)
+ complex(dp) :: vg(3), vr(3)
+ complex(gwp),allocatable :: ihrc(:,:), ug_c(:), ug_v(:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
-
 !************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
@@ -350,7 +344,7 @@ subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfft
  end if
 
  ! Initialize distributed wavefunctions object
- call wfd_init(wfd, cryst, pawtab, psps, keep_ur, mband, nband, nkpt, nsppol,&
+ call wfd%init(cryst, pawtab, psps, keep_ur, mband, nband, nkpt, nsppol,&
    bks_mask, dtset%nspden, nspinor, hdr%ecut, dtset%ecutsm, dtset%dilatmx, ebands%istwfk, ebands%kptns,&
    ngfftc, dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 
@@ -358,7 +352,7 @@ subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfft
  ABI_FREE(keep_ur)
  ABI_FREE(nband)
 
- call wfd%print(header="Wavefunctions on the k-points grid")
+ call wfd%print([std_out], header="Wavefunctions on the k-points grid")
 
  ! Read wavefunctions from WFK file.
  call wfd%read_wfk(wfk_path, iomode_from_fname(wfk_path))
@@ -384,7 +378,7 @@ subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfft
  end if
 
  if (dtset%useria /= 666) then
-   ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
+   call ddkop%init(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
    !if (my_rank == master) call ddkop%print(ab_out)
  end if
 
@@ -534,9 +528,9 @@ subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfft
  ! Write matrix elements to disk.
 
  ! Output EVK file in netcdf format.
- if (my_rank == master .and. write_ncfile) then
+ if (my_rank == master .and. write_ncfile .and. dtset%prtevk == 1) then
    ! Have to build hdr on k-grid with info about perturbation.
-   call hdr_copy(hdr, tmp_hdr)
+   call hdr%copy(tmp_hdr)
    tmp_hdr%qptn = zero
 
    !fname = strcat(prefix, "NEW_EVK.nc")
@@ -545,7 +539,7 @@ subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfft
    !tmp_hdr%pertcase = 0
    !NCF_CHECK(tmp_hdr%ncwrite(ncid, 43, nc_define=.True.))
    !NCF_CHECK(cryst%ncwrite(ncid))
-   !NCF_CHECK(ebands_ncwrite(ebands, ncid))
+   !NCF_CHECK(ebands%ncwrite(ncid))
    !if (ds%only_diago) then
    !  ncerr = nctk_def_arrays(ncid, [ &
    !    nctkarr_t('vred_diagonal', "dp", "three, max_number_of_states, number_of_kpoints, number_of_spins")], defmode=.True.)
@@ -569,7 +563,7 @@ subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfft
      tmp_hdr%pertcase = 3 * cryst%natom + ii
      NCF_CHECK(tmp_hdr%ncwrite(ncid, 43, nc_define=.True.))
      NCF_CHECK(cryst%ncwrite(ncid))
-     NCF_CHECK(ebands_ncwrite(ebands, ncid))
+     NCF_CHECK(ebands%ncwrite(ncid))
      ncerr = nctk_def_arrays(ncid, [ &
        nctkarr_t('h1_matrix_elements', "dp", &
         "two, max_number_of_states, max_number_of_states, number_of_kpoints, number_of_spins")], defmode=.True.)
@@ -599,7 +593,7 @@ subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfft
 
  ! Free memory
  call wfd%free()
- call ebands_free(ebands)
+ call ebands%free()
  call cryst%free()
  call hdr%free()
 
@@ -625,9 +619,7 @@ end subroutine ddkstore_compute_ddk
 subroutine ddkstore_free(self)
 
 !Arguments ------------------------------------
-!scalars
  class(ddkstore_t),intent(inout) :: self
-
 !************************************************************************
 
  ABI_SFREE(self%vdiago)
@@ -646,10 +638,6 @@ end subroutine ddkstore_free
 !! FUNCTION
 !!  Convert ddk matrix element from reduced coordinates to cartesian coordinates.
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! SOURCE
 
 pure subroutine ddk_red2car(rprimd, vred, vcar)
@@ -661,7 +649,6 @@ pure subroutine ddk_red2car(rprimd, vred, vcar)
 
 !Local variables -------------------------------
  real(dp) :: vtmp(2,3)
-
 !************************************************************************
 
  ! Go to Cartesian coordinates (same as pmat2cart routine)
@@ -680,9 +667,9 @@ end subroutine ddk_red2car
 
 !----------------------------------------------------------------------
 
-!!****f* m_ddk/ddkop_new
+!!****f* m_ddk/ddkop_init
 !! NAME
-!!  ddkop_new
+!!  ddkop_init
 !!
 !! FUNCTION
 !!  Build new object. Use dtset%inclvkb to determine whether non-local part should be included.
@@ -700,10 +687,12 @@ end subroutine ddk_red2car
 !!
 !! SOURCE
 
-type(ddkop_t) function ddkop_new(dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngfft) result(new)
+
+subroutine ddkop_init(new, dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngfft)
 
 !Arguments ------------------------------------
 !scalars
+ class(ddkop_t),intent(out) :: new
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
  type(pseudopotential_type),intent(in) :: psps
@@ -717,7 +706,6 @@ type(ddkop_t) function ddkop_new(dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngf
 !scalars
  integer,parameter :: cplex1 = 1
  integer :: nfft, mgfft, idir
-
 ! *************************************************************************
 
  ABI_CHECK(dtset%usepaw == 0, "PAW not tested/implemented!")
@@ -744,18 +732,16 @@ type(ddkop_t) function ddkop_new(dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngf
    ! 2) Perform the setup needed for the non-local factors:
    ! * Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_hamk.
    ! * PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
-   call init_hamiltonian(new%gs_hamkq(idir), psps, pawtab, dtset%nspinor, dtset%nsppol, dtset%nspden, cryst%natom,&
+   call new%gs_hamkq(idir)%init(psps, pawtab, dtset%nspinor, dtset%nsppol, dtset%nspden, cryst%natom,&
      cryst%typat, cryst%xred, nfft, mgfft, ngfft, cryst%rprimd, dtset%nloalg)
      !paw_ij=paw_ij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
-     !usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda)
+     !usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option)
 
    ! Prepare application of the NL part.
-   call init_rf_hamiltonian(cplex1, new%gs_hamkq(idir), new%ipert, new%rf_hamkq(idir), has_e1kbsc=.true.)
-     !&paw_ij1=paw_ij1,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
-     !&mpi_spintab=mpi_enreg%my_isppoltab)
+   call new%rf_hamkq(idir)%init(cplex1, new%gs_hamkq(idir), new%ipert, has_e1kbsc=.true.)
  end do
 
-end function ddkop_new
+end subroutine ddkop_init
 !!***
 
 !----------------------------------------------------------------------
@@ -783,11 +769,11 @@ subroutine ddkop_setup_spin_kpoint(self, dtset, cryst, psps, spin, kpoint, istwf
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: spin, npw_k, istwf_k
  class(ddkop_t),intent(inout) :: self
- type(crystal_t) :: cryst
  type(dataset_type),intent(in) :: dtset
+ type(crystal_t),intent(in) :: cryst
  type(pseudopotential_type),intent(in) :: psps
+ integer,intent(in) :: spin, npw_k, istwf_k
 !arrays
  integer,intent(in) :: kg_k(3,npw_k)
  real(dp),intent(in) :: kpoint(3)
@@ -800,7 +786,6 @@ subroutine ddkop_setup_spin_kpoint(self, dtset, cryst, psps, spin, kpoint, istwf
  integer :: npwarr(nkpt1), dummy_nband(nkpt1*nsppol1)
  integer :: idir, nkpg, nkpg1, useylmgr1, optder !, nylmgr1
  real(dp),allocatable :: ylm_k(:,:),ylmgr1_k(:,:,:)
-
 !************************************************************************
 
  ABI_CHECK(npw_k <= self%mpw, "npw_k > mpw!")
@@ -867,7 +852,7 @@ end subroutine ddkop_setup_spin_kpoint
 !!
 !! SIDE EFFECTS
 !! Stores:
-!!  gh1c(2,npw1*nspinor)= <G|H^(1)|C> or  <G|H^(1)-lambda.S^(1)|C> on the k+q sphere
+!!  gh1c(2,npw1*nspinor)= <G|H^(1)|C> or <G|H^(1)-lambda.S^(1)|C> on the k+q sphere
 !!                        (only kinetic+non-local parts if optlocal=0)
 !!
 !! SOURCE
@@ -891,7 +876,6 @@ subroutine ddkop_apply(self, eig0nk, npw_k, nspinor, cwave, cwaveprj)
 !arrays
  real(dp) :: grad_berry(2,(berryopt0/4)), gvnlx1(2,usevnl0)
  real(dp),pointer :: dkinpw(:),kinpw1(:)
-
 !************************************************************************
 
  self%eig0nk = eig0nk
@@ -906,12 +890,12 @@ subroutine ddkop_apply(self, eig0nk, npw_k, nspinor, cwave, cwaveprj)
    do idir=1,3
      sij_opt = self%gs_hamkq(idir)%usepaw
      call getgh1c(berryopt0, cwave, cwaveprj, self%gh1c(:,:,idir), &
-       grad_berry, self%gs1c(:,:,idir), self%gs_hamkq(idir), gvnlx1, idir, self%ipert, eshift, self%mpi_enreg, optlocal0, &
+       grad_berry, self%gs1c(:,:,idir), self%gs_hamkq(idir), gvnlx1, idir, self%ipert, (/eshift/), self%mpi_enreg, 1, optlocal0, &
        optnl, opt_gvnlx1, self%rf_hamkq(idir), sij_opt, tim_getgh1c, usevnl0)
    end do
 
  else
-   ! optnl 0 with DDK does not work as expected.
+   ! FIXME: optnl 0 with DDK does not work as expected.
    ! So I treat the kinetic term explicitly without calling getgh1c.
    do idir=1,3
      kinpw1 => self%gs_hamkq(idir)%kinpw_kp
@@ -969,7 +953,6 @@ function ddkop_get_braket(self, eig0mk, istwf_k, npw_k, nspinor, brag, mode) res
 !arrays
  real(dp) :: dotarr(2), vk_red(2, 3)
  character(len=50) :: my_mode
-
 !************************************************************************
 
  if (self%usepaw == 0) then
@@ -1039,7 +1022,6 @@ function ddkop_get_vdiag(self, eig0nk, istwf_k, npw_k, nspinor, cwave, cwaveprj,
  character(len=50) :: my_mode
 !arrays
  real(dp) :: cvk(2, 3)
-
 !************************************************************************
 
  my_mode = "cart"; if (present(mode)) my_mode = mode
@@ -1076,8 +1058,6 @@ function ddkop_get_vnondiag(self, eig0nk_bra, istwf_k, npw_k, nspinor, cwave_bra
 
 !Local variables-------------------------------
  character(len=50) :: my_mode
-!arrays
-
 !************************************************************************
 
  my_mode = "cart"; if (present(mode)) my_mode = mode
@@ -1096,8 +1076,6 @@ end function ddkop_get_vnondiag
 !! FUNCTION
 !!  Free memory
 !!
-!! INPUTS
-!!
 !! SOURCE
 
 subroutine ddkop_free(self)
@@ -1107,9 +1085,7 @@ subroutine ddkop_free(self)
  class(ddkop_t),intent(inout) :: self
 
 !Local variables-------------------------------
-!scalars
  integer :: idir
-
 !************************************************************************
 
  ABI_SFREE(self%gh1c)
@@ -1140,9 +1116,7 @@ end subroutine ddkop_free
 subroutine ham_targets_free(self)
 
 !Arguments ------------------------------------
-!scalars
  class(ham_targets_t),intent(inout) :: self
-
 !************************************************************************
 
  ABI_SFREE(self%ffnlk)

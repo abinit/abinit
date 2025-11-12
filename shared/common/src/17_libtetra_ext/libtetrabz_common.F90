@@ -30,13 +30,16 @@ MODULE libtetrabz_common
   !
   use m_abicore
   use m_errors
+  USE_MPI
 
   IMPLICIT NONE
+
 #if defined HAVE_MPI1
  include 'mpif.h'
 #endif
   !
   PRIVATE
+
   PUBLIC :: libtetrabz_initialize, libtetrabz_sort, libtetrabz_interpol_indx, &
   &      libtetrabz_tsmall_a1, libtetrabz_tsmall_b1, libtetrabz_tsmall_b2, libtetrabz_tsmall_b3, &
   &      libtetrabz_tsmall_c1, libtetrabz_tsmall_c2, libtetrabz_tsmall_c3, &
@@ -44,13 +47,14 @@ MODULE libtetrabz_common
   &      libtetrabz_triangle_b2, libtetrabz_triangle_c1, &
   &      libtetrabz_mpisum_d, libtetrabz_mpisum_dv, libtetrabz_mpisum_zv
   !
+
 CONTAINS
 !
 ! define shortest diagonal line & define type of tetragonal
 !
 SUBROUTINE libtetrabz_initialize(ltetra,nge,ngw,bvec,linterpol,wlsm,nk_local,nt_local,nkBZ,ik_global,ik_local,kvec,comm)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: ltetra, nge(3), ngw(3)
   REAL(8),INTENT(IN) :: bvec(3,3)
@@ -197,7 +201,7 @@ END SUBROUTINE libtetrabz_initialize
 !
 SUBROUTINE libtetrabz_kgrid(linterpol,ivvec,ng,nkBZ,nk_local,nt_local,ik_global,ik_local,kvec,comm)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   LOGICAL,INTENT(INOUT) :: linterpol
   INTEGER,INTENT(IN) :: ivvec(3,20,6), ng(3), nkBZ
@@ -289,10 +293,7 @@ END SUBROUTINE libtetrabz_kgrid
 !
 SUBROUTINE libtetrabz_divideMPI(comm,nt,nt_front,nt_local)
   !
-#if defined HAVE_MPI2
-  USE mpi, ONLY : MPI_COMM_SIZE, MPI_COMM_RANK
-#endif
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: comm, nt
   INTEGER,INTENT(OUT) :: nt_front, nt_local
@@ -318,7 +319,7 @@ END SUBROUTINE libtetrabz_divideMPI
 !
 pure SUBROUTINE libtetrabz_sort(n,key,indx)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   integer,INTENT(IN) :: n
   REAL(8),INTENT(inout) :: key(n)
@@ -350,7 +351,7 @@ END SUBROUTINE libtetrabz_sort
 !
 pure SUBROUTINE libtetrabz_interpol_indx(nintp,ng,kvec,kintp,wintp)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER,INTENT(in) :: nintp, ng(3)
   REAL(8),INTENT(in) :: kvec(3)
@@ -451,7 +452,7 @@ END SUBROUTINE libtetrabz_interpol_indx
 
 pure function a_from_e(e) result(a)
 
-  IMPLICIT NONE
+  !IMPLICIT NONE
   REAL(8),INTENT(IN) :: e(4)
   REAL(8) :: a(4,4)
 
@@ -473,7 +474,7 @@ end function a_from_e
 !
 pure SUBROUTINE libtetrabz_tsmall_a1(e,V,tsmall)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
   REAL(8),INTENT(OUT) :: V
@@ -500,7 +501,7 @@ END SUBROUTINE libtetrabz_tsmall_a1
 !
 pure SUBROUTINE libtetrabz_tsmall_b1(e,V,tsmall)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
   REAL(8),INTENT(OUT) :: V
@@ -527,7 +528,7 @@ END SUBROUTINE libtetrabz_tsmall_b1
 !
 pure SUBROUTINE libtetrabz_tsmall_b2(e,V,tsmall)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
   REAL(8),INTENT(OUT) :: V
@@ -554,7 +555,7 @@ END SUBROUTINE libtetrabz_tsmall_b2
 !
 pure SUBROUTINE libtetrabz_tsmall_b3(e,V,tsmall)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
   REAL(8),INTENT(OUT) :: V
@@ -581,7 +582,7 @@ END SUBROUTINE libtetrabz_tsmall_b3
 !
 pure SUBROUTINE libtetrabz_tsmall_c1(e,V,tsmall)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
   REAL(8),INTENT(OUT) :: V
@@ -608,7 +609,7 @@ END SUBROUTINE libtetrabz_tsmall_c1
 !
 pure SUBROUTINE libtetrabz_tsmall_c2(e,V,tsmall)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
   REAL(8),INTENT(OUT) :: V
@@ -635,7 +636,7 @@ END SUBROUTINE libtetrabz_tsmall_c2
 !
 pure SUBROUTINE libtetrabz_tsmall_c3(e,V,tsmall)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
   REAL(8),INTENT(OUT) :: V
@@ -662,7 +663,7 @@ END SUBROUTINE libtetrabz_tsmall_c3
 !
 pure SUBROUTINE libtetrabz_triangle_a1(e,V,tsmall)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
   REAL(8),INTENT(OUT) :: V
@@ -689,7 +690,7 @@ END SUBROUTINE libtetrabz_triangle_a1
 !
 pure SUBROUTINE libtetrabz_triangle_b1(e,V,tsmall)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
   REAL(8),INTENT(OUT) :: V
@@ -716,7 +717,7 @@ END SUBROUTINE libtetrabz_triangle_b1
 !
 pure SUBROUTINE libtetrabz_triangle_b2(e,V,tsmall)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
   REAL(8),INTENT(OUT) :: V
@@ -743,7 +744,7 @@ END SUBROUTINE libtetrabz_triangle_b2
 !
 pure SUBROUTINE libtetrabz_triangle_c1(e,V,tsmall)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
   REAL(8),INTENT(OUT) :: V
@@ -770,19 +771,18 @@ END SUBROUTINE libtetrabz_triangle_c1
 !
 SUBROUTINE libtetrabz_mpisum_d(comm,scaler)
   !
-#if defined HAVE_MPI2
-  USE mpi, ONLY : MPI_DOUBLE_PRECISION, MPI_IN_PLACE, MPI_SUM
-#endif
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER :: comm
   REAL(8) :: scaler
   !
 #if defined(HAVE_MPI)
   INTEGER :: ierr
+  REAL(8) :: arr_scaler(1)
   !
-  CALL MPI_allREDUCE(MPI_IN_PLACE, scaler, 1, &
+  CALL MPI_allREDUCE([scaler], arr_scaler, 1, &
   &                  MPI_DOUBLE_PRECISION, MPI_SUM, comm, ierr)
+  scaler=arr_scaler(1)
 #endif
   !
 END SUBROUTINE libtetrabz_mpisum_d
@@ -791,19 +791,25 @@ END SUBROUTINE libtetrabz_mpisum_d
 !
 SUBROUTINE libtetrabz_mpisum_dv(comm,ndim,vector)
   !
-#if defined HAVE_MPI2
-  USE mpi, ONLY : MPI_DOUBLE_PRECISION, MPI_IN_PLACE, MPI_SUM
-#endif
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER :: comm, ndim
   REAL(8) :: vector(ndim)
   !
 #if defined(HAVE_MPI)
   INTEGER :: ierr
+#ifndef HAVE_MPI2_INPLACE
+  REAL(8) :: vector_out(ndim)
+#endif
   !
+#ifdef HAVE_MPI2_INPLACE
   CALL MPI_allREDUCE(MPI_IN_PLACE, vector, ndim, &
   &                  MPI_DOUBLE_PRECISION, MPI_SUM, comm, ierr)
+#else
+  CALL MPI_allREDUCE(vector, vector_out, ndim, &
+  &                  MPI_DOUBLE_PRECISION, MPI_SUM, comm, ierr)
+  vector(1:ndim)=vector_out(1:ndim)
+#endif
 #endif
   !
 END SUBROUTINE libtetrabz_mpisum_dv
@@ -812,19 +818,25 @@ END SUBROUTINE libtetrabz_mpisum_dv
 !
 SUBROUTINE libtetrabz_mpisum_zv(comm,ndim,vector)
   !
-#if defined HAVE_MPI2
-  USE mpi, ONLY : MPI_DOUBLE_COMPLEX, MPI_IN_PLACE, MPI_SUM
-#endif
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER :: comm, ndim
   COMPLEX(8) :: vector(ndim)
   !
 #if defined(HAVE_MPI)
   INTEGER :: ierr
+#ifndef HAVE_MPI2_INPLACE
+  COMPLEX(8) :: vector_out(ndim)
+#endif
   !
+#ifdef HAVE_MPI2_INPLACE
   CALL MPI_allREDUCE(MPI_IN_PLACE, vector, ndim, &
   &                  MPI_DOUBLE_COMPLEX, MPI_SUM, comm, ierr)
+#else
+  CALL MPI_allREDUCE(vector, vector_out, ndim, &
+  &                  MPI_DOUBLE_COMPLEX, MPI_SUM, comm, ierr)
+  vector(1:ndim)=vector_out(1:ndim)
+#endif
 #endif
   !
 END SUBROUTINE libtetrabz_mpisum_zv

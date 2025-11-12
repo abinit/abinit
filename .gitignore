@@ -1,15 +1,15 @@
-configure~
-config.h.in~
-.gitignore~
+*~
+configure
 .DS_Store
 .deps
 .directory
 .tox
 .idea
 .cache
-.*.sw[op]
+*.sw[op]
 __pycache__
 .ipynb_checkpoints
+.version
 *.egg
 *.egg-info
 Makefile.am
@@ -22,6 +22,7 @@ build_g95
 build_gfortran
 build_ifort
 build.*
+build*
 debian.ac
 debian.ac9
 config.optim
@@ -65,16 +66,20 @@ topology.so
 *.[ao]
 *.stderr
 *.stdout
+*.cmod
+*.stb
+*.ilm
+*.cmdx
 buildbot.ac
+CMakeFiles
+CMakeCache.txt
+install_manifest.txt
+cmake_install.cmake
 tests/TestBot_MPI*/*
-/.abilint
-/abilint.log
-/abilint.out
 /aclocal.m4
 /autom4te.cache
-/build
 /_build*
-/configure
+/build
 /config.dump
 /config.dump.in
 /config.h
@@ -127,6 +132,7 @@ tests/TestBot_MPI*/*
 /config/wrappers/wrap-mpifc
 
 # Documentation
+mkdocs.yml
 mkdocs_plugins/dist
 /site/
 /doc/developers/statistics.json
@@ -180,7 +186,6 @@ mkdocs_plugins/dist
 /doc/*/*.dvi
 /doc/*/*.log
 /doc/*/*.toc
-/doc/*/*/*~
 /doc/*/*.el
 
 # fallbacks
@@ -211,8 +216,10 @@ mkdocs_plugins/dist
 /shared/common/src/14_hidewrite/m_cppopts_dumper.F90
 /shared/common/src/14_hidewrite/m_optim_dumper.F90
 /shared/common/src/18_timing/.deps
+/shared/common/src/*/*.lst
+/shared/libpaw/src/*.lst
 /src/.abilint
-/src/*/*~
+/src/*/*.lst
 /src/abilint.log
 /src/abirules.log
 /src/error_make_abiauty
@@ -239,13 +246,13 @@ mkdocs_plugins/dist
 /src/98_main/tdep
 /src/98_main/dummy_tests
 /src/98_main/optic
+/src/98_main/lruj
 /src/98_main/ujdet
 /src/98_main/fold2Bloch
 /src/98_main/vdw_kernelgen
 /tests/ListOfTests.html
 /tests/ListOfTests.txt
 /tests/Test_suite
-/tests/*/*/*/*~
 /tests/*/*/*~
 /tests/Tmp
 /tests/test_suite.cpkl
@@ -327,8 +334,17 @@ CheckFB.py
 tests/built-in/Input/abinit
 tests/built-in/Input/fort.98
 tests/built-in/Input/testin_wannier90o_EBANDS.agr
-doc/input-web/*~
 mac-1P0-225.ac
 doc/topics/ConstrainedDFT.md
 doxygen_docs
 doxygen.err
+venv
+
+# Pycharm
+.idea/
+
+# VSC
+.vscode/
+
+# R language
+.Rhistory

@@ -14,6 +14,7 @@ nspden   1
 # Dataset 1
 rmm_diis1 -1       # Two CG steps followed by RMM-DIIS.
 nspinor1 1
+istwfk1 *1         # To stabilize the test
 
 # Dataset 2
 # spinor wavefunctions, non-magnetic

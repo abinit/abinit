@@ -1,8 +1,8 @@
 
-.Version 9.3.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 23 Dec 2020.
-- ( at 23h37 )
-  
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/cote_beauty/tests/TestBot_MPI1/tutorial_tbase3_3/tbase3_3.abi
+.Starting date : Fri 13 Sep 2024.
+- ( at 19h05 )
+
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorial_tbase3_3/tbase3_3.abi
 - output file    -> tbase3_3.abo
 - root for input  files -> tbase3_3i
 - root for output files -> tbase3_3o
-
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =         525          nfft =       13824          nkpt =           2
 ================================================================================
-P This job should need less than                       4.782 Mbytes of memory.
+P This job should need less than                       5.180 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.082 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      0.082 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =          10
        mpw =         534          nfft =       13824          nkpt =          10
 ================================================================================
-P This job should need less than                       5.167 Mbytes of memory.
+P This job should need less than                       5.564 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.409 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -68,11 +65,10 @@ _ WF disk file :      0.409 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =          28
        mpw =         534          nfft =       13824          nkpt =          28
 ================================================================================
-P This job should need less than                       6.024 Mbytes of memory.
+P This job should need less than                       6.421 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.143 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
-
 
  DATASET    4 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -85,7 +81,7 @@ _ WF disk file :      1.143 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =          60
        mpw =         534          nfft =       13824          nkpt =          60
 ================================================================================
-P This job should need less than                       7.548 Mbytes of memory.
+P This job should need less than                       7.945 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.446 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -94,10 +90,10 @@ _ WF disk file :      2.446 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -105,7 +101,7 @@ _ WF disk file :      2.446 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
               amu      2.80855000E+01
            diemac      1.20000000E+01
              ecut      1.20000000E+01 Hartree
--          fftalg         312
+-          fftalg         512
            getwfk          -1
               ixc       -1012
            jdtset        1    2    3    4
@@ -345,8 +341,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.13807
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/cote_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/cote_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Si.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Si.psp8
 - Si    ONCVPSP-3.3.0  r_core=   1.60303   1.72197   1.91712
 - 14.00000   4.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -378,9 +374,9 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.5186801687011    -3.402E-03 1.548E-05 1.655E-01
  ETOT  3  -8.5187388273282    -5.866E-05 1.588E-06 1.346E-03
  ETOT  4  -8.5187390561264    -2.288E-07 5.608E-08 2.251E-05
- ETOT  5  -8.5187390642399    -8.113E-09 3.658E-10 2.688E-07
+ ETOT  5  -8.5187390642397    -8.113E-09 3.658E-10 2.688E-07
 
- At SCF step    5, etot is converged : 
+ At SCF step    5, etot is converged :
   for the second time, diff in etot=  8.113E-09 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -460,16 +456,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.12772926558859E+00
-hartree             :  5.47060783406794E-01
-xc                  : -3.11674817182468E+00
+kinetic             :  3.12772926558809E+00
+hartree             :  5.47060783406466E-01
+xc                  : -3.11674817182442E+00
 Ewald energy        : -8.46648022654903E+00
 psp_core            :  4.04636587753304E-01
-local_psp           : -2.33102934151363E+00
-non_local_psp       :  1.31609203889878E+00
-total_energy        : -8.51873906423987E+00
-total_energy_eV     : -2.31806678680208E+02
-band_energy         : -5.22308669023624E-02
+local_psp           : -2.33102934151199E+00
+non_local_psp       :  1.31609203889785E+00
+total_energy        : -8.51873906423973E+00
+total_energy_eV     : -2.31806678680205E+02
+band_energy         : -5.22308669023843E-02
 ...
 
 
@@ -521,13 +517,13 @@ tolerances: {toldfe: 1.00E-06, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -8.5250038208242    -8.525E+00 2.407E-04 2.238E-02
- ETOT  2  -8.5250179069655    -1.409E-05 4.114E-07 1.689E-04
+ ETOT  1  -8.5250038208418    -8.525E+00 2.407E-04 2.238E-02
+ ETOT  2  -8.5250179069654    -1.409E-05 4.114E-07 1.689E-04
  ETOT  3  -8.5250179731184    -6.615E-08 1.243E-07 1.658E-06
- ETOT  4  -8.5250179735121    -3.937E-10 7.991E-09 1.585E-08
+ ETOT  4  -8.5250179735122    -3.938E-10 7.991E-09 1.585E-08
 
- At SCF step    4, etot is converged : 
-  for the second time, diff in etot=  3.937E-10 < toldfe=  1.000E-06
+ At SCF step    4, etot is converged :
+  for the second time, diff in etot=  3.938E-10 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -9.99218877E-06  sigma(3 2)=  0.00000000E+00
@@ -545,7 +541,7 @@ lattice_vectors:
 lattice_lengths: [   7.19835,    7.19835,    7.19835, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.6374446E+02
-convergence: {deltae: -3.937E-10, res2:  1.585E-08, residm:  7.991E-09, diffor: null, }
+convergence: {deltae: -3.938E-10, res2:  1.585E-08, residm:  7.991E-09, diffor: null, }
 etotal    :  -8.52501797E+00
 entropy   :   0.00000000E+00
 fermie    :   1.69761303E-01
@@ -606,16 +602,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.10867040132890E+00
-hartree             :  5.37475235680812E-01
-xc                  : -3.11284585404000E+00
+kinetic             :  3.10867040132811E+00
+hartree             :  5.37475235680395E-01
+xc                  : -3.11284585403979E+00
 Ewald energy        : -8.46648022654903E+00
 psp_core            :  4.04636587753304E-01
-local_psp           : -2.31645317122800E+00
-non_local_psp       :  1.31997905354187E+00
-total_energy        : -8.52501797351215E+00
-total_energy_eV     : -2.31977536490638E+02
-band_energy         : -6.69071258831801E-02
+local_psp           : -2.31645317122638E+00
+non_local_psp       :  1.31997905354121E+00
+total_energy        : -8.52501797351218E+00
+total_energy_eV     : -2.31977536490639E+02
+band_energy         : -6.69071258813383E-02
 ...
 
 
@@ -667,12 +663,12 @@ tolerances: {toldfe: 1.00E-06, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -8.5250712503232    -8.525E+00 1.212E-02 1.112E-01
+ ETOT  1  -8.5250712503234    -8.525E+00 1.212E-02 1.112E-01
  ETOT  2  -8.5251227653633    -5.152E-05 5.012E-04 1.488E-03
  ETOT  3  -8.5251232857512    -5.204E-07 6.880E-05 2.393E-05
- ETOT  4  -8.5251232907514    -5.000E-09 1.298E-05 4.000E-08
+ ETOT  4  -8.5251232907513    -5.000E-09 1.298E-05 4.000E-08
 
- At SCF step    4, etot is converged : 
+ At SCF step    4, etot is converged :
   for the second time, diff in etot=  5.000E-09 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -752,16 +748,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 3, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.10815638117406E+00
-hartree             :  5.37169037859319E-01
-xc                  : -3.11272394462013E+00
+kinetic             :  3.10815638117827E+00
+hartree             :  5.37169037862009E-01
+xc                  : -3.11272394462140E+00
 Ewald energy        : -8.46648022654903E+00
 psp_core            :  4.04636587753304E-01
-local_psp           : -2.31605415901199E+00
-non_local_psp       :  1.32017303264305E+00
-total_energy        : -8.52512329075142E+00
-total_energy_eV     : -2.31980402318463E+02
-band_energy         : -6.72934670968703E-02
+local_psp           : -2.31605415902089E+00
+non_local_psp       :  1.32017303264643E+00
+total_energy        : -8.52512329075131E+00
+total_energy_eV     : -2.31980402318460E+02
+band_energy         : -6.72934670996936E-02
 ...
 
 
@@ -771,9 +767,9 @@ band_energy         : -6.72934670968703E-02
   sigma(3 3)= -1.01082066E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  2.9739E-01 GPa]
-- sigma(1 1)= -2.97393654E-01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -2.97393654E-01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -2.97393654E-01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -2.97393655E-01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -2.97393655E-01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -2.97393655E-01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -813,11 +809,11 @@ tolerances: {toldfe: 1.00E-06, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -8.5251267563626    -8.525E+00 1.096E-03 3.327E-05
- ETOT  2  -8.5251270558111    -2.994E-07 7.803E-05 3.114E-07
+ ETOT  1  -8.5251267563627    -8.525E+00 1.096E-03 3.327E-05
+ ETOT  2  -8.5251270558112    -2.994E-07 7.803E-05 3.114E-07
  ETOT  3  -8.5251270559429    -1.318E-10 2.743E-05 1.277E-09
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.318E-10 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -897,16 +893,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 4, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.10813515384875E+00
-hartree             :  5.37155670622526E-01
-xc                  : -3.11271880756109E+00
+kinetic             :  3.10813515384834E+00
+hartree             :  5.37155670622160E-01
+xc                  : -3.11271880756094E+00
 Ewald energy        : -8.46648022654903E+00
 psp_core            :  4.04636587753304E-01
-local_psp           : -2.31604312698080E+00
-non_local_psp       :  1.32018769292340E+00
-total_energy        : -8.52512705594294E+00
+local_psp           : -2.31604312697977E+00
+non_local_psp       :  1.32018769292302E+00
+total_energy        : -8.52512705594292E+00
 total_energy_eV     : -2.31980504774535E+02
-band_energy         : -6.72920267535825E-02
+band_energy         : -6.72920267514998E-02
 ...
 
 
@@ -922,7 +918,7 @@ band_energy         : -6.72920267535825E-02
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0180000000E+01  1.0180000000E+01  1.0180000000E+01 Bohr
               amu      2.80855000E+01
@@ -940,7 +936,7 @@ band_energy         : -6.72920267535825E-02
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart4    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getwfk          -1
               ixc       -1012
            jdtset        1    2    3    4
@@ -1070,13 +1066,13 @@ P           mkmem4         60
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup         227
-           strten1    -2.3754020033E-05 -2.3754020033E-05 -2.3754020033E-05
+           strten1    -2.3754020029E-05 -2.3754020029E-05 -2.3754020029E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten2    -9.9921887693E-06 -9.9921887693E-06 -9.9921887693E-06
+           strten2    -9.9921887652E-06 -9.9921887652E-06 -9.9921887652E-06
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten3    -1.0108206562E-05 -1.0108206562E-05 -1.0108206562E-05
+           strten3    -1.0108206581E-05 -1.0108206581E-05 -1.0108206581E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten4    -1.0157792566E-05 -1.0157792566E-05 -1.0157792566E-05
+           strten4    -1.0157792564E-05 -1.0157792564E-05 -1.0157792564E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
@@ -1194,7 +1190,7 @@ P           mkmem4         60
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1211,12 +1207,12 @@ P           mkmem4         60
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1234,15 +1230,15 @@ P           mkmem4         60
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          8.4  wall=          8.5
+- Proc.   0 individual time (sec): cpu=          4.0  wall=          4.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered   4 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.4  wall=          8.5
+.Delivered   3 WARNINGs and  14 COMMENTs to log file.
++Overall time at end (sec) : cpu=          4.0  wall=          4.0

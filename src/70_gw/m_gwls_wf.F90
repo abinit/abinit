@@ -6,7 +6,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2022 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2025 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -66,7 +66,6 @@ contains
 
 subroutine set_wf(dv2,nx2,ny2,nz2,nk2,nb2,ng2,cbf2,cf2,cb2)
 
-implicit none
 real(dp), intent(in) :: dv2
 integer, intent(in) :: nx2, ny2, nz2, nk2, nb2, ng2, cbf2, cf2, cb2
 ! *************************************************************************
@@ -100,7 +99,6 @@ end subroutine set_wf
 
 real(dp) function norm_k(v)
 
-implicit none
 real(dp), intent(in) :: v(2,nk)
 ! *************************************************************************
 norm_k = 0.0_dp
@@ -132,8 +130,7 @@ end function norm_k
 
 real(dp) function norm_kc(v)
 
-implicit none
-complex(dpc), intent(in) :: v(nk)
+complex(dp), intent(in) :: v(nk)
 ! *************************************************************************
 norm_kc = zero
 
@@ -161,10 +158,9 @@ end function norm_kc
 !!
 !! SOURCE
 
-complex(dpc) function scprod_kc(v1,v2)
+complex(dp) function scprod_kc(v1,v2)
 
-implicit none
-complex(dpc), intent(in) :: v1(nk), v2(nk)
+complex(dp), intent(in) :: v1(nk), v2(nk)
 ! *************************************************************************
 scprod_kc = zero
 do i=1,nk
@@ -194,7 +190,6 @@ end function scprod_kc
 
 ! real(dp) function contribution(alpha,beta,k,norm_svne)
 !
-!  implicit none
 !  real(dp), intent(in) :: alpha(k), beta(k-1), norm_svne
 !  integer, intent(in) :: k
 !
@@ -240,14 +235,13 @@ end function scprod_kc
 
 ! function contribution_bloc(alpha,beta,kmax,norm_svne,nseeds)
 !
-!  implicit none
 !  real(dp) :: contribution_bloc(2)
 !  integer, intent(in) :: kmax, nseeds
 !  real(dp), intent(in) :: alpha(2,nseeds,nseeds,kmax), beta(2,nseeds,nseeds,kmax-1), norm_svne
 !
 !  integer :: i=0, j=0, k=0
 !  integer, allocatable :: ipiv(:)
-!  complex(dpc), allocatable :: a(:,:),b(:,:)  !For the (non-banded) solver of AX=B
+!  complex(dp), allocatable :: a(:,:),b(:,:)  !For the (non-banded) solver of AX=B
 !! *************************************************************************
 !  !write(std_out,*)  "Allocating..."
 !  ABI_MALLOC(a,(kmax*nseeds,kmax*nseeds))
@@ -268,7 +262,7 @@ end function scprod_kc
 !  do k=1,kmax
 !   do j=1,nseeds
 !    do i=1,nseeds
-!     a((k-1)*nseeds+i,(k-1)*nseeds+j) = cmplx(alpha(1,i,j,k),alpha(2,i,j,k),dpc)
+!     a((k-1)*nseeds+i,(k-1)*nseeds+j) = cmplx(alpha(1,i,j,k),alpha(2,i,j,k),dp)
 !    end do
 !   end do
 !  end do
@@ -276,8 +270,8 @@ end function scprod_kc
 !  do k=1,kmax-1
 !   do j=1,nseeds
 !    do i=1,j
-!      a(k*nseeds+i,(k-1)*nseeds+j) = cmplx(beta(1,i,j,k),beta(2,i,j,k),dpc)
-!      a((k-1)*nseeds+i,k*nseeds+j) = cmplx(beta(1,j,i,k),-beta(2,j,i,k),dpc)
+!      a(k*nseeds+i,(k-1)*nseeds+j) = cmplx(beta(1,i,j,k),beta(2,i,j,k),dp)
+!      a((k-1)*nseeds+i,k*nseeds+j) = cmplx(beta(1,j,i,k),-beta(2,j,i,k),dp)
 !    end do
 !   end do
 !  end do
@@ -318,7 +312,6 @@ function scprod_k(v1,v2)
 ! This function computes the inner product of two "vectors" (typically
 ! wavefunctions), < v1 | v2 >.
 !--------------------------------------------------------------------------------
-implicit none
 real(dp) :: scprod_k(2)
 real(dp), intent(in) :: v1(2,nk), v2(2,nk)
 ! *************************************************************************

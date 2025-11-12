@@ -4,9 +4,8 @@
 !!
 !! FUNCTION
 !!
-!!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (AM)
+!!  Copyright (C) 2008-2025 ABINIT group (AM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +26,6 @@ module m_mover_effpot
  use m_dtset
  use m_dtfil
  use m_abimover
- use m_build_info
  use m_scf_history
  use defs_wvltypes
  use m_xmpi
@@ -38,9 +36,11 @@ module m_mover_effpot
  use m_psps
  use m_args_gs
  use m_ifc
+ use m_symfind
 
  use defs_datatypes,          only : pseudopotential_type
  use defs_abitypes,           only : MPI_type
+ use m_build_info,            only : abinit_version
  use m_geometry,              only : xcart2xred, xred2xcart
  use m_multibinit_dataset,    only : multibinit_dtset_type
  use m_effective_potential,   only : effective_potential_type
@@ -58,11 +58,12 @@ module m_mover_effpot
  use m_copy            , only : alloc_copy
  use m_electronpositron, only : electronpositron_type
  use m_scfcv,            only : scfcv_t, scfcv_run,scfcv_destroy
- use m_results_gs,       only : results_gs_type,init_results_gs,destroy_results_gs
+ use m_results_gs,       only : results_gs_type
  use m_mover,            only : mover
  use m_io_tools,         only : get_unit, open_file
- use m_symfind
- use m_symtk,            only: matr3inv,symatm,mati3inv
+ use m_matrix,           only: matr3inv,mati3inv
+ use m_symtk,            only: symatm
+
  implicit none
 
  private
@@ -107,7 +108,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 !scalar
  integer, intent(in) :: option,comm
 !array
- type(multibinit_dtset_type),intent(in) :: inp
+ type(multibinit_dtset_type),intent(inout) :: inp
  type(effective_potential_type),intent(inout)  :: effective_potential
  character(len=fnlen),intent(in) :: filnam(15)
  type(abihist),optional,intent(inout):: hist
@@ -160,6 +161,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
  real(dp),allocatable :: gred(:,:),fcart(:,:)
  real(dp),allocatable :: vel(:,:)
  real(dp) :: vel_cell(3,3),rprimd(3,3)
+ !real(dp) :: efield(3)
  type(polynomial_coeff_type),dimension(:),allocatable :: coeffs_all,coeffs_tmp,coeffs_bound
  character(len=fnlen) :: filename,md_hist_name
  character(len=fnlen) :: name_file
@@ -173,6 +175,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 !type(pawang_type) :: pawang
 !type(scf_history_type) :: scf_history
  type(abihist) :: hist_tmp
+
 
 !******************************************************************
 
@@ -327,6 +330,9 @@ ABI_FREE(xcart)
          isARused = .true.
          readOnlyLast = .true.
          call read_md_hist(md_hist_name,hist_tmp,isVused,isARused,readOnlyLast)
+
+
+
          write(message,'(2a)')&
 &         ' Map external structure to internal ordering of reference structure: ',ch10
          call wrtout(std_out,message,"COLL")
@@ -481,7 +487,7 @@ ABI_FREE(xcart)
    psps%useylm = dtset%useylm
 
 !  initialisation of results_gs
-   call init_results_gs(dtset%natom,1,1,results_gs)
+   call results_gs%init(dtset%natom,1,1)
 
 !  Set the pointers of scfcv_args
    zero_integer = 0
@@ -572,7 +578,7 @@ ABI_FREE(xcart)
      call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &     rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
 &     effective_potential=effective_potential,filename_ddb=filnam(3),&
-&     verbose=verbose,writeHIST=writeHIST,scup_dtset=scup_inp,sc_size=sc_size(:))
+&     verbose=verbose,writeHIST=writeHIST,scup_dtset=scup_inp,sc_size=sc_size(:),multibinit_dtset=inp)
      INQUIRE(FILE='MD_anharmonic_terms_energy.dat',OPENED=file_opened,number=unit_out)
      if(file_opened) close(unit_out)
    else if(option== -1.or.option==-2)then
@@ -587,7 +593,7 @@ ABI_FREE(xcart)
 !    Try the model
      call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &     rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
-&     effective_potential=effective_potential,verbose=verbose,writeHIST=writeHIST)
+&     effective_potential=effective_potential,verbose=verbose,writeHIST=writeHIST, multibinit_dtset=inp )
 
      write(message, '(a)' ) ' => The model'
      if(effective_potential%anharmonics_terms%bounded)then
@@ -617,7 +623,8 @@ ABI_FREE(xcart)
 &         inp%bound_rangePower,0,inp%bound_maxCoeff,ncoeff,inp%fit_nimposecoeff,inp%fit_imposecoeff,&
 &         1,comm,cutoff_in=inp%bound_cutoff,&
 &         max_power_strain=2,verbose=.true.,positive=.true.,spcoupling=inp%bound_SPCoupling==1,&
-&         anharmstr=inp%bound_anhaStrain==1,only_even_power=.true.,fit_on=inp%fit_on,sel_on=inp%sel_on)
+&         anharmstr=inp%bound_anhaStrain==1,only_even_power=.true.,fit_on=inp%fit_on,sel_on=inp%sel_on, &
+&         max_nbody=inp%fit_max_nbody, drop_rate=0.0_dp, ncoeff_per_cycle=1, fit_weight_T=inp%fit_weight_T)
 
 !        Store the max number of coefficients after the fit process
          ncoeff_max = effective_potential%anharmonics_terms%ncoeff
@@ -665,7 +672,8 @@ ABI_FREE(xcart)
            call effective_potential_setCoeffs(coeffs_tmp(1:ncoeff+ii),effective_potential,ncoeff+ii)
            call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,0,(/0,0/),0,0,&
 &           -1,inp%fit_nimposecoeff,inp%fit_imposecoeff,1,comm,verbose=.true.,positive=.false.,&
-&            fit_on=inp%fit_on,sel_on=inp%sel_on)
+&            fit_on=inp%fit_on,sel_on=inp%sel_on, max_nbody=inp%fit_max_nbody, drop_rate=0.0_dp, &
+&            ncoeff_per_cycle=1, fit_weight_T=inp%fit_weight_T)
            call effective_potential_setSupercell(effective_potential,comm,ncell=sc_size)
            dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd
            acell(:) = one
@@ -710,7 +718,7 @@ ABI_FREE(xcart)
 &         ncoeff_bound,ncoeff_bound_tot,inp%bound_rangePower,inp%bound_rangePower(2),2,sc_size_TS,&
 &         comm,anharmstr=inp%bound_anhaStrain==1,&
 &         spcoupling=inp%bound_SPCoupling==1,verbose=.false.,distributed=.false.,&
-&         only_even_power=.true.,only_odd_power=.false.)
+&         only_even_power=.true.,only_odd_power=.false., max_nbody=inp%fit_max_nbody)
 
          if(iam_master)then
            filename=trim(filnam(2))//"_boundcoeff.xml"
@@ -795,7 +803,7 @@ ABI_FREE(xcart)
 !        Reset the simulation
            call effective_potential_setCoeffs(coeffs_all,effective_potential,ncoeff+ncoeff_bound)
            call fit_polynomial_coeff_getPositive(effective_potential,hist,coeff_values,&
-&           isPositive,listcoeff_bound,ncoeff+ii,ncoeff,nmodels,comm,verbose=.false.)
+&           isPositive,listcoeff_bound,ncoeff+ii,ncoeff,nmodels,comm,verbose=.false., fit_weight_T=inp%fit_weight_T)
            if(all(isPositive == 0)) then
              write(message, '(5a,I0,a)')ch10,'--',ch10,' No possible model ',&
 &             'with ', ii,' additional terms found'
@@ -850,7 +858,9 @@ ABI_FREE(xcart)
                  call effective_potential_setCoeffs(coeffs_tmp(1:ncoeff+ii),effective_potential,&
 &                 ncoeff+ii)
                  call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,0,(/0,0/),1,0,&
-&                 -1,inp%fit_nimposecoeff,inp%fit_imposecoeff,1,comm,verbose=.false.,positive=.false.)
+                   &                 -1,inp%fit_nimposecoeff,inp%fit_imposecoeff,1,comm,verbose=.false.,positive=.false., &
+                   &                  max_nbody=inp%fit_max_nbody, drop_rate=0.0_dp, ncoeff_per_cycle=1, &
+                  &                  fit_weight_T=inp%fit_weight_T)
                  call effective_potential_setSupercell(effective_potential,comm,ncell=sc_size)
                  dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd
                  acell(:) = one
@@ -889,6 +899,7 @@ ABI_FREE(xcart)
 
 !        Exit if the model is bounded
            if(effective_potential%anharmonics_terms%bounded) then
+
 !         Final transfert
              write(message, '(3a)' ) ch10,' => The model is now bounded'
              call wrtout(ab_out,message,'COLL')
@@ -927,11 +938,13 @@ ABI_FREE(xcart)
        end if
 
 !      Fit the final model
+
        call effective_potential_setCoeffs(coeffs_tmp(1:ncoeff+model_ncoeffbound),effective_potential,&
 &       ncoeff+model_ncoeffbound)
 
        call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,0,(/0,0/),0,0,&
-&       -1,inp%fit_nimposecoeff,inp%fit_imposecoeff,1,comm,verbose=.false.,fit_on=inp%fit_on,sel_on=inp%sel_on)
+         &       -1,inp%fit_nimposecoeff,inp%fit_imposecoeff,1,comm,verbose=.false.,fit_on=inp%fit_on,sel_on=inp%sel_on,&
+         &       max_nbody=inp%fit_max_nbody, drop_rate=0.0_dp, ncoeff_per_cycle=1, fit_weight_T=inp%fit_weight_T)
 
        write(message, '(3a)') ch10,' Fitted coefficients at the end of the fit bound process: '
        call wrtout(ab_out,message,'COLL')
@@ -1008,14 +1021,13 @@ ABI_FREE(xcart)
    !   ABI_FREE(npwtot)
    ! end if
    call dtset%free()
-   call destroy_results_gs(results_gs)
+   call results_gs%free()
    call scfcv_destroy(scfcv_args)
    call destroy_mpi_enreg(mpi_enreg)
 
  end if
 
- write(message, '(a,(80a),a,a)' ) ch10,&
-& ('=',ii=1,80),ch10
+ write(message, '(a,(80a),a,a)' ) ch10,('=',ii=1,80),ch10
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
@@ -1037,24 +1049,15 @@ end subroutine mover_effpot
 !! msym : maximum symmetries defines sizes of symrel and tnons
 !! natom
 !!
-!!
 !! OUTPUT
 !! ptgroupma
 !! spgroup: index of spacegroup
 !! symrel(3,3,msym): symmetry relations
 !! tnons(3,msym): translations
 !!
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!!
-!!
 !! SOURCE
 
 subroutine checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup,symrel_out,tnons_out,nsym,tolsym)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1069,34 +1072,28 @@ subroutine checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup,sym
 
 !Local variables ---------------------------------------
 !scalars
-  integer :: berryopt,jellslab,noncoll,nptsym,nzchempot,use_inversion
+  integer :: nptsym,use_inversion
   integer :: chkprim
 ! Arraiys
   integer :: bravais(11),ptsymrel(3,3,msym)
   integer :: symafm(msym),symrel(3,3,msym)
-  real(dp) :: efield(3)=0,gprimd(3,3),spinat(3,natom)
+  real(dp) :: gprimd(3,3),spinat(3,natom)
   real(dp) :: tnons(3,msym)
   real(dp) :: genafm(3)
 
 ! given the acel, rprim and coor
 ! this suroutine find the symmetry group
-berryopt = 0
-jellslab = 0
-noncoll  = 0
-nzchempot= 0
 spinat   = 0
-efield   = 0
 chkprim  = 0
 use_inversion = 0
 
 !write(std_out,*) "tolsym", tolsym, "tol3", tol3
 
-  call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tol4)
+  call symlatt(bravais,std_out,msym,nptsym,ptsymrel,rprimd,tol4)
 !write(std_out,*) 'nptsym', nptsym
-
   call matr3inv(rprimd,gprimd)
-  call symfind(berryopt,efield,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
-&           nzchempot,0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred)
+  call symfind(gprimd,msym,natom,nptsym,0,nsym,&
+&           0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred)
 
 !write(std_out,*) 'nsym', nsym
   call symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tol3)
@@ -1104,7 +1101,6 @@ use_inversion = 0
 !write(std_out,*) 'nsym', nsym
 symrel_out = symrel
 tnons_out  = tnons
-
 
 end subroutine checksymmetrygroup
 !!***

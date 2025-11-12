@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.2.4.2 of ABINIT, released Nov 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Wed  6 Nov 2024.
+- ( at 14h00 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v3_t24/t24.in
-- output file    -> t24.out
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_gonze-10.2/tests/Test_suite/v3_t24/t24.abi
+- output file    -> t24.abo
 - root for input  files -> t24i
 - root for output files -> t24o
-
 
  DATASET    1 : magnetic group, Shubnikov type III
  Fedorov space group Pm -3 (#200); Bravais cP (primitive cubic)
@@ -30,17 +29,16 @@
  Values of the parameters that define the memory need for DATASET  1.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      24  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      24    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          15        mffmem =           1         mkmem =           1
+     natom =      24  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      24    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          24        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       0.753 Mbytes of memory.
+P This job should need less than                       1.514 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.012 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET    2 : magnetic group, Shubnikov type III
  Fedorov space group Pn -3 (#201); Bravais cP (primitive cubic)
@@ -49,17 +47,16 @@ _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET  2.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      24  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      24    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          15        mffmem =           1         mkmem =           1
+     natom =      24  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      24    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          24        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       0.753 Mbytes of memory.
+P This job should need less than                       1.514 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.012 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET    3 : magnetic group, Shubnikov type III
  Fedorov space group Fm -3 (#202); Bravais cF (face-center cubic)
@@ -68,17 +65,16 @@ _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET  3.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       6  mpssoang =       1    mqgrid =    3001
-     natom =      24  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      24    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          15        mffmem =           1         mkmem =           1
+     natom =      24  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      24    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          24        mffmem =           1         mkmem =           1
        mpw =           5          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.673 Mbytes of memory.
+P This job should need less than                       1.376 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.005 Mbytes.
 ================================================================================
-
 
  DATASET    4 : magnetic group, Shubnikov type III
  Fedorov space group Fd -3 (#203); Bravais cF (face-center cubic)
@@ -87,17 +83,16 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET  4.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       6  mpssoang =       1    mqgrid =    3001
-     natom =      24  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      24    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          15        mffmem =           1         mkmem =           1
+     natom =      24  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      24    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          24        mffmem =           1         mkmem =           1
        mpw =           5          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.673 Mbytes of memory.
+P This job should need less than                       1.376 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.005 Mbytes.
 ================================================================================
-
 
  DATASET    5 : magnetic group, Shubnikov type III
  Fedorov space group Im -3 (#204); Bravais cI (body-center cubic)
@@ -106,17 +101,16 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET  5.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      24  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      24    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          15        mffmem =           1         mkmem =           1
+     natom =      24  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      24    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          24        mffmem =           1         mkmem =           1
        mpw =           7          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       0.750 Mbytes of memory.
+P This job should need less than                       1.507 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET    6 : magnetic group, Shubnikov type III
  Fedorov space group Pa -3 (#205); Bravais cP (primitive cubic)
@@ -125,17 +119,16 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET  6.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      24  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      24    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          15        mffmem =           1         mkmem =           1
+     natom =      24  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      24    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          24        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       0.753 Mbytes of memory.
+P This job should need less than                       1.514 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.012 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET    7 : magnetic group, Shubnikov type III
  Fedorov space group Ia -3 (#206); Bravais cI (body-center cubic)
@@ -144,17 +137,16 @@ _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET  7.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      24  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      24    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          15        mffmem =           1         mkmem =           1
+     natom =      24  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      24    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          24        mffmem =           1         mkmem =           1
        mpw =           7          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       0.750 Mbytes of memory.
+P This job should need less than                       1.507 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET    8 : magnetic group, Shubnikov type III
  Fedorov space group P4 3 2 (#207); Bravais cP (primitive cubic)
@@ -163,17 +155,16 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET  8.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      24  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      24    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          15        mffmem =           1         mkmem =           1
+     natom =      24  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      24    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          24        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       0.753 Mbytes of memory.
+P This job should need less than                       1.514 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.012 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET    9 : magnetic group, Shubnikov type III
  Fedorov space group P4_2 3 2 (#208); Bravais cP (primitive cubic)
@@ -182,17 +173,16 @@ _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET  9.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      24  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      24    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          15        mffmem =           1         mkmem =           1
+     natom =      24  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      24    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          24        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       0.753 Mbytes of memory.
+P This job should need less than                       1.514 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.012 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET   10 : magnetic group, Shubnikov type III
  Fedorov space group F4 3 2 (#209); Bravais cF (face-center cubic)
@@ -201,17 +191,16 @@ _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET 10.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       6  mpssoang =       1    mqgrid =    3001
-     natom =      24  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      24    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          15        mffmem =           1         mkmem =           1
+     natom =      24  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      24    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          24        mffmem =           1         mkmem =           1
        mpw =           5          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.673 Mbytes of memory.
+P This job should need less than                       1.376 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.005 Mbytes.
 ================================================================================
-
 
  DATASET   11 : magnetic group, Shubnikov type III
  Fedorov space group F4_1 3 2 (#210); Bravais cF (face-center cubic)
@@ -220,17 +209,16 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 11.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       6  mpssoang =       1    mqgrid =    3001
-     natom =      24  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      24    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          15        mffmem =           1         mkmem =           1
+     natom =      24  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      24    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          24        mffmem =           1         mkmem =           1
        mpw =           5          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.673 Mbytes of memory.
+P This job should need less than                       1.376 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.005 Mbytes.
 ================================================================================
-
 
  DATASET   12 : magnetic group, Shubnikov type III
  Fedorov space group I4 3 2 (#211); Bravais cI (body-center cubic)
@@ -239,17 +227,16 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 12.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      24  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      24    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          15        mffmem =           1         mkmem =           1
+     natom =      24  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      24    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          24        mffmem =           1         mkmem =           1
        mpw =           7          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       0.750 Mbytes of memory.
+P This job should need less than                       1.507 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET   13 : magnetic group, Shubnikov type III
  Fedorov space group P4_3 3 2 (#212); Bravais cP (primitive cubic)
@@ -258,17 +245,16 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET 13.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      24  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      24    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          15        mffmem =           1         mkmem =           1
+     natom =      24  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      24    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          24        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       0.753 Mbytes of memory.
+P This job should need less than                       1.514 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.012 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET   14 : magnetic group, Shubnikov type III
  Fedorov space group P4_1 3 2 (#213); Bravais cP (primitive cubic)
@@ -277,17 +263,16 @@ _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET 14.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      24  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      24    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          15        mffmem =           1         mkmem =           1
+     natom =      24  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      24    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          24        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       0.753 Mbytes of memory.
+P This job should need less than                       1.514 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.012 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET   15 : magnetic group, Shubnikov type III
  Fedorov space group I4_1 3 2 (#214); Bravais cI (body-center cubic)
@@ -296,17 +281,16 @@ _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET 15.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      24  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      24    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          15        mffmem =           1         mkmem =           1
+     natom =      24  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      24    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          24        mffmem =           1         mkmem =           1
        mpw =           7          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       0.750 Mbytes of memory.
+P This job should need less than                       1.507 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET   16 : magnetic group, Shubnikov type III
  Fedorov space group P-4 3 m (#215); Bravais cP (primitive cubic)
@@ -315,17 +299,16 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET 16.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      24  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      24    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          15        mffmem =           1         mkmem =           1
+     natom =      24  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      24    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          24        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       0.753 Mbytes of memory.
+P This job should need less than                       1.514 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.012 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET   17 : magnetic group, Shubnikov type III
  Fedorov space group F-4 3 m (#216); Bravais cF (face-center cubic)
@@ -334,17 +317,16 @@ _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET 17.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       6  mpssoang =       1    mqgrid =    3001
-     natom =      24  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      24    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          15        mffmem =           1         mkmem =           1
+     natom =      24  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      24    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          24        mffmem =           1         mkmem =           1
        mpw =           5          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.673 Mbytes of memory.
+P This job should need less than                       1.376 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.005 Mbytes.
 ================================================================================
-
 
  DATASET   18 : magnetic group, Shubnikov type III
  Fedorov space group I-4 3 m (#217); Bravais cI (body-center cubic)
@@ -353,17 +335,16 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 18.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      24  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      24    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          15        mffmem =           1         mkmem =           1
+     natom =      24  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      24    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          24        mffmem =           1         mkmem =           1
        mpw =           7          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       0.750 Mbytes of memory.
+P This job should need less than                       1.507 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET   19 : magnetic group, Shubnikov type III
  Fedorov space group P-4 3 n (#218); Bravais cP (primitive cubic)
@@ -372,17 +353,16 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET 19.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      24  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      24    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          15        mffmem =           1         mkmem =           1
+     natom =      24  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      24    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          24        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       0.753 Mbytes of memory.
+P This job should need less than                       1.514 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.012 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET   20 : magnetic group, Shubnikov type III
  Fedorov space group F-4 3 c (#219); Bravais cF (face-center cubic)
@@ -391,17 +371,16 @@ _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET 20.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       6  mpssoang =       1    mqgrid =    3001
-     natom =      24  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      24    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          15        mffmem =           1         mkmem =           1
+     natom =      24  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      24    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          24        mffmem =           1         mkmem =           1
        mpw =           5          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.673 Mbytes of memory.
+P This job should need less than                       1.376 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.005 Mbytes.
 ================================================================================
-
 
  DATASET   21 : magnetic group, Shubnikov type III
  Fedorov space group I-4 3 d (#220); Bravais cI (body-center cubic)
@@ -410,17 +389,16 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 21.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      24  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      24    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          15        mffmem =           1         mkmem =           1
+     natom =      24  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      24    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          24        mffmem =           1         mkmem =           1
        mpw =           7          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       0.750 Mbytes of memory.
+P This job should need less than                       1.507 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET   22 : magnetic group, Shubnikov type III
  Fedorov space group Pm -3 m (#221); Bravais cP (primitive cubic)
@@ -429,17 +407,16 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET 22.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      48  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          30        mffmem =           1         mkmem =           1
+     natom =      48  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          48        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.011 Mbytes of memory.
+P This job should need less than                       1.759 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.023 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET   23 : magnetic group, Shubnikov type III
  Fedorov space group Pm -3 m (#221); Bravais cP (primitive cubic)
@@ -448,17 +425,16 @@ _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET 23.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      48  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          30        mffmem =           1         mkmem =           1
+     natom =      48  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          48        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.011 Mbytes of memory.
+P This job should need less than                       1.759 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.023 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET   24 : magnetic group, Shubnikov type III
  Fedorov space group Pm -3 m (#221); Bravais cP (primitive cubic)
@@ -467,17 +443,16 @@ _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET 24.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      48  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          30        mffmem =           1         mkmem =           1
+     natom =      48  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          48        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.011 Mbytes of memory.
+P This job should need less than                       1.759 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.023 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET   25 : magnetic group, Shubnikov type III
  Fedorov space group Pn -3 n (#222); Bravais cP (primitive cubic)
@@ -486,17 +461,16 @@ _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET 25.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      48  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          30        mffmem =           1         mkmem =           1
+     natom =      48  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          48        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.011 Mbytes of memory.
+P This job should need less than                       1.759 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.023 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET   26 : magnetic group, Shubnikov type III
  Fedorov space group Pn -3 n (#222); Bravais cP (primitive cubic)
@@ -505,17 +479,16 @@ _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET 26.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      48  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          30        mffmem =           1         mkmem =           1
+     natom =      48  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          48        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.011 Mbytes of memory.
+P This job should need less than                       1.759 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.023 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET   27 : magnetic group, Shubnikov type III
  Fedorov space group Pn -3 n (#222); Bravais cP (primitive cubic)
@@ -524,17 +497,16 @@ _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET 27.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      48  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          30        mffmem =           1         mkmem =           1
+     natom =      48  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          48        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.011 Mbytes of memory.
+P This job should need less than                       1.759 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.023 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET   28 : magnetic group, Shubnikov type III
  Fedorov space group Pm -3 n (#223); Bravais cP (primitive cubic)
@@ -543,17 +515,16 @@ _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET 28.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      48  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          30        mffmem =           1         mkmem =           1
+     natom =      48  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          48        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.011 Mbytes of memory.
+P This job should need less than                       1.759 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.023 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET   29 : magnetic group, Shubnikov type III
  Fedorov space group Pm -3 n (#223); Bravais cP (primitive cubic)
@@ -562,17 +533,16 @@ _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET 29.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      48  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          30        mffmem =           1         mkmem =           1
+     natom =      48  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          48        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.011 Mbytes of memory.
+P This job should need less than                       1.759 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.023 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET   30 : magnetic group, Shubnikov type III
  Fedorov space group Pm -3 n (#223); Bravais cP (primitive cubic)
@@ -581,17 +551,16 @@ _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET 30.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      48  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          30        mffmem =           1         mkmem =           1
+     natom =      48  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          48        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.011 Mbytes of memory.
+P This job should need less than                       1.759 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.023 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET   31 : magnetic group, Shubnikov type III
  Fedorov space group Pn -3 m (#224); Bravais cP (primitive cubic)
@@ -600,17 +569,16 @@ _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET 31.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      48  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          30        mffmem =           1         mkmem =           1
+     natom =      48  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          48        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.011 Mbytes of memory.
+P This job should need less than                       1.759 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.023 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET   32 : magnetic group, Shubnikov type III
  Fedorov space group Pn -3 m (#224); Bravais cP (primitive cubic)
@@ -619,17 +587,16 @@ _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET 32.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      48  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          30        mffmem =           1         mkmem =           1
+     natom =      48  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          48        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.011 Mbytes of memory.
+P This job should need less than                       1.759 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.023 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET   33 : magnetic group, Shubnikov type III
  Fedorov space group Pn -3 m (#224); Bravais cP (primitive cubic)
@@ -638,17 +605,16 @@ _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET 33.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      48  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          30        mffmem =           1         mkmem =           1
+     natom =      48  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          48        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.011 Mbytes of memory.
+P This job should need less than                       1.759 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.023 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET   34 : magnetic group, Shubnikov type III
  Fedorov space group Fm -3 m (#225); Bravais cF (face-center cubic)
@@ -657,17 +623,16 @@ _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET 34.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       6  mpssoang =       1    mqgrid =    3001
-     natom =      48  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          30        mffmem =           1         mkmem =           1
+     natom =      48  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          48        mffmem =           1         mkmem =           1
        mpw =           5          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.924 Mbytes of memory.
+P This job should need less than                       1.610 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.009 Mbytes ; DEN or POT disk file :      0.005 Mbytes.
 ================================================================================
-
 
  DATASET   35 : magnetic group, Shubnikov type III
  Fedorov space group Fm -3 m (#225); Bravais cF (face-center cubic)
@@ -676,17 +641,16 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 35.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       6  mpssoang =       1    mqgrid =    3001
-     natom =      48  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          30        mffmem =           1         mkmem =           1
+     natom =      48  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          48        mffmem =           1         mkmem =           1
        mpw =           5          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.924 Mbytes of memory.
+P This job should need less than                       1.610 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.009 Mbytes ; DEN or POT disk file :      0.005 Mbytes.
 ================================================================================
-
 
  DATASET   36 : magnetic group, Shubnikov type III
  Fedorov space group Fm -3 m (#225); Bravais cF (face-center cubic)
@@ -695,17 +659,16 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 36.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       6  mpssoang =       1    mqgrid =    3001
-     natom =      48  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          30        mffmem =           1         mkmem =           1
+     natom =      48  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          48        mffmem =           1         mkmem =           1
        mpw =           5          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.924 Mbytes of memory.
+P This job should need less than                       1.610 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.009 Mbytes ; DEN or POT disk file :      0.005 Mbytes.
 ================================================================================
-
 
  DATASET   37 : magnetic group, Shubnikov type III
  Fedorov space group Fm -3 c (#226); Bravais cF (face-center cubic)
@@ -714,17 +677,16 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 37.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       6  mpssoang =       1    mqgrid =    3001
-     natom =      48  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          30        mffmem =           1         mkmem =           1
+     natom =      48  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          48        mffmem =           1         mkmem =           1
        mpw =           5          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.924 Mbytes of memory.
+P This job should need less than                       1.610 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.009 Mbytes ; DEN or POT disk file :      0.005 Mbytes.
 ================================================================================
-
 
  DATASET   38 : magnetic group, Shubnikov type III
  Fedorov space group Fm -3 c (#226); Bravais cF (face-center cubic)
@@ -733,17 +695,16 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 38.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       6  mpssoang =       1    mqgrid =    3001
-     natom =      48  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          30        mffmem =           1         mkmem =           1
+     natom =      48  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          48        mffmem =           1         mkmem =           1
        mpw =           5          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.924 Mbytes of memory.
+P This job should need less than                       1.610 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.009 Mbytes ; DEN or POT disk file :      0.005 Mbytes.
 ================================================================================
-
 
  DATASET   39 : magnetic group, Shubnikov type III
  Fedorov space group Fm -3 c (#226); Bravais cF (face-center cubic)
@@ -752,17 +713,16 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 39.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       6  mpssoang =       1    mqgrid =    3001
-     natom =      48  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          30        mffmem =           1         mkmem =           1
+     natom =      48  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          48        mffmem =           1         mkmem =           1
        mpw =           5          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.924 Mbytes of memory.
+P This job should need less than                       1.610 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.009 Mbytes ; DEN or POT disk file :      0.005 Mbytes.
 ================================================================================
-
 
  DATASET   40 : magnetic group, Shubnikov type III
  Fedorov space group Fd -3 m (#227); Bravais cF (face-center cubic)
@@ -771,17 +731,16 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 40.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       6  mpssoang =       1    mqgrid =    3001
-     natom =      48  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          30        mffmem =           1         mkmem =           1
+     natom =      48  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          48        mffmem =           1         mkmem =           1
        mpw =           5          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.924 Mbytes of memory.
+P This job should need less than                       1.610 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.009 Mbytes ; DEN or POT disk file :      0.005 Mbytes.
 ================================================================================
-
 
  DATASET   41 : magnetic group, Shubnikov type III
  Fedorov space group Fd -3 m (#227); Bravais cF (face-center cubic)
@@ -790,17 +749,16 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 41.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       6  mpssoang =       1    mqgrid =    3001
-     natom =      48  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          30        mffmem =           1         mkmem =           1
+     natom =      48  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          48        mffmem =           1         mkmem =           1
        mpw =           5          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.924 Mbytes of memory.
+P This job should need less than                       1.610 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.009 Mbytes ; DEN or POT disk file :      0.005 Mbytes.
 ================================================================================
-
 
  DATASET   42 : magnetic group, Shubnikov type III
  Fedorov space group Fd -3 m (#227); Bravais cF (face-center cubic)
@@ -809,17 +767,16 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 42.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       6  mpssoang =       1    mqgrid =    3001
-     natom =      48  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          30        mffmem =           1         mkmem =           1
+     natom =      48  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          48        mffmem =           1         mkmem =           1
        mpw =           5          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.924 Mbytes of memory.
+P This job should need less than                       1.610 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.009 Mbytes ; DEN or POT disk file :      0.005 Mbytes.
 ================================================================================
-
 
  DATASET   43 : magnetic group, Shubnikov type III
  Fedorov space group Fd -3 c (#228); Bravais cF (face-center cubic)
@@ -828,17 +785,16 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 43.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       6  mpssoang =       1    mqgrid =    3001
-     natom =      48  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          30        mffmem =           1         mkmem =           1
+     natom =      48  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          48        mffmem =           1         mkmem =           1
        mpw =           5          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.924 Mbytes of memory.
+P This job should need less than                       1.610 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.009 Mbytes ; DEN or POT disk file :      0.005 Mbytes.
 ================================================================================
-
 
  DATASET   44 : magnetic group, Shubnikov type III
  Fedorov space group Fd -3 c (#228); Bravais cF (face-center cubic)
@@ -847,17 +803,16 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 44.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       6  mpssoang =       1    mqgrid =    3001
-     natom =      48  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          30        mffmem =           1         mkmem =           1
+     natom =      48  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          48        mffmem =           1         mkmem =           1
        mpw =           5          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.924 Mbytes of memory.
+P This job should need less than                       1.610 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.009 Mbytes ; DEN or POT disk file :      0.005 Mbytes.
 ================================================================================
-
 
  DATASET   45 : magnetic group, Shubnikov type III
  Fedorov space group Fd -3 c (#228); Bravais cF (face-center cubic)
@@ -866,17 +821,16 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 45.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       6  mpssoang =       1    mqgrid =    3001
-     natom =      48  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          30        mffmem =           1         mkmem =           1
+     natom =      48  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          48        mffmem =           1         mkmem =           1
        mpw =           5          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.924 Mbytes of memory.
+P This job should need less than                       1.610 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.009 Mbytes ; DEN or POT disk file :      0.005 Mbytes.
 ================================================================================
-
 
  DATASET   46 : magnetic group, Shubnikov type III
  Fedorov space group Im -3 m (#229); Bravais cI (body-center cubic)
@@ -885,17 +839,16 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 46.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      48  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          30        mffmem =           1         mkmem =           1
+     natom =      48  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          48        mffmem =           1         mkmem =           1
        mpw =           7          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.005 Mbytes of memory.
+P This job should need less than                       1.747 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.012 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET   47 : magnetic group, Shubnikov type III
  Fedorov space group Im -3 m (#229); Bravais cI (body-center cubic)
@@ -904,17 +857,16 @@ _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET 47.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      48  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          30        mffmem =           1         mkmem =           1
+     natom =      48  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          48        mffmem =           1         mkmem =           1
        mpw =           7          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.005 Mbytes of memory.
+P This job should need less than                       1.747 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.012 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET   48 : magnetic group, Shubnikov type III
  Fedorov space group Im -3 m (#229); Bravais cI (body-center cubic)
@@ -923,17 +875,16 @@ _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET 48.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      48  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          30        mffmem =           1         mkmem =           1
+     natom =      48  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          48        mffmem =           1         mkmem =           1
        mpw =           7          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.005 Mbytes of memory.
+P This job should need less than                       1.747 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.012 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET   49 : magnetic group, Shubnikov type III
  Fedorov space group Ia -3 d (#230); Bravais cI (body-center cubic)
@@ -942,17 +893,16 @@ _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET 49.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      48  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          30        mffmem =           1         mkmem =           1
+     natom =      48  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          48        mffmem =           1         mkmem =           1
        mpw =           7          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.005 Mbytes of memory.
+P This job should need less than                       1.747 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.012 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET   50 : magnetic group, Shubnikov type III
  Fedorov space group Ia -3 d (#230); Bravais cI (body-center cubic)
@@ -961,17 +911,16 @@ _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET 50.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      48  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          30        mffmem =           1         mkmem =           1
+     natom =      48  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          48        mffmem =           1         mkmem =           1
        mpw =           7          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.005 Mbytes of memory.
+P This job should need less than                       1.747 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.012 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET   51 : magnetic group, Shubnikov type III
  Fedorov space group Ia -3 d (#230); Bravais cI (body-center cubic)
@@ -980,25 +929,25 @@ _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET 51.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =      48  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =          30        mffmem =           1         mkmem =           1
+     natom =      48  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =          48        mffmem =           1         mkmem =           1
        mpw =           7          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.005 Mbytes of memory.
+P This job should need less than                       1.747 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.012 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -1055,7 +1004,7 @@ _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
             acell51    1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      1.00794000E+00
              ecut      1.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            istwfk        2
            jdtset        1    2    3    4    5    6    7    8    9   10
                         11   12   13   14   15   16   17   18   19   20
@@ -1116,57 +1065,57 @@ P           mkmem           1
             natom49        48
             natom50        48
             natom51        48
-            nband1         15
-            nband2         15
-            nband3         15
-            nband4         15
-            nband5         15
-            nband6         15
-            nband7         15
-            nband8         15
-            nband9         15
-            nband10        15
-            nband11        15
-            nband12        15
-            nband13        15
-            nband14        15
-            nband15        15
-            nband16        15
-            nband17        15
-            nband18        15
-            nband19        15
-            nband20        15
-            nband21        15
-            nband22        30
-            nband23        30
-            nband24        30
-            nband25        30
-            nband26        30
-            nband27        30
-            nband28        30
-            nband29        30
-            nband30        30
-            nband31        30
-            nband32        30
-            nband33        30
-            nband34        30
-            nband35        30
-            nband36        30
-            nband37        30
-            nband38        30
-            nband39        30
-            nband40        30
-            nband41        30
-            nband42        30
-            nband43        30
-            nband44        30
-            nband45        30
-            nband46        30
-            nband47        30
-            nband48        30
-            nband49        30
-            nband50        30
-            nband51        30
+            nband1         24
+            nband2         24
+            nband3         24
+            nband4         24
+            nband5         24
+            nband6         24
+            nband7         24
+            nband8         24
+            nband9         24
+            nband10        24
+            nband11        24
+            nband12        24
+            nband13        24
+            nband14        24
+            nband15        24
+            nband16        24
+            nband17        24
+            nband18        24
+            nband19        24
+            nband20        24
+            nband21        24
+            nband22        48
+            nband23        48
+            nband24        48
+            nband25        48
+            nband26        48
+            nband27        48
+            nband28        48
+            nband29        48
+            nband30        48
+            nband31        48
+            nband32        48
+            nband33        48
+            nband34        48
+            nband35        48
+            nband36        48
+            nband37        48
+            nband38        48
+            nband39        48
+            nband40        48
+            nband41        48
+            nband42        48
+            nband43        48
+            nband44        48
+            nband45        48
+            nband46        48
+            nband47        48
+            nband48        48
+            nband49        48
+            nband50        48
+            nband51        48
            ndtset          51
             ngfft1          8       8       8
             ngfft2          8       8       8
@@ -1221,6 +1170,8 @@ P           mkmem           1
             ngfft51         8       8       8
              nkpt           1
             nline           1
+           nspden           2
+           nsppol           2
             nstep           1
              nsym1         24
              nsym2         24
@@ -1274,219 +1225,655 @@ P           mkmem           1
              nsym50        48
              nsym51        48
            ntypat           1
-              occ1     2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       0.000000  0.000000  0.000000
-              occ2     2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       0.000000  0.000000  0.000000
-              occ3     2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       0.000000  0.000000  0.000000
-              occ4     2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       0.000000  0.000000  0.000000
-              occ5     2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       0.000000  0.000000  0.000000
-              occ6     2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       0.000000  0.000000  0.000000
-              occ7     2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       0.000000  0.000000  0.000000
-              occ8     2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       0.000000  0.000000  0.000000
-              occ9     2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       0.000000  0.000000  0.000000
-              occ10    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       0.000000  0.000000  0.000000
-              occ11    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       0.000000  0.000000  0.000000
-              occ12    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       0.000000  0.000000  0.000000
-              occ13    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       0.000000  0.000000  0.000000
-              occ14    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       0.000000  0.000000  0.000000
-              occ15    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       0.000000  0.000000  0.000000
-              occ16    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       0.000000  0.000000  0.000000
-              occ17    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       0.000000  0.000000  0.000000
-              occ18    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       0.000000  0.000000  0.000000
-              occ19    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       0.000000  0.000000  0.000000
-              occ20    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       0.000000  0.000000  0.000000
-              occ21    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       0.000000  0.000000  0.000000
-              occ22    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+              occ1     1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-              occ23    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-              occ24    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-              occ25    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-              occ26    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+              occ2     1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-              occ27    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-              occ28    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-              occ29    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-              occ30    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+              occ3     1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-              occ31    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-              occ32    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-              occ33    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-              occ34    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+              occ4     1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-              occ35    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-              occ36    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-              occ37    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-              occ38    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+              occ5     1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-              occ39    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-              occ40    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-              occ41    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-              occ42    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+              occ6     1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-              occ43    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-              occ44    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-              occ45    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-              occ46    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+              occ7     1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-              occ47    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-              occ48    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-              occ49    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-              occ50    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+              occ8     1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-              occ51    2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ9     1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ10    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ11    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ12    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ13    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ14    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ15    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ16    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ17    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ18    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ19    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ20    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ21    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ22    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ23    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ24    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ25    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ26    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ27    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ28    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ29    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ30    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ31    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ32    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ33    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ34    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ35    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ36    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ37    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ38    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ39    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ40    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ41    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ42    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ43    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ44    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ45    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ46    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ47    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ48    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ49    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ50    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ51    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+           occopt           7
            prtvol          -1
         ptgroupma1         53
         ptgroupma2         53
@@ -3937,17 +4324,17 @@ P           mkmem           1
                        0  1  0  -1  1  0   0  1 -1      -1  1  0   0  1 -1   0  1  0
                        1 -1  0   1  0  0   1  0 -1       0  0  1   0 -1  1  -1  0  1
            symrel4     1  0  0   0  1  0   0  0  1       0  1  0   0  0  1   1  0  0
-                       0  1 -1   1  0 -1   0  0 -1       0 -1  1   0 -1  0   1 -1  0
-                       0  0  1   1  0  0   0  1  0      -1  0  1  -1  1  0  -1  0  0
-                       1  0 -1   0  0 -1   0  1 -1      -1  0  0  -1  0  1  -1  1  0
-                       0 -1  0   1 -1  0   0 -1  1       1 -1  0   0 -1  1   0 -1  0
-                      -1  1  0  -1  0  0  -1  0  1       0  0 -1   0  1 -1   1  0 -1
+                       0  1 -1   1  0 -1   0  0 -1       0  0  1   1  0  0   0  1  0
+                      -1  0  1  -1  1  0  -1  0  0       1  0 -1   0  0 -1   0  1 -1
+                       1 -1  0   0 -1  1   0 -1  0      -1  1  0  -1  0  0  -1  0  1
+                       0  0 -1   0  1 -1   1  0 -1       0 -1  0   1 -1  0   0 -1  1
+                       0 -1  1   0 -1  0   1 -1  0      -1  0  0  -1  0  1  -1  1  0
                       -1  0  0   0 -1  0   0  0 -1       0 -1  0   0  0 -1  -1  0  0
-                       0 -1  1  -1  0  1   0  0  1       0  1 -1   0  1  0  -1  1  0
-                       0  0 -1  -1  0  0   0 -1  0       1  0 -1   1 -1  0   1  0  0
-                      -1  0  1   0  0  1   0 -1  1       1  0  0   1  0 -1   1 -1  0
-                       0  1  0  -1  1  0   0  1 -1      -1  1  0   0  1 -1   0  1  0
-                       1 -1  0   1  0  0   1  0 -1       0  0  1   0 -1  1  -1  0  1
+                       0 -1  1  -1  0  1   0  0  1       0  0 -1  -1  0  0   0 -1  0
+                       1  0 -1   1 -1  0   1  0  0      -1  0  1   0  0  1   0 -1  1
+                      -1  1  0   0  1 -1   0  1  0       1 -1  0   1  0  0   1  0 -1
+                       0  0  1   0 -1  1  -1  0  1       0  1  0  -1  1  0   0  1 -1
+                       0  1 -1   0  1  0  -1  1  0       1  0  0   1  0 -1   1 -1  0
            symrel5     1  0  0   0  1  0   0  0  1       0  1  0   0  0  1   1  0  0
                        0  1  0   1  0  0  -1 -1 -1       0  0  1  -1 -1 -1   1  0  0
                        0  0  1   1  0  0   0  1  0       0  0  1   0  1  0  -1 -1 -1
@@ -6052,27 +6439,27 @@ P           mkmem           1
            xangst4     7.1968100368E-01  6.3501265031E-01  4.6567594356E-01
                        4.6567594356E-01  7.1968100368E-01  6.3501265031E-01
                        1.3970278307E+00  1.4816961841E+00  4.6567594356E-01
-                       1.3970278307E+00  6.3501265031E-01  1.6510328908E+00
                        6.3501265031E-01  4.6567594356E-01  7.1968100368E-01
                        4.6567594356E-01  1.3970278307E+00  1.4816961841E+00
                        1.6510328908E+00  1.3970278307E+00  6.3501265031E-01
-                       7.1968100368E-01  1.4816961841E+00  1.6510328908E+00
-                       1.6510328908E+00  7.1968100368E-01  1.4816961841E+00
                        1.4816961841E+00  4.6567594356E-01  1.3970278307E+00
                        6.3501265031E-01  1.6510328908E+00  1.3970278307E+00
                        1.4816961841E+00  1.6510328908E+00  7.1968100368E-01
+                       1.6510328908E+00  7.1968100368E-01  1.4816961841E+00
+                       1.3970278307E+00  6.3501265031E-01  1.6510328908E+00
+                       7.1968100368E-01  1.4816961841E+00  1.6510328908E+00
                        3.3867341350E-01  4.2334176687E-01  5.9267847362E-01
                        5.9267847362E-01  3.3867341350E-01  4.2334176687E-01
                        1.7780354209E+00  1.6933670675E+00  5.9267847362E-01
-                       1.7780354209E+00  4.2334176687E-01  1.5240303607E+00
                        4.2334176687E-01  5.9267847362E-01  3.3867341350E-01
                        5.9267847362E-01  1.7780354209E+00  1.6933670675E+00
                        1.5240303607E+00  1.7780354209E+00  4.2334176687E-01
-                       3.3867341350E-01  1.6933670675E+00  1.5240303607E+00
-                       1.5240303607E+00  3.3867341350E-01  1.6933670675E+00
                        1.6933670675E+00  5.9267847362E-01  1.7780354209E+00
                        4.2334176687E-01  1.5240303607E+00  1.7780354209E+00
                        1.6933670675E+00  1.5240303607E+00  3.3867341350E-01
+                       1.5240303607E+00  3.3867341350E-01  1.6933670675E+00
+                       1.7780354209E+00  4.2334176687E-01  1.5240303607E+00
+                       3.3867341350E-01  1.6933670675E+00  1.5240303607E+00
            xangst5     7.1968100368E-01  6.3501265031E-01  4.6567594356E-01
                        4.6567594356E-01  7.1968100368E-01  6.3501265031E-01
                        1.3970278307E+00  1.4816961841E+00  2.5823847779E+00
@@ -7996,27 +8383,27 @@ P           mkmem           1
             xcart4     1.3600000000E+00  1.2000000000E+00  8.8000000000E-01
                        8.8000000000E-01  1.3600000000E+00  1.2000000000E+00
                        2.6400000000E+00  2.8000000000E+00  8.8000000000E-01
-                       2.6400000000E+00  1.2000000000E+00  3.1200000000E+00
                        1.2000000000E+00  8.8000000000E-01  1.3600000000E+00
                        8.8000000000E-01  2.6400000000E+00  2.8000000000E+00
                        3.1200000000E+00  2.6400000000E+00  1.2000000000E+00
-                       1.3600000000E+00  2.8000000000E+00  3.1200000000E+00
-                       3.1200000000E+00  1.3600000000E+00  2.8000000000E+00
                        2.8000000000E+00  8.8000000000E-01  2.6400000000E+00
                        1.2000000000E+00  3.1200000000E+00  2.6400000000E+00
                        2.8000000000E+00  3.1200000000E+00  1.3600000000E+00
+                       3.1200000000E+00  1.3600000000E+00  2.8000000000E+00
+                       2.6400000000E+00  1.2000000000E+00  3.1200000000E+00
+                       1.3600000000E+00  2.8000000000E+00  3.1200000000E+00
                        6.4000000000E-01  8.0000000000E-01  1.1200000000E+00
                        1.1200000000E+00  6.4000000000E-01  8.0000000000E-01
                        3.3600000000E+00  3.2000000000E+00  1.1200000000E+00
-                       3.3600000000E+00  8.0000000000E-01  2.8800000000E+00
                        8.0000000000E-01  1.1200000000E+00  6.4000000000E-01
                        1.1200000000E+00  3.3600000000E+00  3.2000000000E+00
                        2.8800000000E+00  3.3600000000E+00  8.0000000000E-01
-                       6.4000000000E-01  3.2000000000E+00  2.8800000000E+00
-                       2.8800000000E+00  6.4000000000E-01  3.2000000000E+00
                        3.2000000000E+00  1.1200000000E+00  3.3600000000E+00
                        8.0000000000E-01  2.8800000000E+00  3.3600000000E+00
                        3.2000000000E+00  2.8800000000E+00  6.4000000000E-01
+                       2.8800000000E+00  6.4000000000E-01  3.2000000000E+00
+                       3.3600000000E+00  8.0000000000E-01  2.8800000000E+00
+                       6.4000000000E-01  3.2000000000E+00  2.8800000000E+00
             xcart5     1.3600000000E+00  1.2000000000E+00  8.8000000000E-01
                        8.8000000000E-01  1.3600000000E+00  1.2000000000E+00
                        2.6400000000E+00  2.8000000000E+00  4.8800000000E+00
@@ -9940,27 +10327,27 @@ P           mkmem           1
              xred4     9.0000000000E-02  1.3000000000E-01  2.1000000000E-01
                        2.1000000000E-01  9.0000000000E-02  1.3000000000E-01
                        1.3000000000E-01  9.0000000000E-02  5.7000000000E-01
-                       2.1000000000E-01  5.7000000000E-01  9.0000000000E-02
                        1.3000000000E-01  2.1000000000E-01  9.0000000000E-02
                        5.7000000000E-01  1.3000000000E-01  9.0000000000E-02
                        9.0000000000E-02  2.1000000000E-01  5.7000000000E-01
-                       5.7000000000E-01  2.1000000000E-01  1.3000000000E-01
-                       1.3000000000E-01  5.7000000000E-01  2.1000000000E-01
                        9.0000000000E-02  5.7000000000E-01  1.3000000000E-01
                        5.7000000000E-01  9.0000000000E-02  2.1000000000E-01
                        2.1000000000E-01  1.3000000000E-01  5.7000000000E-01
+                       1.3000000000E-01  5.7000000000E-01  2.1000000000E-01
+                       2.1000000000E-01  5.7000000000E-01  9.0000000000E-02
+                       5.7000000000E-01  2.1000000000E-01  1.3000000000E-01
                        1.6000000000E-01  1.2000000000E-01  4.0000000000E-02
                        4.0000000000E-02  1.6000000000E-01  1.2000000000E-01
                        1.2000000000E-01  1.6000000000E-01  6.8000000000E-01
-                       4.0000000000E-02  6.8000000000E-01  1.6000000000E-01
                        1.2000000000E-01  4.0000000000E-02  1.6000000000E-01
                        6.8000000000E-01  1.2000000000E-01  1.6000000000E-01
                        1.6000000000E-01  4.0000000000E-02  6.8000000000E-01
-                       6.8000000000E-01  4.0000000000E-02  1.2000000000E-01
-                       1.2000000000E-01  6.8000000000E-01  4.0000000000E-02
                        1.6000000000E-01  6.8000000000E-01  1.2000000000E-01
                        6.8000000000E-01  1.6000000000E-01  4.0000000000E-02
                        4.0000000000E-02  1.2000000000E-01  6.8000000000E-01
+                       1.2000000000E-01  6.8000000000E-01  4.0000000000E-02
+                       4.0000000000E-02  6.8000000000E-01  1.6000000000E-01
+                       6.8000000000E-01  4.0000000000E-02  1.2000000000E-01
              xred5     2.6000000000E-01  2.8000000000E-01  3.2000000000E-01
                        3.2000000000E-01  2.6000000000E-01  2.8000000000E-01
                        9.6000000000E-01  9.4000000000E-01  6.8000000000E-01
@@ -11929,10 +12316,10 @@ P           mkmem           1
 
  abinit : before driver, prtvol=-1, debugging mode => will skip acknowledgments
 -
-- Proc.   0 individual time (sec): cpu=          8.2  wall=          8.2
+- Proc.   0 individual time (sec): cpu=          5.5  wall=          5.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and  53 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.2  wall=          8.2
++Overall time at end (sec) : cpu=          5.5  wall=          5.5

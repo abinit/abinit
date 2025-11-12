@@ -8,7 +8,7 @@
 !! (XML or DDB)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2022 ABINIT group (AM)
+!! Copyright (C) 2000-2025 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -22,6 +22,7 @@
 
 #include "abi_common.h"
 
+
 module m_effective_potential_file
 
  use defs_basis
@@ -34,14 +35,12 @@ module m_effective_potential_file
  use m_ifc
  use m_ddb
  use m_ddb_hdr
-#if defined HAVE_NETCDF
  use netcdf
-#endif
 
- use m_io_tools,   only : open_file
+ use m_io_tools,   only : open_file, get_unit
  use m_geometry,   only : xcart2xred, xred2xcart, metric
  use m_symfind,    only : symfind, symlatt
- use m_crystal,    only : crystal_t, crystal_init
+ use m_crystal,    only : crystal_t
  use m_dynmat,     only : dfpt_prtph
  use m_abihist,    only : abihist,abihist_init,abihist_free,abihist_copy,read_md_hist
  use m_ddb_internalstr, only : ddb_internalstr
@@ -178,7 +177,6 @@ module m_effective_potential_file
    subroutine effpot_xml_getValue(filename,name_value,value_result) &
  &                          bind(C,name="effpot_xml_getValue")
       use, intrinsic :: iso_c_binding, only : C_CHAR
-      implicit none
       character(kind=C_CHAR) :: filename(*),name_value(*)
       character(kind=C_CHAR) :: value_result
     end subroutine effpot_xml_getValue
@@ -275,11 +273,17 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 
       call effective_potential_file_getDimSystem(filename,comm,natom,ntypat,nqpt,nrpt)!
 
-      call ddb%from_file(filename,inp%brav, ddb_hdr, Crystal,comm)
+      call ddb%from_file(filename,ddb_hdr,Crystal,comm)
       call ddb_hdr%free()
 
+      call ddb%set_brav(inp%brav)
+
 !     Transfert the ddb to the effective potential
-      call system_ddb2effpot(Crystal,ddb, eff_pot,inp,comm)
+      call system_ddb2effpot(Crystal,ddb,eff_pot,inp,comm)
+
+      ! Free memory
+      call ddb%free()
+      call Crystal%free()
 
 !     Generate long rage interation for the effective potential for both type and generate supercell
       call effective_potential_generateDipDip(eff_pot,inp%dipdip_range,inp%dipdip,inp%asr,comm)
@@ -289,7 +293,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
         call effective_potential_print(eff_pot,-1)
       end if
     end if
-    if (filetype==2 .or.filetype==23) then
+    if (filetype==2 .or.filetype==23) then ! xml file
 
 !     Free the effective potential before
       call effective_potential_free(eff_pot)
@@ -311,7 +315,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 
 
 !     Generate long rage interation for the effective potential for both type and generate supercell
-      call effective_potential_generateDipDip(eff_pot,inp%dipdip_range,inp%dipdip,inp%asr,comm)
+      call effective_potential_generateDipDip(eff_pot,inp%dipdip_range,inp%dipdip,inp%asr,comm,1)
 
 !     If needed, print the effective potential
       call effective_potential_print(eff_pot,inp%prt_model)
@@ -393,10 +397,6 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
    ABI_BUG(message)
  end if
 
-! Deallocation of array
-  call crystal%free()
-  call ddb%free()
-
 end subroutine effective_potential_file_read
 !!***
 
@@ -435,16 +435,15 @@ subroutine effective_potential_file_getType(filename,filetype)
  integer :: ddbun = 666,ios=0
  character(len=500) :: message
  character (len=1000) :: line,readline
-#if defined HAVE_NETCDF
- integer :: natom_id,time_id,xyz_id,six_id
+ integer :: natom_id,time_id,xyz_id,six_id,ddb_version
  integer :: ncid,ncerr
  logical :: md_file
-#endif
-
 !arrays
 ! *************************************************************************
 
  filetype = 0
+
+ ddbun = get_unit()
 
  if (open_file(filename,message,unit=ddbun,form="formatted",status="old",action="read") /= 0) then
    ABI_ERROR(message)
@@ -490,7 +489,6 @@ subroutine effective_potential_file_getType(filename,filetype)
  if(filetype/=0) return
 
 !try to read netcdf HIST file
-#if defined HAVE_NETCDF
  ncerr=nf90_open(path=trim(filename),mode=NF90_NOWRITE,ncid=ncid)
  if(ncerr == NF90_NOERR) then
    md_file = .TRUE.
@@ -508,9 +506,18 @@ subroutine effective_potential_file_getType(filename,filetype)
    end if
  end if
  ncerr = nf90_close(ncid)
-#endif
 
  if(filetype/=0) return
+
+! Try to read netcdf DDB file
+ ncerr=nf90_open(path=trim(filename),mode=NF90_NOWRITE,ncid=ncid)
+ if(ncerr==NF90_NOERR) then
+   ncerr = nf90_get_var(ncid, nctk_idname(ncid, 'ddb_version'), ddb_version)
+   if (ncerr==NF90_NOERR) then
+     filetype = 1
+     return
+   end if
+ end if
 
 !Try to get the dim of MD ASCII file
  call effective_potential_file_getDimMD(filename,natom,nstep)
@@ -555,7 +562,6 @@ subroutine effective_potential_file_getDimSystem(filename,comm,natom,ntypat,nqpt
  !scalar
  integer :: filetype
 ! integer :: dimekb,lmnmax,mband,mtyp,msym,nblok,nkpt,usepaw
- integer :: ddbun = 666
  character(len=500) :: message
  type(ddb_hdr_type) :: ddb_hdr
 !arrays
@@ -578,10 +584,9 @@ subroutine effective_potential_file_getDimSystem(filename,comm,natom,ntypat,nqpt
 &    'if you want to predic the number of cell (nrpt)',ch10,' use bigbx9 routines',ch10
    call wrtout(std_out,message,'COLL')
 
-   call ddb_hdr%open_read(filename,ddbun,comm,dimonly=1)
+   call ddb_hdr%open_read(filename,comm,dimonly=1)
    natom = ddb_hdr%natom
    ntypat = ddb_hdr%ntypat
-
    call ddb_hdr%free()
 
 !  Must read some value to initialze  array (nprt for ifc)
@@ -896,22 +901,18 @@ subroutine effective_potential_file_getDimMD(filename,natom,nstep)
  integer :: ios=0,ios2=0,ios3=0
  integer :: unit_md=24
  logical :: compatible,netcdf
-#if defined HAVE_NETCDF
  integer :: natom_id,time_id,xyz_id,six_id
  integer :: ncid,ncerr
  character(len=5) :: char_tmp
-#endif
 !arrays
  character (len=10000) :: readline,line
  character(len=500) :: msg
-
 ! *************************************************************************
 
  natom = 0
  nstep = 0
 !try to read netcdf
  netcdf = .false.
-#if defined HAVE_NETCDF
  ncerr=nf90_open(path=trim(filename),mode=NF90_NOWRITE,ncid=ncid)
  if(ncerr == NF90_NOERR) then
    netcdf = .TRUE.
@@ -930,7 +931,6 @@ subroutine effective_potential_file_getDimMD(filename,natom,nstep)
      NCF_CHECK_MSG(ncerr," inquire dimension ID for time")
    end if
  end if
-#endif
 
  if(.not.netcdf) then
 !  try to read ASCII file...
@@ -1935,7 +1935,7 @@ end subroutine system_getDimFromXML
 ! Case 1: only local in the xml
    if (irpt1>0 .and. irpt2==0) then
      ifcs%cell(:,:) = int(cell_local(:,:))
-     ifcs%atmfrc(:,:,:,:,:)  = local_atmfrc(:,:,:,:,:)
+     ifcs%atmfrc(:,:,:,:,:)  = zero !local_atmfrc(:,:,:,:,:)
      ifcs%short_atmfrc(:,:,:,:,:) = local_atmfrc(:,:,:,:,:)
      ifcs%ewald_atmfrc(:,:,:,:,:) = zero
 
@@ -1944,7 +1944,7 @@ end subroutine system_getDimFromXML
      ifcs%cell(:,:) = int(cell_total(:,:))
      ifcs%atmfrc(:,:,:,:,:)  = total_atmfrc(:,:,:,:,:)
      ifcs%short_atmfrc(:,:,:,:,:) = zero
-     ifcs%ewald_atmfrc(:,:,:,:,:) = total_atmfrc(:,:,:,:,:)
+     ifcs%ewald_atmfrc(:,:,:,:,:) = zero !total_atmfrc(:,:,:,:,:)
 
 ! Case 3: local + total in the xml
    else if (irpt1>0 .and. irpt2>0)then
@@ -1970,6 +1970,7 @@ end subroutine system_getDimFromXML
 &     ' The number of total IFC  (',irpt2,') is inferior to  ',ch10,&
 &     ' the number of short range IFC (',irpt1,') in ',filename,ch10,&
 &     ' This is not possible',ch10
+
        ABI_BUG(message)
      end if
    end if
@@ -2045,10 +2046,10 @@ end subroutine system_getDimFromXML
  symafm = 0;
  tnons = 0 ;
  space_group = 0;
- call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
+ call symlatt(bravais,std_out,msym,nptsym,ptsymrel,rprimd,tolsym)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
- call symfind(0,(/zero,zero,zero/),gprimd,0,msym,natom,0,nptsym,nsym,&
-&  0,0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred)
+ call symfind(gprimd,msym,natom,nptsym,0,nsym,&
+&  0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred)
 
 !Initialisation of crystal
  npsp = ntypat; timrev = 1
@@ -2058,7 +2059,7 @@ end subroutine system_getDimFromXML
  end do
 
 !Warning znucl is dimension with ntypat = nspsp hence alchemy is not supported here
- call crystal_init(all_amu,Crystal,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
+ call crystal%init(all_amu,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
 &  zion,znucl,timrev,.FALSE.,.FALSE.,title,&
 &  symrel=symrel(:,:,1:nsym),tnons=tnons(:,1:nsym),symafm=symafm(1:nsym))
 
@@ -2209,8 +2210,13 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 
 !Tranfert the ddb into usable array (ipert and idir format like in abinit)
   ABI_MALLOC(blkval,(2,3,mpert,3,mpert,nblok))
+
   blkval = 0
+  if(size(ddb%val) /= 2*3*mpert*3*mpert*nblok ) then
+    ABI_BUG("Size of ddb%val is not consistent.")
+  endif
   blkval = reshape(ddb%val,(/2,3,mpert,3,mpert,nblok/))
+
 
 !**********************************************************************
 ! Transfert crystal values
@@ -2222,9 +2228,9 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   ABI_MALLOC(symrel,(3,3,msym))
   ABI_MALLOC(tnons,(3,msym))
   spinat = zero;  symrel = 0;  symafm = 0;  tnons = zero ; space_group = 0;
-  call symlatt(bravais,msym,nptsym,ptsymrel,crystal%rprimd,tolsym)
-  call symfind(0,(/zero,zero,zero/),crystal%gprimd,0,msym,crystal%natom,0,nptsym,nsym,&
-&              0,0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,&
+  call symlatt(bravais,std_out,msym,nptsym,ptsymrel,crystal%rprimd,tolsym)
+  call symfind(crystal%gprimd,msym,crystal%natom,nptsym,0,nsym,&
+&              0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,&
 &              crystal%typat,use_inversion,crystal%xred)
   if(crystal%nsym/=nsym)then
     write(message,'(4a,I0,3a,I0,3a)') ch10,&
@@ -2234,7 +2240,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 &          ' ---'
       call wrtout(std_out,message,'COLL')
   end if
-  call crystal_init(ddb%amu,effective_potential%crystal,&
+  call effective_potential%crystal%init(ddb%amu,&
 &                   space_group,crystal%natom,crystal%npsp,&
 &                   crystal%ntypat,nsym,crystal%rprimd,&
 &                   crystal%typat,crystal%xred,crystal%zion,&
@@ -2494,10 +2500,8 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
     call asria_calc(inp%asr,d2asr,ddb%val(:,:,iblok),ddb%mpert,ddb%natom)
   end if
 
-  ! Acoustic Sum Rule
-  ! In case the interatomic forces are not calculated, the
-  ! ASR-correction (asrq0%d2asr) has to be determined here from the Dynamical matrix at Gamma.
-  asrq0 = ddb%get_asrq0(inp%asr, inp%rfmeth, crystal%xcart)
+  ! Acoustic sum rule imposition (not yet applied)
+  call asrq0%init(ddb, inp%asr, inp%rfmeth, crystal%xcart)
 
 !**********************************************************************
 ! Interatomic Forces Calculation
@@ -2951,7 +2955,8 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
      end do
 !    Initialisation of the polynomial_coefficent structure with the values
      call polynomial_coeff_init(coefficient(icoeff),nterm_max,coeffs(icoeff),&
-&                               terms(icoeff,:),check=.true.)
+&                               terms(icoeff,:), check=.true., debug_str="init from xml")
+!    Set the name of the coefficient
 
 !    Get the name of this coefficient  and set it
 !    Try to find the index of the term corresponding to the interation in the
@@ -3152,7 +3157,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 !          Initialisation of the polynomial_coefficent structure with the values from the
 !          previous step
            icoeff = icoeff + 1
-           call polynomial_coeff_init(coefficient(1),nterm,coeffs(icoeff),terms(1,:))
+           call polynomial_coeff_init(coefficient(1),nterm,coeffs(icoeff),terms(1,:), debug_str="init from xml fortran", check=.true.)
            call polynomial_coeff_getName(name,coeffs(icoeff),symbols,recompute=.true.)
            call polynomial_coeff_setName(name,coeffs(icoeff))
 !          Deallocation of the terms array for this coefficient
@@ -3224,6 +3229,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
    call polynomial_coeff_free(coeffs(ii))
  end do
  ABI_FREE(coeffs)
+
 
 end subroutine coeffs_xml2effpot
 !!***
@@ -3388,12 +3394,14 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbos
  if (present(verbose)) need_verbose = verbose
  if (present(iatfix)) need_fixmap = .TRUE.
 
+
  natom_hist = size(hist%xred,2)
  nstep_hist = size(hist%xred,3)
 
 ! Try to set the supercell according to the hist file
  rprimd_ref(:,:)  = eff_pot%crystal%rprimd
  rprimd_hist(:,:) = hist%rprimd(:,:,1)
+
 
  if(present(sc_size))then
     ncell(:) = sc_size

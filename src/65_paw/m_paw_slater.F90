@@ -7,7 +7,7 @@
 !!  using real spherical Harmonics.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2022 ABINIT group (MG)
+!! Copyright (C) 2008-2025 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,13 +36,14 @@ MODULE m_paw_slater
  use m_splines
 
  use m_fstrings,     only : basename
- use m_paw_atomorb,  only : atomorb_type, init_atomorb, print_atomorb, destroy_atomorb, get_overlap
+ use m_paw_atomorb,  only : atomorb_type, print_atomorb, destroy_atomorb, get_overlap
+ use m_pawpsp,       only : pawpsp_init_core
  use m_crystal,      only : crystal_t
  use m_paw_io,       only : pawio_print_ij
  use m_pawang,       only : pawang_type
  use m_paw_sphharm,   only : realgaunt
  use m_pawrad,       only : pawrad_type, pawrad_free, pawrad_isame, &
-&                           pawrad_deducer0, simp_gen, calc_slatradl
+&                           pawrad_deducer0, simp_gen, calc_slatradl,pawrad_copy
  use m_pawtab,       only : pawtab_type
  use m_pawrhoij,     only : pawrhoij_type
  use m_paw_lmn,      only : make_kln2ln, make_klm2lm, make_indln, klmn2ijlmn
@@ -66,7 +67,7 @@ MODULE m_paw_slater
 !!  $ F_{ijkl}^L = \dfrac{4\pi}{2L+1} \int u_i(1) u_j(1) \dfrac{r_<^L}{r_>^{L+1}} u_k(2) u_l(2) d1d2 $
 !!
 !!  for a given quadruple (i,j,k,l) as a function L \in [L_min, L_max].
-!!  i,j,k,l are shorthand indeces for (nn,ll) quantum numbers.
+!!  i,j,k,l are shorthand indices for (nn,ll) quantum numbers.
 !!
 !! NOTES
 !!   Basic symmetry properties:
@@ -84,7 +85,7 @@ MODULE m_paw_slater
  type,public :: slatrad_t
 
   integer :: iln,jln,kln,lln
-  ! The (l,n) indeces associated to the partial waves.
+  ! The (l,n) indices associated to the partial waves.
 
   integer :: lslat_min
   ! Min l+1 in the expansion of the Coulomb potential.
@@ -252,8 +253,6 @@ CONTAINS  !=====================================================================
 
 subroutine slatang_cshell_init(Slatang3l,l_max,lm2_size,lc_max,klm2lm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: l_max,lc_max,lm2_size
@@ -405,8 +404,6 @@ end subroutine slatang_cshell_init
 
 subroutine slatang_cshell_free(Slatang3l)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(slatang_cshell_t),intent(inout) :: Slatang3l(:)
@@ -417,12 +414,8 @@ subroutine slatang_cshell_free(Slatang3l)
 
  !@slatang_cshell_t
  do ii=1,SIZE(Slatang3l)
-   if (allocated(Slatang3l(ii)%sggselect)) then
-     ABI_FREE(Slatang3l(ii)%sggselect)
-   end if
-   if (allocated(Slatang3l(ii)%sgg)) then
-     ABI_FREE(Slatang3l(ii)%sgg)
-   end if
+   ABI_SFREE(Slatang3l(ii)%sggselect)
+   ABI_SFREE(Slatang3l(ii)%sgg)
  end do
 
 end subroutine slatang_cshell_free
@@ -444,8 +437,6 @@ end subroutine slatang_cshell_free
 
 subroutine slatrad_cshell_free(Slatrad3l)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(slatrad_cshell_t),intent(inout) :: Slatrad3l(:)
@@ -456,12 +447,8 @@ subroutine slatrad_cshell_free(Slatrad3l)
 
  !@slatrad_cshell_t
  do ii=1,SIZE(Slatrad3l)
-   if (allocated(Slatrad3l(ii)%rlphic_select)) then
-     ABI_FREE(Slatrad3l(ii)%rlphic_select)
-   end if
-   if (allocated(Slatrad3l(ii)%rlphic_int)) then
-     ABI_FREE(Slatrad3l(ii)%rlphic_int)
-   end if
+   ABI_SFREE(Slatrad3l(ii)%rlphic_select)
+   ABI_SFREE(Slatrad3l(ii)%rlphic_int)
  end do
 
 end subroutine slatrad_cshell_free
@@ -490,8 +477,6 @@ end subroutine slatrad_cshell_free
 !! SOURCE
 
 subroutine slatrad_cshell_init(Slatrad3l,ln2_size,Pawrad,Pawtab,Atm,Atmrad,kln_mask)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -592,7 +577,7 @@ subroutine slatrad_cshell_init(Slatrad3l,ln2_size,Pawrad,Pawtab,Atm,Atmrad,kln_m
      iln = kln2ln(5,kln)
      jln = kln2ln(6,kln)
 
-     lslat_max = MAX((il+lc_max),(jl+lc_max))       - 1   ! These are indeces, not l-values.
+     lslat_max = MAX((il+lc_max),(jl+lc_max))       - 1   ! These are indices, not l-values.
      !lslat_min = MIN(ABS(il-lc_max),ABS(jl-lc_max)) + 1
      lslat_min = 1 ! FIXME find better way
 
@@ -691,8 +676,6 @@ end subroutine slatrad_cshell_init
 !! SOURCE
 
 subroutine paw_sigxcore(cplex_dij,lmn2_size,ndij,Pawrad,Pawtab,Atm,Atmrad,dijexc_core)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -830,8 +813,6 @@ end subroutine paw_sigxcore
 
 subroutine paw_mkdijexc_core(ndij,cplex_dij,lmn2_size_max,Cryst,Pawtab,Pawrad,dijexc_core,pawprtvol,filpsp)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: pawprtvol,ndij,cplex_dij,lmn2_size_max
@@ -844,10 +825,9 @@ subroutine paw_mkdijexc_core(ndij,cplex_dij,lmn2_size_max,Cryst,Pawtab,Pawrad,di
 
 !Local variables ---------------------------------------
 !scalars
- integer :: itypat,ic,ierr,lmn_size,lmn2_size,ln_size,isppol
+ integer :: itypat,lmn_size,lmn2_size,ln_size,isppol
  real(dp) :: rcut
- character(len=500) :: header,msg
- character(len=fnlen) :: fcore,string
+ character(len=500) :: header
 !arrays
  integer,allocatable :: phi_indln(:,:)
  real(dp),ABI_CONTIGUOUS pointer :: phi(:,:)
@@ -870,18 +850,10 @@ subroutine paw_mkdijexc_core(ndij,cplex_dij,lmn2_size_max,Cryst,Pawtab,Pawrad,di
  do itypat=1,Cryst%ntypat
 
    ! Read core orbitals for this atom type.
-   string = filpsp(itypat)
-   fcore = "CORE_"//TRIM(basename(string))
-   ic = INDEX (TRIM(string), "/" , back=.TRUE.) ! if string is a path, prepend path to fcore.
-   if (ic>0 .and. ic<LEN_TRIM(string)) fcore = filpsp(itypat)(1:ic)//TRIM(fcore)
-
    rcut=Pawtab(itypat)%rpaw
-   call init_atomorb(Atm(itypat),Radatm(itypat),rcut,fcore,pawprtvol,ierr)
+   call pawpsp_init_core(Atm(itypat),psp_filename=trim(filpsp(itypat)),rcut_in=rcut)
+   call pawrad_copy(Atm(itypat)%radmesh,Radatm(itypat))
 
-   if (ierr/=0) then
-     msg = " Error reading core orbitals from file: "//TRIM(fcore)
-     ABI_ERROR(msg)
-   end if
    write(header,'(a,i4,a)')" === Atom type = ",itypat," === "
    call print_atomorb(Atm(itypat),header,unit=std_out,prtvol=pawprtvol)
    !
@@ -931,8 +903,6 @@ end subroutine paw_mkdijexc_core
 
 subroutine slatrad_free_0D(Slatrad)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(slatrad_t),intent(inout) :: Slatrad
@@ -940,12 +910,8 @@ subroutine slatrad_free_0D(Slatrad)
 ! *********************************************************************
 
  !@slatrad_t
- if (allocated(Slatrad%intgl_select)) then
-   ABI_FREE(Slatrad%intgl_select)
- end if
- if (allocated(Slatrad%intgl)) then
-   ABI_FREE(Slatrad%intgl)
- end if
+ ABI_SFREE(Slatrad%intgl_select)
+ ABI_SFREE(Slatrad%intgl)
 
 end subroutine slatrad_free_0D
 !!***
@@ -962,8 +928,6 @@ end subroutine slatrad_free_0D
 !! SOURCE
 
 subroutine slatrad_free_1D(Slatrad)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1014,7 +978,7 @@ end subroutine slatrad_free_1D
 !!  Slatrad4<slatrad_t>=The object completely initialized.
 !!
 !! NOTES
-!!  Slater integrals S_ij are invariant under exchage of the indeces,
+!!  Slater integrals S_ij are invariant under exchange of the indices,
 !!  but the results reported by calc_slatradl are not due to numerical roundoff errors (err < 10^-9).
 !!  However this does not cause any problem since only the upper triangle of the S_ij matrix
 !!  is stored and used in the other routines.
@@ -1022,8 +986,6 @@ end subroutine slatrad_free_1D
 !! SOURCE
 
 subroutine slatrad_init(Slatrad4,which_intg,ln2_size,Pawrad,Pawtab)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1116,7 +1078,7 @@ subroutine slatrad_init(Slatrad4,which_intg,ln2_size,Pawrad,Pawtab)
      phi_j  => Pawtab%phi (:,jln)
      tphi_j => Pawtab%tphi(:,jln)
 
-     lslat_min = MAX(ABS(il-jl),ABS(kl-ll)) + 1  ! We use indeces not l-values.
+     lslat_min = MAX(ABS(il-jl),ABS(kl-ll)) + 1  ! We use indices not l-values.
      lslat_max = MIN((il+jl),(kl+ll)) - 1
 
      !lslat_min = MIN(ABS(il-jl),ABS(kl-ll)) + 1
@@ -1233,7 +1195,7 @@ end subroutine slatrad_init
 !!  paw_dihf
 !!
 !! FUNCTION
-!!  This routine calculates the onsite D_{ij} strengths of the exchange parth of the self energy.
+!!  This routine calculates the onsite D_{ij} strengths of the exchange part of the self energy.
 !!
 !! INPUTS
 !!  ndij=Usually ndij=nspden, except for spin-orbit (where ndij=nspinor**2)
@@ -1273,8 +1235,6 @@ end subroutine slatrad_init
 
 subroutine paw_dijhf(ndij,cplex_dij,qphase,lmn2_size_max,my_natom,ntypat,Pawtab,Pawrad,Pawang,Pawrhoij,&
 &                    sigx_dij,pawprtvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1381,7 +1341,7 @@ subroutine paw_dijhf(ndij,cplex_dij,qphase,lmn2_size_max,my_natom,ntypat,Pawtab,
          ! Loop over the upper triangle of the D_{ij) matrix and accumulate:
          ! sum_\lk rho_\kl [ \Phi_{ikjl} + \Phi_{iljk} - \Phihat_{ikjl} - \Phihat_{iljk} ]
          do klmn=1,lmn2_size
-           ! Calculate the indeces in the Slatrad4 structure.
+           ! Calculate the indices in the Slatrad4 structure.
            call klmn2ijlmn(klmn,lmn_size,i_lmn,j_lmn)
 
            ! My formula
@@ -1437,8 +1397,6 @@ end subroutine paw_dijhf
 
 function summ_2gaunt(Pawang,ij_lm,kl_lm,ll_idx)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ij_lm,kl_lm,ll_idx
@@ -1458,7 +1416,7 @@ function summ_2gaunt(Pawang,ij_lm,kl_lm,ll_idx)
  max_klm = pawang%l_max**2*(pawang%l_max**2+1)/2
  if (ij_lm>max_klm.or.kl_lm>max_klm.or.ij_lm<1.or.kl_lm<1.or.&
 &    ll_idx>pawang%l_size_max.or.ll_idx<1) then
-   write(msg,'(a,3i0)')"Wrong indeces, check pawxcdev ",ij_lm,kl_lm,ll_idx
+   write(msg,'(a,3i0)')"Wrong indices, check pawxcdev ",ij_lm,kl_lm,ll_idx
    ABI_ERROR(msg)
  end if
 
@@ -1495,8 +1453,6 @@ end function summ_2gaunt
 
 function slat_intg(Slatrad4,Pawtab,Pawang,i_lmn,j_lmn,k_lmn,l_lmn)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: i_lmn,j_lmn,k_lmn,l_lmn
@@ -1516,7 +1472,7 @@ function slat_intg(Slatrad4,Pawtab,Pawang,i_lmn,j_lmn,k_lmn,l_lmn)
 
 !************************************************************************
 
- ! The lmn packed indeces for (ij) and (kl).
+ ! The lmn packed indices for (ij) and (kl).
  if (j_lmn>=i_lmn) then
    ij_lmn = i_lmn + j_lmn*(j_lmn-1)/2
  else
@@ -1529,7 +1485,7 @@ function slat_intg(Slatrad4,Pawtab,Pawang,i_lmn,j_lmn,k_lmn,l_lmn)
    kl_lmn = l_lmn + k_lmn*(k_lmn-1)/2
  end if
  !
- ! The lm indeces for (ij) and (kl) in packed storage.
+ ! The lm indices for (ij) and (kl) in packed storage.
  ij_lm = pawtab%indklmn(1,ij_lmn)
  ij_ln = pawtab%indklmn(2,ij_lmn)
 
@@ -1552,7 +1508,7 @@ function slat_intg(Slatrad4,Pawtab,Pawang,i_lmn,j_lmn,k_lmn,l_lmn)
  ii = kln + lln*(lln-1)/2
  if (slt_idx /=  (iln + jln*(jln-1)/2 + ii*(ii-1)/2 )) then
    write(std_out,*)"slt_idx, iln, jln, kln, lln",slt_idx, iln, jln, kln, lln
-   ABI_BUG("Check indeces")
+   ABI_BUG("Check indices")
  end if
 !END DEBUG
  !

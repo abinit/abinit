@@ -6,7 +6,7 @@
 !! Module to implement unit tests
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2022 ABINIT group (HM)
+!! Copyright (C) 1999-2025 ABINIT group (HM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,15 +35,13 @@ module m_unittests
  use m_sort
  use m_xmpi
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_time,            only : cwtime, cwtime_report
  use m_fstrings,        only : ltoa, itoa, sjoin, strcat
  use m_numeric_tools,   only : linspace, ctrap, simpson_int
  use m_special_funcs,   only : gaussian
- use m_symtk,           only : matr3inv
+ use m_matrix,          only : matr3inv
  use m_io_tools,        only : open_file
  use m_kpts,            only : kpts_ibz_from_kptrlatt, listkk
  use m_geometry,        only : normv
@@ -63,7 +61,7 @@ contains
 !!
 !! FUNCTION
 !!  Generate rprimd compatible with the point group
-!!  This is only for testing porposes
+!!  This is only for testing purposes
 !!
 
 function rprimd_from_ptgroup(ptgroup) result(rprim)
@@ -73,7 +71,6 @@ function rprimd_from_ptgroup(ptgroup) result(rprim)
 !Local variables -------------------------
  real(dp) :: a,b,c, tmp1, tmp2, alpha,beta, gamma, tx,ty,tz
  real(dp) :: rprim(3,3)
-
 ! *********************************************************************
 
  a = one * 5
@@ -138,7 +135,6 @@ end function rprimd_from_ptgroup
 !!
 !! FUNCTION
 !!  Create a crystal structure from a user defined point group
-!!
 
 type(crystal_t) function crystal_from_ptgroup(ptgroup, use_symmetries) result(cryst)
 
@@ -148,13 +144,14 @@ type(crystal_t) function crystal_from_ptgroup(ptgroup, use_symmetries) result(cr
 
 !Local variables -------------------------
  type(irrep_t),allocatable :: irr(:)
- logical,parameter :: use_antiferro_true=.true.,remove_inv_false=.false.
+
  integer,parameter :: npsp1 = 1, space_group0 = 0, timrev2 = 2
  integer :: natom,nclass,ntypat,nsym
  integer :: typat(1)
  real(dp) :: rprimd(3,3)
  real(dp) :: amu(1),xred(3,1),znucl(1),zion(1)
  real(dp),allocatable :: tnons(:,:)
+ logical,parameter :: use_antiferro_true=.true.,remove_inv_false=.false.
  character(len=5),allocatable :: class_names(:)
  integer,allocatable :: symrel(:,:,:),symafm(:),class_ids(:,:)
 
@@ -181,9 +178,9 @@ type(crystal_t) function crystal_from_ptgroup(ptgroup, use_symmetries) result(cr
  amu = one; natom = 1; ntypat = 1; typat = 1; znucl = one; zion = one
  xred(:, 1) = zero
 
- call crystal_init(amu, cryst, space_group0, natom, npsp1, ntypat, nsym, rprimd, typat, xred, &
-                   zion, znucl, timrev2, use_antiferro_true, remove_inv_false, "test", &
-                   symrel=symrel, symafm=symafm, tnons=tnons)
+ call cryst%init(amu, space_group0, natom, npsp1, ntypat, nsym, rprimd, typat, xred, &
+                 zion, znucl, timrev2, use_antiferro_true, remove_inv_false, "test", &
+                 symrel=symrel, symafm=symafm, tnons=tnons)
 
  ABI_FREE(symrel)
  ABI_FREE(tnons)
@@ -213,7 +210,7 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, prtvol, comm)
 !Local variables -------------------------
 !scalars
  integer,parameter :: qptopt1 = 1, nqshft1 = 1, bcorr0 = 0, bcorr1 = 1, master = 0
- integer :: nqibz,iq_ibz,nqbz,ierr,nw, my_rank, return_code
+ integer :: nqibz,iq_ibz,nqbz,ierr,nw, my_rank, return_code, ncid, ncerr
  real(dp),parameter :: max_occ1 = one
  real(dp) :: cpu, wall, gflops, dosdeltae, emin, emax, qnorm, int_dos, broad, min_eig, max_eig, mstar
  character(len=80) :: errstr
@@ -221,9 +218,6 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, prtvol, comm)
  type(crystal_t) :: cryst
  type(t_tetrahedron) :: tetraq
  type(htetra_t) :: htetraq
-#ifdef HAVE_NETCDF
- integer :: ncid, ncerr
-#endif
 !arrays
  integer :: in_qptrlatt(3,3), new_qptrlatt(3,3)
  integer,allocatable :: bz2ibz(:,:)
@@ -232,7 +226,6 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, prtvol, comm)
  real(dp),allocatable :: qbz(:,:), qibz(:,:), wtq_ibz(:), wdt(:,:)
  real(dp),allocatable :: wmesh(:), eig(:),mat(:), dos(:), idos(:), cauchy_ppart(:)
  complex(dp),allocatable :: zmesh(:), cweight(:,:)
-
 ! *********************************************************************
 
  my_rank = xmpi_comm_rank(comm)
@@ -264,7 +257,7 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, prtvol, comm)
  end if
 
  ! Initialize new tetrahedra
- call htetra_init(htetraq, bz2ibz(1,:), cryst%gprimd, qlatt, qbz, nqbz, qibz, nqibz, ierr, errstr, comm)
+ call htetraq%init(bz2ibz(1,:), cryst%gprimd, qlatt, qbz, nqbz, qibz, nqibz, ierr, errstr, comm)
  if (prtvol > 0) then
    call htetraq%print(std_out)
    call cwtime_report(" init_htetra", cpu, wall, gflops)
@@ -306,7 +299,6 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, prtvol, comm)
    write(std_out, *)" Broad: ", broad
    write(std_out, *)" Effective mass: ", mstar
    write(std_out, *)" Use_symmetries: ", use_symmetries
-#ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_create(ncid, "foo_TETRATEST.nc", xmpi_comm_self))
    NCF_CHECK(cryst%ncwrite(ncid))
    ! Add dimensions.
@@ -332,7 +324,6 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, prtvol, comm)
    NCF_CHECK(nctk_set_datamode(ncid))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eig"), eig))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "wmesh"), wmesh))
-#endif
  end if
 
  ABI_MALLOC(dos, (nw))
@@ -519,9 +510,7 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, prtvol, comm)
  call destroy_tetra(tetraq)
 
  if (my_rank == master) then
-#ifdef HAVE_NETCDF
    NCF_CHECK(nf90_close(ncid))
-#endif
  end if
 
  !if (return_code /= 0) then
@@ -566,7 +555,6 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, prtvol, comm)
   write(std_out, "(1x,2(a,1x),/,4x,a,3(f10.5,1x),/)") &
     trim(key), trim(msg), " integral_dos, idos(nw), relative_err: ", int_dos, my_idos(nw), rerr
 
-#ifdef HAVE_NETCDF
   dos_vname = strcat("dos_", key)
   idos_vname = strcat("idos_", key)
   ppart_vname = strcat("cauchy_ppart_", key)
@@ -586,7 +574,6 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, prtvol, comm)
   if (present(cauchy_ppart)) then
     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, ppart_vname), cauchy_ppart))
   end if
-#endif
 
   ! Write results to txt file.
   fname = trim(key)//".dat"
@@ -632,10 +619,7 @@ subroutine tetra_zinv_convergence(ptgroup, use_symmetries, comm)
 !scalars
  integer,parameter :: qptopt1 = 1, nqshft1 = 1, master = 0
  integer :: nqibz, iq_ibz, nqbz, ierr, nw, my_rank
- integer :: num_broad, num_meshes, iq_mesh, ibroad
-#ifdef HAVE_NETCDF
- integer :: ncid, ncerr
-#endif
+ integer :: num_broad, num_meshes, iq_mesh, ibroad, ncid, ncerr
  real(dp),parameter :: max_occ1 = one
  real(dp) :: cpu, wall, gflops, dosdeltae, emin, emax, qnorm, int_dos, broad, min_eig, max_eig
  character(len=80) :: errstr
@@ -648,7 +632,6 @@ subroutine tetra_zinv_convergence(ptgroup, use_symmetries, comm)
  real(dp),allocatable :: qbz(:,:), qibz(:,:), wtq_ibz(:), broad_list(:)
  real(dp),allocatable :: wmesh(:), eig(:), mat(:), dos(:), idos(:), cauchy_ppart(:)
  complex(dp),allocatable :: zmesh(:), cweight(:,:)
-
 ! *********************************************************************
 
  my_rank = xmpi_comm_rank(comm)
@@ -686,7 +669,7 @@ subroutine tetra_zinv_convergence(ptgroup, use_symmetries, comm)
    rlatt = new_qptrlatt; call matr3inv(rlatt, qlatt)
 
    ! Initialize new tetrahedra
-   call htetra_init(htetraq, bz2ibz(1,:), cryst%gprimd, qlatt, qbz, nqbz, qibz, nqibz, ierr, errstr, comm)
+   call htetraq%init(bz2ibz(1,:), cryst%gprimd, qlatt, qbz, nqbz, qibz, nqibz, ierr, errstr, comm)
    call htetraq%print(std_out)
    call cwtime_report(" init_htetra", cpu, wall, gflops)
 
@@ -722,7 +705,6 @@ subroutine tetra_zinv_convergence(ptgroup, use_symmetries, comm)
        write(std_out, *)" min, Max band energy: ", min_eig, max_eig
        write(std_out, *)" energy mesh, Max: ", emin, emax, nw
        !write(std_out, *)" Broad: ", broad
-#ifdef HAVE_NETCDF
        NCF_CHECK(nctk_open_create(ncid, "foo_ZINVCONV.nc", xmpi_comm_self))
        NCF_CHECK(cryst%ncwrite(ncid))
 
@@ -749,7 +731,6 @@ subroutine tetra_zinv_convergence(ptgroup, use_symmetries, comm)
        NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "wmesh"), wmesh))
        NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt_list"), ngqpt_list))
        NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "broad_list"), broad_list))
-#endif
      end if
    end if
 
@@ -757,7 +738,6 @@ subroutine tetra_zinv_convergence(ptgroup, use_symmetries, comm)
 
    do ibroad=1,num_broad
      broad = broad_list(ibroad)
-
      call cwtime_report(" init", cpu, wall, gflops)
 
      dos = zero; cauchy_ppart = zero
@@ -772,12 +752,10 @@ subroutine tetra_zinv_convergence(ptgroup, use_symmetries, comm)
      if (my_rank == master) then
        write(std_out, "(a, 3(f10.5,1x))") " int_dos, idos, rerr: ", int_dos, idos(nw), 100 * (int_dos - idos(nw)) / idos(nw)
        !call write_file('parabola_gauss.dat', nw, wmesh, dos, idos, cauchy_ppart=cauchy_ppart)
-#ifdef HAVE_NETCDF
        ncerr = nf90_put_var(ncid, nctk_idname(ncid, "dos_simple"), dos, start=[1, ibroad, iq_mesh])
        NCF_CHECK(ncerr)
        ncerr = nf90_put_var(ncid, nctk_idname(ncid, "cauchy_ppart_simple"), cauchy_ppart, start=[1, ibroad, iq_mesh])
        NCF_CHECK(ncerr)
-#endif
      end if
 
      zmesh = wmesh + j_dpc * broad
@@ -811,12 +789,10 @@ subroutine tetra_zinv_convergence(ptgroup, use_symmetries, comm)
 
      if (my_rank == master) then
        write(std_out, "(a, 3(f10.5,1x))") " int_dos, idos, rerr: ", int_dos, idos(nw), 100 * (int_dos - idos(nw)) / idos(nw)
-#ifdef HAVE_NETCDF
        ncerr = nf90_put_var(ncid, nctk_idname(ncid, "dos_simtet"), dos, start=[1, ibroad, iq_mesh])
        NCF_CHECK(ncerr)
        ncerr = nf90_put_var(ncid, nctk_idname(ncid, "cauchy_ppart_simtet"), cauchy_ppart, start=[1, ibroad, iq_mesh])
        NCF_CHECK(ncerr)
-#endif
      end if
 
      ! Use LV integration from TDEP
@@ -855,9 +831,7 @@ subroutine tetra_zinv_convergence(ptgroup, use_symmetries, comm)
  call cryst%free()
 
  if (my_rank == master) then
-#ifdef HAVE_NETCDF
    NCF_CHECK(nf90_close(ncid))
-#endif
  end if
 
 end subroutine tetra_zinv_convergence
@@ -869,7 +843,7 @@ end subroutine tetra_zinv_convergence
 !!
 !! FUNCTION
 !!  Test the krank routines
-!!
+
 subroutine kptrank_unittests(ptgroup, ngqpt, use_symmetries, comm)
 
 !Arguments -------------------------------
@@ -892,7 +866,6 @@ subroutine kptrank_unittests(ptgroup, ngqpt, use_symmetries, comm)
  integer,allocatable :: bz2ibz(:,:), bz2ibz_symkpt(:,:), bz2ibz_symkpt_new(:,:), kmap(:,:)
  integer,allocatable :: bz2ibz_listkk(:,:), ibz2bz(:), ibz2bz_new(:)
  real(dp),allocatable :: wtq_fullbz(:), wtq_folded(:), wtq_ibz(:), qbz(:,:),qibz(:,:)
-
 ! *********************************************************************
 
  call wrtout(std_out, sjoin(" kptrank_unittests with ptgroup:", ptgroup, ", and ngqpt:", ltoa(ngqpt)))
@@ -917,8 +890,8 @@ subroutine kptrank_unittests(ptgroup, ngqpt, use_symmetries, comm)
  call cwtime_report(" kpts_ibz_from_kptrlatt", cpu, wall, gflops)
 
  ! Test krank object.
- !krank = krank_new(nqibz, qibz)
- krank = krank_from_kptrlatt(nqibz, qibz, new_qptrlatt)
+ !call krank%init(nqibz, qibz)
+ call krank%from_kptrlatt(nqibz, qibz, new_qptrlatt)
 
  do iq_ibz=1,nqibz
    iqibz_rank = krank%get_index(qibz(:, iq_ibz))
@@ -1019,8 +992,7 @@ subroutine kptrank_unittests(ptgroup, ngqpt, use_symmetries, comm)
  ABI_SFREE(bz2ibz)
  ABI_SFREE(wtq_ibz)
 
- call cryst%free()
- call krank%free()
+ call cryst%free(); call krank%free()
 
 end subroutine kptrank_unittests
 !!***

@@ -6,7 +6,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2022 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2025 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -18,7 +18,6 @@
 #endif
 
 #include "abi_common.h"
-
 
 module m_gwls_GWlanczos
 !----------------------------------------------------------------------------------------------------
@@ -42,8 +41,6 @@ use m_pawang
 use m_errors
 
 use m_io_tools,         only : get_unit
-use m_paw_dmft,         only : paw_dmft_type
-use m_ebands,           only : ebands_init, ebands_free
 
 implicit none
 save
@@ -78,10 +75,8 @@ subroutine get_seeds(first_seed, nseeds, seeds)
 ! This subroutine compute the seeds using the eigenstates of the Hamiltonian
 !
 !----------------------------------------------------------------------------------------------------
-implicit none
-
 integer,      intent(in)  :: first_seed, nseeds
-complex(dpc), intent(out) :: seeds(npw_k,nseeds)
+complex(dp), intent(out) :: seeds(npw_k,nseeds)
 
 real(dp)    , allocatable :: psik_out(:,:)
 real(dp)    , allocatable :: psikb_e(:,:)
@@ -89,12 +84,9 @@ real(dp)    , allocatable :: psig_e(:,:)
 real(dp)    , allocatable :: psikb_s(:,:)
 real(dp)    , allocatable :: psig_s(:,:)
 
-
-
 ! local variables
 integer  :: n
 integer  :: i, j, nsblk
-
 ! *************************************************************************
 
 ! Generate the seeds for the Lanczos algorithm
@@ -176,7 +168,6 @@ subroutine block_lanczos_algorithm(mpi_communicator,matrix_function,kmax,nseeds,
 !
 !
 !----------------------------------------------------------------------------------------------------
-implicit none
 
 !-----------------------------------------
 ! interface with implicit matrix function
@@ -203,8 +194,8 @@ interface
   use defs_basis
 
   integer,     intent(in)   :: l
-  complex(dpc), intent(out) :: v_out(l)
-  complex(dpc), intent(in)  :: v_in(l)
+  complex(dp), intent(out) :: v_out(l)
+  complex(dp), intent(in)  :: v_in(l)
 
   end subroutine matrix_function
 end interface
@@ -218,19 +209,19 @@ integer, intent(in) :: kmax        ! number of Lanczos blocks
 integer, intent(in) :: nseeds      ! size of each blocks
 integer, intent(in) :: Hsize       ! size of the Hilbert space in which the matrix lives
 
-complex(dpc), intent(inout):: seeds(Hsize,nseeds) ! seed vectors for the algorithm
+complex(dp), intent(inout):: seeds(Hsize,nseeds) ! seed vectors for the algorithm
 ! overwritten by X_{k+1} on output
 
 !logical,      intent(in) :: ortho           ! should the Lanczos vector be orthogonalized?
 
-complex(dpc), intent(out) :: alpha(nseeds,nseeds,kmax)  ! the alpha array from the Lanczos algorithm
-complex(dpc), intent(out) :: beta(nseeds,nseeds,kmax)   ! the  beta array from the Lanczos algorithm
-complex(dpc), intent(out) :: Lbasis(Hsize,nseeds*kmax)  ! array containing the Lanczos basis
+complex(dp), intent(out) :: alpha(nseeds,nseeds,kmax)  ! the alpha array from the Lanczos algorithm
+complex(dp), intent(out) :: beta(nseeds,nseeds,kmax)   ! the  beta array from the Lanczos algorithm
+complex(dp), intent(out) :: Lbasis(Hsize,nseeds*kmax)  ! array containing the Lanczos basis
 
 
-complex(dpc), intent(in),optional :: X0(Hsize,nseeds)
-complex(dpc), intent(in),optional :: beta0(nseeds,nseeds)
-complex(dpc), intent(in),optional :: Qk(:,:)  ! array containing vectors to which
+complex(dp), intent(in),optional :: X0(Hsize,nseeds)
+complex(dp), intent(in),optional :: beta0(nseeds,nseeds)
+complex(dp), intent(in),optional :: Qk(:,:)  ! array containing vectors to which
 
 ! the basis must be orthonormalized
 
@@ -242,7 +233,7 @@ complex(dpc), intent(in),optional :: Qk(:,:)  ! array containing vectors to whic
 integer     :: k, seed1
 integer     :: dum(2), lk
 
-complex(dpc), allocatable :: xk(:,:), xkm1(:,:), rk(:,:)
+complex(dp), allocatable :: xk(:,:), xkm1(:,:), rk(:,:)
 
 integer     :: ntime, itime
 real(dp)    :: total_time1, total_time2
@@ -470,17 +461,15 @@ subroutine diagonalize_lanczos_banded(kmax,nseeds,Hsize,alpha,beta,Lbasis,eigenv
 ! Given the result of the Lanczos algorithm, this subroutine diagonalize the banded
 ! matrix as well as updates the basis.
 !-----------------------------------------------------------------------------------
-implicit none
-
 integer, intent(in)  :: kmax        ! number of Lanczos blocks
 integer, intent(in)  :: nseeds      ! size of each blocks
 integer, intent(in)  :: Hsize       ! size of the Hilbert space in which the matrix lives
 logical, intent(in)  :: debug
 
-complex(dpc), intent(in) :: alpha(nseeds,nseeds,kmax)  ! the alpha array from the Lanczos algorithm
-complex(dpc), intent(in) :: beta (nseeds,nseeds,kmax)  ! the  beta array from the Lanczos algorithm
+complex(dp), intent(in) :: alpha(nseeds,nseeds,kmax)  ! the alpha array from the Lanczos algorithm
+complex(dp), intent(in) :: beta (nseeds,nseeds,kmax)  ! the  beta array from the Lanczos algorithm
 
-complex(dpc), intent(inout) :: Lbasis(Hsize,nseeds*kmax)  ! array containing the Lanczos basis
+complex(dp), intent(inout) :: Lbasis(Hsize,nseeds*kmax)  ! array containing the Lanczos basis
 
 
 real(dp), intent(out) :: eigenvalues(nseeds*kmax)
@@ -491,12 +480,12 @@ real(dp), intent(out) :: eigenvalues(nseeds*kmax)
 integer :: kd   ! number of superdiagonal above the diagonal in banded storage
 integer :: ldab ! dimension of banded storage matrix
 
-complex(dpc), allocatable :: band_storage_matrix(:,:)
-complex(dpc), allocatable :: saved_band_storage_matrix(:,:)
+complex(dp), allocatable :: band_storage_matrix(:,:)
+complex(dp), allocatable :: saved_band_storage_matrix(:,:)
 
-complex(dpc), allocatable :: eigenvectors(:,:)
+complex(dp), allocatable :: eigenvectors(:,:)
 
-complex(dpc), allocatable :: Lbasis_tmp(:,:)
+complex(dp), allocatable :: Lbasis_tmp(:,:)
 
 integer :: i, j
 integer :: k
@@ -504,7 +493,7 @@ integer :: s1, s2
 integer :: info
 
 
-complex(dpc), allocatable :: work(:)
+complex(dp), allocatable :: work(:)
 real(dp),     allocatable :: rwork(:)
 
 integer        :: io_unit

@@ -1,0 +1,134 @@
+#exclude: ^(docs|tests/files|tasks.py)
+
+ci:
+  autoupdate_schedule: monthly
+  #skip: [mypy, pyright]
+  autofix_commit_msg: pre-commit auto-fixes
+  autoupdate_commit_msg: pre-commit autoupdate
+
+repos:
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-ast
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-executables-have-shebangs
+      - id: check-added-large-files
+        args: ['--maxkb=1500']  # 1000 KB = 1 MB
+
+  #- repo: https://github.com/astral-sh/ruff-pre-commit
+  #  rev: v0.11.12
+  #  hooks:
+  #    - id: ruff
+  #      args: [--fix, --unsafe-fixes]
+  #    - id: ruff-format
+
+  #- repo: https://github.com/pre-commit/mirrors-mypy
+  #  rev: v1.16.0
+  #  hooks:
+  #    - id: mypy
+  #      #additional_dependencies: [numpy>=1.2.5]
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.1
+    hooks:
+      - id: codespell
+        stages: [pre-commit, commit-msg]
+        exclude_types: [html]
+        args: [--ignore-words=.codespell.ignore, --skip=doc/abiref.bib]
+
+  #- repo: https://github.com/adamchainz/blacken-docs
+  #  rev: 1.19.1
+  #  hooks:
+  #    - id: blacken-docs
+
+  #- repo: https://github.com/pycqa/flake8
+  #  rev: 7.1.0
+  #  hooks:
+  #  -   id: flake8
+  #  additional_dependencies: ['flake8-docstrings']
+
+  #- repo: https://github.com/igorshubovych/markdownlint-cli
+  #  rev: v0.45.0
+  #  hooks:
+  #    - id: markdownlint
+  #      # MD013: line too long
+  #      # MD024: Multiple headings with the same content
+  #      # MD033: no inline HTML
+  #      # MD041: first line in a file should be a top-level heading
+  #      # MD025: single title
+  #      args: [--disable, MD013, MD024, MD025, MD033, MD041, "--"]
+
+  #- repo: https://github.com/RobertCraigie/pyright-python
+  #  rev: v1.1.401
+  #  hooks:
+  #    - id: pyright
+
+  #- repo: https://github.com/PyCQA/doc8
+  #  rev: 2.0.0
+  #  hooks:
+  #    - id: doc8
+  #      args: [--max-line-length=120]
+
+  - repo: local
+    hooks:
+      - id: check-build-config
+        name: Run check-build-config
+        entry: python abichecks/scripts/check-build-config.py
+        language: python
+      - id: run-check-config-h
+        name: Run run-check-config-h
+        entry: python abichecks/scripts/check-config-h.py
+        language: python
+      - id: run-check-forbidden-flags
+        name: Run run-check-forbidden-flags
+        entry: python abichecks/scripts/check-forbidden-flags.py
+        language: python
+      - id: run-check-ascii
+        name: Run run-check_ascii
+        entry: python abichecks/scripts/check_ascii.py
+        language: python
+      #- id: run-warningschk
+      #  name: Run run-warningschk
+      #  entry: python abichecks/scripts/warningschk.py
+      #  language: python
+      #- id: check-build-examples
+      #  name: Run check-build-examples
+      #  entry: python abichecks/scripts/check-build-examples.py
+      #  language: python
+      #- id: check-libpaw
+      #  name: Run check-libpaw
+      #  entry: python abichecks/scripts/check-libpaw.py
+      #  language: python
+      - id: check-forbidden
+        name: Run check-forbidden
+        entry: python abichecks/scripts/check_forbidden.py
+        language: python
+      - id: check-binaries-conf
+        name: Run check-binaries-conf
+        entry: python abichecks/scripts/check-binaries-conf.py
+        language: python
+      #- id: check-build-refs
+      #  name: Run check-build-refs
+      #  entry: python abichecks/scripts/check-build-refs.py
+      #  language: python
+      - id: check-cpp-options
+        name: Run check-cpp-options
+        entry: python abichecks/scripts/check-cpp-options.py
+        language: python
+      #- id: check-line-lengths
+      #  name: Run check-line-lengths
+      #  entry: python abichecks/scripts/check-line-lengths.py
+      #  language: python
+      - id: check-inlined-macros
+        name: run check-inlined-macros
+        entry: python abichecks/scripts/check_inlined_macros.py
+        language: python
+      - id: check-unprotected-omp-target
+        name: run check-unprotected-omp-target.py
+        entry: python abichecks/scripts/check-unprotected-omp-target.py
+        language: python

@@ -3,11 +3,11 @@
 !! m_matrix
 !!
 !! FUNCTION
-!! Module containing some function acting on a matrix 
+!! Module containing some function acting on a matrix
 !!  (sqrt root)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2022 ABINIT group (BA)
+!! Copyright (C) 2009-2025 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,14 +34,20 @@ MODULE m_matrix
 
  private
 
-! public :: init_matrix         ! Main creation method
- public :: invsqrt_matrix         ! inv of Sqrt of Matrix
- public :: blockdiago_fordsyev         ! inv of Sqrt of Matrix
- public :: blockdiago_forzheev         ! inv of Sqrt of Matrix
-! public :: inverse_matrix      ! Inverse matrix
-! public :: nullify_matrix      ! Nullify the object
-! public :: destroy_matrix      ! Frees the allocated memory
-! public :: print_matrix        ! Printout of the basic info
+ public :: invsqrt_matrix       ! inv of Sqrt of Matrix
+ public :: blockdiago_fordsyev  ! inv of Sqrt of Matrix
+ public :: blockdiago_forzheev  ! inv of Sqrt of Matrix
+ public :: mat33det             ! Determinant of a 3x3 matrix
+ public :: mati3inv             ! Invert and transpose orthogonal 3x3 matrix of INTEGER elements.
+ public :: mati3det             ! Compute the determinant of a 3x3 matrix of INTEGER elements.
+ public :: matr3inv             ! Invert and TRANSPOSE general 3x3 matrix of real*8 elements.
+
+
+ ! the determinant of a 3*3 matrix
+ interface mat33det
+    procedure  real_mat33det
+    procedure  int_mat33det
+ end interface mat33det
 
 
 CONTAINS  !===========================================================
@@ -64,8 +70,8 @@ subroutine invsqrt_matrix(matrix,tndim,force_diag)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: tndim 
- complex(dpc),intent(inout) :: matrix(tndim,tndim)
+ integer,intent(in) :: tndim
+ complex(dp),intent(inout) :: matrix(tndim,tndim)
  integer, intent(out) :: force_diag
 !arrays
 
@@ -76,10 +82,9 @@ subroutine invsqrt_matrix(matrix,tndim,force_diag)
  real(dp) :: pawprtvol
 !arrays
  real(dp),allocatable :: eig(:),rwork(:)
- complex(dpc),allocatable :: zwork(:),diag(:,:)
- complex(dpc),allocatable :: sqrtmat(:,:),zhdp2(:,:),sqrtmatinv(:,:)
- complex(dpc),allocatable :: initialmatrix(:,:)
- 
+ complex(dp),allocatable :: zwork(:),diag(:,:)
+ complex(dp),allocatable :: sqrtmat(:,:),zhdp2(:,:),sqrtmatinv(:,:)
+ complex(dp),allocatable :: initialmatrix(:,:)
 ! *************************************************************************
 
 !Do not remove this silly print instruction. Seems needed to avoid floating
@@ -98,7 +103,7 @@ subroutine invsqrt_matrix(matrix,tndim,force_diag)
  ABI_MALLOC(rwork,(3*tndim-2))
  ABI_MALLOC(zwork,(lwork))
  ABI_MALLOC(eig,(tndim))
- 
+
  call zheev('v','u',tndim,matrix,tndim,eig,zwork,lwork,rwork,info)
  if(pawprtvol>3) then
    write(message,'(2a)') ch10,'  - rotation matrix - '
@@ -110,8 +115,8 @@ subroutine invsqrt_matrix(matrix,tndim,force_diag)
     call wrtout(std_out,message,'COLL')
    end do
  endif
- 
- 
+
+
  ABI_FREE(zwork)
  ABI_FREE(rwork)
  if(info/=0) then
@@ -253,7 +258,7 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
  integer,allocatable :: nonnul(:)
  integer,allocatable :: nonnuldege(:)
  logical :: testdege,swap
- 
+
 ! *************************************************************************
 
 !!!Do not remove this silly print instruction. Seems needed to avoid floating
@@ -269,7 +274,7 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
 
  ABI_MALLOC(matrix_save,(tndim,tndim))
  matrix_save=matrix
- 
+
  ABI_MALLOC(Permutcol,(tndim,tndim))
 
  Permutcol=zero
@@ -315,7 +320,7 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
  ABI_MALLOC(Apermutcol,(tndim,tndim))
  if(prtopt==1) then
    write(std_out,*) "Check product of original matrix by permutation matrix "
- endif 
+ endif
  Apermutcol=zero
  do im1=1,tndim
   do im2=1,tndim
@@ -332,7 +337,7 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
       write(std_out,'(2(1x,18(1x,f22.18,f22.18)))') (Apermutcol(im1,im2),im2=1,tndim)
    end do
  endif
- 
+
 
 
  ABI_MALLOC(Permutline,(tndim,tndim))
@@ -444,7 +449,7 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
   endif
   if(testdege) then
    current_dege=current_dege+1
-  else 
+  else
    !new set of degenerate state: reorder it: put it into block diagonal
    !form for column
      if(prtopt==1) write(std_out,*) "newstarting, current_dege",newstarting, current_dege
@@ -587,7 +592,7 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: tndim
- complex(dpc),intent(inout) :: matrix(tndim,tndim)
+ complex(dp),intent(inout) :: matrix(tndim,tndim)
  real(dp),intent(inout) :: eig(tndim)
 !arrays
 
@@ -595,19 +600,18 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
 !scalars
  integer :: im1,im2,im3,info,lwork
  character(len=500) :: message
- complex(dpc):: tmpx
+ complex(dp):: tmpx
  integer(dp):: tmpi
 !arrays
  real(dp),allocatable :: rwork(:)
- complex(dpc),allocatable :: work(:)
+ complex(dp),allocatable :: work(:)
  real(dp),allocatable :: Permutcol(:,:)
- complex(dpc),allocatable :: Apermutcol(:,:)
- complex(dpc),allocatable :: Apermutline(:,:)
- complex(dpc),allocatable :: Apermutlineback(:,:)
+ complex(dp),allocatable :: Apermutcol(:,:)
+ complex(dp),allocatable :: Apermutline(:,:)
+ complex(dp),allocatable :: Apermutlineback(:,:)
  real(dp),allocatable :: Permutline(:,:)
- complex(dpc),allocatable :: matrix_save(:,:) !,W(:)
+ complex(dp),allocatable :: matrix_save(:,:) !,W(:)
  integer,allocatable :: nonnul(:)
- 
 ! *************************************************************************
 
 !!!Do not remove this silly print instruction. Seems needed to avoid floating
@@ -623,7 +627,7 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
 
  ABI_MALLOC(matrix_save,(tndim,tndim))
  matrix_save=matrix
- 
+
  ABI_MALLOC(Permutcol,(tndim,tndim))
 
  Permutcol=zero
@@ -682,7 +686,7 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
  do im1=1,tndim
     write(std_out,'(2(1x,30(1x,f22.18,f22.18)))') (Apermutcol(im1,im2),im2=1,tndim)
  end do
- 
+
 
 
  ABI_MALLOC(Permutline,(tndim,tndim))
@@ -820,5 +824,207 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
 
 end subroutine blockdiago_forzheev
 !!***
+
+!! FUNCTION
+!!  Compute the determinant of a 3x3 real matrix
+!!
+!! INPUTS
+!!  A = 3x3 matrix
+!!
+!! OUTPUT
+!!  det = The determinant
+!!
+!! SOURCE
+
+function real_mat33det(A) result(det)
+  real(dp), intent(in) :: A(3,3)
+  real(dp) :: det
+  DET =  A(1,1)*A(2,2)*A(3,3)  &
+       - A(1,1)*A(2,3)*A(3,2)  &
+       - A(1,2)*A(2,1)*A(3,3)  &
+       + A(1,2)*A(2,3)*A(3,1)  &
+       + A(1,3)*A(2,1)*A(3,2)  &
+       - A(1,3)*A(2,2)*A(3,1)
+end function real_mat33det
+!!***
+
+!! FUNCTION
+!!  Compute the determinant of a 3x3 integer matrix
+!!
+!! INPUTS
+!!  A = 3x3 matrix
+!!
+!! OUTPUT
+!!  det = The determinant
+!!
+!! SOURCE
+
+function int_mat33det(A) result(det)
+  integer, intent(in) :: A(3,3)
+  integer :: det
+  DET =  A(1,1)*A(2,2)*A(3,3)  &
+       - A(1,1)*A(2,3)*A(3,2)  &
+       - A(1,2)*A(2,1)*A(3,3)  &
+       + A(1,2)*A(2,3)*A(3,1)  &
+       + A(1,3)*A(2,1)*A(3,2)  &
+       - A(1,3)*A(2,2)*A(3,1)
+end function int_mat33det
+!!***
+
+!!****f* m_matrix/mati3inv
+!! NAME
+!! mati3inv
+!!
+!! FUNCTION
+!! Invert and transpose orthogonal 3x3 matrix of INTEGER elements.
+!!
+!! INPUTS
+!! mm = integer matrix to be inverted
+!!
+!! OUTPUT
+!! mit = inverse of mm input matrix
+!!
+!! NOTES
+!! Used for symmetry operations.
+!! This routine applies to ORTHOGONAL matrices only.
+!! Since these form a group, inverses are also integer arrays.
+!! Returned array is TRANSPOSE of inverse, as needed.
+!! Note use of integer arithmetic.
+!!
+!! SOURCE
+
+subroutine mati3inv(mm, mit)
+
+!Arguments ------------------------------------
+!arrays
+ integer,intent(in) :: mm(3,3)
+ integer,intent(out) :: mit(3,3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: dd
+ character(len=500) :: msg
+!arrays
+ integer :: tt(3,3)
+
+! *************************************************************************
+
+ tt(1,1) = mm(2,2) * mm(3,3) - mm(3,2) * mm(2,3)
+ tt(2,1) = mm(3,2) * mm(1,3) - mm(1,2) * mm(3,3)
+ tt(3,1) = mm(1,2) * mm(2,3) - mm(2,2) * mm(1,3)
+ tt(1,2) = mm(3,1) * mm(2,3) - mm(2,1) * mm(3,3)
+ tt(2,2) = mm(1,1) * mm(3,3) - mm(3,1) * mm(1,3)
+ tt(3,2) = mm(2,1) * mm(1,3) - mm(1,1) * mm(2,3)
+ tt(1,3) = mm(2,1) * mm(3,2) - mm(3,1) * mm(2,2)
+ tt(2,3) = mm(3,1) * mm(1,2) - mm(1,1) * mm(3,2)
+ tt(3,3) = mm(1,1) * mm(2,2) - mm(2,1) * mm(1,2)
+ dd = mm(1,1) * tt(1,1) + mm(2,1) * tt(2,1) + mm(3,1) * tt(3,1)
+
+ ! Make sure matrix is not singular
+ if (dd /= 0) then
+   mit(:,:)=tt(:,:)/dd
+ else
+   write(msg, '(2a,2x,9(i0,1x),a)' )'Attempting to invert integer array',ch10,mm,' ==> determinant is zero.'
+   ABI_ERROR(msg)
+ end if
+
+ ! If matrix is orthogonal, determinant must be 1 or -1
+ if (abs(dd) /= 1) then
+   write(msg, '(3a,i0)' )'Absolute value of determinant should be one',ch10,'but determinant= ',dd
+   ABI_ERROR(msg)
+ end if
+
+end subroutine mati3inv
+!!***
+
+!!****f* m_matrix/mati3det
+!! NAME
+!! mati3det
+!!
+!! FUNCTION
+!! Compute the determinant of a 3x3 matrix of INTEGER elements.
+!!
+!! INPUTS
+!! mm = integer matrix
+!!
+!! OUTPUT
+!! det = determinant of the matrix
+!!
+!! SOURCE
+
+subroutine mati3det(mm, det)
+
+!Arguments ------------------------------------
+!arrays
+ integer,intent(in) :: mm(3,3)
+ integer,intent(out) :: det
+
+! *************************************************************************
+ det=mm(1,1)*(mm(2,2) * mm(3,3) - mm(3,2) * mm(2,3)) &
+   + mm(2,1)*(mm(3,2) * mm(1,3) - mm(1,2) * mm(3,3)) &
+   + mm(3,1)*(mm(1,2) * mm(2,3) - mm(2,2) * mm(1,3))
+
+end subroutine mati3det
+!!***
+
+!!****f* m_matrix/matr3inv
+!! NAME
+!! matr3inv
+!!
+!! FUNCTION
+!! Invert and transpose general 3x3 matrix of real*8 elements.
+!!
+!! INPUTS
+!! aa = 3x3 matrix to be inverted
+!!
+!! OUTPUT
+!! ait = inverse of aa input matrix
+!!
+!! NOTES
+!! Returned array is TRANSPOSE of inverse, as needed to get g from r.
+!!
+!! SOURCE
+
+subroutine matr3inv(aa, ait)
+
+!Arguments ------------------------------------
+!arrays
+ real(dp),intent(in) :: aa(3,3)
+ real(dp),intent(out) :: ait(3,3)
+
+!Local variables-------------------------------
+!scalars
+ real(dp) :: dd,det,t1,t2,t3
+ character(len=500) :: msg
+
+! *************************************************************************
+
+ t1 = aa(2,2) * aa(3,3) - aa(3,2) * aa(2,3)
+ t2 = aa(3,2) * aa(1,3) - aa(1,2) * aa(3,3)
+ t3 = aa(1,2) * aa(2,3) - aa(2,2) * aa(1,3)
+ det  = aa(1,1) * t1 + aa(2,1) * t2 + aa(3,1) * t3
+
+!Make sure matrix is not singular
+ if (abs(det)>tol16) then
+   dd=one/det
+ else
+   write(msg, '(2a,2x,9es16.8,a,a,es16.8,a)' )&
+     'Attempting to invert real(8) 3x3 array',ch10,aa(:,:),ch10,'   ==> determinant=',det,' is zero.'
+   ABI_BUG(msg)
+ end if
+
+ ait(1,1) = t1 * dd
+ ait(2,1) = t2 * dd
+ ait(3,1) = t3 * dd
+ ait(1,2) = (aa(3,1)*aa(2,3)-aa(2,1)*aa(3,3)) * dd
+ ait(2,2) = (aa(1,1)*aa(3,3)-aa(3,1)*aa(1,3)) * dd
+ ait(3,2) = (aa(2,1)*aa(1,3)-aa(1,1)*aa(2,3)) * dd
+ ait(1,3) = (aa(2,1)*aa(3,2)-aa(3,1)*aa(2,2)) * dd
+ ait(2,3) = (aa(3,1)*aa(1,2)-aa(1,1)*aa(3,2)) * dd
+ ait(3,3) = (aa(1,1)*aa(2,2)-aa(2,1)*aa(1,2)) * dd
+
+end subroutine matr3inv
+!!***
+
 
 END MODULE m_matrix

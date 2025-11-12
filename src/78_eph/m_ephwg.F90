@@ -8,7 +8,7 @@
 !!  involving delta functions. Different approaches are available.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MG, HM)
+!!  Copyright (C) 2008-2025 ABINIT group (MG, HM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,9 +31,7 @@ module m_ephwg
  use m_dtset
  use m_htetra
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_crystal
  use m_ifc
  use m_lgroup
@@ -41,9 +39,8 @@ module m_ephwg
  use m_eph_double_grid
  use m_krank
 
- use defs_datatypes,    only : ebands_t
  use m_time,            only : cwtime, cwtime_report
- use m_symtk,           only : matr3inv
+ use m_matrix,          only : matr3inv
  use m_numeric_tools,   only : arth, inrange, wrap2_pmhalf
  use m_special_funcs,   only : gaussian
  use m_fstrings,        only : strcat, ltoa, itoa, ftoa, ktoa, sjoin
@@ -131,7 +128,7 @@ type, public :: ephwg_t
   real(dp),allocatable :: eigkbs_ibz(:, :, :)
   ! (nibz, nbcount, nsppol)
   ! Electron eigenvalues in the IBZ for nbcount states
-  ! (not necessarly equal to global nband, see also bstart and bcount)
+  ! (not necessarily equal to global nband, see also bstart and bcount)
 
   type(crystal_t), pointer :: cryst => null()
   ! Pointer to input structure (does not own memory)
@@ -224,7 +221,6 @@ type(ephwg_t) function ephwg_new( &
  integer :: out_kptrlatt(3,3)
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom), phfrq(3*cryst%natom)
  real(dp),allocatable :: out_kibz(:,:), out_wtk(:)
-
 !----------------------------------------------------------------------
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -298,7 +294,6 @@ type(ephwg_t) function ephwg_from_ebands(cryst, ifc, ebands, bstart, nbcount, co
 
 !Local variables-------------------------------
  real(dp),allocatable :: eig_ibz(:, :, :)
-
 !----------------------------------------------------------------------
 
  if (bstart == 1 .and. nbcount == ebands%mband) then
@@ -355,7 +350,6 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
  type(krank_t) :: krank
 !arrays
  integer,allocatable :: indkk(:,:)
-
 !----------------------------------------------------------------------
 
  do_mapping = .true.; if (present(skip_mapping)) do_mapping = .not. skip_mapping
@@ -364,7 +358,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
 
  ! Get little group of the (external) kpoint.
  call self%lgk%free()
- self%lgk = lgroup_new(self%cryst, kpoint, self%timrev, self%nbz, self%bz, self%nibz, self%ibz, comm)
+ call self%lgk%init(self%cryst, kpoint, self%timrev, self%nbz, self%bz, self%nibz, self%ibz, comm)
 
  if (prtvol > 0) call self%lgk%print()
  self%nq_k = self%lgk%nibz
@@ -378,9 +372,9 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
    ! Get mapping IBZ_k --> initial IBZ (self%lgk%ibz --> self%ibz)
    ABI_MALLOC(indkk, (6, self%nq_k))
 
-   krank = krank_from_kptrlatt(self%nibz, self%ibz, self%kptrlatt, compute_invrank=.False.)
+   call krank%from_kptrlatt(self%nibz, self%ibz, self%kptrlatt, compute_invrank=.False.)
 
-   if (kpts_map("symrel", self%timrev, cryst, krank, self%nq_k, self%lgk%ibz, indkk) /= 0) then
+   if (kpts_map("symrel", self%kptopt, cryst, krank, self%nq_k, self%lgk%ibz, indkk) /= 0) then
      ABI_ERROR("At least one of the points in IBZ(k) could not be generated from a symmetrical one.")
    end if
 
@@ -397,9 +391,9 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
    end do
    ABI_MALLOC(indkk, (6, self%nq_k))
 
-   krank = krank_from_kptrlatt(self%nibz, self%ibz, self%kptrlatt, compute_invrank=.False.)
+   call krank%from_kptrlatt(self%nibz, self%ibz, self%kptrlatt, compute_invrank=.False.)
 
-   if (kpts_map("symrel", self%timrev, cryst, krank, self%nq_k, self%lgk%ibz, indkk) /= 0) then
+   if (kpts_map("symrel", self%kptopt, cryst, krank, self%nq_k, self%lgk%ibz, indkk) /= 0) then
      ABI_ERROR("At least one of the points in IBZ(k) + q could not be generated from a symmetrical one.")
    end if
    call krank%free()
@@ -423,8 +417,8 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
  ! Build tetrahedron object using IBZ(k) as the effective IBZ
  ! This means that input data for tetra routines must be provided in lgk%kibz_q
  call self%tetra_k%free()
- call htetra_init(self%tetra_k, indkk(:, 1), cryst%gprimd, self%klatt, self%bz, self%nbz, &
-                  self%lgk%ibz, self%nq_k, ierr, errorstring, comm)
+ call self%tetra_k%init(indkk(:, 1), cryst%gprimd, self%klatt, self%bz, self%nbz, &
+                        self%lgk%ibz, self%nq_k, ierr, errorstring, comm)
  !call tetra_write(self%tetra_k, self%lgk%nibz, self%lgk%ibz, strcat("tetrak_", ktoa(kpoint)))
  ABI_CHECK(ierr == 0, errorstring)
 
@@ -481,7 +475,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
 
  ! Get little group of the (external) kpoint.
  call self%lgk%free()
- self%lgk = lgroup_new(self%cryst, kpoint, self%timrev, self%nbz, self%bz, self%nibz, self%ibz, comm)
+ call self%lgk%init(self%cryst, kpoint, self%timrev, self%nbz, self%bz, self%nibz, self%ibz, comm)
  if (prtvol > 0) call self%lgk%print()
  self%nq_k = self%lgk%nibz
 
@@ -558,8 +552,8 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
  ! Build tetrahedron object using IBZ(k) as the effective IBZ
  ! This means that input data for tetra routines must be provided in lgk%kibz_q
  call self%tetra_k%free()
- call htetra_init(self%tetra_k, bz2lgkibz, cryst%gprimd, self%klatt, self%bz, self%nbz, &
-                  self%lgk%ibz, self%nq_k, ierr, errorstring, comm)
+ call self%tetra_k%init(bz2lgkibz, cryst%gprimd, self%klatt, self%bz, self%nbz, &
+                        self%lgk%ibz, self%nq_k, ierr, errorstring, comm)
  if (ierr /= 0) then
    ABI_ERROR(errorstring)
  end if
@@ -654,7 +648,6 @@ subroutine ephwg_get_deltas(self, band, spin, nu, nene, eminmax, bcorr, deltaw_p
 !arrays
  real(dp) :: wme0(nene)
  real(dp),allocatable :: thetaw(:,:), pme_k(:,:)
-
 !----------------------------------------------------------------------
 
  ib = band - self%bstart + 1
@@ -746,7 +739,6 @@ subroutine ephwg_get_deltas_wvals(self, band, spin, nu, neig, eig, bcorr, deltaw
  real(dp) :: wme0(neig)
 !arrays
  real(dp),allocatable :: pme_k(:,:)
-
 !----------------------------------------------------------------------
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -822,7 +814,6 @@ subroutine ephwg_get_deltas_qibzk(self, nu, nene, eminmax, bcorr, dt_weights, co
  real(dp),parameter :: max_occ1 = one
 !arrays
  real(dp),allocatable :: eigen_in(:)
-
 !----------------------------------------------------------------------
 
  ABI_MALLOC(eigen_in, (self%nq_k))
@@ -892,8 +883,8 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
  class(ephwg_t),intent(in) :: self
  logical, optional, intent(in) :: use_bzsum
 !arrays
- complex(dpc),intent(in) :: zvals(nz, nbcalc)
- complex(dpc),intent(out) :: cweights(nz, 2, nbcalc, self%nq_k)
+ complex(dp),intent(in) :: zvals(nz, nbcalc)
+ complex(dp),intent(out) :: cweights(nz, 2, nbcalc, self%nq_k)
  real(dp),optional,intent(in) :: erange(2)
 
 !Local variables-------------------------------
@@ -976,7 +967,6 @@ subroutine ephwg_free(self)
 
 !Arguments ------------------------------------
  class(ephwg_t),intent(inout) :: self
-
 !----------------------------------------------------------------------
 
  ! integer

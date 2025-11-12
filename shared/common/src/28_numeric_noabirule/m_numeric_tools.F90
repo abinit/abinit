@@ -6,7 +6,7 @@
 !!  This module contains basic tools for numeric computations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2022 ABINIT group (MG, GMR, MJV, XG, MVeithen, NH, FJ, MT, DCS, FrD, Olevano, Reining, Sottile, AL)
+!! Copyright (C) 2008-2025 ABINIT group (MG, GMR, MJV, XG, MVeithen, NH, FJ, MT, DCS, FrD, Olevano, Reining, Sottile, AL)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,7 +32,7 @@ MODULE m_numeric_tools
 
  private
 
- public :: arth                  ! Return an arithmetic progression
+ public :: arth                  ! Return an arithmetic progression.
  public :: linspace              ! Similar to the above but with start, stop and num of division
  public :: geop                  ! Return a geometric progression
  public :: reverse               ! Reverse a 1D array *IN PLACE*
@@ -50,7 +50,7 @@ MODULE m_numeric_tools
  public :: imax_loc              ! Index of maxloc on an array returned as scalar instead of array-valued quantity
  public :: imin_loc              ! Index of minloc on an array returned as scalar instead of array-valued quantity
  public :: lfind                 ! Find the index of the first occurrence of .True. in a logical array.
- public :: list2blocks           ! Given a list of integers, find the number of contiguos groups of values.
+ public :: list2blocks           ! Given a list of integers, find the number of contiguous groups of values.
  public :: mask2blocks           ! Find groups of .TRUE. elements in a logical mask.
  public :: linfit                ! Perform a linear fit, y = ax + b, of data
  public :: llsfit_svd            ! Linear least squares fit with SVD of an user-defined set of functions
@@ -62,8 +62,7 @@ MODULE m_numeric_tools
  public :: coeffs_gausslegint    ! Compute the coefficients (supports and weights) for Gauss-Legendre integration.
  public :: simpson_cplx          ! Integrate a complex function via extended Simpson's rule.
  public :: hermitianize          ! Force a square matrix to be hermitian
- public :: mkherm                ! Make the complex array(2,ndim,ndim) hermitian, by adding half of it
-                                 ! to its hermitian conjugate.
+ public :: mkherm                ! Make the complex array(2,ndim,ndim) hermitian, by adding half of it to its hermitian conjugate.
  public :: hermit                ! Rdefine diagonal elements of packed matrix to impose Hermiticity.
  public :: symmetrize            ! Force a square matrix to be symmetric
  public :: pack_matrix           ! Packs a matrix into hermitian format
@@ -80,15 +79,15 @@ MODULE m_numeric_tools
  public :: cmplx_sphcart         ! Convert an array of cplx numbers from spherical to Cartesian coordinates or vice versa.
  public :: pfactorize            ! Factorize a number in terms of an user-specified set of prime factors.
  public :: isordered             ! Check the ordering of a sequence.
- public :: wrap2_zero_one        ! Transforms a real number in a reduced number in the interval [0,1[
-                                 ! where 1 is not included (tol12)
- public :: wrap2_pmhalf          ! Transforms a real number in areduced number in the interval ]-1/2,1/2]
-                                 ! where -1/2 is not included (tol12)
+ public :: wrap2_zero_one        ! Transforms a real number in a reduced number in the interval [0,1[ ! where 1 is not included (tol12)
+ public :: wrap2_pmhalf          ! Transforms a real number in areduced number in the interval ]-1/2,1/2] ! where -1/2 is not included (tol12)
+ public :: interpol1d            ! Linear interpolation in 1D
+ public :: interpol1d_c          ! Linear interpolation in 1D for complex data
  public :: interpol3d_0d         ! Linear interpolation in 3D
  public :: interpol3d_1d         ! Linear interpolation in 3D for an array
- public :: interpol3d_indices    ! Computes the indices in a cube which are neighbors to the point
-                                 ! to be interpolated in interpol3d
+ public :: interpol3d_indices    ! Computes the indices in a cube which are neighbors to the point to be interpolated in interpol3d
  public :: interpolate_denpot    ! Liner interpolation of scalar field e.g. density of potential
+ public :: interpolate_ur        ! Liner interpolation of complex wavefunctions (single and double precision version)
  public :: simpson_int           ! Simpson integral of a tabulated function. Returns arrays with integrated values
  public :: simpson               ! Simpson integral of a tabulated function. Returns scalar with the integral on the full mesh.
  public :: rhophi                ! Compute the phase and the module of a complex number.
@@ -100,7 +99,8 @@ MODULE m_numeric_tools
  public :: kramerskronig         ! check or apply the Kramers Kronig relation
  public :: invcb                 ! Compute a set of inverse cubic roots as fast as possible.
  public :: safe_div              ! Performs 'save division' that is to prevent overflow, underflow, NaN or infinity errors
- public :: bool2index            ! Allocate and return array with the indices in a boolean array that evaluates to .True.
+ public :: bool2index            ! Allocate and return array with the indices in the input boolean array that evaluates to .True.
+ public :: polynomial_regression ! Perform a polynomial regression on incoming data points
  public :: blocked_loop          ! Helper function to implement blocked algorithms inside do loops.
 
  !MG FIXME: deprecated: just to avoid updating refs while refactoring.
@@ -127,6 +127,11 @@ MODULE m_numeric_tools
    module procedure get_trace_rdp
    module procedure get_trace_cdp
  end interface get_trace
+
+ interface interpolate_ur
+   module procedure interpolate_ur_spc
+   module procedure interpolate_ur_dpc
+ end interface interpolate_ur
 
  !interface cart_prod33
  !  module procedure cart_prod33_int
@@ -173,6 +178,7 @@ MODULE m_numeric_tools
    module procedure cdp2rdp_3D
    module procedure cdp2rdp_4D
    module procedure cdp2rdp_5D
+   module procedure cdp2rdp_6D
  end interface c2r
 
  interface isinteger
@@ -249,7 +255,7 @@ MODULE m_numeric_tools
 !!
 !! SOURCE
 
- type,public :: stats_t
+ type, public :: stats_t
    real(dp) :: mean
    real(dp) :: stdev
    real(dp) :: min
@@ -576,7 +582,6 @@ pure subroutine unit_matrix_rdp(matrix)
  real(dp),intent(inout) :: matrix(:,:)
 
 !Local variables-------------------------------
-!scalars
  integer :: ii,nn
 ! *********************************************************************
 
@@ -606,10 +611,9 @@ end subroutine unit_matrix_rdp
 pure subroutine unit_matrix_cdp(matrix)
 
 !Arguments ------------------------------------
- complex(dpc),intent(inout) :: matrix(:,:)
+ complex(dp),intent(inout) :: matrix(:,:)
 
 !Local variables-------------------------------
-!scalars
  integer :: ii,nn
 ! *********************************************************************
 
@@ -639,14 +643,12 @@ end subroutine unit_matrix_cdp
 !!
 !! SOURCE
 
-pure function get_trace_int(matrix) result(trace)
+integer pure function get_trace_int(matrix) result(trace)
 
 !Arguments ------------------------------------
- integer :: trace
  integer,intent(in) :: matrix(:,:)
 
 !Local variables-------------------------------
-!scalars
  integer :: ii
 ! *********************************************************************
 
@@ -675,14 +677,12 @@ end function get_trace_int
 !!
 !! SOURCE
 
-pure function get_trace_rdp(matrix) result(trace)
+real(dp) pure function get_trace_rdp(matrix) result(trace)
 
 !Arguments ------------------------------------
- real(dp) :: trace
  real(dp),intent(in) :: matrix(:,:)
 
 !Local variables-------------------------------
-!scalars
  integer :: ii
 ! *********************************************************************
 
@@ -701,7 +701,7 @@ end function get_trace_rdp
 !!  get_trace_cdp
 !!
 !! FUNCTION
-!!  Calculate the trace of a square matrix (complex(dpc) version)
+!!  Calculate the trace of a square matrix (complex(dp) version)
 !!
 !! INPUTS
 !!
@@ -709,14 +709,12 @@ end function get_trace_rdp
 !!
 !! SOURCE
 
-pure function get_trace_cdp(matrix) result(trace)
+complex(dp) pure function get_trace_cdp(matrix) result(trace)
 
 !Arguments ------------------------------------
- complex(dpc) :: trace
- complex(dpc),intent(in) :: matrix(:,:)
+ complex(dp),intent(in) :: matrix(:,:)
 
 !Local variables-------------------------------
-!scalars
  integer :: ii
 ! *********************************************************************
 
@@ -818,8 +816,8 @@ function get_diag_cdp(cmat) result(cdiag)
 
 !Arguments ------------------------------------
 !scalars
- complex(dpc),intent(in) :: cmat(:,:)
- complex(dpc) :: cdiag(SIZE(cmat,1))
+ complex(dp),intent(in) :: cmat(:,:)
+ complex(dp) :: cdiag(SIZE(cmat,1))
 
 !Local variables-------------------------------
  integer :: ii
@@ -875,7 +873,7 @@ end function isdiagmat_int
 !!  isdiagmat_rdp
 !!
 !! FUNCTION
-!!  True if matrix mat is diagonal withing the given absolute tolerance (default: tol12)
+!!  True if matrix mat is diagonal within the given absolute tolerance (default: tol12)
 !!
 !! SOURCE
 
@@ -958,7 +956,6 @@ pure function l2int_2D(larr) result(int_arr)
 !scalars
  logical,intent(in) :: larr(:,:)
  integer :: int_arr(size(larr,1), size(larr,2))
-
 ! *********************************************************************
 
  where (larr)
@@ -990,7 +987,6 @@ pure function l2int_3D(larr) result(int_arr)
 !scalars
  logical,intent(in) :: larr(:,:,:)
  integer :: int_arr(size(larr,1), size(larr,2), size(larr,3))
-
 ! *********************************************************************
 
  where (larr)
@@ -1024,11 +1020,10 @@ pure function rdp2cdp_1D(rr) result(cc)
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: rr(:,:)
- complex(dpc) :: cc(SIZE(rr,2))
-
+ complex(dp) :: cc(SIZE(rr,2))
 ! *********************************************************************
 
- cc(:)=CMPLX(rr(1,:),rr(2,:),kind=dpc)
+ cc(:)=CMPLX(rr(1,:),rr(2,:),kind=dp)
 
 end function rdp2cdp_1D
 !!***
@@ -1052,11 +1047,10 @@ pure function rdp2cdp_2D(rr) result(cc)
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: rr(:,:,:)
- complex(dpc) :: cc(SIZE(rr,2),SIZE(rr,3))
-
+ complex(dp) :: cc(SIZE(rr,2),SIZE(rr,3))
 ! *********************************************************************
 
- cc(:,:)=CMPLX(rr(1,:,:),rr(2,:,:), kind=dpc)
+ cc(:,:)=CMPLX(rr(1,:,:),rr(2,:,:), kind=dp)
 
 end function rdp2cdp_2D
 !!***
@@ -1080,11 +1074,10 @@ pure function rdp2cdp_3D(rr) result(cc)
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: rr(:,:,:,:)
- complex(dpc) :: cc(SIZE(rr,2),SIZE(rr,3),SIZE(rr,4))
-
+ complex(dp) :: cc(SIZE(rr,2),SIZE(rr,3),SIZE(rr,4))
 ! *********************************************************************
 
- cc(:,:,:)=CMPLX(rr(1,:,:,:),rr(2,:,:,:), kind=dpc)
+ cc(:,:,:)=CMPLX(rr(1,:,:,:),rr(2,:,:,:), kind=dp)
 
 end function rdp2cdp_3D
 !!***
@@ -1108,11 +1101,10 @@ pure function rdp2cdp_4D(rr) result(cc)
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: rr(:,:,:,:,:)
- complex(dpc) :: cc(SIZE(rr,2),SIZE(rr,3),SIZE(rr,4),SIZE(rr,5))
-
+ complex(dp) :: cc(SIZE(rr,2),SIZE(rr,3),SIZE(rr,4),SIZE(rr,5))
 ! *********************************************************************
 
- cc(:,:,:,:)=CMPLX(rr(1,:,:,:,:),rr(2,:,:,:,:), kind=dpc)
+ cc(:,:,:,:)=CMPLX(rr(1,:,:,:,:),rr(2,:,:,:,:), kind=dp)
 
 end function rdp2cdp_4D
 !!***
@@ -1136,11 +1128,10 @@ pure function rdp2cdp_5D(rr) result(cc)
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: rr(:,:,:,:,:,:)
- complex(dpc) :: cc(SIZE(rr,2),SIZE(rr,3),SIZE(rr,4),SIZE(rr,5),SIZE(rr,6))
-
+ complex(dp) :: cc(SIZE(rr,2),SIZE(rr,3),SIZE(rr,4),SIZE(rr,5),SIZE(rr,6))
 ! *********************************************************************
 
- cc(:,:,:,:,:)=CMPLX(rr(1,:,:,:,:,:),rr(2,:,:,:,:,:), kind=dpc)
+ cc(:,:,:,:,:)=CMPLX(rr(1,:,:,:,:,:),rr(2,:,:,:,:,:), kind=dp)
 
 end function rdp2cdp_5D
 !!***
@@ -1164,11 +1155,10 @@ pure function rdp2cdp_6D(rr) result(cc)
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: rr(:,:,:,:,:,:,:)
- complex(dpc) :: cc(SIZE(rr,2),SIZE(rr,3),SIZE(rr,4),SIZE(rr,5),SIZE(rr,6),SIZE(rr,7))
-
+ complex(dp) :: cc(SIZE(rr,2),SIZE(rr,3),SIZE(rr,4),SIZE(rr,5),SIZE(rr,6),SIZE(rr,7))
 ! *********************************************************************
 
- cc(:,:,:,:,:,:)=CMPLX(rr(1,:,:,:,:,:,:),rr(2,:,:,:,:,:,:), kind=dpc)
+ cc(:,:,:,:,:,:)=CMPLX(rr(1,:,:,:,:,:,:),rr(2,:,:,:,:,:,:), kind=dp)
 
 end function rdp2cdp_6D
 !!***
@@ -1195,9 +1185,8 @@ pure function cdp2rdp_0D(cc) result(rr)
 
 !Arguments ------------------------------------
 !scalars
- complex(dpc),intent(in) :: cc
+ complex(dp),intent(in) :: cc
  real(dp) :: rr(2)
-
 ! *********************************************************************
 
  rr(1)=REAL (cc)
@@ -1226,10 +1215,8 @@ end function cdp2rdp_0D
 pure function cdp2rdp_1D(cc) result(rr)
 
 !Arguments ------------------------------------
-!scalars
- complex(dpc),intent(in) :: cc(:)
+ complex(dp),intent(in) :: cc(:)
  real(dp) :: rr(2,SIZE(cc))
-
 ! *********************************************************************
 
  rr(1,:)=REAL (cc(:))
@@ -1245,18 +1232,14 @@ end function cdp2rdp_1D
 !!  cdp2rdp_2D
 !!
 !! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
+!!  Create a real array containing real and imaginary part starting from a complex array
 !!
 !! SOURCE
 
 pure function cdp2rdp_2D(cc) result(rr)
 
 !Arguments ------------------------------------
-!scalars
- complex(dpc),intent(in) :: cc(:,:)
+ complex(dp),intent(in) :: cc(:,:)
  real(dp) :: rr(2,SIZE(cc,1),SIZE(cc,2))
 ! *********************************************************************
 
@@ -1273,20 +1256,15 @@ end function cdp2rdp_2D
 !!  cdp2rdp_3D
 !!
 !! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
+!!  Create a real array containing real and imaginary part starting from a complex array
 !!
 !! SOURCE
 
 pure function cdp2rdp_3D(cc) result(rr)
 
 !Arguments ------------------------------------
-!scalars
- complex(dpc),intent(in) :: cc(:,:,:)
+ complex(dp),intent(in) :: cc(:,:,:)
  real(dp) :: rr(2,SIZE(cc,1),SIZE(cc,2),SIZE(cc,3))
-
 ! *********************************************************************
 
  rr(1,:,:,:)=REAL (cc(:,:,:))
@@ -1302,18 +1280,14 @@ end function cdp2rdp_3D
 !!  cdp2rdp_4D
 !!
 !! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
+!!  Create a real array containing real and imaginary part starting from a complex array
 !!
 !! SOURCE
 
 pure function cdp2rdp_4D(cc) result(rr)
 
 !Arguments ------------------------------------
-!scalars
- complex(dpc),intent(in) :: cc(:,:,:,:)
+ complex(dp),intent(in) :: cc(:,:,:,:)
  real(dp) :: rr(2,SIZE(cc,1),SIZE(cc,2),SIZE(cc,3),SIZE(cc,4))
 ! *********************************************************************
 
@@ -1330,26 +1304,43 @@ end function cdp2rdp_4D
 !!  cdp2rdp_5D
 !!
 !! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
+!!  Create a real array containing real and imaginary part starting from a complex array
 !!
 !! SOURCE
 
 pure function cdp2rdp_5D(cc) result(rr)
 
 !Arguments ------------------------------------
-!scalars
- complex(dpc),intent(in) :: cc(:,:,:,:,:)
+ complex(dp),intent(in) :: cc(:,:,:,:,:)
  real(dp) :: rr(2,SIZE(cc,1),SIZE(cc,2),SIZE(cc,3),SIZE(cc,4),SIZE(cc,5))
-
 ! *********************************************************************
 
  rr(1,:,:,:,:,:)=REAL (cc(:,:,:,:,:))
  rr(2,:,:,:,:,:)=AIMAG(cc(:,:,:,:,:))
 
 end function cdp2rdp_5D
+!!***
+
+!!****f* m_numeric_tools/cdp2rdp_6D
+!! NAME
+!!  cdp2rdp_6D
+!!
+!! FUNCTION
+!!  Create a real array containing real and imaginary part starting from a complex array
+!!
+!! SOURCE
+
+pure function cdp2rdp_6D(cc) result(rr)
+
+!Arguments ------------------------------------
+ complex(dp),intent(in) :: cc(:,:,:,:,:,:)
+ real(dp) :: rr(2,SIZE(cc,1),SIZE(cc,2),SIZE(cc,3),SIZE(cc,4),SIZE(cc,5),SIZE(cc,6))
+! *********************************************************************
+
+ rr(1,:,:,:,:,:,:)=REAL (cc(:,:,:,:,:,:))
+ rr(2,:,:,:,:,:,:)=AIMAG(cc(:,:,:,:,:,:))
+
+end function cdp2rdp_6D
 !!***
 
 !----------------------------------------------------------------------
@@ -1399,7 +1390,6 @@ pure function is_integer_0d(rr,tol) result(ans)
  logical :: ans
 !arrays
  real(dp),intent(in) :: rr
-
 ! *************************************************************************
 
  ans=(ABS(rr-NINT(rr))<tol)
@@ -1429,7 +1419,6 @@ pure function is_integer_1d(rr,tol) result(ans)
  logical :: ans
 !arrays
  real(dp),intent(in) :: rr(:)
-
 ! *************************************************************************
 
  ans=ALL((ABS(rr-NINT(rr))<tol))
@@ -1819,7 +1808,6 @@ integer pure function lfind(mask, back)
 !scalars
  integer :: ii,nitems
  logical :: do_back
-
 !************************************************************************
 
  do_back = .False.; if (present(back)) do_back = back
@@ -1851,7 +1839,7 @@ end function lfind
 !!  list2blocks
 !!
 !! FUNCTION
-!!  Given a list of integers, find the number of contiguos groups of values.
+!!  Given a list of integers, find the number of contiguous groups of values.
 !!  and returns the set of indices that can be used to loop over these groups
 !!  Example list = [1,2,3,5,6] --> blocks = [[1,3], [4,5]]
 !!
@@ -1882,7 +1870,6 @@ subroutine list2blocks(list,nblocks,blocks)
  integer :: ii,nitems
 !arrays
  integer :: work(2,size(list))
-
 !************************************************************************
 
  nitems = size(list)
@@ -1919,7 +1906,7 @@ end subroutine list2blocks
 !!  mask2blocks
 !!
 !! FUNCTION
-!!  Give a logical mask, find the number of contiguos groups of .TRUE. values.
+!!  Give a logical mask, find the number of contiguous groups of .TRUE. values.
 !!  and return the set of indices that can be used to loop over these groups
 !!
 !! INPUTS
@@ -1950,7 +1937,6 @@ subroutine mask2blocks(mask,nblocks,blocks)
  logical :: inblock
 !arrays
  integer :: work(2,SIZE(mask))
-
 !************************************************************************
 
  ! Find first element.
@@ -2081,15 +2067,14 @@ function linfit_spc(nn,xx,zz,aa,bb) result(res)
  integer,intent(in) :: nn
  real(dp) :: res
  real(dp),intent(in) :: xx(nn)
- complex(spc),intent(in) :: zz(nn)
- complex(spc),intent(out) :: aa,bb
-!arrays
+ complex(sp),intent(in) :: zz(nn)
+ complex(sp),intent(out) :: aa,bb
 
 !Local variables-------------------------------
 !scalars
  integer :: ii
  real(dp) :: sx,sx2,msrt
- complex(dpc) :: sz,sxz
+ complex(dp) :: sz,sxz
 ! *************************************************************************
 
  sx=zero ; sx2=zero ; msrt=zero
@@ -2101,8 +2086,8 @@ function linfit_spc(nn,xx,zz,aa,bb) result(res)
   sx2=sx2+xx(ii)*xx(ii)
  end do
 
- aa=CMPLX((nn*sxz-sx*sz)/(nn*sx2-sx*sx), kind=spc)
- bb=CMPLX(sz/nn-sx*aa/nn, kind=spc)
+ aa=CMPLX((nn*sxz-sx*sz)/(nn*sx2-sx*sx), kind=sp)
+ bb=CMPLX(sz/nn-sx*aa/nn, kind=sp)
 
  do ii=1,nn
   msrt=msrt+ABS(zz(ii)-aa*xx(ii)-bb)**2
@@ -2134,15 +2119,15 @@ function linfit_dpc(nn,xx,zz,aa,bb) result(res)
  integer,intent(in) :: nn
  real(dp) :: res
  real(dp),intent(in) :: xx(nn)
- complex(dpc),intent(in) :: zz(nn)
- complex(dpc),intent(out) :: aa,bb
+ complex(dp),intent(in) :: zz(nn)
+ complex(dp),intent(out) :: aa,bb
 !arrays
 
 !Local variables-------------------------------
 !scalars
  integer :: ii
  real(dp) :: sx,sx2,msrt
- complex(dpc) :: sz,sxz
+ complex(dp) :: sz,sxz
 ! *************************************************************************
 
  sx=zero  ; sx2=zero ; msrt=zero
@@ -2199,7 +2184,6 @@ subroutine llsfit_svd(xx,yy,sigma,nfuncs,funcs,chisq,par,var,cov,info)
  interface
   function funcs(xx,nf)
   use defs_basis
-  implicit none
   real(dp),intent(in) :: xx
   integer,intent(in) :: nf
   real(dp) :: funcs(nf)
@@ -2291,7 +2275,7 @@ end subroutine llsfit_svd
 !!  dy=error estimate
 !!
 !! NOTES
-!!  Based on the polint routine reported in Numerical Recipies
+!!  Based on the polint routine reported in Numerical Recipes
 !!
 !! SOURCE
 
@@ -2569,7 +2553,6 @@ end subroutine trapezoidal_
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: xx(:)
-
 !************************************************************************
 
  select case (nn)
@@ -2666,8 +2649,7 @@ recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,np
  real(dp) :: TOL
  character(len=500) :: msg
 !arrays
- real(dp),allocatable :: h(:),s(:)
- real(dp),allocatable :: wx(:),xx(:)
+ real(dp),allocatable :: h(:),s(:), wx(:),xx(:)
 ! *************************************************************************
 
  ierr = 0
@@ -2849,7 +2831,6 @@ subroutine ctrap(imax,ff,hh,ans)
 !scalars
  integer :: ir,ir2
  real(dp) :: endpt,sum
-
 ! *************************************************************************
 
  if (imax>=10)then
@@ -3009,7 +2990,6 @@ subroutine cspint ( ftab, xtab, ntab, a, b, y, e, work, result )
   real(dp) :: s
   real(dp) :: term
   real(dp) :: u
-
 !************************************************************************
 
   if ( ntab < 3 ) then
@@ -3155,7 +3135,6 @@ subroutine coeffs_gausslegint(xmin,xmax,x,weights,n)
  real(dp),parameter :: tol=1.d-13
  real(dp),parameter :: pi=4.d0*atan(1.d0)
  real(dp) :: z,z1,xmean,p1,p2,p3,pp,xl
-
 !************************************************************************
 
  xl=(xmax-xmin)*0.5d0
@@ -3220,14 +3199,13 @@ function simpson_cplx(npts,step,ff)
 !scalars
  integer,intent(in) :: npts
  real(dp),intent(in)  :: step
- complex(dpc),intent(in) :: ff(npts)
- complex(dpc) :: simpson_cplx
+ complex(dp),intent(in) :: ff(npts)
+ complex(dp) :: simpson_cplx
 
 !Local variables ------------------------------
 !scalars
  integer :: ii,my_n
- complex(dpc) :: sum_even, sum_odd
-
+ complex(dp) :: sum_even, sum_odd
 !************************************************************************
 
  my_n=npts; if ((npts/2)*2 == npts) my_n=npts-3
@@ -3286,13 +3264,13 @@ subroutine hermitianize_spc(mat,uplo)
 !scalars
  character(len=*),intent(in) :: uplo
 !arrays
- complex(spc),intent(inout) :: mat(:,:)
+ complex(sp),intent(inout) :: mat(:,:)
 
 !Local variables-------------------------------
 !scalars
  integer :: nn,ii,jj
 !arrays
- complex(spc),allocatable :: tmp(:)
+ complex(sp),allocatable :: tmp(:)
 ! *************************************************************************
 
  nn = assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',__FILE__,__LINE__)
@@ -3370,13 +3348,13 @@ subroutine hermitianize_dpc(mat,uplo)
 !scalars
  character(len=*),intent(in) :: uplo
 !arrays
- complex(dpc),intent(inout) :: mat(:,:)
+ complex(dp),intent(inout) :: mat(:,:)
 
 !Local variables-------------------------------
 !scalars
  integer :: nn,ii,jj
 !arrays
- complex(dpc),allocatable :: tmp(:)
+ complex(dp),allocatable :: tmp(:)
 ! *************************************************************************
 
  nn = assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',__FILE__,__LINE__)
@@ -3400,7 +3378,7 @@ subroutine hermitianize_dpc(mat,uplo)
        if (ii/=jj) then
          mat(jj,ii) = DCONJG(mat(ii,jj))
        else
-         mat(ii,ii) = CMPLX(DBLE(mat(ii,ii)),zero, kind=dpc)
+         mat(ii,ii) = CMPLX(DBLE(mat(ii,ii)),zero, kind=dp)
        end if
      end do
    end do
@@ -3411,7 +3389,7 @@ subroutine hermitianize_dpc(mat,uplo)
       if (ii/=jj) then
         mat(ii,jj) = DCONJG(mat(jj,ii))
       else
-        mat(ii,ii) = CMPLX(REAL(mat(ii,ii)),zero, kind=dpc)
+        mat(ii,ii) = CMPLX(REAL(mat(ii,ii)),zero, kind=dp)
       end if
     end do
   end do
@@ -3453,7 +3431,6 @@ pure subroutine mkherm(array,ndim)
 !Local variables -------------------------
 !scalars
  integer :: i1,i2
-
 ! *********************************************************************
 
  do i1=1,ndim
@@ -3511,17 +3488,16 @@ subroutine hermit(chmin, chmout, ierr, ndim)
 !Local variables-------------------------------
 !scalars
  integer,save :: mmesgs=20,nmesgs=0
- integer :: idim,merrors,nerrors
+ integer :: idim,max_errors,nerrors
  real(dp),parameter :: eps=epsilon(0.0d0)
- real(dp) :: ch_im,ch_re,moduls,tol
+ real(dp) :: ch_im,ch_re,modules,tol
  character(len=500) :: msg
-
 ! *************************************************************************
 
  tol=4096.0d0*eps
 
  ierr=0
- merrors=0
+ max_errors=0
 
 !Copy matrix into possibly new location
  chmout(:)=chmin(:)
@@ -3541,7 +3517,7 @@ subroutine hermit(chmin, chmout, ierr, ndim)
    if( (abs(ch_im) > tol .and. nmesgs<mmesgs) .or. nerrors==2)then
      write(msg, '(3a,i0,a,es20.12,a,es20.12,a)' )&
      ' Input Hermitian matrix has nonzero relative Im part on diagonal:',ch10,&
-     ' for component:',idim,' Im part is: ',ch_im,', Re part is: ',ch_re,'.'
+     ' for component: ',idim,' Im part is: ',ch_im,', Re part is: ',ch_re,'.'
      call wrtout(std_out,msg)
      nmesgs=nmesgs+1
    end if
@@ -3549,25 +3525,24 @@ subroutine hermit(chmin, chmout, ierr, ndim)
    if( ( abs(ch_im) > tol8*abs(ch_re) .and. nmesgs<mmesgs) .or. nerrors==2)then
      write(msg, '(3a,i0,a,es20.12,a,es20.12,a)' )&
      ' Input Hermitian matrix has nonzero relative Im part on diagonal:',ch10,&
-     ' for component',idim,' Im part is',ch_im,', Re part is',ch_re,'.'
+     ' for component: ',idim,' Im part is',ch_im,', Re part is',ch_re,'.'
      call wrtout(std_out,msg)
      nmesgs=nmesgs+1
    end if
 
 !  compute modulus $= (\Re^2+\Im^2)^{1/2}$
-   moduls=sqrt(ch_re**2+ch_im**2)
+   modules=sqrt(ch_re**2+ch_im**2)
 
 !  set Re part to modulus with sign of original Re part
-   chmout(idim*idim+idim-1)=sign(moduls,ch_re)
+   chmout(idim*idim+idim-1)=sign(modules,ch_re)
 
 !  set Im part to 0
    chmout(idim*idim+idim)=zero
 
-   merrors=max(merrors,nerrors)
-
+   max_errors=max(max_errors,nerrors)
  end do
 
- if(merrors==2)then
+ if (max_errors==2)then
    ierr=1
    write(msg, '(3a)' )&
     'Imaginary part(s) of diagonal Hermitian matrix element(s) is too large.',ch10,&
@@ -3608,13 +3583,13 @@ subroutine symmetrize_spc(mat,uplo)
 !scalars
  character(len=*),intent(in) :: uplo
 !arrays
- complex(spc),intent(inout) :: mat(:,:)
+ complex(sp),intent(inout) :: mat(:,:)
 
 !Local variables-------------------------------
 !scalars
  integer :: nn,ii,jj
 !arrays
- complex(spc),allocatable :: tmp(:)
+ complex(sp),allocatable :: tmp(:)
 ! *************************************************************************
 
  nn = assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',__FILE__,__LINE__)
@@ -3683,13 +3658,13 @@ subroutine symmetrize_dpc(mat, uplo)
 !scalars
  character(len=*),intent(in) :: uplo
 !arrays
- complex(dpc),intent(inout) :: mat(:,:)
+ complex(dp),intent(inout) :: mat(:,:)
 
 !Local variables-------------------------------
 !scalars
  integer :: nn,ii,jj
 !arrays
- complex(dpc),allocatable :: tmp(:)
+ complex(dp),allocatable :: tmp(:)
 ! *************************************************************************
 
  nn = assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',__FILE__,__LINE__)
@@ -3754,7 +3729,6 @@ subroutine pack_matrix(mat_in, mat_out, N, cplx)
 
 !Local variables-------------------------------
  integer :: isubh, i, j
-
 ! *************************************************************************
 
  isubh = 1
@@ -3795,7 +3769,6 @@ integer function check_vec_conjg(nn, vec1, vec2, abs_diff, abs_tol) result(ierr)
 !Local variables-------------------------------
  integer :: ii
  real(dp) :: my_abs_tol
-
  ! *************************************************************************
 
  my_abs_tol = tol6; if (present(abs_tol)) my_abs_tol = abs_tol
@@ -3823,11 +3796,7 @@ end function check_vec_conjg
 !!
 !! INPUTS
 !!  arr(:)=vector/matrix to be printed
-!!  mode_paral(optional)=parallel mode, DEFAULT is "COLL"
-!!   "COLL" if all procs are calling the routine with the same message to be written only once
-!!   "PERS" if the procs are calling the routine with different mesgs each to be written,
-!!          or if one proc is calling the routine
-!!  unit(optional)=the unit number of the file, DEFAULT=std_out
+!!  units(:)=unit numbers
 !!  max_r,max_c(optional)=Max number of rows and columns to be printed
 !!   (DEFAULT is 9, output format assumes to be less that 99, but there might be
 !!    problems with wrtout if message size exceeds 500 thus max number of elements should be ~60)
@@ -3837,44 +3806,34 @@ end function check_vec_conjg
 !!
 !! SOURCE
 
-subroutine print_arr1d_spc(arr,max_r,unit,mode_paral)
+subroutine print_arr1d_spc(units, arr, max_r)
 
 !Arguments ------------------------------------
 !scalars
- integer,optional,intent(in) :: unit,max_r
- character(len=4),optional,intent(in) :: mode_paral
+ integer,intent(in) :: units(:)
+ integer,optional,intent(in) :: max_r
 !arrays
- complex(spc),intent(in) :: arr(:)
+ complex(sp),intent(in) :: arr(:)
 
 !Local variables-------------------------------
 !scalars
- integer :: unt,ii,nr,mr
- character(len=4) :: mode
+ integer :: ii, nr, mr
  character(len=500) :: msg
  character(len=100) :: fmth,fmt1
 ! *************************************************************************
 
- unt=std_out ; if (PRESENT(unit      )) unt=unit
- mode='COLL' ; if (PRESENT(mode_paral)) mode=mode_paral
  mr=15       ; if (PRESENT(max_r     )) mr=max_r
-
- if (mode/='COLL'.and.mode/='PERS') then
-  write(msg,'(2a)')' Wrong value of mode_paral ',mode
-  ABI_BUG(msg)
- end if
- !
- ! === Print out matrix ===
- nr=SIZE(arr,DIM=1) ; if (mr>nr) mr=nr
+ nr=SIZE(arr,DIM=1); if (mr>nr) mr=nr
 
  write(fmth,*)'(6x,',mr,'(i2,6x))'
  write(fmt1,*)'(3x,',mr,'f8.3)'
 
  write(msg,fmth)(ii,ii=1,mr)
- call wrtout(unt,msg,mode) !header
+ call wrtout(units, msg) !header
  write(msg,fmt1)REAL (arr(1:mr))
- call wrtout(unt,msg,mode) !real part
+ call wrtout(units, msg) !real part
  write(msg,fmt1)AIMAG(arr(1:mr))
- call wrtout(unt,msg,mode) !imag part
+ call wrtout(units, msg) !imag part
 
 end subroutine print_arr1d_spc
 !!***
@@ -3893,31 +3852,23 @@ end subroutine print_arr1d_spc
 !!
 !! SOURCE
 
-subroutine print_arr1d_dpc(arr, max_r, unit, mode_paral)
+subroutine print_arr1d_dpc(units, arr, max_r)
 
 !Arguments ------------------------------------
 !scalars
- integer,optional,intent(in) :: unit, max_r
- character(len=4),optional,intent(in) :: mode_paral
+ integer,intent(in) :: units(:)
+ integer,optional,intent(in) :: max_r
 !arrays
- complex(dpc),intent(in) :: arr(:)
+ complex(dp),intent(in) :: arr(:)
 
 !Local variables-------------------------------
 !scalars
- integer :: unt,ii,nr,mr
- character(len=4) :: mode
+ integer :: ii,nr,mr
  character(len=500) :: msg
  character(len=100) :: fmth,fmt1
 ! *************************************************************************
 
- unt=std_out ; if (PRESENT(unit      )) unt=unit
- mode='COLL' ; if (PRESENT(mode_paral)) mode=mode_paral
  mr=15       ; if (PRESENT(max_r     )) mr=max_r
-
- if (mode/='COLL'.and.mode/='PERS') then
-  write(msg,'(2a)')' Wrong value of mode_paral ',mode
-  ABI_BUG(msg)
- end if
 
  ! Print out matrix.
  nr=SIZE(arr,DIM=1) ; if (mr>nr) mr=nr
@@ -3926,11 +3877,11 @@ subroutine print_arr1d_dpc(arr, max_r, unit, mode_paral)
  write(fmt1,*)'(3x,',mr,'f8.3)'
 
  write(msg,fmth)(ii,ii=1,mr)
- call wrtout(unt,msg,mode) ! header
+ call wrtout(units, msg) ! header
  write(msg,fmt1)REAL (arr(1:mr))
- call wrtout(unt,msg,mode) !real part
+ call wrtout(units, msg) !real part
  write(msg,fmt1)AIMAG(arr(1:mr))
- call wrtout(unt,msg,mode) !imag part
+ call wrtout(units, msg) !imag part
 
 end subroutine print_arr1d_dpc
 !!***
@@ -3949,33 +3900,25 @@ end subroutine print_arr1d_dpc
 !!
 !! SOURCE
 
-subroutine print_arr2d_spc(arr, max_r, max_c, unit, mode_paral)
+subroutine print_arr2d_spc(units, arr, max_r, max_c)
 
 !Arguments ------------------------------------
 !scalars
- integer,optional,intent(in) :: unit, max_r, max_c
- character(len=4),optional,intent(in) :: mode_paral
+ integer,intent(in) :: units(:)
+ integer,optional,intent(in) :: max_r, max_c
 !arrays
- complex(spc),intent(in) :: arr(:,:)
+ complex(sp),intent(in) :: arr(:,:)
 
 !Local variables-------------------------------
 !scalars
- integer :: unt,ii,jj,nc,nr,mc,mr
- character(len=4) :: mode
+ integer :: ii,jj,nc,nr,mc,mr
  character(len=500) :: msg
  character(len=100) :: fmth,fmt1,fmt2
 ! *************************************************************************
 
- unt =std_out; if (PRESENT(unit      )) unt =unit
- mode='COLL' ; if (PRESENT(mode_paral)) mode=mode_paral
  mc  =9      ; if (PRESENT(max_c     )) mc  =max_c
  mr  =9      ; if (PRESENT(max_r     )) mr  =max_r
 
- if (mode/='COLL'.and.mode/='PERS') then
-   write(msg,'(2a)')'Wrong value of mode_paral ',mode
-   ABI_BUG(msg)
- end if
- !
  ! === Print out matrix ===
  nr=SIZE(arr,DIM=1); if (mr>nr) mr=nr
  nc=SIZE(arr,DIM=2); if (mc>nc) mc=nc
@@ -3985,12 +3928,12 @@ subroutine print_arr2d_spc(arr, max_r, max_c, unit, mode_paral)
  write(fmt2,*)'(5x   ,',mc,'f8.3,a)'
 
  write(msg,fmth)(jj,jj=1,mc)
- call wrtout(unt,msg,mode) !header
+ call wrtout(units, msg) !header
  do ii=1,mr
    write(msg,fmt1)ii,REAL(arr(ii,1:mc))
-   call wrtout(unt,msg,mode) !real part
+   call wrtout(units, msg) !real part
    write(msg,fmt2)  AIMAG(arr(ii,1:mc)),ch10
-   call wrtout(unt,msg,mode) !imag part
+   call wrtout(units, msg) !imag part
  end do
 
 end subroutine print_arr2d_spc
@@ -4010,33 +3953,25 @@ end subroutine print_arr2d_spc
 !!
 !! SOURCE
 
-subroutine print_arr2d_dpc(arr,max_r,max_c,unit,mode_paral)
+subroutine print_arr2d_dpc(units, arr, max_r, max_c)
 
 !Arguments ------------------------------------
 !scalars
- integer,optional,intent(in) :: unit,max_r,max_c
- character(len=4),optional,intent(in) :: mode_paral
+ integer,intent(in) :: units(:)
+ integer,optional,intent(in) :: max_r,max_c
 !arrays
- complex(dpc),intent(in) :: arr(:,:)
+ complex(dp),intent(in) :: arr(:,:)
 
 !Local variables-------------------------------
 !scalars
- integer :: unt,ii,jj,nc,nr,mc,mr
- character(len=4) :: mode
+ integer :: ii,jj,nc,nr,mc,mr
  character(len=500) :: msg
  character(len=100) :: fmth,fmt1,fmt2
 ! *************************************************************************
 
- unt =std_out; if (PRESENT(unit      )) unt =unit
- mode='COLL' ; if (PRESENT(mode_paral)) mode=mode_paral
  mc  =9      ; if (PRESENT(max_c     )) mc  =max_c
  mr  =9      ; if (PRESENT(max_r     )) mr  =max_r
 
- if (mode/='COLL'.and.mode/='PERS') then
-   write(msg,'(2a)')'Wrong value of mode_paral ',mode
-   ABI_BUG(msg)
- end if
- !
  ! === Print out matrix ===
  nr=SIZE(arr,DIM=1); if (mr>nr) mr=nr
  nc=SIZE(arr,DIM=2); if (mc>nc) mc=nc
@@ -4046,12 +3981,12 @@ subroutine print_arr2d_dpc(arr,max_r,max_c,unit,mode_paral)
  write(fmt2,*)'(5x   ,',mc,'f8.3,a)'
 
  write(msg,fmth)(jj,jj=1,mc)
- call wrtout(unt, msg, mode) ! header
+ call wrtout(units, msg) ! header
  do ii=1,mr
    write(msg,fmt1)ii,REAL(arr(ii,1:mc))
-   call wrtout(unt,msg,mode) ! real part
+   call wrtout(units, msg) ! real part
    write(msg,fmt2)  AIMAG(arr(ii,1:mc)),ch10
-   call wrtout(unt,msg,mode) ! imag part
+   call wrtout(units, msg) ! imag part
  end do
 
 end subroutine print_arr2d_dpc
@@ -4073,16 +4008,15 @@ function pade(n, z, f, zz)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
- complex(dpc),intent(in) :: zz
- complex(dpc) :: pade
+ complex(dp),intent(in) :: zz
+ complex(dp) :: pade
 !arrays
- complex(dpc),intent(in) :: z(n), f(n)
+ complex(dp),intent(in) :: z(n), f(n)
 
 !Local variables-------------------------------
 !scalars
- complex(dpc) :: a(n)
- complex(dpc) :: Az(0:n), Bz(0:n)
  integer :: i
+ complex(dp) :: a(n), Az(0:n), Bz(0:n)
 ! *************************************************************************
 
  call calculate_pade_a(a, n, z, f)
@@ -4096,10 +4030,11 @@ function pade(n, z, f, zz)
    Az(i+1)=Az(i)+(zz-z(i))*a(i+1)*Az(i-1)
    Bz(i+1)=Bz(i)+(zz-z(i))*a(i+1)*Bz(i-1)
  end do
- !write(std_out,*) 'Bz(n)',Bz(n)
- !if (REAL(Bz(n))==zero.and.AIMAG(Bz(n))==zero) write(std_out,*) ' Bz(n) ',Bz(n)
  pade=Az(n)/Bz(n)
- !write(std_out,*) 'pade_approx ', pade_approx
+
+ !write(std_out,*) 'pade_approx ', pade
+ !write(std_out,*) 'Bz(n)',Bz(n)
+ !if (real(Bz(n))==zero .and. aimag(Bz(n))==zero) write(std_out,*) ' Bz(n) ',Bz(n)
 
 end function pade
 !!***
@@ -4120,18 +4055,16 @@ function dpade(n, z, f, zz)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
- complex(dpc),intent(in) :: zz
- complex(dpc) :: dpade
+ complex(dp),intent(in) :: zz
+ complex(dp) :: dpade
 !arrays
- complex(dpc),intent(in) :: z(n),f(n)
+ complex(dp),intent(in) :: z(n),f(n)
 
 !Local variables-------------------------------
 !scalars
  integer :: i
 !arrays
- complex(dpc) :: a(n)
- complex(dpc) :: Az(0:n), Bz(0:n)
- complex(dpc) :: dAz(0:n), dBz(0:n)
+ complex(dp) :: a(n), Az(0:n), Bz(0:n), dAz(0:n), dBz(0:n)
 ! *************************************************************************
 
  call calculate_pade_a(a, n, z, f)
@@ -4179,21 +4112,21 @@ subroutine calculate_pade_a(a, n, z, f)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
- complex(dpc),intent(in) :: z(n),f(n)
- complex(dpc),intent(out) :: a(n)
+ complex(dp),intent(in) :: z(n),f(n)
+ complex(dp),intent(out) :: a(n)
 
 !Local variables-------------------------------
 !scalars
  integer :: i,j
 !arrays
- complex(dpc) :: g(n,n)
+ complex(dp) :: g(n,n)
 ! *************************************************************************
 
  g(1,1:n)=f(1:n)
 
  do i=2,n
    do j=i,n
-     if (REAL(g(i-1,j))==zero.and.AIMAG(g(i-1,j))==zero) write(std_out,*) 'g_i(z_j)',i,j,g(i,j)
+    !  if (REAL(g(i-1,j))==zero.and.AIMAG(g(i-1,j))==zero) write(std_out,*) 'g_i(z_j)',i,j,g(i,j)
      g(i,j)=(g(i-1,i-1)-g(i-1,j)) / ((z(j)-z(i-1))*g(i-1,j))
      !write(std_out,*) 'g_i(z_j)',i,j,g(i,j)
    end do
@@ -4222,7 +4155,7 @@ complex(dp) function newrap_step(z, f, df)
 
 !Arguments ------------------------------------
 !scalars
- complex(dpc),intent(in) :: z,f,df
+ complex(dp),intent(in) :: z,f,df
 
 !Local variables-------------------------------
  real(dp) :: dfm2
@@ -4360,7 +4293,6 @@ subroutine remove_copies(n_in, set_in, n_out, is_equal)
   real(dp),pointer :: rpt(:)
  end type rdp1d_pt
  type(rdp1d_pt),allocatable :: Ap(:)
-
 ! *************************************************************************
 
  ABI_MALLOC(Ap,(n_in))
@@ -4430,7 +4362,6 @@ integer function denominator(dd,ierr,tolerance)
  integer,parameter :: largest_integer = HUGE(1)
  integer :: ii
  real(dp) :: my_tol
-
 !************************************************************************
 
  ii=1
@@ -4469,7 +4400,6 @@ integer function mincm(ii,jj)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ii,jj
-
 !************************************************************************
 
  if (ii==0.or.jj==0) then
@@ -4525,19 +4455,18 @@ subroutine continued_fract(nlev,term_type,aa,bb,nz,zpts,spectrum)
  integer,intent(in) :: nlev,term_type,nz
 !arrays
  real(dp),intent(in) ::  bb(nlev)
- complex(dpc),intent(in) :: aa(nlev)
- complex(dpc),intent(in) :: zpts(nz)
- complex(dpc),intent(out) :: spectrum(nz)
+ complex(dp),intent(in) :: aa(nlev)
+ complex(dp),intent(in) :: zpts(nz)
+ complex(dp),intent(out) :: spectrum(nz)
 
 !Local variables ------------------------------
 !scalars
  integer :: it
- real(dp) ::  bb_inf,bg,bu,swap
- complex(dpc) :: aa_inf
+ real(dp) ::  bb_inf,bg,bup,swap
+ complex(dp) :: aa_inf
  character(len=500) :: msg
 !arrays
- complex(dpc),allocatable :: div(:),den(:)
-
+ complex(dp),allocatable :: div(:),den(:)
 !************************************************************************
 
  ABI_MALLOC(div,(nz))
@@ -4560,24 +4489,24 @@ subroutine continued_fract(nlev,term_type,aa,bb,nz,zpts,spectrum)
    ABI_ERROR("To be tested")
    div = zero
    if (nlev>4) then
-     bg=zero; bu=zero
+     bg=zero; bup=zero
      do it=1,nlev,2
        if (it+2<nlev) bg = bg + bb(it+2)
-       bu = bu + bb(it)
+       bup = bup + bb(it)
      end do
      bg = bg/(nlev/2+MOD(nlev,2))
-     bu = bg/((nlev+1)/2)
+     bup = bg/((nlev+1)/2)
      !if (iseven(nlev)) then
      if (.not.iseven(nlev)) then
        swap = bg
-       bg = bu
-       bu = bg
+       bg = bup
+       bup = bg
      end if
-     !write(std_out,*)nlev,bg,bu
+     !write(std_out,*)nlev,bg,bup
      !Here be careful with the sign of SQRT
      do it=1,nz
-       div(it) = half/zpts(it) * (bb(nlev)/bu)**2 * &
-&        ( (zpts(it)**2 +bu**2 -bg**2) - SQRT( (zpts(it)**2+bu**2-bg**2)**2 -four*(zpts(it)*bu)**2) )
+       div(it) = half/zpts(it) * (bb(nlev)/bup)**2 * &
+         ( (zpts(it)**2 +bup**2 -bg**2) - SQRT( (zpts(it)**2+bup**2-bg**2)**2 -four*(zpts(it)*bup)**2) )
      end do
    end if
 
@@ -4629,14 +4558,13 @@ subroutine cmplx_sphcart(carr, from, units)
  character(len=*),intent(in) :: from
  character(len=*),optional,intent(in) :: units
 !arrays
- complex(dpc),intent(inout) :: carr(:,:)
+ complex(dp),intent(inout) :: carr(:,:)
 
 !Local variables-------------------------------
 !scalars
  integer :: jj,ii
  real(dp) :: rho,theta,fact
  character(len=500) :: msg
-
 ! *************************************************************************
 
  select case (from(1:1))
@@ -4652,7 +4580,7 @@ subroutine cmplx_sphcart(carr, from, units)
      do ii=1,SIZE(carr,DIM=1)
         rho  = DBLE(carr(ii,jj))
         theta= AIMAG(carr(ii,jj)) * fact
-        carr(ii,jj) = CMPLX(rho*DCOS(theta), rho*DSIN(theta), kind=dpc)
+        carr(ii,jj) = CMPLX(rho*DCOS(theta), rho*DSIN(theta), kind=dp)
      end do
    end do
 
@@ -4671,7 +4599,7 @@ subroutine cmplx_sphcart(carr, from, units)
         else
           theta= zero
         end if
-        carr(ii,jj) = CMPLX(rho, theta*fact, kind=dpc)
+        carr(ii,jj) = CMPLX(rho, theta*fact, kind=dp)
      end do
    end do
 
@@ -4715,7 +4643,6 @@ subroutine pfactorize(nn,nfactors,pfactors,powers)
 !Local variables ------------------------------
 !scalars
  integer :: tnn,ifc,fact,ipow,maxpwr
-
 ! *************************************************************************
 
  powers=0; tnn=nn
@@ -4775,7 +4702,6 @@ function isordered_rdp(nn,arr,direction,tol) result(isord)
  integer :: ii
  real(dp) :: prev
  character(len=500) :: msg
-
 ! *************************************************************************
 
  prev = arr(1); isord =.TRUE.
@@ -4834,7 +4760,6 @@ pure function stats_eval(arr) result(stats)
 !scalars
  integer :: ii,nn
  real(dp) :: xx,x2_sum
-
 ! *************************************************************************
 
  stats%min   = +HUGE(one)
@@ -4894,7 +4819,6 @@ elemental subroutine wrap2_zero_one(num, red, shift)
 !scalars
  real(dp),intent(in) :: num
  real(dp),intent(out) :: red,shift
-
 ! *************************************************************************
 
  if (num>zero) then
@@ -4950,6 +4874,93 @@ end subroutine wrap2_pmhalf
 
 !----------------------------------------------------------------------
 
+!!***
+!!****f* m_numeric_tools/linear_interpolation
+!! NAME
+!! interpol1d
+!!
+!! FUNCTION
+!!  Perform linear interpolation of a set of points pts_o with values val_o
+!!  The points pts_o and pts_i are assumed to be ascending ordered arrays.
+!!
+!! INPUTS
+!!  npts_o=Number of points in the original array.
+!!  npts_i=Number of points in the interpolated array.
+!!  pts_o(npts_o)=Points in the original array.
+!!  pts_i(npts_i)=Points in the interpolated array.
+!!  val_o(npts_o)=Values at the points pts_o.
+!!
+!! OUTPUT
+!!  res(npts_i)=Interpolated values at the points pts_i.
+!!
+!! SOURCE
+pure function interpol1d(npts_o,npts_i,pts_o,pts_i,val_o) result(res)
+!Arguments ------------------------------------
+!arrays
+  integer,intent(in) :: npts_o, npts_i
+  real(dp),intent(in) :: pts_o(npts_o), pts_i(npts_i)
+  real(dp),intent(in) :: val_o(npts_o)
+  real(dp) :: res(npts_i)
+!Local variables-------------------------------
+!scalars
+  integer :: ii, jj
+  real(dp) :: x1, x2, y1, y2, slope
+! *************************************************************************
+
+  res = zero
+
+  do ii = 1, npts_i
+    do jj = 1, npts_o + 1
+      if (jj == npts_o + 1 .or. pts_i(ii) < pts_o(jj)) exit
+    end do
+    if (jj == 1) then
+      res(ii) = val_o(1)
+    else if (jj == npts_o + 1) then
+      res(ii) = val_o(npts_o)
+    else
+      x1 = pts_o(jj - 1)
+      x2 = pts_o(jj)
+      y1 = val_o(jj - 1)
+      y2 = val_o(jj)
+
+      if (x2 == x1) then
+        res(ii) = (y1 + y2)/2.0_dp
+      else
+        slope = (y2 - y1) / (x2 - x1)
+        res(ii) = y1 + slope * (pts_i(ii) - x1)
+      end if
+    end if
+  end do
+
+end function interpol1d
+!!***
+
+pure function interpol1d_c(npts_o,npts_i,pts_o,pts_i,val_o) result(res)
+!Arguments ------------------------------------
+!arrays
+ integer,intent(in) :: npts_o, npts_i
+ real(dp),intent(in) :: pts_o(npts_o), pts_i(npts_i)
+ complex(dp),intent(in) :: val_o(npts_o)
+ complex(dp) :: res(npts_i)
+!Local variables-------------------------------
+ real(dp) :: val_o_r(npts_o), val_o_i(npts_o), res_r(npts_i), res_i(npts_i)
+! *************************************************************************
+
+  ! Split the complex values into real and imaginary parts.
+  val_o_r = REAL(val_o, kind=dp)
+  val_o_i = AIMAG(val_o)
+
+  ! Interpolate the real part.
+  res_r = interpol1d(npts_o, npts_i, pts_o, pts_i, val_o_r)
+
+  ! Interpolate the imaginary part.
+  res_i = interpol1d(npts_o, npts_i, pts_o, pts_i, val_o_i)
+
+  ! Combine the results back into complex form.
+  res = CMPLX(res_r, res_i, kind=dp)
+end function interpol1d_c
+
+!!----------------------------------------------------------------------
 !!****f* m_numeric_tools/interpol3d_0d
 !! NAME
 !! interpol3d_0d
@@ -4971,29 +4982,26 @@ end subroutine wrap2_pmhalf
 !!
 !! SOURCE
 
-pure function interpol3d_0d(r, nr1, nr2, nr3, grid) result(res)
+pure function interpol3d_0d(rr, nr1, nr2, nr3, grid) result(res)
 
 !Arguments-------------------------------------------------------------
 !scalars
  integer,intent(in) :: nr1, nr2, nr3
  real(dp) :: res
 !arrays
- real(dp),intent(in) :: grid(nr1,nr2,nr3),r(3)
+ real(dp),intent(in) :: grid(nr1,nr2,nr3),rr(3)
 
 !Local variables--------------------------------------------------------
-!scalars
  integer :: ir1,ir2,ir3,pr1,pr2,pr3
- real(dp) :: res1,res2,res3,res4,res5,res6,res7,res8
- real(dp) :: x1,x2,x3
-
+ real(dp) :: res1,res2,res3,res4,res5,res6,res7,res8, x1,x2,x3
 ! *************************************************************************
 
- call interpol3d_indices (r,nr1,nr2,nr3,ir1,ir2,ir3, pr1,pr2,pr3)
+ call interpol3d_indices(rr, nr1, nr2, nr3, ir1, ir2, ir3, pr1, pr2, pr3)
 
-!weight
- x1=one+r(1)*nr1-real(ir1)
- x2=one+r(2)*nr2-real(ir2)
- x3=one+r(3)*nr3-real(ir3)
+ ! weight
+ x1=one+rr(1)*nr1-real(ir1)
+ x2=one+rr(2)*nr2-real(ir2)
+ x3=one+rr(3)*nr3-real(ir3)
 
 !calculation of the density value
  res1=grid(ir1, ir2, ir3) * (one-x1)*(one-x2)*(one-x3)
@@ -5025,49 +5033,47 @@ end function interpol3d_0d
 !! nr1=grid size along x
 !! nr2=grid size along y
 !! nr3=grid size along z
-!! grid(nd,nr1,nr2,nr3)=grid matrix
+!! grid(cplex,nr1,nr2,nr3)=grid matrix
 !!
 !! OUTPUT
-!! res(nd)=Interpolated value
+!! res(cplex)=Interpolated value
 !!
 !! SOURCE
 
-pure function interpol3d_1d(r, nr1, nr2, nr3, grid, nd) result(res)
+pure function interpol3d_1d(rr, nr1, nr2, nr3, grid, cplex) result(res)
 
 !Arguments-------------------------------------------------------------
 !scalars
- integer,intent(in) :: nr1, nr2, nr3, nd
- real(dp) :: res(nd)
+ integer,intent(in) :: nr1, nr2, nr3, cplex
+ real(dp) :: res(cplex)
 !arrays
- real(dp),intent(in) :: grid(nd,nr1,nr2,nr3),r(3)
+ real(dp),intent(in) :: grid(cplex, nr1, nr2, nr3), rr(3)
 
 !Local variables--------------------------------------------------------
 !scalars
  integer :: id,ir1,ir2,ir3,pr1,pr2,pr3
- real(dp) :: res1,res2,res3,res4,res5,res6,res7,res8
- real(dp) :: x1,x2,x3
-
+ real(dp) :: res1,res2,res3,res4,res5,res6,res7,res8,x1,x2,x3
 ! *************************************************************************
 
- call interpol3d_indices (r,nr1,nr2,nr3,ir1,ir2,ir3, pr1,pr2,pr3)
+ call interpol3d_indices(rr, nr1, nr2, nr3, ir1, ir2, ir3, pr1, pr2, pr3)
 
-!weight
- x1=one+r(1)*nr1-real(ir1)
- x2=one+r(2)*nr2-real(ir2)
- x3=one+r(3)*nr3-real(ir3)
+ ! weight
+ x1 = one + rr(1)*nr1 -real(ir1)
+ x2 = one + rr(2)*nr2 -real(ir2)
+ x3 = one + rr(3)*nr3 -real(ir3)
 
-!calculation of the density value
- do id=1,nd
-   res1=grid(id,ir1, ir2, ir3) * (one-x1)*(one-x2)*(one-x3)
-   res2=grid(id,pr1, ir2, ir3) * x1*(one-x2)*(one-x3)
-   res3=grid(id,ir1, pr2, ir3) * (one-x1)*x2*(one-x3)
-   res4=grid(id,ir1, ir2, pr3) * (one-x1)*(one-x2)*x3
-   res5=grid(id,pr1, pr2, ir3) * x1*x2*(one-x3)
-   res6=grid(id,ir1, pr2, pr3) * (one-x1)*x2*x3
-   res7=grid(id,pr1, ir2, pr3) * x1*(one-x2)*x3
-   res8=grid(id,pr1, pr2, pr3) * x1*x2*x3
-   res(id)=res1+res2+res3+res4+res5+res6+res7+res8
- enddo
+ ! calculation of the density value
+ do id=1,cplex
+   res1 = grid(id,ir1, ir2, ir3) * (one-x1)*(one-x2)*(one-x3)
+   res2 = grid(id,pr1, ir2, ir3) * x1*(one-x2)*(one-x3)
+   res3 = grid(id,ir1, pr2, ir3) * (one-x1)*x2*(one-x3)
+   res4 = grid(id,ir1, ir2, pr3) * (one-x1)*(one-x2)*x3
+   res5 = grid(id,pr1, pr2, ir3) * x1*x2*(one-x3)
+   res6 = grid(id,ir1, pr2, pr3) * (one-x1)*x2*x3
+   res7 = grid(id,pr1, ir2, pr3) * x1*(one-x2)*x3
+   res8 = grid(id,pr1, pr2, pr3) * x1*x2*x3
+   res(id) = res1+res2+res3+res4+res5+res6+res7+res8
+ end do
 
 end function interpol3d_1d
 !!***
@@ -5080,10 +5086,10 @@ end function interpol3d_1d
 !!
 !! FUNCTION
 !! Computes the indices in a cube which are neighbors to the point to be
-!!  interpolated in interpol3d
+!! interpolated in interpol3d
 !!
 !! INPUTS
-!! r(3)=point coordinate
+!! rr(3)=point coordinate
 !! nr1=grid size along x
 !! nr2=grid size along y
 !! nr3=grid size along z
@@ -5094,19 +5100,17 @@ end function interpol3d_1d
 !!
 !! SOURCE
 
-pure subroutine interpol3d_indices (r,nr1,nr2,nr3,ir1,ir2,ir3,pr1,pr2,pr3)
+pure subroutine interpol3d_indices(rr,nr1,nr2,nr3,ir1,ir2,ir3,pr1,pr2,pr3)
 
 !Arguments-------------------------------------------------------------
 !scalars
- integer,intent(in) :: nr1,nr2,nr3
- integer,intent(out) :: ir1,ir2,ir3
- integer,intent(out) :: pr1,pr2,pr3
+ integer,intent(in) :: nr1, nr2, nr3
+ integer,intent(out) :: ir1, ir2, ir3, pr1, pr2, pr3
 !arrays
- real(dp),intent(in) :: r(3)
+ real(dp),intent(in) :: rr(3)
 
 !Local variables-------------------------------
  real(dp) :: d1,d2,d3
-
 ! *************************************************************************
 
 !grid density
@@ -5115,9 +5119,9 @@ pure subroutine interpol3d_indices (r,nr1,nr2,nr3,ir1,ir2,ir3,pr1,pr2,pr3)
  d3=one/nr3
 
 !lower left
- ir1=int(r(1)/d1)+1
- ir2=int(r(2)/d2)+1
- ir3=int(r(3)/d3)+1
+ ir1=int(rr(1)/d1)+1
+ ir2=int(rr(2)/d2)+1
+ ir3=int(rr(3)/d3)+1
 
 !upper right
  pr1=mod(ir1+1,nr1)
@@ -5175,25 +5179,251 @@ subroutine interpolate_denpot(cplex, in_ngfft, nspden, in_rhor, out_ngfft, out_r
 !scalars
  integer :: ispden, ir1, ir2, ir3, ifft
  real(dp) :: rr(3)
-
 ! *************************************************************************
 
  ! Linear interpolation.
  do ispden=1,nspden
-   do ir3=0,out_ngfft(3)-1
-     rr(3) = DBLE(ir3)/out_ngfft(3)
-     do ir2=0,out_ngfft(2)-1
-       rr(2) = DBLE(ir2)/out_ngfft(2)
-       do ir1=0,out_ngfft(1)-1
-         rr(1) = DBLE(ir1)/out_ngfft(1)
+   do ir3=0,out_ngfft(3) - 1
+     rr(3) = dble(ir3) / out_ngfft(3)
+     do ir2=0,out_ngfft(2) - 1
+       rr(2) = dble(ir2) / out_ngfft(2)
+       do ir1=0,out_ngfft(1) - 1
+         rr(1) = dble(ir1) / out_ngfft(1)
          ifft = 1 + ir1 + ir2*out_ngfft(1) + ir3*out_ngfft(1)*out_ngfft(2)
-         out_rhor(1:cplex, ifft, ispden) = interpol3d_1d(rr, in_ngfft(1), in_ngfft(2), in_ngfft(3), in_rhor(:, :, ispden),cplex)
+         out_rhor(1:cplex, ifft, ispden) = interpol3d_1d(rr, in_ngfft(1), in_ngfft(2), in_ngfft(3), in_rhor(:,:,ispden), cplex)
        end do
      end do
    end do
  end do
 
 end subroutine interpolate_denpot
+!!***
+
+
+!!****f* m_numeric_tools/interpolate_ur_spc
+!! NAME
+!! interpolate_ur_spc
+!!
+!! FUNCTION
+!!  Linear interpolation of complex wavefunctions given on the real space FFT mesh.
+!!  Assumes array on full mesh i.e. no MPI-FFT.
+!!  Single precision version
+!!
+!! INPUTS
+!!  in_ngfft(3)=Mesh divisions of input array
+!!  ndat=Number of wavefunctions.
+!!  in_ur(in_nfftot * ndat)=Input array
+!!  out_ngfft(3)=Mesh divisions of output array
+!!
+!! OUTPUT
+!!  out_ur(out_nfftot,ndata)=Output array with interpolated data.
+!!
+!! SOURCE
+
+subroutine interpolate_ur_spc(in_ngfft, ndat, in_ur, out_ngfft, out_ur)
+
+!Arguments-------------------------------------------------------------
+!scalars
+ integer,intent(in) :: ndat
+!arrays
+ integer,intent(in) :: in_ngfft(:), out_ngfft(:)
+ complex(sp),intent(in) :: in_ur(product(in_ngfft(1:3)), ndat)
+ complex(sp),intent(out) :: out_ur(product(out_ngfft(1:3)), ndat)
+
+!Local variables--------------------------------------------------------
+!scalars
+ integer :: idat, ir1, ir2, ir3, ifft
+ real(dp) :: rr(3)
+! *************************************************************************
+
+ ! Linear interpolation.
+ do idat=1,ndat
+   do ir3=0,out_ngfft(3) - 1
+     rr(3) = dble(ir3) / out_ngfft(3)
+     do ir2=0,out_ngfft(2) - 1
+       rr(2) = dble(ir2) / out_ngfft(2)
+       do ir1=0,out_ngfft(1) - 1
+         rr(1) = dble(ir1) / out_ngfft(1)
+         ifft = 1 + ir1 + ir2*out_ngfft(1) + ir3*out_ngfft(1)*out_ngfft(2)
+         out_ur(ifft, idat) = interpol3d_1d_spc(rr, in_ngfft(1), in_ngfft(2), in_ngfft(3), in_ur(:,idat))
+       end do
+     end do
+   end do
+ end do
+
+end subroutine interpolate_ur_spc
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_numeric_tools/interpol3d_1d_spc
+!! NAME
+!! interpol3d_1d_spc
+!!
+!! FUNCTION
+!! Computes the value at any point r by linear interpolation
+!! inside the eight vertices of the surrounding cube
+!! r is presumed to be normalized, in a unit cube for the full grid
+!!
+!! INPUTS
+!! r(3)=point coordinate
+!! nr1=grid size along x
+!! nr2=grid size along y
+!! nr3=grid size along z
+!! grid(nr1,nr2,nr3)=grid matrix
+!!
+!! OUTPUT
+!! resInterpolated value
+!!
+!! SOURCE
+
+pure complex(sp) function interpol3d_1d_spc(rr, nr1, nr2, nr3, grid) result(res)
+
+!Arguments-------------------------------------------------------------
+!scalars
+ integer,intent(in) :: nr1, nr2, nr3
+!arrays
+ real(dp),intent(in) :: rr(3)
+ complex(sp),intent(in) :: grid(nr1, nr2, nr3)
+
+!Local variables--------------------------------------------------------
+!scalars
+ integer :: ir1,ir2,ir3,pr1,pr2,pr3
+ complex(sp) :: res1,res2,res3,res4,res5,res6,res7,res8,x1,x2,x3
+! *************************************************************************
+
+ call interpol3d_indices(rr, nr1, nr2, nr3, ir1, ir2, ir3, pr1, pr2, pr3)
+
+ ! weight
+ x1 = one + rr(1)*nr1 -real(ir1)
+ x2 = one + rr(2)*nr2 -real(ir2)
+ x3 = one + rr(3)*nr3 -real(ir3)
+
+ ! calculation of the density value
+ res1 = grid(ir1, ir2, ir3) * (one-x1)*(one-x2)*(one-x3)
+ res2 = grid(pr1, ir2, ir3) * x1*(one-x2)*(one-x3)
+ res3 = grid(ir1, pr2, ir3) * (one-x1)*x2*(one-x3)
+ res4 = grid(ir1, ir2, pr3) * (one-x1)*(one-x2)*x3
+ res5 = grid(pr1, pr2, ir3) * x1*x2*(one-x3)
+ res6 = grid(ir1, pr2, pr3) * (one-x1)*x2*x3
+ res7 = grid(pr1, ir2, pr3) * x1*(one-x2)*x3
+ res8 = grid(pr1, pr2, pr3) * x1*x2*x3
+ res = res1+res2+res3+res4+res5+res6+res7+res8
+
+end function interpol3d_1d_spc
+!!***
+
+!!****f* m_numeric_tools/interpolate_ur_dpc
+!! NAME
+!! interpolate_ur_dpc
+!!
+!! FUNCTION
+!!  Linear interpolation of complex wavefunctions given on the real space FFT mesh.
+!!  Assumes array on full mesh i.e. no MPI-FFT.
+!!  Double precision version
+!!
+!! INPUTS
+!!  in_ngfft(3)=Mesh divisions of input array
+!!  ndat=Number of wavefunctions.
+!!  in_ur(in_nfftot * ndat)=Input array
+!!  out_ngfft(3)=Mesh divisions of output array
+!!
+!! OUTPUT
+!!  out_ur(out_nfftot,ndata)=Output array with interpolated data.
+!!
+!! SOURCE
+
+subroutine interpolate_ur_dpc(in_ngfft, ndat, in_ur, out_ngfft, out_ur)
+
+!Arguments-------------------------------------------------------------
+!scalars
+ integer,intent(in) :: ndat
+!arrays
+ integer,intent(in) :: in_ngfft(:), out_ngfft(:)
+ complex(dp),intent(in) :: in_ur(product(in_ngfft(1:3)), ndat)
+ complex(dp),intent(out) :: out_ur(product(out_ngfft(1:3)), ndat)
+
+!Local variables--------------------------------------------------------
+!scalars
+ integer :: idat, ir1, ir2, ir3, ifft
+ real(dp) :: rr(3)
+! *************************************************************************
+
+ ! Linear interpolation.
+ do idat=1,ndat
+   do ir3=0,out_ngfft(3) - 1
+     rr(3) = dble(ir3) / out_ngfft(3)
+     do ir2=0,out_ngfft(2) - 1
+       rr(2) = dble(ir2) / out_ngfft(2)
+       do ir1=0,out_ngfft(1) - 1
+         rr(1) = dble(ir1) / out_ngfft(1)
+         ifft = 1 + ir1 + ir2*out_ngfft(1) + ir3*out_ngfft(1)*out_ngfft(2)
+         out_ur(ifft, idat) = interpol3d_1d_dpc(rr, in_ngfft(1), in_ngfft(2), in_ngfft(3), in_ur(:,idat))
+       end do
+     end do
+   end do
+ end do
+
+end subroutine interpolate_ur_dpc
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_numeric_tools/interpol3d_1d_dpc
+!! NAME
+!! interpol3d_1d_dpc
+!!
+!! FUNCTION
+!! Computes the value at any point r by linear interpolation
+!! inside the eight vertices of the surrounding cube
+!! r is presumed to be normalized, in a unit cube for the full grid
+!!
+!! INPUTS
+!! r(3)=point coordinate
+!! nr1=grid size along x
+!! nr2=grid size along y
+!! nr3=grid size along z
+!! grid(nr1,nr2,nr3)=grid matrix
+!!
+!! OUTPUT
+!! resInterpolated value
+!!
+!! SOURCE
+
+pure complex(dp) function interpol3d_1d_dpc(rr, nr1, nr2, nr3, grid) result(res)
+
+!Arguments-------------------------------------------------------------
+!scalars
+ integer,intent(in) :: nr1, nr2, nr3
+!arrays
+ real(dp),intent(in) :: rr(3)
+ complex(dp),intent(in) :: grid(nr1, nr2, nr3)
+
+!Local variables--------------------------------------------------------
+!scalars
+ integer :: ir1,ir2,ir3,pr1,pr2,pr3
+ complex(dp) :: res1,res2,res3,res4,res5,res6,res7,res8,x1,x2,x3
+! *************************************************************************
+
+ call interpol3d_indices(rr, nr1, nr2, nr3, ir1, ir2, ir3, pr1, pr2, pr3)
+
+ ! weight
+ x1 = one + rr(1)*nr1 -real(ir1)
+ x2 = one + rr(2)*nr2 -real(ir2)
+ x3 = one + rr(3)*nr3 -real(ir3)
+
+ ! calculation of the density value
+ res1 = grid(ir1, ir2, ir3) * (one-x1)*(one-x2)*(one-x3)
+ res2 = grid(pr1, ir2, ir3) * x1*(one-x2)*(one-x3)
+ res3 = grid(ir1, pr2, ir3) * (one-x1)*x2*(one-x3)
+ res4 = grid(ir1, ir2, pr3) * (one-x1)*(one-x2)*x3
+ res5 = grid(pr1, pr2, ir3) * x1*x2*(one-x3)
+ res6 = grid(ir1, pr2, pr3) * (one-x1)*x2*x3
+ res7 = grid(pr1, ir2, pr3) * x1*(one-x2)*x3
+ res8 = grid(pr1, pr2, pr3) * x1*x2*x3
+ res = res1+res2+res3+res4+res5+res6+res7+res8
+
+end function interpol3d_1d_dpc
 !!***
 
 !----------------------------------------------------------------------
@@ -5232,7 +5462,6 @@ subroutine simpson_int(npts, step, values, int_values)
  real(dp),parameter :: coef2 = 1.166666666666666666666666667_dp  !28.0_dp / 24.0_dp
  real(dp),parameter :: coef3 = 0.958333333333333333333333333_dp  !23.0_dp / 24.0_dp
  character(len=500) :: msg
-
 ! *********************************************************************
 
  if (npts < 6) then
@@ -5270,7 +5499,7 @@ end subroutine simpson_int
 !! simpson
 !!
 !! FUNCTION
-!!   Simpson integral of input function
+!!  Simpson integral of input function
 !!
 !! INPUTS
 !!  step = space between integral arguments
@@ -5291,9 +5520,7 @@ function simpson(step, values) result(res)
  real(dp),intent(in) :: values(:)
 
 !Local variables -------------------------
-!scalars
  real(dp) :: int_values(size(values))
-
 ! *********************************************************************
 
  call simpson_int(size(values),step,values,int_values)
@@ -5328,13 +5555,11 @@ pure subroutine rhophi(cx, phi, rho)
  real(dp),intent(out) :: phi,rho
 !arrays
  real(dp),intent(in) :: cx(2)
-
 ! ***********************************************************************
 
  rho = sqrt(cx(1)*cx(1) + cx(2)*cx(2))
 
  if (abs(cx(1)) > tol8) then
-
    phi = atan(cx(2)/cx(1))
 
    ! phi is an element of [-pi,pi]
@@ -5459,7 +5684,6 @@ subroutine vdiff_print(vd, unit)
  type(vdiff_t),intent(in) :: vd
 
 !Local variables-------------------------------
-!scalars
  integer :: unt
 ! *********************************************************************
 
@@ -5490,7 +5714,7 @@ end subroutine vdiff_print
 !!
 !! SOURCE
 
-subroutine smooth(a, mesh, it)
+pure subroutine smooth(a, mesh, it)
 
 !Arguments ------------------------------------
 !scalars
@@ -5551,7 +5775,7 @@ end subroutine smooth
 !!
 !! SOURCE
 
-subroutine nderiv(hh,yy,zz,ndim,norder)
+pure subroutine nderiv(hh,yy,zz,ndim,norder)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -5565,7 +5789,6 @@ subroutine nderiv(hh,yy,zz,ndim,norder)
 !scalars
  integer :: ier,ii
  real(dp) :: aa,bb,cc,h1,y1
-
 ! *********************************************************************
 
 !Initialization (common to 1st and 2nd derivative)
@@ -5635,7 +5858,7 @@ end subroutine nderiv
 !!  npts=Number of points used in finite difference, origin at npts/2 + 1
 !!
 !! OUTPUT
-!!  coeffient for central finite difference
+!!  coefficients for central finite difference
 !!
 !! SOURCE
 
@@ -5745,7 +5968,6 @@ function uniformrandom(seed)
  real(dp) :: im1inv,im2inv
  real(dp), save :: table(97)
  character(len=500) :: msg
-
 ! *********************************************************************
 
  im1inv=1.0d0/im1 ; im2inv=1.0d0/im2
@@ -5850,13 +6072,10 @@ subroutine findmin(dedv_1,dedv_2,dedv_predict,&
  real(dp) :: discr,ee,eep,lambda_shift,sum1,sum2,sum3,uu
  real(dp) :: uu3,vv,vv3
  character(len=500) :: msg
-
 ! *************************************************************************
 
-!DEBUG
 !write(std_out,*)' findmin : enter'
 !write(std_out,*)' choice,lambda_1,lambda_2=',choice,lambda_1,lambda_2
-!ENDDEBUG
 
  status=0
  d_lambda=lambda_1-lambda_2
@@ -5905,7 +6124,7 @@ subroutine findmin(dedv_1,dedv_2,dedv_predict,&
      ABI_COMMENT(msg)
      lambda_predict=0.25_dp
    end if
-!  Mimick a zero-gradient lambda, in order to avoid spurious
+!  Mimic a zero-gradient lambda, in order to avoid spurious
 !  action of the inverse hessian (the next line would be a realistic estimation)
    dedv_predict=0.0_dp
 !  dedv_predict=dedv_2+lambda_predict*(dedv_1-dedv_2)
@@ -6017,7 +6236,7 @@ subroutine kramerskronig(nomega,omega,eps,method,only_check)
  integer,intent(in) :: method,nomega,only_check
 !arrays
  real(dp),intent(in) :: omega(nomega)
- complex(dpc),intent(inout) :: eps(nomega)
+ complex(dp),intent(inout) :: eps(nomega)
 
 !Local variables-------------------------------
 !scalars
@@ -6027,7 +6246,6 @@ subroutine kramerskronig(nomega,omega,eps,method,only_check)
  character(len=500) :: msg
 !arrays
  real(dp) :: e1kk(nomega),intkk(nomega),kk(nomega)
-
 ! *************************************************************************
 
 !Check whether the frequency grid is linear or not
@@ -6066,7 +6284,6 @@ subroutine kramerskronig(nomega,omega,eps,method,only_check)
      call wrtout(std_out,msg,'COLL')
    end if
  end if
-
 
 !Perform Kramers-Kronig using naive integration
  select case (method)
@@ -6107,7 +6324,7 @@ subroutine kramerskronig(nomega,omega,eps,method,only_check)
 
 !at this point real part is in e1kk, need to put it into eps
  do ii=1,nomega
-   eps(ii)=CMPLX(e1kk(ii),AIMAG(eps(ii)), kind=dpc)
+   eps(ii)=CMPLX(e1kk(ii),AIMAG(eps(ii)), kind=dp)
  end do
 
 !Verify Kramers-Kronig
@@ -6147,8 +6364,6 @@ end subroutine kramerskronig
 !! OUTPUT
 !! scalar product of the two vectors
 !!
-!! SIDE EFFECTS
-!!
 !! WARNINGS
 !! vector size is not checked
 !!
@@ -6157,8 +6372,7 @@ end subroutine kramerskronig
 !! big vectors. The point is that less check is performed.
 !!
 !! MG: FIXME: Well, optized blas1 is for sure better than what you wrote!
-!! Now I dont' have time to update ref files
-!!
+!! Now I don't have time to update ref files
 !!
 !! SOURCE
 
@@ -6174,8 +6388,8 @@ function dotproduct(nv1,nv2,v1,v2)
 !Local variables-------------------------------
 !scalars
  integer :: i,j
-
 ! *************************************************************************
+
  dotproduct=zero
  do j=1,nv2
   do i=1,nv1
@@ -6191,7 +6405,7 @@ end function dotproduct
 !! invcb
 !!
 !! FUNCTION
-!! Compute a set of inverse cubic roots as fast as possible :
+!! Compute a set of inverse cubic roots as fast as possible:
 !! rspts(:)=rhoarr(:)$^\frac{-1}{3}$
 !!
 !! INPUTS
@@ -6220,14 +6434,12 @@ subroutine invcb(rhoarr,rspts,npts)
  real(dp) :: del,prod,rho,rhom1,rhomtrd
  logical :: test
 !character(len=500) :: message
-
 ! *************************************************************************
 
 !Loop over points : here, brute force algorithm
 !do ipts=1,npts
 !rspts(ipts)=sign( (abs(rhoarr(ipts)))**m1thrd,rhoarr(ipts))
 !end do
-!
 
  rhomtrd=sign( (abs(rhoarr(1)))**m1thrd, rhoarr(1) )
  rhom1=one/rhoarr(1)
@@ -6235,7 +6447,7 @@ subroutine invcb(rhoarr,rspts,npts)
  do ipts=2,npts
    rho=rhoarr(ipts)
    prod=rho*rhom1
-!  If the previous point is too far ...
+   ! If the previous point is too far ...
    if(prod < 0.01_dp .or. prod > 10._dp )then
      rhomtrd=sign( (abs(rho))**m1thrd , rho )
      rhom1=one/rho
@@ -6267,7 +6479,7 @@ end subroutine invcb
 !!
 !! FUNCTION
 !!  Subroutine safe_div performs "safe division", that is to prevent overflow,
-!!  underflow, NaN, or infinity errors.  An alternate value is returned if the
+!!  underflow, NaN, or infinity errors. An alternate value is returned if the
 !!  division cannot be performed. (bmy, 2/26/08)
 !!
 !!  For more information, see the discussion on:
@@ -6291,7 +6503,6 @@ elemental subroutine safe_div(n, d, altv, q)
 !scalars
  real(dp),intent(in) :: n, d, altv
  real(dp),intent(out) :: q
-
 ! *********************************************************************
 
  if ( exponent(n) - exponent(d) >= maxexponent(n) .or. d == zero) then
@@ -6336,6 +6547,111 @@ subroutine bool2index(bool_list, out_index)
 end subroutine bool2index
 !!***
 
+!----------------------------------------------------------------------
+!!****f* ABINIT/polynomial_regression
+!! NAME
+!!  polynomial_regression
+!!
+!! FUNCTION
+!!  Perform a polynomial regression on incoming data points, the
+!!  x-values of which are stored in array xvals and the y-values
+!!  stored in array yvals. Returns a one dimensional array with
+!!  fit coefficients (coeffs) and the unbiased RMS error of the
+!!  fit as a scalar (RMSerr).
+!!
+!! INPUTS
+!!  degree = order of the polynomial
+!!  npts = number of data points
+!!  xvals(npts) = x-values of those data points
+!!  yvals(npts) = y-values of those data points
+!!
+!! OUTPUT
+!!  coeffs(degree+1) = coefficients of the polynomial regression
+!!  RMSerr = unbiased RMS error on the fit
+!!            RMSerr=\sqrt{\frac{1}{npts-1}*
+!!                      \sum_i^npts{(fitval-yvals(i))**2}}
+!!
+!! SOURCE
+!!
+
+subroutine polynomial_regression(degree,npts,xvals,yvals,coeffs,RMSerr)
+
+!Arguments ------------------------------------
+!scalars
+ integer                     :: degree,npts
+ real(dp),intent(out)        :: RMSerr
+!arrays
+ real(dp),intent(in)         :: xvals(1:npts),yvals(1:npts)
+ real(dp),intent(out)        :: coeffs(degree+1)
+
+!Local variables-------------------------------
+!scalars
+ integer                     :: ncoeffs,icoeff,ipoint,info
+ real(dp)                    :: residual,fitval
+!arrays
+ integer,allocatable         :: tmp(:)
+ real(dp),allocatable        :: tmptwo(:), A(:,:),ATA(:,:)
+
+!####################################################################
+!#####################  Get Polynomial Fit  #########################
+
+  ncoeffs=degree+1
+
+  ABI_MALLOC(tmp,(ncoeffs))
+  ABI_MALLOC(tmptwo,(ncoeffs))
+  ABI_MALLOC(A,(npts,ncoeffs))
+  ABI_MALLOC(ATA,(ncoeffs,ncoeffs))
+
+  !Construct a polynomial for all input xvalues
+  do icoeff=1,ncoeffs
+    do ipoint=1,npts
+       if (icoeff==1.and.xvals(ipoint)==0.0) then
+          A(ipoint,icoeff) = 1.0
+       else
+          A(ipoint,icoeff) = xvals(ipoint)**(icoeff-1)
+       end if
+    end do
+  end do
+
+  !Get matrix product of transpose of A and A
+  ATA = matmul(transpose(A),A)
+
+  !Compute LU factorization of ATA
+  call DGETRF(ncoeffs,ncoeffs,ATA,ncoeffs,tmp,info)
+  ABI_CHECK(info == 0, sjoin('LAPACK DGETRF in polynomial regression returned:', itoa(info)))
+
+  !Compute inverse of the LU factorized version of ATA
+  call DGETRI(ncoeffs,ATA,ncoeffs,tmp,tmptwo,ncoeffs,info)
+  ABI_CHECK(info == 0, sjoin('LAPACK DGETRI in polynomial regression returned:', itoa(info)))
+
+  !Harvest polynomial coefficients
+  coeffs = matmul(matmul(ATA,transpose(A)),yvals)
+
+!####################################################################
+!##############  RMS error on the polynomial fit  ###################
+
+  residual=0.0d0
+  do ipoint=1,npts
+    fitval=0.0d0
+    do icoeff=1,ncoeffs
+      if (icoeff==1.and.xvals(ipoint)==0.0) then
+        fitval=fitval+coeffs(icoeff)
+      else
+        fitval=fitval+coeffs(icoeff)*xvals(ipoint)**(icoeff-1)
+      end if
+    end do
+    residual=residual+(fitval-yvals(ipoint))**2
+  end do
+  RMSerr=sqrt(residual/(real(npts-1,8)))
+
+  ABI_FREE(A)
+  ABI_FREE(ATA)
+  ABI_FREE(tmp)
+  ABI_FREE(tmptwo)
+
+end subroutine polynomial_regression
+!!***
+
 !!****f* ABINIT/blocked_loop
 !! NAME
 !! blocked_loop
@@ -6360,7 +6676,6 @@ integer pure function blocked_loop(loop_index, loop_stop, batch_size) result(nda
 
 !Arguments ----------------------------------------------
  integer,intent(in) :: loop_index, loop_stop, batch_size
-
 ! *********************************************************************
 
  ndat = merge(batch_size, loop_stop - loop_index + 1, loop_index + batch_size - 1 <= loop_stop)

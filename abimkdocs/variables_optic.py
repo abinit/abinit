@@ -3,8 +3,12 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 
 executable = "optic"
 
-from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
-#from abipy.abio.abivar_database.variables import ValueWithUnit, MultipleValue, Range, ValueWithConditions
+try:
+    from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
+except ImportError:
+    # This is needed for importing this module within Abipy
+    from abipy.abio.abivar_database.variables import ValueWithUnit, MultipleValue, Range
+
 ValueWithConditions = dict
 Variable=dict
 
@@ -237,7 +241,7 @@ Variable(
 This parameter provides a fixed shift to all the conduction bands. As
 LDA/GGA are known to underestimate the band-gap by a significant amount in
 some cases, in order to obtain a reasonable optical spectrum and make a realistic
-comparison with experiments one needs to correct for this.
+comparison with experiments one needs to correct for this [[cite:Levine1989]].
 The scissors shift is normally chosen to be the difference between the experimental and
 theoretical band-gap, and simply shifts the conduction bands. Alternatively, one may
 determine the self energy using the [[tutorial:gw1|GW approach]], in which case

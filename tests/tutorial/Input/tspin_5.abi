@@ -1,5 +1,5 @@
 #  Single Ta atom in a big box (BCC), treated with spin-orbit coupling.
- enunit 2 
+ enunit 2
 
  ndtset 2
 
@@ -7,38 +7,38 @@
 # Second dataset : spinor wavefunctions
  nspinor2 2
 
-# cutoff, k-points: 
+# cutoff, k-points:
  ecut 10
  nkpt  1
- istwfk 1  
- kptopt 0          # Enter the k points manually 
+ istwfk 1
+ kptopt 0          # Enter the k points manually
  kpt  0.0 0.0 0.0
 
 # Crystal cell definition:
- natom  1 
+ natom  1
  ntypat  1
  znucl 73.0
- typat  1 
+ typat  1
  xred  0.0 0.0 0.0
 
  acell 3*15.00
- rprim   0.5  0.5 -0.5 
-        -0.5  0.5  0.5 
+ rprim   0.5  0.5 -0.5
+        -0.5  0.5  0.5
          0.5 -0.5  0.5
 
-# SCF: 
+# SCF:
  toldfe  1.0d-7
-  nline  5  
+  nline  5
  nstep   10
 
 # Electron occupation:
  nband   26
- occopt  7  
+ occopt  7
  tsmear  0.01
-    
+
 # Pseudo:
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_nc_fr_04_pbe_standard_psp8/Ta.psp8"
+ pseudos "Psdj_nc_fr_04_pbe_std_psp8/Ta.psp8"
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
@@ -47,7 +47,7 @@
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   tspin_5.abo, tolnlines = 10, tolabs = 2.0e-8, tolrel = 8.0e-5
 #%% [paral_info]
 #%% max_nprocs = 1

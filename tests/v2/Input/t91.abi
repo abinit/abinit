@@ -57,14 +57,14 @@
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%   t91.abo ,tolnlines = 3, tolabs = 4.5e-04, tolrel = 3.000e-02, fld_options = -medium
+#%% files_to_test =
+#%%   t91.abo ,tolnlines = 3, tolabs = 5.1e-04, tolrel = 3.000e-02, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
-#%% keywords = 
+#%% keywords =
 #%% authors = Unknown
-#%% description = 
+#%% description =
 #%%   H, compressed simple cubic, frozen-phonon calculations corresponding
 #%%   to test 90. No linear XC core correction.
 #%%   The total energy of the quadruple cell is -2.237444057546 Ha,
@@ -72,7 +72,7 @@
 #%%   The frozen-phonon (from forces) calculation of the 2DTE for the q(1/2 0 0)
 #%%   case gives 1.7535588d-2 . A better finite-difference scheme, using
 #%%   a doubled displacement to cancel the finite-difference error, gives
-#%%   1.7534196d-2. 
+#%%   1.7534196d-2.
 #%%   The frozen-phonon (from forces) calculation of the 2DTE for the q(1/4 0 0)
 #%%   case gives 9.386061d-3 . A better finite-difference scheme, using
 #%%   a half displacement to cancel the finite-difference error, gives

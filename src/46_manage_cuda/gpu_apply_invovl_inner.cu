@@ -27,6 +27,7 @@
 #include <math.h>
 
 #include <gpu_linalg.h>
+#include "abi_gpu_header_common.h"
 #include "abi_gpu_header.h"
 #include "cuda_api_error_check.h"
 
@@ -38,10 +39,6 @@
 #include <thrust/device_vector.h>
 #include <thrust/device_ptr.h>
 #include <thrust/transform_reduce.h>
-
-#include <mpi.h>
-
-extern "C" void xmpi_sum_dp_c(double* array, int32_t array_size, MPI_Fint* comm, int32_t* ierr);
 
 //! token used to store memory state for buffers that need to be uploaded each time
 //! apply_block is called.
@@ -270,26 +267,30 @@ extern "C" void gpu_apply_invovl_inner_alloc(int32_t proj_dim[3],
     //int32_t nprojs = proj_dim[1];
     //int32_t ndat_nspinor = proj_dim[2];
 
-    int32_t proj_size_in_bytes = proj_dim[0]*proj_dim[1]*proj_dim[2]*sizeof(double);
+    size_t proj_size_in_bytes = proj_dim[0]*proj_dim[1]*proj_dim[2]*sizeof(double);
 
-    CHECK_CUDA_ERROR( cudaMalloc((void**)&proj_gpu, proj_size_in_bytes) );
-    CHECK_CUDA_ERROR( cudaMalloc((void**)&sm1proj_gpu, proj_size_in_bytes) );
+    printf("[gpu_apply_invovl_inner_alloc] allocating %f GB\n",1e-9*3*proj_size_in_bytes);
+    fflush(stdout);
+
+    CHECK_CUDA_ERROR( cudaMalloc((void**)&proj_gpu,        proj_size_in_bytes) );
+    CHECK_CUDA_ERROR( cudaMalloc((void**)&sm1proj_gpu,     proj_size_in_bytes) );
     CHECK_CUDA_ERROR( cudaMalloc((void**)&ptp_sm1proj_gpu, proj_size_in_bytes) );
 
-    CHECK_CUDA_ERROR( cudaMemset( proj_gpu, 0, proj_size_in_bytes) );
-    CHECK_CUDA_ERROR( cudaMemset( sm1proj_gpu, 0, proj_size_in_bytes) );
+    CHECK_CUDA_ERROR( cudaMemset( proj_gpu, 0,        proj_size_in_bytes) );
+    CHECK_CUDA_ERROR( cudaMemset( sm1proj_gpu, 0,     proj_size_in_bytes) );
     CHECK_CUDA_ERROR( cudaMemset( ptp_sm1proj_gpu, 0, proj_size_in_bytes) );
 
-    CHECK_CUDA_ERROR( cudaMalloc((void**)&temp_proj_gpu, proj_size_in_bytes) );
-    CHECK_CUDA_ERROR( cudaMalloc((void**)&resid_gpu, proj_size_in_bytes) );
+    CHECK_CUDA_ERROR( cudaMalloc((void**)&temp_proj_gpu,    proj_size_in_bytes) );
+    CHECK_CUDA_ERROR( cudaMalloc((void**)&resid_gpu,        proj_size_in_bytes) );
     CHECK_CUDA_ERROR( cudaMalloc((void**)&precondresid_gpu, proj_size_in_bytes) );
 
-    int32_t ndat_nspinor = proj_dim[2];
+    size_t ndat_nspinor = proj_dim[2];
     CHECK_CUDA_ERROR( cudaMalloc((void**)&errs_gpu, ndat_nspinor*sizeof(double)) );
 
     nlmn =   (uint8_t *)  malloc(ntypat * sizeof(uint8_t) );
 
     gpu_inner_allocated = 1;
+
   }
 
 } // gpu_apply_invovl_inner_alloc
@@ -338,9 +339,22 @@ extern "C" void gpu_apply_invovl_matrix_alloc(int32_t cplx,
 
   if (gpu_inv_overlap_matrix_allocated == 0) {
 
-    CHECK_CUDA_ERROR( cudaMalloc((void**) &gram_projs_gpu, cplx*nprojs*nprojs*sizeof(double)) );
-    CHECK_CUDA_ERROR( cudaMalloc((void**) &inv_sij_gpu, cplx*lmnmax*lmnmax*ntypat*sizeof(double)) );
-    CHECK_CUDA_ERROR( cudaMalloc((void**) &inv_s_approx_gpu, cplx*lmnmax*lmnmax*ntypat*sizeof(double)) );
+    size_t gram_projs_gpu_size = cplx*nprojs*nprojs*sizeof(double);
+    size_t inv_sij_size        = cplx*lmnmax*lmnmax*ntypat*sizeof(double);
+
+#ifdef DEBUG_VERBOSE_GPU
+    check_gpu_mem_("gpu_apply_invovl_matrix_alloc begin");
+    printf("[gpu_apply_invovl_matrix_alloc] nprojs=%d lmnmax=%d ntypat=%d sizeof(gram_projs_gpu)=%f GB sizeof(inv_sij_gpu)=%f GB\n",
+           nprojs, lmnmax, ntypat, 1e-9*gram_projs_gpu_size, 1e-9*inv_sij_size);
+#endif
+
+    CHECK_CUDA_ERROR( cudaMalloc((void**) &gram_projs_gpu,   gram_projs_gpu_size) );
+    CHECK_CUDA_ERROR( cudaMalloc((void**) &inv_sij_gpu,      inv_sij_size) );
+    CHECK_CUDA_ERROR( cudaMalloc((void**) &inv_s_approx_gpu, inv_sij_size) );
+
+#ifdef DEBUG_VERBOSE_GPU
+    check_gpu_mem_("gpu_apply_invovl_matrix_alloc end  ");
+#endif
 
     gpu_inv_overlap_matrix_allocated = 1;
   }

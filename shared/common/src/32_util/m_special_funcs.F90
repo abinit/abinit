@@ -7,7 +7,7 @@
 !! evaluate special functions frequently needed in Abinit.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2022 ABINIT group (MG, MT, FB, XG, MVer, FJ, NH, GZ, DRH)
+!! Copyright (C) 2008-2025 ABINIT group (MG, MT, FB, XG, MVer, FJ, NH, GZ, DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,7 +37,7 @@ module m_special_funcs
  public :: clp               ! x-1, if x>1/2, x+1, if x<-1/2
  public :: factorial         ! Calculates N! returning a real.
  public :: permutations      ! Returns N!/(N-k) if N>=0 and N-k>0 else 0.
- public :: binomcoeff        ! Binominal coefficient n!/(n-k)!
+ public :: binomcoeff        ! Binomial coefficient n!/(n-k)!
  public :: laguerre          ! Laguerre Polynomial(x,n,a).
  public :: RadFnH            ! Atomic radial function(r,n,l,Z).
  public :: iradfnh           ! Norm of atomic radial function(a,b,n,l,Z).
@@ -51,8 +51,15 @@ module m_special_funcs
  public :: k_fermi           ! Fermi wave vector corresponding to the local value of the real space density rhor.
  public :: k_thfermi         ! Thomas-Fermi wave vector corresponding to the local value of the real space density rhor
  public :: levi_civita_3     ! Return Levi-Civita tensor of rank 3
- public :: fermi_dirac        ! Fermi Dirac distribution
- public :: bose_einstein      ! Bose Einstein distribution
+ public :: fermi_dirac       ! Fermi Dirac distribution
+ public :: bose_einstein     ! Bose Einstein distribution
+ public :: dip12             ! Complete Fermi integral of order 1/2
+ public :: dip32             ! Complete Fermi integral of order 3/2
+ public :: djp12             ! Incomplete Fermi integral of order 1/2
+ public :: djp32             ! Incomplete Fermi integral of order 3/2
+ public :: tildeAx           ! tilde Ax Pade fit and first and second derivatives
+ public :: tildeBx           ! tilde Bx Pade fit and first and second derivatives
+ public :: tildeBc           ! tilde Bc Pade fit and first and second derivatives
 !!***
 
 !!****t* m_special_funcs/jlspline_t
@@ -90,12 +97,14 @@ module m_special_funcs
    ! bess_spl_der(nx,mlang)
    ! the second derivatives of the cubic spline.
 
+ contains
+
+   procedure :: init => jlspline_init         ! Create new object.
+   procedure :: free => jlspline_free        ! Free memory.
+   procedure :: eval => jlspline_integral    ! Compute integral.
+
  end type jlspline_t
 !!***
-
- public :: jlspline_new         ! Create new object.
- public :: jlspline_free        ! Free memory.
- public :: jlspline_integral    ! Compute integral.
 
 !!****t* m_special_funcs/gspline_t
 !! NAME
@@ -116,14 +125,14 @@ module m_special_funcs
    real(dp) :: sigma
     ! Broadening parameter.
 
-   real(dp) :: xmin,xmax
+   real(dp) :: xmin, xmax
     ! Min and max x in spline mesh. Only positive xs are stored in memory
     ! The values at -x are reconstructed by symmetry.
     ! xmin is usually zero, xmax is the point where the gaussian == tol16.
     ! g(x) is set to zero if x > xmin.
 
    real(dp) :: step, stepm1, step2div6
-    ! Step of the linear mesh used in spline and associated coeffients.
+    ! Step of the linear mesh used in spline and associated coefficients.
 
    real(dp),allocatable :: xvals(:)
     ! xvals(nspline)
@@ -133,12 +142,13 @@ module m_special_funcs
     ! svals(nspline,4)
     ! Internal tables with spline data.
 
+ contains
+
+    procedure :: init => gspline_init      ! Creation method.
+    procedure :: eval => gspline_eval      ! Evaluate interpolant
+    procedure :: free => gspline_free      ! Free memory.
  end type gspline_t
 !!***
-
- public :: gspline_new       ! Creation method.
- public :: gspline_eval      ! Evaluate interpolant
- public :: gspline_free      ! Free memory.
 
 CONTAINS  !===========================================================
 !!***
@@ -165,7 +175,6 @@ pure function clp(x)
 !scalars
  real(dp) :: clp
  real(dp),intent(in) :: x
-
 ! **********************************************************************
 
  if(x > half) then
@@ -205,7 +214,6 @@ elemental function factorial(nn)
 !scalars
  integer :: ii
  real(dp) :: ff
-
 ! *********************************************************************
 
  ff=one
@@ -247,7 +255,6 @@ pure function permutations(nn,kk)
 !scalars
  integer :: ii
  real(dp) :: pp
-
 ! *********************************************************************
 
  if ((nn>=0).and.((nn-kk)>=0)) then
@@ -279,7 +286,6 @@ end function permutations
 !! OUTPUT
 !!   binomcoeff= n!/( k!* (n-k)!)  (real dp)
 !!
-!!
 !! SOURCE
 
 elemental function binomcoeff(n,k)
@@ -288,7 +294,6 @@ elemental function binomcoeff(n,k)
 !scalars
  integer,intent(in) :: n,k
  real(dp) :: binomcoeff
-
 ! *********************************************************************
 
  binomcoeff=factorial(n)/(factorial(k)*factorial(n-k))
@@ -313,7 +318,6 @@ end function binomcoeff
 !! OUTPUT
 !!   Laguerre(x,n,a) (dp)
 !!
-!!
 !! SOURCE
 
 function laguerre(x,n,a)
@@ -330,7 +334,6 @@ function laguerre(x,n,a)
 
 !arrays
  real(dp),allocatable :: ff(:)
-
 ! *********************************************************************
 
  if (present(n)) then
@@ -373,9 +376,7 @@ end function laguerre
 !! OUTPUT
 !!  RadFnH(r,n,l,Z) (dp)
 !!
-!!
 !! SOURCE
-
 
 function RadFnH(r,n,l,Z)
 
@@ -390,7 +391,6 @@ function RadFnH(r,n,l,Z)
 !scalars
  integer   :: nn,ll
  real(dp)  :: ff,rr,ZZ
-
 ! *********************************************************************
 
  if (present(n)) then
@@ -440,7 +440,6 @@ end function RadFnH
 !! OUTPUT
 !!  IRadFnH(a,b,n,l,Z) (dp)
 !!
-!!
 !! SOURCE
 
 recursive function IRadFnH(a,b,n,l,Z,m) result(x)
@@ -455,7 +454,6 @@ recursive function IRadFnH(a,b,n,l,Z,m) result(x)
 !scalars
  integer   :: nn,ll,mm
  real(dp)  :: h,bb,ZZ,x
-
 ! *********************************************************************
 
  if (present(n)) then
@@ -527,7 +525,6 @@ elemental function gaussian(arg, sigma)
 !Local variables ---------------------------------------
 !scalars
  real(dp) :: xx
-
 ! *********************************************************************
 
  xx = arg / (sqrt2 * sigma)
@@ -557,7 +554,6 @@ elemental function lorentzian(arg, sigma)
 !scalars
  real(dp),intent(in) :: arg, sigma
  real(dp) :: lorentzian
-
 ! *********************************************************************
 
  lorentzian = piinv * sigma / (arg ** 2 + sigma ** 2)
@@ -625,7 +621,6 @@ elemental function abi_derf(yy) result(derf_yy)
  real(dp), parameter :: &
 &  sqrpi=.5641895835477563e0_dp, xbig=13.3e0_dp, xlarge=6.375e0_dp, xmin=1.0e-10_dp
  real(dp) ::  res,xden,xi,xnum,xsq,xx
-
 ! ******************************************************************
 
  xx = yy
@@ -859,8 +854,6 @@ end function abi_derfc
 !!
 !! OUTPUT
 !!
-!! SIDE EFFECTS
-!!
 !! NOTES
 !!
 !! SOURCE
@@ -1046,7 +1039,6 @@ subroutine besjm(arg,besjx,cosx,nn,nx,sinx,xx)
  real(dp),parameter :: oo945=1.d0/945.d0
  real(dp) :: bot,rr,rsq,top
  character(len=500) :: message
-
 ! *************************************************************************
 
  if (nn==0) then
@@ -1222,7 +1214,6 @@ subroutine sbf8(nm,xx,sb_out)
  real(dp) :: fn,sn,xi,xn,xs
 !arrays
  real(dp),allocatable :: sb(:)
-
 ! *************************************************************************
 
  if(xx<= 1.0e-36_dp) then
@@ -1291,7 +1282,6 @@ function fermi_dirac(energy, mu, temperature)
 !Local variables-------------------------------
 !scalars
  real(dp) :: arg
-
 ! *************************************************************************
 
  fermi_dirac = zero
@@ -1325,18 +1315,14 @@ end function fermi_dirac
 !!
 !! SOURCE
 
-function bose_einstein(energy, temperature)
+real(dp) function bose_einstein(energy, temperature)
 
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: energy, temperature
- real(dp) :: bose_einstein
 
 !Local variables-------------------------------
-!scalars
  real(dp) :: arg
- character(len=500) :: message
-
 ! *************************************************************************
 
  bose_einstein = zero
@@ -1345,16 +1331,771 @@ function bose_einstein(energy, temperature)
    if(arg > tol12 .and. arg < 600._dp)then
      bose_einstein = one / (exp(arg)  - one)
    else if (arg < tol12) then
-     write(message,'(a)') 'No Bose Einstein for negative energies'
-     ABI_WARNING(message)
+     ABI_WARNING('No Bose Einstein for negative energies')
    end if
  else
-   write(message,'(a)') 'No Bose Einstein for negative or 0 T'
-   ABI_WARNING(message)
+   ABI_WARNING('No Bose Einstein for negative or 0 T')
  end if
 
 
 end function bose_einstein
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_special_funcs/dip12
+!! NAME
+!!  dip12
+!!
+!! FUNCTION
+!!  Returns the complete Fermi integral of order 1/2.
+!!  Based on an analytical approximation.
+!!
+!! INPUTS
+!!  gamma=complete Fermi integral argument
+!!
+!! OUTPUT
+!!  dip12=resulting function
+!!
+!! SOURCE
+
+real(dp) function dip12(gamma)
+
+! Arguments -------------------------------
+! Scalars
+ real(dp),intent(in) :: gamma
+
+! Local variables -------------------------
+! Scalars
+ real(dp) :: d,dy
+! *********************************************************************
+
+ if (gamma.lt.3.) then
+   dy=exp(gamma)
+   if (gamma+1.9375.LE.0) then
+     dip12=dy*&
+     & (1.-dy*(0.35355283-dy*(0.19242767-dy*(0.12456909-dy*&
+     & (8.5114507E-02-dy*4.551794E-02)))))
+   else
+     d=gamma-0.5
+     dip12=dy*(0.677695804-d*(0.187773135+d*(2.16197521E-02-d*&
+     & (9.23703807E-03+d*&
+     & (1.71735167E-03-d*(6.07913775E-04+d*&
+     & (1.1448629E-04-d*&
+     & (4.544432E-05+d*(6.4719368E-06-d*(3.794983E-06+d*&
+     & (1.7338029E-07-d*&
+     & (3.5546516E-07-d*(3.7329191E-08+d*&
+     & (3.3097822E-08-d*&
+     & (8.3190193E-09+d*(2.2752769E-09-d*(7.836005E-10+d*&
+     & (7.519551E-11-d*2.960006E-11))))))))))))))))))
+   end if
+ else if (gamma.lt.20.) then
+   if (gamma.lt.10.) then
+     d=gamma-6.5
+     dip12=12.839811+d*&
+     & (2.844774+d*(0.114920926-d*(3.43733039E-03-d*&
+     & (2.3980356E-04-d*&
+     & (2.0201888E-05-d*(1.5219883E-06-d*&
+     & (6.2770524E-08+d*&
+     & (4.8830336E-09-d*(2.1031164E-09-d*(5.785753E-10-d*&
+     & (7.233066E-11-d*1.230727E-12)))))))))))
+   else
+     d=gamma-14.5
+     dip12=41.7799227+d*&
+     & (4.2881461+d*(7.45407825E-02-d*(8.79243296E-04-d*&
+     & (2.38288861E-05-d*&
+     & (8.82474867E-07-d*(3.82865217E-08-d*&
+     & (1.9274292E-09-d*(1.42248669E-10-d*8.17019813E-12))))))))
+   end if
+ else
+   d=1./gamma
+   dy=gamma*dsqrt(gamma)/1.329340388
+   dip12=dy*(1.-d*(9.354E-07-d*(1.2338391-d*(6.77931E-03-d*&
+   & 1.17871643))))
+ end if
+ dip12=dip12*0.88622692
+end function dip12
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_special_funcs/dip32
+!! NAME
+!!  dip32
+!!
+!! FUNCTION
+!!  Returns the complete Fermi integral of order 3/2.
+!!  Based on an analytical approximation.
+!!
+!! INPUTS
+!!  gamma=complete Fermi integral argument
+!!
+!! OUTPUT
+!!  dip32=resulting function
+!!
+!! SOURCE
+
+real(dp) function dip32(gamma)
+
+! Arguments -------------------------------
+ real(dp),intent(in) :: gamma
+
+! Local variables -------------------------
+! Scalars
+ real(dp) :: d,dval
+! *********************************************************************
+
+ if (gamma.GT.1.75) then
+   dval=gamma*gamma*dsqrt(gamma)
+   if (gamma.LT.4.5) then
+     d=gamma-3.125
+     dip32=(1.27623+0.596065*gamma+0.3*dval)*&
+     & (1.0055558385-d*(5.23889494E-03+d*&
+     & (3.13523144E-03-d*(3.06124286E-03-d*&
+     & (1.3644667E-03-d*&
+     & (4.1528384E-04-d*(8.901188E-05-d*(1.079979E-05+d*&
+     & (2.29058E-06-d*(2.58985E-06-d*7.30909E-07))))))))))
+   else if (gamma.LT.12.) then
+     if (gamma.LT.8.) then
+       d=gamma-6.25
+       dip32=(2.01508+0.425775*gamma+0.3*dval)*&
+       & (1.000387131-d*(3.93626295E-04+d*&
+       & (2.55710115E-04-d*&
+       & (1.57383494E-04-d*(5.0286036E-05-d*&
+       & (1.2073559865E-05-d*&
+       & (2.4909523213E-06-d*(5.244328548E-07-d*&
+       & 8.0884033896E-08))))))))
+     else
+       d=gamma-10.
+       dip32=0.3*dval*&
+       & (1.064687247-d*(1.22972303E-02-d*(1.8362121E-03-d*&
+       & (2.433558E-04-d*(3.018186E-05-d*(3.5694E-06-d*&
+       & (4.11212E-07-d*(5.2151E-08-d*5.8424E-09))))))))
+     end if
+   else
+     d=1./gamma
+     dip32=0.30090111127*dval*&
+     & (1.-d*(2.863E-06-d*(6.168876549-d*&
+     & (1.740553E-02+d*(1.425257+d*2.95887)))))
+   end if
+ else if (gamma+0.75.LE.0) then
+   d=EXP(gamma)
+   dip32=d*&
+   & (1.-d*(1.76775246E-01-d*(6.4124584E-02-d*&
+   & (3.1027055E-02-d*(1.6797637E-02-d*&
+   & (8.212636E-03-d*(2.384106E-03)))))))
+ else
+   d=gamma-0.5
+   dip32=EXP(gamma)*(0.846691-0.128948*gamma)*&
+   & (1.034064158+d*(2.778947E-03-d*&
+   & (3.572502805E-02+d*(3.0411645E-03-d*&
+   & (1.7380548E-03+d*(2.7756776E-04-d*&
+   & (8.08302E-05+d*(1.59606E-05-d*&
+   & (3.8144E-06+d*7.4446E-07)))))))))
+ end if
+ dip32=dip32*1.32934038
+
+end function dip32
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_special_funcs/djp12
+!! NAME
+!!  djp12
+!!
+!! FUNCTION
+!!  Returns the incomplete Fermi integral of order 1/2.
+!!  Based on an analytical approximation.
+!!
+!! INPUTS
+!!  xcut=lower bound of the incomplete Fermi integral
+!!  gamma=incomplete Fermi integral argument
+!!
+!! OUTPUT
+!!  djp12=resulting function
+!!
+!! SOURCE
+
+real(dp) function djp12(xcut, gamma)
+
+! Arguments -------------------------------
+! Scalars
+ real(dp),intent(in) :: xcut,gamma
+
+! Local variables -------------------------
+! Scalars
+ real(dp) :: d2h,db,dc,dd,de,df1,df2,df3,dh
+ real(dp) :: ds,dt,dv,dw,dxm,dxp
+ integer :: i,ind,iq,k,nm,np,nq
+! Arrays
+ real(dp) :: dq(5),df(101),dy(101)
+! *********************************************************************
+
+ dh=0.2D+0
+ d2h=0.4D+0
+ nm=101
+ ind=0
+ dq=(/1.D+0,2.828427124D+0,5.196152423D+0,8.D+0,1.118033989D+1/)
+
+ djp12=0.D+0
+ dxm=gamma-1.5D+1
+ if (xcut.gt.dxm) then
+   if (ind.eq.0) then
+     do i=1,nm
+       dy(i)=-1.5D+1+(i-1)*dh
+       df(i)=1.D+0+dexp(dy(i))
+     end do
+     ind=1
+   end if
+   dxp=gamma+5.D+0
+   if (xcut.lt.dxp) then
+     dc=dxp
+   else
+     dc=xcut
+   end if
+   db=dexp(gamma-dc)
+   dt=db
+   do iq=1,5
+     dd=iq*dc
+     ds=dsqrt(dd)
+     dw=1.+.3275911*ds
+     dw=1.D+0/dw
+     dv=dw*(.2258368458D+0+&
+     & dw*(-.2521286676D+0+dw*(1.2596951294D+0+&
+     & dw*(-1.2878224530D+0+dw*(.9406460699D+0)))))
+     dv=dv+ds
+     de=dt*dv/dq(iq)
+     djp12=djp12+de
+     if (dabs(de).lt.(1.D-07*djp12)) exit
+     dt=-dt*db
+   end do
+   if (xcut.ge.dxp) return
+   np=(dxp-xcut)/dh
+   np=2*(np/2)
+   np=nm-np
+   nq=(15.-gamma)/dh
+   nq=1+2*(nq/2)
+   if (np.lt.nq) np=nq
+   if (np.le.nm) then
+     df3=0.D+0
+     dt=dy(np)+gamma
+     dv=(dt-xcut)/2.D+0
+     df3=0.D0
+     if (dt.ge.1.D-13) df3=dsqrt(dt)
+     if (dabs(dv).ge.1.D-13) then
+       df1=dsqrt(xcut)
+       dt=df1+df3
+       dw=(dv+dv)/(dt*dt)
+       df2=dw*dw
+       df2=df2+df2
+       db=df2*(df2+7.D+0)+7.D+1
+       dc=7.D+0*(1.D+1-df2)
+       dc=dc*dw
+       dd=-df2*(df2-2.8D+1)+1.4D+2
+       dd=dd+dd
+       ds=dt*((db-dc)/(1.D+0+dexp(xcut-gamma))+&
+       & dd/(1.D+0+dexp(xcut+dv-gamma))+(db+dc)/df(np))
+       ds=ds*dv/4.2D+2
+       djp12=djp12+ds
+     end if
+     if (np.ne.nm) then
+       ds=0.D+0
+       np=np+2
+       do k=np,nm,2
+         df1=df3
+         df3=dsqrt(dy(k)+gamma)
+         dt=df1+df3
+         dw=d2h/(dt*dt)
+         df2=dw*dw
+         df2=df2+df2
+         db=df2*(df2+7.D+0)+7.D+1
+         dc=7.D+0*(1.D+1-df2)
+         dc=dc*dw
+         dd=-df2*(df2-2.8D+1)+1.4D+2
+         dd=dd+dd
+         ds=ds+dt*((db-dc)/df(k-2)+dd/df(k-1)+(db+dc)/df(k))
+       end do
+       ds=ds*dh/4.2D+2
+       djp12=djp12+ds
+     end if
+     if (xcut.ge.dxm) return
+   end if
+ end if
+ djp12=dip12(gamma)-xcut*dsqrt(xcut)/1.5D+0
+
+end function djp12
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_special_funcs/djp32
+!! NAME
+!!  djp32
+!!
+!! FUNCTION
+!!  Returns the incomplete Fermi integral of order 3/2.
+!!  Based on an analytical approximation.
+!!
+!! INPUTS
+!!  xcut=lower bound of the incomplete Fermi integral
+!!  gamma=incomplete Fermi integral argument
+!!
+!! OUTPUT
+!!  djp32=resulting function
+!!
+!! SOURCE
+
+real(dp) function djp32(xcut,gamma)
+
+! Arguments -------------------------------
+! Scalars
+ real(dp),intent(in) :: xcut,gamma
+
+! Local variables -------------------------
+! Scalars
+ real(dp) :: d2h,db,dc,dd,de,df1,df2,df3,dh
+ real(dp) :: ds,dt,dv,dw,dx1,dx2
+ real(dp) :: dx3,dxm,dxp
+ integer :: i,ind,iq,k,nm,np,nq
+! Arrays
+ real(dp) :: dq(5),df(101),dy(101)
+! *********************************************************************
+
+ dh=0.2D+0
+ d2h=0.4D+0
+ nm=101
+ ind=0
+ dq=(/1.D+0,5.656854228D+0,1.558845727D+1,3.2D+1,5.590169945D+0/)
+
+ djp32=0.D+0
+ dxm=gamma-1.5D+1
+ if (xcut.GT.dxm) then
+   if (ind.EQ.0) then
+     do i=1,nm
+       dy(i)=-1.5D+1+(i-1)*dh
+       df(i)=1.D+0+DEXP(dy(i))
+     end do
+     ind=1
+   end if
+   dxp=gamma+5.D+0
+   if (xcut.LT.dxp) then
+     dc=dxp
+   else
+     dc=xcut
+   end if
+   db=DEXP(gamma-dc)
+   dt=db
+   do iq=1,5
+     dd=iq*dc
+     ds=DSQRT(dd)
+     dw=1.+.3275911*ds
+     dw=1.D+0/dw
+     dv=dw*(.2258368458D+0+&
+     & dw*(-.2521286676D+0+dw*(1.2596951294D+0+&
+     & dw*(-1.2878224530D+0+dw*(.9406460699D+0)))))
+     dv=dv+ds
+     dv=1.5D+0*dv+ds*dd
+     de=dt*dv/dq(iq)
+     djp32=djp32+de
+     if (DABS(de).LT.(1.D-07*djp32)) exit
+     dt=-dt*db
+   end do
+   if (xcut.GE.dxp) return
+   np=(dxp-xcut)/dh
+   np=2*(np/2)
+   np=nm-np
+   nq=(15.-gamma)/dh
+   nq=1+2*(nq/2)
+   if (np.LT.nq) np=nq
+   if (np.LE.nm) then
+     df3=0.D+0
+     dt=dy(np)+gamma
+     dv=(dt-xcut)/2.D+0
+     df3=DSQRT(dt)
+     dx3=dt
+     if (DABS(dv).GE.1.D-13) then
+       df1=DSQRT(xcut)
+       dt=df1+df3
+       dw=(dv+dv)/(dt*dt)
+       df2=dw*dw
+       df2=df2+df2
+       db=df2*(df2+7.D+0)+7.D+1
+       dc=7.D+0*(1.D+1-df2)
+       dc=dc*dw
+       dd=-df2*(df2-2.8D+1)+1.4D+2
+       dd=dd+dd
+       ds=dt*((db-dc)*xcut/(1.D+0+DEXP(xcut-gamma))+dd*(xcut+dv)&
+       & /(1.D+0+DEXP(xcut+dv-gamma))+(db+dc)*(dy(np)+gamma)/df(np))
+       ds=ds*dv/4.2D+2
+       djp32=djp32+ds
+     end if
+     if (np.NE.nm) then
+       ds=0.D+0
+       np=np+2
+       do k=np,nm,2
+         dx1=dx3
+         df1=df3
+         dx2=dy(k-1)+gamma
+         dx3=dy(k)+gamma
+         df3=DSQRT(dx3)
+         dt=df1+df3
+         dw=d2h/(dt*dt)
+         df2=dw*dw
+         df2=df2+df2
+         db=df2*(df2+7.D+0)+7.D+1
+         dc=7.D+0*(1.D+1-df2)
+         dc=dc*dw
+         dd=-df2*(df2-2.8D+1)+1.4D+2
+         dd=dd+dd
+         ds=ds+dt*((db-dc)*dx1/df(k-2)+dd*dx2/df(k-1)&
+         & +(db+dc)*dx3/df(k))
+       end do
+       ds=ds*dh/4.2D+2
+       djp32=djp32+ds
+     end if
+     if (xcut.GE.dxm) return
+   end if
+ end if
+ djp32=dip32(gamma)-xcut*xcut*DSQRT(xcut)/2.5D+0
+
+end function djp32
+!!***
+
+!!****f* m_special_funcs/tildeAx
+!! NAME
+!!  tildeAx
+!!
+!! FUNCTION
+!!  Returns tilde Ax Pade fit and first and second derivatives
+!!  w.r.t. reduced temperature t.
+!!
+!! NOTES
+!!  Karasiev-Sjostrom-Dufty-Trickey (KSDT) TLDA xc-functional
+!!  V.V. Karasiev, T. Sjostrom, J. Dufty, and S.B. Trickey, PRL 112, 076403 (2014) [[cite:Karasiev2014]]
+!!
+!! INPUTS
+!!  t=reduced temperature, t=T/T_F
+!!
+!! OUTPUT
+!!  Ax=tilde Ax(t)
+!!  dAx=dAx(t)/dt
+!!  d2Ax=d^2Ax(t)/dt^2
+!!
+!! SOURCE
+
+subroutine tildeAx(t,Ax,dAx,d2Ax)
+
+!Arguments ------------------------------------
+!scalars
+ real(dp),intent(in) :: t
+ real(dp),intent(out) :: Ax,dAx,d2Ax
+!Local variables ------------------------------
+!scalars
+ real(dp),parameter :: aln= -0.0475410604245741_dp
+ real(dp),parameter :: a52= -0.1065378473507800_dp
+ real(dp),parameter :: a1 =  0.5823869764908659_dp
+ real(dp),parameter :: a2 = -0.0068339509356661_dp
+ real(dp),parameter :: a3 = 11.5469239288490009_dp
+ real(dp),parameter :: a4 = -0.8465428870889800_dp
+ real(dp),parameter :: a5 = -0.1212525366470300_dp
+ real(dp),parameter :: a6 =  1.9902818786101000_dp
+ real(dp),parameter :: a7 =  0.0000000000000000_dp
+ real(dp),parameter :: a8 =  0.0744389046707120_dp
+ real(dp),parameter :: b1 = 19.9256144707979992_dp
+ real(dp),parameter :: b2 =  5.1663994545590004_dp
+ real(dp),parameter :: b3 =  2.0463164858237000_dp
+ real(dp),parameter :: b4 =  0.0744389046707120_dp
+ real(dp),parameter :: onethird = 1._dp/3._dp
+ real(dp),parameter :: twothird = 2._dp/3._dp
+ real(dp),parameter :: fourthird = 4._dp/3._dp
+ real(dp),parameter :: threehalf = 3._dp/2._dp
+ real(dp),parameter :: fivehalf = 5._dp/2._dp
+ real(dp),parameter :: sevenhalf = 7._dp/2._dp
+ real(dp) :: y,u,du,d2u
+ real(dp) :: v,dv,d2v
+ real(dp) :: dydt,d2ydt2
+ real(dp) :: num,den,fit,dnum,d2num,dden,d2den,dfit,d2fit
+! *************************************************************************
+
+ y = twothird/t**threehalf
+ u = y**twothird
+ du = twothird/y**onethird
+ d2u = -onethird*du/y
+
+ v = y**fourthird
+ dv = fourthird *y**onethird
+ d2v = onethird*dv/y
+
+ dydt = -1._dp/t**fivehalf
+ d2ydt2 = fivehalf/t**sevenhalf
+
+ num = a52*u**fivehalf &
+       +a1*u+a2*u**2+a3*u**3+a4*u**4 &
+       +a5*u**5+a6*u**6+a7*u**7+a8*u**8 &
+       +aln*log(y)*y**4
+ den = 1._dp+b1*v+b2*v**2+b3*v**3+b4*v**4
+ fit = num/den
+ dnum = du*(fivehalf*a52*u**threehalf &
+        +a1+2._dp*a2*u+3._dp*a3*u**2+4._dp*a4*u**3 &
+        +5._dp*a5*u**4+6._dp*a6*u**5+7._dp*a7*u**6+8._dp*a8*u**7) &
+        +aln*y**3+4._dp*aln*log(y)*y**3
+ d2num = d2u*(fivehalf*a52*u**threehalf &
+         +a1+2._dp*a2*u+3._dp*a3*u**2+4._dp*a4*u**3 &
+         +5._dp*a5*u**4+6._dp*a6*u**5+7._dp*a7*u**6+8._dp*a8*u**7) &
+         +du*du*(fivehalf*threehalf*a52*u**half &
+         +2._dp*a2+2._dp*3._dp*a3*u+3._dp*4._dp*a4*u**2 &
+         +4._dp*5._dp*a5*u**3+5._dp*6._dp*a6*u**4 &
+         +6._dp*7._dp*a7*u**5+7._dp*8._dp*a8*u**6) &
+         +7._dp*aln*y**2+12._dp*aln*log(y)*y**2
+ dden = dv*(b1+2._dp*b2*v+3._dp*b3*v**2+4._dp*b4*v**3)
+ d2den = d2v*(b1+2._dp*b2*v+3._dp*b3*v**2+4._dp*b4*v**3) &
+         +dv*dv*(2._dp*b2+2._dp*3._dp*b3*v+3._dp*4._dp*b4*v**2)
+! derivatives w.r.t. y
+ dfit = dnum/den - (num/den)*(dden/den)
+ d2fit = d2num/den - (dnum/den)*(dden/den) &
+         - (dnum/den)*(dden/den) + 2._dp*(num/den)*(dden/den)*(dden/den) &
+         - (num/den)*(d2den/den)
+! Ax, and derivatives w.r.t. t
+ Ax = fit
+ dAx = dfit * dydt
+ d2Ax = d2fit*dydt**2 + dfit*d2ydt2
+ if(Ax/=Ax) Ax=zero
+ if(dAx/=dAx) dAx=zero
+ if(d2Ax/=d2Ax) d2Ax=zero
+
+end subroutine tildeAx
+!!***
+
+!!****f* m_special_funcs/tildeBx
+!! NAME
+!!  tildeBx
+!!
+!! FUNCTION
+!!  Returns tilde Bx Pade fit and first and second derivatives
+!!  w.r.t. reduced temperature t.
+!!
+!! NOTES
+!!  Karasiev-Dufty-Trickey (KDT16) TGGA xc-functional
+!!  V.V. Karasiev, J.W. Dufty, and S.B. Trickey, PRL 120(7), 076401 (2018) [[cite:Karasiev2018]]
+!!
+!! INPUTS
+!!  t=reduced temperature, t=T/T_F
+!!
+!! OUTPUT
+!!  Bx=tilde Bx(t)
+!!  dBx=dBx(t)/dt
+!!  d2Bx=d^2Bx(t)/dt^2
+!!
+!! SOURCE
+
+subroutine tildeBx(t,Bx,dBx,d2Bx)
+
+!Arguments ------------------------------------
+!scalars
+ real(dp),intent(in) :: t
+ real(dp),intent(out) :: Bx,dBx,d2Bx
+
+!Local variables ------------------------------
+!scalars
+ real(dp),parameter :: a2 = -3.4341427276599950_dp
+ real(dp),parameter :: a3 = -0.9066069544311700_dp
+ real(dp),parameter :: a4 =  2.2386316137237001_dp
+ real(dp),parameter :: a5 =  2.4232553178542000_dp
+ real(dp),parameter :: a6 = -0.1339278564306200_dp
+ real(dp),parameter :: a7 =  0.4392739633708200_dp
+ real(dp),parameter :: a8 = -0.0497109675177910_dp
+ real(dp),parameter :: a9 =  0.0000000000000000_dp
+ real(dp),parameter :: a10=  0.0028609701106953_dp
+ real(dp),parameter :: b1 =  0.7098198258073800_dp
+ real(dp),parameter :: b2 =  4.6311326377185997_dp
+ real(dp),parameter :: b3 = -2.9243190977647000_dp
+ real(dp),parameter :: b4 =  6.1688157841895004_dp
+ real(dp),parameter :: b5 = -1.3435764191535999_dp
+ real(dp),parameter :: b6 =  0.1576046383295400_dp
+ real(dp),parameter :: b7 =  0.4365792821186800_dp
+ real(dp),parameter :: b8 = -0.0620444574606262_dp
+ real(dp),parameter :: b9 =  0.0000000000000000_dp
+ real(dp),parameter :: b10=  0.0028609701106953_dp
+ real(dp),parameter :: onethird = 1._dp/3._dp
+ real(dp),parameter :: twothird = 2._dp/3._dp
+ real(dp),parameter :: threehalf = 3._dp/2._dp
+ real(dp),parameter :: fivehalf = 5._dp/2._dp
+ real(dp),parameter :: sevenhalf = 7._dp/2._dp
+ real(dp) :: y,u,du,d2u
+ real(dp) :: v,dv,d2v
+ real(dp) :: dydt,d2ydt2
+ real(dp) :: num,den,fit,dnum,d2num,dden,d2den,dfit,d2fit
+! *************************************************************************
+
+ y = twothird/t**threehalf
+ u = y**twothird
+ du = twothird/y**onethird
+ d2u = -onethird*du/y
+
+ v = u
+ dv = du
+ d2v = d2u
+
+ dydt = -1._dp/t**fivehalf
+ d2ydt2 = fivehalf/t**sevenhalf
+
+ num = a2*u**2+a3*u**3+a4*u**4 &
+       +a5*u**5+a6*u**6+a7*u**7+a8*u**8 &
+       +a9*u**9+a10*u**10
+ den = 1._dp+b1*v+b2*v**2+b3*v**3+b4*v**4 &
+       +b5*v**5+b6*v**6+b7*v**7+b8*v**8+b9*v**9+b10*v**10
+ fit = num/den
+
+ dnum = du*(2._dp*a2*u+3._dp*a3*u**2+4._dp*a4*u**3 &
+        +5._dp*a5*u**4+6._dp*a6*u**5+7._dp*a7*u**6+8._dp*a8*u**7 &
+        +9._dp*a9*u**8+10._dp*a10*u**9)
+
+ d2num = d2u*(2._dp*a2*u+3._dp*a3*u**2+4._dp*a4*u**3 &
+         +5._dp*a5*u**4+6._dp*a6*u**5+7._dp*a7*u**6+8._dp*a8*u**7 &
+         +9._dp*a9*u**8+10._dp*a10*u**9) &
+         +du*du*(2._dp*a2+2._dp*3._dp*a3*u+3._dp*4._dp*a4*u**2 &
+         +4._dp*5._dp*a5*u**3+5._dp*6._dp*a6*u**4 &
+         +6._dp*7._dp*a7*u**5+7._dp*8._dp*a8*u**6 &
+         +8._dp*9._dp*a9*u**7+9._dp*10._dp*a10*u**8)
+
+ dden = dv*(b1+2._dp*b2*v+3._dp*b3*v**2+4._dp*b4*v**3 &
+        +5._dp*b5*v**4+6._dp*b6*v**5+7._dp*b7*v**6+8._dp*b8*v**7 &
+        +9._dp*b9*v**8+10._dp*b10*v**9)
+
+ d2den = d2v*(b1+2._dp*b2*v+3._dp*b3*v**2+4._dp*b4*v**3 &
+         +5._dp*b5*v**4+6._dp*b6*v**5+7._dp*b7*v**6+8._dp*b8*v**7 &
+         +9._dp*b9*v**8+10._dp*b10*v**9) &
+         + dv*dv*(2._dp*b2+2._dp*3._dp*b3*v+3._dp*4._dp*b4*v**2 &
+         +4._dp*5._dp*b5*v**3+5._dp*6._dp*b6*v**4+6._dp*7._dp*b7*v**5+7._dp*8._dp*b8*v**6 &
+         +8._dp*9._dp*b9*v**7+9._dp*10._dp*b10*v**8)
+
+! derivatives w.r.t. y
+ dfit = dnum/den - (num/den)*(dden/den)
+ d2fit = d2num/den - (dnum/den)*(dden/den) &
+         - (dnum/den)*(dden/den) + 2._dp*(num/den)*(dden/den)*(dden/den) &
+         - (num/den)*(d2den/den)
+
+! Bx, and derivatives w.r.t. t
+ Bx = fit
+ dBx = dfit * dydt
+ d2Bx = d2fit*dydt**2 + dfit*d2ydt2
+ if(Bx/=Bx) Bx=zero
+ if(dBx/=dBx) dBx=zero
+ if(d2Bx/=d2Bx) d2Bx=zero
+
+end subroutine tildeBx
+!!***
+
+!!****f* m_special_funcs/tildeBc
+!! NAME
+!!  tildeBc
+!!
+!! FUNCTION
+!!  Returns tilde Bc Pade fit and first and second derivatives
+!!  w.r.t. reduced temperature t.
+!!
+!! NOTES
+!!  Karasiev-Dufty-Trickey (KDT16) TGGA xc-functional
+!!  V.V. Karasiev, J.W. Dufty, and S.B. Trickey, PRL 120(7), 076401 (2018) [[cite:Karasiev2018]]
+!!
+!! INPUTS
+!!  iflag=flag selector integer
+!!  rs=Wigner-Seitz radius (bohr)
+!!  t=reduced temperature, t=T/T_F
+!!
+!! OUTPUT
+!!  Bc=tilde Bc(t)
+!!  dBcdrs=dBxc(rs,t)/drs
+!!  dBcdt=dBc(rs,t)/dt
+!!
+!! SOURCE
+
+subroutine tildeBc(iflag,rs,t,Bc,dBcdrs,dBcdt)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: iflag
+ real(dp),intent(in) :: rs,t
+ real(dp),intent(out) :: Bc,dBcdrs,dBcdt
+
+!Local variables ------------------------------
+!scalars
+ real(dp),parameter :: alpha_n = 0.50000000000000D+00
+ real(dp),parameter :: alpha_d = 0.15000000000000D+01
+ real(dp),parameter :: alpha_t = 0.32500000000000D+01
+ real(dp),parameter :: a1 =  0.30047772904141D+03
+ real(dp),parameter :: b1 = -0.11166043894641D+03
+ real(dp),parameter :: a2 = -0.38706401119284D+03
+ real(dp),parameter :: b2 = -0.45327974938936D+02
+ real(dp),parameter :: a3 =  0.25112236519758D+04
+ real(dp),parameter :: b3 = -0.14507109325068D+04
+ real(dp),parameter :: a4 =  0.52243427453456D+03
+ real(dp),parameter :: b4 = -0.30665095324907D+02
+ real(dp),parameter :: c1 =  0.11077393333429D+03
+ real(dp),parameter :: d1 =  0.12854960224127D+01
+ real(dp),parameter :: c2 =  0.32355494275181D+03
+ real(dp),parameter :: d2 =  0.13482659120012D+02
+ real(dp),parameter :: c3 =  0.45509212104516D+03
+ real(dp),parameter :: d3 =  0.23416017878226D+02
+ real(dp),parameter :: c4 =  0.10884351801356D+04
+ real(dp),parameter :: d4 =  0.24480831491950D+02
+ real(dp),parameter :: c5 =  0.36112604933128D+00
+ real(dp),parameter :: d5 =  0.32161372287131D-08
+ real(dp),parameter :: e1 =  0.32175261286726D+02
+ real(dp),parameter :: e2 =  0.61853047558212D+02
+ real(dp),parameter :: e3 =  0.33585054134674D+03
+ real(dp),parameter :: e4 =  0.12874240529185D+03
+ real(dp),parameter :: f1 =  0.41006056761680D-02
+ real(dp),parameter :: f2 =  0.18933118065366D-01
+ real(dp),parameter :: f3 =  0.24295412676204D-04
+ real(dp),parameter :: f4 =  0.18369775992299D-07
+ real(dp),parameter :: f5 =  0.69274680951701D-10
+ real(dp),parameter :: onethird = 1.d0/3.d0
+ real(dp),parameter :: twothird = 2.d0/3.d0
+ real(dp),parameter :: threehalf = 3.d0/2.d0
+ real(dp),parameter :: fivehalf = 5.d0/2.d0
+ real(dp),parameter :: sevenhalf = 7.d0/2.d0
+ real(dp) :: rsn,rsd,u,du
+ real(dp) :: num,den,dnumdrs,dnumdt,ddendrs,ddendt
+! *************************************************************************
+
+ if(iflag==5.or.iflag==6.or.iflag==7.or.iflag==8) then
+   ! Bc(rs,t) = 1
+   Bc = 1._dp
+   dBcdrs = 0._dp
+   dBcdt = 0._dp
+ elseif(iflag==1.or.iflag==2.or.iflag==3.or.iflag==4) then
+   !
+   ! Bc(rs,t) = Pade Fit
+   !
+   rsn = rs**alpha_n
+   rsd = rs**alpha_d
+   u = t**alpha_t
+   du = alpha_t*t**(alpha_t-1.d0)
+   !
+   num = 1.d0+(a1+b1*rsn+e1*rsn**2)*u+(a2+b2*rsn+e2*rsn**2)*u**2+(a3+b3*rsn+e3*rsn**2)*u**3+(a4+b4*rsn+e4*rsn**2)*u**4
+   dnumdrs = (b1+2.d0*e1*rsn)*u+(b2+2.d0*e2*rsn)*u**2+(b3+2.d0*e3*rsn)*u**3+(b4+2.d0*e4*rsn)*u**4
+   dnumdrs = dnumdrs * alpha_n*rs**(alpha_n-1.d0)
+   dnumdt = (a1+b1*rsn+e1*rsn**2)+2.d0*(a2+b2*rsn+e2*rsn**2)*u+3.d0*(a3+b3*rsn+e3*rsn**2)*u**2+4.d0*(a4+b4*rsn+e4*rsn**2)*u**3
+   dnumdt = dnumdt * du
+   !
+   den = 1.d0+(c1+d1*rsd+f1*rsd**2)*u+(c2+d2*rsd+f2*rsd**2)*u**2+(c3+d3*rsd+f3*rsd**2)*u**3+(c4+d4*rsd+f4*rsd**2)*u**4+(c5+d5*rsd+f5*rsd**2)*u**5
+   ddendrs = (d1+2.d0*f1*rsd)*u+(d2+2.d0*f2*rsd)*u**2+(d3+2.d0*f3*rsd)*u**3+(d4+2.d0*f4*rsd)*u**4+(d5+2.d0*f5*rsd)*u**5
+   ddendrs = ddendrs * alpha_d*rs**(alpha_d-1.d0)
+   ddendt = (c1+d1*rsd+f1*rsd**2)+2.d0*(c2+d2*rsd+f2*rsd**2)*u+3.d0*(c3+d3*rsd+f3*rsd**2)*u**2+4.d0*(c4+d4*rsd+f4*rsd**2)*u**3+5.d0*(c5+d5*rsd+f5*rsd**2)*u**4
+   ddendt = ddendt * du
+   !
+   Bc = num/den
+   dBcdrs = dnumdrs/den - (num/den)*ddendrs/den
+   dBcdt = dnumdt/den - (num/den)*ddendt/den
+   if(Bc/=Bc) Bc=zero
+   if(dBcdrs/=dBcdrs) dBcdrs=zero
+   if(dBcdt/=dBcdt) dBcdt=zero
+   !
+ endif
+
+end subroutine tildeBc
 !!***
 
 !----------------------------------------------------------------------
@@ -1381,7 +2122,6 @@ elemental function k_fermi(rhor)
 !Local variables-------------------------------
 !scalars
  real(dp),parameter :: pisq=pi**2
-
 ! *************************************************************************
 
  k_fermi = (three*pisq*rhor)**third
@@ -1413,7 +2153,6 @@ elemental function k_thfermi(rhor)
 !Local variables-------------------------------
 !scalars
  real(dp),parameter :: pisq=pi**2
-
 ! *************************************************************************
 
  k_thfermi = SQRT(four*k_fermi(rhor)*piinv)
@@ -1436,7 +2175,6 @@ pure function levi_civita_3() result(ee)
 
 !Arguments ------------------------------------
  integer :: ee(3,3,3)
-
 ! *************************************************************************
 
  ee = 0
@@ -1451,9 +2189,9 @@ pure function levi_civita_3() result(ee)
 end function levi_civita_3
 !!***
 
-!!****f* m_special_funcs/jlspline_new
+!!****f* m_special_funcs/jlspline_init
 !! NAME
-!! jlspline_new
+!! jlspline_init
 !!
 !! FUNCTION
 !! Pre-calculate the j_v(y) for recip_ylm on regular grid
@@ -1471,10 +2209,11 @@ end function levi_civita_3
 !!
 !! SOURCE
 
-type(jlspline_t) function jlspline_new(nx, delta, mlang) result(new)
+subroutine jlspline_init(new, nx, delta, mlang)
 
 !Arguments ------------------------------------
 !scalars
+ class(jlspline_t),intent(inout) :: new
  integer,intent(in) :: nx,mlang
  real(dp),intent(in) :: delta
 
@@ -1484,7 +2223,6 @@ type(jlspline_t) function jlspline_new(nx, delta, mlang) result(new)
  real(dp) :: yp1,ypn
 !arrays
  real(dp),allocatable :: cosbessx(:),sinbessx(:)
-
 ! *********************************************************************
 
  if (nx < 2) then
@@ -1528,7 +2266,7 @@ type(jlspline_t) function jlspline_new(nx, delta, mlang) result(new)
  ABI_FREE(sinbessx)
  ABI_FREE(cosbessx)
 
-end function jlspline_new
+end subroutine jlspline_init
 !!***
 
 !----------------------------------------------------------------------
@@ -1545,19 +2283,12 @@ end function jlspline_new
 subroutine jlspline_free(jlspl)
 
 !Arguments ------------------------------------
- type(jlspline_t),intent(inout) :: jlspl
-
+ class(jlspline_t),intent(inout) :: jlspl
 ! *********************************************************************
 
- if (allocated(jlspl%xx)) then
-   ABI_FREE(jlspl%xx)
- end if
- if (allocated(jlspl%bess_spl)) then
-   ABI_FREE(jlspl%bess_spl)
- end if
- if (allocated(jlspl%bess_spl_der)) then
-   ABI_FREE(jlspl%bess_spl_der)
- end if
+ ABI_SFREE(jlspl%xx)
+ ABI_SFREE(jlspl%bess_spl)
+ ABI_SFREE(jlspl%bess_spl_der)
 
 end subroutine jlspline_free
 !!***
@@ -1579,9 +2310,9 @@ end subroutine jlspline_free
 real(dp) function jlspline_integral(jlspl, il, qq, powr, nr, rcut)  result(res)
 
 !Arguments ------------------------------------
+ class(jlspline_t),intent(in) :: jlspl
  integer,intent(in) :: il,nr,powr
  real(dp),intent(in) :: qq, rcut
- type(jlspline_t),intent(in) :: jlspl
 
 !Local variables ---------------------------------------
  integer :: ierr
@@ -1609,9 +2340,9 @@ real(dp) function jlspline_integral(jlspl, il, qq, powr, nr, rcut)  result(res)
 end function jlspline_integral
 !!***
 
-!!****f* m_special_funcs/gspline_new
+!!****f* m_special_funcs/gspline_init
 !! NAME
-!!  gspline_new
+!!  gspline_init
 !!
 !! FUNCTION
 !!  Build object to spline the gaussian approximant and its primitive.
@@ -1621,14 +2352,14 @@ end function jlspline_integral
 !!
 !! SOURCE
 
-type (gspline_t) function gspline_new(sigma) result(new)
+subroutine gspline_init(new, sigma)
 
 !Arguments ------------------------------------
 !scalars
+ class(gspline_t),intent(out) :: new
  real(dp),intent(in) :: sigma
 
 !Local variables ------------------------------
-!scalars
  integer :: ii
  real(dp) :: ybcbeg, ybcend
 ! *************************************************************************
@@ -1658,7 +2389,7 @@ type (gspline_t) function gspline_new(sigma) result(new)
  call spline(new%xvals, new%svals(:,3), new%nspline, new%svals(1,1), new%svals(new%nspline, 1), new%svals(:,4))
  !do ii=1,new%nspline; write(98,*)new%xvals(ii),new%svals(ii,3),new%svals(ii,4); end do
 
-end function gspline_new
+end subroutine gspline_init
 !!***
 
 !!****f* m_special_funcs/gspline_eval
@@ -1672,7 +2403,7 @@ end function gspline_new
 !!  self<gspline_t>=Object used to spline the gaussian approximant
 !!  x0=Shift to be given to xmesh
 !!  nx=Number of points in input mesh.
-!!  xmesh(nx)=Frequency points (not necessarly linear).
+!!  xmesh(nx)=Frequency points (not necessary linear).
 !!
 !! OUTPUT
 !!  weights(nx,2)=First slice contains the gaussian approximant on xmesh.
@@ -1684,9 +2415,9 @@ pure subroutine gspline_eval(self, x0, nx, xmesh, weights)
 
 !Arguments ------------------------------------
 !scalars
+ class(gspline_t),intent(in) :: self
  integer,intent(in) :: nx
  real(dp),intent(in) :: x0
- type(gspline_t),intent(in) :: self
 !arrays
  real(dp),intent(in) :: xmesh(nx)
  real(dp),intent(out) :: weights(nx,2)
@@ -1697,7 +2428,6 @@ pure subroutine gspline_eval(self, x0, nx, xmesh, weights)
  real(dp) :: xx,absx,aa,bb,cc,dd
  logical :: isneg
  !real(dp) :: int_values(nx)
-
 ! *************************************************************************
 
  do ix=1,nx
@@ -1740,25 +2470,16 @@ end subroutine gspline_eval
 !! FUNCTION
 !!  Free dynamic memory
 !!
-!! INPUTS
-!!  self<gspline_t>=Object used to spline the gaussian approximant
-!!
 !! SOURCE
 
 subroutine gspline_free(self)
 
 !Arguments ------------------------------------
-!scalars
- type(gspline_t),intent(inout) :: self
-
+ class(gspline_t),intent(inout) :: self
 ! *************************************************************************
 
- if (allocated(self%xvals)) then
-   ABI_FREE(self%xvals)
- end if
- if (allocated(self%svals)) then
-   ABI_FREE(self%svals)
- end if
+ ABI_SFREE(self%xvals)
+ ABI_SFREE(self%svals)
 
 end subroutine gspline_free
 !!***

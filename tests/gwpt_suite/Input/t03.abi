@@ -1,0 +1,44 @@
+# NSCF computation of WFK file with empty states to prepare ZPR calculation in diamond.
+# IMPORTANT: the GWR driver implements a direct diago with Scalapack with is much faster for large systems,
+# especially if ELPA is used.
+
+ ecut 45.0
+ nstep 150
+ iscf -2          # NSCF run
+ tolwfr 1e-14     # 1e-20 is the recommended value
+ nband  70        # occ + empty states .
+ nbdbuf -10       # A negative value means 10% of nband as buffer.
+
+# K-mesh
+ ngkpt 2 2 2
+ nshiftk 1
+ shiftk 0 0 0
+
+ # Read KS density from file to start NSCF run.
+ getden_filepath "diamond_eph_gwpt/gso_DEN.nc"
+
+ # Get structure from DEN file.
+ structure "abifile:diamond_eph_gwpt/gso_DEN.nc"
+
+ pp_dirpath "$ABI_PSPDIR/Psdj_nc_fr_04_pbe_std_psp8"
+ pseudos "C.psp8"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain =  t01.abi, t02.abi, t03.abi, t04.abi, t05.abi
+#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi
+#%% [files]
+#%% use_git_submodule = diamond_eph_gwpt
+#%% files_to_test =
+#%%   t03.abo, tolnlines= 57, tolabs=  3.000e-02, tolrel=  6.000e-03
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, DFPT, EPH, GWPT
+#%% description = NSCF computation of WFK file with empty states to prepare ZPR calculation in diamond.
+#%%<END TEST_INFO>

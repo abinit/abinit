@@ -15,7 +15,7 @@
              0.0  0.0  0.0  # Gamma
              0.0  0.0  0.5  # Z point
  tolwfr2  1.0d-12
- enunit2  1             # Will output the eigenenergies in eV 
+ enunit2  1             # Will output the eigenenergies in eV
 
 #######################################################################
 #Common input variables
@@ -31,7 +31,7 @@
  ntypat   1
  znucl    1
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_paw_pw_standard/H.xml"
+ pseudos "Psdj_paw_pw_std/H.xml"
 
 #Definition of the atoms
  natom   6
@@ -64,14 +64,14 @@
 #%% executable = abinit
 #%% test_chain = tfold2bloch_1.abi, tfold2bloch_2.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   tfold2bloch_1.abo, tolnlines=38, tolabs=2.0e-4, tolrel=2.0e-02
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = O. Rubel
 #%% keywords = FOLD2BLOCH, PAW
-#%% description = 
+#%% description =
 #%%   H6 Supercell
 #%%   Generates a 6 atom Hydrogen supercell with the multiplicity of 1:2:3 (x:y:z)
 #%%   Produces a WFK file to be analyzed with fold2bloch

@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018-2022 ABINIT group (LB)
+!!  Copyright (C) 2018-2025 ABINIT group (LB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,7 +39,7 @@ contains
 !! Loop over the perturbations j1, j2 and j3
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2022 ABINIT group (LB)
+!! Copyright (C) 2018-2025 ABINIT group (LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -155,8 +155,9 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  use m_inwffil,     only : inwffil
  use m_fft,         only : fourdp
  use m_ioarr,       only : read_rhor
- use m_hamiltonian, only : gs_hamiltonian_type, init_hamiltonian
+ use m_hamiltonian, only : gs_hamiltonian_type
  use m_pawdij,      only : pawdij, pawdijfr, symdij
+ use m_paw_energies,only : paw_energies_type
  use m_pawfgr,      only : pawfgr_type
  use m_pawfgrtab,   only : pawfgrtab_type
  use m_paw_an,      only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify, paw_an_reset_flags
@@ -232,10 +233,11 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  integer :: option,optene,optfr,optorth,pert1case,pert2case,pert3case
  integer :: qphase_rhoij,rdwrpaw,second_idir,timrev,usexcnhat
  logical :: non_magnetic_xc
- real(dp) :: dummy_real,dummy_real2, dummy_real3, ecut_eff
+ real(dp) :: dummy_real,ecut_eff,el_temp
  character(len=500) :: message
  character(len=fnlen) :: fiden1i,fiwf1i,fiwf2i,fiwf3i,fiwfddk,fnamewff(5)
  type(gs_hamiltonian_type) :: gs_hamkq
+ type(paw_energies_type) :: paw_energies_dum
  type(wffile_type) :: wff1,wff2,wff3,wfft1,wfft2,wfft3
  type(wfk_t) :: ddk_f(5)
  type(wvl_data) :: wvl
@@ -293,9 +295,10 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 !2) Perform the setup needed for the non-local factors:
 !* Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_hamk.
 !* PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
- call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,natom,&
+ call gs_hamkq%init(psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,natom,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
-& usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda,paw_ij=paw_ij0)
+& usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,paw_ij=paw_ij0,&
+& gpu_option=dtset%gpu_option)
 
  ABI_MALLOC(vpsp1,(cplex*nfftf))
  ABI_MALLOC(xccc3d1,(cplex*nfftf))
@@ -335,6 +338,9 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  end if
 
  mcg=mpw*nspinor*mband*mkmem*nsppol
+
+!Get electronic temperature from dtset
+ el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
 
 !Allocations/initializations for PAW only
  if(psps%usepaw==1) then
@@ -611,7 +617,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 &                   nhat1_i2pert,nhat1gr,nhat1grdim,nkxc,nspden,dtset%ntypat,n3xccc,non_magnetic_xc,optene,option,&
 &                   dtset%qptn,dtset%ratopt,dtset%ratsm,dtset%ratsph,rhog,rho2g1,rhor,rho2r1,rprimd,dtset%typat,ucvol,psps%usepaw,&
 &                   usexcnhat,dtset%vcutgeo,vhartr1_i2pert,&
-&                   vpsp1,vresid_dum,dummy_real,vtrial1_i2pert,vxc,vxc1_i2pert,xccc3d2,dtset%ixcrot,xred)
+&                   vpsp1,vresid_dum,dummy_real,vtrial1_i2pert,vxc,vxc1_i2pert,xccc3d2,dtset%ixcrot,xred,dtset%qgbt,dtset%use_gbt)
 
                    if (psps%usepaw==1.and.usexcnhat==0) then
                      rho2r1(:,:) = rho2r1(:,:) - nhat1_i2pert(:,:)
@@ -628,11 +634,11 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 
 !                    Computation of "on-site" first-order potentials, first-order densities
                      option=1
-                     call pawdenpot(dummy_real,dummy_real2,dummy_real3,i2pert,dtset%ixc,natom,dtset%natom,&
-&                     nspden,psps%ntypat,dtset%nucdipmom,&
-&                     0,option,paw_an1_i2pert,paw_an0,paw_ij1_i2pert,pawang,&
-&                     dtset%pawprtvol,pawrad,pawrhoij1_i2pert,dtset%pawspnorb,pawtab,dtset%pawxcdev,&
-&                     dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,ucvol,psps%znuclpsp, &
+                     call pawdenpot(dummy_real,el_temp,gprimd,i2pert,dtset%ixc,natom,dtset%natom,&
+&                     nspden,psps%ntypat,dtset%nucdipmom,0,option,paw_an1_i2pert,paw_an0,&
+&                     paw_energies_dum,paw_ij1_i2pert,pawang,dtset%pawprtvol,pawrad,&
+&                     pawrhoij1_i2pert,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%spnorbscl,&
+&                     dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,xred,ucvol,psps%znuclpsp, &
 &                     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
                 !    First-order Dij computation
 !                     call timab(561,1,tsec)
@@ -649,7 +655,8 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
                      call pawdij(cplex,dtset%enunit,gprimd,i2pert,natom,dtset%natom,&
 &                     nfftf,nfftotf,dtset%nspden,psps%ntypat,paw_an1_i2pert,paw_ij1_i2pert,pawang,&
 &                     pawfgrtab,dtset%pawprtvol,pawrad,pawrhoij1_i2pert,dtset%pawspnorb,pawtab,&
-&                     dtset%pawxcdev,qphon,dtset%spnorbscl,ucvol,dtset%cellcharge(1),vtrial1_tmp,vxc1_i2pert,xred,&
+&                     dtset%pawxcdev,qphon,dtset%spnorbscl,ucvol,dtset%cellcharge(1),&
+&                     vtrial1_tmp,vxc1_i2pert,xred,dtset%znucl,&
 &                     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
                      if (has_dijfr>0) then
                        ABI_FREE(vtrial1_tmp)
@@ -713,7 +720,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
                      call wrtout(std_out,message,'COLL')
                      call wrtout(ab_out,message,'COLL')
 !                    Note that the unit number for these files is 50,51,52 or 53 (dtfil%unddk=50)
-                     call wfk_open_read(ddk_f(ii),fiwfddk,1,dtset%iomode,dtfil%unddk+(ii-1),mpi_enreg%comm_cell)
+                     call ddk_f(ii)%open_read(fiwfddk,1,dtset%iomode,dtfil%unddk+(ii-1),mpi_enreg%comm_cell)
                    end do
 
 !                  Perform DFPT part of the 3dte calculation

@@ -1,5 +1,5 @@
 #CO2 in a box.
-#Tests: 
+#Tests:
 #PAW implementation with wvl_bigdft_comp =0
 #
 
@@ -50,12 +50,12 @@ xred 5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
      3.6714652642E-01  5.0000000000E-01  5.0000000000E-01
      6.3285347358E-01  5.0000000000E-01  5.0000000000E-01
 ntypat      2
-typat      1 2 2 
+typat      1 2 2
 znucl     6.00 8.00
 
 #Minimal test: do not print WFK files etc..
 chksymbreak 0
-#optforces  0 
+#optforces  0
 optstress 0
 kptopt 0
 prtden 0
@@ -67,7 +67,7 @@ prteig 0
 #%% executable = abinit
 #%% [files]
 #%% psp_files = C.atompaw.wvl,O.atompaw.wvl
-#%% files_to_test = t34.out, tolnlines = 0, tolabs = 5.0e-10, tolrel = 2.0e-10
+#%% files_to_test = t34.out, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

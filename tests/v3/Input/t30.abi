@@ -34,7 +34,7 @@
  optdriver2 3
  getwfk2    1
  nband2    10
- ppmfrq2  16.5 eV
+# ppmfrq2  16.5 eV   # Note : the default  0.0 is replaced by the Drude plasma frequency, here 16.628 eV, very close to 16.5 eV.
  awtr2       0       # Note : the default awtr 1 is better
  symchi      0       # Note : the default symchi 1 is better
 
@@ -46,7 +46,7 @@
  nkptgw3     1
  kptgw3      0.250  0.750  0.250
  bdgw3       4  5
- ppmfrq3    16.5 eV
+# ppmfrq3    16.5 eV
  zcut3       0.1 eV
  gw_icutcoul3  3          # old deprecated value of icutcoul, only used for legacy
 

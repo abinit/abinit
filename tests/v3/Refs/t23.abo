@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.2.4.2 of ABINIT, released Nov 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Wed  6 Nov 2024.
+- ( at 13h56 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v3_t23/t23.in
-- output file    -> t23.out
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_gonze-10.2/tests/Test_suite/v3_t23/t23.abi
+- output file    -> t23.abo
 - root for input  files -> t23i
 - root for output files -> t23o
-
 
  DATASET    1 : magnetic group, Shubnikov type III
  Fedorov space group P-1 (#  2); Bravais aP (primitive triclinic)
@@ -30,17 +29,16 @@
  Values of the parameters that define the memory need for DATASET  1.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       2    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
+     natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       2    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       0.565 Mbytes of memory.
+P This job should need less than                       1.391 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET    2 : magnetic group, Shubnikov type III
  Fedorov space group P2 (#  3); Bravais mP (primitive monocl.)
@@ -49,17 +47,16 @@ _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  Values of the parameters that define the memory need for DATASET  2.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       2    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
+     natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       2    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.596 Mbytes of memory.
+P This job should need less than                       1.446 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
-
 
  DATASET    3 : magnetic group, Shubnikov type III
  Fedorov space group P2_1 (#  4); Bravais mP (primitive monocl.)
@@ -68,17 +65,16 @@ _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET  3.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       2    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
+     natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       2    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.596 Mbytes of memory.
+P This job should need less than                       1.446 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
-
 
  DATASET    4 : magnetic group, Shubnikov type III
  Fedorov space group C2 (#  5); Bravais mC (1-face-center monocl.)
@@ -87,17 +83,16 @@ _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET  4.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       2    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
+     natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       2    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =           6          nfft =         288          nkpt =           1
 ================================================================================
-P This job should need less than                       0.510 Mbytes of memory.
+P This job should need less than                       1.295 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET    5 : magnetic group, Shubnikov type III
  Fedorov space group Pm (#  6); Bravais mP (primitive monocl.)
@@ -106,17 +101,16 @@ _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET  5.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       2    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
+     natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       2    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.596 Mbytes of memory.
+P This job should need less than                       1.446 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
-
 
  DATASET    6 : magnetic group, Shubnikov type III
  Fedorov space group Pc (#  7); Bravais mP (primitive monocl.)
@@ -125,17 +119,16 @@ _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET  6.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       2    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
+     natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       2    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.596 Mbytes of memory.
+P This job should need less than                       1.446 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
-
 
  DATASET    7 : magnetic group, Shubnikov type III
  Fedorov space group Cm (#  8); Bravais mC (1-face-center monocl.)
@@ -144,17 +137,16 @@ _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET  7.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       2    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
+     natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       2    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =           6          nfft =         288          nkpt =           1
 ================================================================================
-P This job should need less than                       0.510 Mbytes of memory.
+P This job should need less than                       1.295 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET    8 : magnetic group, Shubnikov type III
  Fedorov space group Cc (#  9); Bravais mC (1-face-center monocl.)
@@ -163,17 +155,16 @@ _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET  8.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       2    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
+     natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       2    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =           6          nfft =         288          nkpt =           1
 ================================================================================
-P This job should need less than                       0.510 Mbytes of memory.
+P This job should need less than                       1.295 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET    9 : magnetic group, Shubnikov type III
  Fedorov space group P2/m (# 10); Bravais mP (primitive monocl.)
@@ -182,17 +173,16 @@ _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET  9.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       4  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       4    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           3        mffmem =           1         mkmem =           1
+     natom =       4  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       4    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           4        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.612 Mbytes of memory.
+P This job should need less than                       1.454 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
-
 
  DATASET   10 : magnetic group, Shubnikov type III
  Fedorov space group P2/m (# 10); Bravais mP (primitive monocl.)
@@ -201,17 +191,16 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 10.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       4  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       4    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           3        mffmem =           1         mkmem =           1
+     natom =       4  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       4    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           4        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.612 Mbytes of memory.
+P This job should need less than                       1.454 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
-
 
  DATASET   11 : magnetic group, Shubnikov type III
  Fedorov space group P2/m (# 10); Bravais mP (primitive monocl.)
@@ -220,17 +209,16 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 11.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       4  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       4    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           3        mffmem =           1         mkmem =           1
+     natom =       4  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       4    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           4        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.612 Mbytes of memory.
+P This job should need less than                       1.454 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
-
 
  DATASET   12 : magnetic group, Shubnikov type III
  Fedorov space group P2_1/m (# 11); Bravais mP (primitive monocl.)
@@ -239,17 +227,16 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 12.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       4  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       4    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           3        mffmem =           1         mkmem =           1
+     natom =       4  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       4    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           4        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.612 Mbytes of memory.
+P This job should need less than                       1.454 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
-
 
  DATASET   13 : magnetic group, Shubnikov type III
  Fedorov space group P2_1/m (# 11); Bravais mP (primitive monocl.)
@@ -258,17 +245,16 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 13.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       4  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       4    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           3        mffmem =           1         mkmem =           1
+     natom =       4  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       4    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           4        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.612 Mbytes of memory.
+P This job should need less than                       1.454 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
-
 
  DATASET   14 : magnetic group, Shubnikov type III
  Fedorov space group P2_1/m (# 11); Bravais mP (primitive monocl.)
@@ -277,17 +263,16 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 14.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       4  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       4    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           3        mffmem =           1         mkmem =           1
+     natom =       4  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       4    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           4        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.612 Mbytes of memory.
+P This job should need less than                       1.454 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
-
 
  DATASET   15 : magnetic group, Shubnikov type III
  Fedorov space group C2/m (# 12); Bravais mC (1-face-center monocl.)
@@ -296,17 +281,16 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 15.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =       4  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       4    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           3        mffmem =           1         mkmem =           1
+     natom =       4  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       4    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           4        mffmem =           1         mkmem =           1
        mpw =           6          nfft =         288          nkpt =           1
 ================================================================================
-P This job should need less than                       0.526 Mbytes of memory.
+P This job should need less than                       1.303 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET   16 : magnetic group, Shubnikov type III
  Fedorov space group C2/m (# 12); Bravais mC (1-face-center monocl.)
@@ -315,17 +299,16 @@ _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 16.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =       4  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       4    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           3        mffmem =           1         mkmem =           1
+     natom =       4  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       4    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           4        mffmem =           1         mkmem =           1
        mpw =           6          nfft =         288          nkpt =           1
 ================================================================================
-P This job should need less than                       0.526 Mbytes of memory.
+P This job should need less than                       1.303 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET   17 : magnetic group, Shubnikov type III
  Fedorov space group C2/m (# 12); Bravais mC (1-face-center monocl.)
@@ -334,17 +317,16 @@ _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 17.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =       4  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       4    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           3        mffmem =           1         mkmem =           1
+     natom =       4  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       4    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           4        mffmem =           1         mkmem =           1
        mpw =           6          nfft =         288          nkpt =           1
 ================================================================================
-P This job should need less than                       0.526 Mbytes of memory.
+P This job should need less than                       1.303 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET   18 : magnetic group, Shubnikov type III
  Fedorov space group P2/c (# 13); Bravais mP (primitive monocl.)
@@ -353,17 +335,16 @@ _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 18.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       4  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       4    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           3        mffmem =           1         mkmem =           1
+     natom =       4  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       4    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           4        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.612 Mbytes of memory.
+P This job should need less than                       1.454 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
-
 
  DATASET   19 : magnetic group, Shubnikov type III
  Fedorov space group P2/c (# 13); Bravais mP (primitive monocl.)
@@ -372,17 +353,16 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 19.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       4  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       4    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           3        mffmem =           1         mkmem =           1
+     natom =       4  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       4    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           4        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.612 Mbytes of memory.
+P This job should need less than                       1.454 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
-
 
  DATASET   20 : magnetic group, Shubnikov type III
  Fedorov space group P2/c (# 13); Bravais mP (primitive monocl.)
@@ -391,17 +371,16 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 20.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       4  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       4    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           3        mffmem =           1         mkmem =           1
+     natom =       4  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       4    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           4        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.612 Mbytes of memory.
+P This job should need less than                       1.454 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
-
 
  DATASET   21 : magnetic group, Shubnikov type III
  Fedorov space group P2_1/c (# 14); Bravais mP (primitive monocl.)
@@ -410,17 +389,16 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 21.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       4  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       4    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           3        mffmem =           1         mkmem =           1
+     natom =       4  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       4    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           4        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.612 Mbytes of memory.
+P This job should need less than                       1.454 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
-
 
  DATASET   22 : magnetic group, Shubnikov type III
  Fedorov space group P2_1/c (# 14); Bravais mP (primitive monocl.)
@@ -429,17 +407,16 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 22.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       4  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       4    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           3        mffmem =           1         mkmem =           1
+     natom =       4  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       4    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           4        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.612 Mbytes of memory.
+P This job should need less than                       1.454 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
-
 
  DATASET   23 : magnetic group, Shubnikov type III
  Fedorov space group P2_1/c (# 14); Bravais mP (primitive monocl.)
@@ -448,17 +425,16 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 23.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
-     natom =       4  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       4    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           3        mffmem =           1         mkmem =           1
+     natom =       4  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       4    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           4        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.612 Mbytes of memory.
+P This job should need less than                       1.454 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.012 Mbytes.
 ================================================================================
-
 
  DATASET   24 : magnetic group, Shubnikov type III
  Fedorov space group C2/c (# 15); Bravais mC (1-face-center monocl.)
@@ -467,17 +443,16 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
  Values of the parameters that define the memory need for DATASET 24.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =       4  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       4    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           3        mffmem =           1         mkmem =           1
+     natom =       4  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       4    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           4        mffmem =           1         mkmem =           1
        mpw =           6          nfft =         288          nkpt =           1
 ================================================================================
-P This job should need less than                       0.526 Mbytes of memory.
+P This job should need less than                       1.303 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET   25 : magnetic group, Shubnikov type III
  Fedorov space group C2/c (# 15); Bravais mC (1-face-center monocl.)
@@ -486,17 +461,16 @@ _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 25.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =       4  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       4    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           3        mffmem =           1         mkmem =           1
+     natom =       4  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       4    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           4        mffmem =           1         mkmem =           1
        mpw =           6          nfft =         288          nkpt =           1
 ================================================================================
-P This job should need less than                       0.526 Mbytes of memory.
+P This job should need less than                       1.303 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET   26 : magnetic group, Shubnikov type III
  Fedorov space group C2/c (# 15); Bravais mC (1-face-center monocl.)
@@ -505,25 +479,25 @@ _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  Values of the parameters that define the memory need for DATASET 26.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
      lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
-     natom =       4  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =       4    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =           3        mffmem =           1         mkmem =           1
+     natom =       4  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       4    n1xccc =       0    ntypat =       1
+    occopt =       7   xclevel =       1
+-    mband =           4        mffmem =           1         mkmem =           1
        mpw =           6          nfft =         288          nkpt =           1
 ================================================================================
-P This job should need less than                       0.526 Mbytes of memory.
+P This job should need less than                       1.303 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -555,7 +529,7 @@ _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
             acell26    1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      1.00794000E+00
              ecut      1.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            istwfk        2
            jdtset        1    2    3    4    5    6    7    8    9   10
                         11   12   13   14   15   16   17   18   19   20
@@ -596,24 +570,24 @@ P           mkmem           1
             nband6          2
             nband7          2
             nband8          2
-            nband9          3
-            nband10         3
-            nband11         3
-            nband12         3
-            nband13         3
-            nband14         3
-            nband15         3
-            nband16         3
-            nband17         3
-            nband18         3
-            nband19         3
-            nband20         3
-            nband21         3
-            nband22         3
-            nband23         3
-            nband24         3
-            nband25         3
-            nband26         3
+            nband9          4
+            nband10         4
+            nband11         4
+            nband12         4
+            nband13         4
+            nband14         4
+            nband15         4
+            nband16         4
+            nband17         4
+            nband18         4
+            nband19         4
+            nband20         4
+            nband21         4
+            nband22         4
+            nband23         4
+            nband24         4
+            nband25         4
+            nband26         4
            ndtset          26
             ngfft1          8       8       8
             ngfft2          8       8      10
@@ -643,6 +617,8 @@ P           mkmem           1
             ngfft26         6       6       8
              nkpt           1
             nline           1
+           nspden           2
+           nsppol           2
             nstep           1
              nsym1          2
              nsym2          2
@@ -671,32 +647,59 @@ P           mkmem           1
              nsym25         4
              nsym26         4
            ntypat           1
-              occ1     2.000000  0.000000
-              occ2     2.000000  0.000000
-              occ3     2.000000  0.000000
-              occ4     2.000000  0.000000
-              occ5     2.000000  0.000000
-              occ6     2.000000  0.000000
-              occ7     2.000000  0.000000
-              occ8     2.000000  0.000000
-              occ9     2.000000  2.000000  0.000000
-              occ10    2.000000  2.000000  0.000000
-              occ11    2.000000  2.000000  0.000000
-              occ12    2.000000  2.000000  0.000000
-              occ13    2.000000  2.000000  0.000000
-              occ14    2.000000  2.000000  0.000000
-              occ15    2.000000  2.000000  0.000000
-              occ16    2.000000  2.000000  0.000000
-              occ17    2.000000  2.000000  0.000000
-              occ18    2.000000  2.000000  0.000000
-              occ19    2.000000  2.000000  0.000000
-              occ20    2.000000  2.000000  0.000000
-              occ21    2.000000  2.000000  0.000000
-              occ22    2.000000  2.000000  0.000000
-              occ23    2.000000  2.000000  0.000000
-              occ24    2.000000  2.000000  0.000000
-              occ25    2.000000  2.000000  0.000000
-              occ26    2.000000  2.000000  0.000000
+              occ1     1.000000  0.000000
+                       1.000000  0.000000
+              occ2     1.000000  0.000000
+                       1.000000  0.000000
+              occ3     1.000000  0.000000
+                       1.000000  0.000000
+              occ4     1.000000  0.000000
+                       1.000000  0.000000
+              occ5     1.000000  0.000000
+                       1.000000  0.000000
+              occ6     1.000000  0.000000
+                       1.000000  0.000000
+              occ7     1.000000  0.000000
+                       1.000000  0.000000
+              occ8     1.000000  0.000000
+                       1.000000  0.000000
+              occ9     1.000000  1.000000  0.000000  0.000000
+                       1.000000  1.000000  0.000000  0.000000
+              occ10    1.000000  1.000000  0.000000  0.000000
+                       1.000000  1.000000  0.000000  0.000000
+              occ11    1.000000  1.000000  0.000000  0.000000
+                       1.000000  1.000000  0.000000  0.000000
+              occ12    1.000000  1.000000  0.000000  0.000000
+                       1.000000  1.000000  0.000000  0.000000
+              occ13    1.000000  1.000000  0.000000  0.000000
+                       1.000000  1.000000  0.000000  0.000000
+              occ14    1.000000  1.000000  0.000000  0.000000
+                       1.000000  1.000000  0.000000  0.000000
+              occ15    1.000000  1.000000  0.000000  0.000000
+                       1.000000  1.000000  0.000000  0.000000
+              occ16    1.000000  1.000000  0.000000  0.000000
+                       1.000000  1.000000  0.000000  0.000000
+              occ17    1.000000  1.000000  0.000000  0.000000
+                       1.000000  1.000000  0.000000  0.000000
+              occ18    1.000000  1.000000  0.000000  0.000000
+                       1.000000  1.000000  0.000000  0.000000
+              occ19    1.000000  1.000000  0.000000  0.000000
+                       1.000000  1.000000  0.000000  0.000000
+              occ20    1.000000  1.000000  0.000000  0.000000
+                       1.000000  1.000000  0.000000  0.000000
+              occ21    1.000000  1.000000  0.000000  0.000000
+                       1.000000  1.000000  0.000000  0.000000
+              occ22    1.000000  1.000000  0.000000  0.000000
+                       1.000000  1.000000  0.000000  0.000000
+              occ23    1.000000  1.000000  0.000000  0.000000
+                       1.000000  1.000000  0.000000  0.000000
+              occ24    1.000000  1.000000  0.000000  0.000000
+                       1.000000  1.000000  0.000000  0.000000
+              occ25    1.000000  1.000000  0.000000  0.000000
+                       1.000000  1.000000  0.000000  0.000000
+              occ26    1.000000  1.000000  0.000000  0.000000
+                       1.000000  1.000000  0.000000  0.000000
+           occopt           7
            prtvol          -1
         ptgroupma1          1
         ptgroupma2          2
@@ -1391,10 +1394,10 @@ P           mkmem           1
 
  abinit : before driver, prtvol=-1, debugging mode => will skip acknowledgments
 -
-- Proc.   0 individual time (sec): cpu=          2.4  wall=          2.4
+- Proc.   0 individual time (sec): cpu=          1.6  wall=          1.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and  28 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.4  wall=          2.4
++Overall time at end (sec) : cpu=          1.6  wall=          1.6

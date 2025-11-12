@@ -7,7 +7,7 @@
 !!  results on different procs.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2022 ABINIT group (MMANCINI)
+!! Copyright (C) 2008-2025 ABINIT group (MMANCINI)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,9 +30,7 @@ module m_xredistribute
  use defs_basis
  use m_errors
  use m_abicore
-#if defined HAVE_MPI2
- use mpi
-#endif
+ USE_MPI
 
  implicit none
 

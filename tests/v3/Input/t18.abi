@@ -183,6 +183,11 @@
           0.5d0 2*0.0d0
 
 
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
+
 #Common data
  amu 26.96
  ecut 4

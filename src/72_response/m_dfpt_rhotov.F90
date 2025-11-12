@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2022 ABINIT group (XG, DRH, MT, SPr)
+!!  Copyright (C) 1999-2025 ABINIT group (XG, DRH, MT, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -123,13 +123,15 @@ contains
  subroutine dfpt_rhotov(cplex,ehart01,ehart1,elmag1,elpsp1,emagpen1,exc1,gsqcut,icutcoul,idir,ipert,&
 &           ixc,kxc,magpen,mpatpol,mpdir,mpi_enreg,natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,nspden,ntypat,n3xccc,&
 &           non_magnetic_xc,optene,optres,qphon,ratopt,ratsm,ratsph,rhog,rhog1,rhor,rhor1,rprimd,typat,ucvol,&
-&           usepaw,usexcnhat,vcutgeo,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc,vxc1,xccc3d1,ixcrot,xred)
+&           usepaw,usexcnhat,vcutgeo,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc,vxc1,xccc3d1,ixcrot,xred,qgbt,use_gbt)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,icutcoul,idir,ipert,ixc,n3xccc,natom,nfft,nhat1grdim,nkxc,nspden
  integer,intent(in) :: ntypat,optene,optres,usepaw,usexcnhat,ixcrot,ratopt
  logical,intent(in) :: non_magnetic_xc
+ integer,intent(in) :: use_gbt 
+ real(dp),intent(in):: qgbt(3)
  real(dp),intent(in) :: gsqcut,magpen,ratsm,ucvol
  real(dp),intent(inout) :: ehart01,elpsp1,ehart1,exc1,elmag1,emagpen1
  real(dp),intent(out) :: vres2
@@ -163,7 +165,7 @@ contains
 !arrays
  real(dp)             :: tsec(20)
  real(dp),allocatable :: rhor1_nohat(:,:),vhartr01(:),vxc1val(:,:)
- real(dp),pointer     :: rhor1_(:,:),vhartr1_(:),vxc1_(:,:),v1zeeman(:,:)
+ real(dp),pointer     :: rhor1_(:,:),vhartr1_(:),vxc1_(:,:),v1hspinfield(:,:)
  real(dp),allocatable :: fatsph(:,:),intgden(:,:,:),rhomag(:,:),vmagpen1(:,:)
  real(dp),allocatable :: taumr(:,:,:)
 
@@ -207,9 +209,9 @@ contains
  if(ipert==natom+5.or.ipert==natom+6)then
    if (ipert==natom+5) idir_eff= idir
    if (ipert==natom+6) idir_eff= 4
-   ABI_MALLOC(v1zeeman,(cplex*nfft,nspden))
-   call dfpt_v1zeeman(nspden,nfft,cplex,idir_eff,v1zeeman)
-   if (ipert==natom+5) v1zeeman=0.5d0*v1zeeman
+   ABI_MALLOC(v1hspinfield,(cplex*nfft,nspden))
+   call dfpt_v1hspinfield(nspden,nfft,cplex,idir_eff,v1hspinfield)
+   if (ipert==natom+6) v1hspinfield=2.0d0*v1hspinfield
  end if
 
 !Preconditioned DFPT
@@ -223,13 +225,13 @@ contains
    ABI_MALLOC(taumr,(nfft,natom,3))
    call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,&
   &  ntypat,ratsm,ratsph,rhor1,rprimd,typat,xred,ratopt,prtopt,cplex,&
-  &  intgden=intgden,rhomag=rhomag,fatsph=fatsph,qphon=qphon,taumr=taumr)
+  &  qgbt,use_gbt,intgden=intgden,rhomag=rhomag,fatsph=fatsph,qphon=qphon,taumr=taumr)
  end if
 
  if(ipert>natom+11.and.ipert<=2*natom+11)then
-   ABI_MALLOC(v1zeeman,(cplex*nfft,nspden))
-   call dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,ngfft,nspden,&
-&  qphon,taumr,v1zeeman,xred)
+   ABI_MALLOC(v1hspinfield,(cplex*nfft,nspden))
+   call dfpt_v1hspinfield_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,ngfft,nspden,&
+&  qphon,taumr,v1hspinfield,xred)
  end if
 
  ABI_MALLOC(vmagpen1,(cplex*nfft,nspden))
@@ -293,7 +295,7 @@ contains
      call dotprod_vn(cplex,rhor1,elpsp10,doti,nfft,nfftot,nspden,1,vxc1_,ucvol)
      call dotprod_vn(cplex,rhor1,elpsp1 ,doti,nfft,nfftot,1     ,1,vpsp1,ucvol)
      if (ipert==natom+5.or.ipert==natom+6.or.(ipert>natom+11.and.ipert<=2*natom+11)) then
-       call dotprod_vn(cplex,rhor1,elmag1 ,doti,nfft,nfftot,nspden,1,v1zeeman,ucvol)
+       call dotprod_vn(cplex,rhor1,elmag1 ,doti,nfft,nfftot,nspden,1,v1hspinfield,ucvol)
        elmag1=two*elmag1
      end if
    else
@@ -374,7 +376,7 @@ contains
    end if
 
    if (ipert==natom+5.or.ipert==natom+6.or.(ipert>natom+11.and.ipert<=2*natom+11)) then
-     vresid1 = vresid1 + v1zeeman
+     vresid1 = vresid1 + v1hspinfield
    end if
 
    if (abs(magpen) > tol6) then
@@ -405,7 +407,7 @@ contains
    end if
 
    if (ipert==natom+5.or.ipert==natom+6.or.(ipert>natom+11.and.ipert<=2*natom+11)) then
-     vtrial1 = vtrial1 + v1zeeman
+     vtrial1 = vtrial1 + v1hspinfield
    end if
 
    if (abs(magpen) > tol6) then
@@ -423,7 +425,7 @@ contains
  end if
 
  if (ipert==natom+5.or.ipert==natom+6.or.(ipert>natom+11.and.ipert<=2*natom+11)) then
-   ABI_FREE(v1zeeman)
+   ABI_FREE(v1hspinfield)
  end if
 
  ABI_SFREE(vmagpen1)
@@ -437,12 +439,12 @@ contains
 end subroutine dfpt_rhotov
 !!***
 
-!!****f* ABINIT/dfpt_v1zeeman
+!!****f* ABINIT/dfpt_v1hspinfield
 !! NAME
-!!  dfpt_v1zeeman
+!!  dfpt_v1hspinfield
 !!
 !! FUNCTION
-!!  Calculate 1st order Zeeman potential = -vec{\sigma}.\vec{b}, where
+!!  Calculate 1st order spin magnetic (hspinfield) potential = -vec{\sigma}.\vec{b}, where
 !!  sigma is the vector of Pauli matrices and \vec{b} is the unit
 !!  vector indicating the perturbing field direction.
 !!
@@ -457,7 +459,7 @@ end subroutine dfpt_rhotov
 !!           4: identity matrix at each fft point is returned (for density-density response)
 !!
 !! OUTPUT
-!!  v1zeeman(nfft*cplex,nspden)= 1st order Zeeman potential, or Identity matrix (electrostatic potential) for idir=4
+!!  v1hspinfield(nfft*cplex,nspden)= 1st order spin magnetic (hspinfield) potential, or Identity matrix (electrostatic potential) for idir=4
 !!
 !! SIDE EFFECTS
 !!
@@ -469,11 +471,11 @@ end subroutine dfpt_rhotov
 !!
 !! SOURCE
 
-subroutine dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
+subroutine dfpt_v1hspinfield(nspden,nfft,cplex,idir,v1hspinfield)
 
 !Arguments ------------------------------------
  integer , intent(in)    :: idir,nfft,cplex,nspden
- real(dp), intent(inout) :: v1zeeman(cplex*nfft,nspden)
+ real(dp), intent(inout) :: v1hspinfield(cplex*nfft,nspden)
 
 !Local variables-------------------------------
  integer :: ifft
@@ -503,105 +505,105 @@ subroutine dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
  case(1)
    if (nspden==4) then
      if(idir==3)then       ! Zeeman field along the 3rd axis (z)
-       v1zeeman(:,1)=-1.0d0
-       v1zeeman(:,2)=+1.0d0
-       v1zeeman(:,3)= 0.0d0
-       v1zeeman(:,4)= 0.0d0
+       v1hspinfield(:,1)=-0.5d0
+       v1hspinfield(:,2)=+0.5d0
+       v1hspinfield(:,3)= 0.0d0
+       v1hspinfield(:,4)= 0.0d0
      else if(idir==2)then  ! Zeeman field along the 2nd axis (y)
-       v1zeeman(:,1)= 0.0d0
-       v1zeeman(:,2)= 0.0d0
-       v1zeeman(:,3)= 0.0d0
-       v1zeeman(:,4)=+1.0d0
+       v1hspinfield(:,1)= 0.0d0
+       v1hspinfield(:,2)= 0.0d0
+       v1hspinfield(:,3)= 0.0d0
+       v1hspinfield(:,4)=+0.5d0
      else if(idir==1)then  ! Zeeman field along the 1st axis (x)
-       v1zeeman(:,1)= 0.0d0
-       v1zeeman(:,2)= 0.0d0
-       v1zeeman(:,3)=-1.0d0
-       v1zeeman(:,4)= 0.0d0
+       v1hspinfield(:,1)= 0.0d0
+       v1hspinfield(:,2)= 0.0d0
+       v1hspinfield(:,3)=-0.5d0
+       v1hspinfield(:,4)= 0.0d0
      else if(idir==4)then  ! Scalar potential
-       v1zeeman(:,1)=-1.0d0
-       v1zeeman(:,2)=-1.0d0
-       v1zeeman(:,3)= 0.0d0
-       v1zeeman(:,4)= 0.0d0
+       v1hspinfield(:,1)=-0.5d0
+       v1hspinfield(:,2)=-0.5d0
+       v1hspinfield(:,3)= 0.0d0
+       v1hspinfield(:,4)= 0.0d0
      end if
    else if (nspden==2) then
      if (idir==4) then
-       v1zeeman(:,1)=-1.0d0
-       v1zeeman(:,2)=-1.0d0
+       v1hspinfield(:,1)=-0.5d0
+       v1hspinfield(:,2)=-0.5d0
      else
-       v1zeeman(:,1)=-1.0d0
-       v1zeeman(:,2)= 1.0d0
+       v1hspinfield(:,1)=-0.5d0
+       v1hspinfield(:,2)= 0.5d0
      end if
    else
-     v1zeeman(:,1)= 0.0d0
+     v1hspinfield(:,1)= 0.0d0
    end if
  case(2)
    if (nspden==2) then
      if (idir==4) then
        do ifft=1,nfft
-         v1zeeman(2*ifft-1,1)  =-1.0e0
-         v1zeeman(2*ifft  ,1)  = 0.0e0
-         v1zeeman(2*ifft-1,2)  =-1.0e0
-         v1zeeman(2*ifft  ,2)  = 0.0e0
+         v1hspinfield(2*ifft-1,1)  =-0.5e0
+         v1hspinfield(2*ifft  ,1)  = 0.0e0
+         v1hspinfield(2*ifft-1,2)  =-0.5e0
+         v1hspinfield(2*ifft  ,2)  = 0.0e0
        end do
      else
        do ifft=1,nfft
-         v1zeeman(2*ifft-1,1)  =-1.0e0
-         v1zeeman(2*ifft  ,1)  = 0.0e0
-         v1zeeman(2*ifft-1,2)  = 1.0e0
-         v1zeeman(2*ifft  ,2)  = 0.0e0
+         v1hspinfield(2*ifft-1,1)  =-0.5e0
+         v1hspinfield(2*ifft  ,1)  = 0.0e0
+         v1hspinfield(2*ifft-1,2)  = 0.5e0
+         v1hspinfield(2*ifft  ,2)  = 0.0e0
        end do
      end if
    else if (nspden==4) then
      select case(idir)
      case(1) !along x, v1=-sigma_x
        do ifft=1,nfft
-         v1zeeman(2*ifft-1,1)= 0.0e0 !Re[V^11]
-         v1zeeman(2*ifft  ,1)= 0.0e0 !Im[V^11]
-         v1zeeman(2*ifft-1,2)= 0.0e0 !Re[V^22]
-         v1zeeman(2*ifft  ,2)= 0.0e0 !Im[V^22]
-         v1zeeman(2*ifft-1,3)=-1.0e0 !Re[V^12]
-         v1zeeman(2*ifft  ,3)= 0.0e0 !Im[V^12]
-         v1zeeman(2*ifft-1,4)= 0.0e0 !Re[i.V^21]=Im[V^12]
-         v1zeeman(2*ifft  ,4)=-1.0e0 !Im[i.V^21]=Re[V^12]
+         v1hspinfield(2*ifft-1,1)= 0.0e0 !Re[V^11]
+         v1hspinfield(2*ifft  ,1)= 0.0e0 !Im[V^11]
+         v1hspinfield(2*ifft-1,2)= 0.0e0 !Re[V^22]
+         v1hspinfield(2*ifft  ,2)= 0.0e0 !Im[V^22]
+         v1hspinfield(2*ifft-1,3)=-0.5e0 !Re[V^12]
+         v1hspinfield(2*ifft  ,3)= 0.0e0 !Im[V^12]
+         v1hspinfield(2*ifft-1,4)= 0.0e0 !Re[i.V^21]=Im[V^12]
+         v1hspinfield(2*ifft  ,4)=-0.5e0 !Im[i.V^21]=Re[V^12]
        end do
      case(2) !along y, v1 = -sigma_y
        do ifft=1,nfft
-         v1zeeman(2*ifft-1,1)= 0.0e0 !Re[V^11]
-         v1zeeman(2*ifft  ,1)= 0.0e0 !Im[V^11]
-         v1zeeman(2*ifft-1,2)= 0.0e0 !Re[V^22]
-         v1zeeman(2*ifft  ,2)= 0.0e0 !Im[V^22]
-         v1zeeman(2*ifft-1,3)= 0.0e0 !Re[V^12]
-         v1zeeman(2*ifft  ,3)=+1.0e0 !Im[V^12]
-         v1zeeman(2*ifft-1,4)=+1.0e0 !Re[i.V^21]=Im[V^12]
-         v1zeeman(2*ifft  ,4)= 0.0e0 !Im[i.V^21]=Re[V^12]
+         v1hspinfield(2*ifft-1,1)= 0.0e0 !Re[V^11]
+         v1hspinfield(2*ifft  ,1)= 0.0e0 !Im[V^11]
+         v1hspinfield(2*ifft-1,2)= 0.0e0 !Re[V^22]
+         v1hspinfield(2*ifft  ,2)= 0.0e0 !Im[V^22]
+         v1hspinfield(2*ifft-1,3)= 0.0e0 !Re[V^12]
+         v1hspinfield(2*ifft  ,3)=+0.5e0 !Im[V^12]
+         v1hspinfield(2*ifft-1,4)=+0.5e0 !Re[i.V^21]=Im[V^12]
+         v1hspinfield(2*ifft  ,4)= 0.0e0 !Im[i.V^21]=Re[V^12]
        end do
      case(3)
        do ifft=1,nfft
-         v1zeeman(2*ifft-1,1)=-1.0e0 !Re[V^11]
-         v1zeeman(2*ifft  ,1)= 0.0e0 !Im[V^11]
-         v1zeeman(2*ifft-1,2)= 1.0e0 !Re[V^22]
-         v1zeeman(2*ifft  ,2)= 0.0e0 !Im[V^22]
-         v1zeeman(2*ifft-1,3)= 0.0e0 !Re[V^12]
-         v1zeeman(2*ifft  ,3)= 0.0e0 !Im[V^12]
-         v1zeeman(2*ifft-1,4)= 0.0e0 !Re[i.V^21]
-         v1zeeman(2*ifft  ,4)= 0.0e0 !Im[i.V^21]
+         v1hspinfield(2*ifft-1,1)=-0.5e0 !Re[V^11]
+         v1hspinfield(2*ifft  ,1)= 0.0e0 !Im[V^11]
+         v1hspinfield(2*ifft-1,2)= 0.5e0 !Re[V^22]
+         v1hspinfield(2*ifft  ,2)= 0.0e0 !Im[V^22]
+         v1hspinfield(2*ifft-1,3)= 0.0e0 !Re[V^12]
+         v1hspinfield(2*ifft  ,3)= 0.0e0 !Im[V^12]
+         v1hspinfield(2*ifft-1,4)= 0.0e0 !Re[i.V^21]
+         v1hspinfield(2*ifft  ,4)= 0.0e0 !Im[i.V^21]
        end do
      case(4)
        do ifft=1,nfft
-         v1zeeman(2*ifft-1,1)=-1.0e0 !Re[V^11]
-         v1zeeman(2*ifft  ,1)= 0.0e0 !Im[V^11]
-         v1zeeman(2*ifft-1,2)=-1.0e0 !Re[V^22]
-         v1zeeman(2*ifft  ,2)= 0.0e0 !Im[V^22]
-         v1zeeman(2*ifft-1,3)= 0.0e0 !Re[V^12]
-         v1zeeman(2*ifft  ,3)= 0.0e0 !Im[V^12]
-         v1zeeman(2*ifft-1,4)= 0.0e0 !Re[i.V^21]
-         v1zeeman(2*ifft  ,4)= 0.0e0 !Im[i.V^21]
+         v1hspinfield(2*ifft-1,1)=-0.5e0 !Re[V^11]
+         v1hspinfield(2*ifft  ,1)= 0.0e0 !Im[V^11]
+         v1hspinfield(2*ifft-1,2)=-0.5e0 !Re[V^22]
+         v1hspinfield(2*ifft  ,2)= 0.0e0 !Im[V^22]
+         v1hspinfield(2*ifft-1,3)= 0.0e0 !Re[V^12]
+         v1hspinfield(2*ifft  ,3)= 0.0e0 !Im[V^12]
+         v1hspinfield(2*ifft-1,4)= 0.0e0 !Re[i.V^21]
+         v1hspinfield(2*ifft  ,4)= 0.0e0 !Im[i.V^21]
        end do
      end select
    end if
  end select !cplex
 
-end subroutine dfpt_v1zeeman
+end subroutine dfpt_v1hspinfield
 !!***
 
 !!****f* ABINIT/dfpt_v1magpen
@@ -811,9 +813,9 @@ subroutine dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,mpdir,&
 end subroutine dfpt_v1magpen
 !!***
 
-!!****f* ABINIT/dfpt_v1zeeman_atsph
+!!****f* ABINIT/dfpt_v1hspinfield_atsph
 !! NAME
-!!  dfpt_v1zeeman_atsph
+!!  dfpt_v1hspinfield_atsph
 !!
 !! FUNCTION
 !!  Calculate 1st order potential due to a local Zeeman field inside an
@@ -838,7 +840,7 @@ end subroutine dfpt_v1magpen
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
-!!  v1zeeman(nfft*cplex,nspden)= 1st order Zeeman potential, or Identity matrix (electrostatic potential) for idir=4
+!!  v1hspinfield(nfft*cplex,nspden)= 1st order Zeeman potential, or Identity matrix (electrostatic potential) for idir=4
 !!
 !! SIDE EFFECTS
 !!
@@ -850,8 +852,8 @@ end subroutine dfpt_v1magpen
 !!
 !! SOURCE
 
-subroutine dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,ngfft,nspden,&
-& qphon,taumr,v1zeeman,xred)
+subroutine dfpt_v1hspinfield_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,ngfft,nspden,&
+& qphon,taumr,v1hspinfield,xred)
 
 !Arguments ------------------------------------
 !scalars
@@ -861,7 +863,7 @@ subroutine dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,ngff
  integer, intent(in)    :: ngfft(18)
  real(dp), intent(in)   :: fatsph(nfft,natom)
  real(dp), intent(in)   :: qphon(3)
- real(dp), intent(inout):: v1zeeman(cplex*nfft,nspden)
+ real(dp), intent(inout):: v1hspinfield(cplex*nfft,nspden)
  real(dp), intent(in)   :: taumr(nfft,natom,3)   
  real(dp), intent(in)   :: xred(3,natom)
 
@@ -914,24 +916,24 @@ subroutine dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,ngff
    if (nspden==4) then
      if(idir==3)then       ! Zeeman field along the 3rd axis (z)
        do ifft=1,nfft
-         v1zeeman(ifft,1)=Bloc(ifft)
-         v1zeeman(ifft,2)=-Bloc(ifft)
-         v1zeeman(ifft,3)= 0.0d0
-         v1zeeman(ifft,4)= 0.0d0
+         v1hspinfield(ifft,1)=Bloc(ifft)
+         v1hspinfield(ifft,2)=-Bloc(ifft)
+         v1hspinfield(ifft,3)= 0.0d0
+         v1hspinfield(ifft,4)= 0.0d0
        end do
      else if(idir==2)then  ! Zeeman field along the 2nd axis (y)
        do ifft=1,nfft
-         v1zeeman(ifft,1)= 0.0d0
-         v1zeeman(ifft,2)= 0.0d0
-         v1zeeman(ifft,3)= 0.0d0
-         v1zeeman(ifft,4)=-Bloc(ifft)
+         v1hspinfield(ifft,1)= 0.0d0
+         v1hspinfield(ifft,2)= 0.0d0
+         v1hspinfield(ifft,3)= 0.0d0
+         v1hspinfield(ifft,4)=-Bloc(ifft)
        end do
      else                  ! Zeeman field along the 1st axis (x)
        do ifft=1,nfft
-         v1zeeman(ifft,1)= 0.0d0
-         v1zeeman(ifft,2)= 0.0d0
-         v1zeeman(ifft,3)=Bloc(ifft)
-         v1zeeman(ifft,4)= 0.0d0
+         v1hspinfield(ifft,1)= 0.0d0
+         v1hspinfield(ifft,2)= 0.0d0
+         v1hspinfield(ifft,3)=Bloc(ifft)
+         v1hspinfield(ifft,4)= 0.0d0
        end do
      end if
    else 
@@ -943,45 +945,45 @@ subroutine dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,ngff
      select case(idir)
      case(1) !along x, v1=-sigma_x
        do ifft=1,nfft
-         v1zeeman(2*ifft-1,1)= 0.0e0 !Re[V^11]
-         v1zeeman(2*ifft  ,1)= 0.0e0 !Im[V^11]
-         v1zeeman(2*ifft-1,2)= 0.0e0 !Re[V^22]
-         v1zeeman(2*ifft  ,2)= 0.0e0 !Im[V^22]
-         v1zeeman(2*ifft-1,3)= Bloc(2*ifft-1) !Re[V^12]
-         v1zeeman(2*ifft  ,3)= Bloc(2*ifft) !Im[V^12]
-         v1zeeman(2*ifft-1,4)=-Bloc(2*ifft) !Re[i.V^21]=Im[V^12]
-         v1zeeman(2*ifft  ,4)= Bloc(2*ifft-1) !Im[i.V^21]=Re[V^12]
+         v1hspinfield(2*ifft-1,1)= 0.0e0 !Re[V^11]
+         v1hspinfield(2*ifft  ,1)= 0.0e0 !Im[V^11]
+         v1hspinfield(2*ifft-1,2)= 0.0e0 !Re[V^22]
+         v1hspinfield(2*ifft  ,2)= 0.0e0 !Im[V^22]
+         v1hspinfield(2*ifft-1,3)= Bloc(2*ifft-1) !Re[V^12]
+         v1hspinfield(2*ifft  ,3)= Bloc(2*ifft) !Im[V^12]
+         v1hspinfield(2*ifft-1,4)=-Bloc(2*ifft) !Re[i.V^21]=Im[V^12]
+         v1hspinfield(2*ifft  ,4)= Bloc(2*ifft-1) !Im[i.V^21]=Re[V^12]
        end do
      case(2) !along y, v1 = -sigma_y
        do ifft=1,nfft
-         v1zeeman(2*ifft-1,1)= 0.0e0 !Re[V^11]
-         v1zeeman(2*ifft  ,1)= 0.0e0 !Im[V^11]
-         v1zeeman(2*ifft-1,2)= 0.0e0 !Re[V^22]
-         v1zeeman(2*ifft  ,2)= 0.0e0 !Im[V^22]
-         v1zeeman(2*ifft-1,3)= Bloc(2*ifft)  !Re[V^12]
-         v1zeeman(2*ifft  ,3)=-Bloc(2*ifft-1) !Im[V^12]
-         v1zeeman(2*ifft-1,4)=-Bloc(2*ifft-1) !Re[i.V^21]=Im[V^12]
-         v1zeeman(2*ifft  ,4)=-Bloc(2*ifft) !Im[i.V^21]=Re[V^12]
+         v1hspinfield(2*ifft-1,1)= 0.0e0 !Re[V^11]
+         v1hspinfield(2*ifft  ,1)= 0.0e0 !Im[V^11]
+         v1hspinfield(2*ifft-1,2)= 0.0e0 !Re[V^22]
+         v1hspinfield(2*ifft  ,2)= 0.0e0 !Im[V^22]
+         v1hspinfield(2*ifft-1,3)= Bloc(2*ifft)  !Re[V^12]
+         v1hspinfield(2*ifft  ,3)=-Bloc(2*ifft-1) !Im[V^12]
+         v1hspinfield(2*ifft-1,4)=-Bloc(2*ifft-1) !Re[i.V^21]=Im[V^12]
+         v1hspinfield(2*ifft  ,4)=-Bloc(2*ifft) !Im[i.V^21]=Re[V^12]
        end do
      case(3)
        do ifft=1,nfft
-         v1zeeman(2*ifft-1,1)= Bloc(2*ifft-1) !Re[V^11]
-         v1zeeman(2*ifft  ,1)= Bloc(2*ifft)   !Im[V^11]
-         v1zeeman(2*ifft-1,2)=-Bloc(2*ifft-1) !Re[V^22]
-         v1zeeman(2*ifft  ,2)=-Bloc(2*ifft)  !Im[V^22]
-         v1zeeman(2*ifft-1,3)= 0.0e0 !Re[V^12]
-         v1zeeman(2*ifft  ,3)= 0.0e0 !Im[V^12]
-         v1zeeman(2*ifft-1,4)= 0.0e0 !Re[i.V^21]
-         v1zeeman(2*ifft  ,4)= 0.0e0 !Im[i.V^21]
+         v1hspinfield(2*ifft-1,1)= Bloc(2*ifft-1) !Re[V^11]
+         v1hspinfield(2*ifft  ,1)= Bloc(2*ifft)   !Im[V^11]
+         v1hspinfield(2*ifft-1,2)=-Bloc(2*ifft-1) !Re[V^22]
+         v1hspinfield(2*ifft  ,2)=-Bloc(2*ifft)  !Im[V^22]
+         v1hspinfield(2*ifft-1,3)= 0.0e0 !Re[V^12]
+         v1hspinfield(2*ifft  ,3)= 0.0e0 !Im[V^12]
+         v1hspinfield(2*ifft-1,4)= 0.0e0 !Re[i.V^21]
+         v1hspinfield(2*ifft  ,4)= 0.0e0 !Im[i.V^21]
        end do
      end select
    else
-     write(msg,*) 'Response to local Zeeman fields only implemented for nspden=4'
+     write(msg,*) 'Response to local spin fields only implemented for nspden=4'
      ABI_BUG(msg)
    end if
  end select !cplex
 
-end subroutine dfpt_v1zeeman_atsph
+end subroutine dfpt_v1hspinfield_atsph
 !!***
 
 end module m_dfpt_rhotov

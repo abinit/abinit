@@ -6,7 +6,7 @@
 !!  IO routines for GKK files
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MVer)
+!!  Copyright (C) 2008-2025 ABINIT group (MVer)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,15 +29,16 @@ module m_iogkk
  use m_krank
  use m_hdr
 
- use defs_datatypes,    only : ebands_t
  use defs_abitypes,     only : MPI_type
  use m_numeric_tools,   only : wrap2_pmhalf
  use m_io_tools,        only : open_file, get_unit
- use m_symtk,           only : mati3inv, littlegroup_q
+ use m_matrix,          only : mati3inv
+ use m_symtk,           only : littlegroup_q
  use m_geometry,        only : phdispl_cart2red, littlegroup_pert
  use m_crystal,         only : crystal_t
  use m_ifc,             only : ifc_type
  use m_dynmat,          only : d2sym3
+ use m_ebands,          only : ebands_t
 
  implicit none
 
@@ -192,7 +193,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
 !    Could check for compatibility of natom, kpt grids, ecut, qpt with DDB grid...
 !    MG: Also this task should be done in mrggkk
 
-     call hdr_fort_read(hdr1, unitgkk, fform)
+     call hdr1%fort_read(unitgkk, fform)
      if (fform == 0) then
        write (msg,'(a,i0,a)')' 1WF header number ',i1wf,' was mis-read. fform == 0'
        ABI_ERROR(msg)
@@ -976,7 +977,7 @@ end subroutine prt_gkk_yambo
 !! then maps them into the FS kpt states
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2022 ABINIT group (JPCroc) based on conducti
+!! Copyright (C) 2002-2025 ABINIT group (JPCroc) based on conducti
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1002,21 +1003,15 @@ subroutine read_el_veloc(nband_in,nkpt_in,kpt_in,nsppol_in,elph_tr_ds)
 
 !Local variables-------------------------------
 !scalars
- integer :: bd2tot_index
- integer :: iband,ii,ikpt, ikpt_ddk
- integer :: isppol,l1,mband
- integer :: bantot1
- integer :: unit_ddk
- integer :: symrankkpt
+ integer :: bd2tot_index, iband,ii,ikpt, ikpt_ddk, isppol,l1,mband
+ integer :: bantot1, unit_ddk, symrankkpt
  character(len=fnlen) :: filnam1,filnam2,filnam3
  character(len=500) :: msg
  type(hdr_type) :: hdr1
  type(krank_t) :: krank
 !arrays
  real(dp) :: im_el_veloc(3)
- real(dp),allocatable :: eig1_k(:,:)
- real(dp),allocatable :: eigen11(:),eigen12(:),eigen13(:)
-
+ real(dp),allocatable :: eig1_k(:,:), eigen11(:),eigen12(:),eigen13(:)
 ! *********************************************************************************
 
 !Read data file name
@@ -1072,7 +1067,7 @@ subroutine read_el_veloc(nband_in,nkpt_in,kpt_in,nsppol_in,elph_tr_ds)
  elph_tr_ds%el_veloc=zero
 
 !need correspondence between the DDK kpoints and the kpt_phon
- krank = krank_new(hdr1%nkpt, hdr1%kptns)
+ call krank%init(hdr1%nkpt, hdr1%kptns)
 
  do isppol=1,nsppol_in
    im_el_veloc(:)=zero
@@ -1160,9 +1155,8 @@ subroutine inpgkk(eigen1,filegkk,hdr1)
    ABI_ERROR(message)
  end if
 
-
 !read in header of GS file and eigenvalues
- call hdr_fort_read(hdr0, unitgkk, fform)
+ call hdr0%fort_read(unitgkk, fform)
  ABI_CHECK(fform /= 0, "hdr_fort_read returned fform == 0")
 
  mband = maxval(hdr0%nband(:))
@@ -1190,7 +1184,7 @@ subroutine inpgkk(eigen1,filegkk,hdr1)
  end if
 
 !read in header of 1WF file
- call hdr_fort_read(hdr1, unitgkk, fform)
+ call hdr1%fort_read(unitgkk, fform)
  if (fform == 0) then
    write(message,'(a,i0,a)')' 1WF header number ',i1wf,' was mis-read. fform == 0'
    ABI_ERROR(message)

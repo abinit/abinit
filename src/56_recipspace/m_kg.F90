@@ -6,7 +6,7 @@
 !!  Low-level functions to operate of G-vectors.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (DCA, XG, GMR, MT, DRH, AR)
+!!  Copyright (C) 2008-2025 ABINIT group (DCA, XG, GMR, MT, DRH, AR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -54,13 +54,12 @@ contains
 !!***
 
 !!****f* m_kg/getcut
-!!
 !! NAME
 !! getcut
 !!
 !! FUNCTION
-!! For input kpt, fft box dim ngfft(1:3), recip space metric gmet,
-!! and kinetic energy cutoff ecut (hartree), COMPUTES:
+!! For input kpt, fft box dim ngfft(1:3), recip space metric gmet, and kinetic energy cutoff ecut, COMPUTES:
+!!
 !! if iboxcut==0:
 !!   gsqcut: cut-off on G^2 for "large sphere" of radius double that
 !!            of the basis sphere corresponding to ecut
@@ -68,8 +67,7 @@ contains
 !!                 boxcut >=2 for no aliasing.
 !!                 boxcut < 1 is wrong and halts subroutine.
 !! if iboxcut==1:
-!!   gsqcut: cut-off on G^2 for "large sphere"
-!!            containing the whole fft box
+!!   gsqcut: cut-off on G^2 for "large sphere" containing the whole fft box
 !!   boxcut: no meaning (zero)
 !!
 !! INPUTS
@@ -95,7 +93,7 @@ contains
 !!
 !! SOURCE
 
-subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
+subroutine getcut(boxcut, ecut, gmet, gsqcut, iboxcut, iout, kpt, ngfft)
 
 !Arguments ------------------------------------
 !scalars
@@ -113,7 +111,6 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
  character(len=1000) :: msg
 !arrays
  integer :: gbound(3)
-
 ! *************************************************************************
 
  ! This is to treat the case in which ecut has not been initialized e.g. for wavelet computations.
@@ -160,7 +157,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
      if (boxcut<1.0_dp) then
        write(msg, '(9a,f12.6,6a)' )&
        'Choice of acell, ngfft, and ecut',ch10,&
-       '===> basis sphere extends BEYOND fft box !',ch10,&
+       '===> basis sphere extends BEYOND FFT box !',ch10,&
        'Recall that boxcut=Gcut(box)/Gcut(sphere)  must be > 1.',ch10,&
        'Action: try larger ngfft or smaller ecut.',ch10,&
        'Note that ecut=effcut/boxcut**2 and effcut=',effcut+tol8,ch10,&
@@ -186,7 +183,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
        write(msg, '(15a)' ) ch10,&
        ' getcut : WARNING -',ch10,&
        '  Note that boxcut < 1.5; this usually means',ch10,&
-       '  that the forces are being fairly strongly affected by',' the smallness of the fft box.',ch10,&
+       '  that the forces are being fairly strongly affected by',' the smallness of the FFT box.',ch10,&
        '  Be sure to test with larger ngfft(1:3) values.',ch10,&
        '  This situation might happen when optimizing the cell parameters.',ch10,&
        '  Your starting geometry might be crazy.',ch10,&
@@ -247,7 +244,6 @@ subroutine getmpw(ecut,exchn2n3d,gmet,istwfk,kptns,mpi_enreg,mpw,nkpt)
 !arrays
  integer,allocatable :: kg(:,:)
  real(dp) :: kpoint(3)
-
 ! *************************************************************************
 
 !An upper bound for mpw, might be obtained as follows
@@ -298,6 +294,7 @@ end subroutine getmpw
 !!  kg(3,npw)=integer coordinates of planewaves in basis sphere.
 !!  kpt(3)=reduced coordinates of k point
 !!  npw=number of plane waves at kpt.
+!!  vecpot (optional) = vector potential used in case of RT-TDDFT with electric field
 !!
 !! OUTPUT
 !!  kinpw(npw)=(modified) kinetic energy (or derivative) for each plane wave (Hartree)
@@ -314,6 +311,9 @@ end subroutine getmpw
 !! x = (ecut- unmodified energy)/ecutsm.
 !! This smearing factor is also used to derived a modified kinetic
 !! contribution to stress, in another routine (forstrnps.f)
+!! If a vector potential is given then the expression also includes
+!! its contributions so the kinetic energy operator is given by
+!! $(1/2) (2 \pi)^2 (k+G)^2 + (2 \pi) A\cdot(k+G) + (1/2) A^2$
 !!
 !! Also, in order to break slightly the symmetry between axes, that causes
 !! sometimes a degeneracy of eigenvalues and do not allow to obtain
@@ -322,28 +322,34 @@ end subroutine getmpw
 !!
 !! SOURCE
 
-subroutine mkkin (ecut,ecutsm,effmass_free,gmet,kg,kinpw,kpt,npw,idir1,idir2)
+subroutine mkkin(ecut, ecutsm, effmass_free, gmet, kg, kinpw, kpt, npw, idir1, idir2, vecpot)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: npw
- integer,intent(in) :: idir1,idir2
+ integer,intent(in) :: npw, idir1,idir2
  real(dp),intent(in) :: ecut,ecutsm,effmass_free
 !arrays
  integer,intent(in) :: kg(3,npw)
  real(dp),intent(in) :: gmet(3,3),kpt(3)
  real(dp),intent(out) :: kinpw(npw)
+ real(dp),optional,intent(in) :: vecpot(3)
 
 !Local variables-------------------------------
 !scalars
  integer :: ig,order
  real(dp),parameter :: break_symm=1.0d-11
  real(dp) :: ecutsm_inv,fsm,gpk1,gpk2,gpk3,htpisq,kinetic,kpg2,dkpg2,xx
- real(dp) :: d1kpg2,d2kpg2,ddfsm, dfsm
+ real(dp) :: d1kpg2,d2kpg2,ddfsm,dfsm
+ real(dp) :: akpg,asq
+ logical  :: l_vecpot
 !arrays
  real(dp) :: gmet_break(3,3) !, tsec(2)
-
 ! *************************************************************************
+
+ l_vecpot = .false.
+ if (present(vecpot)) then
+    if (abs(vecpot(1))>tol12 .or. abs(vecpot(2))>tol12 .or. abs(vecpot(3))>tol12) l_vecpot = .true.
+ end if
 
  ! htpisq is (1/2) (2 Pi) **2:
  htpisq=0.5_dp*(two_pi)**2
@@ -363,38 +369,63 @@ subroutine mkkin (ecut,ecutsm,effmass_free,gmet,kg,kinpw,kpt,npw,idir1,idir2)
    end if
  end if
 
-!$OMP PARALLEL DO PRIVATE(dkpg2,d1kpg2,d2kpg2,gpk1,gpk2,gpk3,ig,kinetic,kpg2,xx,fsm,dfsm,ddfsm) &
+ if (l_vecpot) then
+   ! A^2
+   asq=( gmet_break(1,1)*vecpot(1)*vecpot(1) + &
+         gmet_break(2,2)*vecpot(2)*vecpot(2) + &
+         gmet_break(3,3)*vecpot(3)*vecpot(3) + &
+         2.0_dp*( &
+         gmet_break(1,2)*vecpot(1)*vecpot(2) + &
+         gmet_break(1,3)*vecpot(1)*vecpot(3) + &
+         gmet_break(2,3)*vecpot(2)*vecpot(3) ) )
+ end if
+
+!$OMP PARALLEL DO PRIVATE(dkpg2,d1kpg2,d2kpg2,gpk1,gpk2,gpk3,ig,kinetic,kpg2,xx,fsm,dfsm,ddfsm,akpg) &
 !$OMP SHARED(kinpw,ecut,ecutsm,ecutsm_inv) &
-!$OMP SHARED(gmet_break,htpisq,idir1,idir2,kg,kpt,npw)
+!$OMP SHARED(gmet_break,htpisq,idir1,idir2,kg,kpt,npw,vecpot,asq)
  do ig=1,npw
    gpk1=dble(kg(1,ig))+kpt(1)
    gpk2=dble(kg(2,ig))+kpt(2)
    gpk3=dble(kg(3,ig))+kpt(3)
    kpg2=htpisq*&
 &   ( gmet_break(1,1)*gpk1**2+         &
-&   gmet_break(2,2)*gpk2**2+         &
-&   gmet_break(3,3)*gpk3**2          &
-&   +2.0_dp*(gpk1*gmet_break(1,2)*gpk2+  &
+&   gmet_break(2,2)*gpk2**2+           &
+&   gmet_break(3,3)*gpk3**2            &
+&   +2.0_dp*(gpk1*gmet_break(1,2)*gpk2+&
 &   gpk1*gmet_break(1,3)*gpk3+  &
 &   gpk2*gmet_break(2,3)*gpk3 )  )
+   if (l_vecpot) then
+     ! A.(k+G)
+     akpg=( gmet_break(1,1)*vecpot(1)*gpk1  + &
+            gmet_break(2,2)*vecpot(2)*gpk2  + &
+            gmet_break(3,3)*vecpot(3)*gpk3  + &
+            gmet_break(1,2)*(vecpot(1)*gpk2 + vecpot(2)*gpk1) + &
+            gmet_break(1,3)*(vecpot(1)*gpk3 + vecpot(3)*gpk1) + &
+            gmet_break(2,3)*(vecpot(2)*gpk3 + vecpot(3)*gpk2) )
+   end if
    select case (order)
-   case(0)
+   case (0)
      kinetic=kpg2
-   case(1)
+     if (l_vecpot) kinetic=kinetic+two_pi*akpg+0.5_dp*asq
+   case (1)
      dkpg2=htpisq*2.0_dp*&
 &     (gmet_break(idir1,1)*gpk1+gmet_break(idir1,2)*gpk2+gmet_break(idir1,3)*gpk3)
      kinetic=dkpg2
-   case(2)
+     if (l_vecpot) kinetic=kinetic+two_pi*(gmet_break(idir1,1)*vecpot(1) + &
+                                         & gmet_break(idir1,2)*vecpot(2) + &
+                                         & gmet_break(idir1,3)*vecpot(3) )
+   case (2)
      dkpg2=htpisq*2.0_dp*gmet_break(idir1,idir2)
      kinetic=dkpg2
    end select
+
    if(kpg2>ecut-ecutsm)then
      if(kpg2>ecut-tol12)then
        if(order==0) then
-!        Will filter the wavefunction, based on this value, in cgwf.f, getghc.f and precon.f
-         kinetic=huge(0.0_dp)*1.d-10
+         ! Will filter the wavefunction, based on this value, in cgwf.f, getghc.f and precon.f
+         kinetic=huge(zero)*1.d-10
        else
-!        The wavefunction has been filtered : no derivative
+         ! The wavefunction has been filtered: no derivative
          kinetic=0
        end if
      else
@@ -416,11 +447,11 @@ subroutine mkkin (ecut,ecutsm,effmass_free,gmet,kg,kinpw,kpt,npw,idir1,idir2)
        if(order>0) dfsm=-3.0_dp*(-1+xx)**2*xx*(2+5*xx)*fsm**2
        if(order>1) ddfsm=6.0_dp*xx**2*(9+xx*(8+xx*(-52+xx*(-3+xx*(137+xx*(-144+45*xx))))))*fsm**3
        select case (order)
-       case(0)
+       case (0)
          kinetic=kpg2*fsm
-       case(1)
+       case (1)
          kinetic=dkpg2*(fsm-ecutsm_inv*kpg2*dfsm)
-       case(2)
+       case (2)
          kinetic=dkpg2*fsm&
 &         -2.0_dp*d1kpg2*dfsm*ecutsm_inv*d2kpg2&
 &         +kpg2*ddfsm*(ecutsm_inv**2)*d1kpg2*d2kpg2&
@@ -466,7 +497,7 @@ end subroutine mkkin
 !!
 !! NOTES
 !! Note that in case of band parallelism, the number of spin-up
-!! and spin-down bands must be equal at each k points
+!! and spin-down bands must be equal at each k point.
 !!
 !! SOURCE
 
@@ -491,7 +522,6 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
  character(len=500) :: msg
 !arrays
  real(dp) :: kpoint(3)
-
 ! *************************************************************************
 
 !Define me
@@ -504,7 +534,7 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
        nband_down=nband(ikpt+nkpt)
        if(nband_k/=nband_down)then
          write(msg,'(a,a,a,a,a,a,a,a,i4,a,i4,a,a,a,i4,a,a,a)')ch10,&
-         ' kpgio : ERROR -',ch10,&
+         ' kpgio: ERROR -',ch10,&
          '  Band parallel case, one must have same number',ch10,&
          '  of spin up and spin down bands, but input is :',ch10,&
          '  nband(up)=',nband_k,', nband(down)=',nband_down,',',ch10,&
@@ -624,12 +654,11 @@ subroutine ph1d3d(iatom, jatom, kg_k, matblk, natom, npw_k, n1, n2, n3, phkxred,
 
 !Local variables-------------------------------
 !scalars
- integer :: i1,ia,iatblk,ig,shift1,shift2,shift3
+ integer :: i1,ia,iatblk,ig,kg1,kg2,kg3,shift1,shift2,shift3
  real(dp) :: ph12i,ph12r,ph1i,ph1r,ph2i,ph2r,ph3i,ph3r,phkxi,phkxr
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: ph1kxred(:,:)
-
 ! *************************************************************************
 
  if(matblk-1 < jatom-iatom)then
@@ -660,14 +689,17 @@ subroutine ph1d3d(iatom, jatom, kg_k, matblk, natom, npw_k, n1, n2, n3, phkxred,
    end do
 
    ! Compute tri-dimensional phase factor
-!$OMP PARALLEL DO PRIVATE(ig,ph1r,ph1i,ph2r,ph2i,ph3r,ph3i,ph12r,ph12i)
+!$OMP PARALLEL DO PRIVATE(ig,ph1r,ph1i,ph2r,ph2i,ph3r,ph3i,ph12r,ph12i,kg1,kg2,kg3)
    do ig=1,npw_k
-     ph1r=ph1kxred(1,kg_k(1,ig))
-     ph1i=ph1kxred(2,kg_k(1,ig))
-     ph2r=ph1d(1,kg_k(2,ig)+shift2)
-     ph2i=ph1d(2,kg_k(2,ig)+shift2)
-     ph3r=ph1d(1,kg_k(3,ig)+shift3)
-     ph3i=ph1d(2,kg_k(3,ig)+shift3)
+     kg1=kg_k(1,ig)
+     kg2=kg_k(2,ig)+shift2
+     kg3=kg_k(3,ig)+shift3
+     ph1r=ph1kxred(1,kg1)
+     ph1i=ph1kxred(2,kg1)
+     ph2r=ph1d(1,kg2)
+     ph2i=ph1d(2,kg2)
+     ph3r=ph1d(1,kg3)
+     ph3i=ph1d(2,kg3)
      ph12r=ph1r*ph2r-ph1i*ph2i
      ph12i=ph1r*ph2i+ph1i*ph2r
      ph3d(1,ig,iatblk)=ph12r*ph3r-ph12i*ph3i
@@ -720,7 +752,6 @@ subroutine getph(atindx, natom, n1, n2, n3, ph1d, xred)
  integer :: i1,i2,i3,ia,ii,ph1d_size1,ph1d_size2,ph1d_sizemin
  !character(len=500) :: msg
  real(dp) :: arg
-
 ! *************************************************************************
 
  ph1d_size1=size(ph1d,1); ph1d_size2=size(ph1d,2)
@@ -730,6 +761,10 @@ subroutine getph(atindx, natom, n1, n2, n3, ph1d, xred)
  end if
 
  do ia=1,natom
+
+   if(atindx(ia)<1 .or. natom<atindx(ia))then
+     ABI_BUG('Wrong atindx(ia)!')
+   endif
 
    ! Store the phase factor of atom number ia in place atindx(ia)
    i1=(atindx(ia)-1)*(2*n1+1)
@@ -911,7 +946,6 @@ subroutine mkkpg(kg, kpg, kpt, nkpg, npw)
  character(len=500) :: msg
 !arrays
  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
-
 ! *************************************************************************
 
  if (nkpg==0) return
@@ -974,127 +1008,117 @@ end subroutine mkkpg
 !! OUTPUT
 !! pwind_k1(dtset%mpw)=output index of ikpt1 basis states refered to ikpt
 !!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
-!!
 !! SOURCE
 
 subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
 & mpi_enreg,npwarr,pwind_k1,symrec)
 
-  !Arguments ------------------------------------
-  !scalars
-  integer,intent(in) :: fnkpt,ikpt,ikpt1
-  type(dataset_type),intent(in) :: dtset
-  type(MPI_type), intent(inout) :: mpi_enreg
+!Arguments ------------------------------------
+!scalars
+integer,intent(in) :: fnkpt,ikpt,ikpt1
+type(dataset_type),intent(in) :: dtset
+type(MPI_type), intent(inout) :: mpi_enreg
 
-  !arrays
-  integer,intent(in) :: indkk_f2ibz(fnkpt,6)
-  integer,intent(in) :: npwarr(dtset%nkpt)
-  integer,intent(in) :: symrec(3,3,dtset%nsym)
-  integer,intent(out) :: pwind_k1(dtset%mpw)
-  real(dp),intent(in) :: dk(3),fkptns(3,fnkpt),gmet(3,3)
+!arrays
+integer,intent(in) :: indkk_f2ibz(fnkpt,6)
+integer,intent(in) :: npwarr(dtset%nkpt)
+integer,intent(in) :: symrec(3,3,dtset%nsym)
+integer,intent(out) :: pwind_k1(dtset%mpw)
+real(dp),intent(in) :: dk(3),fkptns(3,fnkpt),gmet(3,3)
 
-  !Local variables -------------------------
-  !scalars
-  integer :: exchn2n3d,idum1,ikg1,ikpti,ikpt1i,ipw,istwf_k,isym,isym1,jpw,npw_k,npw_k1
-  real(dp) :: ecut_eff
+!Local variables -------------------------
+!scalars
+integer :: exchn2n3d,idum1,ikg1,ikpti,ikpt1i,ipw,istwf_k,isym,isym1,jpw,npw_k,npw_k1
+real(dp) :: ecut_eff
 
-  !arrays
-  integer,allocatable :: kg_k(:,:),kg1_k(:,:)
-  real(dp) :: dg(3),dum33(3,3),kpt(3),kpt1(3),iadum(3),iadum1(3)
+!arrays
+integer,allocatable :: kg_k(:,:),kg1_k(:,:)
+real(dp) :: dg(3),dum33(3,3),kpt(3),kpt1(3),iadum(3),iadum1(3)
+! ***********************************************************************
 
-  ! ***********************************************************************
+ ikpti = indkk_f2ibz(ikpt,1)
+ ikpt1i = indkk_f2ibz(ikpt1,1)
 
-  ikpti = indkk_f2ibz(ikpt,1)
-  ikpt1i = indkk_f2ibz(ikpt1,1)
+ ecut_eff = dtset%ecut*(dtset%dilatmx)**2
+ exchn2n3d = 0 ; istwf_k = 1 ; ikg1 = 0
 
+ ! Build basis sphere of plane waves for the k-point
+ ! we avoid using the global kg data because of difficulties in parallel-ism
+ ABI_MALLOC(kg_k,(3,dtset%mpw))
+ kg_k(:,:) = 0
+ kpt(:) = dtset%kptns(:,ikpti)
+ call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg_k,kpt,1,mpi_enreg,dtset%mpw,npw_k)
 
-  ecut_eff = dtset%ecut*(dtset%dilatmx)**2
-  exchn2n3d = 0 ; istwf_k = 1 ; ikg1 = 0
+ ! Build basis sphere of plane waves for the nearest neighbour of the k-point
+ ABI_MALLOC(kg1_k,(3,dtset%mpw))
+ kg1_k(:,:) = 0
+ kpt1(:) = dtset%kptns(:,ikpt1i)
+ call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg1_k,kpt1,1,mpi_enreg,dtset%mpw,npw_k1)
 
-  ! Build basis sphere of plane waves for the k-point
-  ! we avoid using the global kg data because of difficulties in parallel-ism
-  ABI_MALLOC(kg_k,(3,dtset%mpw))
-  kg_k(:,:) = 0
-  kpt(:) = dtset%kptns(:,ikpti)
-  call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg_k,kpt,1,mpi_enreg,dtset%mpw,npw_k)
+ ! Deal with symmetry transformations
 
-  ! Build basis sphere of plane waves for the nearest neighbour of the k-point
-  ABI_MALLOC(kg1_k,(3,dtset%mpw))
-  kg1_k(:,:) = 0
-  kpt1(:) = dtset%kptns(:,ikpt1i)
-  call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg1_k,kpt1,1,mpi_enreg,dtset%mpw,npw_k1)
+ ! bra k-point k(b) and IBZ k-point kIBZ(b) related by
+ ! k(b) = alpha(b) S(b)^t kIBZ(b) + G(b)
+ ! where alpha(b), S(b) and G(b) are given by indkk_f2ibz
+ !
+ ! For the ket k-point:
+ ! k(k) = alpha(k) S(k)^t kIBZ(k) + G(k) - GBZ(k)
+ ! where GBZ(k) takes k(k) to the BZ
 
-  !        Deal with symmetry transformations
-  !
+ isym  = indkk_f2ibz(ikpt,2)
+ isym1 = indkk_f2ibz(ikpt1,2)
 
-  !        bra k-point k(b) and IBZ k-point kIBZ(b) related by
-  !        k(b) = alpha(b) S(b)^t kIBZ(b) + G(b)
-  !        where alpha(b), S(b) and G(b) are given by indkk_f2ibz
-  !
-  !        For the ket k-point:
-  !        k(k) = alpha(k) S(k)^t kIBZ(k) + G(k) - GBZ(k)
-  !        where GBZ(k) takes k(k) to the BZ
-  !
+ ! Construct transformed G vector that enters the matching condition:
+ ! alpha(k) S(k)^{t,-1} ( -G(b) - GBZ(k) + G(k) )
 
-  isym  = indkk_f2ibz(ikpt,2)
-  isym1 = indkk_f2ibz(ikpt1,2)
+ dg(:) = -indkk_f2ibz(ikpt,3:5) &
+      & - nint(-fkptns(:,ikpt) - dk(:) - tol10 + fkptns(:,ikpt1)) &
+      & + indkk_f2ibz(ikpt1,3:5)
 
-  !        Construct transformed G vector that enters the matching condition:
-  !        alpha(k) S(k)^{t,-1} ( -G(b) - GBZ(k) + G(k) )
+ iadum(:) = MATMUL(TRANSPOSE(dtset%symrel(:,:,isym1)),dg(:))
 
-  dg(:) = -indkk_f2ibz(ikpt,3:5) &
-       & - nint(-fkptns(:,ikpt) - dk(:) - tol10 + fkptns(:,ikpt1)) &
-       & + indkk_f2ibz(ikpt1,3:5)
+ dg(:) = iadum(:)
 
-  iadum(:) = MATMUL(TRANSPOSE(dtset%symrel(:,:,isym1)),dg(:))
+ ! Construct S(k)^{t,-1} S(b)^{t}
 
-  dg(:) = iadum(:)
+ dum33(:,:) = MATMUL(TRANSPOSE(dtset%symrel(:,:,isym1)),symrec(:,:,isym))
 
-  !        Construct S(k)^{t,-1} S(b)^{t}
+ !        Construct alpha(k) alpha(b)
 
-  dum33(:,:) = MATMUL(TRANSPOSE(dtset%symrel(:,:,isym1)),symrec(:,:,isym))
+ pwind_k1(:) = 0
+ npw_k = npwarr(ikpti)
+ do ipw = 1, npw_k
 
-  !        Construct alpha(k) alpha(b)
+    ! NOTE: the bra G vector is taken for the sym-related IBZ k point,
+    ! not for the FBZ k point
 
-  pwind_k1(:) = 0
-  npw_k = npwarr(ikpti)
-  do ipw = 1, npw_k
+    ! original code from initberry
+    ! iadum(:) = kg(:,kgindex(ikpti) + ipw)
 
-     !          NOTE: the bra G vector is taken for the sym-related IBZ k point,
-     !          not for the FBZ k point
+    iadum(:) = kg_k(:,ipw)
 
-     ! original code from initberry
-     ! iadum(:) = kg(:,kgindex(ikpti) + ipw)
+    ! to determine r.l.v. matchings, we transformed the bra vector
+    ! Rotation
+    iadum1(:)=0
+    do idum1=1,3
+       iadum1(:)=iadum1(:)+dum33(:,idum1)*iadum(idum1)
+    end do
+    iadum(:)=iadum1(:)
+    iadum(:) = iadum(:) + dg(:)
 
-     iadum(:) = kg_k(:,ipw)
+    do jpw = 1, npw_k1
+       iadum1(1:3) = kg1_k(1:3,jpw)
+       if ( (iadum(1) == iadum1(1)).and. &
+            &     (iadum(2) == iadum1(2)).and. &
+            &     (iadum(3) == iadum1(3)) ) then
+          pwind_k1(ipw) = jpw
+          exit
+       end if
+    end do
+ end do
 
-     !          to determine r.l.v. matchings, we transformed the bra vector
-     !          Rotation
-     iadum1(:)=0
-     do idum1=1,3
-        iadum1(:)=iadum1(:)+dum33(:,idum1)*iadum(idum1)
-     end do
-     iadum(:)=iadum1(:)
-     iadum(:) = iadum(:) + dg(:)
-
-     do jpw = 1, npw_k1
-        iadum1(1:3) = kg1_k(1:3,jpw)
-        if ( (iadum(1) == iadum1(1)).and. &
-             &     (iadum(2) == iadum1(2)).and. &
-             &     (iadum(3) == iadum1(3)) ) then
-           pwind_k1(ipw) = jpw
-           exit
-        end if
-     end do
-  end do
-
-  ABI_FREE(kg_k)
-  ABI_FREE(kg1_k)
+ ABI_FREE(kg_k)
+ ABI_FREE(kg1_k)
 
 end subroutine mkpwind_k
 !!***
@@ -1119,7 +1143,6 @@ end subroutine mkpwind_k
 !!
 !! SOURCE
 
-
 subroutine mkkpgcart(gprimd,kg,kpgcar,kpt,nkpg,npw)
 
 !Arguments ------------------------------------
@@ -1137,7 +1160,6 @@ subroutine mkkpgcart(gprimd,kg,kpgcar,kpt,nkpg,npw)
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: kpg(:,:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1152,8 +1174,7 @@ subroutine mkkpgcart(gprimd,kg,kpgcar,kpt,nkpg,npw)
 
 !-- Compute (k+G) --
  ABI_MALLOC(kpg,(npw,nkpg))
-!$OMP PARALLEL DO COLLAPSE(2) &
-!$OMP PRIVATE(mu,ipw)
+!$OMP PARALLEL DO COLLAPSE(2)
  do ipw=1,npw
    do mu=1,3
      kpg(ipw,mu)=kpt(mu)+dble(kg(mu,ipw))
@@ -1161,16 +1182,15 @@ subroutine mkkpgcart(gprimd,kg,kpgcar,kpt,nkpg,npw)
  end do
 !$OMP END PARALLEL DO
 
-!$OMP PARALLEL DO &
-!$OMP PRIVATE(ipw)
+!$OMP PARALLEL DO
  do ipw=1,npw
    kpgcar(ipw,1)=kpg(ipw,1)*gprimd(1,1)+kpg(ipw,2)*gprimd(1,2)+kpg(ipw,3)*gprimd(1,3)
    kpgcar(ipw,2)=kpg(ipw,1)*gprimd(2,1)+kpg(ipw,2)*gprimd(2,2)+kpg(ipw,3)*gprimd(2,3)
    kpgcar(ipw,3)=kpg(ipw,1)*gprimd(3,1)+kpg(ipw,2)*gprimd(3,2)+kpg(ipw,3)*gprimd(3,3)
  end do
 !$OMP END PARALLEL DO
- ABI_FREE(kpg)
 
+ ABI_FREE(kpg)
  DBG_EXIT("COLL")
 
 end subroutine mkkpgcart
@@ -1198,7 +1218,6 @@ end subroutine mkkpgcart
 !!  dqdqkinpw(npw)=d/deps(istr) ( (1/2)*(2 pi)**2 * (k+G)**2 )
 !!
 !! NOTES
-!!
 !!  **Since the 2nd derivative w.r.t q-vector is calculated along cartesian
 !!    directions, the 1/twopi**2 factor (that in the rest of the code is applied
 !!    in the reduced to cartesian derivative conversion process) is here
@@ -1228,12 +1247,10 @@ subroutine mkkin_metdqdq(dqdqkinpw,effmass,gprimd,idir,kg,kpt,npw,qdir)
 !Local variables -------------------------
 !scalars
  integer :: beta,delta,gamma,ig,ka,kb
- real(dp) :: delbd,delbg,deldg
- real(dp) :: dkinetic,gpk1,gpk2,gpk3,htpi
- real(dp) :: gpkc(3)
+ real(dp) :: delbd,delbg,deldg, dkinetic,gpk1,gpk2,gpk3,htpi
 !arrays
- integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
-
+ real(dp) :: gpkc(3)
+ integer,parameter :: idx(18) = [1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2]
 ! *********************************************************************
 
 !htpi is (1/2) (2 Pi):
@@ -1262,8 +1279,7 @@ subroutine mkkin_metdqdq(dqdqkinpw,effmass,gprimd,idir,kg,kpt,npw,qdir)
    gpkc(2)=gprimd(2,1)*gpk1+gprimd(2,2)*gpk2+gprimd(2,3)*gpk3
    gpkc(3)=gprimd(3,1)*gpk1+gprimd(3,2)*gpk2+gprimd(3,3)*gpk3
 
-   dkinetic=htpi*(2.0_dp*deldg*gpkc(beta)+delbg*gpkc(delta)+ &
- & delbd*gpkc(gamma))
+   dkinetic=htpi*(2.0_dp*deldg*gpkc(beta)+delbg*gpkc(delta)+ delbd*gpkc(gamma))
 
    dqdqkinpw(ig)=dkinetic/effmass
  end do

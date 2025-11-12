@@ -11,7 +11,7 @@ import sys
 from abirules_tools import find_src_dirs
 
 # Files that will be checked.
-re_srcfile = re.compile("\.([Ff]|[Ff]90|finc)$")
+re_srcfile = re.compile(r"\.([Ff]|[Ff]90|finc)$")
 
 def is_srcfile(dirpath, fname):
     return re_srcfile.search(fname)

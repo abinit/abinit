@@ -6,7 +6,7 @@
 !! This module contains interfaces for wannier90 lib.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2022 ABINIT group (BA, MT)
+!! Copyright (C) 2004-2025 ABINIT group (BA, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -43,7 +43,6 @@ module defs_wannier90
      proj_x_loc,proj_zona_loc,exclude_bands_loc)
 #endif
   use defs_basis
-  implicit none
   character(len=*), intent(in) :: seed__name
   integer, dimension(3), intent(in) :: mp_grid_loc
   integer, intent(in) :: num_kpts_loc
@@ -71,7 +70,7 @@ module defs_wannier90
   integer, dimension(num_bands_tot), intent(out) :: exclude_bands_loc
 #ifndef HAVE_WANNIER90_V1
   !WANNIER90_V2
-  integer, dimension(num_bands_tot), optional, intent(out) :: proj_s_loc  
+  integer, dimension(num_bands_tot), optional, intent(out) :: proj_s_loc
   real(dp), dimension(3,num_bands_tot), optional, intent(out) :: proj_s_qaxis_loc
 #endif
   end subroutine wannier_setup
@@ -98,11 +97,11 @@ module defs_wannier90
    character(len=*), dimension(num_atoms_loc), intent(in) :: atom_symbols_loc
    real(dp), dimension(3,num_atoms_loc), intent(in) :: atoms_cart_loc
    logical, intent(in)::gamma_only_loc
-   complex(dpc), dimension(num_bands_loc,num_bands_loc,nntot_loc,num_kpts_loc), intent(in) :: M_matrix_loc
-   complex(dpc), dimension(num_bands_loc,num_wann_loc,num_kpts_loc), intent(in) :: A_matrix_loc
+   complex(dp), dimension(num_bands_loc,num_bands_loc,nntot_loc,num_kpts_loc), intent(in) :: M_matrix_loc
+   complex(dp), dimension(num_bands_loc,num_wann_loc,num_kpts_loc), intent(in) :: A_matrix_loc
    real(dp), dimension(num_bands_loc,num_kpts_loc), intent(in) :: eigenvalues_loc
-   complex(dpc), dimension(num_wann_loc,num_wann_loc,num_kpts_loc), intent(out) :: U_matrix_loc
-   complex(dpc), dimension(num_bands_loc,num_wann_loc,num_kpts_loc), optional, intent(out) :: U_matrix_opt_loc
+   complex(dp), dimension(num_wann_loc,num_wann_loc,num_kpts_loc), intent(out) :: U_matrix_loc
+   complex(dp), dimension(num_bands_loc,num_wann_loc,num_kpts_loc), optional, intent(out) :: U_matrix_opt_loc
    logical, dimension(num_bands_loc,num_kpts_loc), optional, intent(out) :: lwindow_loc
    real(dp), dimension(3,num_wann_loc), optional, intent(out) :: wann_centres_loc
    real(dp), dimension(num_wann_loc), optional, intent(out) :: wann_spreads_loc

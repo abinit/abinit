@@ -7,7 +7,7 @@
 !!  recursion
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2022 ABINIT group (XG)
+!! Copyright (C) 2002-2025 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -62,7 +62,6 @@ CONTAINS  !===========================================================
 
 subroutine prtworksim(work_now)
 
- implicit none
 !Arguments ------------------------------------
 ! scalars
  integer,intent(in) :: work_now
@@ -99,7 +98,6 @@ end subroutine prtworksim
 
 subroutine prtworksiRe(work_now)
 
- implicit none
 !Arguments ------------------------------------
 ! scalars
  real(dp),intent(in) :: work_now
@@ -136,8 +134,6 @@ end subroutine prtworksiRe
 !! SOURCE
 
 subroutine prtworkadv(work_now,adv)
-
- implicit none
 
 !Arguments ------------------------------------
 ! scalars

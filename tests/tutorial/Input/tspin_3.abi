@@ -12,13 +12,13 @@ tmpdata_prefix = "tspin_3t"
    ecut  25.0
 
 # SCF:
-  nstep   70
+  nstep   30
  tolwfr   1.0d-7
 
 # Multidataset:
 ndtset 3
 
- ngkpt1  4 4 2 
+ ngkpt1  4 4 2
 prtdos1  1
 
  ngkpt2  3 3 2
@@ -66,7 +66,7 @@ ratsph3  2.4
 
 # Pseudo:
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Fe.psp8"
+ pseudos "Psdj_nc_sr_04_pw_std_psp8/Fe.psp8"
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
@@ -75,15 +75,15 @@ ratsph3  2.4
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%   tspin_3.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% files_to_test =
+#%%   tspin_3.abo, tolnlines = 2, tolabs = 2.000e-08, tolrel = 2.000e-03
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords = NC
-#%% description = 
+#%% description =
 #%%   Fe fcc structure with two atoms per unit cell for test of antiferromagnetic
 #%%   This is the simplest fcc structure compatible with a X point spiral
-#%% topics = ElecDOS
+#%% topics = ElecDOS, AtomCentered
 #%%<END TEST_INFO>

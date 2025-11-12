@@ -12,9 +12,9 @@
 !!  stored in packed format  and B is also positive definite.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2022 ABINIT group (LNguyen,FDahm,MT)
+!!  Copyright (C) 2001-2025 ABINIT group (LNguyen,FDahm,MT)
 !!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~ABINIT/Infos/copyright
+!!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! SOURCE
@@ -30,7 +30,7 @@
 !!
 !! SOURCE
 !!
-  subroutine abi_dhpgv(itype,jobz,uplo,n,a,b,w,z,ldz,istwf_k,use_slk)
+  subroutine abi_dhpgv(itype,jobz,uplo,n,a,b,w,z,ldz,istwf_k,use_slk,use_gpu_elpa)
 
     use m_fstrings,     only : sjoin, itoa
 
@@ -44,15 +44,14 @@
  real(dp), intent(out) :: z(:,:)
  real(dp), intent(out) :: w(:)
  integer, optional, intent(in) :: istwf_k
- integer, optional, intent(in) :: use_slk
+ integer, optional, intent(in) :: use_slk,use_gpu_elpa
 
 !Local variables-------------------------------
- integer :: info,use_slk_,istwf_k_
+ integer :: info,use_slk_,use_gpu_elpa_,istwf_k_
 #ifdef HAVE_LINALG_SCALAPACK
- type(matrix_scalapack) :: sca_a,sca_b,sca_ev
+ type(slkmat_dp_t) :: sca_a,sca_b,sca_ev
  integer :: ierr
 #endif
-
 ! *********************************************************************
 
  ABI_CHECK(lapack_packed_storage,"BUG(1) in abi_dhpgv (storage)!")
@@ -63,6 +62,10 @@
 
  use_slk_ = 0; if (present(use_slk)) use_slk_ = use_slk
  istwf_k_ = 1; if (present(istwf_k)) istwf_k_ = istwf_k
+ use_gpu_elpa_=0
+#ifdef HAVE_LINALG_ELPA
+ if (present(use_gpu_elpa)) use_gpu_elpa_=use_gpu_elpa
+#endif
 
 !===== SCALAPACK
  if (ABI_LINALG_SCALAPACK_ISON.and.use_slk_==1.and.n>slk_minsize)  then
@@ -72,17 +75,17 @@
    call sca_b%init(n,n,slk_processor,istwf_k_)
    call sca_ev%init(n,n,slk_processor,istwf_k_)
 #ifdef HAVE_LINALG_ELPA
-   call matrix_from_global_sym(sca_a,a,istwf_k_)
-   call matrix_from_global_sym(sca_b,b,istwf_k_)
+   call sca_a%from_global_sym(a,istwf_k_)
+   call sca_b%from_global_sym(b,istwf_k_)
 #else
-   call matrix_from_global(sca_a,a,istwf_k_)
-   call matrix_from_global(sca_b,b,istwf_k_)
+   call sca_a%from_global_pack(a,istwf_k_)
+   call sca_b%from_global_pack(b,istwf_k_)
 #endif
    call compute_generalized_eigen_problem(slk_processor,sca_a,sca_b,&
-&       sca_ev,w,slk_communicator,istwf_k_)
-   call matrix_to_global(sca_a,a,istwf_k_)
-   call matrix_to_global(sca_b,b,istwf_k_)
-   call matrix_to_reference(sca_ev,z,istwf_k_)
+&       sca_ev,w,slk_communicator,istwf_k_,use_gpu_elpa=use_gpu_elpa_)
+   call sca_a%to_global_pack(a,istwf_k_)
+   call sca_b%to_global_pack(b,istwf_k_)
+   call sca_ev%to_global(z, istwf_k_)
    call xmpi_sum(z,slk_communicator,ierr)
    call sca_a%free()
    call sca_ev%free()
@@ -113,6 +116,10 @@
 
  ABI_CHECK(info==0,"abi_dhpgv returned info!=0!")
 
+#ifndef HAVE_LINALG_ELPA
+ ABI_UNUSED(use_gpu_elpa)
+#endif
+
 end subroutine abi_dhpgv
 !!***
 
@@ -135,16 +142,15 @@ end subroutine abi_dhpgv
  character(len=1), intent(in) :: jobz
  character(len=1), intent(in) :: uplo
  integer, intent(in) :: n,ldz
- complex(spc), intent(inout) :: a(:,:)
- complex(spc), intent(inout) :: b(:,:)
- complex(spc), intent(out) :: z(:,:)
+ complex(sp), intent(inout) :: a(:,:)
+ complex(sp), intent(inout) :: b(:,:)
+ complex(sp), intent(out) :: z(:,:)
  real(sp), intent(out) :: w(:)
 
 !Local variables-------------------------------
  integer :: info
  real(sp),pointer :: rwork(:)
- complex(spc),pointer :: work(:)
-
+ complex(sp),pointer :: work(:)
 ! *********************************************************************
 
  ABI_CHECK(lapack_packed_storage,"BUG(1) in abi_chpgv (storage)!")
@@ -192,16 +198,15 @@ subroutine abi_zhpgv(itype,jobz,uplo,n,a,b,w,z,ldz)
  integer, intent(in) :: n,ldz
  character(len=1), intent(in) :: jobz
  character(len=1), intent(in) :: uplo
- complex(dpc), intent(inout) :: a(:,:)
- complex(dpc), intent(inout) :: b(:,:)
- complex(dpc), intent(out) :: z(:,:)
+ complex(dp), intent(inout) :: a(:,:)
+ complex(dp), intent(inout) :: b(:,:)
+ complex(dp), intent(out) :: z(:,:)
  real(dp), intent(out) :: w(:)
 
 !Local variables-------------------------------
  integer :: info
  real(dp),pointer :: rwork(:)
- complex(dpc),pointer :: work(:)
-
+ complex(dp),pointer :: work(:)
 ! *********************************************************************
 
  ABI_CHECK(lapack_packed_storage,"BUG(1) in abi_zhpgv (storage)!")

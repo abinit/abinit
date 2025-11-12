@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2022 ABINIT group (BAmadon,AGerossier,ROuterovitch)
+!! Copyright (C) 2006-2025 ABINIT group (BAmadon,AGerossier,ROuterovitch)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -46,7 +46,6 @@ MODULE m_plowannier
  use m_pawtab, only : pawtab_type
  use m_pawcprj, only : pawcprj_type,pawcprj_alloc,pawcprj_get,pawcprj_free
  use m_pawrad, only : pawrad_type, simp_gen
-
 
  implicit none
 
@@ -137,7 +136,7 @@ end type position_wan_type
 
 type, public :: lorbital_type
 
-  complex(dpc), allocatable :: matl(:,:,:)
+  complex(dp), allocatable :: matl(:,:,:)
   !details for different m
 
   real(dp), allocatable :: ph0phiint(:)
@@ -177,7 +176,7 @@ end type orbital_type
 
 type, public :: lorbital2_type
 
-  complex(dpc), allocatable :: matl(:,:,:,:,:)
+  complex(dp), allocatable :: matl(:,:,:,:,:)
   ! size (2l1+1,2l2+1,nspppol,nspinor,nspinor)
 
   real(dp), allocatable :: ph0phiint(:)
@@ -739,39 +738,39 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
  integer :: il1,il2,im1,im2,index_c,index_l,ispinor1,ispinor2,sizem,pos1,pos2
  real(dp) :: int_current,sum,sum2,sum3
 
- complex(dpc) :: wbase,wcurrent
+ complex(dp) :: wbase,wcurrent
  real(dp) :: resolution, wincrease,wmax,wmin
  integer :: iw,dos,shift,unt,unt2,dos_unt,dos_unt2
  integer :: number_of_frequencies,band_struct,prtocc,prtint
  real(dp) :: convert
- complex(dpc):: xsum
+ complex(dp):: xsum
  character(len=fnlen) :: owrfile
 
 !arrays
  real(dp) :: chinorm
- complex(dpc), allocatable :: Fff(:)
- complex(dpc), allocatable :: buffer1(:)
+ complex(dp), allocatable :: Fff(:)
+ complex(dp), allocatable :: buffer1(:)
  logical :: lprojchi
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
  type(operwan_type), allocatable :: operwan(:,:,:)
  type(operwan_realspace_type) :: operwan_realspace
  type(operwan_realspace_type) :: operocc
- complex(dpc), allocatable :: eigenks(:,:,:,:)
- complex(dpc), allocatable :: operks(:,:,:,:)
- complex(dpc), allocatable :: identityks(:,:,:,:)
+ complex(dp), allocatable :: eigenks(:,:,:,:)
+ complex(dp), allocatable :: operks(:,:,:,:)
+ complex(dp), allocatable :: identityks(:,:,:,:)
  real(dp), allocatable :: ff(:)
- complex(dpc), allocatable :: operwansquare(:,:,:,:)
- complex(dpc), allocatable :: operwansquarereal(:,:,:)
- complex(dpc), allocatable :: matrix_to_diag(:,:)
- complex(dpc), allocatable :: energies(:,:)
- complex(dpc), allocatable :: Ffftable(:,:)
+ complex(dp), allocatable :: operwansquare(:,:,:,:)
+ complex(dp), allocatable :: operwansquarereal(:,:,:)
+ complex(dp), allocatable :: matrix_to_diag(:,:)
+ complex(dp), allocatable :: energies(:,:)
+ complex(dp), allocatable :: Ffftable(:,:)
  character(len = 5) :: i2s,x1
 
 !To diagonalize eigenvalues
  real(dp), allocatable :: eig(:), rwork(:)
- complex(dpc), allocatable :: zwork(:)
+ complex(dp), allocatable :: zwork(:)
  integer :: lwork,info,whole_diag
- !complex(dpc), allocatable :: densmat(:,:)
+ !complex(dp), allocatable :: densmat(:,:)
 !************************************************************************
 
 ! Drive the normalization of the psichis
@@ -2338,7 +2337,6 @@ end subroutine compute_coeff_plowannier
  use m_abicore
  use m_io_tools,  only : open_file
  use m_specialmsg, only : wrtout
- implicit none
 
  !Arguments-------------------------
  type(plowannier_type),intent(in) :: wan
@@ -2411,7 +2409,6 @@ end subroutine compute_coeff_plowannier
  use defs_abitypes
  use m_io_tools,  only : open_file
  use m_specialmsg, only : wrtout
- implicit none
 
  !Arguments-------------------------
  type(plowannier_type),intent(inout) :: wan_in
@@ -2509,7 +2506,6 @@ end subroutine get_plowannier
    use m_bz_mesh, only : kmesh_t
    use m_crystal, only : crystal_t
    use m_pawang, only  : pawang_type
-   implicit none
 
 !Arguments-------------------------
    type(plowannier_type),intent(inout) :: wanibz
@@ -2637,42 +2633,17 @@ end subroutine fullbz_plowannier
    end do
  end do
 
- if (allocated(wan%kpt)) then
-   ABI_FREE(wan%kpt)
- end if
- if (allocated(wan%iatom_wan)) then
-   ABI_FREE(wan%iatom_wan)
- end if
- if (allocated(wan%nbl_atom_wan)) then
-   ABI_FREE(wan%nbl_atom_wan)
- end if
- if (allocated(wan%latom_wan)) then
-   ABI_FREE(wan%latom_wan)
- end if
- if (allocated(wan%nbproj_atom_wan)) then
-   ABI_FREE(wan%nbproj_atom_wan)
- end if
- if (allocated(wan%projector_wan)) then
-   ABI_FREE(wan%projector_wan)
- end if
- if (allocated(wan%position)) then
-   ABI_FREE(wan%position)
- end if
- if (allocated(wan%wtk)) then
-   ABI_FREE(wan%wtk)
- end if
- if (allocated(wan%acell)) then
-   ABI_FREE(wan%acell)
- end if
-
-
- if (allocated(wan%nposition)) then
-   ABI_FREE(wan%nposition)
- end if
- if (allocated(wan%psichi)) then
-   ABI_FREE(wan%psichi)
- end if
-
+ ABI_SFREE(wan%kpt)
+ ABI_SFREE(wan%iatom_wan)
+ ABI_SFREE(wan%nbl_atom_wan)
+ ABI_SFREE(wan%latom_wan)
+ ABI_SFREE(wan%nbproj_atom_wan)
+ ABI_SFREE(wan%projector_wan)
+ ABI_SFREE(wan%position)
+ ABI_SFREE(wan%wtk)
+ ABI_SFREE(wan%acell)
+ ABI_SFREE(wan%nposition)
+ ABI_SFREE(wan%psichi)
 
  end subroutine destroy_plowannier
 !!***
@@ -2780,8 +2751,6 @@ end subroutine fullbz_plowannier
 
  subroutine zero_operwan(wan,operwan)
 
-   implicit none
-
    !Arguments----------------------------------
    type(plowannier_type), intent(in) :: wan
    type(operwan_type), intent(inout) :: operwan(wan%nkpt,wan%natom_wan,wan%natom_wan)
@@ -2835,7 +2804,7 @@ end subroutine fullbz_plowannier
    !Arguments--------------------------
    type(plowannier_type), intent(in) :: wan
    type(operwan_type), intent(inout) :: operwan(:,:,:)
-   complex(dpc), intent(in) :: operks(:,:,:,:)
+   complex(dp), intent(in) :: operks(:,:,:,:)
    integer, intent(in) :: option
 
    !Local variables--------------------
@@ -2905,10 +2874,10 @@ subroutine normalization_plowannier(wan,opt)
   type(plowannier_type), intent(inout) :: wan
   integer, intent(in) :: opt
 !Local----------------------
-  complex(dpc), allocatable :: operks(:,:,:,:)
+  complex(dp), allocatable :: operks(:,:,:,:)
   type(operwan_type), allocatable :: operwan(:,:,:)
-  complex(dpc), allocatable :: operwansquare(:,:,:,:)
-  complex(dpc), allocatable :: tmp_operwansquare(:,:)
+  complex(dp), allocatable :: operwansquare(:,:,:,:)
+  complex(dp), allocatable :: tmp_operwansquare(:,:)
   integer :: ikpt, iband, iband1, iband2, isppol,  ispinor1, ispinor2, iatom1,nb_zeros_tot
   integer :: iatom2, il1, il2, im1, im2, index_c, index_l, n1,n2,n3, nkpt,nb_of_zeros
   type(orbital_type), allocatable :: psichinormalized(:,:,:)
@@ -3120,7 +3089,7 @@ subroutine normalization_plowannier(wan,opt)
                     do ispinor2 = 1,wan%nspinor
                       if (opt==0 .and. nb_zeros_tot==0) then
                         if (iatom1.eq.iatom2 .and. il1.eq.il2 .and. im1.eq.im2 .and. ispinor1.eq.ispinor2) then
-                          if (abs(cmplx(1.0,0.0,dpc)-&
+                          if (abs(cmplx(1.0,0.0,dp)-&
                             &operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%&
                             &matl(im1,im2,isppol,ispinor1,ispinor2)) > 1d-8) then
                             write(message,'(a,i0,a,F18.11)') 'Normalization error for ikpt =',ikpt,&
@@ -3420,10 +3389,10 @@ subroutine reduce_operwan_realspace(wan,rhot1,npwx,nibz,comm,nbz,nsppol)
   integer, intent(in) :: npwx,nibz,comm,nbz,nsppol
   type(operwan_realspace_type),target,intent(inout) :: rhot1(npwx,nibz)
 !Local variables----------------------------------
-  complex(dpc),allocatable ::  buffer(:)
+  complex(dp),allocatable ::  buffer(:)
   integer :: dim,pwx,ibz, spin, ispinor1, ispinor2, iatom1, iatom2, pos1, pos2
   integer :: il1, il2, im1, im2, nnn, ierr
-  complex(dpc),pointer :: oper_ptr(:,:,:,:,:)
+  complex(dp),pointer :: oper_ptr(:,:,:,:,:)
 
 
    dim=0

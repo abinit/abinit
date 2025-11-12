@@ -1,0 +1,89 @@
+#################################################################
+# Automatic test for ABINIT:                                    #
+#    Testing TB09 XC functional within PAW approach             #
+#    Also testing the following variables:                      #
+#        - xc_taupos : filtering of the kinetic energy density  #
+#        - getkden   : read KE density from previous dataset    #
+#        - irdkden   : read KE density from an external file    #
+# This test reads data from for libxc#t23                       #
+#                                                               #
+# Cristalline silicon                                   MT 2023 #
+#################################################################
+
+ndtset 2
+
+#==== DATASET 1 : reading densities from another test
+
+irdwfk1     1
+irdden1     1
+irdkden1    1  # Read kinetic energy density
+
+prtwf1      1
+prtden1     1
+prtkden1    1
+
+#==== DATASET 2 : reading densities from previous dataset
+#====             + kinetic energy density filtering
+
+getwfk2     1
+getden2     1
+getkden2    1      # Read kinetic energy density
+xc_taupos2  1.d-8  # Filtering KE density; high value for testing purpose
+
+
+#---- SCF cycle control
+tolvrs      1.0d-12
+nstep       20
+diemac      12.0
+
+#---- Plane-wave basis
+ecut        6.
+pawecutdg   10.
+
+#---- Brillouin zone sampling
+kptopt      1
+ngkpt       2 2 2
+nshiftk     1
+shiftk      0.0 0.0 0.0
+occopt      1
+
+#---- Atomic structure
+acell       3*10.26
+rprim       0.0  0.5  0.5
+            0.5  0.0  0.5
+            0.5  0.5  0.0
+ntypat      1
+znucl       14
+natom       2
+typat       1 1
+xred        0    0    0
+            1/4  1/4  1/4
+nband       5
+ixc         -208012  # TB09 xc functional
+
+pp_dirpath "$ABI_PSPDIR"
+pseudos "Psdj_paw_pbe_std/Si.xml"
+
+#---- Miscellaneous
+enunit      1
+
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t23.abi, t24.abi
+#%% [files]
+#%% files_to_test =
+#%%   t24.abo, tolnlines = 4, tolabs = 1.0e-7, tolrel = 5.e-2, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 8
+#%% [extra_info]
+#%% authors = M. Torrent
+#%% keywords = PAW
+#%% description = Testing TB09 XC functional within PAW approach.
+#%%   Cristalline silicon
+#%%   Also testing the following variables:
+#%%     - xc_taupos : filtering of the kinetic energy density
+#%%     - getkden   : read KE density from previous dataset
+#%%     - irdkden   : read KE density from an external file
+#%%<END TEST_INFO>
