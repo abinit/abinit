@@ -875,7 +875,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    if(extfpmd_chkinp(dtset)) then
      ABI_MALLOC(extfpmd,)
      call extfpmd%init(dtset%mband,hdr%extfpmd_eshift,dtset%extfpmd_nbcut,dtset%extfpmd_nbdbuf,&
-&     dtset%nfft,dtset%nspden,dtset%nsppol,dtset%nkpt,dtset%occopt,rprimd,dtset%tphysel,&
+&     nfftf,dtset%nspden,dtset%nsppol,dtset%nkpt,dtset%occopt,rprimd,dtset%tphysel,&
 &     dtset%tsmear,dtset%useextfpmd,mpi_enreg,dtset%extfpmd_nband)
    end if
  end if
