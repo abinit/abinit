@@ -144,7 +144,7 @@ module m_gstore
  use m_dtfil,          only : datafiles_type
  use m_time,           only : cwtime, cwtime_report, sec2str
  use m_fstrings,       only : tolower, itoa, ftoa, sjoin, ktoa, ltoa, strcat, replace_ch0, yesno, string_in
- use m_numeric_tools,  only : arth, get_diag, isdiagmat
+ use m_numeric_tools,  only : arth, get_diag, isdiagmat, safe_div
  use m_krank,          only : krank_t, get_ibz2bz, star_from_ibz_idx
  use m_io_tools,       only : iomode_from_fname, file_exists
  use m_special_funcs,  only : gaussian
@@ -4843,7 +4843,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
  integer :: ik_bz, ik_ibz, ib_min_k, ib_max_k, iq_bz, ikq_ibz, ib_min_kq, ib_max_kq
  logical :: with_ks__, changed_k, changed_kq, all_gs
  real(dp),parameter :: TOL_EDIFF = 0.001_dp * eV_Ha
- real(dp) :: gg, gg_ks !, g_ratio !, vnk
+ real(dp) :: gg, gg_ks, g_ratio !, vnk
  character(len=abi_slen) :: gstore_gmode
  character(len=500) :: msg
 !arrays
@@ -5044,9 +5044,9 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
               n_k = in_k + bstart_k - 1
               gg = sqrt(g2_mn(im_kq, in_k))
               gg_ks = sqrt(g2ks_mn(im_kq, in_k))
-              write(ab_out, "(a1,5(i5,1x),2(es16.6))")"-", iq_glob, ik_glob, ipc, m_kq, n_k, gg, gg_ks
-              !call safe_div(gg, gg_ks, -one, g_ratio)
-              !write(ab_out, "(a1,5(i5,1x),3(es16.6))")"-", iq_glob, ik_glob, ipc, m_kq, n_k, gg, gg_ks, g_ratio
+              !write(ab_out, "(a1,5(i5,1x),2(es16.6))")"-", iq_glob, ik_glob, ipc, m_kq, n_k, gg, gg_ks
+              call safe_div(gg, gg_ks, -one, g_ratio)
+              write(ab_out, "(a1,5(i5,1x),3(es16.6))")"-", iq_glob, ik_glob, ipc, m_kq, n_k, gg, gg_ks, g_ratio
             end do
           end do
         end if

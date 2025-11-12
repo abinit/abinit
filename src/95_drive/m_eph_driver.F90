@@ -66,7 +66,7 @@ module m_eph_driver
  use m_ephtk,           only : ephtk_update_ebands
  use m_gstore,          only : gstore_t
  use m_migdal_eliashberg, only : migdal_eliashberg_iso !, migdal_eliashberg_aniso
- use m_gstore_sigeph,   only : gstore_sigeph
+ use m_gstore_sigmaph,   only : gstore_sigmaph
  use m_berry_curvature, only : berry_curvature
  use m_cumulant,        only : cumulant_driver
  use m_frohlich,        only : frohlich_t, frohlichmodel_zpr, frohlichmodel_polaronmass
@@ -696,8 +696,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (24)
    ! Compute e-ph self-energy from GSTORE.nc file.
-   call gstore_sigeph(wfk0_path, ngfftc, ngfftf, dtset, dtfil, cryst, ebands, dvdb, ifc, &
-                      pawfgr, pawtab, psps, mpi_enreg, comm)
+   call gstore_sigmaph(wfk0_path, ngfftc, ngfftf, dtset, dtfil, cryst, ebands, dvdb, ifc, &
+                       pawfgr, pawtab, psps, mpi_enreg, comm)
 
  case (5, -5)
    ! Interpolate the DFPT potential.
