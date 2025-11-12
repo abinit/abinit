@@ -481,9 +481,9 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
      defmode=.True.)
    NCF_CHECK(ncerr)
 
-   !if (sigma%nwr > 0) then
-   !  NCF_CHECK(nctk_def_dims(ncid, [nctkdim_t("nwr", sigma%nwr)]))
-   !end if
+   if (sigma%nwr > 0) then
+     NCF_CHECK(nctk_def_dims(ncid, [nctkdim_t("nwr", sigma%nwr)]))
+   end if
    !if (dtset%prteliash == 3) then
    !  NCF_CHECK(nctk_def_dims(ncid, [nctkdim_t("a2f_ne", sigma%a2f_ne)]))
    !end if
@@ -515,30 +515,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
      nctkarr_t("mu_e", "dp", "ntemp") &
    ])
    NCF_CHECK(ncerr)
-
-   !if (sigma%nwr > 0) then
-   !  ! Make room for the spectral function. These arrays get two extra dimensions on file (nkcalc, nsppol).
-   !  ncerr = nctk_def_arrays(ncid, [ &
-   !    nctkarr_t("wrmesh_b", "dp", "nwr, max_nbcalc, nkcalc, nsppol"), &
-   !    nctkarr_t("vals_wr", "dp", "two, nwr, ntemp, max_nbcalc, nkcalc, nsppol"), &
-   !    nctkarr_t("spfunc_wr", "dp", "nwr, ntemp, max_nbcalc, nkcalc, nsppol") &
-   !  ])
-   !  NCF_CHECK(ncerr)
-   !end if
-
-   !if (dtset%prteliash /= 0) then
-   !  ncerr = nctk_def_arrays(ncid, [ &
-   !    nctkarr_t("gfw_vals", "dp", "phmesh_size, three, max_nbcalc, nkcalc, nsppol") &
-   !  ])
-   !  NCF_CHECK(ncerr)
-   !  if (dtset%prteliash == 3) then
-   !    ncerr = nctk_def_arrays(ncid, [ &
-   !      nctkarr_t("a2f_emesh", "dp", "a2f_ne"), &
-   !      nctkarr_t("a2few", "dp", "a2f_ne, phmesh_size, max_nbcalc, nkcalc, nsppol") &
-   !    ])
-   !    NCF_CHECK(ncerr)
-   !  end if
-   !end if
 
    ! ======================================================
    ! Write data that do not depend on the (kpt, spin) loop.
@@ -575,7 +551,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
    !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc2ibz"), sigma%kcalc2ibz))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kTmesh"), sigma%kTmesh))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "mu_e"), sigma%mu_e))
-   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eta"), aimag(sigma%ieta)))
    !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phmesh"), sigma%phmesh))
    !if (dtset%prteliash == 3) then
    !  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "a2f_emesh"), sigma%a2f_emesh))
@@ -655,6 +630,15 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
      do my_iq=1,gqk%my_nq
        call gqk%myqpt(my_iq, gstore, weight_q, qpt); q_is_gamma = sum(qpt**2) < tol14
 
+       ! weight_q is computed here. It depends whether we are summing over the full BZ or IBZ_k.
+       ! IMPORTANT: We cannot cycle is my_iq == 1 as this is the iteration in which we broadcast stern_dw if eph_stern /= 0.
+       ! Also weight_q should be set to zero if q is not in IBZ_k when my_iq == 1.
+       weight_q = one / gstore%nqbz
+       if (use_lgk /= 0) then
+         ii = lg_myk%findq_ibzk(qpt); if (ii == -1 .and. my_iq /= 1) cycle
+         if (ii /= -1) weight_q = lg_myk%weights(ii)
+       end if
+
        !iq_bz = gqk%my_q2bz(my_iq); qq_is_gamma = sum(qq_bz**2) < tol14
        qq_bz_string = ktoa(qpt)
 
@@ -663,7 +647,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
          call cwtime(cpu_qq, wall_qq, gflops_qq, "start")
          call inds2str(0, sjoin(" Computing Sigma_eph for qq_bz:", qq_bz_string), my_iq, gqk%my_nq, gqk%glob_nq, msg)
          call wrtout(std_out, sjoin(msg, ", and spin:", itoa(spin)), pre_newlines=1)
-         !print *, "iq_ibz:", iq_ibz, "qq_bz:", qq_bz, "qq_ibz:", qq_ibz
        end if
 
        ! Find the image of k+q in the IBZ.
@@ -788,15 +771,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
            call xmpi_bcast(stern_dw, master, gqk%qpt_comm%value, ierr)
          end if
        end if ! eph_stern
-
-       ! weight_q is computed here. It depends whether we are summing over the full BZ or IBZ_k.
-       ! IMPORTANT: This check should be done here so that we can Broadcast stern_dw if eph_stern /= 0
-       ! when iq_ibz == 1. Do not move this section above!!!!
-       ! FIXME: This is highly inefficient if use_lgk /= 0
-       weight_q = one / gstore%nqbz
-       if (use_lgk /= 0) then
-         ii = lg_myk%findq_ibzk(qpt); if (ii == -1) goto 10; weight_q = lg_myk%weights(ii)
-       end if
 
        ! Sum over my phonon modes.
        do my_ip=1,gqk%my_npert
@@ -936,7 +910,6 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
          end do ! im_kq
        end do ! my_ip
 
-10     continue
        ABI_SFREE(kpg_kq)
        ABI_SFREE(ffnl_kq)
        ABI_SFREE(kinpw_kq)
@@ -1032,7 +1005,6 @@ subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, eb
  integer,parameter :: max_ntemp = 50, master = 0
  integer :: it, in_k, ikcalc, ik_bz, spin, ierr, bstart_k, bstop_k, cnt, ndeg, spin_ncid, ncerr
  integer :: band_k,ik_ibz,ib_val,ib_cond,jj,ideg,ii,iw, nstates !, nb_k
- !integer :: nq_ibzk_eff, nelem, imyq, iq_ibz_k, sr_ncid, spin_ncid, ncerr
  logical :: changed_k, iwrite
  real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond,qpe_oms,qpe_oms_val,qpe_oms_cond
  real(dp) :: ravg2 ! invsig2fmts, tau
@@ -1041,7 +1013,6 @@ subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, eb
  type(degtab_t) :: degtab
 !arrays
  integer,allocatable :: degblock(:,:)
- !integer, allocatable :: recvcounts(:), displs(:), nq_rank(:), kq_symtab(:,:), my_kq_symtab(:,:)
  real(dp) :: kcalc(3)
  real(dp) :: qp_gaps(sigma%ntemp),qpoms_gaps(sigma%ntemp) !, gfw_avg(sigma%phmesh_size, 3)
  !real(dp),allocatable :: aw(:,:,:), a2few_avg(:,:), gather_srate(:,:,:,:), grp_srate(:,:,:,:)
@@ -1099,6 +1070,30 @@ subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, eb
    !nctkarr_t("vcar_calc", "dp", "three, max_nbcalc, nkcalc, nsppol") &
  ])
  NCF_CHECK(ncerr)
+
+ !if (sigma%nwr > 0) then
+ !  ! Make room for the spectral function. These arrays get two extra dimensions on file (nkcalc, nsppol).
+ !  ncerr = nctk_def_arrays(spin_ncid, [ &
+ !    nctkarr_t("wrmesh_b", "dp", "nwr, nb_k, nkcalc"), &
+ !    nctkarr_t("vals_wr", "dp", "two, nwr, ntemp, nb_k, nkcalc"), &
+ !    nctkarr_t("spfunc_wr", "dp", "nwr, ntemp, nb_k, nkcalc") &
+ !  ])
+ !  NCF_CHECK(ncerr)
+ !end if
+
+ !if (dtset%prteliash /= 0) then
+ !  ncerr = nctk_def_arrays(spin_ncid, [ &
+ !    nctkarr_t("gfw_vals", "dp", "phmesh_size, three, nb_k, nkcalc") &
+ !  ])
+ !  NCF_CHECK(ncerr)
+ !  if (dtset%prteliash == 3) then
+ !    ncerr = nctk_def_arrays(ncid, [ &
+ !      nctkarr_t("a2f_emesh", "dp", "a2f_ne"), &
+ !      nctkarr_t("a2few", "dp", "a2f_ne, phmesh_size, nb_k, nkcalc") &
+ !    ])
+ !    NCF_CHECK(ncerr)
+ !  end if
+ !end if
 
  ! Write data.
  !NCF_CHECK(nctk_set_datamode(spin_ncid))
