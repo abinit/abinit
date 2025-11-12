@@ -1244,12 +1244,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_MALLOC(alpha_mrta, (nbcalc_ks))
      end if
 
-     ! Prepare computation of Sigma_{nk}(w) and spectral function.
      if (sigma%nwr > 0) then
+       ! Prepare computation of Sigma_{nk}(w) and spectral function.
+       ! Build linear mesh **centered** around the KS energy.
        sigma%vals_wr = zero
        do ib_k=1,nbcalc_ks
          band_ks = ib_k + bstart_ks - 1
-         ! Build linear mesh **centered** around the KS energy.
          eig0nk = ebands%eig(band_ks, ik_ibz, spin) - sigma%wr_step * (sigma%nwr / 2)
          sigma%wrmesh_b(:,ib_k) = arth(eig0nk, sigma%wr_step, sigma%nwr)
        end do

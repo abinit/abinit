@@ -124,32 +124,32 @@ module m_gstore_sigeph
   ! Fan-Migdal + Debye-Waller
 
   complex(dp),allocatable :: fan_vals(:,:,:)
-  ! (ntemp, nb_k, nkcalc)
+  ! (ntemp, nb_k, glob_nk)
   ! Fan-Migdal
 
   complex(dp),allocatable :: fan_stern_vals(:,:,:)
-  ! (ntemp, nb_k, nkcalc)
+  ! (ntemp, nb_k, glob_nk)
   ! Fan-Migdal adiabatic Sternheimer part
 
   complex(dp),allocatable :: dvals_de0ks(:,:,:)
-  ! (ntemp, nb_k, nkcalc)
+  ! (ntemp, nb_k, glob_nk)
   ! d Re Sigma_eph(omega, kT, band, kcalc) / d omega (omega=eKS)
 
   real(dp),allocatable :: dw_vals(:,:,:)
-  !  dw_vals(ntemp, nb_k, nkcalc) for given (ikcalc, spin)
+  !  dw_vals(ntemp, nb_k, glob_nk) for given (ikcalc, spin)
   !  Debye-Waller term (static).
 
   real(dp),allocatable :: dw_stern_vals(:,:,:)
-   !  dw_stern_vals(ntemp, nb_k, nkcalc)
+   !  dw_stern_vals(ntemp, nb_k, glob_nk)
    !  Debye-Waller Sternheimer term (static) .
 
   complex(dp),allocatable :: vals_wr(:,:,:,:)
-   ! vals_wr(nwr, ntemp, nb_k, nkcalc)
+   ! vals_wr(nwr, ntemp, nb_k, glob_nk)
    ! Sigma_eph(omega, kT, band)
    ! enk_KS corresponds to nwr/2 + 1.
 
   real(dp),allocatable :: wrmesh_b(:,:,:)
-   ! wrmesh_b(nwr, nb_k, nkcalc)
+   ! wrmesh_b(nwr, nb_k, glob_nk)
    ! Frequency mesh along the real axis (Ha units) used for the different bands
    ! Each mesh is **centered** on the corresponding KS energy.
 
@@ -254,20 +254,18 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
  type(rf_hamiltonian_type) :: rf_ham_kq
 !arrays
  integer :: gmax(3), g0_k(3), g0_kq(3), work_ngfft(18), units(2), my_kqmap(6)
- integer,allocatable :: phmodes_skip(:), gbound_kq(:,:)
- integer,allocatable :: nband(:,:), wfd_istwfk(:), kg_kq(:,:) !, kg_k(:,:), gaussw_qnu(:)
+ integer,allocatable :: phmodes_skip(:), gbound_kq(:,:), nband(:,:), wfd_istwfk(:), kg_kq(:,:) !, kg_k(:,:), gaussw_qnu(:)
  real(dp) :: kk(3), kk_ibz(3), kq_ibz(3), qpt(3), kq(3), fermie1_idir_ipert(3,cryst%natom), dotri(2)
- real(dp),allocatable :: vtrial(:,:), work(:,:,:,:)
- real(dp),allocatable :: kinpw_k(:), kinpw_kq(:),kpg_kq(:,:),kpg_k(:,:)
+ real(dp),allocatable :: vtrial(:,:), work(:,:,:,:), kinpw_k(:), kinpw_kq(:),kpg_kq(:,:),kpg_k(:,:)
  real(dp),allocatable :: ffnl_k(:,:,:,:),ffnl_kq(:,:,:,:),ph3d_k(:,:,:),ph3d_kq(:,:,:),v1scf(:,:,:,:)
  real(dp) :: displ_red_nu(2, 3, cryst%natom)
  real(dp),allocatable :: cg1s_kq(:,:,:,:), h1kets_kq_allperts(:,:,:,:)
- logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  real(dp) :: vec_natom3(2, 3*cryst%natom) ! zpr_frohl_sphcorr(3*cryst%natom),
  real(dp),allocatable :: bra_kq(:,:), kets_k(:,:,:)
  real(dp),allocatable :: stern_ppb(:,:,:,:), stern_fan_t(:), stern_dw(:,:,:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:), rfact_t(:), nqnu_t(:), f_mkq(:)
  complex(dp),allocatable :: cfact_t(:), cfact2_t(:), cfact_wr(:), tpp_red(:,:) !,fmw_frohl_sphcorr(:,:,:,:),
+ logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(pawrhoij_type),allocatable :: pot_pawrhoij(:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
 !----------------------------------------------------------------------
@@ -474,7 +472,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
    ! Add dimensions.
    ncerr = nctk_def_dims(ncid, [ &
      nctkdim_t("nsppol", nsppol), nctkdim_t("ntemp", ntemp), nctkdim_t("natom3", 3 * natom3) &
-     !nctkdim_t("nkcalc", sigma%nkcalc), nctkdim_t("max_nbcalc", sigma%max_nbcalc), &
+     !nctkdim_t("glob_nk", sigma%glob_nk), nctkdim_t("max_nbcalc", sigma%max_nbcalc), &
      !nctkdim_t("phmesh_size", sigma%phmesh_size), &
      !nctkdim_t("nqibz", sigma%nqibz), nctkdim_t("nqbz", sigma%nqbz)
      ], &
@@ -507,10 +505,10 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
      !nctkarr_t("ddb_ngqpt", "int", "three"), &
      !nctkarr_t("ph_ngqpt", "int", "three"), &
      !!nctkarr_t("frohl_params", "dp", "four"), &
-     !nctkarr_t("bstart_ks", "int", "nkcalc, nsppol"), &
-     !nctkarr_t("nbcalc_ks", "int", "nkcalc, nsppol"), &
-     !nctkarr_t("kcalc", "dp", "three, nkcalc"), &
-     !nctkarr_t("kcalc2ibz", "int", "nkcalc, six"), &
+     !nctkarr_t("bstart_ks", "int", "glob_nk, nsppol"), &
+     !nctkarr_t("nbcalc_ks", "int", "glob_nk, nsppol"), &
+     !nctkarr_t("kcalc", "dp", "three, glob_nk"), &
+     !nctkarr_t("kcalc2ibz", "int", "glob_nk, six"), &
      nctkarr_t("kTmesh", "dp", "ntemp"), &
      nctkarr_t("mu_e", "dp", "ntemp") &
    ])
@@ -585,6 +583,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
    if (sigma%nwr > 0) then
      ABI_CALLOC(sigma%vals_wr, (sigma%nwr, ntemp, nb_k, glob_nk))
      ABI_CALLOC(sigma%wrmesh_b, (sigma%nwr, nb_k, glob_nk))
+     ABI_MALLOC(cfact_wr, (sigma%nwr))
    end if
 
    ABI_CALLOC(stern_dw, (2, natom3, natom3, nb_k))
@@ -612,11 +611,12 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
      end if
 
      if (sigma%nwr > 0) then
+       ! Prepare computation of Sigma_{nk}(w) and spectral function.
        ! Build linear mesh **centered** around the KS energy.
        do in_k=1,nb_k
          band_k = in_k + gqk%bstart_k - 1
          eig0nk = ebands%eig(band_k, ik_ibz, spin) - sigma%wr_step * (sigma%nwr / 2)
-         sigma%wrmesh_b(:,in_k, ikcalc) = arth(eig0nk, sigma%wr_step, sigma%nwr)
+         sigma%wrmesh_b(:,in_k,ikcalc) = arth(eig0nk, sigma%wr_step, sigma%nwr)
       end do
      end if
 
@@ -863,7 +863,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
 
                  ! Add static term from Sternheimer to Sigma(w) as well.
                  !if (dtset%eph_stern /= 0) then
-                 !  sigma%vals_wr(:, it, in_k, ikcalc) = sigma%vals_wr(:, it, in_k, ikcalc) + rtmp
+                 !  !sigma%vals_wr(:,it,in_k,ikcalc) = sigma%vals_wr(:,it,in_k,ikcalc) + rtmp
                  !end if
                end do
              end if ! nwr > 0
@@ -935,6 +935,7 @@ subroutine gstore_sigeph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, 
 
    ABI_SFREE(stern_ppb)
    ABI_SFREE(stern_dw)
+   ABI_SFREE(cfact_wr)
 
    call sigma%gather_and_write_results(ncid, gstore, gqk, dtset, ebands)
    end associate
@@ -1015,7 +1016,7 @@ subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, eb
  integer,allocatable :: degblock(:,:)
  real(dp) :: kcalc(3)
  real(dp) :: qp_gaps(sigma%ntemp),qpoms_gaps(sigma%ntemp) !, gfw_avg(sigma%phmesh_size, 3)
- !real(dp),allocatable :: aw(:,:,:), a2few_avg(:,:), gather_srate(:,:,:,:), grp_srate(:,:,:,:)
+ real(dp),allocatable :: aw(:,:,:) !, a2few_avg(:,:), gather_srate(:,:,:,:), grp_srate(:,:,:,:)
  real(dp) :: ks_enes(gqk%nb_k), ze0_vals(sigma%ntemp, gqk%nb_k)
  complex(dp) :: qpoms_enes(sigma%ntemp, gqk%nb_k),qp_enes(sigma%ntemp, gqk%nb_k)
 !! *************************************************************************
@@ -1067,29 +1068,29 @@ subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, eb
    nctkarr_t("qpoms_gaps", "dp", "ntemp, nb_k, glob_nk"), &
    nctkarr_t("qp_gaps", "dp", "ntemp, nb_k, glob_nk") &
    !nctkarr_t("phmesh", "dp", "phmesh_size"), &
-   !nctkarr_t("vcar_calc", "dp", "three, max_nbcalc, nkcalc, nsppol") &
+   !nctkarr_t("vcar_calc", "dp", "three, max_nbcalc, glob_nk, nsppol") &
  ])
  NCF_CHECK(ncerr)
 
- !if (sigma%nwr > 0) then
- !  ! Make room for the spectral function. These arrays get two extra dimensions on file (nkcalc, nsppol).
- !  ncerr = nctk_def_arrays(spin_ncid, [ &
- !    nctkarr_t("wrmesh_b", "dp", "nwr, nb_k, nkcalc"), &
- !    nctkarr_t("vals_wr", "dp", "two, nwr, ntemp, nb_k, nkcalc"), &
- !    nctkarr_t("spfunc_wr", "dp", "nwr, ntemp, nb_k, nkcalc") &
- !  ])
- !  NCF_CHECK(ncerr)
- !end if
+ if (sigma%nwr > 0) then
+   ! Make room for the spectral function.
+   ncerr = nctk_def_arrays(spin_ncid, [ &
+     nctkarr_t("wrmesh_b", "dp", "nwr, nb_k, glob_nk"), &
+     nctkarr_t("vals_wr", "dp", "two, nwr, ntemp, nb_k, glob_nk"), &
+     nctkarr_t("spfunc_wr", "dp", "nwr, ntemp, nb_k, glob_nk") &
+   ])
+   NCF_CHECK(ncerr)
+ end if
 
  !if (dtset%prteliash /= 0) then
  !  ncerr = nctk_def_arrays(spin_ncid, [ &
- !    nctkarr_t("gfw_vals", "dp", "phmesh_size, three, nb_k, nkcalc") &
+ !    nctkarr_t("gfw_vals", "dp", "phmesh_size, three, nb_k, glob_nk") &
  !  ])
  !  NCF_CHECK(ncerr)
  !  if (dtset%prteliash == 3) then
  !    ncerr = nctk_def_arrays(ncid, [ &
  !      nctkarr_t("a2f_emesh", "dp", "a2f_ne"), &
- !      nctkarr_t("a2few", "dp", "a2f_ne, phmesh_size, nb_k, nkcalc") &
+ !      nctkarr_t("a2few", "dp", "a2f_ne, phmesh_size, nb_k, glob_nk") &
  !    ])
  !    NCF_CHECK(ncerr)
  !  end if
@@ -1311,6 +1312,53 @@ subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, eb
    NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("ks_gaps"), ks_gap, start=[1,ikcalc]))
    NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("qpoms_gaps"), qpoms_gaps, start=[1,ikcalc]))
    NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("qp_gaps"), qp_gaps, start=[1,ikcalc]))
+
+   if (sigma%nwr > 0) then
+     NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("wrmesh_b"), sigma%wrmesh_b(:,:,ikcalc), start=[1,1,ikcalc]))
+     NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("vals_wr"), c2r(sigma%vals_wr(:,:,:,ikcalc)), start=[1,1,1,1,ikcalc]))
+
+     ! Compute spectral function. A = -1/pi [Im Sigma(ww)] / ([ww - ee - Re Sigma(ww)] ** 2 + Im Sigma(ww) ** 2])
+     ABI_MALLOC(aw, (sigma%nwr, sigma%ntemp, gqk%nb_k))
+     do in_k=1,gqk%nb_k
+       band_k = in_k + bstart_k - 1
+       kse = ebands%eig(band_k, ik_ibz, spin)
+       do it=1,sigma%ntemp
+         aw(:, it, in_k) = -piinv * aimag(sigma%vals_wr(:, it, in_k, ikcalc)) / &
+           ((sigma%wrmesh_b(:, in_k, ikcalc) - kse - real(sigma%vals_wr(:, it, in_k, ikcalc))) ** 2 + aimag(sigma%vals_wr(:, it, in_k, ikcalc)) ** 2)
+       end do
+     end do
+     NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("spfunc_wr"), aw, start=[1, 1, 1, ikcalc]))
+     ABI_FREE(aw)
+   end if
+
+   if (dtset%prtvol > 0 .and. (ikcalc == 1)) then
+     !if (allocated(sigma%gfw_vals)) then
+     !  write(ab_out, "(2a)")" omega and Eliashberg function gf_{nk}(omega) for testing purposes:"
+     !  iw = (sigma%phmesh_size / 2)
+     !  do in_k=1,min(sigma%nbcalc_ks(ikcalc, spin), 5)
+     !    band_k = in_k + bstart_k - 1
+     !    write(ab_out, "(a, i0)")"For band:", band_k
+     !    do jj=0,1
+     !      write(ab_out, "(4(f8.3,2x))")sigma%phmesh(iw+jj), (sigma%gfw_vals(iw+jj, ii, in_k), ii=1,3)
+     !    end do
+     !  end do
+     !  write(ab_out, "(a)")ch10
+     !end if
+
+     if (sigma%nwr >= 3) then
+       write(ab_out, "(2a)")ch10," omega and Sigma_nk(omega, T=1) in eV for testing purposes:"
+       it = 1; iw = (sigma%nwr / 2)
+       do in_k=1,min(gqk%nb_k, 5)
+         band_k = in_k + bstart_k - 1
+         write(ab_out, "(a, i0)")"For band:", band_k
+         do ii=0,1
+           write(ab_out, "(3(f8.3,2x))")sigma%wrmesh_b(iw+ii, in_k, ikcalc) * Ha_eV, sigma%vals_wr(iw+ii, it, in_k, ikcalc) * Ha_eV
+         end do
+       end do
+       write(ab_out, "(a)")ch10
+     end if
+   end if
+
  end do ! ikcalc
 
  if (sigma%ntemp > max_ntemp) then
