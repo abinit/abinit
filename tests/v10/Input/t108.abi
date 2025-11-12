@@ -76,5 +76,4 @@
 #%%   It tests the following parts of the code:
 #%%     rcpaw_relax, atompaw_solve
 #%%   Note that, in addition to the psp file, the core wave functions file is needed
-#%%   as well as the atomapw input file.
 #%%<END TEST_INFO>

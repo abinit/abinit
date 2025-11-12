@@ -199,7 +199,7 @@ subroutine pawdenpot(compch_sph,el_temp,gprimd,ipert,ixc,my_natom,natom,nspden,n
  integer :: iatom,iatom_tot,idum,ierr,ii,ipositron,iq,iq0_dij,iq0_rhoij
  integer :: itypat,itypat0,lm_size,lmn2_size,mesh_size
  integer :: my_comm_atom,ndij,nkxc1,nk3xc1,nsppol,opt_compch,pawu_algo,pawu_dblec
- integer :: ilmn,ilm,iln,j0lmn,jlm,jlmn,jln,il,klmn,kln,ispden
+ integer :: ilmn,ilm,iln,j0lmn,jlm,jlmn,jln,il,klmn,ispden
  integer :: qphase,usecore,usekden,usetcore,usepawu,usexcnhat,usenhat,usefock
  logical :: keep_vhartree,my_atmtab_allocated,need_kxc,need_k3xc,need_vxctau,extfpmd_pawsph
  logical :: non_magnetic_xc,paral_atom,temp_vxc,eijkl_is_sym,rcpaw_has_valdens,usercpaw
@@ -2565,7 +2565,7 @@ subroutine paw_relax_core(pawtab,pawrad,pawang,pawrhoij,ntypat,rcpaw,psps,dtset,
  integer :: ispden
  integer :: lm_size
  integer :: my_comm_atom,iat,ierr
- integer :: opt_compch,ii
+ integer :: opt_compch
  logical :: my_atmtab_allocated,paral_atom
  real(dp) :: extfpmd_rho
  type(pawang_type),pointer :: pawang_

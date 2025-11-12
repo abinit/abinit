@@ -1545,8 +1545,6 @@ subroutine pawpsp_read_corewf(Atm,filename_,rcut,radmesh_in)
  Atm%mesh_size=0
  Atm%mult=1
  Atm%rcore=0.0_dp
- LIBPAW_ALLOCATE(Atm%mode,(1,1))
- atm%mode = ORB_FROZEN
  atm%zcore_conv=.false.
  atm%nc_conv=.false.
  atm%nresid_c=one
@@ -1574,7 +1572,10 @@ subroutine pawpsp_read_corewf(Atm,filename_,rcut,radmesh_in)
    Atm%zcore_orig=Atm%zcore
    write(msg,'(2f10.5,2x,i8,2x,a)' )Atm%znucl, Atm%zcore, pspdat,'znucl,zcore,pspdat'
    call wrtout(std_out,msg,'COLL')
-   if(Atm%zcore>zero) then
+   if(Atm%zcore==zero) then
+     LIBPAW_ALLOCATE(Atm%mode,(1,1))
+     Atm%mode = ORB_FROZEN
+   else
      !4)
      read(unt,*)pspcod,Atm%ixc,lmax
      write(msg,'(2i5,2x,2x,a)')Atm%ixc,lmax,'ixc,lmax'
@@ -1716,6 +1717,8 @@ subroutine pawpsp_read_corewf(Atm,filename_,rcut,radmesh_in)
      end do
 
      LIBPAW_DEALLOCATE(orbitals)
+     LIBPAW_ALLOCATE(Atm%mode,(Atm%ln_size,Atm%nsppol))
+     Atm%mode = ORB_FROZEN
      LIBPAW_ALLOCATE(Atm%max_occ,(Atm%ln_size,Atm%nsppol))
      Atm%max_occ=Atm%occ
 

@@ -1041,7 +1041,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (dtset%use_rcpaw==1) then
    ABI_WARNING("Untested Mode RCPAW")
    ABI_MALLOC(rcpaw,)
-   call rcpaw_init(rcpaw,dtset,psps%filpsp,pawrad,pawtab,psps%ntypat,1,psps%ziontypat,my_natom,mpi_enreg%comm_atom,mpi_enreg%my_atmtab)
+   call rcpaw_init(rcpaw,dtset,psps%filpsp,pawrad,pawtab,psps%ntypat,1,my_natom,mpi_enreg%comm_atom,mpi_enreg%my_atmtab)
  end if
 
 !###########################################################

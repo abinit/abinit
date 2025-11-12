@@ -258,7 +258,7 @@ end subroutine rcpaw_reinit
 !!
 !! SOURCE
 
-subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,ntypat,cplex,ziontypat,my_natom,comm_atom,mpi_atmtab)
+subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,ntypat,cplex,my_natom,comm_atom,mpi_atmtab)
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: ntypat,my_natom,cplex
@@ -266,7 +266,6 @@ subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,ntypat,cplex,ziontypat,my
  type(rcpaw_type), pointer, intent(inout) :: rcpaw
  type(dataset_type), intent(in) :: dtset
 !arrays
- real(dp),intent(in) :: ziontypat(ntypat) 
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  character(len=fnlen), intent(in) :: filpsp(ntypat)
  type(pawrad_type), intent(in) :: pawrad(ntypat)
@@ -407,8 +406,8 @@ end subroutine rcpaw_init
 !! SOURCE
 
 subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
-& nfft,vtrial,cplex,ucvol,paw_an,&
-&                      gmet,rprimd,xred,ngfft,my_natom,extfpmd,&
+& nfft,vtrial,cplex,ucvol,&
+&                      gmet,rprimd,xred,ngfft,my_natom,&
 &                      distribfft,comm_fft,mpi_atmtab,comm_atom)
 !Arguments ------------------------------------
 !scalars
@@ -420,7 +419,6 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
  type(distribfft_type),optional,target,intent(in)  :: distribfft
  type(rcpaw_type), intent(inout) :: rcpaw
  type(dataset_type), intent(in) :: dtset
- type(extfpmd_type),pointer,intent(in) :: extfpmd
 !arrays
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  integer,intent(in) :: ngfft(18)
@@ -430,7 +428,6 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
  real(dp),intent(in),target :: vtrial(cplex*nfft)
  type(pawtab_type), target,intent(inout) :: pawtab(ntypat)
  type(pawrad_type), intent(in) :: pawrad(ntypat)
- type(paw_an_type),intent(inout) :: paw_an(my_natom)
 
 !Local variables-------------------------------
 !scalars
