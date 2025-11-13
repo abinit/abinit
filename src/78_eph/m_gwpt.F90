@@ -55,7 +55,7 @@ module m_gwpt
  use m_io_tools,       only : iomode_from_fname
  use m_fftcore,        only : ngfft_seq, sphereboundary, print_ngfft
  use m_cgtk,           only : cgtk_rotate
- use m_cgtools,        only : cg_zdotc, cg_real_zdotc, cg_zgemm
+ use m_cgtools,        only : cg_zdotc, cg_real_zdotc, cg_zgemm, fxphas_and_cmp
  use m_crystal,        only : crystal_t
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map
  use m_kg,             only : getph, mkkin
@@ -1680,7 +1680,13 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              ! ===========================
              ! Same operations but for -qq
              ! ===========================
+             ! Set up local potential vlocal1_qq with proper dimensioning, from vtrial1 taking into account the spin
+             ! and prepare application of the NL part. Each MPI rank prepares its own potential.
+             call rf_transgrid_and_pack(spin, nspden, psps%usepaw, cplex, nfftf, nfft, ngfft, nvloc, &
+                                        pawfgr, mpi_enreg, vtrial, v1scf_mq(:,:,:,imyp), vlocal, vlocal1_mqq(:,:,:,:,imyp))
+
              call gs_ham_kmp%load_spin(spin, vlocal=vlocal, with_nonlocal=.true.)
+
              call rf_ham_kmp%init(cplex, gs_ham_kmp, ipert, has_e1kbsc=.true.)
              call rf_ham_kmp%load_spin(spin, vlocal1=vlocal1_mqq(:,:,:,:,imyp), with_nonlocal=.true.)
 
@@ -1811,7 +1817,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                  end if
 
                  ! DEBUG
-                 if (qq_is_gamma .and. im_kq <= 10  .and. in_k <= 10 .and. ipp_bz == 1 .and. ib_sum == 1 .and. my_rank == master) then
+                 !if (qq_is_gamma .and. im_kq <= 10  .and. in_k <= 10 .and. ipp_bz == 1 .and. ib_sum == 1 .and. my_rank == master) then
+                 if (qq_is_gamma .and. ipp_bz == 1 .and. my_rank == master) then
                    ! kk is gamma
                    if (sum(kk**2) < tol14) then
                    !print '(A7, A7, A7, A7, A7, A7)', 'my_is', 'im_kq', 'in_k', 'ipp_bz', 'ib_sum', 'ipc'
@@ -1821,21 +1828,37 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                    !print *, "gks_atm2(:, im_kq, in_k, ipc):", gks_atm2(:, im_kq, in_k, ipc)
                    print *, ' '
 
-                 if (sum(stern_kqmp%cgq - stern_kmp%cgq) > tol14) then
+                 if (sum(abs(stern_kqmp%cgq - stern_kmp%cgq)) > tol14) then
                     print *, "Sternheimer cgq diff"
-                    print *, sum(stern_kqmp%cgq - stern_kmp%cgq)
+                    print *, sum(abs(stern_kqmp%cgq - stern_kmp%cgq))
                     stop
                  end if
 
-                 if (sum(full_cg1_kmp - full_cg1_kqmp) > tol14) then
+                 if (sum(abs(cg_kmp - cg_kqmp)) > tol14) then
+                    print *, "Sternheimer cg_kmp diff"
+                    print *, (sum(abs(cg_kmp - cg_kqmp)) > tol14)
+                    stop
+                 end if
+
+                 if (sum(abs(full_cg1_kmp - full_cg1_kqmp)) > tol14) then
+                    print *, sum(abs(full_cg1_kmp - full_cg1_kqmp))
+                    print *, "full_cg1_kmp(1:2, 1:5)", full_cg1_kmp(1:2,1:5)
+                    print *, "full_cg1_kqmp(1:2, 1:5)", full_cg1_kqmp(1:2, 1:5)
                     print *, "full_cg1_kmpq diff"
-                    print *, sum(full_cg1_kmp - full_cg1_kqmp)
                     !stop
                   end if
+
+                 !if (.not. fxphas_and_cmp(npw_k, nspinor, 1, istwfk1, full_cg1_kmp, full_cg1_kqmp, [zero], msg, &
+                 !                         atol_rho=tol3, atol_dphi=tol6)) then
+                 !  print *, "fxphas for ib_sum", ib_sum
+                 !  ABI_WARNING(sjoin("wavefunctions cg1 are not the same within a phase", ch10, msg))
+                 !end if
 
                  if (sum(abs(full_ur1_star_kmp - full_ur1_kqmp)) > tol14) then
                     print *, "full_ur1_kmpq diff"
                     print *, sum(abs(full_ur1_star_kmp - full_ur1_kqmp))
+                    !print *, "full_ur1_star_kmp(1:5)", full_ur1_star_kmp(1:5)
+                    !print *, "full_ur1_kqmp(1:5)",     full_ur1_kqmp(1:5)
                     !stop
                   end if
 

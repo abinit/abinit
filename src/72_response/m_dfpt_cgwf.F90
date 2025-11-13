@@ -1566,7 +1566,6 @@ end subroutine dfpt_cgwf
 !! full_active_wf1
 !!
 !! FUNCTION
-!! Response function calculation only:
 !! Restore the full "active space" contribution to the 1st-order wavefunctions.
 !! The 1st-order WF corrected in this way will no longer be orthogonal to the other occupied states.
 !! This routine will be only used in a non self-consistent calculation of the
@@ -1840,7 +1839,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  complex(gwp),allocatable :: cwork_sp(:)
  logical :: cycle_bands(stern%nband)
 #ifdef HAVE_GW_DPC
- complex(gwp),pointer :: full_ug1_dp_ptr(:)
+ complex(dp),pointer :: full_ug1_dp_ptr(:)
 #endif
 ! *************************************************************************
 
