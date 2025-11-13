@@ -37,6 +37,7 @@ module m_gstore_sigmaph
  use m_numeric_tools,  only : arth, c2r
  use m_time,           only : cwtime, cwtime_report
  use m_fstrings,       only : tolower, itoa, ftoa, sjoin, ktoa, ltoa, strcat, replace_ch0, yesno, string_in
+ use m_special_funcs,  only : gaussian
  use m_cgtools,        only : cg_zgemm, cg_zdotc
  use m_kg,             only : getph
  use defs_datatypes,   only : pseudopotential_type
@@ -148,18 +149,38 @@ module m_gstore_sigmaph
    ! Sigma_eph(omega, kT, band)
    ! enk_KS corresponds to nwr/2 + 1.
 
+  integer :: phmesh_size
+   ! Number of phonon frequencies in phonon mesh used for Eliashberg functions and
+   ! and other omega-resolved quantities.
+
+  real(dp),allocatable :: phmesh(:)
+   ! phmesh(phmesh_size)
+   ! phonon mesh in Ha.
+
+  real(dp),allocatable :: gfw_vals(:,:,:,:)
+   ! gfw_vals(phmesh_size, 3, nb_k, nkcalc)
+   ! Generalized Eliashberg function a2F_{n,k,spin}(w)
+   !     1: |g(k,q)|^2 with delta(e_\nk - e_{m\kq})
+   !     2: Fan-Migdal in the adiabatic approximation
+   !     3: DW contribution in the adiabatic approximation.
+   ! This array depends on (ikcalc, spin)
+
+  integer :: a2f_ne = 0
+   ! Number of points in a2f_emesh
+
+  real(dp),allocatable :: a2f_emesh(:)
+   ! a2f_emesh(a2f_ne)
+   ! Energy mesh for electrons
+
+  real(dp),allocatable :: a2few(:,:,:,:)
+   ! a2few(a2f_ne, phmesh_size, nb_k, glob_nk)
+   ! FM Eliashberg function a2f_\nk(e, w) = \sum_{mq} |g(k,q)|^2 delta(e - e_{m\kq}) delta(w - w_\qnu}
+   ! This array depends on (ikcalc, spin) and is computed only if prteliash == 3
+
   real(dp),allocatable :: wrmesh_b(:,:,:)
    ! wrmesh_b(nwr, nb_k, glob_nk)
    ! Frequency mesh along the real axis (Ha units) used for the different bands
    ! Each mesh is **centered** on the corresponding KS energy.
-
-  !integer :: phmesh_size
-   ! Number of phonon frequencies in phonon mesh used for Eliashberg functions and
-   ! and other omega-resolved quantities.
-
-  !real(dp),allocatable :: phmesh(:)
-   ! phmesh(phmesh_size)
-   ! phonon mesh in Ha.
 
  contains
 
@@ -229,7 +250,7 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
 !Local variables-------------------------------
  integer,parameter :: master = 0, with_cplex1 = 1, cplex1 = 1, pawread0 = 0, ndat1 = 1, istwfk_1 = 1
  integer,parameter :: LOG_MODQ = 100, LOG_MODK = 1
- integer :: n1, n2, n3, n4, n5, n6, nb_k, nb_kq, glob_nk, ntemp, cplex, my_npert, use_lgk
+ integer :: n1, n2, n3, n4, n5, n6, nb_k, nb_kq, glob_nk, ntemp, cplex, my_npert, use_lgk, iw
  integer :: spin, my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, gap_err, my_rank, ip1, ip2, nu, ipc, idir, ipert
  integer :: it, ik_ibz, ikq_ibz, band_k, band_kq, timrev_k, ii, ikcalc, natom, natom3, nsppol, nspden, nspinor, nkpt !,ik_bz
  integer :: isym_k,isym_kq,trev_k,trev_kq
@@ -237,6 +258,7 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
  integer :: usecprj, mpw, ibsum_kq, band_me, u1_band, ncid, ncerr
  real(dp) :: wqnu, gkq2, weight_q, eig0nk, eig0mk, eig0mkq, ediff, gmod2, hmod2, gdw2, rfact, gdw2_stern !, rtmp !,nqnu,gkq2,gkq2_pf,
  real(dp) :: cpu_kk, wall_kk, gflops_kk, cpu_qq, wall_qq, gflops_qq, cpu_all, wall_all, gflops_all
+ real(dp) :: estep
  logical :: q_is_gamma, intra_band, same_band, isirr_k, isirr_kq, stern_use_cache, print_time_kk, print_time_qq
  complex(dp) :: cfact !, sig_cplx
  character(len=5000) :: msg, qq_bz_string !, kk_string
@@ -258,6 +280,8 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
  real(dp) :: kk(3), kk_ibz(3), kq_ibz(3), qpt(3), kq(3), fermie1_idir_ipert(3,cryst%natom), dotri(2)
  real(dp),allocatable :: vtrial(:,:), work(:,:,:,:), kinpw_k(:), kinpw_kq(:),kpg_kq(:,:),kpg_k(:,:)
  real(dp),allocatable :: ffnl_k(:,:,:,:),ffnl_kq(:,:,:,:),ph3d_k(:,:,:),ph3d_kq(:,:,:),v1scf(:,:,:,:)
+ real(dp),allocatable :: dtw_weights(:,:),dt_tetra_weights(:,:,:),dwargs(:) !,alpha_mrta(:)
+ real(dp),allocatable :: delta_e_minus_emkq(:) ! gkq2_lr(:,:,:)
  real(dp) :: displ_red_nu(2, 3, cryst%natom)
  real(dp),allocatable :: cg1s_kq(:,:,:,:), h1kets_kq_allperts(:,:,:,:)
  real(dp) :: vec_natom3(2, 3*cryst%natom) ! zpr_frohl_sphcorr(3*cryst%natom),
@@ -448,6 +472,32 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
    ABI_MALLOC(gbound_kq, (2*wfd%mgfft+8, 2))
  end if ! eph_stern /= 0
 
+ ! Compute phonon frequency mesh.
+ call ifc%get_phmesh(dtset%ph_wstep, sigma%phmesh_size, sigma%phmesh)
+
+ sigma%a2f_ne = 0
+ if (dtset%prteliash == 3) then
+   ! TODO: dosdeltae should have a default value.
+   ! TODO: Use logmesh/double mesh for electrons?
+   estep = dtset%dosdeltae; if (estep <= zero) estep = 0.05 * eV_Ha
+   sigma%a2f_ne = nint((maxval(ebands%eig) - minval(ebands%eig)) / estep) + 1
+   if (my_rank == master) then
+     write(std_out, *)" Computing a2f with ", sigma%a2f_ne, " points for electrons and ", sigma%phmesh_size, " points for phonons."
+     write(std_out, *)" doseltae:", estep, ", tsmear:", dtset%tsmear
+   end if
+   ABI_MALLOC(sigma%a2f_emesh, (sigma%a2f_ne))
+   sigma%a2f_emesh = arth(minval(ebands%eig), estep, sigma%a2f_ne)
+ end if
+
+ ! Allocate workspace arrays for Eliashberg functions
+ if (dtset%prteliash /= 0) then
+   ABI_MALLOC(dtw_weights, (sigma%phmesh_size, 2))
+   ABI_MALLOC(dwargs, (sigma%phmesh_size))
+   if (sigma%a2f_ne > 0) then
+     ABI_MALLOC(delta_e_minus_emkq, (sigma%a2f_ne))
+   end if
+ end if
+
  ! Allocate work space arrays used inside the loops. Then we are ready to go!
  ntemp = sigma%ntemp
  ABI_MALLOC(nqnu_t, (ntemp))
@@ -470,9 +520,9 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
 
    ! Add dimensions.
    ncerr = nctk_def_dims(ncid, [ &
-     nctkdim_t("nsppol", nsppol), nctkdim_t("ntemp", ntemp), nctkdim_t("natom3", 3 * natom3) &
+     nctkdim_t("nsppol", nsppol), nctkdim_t("ntemp", ntemp), nctkdim_t("natom3", 3 * natom3), &
      !nctkdim_t("glob_nk", sigma%glob_nk), nctkdim_t("max_nbcalc", sigma%max_nbcalc), &
-     !nctkdim_t("phmesh_size", sigma%phmesh_size), &
+     nctkdim_t("phmesh_size", sigma%phmesh_size) &
      !nctkdim_t("nqibz", sigma%nqibz), nctkdim_t("nqbz", sigma%nqbz)
      ], &
      defmode=.True.)
@@ -481,9 +531,9 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
    if (sigma%nwr > 0) then
      NCF_CHECK(nctk_def_dims(ncid, [nctkdim_t("nwr", sigma%nwr)]))
    end if
-   !if (dtset%prteliash == 3) then
-   !  NCF_CHECK(nctk_def_dims(ncid, [nctkdim_t("a2f_ne", sigma%a2f_ne)]))
-   !end if
+   if (dtset%prteliash == 3) then
+     NCF_CHECK(nctk_def_dims(ncid, [nctkdim_t("a2f_ne", sigma%a2f_ne)]))
+   end if
 
    !ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
    !  "symsigma", "nbsum", "bsum_start", "bsum_stop", "symdynmat", &
@@ -583,6 +633,16 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
      ABI_CALLOC(sigma%vals_wr, (sigma%nwr, ntemp, nb_k, glob_nk))
      ABI_CALLOC(sigma%wrmesh_b, (sigma%nwr, nb_k, glob_nk))
      ABI_MALLOC(cfact_wr, (sigma%nwr))
+   end if
+
+   ! Prepare calculation of generalized Eliashberg functions
+   ! prteliash == 0 deactivates computation (default).
+   if (dtset%prteliash /= 0) then
+     ABI_MALLOC(sigma%gfw_vals, (sigma%phmesh_size, 3, nb_k, glob_nk))
+   end if
+
+   if (dtset%prteliash == 3) then
+     ABI_CALLOC(sigma%a2few, (sigma%a2f_ne, sigma%phmesh_size, nb_k, glob_nk))
    end if
 
    ABI_CALLOC(stern_dw, (2, natom3, natom3, nb_k))
@@ -780,6 +840,11 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
 
          nqnu_t(:) = occ_be(wqnu, sigma%kTmesh, zero)
 
+         if (dtset%prteliash /= 0) then
+           dwargs = sigma%phmesh - wqnu
+           dtw_weights(:, 1) = gaussian(dwargs, dtset%ph_smear)
+         end if
+
          if (dtset%eph_stern /= 0) then
            ! Compute T_pp'(q,nu) matrix in reduced coordinates.
            call phdispl_cart2red_nmodes(natom, 1, cryst%gprimd, gqk%my_displ_cart(:,:,:,my_ip,my_iq), displ_red_nu)
@@ -791,6 +856,10 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
            band_kq = im_kq + gqk%bstart_kq - 1
            eig0mkq = ebands%eig(band_kq, ikq_ibz, spin)
            eig0mk = ebands%eig(band_kq, ik_ibz, spin)
+
+           if (dtset%prteliash == 3) then
+             delta_e_minus_emkq = gaussian(sigma%a2f_emesh - eig0mkq, dtset%tsmear)
+           end if
 
            ! Compute electronic occupations for all Temps (note mu_e(it) Fermi level)
            do it=1,ntemp
@@ -813,6 +882,7 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
                cfact_t(:) =  (two * nqnu_t + one) / (eig0nk - eig0mkq + sigma%ieta)
              end if
 
+             ! Note the weight_q included in gkq2
              gkq2 = weight_q * gqk%my_g2(my_ip, im_kq, my_iq, in_k, my_ik)
              cfact_t = cfact_t * gkq2
 
@@ -905,6 +975,39 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
                end do
              end if
 
+             ! Optionally, accumulate contribution to Eliashberg functions
+             if (dtset%prteliash /= 0) then
+               ! EPH strength with delta(e_{nk} - e_{m\kq})
+               !rfact = gaussian(eig0nk - eig0mkq, dtset%tsmear)
+               !sigma%gf_nnuq(ib_k, nu, iq_ibz_k, 1) = sigma%gf_nnuq(ib_k, nu, iq_ibz_k, 1) + &
+               !     rfact * (gkq_nu(1, ib_k, nu) ** 2 + gkq_nu(2, ib_k, nu) ** 2)
+
+               !! Treat contribution to Eliashberg function due to Fan term.
+               !if (ediff > wqnu) then
+               !   rfact = one / ediff
+               !else
+               !  ! Non adiabatic regime --> Add complex shift.
+               !  ! Note however that the expression for this flavor of Eliashberg function relies on adiabaticity.
+               !  rfact = real(one / (ediff + sigma%ieta))
+               !end if
+
+               !gf_val = gkq_nu(1, ib_k, nu) ** 2 + gkq_nu(2, ib_k, nu) ** 2
+               !if (intra_band .and. sigma%frohl_model == 1) then
+               !  gf_val = zero; if (same_band) gf_val = zpr_frohl_sphcorr(nu) * (four_pi / three * q0rad ** 3)
+               !end if
+
+               !sigma%gf_nnuq(ib_k, nu, iq_ibz_k, 2) = sigma%gf_nnuq(ib_k, nu, iq_ibz_k, 2) + gf_val * rfact
+               ! TODO: Add Sternheimer contribution
+
+               if (dtset%prteliash == 3) then
+                 ! Accumulate: |g(k,q)|^2 delta(e - e_{m\kq}) delta(w - w_\qnu}
+                 do iw=1,sigma%phmesh_size
+                   sigma%a2few(:, iw, in_k, ikcalc) = sigma%a2few(:, iw, in_k, ikcalc) + &
+                      delta_e_minus_emkq(:) * dtw_weights(iw, 1) * gkq2
+                 end do
+               end if
+             end if  ! prteliash /= 0
+
            end do ! in_k
          end do ! im_kq
        end do ! my_ip
@@ -958,6 +1061,9 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
  ABI_SFREE(gbound_kq)
  ABI_SFREE(tpp_red)
  ABI_SFREE(work)
+ ABI_SFREE(dtw_weights)
+ ABI_SFREE(dwargs)
+ ABI_SFREE(delta_e_minus_emkq)
 
  call wfd%free(); call gstore%free(); call sigma%free(); call gs_ham_kq%free()
 
@@ -1014,8 +1120,8 @@ subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, eb
 !arrays
  integer,allocatable :: degblock(:,:)
  real(dp) :: kcalc(3)
- real(dp) :: qp_gaps(sigma%ntemp),qpoms_gaps(sigma%ntemp) !, gfw_avg(sigma%phmesh_size, 3)
- real(dp),allocatable :: aw(:,:,:) !, a2few_avg(:,:), gather_srate(:,:,:,:), grp_srate(:,:,:,:)
+ real(dp) :: qp_gaps(sigma%ntemp),qpoms_gaps(sigma%ntemp), gfw_avg(sigma%phmesh_size, 3)
+ real(dp),allocatable :: aw(:,:,:), a2few_avg(:,:) !, gather_srate(:,:,:,:), grp_srate(:,:,:,:)
  real(dp) :: ks_enes(gqk%nb_k), ze0_vals(sigma%ntemp, gqk%nb_k)
  complex(dp) :: qpoms_enes(sigma%ntemp, gqk%nb_k),qp_enes(sigma%ntemp, gqk%nb_k)
 !! *************************************************************************
@@ -1081,28 +1187,34 @@ subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, eb
    NCF_CHECK(ncerr)
  end if
 
- !if (dtset%prteliash /= 0) then
- !  ncerr = nctk_def_arrays(spin_ncid, [ &
- !    nctkarr_t("gfw_vals", "dp", "phmesh_size, three, nb_k, glob_nk") &
- !  ])
- !  NCF_CHECK(ncerr)
- !  if (dtset%prteliash == 3) then
- !    ncerr = nctk_def_arrays(ncid, [ &
- !      nctkarr_t("a2f_emesh", "dp", "a2f_ne"), &
- !      nctkarr_t("a2few", "dp", "a2f_ne, phmesh_size, nb_k, glob_nk") &
- !    ])
- !    NCF_CHECK(ncerr)
- !  end if
- !end if
+ if (dtset%prteliash /= 0) then
+   ncerr = nctk_def_arrays(spin_ncid, [ &
+     nctkarr_t("gfw_vals", "dp", "phmesh_size, three, nb_k, glob_nk") &
+   ])
+   NCF_CHECK(ncerr)
+   if (dtset%prteliash == 3) then
+     ncerr = nctk_def_arrays(spin_ncid, [ &
+       nctkarr_t("a2f_emesh", "dp", "a2f_ne"), &
+       nctkarr_t("a2few", "dp", "a2f_ne, phmesh_size, nb_k, glob_nk") &
+     ])
+     NCF_CHECK(ncerr)
+   end if
+ end if
 
  ! Write data.
- !NCF_CHECK(nctk_set_datamode(spin_ncid))
+ NCF_CHECK(nctk_set_datamode(spin_ncid))
  NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("vals_e0ks"), c2r(sigma%vals_e0ks)))
  NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("fan_vals"), c2r(sigma%fan_vals)))
  NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("fan_stern_vals"), c2r(sigma%fan_stern_vals)))
  NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("dvals_de0ks"), c2r(sigma%dvals_de0ks)))
  NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("dw_vals"), sigma%dw_vals))
  NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("dw_stern_vals"), sigma%dw_stern_vals))
+ if (dtset%prteliash /=0) then
+   NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("gfw_vals"), sigma%gfw_vals))
+ end if
+ if (dtset%prteliash == 3) then
+   NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("a2f_emesh"), sigma%a2f_emesh))
+ end if
 
  ! Write legend.
  if (spin == 1) then
@@ -1127,6 +1239,10 @@ subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, eb
 
  ! Compute QP energies and Gaps (Note that I'm assuming a non-magnetic semiconductor!)
  ib_val = nint(ebands%nelect / (two / ebands%nspinor)); ib_cond = ib_val + 1
+
+ if (sigma%a2f_ne > 0) then
+   ABI_MALLOC(a2few_avg, (sigma%a2f_ne, sigma%phmesh_size))
+ end if
 
  do ikcalc=1,gqk%glob_nk
    ik_bz = gstore%kglob2bz(ikcalc, spin)
@@ -1163,6 +1279,20 @@ subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, eb
        associate (bids => degtab%bids(ideg)%vals)
        nstates = size(bids)
 
+       ! Symmetrize Eliashberg functions
+       if (dtset%prteliash > 0) then
+         gfw_avg = sum(sigma%gfw_vals(:, :, bids(:), ikcalc), dim=3) / nstates
+         do ii=1,nstates
+           sigma%gfw_vals(:, :, bids(ii), ikcalc) = gfw_avg
+         end do
+         if (sigma%a2f_ne > 0) then
+            a2few_avg = sum(sigma%a2few(:, :, bids(:), ikcalc), dim=3) / nstates
+            do ii=1,nstates
+              sigma%a2few(:, :, bids(ii), ikcalc) = a2few_avg
+            end do
+         end if
+       end if
+
        do it=1,sigma%ntemp
          ! Average QP(T) and Z(T).
          cavg1 = sum(sigma%vals_e0ks(it, bids(:), ikcalc)) / nstates
@@ -1190,7 +1320,6 @@ subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, eb
              end do
            end do
          end if
-
        end do ! it
        end associate
      end do ! ideg
@@ -1331,18 +1460,18 @@ subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, eb
    end if
 
    if (dtset%prtvol > 0 .and. (ikcalc == 1)) then
-     !if (allocated(sigma%gfw_vals)) then
-     !  write(ab_out, "(2a)")" omega and Eliashberg function gf_{nk}(omega) for testing purposes:"
-     !  iw = (sigma%phmesh_size / 2)
-     !  do in_k=1,min(sigma%nbcalc_ks(ikcalc, spin), 5)
-     !    band_k = in_k + bstart_k - 1
-     !    write(ab_out, "(a, i0)")"For band:", band_k
-     !    do jj=0,1
-     !      write(ab_out, "(4(f8.3,2x))")sigma%phmesh(iw+jj), (sigma%gfw_vals(iw+jj, ii, in_k), ii=1,3)
-     !    end do
-     !  end do
-     !  write(ab_out, "(a)")ch10
-     !end if
+     if (allocated(sigma%gfw_vals)) then
+       write(ab_out, "(2a)")" omega and Eliashberg function gf_{nk}(omega) for testing purposes:"
+       iw = (sigma%phmesh_size / 2)
+       do in_k=1,min(gqk%nb_k, 5)
+         band_k = in_k + bstart_k - 1
+         write(ab_out, "(a, i0)")"For band:", band_k
+         do jj=0,1
+           write(ab_out, "(4(f8.3,2x))")sigma%phmesh(iw+jj), (sigma%gfw_vals(iw+jj, ii, in_k, ikcalc), ii=1,3)
+         end do
+       end do
+       write(ab_out, "(a)")ch10
+     end if
 
      if (sigma%nwr >= 3) then
        write(ab_out, "(2a)")ch10," omega and Sigma_nk(omega, T=1) in eV for testing purposes:"
@@ -1364,6 +1493,8 @@ subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, eb
    write(ab_out, "(a,i0,a)")" No more than ", max_ntemp, " temperatures are written to the main output file."
    write(ab_out, "(2a)")" Please use the GSEPH.nc file and AbiPy to analyze the results.",ch10
  end if
+
+ ABI_SFREE(a2few_avg)
 
 contains
  integer function vid_spin(var_name)
@@ -1401,6 +1532,11 @@ subroutine sep_free(sigma)
  ABI_SFREE(sigma%dw_stern_vals)
  ABI_SFREE(sigma%vals_wr)
  ABI_SFREE(sigma%wrmesh_b)
+
+ ABI_SFREE(sigma%phmesh)
+ ABI_SFREE(sigma%gfw_vals)
+ ABI_SFREE(sigma%a2f_emesh)
+ ABI_SFREE(sigma%a2few)
 
 end subroutine sep_free
 !!***
