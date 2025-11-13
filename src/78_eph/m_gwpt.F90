@@ -1811,17 +1811,36 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                  end if
 
                  ! DEBUG
-                 if (qq_is_gamma .and. im_kq <= 10  .and. in_k <= 10 .and. ipp_bz == 2 .and. ib_sum == 1 .and. my_rank == master) then
+                 if (qq_is_gamma .and. im_kq <= 10  .and. in_k <= 10 .and. ipp_bz == 1 .and. ib_sum == 1 .and. my_rank == master) then
                    ! kk is gamma
                    if (sum(kk**2) < tol14) then
-                   print '(A7, A7, A7, A7, A7, A7)', 'my_is', 'im_kq', 'in_k', 'ipp_bz', 'ib_sum', 'ipc'
-                   print '(I7, I7, I7, I7, I7, I7)', my_is,  im_kq,  in_k,  ipp_bz,  ib_sum,  ipc
+                   !print '(A7, A7, A7, A7, A7, A7)', 'my_is', 'im_kq', 'in_k', 'ipp_bz', 'ib_sum', 'ipc'
+                   !print '(I7, I7, I7, I7, I7, I7)', my_is,  im_kq,  in_k,  ipp_bz,  ib_sum,  ipc
                    !print *, "gsig_atm(:, im_kq, in_k, ipc):", gsig_atm(:, im_kq, in_k, ipc)
-                   print *, "gks_atm(:, im_kq, in_k, ipc):", gks_atm(:, im_kq, in_k, ipc)
-                   print *, "gks_atm2(:, im_kq, in_k, ipc):", gks_atm2(:, im_kq, in_k, ipc)
+                   !print *, "gks_atm(:, im_kq, in_k, ipc):", gks_atm(:, im_kq, in_k, ipc)
+                   !print *, "gks_atm2(:, im_kq, in_k, ipc):", gks_atm2(:, im_kq, in_k, ipc)
                    print *, ' '
-                   end if
+
+                 if (sum(stern_kqmp%cgq - stern_kmp%cgq) > tol14) then
+                    print *, "Sternheimer cgq diff"
+                    print *, sum(stern_kqmp%cgq - stern_kmp%cgq)
+                    stop
                  end if
+
+                 if (sum(full_cg1_kmp - full_cg1_kqmp) > tol14) then
+                    print *, "full_cg1_kmpq diff"
+                    print *, sum(full_cg1_kmp - full_cg1_kqmp)
+                    !stop
+                  end if
+
+                 if (sum(abs(full_ur1_star_kmp - full_ur1_kqmp)) > tol14) then
+                    print *, "full_ur1_kmpq diff"
+                    print *, sum(abs(full_ur1_star_kmp - full_ur1_kqmp))
+                    !stop
+                  end if
+
+                end if
+                end if
 
                end do ! n_k
              end do ! m_kq
