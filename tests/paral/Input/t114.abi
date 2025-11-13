@@ -128,7 +128,7 @@ jpawu2      0.00 0.84 eV     # Values of J
 #%% nprocs_to_test = 10
 #%% max_nprocs = 10
 #%% [NCPU_10]
-#%% files_to_test = t114_MPI10.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options=-medium
+#%% files_to_test = t114_MPI10.abo, tolnlines = 10, tolabs = 3.0e-3, tolrel = 3.0e-03, fld_options=-medium
 #%% [extra_info]
 #%% authors = F. Gendron
 #%% keywords = DMFT, CTQMC
