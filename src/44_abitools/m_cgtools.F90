@@ -4389,7 +4389,6 @@ logical function fxphas_and_cmp(npw_k, nspinor, nband_k, istwfk, cg1, cg2, eig_k
  integer :: ipw, ipwsp, isp, mcg, band
  real(dp) :: phi1, rho1, phi2, rho2, max_rho_adiff, atol_rho__, phi_diff_ref, max_dphi_adiff, atol_dphi__, gsc(0,0)
  character(len=500) :: btype
-
 ! ***********************************************************************
 
  atol_rho__ = tol6; if (present(atol_rho)) atol_rho__ = atol_rho
@@ -4400,26 +4399,28 @@ logical function fxphas_and_cmp(npw_k, nspinor, nband_k, istwfk, cg1, cg2, eig_k
  call fxphas_seq(cg1, gsc, 1, 1, istwfk, mcg, mgsc, nband_k, npw_k * nspinor, useoverlap0)
  call fxphas_seq(cg2, gsc, 1, 1, istwfk, mcg, mgsc, nband_k, npw_k * nspinor, useoverlap0)
 
+#if 0
  do band=1,nband_k
    call band_type(band, btype)
    if (btype == "degenerate") cycle
-   write(234, *)"band: ", band, "istwfk: ", istwfk, trim(btype)
-   write(235, *)"band: ", band, "istwfk:", istwfk, trim(btype)
-   write(234, *)"cg1:"; write(235, *)"cg2:"
+   !write(234, *)"band: ", band, "istwfk: ", istwfk, trim(btype)
+   !write(235, *)"band: ", band, "istwfk:", istwfk, trim(btype)
+   !write(234, *)"cg1:"; write(235, *)"cg2:"
    !write(234, *)"cg1 rho:"; write(235, *)"cg2 rho phi:"
    do isp=1,nspinor
      do ipw=1,npw_k
        ipwsp = ipw + (isp - 1) * npw_k
-       if (npw_k > 15 .and. ipw > 15 .and. ipw < npw_k - 15) cycle
+       !if (npw_k > 15 .and. ipw > 15 .and. ipw < npw_k - 15) cycle
        !write(234, *)ipwsp, cg1(1, ipwsp, band); write(234, *)ipwsp, cg1(2, ipwsp, band)
        !write(235, *)ipwsp, cg2(1, ipwsp, band); write(235, *)ipwsp, cg2(2, ipwsp, band)
        call rhophi(cg1(:, ipwsp, band), phi1, rho1)
        call rhophi(cg2(:, ipwsp, band), phi2, rho2)
-       write(234, *)ipwsp, rho1!; write(234, *)ipwsp, phi1
-       write(235, *)ipwsp, rho2!; write(235, *)ipwsp, phi2
+       !write(234, *)ipwsp, rho1!; write(234, *)ipwsp, phi1
+       !write(235, *)ipwsp, rho2!; write(235, *)ipwsp, phi2
      end do
    end do
  end do
+#endif
 
  do band=1,nband_k
    do ipw=1,npw_k * nspinor
