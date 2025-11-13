@@ -1818,52 +1818,31 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
                  ! DEBUG
                  !if (qq_is_gamma .and. im_kq <= 10  .and. in_k <= 10 .and. ipp_bz == 1 .and. ib_sum == 1 .and. my_rank == master) then
-                 if (qq_is_gamma .and. ipp_bz == 1 .and. my_rank == master) then
-                   ! kk is gamma
-                   if (sum(kk**2) < tol14) then
-                   !print '(A7, A7, A7, A7, A7, A7)', 'my_is', 'im_kq', 'in_k', 'ipp_bz', 'ib_sum', 'ipc'
-                   !print '(I7, I7, I7, I7, I7, I7)', my_is,  im_kq,  in_k,  ipp_bz,  ib_sum,  ipc
-                   !print *, "gsig_atm(:, im_kq, in_k, ipc):", gsig_atm(:, im_kq, in_k, ipc)
-                   !print *, "gks_atm(:, im_kq, in_k, ipc):", gks_atm(:, im_kq, in_k, ipc)
-                   !print *, "gks_atm2(:, im_kq, in_k, ipc):", gks_atm2(:, im_kq, in_k, ipc)
-                   print *, ' '
+                 !if (qq_is_gamma .and. ipp_bz == 1 .and. sum(kk**2) < tol14 .and. my_rank == master) then
+                 !  ! kk is gamma
+                 !  !print '(A7, A7, A7, A7, A7, A7)', 'my_is', 'im_kq', 'in_k', 'ipp_bz', 'ib_sum', 'ipc'
+                 !  !print '(I7, I7, I7, I7, I7, I7)', my_is,  im_kq,  in_k,  ipp_bz,  ib_sum,  ipc
+                 !  !print *, "gsig_atm(:, im_kq, in_k, ipc):", gsig_atm(:, im_kq, in_k, ipc)
+                 !  !print *, "gks_atm(:, im_kq, in_k, ipc):", gks_atm(:, im_kq, in_k, ipc)
+                 !  !print *, "gks_atm2(:, im_kq, in_k, ipc):", gks_atm2(:, im_kq, in_k, ipc)
+                 !  !print *, ' '
 
-                 if (sum(abs(stern_kqmp%cgq - stern_kmp%cgq)) > tol14) then
-                    print *, "Sternheimer cgq diff"
-                    print *, sum(abs(stern_kqmp%cgq - stern_kmp%cgq))
-                    stop
-                 end if
+                 !  if (sum(abs(stern_kqmp%cgq - stern_kmp%cgq)) > tol14) then
+                 !    print *, "Sternheimer cgq diff", sum(abs(stern_kqmp%cgq - stern_kmp%cgq)); stop
+                 !  end if
 
-                 if (sum(abs(cg_kmp - cg_kqmp)) > tol14) then
-                    print *, "Sternheimer cg_kmp diff"
-                    print *, (sum(abs(cg_kmp - cg_kqmp)) > tol14)
-                    stop
-                 end if
+                 !  if (sum(abs(cg_kmp - cg_kqmp)) > tol14) then
+                 !    print *, "Sternheimer cg_kmp diff", sum(abs(cg_kmp - cg_kqmp)); stop
+                 !  end if
 
-                 if (sum(abs(full_cg1_kmp - full_cg1_kqmp)) > tol14) then
-                    print *, sum(abs(full_cg1_kmp - full_cg1_kqmp))
-                    print *, "full_cg1_kmp(1:2, 1:5)", full_cg1_kmp(1:2,1:5)
-                    print *, "full_cg1_kqmp(1:2, 1:5)", full_cg1_kqmp(1:2, 1:5)
-                    print *, "full_cg1_kmpq diff"
-                    !stop
-                  end if
+                 !  if (sum(abs(full_cg1_kmp - full_cg1_kqmp)) > tol14) then
+                 !    print *, sum(abs(full_cg1_kmp - full_cg1_kqmp)); stop
+                 !  end if
 
-                 !if (.not. fxphas_and_cmp(npw_k, nspinor, 1, istwfk1, full_cg1_kmp, full_cg1_kqmp, [zero], msg, &
-                 !                         atol_rho=tol3, atol_dphi=tol6)) then
-                 !  print *, "fxphas for ib_sum", ib_sum
-                 !  ABI_WARNING(sjoin("wavefunctions cg1 are not the same within a phase", ch10, msg))
+                 !  if (sum(abs(full_ur1_star_kmp - full_ur1_kqmp)) > tol14) then
+                 !    print *, "full_ur1_kmpq diff", sum(abs(full_ur1_star_kmp - full_ur1_kqmp)); stop
+                 !  end if
                  !end if
-
-                 if (sum(abs(full_ur1_star_kmp - full_ur1_kqmp)) > tol14) then
-                    print *, "full_ur1_kmpq diff"
-                    print *, sum(abs(full_ur1_star_kmp - full_ur1_kqmp))
-                    !print *, "full_ur1_star_kmp(1:5)", full_ur1_star_kmp(1:5)
-                    !print *, "full_ur1_kqmp(1:5)",     full_ur1_kqmp(1:5)
-                    !stop
-                  end if
-
-                end if
-                end if
 
                end do ! n_k
              end do ! m_kq
@@ -1929,11 +1908,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        !print *, "gsig_atm(:, 1, 1, 1):", gsig_atm(:, 1, 1, 1)
 
        if (dtset%useria == 0) then
-        gsig_atm = gsig_atm + gks_atm - gxc_atm
+         gsig_atm = gsig_atm + gks_atm - gxc_atm
        else if (dtset%useria > 0) then
-        gsig_atm = gxc_atm
+         gsig_atm = gxc_atm
        else if (dtset%useria < 0) then
-        gsig_atm = gsig_atm
+         gsig_atm = gsig_atm
        end if
 
        !print *, "gks_atm(:, 1, 1, 1) - gxc_atm(:, 1, 1, 1):",  gks_atm(:, 1, 1, 1) - gxc_atm(:, 1, 1, 1)
