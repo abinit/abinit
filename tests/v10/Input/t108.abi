@@ -3,6 +3,8 @@
 # -                                      -
 # -         Alu fcc                      -
 # ----------------------------------------
+# 0 dtsets
+  ndtset 2
 
 # 1- RCPAW
   use_rcpaw 1
@@ -24,7 +26,10 @@
 # 4-Options for the choice of calculation:
 # ----------------------------------------
   occopt 3
-  tsmear 0.0036749
+  tsmear1 0.0036749
+  tsmear2 30000000.0 K
+  useextfpmd2 1
+  extfpmd_pawsph2 1
   ionmov 0
   optcell 0
 
