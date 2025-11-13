@@ -359,6 +359,12 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
     auto subspaces = h_loc_diag.n_subspaces();
     auto rho = solver.density_matrix();
 
+    // Rotate density matrix to Fock basis
+    for (int sub : range(subspaces)) {
+      auto unit_mat = h_loc_diag.get_unitary_matrix(sub);
+      rho[sub] = unit_mat * rho[sub] * dagger(unit_mat);
+    }
+
     complex<double> occ_tmp [num_orbitals] = {0};
 
     for (int iblock : range(nblocks))
@@ -388,14 +394,12 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
       for (int sub : range(subspaces)) {
         auto fock_states = h_loc_diag.get_fock_states(sub);
         int sub_dim = h_loc_diag.get_subspace_dim(sub);
-        auto unit_mat = h_loc_diag.get_unitary_matrix(sub);
-        auto rho_tmp = unit_mat * rho[sub] * dagger(unit_mat);  // rotate density matrix to Fock basis
         for (int ind : range(sub_dim)) {
           auto f_state = fock_states[ind];
 #ifdef HAVE_TRIQS_COMPLEX
-          double prob = rho_tmp(ind,ind).real();
+          double prob = rho[sub](ind,ind).real();
 #else
-          double prob = rho_tmp(ind,ind);
+          double prob = rho[sub](ind,ind);
 #endif
           f_stateb = bitset<64>(f_state);
           bitset<64> f_stateb_;
@@ -513,9 +517,10 @@ void build_dlr(int wdlr_size, int *ndlr, double *wdlr, double lam, double eps) {
   for (int i : range((*ndlr))) wdlr[i] = omega[i];
 }
 
-// This is a copy from a function of TRIQS, which I parallelized since they are not doing it and this function takes forever (E. Castiel)
+// This is a copy from a function of TRIQS, which I optimized since they are not doing it and this function takes forever (E. Castiel)
 // Please make sure it is kept up to date with the official function
-// CAREFUL: the result is not reduced on all CPUs, you have to do it manually after calling the routine
+// CAREFUL: the result is not reduced on all CPUs, you have to do it manually after calling the routine, and the density matrix is
+// assumed to be in the Fock basis, unlike the official version which assumes the eigenstate basis
 template <bool Complex>
 ATOM_DIAG_T::scalar_t trace_rho_op_paral(ATOM_DIAG_T::block_matrix_t const &density_matrix,
                                          ATOM_DIAG_T::many_body_op_t const &op,
@@ -526,13 +531,22 @@ ATOM_DIAG_T::scalar_t trace_rho_op_paral(ATOM_DIAG_T::block_matrix_t const &dens
   int itask = -1;
 
   for (int sp = 0; sp < atom.n_subspaces(); ++sp) {
-    if (atom.get_subspace_dim(sp) != first_dim(density_matrix[sp]))
+    int dim = atom.get_subspace_dim(sp);
+    if (dim != first_dim(density_matrix[sp]))
       TRIQS_RUNTIME_ERROR << "trace_rho_op : size mismatch : size of block " << sp << " differ";
     for (auto const &x : op) {
       itask = (itask+1)%nproc;
       if (itask != rank) continue;
       auto b_m = get_matrix_element_of_monomial_simplified(x.monomial, sp, atom);
-      if (b_m.first == sp) result += x.coef * trace(b_m.second * density_matrix[sp]);
+      // Compute trace of matrix product with correct complexity unlike the official version...
+      if (b_m.first == sp) {
+        ATOM_DIAG_T::scalar_t trace_p = 0;
+        for (int i = 0; i < dim; ++i)
+          for (int j = 0; j < dim; ++j)
+            trace_p += b_m.second(i,j) * density_matrix[sp](j,i);
+        result += x.coef * trace_p;
+      }
+
     }
   }
 
@@ -544,10 +558,7 @@ ATOM_DIAG_T::scalar_t trace_rho_op_paral(ATOM_DIAG_T::block_matrix_t const &dens
 
   // check if op && density matrix are hermitian, if so return real(result)
   // The product of two hermitian matrices is hermitian, hence the Tr(rho * Op)
-  // needs to be real in this case. Here, each monomial b_m is represented in the
-  // eigenbasis of atom diag. This unitary rotation should not change any of the
-  // above statements (Tr is invariant under trafo) However, the eigenbasis is obtained
-  // via LAPACK up to machine prec, introducing tiny imaginary elements. Here, we filter those.
+  // needs to be real in this case.
   // Note: Here it assumed that op & den mat are truely hermitian, 0 tolerance
   if (is_op_hermitian(op) && is_block_matrix_hermitian(density_matrix))
     return std::real(result);
@@ -557,6 +568,7 @@ ATOM_DIAG_T::scalar_t trace_rho_op_paral(ATOM_DIAG_T::block_matrix_t const &dens
 
 // Simplified version to find the matrix elements of the operators (CAREFUL: only the diagonal ones are computed, since they are the
 // only ones needed for the computation of trace_rho_op ; for the off-diagonal ones, use the official function)
+// Also, the operators are not rotated back to the eigenbasis to save up time, unlike the official version
 template <bool Complex>
 std::pair<int, matrix_t> get_matrix_element_of_monomial_simplified(operators::monomial_t const &op_vec, int B, ATOM_DIAG const &atom) {
 
@@ -591,11 +603,10 @@ std::pair<int, matrix_t> get_matrix_element_of_monomial_simplified(operators::mo
 
     })
       ;
+
   }
 
-  if (Bp == -1)
-    return {-1, std::move(m)};
-  else { return {Bp, dagger(atom.get_unitary_matrix(Bp)) * m * atom.get_unitary_matrix(B)}; }
+  return {Bp, std::move(m)};
 
 }
 
