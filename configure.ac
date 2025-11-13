@@ -278,7 +278,7 @@ ABI_FC_EXTENSIONS
 
 # Get module file case
 ABI_FC_MOD_CASE
-
+ABI_FC_MODDIR_FLAG
 # The IBM Fortran compiler crashes if the mpi module is included
 # more than once
 if test "${abi_fc_vendor}" = "ibm" -a "${abi_mpi_enable}" = "yes"; then
@@ -557,7 +557,7 @@ test "${CXX_LIBS}" = "" && \
 # Final adjustments for Fortran
 # Note: FCFLAGS_OPTIM must not be included (per-directory optimizations)
 test "${FCFLAGS}" = "" && \
-  FCFLAGS="${FCFLAGS_DEBUG} ${FCFLAGS_HINTS} ${FCFLAGS_OPENMP} ${FCFLAGS_OPENMP_OFFLOAD} ${FCFLAGS_EXTRA}"
+  FCFLAGS="${FCFLAGS_DEBUG} ${FCFLAGS_HINTS} ${FCFLAGS_OPENMP} ${FCFLAGS_OPENMP_OFFLOAD} ${FCFLAGS_EXTRA} "
 test "${FC_LDFLAGS}" = "" && \
   FC_LDFLAGS="${FC_LDFLAGS_DEBUG} ${FC_LDFLAGS_OPTIM} ${FC_LDFLAGS_HINTS} ${FC_LDFLAGS_EXTRA}"
 test "${FC_LIBS}" = "" && \

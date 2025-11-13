@@ -156,6 +156,7 @@ contains
 !!   | e_corepsp(IN)=psp core-core energy
 !!   | e_kinetic(IN)=kinetic energy part of total energy.
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
+!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
 !!  grchempottn(3,natom)=d(E_chemical potential)/d(xred) (hartree)
 !!  grcondft(3,natom)=d(E_constrainedDFT)/d(xred) (hartree)
