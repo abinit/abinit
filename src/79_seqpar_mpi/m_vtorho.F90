@@ -166,6 +166,7 @@ contains
 !!   | typat= array of types of the natoms
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation
 !!  etotal=total energy (Ha) - only needed for tddft
+!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
 !!  gbound_diel(2*mgfftdiel+8,2)=G sphere boundary for the dielectric matrix
 !!  gmet(3,3)=reciprocal space metric tensor in bohr**-2.
@@ -318,7 +319,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &           pwind,pwind_alloc,pwnsfac,results_gs,resid,residm,rhog,rhor,&
 &           rmet,rprimd,susmat,symrec,taug,taur,tauresid,&
 &           ucvol,usecprj,usevxctau,wffnew,with_vectornd,vectornd,vtrial,vxctau,wvl,&
-&           xg_nonlop,xred,ylm,ylmgr,ylmdiel, rmm_diis_status,rcpaw)
+&           xg_nonlop,xred,ylm,ylmgr,ylmdiel,rmm_diis_status,rcpaw)
 
 !Arguments -------------------------------
 !scalars
@@ -334,7 +335,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type), intent(inout) :: energies
  type(hdr_type), intent(inout) :: hdr
- type(extfpmd_type),pointer,intent(inout) :: extfpmd
+ type(extfpmd_type), pointer, intent(inout) :: extfpmd
  type(paw_dmft_type), intent(inout)  :: paw_dmft
  type(pawang_type), intent(in) :: pawang
  type(pawfgr_type), intent(in) :: pawfgr
@@ -1413,8 +1414,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      ! Compute extfpmd energy shift
      if(associated(extfpmd)) then
-       call extfpmd%compute_eshift(eigen,eknk,dtset%mband,&
-         dtset%nband,nfftf,dtset%nkpt,dtset%nsppol,dtset%nspden,dtset%wtk,vtrial)
+       call extfpmd%compute_eshift(eigen,eknk,dtset%mband,dtset%nband,&
+         nfftf,dtset%nkpt,dtset%nsppol,dtset%nspden,dtset%wtk,vtrial)
      end if
 
      ! RCPAW
@@ -1939,7 +1940,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,extfpmd=extfpmd)
      else
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
-       rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,extfpmd=extfpmd)
+       rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
      end if
 
      ABI_NVTX_END_RANGE()
@@ -2048,8 +2049,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          dtset%nsppol,dtset%nband,dtset%wtk)
        call extfpmd%compute_entropy(energies%entropy_extfpmd,energies%e_fermie,dtset%nkpt,&
          dtset%nsppol,dtset%nspinor,dtset%wtk,dtset%nband)
-       ! CHECK number of electrons integrating rhor.
-       ! write(0,*) sum(rhor(:,:))*extfpmd%ucvol/dtset%nfft
      end if
 
 !    Compute the highest occupied eigenenergy
@@ -2262,7 +2261,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call pawmkrho(1,compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
 &       my_natom,natom,dtset%nspden,dtset%nsym,ntypat,dtset%paral_kgb,pawang,pawfgr,pawfgrtab,&
 &       dtset%pawprtvol,pawrhoij,pawrhoij_unsym,pawtab,qpt,rhowfg,rhowfr,rhor,rprimd,dtset%symafm,&
-&       symrec,dtset%typat,ucvol,dtset%usewvl,xred,pawnhat=nhat,rhog=rhog)
+&       symrec,dtset%typat,ucvol,dtset%usewvl,xred,pawnhat=nhat,rhog=rhog,extfpmd=extfpmd)
        if (dtset%usekden==1) then
 !        DO WE NEED TAUG?
          call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,tauwfg,taug,tauwfr,taur)
