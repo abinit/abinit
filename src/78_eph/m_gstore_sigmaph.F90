@@ -979,8 +979,8 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
              if (dtset%prteliash /= 0) then
                ! EPH strength with delta(e_{nk} - e_{m\kq})
                !rfact = gaussian(eig0nk - eig0mkq, dtset%tsmear)
-               !sigma%gf_nnuq(ib_k, nu, iq_ibz_k, 1) = sigma%gf_nnuq(ib_k, nu, iq_ibz_k, 1) + &
-               !     rfact * (gkq_nu(1, ib_k, nu) ** 2 + gkq_nu(2, ib_k, nu) ** 2)
+               !sigma%gf_nnuq(in_k, nu, iq_ibz_k, 1) = sigma%gf_nnuq(in_k, nu, iq_ibz_k, 1) + &
+               !     rfact * (gkq_nu(1, in_k, nu) ** 2 + gkq_nu(2, in_k, nu) ** 2)
 
                !! Treat contribution to Eliashberg function due to Fan term.
                !if (ediff > wqnu) then
@@ -991,13 +991,19 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
                !  rfact = real(one / (ediff + sigma%ieta))
                !end if
 
-               !gf_val = gkq_nu(1, ib_k, nu) ** 2 + gkq_nu(2, ib_k, nu) ** 2
+               !gf_val = gkq_nu(1, in_k, nu) ** 2 + gkq_nu(2, in_k, nu) ** 2
                !if (intra_band .and. sigma%frohl_model == 1) then
                !  gf_val = zero; if (same_band) gf_val = zpr_frohl_sphcorr(nu) * (four_pi / three * q0rad ** 3)
                !end if
 
-               !sigma%gf_nnuq(ib_k, nu, iq_ibz_k, 2) = sigma%gf_nnuq(ib_k, nu, iq_ibz_k, 2) + gf_val * rfact
+               !sigma%gf_nnuq(in_k, nu, iq_ibz_k, 2) = sigma%gf_nnuq(in_k, nu, iq_ibz_k, 2) + gf_val * rfact
                ! TODO: Add Sternheimer contribution
+
+
+               ! Optionally, accumulate DW contribution to Eliashberg functions.
+               !if (abs(ediff) > EPHTK_WTOL) then
+               !  sigma%gf_nnuq(ib_k, nu, iq_ibz_k, 3) = sigma%gf_nnuq(ib_k, nu, iq_ibz_k, 3) - gdw2 / ediff
+               !end if
 
                if (dtset%prteliash == 3) then
                  ! Accumulate: |g(k,q)|^2 delta(e - e_{m\kq}) delta(w - w_\qnu}
