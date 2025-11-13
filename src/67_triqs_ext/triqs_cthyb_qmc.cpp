@@ -23,6 +23,9 @@ ATOM_DIAG_T::scalar_t trace_rho_op_paral(ATOM_DIAG_T::block_matrix_t const &dens
                                          ATOM_DIAG_T::many_body_op_t const &op, ATOM_DIAG const &atom,
                                          int rank, int nproc);
 
+template <bool Complex>
+std::pair<int, matrix_t> get_matrix_element_of_monomial_simplified(operators::monomial_t const &op_vec, int B, ATOM_DIAG const &atom);
+
 void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_double, bool measure_density_matrix,
                      bool time_invariance, bool use_norm_as_weight, bool debug, int integral, int loc_n_min, int loc_n_max,
                      int seed_a, int seed_b, int num_orbitals, int n_tau, int n_l, int n_cycles, int cycle_length,
@@ -528,7 +531,7 @@ ATOM_DIAG_T::scalar_t trace_rho_op_paral(ATOM_DIAG_T::block_matrix_t const &dens
     for (auto const &x : op) {
       itask = (itask+1)%nproc;
       if (itask != rank) continue;
-      auto b_m = atom.get_matrix_element_of_monomial(x.monomial, sp);
+      auto b_m = get_matrix_element_of_monomial_simplified(x.monomial, sp, atom);
       if (b_m.first == sp) result += x.coef * trace(b_m.second * density_matrix[sp]);
     }
   }
@@ -551,5 +554,52 @@ ATOM_DIAG_T::scalar_t trace_rho_op_paral(ATOM_DIAG_T::block_matrix_t const &dens
   else
     return result;
 }
+
+// Simplified version to find the matrix elements of the operators (CAREFUL: only the diagonal ones are computed, since they are the
+// only ones needed for the computation of trace_rho_op ; for the off-diagonal ones, use the official function)
+template <bool Complex>
+std::pair<int, matrix_t> get_matrix_element_of_monomial_simplified(operators::monomial_t const &op_vec, int B, ATOM_DIAG const &atom) {
+
+  imperative_operator<class hilbert_space, ATOM_DIAG_T::scalar_t, false> monomial_op(many_body_op_t(1.0, op_vec), atom.get_fops());
+
+  matrix_t m;
+  int Bp = -1;
+  int dim = atom.get_subspace_dim(B);
+
+  auto const &fock_states = atom.get_fock_states(B);
+
+  for (auto [i_index, i] : itertools::enumerate(fock_states)) {
+    state<class hilbert_space, ATOM_DIAG_T::scalar_t, true> initial_st(atom.get_full_hilbert_space(), i);
+
+    auto final_st = monomial_op(initial_st);
+
+    // The initializer for i_index is needed here because of the Core Language Defect #2313.
+    // https://stackoverflow.com/a/46115028
+
+    EXPECTS(final_st.nterms() <= 1);
+    foreach (final_st, [&, i_idx = i_index](fock_state_t j, ATOM_DIAG_T::scalar_t x) {
+
+      auto it = std::find(fock_states.begin(), fock_states.end(), j);
+
+      if (it != fock_states.end()) {
+
+        Bp = B;
+        if (m.empty()) { m = matrix_t::zeros({dim, dim}); }
+        m(std::distance(fock_states.begin(), it), i_idx) = x;
+
+      }
+
+    })
+      ;
+  }
+
+  if (Bp == -1)
+    return {-1, std::move(m)};
+  else { return {Bp, dagger(atom.get_unitary_matrix(Bp)) * m * atom.get_unitary_matrix(B)}; }
+
+}
+
+
+
 
 
