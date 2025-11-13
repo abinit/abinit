@@ -88,6 +88,7 @@ CONTAINS  !=====================================================================
 !!
 !! INPUTS
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation (optional argument)
+!!  extfpmd <type(extfpmd_type)>=--optional--extended first-principles molecular dynamics type
 !!  [hyb_mixing, hyb_mixing_sr]= -- optional-- mixing factors for the global (resp. screened) XC hybrid functional
 !!  el_temp=electronic temperature (hartree)
 !!  gprimd=reciprocal lattice translations
@@ -179,7 +180,7 @@ subroutine pawdenpot(compch_sph,el_temp,gprimd,ipert,ixc,my_natom,natom,nspden,n
  type(pawang_type),intent(in) :: pawang
  type(paw_energies_type),intent(out) :: paw_energies
  type(rcpaw_type),pointer,intent(inout),optional :: rcpaw
- type(extfpmd_type),pointer, intent(in), optional :: extfpmd
+ type(extfpmd_type),pointer,intent(in),optional :: extfpmd
 !arrays
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  real(dp),intent(in) :: gprimd(3,3),nucdipmom(3,natom),xred(3,natom),znucl(ntypat)
