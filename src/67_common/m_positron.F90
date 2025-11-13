@@ -103,6 +103,7 @@ contains
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  ecore=core psp energy (part of total energy) (hartree)
 !!  etotal=current value of total energy
+!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
 !!  forces_needed=if >0 forces are needed
 !!  gred(3,natom)=gradients wrt nuclear positions in reduced coordinates
