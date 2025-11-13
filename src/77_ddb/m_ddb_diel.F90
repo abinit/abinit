@@ -733,6 +733,13 @@ subroutine alignph(amu,displ,d2cart,mpert,natom,ntypat,phfrq,typat)
        vec(:,2) = displ(1,:,imode+1)
        displ(1,:,imode) = cos(theta)*vec(:,1) - sin(theta)*vec(:,2)
        displ(1,:,imode+1) = sin(theta)*vec(:,1) + cos(theta)*vec(:,2)
+
+!      MR: Rotate also the imaginary part
+       vec(:,1) = displ(2,:,imode)
+       vec(:,2) = displ(2,:,imode+1)
+       displ(2,:,imode) = cos(theta)*vec(:,1) - sin(theta)*vec(:,2)
+       displ(2,:,imode+1) = sin(theta)*vec(:,1) + cos(theta)*vec(:,2)
+
      end if
 
    else if (deg(imode) == 3) then
