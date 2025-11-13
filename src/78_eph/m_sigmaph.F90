@@ -687,8 +687,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: vtrial(:,:),gvnlx1(:,:),work(:,:,:,:), vcar_ibz(:,:,:,:)
  real(dp),allocatable :: gs1c(:,:),nqnu_tlist(:),dtw_weights(:,:),dt_tetra_weights(:,:,:),dwargs(:),alpha_mrta(:)
- real(dp),allocatable :: delta_e_minus_emkq(:), gkq_allgather(:,:,:),f_tlist_b(:,:)
- real(dp),allocatable :: gkq2_lr(:,:,:)
+ real(dp),allocatable :: delta_e_minus_emkq(:), gkq_allgather(:,:,:),f_tlist_b(:,:), gkq2_lr(:,:,:)
  complex(dp) :: cp3(3)
  complex(dp),allocatable :: osc_ks(:,:), fmw_frohl_sphcorr(:,:,:,:), cfact_wr(:), tpp_red(:,:)
  complex(gwp),allocatable :: ur_k(:,:), ur_kq(:), work_ur(:), workq_ug(:)
@@ -1093,7 +1092,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  end if
  ABI_MALLOC(nqnu_tlist, (sigma%ntemp))
 
- ! Allocate workspace arrays for Eliashberg calculation.
+ ! Allocate workspace arrays for Eliashberg functions
  if (dtset%prteliash /= 0) then
    ABI_MALLOC(dtw_weights, (sigma%phmesh_size, 2))
    ABI_MALLOC(dwargs, (sigma%phmesh_size))
@@ -4520,9 +4519,9 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
  if (self%nwr > 0) call xmpi_sum_master(self%vals_wr, master, comm, ierr)
  if (self%mrta > 0) call xmpi_sum_master(self%linewidth_mrta, master, comm, ierr)
  if (dtset%eph_prtscratew == 1) then
-    ! Collect spectral decomposition of scattering rates, multiply by two since so far we have stored Imag(Sigma) (ph_w)
-    call xmpi_sum_master(self%scratew, master, comm, ierr)
-    self%scratew = two * self%scratew
+   ! Collect spectral decomposition of scattering rates, multiply by two since so far we have stored Imag(Sigma) (ph_w)
+   call xmpi_sum_master(self%scratew, master, comm, ierr)
+   self%scratew = two * self%scratew
  end if
 
  if (dtset%ibte_prep > 0) then
@@ -4819,8 +4818,7 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
 
  call flush_unit(ab_out)
 
- ! Write self-energy matrix elements for this (kpt, spin).
- ! NB: Only master writes
+ ! Write self-energy matrix elements for this (kpt, spin). NB: Only master writes
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"), c2r(self%vals_e0ks), start=[1,1,1,ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "fan_vals"), c2r(self%fan_vals), start=[1,1,1,ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "fan_stern_vals"), c2r(self%fan_stern_vals), start=[1,1,1,ikcalc,spin]))
