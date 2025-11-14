@@ -1,5 +1,5 @@
 
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.Version 10.5.8.4 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 10 Sep 2025.
-- ( at 12h06 )
+.Starting date : Fri 14 Nov 2025.
+- ( at 21h07 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/psml_t06/t06.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/TestBot_MPI1/psml_t06/t06.abi
 - output file    -> t06.abo
 - root for input  files -> t06i
 - root for output files -> t06o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/26_Fe_oncv.psml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/Pspdir/26_Fe_oncv.psml
 - psxml2ab: ps_Number_of_Projectors not relativistic     0
 - psxml2ab: ps_Number_of_Projectors scalar relativistic     6
 - psxml2ab: ps_Projector_L     0
@@ -283,8 +283,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10453
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/26_Fe_oncv.psml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/26_Fe_oncv.psml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/Pspdir/26_Fe_oncv.psml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/Pspdir/26_Fe_oncv.psml
 - Fe    ONCVPSP-3.3.0+psml-3.3.0-72 (s
 - 26.00000  16.00000    170801                znucl, zion, pspdat
     9 -101130    2   -1        -1   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -462,19 +462,19 @@ tolerances: {toldfe: 1.00E-05, }
  ETOT  2  -117.31249140760    -1.877E+00 1.748E-02 2.579E+02 5.443E-01 9.691E-01
  ETOT  3  -117.47957939868    -1.671E-01 1.149E-02 1.184E+00 7.362E-02 1.043E+00
  ETOT  4  -117.47998977722    -4.104E-04 6.043E-05 2.939E-02 1.628E-03 1.041E+00
- ETOT  5  -117.48028367214    -2.939E-04 5.186E-06 4.844E-02 1.143E-01 1.155E+00
- ETOT  6  -117.48053247678    -2.488E-04 9.132E-06 7.610E-02 5.855E-02 1.214E+00
+ ETOT  5  -117.48028367213    -2.939E-04 5.186E-06 4.844E-02 1.143E-01 1.155E+00
+ ETOT  6  -117.48053247679    -2.488E-04 9.132E-06 7.610E-02 5.855E-02 1.214E+00
  ETOT  7  -117.48000488356     5.276E-04 1.059E-06 1.493E-02 1.721E-01 1.042E+00
  ETOT  8  -117.47998837089     1.651E-05 9.174E-07 4.243E-02 2.358E-03 1.039E+00
  ETOT  9  -117.47996571084     2.266E-05 8.133E-07 9.455E-02 2.905E-03 1.037E+00
  ETOT 10  -117.48000517622    -3.947E-05 2.991E-06 1.281E-02 5.912E-03 1.042E+00
- ETOT 11  -117.48032409091    -3.189E-04 1.466E-06 5.292E-02 1.222E-01 1.165E+00
- ETOT 12  -117.48055965106    -2.356E-04 1.260E-06 3.452E-02 5.371E-02 1.218E+00
+ ETOT 11  -117.48032409086    -3.189E-04 1.466E-06 5.292E-02 1.222E-01 1.165E+00
+ ETOT 12  -117.48055965107    -2.356E-04 1.260E-06 3.452E-02 5.371E-02 1.218E+00
  ETOT 13  -117.48056832661    -8.676E-06 1.388E-06 1.361E-02 2.098E-03 1.220E+00
- ETOT 14  -117.48055139292     1.693E-05 9.570E-07 5.204E-02 3.659E-03 1.217E+00
- ETOT 15  -117.48056193887    -1.055E-05 6.313E-07 2.887E-02 2.022E-03 1.219E+00
- ETOT 16  -117.48056508323    -3.144E-06 2.212E-07 2.100E-02 8.428E-04 1.220E+00
- ETOT 17  -117.48056733733    -2.254E-06 6.087E-07 1.535E-02 7.238E-04 1.220E+00
+ ETOT 14  -117.48055139286     1.693E-05 9.571E-07 5.204E-02 3.659E-03 1.217E+00
+ ETOT 15  -117.48056193881    -1.055E-05 6.313E-07 2.887E-02 2.022E-03 1.219E+00
+ ETOT 16  -117.48056508324    -3.144E-06 2.212E-07 2.100E-02 8.428E-04 1.220E+00
+ ETOT 17  -117.48056733716    -2.254E-06 6.087E-07 1.535E-02 7.237E-04 1.220E+00
 
  At SCF step   17, etot is converged : 
   for the second time, diff in etot=  2.254E-06 < toldfe=  1.000E-05
@@ -498,7 +498,7 @@ lattice_volume:   7.9764987E+01
 convergence: {deltae: -2.254E-06, res2:  1.535E-02, residm:  6.087E-07, diffor: null, }
 etotal    :  -1.17480567E+02
 entropy   :   0.00000000E+00
-fermie    :   7.65105642E-01
+fermie    :   7.65105664E-01
 cartesian_stress_tensor: # hartree/bohr^3
 - [  1.20712142E-01,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,   1.20712142E-01,   0.00000000E+00, ]
@@ -525,7 +525,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   80.100E-10; max=  60.871E-08
+ Mean square residual over all n,k,spin=   80.092E-10; max=  60.870E-08
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -569,18 +569,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.86823988393930E+01
-hartree             :  1.71855750082087E+01
-xc                  : -1.54917015990387E+01
+kinetic             :  3.86823989157383E+01
+hartree             :  1.71855750779460E+01
+xc                  : -1.54917016074907E+01
 Ewald energy        : -8.58893111400492E+01
 psp_core            :  2.86737692574925E+00
-local_psp           : -7.65625167246570E+01
-non_local_psp       :  1.72761092782391E+00
-internal            : -1.17480567762570E+02
-'-kT*entropy'       :  4.25244269285729E-07
-total_energy        : -1.17480567337326E+02
-total_energy_eV     : -3.19680881390655E+03
-band_energy         : -1.66355006217836E+01
+local_psp           : -7.65625168570042E+01
+non_local_psp       :  1.72761092270775E+00
+internal            : -1.17480567762403E+02
+'-kT*entropy'       :  4.25244269048632E-07
+total_energy        : -1.17480567337159E+02
+total_energy_eV     : -3.19680881390200E+03
+band_energy         : -1.66355006694105E+01
 ...
 
 
@@ -590,9 +590,9 @@ band_energy         : -1.66355006217836E+01
   sigma(3 3)=  1.20712142E-01  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -3.5515E+03 GPa]
-- sigma(1 1)=  3.55147324E+03  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  3.55147324E+03  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  3.55147324E+03  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  3.55147323E+03  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  3.55147323E+03  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  3.55147323E+03  sigma(2 1)=  0.00000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -735,7 +735,7 @@ P           mkmem          14
            spinat2     0.0000000000E+00  0.0000000000E+00  5.0000000000E+00
            strten1     1.2099746829E-01  1.2099746829E-01  1.2099746829E-01
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten2     1.2071214204E-01  1.2071214204E-01  1.2071214204E-01
+           strten2     1.2071214172E-01  1.2071214172E-01  1.2071214172E-01
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                       -1 -1 -1   0  0  1   0  1  0       1  1  1   0  0 -1   0 -1  0
@@ -865,10 +865,10 @@ P           mkmem          14
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.5  wall=          3.5
+- Proc.   0 individual time (sec): cpu=          3.5  wall=          3.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.5  wall=          3.5
++Overall time at end (sec) : cpu=          3.5  wall=          3.6
