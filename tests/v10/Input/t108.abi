@@ -19,7 +19,7 @@
 # ---------------------------------------
   ecut 10.
   pawecutdg 50.
-  nband 24
+  nband 38
   nstep 5
   toldfe 1.d-5
 
