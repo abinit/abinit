@@ -37,6 +37,15 @@ AC_DEFUN([SD_NETCDF_FORTRAN_INIT], [
   sd_netcdf_fortran_ldflags_def="$7"
   sd_netcdf_fortran_enable_def=""
 
+AC_ARG_WITH([fb-netcdf-fortran-version],
+  [AS_HELP_STRING([--with-fb-netcdf-fortran-version=VERSION],
+    [Specify the version of netcdf to use when installed via fallback])],
+  [abi_fb_netcdf_fortran_version="$withval"],
+  [abi_fb_netcdf_fortran_version="4.6.1"]
+)
+
+AC_SUBST([abi_fb_netcdf_fortran_version])
+
   # Process options
   for kwd in ${sd_netcdf_fortran_options}; do
     case "${kwd}" in
@@ -243,16 +252,19 @@ AC_DEFUN([SD_NETCDF_FORTRAN_DETECT], [
           [Define to 1 if you have a parallel NetCDF Fortran interface library.])
       fi
     else
-      if test "${sd_netcdf_fortran_status}" = "optional" -a \
-              "${sd_netcdf_fortran_init}" = "def"; then
+        sd_netcdf_fortran_ok="yes"
         sd_netcdf_fortran_enable="no"
         sd_netcdf_fortran_cppflags=""
-        sd_netcdf_fortran_cflags=""
+        sd_netcdf_fortran_cflags="-I ${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4_fortran/${abi_fb_netcdf_fortran_version}/include"
         sd_netcdf_fortran_cxxflags=""
-        sd_netcdf_fortran_fcflags=""
+        sd_netcdf_fortran_fcflags="${sd_netcdf_fortran_fcflags_def} -I${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4_fortran/${abi_fb_netcdf_fortran_version}/include"
         sd_netcdf_fortran_ldflags=""
-        sd_netcdf_fortran_libs=""
+        sd_netcdf_fortran_libs="-L${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4_fortran/${abi_fb_netcdf_fortran_version}/lib ${sd_netcdf_fortran_libs_def} ${sd_netcdf_fortran_libs}"
+      if test "${sd_netcdf_fortran_status}" = "optional" -a \
+              "${sd_netcdf_fortran_init}" = "def"; then
+	sd_netcdf_fortran_init='fb'
       else
+        sd_netcdf_fortran_init='fb'
         if test "${sd_netcdf_policy}" = "fail"; then
               AC_MSG_FAILURE([invalid NetCDF Fortran interface configuration])
         else

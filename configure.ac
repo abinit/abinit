@@ -1023,11 +1023,11 @@ fi
 
 if test "${sd_linalg_enable}" != "yes"; then
       ABI_MSG_NOTICE_L([linalg-mandatory],[__CAUTION__ : linalg is __MANDATORY__ !])
-      mandatory="#"
+      mandatory="fail"
 fi
 
 # Check HDF5 serial
-if test "${sd_hdf5_enable}" = "no"; then
+if test "${sd_hdf5_enable}" = "no" -o "${sd_hdf5_init}" = "fb"; then
       ABI_MSG_NOTICE_L([hdf5-mandatory],[__CAUTION__ : HDF5 is __MANDATORY__ !])
       mandatory="#"
 else
@@ -1037,9 +1037,9 @@ else
   fi
 fi
 
-if test "${sd_hdf5_ok}" = "yes";then
+if test "${sd_hdf5_ok}" = "yes" -o "${sd_hdf5_init}" = "fb";then
 # Check NetCDF
-  if test "${sd_netcdf_enable}" = "no"; then
+  if test "${sd_netcdf_enable}" = "no" -o "${sd_netcdf_init}" = "fb"; then
       ABI_MSG_NOTICE_L([netcdf-mandatory],[__CAUTION__ : NetCDF is __MANDATORY__ !])
       mandatory="#"
   else
@@ -1050,7 +1050,7 @@ if test "${sd_hdf5_ok}" = "yes";then
   fi
 
 # Check NetCDF_fortran
-  if test "${sd_netcdf_fortran_enable}" = "no"; then
+  if test "${sd_netcdf_fortran_enable}" = "no" -o "${sd_netcdf_fortran_init}" = "fb"; then
       ABI_MSG_NOTICE_L([netcdf_fortran-mandatory],[__CAUTION__ : NetCDF Fortran is __MANDATORY__ !])
       mandatory="#"
   else
@@ -1062,7 +1062,7 @@ if test "${sd_hdf5_ok}" = "yes";then
 fi
 
 # Check LibXC
-if test "${sd_libxc_enable}" = "no"; then
+if test "${sd_libxc_enable}" = "no" -o "${sd_libxc_init}" = "fb"; then
       ABI_MSG_NOTICE_L([libxc-mandatory],[__CAUTION__ : LibXC is __MANDATORY__ !])
       mandatory="#"
 else
@@ -1100,9 +1100,14 @@ if test "${sd_xmlf90_enable}" = "yes"; then
 fi
 
 # Help to produce libraires
-if test ! -z "${mandatory}"; then
+if test "${mandatory}" = "#"; then
       ABI_MSG_NOTICE_L([help-fb],[We can __help__ you !])
+else 
+   if test "${mandatory}" = "fail"; then
+   	ABI_MSG_NOTICE_S([ __Problems must be solved before continuing__ ])
+   fi
 fi
+
 
 if test ! -z "${status}" -o ! -z "${mandatory}"; then
       ABI_MSG_NOTICE_S([ __Problems must be solved before continuing__ ])
@@ -1128,9 +1133,9 @@ ABI_FALLBACKS_VALIDATE([${abi_fbk_required}])
 #fi
 
 # Check exit
-if test ! -z "${status}" -o ! -z "${mandatory}"; then
-      exit 2
-fi
+#if test ! -z "${status}" -o ! -z "${mandatory}"; then
+#      exit 2
+#fi
 
 
 #-------------------- END JMB --------------------------------------------#
@@ -1261,29 +1266,11 @@ ABI_OUTPUT
 
 # FIXME: Generate fake makefile for the fallbacks until the test farm is
 #        updated
+AC_MSG_NOTICE(["INSTALL is ${INSTALL}"])
 test -e "fallbacks" || ${INSTALL} -d -m 755 "fallbacks"
-${INSTALL} -m 644 "${abinit_srcdir}/config/makefiles/fallbacks.mf" \
+${INSTALL} -m 644 "${abinit_srcdir}/fallbacks/Makefile.am" \
   "fallbacks/Makefile"
 
-# Call CMake to generate Makefile for Kokkos sources directories
-if test "${sd_kokkos_enable}" = "yes"; then
-  rm ${abinit_builddir}/src/16_kokkos_toolbox/Makefile
-  cd ${abinit_builddir}/src/16_kokkos_toolbox && \
-    cmake ${abinit_srcdir}/shared/common/src/16_kokkos_toolbox/. -Wno-dev  \
-    -DUSE_AUTOTOOLS_BUILD_COMPAT=ON -DABINIT_SRC_DIR=${abinit_srcdir} \
-    -DCMAKE_C_FLAGS="${CFLAGS}" -DCMAKE_Fortran_FLAGS="${FCFLAGS}"  \
-    -DCMAKE_CXX_FLAGS="-O2" -DCMAKE_C_COMPILER=${CC}  -DCMAKE_CXX_COMPILER=${CXX} \
-    -DCMAKE_Fortran_COMPILER=${FC} && \
-    cd -
-  rm ${abinit_builddir}/src/44_manage_kokkos/Makefile
-  cd ${abinit_builddir}/src/44_manage_kokkos && \
-    cmake ${abinit_srcdir}/src/44_manage_kokkos/. -Wno-dev  \
-    -DUSE_AUTOTOOLS_BUILD_COMPAT=ON -DABINIT_SRC_DIR=${abinit_srcdir} \
-    -DCMAKE_C_FLAGS="${CFLAGS}" -DCMAKE_Fortran_FLAGS="${FCFLAGS}"  \
-    -DCMAKE_CXX_FLAGS="-O2" -DCMAKE_C_COMPILER=${CC}  -DCMAKE_CXX_COMPILER=${CXX} \
-    -DCMAKE_Fortran_COMPILER=${FC} && \
-    cd -
-fi
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
@@ -1306,3 +1293,42 @@ fi
 #fi
 ABI_MSG_FC_BUGGY(${abi_fc_vendor})
 ABI_MSG_END
+
+
+
+if test "x${mandatory}" = "x#"; then
+  FALLBACKS_SUBDIRS="fallbacks"
+else
+  FALLBACKS_SUBDIRS=""
+fi
+
+AC_SUBST(FALLBACKS_SUBDIRS)
+
+AC_OUTPUT
+
+
+# Call CMake to generate Makefile for Kokkos sources directories
+if test "${sd_kokkos_enable}" = "yes"; then
+  rm ${abinit_builddir}/src/16_kokkos_toolbox/Makefile
+  cd ${abinit_builddir}/src/16_kokkos_toolbox && \
+    cmake ${abinit_srcdir}/shared/common/src/16_kokkos_toolbox/. -Wno-dev  \
+    -DUSE_AUTOTOOLS_BUILD_COMPAT=ON -DABINIT_SRC_DIR=${abinit_srcdir} \
+    -DCMAKE_C_FLAGS="${CFLAGS}" -DCMAKE_Fortran_FLAGS="${FCFLAGS}"  \
+    -DCMAKE_CXX_FLAGS="-O2" -DCMAKE_C_COMPILER=${CC}  -DCMAKE_CXX_COMPILER=${CXX} \
+    -DCMAKE_Fortran_COMPILER=${FC} && \
+    cd -
+  rm ${abinit_builddir}/src/44_manage_kokkos/Makefile
+  cd ${abinit_builddir}/src/44_manage_kokkos && \
+    cmake ${abinit_srcdir}/src/44_manage_kokkos/. -Wno-dev  \
+    -DUSE_AUTOTOOLS_BUILD_COMPAT=ON -DABINIT_SRC_DIR=${abinit_srcdir} \
+    -DCMAKE_C_FLAGS="${CFLAGS}" -DCMAKE_Fortran_FLAGS="${FCFLAGS}"  \
+    -DCMAKE_CXX_FLAGS="-O2" -DCMAKE_C_COMPILER=${CC}  -DCMAKE_CXX_COMPILER=${CXX} \
+    -DCMAKE_Fortran_COMPILER=${FC} && \
+    cd -
+fi
+
+
+if test "x${mandatory}" = "x#"; then
+  ABI_TRIGGERS_SUMMARY	
+  ABI_MSG_NOTICE_L([help-fb], [Missing Mandatory library!])
+fi 
