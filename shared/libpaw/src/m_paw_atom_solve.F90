@@ -1216,6 +1216,12 @@ subroutine atompaw_destroy(atp)
  if(allocated(atp%basis_func_rc)) then
    LIBPAW_DEALLOCATE(atp%basis_func_rc)
  endif
+ if(allocated(atp%eshift)) then
+   LIBPAW_DEALLOCATE(atp%eshift)
+ endif
+ if(allocated(atp%pot_refo)) then
+   LIBPAW_DEALLOCATE(atp%pot_refo)
+ endif
  call DestroyGrid(atp%Grid)
  call DestroyOrbit(atp%Orbit)
  call DestroyPot(atp%Pot)
@@ -2588,7 +2594,7 @@ SUBROUTINE DENITERSub(w,energy,residue,err,success,update,atp)
   ENDIF
   CALL DestroyOrbit(tmpOrbit)
   CALL DestroyPot(tmpPot)
-  DEALLOCATE (dum)
+  LIBPAW_DEALLOCATE(dum)
 END SUBROUTINE  DENITERSub
 
 
@@ -3181,8 +3187,6 @@ END SUBROUTINE r2scaninit
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
 !! r2scan functional
-!!  James W. Furness,  Aaron D. Kaplan, Jinliang Ning, John P.
-!!  Perdew, and Jianwei Sun J. Phys. Chem. Lett. 2020, 11, 8208−8215
 !!  length units == Bohr
 !!  energy units -- Hartree
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
