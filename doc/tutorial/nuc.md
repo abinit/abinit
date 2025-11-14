@@ -319,18 +319,77 @@ Yet another observable routinely measured in NMR spectroscopy is the indirect
 spin-spin coupling, which consists of the energy effect of two nearby nuclear
 magnetic dipoles mediated by the electronic charge and spin density between
 them. As a contribution to the Hamiltonian, this term gives
-$$ J_{ij} = \frac{\partial^2 E}{\partial m_i\m_j} $$
+$$ J_{ij} = \frac{\partial^2 E}{\partial m_i\partial m_j} $$
 (there is a separate, through-space dipole interaction, which gives just a
-constant dependent only on the atomic distribution and not the electons, and is
+constant dependent only on the atomic distribution and not the electrons, and is
 not considered here). Thanks to the inclusion of the relativistic interactions
 in the ZORA approximation, Abinit treats the interaction between the nuclear
 dipole moments of fixed magnitude and the electrons quite accurately
 [[cite:Zwanziger2025a]]. Therefore, the mixed partial derivative expression for
 $J_{ij}$ can be computed non-perturbatively from a finite difference
 expression, as follows: $$ J_{ij} = \frac{1}{4}\left[ E(+1,+1) - E(+1,-1) -
-E(-1,+1) + E(-1,-1)\right], && where a term like $E(+1,+1)$ means the energy
+E(-1,+1) + E(-1,-1)\right], $$ where a term like $E(+1,+1)$ means the energy
 with both dipoles (of magnitude 1) along positive Cartesian directions;
 $E(+1,-1)$ means one dipole positive, one negative, and so forth. Therefore, to
 get a single element of the full $J_{ij}$ tensor (which can be written as a
-$3\times 3$ matrix), 4 total energy calculations are needed. 
+$3\times 3$ matrix), in general 4 total energy calculations are needed. 
 
+An example calculation is provided in the following file:
+
+{% dialog tests/tutorial/Input/tnuc_5.abi %}
+
+This file is for molecular ClF, treated as an isolated species in an
+otherwise empty cell. In this case we can take advantage of symmetry to greatly
+reduce the number of necessary energy calculations. The molecule is aligned along 
+the Cartesian z axis, and thus the only non-zero elements of the $J$ tensor are
+$J_{xx}=J_{yy}$, and $J_{zz}$. Furthermore, because it's a diatomic, the energy terms
+$E(+1,+1)=E(-1,-1)$ and $E(+1,-1)=E(-1,+1)$. Thus only four total calculations are needed,
+two with the dipoles along $y$ and two with the dipoles along $z$. These are input 
+with the code block
+
+    ndtset 4
+     
+    natnd 2
+    iatnd 1 2
+     
+    atndlist1 
+    0  1 0
+    0  1 0
+    atndlist2
+    0  1 0
+    0 -1 0
+    atndlist3 
+    0 0  1
+    0 0  1
+    atndlist4
+    0 0  1
+    0 0 -1
+
+The dipoles are input with [[natnd]], [[iatnd]], and [[atndlist]]. The other critical input
+variable is [[zora]]=2, which activates the ZORA electron and nuclear spin terms. In any case, 
+once the calculation finishes, you will find near the bottom of the output file, the four
+total energies:
+
+    etotal1    -3.9162257011E+01
+    etotal2    -3.9162258675E+01
+    etotal3    -3.9162256163E+01
+    etotal4    -3.9162256345E+01
+
+Note how similar they are. The $J$ tensor is quite weak, so energy must be very tightly converged and
+a convergence study of box size, [[ecut]], and so forth must be done carefully. In our case, the first
+two energies provide 
+$$ J_{yy} = \frac{1}{2}(-39.162257011 -    -39.162258675) = 8.32\times 10^{-7}, $$ 
+and
+$$ J_{zz}=\frac{1}{2}(-39.162256163 - -39.162256345) = 9.1\times 10^{-8} , $$ 
+where we have taken advantage of the symmetries to reduce the calculations from four to two for each element.
+
+The values obtained are in atomic units, where Energy/(dipole$^2$) in atomic units has the value
+$1.2673\times 10^{28}$ T$^2$/J in SI units. 
+For comparison with typical NMR spectroscopy values, the tensor elements should be converted into Hz, and this is
+accomplished by multiplication by $h\times 10^{12}\times 1.2673\times 10^{28}\times\gamma_i\gamma_j$,
+where the $\gamma$ factors are the nuclear gyromagnetic ratios in MHz/T and $h$ is
+Planck's constant in SI units. For our ClF example, we use
+4.17566 MHz/T for $^{35}$Cl, and 40.069244 MHz/T for $^{19}$F. These factors then yield
+$J_{yy} = 1169$ Hz, and $J_{zz} = 128$ Hz, for an isotropic value of 822 Hz. For comparison,
+the experimental value is 839 Hz [[cite:bryce2000indirect]], although this very good level of agreement with experiment should be 
+checked very carefully against convergence parameters and molecular geometry.
