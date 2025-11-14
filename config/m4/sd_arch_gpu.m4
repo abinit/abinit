@@ -307,28 +307,6 @@ AC_DEFUN([SD_GPU_INIT], [
 
     fi
 
-
-    # Toggle use GPU unified memory feature, specific to NVHPC with OpenMP offload, on NVIDIA GPUs
-    # This flag is supported for OpenMP since NVHPC v24.3
-    # On AMD GPU, this feature seem to be controled using env variables.
-    if test "${sd_gpu_nvidia_unified_memory_enable}" == "yes"; then
-      if test "${abi_fc_vendor}" != "nvhpc" -o "${abi_openmp_offload_enable}" = "yes"; then
-        AC_MSG_ERROR([Unified memory setting is only supported with NVHPC SDK and OpenMP offload enabled !])
-      fi
-      nvhpc_version=`echo ${abi_fc_version} | sed 's/\.//;s/-//'`
-      if test ${nvhpc_version} -lt 2430; then
-        AC_MSG_ERROR([Unified memory setting is only supported since NVHPC SDK version 24.3. Your NVHPC is too old.])
-      fi
-      gpu_unified_flag="-gpu=mem:unified"
-      # Use older flag for NVHPC 24.3, deprecated in newer versions
-      if test ${nvhpc_version} -eq 2430; then
-        gpu_unified_flag="-gpu=unified"
-      fi
-      sd_gpu_cflags="${sd_gpu_cflags} {gpu_unified_flag}"
-      sd_gpu_cxxflags="${sd_gpu_cxxflags} {gpu_unified_flag}"
-      sd_gpu_fcflags="${sd_gpu_fcflags} {gpu_unified_flag}"
-      sd_gpu_ldflags="${sd_gpu_ldflags} {gpu_unified_flag}"
-    fi
   fi
 
   # Display configuration
