@@ -4083,6 +4083,7 @@ Subroutine Azeroexpand(Grid,Pot,l,energy,qq,gamma,c1,c2,MA,MB,nr)
  n=Grid%n
  qq=-Pot%rv(n)/2
  if(qq<0.001_dp) qq=0
+ qq=zero
  nz=Pot%nz
  Pot%ww=0; Pot%jj=0;
  balpha2=InvFineStruct**2
@@ -8104,6 +8105,7 @@ SUBROUTINE newboundsch(Grid,rv,v0,v0p,nz,l,nroot,Eig,Psi,ok)
  zz=nz
  qq=-rv(n)/2
  IF (qq<0.001_dp) qq=0._dp
+ qq=zero
  err=n*nz*(h**4);  if (err<tol6) err=tol6
  convrez=convre
  IF (nz.GT.0) convrez=convre*nz
@@ -8263,14 +8265,14 @@ FUNCTION wfnend(l,energy,r,rN,qq)
  INTEGER :: i
  INTEGER, PARAMETER :: last=5
  IF (energy>=0._dp) THEN
-   wfnend=0
+   wfnend=zero
    RETURN
  ENDIF
  b=SQRT(-energy)
  qbb=qq/b
  cn=l*(l+1)
  fac=DDEXP(-b*(r-rN))*(r**qbb)
- term=1._dp;   wfn=0
+ term=1._dp;   wfn=zero
  DO i=1,last
    wfn=wfn+term
    IF (i<last) THEN
