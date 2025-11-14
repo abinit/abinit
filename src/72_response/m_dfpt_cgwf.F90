@@ -1933,7 +1933,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
    !    " after nlines_done: ", nlines_done
    !  enough_stern = enough_stern + 1
    !end if
- end if
+ end if ! u1_band > 0
 
  if (ierr /= 0) return
 

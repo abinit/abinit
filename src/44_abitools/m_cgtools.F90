@@ -4366,7 +4366,7 @@ end subroutine fxphas_seq
 
 !!****f* m_cgtools/fxphas_and_cmp
 !! NAME
-!! fxphas_and_com
+!! fxphas_and_cmp
 !!
 !! FUNCTION
 !! Fix phase and compare two set of wavefunctions
@@ -4386,7 +4386,7 @@ logical function fxphas_and_cmp(npw_k, nspinor, nband_k, istwfk, cg1, cg2, eig_k
 
 !Local variables-------------------------------
  integer, parameter :: useoverlap0 = 0, mgsc = 0
- integer :: ipw, ipwsp, isp, mcg, band
+ integer :: ipw, mcg, band, ipwsp, isp
  real(dp) :: phi1, rho1, phi2, rho2, max_rho_adiff, atol_rho__, phi_diff_ref, max_dphi_adiff, atol_dphi__, gsc(0,0)
  character(len=500) :: btype
 ! ***********************************************************************
@@ -4399,7 +4399,6 @@ logical function fxphas_and_cmp(npw_k, nspinor, nband_k, istwfk, cg1, cg2, eig_k
  call fxphas_seq(cg1, gsc, 1, 1, istwfk, mcg, mgsc, nband_k, npw_k * nspinor, useoverlap0)
  call fxphas_seq(cg2, gsc, 1, 1, istwfk, mcg, mgsc, nband_k, npw_k * nspinor, useoverlap0)
 
-#if 0
  do band=1,nband_k
    call band_type(band, btype)
    if (btype == "degenerate") cycle
@@ -4420,7 +4419,6 @@ logical function fxphas_and_cmp(npw_k, nspinor, nband_k, istwfk, cg1, cg2, eig_k
      end do
    end do
  end do
-#endif
 
  do band=1,nband_k
    do ipw=1,npw_k * nspinor

@@ -280,7 +280,7 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
  real(dp) :: kk(3), kk_ibz(3), kq_ibz(3), qpt(3), kq(3), fermie1_idir_ipert(3,cryst%natom), dotri(2)
  real(dp),allocatable :: vtrial(:,:), work(:,:,:,:), kinpw_k(:), kinpw_kq(:),kpg_kq(:,:),kpg_k(:,:)
  real(dp),allocatable :: ffnl_k(:,:,:,:),ffnl_kq(:,:,:,:),ph3d_k(:,:,:),ph3d_kq(:,:,:),v1scf(:,:,:,:)
- real(dp),allocatable :: dtw_weights(:,:),dt_tetra_weights(:,:,:),dwargs(:) !,alpha_mrta(:)
+ real(dp),allocatable :: dtw_weights(:,:),dwargs(:) !,alpha_mrta(:)
  real(dp),allocatable :: delta_e_minus_emkq(:) ! gkq2_lr(:,:,:)
  real(dp) :: displ_red_nu(2, 3, cryst%natom)
  real(dp),allocatable :: cg1s_kq(:,:,:,:), h1kets_kq_allperts(:,:,:,:)
