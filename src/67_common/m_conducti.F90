@@ -972,7 +972,7 @@ end subroutine conducti_paw
  integer :: iom,isppol,l1,mband,me,mom,mpierr,j2,etiq,pnp_size,iproc,broad_mode,absx_unt
  integer :: natom,nband_k,nkpt,nphicor,nproc,nspinor,nsppol,ntypat,nphicor_max,natom_atnbr
  integer :: occopt,iunt,opt2_unt,ncid,varid,master_band,nb_per_proc,idum
- integer :: sigx1_unt,sigx1_up_unt,sigx1_dn_unt,ems_unt,ems_up_unt,ems_dn_unt,ios
+ integer :: sigx1_unt,sigx1_up_unt,sigx1_dn_unt,ems_unt,ems_up_unt,ems_dn_unt
  logical :: iomode_estf_mpiio,myband,mykpt,need_absorption,need_emissivity
  real(dp) :: del_sig,del_emis,deltae,diff_occ,ecut,fermie
  real(dp) :: omin,omax,omin_sig,omax_sig,omin_emis,omax_emis
